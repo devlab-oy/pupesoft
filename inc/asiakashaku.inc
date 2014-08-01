@@ -31,13 +31,13 @@ else {
 $tp = $kukarow['toimipaikka'];
 
 if (trim($toimipaikka_rajaus) != '') {
-   $tp = $toimipaikka_rajaus;
+  $tp = $toimipaikka_rajaus;
 }
 
 if ($toimipaikka_rajaus == 'X' or $yhtiorow['toimipaikkakasittely'] != 'L') {
   $toimipaikkalisa = '';
 }
-else{
+else {
   $toimipaikkalisa = " and asiakas.toimipaikka = {$tp} ";
 }
 
@@ -48,7 +48,7 @@ $limit      = 1000; // montako riviä on maksimi
 $monta       = 0;
 $asiakasrajaus   = "";
 
-if (in_array($kutsuja, array("asiakasemo.php","kalenteri.php"))) {
+if (in_array($kutsuja, array("asiakasemo.php", "kalenteri.php"))) {
   // Tässä haarassa myös prospektit näytetään
   if ($myos_poistetut == "") {
     $asiakasrajaus = " and asiakas.laji != 'P' ";
@@ -86,7 +86,7 @@ if (is_numeric($asiakasid) and $asiakasid > 0) {
   $monta  = mysql_num_rows($result);
 }
 elseif ($ytunnus != '') {
-  if (substr($ytunnus,0,1) == "£") {
+  if (substr($ytunnus, 0, 1) == "£") {
     // jos eka merkki £ etsitään tilausnumerolla
     // eka merkki pois alusta
     $ytunnus = substr($ytunnus, 1);
@@ -102,7 +102,7 @@ elseif ($ytunnus != '') {
     $monta  = mysql_num_rows($result);
   }
 
-  if (substr($ytunnus,0,1) == "*") {
+  if (substr($ytunnus, 0, 1) == "*") {
     // jos eka merkki on * etsitään laskuilta asiakastietoja nimellä
 
     // eka merkki pois alusta
@@ -125,7 +125,7 @@ elseif ($ytunnus != '') {
     if ($monta != 0) $monta  = 2; // aina selailuun niin menee liitostunnukset ja ytunnukset oikein
   }
 
-  if ($monta == 0  and substr($ytunnus,0,1) == "#") {
+  if ($monta == 0  and substr($ytunnus, 0, 1) == "#") {
     // jos eka merkki on # etsitään toimitusnimen perusteella
 
     // eka merkki pois alusta
@@ -188,7 +188,7 @@ elseif ($ytunnus != '') {
                 FROM asiakas
                 JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                 WHERE asiakas.$konsyhtiot
-                and REPLACE(REPLACE(asiakas.ytunnus, '-', ''), '+', '') = '".str_replace(array('-','+'), '', $ytunnus)."'
+                and REPLACE(REPLACE(asiakas.ytunnus, '-', ''), '+', '') = '".str_replace(array('-', '+'), '', $ytunnus)."'
                 and asiakas.ytunnus!=''
                 $lajilisa $asiakasrajaus)
                 UNION
@@ -204,7 +204,7 @@ elseif ($ytunnus != '') {
                 FROM asiakas
                 JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                 WHERE asiakas.$konsyhtiot
-                and REPLACE(REPLACE(asiakas.ovttunnus, '-', ''), '+', '') = '".str_replace(array('-','+'), '', $ytunnus)."'
+                and REPLACE(REPLACE(asiakas.ovttunnus, '-', ''), '+', '') = '".str_replace(array('-', '+'), '', $ytunnus)."'
                 and asiakas.ovttunnus!=''
                 $lajilisa $asiakasrajaus)
                 UNION
@@ -251,7 +251,7 @@ elseif ($ytunnus != '') {
     $ytunnus2 = $ytunnus;
 
     // mahdollistetaan asiakashaku monella eri sanalla
-    if (strpos($ytunnus," ") !== FALSE) {
+    if (strpos($ytunnus, " ") !== FALSE) {
       $ytunnus2 = str_replace(" ", "%", $ytunnus);
     }
 
@@ -435,10 +435,10 @@ if ($monta > 1 and $monta <= $limit) {
       echo "<th>".t("yhtiö")."</th>";
     }
 
-    echo "<th>",t("ytunnus"),"</th>";
-    echo "<th>",t("asnro"),"</th>";
-    echo "<th>",t("lasknimi/toimnimi"),"</th>";
-    echo "<th colspan='3'>",t("laskosoite/toimosoite"),"</th>";
+    echo "<th>", t("ytunnus"), "</th>";
+    echo "<th>", t("asnro"), "</th>";
+    echo "<th>", t("lasknimi/toimnimi"), "</th>";
+    echo "<th colspan='3'>", t("laskosoite/toimosoite"), "</th>";
 
     if ($yhtiorow['toimipaikkakasittely'] == 'L') {
 
@@ -475,29 +475,29 @@ if ($monta > 1 and $monta <= $limit) {
       echo "<input type='hidden' name='var' value='$var'>";
       echo "<input type='hidden' name='muutparametrit' value='$muutparametrit'>";
 
-        $query = "SELECT *
+      $query = "SELECT *
                   FROM yhtion_toimipaikat
                   WHERE yhtio    = '{$kukarow['yhtio']}'
                   AND vat_numero = ''
                   ORDER BY nimi";
-        $vresult = pupe_query($query);
+      $vresult = pupe_query($query);
 
-        if (mysql_num_rows($vresult) > 0) {
+      if (mysql_num_rows($vresult) > 0) {
 
-          echo "<input type='hidden' name='ytunnus' value='{$ytunnus_talteen}'>";
-          echo "<select name='toimipaikka_rajaus' onchange='this.form.submit()'>";
-          echo "<option value='X' "; if($toimipaikka_rajaus == 'X') {echo 'selected';} echo ">" . t("Kaikki") . "</option>";
-          echo "<option value='0' "; if(empty($toimipaikka_rajaus)) {echo 'selected';} echo ">" . t("Ei toimipaikkaa") . "</option>";
+        echo "<input type='hidden' name='ytunnus' value='{$ytunnus_talteen}'>";
+        echo "<select name='toimipaikka_rajaus' onchange='this.form.submit()'>";
+        echo "<option value='X' "; if ($toimipaikka_rajaus == 'X') {echo 'selected';} echo ">" . t("Kaikki") . "</option>";
+        echo "<option value='0' "; if (empty($toimipaikka_rajaus)) {echo 'selected';} echo ">" . t("Ei toimipaikkaa") . "</option>";
 
-          while ($vrow = mysql_fetch_array($vresult)) {
-            $sel="";
-            if ($tp == $vrow['tunnus']) {
-              $sel = "selected";
-            }
-            echo "<option value='{$vrow['tunnus']}' {$sel}>{$vrow['ovtlisa']} {$vrow['nimi']}</option>";
+        while ($vrow = mysql_fetch_array($vresult)) {
+          $sel="";
+          if ($tp == $vrow['tunnus']) {
+            $sel = "selected";
           }
-          echo "</select>";
+          echo "<option value='{$vrow['tunnus']}' {$sel}>{$vrow['ovtlisa']} {$vrow['nimi']}</option>";
         }
+        echo "</select>";
+      }
 
       echo "</form>";
       echo "</th>";
@@ -561,7 +561,7 @@ if ($monta > 1 and $monta <= $limit) {
 
           $toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio'], $asiakas['toimipaikka']);
 
-          if (mysql_num_rows($toimipaikkares) > 0)  {
+          if (mysql_num_rows($toimipaikkares) > 0) {
 
             $toimipaikkarow = mysql_fetch_assoc($toimipaikkares);
             echo $toimipaikkarow['nimi'];
@@ -608,8 +608,8 @@ if ($monta > 1 and $monta <= $limit) {
         }
       }
 
-      if (is_array($oletus)){
-        foreach($oletus as $o => $a) {
+      if (is_array($oletus)) {
+        foreach ($oletus as $o => $a) {
           echo "<input type='hidden' name='oletus[$o]' value='$a'>";
         }
       }

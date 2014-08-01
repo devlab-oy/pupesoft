@@ -2,11 +2,11 @@
 
 // Ohjelma vatii muuttujan $otunnus joka viittaa saapumiseen johon rivit on kohdistettu.
 // sekä $laskurow arrayn jossa on keikka jossa tunnus on $otunnus
-require_once('pdflib/phppdflib.class.php');
+require_once 'pdflib/phppdflib.class.php';
 
 $select_lisa = "";
 $join_lisat  = "";
-  $where_lisa  = "";
+$where_lisa  = "";
 
 $norm["height"]     = 10;
 $norm["font"]       = "Helvetica";
@@ -30,33 +30,33 @@ $pdf->set_default('margin-left',   0);
 $pdf->set_default('margin-right',   0);
 
 if (!function_exists('alku_vastaanotto')) {
-  function alku_vastaanotto () {
+  function alku_vastaanotto() {
     global $pdf, $laskurow, $yhtiorow, $kukarow, $sivu, $rectparam, $kieli, $norm, $pieni, $boldi2, $rectparam, $rectparam2, $pieniboldi;
 
     $firstpage = $pdf->new_page("a4");
 
-     $pdf->draw_text(310, 815, t("Vastaanottoraportti", $kieli), $firstpage, $boldi2);
+    $pdf->draw_text(310, 815, t("Vastaanottoraportti", $kieli), $firstpage, $boldi2);
 
     tulosta_logo_pdf($pdf, $firstpage, $laskurow);
 
     $pdf->draw_rectangle(785, 310, 765, 580, $firstpage, $rectparam);
-     $pdf->draw_text(315, 778, t("Saapuminen", $kieli), $firstpage, $pieni);
-     $pdf->draw_text(315, 768, $laskurow['laskunro'], $firstpage, $norm);
+    $pdf->draw_text(315, 778, t("Saapuminen", $kieli), $firstpage, $pieni);
+    $pdf->draw_text(315, 768, $laskurow['laskunro'], $firstpage, $norm);
 
     $pdf->draw_rectangle(785, 445, 765, 445, $firstpage, $rectparam);
-     $pdf->draw_text(450, 778, t("Henkilö", $kieli), $firstpage, $pieni);
-     $pdf->draw_text(450, 768, $kukarow['nimi'], $firstpage, $norm);
+    $pdf->draw_text(450, 778, t("Henkilö", $kieli), $firstpage, $pieni);
+    $pdf->draw_text(450, 768, $kukarow['nimi'], $firstpage, $norm);
 
     $pdf->draw_rectangle(765, 310, 745, 580, $firstpage, $rectparam);
-     $pdf->draw_text(315, 758, t("Toimittaja", $kieli), $firstpage, $pieni);
-     $pdf->draw_text(315, 748, $laskurow['nimi'].' '.$laskurow['nimitark'], $firstpage, $norm);
+    $pdf->draw_text(315, 758, t("Toimittaja", $kieli), $firstpage, $pieni);
+    $pdf->draw_text(315, 748, $laskurow['nimi'].' '.$laskurow['nimitark'], $firstpage, $norm);
 
     $pdf->draw_rectangle(725, 15, 705, 580, $firstpage, $rectparam2);
-     $pdf->draw_text(20, 716, t("SSCC"), $firstpage, $pieniboldi);
-     $pdf->draw_text(20, 708, t("Keräysvyöhyke"), $firstpage, $pieniboldi);
-     $pdf->draw_text(100, 716, t("Paikka"), $firstpage, $pieniboldi);
-     $pdf->draw_text(175, 716, t("Tuoteno"), $firstpage, $pieniboldi);
-     $pdf->draw_text(175, 708, t("Nimitys"), $firstpage, $pieniboldi);
+    $pdf->draw_text(20, 716, t("SSCC"), $firstpage, $pieniboldi);
+    $pdf->draw_text(20, 708, t("Keräysvyöhyke"), $firstpage, $pieniboldi);
+    $pdf->draw_text(100, 716, t("Paikka"), $firstpage, $pieniboldi);
+    $pdf->draw_text(175, 716, t("Tuoteno"), $firstpage, $pieniboldi);
+    $pdf->draw_text(175, 708, t("Nimitys"), $firstpage, $pieniboldi);
 
     if ($yhtiorow["vastaanottoraportti"] == "K") {
       $oikpos = $pdf->strlen(t("Saldo"), $pieniboldi);
@@ -66,21 +66,21 @@ if (!function_exists('alku_vastaanotto')) {
       $oikpos = $pdf->strlen(t("Uusi hinta"), $pieniboldi);
       $pdf->draw_text(505-$oikpos, 708, t("Uusi hinta"), $firstpage, $pieniboldi);
       $oikpos = $pdf->strlen(t("Tilattu"), $pieniboldi);
-       $pdf->draw_text(565-$oikpos, 716, t("Tilattu"), $firstpage, $pieniboldi);
+      $pdf->draw_text(565-$oikpos, 716, t("Tilattu"), $firstpage, $pieniboldi);
       $oikpos = $pdf->strlen(t("Saavutettu"), $pieniboldi);
-       $pdf->draw_text(565-$oikpos, 708, t("Saavutettu"), $firstpage, $pieniboldi);
+      $pdf->draw_text(565-$oikpos, 708, t("Saavutettu"), $firstpage, $pieniboldi);
     }
     else {
-       $pdf->draw_text(350, 716, t("Toimittajan tuoteno"), $firstpage, $pieniboldi);
-       $pdf->draw_text(465, 716, t("Tilattu"), $firstpage, $pieniboldi);
-       $pdf->draw_text(520, 716, t("Saavutettu"), $firstpage, $pieniboldi);
+      $pdf->draw_text(350, 716, t("Toimittajan tuoteno"), $firstpage, $pieniboldi);
+      $pdf->draw_text(465, 716, t("Tilattu"), $firstpage, $pieniboldi);
+      $pdf->draw_text(520, 716, t("Saavutettu"), $firstpage, $pieniboldi);
     }
-    return($firstpage);
+    return $firstpage;
   }
 }
 
 if (!function_exists('print_pdf_vastaanotto')) {
-  function print_pdf_vastaanotto () {
+  function print_pdf_vastaanotto() {
     global $pdf, $kukarow, $yhtiorow, $komento, $tee;
 
     //keksitään uudelle failille joku varmasti uniikki nimi:
@@ -100,20 +100,20 @@ if (!function_exists('print_pdf_vastaanotto')) {
 
       $kutsu = "Vastaanottoraportti";
 
-      if (@include("../inc/sahkoposti.inc"));
-      elseif (@include("inc/sahkoposti.inc"));
-      else include("sahkoposti.inc");
+      if (@include "../inc/sahkoposti.inc");
+      elseif (@include "inc/sahkoposti.inc");
+      else include "sahkoposti.inc";
 
-      echo t("Vastaanottoraportti tulostuu"),"...<br>";
+      echo t("Vastaanottoraportti tulostuu"), "...<br>";
     }
     elseif ($tee == 'NAYTATILAUS') {
-        //Työnnetään tuo pdf vaan putkeen!
-        echo file_get_contents($pdffilenimi);
-      }
+      //Työnnetään tuo pdf vaan putkeen!
+      echo file_get_contents($pdffilenimi);
+    }
     elseif ($komento["Vastaanottoraportti"] != '' and $komento["Vastaanottoraportti"] != 'edi') {
       $line = exec("$komento[Vastaanottoraportti] $pdffilenimi");
 
-      echo t("Vastaanottoraportti tulostuu"),"...<br>";
+      echo t("Vastaanottoraportti tulostuu"), "...<br>";
     }
 
     //poistetaan tmp file samantien kuleksimasta...
@@ -200,7 +200,7 @@ while ($row = mysql_fetch_assoc($vastaanottoraportti_result)) {
       $vanharow["hinta"] = "0.00";
     }
 
-    list(,, $varastosaldo) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', '');
+    list(, , $varastosaldo) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', '');
 
     $oikpos = $pdf->strlen($varastosaldo, $pieni);
     $pdf->draw_text(420-$oikpos, $kala, $varastosaldo, $firstpage, $pieni);

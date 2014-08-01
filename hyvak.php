@@ -6,7 +6,7 @@ if ($_REQUEST["tee"] == "haekeikka") {
 
 if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php")  !== FALSE) {
   $pupe_DataTables = '';
-  require ("inc/parametrit.inc");
+  require "inc/parametrit.inc";
 }
 
 enable_ajax();
@@ -68,7 +68,7 @@ if ($keikalla == "on") {
 
       $PHP_SELF = "javascript:ajaxPost('kevyt_toimittajahaku', '{$palvelin2}hyvak.php?', 'keikka', '', '', '', 'post');";
 
-      require ("inc/kevyt_toimittajahaku.inc");
+      require "inc/kevyt_toimittajahaku.inc";
     }
 
     if ($toimittajaid != "") {
@@ -91,7 +91,7 @@ if ($keikalla == "on") {
         //  Haetaan vientitieto..
 
         //  Kululaskun voi kohdistaa useaan saapumiseen
-        if (in_array($laskurow["vienti"], array("B","E","H"))) {
+        if (in_array($laskurow["vienti"], array("B", "E", "H"))) {
           echo "<form id='liita' action='hyvak.php?keikalla=on' method='post' autocomplete='off'>";
           echo "<input type='hidden' name='lopetus' value='$lopetus'>";
           echo "<input type='hidden' name='tee' value = 'liita'>";
@@ -99,7 +99,7 @@ if ($keikalla == "on") {
           echo "<input type='hidden' name='toimittajaid' value = '$toimittajaid'>";
           echo "<table><tr><th>".t("Saapuminen")."</th><th>".t("Kommentit")."</th><th>".t("Rivejä")."/".t("varastossa")."</th><th>".t("Varastonarvo")."</th><th>".t("Summa")."</th></tr>";
 
-          while($row = mysql_fetch_assoc($result)) {
+          while ($row = mysql_fetch_assoc($result)) {
             echo "<tr><td>$row[keikka]</td><td>$row[comments]</td><td align='right'>$row[kpl]/$row[varastossa]</td><td align='right'>$row[varastossaarvo]</td><td>";
             echo "<input type='text' name='liita[".$row["otunnus"]."][liitasumma]' value='$liitasumma' size='10'>";
             echo "</td></tr>";
@@ -108,7 +108,7 @@ if ($keikalla == "on") {
         }
         else {
           echo "<table><tr><th>".t("Saapuminen")."</th><th>".t("Kommentit")."</th><th>".t("Rivejä")."/".t("varastossa")."</th><th>".t("Varastonarvo")."</th></tr>";
-          while($row = mysql_fetch_assoc($result)) {
+          while ($row = mysql_fetch_assoc($result)) {
 
             $query = "SELECT sum(summa) summa
                       from tiliointi
@@ -176,8 +176,8 @@ if ($keikalla == "on") {
           $otunnus     = $l;
           $liitasumma   = $v["liitasumma"];
 
-          if ($liitasumma <> 0 or !in_array($laskurow["vienti"], array("B","E","H"))) {
-            require("tilauskasittely/kululaskut.inc");
+          if ($liitasumma <> 0 or !in_array($laskurow["vienti"], array("B", "E", "H"))) {
+            require "tilauskasittely/kululaskut.inc";
           }
 
           //  Palautetaan Wanha
@@ -187,7 +187,7 @@ if ($keikalla == "on") {
     }
     else {
       //$tunnus = $otunnus;
-      require("tilauskasittely/kululaskut.inc");
+      require "tilauskasittely/kululaskut.inc";
     }
 
     //  Palautetaan tunnus
@@ -245,7 +245,7 @@ if ($tee == 'M' or ($onko_eka_hyvaksyja === TRUE and $tee != 'H' and $tee != 'D'
   if (mysql_num_rows($result) != 1) {
     echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
 
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -255,14 +255,14 @@ if ($tee == 'M' or ($onko_eka_hyvaksyja === TRUE and $tee != 'H' and $tee != 'D'
     $hyvak_apu_tee  = $tee;
     $hyvak_apu_tila = $tila;
 
-    require ("inc/muutosite.inc");
+    require "inc/muutosite.inc";
 
     $tee  = $hyvak_apu_tee;
     $tila = $hyvak_apu_tila;
   }
 }
 
- // Jaaha poistamme laskun!
+// Jaaha poistamme laskun!
 if ($tee == 'D' and $oikeurow['paivitys'] == '1') {
 
   $query = "SELECT *
@@ -275,11 +275,11 @@ if ($tee == 'D' and $oikeurow['paivitys'] == '1') {
   if (mysql_num_rows($result) != 1) {
     echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
 
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
-  $trow = mysql_fetch_assoc ($result);
+  $trow = mysql_fetch_assoc($result);
 
   if ($trow["tapvm"] >= $yhtiorow["ostoreskontrakausi_alku"] or ($trow["tapvm"]=="0000-00-00" and $trow["laskutyyppi"] == "M")) {
 
@@ -343,7 +343,7 @@ if ($tee == "palauta") {
 
   if (mysql_num_rows($result) != 1) {
     echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -412,7 +412,7 @@ if ($tee == "palauta") {
         <input type = 'submit' value = '".t("Palaa laskun hyväksyntään")."'>
         </form>";
 
-    require("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
   else {
@@ -471,13 +471,13 @@ if ($tee == 'Z') {
   if (mysql_num_rows($result) != 1) {
     echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
 
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
   echo "<table><tr>";
   for ($i = 1; $i < mysql_num_fields($result)-1; $i++) {
-    echo "<th>" . t(mysql_field_name($result,$i))."</th>";
+    echo "<th>" . t(mysql_field_name($result, $i))."</th>";
   }
   echo "</tr>";
 
@@ -488,11 +488,11 @@ if ($tee == 'Z') {
   for ($i=1; $i<mysql_num_fields($result); $i++) {
     if ($i == mysql_num_fields($result)-1) {
       if ($trow[mysql_field_name($result, $i)] != "") {
-        echo "<tr><td colspan='".mysql_num_fields($result)."'><font class='error'>".$trow[mysql_field_name($result,$i)]."</font></td>";
+        echo "<tr><td colspan='".mysql_num_fields($result)."'><font class='error'>".$trow[mysql_field_name($result, $i)]."</font></td>";
       }
     }
     else {
-      echo "<td>".$trow[mysql_field_name($result,$i)]."</td>";
+      echo "<td>".$trow[mysql_field_name($result, $i)]."</td>";
     }
   }
 
@@ -509,7 +509,7 @@ if ($tee == 'Z') {
       </tr>
       </table>";
 
-  require ("inc/footer.inc");
+  require "inc/footer.inc";
   exit;
 }
 
@@ -525,7 +525,7 @@ if ($tee == 'W') {
   if (mysql_num_rows($result) != 1) {
     echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
 
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -552,7 +552,7 @@ if ($tee == 'V') {
   if (mysql_num_rows($result) != 1) {
     echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
 
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -578,7 +578,7 @@ if ($tee == 'L') {
   if (mysql_num_rows($result) != 1) {
     echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
 
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -587,7 +587,7 @@ if ($tee == 'L') {
   if ($eka_hyvaksyja != $laskurow['hyvaksyja_nyt'] or $laskurow['hyvaksynnanmuutos'] == '') {
     echo "<font class = 'error'>".t('Lasku on väärässä tilassa')."</font>";
 
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -622,7 +622,7 @@ if ($tee == 'H') {
   if (mysql_num_rows($result) != 1) {
     echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
 
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -717,17 +717,17 @@ if ($tee == 'H') {
     $tila = "H";
     $viesti = t("Seuraava hyväksyjä on")." '" .$hyvaksyja_nyt ."'";
 
-        if (strlen($hyvaksyja_nyt) == 0) {
+    if (strlen($hyvaksyja_nyt) == 0) {
 
       // Suoraveloitus merkitään heti maksua odottavaksi
-          if ($laskurow['suoraveloitus'] != '') {
+      if ($laskurow['suoraveloitus'] != '') {
 
-            // Jotta tiedämme seuraavan tilan pitää tutkia toimittajaa
-            $tila = 'Q';
-            $viesti = t("Suoraveloituslasku odottaa nyt suorituksen kuittausta");
+        // Jotta tiedämme seuraavan tilan pitää tutkia toimittajaa
+        $tila = 'Q';
+        $viesti = t("Suoraveloituslasku odottaa nyt suorituksen kuittausta");
 
         // #TODO eikö tässä pitäisi olla liitostunnus?!?
-            $query = "SELECT *
+        $query = "SELECT *
                       FROM toimi
                       WHERE yhtio = '$kukarow[yhtio]'
                       and ytunnus = '$laskurow[ytunnus]'";
@@ -743,19 +743,19 @@ if ($tee == 'H') {
             $mapvm = $laskurow['erpcm'];
           }
         }
-          }
-          else {
+      }
+      else {
         $tila = 'M';
         $viesti = t("Lasku on valmis maksettavaksi!");
       }
-        }
+    }
   }
   else {
     $viesti = t("Tosite on hyväksytty")."!";
     $tila = 'X';
   }
 
-      $query = "UPDATE lasku SET
+  $query = "UPDATE lasku SET
                 $kentta = now(),
                 hyvaksyja_nyt = '$hyvaksyja_nyt',
                 tila          = '$tila',
@@ -781,7 +781,7 @@ if ($tee == 'P') {
   if (mysql_num_rows($result) == 0) {
     echo t("Tiliöintiä ei löydy")."! $query";
 
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -841,13 +841,13 @@ if ($tee == 'U') {
   if (mysql_num_rows($result) != 1) {
     echo t("Laskua ei enää löydy! Systeemivirhe!");
 
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
   $laskurow = mysql_fetch_assoc($result);
 
-  $summa       = str_replace ( ",", ".", $summa);
+  $summa       = str_replace( ",", ".", $summa);
   $selausnimi   = 'tili'; // Minka niminen mahdollinen popup on?
   $tositetila   = $laskurow["tila"];
   $tositeliit   = $laskurow["liitostunnus"];
@@ -855,11 +855,11 @@ if ($tee == 'U') {
   $kohde_tark    = $kohde;
   $projekti_tark  = $projekti;
 
-  require ("inc/tarkistatiliointi.inc");
+  require "inc/tarkistatiliointi.inc";
 
   $tiliulos = $ulos;
 
-   // Tarvitaan kenties tositenro
+  // Tarvitaan kenties tositenro
   if (isset($kpexport) and $kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
 
     if ($tositenro != 0) {
@@ -873,7 +873,7 @@ if ($tee == 'U') {
       if (mysql_num_rows($result) == 0) {
         echo t("Tositenron tarkastus ei onnistu! Systeemivirhe!");
 
-        require ("inc/footer.inc");
+        require "inc/footer.inc";
         exit;
       }
     }
@@ -894,7 +894,7 @@ if ($tee == 'U') {
         if (mysql_num_rows($result) == 0) {
           echo t("Tositenron tarkastus ei onnistu! Systeemivirhe!");
 
-          require ("inc/footer.inc");
+          require "inc/footer.inc";
           exit;
         }
 
@@ -902,7 +902,7 @@ if ($tee == 'U') {
         $tositenro = $tositerow['tosite'];
       }
 
-       // Tälle saamme tositenron ostoveloista
+      // Tälle saamme tositenron ostoveloista
       if ($laskurow['mapvm'] == $tiliointipvm) {
 
         $query = "SELECT tosite
@@ -917,18 +917,18 @@ if ($tee == 'U') {
         if (mysql_num_rows($result) == 0) {
           echo t("Tositenron tarkastus ei onnistu! Systeemivirhe!");
 
-          require ("inc/footer.inc");
+          require "inc/footer.inc";
           exit;
         }
 
-        $tositerow = mysql_fetch_assoc ($result);
+        $tositerow = mysql_fetch_assoc($result);
         $tositenro = $tositerow['tosite'];
       }
     }
   }
 
   if ($ok != 1) {
-    require ("inc/teetiliointi.inc");
+    require "inc/teetiliointi.inc";
   }
 }
 
@@ -946,7 +946,7 @@ if (strlen($tunnus) != 0) {
   if (mysql_num_rows($result) == 0) {
     echo "<b>".t("Lasku katosi")."</b><br>";
 
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -1287,7 +1287,7 @@ if (strlen($tunnus) != 0) {
 
   echo "</tr></table>";
 
-  if (in_array($laskurow["vienti"], array("B","E","H","C","J","F","K","I","L"))) {
+  if (in_array($laskurow["vienti"], array("B", "E", "H", "C", "J", "F", "K", "I", "L"))) {
     enable_ajax();
 
     echo "<br><table>";
@@ -1350,7 +1350,7 @@ if (strlen($tunnus) != 0) {
 
     if ($jaljella > 0) {
       //  Vaihtoomaisuuslaskuille ei tarvitse hakea toimittajaa, sen me tiedämme jo!
-      if (!in_array($laskurow["vienti"], array("B","E","H"))) {
+      if (!in_array($laskurow["vienti"], array("B", "E", "H"))) {
         if ($toimittajaid == "") $toimittajaid = $laskurow["liitostunnus"];
 
         $toimilisa = "&toimittajaid=$toimittajaid";
@@ -1394,7 +1394,7 @@ if (strlen($tunnus) != 0) {
     }
 
     // Tositteen tiliöintirivit...
-    require ("inc/tiliointirivit.inc");
+    require "inc/tiliointirivit.inc";
     echo "<br><br>";
 
     if ($ok == 1) {
@@ -1407,7 +1407,7 @@ if (strlen($tunnus) != 0) {
             </form><br>";
       }
       else {
-        echo "<font class='error'>",t("Hyväksyttävän laskun summa ylittää sallitun hyväksynnän maksimisumman ja / tai sinun jälkeesi hyväksyjälistalla ei ole esimiestäsi"),"!</font><br /><br />";
+        echo "<font class='error'>", t("Hyväksyttävän laskun summa ylittää sallitun hyväksynnän maksimisumman ja / tai sinun jälkeesi hyväksyjälistalla ei ole esimiestäsi"), "!</font><br /><br />";
       }
     }
 
@@ -1433,7 +1433,7 @@ if (strlen($tunnus) != 0) {
           </form>";
     }
     else {
-      echo "<font class='error'>",t("Hyväksyttävän laskun summa ylittää sallitun hyväksynnän maksimisumman ja sinun jälkeesi hyväksyjälistalla ei ole esimiestäsi"),"!</font><br />";
+      echo "<font class='error'>", t("Hyväksyttävän laskun summa ylittää sallitun hyväksynnän maksimisumman ja sinun jälkeesi hyväksyjälistalla ei ole esimiestäsi"), "!</font><br />";
     }
 
     echo "<form method='post'>
@@ -1470,7 +1470,7 @@ if (strlen($tunnus) != 0) {
           <option value=''>Valitse lasku</option>";
 
       $liicoint = 1;
-      foreach($liitteet as $liite) {
+      foreach ($liitteet as $liite) {
         if ($iframe_id == $liite) $sel = "selected";
         else $sel = "";
 
@@ -1485,7 +1485,7 @@ if (strlen($tunnus) != 0) {
   }
 
   if ($iframe == 'yes') {
-      echo "<td>
+    echo "<td>
         <form method='post'>
           <input type='hidden' name = 'tunnus' value='$tunnus'>
         <input type='hidden' name='lopetus' value='$lopetus'>
@@ -1512,7 +1512,7 @@ elseif ($kutsuja == "") {
               and tila             != 'D'
                 ORDER BY erpcm";
     $result = pupe_query($query);
-    $trow = mysql_fetch_assoc ($result);
+    $trow = mysql_fetch_assoc($result);
 
     if ($trow["kpl"] > 0) {
       echo "<a href='$PHP_SELF?nayta=1'><font class='error'>". sprintf(t('Sinulla on %d pysäytettyä laskua'), $trow["kpl"]) . "</font></a><br><br>";
@@ -1535,7 +1535,7 @@ elseif ($kutsuja == "") {
 
   if (mysql_num_rows($result) == 0) {
     echo "<b>".t("Sinulla ei ole hyväksymättömiä laskuja")."</b><br>";
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -1568,7 +1568,7 @@ elseif ($kutsuja == "") {
   echo "<th>".t("Laskunro")."</th>";
   echo "<th>".t("Liitetty")."</th>";
   echo "<th>".t("Tyyppi")."</th>";
-  if ($liitetaanko_editilaus_laskulle_hakemisto != '') echo "<th>",t("Vertailu"),"</th>";
+  if ($liitetaanko_editilaus_laskulle_hakemisto != '') echo "<th>", t("Vertailu"), "</th>";
   echo "<th>".t("Kustannuspaikka")."</th>";
   echo "</tr>";
   echo "</thead>";
@@ -1598,7 +1598,7 @@ elseif ($kutsuja == "") {
 
     echo "<tr class='aktiivi'>";
 
-     // Eli vain tasolla 1/2/3 ja ensimmäiselle hyväksyjälle.
+    // Eli vain tasolla 1/2/3 ja ensimmäiselle hyväksyjälle.
     if (($kukarow["taso"] == '2' or $kukarow["taso"] == '3') and $onko_eka_hyvaksyja) {
       echo "<td valign='top'>".pupe_DataTablesEchoSort($trow['tapvm'])."<a href='$PHP_SELF?tee=M&tunnus=$trow[tunnus]'>".tv1dateconv($trow["tapvm"])."</a></td>";
     }
@@ -1642,18 +1642,18 @@ elseif ($kutsuja == "") {
 
           foreach ($loytyy_kummastakin as $tuoteno => $null) {
             if (substr($tuoteno, 0, 15) != "Ei_tuotekoodia_" and ($invoice[$tuoteno]['tilattumaara'] != $purchaseorder[$tuoteno]['tilattumaara'] or abs($invoice[$tuoteno]['nettohinta'] - $purchaseorder[$tuoteno]['nettohinta']) > 1)) {
-              echo "<a href='laskujen_vertailu.php?laskunro=$trow[laskunro]&lopetus=hyvak.php////kutsuja=//'>",t("Eroja"),"</a>";
+              echo "<a href='laskujen_vertailu.php?laskunro=$trow[laskunro]&lopetus=hyvak.php////kutsuja=//'>", t("Eroja"), "</a>";
               $ok = '';
               break;
             }
           }
 
           if ($ok == 'ok') {
-            echo "<font class='ok'>",t("OK"),"</font>";
+            echo "<font class='ok'>", t("OK"), "</font>";
           }
         }
         else {
-          echo "<a href='laskujen_vertailu.php?laskunro=$trow[laskunro]&lopetus=hyvak.php////kutsuja=//'>",t("Eroja"),"</a>";
+          echo "<a href='laskujen_vertailu.php?laskunro=$trow[laskunro]&lopetus=hyvak.php////kutsuja=//'>", t("Eroja"), "</a>";
         }
       }
       elseif ($invoice == 'ei_loydy_edia') {
@@ -1754,5 +1754,5 @@ elseif ($kutsuja == "") {
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php") !== FALSE) {
-  require ("inc/footer.inc");
+  require "inc/footer.inc";
 }

@@ -7,12 +7,12 @@ $useslave = 2;
 $compression = FALSE;
 
 if (isset($_POST["tee_lataa"])) {
-  if($_POST["tee_lataa"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee_lataa"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-if (@include("../inc/parametrit.inc"));
-elseif (@include("parametrit.inc"));
+if (@include "../inc/parametrit.inc");
+elseif (@include "parametrit.inc");
 else exit;
 
 if (isset($tee_lataa)) {
@@ -38,7 +38,7 @@ else {
     $muutparametrit = array($mul_osasto, $mul_try);
     $muutparametrit = urlencode(serialize($muutparametrit));
 
-    require ("inc/asiakashaku.inc");
+    require "inc/asiakashaku.inc";
 
     $asiakas = $asiakasrow["tunnus"];
     $ytunnus = $asiakasrow["ytunnus"];
@@ -106,8 +106,8 @@ else {
 
   echo "<tr><th>".t("Osasto")." / ".t("tuoteryhmä").":</th><td nowrap>";
 
-  if (@include("tilauskasittely/monivalintalaatikot.inc"));
-  elseif (@include("monivalintalaatikot.inc"));
+  if (@include "tilauskasittely/monivalintalaatikot.inc");
+  elseif (@include "monivalintalaatikot.inc");
 
   echo "</td></tr>";
   echo "</table><br>";
@@ -159,12 +159,12 @@ else {
     echo "<br><br><font class='message'>".t("Asiakashinnastoa luodaan...")."</font><br>";
     flush();
 
-   require_once ('inc/ProgressBar.class.php');
+    require_once 'inc/ProgressBar.class.php';
     $bar = new ProgressBar();
     $elements = mysql_num_rows($rresult); // total number of elements to process
     $bar->initialize($elements); // print the empty bar
 
-    include('inc/pupeExcel.inc');
+    include 'inc/pupeExcel.inc';
 
     $worksheet    = new pupeExcel();
     $format_bold = array("bold" => TRUE);
@@ -320,7 +320,7 @@ else {
             $worksheet->writeString($excelrivi, 11, t("Netto", $hinkieli));
           }
           else {
-            $worksheet->writeNumber($excelrivi, 11, sprintf('%.2f',${'ale'.$alepostfix}));
+            $worksheet->writeNumber($excelrivi, 11, sprintf('%.2f', ${'ale'.$alepostfix}));
           }
         }
 
@@ -347,7 +347,7 @@ else {
 
   }
 
-  if (@include("inc/footer.inc"));
-  elseif (@include("footer.inc"));
+  if (@include "inc/footer.inc");
+  elseif (@include "footer.inc");
   else exit;
 }

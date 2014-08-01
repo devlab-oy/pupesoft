@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Poista erääntyneet hinnastohinnat, asiakashinnat ja asiakasalennukset").":</font><hr>";
 
@@ -21,12 +21,12 @@ if ($tee == "AJA") {
   $hinnasto     = 0;
   $asiakasale   = 0;
 
-  #############################################################################################
-  #HINNAT:
-  #############################################################################################
+  //############################################################################################
+  //HINNAT:
+  //############################################################################################
 
   // 1. käyttäjän syöttämä hinta/nettohinta
-  # Ei siivottavaa
+  // Ei siivottavaa
 
   // 2A. asiakas.tunnus/asiakas.ytunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta) laskun valuutassa
   // 2B. asiakas.tunnus/asiakas.ytunnus tuote.tuotenumero nettohinta (asiakkaan tuotteen hinta) yhtiön valuutassa
@@ -41,7 +41,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "HINTA: 2AB $row[tunnukset]<br>";
+    //echo "HINTA: 2AB $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -66,7 +66,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "HINTA: 2AB $row[tunnukset]<br>";
+    //echo "HINTA: 2AB $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -93,7 +93,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "HINTA: 3AB $row[tunnukset]<br>";
+    //echo "HINTA: 3AB $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -118,7 +118,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "HINTA: 3AB $row[tunnukset]<br>";
+    //echo "HINTA: 3AB $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -147,7 +147,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "HINTA: 4AB $row[tunnukset]<br>";
+    //echo "HINTA: 4AB $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -176,7 +176,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "HINTA: 5AB $row[tunnukset]<br>";
+    //echo "HINTA: 5AB $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -190,7 +190,7 @@ if ($tee == "AJA") {
     $asiakashinta += count($tunnukset);
   }
 
-     // 6A. asiakas.piiri tuote.tuoteno nettohinta (asiakaspiirin tuotteen hinta) laskun valuutassa
+  // 6A. asiakas.piiri tuote.tuoteno nettohinta (asiakaspiirin tuotteen hinta) laskun valuutassa
   // 6B. asiakas.piiri tuote.tuoteno nettohinta (asiakaspiirin tuotteen hinta) yhtiön valuutassa
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), hinta asc, tunnus desc) tunnukset
             FROM asiakashinta
@@ -205,7 +205,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "HINTA: 6AB $row[tunnukset]<br>";
+    //echo "HINTA: 6AB $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -219,7 +219,7 @@ if ($tee == "AJA") {
     $asiakashinta += count($tunnukset);
   }
 
-   // 7A. asiakas.segmentti tuote.aleryhma nettohinta (asiakassegmentin tuotealeryhmän hinta) laskun valuutassa
+  // 7A. asiakas.segmentti tuote.aleryhma nettohinta (asiakassegmentin tuotealeryhmän hinta) laskun valuutassa
   // 7B. asiakas.segmentti tuote.aleryhma nettohinta (asiakassegmentin tuotealeryhmän hinta) yhtiön valuutassa
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), hinta asc, tunnus desc) tunnukset
             FROM asiakashinta
@@ -234,7 +234,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "HINTA: 7AB $row[tunnukset]<br>";
+    //echo "HINTA: 7AB $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -263,7 +263,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "HINTA: 8AB $row[tunnukset]<br>";
+    //echo "HINTA: 8AB $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -292,7 +292,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "HINTA: 9A $row[tunnukset]<br>";
+    //echo "HINTA: 9A $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -320,7 +320,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "HINTA: 10 $row[tunnukset]<br>";
+    //echo "HINTA: 10 $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -347,7 +347,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "HINTA: 10 $row[tunnukset]<br>";
+    //echo "HINTA: 10 $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -376,7 +376,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "HINTA: 11 $row[tunnukset]<br>";
+    //echo "HINTA: 11 $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -405,7 +405,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "HINTA: 12 $row[tunnukset]<br>";
+    //echo "HINTA: 12 $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -434,7 +434,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "HINTA: 13 $row[tunnukset]<br>";
+    //echo "HINTA: 13 $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -461,7 +461,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "HINTA: 14 $row[tunnukset]<br>";
+    //echo "HINTA: 14 $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -487,7 +487,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "HINTA: 14 $row[tunnukset]<br>";
+    //echo "HINTA: 14 $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -514,7 +514,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "HINTA: 15AB $row[tunnukset]<br>";
+    //echo "HINTA: 15AB $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -529,7 +529,7 @@ if ($tee == "AJA") {
   }
 
   // 16. tuote.nettohinta (tuotteen nettohinta)
-  # Ei siivottavaa
+  // Ei siivottavaa
 
   // 17A. hinnasto.hinta tuotteen bruttohinta hinnastosta laskun valuutassa
   // 17B. hinnasto.hinta tuotteen bruttohinta hinnastosta yhtiön valuutassa
@@ -544,7 +544,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "HINTA: 17AB $row[tunnukset]<br>";
+    //echo "HINTA: 17AB $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -559,27 +559,27 @@ if ($tee == "AJA") {
   }
 
   // 18. tuote.myyntihinta (tuotteen bruttohinta) yhtiön valuutassa
-  # Ei siivottavaa
+  // Ei siivottavaa
 
 
-  #############################################################################################
-  #ALENNUKSET:
-  #############################################################################################
+  //############################################################################################
+  //ALENNUKSET:
+  //############################################################################################
 
   // 1. käyttäjän syöttämä EURO-määräinen alennus
-  # Ei siivottavaa
+  // Ei siivottavaa
 
   // 2. käyttäjän syöttämä EURO-määräinen alennus
-  # Ei siivottavaa
+  // Ei siivottavaa
 
   // 3. käyttäjän syöttämä alennus
-  # Ei siivottavaa
+  // Ei siivottavaa
 
   // 4. käyttäjän syöttämä alennus
-  # Ei siivottavaa
+  // Ei siivottavaa
 
   // 5. käyttäjän syöttämä katejuttu
-  # Ei siivottavaa
+  // Ei siivottavaa
 
   // 5. asiakas.tunnus/asiakas.ytunnus tuote.tuotenumero aleprosentti (asiakkaan tuotteen alennus)
   $query = "SELECT group_concat(tunnus ORDER BY IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999), alennus desc, tunnus desc) tunnukset
@@ -595,7 +595,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "ALE: 5 $row[tunnukset]<br>";
+    //echo "ALE: 5 $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -622,7 +622,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "ALE: 5 $row[tunnukset]<br>";
+    //echo "ALE: 5 $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -650,7 +650,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "ALE: 6 $row[tunnukset]<br>";
+    //echo "ALE: 6 $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -677,7 +677,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "ALE: 6 $row[tunnukset]<br>";
+    //echo "ALE: 6 $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -707,7 +707,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "ALE: 7 $row[tunnukset]<br>";
+    //echo "ALE: 7 $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -737,7 +737,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "ALE: 8 $row[tunnukset]<br>";
+    //echo "ALE: 8 $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -767,7 +767,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "ALE: 9 $row[tunnukset]<br>";
+    //echo "ALE: 9 $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -797,7 +797,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "ALE: 10 $row[tunnukset]<br>";
+    //echo "ALE: 10 $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -827,7 +827,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "ALE: 11 $row[tunnukset]<br>";
+    //echo "ALE: 11 $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -857,7 +857,7 @@ if ($tee == "AJA") {
   $hresult = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($hresult)) {
-    #echo "ALE: 12 $row[tunnukset]<br>";
+    //echo "ALE: 12 $row[tunnukset]<br>";
 
     $tunnukset = explode(",", $row["tunnukset"]);
     array_shift($tunnukset);
@@ -872,12 +872,12 @@ if ($tee == "AJA") {
   }
 
   // 13. tuote.aleryhmä aleprosentti (tuotealeryhmän perusalennus) (Vain ykköstason alennus voidaan tallentaa tähän)
-  # Ei siivottavaa
+  // Ei siivottavaa
 
 
-  #############################################################################################
-  #POISTETAAN ERÄÄNTYNEET:
-  #############################################################################################
+  //############################################################################################
+  //POISTETAAN ERÄÄNTYNEET:
+  //############################################################################################
 
   $query = "DELETE FROM asiakashinta
             WHERE yhtio  = '$kukarow[yhtio]'
@@ -909,4 +909,4 @@ if ($tee == "AJA") {
   echo t("Poistettiin %s erääntynyttä tai duplikaatti asiakashintaa", "", $asiakashinta).".<br>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

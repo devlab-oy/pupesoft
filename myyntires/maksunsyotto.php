@@ -1,6 +1,6 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if ($livesearch_tee == "ASIAKASHAKU") {
   livesearch_asiakashaku();
@@ -34,11 +34,11 @@ if ($tee == "CHECK") {
   $errors = 0;
 
   if ($tilino == 0) {
-     $error[] = t("Valitse saajan tilinumero").".";
+    $error[] = t("Valitse saajan tilinumero").".";
   }
 
   if (strlen($summa) == 0) {
-     $error[] = t("Anna suorituksen summa").".";
+    $error[] = t("Anna suorituksen summa").".";
   }
   else {
     preg_match("/^[-+]?[0-9]+([,.][0-9]+)?/", $summa, $tsumma);
@@ -81,18 +81,18 @@ if ($tee == "SYOTTO") {
   $myyntisaamiset = 0;
 
   switch ($vastatili) {
-    case 'myynti' :
-      $myyntisaamiset = $yhtiorow['myyntisaamiset'];
-      break;
-    case 'factoring' :
-      $myyntisaamiset = $yhtiorow['factoringsaamiset'];
-      break;
-    case 'konserni' :
-      $myyntisaamiset = $yhtiorow['konsernimyyntisaamiset'];
-      break;
-    default :
-      echo t("Virheellinen vastatilitieto")."!";
-      exit;
+  case 'myynti' :
+    $myyntisaamiset = $yhtiorow['myyntisaamiset'];
+    break;
+  case 'factoring' :
+    $myyntisaamiset = $yhtiorow['factoringsaamiset'];
+    break;
+  case 'konserni' :
+    $myyntisaamiset = $yhtiorow['konsernimyyntisaamiset'];
+    break;
+  default :
+    echo t("Virheellinen vastatilitieto")."!";
+    exit;
   }
 
   if ($myyntisaamiset == 0) {
@@ -253,7 +253,7 @@ if ($tee == "SYOTTO") {
 
     $summa = $pistesumma;
 
-    require ("tilauskasittely/tulosta_kuitti.inc");
+    require "tilauskasittely/tulosta_kuitti.inc";
 
     // pdffän piirto
     $firstpage = alku();
@@ -283,12 +283,12 @@ if ($tee == "SYOTTO") {
     $oikeus = 1;
     $tila = "kohdistaminen";
     $PHP_SELF = 'manuaalinen_suoritusten_kohdistus.php';
-    require("manuaalinen_suoritusten_kohdistus.php");
+    require "manuaalinen_suoritusten_kohdistus.php";
     exit;
   }
 
   if ($tiliote == 'Z') {
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
   else {
@@ -307,7 +307,7 @@ if ($asiakasid != "" and $tee == "ETSI") {
     $asiakasid = "";
   }
 
-  require ("inc/asiakashaku.inc");
+  require "inc/asiakashaku.inc";
   $tee = "";
 
   // jos ei löytynyt ytunnuksella kokeillaan laskunumerolla
@@ -323,12 +323,12 @@ if ($asiakasid != "" and $tee == "ETSI") {
     if ($asiakas = mysql_fetch_assoc($result)) {
       echo "<font class='message'>".t("Maksaja löytyi laskunumerolla")." $laskunro:</font><br><br>";
       $asiakasid = $asiakas["liitostunnus"];
-      require ("inc/asiakashaku.inc");
+      require "inc/asiakashaku.inc";
     }
   }
 
   // otetaan muutparametrit takas
-  list ($summa,$ppa,$kka,$vva,$mtili, $selite) = explode("#", $muutparametrit);
+  list ($summa, $ppa, $kka, $vva, $mtili, $selite) = explode("#", $muutparametrit);
 }
 
 // meillä on ytunnus, tehdään syöttöruutu
@@ -554,15 +554,15 @@ if ($ytunnus != '' and $tee == "") {
   <tr>
     <th>".t("Maksupäivä (pp kk vvvv)")."</th>";
 
-    if ($kka == "")
-      $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-    if ($vva == "")
-      $vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-    if ($ppa == "")
-      $ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+  if ($kka == "")
+    $kka = date("m", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+  if ($vva == "")
+    $vva = date("Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+  if ($ppa == "")
+    $ppa = date("d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 
 
-    echo "<td><input name='ppa' size='3' value='$ppa'> <input name='kka' size='3' value='$kka'> <input name='vva' size=5' value='$vva'></td>";
+  echo "<td><input name='ppa' size='3' value='$ppa'> <input name='kka' size='3' value='$kka'> <input name='vva' size=5' value='$vva'></td>";
 
   echo "  </tr>
   <tr>
@@ -581,21 +581,21 @@ if ($ytunnus != '' and $tee == "") {
     <th>".t("Tulosta suorituksesta kuitti")."</th>
     <td>";
 
-    echo "<select name='tulostakuitti'>";
-    echo "<option value=''>".t("Ei tulosteta")."</option>";
+  echo "<select name='tulostakuitti'>";
+  echo "<option value=''>".t("Ei tulosteta")."</option>";
 
-    $querykieli = "SELECT *
+  $querykieli = "SELECT *
                    FROM kirjoittimet
                    WHERE yhtio  = '$kukarow[yhtio]'
                    AND komento != 'EDI'
                    ORDER BY kirjoitin";
-    $kires = pupe_query($querykieli);
+  $kires = pupe_query($querykieli);
 
-    while ($kirow=mysql_fetch_assoc($kires)) {
-      echo "<option value='$kirow[komento]'>$kirow[kirjoitin]</option>";
-    }
+  while ($kirow=mysql_fetch_assoc($kires)) {
+    echo "<option value='$kirow[komento]'>$kirow[kirjoitin]</option>";
+  }
 
-    echo "</select>";
+  echo "</select>";
 
   echo "</td>
   </tr>
@@ -613,7 +613,7 @@ if ($tee == "" and $ytunnus == "") {
 
   $maksaja_haku = htmlentities($maksaja_haku);
 
-  echo "<font class='message'>",t("Maksajan hakuinfo")," ",asiakashakuohje(),"</font><br>";
+  echo "<font class='message'>", t("Maksajan hakuinfo"), " ", asiakashakuohje(), "</font><br>";
   echo "<br>";
   echo t("Maksaja").": ";
   echo "<form method='post' name='maksaja'>";
@@ -629,4 +629,4 @@ if ($tee == "" and $ytunnus == "") {
   $kentta = "asiakasid";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

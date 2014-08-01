@@ -34,7 +34,7 @@ if (($trow["epakurantti25pvm"] != '0000-00-00' or $trow["epakurantti50pvm"] != '
 }
 
 //poistotuotek‰sittely
-if (in_array($trow["status"], array('P','X')) and $riviok == 0) {
+if (in_array($trow["status"], array('P', 'X')) and $riviok == 0) {
   $varaosavirhe .= t("VIRHE: T‰m‰ on poistotuote, sit‰ ei voi tilata")."!<br>";
   $riviok++;
   $tilausok++;
@@ -149,10 +149,10 @@ if ($oikeusostohintapaiv !== FALSE and (float) $prow["hinta"] != (float) $trow['
 if ((($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') or ($toimittajarow["oletus_toimaika"] != 0 and $toimittajarow["oletus_toimaika"] != '')) and $riviok == 0 and strpos($_SERVER['SCRIPT_NAME'], "tilaus_osto.php") !== FALSE and ($yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '1' or $yhtiorow["ostotilaukseen_toimittajan_toimaika"] == '2')) {
 
   if ($trow["toimitusaika"] != 0 and $trow["toimitusaika"] != '') {
-    $ehdotus_pvm = date('Y-m-d',time() + $trow["toimitusaika"] * 24 * 60 * 60);
+    $ehdotus_pvm = date('Y-m-d', time() + $trow["toimitusaika"] * 24 * 60 * 60);
   }
   elseif ($toimittajarow["oletus_toimaika"] != 0 and $toimittajarow["oletus_toimaika"] != '') {
-    $ehdotus_pvm = date('Y-m-d',time() + $toimittajarow["oletus_toimaika"] * 24 * 60 * 60);
+    $ehdotus_pvm = date('Y-m-d', time() + $toimittajarow["oletus_toimaika"] * 24 * 60 * 60);
   }
 
   if ($paivitatoimaika == "ON" and $prow["tunnus"] == $paiv_rivitunnus and $JOPATO != '') {
@@ -259,29 +259,29 @@ if (!isset($rivienmaara) or $rivienmaara < 100) {
       $saldo_myytavissa_font = $tuotteen_toimittaja_row['saldo_myytavissa'] < 1 ? "error" : "ok";
 
       $vastaavat_table .= "<tr class='aktiivi back'>"
-          ."<td><a href='../tuote.php?tee=Z&tuoteno=".urlencode($_tuote['tuoteno'])."&toim_kutsu=RIVISYOTTO&lopetus=$tilost_lopetus//from=LASKUTATILAUS'>{$_tuote["tuoteno"]} $vaihtoehtoinen</a></td>"
-          ."<td>{$tuotteen_toimittaja_row['toim_tuoteno']}</td>"
-          ."<td>{$tvrow["nimitys"]}</td>"
-          ."<td>{$tuotteen_toimittaja_row['toimittajan_nimi']}</td>"
-          ."<td>".sprintf("%.2f", $tuotteen_toimittaja_row['ostohinta'])."</td>"
-          ."<td>".sprintf("%.2f", $tuotteen_toimittaja_row['myyntihinta'])."</td>"
-          ."<td align='right'><font class='{$saldo_myytavissa_font}'>".$tuotteen_toimittaja_row['saldo_myytavissa']."</font></td>";
+        ."<td><a href='../tuote.php?tee=Z&tuoteno=".urlencode($_tuote['tuoteno'])."&toim_kutsu=RIVISYOTTO&lopetus=$tilost_lopetus//from=LASKUTATILAUS'>{$_tuote["tuoteno"]} $vaihtoehtoinen</a></td>"
+        ."<td>{$tuotteen_toimittaja_row['toim_tuoteno']}</td>"
+        ."<td>{$tvrow["nimitys"]}</td>"
+        ."<td>{$tuotteen_toimittaja_row['toimittajan_nimi']}</td>"
+        ."<td>".sprintf("%.2f", $tuotteen_toimittaja_row['ostohinta'])."</td>"
+        ."<td>".sprintf("%.2f", $tuotteen_toimittaja_row['myyntihinta'])."</td>"
+        ."<td align='right'><font class='{$saldo_myytavissa_font}'>".$tuotteen_toimittaja_row['saldo_myytavissa']."</font></td>";
 
-       $vastaavat_table .= "<td align='right' nowrap>";
+      $vastaavat_table .= "<td align='right' nowrap>";
 
-       $_tilattu = (int) $prow['tilattu'];
+      $_tilattu = (int) $prow['tilattu'];
 
-       // Ostopuolella toimipaikan tunnus tallennetaan vanhatunnus-kentt‰‰n
-       if ($tuotteen_toimittaja_row['selitetark_2'] != "") {
-         $vastaavat_table .= "<div class='availability {$_tuote['vastaavat_tunnus']}_{$_tilattu}_availability' /> <span class='{$_tuote['vastaavat_tunnus']}_{$_tilattu}_loading'></span></div>&nbsp;";
-         $vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_custid' value='{$tuotteen_toimittaja_row['selitetark_2']}' />";
-         $vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_username' value='{$tuotteen_toimittaja_row['selitetark_3']}' />";
+      // Ostopuolella toimipaikan tunnus tallennetaan vanhatunnus-kentt‰‰n
+      if ($tuotteen_toimittaja_row['selitetark_2'] != "") {
+        $vastaavat_table .= "<div class='availability {$_tuote['vastaavat_tunnus']}_{$_tilattu}_availability' /> <span class='{$_tuote['vastaavat_tunnus']}_{$_tilattu}_loading'></span></div>&nbsp;";
+        $vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_custid' value='{$tuotteen_toimittaja_row['selitetark_2']}' />";
+        $vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_username' value='{$tuotteen_toimittaja_row['selitetark_3']}' />";
         $vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_password' value='{$tuotteen_toimittaja_row['selitetark_4']}' />";
         $vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_suppliernumber' value='{$tuotteen_toimittaja_row['selitetark_5']}' />";
         $vastaavat_table .= "<input type='hidden' class='{$_tuote['vastaavat_tunnus']}_tt_tunnus' value='{$tuotteen_toimittaja_row['tt_tunnus']}' />";
-       }
+      }
 
-       if ($tuotteen_toimittaja_row['selitetark_2'] == "") {
+      if ($tuotteen_toimittaja_row['selitetark_2'] == "") {
 
         if (!empty($laskurow['varasto'])) {
           $kohde_varastot = array($laskurow['varasto']);
@@ -297,10 +297,10 @@ if (!isset($rivienmaara) or $rivienmaara < 100) {
         $siirto_varastot = hae_mahdolliset_siirto_varastot($kohde_varastot, $_tuote['tuoteno']);
 
         $_siirrettavissa = $siirto_varastot[0]['tuote']['myytavissa'];
-         $siirrettavissa_saldon_font = $_siirrettavissa < 1 ? "error" : "ok";
+        $siirrettavissa_saldon_font = $_siirrettavissa < 1 ? "error" : "ok";
 
-         $vastaavat_table .= "<font class='{$siirrettavissa_saldon_font}'>".sprintf("%.2f", $_siirrettavissa)."</font>";
-       }
+        $vastaavat_table .= "<font class='{$siirrettavissa_saldon_font}'>".sprintf("%.2f", $_siirrettavissa)."</font>";
+      }
 
       $vastaavat_table .= "</td>";
       $vastaavat_table .= "<td>";
@@ -312,7 +312,7 @@ if (!isset($rivienmaara) or $rivienmaara < 100) {
         $_vastaavat_tunnus = $_tuote['vastaavat_tunnus'];
         $_vastaavat_tuoteno = $tuotteen_toimittaja_row['toim_tuoteno'];
 
-        require("inc/sahkoinen_tilausliitanta.inc");
+        require "inc/sahkoinen_tilausliitanta.inc";
       }
 
       $vastaavat_table .= "</td>";
@@ -395,16 +395,16 @@ if (!isset($rivienmaara) or $rivienmaara < 100) {
       list(, , $tuotteen_toimittaja_row['saldo_myytavissa']) = saldo_myytavissa($_tuote['tuoteno'], '', '', '', '', '', '', '', '', '');
 
       $korvaavat_table .= "<tr class='aktiivi'>"
-          ."<td>{$korvaava_tuote["tuoteno"]}</td>"
-          ."<td>{$tuotteen_toimittaja_row['toim_tuoteno']}</td>"
-          ."<td>{$tvrow["nimitys"]}</td>"
-          ."<td>{$tuotteen_toimittaja_row['toimittajan_nimi']}</td>"
-          ."<td>".sprintf("%.2f", $tuotteen_toimittaja_row['ostohinta'])."</td>"
-          ."<td>".sprintf("%.2f", $tuotteen_toimittaja_row['myyntihinta'])."</td>"
-          ."<td align='right'>".$tuotteen_toimittaja_row['saldo_myytavissa']."</td>"
-          ."<td align='right'>".$tuotteen_toimittaja_row['tehdas_saldo']."</td>"
-          ."<td align='left'>"
-          ." <form method='post' name='jalkitoimita'>
+        ."<td>{$korvaava_tuote["tuoteno"]}</td>"
+        ."<td>{$tuotteen_toimittaja_row['toim_tuoteno']}</td>"
+        ."<td>{$tvrow["nimitys"]}</td>"
+        ."<td>{$tuotteen_toimittaja_row['toimittajan_nimi']}</td>"
+        ."<td>".sprintf("%.2f", $tuotteen_toimittaja_row['ostohinta'])."</td>"
+        ."<td>".sprintf("%.2f", $tuotteen_toimittaja_row['myyntihinta'])."</td>"
+        ."<td align='right'>".$tuotteen_toimittaja_row['saldo_myytavissa']."</td>"
+        ."<td align='right'>".$tuotteen_toimittaja_row['tehdas_saldo']."</td>"
+        ."<td align='left'>"
+        ." <form method='post' name='jalkitoimita'>
                   <input type='hidden' name='toim'       value = '$toim'>
                   <input type='hidden' name='lopetus'     value = '$lopetus'>
                   <input type='hidden' name='tilausnumero'   value = '$tilausnumero'>
@@ -415,7 +415,7 @@ if (!isset($rivienmaara) or $rivienmaara < 100) {
                   <input type='hidden' name='tapa'       value = 'VAIHDARIVI'>
                   <input type='Submit' value='".t("Tilaa tuote")."' onclick='return confirm(\"".t('Oletko varma ett‰ haluat vaihtaa tuotteen')."\")'>
                   </form> "
-          ."</td></tr>";
+        ."</td></tr>";
     }
   }
 

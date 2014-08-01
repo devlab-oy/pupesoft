@@ -6,8 +6,8 @@ error_reporting(E_ALL);
 ini_set("display_errors", 1);
 
 // otetaan tietokanta connect
-require("inc/connect.inc");
-require("inc/functions.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 // Pupeasennuksen root
 $pupe_root_polku = dirname(dirname(__FILE__));
@@ -46,8 +46,8 @@ if (isset($argv[5]) and $argv[5] != "") {
 
 $tanaan = date("d.m.Y");
 
-require("inc/connect.inc");
-require("inc/functions.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
@@ -136,13 +136,13 @@ if (mysql_num_rows($result) > 0) {
         if ($korjaa and (int) $laskurow['tapvm'] < $kpitokausi_auki) {
 
           if ($tilirow['crossyearerror'] == 1) {
-             // Uusin varastonmuutos
-             $maxmuutos = explode(",", $tilirow["tanvuodentunnarit"]);
+            // Uusin varastonmuutos
+            $maxmuutos = explode(",", $tilirow["tanvuodentunnarit"]);
             $tapvm     = $tilirow["maxtapvm"];
           }
           else {
-              // Uusin varastonmuutos viime vuoden puolelta
-              $maxmuutos = explode(",", $tilirow["viimevuodentunnarit"]);
+            // Uusin varastonmuutos viime vuoden puolelta
+            $maxmuutos = explode(",", $tilirow["viimevuodentunnarit"]);
             $tapvm     = $kpitokausi_auki_pvm;
           }
 
@@ -178,18 +178,18 @@ if (mysql_num_rows($result) > 0) {
           // Tehdään vastakirjaus alkuperäiselle varastonmuutostiliöinnille
           kopioitiliointi($varmuutun, "", $params);
 
-          ################################################################################################
+          //###############################################################################################
 
-           if ($tilirow['crossyearerror'] == 1) {
-             // Uusin varasto
-             $maxmuutos = explode(",", $vararow["tanvuodentunnarit"]);
+          if ($tilirow['crossyearerror'] == 1) {
+            // Uusin varasto
+            $maxmuutos = explode(",", $vararow["tanvuodentunnarit"]);
             $tapvm     = $vararow["maxtapvm"];
-           }
-           else {
-             // Uusin varasto viime vuoden puolelta
-             $maxmuutos = explode(",", $vararow["viimevuodentunnarit"]);
+          }
+          else {
+            // Uusin varasto viime vuoden puolelta
+            $maxmuutos = explode(",", $vararow["viimevuodentunnarit"]);
             $tapvm     = $kpitokausi_auki_pvm;
-           }
+          }
 
           sort($maxmuutos);
 

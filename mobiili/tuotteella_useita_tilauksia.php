@@ -6,10 +6,10 @@ $_GET["no_css"] = 'yes';
 $mobile = true;
 $valinta = "Etsi";
 
-if (@include_once("../inc/parametrit.inc"));
-elseif (@include_once("inc/parametrit.inc"));
+if (@include_once "../inc/parametrit.inc");
+elseif (@include_once "inc/parametrit.inc");
 
-if(!isset($errors)) $errors = array();
+if (!isset($errors)) $errors = array();
 if (!isset($viivakoodi)) $viivakoodi = "";
 if (!isset($_viivakoodi)) $_viivakoodi = "";
 if (!isset($orig_tilausten_lukumaara)) $orig_tilausten_lukumaara = 0;
@@ -23,7 +23,7 @@ $viivakoodi = (isset($_viivakoodi) and $_viivakoodi != "") ? $_viivakoodi : $vii
 
 $params = array();
 
-# Joku parametri tarvii olla setattu.
+// Joku parametri tarvii olla setattu.
 if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 
   if (strpos($tuotenumero, "%") !== FALSE) $tuotenumero = urldecode($tuotenumero);
@@ -64,7 +64,7 @@ if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 
 }
 else {
-  # T‰nne ei pit‰is p‰‰ty‰, tarkistetaan jo ostotilaus.php:ss‰
+  // T‰nne ei pit‰is p‰‰ty‰, tarkistetaan jo ostotilaus.php:ss‰
   echo t("Parametrivirhe");
   echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=ostotilaus.php'>";
   exit();
@@ -72,7 +72,7 @@ else {
 
 if ($_viivakoodi == $viivakoodi) $viivakoodi = "";
 
-# Tarkistetaan onko k‰ytt‰j‰ll‰ kesken saapumista
+// Tarkistetaan onko k‰ytt‰j‰ll‰ kesken saapumista
 $keskeneraiset_query = "SELECT kuka.kesken FROM lasku
                         JOIN kuka ON (lasku.tunnus=kuka.kesken and lasku.yhtio=kuka.yhtio)
                         WHERE kuka='{$kukarow['kuka']}'
@@ -80,7 +80,7 @@ $keskeneraiset_query = "SELECT kuka.kesken FROM lasku
                         and lasku.tila='K'";
 $keskeneraiset = mysql_fetch_assoc(pupe_query($keskeneraiset_query));
 
-# Jos kuka.kesken on saapuminen, k‰ytet‰‰n sit‰
+// Jos kuka.kesken on saapuminen, k‰ytet‰‰n sit‰
 if ($keskeneraiset['kesken'] != 0) {
   $saapuminen = $keskeneraiset['kesken'];
 }
@@ -90,20 +90,20 @@ $ascdesc = "desc";
 
 if (isset($sort_by)) {
 
-  switch($sort_by) {
-    case 'tuoteno':
-    case 'otunnus':
-    case 'sorttaus_kpl':
-    case 'hylly':
-      $orderby = $sort_by;
-      $ascdesc = ${"sort_by_direction_{$sort_by}"};
-      break;
-    default:
-      break;
+  switch ($sort_by) {
+  case 'tuoteno':
+  case 'otunnus':
+  case 'sorttaus_kpl':
+  case 'hylly':
+    $orderby = $sort_by;
+    $ascdesc = ${"sort_by_direction_{$sort_by}"};
+    break;
+  default:
+    break;
   }
 }
 
-# Haetaan ostotilaukset
+// Haetaan ostotilaukset
 $query = "SELECT
           lasku.tunnus as ostotilaus,
           lasku.liitostunnus,
@@ -186,39 +186,39 @@ if ($tilausten_lukumaara == 0 and (isset($_viivakoodi) and $_viivakoodi != "") a
 
 $tilaukset = mysql_fetch_assoc($result);
 
-# Submit
+// Submit
 if (isset($submit)) {
-  switch($submit) {
-    case 'ok':
+  switch ($submit) {
+  case 'ok':
 
-      if(empty($tilausrivi)) {
-        $errors[] = t("Valitse rivi");
-        break;
-      }
-
-      $url_array['ostotilaus'] = $ostotilaus;
-      $url_array['tilausrivi'] = $tilausrivi;
-      $url_array['saapuminen'] = $saapuminen;
-
-      echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url_array)."'>"; exit();
-
+    if (empty($tilausrivi)) {
+      $errors[] = t("Valitse rivi");
       break;
-    case 'cancel':
-      echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus={$ostotilaus}&backsaapuminen={$backsaapuminen}'>";
-      exit;
-    default:
-      echo "Virhe";
-      break;
+    }
+
+    $url_array['ostotilaus'] = $ostotilaus;
+    $url_array['tilausrivi'] = $tilausrivi;
+    $url_array['saapuminen'] = $saapuminen;
+
+    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url_array)."'>"; exit();
+
+    break;
+  case 'cancel':
+    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?ostotilaus={$ostotilaus}&backsaapuminen={$backsaapuminen}'>";
+    exit;
+  default:
+    echo "Virhe";
+    break;
   }
 }
 
-# Ei osumia, palataan ostotilaus sivulle
+// Ei osumia, palataan ostotilaus sivulle
 if ($tilausten_lukumaara == 0) {
   echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?tuotenumero={$tuotenumero}&ostotilaus={$ostotilaus}&virhe'>";
   exit();
 }
 
-# Jos vain yksi osuma, menn‰‰n suoraan hyllytykseen;
+// Jos vain yksi osuma, menn‰‰n suoraan hyllytykseen;
 if ($tilausten_lukumaara == 1 and $orig_tilausten_lukumaara == 1 and $_viivakoodi == "") {
 
   $url_array['tilausrivi'] = $tilaukset['tunnus'];
@@ -235,7 +235,7 @@ if (isset($virhe)) {
   $errors[] = t("Tuotetta ei lˆytynyt").".<br>";
 }
 
-# Result alkuun
+// Result alkuun
 mysql_data_seek($result, 0);
 
 //otetaan haltuun se tapaus, jos heti halutaan menn‰ takasin hakuruutuun ja meill‰ ei ole viel‰ tehtyn‰ uutta saapumista -> pit‰‰ setata erillinen muuttuja, jotta saapumistunnuksen settaaminen kukarow.keskeniin ohitettaisiin kun palataan hakuun ostotilaus.php
@@ -249,10 +249,10 @@ else {
 $url_lisa = $manuaalisesti_syotetty_ostotilausnro ? "?ostotilaus={$ostotilaus}" : "";
 $url_lisa .= "&backsaapuminen={$backsaapuminen}";
 
-### UI ###
+//## UI ###
 echo "<div class='header'>
   <button onclick='window.location.href=\"ostotilaus.php{$url_lisa}\"' class='button left'><img src='back2.png'></button>
-  <h1>",t("USEITA TILAUKSIA"), "</h1></div>";
+  <h1>", t("USEITA TILAUKSIA"), "</h1></div>";
 
 $viivakoodi_formi_urli = "?tuotenumero=".urlencode($tuotenumero)."&ostotilaus={$ostotilaus}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}";
 
@@ -261,8 +261,8 @@ echo "<div class='main'>
 <form name='viivakoodiformi' method='post' action='{$viivakoodi_formi_urli}' id='viivakoodiformi'>
   <table class='search'>
     <tr>
-      <th>",t("Viivakoodi"),":&nbsp;<input type='text' id='viivakoodi' name='_viivakoodi' value='' /></th>
-      <td><button id='valitse_nappi' value='viivakoodi' class='button' onclick='submit();'>",t("Etsi"),"</button></td>
+      <th>", t("Viivakoodi"), ":&nbsp;<input type='text' id='viivakoodi' name='_viivakoodi' value='' /></th>
+      <td><button id='valitse_nappi' value='viivakoodi' class='button' onclick='submit();'>", t("Etsi"), "</button></td>
     </tr>
   </table>
   </form>
@@ -275,21 +275,21 @@ echo "<div class='main'>
 $url_sorttaus = "ostotilaus={$ostotilaus}&viivakoodi={$viivakoodi}&_viivakoodi={$_viivakoodi}&orig_tilausten_lukumaara={$orig_tilausten_lukumaara}&manuaalisesti_syotetty_ostotilausnro={$manuaalisesti_syotetty_ostotilausnro}&saapuminen={$saapuminen}&tuotenumero=&ennaltakohdistettu={$ennaltakohdistettu}&backsaapuminen={$backsaapuminen}".urlencode($tuotenumero);
 
 if (($tuotenumero != '' or $viivakoodi != '') and $ostotilaus == '') {
-  echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=otunnus&sort_by_direction_otunnus={$sort_by_direction_otunnus}'>",t("Ostotilaus"), "</a>&nbsp;";
+  echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=otunnus&sort_by_direction_otunnus={$sort_by_direction_otunnus}'>", t("Ostotilaus"), "</a>&nbsp;";
   echo $sort_by_direction_otunnus == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
   echo "</th>";
 }
 if ($tuotenumero == '' and $viivakoodi == '' and $ostotilaus != '') {
-  echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=tuoteno&sort_by_direction_tuoteno={$sort_by_direction_tuoteno}'>",t("Tuoteno"), "</a>&nbsp;";
+  echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=tuoteno&sort_by_direction_tuoteno={$sort_by_direction_tuoteno}'>", t("Tuoteno"), "</a>&nbsp;";
   echo $sort_by_direction_tuoteno == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
   echo "</th>";
 }
 
-echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=sorttaus_kpl&sort_by_direction_sorttaus_kpl={$sort_by_direction_sorttaus_kpl}'>",t("Kpl (ulk.)"),"</a>";
+echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=sorttaus_kpl&sort_by_direction_sorttaus_kpl={$sort_by_direction_sorttaus_kpl}'>", t("Kpl (ulk.)"), "</a>";
 echo $sort_by_direction_sorttaus_kpl == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 echo "</th>";
 
-echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=hylly&sort_by_direction_hylly={$sort_by_direction_hylly}'>",t("Tuotepaikka"),"</a>";
+echo "<th><a href='tuotteella_useita_tilauksia.php?{$url_sorttaus}&sort_by=hylly&sort_by_direction_hylly={$sort_by_direction_hylly}'>", t("Tuotepaikka"), "</a>";
 echo $sort_by_direction_hylly == 'asc' ? "<img src='{$palvelin2}pics/lullacons/arrow-double-up-green.png' />" : "<img src='{$palvelin2}pics/lullacons/arrow-double-down-green.png' />";
 echo "</th>";
 echo "</tr>";
@@ -298,15 +298,15 @@ echo "</tr>";
 $_saapuminen = $saapuminen;
 $ennaltakohdistettu = FALSE;
 
-# Loopataan ostotilaukset
-while($row = mysql_fetch_assoc($result)) {
+// Loopataan ostotilaukset
+while ($row = mysql_fetch_assoc($result)) {
 
   if ($row['tilausrivi_tyyppi'] == 'o') {
-      //suoratoimitus asiakkaalle
-      $row['tilausrivi_tyyppi'] = 'JTS';
+    //suoratoimitus asiakkaalle
+    $row['tilausrivi_tyyppi'] = 'JTS';
   }
 
-  # Jos rivi on jo kohdistettu eri saapumiselle
+  // Jos rivi on jo kohdistettu eri saapumiselle
   if ($row['uusiotunnus'] != 0) {
     $saapuminen = $row['uusiotunnus'];
     $ennaltakohdistettu = TRUE;
@@ -327,8 +327,8 @@ while($row = mysql_fetch_assoc($result)) {
       'tilausten_lukumaara' => $tilausten_lukumaara,
       'viivakoodi' => $viivakoodi,
       'tuotenumero' => $tuotenumero,
-      'ennaltakohdistettu' => $ennaltakohdistettu,)
-    );
+      'ennaltakohdistettu' => $ennaltakohdistettu, )
+  );
 
   echo "<tr>";
 
@@ -340,7 +340,7 @@ while($row = mysql_fetch_assoc($result)) {
   }
   echo "
     <td><a href='hyllytys.php?{$url}'>".($row['varattu']+$row['kpl']).
-      "(".($row['varattu']+$row['kpl'])*$row['tuotekerroin'].") {$row['tilausrivi_tyyppi']}
+    "(".($row['varattu']+$row['kpl'])*$row['tuotekerroin'].") {$row['tilausrivi_tyyppi']}
     </a></td>
     <td>{$row['hylly']}</td>";
   echo "<tr>";
@@ -350,15 +350,15 @@ echo "</table></div>";
 echo "Rivej‰: ".mysql_num_rows($result);
 
 echo "<div class='controls'>
-<button type='submit' name='submit' value='ok' onsubmit='false'>",t("OK"),"</button>
-<button class='right' name='submit' id='takaisin' value='cancel' onclick='submit();'>",t("Takaisin"),"</button>
+<button type='submit' name='submit' value='ok' onsubmit='false'>", t("OK"), "</button>
+<button class='right' name='submit' id='takaisin' value='cancel' onclick='submit();'>", t("Takaisin"), "</button>
 </form>
 </div>";
 
 echo "<div class='error'>";
-  foreach($errors as $virhe) {
-    echo $virhe;
-  }
+foreach ($errors as $virhe) {
+  echo $virhe;
+}
 echo "</div>";
 
 echo "<input type='button' id='myHiddenButton' visible='false' onclick='javascript:doFocus();' width='1px' style='display:none'>";

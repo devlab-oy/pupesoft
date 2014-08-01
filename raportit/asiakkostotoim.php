@@ -3,7 +3,7 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require('../inc/parametrit.inc');
+require '../inc/parametrit.inc';
 
 echo "<font class='head'>".t("Asiakkaan ostot toimittajittain")."</font><hr>";
 
@@ -15,7 +15,7 @@ if ($tee == "" or $tee == "JATKA") {
   }
 
   if (isset($muutparametrit)) {
-    list($vva,$kka,$ppa,$vvl,$kkl,$ppl,$ytunnus,$asiakasno,$toimi) = explode('#', $muutparametrit);
+    list($vva, $kka, $ppa, $vvl, $kkl, $ppl, $ytunnus, $asiakasno, $toimi) = explode('#', $muutparametrit);
   }
 
   $muutparametrit = $vva."#".$kka."#".$ppa."#".$vvl."#".$kkl."#".$ppl."#".$ytunnus."#".$asiakasno."#".$toimi."#";
@@ -23,13 +23,13 @@ if ($tee == "" or $tee == "JATKA") {
   if ($vva != '' and $kka != '' and $ppa != '' and $vvl != '' and $kkl != '' and $ppl != '' and $ytunnus != '' and $asiakasno != '') {
     if ($ytunnus != '' and !isset($ylatila)) {
 
-      require("../inc/kevyt_toimittajahaku.inc");
+      require "../inc/kevyt_toimittajahaku.inc";
 
       if ($ytunnus != '') {
         $tee = "JATKA";
       }
     }
-    elseif($ytunnus != '' and isset($ylatila)) {
+    elseif ($ytunnus != '' and isset($ylatila)) {
       $tee = "JATKA";
     }
     else {
@@ -55,7 +55,7 @@ if ($tee == "" or $tee == "JATKA") {
       $ytunnus = $asiakasno;
     }
 
-    require ("inc/asiakashaku.inc");
+    require "inc/asiakashaku.inc";
 
     if ($ytunnus != '') {
       $tee = "JATKA";
@@ -81,7 +81,7 @@ if ($debug == 1) {
 
 if ($tee != '' and $asiakasid != "" and $toimittajaid != "" and $ytunnus != '' and $toimi != '') {
 
-    $query = "SELECT b.tuoteno, b.nimitys, sum(a.kpl) kpl, round(sum(a.rivihinta*((a.alv/100)+1)),2) summa, round(sum(a.rivihinta),2) summa2
+  $query = "SELECT b.tuoteno, b.nimitys, sum(a.kpl) kpl, round(sum(a.rivihinta*((a.alv/100)+1)),2) summa, round(sum(a.rivihinta),2) summa2
               FROM tilausrivi a,
               tuote b,
               tuotteen_toimittajat d,
@@ -100,11 +100,11 @@ if ($tee != '' and $asiakasid != "" and $toimittajaid != "" and $ytunnus != '' a
               and d.liitostunnus = '$toimittajaid'
               GROUP BY 1
               ORDER BY 1";
-    $result = mysql_query($query) or pupe_error($query);
+  $result = mysql_query($query) or pupe_error($query);
 
-    if (mysql_num_rows($result) > 0 ) {
+  if (mysql_num_rows($result) > 0 ) {
 
-      echo "<table>
+    echo "<table>
           <tr>
           <th>".t("Asiakas").":</th>
           <th>$asiakasno</th>
@@ -119,33 +119,33 @@ if ($tee != '' and $asiakasid != "" and $toimittajaid != "" and $ytunnus != '' a
           <th>".t("Summa vton")."</th>
           </tr>";
 
-      while ($row = mysql_fetch_array($result)) {
+    while ($row = mysql_fetch_array($result)) {
 
-        echo "<tr><td>$row[tuoteno]</td><td>".t_tuotteen_avainsanat($row, 'nimitys')."</td><td>$row[kpl]</td><td>$row[summa]</td><td>$row[summa2]</td></tr>";
-      }
-      echo "</table>";
+      echo "<tr><td>$row[tuoteno]</td><td>".t_tuotteen_avainsanat($row, 'nimitys')."</td><td>$row[kpl]</td><td>$row[summa]</td><td>$row[summa2]</td></tr>";
     }
-    else {
-      echo "<br>".t("EI OSUMIA, TARKISTA SYÖTETYT RAJAUKSET")."!<br>";
-    }
+    echo "</table>";
+  }
+  else {
+    echo "<br>".t("EI OSUMIA, TARKISTA SYÖTETYT RAJAUKSET")."!<br>";
+  }
 }
 
 //Käyttäliittymä
-  echo "<br>";
-  echo "<table><form method='post'>";
+echo "<br>";
+echo "<table><form method='post'>";
 
-  if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-  if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-  if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+if (!isset($ppa)) $ppa = date("d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 
-  if (!isset($kkl)) $kkl = date("m");
-  if (!isset($vvl)) $vvl = date("Y");
-  if (!isset($ppl)) $ppl = date("d");
+if (!isset($kkl)) $kkl = date("m");
+if (!isset($vvl)) $vvl = date("Y");
+if (!isset($ppl)) $ppl = date("d");
 
-  echo "<input type='hidden' name='tee' value='JATKA'>
+echo "<input type='hidden' name='tee' value='JATKA'>
       <input type='hidden' name='toimittajaid' value='$toimittajaid'>
       <input type='hidden' name='asiakasid' value='$asiakasid'>";
-  echo "<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
+echo "<tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
       <td><input type='text' name='ppa' value='$ppa' size='3'>
       <input type='text' name='kka' value='$kka' size='3'>
       <input type='text' name='vva' value='$vva' size='5'></td></tr>
@@ -153,21 +153,21 @@ if ($tee != '' and $asiakasid != "" and $toimittajaid != "" and $ytunnus != '' a
       <td><input type='text' name='ppl' value='$ppl' size='3'>
       <input type='text' name='kkl' value='$kkl' size='3'>
       <input type='text' name='vvl' value='$vvl' size='5'></td></tr>";
-      if ($tee == '' and $toimittajaid == '') {
-        echo "<tr><th>".t("Anna asiakas")."</th>
+if ($tee == '' and $toimittajaid == '') {
+  echo "<tr><th>".t("Anna asiakas")."</th>
           <td><input type='text' name='asiakasno' value='$asiakasno' size='20'></td></tr>
           <tr><th>".t("Anna toimittaja")."</th>
           <td><input type='text' name='ytunnus' value='$toimi' size='20'></td></tr>";
-      }
-      else {
-        echo "<tr><th>".t("Asiakas")."</th>
+}
+else {
+  echo "<tr><th>".t("Asiakas")."</th>
           <td>$asiakasno</td></tr>
           <tr><th>".t("Toimittaja")."</th>
           <td>$toimi</td></tr>
           <input type='hidden' name='asiakasno' value='$asiakasno'>
           <input type='hidden' name='ytunnus' value='$toimi'>";
-      }
+}
 
-  echo "<tr><td class='back'><input type='submit' value='".t("Hae")."'></td></tr></table>";
+echo "<tr><td class='back'><input type='submit' value='".t("Hae")."'></td></tr></table>";
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

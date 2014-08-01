@@ -1,5 +1,6 @@
 <?php
-/** päivitetään korvaavuusketjun päätuotteen tarvittaessa hinnastoon kylläksi
+/**
+ * päivitetään korvaavuusketjun päätuotteen tarvittaessa hinnastoon kylläksi
  * - jos löytyy tuote jonka myytävissä on nolla
  * - jos tuotteen hinnastoon='K' hinnastoon='' ja hinnastoon='W'
  * - tuote on korvaavuusketjussa
@@ -7,6 +8,7 @@
  * - korvaavuusketjun päätuotteella on saldoa
  * - korvaavuusketjun päätuottella on hinnastoon ei
  */
+
 
 // Kutsutaanko CLI:stä
 if (php_sapi_name() != 'cli') {

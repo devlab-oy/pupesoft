@@ -2,7 +2,7 @@
 //sisään halutaan $laskurow jossa on tulostettavan tilauksen tiedot
 //jos tilauksia on useita $laskurow muuttujassa on jonkun tilauksen tiedot
 
-if (isset($laskurow['varasto']) AND $laskurow['varasto'] != 0) {
+if (isset($laskurow['varasto']) and $laskurow['varasto'] != 0) {
   // katotaan ihan aluksi, että meillä on edellytykset tulostukselle...
   $query  = "SELECT * FROM varastopaikat WHERE yhtio = '{$kukarow['yhtio']}' and tunnus = '{$laskurow['varasto']}'";
   $prires = pupe_query($query);
@@ -168,7 +168,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   $laskurow['pakkaamo'] = pakkaamo($tilausnumeroita, "yes", $ei_pakkaamoa);
 
   //keräyslistan tulostusta varten
-  require_once ("tulosta_lahete_kerayslista.inc");
+  require_once "tulosta_lahete_kerayslista.inc";
 
   if ($laskurow['liitostunnus'] != 999999999) {
     //haetaan asiakkaan tiedot
@@ -386,35 +386,35 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   $kerayseran_numero = !isset($kerayseran_numero) ? 0 : $kerayseran_numero;
 
   $params_kerayslista = array(
-  'asrow'             => $asrow,
-  'boldi'             => $boldi,
-  'iso'               => $iso,
-  'iso_boldi'         => $iso_boldi,
-  'kala'              => 0,
-  'kieli'             => $kieli,
-  'komento'      => '',
-  'laskurow'          => $laskurow,
-  'norm'              => $norm,
-  'page'              => '',
-  'paino'             => 0,
-  'pdf'               => NULL,
-  'perheid'           => 0,
-  'perheid2'          => 0,
-  'pieni'             => $pieni,
-  'pieni_boldi'       => $pieni_boldi,
-  'rectparam'         => $rectparam,
-  'rivinkorkeus'      => $rivinkorkeus,
-  'rivinumerot'      => $rivinumerot,
-  'row'               => NULL,
-  'sivu'              => 1,
-  'tee'               => $tee,
-  'thispage'      => NULL,
-  'tilausnumeroita'   => $tilausnumeroita,
-  'toim'              => $toim,
-  'tots'              => 0,
-  'tyyppi'        => $tyyppi,
-  'kerayseran_numero' => $kerayseran_numero,
-  'kerayslistatyyppi'  => $kerayslistatyyppi);
+    'asrow'             => $asrow,
+    'boldi'             => $boldi,
+    'iso'               => $iso,
+    'iso_boldi'         => $iso_boldi,
+    'kala'              => 0,
+    'kieli'             => $kieli,
+    'komento'      => '',
+    'laskurow'          => $laskurow,
+    'norm'              => $norm,
+    'page'              => '',
+    'paino'             => 0,
+    'pdf'               => NULL,
+    'perheid'           => 0,
+    'perheid2'          => 0,
+    'pieni'             => $pieni,
+    'pieni_boldi'       => $pieni_boldi,
+    'rectparam'         => $rectparam,
+    'rivinkorkeus'      => $rivinkorkeus,
+    'rivinumerot'      => $rivinumerot,
+    'row'               => NULL,
+    'sivu'              => 1,
+    'tee'               => $tee,
+    'thispage'      => NULL,
+    'tilausnumeroita'   => $tilausnumeroita,
+    'toim'              => $toim,
+    'tots'              => 0,
+    'tyyppi'        => $tyyppi,
+    'kerayseran_numero' => $kerayseran_numero,
+    'kerayslistatyyppi'  => $kerayslistatyyppi);
 
   // Aloitellaan keräyslistan teko
   $params_kerayslista = alku_kerayslista($params_kerayslista);
@@ -453,13 +453,13 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     $tilaus  = $tilausnumeroita;
     $varasto = $laskurow["varasto"];
 
-    require("varaston_tulostusalue.inc");
+    require "varaston_tulostusalue.inc";
 
     if (isset($kirjoitin) and $kirjoitin != '') {
       $apuprintteri = $kirjoitin;
     }
 
-    # Katsotaan onko avainsanoihin määritelty varaston toimipaikan läheteprintteriä
+    // Katsotaan onko avainsanoihin määritelty varaston toimipaikan läheteprintteriä
     if (!empty($laskurow['yhtio_toimipaikka'])) {
       $avainsana_where = " and avainsana.selite       = '{$laskurow['varasto']}'
                            and avainsana.selitetark   = '{$laskurow['yhtio_toimipaikka']}'
@@ -513,7 +513,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
           'komento'           => $komento,
           'lahetekpl'          => "",
           'kieli'           => ""
-          );
+        );
 
         pupesoft_tulosta_lahete($params);
       }

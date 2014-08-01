@@ -18,8 +18,8 @@ if ($php_cli) {
   ini_set("display_errors", 0);
 
   // otetaan tietokanta connect
-  require ("inc/connect.inc");
-  require ("inc/functions.inc");
+  require "inc/connect.inc";
+  require "inc/functions.inc";
 
   // ja parametri komentoriviltä
   $filename = $argv[1];
@@ -36,7 +36,7 @@ if ($php_cli) {
 }
 
 if (!function_exists('jt_toimita_editilaus')) {
-  function jt_toimita_editilaus ($asiakasno, $asiakasid, $asiakasmaa, $toimipaikka = 0) {
+  function jt_toimita_editilaus($asiakasno, $asiakasid, $asiakasmaa, $toimipaikka = 0) {
     global $yhtiorow, $kukarow, $edi_ulos, $php_cli;
 
     $automaaginen             = "automaaginen";
@@ -59,7 +59,7 @@ if (!function_exists('jt_toimita_editilaus')) {
       $asiakasmaalisa = "and (varastopaikat.sallitut_maat like '%{$asiakasmaa}%' or varastopaikat.sallitut_maat = '')";
     }
 
-    # Tarkistetaan onko toimipaikalle varastoja
+    // Tarkistetaan onko toimipaikalle varastoja
     if (!empty($toimipaikka) and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
       $query = "SELECT *
                 FROM varastopaikat
@@ -95,13 +95,13 @@ if (!function_exists('jt_toimita_editilaus')) {
     }
 
     if ($asiakasid > 0 and count($varastosta) > 0) {
-      require('jtselaus.php');
+      require 'jtselaus.php';
     }
   }
 }
 
 if (!function_exists('hae_erikoiskaupan_parametrit')) {
-  function hae_erikoiskaupan_parametrit ($storename, $verkkokauppa_erikoiskasittely) {
+  function hae_erikoiskaupan_parametrit($storename, $verkkokauppa_erikoiskasittely) {
 
     foreach ($verkkokauppa_erikoiskasittely as $sp) {
       if (strpos($storename, $sp[0])) {
@@ -227,7 +227,7 @@ elseif ($edi_tyyppi == "edifact911") {
   // Orders 91.1 tulee ostajan tiedot ennen vastaanottajaa, joten meidän pitää heti tässä vaiheessa kaivaa jo vastaanottajan tiedot
   $order_tietosisalto = file_get_contents($filename);
 
-  $order_tietosisalto = str_replace("\n","", $order_tietosisalto);
+  $order_tietosisalto = str_replace("\n", "", $order_tietosisalto);
   $order_tietosisalto = explode("'", $order_tietosisalto);
 
   // Tallennetaan NAD+SE -segmentti, koska se tulee muuten liian myöhäisessä vaiheessa...
@@ -291,18 +291,18 @@ while ($tietue = fgets($fd)) {
       $tunnus = '*RE OSTOTILRIV'; // Poistetaan häiritsevä nro
     }
   }
-  elseif ($edi_tyyppi == "edifact911"){
+  elseif ($edi_tyyppi == "edifact911") {
     $tunnus = substr($tietue, 0, 3);
     $tieto  = trim(substr($tietue, 4));
   }
   else {
     $tunnus = substr($tietue, 0, 9);
-    $tieto  = trim(substr($tietue,10));
+    $tieto  = trim(substr($tietue, 10));
   }
 
   // tehdään kaikille tiedoille 7 -> 8 bit ääkköskonversio..
-  $from     = array('{','}','|','[',']','\\',chr(179)); // 7bit
-  $to       = array('ä','å','ö','Ä','Å','Ö','|');     // 8bit
+  $from     = array('{', '}', '|', '[', ']', '\\', chr(179)); // 7bit
+  $to       = array('ä', 'å', 'ö', 'Ä', 'Å', 'Ö', '|');     // 8bit
   $orig_tieto = str_replace($from, $to, $tieto);
   $tieto    = str_replace($from, $to, pupesoft_cleanstring($tieto));
 
@@ -317,28 +317,28 @@ while ($tietue = fgets($fd)) {
 
   // Jos kyseessä NAD segmentti, tarkennetaan mikä NAD on kyseessä ja laitetaan $tieto kuntoon
   if ($tunnus == "NAD") {
-    switch (substr($tieto,0,2)) {
-      case 'BY':
-        $tunnus = "NADBY"; // Ostaja
-        $nad_segmentit = explode("+", $tieto);
-        $nad_kentat = explode(":", $nad_segmentit[1]);
-        $tieto = $nad_kentat[0];
-        break;
-      case 'PL':
-        $tunnus = "NADPL"; // Edelleenlaskutettava
-        $nad_segmentit = explode("+", $tieto);
-        $nad_kentat = explode(":", $nad_segmentit[1]);
-        $tieto = $nad_kentat[0];
-        break;
-      case 'CN':
-        $tunnus = "NADCN"; // Tavaran vastaanottaja
-        $nad_segmentit = explode("+", $tieto);
-        $nad_kentat = explode(":", $nad_segmentit[1]);
-        $tieto = $nad_kentat[0];
-        break;
-      case 'DP':
-        $tunnus = "NADDP"; // Toimitusosoite
-        break;
+    switch (substr($tieto, 0, 2)) {
+    case 'BY':
+      $tunnus = "NADBY"; // Ostaja
+      $nad_segmentit = explode("+", $tieto);
+      $nad_kentat = explode(":", $nad_segmentit[1]);
+      $tieto = $nad_kentat[0];
+      break;
+    case 'PL':
+      $tunnus = "NADPL"; // Edelleenlaskutettava
+      $nad_segmentit = explode("+", $tieto);
+      $nad_kentat = explode(":", $nad_segmentit[1]);
+      $tieto = $nad_kentat[0];
+      break;
+    case 'CN':
+      $tunnus = "NADCN"; // Tavaran vastaanottaja
+      $nad_segmentit = explode("+", $tieto);
+      $nad_kentat = explode(":", $nad_segmentit[1]);
+      $tieto = $nad_kentat[0];
+      break;
+    case 'DP':
+      $tunnus = "NADDP"; // Toimitusosoite
+      break;
     }
   }
 
@@ -354,39 +354,294 @@ while ($tietue = fgets($fd)) {
   }
 
   switch ($tunnus) {
-    case 'ICHG_RCPT':
-    case 'OSTOTIL.OT_TOIMITTAJANRO':
-    case 'OSTOTIL.OT_OVTTUNNUS':
-    case 'NADSE':
+  case 'ICHG_RCPT':
+  case 'OSTOTIL.OT_TOIMITTAJANRO':
+  case 'OSTOTIL.OT_OVTTUNNUS':
+  case 'NADSE':
     //Tilauksen vastaanottaja
-      $type = explode("@", $tieto);
-      $tieto = trim($type[0]);
+    $type = explode("@", $tieto);
+    $tieto = trim($type[0]);
 
-      $edi_ulos .= t("Tilaus yritykselle")." '$tieto' ";
+    $edi_ulos .= t("Tilaus yritykselle")." '$tieto' ";
 
-      $query = "SELECT * FROM yhtio WHERE ovttunnus = '$tieto' and ovttunnus != ''";
+    $query = "SELECT * FROM yhtio WHERE ovttunnus = '$tieto' and ovttunnus != ''";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) != 1) {
+      // Kokeillaan tehdä ovttunnuksesta ytunnus
+      $tieto2 = substr($tieto, 4, 8);     // etunollilla
+      $tieto  = substr($tieto, 4, 8) * 1; // ilman etunollio
+
+      // Häkki Örumia varten
+      if ((int) $tieto == 0) $tieto = "20428100";
+
+      $query = "SELECT * FROM yhtio WHERE ytunnus in ('$tieto', '$tieto2') and ytunnus != ''";
       $result = pupe_query($query);
+    }
 
-      if (mysql_num_rows($result) != 1) {
-        // Kokeillaan tehdä ovttunnuksesta ytunnus
-        $tieto2 = substr($tieto, 4, 8);     // etunollilla
-        $tieto  = substr($tieto, 4, 8) * 1; // ilman etunollio
+    if (mysql_num_rows($result) != 1) {
+      $edi_ulos .= "\n".t("Vastaanottavaa yritystä ei löydy tunnuksella")." '$tieto', '$tieto2', '$mailfile'\n";
+      break;
+    }
 
-        // Häkki Örumia varten
-        if ((int) $tieto == 0) $tieto = "20428100";
+    $yhtiorow = mysql_fetch_assoc($result);
+    $yhtiorow = hae_yhtion_parametrit($yhtiorow["yhtio"]);
 
-        $query = "SELECT * FROM yhtio WHERE ytunnus in ('$tieto', '$tieto2') and ytunnus != ''";
+    $kukarow['yhtio'] = $yhtiorow['yhtio']; // Tämä on vaarallista, mutta tätä ilman ei mikän toimi!
+    $kukarow['kuka'] = $edi_laatija;
+
+    // nollataan argv ja laitetaan ensimmäiseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
+    $argv     = array();
+    $argv[0]   = "";
+    $argv[1]   = $kukarow["yhtio"];
+    $editil_cli = TRUE;
+
+    $edi_ulos .= "-> $yhtiorow[nimi] ($kukarow[yhtio])\n";
+    break;
+
+  case 'ONADBY_DO' :
+  case 'OSTOTIL.OT_VAHVISTUS_FAKSILLA' :
+    //Faxvastaus
+    $tieto = substr($tieto, 4, 2);
+    if ($tieto == 'FX' or $tieto == '1') {
+      $vastaustapa .= 'F';
+      $edi_ulos .= t("Pyytää Fax-tilausvahvistuksen").".\n";
+    }
+    break;
+
+  case 'OSTOTIL.OT_TILAUSTYYPPI' :
+    //Tilaustyyppi
+    $editilaus_tilaustyyppi = trim($tieto);
+    break;
+
+  case 'OSTOTIL.VERKKOKAUPPA' :
+    // Verkkokaupan nimi
+    $verkkokauppa = $tieto;
+    break;
+
+  case 'OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO' :
+    // Verkkokaupan asiakasnumero
+    $ot_verkkokauppa_asiakasnro = $tieto;
+    break;
+
+  case 'OBGMIACKR' :
+    //Edivastaus
+    if ($tieto == "AB") {
+      $vastaustapa .= 'E';
+      $edi_ulos .= t("Pyytää EDI-tilausvahvistuksen").".\n";
+    }
+    if ($tieto == "S") {
+      $vastaustapa .= 'S';
+      $edi_ulos .= t("Pyytää sähköposti-tilausvahvistuksen").".\n";
+    }
+    if ($tieto == "F") {
+      $vastaustapa .= 'F';
+      $edi_ulos .= t("Pyytää fax-tilausvahvistuksen").".\n";
+    }
+    break;
+
+  case 'OBGMITYPE' :
+
+    $type = explode("@", $tieto);
+
+    // jos terminaalitoimitus
+    if (trim($type[1]) == "TKT") {
+      $edi_ulos .= t("Terminaalitoimitus")." '$type[1]'\n";
+      $editilaus_tila   = "Z";
+      $editilaus_tyyppi = "Z";
+    }
+    else {
+      $editilaus_tila   = "N";
+      $editilaus_tyyppi = "L";
+    }
+
+    // jos TRM ni ei kai mitää spessua
+    if (trim($type[1]) == "TRM") {
+
+    }
+
+    // Pupesoft tilaustyyppi
+    if ($tieto == '1') {
+      $edi_ulos .= t("Laskua ei saa ketjuttaa")."!\n";
+      $ketjutus = "o";
+    }
+    else {
+      $ketjutus = "";
+    }
+    break;
+
+  case 'OLINSTART' :
+  case 'OSTOTILRIV.OTR_RIVINRO' :
+    //Rivinumero
+    $rivinumero=$tieto;
+    break;
+
+  case 'OFTXDELTX' :
+  case 'OSTOTIL.OT_TOIMITUSTAPA' :
+    //Toimitustapa
+    if (trim($tieto) != '') {
+      $editilaus_toimitustapa = $tieto;
+    }
+    break;
+
+  case 'OFTXGENTX' :
+    //Kommentti
+    $edi_kommentti .= $tieto." \n";
+    break;
+
+  case 'ODTM2__DT' :
+  case 'DTM' :
+    // Toimituspäivä
+
+    if ($edi_tyyppi == "edifact911") {
+      $kentat = explode(":", $tieto);
+      if ($kentat[0] == 2 and $kentat[2] == 102) {
+        $toimpvm = tv3dateconv($kentat[1]);
+      }
+    }
+    else {
+      $type = explode("@", $tieto);
+
+      // 102 on päivämäärä, 616 on viikkonumero
+      if (trim($type[1]) == "102") {
+        $tieto = trim($type[0]);
+        $editilaus_toimitusvv = substr($tieto, 0, 4);
+        $editilaus_toimituskk = substr($tieto, 4, 2);
+        $editilaus_toimituspp = substr($tieto, 6, 2);
+        if (checkdate($editilaus_toimituskk, $editilaus_toimituspp, $editilaus_toimitusvv)) {
+          $toimpvm = "$editilaus_toimitusvv-$editilaus_toimituskk-$editilaus_toimituspp";
+        }
+      }
+    }
+    break;
+
+  case 'OBGMINUMB' :
+  case 'OSTOTIL.OT_NRO' :
+    //Asiakkkaan tilausnumero
+    $asiakkaan_tilausnumero = $tieto;
+    $viite = $tieto. ' '; // laitetaan asiakkaan tilausnumero talteen myös tilausviite-kenttään
+    break;
+
+  case 'ORFFZZ1NU'  :
+    // suunnistustieto ?
+    $suunnistus = $tieto;
+    break;
+
+  case 'ORFFCT_NU'  :
+    //Kommentteja
+    $edi_kommentti .= $tieto." \n";
+    break;
+
+  case 'ORFFCR_NU'  :
+    //Kommentteja
+    $merkkitieto = $tieto;
+    break;
+
+  case 'OSTOTIL.OT_MAKSUEHTO' :
+    //Magento keississä maksuehdon koko nimi verkkokaupassa
+    if ($edi_tyyppi == "magento" and $tieto != '') {
+
+      if ($editilaus_maksuehto == "") {
+        $query = "SELECT *
+                    FROM maksuehto
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND teksti  = '{$tieto}'";
         $result = pupe_query($query);
+
+        if (mysql_num_rows($result) == 1) {
+          $editilaus_maksuehto_row = mysql_fetch_assoc($result);
+          $editilaus_maksuehto   = $editilaus_maksuehto_row['tunnus'];
+        }
       }
 
-      if (mysql_num_rows($result) != 1) {
-        $edi_ulos .= "\n".t("Vastaanottavaa yritystä ei löydy tunnuksella")." '$tieto', '$tieto2', '$mailfile'\n";
+      $editilaus_maksuteksti .= $tieto;
+    }
+    break;
+
+  case 'ORFFABONU' :
+  case 'OSTOTIL.OT_VIITTEEMME' :
+    //Asiakkaan viite
+    $viite .= $tieto. ' ';
+    break;
+
+  case 'ONADBY_RF' :
+    if (substr($tieto, 0, 4) == 'IT @') {
+      $tieto = substr($tieto, 4, 10) * 1;
+    }
+  case 'ONADCN_PC' :
+    $type = explode("@", $tieto);
+    $lopnumero = trim($type[0]);
+  case 'ONADBY_PC' :
+  case 'OSTOTIL.OT_ASIAKASNRO' :
+  case 'ONADDP_PC' :
+  case 'NADBY' :
+  case 'NADPL' :
+  case 'NADCN' :
+    // ONADBY_PC - Ostajan osapuolen tunniste
+    // ONADDP_PC - Toimitusosoitteen osapuolen tunniste
+    // ONADCN_PC - Ostajan logistiikkakeskuksen tunniste (CN -tarkenne ei ole Itellan speksissä, joten tämä on itse pääteltyä!)
+    // ONADBY_RF - Ostajan osapuolen viite (meidän asiakasnumero)
+    // OSTOTIL.OT_ASIAKASNRO - Ostajan meidän asiakasnumero
+
+    if ($edi_tyyppi != "edifact911") {
+      $tieto = trim(substr($tieto, 0, 17));
+    }
+
+    if ($tieto == "") {
+      break;
+    }
+
+    if (isset($crossdock911) and $tunnus == "NADCN") {
+      // Tarkistetaan onko kyseessä koontikuljetuskeissi
+      // haetaan toimitustavan tiedot tiedot
+      $toimiq = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$arow[toimitustapa]'";
+      $toimir = pupe_query($toimiq);
+      $toimiro = mysql_fetch_assoc($toimir);
+
+      // Jos kyseessä on koontikuljetuskeissi niin setataan välietappi (terminaali/varasto)
+      if ($toimiro['tulostustapa'] == "L" or $toimiro['tulostustapa'] == "K") {
+        $query = "SELECT *
+                    FROM asiakas
+                    WHERE yhtio        = '$kukarow[yhtio]'
+                    and toim_ovttunnus = '$tieto'
+                    and toim_ovttunnus not in ('','0')
+                    and laji           not in ('R','P')";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) == 1) {
+          $abrow = mysql_fetch_assoc($result);
+          //laskun sisviesti1 kenttään menee tavaran ensimmäinen vastaanottaja(terminaali/varasto)
+          $lopnumero = $abrow['toim_ovttunnus'];
+          $lopnimi = $abrow['toim_nimi'];
+          $loppostitp = $abrow['toim_postitp'];
+          $loppostino = $abrow['toim_postino'];
+          $loposoite = $abrow['toim_osoite'];
+        }
+        // Koontikeississä ei haluta enää jatkaa ettei vahingossa ylikirjoiteta tilaavaa asiakasta
         break;
       }
+    }
 
-      $yhtiorow = mysql_fetch_assoc($result);
-      $yhtiorow = hae_yhtion_parametrit($yhtiorow["yhtio"]);
+    // Käytetään Magenton asiakasnumeroa jos sellainen löytyy ennalta määritellyistä kaupoista tulevilla tilauksilla
+    // ja on setattu $verkkokauppa_erikoiskasittely:n
+    if ($edi_tyyppi == "magento" and $ot_verkkokauppa_asiakasnro != ''
+      and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
+      and count($verkkokauppa_erikoiskasittely) > 0) {
 
+      $result = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+      if (count($result) > 0) {
+        $tieto = $ot_verkkokauppa_asiakasnro;
+      }
+    }
+
+    // Otetaan talteen
+    $OT_ASIAKASNRO = $tieto;
+
+    // Örum häkki
+    if (!isset($yhtiorow) and strpos($palvelin, "orum.devlab.fi") !== FALSE) {
+      $yhtiorow = hae_yhtion_parametrit("artr");
+
+      // Copy pastettu ylhäältä koko setti. :(
       $kukarow['yhtio'] = $yhtiorow['yhtio']; // Tämä on vaarallista, mutta tätä ilman ei mikän toimi!
       $kukarow['kuka'] = $edi_laatija;
 
@@ -396,749 +651,494 @@ while ($tietue = fgets($fd)) {
       $argv[1]   = $kukarow["yhtio"];
       $editil_cli = TRUE;
 
-      $edi_ulos .= "-> $yhtiorow[nimi] ($kukarow[yhtio])\n";
-      break;
+      $edi_ulos .= "VASTAANOTTTAVAN YHTION TIETO PUUTTUU! -> $yhtiorow[nimi] ($kukarow[yhtio])\n";
+    }
 
-    case 'ONADBY_DO' :
-    case 'OSTOTIL.OT_VAHVISTUS_FAKSILLA' :
-    //Faxvastaus
-      $tieto = substr($tieto,4,2);
-      if ($tieto == 'FX' or $tieto == '1') {
-        $vastaustapa .= 'F';
-        $edi_ulos .= t("Pyytää Fax-tilausvahvistuksen").".\n";
-      }
-      break;
+    if (!is_array($arow)) {
+      $edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
 
-    case 'OSTOTIL.OT_TILAUSTYYPPI' :
-    //Tilaustyyppi
-      $editilaus_tilaustyyppi = trim($tieto);
-      break;
-
-    case 'OSTOTIL.VERKKOKAUPPA' :
-      // Verkkokaupan nimi
-      $verkkokauppa = $tieto;
-      break;
-
-    case 'OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO' :
-      // Verkkokaupan asiakasnumero
-      $ot_verkkokauppa_asiakasnro = $tieto;
-      break;
-
-    case 'OBGMIACKR' :
-    //Edivastaus
-      if ($tieto == "AB") {
-        $vastaustapa .= 'E';
-        $edi_ulos .= t("Pyytää EDI-tilausvahvistuksen").".\n";
-      }
-      if ($tieto == "S") {
-        $vastaustapa .= 'S';
-        $edi_ulos .= t("Pyytää sähköposti-tilausvahvistuksen").".\n";
-      }
-      if ($tieto == "F") {
-        $vastaustapa .= 'F';
-        $edi_ulos .= t("Pyytää fax-tilausvahvistuksen").".\n";
-      }
-      break;
-
-    case 'OBGMITYPE' :
-
-      $type = explode("@", $tieto);
-
-      // jos terminaalitoimitus
-      if (trim($type[1]) == "TKT") {
-        $edi_ulos .= t("Terminaalitoimitus")." '$type[1]'\n";
-        $editilaus_tila   = "Z";
-        $editilaus_tyyppi = "Z";
-      }
-      else {
-        $editilaus_tila   = "N";
-        $editilaus_tyyppi = "L";
-      }
-
-      // jos TRM ni ei kai mitää spessua
-      if (trim($type[1]) == "TRM") {
-
-      }
-
-      // Pupesoft tilaustyyppi
-      if ($tieto == '1') {
-        $edi_ulos .= t("Laskua ei saa ketjuttaa")."!\n";
-        $ketjutus = "o";
-      }
-      else {
-        $ketjutus = "";
-      }
-      break;
-
-    case 'OLINSTART' :
-    case 'OSTOTILRIV.OTR_RIVINRO' :
-    //Rivinumero
-      $rivinumero=$tieto;
-      break;
-
-    case 'OFTXDELTX' :
-    case 'OSTOTIL.OT_TOIMITUSTAPA' :
-    //Toimitustapa
-      if (trim($tieto) != '') {
-        $editilaus_toimitustapa = $tieto;
-      }
-      break;
-
-    case 'OFTXGENTX' :
-    //Kommentti
-      $edi_kommentti .= $tieto." \n";
-      break;
-
-    case 'ODTM2__DT' :
-    case 'DTM' :
-    // Toimituspäivä
-
-      if ($edi_tyyppi == "edifact911") {
-        $kentat = explode(":",$tieto);
-        if ($kentat[0] == 2 and $kentat[2] == 102) {
-          $toimpvm = tv3dateconv($kentat[1]);
-        }
-      }
-      else {
-        $type = explode("@", $tieto);
-
-        // 102 on päivämäärä, 616 on viikkonumero
-        if (trim($type[1]) == "102") {
-          $tieto = trim($type[0]);
-          $editilaus_toimitusvv = substr($tieto, 0, 4);
-          $editilaus_toimituskk = substr($tieto, 4, 2);
-          $editilaus_toimituspp = substr($tieto, 6, 2);
-          if (checkdate($editilaus_toimituskk, $editilaus_toimituspp, $editilaus_toimitusvv)) {
-            $toimpvm = "$editilaus_toimitusvv-$editilaus_toimituskk-$editilaus_toimituspp";
-          }
-        }
-      }
-      break;
-
-    case 'OBGMINUMB' :
-    case 'OSTOTIL.OT_NRO' :
-    //Asiakkkaan tilausnumero
-      $asiakkaan_tilausnumero = $tieto;
-      $viite = $tieto. ' '; // laitetaan asiakkaan tilausnumero talteen myös tilausviite-kenttään
-      break;
-
-    case 'ORFFZZ1NU'  :
-    // suunnistustieto ?
-      $suunnistus = $tieto;
-      break;
-
-    case 'ORFFCT_NU'  :
-    //Kommentteja
-      $edi_kommentti .= $tieto." \n";
-      break;
-
-    case 'ORFFCR_NU'  :
-    //Kommentteja
-      $merkkitieto = $tieto;
-      break;
-
-    case 'OSTOTIL.OT_MAKSUEHTO' :
-    //Magento keississä maksuehdon koko nimi verkkokaupassa
-      if ($edi_tyyppi == "magento" and $tieto != '') {
-
-        if ($editilaus_maksuehto == "") {
-          $query = "SELECT *
-                    FROM maksuehto
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND teksti  = '{$tieto}'";
-          $result = pupe_query($query);
-
-          if (mysql_num_rows($result) == 1) {
-            $editilaus_maksuehto_row = mysql_fetch_assoc($result);
-            $editilaus_maksuehto   = $editilaus_maksuehto_row['tunnus'];
-          }
-        }
-
-        $editilaus_maksuteksti .= $tieto;
-      }
-      break;
-
-    case 'ORFFABONU' :
-    case 'OSTOTIL.OT_VIITTEEMME' :
-    //Asiakkaan viite
-      $viite .= $tieto. ' ';
-      break;
-
-    case 'ONADBY_RF' :
-      if (substr($tieto, 0, 4) == 'IT @') {
-        $tieto = substr($tieto, 4, 10) * 1;
-      }
-    case 'ONADCN_PC' :
-      $type = explode("@", $tieto);
-      $lopnumero = trim($type[0]);
-    case 'ONADBY_PC' :
-    case 'OSTOTIL.OT_ASIAKASNRO' :
-    case 'ONADDP_PC' :
-    case 'NADBY' :
-    case 'NADPL' :
-    case 'NADCN' :
-      // ONADBY_PC - Ostajan osapuolen tunniste
-      // ONADDP_PC - Toimitusosoitteen osapuolen tunniste
-      // ONADCN_PC - Ostajan logistiikkakeskuksen tunniste (CN -tarkenne ei ole Itellan speksissä, joten tämä on itse pääteltyä!)
-      // ONADBY_RF - Ostajan osapuolen viite (meidän asiakasnumero)
-      // OSTOTIL.OT_ASIAKASNRO - Ostajan meidän asiakasnumero
-
-      if ($edi_tyyppi != "edifact911") {
-        $tieto = trim(substr($tieto, 0, 17));
-      }
-
-      if ($tieto == "") {
-        break;
-      }
-
-      if (isset($crossdock911) and $tunnus == "NADCN") {
-        // Tarkistetaan onko kyseessä koontikuljetuskeissi
-        // haetaan toimitustavan tiedot tiedot
-        $toimiq = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$arow[toimitustapa]'";
-        $toimir = pupe_query($toimiq);
-        $toimiro = mysql_fetch_assoc($toimir);
-
-        // Jos kyseessä on koontikuljetuskeissi niin setataan välietappi (terminaali/varasto)
-        if ($toimiro['tulostustapa'] == "L" or $toimiro['tulostustapa'] == "K") {
-          $query = "SELECT *
-                    FROM asiakas
-                    WHERE yhtio        = '$kukarow[yhtio]'
-                    and toim_ovttunnus = '$tieto'
-                    and toim_ovttunnus not in ('','0')
-                    and laji           not in ('R','P')";
-          $result = pupe_query($query);
-
-          if (mysql_num_rows($result) == 1) {
-            $abrow = mysql_fetch_assoc($result);
-            //laskun sisviesti1 kenttään menee tavaran ensimmäinen vastaanottaja(terminaali/varasto)
-            $lopnumero = $abrow['toim_ovttunnus'];
-            $lopnimi = $abrow['toim_nimi'];
-            $loppostitp = $abrow['toim_postitp'];
-            $loppostino = $abrow['toim_postino'];
-            $loposoite = $abrow['toim_osoite'];
-          }
-          // Koontikeississä ei haluta enää jatkaa ettei vahingossa ylikirjoiteta tilaavaa asiakasta
-          break;
-        }
-      }
-
-      // Käytetään Magenton asiakasnumeroa jos sellainen löytyy ennalta määritellyistä kaupoista tulevilla tilauksilla
-      // ja on setattu $verkkokauppa_erikoiskasittely:n
-      if ($edi_tyyppi == "magento" and $ot_verkkokauppa_asiakasnro != ''
-        and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
-        and count($verkkokauppa_erikoiskasittely) > 0) {
-
-        $result = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
-        if (count($result) > 0) {
-          $tieto = $ot_verkkokauppa_asiakasnro;
-        }
-      }
-
-      // Otetaan talteen
-      $OT_ASIAKASNRO = $tieto;
-
-      // Örum häkki
-      if (!isset($yhtiorow) and strpos($palvelin, "orum.devlab.fi") !== FALSE) {
-        $yhtiorow = hae_yhtion_parametrit("artr");
-
-        // Copy pastettu ylhäältä koko setti. :(
-        $kukarow['yhtio'] = $yhtiorow['yhtio']; // Tämä on vaarallista, mutta tätä ilman ei mikän toimi!
-        $kukarow['kuka'] = $edi_laatija;
-
-        // nollataan argv ja laitetaan ensimmäiseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
-        $argv     = array();
-        $argv[0]   = "";
-        $argv[1]   = $kukarow["yhtio"];
-        $editil_cli = TRUE;
-
-        $edi_ulos .= "VASTAANOTTTAVAN YHTION TIETO PUUTTUU! -> $yhtiorow[nimi] ($kukarow[yhtio])\n";
-      }
-
-      if (!is_array($arow)) {
-        $edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
-
-        $query = "SELECT *
+      $query = "SELECT *
                   FROM asiakas
                   WHERE yhtio        = '$kukarow[yhtio]'
                   and toim_ovttunnus = '$tieto'
                   and toim_ovttunnus not in ('','0')
                   and laji           not in ('R','P')";
-        $result = pupe_query($query);
+      $result = pupe_query($query);
 
-        if (mysql_num_rows($result) == 1) {
-          $arow = mysql_fetch_assoc($result);
-          $vastaustapa .= $arow['tilausvahvistus'];
-          $edi_ulos .= "$arow[nimi] $arow[nimitark] $arow[toim_nimi] $arow[toim_nimitark] $arow[toim_postitp]\n";
-        }
+      if (mysql_num_rows($result) == 1) {
+        $arow = mysql_fetch_assoc($result);
+        $vastaustapa .= $arow['tilausvahvistus'];
+        $edi_ulos .= "$arow[nimi] $arow[nimitark] $arow[toim_nimi] $arow[toim_nimitark] $arow[toim_postitp]\n";
       }
+    }
 
-      if (!is_array($arow)) {
-        $query = "SELECT *
+    if (!is_array($arow)) {
+      $query = "SELECT *
                   FROM asiakas
                   WHERE yhtio   = '$kukarow[yhtio]'
                   and ovttunnus = '$tieto'
                   and ovttunnus not in ('','0')
                   and laji      not in ('R','P')";
-        $result = pupe_query($query);
+      $result = pupe_query($query);
 
-        if (mysql_num_rows($result) == 1) {
-          $arow = mysql_fetch_assoc($result);
-          $vastaustapa .= $arow['tilausvahvistus'];
-          $edi_ulos .= "$arow[nimi] $arow[nimitark] $arow[toim_nimi] $arow[toim_nimitark] $arow[toim_postitp]\n";
-        }
+      if (mysql_num_rows($result) == 1) {
+        $arow = mysql_fetch_assoc($result);
+        $vastaustapa .= $arow['tilausvahvistus'];
+        $edi_ulos .= "$arow[nimi] $arow[nimitark] $arow[toim_nimi] $arow[toim_nimitark] $arow[toim_postitp]\n";
       }
+    }
 
-      if (($tunnus == "ONADBY_RF" or $tunnus == "OSTOTIL.OT_ASIAKASNRO") and !is_array($arow)) {
-        $query = "SELECT *
+    if (($tunnus == "ONADBY_RF" or $tunnus == "OSTOTIL.OT_ASIAKASNRO") and !is_array($arow)) {
+      $query = "SELECT *
                   FROM asiakas
                   WHERE yhtio    = '$kukarow[yhtio]'
                   and asiakasnro = '$tieto'
                   and asiakasnro not in ('','0')
                   and laji       not in ('R','P')";
-        $result = pupe_query($query);
+      $result = pupe_query($query);
 
-        if (mysql_num_rows($result) == 1) {
-          $arow = mysql_fetch_assoc($result);
-          $vastaustapa .= $arow['tilausvahvistus'];
-          $edi_ulos .= "$arow[nimi] $arow[nimitark] $arow[toim_nimi] $arow[toim_nimitark] $arow[toim_postitp]\n";
-        }
+      if (mysql_num_rows($result) == 1) {
+        $arow = mysql_fetch_assoc($result);
+        $vastaustapa .= $arow['tilausvahvistus'];
+        $edi_ulos .= "$arow[nimi] $arow[nimitark] $arow[toim_nimi] $arow[toim_nimitark] $arow[toim_postitp]\n";
       }
+    }
 
-      if (!is_array($arow)) {
-        $edi_ulos .= t("Asiakas ei löydy tunnuksella")." '$tieto'\n";
-      }
+    if (!is_array($arow)) {
+      $edi_ulos .= t("Asiakas ei löydy tunnuksella")." '$tieto'\n";
+    }
 
-      // otetaan talteen kaikki eri arowt, valitaan paras lopuksi.
-      if (is_array($arow) and $tunnus == 'ONADBY_RF') {
-        $arow_viite = $arow;
-        unset($arow);
-      }
-      elseif (is_array($arow) and $tunnus == 'ONADBY_PC') {
-        $arow_ostaja = $arow;
-        unset($arow);
-      }
-      elseif (is_array($arow) and $tunnus == 'ONADDP_PC') {
-        $arow_toimitus = $arow;
-        unset($arow);
-      }
-      elseif (is_array($arow) and $tunnus == 'ONADCN_PC') {
-        $arow_terminaali = $arow;
-        unset($arow);
-      }
+    // otetaan talteen kaikki eri arowt, valitaan paras lopuksi.
+    if (is_array($arow) and $tunnus == 'ONADBY_RF') {
+      $arow_viite = $arow;
+      unset($arow);
+    }
+    elseif (is_array($arow) and $tunnus == 'ONADBY_PC') {
+      $arow_ostaja = $arow;
+      unset($arow);
+    }
+    elseif (is_array($arow) and $tunnus == 'ONADDP_PC') {
+      $arow_toimitus = $arow;
+      unset($arow);
+    }
+    elseif (is_array($arow) and $tunnus == 'ONADCN_PC') {
+      $arow_terminaali = $arow;
+      unset($arow);
+    }
 
-      break;
+    break;
 
-    case 'OSTOTIL.OT_YRITYS':
-      $lnimitark = trim($tieto);
-      break;
+  case 'OSTOTIL.OT_YRITYS':
+    $lnimitark = trim($tieto);
+    break;
 
-    case 'OSTOTIL.OT_KATUOSOITE':
-      $losoite = trim($tieto);
-      break;
+  case 'OSTOTIL.OT_KATUOSOITE':
+    $losoite = trim($tieto);
+    break;
 
-    case 'OSTOTIL.OT_POSTITOIMIPAIKKA':
-      $lpostitp = trim($tieto);
-      break;
+  case 'OSTOTIL.OT_POSTITOIMIPAIKKA':
+    $lpostitp = trim($tieto);
+    break;
 
-    case 'OSTOTIL.OT_POSTINRO':
-      $lpostino = trim($tieto);
-      break;
+  case 'OSTOTIL.OT_POSTINRO':
+    $lpostino = trim($tieto);
+    break;
 
-    case 'OSTOTIL.OT_YHTEYSHENKILO':
-      $lnimi = trim($tieto);
-      break;
+  case 'OSTOTIL.OT_YHTEYSHENKILO':
+    $lnimi = trim($tieto);
+    break;
 
-    case 'ONADPL_PC' :
-      // Asiakkaan joku toimitus ovttunnus tms... tää ylikirjottaa kaiken...
-      if ($tieto != "") {
+  case 'ONADPL_PC' :
+    // Asiakkaan joku toimitus ovttunnus tms... tää ylikirjottaa kaiken...
+    if ($tieto != "") {
 
-        $type = explode("@", $tieto);
-        $tieto = trim($type[0]);
+      $type = explode("@", $tieto);
+      $tieto = trim($type[0]);
 
-        $edi_ulos .= t("Tilaava toim_asiakas")." $tieto -> ";
+      $edi_ulos .= t("Tilaava toim_asiakas")." $tieto -> ";
 
-        $query = "SELECT *
+      $query = "SELECT *
                   FROM asiakas
                   WHERE yhtio        = '$kukarow[yhtio]'
                   and toim_ovttunnus = '$tieto'
                   and toim_ovttunnus not in ('','0')
                   and laji           not in ('R','P')";
-        $result = pupe_query($query);
+      $result = pupe_query($query);
 
-        if (mysql_num_rows($result) == 1) {
-          $arow = mysql_fetch_assoc($result);
-          $vastaustapa .= $arow['tilausvahvistus'];
-          $edi_ulos .= "$arow[toim_nimi]\n";
-        }
-
+      if (mysql_num_rows($result) == 1) {
+        $arow = mysql_fetch_assoc($result);
+        $vastaustapa .= $arow['tilausvahvistus'];
+        $edi_ulos .= "$arow[toim_nimi]\n";
       }
 
-      break;
+    }
 
-    case 'ONADCN_NA' :
+    break;
+
+  case 'ONADCN_NA' :
     // lopullisen asiakkkaan nimi
-      $lopnimi = $tieto;
-      break;
+    $lopnimi = $tieto;
+    break;
 
-    case 'ONADCN_SA' :
+  case 'ONADCN_SA' :
     // lopullisen asiakkkaan osoite
-      $loposoite = $tieto;
-      break;
+    $loposoite = $tieto;
+    break;
 
-    case 'ONADCN_CI' :
+  case 'ONADCN_CI' :
     // lopullisen asiakkkaan postitp
-      $loppostitp = $tieto;
-      break;
+    $loppostitp = $tieto;
+    break;
 
-    case 'ONADCN_PO' :
+  case 'ONADCN_PO' :
     // lopullisen asiakkkaan postitn
-      $loppostino = $tieto;
-      break;
+    $loppostino = $tieto;
+    break;
 
-    case 'NADDP' :
+  case 'NADDP' :
     // NAD-DP segmentissä, tulee kerralla kaikki toimitusosoitteen tiedot
     // Toimitusosoitteen nimi-kentässä on kovakoodattu teksti "TAVARAN VASTAANOTTAJA" (by Servinet)
-      $kentat = explode("+", $tieto);
+    $kentat = explode("+", $tieto);
 
-      if ($kentat[3] != "TAVARAN VASTAANOTTAJA") {
-        $tnimi = $kentat[3];
-        $tnimitark = "";
-        $tpostitp = $kentat[5];
-        $tpostino = $kentat[7];
-        $tosoite = $kentat[4];
+    if ($kentat[3] != "TAVARAN VASTAANOTTAJA") {
+      $tnimi = $kentat[3];
+      $tnimitark = "";
+      $tpostitp = $kentat[5];
+      $tpostino = $kentat[7];
+      $tosoite = $kentat[4];
 
-        // Jos kenttä ei sisältänyt toimitusosoitetta niin koitetaan oliko siellä toim_ovttunnus
-        if (isset($crossdock911) and (empty($tosoite) or empty($tpostino) or empty($tpostitp) or empty($tnimi))) {
+      // Jos kenttä ei sisältänyt toimitusosoitetta niin koitetaan oliko siellä toim_ovttunnus
+      if (isset($crossdock911) and (empty($tosoite) or empty($tpostino) or empty($tpostitp) or empty($tnimi))) {
 
-          list ($toimovttunnus) = explode(':', $kentat[1]);
-          if ($toimovttunnus != '') {
+        list ($toimovttunnus) = explode(':', $kentat[1]);
+        if ($toimovttunnus != '') {
 
-            $query = "SELECT *
+          $query = "SELECT *
                       FROM asiakas
                       WHERE yhtio        = '$kukarow[yhtio]'
                       and toim_ovttunnus = '$toimovttunnus'
                       and toim_ovttunnus not in ('','0')
                       and laji           not in ('R','P')";
-            $result = pupe_query($query);
+          $result = pupe_query($query);
 
-            if (mysql_num_rows($result) == 1) {
-              $abrow = mysql_fetch_assoc($result);
-              $edi_ulos .= t("Tilaus toimitetaan")." $toimovttunnus -> ";
+          if (mysql_num_rows($result) == 1) {
+            $abrow = mysql_fetch_assoc($result);
+            $edi_ulos .= t("Tilaus toimitetaan")." $toimovttunnus -> ";
 
-              $tnimi     = $abrow['toim_nimi'];
-              $tnimitark = $abrow['toim_nimitark'];
-              $tpostitp  = $abrow['toim_postitp'];
-              $tpostino  = $abrow['toim_postino'];
-              $tosoite   = $abrow['toim_osoite'];
+            $tnimi     = $abrow['toim_nimi'];
+            $tnimitark = $abrow['toim_nimitark'];
+            $tpostitp  = $abrow['toim_postitp'];
+            $tpostino  = $abrow['toim_postino'];
+            $tosoite   = $abrow['toim_osoite'];
 
-              $edi_ulos .= "$abrow[toim_nimi]\n";
-            }
-            else {
-              $edi_ulos .= t("Toimitusosoitteita löytyi %s kpl tunnuksella", "", mysql_num_rows($result))." $toimovttunnus -> ";
-            }
+            $edi_ulos .= "$abrow[toim_nimi]\n";
+          }
+          else {
+            $edi_ulos .= t("Toimitusosoitteita löytyi %s kpl tunnuksella", "", mysql_num_rows($result))." $toimovttunnus -> ";
           }
         }
       }
-      break;
+    }
+    break;
 
-    case 'ONADDP_NA' :
-    case 'OSTOTIL.OT_TOIMITUS_NIMI' :
-      // toimitusasiakkaan nimi
-      $tnimi = $tieto;
-      break;
+  case 'ONADDP_NA' :
+  case 'OSTOTIL.OT_TOIMITUS_NIMI' :
+    // toimitusasiakkaan nimi
+    $tnimi = $tieto;
+    break;
 
-    case 'ONADDP_NB' :
-    case 'OSTOTIL.OT_TOIMITUS_YRITYS' :
-      // toimitusasiakkaan nimitark
-      $tnimitark = $tieto;
-      break;
+  case 'ONADDP_NB' :
+  case 'OSTOTIL.OT_TOIMITUS_YRITYS' :
+    // toimitusasiakkaan nimitark
+    $tnimitark = $tieto;
+    break;
 
-    case 'ONADDP_SA' :
-    case 'OSTOTIL.OT_TOIMITUS_KATUOSOITE' :
+  case 'ONADDP_SA' :
+  case 'OSTOTIL.OT_TOIMITUS_KATUOSOITE' :
     // toimitusasiakkaan osoite
-      $tosoite = $tieto;
-      break;
+    $tosoite = $tieto;
+    break;
 
-    case 'ONADDP_PO' :
-    case 'OSTOTIL.OT_TOIMITUS_POSTINRO' :
+  case 'ONADDP_PO' :
+  case 'OSTOTIL.OT_TOIMITUS_POSTINRO' :
     // toimitusasiakkaan postinro
-      $tpostino = $tieto;
-      break;
+    $tpostino = $tieto;
+    break;
 
-    case 'ONADDP_CI' :
-    case 'OSTOTIL.OT_TOIMITUS_POSTITOIMIPAIKKA' :
+  case 'ONADDP_CI' :
+  case 'OSTOTIL.OT_TOIMITUS_POSTITOIMIPAIKKA' :
     // toimitusasiakkaan postitoimipaikka
-      $tpostitp = $tieto;
-      break;
+    $tpostitp = $tieto;
+    break;
 
-    case 'OSTOTIL.OT_TOIMITUS_MAAKOODI' :
-      // toimitusosoitteen maakoodi
-      $ltoim_maa = substr(trim($tieto), 0, 2);
-      break;
+  case 'OSTOTIL.OT_TOIMITUS_MAAKOODI' :
+    // toimitusosoitteen maakoodi
+    $ltoim_maa = substr(trim($tieto), 0, 2);
+    break;
 
-    case 'OSTOTIL.OT_TOIMITUS_PUH' :
-      // toimitusosoitteen puh
-      $ltoim_puh = trim($tieto);
-      break;
+  case 'OSTOTIL.OT_TOIMITUS_PUH' :
+    // toimitusosoitteen puh
+    $ltoim_puh = trim($tieto);
+    break;
 
-    case 'OSTOTIL.OT_TOIMITUS_EMAIL' :
-      // toimitusosoitteen email
-      $ltoim_email = trim($tieto);
-      break;
+  case 'OSTOTIL.OT_TOIMITUS_EMAIL' :
+    // toimitusosoitteen email
+    $ltoim_email = trim($tieto);
+    break;
 
-    case 'OSTOTIL.OT_YHTEYSHENKILONPUH' :
-      // yhteyshenkilön puhelinnumero
-      $yhteyshenkilon_puhelin = trim($tieto);
-      break;
+  case 'OSTOTIL.OT_YHTEYSHENKILONPUH' :
+    // yhteyshenkilön puhelinnumero
+    $yhteyshenkilon_puhelin = trim($tieto);
+    break;
 
-    case 'OSTOTIL.OT_MAKSETTU' :
-      // jos Magenton tilaus on jo maksettu luottokortilla niin päivitetään maksuehto
-      if ($edi_tyyppi == "magento" and ($tieto == 'processing' or $tieto == 'complete')) {
-        $kukarow["kassamyyja"] = "";
-        $editilaus_kassalipas = "";
+  case 'OSTOTIL.OT_MAKSETTU' :
+    // jos Magenton tilaus on jo maksettu luottokortilla niin päivitetään maksuehto
+    if ($edi_tyyppi == "magento" and ($tieto == 'processing' or $tieto == 'complete')) {
+      $kukarow["kassamyyja"] = "";
+      $editilaus_kassalipas = "";
 
-        $query = "SELECT tunnus
+      $query = "SELECT tunnus
                   FROM maksuehto
                   WHERE yhtio  = '$kukarow[yhtio]'
                   AND kateinen = 'o'
                   LIMIT 1";
-        $editilaus_kateinen_res = pupe_query($query);
-        $editilaus_kateinen_row = mysql_fetch_assoc($editilaus_kateinen_res);
+      $editilaus_kateinen_res = pupe_query($query);
+      $editilaus_kateinen_row = mysql_fetch_assoc($editilaus_kateinen_res);
 
-        if (mysql_num_rows($editilaus_kateinen_res) == 1) {
-          $editilaus_maksuehto = $editilaus_kateinen_row["tunnus"];
+      if (mysql_num_rows($editilaus_kateinen_res) == 1) {
+        $editilaus_maksuehto = $editilaus_kateinen_row["tunnus"];
 
-          $query = "SELECT tunnus
+        $query = "SELECT tunnus
                     FROM kassalipas
                     WHERE yhtio = '$kukarow[yhtio]'
                     AND nimi    = 'Verkkokauppa'";
-          $kassalipas_res = pupe_query($query);
+        $kassalipas_res = pupe_query($query);
 
-          if (mysql_num_rows($kassalipas_res) == 1) {
-            $kassalipas_row = mysql_fetch_assoc($kassalipas_res);
-            $kukarow["kassamyyja"] = $editilaus_kassalipas = $kassalipas_row["tunnus"];
-          }
-          else {
-            $editilaus_maksuehto = "";
-            $edi_ulos .= t("Verkkokaupan kassalipasta ei löytynyt")."!\n";
-            $edi_ulos .= t("Tilaus on maksettu, mutta jäi avoimeksi")."!\n";
-          }
+        if (mysql_num_rows($kassalipas_res) == 1) {
+          $kassalipas_row = mysql_fetch_assoc($kassalipas_res);
+          $kukarow["kassamyyja"] = $editilaus_kassalipas = $kassalipas_row["tunnus"];
         }
         else {
           $editilaus_maksuehto = "";
-          $edi_ulos .= t("Luottokorttimaksuehtoa ei löytynyt")."!\n";
+          $edi_ulos .= t("Verkkokaupan kassalipasta ei löytynyt")."!\n";
           $edi_ulos .= t("Tilaus on maksettu, mutta jäi avoimeksi")."!\n";
         }
       }
+      else {
+        $editilaus_maksuehto = "";
+        $edi_ulos .= t("Luottokorttimaksuehtoa ei löytynyt")."!\n";
+        $edi_ulos .= t("Tilaus on maksettu, mutta jäi avoimeksi")."!\n";
+      }
+    }
 
-      if ($edi_tyyppi == "magento" and $tieto == 'pending_cashondelivery_asp') {
-        // tämä on jälkivaatimus
-        $kukarow["kassamyyja"] = "";
-        $editilaus_kassalipas = "";
+    if ($edi_tyyppi == "magento" and $tieto == 'pending_cashondelivery_asp') {
+      // tämä on jälkivaatimus
+      $kukarow["kassamyyja"] = "";
+      $editilaus_kassalipas = "";
 
-        $query = "SELECT tunnus
+      $query = "SELECT tunnus
                   FROM maksuehto
                   WHERE yhtio = '$kukarow[yhtio]'
                   AND jv      = 'o'
                   ORDER BY jarjestys
                   LIMIT 1";
-        $editilaus_kateinen_res = pupe_query($query);
-        $editilaus_kateinen_row = mysql_fetch_assoc($editilaus_kateinen_res);
+      $editilaus_kateinen_res = pupe_query($query);
+      $editilaus_kateinen_row = mysql_fetch_assoc($editilaus_kateinen_res);
 
-        if (mysql_num_rows($editilaus_kateinen_res) == 1) {
-          $editilaus_maksuehto = $editilaus_kateinen_row["tunnus"];
-        }
-        else {
-          $editilaus_maksuehto = "";
-          $edi_ulos .= t("Jälkivaatimus-maksuehtoa ei löytynyt")."!\n";
-        }
+      if (mysql_num_rows($editilaus_kateinen_res) == 1) {
+        $editilaus_maksuehto = $editilaus_kateinen_row["tunnus"];
+      }
+      else {
+        $editilaus_maksuehto = "";
+        $edi_ulos .= t("Jälkivaatimus-maksuehtoa ei löytynyt")."!\n";
+      }
 
-        $query = "SELECT selite
+      $query = "SELECT selite
                   FROM toimitustapa
                   WHERE yhtio  = '$kukarow[yhtio]'
                   AND jvkielto = ''
                   ORDER BY jarjestys
                   LIMIT 1";
-        $editilaus_kateinen_res = pupe_query($query);
-        $editilaus_kateinen_row = mysql_fetch_assoc($editilaus_kateinen_res);
+      $editilaus_kateinen_res = pupe_query($query);
+      $editilaus_kateinen_row = mysql_fetch_assoc($editilaus_kateinen_res);
 
-        if (mysql_num_rows($editilaus_kateinen_res) == 1) {
-          $editilaus_toimitustapa = $editilaus_kateinen_row["selite"];
-        }
-        else {
-          $editilaus_toimitustapa = "";
-          $edi_ulos .= t("Jälkivaatimus-toimitustapaa ei löytynyt")."!\n";
-        }
-      }
-      break;
-
-    case 'OSTOTIL.OT_SUMMA' :
-      // Kun tullaan magentosta ja meillä on laskun loppusumma
-      // Tallennetaan tämä laskun 'hinta'-kenttään niin jos se jää riittävän lähelle totuutta niin pupe pyöristää loppusumman tähän
-      if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $tieto != '') {
-        $editilaus_loppuhinta = (float) trim($tieto);
-      }
-      break;
-
-    case 'OSTOTIL.OT_VIITTEENNE':
-      // halutaan futur ja magento-aineistoista tämä tieto sisviesti2-kenttään
-      $orig_tieto = pupesoft_cleanstring($orig_tieto, array(";"));
-      $lopviesti = trim($orig_tieto);
-      break;
-
-    case 'OSTOTIL.OT_VEROMAARA':
-      // magento-keisissä, veron määrä
-      $veromaara = (int) trim($orig_tieto);
-      break;
-
-    //Tilaus päättyy. Aika tehdä se kantaan
-    case 'OHDR__END' :
-    case '*RE OSTOTIL' :
-    case 'UNS':
-
-      // Orders 91.1 tulee kaksi UNS segmenttiä (D ja S). D tarkoittaa otsikko päätty, S tarkoittaa sanoma päättyy.
-      if ($edi_tyyppi == "edifact911" and substr($tieto, 0, 1) != "D") {
-        break;
-      }
-
-      // valitaan paras arow!
-      if (!is_array($arow)) {
-        if (isset($arow_viite)) {
-          $arow = $arow_viite;        // ONADBY_RF
-        }
-        elseif (isset($arow_terminaali)) {
-          $arow = $arow_terminaali;      // ONADCN_PC
-        }
-        elseif (isset($arow_toimitus)) {
-          $arow = $arow_toimitus;        // ONADDP_PC
-        }
-        elseif (isset($arow_ostaja)) {
-          $arow = $arow_ostaja;        // ONADBY_PC
-        }
-      }
-
-      // lisätään otsikko vain jos asiakas löytyi
-      if (!is_array($arow)) {
-        $edi_ulos .= t("Tilaukselta ei löytynyt asiakastietoja")."!\n";
-        $editilaus_otsikko_ok = "EI";
-      }
-      elseif (!isset($yhtiorow)) {
-        $edi_ulos .= t("Tilaukselta ei löytynyt yhtiötietoja")."!\n";
-        $editilaus_otsikko_ok = "EI";
+      if (mysql_num_rows($editilaus_kateinen_res) == 1) {
+        $editilaus_toimitustapa = $editilaus_kateinen_row["selite"];
       }
       else {
-        $editilaus_otsikko_ok = "KYLLA";
+        $editilaus_toimitustapa = "";
+        $edi_ulos .= t("Jälkivaatimus-toimitustapaa ei löytynyt")."!\n";
+      }
+    }
+    break;
 
-        // haetaan tomitustavan oletusmaksajan tiedot
-        $apuqu = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$arow[toimitustapa]'";
-        $meapu = pupe_query($apuqu);
-        $apuro = mysql_fetch_assoc($meapu);
+  case 'OSTOTIL.OT_SUMMA' :
+    // Kun tullaan magentosta ja meillä on laskun loppusumma
+    // Tallennetaan tämä laskun 'hinta'-kenttään niin jos se jää riittävän lähelle totuutta niin pupe pyöristää loppusumman tähän
+    if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $tieto != '') {
+      $editilaus_loppuhinta = (float) trim($tieto);
+    }
+    break;
 
-        $maksaja = $apuro['merahti'];
+  case 'OSTOTIL.OT_VIITTEENNE':
+    // halutaan futur ja magento-aineistoista tämä tieto sisviesti2-kenttään
+    $orig_tieto = pupesoft_cleanstring($orig_tieto, array(";"));
+    $lopviesti = trim($orig_tieto);
+    break;
 
-        // Verkkokauppatilauksissa luotamme tiedoston laskutustietoihin
-        if ($edi_tyyppi == "magento") {
-          $arow["nimi"]    = $lnimi;
-          $arow["nimitark"]  = $lnimitark;
-          $arow["osoite"]    = $losoite;
-          $arow["postitp"]  = $lpostitp;
-          $arow["postino"]  = $lpostino;
-          $arow["maa"]    = $ltoim_maa;
-          $arow["toim_puh"]  = $ltoim_puh;
-          $arow["toim_email"] = $ltoim_email;
-          $arow["vienti"]    = "";
+  case 'OSTOTIL.OT_VEROMAARA':
+    // magento-keisissä, veron määrä
+    $veromaara = (int) trim($orig_tieto);
+    break;
 
-          $arow['laskutus_nimi']     = $lnimi;
-          $arow['laskutus_nimitark']   = $lnimitark;
-          $arow['laskutus_osoite']  = $losoite;
-          $arow['laskutus_postitp']   = $lpostitp;
-          $arow['laskutus_postino']   = $lpostino;
-          $arow['laskutus_maa']    = $ltoim_maa;
+    //Tilaus päättyy. Aika tehdä se kantaan
+  case 'OHDR__END' :
+  case '*RE OSTOTIL' :
+  case 'UNS':
 
-          if ($arow["maa"] != $yhtiorow["maa"] and $arow["maa"] != "") {
-            // katsotaan mimmosesta viennistä on kysymys
-            $maa_eu_query = "SELECT distinct eu
+    // Orders 91.1 tulee kaksi UNS segmenttiä (D ja S). D tarkoittaa otsikko päätty, S tarkoittaa sanoma päättyy.
+    if ($edi_tyyppi == "edifact911" and substr($tieto, 0, 1) != "D") {
+      break;
+    }
+
+    // valitaan paras arow!
+    if (!is_array($arow)) {
+      if (isset($arow_viite)) {
+        $arow = $arow_viite;        // ONADBY_RF
+      }
+      elseif (isset($arow_terminaali)) {
+        $arow = $arow_terminaali;      // ONADCN_PC
+      }
+      elseif (isset($arow_toimitus)) {
+        $arow = $arow_toimitus;        // ONADDP_PC
+      }
+      elseif (isset($arow_ostaja)) {
+        $arow = $arow_ostaja;        // ONADBY_PC
+      }
+    }
+
+    // lisätään otsikko vain jos asiakas löytyi
+    if (!is_array($arow)) {
+      $edi_ulos .= t("Tilaukselta ei löytynyt asiakastietoja")."!\n";
+      $editilaus_otsikko_ok = "EI";
+    }
+    elseif (!isset($yhtiorow)) {
+      $edi_ulos .= t("Tilaukselta ei löytynyt yhtiötietoja")."!\n";
+      $editilaus_otsikko_ok = "EI";
+    }
+    else {
+      $editilaus_otsikko_ok = "KYLLA";
+
+      // haetaan tomitustavan oletusmaksajan tiedot
+      $apuqu = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$arow[toimitustapa]'";
+      $meapu = pupe_query($apuqu);
+      $apuro = mysql_fetch_assoc($meapu);
+
+      $maksaja = $apuro['merahti'];
+
+      // Verkkokauppatilauksissa luotamme tiedoston laskutustietoihin
+      if ($edi_tyyppi == "magento") {
+        $arow["nimi"]    = $lnimi;
+        $arow["nimitark"]  = $lnimitark;
+        $arow["osoite"]    = $losoite;
+        $arow["postitp"]  = $lpostitp;
+        $arow["postino"]  = $lpostino;
+        $arow["maa"]    = $ltoim_maa;
+        $arow["toim_puh"]  = $ltoim_puh;
+        $arow["toim_email"] = $ltoim_email;
+        $arow["vienti"]    = "";
+
+        $arow['laskutus_nimi']     = $lnimi;
+        $arow['laskutus_nimitark']   = $lnimitark;
+        $arow['laskutus_osoite']  = $losoite;
+        $arow['laskutus_postitp']   = $lpostitp;
+        $arow['laskutus_postino']   = $lpostino;
+        $arow['laskutus_maa']    = $ltoim_maa;
+
+        if ($arow["maa"] != $yhtiorow["maa"] and $arow["maa"] != "") {
+          // katsotaan mimmosesta viennistä on kysymys
+          $maa_eu_query = "SELECT distinct eu
                              FROM maat
                              WHERE koodi = '$arow[maa]'";
-            $maa_eu_res = pupe_query($maa_eu_query);
-            $maa_eu_row = mysql_fetch_assoc($maa_eu_res);
+          $maa_eu_res = pupe_query($maa_eu_query);
+          $maa_eu_row = mysql_fetch_assoc($maa_eu_res);
 
-            if ($maa_eu_row["eu"] == "") {
-              $arow["vienti"] = "K";
+          if ($maa_eu_row["eu"] == "") {
+            $arow["vienti"] = "K";
+          }
+          else {
+            // Jos EU-yksityishenkilkölle menee verollisena
+            if ($veromaara != 0) {
+              $arow["vienti"] = "";
             }
             else {
-              // Jos EU-yksityishenkilkölle menee verollisena
-              if ($veromaara != 0) {
-                $arow["vienti"] = "";
-              }
-              else {
-                $arow["vienti"] = "E";
-              }
+              $arow["vienti"] = "E";
             }
           }
         }
+      }
 
-        if (trim($arow['laskutus_nimi']) == '') {
-          $arow['laskutus_nimi']     = $arow['nimi'];
-          $arow['laskutus_nimitark']  = $arow['nimitark'];
-          $arow['laskutus_osoite']  = $arow['osoite'];
-          $arow['laskutus_postitp']  = $arow['postitp'];
-          $arow['laskutus_postino']  = $arow['postino'];
-          $arow['laskutus_maa']    = $arow['maa'];
+      if (trim($arow['laskutus_nimi']) == '') {
+        $arow['laskutus_nimi']     = $arow['nimi'];
+        $arow['laskutus_nimitark']  = $arow['nimitark'];
+        $arow['laskutus_osoite']  = $arow['osoite'];
+        $arow['laskutus_postitp']  = $arow['postitp'];
+        $arow['laskutus_postino']  = $arow['postino'];
+        $arow['laskutus_maa']    = $arow['maa'];
+      }
+
+      // jos asiakkalla ei ole toimitusosoitetietoja, kopsataan laskutustiedot
+      if (trim($arow['toim_nimi']) == "") {
+        $arow['toim_nimi']    = $arow['nimi'];
+        $arow['toim_nimitark']  = $arow['nimitark'];
+        $arow['toim_osoite']  = $arow['osoite'];
+        $arow['toim_postitp']  = $arow['postitp'];
+        $arow['toim_postino']  = $arow['postino'];
+        $arow['toim_maa']    = $arow['maa'];
+      }
+
+      // jos tilauksessa on tullut poikkeava nimi, postino ja postitp otetaan kaikki tiedot tilaukselta (PAITSI JO KYSESSÄ ON KOONTIKULJETUSKEISSI)
+      if (isset($crossdock911) or ($tnimi != "" or ($tnimi == "" and $tnimitark != "")) and $tpostino != "" and $tpostitp != "" and $apuro["tulostustapa"] != "K" and $apuro["tulostustapa"] != "L") {
+        if ($tnimi == "" and $tnimitark != "") {
+          $tnimi = $tnimitark;
+          $tnimitark = "";
         }
 
-        // jos asiakkalla ei ole toimitusosoitetietoja, kopsataan laskutustiedot
-        if (trim($arow['toim_nimi']) == "") {
-          $arow['toim_nimi']    = $arow['nimi'];
-          $arow['toim_nimitark']  = $arow['nimitark'];
-          $arow['toim_osoite']  = $arow['osoite'];
-          $arow['toim_postitp']  = $arow['postitp'];
-          $arow['toim_postino']  = $arow['postino'];
-          $arow['toim_maa']    = $arow['maa'];
-        }
+        $arow['toim_nimi']    = $tnimi;
+        $arow['toim_nimitark']  = $tnimitark;
+        $arow['toim_osoite']  = $tosoite;
+        $arow['toim_postino']  = $tpostino;
+        $arow['toim_postitp']  = $tpostitp;
+      }
 
-        // jos tilauksessa on tullut poikkeava nimi, postino ja postitp otetaan kaikki tiedot tilaukselta (PAITSI JO KYSESSÄ ON KOONTIKULJETUSKEISSI)
-        if (isset($crossdock911) or ($tnimi != "" or ($tnimi == "" and $tnimitark != "")) and $tpostino != "" and $tpostitp != "" and $apuro["tulostustapa"] != "K" and $apuro["tulostustapa"] != "L") {
-          if ($tnimi == "" and $tnimitark != "") {
-            $tnimi = $tnimitark;
-            $tnimitark = "";
-          }
+      // jos tilauksella ei ole maksuehtoa, käytetään asiakkaan oletusta
+      if ($editilaus_maksuehto == '') {
+        $editilaus_maksuehto = $arow["maksuehto"];
+      }
 
-          $arow['toim_nimi']    = $tnimi;
-          $arow['toim_nimitark']  = $tnimitark;
-          $arow['toim_osoite']  = $tosoite;
-          $arow['toim_postino']  = $tpostino;
-          $arow['toim_postitp']  = $tpostitp;
-        }
-
-        // jos tilauksella ei ole maksuehtoa, käytetään asiakkaan oletusta
-        if ($editilaus_maksuehto == '') {
-          $editilaus_maksuehto = $arow["maksuehto"];
-        }
-
-        if (trim($editilaus_toimitustapa) != '') {
-          // tarkistetaan löytyykö toimitustapa pupesta suoraan
-          if ($edi_tyyppi == "magento") {
-            $query = "SELECT *
+      if (trim($editilaus_toimitustapa) != '') {
+        // tarkistetaan löytyykö toimitustapa pupesta suoraan
+        if ($edi_tyyppi == "magento") {
+          $query = "SELECT *
                       FROM toimitustapa
                       WHERE yhtio  = '{$kukarow['yhtio']}'
                       AND selite   = '{$editilaus_toimitustapa}'
                       AND selite  != ''
                       ORDER BY muutospvm DESC
                       LIMIT 1";
-            $ressu = pupe_query($query);
+          $ressu = pupe_query($query);
 
-            // - jos löytyy niin käytetään sitä
-            if (mysql_num_rows($ressu) == 1) {
-              $ftc = mysql_fetch_assoc($ressu);
-              $editilaus_toimitustapa = $ftc['selite'];
-            }
-            else {
-              $editilaus_toimitustapa = '';
-            }
+          // - jos löytyy niin käytetään sitä
+          if (mysql_num_rows($ressu) == 1) {
+            $ftc = mysql_fetch_assoc($ressu);
+            $editilaus_toimitustapa = $ftc['selite'];
           }
           else {
-            $query = "SELECT *
+            $editilaus_toimitustapa = '';
+          }
+        }
+        else {
+          $query = "SELECT *
                       FROM asiakkaan_avainsanat
                       WHERE yhtio       = '{$kukarow['yhtio']}'
                       AND tarkenne      = '{$editilaus_toimitustapa}'
@@ -1148,159 +1148,159 @@ while ($tietue = fgets($fd)) {
                       AND liitostunnus  = '{$arow['tunnus']}'
                       ORDER BY muutospvm DESC
                       LIMIT 1";
-            $toimitustapa_chk_res = pupe_query($query);
+          $toimitustapa_chk_res = pupe_query($query);
 
-            if (mysql_num_rows($toimitustapa_chk_res) == 1) {
-              $toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
-              $editilaus_toimitustapa = $toimitustapa_chk_row['avainsana'];
-            }
-            else {
-              $edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $editilaus_toimitustapa \n";
-              $editilaus_toimitustapa = '';
-            }
+          if (mysql_num_rows($toimitustapa_chk_res) == 1) {
+            $toimitustapa_chk_row = mysql_fetch_assoc($toimitustapa_chk_res);
+            $editilaus_toimitustapa = $toimitustapa_chk_row['avainsana'];
+          }
+          else {
+            $edi_kommentti .= t("Asiakas pyysi toimitustapaa").": $editilaus_toimitustapa \n";
+            $editilaus_toimitustapa = '';
           }
         }
+      }
 
-        // jos tilauksella ei ole toimitustapaa, käytetään asiakkaan oletusta
-        if ($editilaus_toimitustapa == '') {
-          $editilaus_toimitustapa = $arow["toimitustapa"];
+      // jos tilauksella ei ole toimitustapaa, käytetään asiakkaan oletusta
+      if ($editilaus_toimitustapa == '') {
+        $editilaus_toimitustapa = $arow["toimitustapa"];
+      }
+
+      // jos ei olla pakotettu rahtivapaata, niin otetaan asiakkaan oletus
+      if ($editilaus_rahtivapaa == '') {
+        $editilaus_rahtivapaa = $arow["rahtivapaa"];
+      }
+
+      // katsotaan magentotilauksilta tilaustyyppi
+      if ($edi_tyyppi == "magento" and $editilaus_tilaustyyppi != "") {
+        // tyyppi 9, ohitetaan aina varastoprosessi ja aina sisäinen
+        if ($editilaus_tilaustyyppi == "9") {
+          $editilaus_eilahetetta = "o";
+          $editilaus_sisainen = "o";
         }
-
-        // jos ei olla pakotettu rahtivapaata, niin otetaan asiakkaan oletus
-        if ($editilaus_rahtivapaa == '') {
-          $editilaus_rahtivapaa = $arow["rahtivapaa"];
+        elseif ($editilaus_tilaustyyppi == 'K') {
+          $editilaus_tila   = 'N';
+          $editilaus_alatila   = '';
         }
+      }
 
-        // katsotaan magentotilauksilta tilaustyyppi
-        if ($edi_tyyppi == "magento" AND $editilaus_tilaustyyppi != "") {
-          // tyyppi 9, ohitetaan aina varastoprosessi ja aina sisäinen
-          if ($editilaus_tilaustyyppi == "9") {
-            $editilaus_eilahetetta = "o";
-            $editilaus_sisainen = "o";
-          }
-          elseif ($editilaus_tilaustyyppi == 'K') {
-            $editilaus_tila   = 'N';
-            $editilaus_alatila   = '';
-          }
-        }
+      $tilaustyyppilisa = '';
 
-        $tilaustyyppilisa = '';
+      if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
+        and count($verkkokauppa_erikoiskasittely) > 0) {
 
-        if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
-          and count($verkkokauppa_erikoiskasittely) > 0) {
-
-          list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa) = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
-          // Jos löytyy erikoiskäsittely niin näytetään se myös käyttöliittymässä
-          if (isset($nimi) and !empty($nimi)) {
-            $edi_ulos .= t("Tilauksen erikoiskäsittely")."-> {$nimi},
+        list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa) = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+        // Jos löytyy erikoiskäsittely niin näytetään se myös käyttöliittymässä
+        if (isset($nimi) and !empty($nimi)) {
+          $edi_ulos .= t("Tilauksen erikoiskäsittely")."-> {$nimi},
               ".t("tilaustyyppi").": {$editilaus_tilaustyyppi},
               ".t("tilaustyyppilisä").": {$tilaustyyppilisa} \n\n";
-          }
         }
+      }
 
-        // jos tilauksella on tullut lopullisen asikkaan tiedot, laitetaan ne talteen sisviesti ykköseen
-        if ($lopnimi != "") {
-          $arow["sisviesti1"] = "$lopnumero\n$lopnimi\n$loposoite\n$loppostino\n$loppostitp";
+      // jos tilauksella on tullut lopullisen asikkaan tiedot, laitetaan ne talteen sisviesti ykköseen
+      if ($lopnimi != "") {
+        $arow["sisviesti1"] = "$lopnumero\n$lopnimi\n$loposoite\n$loppostino\n$loppostitp";
 
-          // jos kyseessä on terminaalitoimitus
-          if ($editilaus_tila == "Z") {
-            $lopviesti = "$lopnumero#$lopnimi"; // laitetaan vielä numero ja nimi omaan paikkaan..
-          }
+        // jos kyseessä on terminaalitoimitus
+        if ($editilaus_tila == "Z") {
+          $lopviesti = "$lopnumero#$lopnimi"; // laitetaan vielä numero ja nimi omaan paikkaan..
         }
+      }
 
-        // jos tilauksella oli toivottu, että laskua *EI SAA* ketjuttaa ni tehdään niin
-        if ($ketjutus != "") {
-          $arow["ketjutus"] = $ketjutus;
-        }
+      // jos tilauksella oli toivottu, että laskua *EI SAA* ketjuttaa ni tehdään niin
+      if ($ketjutus != "") {
+        $arow["ketjutus"] = $ketjutus;
+      }
 
-        $edimyyja = "";
+      $edimyyja = "";
 
-        // Haetaan vielä myyyjänumero
-        $query = "SELECT tunnus
+      // Haetaan vielä myyyjänumero
+      $query = "SELECT tunnus
                   FROM kuka
                   WHERE yhtio = '$kukarow[yhtio]'
                   and kuka    = 'EDI'";
+      $meapu = pupe_query($query);
+
+      if (mysql_num_rows($meapu) == 1) {
+        $apuro = mysql_fetch_assoc($meapu);
+        $edimyyja = $apuro['tunnus'];
+      }
+      elseif ($arow["myyjanro"] != "") {
+        $query = "SELECT tunnus
+                    FROM kuka
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    and myyja   = '$arow[myyjanro]'";
         $meapu = pupe_query($query);
 
         if (mysql_num_rows($meapu) == 1) {
           $apuro = mysql_fetch_assoc($meapu);
           $edimyyja = $apuro['tunnus'];
         }
-        elseif ($arow["myyjanro"] != "")  {
-          $query = "SELECT tunnus
-                    FROM kuka
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    and myyja   = '$arow[myyjanro]'";
-          $meapu = pupe_query($query);
+      }
 
-          if (mysql_num_rows($meapu) == 1) {
-            $apuro = mysql_fetch_assoc($meapu);
-            $edimyyja = $apuro['tunnus'];
-          }
+      if ($yhtiorow["splittauskielto"] == "E") {
+        $splittauskielto = "E";
+      }
+      else {
+        $splittauskielto = "";
+      }
+
+      $til_vienti = $arow["vienti"];
+
+      if ($edi_tyyppi == 'futursoft' and ($editilaus_tilaustyyppi == 2 or $editilaus_tilaustyyppi == 3)) {
+        $tilaustyyppilisa = $editilaus_tilaustyyppi;
+
+        if ($editilaus_tilaustyyppi == 3) {
+          $editilaus_tila   = 'C';
+          $editilaus_alatila   = 'A';
+          $tilaustyyppilisa   = 'R';
         }
+      }
 
-        if ($yhtiorow["splittauskielto"] == "E") {
-          $splittauskielto = "E";
+      // Tallennetaan ohjelmamoduli
+      $ohjelmamoduli = strtoupper($edi_tyyppi);
+
+      // Rahtivapaat tilaukset lähetetään aina lähettäjän rahtisopimuksella
+      if ($maksaja == "" and $editilaus_rahtivapaa != "") {
+        $maksaja = "K";
+      }
+
+      $prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$arow['luokka']}'", "", "", "selitetark_3");
+
+      // Default 9 myös kannassa, niin laitetaan tännekki 9 jos avainsanoista ei löydy prioa
+      if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;
+
+      // Oletuksena näin Futursoft keississä
+      if ($edi_tyyppi == 'futursoft') {
+        $ohjausmerkki = $lopviesti;
+      }
+
+      if ($tilaustyyppilisa == 2) {
+        $ohjausmerkki = 'VARASTOTÄYDENNYS';
+      }
+      elseif (trim($ohjausmerkki) != "") {
+        $_ohjausmerkki = $ohjausmerkki;
+        $_ohjausmerkki = str_replace(array(" ", ",", ".", "-", "/", "+", ":"), "", $_ohjausmerkki);
+        $_ohjausmerkki = strtolower($_ohjausmerkki);
+        $_ohjausmerkki = str_replace(array("ä", "Ä"), "a", $_ohjausmerkki);
+        $_ohjausmerkki = str_replace(array("ö", "Ö"), "o", $_ohjausmerkki);
+
+        // FRSTTT = varastotayd joka on minimissään se mikä hyväksytään varastotäydennys tekstinä
+        if (metaphone($_ohjausmerkki, 6) == 'FRSTTT') {
+          $ohjausmerkki     = 'VARASTOTÄYDENNYS';
+          $tilaustyyppilisa = 2;
         }
-        else {
-          $splittauskielto = "";
-        }
+      }
 
-        $til_vienti = $arow["vienti"];
+      if ($arow["myynti_kommentti1"] != "") {
+        $edi_kommentti .= $arow["myynti_kommentti1"]." \n";
+      }
 
-        if ($edi_tyyppi == 'futursoft' and ($editilaus_tilaustyyppi == 2 or $editilaus_tilaustyyppi == 3)) {
-          $tilaustyyppilisa = $editilaus_tilaustyyppi;
+      $edi_kommentti = trim($edi_kommentti);
 
-          if ($editilaus_tilaustyyppi == 3) {
-            $editilaus_tila   = 'C';
-            $editilaus_alatila   = 'A';
-            $tilaustyyppilisa   = 'R';
-          }
-        }
-
-        // Tallennetaan ohjelmamoduli
-        $ohjelmamoduli = strtoupper($edi_tyyppi);
-
-        // Rahtivapaat tilaukset lähetetään aina lähettäjän rahtisopimuksella
-        if ($maksaja == "" and $editilaus_rahtivapaa != "") {
-          $maksaja = "K";
-        }
-
-        $prioriteettinro = t_avainsana("ASIAKASLUOKKA", "", " and avainsana.selite='{$arow['luokka']}'", "", "", "selitetark_3");
-
-        // Default 9 myös kannassa, niin laitetaan tännekki 9 jos avainsanoista ei löydy prioa
-        if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;
-
-        // Oletuksena näin Futursoft keississä
-        if ($edi_tyyppi == 'futursoft') {
-          $ohjausmerkki = $lopviesti;
-        }
-
-        if ($tilaustyyppilisa == 2) {
-          $ohjausmerkki = 'VARASTOTÄYDENNYS';
-        }
-        elseif (trim($ohjausmerkki) != "") {
-          $_ohjausmerkki = $ohjausmerkki;
-           $_ohjausmerkki = str_replace(array(" ", ",", ".", "-", "/", "+", ":"), "", $_ohjausmerkki);
-           $_ohjausmerkki = strtolower($_ohjausmerkki);
-          $_ohjausmerkki = str_replace(array("ä", "Ä"), "a", $_ohjausmerkki);
-          $_ohjausmerkki = str_replace(array("ö", "Ö"), "o", $_ohjausmerkki);
-
-          // FRSTTT = varastotayd joka on minimissään se mikä hyväksytään varastotäydennys tekstinä
-           if (metaphone($_ohjausmerkki, 6) == 'FRSTTT') {
-            $ohjausmerkki     = 'VARASTOTÄYDENNYS';
-            $tilaustyyppilisa = 2;
-          }
-        }
-
-        if ($arow["myynti_kommentti1"] != "") {
-          $edi_kommentti .= $arow["myynti_kommentti1"]." \n";
-        }
-
-        $edi_kommentti = trim($edi_kommentti);
-
-        // Onko asiakkaalla oletusyhteyshenkilö?
-        $yhteysquery = "SELECT nimi
+      // Onko asiakkaalla oletusyhteyshenkilö?
+      $yhteysquery = "SELECT nimi
                         FROM yhteyshenkilo
                         where yhtio              = '$kukarow[yhtio]'
                         and liitostunnus         = '$arow[tunnus]'
@@ -1309,27 +1309,27 @@ while ($tietue = fgets($fd)) {
                         and oletusyhteyshenkilo != ''
                         ORDER BY nimi
                         LIMIT 1";
-        $yhteysresult = pupe_query($yhteysquery);
+      $yhteysresult = pupe_query($yhteysquery);
 
-        if ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
-          $tilausyhteyshenkilo = $yhteysrow['nimi'];
-        }
+      if ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
+        $tilausyhteyshenkilo = $yhteysrow['nimi'];
+      }
 
-        if ($arow['toimipaikka'] != 0) {
-          $kukarow_toimipaikka_tmp = $kukarow['toimipaikka'];
-          $kukarow['toimipaikka'] = $arow['toimipaikka'];
+      if ($arow['toimipaikka'] != 0) {
+        $kukarow_toimipaikka_tmp = $kukarow['toimipaikka'];
+        $kukarow['toimipaikka'] = $arow['toimipaikka'];
+        $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+
+        if ($yhtiorow['myyntitilauksen_toimipaikka'] == '') {
+          $kukarow['toimipaikka'] = $kukarow_toimipaikka_tmp;
           $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
-
-          if ($yhtiorow['myyntitilauksen_toimipaikka'] == '') {
-            $kukarow['toimipaikka'] = $kukarow_toimipaikka_tmp;
-            $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
-          }
         }
+      }
 
-        $toimitetaan_tanne = (isset($toimovttunnus) and !empty($toimovttunnus)) ? $toimovttunnus : $arow['toim_ovttunnus'];
+      $toimitetaan_tanne = (isset($toimovttunnus) and !empty($toimovttunnus)) ? $toimovttunnus : $arow['toim_ovttunnus'];
 
-        // Lisätään otsikko
-        $query = "INSERT into lasku SET
+      // Lisätään otsikko
+      $query = "INSERT into lasku SET
                   aktiivinen_kuljetus     = '$suunnistus',
                   alatila                 = '$editilaus_alatila',
                   alv                     = '$arow[alv]',
@@ -1418,10 +1418,10 @@ while ($tietue = fgets($fd)) {
                   yhtio_toimipaikka       = '$kukarow[toimipaikka]',
                   ytunnus                 = '$arow[ytunnus]',
                   ohjelma_moduli          = '$ohjelmamoduli'";
-        $result = pupe_query($query);
-        $id = mysql_insert_id();
+      $result = pupe_query($query);
+      $id = mysql_insert_id();
 
-        $query = "INSERT INTO laskun_lisatiedot SET
+      $query = "INSERT INTO laskun_lisatiedot SET
                   laskutus_nimi     = '$arow[laskutus_nimi]',
                   laskutus_nimitark = '$arow[laskutus_nimitark]',
                   laskutus_osoite   = '$arow[laskutus_osoite]',
@@ -1432,45 +1432,45 @@ while ($tietue = fgets($fd)) {
                   luontiaika        = now(),
                   yhtio             = '$kukarow[yhtio]',
                   otunnus           = '$id'";
-        $lisatiedot_result = pupe_query($query);
+      $lisatiedot_result = pupe_query($query);
 
-        if ($edi_tyyppi == 'futursoft' and $editilaus_tilaustyyppi == 3) {
-          $query = "INSERT INTO tyomaarays SET
+      if ($edi_tyyppi == 'futursoft' and $editilaus_tilaustyyppi == 3) {
+        $query = "INSERT INTO tyomaarays SET
                     yhtio   = '{$kukarow['yhtio']}',
                     otunnus = '{$id}'";
-          $tyomaarays_ins_res = pupe_query($query);
-        }
+        $tyomaarays_ins_res = pupe_query($query);
+      }
 
-        $edi_ulos .= t("Tilausnumero")." $id\n\n";
+      $edi_ulos .= t("Tilausnumero")." $id\n\n";
 
-        // haetaan tilauksen tiedot
-        $query    = "SELECT * from lasku where tunnus='$id' and yhtio='$kukarow[yhtio]'";
-        $result   = pupe_query($query);
-        $laskurow = mysql_fetch_assoc($result);
+      // haetaan tilauksen tiedot
+      $query    = "SELECT * from lasku where tunnus='$id' and yhtio='$kukarow[yhtio]'";
+      $result   = pupe_query($query);
+      $laskurow = mysql_fetch_assoc($result);
 
-        //vientikieltotarkistus
-        $query  = "SELECT if(toim_maa != '', toim_maa, maa) maa
+      //vientikieltotarkistus
+      $query  = "SELECT if(toim_maa != '', toim_maa, maa) maa
                    FROM asiakas
                    WHERE yhtio = '$kukarow[yhtio]'
                    and tunnus  = '$laskurow[liitostunnus]'";
-        $vieres = pupe_query($query);
-        $vierow = mysql_fetch_assoc($vieres);
+      $vieres = pupe_query($query);
+      $vierow = mysql_fetch_assoc($vieres);
 
-        if (isset($vierow) and $vierow["maa"] != "") {
-          $kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
-        }
-        else {
-          $kieltolisa = "";
-        }
+      if (isset($vierow) and $vierow["maa"] != "") {
+        $kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
+      }
+      else {
+        $kieltolisa = "";
+      }
 
-        // Tallennetaan alkuperäinen aineisto tilauksen liitetiedostoksi
-        $liitefile = file_get_contents($mailfile);
-        $filesize  = strlen($liitefile);
-        $filename  = basename($mailfile);
-        $liitefile = mysql_real_escape_string($liitefile);
-        $fileslite = t("Tilausnumero")." $id";
+      // Tallennetaan alkuperäinen aineisto tilauksen liitetiedostoksi
+      $liitefile = file_get_contents($mailfile);
+      $filesize  = strlen($liitefile);
+      $filename  = basename($mailfile);
+      $liitefile = mysql_real_escape_string($liitefile);
+      $fileslite = t("Tilausnumero")." $id";
 
-        $query = "INSERT INTO liitetiedostot SET
+      $query = "INSERT INTO liitetiedostot SET
                   yhtio           = '$kukarow[yhtio]',
                   liitos          = 'lasku',
                   liitostunnus    = '$id',
@@ -1488,176 +1488,170 @@ while ($tietue = fgets($fd)) {
                   jarjestys       = '1',
                   laatija         = '$edi_laatija',
                   luontiaika      = now()";
-        $Xresult = pupe_query($query);
+      $Xresult = pupe_query($query);
 
-        // HUOM: Laitetaan messu myyntiin jos asiakkaan nimi meidän kannassa on eri kuin tilaukselta tullut nimi
-        if ($lnimitark != "" and substr($lnimitark, 0, 7) != "Autoasi" and $arow["yhtio"] == "artr" and gethostname() != 'demo.devlab.fi') {
+      // HUOM: Laitetaan messu myyntiin jos asiakkaan nimi meidän kannassa on eri kuin tilaukselta tullut nimi
+      if ($lnimitark != "" and substr($lnimitark, 0, 7) != "Autoasi" and $arow["yhtio"] == "artr" and gethostname() != 'demo.devlab.fi') {
 
-          $asnokonflikti = "";
+        $asnokonflikti = "";
 
-          // Kauttalaskutus
-          if (strtoupper($arow["toim_nimi"]) != strtoupper($lnimitark) and $arow["yhtio"] == "artr" and $arow["osasto"] == "6") {
-            $asnokonflikti = $arow["toim_nimi"];
-          }
-          elseif (strtoupper($arow["nimi"]) != strtoupper($lnimitark)) {
-            $asnokonflikti = $arow["nimi"];
-          }
+        // Kauttalaskutus
+        if (strtoupper($arow["toim_nimi"]) != strtoupper($lnimitark) and $arow["yhtio"] == "artr" and $arow["osasto"] == "6") {
+          $asnokonflikti = $arow["toim_nimi"];
+        }
+        elseif (strtoupper($arow["nimi"]) != strtoupper($lnimitark)) {
+          $asnokonflikti = $arow["nimi"];
+        }
 
-          if ($asnokonflikti != "") {
-            // lähetetään meili
-            $bound   = uniqid(time()."_") ;
+        if ($asnokonflikti != "") {
+          // lähetetään meili
+          $bound   = uniqid(time()."_") ;
 
-            $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
-            $header .= "MIME-Version: 1.0\n" ;
-            $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
+          $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+          $header .= "MIME-Version: 1.0\n" ;
+          $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
-            $mail  = "--$bound\n";
-            $mail .= "Content-Type: text/plain;charset=iso-8859-1\n" ;
-            $mail .= "Content-Transfer-Encoding: quoted-printable\n";
-            $mail .= "\n";
-            $mail .= "Tilausnumero: $id\n";
-            $mail .= "Pvm: ".date("d.m.Y")."\n\n";
-            $mail .= "Asiakkaan nimi Futursoft-aineistossa: $lnimitark\n";
-            $mail .= "Asiakasnumero Futursoft-aineistossa: $OT_ASIAKASNRO\n\n";
-            $mail .= "Asiakkaan nimi Pupesoftissa: $asnokonflikti\n";
-            $mail .= "Asiakasnumero Pupesoftissa: $arow[asiakasnro]\n";
-            $mail .= "--$bound--\n";
+          $mail  = "--$bound\n";
+          $mail .= "Content-Type: text/plain;charset=iso-8859-1\n" ;
+          $mail .= "Content-Transfer-Encoding: quoted-printable\n";
+          $mail .= "\n";
+          $mail .= "Tilausnumero: $id\n";
+          $mail .= "Pvm: ".date("d.m.Y")."\n\n";
+          $mail .= "Asiakkaan nimi Futursoft-aineistossa: $lnimitark\n";
+          $mail .= "Asiakasnumero Futursoft-aineistossa: $OT_ASIAKASNRO\n\n";
+          $mail .= "Asiakkaan nimi Pupesoftissa: $asnokonflikti\n";
+          $mail .= "Asiakasnumero Pupesoftissa: $arow[asiakasnro]\n";
+          $mail .= "--$bound--\n";
 
-            #$boob = mail("myynti@orum.fi,messages@devlab.fi", mb_encode_mimeheader("Asiakasnumero-konflikti Futursoft-tilauksen sisäänluvussa", "ISO-8859-1", "Q"), $mail, $header, "-f $yhtiorow[postittaja_email]");
-          }
+          //$boob = mail("myynti@orum.fi,messages@devlab.fi", mb_encode_mimeheader("Asiakasnumero-konflikti Futursoft-tilauksen sisäänluvussa", "ISO-8859-1", "Q"), $mail, $header, "-f $yhtiorow[postittaja_email]");
+        }
+      }
+    }
+
+    break;
+
+  case 'OLINSA_NU' :
+  case 'OSTOTILRIV.OTR_TUOTEKOODI' :
+  case 'PIA':
+    //Tuotenumero
+
+    if ($edi_tyyppi == "edifact911") {
+      $kaikki_kentat = explode(":", $tieto);
+      $kentta = explode("+", $kaikki_kentat[1]);
+      $tieto = $kentta[1];
+    }
+
+    // jos ei olla saatu tuoteinfoa aikasemmin, kokeillaan etsiä tuote tuotenumerolla
+    if ($tuoteno == "" and $tieto != "") {
+
+      if ($edi_tyyppi != "magento" and $edi_tyyppi != "futursoft" and $edi_tyyppi != "edifact911" and $yhtiorow["yhtio"] == "artr") {
+        // poistetaan jos kolmas merkki jos se on viiva
+        if (substr($tieto, 2, 1) == '-') {
+          $tieto = substr($tieto, 0, 2) . substr($tieto, 3, 15);
         }
       }
 
-      break;
-
-    case 'OLINSA_NU' :
-    case 'OSTOTILRIV.OTR_TUOTEKOODI' :
-    case 'PIA':
-      //Tuotenumero
-
-      if ($edi_tyyppi == "edifact911") {
-        $kaikki_kentat = explode(":", $tieto);
-        $kentta = explode("+", $kaikki_kentat[1]);
-        $tieto = $kentta[1];
+      // Poistetaan spacet
+      if (in_array($yhtiorow["yhtio"], array("allr", "mast"))) {
+        $tieto = str_replace(" ", "", $tieto);
       }
 
-      // jos ei olla saatu tuoteinfoa aikasemmin, kokeillaan etsiä tuote tuotenumerolla
-      if ($tuoteno == "" and $tieto != "") {
+      if (strpos($tieto, "@") !== FALSE) {
+        list($tieto) = explode("@", $tieto);
+        $tieto = trim($tieto);
+      }
 
-        if ($edi_tyyppi != "magento" and $edi_tyyppi != "futursoft" and $edi_tyyppi != "edifact911" and $yhtiorow["yhtio"] == "artr") {
-          // poistetaan jos kolmas merkki jos se on viiva
-          if (substr($tieto, 2, 1) == '-') {
-            $tieto = substr($tieto, 0, 2) . substr($tieto, 3, 15);
-          }
-        }
-
-        // Poistetaan spacet
-        if (in_array($yhtiorow["yhtio"], array("allr","mast"))) {
-          $tieto = str_replace(" ", "", $tieto);
-        }
-
-        if (strpos($tieto, "@") !== FALSE) {
-          list($tieto) = explode("@", $tieto);
-          $tieto = trim($tieto);
-        }
-
-        // Spessukase
-        if ($yhtiorow["yhtio"] == "artr") {
-          // 1. Etsitään aktiivisia tuotteita kaikki spacet poistettuina
-          $query = "SELECT *
+      // Spessukase
+      if ($yhtiorow["yhtio"] == "artr") {
+        // 1. Etsitään aktiivisia tuotteita kaikki spacet poistettuina
+        $query = "SELECT *
                     FROM tuote
                     WHERE yhtio  = '{$kukarow["yhtio"]}'
                     and tuoteno  = '{$tieto}'
                     and status  != 'P'
                     {$kieltolisa}";
-          $result = pupe_query($query);
+        $result = pupe_query($query);
 
-          if (mysql_num_rows($result) == 0) {
-            // Laitetaan kolmanneksi merkiksi space...
-            $tieto = substr($tieto, 0, 2)." ".substr($tieto, 2);
+        if (mysql_num_rows($result) == 0) {
+          // Laitetaan kolmanneksi merkiksi space...
+          $tieto = substr($tieto, 0, 2)." ".substr($tieto, 2);
 
-            // 2. Laitetaan kolmanneksi merkiksi space ja tsekataan löytyykö aktiivinen
-            $query = "SELECT *
+          // 2. Laitetaan kolmanneksi merkiksi space ja tsekataan löytyykö aktiivinen
+          $query = "SELECT *
                       FROM tuote
                       WHERE yhtio  = '{$kukarow["yhtio"]}'
                       and tuoteno  = '{$tieto}'
                       and status  != 'P'
                       {$kieltolisa}";
-            $result = pupe_query($query);
+          $result = pupe_query($query);
 
-            if (mysql_num_rows($result) == 0) {
-              // Poistetaan kolmannesta merkistä space...
-              $tieto = substr($tieto, 0, 2).substr($tieto, 3);
+          if (mysql_num_rows($result) == 0) {
+            // Poistetaan kolmannesta merkistä space...
+            $tieto = substr($tieto, 0, 2).substr($tieto, 3);
 
-              // 3. Poistetaan kolmannesta merkistä space ja tsekataan löytyykö poistettu
-              $query = "SELECT *
+            // 3. Poistetaan kolmannesta merkistä space ja tsekataan löytyykö poistettu
+            $query = "SELECT *
                         FROM tuote
                         WHERE yhtio = '{$kukarow["yhtio"]}'
                         and tuoteno = '{$tieto}'
                         {$kieltolisa}";
-              $result = pupe_query($query);
+            $result = pupe_query($query);
 
-              if (mysql_num_rows($result) == 0) {
-                // Laitetaan kolmanneksi merkiksi space...
-                $tieto = substr($tieto, 0, 2)." ".substr($tieto, 2);
+            if (mysql_num_rows($result) == 0) {
+              // Laitetaan kolmanneksi merkiksi space...
+              $tieto = substr($tieto, 0, 2)." ".substr($tieto, 2);
 
-                // 4. Laitetaan kolmanneksi merkiksi space ja tsekataan löytyykö poistettu
-                $query = "SELECT *
+              // 4. Laitetaan kolmanneksi merkiksi space ja tsekataan löytyykö poistettu
+              $query = "SELECT *
                           FROM tuote
                           WHERE yhtio = '{$kukarow["yhtio"]}'
                           and tuoteno = '{$tieto}'
                           {$kieltolisa}";
-                $result = pupe_query($query);
+              $result = pupe_query($query);
 
-                if (mysql_num_rows($result) == 0) {
-                  // Jos ei millään löydy niin laitetaan ilman spaceja eteenpäin...
-                  $tieto = substr($tieto, 0, 2).substr($tieto, 3);
-                }
+              if (mysql_num_rows($result) == 0) {
+                // Jos ei millään löydy niin laitetaan ilman spaceja eteenpäin...
+                $tieto = substr($tieto, 0, 2).substr($tieto, 3);
               }
             }
           }
-
-          // spessukeissi, hinnastoon E tuotteita ei löydetä
-          $kieltolisa .= " and hinnastoon != 'E'";
         }
 
-        $query = "SELECT *
+        // spessukeissi, hinnastoon E tuotteita ei löydetä
+        $kieltolisa .= " and hinnastoon != 'E'";
+      }
+
+      $query = "SELECT *
                   FROM tuote
                   WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
                   and tuote.tuoteno = '{$tieto}'
                   {$kieltolisa}";
-        $result = pupe_query($query);
+      $result = pupe_query($query);
 
-        if (mysql_num_rows($result) == 0) {
-          ///* Lisätään tilaukselle dummytuote ja kommentti *///
-          $edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." '$tieto' ".t("ei löydy")."!\n";
-          $tuoteerrortxt .= " $tieto";
-          $tuoteerror = 1;
-        }
-        else  {
-          $trow = mysql_fetch_assoc($result);
+      if (mysql_num_rows($result) == 0) {
+        ///* Lisätään tilaukselle dummytuote ja kommentti *///
+        $edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." '$tieto' ".t("ei löydy")."!\n";
+        $tuoteerrortxt .= " $tieto";
+        $tuoteerror = 1;
+      }
+      else {
+        $trow = mysql_fetch_assoc($result);
 
-          if ($trow['panttitili'] == 'K') {
-            $query = "SELECT *
+        if ($trow['panttitili'] == 'K') {
+          $query = "SELECT *
                       from tuoteperhe
                       where tuoteperhe.yhtio       = '{$kukarow["yhtio"]}'
                       and tuoteperhe.tuoteno       = '{$trow["tuoteno"]}'
                       and tuoteperhe.ohita_kerays != ''";
-            $result = pupe_query($query);
+          $result = pupe_query($query);
 
-                        // Runkotuotteita ei saa tilata suoraan!
-            if (mysql_num_rows($result) != 0) {
-              ///* Lisätään tilaukselle kommentti *///
-              $edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." '$tieto' ".t("on runko")."!\n";
-              $tuoteerrortxt .= " $tieto";
-              $tuoteno = $trow['tuoteno'];
-              $tuoteerror = 2;
-            }
-            else {
-              $edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." $tieto ";
-              $tuoteno = $trow['tuoteno'];
-              $tuoteerror = 0; // tuote ok
-            }
+          // Runkotuotteita ei saa tilata suoraan!
+          if (mysql_num_rows($result) != 0) {
+            ///* Lisätään tilaukselle kommentti *///
+            $edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." '$tieto' ".t("on runko")."!\n";
+            $tuoteerrortxt .= " $tieto";
+            $tuoteno = $trow['tuoteno'];
+            $tuoteerror = 2;
           }
           else {
             $edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." $tieto ";
@@ -1665,295 +1659,301 @@ while ($tietue = fgets($fd)) {
             $tuoteerror = 0; // tuote ok
           }
         }
+        else {
+          $edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." $tieto ";
+          $tuoteno = $trow['tuoteno'];
+          $tuoteerror = 0; // tuote ok
+        }
       }
-      break;
+    }
+    break;
 
-    case 'OLINSA_PI' :
-      // tämän rivin asiakkaan oma tuotenumero
-      $type = explode("@", $tieto);
-      $olinsapi    = trim($type[0]);
-      $olinvarasto = trim($type[2]); // kolmannessa segmentissä tulee meidän varastopaikka jos lähettäjä tietää sen
-      break;
+  case 'OLINSA_PI' :
+    // tämän rivin asiakkaan oma tuotenumero
+    $type = explode("@", $tieto);
+    $olinsapi    = trim($type[0]);
+    $olinvarasto = trim($type[2]); // kolmannessa segmentissä tulee meidän varastopaikka jos lähettäjä tietää sen
+    break;
 
-    case 'OLINEN_NU' :
-    case 'LIN':
-      // tuotteen EAN-koodi
+  case 'OLINEN_NU' :
+  case 'LIN':
+    // tuotteen EAN-koodi
 
-      if ($edi_tyyppi == "edifact911") {
-        $kaikki_kentat = explode("++", $tieto);
-        $ean_kentta = explode(':', $kaikki_kentat[1]);
-        $tieto = $ean_kentta[0];
-        $rivinumero = $kaikki_kentat[0]; // Tästä segmentistä saadaan myös rivinumero
-      }
+    if ($edi_tyyppi == "edifact911") {
+      $kaikki_kentat = explode("++", $tieto);
+      $ean_kentta = explode(':', $kaikki_kentat[1]);
+      $tieto = $ean_kentta[0];
+      $rivinumero = $kaikki_kentat[0]; // Tästä segmentistä saadaan myös rivinumero
+    }
 
-      // jos ei olla saatu tuoteinfoa aikasemmin, kokeillaan etsiä tuote EAN koodilla
-      if ($tuoteno == "" and $tieto != "") {
+    // jos ei olla saatu tuoteinfoa aikasemmin, kokeillaan etsiä tuote EAN koodilla
+    if ($tuoteno == "" and $tieto != "") {
 
-        $query = "SELECT *
+      $query = "SELECT *
                   FROM tuote USE INDEX (yhtio_eankoodi_index)
                   WHERE yhtio  = '$kukarow[yhtio]'
                   and eankoodi = '$tieto'
                   $kieltolisa
                   ORDER BY tunnus";
-        $result = pupe_query($query);
+      $result = pupe_query($query);
 
-        if (mysql_num_rows($result) == 0) {
-          ///* Lisätään tilaukselle dummytuote ja kommentti *///
-          $edi_ulos .= t("Rivi")." $rivinumero EAN '$tieto' ".t("ei löydy")."!\n";
-          $tuoteerrortxt .= " $tieto";
-          $tuoteerror = 1;
-        }
-        else {
-          $trow = mysql_fetch_assoc($result);
-          $edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." $trow[tuoteno] / EAN: $tieto ";
-          $tuoteno = $trow['tuoteno'];
-          $tuoteerror = 0; // tuote ok
-        }
-      }
-
-      break;
-
-    case 'OLIN8__IF' :
-      // asiakkaan antama nimitys tuotteelle
-      $type = explode("@", $tieto);
-      $edi_nimitys = $type[4]; // rivin neljännessä segmentissä tulee oikee info
-      break;
-
-    case 'OSTOTILRIV.OTR_OSTOHINTA' :
-      // Kun tullaan magentosta ja meillä on rahtikulu, niin otetaan hinta talteeen
-      // TAI kun tullaan magentosta ja me luotetaan verkkokaupan hintoihin.
-      if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $tieto != '') {
-        // Tämä hinta on aina veroton, joten lasketaan vero päälle jos myyntihinnat ovat verollisia
-        $editilaus_hinta = (float) trim($tieto);
-
-        if ($yhtiorow["alv_kasittely"] == '' and !isset($verkkokauppa_hinnatedifailistaverollisina)) {
-          $editilaus_hinta = round($editilaus_hinta * (1 + $laskurow["alv"]/100), 2);
-        }
-      }
-
-      // Jos tilaus tulee ennalta määritellyistä kaupoista
-      // jotka on setattu $verkkokauppa_erikoiskasittely:n, nollataan hinta
-      if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
-        and count($verkkokauppa_erikoiskasittely) > 0) {
-
-        $result = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
-        if (count($result) > 0) {
-          $editilaus_hinta = 0;
-        }
-      }
-
-      break;
-
-    case 'OSTOTILRIV.OTR_ALENNUS' :
-      // Kun tullaan magentosta ja meillä on alennus, niin otetaan alennus talteen jos me luotetaan verkkokaupan hintoihin.
-      if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $tieto != '') {
-        $editilaus_alennus = (float) trim($tieto);
-      }
-      break;
-
-    case 'OSTOTILRIV.OTR_SALLITAANJT' :
-      // Sallitaan JT-Rivit
-      if ($tieto == '1') {
-        $sallitaanjt = '1';
+      if (mysql_num_rows($result) == 0) {
+        ///* Lisätään tilaukselle dummytuote ja kommentti *///
+        $edi_ulos .= t("Rivi")." $rivinumero EAN '$tieto' ".t("ei löydy")."!\n";
+        $tuoteerrortxt .= " $tieto";
+        $tuoteerror = 1;
       }
       else {
-        $sallitaanjt = '0';
+        $trow = mysql_fetch_assoc($result);
+        $edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." $trow[tuoteno] / EAN: $tieto ";
+        $tuoteno = $trow['tuoteno'];
+        $tuoteerror = 0; // tuote ok
       }
+    }
 
+    break;
+
+  case 'OLIN8__IF' :
+    // asiakkaan antama nimitys tuotteelle
+    $type = explode("@", $tieto);
+    $edi_nimitys = $type[4]; // rivin neljännessä segmentissä tulee oikee info
+    break;
+
+  case 'OSTOTILRIV.OTR_OSTOHINTA' :
+    // Kun tullaan magentosta ja meillä on rahtikulu, niin otetaan hinta talteeen
+    // TAI kun tullaan magentosta ja me luotetaan verkkokaupan hintoihin.
+    if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $tieto != '') {
+      // Tämä hinta on aina veroton, joten lasketaan vero päälle jos myyntihinnat ovat verollisia
+      $editilaus_hinta = (float) trim($tieto);
+
+      if ($yhtiorow["alv_kasittely"] == '' and !isset($verkkokauppa_hinnatedifailistaverollisina)) {
+        $editilaus_hinta = round($editilaus_hinta * (1 + $laskurow["alv"]/100), 2);
+      }
+    }
+
+    // Jos tilaus tulee ennalta määritellyistä kaupoista
+    // jotka on setattu $verkkokauppa_erikoiskasittely:n, nollataan hinta
+    if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
+      and count($verkkokauppa_erikoiskasittely) > 0) {
+
+      $result = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+      if (count($result) > 0) {
+        $editilaus_hinta = 0;
+      }
+    }
+
+    break;
+
+  case 'OSTOTILRIV.OTR_ALENNUS' :
+    // Kun tullaan magentosta ja meillä on alennus, niin otetaan alennus talteen jos me luotetaan verkkokaupan hintoihin.
+    if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $tieto != '') {
+      $editilaus_alennus = (float) trim($tieto);
+    }
+    break;
+
+  case 'OSTOTILRIV.OTR_SALLITAANJT' :
+    // Sallitaan JT-Rivit
+    if ($tieto == '1') {
+      $sallitaanjt = '1';
+    }
+    else {
+      $sallitaanjt = '0';
+    }
+
+    break;
+
+  case 'OSTOTILRIV.OTR_VIITE' :
+    $rivikommentti = pupesoft_cleanstring($tieto);
+    break;
+
+  case 'OLIN21_QT' :
+  case 'OSTOTILRIV.OTR_TILATTUMAARA' :
+  case 'QTY':
+  case 'QTYLIN':
+
+    if ($edi_tyyppi != "edifact911") {
+      //Tilattava määrä
+      $tieto = str_replace(",", ".", $tieto);
+    }
+
+    if ($edi_tyyppi == "magento" and (strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero']) or strtolower($tuoteno) == strtolower($yhtiorow['alennus_tuotenumero'])) and $tieto != '') {
+      $kpl = (float) substr($tieto, 0, 16);
+    }
+    elseif ($edi_tyyppi == "edifact911") {
+      $kentat = explode(":", $tieto);
+      $kpl = (float) abs($kentat[1]);
+    }
+    else {
+      $kpl = (float) abs(substr($tieto, 0, 16)); // abs() ettei asiakkaat pysty tekemään hyvityksiä!
+    }
+
+    $edi_ulos .= t("tilattiin")." $kpl ".t("kpl").".\n";
+
+    if ($tunnus != "QTYLIN") {
       break;
+    }
 
-    case 'OSTOTILRIV.OTR_VIITE' :
-      $rivikommentti = pupesoft_cleanstring($tieto);
-      break;
+  case 'OLIN__END' :
+  case '*RE OSTOTILRIV' :
+  case 'RFF':
+  case 'PCD':
+  case 'BGM':
+  case 'QTYLIN':
 
-    case 'OLIN21_QT' :
-    case 'OSTOTILRIV.OTR_TILATTUMAARA' :
-    case 'QTY':
-    case 'QTYLIN':
+    if ($edi_tyyppi == "edifact911") {
+      $kentat = explode(":", $tieto);
+      $kentat_bgm = explode("+", $tieto);
 
-      if ($edi_tyyppi != "edifact911") {
-        //Tilattava määrä
-        $tieto = str_replace (",", ".", $tieto);
-      }
-
-      if ($edi_tyyppi == "magento" and (strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero']) or strtolower($tuoteno) == strtolower($yhtiorow['alennus_tuotenumero'])) and $tieto != '') {
-        $kpl = (float) substr($tieto,0,16);
-      }
-      elseif ($edi_tyyppi == "edifact911") {
-        $kentat = explode(":", $tieto);
-        $kpl = (float) abs($kentat[1]);
-      }
-      else {
-        $kpl = (float) abs(substr($tieto,0,16)); // abs() ettei asiakkaat pysty tekemään hyvityksiä!
-      }
-
-      $edi_ulos .= t("tilattiin")." $kpl ".t("kpl").".\n";
-
-      if ($tunnus != "QTYLIN") {
+      // BGM kentässä tulee 'BGM+QQQ+ABCDEFGHIJKLM'
+      // QQQ = arvot, 105=tilaus, 640=toimituskehoitus, 221=plokkitilaus/ennakkotilaus
+      // ABCDEFGHIJKLM = tossa tulee myymälän tilausnumero, joka pitäisi olla sama kuin RFF+VN kentän arvo.
+      if ($asiakkaan_tilausnumero == "" and $kentat_bgm[0] == '105' and $kentat_bgm[1] != "") {
+        $asiakkaan_tilausnumero = $kentat_bgm[1];
+        $viite = $kentat_bgm[1]. ' ';
         break;
       }
 
-    case 'OLIN__END' :
-    case '*RE OSTOTILRIV' :
-    case 'RFF':
-    case 'PCD':
-    case 'BGM':
-    case 'QTYLIN':
-
-      if ($edi_tyyppi == "edifact911") {
-        $kentat = explode(":", $tieto);
-        $kentat_bgm = explode("+", $tieto);
-
-        // BGM kentässä tulee 'BGM+QQQ+ABCDEFGHIJKLM'
-        // QQQ = arvot, 105=tilaus, 640=toimituskehoitus, 221=plokkitilaus/ennakkotilaus
-        // ABCDEFGHIJKLM = tossa tulee myymälän tilausnumero, joka pitäisi olla sama kuin RFF+VN kentän arvo.
-        if ($asiakkaan_tilausnumero == "" and $kentat_bgm[0] == '105' and $kentat_bgm[1] != "") {
-          $asiakkaan_tilausnumero = $kentat_bgm[1];
-          $viite = $kentat_bgm[1]. ' ';
-          break;
-        }
-
-        // Orders 91.1 tulee kaksi RFF segmenttiä (VN ja WS). VN otsikon viite, joten ei liity tilausriveihin. WS on tilausrivin loppumisen merkki.
-        if ($kentat[0] == "VN" and $asiakkaan_tilausnumero == "") {
-          $asiakkaan_tilausnumero = $kentat[1];
-          $viite = $kentat[1]. ' ';
-          break;
-        }
+      // Orders 91.1 tulee kaksi RFF segmenttiä (VN ja WS). VN otsikon viite, joten ei liity tilausriveihin. WS on tilausrivin loppumisen merkki.
+      if ($kentat[0] == "VN" and $asiakkaan_tilausnumero == "") {
+        $asiakkaan_tilausnumero = $kentat[1];
+        $viite = $kentat[1]. ' ';
+        break;
       }
+    }
 
-      if ($editilaus_otsikko_ok == "KYLLA") {
-         // jos tuote on löytynyt ok
-        if ($tuoteerror == 0) {
+    if ($editilaus_otsikko_ok == "KYLLA") {
+      // jos tuote on löytynyt ok
+      if ($tuoteerror == 0) {
 
-          $tuoteno_array = array($tuoteno);
+        $tuoteno_array = array($tuoteno);
 
-          $hyvityssaanto_indeksi         = 0;
-          $hyvityssaanto_hinta_array       = "";
-          $hyvityssaanto_ale_array       = "";
-          $hyvityssaanto_kpl_array       = "";
-          $hyvityssaanto_kommentti_array     = "";
-          $hyvityssaanto_palautuskielto_array  = "";
+        $hyvityssaanto_indeksi         = 0;
+        $hyvityssaanto_hinta_array       = "";
+        $hyvityssaanto_ale_array       = "";
+        $hyvityssaanto_kpl_array       = "";
+        $hyvityssaanto_kommentti_array     = "";
+        $hyvityssaanto_palautuskielto_array  = "";
 
-          // Jos käytetään reklamaatioiden hinnoittelusääntöä ja käyttäjä ei ole väkisinhyväksynyt riviä
-          if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and $editilaus_tilaustyyppi == 3) {
-            $hyvityssaanto_hinta_array = array();
-            $hyvityssaanto_ale_array = array();
-            $hyvityssaanto_kpl_array = array();
-            $hyvityssaanto_kommentti_array = array();
-            $hyvityssaanto_palautuskielto_array = array();
+        // Jos käytetään reklamaatioiden hinnoittelusääntöä ja käyttäjä ei ole väkisinhyväksynyt riviä
+        if ($yhtiorow["reklamaation_hinnoittelu"] == "K" and $editilaus_tilaustyyppi == 3) {
+          $hyvityssaanto_hinta_array = array();
+          $hyvityssaanto_ale_array = array();
+          $hyvityssaanto_kpl_array = array();
+          $hyvityssaanto_kommentti_array = array();
+          $hyvityssaanto_palautuskielto_array = array();
 
-            $palautus = hae_hyvityshinta($laskurow["liitostunnus"], $tuoteno, $kpl);
+          $palautus = hae_hyvityshinta($laskurow["liitostunnus"], $tuoteno, $kpl);
 
-            if (count($palautus) > 0) $tuoteno_array = array();
+          if (count($palautus) > 0) $tuoteno_array = array();
 
-            foreach ($palautus as $index => $arvot) {
-              $tuoteno_array[] = $palautus[$index]["tuoteno"];
-              $hyvityssaanto_hinta_array[$index][$tuoteno] = $palautus[$index]["hinta"];
-              $hyvityssaanto_ale_array[$index][$tuoteno] = $palautus[$index]["ale"];
-              $hyvityssaanto_kpl_array[$index][$tuoteno] = $palautus[$index]["kpl"] * -1;
-              $hyvityssaanto_kommentti_array[$index][$tuoteno] = $palautus[$index]["kommentti"];
-              $hyvityssaanto_palautuskielto_array[$index][$tuoteno] = $palautus[$index]["palautuskielto"];
-            }
+          foreach ($palautus as $index => $arvot) {
+            $tuoteno_array[] = $palautus[$index]["tuoteno"];
+            $hyvityssaanto_hinta_array[$index][$tuoteno] = $palautus[$index]["hinta"];
+            $hyvityssaanto_ale_array[$index][$tuoteno] = $palautus[$index]["ale"];
+            $hyvityssaanto_kpl_array[$index][$tuoteno] = $palautus[$index]["kpl"] * -1;
+            $hyvityssaanto_kommentti_array[$index][$tuoteno] = $palautus[$index]["kommentti"];
+            $hyvityssaanto_palautuskielto_array[$index][$tuoteno] = $palautus[$index]["palautuskielto"];
+          }
+        }
+
+        foreach ($tuoteno_array as $tuoteno) {
+
+          // halutaan $tuoteno
+          // $kpl kappaletta
+          // $trow jossa on tuotten tiedot
+          $ytunnus          = $laskurow["ytunnus"];
+          $hinta           = "";
+          $netto           = "";
+
+          for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+            ${'ale'.$alepostfix} = "";
           }
 
-          foreach ($tuoteno_array as $tuoteno) {
+          $var          = "";
+          $alv          = "";
+          $toimaika         = $laskurow["toimaika"];
+          $kerayspvm        = $laskurow["kerayspvm"];
+          $paikka          = "";
+          $kukarow["kesken"]     = $laskurow["tunnus"];
+          $jtkielto         = $laskurow['jtkielto'];
+          $varasto         = array();
+          $kommentti        = $rivikommentti;
+          $laskurow["varasto"]  = "";
 
-            // halutaan $tuoteno
-            // $kpl kappaletta
-            // $trow jossa on tuotten tiedot
-            $ytunnus          = $laskurow["ytunnus"];
-            $hinta           = "";
-            $netto           = "";
-
-            for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-              ${'ale'.$alepostfix} = "";
-            }
-
-            $var          = "";
-            $alv          = "";
-            $toimaika         = $laskurow["toimaika"];
-            $kerayspvm        = $laskurow["kerayspvm"];
-            $paikka          = "";
-            $kukarow["kesken"]     = $laskurow["tunnus"];
-            $jtkielto         = $laskurow['jtkielto'];
-            $varasto         = array();
-            $kommentti        = $rivikommentti;
-            $laskurow["varasto"]  = "";
-
-            if ($edi_tyyppi == "magento") {
-              // Nämä ovat ainoat varastot joista verkkokauppa saa myydä
-              if ($verkkokauppavarasto == "") {
-                $query  = "SELECT GROUP_CONCAT(tunnus) tunnukset
+          if ($edi_tyyppi == "magento") {
+            // Nämä ovat ainoat varastot joista verkkokauppa saa myydä
+            if ($verkkokauppavarasto == "") {
+              $query  = "SELECT GROUP_CONCAT(tunnus) tunnukset
                            FROM varastopaikat
                            WHERE yhtio      = '$kukarow[yhtio]'
                            AND prioriteetti > 0 AND tyyppi != 'P'";
-                $pres = pupe_query($query);
-                $prow = mysql_fetch_assoc($pres);
+              $pres = pupe_query($query);
+              $prow = mysql_fetch_assoc($pres);
 
-                if ($prow["tunnukset"] != "") {
-                  $verkkokauppavarasto   = explode(",", $prow["tunnukset"]);
-                  $verkkokauppavarasto_li = " and varastopaikat.tunnus in ($prow[tunnukset]) ";
-                  $laskurow["varasto"]   = $verkkokauppavarasto[0];
-                }
+              if ($prow["tunnukset"] != "") {
+                $verkkokauppavarasto   = explode(",", $prow["tunnukset"]);
+                $verkkokauppavarasto_li = " and varastopaikat.tunnus in ($prow[tunnukset]) ";
+                $laskurow["varasto"]   = $verkkokauppavarasto[0];
               }
+            }
 
-              $varasto = $verkkokauppavarasto;
-            }
-            elseif ($olinvarasto != "") {
-              $varasto = $olinvarasto;
-            }
-            elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and $laskurow['yhtio_toimipaikka'] == 0) {
-              $query = "SELECT *
+            $varasto = $verkkokauppavarasto;
+          }
+          elseif ($olinvarasto != "") {
+            $varasto = $olinvarasto;
+          }
+          elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and $laskurow['yhtio_toimipaikka'] == 0) {
+            $query = "SELECT *
                         FROM varastopaikat
                         WHERE yhtio     = '{$kukarow['yhtio']}'
                         AND tyyppi      = ''
                         AND toimipaikka = 0";
-              $varresult = pupe_query($query);
+            $varresult = pupe_query($query);
 
-              while ($varrow = mysql_fetch_assoc($varresult)) {
-                array_push($varasto, $varrow['tunnus']);
-              }
+            while ($varrow = mysql_fetch_assoc($varresult)) {
+              array_push($varasto, $varrow['tunnus']);
             }
+          }
 
-            // jos terminaalitoimitus niin ohitetaan kaikki saldozekit, sekä laitetaan kommenttiriville asiakkaan tuotenumero ja nimitys
-            if ($editilaus_tila == "Z") {
-              $var = "Y";
-              $kommentti = "$olinsapi#$edi_nimitys";
+          // jos terminaalitoimitus niin ohitetaan kaikki saldozekit, sekä laitetaan kommenttiriville asiakkaan tuotenumero ja nimitys
+          if ($editilaus_tila == "Z") {
+            $var = "Y";
+            $kommentti = "$olinsapi#$edi_nimitys";
+          }
+
+          // jos tullaan magentosta ja hinta on tiedossa ja kyseessä on rahtikulu, niin uskalletaan luottaa magenton antamaan hintaan
+          if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $editilaus_hinta > 0) {
+            $hinta = $editilaus_hinta;
+          }
+          elseif (is_array($hyvityssaanto_hinta_array) and isset($hyvityssaanto_hinta_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_hinta_array[$hyvityssaanto_indeksi][$tuoteno])) {
+            $hinta = $hyvityssaanto_hinta_array[$hyvityssaanto_indeksi][$tuoteno];
+          }
+
+          // jos tullaan magentosta ja alennus on tiedossa
+          if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $editilaus_alennus > 0) {
+            $ale1 = $editilaus_alennus;
+          }
+          elseif (is_array($hyvityssaanto_ale_array) and isset($hyvityssaanto_ale_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_ale_array[$hyvityssaanto_indeksi][$tuoteno])) {
+
+            // hyvityssäännön alennus yliajaa käyttäjän syöttämän alennuksen
+            $ale1 = $hyvityssaanto_ale_array[$hyvityssaanto_indeksi][$tuoteno];
+
+            for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+              ${'ale'.$alepostfix} = 0;
             }
-
-            // jos tullaan magentosta ja hinta on tiedossa ja kyseessä on rahtikulu, niin uskalletaan luottaa magenton antamaan hintaan
-            if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $editilaus_hinta > 0) {
-              $hinta = $editilaus_hinta;
-            }
-            elseif (is_array($hyvityssaanto_hinta_array) and isset($hyvityssaanto_hinta_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_hinta_array[$hyvityssaanto_indeksi][$tuoteno])) {
-              $hinta = $hyvityssaanto_hinta_array[$hyvityssaanto_indeksi][$tuoteno];
-            }
-
-            // jos tullaan magentosta ja alennus on tiedossa
-            if ($edi_tyyppi == "magento" and (isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") and $editilaus_alennus > 0) {
-              $ale1 = $editilaus_alennus;
-            }
-            elseif (is_array($hyvityssaanto_ale_array) and isset($hyvityssaanto_ale_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_ale_array[$hyvityssaanto_indeksi][$tuoteno])) {
-
-              // hyvityssäännön alennus yliajaa käyttäjän syöttämän alennuksen
-              $ale1 = $hyvityssaanto_ale_array[$hyvityssaanto_indeksi][$tuoteno];
-
-              for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-                ${'ale'.$alepostfix} = 0;
-              }
-            }
+          }
 
 
-            // Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa.
-            // Jos tilattu kpl-määrä on suurempi kuin myytävissä oleva kpl-määrä, niin pakotetaan rivi hyväksytyksi
-            if ($edi_tyyppi == "magento" and $tuoteno != '' and $kpl > 0 and $trow["ei_saldoa"] == "") {
+          // Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa.
+          // Jos tilattu kpl-määrä on suurempi kuin myytävissä oleva kpl-määrä, niin pakotetaan rivi hyväksytyksi
+          if ($edi_tyyppi == "magento" and $tuoteno != '' and $kpl > 0 and $trow["ei_saldoa"] == "") {
 
-              list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno, "", $verkkokauppavarasto);
+            list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno, "", $verkkokauppavarasto);
 
-              // jos saldo ei riitä normivarastoista, pitää katsoa missä varastossa riittää ja myydään sieltä (koska jossain riittää, muuten tilaus ei olisi edes tullu tänne asti)
-              if ($chk_myytavissa < $kpl) {
+            // jos saldo ei riitä normivarastoista, pitää katsoa missä varastossa riittää ja myydään sieltä (koska jossain riittää, muuten tilaus ei olisi edes tullu tänne asti)
+            if ($chk_myytavissa < $kpl) {
 
-                $query = "SELECT distinct varastopaikat.tunnus varasto, varastopaikat.prioriteetti
+              $query = "SELECT distinct varastopaikat.tunnus varasto, varastopaikat.prioriteetti
                           FROM tuotepaikat
                           JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                             AND varastopaikat.tyyppi       != ''
@@ -1963,100 +1963,100 @@ while ($tietue = fgets($fd)) {
                           WHERE tuotepaikat.yhtio           = '$kukarow[yhtio]'
                           AND tuotepaikat.tuoteno           = '$tuoteno'
                           ORDER BY prioriteetti";
-                $sres = pupe_query($query);
+              $sres = pupe_query($query);
 
-                $erikoisvarastojen_saldot = array();
-                $erikois_i = 0;
+              $erikoisvarastojen_saldot = array();
+              $erikois_i = 0;
 
-                while ($erikoisasaldo_row = mysql_fetch_assoc($sres)) {
-                  list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno, '', $erikoisasaldo_row["varasto"]);
+              while ($erikoisasaldo_row = mysql_fetch_assoc($sres)) {
+                list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno, '', $erikoisasaldo_row["varasto"]);
 
-                  if ($chk_myytavissa >= $kpl) {
-                    $erikoisvarastojen_saldot[$erikois_i]["varasto"] = (int) $erikoisasaldo_row["varasto"];
-                    $erikoisvarastojen_saldot[$erikois_i]["myytavissa"] = (float) $chk_myytavissa;
-                    $erikoisvarastojen_saldot[$erikois_i]["prioriteetti"] = (int) $erikoisasaldo_row["prioriteetti"];
-                    $erikois_i++;
-                  }
-                }
-
-                if (count($erikoisvarastojen_saldot) > 0) {
-                  // Sortataan 2 dimensoinen array. pitää ensiksi tehdä sortattavista keystä omat arrayt
-                  $apusort_jarj0 = $apusort_jarj1 = array();
-                  foreach ($erikoisvarastojen_saldot as $apusort_key => $apusort_row) {
-                      $apusort_jarj0[$apusort_key] = $apusort_row['prioriteetti'];
-                    $apusort_jarj1[$apusort_key] = $apusort_row['myytavissa'];
-                  }
-
-                  // sortataan by myytavissa, sorttauskenttä
-                  array_multisort($apusort_jarj0, SORT_ASC, $apusort_jarj1, SORT_DESC, $erikoisvarastojen_saldot);
-
-                  $varasto = $erikoisvarastojen_saldot[0]["varasto"]; // ekassa varastossa on pienin prioriteetti
-                  $laskurow["varasto"] = $varasto; // joudutaan spooffaamaan laskurow varasto
-
-                  // Tilausrivin systeemikommentti
-                  $kommentti .= t("HUOM: Tuote toimitetaan erikoisvarastosta!");
-                }
-                else {
-                  $var = "H";
+                if ($chk_myytavissa >= $kpl) {
+                  $erikoisvarastojen_saldot[$erikois_i]["varasto"] = (int) $erikoisasaldo_row["varasto"];
+                  $erikoisvarastojen_saldot[$erikois_i]["myytavissa"] = (float) $chk_myytavissa;
+                  $erikoisvarastojen_saldot[$erikois_i]["prioriteetti"] = (int) $erikoisasaldo_row["prioriteetti"];
+                  $erikois_i++;
                 }
               }
-            }
 
-            $kutsuja = "EDITILAUS";
+              if (count($erikoisvarastojen_saldot) > 0) {
+                // Sortataan 2 dimensoinen array. pitää ensiksi tehdä sortattavista keystä omat arrayt
+                $apusort_jarj0 = $apusort_jarj1 = array();
+                foreach ($erikoisvarastojen_saldot as $apusort_key => $apusort_row) {
+                  $apusort_jarj0[$apusort_key] = $apusort_row['prioriteetti'];
+                  $apusort_jarj1[$apusort_key] = $apusort_row['myytavissa'];
+                }
 
-            // Jos meillä on täppä päällä, että asiakas haluaa kamat jälkitoimitukseen
-            if ($sallitaanjt == '1') {
-              $var     = "J";
-              $kommentti   = ""; // HUOM: nollataan kommentti
-            }
+                // sortataan by myytavissa, sorttauskenttä
+                array_multisort($apusort_jarj0, SORT_ASC, $apusort_jarj1, SORT_DESC, $erikoisvarastojen_saldot);
 
-            if (is_array($hyvityssaanto_kpl_array) and isset($hyvityssaanto_kpl_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_kpl_array[$hyvityssaanto_indeksi][$tuoteno])) {
-              $kpl = $hyvityssaanto_kpl_array[$hyvityssaanto_indeksi][$tuoteno];
-            }
+                $varasto = $erikoisvarastojen_saldot[0]["varasto"]; // ekassa varastossa on pienin prioriteetti
+                $laskurow["varasto"] = $varasto; // joudutaan spooffaamaan laskurow varasto
 
-            if ($edi_tyyppi == 'futursoft' and $editilaus_tilaustyyppi == 3) {
-              $kpl = abs($kpl) * -1;
-            }
-
-            if (is_array($hyvityssaanto_kommentti_array) and isset($hyvityssaanto_kommentti_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_kommentti_array[$hyvityssaanto_indeksi][$tuoteno])) {
-
-              // jos myyjä on reklamaatiossa syöttänyt riville kommentin niin se laitetaan ensimmäiselle sille tarkoitetulle riville
-              if ($kommentti != "") {
-                $kommentti .= " ";
+                // Tilausrivin systeemikommentti
+                $kommentti .= t("HUOM: Tuote toimitetaan erikoisvarastosta!");
               }
-
-              $kommentti .= $hyvityssaanto_kommentti_array[$hyvityssaanto_indeksi][$tuoteno];
+              else {
+                $var = "H";
+              }
             }
-
-            if (is_array($hyvityssaanto_palautuskielto_array) and isset($hyvityssaanto_palautuskielto_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_palautuskielto_array[$hyvityssaanto_indeksi][$tuoteno])) {
-              $hyvityssaannon_palautuskielto =  $hyvityssaanto_palautuskielto_array[$hyvityssaanto_indeksi][$tuoteno];
-            }
-            else {
-              $hyvityssaannon_palautuskielto = "";
-            }
-
-            require ("lisaarivi.inc");
-
-            $edi_ulos .= "\n";
-
-            $hyvityssaanto_indeksi++;
           }
 
-        } // end jos tuote on löydetty oikein
-        else {
+          $kutsuja = "EDITILAUS";
 
-          if ($tuoteerror == 2)  {
-              // Tilausrivin systeemikommentti
-              $kommentti   .= t("Yritettiin tilata pelkkää runkoa").$tuoteerrortxt;
-              $virhetuoteno = $tuoteno;
+          // Jos meillä on täppä päällä, että asiakas haluaa kamat jälkitoimitukseen
+          if ($sallitaanjt == '1') {
+            $var     = "J";
+            $kommentti   = ""; // HUOM: nollataan kommentti
+          }
+
+          if (is_array($hyvityssaanto_kpl_array) and isset($hyvityssaanto_kpl_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_kpl_array[$hyvityssaanto_indeksi][$tuoteno])) {
+            $kpl = $hyvityssaanto_kpl_array[$hyvityssaanto_indeksi][$tuoteno];
+          }
+
+          if ($edi_tyyppi == 'futursoft' and $editilaus_tilaustyyppi == 3) {
+            $kpl = abs($kpl) * -1;
+          }
+
+          if (is_array($hyvityssaanto_kommentti_array) and isset($hyvityssaanto_kommentti_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_kommentti_array[$hyvityssaanto_indeksi][$tuoteno])) {
+
+            // jos myyjä on reklamaatiossa syöttänyt riville kommentin niin se laitetaan ensimmäiselle sille tarkoitetulle riville
+            if ($kommentti != "") {
+              $kommentti .= " ";
+            }
+
+            $kommentti .= $hyvityssaanto_kommentti_array[$hyvityssaanto_indeksi][$tuoteno];
+          }
+
+          if (is_array($hyvityssaanto_palautuskielto_array) and isset($hyvityssaanto_palautuskielto_array[$hyvityssaanto_indeksi]) and isset($hyvityssaanto_palautuskielto_array[$hyvityssaanto_indeksi][$tuoteno])) {
+            $hyvityssaannon_palautuskielto =  $hyvityssaanto_palautuskielto_array[$hyvityssaanto_indeksi][$tuoteno];
           }
           else {
-              // Tilausrivin systeemikommentti
-              $kommentti   .= t("Yritettiin tilata tuntematonta tuotetta").$tuoteerrortxt;
-              $virhetuoteno = "TUNTEMATON";
+            $hyvityssaannon_palautuskielto = "";
           }
 
-          $query = "INSERT into tilausrivi set
+          require "lisaarivi.inc";
+
+          $edi_ulos .= "\n";
+
+          $hyvityssaanto_indeksi++;
+        }
+
+      } // end jos tuote on löydetty oikein
+      else {
+
+        if ($tuoteerror == 2) {
+          // Tilausrivin systeemikommentti
+          $kommentti   .= t("Yritettiin tilata pelkkää runkoa").$tuoteerrortxt;
+          $virhetuoteno = $tuoteno;
+        }
+        else {
+          // Tilausrivin systeemikommentti
+          $kommentti   .= t("Yritettiin tilata tuntematonta tuotetta").$tuoteerrortxt;
+          $virhetuoteno = "TUNTEMATON";
+        }
+
+        $query = "INSERT into tilausrivi set
                     tilaajanrivinro = '$rivinumero',
                     laatija         = 'edi',
                     laadittu        = now(),
@@ -2069,125 +2069,125 @@ while ($tietue = fgets($fd)) {
                     otunnus         = '$id',
                     tyyppi          = '$editilaus_tyyppi',
                     kommentti       = '$kommentti'";
-          $result = pupe_query($query);
+        $result = pupe_query($query);
 
-        }
       }
+    }
 
-      // nollataan kaikki rivin muuttujat (nämä samat pitää tehdä filen alussa)
-      $tuoteerror        = 1; // oletetaan aina ettei  tuotetta löydy
-      $tuoteerrortxt     = "";
-      $kpl               = "";
-      $rivinumero        = "";
-      $kommentti         = "";
-      $tuoteno           = "";
-      $olinsapi          = "";
-      $olinvarasto       = "";
-      $edi_nimitys       = "";
-      $sallitaanjt       = "";
-      $editilaus_hinta   = "";
-      $editilaus_alennus = "";
-      $rivikommentti     = "";
-      break;
+    // nollataan kaikki rivin muuttujat (nämä samat pitää tehdä filen alussa)
+    $tuoteerror        = 1; // oletetaan aina ettei  tuotetta löydy
+    $tuoteerrortxt     = "";
+    $kpl               = "";
+    $rivinumero        = "";
+    $kommentti         = "";
+    $tuoteno           = "";
+    $olinsapi          = "";
+    $olinvarasto       = "";
+    $edi_nimitys       = "";
+    $sallitaanjt       = "";
+    $editilaus_hinta   = "";
+    $editilaus_alennus = "";
+    $rivikommentti     = "";
+    break;
 
-    case 'OMSG__END' :
-    case '*IE' :
-    case 'UNT':
+  case 'OMSG__END' :
+  case '*IE' :
+  case 'UNT':
 
-      // jos meilla on otsikko voidaan laittaa sen valmiiksi
-      if ($editilaus_otsikko_ok == "KYLLA") {
-        //tarkistetaan toimitustapa vakin takia
-        $query = "SELECT *
+    // jos meilla on otsikko voidaan laittaa sen valmiiksi
+    if ($editilaus_otsikko_ok == "KYLLA") {
+      //tarkistetaan toimitustapa vakin takia
+      $query = "SELECT *
                   FROM tilausrivi
                   JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.vakkoodi not in ('','0'))
                   WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
                   and tilausrivi.otunnus = '$id'";
-        $result = pupe_query($query);
+      $result = pupe_query($query);
 
-        if (mysql_num_rows($result) > 0) {
-          $query = "SELECT vak_kielto
+      if (mysql_num_rows($result) > 0) {
+        $query = "SELECT vak_kielto
                     FROM toimitustapa
                     WHERE yhtio = '$kukarow[yhtio]'
                     and selite  = '$laskurow[toimitustapa]'";
-          $result = pupe_query($query);
-          $toimtapatmp = mysql_fetch_assoc($result);
+        $result = pupe_query($query);
+        $toimtapatmp = mysql_fetch_assoc($result);
 
-          if ($toimtapatmp['vak_kielto'] != '' and $toimtapatmp['vak_kielto'] != 'K') {
-            $query = "SELECT selite
+        if ($toimtapatmp['vak_kielto'] != '' and $toimtapatmp['vak_kielto'] != 'K') {
+          $query = "SELECT selite
                       FROM toimitustapa
                       WHERE yhtio    = '$kukarow[yhtio]'
                       AND selite     = '$toimtapatmp[vak_kielto]'
                       AND vak_kielto = ''";
-            $result = pupe_query($query);
+          $result = pupe_query($query);
 
-            if (mysql_num_rows($result) == 1) {
-              $query = "UPDATE lasku SET toimitustapa = '$toimtapatmp[vak_kielto]' where yhtio = '$kukarow[yhtio]' and tunnus = '$id'";
-              $result = pupe_query($query);
-            }
+          if (mysql_num_rows($result) == 1) {
+            $query = "UPDATE lasku SET toimitustapa = '$toimtapatmp[vak_kielto]' where yhtio = '$kukarow[yhtio]' and tunnus = '$id'";
+            $result = pupe_query($query);
           }
         }
+      }
 
-        // haetaan tilauksen tiedot
-        $query    = "SELECT * FROM lasku WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
-        $result   = pupe_query($query);
-        $laskurow = mysql_fetch_assoc($result);
+      // haetaan tilauksen tiedot
+      $query    = "SELECT * FROM lasku WHERE tunnus='$id' AND yhtio='$kukarow[yhtio]'";
+      $result   = pupe_query($query);
+      $laskurow = mysql_fetch_assoc($result);
 
-        // tarvitaan $kukarow[yhtio], $kukarow[kesken], $laskurow ja $yhtiorow
-        $kukarow["kesken"] = $laskurow["tunnus"];
-        $editilaus_lasku_tunnus = $laskurow["tunnus"];
+      // tarvitaan $kukarow[yhtio], $kukarow[kesken], $laskurow ja $yhtiorow
+      $kukarow["kesken"] = $laskurow["tunnus"];
+      $editilaus_lasku_tunnus = $laskurow["tunnus"];
 
-        // jos terminaalitoimitus niin EI tehdä tilaus-valmista...
-        if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3 and $editilaus_tilaustyyppi != 'K') {
+      // jos terminaalitoimitus niin EI tehdä tilaus-valmista...
+      if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3 and $editilaus_tilaustyyppi != 'K') {
 
-          if (in_array($yhtiorow['jt_automatiikka'], array('Y','W','K'))) {
+        if (in_array($yhtiorow['jt_automatiikka'], array('Y', 'W', 'K'))) {
 
-            //lisätään tilaukseen ne jt-rivit jotka riittävät kaikille
-            $edi_ulos .= "\n";
-
-            $_ytunnus = $laskurow['ytunnus'];
-            $_ltun = $laskurow['liitostunnus'];
-            $_maa = $laskurow['maa'];
-            $_ytp = $laskurow['yhtio_toimipaikka'];
-
-            jt_toimita_editilaus($_ytunnus, $_ltun, $_maa, $_ytp);
-            $edi_ulos .= "\n";
-          }
-
+          //lisätään tilaukseen ne jt-rivit jotka riittävät kaikille
           $edi_ulos .= "\n";
 
-          $silent = "SILENT";
-          $tilausvalmiskutsuja = "EDITILAUS";
+          $_ytunnus = $laskurow['ytunnus'];
+          $_ltun = $laskurow['liitostunnus'];
+          $_maa = $laskurow['maa'];
+          $_ytp = $laskurow['yhtio_toimipaikka'];
 
-          require ("tilaus-valmis.inc");
+          jt_toimita_editilaus($_ytunnus, $_ltun, $_maa, $_ytp);
+          $edi_ulos .= "\n";
+        }
 
-          // jos magentosta tullut tilaus on jo maksettu, päivitetään se takaisin keräysjonoon (paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi ja laskuttaa kaikki)
-          if ($edi_tyyppi == "magento" and $editilaus_kassalipas != "" and $editilaus_tilaustyyppi != "9") {
-            // Haetaan yrityksen ensimmäinen normivarasto. Tallennetaan tilaus tähän varastoon
-            $varasto_query = "SELECT tunnus
+        $edi_ulos .= "\n";
+
+        $silent = "SILENT";
+        $tilausvalmiskutsuja = "EDITILAUS";
+
+        require "tilaus-valmis.inc";
+
+        // jos magentosta tullut tilaus on jo maksettu, päivitetään se takaisin keräysjonoon (paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi ja laskuttaa kaikki)
+        if ($edi_tyyppi == "magento" and $editilaus_kassalipas != "" and $editilaus_tilaustyyppi != "9") {
+          // Haetaan yrityksen ensimmäinen normivarasto. Tallennetaan tilaus tähän varastoon
+          $varasto_query = "SELECT tunnus
                               from varastopaikat
                               where yhtio = '$kukarow[yhtio]'
                               and tyyppi  = ''
                               order by alkuhyllyalue
                               limit 1";
-            $varasto_res = pupe_query($varasto_query);
-            $varasto_row = mysql_fetch_assoc($varasto_res);
+          $varasto_res = pupe_query($varasto_query);
+          $varasto_row = mysql_fetch_assoc($varasto_res);
 
-            $query = "SELECT hyllyalue, hyllynro
+          $query = "SELECT hyllyalue, hyllynro
                       FROM tilausrivi
                       WHERE yhtio    = '$kukarow[yhtio]'
                       AND hyllyalue != ''
                       AND hyllynro  != ''
                       AND otunnus    = '$editilaus_lasku_tunnus'";
-            $edi_varastopaikka_res = pupe_query($query);
-            $edi_varastopaikka_row = mysql_fetch_assoc($edi_varastopaikka_res);
+          $edi_varastopaikka_res = pupe_query($query);
+          $edi_varastopaikka_row = mysql_fetch_assoc($edi_varastopaikka_res);
 
-            $tulostusalue = onkotulostusalueita($edi_varastopaikka_row["hyllyalue"], $edi_varastopaikka_row["hyllynro"], $varasto_row['tunnus'], $kukarow['yhtio']);
+          $tulostusalue = onkotulostusalueita($edi_varastopaikka_row["hyllyalue"], $edi_varastopaikka_row["hyllynro"], $varasto_row['tunnus'], $kukarow['yhtio']);
 
-            $vielisa = "";
-            if ($til_vienti == "") $vielisa = "chn = '999', ";
+          $vielisa = "";
+          if ($til_vienti == "") $vielisa = "chn = '999', ";
 
-            // Palautetaan tilaus takaisin "myyntitilaus keräysjonossa"-tilaan, lisätään päälle laskutuskielto varmuuden vuoksi (ei vientitilauksille)
-            $query = "UPDATE lasku SET
+          // Palautetaan tilaus takaisin "myyntitilaus keräysjonossa"-tilaan, lisätään päälle laskutuskielto varmuuden vuoksi (ei vientitilauksille)
+          $query = "UPDATE lasku SET
                       mapvm        = now(),
                       tila         = 'N',
                       alatila      = 'A',
@@ -2197,120 +2197,120 @@ while ($tietue = fgets($fd)) {
                       tulostusalue = '$tulostusalue'
                       WHERE yhtio  = '$kukarow[yhtio]'
                       AND tunnus   = '$editilaus_lasku_tunnus'";
-            $magento_maksettu_res = pupe_query($query);
+          $magento_maksettu_res = pupe_query($query);
 
-            // haetaan tilauksen tiedot
-            $query    = "SELECT * FROM lasku WHERE tunnus = '$editilaus_lasku_tunnus' AND yhtio = '$kukarow[yhtio]'";
-            $result   = pupe_query($query);
-            $laskurow = mysql_fetch_assoc($result);
+          // haetaan tilauksen tiedot
+          $query    = "SELECT * FROM lasku WHERE tunnus = '$editilaus_lasku_tunnus' AND yhtio = '$kukarow[yhtio]'";
+          $result   = pupe_query($query);
+          $laskurow = mysql_fetch_assoc($result);
 
-            // pitää nollata toimitettuaika riveille
-            $query = "UPDATE tilausrivi SET
+          // pitää nollata toimitettuaika riveille
+          $query = "UPDATE tilausrivi SET
                       toimitettu     = '',
                       toimitettuaika = ''
                       WHERE yhtio    = '$kukarow[yhtio]'
                       AND otunnus    = '$editilaus_lasku_tunnus'";
-            $result = pupe_query($query);
+          $result = pupe_query($query);
 
-            // pitää nollata kerattyaika kaikille saldollisille tuotteille
-            $query = "UPDATE tilausrivi SET
+          // pitää nollata kerattyaika kaikille saldollisille tuotteille
+          $query = "UPDATE tilausrivi SET
                       keratty      = '',
                       kerattyaika  = ''
                       WHERE yhtio  = '$kukarow[yhtio]'
                       AND otunnus  = '$editilaus_lasku_tunnus'
                       AND keratty != 'saldoton'";
-            $result = pupe_query($query);
+          $result = pupe_query($query);
 
-            // ei haluta käsitellä tätä toista kertaa kassamyyntinä, koska se estää splittauksen
-            $kukarow["kassamyyja"] = $editilaus_kassalipas = "";
+          // ei haluta käsitellä tätä toista kertaa kassamyyntinä, koska se estää splittauksen
+          $kukarow["kassamyyja"] = $editilaus_kassalipas = "";
 
-            // kutsutaan uudestaan tilaukselle tilaus-valmis, niin saadaan splitattua se varastoihin
-            $silent = "SILENT";
-            $tilausvalmiskutsuja = "EDITILAUS";
+          // kutsutaan uudestaan tilaukselle tilaus-valmis, niin saadaan splitattua se varastoihin
+          $silent = "SILENT";
+          $tilausvalmiskutsuja = "EDITILAUS";
 
-            require ("tilaus-valmis.inc");
-          }
-
-          $edi_ulos .= "$tilaus_valmis_ulos\n";
-          $edi_ulos .= "$tilaus_valmis_message\n";
-          $edi_ulos .= "\n".t("Merkittiin tilaus valmiiksi").": $editilaus_lasku_tunnus.\n\n";
+          require "tilaus-valmis.inc";
         }
-        elseif ($editilaus_tila == "Z") {
-          $query = "UPDATE lasku SET
+
+        $edi_ulos .= "$tilaus_valmis_ulos\n";
+        $edi_ulos .= "$tilaus_valmis_message\n";
+        $edi_ulos .= "\n".t("Merkittiin tilaus valmiiksi").": $editilaus_lasku_tunnus.\n\n";
+      }
+      elseif ($editilaus_tila == "Z") {
+        $query = "UPDATE lasku SET
                     alatila     = 'A'
                     WHERE yhtio = '$kukarow[yhtio]'
                     AND tunnus  = '$editilaus_lasku_tunnus'";
-          $terminaali_tilaus_res = pupe_query($query);
-          $edi_ulos .= "\n".t("Terminaalitoimitus vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
-        }
-        elseif ($editilaus_tilaustyyppi == 3) {
-          $edi_ulos .= "\n".t("Reklamaatio vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
-        }
+        $terminaali_tilaus_res = pupe_query($query);
+        $edi_ulos .= "\n".t("Terminaalitoimitus vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
       }
-      else {
-        $edi_ulos .= "\n".t("Otsikko oli virheellinen tilausta/rivejä ei lisätty")."!\n\n";
+      elseif ($editilaus_tilaustyyppi == 3) {
+        $edi_ulos .= "\n".t("Reklamaatio vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
       }
+    }
+    else {
+      $edi_ulos .= "\n".t("Otsikko oli virheellinen tilausta/rivejä ei lisätty")."!\n\n";
+    }
 
-      // nollataan kaikki laskun muuttujat (kaikki nämä samat pitää nollata filen alussa)
-      unset($arow);
-      unset($arow_viite);
-      unset($arow_ostaja);
-      unset($arow_toimitus);
-      unset($arow_terminaali);
-      unset($crossdock911);
+    // nollataan kaikki laskun muuttujat (kaikki nämä samat pitää nollata filen alussa)
+    unset($arow);
+    unset($arow_viite);
+    unset($arow_ostaja);
+    unset($arow_toimitus);
+    unset($arow_terminaali);
+    unset($crossdock911);
 
-      $toimpvm          = date("Y-m-d");
-      $vastaustapa       = "";
-      $editilaus_tila         = "N"; // laskun tila
-      $editilaus_alatila    = "";
-      $editilaus_tyyppi       = "L"; // tilausrivi tyyppi
-      $id                     = "";
-      $edi_kommentti          = "";
-      $vastaustapa            = "";
-      $maksaja                = "";
-      $viite                  = "";
-      $asiakkaan_tilausnumero  = "";
-      $editilaus_otsikko_ok   = "";
-      $suunnistus             = "";
-      $tnimi                  = "";
-      $tnimitark              = "";
-      $tpostitp               = "";
-      $tpostino               = "";
-      $tosoite                = "";
-      $lnimi          = "";
-      $lnimitark        = "";
-      $lpostitp        = "";
-      $lpostino        = "";
-      $losoite        = "";
-      $lopnumero              = "";
-      $lopnimi                = "";
-      $loppostitp             = "";
-      $loppostino             = "";
-      $loposoite              = "";
-      $ltoim_maa        = "";
-      $ltoim_puh        = "";
-      $yhteyshenkilon_puhelin = "";
-      $tilausyhteyshenkilo  = "";
-      $lopviesti              = "";
-      $veromaara        = "";
-      $ohjausmerkki      = "";
-      $ketjutus               = "";
-      $editilaus_maksuehto  = "";
-      $editilaus_maksuteksti  = "";
-      $editilaus_toimitustapa = "";
-      $editilaus_rahtivapaa  = "";
-      $editilaus_tilaustyyppi = "";
-      $editilaus_eilahetetta  = "";
-      $editilaus_sisainen    = "";
-      $editilaus_kassalipas  = "";
-      $til_vienti        = "";
-      $verkkokauppavarasto  = "";
-      $verkkokauppavarasto_li  = "";
-      $editilaus_loppuhinta  = "";
-      $kieltolisa        = "";
-      $OT_ASIAKASNRO      = "";
-      $merkkitieto       = "";
-      break;
+    $toimpvm          = date("Y-m-d");
+    $vastaustapa       = "";
+    $editilaus_tila         = "N"; // laskun tila
+    $editilaus_alatila    = "";
+    $editilaus_tyyppi       = "L"; // tilausrivi tyyppi
+    $id                     = "";
+    $edi_kommentti          = "";
+    $vastaustapa            = "";
+    $maksaja                = "";
+    $viite                  = "";
+    $asiakkaan_tilausnumero  = "";
+    $editilaus_otsikko_ok   = "";
+    $suunnistus             = "";
+    $tnimi                  = "";
+    $tnimitark              = "";
+    $tpostitp               = "";
+    $tpostino               = "";
+    $tosoite                = "";
+    $lnimi          = "";
+    $lnimitark        = "";
+    $lpostitp        = "";
+    $lpostino        = "";
+    $losoite        = "";
+    $lopnumero              = "";
+    $lopnimi                = "";
+    $loppostitp             = "";
+    $loppostino             = "";
+    $loposoite              = "";
+    $ltoim_maa        = "";
+    $ltoim_puh        = "";
+    $yhteyshenkilon_puhelin = "";
+    $tilausyhteyshenkilo  = "";
+    $lopviesti              = "";
+    $veromaara        = "";
+    $ohjausmerkki      = "";
+    $ketjutus               = "";
+    $editilaus_maksuehto  = "";
+    $editilaus_maksuteksti  = "";
+    $editilaus_toimitustapa = "";
+    $editilaus_rahtivapaa  = "";
+    $editilaus_tilaustyyppi = "";
+    $editilaus_eilahetetta  = "";
+    $editilaus_sisainen    = "";
+    $editilaus_kassalipas  = "";
+    $til_vienti        = "";
+    $verkkokauppavarasto  = "";
+    $verkkokauppavarasto_li  = "";
+    $editilaus_loppuhinta  = "";
+    $kieltolisa        = "";
+    $OT_ASIAKASNRO      = "";
+    $merkkitieto       = "";
+    break;
   }
 }
 

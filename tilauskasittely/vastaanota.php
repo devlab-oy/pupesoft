@@ -332,11 +332,11 @@ if ($tee == 'paikat' and $vainlistaus == '') {
       if (isset($rivivarasto[$tun]) and $rivivarasto[$tun] != 'x' and $rivivarasto[$tun] != '') {
         // Varastopaikka vaihdettiin pop-upista, siellä on paikan tunnus
         // tehdään uusi paikka jos valittiin paikaton lapsivarasto
-        if (substr($rivivarasto[$tun],0,1) == 'V') {
-          $uusi_paikka = lisaa_tuotepaikka($tilausrivirow["tuoteno"],'','','','','','',0,0,substr($rivivarasto[$tun],1));
+        if (substr($rivivarasto[$tun], 0, 1) == 'V') {
+          $uusi_paikka = lisaa_tuotepaikka($tilausrivirow["tuoteno"], '', '', '', '', '', '', 0, 0, substr($rivivarasto[$tun], 1));
           $ptunnus = $uusi_paikka['tuotepaikan_tunnus'];
         }
-        else{
+        else {
           $ptunnus = $rivivarasto[$tun];
         }
 
@@ -1572,7 +1572,7 @@ if (!empty($id) and $echotaanko) {
           }
           else {
 
-            $tlv_lista = mysql_result($tlv_res,0);
+            $tlv_lista = mysql_result($tlv_res, 0);
 
             $tlvlisa="UNION
                       SELECT tp.tunnus,
@@ -1596,7 +1596,7 @@ if (!empty($id) and $echotaanko) {
                       AND vp.tunnus NOT IN ($tlv_lista)";
           }
         }
-        else{
+        else {
           $lvlisa = $tlvlisa = '';
         }
 
@@ -1630,8 +1630,8 @@ if (!empty($id) and $echotaanko) {
           if ($counts['s1'] > 0) {
             echo "<optgroup label=", t("Kohdevaraston-paikat"), ">";
             foreach ($s1_options as $tp) {
-              echo "<option value='",$tp['tunnus'],"'>";
-              echo $tp['hyllyalue'],' ',$tp['hyllynro'],' ',$tp['hyllyvali'],' ',$tp['hyllytaso'];
+              echo "<option value='", $tp['tunnus'], "'>";
+              echo $tp['hyllyalue'], ' ', $tp['hyllynro'], ' ', $tp['hyllyvali'], ' ', $tp['hyllytaso'];
               echo "</option>";
             }
             echo "</optgroup>";
@@ -1640,8 +1640,8 @@ if (!empty($id) and $echotaanko) {
           if ($counts['s2'] > 0) {
             echo "<optgroup label=", t("Lapsivarastojen-paikat"), ">";
             foreach ($s2_options as $tp) {
-              echo "<option value='",$tp['tunnus'],"'>";
-              echo $tp['hyllyalue'],' ',$tp['hyllynro'],' ',$tp['hyllyvali'],' ',$tp['hyllytaso'];
+              echo "<option value='", $tp['tunnus'], "'>";
+              echo $tp['hyllyalue'], ' ', $tp['hyllynro'], ' ', $tp['hyllyvali'], ' ', $tp['hyllytaso'];
               echo "</option>";
             }
             echo "</optgroup>";
@@ -1650,7 +1650,7 @@ if (!empty($id) and $echotaanko) {
           if ($counts['s3'] > 0) {
             echo "<optgroup label=", t("Paikattomat-lapsivarastot"), ">";
             foreach ($s3_options as $va) {
-              echo "<option value='V",$va['tunnus'],"'>";
+              echo "<option value='V", $va['tunnus'], "'>";
               echo $va['nimitys'];
               echo "</option>";
             }

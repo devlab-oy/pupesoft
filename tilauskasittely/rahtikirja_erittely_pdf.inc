@@ -1,6 +1,6 @@
 <?php
 
-require_once("pdflib/phppdflib.class.php");
+require_once "pdflib/phppdflib.class.php";
 
 unset($pdf);
 
@@ -20,7 +20,7 @@ $huge["height"] = 22;
 $huge["font"]   = "Helvetica-Bold";
 
 if (!function_exists('uusi_sivu_erittely')) {
-  function uusi_sivu_erittely ($laskurow) {
+  function uusi_sivu_erittely($laskurow) {
     global $yhtiorow, $kukarow, $pdf, $kieli, $iso, $toitarow, $kirj;
 
     if (!isset($pdf)) {
@@ -61,7 +61,7 @@ if (!function_exists('uusi_sivu_erittely')) {
 }
 
 if (!function_exists('loppu_erittely')) {
-  function loppu_erittely ($kala1, $kala, $firstpage, $kollityht, $kilotyht, $lavametriyht) {
+  function loppu_erittely($kala1, $kala, $firstpage, $kollityht, $kilotyht, $lavametriyht) {
     global $yhtiorow, $kukarow, $pdf, $kieli, $rectparam, $norm, $kirj;
 
     $pdf->draw_rectangle($kala1, 60, $kala-22, 540,  $firstpage, $rectparam);
@@ -86,7 +86,7 @@ if (!function_exists('loppu_erittely')) {
 }
 
 if (!function_exists('rivi_erittely')) {
-  function rivi_erittely ($laskurow, $kala, $firstpage, $kollityht, $kilotyht, $lavametriyht, $vikarivi) {
+  function rivi_erittely($laskurow, $kala, $firstpage, $kollityht, $kilotyht, $lavametriyht, $vikarivi) {
     global $yhtiorow, $kukarow, $pdf, $kieli, $rectparam, $norm, $kirj, $iso, $toitarow;
     static $edytunnus, $kala1, $edliitostunnus;
 
@@ -119,21 +119,21 @@ if (!function_exists('rivi_erittely')) {
 
     if ($otsikot) {
       $pdf->draw_rectangle($kala, 60, $kala-50, 540, $firstpage, $rectparam);
-         $pdf->draw_text(62, $kala-8, t("Asiakas", $kieli),  $firstpage, $norm);
-         $pdf->draw_text(62, $kala-18, t("Ytunnus", $kieli)." ".$laskurow['ytunnus'],    $firstpage, $kirj);
+      $pdf->draw_text(62, $kala-8, t("Asiakas", $kieli),  $firstpage, $norm);
+      $pdf->draw_text(62, $kala-18, t("Ytunnus", $kieli)." ".$laskurow['ytunnus'],    $firstpage, $kirj);
 
-         if ($toitarow['erittely'] == 'k') {
-           $pdf->draw_text(62, $kala-28, $laskurow['nimi']." ".$laskurow['nimitark'],    $firstpage, $kirj);
-           $pdf->draw_text(62, $kala-38, $laskurow['osoite'],  $firstpage, $kirj);
-           $pdf->draw_text(62, $kala-48, $laskurow['postino']." ".$laskurow['postitp'],  $firstpage, $kirj);
-         }
-         else {
-           $pdf->draw_text(62, $kala-28, $laskurow['toim_nimi']." ".$laskurow['toim_nimitark'],    $firstpage, $kirj);
-           $pdf->draw_text(62, $kala-38, $laskurow['toim_osoite'],  $firstpage, $kirj);
-           $pdf->draw_text(62, $kala-48, $laskurow['toim_postino']." ".$laskurow['toim_postitp'],  $firstpage, $kirj);
-         }
+      if ($toitarow['erittely'] == 'k') {
+        $pdf->draw_text(62, $kala-28, $laskurow['nimi']." ".$laskurow['nimitark'],    $firstpage, $kirj);
+        $pdf->draw_text(62, $kala-38, $laskurow['osoite'],  $firstpage, $kirj);
+        $pdf->draw_text(62, $kala-48, $laskurow['postino']." ".$laskurow['postitp'],  $firstpage, $kirj);
+      }
+      else {
+        $pdf->draw_text(62, $kala-28, $laskurow['toim_nimi']." ".$laskurow['toim_nimitark'],    $firstpage, $kirj);
+        $pdf->draw_text(62, $kala-38, $laskurow['toim_osoite'],  $firstpage, $kirj);
+        $pdf->draw_text(62, $kala-48, $laskurow['toim_postino']." ".$laskurow['toim_postitp'],  $firstpage, $kirj);
+      }
 
-         $query = "SELECT yhteyshenkilo.nimi,
+      $query = "SELECT yhteyshenkilo.nimi,
                    IF(yhteyshenkilo.puh != '', yhteyshenkilo.puh, IF(yhteyshenkilo.gsm != '', yhteyshenkilo.gsm, '')) puh
                    FROM lasku
                    JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = lasku.yhtio AND yhteyshenkilo.nimi = lasku.tilausyhteyshenkilo AND yhteyshenkilo.tyyppi = 'A')
@@ -141,10 +141,10 @@ if (!function_exists('rivi_erittely')) {
                    AND lasku.tunnus               IN ({$laskurow['tunnus']})
                    AND lasku.tilausyhteyshenkilo != ''
                    LIMIT 1";
-         $yhres = pupe_query($query);
+      $yhres = pupe_query($query);
 
-         if (mysql_num_rows($yhres) == 0) {
-           $query = "SELECT yhteyshenkilo.nimi,
+      if (mysql_num_rows($yhres) == 0) {
+        $query = "SELECT yhteyshenkilo.nimi,
                      IF(yhteyshenkilo.puh != '', yhteyshenkilo.puh, IF(yhteyshenkilo.gsm != '', yhteyshenkilo.gsm, '')) puh
                      FROM laskun_lisatiedot
                      JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = laskun_lisatiedot.yhtio AND yhteyshenkilo.tunnus = laskun_lisatiedot.yhteyshenkilo_kaupallinen AND yhteyshenkilo.tyyppi = 'A')
@@ -152,24 +152,24 @@ if (!function_exists('rivi_erittely')) {
                      AND laskun_lisatiedot.otunnus                IN ({$laskurow['tunnus']})
                      AND laskun_lisatiedot.yhteyshenkilo_tekninen > 0
                      LIMIT 1";
-           $yhres = pupe_query($query);
-         }
+        $yhres = pupe_query($query);
+      }
 
       if (mysql_num_rows($yhres) == 0) {
-           $query = "SELECT '2' O, '' nimi,
+        $query = "SELECT '2' O, '' nimi,
                      IF(puhelin != '', puhelin, IF(gsm != '', gsm, '')) puh
                      FROM asiakas
                      WHERE yhtio = '{$kukarow['yhtio']}'
                      AND tunnus  = '{$laskurow['liitostunnus']}'";
-           $yhres = pupe_query($query);
-         }
+        $yhres = pupe_query($query);
+      }
 
-         if (mysql_num_rows($yhres) > 0) {
-           $yhrow = mysql_fetch_assoc($yhres);
+      if (mysql_num_rows($yhres) > 0) {
+        $yhrow = mysql_fetch_assoc($yhres);
 
-           $pdf->draw_text(244, $kala-38, $yhrow['nimi'],  $firstpage, $kirj);
-           $pdf->draw_text(244, $kala-48, $yhrow['puh'],  $firstpage, $kirj);
-         }
+        $pdf->draw_text(244, $kala-38, $yhrow['nimi'],  $firstpage, $kirj);
+        $pdf->draw_text(244, $kala-48, $yhrow['puh'],  $firstpage, $kirj);
+      }
 
       $oikpos = $pdf->strlen(t("Allekirjoitus ja nimenselvennys", $kieli), $norm);
       $pdf->draw_text(530-$oikpos, $kala-45, t("Allekirjoitus ja nimenselvennys", $kieli),   $firstpage, $norm);
@@ -272,7 +272,7 @@ if ($otunnukset == "") $otunnukset = 0;
 
 if ($yhdistetaan_lahtoon != 0 and !empty($yhdistettavan_lahdon_tilaukset)) {
   if (sort(explode(',', $yhdistetaan_lahtoon)) == sort(explode(',', $otunnukset))) {
-    foreach($yhdistettavan_lahdon_tilaukset as $til) {
+    foreach ($yhdistettavan_lahdon_tilaukset as $til) {
       $otunnukset .= ',' . $til;
     }
   }
@@ -332,7 +332,7 @@ if (mysql_num_rows($result) > 0) {
   }
 
   //keksitään uudelle failille joku varmasti uniikki nimi:
-  $pdffilenimi = "/tmp/rahtikirjaerittely-".md5(uniqid(rand(),true)).".pdf";
+  $pdffilenimi = "/tmp/rahtikirjaerittely-".md5(uniqid(rand(), true)).".pdf";
 
   //kirjoitetaan pdf faili levylle..
   $fh = fopen($pdffilenimi, "w");
@@ -347,7 +347,7 @@ if (mysql_num_rows($result) > 0) {
     if ($kirjoitin == "email") {
       $liite = $pdffilenimi;
       $kutsu = "PDF-erittely";
-      require("inc/sahkoposti.inc");
+      require "inc/sahkoposti.inc";
     }
     else {
       //itse print komento...

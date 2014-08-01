@@ -2,7 +2,7 @@
 
 $extranet = 1;
 
-require ("parametrit.inc");
+require "parametrit.inc";
 
 $go = $_POST['go'];
 if ($go=='') $go = $_GET['go'];

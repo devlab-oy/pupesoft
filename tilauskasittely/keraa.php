@@ -1839,7 +1839,7 @@ if ($tee == 'P') {
           // Valittu tulostin
           $valittu_tulostin_valittu = $valittu_tulostin;
 
-          # Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
+          // Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
           if (!empty($laskurow['yhtio_toimipaikka'])) {
             $avainsana_where = " and avainsana.selite       = '{$laskurow['varasto']}'
                                  and avainsana.selitetark   = '{$laskurow['yhtio_toimipaikka']}'
@@ -3077,7 +3077,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
             $tunken2 = "myyntirivitunnus";
           }
 
-          if ($row["tyyppi"] != "W" AND ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "V")) {
+          if ($row["tyyppi"] != "W" and ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "T" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "V")) {
 
             $query = "SELECT count(*) kpl, min(sarjanumero) sarjanumero
                       from sarjanumeroseuranta
@@ -3369,7 +3369,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           }
         }
 
-        # Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
+        // Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
         $query = "SELECT varasto, yhtio_toimipaikka
                   FROM lasku
                   WHERE yhtio = '{$kukarow['yhtio']}'

@@ -3,7 +3,7 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Myyntitilasto")."</font><hr>";
 
@@ -38,8 +38,8 @@ echo "<tr><th>".t("Loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)")."</th>
 
 echo "<tr><th>".t("Rajaukset")."</th><td colspan='3'>";
 
-$monivalintalaatikot = array('OSASTO','TRY');
-require ("tilauskasittely/monivalintalaatikot.inc");
+$monivalintalaatikot = array('OSASTO', 'TRY');
+require "tilauskasittely/monivalintalaatikot.inc";
 
 echo "</td></tr>";
 echo "</table>";
@@ -74,7 +74,7 @@ if (!function_exists("tuoteryhman_varastonarvo")) {
     $saldo_nyt = $arvo['saldo_nyt'];
 
     // varastonmuutos
-     $query = "SELECT
+    $query = "SELECT
                sum(if(tapahtuma.laadittu >= '$pvm1 00:00:00', tapahtuma.kpl, 0)) muutoskpl1,
                sum(if(tapahtuma.laadittu >= '$pvm2 00:00:00', tapahtuma.kpl, 0)) muutoskpl2
                 FROM tuote
@@ -103,7 +103,7 @@ if ($tee != '' and isset($painoinnappia)) {
 
   echo "<table>
       <tr>
-      <th>",t("Valittu aikav‰li"),"</th>
+      <th>", t("Valittu aikav‰li"), "</th>
       <td>{$ppa}</td>
       <td>{$kka}</td>
       <td>{$vva}</td>
@@ -193,7 +193,7 @@ if ($tee != '' and isset($painoinnappia)) {
 
   $rows = tilausrivin_tarkistus_riveittain($parametrit);
 
-  foreach($rows as $row) {
+  foreach ($rows as $row) {
 
     $params = array();
     $params['osasto'] = $row['osasto'];
@@ -219,37 +219,37 @@ if ($tee != '' and isset($painoinnappia)) {
 
     $myyntiVA = round($row['myyntiVA']);
     $kateVA = round($row['kateVA']);
-    if( $myyntiVA != 0){
+    if ( $myyntiVA != 0) {
       $kateprosVA = round($kateVA / $myyntiVA * 100, 1);
     }
-    else{
+    else {
       $kateprosVA = 0;
     }
 
     $myyntiEDVA = round($row['myyntiEDVA']);
     $kateEDVA = round($row['kateEDVA']);
-    if( $myyntiEDVA != 0){
+    if ( $myyntiEDVA != 0) {
       $kateprosEDVA = round($kateEDVA / $myyntiEDVA * 100, 1);
     }
-    else{
+    else {
       $kateprosEDVA = 0;
     }
 
     $myyntiED = round($row['myyntiED']);
     $kateED = round($row['kateED']);
-    if( $myyntiED != 0){
+    if ( $myyntiED != 0) {
       $kateprosED = round($kateED / $myyntiED * 100, 1);
     }
-    else{
+    else {
       $kateprosED = 0;
     }
 
     $myynti12 = round($row['myynti12']);
     $kate12 = round($row['kate12']);
-    if( $myynti12 != 0){
+    if ( $myynti12 != 0) {
       $katepros12 = round($kate12 / $myynti12 * 100, 1);
     }
-    else{
+    else {
       $katepros12 = 0;
     }
 
@@ -279,4 +279,4 @@ if ($tee != '' and isset($painoinnappia)) {
   }
   echo "</table>";
 }
-require ("inc/footer.inc");
+require "inc/footer.inc";

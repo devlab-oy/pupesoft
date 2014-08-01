@@ -15,11 +15,11 @@ if (isset($_POST["tee"])) {
   }
 }
 
-require("../inc/parametrit.inc");
-require('valmistuslinjat.inc');
-require('validation/Validation.php');
-require('inc/pupeExcel.inc');
-require('inc/ProgressBar.class.php');
+require "../inc/parametrit.inc";
+require 'valmistuslinjat.inc';
+require 'validation/Validation.php';
+require 'inc/pupeExcel.inc';
+require 'inc/ProgressBar.class.php';
 
 if (isset($tee) and $tee == 'lataa_tiedosto') {
   $filepath = "/tmp/".$tmpfilenimi;
@@ -313,7 +313,7 @@ function generoi_custom_excel($valmistukset, $valmistuslinjat, $esitysmuoto) {
 
         $laskutyyppi = $tilausrivi['tila'];
         $alatila = $tilausrivi['alatila'];
-        require('inc/laskutyyppi.inc');
+        require 'inc/laskutyyppi.inc';
         $xls->write($rivi, $sarake, $laskutyyppi.' '.$alatila);
         $sarake++;
 
@@ -433,7 +433,7 @@ function echo_valmistukset_joissa_raaka_aine_ei_riita($request) {
         echo "<td>";
         $laskutyyppi = $tilausrivi['tila'];
         $alatila = $tilausrivi['alatila'];
-        require('inc/laskutyyppi.inc');
+        require 'inc/laskutyyppi.inc';
         echo $laskutyyppi.' '.$alatila;
         echo "</td>";
 
@@ -676,7 +676,7 @@ function echo_kayttoliittyma($request) {
   $mul_osasto = $request['mul_osasto'];
   $mul_try = $request['mul_try'];
   $mul_tme = $request['mul_tme'];
-  require ("tilauskasittely/monivalintalaatikot.inc");
+  require "tilauskasittely/monivalintalaatikot.inc";
   echo "</td>";
   echo "</tr>";
 
@@ -696,4 +696,4 @@ function echo_kayttoliittyma($request) {
   echo "<br/>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

@@ -99,9 +99,9 @@ if (!function_exists('luo_ostotilausotsikko')) {
 
     // K‰sitell‰‰n myyntitilauksen otsikolla setattu "ostotilauksen k‰sittely"
     switch ($params['ostotilauksen_kasittely']) {
-      case '5':
-      case '4':
-        $ostotilauksen_kasittely_wherelisa .= "
+    case '5':
+    case '4':
+      $ostotilauksen_kasittely_wherelisa .= "
           and toim_nimi    = '{$toim_nimi}'
           and toim_nimitark  = '{$toim_nimitark}'
           and toim_osoite    = '{$toim_osoite}'
@@ -112,10 +112,10 @@ if (!function_exists('luo_ostotilausotsikko')) {
           and ohjausmerkki   = '{$params['ohjausmerkki']}'
           and chn        = '$chn'
           and tilaustyyppi  = '{$params['tilaustyyppi']}'";
-        break;
-      case '2':
-      case '3':
-        $ostotilauksen_kasittely_wherelisa .= "
+      break;
+    case '2':
+    case '3':
+      $ostotilauksen_kasittely_wherelisa .= "
           and toim_nimi    = '{$toim_nimi}'
           and toim_nimitark  = '{$toim_nimitark}'
           and toim_osoite    = '{$toim_osoite}'
@@ -124,11 +124,11 @@ if (!function_exists('luo_ostotilausotsikko')) {
           and toim_maa    = '{$toim_maa}'
           and chn        = '$chn'
           and tilaustyyppi  = '{$params['tilaustyyppi']}'";
-        break;
-      case '1':
-      case '0':
-      default:
-        $ostotilauksen_kasittely_wherelisa .= "
+      break;
+    case '1':
+    case '0':
+    default:
+      $ostotilauksen_kasittely_wherelisa .= "
           and toim_nimi    = '{$toim_nimi}'
           and toim_nimitark  = '{$toim_nimitark}'
           and toim_osoite    = '{$toim_osoite}'
@@ -139,7 +139,7 @@ if (!function_exists('luo_ostotilausotsikko')) {
           and laatija     = '{$kukarow['kuka']}'
           and chn        = '$chn'
           and tilaustyyppi  = '{$params['tilaustyyppi']}'";
-        break;
+      break;
     }
 
     $query = "SELECT *

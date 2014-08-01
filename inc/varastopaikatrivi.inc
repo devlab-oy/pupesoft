@@ -5,7 +5,7 @@ $jatko = 1; // oletetaan normaali käsittely
 $tyyppi = 1; // oletetaan rivin näkyvyys
 
 
-if (substr(mysql_field_name($result,$i),0,9) == 'printteri') {
+if (substr(mysql_field_name($result, $i), 0, 9) == 'printteri') {
 
   $sel = array();
   $sel[$trow[$i]] = "SELECTED";
@@ -23,7 +23,7 @@ if (substr(mysql_field_name($result,$i),0,9) == 'printteri') {
 
   while ($kirow = mysql_fetch_array($kires)) {
     $ulos .= "<option value='$kirow[tunnus]' ";
-    if(isset($sel[$kirow["tunnus"]])) $ulos .= $sel[$kirow["tunnus"]];
+    if (isset($sel[$kirow["tunnus"]])) $ulos .= $sel[$kirow["tunnus"]];
     $ulos .=">$kirow[kirjoitin]</option>";
   }
 
@@ -32,7 +32,7 @@ if (substr(mysql_field_name($result,$i),0,9) == 'printteri') {
   $jatko=0;
 }
 
-if (mysql_field_name($result,$i) == 'tyyppi') {
+if (mysql_field_name($result, $i) == 'tyyppi') {
   $sel = array();
   $sel[$trow[$i]] = "selected";
 
@@ -116,7 +116,7 @@ if (mysql_field_name($result, $i) == "maa") {
 }
 
 if (mysql_field_name($result, $i) == "tunnus" or
-    mysql_field_name($result, $i) == "yhtio") {
+  mysql_field_name($result, $i) == "yhtio") {
   $tyyppi = 0;
 }
 

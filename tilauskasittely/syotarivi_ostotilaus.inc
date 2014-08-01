@@ -29,7 +29,7 @@ $suoratoimitusekko = "";
 
 if ($rivitunnus > 0) {
   //Tutkitaan löytyykö JT-rivi joka mäppäytyy tähän ostoriviin
-     $query = "SELECT tilausrivi.tunnus, tilausrivi.otunnus, lasku.nimi, tilausrivin_lisatiedot.suoraan_laskutukseen
+  $query = "SELECT tilausrivi.tunnus, tilausrivi.otunnus, lasku.nimi, tilausrivin_lisatiedot.suoraan_laskutukseen
                FROM tilausrivin_lisatiedot
                JOIN tilausrivi ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and (tilausrivi.varattu+tilausrivi.jt) > 0 and tilausrivi.laskutettuaika = '0000-00-00')
                JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
@@ -53,7 +53,7 @@ if ($rivitunnus > 0) {
 if ($yhtiorow['variaatiomyynti'] == "K" and $kukarow["extranet"] == '' and (is_array($tuoteno_array) or $tuoteno != "" or $variaatio_tuoteno) and $ulos == "" and $rivitunnus == "") {
   $variaaritorivi_osto = TRUE;
 
-  require ("syota_variaatiorivi.inc");
+  require "syota_variaatiorivi.inc";
 }
 
 if ($variaaritorivi === FALSE) {
@@ -66,9 +66,9 @@ if ($variaaritorivi === FALSE) {
       <th>".t("Määrä")."</th>
       <th>".t("Hinta")."</th>";
 
-      for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
-        echo "<th>",t("Ale"),"{$alepostfix}</th>";
-      }
+  for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
+    echo "<th>", t("Ale"), "{$alepostfix}</th>";
+  }
 
   echo   "<th>".t("Alv")."</th>
       <th>".t("Viestit")."</th>
@@ -101,18 +101,18 @@ if ($variaaritorivi === FALSE) {
 
   $backspan = 5;
   for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
-    echo "<td><input type='text' size='5' name='ale{$alepostfix}' value = '",${'ale'.$alepostfix},"'></td>";
+    echo "<td><input type='text' size='5' name='ale{$alepostfix}' value = '", ${'ale'.$alepostfix}, "'></td>";
     $backspan++;
   }
 
   if ($alv=='') $alv=$laskurow['alv'];
 
-  echo "<td>".alv_popup_oletus('alv',$alv)."</td><td>";
+  echo "<td>".alv_popup_oletus('alv', $alv)."</td><td>";
 
   if ($automatiikka == "ON" and $onjodropdowni != 'ON' and $laskurow['tila'] != 'O') {
     echo "  ".t("Valtse toiminto").": <select name='var'>";
     echo "<option value='LOJ#!¡!#$kpl'>".t("Lisää syötetyt ja merkkaa erotus JT:ksi")."</option>";
-#      echo "<option value='LOP#!¡!#$kpl'>".t("Lisää syötetyt ja merkkaa erotus puutteeksi")."</option>";
+    //      echo "<option value='LOP#!¡!#$kpl'>".t("Lisää syötetyt ja merkkaa erotus puutteeksi")."</option>";
     echo "<option value=''>".t("Päivitä rivin määrä")."</option>";
     echo "</select>";
   }
@@ -127,7 +127,7 @@ if ($variaaritorivi === FALSE) {
   echo "<td class='back'><input type='Submit' name= 'kumpi' value = '".t("Lisää")."'></td>";
 
   //näytetään poista nappi vain kun ollaan navigoitu ostotilaus riville saapumisen kohdista rivin kautta ja kun tilausrivi on esitäytetty
-  if($saapuminen_ostorivin_muokkaus == 1 and !empty($rivitunnus)) {
+  if ($saapuminen_ostorivin_muokkaus == 1 and !empty($rivitunnus)) {
     echo "<td class='back'><input type='submit' name='poista' value='".t("Poista")."'/></td>";
   }
 
@@ -152,9 +152,9 @@ if ($variaaritorivi === FALSE) {
   }
 
   if ($toimaika == "" or $toimaika == "0000-00-00") {
-    $toimkka = date("m",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-    $toimvva = date("Y",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-    $toimppa = date("d",mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+    $toimkka = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+    $toimvva = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+    $toimppa = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
   }
   else {
     $toimkka = substr($toimaika, 5, 2);
@@ -176,6 +176,6 @@ if ($formi == '') {
   $formi = 'rivi';
 }
 
- if ($kentta == '') {
-     $kentta = 'tuoteno';
- }
+if ($kentta == '') {
+  $kentta = 'tuoteno';
+}

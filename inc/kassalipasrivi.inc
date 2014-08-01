@@ -21,7 +21,7 @@ if ((mysql_field_name($result, $i) == "kassa") or
     $jatko = 0;
   }
   else {
-    $ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+    $ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result, $i) ."'>";
 
     $query = "SELECT nimi
               FROM tili

@@ -6,37 +6,40 @@
  * Tarkistaa sepa-palvelimelta tulleen vastauksen koodin ja palauttaa true tai false sen
  * perusteella. Echottaa myos mahdollisen virheilmoituksen
  *
- * @param $vastaus
+ * @param unknown $vastaus
  *
  * @return bool
  */
+
+
 function vastaus_kunnossa($koodi) {
   switch ($koodi) {
-    case 200:
-      return true;
-    case 400:
-      virhe("Palvelimelta saatiin virheilmoitus, tarkista, että antamasi tiedot ovat kunnossa");
-      return false;
-    case 500:
-      virhe("Pankki ei vastaa kyselyyn, yritä myöhemmin uudestaan");
-      return false;
-    case 503:
-      virhe("Pankki ei vastaa kyselyyn toivotulla tavalla, yritä myöhemmin uudestaan");
-      return false;
-    case 0:
-      virhe("Sepa-palvelimeen ei jostain syystä saada yhteyttä, yritä myöhemmin uudestaan");
-      return false;
-    default:
-      virhe("Tuntematon virhekoodi");
-      return false;
+  case 200:
+    return true;
+  case 400:
+    virhe("Palvelimelta saatiin virheilmoitus, tarkista, että antamasi tiedot ovat kunnossa");
+    return false;
+  case 500:
+    virhe("Pankki ei vastaa kyselyyn, yritä myöhemmin uudestaan");
+    return false;
+  case 503:
+    virhe("Pankki ei vastaa kyselyyn toivotulla tavalla, yritä myöhemmin uudestaan");
+    return false;
+  case 0:
+    virhe("Sepa-palvelimeen ei jostain syystä saada yhteyttä, yritä myöhemmin uudestaan");
+    return false;
+  default:
+    virhe("Tuntematon virhekoodi");
+    return false;
   }
 }
+
 
 /**
  * Piirtaa taulun palvelimelta ladatuille tiedostoille ja nayttaa siina tiedoston viitteen ja
  * statuksen
  *
- * @param $tiedostot
+ * @param unknown $tiedostot
  */
 function tiedostot_table($tiedostot) {
   echo "<br/>";
@@ -65,8 +68,10 @@ function tiedostot_table($tiedostot) {
   echo "<br/><br/>";
 }
 
+
 /**
- * @param string $viesti
+ *
+ * @param string  $viesti
  */
 function virhe($viesti) {
   global $kukarow, $yhtiorow;
@@ -77,8 +82,10 @@ function virhe($viesti) {
   echo "<br/>";
 }
 
+
 /**
- * @param string $viesti
+ *
+ * @param string  $viesti
  */
 function ok($viesti) {
   global $kukarow, $yhtiorow;
@@ -89,8 +96,10 @@ function ok($viesti) {
   echo "<br/>";
 }
 
+
 /**
- * @param string $viesti
+ *
+ * @param string  $viesti
  */
 function viesti($viesti) {
   global $kukarow, $yhtiorow;
@@ -103,6 +112,7 @@ function viesti($viesti) {
 
 
 // Pankkiyhteys tietokantafunktiot
+
 
 /**
  * Hakee kaikki yhtion pankkiyhteydet tietokannasta ja lisaa pankin nimen palautettavaan arrayhyn
@@ -127,6 +137,7 @@ function hae_pankkiyhteydet() {
 
   return $luodut_pankkiyhteydet;
 }
+
 
 /**
  * Hakee pankkiyhteydet, joita ei ole viela luotu kyseiselle yhtiolle
@@ -155,8 +166,10 @@ function mahdolliset_pankkiyhteydet() {
   return $mahdolliset_pankkiyhteydet;
 }
 
+
 /**
- * @param string $pankki
+ *
+ * @param string  $pankki
  *
  * @return resource
  */
@@ -359,9 +372,9 @@ function sepa_get_certificate($params) {
   $encryption_csr = parameter($params["encryption_csr"]);
 
   if (empty($bank)
-      or empty($customer_id)
-      or empty($pin)
-      or empty($signing_csr)) {
+    or empty($customer_id)
+    or empty($pin)
+    or empty($signing_csr)) {
     return false;
   }
 
@@ -467,12 +480,13 @@ function sepa_target_id_for_file_type($params) {
 
 // Sertifikaatti / salausfunktiot
 
+
 /**
  * Hakee pankkiyhteysrivin tietokannasta ja purkaa kenttien salauksen.
  * Palauttaa pankkiyhteys arrayn
  *
- * @param string $pankkiyhteys_tunnus
- * @param string $salasana
+ * @param string  $pankkiyhteys_tunnus
+ * @param string  $salasana
  *
  * @return array
  */
@@ -529,11 +543,12 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
   return $pankki;
 }
 
+
 /**
  * Laitaa kaikki tietyntyyppiset tiedostot pankista ja
  * palauttaa arrayn tiedostojen viitteista ja
  *
- * @param array $params
+ * @param array   $params
  *
  * @return array|bool
  */
@@ -587,6 +602,7 @@ function sepa_lataa_kaikki_uudet_tiedostot($params) {
   return $tiedostot;
 }
 
+
 /**
  * Generoi private keyn ja certificate signing requestin. Tiedot signing requestiin haetaan
  * yhtiorowista. Palauttaa arrayn, jossa private_key ja csr.
@@ -622,11 +638,12 @@ function generoi_private_key_ja_csr() {
   );
 }
 
+
 /**
  * Salaa annetun datan annetulla salasanalla. Salaus on 256-bittinen AES-salaus.
  *
- * @param string $salattava_data
- * @param string $salasana
+ * @param string  $salattava_data
+ * @param string  $salasana
  *
  * @return string
  */
@@ -647,11 +664,12 @@ function salaa($salattava_data, $salasana) {
   return base64_encode($salattu_data);
 }
 
+
 /**
  * Purkaa 256-bittisen AES-salauksen annetusta datasta annetulla salasanalla
  *
- * @param string $salattu_data
- * @param string $salasana
+ * @param string  $salattu_data
+ * @param string  $salasana
  *
  * @return string
  */
@@ -668,13 +686,14 @@ function pura_salaus($salattu_data, $salasana) {
   $iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_CBC);
 
   //  Pitaa olla monta spacee, jotta UTF-8 konversio ei riko toiminnallisuutta
-  $iv = substr    ($salattu_data_binaari, 0, $iv_size);
+  $iv = substr($salattu_data_binaari, 0, $iv_size);
 
   //  Pitaa olla monta spacee, jotta UTF-8 konversio ei riko toiminnallisuutta
-  $salattu_data_binaari = substr    ($salattu_data_binaari, $iv_size);
+  $salattu_data_binaari = substr($salattu_data_binaari, $iv_size);
 
   return mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $avain, $salattu_data_binaari, MCRYPT_MODE_CBC, $iv);
 }
+
 
 /**
  * Palauttaa arrayn tuetuista pankeista muodossa BIC => [lyhyt_nimi, pitka_nimi]

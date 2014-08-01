@@ -8,8 +8,8 @@
 $gpg       = "/usr/bin/gpg";
 $recipient = escapeshellarg($recipient);
 
-$msgfile1   = "/tmp/$kukarow[yhtio]".md5(uniqid(rand(),true)).".txt";
-$msgfile2   = "/tmp/$kukarow[yhtio]".md5(uniqid(rand(),true)).".gpg";
+$msgfile1   = "/tmp/$kukarow[yhtio]".md5(uniqid(rand(), true)).".txt";
+$msgfile2   = "/tmp/$kukarow[yhtio]".md5(uniqid(rand(), true)).".gpg";
 
 if (!$handle = fopen($msgfile1, "w"))
   die("filen luonti epäonnistui!");
@@ -19,12 +19,12 @@ if (fwrite($handle, $message) === FALSE)
 
 fclose($handle);
 
-#echo "Recipient: ".htmlentities($recipient)."<br>";
-#echo "Message: $message<br>";
+//echo "Recipient: ".htmlentities($recipient)."<br>";
+//echo "Message: $message<br>";
 
 $test = shell_exec("$gpg --homedir /root/.gnupg --check-sigs $recipient 2>&1 | grep error");
 
-if (strpos($test,"error")) {
+if (strpos($test, "error")) {
   echo "<font class='error'>";
   echo "Vastaanottajan tiedot vialliset!<br><br>";
   echo "Recipient: ".htmlentities($recipient)."<br><br>";
@@ -34,7 +34,7 @@ if (strpos($test,"error")) {
 else {
   $test = shell_exec("$gpg --homedir /root/.gnupg -e -r $recipient -o $msgfile2 $msgfile1");
 
-  if (strpos($test,"error")) {
+  if (strpos($test, "error")) {
     echo "<font class='error'>";
     echo "GPG salaus epäonnistui!<br><br>";
     echo "$gpg --homedir /root/.gnupg -e -r ".htmlentities($recipient)." -o $msgfile2 $msgfile1<br><br>";

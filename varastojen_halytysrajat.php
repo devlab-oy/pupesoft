@@ -1,10 +1,10 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Varastojen hälytysrajat")."</font><hr>";
 
-list($abcrajaus,$abcrajaustapa) = explode("##",$abcrajaus);
+list($abcrajaus, $abcrajaustapa) = explode("##", $abcrajaus);
 
 if (!isset($abcrajaustapa)) $abcrajaustapa = "TK";
 
@@ -12,44 +12,44 @@ list($ryhmanimet, $ryhmaprossat, , , , ) = hae_ryhmanimet($abcrajaustapa);
 
 
 // Tarvittavat päivämäärät
-if (!isset($kka1)) $kka1 = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-if (!isset($vva1)) $vva1 = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
-if (!isset($ppa1)) $ppa1 = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+if (!isset($kka1)) $kka1 = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+if (!isset($vva1)) $vva1 = date("Y", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+if (!isset($ppa1)) $ppa1 = date("d", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 if (!isset($kkl1)) $kkl1 = date("m");
 if (!isset($vvl1)) $vvl1 = date("Y");
 if (!isset($ppl1)) $ppl1 = date("d");
 
-if (!isset($kka2)) $kka2 = date("m",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
-if (!isset($vva2)) $vva2 = date("Y",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
-if (!isset($ppa2)) $ppa2 = date("d",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
+if (!isset($kka2)) $kka2 = date("m", mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
+if (!isset($vva2)) $vva2 = date("Y", mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
+if (!isset($ppa2)) $ppa2 = date("d", mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
 if (!isset($kkl2)) $kkl2 = date("m");
 if (!isset($vvl2)) $vvl2 = date("Y");
 if (!isset($ppl2)) $ppl2 = date("d");
 
-if (!isset($kka3)) $kka3 = date("m",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
-if (!isset($vva3)) $vva3 = date("Y",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
-if (!isset($ppa3)) $ppa3 = date("d",mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+if (!isset($kka3)) $kka3 = date("m", mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+if (!isset($vva3)) $vva3 = date("Y", mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
+if (!isset($ppa3)) $ppa3 = date("d", mktime(0, 0, 0, date("m")-6, date("d"), date("Y")));
 if (!isset($kkl3)) $kkl3 = date("m");
 if (!isset($vvl3)) $vvl3 = date("Y");
 if (!isset($ppl3)) $ppl3 = date("d");
 
-if (!isset($kka4)) $kka4 = date("m",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
-if (!isset($vva4)) $vva4 = date("Y",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
-if (!isset($ppa4)) $ppa4 = date("d",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
+if (!isset($kka4)) $kka4 = date("m", mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
+if (!isset($vva4)) $vva4 = date("Y", mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
+if (!isset($ppa4)) $ppa4 = date("d", mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
 if (!isset($kkl4)) $kkl4 = date("m");
 if (!isset($vvl4)) $vvl4 = date("Y");
 if (!isset($ppl4)) $ppl4 = date("d");
 
 //katotaan pienin alkupvm ja isoin loppupvm
-$apaiva1 = (int) date('Ymd',mktime(0,0,0,$kka1,$ppa1,$vva1));
-$apaiva2 = (int) date('Ymd',mktime(0,0,0,$kka2,$ppa2,$vva2));
-$apaiva3 = (int) date('Ymd',mktime(0,0,0,$kka3,$ppa3,$vva3));
-$apaiva4 = (int) date('Ymd',mktime(0,0,0,$kka4,$ppa4,$vva4));
+$apaiva1 = (int) date('Ymd', mktime(0, 0, 0, $kka1, $ppa1, $vva1));
+$apaiva2 = (int) date('Ymd', mktime(0, 0, 0, $kka2, $ppa2, $vva2));
+$apaiva3 = (int) date('Ymd', mktime(0, 0, 0, $kka3, $ppa3, $vva3));
+$apaiva4 = (int) date('Ymd', mktime(0, 0, 0, $kka4, $ppa4, $vva4));
 
-$lpaiva1 = (int) date('Ymd',mktime(0,0,0,$kkl1,$ppl1,$vvl1));
-$lpaiva2 = (int) date('Ymd',mktime(0,0,0,$kkl2,$ppl2,$vvl2));
-$lpaiva3 = (int) date('Ymd',mktime(0,0,0,$kkl3,$ppl3,$vvl3));
-$lpaiva4 = (int) date('Ymd',mktime(0,0,0,$kkl4,$ppl4,$vvl4));
+$lpaiva1 = (int) date('Ymd', mktime(0, 0, 0, $kkl1, $ppl1, $vvl1));
+$lpaiva2 = (int) date('Ymd', mktime(0, 0, 0, $kkl2, $ppl2, $vvl2));
+$lpaiva3 = (int) date('Ymd', mktime(0, 0, 0, $kkl3, $ppl3, $vvl3));
+$lpaiva4 = (int) date('Ymd', mktime(0, 0, 0, $kkl4, $ppl4, $vvl4));
 
 $apienin = 99999999;
 $lsuurin = 0;
@@ -68,8 +68,8 @@ if ($apienin == 99999999 and $lsuurin == 0) {
   $apienin = $lsuurin = date('Ymd'); // jos mitään ei löydy niin NOW molempiin. :)
 }
 
-$apvm = substr($apienin,0,4)."-".substr($apienin,4,2)."-".substr($apienin,6,2);
-$lpvm = substr($lsuurin,0,4)."-".substr($lsuurin,4,2)."-".substr($lsuurin,6,2);
+$apvm = substr($apienin, 0, 4)."-".substr($apienin, 4, 2)."-".substr($apienin, 6, 2);
+$lpvm = substr($lsuurin, 0, 4)."-".substr($lsuurin, 4, 2)."-".substr($lsuurin, 6, 2);
 
 if (isset($tuoteno) and $tuoteno != '') {
   //tarvitaan multiple select boksin tekoon
@@ -94,7 +94,7 @@ if (isset($tuoteno_array)) {
   foreach ($tuoteno_array as $tarray => $tuotevalue) {
     $muutparametrit .= "'$tuotevalue',";
   }
-  $muutparametrit = substr($muutparametrit,0,-1); // vika pilkku pois
+  $muutparametrit = substr($muutparametrit, 0, -1); // vika pilkku pois
 
 }
 
@@ -108,7 +108,7 @@ if ($ytunnus_haku != "") {
 
 
   $toimittajaid = "";
-  require ("inc/kevyt_toimittajahaku.inc");
+  require "inc/kevyt_toimittajahaku.inc";
   $toimittajaid  = $toimittajarow["tunnus"];
   $tee = "";
   $ytunnus = '';
@@ -151,10 +151,10 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
     foreach ($varastot as $key => $value) {
       $lisa_varastot .= "'$value',";
     }
-    $lisa_varastot = substr($lisa_varastot,0,-1); // vika pilkku pois
+    $lisa_varastot = substr($lisa_varastot, 0, -1); // vika pilkku pois
 
     $lisa_varastot .= ")";
-    }
+  }
 
   echo "<table><tr><td class='back' valign='top'>";
   echo "<tr><th>Hälytysrajan laskenta</th><td>$tarve pv tarve</td></tr>";
@@ -343,11 +343,11 @@ if ($tee == "selaa" and isset($ehdotusnappi)) {
 
     // saldo myytävissa kaikki varastot
     list(, , $saldo) = saldo_myytavissa($row["tuoteno"], "KAIKKI");
-    echo "<td align='right'>".sprintf("%.2f",$saldo)."<br>";
+    echo "<td align='right'>".sprintf("%.2f", $saldo)."<br>";
 
     // saldo myytävissa tämä varasto
     list(, , $saldo) = saldo_myytavissa($row["tuoteno"], "KAIKKI", $row[tunnus]);
-    echo sprintf("%.2f",$saldo)."</td>";
+    echo sprintf("%.2f", $saldo)."</td>";
 
     echo "<td align='right' class='tooltip' id='$row[paikkatunnus]'>$summarow[kpl1]<br/>$summarow[varastonkpl1]</td>";
 
@@ -603,8 +603,8 @@ if ($tee == "" or !isset($ehdotusnappi)) {
   echo "</td></tr>";
 
   //  Oletetaan että käyttäjä ei halyua/saa ostaa poistuvia tai poistettuja tuotteita!
-  if(!isset($poistetut)) $poistetut = "checked";
-  if(!isset($poistuva)) $poistuva = "checked";
+  if (!isset($poistetut)) $poistetut = "checked";
+  if (!isset($poistuva)) $poistuva = "checked";
 
   $chk = "";
   if ($poistetut != "") $chk = "checked";
@@ -680,4 +680,4 @@ if ($tee == "" or !isset($ehdotusnappi)) {
 
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

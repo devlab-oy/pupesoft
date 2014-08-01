@@ -3,7 +3,7 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>Hae tuotteen tulliprossa (veroperustetieto):</font><hr>";
 
@@ -88,7 +88,7 @@ if ($tuoteno != '') {
 
   ob_start();
 
-  require("taric_veroperusteet.inc");
+  require "taric_veroperusteet.inc";
 
   $kala = ob_get_contents();
 
@@ -152,7 +152,7 @@ if (isset($KAIKKI)) {
 
     ob_start();
 
-    require("taric_veroperusteet.inc");
+    require "taric_veroperusteet.inc";
 
     $kala = ob_get_contents();
 
@@ -172,4 +172,4 @@ if (isset($KAIKKI)) {
 
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

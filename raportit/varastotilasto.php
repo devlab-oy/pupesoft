@@ -1,8 +1,8 @@
 <?php
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if (isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
@@ -14,7 +14,7 @@ $compression = FALSE;
 // DataTables p‰‰lle
 $pupe_DataTables = 'vartiltaul';
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -29,7 +29,7 @@ if ($ytunnus != '') {
 
   if ($valittuytunnus != "" and $valittuytunnus != $ytunnus) $toimittajaid = "";
 
-  require ("inc/kevyt_toimittajahaku.inc");
+  require "inc/kevyt_toimittajahaku.inc";
 
   // Toimittaja lˆytyi
   if ($toimittajaid == 0) {
@@ -63,7 +63,7 @@ echo "</tr>";
 echo "<tr><th>".t("Rajaukset")."</th><td>";
 
 $monivalintalaatikot = array('OSASTO', 'TRY', '<br>TUOTEMERKKI');
-require ("tilauskasittely/monivalintalaatikot.inc");
+require "tilauskasittely/monivalintalaatikot.inc";
 
 echo "</td></tr>";
 
@@ -183,7 +183,7 @@ if ($tee != "" and isset($painoinnappia)) {
 
   if ($total_rows > 0) {
 
-    include('inc/pupeExcel.inc');
+    include 'inc/pupeExcel.inc';
 
     $worksheet    = new pupeExcel();
     $format_bold = array("bold" => TRUE);
@@ -293,7 +293,7 @@ if ($tee != "" and isset($painoinnappia)) {
     $excelrivi++;
 
     echo "<font class='message'>", t("K‰sitell‰‰n"), " $total_rows ", t("tuotetta"), ".</font>";
-    require('inc/ProgressBar.class.php');
+    require 'inc/ProgressBar.class.php';
 
     $bar = new ProgressBar();
     $bar->initialize($total_rows); // print the empty bar
@@ -370,7 +370,7 @@ if ($tee != "" and isset($painoinnappia)) {
       $valitut_varastot = isset($valitut_varastot) ? $valitut_varastot : 0;
 
       list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], "",
-                                                              $valitut_varastot);
+        $valitut_varastot);
       $varattu = $saldo - $myytavissa + $jalkitoimituksessa;
 
       // Jos kaikki luvut on nollaa, niin skipataan rivi
@@ -497,7 +497,7 @@ if ($tee != "" and isset($painoinnappia)) {
     echo "</table><br>";
 
     if ($total_rows > 1000) {
-      echo "<font class='error'>", t("Hakutulos oli liian suuri"), ". " ,t("Tulos vain exceliss‰"), ".</font><br><br>";
+      echo "<font class='error'>", t("Hakutulos oli liian suuri"), ". " , t("Tulos vain exceliss‰"), ".</font><br><br>";
     }
     else {
       if ($listaustyyppi == "kappaleet2" and $nayta_vapaa_saldo == "on") {
@@ -524,4 +524,4 @@ if ($tee != "" and isset($painoinnappia)) {
   }
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

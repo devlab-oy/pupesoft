@@ -4,7 +4,7 @@ if (isset($_REQUEST["komento"]) and $_REQUEST["komento"] == "PDF_RUUDULLE") {
   $nayta_pdf = 1;
 }
 
-require("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 $logistiikka_yhtio = '';
 $logistiikka_yhtiolisa = '';
@@ -30,7 +30,7 @@ else {
 if (!isset($nayta_pdf)) echo "<font class='head'>".t("Rahtikirjakopio")."</font><hr>";
 
 if ($yhtiorow['kerayserat'] == 'K' and $real_submit != "" and $tee == 'valitse' and $toimitustapa == "" and $lahto == "") {
-  echo "<font class='error'>",t("Valitse toimitustapa tai lähtö"),"</font><br />";
+  echo "<font class='error'>", t("Valitse toimitustapa tai lähtö"), "</font><br />";
   $real_submit = $tee = "";
 }
 
@@ -65,7 +65,7 @@ if ($tee == 'erittelykopsu') {
     $otunnukset = $laskurow["tilaukset"];
 
     if ($otunnukset != "") {
-      require("tilauskasittely/rahtikirja_erittely_pdf.inc");
+      require "tilauskasittely/rahtikirja_erittely_pdf.inc";
 
       echo t("Rahtikirjaerittely tulostuu")."...<br><br>";
     }
@@ -78,7 +78,7 @@ if ($tee == 'erittelykopsu') {
 }
 
 if ($tee == 'tulosta' and (!isset($rtunnukset) or count($rtunnukset) == 0)) {
-  if (!isset($nayta_pdf)) echo "<font class='error'>",t("Et valinnut yhtään rahtikirjaa"),"!</font><br>";
+  if (!isset($nayta_pdf)) echo "<font class='error'>", t("Et valinnut yhtään rahtikirjaa"), "!</font><br>";
   $tee = "";
 }
 
@@ -165,7 +165,7 @@ if ($tee == 'tulosta') {
       $pakkaustieto_rahtikirjanro = '';
     }
 
-    require ("rahtikirja-tulostus.php");
+    require "rahtikirja-tulostus.php";
   }
 
 
@@ -218,12 +218,12 @@ if ($tee == 'valitse' and $real_submit != '') {
               GROUP BY rahtikirjanro";
   }
   else {
-      $query = "SELECT rahtikirjanro
+    $query = "SELECT rahtikirjanro
                 from rahtikirjat
                 where otsikkonro = '$otunnus'
                       and yhtio  = '$kukarow[yhtio]'";
-      $res = mysql_query($query) or pupe_error($query);
-      $rahtikirjanro = mysql_fetch_array($res);
+    $res = mysql_query($query) or pupe_error($query);
+    $rahtikirjanro = mysql_fetch_array($res);
 
     $query = "SELECT rahtikirjanro, sum(kilot) paino, yhtio
               from rahtikirjat
@@ -267,7 +267,7 @@ if ($tee == 'valitse' and $real_submit != '') {
 
     echo "<table>";
     echo "<tr>";
-    if ($logistiikka_yhtio != '') echo "<th>",t("Yhtiö"),"</th>";
+    if ($logistiikka_yhtio != '') echo "<th>", t("Yhtiö"), "</th>";
     echo "<th>".t("Rahtikirjanro")."</th>";
     echo "<th>".t("Tilausnumero")."</th>";
     echo "<th>".t("Tulostettu")."</th>";
@@ -325,7 +325,7 @@ if ($tee == 'valitse' and $real_submit != '') {
               ORDER BY kirjoitin";
     $kirre = mysql_query($query) or pupe_error($query);
 
-    echo t("Rahtikirjatulostin"),"<br>";
+    echo t("Rahtikirjatulostin"), "<br>";
     echo "<select name='komento'>";
     echo "<option value=''>".t("Oletustulostimelle")."</option>";
 
@@ -336,13 +336,13 @@ if ($tee == 'valitse' and $real_submit != '') {
     echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
     echo "</select><br><br>";
 
-    echo t("Tulosta osoitelaput"),"<br>";
+    echo t("Tulosta osoitelaput"), "<br>";
 
     mysql_data_seek($kirre, 0);
 
     echo "<td>";
     echo "<select name='valittu_rakiroslapp_tulostin'>";
-    echo "<option value=''>",t("Ei tulosteta"),"</option>";
+    echo "<option value=''>", t("Ei tulosteta"), "</option>";
 
     while ($kirrow = mysql_fetch_array($kirre)) {
       echo "<option value='$kirrow[tunnus]'>$kirrow[kirjoitin]</option>";
@@ -380,7 +380,7 @@ if ($tee == '') {
     <input type='text' name='kk' value='$kk' size='3'>
     <input type='text' name='vv' value='$vv' size='5'>";
 
-  if ($yhtiorow['kerayserat'] == 'K') echo "<input type='submit' name='dummy_submit' value='",t("Päivitä lähdöt"),"' />";
+  if ($yhtiorow['kerayserat'] == 'K') echo "<input type='submit' name='dummy_submit' value='", t("Päivitä lähdöt"), "' />";
 
   echo "</td></tr>";
 
@@ -390,7 +390,7 @@ if ($tee == '') {
   echo "<tr><th>".t("Valitse toimitustapa").":</th>";
   echo "<td><select name='toimitustapa' {$onchange}>";
 
-  if ($yhtiorow['kerayserat'] == 'K') echo "<option value=''>",t("Ei valintaa"),"</option>";
+  if ($yhtiorow['kerayserat'] == 'K') echo "<option value=''>", t("Ei valintaa"), "</option>";
 
   $toimitustapa_tunnus = '';
 
@@ -459,10 +459,10 @@ if ($tee == '') {
   if ($yhtiorow['kerayserat'] == 'K') {
 
     echo "<tr>";
-    echo "<th>",t("Valitse lähtö"),"</th>";
+    echo "<th>", t("Valitse lähtö"), "</th>";
     echo "<td>";
     echo "<select name='lahto'>";
-    echo "<option value=''>",t("Kaikki"),"</option>";
+    echo "<option value=''>", t("Kaikki"), "</option>";
 
     $toimitustapalisa = "";
 
@@ -557,7 +557,7 @@ if ($tee == '') {
               ORDER BY kirjoitin";
     $kirre = mysql_query($query) or pupe_error($query);
 
-    echo "<tr><th>".t("Tulostin"),"</th>";
+    echo "<tr><th>".t("Tulostin"), "</th>";
     echo "<td><select name='kirjoitin'>";
 
     while ($kirrow = mysql_fetch_array($kirre)) {
@@ -574,4 +574,4 @@ if ($tee == '') {
   }
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

@@ -1,6 +1,6 @@
 <?php
 
-require("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Kohdista eri riveiltä myydyt sarjanumerot")."</font><hr>";
 
@@ -16,7 +16,7 @@ echo "<table>";
 
 $lask = 0;
 
-while($sarrow1 = mysql_fetch_array($sarres1)) {
+while ($sarrow1 = mysql_fetch_array($sarres1)) {
 
   $query = "SELECT *
             FROM sarjanumeroseuranta
@@ -62,4 +62,4 @@ if ($lask > 0 and $tee == "") {
       </form>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

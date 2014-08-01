@@ -2,10 +2,10 @@
 
 if (isset($_REQUEST["tee"]) and $_REQUEST["tee"] == 'NAYTATILAUS') $nayta_pdf = 1; //Generoidaan .pdf-file
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if (isset($_POST['ajax_toiminto']) and trim($_POST['ajax_toiminto']) != '') {
-  require ("inc/tilioinnin_toiminnot.inc");
+  require "inc/tilioinnin_toiminnot.inc";
 }
 
 if (!isset($ok)) $ok = 0;
@@ -23,12 +23,12 @@ if (!isset($lisaselite)) $lisaselite = "";
 $listaus = FALSE;
 
 if ($tee_pdf == 'tulosta_karhu') {
-  require ('myyntires/paperikarhu.php');
+  require 'myyntires/paperikarhu.php';
   exit;
 }
 
 if ($tee_pdf == 'tulosta_tratta') {
-  require ('myyntires/paperitratta.php');
+  require 'myyntires/paperitratta.php';
   exit;
 }
 
@@ -39,7 +39,7 @@ if ($tee == 'tulosta_korkoerittely') {
   $res = pupe_query($apuqu);
   if (mysql_num_rows($res) == 1) {
     $trow = mysql_fetch_assoc($res);
-    require ('myyntires/tulosta_korkoerittely.inc');
+    require 'myyntires/tulosta_korkoerittely.inc';
   }
   exit;
 }
@@ -121,9 +121,9 @@ if ($tee == 'G') {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
-      $trow=mysql_fetch_assoc ($result);
-      $tunnus=$trow['tunnus'];
-      $tee = 'E';
+    $trow=mysql_fetch_assoc($result);
+    $tunnus=$trow['tunnus'];
+    $tee = 'E';
   }
   else {
     echo "<font class='error'>".t("Ei seuraavaa tositetta")."</font><br>";
@@ -152,7 +152,7 @@ if (isset($tee_Y) or isset($tee_Z) or isset($tee_X) or isset($tee_XKAIKKI) or is
     $row    = mysql_fetch_assoc($result);
 
     if ($row["ero"] > 365) {
-      echo "<font class='error'>",t("Jotta homma ei menisi liian hitaaksi, niin vuosi on pisin mahdollinen laskentaväli!"),"</font><br>";
+      echo "<font class='error'>", t("Jotta homma ei menisi liian hitaaksi, niin vuosi on pisin mahdollinen laskentaväli!"), "</font><br>";
 
       unset($tee_alvkirjauksia_ilmanalvtasoa);
       unset($tee_automaattikirjauksia_alv_muutettu);
@@ -427,11 +427,11 @@ if (isset($tee_Y) or isset($tee_Z) or isset($tee_X) or isset($tee_XKAIKKI) or is
                 GROUP BY 1,2,3,4";
     }
   }
-  elseif((int) $tav > 0 or strlen($selite) > 0 or strlen($tilino) > 0 or strlen($summa) > 0 or strlen($laatija) > 0 or ($kpexport == 1 and strlen($tositenro) > 0)) {
+  elseif ((int) $tav > 0 or strlen($selite) > 0 or strlen($tilino) > 0 or strlen($summa) > 0 or strlen($laatija) > 0 or ($kpexport == 1 and strlen($tositenro) > 0)) {
 
     $plisa = "";
     $lisa  = "";
-    $summa = str_replace ( ",", ".", $summa);
+    $summa = str_replace( ",", ".", $summa);
 
     if ($tav > 0 and $tav < 1000) {
       $tav += 2000;
@@ -441,10 +441,10 @@ if (isset($tee_Y) or isset($tee_Z) or isset($tee_X) or isset($tee_XKAIKKI) or is
       $plisa = " and tapvm = '$tav-$tak-$tap' ";
     }
     elseif ($tav != 0 and $tak != 0) {
-      $plisa = " and tapvm >= '$tav-$tak-01' and tapvm < '".date("Y-m-d",mktime(0, 0, 0, $tak+1, 1, $tav))."' ";
+      $plisa = " and tapvm >= '$tav-$tak-01' and tapvm < '".date("Y-m-d", mktime(0, 0, 0, $tak+1, 1, $tav))."' ";
     }
     elseif ($tav != 0) {
-      $plisa = " and tapvm >= '$tav-01-01' and tapvm < '".date("Y-m-d",mktime(0, 0, 0, 1, 1, $tav+1))."' ";
+      $plisa = " and tapvm >= '$tav-01-01' and tapvm < '".date("Y-m-d", mktime(0, 0, 0, 1, 1, $tav+1))."' ";
     }
     else {
       $plisa = " and tapvm >= '$yhtiorow[tilikausi_alku]' and tapvm <= '$yhtiorow[tilikausi_loppu]' ";
@@ -473,10 +473,10 @@ if (isset($tee_Y) or isset($tee_Z) or isset($tee_X) or isset($tee_XKAIKKI) or is
 
     if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
       if (strlen($tositenro) > 0) {
-        list($tositenro1, $tositenro2) = explode("-",$tositenro);
+        list($tositenro1, $tositenro2) = explode("-", $tositenro);
         $tositenro1 = (int) $tositenro1;
         $tositenro2 = (int) $tositenro2;
-        $tositenro = sprintf ('%02d', $tositenro1) . sprintf ('%06d', $tositenro2);
+        $tositenro = sprintf('%02d', $tositenro1) . sprintf('%06d', $tositenro2);
         $lisa .= " and tiliointi.tosite = '$tositenro' ";
       }
     }
@@ -528,7 +528,7 @@ if (isset($tee_Y) or isset($tee_Z) or isset($tee_X) or isset($tee_XKAIKKI) or is
     echo "<table><tr>";
 
     for ($i = 1; $i < mysql_num_fields($result)+$miinusta; $i++) {
-      echo "<th>".t(mysql_field_name($result,$i))."</th>";
+      echo "<th>".t(mysql_field_name($result, $i))."</th>";
     }
 
     echo "</tr>";
@@ -556,7 +556,7 @@ if (isset($tee_Y) or isset($tee_Z) or isset($tee_X) or isset($tee_XKAIKKI) or is
         $kennimi = mysql_field_name($result, $i);
 
         if ($i == 1) {
-          if (mysql_field_name($result,$i) == 'tapvm' or (mysql_field_name($result,$i) == 'alku' and isset($tee_KP))) {
+          if (mysql_field_name($result, $i) == 'tapvm' or (mysql_field_name($result, $i) == 'alku' and isset($tee_KP))) {
             $orgpvm     = $trow[$kennimi];
             $trow[$kennimi] = tv1dateconv($trow[$kennimi]);
 
@@ -573,7 +573,7 @@ if (isset($tee_Y) or isset($tee_Z) or isset($tee_X) or isset($tee_XKAIKKI) or is
             echo "<td><a href = '".$palvelin2."tilioteselailu.php?tilino=$trow[tilino]&pvm=$orgpvm&tyyppi=1&tee=T&lopetus=$lopetus'>$trow[$kennimi]</td>";
           }
         }
-        elseif (is_numeric($trow[$kennimi]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int')) {
+        elseif (is_numeric($trow[$kennimi]) and (mysql_field_type($result, $i) == 'real' or mysql_field_type($result, $i) == 'int')) {
           if ($kennimi == "vero") $trow[$kennimi] = $trow[$kennimi] * 1;
 
           echo "<td align='right'>$trow[$kennimi]</td>";
@@ -582,11 +582,11 @@ if (isset($tee_Y) or isset($tee_Z) or isset($tee_X) or isset($tee_XKAIKKI) or is
           echo "<td>".tv1dateconv($trow[$kennimi])."</td>";
         }
         elseif (mysql_field_name($result, $i) == "ytunnus") {
-            echo "<td>".tarkistahetu($trow["ytunnus"])."</td>";
-          }
+          echo "<td>".tarkistahetu($trow["ytunnus"])."</td>";
+        }
         elseif (mysql_field_name($result, $i) == "tiliote" and isset($tee_KP)) {
-          $pano = sprintf("%.2f",substr($trow[$kennimi],21,19) / 100);
-          $otto = sprintf("%.2f",substr($trow[$kennimi],48,19) / 100);
+          $pano = sprintf("%.2f", substr($trow[$kennimi], 21, 19) / 100);
+          $otto = sprintf("%.2f", substr($trow[$kennimi], 48, 19) / 100);
 
           $saldo = sprintf("%.2f", $pano + $otto);
 
@@ -780,7 +780,7 @@ if ($tee == 'U') {
     $laskurow = mysql_fetch_assoc($result);
   }
 
-  $summa       = str_replace ( ",", ".", $summa);
+  $summa       = str_replace( ",", ".", $summa);
   $selausnimi   = 'tili'; // Minka niminen mahdollinen popup on?
   $tositetila   = $laskurow["tila"];
   $tositeliit   = $laskurow["liitostunnus"];
@@ -818,40 +818,62 @@ if ($tee == 'U') {
     else {
       //Tällä ei vielä ole tositenroa. Yritetään jotain
       switch ($laskurow['tila']) {
-        case "X" : // Tämä on muistiotosite, sillä voi olla vain yksi tositenro
-          $query = "SELECT distinct tosite
+      case "X" : // Tämä on muistiotosite, sillä voi olla vain yksi tositenro
+        $query = "SELECT distinct tosite
                     FROM tiliointi
                     WHERE yhtio = '$kukarow[yhtio]'
                     and ltunnus = '$tunnus'";
-          $result = pupe_query($query);
+        $result = pupe_query($query);
 
-          if (mysql_num_rows($result) != 1) {
-            echo t("Tositenron tarkastus ei onnistu! Oletetaan nolla");
-            $tositenro=0;
-          }
-          else {
-            $tositerow=mysql_fetch_assoc ($result);
-            $tositenro = $tositerow['tosite'];
-          }
-          break;
+        if (mysql_num_rows($result) != 1) {
+          echo t("Tositenron tarkastus ei onnistu! Oletetaan nolla");
+          $tositenro=0;
+        }
+        else {
+          $tositerow=mysql_fetch_assoc($result);
+          $tositenro = $tositerow['tosite'];
+        }
+        break;
 
-        case 'U' : //Tämä on myyntilasku
-          $query = "SELECT tosite
+      case 'U' : //Tämä on myyntilasku
+        $query = "SELECT tosite
                     FROM tiliointi
                     WHERE yhtio = '$kukarow[yhtio]'
                     and ltunnus = '$tunnus'";
-          $result = pupe_query($query);
-          if (mysql_num_rows($result) != 0) {
+        $result = pupe_query($query);
+        if (mysql_num_rows($result) != 0) {
 
-            // Tälle saamme tositenron myyntisaamisista
-            if ($laskurow['tapvm'] == $tiliointipvm) {
-              $query = "SELECT tosite
+          // Tälle saamme tositenron myyntisaamisista
+          if ($laskurow['tapvm'] == $tiliointipvm) {
+            $query = "SELECT tosite
                         FROM tiliointi
                         WHERE yhtio = '$kukarow[yhtio]'
                         and ltunnus = '$tunnus'
                         and tapvm   = '$tiliointipvm'
                         and tilino  in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[konsernimyyntisaamiset]', '$yhtiorow[factoringsaamiset]')
                         and summa   = $laskurow[summa]";
+            $result = pupe_query($query);
+
+            if (mysql_num_rows($result) == 0) {
+              echo t("Tositenron tarkastus ei onnistu! Oletetaan nolla");
+              $tositenro=0;
+            }
+            else {
+              $tositerow = mysql_fetch_assoc($result);
+              $tositenro = $tositerow['tosite'];
+            }
+          }
+          else {
+
+            // Tälle saamme tositenron jostain samanlaisesta viennistä
+            if ($laskurow['tapvm'] != $tiliointipvm) {
+              $query = "SELECT tosite
+                          FROM tiliointi
+                          WHERE yhtio  = '$kukarow[yhtio]'
+                          and ltunnus  = '$tunnus'
+                          and tapvm    = '$tiliointipvm'
+                          and tilino   not in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[konsernimyyntisaamiset]', '$yhtiorow[factoringsaamiset]')
+                          and summa   != $laskurow[summa]";
               $result = pupe_query($query);
 
               if (mysql_num_rows($result) == 0) {
@@ -863,77 +885,55 @@ if ($tee == 'U') {
                 $tositenro = $tositerow['tosite'];
               }
             }
-            else {
-
-              // Tälle saamme tositenron jostain samanlaisesta viennistä
-              if ($laskurow['tapvm'] != $tiliointipvm) {
-                $query = "SELECT tosite
-                          FROM tiliointi
-                          WHERE yhtio  = '$kukarow[yhtio]'
-                          and ltunnus  = '$tunnus'
-                          and tapvm    = '$tiliointipvm'
-                          and tilino   not in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[konsernimyyntisaamiset]', '$yhtiorow[factoringsaamiset]')
-                          and summa   != $laskurow[summa]";
-                $result = pupe_query($query);
-
-                if (mysql_num_rows($result) == 0) {
-                  echo t("Tositenron tarkastus ei onnistu! Oletetaan nolla");
-                  $tositenro=0;
-                }
-                else {
-                  $tositerow = mysql_fetch_assoc($result);
-                  $tositenro = $tositerow['tosite'];
-                }
-              }
-            }
           }
-          else {
-            echo t("Tositenumeron tarkistus ei onnistu, koska tositteen kaikki tiliöinnit puuttuvat")."<br>";
-            $tositenro=0;
-          }
-        default: //Tämän pitäisi olla nyt ostolasku
+        }
+        else {
+          echo t("Tositenumeron tarkistus ei onnistu, koska tositteen kaikki tiliöinnit puuttuvat")."<br>";
+          $tositenro=0;
+        }
+      default: //Tämän pitäisi olla nyt ostolasku
 
-          // Tälle saamme tositenron ostoveloista
-          if ($laskurow['tapvm'] == $tiliointipvm) {
-            $query = "SELECT tosite
+        // Tälle saamme tositenron ostoveloista
+        if ($laskurow['tapvm'] == $tiliointipvm) {
+          $query = "SELECT tosite
                       FROM tiliointi
                       WHERE yhtio = '$kukarow[yhtio]'
                       and ltunnus = '$tunnus'
                       and tapvm   = '$tiliointipvm'
                       and tilino  in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
                       and summa   = round($laskurow[summa] * $laskurow[vienti_kurssi],2) * -1";
-            $result = pupe_query($query);
+          $result = pupe_query($query);
 
-            if (mysql_num_rows($result) == 0) {
-              echo t("Tositenron tarkastus ei onnistu! Oletetaan nolla");
-              $tositenro = 0;
-            }
-            else {
-              $tositerow = mysql_fetch_assoc ($result);
-              $tositenro = $tositerow['tosite'];
-            }
+          if (mysql_num_rows($result) == 0) {
+            echo t("Tositenron tarkastus ei onnistu! Oletetaan nolla");
+            $tositenro = 0;
           }
+          else {
+            $tositerow = mysql_fetch_assoc($result);
+            $tositenro = $tositerow['tosite'];
+          }
+        }
 
-          // Tälle saamme tositenron ostoveloista
-          if ($laskurow['mapvm'] == $tiliointipvm) {
-            $query = "SELECT tosite
+        // Tälle saamme tositenron ostoveloista
+        if ($laskurow['mapvm'] == $tiliointipvm) {
+          $query = "SELECT tosite
                       FROM tiliointi
                       WHERE yhtio = '$kukarow[yhtio]'
                       and ltunnus = '$tunnus'
                       and tapvm   = '$tiliointipvm'
                       and tilino  in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
                       and summa   = round($laskurow[summa] * $laskurow[vienti_kurssi],2)";
-            $result = pupe_query($query);
+          $result = pupe_query($query);
 
-            if (mysql_num_rows($result) == 0) {
-              echo t("Tositenron tarkastus ei onnistu! Oletetaan nolla");
-              $tositenro=0;
-            }
-            else {
-              $tositerow=mysql_fetch_assoc ($result);
-              $tositenro = $tositerow['tosite'];
-            }
+          if (mysql_num_rows($result) == 0) {
+            echo t("Tositenron tarkastus ei onnistu! Oletetaan nolla");
+            $tositenro=0;
           }
+          else {
+            $tositerow=mysql_fetch_assoc($result);
+            $tositenro = $tositerow['tosite'];
+          }
+        }
       }
     }
     echo "<font class='message'>".t("Tiliöintirivi liitettiin tositteeseen")." $tositenro</font><br>";
@@ -1096,7 +1096,7 @@ if ($tee == 'E' or $tee == 'F') {
       $karhu_result = pupe_query($karhu_query);
 
       if (mysql_num_rows($karhu_result) > 0) {
-        echo "<tr><th>",t('Maksukehotus / Tratta'),":</th><td>";
+        echo "<tr><th>", t('Maksukehotus / Tratta'), ":</th><td>";
 
         $laskuri = 0;
 
@@ -1156,7 +1156,7 @@ if ($tee == 'E' or $tee == 'F') {
 
       if (mysql_num_rows($korko2_result) > 0) {
 
-        echo "<tr><th>",t('Korkolaskut'),":</th><td>";
+        echo "<tr><th>", t('Korkolaskut'), ":</th><td>";
 
         while ($korkolaskurow2 = mysql_fetch_assoc($korko2_result)) {
           echo "<form id='tulostakopioform_$korkolaskurow2[tunnus]' name='tulostakopioform_$korkolaskurow2[tunnus]' method='post' action='".$palvelin2."tilauskasittely/tulostakopio.php'>
@@ -1218,7 +1218,7 @@ if ($tee == 'E' or $tee == 'F') {
       $varastosiirto_result = pupe_query($query);
       $varastosiirto = mysql_fetch_assoc($varastosiirto_result);
 
-      $_onko_varastosiirto = ($varastosiirto['tila'] == 'G' and in_array($varastosiirto['alatila'], array('X','V')));
+      $_onko_varastosiirto = ($varastosiirto['tila'] == 'G' and in_array($varastosiirto['alatila'], array('X', 'V')));
       //Tarkistetaan onko myyntilaskun vanhatunnus linkissä vastaanotettu varastosiirto
       if ($_onko_varastosiirto) {
         echo "<tr>";
@@ -1306,7 +1306,7 @@ if ($tee == 'E' or $tee == 'F') {
     if ($tee2 != 1) {
 
       echo "<table>";
-      if ($yhtiorow['ostolaskujen_paivays'] == "1" and $trow["lapvm"] != '0000-00-00'){
+      if ($yhtiorow['ostolaskujen_paivays'] == "1" and $trow["lapvm"] != '0000-00-00') {
         echo "<tr><th>".t("Lapvm")."</th><td align='right'>".tv1dateconv($trow["lapvm"])."</td></tr>";
       }
       echo "<tr><th>".t("Tapvm")."</th><td align='right'>".tv1dateconv($trow["tapvm"])."</td></tr>";
@@ -1332,13 +1332,13 @@ if ($tee == 'E' or $tee == 'F') {
 
         echo "<tr><th>".t("Alkuperäinen summa")."</th><td align='right'><strong>$trow[arvo]</strong></td></tr>";
         $osa = 1;
-        while ($jaetutrow = mysql_fetch_assoc ($jaetutres)) {
+        while ($jaetutrow = mysql_fetch_assoc($jaetutres)) {
           echo "<tr><th>".t("Osa")." $osa</th><td align='right'><a href='muutosite.php?tee=E&tunnus=$jaetutrow[tunnus]'>$jaetutrow[summa]</a></td></tr>";
           $osa++;
         }
       }
 
-      if ($trow['laskunro'] != 0) echo "<tr><th nowrap>",t("Laskunro"),"</th><td align='right'>$trow[laskunro]</td></tr>";
+      if ($trow['laskunro'] != 0) echo "<tr><th nowrap>", t("Laskunro"), "</th><td align='right'>$trow[laskunro]</td></tr>";
 
       echo "</table>";
     }
@@ -1362,7 +1362,7 @@ if ($tee == 'E' or $tee == 'F') {
       }
       echo "</td></tr>";
       echo "</table>";
-     }
+    }
 
     // Lopetetaan keskisarake, aloitetaan oikea sarake
     echo "</td><td style='padding: 0px; margin: 0px; vertical-align:top;'>";
@@ -1371,7 +1371,7 @@ if ($tee == 'E' or $tee == 'F') {
 
     $laskutyyppi = $trow["tila"];
     $alatila = $trow["alatila"];
-    require ("inc/laskutyyppi.inc");
+    require "inc/laskutyyppi.inc";
 
     echo "<tr><th>".t("Tila")."</th><td nowrap>$laskutyyppi $alatila</td></tr>";
     echo "<tr><th>".t("Laatija")."</th><td nowrap>".tv1dateconv($trow["luontiaika"], "PITKÄ")." &raquo; $trow[laatija_nimi]</td></tr>";
@@ -1444,7 +1444,7 @@ if ($tee == 'E' or $tee == 'F') {
     echo "<input type = 'hidden' name = 'tila' value=''>";
     echo "<input type = 'hidden' name = 'tunnus' value='{$tunnus}'>";
     echo "<input type = 'hidden' name = 'lisaselite' class='lisaselite' value='' />";
-    echo "<input type = 'submit' class='hae_lisaselite' value = '",t("Muuta tietoja"),"'>";
+    echo "<input type = 'submit' class='hae_lisaselite' value = '", t("Muuta tietoja"), "'>";
     echo "</form>";
   }
 
@@ -1652,7 +1652,7 @@ if ($tee == "") {
   if (!isset($ppl)) $ppl = $tklopu[2];
 
   // Ei sallita loppupäivää tulevaisuudessa
-  if (date("Ymd",mktime(0, 0, 0, $kkl, $ppl, $vvl)) > date("Ymd")) {
+  if (date("Ymd", mktime(0, 0, 0, $kkl, $ppl, $vvl)) > date("Ymd")) {
     $kkl = date("m");
     $vvl = date("Y");
     $ppl = date("d");
@@ -1664,9 +1664,9 @@ if ($tee == "") {
 
   // Sallitaan vain vuosi takaperin
   if ($row["ero"] > 365) {
-    $kka = date("m",mktime(0, 0, 0, $kkl, $ppl-365, $vvl));
-    $vva = date("Y",mktime(0, 0, 0, $kkl, $ppl-365, $vvl));
-    $ppa = date("d",mktime(0, 0, 0, $kkl, $ppl-365, $vvl));
+    $kka = date("m", mktime(0, 0, 0, $kkl, $ppl-365, $vvl));
+    $vva = date("Y", mktime(0, 0, 0, $kkl, $ppl-365, $vvl));
+    $ppa = date("d", mktime(0, 0, 0, $kkl, $ppl-365, $vvl));
   }
 
   echo "  <tr><th colspan='2'>".t("Etsi tapahtumia ajalta").":
@@ -1731,4 +1731,4 @@ if ($tee == "") {
       </form>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

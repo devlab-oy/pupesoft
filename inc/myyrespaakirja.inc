@@ -91,28 +91,28 @@ echo "
   </tr>
   <tr>";
 
-  // haetaan kaikki yrityksen rahatilit mysql muodossa
-  $query  = "SELECT oletus_rahatili, nimi, tilino
+// haetaan kaikki yrityksen rahatilit mysql muodossa
+$query  = "SELECT oletus_rahatili, nimi, tilino
              FROM yriti
              WHERE yhtio          = '$kukarow[yhtio]'
              AND kaytossa         = ''
              AND oletus_rahatili != ''";
-  $ratire = mysql_query($query) or pupe_error($query);
+$ratire = mysql_query($query) or pupe_error($query);
 
-  echo "<th>".t("Pankkitili")."</th>";
-  echo "<td>";
-  echo "<select name='rahatili'>";
-  echo "<option value=''>".t("Kaikki")."</option>";
+echo "<th>".t("Pankkitili")."</th>";
+echo "<td>";
+echo "<select name='rahatili'>";
+echo "<option value=''>".t("Kaikki")."</option>";
 
-  $psel = array();
-  $psel[$rahatili] = "SELECTED";
+$psel = array();
+$psel[$rahatili] = "SELECTED";
 
-  while ($ratiro = mysql_fetch_array($ratire)) {
-    $rahatilisel = $ratiro["oletus_rahatili"];
-    echo "<option value='$ratiro[oletus_rahatili]' $psel[$rahatilisel]>$ratiro[nimi] ($ratiro[tilino])</option>";
-  }
+while ($ratiro = mysql_fetch_array($ratire)) {
+  $rahatilisel = $ratiro["oletus_rahatili"];
+  echo "<option value='$ratiro[oletus_rahatili]' $psel[$rahatilisel]>$ratiro[nimi] ($ratiro[tilino])</option>";
+}
 
-  echo "
+echo "
   </td>
       <td class='back'><input type = 'submit' value = '".t("Näytä")."'></td></tr></table></form><br><br>";
 
@@ -140,8 +140,8 @@ if ($tee == "1") {
     $jarj = "tiliointi.tapvm, tiliointi.summa";
 
     if ($alvk == 0) {
-            echo "<font class='head'>".t("Suorituspäiväkirja vuodelta")." $alvv</font><hr>";
-        $lisa = "LEFT(tiliointi.tapvm,4) = '$alvv'";
+      echo "<font class='head'>".t("Suorituspäiväkirja vuodelta")." $alvv</font><hr>";
+      $lisa = "LEFT(tiliointi.tapvm,4) = '$alvv'";
     }
     else {
       if ($alvp == 0) {
@@ -247,7 +247,7 @@ if ($tee == "1") {
     echo "<tfoot>";
     echo "<tr>
       <td class='tumma' colspan='6'>".t("Yhteensä")."</td>
-      <td class='tumma' name='yhteensa' id='yhteensa' align='right'>".sprintf("%.2f", $summa),"</td>
+      <td class='tumma' name='yhteensa' id='yhteensa' align='right'>".sprintf("%.2f", $summa), "</td>
       </tr>";
     echo "</tfoot>";
     echo "</table><br>";

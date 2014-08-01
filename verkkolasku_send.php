@@ -22,8 +22,8 @@ if ($php_cli) {
   ini_set("display_errors", 0);
 
   // otetaan tietokanta connect
-  require("inc/connect.inc");
-  require("inc/functions.inc");
+  require "inc/connect.inc";
+  require "inc/functions.inc";
 
   $yhtio = pupesoft_cleanstring($argv[1]);
   $yhtiorow = hae_yhtion_parametrit($yhtio);
@@ -39,13 +39,13 @@ pupesoft_flock();
 
 // Katsotaan, että tarvittavat muuttujat on setattu
 if (!isset(  $verkkolaskut_siirto["host"],
-      $verkkolaskut_siirto["user"],
-      $verkkolaskut_siirto["pass"],
-      $verkkolaskut_siirto["path"],
-      $verkkolaskut_siirto["type"],
-      $verkkolaskut_siirto["local_dir"],
-      $verkkolaskut_siirto["local_dir_ok"],
-      $verkkolaskut_siirto["local_dir_error"])) {
+    $verkkolaskut_siirto["user"],
+    $verkkolaskut_siirto["pass"],
+    $verkkolaskut_siirto["path"],
+    $verkkolaskut_siirto["type"],
+    $verkkolaskut_siirto["local_dir"],
+    $verkkolaskut_siirto["local_dir_ok"],
+    $verkkolaskut_siirto["local_dir_error"])) {
   echo "verkkolasku-send parametrit puuttuu!\n";
   exit;
 }
@@ -59,7 +59,7 @@ $ftptype = $verkkolaskut_siirto["type"];
 $localdir = $verkkolaskut_siirto["local_dir"];
 $localdir_error = $verkkolaskut_siirto["local_dir_error"];
 $ftpsucc = $verkkolaskut_siirto["local_dir_ok"];
-  $ftpfail = $localdir_error;
+$ftpfail = $localdir_error;
 
 
 
@@ -68,7 +68,7 @@ if ($handle = opendir($localdir)) {
   while (($file = readdir($handle)) !== FALSE) {
     $ftpfile = realpath($localdir."/".$file);
     if (is_file($ftpfile)) {
-      require ("inc/ftp-send.inc");
+      require "inc/ftp-send.inc";
     }
   }
   closedir($handle);
@@ -81,7 +81,7 @@ if ($handle = opendir($localdir_error)) {
   while (($file = readdir($handle)) !== FALSE) {
     $ftpfile = realpath($localdir_error."/".$file);
     if (is_file($ftpfile)) {
-      require ("inc/ftp-send.inc");
+      require "inc/ftp-send.inc";
     }
   }
   closedir($handle);

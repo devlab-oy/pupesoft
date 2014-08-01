@@ -38,9 +38,9 @@ if ($tee == "lisaalisaa") {
     $tee = "lisaa";
   }
 
-  if (substr($taso,0,1) != substr($uusitaso,0,1)) {
+  if (substr($taso, 0, 1) != substr($uusitaso, 0, 1)) {
 
-    echo "<font class='error'>Uuden tason ensimmäinen merkki on oltava: ".substr($taso,0,1)."!</font><br>";
+    echo "<font class='error'>Uuden tason ensimmäinen merkki on oltava: ".substr($taso, 0, 1)."!</font><br>";
 
     $tee = "lisaa";
   }
@@ -68,7 +68,7 @@ if ($tee == "lisaalisaa") {
       $vresult = mysql_query($query) or pupe_error($query);
 
       while ($vrow = mysql_fetch_array($vresult)) {
-        $paivtaso = $taso.substr($uusitaso,-1).substr($vrow["taso"], strlen($taso));
+        $paivtaso = $taso.substr($uusitaso, -1).substr($vrow["taso"], strlen($taso));
 
         echo "Tasokoodi muuttuu: $vrow[taso] --> $paivtaso<br>";
 
@@ -137,7 +137,7 @@ if ($tee == "lisaa") {
   $valittuu="";
   if ($tyyppi='U') $valittuu="selected";
 
-  if(!isset($uusitaso)) {
+  if (!isset($uusitaso)) {
     $uusitaso = $taso;
   }
   echo "
@@ -178,9 +178,9 @@ if ($tee == "muutamuuta") {
     $tee = "muuta";
   }
 
-  if (substr($taso,0,1) != substr($uusitaso,0,1)) {
+  if (substr($taso, 0, 1) != substr($uusitaso, 0, 1)) {
 
-    echo "<font class='error'>Uuden tason ensimmäinen merkki on oltava: ".substr($taso,0,1)."!</font><br>";
+    echo "<font class='error'>Uuden tason ensimmäinen merkki on oltava: ".substr($taso, 0, 1)."!</font><br>";
 
     $tee = "muuta";
   }

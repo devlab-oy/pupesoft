@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists("pakkaustarkista")) {
-  function pakkaustarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+  function pakkaustarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $yhtiorow;
 
     if (mysql_field_name($result, $i) == "pakkaus") {

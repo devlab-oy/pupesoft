@@ -4,11 +4,11 @@
 $useslave = 1;
 
 if (isset($_POST["supertee"])) {
-  if($_POST["supertee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["supertee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (isset($supertee)) {
   if ($supertee == "lataa_tiedosto") {
@@ -20,7 +20,7 @@ if (isset($supertee)) {
 echo "<font class='head'>".t("Myˆh‰ss‰ olevat myyntitilaukset")."</font><hr>";
 
 if ($ytunnus != '') {
-  require ("inc/kevyt_toimittajahaku.inc");
+  require "inc/kevyt_toimittajahaku.inc";
 }
 
 if ($myovv == '') {
@@ -40,7 +40,7 @@ echo "</tr>";
 
 $kayta_ostotilausta_check = isset($kayta_ostotilausta) ? " checked='checked'" : '';
 
-echo "<tr><th>",t("Vertaa ostotilauksen toimitusp‰iv‰m‰‰r‰‰n"),"</th><td><input type='checkbox' name='kayta_ostotilausta'{$kayta_ostotilausta_check}></td></tr>";
+echo "<tr><th>", t("Vertaa ostotilauksen toimitusp‰iv‰m‰‰r‰‰n"), "</th><td><input type='checkbox' name='kayta_ostotilausta'{$kayta_ostotilausta_check}></td></tr>";
 
 if (!isset($ytunnus)) {
   $ytunnus = '';
@@ -67,7 +67,7 @@ echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei tuoteryhm‰‰")."</option>
 while ($rivi = mysql_fetch_array($sresult)) {
   $mul_check = '';
   if ($mul_tuoteryhma!="") {
-    if (in_array($rivi["selite"],$mul_tuoteryhma)) {
+    if (in_array($rivi["selite"], $mul_tuoteryhma)) {
       $mul_check = 'SELECTED';
     }
   }
@@ -101,7 +101,7 @@ echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei kustannuspaikkaa")."</op
 while ($rivi = mysql_fetch_array($vresult)) {
   $mul_check = '';
   if ($mul_kustannuspaikka!="") {
-    if (in_array($rivi[0],$mul_kustannuspaikka)) {
+    if (in_array($rivi[0], $mul_kustannuspaikka)) {
       $mul_check = 'SELECTED';
     }
   }
@@ -123,7 +123,7 @@ echo "</form></table><br>";
 
 if ($tee == 'NAYTATILAUS') {
   echo "<font class='head'>Tilausnro: $tunnus</font><hr>";
-  require ("naytatilaus.inc");
+  require "naytatilaus.inc";
   echo "<br><br><br>";
   $tee = "HAE";
   $mul_tuoteryhma = unserialize(base64_decode($se_tuoteryhma));
@@ -177,8 +177,8 @@ if ($tee == "HAE") {
     echo "<th>".t("Tilaus")."</th>";
     echo "<th>".t("Ytunnus")."</th>";
     echo "<th>".t("Asiakas")."</th>";
-    echo "<th>",t("Osto Toimitusaika"),"</th>";
-    echo "<th>",t("Tilattu"),"</th>";
+    echo "<th>", t("Osto Toimitusaika"), "</th>";
+    echo "<th>", t("Tilattu"), "</th>";
   }
   else {
     echo "<th>".t("Ytunnus")."</th>";
@@ -198,13 +198,13 @@ if ($tee == "HAE") {
 
   if ($vain_excel != '') {
 
-    include('inc/pupeExcel.inc');
+    include 'inc/pupeExcel.inc';
 
     $worksheet    = new pupeExcel();
     $format_bold = array("bold" => TRUE);
     $excelrivi    = 0;
 
-    if(isset($worksheet)) {
+    if (isset($worksheet)) {
       $excelsarake = 0;
 
       if (isset($kayta_ostotilausta) and $kayta_ostotilausta != '') {
@@ -298,15 +298,15 @@ if ($tee == "HAE") {
   $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo "<tr><td class='back'><font class='message'>",t("Yht‰‰n tilausta ei lˆytynyt"),"!</font></td></tr>";
+    echo "<tr><td class='back'><font class='message'>", t("Yht‰‰n tilausta ei lˆytynyt"), "!</font></td></tr>";
   }
 
   while ($tulrow = mysql_fetch_array($result)) {
 
-    list(,, $myytavissa) = saldo_myytavissa($tulrow["tuoteno"], '', '', '', '', '', '', '', '', '');
+    list(, , $myytavissa) = saldo_myytavissa($tulrow["tuoteno"], '', '', '', '', '', '', '', '', '');
 
     if ($yhtiorow['saldo_kasittely'] != '') {
-      list(,, $myytavissa_tul) = saldo_myytavissa($tulrow["tuoteno"], '', '', '', '', '', '', '', '', $myovv."-".$myokk."-".$myopp);
+      list(, , $myytavissa_tul) = saldo_myytavissa($tulrow["tuoteno"], '', '', '', '', '', '', '', '', $myovv."-".$myokk."-".$myopp);
     }
 
     if (isset($kayta_ostotilausta) and $kayta_ostotilausta != '') {
@@ -448,7 +448,7 @@ if ($tee == "HAE") {
       else {
         $laskutyyppi = $tulrow["tila"];
         $alatila   = $tulrow["alatila"];
-        require ("inc/laskutyyppi.inc");
+        require "inc/laskutyyppi.inc";
       }
 
       echo "<tr class='aktiivi'>";
@@ -478,7 +478,7 @@ if ($tee == "HAE") {
 
       echo "</tr>";
 
-      if(isset($worksheet)) {
+      if (isset($worksheet)) {
         $excelsarake = 0;
 
         $worksheet->write($excelrivi, $excelsarake, $tulrow["ytunnus"], $format_bold);
@@ -520,7 +520,7 @@ if ($tee == "HAE") {
 
   echo "</table>";
 
-  if(isset($worksheet)) {
+  if (isset($worksheet)) {
 
     // We need to explicitly close the worksheet
     $excelnimi = $worksheet->close();
@@ -536,4 +536,4 @@ if ($tee == "HAE") {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

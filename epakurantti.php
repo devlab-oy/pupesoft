@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if ($toim == "VAIHDAKEHAHIN") {
   echo "<font class='head'>".t("Vaihda tuotteen keskihankintahinta")."</font><hr>";
@@ -24,7 +24,7 @@ if ($toim == "VAIHDAKEHAHIN" and $tee == "tiedostosta") {
     $path_parts = pathinfo($_FILES['userfile']['name']);
     $ext = strtoupper($path_parts['extension']);
 
-    $retval = tarkasta_liite("userfile", array("XLSX","XLS","ODS","SLK","XML","GNUMERIC","CSV","TXT","DATAIMPORT"));
+    $retval = tarkasta_liite("userfile", array("XLSX", "XLS", "ODS", "SLK", "XML", "GNUMERIC", "CSV", "TXT", "DATAIMPORT"));
 
     if ($retval !== TRUE) {
       echo "<font class='error'><br>".t("V‰‰r‰ tiedostomuoto")."!</font>";
@@ -51,7 +51,7 @@ if ($toim == "VAIHDAKEHAHIN" and $tee == "tiedostosta") {
 
     echo t("K‰sitell‰‰n rivi‰").":  ".($rivinumero+1).". ".t("Tuote").": $tuoteno ";
 
-    require ("epakurantti.inc");
+    require "epakurantti.inc";
 
     echo "<br>";
   }
@@ -70,7 +70,7 @@ if ($tee != '') {
 
   // t‰‰ll‰ tehd‰‰n ep‰kuranttihommat
   // tarvitaan $kukarow, $tuoteno ja jos halutaan muuttaa ni $tee jossa on paalle, puolipaalle tai pois
-  require ("epakurantti.inc");
+  require "epakurantti.inc";
 
   if ($tee == 'vahvista' and isset($sarjatunnus) and $sarjatunnus > 0) {
 
@@ -226,4 +226,4 @@ if ($tee == '') {
   $kentta = "tuoteno";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

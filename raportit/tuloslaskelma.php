@@ -5,11 +5,11 @@ $useslave = 1;
 
 if (isset($_POST["teetiedosto"])) {
   if ($_POST["teetiedosto"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "tuloslaskelma.php")  !== FALSE) {
-  require ("../inc/parametrit.inc");
+  require "../inc/parametrit.inc";
 }
 else {
   if ((int) $mul_proj[0] == 0) {
@@ -49,8 +49,8 @@ if (isset($teetiedosto)) {
 else {
   // Muokataan tilikartan rakennetta
   if (isset($tasomuutos)) {
-    require("../tasomuutos.inc");
-    require('../inc/footer.inc');
+    require "../tasomuutos.inc";
+    require '../inc/footer.inc';
     exit;
   }
 
@@ -294,7 +294,7 @@ else {
   echo "<option value='TILI'>".t("Tili taso")."</option>\n";
 
   for ($i=$vrow["taso"]-1; $i >= 0; $i--) {
-    echo "<option ".$sel[$i+2]." value='".($i+2)."'>".t("Taso %s",'',$i+1)."</option>\n";
+    echo "<option ".$sel[$i+2]." value='".($i+2)."'>".t("Taso %s", '', $i+1)."</option>\n";
   }
 
   echo "</select></td></tr>";
@@ -392,7 +392,7 @@ else {
   $monivalintalaatikot = array("KUSTP", "KOHDE", "PROJEKTI");
   $noautosubmit = TRUE;
 
-  require ("tilauskasittely/monivalintalaatikot.inc");
+  require "tilauskasittely/monivalintalaatikot.inc";
 
   echo "<br><input type = 'submit' value = '".t("Näytä")."'></form><br><br>";
 
@@ -622,7 +622,7 @@ else {
   // Budjettitauluun sopiva rajaus
   if (isset($lisa) and $lisa != "" and $vertailubu != "") {
     // Rajataan budjettia
-    $bulisa = str_replace("tiliointi.","budjetti.", $lisa);
+    $bulisa = str_replace("tiliointi.", "budjetti.", $lisa);
   }
 
   if ($tltee == "aja") {
@@ -662,7 +662,7 @@ else {
       $paakirjalink = FALSE;
     }
 
-    $lopelinkki = "&lopetus=$PHP_SELF////tltee=$tltee//toim=$toim//tyyppi=$tyyppi//plvv=$plvv//plvk=$plvk//plvp=$plvp//alvv=$alvv//alvk=$alvk//alvp=$alvp//tkausi=$tkausi//rtaso=$rtaso//tarkkuus=$tarkkuus//desi=$desi//kaikkikaudet=$kaikkikaudet//ei_yhteensa=$ei_yhteensa//vertailued=$vertailued//vertailubu=$vertailubu".str_replace("&","//",$ulisa);
+    $lopelinkki = "&lopetus=$PHP_SELF////tltee=$tltee//toim=$toim//tyyppi=$tyyppi//plvv=$plvv//plvk=$plvk//plvp=$plvp//alvv=$alvv//alvk=$alvk//alvp=$alvp//tkausi=$tkausi//rtaso=$rtaso//tarkkuus=$tarkkuus//desi=$desi//kaikkikaudet=$kaikkikaudet//ei_yhteensa=$ei_yhteensa//vertailued=$vertailued//vertailubu=$vertailubu".str_replace("&", "//", $ulisa);
 
     $startmonth  = date("Ymd",   mktime(0, 0, 0, $plvk, 1, $plvv));
     $endmonth   = date("Ymd",   mktime(0, 0, 0, $alvk, 1, $alvv));
@@ -698,13 +698,13 @@ else {
     for ($i = $startmonth;  $i <= $endmonth;) {
 
       if ($i == $startmonth) $alku = $plvv."-".$plvk."-".$plvp;
-      else $alku = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2), substr($i,0,4)));
+      else $alku = date("Y-m-d", mktime(0, 0, 0, substr($i, 4, 2), substr($i, 6, 2), substr($i, 0, 4)));
 
       if ($i == $endmonth) $loppu = $alvv."-".$alvk."-".$alvp;
-      else $loppu = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2)+1, 0, substr($i,0,4)));
+      else $loppu = date("Y-m-d", mktime(0, 0, 0, substr($i, 4, 2)+1, 0, substr($i, 0, 4)));
 
-      $bukausi = date("Ym",    mktime(0, 0, 0, substr($i,4,2), substr($i,6,2), substr($i,0,4)));
-      $headny  = date("Y/m",   mktime(0, 0, 0, substr($i,4,2), substr($i,6,2),  substr($i,0,4)));
+      $bukausi = date("Ym",    mktime(0, 0, 0, substr($i, 4, 2), substr($i, 6, 2), substr($i, 0, 4)));
+      $headny  = date("Y/m",   mktime(0, 0, 0, substr($i, 4, 2), substr($i, 6, 2),  substr($i, 0, 4)));
 
       if ($alkuquery1 != "") $alkuquery1 .= " ,";
       if ($alkuquery2 != "") $alkuquery2 .= " ,";
@@ -717,7 +717,7 @@ else {
       if ($vertailued != "") {
 
         if ($i == $startmonth) $alku_ed = ($plvv-1)."-".$plvk."-".$plvp;
-        else $alku_ed  = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2), substr($i,6,2), substr($i,0,4)-1));
+        else $alku_ed  = date("Y-m-d", mktime(0, 0, 0, substr($i, 4, 2), substr($i, 6, 2), substr($i, 0, 4)-1));
 
         if ($i == $endmonth) {
 
@@ -733,9 +733,9 @@ else {
             $loppu_ed = ($alvv-1)."-".$alvk."-".$alvp;
           }
         }
-        else $loppu_ed = date("Y-m-d", mktime(0, 0, 0, substr($i,4,2)+1, 0, substr($i,0,4)-1));
+        else $loppu_ed = date("Y-m-d", mktime(0, 0, 0, substr($i, 4, 2)+1, 0, substr($i, 0, 4)-1));
 
-        $headed   = date("Y/m",   mktime(0, 0, 0, substr($i,4,2), substr($i,6,2), substr($i,0,4)-1));
+        $headed   = date("Y/m",   mktime(0, 0, 0, substr($i, 4, 2), substr($i, 6, 2), substr($i, 0, 4)-1));
 
         $alkuquery1 .= " ,sum(if (tiliointi.tapvm >= '$alku_ed' and tiliointi.tapvm <= '$loppu_ed', tiliointi.summa, 0)) '$headed'\n";
         $alkuquery2 .= " ,sum(if (tiliointi.tapvm >= '$alku_ed' and tiliointi.tapvm <= '$loppu_ed', tiliointi.summa, 0)) '$headed'\n";
@@ -750,7 +750,7 @@ else {
         $kaudet[] = "budj $headny";
       }
 
-      $i = date("Ymd",mktime(0, 0, 0, substr($i,4,2)+1, 1, substr($i,0,4)));
+      $i = date("Ymd", mktime(0, 0, 0, substr($i, 4, 2)+1, 1, substr($i, 0, 4)));
     }
 
     $vka = date("Y/m", mktime(0, 0, 0, $plvk, 1, $plvv));
@@ -935,7 +935,7 @@ else {
           foreach ($tilirow_summat as $sarake => $tilirow_sum) {
             // summataan kausien saldot
             foreach ($kaudet as $kausi) {
-              if (substr($kausi,0,4) == "budj") {
+              if (substr($kausi, 0, 4) == "budj") {
                 $i = $tasoluku - 1;
 
                 $summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$kausi];
@@ -976,7 +976,7 @@ else {
         foreach ($tilirow_summat as $sarake => $tilirow_sum) {
           // summataan kausien saldot
           foreach ($kaudet as $kausi) {
-            if (substr($kausi,0,4) == "budj") {
+            if (substr($kausi, 0, 4) == "budj") {
               $i = $tasoluku - 1;
 
               $summa[$kausi][$taso[$i]][(string) $sarake] = $tilirow_sum[$kausi];
@@ -999,7 +999,7 @@ else {
 
         foreach ($sarakkeet as $sarake) {
           foreach ($kaudet as $kausi) {
-            if (substr($kausi,0,4) != "budj") {
+            if (substr($kausi, 0, 4) != "budj") {
               //Käytetään oletusarvo, jos alkuperäisen tason arvo on 0
               if ((isset($summa[$kausi][$taso[$summattavaindeksi]][(string) $sarake]) and $summa[$kausi][$taso[$summattavaindeksi]][(string) $sarake] == 0) or !isset($summa[$kausi][$taso[$summattavaindeksi]][(string) $sarake])) {
 
@@ -1064,7 +1064,7 @@ else {
       // vain yhteensä
       $alkukausi = count($kaudet)-1;
 
-      if ($vertailued != "" and $vertailubu != ""){
+      if ($vertailued != "" and $vertailubu != "") {
         $alkukausi -= 2;
       }
       elseif ($vertailued != "" and $vertailubu == "") {
@@ -1224,8 +1224,8 @@ else {
             $summares = pupe_query($query);
 
             // Budjettia ei summata
-            if ($summarow = mysql_fetch_assoc($summares) and substr($kaudet[$i],0,4) != "budj") {
-              foreach(explode(",", $summarow["summattava_taso"]) as $staso) {
+            if ($summarow = mysql_fetch_assoc($summares) and substr($kaudet[$i], 0, 4) != "budj") {
+              foreach (explode(",", $summarow["summattava_taso"]) as $staso) {
                 $summa[$kaudet[$i]][$key][(string) $sarake] = $summa[$kaudet[$i]][$key][(string) $sarake] + $summa[$kaudet[$i]][$staso][(string) $sarake];
               }
             }
@@ -1296,7 +1296,7 @@ else {
 
     // Excel-koodia
     if (isset($teexls) and $teexls == "OK") {
-      include('inc/pupeExcel.inc');
+      include 'inc/pupeExcel.inc';
 
       $worksheet    = new pupeExcel();
       $format_bold = array("bold" => TRUE);
@@ -1323,7 +1323,7 @@ else {
 
     // PDF-koodia
     if (isset($teepdf) and $teepdf == "OK") {
-      require_once('pdflib/phppdflib.class.php');
+      require_once 'pdflib/phppdflib.class.php';
 
       $pdf = new pdffile;
       $pdf->set_default('margin', 0);
@@ -1332,7 +1332,7 @@ else {
 
       $p["height"]   = 10;
       $p["font"]     = "Times-Roman";
-          $b["height"]  = 8;
+      $b["height"]  = 8;
       $b["font"]     = "Times-Bold";
 
       if (count($kaudet) > 10 and $kaikkikaudet != "") {
@@ -1367,7 +1367,7 @@ else {
       }
 
       if (!function_exists("alku")) {
-        function alku () {
+        function alku() {
           global $yhtiorow, $kukarow, $firstpage, $pdf, $bottom, $kaudet, $kaikkikaudet, $saraklev, $rivikork, $p, $b, $otsikko, $alkukausi, $yhteensasaraklev, $vaslev, $sarakkeet, $ei_yhteensa, $leveysarray;
 
           if ((count($kaudet) > 5 and $kaikkikaudet == "joo") or count($sarakkeet) > 2) {
@@ -1492,7 +1492,7 @@ else {
           }
           elseif ($pi > 2) {
 
-            if (isset($teexls) and $teexls == "OK") $worksheet->writeNumber($excelrivi, $pi-2, (float) str_replace(" ","",str_replace(",",".", $arvo)));
+            if (isset($teexls) and $teexls == "OK") $worksheet->writeNumber($excelrivi, $pi-2, (float) str_replace(" ", "", str_replace(",", ".", $arvo)));
 
             if (isset($teepdf) and $teepdf == "OK") {
               $oikpos = $pdf->strlen($arvo, $p);
@@ -1529,7 +1529,7 @@ else {
       echo "<input type='hidden' name='toim' value='$toim'>";
       echo "<input type='hidden' name='teetiedosto' value='lataa_tiedosto'>";
       // poistetaan välilyönti
-      $otsikko = str_replace(" ","_",$otsikko);
+      $otsikko = str_replace(" ", "_", $otsikko);
       echo "<input type='hidden' name='kaunisnimi' value='$otsikko.pdf'>";
       echo "<input type='hidden' name='tmpfilenimi' value='$pdffilenimi'>";
       echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
@@ -1546,7 +1546,7 @@ else {
       echo "<input type='hidden' name='toim' value='$toim'>";
       echo "<input type='hidden' name='teetiedosto' value='lataa_tiedosto'>";
       // poistetaan välilyönti
-      $otsikko = str_replace(" ","_",$otsikko);
+      $otsikko = str_replace(" ", "_", $otsikko);
       echo "<input type='hidden' name='kaunisnimi' value='$otsikko.xlsx'>";
       echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
       echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
@@ -1554,5 +1554,5 @@ else {
     }
   }
 
-  require("inc/footer.inc");
+  require "inc/footer.inc";
 }

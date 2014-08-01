@@ -1,33 +1,33 @@
 <?php
 
-if(!function_exists("yhtion_parametrittarkista")) {
-  function yhtion_parametrittarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("yhtion_parametrittarkista")) {
+  function yhtion_parametrittarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $tiedostopaate;
 
     static  $verkkolasku_lah_talteen,
-        $verkkolasku_lah_talteen_i,
-        $maksuehto_tuotenumero,
-        $rahti_tuotenumero,
-        $jalkivaatimus_tuotenumero,
-        $laskutuslisa_tuotenumero,
-        $ennakkomaksu_tuotenumero,
-        $kasittelykulu_tuotenumero,
-        $alennus_tuotenumero,
-        $kuljetusvakuutus_tuotenumero,
-        $erilliskasiteltava_tuotenumero,
-        $ennakkomaksu_tuotenumero,
-        $lisakulu_tuotenumero,
-        $ind_maksuehto_tuotenumero,
-        $ind_rahti_tuotenumero,
-        $ind_jalkivaatimus_tuotenumero,
-        $ind_laskutuslisa_tuotenumero,
-        $ind_ennakkomaksu_tuotenumero,
-        $ind_kasittelykulu_tuotenumero,
-        $ind_alennus_tuotenumero,
-        $ind_kuljetusvakuutus_tuotenumero,
-        $ind_erilliskasiteltava_tuotenumero,
-        $ind_ennakkomaksu_tuotenumero,
-        $ind_lisakulu_tuotenumero;
+    $verkkolasku_lah_talteen_i,
+    $maksuehto_tuotenumero,
+    $rahti_tuotenumero,
+    $jalkivaatimus_tuotenumero,
+    $laskutuslisa_tuotenumero,
+    $ennakkomaksu_tuotenumero,
+    $kasittelykulu_tuotenumero,
+    $alennus_tuotenumero,
+    $kuljetusvakuutus_tuotenumero,
+    $erilliskasiteltava_tuotenumero,
+    $ennakkomaksu_tuotenumero,
+    $lisakulu_tuotenumero,
+    $ind_maksuehto_tuotenumero,
+    $ind_rahti_tuotenumero,
+    $ind_jalkivaatimus_tuotenumero,
+    $ind_laskutuslisa_tuotenumero,
+    $ind_ennakkomaksu_tuotenumero,
+    $ind_kasittelykulu_tuotenumero,
+    $ind_alennus_tuotenumero,
+    $ind_kuljetusvakuutus_tuotenumero,
+    $ind_erilliskasiteltava_tuotenumero,
+    $ind_ennakkomaksu_tuotenumero,
+    $ind_lisakulu_tuotenumero;
 
     $fieldname = mysql_field_name($result, $i);
 
@@ -47,16 +47,16 @@ if(!function_exists("yhtion_parametrittarkista")) {
       }
     }
 
-    if ($fieldname == "maksuehto_tuotenumero" OR
-        $fieldname == "rahti_tuotenumero" OR
-        $fieldname == "jalkivaatimus_tuotenumero" OR
-        $fieldname == "laskutuslisa_tuotenumero" OR
-        $fieldname == "ennakkomaksu_tuotenumero" OR
-      $fieldname == "kasittelykulu_tuotenumero" OR
-        $fieldname == "alennus_tuotenumero" OR
-      $fieldname == "kuljetusvakuutus_tuotenumero" OR
-      $fieldname == "erilliskasiteltava_tuotenumero" OR
-      $fieldname == "ennakkomaksu_tuotenumero" OR
+    if ($fieldname == "maksuehto_tuotenumero" or
+      $fieldname == "rahti_tuotenumero" or
+      $fieldname == "jalkivaatimus_tuotenumero" or
+      $fieldname == "laskutuslisa_tuotenumero" or
+      $fieldname == "ennakkomaksu_tuotenumero" or
+      $fieldname == "kasittelykulu_tuotenumero" or
+      $fieldname == "alennus_tuotenumero" or
+      $fieldname == "kuljetusvakuutus_tuotenumero" or
+      $fieldname == "erilliskasiteltava_tuotenumero" or
+      $fieldname == "ennakkomaksu_tuotenumero" or
       $fieldname == "lisakulu_tuotenumero") {
 
       $tuote = mysql_real_escape_string(trim($t[$i]));
@@ -110,28 +110,28 @@ if(!function_exists("yhtion_parametrittarkista")) {
 
     if ($fieldname == "syncronoi") {
 
-      if($t[$i]!="") {
-        $t[$i]=str_replace("'","",$t[$i]);
-        if(strpos($t[$i],",")) {
-          $taulut=explode(",",$t[$i]);
+      if ($t[$i]!="") {
+        $t[$i]=str_replace("'", "", $t[$i]);
+        if (strpos($t[$i], ",")) {
+          $taulut=explode(",", $t[$i]);
         }
         else {
           $taulut=array($t[$i]);
         }
 
-        $sallitut=array("asiakas","toimi","avainsana","tuote","tuotteen_toimittajat");
-        $sallitut_avainsana=array("TRY","OSASTO");
+        $sallitut=array("asiakas", "toimi", "avainsana", "tuote", "tuotteen_toimittajat");
+        $sallitut_avainsana=array("TRY", "OSASTO");
 
-        if(count($taulut)>0) {
-          foreach($taulut as $taulu) {
+        if (count($taulut)>0) {
+          foreach ($taulut as $taulu) {
 
-            if(strpos($taulu,"avainsana")!==false) {
-              $taululisat = explode("|",substr($taulu,10));
-              $taulu = substr($taulu,0,9);
-              if(count($taululisat)>0) {
-                foreach($taululisat as $taululisa) {
-                  if(!in_array($taululisa, $sallitut_avainsana)) {
-                    if($virhe[$i]!="") {
+            if (strpos($taulu, "avainsana")!==false) {
+              $taululisat = explode("|", substr($taulu, 10));
+              $taulu = substr($taulu, 0, 9);
+              if (count($taululisat)>0) {
+                foreach ($taululisat as $taululisa) {
+                  if (!in_array($taululisa, $sallitut_avainsana)) {
+                    if ($virhe[$i]!="") {
                       $virhe[$i] .= "<br>";
                     }
                     $virhe[$i] .= t("Lisätieto ei kelpaa")." '$lisa' ".t("sallitut lisat ovat")." ".implode("|", $sallitut_avainsana);
@@ -139,7 +139,7 @@ if(!function_exists("yhtion_parametrittarkista")) {
                 }
               }
               else {
-                if($virhe[$i]!="") {
+                if ($virhe[$i]!="") {
                   $virhe[$i] .= "<br>";
                 }
                 $virhe[$i] .= t("Lisätiedot vaaditaan")." '$lisa' ".t("sallitut lisat ovat")." ".implode("|", $sallitut_avainsana);
@@ -148,8 +148,8 @@ if(!function_exists("yhtion_parametrittarkista")) {
 
             $query="show tables like '$taulu'";
             $taulures=pupe_query($query);
-            if(mysql_num_rows($taulures)==0 or !in_array($taulu, $sallitut)) {
-              if($virhe[$i]!="") {
+            if (mysql_num_rows($taulures)==0 or !in_array($taulu, $sallitut)) {
+              if ($virhe[$i]!="") {
                 $virhe[$i] .= "<br>";
               }
               $virhe[$i] .= t("Taulu ei kelpaa")." '$taulu' ".t("sallitut kentät ovat")." ".implode(",", $sallitut);
@@ -201,25 +201,25 @@ if(!function_exists("yhtion_parametrittarkista")) {
       $verkkolasku_lah_talteen_i = $i;
     }
 
-        if ($fieldname == "erapaivan_ylityksen_raja") {
-            $t[$i] = (int) trim($t[$i]);
+    if ($fieldname == "erapaivan_ylityksen_raja") {
+      $t[$i] = (int) trim($t[$i]);
       if ($t[$i] < 1) {
         $virhe[$i] = t("Arvon oltava kokonaisluku ja vähintään 1") . "!";
       }
-        }
+    }
 
     if ($fieldname == "lahetteen_tulostustapa") {
-            if (in_array($t[$i], array('B', 'I')) and !empty($t['kerayserat'])) {
+      if (in_array($t[$i], array('B', 'I')) and !empty($t['kerayserat'])) {
         //jos lahetteen_tulostustapa on asennossa:
         //"Myyntitilausten keräyslistat ja lähetteet tulostetaan automaattisesti"
         //tai "Myyntitilausten keräyslistat ja lähetteet tulostetaan automaattisesti ja tilaus laitetaan toimitetuksi"
         //ja kerayserät on päällä
         $virhe[$i] = t("Keräyserät ei voi olla päällä jos lähete halutaan tulostaa automaattisesti") . "!";
       }
-        }
+    }
 
     if ($fieldname == "tunnus") {
-        // Tsekataan, että tietyt tuotteen ei oo samoja keskenään
+      // Tsekataan, että tietyt tuotteen ei oo samoja keskenään
       if ($rahti_tuotenumero != "" and $rahti_tuotenumero == $erilliskasiteltava_tuotenumero) {
         $virhe[$i] = $virhe[$ind_erilliskasiteltava_tuotenumero] = t("Erilliskäsiteltäväkulun tuotenumero ei voi olla sama kuin Rahtikulun tuotenumero")."!";
       }
@@ -231,6 +231,6 @@ if(!function_exists("yhtion_parametrittarkista")) {
       if ($rahti_tuotenumero != "" and $rahti_tuotenumero == $kuljetusvakuutus_tuotenumero) {
         $virhe[$i] = $virhe[$ind_kuljetusvakuutus_tuotenumero] = t("Kuljetusvakuutuksen tuotenumero ei voi olla sama kuin Rahtikulun tuotenumero")."!";
       }
-        }
+    }
   }
 }

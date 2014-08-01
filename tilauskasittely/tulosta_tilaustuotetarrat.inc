@@ -1,10 +1,10 @@
 <?php
 
-if(!function_exists("tulosta_tilaustuotetarrat")) {
+if (!function_exists("tulosta_tilaustuotetarrat")) {
   function tulosta_tilaustuotetarrat($otunnus, $tunnukset, $komento="", $tee="") {
     global $yhtiorow, $kukarow, $pdf, $fonts, $h;
 
-    if($tunnukset>0) {
+    if ($tunnukset>0) {
       $lisa = "tilausrivi.tunnus in ($tunnukset) and ";
     }
     else {
@@ -23,15 +23,15 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
               WHERE tilausrivi.yhtio='$kukarow[yhtio]' and $lisa tilausrivi.tyyppi = 'O'";
     $result = mysql_query($query) or pupe_error($query);
 
-    if(mysql_num_rows($result) > 0) {
+    if (mysql_num_rows($result) > 0) {
 
-      require_once('pdflib/pupepdf.class.php');
+      require_once 'pdflib/pupepdf.class.php';
 
       if (!function_exists('alku')) {
-        function alku ($pdf, $row) {
+        function alku($pdf, $row) {
           global $yhtiorow, $laskurow, $kukarow, $fonts, $tid, $h, $pdf;
 
-          if(!is_object($pdf)) {
+          if (!is_object($pdf)) {
             //  Aloitellaan piirtely‰
             $pdf = new pdf;
             $pdf->enable('template');
@@ -61,11 +61,11 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
         }
       }
       $tarrat_tot=0;
-      while($row = mysql_fetch_array($result)) {
+      while ($row = mysql_fetch_array($result)) {
 
         $tarra_kpl = "";
 
-        if(file_exists($row["tarratyyppi"])) {
+        if (file_exists($row["tarratyyppi"])) {
 
           //  Haetaan perustietoja
           $query = "SELECT laskutettuaika
@@ -80,7 +80,7 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
           $sarjares = mysql_query($query) or pupe_error($query);
           $sarjarow = mysql_fetch_array($sarjares);
 
-          if(table_exists("sarjanumeron_lisatiedot")) {
+          if (table_exists("sarjanumeron_lisatiedot")) {
             $query = "SELECT *
                       FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
                       WHERE yhtio      = '$kukarow[yhtio]'
@@ -90,21 +90,21 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
           }
 
           //  Ratkaistaan tulostusm‰‰r‰
-          if(in_array($row["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
+          if (in_array($row["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
             $tarra_kpl = 1;
           }
-          elseif(in_array(strtoupper($row["yksikko"]), array("KPL"))) {
+          elseif (in_array(strtoupper($row["yksikko"]), array("KPL"))) {
             $tarra_kpl = $row["kpl"];
           }
           else {
             $tarra_kpl = $row["tarrakpl"];
           }
 
-          for($i=0;$i<$tarra_kpl;$i++) {
-            require($row["tarratyyppi"]);
+          for ($i=0;$i<$tarra_kpl;$i++) {
+            require $row["tarratyyppi"];
           }
 
-          if($komento=="OPTIMOI") {
+          if ($komento=="OPTIMOI") {
             $query = "SELECT printteri2
                       FROM varastopaikat
                       WHERE varastopaikat.yhtio = '$kukarow[yhtio]' and varastopaikat.printteri2 != '' and
@@ -122,10 +122,10 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
       }
 
       //  Tulostetaan tarra jos meill‰ on jotain tulostettavaa
-      if($tarrat_tot>0) {
+      if ($tarrat_tot>0) {
 
         //  Haetaan sopivan varaston printteri2
-        if($komento=="OPTIMOI" and is_array($arvaakirjoitin)) {
+        if ($komento=="OPTIMOI" and is_array($arvaakirjoitin)) {
           arsort($arvaakirjoitin);
           $query = "SELECT *
                     FROM kirjoittimet
@@ -147,10 +147,10 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
           $kutsu = "Tilaustuotetarrat $laskurow[tunnus]";
 
           if ($kukarow["extranet"] == '') {
-            require("../inc/sahkoposti.inc");
+            require "../inc/sahkoposti.inc";
           }
           else {
-            require("sahkoposti.inc");
+            require "sahkoposti.inc";
           }
         }
         elseif ($tee == 'NAYTATILAUS') {
@@ -160,7 +160,7 @@ if(!function_exists("tulosta_tilaustuotetarrat")) {
         elseif ($komento != '' and $komento != 'edi') {
           echo t("Tilaustuotetarrat tulostuu")."...<br>";
           $line = exec("$komento $pdf_tilaustuotetarrafilenimi", $output, $returnvalue);
-          if($returnvalue == 0) {
+          if ($returnvalue == 0) {
             echo "<font class='message'>".t("Tilaustuotetarrat tulostettiin")."</font><br>";
           }
           else {

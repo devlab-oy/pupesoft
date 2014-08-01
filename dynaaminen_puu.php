@@ -4,7 +4,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
   $no_head = "yes";
 }
 
-require('inc/parametrit.inc');
+require 'inc/parametrit.inc';
 
 $saamuokata = false;
 $saamuokataliitoksia = false;
@@ -56,8 +56,8 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
       $_selitetark = t_avainsana("DPAVAINSANALAJI", "", "and avainsana.selitetark = '{$dp_row['avainsana']}' and avainsana.selitetark_2 = '{$toim}'", "", "", "selitetark");
 
       if ($saamuokata) {
-        echo "<a class='remove_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/stop.png' alt='",t('Poista'),"'/></a>&nbsp;&nbsp;";
-        echo "<a style='float: right;' class='edit_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t('Muokkaa'),"'/></a>";
+        echo "<a class='remove_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/stop.png' alt='", t('Poista'), "'/></a>&nbsp;&nbsp;";
+        echo "<a style='float: right;' class='edit_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t('Muokkaa'), "'/></a>";
         echo "<input type='hidden' class='edit_keyword_class' id='{$dp_row['tunnus']}_class' value='{$dp_row['avainsana']}' />";
       }
 
@@ -83,7 +83,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
   $uusi_nimi  = (isset($uusi_nimi)) ? utf8_decode($uusi_nimi): "";
   $uusi_koodi  = (isset($uusi_koodi)) ? utf8_decode($uusi_koodi): "";
 
-  function getnoderow ($toim, $nodeid) {
+  function getnoderow($toim, $nodeid) {
     global $yhtiorow, $kukarow;
 
     $qu = "SELECT *
@@ -111,7 +111,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
     // muokkaustoiminnot
     if (isset($tee) and $tee != '') {
 
-      if ($saamuokata and !in_array($tee, array('addtotree','removefromtree'))) {
+      if ($saamuokata and !in_array($tee, array('addtotree', 'removefromtree'))) {
 
         // Siirretään haaraa järjestyksessä ylös tai alas
         if ($tee == 'ylos' or $tee == 'alas') {
@@ -146,7 +146,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
           }
           else {
 
-            # Tarkistetaan onko avainsana jo tallennettu kantaa. Duplikaatteja ei sallita.
+            // Tarkistetaan onko avainsana jo tallennettu kantaa. Duplikaatteja ei sallita.
             $query = "SELECT tunnus
                       FROM dynaaminen_puu_avainsanat
                       WHERE yhtio      = '{$kukarow['yhtio']}'
@@ -192,7 +192,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
           if ($targetnoderow != FALSE) {
             $src['lft'] = $noderow['lft'];
             $src['rgt'] = $noderow['rgt'];
-            siirraOksa($toim,$src,$targetnoderow['rgt']);
+            siirraOksa($toim, $src, $targetnoderow['rgt']);
             paivitapuunsyvyys($toim);
           }
         }
@@ -224,10 +224,10 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
 
     echo "<h2 style='font-size: 20px'>".$noderow['nimi']."</h2><hr />
         <p><font class='message'>".t("Koodi").":</font> ".$noderow['koodi']."<br />".
-        "<font class='message'>".t("Tunnus").":</font> ".$noderow['tunnus']."<br />".
-        " <font class='message'>".t("Syvyys").":</font> ".$noderow['syvyys']."<br />".
-        " <font class='message'>lft / rgt:</font> ".$noderow['lft']." / ".$noderow['rgt'].
-        "</p>";
+      "<font class='message'>".t("Tunnus").":</font> ".$noderow['tunnus']."<br />".
+      " <font class='message'>".t("Syvyys").":</font> ".$noderow['syvyys']."<br />".
+      " <font class='message'>lft / rgt:</font> ".$noderow['lft']." / ".$noderow['rgt'].
+      "</p>";
 
     // " <font class='message'>".t("Toimittajan koodi").":</font> ".$noderow['toimittajan_koodi'].
 
@@ -263,18 +263,18 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
 
     echo "<hr /><div id='editbuttons'>";
     if ($saamuokata) {
-      echo "  <a href='#' id='showeditbox' id='muokkaa'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t('Muokkaa lapsikategoriaa'),"'/> ".t('Muokkaa tason tietoja')."</a><br /><br />
-          <a href='#' class='editbtn' id='ylos'><img src='{$palvelin2}pics/lullacons/arrow-single-up-green.png' alt='",t('Siirrä ylöspäin'),"'/> ".t('Siirrä tasoa ylöspäin')."</a><br />
-          <a href='#' class='editbtn' id='alas'><img src='{$palvelin2}pics/lullacons/arrow-single-down-green.png' alt='",t('Siirrä alaspäin'),"'/> ".t('Siirrä tasoa alaspäin')."</a><br /><br />
-          <a href='#' id='showmovebox'> <img src='{$palvelin2}pics/lullacons/arrow-single-right-green.png' alt='",t('Siirrä alatasoksi'),"'/> ".t('Siirrä oksa alatasoksi')."</a><br /><br />
-          <a href='#' id='showaddbox'><img src='{$palvelin2}pics/lullacons/add.png' alt='",t('Lisää'),"'/>".t('Lisää uusi lapsitaso')."</a><br /><br />";
+      echo "  <a href='#' id='showeditbox' id='muokkaa'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t('Muokkaa lapsikategoriaa'), "'/> ".t('Muokkaa tason tietoja')."</a><br /><br />
+          <a href='#' class='editbtn' id='ylos'><img src='{$palvelin2}pics/lullacons/arrow-single-up-green.png' alt='", t('Siirrä ylöspäin'), "'/> ".t('Siirrä tasoa ylöspäin')."</a><br />
+          <a href='#' class='editbtn' id='alas'><img src='{$palvelin2}pics/lullacons/arrow-single-down-green.png' alt='", t('Siirrä alaspäin'), "'/> ".t('Siirrä tasoa alaspäin')."</a><br /><br />
+          <a href='#' id='showmovebox'> <img src='{$palvelin2}pics/lullacons/arrow-single-right-green.png' alt='", t('Siirrä alatasoksi'), "'/> ".t('Siirrä oksa alatasoksi')."</a><br /><br />
+          <a href='#' id='showaddbox'><img src='{$palvelin2}pics/lullacons/add.png' alt='", t('Lisää'), "'/>".t('Lisää uusi lapsitaso')."</a><br /><br />";
 
       // poistonappi aktiivinen vain jos ei ole liitoksia
       if ($own_items > 0 or $child_items > 0) {
         echo "<font style='info'>".t("Poistaminen ei ole mahdollista kun tasolla on liitoksia.")."</font>";
       }
       else {
-        echo "<a href='#' class='editbtn' id='poista'><img src='{$palvelin2}pics/lullacons/stop.png' alt='",t('Poista'),"'/> ".t('Poista taso')."</a>";
+        echo "<a href='#' class='editbtn' id='poista'><img src='{$palvelin2}pics/lullacons/stop.png' alt='", t('Poista'), "'/> ".t('Poista taso')."</a>";
       }
     }
 
@@ -338,7 +338,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
       </form>
     </div>";
 
-    ?>
+?>
     <script language="javascript">
     var params = new Object();
     <?php
@@ -358,7 +358,7 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
       echo "var nimi = '{$noderow["nimi"]}';";
       echo "var koodi = '{$noderow["koodi"]}';";
       echo "params['liitos']  = '{$liitos}';";
-      ?>
+?>
 
       jQuery(".editbtn").click(function(){
         params["tee"] = this.id;
@@ -496,16 +496,16 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
       });
       <?php
     }
-    ?>
+?>
     </script>
     <?php
     // suljetaan nodelaatikko
     echo "</div>";
 
-    # noden avainsanatlaatikko
+    // noden avainsanatlaatikko
     echo "<br /><hr /><br />";
     echo "<div id='infobox_keywords' class='spec' style='padding: 20px; border: 1px solid black;'>";
-    echo "<h2 style='font-size: 20px'>",t("Avainsanat"),"</h2><hr />";
+    echo "<h2 style='font-size: 20px'>", t("Avainsanat"), "</h2><hr />";
 
     $query = "SELECT *
               FROM dynaaminen_puu_avainsanat
@@ -523,8 +523,8 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
         $_selitetark = t_avainsana("DPAVAINSANALAJI", "", "and avainsana.selitetark = '{$dp_row['avainsana']}' and avainsana.selitetark_2 = '{$toim}'", "", "", "selitetark");
 
         if ($saamuokata) {
-          echo "<a class='remove_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/stop.png' alt='",t('Poista'),"'/></a>&nbsp;&nbsp;";
-          echo "<a style='float: right;' class='edit_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='",t('Muokkaa'),"'/></a>";
+          echo "<a class='remove_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/stop.png' alt='", t('Poista'), "'/></a>&nbsp;&nbsp;";
+          echo "<a style='float: right;' class='edit_keyword' id='{$dp_row['tunnus']}'><img src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t('Muokkaa'), "'/></a>";
           echo "<input type='hidden' class='edit_keyword_class' id='{$dp_row['tunnus']}_class' value='{$dp_row['avainsana']}' />";
         }
 
@@ -540,12 +540,12 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
     echo "<div id='editbuttons_keywords'>";
 
     if ($saamuokata) {
-      echo "<a href='#' id='showaddbox_keywords'><img src='{$palvelin2}pics/lullacons/add.png' alt='",t('Lisää'),"'/>",t('Lisää uusi avainsana'),"</a><br /><br />";
+      echo "<a href='#' id='showaddbox_keywords'><img src='{$palvelin2}pics/lullacons/add.png' alt='", t('Lisää'), "'/>", t('Lisää uusi avainsana'), "</a><br /><br />";
     }
 
     echo "</div>";
 
-    # tason avainsana lisäyslaatikko
+    // tason avainsana lisäyslaatikko
     echo "<div id='nodebox_keywords' style='display: none'>
       <form id='keywordsform'>
       <fieldset>
@@ -557,9 +557,9 @@ if (isset($_REQUEST["ajax"]) and $_REQUEST["ajax"] == "OK") {
     $vresult = t_avainsana("DPAVAINSANALAJI", "", "and avainsana.selitetark_2 = '{$toim}'");
 
     echo "<select id='keywords_category' name='keywords_category' style='float: right;'>";
-    echo "<option value=''>",t("Valitse laji"),"</option>";
+    echo "<option value=''>", t("Valitse laji"), "</option>";
 
-    while($row = mysql_fetch_assoc($vresult)) {
+    while ($row = mysql_fetch_assoc($vresult)) {
       echo "<option value='{$row['selite']}'>{$row['selitetark']}</option>";
     }
 
@@ -614,7 +614,7 @@ if (isset($tee) and isset($toim)) {
            AND liitos  = '{$liitos}'";
     $re = pupe_query($qu);
     // haetaan tiedot arrayhin myohempaa kayttoa varten
-    while($row = mysql_fetch_assoc($re)) {
+    while ($row = mysql_fetch_assoc($re)) {
       $valitutnodet[] = $row['puun_tunnus'];
     }
   }
@@ -669,11 +669,11 @@ else {
     $diff = $row['syvyys'] - $prevdepth;
     $diffi = $diff;
 
-    while($diff > 0) {
+    while ($diff > 0) {
       echo "\n<ul>";
       $diff--;
     }
-    while($diff < 0) {
+    while ($diff < 0) {
       echo "</li>\n</ul>\n</li>";
       $diff++;
     }
@@ -687,7 +687,7 @@ else {
   echo "</ul></div>
       <div id='infobox' class='spec' style='padding: 20px; border: 1px solid black; left: 520px; top: 52px; float: right; position: absolute;'></div>";
 
-  ?>
+?>
   <script language="javascript">
 
   var dynpuuparams = new Object();
@@ -700,7 +700,7 @@ else {
   if (isset($liitos) and $liitos != "") {
     echo 'dynpuuparams["liitos"] = "'.$liitos.'";';
   }
-  ?>
+?>
 
   var loadimg = "<img src='pics/loading_orange.gif' id='loading' />";
   var activenode;
@@ -882,16 +882,16 @@ else {
   if ($tee == 'valitsesegmentti') {
     $nodet = implode("','", $valitutnodet);
     echo "var valitutnodet = ['".$nodet."'];";
-  ?>
+?>
     jQuery.each(valitutnodet, function() {
       jQuery("#"+this).addClass("error");
     });
 
   <?php
   }
-  ?>
+?>
   </script>
   <?php
 }
 
-require('inc/footer.inc');
+require 'inc/footer.inc';

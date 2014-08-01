@@ -3,7 +3,7 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Maksuvalmius")."</font><hr>";
 
@@ -89,7 +89,7 @@ if ($tee == "1") {
     else {
       echo "<table><tr><th>".t("Konserniyritykset").":</th></tr>";
 
-      while ($yrow = mysql_fetch_array ($result)) {
+      while ($yrow = mysql_fetch_array($result)) {
         echo "<tr><td>$yrow[nimi]</td></tr>";
       }
 
@@ -153,4 +153,4 @@ if ($tee == "1") {
   echo "</table>";
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

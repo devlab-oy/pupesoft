@@ -3,7 +3,7 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Laskutuksen tiliöinnit")."</font><hr>";
 
@@ -71,9 +71,9 @@ if ($tee == "tee") {
   echo "<table>";
   echo "<tr>";
   for ($i = 0; $i < mysql_num_fields($result); $i++) {
-    echo "<th>" . t(mysql_field_name($result,$i)) ."</th>";
+    echo "<th>" . t(mysql_field_name($result, $i)) ."</th>";
   }
-  while ($trow=mysql_fetch_array ($result)) {
+  while ($trow=mysql_fetch_array($result)) {
     echo "<tr>";
     for ($i=0; $i<mysql_num_fields($result); $i++) {
       echo "<td>$trow[$i]</td>";
@@ -83,4 +83,4 @@ if ($tee == "tee") {
   }
   echo "</table>";
 }
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

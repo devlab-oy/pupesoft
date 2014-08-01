@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("toimitustapatarkista")) {
-  function toimitustapatarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("toimitustapatarkista")) {
+  function toimitustapatarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set;
 
     static $aputulostustapa, $apuvakkielto;
@@ -23,8 +23,8 @@ if(!function_exists("toimitustapatarkista")) {
     // jos toimitustavan nimeä ollaan muuttamassa...
     if ((mysql_field_name($result, $i)=="selite") and ($t[$i]!=$trow[$i])) {
       $toita = trim($t[$i]);
-      $toita = str_replace("'","",$toita);
-      $toita = str_replace("\"","",$toita);
+      $toita = str_replace("'", "", $toita);
+      $toita = str_replace("\"", "", $toita);
 
       $query = "SELECT tunnus from toimitustapa where selite='$toita' and yhtio='$kukarow[yhtio]' and tunnus != '$tunnus'";
       $updre = mysql_query($query) or pupe_error($query);
@@ -81,7 +81,7 @@ if(!function_exists("toimitustapatarkista")) {
       }
     }
 
-    if (mysql_field_name($result, $i) == "rahti_tuotenumero" OR
+    if (mysql_field_name($result, $i) == "rahti_tuotenumero" or
       mysql_field_name($result, $i) == "kuljetusvakuutus_tuotenumero") {
 
       $tuote = mysql_real_escape_string(trim($t[$i]));

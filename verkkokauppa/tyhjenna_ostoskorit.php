@@ -10,7 +10,7 @@ if (!isset($argv[1]) or $argv[1] == '') {
   die;
 }
 
-require("../inc/connect.inc");
+require "../inc/connect.inc";
 
 $yhtio = mysql_real_escape_string($argv[1]);
 

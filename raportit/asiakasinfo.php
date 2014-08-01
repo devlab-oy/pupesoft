@@ -5,11 +5,11 @@ $useslave = 1;
 
 if (isset($_POST["tee"])) {
   if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-if (@include("../inc/parametrit.inc"));
-elseif (@include("parametrit.inc"));
+if (@include "../inc/parametrit.inc");
+elseif (@include "parametrit.inc");
 else exit;
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
@@ -51,7 +51,7 @@ if ($tee == 'eposti') {
     if ($komento == '') {
       $tulostimet[] = "Alennustaulukko";
       $toimas = $ytunnus;
-      require("inc/valitse_tulostin.inc");
+      require "inc/valitse_tulostin.inc";
     }
 
     $ytunnus = $toimas;
@@ -60,9 +60,9 @@ if ($tee == 'eposti') {
     $komento["Alennustaulukko"] = "email";
   }
 
-  require('pdflib/phppdflib.class.php');
+  require 'pdflib/phppdflib.class.php';
 
-  function alku () {
+  function alku() {
     global $yhtiorow, $firstpage, $pdf, $rectparam, $norm, $norm_bold, $pieni, $ytunnus, $asiakasid, $kukarow, $kala, $tid, $otsikkotid;
 
     static $sivu;
@@ -137,7 +137,7 @@ if ($tee == 'eposti') {
 
   }
 
-  function rivi ($firstpage, $osasto, $try, $tuote, $ryhma, $ale, $alelaji) {
+  function rivi($firstpage, $osasto, $try, $tuote, $ryhma, $ale, $alelaji) {
     global $pdf, $kala, $rectparam, $norm, $norm_bold, $pieni;
 
     static $edosasto;
@@ -162,9 +162,9 @@ if ($tee == 'eposti') {
     else {
       $pdf->draw_text(60, $kala, $tuote,                 $firstpage, $norm);
     }
-    $pdf->draw_text(310, $kala, sprintf('%10s',$ryhma),   $firstpage, $norm);
-    $pdf->draw_text(420, $kala, sprintf('%10s',sprintf('%.2d',$ale))."%",   $firstpage, $norm);
-    if ($yhtiorow['myynnin_alekentat'] > 1 and trim($alelaji) != '') $pdf->draw_text(500, $kala, sprintf('%10s',t("Ale").$alelaji),   $firstpage, $norm);
+    $pdf->draw_text(310, $kala, sprintf('%10s', $ryhma),   $firstpage, $norm);
+    $pdf->draw_text(420, $kala, sprintf('%10s', sprintf('%.2d', $ale))."%",   $firstpage, $norm);
+    if ($yhtiorow['myynnin_alekentat'] > 1 and trim($alelaji) != '') $pdf->draw_text(500, $kala, sprintf('%10s', t("Ale").$alelaji),   $firstpage, $norm);
 
     $kala -= 15;
   }
@@ -188,7 +188,7 @@ if ($kukarow["extranet"] == "" and $lopetus == "") {
 }
 
 if ($kukarow["extranet"] == "" and $ytunnus != '') {
-  require ("inc/asiakashaku.inc");
+  require "inc/asiakashaku.inc";
 }
 
 // jos meill‰ on onnistuneesti valittu asiakas
@@ -235,7 +235,7 @@ if ($asiakasid > 0) {
   }
 
   if ($tee != "eposti") {
-    if (@include('Spreadsheet/Excel/Writer.php')) {
+    if (@include 'Spreadsheet/Excel/Writer.php') {
       //keksit‰‰n failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
@@ -300,7 +300,7 @@ if ($asiakasid > 0) {
     echo "<hr>";
 
     // 24 kk sitten
-    $ayy = date("Y-m-01",mktime(0, 0, 0, date("m")-24, date("d"), date("Y")));
+    $ayy = date("Y-m-01", mktime(0, 0, 0, date("m")-24, date("d"), date("Y")));
 
     $query  = "SELECT date_format(tapvm,'%Y/%m') kausi,
                round(sum(arvo),0) myynti,
@@ -412,7 +412,7 @@ if ($asiakasid > 0) {
       }
 
       if ($maxkay > 0) {
-        $haskay  = round(50*$askarow['kaynnit']/$maxkay,0);
+        $haskay  = round(50*$askarow['kaynnit']/$maxkay, 0);
       }
       else {
         $haskay = 0;
@@ -490,7 +490,7 @@ if ($asiakasid > 0) {
     echo "</form>";
 
     // alkukuukauden tiedot 12 kk sitten
-    $ayy = date("Y-m-01",mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
+    $ayy = date("Y-m-01", mktime(0, 0, 0, date("m")-12, date("d"), date("Y")));
 
     $query = "SELECT osasto, try,
               round(sum(rivihinta),0) myynti,
@@ -595,9 +595,9 @@ if ($asiakasid > 0) {
       $asiakas    = $ytunnus;
       $rajaus      = array();
       $toimittaja   = "";
-      $kka       = date("m",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
-      $vva       = date("Y",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
-      $ppa       = date("d",mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
+      $kka       = date("m", mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
+      $vva       = date("Y", mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
+      $ppa       = date("d", mktime(0, 0, 0, date("m")-3, date("d"), date("Y")));
       $kkl       = date("m");
       $vvl       = date("Y");
       $ppl       = date("d");
@@ -608,7 +608,7 @@ if ($asiakasid > 0) {
       //  Huijataan myyntiseurantaa
       if ($lopetus == "") $lopetus = "block";
 
-      require("myyntiseuranta.php");
+      require "myyntiseuranta.php";
 
       if ($lopetus == "block") $lopetus = "";
 
@@ -716,7 +716,7 @@ if ($asiakasid > 0) {
       }
 
       if (isset($workbook_ale) and $yhdistetty == "") {
-        foreach($otsik_spread as $key => $value) {
+        foreach ($otsik_spread as $key => $value) {
           $worksheet->write($excelrivi, $key, t(ucfirst($value)), $format_bold);
         }
         $excelrivi++;
@@ -731,14 +731,14 @@ if ($asiakasid > 0) {
       // tehd‰‰n avainsana query
       $tryres = t_avainsana("OSASTO");
 
-      while($tryrow = mysql_fetch_assoc($tryres)) {
+      while ($tryrow = mysql_fetch_assoc($tryres)) {
         $osastot[$tryrow["selite"]] = $tryrow["selitetark"];
       }
 
       // tehd‰‰n avainsana query
       $tryres = t_avainsana("TRY");
 
-      while($tryrow = mysql_fetch_assoc($tryres)) {
+      while ($tryrow = mysql_fetch_assoc($tryres)) {
         $tryt[$tryrow["selite"]] = $tryrow["selitetark"];
       }
 
@@ -883,7 +883,7 @@ if ($asiakasid > 0) {
 
       // Otsikot
       if (isset($workbook_ale) and $yhdistetty == "") {
-        foreach($otsik_spread as $key => $value) {
+        foreach ($otsik_spread as $key => $value) {
           $worksheet->write($excelrivi, $key, t(ucfirst($value)), $format_bold);
         }
         $excelrivi++;
@@ -909,7 +909,7 @@ if ($asiakasid > 0) {
             $edasryhma  = $asrow["asiakasryhm‰"];
 
             if (isset($workbook_ale) and $yhdistetty == "") {
-              foreach($otsik_spread as $key => $value) {
+              foreach ($otsik_spread as $key => $value) {
                 $worksheet->write($excelrivi, $key, $asrow[$value]);
               }
               $excelrivi++;
@@ -918,7 +918,7 @@ if ($asiakasid > 0) {
             $dada = array();
             if ($yhdistetty == "") $ashin .= "<tr>";
 
-            foreach($otsik as $o) {
+            foreach ($otsik as $o) {
 
               if ($yhdistetty != "") {
                 $dada[$o] = $asrow[$o];
@@ -988,14 +988,14 @@ if ($asiakasid > 0) {
 
       // Otsikot
       if (isset($workbook_ale)) {
-        foreach($otsik_spread as $key => $value) {
+        foreach ($otsik_spread as $key => $value) {
           $worksheet->write($excelrivi, $key, t(ucfirst($value)), $format_bold);
         }
         $excelrivi++;
       }
 
       $yhdistetty  .= "<tr>";
-      foreach($otsik as $o) {
+      foreach ($otsik as $o) {
         $yhdistetty .= "<th>".t(ucfirst($o))."</th>";
       }
       $yhdistetty  .= "</tr>";
@@ -1003,7 +1003,7 @@ if ($asiakasid > 0) {
       foreach ($yhdistetty_array as $key => $value) {
 
         if (isset($workbook_ale)) {
-          foreach($otsik_spread as $key => $xvalue) {
+          foreach ($otsik_spread as $key => $xvalue) {
             $worksheet->write($excelrivi, $key, $value[$xvalue]);
           }
           $excelrivi++;
@@ -1091,10 +1091,10 @@ if ($asiakasid > 0) {
         $kutsu = "Alennustaulukko - ".trim($asiakasrow["nimi"]." ".$asiakasrow["nimitark"]);
 
         if ($kukarow["extranet"] != "") {
-          require("sahkoposti.inc");
+          require "sahkoposti.inc";
         }
         else {
-          require("inc/sahkoposti.inc");
+          require "inc/sahkoposti.inc";
         }
 
         echo "<br><br>".t("Alennustaulukko l‰hetet‰‰n osoitteeseen")." $kukarow[eposti]...<br>";
@@ -1115,6 +1115,6 @@ if ($asiakasid > 0) {
 $formi  = "asiakas";
 $kentta = "ytunnus";
 
-if (@include("inc/footer.inc"));
-elseif (@include("footer.inc"));
+if (@include "inc/footer.inc");
+elseif (@include "footer.inc");
 else exit;

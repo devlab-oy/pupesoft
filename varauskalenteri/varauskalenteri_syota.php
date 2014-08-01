@@ -20,23 +20,23 @@ if ($kello == "") {
 
   echo "<select name='kello'>";
 
-  for($i = 801; $i <= 2300; $i++) {
+  for ($i = 801; $i <= 2300; $i++) {
     $i--;
     $sel = '';
 
-    if(substr($i,0,1) == "8" || substr($i,0,1) == "9") {
-      $alku = substr($i,0,1);
-      $loppu = substr($i,1,2);
+    if (substr($i, 0, 1) == "8" || substr($i, 0, 1) == "9") {
+      $alku = substr($i, 0, 1);
+      $loppu = substr($i, 1, 2);
       $alku = "0".$alku;
     }
     else {
-      $alku = substr($i,0,2);
-      $loppu = substr($i,2,2);
+      $alku = substr($i, 0, 2);
+      $loppu = substr($i, 2, 2);
     }
 
     echo "<option value='$alku:$loppu'>$alku:$loppu</option>";
 
-    if($loppu == "00" && $alku <= 16) {
+    if ($loppu == "00" && $alku <= 16) {
       $loppu = "30";
     }
     else {
@@ -63,26 +63,26 @@ echo "<tr>
 $alku  = "";
 $loppu = "";
 
-for($i = 801; $i <= 2300; $i++) {
+for ($i = 801; $i <= 2300; $i++) {
   $i--;
   $sel = '';
 
-  if(substr($i,0,1) == "8" || substr($i,0,1) == "9") {
-    $alku = substr($i,0,1);
-    $loppu = substr($i,1,2);
+  if (substr($i, 0, 1) == "8" || substr($i, 0, 1) == "9") {
+    $alku = substr($i, 0, 1);
+    $loppu = substr($i, 1, 2);
     $alku = "0".$alku;
   }
   else {
-    $alku = substr($i,0,2);
-    $loppu = substr($i,2,2);
+    $alku = substr($i, 0, 2);
+    $loppu = substr($i, 2, 2);
   }
 
-  if($alku == substr($kello,0,2)) {
+  if ($alku == substr($kello, 0, 2)) {
     $sel = "SELECTED";
   }
   echo "<option value='$alku:$loppu' $sel>$alku:$loppu</option>";
 
-  if($loppu == "00" && $alku <= 16) {
+  if ($loppu == "00" && $alku <= 16) {
     $loppu = "30";
   }
   else {

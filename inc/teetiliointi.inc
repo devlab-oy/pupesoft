@@ -12,14 +12,14 @@ $laskurow = mysql_fetch_assoc($result);
 $summa = round($summa, 2);
 
 if ($vero != 0) { // Netotetaan alvi
-  $alv = round($summa - $summa / (1 + ($vero / 100)),2);
+  $alv = round($summa - $summa / (1 + ($vero / 100)), 2);
   $summa -= $alv;
 }
 
 if ((!isset($kpexport) or $kpexport != 1) and strtoupper($yhtiorow['maa']) == 'FI') $tositenro = 0; // Jos tätä ei tarvita
 
 // jos on valittu tiliointipvm popupista
-if (isset($tiliointipvm) and $tiliointipvm != ''){
+if (isset($tiliointipvm) and $tiliointipvm != '') {
   $laskurow['tapvm'] = $tiliointipvm;
 }
 

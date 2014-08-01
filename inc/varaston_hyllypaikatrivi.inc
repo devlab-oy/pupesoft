@@ -5,7 +5,7 @@ $jatko = 1; // oletetaan normaali käsittely
 $tyyppi = 1; // oletetaan rivin näkyvyys
 
 if (mysql_field_name($result, $i) == "tunnus" or
-    mysql_field_name($result, $i) == "yhtio") {
+  mysql_field_name($result, $i) == "yhtio") {
   $tyyppi = 0;
 }
 
@@ -20,7 +20,7 @@ if (mysql_field_name($result, $i) == "hyllyalue") {
 
 if (mysql_field_name($result, $i) == "reservipaikka") {
 
-   $sel = array_fill_keys(array($trow[$i]), " selected") + array('E' => '', 'K' => '');
+  $sel = array_fill_keys(array($trow[$i]), " selected") + array('E' => '', 'K' => '');
 
   $ulos = "<td><select name='{$nimi}'>";
   $ulos .= "<option value='E'{$sel['E']}>".t("Ei")."</option>";

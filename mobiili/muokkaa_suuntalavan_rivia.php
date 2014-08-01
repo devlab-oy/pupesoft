@@ -5,8 +5,8 @@ $_GET["no_css"] = 'yes';
 
 $mobile = true;
 
-if (@include_once("../inc/parametrit.inc"));
-elseif (@include_once("inc/parametrit.inc"));
+if (@include_once "../inc/parametrit.inc");
+elseif (@include_once "inc/parametrit.inc");
 
 $alusta_tunnus = (int) $alusta_tunnus;
 $liitostunnus = (int) $liitostunnus;
@@ -22,14 +22,14 @@ $data = array(
 );
 $url = http_build_query($data);
 
-# Haetaan suuntalavan tuotteet
+// Haetaan suuntalavan tuotteet
 $res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $tilausrivi);
 $row = mysql_fetch_assoc($res);
 
-# Jos on painettu nappia
+// Jos on painettu nappia
 if (isset($submit) and trim($submit) != '') {
 
-  # Pois suuntalavalta nappi
+  // Pois suuntalavalta nappi
   if ($submit == 'submit') {
 
     if (!isset($maara)) {
@@ -47,11 +47,11 @@ if (isset($submit) and trim($submit) != '') {
       }
     }
     else {
-      # P‰ivitet‰‰n tilausrivin m‰‰r‰ ja splitataan rivi
+      // P‰ivitet‰‰n tilausrivin m‰‰r‰ ja splitataan rivi
       $ok = paivita_tilausrivin_kpl($tilausrivi, ($row['varattu'] - $maara));
       $uuden_rivin_id = splittaa_tilausrivi($tilausrivi, $maara, TRUE, TRUE);
 
-      # Redirect alustaan vai suuntalavan_tuotteet
+      // Redirect alustaan vai suuntalavan_tuotteet
       echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=suuntalavan_tuotteet.php?{$url}'>";
       exit;
     }
@@ -60,26 +60,26 @@ if (isset($submit) and trim($submit) != '') {
 
 echo "<div class='header'>";
 echo "<button onclick='window.location.href=\"suuntalavan_tuotteet.php?$url\"' class='button left'><img src='back2.png'></button>";
-echo "<h1>",t("MUOKKAA SUUNTALAVAN RIVIƒ", $browkieli),"</h1></div>";
+echo "<h1>", t("MUOKKAA SUUNTALAVAN RIVIƒ", $browkieli), "</h1></div>";
 
 echo "<div class='main'>
 
 <form name='muokkaaformi' method='post' action=''>
 <table>
   <tr>
-    <th>",t("Suuntalava", $browkieli),"</th>
+    <th>", t("Suuntalava", $browkieli), "</th>
     <td colspan='2'>{$alusta_tunnus}</td>
   </tr>
   <tr>
-    <th>",t("Tuote", $browkieli),"</th>
+    <th>", t("Tuote", $browkieli), "</th>
     <td colspan='2'>{$row['tuoteno']}</td>
   </tr>
   <tr>
-    <th>",t("Toim. Tuotekoodi", $browkieli),"</th>
+    <th>", t("Toim. Tuotekoodi", $browkieli), "</th>
     <td colspan='2'>{$row['toim_tuoteno']}</td>
   </tr>
   <tr>
-    <th>",t("M‰‰r‰", $browkieli),"</th>
+    <th>", t("M‰‰r‰", $browkieli), "</th>
     <td><input type='text' name='maara' value='' size='7' />
     <td>{$row['varattu']} {$row['yksikko']}</td>
   </tr>
@@ -91,7 +91,7 @@ echo "<div class='main'>
 </div>";
 
 echo "<div class='controls'>
-  <button name='submit' value='submit' class='button' onclick='submit();'>",t("Pois suuntalavalta", $browkieli),"</button>
+  <button name='submit' value='submit' class='button' onclick='submit();'>", t("Pois suuntalavalta", $browkieli), "</button>
 </div>";
 
-require('inc/footer.inc');
+require 'inc/footer.inc';

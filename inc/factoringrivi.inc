@@ -61,7 +61,7 @@ if (mysql_field_name($result, $i) == "valkoodi") { //valuutta
   while ($vrow=mysql_fetch_array($vresult)) {
     $sel="";
     if ($trow[$i] == $vrow['nimi']) {
-        $sel = "selected";
+      $sel = "selected";
     }
     $ulos .= "<option value = '$vrow[nimi]' $sel>$vrow[nimi]";
   }
@@ -83,7 +83,7 @@ if (mysql_field_name($result, $i) == "pankki_tili") { //valuutta
   while ($vrow=mysql_fetch_array($vresult)) {
     $sel="";
     if ($trow[$i] == $vrow['tilino']) {
-        $sel = "selected";
+      $sel = "selected";
     }
     $ulos .= "<option value = '$vrow[tilino]' $sel>$vrow[nimi] $vrow[tilino]";
   }

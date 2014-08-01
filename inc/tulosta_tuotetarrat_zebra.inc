@@ -39,7 +39,7 @@ if (mysql_num_rows($tarrares) == 1) {
     // jos nimitys on pidempi kuin 25 merkkiä niin se ei mahdu yhdelle riville vaan pitää jakaa kahtia
     if (strlen($nimitys) > 25 and $malli == 'Zebra') {
       if (strpos($nimitys, " ")) {
-        $nimipalat = explode(' ',$nimitys);
+        $nimipalat = explode(' ', $nimitys);
 
         $merkkimaara = 0;
         $nimitys = "";
@@ -56,8 +56,8 @@ if (mysql_num_rows($tarrares) == 1) {
         }
       }
 
-      $nimitys = substr($nimitys,0,25);
-      $nimitys2 = substr($nimitys2,0,25);
+      $nimitys = substr($nimitys, 0, 25);
+      $nimitys2 = substr($nimitys2, 0, 25);
     }
     $tuoteno = $tarrarow['tuoteno'];
 
@@ -77,31 +77,31 @@ if (mysql_num_rows($tarrares) == 1) {
       $sivu .= "N\n";
       $sivu .= "B125,0,0,3,2,5,45,B,"; //alku
       $sivu .= "\"";
-      $sivu .= sprintf("%-17s",$tuoteno);
+      $sivu .= sprintf("%-17s", $tuoteno);
       $sivu .= "\"";
       $sivu .= "\n";
       $sivu .= "A560,0,0,2,1,2,N,";
       $sivu .= "\n";
       $sivu .= "A120,75,0,3,1,2,N,";
       $sivu .= "\"";
-      $sivu .= sprintf("%-25s",$nimitys);
+      $sivu .= sprintf("%-25s", $nimitys);
       $sivu .= "\"\"";
       $sivu .= "  ";
       $sivu .= "\"\"";
-      $sivu .= sprintf("%10s",$tarrarow["tarrakpl"]);
+      $sivu .= sprintf("%10s", $tarrarow["tarrakpl"]);
       $sivu .= "\"";
       $sivu .= "\n";
       $sivu .= "A120,115,0,3,1,2,N,";
       $sivu .= "\"";
-      $sivu .= sprintf("%-25s",$nimitys2);
+      $sivu .= sprintf("%-25s", $nimitys2);
       $sivu .= "\"";
       $sivu .= "\n";
       $sivu .= "P".$tkpl;
       $sivu .= "\n";
 
       //konvertoidaan ääkköset printterin ymmärtämään muotoon
-      $from = array ('ä','å','ö','Ä','Å','Ö');
-      $to   = array (chr(132),chr(134),chr(148),chr(142),chr(143),chr(153));   // DOS charset
+      $from = array ('ä', 'å', 'ö', 'Ä', 'Å', 'Ö');
+      $to   = array (chr(132), chr(134), chr(148), chr(142), chr(143), chr(153));   // DOS charset
       $sivu = str_replace($from, $to, $sivu);                  // Tehdään käännös
 
       $sivu = escapeshellarg($sivu);
@@ -118,7 +118,7 @@ if (mysql_num_rows($tarrares) == 1) {
 
       if (strlen($nimitys) > $pituus_nimitys ) {
         if (strpos($nimitys, " ")) {
-          $nimipalat = explode(' ',$nimitys);
+          $nimipalat = explode(' ', $nimitys);
 
           $merkkimaara = 0;
           $nimitys = "";
@@ -135,15 +135,15 @@ if (mysql_num_rows($tarrares) == 1) {
           }
         }
 
-        $nimitys = substr($nimitys,0,$pituus_nimitys);
-        $nimitys2 = substr($nimitys2,0,$pituus_nimitys);
+        $nimitys = substr($nimitys, 0, $pituus_nimitys);
+        $nimitys2 = substr($nimitys2, 0, $pituus_nimitys);
       }
 
       $pituus_tuoteno = 25; // voidaan määrittää mistä kohdasta katkaistaan tuoteno.
 
       if (strlen($tuoteno) > $pituus_tuoteno ) {
         if (strpos($tuoteno, " ")) {
-          $nimipalat = explode(' ',$tuoteno);
+          $nimipalat = explode(' ', $tuoteno);
 
           $merkkimaara = 0;
           $tuoteno = "";
@@ -160,8 +160,8 @@ if (mysql_num_rows($tarrares) == 1) {
           }
         }
 
-        $tuoteno = substr($nimitys,0,$pituus_tuoteno);
-        $tuoteno2 = substr($nimitys2,0,$pituus_tuoteno);
+        $tuoteno = substr($nimitys, 0, $pituus_tuoteno);
+        $tuoteno2 = substr($nimitys2, 0, $pituus_tuoteno);
       }
 
       $sivu  = "^XA\n";    // vakio alku, pakollinen
@@ -194,7 +194,7 @@ if (mysql_num_rows($tarrares) == 1) {
 
       if (strlen($nimitys) > $pituus ) {
         if (strpos($nimitys, " ")) {
-          $nimipalat = explode(' ',$nimitys);
+          $nimipalat = explode(' ', $nimitys);
 
           $merkkimaara = 0;
           $nimitys = "";
@@ -211,8 +211,8 @@ if (mysql_num_rows($tarrares) == 1) {
           }
         }
 
-        $nimitys = substr($nimitys,0,$pituus);
-        $nimitys2 = substr($nimitys2,0,$pituus);
+        $nimitys = substr($nimitys, 0, $pituus);
+        $nimitys2 = substr($nimitys2, 0, $pituus);
       }
 
 

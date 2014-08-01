@@ -3,7 +3,7 @@
 
 if (isset($_POST["tee"])) {
   if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
@@ -24,7 +24,7 @@ if ($_REQUEST["toim"] == 'toimittajahaku' or $_REQUEST["toim"] == 'laskuhaku' or
   $pupe_DataTables = $_REQUEST["toim"];
 }
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -43,14 +43,14 @@ if ($livesearch_tee == "TILIHAKU") {
 }
 
 if ($excel == "YES") {
-  include('inc/pupeExcel.inc');
+  include 'inc/pupeExcel.inc';
 
   $worksheet    = new pupeExcel();
   $format_bold = array("bold" => TRUE);
   $excelrivi   = 0;
 }
 
-require ("inc/".$toim.".inc");
+require "inc/".$toim.".inc";
 
 if (isset($worksheet) and $excelrivi > 0) {
   $excelnimi = $worksheet->close();
@@ -66,4 +66,4 @@ if (isset($worksheet) and $excelrivi > 0) {
   echo "</table><br>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

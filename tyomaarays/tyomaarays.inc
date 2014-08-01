@@ -6,7 +6,7 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
 
   if ($toim != "REKLAMAATIO") {
     $tulostimet[0] = "Työmääräys";
-    require_once ("tyomaarays/tulosta_tyomaarays.inc");
+    require_once "tyomaarays/tulosta_tyomaarays.inc";
   }
   else {
     if ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $laskurow['tilaustyyppi'] == 'U') {
@@ -16,7 +16,7 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
       $tulostimet[0] = "Reklamaatio";
     }
 
-    require_once ("tilauskasittely/tulosta_lahete_kerayslista.inc");
+    require_once "tilauskasittely/tulosta_lahete_kerayslista.inc";
   }
 
   if (count($komento) == 0) {
@@ -25,13 +25,13 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
 
       $tilaustyyppi = 'U';
 
-      echo "<font class='head'>",t("Takuu"),":</font><hr>";
+      echo "<font class='head'>", t("Takuu"), ":</font><hr>";
     }
     else {
-      echo "<font class='head'>",t($tulostimet[0]),":</font><hr>";
+      echo "<font class='head'>", t($tulostimet[0]), ":</font><hr>";
     }
 
-    require("inc/valitse_tulostin.inc");
+    require "inc/valitse_tulostin.inc";
   }
   elseif ($kappaleet > 0) {
     if ($toim != "REKLAMAATIO" and $komento["Työmääräys"] != "email" and $tyomtyyppi != 'Z') {
@@ -117,7 +117,7 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
     $kal++;
   }
 
-  mysql_data_seek($riresult,0);
+  mysql_data_seek($riresult, 0);
 
   // Aloitellaan lähetteen teko
   if ($toim != "REKLAMAATIO") {
@@ -146,32 +146,32 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
       }
 
       $params_tyomaarays = array( "asrow"           => $asrow,
-                    "boldi"           => $boldi,
-                    "edtuotetyyppi"   => "",
-                    "iso"             => $iso,
-                    "kala"            => 0,
-                    "kieli"           => $kieli,
-                    "komento"      => $komento[$tulostimet[0]],
-                    "laskurow"        => $laskurow,
-                    "lineparam"       => $lineparam,
-                    "norm"            => $norm,
-                    "page"            => NULL,
-                    "pdf"             => NULL,
-                    "perheid"         => 0,
-                    "perheid2"        => 0,
-                    "pieni"           => $pieni,
-                    "pieni_boldi"     => $pieni_boldi,
-                    "rectparam"       => $rectparam,
-                    "returnvalue"     => 0,
-                    "rivinkorkeus"    => $rivinkorkeus,
-                    "rivinumerot"     => $rivinumerot,
-                    "row"             => NULL,
-                    "sivu"            => 1,
-                    "tee"             => $tee,
-                    "thispage"      => NULL,
-                    "toim"            => $toim,
-                    "tots"        => 0,
-                    "tyyppi"          => $tyyppi,);
+        "boldi"           => $boldi,
+        "edtuotetyyppi"   => "",
+        "iso"             => $iso,
+        "kala"            => 0,
+        "kieli"           => $kieli,
+        "komento"      => $komento[$tulostimet[0]],
+        "laskurow"        => $laskurow,
+        "lineparam"       => $lineparam,
+        "norm"            => $norm,
+        "page"            => NULL,
+        "pdf"             => NULL,
+        "perheid"         => 0,
+        "perheid2"        => 0,
+        "pieni"           => $pieni,
+        "pieni_boldi"     => $pieni_boldi,
+        "rectparam"       => $rectparam,
+        "returnvalue"     => 0,
+        "rivinkorkeus"    => $rivinkorkeus,
+        "rivinumerot"     => $rivinumerot,
+        "row"             => NULL,
+        "sivu"            => 1,
+        "tee"             => $tee,
+        "thispage"      => NULL,
+        "toim"            => $toim,
+        "tots"        => 0,
+        "tyyppi"          => $tyyppi, );
 
       // Aloitellaan lomakkeen teko
       $params_tyomaarays = tyomaarays_alku($params_tyomaarays);
@@ -210,33 +210,33 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
     }
 
     $params_kerayslista = array(
-    'asrow'             => $asrow,
-    'boldi'             => $boldi,
-    'iso'               => $iso,
-    'kala'              => 0,
-    'kieli'             => $kieli,
-    'komento'      => '',
-    'laskurow'          => $laskurow,
-    'norm'              => $norm,
-    'page'              => '',
-    'paino'             => 0,
-    'pdf'               => NULL,
-    'perheid'           => 0,
-    'perheid2'          => 0,
-    'pieni'             => $pieni,
-    'pieni_boldi'       => $pieni_boldi,
-    'rectparam'         => $rectparam,
-    'rivinkorkeus'      => $rivinkorkeus,
-    'rivinumerot'      => $rivinumerot,
-    'row'               => NULL,
-    'sivu'              => 1,
-    'tee'               => $tee,
-    'thispage'      => NULL,
-    'tilausnumeroita'   => $tilausnumeroita,
-    'toim'              => $toim,
-    'tots'              => 0,
-    'tyyppi'        => $tyyppi,
-    'kerayslistatyyppi'  => '');
+      'asrow'             => $asrow,
+      'boldi'             => $boldi,
+      'iso'               => $iso,
+      'kala'              => 0,
+      'kieli'             => $kieli,
+      'komento'      => '',
+      'laskurow'          => $laskurow,
+      'norm'              => $norm,
+      'page'              => '',
+      'paino'             => 0,
+      'pdf'               => NULL,
+      'perheid'           => 0,
+      'perheid2'          => 0,
+      'pieni'             => $pieni,
+      'pieni_boldi'       => $pieni_boldi,
+      'rectparam'         => $rectparam,
+      'rivinkorkeus'      => $rivinkorkeus,
+      'rivinumerot'      => $rivinumerot,
+      'row'               => NULL,
+      'sivu'              => 1,
+      'tee'               => $tee,
+      'thispage'      => NULL,
+      'tilausnumeroita'   => $tilausnumeroita,
+      'toim'              => $toim,
+      'tots'              => 0,
+      'tyyppi'        => $tyyppi,
+      'kerayslistatyyppi'  => '');
 
 
     // Aloitellaan keräyslistan teko
@@ -296,7 +296,7 @@ if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == 'VALMI
     $result = pupe_query($query);
   }
   else {
-    require("tilauskasittely/tilaus-valmis.inc");
+    require "tilauskasittely/tilaus-valmis.inc";
   }
   $tee = "";
 }
@@ -339,7 +339,7 @@ if ($toim == "REKLAMAATIO" and $tee == 'VALMIS') {
     }
 
     if (count($palautettavat) > 0) {
-      require("tilauskasittely/tilauksesta_myyntitilaus.inc");
+      require "tilauskasittely/tilauksesta_myyntitilaus.inc";
 
       foreach ($palautettavat as $asiakas => $rivit) {
         $rivitlisa = " AND tilausrivi.tunnus in (".substr($rivit, 0, -1).")";
@@ -356,7 +356,7 @@ if ($toim == "REKLAMAATIO" and $tee == 'VALMIS') {
       }
     }
 
-    require("tilauskasittely/tilaus-valmis.inc");
+    require "tilauskasittely/tilaus-valmis.inc";
   }
 
   $tee = "";
@@ -388,7 +388,7 @@ if ($toim == "SIIRTOTYOMAARAYS" and $tee == 'VALMIS') {
     $result = pupe_query($query);
   }
   else {
-    require("tilauskasittely/tilaus-valmis-siirtolista.inc");
+    require "tilauskasittely/tilaus-valmis-siirtolista.inc";
   }
 
   $tee = "";

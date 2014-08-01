@@ -80,7 +80,7 @@ elseif ($type == '3' or ($type == 'S' and $factoring_oikaisutunnus == '0' )) {
   else {
     $query = "SELECT valkoodi FROM yhtio WHERE yhtio = '$yritirow[yhtio]'";
     $valresult = pupe_query($query);
-    $valrow = mysql_fetch_assoc ($valresult);
+    $valrow = mysql_fetch_assoc($valresult);
 
     if ($valrow["valkoodi"] == '') {
       echo "<font class='error'> Yhtiöllä ei ole valuuttaa!</font><br>\n";

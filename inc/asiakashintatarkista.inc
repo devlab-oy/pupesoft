@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("asiakashintatarkista")) {
-  function asiakashintatarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("asiakashintatarkista")) {
+  function asiakashintatarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $alasveto;
 
     static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chminkpl, $chmaxkpl, $chalkupvm, $chloppupvm, $chastunn, $chtuoteno_ind, $chsegmentti, $chpiiri;
@@ -54,7 +54,7 @@ if(!function_exists("asiakashintatarkista")) {
           $ulos2       = "";
 
           if ($ytunnus != "" and $ytunnus != "0") {
-            require("asiakashaku.inc");
+            require "asiakashaku.inc";
           }
 
           if ($ulos2 != "" and $ytunnus == "") {
@@ -104,7 +104,7 @@ if(!function_exists("asiakashintatarkista")) {
           $kutsuja     = "yllapito.php";
           $ulos      = "";
 
-          require ("inc/tuotehaku.inc");
+          require "inc/tuotehaku.inc";
 
           if ($ulos != "") {
             $alasveto[$i] = "<select name='t[$i]'>".$ulos."</select>";

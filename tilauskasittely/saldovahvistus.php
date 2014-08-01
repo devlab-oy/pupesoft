@@ -14,9 +14,9 @@ if (isset($_POST["tee"])) {
   }
 }
 
-require ("../inc/parametrit.inc");
-require('myyntires/paperitiliote_saldovahvistus.php');
-require('inc/pupeExcel.inc');
+require "../inc/parametrit.inc";
+require 'myyntires/paperitiliote_saldovahvistus.php';
+require 'inc/pupeExcel.inc';
 
 if ($tee == 'lataa_tiedosto') {
   $filepath = "/tmp/".$tmpfilenimi;
@@ -298,7 +298,7 @@ elseif ($request['tee'] == 'poista_valinnat') {
 </script>
 <?php
 
-require('inc/footer.inc');
+require 'inc/footer.inc';
 
 function lisaa_sessioon_saldovahvistus_rivi($lasku_tunnukset_key, $saldovahvistusrivi) {
   global $kukarow, $yhtiorow;
@@ -314,7 +314,7 @@ function lisaa_sessioon_saldovahvistus_rivi($lasku_tunnukset_key, $saldovahvistu
 function echo_saldovahvistukset($request) {
   global $kukarow, $yhtiorow, $pupe_DataTables, $palvelin2;
 
-//  echo "<table class='display'>";
+  //  echo "<table class='display'>";
 
   pupe_DataTables(array(array($pupe_DataTables, 6, 8, false, false, true)));
   echo "<table class='display dataTable' id='{$pupe_DataTables}'>";

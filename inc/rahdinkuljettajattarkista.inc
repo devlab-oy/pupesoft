@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists("rahdinkuljettajattarkista")) {
-  function rahdinkuljettajattarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+  function rahdinkuljettajattarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
 
     if (mysql_field_name($result, $i) == "koodi" or mysql_field_name($result, $i) == "nimi") {
       if (trim($t[$i]) == '') {
@@ -18,7 +18,7 @@ if (!function_exists("rahdinkuljettajattarkista")) {
 
     if (mysql_field_name($result, $i) == 'pakkauksen_sarman_minimimitta') {
       $t[$i] = str_replace(',', '.', $t[$i]);
-      if(!is_numeric($t[$i])) {
+      if (!is_numeric($t[$i])) {
         $virhe[$i] = t("Tietue pitää olla numero");
       }
     }

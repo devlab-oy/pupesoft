@@ -164,7 +164,7 @@ if (mysql_field_name($result, $i) == "selite") {
   elseif ($trow[3] == "sammutin_koko") {
     $sammuttimen_koot_result = t_avainsana('SAMMUTIN_KOKO');
     $sammutin_koot = array();
-    while($sammutin_koko_avainsana = mysql_fetch_assoc($sammuttimen_koot_result)) {
+    while ($sammutin_koko_avainsana = mysql_fetch_assoc($sammuttimen_koot_result)) {
       $sammutin_koot[] = $sammutin_koko_avainsana;
     }
     $sel = "";
@@ -258,7 +258,7 @@ if (mysql_field_name($result, $i) == "kieli") {
 
 if (mysql_field_name($result, $i) == 'status') {
   if (substr($trow['laji'], 0, 10) == 'lisatieto_') {
-     $sel = array_fill_keys(array($trow[$i]), " selected") + array('P' => '', 'L' => '');
+    $sel = array_fill_keys(array($trow[$i]), " selected") + array('P' => '', 'L' => '');
 
     $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
     $ulos .= "<option value=''>".t("Aktiivinen")."</option>";
@@ -275,7 +275,7 @@ if (mysql_field_name($result, $i) == 'status') {
 
 if (mysql_field_name($result, $i) == 'nakyvyys') {
   if (substr($trow['laji'], 0, 10) == 'lisatieto_') {
-     $sel = array_fill_keys(array($trow[$i]), " selected") + array('o' => '', 'K' => '');
+    $sel = array_fill_keys(array($trow[$i]), " selected") + array('o' => '', 'K' => '');
 
     $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
     $ulos .= "<option value=''>".t("Kyllä")."</option>";

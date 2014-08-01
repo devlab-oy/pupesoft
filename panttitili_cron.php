@@ -15,9 +15,9 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__)
 error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 ini_set("display_errors", 0);
 
-require ("inc/connect.inc");
-require ("inc/functions.inc");
-require ("tilauskasittely/luo_myyntitilausotsikko.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
+require "tilauskasittely/luo_myyntitilausotsikko.inc";
 
 $kukarow['yhtio'] = (string) $argv[1];
 $kukarow['kuka'] = 'admin';
@@ -105,7 +105,7 @@ $queryt = array(
   GROUP BY panttitili.asiakas",
 );
 
-foreach($queryt as $query) {
+foreach ($queryt as $query) {
   $panttitili_res = pupe_query($query);
 
   while ($panttitili_row = mysql_fetch_assoc($panttitili_res)) {
@@ -203,7 +203,7 @@ foreach($queryt as $query) {
         $query_insert_lisa .= " ale{$alepostfix} = '".$pantti_row["ale{$alepostfix}"]."', ";
       }
 
-       $kommenttilisa = "(" . t("tilausnro") . ": " . $pantti_row['myyntitilausnro'] . ", " . t("tilauspvm") . ": " . $pantti_row['myyntipvm'] . ")";
+      $kommenttilisa = "(" . t("tilausnro") . ": " . $pantti_row['myyntitilausnro'] . ", " . t("tilauspvm") . ": " . $pantti_row['myyntipvm'] . ")";
 
       $query = "INSERT INTO tilausrivi SET
                 yhtio                = '{$kukarow['yhtio']}',

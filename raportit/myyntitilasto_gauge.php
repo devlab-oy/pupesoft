@@ -3,7 +3,7 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 ini_set("memory_limit", "5G");
 
@@ -172,7 +172,7 @@ echo "  <script type='text/javascript' charset='utf-8'>
       });
     </script>";
 
-echo "<font class='head'>",t("Myyntitilasto"),"</font><hr>";
+echo "<font class='head'>", t("Myyntitilasto"), "</font><hr>";
 
 echo "<form method='post'>";
 echo "<table><tr>";
@@ -202,12 +202,12 @@ $row = mysql_fetch_assoc($result);
 
 echo "<input type='hidden' id='tilatut_eurot' value='{$row['tilatut_eurot']}' />";
 echo "<input type='hidden' id='toimitetut_rivit' value='{$row['toimitetut_rivit']}' />";
-echo "<input type='hidden' id='tilatut_katepros' value='",($row['tilatut_eurot'] != 0 ? round($row['tilatut_kate'] / $row['tilatut_eurot'] * 100, 1) : 0),"' />";
+echo "<input type='hidden' id='tilatut_katepros' value='", ($row['tilatut_eurot'] != 0 ? round($row['tilatut_kate'] / $row['tilatut_eurot'] * 100, 1) : 0), "' />";
 echo "<input type='hidden' name='tee' value='laske' />";
 
-if (!isset($kka)) $kka = date("n",mktime(0, 0, 0, date("n"), 1, date("Y")));
-if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("n"), 1, date("Y")));
-if (!isset($ppa)) $ppa = date("j",mktime(0, 0, 0, date("n"), 1, date("Y")));
+if (!isset($kka)) $kka = date("n", mktime(0, 0, 0, date("n"), 1, date("Y")));
+if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("n"), 1, date("Y")));
+if (!isset($ppa)) $ppa = date("j", mktime(0, 0, 0, date("n"), 1, date("Y")));
 
 if (!isset($kkl)) $kkl = date("n");
 if (!isset($vvl)) $vvl = date("Y");
@@ -215,14 +215,14 @@ if (!isset($ppl)) $ppl = date("j");
 
 echo "<table>";
 echo "<tr>";
-echo "<th>",t("Syötä alkupäivämäärä")," (",t("pp-kk-vvvv"),")</th>";
+echo "<th>", t("Syötä alkupäivämäärä"), " (", t("pp-kk-vvvv"), ")</th>";
 echo "<td><input type='text' name='ppa' id='ppa' value='{$ppa}' size='3'>";
 echo "<input type='text' name='kka' id='kka' value='{$kka}' size='3'>";
 echo "<input type='text' name='vva' id='vva' value='{$vva}' size='5'></td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>",t("Syötä loppupäivämäärä")," (",t("pp-kk-vvvv"),")</th>";
+echo "<th>", t("Syötä loppupäivämäärä"), " (", t("pp-kk-vvvv"), ")</th>";
 echo "<td><input type='text' name='ppl' id='ppl' value='{$ppl}' size='3'>";
 echo "<input type='text' name='kkl' id='kkl' value='{$kkl}' size='3'>";
 echo "<input type='text' name='vvl' id='vvl' value='{$vvl}' size='5'></td>";
@@ -244,7 +244,7 @@ if ($yhtiorow['konserni'] != "") {
   $numrows = mysql_num_rows($yhtio_res);
 
   echo "<tr>";
-  echo "<th rowspan='{$numrows}'>",t("Valitse yhtiö"),"</th>";
+  echo "<th rowspan='{$numrows}'>", t("Valitse yhtiö"), "</th>";
 
   $i = 0;
 
@@ -278,25 +278,25 @@ if (!isset($naytetaan_tulos)) $naytetaan_tulos = '';
 
 $sel = array_fill_keys(array($naytetaan_tulos), " selected") + array('daily' => '', 'weekly' => '', 'monthly' => '');
 
-echo "<tr><th>",t("Näytetään tulos"),"</th>";
+echo "<tr><th>", t("Näytetään tulos"), "</th>";
 echo "<td><select name='naytetaan_tulos' id='naytetaan_tulos'>";
-echo "<option value='daily'{$sel['daily']}>",t("Päivittäin"),"</option>";
-echo "<option value='weekly'{$sel['weekly']}>",t("Viikottain"),"</option>";
-echo "<option value='monthly'{$sel['monthly']}>",t("Kuukausittain"),"</option>";
+echo "<option value='daily'{$sel['daily']}>", t("Päivittäin"), "</option>";
+echo "<option value='weekly'{$sel['weekly']}>", t("Viikottain"), "</option>";
+echo "<option value='monthly'{$sel['monthly']}>", t("Kuukausittain"), "</option>";
 echo "</select></td></tr>";
 
 if (!isset($naytetaan_luvut)) $naytetaan_luvut = '';
 
 $sel = array_fill_keys(array($naytetaan_luvut), " selected") + array('tuhansittain' => '', 'eurolleen' => '', 'sentilleen' => '');
 
-echo "<tr><th>",t("Näytetään luvut"),"</th>";
+echo "<tr><th>", t("Näytetään luvut"), "</th>";
 echo "<td><select name='naytetaan_luvut' id='naytetaan_luvut'>";
-echo "<option value='tuhansittain'{$sel['tuhansittain']}>",t("Tuhannen tarkkuudella"),"</option>";
-echo "<option value='eurolleen'{$sel['eurolleen']}>",t("Kokonaislukuina"),"</option>";
-echo "<option value='sentilleen'{$sel['sentilleen']}>",t("Sellaisinaan"),"</option>";
+echo "<option value='tuhansittain'{$sel['tuhansittain']}>", t("Tuhannen tarkkuudella"), "</option>";
+echo "<option value='eurolleen'{$sel['eurolleen']}>", t("Kokonaislukuina"), "</option>";
+echo "<option value='sentilleen'{$sel['sentilleen']}>", t("Sellaisinaan"), "</option>";
 echo "</select></td></tr>";
 
-echo "<tr><td colspan='2' class='back'><input type='submit' value='",t("Hae"),"' /></td></tr>";
+echo "<tr><td colspan='2' class='back'><input type='submit' value='", t("Hae"), "' /></td></tr>";
 
 echo "</table>";
 echo "</td></tr></table>";
@@ -305,12 +305,12 @@ echo "</form>";
 if (!isset($tee)) $tee = '';
 
 if ($tee == 'laske' and (!isset($yhtiot) or count($yhtiot) == 0)) {
-  echo "<font class='error'>",t("Et valinnut yhtiötä"),"!</font>";
+  echo "<font class='error'>", t("Et valinnut yhtiötä"), "!</font>";
   $tee = '';
 }
 
 if ((isset($ppa) and (int) $ppa == 0) or (isset($kka) and (int) $kka == 0) or (isset($vva) and (int) $vva == 0) or (isset($ppl) and (int) $ppl == 0) or (isset($kkl) and (int) $kkl == 0) or (isset($vvl) and (int) $vvl == 0)) {
-  echo "<font class='error'>",t("Päivämäärässä on virhe"),"!</font>";
+  echo "<font class='error'>", t("Päivämäärässä on virhe"), "!</font>";
   $tee = '';
 }
 
@@ -358,17 +358,17 @@ if ($tee == 'laske') {
   echo "<br />";
   echo "<table>";
   echo "<tr>";
-  echo "<th>",t("Kustp"),"</th>";
-  echo "<th>",t("Osasto"),"<br />",t("Try"),"</th>";
+  echo "<th>", t("Kustp"), "</th>";
+  echo "<th>", t("Osasto"), "<br />", t("Try"), "</th>";
   echo "<th>";
   echo $naytetaan_tulos == 'monthly' ? t("Kuukausi") : ($naytetaan_tulos == 'weekly' ? t("Viikko") : t("Päivä"));
   echo "</th>";
-  echo "<th>",t("Tilatut")," $_k{$yhtiorow["valkoodi"]}</th>";
-  echo "<th>",t("Tilatut Kate%"),"</th>";
-  echo "<th>",t("Tilatut Rivit"),"</th>";
-  echo "<th>",t("Laskutetut")," $_k{$yhtiorow["valkoodi"]}</th>";
-  echo "<th>",t("Laskutetut Kate%"),"</th>";
-  echo "<th>",t("Laskutetut Rivit"),"</th>";
+  echo "<th>", t("Tilatut"), " $_k{$yhtiorow["valkoodi"]}</th>";
+  echo "<th>", t("Tilatut Kate%"), "</th>";
+  echo "<th>", t("Tilatut Rivit"), "</th>";
+  echo "<th>", t("Laskutetut"), " $_k{$yhtiorow["valkoodi"]}</th>";
+  echo "<th>", t("Laskutetut Kate%"), "</th>";
+  echo "<th>", t("Laskutetut Rivit"), "</th>";
   echo "</tr>";
 
   $yhteensa = array(
@@ -666,7 +666,7 @@ if ($tee == 'laske') {
 
         echo "<tr class='{$id}_osasto tumma osasto' style='display:none;'>";
         echo "<td align='right'></td>";
-        echo "<td align='right' class='toggleable' id='{$id}_{$osasto}_try'><img style='float:left;' id='img_{$id}_{$osasto}_try' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;{$osasto} ",t_avainsana("OSASTO", "", "and avainsana.selite ='{$osasto}'", "", "", "selitetark"),"</td>";
+        echo "<td align='right' class='toggleable' id='{$id}_{$osasto}_try'><img style='float:left;' id='img_{$id}_{$osasto}_try' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;{$osasto} ", t_avainsana("OSASTO", "", "and avainsana.selite ='{$osasto}'", "", "", "selitetark"), "</td>";
         echo "<td align='right'></td>";
         echo "<td align='right'>{$vals['tilatut_eurot']}</td>";
         echo "<td align='right'>{$tilatut_katepros}</td>";
@@ -722,7 +722,7 @@ if ($tee == 'laske') {
 
           echo "<tr class='{$id}_{$osasto}_try spec try' style='display:none;'>";
           echo "<td align='right'></td>";
-          echo "<td align='right'>{$try} ",t_avainsana("TRY", "", "and avainsana.selite ='{$try}'", "", "", "selitetark"),"</td>";
+          echo "<td align='right'>{$try} ", t_avainsana("TRY", "", "and avainsana.selite ='{$try}'", "", "", "selitetark"), "</td>";
           echo "<td align='right'></td>";
           echo "<td align='right'>{$vals['tilatut_eurot']}</td>";
           echo "<td align='right'>{$tilatut_katepros}</td>";
@@ -778,7 +778,7 @@ if ($tee == 'laske') {
 
       echo "<tr class='{$pvm}_osasto tumma osasto' style='display:none;'>";
       echo "<td align='right'></td>";
-      echo "<td align='right' class='toggleable' id='{$pvm}_{$osasto}_try'><img style='float:left;' id='img_{$pvm}_{$osasto}_try' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;{$osasto} ",t_avainsana("OSASTO", "", "and avainsana.selite ='{$osasto}'", "", "", "selitetark"),"</td>";
+      echo "<td align='right' class='toggleable' id='{$pvm}_{$osasto}_try'><img style='float:left;' id='img_{$pvm}_{$osasto}_try' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;{$osasto} ", t_avainsana("OSASTO", "", "and avainsana.selite ='{$osasto}'", "", "", "selitetark"), "</td>";
       echo "<td align='right'></td>";
       echo "<td align='right'>{$vals['tilatut_eurot']}</td>";
       echo "<td align='right'>{$tilatut_katepros}</td>";
@@ -834,7 +834,7 @@ if ($tee == 'laske') {
 
         echo "<tr class='{$pvm}_{$osasto}_try spec try' style='display:none;'>";
         echo "<td align='right'></td>";
-        echo "<td align='right'>{$try} ",t_avainsana("TRY", "", "and avainsana.selite ='{$try}'", "", "", "selitetark"),"</td>";
+        echo "<td align='right'>{$try} ", t_avainsana("TRY", "", "and avainsana.selite ='{$try}'", "", "", "selitetark"), "</td>";
         echo "<td align='right'></td>";
         echo "<td align='right'>{$vals['tilatut_eurot']}</td>";
         echo "<td align='right'>{$tilatut_katepros}</td>";
@@ -848,8 +848,8 @@ if ($tee == 'laske') {
   }
 
   echo "<tr class='aktiivi'>";
-  echo "<th class='toggleable' id='yhteensa_kustp'><img style='float:left;' id='img_yhteensa_kustp' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;",t("Yhteensä"),"<br />",t("Kustp"),"</th>";
-  echo "<th class='toggleable' id='yhteensa_osasto'><img style='float:left;' id='img_yhteensa_osasto' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;",t("Yhteensä"),"<br />",t("os / try"),"</th>";
+  echo "<th class='toggleable' id='yhteensa_kustp'><img style='float:left;' id='img_yhteensa_kustp' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;", t("Yhteensä"), "<br />", t("Kustp"), "</th>";
+  echo "<th class='toggleable' id='yhteensa_osasto'><img style='float:left;' id='img_yhteensa_osasto' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;", t("Yhteensä"), "<br />", t("os / try"), "</th>";
   echo "<td align='right'></td>";
 
   echo "<td align='right'>";
@@ -866,8 +866,8 @@ if ($tee == 'laske') {
 
   echo "</td>";
 
-  echo "<td align='right'>",round($yhteensa['tilatut_kate'] / $yhteensa['tilatut_eurot'] * 100, 1),"</td>";
-  echo "<td align='right'>",round($yhteensa['tilatut_rivit']),"</td>";
+  echo "<td align='right'>", round($yhteensa['tilatut_kate'] / $yhteensa['tilatut_eurot'] * 100, 1), "</td>";
+  echo "<td align='right'>", round($yhteensa['tilatut_rivit']), "</td>";
 
   echo "<td align='right'>";
 
@@ -883,8 +883,8 @@ if ($tee == 'laske') {
 
   echo "</td>";
 
-  echo "<td align='right'>",(round($yhteensa['laskutetut_kate'] / $yhteensa['laskutetut_eurot'] * 100, 1)),"</td>";
-  echo "<td align='right'>",round($yhteensa['laskutetut_rivit']),"</td>";
+  echo "<td align='right'>", (round($yhteensa['laskutetut_kate'] / $yhteensa['laskutetut_eurot'] * 100, 1)), "</td>";
+  echo "<td align='right'>", round($yhteensa['laskutetut_rivit']), "</td>";
   echo "</tr>";
 
   ksort($yhteensa_kustp);
@@ -897,7 +897,7 @@ if ($tee == 'laske') {
     $kustp_id = str_replace(" ", "", $kustp);
 
     echo "<tr class='yhteensa_kustp aktiivi' style='display:none;'>";
-    echo "<th class='toggleable' id='yhteensa_{$kustp_id}_osasto'><img style='float:left;' id='img_yhteensa_{$kustp_id}_osasto' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;",t("Yhteensä")," {$_kustp}</th>";
+    echo "<th class='toggleable' id='yhteensa_{$kustp_id}_osasto'><img style='float:left;' id='img_yhteensa_{$kustp_id}_osasto' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;", t("Yhteensä"), " {$_kustp}</th>";
     echo "<td align='right'></td>";
     echo "<td align='right'></td>";
 
@@ -915,8 +915,8 @@ if ($tee == 'laske') {
 
     echo "</td>";
 
-    echo "<td align='right'>",($vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : ''),"</td>";
-    echo "<td align='right'>",round($vals['tilatut_rivit']),"</td>";
+    echo "<td align='right'>", ($vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : ''), "</td>";
+    echo "<td align='right'>", round($vals['tilatut_rivit']), "</td>";
 
     echo "<td align='right'>";
 
@@ -932,8 +932,8 @@ if ($tee == 'laske') {
 
     echo "</td>";
 
-    echo "<td align='right'>",($vals['laskutetut_eurot'] != 0 ? round($vals['laskutetut_kate'] / $vals['laskutetut_eurot'] * 100, 1) : ''),"</td>";
-    echo "<td align='right'>",round($vals['laskutetut_rivit']),"</td>";
+    echo "<td align='right'>", ($vals['laskutetut_eurot'] != 0 ? round($vals['laskutetut_kate'] / $vals['laskutetut_eurot'] * 100, 1) : ''), "</td>";
+    echo "<td align='right'>", round($vals['laskutetut_rivit']), "</td>";
     echo "</tr>";
 
     ksort($yhteensa_kustp_osasto);
@@ -948,7 +948,7 @@ if ($tee == 'laske') {
 
       echo "<tr class='yhteensa_{$kustp_id}_osasto aktiivi osasto' style='display:none;'>";
       echo "<td align='right'></td>";
-      echo "<th class='toggleable' id='yhteensa_{$id}_try'><img style='float:left;' id='img_{$id}_try' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;",t("Yhteensä")," {$_osasto} ",t_avainsana("OSASTO", "", "and avainsana.selite ='{$osasto}'", "", "", "selitetark"),"</th>";
+      echo "<th class='toggleable' id='yhteensa_{$id}_try'><img style='float:left;' id='img_{$id}_try' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;", t("Yhteensä"), " {$_osasto} ", t_avainsana("OSASTO", "", "and avainsana.selite ='{$osasto}'", "", "", "selitetark"), "</th>";
       echo "<td align='right'></td>";
 
       echo "<td align='right'>";
@@ -965,8 +965,8 @@ if ($tee == 'laske') {
 
       echo "</td>";
 
-      echo "<td align='right'>",($vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : ''),"</td>";
-      echo "<td align='right'>",round($vals['tilatut_rivit']),"</td>";
+      echo "<td align='right'>", ($vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : ''), "</td>";
+      echo "<td align='right'>", round($vals['tilatut_rivit']), "</td>";
 
       echo "<td align='right'>";
 
@@ -982,8 +982,8 @@ if ($tee == 'laske') {
 
       echo "</td>";
 
-      echo "<td align='right'>",($vals['laskutetut_eurot'] != 0 ? round($vals['laskutetut_kate'] / $vals['laskutetut_eurot'] * 100, 1) : ''),"</td>";
-      echo "<td align='right'>",round($vals['laskutetut_rivit']),"</td>";
+      echo "<td align='right'>", ($vals['laskutetut_eurot'] != 0 ? round($vals['laskutetut_kate'] / $vals['laskutetut_eurot'] * 100, 1) : ''), "</td>";
+      echo "<td align='right'>", round($vals['laskutetut_rivit']), "</td>";
       echo "</tr>";
 
       unset($try);
@@ -994,7 +994,7 @@ if ($tee == 'laske') {
 
         echo "<tr class='yhteensa_{$id}_try spec aktiivi try' style='display:none;'>";
         echo "<td align='right'></td>";
-        echo "<td align='left' class='tumma'>",t("Yhteensä")," {$try} ",t_avainsana("TRY", "", "and avainsana.selite ='{$try}'", "", "", "selitetark"),"</td>";
+        echo "<td align='left' class='tumma'>", t("Yhteensä"), " {$try} ", t_avainsana("TRY", "", "and avainsana.selite ='{$try}'", "", "", "selitetark"), "</td>";
         echo "<td align='right'></td>";
 
         echo "<td align='right'>";
@@ -1011,8 +1011,8 @@ if ($tee == 'laske') {
 
         echo "</td>";
 
-        echo "<td align='right'>",($vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : ''),"</td>";
-        echo "<td align='right'>",round($vals['tilatut_rivit']),"</td>";
+        echo "<td align='right'>", ($vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : ''), "</td>";
+        echo "<td align='right'>", round($vals['tilatut_rivit']), "</td>";
 
         echo "<td align='right'>";
 
@@ -1028,8 +1028,8 @@ if ($tee == 'laske') {
 
         echo "</td>";
 
-        echo "<td align='right'>",($vals['laskutetut_eurot'] != 0 ? round($vals['laskutetut_kate'] / $vals['laskutetut_eurot'] * 100, 1) : ''),"</td>";
-        echo "<td align='right'>",round($vals['laskutetut_rivit']),"</td>";
+        echo "<td align='right'>", ($vals['laskutetut_eurot'] != 0 ? round($vals['laskutetut_kate'] / $vals['laskutetut_eurot'] * 100, 1) : ''), "</td>";
+        echo "<td align='right'>", round($vals['laskutetut_rivit']), "</td>";
         echo "</tr>";
       }
     }
@@ -1045,7 +1045,7 @@ if ($tee == 'laske') {
 
     echo "<tr class='yhteensa_osasto aktiivi osasto' style='display:none;'>";
     echo "<td align='right'></td>";
-    echo "<th class='toggleable' id='{$osasto}_try'><img style='float:left;' id='img_{$osasto}_try' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;",t("Yhteensä")," {$_osasto} ",t_avainsana("OSASTO", "", "and avainsana.selite ='{$osasto}'", "", "", "selitetark"),"</th>";
+    echo "<th class='toggleable' id='{$osasto}_try'><img style='float:left;' id='img_{$osasto}_try' src='{$palvelin2}pics/lullacons/bullet-arrow-right.png' />&nbsp;", t("Yhteensä"), " {$_osasto} ", t_avainsana("OSASTO", "", "and avainsana.selite ='{$osasto}'", "", "", "selitetark"), "</th>";
     echo "<td align='right'></td>";
 
     echo "<td align='right'>";
@@ -1062,8 +1062,8 @@ if ($tee == 'laske') {
 
     echo "</td>";
 
-    echo "<td align='right'>",($vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : ''),"</td>";
-    echo "<td align='right'>",round($vals['tilatut_rivit']),"</td>";
+    echo "<td align='right'>", ($vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : ''), "</td>";
+    echo "<td align='right'>", round($vals['tilatut_rivit']), "</td>";
 
     echo "<td align='right'>";
 
@@ -1079,8 +1079,8 @@ if ($tee == 'laske') {
 
     echo "</td>";
 
-    echo "<td align='right'>",($vals['laskutetut_eurot'] != 0 ? round($vals['laskutetut_kate'] / $vals['laskutetut_eurot'] * 100, 1) : ''),"</td>";
-    echo "<td align='right'>",round($vals['laskutetut_rivit']),"</td>";
+    echo "<td align='right'>", ($vals['laskutetut_eurot'] != 0 ? round($vals['laskutetut_kate'] / $vals['laskutetut_eurot'] * 100, 1) : ''), "</td>";
+    echo "<td align='right'>", round($vals['laskutetut_rivit']), "</td>";
     echo "</tr>";
 
     unset($try);
@@ -1091,7 +1091,7 @@ if ($tee == 'laske') {
 
       echo "<tr class='{$osasto}_try spec aktiivi try' style='display:none;'>";
       echo "<td align='right'></td>";
-      echo "<td align='left' class='tumma'>",t("Yhteensä")," {$try} ",t_avainsana("TRY", "", "and avainsana.selite ='{$try}'", "", "", "selitetark"),"</td>";
+      echo "<td align='left' class='tumma'>", t("Yhteensä"), " {$try} ", t_avainsana("TRY", "", "and avainsana.selite ='{$try}'", "", "", "selitetark"), "</td>";
       echo "<td align='right'></td>";
 
       echo "<td align='right'>";
@@ -1108,8 +1108,8 @@ if ($tee == 'laske') {
 
       echo "</td>";
 
-      echo "<td align='right'>",($vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : ''),"</td>";
-      echo "<td align='right'>",round($vals['tilatut_rivit']),"</td>";
+      echo "<td align='right'>", ($vals['tilatut_eurot'] != 0 ? round($vals['tilatut_kate'] / $vals['tilatut_eurot'] * 100, 1) : ''), "</td>";
+      echo "<td align='right'>", round($vals['tilatut_rivit']), "</td>";
 
       echo "<td align='right'>";
 
@@ -1125,8 +1125,8 @@ if ($tee == 'laske') {
 
       echo "</td>";
 
-      echo "<td align='right'>",($vals['laskutetut_eurot'] != 0 ? round($vals['laskutetut_kate'] / $vals['laskutetut_eurot'] * 100, 1) : ''),"</td>";
-      echo "<td align='right'>",round($vals['laskutetut_rivit']),"</td>";
+      echo "<td align='right'>", ($vals['laskutetut_eurot'] != 0 ? round($vals['laskutetut_kate'] / $vals['laskutetut_eurot'] * 100, 1) : ''), "</td>";
+      echo "<td align='right'>", round($vals['laskutetut_rivit']), "</td>";
       echo "</tr>";
     }
   }
@@ -1134,4 +1134,4 @@ if ($tee == 'laske') {
   echo "</table>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

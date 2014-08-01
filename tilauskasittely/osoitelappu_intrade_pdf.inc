@@ -70,12 +70,12 @@ if ($yhtiorow['ean'] == '') {
 }
 
 //PDF:n luonti ja defaultit
-require_once("pdflib/phppdflib.class.php");
+require_once "pdflib/phppdflib.class.php";
 
 // jos php-gd on installoitu niin loidataab barcode library
 if (in_array("gd", get_loaded_extensions())) {
-  if (@include_once("viivakoodi/Barcode.php"));
-  else include_once("Barcode.php");
+  if (@include_once "viivakoodi/Barcode.php");
+  else include_once "Barcode.php";
 }
 
 //PDF parametrit
@@ -172,7 +172,7 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
     // tulostuskpl (2)
     // tarkiste (1)
     $sscc  = "1";
-    $sscc .= sprintf("%-08.8s",$yhtiorow["ean"]);
+    $sscc .= sprintf("%-08.8s", $yhtiorow["ean"]);
     $sscc .= sprintf('%06.6s', substr($laskurow["tunnus"], -6));
     $sscc .= sprintf('%02.2s', $uniq_merkki);
     $loppu = tarkiste($sscc);
@@ -184,7 +184,7 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
 
   if (class_exists("Image_Barcode")) {
     //luodaan viivakoodiolio kuljetusohjeelle = postino
-    $nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+    $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
 
     imagejpeg(Image_Barcode::draw('400'.$laskurow['asiakkaan_tilausnumero'], 'code128', 'jpg', false, 3, 170), $nimi);
 
@@ -198,7 +198,7 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
     $pdf->image_place($image, mm_pt(72), mm_pt(24), $firstpage, $logoparam);
     system("rm -f $nimi");
 
-    $nimi = "/tmp/".md5(uniqid(rand(),true)).".jpg";
+    $nimi = "/tmp/".md5(uniqid(rand(), true)).".jpg";
 
     imagejpeg(Image_Barcode::draw($sscc, 'code128', 'jpg', false, 3, 170), $nimi);
 
@@ -217,7 +217,7 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
   $pdf->draw_text(mm_pt(50), mm_pt(65), "(400) $laskurow[asiakkaan_tilausnumero]{$kirjainlisa}",  $firstpage, $iso);
 
   //tehää tästä vielä kaunis kattella
-  $sscc = substr($sscc,0,4).substr($sscc,4,1).substr($sscc,5,8).substr($sscc,13,8).substr($sscc,21,1);
+  $sscc = substr($sscc, 0, 4).substr($sscc, 4, 1).substr($sscc, 5, 8).substr($sscc, 13, 8).substr($sscc, 21, 1);
 
   // piirretään viivakoodi paprulle
   $pdf->draw_text(mm_pt(22), mm_pt(33), "Kolli - Item ID.: ", $firstpage, $otsik);
@@ -225,17 +225,17 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
 
   // sitten aletaan piirtämään itse PDF sisältöä
   // ensin isot viivat kohilleen
-  $pdf->draw_rectangle(mm_pt(179),mm_pt(21.5),mm_pt(31),mm_pt(126.5), $firstpage, $rectparam);
+  $pdf->draw_rectangle(mm_pt(179), mm_pt(21.5), mm_pt(31), mm_pt(126.5), $firstpage, $rectparam);
 
   unset($data);
-  if( (int) $yhtiorow["lasku_logo"] > 0) {
+  if ( (int) $yhtiorow["lasku_logo"] > 0) {
     $liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
     $data = $liite["data"];
     $isizelogo[0] = $liite["image_width"];
     $isizelogo[1] = $liite["image_height"];
     unset($liite);
   }
-  elseif(file_exists($yhtiorow["lasku_logo"])) {
+  elseif (file_exists($yhtiorow["lasku_logo"])) {
     $filename = $yhtiorow["lasku_logo"];
 
     $fh = fopen($filename, "r");
@@ -245,10 +245,10 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
     $isizelogo = getimagesize($yhtiorow["lasku_logo"]);
   }
 
-  if($data) {
+  if ($data) {
     $image = $pdf->jfif_embed($data);
 
-    if(!$image) {
+    if (!$image) {
       echo t("Logokuvavirhe");
     }
     else {
@@ -271,10 +271,10 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
   $pdf->draw_text(mm_pt(22), mm_pt(170), $yhtiorow['nimi'],                $firstpage, $pien);
   if ($yhtiorow['nimitark'] != '') {
     $pdf->draw_text(mm_pt(22), mm_pt(165), $yhtiorow['nimitark'],            $firstpage, $pien);
-    $pdf->draw_text(mm_pt(22), mm_pt(160), $yhtiorow['osoite']." ".$yhtiorow['postino']." ".strtoupper($yhtiorow['postitp']),$firstpage, $pien);
+    $pdf->draw_text(mm_pt(22), mm_pt(160), $yhtiorow['osoite']." ".$yhtiorow['postino']." ".strtoupper($yhtiorow['postitp']), $firstpage, $pien);
   }
   else {
-    $pdf->draw_text(mm_pt(22), mm_pt(165), $yhtiorow['osoite'].", ".$yhtiorow['postino']." ".strtoupper($yhtiorow['postitp']),$firstpage, $pien);
+    $pdf->draw_text(mm_pt(22), mm_pt(165), $yhtiorow['osoite'].", ".$yhtiorow['postino']." ".strtoupper($yhtiorow['postitp']), $firstpage, $pien);
   }
 
   $pdf->draw_text(mm_pt(100), mm_pt(175), "Lähetyspvm",                  $firstpage, $norm);
@@ -330,7 +330,7 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
 }
 
 //keksitään uudelle failille joku varmasti uniikki nimi:
-$pdffilenimi = "/tmp/osoitelappu-intrade-".md5(uniqid(rand(),true)).".pdf";
+$pdffilenimi = "/tmp/osoitelappu-intrade-".md5(uniqid(rand(), true)).".pdf";
 
 //kirjoitetaan pdf faili levylle..
 $fh = fopen($pdffilenimi, "w");
@@ -341,7 +341,7 @@ if ($oslapp == 'email') {
   $liite = $pdffilenimi;
   $kutsu = "Osoitelappu";
 
-  require("inc/sahkoposti.inc");
+  require "inc/sahkoposti.inc";
 }
 elseif ($tee == 'NAYTATILAUS') {
   //Työnnetään tuo pdf vaan putkeen!

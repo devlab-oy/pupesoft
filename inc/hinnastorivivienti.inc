@@ -1,9 +1,9 @@
 <?php
 
 function hinnastorivi($tuote, $laskurow) {
-    global $kukarow, $yhtiorow, $kl_alenimi;
+  global $kukarow, $yhtiorow, $kl_alenimi;
 
-    static $rivi = 1;
+  static $rivi = 1;
 
   //haetaan aleryhmän tunnus
   $query = "SELECT b.tunnus, b.ryhma
@@ -34,7 +34,7 @@ function hinnastorivi($tuote, $laskurow) {
     $korvaresult = mysql_query($query) or pupe_error($query);
 
     $lask = 0;
-    while ($korvarow = mysql_fetch_array($korvaresult)){
+    while ($korvarow = mysql_fetch_array($korvaresult)) {
       $korvaavat[$lask] = $korvarow["tuoteno"];
       if ($korvarow["tuoteno"] == $tuote["tuoteno"]) {
         $koti = $lask;
@@ -49,11 +49,11 @@ function hinnastorivi($tuote, $laskurow) {
       $edellinen  = '';
       $seuraava  = $korvaavat[$koti+1];
     }
-    elseif($koti == $lask) {
+    elseif ($koti == $lask) {
       $edellinen  = $korvaavat[$koti-1];
       $seuraava  = '';
     }
-    else{
+    else {
       $edellinen  = $korvaavat[$koti-1];
       $seuraava  = $korvaavat[$koti+1];
     }
@@ -61,16 +61,16 @@ function hinnastorivi($tuote, $laskurow) {
 
   $myyntihinta = hintapyoristys(tuotteen_myyntihinta($laskurow, $tuote, 1, "ei"));
 
-  $out  = sprintf('%-20.20s'  ,$tuote["tuoteno"]);
-  $out .= sprintf('%-60.60s'  ,t_tuotteen_avainsanat($tuote, 'nimitys'));
-  $out .= sprintf('%-10.10s'  ,t_avainsana("Y", "", "and avainsana.selite='$tuote[yksikko]'", "", "", "selite"));
-  $out .= sprintf('%-15.15s'  ,$aletun);
-  $out .= sprintf('%08d'    ,str_replace('.','', $myyntihinta));
-  $out .= sprintf('%08d'    ,str_replace('.','', $myyntihinta));
-  $out .= sprintf('%-20.20s'  ,$seuraava);
-  $out .= sprintf('%-20.20s'  ,$edellinen);
-  $out .= sprintf('%-3.3s'  ,'');
+  $out  = sprintf('%-20.20s'  , $tuote["tuoteno"]);
+  $out .= sprintf('%-60.60s'  , t_tuotteen_avainsanat($tuote, 'nimitys'));
+  $out .= sprintf('%-10.10s'  , t_avainsana("Y", "", "and avainsana.selite='$tuote[yksikko]'", "", "", "selite"));
+  $out .= sprintf('%-15.15s'  , $aletun);
+  $out .= sprintf('%08d'    , str_replace('.', '', $myyntihinta));
+  $out .= sprintf('%08d'    , str_replace('.', '', $myyntihinta));
+  $out .= sprintf('%-20.20s'  , $seuraava);
+  $out .= sprintf('%-20.20s'  , $edellinen);
+  $out .= sprintf('%-3.3s'  , '');
   $out .= "\r\n";
 
-    return $out;
+  return $out;
 }

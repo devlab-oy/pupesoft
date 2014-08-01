@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("asiakastarkista")) {
-  function asiakastarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("asiakastarkista")) {
+  function asiakastarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $ulosarray, $ytunnus_select, $asiakasnro_select, $toim, $asiak_laji;
 
     static $ytunnus_tunnus, $ytunnus, $ovttunnus, $apuverkkotunnus, $apuverkkotunnusi, $apulasku_email, $apulasku_emaili, $apu_maa, $apu_toim_maa, $laskutus_talteen_i, $laskutus_talteen;
@@ -187,10 +187,10 @@ if(!function_exists("asiakastarkista")) {
     }
 
     if ((mysql_field_name($result, $i) == "tilino" or
-      mysql_field_name($result, $i) == "tilino_eu" or
-      mysql_field_name($result, $i) == "tilino_ei_eu" or
-      mysql_field_name($result, $i) == "tilino_marginaali" or
-      mysql_field_name($result, $i) == "tilino_osto_marginaali") and $t[$i] != '') {
+        mysql_field_name($result, $i) == "tilino_eu" or
+        mysql_field_name($result, $i) == "tilino_ei_eu" or
+        mysql_field_name($result, $i) == "tilino_marginaali" or
+        mysql_field_name($result, $i) == "tilino_osto_marginaali") and $t[$i] != '') {
 
       $query = "SELECT yhtio
                 FROM tili
@@ -213,13 +213,13 @@ if(!function_exists("asiakastarkista")) {
 
         // jos ollaan valittu jotain muuta kuin PAPERI tai EMAIL niin verkkotunnus pitää syöttää!
         if (trim($t[$i]) != '999'
-            and trim($t[$i]) != '112'
-            and trim($t[$i]) != '666'
-            and trim($t[$i]) != '667'
-            and trim($t[$i]) != '100'
-            and trim($t[$i]) != '030'
-            and $apuverkkotunnus == ""
-            and $yhtiorow['verkkolasku_lah'] != 'apix') {
+          and trim($t[$i]) != '112'
+          and trim($t[$i]) != '666'
+          and trim($t[$i]) != '667'
+          and trim($t[$i]) != '100'
+          and trim($t[$i]) != '030'
+          and $apuverkkotunnus == ""
+          and $yhtiorow['verkkolasku_lah'] != 'apix') {
           // Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
           $virhe[$i] = $virhe[$apuverkkotunnusi] = t("Olet valinnut laskutustavaksi muun kuin Paperi ja verkkotunnus on tyhjä! Laskutus ei onnistu")."!";
         }
@@ -288,7 +288,7 @@ if(!function_exists("asiakastarkista")) {
 
       if (strtoupper($t[$i]) == 'FI' and $asiak_laji != "R" and $asiak_laji != "H" and ($yhtiorow["ytunnus_tarkistukset"] == "" or $yhtiorow["ytunnus_tarkistukset"] == "A")) {
 
-        require ("tarkistaytunnus.inc");
+        require "tarkistaytunnus.inc";
 
         if ($ok == 0) {
           // Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
@@ -296,7 +296,7 @@ if(!function_exists("asiakastarkista")) {
 
         }
         else {
-           $t[$ytunnus_tunnus] = $ytunnus;
+          $t[$ytunnus_tunnus] = $ytunnus;
         }
       }
       elseif ($yhtiorow["maa"] == 'FI' and strtoupper($t[$i]) == 'SE' and strtoupper(substr($t[$ytunnus_tunnus], 0, 2)) != "SE" and $asiak_laji != "H") {
@@ -306,8 +306,8 @@ if(!function_exists("asiakastarkista")) {
     }
 
     if (mysql_field_name($result, $i) == "laskutus_nimi" and trim($t[$i]) != '') {
-        $laskutus_talteen  = trim($t[$i]);
-        $laskutus_talteen_i = $i;
+      $laskutus_talteen  = trim($t[$i]);
+      $laskutus_talteen_i = $i;
     }
 
     if (mysql_field_name($result, $i) == "laskutus_osoite" or mysql_field_name($result, $i) == "laskutus_postino" or mysql_field_name($result, $i) == "laskutus_postitp") {

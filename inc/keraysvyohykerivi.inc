@@ -5,7 +5,7 @@ $jatko = 1; // oletetaan normaali käsittely
 $tyyppi = 1; // oletetaan rivin näkyvyys
 
 if (mysql_field_name($result, $i) == "tunnus" or
-    mysql_field_name($result, $i) == "yhtio") {
+  mysql_field_name($result, $i) == "yhtio") {
   $tyyppi = 0;
 }
 
@@ -118,11 +118,11 @@ if (mysql_field_name($result, $i) == "varasto") {
   $jatko = 0;
 }
 
-if (substr(mysql_field_name($result,$i),0,9) == 'printteri') {
+if (substr(mysql_field_name($result, $i), 0, 9) == 'printteri') {
 
   $ulos = "<td><select name='$nimi'>";
 
-  $printterilisa = mysql_field_name($result,$i) == 'printteri8' ? " and komento != 'email' " : '';
+  $printterilisa = mysql_field_name($result, $i) == 'printteri8' ? " and komento != 'email' " : '';
 
   $query = "SELECT *
             FROM kirjoittimet

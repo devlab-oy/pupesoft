@@ -3,7 +3,7 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require('../inc/parametrit.inc');
+require '../inc/parametrit.inc';
 
 echo "<font class='head'>".t("Tuoteryhmävertailu").": ";
 
@@ -20,15 +20,15 @@ if ($kausi1!='' and $kausi2!='' and $osasto!='' and $try!='') {
   if ($osastol=='') $osastol=$osasto;
   if ($tryl=='')    $tryl=$try;
 
-  $mkausi1  = substr($kausi1,0,4)."-".substr($kausi1,4,2)."-01";
-  $mkausi1l = substr($kausi1l,0,4)."-".substr($kausi1l,4,2)."-".date("d",mktime(0, 0, 0, substr($kausi1l,4,2)+1, 0, substr($kausi1l,0,4)));
-  $mkausi2  = substr($kausi2,0,4)."-".substr($kausi2,4,2)."-01";
-  $mkausi2l = substr($kausi2l,0,4)."-".substr($kausi2l,4,2)."-".date("d",mktime(0, 0, 0, substr($kausi2l,4,2)+1, 0, substr($kausi2l,0,4)));
+  $mkausi1  = substr($kausi1, 0, 4)."-".substr($kausi1, 4, 2)."-01";
+  $mkausi1l = substr($kausi1l, 0, 4)."-".substr($kausi1l, 4, 2)."-".date("d", mktime(0, 0, 0, substr($kausi1l, 4, 2)+1, 0, substr($kausi1l, 0, 4)));
+  $mkausi2  = substr($kausi2, 0, 4)."-".substr($kausi2, 4, 2)."-01";
+  $mkausi2l = substr($kausi2l, 0, 4)."-".substr($kausi2l, 4, 2)."-".date("d", mktime(0, 0, 0, substr($kausi2l, 4, 2)+1, 0, substr($kausi2l, 0, 4)));
 
   $osastot     = '';
   $osastonimet = array();
   $tryt        = '';
-    $trynimet    = array();
+  $trynimet    = array();
 
   $res = t_avainsana("OSASTO", "", "and avainsana.selite+0 >= '$osasto' and avainsana.selite+0 <= '$osastol'");
 
@@ -44,8 +44,8 @@ if ($kausi1!='' and $kausi2!='' and $osasto!='' and $try!='') {
     $trynimet[$row['selite']] = $row["selitetark"];
   }
 
-  $osastot = substr($osastot,0,-1);
-  $tryt    = substr($tryt,0,-1);
+  $osastot = substr($osastot, 0, -1);
+  $tryt    = substr($tryt, 0, -1);
 
   if ($tryt != "" and $osastot != "") {
 
@@ -92,7 +92,7 @@ if ($kausi1!='' and $kausi2!='' and $osasto!='' and $try!='') {
               and tyyppi='L'
               and ((laskutettuaika>='$mkausi1' and laskutettuaika<='$mkausi1l') or (laskutettuaika>='$mkausi2' and laskutettuaika<='$mkausi2l'))
               GROUP BY osasto, try ";
-    $res  = mysql_query ($query) or pupe_error($query);
+    $res  = mysql_query($query) or pupe_error($query);
 
     $kate1 ='';
     $kate2 ='';
@@ -100,7 +100,7 @@ if ($kausi1!='' and $kausi2!='' and $osasto!='' and $try!='') {
     $katproero ='';
     $kplproero ='';
 
-      while ($row = mysql_fetch_array($res)) {
+    while ($row = mysql_fetch_array($res)) {
       // nollataan muuttujat
       $kate1 = $kate2 = $myyproero = $katproero = $kplproero = 0;
 
@@ -295,4 +295,4 @@ echo "<table>
 
 </form>";
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

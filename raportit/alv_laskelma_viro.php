@@ -1,6 +1,6 @@
 <?php
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 /*
 1.    EE100  Sales 20% VAT
@@ -63,7 +63,7 @@ if (isset($tee) and $tee == 'kuittaa_alv_ilmoitus') {
     $tilires = pupe_query($query);
 
     if (mysql_num_rows($tilires) != 1) {
-      echo "<font class='error'>",t("VIRHE: Maksettava ALV-Tili virheellinen")."! ($maksettava_alv_tili)</font><br><br>";
+      echo "<font class='error'>", t("VIRHE: Maksettava ALV-Tili virheellinen")."! ($maksettava_alv_tili)</font><br><br>";
     }
 
     $query = "SELECT *
@@ -73,13 +73,13 @@ if (isset($tee) and $tee == 'kuittaa_alv_ilmoitus') {
     $erotilires = pupe_query($query);
 
     if (mysql_num_rows($erotilires) != 1) {
-      echo "<font class='error'>",t("VIRHE: Erotuksen Tili virheellinen")."! ($erotus_tili)</font><br><br>";
+      echo "<font class='error'>", t("VIRHE: Erotuksen Tili virheellinen")."! ($erotus_tili)</font><br><br>";
     }
 
     if (mysql_num_rows($tilires) == 1 and mysql_num_rows($erotilires) == 1) {
 
       $alvtili_yht = (float) $alvtili_yht;
-            $alvmaks_yht = (float) $alvmaks_yht;
+      $alvmaks_yht = (float) $alvmaks_yht;
       $alvpyor_yht = (float) round($alvmaks_yht-$alvtili_yht, 2);
 
       $summa         = $alvtili_yht;
@@ -104,9 +104,9 @@ if (isset($tee) and $tee == 'kuittaa_alv_ilmoitus') {
                 laatija    = '{$kukarow['kuka']}',
                 luontiaika = now()";
       $result = pupe_query($query);
-      $tunnus = mysql_insert_id ($link);
+      $tunnus = mysql_insert_id($link);
 
-      require("inc/teetiliointi.inc");
+      require "inc/teetiliointi.inc";
 
       $summa         = $alvmaks_yht * -1;
       $tili         = $maksettava_alv_tili;
@@ -118,7 +118,7 @@ if (isset($tee) and $tee == 'kuittaa_alv_ilmoitus') {
       $summa_valuutassa   = 0;
       $valkoodi       = $yhtiorow['valuutta'];
 
-      require("inc/teetiliointi.inc");
+      require "inc/teetiliointi.inc";
 
       if ($alvpyor_yht != 0) {
 
@@ -132,7 +132,7 @@ if (isset($tee) and $tee == 'kuittaa_alv_ilmoitus') {
         $summa_valuutassa   = 0;
         $valkoodi       = $yhtiorow['valuutta'];
 
-        require("inc/teetiliointi.inc");
+        require "inc/teetiliointi.inc";
       }
     }
 
@@ -147,7 +147,7 @@ if (isset($tee) and $tee == 'kuittaa_alv_ilmoitus') {
     $valkoodi       = '';
   }
   else {
-    echo "<font class='error'>",t("VIRHE: ALV-laskelma on jo t‰sm‰tty"),"!</font><br><br>";
+    echo "<font class='error'>", t("VIRHE: ALV-laskelma on jo t‰sm‰tty"), "!</font><br><br>";
   }
 }
 
@@ -370,12 +370,12 @@ if (isset($tee) and $tee == 'erittele') {
         echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
         echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]//etsivirheita=$etsivirheita'>$trow[tilino]</a></td>";
         echo "<td valign='top'>$trow[nimi]</td>";
-        echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['bruttosumma']),"</td>";
-        echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['verot']),"</td>";
+        echo "<td valign='top' align='right' nowrap>", sprintf('%.2f', $trow['bruttosumma']), "</td>";
+        echo "<td valign='top' align='right' nowrap>", sprintf('%.2f', $trow['verot']), "</td>";
 
         if (strtoupper($trow["maa"]) != strtoupper($yhtiorow["maa"])) {
-          echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['bruttosumma_valuutassa']),"</td>";
-          echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['verot_valuutassa']),"</td>";
+          echo "<td valign='top' align='right' nowrap>", sprintf('%.2f', $trow['bruttosumma_valuutassa']), "</td>";
+          echo "<td valign='top' align='right' nowrap>", sprintf('%.2f', $trow['verot_valuutassa']), "</td>";
         }
         else {
           echo "<td valign='top' align='right'></td>";
@@ -490,12 +490,12 @@ if (isset($tee) and $tee == 'erittele') {
       echo "<td valign='top' align='right'>". (float) $trow["vero"]."%</td>";
       echo "<td valign='top'><a href='".$palvelin2."raportit.php?toim=paakirja&tee=P&alvv=$vv&alvk=$kk&tili=$trow[tilino]&alv=$trow[vero]&maarajaus=$trow[maa]&lopetus=$PHP_SELF////tee=erittele//ryhma=$ryhma//vv=$vv//kk=$kk//maarajaus=$trow[maa]//etsivirheita=$etsivirheita'>$trow[tilino]</a></td>";
       echo "<td valign='top'>$trow[nimi]</td>";
-      echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['nettosumma']),"</td>";
-      echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['verot']),"</td>";
+      echo "<td valign='top' align='right' nowrap>", sprintf('%.2f', $trow['nettosumma']), "</td>";
+      echo "<td valign='top' align='right' nowrap>", sprintf('%.2f', $trow['verot']), "</td>";
 
       if (strtoupper($trow["maa"]) != strtoupper($yhtiorow["maa"])) {
-        echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['nettosumma_valuutassa']),"</td>";
-        echo "<td valign='top' align='right' nowrap>",sprintf('%.2f', $trow['verot_valuutassa']),"</td>";
+        echo "<td valign='top' align='right' nowrap>", sprintf('%.2f', $trow['nettosumma_valuutassa']), "</td>";
+        echo "<td valign='top' align='right' nowrap>", sprintf('%.2f', $trow['verot_valuutassa']), "</td>";
       }
       else {
         echo "<td valign='top' align='right'></td>";
@@ -530,7 +530,7 @@ if (isset($tee) and $tee == 'erittele') {
   }
 }
 
-function laskeveroja ($taso, $tulos) {
+function laskeveroja($taso, $tulos) {
   global $yhtiorow, $kukarow, $startmonth, $endmonth, $oletus_verokanta;
 
   if ($tulos == $oletus_verokanta or $tulos == 'veronmaara' or $tulos == 'summa') {
@@ -618,10 +618,10 @@ function laskeveroja ($taso, $tulos) {
     $vero = 0;
   }
 
-  return sprintf('%.2f',$vero);
+  return sprintf('%.2f', $vero);
 }
 
-function laskeverojaverokannoittain ($taso) {
+function laskeverojaverokannoittain($taso) {
   global $yhtiorow, $kukarow, $startmonth, $endmonth, $oletus_verokanta;
 
   $ee100lisa = "";
@@ -692,16 +692,16 @@ function alvlaskelma($kk, $vv) {
     $ee110 = laskeverojaverokannoittain('ee110');
 
     //3. Sales 0% VAT
-    $ee300 = laskeveroja('ee300','summa') * -1;
+    $ee300 = laskeveroja('ee300', 'summa') * -1;
 
     //3.1. Intra-Community supply of GOODS AND SERVICES
-    $ee310 = laskeveroja('ee310','summa') * -1;
+    $ee310 = laskeveroja('ee310', 'summa') * -1;
 
     //3.1.1. Intra-Community supply of GOODS
-    $ee311 = laskeveroja('ee311','summa');
+    $ee311 = laskeveroja('ee311', 'summa');
 
     //3.2. Exportation of goods outside EU
-    $ee320 = laskeveroja('ee320','summa') * -1;
+    $ee320 = laskeveroja('ee320', 'summa') * -1;
 
     //3.2.1. Exportation of goods outside EU, sale to passengers with return of value added tax
     $ee321 = 0;
@@ -713,19 +713,19 @@ function alvlaskelma($kk, $vv) {
     $ee410 = 0;
 
     //5. Total amount of input VAT subject to deduction
-    $ee500 = laskeveroja('ee500','veronmaara');
+    $ee500 = laskeveroja('ee500', 'veronmaara');
 
     //5.1. Total amount of input VAT subject to deduction from PRODUCT IMPORT (outside EU)
-    $ee510 = laskeveroja('ee510','veronmaara');
+    $ee510 = laskeveroja('ee510', 'veronmaara');
 
     //5.2. Total amount of input VAT subject to deduction from FIXED ASSET PURCHASES
-    $ee520 = laskeveroja('ee520','veronmaara');
+    $ee520 = laskeveroja('ee520', 'veronmaara');
 
     //6. Intra-Community acquisitions of GOODS AND SERVICES received from a taxable person of another Member State
-    $ee600 = laskeveroja('ee600','summa');
+    $ee600 = laskeveroja('ee600', 'summa');
 
     //6.1. Intra-Community acquisitions of GOODS received from a taxable person of another Member State
-    $ee610 = laskeveroja('ee610','summa');
+    $ee610 = laskeveroja('ee610', 'summa');
 
     //7. Other extraordinary purchases taxed with VAT
     $ee700 = 0;
@@ -755,8 +755,8 @@ function alvlaskelma($kk, $vv) {
     $ee1300 = $vat_loppusumma < 0 ? $vat_loppusumma : 0;
 
     echo "<br><table>";
-    echo "<tr><th>",t("Ilmoittava yritys"),"</th><th>EE{$yhtiorow["ytunnus"]}</th></tr>";
-    echo "<tr><th>",t("Ilmoitettava kausi"),"</th><th>".substr($startmonth,0,4)."/".substr($startmonth,5,2)."</th></tr>";
+    echo "<tr><th>", t("Ilmoittava yritys"), "</th><th>EE{$yhtiorow["ytunnus"]}</th></tr>";
+    echo "<tr><th>", t("Ilmoitettava kausi"), "</th><th>".substr($startmonth, 0, 4)."/".substr($startmonth, 5, 2)."</th></tr>";
 
     // Verollinen myynti
     echo "<tr class='aktiivi'><td><a href = '?tee=erittele&ryhma=1&vv=$vv&kk=$kk&etsivirheita=$etsivirheita'>1)</a> 20% m‰‰raga maksustatavad toimingud ja tehingud, sh</td><td align='right'>".sprintf('%.2f', $ee100["20.00"])."</td></tr>";
@@ -814,21 +814,21 @@ function alvlaskelma($kk, $vv) {
               AND tiliointi.tapvm    >= '$startmonth'
               AND tiliointi.tapvm    <= '$endmonth'";
     $verores = pupe_query($query);
-    $verorow = mysql_fetch_assoc ($verores);
+    $verorow = mysql_fetch_assoc($verores);
 
     // ei n‰ytet‰ yhteens‰-laatikkoa turhaan
     if ($verorow["vero"] != 0 or (($verorow['vero'] - $ee1200) * -1) != $ee1200 or $ee1200 == 0) {
       echo "<table>";
-      echo "<tr class='aktiivi'><th>",t("Tili")," $yhtiorow[alv] ",t("yhteens‰"),"</th><td align='right'>".sprintf('%.2f', $verorow['vero'] * -1)."</td></tr>";
+      echo "<tr class='aktiivi'><th>", t("Tili"), " $yhtiorow[alv] ", t("yhteens‰"), "</th><td align='right'>".sprintf('%.2f', $verorow['vero'] * -1)."</td></tr>";
 
 
       if ($ee1200 == 0 and $ee1300 != 0) {
-        echo "<tr class='aktiivi'><th>",t("Palautettava alv"),"</th><td align='right'>".sprintf('%.2f', $ee1300)."</td></tr>";
-        echo "<tr class='aktiivi'><th>",t("Erotus"),"</th><td align='right'>".sprintf('%.2f', (-1 * $verorow['vero']) - $ee1300)."</td></tr>";
+        echo "<tr class='aktiivi'><th>", t("Palautettava alv"), "</th><td align='right'>".sprintf('%.2f', $ee1300)."</td></tr>";
+        echo "<tr class='aktiivi'><th>", t("Erotus"), "</th><td align='right'>".sprintf('%.2f', (-1 * $verorow['vero']) - $ee1300)."</td></tr>";
       }
       else {
-        echo "<tr class='aktiivi'><th>",t("Maksettava alv"),"</th><td align='right'>".sprintf('%.2f', $ee1200)."</td></tr>";
-        echo "<tr class='aktiivi'><th>",t("Erotus"),"</th><td align='right'>".sprintf('%.2f', (-1 * $verorow['vero']) - $ee1200)."</td></tr>";
+        echo "<tr class='aktiivi'><th>", t("Maksettava alv"), "</th><td align='right'>".sprintf('%.2f', $ee1200)."</td></tr>";
+        echo "<tr class='aktiivi'><th>", t("Erotus"), "</th><td align='right'>".sprintf('%.2f', (-1 * $verorow['vero']) - $ee1200)."</td></tr>";
       }
 
       echo "</table><br>";
@@ -847,7 +847,7 @@ function alvlaskelma($kk, $vv) {
 
       if (mysql_num_rows($tositelinkki_result) > 0) {
         $tositelinkki_row = mysql_fetch_assoc($tositelinkki_result);
-        echo "<a href='../muutosite.php?tee=E&tunnus={$tositelinkki_row['tunnus']}&lopetus={$palvelin2}raportit/alv_laskelma_viro.php////kk=$kk//vv=$vv//etsivirheita=$etsivirheita'>",t("Katso tositetta"),"</a><br /><br />";
+        echo "<a href='../muutosite.php?tee=E&tunnus={$tositelinkki_row['tunnus']}&lopetus={$palvelin2}raportit/alv_laskelma_viro.php////kk=$kk//vv=$vv//etsivirheita=$etsivirheita'>", t("Katso tositetta"), "</a><br /><br />";
       }
       elseif (abs($verorow['vero']) != 0 and abs(round((-1 * $verorow['vero']) - $ee1200, 2)) <= $alv_laskelman_sallittu_erotus and (int) date("Ym") > (int) $vv.$kk) {
         echo "<form method='post' name='alv_ilmoituksen_kuittaus'>";
@@ -861,20 +861,20 @@ function alvlaskelma($kk, $vv) {
         echo "<input type='hidden' name='alvmaks_yht' value='".round($ee1200, 2)."' />";
         echo "<input type='hidden' name='alvtili_yht' value='".round($verorow['vero']*-1, 2)."' />";
 
-        echo "<tr><th>",t("Anna maksettava ALV-tili"),"</th><td>";
+        echo "<tr><th>", t("Anna maksettava ALV-tili"), "</th><td>";
         echo livesearch_kentta("alv_ilmoituksen_kuittaus", "TILIHAKU", "maksettava_alv_tili", 200, $maksettava_alv_tili, 'EISUBMIT');
         echo "</td></tr>";
 
         if (!isset($erotus_tili) or $erotus_tili == "") $erotus_tili = $yhtiorow["pyoristys"];
 
-        echo "<tr><th>",t("Anna erotuksen tili"),"</th><td>";
+        echo "<tr><th>", t("Anna erotuksen tili"), "</th><td>";
         echo livesearch_kentta("erotuksen_kuittaus", "TILIHAKU", "erotus_tili", 200, $erotus_tili, 'EISUBMIT');
 
-        echo "</td><td class='back'><input type='submit' value='",t("Kuittaa ALV-ilmoitus"),"' /></td></tr>";
+        echo "</td><td class='back'><input type='submit' value='", t("Kuittaa ALV-ilmoitus"), "' /></td></tr>";
         echo "</table></form><br />";
       }
       elseif (abs($verorow['vero']) != 0 and abs(round((-1 * $verorow['vero']) - $ee1200, 2)) != 0 and (int) date("Ym") > (int) $vv.$kk) {
-        echo "<font class='error'>",t("Tilin")," {$yhtiorow['alv']} ",t("ja maksettavan arvonlis‰veron luvut eiv‰t t‰sm‰‰"),"!</font><br /><br />";
+        echo "<font class='error'>", t("Tilin"), " {$yhtiorow['alv']} ", t("ja maksettavan arvonlis‰veron luvut eiv‰t t‰sm‰‰"), "!</font><br /><br />";
       }
     }
   }
@@ -935,4 +935,4 @@ if (!isset($vv)) $vv = "";
 
 alvlaskelma($kk, $vv);
 
-require("inc/footer.inc");
+require "inc/footer.inc";

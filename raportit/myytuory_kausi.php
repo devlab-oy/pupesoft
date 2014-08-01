@@ -7,11 +7,11 @@ $useslave = 1;
 $compression = FALSE;
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 //Ja t‰ss‰ laitetaan ne takas
 $sqlhaku = $sqlapu;
@@ -57,7 +57,7 @@ else {
 
     $edosasto = "X";
 
-    require_once ('inc/ProgressBar.class.php');
+    require_once 'inc/ProgressBar.class.php';
     $bar = new ProgressBar();
     $elements = mysql_num_rows($result); // total number of elements to process
     $bar->initialize($elements); // print the empty bar
@@ -105,7 +105,7 @@ else {
         if (($turhatpois != 1 or $myyn30 != 0 or $kate30 != 0 or $varTOT != 0) and ($eiyhteensa != 1)) {
 
           if ($myyn30 > 0)
-            $kate30pros = sprintf("%.02f",round($kate30/$myyn30*100,2));
+            $kate30pros = sprintf("%.02f", round($kate30/$myyn30*100, 2));
           else
             $kate30pros="0.00";
 
@@ -137,7 +137,7 @@ else {
       $yhtvarTOT+=$varastonarvo;
 
       if ($row["summa30"] > 0)
-        $kate30pros = sprintf("%.02f",round($row["kate30"]/$row["summa30"]*100,2));
+        $kate30pros = sprintf("%.02f", round($row["kate30"]/$row["summa30"]*100, 2));
       else
         $kate30pros = "0.00";
 
@@ -163,7 +163,7 @@ else {
       if ($turhatpois != 1 or $myyn30 != 0 or $kate30 != 0 or $varTOT != 0) {
 
         if ($myyn30 > 0)
-          $kate30pros = sprintf("%.02f",round($kate30/$myyn30*100,2));
+          $kate30pros = sprintf("%.02f", round($kate30/$myyn30*100, 2));
         else
           $kate30pros="0.00";
 
@@ -178,7 +178,7 @@ else {
       }
 
       if ($yhtmyyn30 > 0)
-        $yhtkatepros = sprintf("%.02f",round($yhtkate30/$yhtmyyn30*100,2));
+        $yhtkatepros = sprintf("%.02f", round($yhtkate30/$yhtmyyn30*100, 2));
       else
         $yhtkatepros="0.00";
 
@@ -192,7 +192,7 @@ else {
       $ulos .= "\n";
     }
 
-    if(include('Spreadsheet/Excel/Writer.php')) {
+    if (include 'Spreadsheet/Excel/Writer.php') {
 
       //keksit‰‰n failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
@@ -209,21 +209,21 @@ else {
       $excelrivi = 0;
     }
 
-    if(isset($workbook)) {
+    if (isset($workbook)) {
       $rivit = explode("\n", $ulos);
 
       $rivi = explode("\t", $rivit[0]);
       for ($i=0; $i < count($rivi); $i++) $worksheet->write($excelrivi, $i, $rivi[$i], $format_bold);
       $excelrivi++;
 
-      for($j = 1; $j<count($rivit); $j++) {
+      for ($j = 1; $j<count($rivit); $j++) {
         $rivi = explode("\t", $rivit[$j]);
         for ($i=0; $i < count($rivi); $i++) $worksheet->write($excelrivi, $i, $rivi[$i]);
         $excelrivi++;
       }
     }
 
-    if(isset($workbook)) {
+    if (isset($workbook)) {
 
       // We need to explicitly close the workbook
       $workbook->close();
@@ -269,11 +269,11 @@ else {
   echo "<table><form method='post'>";
 
   if (!isset($kka))
-    $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+    $kka = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
   if (!isset($vva))
-    $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+    $vva = date("Y", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
   if (!isset($ppa))
-    $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+    $ppa = date("d", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 
   if (!isset($kkl))
     $kkl = date("m");
@@ -305,5 +305,5 @@ else {
 
   echo "<td class='back' colspan='2'><input type='submit' value='".t("Aja raportti")."'></td></tr></table>";
 
-  require ("../inc/footer.inc");
+  require "../inc/footer.inc";
 }

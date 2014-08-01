@@ -20,8 +20,8 @@ if ($php_cli) {
   date_default_timezone_set('Europe/Helsinki');
 
   // otetaan tietokanta connect
-  require ("../inc/connect.inc");
-  require ("../inc/functions.inc");
+  require "../inc/connect.inc";
+  require "../inc/functions.inc";
 
   $kukarow['yhtio'] = trim($argv[1]);
 
@@ -37,17 +37,17 @@ if ($php_cli) {
   $tee = "YHTEENVETO";
 }
 else {
-  require ("../inc/parametrit.inc");
+  require "../inc/parametrit.inc";
   echo "<font class='head'>".t("ABC-Aputaulun rakennus")."<hr></font>";
 }
 
-if (!isset($kka)) $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")-1));
-if (!isset($vva)) $vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")-1));
-if (!isset($ppa)) $ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")-1));
+if (!isset($kka)) $kka = date("m", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")-1));
+if (!isset($vva)) $vva = date("Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")-1));
+if (!isset($ppa)) $ppa = date("d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")-1));
 
-if (!isset($kkl)) $kkl = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-if (!isset($vvl)) $vvl = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-if (!isset($ppl)) $ppl = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+if (!isset($kkl)) $kkl = date("m", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+if (!isset($vvl)) $vvl = date("Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+if (!isset($ppl)) $ppl = date("d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 
 if (!isset($abctyyppi)) $abctyyppi = "kate";
 
@@ -175,7 +175,7 @@ if ($tee == 'YHTEENVETO') {
     $rowarray[] = $row;
   }
 
-   // tää on nyt hardcoodattu, eli miltä kirjanpidon tasolta otetaan kulut
+  // tää on nyt hardcoodattu, eli miltä kirjanpidon tasolta otetaan kulut
   $sisainen_taso = "34";
 
   if ($kustannuksetyht == "" and $sisainen_taso != "") {
@@ -201,7 +201,7 @@ if ($tee == 'YHTEENVETO') {
     $kustapermyyrivi = 0;
   }
 
-  $abctyypit = array("kate","kpl","rivia","summa");
+  $abctyypit = array("kate", "kpl", "rivia", "summa");
 
   foreach ($abctyypit as $abctyyppi) {
 
@@ -260,16 +260,16 @@ if ($tee == 'YHTEENVETO') {
         $luokka = 3;
       }
 
-      if ($row["summa"] != 0) $kateprosentti = round($row["kate"] / $row["summa"] * 100,2);
+      if ($row["summa"] != 0) $kateprosentti = round($row["kate"] / $row["summa"] * 100, 2);
       else $kateprosentti = 0;
 
-      if ($row["rivia"] != 0)  $myyntieranarvo = round($row["summa"] / $row["rivia"],2);
+      if ($row["rivia"] != 0)  $myyntieranarvo = round($row["summa"] / $row["rivia"], 2);
       else $myyntieranarvo = 0;
 
-      if ($row["rivia"] != 0)  $myyntieranakpl = round($row["kpl"] / $row["rivia"],2);
+      if ($row["rivia"] != 0)  $myyntieranakpl = round($row["kpl"] / $row["rivia"], 2);
       else $myyntieranakpl = 0;
 
-      if ($row["puuterivia"] + $row["rivia"] != 0) $palvelutaso = round(100 - ($row["puuterivia"] / ($row["puuterivia"] + $row["rivia"]) * 100),2);
+      if ($row["puuterivia"] + $row["rivia"] != 0) $palvelutaso = round(100 - ($row["puuterivia"] / ($row["puuterivia"] + $row["rivia"]) * 100), 2);
       else $palvelutaso = 0;
 
       //rivin kustannus
@@ -371,7 +371,7 @@ if ($tee == 'YHTEENVETO') {
         pupe_query($query, $masterlink);
 
         // luokka vaihtuu
-        if (round($ryhmaprossa,2) >= $ryhmaprossat[$i]) {
+        if (round($ryhmaprossa, 2) >= $ryhmaprossat[$i]) {
           $ryhmaprossa = 0;
           $i++;
 
@@ -443,7 +443,7 @@ if ($tee == 'YHTEENVETO') {
         pupe_query($query, $masterlink);
 
         // luokka vaihtuu
-        if (round($ryhmaprossa,2) >= $ryhmaprossat[$i]) {
+        if (round($ryhmaprossa, 2) >= $ryhmaprossat[$i]) {
           $ryhmaprossa = 0;
           $i++;
 
@@ -491,5 +491,5 @@ if (!$php_cli) {
   echo "</table>";
   echo "<br><input type='submit' value='".t("Rakenna")."'>";
   echo "</form><br><br><br>";
-  require ("../inc/footer.inc");
+  require "../inc/footer.inc";
 }

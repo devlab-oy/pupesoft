@@ -9,12 +9,12 @@ else {
 
 if (isset($_REQUEST["tee"])) {
   if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
-  if(isset($_REQUEST["kaunisnimi"]) and $_REQUEST["kaunisnimi"] != '') {
-    $_REQUEST["kaunisnimi"] = str_replace("/","",$_REQUEST["kaunisnimi"]);
+  if (isset($_REQUEST["kaunisnimi"]) and $_REQUEST["kaunisnimi"] != '') {
+    $_REQUEST["kaunisnimi"] = str_replace("/", "", $_REQUEST["kaunisnimi"]);
   }
 }
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 $sahkoinen_tilausliitanta = @file_exists("../inc/sahkoinen_tilausliitanta.inc") ? true : false;
 
@@ -33,7 +33,7 @@ if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'tarkista_tehtaan_saldot')
     $suppliernumber = $suppliernumber;
     $tt_tunnus = (int) $tt_tunnus;
 
-    require("inc/sahkoinen_tilausliitanta.inc");
+    require "inc/sahkoinen_tilausliitanta.inc";
   }
 
   if (!isset($data)) $data = array('id' => 0, 'error' => true, 'error_msg' => utf8_encode(t("Haku ei onnistunut! Ole yhteydessä IT-tukeen")));
@@ -49,7 +49,7 @@ if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'tarkista_tehtaan_saldot_k
     $hae = 'tarkista_tehtaan_saldot_kaikki';
     $otunnus = (int) $otunnus;
 
-    require("inc/sahkoinen_tilausliitanta.inc");
+    require "inc/sahkoinen_tilausliitanta.inc";
   }
 
   if (!isset($data)) $data = array('id' => 0, 'error' => true, 'error_msg' => utf8_encode(t("Haku ei onnistunut! Ole yhteydessä IT-tukeen")));
@@ -76,7 +76,7 @@ if ($ajax_request) {
     $result = pupe_query($query);
 
     $tuote_saldot = array();
-    while($tuote_saldo = mysql_fetch_assoc($result)) {
+    while ($tuote_saldo = mysql_fetch_assoc($result)) {
       $tuote_saldot[] = $tuote_saldo;
     }
 
@@ -88,7 +88,7 @@ if ($ajax_request) {
   }
 }
 
-require ('inc/luo_ostotilausotsikko.inc');
+require 'inc/luo_ostotilausotsikko.inc';
 
 if (!isset($tee)) $tee = "";
 if (!isset($from)) $from = "";
@@ -109,7 +109,7 @@ if (!isset($nayta_pdf)) {
   if ($kukarow["extranet"] == "") {
     echo "<script src='../js/tilaus.js'></script>";
     echo "<script src='../js/tilaus_osto/tilaus_osto.js'></script>";
-      ?>
+?>
       <style>
       .vastaavat_korvaavat_hidden {
         display:none;
@@ -158,12 +158,12 @@ if ($tee == 'AKTIVOI' and $mista == "muokkaatilaus") {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
-      echo "<font class='error'>".t("Tilauksen tila on vaihtunut. Ole hyvä avaa tilaus uudestaan").".</font><br>";
+    echo "<font class='error'>".t("Tilauksen tila on vaihtunut. Ole hyvä avaa tilaus uudestaan").".</font><br>";
 
-      // poistetaan aktiiviset tilaukset jota tällä käyttäjällä oli
-      $query = "UPDATE kuka SET kesken='' WHERE yhtio='$kukarow[yhtio]' AND kuka='$kukarow[kuka]'";
-      $result = pupe_query($query);
-      exit;
+    // poistetaan aktiiviset tilaukset jota tällä käyttäjällä oli
+    $query = "UPDATE kuka SET kesken='' WHERE yhtio='$kukarow[yhtio]' AND kuka='$kukarow[kuka]'";
+    $result = pupe_query($query);
+    exit;
   }
 }
 
@@ -219,7 +219,7 @@ if ($lopetus != "") {
 }
 
 if ((int) $kukarow['kesken'] == 0 or $tee == "MUUOTAOSTIKKOA") {
-  require("otsik_ostotilaus.inc");
+  require "otsik_ostotilaus.inc";
 }
 
 if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
@@ -330,7 +330,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               AND uusiotunnus = 0";
     $result = pupe_query($query);
 
-    while($ostotilausrivi = mysql_fetch_assoc($result)) {
+    while ($ostotilausrivi = mysql_fetch_assoc($result)) {
       tarkista_myynti_osto_liitos_ja_poista($ostotilausrivi['tunnus'], false);
     }
 
@@ -355,7 +355,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
       }
 
       $tulostimet[0] = "Ostotilaus";
-      require("../inc/valitse_tulostin.inc");
+      require "../inc/valitse_tulostin.inc";
     }
 
     // luodaan varastopaikat jos tilaus on optimoitu varastoon...
@@ -423,7 +423,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             $oletus = '';
           }
 
-             if (!isset($nayta_pdf)) echo "<font class='error'>".t("Tehtiin uusi varastopaikka")." $ostotilausrivit[tuoteno]: $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0</font><br>";
+          if (!isset($nayta_pdf)) echo "<font class='error'>".t("Tehtiin uusi varastopaikka")." $ostotilausrivit[tuoteno]: $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0</font><br>";
 
           // lisätään paikka
           $query = "INSERT INTO tuotepaikat set
@@ -471,7 +471,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
     if (isset($nayta_pdf)) $tee = "NAYTATILAUS";
 
-    require('tulosta_ostotilaus.inc');
+    require 'tulosta_ostotilaus.inc';
 
     // päivitetään tässä tilaus tulostetuksi
     $query = "UPDATE lasku SET lahetepvm = now() WHERE tunnus='$kukarow[kesken]'";
@@ -572,7 +572,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
         //Jos vaihdettava rivi on linkattu myyntitilaukseen, käydään vaihtamassa myös myyntitilauksen tuote vastaavaan tuotteeseen.
         $ale_query = "";
-        foreach($ale as $a_index => $a) {
+        foreach ($ale as $a_index => $a) {
           $ale_query .= $a_index .' = ' . $a . ',';
         }
         $ale_query = substr($ale_query, 0, -1);
@@ -783,7 +783,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
     }
     if ($toim != "HAAMU") {
       $multi = "TRUE";
-      require("inc/tuotehaku.inc");
+      require "inc/tuotehaku.inc";
     }
   }
 
@@ -820,10 +820,10 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
         $trow["alv"] = $laskurow["alv"];
       }
 
-      if (checkdate($toimkka,$toimppa,$toimvva)) {
+      if (checkdate($toimkka, $toimppa, $toimvva)) {
         $toimaika = $toimvva."-".$toimkka."-".$toimppa;
       }
-      if (checkdate($kerayskka,$keraysppa,$keraysvva)) {
+      if (checkdate($kerayskka, $keraysppa, $keraysvva)) {
         $kerayspvm = $keraysvva."-".$kerayskka."-".$keraysppa;
       }
       if ($toimaika == "" or $toimaika == "0000-00-00") {
@@ -884,7 +884,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
       $rivitunnus_temp = $rivitunnus;
 
       if ($kpl != "") {
-        require ('lisaarivi.inc');
+        require 'lisaarivi.inc';
       }
 
       if (!empty($lisatyt_rivit2)) {
@@ -987,7 +987,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
   //lisätään rivejä tiedostosta
   if ($tee == 'mikrotila' or $tee == 'file') {
-    require('mikrotilaus_ostotilaus.inc');
+    require 'mikrotilaus_ostotilaus.inc';
   }
 
   // Jee meillä on otsikko!
@@ -1053,7 +1053,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           <form method='POST' action='{$palvelin2}yllapito.php?toim=liitetiedostot&from=tilausmyynti&ohje=off&haku[7]=@lasku&haku[8]=@$id&lukitse_avaimeen=$id&lukitse_laji=lasku'>
           <input type='hidden' name='lopetus' value='{$tilost_lopetus}//from=LASKUTATILAUS'>
           <input type='hidden' name='toim_kutsu' value='{$toim}'>
-          <input type='submit' value='",t('Tilauksen liitetiedostot'),"'>
+          <input type='submit' value='", t('Tilauksen liitetiedostot'), "'>
           </form>
           </td>";
     }
@@ -1066,7 +1066,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           <input type='hidden' name='toim_kutsu' value='{$toim}'>
           <input type='hidden' name='liitostunnus' value='{$laskurow['liitostunnus']}' />
           <input type='hidden' name='tee_myos_tuotteen_toimittaja_liitos' value='JOO' />
-          <input type='submit' value='",t('Uusi tuote'),"'>
+          <input type='submit' value='", t('Uusi tuote'), "'>
           </form>";
       echo "</td>";
 
@@ -1119,7 +1119,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
       echo "</form>";
     }
 
-    require('syotarivi_ostotilaus.inc');
+    require 'syotarivi_ostotilaus.inc';
 
     if ($huomio != '') {
       echo "<font class='message'>$huomio</font><br>";
@@ -1179,17 +1179,17 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
       echo "</form>";
     }
 
-    if ($sahkoinen_tilausliitanta AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
+    if ($sahkoinen_tilausliitanta and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
 
       $style = "width: 15px; height: 15px; display: inline-table; border-radius: 50%; -webkit-border-radius: 50%; -moz-border-radius: 50%;";
 
       echo "&nbsp;&nbsp;&nbsp;<span class='tooltip' id='color_tooltip'><span style='{$style} background-color: #5D2; margin-right: 5px;'></span><span style='{$style} background-color: #FCF300; margin-right: 5px;'></span><span style='{$style} background-color: #E66; margin-right: 5px;'></span></span></a>";
       echo "<div id='div_color_tooltip' class='popup' style='width: 300px; line-height: 15px; height: 60px;'>";
       echo "<table>";
-      echo "<tr><td class='back'><span style='{$style} background-color: #5D2;'></span></td><td class='back'><span style='float: right'>",t("kysytty määrä löytyy"),"</span></td></tr>";
-      echo "<tr><td class='back'><span style='{$style} background-color: #FCF300;'></span></td><td class='back'><span style='float: right;'>",t("osa kysytystä määrästä löytyy"),"</span></td></tr>";
-      echo "<tr><td class='back'><span style='{$style} background-color: #E66'></span></td><td class='back'><span style='float: right;'>",t("kysyttyä määrää ei löydy"),"</span></td></tr>";
-      echo "<tr><td class='back'><img src='{$palvelin2}pics/lullacons/alert.png' /></td><td class='back'><span style='float: right;'>",t("kysyttyä tuotetta ei löydy"),"</span></td></tr>";
+      echo "<tr><td class='back'><span style='{$style} background-color: #5D2;'></span></td><td class='back'><span style='float: right'>", t("kysytty määrä löytyy"), "</span></td></tr>";
+      echo "<tr><td class='back'><span style='{$style} background-color: #FCF300;'></span></td><td class='back'><span style='float: right;'>", t("osa kysytystä määrästä löytyy"), "</span></td></tr>";
+      echo "<tr><td class='back'><span style='{$style} background-color: #E66'></span></td><td class='back'><span style='float: right;'>", t("kysyttyä määrää ei löydy"), "</span></td></tr>";
+      echo "<tr><td class='back'><img src='{$palvelin2}pics/lullacons/alert.png' /></td><td class='back'><span style='float: right;'>", t("kysyttyä tuotetta ei löydy"), "</span></td></tr>";
       echo "</table>";
       echo "</div>";
     }
@@ -1203,16 +1203,40 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
     $ale_query_select_lisa = generoi_alekentta_select('erikseen', 'O');
 
     //Listataan tilauksessa olevat tuotteet
-    $query = "SELECT tilausrivi.nimitys,
-              concat_ws(' ', tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) paikka,
+    $query = "SELECT
+              tilausrivi.nimitys,
+              concat_ws(' ', tilausrivi.hyllyalue,
+                tilausrivi.hyllynro,
+                tilausrivi.hyllyvali,
+                tilausrivi.hyllytaso) paikka,
               tilausrivi.tuoteno,
               tuotteen_toimittajat.toim_tuoteno,
               tuotteen_toimittajat.toim_nimitys,
               tuotteen_toimittajat.valuutta,
               tilausrivi.tilkpl tilattu,
-              round(tilausrivi.tilkpl*if (tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin),4) tilattu_ulk,
-              round((tilausrivi.varattu+tilausrivi.jt)*tilausrivi.hinta*if (tuotteen_toimittajat.tuotekerroin=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin)*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
-              tilausrivi.alv, tilausrivi.toimaika, tilausrivi.kerayspvm, tilausrivi.uusiotunnus, tilausrivi.tunnus, tilausrivi.perheid, tilausrivi.perheid2, tilausrivi.hinta, {$ale_query_select_lisa} tilausrivi.varattu varattukpl, tilausrivi.kommentti,
+              round(tilausrivi.tilkpl
+                * if (tuotteen_toimittajat.tuotekerroin = 0
+                  OR tuotteen_toimittajat.tuotekerroin is NULL,
+                    1, tuotteen_toimittajat.tuotekerroin),
+                    4) tilattu_ulk,
+              round((tilausrivi.varattu + tilausrivi.jt)
+                * tilausrivi.hinta
+                * if (tuotteen_toimittajat.tuotekerroin = 0
+                  OR tuotteen_toimittajat.tuotekerroin IS NULL,
+                    1,
+                    tuotteen_toimittajat.tuotekerroin)
+                * {$query_ale_lisa}, '$yhtiorow[hintapyoristys]') rivihinta,
+              tilausrivi.alv,
+              tilausrivi.toimaika,
+              tilausrivi.kerayspvm,
+              tilausrivi.uusiotunnus,
+              tilausrivi.tunnus,
+              tilausrivi.perheid,
+              tilausrivi.perheid2,
+              tilausrivi.hinta,
+              {$ale_query_select_lisa}
+              tilausrivi.varattu varattukpl,
+              tilausrivi.kommentti,
               $sorttauskentta,
               tilausrivi.var,
               tilausrivi.var2,
@@ -1223,6 +1247,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               tuote.kehahin keskihinta,
               tuote.sarjanumeroseuranta,
               tuotteen_toimittajat.ostohinta,
+              if(tuotteen_toimittajat.osto_era = 0, 1, tuotteen_toimittajat.osto_era) AS osto_era,
               tuotteen_toimittajat.valuutta,
               tilausrivi.erikoisale,
               tilausrivi.ale1,
@@ -1238,14 +1263,23 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               ta2.selite p3,
               ta2.selitetark p3s
               FROM tilausrivi
-              LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-              LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
-              LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki > 0 AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus)
-              LEFT JOIN tuotteen_avainsanat as ta1 on (ta1.yhtio=tuote.yhtio and ta1.tuoteno=tuote.tuoteno and ta1.laji='pakkauskoko2' )
-              LEFT JOIN tuotteen_avainsanat as ta2 on (ta2.yhtio=tuote.yhtio and ta2.tuoteno=tuote.tuoteno and ta2.laji='pakkauskoko3')
-              WHERE tilausrivi.otunnus = '$kukarow[kesken]'
-              and tilausrivi.yhtio     = '$kukarow[yhtio]'
-              and tilausrivi.tyyppi    = 'O'
+              LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio
+                AND tilausrivi.tuoteno                      = tuote.tuoteno
+              LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio
+                AND tuote.tuoteno                           = tuotteen_toimittajat.tuoteno
+                AND tuotteen_toimittajat.liitostunnus       = '$laskurow[liitostunnus]'
+              LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+                AND tilausrivin_lisatiedot.tilausrivilinkki > 0
+                AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus)
+              LEFT JOIN tuotteen_avainsanat AS ta1 ON (ta1.yhtio = tuote.yhtio
+                AND ta1.tuoteno                             = tuote.tuoteno
+                AND ta1.laji                                = 'pakkauskoko2' )
+              LEFT JOIN tuotteen_avainsanat AS ta2 ON (ta2.yhtio = tuote.yhtio
+                AND ta2.tuoteno                             = tuote.tuoteno
+                AND ta2.laji                                = 'pakkauskoko3')
+              WHERE tilausrivi.otunnus                      = '$kukarow[kesken]'
+              and tilausrivi.yhtio                          = '$kukarow[yhtio]'
+              and tilausrivi.tyyppi                         = 'O'
               ORDER BY sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus";
     $presult = pupe_query($query);
 
@@ -1451,7 +1485,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               $halyraja_chk_res = pupe_query($query);
               $halyraja_chk_row = mysql_fetch_assoc($halyraja_chk_res);
 
-              echo "<li>",t("Hälytysraja"),": {$halyraja_chk_row['halytysraja']} {$pop_yks}</li>";
+              echo "<li>", t("Hälytysraja"), ": {$halyraja_chk_row['halytysraja']} {$pop_yks}</li>";
             }
 
             echo "<li>".t("Keskihinta").": $prow[keskihinta] $prow[valuutta]</li><li>".t("Ostohinta").": $prow[ostohinta] $prow[valuutta]</li>";
@@ -1509,11 +1543,11 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           echo "</td>";
           echo "<td valign='top' $class align='right'>";
 
-          if ($sahkoinen_tilausliitanta AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
+          if ($sahkoinen_tilausliitanta and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
             echo "<div class='availability {$prow['tunnus']}_availability' /> <span class='{$prow['tunnus']}_loading'></span></div>&nbsp;";
           }
 
-          echo ($prow["tilattu"]*1)." ",strtolower($prow['yksikko']),"<br />".($prow["tilattu_ulk"]*1)." ",strtolower($prow['toim_yksikko']),"</td>";
+          echo ($prow["tilattu"]*1)." ", strtolower($prow['yksikko']), "<br />".($prow["tilattu_ulk"]*1)." ", strtolower($prow['toim_yksikko']), "</td>";
           echo "<td valign='top' $class align='right'>".hintapyoristys($prow["hinta"])."</td>";
 
           $alespan = 8;
@@ -1540,7 +1574,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
             // Tarkistetaan tilausrivi
             if ($toim != "HAAMU") {
-              require("tarkistarivi_ostotilaus.inc");
+              require "tarkistarivi_ostotilaus.inc";
             }
 
             echo "  <td valign='top' class='back' nowrap>
@@ -1635,7 +1669,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                     echo "<td><input type='text' name='ale_array{$alepostfix}[$xprow[tuoteno]]' size='5' maxlength='6'></td>";
                   }
 
-                  echo "<td>".alv_popup_oletus('alv',$alv)."</td>
+                  echo "<td>".alv_popup_oletus('alv', $alv)."</td>
                       <td style='border-right: 1px solid;'></td>";
                   $lask++;
                   $borderlask--;
@@ -1699,11 +1733,11 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
               $font_class = $comp_a != $comp_b ? 'error' : 'ok';
 
-              echo "<font class='{$font_class}'>",t("Vahvistettu toimitusaika"),": ",tv1dateconv($prow["toimaika"]),"<br />";
-              echo t("Vahvistettu määrä"),": {$prow['vahvistettu_maara']}";
+              echo "<font class='{$font_class}'>", t("Vahvistettu toimitusaika"), ": ", tv1dateconv($prow["toimaika"]), "<br />";
+              echo t("Vahvistettu määrä"), ": {$prow['vahvistettu_maara']}";
 
               if ($prow['vahvistettu_kommentti'] != "") {
-                echo "<br />",t("Vahvistettu kommentti"),": {$prow['vahvistettu_kommentti']}";
+                echo "<br />", t("Vahvistettu kommentti"), ": {$prow['vahvistettu_kommentti']}";
               }
 
               echo "</font>";
@@ -1864,11 +1898,11 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           </form>
           </td>";
 
-      if ($sahkoinen_tilausliitanta AND ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
+      if ($sahkoinen_tilausliitanta and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'S' or $yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A')) {
 
         if (mysql_num_rows(t_avainsana('SAHKTILTUN', '', " AND selite = '{$laskurow['vanhatunnus']}' AND selitetark = '{$laskurow['liitostunnus']}' ")) > 0) {
           $hae = 'nappi_kaikki';
-          require("inc/sahkoinen_tilausliitanta.inc");
+          require "inc/sahkoinen_tilausliitanta.inc";
         }
       }
 
@@ -1937,7 +1971,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
   }
 
   if (!isset($nayta_pdf) and $tee == "") {
-    require("otsik_ostotilaus.inc");
+    require "otsik_ostotilaus.inc";
   }
 }
 
@@ -1947,4 +1981,4 @@ if (!empty($tuoteno) and empty($kpl)) {
   $kentta = "kpl";
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

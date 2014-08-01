@@ -8777,6 +8777,7 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
       $result = pupe_query($query);
 
       $limit = 0;
+
       if (mysql_num_rows($result) > 0) {
         while ($row = mysql_fetch_assoc($result)) {
           echo "  <div id='asiakastilausnumero_valinta_$hakuid$row[tunnus]'
@@ -8803,7 +8804,9 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
           $laadittu = tv1dateconv($row["luontiaika"]);
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>$row[asiakkaan_tilausnumero]</font> &raquo; $row[nimi] - $laadittu
+                </span>
               </div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
           $limit++;
 
@@ -8817,6 +8820,8 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei tilauksia.")."</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -8889,7 +8894,9 @@ if (!function_exists("livesearch_tilihaku")) {
           }
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>$row[tilino]</font> &raquo; $row[nimi]
+                </span>
               </div><div name='selectValues$hakuid' id='$row[tilino]'></div>";
           $limit++;
 
@@ -8903,6 +8910,8 @@ if (!function_exists("livesearch_tilihaku")) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei tilejä.")."</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9083,8 +9092,9 @@ if (!function_exists("livesearch_tuotehaku")) {
           else {
             echo "document.getElementById('livesearch_{$hakuid}').style.visibility = 'hidden';";
           }
-          echo "\"style='padding:2px;'>";
-          echo "<font style='{$tyyli}'>{$row['tuoteno']}</font> &raquo; <font style='{$tyyli2}'>{$row['nimitys']}</font>";
+          echo "\"style='padding:2px;'>
+              <span class='livesearch_rivispan_{$hakuid}'>
+              <font style='{$tyyli}'>{$row['tuoteno']}</font> &raquo; <font style='{$tyyli2}'>{$row['nimitys']}</font>";
 
           if (in_array($yhtiorow['livetuotehaku_hakutapa'], array('E', 'G')) and count($varastot_mista_saa_myyda) > 0) {
 
@@ -9098,7 +9108,7 @@ if (!function_exists("livesearch_tuotehaku")) {
             echo " &raquo; <font style='{$tyyli2}'>", t("Saldo"), " {$saldo_yht}</font>";
           }
 
-          echo "</div>";
+          echo "</span></div>";
           echo "<div name='selectValues{$hakuid}' id='{$row['tuoteno']}'></div>";
 
         }
@@ -9114,6 +9124,8 @@ if (!function_exists("livesearch_tuotehaku")) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei tuotteita.")."</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9188,7 +9200,9 @@ if (!function_exists('livesearch_tuotekategoriahaku')) {
           }
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>{$polku['polku']} &raquo; {$row['nimi']}</font>
+                </span>
               </div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
           $limit++;
 
@@ -9202,6 +9216,8 @@ if (!function_exists('livesearch_tuotekategoriahaku')) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei tuotekategorioita").".</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9269,7 +9285,9 @@ if (!function_exists('livesearch_tuoteryhmahaku')) {
           }
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>{$row['selite']} - {$row['selitetark']}</font>
+                </span>
               </div><div name='selectValues$hakuid' id='$row[selite]'></div>";
           $limit++;
 
@@ -9283,6 +9301,8 @@ if (!function_exists('livesearch_tuoteryhmahaku')) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei tuoteryhmiä").".</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9366,7 +9386,9 @@ if (!function_exists("livesearch_kayttajahaku")) {
           }
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>$row[nimi]</font> &raquo; ($row[kuka])
+                </span>
               </div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
           $limit++;
 
@@ -9380,6 +9402,8 @@ if (!function_exists("livesearch_kayttajahaku")) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei käyttäjiä.")."</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9456,7 +9480,9 @@ if (!function_exists("livesearch_asiakashaku")) {
           }
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>$row[ytunnus] &raquo; $row[asiakkaan_tieto]</font>
+                </span>
               </div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
           $limit++;
 
@@ -9470,6 +9496,8 @@ if (!function_exists("livesearch_asiakashaku")) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei asiakkaita.")."</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9542,7 +9570,9 @@ if (!function_exists('livesearch_asiakasytunnushaku')) {
           }
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>$row[ytunnus] &raquo; $row[nimi]</font>
+                </span>
               </div><div name='selectValues$hakuid' id='$row[ytunnus]'></div>";
           $limit++;
 
@@ -9556,6 +9586,8 @@ if (!function_exists('livesearch_asiakasytunnushaku')) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei asiakkaita.")."</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9630,7 +9662,9 @@ if (!function_exists('livesearch_asiakaskategoriahaku')) {
           }
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>{$polku['polku']} &raquo; {$row['nimi']}</font>
+                </span>
               </div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
           $limit++;
 
@@ -9644,6 +9678,8 @@ if (!function_exists('livesearch_asiakaskategoriahaku')) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei asiakaskategorioita").".</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9711,7 +9747,9 @@ if (!function_exists("livesearch_varastohaku")) {
           }
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>$row[hyllyt]</font>
+                </span>
               </div><div name='selectValues$hakuid' id='$row[hyllyt]'></div>";
           $limit++;
 
@@ -9725,6 +9763,8 @@ if (!function_exists("livesearch_varastohaku")) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei varastoa.")."</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9789,7 +9829,9 @@ if (!function_exists("livesearch_toimittajahaku")) {
           }
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>$row[nimi]</font>
+                </span>
               </div><div name='selectValues$hakuid' id='$row[tunnus]'></div>";
           $limit++;
 
@@ -9803,6 +9845,8 @@ if (!function_exists("livesearch_toimittajahaku")) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei toimittajia").".</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9861,7 +9905,9 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
           }
           echo "\"
                 style='padding:2px;'>
+                <span class='livesearch_rivispan_{$hakuid}'>
                 <font style='font-weight:bold'>{$row['sarjanumero']}</font>
+                </span>
               </div><div name='selectValues$hakuid' id='$row[sarjanumero]'></div>";
           $limit++;
 
@@ -9875,6 +9921,8 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei sarjanumeroita").".</font></div>";
       }
+
+      livesearch_trimmaa_leveys($hakuid);
     }
     else {
       echo "
@@ -9936,13 +9984,13 @@ if (!function_exists('livesearch_kohdehaku')) {
                   } \"
                 onmouseout=\"this.className='';\"
                 onclick=\"document.getElementById('$hakuid').value='{$row['kohde_tunnus']}';";
-                if ($submit == "") {
-                  echo "document.$formi.submit();";
-                }
-                else {
-                  echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
-                }
-                echo "\"
+          if ($submit == "") {
+            echo "document.$formi.submit();";
+          }
+          else {
+            echo "document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';";
+          }
+          echo "\"
                 style='padding:2px;'>
                 <font style='font-weight:bold'>{$row['kohde_nimi']} - {$row['asiakas_nimi']}</font>
               </div><div name='selectValues$hakuid' id='{$row['kohde_tunnus']}'></div>";
@@ -9953,7 +10001,7 @@ if (!function_exists('livesearch_kohdehaku')) {
           }
         }
 
-        echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>",t("Haulla löytyi")," ".mysql_num_rows($result). " ",t("kohdetta"),", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+        echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>", t("Haulla löytyi"), " ".mysql_num_rows($result). " ", t("kohdetta"), ", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
       }
       else {
         echo "<div style='padding:2px'><font class='message'>".t("Ei kohteita").".</font></div>";
@@ -10003,6 +10051,42 @@ if (!function_exists("livesearch_kentta")) {
     }
     $return .= "<div id='livesearch_$hakuID' class='liveSearch' name='livesearch_$hakuID' style='width:{$result_width}px; overflow: auto; max-height: 200px;' onmousedown=\"setTimeout('document.getElementById(\'$hakuID\').focus()',10);\"></div>";
     return $return;
+  }
+}
+
+if (!function_exists("livesearch_trimmaa_leveys")) {
+  function livesearch_trimmaa_leveys($hakuid) {
+
+    echo "
+    <script TYPE='text/javascript' LANGUAGE='JavaScript'>
+
+      document.getElementById('livesearch_{$hakuid}').style.width = '1000px';
+
+      var ikkunanleveys = $(window).width();
+      var maxleveys = 0;
+      var leveys = 0;
+
+      $('.livesearch_rivispan_{$hakuid}').each(function(t) {
+        leveys = $(this).width();
+
+        if (leveys > maxleveys) {
+          maxleveys = leveys;
+        }
+      });
+
+      maxleveys = maxleveys + 25;
+
+      //Käytetään korkeintaan puolet ikkunasta
+      if (maxleveys > ikkunanleveys/2) {
+        maxleveys = Math.round(ikkunanleveys/2);
+      }
+      if (maxleveys < 200) {
+        maxleveys = 200;
+      }
+
+      document.getElementById('livesearch_{$hakuid}').style.width = maxleveys+'px';
+
+    </script>";
   }
 }
 
@@ -24114,9 +24198,9 @@ if (!function_exists('hae_laitteen_oletus_huoltosyklit')) {
 
 if (!function_exists('js_laite')) {
 
-    function js_laite() {
-      global $palvelin2;
-      ?>
+  function js_laite() {
+    global $palvelin2;
+?>
       <script src='<?php echo $palvelin2 ?>js/valid_date_plugin.js'></script>
       <script>
         var palvelin2 = '<?php echo $palvelin2 ?>';
@@ -24368,11 +24452,13 @@ if (!function_exists('hae_extranet_kayttajaan_liitetty_asiakas')) {
 }
 
 if (!function_exists('kirjoita_json_tiedosto')) {
+
+
   /**
    * Kirjoittaa json-tiedoston /tmp/ -kansioon. Annettavalla array:lle ($data) ajetaan array_utf8_encode rekursiivisesti.
    *
-   * @param array $data
-   * @param string $json_tiedosto_nimi
+   * @param array   $data
+   * @param string  $json_tiedosto_nimi
    * @return string
    */
   function kirjoita_json_tiedosto($data, $json_tiedosto_nimi) {
@@ -24392,12 +24478,14 @@ if (!function_exists('kirjoita_json_tiedosto')) {
 }
 
 if (!function_exists('aja_ruby')) {
+
+
   /**
    * Tätä funktiota käytetään ruby-koodin ajamiseen, joka generoi pdf-tiedostoja. Funktio palauttaa generoidun tiedoston nimen.
    *
    * @global string $pupe_root_polku
-   * @param string $json_data_filepath
-   * @param string $ruby_tiedosto_nimi
+   * @param string  $json_data_filepath
+   * @param string  $ruby_tiedosto_nimi
    * @return string
    */
   function aja_ruby($json_data_filepath, $ruby_tiedosto_nimi) {
@@ -24421,10 +24509,10 @@ if (!function_exists('pupesoft_require')) {
     global $kukarow, $yhtiorow, $starttime;
 
     if (file_exists($filename)) {
-      require_once($filename);
+      require_once $filename;
     }
     elseif (file_exists(basename($filename))) {
-      require_once(basename($filename));
+      require_once basename($filename);
     }
     else {
       die(t('Ajettavaa tiedostoa ei löytynyt'));
@@ -27206,7 +27294,7 @@ if (!function_exists('hae_maksuehdot')) {
     $result = pupe_query($query);
 
     $maksuehdot = array();
-    while($maksuehto = mysql_fetch_assoc($result)) {
+    while ($maksuehto = mysql_fetch_assoc($result)) {
       $maksuehdot[] = $maksuehto;
     }
 
@@ -27518,7 +27606,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
                       LIMIT 1;";
             $f_result = pupe_query($query);
 
-            # jos tämä epäonnistuu, virheilmoitus tulee alempana kun tilinumeroa ei löydy
+            // jos tämä epäonnistuu, virheilmoitus tulee alempana kun tilinumeroa ei löydy
             if (mysql_num_rows($f_result) == 1) {
               $f_row = mysql_fetch_assoc($f_result);
               $tilino = $f_row['tilino'];
@@ -27562,7 +27650,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
           $kukarow["yhtio"] = $yritirow["yhtio"];
         }
 
-         // Tarkistetaan tilit
+        // Tarkistetaan tilit
         if (strlen($yritirow['oletus_rahatili']) == 0 or strlen($yritirow['oletus_kulutili']) == 0) {
           echo "<font class='error'>".t("Tililtä puuttuu kulu tai rahatili")."</font>";
           echo "<br>";
@@ -27582,20 +27670,20 @@ if (!function_exists("tallenna_tiliote_viite")) {
         $yhtio_tsekrow = mysql_fetch_assoc($yhtio_tsekres);
 
         //vertaillaan tilikauteen
-        list($vv1,$kk1,$pp1) = explode("-", $yhtio_tsekrow["myyntireskontrakausi_alku"]);
-        list($vv2,$kk2,$pp2) = explode("-", $yhtio_tsekrow["myyntireskontrakausi_loppu"]);
+        list($vv1, $kk1, $pp1) = explode("-", $yhtio_tsekrow["myyntireskontrakausi_alku"]);
+        list($vv2, $kk2, $pp2) = explode("-", $yhtio_tsekrow["myyntireskontrakausi_loppu"]);
 
         $myrealku  = (int) date('Ymd', mktime(0, 0, 0, (int) $kk1, (int) $pp1, (int) $vv1));
         $myreloppu = (int) date('Ymd', mktime(0, 0, 0, (int) $kk2, (int) $pp2, (int) $vv2));
 
-        list($vv1,$kk1,$pp1) = explode("-", $yhtio_tsekrow["ostoreskontrakausi_alku"]);
-        list($vv2,$kk2,$pp2) = explode("-", $yhtio_tsekrow["ostoreskontrakausi_loppu"]);
+        list($vv1, $kk1, $pp1) = explode("-", $yhtio_tsekrow["ostoreskontrakausi_alku"]);
+        list($vv2, $kk2, $pp2) = explode("-", $yhtio_tsekrow["ostoreskontrakausi_loppu"]);
 
         $oresalku  = (int) date('Ymd', mktime(0, 0, 0, (int) $kk1, (int) $pp1, (int) $vv1));
         $oresloppu = (int) date('Ymd', mktime(0, 0, 0, (int) $kk2, (int) $pp2, (int) $vv2));
 
-        list($vv1,$kk1,$pp1) = explode("-", $yhtio_tsekrow["tilikausi_alku"]);
-        list($vv2,$kk2,$pp2) = explode("-", $yhtio_tsekrow["tilikausi_loppu"]);
+        list($vv1, $kk1, $pp1) = explode("-", $yhtio_tsekrow["tilikausi_alku"]);
+        list($vv2, $kk2, $pp2) = explode("-", $yhtio_tsekrow["tilikausi_loppu"]);
 
         $tikaalku  = (int) date('Ymd', mktime(0, 0, 0, (int) $kk1, (int) $pp1, (int) $vv1));
         $tikaloppu = (int) date('Ymd', mktime(0, 0, 0, (int) $kk2, (int) $pp2, (int) $vv2));
@@ -27677,7 +27765,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
               $xtyyppi=0;
               $virhe++;
             }
-            elseif (!$forceta)  {
+            elseif (!$forceta) {
               echo "<font class='error'>";
               echo "VIRHE: Tämä aineisto on jo aiemmin käsitelty!<br>";
               echo "Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio]";
@@ -27945,15 +28033,15 @@ if (!function_exists("kasittele_tiliote_viite")) {
 
       if ($tiliotedatarow['tyyppi'] == 1) {
         $tee_selvittely = true;
-        require("inc/tiliote.inc");
+        require "inc/tiliote.inc";
       }
       if ($tiliotedatarow['tyyppi'] == 2) {
         $tee_selvittely = true;
-        require("inc/LMP.inc");
+        require "inc/LMP.inc";
       }
       if ($tiliotedatarow['tyyppi'] == 3) {
         $tee_viitemaksu_kohdistus = true;
-        require("inc/viitemaksut.inc");
+        require "inc/viitemaksut.inc";
       }
 
       // merkataan tämä tiliotedatarivi käsitellyksi
@@ -27971,13 +28059,13 @@ if (!function_exists("kasittele_tiliote_viite")) {
       $kohdm = $vastavienti_valuutassa;
 
       echo "<tr><td colspan = '6'>";
-      require("inc/teeselvittely.inc");
+      require "inc/teeselvittely.inc";
       echo "</td></tr>";
       echo "</table><br>\n<br>\n";
     }
 
     if ($tee_viitemaksu_kohdistus) {
-      # Tässä tarvitaan kukarow[yhtio], joten ajetaan tämä kaikille firmoille
+      // Tässä tarvitaan kukarow[yhtio], joten ajetaan tämä kaikille firmoille
       $query = "SELECT yhtio from yhtio";
       $yhtiores = pupe_query($query);
 
@@ -27988,8 +28076,8 @@ if (!function_exists("kasittele_tiliote_viite")) {
         // Setataan kukarow-yhtiö
         $kukarow["yhtio"] = $yhtiorow["yhtio"];
 
-        require("inc/viitemaksut_kohdistus.inc");
-        require("myyntires/suoritus_asiakaskohdistus_kaikki.php");
+        require "inc/viitemaksut_kohdistus.inc";
+        require "myyntires/suoritus_asiakaskohdistus_kaikki.php";
       }
 
       echo "<br><br>";
@@ -28002,6 +28090,7 @@ if (!function_exists("kasittele_tiliote_viite")) {
 
 if (!function_exists('array_column')) {
 
+
   /**
    * Returns the values from a single column of the input array, identified by
    * the $columnKey.
@@ -28009,12 +28098,12 @@ if (!function_exists('array_column')) {
    * Optionally, you may provide an $indexKey to index the values in the returned
    * array by the values from the $indexKey column in the input array.
    *
-   * @param array $input A multi-dimensional array (record set) from which to pull
+   * @param array   $input     A multi-dimensional array (record set) from which to pull
    *                     a column of values.
-   * @param mixed $columnKey The column of values to return. This value may be the
+   * @param mixed   $columnKey The column of values to return. This value may be the
    *                         integer key of the column you wish to retrieve, or it
    *                         may be the string key name for an associative array.
-   * @param mixed $indexKey (Optional.) The column to use as the index/keys for
+   * @param mixed   $indexKey  (Optional.) The column to use as the index/keys for
    *                        the returned array. This value may be the integer key
    *                        of the column, or it may be the string key name.
    * @return array

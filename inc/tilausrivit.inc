@@ -17,7 +17,7 @@ if ($trow['tila'] == 'U') {
             ORDER BY toimaika, tunnus";
 }
 //nämä ovat ostoreskontran laskuja ja sillon pitää löytää keikan perusteella rivit
-elseif (in_array($trow['tila'], array('H','Y','M','P','Q')) and (int) $laskrow["laskunro"] > 0) {
+elseif (in_array($trow['tila'], array('H', 'Y', 'M', 'P', 'Q')) and (int) $laskrow["laskunro"] > 0) {
   $query = "SELECT laskunro
             FROM lasku
             WHERE vanhatunnus = '$tunnus' and yhtio='$kukarow[yhtio]' and tila = 'K' limit 1";
@@ -54,11 +54,11 @@ if (mysql_num_rows($result) > 0) {
   echo "<table>";
 
   for ($i = 0; $i < mysql_num_fields($result); $i++) {
-    echo "<th>" . t(mysql_field_name($result,$i)) ."</th>";
+    echo "<th>" . t(mysql_field_name($result, $i)) ."</th>";
   }
   echo "</tr>";
 
-  while ($trow=mysql_fetch_array ($result)) {
+  while ($trow=mysql_fetch_array($result)) {
     echo "<tr>";
     for ($i=0; $i<mysql_num_fields($result); $i++) {
       echo "<td>$trow[$i]</td>";

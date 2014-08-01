@@ -1,9 +1,9 @@
 <?php
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if ($tee == 'NAYTATILAUS') {
   echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
-  require ("raportit/naytatilaus.inc");
+  require "raportit/naytatilaus.inc";
 }
 
 $logistiikka_yhtio = '';
@@ -52,16 +52,16 @@ $result = mysql_query($query) or pupe_error($query);
 
 echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
 
-while($row = mysql_fetch_array($result)){
+while ($row = mysql_fetch_array($result)) {
   $sel = '';
   if ($tupakkaamo == '') {
-    if($row['nimi'] == $kukarow['oletus_pakkaamo']) {
+    if ($row['nimi'] == $kukarow['oletus_pakkaamo']) {
       $sel = 'selected';
       $tupakkaamo = $row['nimi'];
     }
   }
   else {
-    if($row['nimi'] == $tupakkaamo) {
+    if ($row['nimi'] == $tupakkaamo) {
       $sel = 'selected';
       $tupakkaamo = $row['nimi'];
     }
@@ -175,8 +175,8 @@ if (mysql_num_rows($pakkaamore) != 0) {
     echo "<td>".$row['ytunnus']."</td>";
     echo "<td>".$row['asnimi']."</td>";
     echo "<td><a href='?tupakkaamo=$tupakkaamo&tee=NAYTATILAUS&tunnus=$row[tunnus]'>".$row['tunnus']."</a></td>";
-    echo "<td>".tv1dateconv($row['lahetepvm'],"P","LYHYT")."</td>";
-    echo "<td>".tv1dateconv($kerayspvmrow['kerayspvm'],"P","LYHYT")."</td>";
+    echo "<td>".tv1dateconv($row['lahetepvm'], "P", "LYHYT")."</td>";
+    echo "<td>".tv1dateconv($kerayspvmrow['kerayspvm'], "P", "LYHYT")."</td>";
     echo "<td><input type='checkbox' name='checktunnukset[]' value='$row[tunnus]'></td></tr>";
 
     $pakkaamo = $row['pakkaamo'];
@@ -186,4 +186,4 @@ if (mysql_num_rows($pakkaamore) != 0) {
 
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

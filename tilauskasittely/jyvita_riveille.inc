@@ -15,11 +15,11 @@
 */
 
 if (strpos($jysum, "%") !== false and empty($valitut_tilausrivi_tunnukset)) {
-  $jysum = str_replace("%","", $jysum);
+  $jysum = str_replace("%", "", $jysum);
   $anna_ea = "TOKI";
 }
 
-$jysum = round(str_replace(",",".", $jysum), 2);
+$jysum = round(str_replace(",", ".", $jysum), 2);
 $jyvitetaan_ristiin = "";
 
 //Lasketaan tilauksen arvot

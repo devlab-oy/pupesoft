@@ -1,5 +1,5 @@
 <?php
-require('inc/parametrit.inc');
+require 'inc/parametrit.inc';
 
 echo "<font class='head'>Danskebank Factoring</font><hr><br>";
 
@@ -17,7 +17,7 @@ if ($tee == "") {
             lasku.summa                 != 0 and
             lasku.factoringsiirtonumero  = '' and
             lasku.valkoodi               = '$yhtiorow[valkoodi]'";
-  $result = mysql_query ($query) or pupe_error($query);
+  $result = mysql_query($query) or pupe_error($query);
   $laskurow = mysql_fetch_array($result);
 
   echo "<table>";
@@ -96,7 +96,7 @@ if ($tee == 'TULOSTA') {
             lasku.factoringsiirtonumero  = '$numero' and
             lasku.valkoodi               = '$yhtiorow[valkoodi]'
             order by laskunro";
-  $result = mysql_query ($query) or pupe_error($query);
+  $result = mysql_query($query) or pupe_error($query);
   $laskurow = mysql_fetch_array($result);
 
   // jos löytyi jotain factoroitavaa tallennetaan ni siirtonumero ekaks laskuille, minimoidaan aikaikkunat ja tablejen lukitusaika
@@ -106,33 +106,33 @@ if ($tee == 'TULOSTA') {
     if ($numero == 0) {
       // lukitaan, ettei muut pääse sörkkimään väliin
       $query  = "  LOCK TABLES lasku WRITE";
-      $result = mysql_query ($query) or pupe_error($query);
+      $result = mysql_query($query) or pupe_error($query);
 
       // haetaan seuraava vapaa listanumero
       $query = "SELECT max(factoringsiirtonumero) + 1
                 FROM lasku
                 WHERE yhtio = '$kukarow[yhtio]'";
-      $result = mysql_query ($query) or pupe_error($query);
+      $result = mysql_query($query) or pupe_error($query);
       $facrow = mysql_fetch_array($result);
 
       // päivitetään se laskuille
       $query = "UPDATE lasku
                 SET factoringsiirtonumero = '$facrow[0]'
                 WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($laskurow[tunnukset])";
-      $result = mysql_query ($query) or pupe_error($query);
+      $result = mysql_query($query) or pupe_error($query);
 
       $numero = $facrow[0];
 
       // lukko pois
       $query  = "  UNLOCK TABLES";
-      $result = mysql_query ($query) or pupe_error($query);
+      $result = mysql_query($query) or pupe_error($query);
     }
 
     // sitte käydään vasta laskut läpi..
     $query = "SELECT *
               FROM lasku
               WHERE yhtio = '$kukarow[yhtio]' and tunnus in ($laskurow[tunnukset])";
-    $result = mysql_query ($query) or pupe_error($query);
+    $result = mysql_query($query) or pupe_error($query);
 
     // laskurit nollaan
     $hyvitys      = 0;
@@ -199,7 +199,7 @@ if ($tee == 'TULOSTA') {
                where yhtio        = '$kukarow[yhtio]'
                and factoringyhtio = 'SAMPO'
                and valkoodi       = '$yhtiorow[valkoodi]'";
-    $result = mysql_query ($query) or pupe_error($query);
+    $result = mysql_query($query) or pupe_error($query);
     $soprow = mysql_fetch_array($result);
 
     // vähän siirtolistainfoa ruudulle
@@ -300,7 +300,7 @@ if ($tee == 'TULOSTA') {
 
       system("ps2pdf -sPAPERSIZE=a4 $tempfile2.ps $liite[1]");
 
-      require("inc/sahkoposti.inc");
+      require "inc/sahkoposti.inc";
 
       unlink($tempfile1.".pdf");
       unlink($tempfile2.".pdf");
@@ -319,4 +319,4 @@ if ($tee == 'TULOSTA') {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

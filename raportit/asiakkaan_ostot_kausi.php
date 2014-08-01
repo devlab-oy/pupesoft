@@ -2,13 +2,13 @@
 
 if (isset($_POST["tee"])) {
   if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -31,7 +31,7 @@ if ($row["ero"] > 366) {
 if ($tee == 'go') {
 
   if (isset($muutparametrit)) {
-    list($vva,$kka,$ppa,$vvl,$kkl,$ppl) = explode('#', $muutparametrit);
+    list($vva, $kka, $ppa, $vvl, $kkl, $ppl) = explode('#', $muutparametrit);
   }
 
   $muutparametrit = $vva."#".$kka."#".$ppa."#".$vvl."#".$kkl."#".$ppl."#";
@@ -48,7 +48,7 @@ if ($tee == 'go') {
 
   if ($ytunnus != '') {
     if ($asosasto == '') {
-      require ("inc/asiakashaku.inc");
+      require "inc/asiakashaku.inc";
     }
     $ok++;
   }
@@ -98,7 +98,7 @@ if ($tee == 'go') {
   if ($ok == 1 and ($asiakasid != '' or $asosasto != '')) {
     $result = pupe_query($query);
 
-    include('inc/pupeExcel.inc');
+    include 'inc/pupeExcel.inc';
 
     $worksheet    = new pupeExcel();
     $format_bold = array("bold" => TRUE);
@@ -172,11 +172,11 @@ if ($tee == 'go') {
 echo "<table><form name='piiri' method='post'>";
 
 if (!isset($kka))
-  $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  $kka = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 if (!isset($vva))
-  $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  $vva = date("Y", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 if (!isset($ppa))
-  $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  $ppa = date("d", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 
 if (!isset($kkl))
   $kkl = date("m");
@@ -222,4 +222,4 @@ echo "<tr><th>".t("Valitse osasto")."</th>
 echo "<br><input type='submit' value='".t("Aja raportti")."'>";
 echo "</form>";
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

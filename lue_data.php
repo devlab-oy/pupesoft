@@ -23,20 +23,20 @@ ini_set("max_execution_time", 18000);
 if (php_sapi_name() == 'cli') {
 
   $pupe_root_polku = dirname(__FILE__);
-  require ("{$pupe_root_polku}/inc/connect.inc");
-  require ("{$pupe_root_polku}/inc/functions.inc");
+  require "{$pupe_root_polku}/inc/connect.inc";
+  require "{$pupe_root_polku}/inc/functions.inc";
 
   $cli = true;
   ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear".PATH_SEPARATOR."/usr/share/php/");
 
   $sanakirja_kielet = array("fi" => "Suomi",
-                            "en" => "Englanti",
-                            "se" => "Ruotsi",
-                            "ee" => "Viro",
-                            "de" => "Saksa",
-                            "dk" => "Tanska",
-                            "no" => "Norja",
-                            "ru" => "Ven‰j‰");
+    "en" => "Englanti",
+    "se" => "Ruotsi",
+    "ee" => "Viro",
+    "de" => "Saksa",
+    "dk" => "Tanska",
+    "no" => "Norja",
+    "ru" => "Ven‰j‰");
 
   if (trim($argv[1]) != '') {
     $kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
@@ -116,7 +116,7 @@ else {
   // Laitetaan max time 5H
   ini_set("max_execution_time", 18000);
   if (strpos($_SERVER['SCRIPT_NAME'], "lue_data.php") !== FALSE) {
-    require ("inc/parametrit.inc");
+    require "inc/parametrit.inc";
   }
   $cli = false;
 }
@@ -174,7 +174,7 @@ if (!$cli and $oikeurow['paivitys'] != '1') {
 if (!isset($table)) $table = '';
 
 $kasitellaan_tiedosto = FALSE;
-require ("inc/pakolliset_sarakkeet.inc");
+require "inc/pakolliset_sarakkeet.inc";
 
 if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE or ($cli and trim($_FILES['userfile']['tmp_name']) != ''))) {
 
@@ -190,7 +190,7 @@ if (isset($_FILES['userfile']) and (is_uploaded_file($_FILES['userfile']['tmp_na
 
   lue_data_echo("<font class='message'>".t("Tarkastetaan l‰hetetty tiedosto")."...<br><br></font>");
 
-  $retval = tarkasta_liite("userfile", array("XLSX","XLS","ODS","SLK","XML","GNUMERIC","CSV","TXT","DATAIMPORT"));
+  $retval = tarkasta_liite("userfile", array("XLSX", "XLS", "ODS", "SLK", "XML", "GNUMERIC", "CSV", "TXT", "DATAIMPORT"));
 
   if ($retval !== TRUE) {
     lue_data_echo("<font class='error'><br>".t("V‰‰r‰ tiedostomuoto")."!</font>");
@@ -205,7 +205,11 @@ if ($kasitellaan_tiedosto) {
 
   $lue_data_autoid = file_exists("lue_data_autoid.php");
 
-  /** K‰sitelt‰v‰n filen nimi **/
+  /**
+   * K‰sitelt‰v‰n filen nimi *
+   */
+
+
   $kasiteltava_tiedoto_path = $_FILES['userfile']['tmp_name'];
 
   if (isset($api_kentat) and count($api_kentat) > 0) {
@@ -215,7 +219,9 @@ if ($kasitellaan_tiedosto) {
     $excelrivit = pupeFileReader($kasiteltava_tiedoto_path, $ext);
   }
 
-  /** Otetaan tiedoston otsikkorivi **/
+  /**
+   * Otetaan tiedoston otsikkorivi *
+   */
   $headers = $excelrivit[0];
   $headers = array_map('trim', $headers);
   $headers = array_map('strtoupper', $headers);
@@ -325,7 +331,7 @@ if ($kasitellaan_tiedosto) {
         lue_data_echo("## LUE-DATA-EOF ##");
       }
       lue_data_echo($lue_data_output_text, true);
-      require ("inc/footer.inc");
+      require "inc/footer.inc";
       exit;
     }
   }
@@ -451,7 +457,7 @@ if ($kasitellaan_tiedosto) {
 
   // REST-api ei salli etenemispalkkia
   if ((!$cli or $lue_data_output_file != "") and !isset($api_kentat)) {
-    require('inc/ProgressBar.class.php');
+    require 'inc/ProgressBar.class.php';
   }
 
   // Otetaan pupen talut haltuun
@@ -536,7 +542,7 @@ if ($kasitellaan_tiedosto) {
       }
 
       if (count($apu_sarakkeet) > 0) {
-        foreach($apu_sarakkeet as $s) {
+        foreach ($apu_sarakkeet as $s) {
           $trows[$table_mysql.".".strtoupper($s)] = "";
         }
       }
@@ -654,7 +660,7 @@ if ($kasitellaan_tiedosto) {
 
       if (!isset($api_kentat)) {
         lue_data_echo($lue_data_output_text, true);
-        require ("inc/footer.inc");
+        require "inc/footer.inc";
         exit;
       }
       else {
@@ -776,9 +782,9 @@ if ($kasitellaan_tiedosto) {
 
           $valinta .= " and TUOTENO='$tuoteno'";
         }
-        elseif ($table_mysql == 'autoid_lisatieto' and $lue_data_autoid and ($taulunrivit[$taulu][$eriviindex][$postoiminto] == "POISTA" or $taulunrivit[$taulu][$eriviindex][$postoiminto] == "MUUTA") AND !in_array($eriviindex, $lisatyt_indeksit)) {
+        elseif ($table_mysql == 'autoid_lisatieto' and $lue_data_autoid and ($taulunrivit[$taulu][$eriviindex][$postoiminto] == "POISTA" or $taulunrivit[$taulu][$eriviindex][$postoiminto] == "MUUTA") and !in_array($eriviindex, $lisatyt_indeksit)) {
           $tee = "pre_rivi_loop";
-          require("lue_data_autoid.php");
+          require "lue_data_autoid.php";
         }
         elseif ($taulunotsikot[$taulu][$j] == "TOIM_TUOTENO") {
           $toim_tuoteno = $taulunrivit[$taulu][$eriviindex][$j];
@@ -894,11 +900,11 @@ if ($kasitellaan_tiedosto) {
 
                   foreach ($taulunotsikot[$taulu] as $indexi_x => $columnin_nimi_x) {
                     switch ($columnin_nimi_x) {
-                      case 'LIITOS':
-                        $rivi_array_x[] = $asiakkaan_haku_row['tunnus'];
-                        break;
-                      default:
-                        $rivi_array_x[] = $taulunrivit[$taulu][$eriviindex][$indexi_x];
+                    case 'LIITOS':
+                      $rivi_array_x[] = $asiakkaan_haku_row['tunnus'];
+                      break;
+                    default:
+                      $rivi_array_x[] = $taulunrivit[$taulu][$eriviindex][$indexi_x];
                     }
                   }
 
@@ -1266,13 +1272,13 @@ if ($kasitellaan_tiedosto) {
         if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'MUUTA') {
           if ($eiyhtiota == "") {
             $query = "UPDATE LOW_PRIORITY {$table_mysql} SET yhtio='$kukarow[yhtio]', muuttaja='$kukarow[kuka]', muutospvm=now() ";
-              }
+          }
           elseif ($eiyhtiota == "EILAATIJAA") {
             $query = "UPDATE LOW_PRIORITY {$table_mysql} SET yhtio = '{$kukarow['yhtio']}' ";
           }
           elseif ($eiyhtiota == "TRIP") {
             $query = "UPDATE LOW_PRIORITY {$table_mysql} SET muuttaja='$kukarow[kuka]', muutospvm=now() ";
-              }
+          }
         }
 
         if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'POISTA') {
@@ -1311,7 +1317,7 @@ if ($kasitellaan_tiedosto) {
               }
             }
 
-            if (substr($trows[$table_mysql.".".$otsikko],0,7) == "decimal" or substr($trows[$table_mysql.".".$otsikko],0,4) == "real") {
+            if (substr($trows[$table_mysql.".".$otsikko], 0, 7) == "decimal" or substr($trows[$table_mysql.".".$otsikko], 0, 4) == "real") {
 
               // Korvataan decimal kenttien pilkut pisteill‰...
               $taulunrivit[$taulu][$eriviindex][$r] = str_replace(",", ".", $taulunrivit[$taulu][$eriviindex][$r]);
@@ -1386,7 +1392,7 @@ if ($kasitellaan_tiedosto) {
                 $tee = "peru";
               }
 
-              if ($taulunrivit[$taulu][$eriviindex][$r] == "0000-00-00" or substr(strtoupper($taulunrivit[$taulu][$eriviindex][$r]),0,4) == "POIS") {
+              if ($taulunrivit[$taulu][$eriviindex][$r] == "0000-00-00" or substr(strtoupper($taulunrivit[$taulu][$eriviindex][$r]), 0, 4) == "POIS") {
 
                 if (substr(strtoupper($taulunrivit[$taulu][$eriviindex][$r]), 0, 4) == "POIS" and strlen($taulunrivit[$taulu][$eriviindex][$r]) == 15) {
                   $epakurpvm = substr($taulunrivit[$taulu][$eriviindex][$r], 5);
@@ -1468,14 +1474,14 @@ if ($kasitellaan_tiedosto) {
             // tehd‰‰n riville oikeellisuustsekkej‰
             if ($table_mysql == 'sanakirja' and $otsikko == 'FI') {
               // jos ollaan mulkkaamassa RU ni tehd‰‰n utf-8 -> latin-1 konversio FI kent‰ll‰
-               if (in_array("RU", $taulunotsikot[$taulu])) {
+              if (in_array("RU", $taulunotsikot[$taulu])) {
                 $taulunrivit[$taulu][$eriviindex][$r] = iconv("UTF-8", "ISO-8859-1", $taulunrivit[$taulu][$eriviindex][$r]);
               }
             }
 
             if ($lue_data_autoid) {
               $tee = "rivi_loop";
-              require("lue_data_autoid.php");
+              require "lue_data_autoid.php";
             }
 
             //tarkistetaan asiakasalennus ja asiakashinta juttuja
@@ -1715,7 +1721,7 @@ if ($kasitellaan_tiedosto) {
               }
               elseif ($eilisataeikamuuteta == "") {
                 $query .= ", $otsikko = '{$taulunrivit[$taulu][$eriviindex][$r]}' ";
-                }
+              }
             }
 
             //lis‰t‰‰n rivi
@@ -2082,7 +2088,7 @@ if ($kasitellaan_tiedosto) {
               $funktio = $table_mysql."tarkista";
 
               if (!function_exists($funktio)) {
-                @include("inc/$funktio.inc");
+                @include "inc/$funktio.inc";
               }
 
               unset($virhe);
@@ -2093,11 +2099,11 @@ if ($kasitellaan_tiedosto) {
 
               if (isset($virhe[$i]) and $virhe[$i] != "") {
                 switch ($table_mysql) {
-                  case "tuote":
-                    $virheApu = t("Tuote")." ".$tarkrow["tuoteno"].": ";
-                    break;
-                  default:
-                    $virheApu = "";
+                case "tuote":
+                  $virheApu = t("Tuote")." ".$tarkrow["tuoteno"].": ";
+                  break;
+                default:
+                  $virheApu = "";
                 }
 
                 lue_data_echo(t("Virhe rivill‰").": $rivilaskuri <font class='error'>$virheApu".mysql_field_name($result, $i).": ".$virhe[$i]." (".$t[$i].")</font><br>");
@@ -2141,11 +2147,11 @@ if ($kasitellaan_tiedosto) {
 
             // tehd‰‰n ep‰kunrattijutut
             if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "75paalle" or $tee == "pois" or $tee == "peru") {
-              require("epakurantti.inc");
+              require "epakurantti.inc";
             }
 
             // Tapahtumat tuotepaikoille kuntoon!
-            if (($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'POISTA' OR $taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA') AND $table_mysql == 'tuotepaikat') {
+            if (($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'POISTA' or $taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA') and $table_mysql == 'tuotepaikat') {
               if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'POISTA') {
                 $tapahtumaselite = t("Poistettiin tuotepaikka");
                 $tapahtumalaji = "poistettupaikka";
@@ -2195,7 +2201,7 @@ if ($kasitellaan_tiedosto) {
       // Kirjoitetaan viel‰ loppuun virheelliset rivit
       if (count($lue_data_virheelliset_rivit) > 0) {
 
-        if (include('Spreadsheet/Excel/Writer.php')) {
+        if (include 'Spreadsheet/Excel/Writer.php') {
 
           $workbook = new Spreadsheet_Excel_Writer($lue_data_err_file);
           $workbook->setVersion(8);
@@ -2339,10 +2345,10 @@ if (!$cli and !isset($api_kentat)) {
   echo "</tr>";
 
   if ($table == 'autoid_lisatieto') {
-    echo "<tr><th>",t("Valitse liitos"),":</th>
+    echo "<tr><th>", t("Valitse liitos"), ":</th>
           <td><select name='autoid_liitos'>
-          <option value=''>",t("Autoid"),"</option>
-          <option value='malli'>",t("Mallinumero"),"</option>
+          <option value=''>", t("Autoid"), "</option>
+          <option value='malli'>", t("Mallinumero"), "</option>
           </select></td>
       </tr>";
   }
@@ -2357,18 +2363,18 @@ if (!$cli and !isset($api_kentat)) {
   }
 
   if (in_array($table, array("puun_alkio_asiakas", "puun_alkio_tuote"))) {
-    echo "  <tr><th>",t("Valitse liitos"),":</th>
+    echo "  <tr><th>", t("Valitse liitos"), ":</th>
           <td><select name='dynaamisen_taulun_liitos'>";
 
     if ($table == 'puun_alkio_asiakas') {
-      echo "  <option value=''>",t("Asiakkaan tunnus"),"</option>
-          <option value='ytunnus'>",t("Asiakkaan ytunnus"),"</option>
-          <option value='toim_ovttunnus'>",t("Asiakkaan toimitusosoitteen ovttunnus"),"</option>
-          <option value='asiakasnro'>",t("Asiakkaan asiakasnumero"),"</option>";
+      echo "  <option value=''>", t("Asiakkaan tunnus"), "</option>
+          <option value='ytunnus'>", t("Asiakkaan ytunnus"), "</option>
+          <option value='toim_ovttunnus'>", t("Asiakkaan toimitusosoitteen ovttunnus"), "</option>
+          <option value='asiakasnro'>", t("Asiakkaan asiakasnumero"), "</option>";
     }
     else {
-      echo "  <option value=''>",t("Puun alkion tunnus"),"</option>
-          <option value='koodi'>",t("Puun alkion koodi"),"</option>";
+      echo "  <option value=''>", t("Puun alkion tunnus"), "</option>
+          <option value='koodi'>", t("Puun alkion koodi"), "</option>";
     }
 
     echo "</select></td></tr>";
@@ -2419,4 +2425,4 @@ if (!$cli and !isset($api_kentat)) {
     <br>";
 }
 
-if (!isset($api_kentat)) require ("inc/footer.inc");
+if (!isset($api_kentat)) require "inc/footer.inc";

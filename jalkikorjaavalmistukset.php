@@ -1,6 +1,6 @@
 <?php
 
-require('inc/parametrit.inc');
+require 'inc/parametrit.inc';
 
 echo "<font class='head'>".t("Korjaa valmistuksia").":</font><hr><br>";
 
@@ -85,4 +85,4 @@ if ($tee == "") {
   echo "</form>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

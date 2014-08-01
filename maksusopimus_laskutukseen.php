@@ -5,7 +5,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
   // DataTables p‰‰lle
   $pupe_DataTables = "maksusopparit";
 
-  require("inc/parametrit.inc");
+  require "inc/parametrit.inc";
 }
 
 if (!function_exists("ennakkolaskuta")) {
@@ -82,7 +82,7 @@ if (!function_exists("ennakkolaskuta")) {
     $query = "INSERT INTO lasku SET ";
     for ($i=0; $i<mysql_num_fields($stresult); $i++) {
 
-      $fieldname = mysql_field_name($stresult,$i);
+      $fieldname = mysql_field_name($stresult, $i);
 
       // paitsi tilaan laitetaan N
       if ($fieldname == 'tila') {
@@ -111,41 +111,41 @@ if (!function_exists("ennakkolaskuta")) {
       }
       // ker‰ysaika, luontiaika ja toimitusaikaan now
       elseif ($fieldname == 'kerayspvm' or
-          $fieldname == 'luontiaika' or
-          $fieldname == 'toimaika') {
+        $fieldname == 'luontiaika' or
+        $fieldname == 'toimaika') {
         $query .= $fieldname."=now(),";
       }
       // n‰m‰ kent‰t tyhjennet‰‰n
       elseif ($fieldname == 'kapvm' or
-          $fieldname == 'tapvm' or
-          $fieldname == 'olmapvm' or
-          $fieldname == 'summa' or
-          $fieldname == 'kasumma' or
-          $fieldname == 'hinta' or
-          $fieldname == 'kate' or
-          $fieldname == 'arvo' or
-          $fieldname == 'maksuaika' or
-          $fieldname == 'lahetepvm' or
-          $fieldname == 'viite' or
-          $fieldname == 'laskunro' or
-          $fieldname == 'mapvm' or
-          $fieldname == 'tilausvahvistus' or
-          $fieldname == 'viikorkoeur' or
-          $fieldname == 'tullausnumero' or
-          $fieldname == 'laskutuspvm' or
-          $fieldname == 'laskuttaja' or
-          $fieldname == 'laskutettu' or
-          $fieldname == 'lahetepvm' or
-          $fieldname == 'maksaja' or
-          $fieldname == 'maksettu' or
-          $fieldname == 'maa_maara' or
-          $fieldname == 'kuljetusmuoto' or
-          $fieldname == 'kauppatapahtuman_luonne' or
-          $fieldname == 'sisamaan_kuljetus' or
-          $fieldname == 'sisamaan_kuljetusmuoto' or
-          $fieldname == 'poistumistoimipaikka' or
-          $fieldname == 'vanhatunnus' or
-          $fieldname == 'poistumistoimipaikka_koodi') {
+        $fieldname == 'tapvm' or
+        $fieldname == 'olmapvm' or
+        $fieldname == 'summa' or
+        $fieldname == 'kasumma' or
+        $fieldname == 'hinta' or
+        $fieldname == 'kate' or
+        $fieldname == 'arvo' or
+        $fieldname == 'maksuaika' or
+        $fieldname == 'lahetepvm' or
+        $fieldname == 'viite' or
+        $fieldname == 'laskunro' or
+        $fieldname == 'mapvm' or
+        $fieldname == 'tilausvahvistus' or
+        $fieldname == 'viikorkoeur' or
+        $fieldname == 'tullausnumero' or
+        $fieldname == 'laskutuspvm' or
+        $fieldname == 'laskuttaja' or
+        $fieldname == 'laskutettu' or
+        $fieldname == 'lahetepvm' or
+        $fieldname == 'maksaja' or
+        $fieldname == 'maksettu' or
+        $fieldname == 'maa_maara' or
+        $fieldname == 'kuljetusmuoto' or
+        $fieldname == 'kauppatapahtuman_luonne' or
+        $fieldname == 'sisamaan_kuljetus' or
+        $fieldname == 'sisamaan_kuljetusmuoto' or
+        $fieldname == 'poistumistoimipaikka' or
+        $fieldname == 'vanhatunnus' or
+        $fieldname == 'poistumistoimipaikka_koodi') {
         $query .= $fieldname."='',";
       }
       elseif ($fieldname == 'kate_korjattu') {
@@ -173,7 +173,7 @@ if (!function_exists("ennakkolaskuta")) {
         $query .= "jaksotettu = '".($laskurow['jaksotettu'] * -1)."',";
       }
       elseif ($fieldname == 'viesti' and !empty($yhtiorow['ennakkolaskun_tyyppi'])) {
-        $viesti = t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"],2)."% ";
+        $viesti = t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"], 2)."% ";
         $query .= "viesti = '".$viesti."',";
       }
       elseif ($fieldname != 'tunnus') {
@@ -182,7 +182,7 @@ if (!function_exists("ennakkolaskuta")) {
       }
     }
 
-    $query = substr($query,0,-1);
+    $query = substr($query, 0, -1);
     $stresult = pupe_query($query);
     $id = mysql_insert_id();
 
@@ -301,7 +301,7 @@ if (!function_exists("ennakkolaskuta")) {
 
     if (mysql_num_rows($sresult) == 0) {
       $nimitys     = t($posrow["kuvaus"], $kielirow["kieli"]);
-      $rivikommentti   = t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"],2)."% ";
+      $rivikommentti   = t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"], 2)."% ";
 
       if ($posrow["lisatiedot"] != "") {
         $rivikommentti .= "\n ".$posrow["lisatiedot"];
@@ -326,7 +326,7 @@ if (!function_exists("ennakkolaskuta")) {
         }
         else {
           $nimitys     = t($posrow["kuvaus"], $kielirow["kieli"]);
-          $rivikommentti   = t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"],2)."% ";
+          $rivikommentti   = t("Ennakkolasku", $kielirow["kieli"])." $lahteva_lasku ".t("tilaukselle", $kielirow["kieli"])." $tunnus ".t("Osuus", $kielirow["kieli"])." ".round($posrow["osuus"], 2)."% ";
 
           if ($posrow["lisatiedot"] != "") {
             $rivikommentti .= "\n ".$posrow["lisatiedot"];
@@ -574,7 +574,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
     $rahres = pupe_query($query);
     $posrow = mysql_fetch_assoc($rahres);
 
-    for($ie=0; $ie < $posrow["ennakko_kpl"]; $ie++) {
+    for ($ie=0; $ie < $posrow["ennakko_kpl"]; $ie++) {
       //tehd‰‰n ennakklasku
       ennakkolaskuta($tunnus);
     }
@@ -607,7 +607,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
     $laskures = pupe_query($query);
     $laskurow = mysql_fetch_assoc($laskures);
 
-    require('tilauskasittely/tilaus-valmis.inc');
+    require 'tilauskasittely/tilaus-valmis.inc';
 
     $tee = "";
   }
@@ -783,7 +783,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
                 <input type='hidden' name='toim' value='{$toim}'>
                 <input type='hidden' name='tunnus' value='{$row['jaksotettu']}'>
                 <input type='hidden' name='tee' value='vapauta_tilaus_keraykseen'>
-                <input type='submit' name = 'submit' value='",t("Vapauta tilaus ker‰ykseen"),"'>
+                <input type='submit' name = 'submit' value='", t("Vapauta tilaus ker‰ykseen"), "'>
                 </form>";
           }
 
@@ -835,7 +835,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
               <input type='hidden' name='toim' value='{$toim}'>
               <input type='hidden' name='tunnus' value='{$row['jaksotettu']}'>
               <input type='hidden' name='tee' value='vapauta_tilaus_keraykseen'>
-              <input type='submit' name = 'submit' value='",t("Vapauta tilaus ker‰ykseen"),"'>
+              <input type='submit' name = 'submit' value='", t("Vapauta tilaus ker‰ykseen"), "'>
               </form>";
         }
 
@@ -854,7 +854,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
               <input type='hidden' name='toim' value='{$toim}'>
               <input type='hidden' name='tunnus' value='{$row['jaksotettu']}'>
               <input type='hidden' name='tee' value='vapauta_tilaus_keraykseen'>
-              <input type='submit' name = 'submit' value='",t("Vapauta tilaus ker‰ykseen"),"'>
+              <input type='submit' name = 'submit' value='", t("Vapauta tilaus ker‰ykseen"), "'>
               </form>";
         }
 
@@ -868,5 +868,5 @@ if (strpos($_SERVER['SCRIPT_NAME'], "maksusopimus_laskutukseen.php") !== FALSE) 
     echo "</table>";
   }
 
-  require("inc/footer.inc");
+  require "inc/footer.inc";
 }

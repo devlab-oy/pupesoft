@@ -14,13 +14,13 @@ if (isset($_POST['filenimi']) and $_POST['filenimi'] != '') {
   $filenimi = '/tmp/' . basename($_POST['filenimi']);
   readfile($filenimi);
 
-    // tuhotaan edellinen
+  // tuhotaan edellinen
   unlink('/tmp/' . basename($filenimi));
   exit;
 }
 
-if (@include("inc/parametrit.inc"));
-elseif (@include("parametrit.inc"));
+if (@include "inc/parametrit.inc");
+elseif (@include "parametrit.inc");
 else exit;
 
 echo "<font class='head'>".t("Hinnastoajo")."</font><hr>";
@@ -31,10 +31,10 @@ echo "<input type='hidden' name='tee' value='kaikki'>";
 $monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
 
 if (file_exists("tilauskasittely/monivalintalaatikot.inc")) {
-  require("tilauskasittely/monivalintalaatikot.inc");
+  require "tilauskasittely/monivalintalaatikot.inc";
 }
 else {
-  require("monivalintalaatikot.inc");
+  require "monivalintalaatikot.inc";
 }
 
 echo "<br><br>";
@@ -104,17 +104,17 @@ if (isset($submitnappi)) {
 
   // katsotaan mikä hinnastoformaatti
   if (file_exists("inc/hinnastorivi".basename($_POST["hinnasto"]).".inc")) {
-    require("inc/hinnastorivi".basename($_POST["hinnasto"]).".inc");
+    require "inc/hinnastorivi".basename($_POST["hinnasto"]).".inc";
   }
   else {
-    require("hinnastorivi".basename($_POST["hinnasto"]).".inc");
+    require "hinnastorivi".basename($_POST["hinnasto"]).".inc";
   }
 
   if (file_exists("inc/ProgressBar.class.php")) {
-    require("inc/ProgressBar.class.php");
+    require "inc/ProgressBar.class.php";
   }
   else {
-    require("ProgressBar.class.php");
+    require "ProgressBar.class.php";
   }
 
   $bar = new ProgressBar();
@@ -223,7 +223,7 @@ if (isset($submitnappi)) {
   $cmd = "/usr/bin/zip -j /tmp/$kukarow[yhtio].$kukarow[kuka].zip /tmp/$filenimi";
   $palautus = exec($cmd);
 
-    // poistetaan tmp file
+  // poistetaan tmp file
   unlink('/tmp/' . $filenimi);
 
   $filenimi = "/tmp/$kukarow[yhtio].$kukarow[kuka].zip";
@@ -243,6 +243,6 @@ if (isset($submitnappi)) {
   echo "</table>";
 }
 
-if (@include("inc/footer.inc"));
-elseif (@include("footer.inc"));
+if (@include "inc/footer.inc");
+elseif (@include "footer.inc");
 else exit;

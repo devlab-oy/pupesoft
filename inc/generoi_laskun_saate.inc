@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists("generoi_laskun_saate")) {
-  function generoi_laskun_saate ($lasrow, $saatekirje = '', $kieli = '',$toim = '') {
+  function generoi_laskun_saate($lasrow, $saatekirje = '', $kieli = '', $toim = '') {
     global $kukarow, $yhtiorow;
 
     $content_body     = "";

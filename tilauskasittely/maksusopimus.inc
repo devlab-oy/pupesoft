@@ -429,10 +429,10 @@ if (mysql_num_rows($result) == 1) {
         $tuoterow = mysql_fetch_array($tuoteresult);
 
         if ($yhtiorow["alv_kasittely"] != "" and $kukarow["alv_kasittely"] == "A") {
-          $row["summa"] = round($row["summa"] * (1+($tuoterow["alv"]/100)),2);
+          $row["summa"] = round($row["summa"] * (1+($tuoterow["alv"]/100)), 2);
         }
         else {
-          $row["summa"] = round($row["summa"],2);
+          $row["summa"] = round($row["summa"], 2);
         }
 
         echo "<td align ='right'><input style='text-align:right' type='text' size='10'  name='summa' value='".sprintf('%.2f', $row["summa"])."'></td>";
@@ -441,7 +441,7 @@ if (mysql_num_rows($result) == 1) {
         echo "<tr>";
         echo "<td colspan='2'></td><td valign='top'><select name='kuvaus'>";
 
-        while($prow= mysql_fetch_array($kuvares)) {
+        while ($prow= mysql_fetch_array($kuvares)) {
           if ($row["kuvaus"] == $prow["selitetark"]) $sel = "SELECTED";
           else $sel = "";
 
@@ -478,7 +478,7 @@ if (mysql_num_rows($result) == 1) {
 
         echo "<td>";
 
-        while($prow = mysql_fetch_array($mresult)) {
+        while ($prow = mysql_fetch_array($mresult)) {
           if ($row["maksuehto"] == $prow["tunnus"]) echo t_tunnus_avainsanat($prow, "teksti", "MAKSUEHTOKV");
         }
 
@@ -495,8 +495,8 @@ if (mysql_num_rows($result) == 1) {
       $erpcmvv = "";
 
       //alkuun tämä resultti
-      mysql_data_seek($kuvares,0);
-      mysql_data_seek($mresult,0);
+      mysql_data_seek($kuvares, 0);
+      mysql_data_seek($mresult, 0);
     }
 
     $ihakaikki_verolli  = $loput_verolli + $jaksotettavaa_verolli;
@@ -504,7 +504,7 @@ if (mysql_num_rows($result) == 1) {
 
     //Käsin syötetty summa johon lasku pyöristetään
     if ($laskurow["hinta"] <> 0 and abs($laskurow["hinta"]-$ihakaikki_verolli) <= 0.5) {
-      $ihakaikki_verolli = sprintf("%.2f",$laskurow["hinta"]);
+      $ihakaikki_verolli = sprintf("%.2f", $laskurow["hinta"]);
     }
     //Käsin syötetty summa johon lasku pyöristetään
     if ($laskurow["hinta"] <> 0 and abs($laskurow["hinta"]-$loput_verolli-$jaksotettavaa_verolli) <= 0.5) {
@@ -520,8 +520,8 @@ if (mysql_num_rows($result) == 1) {
     echo "</table>";
 
     if (round($tot, 2) != $jaksotettavaa) {
-      $osuusvippaus   = round(($osuus - 100) * -1,2);
-      $summavippaus   = round($jaksotettavaa-$tot,2);
+      $osuusvippaus   = round(($osuus - 100) * -1, 2);
+      $summavippaus   = round($jaksotettavaa-$tot, 2);
 
       echo "<br>";
       echo "<font class='error'>".t("Positiot eivät täsmää, muuta jotain positiota")." $osuusvippaus% $summavippaus $yhtiorow[valkoodi]</font>";
@@ -541,7 +541,7 @@ if (mysql_num_rows($result) == 1) {
       echo "<input type='hidden' name='tilausnumero' value='{$tilausnumero}'>";
       echo "<input type='hidden' name='tulosta_maksusopimus' value='{$laskurow['jaksotettu']}'>";
       echo "<input type='hidden' name='tunnus' value='{$laskurow['tunnus']}'>";
-      echo "<tr><th colspan='5'><input type='submit' value='",t("Positiot PDF-muotoon"),"' onClick=\"js_openFormInNewWindow('tulosta_maksusopimus', ''); return false;\"></th></tr>";
+      echo "<tr><th colspan='5'><input type='submit' value='", t("Positiot PDF-muotoon"), "' onClick=\"js_openFormInNewWindow('tulosta_maksusopimus', ''); return false;\"></th></tr>";
       echo "</form>";
       echo "<br>";
 

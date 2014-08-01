@@ -12,8 +12,8 @@ if (isset($_POST["tee"])) {
   }
 }
 
-require("../inc/parametrit.inc");
-require('valmistuslinjat.inc');
+require "../inc/parametrit.inc";
+require 'valmistuslinjat.inc';
 
 //Nämä ovat $lopetus varten. lopetus-muuttujaan serialisoidaan ja base64-enkoodataan arrayt
 //ja ne pitää reverttaa tässä kohtaa kun tuotekyselystä tullaan takaisin.
@@ -270,12 +270,12 @@ function teerivi($tuoteno, $valittu_toimittaja, $abc_rajaustapa) {
   else {
     // Toimittajaa ei löydy -> alustetaan defaulttiarvot (lisää tähän jos muutat queryä)
     $toimittajarow = array(
-            "toimitusaika" => 0,
-            "pakkauskoko" => 1,
-            "toimittaja" => "",
-            "nimi" => t("Ei toimittajaa"),
-            "tunnus" => 0,
-            );
+      "toimitusaika" => 0,
+      "pakkauskoko" => 1,
+      "toimittaja" => "",
+      "nimi" => t("Ei toimittajaa"),
+      "tunnus" => 0,
+    );
   }
 
   // Haetaan tuotteen status
@@ -369,7 +369,7 @@ if ($ytunnus != "" and $toimittajaid == "") {
     $muutparametrit .= $key."=".$value."##";
   }
 
-  require ("inc/kevyt_toimittajahaku.inc");
+  require "inc/kevyt_toimittajahaku.inc";
 
   if ($toimittajaid == 0) {
     $tee = "ÄLÄMEEMIHINKÄÄN";
@@ -388,7 +388,7 @@ if (isset($tee) and $tee == "TEE_VALMISTUKSET") {
   $apusort_jarj0 = $apusort_jarj1 = array();
 
   foreach ($valmistettavat_tuotteet as $apusort_key => $apusort_row) {
-      $apusort_jarj0[$apusort_key] = $apusort_row['valmistuslinja'];
+    $apusort_jarj0[$apusort_key] = $apusort_row['valmistuslinja'];
     $apusort_jarj1[$apusort_key] = $apusort_row['riittopv'];
   }
 
@@ -498,7 +498,7 @@ if (isset($tee) and $tee == "TEE_VALMISTUKSET") {
       $tuotenimitys    = "";              // tuotteen nimitys jos nimityksen syötö on yhtiöllä sallittu
       $tuotenimitys_force  = "";              // tuotteen nimitys muutetaan systemitasolla
 
-      require ("tilauskasittely/lisaarivi.inc");
+      require "tilauskasittely/lisaarivi.inc";
     }
   }
 
@@ -822,7 +822,7 @@ if (isset($ehdotusnappi) and $ehdotusnappi != "") {
 
       $laskutyyppi = "V";
       $alatila = $row["tila"];
-      require ("inc/laskutyyppi.inc");
+      require "inc/laskutyyppi.inc";
 
       echo "<td>$laskutyyppi $alatila</td>";
       echo "</tr>";
@@ -982,7 +982,7 @@ if (isset($ehdotusnappi) and $ehdotusnappi != "") {
     $apusort_jarj0 = $apusort_jarj1 = $apusort_jarj2 = array();
 
     foreach ($valmistettavat_tuotteet as $apusort_key => $apusort_row) {
-        $apusort_jarj0[$apusort_key] = $apusort_row['valmistuslinja'];
+      $apusort_jarj0[$apusort_key] = $apusort_row['valmistuslinja'];
       $apusort_jarj1[$apusort_key] = $apusort_row['isatuote'];
       $apusort_jarj2[$apusort_key] = $apusort_row['tuoteno'];
     }
@@ -1402,7 +1402,7 @@ if (!isset($tee) or $tee == "") {
 
   $monivalintalaatikot = array('OSASTO', 'TRY', 'TUOTEMERKKI');
   $monivalintalaatikot_normaali = array();
-  require ("tilauskasittely/monivalintalaatikot.inc");
+  require "tilauskasittely/monivalintalaatikot.inc";
 
   echo "</td>";
   echo "</tr>";
@@ -1445,9 +1445,9 @@ if (!isset($tee) or $tee == "") {
 
   echo "<tr><th>".t("Tilaustuotteiden käsittely")."</th><td>";
   echo "<select name='tilaustuotteiden_kasittely'>";
-      echo "<option value='A' {$sel['A']}>".t("Tilaustuotteiden määräennuste on jälkitoimitusrivit")."</option>";
-      echo "<option value='B' {$sel['B']}>".t("Tilaustuotteiden määräennuste on budjetti/myynti/toimitusaika")."</option>";
-      echo "<option value='C' {$sel['C']}>".t("Tilaustuotteiden määräennuste on jälkitoimitusrivit + budjetti/myynti")."</option>";
+  echo "<option value='A' {$sel['A']}>".t("Tilaustuotteiden määräennuste on jälkitoimitusrivit")."</option>";
+  echo "<option value='B' {$sel['B']}>".t("Tilaustuotteiden määräennuste on budjetti/myynti/toimitusaika")."</option>";
+  echo "<option value='C' {$sel['C']}>".t("Tilaustuotteiden määräennuste on jälkitoimitusrivit + budjetti/myynti")."</option>";
   echo "</select>";
   echo "</td>";
   echo "</tr>";
@@ -1553,4 +1553,4 @@ if (!isset($tee) or $tee == "") {
   echo "<br><input type='submit' name='ehdotusnappi' value = '".t("Suunnittele valmistus")."'></form>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

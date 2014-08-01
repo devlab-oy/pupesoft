@@ -21,7 +21,7 @@ if ($tunnus != 0) {
   $query = "SELECT *, concat_ws(' ', tapvm, mapvm) laskunpvm
             FROM lasku
             WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
-  $result = mysql_query ($query) or pupe_error($query);
+  $result = mysql_query($query) or pupe_error($query);
 
   if (mysql_num_rows($result) > 0) {
     $smlaskurow = mysql_fetch_assoc($result);
@@ -67,8 +67,8 @@ $year = date("Y");
 $kuu  = date("n");
 
 // Poimitaan erikseen edellisen kuun viimeisen päivän vv,kk,pp raportin oletuspäivämääräksi
-if ($vv == '') $vv = date("Y",mktime(0,0,0,$kuu,0,$year));
-if ($kk == '') $kk = date("n",mktime(0,0,0,$kuu,0,$year));
+if ($vv == '') $vv = date("Y", mktime(0, 0, 0, $kuu, 0, $year));
+if ($kk == '') $kk = date("n", mktime(0, 0, 0, $kuu, 0, $year));
 if (strlen($kk) == 1) $kk = "0" . $kk;
 
 // Ylös hakukriteerit
@@ -190,7 +190,7 @@ if ($tee == 'P') {
   if (mysql_num_rows($result) == 0) {
     echo t("Tiliöintiä ei löydy")."! $query";
 
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -250,13 +250,13 @@ if ($tee == 'U') {
   if (mysql_num_rows($result) != 1) {
     echo t("Laskua ei enää löydy! Systeemivirhe!");
 
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
   $laskurow = mysql_fetch_assoc($result);
 
-  $summa       = str_replace ( ",", ".", $summa);
+  $summa       = str_replace( ",", ".", $summa);
   $selausnimi   = 'tili'; // Minka niminen mahdollinen popup on?
   $tositetila   = $laskurow["tila"];
   $tositeliit   = $laskurow["liitostunnus"];
@@ -264,11 +264,11 @@ if ($tee == 'U') {
   $kohde_tark    = $kohde;
   $projekti_tark  = $projekti;
 
-  require ("inc/tarkistatiliointi.inc");
+  require "inc/tarkistatiliointi.inc";
 
   $tiliulos = $ulos;
 
-   // Tarvitaan kenties tositenro
+  // Tarvitaan kenties tositenro
   if ($kpexport == 1 or strtoupper($yhtiorow['maa']) != 'FI') {
 
     if ($tositenro != 0) {
@@ -282,7 +282,7 @@ if ($tee == 'U') {
       if (mysql_num_rows($result) == 0) {
         echo t("Tositenron tarkastus ei onnistu! Systeemivirhe!");
 
-        require ("inc/footer.inc");
+        require "inc/footer.inc";
         exit;
       }
     }
@@ -303,15 +303,15 @@ if ($tee == 'U') {
         if (mysql_num_rows($result) == 0) {
           echo t("Tositenron tarkastus ei onnistu! Systeemivirhe!");
 
-          require ("inc/footer.inc");
+          require "inc/footer.inc";
           exit;
         }
 
-        $tositerow = mysql_fetch_assoc ($result);
+        $tositerow = mysql_fetch_assoc($result);
         $tositenro = $tositerow['tosite'];
       }
 
-       // Tälle saamme tositenron ostoveloista
+      // Tälle saamme tositenron ostoveloista
       if ($laskurow['mapvm'] == $tiliointipvm) {
 
         $query = "SELECT tosite
@@ -326,18 +326,18 @@ if ($tee == 'U') {
         if (mysql_num_rows($result) == 0) {
           echo t("Tositenron tarkastus ei onnistu! Systeemivirhe!");
 
-          require ("inc/footer.inc");
+          require "inc/footer.inc";
           exit;
         }
 
-        $tositerow = mysql_fetch_assoc ($result);
+        $tositerow = mysql_fetch_assoc($result);
         $tositenro = $tositerow['tosite'];
       }
     }
   }
 
   if ($ok != 1) {
-    require ("inc/teetiliointi.inc");
+    require "inc/teetiliointi.inc";
   }
 
   $tee = "E";
@@ -372,5 +372,5 @@ if ($iframe != '') echo "</div>";
 echo $loppudiv;
 
 echo "<div style='float: bottom;'>";
-require ("inc/footer.inc");
+require "inc/footer.inc";
 echo "</div>";

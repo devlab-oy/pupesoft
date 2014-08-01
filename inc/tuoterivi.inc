@@ -98,16 +98,16 @@ if (mysql_field_name($result, $i) == "nimitys") {
              WHERE yhtio     = '$kukarow[yhtio]'
              and tuoteno     = '$tuoteno'
              and tuotetyyppi in ('A','B')";
-    $sresult = pupe_query($query);
+  $sresult = pupe_query($query);
 
-  if(mysql_num_rows($sresult) != 0) {
+  if (mysql_num_rows($sresult) != 0) {
     $ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td><td class = 'back'><font class='info'>".t("HUOM: Viranomaistuotteen nimiystä ei tulisi muuttaa!")."</font></td>";
     $jatko=0;
   }
 }
 
 if (mysql_field_name($result, $i) == "tuotetyyppi") {
-   $sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('A', 'B', 'R', 'K', 'M'), '');
+  $sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('A', 'B', 'R', 'K', 'M'), '');
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
@@ -195,15 +195,15 @@ if (mysql_field_name($result, $i) == "valuutta") {
             FROM valuu
             WHERE yhtio = '$kukarow[yhtio]'
             ORDER BY jarjestys";
-        $vresult = pupe_query($query);
-        $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-        while ($vrow=mysql_fetch_array($vresult)) {
-          $sel="";
-          if ($trow[$i] == $vrow[0] and $vrow[0] != "") {
-                  $sel = "selected";
-          }
-          $ulos .= "<option value = '$vrow[0]' $sel>$vrow[0]</option>";
-        }
+  $vresult = pupe_query($query);
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow[0] and $vrow[0] != "") {
+      $sel = "selected";
+    }
+    $ulos .= "<option value = '$vrow[0]' $sel>$vrow[0]</option>";
+  }
   $ulos .= "</select></td>";
   $jatko = 0;
 }
@@ -256,7 +256,7 @@ if (mysql_field_name($result, $i) == "kommentoitava") {
 
 if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
 
-   $sel = array_fill_keys(array($trow[$i]), "selected") + array_fill_keys(array('S', 'T', 'U', 'V', 'E', 'F', 'G'), '');
+  $sel = array_fill_keys(array($trow[$i]), "selected") + array_fill_keys(array('S', 'T', 'U', 'V', 'E', 'F', 'G'), '');
 
   $query = "SELECT count(*) saldo
             FROM tuotepaikat
@@ -268,25 +268,25 @@ if (mysql_field_name($result, $i) == "sarjanumeroseuranta") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
-  if ($poistolukko == "" or $trow[$i] == "" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("","T","V","E","F")))) {
+  if ($poistolukko == "" or $trow[$i] == "" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("", "T", "V", "E", "F")))) {
     $ulos .= "<option value = ''>".t("Ei seurantaa")."</option>";
   }
-  if ($poistolukko == "" or $sel["S"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("S","U")))) {
+  if ($poistolukko == "" or $sel["S"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("S", "U")))) {
     $ulos .= "<option value = 'S' $sel[S]>".t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo")." (S)</option>";
   }
-  if ($poistolukko == "" or $sel["T"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("","T","V","E","F")))) {
+  if ($poistolukko == "" or $sel["T"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("", "T", "V", "E", "F")))) {
     $ulos .= "<option value = 'T' $sel[T]>".t("Sarjanumeroseuranta. Myynti / Keskihinta-varastonarvo")." (T)</option>";
   }
-  if ($poistolukko == "" or $sel["U"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("S","U")))) {
+  if ($poistolukko == "" or $sel["U"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("S", "U")))) {
     $ulos .= "<option value = 'U' $sel[U]>".t("Sarjanumeroseuranta. Osto-Myynti / In-Out varastonarvo. Automaattinen sarjanumerointi")." (U)</option>";
   }
-  if ($poistolukko == "" or $sel["V"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("","T","V","E","F")))) {
+  if ($poistolukko == "" or $sel["V"] == "selected" or ($vrow["saldo"] == 0 and in_array($trow[$i], array("", "T", "V", "E", "F")))) {
     $ulos .= "<option value = 'V' $sel[V]>".t("Sarjanumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")." (V)</option>";
   }
-  if ($poistolukko == "" or $sel["E"] == "selected" or in_array($trow[$i], array("E","F")) or ($vrow["saldo"] == 0 and in_array($trow[$i], array("","T","V","E","F")))) {
+  if ($poistolukko == "" or $sel["E"] == "selected" or in_array($trow[$i], array("E", "F")) or ($vrow["saldo"] == 0 and in_array($trow[$i], array("", "T", "V", "E", "F")))) {
     $ulos .= "<option value = 'E' $sel[E]>".t("Eränumeroseuranta. Osto-Myynti / Keskihinta-varastonarvo")." (E)</option>";
   }
-  if ($poistolukko == "" or $sel["F"] == "selected" or in_array($trow[$i], array("E","F")) or ($vrow["saldo"] == 0 and in_array($trow[$i], array("","T","V","E","F")))) {
+  if ($poistolukko == "" or $sel["F"] == "selected" or in_array($trow[$i], array("E", "F")) or ($vrow["saldo"] == 0 and in_array($trow[$i], array("", "T", "V", "E", "F")))) {
     $ulos .= "<option value = 'F' $sel[F]>".t("Eränumeroseuranta parasta-ennen päivällä. Osto-Myynti / Keskihinta-varastonarvo")." (F)</option>";
   }
   if ($poistolukko == "" or $sel["G"] == "selected") {
@@ -382,7 +382,7 @@ if (mysql_field_name($result, $i) == "status") {
 
 if (mysql_field_name($result, $i) == "alv") {
   if ($trow[$i]=='') $trow[$i]=alv_oletus();
-  $ulos = "<td>".alv_popup($nimi,$trow[$i])."</td>";
+  $ulos = "<td>".alv_popup($nimi, $trow[$i])."</td>";
   $jatko = 0;
 }
 
@@ -396,7 +396,7 @@ if (mysql_field_name($result, $i) == "suoratoimitus") {
     $ulos = "<td><select name='$nimi'".js_alasvetoMaxWidth($nimi, 300).">
       <option value=''>".t("Myyntitilaukselta ei voi luoda ostorivejä tästä tuotteesta")."</option>";
 
-    if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('W', 'J'))){
+    if (in_array($yhtiorow["tee_osto_myyntitilaukselta"], array('W', 'J'))) {
       $ulos .= "<option value='S' {$sel['S']}>".t("Myyntitilaukselta voi luoda ostorivejä tästä tuotteesta varastoon tai asiakkaalle")."</option>
             <option value='U' {$sel['U']}>".t("Myyntitilaukselta voi luoda ostorivejä tästä tuotteesta asiakkaalle")."</option>
             <option value='X' {$sel['X']}>".t("Myyntitilaukselta voi luoda ostorivejä tästä tuotteesta varastoon")."</option>";
@@ -415,7 +415,7 @@ if (mysql_field_name($result, $i) == "suoratoimitus") {
 
 if (mysql_field_name($result, $i) == "hinnastoon") {
 
-   $sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('E', 'W', 'V'), '');
+  $sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('E', 'W', 'V'), '');
 
   $ulos = "<td><select name = '$nimi' ".js_alasvetoMaxWidth($nimi, 300).">
     <option value=''>".t("Tuote näytetään hinnastossa, mutta ei verkkokaupassa")."</option>
@@ -536,7 +536,7 @@ if (mysql_field_name($result, $i) == "tarratyyppi") {
 
   $vresult = t_avainsana("TARRATYYPPI");
 
-  if(mysql_num_rows($vresult)>0) {
+  if (mysql_num_rows($vresult)>0) {
     $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">
             <option value=''>".t("Ei tilaustuotetarraa")."</option>";
     while ($vrow = mysql_fetch_array($vresult)) {
@@ -554,7 +554,7 @@ if (mysql_field_name($result, $i) == "tarratyyppi") {
 
 //* Nämä sarakkeet eivät välttämättä löydy kaikista installaatioista (Laitemyyntispecific)*//
 if (mysql_field_name($result, $i) == "vari") {
-  $vresult = t_avainsana("SARJANUMERON_LI","", "and avainsana.selite='VARIRUNKO'");
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and avainsana.selite='VARIRUNKO'");
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
   $ulos .= "<option value = '' >".t("Valitse rungon väri")."</option>";
@@ -571,7 +571,7 @@ if (mysql_field_name($result, $i) == "vari") {
   $jatko = 0;
 }
 if (mysql_field_name($result, $i) == "laitetyyppi") {
-  $vresult = t_avainsana("SARJANUMERON_LI","", "and avainsana.selite='TYYPPI'");
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and avainsana.selite='TYYPPI'");
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
   $ulos .= "<option value = '' >".t("Valitse tyyppi")."</option>";
@@ -588,7 +588,7 @@ if (mysql_field_name($result, $i) == "laitetyyppi") {
   $jatko = 0;
 }
 if (mysql_field_name($result, $i) == "runkotyyppi") {
-  $vresult = t_avainsana("SARJANUMERON_LI","", "and avainsana.selite='RUNKOTYYPPI'");
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and avainsana.selite='RUNKOTYYPPI'");
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
   $ulos .= "<option value = '' >".t("Valitse tyyppi")."</option>";
@@ -605,7 +605,7 @@ if (mysql_field_name($result, $i) == "runkotyyppi") {
   $jatko = 0;
 }
 if (mysql_field_name($result, $i) == "kilpi") {
-  $vresult = t_avainsana("SARJANUMERON_LI","", "and avainsana.selite='KILPI'");
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and avainsana.selite='KILPI'");
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
   $ulos .= "<option value = '' >".t("Valitse kilpi")."</option>";
@@ -622,7 +622,7 @@ if (mysql_field_name($result, $i) == "kilpi") {
   $jatko = 0;
 }
 if (mysql_field_name($result, $i) == "materiaali") {
-  $vresult = t_avainsana("SARJANUMERON_LI","", "and avainsana.selite='MATERIAALI'");
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and avainsana.selite='MATERIAALI'");
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
   $ulos .= "<option value = '' >".t("Valitse veneen materiaali")."</option>";
@@ -639,7 +639,7 @@ if (mysql_field_name($result, $i) == "materiaali") {
   $jatko = 0;
 }
 if (mysql_field_name($result, $i) == "koneistus") {
-  $vresult = t_avainsana("SARJANUMERON_LI","", "and avainsana.selite='KONEISTUS'");
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and avainsana.selite='KONEISTUS'");
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
   $ulos .= "<option value = '' >".t("Valitse veneen koneistus")."</option>";
@@ -656,7 +656,7 @@ if (mysql_field_name($result, $i) == "koneistus") {
   $jatko = 0;
 }
 if (mysql_field_name($result, $i) == "sprinkleri") {
-  $vresult = t_avainsana("SARJANUMERON_LI","", "and avainsana.selite='SPRINKLERI'");
+  $vresult = t_avainsana("SARJANUMERON_LI", "", "and avainsana.selite='SPRINKLERI'");
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
   $ulos .= "<option value = '' >".t("Valitse tyyppi")."</option>";
@@ -675,7 +675,7 @@ if (mysql_field_name($result, $i) == "sprinkleri") {
 
 if (mysql_field_name($result, $i) == "yksin_kerailyalustalle") {
 
-   $sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('K', 'E'), '');
+  $sel = array_fill_keys(array($trow[$i]), " selected") + array_fill_keys(array('K', 'E'), '');
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
   $ulos .= "<option value=''>".t("Ei")."</option>";
@@ -782,9 +782,9 @@ if (mysql_field_name($result, $i) == "ostoehdotus") {
   $jatko = 0;
 }
 
-if($yhtiorow['laite_huolto'] == 'X' and !isset($redirect_echoed)) {
+if ($yhtiorow['laite_huolto'] == 'X' and !isset($redirect_echoed)) {
   $redirect_echoed = 1;
-  if(!empty($valittu_asiakas)) {
+  if (!empty($valittu_asiakas)) {
     echo "<input type='hidden' name='redirect_to' value='asiakkaan_laite_hallinta.php' />";
     echo "<input type='hidden' name='valittu_asiakas' value='{$valittu_asiakas}' />";
   }

@@ -1893,6 +1893,30 @@ if ($fieldname == "vienti_erittelyn_tulostus") {
   $jatko = 0;
 }
 
+if ($fieldname == "vientierittely_ryhmittely") {
+
+  $ulos = "<td>";
+  $ulos .= "<select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel1 = "";
+  $sel2 = "";
+  $sel3 = "";
+
+  if ($trow[$i] == "") {
+    $sel1 = "selected";
+  }
+  elseif ($trow[$i] == "T") {
+    $sel2 = "selected";
+  }
+
+  $ulos .= "<option value=''  $sel1>".t("Vientierittely‰ ei ryhmitell‰")."</option>";
+  $ulos .= "<option value='T' $sel2>".t("Vientierittely ryhmitell‰‰n tullinimikkeen mukaan")."</option>";
+  $ulos .= "</select>";
+  $ulos .= "</td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "oletus_lahetekpl") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

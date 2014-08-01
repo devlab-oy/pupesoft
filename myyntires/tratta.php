@@ -1,6 +1,6 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Tratta")."</font><hr>";
 
@@ -23,7 +23,7 @@ if ($kukarow["kirjoitin"] == 0) {
 
 if ($tee == 'LAHETA') {
   if (! empty($_POST['lasku_tunnus'])) {
-    require ('paperitratta.php');
+    require 'paperitratta.php';
     $jatka = true;
   }
   else {
@@ -156,7 +156,7 @@ if ($tee == 'TRATTAA' and $tratattavat[0] == "") {
   $tee = "";
 }
 
-if ($tee == 'TRATTAA')  {
+if ($tee == 'TRATTAA') {
 
   $query = "SELECT lasku.liitostunnus,
             lasku.summa-lasku.saldo_maksettu as summa,
@@ -190,7 +190,7 @@ if ($tee == 'TRATTAA')  {
   $asiakastiedot = mysql_fetch_array($asiakasresult);
 
   //ja kelataan akuun
-  mysql_data_seek($result,0);
+  mysql_data_seek($result, 0);
 
   echo "<table><td valign='top' class='back'>";
 
@@ -320,7 +320,7 @@ if ($tee == 'TRATTAA')  {
   echo "<input name='tee' type='hidden' value='LAHETA'>";
   echo "<input name='yhteyshenkilo' type='hidden' value='$yhteyshenkilo'>";
 
-  foreach($tratattavat as $tunnukset) {
+  foreach ($tratattavat as $tunnukset) {
     echo "\n<input type='hidden' name='tratattavat[]' value='$tunnukset'>";
   }
 
@@ -331,7 +331,7 @@ if ($tee == 'TRATTAA')  {
   echo "<input type='hidden' name='tee' value='OHITA'>";
   echo "<input name='yhteyshenkilo' type='hidden' value='$yhteyshenkilo'>";
 
-  foreach($tratattavat as $tunnukset) {
+  foreach ($tratattavat as $tunnukset) {
     echo "\n<input type='hidden' name='tratattavat[]' value='$tunnukset'>";
   }
 
@@ -419,7 +419,7 @@ if ($tee == "") {
   echo "<tr><th>".t("Yhteyshenkilö").":</th>";
   echo "<td><select name='yhteyshenkilo'>";
 
-  while($row = mysql_fetch_array($meapu)) {
+  while ($row = mysql_fetch_array($meapu)) {
     $sel = "";
 
     if ($row['kuka'] == $kukarow['kuka']) {
@@ -439,4 +439,4 @@ if ($tee == "") {
   echo "</table>";
 }
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

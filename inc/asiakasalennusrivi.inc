@@ -168,7 +168,7 @@ if (mysql_field_name($result, $i) == "tuoteno" and isset($alasveto[$i])) {
 }
 
 if (mysql_field_name($result, $i) == "monikerta") {
-   $sel = "";
+  $sel = "";
   if ($trow[$i] != "") $sel = "SELECTED";
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
@@ -179,7 +179,7 @@ if (mysql_field_name($result, $i) == "monikerta") {
 }
 
 if (mysql_field_name($result, $i) == "alennuslaji") {
-   $sel = array_fill_keys(array($trow[$i]), " selected") + array_fill(1, $yhtiorow['myynnin_alekentat'], '');
+  $sel = array_fill_keys(array($trow[$i]), " selected") + array_fill(1, $yhtiorow['myynnin_alekentat'], '');
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
 

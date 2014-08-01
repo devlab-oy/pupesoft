@@ -5,8 +5,8 @@ require "inc/parametrit.inc";
 echo "<font class='head'>".t("Laskujen suoritus")."</font><hr>";
 
 if ($tee == 'V') {
-  $summa = str_replace (",", ".", $summa);
-  $summa_valuutassa = str_replace (",", ".", $summa_valuutassa);
+  $summa = str_replace(",", ".", $summa);
+  $summa_valuutassa = str_replace(",", ".", $summa_valuutassa);
 }
 
 if ($tee == 'W') {
@@ -186,8 +186,8 @@ if ($tee == 'V') {
 
     while ($tiliointirow = mysql_fetch_assoc($yresult)) {
       // Kuinka paljon on tämän viennin osuus
-      $summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $laskurow['vietysumma'] * $laskurow['maksukasumma'],2);
-      $summa_valuutassa = round($tiliointirow['summa_valuutassa'] * (1+$tiliointirow['vero']/100) / $laskurow['vietysumma_valuutassa'] * $laskurow['maksukasumma_valuutassa'],2);
+      $summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $laskurow['vietysumma'] * $laskurow['maksukasumma'], 2);
+      $summa_valuutassa = round($tiliointirow['summa_valuutassa'] * (1+$tiliointirow['vero']/100) / $laskurow['vietysumma_valuutassa'] * $laskurow['maksukasumma_valuutassa'], 2);
 
       $alv = 0;
       $alv_valuutassa = 0;
@@ -195,8 +195,8 @@ if ($tee == 'V') {
       echo "<font class='message'>".t("Kirjaan kassa-alennusta")." $summa</font><br>";
 
       if ($tiliointirow['vero'] != 0) { // Netotetaan alvi
-        $alv = round($summa - $summa / (1 + ($tiliointirow['vero'] / 100)),2);
-        $alv_valuutassa = round($summa_valuutassa - $summa_valuutassa / (1 + ($tiliointirow['vero'] / 100)),2);
+        $alv = round($summa - $summa / (1 + ($tiliointirow['vero'] / 100)), 2);
+        $alv_valuutassa = round($summa_valuutassa - $summa_valuutassa / (1 + ($tiliointirow['vero'] / 100)), 2);
         $summa -= $alv;
         $summa_valuutassa -= $alv_valuutassa;
       }
@@ -221,7 +221,7 @@ if ($tee == 'V') {
                 laatija          = '$kukarow[kuka]',
                 laadittu         = now()";
       $xresult = pupe_query($query);
-      $isa = mysql_insert_id ($link); // Näin löydämme tähän liittyvät alvit....
+      $isa = mysql_insert_id($link); // Näin löydämme tähän liittyvät alvit....
 
       if ($tiliointirow['vero'] != 0) {
         // Kassa-ale alv
@@ -317,7 +317,7 @@ if ($tee == 'V') {
                     laatija  = '$kukarow[kuka]',
                     laadittu = now()";
           $xresult = pupe_query($query);
-          $isa = mysql_insert_id ($link);
+          $isa = mysql_insert_id($link);
 
           $totvesumma += $summa;
         }
@@ -395,17 +395,17 @@ if ($tee == 'V') {
 
   echo "<br><table><tr>";
   for ($i = 0; $i < 8; $i++) {
-    echo "<th>".t(mysql_field_name($result,$i))."</th>";
+    echo "<th>".t(mysql_field_name($result, $i))."</th>";
   }
   echo "</tr>";
 
   for ($i=0; $i < 8; $i++) {
-    if (mysql_field_name($result,$i) == 'ebid') {
+    if (mysql_field_name($result, $i) == 'ebid') {
       // tehdään lasku linkki
       echo "<td>".ebid($laskurow['tunnus']) ."</td>";
     }
     else {
-      echo "<td>".$laskurow[mysql_field_name($result,$i)]."</td>";
+      echo "<td>".$laskurow[mysql_field_name($result, $i)]."</td>";
     }
   }
 
@@ -429,7 +429,7 @@ if ($tee == 'V') {
   echo "<table><tr>";
 
   for ($i = 0; $i < mysql_num_fields($result)-2 ; $i++) {
-    echo "<th>" . t(mysql_field_name($result,$i))."</th>";
+    echo "<th>" . t(mysql_field_name($result, $i))."</th>";
   }
 
   echo "<th></th>";
@@ -458,7 +458,7 @@ if ($tee == 'V') {
   }
 
   echo "</table>";
-  echo "<font class='message'>".t("Tosite yhteensä")." ". round($kokokirjaus,2) . "</font>";
+  echo "<font class='message'>".t("Tosite yhteensä")." ". round($kokokirjaus, 2) . "</font>";
   echo "<br><br>";
 
   echo "<table><tr>";
@@ -522,7 +522,7 @@ if ($tee == "W") {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0)
-       echo "<font class='error'><br>".t("HUOM: Summalla ei löytynyt laskua")." $tiliotesumma!</font><br><br>";
+      echo "<font class='error'><br>".t("HUOM: Summalla ei löytynyt laskua")." $tiliotesumma!</font><br><br>";
     else
       $summahakuok=1;
   }
@@ -550,24 +550,24 @@ if ($tee == "W") {
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
-       echo "<font class='error'>".t("Tilillä")." ($mtili) ".t("ei ole suoritusta odottavia laskuja")."</font><br>";
+      echo "<font class='error'>".t("Tilillä")." ($mtili) ".t("ei ole suoritusta odottavia laskuja")."</font><br>";
     }
   }
 
   echo "<table>";
   echo "<tr>";
-  echo "<th valign='top'><a href='suori.php?tee=W&lopetus=$lopetus&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=nimi&jarj=$jarj'>",t("Nimi"),"</a></th>";
-  echo "<th valign='top'><a href='suori.php?tee=W&lopetus=$lopetus&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=tapvm&jarj=$jarj'>",t("Tapvm"),"</a></th>";
-  echo "<th valign='top'><a href='suori.php?tee=W&lopetus=$lopetus&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=erpcm&jarj=$jarj'>",t("Erpvm"),"</a></th>";
-  echo "<th valign='top'><a href='suori.php?tee=W&lopetus=$lopetus&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=popvm&jarj=$jarj'>",t("Popvm"),"</a></th>";
-  echo "<th valign='top'><a href='suori.php?tee=W&lopetus=$lopetus&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=olmapvm&jarj=$jarj'>",t("Olmapvm"),"</a></th>";
-  echo "<th valign='top'>",t("Laskunro"),"</th>";
-  echo "<th valign='top'>",t("Viite"),"</th>";
-  echo "<th valign='top' style='text-align:right;'>",t("Summa"),"</th>";
-  echo "<th valign='top' style='text-align:right;'>",t('Kasumma'),"</th>";
-  echo "<th valign='top'>",t("Ebid"),"</th>";
-  echo "<th valign='top' style='text-align:right;'>",t('Summa'),"<br>$yhtiorow[valkoodi]</th>";
-  echo "<th valign='top' style='text-align:right;'>",t('Summa'),"<br>".t('valuutassa')."</th>";
+  echo "<th valign='top'><a href='suori.php?tee=W&lopetus=$lopetus&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=nimi&jarj=$jarj'>", t("Nimi"), "</a></th>";
+  echo "<th valign='top'><a href='suori.php?tee=W&lopetus=$lopetus&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=tapvm&jarj=$jarj'>", t("Tapvm"), "</a></th>";
+  echo "<th valign='top'><a href='suori.php?tee=W&lopetus=$lopetus&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=erpcm&jarj=$jarj'>", t("Erpvm"), "</a></th>";
+  echo "<th valign='top'><a href='suori.php?tee=W&lopetus=$lopetus&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=popvm&jarj=$jarj'>", t("Popvm"), "</a></th>";
+  echo "<th valign='top'><a href='suori.php?tee=W&lopetus=$lopetus&mav=$mav&mak=$mak&map=$map&kurssi=$kurssi&mtili=$mtili&tiliotesumma=$tiliotesumma&order=olmapvm&jarj=$jarj'>", t("Olmapvm"), "</a></th>";
+  echo "<th valign='top'>", t("Laskunro"), "</th>";
+  echo "<th valign='top'>", t("Viite"), "</th>";
+  echo "<th valign='top' style='text-align:right;'>", t("Summa"), "</th>";
+  echo "<th valign='top' style='text-align:right;'>", t('Kasumma'), "</th>";
+  echo "<th valign='top'>", t("Ebid"), "</th>";
+  echo "<th valign='top' style='text-align:right;'>", t('Summa'), "<br>$yhtiorow[valkoodi]</th>";
+  echo "<th valign='top' style='text-align:right;'>", t('Summa'), "<br>".t('valuutassa')."</th>";
 
   echo "<th colspan='2'>".t("Suoritus")."<br>".t("selvittelytililtä")."</th>";
   echo "</tr>";
@@ -670,7 +670,7 @@ if ($tee == '') {
       echo "<tr>";
 
       for ($i=1; $i<mysql_num_fields($result); $i++) {
-        echo "<td>".$trow[mysql_field_name($result,$i)]."</td>";
+        echo "<td>".$trow[mysql_field_name($result, $i)]."</td>";
       }
 
       echo "<form action = '?tee=W' method='post'><td>

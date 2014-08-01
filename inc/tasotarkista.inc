@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("tasotarkista")) {
-  function tasotarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("tasotarkista")) {
+  function tasotarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set;
 
     static $tyyppitalteen;
@@ -18,7 +18,7 @@ if(!function_exists("tasotarkista")) {
       elseif (strpos(trim($t[$i]), "Ö") !== FALSE ) {
         $virhe[$i] = t("Ö ei ole sallittu kirjain tasossa!");
       }
-      elseif (in_array(strtoupper($tyyppitalteen), array('S','U')) and !in_array(substr(trim($t[$i]), 0, 1), array("1", "2", "3"))) {
+      elseif (in_array(strtoupper($tyyppitalteen), array('S', 'U')) and !in_array(substr(trim($t[$i]), 0, 1), array("1", "2", "3"))) {
         $virhe[$i] = t("Taso tulee alkaa numerolla 1, 2 tai 3!");
       }
       elseif ((strtoupper($tyyppitalteen) == 'B') and !is_numeric($t[$i])) {

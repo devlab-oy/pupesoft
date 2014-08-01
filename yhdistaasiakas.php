@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if (!isset($konserni))   $konserni = '';
 if (!isset($tee))     $tee = '';
@@ -666,7 +666,7 @@ echo "<input type='hidden' name='tee' value='YHDISTA'>";
 $monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI", "ASIAKASMYYJA", "ASIAKASTILA", "<br>DYNAAMINEN_ASIAKAS");
 $monivalintalaatikot_normaali = array();
 
-require ("tilauskasittely/monivalintalaatikot.inc");
+require "tilauskasittely/monivalintalaatikot.inc";
 
 $kentat    = "asiakas.ytunnus::asiakas.ytunnus::asiakas.nimi>>asiakas.toim_nimi::asiakas.osoite>>asiakas.toim_osoite::asiakas.postino>>asiakas.toim_postino::asiakas.postitp>>asiakas.toim_postitp::asiakas.asiakasnro";
 $jarjestys = 'ytunnus, nimi, selaus, tunnus';
@@ -679,7 +679,7 @@ for ($i = 0; $i <= $count; $i++) {
     if ($array[$i] == "asiakas.ytunnus" || $array[$i] == "asiakas.asiakasnro") {
       $lisa .= " and " . $array[$i] . " like '%" . $haku[$i] . "%'";
       $ulisa .= "&haku[" . $i . "]=" . $haku[$i];
-    }else{
+    }else {
       $toimlisa = explode(">>", $array[$i]);
       $lisa .= " and (" . $toimlisa[0] . " like '%" . $haku[$i] . "%'";
       $lisa .= " or " . $toimlisa[1] . " like '%" . $haku[$i] . "%')";
@@ -715,15 +715,15 @@ echo "<br><table>";
 echo "<tr>";
 
 for ($i = 1; $i < mysql_num_fields($result)-1; $i++) { // HAKUKENTÄT
-  echo "<th><a href='$PHP_SELF?ojarj=".mysql_field_name($result,$i).$ulisa."'>" . t(mysql_field_name($result,$i)) . "</a>";
+  echo "<th><a href='$PHP_SELF?ojarj=".mysql_field_name($result, $i).$ulisa."'>" . t(mysql_field_name($result, $i)) . "</a>";
 
-  if   (mysql_field_len($result,$i)>20) $size='20';
-  elseif  (mysql_field_len($result,$i)<=20)  $size='10';
+  if   (mysql_field_len($result, $i)>20) $size='20';
+  elseif  (mysql_field_len($result, $i)<=20)  $size='10';
   else  $size='10';
 
   if (!isset($haku[$i])) $haku[$i] = '';
 
-  echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+  echo "<br><input type='text' name='haku[$i]' value='$haku[$i]' size='$size' maxlength='" . mysql_field_len($result, $i) ."'>";
   echo "</th>";
 }
 echo "<th>".t("Yhdistä")."</th><th>".t("jätä tämä")."</th>";
@@ -731,7 +731,7 @@ echo "<td class='back'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi / yhdis
 
 $kalalask = 1;
 
-while ($trow = mysql_fetch_array ($result)) { // tiedot
+while ($trow = mysql_fetch_array($result)) { // tiedot
   echo "<tr class='aktiivi'>";
 
   for ($i=1; $i<mysql_num_fields($result)-1; $i++) {
@@ -740,7 +740,7 @@ while ($trow = mysql_fetch_array ($result)) { // tiedot
       if (trim($trow[1]) == '') $trow[1] = t("*tyhjä*");
       echo "<td><a name='2_$kalalask' href='".$palvelin2."yllapito.php?toim=asiakas&tunnus=$trow[tunnus]&lopetus=".$palvelin2."yhdistaasiakas.php////ojarj=$ojarj".str_replace("&", "//", $ulisa)."///2_$kalalask'>$trow[$i]</a></td>";
     }
-    elseif (mysql_field_name($result,$i) == 'ytunnus') {
+    elseif (mysql_field_name($result, $i) == 'ytunnus') {
       echo "<td><a name='2_$kalalask' href='".$palvelin2."yllapito.php?toim=asiakas&tunnus=$trow[tunnus]&lopetus=".$palvelin2."yhdistaasiakas.php////ojarj=$ojarj".str_replace("&", "//", $ulisa)."///2_$kalalask'>$trow[$i]</a></td>";
     }
     else {
@@ -760,4 +760,4 @@ echo "</table><br><br>";
 echo "<input type='submit' value='".t("Yhdistä asiakkaat")."'>";
 echo "</form>";
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

@@ -2,7 +2,7 @@
 
 if (isset($_POST["tee"])) {
   if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
 require "../inc/parametrit.inc";
@@ -65,7 +65,7 @@ if ($tee == "TULOSTA") {
   $rajaus = urlencode(serialize($rajaus));
 
   if ($raportti != "EX" and count($komento) == 0) {
-    require("inc/valitse_tulostin.inc");
+    require "inc/valitse_tulostin.inc";
   }
 
   $joinilisa = "";
@@ -123,7 +123,7 @@ if ($tee == "TULOSTA") {
     }
   }
   else {
-    include('inc/pupeExcel.inc');
+    include 'inc/pupeExcel.inc';
 
     $worksheet    = new pupeExcel();
     $format_bold = array("bold" => TRUE);
@@ -176,18 +176,18 @@ if ($tee == "TULOSTA") {
       $result = mysql_query($kysely) or pupe_error($kysely);
     }
 
-        // k‰ytet‰‰n toim_ tietoja jos niin halutaan
-      if ($_POST['toimas'] == 'on') {
+    // k‰ytet‰‰n toim_ tietoja jos niin halutaan
+    if ($_POST['toimas'] == 'on') {
 
       // tarkistetaan tiedot
       $nimi    = (trim($row['toim_nimi']) != '')       ? true : false;
       $osoite  = (trim($row['toim_osoite']) != '')     ? true : false;
       $postino = (trim($row['toim_postino']) != ''
-            and $row['toim_postino'] != '00000') ? true : false;
+        and $row['toim_postino'] != '00000') ? true : false;
       $postitp = (trim($row['toim_postitp']) != '')    ? true : false;
       $maa     = (trim($row['toim_maa']) != '')        ? true : false;
 
-       // ovatko tiedot validit
+      // ovatko tiedot validit
       if ($nimi and $osoite and $postino and $postitp and $maa) {
         $row['nimi']     = $row['toim_nimi'];
         $row['nimitark'] = $row['toim_nimitark'];
@@ -196,7 +196,7 @@ if ($tee == "TULOSTA") {
         $row['postitp']  = $row['toim_postitp'];
         $row['maa']      = $row['toim_maa'];
       }
-      }
+    }
 
     if ($raportti == "EX") {
       $excelsarake = 0;
@@ -244,14 +244,14 @@ if ($tee == "TULOSTA") {
         $lisa = "";
       }
 
-      $sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["nimi"]))."\n";
-      $sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["nimitark"]))."\n";
+      $sisalto .= sprintf('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["nimi"]))."\n";
+      $sisalto .= sprintf('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["nimitark"]))."\n";
       if (($as_yht_tiedot == 'on' or $asiakas_segmentin_yhteystiedot == 'on') and $row["yht_nimi"] != '') {
-        $sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["yht_nimi"]))."\n";
+        $sisalto .= sprintf('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["yht_nimi"]))."\n";
       }
-      $sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["osoite"]))."\n";
-      $sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["postino"]." ".$row["postitp"]))."\n";
-      $sisalto .= sprintf ('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["maa"]))."\n";
+      $sisalto .= sprintf('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["osoite"]))."\n";
+      $sisalto .= sprintf('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["postino"]." ".$row["postitp"]))."\n";
+      $sisalto .= sprintf('%-'.$rivinpituus.'.'.$rivinpituus.'s', " $lisa".trim($row["maa"]))."\n";
 
       if (($as_yht_tiedot == 'on' or $asiakas_segmentin_yhteystiedot == 'on') and $row["yht_nimi"] != '') {
         $sisalto .= "\n";
@@ -319,7 +319,7 @@ if ($tee == "TULOSTA") {
 
       system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps $liite");
 
-      require("inc/sahkoposti.inc");
+      require "inc/sahkoposti.inc";
     }
     else {
       $cmd = $komento["Tarrat"]." ".$filenimi.".ps";
@@ -364,12 +364,12 @@ if ($tee == '') {
   $monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASPIIRI", "ASIAKASMYYJA", "ASIAKASTILA", "<br>DYNAAMINEN_ASIAKAS");
   $monivalintalaatikot_normaali = array();
 
-  require ("tilauskasittely/monivalintalaatikot.inc");
+  require "tilauskasittely/monivalintalaatikot.inc";
 
   $kentat = "asiakas.nimi, asiakas.osoite, asiakas.postino, asiakas.postitp, asiakas.maa, asiakas.osasto, asiakas.ryhma, asiakas.piiri, asiakas.flag_1, asiakas.flag_2, asiakas.flag_3, asiakas.flag_4";
 
   $array = explode(",", $kentat);
-      $count = count($array);
+  $count = count($array);
 
   for ($i=0; $i<=$count; $i++) {
     if (strlen($haku[$i]) > 0) {
@@ -383,11 +383,11 @@ if ($tee == '') {
 
       $ulisa .= "&haku[" . $i . "]=" . $haku[$i];
     }
-      }
+  }
 
   if (strlen($ojarj) > 0) {
-        $jarjestys = $ojarj;
-      }
+    $jarjestys = $ojarj;
+  }
   else {
     $jarjestys = 'asiakas.nimi';
   }
@@ -527,7 +527,7 @@ if ($tee == '') {
   echo "</table>";
   echo "<br><br>";
 
-  $otunnus = substr($otunnus,0,-1);
+  $otunnus = substr($otunnus, 0, -1);
 
   $tck = "";
   $chk = "";
@@ -560,4 +560,4 @@ if ($tee == '') {
   echo "<tr><td class='back'><input type='submit' name='TULOSTA' value = '".t("Tulosta")."'></td><td class='back'></td></tr></table></form>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

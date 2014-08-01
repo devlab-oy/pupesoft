@@ -181,14 +181,14 @@ if (strlen($pankkitili) != 0) {
 
   echo "<tr>";
   for ($i = 1; $i < mysql_num_fields($result); $i++) {
-    echo "<th>" . t(mysql_field_name($result,$i))."</th>";
+    echo "<th>" . t(mysql_field_name($result, $i))."</th>";
   }
   echo "</tr>";
 
   while ($tiliointirow = mysql_fetch_array($result)) {
     echo "<tr>";
     for ($i = 1; $i<mysql_num_fields($result); $i++) {
-      if (mysql_field_name($result,$i) == 'kustp') {
+      if (mysql_field_name($result, $i) == 'kustp') {
         echo "<td>";
         if ($tiliointirow[$i] != 0) { // Meillä on kustannuspaikka
           $query = "SELECT nimi
@@ -203,7 +203,7 @@ if (strlen($pankkitili) != 0) {
         }
         echo "</td>";
       }
-      elseif (mysql_field_name($result,$i) == 'kustp2') {
+      elseif (mysql_field_name($result, $i) == 'kustp2') {
         echo "<td>";
         if ($tiliointirow[$i] != 0) { // Meillä on kustannuspaikka
           $query = "SELECT nimi
@@ -213,7 +213,7 @@ if (strlen($pankkitili) != 0) {
                     and kaytossa != 'E'
                     and tyyppi    = 'K'";
           $xresult = mysql_query($query) or pupe_error($query);
-          $xrow = mysql_fetch_array ($xresult);
+          $xrow = mysql_fetch_array($xresult);
 
           echo "$xrow[0]";
         }
@@ -266,7 +266,7 @@ if (strlen($pankkitili) != 0) {
   }
   $ulos .= "</select>";
 
-  mysql_data_seek($result,0);
+  mysql_data_seek($result, 0);
 
   $ulos2 = "<select ".js_alasvetoMaxWidth($nimi, 100)." name = 'kustp2'><option value = ' '>".t("Ei kustannuspaikkaa")."</option>";
 
@@ -281,7 +281,7 @@ if (strlen($pankkitili) != 0) {
   $ulos2 .= "</select>";
 
   if ($pankkitili != 'x') {
-    if (substr($erittely,0,1)=='o') $erittely='checked'; else $erittely='';
+    if (substr($erittely, 0, 1)=='o') $erittely='checked'; else $erittely='';
 
     echo "<tr>
         <td><form method='post'>
@@ -332,7 +332,7 @@ else {
       <td>
       <select name = 'pankkitili'><option value = 'x'>".t("Viiteaineisto");
 
-  while ($yritirow=mysql_fetch_array ($result)) {
+  while ($yritirow=mysql_fetch_array($result)) {
     $valittu = "";
     if ($yritirow['tilino'] == $pankkitili) {
       $valittu = "selected";

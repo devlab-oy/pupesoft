@@ -13,7 +13,7 @@ $result = mysql_query($query) or pupe_error($query);
 echo "<table>";
 echo "<tr><th>".t("Valkoodi")."</th><th>".t("Summa valuutassa")."</th><th>".t("Summa")."</th><th>".t("Kpl")."</th></tr>";
 
-while ($trow=mysql_fetch_array ($result)) {
+while ($trow=mysql_fetch_array($result)) {
   echo "<tr>";
 
   echo "<td>$trow[valkoodi]</td>";

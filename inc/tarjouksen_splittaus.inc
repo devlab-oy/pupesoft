@@ -1,6 +1,6 @@
 <?php
 
-require_once('tilauskasittely/luo_myyntitilausotsikko.inc');
+require_once 'tilauskasittely/luo_myyntitilausotsikko.inc';
 
 $query = "SELECT laskun_lisatiedot.sopimus_lisatietoja,
           laskun_lisatiedot.saate,
@@ -133,7 +133,7 @@ foreach ($tarjouksen_asiakkaat as $tarjous_asiakas) {
   // Tällä parametrilla ohitetaan tilausvahvistuksen lähettäminen Tarjouspohjaa kopioidessa
   $laskurow['tilausvahvistus'] = "";
 
-  require_once('tilaus-valmis.inc');
+  require_once 'tilaus-valmis.inc';
 }
 
 $query = "UPDATE lasku

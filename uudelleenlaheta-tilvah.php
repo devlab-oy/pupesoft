@@ -3,7 +3,7 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Uudelleenl‰het‰ tilausvahvistus")."</font><hr>";
 
@@ -24,13 +24,13 @@ if ($tee == "laheta" and $tunnukset != "") {
         //
         // tulostetaan t‰ss‰, niin saadaan vahvistukseen koko tilaus, ennenkun sen splitaatan eri varastoihin
         $params_tilausvahvistus = array(
-        'tee'            => "",
-        'toim'            => "",
-        'kieli'            => "",
-        'komento'          => "",
-        'laskurow'          => $laskurow,
-        'naytetaanko_rivihinta'    => "",
-        'extranet_tilausvahvistus'  => "",
+          'tee'            => "",
+          'toim'            => "",
+          'kieli'            => "",
+          'komento'          => "",
+          'laskurow'          => $laskurow,
+          'naytetaanko_rivihinta'    => "",
+          'extranet_tilausvahvistus'  => "",
         );
 
         laheta_tilausvahvistus($params_tilausvahvistus);

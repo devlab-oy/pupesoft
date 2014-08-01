@@ -3,13 +3,13 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Uudelleenl‰het‰ PostNord-ker‰yssanoma")."</font><hr>";
 
 if ($tee == "laheta" and $tilaukset != "") {
 
-  $tilaukset = pupesoft_cleanstring(str_replace(array("\r","\n"), "", $tilaukset));
+  $tilaukset = pupesoft_cleanstring(str_replace(array("\r", "\n"), "", $tilaukset));
 
   $query = "SELECT distinct lasku.tunnus
             FROM lasku
@@ -37,4 +37,4 @@ echo "<textarea name='tilaukset' rows='10' cols='60'></textarea>";
 echo "<br><input type='submit' value='".t("L‰het‰ ker‰yssanomat")."'>";
 echo "</form>";
 
-require("inc/footer.inc");
+require "inc/footer.inc";

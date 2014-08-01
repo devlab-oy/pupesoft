@@ -148,7 +148,7 @@ if (mysql_field_name($result, $i) == "tiliointi_tarkistus") {
   $ulos .= "<option value = '3' $sel[3]>".t("pakollisia kenttiä tiliöinnissä on kustannuspaikka, projekti")."</option>\n";
   $ulos .= "<option value = '4' $sel[4]>".t("pakollisia kenttiä tiliöinnissä on kustannuspaikka, kohde ja projekti")."</option>\n";
   $ulos .= "<option value = '5' $sel[5]>".t("pakollisia kenttiä tiliöinnissä on kohde")."</option>\n";
-   $ulos .= "<option value = '6' $sel[6]>".t("pakollisia kenttiä tiliöinnissä on kohde, projekti")."</option>\n";
+  $ulos .= "<option value = '6' $sel[6]>".t("pakollisia kenttiä tiliöinnissä on kohde, projekti")."</option>\n";
   $ulos .= "<option value = '7' $sel[7]>".t("pakollisia kenttiä tiliöinnissä on projekti")."</option>\n";
   $ulos .= "</select></td>\n";
   $jatko = 0;

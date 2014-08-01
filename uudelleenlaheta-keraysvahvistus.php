@@ -9,7 +9,7 @@ ob_implicit_flush(1);
 // Ei käytetä pakkausta
 $compression = FALSE;
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Uudelleenlähetä keraysvahvistus")."</font><hr>";
 
@@ -42,7 +42,7 @@ if ($tee == "laheta" and $tunnukset != "") {
         'lahetekpl'          => "",
         'kieli'           => "",
         'koontilahete'        => "",
-        );
+      );
 
       pupesoft_tulosta_lahete($params);
 

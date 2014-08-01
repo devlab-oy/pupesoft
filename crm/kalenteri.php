@@ -1,6 +1,6 @@
 <?php
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 // otetaan oletukseksi tämä kuukausi, vuosi ja päivä
 if ($paiva=='') $paiva = date("j");
@@ -8,20 +8,20 @@ if ($kuu=='')   $kuu   = date("n");
 if ($year=='')  $year  = date("Y");
 
 //lasketaan edellinen ja seuraava kuukausi/vuosi
-$backmonth= date("n",mktime(0, 0, 0, $kuu-1, 1,  $year));
-$backyear = date("Y",mktime(0, 0, 0, $kuu-1, 1,  $year));
-$nextmonth= date("n",mktime(0, 0, 0, $kuu+1, 1,  $year));
-$nextyear = date("Y",mktime(0, 0, 0, $kuu+1, 1,  $year));
+$backmonth= date("n", mktime(0, 0, 0, $kuu-1, 1,  $year));
+$backyear = date("Y", mktime(0, 0, 0, $kuu-1, 1,  $year));
+$nextmonth= date("n", mktime(0, 0, 0, $kuu+1, 1,  $year));
+$nextyear = date("Y", mktime(0, 0, 0, $kuu+1, 1,  $year));
 
-$edelday  = date("j",mktime(0, 0, 0, $kuu, $paiva-1,  $year));
-$edelmonth= date("n",mktime(0, 0, 0, $kuu, $paiva-1,  $year));
-$edelyear = date("Y",mktime(0, 0, 0, $kuu, $paiva-1,  $year));
-$seurday  = date("j",mktime(0, 0, 0, $kuu, $paiva+1,  $year));
-$seurmonth= date("n",mktime(0, 0, 0, $kuu, $paiva+1,  $year));
-$seuryear = date("Y",mktime(0, 0, 0, $kuu, $paiva+1,  $year));
+$edelday  = date("j", mktime(0, 0, 0, $kuu, $paiva-1,  $year));
+$edelmonth= date("n", mktime(0, 0, 0, $kuu, $paiva-1,  $year));
+$edelyear = date("Y", mktime(0, 0, 0, $kuu, $paiva-1,  $year));
+$seurday  = date("j", mktime(0, 0, 0, $kuu, $paiva+1,  $year));
+$seurmonth= date("n", mktime(0, 0, 0, $kuu, $paiva+1,  $year));
+$seuryear = date("Y", mktime(0, 0, 0, $kuu, $paiva+1,  $year));
 
-if (!isset($MONTH_ARRAY)) $MONTH_ARRAY = array(1=> t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kesäkuu'),t('Heinäkuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
-if (!isset($AIKA_ARRAY)) $AIKA_ARRAY = array("08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00");
+if (!isset($MONTH_ARRAY)) $MONTH_ARRAY = array(1=> t('Tammikuu'), t('Helmikuu'), t('Maaliskuu'), t('Huhtikuu'), t('Toukokuu'), t('Kesäkuu'), t('Heinäkuu'), t('Elokuu'), t('Syyskuu'), t('Lokakuu'), t('Marraskuu'), t('Joulukuu'));
+if (!isset($AIKA_ARRAY)) $AIKA_ARRAY = array("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00");
 
 function days_in_month($kuu, $year) {
   // calculate number of days in a month
@@ -39,16 +39,16 @@ function weekday_number($paiva, $kuu, $year) {
 
 //jos muutparametrit os setattu niin otetaan siitä ulos ruksatut kalenterit
 if (isset($muutparametrit)) {
-  $valx = explode('!¡!',$muutparametrit);
+  $valx = explode('!¡!', $muutparametrit);
   $valitut = $valx[0];
 }
 
 //tässä määritellään kenen kaikkien kalenterit näytetään
 if (isset($kalen)) {
-  foreach($kalen as $tama) {
+  foreach ($kalen as $tama) {
     $valitut .= "$tama,";
   }
-  $valitut = substr($valitut,0,-1); // Viimeinen pilkku poistetaan
+  $valitut = substr($valitut, 0, -1); // Viimeinen pilkku poistetaan
 }
 else {
   if (!isset($valitut)) {
@@ -99,7 +99,7 @@ else {
 
 // Poistetaan liitetiedosto kalenterimerkinnästä
 // mikäli GET-parametreistä löytyy poista_liite
-if( isset($poista_liite) and (int) $poista_liite > 0 ) {
+if ( isset($poista_liite) and (int) $poista_liite > 0 ) {
   $poista_liite = (int) $poista_liite;
 
   $query = "DELETE FROM liitetiedostot
@@ -126,7 +126,7 @@ if ($tee == 'LISAA') {
     $kutsuja = 'kalenteri.php';
     $ahlopetus   = $palvelin2."crm/kalenteri.php////tee=LISAA//ytunnus=$ytunnus//muutparametrit=$muutparametrit";
 
-    require ("inc/asiakashaku.inc");
+    require "inc/asiakashaku.inc";
 
     if ($ytunnus == '') {
       exit;
@@ -277,7 +277,7 @@ if ($tee == "POISTA" and (int) $tunnus > 0) {
 }
 
 // tehdään lisäys ruutu ja laitetaan kaikki muuttujaan jotta voidaan echota sit oikeessa kohdassa
-if($tee == "SYOTA") {
+if ($tee == "SYOTA") {
   if ($tunnus != '') {
     $kukalisa = $toim == 'TYOMAARAYS_ASENTAJA' ? " AND kuka = '$kukarow[kuka]' " : '';
 
@@ -356,8 +356,8 @@ if($tee == "SYOTA") {
     <select name='lkello'>";
 
   if ($lkello == '') {
-    $lophh=substr($kello,0,2);
-    $lopmm=substr($kello,3,2)-30;
+    $lophh=substr($kello, 0, 2);
+    $lopmm=substr($kello, 3, 2)-30;
   }
   else {
 
@@ -365,8 +365,8 @@ if($tee == "SYOTA") {
       $lkello = "24:00:00";
     }
 
-    $lophh=substr($lkello,0,2);
-    $lopmm=substr($lkello,3,2)-30;
+    $lophh=substr($lkello, 0, 2);
+    $lopmm=substr($lkello, 3, 2)-30;
   }
 
   list($whlopt, $whlopm) = explode(":", $AIKA_ARRAY[count($AIKA_ARRAY)-1]);
@@ -378,12 +378,12 @@ if($tee == "SYOTA") {
   $lopdate = "";
 
   while ($lopdate != $whileloppu) {
-    $lophh   = date("H",mktime($lophh, $lopmm+30, 0));
-    $lopmm   = date("i",mktime($lophh, $lopmm+30, 0));
-    $lopdate = date("H:i",mktime($lophh, $lopmm+30, 0));
+    $lophh   = date("H", mktime($lophh, $lopmm+30, 0));
+    $lopmm   = date("i", mktime($lophh, $lopmm+30, 0));
+    $lopdate = date("H:i", mktime($lophh, $lopmm+30, 0));
 
     $sel = '';
-    if ($lopdate == substr($aikaloppu,0,5)) {
+    if ($lopdate == substr($aikaloppu, 0, 5)) {
       $sel = "SELECTED";
     }
 
@@ -398,7 +398,7 @@ if($tee == "SYOTA") {
 
   while ($vrow=mysql_fetch_assoc($vresult)) {
     $sel="";
-     if ($tapa == $vrow["selitetark"]) {
+    if ($tapa == $vrow["selitetark"]) {
       $sel = "selected";
     }
     $lisays .= "<option value = '$vrow[selitetark]' $sel>$vrow[selitetark]</option>";
@@ -520,33 +520,33 @@ if ($toim != 'TYOMAARAYS_ASENTAJA') {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
-          echo "<table width='100%'>";
-          echo "<tr>";
-           echo "<th colspan='6'>".t("Muistutukset")."</th>";
-          echo "</tr>";
+    echo "<table width='100%'>";
+    echo "<tr>";
+    echo "<th colspan='6'>".t("Muistutukset")."</th>";
+    echo "</tr>";
 
 
-          while ($prow = mysql_fetch_assoc ($result)) {
-                  echo "  <form action='kuittaamattomat.php?tee=A&kaletunnus=$prow[tunnus]&kuka=$prow[kuka]' method='post'>
+    while ($prow = mysql_fetch_assoc($result)) {
+      echo "  <form action='kuittaamattomat.php?tee=A&kaletunnus=$prow[tunnus]&kuka=$prow[kuka]' method='post'>
               <input type='hidden' name='lopetus' value='$lopetus'>
               <tr>";
 
-                   echo "<td nowrap>$prow[Muistutukset]</td>";
-                  echo "<td nowrap>$prow[Asiakas]</td>";
-                  echo "<td nowrap>$prow[Yhteyshenkilo]</td>";
-                  echo "<td nowrap>$prow[Kommentit]</td>";
-                  echo "<td nowrap>$prow[Tapa]</td>";
+      echo "<td nowrap>$prow[Muistutukset]</td>";
+      echo "<td nowrap>$prow[Asiakas]</td>";
+      echo "<td nowrap>$prow[Yhteyshenkilo]</td>";
+      echo "<td nowrap>$prow[Kommentit]</td>";
+      echo "<td nowrap>$prow[Tapa]</td>";
 
-                 if ($kons == 1) {
-                   $ko = "(".$prow["yhtio"]."), ";
-                 }
+      if ($kons == 1) {
+        $ko = "(".$prow["yhtio"]."), ";
+      }
 
-                  echo "<td nowrap>$ko $prow[Nimi]</td>";
+      echo "<td nowrap>$ko $prow[Nimi]</td>";
 
-                  echo "<td class='back'><input type='submit' value='".t("Kuittaa")."'></td>";
-                  echo "</tr></form>";
-          }
-          echo "</table>";
+      echo "<td class='back'><input type='submit' value='".t("Kuittaa")."'></td>";
+      echo "</tr></form>";
+    }
+    echo "</table>";
   }
   echo "</td>";
 }
@@ -566,8 +566,8 @@ echo "<table width='100%'>
     <select name='kuu' onchange='submit();'>";
 
 $i=1;
-foreach($MONTH_ARRAY as $val) {
-  if($i == $kuu) {
+foreach ($MONTH_ARRAY as $val) {
+  if ($i == $kuu) {
     $sel = "selected";
   }
   else {
@@ -581,7 +581,7 @@ echo "</select></form></td></tr>";
 
 
 echo "<tr><th>".t("Vk.")."</th><th>".t("Ma")."</th><th>".t("Ti")."</th><th>".t("Ke")."</th><th>".t("To")."</th><th>".t("Pe")."</th><th>".t("La")."</th><th>".t("Su")."</th></tr>";
-echo "<tr><th>".date("W",mktime(0, 0, 0, $kuu, 1, $year))."</th>";
+echo "<tr><th>".date("W", mktime(0, 0, 0, $kuu, 1, $year))."</th>";
 
 // kirjotetaan alkuun tyhjiä soluja
 for ($i=0; $i < weekday_number("1", $kuu, $year); $i++) {
@@ -629,7 +629,7 @@ for ($i=1; $i <= days_in_month($kuu, $year); $i++) {
 
   // tehdään rivinvaihto jos kyseessä on sunnuntai ja seuraava päivä on olemassa..
   if ((weekday_number($i, $kuu, $year)==6) and (days_in_month($kuu, $year)>$i)) {
-    $weeknro=date("W",mktime(0, 0, 0, $kuu, $i+1, $year));
+    $weeknro=date("W", mktime(0, 0, 0, $kuu, $i+1, $year));
     echo "</tr><tr><th>$weeknro</th>";
   }
 }
@@ -725,7 +725,7 @@ if (mysql_num_rows($result) > 0) {
   echo "<th colspan='4'>".t("Kokopäivän tapahtumat")."</th>";
   echo "</tr>";
 
-  while ($prow = mysql_fetch_assoc ($result)) {
+  while ($prow = mysql_fetch_assoc($result)) {
 
     //haetaan asiakkaan tiedot
     $query = "SELECT *
@@ -844,9 +844,9 @@ $hh   = $whalkt-1;
 $mm   = $whalkm;
 
 while ($kello_nyt != $whileloppu) {
-  $hh        = date("H",mktime($hh, $mm+30, 0));
-  $mm        = date("i",mktime($hh, $mm+30, 0));
-  $kello_nyt  = date("H:i",mktime($hh, $mm+30, 0));
+  $hh        = date("H", mktime($hh, $mm+30, 0));
+  $mm        = date("i", mktime($hh, $mm+30, 0));
+  $kello_nyt  = date("H:i", mktime($hh, $mm+30, 0));
 
   $paiva     = sprintf("%02d", $paiva);
   $kuu       = sprintf("%02d", $kuu);
@@ -920,19 +920,19 @@ while ($kello_nyt != $whileloppu) {
         //katsotaan näytetäänkö montaa kalenteria
         if ((($ruksattuja!=1) or ($ruksattuja==1 and $row['nimi']!=$kukarow['nimi'])) or ($kons == 1))
 
-        if ($row['nimi'] != '') {
-          $kukanimi  = $ko." ".$row['nimi']."<br>";
-        }
+          if ($row['nimi'] != '') {
+            $kukanimi  = $ko." ".$row['nimi']."<br>";
+          }
         elseif ($row['kuka'] != '') {
           $kukanimi  = $ko." ".$row['kuka']."<br>";
         }
         else $kukanimi = '';
 
         //Vanhoja kalenteritapahtumia ei saa enää muuttaa
-        list($rvv,$rkk,$rpp) = explode("-",substr($row["pvmloppu"],0,10));
+        list($rvv, $rkk, $rpp) = explode("-", substr($row["pvmloppu"], 0, 10));
 
-        $kaleloppu  = (int) date('Ymd',mktime(0,0,0,$rkk,$rpp,$rvv));
-        $aikanyt   = (int) date('Ymd',mktime(0,0,0,date('m'),date('d'),date('Y')));
+        $kaleloppu  = (int) date('Ymd', mktime(0, 0, 0, $rkk, $rpp, $rvv));
+        $aikanyt   = (int) date('Ymd', mktime(0, 0, 0, date('m'), date('d'), date('Y')));
 
         $varilisa = "";
 
@@ -954,7 +954,7 @@ while ($kello_nyt != $whileloppu) {
           echo "<td class='tumma'  rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>$kukanimi<a href='$PHP_SELF?valitut=".urlencode($valitut)."&kenelle=".urlencode($kenelle)."&tee=SYOTA&kello=$kello_nyt&year=$year&kuu=$kuu&paiva=$paiva&tunnus=$row[tunnus]&konserni=$konserni&toim=$toim&tyomaarays=$tyomaarays&lopetus=$lopetus'>$row[tapa]</a> ";
         }
         elseif ($row['tyyppi'] == 'asennuskalenteri') {
-          echo "<td class='tumma' rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>",t("Asennustyö")," $row[liitostunnus] ";
+          echo "<td class='tumma' rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>", t("Asennustyö"), " $row[liitostunnus] ";
         }
         else {
           echo "<td class='tumma' rowspan='$kesto' style='$varilisa border:1px solid #FF0000;' valign='top'>$kukanimi $row[tapa] ";
@@ -993,10 +993,10 @@ while ($kello_nyt != $whileloppu) {
         echo "<td colspan='$tyhjaa'></td>";
       }
     }
-    elseif($tyhjaa > 0) {
+    elseif ($tyhjaa > 0) {
       echo "<td colspan='$tyhjaa'></td>";
     }
-    }
+  }
   echo "</tr>";
 }
 
@@ -1011,4 +1011,4 @@ echo "</tr>";
 //kalenterivalinta end
 echo "</table>";
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

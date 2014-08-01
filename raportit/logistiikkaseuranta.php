@@ -3,7 +3,7 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Logistiikkaseuranta")."</font><hr>";
 
@@ -13,7 +13,7 @@ echo "<input type='hidden' name='tee' value='nayta'>";
 echo "<tr><th>Tilausnumero:</th><td><input type='text' name='tilaus' value='$tilaus' size='15'></td></tr>";
 echo "<tr><th>Laskunumero:</th><td><input type='text' name='lasku' value='$lasku' size='15'></td></tr>";
 
-echo "  <tr><th valign='top'>",t("Valitse p‰iv‰"),"</th>
+echo "  <tr><th valign='top'>", t("Valitse p‰iv‰"), "</th>
     <td><select name='paiva_vv'>";
 
 $sel = array();
@@ -76,7 +76,7 @@ if ($virhelaji == "lahtosuljettueilaskutettu")   $sel4 = "SELECTED";
 if ($virhelaji == "lahtosuljettueikeratty")   $sel5 = "SELECTED";
 
 echo "<option value='' >Valitse</option>";
-#echo "<option value='rahtiveloitus' $sel1>V‰‰r‰ rahtimaksu</option>";
+//echo "<option value='rahtiveloitus' $sel1>V‰‰r‰ rahtimaksu</option>";
 echo "<option value='laskeiker' $sel2>Rivi laskutettu mutta ei ker‰tty</option>";
 echo "<option value='nollarivit' $sel3>Ker‰tt‰v‰ m‰‰r‰ nolla</option>";
 echo "<option value='lahtosuljettueilaskutettu' $sel4>Laskuttamaton tilaus suljetussa l‰hdˆss‰ (ei p‰iv‰rajausta)</option>";
@@ -133,8 +133,8 @@ if ($tee == "rahtisopparitilanne") {
 
       if (strlen($rahsoprow['rahtisopimus']) > 0) {
         if (($toimtaparow['virallinen_selite'] == "KKSTD" or
-          $toimtaparow['virallinen_selite'] == "IT09" or
-          $toimtaparow['virallinen_selite'] == "IT14") and strlen($rahsoprow['rahtisopimus']) < 6) {
+            $toimtaparow['virallinen_selite'] == "IT09" or
+            $toimtaparow['virallinen_selite'] == "IT14") and strlen($rahsoprow['rahtisopimus']) < 6) {
           $pitvirh = TRUE;
         }
         elseif ($toimtaparow['virallinen_selite'] == "KLGRP" and strlen($rahsoprow['rahtisopimus']) < 4) {
@@ -146,7 +146,7 @@ if ($tee == "rahtisopparitilanne") {
       }
 
       if ($rahsoprow["rahtisopimus"] == "" or $pitvirh) {
-         echo "<tr>";
+        echo "<tr>";
         echo "<td>$asiakasrow[asiakasnro]</td>";
         echo "<td>$asiakasrow[ytunnus]</td>";
         echo "<td>$asiakasrow[nimi]</td>";
@@ -314,13 +314,13 @@ if ($tee == "nayta") {
       elseif ($tilausrow["tila"] == "V" and  $tilausrow["tilaustyyppi"] == "W") {
         $tarkenne = " (".t("Varastoon").") ";
       }
-      elseif(($tilausrow["tila"] == "N" or $tilausrow["tila"] == "L") and $tilausrow["tilaustyyppi"] == "R") {
+      elseif (($tilausrow["tila"] == "N" or $tilausrow["tila"] == "L") and $tilausrow["tilaustyyppi"] == "R") {
         $tarkenne = " (".t("Reklamaatio").") ";
       }
-      elseif(($tilausrow["tila"] == "N" or $tilausrow["tila"] == "L") and $tilausrow["tilaustyyppi"] == "A") {
+      elseif (($tilausrow["tila"] == "N" or $tilausrow["tila"] == "L") and $tilausrow["tilaustyyppi"] == "A") {
         $laskutyyppi = "Tyˆm‰‰r‰ys";
       }
-      elseif($tilausrow["tila"] == "N" and $tilausrow["tilaustyyppi"] == "E") {
+      elseif ($tilausrow["tila"] == "N" and $tilausrow["tilaustyyppi"] == "E") {
         $laskutyyppi = "Ennakkotilaus kesken";
       }
 
@@ -443,7 +443,7 @@ if ($tee == "nayta") {
       $rivi .= "<tr>";
       $rivi .= "<td>$tilausrivirow[otunnus]</td>";
       $rivi .= "<td><a target='Tuotekysely' href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($tilausrivirow["tuoteno"])."'>$tilausrivirow[tuoteno]</a></td>";
-      $rivi .= "<td>".substr($tilausrivirow["nimitys"],0,20)."</td>";
+      $rivi .= "<td>".substr($tilausrivirow["nimitys"], 0, 20)."</td>";
       $rivi .= "<td align='right'>".(float) ($tilausrivirow["tilkpl"])."</td>";
       $rivi .= "<td align='right'>".(float) ($tilausrivirow["kpl"])."</td>";
       $rivi .= "<td>$tilausrivirow[var]</td>";
@@ -732,4 +732,4 @@ if ($tee == "nayta") {
   echo "</table>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

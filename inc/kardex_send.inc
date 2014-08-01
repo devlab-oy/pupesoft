@@ -31,7 +31,7 @@ if (mysql_num_rows($kardex_res) > 0) {
 
     $kardex_sscc_sisalto = $kardex_row['sscc'];
 
-    if (($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") OR
+    if (($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") or
       ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "")) {
 
       // Jos Unifaun on käytössä niin ulkoinen SSCC ei saa olla tyhjä
@@ -82,11 +82,11 @@ if (mysql_num_rows($kardex_res) > 0) {
     $ftppass = $kardex_pass;
     $ftppath = $kardex_path;
     $ftpport = $kardex_port;
-      $ftpfail = $kardex_fail;
+    $ftpfail = $kardex_fail;
     $ftpsucc = $kardex_succ;
     $ftpfile = $kardexnimi;
 
-    require('inc/ftp-send.inc');
+    require 'inc/ftp-send.inc';
   }
   elseif ($kardex_sscc != "") {
     // Katotaan, ettei tätä ole jo siirretty uudelleenkäsiteltävien joukkoon

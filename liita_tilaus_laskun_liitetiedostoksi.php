@@ -1,14 +1,14 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
-echo "<font class='head'>",t("Liitä tilaus laskun liitetiedostoksi"),"</font><hr>";
+echo "<font class='head'>", t("Liitä tilaus laskun liitetiedostoksi"), "</font><hr>";
 
 if (!isset($laskunro)) $laskunro = '';
 
 echo "<table>";
 echo "<form method='post'>";
-echo "<tr><th>",t("Laskunumero"),"</th><td><input type='text' name='laskunro' value='{$laskunro}' /></td><td><input type='submit' value='",t("Etsi"),"' /></td></tr>";
+echo "<tr><th>", t("Laskunumero"), "</th><td><input type='text' name='laskunro' value='{$laskunro}' /></td><td><input type='submit' value='", t("Etsi"), "' /></td></tr>";
 echo "</form>";
 echo "</table>";
 
@@ -26,16 +26,16 @@ if (trim($laskunro) != '' and is_numeric($laskunro)) {
 
     $onnistuiko = liita_tilaus_laskun_liitetiedostoksi($kukarow, $yhtiorow, $liitetaanko_editilaus_laskulle_hakemisto, $lasku_row['tunnus'], $lasku_row['asiakkaan_tilausnumero']);
 
-    if ($onnistuiko) echo "<br/>",t("Laskun")," {$laskunro} ",t("liitetiedostoksi lisättin tilaus")," {$lasku_row['asiakkaan_tilausnumero']}.<br/>";
-    else echo "<br/>",t("Liitetiedoston lisääminen epäonnistui"),". ",t("Tilausta ei löytynyt"),"!<br/>";
+    if ($onnistuiko) echo "<br/>", t("Laskun"), " {$laskunro} ", t("liitetiedostoksi lisättin tilaus"), " {$lasku_row['asiakkaan_tilausnumero']}.<br/>";
+    else echo "<br/>", t("Liitetiedoston lisääminen epäonnistui"), ". ", t("Tilausta ei löytynyt"), "!<br/>";
 
   }
   elseif (mysql_num_rows($lasku_res) == 2) {
-    echo "<br/><font class='error'>",t("Laskuun on jo liitetty tilaus"),"!</font><br/>";
+    echo "<br/><font class='error'>", t("Laskuun on jo liitetty tilaus"), "!</font><br/>";
   }
   else {
-    echo "<br/><font class='error'>",t("Finvoice-laskuaineistoa ei ole laskun liitetiedostona"),"!</font><br/>";
+    echo "<br/><font class='error'>", t("Finvoice-laskuaineistoa ei ole laskun liitetiedostona"), "!</font><br/>";
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

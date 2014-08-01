@@ -11,7 +11,7 @@ if (php_sapi_name() == 'cli') {
 }
 
 if (!$php_cli) {
-  require ("inc/parametrit.inc");
+  require "inc/parametrit.inc";
   $kyhtio = $kukarow['yhtio'];
 }
 else {
@@ -19,73 +19,73 @@ else {
   if ($argv[1] != "") $kyhtio = trim($argv[1]);
   else die ("Yhtiö on annettava!");
 
-  require ("/var/www/html/pupesoft/inc/connect.inc");
-  require ("/var/www/html/pupesoft/inc/functions.inc");
+  require "/var/www/html/pupesoft/inc/connect.inc";
+  require "/var/www/html/pupesoft/inc/functions.inc";
   $tee = "aja";
 }
 
 function ftp_rmfiles($ftp_stream, $directory, $nodel = "", $nodelpict = "") {
 
-    if (!is_resource($ftp_stream) ||
-        get_resource_type($ftp_stream) !== 'FTP Buffer') {
-        return false;
-    }
+  if (!is_resource($ftp_stream) ||
+    get_resource_type($ftp_stream) !== 'FTP Buffer') {
+    return false;
+  }
 
   ftp_pasv($ftp_stream, true);
 
-    $i             = 0;
-    $files         = array();
-    $statusnext    = false;
-    $statusprev    = false;
-    $currentfolder = $directory;
+  $i             = 0;
+  $files         = array();
+  $statusnext    = false;
+  $statusprev    = false;
+  $currentfolder = $directory;
 
-    $list = ftp_rawlist($ftp_stream, $directory, true);
+  $list = ftp_rawlist($ftp_stream, $directory, true);
 
-    foreach ($list as $current) {
+  foreach ($list as $current) {
 
-        if (empty($current)) {
+    if (empty($current)) {
       if ($statusprev == true) {
         $statusprev = false;
         continue;
       }
-            $statusnext = true;
-            continue;
-        }
-
-        if ($statusnext === true) {
-      $currentfolder = substr($current, 0, -1);
-            $statusnext = false;
-      $statusprev = true;
-            continue;
-        }
-
-        $split = preg_split('[ ]', $current, 9, PREG_SPLIT_NO_EMPTY);
-        $entry = $split[8];
-        $isdir = ($split[0]{0} === 'd') ? true : false;
-
-        if ($entry === '.' || $entry === '..') {
-            continue;
-        }
-
-        if ($isdir !== true) {
-            $files[] = $currentfolder . '/' . $entry;
-        }
-
+      $statusnext = true;
+      continue;
     }
 
-    foreach ($files as $file) {
-    #HUOM: Kuvia joiden nimessä on stringi "eipoisteta" ei poisteta
+    if ($statusnext === true) {
+      $currentfolder = substr($current, 0, -1);
+      $statusnext = false;
+      $statusprev = true;
+      continue;
+    }
+
+    $split = preg_split('[ ]', $current, 9, PREG_SPLIT_NO_EMPTY);
+    $entry = $split[8];
+    $isdir = ($split[0]{0} === 'd') ? true : false;
+
+    if ($entry === '.' || $entry === '..') {
+      continue;
+    }
+
+    if ($isdir !== true) {
+      $files[] = $currentfolder . '/' . $entry;
+    }
+
+  }
+
+  foreach ($files as $file) {
+    //HUOM: Kuvia joiden nimessä on stringi "eipoisteta" ei poisteta
     if (stripos($file, "eipoisteta") === FALSE) {
       if ($nodelpict != '') {
         if (strpos($file, $nodelpict) === FALSE) {
-              ftp_delete($ftp_stream, $file);
+          ftp_delete($ftp_stream, $file);
         }
       }
       else {
-            ftp_delete($ftp_stream, $file);
+        ftp_delete($ftp_stream, $file);
       }
     }
-    }
+  }
 }
 
 if ($tee == "aja") {
@@ -133,11 +133,11 @@ if ($tee == "aja") {
 
     // jos viimeinen merkki pathissä ei ole kauttaviiva lisätään kauttaviiva...
     if (substr($ftpkuvapath, -1) != "/") {
-       $ftpkuvapath .= "/";
+      $ftpkuvapath .= "/";
     }
 
     if (substr($ftpmuupath, -1) != "/") {
-       $ftpmuupath .= "/";
+      $ftpmuupath .= "/";
     }
 
     // jos login ok kokeillaan uploadata
@@ -180,7 +180,7 @@ if ($tee == "aja") {
             $counter++;
           }
           else {
-            file_put_contents($kokonimi,$row["data"]);
+            file_put_contents($kokonimi, $row["data"]);
             fclose($handle);
 
             list($mtype, $crap) = explode("/", $row["filetype"]);

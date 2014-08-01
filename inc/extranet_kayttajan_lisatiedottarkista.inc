@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("extranet_kayttajan_lisatiedottarkista")) {
-  function extranet_kayttajan_lisatiedottarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("extranet_kayttajan_lisatiedottarkista")) {
+  function extranet_kayttajan_lisatiedottarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $laji, $poistolukko;
 
     if (mysql_field_name($result, $i) == "liitostunnus") {

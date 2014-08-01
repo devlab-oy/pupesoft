@@ -1,6 +1,6 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Tulosseuranta")."</font><hr>";
 
@@ -86,7 +86,7 @@ $piirra_otsikot = FALSE;
 $lisa = "";
 $lisa_haku_kustp = "";
 
-require ("tilauskasittely/monivalintalaatikot.inc");
+require "tilauskasittely/monivalintalaatikot.inc";
 
 echo "</td>";
 echo "</tr>";
@@ -255,4 +255,4 @@ if ($tee == "raportoi") {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

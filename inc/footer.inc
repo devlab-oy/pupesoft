@@ -9,12 +9,12 @@ if (isset($formi) and isset($kentta)) {
   echo "<script LANGUAGE='JavaScript'>window.document.$formi.$kentta.focus();</script>";
 }
 
-$timeparts = explode(" ",microtime());
-$endtime   = $timeparts[1].substr($timeparts[0],1);
-$aika      = round($endtime-$starttime,4);
+$timeparts = explode(" ", microtime());
+$endtime   = $timeparts[1].substr($timeparts[0], 1);
+$aika      = round($endtime-$starttime, 4);
 $useslave  = 0;
 
-if ((!isset($verkkokauppa) or $verkkokauppa == "") and require("connect.inc")) {
+if ((!isset($verkkokauppa) or $verkkokauppa == "") and require "connect.inc") {
   $suoque = "INSERT INTO suorituskykyloki
              SET yhtio     = '$kukarow[yhtio]',
              skripti       = '".$_SERVER['SCRIPT_NAME']."',
@@ -58,29 +58,29 @@ if ($lopeta_body) {
 
   if ($piirra_sanakirja) {
     switch (strtoupper($kukarow["kieli"])) {
-      case "EN":
-        $kieli  = "en";
-        $kindex = 0;
-        break;
-      case "SE":
-        $kieli  = "se";
-        $kindex = 1;
-        break;
-      case "DE":
-        $kieli  = "de";
-        $kindex = 2;
-        break;
-      case "DK":
-        $kieli  = "dk";
-        $kindex = 3;
-        break;
-      case "EE":
-        $kieli  = "ee";
-        $kindex = 4;
-        break;
-      default:
-        $kieli  = "en";
-        $kindex = 0;
+    case "EN":
+      $kieli  = "en";
+      $kindex = 0;
+      break;
+    case "SE":
+      $kieli  = "se";
+      $kindex = 1;
+      break;
+    case "DE":
+      $kieli  = "de";
+      $kindex = 2;
+      break;
+    case "DK":
+      $kieli  = "dk";
+      $kindex = 3;
+      break;
+    case "EE":
+      $kieli  = "ee";
+      $kindex = 4;
+      break;
+    default:
+      $kieli  = "en";
+      $kindex = 0;
     }
 
     echo "<br><br>";

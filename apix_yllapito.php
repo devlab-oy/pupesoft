@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 $status_message1 = "";
 $status_message2 = "";
@@ -52,7 +52,7 @@ if ($tee == "SendRegistrationInfo") {
 
   $xmlfile = utf8_encode($xmlfile);
 
-  #$url = "https://test-api.apix.fi/registration";
+  //$url = "https://test-api.apix.fi/registration";
   $url = "https://api.apix.fi/registration";
 
   $real_url = "$url?id=$yhtiorow[ytunnus]&idq=y-tunnus";
@@ -92,7 +92,7 @@ if ($tee == "SendRegistrationInfo") {
 
 if ($tee == "RetrieveTransferID") {
 
-  #$url    = "https://test-api.apix.fi/app-transferID";
+  //$url    = "https://test-api.apix.fi/app-transferID";
   $url    = "https://api.apix.fi/app-transferID";
   $timestamp  = gmdate("YmdHis");
   $pw_digest  = substr(hash('sha256', trim($password)), 0, 64);
@@ -167,7 +167,7 @@ echo $status_message1;
 echo "<br><br>";
 
 echo "<font class='message'>Vaihe 2: Rekisteröidy APIX asiakkaaksi ja hanki verkkopostimerkkejä heidän verkkokaupasta</font><hr>";
-#  echo "<form target='top' action='https://test-registration.apix.fi' method='get'>";
+//  echo "<form target='top' action='https://test-registration.apix.fi' method='get'>";
 echo "<form target='top' action='https://registration.apix.fi' method='get'>";
 echo "<input type='submit' value='Siirry APIX rekisteröintiin klikkaamalla tästä'>";
 echo "</form>";
@@ -188,4 +188,4 @@ echo $status_message2;
 
 echo "</form>";
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

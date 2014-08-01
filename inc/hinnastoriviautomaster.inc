@@ -4,7 +4,7 @@ function hinnastorivi($tuote, $laskurow) {
 
   $myyntihinta = tuotteen_myyntihinta($laskurow, $tuote, 1, "ei");
 
-    // muutetaan yksiköt ISO-standardin mukaisiksi
+  // muutetaan yksiköt ISO-standardin mukaisiksi
   $yksikko="";
   if ($tuote['yksikko']=='KPL' or $tuote['yksikko']=='PCE')
     $yksikko = "PCE";
@@ -13,7 +13,7 @@ function hinnastorivi($tuote, $laskurow) {
   if ($tuote['yksikko']=='PAR')
     $yksikko = "PAR";
 
-    // tehdään tietuetta
+  // tehdään tietuetta
   $out  .= sprintf("%-35.35s", $tuote['tuoteno']);          // tuotenumero
   $out  .= sprintf("%-10.10s", sprintf("%02s", $tuote['try']));    // tuotteen tuoteryhmä kahteen merkkiin asti zeropaddattuna
   $out  .= sprintf("%-10.10s", sprintf("%02s", $tuote['aleryhma']));  // tuotteen alennusryhmä kahteen merkkiin asti zeropaddattuna
@@ -42,5 +42,5 @@ function hinnastorivi($tuote, $laskurow) {
   $out  .= sprintf("%-11.11s", "");                     // alennushinta
   $out .= "\n";
 
-    return $out;
+  return $out;
 }

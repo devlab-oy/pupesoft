@@ -30,12 +30,12 @@ while ($row = mysql_fetch_array($res)) {
   $tarrakpl = $row["varattu"] * $row["tarrakerroin"];
 
   //mahtuu 7 tarraa per rivi
-  for($a = 0; $a < $tarrakpl; $a++) {
+  for ($a = 0; $a < $tarrakpl; $a++) {
     if ($laskuri % 7 == 0 and $laskuri > 0) {
-      $sisalto  = sprintf ('%-75.75s',$sisalto1);
-        $sisalto .= sprintf ('%-75.75s',$sisalto2);
-         $sisalto .= sprintf ('%-75.75s',$sisalto3);
-         $sisalto .= "\r\n"."\r\n";
+      $sisalto  = sprintf('%-75.75s', $sisalto1);
+      $sisalto .= sprintf('%-75.75s', $sisalto2);
+      $sisalto .= sprintf('%-75.75s', $sisalto3);
+      $sisalto .= "\r\n"."\r\n";
 
       if ($laskuri % 112 == 0 && $laskuri > 0) {
         $sisalto .= "\r\n";
@@ -47,17 +47,17 @@ while ($row = mysql_fetch_array($res)) {
       $sisalto3 = '';
     }
 
-    $sisalto1 .= sprintf ('%-11.9s',substr($row["tuoteno"],0,9));
-    $sisalto2 .= sprintf ('%-11.9s',substr($row["tuoteno"],9,9));
-    $sisalto3 .= sprintf ('%-11.9s',$row["tarrakpl"]." ".t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite"));
+    $sisalto1 .= sprintf('%-11.9s', substr($row["tuoteno"], 0, 9));
+    $sisalto2 .= sprintf('%-11.9s', substr($row["tuoteno"], 9, 9));
+    $sisalto3 .= sprintf('%-11.9s', $row["tarrakpl"]." ".t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite"));
     $laskuri++;
   }
 }
 
 if ($sisalto1 != "") {
-  $sisalto  = sprintf ('%-75.75s',$sisalto1);
-  $sisalto .= sprintf ('%-75.75s',$sisalto2);
-  $sisalto .= sprintf ('%-75.75s',$sisalto3);
+  $sisalto  = sprintf('%-75.75s', $sisalto1);
+  $sisalto .= sprintf('%-75.75s', $sisalto2);
+  $sisalto .= sprintf('%-75.75s', $sisalto3);
   $sisalto .= "\r\n"."\r\n";
   fputs($fh, $sisalto);
 }
@@ -68,7 +68,7 @@ if ($komento["Tuotetarrat"] == 'email') {
   $liite = $filenimi;
   $ctype = "TEXT";
   $kutsu = "tuotetarrat-".date("Y-m-d").".txt";
-  require("inc/sahkoposti.inc");
+  require "inc/sahkoposti.inc";
 
   //p‰‰dyt‰‰n taas selailemaan toimittajia
   echo t("Tuotetarrat tulostuu")."...<br>";

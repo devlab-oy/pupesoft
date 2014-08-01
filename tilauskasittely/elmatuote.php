@@ -14,8 +14,8 @@ if (php_sapi_name() == 'cli') {
 if ($php_cli) {
 
   // otetaan tietokanta connect
-  require ("../inc/connect.inc");
-  require ("../inc/functions.inc");
+  require "../inc/connect.inc";
+  require "../inc/functions.inc";
 
   // hmm.. j‰nn‰‰
   $kukarow['yhtio']=$argv[1];
@@ -32,7 +32,7 @@ if ($php_cli) {
   }
 }
 else {
-  require ("../inc/parametrit.inc");
+  require "../inc/parametrit.inc";
 }
 
 $echoulos = "<font class='head'>Elmatuote</font><hr>";
@@ -42,7 +42,7 @@ if ($aja=='run') {
   flush();
 
   // tehd‰‰n temppitiedosto
-  $elma  = "../dataout/elmatuot-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(),true)).".txt";
+  $elma  = "../dataout/elmatuot-$kukarow[yhtio]-".date("Ymd")."-".md5(uniqid(rand(), true)).".txt";
   if (!$handle = fopen($elma, "w")) die("Filen $elma luonti ep‰onnistui!");
 
   // itte query
@@ -58,12 +58,11 @@ if ($aja=='run') {
 
   // arvioidaan kestoa
   $arvio     = array();
-  $timeparts = explode(" ",microtime());
-  $alkuaika  = $timeparts[1].substr($timeparts[0],1);
+  $timeparts = explode(" ", microtime());
+  $alkuaika  = $timeparts[1].substr($timeparts[0], 1);
   $joukko    = 100; //kuinka monta rivi‰ otetaan keskiarvoon
 
-  while ($row = mysql_fetch_array($res))
-  {
+  while ($row = mysql_fetch_array($res)) {
     // muutetaan yksikˆt ISO-standardin mukaisiksi
     $yksikko="";
     if ($row['yksikko']=='KPL' or $row['yksikko']=='PCE')
@@ -95,22 +94,22 @@ if ($aja=='run') {
     if ($saldo < 1) $saldo = 0;
 
     // tehd‰‰n tietuetta
-    $ulos   = sprintf("%-20.20s",$row['tuoteno']);
-    $ulos  .= sprintf("%-2.2s" ,$row['osasto']);
-    $ulos  .= sprintf("%-5.5s" ,$row['try']);
-    $ulos  .= sprintf("%-15.15s",$row['aleryhma']);
-    $ulos  .= sprintf("%-50.50s",$row['nimitys']);
-    $ulos  .= sprintf("%-10.10s",$row['myyntihinta']);
-    $ulos  .= sprintf("%-10.10s",$saldo);
-    $ulos  .= sprintf("%-1.1s" ,$hyllyalue);
-    $ulos  .= sprintf("%-2.2s" ,$hyllynro);
-    $ulos  .= sprintf("%-2.2s" ,$hyllyvali);
-    $ulos  .= sprintf("%-2.2s" ,$hyllytaso);
-    $ulos  .= sprintf("%-3.3s" ,$yksikko);
-    $ulos  .= sprintf("%-7.7s" ,$row['myynti_era']);
-    $ulos  .= sprintf("%-13.13s",$row['eankoodi']);
+    $ulos   = sprintf("%-20.20s", $row['tuoteno']);
+    $ulos  .= sprintf("%-2.2s" , $row['osasto']);
+    $ulos  .= sprintf("%-5.5s" , $row['try']);
+    $ulos  .= sprintf("%-15.15s", $row['aleryhma']);
+    $ulos  .= sprintf("%-50.50s", $row['nimitys']);
+    $ulos  .= sprintf("%-10.10s", $row['myyntihinta']);
+    $ulos  .= sprintf("%-10.10s", $saldo);
+    $ulos  .= sprintf("%-1.1s" , $hyllyalue);
+    $ulos  .= sprintf("%-2.2s" , $hyllynro);
+    $ulos  .= sprintf("%-2.2s" , $hyllyvali);
+    $ulos  .= sprintf("%-2.2s" , $hyllytaso);
+    $ulos  .= sprintf("%-3.3s" , $yksikko);
+    $ulos  .= sprintf("%-7.7s" , $row['myynti_era']);
+    $ulos  .= sprintf("%-13.13s", $row['eankoodi']);
 
-/* vanha kuvaus
+    /* vanha kuvaus
     $ulos   = sprintf("%-12.12s",$row['tuoteno']);
     $ulos  .= sprintf("%01.1s"  ,$row['osasto']);
     $ulos  .= sprintf("%03.3s"  ,$row['try']);
@@ -130,20 +129,18 @@ if ($aja=='run') {
     $query  = "select * from korvaavat where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
     $kores  = mysql_query($query) or pupe_error($query);
 
-    if (mysql_num_rows($kores)>0)
-    {
+    if (mysql_num_rows($kores)>0) {
       $korow  = mysql_fetch_array($kores);
       $query  = "select * from korvaavat where yhtio='$kukarow[yhtio]' and id='$korow[id]' order by jarjestys, tuoteno";
       $kores  = mysql_query($query) or pupe_error($query);
       $nexti  = 0;
 
-      while ($korow = mysql_fetch_array($kores))
-      {
+      while ($korow = mysql_fetch_array($kores)) {
         if ($nexti == 1) {
           // vanha
           // $ulos .= sprintf("%-12.12s",$korow['tuoteno']);
           // uusi
-          $ulos .= sprintf("%-20.20s",$korow['tuoteno']);
+          $ulos .= sprintf("%-20.20s", $korow['tuoteno']);
           break;
         }
         if ($korow['tuoteno'] == $row['tuoteno']) {
@@ -161,7 +158,7 @@ if ($aja=='run') {
   // faili kiinni
   fclose($handle);
 
-  $timeparts = explode(" ",microtime());
+  $timeparts = explode(" ", microtime());
   $endtime   = $timeparts[1].substr($timeparts[0], 1);
   $aika      = round($endtime-$starttime, 4);
 
@@ -169,8 +166,8 @@ if ($aja=='run') {
   $echoulos .= "<font class='message'>L‰hetet‰‰n tiedosto Elmaan...</font>";
 
   //pakataan faili
-  #$cmd = "/usr/bin/bzip2 $elma";
-  #$palautus = exec($cmd);
+  //$cmd = "/usr/bin/bzip2 $elma";
+  //$palautus = exec($cmd);
 
   // tarvitaan  $ftphost $ftpuser $ftppass $ftppath $ftpfile
   // palautetaan $palautus ja $syy
@@ -179,10 +176,10 @@ if ($aja=='run') {
   $ftpuser = $elmatuoteuser;
   $ftppass = $elmatuotepass;
   $ftppath = $elmatuotepath;
-  #$ftpfile = realpath($elma.".bz2");
+  //$ftpfile = realpath($elma.".bz2");
   $ftpfile = realpath($elma);
 
-  require ("../inc/ftp-send.inc");
+  require "../inc/ftp-send.inc";
 
   //L‰hetet‰‰n tiedosto asiakkaille suoraan jotka haluavat sen ilman Elmaa
   $echoulos .= "<font class='message'>L‰hetet‰‰n tiedosto Asiakkaille...</font><br>";
@@ -192,7 +189,7 @@ if ($aja=='run') {
 
   if (mysql_num_rows($kores) > 0) {
 
-    $elmazip = substr(substr($elma,0,-4).".zip",11);
+    $elmazip = substr(substr($elma, 0, -4).".zip", 11);
     $cmd = "/usr/bin/zip -j /tmp/$elmazip $elma";
     $palautus = exec($cmd);
 
@@ -233,7 +230,7 @@ if ($aja=='run') {
   }
   else {
     echo "$echoulos";
-    require ("../inc/footer.inc");
+    require "../inc/footer.inc";
   }
 
 }
@@ -243,5 +240,5 @@ else {
   echo "<input type='submit' value='Aja Elmatuote!'>";
   echo "</form>";
 
-  require ("../inc/footer.inc");
+  require "../inc/footer.inc";
 }

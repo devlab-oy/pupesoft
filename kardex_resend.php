@@ -22,8 +22,8 @@ if ($php_cli) {
   ini_set("display_errors", 0);
 
   // otetaan tietokanta connect
-  require("inc/connect.inc");
-  require("inc/functions.inc");
+  require "inc/connect.inc";
+  require "inc/functions.inc";
 
   $kukarow['yhtio'] = (string) $argv[1];
   $kukarow['kuka']  = 'admin';
@@ -48,7 +48,7 @@ if ($handle = opendir($kardex_sscc)) {
     if (is_file($kardex_sscc."/".$file)) {
       $kerayseran_numero = preg_replace("/[^0-9]/", "", $file);
 
-      require("inc/kardex_send.inc");
+      require "inc/kardex_send.inc";
     }
   }
 
@@ -62,7 +62,7 @@ if ($kardex_host != "" and $kardex_user != "" and $kardex_pass != "" and $kardex
   $ftppass = $kardex_pass;
   $ftppath = $kardex_path;
   $ftpport = $kardex_port;
-    $ftpfail = $kardex_fail;
+  $ftpfail = $kardex_fail;
   $ftpsucc = $kardex_succ;
   $ftpfile = $kardexnimi;
 
@@ -73,7 +73,7 @@ if ($kardex_host != "" and $kardex_user != "" and $kardex_pass != "" and $kardex
       if (is_file($ftpfail."/".$file)) {
         $ftpfile = realpath($ftpfail."/".$file);
 
-        require ("inc/ftp-send.inc");
+        require "inc/ftp-send.inc";
 
         // Jos siirto meni ok, niin remmataan faili
         if ($palautus == 0) {

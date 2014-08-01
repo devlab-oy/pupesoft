@@ -80,7 +80,7 @@ if ($toim == "OSTO" or $tulostimet[0] == "Ostotilaus") {
 
   $chk = ((isset($nimitykset) and $nimitykset != '') or (!isset($nimitykset) and $yhtiorow['ostotilaustyyppi'] == 'A')) ? 'checked' : '';
 
-  echo "<tr><th>",t("Tulosta nimitykset ostotilaukselle"),"</th><td><input type='checkbox' name='nimitykset' {$chk}></td></tr>";
+  echo "<tr><th>", t("Tulosta nimitykset ostotilaukselle"), "</th><td><input type='checkbox' name='nimitykset' {$chk}></td></tr>";
 
   $mista = 'toimi';
 
@@ -99,7 +99,7 @@ if ($toim == "LAHETE" and $yhtiorow["lahete_tyyppi_tulostus"] != '' and $otunnus
 
   $vresult = t_avainsana("LAHETETYYPPI");
 
-  while($row = mysql_fetch_array($vresult)) {
+  while ($row = mysql_fetch_array($vresult)) {
     $sel = "";
     if ($row["selite"] == $lahetetyyppi) $sel = 'selected';
 
@@ -221,28 +221,28 @@ if ($toim == "TILAUSVAHVISTUS" and $yhtiorow["tilausvahvistus_tyyppi_tulostus"] 
 }
 
 if ($toim == "TILAUSVAHVISTUS") {
-  echo "<tr><th>",t("Näytetäänkö rivihinta"),"</th><td><select name='naytetaanko_rivihinta'>";
-  echo "<option value=''>",t("Näytetään rivihinta"),"</option>";
-  echo "<option value='ei_rivihintaa'>",t("Ei näytetä rivihintaa"),"</option>";
+  echo "<tr><th>", t("Näytetäänkö rivihinta"), "</th><td><select name='naytetaanko_rivihinta'>";
+  echo "<option value=''>", t("Näytetään rivihinta"), "</option>";
+  echo "<option value='ei_rivihintaa'>", t("Ei näytetä rivihintaa"), "</option>";
   echo "</select></td></tr>";
 }
 
 if ($toim == "TARJOUS") {
-  echo "<tr><th>",t("Näytetäänkö verolliset vai verottomat hinnat"),"</th><td><select name='verolliset_verottomat_hinnat'>";
-  echo "<option value=''>",t("Haetaan yhtiön parametreistä"),"</option>";
-  echo "<option value='verolliset'>",t("Verolliset"),"</option>";
-  echo "<option value='verottomat'>",t("Verottomat"),"</option>";
+  echo "<tr><th>", t("Näytetäänkö verolliset vai verottomat hinnat"), "</th><td><select name='verolliset_verottomat_hinnat'>";
+  echo "<option value=''>", t("Haetaan yhtiön parametreistä"), "</option>";
+  echo "<option value='verolliset'>", t("Verolliset"), "</option>";
+  echo "<option value='verottomat'>", t("Verottomat"), "</option>";
   echo "</select></td></tr>";
 
-  echo "<tr><th>",t("Näytetäänkö rivihinta"),"</th><td><select name='naytetaanko_rivihinta'>";
-  echo "<option value=''>",t("Näytetään hinnat"),"</option>";
-  echo "<option value='ei_rivihintaa'>",t("Ei näytetä rivihintaa"),"</option>";
-  echo "<option value='kokonaan_ilman_hintoja'>",t("Kokonaan ilman hintoja"),"</option>";
+  echo "<tr><th>", t("Näytetäänkö rivihinta"), "</th><td><select name='naytetaanko_rivihinta'>";
+  echo "<option value=''>", t("Näytetään hinnat"), "</option>";
+  echo "<option value='ei_rivihintaa'>", t("Ei näytetä rivihintaa"), "</option>";
+  echo "<option value='kokonaan_ilman_hintoja'>", t("Kokonaan ilman hintoja"), "</option>";
   echo "</select></td></tr>";
 
-  echo "<tr><th>",t("Näytetäänkö tuotenumerot"),"</th><td><select name='naytetaanko_tuoteno'>";
-  echo "<option value=''>",t("Kyllä"),"</option>";
-  echo "<option value='ei'>",t("Ei"),"</option>";
+  echo "<tr><th>", t("Näytetäänkö tuotenumerot"), "</th><td><select name='naytetaanko_tuoteno'>";
+  echo "<option value=''>", t("Kyllä"), "</option>";
+  echo "<option value='ei'>", t("Ei"), "</option>";
   echo "</select></td></tr>";
 }
 
@@ -330,7 +330,7 @@ foreach ($tulostimet as $tulostin) {
   }
 
   if ($toim == "PROFORMA" or $toim == "VIENTILASKU") {
-    echo "<tr><th>",t("Tulosta myös tullinimike ja alkuperämaa")."</th>";
+    echo "<tr><th>", t("Tulosta myös tullinimike ja alkuperämaa")."</th>";
     echo "<td><input type='checkbox' name='tullinimike_ja_alkuperamaa' /></td></tr>";
   }
 
@@ -340,7 +340,7 @@ foreach ($tulostimet as $tulostin) {
   echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
 
   if ($tulostimet[0] == "Inventointi") {
-   echo "<option value='excel'>".t('Excel-tiedosto')."</option>";
+    echo "<option value='excel'>".t('Excel-tiedosto')."</option>";
   }
 
   if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS' or $toim == 'LAHETE' or $toim == 'TILAUSVAHVISTUS' or $toim == 'LASKU') and $asrow['email'] != '') {
@@ -352,7 +352,7 @@ foreach ($tulostimet as $tulostin) {
   }
 
   if (isset($editoimrow) and $editoimrow["edi_kuvaus"] != '' and
-      (preg_match("/(excel|wabco|xml|sendorder)/", $editoimrow['edi_kuvaus']) or
+    (preg_match("/(excel|wabco|xml|sendorder)/", $editoimrow['edi_kuvaus']) or
       ($editoimrow["edi_palvelin"] != '' and $editoimrow["edi_kayttaja"] != '' and $editoimrow["edi_salasana"] != '' and $editoimrow["edi_polku"] != '') or
       ($editoimrow['edi_palvelin'] == "localhost" and $editoimrow["edi_polku"] != ''))) {
     $rajaus = "";
@@ -405,7 +405,7 @@ foreach ($tulostimet as $tulostin) {
     // Katsotaan onko Zebra-tulostinta käytössä.
     // Oletetaan että silloin merkistö ei ole 0
 
-    if ($seepra) echo "<option value = 'Z'>",t("Työmääräystarra Zebra"),"</option>";
+    if ($seepra) echo "<option value = 'Z'>", t("Työmääräystarra Zebra"), "</option>";
 
     echo "</select>";
     echo "</td></tr>";
@@ -416,7 +416,7 @@ foreach ($tulostimet as $tulostin) {
     $colspanni = 3;
 
     if ($yhtiorow['suuntalavat'] == 'S' and $toim != 'REKLAMAATIO') {
-      echo "<tr><th>",t("Valitse suuntalavat"),"</th><td>";
+      echo "<tr><th>", t("Valitse suuntalavat"), "</th><td>";
 
       while ($suuntalavat_row = mysql_fetch_assoc($suuntalavat_res)) {
         $ched = (in_array($suuntalavat_row["tunnus"], $valitut_suuntalavat)) ? "CHECKED" : "";
@@ -445,7 +445,7 @@ foreach ($tulostimet as $tulostin) {
     echo "<tr><th rowspan='$colspanni'>".t("Järjestele purkulista")."</th>";
 
     if ($yhtiorow['suuntalavat'] == 'S' and $toim != 'REKLAMAATIO') {
-      echo "<td><input type='radio' name='sorttaus' value='indeksi' checked='checked' />",t("hyllypaikan indeksin mukaan"),"</td></tr><tr>";
+      echo "<td><input type='radio' name='sorttaus' value='indeksi' checked='checked' />", t("hyllypaikan indeksin mukaan"), "</td></tr><tr>";
       $checked = '';
     }
     else {
@@ -489,6 +489,6 @@ echo "</table><br><input type='submit' name='tulosta' value='".t("Tulosta")."'><
 
 if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php") === FALSE) {
   //lopetetaan tähän, muuten esim rivit.inc nollaa kukarow[kesken] muuttujan ja moni muukin asia toimisi kovin heikosti...
-  require("inc/footer.inc");
+  require "inc/footer.inc";
   exit;
 }

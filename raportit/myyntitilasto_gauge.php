@@ -594,11 +594,11 @@ if ($tee == 'laske') {
               FROM budjetti_asiakas
               JOIN asiakas ON (asiakas.yhtio = budjetti_asiakas.yhtio AND asiakas.tunnus = budjetti_asiakas.asiakkaan_tunnus)
               JOIN kustannuspaikka ON (kustannuspaikka.yhtio = asiakas.yhtio AND kustannuspaikka.tunnus = asiakas.kustannuspaikka)
-              WHERE budjetti_asiakas.yhtio IN ('{$query_yhtiot}')
-              AND budjetti_asiakas.kausi >= DATE_FORMAT('{$alku}', '%Y%m')
-              AND budjetti_asiakas.kausi <= DATE_FORMAT('{$loppu}','%Y%m')
-              AND budjetti_asiakas.summa > 0
-              AND budjetti_asiakas.try != ''
+              WHERE budjetti_asiakas.yhtio  IN ('{$query_yhtiot}')
+              AND budjetti_asiakas.kausi    >= DATE_FORMAT('{$alku}', '%Y%m')
+              AND budjetti_asiakas.kausi    <= DATE_FORMAT('{$loppu}','%Y%m')
+              AND budjetti_asiakas.summa    > 0
+              AND budjetti_asiakas.try     != ''
               GROUP BY 1,2,3";
     $result = pupe_query($query);
 

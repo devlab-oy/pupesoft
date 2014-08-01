@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("yhtion_toimipaikat_parametrittarkista")) {
-  function yhtion_toimipaikat_parametrittarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("yhtion_toimipaikat_parametrittarkista")) {
+  function yhtion_toimipaikat_parametrittarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $ulosarray, $yllapitonappi;
     static $chtoimipaikka, $chparametri, $chparametri_ind;
 

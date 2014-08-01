@@ -27815,9 +27815,9 @@ if (!function_exists('hae_toimitustavat')) {
                   JOIN toimitustapa AS tpa
                   ON ( ana.yhtio = tpa.yhtio AND ana.selitetark_2 = tpa.tunnus )
                   WHERE ana.yhtio = '$kukarow[yhtio]'
-                  AND ana.laji = 'SIIRTOVARASTOT'
-                  AND ana.selite = $lv
-                  AND selitetark = $kv";
+                  AND ana.laji    = 'SIIRTOVARASTOT'
+                  AND ana.selite  = $lv
+                  AND selitetark  = $kv";
       $ott_result = pupe_query($ott_qry);
 
       $oletus_toimitustavat = array();
@@ -27826,8 +27826,8 @@ if (!function_exists('hae_toimitustavat')) {
       }
       $toimipaikan_toimitustavat = array_merge($toimipaikan_toimitustavat, $asiakkaan_toimitustavat, $oletus_toimitustavat);
     }
-    else{
-    $toimipaikan_toimitustavat   = array_merge($toimipaikan_toimitustavat, $asiakkaan_toimitustavat);
+    else {
+      $toimipaikan_toimitustavat = array_merge($toimipaikan_toimitustavat, $asiakkaan_toimitustavat);
     }
 
     $sort = array();
@@ -28442,7 +28442,7 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
           }
 
           if (    isset($row[$k])
-              and isset($tuote_temp)) {
+            and isset($tuote_temp)) {
 
             if (in_array($k, $parametrit['laske_kate'])) {
 
@@ -28465,7 +28465,7 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
         foreach ($parametrit['sum'] as $k) {
 
           if (    isset($row[$k])
-              and isset($tuote_temp)) {
+            and isset($tuote_temp)) {
 
             if (in_array($k, $parametrit['laske_kate'])) {
 
@@ -28489,8 +28489,8 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
         if (isset($row[$k])) {
           $ryhmitetty_array[$ryhmitys][$k] = $row[$k];
         }
-        else{
-         $ryhmitetty_array[$ryhmitys][$k] = '';
+        else {
+          $ryhmitetty_array[$ryhmitys][$k] = '';
         }
       }
 
@@ -28510,11 +28510,11 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
           if (array_key_exists($key, $order)) {
             $apu1[$order[$key]] = $ryhmitetty_array[$ryhmitys][$key];
           }
-          else{
-           $apu2[$key] = $ryhmitetty_array[$ryhmitys][$key];
+          else {
+            $apu2[$key] = $ryhmitetty_array[$ryhmitys][$key];
           }
         }
-        $ryhmitetty_array[$ryhmitys] = array_merge($apu1,$apu2);
+        $ryhmitetty_array[$ryhmitys] = array_merge($apu1, $apu2);
       }
     }
 
@@ -28523,12 +28523,12 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
     $sorttaajat = $parametrit['order_by'];
 
     usort($ryhmitetty_array, function($a, $b) use ($sorttaajat) {
-      foreach ($sorttaajat as $sorttaaja) {
-        if ($a[$sorttaaja] > $b[$sorttaaja]) return 1;
-        if ($a[$sorttaaja] < $b[$sorttaaja]) return -1;
-      }
-      return 0;
-    });
+        foreach ($sorttaajat as $sorttaaja) {
+          if ($a[$sorttaaja] > $b[$sorttaaja]) return 1;
+          if ($a[$sorttaaja] < $b[$sorttaaja]) return -1;
+        }
+        return 0;
+      });
     return $ryhmitetty_array;
   }
 }
@@ -28798,7 +28798,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
                       LIMIT 1;";
             $f_result = pupe_query($query);
 
-            # jos tämä epäonnistuu, virheilmoitus tulee alempana kun tilinumeroa ei löydy
+            // jos tämä epäonnistuu, virheilmoitus tulee alempana kun tilinumeroa ei löydy
             if (mysql_num_rows($f_result) == 1) {
               $f_row = mysql_fetch_assoc($f_result);
               $tilino = $f_row['tilino'];
@@ -28842,7 +28842,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
           $kukarow["yhtio"] = $yritirow["yhtio"];
         }
 
-         // Tarkistetaan tilit
+        // Tarkistetaan tilit
         if (strlen($yritirow['oletus_rahatili']) == 0 or strlen($yritirow['oletus_kulutili']) == 0) {
           echo "<font class='error'>".t("Tililtä puuttuu kulu tai rahatili")."</font>";
           echo "<br>";
@@ -28862,20 +28862,20 @@ if (!function_exists("tallenna_tiliote_viite")) {
         $yhtio_tsekrow = mysql_fetch_assoc($yhtio_tsekres);
 
         //vertaillaan tilikauteen
-        list($vv1,$kk1,$pp1) = explode("-", $yhtio_tsekrow["myyntireskontrakausi_alku"]);
-        list($vv2,$kk2,$pp2) = explode("-", $yhtio_tsekrow["myyntireskontrakausi_loppu"]);
+        list($vv1, $kk1, $pp1) = explode("-", $yhtio_tsekrow["myyntireskontrakausi_alku"]);
+        list($vv2, $kk2, $pp2) = explode("-", $yhtio_tsekrow["myyntireskontrakausi_loppu"]);
 
         $myrealku  = (int) date('Ymd', mktime(0, 0, 0, (int) $kk1, (int) $pp1, (int) $vv1));
         $myreloppu = (int) date('Ymd', mktime(0, 0, 0, (int) $kk2, (int) $pp2, (int) $vv2));
 
-        list($vv1,$kk1,$pp1) = explode("-", $yhtio_tsekrow["ostoreskontrakausi_alku"]);
-        list($vv2,$kk2,$pp2) = explode("-", $yhtio_tsekrow["ostoreskontrakausi_loppu"]);
+        list($vv1, $kk1, $pp1) = explode("-", $yhtio_tsekrow["ostoreskontrakausi_alku"]);
+        list($vv2, $kk2, $pp2) = explode("-", $yhtio_tsekrow["ostoreskontrakausi_loppu"]);
 
         $oresalku  = (int) date('Ymd', mktime(0, 0, 0, (int) $kk1, (int) $pp1, (int) $vv1));
         $oresloppu = (int) date('Ymd', mktime(0, 0, 0, (int) $kk2, (int) $pp2, (int) $vv2));
 
-        list($vv1,$kk1,$pp1) = explode("-", $yhtio_tsekrow["tilikausi_alku"]);
-        list($vv2,$kk2,$pp2) = explode("-", $yhtio_tsekrow["tilikausi_loppu"]);
+        list($vv1, $kk1, $pp1) = explode("-", $yhtio_tsekrow["tilikausi_alku"]);
+        list($vv2, $kk2, $pp2) = explode("-", $yhtio_tsekrow["tilikausi_loppu"]);
 
         $tikaalku  = (int) date('Ymd', mktime(0, 0, 0, (int) $kk1, (int) $pp1, (int) $vv1));
         $tikaloppu = (int) date('Ymd', mktime(0, 0, 0, (int) $kk2, (int) $pp2, (int) $vv2));
@@ -28957,7 +28957,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
               $xtyyppi=0;
               $virhe++;
             }
-            elseif (!$forceta)  {
+            elseif (!$forceta) {
               echo "<font class='error'>";
               echo "VIRHE: Tämä aineisto on jo aiemmin käsitelty!<br>";
               echo "Tili: $tilino / Pvm: $alkupvm / Yhtiö: $yritirow[yhtio]";
@@ -29225,15 +29225,15 @@ if (!function_exists("kasittele_tiliote_viite")) {
 
       if ($tiliotedatarow['tyyppi'] == 1) {
         $tee_selvittely = true;
-        require("inc/tiliote.inc");
+        require "inc/tiliote.inc";
       }
       if ($tiliotedatarow['tyyppi'] == 2) {
         $tee_selvittely = true;
-        require("inc/LMP.inc");
+        require "inc/LMP.inc";
       }
       if ($tiliotedatarow['tyyppi'] == 3) {
         $tee_viitemaksu_kohdistus = true;
-        require("inc/viitemaksut.inc");
+        require "inc/viitemaksut.inc";
       }
 
       // merkataan tämä tiliotedatarivi käsitellyksi
@@ -29251,13 +29251,13 @@ if (!function_exists("kasittele_tiliote_viite")) {
       $kohdm = $vastavienti_valuutassa;
 
       echo "<tr><td colspan = '6'>";
-      require("inc/teeselvittely.inc");
+      require "inc/teeselvittely.inc";
       echo "</td></tr>";
       echo "</table><br>\n<br>\n";
     }
 
     if ($tee_viitemaksu_kohdistus) {
-      # Tässä tarvitaan kukarow[yhtio], joten ajetaan tämä kaikille firmoille
+      // Tässä tarvitaan kukarow[yhtio], joten ajetaan tämä kaikille firmoille
       $query = "SELECT yhtio from yhtio";
       $yhtiores = pupe_query($query);
 
@@ -29268,8 +29268,8 @@ if (!function_exists("kasittele_tiliote_viite")) {
         // Setataan kukarow-yhtiö
         $kukarow["yhtio"] = $yhtiorow["yhtio"];
 
-        require("inc/viitemaksut_kohdistus.inc");
-        require("myyntires/suoritus_asiakaskohdistus_kaikki.php");
+        require "inc/viitemaksut_kohdistus.inc";
+        require "myyntires/suoritus_asiakaskohdistus_kaikki.php";
       }
 
       echo "<br><br>";

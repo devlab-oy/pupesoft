@@ -1,10 +1,10 @@
 <?php
 
-if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
-if($_POST["filenimi"] != '' and strpos($_POST["factoringyhtio"], "Nordeasii") !== FALSE) $kaunisnimi = "SOLOMYSA.DAT";
-if($_POST["filenimi"] != '' and strpos($_POST["factoringyhtio"], "OKOsiirto") !== FALSE) $kaunisnimi = "OKOMYSA.DAT";
+if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
+if ($_POST["filenimi"] != '' and strpos($_POST["factoringyhtio"], "Nordeasii") !== FALSE) $kaunisnimi = "SOLOMYSA.DAT";
+if ($_POST["filenimi"] != '' and strpos($_POST["factoringyhtio"], "OKOsiirto") !== FALSE) $kaunisnimi = "OKOMYSA.DAT";
 
-require("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if ($tee == "lataa_tiedosto") {
   readfile("dataout/".$filenimi);
@@ -38,14 +38,14 @@ else {
   $i=0;
 
   while ($file = readdir($handle)) {
-      $lista[$i] = $file;
-     $i++;
+    $lista[$i] = $file;
+    $i++;
   }
 
   sort($lista);
 
   for ($i=0; $i < count($lista); $i++) {
-    if (substr($lista[$i],0, 9) == $factoringyhtio) {
+    if (substr($lista[$i], 0, 9) == $factoringyhtio) {
       echo "<option value='$lista[$i]'>$lista[$i]</option>";
     }
   }
@@ -56,5 +56,5 @@ else {
   echo "<input type='submit' value='Tallenna'></form>";
   echo "<br><br>";
 
-  require ("inc/footer.inc");
+  require "inc/footer.inc";
 }

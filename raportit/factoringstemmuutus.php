@@ -3,7 +3,7 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Factioringtäsmäytys")."</font><hr>";
 
@@ -66,11 +66,11 @@ if (isset($submit)) {
   $laskures = pupe_query($query);
   $laskurow = mysql_fetch_assoc($laskures);
 
-  echo "<tr><th>",t("Lähteneet veloituslaskut"),"</th><td>$laskurow[possumma]</td></tr>";
+  echo "<tr><th>", t("Lähteneet veloituslaskut"), "</th><td>$laskurow[possumma]</td></tr>";
   $lahteneet=$laskurow['possumma'];
-  echo "<tr><th>",t("Lähteneet hyvityslaskut"),"</th><td>$laskurow[negsumma]</td></tr>";
+  echo "<tr><th>", t("Lähteneet hyvityslaskut"), "</th><td>$laskurow[negsumma]</td></tr>";
   $lahteneet+=$laskurow['negsumma'];
-  echo "<tr><th>",t("Lähteneet yhteensä"),"</th><td>$lahteneet</td></tr>";
+  echo "<tr><th>", t("Lähteneet yhteensä"), "</th><td>$lahteneet</td></tr>";
 
   $query = "SELECT tiliointi.tilino, SUM(tiliointi.summa) summa, sum(if(lasku.tapvm=tiliointi.tapvm,tiliointi.summa,0)) summa2
             FROM tiliointi, lasku
@@ -100,16 +100,16 @@ if (isset($submit)) {
     elseif ($laskurow['tilino'] == $yhtiorow['myynninkassaale'])
       $kateisalennukset = $laskurow['summa'];
     elseif ($laskurow['tilino'] == $yhtiorow['alv'])
-      $suoritustenalv = round($laskurow['summa'] - $laskurow['summa2'],2);
+      $suoritustenalv = round($laskurow['summa'] - $laskurow['summa2'], 2);
     else
       $luottotappiot = $laskurow['summa'];
   }
 
-  echo "<tr><th>",t("Suoritukset"),"</th><td>",$factoringsaamiset-$lahteneet-$kateisalennukset-$suoritustenalv,"</td></tr>";
-  echo "<tr><th>",t("Käteisalennukset"),"</th><td>$kateisalennukset</td></tr>";
-  echo "<tr><th>",t("Alv"),"</th><td>$suoritustenalv</td></tr>";
-  echo "<tr><th>",t("Luottotappiot"),"</th><td>$luottotappiot</td></tr>";
-  echo "<tr><th>",t("Kohdistetut yhteensä"),"</th><td>$suoritukset</td></tr>";
+  echo "<tr><th>", t("Suoritukset"), "</th><td>", $factoringsaamiset-$lahteneet-$kateisalennukset-$suoritustenalv, "</td></tr>";
+  echo "<tr><th>", t("Käteisalennukset"), "</th><td>$kateisalennukset</td></tr>";
+  echo "<tr><th>", t("Alv"), "</th><td>$suoritustenalv</td></tr>";
+  echo "<tr><th>", t("Luottotappiot"), "</th><td>$luottotappiot</td></tr>";
+  echo "<tr><th>", t("Kohdistetut yhteensä"), "</th><td>$suoritukset</td></tr>";
 
 
   $query = "SELECT *
@@ -146,7 +146,7 @@ if (isset($submit)) {
 
       $laskurow['summa'] = $laskurow['summa'] * -1;
 
-      echo "<tr><th>",t("Kohdistamattomat suoritukset rahatilillä"),"</th><td>$laskurow[summa]</td></tr>";
+      echo "<tr><th>", t("Kohdistamattomat suoritukset rahatilillä"), "</th><td>$laskurow[summa]</td></tr>";
 
       $suoritukset += $laskurow['summa'];
     }
@@ -154,15 +154,15 @@ if (isset($submit)) {
   }
   else echo "<font class='error'>".t('Factoringsopimus ei löydy')."</font>$sopimus<br>";
 
-  echo "<tr><th>",t("Suoritukset yhteensä ennen korjauksia"),"</th><td>$suoritukset</td></tr>";
+  echo "<tr><th>", t("Suoritukset yhteensä ennen korjauksia"), "</th><td>$suoritukset</td></tr>";
 
-  $erotus = round($kplahteneet - $lahteneet,2);
+  $erotus = round($kplahteneet - $lahteneet, 2);
 
-  echo "<tr><th>",t("Korjaus ongelmista"),"</th><td>$erotus</td></tr>";
+  echo "<tr><th>", t("Korjaus ongelmista"), "</th><td>$erotus</td></tr>";
 
   $suoritukset -= $erotus;
 
-  echo "<tr><th>",t("Suoritukset yhteensä"),"</th><td>$suoritukset</td></tr>";
+  echo "<tr><th>", t("Suoritukset yhteensä"), "</th><td>$suoritukset</td></tr>";
 
   if ($kplahteneet!=$lahteneet) {
     $query = "SELECT tiliointi.summa summa, lasku.summa summa2, lasku.nimi, lasku.laskunro
@@ -181,11 +181,11 @@ if (isset($submit)) {
     $laskures = pupe_query($query);
 
     while ($laskurow = mysql_fetch_assoc($laskures)) {
-      echo "<tr><th>",t("Laskussa ongelma"),"</th><td>$laskurow[laskunro] $laskurow[summa] $laskurow[summa2] $laskurow[nimi]</td></tr>";
+      echo "<tr><th>", t("Laskussa ongelma"), "</th><td>$laskurow[laskunro] $laskurow[summa] $laskurow[summa2] $laskurow[nimi]</td></tr>";
     }
   }
 
   echo "</table>";
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

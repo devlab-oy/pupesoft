@@ -35,10 +35,10 @@ if (mysql_num_rows($result) > 100) {
 echo "<table><tr>";
 
 for ($i = 1; $i < mysql_num_fields($result); $i++) {
-  echo "<th>" . t(mysql_field_name($result,$i)) . "</th>";
+  echo "<th>" . t(mysql_field_name($result, $i)) . "</th>";
 }
 
-while ($trow=mysql_fetch_array ($result)) {
+while ($trow=mysql_fetch_array($result)) {
   echo "<tr>";
   for ($i=1; $i<mysql_num_fields($result); $i++) {
     if ($i == 1) { // Linkki laskuntietoihin

@@ -3,7 +3,7 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require('../inc/parametrit.inc');
+require '../inc/parametrit.inc';
 
 echo "<font class='head'>".t("Loppuneet tuotteet").":</font><hr>";
 
@@ -18,10 +18,10 @@ if ($tee != '') {
   $varastot = "";
 
   if (is_array($varastosta)) {
-    foreach($varastosta as $var) {
+    foreach ($varastosta as $var) {
       $varastot .= $var.",";
     }
-    $varastot = substr($varastot,0,-1);
+    $varastot = substr($varastot, 0, -1);
     $varastot = " and tuotepaikat.varasto in ($varastot) ";
   }
 
@@ -65,7 +65,7 @@ if ($tee != '') {
     $prow    = mysql_fetch_array($result1);
 
     echo "  <tr><td>$row[osasto]</td><td>$row[try]</td><td>$row[tuoteno]</td><td>".t_tuotteen_avainsanat($row, 'nimitys')."</td>
-        <td>".substr($row["saldoaika"],0,10)."</td><td>$prow[varattu]</td><td>$prow[toimaika]</td>
+        <td>".substr($row["saldoaika"], 0, 10)."</td><td>$prow[varattu]</td><td>$prow[toimaika]</td>
         <td>$row[varastopaikka]</td><td>$row[toim_tuoteno]</td>
         <td>$row[tahtituote]</td><td>$row[hinnastoon]</td>
         <td>$row[status]</td><td>$row[toimittaja]</td></tr>";
@@ -109,4 +109,4 @@ while ($vrow = mysql_fetch_array($vtresult)) {
 
 echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td></tr></table>";
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

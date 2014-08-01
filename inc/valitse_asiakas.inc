@@ -1,6 +1,6 @@
 <?php
 
-require('tilauskasittely/luo_myyntitilausotsikko.inc');
+require 'tilauskasittely/luo_myyntitilausotsikko.inc';
 if ($toim == 'EXTTARJOUS') {
   echo "<font class='head'>".t("Ext-Tarjoukset")."</font><hr>";
 }
@@ -115,7 +115,7 @@ else {
   echo_asiakas_lisays_form($request);
 }
 
-require ('inc/footer.inc');
+require 'inc/footer.inc';
 exit;
 
 function tarkista_loytyyko_dummytarjous($asiakasid, $toim) {
@@ -174,7 +174,7 @@ function echo_asiakas_rajaus($request) {
   $monivalintalaatikot = array("ASIAKASOSASTO", "ASIAKASRYHMA", "ASIAKASMYYJA");
   $monivalintalaatikot_normaali = array();
 
-  require ("tilauskasittely/monivalintalaatikot.inc");
+  require "tilauskasittely/monivalintalaatikot.inc";
 
   echo t("Anna y-tunnus, nimi tai asiakasnumero");
   echo "<input type='text' name='hakuehto' value='{$request['hakuehto']}'>";

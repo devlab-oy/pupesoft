@@ -25,7 +25,7 @@ if (mysql_field_name($result, $i) == "laji") {
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300)." onchange='submit();'>";
   $ulos .= "<option value=''>".t("Oletus")."</option>";
 
-  while($row = mysql_fetch_assoc($vresult)) {
+  while ($row = mysql_fetch_assoc($vresult)) {
     $sel = "";
 
     if ($row["selite"] == $trow[$i]) {

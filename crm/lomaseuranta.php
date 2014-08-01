@@ -3,7 +3,7 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Lomaseuranta")."</font><hr>";
 
@@ -92,4 +92,4 @@ if ($kuka != '') {
   }
 }
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

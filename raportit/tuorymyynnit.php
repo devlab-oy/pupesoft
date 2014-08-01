@@ -3,7 +3,7 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Asiakkaan ostot tuoteryhm‰st‰")."</font><hr>";
 
@@ -26,7 +26,7 @@ if ($try=='' or $ytunnus=='') {
 }
 
 if ($ytunnus!='') {
-  require ("inc/asiakashaku.inc");
+  require "inc/asiakashaku.inc";
 }
 
 // jos meill‰ on onnistuneesti valittu asiakas
@@ -65,7 +65,7 @@ if ($ytunnus!='' and $try!='') {
   echo ")</font><hr>";
 
   // alkukuukauden tiedot 24 kk sitten
-  $ayy = date("Y-m-01",mktime(0, 0, 0, date("m")-24, date("d"), date("Y")));
+  $ayy = date("Y-m-01", mktime(0, 0, 0, date("m")-24, date("d"), date("Y")));
 
   $query  = "SELECT
              date_format(lasku.tapvm,'%Y/%m') kausi,
@@ -97,7 +97,7 @@ if ($ytunnus!='' and $try!='') {
 
   // ja kelataan resultti alkuun
   if (mysql_num_rows($result)>0)
-    mysql_data_seek($result,0);
+    mysql_data_seek($result, 0);
 
   $col=1;
   echo "<table>\n";
@@ -108,9 +108,9 @@ if ($ytunnus!='' and $try!='') {
 
     // lasketaan pylv‰iden korkeus
     if ($maxeur>0) {
-      $hmyynti  = round(50*$sumrow['myynti']/$maxeur,0);
-      $hkate    = round(50*$sumrow['kate']/$maxeur,0);
-      $hkatepro = round($sumrow['katepro']/2,0);
+      $hmyynti  = round(50*$sumrow['myynti']/$maxeur, 0);
+      $hkate    = round(50*$sumrow['kate']/$maxeur, 0);
+      $hkatepro = round($sumrow['katepro']/2, 0);
       if ($hkatepro>60) $hkatepro = 60;
     }
     else {
@@ -166,4 +166,4 @@ if ($ytunnus!='' and $try!='') {
 $formi  = "asiakas";
 $kentta = "ytunnus";
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

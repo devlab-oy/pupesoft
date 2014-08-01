@@ -3,7 +3,7 @@
 // DataTables p‰‰lle
 $pupe_DataTables = "asiakkaantilaukset";
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if ($livesearch_tee == 'ASIAKKAANTILAUSNUMERO') {
   livesearch_asiakkaantilausnumero($toim);
@@ -49,11 +49,11 @@ if (isset($vaihda)) {
 }
 
 if (!isset($kka))
-  $kka = date("m",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  $kka = date("m", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 if (!isset($vva))
-  $vva = date("Y",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  $vva = date("Y", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 if (!isset($ppa))
-  $ppa = date("d",mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
+  $ppa = date("d", mktime(0, 0, 0, date("m")-1, date("d"), date("Y")));
 
 if (!isset($kkl))
   $kkl = date("m");
@@ -102,14 +102,14 @@ if ($cleantoim == 'TAKUU') {
 
 if ($til == "" or $cleantoim == "") {
   echo "<p><font class='error'>".t("J‰rjestelm‰virhe, t‰m‰n modulin suorittaminen suoralla urlilla on kielletty")." !!!</font></p>";
-  require ("inc/footer.inc");
+  require "inc/footer.inc";
   exit;
 }
 
 //  Voidaan n‰ytt‰‰ vain tilaus ilman hakuja yms. Haluamme kuitenkin tarkastaa oikeudet.
 if ($tee == "NAYTA" and $til != "") {
-  require ("raportit/naytatilaus.inc");
-  require ("inc/footer.inc");
+  require "raportit/naytatilaus.inc";
+  require "inc/footer.inc";
   die();
 }
 
@@ -143,7 +143,7 @@ if ($tee != 'NAYTATILAUS' and $ytunnus == '' and $otunnus == '' and $laskunro ==
 if ($tee == 'NAYTATILAUS') {
   echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
 
-  require ("naytatilaus.inc");
+  require "naytatilaus.inc";
 
   if ($cleantoim == "MYYNTI" or $cleantoim == "TARJOUS" or $cleantoim == 'REKLAMAATIO' or $cleantoim == 'VALMISTUSMYYNTI' or $cleantoim == "TAKUU") {
     $query = "SELECT *
@@ -166,7 +166,7 @@ if ($tee == 'NAYTATILAUS') {
               <th>".t("Tulostuspaikka")."</th>
               <th>".t("Tulostustapa")."</th></tr>";
 
-      while ($rahtirow = mysql_fetch_array($rahtiresult)){
+      while ($rahtirow = mysql_fetch_array($rahtiresult)) {
         $query = "SELECT nimitys
                   FROM varastopaikat
                   WHERE tunnus='$rahtirow[tulostuspaikka]'
@@ -203,11 +203,11 @@ if ($tee == 'NAYTATILAUS') {
 
 if ($ytunnus != '' and ($otunnus == '' and $laskunro == '' and $sopimus == '')) {
   if ($cleantoim == 'MYYNTI' or $cleantoim == "TARJOUS" or $cleantoim == 'REKLAMAATIO' or $cleantoim == 'VALMISTUSMYYNTI' or $cleantoim == "TAKUU") {
-    require ("inc/asiakashaku.inc");
+    require "inc/asiakashaku.inc";
   }
 
   if ($cleantoim == 'OSTO') {
-    require ("inc/kevyt_toimittajahaku.inc");
+    require "inc/kevyt_toimittajahaku.inc";
   }
 }
 elseif ($otunnus > 0) {
@@ -560,7 +560,7 @@ if ($ytunnus != '') {
     echo "<tr>";
 
     for ($i=0; $i < mysql_num_fields($result)-8; $i++) {
-      echo "<th>".t(mysql_field_name($result,$i))."</th>";
+      echo "<th>".t(mysql_field_name($result, $i))."</th>";
     }
 
     echo "<th>".t("Tyyppi")."</th>
@@ -570,7 +570,7 @@ if ($ytunnus != '') {
     echo "<tr>";
 
     for ($i=0; $i < mysql_num_fields($result)-8; $i++) {
-      echo "<td><input type='text' class='search_field' name='search_".t(mysql_field_name($result,$i))."'></td>";
+      echo "<td><input type='text' class='search_field' name='search_".t(mysql_field_name($result, $i))."'></td>";
     }
 
     echo "<td><input type='text' class='search_field' name='search_tyyppi'></td>
@@ -658,15 +658,15 @@ if ($ytunnus != '') {
       }
 
       for ($i=1; $i<mysql_num_fields($result)-8; $i++) {
-        if (mysql_field_name($result,$i) == 'toimaika') {
+        if (mysql_field_name($result, $i) == 'toimaika') {
           echo "<td valign='top' $class>{$row[$i]}</td>";
         }
-        elseif (mysql_field_name($result,$i) == 'laskunro' and $row['tila'] == "U" and tarkista_oikeus("muutosite.php")) {
+        elseif (mysql_field_name($result, $i) == 'laskunro' and $row['tila'] == "U" and tarkista_oikeus("muutosite.php")) {
           echo "<td valign='top' nowrap align='right' $class>";
           echo "<a href = '{$palvelin2}muutosite.php?tee=E&tunnus=$row[tilaus]&lopetus=$PHP_SELF////asiakasid=$asiakasid//ytunnus=$ytunnus//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toim=$toim'>$row[$i]</a>";
           echo "</td>";
         }
-        elseif (is_numeric(trim($row[$i])) and mysql_field_name($result,$i) != 'tilausviite' and mysql_field_name($result,$i) != 'astilno') {
+        elseif (is_numeric(trim($row[$i])) and mysql_field_name($result, $i) != 'tilausviite' and mysql_field_name($result, $i) != 'astilno') {
           echo "<td valign='top' nowrap align='right' $class>$row[$i]</td>";
         }
         else {
@@ -758,7 +758,7 @@ if ((int) $asiakasid == 0 and (int) $toimittajaid == 0) {
     echo "<tr><th>".t("Toimittajan nimi")."</th><td><input type='text' size='10' name='ytunnus'></td></tr>";
   }
   else {
-    echo "<tr><th>".t("Asiakas")."</th><td><input type='text' size='10' name='ytunnus'> ",asiakashakuohje(),"</td></tr>";
+    echo "<tr><th>".t("Asiakas")."</th><td><input type='text' size='10' name='ytunnus'> ", asiakashakuohje(), "</td></tr>";
   }
   if ($cleantoim == "YLLAPITO") {
     echo "<tr><th>".t("Sopimusnumero")."</th><td><input type='text' size='10' name='sopimus'></td></tr>";
@@ -788,4 +788,4 @@ else {
   echo "</form>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

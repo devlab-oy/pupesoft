@@ -6,8 +6,8 @@ error_reporting(E_ALL);
 ini_set("display_errors", 1);
 
 // otetaan tietokanta connect ja funktiot
-require("inc/connect.inc");
-require("inc/functions.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 function alv_update_lisaa_avainsanat($query_where_lisa = "") {
 
@@ -383,15 +383,15 @@ echo "\n";
 echo date("H:i:s d.m.Y"), ": Aloitetaan alv-update\n";
 
 // Lisätään uudet verokannat (kaikille)
-# alv_update_lisaa_avainsanat();
+// alv_update_lisaa_avainsanat();
 
 // Nostetaan hintoja, mikäli käytössä on verolliset myyntihinnat
 // HUOM1! Tämä pitää ajaa ennenkuin tuotteet päivitetään!
 // HUOM2! Tämä EI nosta tuotteiden myyntihintoja avoimilta tilauksilta, tarjouksilta, sopimuksilta, jne...
-# alv_update_paivita_hinnat("and yhtio.yhtio in ('mast', 'flmar')");
+// alv_update_paivita_hinnat("and yhtio.yhtio in ('mast', 'flmar')");
 
 // Päivitetään tuotteiden ja asiakkaiden oletus alv
-# alv_update_paivita_tuote_ja_asiakas("and yhtio.yhtio in ('savt', 'allr', 'mast', 'flmar', 'colly', 'vipme', 'oga', 'tkp', 'maant', 'harda', 'makia', 'mmg', 'tawas', 'digi', 'optra', 'vizu', 'ota', 'resta', 'mara ', 'osuus', 'jarj ', 'henri', 'etela', 'suome', 'kahvi', 'matka', 'signa', 'srs', 'kike', 'kikes', 'artr', 'atarv', 'turva', 'asifi', 'merca', 'mertr', 'kiilt', '1', '2', 'aino', 'datap', 'demo', 'demo9', 'gift', 'hanki', 'hasse', 'iadv2', 'iadve', 'ieasy', 'ielon', 'ifinn', 'ifunh', 'iguar', 'ihoht', 'iholm', 'ihuon', 'iinte', 'ileca', 'ilii2', 'iliik', 'imapi', 'ipoin', 'ispee', 'itime', 'iunel', 'ivend', 'kaupp', 'khaal', 'kolma', 'kunta', 'kyyti', 'liima', 'media', 'moope', 'myyra', 'nelio', 'orien', 'pankk', 'posti', 'prii', 'roiko', 'saik', 'saikk', 'tadfl', 'tanto', 'tarom', 'tclem', 'tclus', 'tcoce', 'tekof', 'teles', 'terv.', 'tfeim', 'tgift', 'tgrav', 'tideo', 'tinno', 'tjoba', 'tkalu', 'tkoko', 'tkybi', 'tmaal', 'tmaka', 'tmapp', 'tmeri', 'tmydr', 'tnice', 'todec', 'toffi', 'tpiha', 'tpint', 'tpres', 'treil', 'tsafe', 'tseif', 'tspla', 'tsund', 'tswan', 'tsyne', 'ttert', 'ttoim', 'tturv', 'turma', 'tvest', 'twant', 'twear', 'vero', 'virta')");
+// alv_update_paivita_tuote_ja_asiakas("and yhtio.yhtio in ('savt', 'allr', 'mast', 'flmar', 'colly', 'vipme', 'oga', 'tkp', 'maant', 'harda', 'makia', 'mmg', 'tawas', 'digi', 'optra', 'vizu', 'ota', 'resta', 'mara ', 'osuus', 'jarj ', 'henri', 'etela', 'suome', 'kahvi', 'matka', 'signa', 'srs', 'kike', 'kikes', 'artr', 'atarv', 'turva', 'asifi', 'merca', 'mertr', 'kiilt', '1', '2', 'aino', 'datap', 'demo', 'demo9', 'gift', 'hanki', 'hasse', 'iadv2', 'iadve', 'ieasy', 'ielon', 'ifinn', 'ifunh', 'iguar', 'ihoht', 'iholm', 'ihuon', 'iinte', 'ileca', 'ilii2', 'iliik', 'imapi', 'ipoin', 'ispee', 'itime', 'iunel', 'ivend', 'kaupp', 'khaal', 'kolma', 'kunta', 'kyyti', 'liima', 'media', 'moope', 'myyra', 'nelio', 'orien', 'pankk', 'posti', 'prii', 'roiko', 'saik', 'saikk', 'tadfl', 'tanto', 'tarom', 'tclem', 'tclus', 'tcoce', 'tekof', 'teles', 'terv.', 'tfeim', 'tgift', 'tgrav', 'tideo', 'tinno', 'tjoba', 'tkalu', 'tkoko', 'tkybi', 'tmaal', 'tmaka', 'tmapp', 'tmeri', 'tmydr', 'tnice', 'todec', 'toffi', 'tpiha', 'tpint', 'tpres', 'treil', 'tsafe', 'tseif', 'tspla', 'tsund', 'tswan', 'tsyne', 'ttert', 'ttoim', 'tturv', 'turma', 'tvest', 'twant', 'twear', 'vero', 'virta')");
 
 // Päivitetään verokannat avoimilta tilauksilta, tarjouksilta, sopimuksilta, jne...
 alv_update_paivita_avoimet("and yhtio.yhtio in ('allr', 'mast', 'flmar', 'colly', 'vipme', 'oga', 'tkp', 'maant', 'harda', 'makia', 'mmg', 'tawas', 'digi', 'optra', 'vizu', 'ota', 'resta', 'mara ', 'osuus', 'jarj ', 'henri', 'etela', 'suome', 'kahvi', 'matka', 'signa', 'srs', 'kike', 'kikes', 'artr', 'atarv', 'turva', 'asifi', 'merca', 'mertr', 'kiilt', '1', '2', 'aino', 'datap', 'demo', 'demo9', 'gift', 'hanki', 'hasse', 'iadv2', 'iadve', 'ieasy', 'ielon', 'ifinn', 'ifunh', 'iguar', 'ihoht', 'iholm', 'ihuon', 'iinte', 'ileca', 'ilii2', 'iliik', 'imapi', 'ipoin', 'ispee', 'itime', 'iunel', 'ivend', 'kaupp', 'khaal', 'kolma', 'kunta', 'kyyti', 'liima', 'media', 'moope', 'myyra', 'nelio', 'orien', 'pankk', 'posti', 'prii', 'roiko', 'saik', 'saikk', 'tadfl', 'tanto', 'tarom', 'tclem', 'tclus', 'tcoce', 'tekof', 'teles', 'terv.', 'tfeim', 'tgift', 'tgrav', 'tideo', 'tinno', 'tjoba', 'tkalu', 'tkoko', 'tkybi', 'tmaal', 'tmaka', 'tmapp', 'tmeri', 'tmydr', 'tnice', 'todec', 'toffi', 'tpiha', 'tpint', 'tpres', 'treil', 'tsafe', 'tseif', 'tspla', 'tsund', 'tswan', 'tsyne', 'ttert', 'ttoim', 'tturv', 'turma', 'tvest', 'twant', 'twear', 'vero', 'virta')");

@@ -92,18 +92,18 @@ if ($kollityht > 0) {
   if ($kollityht > 100) $apu_kollityht = 99; // varmuuden vuoks, kun ei saa olla ku kaks merkkiä
 
   //PDF:n luonti ja defaultit
-  define (__TRACE_ENABLED__, false);
-  define (__DEBUG_ENABLED__, false);
+  define(__TRACE_ENABLED__, false);
+  define(__DEBUG_ENABLED__, false);
 
   // jos php-gd on installoitu niin loidataab barcode library
   if (in_array("gd", get_loaded_extensions())) {
-    require_once("barcode/barcode.php");
-    require_once("barcode/debug.php");
-    require_once("barcode/c39object.php");
-    require_once("barcode/c128aobject.php");
+    require_once "barcode/barcode.php";
+    require_once "barcode/debug.php";
+    require_once "barcode/c39object.php";
+    require_once "barcode/c128aobject.php";
   }
 
-  require_once("pdflib/phppdflib.class.php");
+  require_once "pdflib/phppdflib.class.php";
 
   //PDF parametrit
   $pdf = new pdffile;
@@ -145,7 +145,7 @@ if ($kollityht > 0) {
 
     //$prefix = "(00)"; // tää on turha
     $sscc = 1;
-    $sscc .= sprintf("%08.8s",$yhtiorow["ytunnus"]);
+    $sscc .= sprintf("%08.8s", $yhtiorow["ytunnus"]);
     $sscc .= sprintf('%06.6s', substr($laskurow["tunnus"], -6));
     $sscc .= sprintf('%02.2s', $tulostuskpl);
     $loppu = tarkiste($sscc);
@@ -165,13 +165,13 @@ if ($kollityht > 0) {
 
       $image = $pdf->jfif_embed($data);
 
-      if(!$image) {
+      if (!$image) {
         echo t("Logokuvavirhe");
       }
       else {
         $kala = array();
         $kala['scale'] = 0.20;
-        $pdf->image_place($image, mm_pt(180), mm_pt(100), $firstpage,$kala);
+        $pdf->image_place($image, mm_pt(180), mm_pt(100), $firstpage, $kala);
       }
     }
 
@@ -206,7 +206,7 @@ if ($kollityht > 0) {
         $nimi1 = $obj->FlushObject();
 
         //keksitään uudelle failille joku varmasti uniikki nimi:
-        $nimi2 = "/tmp/".md5(uniqid(rand(),true)).".png";
+        $nimi2 = "/tmp/".md5(uniqid(rand(), true)).".png";
 
         passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
 
@@ -260,7 +260,7 @@ if ($kollityht > 0) {
         $nimi1 = $obj->FlushObject();
 
         //keksitään uudelle failille joku varmasti uniikki nimi:
-        $nimi2 = "/tmp/".md5(uniqid(rand(),true)).".png";
+        $nimi2 = "/tmp/".md5(uniqid(rand(), true)).".png";
 
         passthru("/usr/bin/convert -colors 2 ".$nimi1." ".$nimi2, $palautus);
 
@@ -276,7 +276,7 @@ if ($kollityht > 0) {
         }
 
         //tehää tästä vielä kaunis kattella
-        $sscc = substr($sscc,0,4)." ".substr($sscc,4,1)." ".substr($sscc,5,8)." ".substr($sscc,13,8)." ".substr($sscc,21,1);
+        $sscc = substr($sscc, 0, 4)." ".substr($sscc, 4, 1)." ".substr($sscc, 5, 8)." ".substr($sscc, 13, 8)." ".substr($sscc, 21, 1);
 
         $pdf->draw_text(mm_pt(4), mm_pt(5), "Kolli - Item ID.: $sscc", $firstpage, $otsik);
         unset($obj);
@@ -292,7 +292,7 @@ if ($kollityht > 0) {
 
     // sitten aletaan piirtämään itse PDF sisältöä
     // ensin isot viivat kohilleen
-    $pdf->draw_rectangle(585,5,5,415,                            $firstpage, $rectparam);
+    $pdf->draw_rectangle(585, 5, 5, 415,                            $firstpage, $rectparam);
 
     //Mistä
     $pdf->draw_text(mm_pt(4), mm_pt(200), "Mistä - Från - From: ",              $firstpage, $otsik);
@@ -318,11 +318,11 @@ if ($kollityht > 0) {
     $pdf->draw_text(mm_pt(50), mm_pt(155), $tilausnumeroita, $firstpage, $kirj);
 
     //Minne
-    $pdf->draw_rectangle(mm_pt(150),mm_pt(5),mm_pt(150),mm_pt(10),              $firstpage, $rectparam);
-    $pdf->draw_rectangle(mm_pt(150),mm_pt(5),mm_pt(145),mm_pt(5),              $firstpage, $rectparam);
+    $pdf->draw_rectangle(mm_pt(150), mm_pt(5), mm_pt(150), mm_pt(10),              $firstpage, $rectparam);
+    $pdf->draw_rectangle(mm_pt(150), mm_pt(5), mm_pt(145), mm_pt(5),              $firstpage, $rectparam);
 
-    $pdf->draw_rectangle(mm_pt(150),mm_pt(138),mm_pt(150),mm_pt(143),            $firstpage, $rectparam);
-    $pdf->draw_rectangle(mm_pt(150),mm_pt(143),mm_pt(145),mm_pt(143),            $firstpage, $rectparam);
+    $pdf->draw_rectangle(mm_pt(150), mm_pt(138), mm_pt(150), mm_pt(143),            $firstpage, $rectparam);
+    $pdf->draw_rectangle(mm_pt(150), mm_pt(143), mm_pt(145), mm_pt(143),            $firstpage, $rectparam);
 
     $pdf->draw_text(mm_pt(15),  mm_pt(145), "Minne - Till - To: " ,              $firstpage, $otsik);
     $pdf->draw_text(mm_pt(15),  mm_pt(140), $laskurow['toim_nimi'],              $firstpage, $kirj);
@@ -336,7 +336,7 @@ if ($kollityht > 0) {
     $tempr = mysql_query($query) or pupe_error($query);
     $maarow = mysql_fetch_array($tempr);
 
-    $pdf->draw_text(mm_pt(15),  mm_pt(116), substr($maarow['nimi'],5),                $firstpage, $iso);
+    $pdf->draw_text(mm_pt(15),  mm_pt(116), substr($maarow['nimi'], 5),                $firstpage, $iso);
 
     $query = "SELECT *
               FROM asiakas
@@ -352,11 +352,11 @@ if ($kollityht > 0) {
     $pdf->draw_text(mm_pt(87), mm_pt(112), $laskurow["toimitustapa"],  $firstpage, $kirj);
 
 
-    $pdf->draw_rectangle(mm_pt(110),mm_pt(5),mm_pt(110),mm_pt(10),    $firstpage, $rectparam);
-    $pdf->draw_rectangle(mm_pt(110),mm_pt(5),mm_pt(115),mm_pt(5),    $firstpage, $rectparam);
+    $pdf->draw_rectangle(mm_pt(110), mm_pt(5), mm_pt(110), mm_pt(10),    $firstpage, $rectparam);
+    $pdf->draw_rectangle(mm_pt(110), mm_pt(5), mm_pt(115), mm_pt(5),    $firstpage, $rectparam);
 
-    $pdf->draw_rectangle(mm_pt(110),mm_pt(138),mm_pt(110),mm_pt(143),  $firstpage, $rectparam);
-    $pdf->draw_rectangle(mm_pt(110),mm_pt(143),mm_pt(115),mm_pt(143),  $firstpage, $rectparam);
+    $pdf->draw_rectangle(mm_pt(110), mm_pt(138), mm_pt(110), mm_pt(143),  $firstpage, $rectparam);
+    $pdf->draw_rectangle(mm_pt(110), mm_pt(143), mm_pt(115), mm_pt(143),  $firstpage, $rectparam);
 
     //Kuljetusohjeet = viivakoodi tulee tähän
     $pdf->draw_text(mm_pt(4), mm_pt(70), "Kuljetusohjeet - Transportinstruktioner - Transport Instructions:",  $firstpage, $otsik);
@@ -372,7 +372,7 @@ if ($kollityht > 0) {
     if (is_array($vakit)) {
       $komm .= "\n";
 
-      foreach($vakit as $vak) {
+      foreach ($vakit as $vak) {
         $komm .= "$vak.\n";
       }
     }
@@ -390,7 +390,7 @@ if ($kollityht > 0) {
   }
 
   //keksitään uudelle failille joku varmasti uniikki nimi:
-  $pdffilenimi = "/tmp/dpdosoitelappu-".md5(uniqid(rand(),true)).".pdf";
+  $pdffilenimi = "/tmp/dpdosoitelappu-".md5(uniqid(rand(), true)).".pdf";
 
   //kirjoitetaan pdf faili levylle..
   $fh = fopen($pdffilenimi, "w");
@@ -400,7 +400,7 @@ if ($kollityht > 0) {
   if ($kirjoitin == "email") {
     $liite = $pdffilenimi;
     $kutsu = "PDF-rahtikirja";
-    require("inc/sahkoposti.inc");
+    require "inc/sahkoposti.inc";
   }
   else {
     //itse print komento...

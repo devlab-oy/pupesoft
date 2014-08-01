@@ -3,7 +3,7 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
-include('../inc/parametrit.inc');
+include '../inc/parametrit.inc';
 
 if (!isset($tee)) $tee = '';
 
@@ -53,7 +53,7 @@ if (!function_exists("piirra_tuntiraportti")) {
       $tyomaarayslisa .= " and tyomaarays.tyostatus = '".mysql_real_escape_string($tyostatus)."' ";
     }
 
-    if (trim($tyom_nro) == '' and trim($vva) != '' and trim($kka) != '' and trim($ppa) != '' and trim($vvl) != '' and trim($kkl) != '' and trim($ppl) != ''){
+    if (trim($tyom_nro) == '' and trim($vva) != '' and trim($kka) != '' and trim($ppa) != '' and trim($vvl) != '' and trim($kkl) != '' and trim($ppl) != '') {
       $vva = (int) $vva;
       $kka = (int) $kka;
       $ppa = (int) $ppa;
@@ -123,10 +123,10 @@ if (!function_exists("piirra_tuntiraportti")) {
           echo "<tr>
               <td valign='top'>$row[tunnus]<br/>$row[nimi]";
 
-              if (trim($row['nimitark']) != '') echo "<br/>$row[nimitark]";
-              if (trim($row['ytunnus']) != '') echo "<br/>$row[ytunnus]";
+          if (trim($row['nimitark']) != '') echo "<br/>$row[nimitark]";
+          if (trim($row['ytunnus']) != '') echo "<br/>$row[ytunnus]";
 
-              echo "</td>
+          echo "</td>
               <td valign='top' style='padding: 0px;' align='right'>";
 
           if ($row["asennuskalenteri"] != "") {
@@ -136,8 +136,8 @@ if (!function_exists("piirra_tuntiraportti")) {
 
               list($alku, $loppu, $nimi, $kuka) = explode("##", $asekale);
 
-              $atstamp = mktime(substr($alku,11,2), substr($alku,14,2), 0, substr($alku,5,2), substr($alku,8,2), substr($alku,0,4));
-              $ltstamp = mktime(substr($loppu,11,2), substr($loppu,14,2), 0, substr($loppu,5,2), substr($loppu,8,2), substr($loppu,0,4));
+              $atstamp = mktime(substr($alku, 11, 2), substr($alku, 14, 2), 0, substr($alku, 5, 2), substr($alku, 8, 2), substr($alku, 0, 4));
+              $ltstamp = mktime(substr($loppu, 11, 2), substr($loppu, 14, 2), 0, substr($loppu, 5, 2), substr($loppu, 8, 2), substr($loppu, 0, 4));
 
               if (!isset($kaletunnit[$nimi])) $kaletunnit[$nimi] = 0;
 
@@ -190,8 +190,8 @@ if (!function_exists("piirra_tuntiraportti")) {
 
                 list($alku, $loppu, $nimi, $kuka) = explode("##", $asekale);
 
-                $atstamp = mktime(substr($alku,11,2), substr($alku,14,2), 0, substr($alku,5,2), substr($alku,8,2), substr($alku,0,4));
-                $ltstamp = mktime(substr($loppu,11,2), substr($loppu,14,2), 0, substr($loppu,5,2), substr($loppu,8,2), substr($loppu,0,4));
+                $atstamp = mktime(substr($alku, 11, 2), substr($alku, 14, 2), 0, substr($alku, 5, 2), substr($alku, 8, 2), substr($alku, 0, 4));
+                $ltstamp = mktime(substr($loppu, 11, 2), substr($loppu, 14, 2), 0, substr($loppu, 5, 2), substr($loppu, 8, 2), substr($loppu, 0, 4));
 
                 if (!isset($asekaletunnit[$nimi])) $asekaletunnit[$nimi] = 0;
 
@@ -239,7 +239,7 @@ if (!function_exists("piirra_tuntiraportti")) {
           foreach ($hinta as $valuutta => $rivihinta) {
             if ($rivihinta == 0) continue;
 
-            echo "<tr><td class='spec' align='left'>",t("$tuotetyyppi").":";
+            echo "<tr><td class='spec' align='left'>", t("$tuotetyyppi").":";
 
             if ($tuotetyyppi == 'Työt') {
               echo "<br/>";
@@ -270,7 +270,7 @@ if (!function_exists("piirra_tuntiraportti")) {
           }
         }
 
-        echo "<tr><td class='spec'>",t("Yhteensä"),":</td>";
+        echo "<tr><td class='spec'>", t("Yhteensä"), ":</td>";
 
         foreach ($hinnatyht as $val => $hinta) {
           echo "<td class='spec' align='right'>$hinta $valuutta</td>";
@@ -332,7 +332,7 @@ if (!function_exists("piirra_tuntiraportti")) {
 
 //Voidaan tarvita jotain muuttujaa täältä
 if (isset($muutparametrit)) {
-  list($tyom_nro,$asentaja,$tyojono,$tyostatus,$asiakasid,$asiakasosasto,$asiakasryhma,$kka,$vva,$ppa,$kkl,$vvl,$ppl,$tultiin) = explode('#', $muutparametrit);
+  list($tyom_nro, $asentaja, $tyojono, $tyostatus, $asiakasid, $asiakasosasto, $asiakasryhma, $kka, $vva, $ppa, $kkl, $vvl, $ppl, $tultiin) = explode('#', $muutparametrit);
 }
 
 if (!isset($tyom_nro)) $tyom_nro = '';
@@ -350,23 +350,23 @@ if (!isset($kkl)) $kkl = date("m");
 if (!isset($vvl)) $vvl = date("Y");
 if (!isset($ppl)) $ppl = date("d", mktime(0, 0, 0, date("m")+1, 0, date("Y")));
 
-echo "<font class='head'>",t("Tunti- ja kuluraportointi"),":</font><hr>";
+echo "<font class='head'>", t("Tunti- ja kuluraportointi"), ":</font><hr>";
 
 echo "  <form method='post'>
     <input type='hidden' name='tee' value='raportoi'>
     <table>
     <tr>
-    <th>",t("Työmääräys numero"),"</th>
+    <th>", t("Työmääräys numero"), "</th>
     <td colspan='3'><input type='text' name='tyom_nro' value='$tyom_nro'></td>
     </tr>
     <tr>
-    <th>",t("Asiakkaan nimi")," / ",t("Asiakasnumero")," / ",t("Ytunnus"),"</th>
+    <th>", t("Asiakkaan nimi"), " / ", t("Asiakasnumero"), " / ", t("Ytunnus"), "</th>
     <td colspan='3'><input type='text' name='ytunnus' value='$ytunnus'></td>
     </tr>";
 
 $vresult = t_avainsana("ASIAKASOSASTO");
 
-echo "<tr><th>",t("Asiakasosasto"),"</th><td colspan='3'><select name='asiakasosasto'>";
+echo "<tr><th>", t("Asiakasosasto"), "</th><td colspan='3'><select name='asiakasosasto'>";
 echo "<option value = ''>".t("Kaikki")."</option>";
 
 while ($vrow = mysql_fetch_assoc($vresult)) {
@@ -382,7 +382,7 @@ echo "</select></td></tr>";
 
 $vresult = t_avainsana("ASIAKASRYHMA");
 
-echo "<tr><th>",t("Asiakasryhmä"),"</th><td colspan='3'><select name='asiakasryhma'>";
+echo "<tr><th>", t("Asiakasryhmä"), "</th><td colspan='3'><select name='asiakasryhma'>";
 echo "<option value = ''>".t("Kaikki")."</option>";
 
 while ($vrow = mysql_fetch_assoc($vresult)) {
@@ -398,7 +398,7 @@ echo "</select></td></tr>";
 
 $vresult = t_avainsana("TYOM_TYOLINJA");
 
-echo "<tr><th>",t("Työlinja"),"</th><td colspan='3'><select name='asentaja'>";
+echo "<tr><th>", t("Työlinja"), "</th><td colspan='3'><select name='asentaja'>";
 echo "<option value = ''>".t("Kaikki")."</option>";
 
 $sel = "";
@@ -421,7 +421,7 @@ echo "</select></td></tr>";
 
 $vresult = t_avainsana("TYOM_TYOJONO");
 
-echo "<tr><th>",t("Työjono"),"</th><td colspan='3'><select name='tyojono'>";
+echo "<tr><th>", t("Työjono"), "</th><td colspan='3'><select name='tyojono'>";
 echo "<option value = ''>".t("Kaikki")."</option>";
 
 while ($vrow = mysql_fetch_assoc($vresult)) {
@@ -437,7 +437,7 @@ echo "</select></td></tr>";
 
 $vresult = t_avainsana("TYOM_TYOSTATUS");
 
-echo "<tr><th>",t("Työstatus"),"</th><td colspan='3'><select name='tyostatus'>";
+echo "<tr><th>", t("Työstatus"), "</th><td colspan='3'><select name='tyostatus'>";
 echo "<option value = ''>".t("Kaikki")."</option>";
 
 while ($vrow = mysql_fetch_assoc($vresult)) {
@@ -465,7 +465,7 @@ echo "  <tr><th>".t("Syötä alkupäivämäärä (pp-kk-vvvv)")."</th>
 
 echo "</table>";
 
-echo "<input type='submit' value='",t("Hae"),"'></form><br/><br/>";
+echo "<input type='submit' value='", t("Hae"), "'></form><br/><br/>";
 
 if ($tee == 'raportoi' and trim($ytunnus) != '' and $tultiin != 'asiakashaku') {
 
@@ -476,8 +476,8 @@ if ($tee == 'raportoi' and trim($ytunnus) != '' and $tultiin != 'asiakashaku') {
   //Voidaan tarvita jotain muuttujaa täältä
   $muutparametrit = $tyom_nro.'#'.$asentaja.'#'.$tyojono.'#'.$tyostatus.'#'.$asiakasid.'#'.$asiakasosasto.'#'.$asiakasryhma.'#'.$kka.'#'.$vva.'#'.$ppa.'#'.$kkl.'#'.$vvl.'#'.$ppl.'#'.$tultiin;
 
-  if (@include("inc/asiakashaku.inc"));
-  elseif (@include("asiakashaku.inc"));
+  if (@include "inc/asiakashaku.inc");
+  elseif (@include "asiakashaku.inc");
   else exit;
 }
 
@@ -500,4 +500,4 @@ if ($tee == 'raportoi') {
   echo "</table><br>";
 }
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

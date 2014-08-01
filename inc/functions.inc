@@ -27274,7 +27274,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
                       LIMIT 1;";
             $f_result = pupe_query($query);
 
-            # jos tämä epäonnistuu, virheilmoitus tulee alempana kun tilinumeroa ei löydy
+            // jos tämä epäonnistuu, virheilmoitus tulee alempana kun tilinumeroa ei löydy
             if (mysql_num_rows($f_result) == 1) {
               $f_row = mysql_fetch_assoc($f_result);
               $tilino = $f_row['tilino'];
@@ -27701,15 +27701,15 @@ if (!function_exists("kasittele_tiliote_viite")) {
 
       if ($tiliotedatarow['tyyppi'] == 1) {
         $tee_selvittely = true;
-        require("inc/tiliote.inc");
+        require "inc/tiliote.inc";
       }
       if ($tiliotedatarow['tyyppi'] == 2) {
         $tee_selvittely = true;
-        require("inc/LMP.inc");
+        require "inc/LMP.inc";
       }
       if ($tiliotedatarow['tyyppi'] == 3) {
         $tee_viitemaksu_kohdistus = true;
-        require("inc/viitemaksut.inc");
+        require "inc/viitemaksut.inc";
       }
 
       // merkataan tämä tiliotedatarivi käsitellyksi
@@ -27727,13 +27727,13 @@ if (!function_exists("kasittele_tiliote_viite")) {
       $kohdm = $vastavienti_valuutassa;
 
       echo "<tr><td colspan = '6'>";
-      require("inc/teeselvittely.inc");
+      require "inc/teeselvittely.inc";
       echo "</td></tr>";
       echo "</table><br>\n<br>\n";
     }
 
     if ($tee_viitemaksu_kohdistus) {
-      # Tässä tarvitaan kukarow[yhtio], joten ajetaan tämä kaikille firmoille
+      // Tässä tarvitaan kukarow[yhtio], joten ajetaan tämä kaikille firmoille
       $query = "SELECT yhtio from yhtio";
       $yhtiores = pupe_query($query);
 
@@ -27744,8 +27744,8 @@ if (!function_exists("kasittele_tiliote_viite")) {
         // Setataan kukarow-yhtiö
         $kukarow["yhtio"] = $yhtiorow["yhtio"];
 
-        require("inc/viitemaksut_kohdistus.inc");
-        require("myyntires/suoritus_asiakaskohdistus_kaikki.php");
+        require "inc/viitemaksut_kohdistus.inc";
+        require "myyntires/suoritus_asiakaskohdistus_kaikki.php";
       }
 
       echo "<br><br>";

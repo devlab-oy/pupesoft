@@ -37,11 +37,11 @@ ini_set("display_errors", 1);
 ini_set("memory_limit", "2G");
 
 // otetaan tietokanta connect ja funktiot
-require("inc/connect.inc");
-require("inc/functions.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 $lock_params = array(
-    "locktime" => 5400,
+  "locktime" => 5400,
 );
 
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan

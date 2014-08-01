@@ -16,7 +16,7 @@ else {
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
-  require ("inc/parametrit.inc");
+  require "inc/parametrit.inc";
 }
 
 if (function_exists("js_popup")) {
@@ -117,7 +117,7 @@ if (isset($_POST["toim"]) and $_POST["toim"] == "yhtion_parametrit") {
   }
 }
 
-require ("inc/$toim.inc");
+require "inc/$toim.inc";
 
 if ($otsikko == "") {
   $otsikko = $toim;
@@ -315,7 +315,7 @@ if ($upd == 1) {
     $funktio = $toim."tarkista";
 
     if (!function_exists($funktio)) {
-      require("inc/$funktio.inc");
+      require "inc/$funktio.inc";
     }
 
     if (function_exists($funktio)) {
@@ -802,23 +802,23 @@ if ($upd == 1) {
             ($laskuorow["suoraveloitus"] != $otsikrow["oletus_suoraveloitus"]) or
             ($laskuorow["sisviesti1"] != $otsikrow["ohjeitapankille"]))) {
 
-            #echo "<br><table>";
-            #echo "<tr><td>Lasku palautetaan hyv‰ksynt‰‰n</td><td>$laskuorow[summa]</td></tr>";
-            #echo "<tr><td>".$laskuorow["erpcm"]."</td><td>".$oletus_erapvm."</td></tr>";
-            #echo "<tr><td>".$laskuorow["kapvm"]."</td><td>".$oletus_kapvm."</td></tr>";
-            #echo "<tr><td>".$laskuorow["kasumma"]."</td><td>".$otsikrow["oletus_kasumma"]."</td></tr>";
-            #echo "<tr><td>".$laskuorow["tilinumero"]."</td><td>".$otsikrow["tilinumero"]."</td></tr>";
-            #echo "<tr><td>".$laskuorow["ultilno"]."</td><td>".$otsikrow["ultilno"]."</td></tr>";
-            #echo "<tr><td>".$laskuorow["pankki_haltija"]."</td><td>".$otsikrow["pankki_haltija"]."</td></tr>";
-            #echo "<tr><td>".$laskuorow["swift"]."</td><td>".$otsikrow["swift"]."</td></tr>";
-            #echo "<tr><td>".$laskuorow["pankki1"]."</td><td>".$otsikrow["pankki1"]."</td></tr>";
-            #echo "<tr><td>".$laskuorow["pankki2"]."</td><td>".$otsikrow["pankki2"]."</td></tr>";
-            #echo "<tr><td>".$laskuorow["pankki3"]."</td><td>".$otsikrow["pankki3"]."</td></tr>";
-            #echo "<tr><td>".$laskuorow["pankki4"]."</td><td>".$otsikrow["pankki4"]."</td></tr>";
-            #echo "<tr><td>".$laskuorow["hyvaksynnanmuutos"]."</td><td>".$otsikrow["oletus_hyvaksynnanmuutos"]."</td></tr>";
-            #echo "<tr><td>".$laskuorow["suoraveloitus"]."</td><td>".$otsikrow["oletus_suoraveloitus"]."</td></tr>";
-            #echo "<tr><td>".$laskuorow["sisviesti1"]."</td><td>".$otsikrow["ohjeitapankille"]."</td></tr>";
-            #echo "</table>";
+            //echo "<br><table>";
+            //echo "<tr><td>Lasku palautetaan hyv‰ksynt‰‰n</td><td>$laskuorow[summa]</td></tr>";
+            //echo "<tr><td>".$laskuorow["erpcm"]."</td><td>".$oletus_erapvm."</td></tr>";
+            //echo "<tr><td>".$laskuorow["kapvm"]."</td><td>".$oletus_kapvm."</td></tr>";
+            //echo "<tr><td>".$laskuorow["kasumma"]."</td><td>".$otsikrow["oletus_kasumma"]."</td></tr>";
+            //echo "<tr><td>".$laskuorow["tilinumero"]."</td><td>".$otsikrow["tilinumero"]."</td></tr>";
+            //echo "<tr><td>".$laskuorow["ultilno"]."</td><td>".$otsikrow["ultilno"]."</td></tr>";
+            //echo "<tr><td>".$laskuorow["pankki_haltija"]."</td><td>".$otsikrow["pankki_haltija"]."</td></tr>";
+            //echo "<tr><td>".$laskuorow["swift"]."</td><td>".$otsikrow["swift"]."</td></tr>";
+            //echo "<tr><td>".$laskuorow["pankki1"]."</td><td>".$otsikrow["pankki1"]."</td></tr>";
+            //echo "<tr><td>".$laskuorow["pankki2"]."</td><td>".$otsikrow["pankki2"]."</td></tr>";
+            //echo "<tr><td>".$laskuorow["pankki3"]."</td><td>".$otsikrow["pankki3"]."</td></tr>";
+            //echo "<tr><td>".$laskuorow["pankki4"]."</td><td>".$otsikrow["pankki4"]."</td></tr>";
+            //echo "<tr><td>".$laskuorow["hyvaksynnanmuutos"]."</td><td>".$otsikrow["oletus_hyvaksynnanmuutos"]."</td></tr>";
+            //echo "<tr><td>".$laskuorow["suoraveloitus"]."</td><td>".$otsikrow["oletus_suoraveloitus"]."</td></tr>";
+            //echo "<tr><td>".$laskuorow["sisviesti1"]."</td><td>".$otsikrow["ohjeitapankille"]."</td></tr>";
+            //echo "</table>";
 
             $laskuorow["tila"]    = "H";
 
@@ -1820,7 +1820,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       }
     }
 
-    require ("inc/$toim"."rivi.inc");
+    require "inc/$toim"."rivi.inc";
 
     if (mysql_num_rows($al_res) == 0 and $rajattu_nakyma != '') {
       $ulos = "";
@@ -1945,7 +1945,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   echo "<td class='back' valign='top'>";
 
   if ($errori == '' and $toim == "sarjanumeron_lisatiedot") {
-    @include ("inc/arviokortti.inc");
+    @include "inc/arviokortti.inc";
   }
 
   // Yll‰pito.php:n formi kiinni vasta t‰ss‰
@@ -2262,5 +2262,5 @@ if ($from == "yllapito") {
   echo "<script LANGUAGE='JavaScript'>resizeIframe('{$toim}_iframe' $jcsmaxheigth);</script>";
 }
 elseif ($from != "yllapito") {
-  require ("inc/footer.inc");
+  require "inc/footer.inc";
 }

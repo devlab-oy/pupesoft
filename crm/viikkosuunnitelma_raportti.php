@@ -4,18 +4,18 @@
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
   exit;
 }
 
-echo "<font class='head'>",t("Edustajaraportti"),"</font><hr>";
+echo "<font class='head'>", t("Edustajaraportti"), "</font><hr>";
 
 if (!isset($konserni)) $konserni = "";
 if (!isset($vstk)) $vstk = "";
@@ -63,8 +63,8 @@ if ($tee == '') {
 
   $asosresult = t_avainsana("ASIAKASOSASTO");
 
-  echo "<tr><th>",t("Valitse asiakkaan osasto"),":</th><td colspan='3'><select name='asos'>";
-  echo "<option value=''>",t("Kaikki osastot"),"</option>";
+  echo "<tr><th>", t("Valitse asiakkaan osasto"), ":</th><td colspan='3'><select name='asos'>";
+  echo "<option value=''>", t("Kaikki osastot"), "</option>";
 
   while ($asosrow = mysql_fetch_assoc($asosresult)) {
     $sel = $asos == $asosrow["selite"] ? "selected" : "";
@@ -76,8 +76,8 @@ if ($tee == '') {
 
   $asosresult = t_avainsana("PIIRI");
 
-  echo "<tr><th>",t("Valitse asiakkaan piiri"),":</th><td colspan='3'><select name='aspiiri'>";
-  echo "<option value=''>",t("Kaikki piirit"),"</option>";
+  echo "<tr><th>", t("Valitse asiakkaan piiri"), ":</th><td colspan='3'><select name='aspiiri'>";
+  echo "<option value=''>", t("Kaikki piirit"), "</option>";
 
   while ($asosrow = mysql_fetch_assoc($asosresult)) {
     $sel = $aspiiri == $asosrow["selite"] ? "selected" : "";
@@ -88,8 +88,8 @@ if ($tee == '') {
 
   $asosresult = t_avainsana("ASIAKASRYHMA");
 
-  echo "<tr><th>",t("Valitse asiakkaan ryhmä"),":</th><td colspan='3'><select name='asryhma'>";
-  echo "<option value=''>",t("Kaikki ryhmät"),"</option>";
+  echo "<tr><th>", t("Valitse asiakkaan ryhmä"), ":</th><td colspan='3'><select name='asryhma'>";
+  echo "<option value=''>", t("Kaikki ryhmät"), "</option>";
 
   while ($asosrow = mysql_fetch_assoc($asosresult)) {
     $sel = $asryhma == $asosrow["selite"] ? "selected" : "";
@@ -101,20 +101,20 @@ if ($tee == '') {
 
   if ($yhtiorow['konserni'] != "") {
     $chk = trim($konserni) != '' ? "CHECKED" : "";
-    echo "<tr><th>",t("Näytä konsernin kaikki asiakkaat"),":</th><td colspan='3'><input type='checkbox' name='konserni' {$chk}></td></tr>";
+    echo "<tr><th>", t("Näytä konsernin kaikki asiakkaat"), ":</th><td colspan='3'><input type='checkbox' name='konserni' {$chk}></td></tr>";
   }
   $chk = trim($piilota_matkasarakkeet) != '' ? "CHECKED" : "";
-  echo "<tr><th>",t("Piilota matkasarakkeet"),":</th><td colspan='3'><input type='checkbox' id='piilota_matkasarakkeet' name='piilota_matkasarakkeet' {$chk}></td></tr>";
+  echo "<tr><th>", t("Piilota matkasarakkeet"), ":</th><td colspan='3'><input type='checkbox' id='piilota_matkasarakkeet' name='piilota_matkasarakkeet' {$chk}></td></tr>";
 
   $chk = trim($nayta_yhteenveto) != '' ? "CHECKED" : "";
   echo "<tr><th>".t("Näytä yhteenveto")."</th><td colspan='3'><input type='checkbox' name='nayta_yhteenveto' {$chk}></td></tr>";
 
   if (!isset($kka))
-    $kka = date("m",mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
+    $kka = date("m", mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
   if (!isset($vva))
-    $vva = date("Y",mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
+    $vva = date("Y", mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
   if (!isset($ppa))
-    $ppa = date("d",mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
+    $ppa = date("d", mktime(0, 0, 0, date("m"), date("d")-7, date("Y")));
 
   if (!isset($kkl))
     $kkl = date("m");
@@ -136,10 +136,10 @@ if ($tee == '') {
   if (isset($kaletapa)) {
     if (!isset($vali_kale)) $vali_kale = "";
 
-    foreach($kaletapa as $tama) {
+    foreach ($kaletapa as $tama) {
       $vali_kale .= "$tama,";
     }
-    $vali_kale     = substr($vali_kale,0,-1); // Viimeinen pilkku poistetaan
+    $vali_kale     = substr($vali_kale, 0, -1); // Viimeinen pilkku poistetaan
 
   }
   else {
@@ -173,10 +173,10 @@ if ($tee == '') {
   if (isset($kalen)) {
     if (!isset($valitut)) $valitut = "";
 
-    foreach($kalen as $tama) {
+    foreach ($kalen as $tama) {
       $valitut .= "$tama,";
     }
-    $valitut = substr($valitut,0,-1); // Viimeinen pilkku poistetaan
+    $valitut = substr($valitut, 0, -1); // Viimeinen pilkku poistetaan
   }
   else {
     if (!isset($valitut)) {
@@ -197,13 +197,13 @@ if ($tee == '') {
   }
 
   echo "<tr>
-      <th>",t("Listaa edustajat"),"<br><br><input type='checkbox' class='check_all' value='kalen'> ".t("Valitse kaikki")."</th>";
+      <th>", t("Listaa edustajat"), "<br><br><input type='checkbox' class='check_all' value='kalen'> ".t("Valitse kaikki")."</th>";
 
   echo "  <td colspan='3'><div style='width:280px;height:265px;overflow:auto;'>
 
       <table width='100%'><tr>
       <td><input type='checkbox' class='kalen' name='kalen[]' value = '{$kukarow['kuka']}' {$checked}></td>
-      <td>",t("Oma"),"</td></tr>";
+      <td>", t("Oma"), "</td></tr>";
 
   $query = "SELECT kuka.tunnus, kuka.nimi, kuka.kuka
             FROM kuka, oikeu
@@ -263,7 +263,7 @@ if ($tee == '') {
   if ($lisa != '') {
     $asiakasjoini = " LEFT JOIN asiakas USE INDEX (ytunnus_index) ON (asiakas.tunnus = kalenteri.liitostunnus AND asiakas.yhtio = kalenteri.yhtio) ";
   }
-  foreach($yhtiot as $yhtio) {
+  foreach ($yhtiot as $yhtio) {
     $query = "SELECT kuka.nimi kukanimi,
               kuka.yhtio yhtijo,
               avainsana.selitetark aselitetark,
@@ -288,7 +288,7 @@ if ($tee == '') {
 
     if (mysql_num_rows($result_group) > 0) {
 
-      include('inc/pupeExcel.inc');
+      include 'inc/pupeExcel.inc';
 
       $worksheet    = new pupeExcel();
       $format_bold = array("bold" => TRUE);
@@ -296,7 +296,7 @@ if ($tee == '') {
       $excelsarake = 0;
 
       if ($piirra_yhteenveto) {
-        # yhteenveto alkuun
+        // yhteenveto alkuun
         echo "<tr>";
         echo "<th>".t("Edustaja")."</th>";
         echo "<th>".t("Yhtiö")."</th>";
@@ -352,28 +352,28 @@ if ($tee == '') {
                     AND kalenteri.tapa    = avainsana.selitetark
                     {$lisa}
                     ORDER BY pvmalku, kalenteri.tunnus, kukanimi, aselitetark";
-                  $ressu = pupe_query($query);
+          $ressu = pupe_query($query);
 
           echo "<table style='width:100%;'>";
 
           echo "<tr>";
 
-          echo "<th>",t("Edustaja"),"</th>";
-          if ($nayta_sarake) echo "<th>",t("Yhtio"),"</th>";
-          echo "<th>",t("Tapa"),"</th>";
-          echo "<th>",t("Paikka"),"</th>";
-          echo "<th>",t("Postino"),"</th>";
-          echo "<th>",t("Asiakas"),"</th>";
-          echo "<th>",t("Asiakasno"),"</th>";
-          echo "<th>",t("Nimi"),"</th>";
-          if ($nayta_sarake) echo "<th>",t("Pvm"),"</th>";
-          if ($nayta_sarake) echo "<th>",t("Kampanjat"),"</th>";
-          echo "<th>",t("PvmKäyty"),"</th>";
-          if ($nayta_sarake) echo "<th>",t("Km"),"</th>";
-          echo "<th>",t("Lähtö"),"</th>";
-          echo "<th>",t("Paluu"),"</th>";
-          if ($nayta_sarake) echo "<th>",t("PvRaha"),"</th>";
-          echo "<th>",t("Kommentit"),"</th>";
+          echo "<th>", t("Edustaja"), "</th>";
+          if ($nayta_sarake) echo "<th>", t("Yhtio"), "</th>";
+          echo "<th>", t("Tapa"), "</th>";
+          echo "<th>", t("Paikka"), "</th>";
+          echo "<th>", t("Postino"), "</th>";
+          echo "<th>", t("Asiakas"), "</th>";
+          echo "<th>", t("Asiakasno"), "</th>";
+          echo "<th>", t("Nimi"), "</th>";
+          if ($nayta_sarake) echo "<th>", t("Pvm"), "</th>";
+          if ($nayta_sarake) echo "<th>", t("Kampanjat"), "</th>";
+          echo "<th>", t("PvmKäyty"), "</th>";
+          if ($nayta_sarake) echo "<th>", t("Km"), "</th>";
+          echo "<th>", t("Lähtö"), "</th>";
+          echo "<th>", t("Paluu"), "</th>";
+          if ($nayta_sarake) echo "<th>", t("PvRaha"), "</th>";
+          echo "<th>", t("Kommentit"), "</th>";
 
           echo "</tr>";
 
@@ -428,7 +428,7 @@ if ($tee == '') {
 
       $excelrivi++;
 
-      if(!$piirra_yhteenveto) {
+      if (!$piirra_yhteenveto) {
         echo "<table>";
         echo "<tr>";
         echo "<th>".t("Edustaja")."</th>";
@@ -495,7 +495,7 @@ if ($tee == '') {
 
         $excelrivi++;
 
-        if(!$piirra_yhteenveto) {
+        if (!$piirra_yhteenveto) {
           echo "<tr>";
           echo "<td>{$row["kukanimi"]}</td>";
           if ($nayta_sarake) echo "<td>{$row["yhtio"]}</td>";
@@ -516,7 +516,7 @@ if ($tee == '') {
           echo "</tr>";
         }
       }
-      if(!$piirra_yhteenveto) echo "</table>";
+      if (!$piirra_yhteenveto) echo "</table>";
       $excelnimi = $worksheet->close();
     }
   }
@@ -524,14 +524,14 @@ if ($tee == '') {
 
   if (isset($excelnimi)) {
     echo "<br><br><table>";
-    echo "<tr><th>",t("Tallenna tulos"),":</th>";
+    echo "<tr><th>", t("Tallenna tulos"), ":</th>";
     echo "<form method='post' class='multisubmit'>";
     echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
     echo "<input type='hidden' name='kaunisnimi' value='Edustajaraportti.xlsx'>";
     echo "<input type='hidden' name='tmpfilenimi' value='{$excelnimi}'>";
-    echo "<td class='back'><input type='submit' value='",t("Tallenna"),"'></td></tr></form>";
+    echo "<td class='back'><input type='submit' value='", t("Tallenna"), "'></td></tr></form>";
     echo "</table><br>";
   }
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 
 /*
@@ -15,19 +15,19 @@ require ("inc/parametrit.inc");
 echo "<font class='head'>".t("Liit‰ tilaus projektiin")."</font><hr><br><br>";
 
 
-if($tee=="KORJAA" or $tee=="LIITA") {
+if ($tee=="KORJAA" or $tee=="LIITA") {
   //  tarkastetaan ett‰ tunnusnippu on edelleen ok
   $query = "  SELECT nimi, nimitark, tila, alatila, tunnusnippu, tunnus from lasku where yhtio='$kukarow[yhtio]' and tila IN ('R', 'L','N') and tunnusnippu>0 and tunnus='$tunnusnippu'";
   $result = mysql_query($query) or pupe_error($query);
-  if(mysql_num_rows($result)>0) {
+  if (mysql_num_rows($result)>0) {
     $laskurow=mysql_fetch_array($result);
 
     $query = "  SELECT nimi, nimitark, tila, alatila, tunnusnippu, tunnus from lasku where yhtio='$kukarow[yhtio]' and tila IN ('L','G','E','V','W','N','T','C') and tunnus='$tunnus'";
     $res = mysql_query($query) or pupe_error($query);
-    if(mysql_num_rows($res)>0) {
+    if (mysql_num_rows($res)>0) {
       $row=mysql_fetch_array($res);
 
-      if($tee=="LIITA") {
+      if ($tee=="LIITA") {
         $query="update lasku set tunnusnippu='$tunnusnippu' where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
         $updres=mysql_query($query) or pupe_error($query);
         echo "<font class='message'>".t("Liitettiin tilaus")." $tunnus ".t("tilaukseen")." $tunnusnippu</font><br><br>";
@@ -59,7 +59,7 @@ if($tee=="KORJAA" or $tee=="LIITA") {
         //tehd‰‰n selv‰kielinen tila/alatila
         require "inc/laskutyyppi.inc";
 
-        if($row["tunnusnippu"]>0) {
+        if ($row["tunnusnippu"]>0) {
           $lisa="<td class='back'><font class='message'>".t("HUOM: tilaus on jo liitettyn‰ projektiin")." $row[tunnusnippu]</font></td>";
         }
         else {
@@ -100,12 +100,12 @@ if($tee=="KORJAA" or $tee=="LIITA") {
   }
 }
 
-if($tee == "HAE") {
+if ($tee == "HAE") {
   $query = "  SELECT nimi, nimitark, tila, alatila, tunnusnippu, tunnus from lasku where yhtio='$kukarow[yhtio]' and tila IN ('R', 'L','N') and tunnus='$tunnusnippu'";
   $result = mysql_query($query) or pupe_error($query);
-  if(mysql_num_rows($result)>0) {
+  if (mysql_num_rows($result)>0) {
     $laskurow=mysql_fetch_array($result);
-    if($laskurow["tunnusnippu"]>0) {
+    if ($laskurow["tunnusnippu"]>0) {
       $laskutyyppi=$laskurow["tila"];
       $alatila=$laskurow["alatila"];
 
@@ -149,7 +149,7 @@ if($tee == "HAE") {
 }
 
 
-if($tee == "") {
+if ($tee == "") {
   echo "<table>
       <tr>
         <th>".t("Anna projekti/tilausnumero")."<br>".t("johon haluat liitt‰‰ tilauksen")."</th>
@@ -166,4 +166,4 @@ if($tee == "") {
 }
 
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

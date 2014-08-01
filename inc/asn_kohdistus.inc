@@ -61,7 +61,7 @@ if (!function_exists("asn_kohdistus")) {
       if ((isset($edellinen_toimittaja) and $edellinen_toimittaja != $row["toimittajanumero"]) or (isset($edellinen_asn_numero) and $edellinen_asn_numero != $row["asn_numero"]) or (isset($edellinen_paketinnumero) and $edellinen_paketinnumero != $row["paketinnumero"])) {
 
         if ($virheet == 0 and count($paketin_rivit) > 0) {
-          asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste,'');
+          asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste, '');
         }
         else {
           $virheet = 0;
@@ -280,7 +280,7 @@ if (!function_exists("asn_kohdistus")) {
 
           // $tilausrivi_muuttuja sis‰lt‰‰ jo k‰ytetyt rivit. Otetaan lisa_array:sta extraa viel‰.
           $loysan_tilausrivi_muuttuja = count($kaytetyt_tilausrivit) > 0 ? ",'".implode("','", $kaytetyt_tilausrivit)."'" : "";
-          $loysan_tilausrivi_muuttuja = "and tilausrivi.tunnus not in ('".implode("','",$lisa_array)."'{$loysan_tilausrivi_muuttuja})";
+          $loysan_tilausrivi_muuttuja = "and tilausrivi.tunnus not in ('".implode("','", $lisa_array)."'{$loysan_tilausrivi_muuttuja})";
 
           $query = "SELECT tilausrivi.*, tilausrivi.varattu+tilausrivi.kpl AS varattu
                     FROM tilausrivi
@@ -634,19 +634,19 @@ if (!function_exists("asn_kohdistus")) {
                   // Ei monisteta tunnusta
                   for ($ii = 1; $ii < mysql_num_fields($tapahtuma_res) - 1; $ii++) {
 
-                    $fieldname = mysql_field_name($tapahtuma_res,$ii);
+                    $fieldname = mysql_field_name($tapahtuma_res, $ii);
 
                     $fields .= ", ".$fieldname;
 
                     switch ($fieldname) {
-                      case 'rivitunnus':
-                        $values .= ", '{$_vid}'";
-                        break;
-                      case 'kpl':
-                        $values .= ", '{$positiivinen_arvo}'";
-                        break;
-                      default:
-                        $values .= ", '".$tapahtuma_row[$fieldname]."'";
+                    case 'rivitunnus':
+                      $values .= ", '{$_vid}'";
+                      break;
+                    case 'kpl':
+                      $values .= ", '{$positiivinen_arvo}'";
+                      break;
+                    default:
+                      $values .= ", '".$tapahtuma_row[$fieldname]."'";
                     }
                   }
 
@@ -870,19 +870,19 @@ if (!function_exists("asn_kohdistus")) {
                 // Ei monisteta tunnusta
                 for ($ii = 1; $ii < mysql_num_fields($tapahtuma_res) - 1; $ii++) {
 
-                  $fieldname = mysql_field_name($tapahtuma_res,$ii);
+                  $fieldname = mysql_field_name($tapahtuma_res, $ii);
 
                   $fields .= ", ".$fieldname;
 
                   switch ($fieldname) {
-                    case 'rivitunnus':
-                      $values .= ", '{$_vid}'";
-                      break;
-                    case 'kpl':
-                      $values .= ", '{$kappaleerotus}'";
-                      break;
-                    default:
-                      $values .= ", '".$tapahtuma_row[$fieldname]."'";
+                  case 'rivitunnus':
+                    $values .= ", '{$_vid}'";
+                    break;
+                  case 'kpl':
+                    $values .= ", '{$kappaleerotus}'";
+                    break;
+                  default:
+                    $values .= ", '".$tapahtuma_row[$fieldname]."'";
                   }
                 }
 
@@ -926,7 +926,7 @@ if (!function_exists("asn_kohdistus")) {
     }
 
     if ($virheet == 0 and count($paketin_rivit) > 0) {
-      asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste,'');
+      asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste, '');
     }
     elseif ($virheet != 0) {
       echo "VIRHE 2: Paketti hylatty. Toimittaja $edellinen_toimittaja ASN-sanoma $edellinen_asn_numero $virhe Paketti $edellinen_paketinnumero $d";
@@ -935,7 +935,7 @@ if (!function_exists("asn_kohdistus")) {
 }
 
 if (!function_exists("asn_kohdista_suuntalava")) {
-  function asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste,$SSCC='') {
+  function asn_kohdista_suuntalava($edellinen_toimittaja, $edellinen_asn_numero, $paketin_rivit, $paketin_tuotteet, $paketin_tunnukset, $edellinen_paketintunniste, $SSCC='') {
     global $yhtiorow, $kukarow;
 
     // Haetaan toimittajan tiedot
@@ -1057,7 +1057,7 @@ if (!function_exists("asn_kohdista_suuntalava")) {
       $automaattinen_paivitys = "";
       $suuntalavat_ei_kayttoliittymaa = "KYLLA";
 
-      require ("tilauskasittely/suuntalavat.inc");
+      require "tilauskasittely/suuntalavat.inc";
 
       // Saadaan $uusi_suuntalavan_tunnus ^ incist‰.
       // P‰ivitet‰‰n paketin ostotilausrivit kohdistetuksi keikkan ja oikealle suuntalavalle
@@ -1079,7 +1079,7 @@ if (!function_exists("asn_kohdista_suuntalava")) {
       $tee = "siirtovalmis";
       $suuntalavat_ei_kayttoliittymaa = "KYLLA";
 
-      require ("tilauskasittely/suuntalavat.inc");
+      require "tilauskasittely/suuntalavat.inc";
     }
   }
 }

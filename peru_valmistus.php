@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Peru valmistus").":</font><hr>";
 
@@ -155,7 +155,7 @@ if ($id != 0) {
               order by tunnus $order";
     $tapares = mysql_query($query) or pupe_error($query);
 
-    while($taparow = mysql_fetch_array($tapares)) {
+    while ($taparow = mysql_fetch_array($tapares)) {
 
       if ($tee != 'KORJAA') {
         echo "<td class='back' valign='top'><table>";
@@ -189,7 +189,7 @@ if ($id != 0) {
         elseif ($taparow2["kpl"] > 0) {
           $voidaankopoistaa = "Ei";
         }
-        elseif($taparow2["kpl"] == 0) {
+        elseif ($taparow2["kpl"] == 0) {
           $voidaankopoistaa = "Kyllä";
         }
         else {
@@ -256,7 +256,7 @@ if ($id != 0) {
                     order by tunnus $order";
           $valm_res = mysql_query($query) or pupe_error($query);
 
-          while($valm_row = mysql_fetch_array($valm_res)) {
+          while ($valm_row = mysql_fetch_array($valm_res)) {
             //Poistetaan tilausrivi
             $query = "DELETE from tilausrivi
                       where yhtio = '$kukarow[yhtio]'
@@ -447,4 +447,4 @@ if ($id == '') {
 }
 
 
-require("inc/footer.inc");
+require "inc/footer.inc";

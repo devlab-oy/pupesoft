@@ -141,7 +141,7 @@
     $ahlopetus   = "tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//mista=$mista//tila=$tila//from=ASIAKASYLLAPITO";
     $lause     = "<font class='head'>".t("Valitse asiakas").":</font><hr><br>";
 
-    require ("inc/asiakashaku.inc");
+  require "inc/asiakashaku.inc";
 
     if ($asiakasid == '' and $monta > 1) {
       //Löytyi monta sopivaa, näytetään formi, mutta ei otsikkoa
@@ -217,7 +217,7 @@
       $grouppaus       = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "ytunnus" : "";
 
       ob_start();
-      require ("raportit/saatanat.php");
+    require "raportit/saatanat.php";
       $retval = ob_get_contents();
       ob_end_clean();
 
@@ -566,7 +566,7 @@
 
       if (mysql_num_rows($myyntitili_result) != 1) {
         echo t("VIRHE: Myyntitili-varastoa ei ole perustettu")."!";
-        require("inc/footer.inc");
+      require "inc/footer.inc";
         exit;
       }
     }
@@ -2299,7 +2299,7 @@
       $oikea_sarake[$oikea] .= "</td>";
       $oikea++;
 
-      # Lähetetyypin valinta
+    // Lähetetyypin valinta
       $lahetetyypit = t_avainsana("LAHETETYYPPI");
 
       $vasen_sarake[$vasen] = "<td>".t("Lähetetyyppi").":</td>";
@@ -2329,7 +2329,7 @@
       $vasen_sarake[$vasen] .= "<option value = '6'  $sel[6]>".t("Normaali laskupohja (Ei näytetä tilausnumeroa/toimitusaikaa)")."</option>";
       $vasen_sarake[$vasen] .= "<option value = '7'  $sel[7]>".t("Normaali laskupohja (Näytetään tuotteen EAN koodi ja asiakaskommentti)")."</option>";
       $vasen_sarake[$vasen] .= "<option value = '1'  $sel[1]>".t("Pelkistetty laskupohja 1")."</option>";
-      #$vasen_sarake[$vasen] .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)")."</option>";
+    //$vasen_sarake[$vasen] .= "<option value = '3' $sel[3]>".t("Pelkistetty laskupohja 2 (Tuoteperheet yhdistetty)")."</option>";
       $vasen_sarake[$vasen] .= "<option value = '4'  $sel[4]>".t("Pelkistetty laskupohja 3")."</option>";
       $vasen_sarake[$vasen] .= "<option value = '10' $sel[10]>".t("Normaali laskupohja ilman rivihintoja (ei laillinen Suomessa)")."</option>";
       $vasen_sarake[$vasen] .= "<option value = '12' $sel[12]>".t("Normaali laskupohja (Tuoteperheet yhdistetty) ilman rivihintoja (ei laillinen Suomessa)")."</option>";
@@ -3598,7 +3598,7 @@
     if (($toim != 'TARJOUS' and $toim != 'EXTTARJOUS')) {
       //Tarjous keisissä halutaan ohittaa tämä checki koska toimaika = 0000-00-00 merkkaa, että tarjousta ei haluta pdf:llä näkyviin
       //Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
-      if (($kerpp > $toimpp AND $kerkk >= $toimkk AND $kervv >= $toimvv) OR ($kerpp < $toimpp AND $kerkk > $toimkk AND $kervv >= $toimvv) OR ($kervv > $toimvv)) {
+    if (($kerpp > $toimpp and $kerkk >= $toimkk and $kervv >= $toimvv) or ($kerpp < $toimpp and $kerkk > $toimkk and $kervv >= $toimvv) or ($kervv > $toimvv)) {
         $toimpp = $kerpp;
         $toimkk = $kerkk;
         $toimvv = $kervv;

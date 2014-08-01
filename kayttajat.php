@@ -1,6 +1,6 @@
 <?php
 
-  require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
   if (isset($livesearch_tee) and $livesearch_tee == "KAYTTAJAHAKU") {
     livesearch_kayttajahaku($toim);
@@ -60,7 +60,7 @@
     $asiakasid     = "";
     $ytunnus_oat    = "";
 
-    require ("inc/asiakashaku.inc");
+  require "inc/asiakashaku.inc";
 
     if ($monta == 1) {
       $ytunnus_oa_id  = $asiakasid;
@@ -91,7 +91,7 @@
     $asiakasid     = "";
     $ytunnus_oa    = "";
 
-    require ("inc/asiakashaku.inc");
+  require "inc/asiakashaku.inc";
 
     if ($monta == 1) {
       $ytunnus_oat_id  = $asiakasid;
@@ -846,7 +846,7 @@
             $monivalintarajaus_dynaaminen = $krow['hierarkia'];
           }
 
-          require ("tilauskasittely/monivalintalaatikot.inc");
+        require "tilauskasittely/monivalintalaatikot.inc";
 
           echo "</td></tr>";
 
@@ -1527,7 +1527,7 @@
         $res = pupe_query($queryoik);
 
         if (mysql_num_rows($res) > 0) {
-          require ("inc/extranet_kayttajan_lisatiedot.inc");
+        require "inc/extranet_kayttajan_lisatiedot.inc";
           echo "<td class='back'>";
           echo "<iframe id='extranet_lisatiedot_iframe' name='extranet_lisatiedot_iframe' src='yllapito.php?toim=extranet_kayttajan_lisatiedot&from=yllapito&ohje=off&haku[4]=@{$selkuka}&lukitse_avaimeen={$selkuka}' style='height: 700px; width: 700px; border: 0px; display: inline;' scrolling='yes' border='0' frameborder='0'></iFrame>";
           echo "</td>";
@@ -1639,4 +1639,4 @@
     echo "</table>";
   }
 
-  require("inc/footer.inc");
+require "inc/footer.inc";

@@ -3,12 +3,12 @@
 // T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (!isset($merkki)) $merkki = "";
 if (!isset($tryittain)) $tryittain = "";
 
-echo "<font class='head'>",t("Varastonarvo"),"</font><hr>";
+echo "<font class='head'>", t("Varastonarvo"), "</font><hr>";
 
 echo " <!-- Enabloidaan shiftill‰ checkboxien chekkaus //-->
     <script src='../inc/checkboxrange.js'></script>
@@ -44,7 +44,7 @@ echo "<form method='post'>";
 $monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
 $noautosubmit = TRUE;
 
-require ("tilauskasittely/monivalintalaatikot.inc");
+require "tilauskasittely/monivalintalaatikot.inc";
 
 echo "<br><table>";
 
@@ -63,11 +63,11 @@ else {
 }
 
 echo "<tr>";
-echo "<th>",t("Aja tuotemerkeitt‰in"),":</th><td><input type='checkbox' name='merkki' $chk></td>";
+echo "<th>", t("Aja tuotemerkeitt‰in"), ":</th><td><input type='checkbox' name='merkki' $chk></td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>",t("Tai tuoteryhmitt‰in"),":</th><td><input type='checkbox' name='tryittain' $chk2></td>";
+echo "<th>", t("Tai tuoteryhmitt‰in"), ":</th><td><input type='checkbox' name='tryittain' $chk2></td>";
 echo "</tr>";
 
 $epakur_chk1 = "";
@@ -85,20 +85,20 @@ elseif ($epakur == 'ei_epakur') {
 }
 
 echo "<tr>";
-echo "<th>",t("N‰ytett‰v‰t tuotteet"),":</th><td>";
+echo "<th>", t("N‰ytett‰v‰t tuotteet"), ":</th><td>";
 echo "<select name='epakur'>";
-echo "<option value='kaikki'    $epakur_chk1>",t("N‰yt‰ kaikki tuotteet"),"</option>";
-echo "<option value='epakur'    $epakur_chk2>",t("N‰yt‰ vain ep‰kurantit tuotteet"),"</option>";
-echo "<option value='ei_epakur' $epakur_chk3>",t("N‰yt‰ varastonarvoon vaikuttavat tuotteet"),"</option>";
+echo "<option value='kaikki'    $epakur_chk1>", t("N‰yt‰ kaikki tuotteet"), "</option>";
+echo "<option value='epakur'    $epakur_chk2>", t("N‰yt‰ vain ep‰kurantit tuotteet"), "</option>";
+echo "<option value='ei_epakur' $epakur_chk3>", t("N‰yt‰ varastonarvoon vaikuttavat tuotteet"), "</option>";
 echo "</select>";
 echo "</td></tr>";
 
-echo "<tr><th valign=top>",t('Varastot'),"<br /><br /><span style='font-size: 0.8em;'>"
-  ,t('Saat kaikki varastot jos et valitse yht‰‰n')
-  ,"</span></th>
+echo "<tr><th valign=top>", t('Varastot'), "<br /><br /><span style='font-size: 0.8em;'>"
+, t('Saat kaikki varastot jos et valitse yht‰‰n')
+, "</span></th>
     <td>";
 
-if($piilotetut_varastot != 'on') {
+if ($piilotetut_varastot != 'on') {
   $piilotetut_varastot_where = ' AND tyyppi != "P"';
 }
 
@@ -124,7 +124,7 @@ while ($varow = mysql_fetch_array($vares)) {
 echo "</td></tr>";
 echo "</table>";
 echo "<br>";
-echo "<input type='submit' name='ajetaan' value='",t("Laske varastonarvot"),"'>";
+echo "<input type='submit' name='ajetaan' value='", t("Laske varastonarvot"), "'>";
 echo "</form><br><br>";
 
 if (isset($ajetaan)) {
@@ -230,23 +230,23 @@ if (isset($ajetaan)) {
   echo "<tr>";
 
   if ($merkki != '') {
-    echo "<th>",t("Tuotemerkki"),"</th>";
+    echo "<th>", t("Tuotemerkki"), "</th>";
   }
 
   if ($tryittain != '') {
-    echo "<th>",t("Tuoteryhm‰"),"</th>";
+    echo "<th>", t("Tuoteryhm‰"), "</th>";
   }
 
   if (isset($varastot) and count($varastot) > 0) {
-    echo "<th>",t("Varasto"),"</th>";
+    echo "<th>", t("Varasto"), "</th>";
   }
 
-  echo "<th>",t("Pvm"),"</th>";
-  echo "<th>",t("Varastonarvo"),"</th>";
-  echo "<th>",t("Bruttovarastonarvo"),"</th>";
+  echo "<th>", t("Pvm"), "</th>";
+  echo "<th>", t("Varastonarvo"), "</th>";
+  echo "<th>", t("Bruttovarastonarvo"), "</th>";
 
   if ($merkki != '' or $tryittain != '') {
-    echo "<th>",t("Varastonkierto"),"</th>";
+    echo "<th>", t("Varastonkierto"), "</th>";
   }
 
   echo "</tr>";
@@ -275,9 +275,9 @@ if (isset($ajetaan)) {
       echo "<td>{$row["nimitys"]}</td>";
     }
 
-    echo "<td>",date("d.m.Y"),"</td>";
-    echo "<td align='right'>",sprintf("%.2f", $varvo),"</td>";
-    echo "<td align='right'>",sprintf("%.2f", $bvarvo),"</td>";
+    echo "<td>", date("d.m.Y"), "</td>";
+    echo "<td align='right'>", sprintf("%.2f", $varvo), "</td>";
+    echo "<td align='right'>", sprintf("%.2f", $bvarvo), "</td>";
 
     if ($merkki != '' or $tryittain != '') {
 
@@ -310,7 +310,7 @@ if (isset($ajetaan)) {
         $kierto = 0;
       }
 
-      echo "<td align='right'>",str_replace(".",",",sprintf("%.2f", $kierto)),"</td>";
+      echo "<td align='right'>", str_replace(".", ",", sprintf("%.2f", $kierto)), "</td>";
     }
 
     echo "</tr>";
@@ -334,13 +334,13 @@ if (isset($ajetaan)) {
       $colspan++;
     }
 
-    echo "<td class='tumma' colspan='$colspan'>",t("Yhteens‰"),"</td>";
-    echo "<td class='tumma' align='right'>",sprintf("%.2f",$varastosumma),"</td>";
-    echo "<td class='tumma' align='right'>",sprintf("%.2f",$bruttovarastosumma),"</td>";
+    echo "<td class='tumma' colspan='$colspan'>", t("Yhteens‰"), "</td>";
+    echo "<td class='tumma' align='right'>", sprintf("%.2f", $varastosumma), "</td>";
+    echo "<td class='tumma' align='right'>", sprintf("%.2f", $bruttovarastosumma), "</td>";
     echo "</tr>";
   }
 
   echo "</table>";
 }
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

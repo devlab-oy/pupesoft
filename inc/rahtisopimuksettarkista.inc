@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("rahtisopimuksettarkista")) {
-  function rahtisopimuksettarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("rahtisopimuksettarkista")) {
+  function rahtisopimuksettarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $alasveto;
 
     static $chytunnus;
@@ -26,7 +26,7 @@ if(!function_exists("rahtisopimuksettarkista")) {
           $ytunnus     = $chytunnus;
           $kutsuja     = "yllapito.php";
           $ulos       = "";
-          require("asiakashaku.inc");
+          require "asiakashaku.inc";
 
           if ($ulos != "" and $ytunnus == "") {
             $alasveto[$i] = "<select name='t[$i]'>".$ulos."</select>";
@@ -57,7 +57,7 @@ if(!function_exists("rahtisopimuksettarkista")) {
           $ytunnus     = $chastunn;
           $kutsuja     = "yllapito.php";
           $ulos2       = "";
-          require("asiakashaku.inc");
+          require "asiakashaku.inc";
 
           if ($ulos != "" and $ytunnus == "") {
             $alasveto[$i] = "<select name='t[$i]'>".$ulos2."</select>";

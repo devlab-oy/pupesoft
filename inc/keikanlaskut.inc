@@ -71,7 +71,7 @@ if (!isset($lkk)) $lkk = date("m");
 if (!isset($lvv)) $lvv = date("Y");
 
 echo "<form>";
- echo "<input type='hidden' name='toim' value='$toim'>";
+echo "<input type='hidden' name='toim' value='$toim'>";
 echo "<table>";
 echo "<tr>";
 echo "<th>".t("Alkupäivä")."</th>";
@@ -192,7 +192,7 @@ if (mysql_num_rows($result) > 0 ) {
     if ($trow["vienti"] == 'L') $vienti = t('ei-EU raaka-aine');
 
     echo "<tr class='aktiivi'>";
-    echo "<td><a name='$trow[latunnus]' href='$palvelin2","muutosite.php?tee=E&tunnus=$trow[latunnus]'>$trow[ytunnus]</a></td>";
+    echo "<td><a name='$trow[latunnus]' href='$palvelin2", "muutosite.php?tee=E&tunnus=$trow[latunnus]'>$trow[ytunnus]</a></td>";
     echo "<td>$trow[nimi]</td>";
     echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summa"])." $trow[valkoodi]</td>";
     echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"])." $yhtiorow[valkoodi]</td>";
@@ -206,9 +206,9 @@ if (mysql_num_rows($result) > 0 ) {
     if ($trow["tapvm"] >= $yhtiorow["tilikausi_alku"] and ($kukarow["taso"] == "2" or $kukarow["taso"] == "3")) {
       echo "<td class='back'>";
       echo "<form method='post' action='#$edellinen' onSubmit='return confirm(\"$trow[nimi]\\n$vienti\\n".tv1dateconv($trow["tapvm"])."\\n$trow[summa] $trow[valkoodi]\\n\\n".t("Oletko varma, että haluat muuttaa laskun kululaskuksi")."?\")'>";
-       echo "<input type='hidden' name='toim' value='$toim'>";
-       echo "<input type='hidden' name='toim_tee' value='kululasku'>";
-       echo "<input type='hidden' name='tunnus' value='$trow[latunnus]'>";
+      echo "<input type='hidden' name='toim' value='$toim'>";
+      echo "<input type='hidden' name='toim_tee' value='kululasku'>";
+      echo "<input type='hidden' name='tunnus' value='$trow[latunnus]'>";
       echo "<input type='hidden' name='app' value='$app'>";
       echo "<input type='hidden' name='akk' value='$akk'>";
       echo "<input type='hidden' name='lpp' value='$lpp'>";
@@ -237,26 +237,26 @@ if (mysql_num_rows($result) > 0 ) {
 
   echo "<tr>";
   echo "<th colspan='3'>".t("Vaihto-omaisuuslaskuja yhteensä")."</th>";
-  echo "<th style='text-align: right;'>".round($vaihto_sum_yhteensa,2)." $yhtiorow[valkoodi]</th>";
+  echo "<th style='text-align: right;'>".round($vaihto_sum_yhteensa, 2)." $yhtiorow[valkoodi]</th>";
   echo "<th></th>";
-  echo "<th style='text-align: right;'>".round($vaihto_arvo_yhteensa,2)." $yhtiorow[valkoodi]</th>";
+  echo "<th style='text-align: right;'>".round($vaihto_arvo_yhteensa, 2)." $yhtiorow[valkoodi]</th>";
   echo "<th colspan='3'></th>";
   echo "</tr>";
 
   echo "<tr>";
   echo "<th colspan='3'>".t("Rahti/huolintalaskuja yhteensä")."</th>";
-  echo "<th style='text-align: right;'>".round($rahti_sum_yhteensa,2)." $yhtiorow[valkoodi]</th>";
+  echo "<th style='text-align: right;'>".round($rahti_sum_yhteensa, 2)." $yhtiorow[valkoodi]</th>";
   echo "<th></th>";
-  echo "<th style='text-align: right;'>".round($rahti_arvo_yhteensa,2)." $yhtiorow[valkoodi]</th>";
+  echo "<th style='text-align: right;'>".round($rahti_arvo_yhteensa, 2)." $yhtiorow[valkoodi]</th>";
   echo "<th colspan='3'></th>";
   echo "</tr>";
 
 
   echo "<tr>";
   echo "<th colspan='3'>".t("Yhteensä")."</th>";
-  echo "<th style='text-align: right;'>".round($yhteesa_ve,2)." $yhtiorow[valkoodi]</th>";
+  echo "<th style='text-align: right;'>".round($yhteesa_ve, 2)." $yhtiorow[valkoodi]</th>";
   echo "<th></th>";
-  echo "<th style='text-align: right;'>".round($yhteesa_eive,2)." $yhtiorow[valkoodi]</th>";
+  echo "<th style='text-align: right;'>".round($yhteesa_eive, 2)." $yhtiorow[valkoodi]</th>";
   echo "<th colspan='3'></th>";
   echo "</tr>";
   echo "</table><br>";
@@ -323,7 +323,7 @@ if (mysql_num_rows($result) > 0 ) {
     if ($trow["vienti"] == 'L') $vienti = t('ei-EU raaka-aine');
 
     echo "<tr class='aktiivi'>";
-    echo "<td><a href='$palvelin2","muutosite.php?tee=E&tunnus=$trow[latunnus]'>$trow[ytunnus]</a></td>";
+    echo "<td><a href='$palvelin2", "muutosite.php?tee=E&tunnus=$trow[latunnus]'>$trow[ytunnus]</a></td>";
     echo "<td>$trow[nimi]</td>";
     echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summa"])." $trow[valkoodi]</td>";
     echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"])." $yhtiorow[valkoodi]</td>";
@@ -339,7 +339,7 @@ if (mysql_num_rows($result) > 0 ) {
 
   echo "<tr>";
   echo "<th colspan='6'>".t("Yhteensä")."</th>";
-  echo "<th style='text-align: right;'>".round($yhteesa,2)." $yhtiorow[valkoodi]</th>";
+  echo "<th style='text-align: right;'>".round($yhteesa, 2)." $yhtiorow[valkoodi]</th>";
   echo "<th colspan='2'></th>";
   echo "</tr>";
   echo "</table><br>";
@@ -392,7 +392,7 @@ if (mysql_num_rows($result) > 0 ) {
   while ($trow = mysql_fetch_array($result)) {
 
     echo "<tr class='aktiivi'>";
-    echo "<td><a href='$palvelin2","muutosite.php?tee=E&tunnus=$trow[ltunnus]'>$trow[tilino] - $trow[tilinimi]</a></td>";
+    echo "<td><a href='$palvelin2", "muutosite.php?tee=E&tunnus=$trow[ltunnus]'>$trow[tilino] - $trow[tilinimi]</a></td>";
     echo "<td>$trow[kustpnimi]</td>";
     echo "<td>$trow[kohdenimi]</td>";
     echo "<td>$trow[projektinimi]</td>";
@@ -408,7 +408,7 @@ if (mysql_num_rows($result) > 0 ) {
 
   echo "<tr>";
   echo "<th colspan='5'>".t("Yhteensä")."</th>";
-  echo "<th style='text-align: right;'>".round($yhteesa,2)." $yhtiorow[valkoodi]</th>";
+  echo "<th style='text-align: right;'>".round($yhteesa, 2)." $yhtiorow[valkoodi]</th>";
   echo "<th colspan='2'></th>";
   echo "</tr>";
   echo "</table><br>";
@@ -470,7 +470,7 @@ if (mysql_num_rows($result) > 0 ) {
     if ($trow["vienti"] == 'L') $vienti = t('ei-EU raaka-aine');
 
     echo "<tr class='aktiivi'>";
-    echo "<td><a href='$palvelin2","muutosite.php?tee=E&tunnus=$trow[latunnus]'>$trow[ytunnus]</a></td>";
+    echo "<td><a href='$palvelin2", "muutosite.php?tee=E&tunnus=$trow[latunnus]'>$trow[ytunnus]</a></td>";
     echo "<td>$trow[nimi]</td>";
     echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summa"])." $trow[valkoodi]</td>";
     echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"])." $yhtiorow[valkoodi]</td>";
@@ -483,7 +483,7 @@ if (mysql_num_rows($result) > 0 ) {
 
   echo "<tr>";
   echo "<th colspan='3'>".t("Yhteensä")."</th>";
-  echo "<th style='text-align: right;'>".round($yhteesa,2)." $yhtiorow[valkoodi]</th>";
+  echo "<th style='text-align: right;'>".round($yhteesa, 2)." $yhtiorow[valkoodi]</th>";
   echo "<th colspan='2'></th>";
   echo "</tr>";
   echo "</table><br>";
@@ -535,7 +535,7 @@ if (mysql_num_rows($result) > 0 ) {
     if ($trow["vienti"] == 'G') $vienti = t('ei-EU');
 
     echo "<tr class='aktiivi'>";
-    echo "<td><a href='$palvelin2","muutosite.php?tee=E&tunnus=$trow[latunnus]'>$trow[ytunnus]</a></td>";
+    echo "<td><a href='$palvelin2", "muutosite.php?tee=E&tunnus=$trow[latunnus]'>$trow[ytunnus]</a></td>";
     echo "<td>$trow[nimi]</td>";
     echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summa"])." $trow[valkoodi]</td>";
     echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"])." $yhtiorow[valkoodi]</td>";
@@ -548,7 +548,7 @@ if (mysql_num_rows($result) > 0 ) {
 
   echo "<tr>";
   echo "<th colspan='3'>".t("Yhteensä")."</th>";
-  echo "<th style='text-align: right;'>".round($yhteesa,2)." $yhtiorow[valkoodi]</th>";
+  echo "<th style='text-align: right;'>".round($yhteesa, 2)." $yhtiorow[valkoodi]</th>";
   echo "<th colspan='2'></th>";
   echo "</tr>";
   echo "</table><br>";
@@ -632,7 +632,7 @@ if (mysql_num_rows($result) > 0 ) {
     if ($trow["vienti"] == 'L') $vienti = t('ei-EU raaka-aine');
 
     echo "<tr class='aktiivi'>";
-    echo "<td><a href='$palvelin2","muutosite.php?tee=E&tunnus=$trow[latunnus]'>$trow[ytunnus]</a></td>";
+    echo "<td><a href='$palvelin2", "muutosite.php?tee=E&tunnus=$trow[latunnus]'>$trow[ytunnus]</a></td>";
     echo "<td>$trow[nimi]</td>";
     echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summa"])." $trow[valkoodi]</td>";
     echo "<td style='text-align: right;' nowrap>".sprintf("%.2f", $trow["summaeur"])."</td>";
@@ -670,7 +670,7 @@ if (mysql_num_rows($result) > 0 ) {
 
   echo "<tr>";
   echo "<th colspan='7'>".t("Yhteensä")."</th>";
-  echo "<th style='text-align: right;'>".round($yhteesa,2)." $yhtiorow[valkoodi]</th>";
+  echo "<th style='text-align: right;'>".round($yhteesa, 2)." $yhtiorow[valkoodi]</th>";
   echo "<th colspan='2'></th>";
   echo "</tr>";
   echo "</table><br>";

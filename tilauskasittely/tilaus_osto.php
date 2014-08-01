@@ -1214,14 +1214,14 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               tuotteen_toimittajat.toim_nimitys,
               tuotteen_toimittajat.valuutta,
               tilausrivi.tilkpl tilattu,
-              round(tilausrivi.tilkpl 
-                * if (tuotteen_toimittajat.tuotekerroin = 0 
-                  OR tuotteen_toimittajat.tuotekerroin is NULL, 
-                    1, tuotteen_toimittajat.tuotekerroin), 
+              round(tilausrivi.tilkpl
+                * if (tuotteen_toimittajat.tuotekerroin = 0
+                  OR tuotteen_toimittajat.tuotekerroin is NULL,
+                    1, tuotteen_toimittajat.tuotekerroin),
                     4) tilattu_ulk,
               round((tilausrivi.varattu + tilausrivi.jt)
                 * tilausrivi.hinta
-                * if (tuotteen_toimittajat.tuotekerroin = 0 
+                * if (tuotteen_toimittajat.tuotekerroin = 0
                   OR tuotteen_toimittajat.tuotekerroin IS NULL,
                     1,
                     tuotteen_toimittajat.tuotekerroin)

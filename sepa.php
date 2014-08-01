@@ -462,7 +462,7 @@ if ($tee == "laheta_pankkiin") {
     virhe("Salasana täytyy antaa!");
     $tee = "virhe";
   }
-  elseif (!pankkiyhteys_salasana_kunnossa($pankkiyhteys_tunnus, $salasana)) {
+  elseif (!hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana)) {
     virhe("Antamasi salasana on väärä!");
     $tee = "virhe";
   }
@@ -482,19 +482,14 @@ if ($tee == "laheta_pankkiin") {
 
 // Pankkiyhteys tiedoston lähetys
 if ($tee == "laheta_pankkiin") {
-  $pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana);
-
   $_xml = file_get_contents($pankkiyhteys_tiedosto_full);
   $_data = base64_encode($_xml);
 
   $params = array(
-    "bank" => $pankkiyhteys["pankki_lyhyt_nimi"],
-    "customer_id" => $pankkiyhteys["customer_id"],
-    "target_id" => $pankkiyhteys["target_id"],
-    "certificate" => $pankkiyhteys["certificate"],
-    "private_key" => $pankkiyhteys["private_key"],
-    "file_type" => "NDCORPAYS",
-    "maksuaineisto" => "{$_data}"
+    "pankkiyhteys_tunnus"   => $pankkiyhteys_tunnus,
+    "pankkiyhteys_salasana" => $salasana,
+    "file_type"             => "NDCORPAYS",
+    "maksuaineisto"         => $_data,
   );
 
   $vastaus = sepa_upload_file($params);
@@ -533,6 +528,8 @@ if ($yhtiorow["pankkitiedostot"] == "F" and $tee != "virhe") {
             FROM yriti
             WHERE yhtio  = '{$kukarow['yhtio']}'
             AND kaytossa = ''
+            AND iban != ''
+            AND bic != ''
             ORDER BY nimi";
   $result = pupe_query($query);
 
@@ -976,13 +973,14 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
 
 // Jos meillä on SEPA pankkiyhteys käytössä
 if (SEPA_PANKKIYHTEYS and !empty($pankkiyhteys_tiedosto)) {
-  // Katsotaan, että pankkiyhteys on perustettu
+  // Katsotaan, että pankkiyhteys on perustettu ja asiakasid on oikein
   $query = "SELECT pankkiyhteys.tunnus AS pankkiyhteys_tunnus
             FROM yriti
             INNER JOIN pankkiyhteys ON (pankkiyhteys.yhtio = yriti.yhtio
-              AND pankkiyhteys.pankki = yriti.bic)
-            WHERE yriti.yhtio         = '{$kukarow["yhtio"]}'
-            AND yriti.tunnus          = {$pankkitili_tunnus}";
+              AND pankkiyhteys.pankki = yriti.bic
+              AND pankkiyhteys.customer_id = yriti.asiakastunnus)
+            WHERE yriti.yhtio = '{$kukarow["yhtio"]}'
+            AND yriti.tunnus = {$pankkitili_tunnus}";
   $result = pupe_query($query);
 
   // Meillä on pankkiyhteys luotu, tehdään formi lähettämistä varten

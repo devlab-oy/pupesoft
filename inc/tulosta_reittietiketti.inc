@@ -2,9 +2,9 @@
 
 if ($kerayseran_numero > 0) {
 
-  if (($unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") OR
+  if (($unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") or
     ($unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "")) {
-    require_once("inc/unifaun_send.inc");
+    require_once "inc/unifaun_send.inc";
   }
 
   $pakkauskirjainlisa = (isset($uusi_pakkauskirjain) and trim($uusi_pakkauskirjain) != "") ? " AND kerayserat.pakkausnro = '{$uusi_pakkauskirjain}' " : "";
@@ -45,7 +45,7 @@ if ($kerayseran_numero > 0) {
 
       if ($toitarow['tulostustapa'] == 'E' and
         (($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") or
-        ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != ""))) {
+          ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != ""))) {
 
         if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc') {
           $unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
@@ -89,7 +89,7 @@ if ($kerayseran_numero > 0) {
 
       $unifaun_kaytossa = FALSE;
 
-      if (($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") OR
+      if (($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' and $unifaun_ps_host != "" and $unifaun_ps_user != "" and $unifaun_ps_pass != "" and $unifaun_ps_path != "") or
         ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc' and $unifaun_uo_host != "" and $unifaun_uo_user != "" and $unifaun_uo_pass != "" and $unifaun_uo_path != "")) {
 
         $query = "SELECT unifaun_nimi
@@ -347,24 +347,24 @@ if ($kerayseran_numero > 0) {
 
             // Tulostetaan Pupen oma kollitarra
             $params = array(
-               'tilriv' => $row['tunnus'],//tilausnumero
-               'pakkaus_kirjain' => excel_column_name($keraysera_row['pakkausnro']),
-               'sscc' => $keraysera_row['sscc'],
-               'toimitustapa' => $row['toimitustapa'],
-               'rivit' => $keraysera_row['rivimaara'],//tilausrivien määrä
-               'paino' => $pakkaus_info_row['tuotemassa'],
-               'tilavuus' => $pakkaus_info_row['kuutiot'],
-               'lask_nimi' => $rakir_row['toim_nimi'],
-               'lask_nimitark' => $rakir_row['toim_nimitark'],
-               'lask_osoite' => $rakir_row['toim_osoite'],
-               'lask_postino' => $rakir_row['toim_postino'],
-               'lask_postitp' => $rakir_row['toim_postitp'],
-               'lask_viite' => $row['viesti'],
-               'lask_merkki' => $row['ohjausmerkki'],
-               'reittietikettitulostin' => $kirjoitin_row['komento'],
-             );
+              'tilriv' => $row['tunnus'], //tilausnumero
+              'pakkaus_kirjain' => excel_column_name($keraysera_row['pakkausnro']),
+              'sscc' => $keraysera_row['sscc'],
+              'toimitustapa' => $row['toimitustapa'],
+              'rivit' => $keraysera_row['rivimaara'], //tilausrivien määrä
+              'paino' => $pakkaus_info_row['tuotemassa'],
+              'tilavuus' => $pakkaus_info_row['kuutiot'],
+              'lask_nimi' => $rakir_row['toim_nimi'],
+              'lask_nimitark' => $rakir_row['toim_nimitark'],
+              'lask_osoite' => $rakir_row['toim_osoite'],
+              'lask_postino' => $rakir_row['toim_postino'],
+              'lask_postitp' => $rakir_row['toim_postitp'],
+              'lask_viite' => $row['viesti'],
+              'lask_merkki' => $row['ohjausmerkki'],
+              'reittietikettitulostin' => $kirjoitin_row['komento'],
+            );
 
-             tulosta_reittietiketti($params);
+            tulosta_reittietiketti($params);
           }
         }
       }

@@ -24,7 +24,7 @@ if (isset($_REQUEST["tee"]) and $_REQUEST["tee"] == "NAYTATILAUS") {
   flush();
 }
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if (isset($livesearch_tee) and $livesearch_tee == "TOIMITTAJAHAKU") {
   livesearch_toimittajahaku();
@@ -131,18 +131,18 @@ if (isset($tiedosto)) {
 $laskuri = 0;
 $valitutlaskut = 0;
 
-require ("inc/verkkolasku-in-erittele-laskut.inc");
+require "inc/verkkolasku-in-erittele-laskut.inc";
 
 if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
 
-  require ("inc/verkkolasku-in.inc");
+  require "inc/verkkolasku-in.inc";
 
   echo "<table><tr>";
   echo "<th>".t("Vastaanottaja")."<br>".t("Yhtiö")."</th><th>".t("Toiminto")."</th><th>".t("Ovttunnus")."<br>".t("Y-tunnus")."</th><th>".t("Toimittaja")."</th><th>".t("Laskunumero")."<br>".t("Maksutili")."<br>".t("Summa")."</th><th>".t("Pvm")."</th></tr><tr>";
 
   while (($file = readdir($handle)) !== FALSE) {
 
-    if (is_file($verkkolaskuvirheet_vaarat."/".$file) and substr($file,0,1) != ".") {
+    if (is_file($verkkolaskuvirheet_vaarat."/".$file) and substr($file, 0, 1) != ".") {
       unset($yhtiorow);
       unset($xmlstr);
 
@@ -181,19 +181,19 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
 
         // Katsotaan mitä aineistoa käpistellään
         if (strpos($file, "finvoice") !== false or strpos($file, "maventa") !== false or strpos($file, "apix") !== false) {
-          require("inc/verkkolasku-in-finvoice.inc");
+          require "inc/verkkolasku-in-finvoice.inc";
           $kumpivoice = "FINVOICE";
         }
-        elseif (strpos($file, "teccominvoice") !== false){
-          require("inc/verkkolasku-in-teccom.inc");
+        elseif (strpos($file, "teccominvoice") !== false) {
+          require "inc/verkkolasku-in-teccom.inc";
           $kumpivoice = "TECCOM";
         }
         else {
-          require("inc/verkkolasku-in-pupevoice.inc");
+          require "inc/verkkolasku-in-pupevoice.inc";
           $kumpivoice = "PUPEVOICE";
         }
 
-         $laskuttajan_osoite   = "";
+        $laskuttajan_osoite   = "";
         $laskuttajan_postitp   = "";
         $laskuttajan_postino   = "";
         $laskuttajan_maa     = "";
@@ -212,7 +212,7 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
           $laskuttajan_postitp   = utf8_decode($xml->InvoiceHeader->SellerParty->Address->City);
           $laskuttajan_postino   = utf8_decode($xml->InvoiceHeader->SellerParty->Address->PostalCode);
           $laskuttajan_maa     = utf8_decode($xml->InvoiceHeader->SellerParty->Address->CountryCode);
-           $laskuttajan_tilino    = $lasku_toimittaja["ultilno"];
+          $laskuttajan_tilino    = $lasku_toimittaja["ultilno"];
           $laskuttajan_ovt    = $lasku_toimittaja["ovt_tunnus"];
           $laskuttajan_vat    = $lasku_toimittaja["ytunnus"];
 
@@ -565,9 +565,9 @@ if ($handle = opendir($verkkolaskuvirheet_vaarat)) {
 
         echo "</td>";
 
-        $tpp = substr($laskun_tapvm,6,2);
-        $tpk = substr($laskun_tapvm,4,2);
-        $tpv = substr($laskun_tapvm,0,4);
+        $tpp = substr($laskun_tapvm, 6, 2);
+        $tpk = substr($laskun_tapvm, 4, 2);
+        $tpv = substr($laskun_tapvm, 0, 4);
 
         echo "<td>".tv1dateconv($tpv."-".$tpk."-".$tpp)."</td>";
         echo "</tr>";

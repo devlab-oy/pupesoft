@@ -1,11 +1,11 @@
 <?php
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require('inc/parametrit.inc');
+require 'inc/parametrit.inc';
 
 if ($lataa_tiedosto == 1) {
   readfile("dataout/".$filenimi);
@@ -44,57 +44,57 @@ if ($kausi == "") {
   exit;
 }
 
-function teetietue ($yhtio, $tosite, $summa, $ltunnus, $tapvm, $tilino, $kustp, $projekti, $ytunnus, $nimi, $selite, $jakso) {
+function teetietue($yhtio, $tosite, $summa, $ltunnus, $tapvm, $tilino, $kustp, $projekti, $ytunnus, $nimi, $selite, $jakso) {
 
   $ulos = 'TKB';                                //tietuetyyppi
-  $ulos .= sprintf ('%-8s',  $tapvm);                      //päivämäärä
-  $ulos .= sprintf ('%-08d', $tosite);                     //tositelaji ja tositenumero
-  $ulos .= sprintf ('%03d', '0');                       //???? tositenumeron tarkenne 1
-  $ulos .= sprintf ('%03d', '0');                       //???? tositenumeron tarkenne 2
-  $ulos .= sprintf ('%06d', $tilino);                      //tili
-  $ulos .= sprintf ('%6.6s', $kustp);
-  $ulos .= sprintf ('%6.6s', $projekti);
-  $ulos .= sprintf ('%-10s', ' ');                       //???? projektilaji
-  $ulos .= sprintf ('%04d', $jakso);                  //jakso
+  $ulos .= sprintf('%-8s',  $tapvm);                      //päivämäärä
+  $ulos .= sprintf('%-08d', $tosite);                     //tositelaji ja tositenumero
+  $ulos .= sprintf('%03d', '0');                       //???? tositenumeron tarkenne 1
+  $ulos .= sprintf('%03d', '0');                       //???? tositenumeron tarkenne 2
+  $ulos .= sprintf('%06d', $tilino);                      //tili
+  $ulos .= sprintf('%6.6s', $kustp);
+  $ulos .= sprintf('%6.6s', $projekti);
+  $ulos .= sprintf('%-10s', ' ');                       //???? projektilaji
+  $ulos .= sprintf('%04d', $jakso);                  //jakso
 
   if ($summa > 0) {
     $etu   = '+';
-    $summa = sprintf ('%016d',  round(100 * $summa,2));
-    $maara = sprintf ('%015d',  round(100 * $summa,2));
+    $summa = sprintf('%016d',  round(100 * $summa, 2));
+    $maara = sprintf('%015d',  round(100 * $summa, 2));
   }
   else {
     $etu = '-';
-    $summa = sprintf ('%016d',  round(100 * $summa * -1,2));
-    $maara = sprintf ('%015d',  round(100 * $summa * -1,2));
+    $summa = sprintf('%016d',  round(100 * $summa * -1, 2));
+    $maara = sprintf('%015d',  round(100 * $summa * -1, 2));
   }
 
   $ulos .= $etu;                                //rahamäärän etumerkki
   $ulos .= $summa;                              //rahamäärä
   $ulos .= $etu;                                //määrän etumerkki
   $ulos .= $maara;                              //määrä
-  $ulos .= sprintf ('%-72.72s', $nimi . "/" . $selite);            //liikekumppanin nimi + tiliöinnin selite
-  $ulos .= sprintf ('%-8.8s', '');                       //asiakasnumero
-  $ulos .= sprintf ('%-2.2s', ' ');                      //???? laskulaji
-  $ulos .= sprintf ('%-6.6s', ' ');                       //laskun numero
-  $ulos .= sprintf ('%-6.6s', ' ');                      //???? kustannuslaji
-  $ulos .= sprintf ('%-8.8s', ' ');                      //???? ryhmä3
-  $ulos .= sprintf ('%-6.6s', ' ');                      //???? ryhmä3 laji
-  $ulos .= sprintf ('%-8.8s', ' ');                      //???? ryhmä4
-  $ulos .= sprintf ('%-6.6s', ' ');                      //???? ryhmä4 laji
+  $ulos .= sprintf('%-72.72s', $nimi . "/" . $selite);            //liikekumppanin nimi + tiliöinnin selite
+  $ulos .= sprintf('%-8.8s', '');                       //asiakasnumero
+  $ulos .= sprintf('%-2.2s', ' ');                      //???? laskulaji
+  $ulos .= sprintf('%-6.6s', ' ');                       //laskun numero
+  $ulos .= sprintf('%-6.6s', ' ');                      //???? kustannuslaji
+  $ulos .= sprintf('%-8.8s', ' ');                      //???? ryhmä3
+  $ulos .= sprintf('%-6.6s', ' ');                      //???? ryhmä3 laji
+  $ulos .= sprintf('%-8.8s', ' ');                      //???? ryhmä4
+  $ulos .= sprintf('%-6.6s', ' ');                      //???? ryhmä4 laji
   $ulos .= '+';                                //???? määrä kahden etumerkki
-  $ulos .= sprintf ('%015d', '0');                      //???? määrä 2
+  $ulos .= sprintf('%015d', '0');                      //???? määrä 2
   $ulos .= '+';                                //???? määrä kolmen etumerkki
-  $ulos .= sprintf ('%015d', '0');                      //???? määrä 3
-  $ulos .= sprintf ('%-4s', ' ');                        //???? yritysnumero
-  $ulos .= sprintf ('%-20s', ' ');                      //???? maksatuserätunnus
-  $ulos .= sprintf ('%-3s', 'EUR');                      //rahayksikön valuutta
+  $ulos .= sprintf('%015d', '0');                      //???? määrä 3
+  $ulos .= sprintf('%-4s', ' ');                        //???? yritysnumero
+  $ulos .= sprintf('%-20s', ' ');                      //???? maksatuserätunnus
+  $ulos .= sprintf('%-3s', 'EUR');                      //rahayksikön valuutta
 
   $palautus = $ulos."\r\n";
 
   return $palautus;
 }
 
-function rivit ($result, $laji, $yhtio, $summataan) {
+function rivit($result, $laji, $yhtio, $summataan) {
 
   $rivitruudulle   = array();
   $palautus     = "";
@@ -132,7 +132,7 @@ function rivit ($result, $laji, $yhtio, $summataan) {
     $projprow = mysql_fetch_assoc($vresult);
 
     if ((int) $kustprow['nimi'] == 0) {
-       $row['kustp'] = "";  //tsekataan ettei seurantakohteille  tule turhia etunollia
+      $row['kustp'] = "";  //tsekataan ettei seurantakohteille  tule turhia etunollia
     }
     else {
       $row['kustp'] = $kustprow['nimi'];
@@ -155,7 +155,7 @@ function rivit ($result, $laji, $yhtio, $summataan) {
       $trow = mysql_fetch_assoc($tresult);
 
       if ($laji == 30) {
-        $tosite = $laji.sprintf ('%06d', $row['laskunro']);
+        $tosite = $laji.sprintf('%06d', $row['laskunro']);
       }
       else {
         if ($trow["tosite"] == 0) {
@@ -355,7 +355,7 @@ if (mysql_num_rows($result) > 0) {
   echo "<tr>";
 
   for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
-    echo "<th>".mysql_field_name($result,$i)."</th>";
+    echo "<th>".mysql_field_name($result, $i)."</th>";
   }
 
   echo "</tr>";
@@ -376,7 +376,7 @@ if (mysql_num_rows($result) > 0) {
 }
 
 if ($tikonerr != 0) {
-  require ("inc/footer.inc");
+  require "inc/footer.inc";
   exit;
 }
 
@@ -384,7 +384,7 @@ if ($tikonerr != 0) {
 $nimi = "TIKON-$kukarow[yhtio]-".date("ymd.His-s").".dat";
 
 //avataan tiedosto
-$toot = fopen("dataout/".$nimi,"w+");
+$toot = fopen("dataout/".$nimi, "w+");
 
 echo "$yhtiorow[nimi] ".t("kirjanpidolliset tapahtumat kaudella")." $kausi. ";
 

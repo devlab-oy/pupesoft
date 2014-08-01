@@ -46,12 +46,12 @@ else {
   $monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI", "TUOTEMYYJA", "TUOTEOSTAJA");
 }
 
-require ("tilauskasittely/monivalintalaatikot.inc");
+require "tilauskasittely/monivalintalaatikot.inc";
 
 echo "<br>";
 echo "<table style='display:inline;'>";
 echo "<tr>";
-echo "<th>",t("N‰yt‰"),":</th>";
+echo "<th>", t("N‰yt‰"), ":</th>";
 echo "<td nowrap>";
 
 $nayta_select1 = $nayta_select2 = $nayta_select3 = $nayta_select4 = $nayta_select5 = '';
@@ -72,17 +72,17 @@ elseif ($nayta_valinta == 'tuoteostajittain') {
 }
 
 if ($asiakasanalyysi) {
-  echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='osastoittain' $nayta_select1>",t("Asiakasosastoittain"),"<br/>";
-  echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteryhmittain' $nayta_select2>",t("Asiakasryhmitt‰in"),"<br/>";
+  echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='osastoittain' $nayta_select1>", t("Asiakasosastoittain"), "<br/>";
+  echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteryhmittain' $nayta_select2>", t("Asiakasryhmitt‰in"), "<br/>";
 }
 else {
-  echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='osastoittain' $nayta_select1>",t("Tuoteosastoittain"),"<br/>";
-  echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteryhmittain' $nayta_select2>",t("Tuoteryhmitt‰in"),"<br/>";
+  echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='osastoittain' $nayta_select1>", t("Tuoteosastoittain"), "<br/>";
+  echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteryhmittain' $nayta_select2>", t("Tuoteryhmitt‰in"), "<br/>";
 }
 
-if (!$asiakasanalyysi) echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuotemerkeittain' $nayta_select3>",t("Tuotemerkeitt‰in"),"<br/>";
-if (!$asiakasanalyysi) echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuotemyyjittain' $nayta_select4>",t("Tuotemyyjitt‰in"),"<br/>";
-if (!$asiakasanalyysi) echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteostajittain' $nayta_select5>",t("Tuoteostajittain");
+if (!$asiakasanalyysi) echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuotemerkeittain' $nayta_select3>", t("Tuotemerkeitt‰in"), "<br/>";
+if (!$asiakasanalyysi) echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuotemyyjittain' $nayta_select4>", t("Tuotemyyjitt‰in"), "<br/>";
+if (!$asiakasanalyysi) echo "<input type='radio' name='nayta_valinta' id='nayta_valinta' value='tuoteostajittain' $nayta_select5>", t("Tuoteostajittain");
 echo "</td>";
 echo "</tr>";
 
@@ -90,10 +90,10 @@ if (!$asiakasanalyysi) {
   $result = t_avainsana("S");
 
   echo "<tr>";
-  echo "<th>",t("Tuotteen status"),"</th>";
+  echo "<th>", t("Tuotteen status"), "</th>";
   echo "<td><select name='status'><option value=''>".t("Kaikki")."</option>";
 
-  while ($lajirow = mysql_fetch_assoc ($result)) {
+  while ($lajirow = mysql_fetch_assoc($result)) {
     $selli = '';
     if ($lajirow['selite'] == $status) {
       $selli = 'SELECTED';
@@ -193,7 +193,7 @@ if ($tee == "YHTEENVETO") {
     echo "<th nowrap><a href='$PHP_SELF?toim=$toim&tee=YHTEENVETO&nayta_valinta=$nayta_valinta&osasto=$osasto&try=$try&tuotemerkki=$tuotemerkki&tuotemyyja=$tuotemyyja&tuoteostaja=$tuoteostaja&tuotemalli=$tuotemalli&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&order=".$orderurl."malli&status=$status'>".t("Tuotemalli")."</a><br>&nbsp;</th>";
   }
 
-  if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI' and $tuotemyyja != 'KAIKKI' and $tuoteostaja != 'KAIKKI' and $tuotemalli != 'KAIKKI')  {
+  if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI' and $tuotemyyja != 'KAIKKI' and $tuoteostaja != 'KAIKKI' and $tuotemalli != 'KAIKKI') {
     echo "<th nowrap>".t("ABC")."<br>".t("Luokka")."</th>";
   }
 
@@ -309,7 +309,7 @@ if ($tee == "YHTEENVETO") {
   $prequery = "";
   $orderby  = " ORDER BY ";
 
-  if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI' and $tuotemyyja != 'KAIKKI' and $tuoteostaja != 'KAIKKI' and $tuotemalli != 'KAIKKI')  {
+  if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI' and $tuotemyyja != 'KAIKKI' and $tuoteostaja != 'KAIKKI' and $tuotemalli != 'KAIKKI') {
     $prequery .= " abc_aputaulu.luokka,";
     $groupby  .= " abc_aputaulu.luokka,";
     $orderby  .= " abc_aputaulu.luokka,";
@@ -325,13 +325,13 @@ if ($tee == "YHTEENVETO") {
   }
 
   // n‰m‰ m‰‰ritt‰‰ kumpaan tauluun Joinataan, asiakas vai tuote
-  $asiakas_join_array = array('AK','AM','AP','AR');
-  $tuote_join_array = array('TK','TM','TP','TR','TV');
+  $asiakas_join_array = array('AK', 'AM', 'AP', 'AR');
+  $tuote_join_array = array('TK', 'TM', 'TP', 'TR', 'TV');
 
-  if (in_array($abcchar,$asiakas_join_array)) {
+  if (in_array($abcchar, $asiakas_join_array)) {
     $analyysin_join = " JOIN asiakas on (abc_aputaulu.yhtio = asiakas.yhtio and abc_aputaulu.tuoteno = asiakas.tunnus) ";
   }
-  elseif (in_array($abcchar,$tuote_join_array)) {
+  elseif (in_array($abcchar, $tuote_join_array)) {
     $analyysin_join = " JOIN tuote USING (yhtio, tuoteno) ";
   }
   else {
@@ -460,34 +460,34 @@ if ($tee == "YHTEENVETO") {
       echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=OSASTOTRY&mul_malli[]=$row[malli]&lisatiedot=$lisatiedot&status=$status'>$row[malli]</a></td>";
     }
 
-    if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI' and $tuotemyyja != 'KAIKKI' and $tuoteostaja != 'KAIKKI' and $tuotemalli != 'KAIKKI')  {
+    if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI' and $tuotemyyja != 'KAIKKI' and $tuoteostaja != 'KAIKKI' and $tuotemalli != 'KAIKKI') {
       echo "<td valign='top'><a href='$PHP_SELF?toim=$toim&tee=LUOKKA&luokka=$row[luokka]$ulisa&saapumispvm=$saapumispvm&lisatiedot=$lisatiedot&status=$status'>".$ryhmanimet[$row["luokka"]]."</a></td>";
     }
 
-    echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["summa"]));
+    echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.1f', $row["summa"]));
     echo "<input type='hidden' name='summa_$i' id='summa_$i' value='$row[summa]'></td>";
 
     if ($lisatiedot == "TARK") {
-      echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["max"]))."</td>";
-      echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["min"]))."</td>";
+      echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.1f', $row["max"]))."</td>";
+      echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.1f', $row["min"]))."</td>";
     }
 
     if ($lisatiedot != "OSTONOHJ") {
-      echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["kate"]))."</td>";
-      echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["kateprosentti"]))."</td>";
+      echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.1f', $row["kate"]))."</td>";
+      echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.1f', $row["kateprosentti"]))."</td>";
     }
 
     if ($lisatiedot == "TARK" or $lisatiedot == "OSTONOHJ") {
       if ($lisatiedot == "TARK") {
-        echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["kateosuus"]))."</td>";
+        echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.1f', $row["kateosuus"]))."</td>";
       }
-      echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.0f',$row["tuotelkm"]))."</td>";
+      echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.0f', $row["tuotelkm"]))."</td>";
     }
 
-    if (!$asiakasanalyysi) echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["vararvo"]))."</td>";
+    if (!$asiakasanalyysi) echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.1f', $row["vararvo"]))."</td>";
 
     if (!$asiakasanalyysi and ($lisatiedot == "TARK" or $lisatiedot == "OSTONOHJ")) {
-      echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.0f',$row["saldo"]))."</td>";
+      echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.0f', $row["saldo"]))."</td>";
     }
 
     if ($lisatiedot == "OSTONOHJ") {
@@ -497,11 +497,11 @@ if ($tee == "YHTEENVETO") {
       echo "</td>";
     }
 
-    if (!$asiakasanalyysi) echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["kiertonopeus"]))."</td>";
+    if (!$asiakasanalyysi) echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.1f', $row["kiertonopeus"]))."</td>";
 
     if ($lisatiedot == "OSTONOHJ") {
       if (${'kiertonopeus_input'.$i} == '') {
-        $kntavoitevalue = str_replace(".",",",$paramrow["kiertonopeus_tavoite"]);
+        $kntavoitevalue = str_replace(".", ",", $paramrow["kiertonopeus_tavoite"]);
       }
       else {
         $kntavoitevalue = ${'kiertonopeus_input'.$i};
@@ -511,25 +511,25 @@ if ($tee == "YHTEENVETO") {
     }
 
     if (!$asiakasanalyysi and $lisatiedot != "OSTONOHJ") {
-      echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["kate_kertaa_kierto"]))."</td>";
-      echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.0f',$row["kpl"]))."</td>";
+      echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.1f', $row["kate_kertaa_kierto"]))."</td>";
+      echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.0f', $row["kpl"]))."</td>";
     }
 
     if (!$asiakasanalyysi and ($lisatiedot == "TARK" or $lisatiedot == "OSTONOHJ")) {
       if ($lisatiedot == "TARK") {
-        echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["myyntieranakpl"]))."</td>";
-        echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["myyntieranarvo"]))."</td>";
-        echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.0f',$row["rivia"]))."</td>";
+        echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.1f', $row["myyntieranakpl"]))."</td>";
+        echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.1f', $row["myyntieranarvo"]))."</td>";
+        echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.0f', $row["rivia"]))."</td>";
       }
 
-      echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.0f',$row["puuterivia"]))."</td>";
+      echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.0f', $row["puuterivia"]))."</td>";
 
       if ($lisatiedot == "OSTONOHJ") {
         echo "<td align='right' valign='top' nowrap></td>";
       }
     }
 
-    echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["palvelutaso"]))."</td>";
+    echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.1f', $row["palvelutaso"]))."</td>";
 
     if ($lisatiedot == "OSTONOHJ") {
       $ostoera_paivissa = 0;
@@ -565,22 +565,22 @@ if ($tee == "YHTEENVETO") {
         echo "Vuosiostot m‰‰r‰ = $row[osto_kpl]<br>";
         echo "Vuosiostot $row[osto_kerrat] kertaa<br><br>";
 
-        echo "Keskim‰‰r‰inen ostoer‰ on ".round(($row["osto_kpl"] / $row["osto_kerrat"]), 0)." kpl. (".round($row["osto_kpl"],0)." / $row[osto_kerrat])<br>";
+        echo "Keskim‰‰r‰inen ostoer‰ on ".round(($row["osto_kpl"] / $row["osto_kerrat"]), 0)." kpl. (".round($row["osto_kpl"], 0)." / $row[osto_kerrat])<br>";
         echo "Keskim‰‰rin myyd‰‰n ".round(($row["kpl"] / 365), 2)." ($row[kpl] / 365) kappaletta p‰iv‰ss‰<br>";
         echo "Vuodessa myyd‰‰n rivi‰: $row[rivia]<br>";
-        echo "eli ".round(($row["osto_kpl"] / $row["osto_kerrat"]), 0)." antaa n‰in tuon noin ".round(($row["osto_kpl"] / $row["osto_kerrat"]) / ($row["kpl"] / 365), 2)." p‰iv‰‰ (".round(($row["osto_kpl"] / $row["osto_kerrat"]),2)." / ".round(($row["kpl"] / 365),2).")<br><br>";
+        echo "eli ".round(($row["osto_kpl"] / $row["osto_kerrat"]), 0)." antaa n‰in tuon noin ".round(($row["osto_kpl"] / $row["osto_kerrat"]) / ($row["kpl"] / 365), 2)." p‰iv‰‰ (".round(($row["osto_kpl"] / $row["osto_kerrat"]), 2)." / ".round(($row["kpl"] / 365), 2).")<br><br>";
 
         echo "$row[tuotenumerot]<br>";
         echo "KPL: $row[kpl] &#09; OSTO_KPL: $row[osto_kpl] &#09; OSTO_KERRAT: $row[osto_kerrat] &#09; OSTO_RIVIT: $row[osto_rivia]<br>";
 
-        echo "Saapumisten tavoite: ".round(($row["osto_kerrat"]/str_replace(",",".",$row["kiertonopeus"]))*str_replace(",",".",$kntavoite),0)." eli ($row[osto_kerrat]/$row[kiertonopeus])*$kntavoite";
+        echo "Saapumisten tavoite: ".round(($row["osto_kerrat"]/str_replace(",", ".", $row["kiertonopeus"]))*str_replace(",", ".", $kntavoite), 0)." eli ($row[osto_kerrat]/$row[kiertonopeus])*$kntavoite";
 
 
         echo "</pre>";
       }
 
       if (${'palvelutaso_input'.$i} == '') {
-        $pttvalue = str_replace(".",",",$paramrow["palvelutaso_tavoite"]);
+        $pttvalue = str_replace(".", ",", $paramrow["palvelutaso_tavoite"]);
       }
       else {
         $pttvalue = ${'palvelutaso_input'.$i};
@@ -589,7 +589,7 @@ if ($tee == "YHTEENVETO") {
       echo "<td align='center' valign='top' nowrap><input type='text' size='6' name='palvelutaso_input$i' id='palvelutaso_input$i' value='$pttvalue' onkeyup='kutsu_update(\"abc_yhteenveto_form\");'></td>";
 
       if (${'varmuusvarasto_input'.$i} == '') {
-        $varmvarvalue = str_replace(".",",",$paramrow["varmuusvarasto_pv"]);
+        $varmvarvalue = str_replace(".", ",", $paramrow["varmuusvarasto_pv"]);
       }
       else {
         $varmvarvalue = ${'varmuusvarasto_input'.$i};
@@ -598,7 +598,7 @@ if ($tee == "YHTEENVETO") {
       echo "<td align='center' valign='top' nowrap><input type='text' size='5' name='varmuusvarasto_input$i' id='varmuusvarasto_input$i' value='$varmvarvalue' onkeyup='kutsu_update(\"abc_yhteenveto_form\");'></td>";
 
       if (${'hankintaaika_input'.$i} == '') {
-        $haikavalue = str_replace(".",",",$paramrow["toimittajan_toimitusaika_pv"]);
+        $haikavalue = str_replace(".", ",", $paramrow["toimittajan_toimitusaika_pv"]);
       }
       else {
         $haikavalue = ${'hankintaaika_input'.$i};
@@ -614,20 +614,20 @@ if ($tee == "YHTEENVETO") {
       echo "<td align='center' valign='top' nowrap><input type='text' size='6' name='ostoera_pv_$i' id='ostoera_pv_$i' value='$ostoera_paivissa' disabled></td>";
       echo "<td align='center' valign='top' nowrap><input type='text' size='5' name='saap_lkm_nyt_$i' id='saap_lkm_nyt_$i' value='$row[osto_kerrat]' disabled></td>";
 
-      $saaplkmtavoite = round((365/$ostoera_paivissa)*$row["tuotelkm"],0);
+      $saaplkmtavoite = round((365/$ostoera_paivissa)*$row["tuotelkm"], 0);
       echo "<input type='hidden' name='tuote_lkm_$i' id='tuote_lkm_$i' value='$row[tuotelkm]'>";
       echo "<td align='center' valign='top' nowrap><input type='text' size='5' name='saap_lkm_tavoite_$i' id='saap_lkm_tavoite_$i' value='$saaplkmtavoite' disabled></td>";
       echo "<td align='center' valign='top' nowrap><input type='text' size='5' name='otot_lkm_$i' id='otot_lkm_$i' value='$row[rivia]' disabled></td>";
     }
 
     if (!$asiakasanalyysi and $lisatiedot == "TARK") {
-      echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["ostoeranakpl"]))."</td>";
-      echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["ostoeranarvo"]))."</td>";
-      echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.0f',$row["osto_rivia"]))."</td>";
-      echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["kustannus"]))."</td>";
-      echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["kustannus_osto"]))."</td>";
-      echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["kustannus_yht"]))."</td>";
-      echo "<td align='right' valign='top' nowrap>".str_replace(".",",",sprintf('%.1f',$row["total"]))."</td>";
+      echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.1f', $row["ostoeranakpl"]))."</td>";
+      echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.1f', $row["ostoeranarvo"]))."</td>";
+      echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.0f', $row["osto_rivia"]))."</td>";
+      echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.1f', $row["kustannus"]))."</td>";
+      echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.1f', $row["kustannus_osto"]))."</td>";
+      echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.1f', $row["kustannus_yht"]))."</td>";
+      echo "<td align='right' valign='top' nowrap>".str_replace(".", ",", sprintf('%.1f', $row["total"]))."</td>";
     }
     echo "</tr>\n";
 
@@ -650,28 +650,28 @@ if ($tee == "YHTEENVETO") {
   }
 
   //yhteens‰rivi
-  if ($ryhmamyyntiyht != 0) $kateprosenttiyht = round($ryhmakateyht / $ryhmamyyntiyht * 100,2);
+  if ($ryhmamyyntiyht != 0) $kateprosenttiyht = round($ryhmakateyht / $ryhmamyyntiyht * 100, 2);
   else $kateprosenttiyht = 0;
 
-  if ($sumrow["yhtkate"] != 0) $kateosuusyht = round($ryhmakateyht / $sumrow["yhtkate"] * 100,2);
+  if ($sumrow["yhtkate"] != 0) $kateosuusyht = round($ryhmakateyht / $sumrow["yhtkate"] * 100, 2);
   else $kateosuusyht = 0;
 
-  if ($ryhmanvarastonarvoyht != 0) $kiertonopeusyht = round(($ryhmamyyntiyht - $ryhmakateyht) / $ryhmanvarastonarvoyht,2);
+  if ($ryhmanvarastonarvoyht != 0) $kiertonopeusyht = round(($ryhmamyyntiyht - $ryhmakateyht) / $ryhmanvarastonarvoyht, 2);
   else $kiertonopeusyht = 0;
 
-  if ($rivilkmyht != 0) $myyntieranarvoyht = round($ryhmamyyntiyht / $rivilkmyht,2);
+  if ($rivilkmyht != 0) $myyntieranarvoyht = round($ryhmamyyntiyht / $rivilkmyht, 2);
   else $myyntieranarvoyht = 0;
 
-  if ($rivilkmyht != 0) $myyntieranakplyht = round($ryhmakplyht / $rivilkmyht,2);
+  if ($rivilkmyht != 0) $myyntieranakplyht = round($ryhmakplyht / $rivilkmyht, 2);
   else $myyntieranakplyht = 0;
 
-  if ($ryhmapuuterivityht + $rivilkmyht != 0)  $palvelutasoyht = round(100 - ($ryhmapuuterivityht / ($ryhmapuuterivityht + $rivilkmyht) * 100),2);
+  if ($ryhmapuuterivityht + $rivilkmyht != 0)  $palvelutasoyht = round(100 - ($ryhmapuuterivityht / ($ryhmapuuterivityht + $rivilkmyht) * 100), 2);
   else $palvelutasoyht = 0;
 
-  if ($ryhmaostotrivityht != 0) $ostoeranarvoyht = round($ryhmaostotyht / $ryhmaostotrivityht,2);
+  if ($ryhmaostotrivityht != 0) $ostoeranarvoyht = round($ryhmaostotyht / $ryhmaostotrivityht, 2);
   else $ostoeranarvoyht = 0;
 
-  if ($ryhmaostotrivityht != 0) $ostoeranakplyht = round($ryhmaostotkplyht / $ryhmaostotrivityht,2);
+  if ($ryhmaostotrivityht != 0) $ostoeranakplyht = round($ryhmaostotkplyht / $ryhmaostotrivityht, 2);
   else $ostoeranakplyht = 0;
 
   if ($ryhmamyyntiyht != 0 and $ryhmanvarastonarvoyht != 0) {
@@ -709,12 +709,12 @@ if ($tee == "YHTEENVETO") {
     $colspan++;
   }
 
-  if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI' and $tuotemyyja != 'KAIKKI' and $tuoteostaja != 'KAIKKI' and $tuotemalli != 'KAIKKI')  {
+  if ($osasto != 'KAIKKI' and $try != 'KAIKKI' and $tuotemerkki != 'KAIKKI' and $tuotemyyja != 'KAIKKI' and $tuoteostaja != 'KAIKKI' and $tuotemalli != 'KAIKKI') {
     $colspan++;
   }
 
   echo "<td colspan='$colspan'>".t("Yhteens‰").":</td>";
-  echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$ryhmamyyntiyht));
+  echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.1f', $ryhmamyyntiyht));
   echo "<input type='hidden' name='summa_yht' id='summa_yht' value='$ryhmamyyntiyht'>";
   echo "<input type='hidden' name='kate_yht' id='kate_yht' value='$ryhmakateyht'>";
   echo "</td>";
@@ -725,53 +725,53 @@ if ($tee == "YHTEENVETO") {
   }
 
   if ($lisatiedot != "OSTONOHJ") {
-    echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$ryhmakateyht))."</td>";
-    echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$kateprosenttiyht))."</td>";
+    echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.1f', $ryhmakateyht))."</td>";
+    echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.1f', $kateprosenttiyht))."</td>";
   }
 
   if ($lisatiedot == "TARK" or $lisatiedot == "OSTONOHJ") {
     if ($lisatiedot == "TARK") {
-      echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$kateosuusyht))."</td>";
+      echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.1f', $kateosuusyht))."</td>";
     }
-    echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.0f',$tuotelkmyht))."</td>";
+    echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.0f', $tuotelkmyht))."</td>";
   }
 
-  if (!$asiakasanalyysi) echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$ryhmanvarastonarvoyht))."</td>";
+  if (!$asiakasanalyysi) echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.1f', $ryhmanvarastonarvoyht))."</td>";
 
   if (!$asiakasanalyysi and ($lisatiedot == "TARK" or $lisatiedot == "OSTONOHJ")) {
-    echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.0f',$saldoyht))."</td>";
+    echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.0f', $saldoyht))."</td>";
   }
 
   if ($lisatiedot == "OSTONOHJ") {
     echo "<td align='right' valign='top' nowrap><input type='text' size='10' name='vararvo_yht' id='vararvo_yht' value='' disabled></td>";
   }
 
-  if (!$asiakasanalyysi) echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$kiertonopeusyht))."</td>";
+  if (!$asiakasanalyysi) echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.1f', $kiertonopeusyht))."</td>";
 
   if ($lisatiedot == "OSTONOHJ") {
     echo "<td align='center' class='spec' nowrap><input type='text' size='5' name='kiertonopeus_input_yht' id='kiertonopeus_input_yht' value='' disabled></td>";
   }
 
   if (!$asiakasanalyysi and $lisatiedot != "OSTONOHJ") {
-    echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$kate_kertaa_kierto))."</td>";
-    echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.0f',$ryhmakplyht))."</td>";
+    echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.1f', $kate_kertaa_kierto))."</td>";
+    echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.0f', $ryhmakplyht))."</td>";
   }
 
   if (!$asiakasanalyysi and ($lisatiedot == "TARK" or $lisatiedot == "OSTONOHJ")) {
     if ($lisatiedot == "TARK") {
-      echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$myyntieranakplyht))."</td>";
-      echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$myyntieranarvoyht))."</td>";
-      echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.0f',$rivilkmyht))."</td>";
+      echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.1f', $myyntieranakplyht))."</td>";
+      echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.1f', $myyntieranarvoyht))."</td>";
+      echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.0f', $rivilkmyht))."</td>";
     }
 
-    echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.0f',$ryhmapuuterivityht))."</td>";
+    echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.0f', $ryhmapuuterivityht))."</td>";
 
     if ($lisatiedot == "OSTONOHJ") {
       echo "<td align='center' valign='top' nowrap></td>";
     }
   }
 
-  echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$palvelutasoyht))."</td>";
+  echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.1f', $palvelutasoyht))."</td>";
 
   if ($lisatiedot == "OSTONOHJ") {
     echo "<td align='center' class='spec' nowrap><input type='text' size='5' name='palvelutaso_input_yht' id='palvelutaso_input_yht' value='100' disabled></td>";
@@ -786,13 +786,13 @@ if ($tee == "YHTEENVETO") {
   }
 
   if (!$asiakasanalyysi and $lisatiedot == "TARK") {
-    echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$ostoeranakplyht))."</td>";
-    echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$ostoeranarvoyht))."</td>";
-    echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.0f',$ryhmaostotrivityht))."</td>";
-    echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$ryhmakustamyyyht))."</td>";
-    echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$ryhmakustaostyht))."</td>";
-    echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$ryhmakustayhtyht))."</td>";
-    echo "<td align='right' class='spec' nowrap>".str_replace(".",",",sprintf('%.1f',$totalyht))."</td>";
+    echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.1f', $ostoeranakplyht))."</td>";
+    echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.1f', $ostoeranarvoyht))."</td>";
+    echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.0f', $ryhmaostotrivityht))."</td>";
+    echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.1f', $ryhmakustamyyyht))."</td>";
+    echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.1f', $ryhmakustaostyht))."</td>";
+    echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.1f', $ryhmakustayhtyht))."</td>";
+    echo "<td align='right' class='spec' nowrap>".str_replace(".", ",", sprintf('%.1f', $totalyht))."</td>";
   }
 
   echo "</tr>\n";

@@ -2,7 +2,7 @@
 
 ob_start();
 
-require ("parametrit.inc");
+require "parametrit.inc";
 
 $query = "UPDATE kuka SET
           session       = ''

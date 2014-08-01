@@ -1,7 +1,7 @@
 <?php
 
-require_once("connect.inc");
-require_once("functions.inc");
+require_once "connect.inc";
+require_once "functions.inc";
 
 if (!isset($tuotenumero)) $tuotenumero = '';
 if (!isset($nimitys)) $nimitys = '';

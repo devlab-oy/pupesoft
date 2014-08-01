@@ -3,7 +3,7 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Tuoteryhmien myynnit")."</font><hr>";
 
@@ -41,7 +41,7 @@ if ($submit != '' and $vv != '' and $kk != '') {
   }
 
   $ayy = "$vv-$kk-01";
-  $lyy = date("Y-m-01",mktime(0, 0, 0, $kk+1, 1, $vv));
+  $lyy = date("Y-m-01", mktime(0, 0, 0, $kk+1, 1, $vv));
 
   // tehd‰‰n asiakkaan ostot tuoteryhm‰st‰
   echo "<br><font class='message'>".t("Tuoteryhmien myynnit")." $vv-$kk ".t("osastolta")." $osasto (<font color='$cmyynti'>".t("myynti")."</font>/<font color='$ckate'>".t("kate")."</font>/<font color='$ckatepr'>".t("kateprosentti")."</font>)</font><hr>";
@@ -72,7 +72,7 @@ if ($submit != '' and $vv != '' and $kk != '') {
 
   // ja kelataan resultti alkuun
   if (mysql_num_rows($result)>0)
-    mysql_data_seek($result,0);
+    mysql_data_seek($result, 0);
 
   $col=1;
   echo "<table>\n";
@@ -83,9 +83,9 @@ if ($submit != '' and $vv != '' and $kk != '') {
 
     // lasketaan pylv‰iden korkeus
     if ($maxeur>0) {
-      $hmyynti  = round(50*$sumrow['myynti']/$maxeur,0);
-      $hkate    = round(50*$sumrow['kate']/$maxeur,0);
-      $hkatepro = round($sumrow['katepro']/2,0);
+      $hmyynti  = round(50*$sumrow['myynti']/$maxeur, 0);
+      $hkate    = round(50*$sumrow['kate']/$maxeur, 0);
+      $hkatepro = round($sumrow['katepro']/2, 0);
       if ($hkatepro>60) $hkatepro = 60;
     }
     else {
@@ -134,4 +134,4 @@ if ($submit != '' and $vv != '' and $kk != '') {
 $formi  = "tuomy";
 $kentta = "vv";
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

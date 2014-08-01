@@ -4,41 +4,41 @@
 // palautetaan virheviesti jos tapahtuu jotain, muuten palautetaan tyhjää
 
 if (!function_exists("verkkolasku_in")) {
-  function verkkolasku_in ($file, $luolasku = TRUE) {
+  function verkkolasku_in($file, $luolasku = TRUE) {
     global $kukarow, $yhtiorow, $toim_asiakkaantiedot, $xmlstr, $liitetaanko_editilaus_laskulle_hakemisto, $verkkolaskut_orig;
 
     if (!is_file($file)) {
-      echo ("Tiedostoa $file ei löydy!\n");
-      return ("Tiedostoa $file ei löydy!");
+      echo "Tiedostoa $file ei löydy!\n";
+      return "Tiedostoa $file ei löydy!";
     }
 
     // luetaan file muuttujaan
     $xmlstr = file_get_contents($file);
 
     if ($xmlstr === FALSE) {
-      echo ("Tiedosto $file luku epäonnistui!\n");
-      return ("Tiedosto $file luku epäonnistui!");
+      echo "Tiedosto $file luku epäonnistui!\n";
+      return "Tiedosto $file luku epäonnistui!";
     }
 
     // luetaan sisään xml
     $xml = simplexml_load_string($xmlstr);
 
     if ($xml === FALSE) {
-      echo ("Tiedosto $file ei ole validi XML!\n");
-      return ("Tiedosto $file ei ole validi XML!");
+      echo "Tiedosto $file ei ole validi XML!\n";
+      return "Tiedosto $file ei ole validi XML!";
     }
 
-    require_once("inc/functions.inc");
+    require_once "inc/functions.inc";
 
     // Katsotaan mitä aineistoa käpistellään
     if (strpos($file, "finvoice") !== false or strpos($file, "maventa") !== false) {
-      require("inc/verkkolasku-in-finvoice.inc");
+      require "inc/verkkolasku-in-finvoice.inc";
     }
-    elseif (strpos($file, "teccominvoice") !== false){
-      require("inc/verkkolasku-in-teccom.inc");
+    elseif (strpos($file, "teccominvoice") !== false) {
+      require "inc/verkkolasku-in-teccom.inc";
     }
     else {
-      require("inc/verkkolasku-in-pupevoice.inc");
+      require "inc/verkkolasku-in-pupevoice.inc";
     }
 
     // Nämä muuttujat kuuluisi olla setattuna:
@@ -121,7 +121,7 @@ if (!function_exists("verkkolasku_in")) {
     $yhtio         = trim($yhtio);
 
     // Itella lehettää joskus verkkotunnusta todella kummallisessa muodossa.. kokeillaan arvailla oikein
-    $pos = strpos($verkkotunnus_vas,"@");
+    $pos = strpos($verkkotunnus_vas, "@");
 
     if ($pos !== FALSE) {
       $verkkotunnus_vas = substr($verkkotunnus_vas, 0, $pos); // otetaan info ekaan ättämerkkiin asti
@@ -262,7 +262,7 @@ if (!function_exists("verkkolasku_in")) {
         mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
       }
 
-      return ($return);
+      return $return;
     }
     elseif (isset($yhtiorow)) {
 
@@ -516,7 +516,7 @@ if (!function_exists("verkkolasku_in")) {
     $rivikohtaiset_rahtikulut = 0;
 
     if (@file_exists("inc/maventa.inc") and (($trow['asn_sanomat'] == "M" and $ebid == 'MAVENTAXML') or ($trow['asn_sanomat'] == 'F' and $ebid == 'FINVOICEXML'))) {
-      require("inc/maventa.inc");
+      require "inc/maventa.inc";
     }
 
     // Tätä voi ajaa myös verkkolaskuvirheetohjelmasta silloin $luolasku on FALSE ja lopetetaan tässä vaiheessa
@@ -537,7 +537,7 @@ if (!function_exists("verkkolasku_in")) {
 
         mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 
-        return ($return);
+        return $return;
       }
       else {
         $return .= "Toimittaja: $trow[ytunnus]/$trow[ovttunnus] - $trow[nimi]\nEpäonnistumisen syy: ";
@@ -876,9 +876,9 @@ if (!function_exists("verkkolasku_in")) {
       $tillop = explode("-", $yhtiorow["ostoreskontrakausi_loppu"]);
 
       // Verrataan vähän päivämääriä. onpa ikävää PHP:ssä!
-      $ostoresktilalk = (int) date('Ymd', mktime(0,0,0, $tilalk[1], $tilalk[2], $tilalk[0]));
-      $ostoresktillop = (int) date('Ymd', mktime(0,0,0, $tillop[1], $tillop[2], $tillop[0]));
-      $syotettypvm   = (int) date('Ymd', mktime(0,0,0, $tpk, $tpp, $tpv));
+      $ostoresktilalk = (int) date('Ymd', mktime(0, 0, 0, $tilalk[1], $tilalk[2], $tilalk[0]));
+      $ostoresktillop = (int) date('Ymd', mktime(0, 0, 0, $tillop[1], $tillop[2], $tillop[0]));
+      $syotettypvm   = (int) date('Ymd', mktime(0, 0, 0, $tpk, $tpp, $tpv));
 
       if ($syotettypvm > $ostoresktillop) {
         $tpp = $tillop[2];
@@ -910,7 +910,7 @@ if (!function_exists("verkkolasku_in")) {
         if (mysql_num_rows($avainresult) != 1) {
           $return .= "Yrityksen $yhtio oletus ALV% puuttuu tai niitä on monta!\n";
           mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-          return ($return);
+          return $return;
         }
         else {
           $avainrow = mysql_fetch_assoc($avainresult);
@@ -929,10 +929,10 @@ if (!function_exists("verkkolasku_in")) {
 
         // Jos oletustakaan ei ole, laitetaan lasku erääntymään huomenna...
         if ($err == 0) {
-          list($erv,$erk,$erp) = explode("-",strftime("%Y-%m-%d", mktime(0,0,0,date("m"),date("d")+1,date("Y"))));
+          list($erv, $erk, $erp) = explode("-", strftime("%Y-%m-%d", mktime(0, 0, 0, date("m"), date("d")+1, date("Y"))));
         }
         elseif ($err > 0) {
-          $newer = strftime("%Y-%m-%d", mktime(0,0,0,$vpk, $vpp+$err, $vpv));
+          $newer = strftime("%Y-%m-%d", mktime(0, 0, 0, $vpk, $vpp+$err, $vpv));
           $erp = (int) substr($newer, 8, 2);
           $erk = (int) substr($newer, 5, 2);
           $erv = (int) substr($newer, 0, 4);
@@ -944,7 +944,7 @@ if (!function_exists("verkkolasku_in")) {
       if (!checkdate($erk, $erp, $erv)) {
         $return .= "Virheellinen eräpvm $erv-$erk-$erp\n";
         mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-        return ($return);
+        return $return;
       }
 
       $kassaale = 0;
@@ -960,7 +960,7 @@ if (!function_exists("verkkolasku_in")) {
         $kapro = $trow['oletus_kapro'];
 
         if ($krr > 0) {
-          $newer = strftime("%Y-%m-%d", mktime(0,0,0,$vpk, $vpp+$krr, $vpv));
+          $newer = strftime("%Y-%m-%d", mktime(0, 0, 0, $vpk, $vpp+$krr, $vpv));
           $krp = (int) substr($newer, 8, 2);
           $krk = (int) substr($newer, 5, 2);
           $krv = (int) substr($newer, 0, 4);
@@ -986,12 +986,12 @@ if (!function_exists("verkkolasku_in")) {
         if (!checkdate($krk, $krp, $krv)) {
           $return .= "Virheellinen kassaeräpvm '$krv-$krk-$krp' kassaale '$kassaale'\n";
           mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-          return ($return);
+          return $return;
         }
         elseif ($kassaale == 0) {
           $return .= "Kassapvm on, mutta kassa-ale puuttu\n";
           mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-          return ($return);
+          return $return;
         }
       }
 
@@ -1036,26 +1036,26 @@ if (!function_exists("verkkolasku_in")) {
       if ($summa == 0) {
         $return .= "Laskulta puuttuu summa!\n";
         mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-        return ($return);
+        return $return;
       }
 
       // Normaali viitetarkistus
       if (isset($viite) and strlen($viite) > 0 and substr($viite, 0, 2) != "RF" and tarkista_viite($viite) === FALSE) {
         $return .= "Viite '$viite' on väärin!\n";
         mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-        return ($return);
+        return $return;
       }
       // RF-viitetarkistus
       if (isset($viite) and strlen($viite) > 0 and  substr($viite, 0, 2) == "RF" and tarkista_rfviite($viite) === FALSE) {
         $return .= "RF-Viite '$viite' on väärin!\n";
         mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-        return ($return);
+        return $return;
       }
 
       if (isset($viite) and strlen($viite) > 0 and isset($viesti) and strlen($viesti) > 0) {
         $return .= "Viitettä ja viestiä ei voi antaa yhtäaikaa!\n";
         mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-        return ($return);
+        return $return;
       }
 
       $query = "SELECT kurssi
@@ -1067,7 +1067,7 @@ if (!function_exists("verkkolasku_in")) {
       if (mysql_num_rows($result) != 1) {
         $return .= "Valuuttaa $valkoodi ei löytynytkään!\n";
         mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun vastaanotto epäonnistui", "ISO-8859-1", "Q"), $return, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-        return ($return);
+        return $return;
       }
 
       $vrow = mysql_fetch_assoc($result);
@@ -1242,7 +1242,7 @@ if (!function_exists("verkkolasku_in")) {
         $ealvi = array($lisavat[0]);
       }
 
-       // Tehdän pelkät oletustiliöinnit
+      // Tehdän pelkät oletustiliöinnit
       if (mysql_num_rows($result) == 0 and count($ealvi) == 1) {
 
         if ($oletustili > 0) {
@@ -1302,7 +1302,7 @@ if (!function_exists("verkkolasku_in")) {
         $kukarow['yhtio']     = $yhtio;
         $kukarow['kuka']      = 'verkkolas';
 
-        require ("inc/teetiliointi.inc");
+        require "inc/teetiliointi.inc";
 
         // Napataan luodut tarkenteet...
         if ($yhtiorow["kirjanpidon_tarkenteet"] == "K") {
@@ -1404,7 +1404,7 @@ if (!function_exists("verkkolasku_in")) {
                       and tilino    not in ('0','')";
             $result = pupe_query($query);
 
-             // Sopiva sääntöä ei löytynyt
+            // Sopiva sääntöä ei löytynyt
             if (mysql_num_rows($result) == 0) {
 
               $query = "SELECT tilino, kustp
@@ -1416,9 +1416,9 @@ if (!function_exists("verkkolasku_in")) {
                         and tilino    not in ('0','')";
               $result = pupe_query($query);
 
-               // Hmm, mikään sääntö ei kelpaa
+              // Hmm, mikään sääntö ei kelpaa
               if (mysql_num_rows($result) == 0) {
-                 if (isset($rtuoteno[$i]["tilinumero"]) and $rtuoteno[$i]["tilinumero"] != "") {
+                if (isset($rtuoteno[$i]["tilinumero"]) and $rtuoteno[$i]["tilinumero"] != "") {
                   $tili = $rtuoteno[$i]["tilinumero"];
                 }
                 elseif ($oletustili > 0) {
@@ -1426,7 +1426,7 @@ if (!function_exists("verkkolasku_in")) {
                   $tili = $oletustili;
                 }
                 else {
-                   // Yleinen kulutili
+                  // Yleinen kulutili
                   $tili = $yhtiorow['muutkulut'];
                 }
               }
@@ -1486,14 +1486,14 @@ if (!function_exists("verkkolasku_in")) {
               }
             }
 
-            $summa          = round($summa * (1+($vero/100)),2);
+            $summa          = round($summa * (1+($vero/100)), 2);
             $summa_valuutassa    = round($summa * (1+($vero/100)) / $vrow['kurssi'], 2);
             $totsumma        += $summa;
             $totsumma_valuutassa  += $summa_valuutassa;
             $kukarow['yhtio']     = $yhtio;
             $kukarow['kuka']     = 'verkkolas';
 
-            require ("inc/teetiliointi.inc");
+            require "inc/teetiliointi.inc";
 
             // Napataan luodut tarkenteet...
             if ($yhtiorow["kirjanpidon_tarkenteet"] == "K" and (($summa > $maksimisumma and $omasumma >= 0) or ($summa < $maksimisumma and $omasumma < 0))) {
@@ -1570,9 +1570,9 @@ if (!function_exists("verkkolasku_in")) {
         if ($ei_oteta_kulua_pois and ($osto_kulu != 0 or $osto_rahti != 0 or $osto_rivi_kulu != 0)) {
           $laskun_kulut = array(
             $vero => array(
-            'osto_kulu' => $osto_kulu,
-            'osto_rahti' => $osto_rahti,
-            'osto_rivi_kulu' => $osto_rivi_kulu
+              'osto_kulu' => $osto_kulu,
+              'osto_rahti' => $osto_rahti,
+              'osto_rivi_kulu' => $osto_rivi_kulu
             )
           );
         }
@@ -1580,7 +1580,7 @@ if (!function_exists("verkkolasku_in")) {
 
       // Tehdään ASN Insertit
       // Pitää olla vaihto-omaisuuslasku
-      if (in_array($trow['oletus_vienti'], array('C','F','I','J','K','L')) and ($ebid == "TECCOM-INVOICE" or ($ebid == "MAVENTAXML" and $trow['asn_sanomat'] == 'M') or ($ebid == "FINVOICEXML" and $trow['asn_sanomat'] == 'F')) and !$onko_dupli_asn and !$onko_hyvityslasku) {
+      if (in_array($trow['oletus_vienti'], array('C', 'F', 'I', 'J', 'K', 'L')) and ($ebid == "TECCOM-INVOICE" or ($ebid == "MAVENTAXML" and $trow['asn_sanomat'] == 'M') or ($ebid == "FINVOICEXML" and $trow['asn_sanomat'] == 'F')) and !$onko_dupli_asn and !$onko_hyvityslasku) {
 
         $saapumispvm_chk = trim($laskun_tapvm) != '' ? substr($laskun_tapvm, 0, 4).'-'.substr($laskun_tapvm, 4, 2).'-'.substr($laskun_tapvm, 6, 2).' 00:00:00' : '0000-00-00 00:00:00';
         $count_rtuoteno  = count($rtuoteno);
@@ -1665,12 +1665,12 @@ if (!function_exists("verkkolasku_in")) {
             // Jos menevät nollana, funktio osaa ottaa oletuksen tilin takaa.
             list($kustp, $kohde, $projekti) = kustannuspaikka_kohde_projekti($tili, $kustp, $kohde, $projekti);
 
-            require ("inc/teetiliointi.inc");
+            require "inc/teetiliointi.inc";
           }
         }
       }
 
-       // Tuli pyöristyseroja
+      // Tuli pyöristyseroja
       if (round(abs($totsumma - $omasumma), 2) >= 0.01) {
         $vero = 0;
 
@@ -1684,11 +1684,11 @@ if (!function_exists("verkkolasku_in")) {
           $vero = $oletusalvi;
         }
 
-        require ("inc/teetiliointi.inc");
+        require "inc/teetiliointi.inc";
       }
 
       // jos kyseessä on tavaraa
-      if (!$onko_hyvityslasku and in_array($trow['oletus_vienti'], array('C','F','I','J','K','L'))) {
+      if (!$onko_hyvityslasku and in_array($trow['oletus_vienti'], array('C', 'F', 'I', 'J', 'K', 'L'))) {
 
         if (!isset($alv_talteen)) $alv_talteen = '';
 
@@ -1721,7 +1721,7 @@ if (!function_exists("verkkolasku_in")) {
       if ($trow['oletus_suoraveloitus'] != '') {
 
         if ($trow['oletus_suoravel_pankki'] > 0) {
-           //Toimittajalla on pankkitili, teemme eräpäivälle suorituksen valmiiksi
+          //Toimittajalla on pankkitili, teemme eräpäivälle suorituksen valmiiksi
 
           list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($ostovelat);
 
@@ -1774,7 +1774,7 @@ if (!function_exists("verkkolasku_in")) {
           }
         }
         else {
-           // Tämä koskee vain suoraveloitusta
+          // Tämä koskee vain suoraveloitusta
           if ($tila == 'M') {
             $query = "UPDATE lasku set
                       tila = 'Q'
@@ -1843,7 +1843,7 @@ if (!function_exists("verkkolasku_in")) {
 
           $sisalto = file_get_contents($url);
 
-          if (substr($sisalto,0,4) == "%PDF") {
+          if (substr($sisalto, 0, 4) == "%PDF") {
             // tallennetaan kuva
             $filename = $ebid.".pdf";
             $data  = mysql_real_escape_string($sisalto);
@@ -1991,7 +1991,7 @@ if (!function_exists("verkkolasku_in")) {
       }
 
       // päästiin onnillisesti loppuun
-        $meili = "Verkkolasku $verkapunimi yritykselle $yhtiorow[nimi]\nTiedosto: $file\nLähettäjä: $laskuttajan_nimi\nLaskunro: $laskun_numero\nPäivä: $laskun_tapvm\nSumma: $laskun_summa_eur\nViite: $laskun_pankkiviite\nEnsimmäinen hyväksyjä: $hyvaksyja_nyt\n$laskuvirhe\n";
+      $meili = "Verkkolasku $verkapunimi yritykselle $yhtiorow[nimi]\nTiedosto: $file\nLähettäjä: $laskuttajan_nimi\nLaskunro: $laskun_numero\nPäivä: $laskun_tapvm\nSumma: $laskun_summa_eur\nViite: $laskun_pankkiviite\nEnsimmäinen hyväksyjä: $hyvaksyja_nyt\n$laskuvirhe\n";
 
       $tulos = mail($yhtiorow['talhal_email'], mb_encode_mimeheader("$yhtiorow[nimi] vastaanotti laskun $verkapunimi:lta", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 

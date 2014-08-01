@@ -46,7 +46,7 @@ if ($lukitse_laji == "lasku" and $lukitse_avaimeen > 0) {
 
   /*  Tarkastetaan käyttäjäoikeuksia hieman eri tavalla eri laskuilla  */
   //  Ostoreskontran laskut
-  if (in_array($lasrow['tila'], array('H','Y','M','P','Q','X'))) {
+  if (in_array($lasrow['tila'], array('H', 'Y', 'M', 'P', 'Q', 'X'))) {
     $query = "SELECT * from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi LIKE '%ulask.php'";
     $res = mysql_query($query) or pupe_error($query);
 
@@ -55,16 +55,16 @@ if ($lukitse_laji == "lasku" and $lukitse_avaimeen > 0) {
     }
   }
   //  Nämä ovat varmaankin sitten itse tilauksia?
-  elseif(in_array($lasrow['tila'], array("L","N","R","E","T","U","0","A","O","V"))) {
+  elseif (in_array($lasrow['tila'], array("L", "N", "R", "E", "T", "U", "0", "A", "O", "V"))) {
     $uusilukko = "";
   }
 
-  if ($kukarow["taso"] == "3" or !in_array($lasrow['tila'], array('Y','M','P','Q')) or ($lasrow['tila'] == "M" and $lasrow['h1time'] == '0000-00-00 00:00:00' and $lasrow['h2time'] == '0000-00-00 00:00:00' and $lasrow['h3time'] == '0000-00-00 00:00:00' and $lasrow['h4time'] == '0000-00-00 00:00:00' and $lasrow['h5time'] == '0000-00-00 00:00:00')) {
+  if ($kukarow["taso"] == "3" or !in_array($lasrow['tila'], array('Y', 'M', 'P', 'Q')) or ($lasrow['tila'] == "M" and $lasrow['h1time'] == '0000-00-00 00:00:00' and $lasrow['h2time'] == '0000-00-00 00:00:00' and $lasrow['h3time'] == '0000-00-00 00:00:00' and $lasrow['h4time'] == '0000-00-00 00:00:00' and $lasrow['h5time'] == '0000-00-00 00:00:00')) {
     $poistolukko = "";
   }
 
   if ($del == 1 or ($tunnus != "" and $_FILES["liite_data"]["size"] > 0)) {
-    if (in_array($lasrow['tila'], array('H','M')) and $kukarow["taso"] != 3) {
+    if (in_array($lasrow['tila'], array('H', 'M')) and $kukarow["taso"] != 3) {
 
       $komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Lasku palautettiin hyväksyntään koska laskun liitteitä muutettiin.")."<br>";
 

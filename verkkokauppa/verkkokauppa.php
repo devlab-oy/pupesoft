@@ -8,7 +8,7 @@ if ($_REQUEST["tee"] == "login") {
   $extranet     = 1;
   $_GET["no_css"] = "yes";
 
-  require("parametrit.inc");
+  require "parametrit.inc";
 
   if (trim($user) != '') {
 
@@ -34,12 +34,12 @@ if ($_REQUEST["tee"] == "login") {
       $vertaa = md5(trim($salasana));
     }
 
-    if (mysql_num_rows ($result) == 1 and $vertaa == $krow['salasana']) {
+    if (mysql_num_rows($result) == 1 and $vertaa == $krow['salasana']) {
 
-      srand ((double) microtime() * 1000000);
+      srand((double) microtime() * 1000000);
 
       for ($i = 0; $i < 25; $i++) {
-        $session = $session . chr(rand(65,90)) ;
+        $session = $session . chr(rand(65, 90)) ;
       }
 
       $query = "UPDATE kuka
@@ -76,7 +76,7 @@ if ($_REQUEST["tee"] == "login") {
   unset($_GET);
 }
 
-require ("parametrit.inc");
+require "parametrit.inc";
 
 if ($livesearch_tee == "TUOTEHAKU") {
   livesearch_tuotehaku();
@@ -115,7 +115,7 @@ if (!function_exists("tilaus")) {
     }
 
     ob_start();
-    require("naytatilaus.inc");
+    require "naytatilaus.inc";
     $ulos .= ob_get_contents();
     ob_end_clean();
 
@@ -288,11 +288,11 @@ if (!function_exists("menu")) {
             }
 
             $hinnat = alehinta(array(
-                  "valkoodi" => "EUR",
-                  "maa" => $yhtiorow["maa"],
-                  "vienti_kurssi" => 1,
-                  "liitostunnus" => $asiakasrow["tunnus"],
-                  "ytunnus" => $asiakasrow["ytunnus"]) , $trow, 1, '', '', '', "hintaperuste,aleperuste");
+                "valkoodi" => "EUR",
+                "maa" => $yhtiorow["maa"],
+                "vienti_kurssi" => 1,
+                "liitostunnus" => $asiakasrow["tunnus"],
+                "ytunnus" => $asiakasrow["ytunnus"]) , $trow, 1, '', '', '', "hintaperuste,aleperuste");
 
             if ($hinnat["hintaperuste"] !== FALSE and $hinnat["hintaperuste"] >= 2 and $hinnat["hintaperuste"] <= 13) {
               $ok = 1;
@@ -382,13 +382,13 @@ if (!function_exists("menu")) {
             }
 
             $hinnat = alehinta(array(
-                  "valkoodi" => "EUR",
-                  "maa" => $yhtiorow["maa"],
-                  "vienti_kurssi" => 1,
-                  "liitostunnus" => $asiakasrow["tunnus"],
-                  "ytunnus" => $asiakasrow["ytunnus"]) , $trow, 1, '', '', '', "hintaperuste,aleperuste");
+                "valkoodi" => "EUR",
+                "maa" => $yhtiorow["maa"],
+                "vienti_kurssi" => 1,
+                "liitostunnus" => $asiakasrow["tunnus"],
+                "ytunnus" => $asiakasrow["ytunnus"]) , $trow, 1, '', '', '', "hintaperuste,aleperuste");
 
-                  if ($hinnat["hintaperuste"] !== FALSE and $hinnat["hintaperuste"] >= 2 and $hinnat["hintaperuste"] <= 13) {
+            if ($hinnat["hintaperuste"] !== FALSE and $hinnat["hintaperuste"] >= 2 and $hinnat["hintaperuste"] <= 13) {
               $ok = 1;
             }
 
@@ -467,7 +467,7 @@ if (!function_exists("uutiset")) {
           $search = array();
           $replace = array();
 
-          foreach($matches as $m) {
+          foreach ($matches as $m) {
 
             //  Haetaan tuotenumero
             $query = "SELECT tuoteno, nimitys
@@ -532,7 +532,7 @@ if ($tee == "monistalasku") {
       $tee = "MONISTA";
       $vain_monista = "utilaus";
 
-      require("monistalasku.php");
+      require "monistalasku.php";
 
       return end($tulos_ulos);
     }
@@ -625,7 +625,7 @@ if ($tee == "tuotteen_lisatiedot") {
     $liitetyypit = array("public");
   }
   else {
-    $liitetyypit = array("extranet","public");
+    $liitetyypit = array("extranet", "public");
   }
 
   //  Haetaan kaikki liitetiedostot
@@ -646,7 +646,7 @@ if ($tee == "tuotteen_lisatiedot") {
 
     $liitetiedostot = $edkaytto = "";
 
-    while($row = mysql_fetch_array($result)) {
+    while ($row = mysql_fetch_array($result)) {
       if ($row["kayttotarkoitus"] == "TK") {
         if ($row["peukalokuva"] > 0) {
           $liitetiedostot .= "$row[selite]<br><a href='view.php?id=$row[tunnus]' target='_blank'><img src='view.php?id=$row[peukalokuva]'></a><br><font class='info'>".t("Klikkaa kuvaa")."</info><br>";
@@ -809,7 +809,7 @@ if ($tee == "tilaa") {
       $silent = "JOO";
       $tilausvalmiskutsuja = "VERKKOKAUPPA";
 
-      require("tilaus-valmis.inc");
+      require "tilaus-valmis.inc";
     }
 
     $ulos = "<font class='head'>".t("Kiitos tilauksesta")."</font><br><br><font class='message'>".t("Tilauksesi numero on").": $kukarow[kesken]</font><br>";
@@ -1150,7 +1150,7 @@ if ($tee == "selaa") {
   }
 
   if ($kukarow["kuka"] != "www" and (int) $kukarow["kesken"] == 0) {
-    require_once("luo_myyntitilausotsikko.inc");
+    require_once "luo_myyntitilausotsikko.inc";
     $tilausnumero = luo_myyntitilausotsikko("EXTRANET", $kukarow["oletus_asiakas"], $tilausnumero, "", "", "", "VERKKOKAUPPA");
     $kukarow["kesken"] = $tilausnumero;
   }
@@ -1161,7 +1161,7 @@ if ($tee == "selaa") {
     echo "<div class='livehaku' id='livehaku'>".t("Tuotehaku").": <form action='verkkokauppa.php?tee=selaa&hakutapa=koodilla' name='liveformi' id= 'liveformi'>".livesearch_kentta("liveformi", "TUOTEHAKU", "tuotenumero", 300)."</form></div>";
   }
 
-  require("tuote_selaus_haku.php");
+  require "tuote_selaus_haku.php";
 }
 
 if ($tee == "") {
@@ -1265,7 +1265,7 @@ if ($tee == "") {
     $login_screen = "<form name='login' id= 'loginform' method='post'>
             <input type='hidden' name='tee' value='login'>
             <input type='hidden' id = 'location' name='location' value='$palvelin2'>
-            <font class='login'>".t("Käyttäjätunnus",$browkieli).":</font>
+            <font class='login'>".t("Käyttäjätunnus", $browkieli).":</font>
             <input type='text' value='' name='user' size='15' maxlength='30'>
             <font class='login'>".t("Salasana", $browkieli).":</font>
             <input type='password' name='salasana' size='15' maxlength='30'>
@@ -1311,7 +1311,7 @@ if ($tee == "") {
   else {
     $verkkokauppa_ulos .= "<div class='selain' id='selain'>
                 $verkko
-                ".uutiset('','',"ETUSIVU")."
+                ".uutiset('', '', "ETUSIVU")."
                 </div>";
   }
 

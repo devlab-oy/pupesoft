@@ -1,6 +1,6 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Kuittaa sisäinen työmääräys valmiiksi").":<hr></font>";
 
@@ -59,7 +59,7 @@ if ($tee == "VALMIS") {
                    and tilausrivi.otunnus='$tilausnumero'";
       $jres = pupe_query($query);
 
-      while($srow1 = mysql_fetch_assoc($jres)) {
+      while ($srow1 = mysql_fetch_assoc($jres)) {
         $query = "SELECT count(distinct sarjanumero) kpl
                   FROM sarjanumeroseuranta
                   WHERE yhtio          = '$kukarow[yhtio]'
@@ -71,7 +71,7 @@ if ($tee == "VALMIS") {
         if ($srow2["kpl"] != abs($srow1["varattu"])) {
           echo t("Tilaukselta puuttuu sarjanumeroita, ei voida merkata valmiiksi").": $laskurow[tunnus] $srow1[tuoteno] $laskurow[nimi]!!!<br>\n";
 
-          require ("../inc/footer.inc");
+          require "../inc/footer.inc";
           exit;
         }
       }
@@ -91,7 +91,7 @@ if ($tee == "VALMIS") {
                    and tilausrivi.perheid2=tilausrivi.tunnus";
       $jres = pupe_query($query);
 
-      while($srow = mysql_fetch_assoc($jres)) {
+      while ($srow = mysql_fetch_assoc($jres)) {
 
         //Jotta saadaan oma kulukeikka per laite
         unset($otunnus);
@@ -131,7 +131,7 @@ if ($tee == "VALMIS") {
 
           while ($ostokokorow = mysql_fetch_assoc($monistares2)) {
 
-            $maara = round($ostokokorow["kpl"] / $ostorow["kpl"],2);
+            $maara = round($ostokokorow["kpl"] / $ostorow["kpl"], 2);
 
             if ($maara > 0) {
 
@@ -154,18 +154,18 @@ if ($tee == "VALMIS") {
                 $kennimi = mysql_field_name($monistares2, $i);
 
                 switch ($kennimi) {
-                  case 'kpl':
-                  case 'tilkpl':
-                    $kysely .= $kennimi."='$maara',";
-                    break;
-                  case 'rivihinta':
-                    $kysely .= $kennimi."='$koprivihinta',";
-                    break;
-                  case 'kate_korjattu':
-                    $kysely .= $kennimi."= NULL,";
-                    break;
-                  default:
-                    $kysely .= $kennimi."='".$ostokokorow[$kennimi]."',";
+                case 'kpl':
+                case 'tilkpl':
+                  $kysely .= $kennimi."='$maara',";
+                  break;
+                case 'rivihinta':
+                  $kysely .= $kennimi."='$koprivihinta',";
+                  break;
+                case 'kate_korjattu':
+                  $kysely .= $kennimi."= NULL,";
+                  break;
+                default:
+                  $kysely .= $kennimi."='".$ostokokorow[$kennimi]."',";
                 }
               }
 
@@ -193,19 +193,19 @@ if ($tee == "VALMIS") {
                 //Kopioidaan tapahtuma
                 $kysely = "  INSERT INTO tapahtuma SET ";
 
-                for($i=0; $i < mysql_num_fields($tapares)-1; $i++) { // Ei monisteta tunnusta
+                for ($i=0; $i < mysql_num_fields($tapares)-1; $i++) { // Ei monisteta tunnusta
 
                   $kennimi = mysql_field_name($tapares, $i);
 
                   switch ($kennimi) {
-                    case 'kpl':
-                      $kysely .= $kennimi."='$maara',";
-                      break;
-                    case 'rivitunnus':
-                      $kysely .= $kennimi."='$insid',";
-                      break;
-                    default:
-                      $kysely .= $kennimi."='".$taparow[$kennimi]."',";
+                  case 'kpl':
+                    $kysely .= $kennimi."='$maara',";
+                    break;
+                  case 'rivitunnus':
+                    $kysely .= $kennimi."='$insid',";
+                    break;
+                  default:
+                    $kysely .= $kennimi."='".$taparow[$kennimi]."',";
                   }
                 }
 
@@ -299,7 +299,7 @@ if ($tee == "VALMIS") {
 
           if ($lisarow["ei_saldoa"] == '') {
             //Siirretään lisävaruste samaan paikkaan ku isätuote ja varataan lisävarusteen saldoa
-            if($lisarow["hyllyalue"] != $srow["hyllyalue"] or $lisarow["hyllynro"] != $srow["hyllynro"] or $lisarow["hyllyvali"] != $srow["hyllyvali"] or $lisarow["hyllytaso"] != $srow["hyllytaso"]) {
+            if ($lisarow["hyllyalue"] != $srow["hyllyalue"] or $lisarow["hyllynro"] != $srow["hyllynro"] or $lisarow["hyllyvali"] != $srow["hyllyvali"] or $lisarow["hyllytaso"] != $srow["hyllytaso"]) {
               // Tehdään saldosiirto
 
               // Katsotaan löytyykö jatkojalostettavan tuotteen paikka myös lisävarusteelta
@@ -612,9 +612,9 @@ if ($tee == "") {
       </form>";
 
   // pvm 30 pv taaksepäin
-  $dd = date("d",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
-  $mm = date("m",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
-  $yy = date("Y",mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
+  $dd = date("d", mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
+  $mm = date("m", mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
+  $yy = date("Y", mktime(0, 0, 0, date("m"), date("d")-30, date("Y")));
 
   $haku='';
   if (is_string($etsi))  $haku="and (lasku.nimi like '%$etsi%' or lasku.laatija like '%$etsi%')";
@@ -636,7 +636,7 @@ if ($tee == "") {
     echo "<tr>";
 
     for ($i=0; $i < mysql_num_fields($result)-2; $i++) {
-      echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
+      echo "<th align='left'>".t(mysql_field_name($result, $i))."</th>";
     }
     echo "<th align='left'>".t("tyyppi")."</th></tr>";
 
@@ -652,7 +652,7 @@ if ($tee == "") {
       $alatila   = $row["alatila"];
 
       //tehdään selväkielinen tila/alatila
-      require ("inc/laskutyyppi.inc");
+      require "inc/laskutyyppi.inc";
 
       echo "<td>".t("$laskutyyppi")." ".t("$alatila")."</td>";
 
@@ -689,4 +689,4 @@ if ($tee == "") {
     echo t("Ei tilauksia")."...";
   }
 }
-require ("inc/footer.inc");
+require "inc/footer.inc";

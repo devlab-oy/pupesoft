@@ -16,8 +16,8 @@ error_reporting(E_ALL);
 ini_set("display_errors", 1);
 
 // otetaan tietokanta connect
-require("inc/connect.inc");
-require("inc/functions.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock();
@@ -52,7 +52,7 @@ if ($handle = opendir($kansio)) {
 
     $tulos_ulos = "";
 
-    require("inc/ftp-send.inc");
+    require "inc/ftp-send.inc";
   }
 
   closedir($handle);
@@ -88,7 +88,7 @@ if ($handle = opendir($kansio)) {
 
     $tulos_ulos = "";
 
-    require("inc/ftp-send.inc");
+    require "inc/ftp-send.inc";
   }
 
   closedir($handle);
@@ -123,7 +123,7 @@ if ($handle = opendir($kansio)) {
 
     $tulos_ulos = "";
 
-    require("inc/ftp-send.inc");
+    require "inc/ftp-send.inc";
   }
 
   closedir($handle);
@@ -158,7 +158,7 @@ if ($handle = opendir($kansio)) {
 
     $tulos_ulos = "";
 
-    require("inc/ftp-send.inc");
+    require "inc/ftp-send.inc";
   }
 
   closedir($handle);
@@ -196,7 +196,7 @@ if ($handle = opendir($kansio)) {
 
     try {
       // Testaus
-      #$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+      //$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
 
       // Tuotanto
       $client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');

@@ -24,7 +24,7 @@ $rectparam["width"] = 0.3;
 
 //muutamat funktiot...
 if (!function_exists('alku')) {
-  function alku ($pdf) {
+  function alku($pdf) {
     global $kukarow, $yhtiorow, $rectparam, $p, $asiakasrow, $pz, $toimrow;
 
     $page = $pdf->new_page("a4");
@@ -52,7 +52,7 @@ if (!function_exists('alku')) {
     $title = str_replace(array("‰", "ˆ", "Â"), array("ƒ", "÷", "≈"), $title);
     $title_position = 360;
 
-    $pdf->draw_text($title_position,815, t($title, $kieli),   $page);
+    $pdf->draw_text($title_position, 815, t($title, $kieli),   $page);
 
     $pdf->draw_rectangle(710, 20,  690, 290, $page, $rectparam);
     $pdf->draw_rectangle(710, 290, 690, 360, $page, $rectparam);
@@ -68,7 +68,7 @@ if (!function_exists('alku')) {
 
     $pdf->draw_rectangle(710, 20, 20, 580, $page, $rectparam);
 
-    return(array($page,680));
+    return array($page, 680);
   }
 }
 
@@ -80,16 +80,16 @@ if (!function_exists('rivi')) {
 
     //jos on paljon rivej‰ tehd‰‰n uusi otsikko...
     if ($kalakorkeus < 70) {
-      list($page,$kalakorkeus) = alku($pdf);
+      list($page, $kalakorkeus) = alku($pdf);
     }
 
     //K‰‰nnet‰‰n nimitys
     $jtrow['nimitys'] = t_tuotteen_avainsanat($jtrow, 'nimitys', $kieli);
 
     if (strlen($jtrow["nimitys"]) > 60) {
-      $nimitys = substr($jtrow["nimitys"],0,60);
+      $nimitys = substr($jtrow["nimitys"], 0, 60);
       $pdf->draw_text(25, $kalakorkeus, $nimitys,               $page, $px);
-      $nimitys = substr($jtrow["nimitys"],60);
+      $nimitys = substr($jtrow["nimitys"], 60);
       $pdf->draw_text(25, $kalakorkeus-8, $nimitys,             $page, $px);
     }
     else {
@@ -111,12 +111,12 @@ if (!function_exists('rivi')) {
 
     $kalakorkeus = $kalakorkeus - $rivinkorkeus;
 
-    return(array($page, $kalakorkeus));
+    return array($page, $kalakorkeus);
   }
 }
 
 if (!function_exists('print_pdf')) {
-  function print_pdf ($pdf, $luetkpl) {
+  function print_pdf($pdf, $luetkpl) {
     global $kukarow, $yhtiorow, $tee, $asiakasrow;
 
     $returnvalue=0;
@@ -137,12 +137,12 @@ if (!function_exists('print_pdf')) {
     $liite = $pdffilenimi;
     $kutsu = t("J‰lkitoimitusraportti", $kieli);
 
-//    debuggaus-echo
-//    echo t("Luettelo tulostuu")."...$asiakasrow[nimi]\n";
+    //    debuggaus-echo
+    //    echo t("Luettelo tulostuu")."...$asiakasrow[nimi]\n";
 
     $kukarow["eposti"] = $asiakasrow["email"];
-//    $kukarow["eposti"] = "tomi@arwidson.fi";
-    require("../inc/sahkoposti.inc");
+    //    $kukarow["eposti"] = "tomi@arwidson.fi";
+    require "../inc/sahkoposti.inc";
 
     //poistetaan tmp file samantien kuleksimasta...
     system("rm -f $pdffilenimi");

@@ -1,7 +1,7 @@
 <?php
 
-### !!! HUOMHUOM !!! ###
-### Tämä ominaisuus on deprikoitu, käytä functions.inc:ssä määriteltyä pupesoft_sahkoposti -funktiota sähköpostin lähettämiseen!! ###
+//## !!! HUOMHUOM !!! ###
+//## Tämä ominaisuus on deprikoitu, käytä functions.inc:ssä määriteltyä pupesoft_sahkoposti -funktiota sähköpostin lähettämiseen!! ###
 
 // Tämä ohjelma haluaa $liite muuttujan jossa on tiedostonnimi joka liitetään
 // Ja $kutsu jossa on tiedoston kuvaus

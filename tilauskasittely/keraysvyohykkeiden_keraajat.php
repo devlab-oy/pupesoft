@@ -1,6 +1,6 @@
 <?php
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "  <script type='text/javascript' src='https://www.google.com/jsapi'></script>";
 echo "  <script type='text/javascript'>
@@ -37,9 +37,9 @@ echo "  <script type='text/javascript'>
         var options = {
           width: 800,
           height: 320,
-          title: '",t("Keräilyn kuormitus lähdön ajan mukaan"),"',
+          title: '", t("Keräilyn kuormitus lähdön ajan mukaan"), "',
           hAxis: {
-            title: '",t("Klo"),"',
+            title: '", t("Klo"), "',
             titleTextStyle: {color: 'black'}
           },
           vAxis: {
@@ -129,27 +129,27 @@ echo "  <script type='text/javascript'>
       //-->
     </script>";
 
-echo "<font class='head'>",t("Keräysvyöhykekuormitus"),"</font><hr>";
+echo "<font class='head'>", t("Keräysvyöhykekuormitus"), "</font><hr>";
 
 if (isset($nayta_valinnat) and count($nayta_valinnat) == 1) {
-  echo "<br /><font class='error'>",t("VIRHE: Et valinnut mitään rajausta"),"!</font><br /><br />";
+  echo "<br /><font class='error'>", t("VIRHE: Et valinnut mitään rajausta"), "!</font><br /><br />";
 }
 
 if (!isset($tilat)) $tilat = array('aloittamatta' => ' checked');
 if (!isset($volyymisuure)) $volyymisuure = "rivit";
 if (!isset($ajankohta)) $ajankohta = "present";
-if (!isset($future_date_pp_alku)) $future_date_pp_alku = date("d",mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
-if (!isset($future_date_kk_alku)) $future_date_kk_alku = date("m",mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
-if (!isset($future_date_vv_alku)) $future_date_vv_alku = date("Y",mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
-if (!isset($future_date_pp_loppu)) $future_date_pp_loppu = date("d",mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
-if (!isset($future_date_kk_loppu)) $future_date_kk_loppu = date("m",mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
-if (!isset($future_date_vv_loppu)) $future_date_vv_loppu = date("Y",mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
-if (!isset($past_date_pp_alku)) $past_date_pp_alku = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-if (!isset($past_date_kk_alku)) $past_date_kk_alku = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-if (!isset($past_date_vv_alku)) $past_date_vv_alku = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-if (!isset($past_date_pp_loppu)) $past_date_pp_loppu = date("d",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-if (!isset($past_date_kk_loppu)) $past_date_kk_loppu = date("m",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
-if (!isset($past_date_vv_loppu)) $past_date_vv_loppu = date("Y",mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+if (!isset($future_date_pp_alku)) $future_date_pp_alku = date("d", mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
+if (!isset($future_date_kk_alku)) $future_date_kk_alku = date("m", mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
+if (!isset($future_date_vv_alku)) $future_date_vv_alku = date("Y", mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
+if (!isset($future_date_pp_loppu)) $future_date_pp_loppu = date("d", mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
+if (!isset($future_date_kk_loppu)) $future_date_kk_loppu = date("m", mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
+if (!isset($future_date_vv_loppu)) $future_date_vv_loppu = date("Y", mktime(0, 0, 0, date("m"), date("d")+1, date("Y")));
+if (!isset($past_date_pp_alku)) $past_date_pp_alku = date("d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+if (!isset($past_date_kk_alku)) $past_date_kk_alku = date("m", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+if (!isset($past_date_vv_alku)) $past_date_vv_alku = date("Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+if (!isset($past_date_pp_loppu)) $past_date_pp_loppu = date("d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+if (!isset($past_date_kk_loppu)) $past_date_kk_loppu = date("m", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+if (!isset($past_date_vv_loppu)) $past_date_vv_loppu = date("Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
 if (!isset($nayta_valinnat) or count($nayta_valinnat) == 1) $nayta_valinnat = array('aloittamatta');
 
 $wherelisa = "";
@@ -158,17 +158,17 @@ $kerayserat_tilalisa = "";
 foreach ($nayta_valinnat as $mita_naytetaan) {
 
   switch ($mita_naytetaan) {
-    case 'aloittamatta':
-      $wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'N' AND lasku.alatila = 'A')" : "(lasku.tila = 'N' AND lasku.alatila = 'A')";
-      break;
-    case 'aloitettu':
-      $wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'L' AND lasku.alatila = 'A')" : "(lasku.tila = 'L' AND lasku.alatila = 'A')";
-      $kerayserat_tilalisa = trim($kerayserat_tilalisa) != "" ? "{$kerayserat_tilalisa} OR kerayserat.tila IN ('K','X')" : "kerayserat.tila IN ('K','X')";
-      break;
-    case 'keratty':
-      $wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'L' AND lasku.alatila IN ('B', 'C'))" : "(lasku.tila = 'L' AND lasku.alatila IN ('B', 'C'))";
-      $kerayserat_tilalisa = trim($kerayserat_tilalisa) != "" ? "{$kerayserat_tilalisa} OR (kerayserat.tila IN ('T','R'))" : "(kerayserat.tila IN ('T','R'))";
-      break;
+  case 'aloittamatta':
+    $wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'N' AND lasku.alatila = 'A')" : "(lasku.tila = 'N' AND lasku.alatila = 'A')";
+    break;
+  case 'aloitettu':
+    $wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'L' AND lasku.alatila = 'A')" : "(lasku.tila = 'L' AND lasku.alatila = 'A')";
+    $kerayserat_tilalisa = trim($kerayserat_tilalisa) != "" ? "{$kerayserat_tilalisa} OR kerayserat.tila IN ('K','X')" : "kerayserat.tila IN ('K','X')";
+    break;
+  case 'keratty':
+    $wherelisa = trim($wherelisa) != "" ? "{$wherelisa} OR (lasku.tila = 'L' AND lasku.alatila IN ('B', 'C'))" : "(lasku.tila = 'L' AND lasku.alatila IN ('B', 'C'))";
+    $kerayserat_tilalisa = trim($kerayserat_tilalisa) != "" ? "{$kerayserat_tilalisa} OR (kerayserat.tila IN ('T','R'))" : "(kerayserat.tila IN ('T','R'))";
+    break;
   }
 
 }
@@ -200,17 +200,17 @@ $result = pupe_query($query);
 echo "<table>";
 
 echo "<tr>";
-echo "<th>",t("Valitse"),"</td>";
+echo "<th>", t("Valitse"), "</td>";
 echo "<td style='vertical-align:middle;'>";
 
 $chk = array_fill_keys($nayta_valinnat, " checked") + array('aloittamatta' => '', 'aloitettu' => '', 'keratty' => '');
 
 echo "<form method='post' action=''>";
 echo "<input type='hidden' name='nayta_valinnat[]' value='default' />";
-echo "<input type='checkbox' name='nayta_valinnat[]' value='aloittamatta' {$chk['aloittamatta']} /> ",t("Aloittamatta"),"&nbsp;&nbsp;";
-echo "<input type='checkbox' name='nayta_valinnat[]' value='aloitettu' {$chk['aloitettu']} /> ",t("Aloitettu"),"&nbsp;&nbsp;";
-echo "<input type='checkbox' name='nayta_valinnat[]' value='keratty' {$chk['keratty']} /> ",t("Kerätty"),"&nbsp;&nbsp;";
-echo "<input type='submit' value='",t("Näytä"),"' />";
+echo "<input type='checkbox' name='nayta_valinnat[]' value='aloittamatta' {$chk['aloittamatta']} /> ", t("Aloittamatta"), "&nbsp;&nbsp;";
+echo "<input type='checkbox' name='nayta_valinnat[]' value='aloitettu' {$chk['aloitettu']} /> ", t("Aloitettu"), "&nbsp;&nbsp;";
+echo "<input type='checkbox' name='nayta_valinnat[]' value='keratty' {$chk['keratty']} /> ", t("Kerätty"), "&nbsp;&nbsp;";
+echo "<input type='submit' value='", t("Näytä"), "' />";
 echo "</form>";
 echo "</td>";
 echo "<td class='back' colspan='5'></td>";
@@ -219,13 +219,13 @@ echo "</tr>";
 echo "<tr><td class='back' colspan='7'>&nbsp;</td></tr>";
 
 echo "<tr>";
-echo "<th>",t("Keräysvyöhyke"),"</th>";
-echo "<th>",t("Tilaukset"),"<br />",t("Ker / Til"),"</th>";
-echo "<th>",t("Rivit"),"<br />",t("Ker / Suun"),"</th>";
-echo "<th>",t("Kilot"),"<br />",t("Ker / Suun"),"</th>";
-echo "<th>",t("Litrat"),"<br />",t("Ker / Suun"),"</th>";
-echo "<th>",t("Keräyserän aloitusaika"),"</th>";
-echo "<th>",t("Keräilykapasiteettitarve"),"</th>";
+echo "<th>", t("Keräysvyöhyke"), "</th>";
+echo "<th>", t("Tilaukset"), "<br />", t("Ker / Til"), "</th>";
+echo "<th>", t("Rivit"), "<br />", t("Ker / Suun"), "</th>";
+echo "<th>", t("Kilot"), "<br />", t("Ker / Suun"), "</th>";
+echo "<th>", t("Litrat"), "<br />", t("Ker / Suun"), "</th>";
+echo "<th>", t("Keräyserän aloitusaika"), "</th>";
+echo "<th>", t("Keräilykapasiteettitarve"), "</th>";
 echo "</tr>";
 
 $i = 1;
@@ -238,7 +238,7 @@ $max_rivit_suunnittelussa = 0;
 
 while ($row = mysql_fetch_assoc($result)) {
   echo "<tr>";
-  echo "<th class='keraysvyohyke' id='{$i}'>{$row['ker_nimitys']}&nbsp;<img title='",t("Näytä kerääjät"),"' alt='",t("Näytä kerääjät"),"' src='{$palvelin2}pics/lullacons/go-down.png' style='float:right;' /></th>";
+  echo "<th class='keraysvyohyke' id='{$i}'>{$row['ker_nimitys']}&nbsp;<img title='", t("Näytä kerääjät"), "' alt='", t("Näytä kerääjät"), "' src='{$palvelin2}pics/lullacons/go-down.png' style='float:right;' /></th>";
   echo "<td>";
 
   $query = "SELECT lasku.tunnus, SUM(IF(tilausrivi.kerattyaika != '0000-00-00 00:00:00', 0, 1)) AS 'keratyt'
@@ -313,7 +313,7 @@ while ($row = mysql_fetch_assoc($result)) {
 
     while ($era_row = mysql_fetch_assoc($era_res)) {
       echo "<tr class='era_{$i}' style='display:none;'>";
-      echo "<td class='erat' id='erat_{$i}_{$x}'>{$era_row['keraaja']}&nbsp;<img title='",t("Näytä keräyserät"),"' alt='",t("Näytä keräyserät"),"' src='{$palvelin2}pics/lullacons/go-down.png' style='float:right;' /></td>";
+      echo "<td class='erat' id='erat_{$i}_{$x}'>{$era_row['keraaja']}&nbsp;<img title='", t("Näytä keräyserät"), "' alt='", t("Näytä keräyserät"), "' src='{$palvelin2}pics/lullacons/go-down.png' style='float:right;' /></td>";
       echo "<td>{$era_row['tilaukset']}</td>";
       echo "<td>{$era_row['rivit']}</td>";
       echo "<td>{$era_row['kg']}</td>";
@@ -323,12 +323,12 @@ while ($row = mysql_fetch_assoc($result)) {
       echo "</tr>";
 
       echo "<tr class='asiakas_{$i}_{$x}' style='display:none;'>";
-      echo "<th>",t("Tila"),"</th>";
-      echo "<th>",t("Prio"),"</th>";
-      echo "<th>",t("Keräyserä"),"</th>";
-      echo "<th>",t("Toimitusasiakas"),"</th>";
-      echo "<th>",t("Lähtö"),"</th>";
-      echo "<th>",t("Toimitustapa"),"</th>";
+      echo "<th>", t("Tila"), "</th>";
+      echo "<th>", t("Prio"), "</th>";
+      echo "<th>", t("Keräyserä"), "</th>";
+      echo "<th>", t("Toimitusasiakas"), "</th>";
+      echo "<th>", t("Lähtö"), "</th>";
+      echo "<th>", t("Toimitustapa"), "</th>";
       echo "<th></th>";
       echo "</tr>";
 
@@ -363,7 +363,7 @@ while ($row = mysql_fetch_assoc($result)) {
           echo t("Kerätty");
         }
 
-        echo "&nbsp;<img title='",t("Näytä rivit"),"' alt='",t("Näytä rivit"),"' src='{$palvelin2}pics/lullacons/go-down.png' style='float:right;' /></td>";
+        echo "&nbsp;<img title='", t("Näytä rivit"), "' alt='", t("Näytä rivit"), "' src='{$palvelin2}pics/lullacons/go-down.png' style='float:right;' /></td>";
 
         echo "<td>{$asiakas_row['prioriteettinro']}</td>";
         echo "<td>{$asiakas_row['nro']}</td>";
@@ -393,12 +393,12 @@ while ($row = mysql_fetch_assoc($result)) {
 
         if (mysql_num_rows($rivi_res) > 0) {
           echo "<tr class='rivit_{$i}_{$x}_{$y}' style='display:none;'>";
-          echo "<th>",t("Tuotenro"),"</th>";
-          echo "<th>",t("Tuotekuvaus"),"</th>";
-          echo "<th>",t("Keräyspaikka"),"</th>";
-          echo "<th>",t("Asiakas"),"</th>";
-          echo "<th>",t("Kerätty / Tilattu"),"</th>";
-          echo "<th>",t("Tilaus"),"</th>";
+          echo "<th>", t("Tuotenro"), "</th>";
+          echo "<th>", t("Tuotekuvaus"), "</th>";
+          echo "<th>", t("Keräyspaikka"), "</th>";
+          echo "<th>", t("Asiakas"), "</th>";
+          echo "<th>", t("Kerätty / Tilattu"), "</th>";
+          echo "<th>", t("Tilaus"), "</th>";
           echo "<th></th>";
           echo "</tr>";
 
@@ -443,7 +443,7 @@ while ($row = mysql_fetch_assoc($result)) {
 }
 
 echo "<tr>";
-echo "<th>",t("Yhteensä"),"</th>";
+echo "<th>", t("Yhteensä"), "</th>";
 echo "<th>{$max_keratyt} / {$max_tilatut}</th>";
 echo "<th>{$max_rivit_keratyt} / {$max_rivit_suunnittelussa}</th>";
 echo "<th colspan='4'></th>";
@@ -456,13 +456,13 @@ echo "<br /><br />";
 echo "<form method='post' action=''>";
 echo "<table>";
 echo "<tr>";
-echo "<th><input type='checkbox' class='checkall' id='varasto' checked /> ",t("Varasto"),"</th>";
-echo "<th><input type='checkbox' class='checkall' id='keraysvyohyke' checked /> ",t("Keräysvyöhyke"),"</th>";
-echo "<th><input type='checkbox' class='checkall' id='toimitustapa' checked /> ",t("Kuljetusliike"),"</th>";
-echo "<th><input type='checkbox' class='checkall' id='prioriteetit' checked /> ",t("Prioriteetti"),"</th>";
-echo "<th><input type='checkbox' class='checkall' id='tilat' checked /> ",t("Tila"),"</th>";
-echo "<th>",t("Volyymisuure"),"</th>";
-echo "<th>",t("Ajankohta"),"</th>";
+echo "<th><input type='checkbox' class='checkall' id='varasto' checked /> ", t("Varasto"), "</th>";
+echo "<th><input type='checkbox' class='checkall' id='keraysvyohyke' checked /> ", t("Keräysvyöhyke"), "</th>";
+echo "<th><input type='checkbox' class='checkall' id='toimitustapa' checked /> ", t("Kuljetusliike"), "</th>";
+echo "<th><input type='checkbox' class='checkall' id='prioriteetit' checked /> ", t("Prioriteetti"), "</th>";
+echo "<th><input type='checkbox' class='checkall' id='tilat' checked /> ", t("Tila"), "</th>";
+echo "<th>", t("Volyymisuure"), "</th>";
+echo "<th>", t("Ajankohta"), "</th>";
 echo "</tr>";
 
 echo "<tr>";
@@ -582,31 +582,31 @@ echo "<td>";
 
 $chk = array_fill_keys(array_keys($tilat), " checked") + array('aloittamatta' => '', 'aloitettu' => '', 'keratty' => '');
 
-echo "<input type='checkbox' class='tilat' name='tilat[aloittamatta]'{$chk['aloittamatta']}/> ",t("Aloittamatta"),"<br />";
-echo "<input type='checkbox' class='tilat' name='tilat[aloitettu]'{$chk['aloitettu']} /> ",t("Aloitettu"),"<br />";
-echo "<input type='checkbox' class='tilat' name='tilat[keratty]'{$chk['keratty']} /> ",t("Kerätty");
+echo "<input type='checkbox' class='tilat' name='tilat[aloittamatta]'{$chk['aloittamatta']}/> ", t("Aloittamatta"), "<br />";
+echo "<input type='checkbox' class='tilat' name='tilat[aloitettu]'{$chk['aloitettu']} /> ", t("Aloitettu"), "<br />";
+echo "<input type='checkbox' class='tilat' name='tilat[keratty]'{$chk['keratty']} /> ", t("Kerätty");
 echo "</td>";
 
 $chk = array_fill_keys(array($volyymisuure), " checked") + array('rivit' => '', 'kg' => '', 'litrat' => '');
 
 echo "<td>";
-echo "<input type='radio' name='volyymisuure' value='rivit'{$chk['rivit']} /> ",t("Rivit"),"<br />";
-echo "<input type='radio' name='volyymisuure' value='kg'{$chk['kg']} /> ",t("Kg"),"<br />";
-echo "<input type='radio' name='volyymisuure' value='litrat'{$chk['litrat']} /> ",t("Litrat");
+echo "<input type='radio' name='volyymisuure' value='rivit'{$chk['rivit']} /> ", t("Rivit"), "<br />";
+echo "<input type='radio' name='volyymisuure' value='kg'{$chk['kg']} /> ", t("Kg"), "<br />";
+echo "<input type='radio' name='volyymisuure' value='litrat'{$chk['litrat']} /> ", t("Litrat");
 echo "</td>";
 
 $chk = array_fill_keys(array($ajankohta), " checked") + array('past' => '', 'present' => '', 'future' => '');
 
 echo "<td>";
-echo "<input type='radio' name='ajankohta' value='past'{$chk['past']} /> ",t("Historia"),"<br />";
+echo "<input type='radio' name='ajankohta' value='past'{$chk['past']} /> ", t("Historia"), "<br />";
 echo "<input type='text' name='past_date_pp_alku' size='3' value='{$past_date_pp_alku}' />&nbsp;";
 echo "<input type='text' name='past_date_kk_alku' size='3' value='{$past_date_kk_alku}' />&nbsp;";
 echo "<input type='text' name='past_date_vv_alku' size='5' value='{$past_date_vv_alku}' /> - ";
 echo "<input type='text' name='past_date_pp_loppu' size='3' value='{$past_date_pp_loppu}' />&nbsp;";
 echo "<input type='text' name='past_date_kk_loppu' size='3' value='{$past_date_kk_loppu}' />&nbsp;";
 echo "<input type='text' name='past_date_vv_loppu' size='5' value='{$past_date_vv_loppu}' /><br /><br />";
-echo "<input type='radio' name='ajankohta' value='present'{$chk['present']} /> ",t("Tämä päivä"),"<br /><br />";
-echo "<input type='radio' name='ajankohta' value='future'{$chk['future']} /> ",t("Tulevat"),"<br />";
+echo "<input type='radio' name='ajankohta' value='present'{$chk['present']} /> ", t("Tämä päivä"), "<br /><br />";
+echo "<input type='radio' name='ajankohta' value='future'{$chk['future']} /> ", t("Tulevat"), "<br />";
 echo "<input type='text' name='future_date_pp_alku' size='3' value='{$future_date_pp_alku}' />&nbsp;";
 echo "<input type='text' name='future_date_kk_alku' size='3' value='{$future_date_kk_alku}' />&nbsp;";
 echo "<input type='text' name='future_date_vv_alku' size='5' value='{$future_date_vv_alku}' /> - ";
@@ -617,7 +617,7 @@ echo "</td>";
 
 echo "</tr>";
 
-echo "<tr><td class='back' colspan='6'><input type='submit' name='submit_form' value='",t("Näytä"),"' /></td></tr>";
+echo "<tr><td class='back' colspan='6'><input type='submit' name='submit_form' value='", t("Näytä"), "' /></td></tr>";
 
 echo "</table>";
 echo "</form>";
@@ -760,11 +760,11 @@ if (isset($submit_form)) {
 
     }
 
-    echo "<div id='chart_div_values' style='display:none;'>",json_encode($data),"</div>";
-    echo "<div id='chart_div_volume' style='display:none;'>",ucwords($volyymisuure),"</div>";
+    echo "<div id='chart_div_values' style='display:none;'>", json_encode($data), "</div>";
+    echo "<div id='chart_div_volume' style='display:none;'>", ucwords($volyymisuure), "</div>";
   }
   else {
-    echo "<font class='error'>",t("Tarkista valinnat"),"!</font>";
+    echo "<font class='error'>", t("Tarkista valinnat"), "!</font>";
   }
 }
 
@@ -772,4 +772,4 @@ echo "<br /><br />";
 
 echo "<div id='chart_div'></div>";
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

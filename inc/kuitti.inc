@@ -40,7 +40,7 @@ else {
 }
 
 //PDF:n luonti ja defaultit
-require_once("pdflib/phppdflib.class.php");
+require_once "pdflib/phppdflib.class.php";
 
 //PDF parametrit
 $pdf = new pdffile;
@@ -73,13 +73,13 @@ for ($siirto = 0; $siirto <= 426; $siirto += 426) {
   $pdf->draw_text(65,  782 - $siirto,  $luovuttaja,            $firstpage, $kirj);
 
   $pdf->draw_text(65,  758 - $siirto,
-    sprintf(t("on suorittanut %s %6.2f ").$yhtiorow['valkoodi'],$kuittirow['tapvm'], $kuittirow['summa']),
-                                    $firstpage, $kirj);
+    sprintf(t("on suorittanut %s %6.2f ").$yhtiorow['valkoodi'], $kuittirow['tapvm'], $kuittirow['summa']),
+    $firstpage, $kirj);
   $pdf->draw_text(65,  736 - $siirto,
     sprintf(t("%s:lle"), $saaja),                  $firstpage, $kirj);
 
   $pdf->draw_text(65,  714 - $siirto, t("Lisätietoja").": " . $kuittirow['selite'],
-                                    $firstpage, $kirj);
+    $firstpage, $kirj);
 
   $pdf->draw_text(65,  635 - $siirto,  t("Allekirjoitus"),        $firstpage, $pieni);
   $pdf->draw_rectangle(645 - $siirto, 60, 623 - $siirto, 300,      $firstpage, $rectparam);
@@ -87,7 +87,7 @@ for ($siirto = 0; $siirto <= 426; $siirto += 426) {
 }
 
 //keksitään uudelle failille joku varmasti uniikki nimi:
-$pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(),true)).".pdf";
+$pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(), true)).".pdf";
 
 //kirjoitetaan pdf faili levylle..
 $fh = fopen($pdffilenimi, "w");
@@ -105,9 +105,9 @@ if ($kirjoitinrow["komento"] == 'email') {
     $kutsu .= ", ".trim($saaja);
   }
 
-  if (@include("../inc/sahkoposti.inc"));
-  elseif (@include("inc/sahkoposti.inc"));
-  else include("sahkoposti.inc");
+  if (@include "../inc/sahkoposti.inc");
+  elseif (@include "inc/sahkoposti.inc");
+  else include "sahkoposti.inc";
 }
 else {
   $line = exec("$kirjoitinrow[komento] $pdffilenimi");

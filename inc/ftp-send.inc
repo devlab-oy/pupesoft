@@ -1,34 +1,34 @@
 <?php
 
-if (@include_once("inc/functions.inc"));
-elseif (@include_once("functions.inc"));
+if (@include_once "inc/functions.inc");
+elseif (@include_once "functions.inc");
 else exit;
 
 // Parametrit:
-# $ftphost --> FTP-palvelin
-# $ftpuser --> Käyttäjätunnus
-# $ftppass --> Salasana
-# $ftppath --> Kansio FTP-palvelimella jonne failit työnnetään
-# $ftpfile --> Siirrettävä tiedosto
-# $ftpport --> Custom portti, ei pakollinen
-# $ftpfail --> Kansio jonne laitetaan failit jos siirto feilaa, ei pakollinen
-# $ftpsucc --> Kansio jonne tallennetaan failit jos siirto onnistuu, ei pakollinen
-# $ftptype --> FTP-palvelimen tyyppi esim "AS400", ei pakollinen
-# $ftptmpr --> Käytetäänkö .TMP päätettä siirron aikana.
+// $ftphost --> FTP-palvelin
+// $ftpuser --> Käyttäjätunnus
+// $ftppass --> Salasana
+// $ftppath --> Kansio FTP-palvelimella jonne failit työnnetään
+// $ftpfile --> Siirrettävä tiedosto
+// $ftpport --> Custom portti, ei pakollinen
+// $ftpfail --> Kansio jonne laitetaan failit jos siirto feilaa, ei pakollinen
+// $ftpsucc --> Kansio jonne tallennetaan failit jos siirto onnistuu, ei pakollinen
+// $ftptype --> FTP-palvelimen tyyppi esim "AS400", ei pakollinen
+// $ftptmpr --> Käytetäänkö .TMP päätettä siirron aikana.
 
 // Palautetaan:
-# $palautus
-# $syy
+// $palautus
+// $syy
 
 // Debug:
-# echo "ftphost --> $ftphost<br>";
-# echo "ftpuser --> $ftpuser<br>";
-# echo "ftppass --> $ftppass<br>";
-# echo "ftppath --> $ftppath<br>";
-# echo "ftpfile --> $ftpfile<br>";
-# echo "ftpport --> $ftpport<br>";
-# echo "ftpfail --> $ftpfail<br>";
-# echo "ftpsucc --> $ftpsucc<br>";
+// echo "ftphost --> $ftphost<br>";
+// echo "ftpuser --> $ftpuser<br>";
+// echo "ftppass --> $ftppass<br>";
+// echo "ftppath --> $ftppath<br>";
+// echo "ftpfile --> $ftpfile<br>";
+// echo "ftpport --> $ftpport<br>";
+// echo "ftpfail --> $ftpfail<br>";
+// echo "ftpsucc --> $ftpsucc<br>";
 
 $syy       = "";
 $palautus     = 0;
@@ -133,7 +133,7 @@ else {
         // Jos $ftpport on käytössä niin käytetään näitä komentoja.
         // Näyttää siltä, että ftp_rename ei osaa hanskata renametusta kun käytetään custom porttia
         $rename = ftp_raw($conn_id, "RNFR {$ftppath}{$ftpfile_tmp}");
-              $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$filenimi}");
+        $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$filenimi}");
 
         if (stripos($rename[0], "command successful") === FALSE and stripos($rename[0], "file renamed") === FALSE) {
           $rename1 = FALSE;
@@ -216,26 +216,26 @@ else {
   if ($palautus != 0 and (!isset($ftpfail) or $ftpfail == "")) {
     // ncftpput:in exit valuet
     switch ($palautus) {
-      case  1:
-        $syy = "Could not connect to remote host. ($ftphost)";
-        break;
-      case  2:
-        $syy = "Could not login to remote host ($ftpuser, $ftppass)";
-        break;
-      case  3:
-        $syy = "Transfer failed ($ftppath, ".realpath($ftpfile).")";
-        break;
-      case  4:
-        $syy = "Rename failed ($ftppath, {$ftppath}{$ftpfile_tmp} --> {$ftppath}{$filenimi})";
-        break;
-      case  5:
-        $syy = "Rename failed ($ftppath, {$ftppath}{$filenimi} --> {$ftppath}{$renameftpfile})";
-        break;
-      case  6:
-        $syy = "Delete failed ({$ftppath}{$ftpfile_tmp})";
-        break;
-      default:
-        $syy = t("Tuntematon errorkoodi")." ($palautus)!!";
+    case  1:
+      $syy = "Could not connect to remote host. ($ftphost)";
+      break;
+    case  2:
+      $syy = "Could not login to remote host ($ftpuser, $ftppass)";
+      break;
+    case  3:
+      $syy = "Transfer failed ($ftppath, ".realpath($ftpfile).")";
+      break;
+    case  4:
+      $syy = "Rename failed ($ftppath, {$ftppath}{$ftpfile_tmp} --> {$ftppath}{$filenimi})";
+      break;
+    case  5:
+      $syy = "Rename failed ($ftppath, {$ftppath}{$filenimi} --> {$ftppath}{$renameftpfile})";
+      break;
+    case  6:
+      $syy = "Delete failed ({$ftppath}{$ftpfile_tmp})";
+      break;
+    default:
+      $syy = t("Tuntematon errorkoodi")." ($palautus)!!";
     }
 
     $rivi  = "{$_SERVER['SCRIPT_NAME']}\n";

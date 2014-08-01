@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("rahtikirjanumerotarkista")) {
-  function rahtikirjanumerotarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("rahtikirjanumerotarkista")) {
+  function rahtikirjanumerotarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $laji, $poistolukko;
 
     if (mysql_field_name($result, $i) == "rahtikirjanro") {
@@ -16,7 +16,7 @@ if(!function_exists("rahtikirjanumerotarkista")) {
                    WHERE yhtio        = '$kukarow[yhtio]'
                    and rahtikirjanro  = '$t[$i]'
                    and tunnus        != '$tunnus'";
-          $sresult = pupe_query($query);
+        $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) != 0) {
           // Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
@@ -28,7 +28,7 @@ if(!function_exists("rahtikirjanumerotarkista")) {
             if (strlen($t[$i]) != 12) {
               $virhe[$i] = t("Rahtikirjanumero on oltava 12-merkkiä pitkä")."!";
             }
-            elseif($t[$i] != mod10_tarkiste(substr($t[$i],0,-1))) {
+            elseif ($t[$i] != mod10_tarkiste(substr($t[$i], 0, -1))) {
               $virhe[$i] = t("Rahtikirjanumeron tarkiste on virheellinen")."!";
             }
           }

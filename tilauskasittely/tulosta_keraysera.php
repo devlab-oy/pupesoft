@@ -1,10 +1,10 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 js_popup();
 
-echo "<font class='head'>",t("Tulosta ker‰yser‰"),"</font><hr>";
+echo "<font class='head'>", t("Tulosta ker‰yser‰"), "</font><hr>";
 
 echo "  <script type='text/javascript' language='JavaScript'>
       $(document).ready(function() {
@@ -54,7 +54,7 @@ if ($tee == 'tee_arpajaiset') {
 }
 
 if ($tee == "selaa" and (int) $keraajanro == 0 and $keraajalist == "") {
-  echo "<font class='error'>",t("Valitse ker‰‰j‰"),"!</font><br>";
+  echo "<font class='error'>", t("Valitse ker‰‰j‰"), "!</font><br>";
   $tee = '';
 }
 
@@ -71,9 +71,9 @@ if ($tee == '') {
             AND keraysvyohyke != ''";
   $kuresult = pupe_query($query);
 
-  echo "<tr><th>",t("Ker‰‰j‰"),"</th><td><input type='text' size='5' name='keraajanro'> ",t("tai")," ";
+  echo "<tr><th>", t("Ker‰‰j‰"), "</th><td><input type='text' size='5' name='keraajanro'> ", t("tai"), " ";
   echo "<select name='keraajalist'>";
-  echo "<option value=''>",t("Valitse ker‰‰j‰"),"</option>";
+  echo "<option value=''>", t("Valitse ker‰‰j‰"), "</option>";
 
   while ($kurow = mysql_fetch_assoc($kuresult)) {
 
@@ -89,7 +89,7 @@ if ($tee == '') {
     echo "<option value='{$kurow['kuka']}' {$selker}>{$kurow['nimi']}</option>";
   }
 
-  echo "</select>&nbsp;<input type='submit' value='",t("Valitse"),"' /></td>";
+  echo "</select>&nbsp;<input type='submit' value='", t("Valitse"), "' /></td>";
   echo "</tr>";
 
   $query = "SELECT tunnus, nimitys
@@ -98,7 +98,7 @@ if ($tee == '') {
             ORDER BY tyyppi, nimitys";
   $varastores = pupe_query($query);
 
-  echo "<tr><th>",t("Valitse varasto"),"</th><td>&nbsp;";
+  echo "<tr><th>", t("Valitse varasto"), "</th><td>&nbsp;";
   echo "<select name='select_varasto'>";
 
   while ($varastorow = mysql_fetch_assoc($varastores)) {
@@ -150,7 +150,7 @@ if ($tee == 'uusi_pakkaus') {
               luontiaika    = now()";
     $ins_uusi_pak_res = pupe_query($query);
 
-    echo "<br /><font class='message'>",t("Uusi pakkaus lis‰tty"),"!</font><br />";
+    echo "<br /><font class='message'>", t("Uusi pakkaus lis‰tty"), "!</font><br />";
   }
 
   $tee = 'muokkaa';
@@ -251,7 +251,7 @@ if ($tee == 'muuta') {
           $kpl_chk_row = mysql_fetch_assoc($kpl_chk_res);
 
           if ($paljon_siirretaan > $kpl_chk_row['kpl']) {
-            echo "<br /><font class='error'>",t("Siirrett‰v‰ kappalem‰‰r‰ oli liian suuri"),"! ({$paljon_siirretaan} > {$kpl_chk_row['kpl']})</font><br />";
+            echo "<br /><font class='error'>", t("Siirrett‰v‰ kappalem‰‰r‰ oli liian suuri"), "! ({$paljon_siirretaan} > {$kpl_chk_row['kpl']})</font><br />";
           }
           else {
             $kerattylisa1 = $kerattylisa2 = $kerattylisa3 = "";
@@ -375,7 +375,7 @@ if ($tee == 'muuta') {
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) == 0) {
-          echo "<font class='error'>",t("Ker‰‰j‰‰")," {$reittietiketti_row['laatija']} ",t("ei lˆydy"),"!</font><br>";
+          echo "<font class='error'>", t("Ker‰‰j‰‰"), " {$reittietiketti_row['laatija']} ", t("ei lˆydy"), "!</font><br>";
         }
         else {
 
@@ -392,7 +392,7 @@ if ($tee == 'muuta') {
           $uusi_sscc = $reittietiketti_row["sscc"];
 
           // Tulostetaan kollilappu
-          require('inc/tulosta_reittietiketti.inc');
+          require 'inc/tulosta_reittietiketti.inc';
 
           // Palautetaan alkup kukarow
           $kukarow = $kukarow_orig;
@@ -429,10 +429,10 @@ if ($tee != '') {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-    echo "<font class='error'>",t("Ker‰‰j‰‰")," {$keraajanro} ",t("ei lˆydy"),"!</font><br>";
+    echo "<font class='error'>", t("Ker‰‰j‰‰"), " {$keraajanro} ", t("ei lˆydy"), "!</font><br>";
   }
   elseif ($select_varasto == '') {
-    echo "<font class='error'>",t("Et valinnut varastoa"),"!</font><br>";
+    echo "<font class='error'>", t("Et valinnut varastoa"), "!</font><br>";
   }
   else {
 
@@ -450,10 +450,10 @@ if ($tee != '') {
     echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
 
     echo "<table>";
-    echo "<tr><th>",t("Ker‰‰j‰"),"</th><td>{$keraajarow['nimi']}</td></tr>";
-    echo "<tr><th>",t("Valitse reittietiketin tulostin"),"</th><td>";
+    echo "<tr><th>", t("Ker‰‰j‰"), "</th><td>{$keraajarow['nimi']}</td></tr>";
+    echo "<tr><th>", t("Valitse reittietiketin tulostin"), "</th><td>";
     echo "<select name='reittietikettitulostin'>";
-    echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
+    echo "<option value=''>", t("Ei kirjoitinta"), "</option>";
 
     $select_varasto = (int) $select_varasto;
 
@@ -485,9 +485,9 @@ if ($tee != '') {
     echo "</tr>";
 
     if ($tee != 'muuta' and $tee != 'muokkaa') {
-      echo "<tr><th>",t("Valitse ker‰yslistan tulostin"),"</th><td>";
+      echo "<tr><th>", t("Valitse ker‰yslistan tulostin"), "</th><td>";
       echo "<select name='kerayslistatulostin'>";
-      echo "<option value=''>",t("Ei kirjoitinta"),"</option>";
+      echo "<option value=''>", t("Ei kirjoitinta"), "</option>";
 
       mysql_data_seek($kires, 0);
 
@@ -503,7 +503,7 @@ if ($tee != '') {
 
       echo "</select></td>";
 
-      echo "<td class='back'><input type='submit' value='",t("Hae ker‰yser‰"),"' />";
+      echo "<td class='back'><input type='submit' value='", t("Hae ker‰yser‰"), "' />";
 
       // Tsekataan onko k‰ytt‰j‰ll‰ oikeus tulostaa kaikki t‰ss‰ varastossa
       $ktkre = t_avainsana("KERAYSERA_TK", "", "and avainsana.selite  = '{$keraajarow['kuka']}' AND avainsana.selitetark = '{$select_varasto}' ");
@@ -511,7 +511,7 @@ if ($tee != '') {
 
       if ($ktkrow['selite'] != "") $naytetaan_tulosta_kaikki = 1;
 
-      if ($naytetaan_tulosta_kaikki) echo "<input type='button' id='tulosta_kaikki_namiska' value='",t("Tulosta kaikki"),"' />";
+      if ($naytetaan_tulosta_kaikki) echo "<input type='button' id='tulosta_kaikki_namiska' value='", t("Tulosta kaikki"), "' />";
       echo "<input type='hidden' id='tulosta_kaikki' name='tulosta_kaikki' value='' />";
       echo "</td>";
     }
@@ -538,7 +538,7 @@ if ($tee != '') {
       if ($tulosta_kaikki == "JOO" and $naytetaan_tulosta_kaikki == 0) {
         //jos yritet‰‰n tulostaa kaikki niin tsekataan viel‰ k‰yttˆoikeudet
         $tulosta_kaikki = "";
-        echo "<font class='message'>",t("Yritit tulostaa kaikki ker‰yser‰t mutta k‰yttˆoikeus puuttuu"),".</font><br />";
+        echo "<font class='message'>", t("Yritit tulostaa kaikki ker‰yser‰t mutta k‰yttˆoikeus puuttuu"), ".</font><br />";
       }
 
       while ($loop_counter) {
@@ -549,7 +549,7 @@ if ($tee != '') {
         if (isset($erat['tilaukset']) and count($erat['tilaukset']) > 0) {
 
           // Tallennetaan ker‰yser‰
-          require('inc/tallenna_keraysera.inc');
+          require 'inc/tallenna_keraysera.inc';
 
           // N‰m‰ tilaukset tallennettin ker‰yser‰‰n
           if (isset($lisatyt_tilaukset) and count($lisatyt_tilaukset) > 0) {
@@ -570,7 +570,7 @@ if ($tee != '') {
             $laskuja         = count($erat['tilaukset']);
             $lukotetaan       = FALSE;
 
-            require("tilauskasittely/tilaus-valmis-tulostus.inc");
+            require "tilauskasittely/tilaus-valmis-tulostus.inc";
 
             // Jos tulostus feilasi, niin dellataan ker‰yser‰
             if ($virheellinen == "X" and $kerayseran_numero > 0) {
@@ -587,21 +587,21 @@ if ($tee != '') {
           $loop_counter = $tulosta_kaikki == "JOO" ? TRUE : FALSE;
         }
         else {
-          echo "<font class='message'>",t("Ei ole yht‰‰n ker‰tt‰v‰‰ ker‰yser‰‰"),".</font><br />";
+          echo "<font class='message'>", t("Ei ole yht‰‰n ker‰tt‰v‰‰ ker‰yser‰‰"), ".</font><br />";
           $loop_counter = FALSE;
         }
 
         // lukitaan tableja
-         $query = "UNLOCK TABLES";
+        $query = "UNLOCK TABLES";
         $result = pupe_query($query);
 
         if (isset($lisatyt_tilaukset) and count($lisatyt_tilaukset) > 0) {
 
           // Tulostetaan kollilappu
-          require('inc/tulosta_reittietiketti.inc');
+          require 'inc/tulosta_reittietiketti.inc';
 
           if ($erat['keraysvyohyketiedot']['ulkoinen_jarjestelma'] == "K") {
-            require("inc/kardex_send.inc");
+            require "inc/kardex_send.inc";
           }
         }
       }
@@ -622,8 +622,8 @@ if ($tee != '') {
       echo "<input type='hidden' name='keraajalist' value='{$keraajalist}' />";
       echo "<input type='hidden' name='tee' value='selaa' />";
       echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
-      echo t('Etsi'),":&nbsp;<input type='text' name='etsi_kerayseraa' value='{$etsi_kerayseraa}' />&nbsp;";
-      echo "<input type='submit' value='",t("Hae"),"' />";
+      echo t('Etsi'), ":&nbsp;<input type='text' name='etsi_kerayseraa' value='{$etsi_kerayseraa}' />&nbsp;";
+      echo "<input type='submit' value='", t("Hae"), "' />";
       echo "</form>";
       echo "<br /><br />";
     }
@@ -652,21 +652,21 @@ if ($tee != '') {
     $kerayserat_res = pupe_query($query);
 
     if (mysql_num_rows($kerayserat_res) > 0) {
-      echo "<img title='",t("N‰yt‰ rivi esimerkkikuva"),"' alt='",t("N‰yt‰ rivi esimerkkikuva"),"' src='{$palvelin2}pics/lullacons/go-down.png' /> = <font class='message'>",t("Saat lis‰‰ infoa ker‰yser‰st‰ klikkaamalla rivi‰"),"</font><br /><br />";
+      echo "<img title='", t("N‰yt‰ rivi esimerkkikuva"), "' alt='", t("N‰yt‰ rivi esimerkkikuva"), "' src='{$palvelin2}pics/lullacons/go-down.png' /> = <font class='message'>", t("Saat lis‰‰ infoa ker‰yser‰st‰ klikkaamalla rivi‰"), "</font><br /><br />";
 
       echo "<table>";
       echo "<tr>";
-      echo "<th>",t("Nro"),"</th>";
-      echo "<th>",t("Ker‰ysvyˆhyke"),"</th>";
-      echo "<th>",t("Rivej‰"),"</th>";
-      echo "<th>",t("Asiakkaita"),"</th>";
-      echo "<th>",t("Laadittu"),"<br>",t("Ker‰tty"),"</th>";
-      echo "<th>",t("Ker‰‰j‰"),"</th>";
+      echo "<th>", t("Nro"), "</th>";
+      echo "<th>", t("Ker‰ysvyˆhyke"), "</th>";
+      echo "<th>", t("Rivej‰"), "</th>";
+      echo "<th>", t("Asiakkaita"), "</th>";
+      echo "<th>", t("Laadittu"), "<br>", t("Ker‰tty"), "</th>";
+      echo "<th>", t("Ker‰‰j‰"), "</th>";
       echo "</tr>";
 
       while ($kerayserat_row = mysql_fetch_assoc($kerayserat_res)) {
         echo "<tr class='toggleable' id='{$kerayserat_row['nro']}'>";
-        echo "<td>{$kerayserat_row['nro']}&nbsp;<img title='",t("N‰yt‰ rivi"),"' alt='",t("N‰yt‰ rivi"),"' src='{$palvelin2}pics/lullacons/go-down.png' /></td>";
+        echo "<td>{$kerayserat_row['nro']}&nbsp;<img title='", t("N‰yt‰ rivi"), "' alt='", t("N‰yt‰ rivi"), "' src='{$palvelin2}pics/lullacons/go-down.png' /></td>";
         echo "<td>{$kerayserat_row['keraysvyohyke']}</td>";
         echo "<td>{$kerayserat_row['rivimaara']}</td>";
         echo "<td>{$kerayserat_row['asiakasmaara']}</td>";
@@ -715,7 +715,7 @@ if ($tee != '') {
           echo "<input type='hidden' name='keraajalist' value='{$keraajalist}' />";
           echo "<input type='hidden' name='tee' value='muokkaa' />";
           echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
-          echo "<input type='submit' value='",t("Muokkaa"),"' />";
+          echo "<input type='submit' value='", t("Muokkaa"), "' />";
           echo "</form>";
         }
         elseif ($tee == 'muokkaa') {
@@ -724,9 +724,9 @@ if ($tee != '') {
           echo "<input type='hidden' name='keraajalist' value='{$keraajalist}' />";
           echo "<input type='hidden' name='select_varasto' value='{$select_varasto}' />";
           echo "<input type='hidden' name='tee' value='tee_arpajaiset'>";
-          echo "<input class='notoggle' type='submit' name='muuta' value='",t("Tallenna"),"'>";
-          echo "<input class='notoggle' type='submit' name='uusi_pakkaus' value='",t("Uusi pakkaus"),"'>";
-          echo "<input class='notoggle' type='submit' name='palaa' value='",t("Palaa"),"'>";
+          echo "<input class='notoggle' type='submit' name='muuta' value='", t("Tallenna"), "'>";
+          echo "<input class='notoggle' type='submit' name='uusi_pakkaus' value='", t("Uusi pakkaus"), "'>";
+          echo "<input class='notoggle' type='submit' name='palaa' value='", t("Palaa"), "'>";
         }
 
         echo "</td>";
@@ -761,29 +761,29 @@ if ($tee != '') {
         echo "<div id='toggleable_{$kerayserat_row['nro']}' style='{$display} width:100%;'>";
         echo "<table style='width:100%;'>";
         echo "<tr>";
-        echo "<th>",t("Pakkauskirjain"),"</th>";
-        echo "<th>",t("SSCC"),"</th>";
-        echo "<th>",t("M‰‰r‰"),"</th>";
+        echo "<th>", t("Pakkauskirjain"), "</th>";
+        echo "<th>", t("SSCC"), "</th>";
+        echo "<th>", t("M‰‰r‰"), "</th>";
 
         if ($tee != 'muokkaa') {
-          echo "<th>",t("Tuoteno"),"</th>";
-          echo "<th>",t("Asiakas"),"</th>";
+          echo "<th>", t("Tuoteno"), "</th>";
+          echo "<th>", t("Asiakas"), "</th>";
         }
 
-        echo "<th>",t("Pakkaus"),"</th>";
+        echo "<th>", t("Pakkaus"), "</th>";
 
         if ($tee == 'muokkaa') {
-          echo "<th>",t("Reittietiketti"),"</th>";
+          echo "<th>", t("Reittietiketti"), "</th>";
         }
 
         echo "</tr>";
 
         while ($rivit_row = mysql_fetch_assoc($rivit_res)) {
-          echo "<tr class='tumma toggleable' id='",chr((64+$rivit_row['pakkausnro'])),"'>";
-          echo "<td nowrap>",chr((64+$rivit_row['pakkausnro']));
+          echo "<tr class='tumma toggleable' id='", chr((64+$rivit_row['pakkausnro'])), "'>";
+          echo "<td nowrap>", chr((64+$rivit_row['pakkausnro']));
 
           if ($tee == 'muokkaa') {
-            echo "&nbsp;<img title='",t("N‰yt‰ rivi"),"' alt='",t("N‰yt‰ rivi"),"' src='{$palvelin2}pics/lullacons/go-down.png' />";
+            echo "&nbsp;<img title='", t("N‰yt‰ rivi"), "' alt='", t("N‰yt‰ rivi"), "' src='{$palvelin2}pics/lullacons/go-down.png' />";
           }
 
           echo "</td>";
@@ -862,21 +862,21 @@ if ($tee != '') {
 
             $viewable = (isset($view) and $view == 'yes') ? '' : 'display:none;';
 
-            echo "<div id='toggleable_",chr((64+$rivit_row['pakkausnro'])),"' style='{$viewable} width:100%'>";
+            echo "<div id='toggleable_", chr((64+$rivit_row['pakkausnro'])), "' style='{$viewable} width:100%'>";
 
             echo "<table style='width:100%'>";
 
             if (mysql_num_rows($content_res) == 0) {
-              echo "<tr><td>",t("Poista pakkaus")," <input class='notoggle' type='checkbox' name='poista_pakkaus[{$rivit_row['pakkausnro']}]' value='{$rivit_row['pakkausnro']}' /></td></tr>";
+              echo "<tr><td>", t("Poista pakkaus"), " <input class='notoggle' type='checkbox' name='poista_pakkaus[{$rivit_row['pakkausnro']}]' value='{$rivit_row['pakkausnro']}' /></td></tr>";
             }
             else {
 
               echo "<tr>";
-              echo "<th>",t("Tuoteno"),"</th>";
-              echo "<th>",t("Hyllypaikka"),"</th>";
-              echo "<th>",t("M‰‰r‰"),"</th>";
-              echo "<th>",t("Asiakas"),"</th>";
-              echo "<th>",t("Siirr‰")," (",t("Minne ja kuinka paljon"),")</th>";
+              echo "<th>", t("Tuoteno"), "</th>";
+              echo "<th>", t("Hyllypaikka"), "</th>";
+              echo "<th>", t("M‰‰r‰"), "</th>";
+              echo "<th>", t("Asiakas"), "</th>";
+              echo "<th>", t("Siirr‰"), " (", t("Minne ja kuinka paljon"), ")</th>";
               echo "</tr>";
 
               while ($content_row = mysql_fetch_assoc($content_res)) {
@@ -898,10 +898,10 @@ if ($tee != '') {
                 $siirra_res = pupe_query($query);
 
                 echo "<select name='siirra_tuote[{$content_row['rivitunnus']}]' class='siirra_tuote'>";
-                echo "<option value=''>",t("Ei siirret‰"),"</option>";
+                echo "<option value=''>", t("Ei siirret‰"), "</option>";
 
                 while ($siirra_row = mysql_fetch_assoc($siirra_res)) {
-                  echo "<option value='{$siirra_row['pakkausnro']}'>",chr((64+$siirra_row['pakkausnro'])),"</option>";
+                  echo "<option value='{$siirra_row['pakkausnro']}'>", chr((64+$siirra_row['pakkausnro'])), "</option>";
                 }
 
                 echo "</select>";
@@ -930,4 +930,4 @@ if ($tee != '') {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

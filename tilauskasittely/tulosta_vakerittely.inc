@@ -1,7 +1,7 @@
 <?php
 
-if (@require_once("pdflib/phppdflib.class.php"));
-else require_once("phppdflib.class.php");
+if (@require_once "pdflib/phppdflib.class.php");
+else require_once "phppdflib.class.php";
 
 $norm["height"]       = 10;
 $norm["font"]         = "Times-Roman";
@@ -28,7 +28,7 @@ $rectparam["width"]     = 0.3;
 $rivinkorkeus        = 17;
 
 if (!function_exists('vakadr_otsikko')) {
-  function vakadr_otsikko ($params) {
+  function vakadr_otsikko($params) {
     global $kukarow, $yhtiorow;
 
     // Luodaan muuttujat
@@ -49,11 +49,11 @@ if (!function_exists('vakadr_otsikko')) {
 
     tulosta_logo_pdf($pdf, $thispage, $laskurow);
 
-    $pdf->draw_text(290,815, t("Kuljetuksen VAK/ADR-erittely", $kieli), $thispage, $iso);
+    $pdf->draw_text(290, 815, t("Kuljetuksen VAK/ADR-erittely", $kieli), $thispage, $iso);
 
     // VASEN PUOLI
     // Myyjän tiedot
-    $pdf->draw_text(30, 717, t("Lähettäjä", $kieli),$thispage, $boldi);
+    $pdf->draw_text(30, 717, t("Lähettäjä", $kieli), $thispage, $boldi);
     $pdf->draw_text(30, 707, $yhtiorow["nimi"],  $thispage, $norm);
     $pdf->draw_text(30, 697, $yhtiorow["osoite"],  $thispage, $norm);
     $pdf->draw_text(30, 687, $yhtiorow["postino"]." ".$yhtiorow["postitp"], $thispage, $norm);
@@ -78,7 +78,7 @@ if (!function_exists('vakadr_otsikko')) {
     $pdf->draw_text(290, 792, t("Toimitustapa", $kieli), $thispage, $boldi);
     $pdf->draw_text(370, 792, $laskurow["toimitustapa"], $thispage, $boldi);
 
-    $pdf->draw_text(290, 780, t("Tilausnumero", $kieli),$thispage, $norm);
+    $pdf->draw_text(290, 780, t("Tilausnumero", $kieli), $thispage, $norm);
     $pdf->draw_text(370, 780, $laskurow["tunnus"], $thispage, $norm);
 
     $pdf->draw_text(290, 770, t("Päivämäärä", $kieli), $thispage, $norm);
@@ -129,18 +129,18 @@ if (!function_exists('vakadr_rivi')) {
       $kala = $kala-15; // oikeasta kohtaan ja että SSCC väliin tulee väliä
 
       if ((is_numeric($sscc_ulkoinen) and (int) $sscc_ulkoinen > 0) or (!is_numeric($sscc_ulkoinen) and (string) $sscc_ulkoinen != "")) {
-        $pdf->draw_text(150,$kala, $sscc_ulkoinen, $thispage, $boldi); // ULKOINEN_SSCC tähän jos löytyy
+        $pdf->draw_text(150, $kala, $sscc_ulkoinen, $thispage, $boldi); // ULKOINEN_SSCC tähän jos löytyy
       }
       else {
-        $pdf->draw_text(150,$kala, $sscc, $thispage, $boldi); // SSCC tähän
+        $pdf->draw_text(150, $kala, $sscc, $thispage, $boldi); // SSCC tähän
       }
 
       // tää on se ongelma.
       // tehdään kollikohtaiset otsikot.
       $pdf->draw_text(30,  $kala, t("Kollitunniste (SSCC)", $kieli), $thispage, $boldi);
-      $pdf->draw_text(290,$kala, t("Tilaus", $kieli), $thispage, $boldi);
-      $pdf->draw_text(330,$kala, $laskurow["tunnus"], $thispage, $norm);
-      $pdf->draw_text(520,$kala, t("Määrä kg", $kieli), $thispage, $boldi);
+      $pdf->draw_text(290, $kala, t("Tilaus", $kieli), $thispage, $boldi);
+      $pdf->draw_text(330, $kala, $laskurow["tunnus"], $thispage, $norm);
+      $pdf->draw_text(520, $kala, t("Määrä kg", $kieli), $thispage, $boldi);
       $kala = $kala-12;
 
     }
@@ -152,10 +152,10 @@ if (!function_exists('vakadr_rivi')) {
         $pdf->draw_text(30, $kala, $ff_string, $thispage, $ff_font);
       }
       else {
-        $pdf->draw_text(30,$kala, $vakkoodi, $thispage, $norm);
+        $pdf->draw_text(30, $kala, $vakkoodi, $thispage, $norm);
       }
 
-      $pdf->draw_text(520,$kala, sprintf("%.2f",$massa), $thispage, $boldi);
+      $pdf->draw_text(520, $kala, sprintf("%.2f", $massa), $thispage, $boldi);
       $kala = $kala-11;
     }
 
@@ -297,7 +297,7 @@ if (!function_exists('print_pdf_vakadr')) {
 
       foreach ($komentoulos as $komento) {
         // itse print komento...
-        if ($komento == 'email' or substr($komento,0,12) == 'asiakasemail') {
+        if ($komento == 'email' or substr($komento, 0, 12) == 'asiakasemail') {
           $liite = $pdffilenimi;
           $content_body = "";
 
@@ -309,9 +309,9 @@ if (!function_exists('print_pdf_vakadr')) {
             $kutsu .= ", ".trim($laskurow["nimi"]);
           }
 
-          if (@include("../inc/sahkoposti.inc"));
-          elseif (@include("inc/sahkoposti.inc"));
-          else include("sahkoposti.inc");
+          if (@include "../inc/sahkoposti.inc");
+          elseif (@include "inc/sahkoposti.inc");
+          else include "sahkoposti.inc";
         }
         elseif ($komento != '' and $komento != 'edi') {
           echo t("VAK/ADR-erittely tulostuu")."...<br>";

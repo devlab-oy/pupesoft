@@ -14,9 +14,9 @@ if (isset($_POST["tee"])) {
   }
 }
 
-require ("../inc/parametrit.inc");
-require ("inc/pupeExcel.inc");
-require ('inc/ProgressBar.class.php');
+require "../inc/parametrit.inc";
+require "inc/pupeExcel.inc";
+require 'inc/ProgressBar.class.php';
 
 if (isset($livesearch_tee) and $livesearch_tee == "ASIAKASHAKU") {
   livesearch_asiakashaku();
@@ -90,7 +90,7 @@ if ($request['action'] == 'aja_raportti' and $valid) {
 
 echo_kayttoliittyma($request);
 
-require ("inc/footer.inc");
+require "inc/footer.inc";
 
 function echo_kayttoliittyma($request = array()) {
   global $kukarow, $yhtiorow;

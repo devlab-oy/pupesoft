@@ -28,7 +28,7 @@ if (! $valmistukset) {
 }
 
 // Loopataan valmistukset läpi
-foreach($valmistukset as $valmistus) {
+foreach ($valmistukset as $valmistus) {
   // Näytetään vain ne valmistukset joilla on valmisteita ja ovat tilassa Odottaa valmistusta
   if (count($valmistus->tuotteet()) > 0 and in_array($valmistus->getTila(), array(Valmistus::ODOTTAA, Valmistus::KESKEYTETTY))) {
     echo "<table>";
@@ -63,11 +63,11 @@ foreach($valmistukset as $valmistus) {
 }
 
 // Virheilmoitukset
-if (!empty($errors))  {
+if (!empty($errors)) {
   echo "<font class='error'>";
   echo t($errors);
   echo "</font>";
 }
 
 // FOOTER
-require ("inc/footer.inc");
+require "inc/footer.inc";

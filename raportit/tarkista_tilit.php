@@ -3,7 +3,7 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 2;
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<br><font class='head'>".t("Tiliöintien tilit")."</font><hr><br>";
 
@@ -36,7 +36,7 @@ $columnit = array("tilino", "tilino_eu", "tilino_ei_eu");
 $query = "SHOW TABLES";
 $result = mysql_query($query) or pupe_error($query);
 
-while($table = mysql_fetch_array($result)) {
+while ($table = mysql_fetch_array($result)) {
 
   if (in_array($table[0], $tables)) {
 
@@ -45,7 +45,7 @@ while($table = mysql_fetch_array($result)) {
     $query = "  SHOW columns FROM $table[0]";
     $res = mysql_query($query) or pupe_error($query);
 
-    while($col = mysql_fetch_array($res)) {
+    while ($col = mysql_fetch_array($res)) {
       if (in_array($col[0], $columnit)) {
         foreach ($columnit as $c) {
           $query = "SELECT $c
@@ -60,7 +60,7 @@ while($table = mysql_fetch_array($result)) {
                       WHERE yhtio = '$kukarow[yhtio]' and tilino = '".$row[$c]."'";
             $tarkresr = mysql_query($query) or pupe_error($query);
 
-            if(mysql_num_rows($tarkresr) == 0) {
+            if (mysql_num_rows($tarkresr) == 0) {
               echo "<font class='error'>[$c] Tiliä ei löydy '".$row[$c]."'</font><br>";
             }
           }
@@ -70,4 +70,4 @@ while($table = mysql_fetch_array($result)) {
   }
 }
 
-require("../inc/footer.inc");
+require "../inc/footer.inc";

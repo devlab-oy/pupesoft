@@ -88,12 +88,12 @@ if ($tee == '') {
 
   echo "<br><br><input type = 'submit' value = '".t("Näytä")."'></form>";
 
-  require ("inc/footer.inc");
+  require "inc/footer.inc";
   exit;
 }
 
-$timeparts = explode(" ",microtime());
-$phptime = $timeparts[1].substr($timeparts[0],1);
+$timeparts = explode(" ", microtime());
+$phptime = $timeparts[1].substr($timeparts[0], 1);
 
 // Onko meillä lisärajoitteita??
 $lisa='';
@@ -143,8 +143,8 @@ while ($tilirow = mysql_fetch_array($result)) {
   $kausi='';
   $summa='';
 
-  while ($tiliointirow=mysql_fetch_array ($aresult)) {
-    $kk = substr($tiliointirow['kausi'],5,2)*1;
+  while ($tiliointirow=mysql_fetch_array($aresult)) {
+    $kk = substr($tiliointirow['kausi'], 5, 2)*1;
     $kausi[$kk]=$tiliointirow['kausi'];
     $summa[$kk]=$tiliointirow['summa'];
   }
@@ -153,7 +153,7 @@ while ($tilirow = mysql_fetch_array($result)) {
 
   for ($i=1; $i<13; $i++) {
     echo "<td align='right'>";
-    echo str_replace(".",",",sprintf("%.2f", $summa[$i]));
+    echo str_replace(".", ",", sprintf("%.2f", $summa[$i]));
     echo "</td>";
   }
 

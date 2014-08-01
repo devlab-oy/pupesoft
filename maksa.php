@@ -3,7 +3,7 @@
 // DataTables päälle
 $pupe_DataTables = "maksalaskuja";
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 js_popup();
 
@@ -52,7 +52,7 @@ if (count($_POST) == 0) {
 }
 
 // Päivitetään oletustili
-  if ($tee == 'O') {
+if ($tee == 'O') {
   $query = "UPDATE kuka SET
             oletustili  = '$oltili'
             WHERE yhtio = '$kukarow[yhtio]'
@@ -148,7 +148,7 @@ if ($tee == 'H' or $tee == 'G') {
 
   if (mysql_num_rows($result) != 1) {
     echo "<b>".t("Haulla ei löytynyt yhtä laskua")."</b>";
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -162,7 +162,7 @@ if ($tee == 'H' or $tee == 'G') {
   // Se oli jo maksettu
   if (strlen($trow["maksuaika"]) > 0) {
     echo "<font class='error'>".t("Laskun ehti jo joku muu maksaa! Ohitetaan")."! $trow[maksuaika]</font><br>";
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -172,7 +172,7 @@ if ($tee == 'H' or $tee == 'G') {
   }
 
   // Hyvityslasku --> vastaava määrä rahaa on oltava veloituspuolella
-  if ($trow['summa'] < 0 and $eipankkiin == '')  {
+  if ($trow['summa'] < 0 and $eipankkiin == '') {
 
     // Huomaa samat kyselyt (wheret) tee == G haarassa...
     if (strtoupper($trow['maa']) == 'FI') {
@@ -210,7 +210,7 @@ if ($tee == 'H' or $tee == 'G') {
 
     if (mysql_num_rows($result) != 1) {
       echo "<b>".t("Hyvityshaulla ei löytynyt mitään")."</b>$query";
-      require ("inc/footer.inc");
+      require "inc/footer.inc";
       exit;
     }
 
@@ -234,7 +234,7 @@ if ($tee == 'H' or $tee == 'G') {
         <input type='radio'  name = 'valinta' value='E'> ".t("Ei")."
         <input type='submit' name = 'valitse' value='".t("Valitse")."'>";
 
-        require ("inc/footer.inc");
+        require "inc/footer.inc";
         exit;
       }
 
@@ -322,7 +322,7 @@ if ($tee == 'G') {
 
   if (mysql_num_rows($result) < 2) {
     echo "<font class='error'>".t("Laskuja katosi")."</font><br>";
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -363,7 +363,7 @@ if ($tee == 'G') {
 
     if ($kurssi == 0) {
       echo "<font class='error'>$query".t("Ei löydetty sopivaa kurssia!")."</font><br>";
-      require ("inc/footer.inc");
+      require "inc/footer.inc";
       exit;
     }
   }
@@ -453,12 +453,12 @@ if ($tee == 'G') {
 
         while ($tiliointirow = mysql_fetch_assoc($yresult)) {
           // Kuinka paljon on tämän viennin osuus
-          $summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $laskurow['vietysumma'] * $laskurow['maksukasumma'],2);
-          $summa_valuutassa = round($tiliointirow['summa_valuutassa'] * (1+$tiliointirow['vero']/100) / $laskurow['vietysumma_valuutassa'] * $laskurow['maksukasumma_valuutassa'],2);
+          $summa = round($tiliointirow['summa'] * (1+$tiliointirow['vero']/100) / $laskurow['vietysumma'] * $laskurow['maksukasumma'], 2);
+          $summa_valuutassa = round($tiliointirow['summa_valuutassa'] * (1+$tiliointirow['vero']/100) / $laskurow['vietysumma_valuutassa'] * $laskurow['maksukasumma_valuutassa'], 2);
 
           if ($tiliointirow['vero'] != 0) { // Netotetaan alvi
-            $alv = round($summa - $summa / (1 + ($tiliointirow['vero'] / 100)),2);
-            $alv_valuutassa = round($summa_valuutassa - $summa_valuutassa / (1 + ($tiliointirow['vero'] / 100)),2);
+            $alv = round($summa - $summa / (1 + ($tiliointirow['vero'] / 100)), 2);
+            $alv_valuutassa = round($summa_valuutassa - $summa_valuutassa / (1 + ($tiliointirow['vero'] / 100)), 2);
 
             $summa -= $alv;
             $summa_valuutassa -= $alv_valuutassa;
@@ -484,7 +484,7 @@ if ($tee == 'G') {
                     laatija          = '$kukarow[kuka]',
                     laadittu         = now()";
           $xresult = pupe_query($query);
-          $isa = mysql_insert_id ($link); // Näin löydämme tähän liittyvät alvit....
+          $isa = mysql_insert_id($link); // Näin löydämme tähän liittyvät alvit....
 
           if ($tiliointirow['vero'] != 0) {
             // Kassa-alen alv
@@ -564,7 +564,7 @@ if ($tee == 'G') {
                         laatija  = '$kukarow[kuka]',
                         laadittu = now()";
               $xresult = pupe_query($query);
-              $isa = mysql_insert_id ($link);
+              $isa = mysql_insert_id($link);
 
               $totvesumma += $summa;
             }
@@ -628,10 +628,10 @@ if ($tee == 'H') {
             AND tila     = 'M'";
   $result = pupe_query($query);
 
-   // Jotain meni pieleen
+  // Jotain meni pieleen
   if (mysql_affected_rows() != 1) {
     echo "System error Debug --> $query<br>";
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -695,11 +695,11 @@ if ($tee == 'DP') {
       $result = pupe_query($query);
       if (mysql_num_rows($result) != 1) {
         echo "<b>".t("Hyvityshaulla ei löytynyt mitään")."</b>$query";
-        require ("inc/footer.inc");
+        require "inc/footer.inc";
         exit;
       }
 
-      $veloitusrow=mysql_fetch_assoc ($result);
+      $veloitusrow=mysql_fetch_assoc($result);
 
       if ($veloitusrow['summa'] < 0) {
         echo "<font class='error'>".t("Jos poistat tämän laskun maksatuksesta, on asiakkaalle valittu liikaa hyvityksiä.")." ($veloitusrow[summa])</font><br><br>";
@@ -724,7 +724,7 @@ if ($tee == 'DP') {
       if (mysql_affected_rows() != 1) { // Jotain meni pieleen
         echo "System error Debug --> $query<br>";
 
-        require ("inc/footer.inc");
+        require "inc/footer.inc";
         exit;
       }
 
@@ -742,8 +742,8 @@ if ($tee == 'DP') {
 if ($tee == "NK" or $tee == "NT" or $tee == "NV") {
 
   if ($oltilrow["oletustili"] == 0) {
-    echo "<br/><font class='error'>",t("Maksutili on kateissa"),"! ",t("Systeemivirhe"),"!</font><br/><br/>";
-    require ("inc/footer.inc");
+    echo "<br/><font class='error'>", t("Maksutili on kateissa"), "! ", t("Systeemivirhe"), "!</font><br/><br/>";
+    require "inc/footer.inc";
     exit;
   }
 
@@ -796,9 +796,9 @@ if ($tee == "NK" or $tee == "NT" or $tee == "NV") {
     $yrires = pupe_query($query);
 
     if (mysql_num_rows($yrires) != 1) {
-      echo "<br/><font class='error'>",t("Maksutili katosi"),"! ",t("Systeemivirhe"),"!</font><br/><br/>";
+      echo "<br/><font class='error'>", t("Maksutili katosi"), "! ", t("Systeemivirhe"), "!</font><br/><br/>";
 
-      require ("inc/footer.inc");
+      require "inc/footer.inc";
       exit;
     }
 
@@ -827,7 +827,7 @@ if ($tee == "NK" or $tee == "NT" or $tee == "NV") {
     if (mysql_affected_rows() != 1) { // Jotain meni pieleen
       echo "System error Debug --> $query<br>";
 
-      require ("inc/footer.inc");
+      require "inc/footer.inc";
       exit;
     }
 
@@ -857,11 +857,11 @@ if ($tee == 'D' and $oikeurow['paivitys'] == '1') {
 
   if (mysql_num_rows($result) != 1) {
     echo t('lasku kateissa') . "$tunnus</font>";
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
-  $trow = mysql_fetch_assoc ($result);
+  $trow = mysql_fetch_assoc($result);
 
   $komm = "(" . $kukarow['nimi'] . "@" . date('Y-m-d') .") ".t("Poisti laskun")."<br>" . $trow['comments'];
 
@@ -883,7 +883,7 @@ if ($tee == 'D' and $oikeurow['paivitys'] == '1') {
             yhtio        = '$kukarow[yhtio]'";
   $result = pupe_query($query);
 
-  echo "<font class='error'>".sprintf(t('Poistit %s:n laskun tunnuksella %d.'), $trow['nimi'],$tunnus)."</font><br><br>";
+  echo "<font class='error'>".sprintf(t('Poistit %s:n laskun tunnuksella %d.'), $trow['nimi'], $tunnus)."</font><br><br>";
 
   $tunnus = '';
   $tee   = 'S';
@@ -905,7 +905,7 @@ if ($tee == 'W') {
   if (mysql_num_rows($result) == 0) {
     echo "<font class='head'>".t("Sinulla ei ole yhtään tiliä, jolla olisi limiittiä")."!<p>".t("Käy päivittämässä limiitit yrityksen pankkitileille")."!</font><hr>";
 
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -918,7 +918,7 @@ if ($tee == 'W') {
   echo "<th colspan='3'>".t("Maksulimitti")."</th>";
   echo "</tr>";
 
-  while ($yritirow = mysql_fetch_assoc ($result)) {
+  while ($yritirow = mysql_fetch_assoc($result)) {
     echo "<tr>";
     echo "<td>$yritirow[tili]</td>";
 
@@ -953,7 +953,7 @@ else {
 
   if (mysql_num_rows($result) != 1) {
     echo t("Etsin tiliä")." '$oltilrow[oletustili]', ".t("mutta sitä ei löytynyt")."!";
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -1071,7 +1071,7 @@ if ($tee == 'DM') {
   echo "<br><font class='message'>".t("Maksuaineistoon poimitut laskut")."</font><hr>";
 
   if (mysql_num_rows($result) == 0) {
-     echo "<font class='error'>".t("Ei yhtään poimittua laskua")."!</font><br>";
+    echo "<font class='error'>".t("Ei yhtään poimittua laskua")."!</font><br>";
   }
   else {
 
@@ -1112,8 +1112,8 @@ if ($tee == 'DM') {
     $summa = 0;
     $valsumma = array();
 
-    while ($trow=mysql_fetch_assoc ($result)) {
-          echo "<tr class='aktiivi'>";
+    while ($trow=mysql_fetch_assoc($result)) {
+      echo "<tr class='aktiivi'>";
 
       $query = "SELECT count(*) maara,
                 group_concat(concat(lasku.summa, ' ', lasku.valkoodi) separator '<br>') summa
@@ -1124,7 +1124,7 @@ if ($tee == 'DM') {
                 and ultilno = '$trow[ultilno]'
                 and swift   = '$trow[swift]'";
       $hyvitysresult = pupe_query($query);
-      $hyvitysrow = mysql_fetch_assoc ($hyvitysresult);
+      $hyvitysrow = mysql_fetch_assoc($hyvitysresult);
 
       echo "<td valign='top'>";
       echo "<a name='$trow[tunnus]' href='muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$PHP_SELF////tee=DM//valuu=$valuu//erapvm=$erapvm//nimihaku=$nimihaku///$tunnus'>$trow[nimi]</a>";
@@ -1193,7 +1193,7 @@ if ($tee == 'DM') {
         printf(t("Lasku on jaettu %s osaan!"), mysql_num_rows($jaetutres));
         echo "<br>".t("Alkuperäinen summa")." $trow[arvo] $trow[valkoodi]<br>";
         $osa = 1;
-        while ($jaetutrow = mysql_fetch_assoc ($jaetutres)) {
+        while ($jaetutrow = mysql_fetch_assoc($jaetutres)) {
           echo "$osa: $jaetutrow[summa] $jaetutrow[valkoodi]<br>";
           $osa++;
         }
@@ -1213,7 +1213,7 @@ if ($tee == 'DM') {
 
       if (is_array($lasku_urlit)) {
         foreach ($lasku_urlit as $lasku_url) {
-          echo "<a href='$lasku_url' target='Attachment'>",t("Näytä liite"),"</a><br>";
+          echo "<a href='$lasku_url' target='Attachment'>", t("Näytä liite"), "</a><br>";
         }
       }
       else {
@@ -1240,7 +1240,7 @@ if ($tee == 'DM') {
 
     echo "<table>";
 
-    foreach($valsumma as $val => $sum) {
+    foreach ($valsumma as $val => $sum) {
       echo "<tr><th colspan='3'>$val ".t("laskut")." ".t("yhteensä")."</th><td valign='top' align='right'>".sprintf('%.2f', $sum)." $val</td></tr>";
     }
 
@@ -1299,7 +1299,7 @@ if ($tee == 'S') {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
-     echo "<br><font class='error'>".t("Haulla ei löytynyt yhtään laskua")."</font><br>";
+    echo "<br><font class='error'>".t("Haulla ei löytynyt yhtään laskua")."</font><br>";
   }
   else {
 
@@ -1343,9 +1343,9 @@ if ($tee == 'S') {
 
     echo "<tbody>";
 
-    while ($trow = mysql_fetch_assoc ($result)) {
+    while ($trow = mysql_fetch_assoc($result)) {
 
-          echo "<tr class='aktiivi'>";
+      echo "<tr class='aktiivi'>";
 
       $query = "SELECT count(*) maara,
                 group_concat(concat(lasku.summa, ' ', lasku.valkoodi) separator '<br>') summa
@@ -1356,7 +1356,7 @@ if ($tee == 'S') {
                 and ultilno = '$trow[ultilno]'
                 and swift   = '$trow[swift]'";
       $hyvitysresult = pupe_query($query);
-      $hyvitysrow = mysql_fetch_assoc ($hyvitysresult);
+      $hyvitysrow = mysql_fetch_assoc($hyvitysresult);
 
       echo "<td valign='top'>";
       echo "<a name='$trow[tunnus]' href='muutosite.php?tee=E&tunnus=$trow[tunnus]&lopetus=$PHP_SELF////tee=S//valuu=$valuu//erapvm=$erapvm//nimihaku=$nimihaku///$tunnus'>$trow[nimi]</a>";
@@ -1433,7 +1433,7 @@ if ($tee == 'S') {
 
         $osa = 1;
 
-        while ($jaetutrow = mysql_fetch_assoc ($jaetutres)) {
+        while ($jaetutrow = mysql_fetch_assoc($jaetutres)) {
           echo "$osa: $jaetutrow[summa] $jaetutrow[valkoodi]<br>";
           $osa++;
         }
@@ -1483,7 +1483,7 @@ if ($tee == 'S') {
         $maksukielto_row = mysql_fetch_assoc($maksukielto_res);
 
         if ($maksukielto_row['maksukielto'] == 'K') {
-          echo "<font class='error'>",t("Maksukiellossa"),"</font>";
+          echo "<font class='error'>", t("Maksukiellossa"), "</font>";
         }
         else {
           echo "  <input type='hidden' name = 'tee' value='H'>
@@ -1572,7 +1572,7 @@ if ($tee == 'S') {
 
     echo "<table>";
 
-    foreach($valsumma as $val => $sum) {
+    foreach ($valsumma as $val => $sum) {
       echo "<tr><th colspan='3'>$val ".t("laskut")." ".t("yhteensä")."</th><td valign='top' align='right'>".sprintf('%.2f', $sum)." $val</td></tr>";
     }
 
@@ -1623,7 +1623,7 @@ if ($tee == 'V') {
 
   if (mysql_num_rows($result) > 0) {
     $kaikaval = 0;
-    while ($valuurow = mysql_fetch_assoc ($result)) {
+    while ($valuurow = mysql_fetch_assoc($result)) {
       $kaikaval += $valuurow["maara"];
     }
   }
@@ -1633,11 +1633,11 @@ if ($tee == 'V') {
   if (mysql_num_rows($result) > 0) {
     mysql_data_seek($result, 0);
 
-    while ($valuurow = mysql_fetch_assoc ($result)) {
+    while ($valuurow = mysql_fetch_assoc($result)) {
       if ($valuurow["valkoodi"] == $valuu) {
         $sel = "SELECTED";
       }
-      else{
+      else {
         $sel = "";
       }
 
@@ -1664,7 +1664,7 @@ if ($tee == 'V') {
 
   if (mysql_num_rows($result) > 0) {
     $kaikaval = 0;
-    while ($laskurow = mysql_fetch_assoc ($result)) {
+    while ($laskurow = mysql_fetch_assoc($result)) {
       $kaikaval += $laskurow["maara"];
     }
   }
@@ -1674,11 +1674,11 @@ if ($tee == 'V') {
   if (mysql_num_rows($result) > 0) {
     mysql_data_seek($result, 0);
 
-    while ($laskurow = mysql_fetch_assoc ($result)) {
+    while ($laskurow = mysql_fetch_assoc($result)) {
       if ($laskurow["olmapvm"] == $erapvm) {
         $sel = "SELECTED";
       }
-      else{
+      else {
         $sel = "";
       }
 
@@ -1691,7 +1691,7 @@ if ($tee == 'V') {
   if ($kaikki != "") {
     $sel = "CHECKED";
   }
-  else{
+  else {
     $sel = "";
   }
 
@@ -1731,4 +1731,4 @@ if ($tee == 'V') {
 
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

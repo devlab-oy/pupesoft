@@ -6,8 +6,8 @@ if (php_sapi_name() == 'cli') {
   error_reporting(E_ALL ^ E_WARNING ^ E_NOTICE);
   ini_set("display_errors", 0);
 
-  require("inc/connect.inc");
-  require("inc/functions.inc");
+  require "inc/connect.inc";
+  require "inc/functions.inc";
 
   $yhtio = trim($argv[1]);
 
@@ -24,7 +24,7 @@ if (php_sapi_name() == 'cli') {
 }
 elseif (php_sapi_name() != 'cli') {
   //for debug reasons
-  require('inc/parametrit.inc');
+  require 'inc/parametrit.inc';
 
   echo "<font class='head'>".t('Asiakkaan jt-rivien toimitusajan vahvistus')."</font><hr>";
 }
@@ -55,6 +55,8 @@ laheta_asiakas_emailit($asiakkaille_lahtevat_sahkopostit);
  * @global array $yhtiorow
  * @return array
  */
+
+
 function hae_ostotilauksien_tilausrivit_joiden_toimitusaika_on_muuttunut_tai_vahvistettu() {
   global $kukarow, $yhtiorow;
 
@@ -86,12 +88,13 @@ function hae_ostotilauksien_tilausrivit_joiden_toimitusaika_on_muuttunut_tai_vah
   return $ostolaskut;
 }
 
+
 /**
  * Käsitellään ostolaskujen tilausrivit niin, että tuotteen alle saadaan kokonaistilaus määrät
  *
  * @global array $kukarow
  * @global array $yhtiorow
- * @param array $ostolaskut
+ * @param array   $ostolaskut
  * @return array
  */
 function kasittele_ostotilaukset($ostolaskut) {
@@ -110,6 +113,7 @@ function kasittele_ostotilaukset($ostolaskut) {
   return $ostolasku_temp;
 }
 
+
 /**
  * Hakee kaikki myyntitilaukset ja niiden rivit, joissa on jt-rivejä
  * Tätä funktiota käytetään kun yhtiöparametri jt_toimitusaika_email_vahvistus on päällä
@@ -121,7 +125,7 @@ function kasittele_ostotilaukset($ostolaskut) {
  *
  * @global array $kukarow
  * @global array $yhtiorow
- * @param bool $kaikki_myyntitilaukset
+ * @param bool    $kaikki_myyntitilaukset
  * @return array
  */
 function hae_myyntitilaukset_joilla_jt_riveja($kaikki_myyntitilaukset = true) {
@@ -162,12 +166,13 @@ function hae_myyntitilaukset_joilla_jt_riveja($kaikki_myyntitilaukset = true) {
   return $myyntitilaukset;
 }
 
+
 /**
  * Hakee myyntitilauksen myyntitilausrivit
  *
  * @global array $kukarow
  * @global array $yhtiorow
- * @param int $tilaus_tunnus
+ * @param int     $tilaus_tunnus
  * @return array
  */
 function hae_myyntitilausrivit($tilaus_tunnus) {
@@ -192,12 +197,13 @@ function hae_myyntitilausrivit($tilaus_tunnus) {
   return $tilausrivit;
 }
 
+
 /**
  * Hakee myyntitilauksen asiakkaan
  *
  * @global array $kukarow
  * @global array $yhtiorow
- * @param int $liitostunnus
+ * @param int     $liitostunnus
  * @return array
  */
 function hae_myyntitilauksen_asiakas($liitostunnus) {
@@ -212,13 +218,14 @@ function hae_myyntitilauksen_asiakas($liitostunnus) {
   return mysql_fetch_assoc($result);
 }
 
+
 /**
  * Generoi ostotilausrivien sekä myyntitilauksien pohjalta asiakkaille lähetettävät emailit
  *
  * @global array $kukarow
  * @global array $yhtiorow
- * @param array $tuotteet_ja_niiden_ostotilausrivit
- * @param array $myyntitilaukset
+ * @param array   $tuotteet_ja_niiden_ostotilausrivit
+ * @param array   $myyntitilaukset
  * @return array
  */
 function generoi_asiakas_emailit($tuotteet_ja_niiden_ostotilausrivit, $myyntitilaukset) {
@@ -267,15 +274,16 @@ function generoi_asiakas_emailit($tuotteet_ja_niiden_ostotilausrivit, $myyntitil
   return $asiakkaille_lahtevat_sahkopostit;
 }
 
+
 /**
  * Populoi asiakas_email_arraytä, johon kerätään asiakkaalle lähetettäviä emaileja
  *
  * @global array $kukarow
  * @global array $yhtiorow
- * @param array $asiakkaille_lahtevat_sahkopostit
- * @param array $myyntitilaus
- * @param array $myyntitilausrivi
- * @param array $ostotilausrivi
+ * @param array   $asiakkaille_lahtevat_sahkopostit
+ * @param array   $myyntitilaus
+ * @param array   $myyntitilausrivi
+ * @param array   $ostotilausrivi
  */
 function populoi_asiakkaan_email_array(&$asiakkaille_lahtevat_sahkopostit, $myyntitilaus, $myyntitilausrivi, $ostotilausrivi) {
   global $kukarow, $yhtiorow;
@@ -292,25 +300,26 @@ function populoi_asiakkaan_email_array(&$asiakkaille_lahtevat_sahkopostit, $myyn
   //jos riittää niin voidaan lisätä asiakkaan emailiin tilauksen alle tilausrivi
   if (empty($asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['tilaukset'][$myyntitilaus['tunnus']]['tilausrivit'][$myyntitilausrivi['tuoteno']])) {
     $asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['tilaukset'][$myyntitilaus['tunnus']]['tilausrivit'][$myyntitilausrivi['tuoteno']] .= '<td>'.$myyntitilausrivi['tuoteno'].'</td>'
-        .'<td>'.$myyntitilausrivi['nimitys'].'</td>'
-        .'<td>'.$myyntitilausrivi['tilkpl'].'</td>'
-        .'<td>'.t("Toimitusaika", $kieli).': '.date('d.m.Y', strtotime($ostotilausrivi['toimaika'])).' '.(number_format($kappaleet_jotka_riittaa, 0)).' '.t("kpl", $kieli).' '; //HUOM JÄTETÄÄN VIIMEINEN TD PRINTTAAMATTA, jotta viimeiseen soluun voidaan appendaa lisää toimituksia. viimeinen td printataan emailin luomis vaiheessa
+      .'<td>'.$myyntitilausrivi['nimitys'].'</td>'
+      .'<td>'.$myyntitilausrivi['tilkpl'].'</td>'
+      .'<td>'.t("Toimitusaika", $kieli).': '.date('d.m.Y', strtotime($ostotilausrivi['toimaika'])).' '.(number_format($kappaleet_jotka_riittaa, 0)).' '.t("kpl", $kieli).' '; //HUOM JÄTETÄÄN VIIMEINEN TD PRINTTAAMATTA, jotta viimeiseen soluun voidaan appendaa lisää toimituksia. viimeinen td printataan emailin luomis vaiheessa
   }
   else {
     $asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['tilaukset'][$myyntitilaus['tunnus']]['tilausrivit'][$myyntitilausrivi['tuoteno']] .= '<br/>'
-        .t("Toimitusaika", $kieli).': '.date('d.m.Y', strtotime($ostotilausrivi['toimaika'])).' '.(number_format($kappaleet_jotka_riittaa, 0)).' '.t("kpl", $kieli).' '; //HUOM JÄTETÄÄN VIIMEINEN TD PRINTTAAMATTA, jotta viimeiseen soluun voidaan appendaa lisää toimituksia. viimeinen td printataan emailin luomis vaiheessa
+      .t("Toimitusaika", $kieli).': '.date('d.m.Y', strtotime($ostotilausrivi['toimaika'])).' '.(number_format($kappaleet_jotka_riittaa, 0)).' '.t("kpl", $kieli).' '; //HUOM JÄTETÄÄN VIIMEINEN TD PRINTTAAMATTA, jotta viimeiseen soluun voidaan appendaa lisää toimituksia. viimeinen td printataan emailin luomis vaiheessa
   }
 
   $asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['kieli'] = $kieli;
   $asiakkaille_lahtevat_sahkopostit[$myyntitilaus['liitostunnus']]['email'] = $myyntitilaus['asiakas']['email'];
 }
 
+
 /**
  * Lähettää generoidut emailit
  *
  * @global array $kukarow
  * @global array $yhtiorow
- * @param array $asiakkaille_lahtevat_sahkopostit
+ * @param array   $asiakkaille_lahtevat_sahkopostit
  */
 function laheta_asiakas_emailit($asiakkaille_lahtevat_sahkopostit = array()) {
   global $kukarow, $yhtiorow;
@@ -350,13 +359,14 @@ function laheta_asiakas_emailit($asiakkaille_lahtevat_sahkopostit = array()) {
   }
 }
 
+
 /**
  * Lähettää yhden emailin
  *
  * @global array $kukarow
  * @global array $yhtiorow
- * @param string $email
- * @param string $body
+ * @param string  $email
+ * @param string  $body
  */
 function laheta_sahkoposti($email, $body) {
   global $kukarow, $yhtiorow;

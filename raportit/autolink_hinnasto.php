@@ -8,18 +8,18 @@ if ($filenimi != '' and file_exists($filenimi)) {
   header("Content-Disposition: attachment; filename=hindisk.zip");
   header("Content-Description: File Transfer");
 
-  $toot = fopen($filenimi,"r");
+  $toot = fopen($filenimi, "r");
 
-  while (!feof ($toot)) {
+  while (!feof($toot)) {
     echo fgets($toot);
   }
-  fclose ($toot);
+  fclose($toot);
 
   system("rm -f ".$filenimi);
   exit;
 }
 
-require('../inc/parametrit.inc');
+require '../inc/parametrit.inc';
 
 echo "<font class='head'>".t("Hinnastoajo").":</font><hr>";
 
@@ -28,17 +28,17 @@ if ($tee != '') {
   $where2 = '';
 
   if ($osasto != '') {
-    $osastot = explode(" ",$osasto);
+    $osastot = explode(" ", $osasto);
 
-    for($i = 0; $i < count($osastot); $i++) {
+    for ($i = 0; $i < count($osastot); $i++) {
       $osastot[$i] = trim($osastot[$i]);
 
       if ($osastot[$i] != '') {
-        if (strpos($osastot[$i],"-")) {
+        if (strpos($osastot[$i], "-")) {
 
-          $osastot2 = explode("-",$osastot[$i]);
+          $osastot2 = explode("-", $osastot[$i]);
 
-          for($ia = $osastot2[0]; $ia<= $osastot2[1]; $ia++) {
+          for ($ia = $osastot2[0]; $ia<= $osastot2[1]; $ia++) {
             $where1 .= "'".$ia."',";
           }
         }
@@ -47,20 +47,20 @@ if ($tee != '') {
         }
       }
     }
-    $where1 = substr($where1,0,-1);
+    $where1 = substr($where1, 0, -1);
     $where1 = " osasto in (".$where1.") ";
-    }
+  }
 
   if ($try != '') {
-    $tryt = explode(" ",$try);
+    $tryt = explode(" ", $try);
 
-    for($i = 0; $i < count($tryt); $i++) {
+    for ($i = 0; $i < count($tryt); $i++) {
       $tryt[$i] = trim($tryt[$i]);
 
       if ($tryt[$i] != '') {
-        if (strpos($tryt[$i],"-")) {
-          $tryt2 = explode("-",$tryt[$i]);
-          for($ia = $tryt2[0]; $ia<= $tryt2[1]; $ia++) {
+        if (strpos($tryt[$i], "-")) {
+          $tryt2 = explode("-", $tryt[$i]);
+          for ($ia = $tryt2[0]; $ia<= $tryt2[1]; $ia++) {
             $where2 .= "'".$ia."',";
           }
         }
@@ -69,7 +69,7 @@ if ($tee != '') {
         }
       }
     }
-    $where2 = substr($where2,0,-1);
+    $where2 = substr($where2, 0, -1);
     $where2 = " try in (".$where2.") ";
   }
 
@@ -97,10 +97,10 @@ if ($tee != '') {
 
     //kirjoitetaan pdf faili levylle..
 
-    $filenimi = "$kukarow[yhtio]-hindisk-".md5(uniqid(rand(),true)).".txt";
+    $filenimi = "$kukarow[yhtio]-hindisk-".md5(uniqid(rand(), true)).".txt";
 
     if (!$fh = fopen("/tmp/".$filenimi, "w+"))
-        die("".t("filen luonti epäonnistui")."!");
+      die("".t("filen luonti epäonnistui")."!");
 
     while ($row = mysql_fetch_array($result)) {
       //korvaavat tuotteet
@@ -114,7 +114,7 @@ if ($tee != '') {
         $korvaresult = mysql_query($query) or pupe_error($query);
 
         $lask = 0;
-        while ($korvarow = mysql_fetch_array($korvaresult)){
+        while ($korvarow = mysql_fetch_array($korvaresult)) {
           $korvaavat[$lask] = $korvarow["tuoteno"];
           if ($korvarow["tuoteno"] == $row["tuoteno"]) {
             $koti = $lask;
@@ -129,25 +129,25 @@ if ($tee != '') {
           $edellinen  = '';
           $seuraava  = $korvaavat[$koti+1];
         }
-        elseif($koti == $lask) {
+        elseif ($koti == $lask) {
           $edellinen  = $korvaavat[$koti-1];
           $seuraava  = '';
         }
-        else{
+        else {
           $edellinen  = $korvaavat[$koti-1];
           $seuraava  = $korvaavat[$koti+1];
         }
       }
 
-      $rivi  = sprintf('%-12.12s'  ,$row["tuoteno"]);
-      $rivi .= sprintf('%-60.60s'  ,$row["nimitys"]);
-      $rivi .= sprintf('%-3.3s'  ,$row["yksikko"]);
-      $rivi .= sprintf('%02d'    ,$row["aleryhma"]);
-      $rivi .= sprintf('%08d'    ,str_replace('.','',$row["myyntihinta"]));
-      $rivi .= sprintf('%08d'    ,str_replace('.','',$row["myyntihinta"]));
-      $rivi .= sprintf('%-12.12s'  ,$seuraava);
-      $rivi .= sprintf('%-12.12s'  ,$edellinen);
-      $rivi .= sprintf('%-3.3s'  ,'');
+      $rivi  = sprintf('%-12.12s'  , $row["tuoteno"]);
+      $rivi .= sprintf('%-60.60s'  , $row["nimitys"]);
+      $rivi .= sprintf('%-3.3s'  , $row["yksikko"]);
+      $rivi .= sprintf('%02d'    , $row["aleryhma"]);
+      $rivi .= sprintf('%08d'    , str_replace('.', '', $row["myyntihinta"]));
+      $rivi .= sprintf('%08d'    , str_replace('.', '', $row["myyntihinta"]));
+      $rivi .= sprintf('%-12.12s'  , $seuraava);
+      $rivi .= sprintf('%-12.12s'  , $edellinen);
+      $rivi .= sprintf('%-3.3s'  , '');
       $rivi .= "\n";
 
       fwrite($fh, $rivi);
@@ -180,4 +180,4 @@ echo "<tr><th>".t("Syötä osastot ja tuoteryhmät").":</th>
     <td><input type='text' name='try' value='$try' size='15'></td>";
 echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td></tr></table>";
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

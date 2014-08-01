@@ -4,11 +4,11 @@
 $useslave = 1;
 
 if (isset($_POST["supertee"])) {
-  if($_POST["supertee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["supertee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (isset($supertee)) {
   if ($supertee == "lataa_tiedosto") {
@@ -20,14 +20,14 @@ if (isset($supertee)) {
 echo "<font class='head'>".t("Menossa olevat tilaukset")."</font><hr>";
 
 if ($tee == 'NAYTATILAUS') {
-    echo "<font class='head'>Tilausnro: $tunnus</font><hr>";
-    require ("naytatilaus.inc");
-    echo "<br><br><br>";
-    $tee = "";
+  echo "<font class='head'>Tilausnro: $tunnus</font><hr>";
+  require "naytatilaus.inc";
+  echo "<br><br><br>";
+  $tee = "";
 }
 
 if ($ytunnus != '' and $ytunnus != 'TULKAIKKI') {
-  require ("inc/asiakashaku.inc");
+  require "inc/asiakashaku.inc";
 }
 
 if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
@@ -73,14 +73,14 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
   $result = mysql_query($query) or pupe_error($query);
 
   if ($vain_excel != '' or $vain_excel_kaikki != '') {
-    include('inc/pupeExcel.inc');
+    include 'inc/pupeExcel.inc';
 
     $worksheet    = new pupeExcel();
     $format_bold = array("bold" => TRUE);
 
     $excelrivi = 0;
 
-    if(isset($worksheet)) {
+    if (isset($worksheet)) {
       $excelsarake = 0;
 
       $worksheet->write($excelrivi, $excelsarake, t("Tilno"), $format_bold);
@@ -124,7 +124,7 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
     $tilsum += $tulrow["tilattu"];
     $eursum += $tulrow["arvo"];
 
-    if(isset($worksheet)) {
+    if (isset($worksheet)) {
       $excelsarake = 0;
 
       $worksheet->writeString($excelrivi, $excelsarake, $tulrow["tunnus"]);
@@ -157,7 +157,7 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
   echo "</tr>";
   echo "</table>";
 
-  if(isset($worksheet)) {
+  if (isset($worksheet)) {
     $excelsarake = 0;
 
     $excelsarake++;
@@ -172,7 +172,7 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
     $excelrivi++;
   }
 
-  if(isset($worksheet)) {
+  if (isset($worksheet)) {
 
     // We need to explicitly close the workbook
     $excelnimi = $worksheet->close();
@@ -226,4 +226,4 @@ echo "</form>";
 $formi  = "asiakas";
 $kentta = "ytunnus";
 
-require ("../inc/footer.inc");
+require "../inc/footer.inc";

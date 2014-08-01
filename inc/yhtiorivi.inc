@@ -58,16 +58,16 @@ if (mysql_field_name($result, $i) == "valkoodi") { //valuutta
             FROM valuu
             WHERE yhtio = '$kukarow[yhtio]'
             ORDER BY jarjestys";
-     $vresult = mysql_query($query) or pupe_error($query);
-    $ulos = "<td><select name='$nimi'>";
+  $vresult = mysql_query($query) or pupe_error($query);
+  $ulos = "<td><select name='$nimi'>";
 
-    while ($vrow=mysql_fetch_array($vresult)) {
-        $sel="";
-        if ($trow[$i] == $vrow['nimi']) {
-                $sel = "selected";
-        }
-        $ulos .= "<option value = '$vrow[nimi]' $sel>$vrow[nimi]";
-      }
+  while ($vrow=mysql_fetch_array($vresult)) {
+    $sel="";
+    if ($trow[$i] == $vrow['nimi']) {
+      $sel = "selected";
+    }
+    $ulos .= "<option value = '$vrow[nimi]' $sel>$vrow[nimi]";
+  }
 
   $ulos .= "</select></td>";
   $jatko = 0;
@@ -138,7 +138,7 @@ if ((mysql_field_name($result, $i) == "kassa") or
       $ulos .= "<input type = 'hidden' name = '$nimi' value = '$trow[$i]'>$trow[$i] - ";
     }
     else {
-      $ulos .= "<input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+      $ulos .= "<input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result, $i) ."'>";
     }
 
     $query = "SELECT nimi

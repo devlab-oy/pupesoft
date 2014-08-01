@@ -12,7 +12,7 @@ if (mysql_num_rows($result) == 1) {
   $laskurow = mysql_fetch_array($result);
 }
 else {
-  if (substr($luouusikeikka,0,2) == "OK") {
+  if (substr($luouusikeikka, 0, 2) == "OK") {
     // haetaan seuraava vapaa keikkaid
     $query  = "SELECT max(laskunro)+1 from lasku where yhtio='$kukarow[yhtio]' and tila='K'";
     $result = pupe_query($query);
@@ -216,7 +216,7 @@ if ($tee_kululaskut == "liita") {
       $tunnus = $laskutunnus;
       $tila = 'ostolasku_kulut';
 
-      require('inc/muutosite.inc');
+      require 'inc/muutosite.inc';
 
       $tunnus = $tmp_tunnus;
       $laskurow = $tmp_laskurow;
@@ -272,7 +272,7 @@ if ($tee_kululaskut == "poista") {
 
         $tila = 'ostolasku_kulut';
 
-        require('inc/muutosite.inc');
+        require 'inc/muutosite.inc';
 
         $tunnus = $tmp_tunnus;
         $laskurow = $tmp_laskurow;
@@ -388,7 +388,7 @@ if ($keikanalatila == "T" and $tee_kululaskut == "lisaa_rivit" and $kukarow["kes
       $alv         = (float) $wtrow["selite"];
       $laskurow["alv"]   = $myy_laskrow["alv"];
 
-      require ("lisaarivi.inc");
+      require "lisaarivi.inc";
     }
   }
 
@@ -428,19 +428,19 @@ if ($silent == "") {
           <th>".t("Vienti")."</th>";
 
       if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '')) {
-        echo "<th>",t("Rahdit"),"</th>";
-        echo "<th>",t("Kulut"),"</th>";
-        echo "<th>",t("Rivikohtaiset kulut"),"</th>";
+        echo "<th>", t("Rahdit"), "</th>";
+        echo "<th>", t("Kulut"), "</th>";
+        echo "<th>", t("Rivikohtaiset kulut"), "</th>";
       }
 
       echo "</tr>";
 
       mysql_data_seek($result, 0);
 
-      while($llrow = mysql_fetch_array($result)) {
+      while ($llrow = mysql_fetch_array($result)) {
 
         $comments = "";
-        if($llrow["comments"] != "") {
+        if ($llrow["comments"] != "") {
           $comments = "<br><i>$llrow[comments]</i>asd";
         }
 
@@ -480,9 +480,9 @@ if ($silent == "") {
         echo "<td valign='top'>$vienti_teksti</td>";
 
         if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '')) {
-          echo "<td valign='top'>",sprintf("%.2f", $llrow['osto_rahti']),"</td>";
-          echo "<td valign='top'>",sprintf("%.2f", $llrow['osto_kulu']),"</td>";
-          echo "<td valign='top'>",sprintf("%.2f", $llrow['osto_rivi_kulu']),"</td>";
+          echo "<td valign='top'>", sprintf("%.2f", $llrow['osto_rahti']), "</td>";
+          echo "<td valign='top'>", sprintf("%.2f", $llrow['osto_kulu']), "</td>";
+          echo "<td valign='top'>", sprintf("%.2f", $llrow['osto_rivi_kulu']), "</td>";
         }
 
         echo "<td valign='top' class='back'>
@@ -630,11 +630,11 @@ if ($silent == "") {
       $sel = (isset($toimipaikka) and is_numeric($toimipaikka) and $toimipaikka == 0) ? "selected" : "";
 
       echo "<tr>";
-      echo "<th>",t("Toimipaikka"),"</th>";
+      echo "<th>", t("Toimipaikka"), "</th>";
       echo "<th>";
       echo "<select name='toimipaikka'>";
-      echo "<option value='kaikki'>",t("Kaikki toimipaikat"),"</option>";
-      echo "<option value='0' {$sel}>",t("Ei toimipaikkaa"),"</option>";
+      echo "<option value='kaikki'>", t("Kaikki toimipaikat"), "</option>";
+      echo "<option value='0' {$sel}>", t("Ei toimipaikkaa"), "</option>";
 
       while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
 
@@ -665,7 +665,7 @@ if ($silent == "") {
       echo "</select>";
       echo "</th>";
       echo "<td>&nbsp;</td>";
-      echo "<td class='back'><input type='submit' value='",t("Hae"),"'></td>";
+      echo "<td class='back'><input type='submit' value='", t("Hae"), "'></td>";
       echo "</tr>";
     }
 
@@ -701,16 +701,16 @@ if ($silent == "") {
 
     //  Haetaan oletuksena nimen alulla!!
     if ($hakutapa == "S") {
-      $haku = (float) str_replace(",",".",$haku); // pilkut pisteiksi
+      $haku = (float) str_replace(",", ".", $haku); // pilkut pisteiksi
       $lisa = " and lasku.summa = '$haku'";
     }
 
     if ($hakutapa == "N") $lisa = " and lasku.nimi like '%$haku%'";
     if ($hakutapa == "V") $lisa = " and lasku.viite = '$haku'";
 
-//    if ($hakutapa == "" or $hakutapa != "N") {
-//      $lisa .= " and lasku.ytunnus = '$laskurow[ytunnus]'";
-//    }
+    //    if ($hakutapa == "" or $hakutapa != "N") {
+    //      $lisa .= " and lasku.ytunnus = '$laskurow[ytunnus]'";
+    //    }
 
     // katsotaan aluksi, ollaanko tähän saapumiseen liitetty jo vaihto-omaisuuslasku
     $query  = "SELECT *
@@ -788,9 +788,9 @@ if ($silent == "") {
           <th>".t("Summa")."</th>";
 
       if ($yhtiorow['ostolaskun_kulutilit'] != '' and ($yhtiorow['osto_rahti'] != '' or $yhtiorow['osto_kulu'] != '' or $yhtiorow['osto_rivi_kulu'] != '')) {
-        echo "<th>",t("Rahdit"),"</th>";
-        echo "<th>",t("Kulut"),"</th>";
-        echo "<th>",t("Rivikohtaiset kulut"),"</th>";
+        echo "<th>", t("Rahdit"), "</th>";
+        echo "<th>", t("Kulut"), "</th>";
+        echo "<th>", t("Rivikohtaiset kulut"), "</th>";
       }
 
       echo "</tr>";
@@ -837,7 +837,7 @@ if ($silent == "") {
         $apure = pupe_query($query);
         $apurow = mysql_fetch_array($apure);
 
-        $summa_kaytettavissa = round(abs($verotonsumma) - abs($apurow["arvo"]),2);
+        $summa_kaytettavissa = round(abs($verotonsumma) - abs($apurow["arvo"]), 2);
 
         if ($summa_kaytettavissa > 0) {
           if ($listaustapa == "liittamattomat" or $listaustapa == "") {
@@ -896,8 +896,8 @@ if ($silent == "") {
         echo "</td>";
 
         echo "  <td valign='top' NOWRAP>".tv1dateconv($llrow["tapvm"])."</td>
-            <td align='right' valign='top' NOWRAP>".sprintf('%.2f',$verosumma)."</td>
-            <td align='right' valign='top' NOWRAP>".sprintf('%.2f',$verotonsumma)."</td>
+            <td align='right' valign='top' NOWRAP>".sprintf('%.2f', $verosumma)."</td>
+            <td align='right' valign='top' NOWRAP>".sprintf('%.2f', $verotonsumma)."</td>
             <td valign='top'>$llrow[valkoodi]</td>
             <td valign='top'>$llrow[viite]</td>";
 
@@ -932,7 +932,7 @@ if ($silent == "") {
 
           $summa_kaytettavissa = $summa_kaytettavissa * $lw;
 
-          echo "<td class='green' align='right' valign='top'>".sprintf('%.2f',$summa_kaytettavissa)."</td>";
+          echo "<td class='green' align='right' valign='top'>".sprintf('%.2f', $summa_kaytettavissa)."</td>";
 
           if ($voikolisata == "OK") {
 
@@ -955,17 +955,17 @@ if ($silent == "") {
 
                 if ($verollinen_lasku) {
                   echo "<select name='osto_rahti_alv_verollisuus'>";
-                  echo "<option value=''>",t("Verollinen arvo"),"</option>";
-                  echo "<option value='X'>",t("Veroton arvo"),"</option>";
+                  echo "<option value=''>", t("Verollinen arvo"), "</option>";
+                  echo "<option value='X'>", t("Veroton arvo"), "</option>";
                   echo "</select>";
 
                   echo "<br />";
                 }
 
-                echo "<input type='text' name='osto_rahti' size='10' value='",sprintf('%.2f',$llrow['osto_rahti']),"' /> <span style='text-align:middle'>{$llrow['valkoodi']}</span>";
+                echo "<input type='text' name='osto_rahti' size='10' value='", sprintf('%.2f', $llrow['osto_rahti']), "' /> <span style='text-align:middle'>{$llrow['valkoodi']}</span>";
 
                 if ($verollinen_lasku) {
-                  echo "<br />",alv_popup('osto_rahti_alv', $llrow['osto_rahti_alv'])," ",t("alv");
+                  echo "<br />", alv_popup('osto_rahti_alv', $llrow['osto_rahti_alv']), " ", t("alv");
                 }
 
                 echo "</td>";
@@ -974,17 +974,17 @@ if ($silent == "") {
 
                 if ($verollinen_lasku) {
                   echo "<select name='osto_kulu_alv_verollisuus'>";
-                  echo "<option value=''>",t("Verollinen arvo"),"</option>";
-                  echo "<option value='X'>",t("Veroton arvo"),"</option>";
+                  echo "<option value=''>", t("Verollinen arvo"), "</option>";
+                  echo "<option value='X'>", t("Veroton arvo"), "</option>";
                   echo "</select>";
 
                   echo "<br />";
                 }
 
-                echo "<input type='text' name='osto_kulu' size='10' value='",sprintf('%.2f',$llrow['osto_kulu']),"' /> <span style='text-align:middle'>{$llrow['valkoodi']}</span>";
+                echo "<input type='text' name='osto_kulu' size='10' value='", sprintf('%.2f', $llrow['osto_kulu']), "' /> <span style='text-align:middle'>{$llrow['valkoodi']}</span>";
 
                 if ($verollinen_lasku) {
-                  echo "<br />",alv_popup('osto_kulu_alv', $llrow['osto_kulu_alv'])," ",t("alv");
+                  echo "<br />", alv_popup('osto_kulu_alv', $llrow['osto_kulu_alv']), " ", t("alv");
                 }
 
                 echo "</td>";
@@ -993,17 +993,17 @@ if ($silent == "") {
 
                 if ($verollinen_lasku) {
                   echo "<select name='osto_rivi_kulu_alv_verollisuus'>";
-                  echo "<option value=''>",t("Verollinen arvo"),"</option>";
-                  echo "<option value='X'>",t("Veroton arvo"),"</option>";
+                  echo "<option value=''>", t("Verollinen arvo"), "</option>";
+                  echo "<option value='X'>", t("Veroton arvo"), "</option>";
                   echo "</select>";
 
                   echo "<br />";
                 }
 
-                echo "<input type='text' name='osto_rivi_kulu' size='10' value='",sprintf('%.2f',$llrow['osto_rivi_kulu']),"' /> <span style='text-align:middle'>{$llrow['valkoodi']}</span>";
+                echo "<input type='text' name='osto_rivi_kulu' size='10' value='", sprintf('%.2f', $llrow['osto_rivi_kulu']), "' /> <span style='text-align:middle'>{$llrow['valkoodi']}</span>";
 
                 if ($verollinen_lasku) {
-                  echo "<br />",alv_popup('osto_rivi_kulu_alv', $llrow['osto_rivi_kulu_alv'])," ",t("alv");
+                  echo "<br />", alv_popup('osto_rivi_kulu_alv', $llrow['osto_rivi_kulu_alv']), " ", t("alv");
                 }
 
                 echo "</td>";

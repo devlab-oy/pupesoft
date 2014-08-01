@@ -23,12 +23,12 @@ if (!function_exists("uusi_karhukierros")) {
   }
 }
 
-function liita_lasku($ktunnus,$ltunnus) {
+function liita_lasku($ktunnus, $ltunnus) {
   $query = "INSERT INTO karhu_lasku (ktunnus,ltunnus) values ($ktunnus,$ltunnus)";
   $result = pupe_query($query);
 }
 
-function alku ($trattakierros_tunnus = '') {
+function alku($trattakierros_tunnus = '') {
   global $pdf, $asiakastiedot, $yhteyshenkilo, $yhtiorow, $kukarow, $kala, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli, $iso;
 
   $firstpage = $pdf->new_page("a4");
@@ -98,9 +98,9 @@ function alku ($trattakierros_tunnus = '') {
   $pdf->draw_rectangle(779, 420, 758, 580, $firstpage, $rectparam);
   $pdf->draw_text(310, 771, t("Eräpäivä", $kieli), $firstpage, $pieni);
 
-  $seurday   = date("d",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
-  $seurmonth = date("m",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
-  $seuryear  = date("Y",mktime(0, 0, 0, $kuu, $paiva+7,  $year));
+  $seurday   = date("d", mktime(0, 0, 0, $kuu, $paiva+7,  $year));
+  $seurmonth = date("m", mktime(0, 0, 0, $kuu, $paiva+7,  $year));
+  $seuryear  = date("Y", mktime(0, 0, 0, $kuu, $paiva+7,  $year));
 
   $pdf->draw_text(310, 761, tv1dateconv($seuryear."-".$seurmonth."-".$seurday), $firstpage, $norm);
 
@@ -139,15 +139,15 @@ function alku ($trattakierros_tunnus = '') {
   }
 
 
-  return($firstpage);
+  return $firstpage;
 }
 
-function rivi ($firstpage, $summa) {
+function rivi($firstpage, $summa) {
   global $firstpage, $pdf, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli, $karhukertanro, $yhtiorow, $kukarow;
 
   if (($lask == 29 and $sivu == 1) or ($lask == 37 and $sivu > 1)) {
     $sivu++;
-    loppu($firstpage,'');
+    loppu($firstpage, '');
     $firstpage = alku();
     $kala = 605;
     $lask = 1;
@@ -183,10 +183,10 @@ function rivi ($firstpage, $summa) {
   $kala = $kala - 13;
 
   $lask++;
-  return($summa);
+  return $summa;
 }
 
-function loppu ($firstpage, $summa, $valkoodi) {
+function loppu($firstpage, $summa, $valkoodi) {
 
   global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kaatosumma, $kieli, $maksuehtotiedot;
 
@@ -269,7 +269,7 @@ function loppu ($firstpage, $summa, $valkoodi) {
 
 }
 
-require('pdflib/phppdflib.class.php');
+require 'pdflib/phppdflib.class.php';
 
 flush();
 
@@ -297,7 +297,7 @@ $sivu = 1;
 // aloitellaan laskun teko
 $xquery='';
 for ($i=0; $i < count($lasku_tunnus); $i++) {
-  if($i != 0) {
+  if ($i != 0) {
     $xquery=$xquery . ",";
   }
 
@@ -362,7 +362,7 @@ $asiakastiedot = mysql_fetch_assoc($asiakasresult);
 $kieli = $asiakastiedot["kieli"];
 
 //ja kelataan akuun
-mysql_data_seek($result,0);
+mysql_data_seek($result, 0);
 
 $query = "SELECT GROUP_CONCAT(distinct liitostunnus) liitokset
           FROM lasku
@@ -398,14 +398,14 @@ $firstpage = alku($karhutunnus);
 $summa=0.0;
 while ($row = mysql_fetch_assoc($result)) {
   if ($tee_pdf != 'tulosta_tratta') {
-    liita_lasku($karhukierros,$row['tunnus']);
+    liita_lasku($karhukierros, $row['tunnus']);
   }
   $summa = rivi($firstpage, $summa);
 }
 
 $loppusumma = sprintf('%.2f', $summa+$kaatosumma);
 
-loppu($firstpage,$loppusumma, $laskutiedot["valkoodi"]);
+loppu($firstpage, $loppusumma, $laskutiedot["valkoodi"]);
 
 //keksitään uudelle failille joku varmasti uniikki nimi:
 list($usec, $sec) = explode(' ', microtime());
@@ -431,12 +431,12 @@ if ($nayta_pdf != 1 and $tee_pdf != 'tulosta_tratta') {
 
   if (mysql_num_rows($kires) == 1) {
     $kirow = mysql_fetch_assoc($kires);
-    if($kirow["komento"] == "email") {
+    if ($kirow["komento"] == "email") {
       $liite = $pdffilenimi;
       $kutsu = "Tratta ".$asiakastiedot["ytunnus"];
       echo t("Tratta lähetetään osoitteeseen")."  $kukarow[eposti]...\n<br>";
 
-      require("inc/sahkoposti.inc");
+      require "inc/sahkoposti.inc";
     }
     else {
       $line = exec("{$kirow['komento']} $pdffilenimi");

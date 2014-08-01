@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Sanakirjan synkronointi")."</font><hr>";
 
@@ -24,17 +24,17 @@ if ($oikeurow['paivitys'] != '1') { // Saako p‰ivitt‰‰
 
 if (!isset($tee)) $tee = "";
 
-$kieliarray = array("se","en","de","no","dk","ee");
+$kieliarray = array("se", "en", "de", "no", "dk", "ee");
 
 if ($tee == "TEE" or $tee == "UPDATE") {
 
   $ch  = curl_init();
-  curl_setopt ($ch, CURLOPT_URL, "http://api.devlab.fi/referenssisanakirja.sql");
-  curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-  curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-  curl_setopt ($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt ($ch, CURLOPT_HEADER, FALSE);
-  $sanakirja = curl_exec ($ch);
+  curl_setopt($ch, CURLOPT_URL, "http://api.devlab.fi/referenssisanakirja.sql");
+  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($ch, CURLOPT_HEADER, FALSE);
+  $sanakirja = curl_exec($ch);
   $sanakirja = explode("\n", trim($sanakirja));
 
   // Eka rivi
@@ -68,7 +68,7 @@ if ($tee == "TEE" or $tee == "UPDATE") {
       foreach ($sanakirja as $rivi) {
         // luetaan rivi tiedostosta..
         $poista   = array("'", "\\");
-        $rivi   = str_replace($poista,"",$rivi);
+        $rivi   = str_replace($poista, "", $rivi);
         $rivi   = explode("\t", trim($rivi));
 
         if ($rivi[$sync_otsikot["fi"]] != "") {
@@ -199,4 +199,4 @@ else {
       </form>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

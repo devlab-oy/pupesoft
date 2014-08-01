@@ -36,7 +36,7 @@ elseif ($nimi != '' and (($tila == '' or $tila == 'vaihdaasiakas') and !isset($j
   $ytunnus = $nimi;
 
   $lause = "<font class='head'>".t("Valitse toimittaja").":</font><hr><br>";
-  require ("../inc/kevyt_toimittajahaku.inc");
+  require "../inc/kevyt_toimittajahaku.inc";
 
   if ($ytunnus == '' and $monta > 1) {
     //Löytyi monta sopivaa, näytetään formi, mutta ei otsikkoa
@@ -57,7 +57,7 @@ elseif ($ytunnus != '' and (($kukarow['kesken'] == 0 and $tila == '') or $tila =
   $tila = 'Muuta';
 }
 
-if (isset($jatka) AND !checkdate($toimkk, $toimpp, $toimvv)) {
+if (isset($jatka) and !checkdate($toimkk, $toimpp, $toimvv)) {
   echo "<font class='error'>".t("VIRHE: Syötetty toimituspäivä on virheellinen")."!</font><br><br>";
   $tee = "otsik_ostotilaus";
   unset($jatka);
@@ -65,7 +65,7 @@ if (isset($jatka) AND !checkdate($toimkk, $toimpp, $toimvv)) {
 }
 
 if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
-  if($toim == "HAAMU") {
+  if ($toim == "HAAMU") {
     echo "<font class='head'>".t("Työ/tarvikeoston otsikko").":</font><hr><br>";
   }
   else {
@@ -235,7 +235,7 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
       $toimvv = $kervv = date("Y");
     }
     elseif ($kukarow['kesken'] == 0 and $yhtiorow['ostotilaukseen_toimittajan_toimaika'] == '2') {
-      $toimittajan_toimaika = date('Y-m-d',time() + $srow["oletus_toimaika"] * 24 * 60 * 60);
+      $toimittajan_toimaika = date('Y-m-d', time() + $srow["oletus_toimaika"] * 24 * 60 * 60);
 
       list($toimvv, $toimkk, $toimpp) = explode('-', $toimittajan_toimaika);
       list($kervv, $kerkk, $kerpp)    = explode('-', $toimittajan_toimaika);
@@ -244,8 +244,8 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
     else {
       list($toimvv, $toimkk, $toimpp) = explode('-', $srow["toimaika"]);
       list($kervv, $kerkk, $kerpp)    = explode('-', $srow["kerayspvm"]);
-      $kerpp = substr($kerpp,0,2);
-      $toimpp = substr($toimpp,0,2);
+      $kerpp = substr($kerpp, 0, 2);
+      $toimpp = substr($toimpp, 0, 2);
 
     }
 
@@ -279,7 +279,7 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
     echo "<td>".t("Ostaja").":</td>";
     echo "<td><select name='myyja'>";
 
-    while($row = mysql_fetch_array($yresult)) {
+    while ($row = mysql_fetch_array($yresult)) {
       $sel = "";
       if ($srow['myyja'] == '' or $srow['myyja'] == 0) {
         if ($row['nimi'] == $kukarow['nimi']) {
@@ -324,7 +324,7 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
       echo "<select name='toimipiste'>";
       echo "<option value=''>".t("Ei poikkeavaa toimipistettä")."</option>";
 
-      while($row = mysql_fetch_array($yresult)) {
+      while ($row = mysql_fetch_array($yresult)) {
         $sel = "";
 
         if ($srow["vanhatunnus"] == $row["tunnus"] or ($srow['vanhatunnus'] == 0 and $kukarow['toimipaikka'] == $row['tunnus'])) $sel = "selected";
@@ -338,7 +338,7 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
     }
 
     if ($toim != "HAAMU") {
-      echo "<tr><td>",t("Tilaustyyppi"),":</td>";
+      echo "<tr><td>", t("Tilaustyyppi"), ":</td>";
       echo "<td><select name='tilaustyyppi'>";
 
       $ostotil_tiltyyp_res = t_avainsana("OSTOTIL_TILTYYP");
@@ -353,8 +353,8 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
 
         $sel = array($srow['tilaustyyppi'] => "selected") + array(1 => '', 2 => '');
 
-        echo "<option value='2' {$sel[2]}>",t("Normaalitilaus"),"</option>";
-        echo "<option value='1' {$sel[1]}>",t("Pikalähetys"),"</option>";
+        echo "<option value='2' {$sel[2]}>", t("Normaalitilaus"), "</option>";
+        echo "<option value='1' {$sel[1]}>", t("Pikalähetys"), "</option>";
       }
 
       echo "</select></td>";
@@ -375,9 +375,9 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
 
       echo "<select name = 'kuljetus'>";
 
-      while($toimtaparow  = mysql_fetch_array($toimtapares)) {
+      while ($toimtaparow  = mysql_fetch_array($toimtapares)) {
         $sel = $srow['kuljetus'] == $toimtaparow['selite'] ? "selected" : "";
-        echo "<option value='{$toimtaparow['selite']}' {$sel}>",trim("{$toimtaparow['selite']} {$toimtaparow['selitetark']}"),"</option>";
+        echo "<option value='{$toimtaparow['selite']}' {$sel}>", trim("{$toimtaparow['selite']} {$toimtaparow['selitetark']}"), "</option>";
       }
 
       echo "</select>";
@@ -464,7 +464,7 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
 
       echo "<option value=''>".t("Valitse allekirjoittaja")."</option>";
 
-      while($row = mysql_fetch_assoc($yresult)) {
+      while ($row = mysql_fetch_assoc($yresult)) {
         $sel = "";
         if ($row['tunnus'] == $srow['allekirjoittaja']) {
           $sel = 'selected';
@@ -571,7 +571,7 @@ if (isset($jatka)) {
       $tpostitp  = $varow["postitp"];
       $tmaa       = $varow["maa"];
 
-      echo "<font class='message'>",t("Toimitusosoitteen tiedot haettiin varaston %s takaa", "", $varow["nimitys"]),".</font><br /><br />";
+      echo "<font class='message'>", t("Toimitusosoitteen tiedot haettiin varaston %s takaa", "", $varow["nimitys"]), ".</font><br /><br />";
     }
   }
 
@@ -609,7 +609,7 @@ if (isset($jatka)) {
     $tilausyhteyshenkilo = $seltilausyhteyshenkilo;
   }
 
-  $crlf = array("\r","\n"); // poistetaan rivinvaihdot kommentista
+  $crlf = array("\r", "\n"); // poistetaan rivinvaihdot kommentista
   $comments = str_replace($crlf, " ", $comments);
 
   if ($toim == "HAAMU") {

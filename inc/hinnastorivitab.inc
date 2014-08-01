@@ -13,7 +13,7 @@ function hinnastoriviotsikot() {
   $out .= t('osasto')."\t";         // tuotteen osasto
   $out .= t('try')."\t";        // tuoteryhm‰
   $out .= t('korvaava tuote')."\t";  // korvaava tuote
-  if($saatavuus == 'kylla') {
+  if ($saatavuus == 'kylla') {
     $out .= t('onko saatavilla')."\t";//saatavuus
   }
   $out .= "\n";
@@ -22,7 +22,7 @@ function hinnastoriviotsikot() {
 }
 
 function hinnastorivi($tuote, $laskurow) {
-    global $kukarow, $yhtiorow, $saatavuus;
+  global $kukarow, $yhtiorow, $saatavuus;
 
 
   //korvaavat tuotteet
@@ -36,7 +36,7 @@ function hinnastorivi($tuote, $laskurow) {
     $korvaresult = mysql_query($query) or pupe_error($query);
 
     $lask = 0;
-    while ($korvarow = mysql_fetch_array($korvaresult)){
+    while ($korvarow = mysql_fetch_array($korvaresult)) {
       $korvaavat[$lask] = $korvarow["tuoteno"];
       if ($korvarow["tuoteno"] == $tuote["tuoteno"]) {
         $koti = $lask;
@@ -51,11 +51,11 @@ function hinnastorivi($tuote, $laskurow) {
       $edellinen  = '';
       $seuraava  = $korvaavat[$koti+1];
     }
-    elseif($koti == $lask) {
+    elseif ($koti == $lask) {
       $edellinen  = $korvaavat[$koti-1];
       $seuraava  = '';
     }
-    else{
+    else {
       $edellinen  = $korvaavat[$koti-1];
       $seuraava  = $korvaavat[$koti+1];
     }
@@ -63,7 +63,7 @@ function hinnastorivi($tuote, $laskurow) {
 
   $myyntihinta = tuotteen_myyntihinta($laskurow, $tuote, 1, "ei");
 
-    // tehd‰‰n tietuetta
+  // tehd‰‰n tietuetta
   $out = $tuote['tuoteno']."\t";    // tuotenumero
   $out .= t_tuotteen_avainsanat($tuote, 'nimitys')."\t";    // tuotteen nimitys
   $out .= $tuote['eankoodi']."\t";  // tuotteen eankoodi alennusryhm‰ kahteen merkkiin asti zeropaddattuna
@@ -74,12 +74,12 @@ function hinnastorivi($tuote, $laskurow) {
   $out .= $tuote['osasto']."\t";       // tuotteen osasto
   $out .= $tuote['try']."\t";      // tuoteryhm‰
   $out .= $seuraava;          // korvaava tuote
-  if($saatavuus == 'kylla') {
+  if ($saatavuus == 'kylla') {
     $out .= "\t" . hae_saatavuus($laskurow, $tuote['tuoteno']);      // saatavuus
   }
   $out .= "\n";
 
-    return $out;
+  return $out;
 }
 
 function hae_saatavuus($laskurow, $tuoteno) {

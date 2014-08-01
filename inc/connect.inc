@@ -1,6 +1,6 @@
 <?php
 
-require("salasanat.php");
+require "salasanat.php";
 
 // $masterlink on aina linkki master-kantaan.
 // $link on linkki master- tai slave-kantaan. Jos slave on käytössä ja aktivoitu $useslave-muuttujalla niin silloin tuo pointaa siis slave-kantaan.

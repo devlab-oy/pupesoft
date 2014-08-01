@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("yhtiotarkista")) {
-  function yhtiotarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("yhtiotarkista")) {
+  function yhtiotarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $ulosarray;
 
     if ((mysql_field_name($result, $i) == "kotipaikka") or
@@ -22,81 +22,81 @@ if(!function_exists("yhtiotarkista")) {
     }
 
     if (((mysql_field_name($result, $i) == "kassa") or
-      (mysql_field_name($result, $i) == "pankkikortti") or
-      (mysql_field_name($result, $i) == "luottokortti") or
-      (mysql_field_name($result, $i) == "myynti") or
-      (mysql_field_name($result, $i) == "myynti_eu") or
-      (mysql_field_name($result, $i) == "myynti_ei_eu") or
-      (mysql_field_name($result, $i) == "myynti_marginaali") or
-      (mysql_field_name($result, $i) == "myynti_kaanteinen") or
-      (mysql_field_name($result, $i) == "osto_marginaali") or
-      (mysql_field_name($result, $i) == "myyntisaamiset") or
-      (mysql_field_name($result, $i) == "luottotappiot") or
-      (mysql_field_name($result, $i) == "ostovelat") or
-      (mysql_field_name($result, $i) == "valuuttaero") or
-      (mysql_field_name($result, $i) == "myynninvaluuttaero") or
-      (mysql_field_name($result, $i) == "matkalla_olevat") or
-      (mysql_field_name($result, $i) == "kassaale") or
-      (mysql_field_name($result, $i) == "myynninkassaale") or
-      (mysql_field_name($result, $i) == "muutkulut") or
-      (mysql_field_name($result, $i) == "pyoristys") or
-      (mysql_field_name($result, $i) == "varasto") or
-      (mysql_field_name($result, $i) == "varastonmuutos") or
-      (mysql_field_name($result, $i) == "alv") or
-      (mysql_field_name($result, $i) == "siirtosaamiset") or
-      (mysql_field_name($result, $i) == "siirtovelka") or
-      (mysql_field_name($result, $i) == "factoringsaamiset") or
-      (mysql_field_name($result, $i) == "selvittelytili") or
-      (mysql_field_name($result, $i) == "raaka_ainevarasto") or
-      (mysql_field_name($result, $i) == "raaka_ainevarastonmuutos") or
-      (mysql_field_name($result, $i) == "varastonmuutos_valmistuksesta") or
-      (mysql_field_name($result, $i) == "varastonmuutos_inventointi") or
-      (mysql_field_name($result, $i) == "varastonmuutos_epakurantti") or
-      (mysql_field_name($result, $i) == "konsernisaamiset") or
-      (mysql_field_name($result, $i) == "konsernivelat") or
-      (mysql_field_name($result, $i) == "konserniostovelat") or
-      (mysql_field_name($result, $i) == "konsernimyyntisaamiset")) and trim($t[$i]) == '') {
+        (mysql_field_name($result, $i) == "pankkikortti") or
+        (mysql_field_name($result, $i) == "luottokortti") or
+        (mysql_field_name($result, $i) == "myynti") or
+        (mysql_field_name($result, $i) == "myynti_eu") or
+        (mysql_field_name($result, $i) == "myynti_ei_eu") or
+        (mysql_field_name($result, $i) == "myynti_marginaali") or
+        (mysql_field_name($result, $i) == "myynti_kaanteinen") or
+        (mysql_field_name($result, $i) == "osto_marginaali") or
+        (mysql_field_name($result, $i) == "myyntisaamiset") or
+        (mysql_field_name($result, $i) == "luottotappiot") or
+        (mysql_field_name($result, $i) == "ostovelat") or
+        (mysql_field_name($result, $i) == "valuuttaero") or
+        (mysql_field_name($result, $i) == "myynninvaluuttaero") or
+        (mysql_field_name($result, $i) == "matkalla_olevat") or
+        (mysql_field_name($result, $i) == "kassaale") or
+        (mysql_field_name($result, $i) == "myynninkassaale") or
+        (mysql_field_name($result, $i) == "muutkulut") or
+        (mysql_field_name($result, $i) == "pyoristys") or
+        (mysql_field_name($result, $i) == "varasto") or
+        (mysql_field_name($result, $i) == "varastonmuutos") or
+        (mysql_field_name($result, $i) == "alv") or
+        (mysql_field_name($result, $i) == "siirtosaamiset") or
+        (mysql_field_name($result, $i) == "siirtovelka") or
+        (mysql_field_name($result, $i) == "factoringsaamiset") or
+        (mysql_field_name($result, $i) == "selvittelytili") or
+        (mysql_field_name($result, $i) == "raaka_ainevarasto") or
+        (mysql_field_name($result, $i) == "raaka_ainevarastonmuutos") or
+        (mysql_field_name($result, $i) == "varastonmuutos_valmistuksesta") or
+        (mysql_field_name($result, $i) == "varastonmuutos_inventointi") or
+        (mysql_field_name($result, $i) == "varastonmuutos_epakurantti") or
+        (mysql_field_name($result, $i) == "konsernisaamiset") or
+        (mysql_field_name($result, $i) == "konsernivelat") or
+        (mysql_field_name($result, $i) == "konserniostovelat") or
+        (mysql_field_name($result, $i) == "konsernimyyntisaamiset")) and trim($t[$i]) == '') {
 
       $virhe[$i] = t("Tili puuttuu!");
     }
 
     if (((mysql_field_name($result, $i) == "kassa") or
-      (mysql_field_name($result, $i) == "pankkikortti") or
-      (mysql_field_name($result, $i) == "luottokortti") or
-      (mysql_field_name($result, $i) == "kassaerotus") or
-      (mysql_field_name($result, $i) == "kateistilitys") or
-      (mysql_field_name($result, $i) == "myynti") or
-      (mysql_field_name($result, $i) == "myynti_eu") or
-      (mysql_field_name($result, $i) == "myynti_ei_eu") or
-      (mysql_field_name($result, $i) == "myynti_marginaali") or
-      (mysql_field_name($result, $i) == "myynti_kaanteinen") or
-      (mysql_field_name($result, $i) == "osto_marginaali") or
-      (mysql_field_name($result, $i) == "myyntisaamiset") or
-      (mysql_field_name($result, $i) == "luottotappiot") or
-      (mysql_field_name($result, $i) == "ostovelat") or
-      (mysql_field_name($result, $i) == "valuuttaero") or
-      (mysql_field_name($result, $i) == "myynninvaluuttaero") or
-      (mysql_field_name($result, $i) == "matkalla_olevat") or
-      (mysql_field_name($result, $i) == "kassaale") or
-      (mysql_field_name($result, $i) == "myynninkassaale") or
-      (mysql_field_name($result, $i) == "muutkulut") or
-      (mysql_field_name($result, $i) == "pyoristys") or
-      (mysql_field_name($result, $i) == "varasto") or
-      (mysql_field_name($result, $i) == "varastonmuutos") or
-      (mysql_field_name($result, $i) == "alv") or
-      (mysql_field_name($result, $i) == "siirtosaamiset") or
-      (mysql_field_name($result, $i) == "siirtovelka") or
-      (mysql_field_name($result, $i) == "factoringsaamiset") or
-      (mysql_field_name($result, $i) == "selvittelytili") or
-      (mysql_field_name($result, $i) == "raaka_ainevarasto") or
-      (mysql_field_name($result, $i) == "raaka_ainevarastonmuutos") or
-      (mysql_field_name($result, $i) == "varastonmuutos_valmistuksesta") or
-      (mysql_field_name($result, $i) == "varastonmuutos_inventointi") or
-      (mysql_field_name($result, $i) == "varastonmuutos_epakurantti") or
-      (mysql_field_name($result, $i) == "konsernisaamiset") or
-      (mysql_field_name($result, $i) == "konsernivelat") or
-      (mysql_field_name($result, $i) == "konserniostovelat") or
-      (mysql_field_name($result, $i) == "konsernimyyntisaamiset")) and trim($t[$i]) != '') {
+        (mysql_field_name($result, $i) == "pankkikortti") or
+        (mysql_field_name($result, $i) == "luottokortti") or
+        (mysql_field_name($result, $i) == "kassaerotus") or
+        (mysql_field_name($result, $i) == "kateistilitys") or
+        (mysql_field_name($result, $i) == "myynti") or
+        (mysql_field_name($result, $i) == "myynti_eu") or
+        (mysql_field_name($result, $i) == "myynti_ei_eu") or
+        (mysql_field_name($result, $i) == "myynti_marginaali") or
+        (mysql_field_name($result, $i) == "myynti_kaanteinen") or
+        (mysql_field_name($result, $i) == "osto_marginaali") or
+        (mysql_field_name($result, $i) == "myyntisaamiset") or
+        (mysql_field_name($result, $i) == "luottotappiot") or
+        (mysql_field_name($result, $i) == "ostovelat") or
+        (mysql_field_name($result, $i) == "valuuttaero") or
+        (mysql_field_name($result, $i) == "myynninvaluuttaero") or
+        (mysql_field_name($result, $i) == "matkalla_olevat") or
+        (mysql_field_name($result, $i) == "kassaale") or
+        (mysql_field_name($result, $i) == "myynninkassaale") or
+        (mysql_field_name($result, $i) == "muutkulut") or
+        (mysql_field_name($result, $i) == "pyoristys") or
+        (mysql_field_name($result, $i) == "varasto") or
+        (mysql_field_name($result, $i) == "varastonmuutos") or
+        (mysql_field_name($result, $i) == "alv") or
+        (mysql_field_name($result, $i) == "siirtosaamiset") or
+        (mysql_field_name($result, $i) == "siirtovelka") or
+        (mysql_field_name($result, $i) == "factoringsaamiset") or
+        (mysql_field_name($result, $i) == "selvittelytili") or
+        (mysql_field_name($result, $i) == "raaka_ainevarasto") or
+        (mysql_field_name($result, $i) == "raaka_ainevarastonmuutos") or
+        (mysql_field_name($result, $i) == "varastonmuutos_valmistuksesta") or
+        (mysql_field_name($result, $i) == "varastonmuutos_inventointi") or
+        (mysql_field_name($result, $i) == "varastonmuutos_epakurantti") or
+        (mysql_field_name($result, $i) == "konsernisaamiset") or
+        (mysql_field_name($result, $i) == "konsernivelat") or
+        (mysql_field_name($result, $i) == "konserniostovelat") or
+        (mysql_field_name($result, $i) == "konsernimyyntisaamiset")) and trim($t[$i]) != '') {
 
       $query = "SELECT nimi
                 FROM tili
@@ -132,7 +132,7 @@ if(!function_exists("yhtiotarkista")) {
 
     if (mysql_field_name($result, $i) == "ytunnus" and strtoupper($yhtiorow["maa"]) == "FI") {
       $ytunnus = trim($t[$i]);
-      require ("tarkistaytunnus.inc");
+      require "tarkistaytunnus.inc";
 
       if ($ok==0) {
         $virhe[$i] = t("Virheellinen y-tunnus!")." $t[$i] -> $ytunnus";
@@ -159,7 +159,7 @@ if(!function_exists("yhtiotarkista")) {
 
         $pankkitili = $t[$i];
 
-        require ('pankkitilinoikeellisuus.php');
+        require 'pankkitilinoikeellisuus.php';
 
         if ($pankkitili == '') {
           $pankkitili = tarkista_iban($t[$i]);

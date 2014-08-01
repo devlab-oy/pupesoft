@@ -4,11 +4,11 @@
 $useslave = 1;
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -39,29 +39,29 @@ else {
       //-->
       </script>";
 
-  echo "<font class='head'>",t("Sähköinen markkinointi"),"</font><hr>";
+  echo "<font class='head'>", t("Sähköinen markkinointi"), "</font><hr>";
   echo "<table>";
   echo "<form method='post'>";
 
   echo "<tr>";
-  echo "<th colspan='2'>",t("Asiakastiedot"),"</th>";
+  echo "<th colspan='2'>", t("Asiakastiedot"), "</th>";
   echo "</tr>";
   echo "<tr>";
-  echo "<td>",t("Ytunnus"),"</td>";
+  echo "<td>", t("Ytunnus"), "</td>";
   echo "<td><input type='text' name='ytunnus' id='ytunnus' value='$ytunnus'></td>";
   echo "</tr>";
   echo "<tr>";
-  echo "<td>",t("Nimi"),"</td>";
+  echo "<td>", t("Nimi"), "</td>";
   echo "<td><input type='text' name='nimi' id='nimi' value='$nimi'></td>";
   echo "<tr>";
-  echo "<td>",t("Postitoimipaikka"),"</td><td><input type='text' name='postitp' id='postitp' value='$postitp'></td>";
+  echo "<td>", t("Postitoimipaikka"), "</td><td><input type='text' name='postitp' id='postitp' value='$postitp'></td>";
   echo "</tr>";
   echo "<tr>";
-  echo "<td>",t("Postitoimialue"),"</td>";
+  echo "<td>", t("Postitoimialue"), "</td>";
   echo "<td><input type='text' name='postino1' id='postino1' value='$postino1' size='6' maxlength='5'>-<input type='text' name='postino2' id='postino2' value='$postino2' size='6' maxlength='5'></td>";
   echo "</tr>";
-  echo "<tr><td>",t("Kieli"),"</td>";
-  echo "<td><select name='kieli'><option value=''>",t("Ei valintaa"),"</option>";
+  echo "<tr><td>", t("Kieli"), "</td>";
+  echo "<td><select name='kieli'><option value=''>", t("Ei valintaa"), "</option>";
 
   $query = "SELECT DISTINCT kieli
             FROM asiakas
@@ -82,7 +82,7 @@ else {
 
   echo "</select></td>";
   echo "</tr>";
-  echo "<tr><td>",t("Sähköpostiosoite"),"</td>";
+  echo "<tr><td>", t("Sähköpostiosoite"), "</td>";
   echo "<td><input type='text' name='email' id='email' value='$email'></td>";
   echo "</tr>";
   echo "<tr><td colspan='2' class='back'>&nbsp;</td></tr>";
@@ -110,14 +110,14 @@ else {
 
   $monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI", "<br>MALLI/MALLITARK");
   $monivalintalaatikot_normaali = array();
-  require ("tilauskasittely/monivalintalaatikot.inc");
+  require "tilauskasittely/monivalintalaatikot.inc";
 
   echo "</td></tr>";
 
   echo "</table>";
   echo "<br>";
   echo "<table>";
-  echo "<tr><th colspan='4'>",t("Asiakkaan avainsanat"),"</th></tr>";
+  echo "<tr><th colspan='4'>", t("Asiakkaan avainsanat"), "</th></tr>";
 
   $query = "SELECT count(selite) laskuri, selitetark, selite, jarjestys, min(tunnus) mintunnus
             FROM avainsana
@@ -150,7 +150,7 @@ else {
                 ORDER BY selitetark_2";
       $filler_res = pupe_query($query);
 
-      echo "<td><select name='{$dynamic_row['selite']}' ".js_alasvetoMaxWidth($dynamic_row['mintunnus'], 300)."><option value=''>",t("Ei valintaa"),"</option>";
+      echo "<td><select name='{$dynamic_row['selite']}' ".js_alasvetoMaxWidth($dynamic_row['mintunnus'], 300)."><option value=''>", t("Ei valintaa"), "</option>";
 
       $var = $dynamic_row['selite'];
 
@@ -182,7 +182,7 @@ else {
       }
       else {
 
-        echo "<td><select name='{$dynamic_row['selite']}' ".js_alasvetoMaxWidth($dynamic_row['mintunnus'], 300)."><option value=''>",t("Ei valintaa"),"</option>";
+        echo "<td><select name='{$dynamic_row['selite']}' ".js_alasvetoMaxWidth($dynamic_row['mintunnus'], 300)."><option value=''>", t("Ei valintaa"), "</option>";
 
         $var = $dynamic_row['selite'];
 
@@ -221,7 +221,7 @@ else {
 
     if (isset($dyn) and count($dyn) > 0) {
 
-      foreach($dyn as $muuttuja) {
+      foreach ($dyn as $muuttuja) {
         if ($$muuttuja != '') {
           $$muuttuja = mysql_real_escape_string($$muuttuja);
 
@@ -229,8 +229,8 @@ else {
           $av_sana .= "'".${$muuttuja}."',";
         }
       }
-      $av_laji = substr($av_laji,0,-1);
-      $av_sana = substr($av_sana,0,-1);
+      $av_laji = substr($av_laji, 0, -1);
+      $av_sana = substr($av_sana, 0, -1);
 
       if ($av_laji != "" and $av_sana != "") {
         $asiakkaan_avainsana_join = "JOIN asiakkaan_avainsanat on (asiakkaan_avainsanat.yhtio = asiakas.yhtio and asiakas.tunnus = asiakkaan_avainsanat.liitostunnus)";
@@ -309,17 +309,17 @@ else {
 
     echo "<form method='post' class='multisubmit'>";
     echo "<table>";
-    echo "<tr><th colspan='4'>",t("Tallennustoiminnot"),"</th></tr>";
+    echo "<tr><th colspan='4'>", t("Tallennustoiminnot"), "</th></tr>";
 
-    echo "<tr><td>",t("Tallenna tulostetut"),":</td><td colspan='3'>";
+    echo "<tr><td>", t("Tallenna tulostetut"), ":</td><td colspan='3'>";
     echo "<input type='hidden' name='ext' id='ext' value=''>";
     echo "CSV <input type='radio' name='paate' id='paate' value='csv' onclick='nimi(this.value);'> ";
     echo "Excel <input type='radio' name='paate' id='paate' value='xls' onclick='nimi(this.value);'></td>";
     echo "</tr>";
 
-    echo "<tr><td>",t("Tallenna tiedosto nimellä (ilman päätettä)"),"</td>";
+    echo "<tr><td>", t("Tallenna tiedosto nimellä (ilman päätettä)"), "</td>";
     echo "<td colspan='3'><input type='text' name='tiedostonimi' id='tiedostonimi' value='$tiedostonimi' onkeyup='nimi2(this.value);'>";
-    echo "&nbsp;<font class='info'>(",t("Tyhjä nimi on muotoa postituslista-pvmkellonaika.pääte"),")</font></td>";
+    echo "&nbsp;<font class='info'>(", t("Tyhjä nimi on muotoa postituslista-pvmkellonaika.pääte"), ")</font></td>";
 
     echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
     echo "<input type='hidden' name='kaunisnimi' id='kaunisnimi' value=''>";
@@ -334,18 +334,18 @@ else {
     echo "<table>";
 
     echo "<tr>";
-    echo "<th>",t("Ytunnus"),"</th>";
-    echo "<th>",t("Nimi"),"</th>";
-    echo "<th>",t("Sähköpostiosoite"),"</th>";
-    echo "<th>",t("Postino")." ".t("Postitp"),"</th>";
-    echo "<th>",t("Toim.Postino")." ".t("Toim.Postitp"),"</th>";
-    echo "<th>",t("Myyntisumma"),"</th>";
+    echo "<th>", t("Ytunnus"), "</th>";
+    echo "<th>", t("Nimi"), "</th>";
+    echo "<th>", t("Sähköpostiosoite"), "</th>";
+    echo "<th>", t("Postino")." ".t("Postitp"), "</th>";
+    echo "<th>", t("Toim.Postino")." ".t("Toim.Postitp"), "</th>";
+    echo "<th>", t("Myyntisumma"), "</th>";
 
     echo "</tr>";
 
     $tmptiedostonimi = "Postituslista-".date("dmYHis").".xls";
 
-    if(@include('Spreadsheet/Excel/Writer.php')) {
+    if (@include 'Spreadsheet/Excel/Writer.php') {
 
       $workbook = new Spreadsheet_Excel_Writer('/tmp/'.$tmptiedostonimi);
       $workbook->setVersion(8);
@@ -504,10 +504,10 @@ else {
     $info = pathinfo($tmptiedostonimi);
 
     file_put_contents("/tmp/$info[filename].csv", $rivi);
-    echo "<tr><th colspan='10' id='riveja'>",t("Rivejä")," $rows ",t("kappaletta"),"</th></tr>";
+    echo "<tr><th colspan='10' id='riveja'>", t("Rivejä"), " $rows ", t("kappaletta"), "</th></tr>";
   }
   echo "</form>";
   echo "</table>";
 
-  require ("../inc/footer.inc");
+  require "../inc/footer.inc";
 }

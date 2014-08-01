@@ -11,7 +11,7 @@ $specutxt = "";
 $tuotteet = explode(",", $row['kaikkituotteet']);
 
 if ($row["tullinimike1"] == '' or $row["tullinimike1"] == 0) {
-    foreach ($tuotteet as $tuotetiedot) {
+  foreach ($tuotteet as $tuotetiedot) {
     list($tuotetunnus, $tuoteno) = explode("!¡!", $tuotetiedot);
 
     $virhetxt .= t("Tuote").": <a href='yllapito.php?toim=tuote&tunnus=$tuotetunnus&lopetus=$lopetus_intra1$lopetus_intra2'>$tuoteno</a>. ".t("Tullinimike tuotteelta puuttuu")."!<br>";
@@ -31,7 +31,7 @@ elseif ($row["tullinimike1"] != "") {
     foreach ($tuotteet as $tuotetiedot) {
       list($tuotetunnus, $tuoteno) = explode("!¡!", $tuotetiedot);
 
-        $virhetxt .= t("Tuote").": <a href='yllapito.php?toim=tuote&tunnus=$tuotetunnus&lopetus=$lopetus_intra1$lopetus_intra2'>$tuoteno</a> ".t("Tullinimike on virheellinen")." $row[tullinimike1]<br>";
+      $virhetxt .= t("Tuote").": <a href='yllapito.php?toim=tuote&tunnus=$tuotetunnus&lopetus=$lopetus_intra1$lopetus_intra2'>$tuoteno</a> ".t("Tullinimike on virheellinen")." $row[tullinimike1]<br>";
       $virhe++;
     }
   }
@@ -184,12 +184,12 @@ while ($intrlasrow = mysql_fetch_array($intrlasres)) {
   }
 
   if ((int) $intrlasrow["kauppatapahtuman_luonne"] <= 0) {
-       $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Kauppatapahtuman luonne puuttuu")."!<br>";
+    $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Kauppatapahtuman luonne puuttuu")."!<br>";
     $virhe++;
   }
 
   if ((int) $intrlasrow["kuljetusmuoto"] == 0) {
-      $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Kuljetusmuoto puuttuu")."!<br>";
+    $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Kuljetusmuoto puuttuu")."!<br>";
     $virhe++;
   }
 

@@ -1,8 +1,8 @@
 <?php
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if (isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
@@ -11,7 +11,7 @@ $useslave = 1;
 // Ei k‰ytet‰ pakkausta
 $compression = FALSE;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
@@ -23,7 +23,7 @@ echo "<font class=head>".t("Tuotteet joiden tulossa oleva saldo ei riit‰")."</fo
 
 if ($ytunnus != '') {
   $toimittajaid = "";
-  require ("inc/kevyt_toimittajahaku.inc");
+  require "inc/kevyt_toimittajahaku.inc";
 
   if ($toimittajaid == "") {
     exit;
@@ -40,8 +40,8 @@ echo "<input type='hidden' name='tee' value='raportoi'>";
 echo "<table>";
 echo "<tr><th>".t("Rajaukset")."</th><td>";
 
-$monivalintalaatikot = array('OSASTO','TRY','TUOTEMERKKI');
-require ("tilauskasittely/monivalintalaatikot.inc");
+$monivalintalaatikot = array('OSASTO', 'TRY', 'TUOTEMERKKI');
+require "tilauskasittely/monivalintalaatikot.inc";
 
 echo "</td></tr>";
 echo "<tr>";
@@ -80,7 +80,7 @@ if ($tee != "" and isset($painoinnappia)) {
     $toimittaja_join = "";
   }
 
-  if (@include('Spreadsheet/Excel/Writer.php')) {
+  if (@include 'Spreadsheet/Excel/Writer.php') {
 
     //keksit‰‰n failille joku varmasti uniikki nimi:
     list($usec, $sec) = explode(' ', microtime());
@@ -140,7 +140,7 @@ if ($tee != "" and isset($painoinnappia)) {
   if ($total_rows > 0) {
 
     echo "<font class='message'>", t("K‰sitell‰‰n"), " $total_rows ", t("tuotetta"), ".</font>";
-    require('inc/ProgressBar.class.php');
+    require 'inc/ProgressBar.class.php';
 
     $bar = new ProgressBar();
     $bar->initialize($total_rows); // print the empty bar
@@ -243,4 +243,4 @@ if ($tee != "" and isset($painoinnappia)) {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

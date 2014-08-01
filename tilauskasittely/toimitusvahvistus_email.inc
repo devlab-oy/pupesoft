@@ -58,11 +58,11 @@ if ($toimitusvahvistus_email_lahetys) {
 
   // Sähköpostin lähetykseen parametrit
   $parametri = array( "to"       => $rakir_row['asiakas_email'],
-            "cc"       => "",
-            "subject"    => t("Toimitusvahvistus"),
-            "ctype"      => "text",
-            "body"      => $body,
-          );
+    "cc"       => "",
+    "subject"    => t("Toimitusvahvistus"),
+    "ctype"      => "text",
+    "body"      => $body,
+  );
 
   if (pupesoft_sahkoposti($parametri)) {
     echo t("Sähköpostin lähetys onnistui").": {$rakir_row['asiakas_email']}<br />";

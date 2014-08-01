@@ -14,8 +14,8 @@ if (!isset($argv[1]) or $argv[1] == '') {
 }
 
 // otetaan tietokanta connect
-require ("inc/connect.inc");
-require ("inc/functions.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 if (isset($argv[2]) and $argv[2] != "") {
   $ajalta = $argv[2];
@@ -70,7 +70,7 @@ $result = mysql_query($query) or pupe_error($query);
 while ($trow=mysql_fetch_array($result)) {
   $muistuta = 0;
   //  Kandeeko tästä muistuttaa?
-  for($i=1;$i<=5;$i++) {
+  for ($i=1;$i<=5;$i++) {
     if ($trow["hyvak$i"] == $trow["hyvaksyja_nyt"]) {
 
       //  Verrataan luontiaikaan..

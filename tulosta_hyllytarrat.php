@@ -4,7 +4,7 @@
 $useslave = 1;
 
 //$toim='YKS' tarkottaa yksinkertainen ja silloin ei välitetä onko tuotteella eankoodia vaan tulostetaan suoraan tuoteno viivakoodiin
-require("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Tulosta hyllytarroja")."</font><hr>";
 
@@ -64,7 +64,7 @@ if ($tee== 'Z' and $ulos == '') {
   $komento = $komrow['komento'];
 
   foreach ($paikat as $paikka) {
-    require("inc/tulosta_hyllytarrat_tec.inc");
+    require "inc/tulosta_hyllytarrat_tec.inc";
   }
 
   echo t("Hyllytarrat tulostuu")."...<br><br>";
@@ -82,7 +82,7 @@ echo "<input type='hidden' name='toim' value='$toim'>";
 
 echo "<table>";
 echo "<tr><th>".t("Alkuosoite")."</th></tr><tr>";
-echo "<td>",hyllyalue("ahyllyalue", $ahyllyalue);
+echo "<td>", hyllyalue("ahyllyalue", $ahyllyalue);
 echo "-";
 echo "<input type='text' name='ahyllynro' size='5' maxlength='5' value='$ahyllynro'>";
 echo "-";
@@ -91,7 +91,7 @@ echo "-";
 echo "<input type='text' name='ahyllytaso' size='5' maxlength='5' value='$ahyllytaso'></td></tr>";
 
 echo "<tr><th>".t("Loppuosoite")."</th></tr><tr>";
-echo "<td>",hyllyalue("lhyllyalue", $lhyllyalue);
+echo "<td>", hyllyalue("lhyllyalue", $lhyllyalue);
 echo "-";
 echo "<input type='text' name='lhyllynro' size='5' maxlength='5' value='$lhyllynro'>";
 echo "-";
@@ -114,7 +114,7 @@ while ($kirow=mysql_fetch_array($kires)) {
   echo "<option value='$kirow[tunnus]' $select>$kirow[kirjoitin]</option>";
 }
 
-mysql_data_seek($kires,0);
+mysql_data_seek($kires, 0);
 
 echo "</select></td>";
 
@@ -146,7 +146,7 @@ echo "<tr><form method='post' name='kala' autocomplete='off'>";
 echo "<input type='hidden' name='tee' value='Z'>";
 echo "<input type='hidden' name='lisa' value='yks'>";
 echo "<input type='hidden' name='toim' value='$toim'>";
-echo "<td>",hyllyalue("yhyllyalue", $yhyllyalue);
+echo "<td>", hyllyalue("yhyllyalue", $yhyllyalue);
 echo "-";
 echo "<input type='text' name='yhyllynro' size='5' maxlength='5' value='$yhyllynro'>";
 echo "-";
@@ -180,4 +180,4 @@ echo "</select></td>";
 echo "<td class='back'><input type='Submit' value='".t("Tulosta")."'></td>";
 echo "</form></tr></table>";
 
-require("inc/footer.inc");
+require "inc/footer.inc";

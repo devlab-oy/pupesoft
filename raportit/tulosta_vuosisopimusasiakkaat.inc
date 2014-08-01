@@ -1,6 +1,6 @@
 <?php
 
-require("pdflib/phppdflib.class.php");
+require "pdflib/phppdflib.class.php";
 
 //PDF parametrit
 $pdf = new pdffile;
@@ -21,7 +21,7 @@ $kala = 575;
 $lask = 1;
 $sivu = 1;
 
-function alku ($laji = '') {
+function alku($laji = '') {
   global $pdf, $asiakasrow, $yhtiorow, $sivu, $norm, $pieni, $pvm, $alkuvv, $alkukk, $alkupp, $loppuvv, $loppukk, $loppupp;
 
   // jos ollaan syötetty poikkeava päivä, käytetään sitä
@@ -96,7 +96,7 @@ function alku ($laji = '') {
   $oikpos = $pdf->strlen("Indeksi", $pieni);
   $pdf->draw_text(575-$oikpos, 600, "Indeksi",      $firstpage, $pieni);
 
-  return($firstpage);
+  return $firstpage;
 }
 
 function rivi_kaikki($firstpage, $laji = '', $rows = array()) {
@@ -112,7 +112,7 @@ function rivi_kaikki($firstpage, $laji = '', $rows = array()) {
     }
 
     if ($row["ed"] != 0) {
-      $indexi = round($row["va"]/$row["ed"],2)*100;
+      $indexi = round($row["va"]/$row["ed"], 2)*100;
     }
     else {
       $indexi = 0;
@@ -165,7 +165,7 @@ function rivi_kaikki($firstpage, $laji = '', $rows = array()) {
   return $firstpage;
 }
 
-function rivi ($firstpage, $laji = '') {
+function rivi($firstpage, $laji = '') {
   global $firstpage, $pdf, $row, $kala, $sivu, $lask, $norm, $lask, $edosasto;
 
   if ($lask >= 34) {
@@ -177,7 +177,7 @@ function rivi ($firstpage, $laji = '') {
   }
 
   if ($row["ed"] != 0) {
-    $indexi = round($row["va"]/$row["ed"],2)*100;
+    $indexi = round($row["va"]/$row["ed"], 2)*100;
   }
   else {
     $indexi = 0;
@@ -233,7 +233,7 @@ function rivi ($firstpage, $laji = '') {
   $lask++;
 }
 
-function loppu ($firstpage, $sendemail = '') {
+function loppu($firstpage, $sendemail = '') {
   global $pdf, $kala, $norm, $sumkpled, $sumkplva, $sumed, $sumva, $sumindexi, $asiakas_numero;
 
   //kirjoitetaan yhteensärivit loppuun
@@ -254,7 +254,7 @@ function loppu ($firstpage, $sendemail = '') {
   $pdf->draw_text(530-$oikpos, $kala, hintapyoristys($sumed),     $firstpage, $norm);
 
   if ($sumed != 0) {
-    $sumindexi = round($sumva/$sumed,2)*100;
+    $sumindexi = round($sumva/$sumed, 2)*100;
   }
   else {
     $sumindexi = 0;

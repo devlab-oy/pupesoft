@@ -21,24 +21,24 @@ if (!$php_cli) {
 ini_set("max_execution_time", 0);
 
 $pupe_root_polku = dirname(__FILE__);
-require ("{$pupe_root_polku}/inc/connect.inc");
-require ("{$pupe_root_polku}/inc/functions.inc");
+require "{$pupe_root_polku}/inc/connect.inc";
+require "{$pupe_root_polku}/inc/functions.inc";
 
 $lock_params = array(
-    "locktime" => 900,
+  "locktime" => 900,
 );
 
 // Sallitaan vain yksi instanssi t‰st‰ skriptist‰ kerrallaan
 pupesoft_flock($lock_params);
 
-function data_import () {
-  GLOBAL $pupe_root_polku;
+function data_import() {
+  global $pupe_root_polku;
 
   $faileja_kasitelty = FALSE;
 
   // Loopataan DATAIN -hakemisto l‰pi
   if ($files = scandir($pupe_root_polku."/datain")) {
-      foreach ($files as $file) {
+    foreach ($files as $file) {
 
       // Etsit‰‰n "lue-data#" -alkuisia filej‰, jotka loppuu ".DATAIMPORT"
       if (substr($file, 0, 9) == "lue-data#" and substr($file, -11) == ".DATAIMPORT") {
@@ -72,7 +72,7 @@ function data_import () {
           $faileja_kasitelty = TRUE;
         }
       }
-      }
+    }
   }
 
   // Katsotaan oisko tullut lis‰‰ k‰sitelt‰vi‰

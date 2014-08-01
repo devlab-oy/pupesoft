@@ -174,7 +174,7 @@ while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
     }
 
     if ($perutaan == "JOO") {
-      if (in_array($raakaainerow["sarjanumeroseuranta"], array("E","F","G"))) {
+      if (in_array($raakaainerow["sarjanumeroseuranta"], array("E", "F", "G"))) {
         $query = "UPDATE sarjanumeroseuranta
                   SET myyntirivitunnus = 0,
                   muutospvm            = now(),
@@ -191,7 +191,7 @@ while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
                 and tunnus  = '$raakaainerow[tunnus]'";
     }
     else {
-      if (in_array($raakaainerow["sarjanumeroseuranta"], array("E","F","G"))) {
+      if (in_array($raakaainerow["sarjanumeroseuranta"], array("E", "F", "G"))) {
         // P‰vitet‰‰n raaka-aineen er‰numeron era_kpl-kentt‰‰n oikea luku
         $query = "UPDATE sarjanumeroseuranta
                   SET era_kpl = era_kpl+$mtos,
@@ -319,7 +319,7 @@ if ($perutaan == "JOO") {
     }
   }
 
-  if (in_array($tilrivirow["sarjanumeroseuranta"], array("E","F","G"))) {
+  if (in_array($tilrivirow["sarjanumeroseuranta"], array("E", "F", "G"))) {
     // Valmisteen er‰numerot on siirretty valmistetulle tilausriville, eli ne jotka on tyypill‰ "O"
     $query = "SELECT tunnus
               FROM tilausrivi
@@ -483,7 +483,7 @@ else {
           }
         }
 
-        if (in_array($tilrivirow["sarjanumeroseuranta"], array("E","F","G"))) {
+        if (in_array($tilrivirow["sarjanumeroseuranta"], array("E", "F", "G"))) {
           // P‰vitet‰‰n valmisteen er‰numeron era_kpl-kentt‰‰n oikea luku
           $query = "UPDATE sarjanumeroseuranta
                     SET era_kpl = era_kpl+$kaantopisteen_saldomuutos,

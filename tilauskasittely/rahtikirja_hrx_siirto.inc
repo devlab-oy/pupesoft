@@ -73,7 +73,7 @@ if ($kollityht > 0) {
 
     $sanoma  = str_pad($y_nimi, 19, " ");
     $sanoma .= str_pad($v_nimi, 30, " ");
-    $sanoma .= str_pad($v_osoite, 50, " "); #kaksi kenttää yhdistetty samaksi (osoite 1 ja osoite 2)
+    $sanoma .= str_pad($v_osoite, 50, " "); //kaksi kenttää yhdistetty samaksi (osoite 1 ja osoite 2)
     $sanoma .= str_pad($v_postino_postitp, 25, " ");
     $sanoma .= str_pad($v_maa, 25, " ");
 
@@ -121,19 +121,19 @@ if ($kollityht > 0) {
     $sanoma .= str_pad(substr(trim($pakkaus[0]), 0, 3), 3, " ");
     $sanoma .= str_pad(substr(trim($rahtikirjanro), 0, 10), 10, " ");
 
-    if (substr($hrx_path,-1) != '/') {
+    if (substr($hrx_path, -1) != '/') {
       $hrx_path .= '/';
     }
     if ($kukarow['yhtio'] == 'mergr') {
-      $filenimi = "/tmp/MG-".md5(uniqid(rand(),true)).".dat";
+      $filenimi = "/tmp/MG-".md5(uniqid(rand(), true)).".dat";
     }
     else {
-      $filenimi = "/tmp/hrx-import-".md5(uniqid(rand(),true)).".dat";
+      $filenimi = "/tmp/hrx-import-".md5(uniqid(rand(), true)).".dat";
     }
 
     //kirjoitetaan faili levylle..
     if (file_put_contents($filenimi, $sanoma) === FALSE) {
-      echo "<br><font class='error'>",t("Tiedoston kirjoitus epäonnistui"),"!</font><br>";
+      echo "<br><font class='error'>", t("Tiedoston kirjoitus epäonnistui"), "!</font><br>";
     }
 
     if ($hrx_host != "" and $hrx_user != "" and $hrx_pass != "" and $hrx_path != "") {
@@ -144,10 +144,10 @@ if ($kollityht > 0) {
       $ftppass = $hrx_pass;
       $ftppath = $hrx_path;
       $ftpfile = realpath($filenimi);
-      require ("inc/ftp-send.inc");
+      require "inc/ftp-send.inc";
     }
 
-     # TULOSTETAAN LIPPULAPPUSET
+    // TULOSTETAAN LIPPULAPPUSET
     // haetaan varaston osoitetiedot, käytetään niitä lähetystietoina
     $query = "SELECT nimi, nimitark, osoite, postino, postitp, maa
               FROM varastopaikat
@@ -180,28 +180,28 @@ if ($kollityht > 0) {
     for ($i = 1; $i <= $kollityht; $i++) {
       // Tulostetaan Pupen oma kollitarra
       $params = array(
-         'tilriv' => "{$rahtikirjanro}",
-         'toimitustapa' => $laskurow['toimitustapa'],
-         'toim_nimi' => $rakir_row['toim_nimi'],
-         'toim_nimitark' => $rakir_row['toim_nimitark'],
-         'toim_osoite' => $rakir_row['toim_osoite'],
-         'toim_postino' => $rakir_row['toim_postino'],
-         'toim_postitp' => $rakir_row['toim_postitp'],
-         'lahettaja_nimi' => $lahettaja_nimi,
-         'lahettaja_nimitark' => $lahettaja_nimitark,
-         'lahettaja_osoite' => $lahettaja_osoite,
-         'lahettaja_postino' => $lahettaja_postino,
-         'lahettaja_postitp' => $lahettaja_postitp,
-         'lahettaja_maa' => $lahettaja_maa,
-         'lahettaja_maa_nimi' => $lahettaja_maa_nimi,
-         'reittietikettitulostin' => $kirjoitin,
-         'mediatyyppi' => $mediatyyppi,
-         'monesko_laatikko' => $i,
-         'montako_laatikkoa_yht' => $kollityht,
-         'pakkauskoodi' => $pakkaus[0],
+        'tilriv' => "{$rahtikirjanro}",
+        'toimitustapa' => $laskurow['toimitustapa'],
+        'toim_nimi' => $rakir_row['toim_nimi'],
+        'toim_nimitark' => $rakir_row['toim_nimitark'],
+        'toim_osoite' => $rakir_row['toim_osoite'],
+        'toim_postino' => $rakir_row['toim_postino'],
+        'toim_postitp' => $rakir_row['toim_postitp'],
+        'lahettaja_nimi' => $lahettaja_nimi,
+        'lahettaja_nimitark' => $lahettaja_nimitark,
+        'lahettaja_osoite' => $lahettaja_osoite,
+        'lahettaja_postino' => $lahettaja_postino,
+        'lahettaja_postitp' => $lahettaja_postitp,
+        'lahettaja_maa' => $lahettaja_maa,
+        'lahettaja_maa_nimi' => $lahettaja_maa_nimi,
+        'reittietikettitulostin' => $kirjoitin,
+        'mediatyyppi' => $mediatyyppi,
+        'monesko_laatikko' => $i,
+        'montako_laatikkoa_yht' => $kollityht,
+        'pakkauskoodi' => $pakkaus[0],
         'yh_nimi' => $yh_nimi,
         'yh_puh' => $yh_puh,
-       );
+      );
 
       tulosta_hrx($params);
     }

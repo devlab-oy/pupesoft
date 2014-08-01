@@ -1,16 +1,16 @@
 <?php
 
-require("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if (!isset($tee)) $tee = '';
 
-echo "<font class='head'>",t("Synkronoi tuotteet ulkoiseen j‰rjestelm‰‰n"),"</font><hr><br />";
+echo "<font class='head'>", t("Synkronoi tuotteet ulkoiseen j‰rjestelm‰‰n"), "</font><hr><br />";
 
 if ($ftp_posten_logistik_host == '' or $ftp_posten_logistik_user == '' or $ftp_posten_logistik_pass == '' or $ftp_posten_logistik_path == '') {
 
-  echo "<br /><font class='error'>",t("Tarvittavat FTP-tunnukset ovat puutteelliset"),"!</font><br>";
+  echo "<br /><font class='error'>", t("Tarvittavat FTP-tunnukset ovat puutteelliset"), "!</font><br>";
 
-  require ("inc/footer.inc");
+  require "inc/footer.inc";
   exit;
 }
 
@@ -28,17 +28,17 @@ if (mysql_num_rows($res) > 0) {
 
   if ($tee == '') {
 
-    echo "<font class='message'>",t("Tuotteet joita ei ole synkronoitu"),"</font><br />";
-    echo "<font class='message'>",t("Yhteens‰ %d kappaletta", "", mysql_num_rows($res)),"</font><br /><br />";
+    echo "<font class='message'>", t("Tuotteet joita ei ole synkronoitu"), "</font><br />";
+    echo "<font class='message'>", t("Yhteens‰ %d kappaletta", "", mysql_num_rows($res)), "</font><br /><br />";
 
     echo "<form action='' method='post'>";
     echo "<table>";
     echo "<tr><td class='back' colspan='2'>";
-    echo "<input type='submit' name='tee' value='",t("L‰het‰"),"' />";
+    echo "<input type='submit' name='tee' value='", t("L‰het‰"), "' />";
     echo "</td></tr>";
     echo "<tr>";
-    echo "<th>",t("Tuotenumero"),"</th>";
-    echo "<th>",t("Nimitys"),"</th>";
+    echo "<th>", t("Tuotenumero"), "</th>";
+    echo "<th>", t("Nimitys"), "</th>";
     echo "</tr>";
   }
   else {
@@ -154,7 +154,7 @@ if (mysql_num_rows($res) > 0) {
   if ($tee == '') {
 
     echo "<tr><td class='back' colspan='2'>";
-    echo "<input type='submit' name='tee' value='",t("L‰het‰"),"' />";
+    echo "<input type='submit' name='tee' value='", t("L‰het‰"), "' />";
     echo "</td></tr>";
     echo "</table>";
     echo "</form>";
@@ -164,7 +164,7 @@ if (mysql_num_rows($res) > 0) {
     $filename = $pupe_root_polku."/dataout/materialmaster_".md5(uniqid()).".xml";
 
     if (file_put_contents($filename, utf8_encode($xml->asXML()))) {
-      echo "<br /><font class='message'>",t("Tiedoston luonti onnistui"),"</font><br />";
+      echo "<br /><font class='message'>", t("Tiedoston luonti onnistui"), "</font><br />";
 
       $ftphost = $ftp_posten_logistik_host;
       $ftpuser = $ftp_posten_logistik_user;
@@ -172,15 +172,15 @@ if (mysql_num_rows($res) > 0) {
       $ftppath = $ftp_posten_logistik_path;
       $ftpfile = realpath($filename);
 
-      require ("inc/ftp-send.inc");
+      require "inc/ftp-send.inc";
     }
     else {
-      echo "<br /><font class='error'>",t("Tiedoston luonti ep‰onnistui"),"</font><br />";
+      echo "<br /><font class='error'>", t("Tiedoston luonti ep‰onnistui"), "</font><br />";
     }
   }
 }
 else {
-  echo "<font class='message'>",t("Kaikki tuotteet ovat synkronoitu"),"</font><br />";
+  echo "<font class='message'>", t("Kaikki tuotteet ovat synkronoitu"), "</font><br />";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

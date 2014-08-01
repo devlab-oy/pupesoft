@@ -64,7 +64,7 @@ $laskurow = mysql_fetch_assoc($aresult);
 
 $vientikurssi = 1;
 
-if (!in_array($laskurow["vienti_kurssi"], array(1,0))) {
+if (!in_array($laskurow["vienti_kurssi"], array(1, 0))) {
   $vientikurssi = $laskurow["vienti_kurssi"];
 }
 
@@ -135,7 +135,7 @@ if (trim($laskurow['laskutus_nimi']) == '') {
   $laskurow['laskutus_maa']     = $laskurow['maa'];
 }
 
-echo "<td>$laskurow[laskutus_nimi] $laskurow[laskutus_nimitark]<br>$laskurow[laskutus_osoite]<br>$laskurow[laskutus_postino] $laskurow[laskutus_postitp]<br>",maa($laskurow['laskutus_maa']),"</td>";
+echo "<td>$laskurow[laskutus_nimi] $laskurow[laskutus_nimitark]<br>$laskurow[laskutus_osoite]<br>$laskurow[laskutus_postino] $laskurow[laskutus_postitp]<br>", maa($laskurow['laskutus_maa']), "</td>";
 
 if ($laskurow["tila"] == "O") {
   echo "<td>$laskurow[rahti_etu]</td>";
@@ -166,10 +166,10 @@ $alatila   = $laskurow["alatila"];
 
 //tehdään selväkielinen tila/alatila
 if ($kukarow["extranet"] != '') {
-  require ("laskutyyppi.inc");
+  require "laskutyyppi.inc";
 }
 else {
-  require ("inc/laskutyyppi.inc");
+  require "inc/laskutyyppi.inc";
 }
 
 if ($laskurow["vienti"] == "K") {
@@ -251,11 +251,11 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
   if (isset($dpdss[$kukarow['yhtio']]))  $dpdss  = $dpdss[$kukarow['yhtio']];
   else $dpdss = "";
 
-  $possi = strpos(strtoupper($laskurow['toimitustapa']),"DPD");
+  $possi = strpos(strtoupper($laskurow['toimitustapa']), "DPD");
 
   if (isset($rakirrow)) {
     // postin rahtikirjat alkaa JJFI, ja tehdään niille linkki suoraan postin seurantaan
-    if (stripos($rakirrow['rahtikirjanro'],"JJFI") !== FALSE) {
+    if (stripos($rakirrow['rahtikirjanro'], "JJFI") !== FALSE) {
       $linkurl = "";
 
       preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $rakirrow['rahtikirjanro'], $match);
@@ -265,7 +265,7 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
         $linkurl .= "<a target=newikkuna href='http://www.itella.fi/itemtracking/itella/search_by_shipment_id?ShipmentId={$nro}'>{$nro}</a><br>";
       }
 
-      $linkurl = substr($linkurl,0,-4); // vika br pois
+      $linkurl = substr($linkurl, 0, -4); // vika br pois
     }
     //luodaan ups seurantalinkki
     elseif (stripos($rakirrow['rahtikirjanro'], 'UPS') !== FALSE) {
@@ -277,7 +277,7 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
         $linkurl .= "<a target=newikkuna href='http://wwwapps.ups.com/etracking/tracking.cgi?InquiryNumber1={$nro}&TypeOfInquiryNumber=T&AcceptUPSLicenseAgreement=yes&submit=Trac&loc=".strtolower($kukarow["kieli"])."_".strtoupper($kukarow["kieli"])."'>{$nro}</a><br>";
       }
 
-      $linkurl = substr($linkurl,0,-4); // vika br pois
+      $linkurl = substr($linkurl, 0, -4); // vika br pois
     }
     //luodaan dpd seurantalinkk
     elseif ($possi !== FALSE and $rakirrow['rahtikirjanro'] != '' and $dpdtun != '' and $dpdss != '') {
@@ -312,12 +312,12 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
         $loppu = tarkiste($sscc);
         $sscc = $sscc.$loppu;
 
-        #$linkurl .= "<a target=newikkuna href='http://extranet.dpd.de/cgi-bin/delistrack.acl?typ=4&model=web_login.gws&username=$dpdtun&password=$dpdss&pknr=$sscc'>$sscc</a><br>";
+        //$linkurl .= "<a target=newikkuna href='http://extranet.dpd.de/cgi-bin/delistrack.acl?typ=4&model=web_login.gws&username=$dpdtun&password=$dpdss&pknr=$sscc'>$sscc</a><br>";
         $linkurl .= "<a target=newikkuna href='http://$dpdtun:$dpdss@tracking.dpd.de/cgi-bin/delistrack.acl?typ=4&pknr=$sscc'>$sscc</a><br>";
 
       }
 
-      $linkurl = substr($linkurl,0,-4); // vika br pois
+      $linkurl = substr($linkurl, 0, -4); // vika br pois
 
     }
     else {
@@ -446,11 +446,11 @@ if ($laskurow['tilaustyyppi'] == 'R' or $laskurow['tilaustyyppi'] == 'T' or $las
   $reklarow = mysql_fetch_assoc($reklaresult);
 
   if (trim($reklarow['komm1']) != '') {
-    $komm .= "\n".t("Työn kuvaus").":###".wordwrap(str_replace("\n","\n###", $reklarow['komm1']), 90, "\n###");
+    $komm .= "\n".t("Työn kuvaus").":###".wordwrap(str_replace("\n", "\n###", $reklarow['komm1']), 90, "\n###");
   }
 
   if (trim($reklarow['komm2']) != '') {
-    $komm .= "\n".t("Sisäiset kommentit").":###".wordwrap(str_replace("\n","\n###", $reklarow['komm2']), 90, "\n###");
+    $komm .= "\n".t("Sisäiset kommentit").":###".wordwrap(str_replace("\n", "\n###", $reklarow['komm2']), 90, "\n###");
   }
 }
 
@@ -458,7 +458,7 @@ if ($verkkokauppa != "" and $muokkaa != "") {
   $komm .= "\n".t("Kommentti")." 1:###<textarea name='comments' cols = '60' rows = '3'>".str_replace(array("\r\n", "\r", "\n"), " ", $laskurow["comments"])."</textarea>";
 }
 elseif (trim($laskurow['comments']) != '') {
-  $komm .= "\n".t("Kommentti")." 1:###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");
+  $komm .= "\n".t("Kommentti")." 1:###".wordwrap(str_replace("\n", "\n###", $laskurow['comments']), 90, "\n###");
 }
 
 if ($laskurow["sisviesti2"] != "" and $kukarow["extranet"] == "") {
@@ -477,16 +477,16 @@ if ($laskurow["sisviesti2"] != "" and $kukarow["extranet"] == "") {
     }
   }
 
-  if (!$pregit) $komm .= "\n".t("Kommentti")." 2:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti2']), 90, "\n###");
+  if (!$pregit) $komm .= "\n".t("Kommentti")." 2:###".wordwrap(str_replace("\n", "\n###", $laskurow['sisviesti2']), 90, "\n###");
   else $komm .= "\n".t("Kommentti")." 2:###".$laskurow["sisviesti2"];
 }
 
 if ($laskurow["sisviesti1"] != "") {
-  $komm .= "\n".t("Kommentti")." 3:###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti1']), 90, "\n###");
+  $komm .= "\n".t("Kommentti")." 3:###".wordwrap(str_replace("\n", "\n###", $laskurow['sisviesti1']), 90, "\n###");
 }
 
 if ($laskurow["sisviesti3"] != "" and $kukarow["extranet"] == "") {
-  $komm .= "\n".t("Sisäinen viesti").":###".wordwrap(str_replace("\n","\n###", $laskurow['sisviesti3']), 90, "\n###");
+  $komm .= "\n".t("Sisäinen viesti").":###".wordwrap(str_replace("\n", "\n###", $laskurow['sisviesti3']), 90, "\n###");
 }
 
 if ($laskurow["noutaja"] != '') {
@@ -496,7 +496,7 @@ if ($laskurow["noutaja"] != '') {
 if ($komm != "") {
   $kommentit = explode("\n", trim($komm));
 
-  foreach($kommentit as $kommentti) {
+  foreach ($kommentit as $kommentti) {
 
     list($o, $v) = explode("###", $kommentti);
 
@@ -707,7 +707,7 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
     echo "</tr>";
 
     //Haetaan sarjanumeron tiedot
-    if ($prow["maara"] + $prow["varattu"] > 0){
+    if ($prow["maara"] + $prow["varattu"] > 0) {
       $sarjanutunnus = "ostorivitunnus";
     }
     else {
@@ -724,7 +724,7 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
 
     $prow["kommentti"] = str_replace("\n", "<br>", trim($prow["kommentti"]));
 
-    if ($prow["kommentti"] != '' and mysql_num_rows($sarjares) > 0){
+    if ($prow["kommentti"] != '' and mysql_num_rows($sarjares) > 0) {
       $prow["kommentti"] .= "<br>";
     }
 
@@ -754,7 +754,7 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
     }
   }
 
-  foreach($summa as $val => $sum) {
+  foreach ($summa as $val => $sum) {
     echo "<tr><td class='back' colspan='8'></td><td class='spec' colspan='2' align='right'>".t("Yhteensä").":</td><td class='spec' align='right'>".hintapyoristys($sum)." $val</td></tr>";
   }
 
@@ -988,7 +988,7 @@ else {
 
     //Haetaan sarjanumeron tiedot
     if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
-      if ($row["määrä"] + $row["varattu"] > 0){
+      if ($row["määrä"] + $row["varattu"] > 0) {
         $sarjanutunnus = "ostorivitunnus";
       }
       else {
@@ -1023,7 +1023,7 @@ else {
 
     $row["kommentti"] = str_replace("\n", "<br>", trim($row["kommentti"]));
 
-    if ($row["sarjanumeroseuranta"] != ''){
+    if ($row["sarjanumeroseuranta"] != '') {
       if ($row["kommentti"] != '') {
         $row["kommentti"] .= "<br>";
       }
@@ -1216,7 +1216,7 @@ else {
         //annetaan valita tilausrivin tyyppi
         mysql_data_seek($trivityyppi_result, 0);
 
-        while($trrow = mysql_fetch_assoc($trivityyppi_result)) {
+        while ($trrow = mysql_fetch_assoc($trivityyppi_result)) {
           $sel = "";
           if ($trrow["selite"]==$row["positio"]) echo "$trrow[selitetark]";
         }
@@ -1251,15 +1251,15 @@ else {
         echo "<td $class align='left' valign='top'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]";
       }
 
-      if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and !in_array($row["var"], array('P','J','S','T','U'))) {
-           $query = "SELECT sarjanumeroseuranta.sarjanumero era, sarjanumeroseuranta.parasta_ennen
-                     FROM sarjanumeroseuranta
-                     WHERE yhtio          = '$kukarow[yhtio]'
-                     and tuoteno          = '$row[tuoteno]'
-                     and myyntirivitunnus = '$row[tunnus]'
-                     LIMIT 1";
-           $sarjares = pupe_query($query);
-           $sarjarow = mysql_fetch_assoc($sarjares);
+      if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and !in_array($row["var"], array('P', 'J', 'S', 'T', 'U'))) {
+        $query = "SELECT sarjanumeroseuranta.sarjanumero era, sarjanumeroseuranta.parasta_ennen
+                  FROM sarjanumeroseuranta
+                  WHERE yhtio          = '$kukarow[yhtio]'
+                  and tuoteno          = '$row[tuoteno]'
+                  and myyntirivitunnus = '$row[tunnus]'
+                  LIMIT 1";
+        $sarjares = pupe_query($query);
+        $sarjarow = mysql_fetch_assoc($sarjares);
 
         echo ", $sarjarow[era]";
 
@@ -1414,7 +1414,7 @@ else {
 
           // Kate = Hinta - Ostohinta
           if ($row["rivihinta"] != 0) {
-            $kate = sprintf('%.2f',100*($row["rivihinta"] - ($ostohinta * $kpl))/$row["rivihinta"])."%";
+            $kate = sprintf('%.2f', 100*($row["rivihinta"] - ($ostohinta * $kpl))/$row["rivihinta"])."%";
           }
 
           if ($row["tyyppi"] != "V" and $row["tuoteno"] != $yhtiorow["ennakkomaksu_tuotenumero"]) $kate_yht += ($row["rivihinta"] - ($ostohinta * $kpl));
@@ -1437,7 +1437,7 @@ else {
 
           $ostohinta = 0;
 
-          while($sarjarow = mysql_fetch_assoc($sarjares)) {
+          while ($sarjarow = mysql_fetch_assoc($sarjares)) {
 
             // Haetaan hyvitettävien myyntirivien kautta alkuperäiset ostorivit
             $query = "SELECT tilausrivi.rivihinta/tilausrivi.kpl ostohinta
@@ -1459,7 +1459,7 @@ else {
 
           // Kate = Hinta - Alkuperäinen ostohinta
           if ($row["rivihinta"] != 0) {
-            $kate = sprintf('%.2f',100 * ($row["rivihinta"]*-1 - $ostohinta)/$row["rivihinta"])."%";
+            $kate = sprintf('%.2f', 100 * ($row["rivihinta"]*-1 - $ostohinta)/$row["rivihinta"])."%";
           }
           else {
             $kate = "100.00%";
@@ -1477,7 +1477,7 @@ else {
           $kate = "";
         }
         elseif ($row["rivihinta"] != 0) {
-          $kate = sprintf('%.2f',100*($row["rivihinta"] - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"]+$row['määrä'])))/$row["rivihinta"])."%";
+          $kate = sprintf('%.2f', 100*($row["rivihinta"] - (kehahin($row["tuoteno"])*($row["varattu"]+$row["jt"]+$row['määrä'])))/$row["rivihinta"])."%";
         }
         elseif (kehahin($row["tuoteno"]) != 0) {
           $kate = "-100.00%";
@@ -1513,7 +1513,7 @@ else {
         echo "<td style='text-align:right;'>".t("Saldoton")."</td>";
 
         if ($naytetaan_valmistuslinja) {
-          $linjannimi = t_avainsana("VALMISTUSLINJA",''," and avainsana.selite='{$row["valmistuslinja"]}'",'','',"selitetark");
+          $linjannimi = t_avainsana("VALMISTUSLINJA", '', " and avainsana.selite='{$row["valmistuslinja"]}'", '', '', "selitetark");
           if ($linjannimi == "") $linjannimi = t("Ei Linjaa");
           echo "<td>{$linjannimi}</td>";
         }
@@ -1542,7 +1542,7 @@ else {
         }
 
         if ($naytetaan_valmistuslinja) {
-          $linjannimi = t_avainsana("VALMISTUSLINJA",''," and avainsana.selite='{$row["valmistuslinja"]}'",'','',"selitetark");
+          $linjannimi = t_avainsana("VALMISTUSLINJA", '', " and avainsana.selite='{$row["valmistuslinja"]}'", '', '', "selitetark");
           if ($linjannimi == "") $linjannimi = t("Ei Linjaa");
           echo "<td>{$linjannimi}</td>";
         }
@@ -1640,7 +1640,7 @@ else {
 
     $colspan += $yhtiorow['myynnin_alekentat'] - 1;
 
-    echo "<tr><td class='back' colspan='$colspan'></td><td class='spec' colspan='3' align='right' nowrap>".t("Veroton yhteensä").":</td><td class='spec' align='right'>".sprintf('%.2f',$arvo_yht)."</td><td class='spec'>$laskurow[valkoodi]</td></tr>";
+    echo "<tr><td class='back' colspan='$colspan'></td><td class='spec' colspan='3' align='right' nowrap>".t("Veroton yhteensä").":</td><td class='spec' align='right'>".sprintf('%.2f', $arvo_yht)."</td><td class='spec'>$laskurow[valkoodi]</td></tr>";
 
 
     // Haetaan kaikki alvikannat riveiltä
@@ -1699,10 +1699,10 @@ else {
         $alvi = ($alvrow["alv"]*1)."%";
       }
 
-      echo "<tr><td class='back' colspan='$colspan'></td><td class='spec' colspan='3' align='right' nowrap>".t("Arvonlisävero", $kieli)." (".sprintf('%.2f',$arow["rivihinta"])."):</td><td align='right' class='spec' nowrap>".sprintf('%.2f', $arow["alvrivihinta"])."</td><td class='spec'>$alvi</td></tr>";
+      echo "<tr><td class='back' colspan='$colspan'></td><td class='spec' colspan='3' align='right' nowrap>".t("Arvonlisävero", $kieli)." (".sprintf('%.2f', $arow["rivihinta"])."):</td><td align='right' class='spec' nowrap>".sprintf('%.2f', $arow["alvrivihinta"])."</td><td class='spec'>$alvi</td></tr>";
     }
 
-    echo "<tr><td class='back' colspan='$colspan'></td><td class='spec' colspan='3' align='right' nowrap>".t("Verollinen yhteensä").":</td><td class='spec' align='right' nowrap>".sprintf('%.2f',$summa_yht)."</td><td class='spec'>$laskurow[valkoodi]</td></tr>";
+    echo "<tr><td class='back' colspan='$colspan'></td><td class='spec' colspan='3' align='right' nowrap>".t("Verollinen yhteensä").":</td><td class='spec' align='right' nowrap>".sprintf('%.2f', $summa_yht)."</td><td class='spec'>$laskurow[valkoodi]</td></tr>";
 
     if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and $yhtiorow["naytetaan_katteet_tilauksella"] == "Y"))) {
 
@@ -1713,12 +1713,12 @@ else {
         $ykate = @round(abs($kate_yht / $rihin_yht * 100), 2);
       }
 
-      echo "<tr><td class='back' colspan='$colspan'></td><td class='spec' colspan='3' align='right' nowrap>".t("Kate yhteensä").":</td><td class='spec' align='right' nowrap>".sprintf('%.2f',$ykate)."</td><td class='spec'>%</td></tr>";
+      echo "<tr><td class='back' colspan='$colspan'></td><td class='spec' colspan='3' align='right' nowrap>".t("Kate yhteensä").":</td><td class='spec' align='right' nowrap>".sprintf('%.2f', $ykate)."</td><td class='spec'>%</td></tr>";
     }
 
     if ($ennaa_yht != 0) {
       echo "<tr><td class='back'><br></td></tr>";
-      echo "<tr><td class='back' colspan='$colspan'></td><td class='spec' colspan='3' align='right' nowrap>".t("Ennakkolaskutus").":</td><td class='spec' align='right' nowrap>".sprintf('%.2f',$ennaa_yht)."</td><td class='spec'>$laskurow[valkoodi]</td></tr>";
+      echo "<tr><td class='back' colspan='$colspan'></td><td class='spec' colspan='3' align='right' nowrap>".t("Ennakkolaskutus").":</td><td class='spec' align='right' nowrap>".sprintf('%.2f', $ennaa_yht)."</td><td class='spec'>$laskurow[valkoodi]</td></tr>";
 
       //Haetaan kaikki alvikannat riveiltä
       $alvquery = "SELECT distinct alv
@@ -1774,10 +1774,10 @@ else {
           $alvi = ($alvrow["alv"]*1)."%";
         }
 
-        echo "<tr><td class='back' colspan='$colspan'></td><td class='spec' colspan='3' align='right' nowrap>".t("Arvonlisävero", $kieli)." (".sprintf('%.2f',$arow["rivihinta"])."):</td><td align='right' class='spec' nowrap>".sprintf('%.2f', $arow["alvrivihinta"])."</td><td class='spec'>$alvi</td></tr>";
+        echo "<tr><td class='back' colspan='$colspan'></td><td class='spec' colspan='3' align='right' nowrap>".t("Arvonlisävero", $kieli)." (".sprintf('%.2f', $arow["rivihinta"])."):</td><td align='right' class='spec' nowrap>".sprintf('%.2f', $arow["alvrivihinta"])."</td><td class='spec'>$alvi</td></tr>";
       }
 
-      echo "<tr><td class='back' colspan='$colspan'></td><td class='spec' colspan='3' align='right' nowrap>".t("Yhteensä").":</td><td align='right' class='spec' nowrap>".sprintf('%.2f',$ennas_yht)."</td><td class='spec'>$laskurow[valkoodi]</td></tr>";
+      echo "<tr><td class='back' colspan='$colspan'></td><td class='spec' colspan='3' align='right' nowrap>".t("Yhteensä").":</td><td align='right' class='spec' nowrap>".sprintf('%.2f', $ennas_yht)."</td><td class='spec'>$laskurow[valkoodi]</td></tr>";
     }
   }
 
@@ -1910,10 +1910,10 @@ if ($tee != "NAYTA") {
           <td align='right'>$maksusoprow[summa]</td>
           <td align='center'>$maksusoprow[laskunro]</td>
           <td align='center'>$maksusoprow[tapvm] ";
-          if ($maksusoprow["tapvm"] != '') {
-            echo "($maksusoprow[summa] $yhtiorow[valkoodi] / $maksusoprow[summa_valuutassa] $maksusoprow[valkoodi])";
-          }
-          echo "</td>
+      if ($maksusoprow["tapvm"] != '') {
+        echo "($maksusoprow[summa] $yhtiorow[valkoodi] / $maksusoprow[summa_valuutassa] $maksusoprow[valkoodi])";
+      }
+      echo "</td>
           <td align='center'>$maksusoprow[erpcm]</td>
           <td align='center'>$maksusoprow[mapvm]</td>
         </tr>";
@@ -1939,7 +1939,7 @@ if ($tee != "NAYTA") {
       echo "<table>";
       echo "<tr>";
       for ($i=0; $i < mysql_num_fields($result)-2; $i++) {
-        echo "<th align='left'>".t(mysql_field_name($result,$i))."</th>";
+        echo "<th align='left'>".t(mysql_field_name($result, $i))."</th>";
       }
       echo "<th align='left'>".t("Tyyppi")."</th>";
       echo "</tr>";

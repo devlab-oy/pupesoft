@@ -1,11 +1,11 @@
 <?php
 
-require("../inc/parametrit.inc");
-require('validation/Validation.php');
-require('valmistuslinjat.inc');
+require "../inc/parametrit.inc";
+require 'validation/Validation.php';
+require 'valmistuslinjat.inc';
 
 if (isset($tee) and $tee == "TILAA_AJAX") {
-  require_once("inc/tilaa_ajax.inc");
+  require_once "inc/tilaa_ajax.inc";
 }
 
 if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] != 'U') {
@@ -108,13 +108,13 @@ else {
 if ($tee2 == 'NAYTATILAUS') {
 
   if ($logistiikka_yhtio != '' and $konsernivarasto_yhtiot != '') {
-    echo "<font class='head'>",t("Yhtiön")," $yhtiorow[nimi] ",t("tilaus")," $tunnus:</font><hr>";
+    echo "<font class='head'>", t("Yhtiön"), " $yhtiorow[nimi] ", t("tilaus"), " $tunnus:</font><hr>";
   }
   else {
     echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
   }
 
-  require ("raportit/naytatilaus.inc");
+  require "raportit/naytatilaus.inc";
   echo "<br><br><br>";
   $tee2 = $vanha_tee2;
 
@@ -183,7 +183,7 @@ if ($tee2 == 'TULOSTA') {
     }
 
     //tulostettavat tilausket
-    $tilausnumerorypas[] = substr($laskut,0,-1);
+    $tilausnumerorypas[] = substr($laskut, 0, -1);
     //ja niiden lukumäärä
     $laskuja = $lask;
   }
@@ -255,7 +255,7 @@ if ($tee2 == 'TULOSTA') {
               else $toim = "SIIRTOLISTA";
             }
 
-            require("tilaus-valmis-siirtolista.inc");
+            require "tilaus-valmis-siirtolista.inc";
 
             $toim      = $toim_bck;
           }
@@ -265,7 +265,7 @@ if ($tee2 == 'TULOSTA') {
             $toim_bck    = $toim;
             $toim       = "VALMISTAVARASTOON";
 
-            require("tilaus-valmis-siirtolista.inc");
+            require "tilaus-valmis-siirtolista.inc";
 
             $toim       = $toim_bck;
           }
@@ -277,7 +277,7 @@ if ($tee2 == 'TULOSTA') {
             $tyyppi     = "REKLAMAATIO";
             if ($toim == "KAIKKILISTAT") $toim = "VASTAANOTA_REKLAMAATIO";
 
-            require("tilaus-valmis-tulostus.inc");
+            require "tilaus-valmis-tulostus.inc";
 
             $toim = $toim_bck;
           }
@@ -285,7 +285,7 @@ if ($tee2 == 'TULOSTA') {
             $toim_bck    = $toim;
             if ($toim == "KAIKKILISTAT") $toim = "";
 
-            require("tilaus-valmis-tulostus.inc");
+            require "tilaus-valmis-tulostus.inc";
 
             $toim = $toim_bck;
           }
@@ -384,7 +384,7 @@ if ($tee2 == 'VALITSE') {
       echo "<table>";
       echo "<tr>";
       if ($logistiikka_yhtio != '') {
-        echo "<th>",t("Yhtiö"),"</th>";
+        echo "<th>", t("Yhtiö"), "</th>";
       }
       echo "<th>".t("Pri")."<br>".t("Varastoon")."</th>";
       echo "<th>".t("Tilaus")."</th>";
@@ -507,7 +507,7 @@ if ($tee2 == 'VALITSE') {
       if ($yhtiorow["pakkaamolokerot"] != "") {
 
         echo "<tr>";
-        echo "<th>",t("Ei lokeroa"),"</th>";
+        echo "<th>", t("Ei lokeroa"), "</th>";
 
         $ei_pakkaamoa_sel = '';
 
@@ -552,10 +552,10 @@ if ($tee2 == 'VALITSE') {
       $varasto = $tul_varastoon;
       $tilaus  = $tilaukset;
 
-      require("varaston_tulostusalue.inc");
+      require "varaston_tulostusalue.inc";
 
       echo "<tr>";
-      echo "<th>",t("Tulostin"),"</th>";
+      echo "<th>", t("Tulostin"), "</th>";
       echo "<td>";
 
       $query = "SELECT *
@@ -646,7 +646,7 @@ if ($tee2 == '') {
     $valid = true;
     $haku .= " and lasku.kerayspvm<=date_add(now(), INTERVAL $karajaus day)";
   }
-  elseif($vva != '' and $kka != '' and $ppa != '' and $vvl != '' and $kkl != '' and $ppl != '') {
+  elseif ($vva != '' and $kka != '' and $ppa != '' and $vvl != '' and $kkl != '' and $ppl != '') {
     $valid = true;
     $alku_paiva = "{$vva}-{$kka}-{$ppa}";
     $loppu_paiva = "{$vvl}-{$kkl}-{$ppl}";
@@ -674,8 +674,8 @@ if ($tee2 == '') {
   }
 
   if ($tuvarasto != '' and $tuvarasto != 'KAIKKI') {
-    if (strpos($tuvarasto,"##")) {
-      $temp_tuvarasto = explode("##",$tuvarasto);
+    if (strpos($tuvarasto, "##")) {
+      $temp_tuvarasto = explode("##", $tuvarasto);
       $haku .= " and lasku.varasto='$temp_tuvarasto[0]' and lasku.tulostusalue = '$temp_tuvarasto[1]'";
     }
     else {
@@ -744,7 +744,7 @@ if ($tee2 == '') {
   $sel = array();
   $sel[$tuvarasto] = "SELECTED";
 
-  while ($row = mysql_fetch_array($result)){
+  while ($row = mysql_fetch_array($result)) {
 
     if ($row['tulostusalue'] != '') {
       echo "<option value='$row[tunnus]##$row[tulostusalue]' ".$sel[$row['tunnus']."##".$row['tulostusalue']].">$row[nimitys] $row[tulostusalue] ($row[kpl])";
@@ -775,7 +775,7 @@ if ($tee2 == '') {
 
     $sel=array();
     $sel[$tumaa] = "selected";
-    while ($row = mysql_fetch_array($result)){
+    while ($row = mysql_fetch_array($result)) {
       echo "<option value='$row[maa]' ".$sel[$row['maa']].">$row[maa] ($row[kpl])</option>";
     }
     echo "</select>";
@@ -793,7 +793,7 @@ if ($tee2 == '') {
             ORDER by clearing";
   $result = pupe_query($query);
 
-  echo "<option value='KAIKKI'>",t("Näytä kaikki"),"</option>";
+  echo "<option value='KAIKKI'>", t("Näytä kaikki"), "</option>";
 
   if (mysql_num_rows($result) > 0) {
 
@@ -802,16 +802,16 @@ if ($tee2 == '') {
     while ($row = mysql_fetch_assoc($result)) {
 
       if ($row["clearing"] == "") {
-        echo "<option value='NORMAA' {$sel['NORMAA']}>",t("Näytä normaalitilaukset")," ({$row['kpl']})</option>";
+        echo "<option value='NORMAA' {$sel['NORMAA']}>", t("Näytä normaalitilaukset"), " ({$row['kpl']})</option>";
       }
-       elseif ($row["clearing"] == "ENNAKKOTILAUS") {
-        echo "<option value='ENNAKK' {$sel['ENNAKK']}>",t("Näytä ennakkotilaukset")," ({$row['kpl']})</option>";
+      elseif ($row["clearing"] == "ENNAKKOTILAUS") {
+        echo "<option value='ENNAKK' {$sel['ENNAKK']}>", t("Näytä ennakkotilaukset"), " ({$row['kpl']})</option>";
       }
-       elseif ($row["clearing"] == "JT-TILAUS") {
-        echo "<option value='JTTILA' {$sel['JTTILA']}>",t("Näytä jt-tilaukset")," ({$row['kpl']})</option>";
+      elseif ($row["clearing"] == "JT-TILAUS") {
+        echo "<option value='JTTILA' {$sel['JTTILA']}>", t("Näytä jt-tilaukset"), " ({$row['kpl']})</option>";
       }
       elseif ($row['clearing'] == 'VALMISTUS') {
-        echo "<option value='VALMISTUS' {$sel['VALMISTUS']}>",t("Näytä jt-tilaukset valmistuksesta")," ({$row['kpl']})</option>";
+        echo "<option value='VALMISTUS' {$sel['VALMISTUS']}>", t("Näytä jt-tilaukset valmistuksesta"), " ({$row['kpl']})</option>";
       }
     }
   }
@@ -835,7 +835,7 @@ if ($tee2 == '') {
 
   $sel=array();
   $sel[$tutoimtapa] = "selected";
-  while ($row = mysql_fetch_array($result)){
+  while ($row = mysql_fetch_array($result)) {
     echo "<option value='$row[selite]' ".$sel[$row["selite"]].">".t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV")." ($row[kpl])</option>";
   }
 
@@ -1080,7 +1080,7 @@ if ($tee2 == '') {
 
       echo "</$ero>";
 
-      echo "<$ero valign='top'>".str_replace(',','<br>',$tilrow["otunnus"])."</$ero>";
+      echo "<$ero valign='top'>".str_replace(',', '<br>', $tilrow["otunnus"])."</$ero>";
       echo "<$ero valign='top'>$tilrow[ytunnus]";
 
       if ($toim == 'SIIRTOLISTA' or $toim == 'SIIRTOTYOMAARAYS') {
@@ -1168,7 +1168,7 @@ if ($tee2 == '') {
         $varasto = $tilrow["varasto"];
         $tilaus  = $tilrow["otunnus"];
 
-        require("varaston_tulostusalue.inc");
+        require "varaston_tulostusalue.inc";
 
         echo "<form method='post'>";
 
@@ -1356,4 +1356,4 @@ if ($tee2 == '') {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

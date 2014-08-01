@@ -4,11 +4,11 @@ if ($_REQUEST['malli'] == 'PDF24' or $_REQUEST['malli'] == 'PDF40') {
   $nayta_pdf = 1;
 }
 
-require("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 //$toim='YKS' tarkottaa yksinkertainen ja silloin ei välitetä onko tuotteella eankoodia vaan tulostetaan suoraan tuoteno viivakoodiin
 
-if (!isset($nayta_pdf)) echo "<font class='head'>",t("Tulosta tuotetarroja"),"</font><hr>";
+if (!isset($nayta_pdf)) echo "<font class='head'>", t("Tulosta tuotetarroja"), "</font><hr>";
 
 if (!isset($toim)) $toim = '';
 if (!isset($tuoteno)) $tuoteno = '';
@@ -48,7 +48,7 @@ if ($tee == 'H') {
 
   $lisa = "";
 
-  if ($saldo == '1'){
+  if ($saldo == '1') {
     $lisa = " AND saldo > 0  ";
   }
 
@@ -78,19 +78,19 @@ if ($tee == 'Z') {
 }
 
 if ($ulos != "") {
-    $formi = 'hakua';
-    echo "<form method='post' name='$formi' autocomplete='off'>";
-    echo "<input type='hidden' name='tee' value='Z'>";
-    echo "<input type='hidden' name='tulostakappale' value='$tulostakappale'>";
-    echo "<input type='hidden' name='kirjoitin' value='$kirjoitin'>";
-    echo "<input type='hidden' name='toim' value='$toim'>";
-    echo "<input type='hidden' name='malli' value='$malli'>";
-    echo "<table><tr>";
-    echo "<td>".t("Valitse listasta").":</td>";
-    echo "<td>$ulos</td>";
-    echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></td>";
-    echo "</tr></table>";
-    echo "</form>";
+  $formi = 'hakua';
+  echo "<form method='post' name='$formi' autocomplete='off'>";
+  echo "<input type='hidden' name='tee' value='Z'>";
+  echo "<input type='hidden' name='tulostakappale' value='$tulostakappale'>";
+  echo "<input type='hidden' name='kirjoitin' value='$kirjoitin'>";
+  echo "<input type='hidden' name='toim' value='$toim'>";
+  echo "<input type='hidden' name='malli' value='$malli'>";
+  echo "<table><tr>";
+  echo "<td>".t("Valitse listasta").":</td>";
+  echo "<td>$ulos</td>";
+  echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></td>";
+  echo "</tr></table>";
+  echo "</form>";
 }
 
 if ($tee != 'H') {
@@ -139,7 +139,7 @@ if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
       $tuotteet[$tuoteno] = $tuoteno;
     }
 
-    require_once("pdflib/phppdflib.class.php");
+    require_once "pdflib/phppdflib.class.php";
 
     if ($malli == 'PDF24' or $malli == 'PDF40') {
       //PDF parametrit
@@ -156,18 +156,18 @@ if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
       if ($malli != 'Zebra' and $malli != 'Zebra_hylly' and $malli != 'Zebra_tuote') {
         for ($a = 0; $a < $tkpl; $a++) {
           if ($malli == 'Tec') {
-            require("inc/tulosta_tuotetarrat_tec.inc");
+            require "inc/tulosta_tuotetarrat_tec.inc";
           }
           elseif ($malli == 'Intermec') {
-            require("inc/tulosta_tuotetarrat_intermec.inc");
+            require "inc/tulosta_tuotetarrat_intermec.inc";
           }
           elseif ($malli == 'PDF24' or $malli == 'PDF40') {
-            require("inc/tulosta_tuotetarrat_pdf.inc");
+            require "inc/tulosta_tuotetarrat_pdf.inc";
           }
         }
       }
       else {
-        require("inc/tulosta_tuotetarrat_zebra.inc");
+        require "inc/tulosta_tuotetarrat_zebra.inc";
       }
     }
 
@@ -267,7 +267,7 @@ if (!isset($nayta_pdf)) {
   echo "</tr>";
   echo "</table>";
   echo "</form>";
-   // tästä alkaa toinen formi
+  // tästä alkaa toinen formi
   $sel = "";
   $lisa = "";
 
@@ -283,7 +283,7 @@ if (!isset($nayta_pdf)) {
   echo "<table>";
   echo "<tr><th colspan='2'><center>".t("Tulostetaan tuotetarrat hyllyjen väliltä")."</center></th><tr>";
   echo "<tr><th>".t("Alkuosoite")."</th>";
-  echo "<td>",hyllyalue("ahyllyalue", $ahyllyalue);
+  echo "<td>", hyllyalue("ahyllyalue", $ahyllyalue);
   echo "-";
   echo "<input type='text' name='ahyllynro' size='5' maxlength='5' value='$ahyllynro'>";
   echo "-";
@@ -292,7 +292,7 @@ if (!isset($nayta_pdf)) {
   echo "<input type='text' name='ahyllytaso' size='5' maxlength='5' value='$ahyllytaso'></td></tr>";
 
   echo "<tr><th>".t("Loppuosoite")."</th>";
-  echo "<td>",hyllyalue("lhyllyalue", $lhyllyalue);
+  echo "<td>", hyllyalue("lhyllyalue", $lhyllyalue);
   echo "-";
   echo "<input type='text' name='lhyllynro' size='5' maxlength='5' value='$lhyllynro'>";
   echo "-";
@@ -305,7 +305,7 @@ if (!isset($nayta_pdf)) {
   echo "<tr><th>".t("Kirjoitin")."</th><td><select name='kirjoitin'>";
   echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 
-  mysql_data_seek($kires,0);
+  mysql_data_seek($kires, 0);
 
   while ($kirow = mysql_fetch_array($kires)) {
     if ($kirow['tunnus'] == $kirjoitin) $select = 'SELECTED';
@@ -332,4 +332,4 @@ if (!isset($nayta_pdf)) {
   echo "</form>";
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

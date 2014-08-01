@@ -38,7 +38,7 @@ $jsres  = mysql_query($query) or pupe_error($query);
 $jtssa = "";
 $jtsum = 0;
 
-while($jsrow  = mysql_fetch_array($jsres)) {
+while ($jsrow  = mysql_fetch_array($jsres)) {
   $jtssa .= t("HUOM: Asiakkaalle")." $jsrow[ytunnus] ".t("on ennaltavarattu")." $jsrow[jt] ".t("kpl tätä tuotetta")."!<br>";
   $jtsum += $jsrow["jt"];
 }

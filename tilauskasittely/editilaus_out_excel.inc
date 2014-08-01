@@ -1,10 +1,10 @@
 <?php
 
-# Formaatti on:
-# toimittajanumero
-# tilausnumero
-# tuotekoodi
-# määrä
+// Formaatti on:
+// toimittajanumero
+// tilausnumero
+// tuotekoodi
+// määrä
 
 $query_ale_lisa = generoi_alekentta("O");
 
@@ -31,7 +31,7 @@ if (mysql_num_rows($result) == 0) {
 }
 else {
 
-  require_once('Spreadsheet/Excel/Writer.php');
+  require_once 'Spreadsheet/Excel/Writer.php';
 
   $excel_editilaus = $pupe_root_polku."/dataout/excel-order-$laskurow[tunnus].xls";
 
@@ -44,7 +44,7 @@ else {
   $boldi = $workbook->addFormat();
   $boldi->setBold();
 
-  $thispage->setColumn(1,2,25);
+  $thispage->setColumn(1, 2, 25);
 
   $excelrivi = 1;
   $thispage->writeString($excelrivi++,   1, trim($laskurow["toim_nimi"]." ".$laskurow["toim_nimitark"]), $boldi);

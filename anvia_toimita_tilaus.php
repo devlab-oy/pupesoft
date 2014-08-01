@@ -1,9 +1,9 @@
 <?php
-# Otetaan sisään:
-# $anvia_api_met = Toimitustapa
-# $anvia_api_rak = Rahtikirjanro
-# $anvia_api_ord = Asiakkaan_tilausnumero
-# $anvia_api_til = Pupen tilausnumero
+// Otetaan sisään:
+// $anvia_api_met = Toimitustapa
+// $anvia_api_rak = Rahtikirjanro
+// $anvia_api_ord = Asiakkaan_tilausnumero
+// $anvia_api_til = Pupen tilausnumero
 
 $tiedoston_sijainti = "{$pupe_root_polku}/dataout/anvia_toimituskuittaus_".date("Y_m_d_Hi").".xml";
 

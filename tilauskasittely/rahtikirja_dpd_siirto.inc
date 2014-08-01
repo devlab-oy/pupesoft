@@ -70,7 +70,7 @@ if ($kollityht > 0) {
     $tilausnumerot = $tilausnumerot2 = "";
 
     // Laitetaan max 30 merkkiä tilausnumeroita välilyönnillä eroteltuna
-    foreach($lotsikot as $tilnum) {
+    foreach ($lotsikot as $tilnum) {
       if ((strlen($tilausnumerot) + strlen($tilnum) + 1) <= 30) {
         $tilausnumerot = "{$tilausnumerot} {$tilnum}";
       }
@@ -93,12 +93,12 @@ if ($kollityht > 0) {
     $laskures = mysql_query($query) or pupe_error($query);
     $laskurow = mysql_fetch_array($laskures);
 
-    for($i=0;$i<mysql_num_fields($laskures);$i++) {
+    for ($i=0;$i<mysql_num_fields($laskures);$i++) {
       $r = mysql_field_name($laskures, $i);
       $v = $laskurow[$i];
 
       //  Korvaavuksia ja näppäilyä
-      if($r=="asiakkaan_viite" and $v == "") {
+      if ($r=="asiakkaan_viite" and $v == "") {
         $v = $laskurow["viite"];
       }
 
@@ -113,7 +113,7 @@ if ($kollityht > 0) {
     $asres = mysql_query($query) or pupe_error($query);
     $asrow = mysql_fetch_array($asres);
 
-    for($i=0;$i<mysql_num_fields($asres);$i++) {
+    for ($i=0;$i<mysql_num_fields($asres);$i++) {
       $r = mysql_field_name($asres, $i);
       $v = $asrow[$i];
 
@@ -154,7 +154,7 @@ if ($kollityht > 0) {
     $koko_summa = 0;
 
     //  Luotamme vahvasti siihen, että meillä on rakir_res tallella.. Täältä tulee jotain hyödyllistä kumminkin..
-    for($i=0;$i<mysql_num_fields($rakir_res);$i++) {
+    for ($i=0;$i<mysql_num_fields($rakir_res);$i++) {
 
       $r = mysql_field_name($rakir_res, $i);
       $v = $rakir_row[$r];
@@ -208,7 +208,7 @@ if ($kollityht > 0) {
 
     if (mysql_num_rows($yhres) > 0) {
       $yhrow = mysql_fetch_array($yhres);
-      for($i=0;$i<mysql_num_fields($yhres);$i++) {
+      for ($i=0;$i<mysql_num_fields($yhres);$i++) {
         $r = mysql_field_name($yhres, $i);
         $v = $yhrow[$i];
 
@@ -220,26 +220,26 @@ if ($kollityht > 0) {
     $parcelOrder["kollit"] = $kollityht;
 
     //  Luodaan aineostoformaatti
-    if(!is_array($delisprintFileFormat)) {
+    if (!is_array($delisprintFileFormat)) {
 
-      ########## Uusi muokattu formaatti ##########
-      # Reference
-      # Reference 2
-      # Viite
-      # Vastaanottajan yhteyshenkilö
-      # Vastaanottajan nimi
-      # Vastaanottajan lähiosoite
-      # Vastaanottajan lähiosoite 2
-      # Vastaanottajan postinumero
-      # Vastaanottajan postitoimipaikka
-      # Vastaanottajan maa
-      # Vastaanottajan puhelinnumero
-      # Pakkausten määrä
-      # Lähetystapa
-      # Loppusumma jos jälkivaatimus, muuten ei mitään
-      # Valuutta jos jälkivaatimus, muuten ei mitään
-      # Jos maksuehto on jälkivaatimus, laitetaan t("Käteinen")
-      # Rahtikirjanro
+      //######### Uusi muokattu formaatti ##########
+      // Reference
+      // Reference 2
+      // Viite
+      // Vastaanottajan yhteyshenkilö
+      // Vastaanottajan nimi
+      // Vastaanottajan lähiosoite
+      // Vastaanottajan lähiosoite 2
+      // Vastaanottajan postinumero
+      // Vastaanottajan postitoimipaikka
+      // Vastaanottajan maa
+      // Vastaanottajan puhelinnumero
+      // Pakkausten määrä
+      // Lähetystapa
+      // Loppusumma jos jälkivaatimus, muuten ei mitään
+      // Valuutta jos jälkivaatimus, muuten ei mitään
+      // Jos maksuehto on jälkivaatimus, laitetaan t("Käteinen")
+      // Rahtikirjanro
       $delisprintFileFormat = array(
         "tilausnumero",
         "tilausnumero2",
@@ -263,7 +263,7 @@ if ($kollityht > 0) {
 
     unset($aineisto);
 
-    foreach($delisprintFileFormat as $p) {
+    foreach ($delisprintFileFormat as $p) {
       $aineisto .= $parcelOrder[$p].";";
 
       // tehdään ylimääräinen ; koska formaatissa on lähiosoite 2 mitä ei ole pupessa
@@ -275,14 +275,14 @@ if ($kollityht > 0) {
     // Muunnetaan merkistö Windows ANSI
     iconv("ISO-8859-1", "Windows-1252", $aineisto);
 
-    if (substr($dpd_ds_path,-1) != '/') {
+    if (substr($dpd_ds_path, -1) != '/') {
       $dpd_ds_path .= '/';
     }
 
     // Jos siirretään FTP:llä niin $dpd_ds_path on remote pathi ja jos ei siirretä niin $dpd_ds_path on local pathi
     if ($dpd_ds_host != "" and $dpd_ds_user != "" and $dpd_ds_pass != "" and $dpd_ds_path != "") {
 
-      $filenimi = "/tmp/dpdimport-".md5(uniqid(rand(),true)).".dat";
+      $filenimi = "/tmp/dpdimport-".md5(uniqid(rand(), true)).".dat";
 
       if (file_put_contents($filenimi, $aineisto) === FALSE) {
         echo "<br><font class='error'>".t("tiedoston kirjoitus EPÄONNISTUI")."</font><br>";
@@ -296,11 +296,11 @@ if ($kollityht > 0) {
       $ftppath = (trim($toitarow['lajittelupiste']) != '') ? $dpd_ds_path . trim($toitarow['lajittelupiste']) . "/" : $dpd_ds_path;
       $ftpfile = realpath($filenimi);
 
-      require ("inc/ftp-send.inc");
+      require "inc/ftp-send.inc";
     }
     else {
       //kirjoitetaan faili levylle..
-      $filenimi = $dpd_ds_path."dpdimport-".md5(uniqid(rand(),true)).".dat";
+      $filenimi = $dpd_ds_path."dpdimport-".md5(uniqid(rand(), true)).".dat";
 
       if (file_put_contents($filenimi, $aineisto) === FALSE) {
         echo "<br><font class='error'>".t("tiedoston kirjoitus EPÄONNISTUI")."</font><br>";

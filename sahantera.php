@@ -1,6 +1,6 @@
 <?php
 
-require("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if ($livesearch_tee == "TUOTEHAKU") {
   livesearch_tuotehaku();
@@ -95,15 +95,15 @@ if ($tee == "jatka") {
   $nimitys = split(" ", $trow["nimitys"]);
 
   $out = chr(10).chr(10).chr(10).chr(10);     // 5 rivinvaihtoa (Line feed)
-  $out .= sprintf ('%6s', ' ');          // 6 spacea
-  $out .= sprintf ('%-9.9s', $nimitys[1]);     // Nimityksestä toka sana, max 9 merkkiä
-  $out .= sprintf ('%1s', ' ');          // 1 space
-  $out .= sprintf ('%-25.25s', $mitat);       // Pituus x leveys x paksuus, max 25 merkkiä
-  $out .= sprintf ('%1s', ' ');          // 1 space
-  $out .= sprintf ('%-12.12s', $hammastus);    // Hammastus, max 12 merkkiä
+  $out .= sprintf('%6s', ' ');          // 6 spacea
+  $out .= sprintf('%-9.9s', $nimitys[1]);     // Nimityksestä toka sana, max 9 merkkiä
+  $out .= sprintf('%1s', ' ');          // 1 space
+  $out .= sprintf('%-25.25s', $mitat);       // Pituus x leveys x paksuus, max 25 merkkiä
+  $out .= sprintf('%1s', ' ');          // 1 space
+  $out .= sprintf('%-12.12s', $hammastus);    // Hammastus, max 12 merkkiä
   $out .= chr(10).chr(10).chr(13);        // 2 rivinvaihtoa (Line feed) + 1 Carriage return (= siirretään kirjoituspää rivin alkuun)
-  $out .= sprintf ('%16s', ' ');          // 16 spacea
-  $out .= sprintf ('%-40.40s', $trow["tuoteno"]);  // Tuotenumero, max 40 merkkiä
+  $out .= sprintf('%16s', ' ');          // 16 spacea
+  $out .= sprintf('%-40.40s', $trow["tuoteno"]);  // Tuotenumero, max 40 merkkiä
   $out .= chr(13).chr(12);            // Carriage return + Form feed
 
   $boob = file_put_contents($filenimi, $out);
@@ -137,4 +137,4 @@ if ($tee == "tulosta") {
   unlink($filenimi);
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

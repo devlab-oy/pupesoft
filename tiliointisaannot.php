@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if (!isset($tyyppi))   $tyyppi = 't';
 if (!isset($tee))     $tee = '';
@@ -46,7 +46,7 @@ if ($tee == 'S' or $tee == 'N' or $tee == 'Y') {
     echo "<table><tr>";
 
     for ($i = 1; $i < mysql_num_fields($result); $i++) {
-      echo "<th>".t(mysql_field_name($result,$i))."</th>";
+      echo "<th>".t(mysql_field_name($result, $i))."</th>";
     }
 
     echo "<th></th></tr>";
@@ -57,7 +57,7 @@ if ($tee == 'S' or $tee == 'N' or $tee == 'Y') {
           <input type='hidden' name='tunnus' value='$trow[tunnus]'>";
 
       for ($i = 1; $i < mysql_num_fields($result); $i++) {
-        echo "<td>".$trow[mysql_field_name($result,$i)]."</td>";
+        echo "<td>".$trow[mysql_field_name($result, $i)]."</td>";
       }
 
       echo "<td><input type='submit' value='".t("Valitse")."'></td></tr></form>";
@@ -65,7 +65,7 @@ if ($tee == 'S' or $tee == 'N' or $tee == 'Y') {
 
     echo "</table>";
 
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
 
     exit;
   }
@@ -288,18 +288,18 @@ if (isset($tunnus) and $tunnus > 0) {
     $xml = simplexml_load_string($xmlstr);
 
     if ($xml === FALSE) {
-        echo ("Tiedosto $file ei ole validi XML!\n");
-        return ("Tiedosto $file ei ole validi XML!");
-       }
+      echo "Tiedosto $file ei ole validi XML!\n";
+      return "Tiedosto $file ei ole validi XML!";
+    }
 
-    require_once("inc/functions.inc");
+    require_once "inc/functions.inc";
 
     // Katsotaan mitä aineistoa käpistellään
     if ($kayttotyyppi == 'FINVOICE') {
-        require("inc/verkkolasku-in-finvoice.inc");
+      require "inc/verkkolasku-in-finvoice.inc";
     }
     else {
-        require("inc/verkkolasku-in-pupevoice.inc");
+      require "inc/verkkolasku-in-pupevoice.inc";
 
     }
   }
@@ -318,13 +318,13 @@ if (isset($tunnus) and $tunnus > 0) {
 
   echo "<table><tr>";
   for ($i = 0; $i < mysql_num_fields($result); $i++) {
-    echo "<th>" . t(mysql_field_name($result,$i))."</th>";
+    echo "<th>" . t(mysql_field_name($result, $i))."</th>";
   }
   echo "</tr>";
 
   while ($toimittajarow = mysql_fetch_assoc($result)) {
     for ($i = 0; $i < mysql_num_fields($result); $i++) {
-      echo "<td>".$toimittajarow[mysql_field_name($result,$i)]."</td>";
+      echo "<td>".$toimittajarow[mysql_field_name($result, $i)]."</td>";
     }
   }
 
@@ -431,7 +431,7 @@ if (isset($tunnus) and $tunnus > 0) {
 
   echo "<tr>";
   for ($i = 1; $i < mysql_num_fields($result)-2; $i++) {
-    echo "<th>" . t(mysql_field_name($result,$i))."</th>";
+    echo "<th>" . t(mysql_field_name($result, $i))."</th>";
   }
   if ($tyyppi !='t') echo "<th>".t("Laskun tyyppi")."</th>";
   echo "</tr>";
@@ -491,7 +491,7 @@ if (isset($tunnus) and $tunnus > 0) {
         }
       }
       elseif ($kennimi == 'Kustannuspaikka' and $tiliointirow['kustp'] == 999999999) {
-        echo "<td>",t("Oletus kustannuspaikka"),"</td>";
+        echo "<td>", t("Oletus kustannuspaikka"), "</td>";
       }
       else {
         echo "<td>$tiliointirow[$kennimi]</td>";
@@ -501,44 +501,44 @@ if (isset($tunnus) and $tunnus > 0) {
       echo "<td>";
 
       switch ($tiliointirow["vienti"]) {
-        case 'A':
-          echo t("Kotimaa");
-          break;
-        case 'B':
-          echo t("Kotimaa huolinta/rahti");
-          break;
-        case 'C':
-          echo t("Kotimaa vaihto-omaisuus");
-          break;
-        case 'D':
-          echo t("EU");
-          break;
-        case 'E':
-          echo t("EU huolinta/rahti");
-          break;
-        case 'F':
-          echo t("EU vaihto-omaisuus");
-          break;
-        case 'G':
-          echo t("ei-EU");
-          break;
-        case 'H':
-          echo t("ei-EU huolinta/rahti");
-          break;
-        case 'I':
-          echo t("ei-EU vaihto-omaisuus");
-          break;
-        case 'J':
-          echo t("Kotimaa raaka-aine");
-          break;
-        case 'K':
-          echo t("EU raaka-aine");
-          break;
-        case 'L':
-          echo t("ei-EU raaka-aine");
-          break;
-        default:
-          echo t("Toimittajan oletus");
+      case 'A':
+        echo t("Kotimaa");
+        break;
+      case 'B':
+        echo t("Kotimaa huolinta/rahti");
+        break;
+      case 'C':
+        echo t("Kotimaa vaihto-omaisuus");
+        break;
+      case 'D':
+        echo t("EU");
+        break;
+      case 'E':
+        echo t("EU huolinta/rahti");
+        break;
+      case 'F':
+        echo t("EU vaihto-omaisuus");
+        break;
+      case 'G':
+        echo t("ei-EU");
+        break;
+      case 'H':
+        echo t("ei-EU huolinta/rahti");
+        break;
+      case 'I':
+        echo t("ei-EU vaihto-omaisuus");
+        break;
+      case 'J':
+        echo t("Kotimaa raaka-aine");
+        break;
+      case 'K':
+        echo t("EU raaka-aine");
+        break;
+      case 'L':
+        echo t("ei-EU raaka-aine");
+        break;
+      default:
+        echo t("Toimittajan oletus");
       }
 
       echo "</td>";
@@ -652,11 +652,11 @@ if (isset($tunnus) and $tunnus > 0) {
               ORDER BY nimi";
     $hyvak_result = pupe_query($query);
 
-    echo "<td nowrap>",t("Hyväksyjä")," 1: <select name='hyvak1'>";
-    echo "<option value=''>",t("Oletus"),"</option>";
+    echo "<td nowrap>", t("Hyväksyjä"), " 1: <select name='hyvak1'>";
+    echo "<option value=''>", t("Oletus"), "</option>";
 
     $sel = (isset($hyvak1) and $hyvak1 == "MAKSUUN") ? $sel = ' SELECTED' : '';
-    echo "<option value='MAKSUUN' $sel>",t("Suoraan maksuvalmiiksi"),"</option>";
+    echo "<option value='MAKSUUN' $sel>", t("Suoraan maksuvalmiiksi"), "</option>";
 
     while ($hyvak_row = mysql_fetch_assoc($hyvak_result)) {
       $sel = (isset($hyvak1) and $hyvak1 == $hyvak_row['kuka']) ? $sel = ' SELECTED' : '';
@@ -666,7 +666,7 @@ if (isset($tunnus) and $tunnus > 0) {
     echo "</select><br/>";
 
     mysql_data_seek($hyvak_result, 0);
-    echo t("Hyväksyjä")," 2: <select name='hyvak2'><option value=''>",t("Oletus"),"</option>";
+    echo t("Hyväksyjä"), " 2: <select name='hyvak2'><option value=''>", t("Oletus"), "</option>";
 
     while ($hyvak_row = mysql_fetch_assoc($hyvak_result)) {
       $sel = (isset($hyvak2) and $hyvak2 == $hyvak_row['kuka']) ? $sel = ' SELECTED' : '';
@@ -676,7 +676,7 @@ if (isset($tunnus) and $tunnus > 0) {
     echo "</select><br/>";
 
     mysql_data_seek($hyvak_result, 0);
-    echo t("Hyväksyjä")," 3: <select name='hyvak3'><option value=''>",t("Oletus"),"</option>";
+    echo t("Hyväksyjä"), " 3: <select name='hyvak3'><option value=''>", t("Oletus"), "</option>";
 
     while ($hyvak_row = mysql_fetch_assoc($hyvak_result)) {
       $sel = (isset($hyvak3) and $hyvak3 == $hyvak_row['kuka']) ? $sel = ' SELECTED' : '';
@@ -686,7 +686,7 @@ if (isset($tunnus) and $tunnus > 0) {
     echo "</select><br/>";
 
     mysql_data_seek($hyvak_result, 0);
-    echo t("Hyväksyjä")," 4: <select name='hyvak4'><option value=''>",t("Oletus"),"</option>";
+    echo t("Hyväksyjä"), " 4: <select name='hyvak4'><option value=''>", t("Oletus"), "</option>";
 
     while ($hyvak_row = mysql_fetch_assoc($hyvak_result)) {
       $sel = (isset($hyvak4) and $hyvak4 == $hyvak_row['kuka']) ? $sel = ' SELECTED' : '';
@@ -696,7 +696,7 @@ if (isset($tunnus) and $tunnus > 0) {
     echo "</select><br/>";
 
     mysql_data_seek($hyvak_result, 0);
-    echo t("Hyväksyjä")," 5: <select name='hyvak5'><option value=''>",t("Oletus"),"</option>";
+    echo t("Hyväksyjä"), " 5: <select name='hyvak5'><option value=''>", t("Oletus"), "</option>";
 
     while ($hyvak_row = mysql_fetch_assoc($hyvak_result)) {
       $sel = (isset($hyvak5) and $hyvak5 == $hyvak_row['kuka']) ? $sel = ' SELECTED' : '';
@@ -710,7 +710,7 @@ if (isset($tunnus) and $tunnus > 0) {
 
   if (mysql_num_rows($toimipaikat_res) > 0) {
 
-    echo "<td><select name='toimipaikka'><option value='0'>",t("Ei toimipaikkaa"),"</option>";
+    echo "<td><select name='toimipaikka'><option value='0'>", t("Ei toimipaikkaa"), "</option>";
 
     while ($toimipaikat_row = mysql_fetch_assoc($toimipaikat_res)) {
 
@@ -771,7 +771,7 @@ if (isset($tunnus) and $tunnus > 0) {
           <option value='L' $vientil>".t("ei-EU raaka-aine")."</option>
           </select>
         </td>";
-    }
+  }
 
   echo "<td class='back'><input type='Submit' value = '".t("Lisää tiliöintisääntö")."'>$virhe</td>";
   echo "</tr></form></table>";
@@ -796,4 +796,4 @@ else {
   $kentta = 'nimi';
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

@@ -24885,37 +24885,37 @@ if (!function_exists('laske_siirrettava_maara')) {
     $query = "(SELECT t1.tunnus, t1.otunnus, t1.varattu
                FROM lasku AS l1
                JOIN tilausrivi AS t1 ON (
-                 t1.yhtio           = l1.yhtio AND
-                 t1.otunnus         = l1.tunnus AND
-                 t1.tuoteno         = '{$row['tuoteno']}' AND
-                 t1.hyllyalue       = '{$row['hyllyalue']}' AND
-                 t1.hyllynro        = '{$row['hyllynro']}' AND
-                 t1.hyllyvali       = '{$row['hyllyvali']}' AND
-                 t1.hyllytaso       = '{$row['hyllytaso']}' AND
-                 t1.tyyppi          IN ('L','G') AND
-                 t1.var             IN ('','H') AND
-                 t1.keratty         = '' AND
-                 t1.uusiotunnus     = 0 AND
-                 t1.kpl             = 0 AND
-                 t1.varattu         > 0
+                 t1.yhtio          = l1.yhtio AND
+                 t1.otunnus        = l1.tunnus AND
+                 t1.tuoteno        = '{$row['tuoteno']}' AND
+                 t1.hyllyalue      = '{$row['hyllyalue']}' AND
+                 t1.hyllynro       = '{$row['hyllynro']}' AND
+                 t1.hyllyvali      = '{$row['hyllyvali']}' AND
+                 t1.hyllytaso      = '{$row['hyllytaso']}' AND
+                 t1.tyyppi         IN ('L','G') AND
+                 t1.var            IN ('','H') AND
+                 t1.keratty        = '' AND
+                 t1.uusiotunnus    = 0 AND
+                 t1.kpl            = 0 AND
+                 t1.varattu        > 0
                )
-               WHERE l1.yhtio       = '{$kukarow['yhtio']}'
+               WHERE l1.yhtio      = '{$kukarow['yhtio']}'
                AND ((l1.tila = 'N' AND l1.alatila != 'X')
                  OR (l1.tila = 'G' AND l1.alatila IN ('', 'J'))))
                UNION
                (SELECT t2.tunnus, t2.otunnus, t2.jt + t2.varattu AS varattu
                FROM tilausrivi AS t2
-               WHERE t2.yhtio       = '{$kukarow['yhtio']}'
-               AND  t2.tuoteno      = '{$row['tuoteno']}'
-               AND  t2.hyllyalue    = '{$row['hyllyalue']}'
-               AND  t2.hyllynro     = '{$row['hyllynro']}'
-               AND  t2.hyllyvali    = '{$row['hyllyvali']}'
-               AND  t2.hyllytaso    = '{$row['hyllytaso']}'
-               AND  t2.tyyppi       IN ('L','G')
-               AND  t2.var          = 'J'
-               AND  t2.keratty      = ''
-               AND  t2.uusiotunnus  = 0
-               AND  t2.kpl          = 0
+               WHERE t2.yhtio      = '{$kukarow['yhtio']}'
+               AND  t2.tuoteno     = '{$row['tuoteno']}'
+               AND  t2.hyllyalue   = '{$row['hyllyalue']}'
+               AND  t2.hyllynro    = '{$row['hyllynro']}'
+               AND  t2.hyllyvali   = '{$row['hyllyvali']}'
+               AND  t2.hyllytaso   = '{$row['hyllytaso']}'
+               AND  t2.tyyppi      IN ('L','G')
+               AND  t2.var         = 'J'
+               AND  t2.keratty     = ''
+               AND  t2.uusiotunnus = 0
+               AND  t2.kpl         = 0
                AND  t2.jt + t2.varattu > 0)";
     $result = pupe_query($query);
 
@@ -28633,7 +28633,7 @@ if (!function_exists("etsi_tuotteelle_korjaava_varastoonvientipaiva")) {
               FROM tuotepaikat
               JOIN tuote USING (yhtio,tuoteno)
               WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-              and tuote.tuoteno = '$tuotenumero'
+              and tuote.tuoteno       = '$tuotenumero'
               GROUP BY 1,2
               ORDER BY 1";
     $result = pupe_query($query);
@@ -28644,8 +28644,8 @@ if (!function_exists("etsi_tuotteelle_korjaava_varastoonvientipaiva")) {
 
       $query = "SELECT tunnus, tuoteno, kpl, kplhinta, hinta, laji, if (laji in ('tulo','valmistus'), kplhinta, hinta)*kpl arvo, laadittu
                 FROM tapahtuma
-                WHERE yhtio   = '$kukarow[yhtio]'
-                and tuoteno   = '$trow[tuoteno]'
+                WHERE yhtio  = '$kukarow[yhtio]'
+                and tuoteno  = '$trow[tuoteno]'
                 and laadittu >= '{$yhtiorow['tilikausi_alku']}'
                 ORDER BY laadittu desc";
       $tresult = pupe_query($query);
@@ -28793,7 +28793,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
           if ($onko_vipn) {
             $query = "SELECT tilino
                       FROM yriti
-                      WHERE bic = 'DABAFIHH'
+                      WHERE bic      = 'DABAFIHH'
                       AND factoring != ''
                       LIMIT 1;";
             $f_result = pupe_query($query);
@@ -28884,9 +28884,9 @@ if (!function_exists("tallenna_tiliote_viite")) {
         $query = "SELECT *
                   FROM tiliotedata
                   WHERE tilino = '$tilino'
-                  AND alku = '$alkupvm'
-                  AND loppu = '$loppupvm'
-                  AND tyyppi = '$xtyyppi'";
+                  AND alku     = '$alkupvm'
+                  AND loppu    = '$loppupvm'
+                  AND tyyppi   = '$xtyyppi'";
         $tiliotedatares = pupe_query($query);
 
         if (mysql_num_rows($tiliotedatares) > 0) {
@@ -28901,9 +28901,9 @@ if (!function_exists("tallenna_tiliote_viite")) {
             $query = "SELECT group_concat(tieto SEPARATOR '') AS kantaaineisto
                       FROM tiliotedata
                       WHERE tilino = '$tilino'
-                      AND alku = '$alkupvm'
-                      AND loppu = '$loppupvm'
-                      AND tyyppi = '$xtyyppi'";
+                      AND alku     = '$alkupvm'
+                      AND loppu    = '$loppupvm'
+                      AND tyyppi   = '$xtyyppi'";
             $tiliotedatares = pupe_query($query);
             $tiliotedatarow = mysql_fetch_assoc($tiliotedatares);
 
@@ -29024,9 +29024,9 @@ if (!function_exists("tallenna_tiliote_viite")) {
           $query = "SELECT alku
                     FROM tiliotedata
                     WHERE yhtio = '$yritirow[yhtio]'
-                    AND tilino = '$tilino'
-                    AND tyyppi = '$xtyyppi'
-                    AND tieto = '$tietue'
+                    AND tilino  = '$tilino'
+                    AND tyyppi  = '$xtyyppi'
+                    AND tieto   = '$tietue'
                     AND substring(tieto, 13, 18) = '$arkistotunnari'";
           $vchkres = pupe_query($query);
 
@@ -29119,13 +29119,13 @@ if (!function_exists("tallenna_tiliote_viite")) {
       if ($xtyyppi > 0 and $xtyyppi <= 3) {
         // Kirjoitetaan tiedosto kantaan
         $query = "INSERT into tiliotedata set
-                  yhtio = '$yritirow[yhtio]',
+                  yhtio    = '$yritirow[yhtio]',
                   aineisto = '$aineistorow[aineisto]',
-                  tilino = '$tilino',
-                  alku = '$alkupvm',
-                  loppu = '$loppupvm',
-                  tyyppi = '$xtyyppi',
-                  tieto = '$tietue'";
+                  tilino   = '$tilino',
+                  alku     = '$alkupvm',
+                  loppu    = '$loppupvm',
+                  tyyppi   = '$xtyyppi',
+                  tieto    = '$tietue'";
         $tiliotedataresult = pupe_query($query);
         $tiliote_id = mysql_insert_id();
 
@@ -29136,7 +29136,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
 
         if ($td_perheid > 0) {
           $query = "UPDATE tiliotedata SET
-                    perheid = $td_perheid
+                    perheid      = $td_perheid
                     WHERE tunnus = $tiliote_id";
           $updateperheid = pupe_query($query);
         }

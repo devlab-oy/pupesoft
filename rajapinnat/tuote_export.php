@@ -97,7 +97,7 @@ echo date("d.m.Y @ G:i:s")." - Aloitetaan tuote-export.\n";
 echo date("d.m.Y @ G:i:s")." - Haetaan tuotetiedot.\n";
 
 // Haetaan pupesta tuotteen tiedot
-$query = "SELECT 
+$query = "SELECT
           tuote.*,
           tuote.mallitarkenne campaign_code,
           tuote.malli target,
@@ -238,13 +238,13 @@ while ($row = mysql_fetch_array($res)) {
     );
   }
   // Katsotaan onko tuotteelle voimassaolevaa hinnastohintaa
-  $query = "SELECT 
+  $query = "SELECT
             *
             FROM hinnasto
-            WHERE yhtio    = '{$kukarow['yhtio']}'
-              AND tuoteno  = '{$row['tuoteno']}'
-              AND maa      = '{$yhtiorow['maa']}'
-              AND laji     = ''
+            WHERE yhtio   = '{$kukarow['yhtio']}'
+              AND tuoteno = '{$row['tuoteno']}'
+              AND maa     = '{$yhtiorow['maa']}'
+              AND laji    = ''
               AND ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
             ORDER BY ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
             LIMIT 1";
@@ -755,15 +755,15 @@ while ($rowselite = mysql_fetch_assoc($resselite)) {
       if (count($breadcrumbs) > 1) array_shift($breadcrumbs);
       $tuotepuun_nodet[] = $breadcrumbs;
     }
-    
+
     // Katsotaan onko tuotteelle voimassaolevaa hinnastohintaa
-    $query = "SELECT 
+    $query = "SELECT
               *
               FROM hinnasto
-              WHERE yhtio    = '{$kukarow['yhtio']}'
-                AND tuoteno  = '{$alirow['tuoteno']}'
-                AND maa      = '{$yhtiorow['maa']}'
-                AND laji     = ''
+              WHERE yhtio   = '{$kukarow['yhtio']}'
+                AND tuoteno = '{$alirow['tuoteno']}'
+                AND maa     = '{$yhtiorow['maa']}'
+                AND laji    = ''
                 AND ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
               ORDER BY ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
               LIMIT 1";

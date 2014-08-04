@@ -110,7 +110,37 @@ function viesti($viesti) {
   echo "<br/>";
 }
 
+function sepa_pankkiyhteys_kunnossa() {
+  global $yhtiorow, $kukarow;
 
+  if (SEPA_PANKKIYHTEYS === false) {
+    echo "<font class='error'>";
+    echo t("SEPA-palvelua ei ole aktivoitu.");
+    echo "<br>";
+
+    if (empty($sepa_pankkiyhteys_token)) {
+      echo "<br>";
+      echo t("Sepa palvelun tunniste on asentamatta!");
+    }
+
+    if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on') {
+      echo "<br>";
+      echo t("Voit k‰ytt‰‰ pankkiyhteytt‰ vain salatulla yhteydell‰!");
+    }
+
+    if ($yhtiorow['pankkitiedostot'] != "F") {
+      echo "<br>";
+      echo t("Voit k‰ytt‰‰ pankkiyhteytt‰ vain pankkitiedostot -parametrill‰");
+      echo ": \"";
+      echo t("P‰iv‰t yhdistet‰‰n, yksi tiedosto per pankki");
+      echo "\"!";
+    }
+
+    echo "</font>";
+
+    exit;
+  }
+}
 // Pankkiyhteys tietokantafunktiot
 
 

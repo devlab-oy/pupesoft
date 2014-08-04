@@ -27046,7 +27046,8 @@ if (!function_exists("tallenna_tiliote_viite")) {
     $tiliotedataresult = pupe_query($query);
 
     // Etsitään aineistonumero
-    $query = "SELECT max(aineisto) + 1 AS aineisto FROM tiliotedata";
+    $query = "SELECT ifnull(max(aineisto), 0) + 1 AS aineisto
+              FROM tiliotedata";
     $aineistores = pupe_query($query);
     $aineistorow = mysql_fetch_assoc($aineistores);
 
@@ -27521,14 +27522,17 @@ if (!function_exists("kasittele_tiliote_viite")) {
     $meteidres = pupe_query($query);
     $meteidrow = mysql_fetch_assoc($meteidres);
 
+    $tiliotedatarow = mysql_fetch_assoc($tiliotedataresult);
+    mysql_data_seek($tiliotedataresult, 0);
+
+    $query = "SELECT *
+              FROM yriti
+              WHERE tilino = '{$tiliotedatarow['tilino']}'";
+    $yriti_result = pupe_query($query);
+    $yritirow = mysql_fetch_assoc($yriti_result);
+
     while ($tiliotedatarow = mysql_fetch_assoc($tiliotedataresult)) {
       $tietue = $tiliotedatarow['tieto'];
-
-      $query = "SELECT *
-                FROM yriti
-                WHERE tilino = '{$tiliotedatarow['tilino']}'";
-      $yriti_result = pupe_query($query);
-      $yritirow = mysql_fetch_assoc($yriti_result);
 
       // Setataan kukarow-yhtiö
       $kukarow["yhtio"] = $yritirow["yhtio"];

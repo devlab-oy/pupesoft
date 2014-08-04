@@ -333,10 +333,9 @@ if ($fieldname == "koontilahete_kerayserissa") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
-  $selK = $trow[$i] == 'K' ? 'selected' : '';
   $selE = $trow[$i] == 'E' ? 'selected' : '';
 
-  $ulos .= "<option value = 'K' {$selK}>".t("Koontilähetteen tuotteet niputetaan per SSCC")."</option>";
+  $ulos .= "<option value = ''>".t("Koontilähetteen tuotteet niputetaan per SSCC")."</option>";
   $ulos .= "<option value = 'E' {$selE}>".t("Koontilähetteen tuotteita ei niputeta SSCC:llä")."</option>";
 
   $ulos .= "</select>";

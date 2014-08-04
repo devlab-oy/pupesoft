@@ -121,20 +121,20 @@ function filelist_table($array, $type) {
     echo "<td>";
 
     if (strtolower($tiedosto["status"]) == 'new') {
-      $_class = "{$type}_boxes";
+      $_chk = "checked";
     }
     else {
-     $_class = '';
+     $_chk = '';
     }
 
-    echo "<input type='checkbox' value='{$_viite}' name='{$type}_references[]' class='{$_class}'>";
+    echo "<input type='checkbox' {$_chk} value='{$_viite}' name='{$type}_references[]' class='{$type}_boxes'>";
     echo "</td>";
     echo "</tr>";
   }
 
   echo "<tr>";
   echo "<th colspan='4'>";
-  echo t("Hae kaikki uudet %s-aineistot", $kukarow['kieli'], $type);
+  echo t("Ruksaa kaikki");
   echo "</th>";
   echo "<td>";
   echo "<input type='checkbox' id='{$type}_toggler'>";

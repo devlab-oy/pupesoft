@@ -1,6 +1,6 @@
 <?php
 
-$MONTH_ARRAY = array(1=>t('Tammikuu'),t('Helmikuu'),t('Maaliskuu'),t('Huhtikuu'),t('Toukokuu'),t('Kesäkuu'),t('Heinäkuu'),t('Elokuu'),t('Syyskuu'),t('Lokakuu'),t('Marraskuu'),t('Joulukuu'));
+$MONTH_ARRAY = array(1=>t('Tammikuu'), t('Helmikuu'), t('Maaliskuu'), t('Huhtikuu'), t('Toukokuu'), t('Kesäkuu'), t('Heinäkuu'), t('Elokuu'), t('Syyskuu'), t('Lokakuu'), t('Marraskuu'), t('Joulukuu'));
 
 if ($tee == '1' and !isset($ajarappari)) {
   $tee = "";
@@ -61,7 +61,7 @@ if ($tee == '1') {
     $tilinolisa1 = "tapvm,";
     $tilinolisa2 = " and tiliointi.tilino = '$tilino' ";
   }
-    else {
+  else {
     $tilinolisa1 = "";
     $tilinolisa2 = "";
   }
@@ -111,7 +111,7 @@ if ($tee == '1') {
   echo "<th>".t("Kumulatiivinen")."</font></th>";
   echo "<th>".t("Summa valuutassa")."</font></th>";
 
-  if(isset($worksheet)) {
+  if (isset($worksheet)) {
     $iiiiii = 0;
 
     if ($tilino != '') {
@@ -149,7 +149,7 @@ if ($tee == '1') {
   $summa3 = 0;
   $summa_valuutassa = array();
 
-  while ($trow = mysql_fetch_array ($result)) {
+  while ($trow = mysql_fetch_array($result)) {
 
     $summa  += $trow['Kumulatiivinen'];
     $summa2 += $trow['Saldo'];
@@ -160,11 +160,11 @@ if ($tee == '1') {
       $lopelink = "&lopetus=$PHP_SELF////toim=tilisaldot//tee=$tee//tkausi=$tkausi//alvk=$alvk//tilino=$tilino//ajarappari=$ajarappari";
 
       if ($tilino != '') {
-        echo "<td><a name='tili1_$trow[tilino]' href='raportit.php?toim=paakirja&tee=K&tili=$trow[tilino]&alvv=".substr($trow["tapvm"], 0,4)."&alvk=".substr($trow["tapvm"],5,2)."&alvp=".substr($trow["tapvm"],-2)."$lopelink///tili1_$trow[tilino]'>".tv1dateconv($trow["tapvm"])."</a></td>";
+        echo "<td><a name='tili1_$trow[tilino]' href='raportit.php?toim=paakirja&tee=K&tili=$trow[tilino]&alvv=".substr($trow["tapvm"], 0, 4)."&alvk=".substr($trow["tapvm"], 5, 2)."&alvp=".substr($trow["tapvm"], -2)."$lopelink///tili1_$trow[tilino]'>".tv1dateconv($trow["tapvm"])."</a></td>";
       }
 
       if ($alvk != "") {
-        $linkkilisa = "&alvv=".substr($alvk, 0,4)."&alvk=".substr($alvk, 4,2);
+        $linkkilisa = "&alvv=".substr($alvk, 0, 4)."&alvk=".substr($alvk, 4, 2);
       }
       else {
         $linkkilisa = "&tkausi=$tkausi";
@@ -236,7 +236,7 @@ if ($tee == '1') {
         $iiiiii++;
 
         $valuutta_summat = "";
-        foreach($summa_valuutassa as $valuutta => $sum) {
+        foreach ($summa_valuutassa as $valuutta => $sum) {
           $valuutta_summat .= "$sum $valuutta\n";
         }
 
@@ -278,10 +278,10 @@ echo "<form name='valinta' action = 'raportit.php' method='post'>
 
 echo "<tr><th>".t("Valitse tilikausi")."</th>";
 
- $query = "SELECT *
-           FROM tilikaudet
-           WHERE yhtio = '$kukarow[yhtio]'
-           ORDER BY tilikausi_alku desc";
+$query = "SELECT *
+          FROM tilikaudet
+          WHERE yhtio = '$kukarow[yhtio]'
+          ORDER BY tilikausi_alku desc";
 $vresult = mysql_query($query) or pupe_error($query);
 
 echo "<td><select name='tkausi' onchange='submit();'>";

@@ -53,14 +53,14 @@ $ei_oteta_kulua_pois = FALSE;
 if (strtoupper($laskuttajan_toimittajanumero) == "ELRING") {
   $laskuttajan_toimittajanumero = "123312";
 }
-elseif (strtoupper($laskuttajan_toimittajanumero) == "BOSCH" OR strtoupper($laskuttajan_toimittajanumero) == "AA_FI") {
+elseif (strtoupper($laskuttajan_toimittajanumero) == "BOSCH" or strtoupper($laskuttajan_toimittajanumero) == "AA_FI") {
   $laskuttajan_toimittajanumero = "123067";
 
   // Tarkistusnumero
   $viite = $laskun_numero;
 
   // Menee tasan samalla systeemilla kuin viitenumeron tarkistusnumeron laskeminen..
-  include("inc/generoiviite.inc");
+  include "inc/generoiviite.inc";
 
   $laskun_pankkiviite = $viite;
 }
@@ -109,7 +109,7 @@ if (isset($xml->InvoiceHeader->OrderRef)) {
       $laskun_tilausviite .= $viitteet->BuyerOrderNumber.",";
     }
   }
-  $laskun_tilausviite = substr($laskun_tilausviite,0,-1);
+  $laskun_tilausviite = substr($laskun_tilausviite, 0, -1);
 }
 else {
   foreach ($xml->InvoiceDetail as $riveilta) {
@@ -118,7 +118,7 @@ else {
   if (is_array($rivi)) {
     $rivi = array_unique($rivi); // otetaan uniikit
     $rivi = array_values($rivi); // poistetaan turhat v‰lit
-    $laskun_tilausviite = implode(",",$rivi);
+    $laskun_tilausviite = implode(",", $rivi);
   }
 }
 
@@ -219,7 +219,7 @@ if (count($tuotetiedot) > 0) {
   foreach ($tuotetiedot as $tuotetieto) {
 
     // tuotekoodi
-    $rtuoteno[$i]["tuoteno"] = utf8_decode($tuotetieto->ProductId->ProductNumber);
+    $rtuoteno[$i]["tuoteno"] = pupesoft_cleanstring(utf8_decode($tuotetieto->ProductId->ProductNumber));
 
     $query = "SELECT tt.*
               FROM tuotteen_toimittajat AS tt
@@ -395,7 +395,7 @@ if (count($tuotetiedot) > 0) {
             if (($laskuttajan_toimittajanumero == "123067" and $charge_description == "bx core value") or
               ($laskuttajan_toimittajanumero == "123067" and $charge_description == "bx runkoarvo") or
               ($laskuttajan_toimittajanumero == "123007" and ($charge_code == "zcwr" or strpos($charge_description, "at.wert (rechnung)") !== FALSE)) or
-              (in_array($laskuttajan_toimittajanumero, array("123084","123007")) and strpos($charge_description, "core value") !== FALSE)) {
+              (in_array($laskuttajan_toimittajanumero, array("123084", "123007")) and strpos($charge_description, "core value") !== FALSE)) {
 
               // Jos rivill‰ tulee runkoveloitus, niin pit‰‰ tehd‰ rungosta oma lapsirivi
               $query = "SELECT tuote.tuoteno, tuote.nimitys

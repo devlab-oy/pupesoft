@@ -1,8 +1,8 @@
 <?php
 
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if(isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if (isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
@@ -14,7 +14,7 @@ $compression = FALSE;
 // DataTables p‰‰lle
 $pupe_DataTables = 'vartiltaul';
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
@@ -29,7 +29,7 @@ if ($ytunnus != '') {
 
   if ($valittuytunnus != "" and $valittuytunnus != $ytunnus) $toimittajaid = "";
 
-  require ("inc/kevyt_toimittajahaku.inc");
+  require "inc/kevyt_toimittajahaku.inc";
 
   // Toimittaja lˆytyi
   if ($toimittajaid == 0) {
@@ -63,9 +63,37 @@ echo "</tr>";
 echo "<tr><th>".t("Rajaukset")."</th><td>";
 
 $monivalintalaatikot = array('OSASTO', 'TRY', '<br>TUOTEMERKKI');
-require ("tilauskasittely/monivalintalaatikot.inc");
+require "tilauskasittely/monivalintalaatikot.inc";
 
 echo "</td></tr>";
+
+// Varastot
+$query = "SELECT tunnus, nimitys
+          FROM varastopaikat
+          WHERE yhtio = '{$kukarow["yhtio"]}'";
+$result = pupe_query($query);
+
+$varastot = array();
+
+while ($varasto = mysql_fetch_assoc($result)) {
+  array_push($varastot, $varasto);
+}
+
+// Varaston valinta
+echo "<tr>";
+echo "<th>Varasto</th>";
+echo "<td>";
+echo "<select multiple name='valitut_varastot[]'>";
+
+foreach ($varastot as $varasto) {
+  $selected = in_array($varasto["tunnus"], $valitut_varastot) ? "selected" : "";
+  echo "<option value='{$varasto["tunnus"]}' {$selected}>{$varasto["nimitys"]}</option>";
+}
+
+
+echo "</select>";
+echo "</td>";
+echo "</tr>";
 
 echo "<tr>";
 echo "<th>".t("Toimittaja")."</th>";
@@ -81,6 +109,16 @@ $nollapiilochk = "";
 if (isset($nollapiilo) and $nollapiilo != '') $nollapiilochk  = "CHECKED";
 echo "<tr><th>".t("Piilota nollarivit")."</th><td><input type='checkbox' name='nollapiilo' $nollapiilochk></td></tr>";
 
+// Checkbox, jolla valitaan naytentaanko vapaa saldo vai ei
+echo "<tr>";
+echo "<th>";
+echo t("N‰yt‰ vapaa saldo");
+echo "</th>";
+
+$checked = (isset($nayta_vapaa_saldo) and $nayta_vapaa_saldo == "on") ? "checked" : "";
+echo "<td><input type='checkbox' name='nayta_vapaa_saldo' {$checked}/></td>";
+echo "</tr>";
+
 echo "</table>";
 echo "<br><input type='submit' value='".t("Aja raportti")."' name='painoinnappia'>";
 echo "</form>";
@@ -93,6 +131,20 @@ if ($tee != "" and isset($painoinnappia) and $lisa == "" and $toimittajaid == ""
 
 if ($tee != "" and isset($painoinnappia)) {
 
+  if (isset($valitut_varastot)) {
+    $varastot = join(",", $valitut_varastot);
+    $tuotepaikka_join = "INNER JOIN tuotepaikat
+                         ON (tuote.tuoteno = tuotepaikat.tuoteno
+                         AND tuote.yhtio = tuotepaikat.yhtio)";
+    $varasto_filter = "AND tuotepaikat.varasto in ({$varastot})";
+    $varasto_tilausrivi_filter = "AND tilausrivi.varasto in ({$varastot})";
+  }
+  else {
+    $tuotepaikka_join = "";
+    $varasto_filter = "";
+    $varasto_tilausrivi_filter = "";
+  }
+
   if ($toimittajaid != "") {
     $toimittaja_join = "  JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tuote.yhtio
                 AND tuotteen_toimittajat.tuoteno = tuote.tuoteno
@@ -102,7 +154,7 @@ if ($tee != "" and isset($painoinnappia)) {
     $toimittaja_join = "";
   }
 
-  $query = "SELECT tuote.tuoteno,
+  $query = "SELECT DISTINCT tuote.tuoteno,
             tuote.nimitys,
             tuote.osasto,
             tuote.try,
@@ -112,11 +164,14 @@ if ($tee != "" and isset($painoinnappia)) {
             tuote.epakurantti25pvm,
             tuote.epakurantti50pvm,
             tuote.epakurantti75pvm,
-            tuote.epakurantti100pvm
+            tuote.epakurantti100pvm,
+            tuote.eankoodi
             FROM tuote
             {$toimittaja_join}
+            {$tuotepaikka_join}
             WHERE tuote.yhtio                       = '{$kukarow["yhtio"]}'
             {$lisa}
+            {$varasto_filter}
             AND (tuote.status != 'P' OR (  SELECT sum(tuotepaikat.saldo)
                             FROM tuotepaikat
                             WHERE tuotepaikat.yhtio = tuote.yhtio
@@ -128,7 +183,7 @@ if ($tee != "" and isset($painoinnappia)) {
 
   if ($total_rows > 0) {
 
-    include('inc/pupeExcel.inc');
+    include 'inc/pupeExcel.inc';
 
     $worksheet    = new pupeExcel();
     $format_bold = array("bold" => TRUE);
@@ -143,6 +198,11 @@ if ($tee != "" and isset($painoinnappia)) {
       $varastotilasto_table .= "<th>".t("Tuoteno")."</th>";
       $varastotilasto_table .= "<th>".t("Nimitys")."</th>";
       $varastotilasto_table .= "<th>".t("Varastosaldo")."</th>";
+
+      if ($nayta_vapaa_saldo == "on") {
+        $varastotilasto_table .= "<th>" . t("Vapaa saldo") . "</th>";
+      }
+
       $varastotilasto_table .= "<th>".t("Varastonarvo")."</th>";
       $varastotilasto_table .= "<th>".t("Myyntihinta")."</th>";
       $varastotilasto_table .= "<th>".t("Varmuusvarasto")."</th>";
@@ -169,6 +229,14 @@ if ($tee != "" and isset($painoinnappia)) {
       $varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Tuoteno'></td>";
       $varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Nimitys'></td>";
       $varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Varastosaldo'></td>";
+
+      if ($nayta_vapaa_saldo == "on") {
+        $varastotilasto_table .= "<td>";
+        $varastotilasto_table .= "<input type='text' class='search_field'";
+        $varastotilasto_table .= " name='search_Vapaasaldo'/>";
+        $varastotilasto_table .= "</td>";
+      }
+
       $varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Varastonarvo'></td>";
       $varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Myyntihinta'></td>";
       $varastotilasto_table .= "<td><input type='text' class='search_field' name='search_Varmuusvarasto'></td>";
@@ -197,7 +265,13 @@ if ($tee != "" and isset($painoinnappia)) {
     $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhm‰"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteno"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
+    $worksheet->writeString($excelrivi, $excelsarake++, t("EAN-koodi"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Varastosaldo"));
+
+    if ($nayta_vapaa_saldo == "on") {
+      $worksheet->writeString($excelrivi, $excelsarake++, t("Vapaa saldo"));
+    }
+
     $worksheet->writeString($excelrivi, $excelsarake++, t("Varastonarvo"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Myyntihinta"));
     $worksheet->writeString($excelrivi, $excelsarake++, t("Varmuusvarasto"));
@@ -219,7 +293,7 @@ if ($tee != "" and isset($painoinnappia)) {
     $excelrivi++;
 
     echo "<font class='message'>", t("K‰sitell‰‰n"), " $total_rows ", t("tuotetta"), ".</font>";
-    require('inc/ProgressBar.class.php');
+    require 'inc/ProgressBar.class.php';
 
     $bar = new ProgressBar();
     $bar->initialize($total_rows); // print the empty bar
@@ -235,7 +309,8 @@ if ($tee != "" and isset($painoinnappia)) {
                 WHERE yhtio = '{$kukarow["yhtio"]}'
                 AND tuoteno = '{$row["tuoteno"]}'
                 AND tyyppi  = 'O'
-                AND varattu > 0";
+                AND varattu > 0
+                {$varasto_tilausrivi_filter}";
       $ostoresult = pupe_query($query);
       $ostorivi = mysql_fetch_assoc($ostoresult);
 
@@ -249,7 +324,8 @@ if ($tee != "" and isset($painoinnappia)) {
                   AND tuoteno = '{$row["tuoteno"]}'
                   AND tyyppi  = 'L'
                   AND var     = 'J'
-                  AND jt      > 0";
+                  AND jt      > 0
+                  {$varasto_tilausrivi_filter}";
         $jt_result = pupe_query($query);
         $jt_rivi = mysql_fetch_assoc($jt_result);
         $jalkitoimituksessa = $jt_rivi["jt"];
@@ -268,7 +344,8 @@ if ($tee != "" and isset($painoinnappia)) {
                 AND tuoteno         = '{$row["tuoteno"]}'
                 AND tyyppi          = 'L'
                 and laskutettuaika  >= date_sub(CURDATE(), interval 12 month)
-                AND kpl            != 0";
+                AND kpl            != 0
+                {$varasto_tilausrivi_filter}";
       $myyntiresult = pupe_query($query);
       $myyntirivi = mysql_fetch_assoc($myyntiresult);
 
@@ -284,12 +361,16 @@ if ($tee != "" and isset($painoinnappia)) {
                   AND tuoteno         = '{$row["tuoteno"]}'
                   AND tyyppi          = 'V'
                   and toimitettuaika  >= date_sub(CURDATE(), interval 12 month)
-                  AND kpl            != 0";
+                  AND kpl            != 0
+                  {$varasto_tilausrivi_filter}";
         $kulutusresult = pupe_query($query);
         $kulutusrivi = mysql_fetch_assoc($kulutusresult);
       }
 
-      list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"]);
+      $valitut_varastot = isset($valitut_varastot) ? $valitut_varastot : 0;
+
+      list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], "",
+        $valitut_varastot);
       $varattu = $saldo - $myytavissa + $jalkitoimituksessa;
 
       // Jos kaikki luvut on nollaa, niin skipataan rivi
@@ -329,6 +410,7 @@ if ($tee != "" and isset($painoinnappia)) {
       $varastonarvo = ((float) $varastonarvo == 0) ? "" : $varastonarvo;
       $varattu = ((int) $varattu == 0) ? "" : $varattu;
       $saldo = ((int) $saldo == 0) ? "" : $saldo;
+      $vapaa_saldo = ((int) $myytavissa == 0) ? "" : $myytavissa;
 
       if ($total_rows <= 1000) {
         $varastotilasto_table .= "<tr class='aktiivi'>";
@@ -337,6 +419,11 @@ if ($tee != "" and isset($painoinnappia)) {
         $varastotilasto_table .= "<td><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."'>$row[tuoteno]</a></td>";
         $varastotilasto_table .= "<td>$row[nimitys]</td>";
         $varastotilasto_table .= "<td align='right'>$saldo</td>";
+
+        if ($nayta_vapaa_saldo == "on") {
+          $varastotilasto_table .= "<td align='right'>{$vapaa_saldo}</td>";
+        }
+
         $varastotilasto_table .= "<td align='right'>$varastonarvo</td>";
         $varastotilasto_table .= "<td align='right'>".hintapyoristys($row['myyntihinta'])."</td>";
         $varastotilasto_table .= "<td align='right'>$row[varmuus_varasto]</td>";
@@ -363,7 +450,13 @@ if ($tee != "" and isset($painoinnappia)) {
       $worksheet->writeString($excelrivi, $excelsarake++, $row["try"]);
       $worksheet->writeString($excelrivi, $excelsarake++, $row["tuoteno"]);
       $worksheet->writeString($excelrivi, $excelsarake++, $row["nimitys"]);
+      $worksheet->writeString($excelrivi, $excelsarake++, $row["eankoodi"]);
       $worksheet->writeNumber($excelrivi, $excelsarake++, $saldo);
+
+      if ($nayta_vapaa_saldo == "on") {
+        $worksheet->writeNumber($excelrivi, $excelsarake++, $vapaa_saldo);
+      }
+
       $worksheet->writeNumber($excelrivi, $excelsarake++, $varastonarvo);
       $worksheet->writeNumber($excelrivi, $excelsarake++, $row["myyntihinta"]);
       $worksheet->writeNumber($excelrivi, $excelsarake++, $row["varmuus_varasto"]);
@@ -404,15 +497,24 @@ if ($tee != "" and isset($painoinnappia)) {
     echo "</table><br>";
 
     if ($total_rows > 1000) {
-      echo "<font class='error'>", t("Hakutulos oli liian suuri"), ". " ,t("Tulos vain exceliss‰"), ".</font><br><br>";
+      echo "<font class='error'>", t("Hakutulos oli liian suuri"), ". " , t("Tulos vain exceliss‰"), ".</font><br><br>";
     }
     else {
-      if ($listaustyyppi == "kappaleet2"){
-        pupe_DataTables(array(array($pupe_DataTables, 19, 19, false, false)));
+      if ($listaustyyppi == "kappaleet2" and $nayta_vapaa_saldo == "on") {
+        $sarakkeet = 20;
+      }
+      elseif ($listaustyyppi == "kappaleet2") {
+        $sarakkeet = 19;
+      }
+      elseif ($nayta_vapaa_saldo == "on") {
+        $sarakkeet = 16;
       }
       else {
-        pupe_DataTables(array(array($pupe_DataTables, 15, 15, false, false)));
+        $sarakkeet = 15;
       }
+
+      pupe_DataTables(array(array($pupe_DataTables, $sarakkeet, $sarakkeet, false, false)));
+
       echo "<br>", $varastotilasto_table;
     }
   }
@@ -422,4 +524,4 @@ if ($tee != "" and isset($painoinnappia)) {
   }
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

@@ -1,9 +1,12 @@
 <?php
+
 // Kirjoitetaan lasku
-$selite = str_replace ("'", " ", $vientiselite); // Poistaa SQL-virheen mahdollisuuden
-$tpv = substr($pvm,0,2);
-$tpk = substr($pvm,2,2);
-$tpp = substr($pvm,4,2);
+$selite = str_replace("'", " ", $vientiselite); // Poistaa SQL-virheen mahdollisuuden
+
+$tpv = substr($pvm, 0, 2);
+$tpk = substr($pvm, 2, 2);
+$tpp = substr($pvm, 4, 2);
+
 if ($tpv < 1000) $tpv += 2000;
 
 $query = "INSERT into lasku set
@@ -16,7 +19,7 @@ $query = "INSERT into lasku set
           laatija       = 'tiliote',
           luontiaika    = now()";
 $result = pupe_query($query);
-$kulutunnus = mysql_insert_id($link);
+$kulutunnus = mysql_insert_id();
 
 list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yritirow["oletus_rahatili"]);
 
@@ -56,18 +59,19 @@ $query = "INSERT into tiliointi set
           laatija  = 'tiliote',
           laadittu = now()";
 $result = pupe_query($query);
+$_tiliointi_id = mysql_insert_id();
 
-  $query = "UPDATE tiliotedata
-            SET kasitelty = now(),
-            tiliointitunnus = ".mysql_insert_id ($link)."
-            WHERE tunnus    = '$tiliotedataid'";
+$query = "UPDATE tiliotedata SET
+          kasitelty       = now(),
+          tiliointitunnus = {$_tiliointi_id}
+          WHERE tunnus    = '$tiliotedataid'";
 $dummyresult = pupe_query($query);
 
 $query = "UPDATE tiliotedata
           SET kuitattu = 'tiliote',
           kuitattuaika = now()
           WHERE yhtio  = '$yritirow[yhtio]'
-          and perheid  = '$tiliotedatape'";
+          AND perheid  = '$tiliotedatape'";
 $dummyresult = pupe_query($query);
 
 // Merkataan käsitellyiksi & lisätään linkki

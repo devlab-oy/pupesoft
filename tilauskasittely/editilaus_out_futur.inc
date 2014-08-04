@@ -6,7 +6,7 @@ if (!isset($toim)) $toim = "";
 
 $luodaan_aineisto = true;
 
-if (!in_array($myynti_vai_osto, array('M','O')) or !isset($laskurow)) $luodaan_aineisto = false;
+if (!in_array($myynti_vai_osto, array('M', 'O')) or !isset($laskurow)) $luodaan_aineisto = false;
 
 if ($luodaan_aineisto and $myynti_vai_osto == 'M') {
 
@@ -22,19 +22,19 @@ if ($luodaan_aineisto and $myynti_vai_osto == 'M') {
 
   while ($chk_row = mysql_fetch_assoc($chk_res)) {
 
-    switch($chk_row['laji']) {
-      case 'futur_host':
-        $ftphost_futur = $chk_row['avainsana'];
-        break;
-      case 'futur_path':
-        $ftppath_futur = $chk_row['avainsana'];
-        break;
-      case 'futur_user':
-        $ftpuser_futur = $chk_row['avainsana'];
-        break;
-      case 'futur_password':
-        $ftppass_futur = $chk_row['avainsana'];
-        break;
+    switch ($chk_row['laji']) {
+    case 'futur_host':
+      $ftphost_futur = $chk_row['avainsana'];
+      break;
+    case 'futur_path':
+      $ftppath_futur = $chk_row['avainsana'];
+      break;
+    case 'futur_user':
+      $ftpuser_futur = $chk_row['avainsana'];
+      break;
+    case 'futur_password':
+      $ftppass_futur = $chk_row['avainsana'];
+      break;
     }
   }
 
@@ -50,17 +50,17 @@ if ($luodaan_aineisto) {
 
   $summa = $toim == 'REKLAMAATIO' ? $laskurow['summa'] : '';
 
-     //tilauksen otsikko
-     $edi_order  = "*IS from:721111720-1 to:IKH,ORDERS*id:{$laskurow['tunnus']} version:AFP-1.0 *MS\n";
-     $edi_order .= "*MS {$laskurow['tunnus']}\n";
-     $edi_order .= "*RS OSTOTIL\n";
+  //tilauksen otsikko
+  $edi_order  = "*IS from:721111720-1 to:IKH,ORDERS*id:{$laskurow['tunnus']} version:AFP-1.0 *MS\n";
+  $edi_order .= "*MS {$laskurow['tunnus']}\n";
+  $edi_order .= "*RS OSTOTIL\n";
 
-     if ($myynti_vai_osto == 'O') $_toimitustapa = $laskurow['kuljetus'];
-     else $_toimitustapa = $laskurow['toimitustapa'];
+  if ($myynti_vai_osto == 'O') $_toimitustapa = $laskurow['kuljetus'];
+  else $_toimitustapa = $laskurow['toimitustapa'];
 
-     $edi_order .= "OSTOTIL.OT_NRO:{$laskurow['tunnus']}\n";
+  $edi_order .= "OSTOTIL.OT_NRO:{$laskurow['tunnus']}\n";
   // 0 = Örum
-     $edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:0\n";
+  $edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:0\n";
   $edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:{$laskurow['tilaustyyppi']}\n";
   $edi_order .= "OSTOTIL.OT_TILAUSAIKA:\n";
   $edi_order .= "OSTOTIL.OT_KASITTELIJA:\n";
@@ -179,14 +179,14 @@ if ($luodaan_aineisto) {
   }
 
   $edi_order .= "OSTOTIL.OT_TOIMITUS_YRITYS:{$toim_yritys}\n";
-  #$edi_order .= "OSTOTIL.OT_TOIMITUS_NIMI:\n";
+  //$edi_order .= "OSTOTIL.OT_TOIMITUS_NIMI:\n";
   $edi_order .= "OSTOTIL.OT_TOIMITUS_KATUOSOITE:{$toim_osoite}\n";
   $edi_order .= "OSTOTIL.OT_TOIMITUS_POSTITOIMIPAIKKA:{$toim_postitp}\n";
   $edi_order .= "OSTOTIL.OT_TOIMITUS_POSTINRO:{$toim_postino}\n";
   $edi_order .= "OSTOTIL.OT_TOIMITUS_MAAKOODI:{$toim_maa}\n";
-     $edi_order .= "*RE OSTOTIL\n";
+  $edi_order .= "*RE OSTOTIL\n";
 
-     $i = 1;
+  $i = 1;
 
   $query = "SELECT tilausrivi.*
             FROM tilausrivi
@@ -248,25 +248,25 @@ if ($luodaan_aineisto) {
     $edi_order .= "OSTOTILRIV.OTR_RIVISUMMA:{$rivihinta}\n";
 
     if ($toim == 'REKLAMAATIO') {
-        $edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:{$hinta}\n";
+      $edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:{$hinta}\n";
 
       for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-          $edi_order .= "OSTOTILRIV.OTR_ALENNUS_{$alepostfix}:0\n";
+        $edi_order .= "OSTOTILRIV.OTR_ALENNUS_{$alepostfix}:0\n";
       }
     }
     else {
 
-        $edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:{$tilausrivi_row['hinta']}\n";
+      $edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:{$tilausrivi_row['hinta']}\n";
 
       $ale = generoi_alekentta_php($tilausrivi_row, $myynti_vai_osto, 'erikseen');
       for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-          $edi_order .= "OSTOTILRIV.OTR_ALENNUS_{$alepostfix}:".$ale["ale".$alepostfix]."\n";
+        $edi_order .= "OSTOTILRIV.OTR_ALENNUS_{$alepostfix}:".$ale["ale".$alepostfix]."\n";
       }
     }
 
     $edi_order .= "OSTOTILRIV.OTR_VEROKANTA:{$tilausrivi_row['alv']}\n";
 
-    #$edi_order .= "OSTOTILRIV.OTR_VIITE:{$tilausrivi_row['kommentti']}\n";
+    //$edi_order .= "OSTOTILRIV.OTR_VIITE:{$tilausrivi_row['kommentti']}\n";
     $edi_order .= "OSTOTILRIV.OTR_OSATOIMITUSKIELTO:\n";
     $edi_order .= "OSTOTILRIV.OTR_JALKITOIMITUSKIELTO:\n";
     $edi_order .= "OSTOTILRIV.OTR_YKSIKKO:{$tilausrivi_row['yksikko']}\n";
@@ -296,13 +296,13 @@ if ($luodaan_aineisto) {
       pupe_query($query, $masterlink);
     }
 
-       $edi_order .= "*ME\n";
-       $edi_order .= "*IE\n";
+    $edi_order .= "*ME\n";
+    $edi_order .= "*IE\n";
 
     $edipolku = "/tmp";
 
     $filename = $edipolku."/{$laskurow['tunnus']}.dat";
-    file_put_contents($filename,$edi_order);
+    file_put_contents($filename, $edi_order);
 
     $ftphost = $ftphost_futur;
     $ftpuser = $ftpuser_futur;
@@ -312,13 +312,13 @@ if ($luodaan_aineisto) {
     $ftpfile = $unlink_filename = $filename;
 
     if (file_exists("ftp-send.inc")) {
-      require("ftp-send.inc");
+      require "ftp-send.inc";
     }
     elseif (file_exists("../inc/ftp-send.inc")) {
-      require("../inc/ftp-send.inc");
+      require "../inc/ftp-send.inc";
     }
     else {
-      require("inc/ftp-send.inc");
+      require "inc/ftp-send.inc";
     }
 
     if ($palautus != 0) $luodaan_aineisto = false;

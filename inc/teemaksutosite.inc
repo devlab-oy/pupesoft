@@ -1,10 +1,10 @@
 <?php
 
 // Kirjoitetaan laskulle maksutiliöinti
-$selite = str_replace ("'", " ", $vientiselite); // Poistaa SQL-virheen mahdollisuuden
-$tpv   = substr($pvm,0,2);
-$tpk   = substr($pvm,2,2);
-$tpp   = substr($pvm,4,2);
+$selite = str_replace("'", " ", $vientiselite); // Poistaa SQL-virheen mahdollisuuden
+$tpv   = substr($pvm, 0, 2);
+$tpk   = substr($pvm, 2, 2);
+$tpp   = substr($pvm, 4, 2);
 if ($tpv < 1000) $tpv += 2000;
 
 $teemaksutosite = TRUE;
@@ -68,7 +68,7 @@ if ($teemaksutosite) {
       echo "<font class='message'>".t("Kirjaan kassa-alennusta")." $summa</font><br>\n";
 
       if ($tiliointirow['vero'] != 0) { // Netotetaan alvi
-        $alv = round($summa - $summa / (1 + ($tiliointirow['vero'] / 100)),2);
+        $alv = round($summa - $summa / (1 + ($tiliointirow['vero'] / 100)), 2);
         $summa -= $alv;
       }
 
@@ -135,7 +135,7 @@ if ($teemaksutosite) {
     $vesumma = ($maara*-1) - $trow['vietysumma'];
 
     if ($trow['alatila'] == 'K' and $trow['vietykasumma'] != 0) {
-      $vesumma = round(($maara*-1) - ($trow['vietysumma'] - $trow['vietykasumma']),2);
+      $vesumma = round(($maara*-1) - ($trow['vietysumma'] - $trow['vietykasumma']), 2);
     }
 
     if (round($vesumma, 2) != 0) {
@@ -171,7 +171,7 @@ if ($teemaksutosite) {
                     laatija  = 'tiliote',
                     laadittu = now()";
           $xresult = pupe_query($query);
-          $isa = mysql_insert_id ($link);
+          $isa = mysql_insert_id();
 
           $totvesumma += $summa;
         }
@@ -207,7 +207,6 @@ if ($teemaksutosite) {
             laadittu = now()";
   $result = pupe_query($query);
 
-
   // Tarkenteet kopsataan alkuperäiseltä tiliöinniltä, mutta jos alkuperäinen tiliöinti on ilman tarkenteita, niin mennään tilin defaulteilla
   list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($ostovelkarow["tilino"], $ostovelkarow["kustp"], $ostovelkarow["kohde"], $ostovelkarow["projekti"]);
 
@@ -226,11 +225,12 @@ if ($teemaksutosite) {
             laatija  = 'tiliote',
             laadittu = now()";
   $result = pupe_query($query);
+  $_tiliointi_id = mysql_insert_id();
 
-    $query = "UPDATE tiliotedata
-              SET kasitelty = now(),
-              tiliointitunnus = ".mysql_insert_id($link)."
-              WHERE tunnus='$tiliotedataid'";
+  $query = "UPDATE tiliotedata
+            SET kasitelty = now(),
+            tiliointitunnus = {$_tiliointi_id}
+            WHERE tunnus    = {$tiliotedataid}";
   $dummyresult = pupe_query($query);
 
   $query = "UPDATE tiliotedata

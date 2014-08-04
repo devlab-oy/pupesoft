@@ -57,49 +57,49 @@ if (mysql_field_name($result, $i) == "kieli") {
 
 if (mysql_field_name($result, $i) == "kayttotarkoitus") {
 
-    $ulos = "<td><select name='$nimi'>";
-    $sel  = "";
+  $ulos = "<td><select name='$nimi'>";
+  $sel  = "";
 
-    if ($lukitse_laji == "tuote") {
-      $kires = t_avainsana("LITETY");
-    }
-    elseif ($lukitse_laji == "lasku" and !in_array($lasrow['tila'], array("H","Y","M","P","Q","X"))) {
-      $liitemuok_ok = true;
+  if ($lukitse_laji == "tuote") {
+    $kires = t_avainsana("LITETY");
+  }
+  elseif ($lukitse_laji == "lasku" and !in_array($lasrow['tila'], array("H", "Y", "M", "P", "Q", "X"))) {
+    $liitemuok_ok = true;
 
-      $kires = t_avainsana("TIL-LITETY", "", "ORDER BY selitetark_2 DESC, jarjestys, selite");
-    }
+    $kires = t_avainsana("TIL-LITETY", "", "ORDER BY selitetark_2 DESC, jarjestys, selite");
+  }
 
-    $natsasko = FALSE;
+  $natsasko = FALSE;
 
-    if (is_resource($kires)) {
-      while ($kirow = mysql_fetch_array($kires)) {
-        if ($kirow["selite"] == $trow[$i]) {
-          $select = 'SELECTED';
-          $natsasko = TRUE;
-        }
-        else $select = '';
-
-        if ($kirow["selitetark_2"] == "PAKOLLINEN") {
-          $paklisa = "*";
-        }
-        else {
-          $paklisa = "";
-        }
-
-        $ulos .= "<option value='$kirow[selite]' $select>$paklisa $kirow[selitetark]</option>";
+  if (is_resource($kires)) {
+    while ($kirow = mysql_fetch_array($kires)) {
+      if ($kirow["selite"] == $trow[$i]) {
+        $select = 'SELECTED';
+        $natsasko = TRUE;
       }
-    }
-    else {
-      $ulos .= "<option value='MU'>".t("Yleinen")."</option>";
-    }
+      else $select = '';
 
-    // Jos LITETY-avainsanaa ei ollut mutta kannassa on kuitenkin jokin tieto jo niin pidetään se selectöitynä
-    if (!$natsasko and $trow[$i] != "") {
-      $ulos .= "<option value= '$trow[$i]' SELECTED>$trow[$i]</option>";
-    }
+      if ($kirow["selitetark_2"] == "PAKOLLINEN") {
+        $paklisa = "*";
+      }
+      else {
+        $paklisa = "";
+      }
 
-    $ulos .= "</select></td>";
-    $jatko = 0;
+      $ulos .= "<option value='$kirow[selite]' $select>$paklisa $kirow[selitetark]</option>";
+    }
+  }
+  else {
+    $ulos .= "<option value='MU'>".t("Yleinen")."</option>";
+  }
+
+  // Jos LITETY-avainsanaa ei ollut mutta kannassa on kuitenkin jokin tieto jo niin pidetään se selectöitynä
+  if (!$natsasko and $trow[$i] != "") {
+    $ulos .= "<option value= '$trow[$i]' SELECTED>$trow[$i]</option>";
+  }
+
+  $ulos .= "</select></td>";
+  $jatko = 0;
 }
 
 if (mysql_field_name($result, $i) == "filesize" and $tunnus != "") {

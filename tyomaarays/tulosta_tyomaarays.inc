@@ -1,6 +1,6 @@
 <?php
 
-require_once("pdflib/phppdflib.class.php");
+require_once "pdflib/phppdflib.class.php";
 
 $norm["height"]     = 10;
 $norm["font"]       = "Times-Roman";
@@ -50,7 +50,7 @@ if (!function_exists('tyomaarays_alku')) {
     $drawtext     = "off";
     $border        = "off";
     $stretchtext  = "off";
-        $negative     = "off";
+    $negative     = "off";
 
     $style  = BCS_ALIGN_CENTER;
     $style |= ($output  == "png" )   ? BCS_IMAGE_PNG  : 0;
@@ -75,10 +75,10 @@ if (!function_exists('tyomaarays_alku')) {
     $pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"],     $thispage, $iso);
 
     if ($tyyppi == "SISAINEN") {
-      $pdf->draw_text(300,815, t("Sisäinen työmääräys", $kieli),   $thispage, $iso);
+      $pdf->draw_text(300, 815, t("Sisäinen työmääräys", $kieli),   $thispage, $iso);
     }
     else {
-      $pdf->draw_text(310,815, t("Työmääräys", $kieli),       $thispage, $iso);
+      $pdf->draw_text(310, 815, t("Työmääräys", $kieli),       $thispage, $iso);
     }
 
     $pdf->draw_text(310, 803, t("Sivu", $kieli),           $thispage, $norm);
@@ -214,7 +214,7 @@ if (!function_exists('tyomaarays_alku')) {
 
       if (((!is_numeric($laskurow[$kentta]) and trim($laskurow[$kentta]) != '') or (is_numeric($laskurow[$kentta]) and $laskurow[$kentta] != 0)) and trim($laskurow[$kentta]) != '0000-00-00') {
         if (strtoupper($al_row["selitetark_2"]) == "TEXT") {
-          $al_komm .= "\n$al_row[selitetark]:###".wordwrap(str_replace("\n","\n###", $laskurow[$kentta]), 90, "\n###");
+          $al_komm .= "\n$al_row[selitetark]:###".wordwrap(str_replace("\n", "\n###", $laskurow[$kentta]), 90, "\n###");
         }
         else {
           if (strtoupper($al_row["selitetark_2"]) == "DATE") {
@@ -270,7 +270,7 @@ if (!function_exists('tyomaarays_alku')) {
     }
 
     if (trim($laskurow['comments']) != '') {
-      $komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n","\n###", $laskurow['comments']), 90, "\n###");
+      $komm .= "\n".t("Kommentti", $kieli).":###".wordwrap(str_replace("\n", "\n###", $laskurow['comments']), 90, "\n###");
     }
 
     if (trim($al_komm) != '') {
@@ -285,7 +285,7 @@ if (!function_exists('tyomaarays_alku')) {
       $maxoik = 0;
 
       foreach ($kommentit as $kommentti) {
-        if(strpos($kommentti, "###") !== FALSE) {
+        if (strpos($kommentti, "###") !== FALSE) {
           list($o, $v) = explode("###", $kommentti);
 
           $oikpos = $pdf->strlen($o, $boldi);
@@ -344,7 +344,7 @@ if (!function_exists('tyomaarays_alku')) {
 }
 
 if (!function_exists('tyomaarays_uusi_sivu')) {
-  function tyomaarays_uusi_sivu ($params) {
+  function tyomaarays_uusi_sivu($params) {
     global $yhtiorow, $kukarow;
 
     // Luodaan muuttujat
@@ -361,7 +361,7 @@ if (!function_exists('tyomaarays_uusi_sivu')) {
     $drawtext     = "off";
     $border        = "off";
     $stretchtext  = "off";
-        $negative     = "off";
+    $negative     = "off";
 
     $style  = BCS_ALIGN_CENTER;
     $style |= ($output  == "png" ) ? BCS_IMAGE_PNG  : 0;
@@ -378,10 +378,10 @@ if (!function_exists('tyomaarays_uusi_sivu')) {
     $pdf->draw_text(410, 815, $laskurow["hyvaksynnanmuutos"],     $thispage, $iso);
 
     if ($tyyppi == "SISAINEN") {
-      $pdf->draw_text(300,815, t("Sisäinen työmääräys", $kieli),   $thispage, $iso);
+      $pdf->draw_text(300, 815, t("Sisäinen työmääräys", $kieli),   $thispage, $iso);
     }
     else {
-      $pdf->draw_text(310,815, t("Työmääräys", $kieli),       $thispage, $iso);
+      $pdf->draw_text(310, 815, t("Työmääräys", $kieli),       $thispage, $iso);
     }
 
     $pdf->draw_text(310, 803, t("Sivu", $kieli),           $thispage, $norm);
@@ -438,7 +438,7 @@ if (!function_exists('tyomaarays_uusi_sivu')) {
 }
 
 if (!function_exists('tyomaarays_rivi_otsikot')) {
-  function tyomaarays_rivi_otsikot ($params) {
+  function tyomaarays_rivi_otsikot($params) {
     global $yhtiorow, $kukarow;
 
     // Luodaan muuttujat
@@ -626,7 +626,7 @@ if (!function_exists('tyomaarays_rivi')) {
               $row["perhe_kommentti"] .= strtoupper($perherow["tuoteno"]).", ";
             }
           }
-          $row["perhe_kommentti"] = substr($row["perhe_kommentti"],0,-2);
+          $row["perhe_kommentti"] = substr($row["perhe_kommentti"], 0, -2);
         }
       }
     }
@@ -638,7 +638,7 @@ if (!function_exists('tyomaarays_rivi')) {
 
     $pdf->draw_text(23,  $kala, $rivinumerot[$row["tunnus"]],  $thispage, $pieni);
 
-    if ($row["keratty"] != '' and !in_array($row["var"], array('J','P'))) {
+    if ($row["keratty"] != '' and !in_array($row["var"], array('J', 'P'))) {
       $row['varattu'] = ($row['varattu']+$row['kpl'])." ".t_avainsana("Y", $kieli, "and avainsana.selite='$row[yksikko]'", "", "", "selite");
     }
     else {
@@ -666,8 +666,16 @@ if (!function_exists('tyomaarays_rivi')) {
       $pdf->draw_text(415-$oikpos, $kala, $row["varattu"],                 $thispage, $norm);
 
       if ($tyyppi == 'Q') {
-        $oikpos = $pdf->strlen(hintapyoristys($row["hinta"] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100)), $norm);
-        $pdf->draw_text(465-$oikpos, $kala, hintapyoristys($row["hinta"] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100)),         $thispage, $norm);
+
+        if ($yhtiorow["alv_kasittely"] != '' and $row["alv"] < 500) {
+          $hinta = hintapyoristys($row["hinta"] * (1 + $row["alv"] / 100));
+        }
+        else {
+          $hinta = hintapyoristys($row["hinta"]);
+        }
+
+        $oikpos = $pdf->strlen($hinta, $norm);
+        $pdf->draw_text(465-$oikpos, $kala, $hinta,         $thispage, $norm);
       }
       else {
         $oikpos = $pdf->strlen(hintapyoristys($row["hinta"]), $norm);
@@ -707,8 +715,15 @@ if (!function_exists('tyomaarays_rivi')) {
       }
 
       if ($tyyppi == 'Q') {
-        $oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100)), $norm);
-        $pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"] * (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100)),       $thispage, $norm);
+
+        if ($yhtiorow["alv_kasittely"] != '' and $row["alv"] < 500) {
+          $rivihinta = hintapyoristys($row["rivihinta"] * (1 + $row["alv"] / 100));
+        }
+        else {
+          $rivihinta = hintapyoristys($row["rivihinta"]);
+        }
+        $oikpos = $pdf->strlen($rivihinta, $norm);
+        $pdf->draw_text(575-$oikpos, $kala, $rivihinta,       $thispage, $norm);
       }
       else {
         $oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
@@ -760,7 +775,7 @@ if (!function_exists('tyomaarays_rivi')) {
       elseif ($row["uusiotunnus"] > 0 and $row["osto_vai_hyvitys"] == '' and $row["varattu"] + $row["kpl"] < 0 and ($row['sarjanumeroseuranta'] == 'S' or $row['sarjanumeroseuranta'] == 'U' or $row['sarjanumeroseuranta'] == 'G')) {
         $sarjanutunnus = "myyntirivitunnus";
       }
-      elseif ($row["varattu"]+$row["kpl"] < 0){
+      elseif ($row["varattu"]+$row["kpl"] < 0) {
         $sarjanutunnus = "ostorivitunnus";
       }
       else {
@@ -881,25 +896,25 @@ if (!function_exists('tyomaarays_loppu')) {
       if ($ytunpit > 0) {
         $uytunnus = $yhtiorow["ytunnus"];
         while ($ytunpit > 0) {
-            $uytunnus = "0".$uytunnus; $ytunpit--;
+          $uytunnus = "0".$uytunnus; $ytunpit--;
         }
       }
       else {
         $uytunnus = $yhtiorow["ytunnus"];
       }
 
-      $uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
+      $uytunnus = substr($uytunnus, 0, 7)."-".substr($uytunnus, 7, 1);
     }
     else {
       $uytunnus = $yhtiorow["ytunnus"];
     }
 
-        if ($laskurow['yhtio_ovttunnus'] != $yhtiorow['ovttunnus'] and $laskurow['yhtio_ovttunnus'] != '') {
-            $uytunnus = $laskurow['yhtio_ovttunnus'];
-        }
+    if ($laskurow['yhtio_ovttunnus'] != $yhtiorow['ovttunnus'] and $laskurow['yhtio_ovttunnus'] != '') {
+      $uytunnus = $laskurow['yhtio_ovttunnus'];
+    }
     else {
-        $uytunnus = $yhtiorow["maa"]."-".$uytunnus;
-        }
+      $uytunnus = $yhtiorow["maa"]."-".$uytunnus;
+    }
 
     $pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",      $thispage, $pieni);
     $pdf->draw_text(444, 55, $uytunnus,              $thispage, $pieni);
@@ -962,25 +977,25 @@ if (!function_exists('tyomaarays_loppu_lisarivit')) {
       if ($ytunpit > 0) {
         $uytunnus = $yhtiorow["ytunnus"];
         while ($ytunpit > 0) {
-            $uytunnus = "0".$uytunnus; $ytunpit--;
+          $uytunnus = "0".$uytunnus; $ytunpit--;
         }
       }
       else {
         $uytunnus = $yhtiorow["ytunnus"];
       }
 
-      $uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
+      $uytunnus = substr($uytunnus, 0, 7)."-".substr($uytunnus, 7, 1);
     }
     else {
       $uytunnus = $yhtiorow["ytunnus"];
     }
 
-        if ($laskurow['yhtio_ovttunnus'] != $yhtiorow['ovttunnus'] and $laskurow['yhtio_ovttunnus'] != '') {
-            $uytunnus = $laskurow['yhtio_ovttunnus'];
-        }
+    if ($laskurow['yhtio_ovttunnus'] != $yhtiorow['ovttunnus'] and $laskurow['yhtio_ovttunnus'] != '') {
+      $uytunnus = $laskurow['yhtio_ovttunnus'];
+    }
     else {
-        $uytunnus = $yhtiorow["maa"]."-".$uytunnus;
-        }
+      $uytunnus = $yhtiorow["maa"]."-".$uytunnus;
+    }
 
     $pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",      $thispage, $pieni);
     $pdf->draw_text(444, 55, $uytunnus,              $thispage, $pieni);
@@ -1100,10 +1115,10 @@ if (!function_exists('tyomaarays_print_pdf')) {
       echo t("Työmääräys tulostuu")."...<br>";
 
       if ($kukarow["extranet"] == '') {
-        require("../inc/sahkoposti.inc");
+        require "../inc/sahkoposti.inc";
       }
       else {
-        require("sahkoposti.inc");
+        require "sahkoposti.inc";
       }
     }
     elseif ($tee == 'NAYTATILAUS') {
@@ -1148,7 +1163,7 @@ if (!function_exists('tulosta_tyomaaraystarra_zebra')) {
 
     if (strlen($nimitys) > $pituus ) {
       if (strpos($nimitys, " ")) {
-        $nimipalat = explode(' ',$nimitys);
+        $nimipalat = explode(' ', $nimitys);
 
         $merkkimaara = 0;
         $nimitys = "";
@@ -1164,8 +1179,8 @@ if (!function_exists('tulosta_tyomaaraystarra_zebra')) {
         }
       }
 
-      $nimitys = substr($nimitys,0,$pituus);
-      $nimitys2 = $nimitys2 != "" ? substr($nimitys2,0,$pituus) : "";
+      $nimitys = substr($nimitys, 0, $pituus);
+      $nimitys2 = $nimitys2 != "" ? substr($nimitys2, 0, $pituus) : "";
     }
 
     $sivu  = "^XA\n";    // vakio alku, pakollinen

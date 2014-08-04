@@ -1,6 +1,6 @@
 <?php
 
-require("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if ($tee == "update") {
 
@@ -17,7 +17,7 @@ if ($tee == "update") {
 }
 
 $css_kuvaus = array(
-    'BODY_BACKGROUND'    =>  'Sivun tausta'
+  'BODY_BACKGROUND'    =>  'Sivun tausta'
   ,  'BODY_COLOR'      =>  'Sivun perusteksti'
   ,  'ERROR_COLOR'      =>  'Virheteksti'
   ,  'HEAD_COLOR'      =>  'Otsikkoteksti'
@@ -45,12 +45,12 @@ $css_kuvaus = array(
   ,  'TUMMA_BACKGROUND'    =>  'Tumman elementin tausta'
   ,  'TUMMA_COLOR'      =>  'Tumman elementin teksti'
   ,  'ASIAKASFAKTA_COLOR'  =>  'Asiakasfakta otsikolla ja myyntitilauksella'
-  );
+);
 
-function getCSSDescription($css_name){
+function getCSSDescription($css_name) {
   global $css_kuvaus;
 
-  if(array_key_exists($css_name, $css_kuvaus)){
+  if (array_key_exists($css_name, $css_kuvaus)) {
     return $css_kuvaus[$css_name];
   }
   else return false;
@@ -62,7 +62,7 @@ preg_match_all("/.*?\/\*(.*?(_COLOR|_BACKGROUND))\*\//", $yhtiorow['css'], $vari
 
 $varit = array();
 
-for($i=0; $i<count($varitmatch[0]); $i++) {
+for ($i=0; $i<count($varitmatch[0]); $i++) {
   if (!isset($varit[$varitmatch[1][$i]])) {
     $varit[$varitmatch[1][$i]] = $varitmatch[0][$i];
   }
@@ -153,7 +153,7 @@ echo "  <tr>
     <th>Kuvaus</th>
     </tr>";
 
-foreach($varit as $vari_index => $vari) {
+foreach ($varit as $vari_index => $vari) {
 
   preg_match("/(#[a-f0-9]{3,6});/i", $vari, $varirgb);
 
@@ -167,4 +167,4 @@ foreach($varit as $vari_index => $vari) {
 
 echo "</table><input type='submit' value='Päivitä'></form><br><br><br><br>";
 
-require("inc/footer.inc");
+require "inc/footer.inc";

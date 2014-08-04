@@ -1,8 +1,11 @@
 <?php
 
-/** Vastaavat ketjut
+/**
+ * Vastaavat ketjut
  *  Hakee vastaavat ketjuja tuotenumerolla
  */
+
+
 class Vastaavat {
 
   // Ketjun id
@@ -11,7 +14,9 @@ class Vastaavat {
   // Tuote jolla ketju on alunperin haettu
   private $tuote;
 
-  /** Ketju tarvitsee aina tuotenumeron minkä perusteella ketju luodaan.
+
+  /**
+   * Ketju tarvitsee aina tuotenumeron minkä perusteella ketju luodaan.
    */
   function __construct($tuoteno, $options = array()) {
     global $kukarow;
@@ -49,7 +54,9 @@ class Vastaavat {
     return $this->idt;
   }
 
-  /** Palauttaa ketjun kaikki tuotteet
+
+  /**
+   * Palauttaa ketjun kaikki tuotteet
    */
   function tuotteet($ketju, $options = array()) {
     global $kukarow;

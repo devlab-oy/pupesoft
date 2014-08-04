@@ -1,6 +1,6 @@
 <?php
 
-require("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 if ($livesearch_tee == "TUOTEHAKU") {
   livesearch_tuotehaku();
@@ -43,7 +43,7 @@ if ($tee == 'N' or $tee == 'E') {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
-    $trow = mysql_fetch_assoc ($result);
+    $trow = mysql_fetch_assoc($result);
     $tuoteno = $trow['tuoteno'];
     $tee='Z';
   }
@@ -170,16 +170,26 @@ echo "</tr></table><br>";
 
 //tuotteen varastostatus
 if ($tee == 'Z') {
-  $query = "SELECT tuote.*, date_format(tuote.muutospvm, '%Y-%m-%d') muutos, date_format(tuote.luontiaika, '%Y-%m-%d') luonti,
-            group_concat(distinct toimi.nimi order by tuotteen_toimittajat.tunnus separator '<br>') toimittaja,
-            group_concat(distinct tuotteen_toimittajat.osto_era order by tuotteen_toimittajat.tunnus separator '<br>') osto_era,
-            group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '<br>') toim_tuoteno,
-            group_concat(distinct tuotteen_toimittajat.tuotekerroin order by tuotteen_toimittajat.tunnus separator '<br>') tuotekerroin
+  $query = "SELECT
+            tuote.*,
+            date_format(tuote.muutospvm, '%Y-%m-%d') muutos,
+            date_format(tuote.luontiaika, '%Y-%m-%d') luonti,
+            group_concat(distinct toimi.nimi
+              ORDER BY tuotteen_toimittajat.tunnus separator '<br>') toimittaja,
+            group_concat(distinct if(tuotteen_toimittajat.osto_era = 0,
+                1,
+                tuotteen_toimittajat.osto_era)
+              ORDER BY tuotteen_toimittajat.tunnus separator '<br>') osto_era,
+            group_concat(distinct tuotteen_toimittajat.toim_tuoteno
+              ORDER BY tuotteen_toimittajat.tunnus separator '<br>') toim_tuoteno,
+            group_concat(distinct tuotteen_toimittajat.tuotekerroin
+              ORDER BY tuotteen_toimittajat.tunnus separator '<br>') tuotekerroin
             FROM tuote
             LEFT JOIN tuotteen_toimittajat USING (yhtio, tuoteno)
-            LEFT JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
-            WHERE tuote.yhtio = '$kukarow[yhtio]'
-            and tuote.tuoteno = '$tuoteno'
+            LEFT JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio
+              AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
+            WHERE tuote.yhtio  = '$kukarow[yhtio]'
+            and tuote.tuoteno  = '$tuoteno'
             GROUP BY tuote.tuoteno";
   $result = pupe_query($query);
 
@@ -315,9 +325,9 @@ if ($tee == 'Z') {
       $sresult = pupe_query($query);
 
       if (mysql_num_rows($sresult) > 0) {
-        while ($saldorow = mysql_fetch_assoc ($sresult)) {
+        while ($saldorow = mysql_fetch_assoc($sresult)) {
 
-          list($saldo, $hyllyssa,) = saldo_myytavissa($saldorow["tuoteno"], '', '', $saldorow["yhtio"], $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], '', $saldoaikalisa, $saldorow["era"]);
+          list($saldo, $hyllyssa, ) = saldo_myytavissa($saldorow["tuoteno"], '', '', $saldorow["yhtio"], $saldorow["hyllyalue"], $saldorow["hyllynro"], $saldorow["hyllyvali"], $saldorow["hyllytaso"], '', $saldoaikalisa, $saldorow["era"]);
 
           //summataan kokonaissaldoa ja vain oman firman saldoa
           $kokonaissaldo += $saldo;
@@ -351,7 +361,7 @@ if ($tee == 'Z') {
         }
       }
 
-      list($saldo, $hyllyssa,) = saldo_myytavissa($tuoteno, 'ORVOT', '', '', '', '', '', '', '', $saldoaikalisa);
+      list($saldo, $hyllyssa, ) = saldo_myytavissa($tuoteno, 'ORVOT', '', '', '', '', '', '', '', $saldoaikalisa);
 
       if ($saldo != 0) {
         echo "<tr>";
@@ -399,7 +409,7 @@ if ($tee == 'Z') {
       $korva2result = pupe_query($query);
 
       while ($row = mysql_fetch_assoc($korva2result)) {
-        list($saldo, $hyllyssa,) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
+        list($saldo, $hyllyssa, ) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
 
         echo "<tr>";
         echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($row["tuoteno"])."&lopetus=$lopetus'>$row[tuoteno]</a></td>";
@@ -434,7 +444,7 @@ if ($tee == 'Z') {
       $vasta2result = pupe_query($query);
 
       while ($row = mysql_fetch_assoc($vasta2result)) {
-        list($saldo, $hyllyssa,) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
+        list($saldo, $hyllyssa, ) = saldo_myytavissa($row["tuoteno"], '', '', '', '', '', '', '', '', $saldoaikalisa);
 
         echo "<tr>";
         echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($row["tuoteno"])."&lopetus=$lopetus'>$row[tuoteno]</a></td>";
@@ -653,7 +663,7 @@ if ($tee == 'Z') {
               ORDER BY tapahtuma.laadittu desc $maara";
     $qresult = pupe_query($query);
 
-    while ($prow = mysql_fetch_assoc ($qresult)) {
+    while ($prow = mysql_fetch_assoc($qresult)) {
       echo "<tr>";
       echo "<td nowrap>$prow[kuka]</td>";
       echo "<td nowrap>";
@@ -676,15 +686,15 @@ if ($tee == 'Z') {
 }
 
 if ($tee == "Y") {
-    echo "<form method='post' autocomplete='off'>";
-    echo "<input type='hidden' name='toim' value='$toim'>";
-    echo "<input type='hidden' name='tee' value='Z'>";
-    echo "<table><tr>";
-    echo "<th>".t("Valitse tuotenumero").":</th>";
-    echo "<td>$ulos</td>";
-    echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></td>";
-    echo "</tr></table>";
-    echo "</form>";
+  echo "<form method='post' autocomplete='off'>";
+  echo "<input type='hidden' name='toim' value='$toim'>";
+  echo "<input type='hidden' name='tee' value='Z'>";
+  echo "<table><tr>";
+  echo "<th>".t("Valitse tuotenumero").":</th>";
+  echo "<td>$ulos</td>";
+  echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></td>";
+  echo "</tr></table>";
+  echo "</form>";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

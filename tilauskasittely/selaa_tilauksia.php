@@ -3,7 +3,7 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 if ($toim == "") $toim = "MYYNTI";
 
@@ -31,20 +31,20 @@ if ($tee == "kk" and !isset($vv) and !isset($kk)) {
 }
 
 // edellinen ja seuraava kuukausi
-$ekv = date("Y",mktime(0, 0, 0, $kk-1, 1, $vv));
-$ekk = date("m",mktime(0, 0, 0, $kk-1, 1, $vv));
-$ekp = date("d",mktime(0, 0, 0, $kk-1, 1, $vv));
-$nkv = date("Y",mktime(0, 0, 0, $kk+1, 1, $vv));
-$nkk = date("m",mktime(0, 0, 0, $kk+1, 1, $vv));
-$nkp = date("d",mktime(0, 0, 0, $kk+1, 1, $vv));
+$ekv = date("Y", mktime(0, 0, 0, $kk-1, 1, $vv));
+$ekk = date("m", mktime(0, 0, 0, $kk-1, 1, $vv));
+$ekp = date("d", mktime(0, 0, 0, $kk-1, 1, $vv));
+$nkv = date("Y", mktime(0, 0, 0, $kk+1, 1, $vv));
+$nkk = date("m", mktime(0, 0, 0, $kk+1, 1, $vv));
+$nkp = date("d", mktime(0, 0, 0, $kk+1, 1, $vv));
 
 // edellinen ja seuraava päivä
-$epv = date("Y",mktime(0, 0, 0, $kk, $pp-1, $vv));
-$epk = date("m",mktime(0, 0, 0, $kk, $pp-1, $vv));
-$epp = date("d",mktime(0, 0, 0, $kk, $pp-1, $vv));
-$npv = date("Y",mktime(0, 0, 0, $kk, $pp+1, $vv));
-$npk = date("m",mktime(0, 0, 0, $kk, $pp+1, $vv));
-$npp = date("d",mktime(0, 0, 0, $kk, $pp+1, $vv));
+$epv = date("Y", mktime(0, 0, 0, $kk, $pp-1, $vv));
+$epk = date("m", mktime(0, 0, 0, $kk, $pp-1, $vv));
+$epp = date("d", mktime(0, 0, 0, $kk, $pp-1, $vv));
+$npv = date("Y", mktime(0, 0, 0, $kk, $pp+1, $vv));
+$npk = date("m", mktime(0, 0, 0, $kk, $pp+1, $vv));
+$npp = date("d", mktime(0, 0, 0, $kk, $pp+1, $vv));
 
 $etsi = '';
 
@@ -169,7 +169,7 @@ if ($toim == "KEIKKA") {
              ORDER BY luontiaika";
 
   // päivänäkymä
-  $query2 = "SELECT lasku.laskunro keikka, lasku.tunnus, lasku.nimi, DATE_FORMAT(lasku.luontiaika,'%d.%m.%Y') pvm, if(lasku.mapvm='0000-00-00','',DATE_FORMAT(lasku.mapvm,'%d.%m.%Y')) jlaskenta,
+  $query2 = "SELECT lasku.laskunro saapuminen, lasku.tunnus, lasku.nimi, DATE_FORMAT(lasku.luontiaika,'%d.%m.%Y') pvm, if(lasku.mapvm='0000-00-00','',DATE_FORMAT(lasku.mapvm,'%d.%m.%Y')) jlaskenta,
              round(sum(tilausrivi.hinta*{$query_ale_lisa}*(tilausrivi.varattu+tilausrivi.kpl)),2) summa, lasku.valkoodi
              FROM lasku use index (yhtio_tila_luontiaika)
              JOIN tilausrivi use index (uusiotunnus_index) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tyyppi!='D')
@@ -186,7 +186,7 @@ if ($toim == "KEIKKA") {
         ORDER BY lasku.laskunro";
 
   // tilausnäkymä
-  $query3 = "SELECT lasku.laskunro keikka, DATE_FORMAT(lasku.luontiaika,'%d.%m.%Y') pvm, tuoteno, nimitys, kpl+varattu kpl, round(tilausrivi.hinta*vienti_kurssi, '$yhtiorow[hintapyoristys]') hinta,
+  $query3 = "SELECT lasku.laskunro saapuminen, DATE_FORMAT(lasku.luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(tilausrivi.laskutettuaika,'%d.%m.%Y') 'viety varastoon', tuoteno, nimitys, kpl+varattu kpl, round(tilausrivi.hinta*vienti_kurssi, '$yhtiorow[hintapyoristys]') hinta,
              round(tilausrivi.hinta*{$query_ale_lisa}*(tilausrivi.varattu+tilausrivi.kpl)*vienti_kurssi,'$yhtiorow[hintapyoristys]') arvo, '$yhtiorow[valkoodi]' valkoodi, round(tilausrivi.rivihinta, '$yhtiorow[hintapyoristys]') ostohinta, vienti_kurssi kurssi, tilausrivin_lisatiedot.hankintakulut
              FROM tilausrivi use index (uusiotunnus_index)
              JOIN lasku use index (PRIMARY) on (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.uusiotunnus)
@@ -197,7 +197,7 @@ if ($toim == "KEIKKA") {
              ORDER BY tilausrivi.tunnus";
 
   // tilausnumerohaku
-  $query4 = "SELECT lasku.laskunro keikka, lasku.tunnus, lasku.nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, if(mapvm='0000-00-00','',DATE_FORMAT(mapvm,'%d.%m.%Y')) jlaskenta,
+  $query4 = "SELECT lasku.laskunro saapuminen, lasku.tunnus, lasku.nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, if(mapvm='0000-00-00','',DATE_FORMAT(mapvm,'%d.%m.%Y')) jlaskenta,
              round(sum(tilausrivi.hinta*{$query_ale_lisa}*(tilausrivi.varattu+tilausrivi.kpl)),2) summa, lasku.valkoodi
              FROM tilausrivi use index (yhtio_otunnus)
              JOIN lasku ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tila = 'K' and vanhatunnus = 0
@@ -402,13 +402,13 @@ if (mysql_num_rows($result) > 0) {
 
   while ($row = mysql_fetch_array($result)) {
 
-    list ($pp,$kk,$vv) = explode(".", $row["pvm"],3);
+    list ($pp, $kk, $vv) = explode(".", $row["pvm"], 3);
 
     echo "<tr>";
 
     for ($i = 0; $i < mysql_num_fields($result); $i++) {
 
-      if (is_numeric($row[$i]) and (mysql_field_type($result,$i) == 'real' or mysql_field_type($result,$i) == 'int')) {
+      if (is_numeric($row[$i]) and (mysql_field_type($result, $i) == 'real' or mysql_field_type($result, $i) == 'int')) {
         echo "<td align='right'>$row[$i]</td>";
       }
       elseif (mysql_field_name($result, $i) == "hankintakulut") {
@@ -423,6 +423,9 @@ if (mysql_num_rows($result) > 0) {
         }
 
         echo "<td align='right'>$osuus_kululaskuista $yhtiorow[valkoodi]</td><td align='right'>$osuus_eturahdista $yhtiorow[valkoodi]</td><td align='right'>$tulliprossa %</td><td align='right'>$aputullimaara $yhtiorow[valkoodi]</td><td align='right'>$rivinlisakulu $yhtiorow[valkoodi]</td>";
+      }
+      elseif (mysql_field_name($result, $i) == "tuoteno") {
+        echo "<td><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row[$i])."'>$row[$i]</a></td>";
       }
       else {
         echo "<td>$row[$i]</td>";
@@ -458,7 +461,7 @@ if (mysql_num_rows($result) > 0) {
       $tila_row = mysql_fetch_array($aputilares);
 
       // vain laskuttamattomille myyntitilaukille voi tehdä jotain
-      if ($tila_row["tila"] == "L" and $tila_row["alatila"] != "X" or ($tila_row["tila"] == "N" and in_array($tila_row["alatila"], array('A','')))) {
+      if ($tila_row["tila"] == "L" and $tila_row["alatila"] != "X" or ($tila_row["tila"] == "N" and in_array($tila_row["alatila"], array('A', '')))) {
         echo "<form method='post' action='vaihda_tila.php'>";
         echo "<input type='hidden' name='parametrit' value='$teemita#$pp#$kk#$vv#$toim'>";
         echo "<input type='hidden' name='tee' value='valitse'>";
@@ -478,18 +481,18 @@ if (mysql_num_rows($result) > 0) {
       $i = 6;
     }
     echo "<th colspan='".(mysql_num_fields($result)-$i)."'>".t("Yhteensä").": </th>";
-    echo "<th align='right'>".sprintf('%.02f',$summa)."</td>";
-    echo "<th align='right'>".sprintf('%.02f',$arvo)."</td>";
+    echo "<th align='right'>".sprintf('%.02f', $summa)."</td>";
+    echo "<th align='right'>".sprintf('%.02f', $arvo)."</td>";
 
     if ($osuus_kululaskuista_yhteensa != "" or $osuus_eturahdista_yhteensa != "" or $aputullimaara_yhteensa != "" or $rivinlisakulu_yhteensa != "") {
       echo "<th align='right'>&nbsp;</td>";
       echo "<th align='right'>&nbsp;$ostohinta_yhteesa</td>";
       echo "<th align='right'>&nbsp;</td>";
-      echo "<th align='right'>".sprintf('%.02f',$osuus_kululaskuista_yhteensa)." $yhtiorow[valkoodi]</td>";
-      echo "<th align='right'>".sprintf('%.02f',$osuus_eturahdista_yhteensa)." $yhtiorow[valkoodi]</td>";
+      echo "<th align='right'>".sprintf('%.02f', $osuus_kululaskuista_yhteensa)." $yhtiorow[valkoodi]</td>";
+      echo "<th align='right'>".sprintf('%.02f', $osuus_eturahdista_yhteensa)." $yhtiorow[valkoodi]</td>";
       echo "<th align='right'>&nbsp;</td>";
-      echo "<th align='right'>".sprintf('%.02f',$aputullimaara_yhteensa)." $yhtiorow[valkoodi]</td>";
-      echo "<th align='right'>".sprintf('%.02f',$rivinlisakulu_yhteensa)." $yhtiorow[valkoodi]</td>";
+      echo "<th align='right'>".sprintf('%.02f', $aputullimaara_yhteensa)." $yhtiorow[valkoodi]</td>";
+      echo "<th align='right'>".sprintf('%.02f', $rivinlisakulu_yhteensa)." $yhtiorow[valkoodi]</td>";
     }
     echo "</tr>";
   }
@@ -500,4 +503,4 @@ else {
   echo t("Ei tilauksia")."...";
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

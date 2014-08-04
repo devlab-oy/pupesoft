@@ -23,8 +23,8 @@ if (trim($argv[3]) == '') {
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
 
 // otetaan tietokanta connect ja funktiot
-require("inc/connect.inc");
-require("inc/functions.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 // Sallitaan vain yksi instanssi t‰st‰ skriptist‰ kerrallaan
 pupesoft_flock();
@@ -98,6 +98,24 @@ if ($handle = opendir($path)) {
             $tuoterow = mysql_fetch_assoc($tuoteres);
 
             list($saldo, $hyllyssa, $myytavissa, $devnull) = saldo_myytavissa($tuoterow["tuoteno"], "KAIKKI", $varastorow['tunnus']);
+
+            // Etuk‰teen maksetut tilaukset, jotka ovat ker‰‰m‰tt‰ mutta tilaus jo laskutettu
+            // Lasketaan ne mukaan Pupen hyllyss‰ m‰‰r‰‰n, koska saldo_myytavissa ei huomioi niit‰
+            $query = "SELECT ifnull(sum(tilausrivi.kpl), 0) AS keraamatta
+                      FROM tilausrivi
+                      INNER JOIN lasku on (lasku.yhtio = tilausrivi.yhtio
+                        AND lasku.tunnus          = tilausrivi.otunnus
+                        AND lasku.mapvm          != '0000-00-00'
+                        AND lasku.chn             = '999')
+                      WHERE tilausrivi.yhtio      = '{$kukarow['yhtio']}'
+                      AND tilausrivi.tyyppi       = 'L'
+                      AND tilausrivi.var         != 'P'
+                      AND tilausrivi.keratty      = ''
+                      AND tilausrivi.kerattyaika  = '0000-00-00 00:00:00'";
+            $ker_result = pupe_query($query);
+            $ker_rivi = mysql_fetch_assoc($ker_result);
+
+            $hyllyssa += $ker_rivi['keraamatta'];
 
             // Vertailukonversio
             $a = (int) $kpl * 10000;

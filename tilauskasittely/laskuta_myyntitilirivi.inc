@@ -1,7 +1,7 @@
 <?php
 
 // M‰‰ritell‰‰n funktio, jolla kopsataan valitut rivit uudelle myyntitilaukselle.
-require("tilauksesta_myyntitilaus.inc");
+require "tilauksesta_myyntitilaus.inc";
 
 if ($tilatapa == "VALITSE") {
   $sela = "";
@@ -45,7 +45,7 @@ if ($tilatapa == "PAIVITA") {
   if ($qrow["kpl"] != $kpl and (float) $kpl > 0) {
     $isakpl = $qrow["kpl"];
 
-    if($qrow["perheid"] != 0) {
+    if ($qrow["perheid"] != 0) {
       $query  = "SELECT *
                  FROM tilausrivi
                  WHERE yhtio = '$kukarow[yhtio]'
@@ -55,14 +55,14 @@ if ($tilatapa == "PAIVITA") {
       $qres = pupe_query($query);
     }
 
-    mysql_data_seek($qres,0);
+    mysql_data_seek($qres, 0);
 
     $uuden_perheen_perheid = 0;
     $kopsatut_rivit = array();
 
-    while($qrow = mysql_fetch_array($qres)) {
+    while ($qrow = mysql_fetch_array($qres)) {
 
-      $uusikpl = round(($qrow["kpl"]/$isakpl)*$kpl,2);
+      $uusikpl = round(($qrow["kpl"]/$isakpl)*$kpl, 2);
       $erotus  = $qrow["kpl"] - $uusikpl;
 
       if ($erotus > 0) {
@@ -73,33 +73,33 @@ if ($tilatapa == "PAIVITA") {
                   AND tunnus  = '$qrow[tunnus]'";
         $updres = pupe_query($query);
 
-        $fields = mysql_field_name($qres,0);
+        $fields = mysql_field_name($qres, 0);
         $values = "'".$qrow[0]."'";
 
-        for($i=1; $i < mysql_num_fields($qres)-1; $i++) { // Ei monisteta tunnusta
+        for ($i=1; $i < mysql_num_fields($qres)-1; $i++) { // Ei monisteta tunnusta
 
-          $fields .= ", ".mysql_field_name($qres,$i);
+          $fields .= ", ".mysql_field_name($qres, $i);
 
-          switch (mysql_field_name($qres,$i)) {
-            case 'laadittu':
-              $values .= ", now()";
-              break;
-            case 'tunnus':
-              $values .= ", ''";
-              break;
-            case 'laatija':
-              $values .= ", '$kukarow[kuka]'";
-              break;
-            case 'kpl':
-            case 'tilkpl':
-            case 'varattu':
-              $values .= ", '$erotus'";
-              break;
-            case 'kate_korjattu':
-              $values .= ", NULL";
-              break;
-            default:
-              $values .= ", '".$qrow[$i]."'";
+          switch (mysql_field_name($qres, $i)) {
+          case 'laadittu':
+            $values .= ", now()";
+            break;
+          case 'tunnus':
+            $values .= ", ''";
+            break;
+          case 'laatija':
+            $values .= ", '$kukarow[kuka]'";
+            break;
+          case 'kpl':
+          case 'tilkpl':
+          case 'varattu':
+            $values .= ", '$erotus'";
+            break;
+          case 'kate_korjattu':
+            $values .= ", NULL";
+            break;
+          default:
+            $values .= ", '".$qrow[$i]."'";
           }
         }
 
@@ -116,7 +116,7 @@ if ($tilatapa == "PAIVITA") {
       }
     }
     if (count($kopsatut_rivit) > 1) {
-      foreach($kopsatut_rivit as $uusitunnu) {
+      foreach ($kopsatut_rivit as $uusitunnu) {
         $query = "UPDATE tilausrivi SET
                   perheid     = '$uuden_perheen_perheid'
                   WHERE yhtio = '$kukarow[yhtio]'
@@ -217,7 +217,7 @@ if ($tilatapa == "PALAUTA") {
     $kukarow["kesken"] = 0;
     $tilausnumero = 0;
 
-    require("tilauskasittely/otsik_siirtolista.inc");
+    require "tilauskasittely/otsik_siirtolista.inc";
 
     $kukarow["kesken"] = $id;
 
@@ -251,7 +251,7 @@ if ($tilatapa == "PALAUTA") {
       // $var          --> H,J,P varrit
       // $paikka        --> milt‰ varastopaikalta siirret‰‰n
 
-      require("tilauskasittely/lisaarivi.inc");
+      require "tilauskasittely/lisaarivi.inc";
 
       // P‰ivitet‰‰n uusi siirtolistan rivi samantien ker‰tyksi
       $query = "UPDATE tilausrivi SET

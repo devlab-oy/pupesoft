@@ -1,8 +1,8 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
-echo "<font class='head'>",t("Messenger"),"</font><hr>";
+echo "<font class='head'>", t("Messenger"), "</font><hr>";
 
 $query = "SELECT distinct yhtio
           FROM yhtio
@@ -106,7 +106,7 @@ for ($i = 0; $i <= 3; $i++) {
   $y = $y * 2;
 }
 
- echo "    </select> ".t("viimeisintä")."
+echo "    </select> ".t("viimeisintä")."
       <select name='kuka' onChange='javascript:submit()'>
         <option value='vastaanotettua' $sel2>".t("vastaanotettua")."</option>
         <option value='lähetettyä' $sel3>".t("lähetettyä")."</option>
@@ -136,7 +136,7 @@ while ($row = mysql_fetch_array($result)) {
   echo "</td>";
 
   echo "<td>";
-  echo tv1dateconv($row['luontiaika'],'yes');
+  echo tv1dateconv($row['luontiaika'], 'yes');
   echo "</td>";
 
   echo "<td>";
@@ -153,4 +153,4 @@ while ($row = mysql_fetch_array($result)) {
 
 echo "</table>";
 
-require("inc/footer.inc");
+require "inc/footer.inc";

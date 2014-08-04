@@ -1,6 +1,6 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Muuta factorointia")."</font><hr>";
 
@@ -241,4 +241,4 @@ if (!isset($laskuno)) {
 $formi = "eikat";
 $kentta = "laskuno";
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

@@ -2,15 +2,15 @@
 
 if ($_REQUEST["tee"] == 'NAYTATILAUS') $nayta_pdf = 1; //Generoidaan .pdf-file
 
-require ('../inc/parametrit.inc');
+require '../inc/parametrit.inc';
 
 if ($tee_pdf == 'tulosta_karhu') {
-  require ('myyntires/paperikarhu.php');
+  require 'myyntires/paperikarhu.php';
   exit;
 }
 
 if ($tee_pdf == 'tulosta_tratta') {
-  require ('myyntires/paperitratta.php');
+  require 'myyntires/paperitratta.php';
   exit;
 }
 
@@ -29,7 +29,7 @@ else {
 if ($tee == 'uusi_ekirje') {
   $tee_pdf = "tulosta_karhu";
 
-  require ('myyntires/paperikarhu.php');
+  require 'myyntires/paperikarhu.php';
 
   echo "<br><font class='ok'>eKirje l‰hetetty uudestaan asiakkaalle $asiakastiedot[nimi]!</font><br><br>";
 }
@@ -62,7 +62,7 @@ if ($tee == "uusi_ekirjekierros") {
 
     try {
       // koitetaan l‰hett‰‰ eKirje sek‰ tulostaa
-      require ('paperikarhu.php');
+      require 'paperikarhu.php';
 
       echo "<font class='ok'>eKirje l‰hetetty uudestaan asiakkaalle $asiakastiedot[nimi]!</font><br>";
     }
@@ -100,7 +100,7 @@ if (isset($_POST['poista_tratta'])) {
                 AND ltunnus   = $row[ltunnus]";
       $kres = pupe_query($query);
 
-      echo "<font class='message'>",t("Tratta poistettu laskulta")," $row[ltunnus] (",t("kierros")," $poista_tratta_tunnus)</font><br/>";
+      echo "<font class='message'>", t("Tratta poistettu laskulta"), " $row[ltunnus] (", t("kierros"), " $poista_tratta_tunnus)</font><br/>";
     }
   }
 }
@@ -233,7 +233,7 @@ if ((isset($tee_hae) and $tee_hae != "") or (isset($tee_kaikki) and $tee_kaikki 
         $kuu   = substr($row["pvm"], 5, 2);
         $year  = substr($row["pvm"], 0, 4);
 
-        $erapaiva = tv1dateconv(date("Y-m-d",mktime(0, 0, 0, $kuu, $paiva+$yhtiorow['karhuerapvm'], $year)));
+        $erapaiva = tv1dateconv(date("Y-m-d", mktime(0, 0, 0, $kuu, $paiva+$yhtiorow['karhuerapvm'], $year)));
       }
       else {
         $erapaiva = t("HETI");
@@ -297,7 +297,7 @@ if ((isset($tee_hae) and $tee_hae != "") or (isset($tee_kaikki) and $tee_kaikki 
 
       if ($toim == "TRATTA") {
         echo "<td><form method='post'>";
-        echo "<input type='submit' name='poista_tratta' id='poista_tratta' value='",t("Poista"),"'>";
+        echo "<input type='submit' name='poista_tratta' id='poista_tratta' value='", t("Poista"), "'>";
         echo "<input type='hidden' name='poista_tratta_tunnus' id='poista_tratta_tunnus' value='$row[ktunnus]'>";
         echo "<input type='hidden' name='ltunnus' id='ltunnus' value='$row[ltunnus]'>";
         echo "</form></td>";
@@ -377,4 +377,4 @@ elseif (isset($tee_kiekat)) {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

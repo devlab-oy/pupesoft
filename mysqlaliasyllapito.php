@@ -1,6 +1,6 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Mysqlalias-avainsanojen ylläpito")."</font><hr>";
 
@@ -52,7 +52,9 @@ if ($upd == 1) {
                 selitetark_2 = '$xalias_set',
                 selitetark_3 = '$pakollisuus',
                 selitetark_4 = '{$oletusarvo[$al_nimi]}',
-                selitetark_5 = '{$ohjeteksti[$al_nimi]}'";
+                selitetark_5 = '{$ohjeteksti[$al_nimi]}',
+                laatija      = '{$kukarow['kuka']}',
+                luontiaika   = now()";
       $al_res = pupe_query($query);
     }
   }
@@ -80,7 +82,7 @@ if ($kopsaataulu != "" and $uusisetti != "") {
   $query = "SELECT *
             FROM avainsana
             WHERE yhtio      = '$kukarow[yhtio]'
-            and laji='MYSQLALIAS'
+            and laji         = 'MYSQLALIAS'
             and selite       like '$kopsaataulu.%'
             and selitetark_2 = '$alias_set'";
   $al_res1 = pupe_query($query);
@@ -88,7 +90,7 @@ if ($kopsaataulu != "" and $uusisetti != "") {
   $query = "SELECT *
             FROM avainsana
             WHERE yhtio      = '$kukarow[yhtio]'
-            and laji='MYSQLALIAS'
+            and laji         = 'MYSQLALIAS'
             and selite       like '$kopsaataulu.%'
             and selitetark_2 = '$uusisetti'";
   $al_res2 = pupe_query($query);
@@ -96,11 +98,17 @@ if ($kopsaataulu != "" and $uusisetti != "") {
   if (mysql_num_rows($al_res1) > 0 and mysql_num_rows($al_res2) == 0) {
     while ($al_row = mysql_fetch_array($al_res1)) {
       $query = "INSERT INTO avainsana
-                SET yhtio     = '$kukarow[yhtio]',
+                SET yhtio    = '$kukarow[yhtio]',
                 laji         = 'MYSQLALIAS',
+                nakyvyys     = '$al_row[nakyvyys]',
                 selite       = '$al_row[selite]',
                 selitetark   = '$al_row[selitetark]',
-                selitetark_2 = '$uusisetti'";
+                selitetark_2 = '$uusisetti',
+                selitetark_3 = '$al_row[selitetark_3]',
+                selitetark_4 = '$al_row[selitetark_4]',
+                selitetark_5 = '$al_row[selitetark_5]',
+                laatija      = '{$kukarow['kuka']}',
+                luontiaika   = now()";
       $al_res3 = pupe_query($query);
     }
   }
@@ -219,19 +227,19 @@ if ($taulu != "") {
     if (strlen($trow[$i]) > 35) {
       $size = strlen($trow[$i])+2;
     }
-    elseif (mysql_field_len($result,$i)>10) {
+    elseif (mysql_field_len($result, $i)>10) {
       $size = '35';
     }
-    elseif (mysql_field_len($result,$i)<5) {
+    elseif (mysql_field_len($result, $i)<5) {
       $size = '5';
     }
     else {
       $size = '10';
     }
 
-    $maxsize = mysql_field_len($result,$i); // Jotta tätä voidaan muuttaa
+    $maxsize = mysql_field_len($result, $i); // Jotta tätä voidaan muuttaa
 
-    require ("inc/$taulu"."rivi.inc");
+    require "inc/$taulu"."rivi.inc";
 
     // Näitä kenttiä ei ikinä saa päivittää käyttöliittymästä
     if (mysql_field_name($result, $i) == "laatija" or
@@ -296,9 +304,9 @@ if ($taulu != "") {
       echo "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='$maxsize'></td>";
     }
     elseif ($tyyppi == 1.5) {
-      $vva = substr($trow[$i],0,4);
-      $kka = substr($trow[$i],5,2);
-      $ppa = substr($trow[$i],8,2);
+      $vva = substr($trow[$i], 0, 4);
+      $kka = substr($trow[$i], 5, 2);
+      $ppa = substr($trow[$i], 8, 2);
 
       echo "<td>
           <input type = 'text' name = 'tpp[$i]' value = '$ppa' size='3' maxlength='2'>
@@ -308,13 +316,13 @@ if ($taulu != "") {
     elseif ($tyyppi == 2) {
       echo "<td>$trow[$i]</td>";
     }
-    elseif($tyyppi == 3) {
+    elseif ($tyyppi == 3) {
       echo "<td>$trow[$i]<input type = 'hidden' name = '$nimi' value = '$trow[$i]'></td>";
     }
-    elseif($tyyppi == 4) {
+    elseif ($tyyppi == 4) {
       echo "<input type = 'hidden' name = '$nimi' value = '$trow[$i]'>";
     }
-    elseif($tyyppi == 5) {
+    elseif ($tyyppi == 5) {
       echo "<td><input type = 'file' name = 'liite_$i'></td>";
     }
 
@@ -352,4 +360,4 @@ if ($taulu != "") {
 
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

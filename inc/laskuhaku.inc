@@ -1,6 +1,6 @@
 <?php
 
-echo "<font class='head'>",t("Laskuhaku"),"</font><hr>";
+echo "<font class='head'>", t("Laskuhaku"), "</font><hr>";
 
 if (!isset($tee)) $tee = '';
 if (!isset($pvm)) $pvm = '';
@@ -120,7 +120,7 @@ echo "<tr>
         <option value='tappvm' {$sel['tappvm']}>".t("Tapahtumap‰iv‰m‰‰r‰")."</option>";
 
 if ($yhtiorow['ostolaskujen_paivays'] == "1") {
-    echo "<option value='laspvm' {$sel['laspvm']}>".t("Laskunp‰iv‰m‰‰r‰")."</option>";
+  echo "<option value='laspvm' {$sel['laspvm']}>".t("Laskunp‰iv‰m‰‰r‰")."</option>";
 }
 
 
@@ -176,7 +176,7 @@ for ($i = 1; $i < 32; $i++) {
 echo "</select></td><td class='back'>&nbsp;</td></tr>";
 
 echo "<tr>
-  <th valign='top'>",t("Loppupvm"),"</th>
+  <th valign='top'>", t("Loppupvm"), "</th>
   <td><select name='loppuvv'>";
 
 $sel = array();
@@ -224,25 +224,54 @@ for ($i = 1; $i < 32; $i++) {
 
 echo "</select></td><td class='back'>&nbsp;</td></tr>";
 
+$monivalintalaatikot = array();
+
 $query = "SELECT tunnus
           FROM kustannuspaikka
-          WHERE yhtio   = '$kukarow[yhtio]'
-          and tyyppi    = 'K'
-          and kaytossa != 'E'
+          WHERE yhtio   = '{$kukarow["yhtio"]}'
+          AND tyyppi    = 'K'
+          AND kaytossa != 'E'
           LIMIT 1";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0) {
+  $monivalintalaatikot[] = "KUSTP";
+}
 
-  echo "<tr><th>".t("Kustannuspaikka")."</th><td>";
+$query = "SELECT tunnus
+          FROM kustannuspaikka
+          WHERE yhtio   = '{$kukarow["yhtio"]}'
+          AND tyyppi    = 'O'
+          AND kaytossa != 'E'
+          LIMIT 1";
+$result = pupe_query($query);
 
-  $monivalintalaatikot = array("KUSTP");
+if (mysql_num_rows($result) > 0) {
+  $monivalintalaatikot[] = "KOHDE";
+}
+
+$query = "SELECT tunnus
+          FROM kustannuspaikka
+          WHERE yhtio   = '{$kukarow["yhtio"]}'
+          AND tyyppi    = 'P'
+          AND kaytossa != 'E'
+          LIMIT 1";
+$result = pupe_query($query);
+
+if (mysql_num_rows($result) > 0) {
+  $monivalintalaatikot[] = "PROJEKTI";
+}
+
+if (count($monivalintalaatikot) > 0) {
+  echo "<tr>";
+  echo "<th>".t("Tarkenne")."</th>";
+  echo "<td>";
+
   $noautosubmit = TRUE;
-  $piirra_otsikot = FALSE;
+  require "tilauskasittely/monivalintalaatikot.inc";
 
-  require ("tilauskasittely/monivalintalaatikot.inc");
-
-  echo "</td></tr>";
+  echo "</td>";
+  echo "</tr>";
 }
 
 $sel = array_fill_keys(array($laskuntyyppi), " selected") + array_fill_keys(array('H', 'Y', 'M', 'P', 'Q', 'K'), '');
@@ -315,7 +344,7 @@ if ($tee != '') {
 
   $alku += 0;
 
-  if (isset($lisa) and strpos($lisa, "tiliointi.kustp") !== FALSE) {
+  if (isset($lisa) and strpos($lisa, "tiliointi.") !== FALSE) {
     $tiliointilisa = " JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.korjattu='') ";
   }
   else {
@@ -338,7 +367,7 @@ if ($tee != '') {
   if (mysql_num_rows($result) == 0) {
     echo "<b>".t("Haulla ei lˆytynyt yht‰‰n laskua")."</b>";
 
-    require ("inc/footer.inc");
+    require "inc/footer.inc";
     exit;
   }
 
@@ -442,5 +471,5 @@ if ($tee != '') {
 
   echo "<br><br>";
 
-   $toim = "";
+  $toim = "";
 }

@@ -22,8 +22,8 @@ if ($php_cli) {
   ini_set("display_errors", 0);
 
   // otetaan tietokanta connect
-  require("inc/connect.inc");
-  require("inc/functions.inc");
+  require "inc/connect.inc";
+  require "inc/functions.inc";
 
   $yhtio = pupesoft_cleanstring($argv[1]);
   $yhtiorow = hae_yhtion_parametrit($yhtio);
@@ -41,14 +41,14 @@ pupesoft_flock();
 $y = $kukarow["yhtio"];
 
 if (!isset(  $maksuaineiston_siirto[$y]["host"],
-      $maksuaineiston_siirto[$y]["user"],
-      $maksuaineiston_siirto[$y]["pass"],
-      $maksuaineiston_siirto[$y]["path"],
-      $maksuaineiston_siirto[$y]["type"],
-      $maksuaineiston_siirto[$y]["file"],
-      $maksuaineiston_siirto[$y]["local_dir"],
-      $maksuaineiston_siirto[$y]["local_dir_ok"],
-      $maksuaineiston_siirto[$y]["local_dir_error"])) {
+    $maksuaineiston_siirto[$y]["user"],
+    $maksuaineiston_siirto[$y]["pass"],
+    $maksuaineiston_siirto[$y]["path"],
+    $maksuaineiston_siirto[$y]["type"],
+    $maksuaineiston_siirto[$y]["file"],
+    $maksuaineiston_siirto[$y]["local_dir"],
+    $maksuaineiston_siirto[$y]["local_dir_ok"],
+    $maksuaineiston_siirto[$y]["local_dir_error"])) {
   echo "maksuaineisto-send parametrit puuttuu!\n";
   exit;
 }
@@ -63,14 +63,14 @@ $renameftpfile = $maksuaineiston_siirto[$y]["file"];
 $localdir = $maksuaineiston_siirto[$y]["local_dir"];
 $localdir_error = $maksuaineiston_siirto[$y]["local_dir_error"];
 $ftpsucc = $maksuaineiston_siirto[$y]["local_dir_ok"];
-  $ftpfail = $localdir_error;
+$ftpfail = $localdir_error;
 
 // Loopataan läpi pankkipolku
 if ($handle = opendir($localdir)) {
   while (($file = readdir($handle)) !== FALSE) {
     $ftpfile = realpath($localdir."/".$file);
     if (is_file($ftpfile)) {
-      require ("inc/ftp-send.inc");
+      require "inc/ftp-send.inc";
     }
   }
   closedir($handle);
@@ -83,7 +83,7 @@ if ($handle = opendir($localdir_error)) {
   while (($file = readdir($handle)) !== FALSE) {
     $ftpfile = realpath($localdir_error."/".$file);
     if (is_file($ftpfile)) {
-      require ("inc/ftp-send.inc");
+      require "inc/ftp-send.inc";
     }
   }
   closedir($handle);

@@ -11,15 +11,15 @@ if (php_sapi_name() == 'cli') {
 }
 
 if (!$php_cli) {
-  require ("inc/parametrit.inc");
+  require "inc/parametrit.inc";
   $kyhtio = $kukarow['yhtio'];
 }
 else {
   if ($argv[1] != "") $kyhtio = trim($argv[1]);
   else die ("Yhtiö on annettava!");
 
-  require ("/var/www/html/pupesoft/inc/connect.inc");
-  require ("/var/www/html/pupesoft/inc/functions.inc");
+  require "/var/www/html/pupesoft/inc/connect.inc";
+  require "/var/www/html/pupesoft/inc/functions.inc";
   $tee = "aja";
 }
 
@@ -75,12 +75,12 @@ function tee_file($result, $dirri, $tiedostonnimi, $ftpkuvahost, $ftpkuvauser, $
         while ($row = mysql_fetch_array($result)) {
           for ($i=0; $i < $fields; $i++) {
 
-            if (strpos($row[$i],'"') !== FALSE) {
-              $row[$i] = str_replace('"',"",$row[$i]);
+            if (strpos($row[$i], '"') !== FALSE) {
+              $row[$i] = str_replace('"', "", $row[$i]);
             }
 
-            if (strpos(($temp = mysql_field_name($result, $i)),"lyhytkuvaus") !== FALSE) {
-              $row[$i] = cut_text($row[$i],100);
+            if (strpos(($temp = mysql_field_name($result, $i)), "lyhytkuvaus") !== FALSE) {
+              $row[$i] = cut_text($row[$i], 100);
             }
 
             /*
@@ -110,7 +110,7 @@ function tee_file($result, $dirri, $tiedostonnimi, $ftpkuvahost, $ftpkuvauser, $
             }*/
 
 
-            $ulos .= str_replace($order,"<br>",$row[$i]);
+            $ulos .= str_replace($order, "<br>", $row[$i]);
 
             if ($i == $fields-1) {
               $ulos .= "\n";
@@ -122,8 +122,8 @@ function tee_file($result, $dirri, $tiedostonnimi, $ftpkuvahost, $ftpkuvauser, $
         }
 
 
-        fputs ($handle,$ulos);
-        fclose ($handle);
+        fputs($handle, $ulos);
+        fclose($handle);
 
         $upload = ftp_put($conn_id, $tiedostonnimi, realpath($kokonimi), FTP_BINARY);
 
@@ -154,33 +154,33 @@ function cut_text($text, $chars) {
   }
   else {
 
-    if (substr($text,$chars) == " ") {
-      return substr($text,0,$chars)."...";
+    if (substr($text, $chars) == " ") {
+      return substr($text, 0, $chars)."...";
     }
-    elseif (substr($text,$chars) == ".") {
-      return substr($text,0,$chars)."..";
+    elseif (substr($text, $chars) == ".") {
+      return substr($text, 0, $chars)."..";
     }
-    elseif (substr($text,$chars) == ",") {
-      return substr($text,0,$chars-1)."...";
+    elseif (substr($text, $chars) == ",") {
+      return substr($text, 0, $chars-1)."...";
     }
     else {
 
-      $text = substr($text,0,$chars);
-      $pos[0] = strrpos($text," ");
-      $pos[1] = strrpos($text,".");
-      $pos[2] = strrpos($text,",");
+      $text = substr($text, 0, $chars);
+      $pos[0] = strrpos($text, " ");
+      $pos[1] = strrpos($text, ".");
+      $pos[2] = strrpos($text, ",");
 
 
       sort($pos);
 
-      if (substr($text,$pos[2],1) == " ") {
-        return substr($text,0,$pos[2])."...";
+      if (substr($text, $pos[2], 1) == " ") {
+        return substr($text, 0, $pos[2])."...";
       }
-      elseif (substr($text,$pos[2],1) == ".") {
-        return substr($text,0,$pos[2])."..";
+      elseif (substr($text, $pos[2], 1) == ".") {
+        return substr($text, 0, $pos[2])."..";
       }
-      elseif (substr($text,$pos[2],1) == ",") {
-        return substr($text,0,$pos[2]-1)."...";
+      elseif (substr($text, $pos[2], 1) == ",") {
+        return substr($text, 0, $pos[2]-1)."...";
       }
 
     }

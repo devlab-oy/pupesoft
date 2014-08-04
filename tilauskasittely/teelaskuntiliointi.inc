@@ -239,7 +239,7 @@ else {
                 laatija          = '$kukarow[kuka]',
                 laadittu         = now()";
       $laskutusres = pupe_query($query);
-      $isa = mysql_insert_id ($link);
+      $isa = mysql_insert_id($link);
 
       $lukko = "";
 
@@ -289,7 +289,7 @@ else {
                   laatija          = '$kukarow[kuka]',
                   laadittu         = now()";
         $laskutusres = pupe_query($query);
-        $isa = mysql_insert_id ($link);
+        $isa = mysql_insert_id($link);
 
         if ($xrow["alv"] != 0) {
 
@@ -411,6 +411,7 @@ else {
     $myysaatili = "";
 
     $myysaa_kateinen = array();
+    $myysaa_kateinen['laskulle'] = $yhtiorow['myyntisaamiset'];
 
     if (mysql_num_rows($kateisresult) == 1) {
       $myysaa_kateinen['kateinen']     = $kateisrow['kassa'];
@@ -475,8 +476,7 @@ else {
     $loppusumma_valuutassa = 0;
 
     foreach ($kateismaksu as $tili => $arvo) {
-
-      $arvo = str_replace(",",".",$arvo);
+      $arvo = str_replace(",", ".", $arvo);
 
       if ((float) $arvo != 0) {
 
@@ -511,6 +511,17 @@ else {
 
         $loppusumma += $arvo;
         $loppusumma_valuutassa += $arvo_valuutassa;
+
+        // P‰ivitet‰‰n laskulle
+        if ($tili == "laskulle" and $yhtiorow['sallitaanko_kateismyynti_laskulle'] != '') {
+          $query = "UPDATE lasku
+                    SET saldo_maksettu = (summa - $arvo),
+                    saldo_maksettu_valuutassa = (summa_valuutassa  - $arvo_valuutassa),
+                    mapvm                     = 0
+                    WHERE tunnus              = '$lasku[tunnus]'
+                    AND yhtio                 = '$kukarow[yhtio]'";
+          pupe_query($query);
+        }
       }
     }
   }
@@ -537,8 +548,8 @@ else {
   }
 
   // Kirjataan pyoristykset, jos niita on
-  $vastasumma = round($vastasumma,2);
-  $vastasumma_valuutassa = round($vastasumma_valuutassa,2);
+  $vastasumma = round($vastasumma, 2);
+  $vastasumma_valuutassa = round($vastasumma_valuutassa, 2);
 
   list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["pyoristys"], $maksimisumma_kustp, $maksimisumma_kohde, $maksimisumma_projekti);
 

@@ -60,7 +60,7 @@ if ($tee == 'U') {
 
     echo "<td>";
     echo "<input type='checkbox' name='kausi[]' value='$i'> ";
-    echo date("d.m.Y", mktime (0, 0, 0, $kk+$i-1, 1, $vv));
+    echo date("d.m.Y", mktime(0, 0, 0, $kk+$i-1, 1, $vv));
     echo "</td>";
 
     // Tehdään vähän sarakkeita
@@ -79,11 +79,11 @@ if ($tee == 'U') {
 }
 elseif (count($kausi) > 0) {
 
-  $pkk = substr($tiliointirow['tapvm'], 5,2); // Tämä on kausi
-  $pvv = substr($tiliointirow['tapvm'], 0,4); // Tämä on vuosi
+  $pkk = substr($tiliointirow['tapvm'], 5, 2); // Tämä on kausi
+  $pvv = substr($tiliointirow['tapvm'], 0, 4); // Tämä on vuosi
   $kpl = count($kausi);
 
-  $summa = round($tiliointirow['summa']/$kpl,2);
+  $summa = round($tiliointirow['summa']/$kpl, 2);
 
   $tsumma = 0;
 
@@ -167,7 +167,7 @@ elseif (count($kausi) > 0) {
 
       $pkk = substr($tiliointirow['tapvm'], 5, 2); // Tämä on kausi
       $pvv = substr($tiliointirow['tapvm'], 0, 4); // Tämä on vuosi
-      $tapvm = date("Y-m-d", mktime (0, 0, 0, $pkk+$mille-1, 1, $pvv));
+      $tapvm = date("Y-m-d", mktime(0, 0, 0, $pkk+$mille-1, 1, $pvv));
 
       $query = "INSERT INTO tiliointi SET
                 yhtio     = '$kukarow[yhtio]',
@@ -223,7 +223,7 @@ elseif (count($kausi) > 0) {
 
   if ($tsumma != $tiliointirow['summa']) {
     $tsumma -= $tiliointirow['summa'];
-    $tsumma = round($tsumma,2);
+    $tsumma = round($tsumma, 2);
 
     $query = "UPDATE tiliointi SET summa = summa - $tsumma WHERE tunnus = '$viimeinen1' and yhtio = '$kukarow[yhtio]'";
     $result = pupe_query($query);

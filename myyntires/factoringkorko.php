@@ -1,6 +1,6 @@
 <?php
 
-require ("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "<font class='head'>".t("Kohdista viitesuoritus korkoihin")."</font><hr>";
 
@@ -23,7 +23,7 @@ echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
   //-->
   </script>";
 
-if (isset($tilino)){
+if (isset($tilino)) {
 
   // tutkaillaan tili‰
   $query = "SELECT *
@@ -264,15 +264,15 @@ if (isset($tapa) and $tapa == 'pois') {
 }
 
 if (!isset($tapa)) {
-    echo "<form method='post' autocomplete='off'>";
-    echo "<table>";
-    echo "<tr><th>".t("Suorituksia siirret‰‰n korkoihin")."</th>";
-    echo "<td><input type='radio' name='tapa' value='paalle' checked></td></tr>";
-    echo "<tr><th>".t("Suorituksia siirret‰‰n koroista normaaleiksi suorituksiksi")."</th>";
-    echo "<td><input type='radio' name='tapa' value='pois'></td></tr>";
-    echo "<tr><td class='back'><input name='subnappi' type='submit' value='".t("Valitse")."'></td></tr>";
-    echo "</table>";
-    echo "</form>";
+  echo "<form method='post' autocomplete='off'>";
+  echo "<table>";
+  echo "<tr><th>".t("Suorituksia siirret‰‰n korkoihin")."</th>";
+  echo "<td><input type='radio' name='tapa' value='paalle' checked></td></tr>";
+  echo "<tr><th>".t("Suorituksia siirret‰‰n koroista normaaleiksi suorituksiksi")."</th>";
+  echo "<td><input type='radio' name='tapa' value='pois'></td></tr>";
+  echo "<tr><td class='back'><input name='subnappi' type='submit' value='".t("Valitse")."'></td></tr>";
+  echo "</table>";
+  echo "</form>";
 }
 else {
   if (!isset($viite)) {
@@ -303,4 +303,4 @@ else {
 $formi = "eikat";
 $kentta = "viite";
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

@@ -19,8 +19,8 @@ if (trim($argv[2]) == '') {
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
 
 // otetaan tietokanta connect ja funktiot
-require("inc/connect.inc");
-require("inc/functions.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock();
@@ -100,8 +100,8 @@ if ($handle = opendir($path)) {
 
         paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $tilausnumero, 'kilotyht' => $kilotrow['kilotyht']));
 
-        // Katsotaan onko magento-API konffattu, eli verkkokauppa käytössä, silloin merkataan tilaus toimitetuksi Magentossa kun rahtikirja tulostetaan
-        if (isset($magento_api_url) and $magento_api_url != "" and $magento_api_usr != "" and  $magento_api_pas != "") {
+        // Katsotaan onko Magento käytössä, silloin merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
+        if ($magento_kaytossa) {
 
           $query = "SELECT toimitustapa
                     FROM rahtikirjat
@@ -133,7 +133,7 @@ if ($handle = opendir($path)) {
               $magento_api_rak = $seurantakoodi;
               $magento_api_ord = $magerow["asiakkaan_tilausnumero"];
 
-              require("magento_toimita_tilaus.php");
+              require "magento_toimita_tilaus.php";
             }
           }
         }

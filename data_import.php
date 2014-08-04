@@ -9,11 +9,11 @@ $compression = FALSE;
 
 // Ladataan tiedosto
 if (isset($_POST["tee"])) {
-  if($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/","",$_POST["kaunisnimi"]);
+  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
 }
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 // Ladataan tai poistetaan tiedosto
 if (isset($tee) and ($tee == "lataa_tiedosto" or $tee == "poista_file")) {
@@ -35,17 +35,17 @@ if (isset($tee) and ($tee == "lataa_tiedosto" or $tee == "poista_file")) {
   }
   elseif ($tee == "poista_file") {
     unlink($pupe_root_polku."/datain/".$datain_filenimi);
-    unlink($pupe_root_polku."/datain/".substr($datain_filenimi,0,-3)."ERR");
+    unlink($pupe_root_polku."/datain/".substr($datain_filenimi, 0, -3)."ERR");
   }
 }
 
 if (isset($tee) and $tee == "poistakaikki_filetsut") {
   if ($files = scandir($pupe_root_polku."/datain")) {
-      foreach ($files as $file) {
+    foreach ($files as $file) {
       // Tämä file on valmis lue-data file
       if (substr($file, 0, 11+strlen($kukarow["kuka"])+strlen($kukarow["yhtio"])) == "lue-data#{$kukarow["kuka"]}#{$kukarow["yhtio"]}#" and substr($file, -4) == ".LOG") {
         unlink($pupe_root_polku."/datain/".$file);
-        unlink($pupe_root_polku."/datain/".substr($file,0,-3)."ERR");
+        unlink($pupe_root_polku."/datain/".substr($file, 0, -3)."ERR");
       }
     }
   }
@@ -97,16 +97,18 @@ if ($tee == "file" and $laheta != "") {
     $path_parts = pathinfo($_FILES['userfile']['name']);
     $kasitellaan_tiedosto_tyyppi = strtoupper($path_parts['extension']);
 
+    $sallitut_tyypit = array("XLSX", "DATAIMPORT");
+
+    // Jos meillä on ssconvert asennettuna, voidaan käsitellä myös XLS tiedostoja
+    if (is_executable("/usr/bin/ssconvert")) {
+      $sallitut_tyypit[] = "XLS";
+    }
+
     // Vain Excel!
-    $return = tarkasta_liite("userfile", array("XLSX","XLS","DATAIMPORT"));
+    $return = tarkasta_liite("userfile", $sallitut_tyypit);
 
     if ($return !== TRUE) {
       echo "<font class='error'>$return</font>\n";
-      $kasitellaan_tiedosto = FALSE;
-    }
-
-    if (!is_executable("/usr/bin/ssconvert") and $kasitellaan_tiedosto_tyyppi == "XLS") {
-      echo "<font class='error'>".t("Gnumeric (ssconvert) ei ole asennettu")."!</font><br>\n";
       $kasitellaan_tiedosto = FALSE;
     }
 
@@ -125,7 +127,11 @@ if ($tee == "file" and $laheta != "") {
 
       $kasiteltava_tiedosto_path_csv = $kasiteltava_tiedosto_path.".DATAIMPORT";
 
-      /** Määritellään importattavan tiedoston tyyppi. Kaikki vaihtoehdot saa komentoriviltä: ssconvert --list-importers **/
+      /**
+       * Määritellään importattavan tiedoston tyyppi. Kaikki vaihtoehdot saa komentoriviltä: ssconvert --list-importers *
+       */
+
+
       $import_type = "--import-type=Gnumeric_Excel:excel";
 
       $return_string = system("/usr/bin/ssconvert --export-type=Gnumeric_stf:stf_csv $import_type ".escapeshellarg($kasiteltava_tiedosto_path)." ".escapeshellarg($kasiteltava_tiedosto_path_csv), $return);
@@ -201,7 +207,7 @@ if ($tee == "file" and $laheta != "") {
 
     // Loopataan läpi kaikki splitatut tiedostot
     if ($handle = opendir($kasiteltava_filepath)) {
-        while (false !== ($file = readdir($handle))) {
+      while (false !== ($file = readdir($handle))) {
 
         // Tämä file tämän käyttäjän tämän session file
         if (substr($file, 0, strlen($kasiteltava_filenimi)) == $kasiteltava_filenimi) {
@@ -227,8 +233,8 @@ if ($tee == "file" and $laheta != "") {
 
           $montako_osaa++;
         }
-        }
-        closedir($handle);
+      }
+      closedir($handle);
     }
 
     // Poistetaan headerifile
@@ -256,7 +262,7 @@ $tiedostoja_jonossa = 0;
 $omia_tiedostoja_jonossa = 0;
 
 if ($handle = opendir($pupe_root_polku."/datain")) {
-    while (false !== ($file = readdir($handle))) {
+  while (false !== ($file = readdir($handle))) {
     // Tämä file on valmis lue-data file
 
     if (substr($file, 0, 9) == "lue-data#" and substr($file, -11) == ".DATAIMPORT") {
@@ -267,8 +273,8 @@ if ($handle = opendir($pupe_root_polku."/datain")) {
         $omia_tiedostoja_jonossa++;
       }
     }
-    }
-    closedir($handle);
+  }
+  closedir($handle);
 }
 
 if ($tiedostoja_jonossa > 0) {
@@ -381,18 +387,18 @@ if (in_array($table, array("yhteyshenkilo", "asiakkaan_avainsanat", "kalenteri")
 }
 
 if (in_array($table, array("puun_alkio_asiakas", "puun_alkio_tuote"))) {
-  echo "  <tr><th>",t("Valitse liitos"),":</th>
+  echo "  <tr><th>", t("Valitse liitos"), ":</th>
         <td><select name='dynaamisen_taulun_liitos'>";
 
   if ($table == 'puun_alkio_asiakas') {
-    echo "  <option value=''>",t("Asiakkaan tunnus"),"</option>
-        <option value='ytunnus'>",t("Asiakkaan ytunnus"),"</option>
-        <option value='toim_ovttunnus'>",t("Asiakkaan toimitusosoitteen ovttunnus"),"</option>
-        <option value='asiakasnro'>",t("Asiakkaan asiakasnumero"),"</option>";
+    echo "  <option value=''>", t("Asiakkaan tunnus"), "</option>
+        <option value='ytunnus'>", t("Asiakkaan ytunnus"), "</option>
+        <option value='toim_ovttunnus'>", t("Asiakkaan toimitusosoitteen ovttunnus"), "</option>
+        <option value='asiakasnro'>", t("Asiakkaan asiakasnumero"), "</option>";
   }
   else {
-    echo "  <option value=''>",t("Puun alkion tunnus"),"</option>
-        <option value='koodi'>",t("Puun alkion koodi"),"</option>";
+    echo "  <option value=''>", t("Puun alkion tunnus"), "</option>
+        <option value='koodi'>", t("Puun alkion koodi"), "</option>";
   }
 
   echo "</select></td></tr>";
@@ -449,7 +455,7 @@ $kasitelty = array();
 $kasitelty_i = 0;
 
 if ($files = scandir($pupe_root_polku."/datain")) {
-    foreach ($files as $file) {
+  foreach ($files as $file) {
     // Tämä file on valmis lue-data file
     if (substr($file, 0, 11+strlen($kukarow["kuka"])+strlen($kukarow["yhtio"])) == "lue-data#{$kukarow["kuka"]}#{$kukarow["yhtio"]}#" and substr($file, -4) == ".LOG") {
 
@@ -474,7 +480,7 @@ if ($files = scandir($pupe_root_polku."/datain")) {
         $orig_file = $filen_tiedot[5];
 
         $kasitelty[$kasitelty_i]["filename"] = $file;
-        $kasitelty[$kasitelty_i]["errfilename"] = substr($file,0,-3)."ERR";
+        $kasitelty[$kasitelty_i]["errfilename"] = substr($file, 0, -3)."ERR";
         $kasitelty[$kasitelty_i]["orig_file"] = $orig_file;
         $kasitelty[$kasitelty_i]["taulu"] = $taulut[$cleantaulu];
         $kasitelty[$kasitelty_i]["aika"] = date("d.m.Y H:i:s", filemtime($pupe_root_polku."/datain/".$file));
@@ -483,7 +489,7 @@ if ($files = scandir($pupe_root_polku."/datain")) {
         $kasitelty_i++;
       }
     }
-    }
+  }
 }
 
 if (count($kasitelty) > 0) {
@@ -534,4 +540,4 @@ if (count($kasitelty) > 0) {
 
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

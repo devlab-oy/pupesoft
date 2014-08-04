@@ -3,7 +3,7 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 js_popup();
 enable_ajax();
@@ -102,4 +102,4 @@ else {
   echo "<font class='message'>".t("Yrityksellä ei ole y-tunnusten tarkistus käytössä.")."</font>";
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

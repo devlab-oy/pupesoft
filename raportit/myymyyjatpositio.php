@@ -4,7 +4,7 @@
 $useslave = 1;
 $pupe_DataTables = "myymyyjat";
 
-require('../inc/parametrit.inc');
+require '../inc/parametrit.inc';
 
 echo "<font class='head'>".t("Myyjien rivimyynnit").":</font><hr>";
 
@@ -213,4 +213,4 @@ if ($tee != '') {
 
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

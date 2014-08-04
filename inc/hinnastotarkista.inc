@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("hinnastotarkista")) {
-  function hinnastotarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("hinnastotarkista")) {
+  function hinnastotarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set;
 
     static $chtuoteno, $chalkupvm, $chloppupvm;
@@ -42,8 +42,8 @@ if(!function_exists("hinnastotarkista")) {
         $chalkupvm = '0000-00-00';
       }
       else {
-        list($vv,$kk,$pp) = explode("-", $chalkupvm);
-        if (!checkdate($kk,$pp,$vv)) {
+        list($vv, $kk, $pp) = explode("-", $chalkupvm);
+        if (!checkdate($kk, $pp, $vv)) {
           $virhe[$i] = t("Virheellinen päivämäärä!");
         }
       }
@@ -55,8 +55,8 @@ if(!function_exists("hinnastotarkista")) {
         $chloppupvm = '0000-00-00';
       }
       else {
-        list($vv,$kk,$pp) = explode("-", $chloppupvm);
-        if (!checkdate($kk,$pp,$vv)) {
+        list($vv, $kk, $pp) = explode("-", $chloppupvm);
+        if (!checkdate($kk, $pp, $vv)) {
           $virhe[$i] = t("Virheellinen päivämäärä!");
         }
       }

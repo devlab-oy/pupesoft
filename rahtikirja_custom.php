@@ -1,23 +1,23 @@
 <?php
 
-require ("inc/parametrit.inc");
+require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Tyhjä rahtikirja").":</font><hr><br>";
 
 if (isset($_POST['valmis']) and $_POST['valmis'] != '') {
 
-    // tallennetaan rahtikirja
-    $clean = array(
-        'yhtio'            => $kukarow['yhtio'],
+  // tallennetaan rahtikirja
+  $clean = array(
+    'yhtio'            => $kukarow['yhtio'],
     'merahti'          => (isset($_POST['merahti']) and $_POST['merahti'] == '1') ? 'K' : 'E',
-        'toimitustapa'     => strip_tags($_POST['toimitustapa']),
-        'otsikkonro'       => null, //tunnus,
+    'toimitustapa'     => strip_tags($_POST['toimitustapa']),
+    'otsikkonro'       => null, //tunnus,
     'viitelah'         => strip_tags($_POST['viitelah']),
     'viitevas'         => strip_tags($_POST['viitevas']),
-        'rahtisopimus'     => (isset($_POST['rahtisopimus'])) ? $_POST['rahtisopimus'] : '',
+    'rahtisopimus'     => (isset($_POST['rahtisopimus'])) ? $_POST['rahtisopimus'] : '',
     'viesti'         => strip_tags($_POST['viesti']),
     'tulostuspaikka'  => strip_tags($_POST['varasto']),
-    );
+  );
 
   $count = 0;
 
@@ -30,10 +30,10 @@ if (isset($_POST['valmis']) and $_POST['valmis'] != '') {
     $_POST['kuutiot'][$i]  = str_replace(',', '.', $_POST['kuutiot'][$i]);
     $_POST['lavametri'][$i]  = str_replace(',', '.', $_POST['lavametri'][$i]);
 
-    if((isset($_POST['kilot'][$i]) and is_numeric($_POST['kilot'][$i]))
-    or (isset($_POST['kollit'][$i]) and is_numeric($_POST['kollit'][$i]))
-    or (isset($_POST['kuutiot'][$i]) and is_numeric($_POST['kuutiot'][$i]))
-    or (isset($_POST['lavametri'][$i]) and is_numeric($_POST['lavametri'][$i]))) {
+    if ((isset($_POST['kilot'][$i]) and is_numeric($_POST['kilot'][$i]))
+      or (isset($_POST['kollit'][$i]) and is_numeric($_POST['kollit'][$i]))
+      or (isset($_POST['kuutiot'][$i]) and is_numeric($_POST['kuutiot'][$i]))
+      or (isset($_POST['lavametri'][$i]) and is_numeric($_POST['lavametri'][$i]))) {
 
       $count++;
 
@@ -41,9 +41,9 @@ if (isset($_POST['valmis']) and $_POST['valmis'] != '') {
         'pakkaus'           => strip_tags($_POST['pakkaus'][$i]),
         'pakkauskuvaus'     => strip_tags($_POST['pakkauskuvaus'][$i]),
         'kilot'             => $_POST['kilot'][$i],
-            'kollit'            => $_POST['kollit'][$i],
-            'kuutiot'           => $_POST['kuutiot'][$i],
-            'lavametri'         => $_POST['lavametri'][$i],
+        'kollit'            => $_POST['kollit'][$i],
+        'kuutiot'           => $_POST['kuutiot'][$i],
+        'lavametri'         => $_POST['lavametri'][$i],
         'pakkauskuvaustark' => $_POST['pakkauskuvaustark'][$i]);
 
       $data = array_merge($clean, $data);
@@ -88,8 +88,8 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
   $GLOBALS['kuutiot']   = $data['kuutiot'];
   $GLOBALS['lavametri'] = $data['lavametri'];
 
-    $GLOBALS['kilotyht']  = $data['kilotyht'];
-    $GLOBALS['kollityht'] = $data['kollityht'];
+  $GLOBALS['kilotyht']  = $data['kilotyht'];
+  $GLOBALS['kollityht'] = $data['kollityht'];
 
   $GLOBALS['rtunnus']   = abs($otsikkonro);
 
@@ -102,16 +102,16 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
   if ($data['merahti'] == 'K') {
     $rahdinmaksaja = 'Lähettäjä';
     $toitarow = array(
-        'sopimusnro'       => $data['rahtisopimus'],
-        'selite'           => $data['toimitustapa'],
-        'rahdinkuljettaja' => '',
+      'sopimusnro'       => $data['rahtisopimus'],
+      'selite'           => $data['toimitustapa'],
+      'rahdinkuljettaja' => '',
     );
   }
   else {
     $rahdinmaksaja = 'Vastaanottaja';
     $toitarow = array(
-        'selite'           => $data['toimitustapa'],
-        'rahdinkuljettaja' => '',
+      'selite'           => $data['toimitustapa'],
+      'rahdinkuljettaja' => '',
     );
   }
 
@@ -266,10 +266,10 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
     $res = pupe_query($query);
     $k = mysql_fetch_assoc($res);
 
-      $kirjoitin   = $k['komento'];
+    $kirjoitin   = $k['komento'];
     $tulostuskpl = $kollityht;
 
-    include("tilauskasittely/$toitarow[rahtikirja]");
+    include "tilauskasittely/$toitarow[rahtikirja]";
 
     echo "<p>".t("Tulostetaan rahtikirja")."...</p><br>";
   }
@@ -298,10 +298,10 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
     $oslapp = $kirrow['komento'];
 
     if ($toitarow['osoitelappu'] == 'intrade') {
-      require('tilauskasittely/osoitelappu_intrade_pdf.inc');
+      require 'tilauskasittely/osoitelappu_intrade_pdf.inc';
     }
     else {
-      require ("tilauskasittely/osoitelappu_pdf.inc");
+      require "tilauskasittely/osoitelappu_pdf.inc";
     }
 
     echo "<p>".t("Tulostetaan osoitelappu")."...</p><br>";
@@ -313,13 +313,13 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
 }
 
 if (isset($_POST['ytunnus']) and $asiakasid !== FALSE) {
-    require 'inc/asiakashaku.inc';
+  require 'inc/asiakashaku.inc';
 }
 
 if (!$asiakasid and !$rahtikirja_ilman_asiakasta) {
 
   if (isset($_POST['ytunnus'])) {
-     echo "<br><br>";
+    echo "<br><br>";
   }
 
   echo "<table><form method='POST' action='rahtikirja_custom.php' name='haku'>
@@ -430,7 +430,7 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
     $asiakasrow['toim_maa']      = $tmaa;
   }
 
-    echo "<form method='post' action='rahtikirja_custom.php' name='rahtikirja'><table>";
+  echo "<form method='post' action='rahtikirja_custom.php' name='rahtikirja'><table>";
   echo "<tr>
       <th colspan='2' align='left' valign='top'>&nbsp; ".t("Asiakkaan tiedot").":</td></tr>";
   echo "<tr>
@@ -474,40 +474,40 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
 
 <tr><th><?php echo t('Varasto') ?></th><td><select name='varasto' onChange='document.rahtikirja.submit();'>
   <?php
-    foreach (pupe_varasto_fetch_all() as $key => $val) {
+  foreach (pupe_varasto_fetch_all() as $key => $val) {
 
-      if ($varasto == $key or !isset($varasto)) {
-        $sel = "SELECTED";
-        $varasto = $key;
-      }
-      else {
-        $sel = "";
-      }
-
-      echo "<option value='$key' $sel>$val</option>";
+    if ($varasto == $key or !isset($varasto)) {
+      $sel = "SELECTED";
+      $varasto = $key;
     }
-  ?>
+    else {
+      $sel = "";
+    }
+
+    echo "<option value='$key' $sel>$val</option>";
+  }
+?>
   </select></td>
 </tr>
 <tr>
   <th><?php echo t('Toimitustapa') ?></th>
   <td><select name='toimitustapa' onchange='document.rahtikirja.submit();'>
       <?php
-      $toimitustapa_val = "";
-          $toimtavat = pupe_toimitustapa_fetch_all();
+  $toimitustapa_val = "";
+  $toimtavat = pupe_toimitustapa_fetch_all();
 
-        foreach ($toimtavat as $toimt): ?>
+  foreach ($toimtavat as $toimt): ?>
           <?php
 
-          // onko tämä valittu
-          $sel = '';
-          if ((isset($_POST['toimitustapa']) and $_POST['toimitustapa'] == $toimt['selite'])
-          or (!isset($_POST['toimitustapa']) and $asiakasrow['toimitustapa'] == $toimt['selite'])) {
-            $sel = "selected";
-            $toimitustapa_val = $toimt['selite'];
-          }
+    // onko tämä valittu
+    $sel = '';
+  if ((isset($_POST['toimitustapa']) and $_POST['toimitustapa'] == $toimt['selite'])
+    or (!isset($_POST['toimitustapa']) and $asiakasrow['toimitustapa'] == $toimt['selite'])) {
+    $sel = "selected";
+    $toimitustapa_val = $toimt['selite'];
+  }
 
-          ?>
+?>
       <option <?php echo $sel ?> value="<?php echo $toimt['selite'] ?>"><?php echo t_tunnus_avainsanat($toimt, "selite", "TOIMTAPAKV") ?></option>
     <?php endforeach; ?>
     </select>
@@ -518,8 +518,8 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
 
 <?php
 
-// jos toimitustapaa EI submitattu niin haetaan kannasta
-if (!isset($_POST['toimitustapa'])) {
+  // jos toimitustapaa EI submitattu niin haetaan kannasta
+  if (!isset($_POST['toimitustapa'])) {
     $merahti = true;
     $sel    = '';
 
@@ -535,14 +535,14 @@ if (!isset($_POST['toimitustapa'])) {
       $merahti = false;
       $sel = "selected";
     }
-}
-else {
+  }
+  else {
     $sel = '';
 
     if (isset($_POST['merahti']) and $_POST['merahti'] === '0') {
-        $sel = 'selected';
+      $sel = 'selected';
     }
-}
+  }
 ?>
 
 <tr><th><?php echo t('Rahti') ?></th><td><select name='merahti' onChange='document.rahtikirja.submit();'>
@@ -557,7 +557,7 @@ else {
   if (isset($_POST['toimitustapa'])) {
     $toimitustapa = $_POST['toimitustapa'];
   }
-  ?>
+?>
   <td><input type="text" name="rahtisopimus" value="<?php echo pupe_rahtisopimus($merahti, $toimitustapa, $asiakasrow['ytunnus']) ?>"></td>
 </tr>
 
@@ -565,7 +565,7 @@ else {
   echo "<tr><th>".t('Lähettäjän viite')."</th><td><input type=hidden name='asiakas' value='$asiakasrow[ytunnus]'><input type='text' name='viitelah'></td></tr>";
   echo "<tr><th>".t('Vastaanottajan viite')."</th><td><input type='text' name='viitevas'></td></tr>";
   echo "<tr><th>".t('Viesti')."</th><td><input type='text' name='viesti' value='{$asiakasrow['kuljetusohje']}'></td></tr>";
-    echo "<tr><th>".t('Rahtikirja')."</th><td><select name='tulostin'>";
+  echo "<tr><th>".t('Rahtikirja')."</th><td><select name='tulostin'>";
   echo "<option value=''>".t("Ei tulosteta")."</option>";
 
   // Hetaan varaston tulostimet
@@ -587,11 +587,11 @@ else {
     $sel_lahete[$tulostin] = "SELECTED";
   }
 
-    $query = "SELECT *
-              from kirjoittimet
-              where yhtio  = '$kukarow[yhtio]'
-              AND komento != 'EDI'
-              ORDER BY kirjoitin";
+  $query = "SELECT *
+            from kirjoittimet
+            where yhtio  = '$kukarow[yhtio]'
+            AND komento != 'EDI'
+            ORDER BY kirjoitin";
   $kires = pupe_query($query);
 
   while ($kirow = mysql_fetch_assoc($kires)) {
@@ -634,7 +634,7 @@ else {
   $i = 0;
 
   while ($row = mysql_fetch_assoc($result)) {
-      echo "<tr>
+    echo "<tr>
             <td>
                 <input type='hidden' name='pakkaus[$i]' value='$row[pakkaus]'>
             <input type='hidden' name='pakkauskuvaus[$i]' value='$row[pakkauskuvaus]'>
@@ -648,21 +648,22 @@ else {
 
     echo "<td><input type='text' size='10' name='pakkauskuvaustark[$i]'></td>";
 
-      $i++;
-    }
+    $i++;
+  }
 
   echo "</table><input type='hidden' name='asiakasid' value='{$asiakasid}'><input type='submit' name='valmis' value='".t("Valmis")."'></form>";
 }
 
 /**
- *
  * Lisää uuden rahtikirjan
  *
- * @param array $data Kentät arrayn keynä
+ * @param array   $data Kentät arrayn keynä
  *
  * @return void
  *
  */
+
+
 function pupe_rahtikirja_insert($data) {
   // alustetaan tiedot jotka insertoidaan
   $alustus = array(
@@ -676,10 +677,10 @@ function pupe_rahtikirja_insert($data) {
     'rahtikirjanro'   => null,
     'viitelah'        => null,
     'viitevas'        => null,
-        'kilot'           => 0,
-        'kollit'          => 0,
-        'kuutiot'         => 0,
-        'lavametri'       => 0,
+    'kilot'           => 0,
+    'kollit'          => 0,
+    'kuutiot'         => 0,
+    'lavametri'       => 0,
     'pakkauskuvaustark' => null,
     'viesti'      => null,
     'tulostuspaikka'  => null,
@@ -687,7 +688,7 @@ function pupe_rahtikirja_insert($data) {
 
   $data = array_merge($alustus, $data);
 
-  foreach($data as $key => &$val) {
+  foreach ($data as $key => &$val) {
     $val = mysql_real_escape_string($val, $GLOBALS['link']);
   }
 
@@ -701,8 +702,8 @@ function pupe_rahtikirja_insert($data) {
   return mysql_insert_id();
 }
 
+
 /**
- *
  * undocumented function
  *
  * arrayt:
@@ -718,8 +719,8 @@ function pupe_rahtikirja_insert($data) {
  *
  */
 function pupe_rahtikirja_fetch($otsikkonro) {
-    $query = sprintf("SELECT * from rahtikirjat where otsikkonro=%d", (int) $otsikkonro);
-    $result = mysql_query($query);
+  $query = sprintf("SELECT * from rahtikirjat where otsikkonro=%d", (int) $otsikkonro);
+  $result = mysql_query($query);
 
   $data = array(
     'lotsikot'      => array(),
@@ -739,7 +740,7 @@ function pupe_rahtikirja_fetch($otsikkonro) {
 
   $i = 0;
 
-    while ($rahtikirja = mysql_fetch_assoc($result)) {
+  while ($rahtikirja = mysql_fetch_assoc($result)) {
 
     if ($i == 0) {
       $data = array_merge($rahtikirja, $data);
@@ -763,13 +764,13 @@ function pupe_rahtikirja_fetch($otsikkonro) {
     $data['lavametriyht'] += $rahtikirja['lavametri'];
 
     $i++;
-    }
+  }
 
   return $data;
 }
 
+
 /**
- *
  * Hakee kaikki varastopaikat yhtiolle
  *
  * @return array tunnus => nimitys
@@ -791,8 +792,8 @@ function pupe_varasto_fetch_all() {
   return $varastot;
 }
 
+
 /**
- *
  * undocumented function
  *
  * @return void
@@ -816,8 +817,8 @@ function pupe_toimitustapa_fetch_all() {
   return $data;
 }
 
+
 /**
- *
  * undocumented function
  *
  * @return void
@@ -847,4 +848,4 @@ function pupe_rahtisopimus($merahti, $toimitustapa, $ytunnus = null) {
   return false;
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

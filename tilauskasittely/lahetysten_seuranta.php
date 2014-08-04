@@ -1,6 +1,6 @@
 <?php
 
-require("../inc/parametrit.inc");
+require "../inc/parametrit.inc";
 
 echo "  <script type='text/javascript' language='JavaScript'>
 
@@ -25,20 +25,20 @@ echo "  <script type='text/javascript' language='JavaScript'>
 
     </script>";
 
-echo "<font class='head'>",t("L‰hetysten seuranta"),"</font><hr>";
+echo "<font class='head'>", t("L‰hetysten seuranta"), "</font><hr>";
 
 if ((isset($ppalku) and trim($ppalku) == '') or (isset($kkalku) and trim($kkalku) == '') or (isset($vvalku) and trim($vvalku) == '')) {
-  echo "<font class='error'>",t("VIRHE: Alkup‰iv‰m‰‰r‰ on virheellinen"),"!</font><br /><br />";
+  echo "<font class='error'>", t("VIRHE: Alkup‰iv‰m‰‰r‰ on virheellinen"), "!</font><br /><br />";
   $tee = "";
 }
 
 if ((isset($pploppu) and trim($pploppu) == '') or (isset($kkloppu) and trim($kkloppu) == '') or (isset($vvloppu) and trim($vvloppu) == '')) {
-  echo "<font class='error'>",t("VIRHE: Loppup‰iv‰m‰‰r‰ on virheellinen"),"!</font><br /><br />";
+  echo "<font class='error'>", t("VIRHE: Loppup‰iv‰m‰‰r‰ on virheellinen"), "!</font><br /><br />";
   $tee = "";
 }
 
 if ($tee != "" and isset($asiakas) and trim($asiakas) == "" and isset($paikkakunta) and trim($paikkakunta) == "" and isset($tilausnumero) and trim($tilausnumero == "") and isset($sscc) and trim($sscc == "")) {
-  echo "<font class='error'>",t("VIRHE: Ainakin yksi hakuehto syˆtett‰v‰"),"!</font><br /><br />";
+  echo "<font class='error'>", t("VIRHE: Ainakin yksi hakuehto syˆtett‰v‰"), "!</font><br /><br />";
   $tee = "";
 }
 
@@ -58,15 +58,15 @@ if (!isset($varasto)) $varasto = "";
 
 echo "<form method='post'>";
 echo "<table>";
-echo "<tr><th>",t("Asiakas"),"</th><td><input type='text' name='asiakas' value='{$asiakas}' />&nbsp;</td>";
-echo "<th>",t("Paikkakunta"),"</th><td><input type='text' name='paikkakunta' value='{$paikkakunta}' /></td></tr>";
-echo "<tr><th>",t("Tilausnumero"),"</th><td><input type='text' name='tilausnumero' value='{$tilausnumero}' /></td>";
-echo "<th>",t("SSCC"),"</th><td><input type='text' name='sscc' value='{$sscc}' /></td></tr>";
-echo "<tr><th>",t("Tuotenumero"),"</th><td><input type='text' name='tuotenumero' value='{$tuotenumero}' /></td>";
+echo "<tr><th>", t("Asiakas"), "</th><td><input type='text' name='asiakas' value='{$asiakas}' />&nbsp;</td>";
+echo "<th>", t("Paikkakunta"), "</th><td><input type='text' name='paikkakunta' value='{$paikkakunta}' /></td></tr>";
+echo "<tr><th>", t("Tilausnumero"), "</th><td><input type='text' name='tilausnumero' value='{$tilausnumero}' /></td>";
+echo "<th>", t("SSCC"), "</th><td><input type='text' name='sscc' value='{$sscc}' /></td></tr>";
+echo "<tr><th>", t("Tuotenumero"), "</th><td><input type='text' name='tuotenumero' value='{$tuotenumero}' /></td>";
 
-echo "<th>",t("Varasto"),"</th>";
+echo "<th>", t("Varasto"), "</th>";
 echo "<td><select name='varasto'>";
-echo "<option value=''>",t("Valitse"),"</option>";
+echo "<option value=''>", t("Valitse"), "</option>";
 
 $query = "SELECT *
           FROM varastopaikat
@@ -81,7 +81,7 @@ while ($varasto_row = mysql_fetch_assoc($varasto_res)) {
 
 echo "</select></td></tr>";
 
-echo "<tr><th>",t("P‰iv‰m‰‰r‰"),"</th><td style='text-align:right; vertical-align:middle;'>";
+echo "<tr><th>", t("P‰iv‰m‰‰r‰"), "</th><td style='text-align:right; vertical-align:middle;'>";
 echo "<input type='text' name='ppalku' value='{$ppalku}' size='3' />&nbsp;";
 echo "<input type='text' name='kkalku' value='{$kkalku}' size='3' />&nbsp;";
 echo "<input type='text' name='vvalku' value='{$vvalku}' size='5' />&nbsp;-</td><td colspan='2' >&nbsp;";
@@ -92,7 +92,7 @@ echo "<input type='hidden' name='tee' value='hae' />";
 echo "</td></tr>";
 echo "</table><br>";
 
-echo "<input type='submit' value='",t("Hae"),"' />";
+echo "<input type='submit' value='", t("Hae"), "' />";
 echo "</form>";
 
 if ($tee == 'hae') {
@@ -173,21 +173,21 @@ if ($tee == 'hae') {
       if (mysql_num_rows($era_res) > 0) {
 
         echo "<tr>";
-        echo "<td class='back' colspan='6'><font class='message'>",tv1dateconv($row['pvm']),"</font></td>";
+        echo "<td class='back' colspan='6'><font class='message'>", tv1dateconv($row['pvm']), "</font></td>";
         echo "</tr>";
 
         echo "<tr>";
-        echo "<th>",t("Status"),"</th>";
+        echo "<th>", t("Status"), "</th>";
         echo "<th>{$row['nimi']}</th>";
         echo "<th>{$row['toimitustapa']}</th>";
-        echo "<th>",t("Kg"),"</th>";
-        echo "<th>",t("Ohjausmerkki"),"</th>";
-        echo "<th>",t("Toim.osoite"),"</th>";
+        echo "<th>", t("Kg"), "</th>";
+        echo "<th>", t("Ohjausmerkki"), "</th>";
+        echo "<th>", t("Toim.osoite"), "</th>";
         echo "</tr>";
 
         while ($era_row = mysql_fetch_assoc($era_res)) {
           echo "<tr>";
-          echo "<td>",t("L‰hetetty"),"</td>";
+          echo "<td>", t("L‰hetetty"), "</td>";
 
           echo "<td class='sscc' id='{$era_row['sscc']}'>";
 
@@ -213,7 +213,7 @@ if ($tee == 'hae') {
             echo "{$era_row['sscc']}";
           }
 
-          echo "&nbsp;&nbsp;&nbsp;&nbsp;<img title='",t("N‰yt‰ kollin sis‰ltˆ"),"' alt='",t("N‰yt‰ kollin sis‰ltˆ"),"' src='{$palvelin2}pics/lullacons/go-down.png' style='float:right;' /></td>";
+          echo "&nbsp;&nbsp;&nbsp;&nbsp;<img title='", t("N‰yt‰ kollin sis‰ltˆ"), "' alt='", t("N‰yt‰ kollin sis‰ltˆ"), "' src='{$palvelin2}pics/lullacons/go-down.png' style='float:right;' /></td>";
 
           echo "<td>{$era_row['pakkauskuvaus']}</td>";
           echo "<td>{$era_row['kg']}</td>";
@@ -235,11 +235,11 @@ if ($tee == 'hae') {
 
           echo "<tr class='{$era_row['sscc']}' style='display:none'>";
           echo "<th></th>";
-          echo "<th>",t("Tilausnumero"),"</th>";
-          echo "<th>",t("Tuotenumero"),"</th>";
-          echo "<th>",t("Nimitys"),"</th>";
-          echo "<th>",t("Kpl ker‰tty"),"</th>";
-          echo "<th>",t("Ker‰‰j‰"),"</th>";
+          echo "<th>", t("Tilausnumero"), "</th>";
+          echo "<th>", t("Tuotenumero"), "</th>";
+          echo "<th>", t("Nimitys"), "</th>";
+          echo "<th>", t("Kpl ker‰tty"), "</th>";
+          echo "<th>", t("Ker‰‰j‰"), "</th>";
           echo "</tr>";
 
           while ($sscc_row = mysql_fetch_assoc($sscc_res)) {
@@ -266,4 +266,4 @@ if ($tee == 'hae') {
   }
 }
 
-require ("inc/footer.inc");
+require "inc/footer.inc";

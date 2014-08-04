@@ -43,7 +43,7 @@ if (mysql_field_name($result, $i) == "valkoodi") { //valuutta
   while ($vrow=mysql_fetch_array($vresult)) {
     $sel="";
     if ($trow[$i] == $vrow['nimi']) {
-        $sel = "selected";
+      $sel = "selected";
     }
     $ulos .= "<option value = '$vrow[nimi]' $sel>$vrow[nimi]";
   }
@@ -74,7 +74,7 @@ if (mysql_field_name($result, $i) == "factoring") {
 
 }
 
- if (mysql_field_name($result, $i) == "hyvak") { //hyväksyjät
+if (mysql_field_name($result, $i) == "hyvak") { //hyväksyjät
   $query = "SELECT kuka, nimi
             FROM kuka
             WHERE yhtio = '$kukarow[yhtio]'
@@ -168,7 +168,7 @@ if  (mysql_field_name($result, $i) == "oletus_kulutili" or
     $jatko = 0;
   }
   else {
-    $ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result,$i) ."'>";
+    $ulos = "<td><input type = 'text' name = '$nimi' value = '$trow[$i]' size='$size' maxlength='" . mysql_field_len($result, $i) ."'>";
     $query = "SELECT nimi
               FROM tili
               WHERE yhtio='$kukarow[yhtio]' and tilino = '$trow[$i]'";
@@ -216,5 +216,5 @@ if (mysql_field_name($result, $i) == "siirtoavain" or
   mysql_field_name($result, $i) == "pankki" or
   mysql_field_name($result, $i) == "asiakastarkenne" or
   mysql_field_name($result, $i) == "pankkitarkenne") {
-    $tyyppi = 0;
+  $tyyppi = 0;
 }

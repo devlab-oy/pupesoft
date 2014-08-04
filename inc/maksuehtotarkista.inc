@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("maksuehtotarkista")) {
-  function maksuehtotarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("maksuehtotarkista")) {
+  function maksuehtotarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set;
 
     static $prossa, $moniehto, $kassa_txt, $kassa_pros;
@@ -13,8 +13,8 @@ if(!function_exists("maksuehtotarkista")) {
         $virhe[$i] = t("Et voi tehdä moniehto-maksuehtoa koska yhtiöltä puuttuu maksuehto_tuotenumero!");
       }
       if ($prossa!= 0) {
-          $moniehto = 1;
-        }
+        $moniehto = 1;
+      }
     }
 
     if (mysql_field_name($result, $i) == "jv") {

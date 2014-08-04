@@ -26,15 +26,6 @@ if ($tee == "" and isset($_COOKIE[$cookie_secret])) {
   $tee = "valitse";
 }
 
-// Jos meillä on cookie, tehdään uloskirjautumisnappi
-if (isset($_COOKIE[$cookie_secret])) {
-  echo "<form method='post' action='pankkiyhteys.php'>";
-  echo "<input type='hidden' name='tee' value='kirjaudu_ulos'/>";
-  echo "<input type='submit' value='" . t('Kirjaudu ulos') . "'>";
-  echo "</form>";
-  echo "<br>";
-}
-
 // Kirjaudutaan pankkiin
 if ($tee == "kirjaudu") {
   if (empty($salasana)) {
@@ -51,8 +42,8 @@ if ($tee == "kirjaudu") {
   }
   else {
     // Setataan SECURE cookiet, HTTP only
-    setcookie($cookie_secret, $salasana, time() + 300, '/', false, true, true);
-    setcookie($cookie_tunnus, $pankkiyhteys_tunnus, time() + 300, '/', false, true, true);
+    setcookie($cookie_secret, $salasana, time() + 300, '/', $pupesoft_server, true, true);
+    setcookie($cookie_tunnus, $pankkiyhteys_tunnus, time() + 300, '/', $pupesoft_server, true, true);
 
     // Laitetaan samantien myös globaaliin
     $_COOKIE[$cookie_secret] = $salasana;
@@ -65,14 +56,23 @@ if ($tee == "kirjaudu") {
 // Kirjaudutaan ulos pankista
 if ($tee == "kirjaudu_ulos") {
   // Unsetataan cookiet
-  setcookie($cookie_secret, "", time() - 300, "/", false, true, true);
-  setcookie($cookie_tunnus, "", time() - 300, "/", false, true, true);
+  setcookie($cookie_secret, "deleted", time() - 43200, '/', $pupesoft_server, true, true);
+  setcookie($cookie_tunnus, "deleted", time() - 43200, '/', $pupesoft_server, true, true);
 
   // Poistetaan myös globaalista
   unset($_COOKIE[$cookie_secret]);
   unset($_COOKIE[$cookie_tunnus]);
 
   $tee = "";
+}
+
+// Jos meillä on cookie, tehdään uloskirjautumisnappi
+if (isset($_COOKIE[$cookie_secret])) {
+  echo "<form method='post' action='pankkiyhteys.php'>";
+  echo "<input type='hidden' name='tee' value='kirjaudu_ulos'/>";
+  echo "<input type='submit' value='" . t('Kirjaudu ulos') . "'>";
+  echo "</form>";
+  echo "<br>";
 }
 
 // Oikellisuustarkistukset

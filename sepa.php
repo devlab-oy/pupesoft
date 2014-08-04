@@ -519,6 +519,17 @@ if ($tee == "laheta_pankkiin") {
 
 $pankkitili_tunnus = empty($pankkitili_tunnus) ? 0 : (int) $pankkitili_tunnus;
 
+// Jos halutaan tiedosto per pankki per päivä
+if ($yhtiorow["pankkitiedostot"] == "E") {
+  echo "<font class='error'>";
+  echo t("SEPA-aineston voi luoda ainoastaan per pankki tai kaikki pankit yhteen tiedostoon.");
+  echo "<br>";
+  echo t("Tarkista pankkitiedostot -yhtiön parametrti.");
+  echo "</font>";
+
+  $tee = "virhe";
+}
+
 if ($tee == "KIRJOITAKOPIO") {
   $lisa = " and lasku.tunnus in ($poimitut_laskut) ";
 }

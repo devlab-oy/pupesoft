@@ -1127,14 +1127,19 @@ if ($row['tuoteno'] != '' and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A
 
   if ($vastaavat->onkovastaavia()) {
 
+    $ketjut = explode(",", $vastaavat->getIDt());
+    $ketjun_tuotteet = array();
+    foreach ($ketjut as $ketju) {
+      $ketjun_tuotteet[$ketju] = $vastaavat->tuotteet($ketju);
+    }
+
     if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A' and in_array($row["var2"], array("OK", "PK"))) {
 
       $lisa_huomautus = "";
       // Loopataan kaikki tuotteen vastaavuusketjut
-      $ketjut = explode(",", $vastaavat->getIDt());
       foreach ($ketjut as $ketju) {
         // Haetaan tuotteet ketjukohtaisesti
-        $_tuotteet = $vastaavat->tuotteet($ketju);
+        $_tuotteet = $ketjun_tuotteet[$ketju];
         foreach ($_tuotteet as $_tuote) {
           list(, , $vmyytavissa) = saldo_myytavissa($_tuote["tuoteno"], '', $laskurow['varasto']);
 
@@ -1142,7 +1147,7 @@ if ($row['tuoteno'] != '' and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A
             $lisa_huomautus .= "<div style='float:right; position:relative; top:4px; right:8px;'>";
             $lisa_huomautus .= t("VASTAAVIA PAIKALLISVARASTOSSA!");
             $lisa_huomautus .= "</div>";
-            break;
+            break 2;
           }
         }
       }
@@ -1170,12 +1175,12 @@ if ($row['tuoteno'] != '' and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A
     else {
 
       // Loopataan kaikki tuotteen vastaavuusketjut
-      foreach (explode(",", $vastaavat->getIDt()) as $ketju) {
+      foreach ($ketjut as $ketju) {
 
         $vastaavat_table = "";
 
         // Haetaan tuotteet ketjukohtaisesti
-        $_tuotteet = $vastaavat->tuotteet($ketju);
+        $_tuotteet = $ketjun_tuotteet[$ketju];
 
         foreach ($_tuotteet as $_tuote) {
 

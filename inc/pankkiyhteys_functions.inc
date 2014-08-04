@@ -98,7 +98,7 @@ function filelist_table($array, $type) {
 
   echo "<thead>";
   echo "<tr>";
-  echo "<th>" . t("Tiedosto") . "</th>";
+  echo "<th>" . t("Tiedostonimi") . "</th>";
   echo "<th>" . t("Tili") . "</th>";
   echo "<th>" . t("Aikaleima") . "</th>";
   echo "<th>" . t("Status") . "</th>";
@@ -111,10 +111,12 @@ function filelist_table($array, $type) {
   foreach ($array['files'] as $tiedosto) {
     $_viite = $tiedosto["fileReference"];
 
+    $_date = date("d.m.Y h:i:s", strtotime($tiedosto["fileTimestamp"]));
+
     echo "<tr>";
     echo "<td>{$_viite}</td>";
     echo "<td>{$tiedosto["serviceId"]}</td>";
-    echo "<td>{$tiedosto["fileTimestamp"]}</td>";
+    echo "<td>{$_date}</td>";
     echo "<td>{$tiedosto["status"]}</td>";
     echo "<td>";
 

@@ -56,7 +56,7 @@ function tiedostot_table($tiedostot) {
   echo "<tbody>";
 
   foreach ($tiedostot as $tiedosto) {
-    echo "<tr>";
+    echo "<tr class='aktiivi'>";
     echo "<td>{$tiedosto["viite"]}</td>";
     echo "<td>{$tiedosto["status"]}</td>";
     echo "</tr>";

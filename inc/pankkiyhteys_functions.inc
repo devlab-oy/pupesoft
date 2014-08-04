@@ -113,7 +113,7 @@ function filelist_table($array, $type) {
 
     $_date = date("d.m.Y h:i:s", strtotime($tiedosto["fileTimestamp"]));
 
-    echo "<tr>";
+    echo "<tr class='aktiivi'>";
     echo "<td>{$_viite}</td>";
     echo "<td>{$tiedosto["serviceId"]}</td>";
     echo "<td>{$_date}</td>";

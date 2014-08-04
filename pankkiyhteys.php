@@ -1,5 +1,8 @@
 <?php
 
+// Startaan bufferi, koska pitää tehdä keksejä keskenkaiken
+ob_start();
+
 require "inc/parametrit.inc";
 require "inc/pankkiyhteys_functions.inc";
 
@@ -284,3 +287,6 @@ if ($tee == "") {
 }
 
 require 'inc/footer.inc';
+
+// Flushataan bufferi tässä, koska cookiet on nyt done.
+ob_end_flush();

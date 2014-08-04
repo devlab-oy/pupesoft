@@ -200,9 +200,11 @@ function sepa_download_file_list($params) {
     return false;
   }
 
+  $bank = $pankkiyhteys['bank'];
+
   // Nordealla, pitää hakea filetypen "target_id"
   // Haetaan vaan jos ei ole passattu parametrinä
-  if ($pankkiyhteys['bank'] == "nordea" and $target_id == "") {
+  if ($bank == "nordea" and $target_id == "") {
     $target_id = sepa_target_id_for_file_type($params);
 
     if ($target_id === false) {
@@ -210,19 +212,22 @@ function sepa_download_file_list($params) {
     }
   }
 
+  // Varmistetaan, että ei kutsuta väärällä filetypellä
+  $file_type = sepa_file_type_check($bank, $file_type);
+
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
       "signing_certificate"    => $pankkiyhteys["signing_certificate"],
       "signing_private_key"    => $pankkiyhteys["signing_private_key"],
-      "encryption_certificate" => $pankkiyhteys["encryption_certificate"],
+      "encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
       "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
       "customer_id"            => $pankkiyhteys["customer_id"],
       "target_id"              => $target_id,
       "file_type"              => $file_type,
       "status"                 => $status,
     ),
-    "url" => "https://sepa.devlab.fi/api/{$pankkiyhteys['bank']}/download_file_list",
+    "url" => "https://sepa.devlab.fi/api/{$bank}/download_file_list",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -255,15 +260,20 @@ function sepa_download_files($params) {
     return false;
   }
 
+  $bank = $pankkiyhteys['bank'];
+
   // Nordealla, pitää hakea filetypen "target_id"
   // Haetaan vaan jos ei ole passattu parametrinä
-  if ($pankkiyhteys['bank'] == "nordea" and $target_id == "") {
+  if ($bank == "nordea" and $target_id == "") {
     $target_id = sepa_target_id_for_file_type($params);
 
     if ($target_id === false) {
       return false;
     }
   }
+
+  // Varmistetaan, että ei kutsuta väärällä filetypellä
+  $file_type = sepa_file_type_check($bank, $file_type);
 
   $tiedostot = array();
 
@@ -273,14 +283,14 @@ function sepa_download_files($params) {
       "data"    => array(
         "signing_certificate"    => $pankkiyhteys["signing_certificate"],
         "signing_private_key"    => $pankkiyhteys["signing_private_key"],
-        "encryption_certificate" => $pankkiyhteys["encryption_certificate"],
+        "encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
         "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
         "customer_id"            => $pankkiyhteys["customer_id"],
         "target_id"              => $target_id,
         "file_type"              => $file_type,
         "file_reference"         => $viite
       ),
-      "url" => "https://sepa.devlab.fi/api/{$pankkiyhteys['bank']}/download_file",
+      "url" => "https://sepa.devlab.fi/api/{$bank}/download_file",
       "headers" => array(
         "Content-Type: application/json",
         "Authorization: Token token={$sepa_pankkiyhteys_token}"
@@ -334,12 +344,15 @@ function sepa_upload_file($params) {
     }
   }
 
+  // Varmistetaan, että ei kutsuta väärällä filetypellä
+  $file_type = sepa_file_type_check($bank, $file_type);
+
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
       "signing_certificate"    => $pankkiyhteys["signing_certificate"],
       "signing_private_key"    => $pankkiyhteys["signing_private_key"],
-      "encryption_certificate" => $pankkiyhteys["encryption_certificate"],
+      "encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
       "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
       "customer_id"            => $pankkiyhteys["customer_id"],
       "target_id"              => $target_id,
@@ -427,7 +440,7 @@ function sepa_get_user_info($params) {
     "data"    => array(
       "signing_certificate"    => $pankkiyhteys["signing_certificate"],
       "signing_private_key"    => $pankkiyhteys["signing_private_key"],
-      "encryption_certificate" => $pankkiyhteys["encryption_certificate"],
+      "encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
       "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
       "customer_id"            => $pankkiyhteys["customer_id"],
     ),
@@ -478,6 +491,43 @@ function sepa_target_id_for_file_type($params) {
   return $target_id;
 }
 
+function sepa_file_type_check($bank, $file_type) {
+  // Varmistetaan, että ei kutsuta väärällä filetypellä
+
+  // Nordeamuunnokset
+  if ($bank == "nordea") {
+    // Konekielinen tiliote
+    if ($file_type == "KTON") {
+      $file_type = "TITO";
+    }
+    // Konekielinen viiteaineisto
+    if ($file_type == "VIPN") {
+      $file_type = "KTL";
+    }
+    // XML maksuaineisto
+    if ($file_type == "C2BL") {
+      $file_type = "NDCORPAYS";
+    }
+  }
+
+  // Danskemuunnokset
+  if ($bank == "danske") {
+    // Konekielinen tiliote
+    if ($file_type == "TITO") {
+      $file_type = "KTON";
+    }
+    // Konekielinen viiteaineisto
+    if ($file_type == "KTL") {
+      $file_type = "VIPN";
+    }
+    // XML maksuaineisto
+    if ($file_type == "NDCORPAYS") {
+      $file_type = "C2BL";
+    }
+  }
+
+  return $file_type;
+}
 // Sertifikaatti / salausfunktiot
 
 
@@ -537,7 +587,7 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
     $_salaamaton = pura_salaus($pankki[$key], $salasana);
 
     // Base64 enkoodataan ja setataan takasin arrayseen
-    $pankki[$key] = base64_encode($_salaamaton);
+    $pankki[$key] = base64_encode(trim($_salaamaton));
   }
 
   return $pankki;
@@ -708,7 +758,7 @@ function tuetut_pankit() {
       "nimi"       => "Nordea",
       "lyhyt_nimi" => "nordea"
     ),
-    "DABAFIHX" => array(
+    "DABAFIHH" => array(
       "nimi"       => "Danske Bank",
       "lyhyt_nimi" => "danske"
     ),

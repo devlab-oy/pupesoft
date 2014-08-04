@@ -364,9 +364,11 @@ function sepa_upload_file($params) {
     return false;
   }
 
+  $bank = $pankkiyhteys['bank'];
+
   // Nordealla, pitää hakea filetypen "target_id"
   // Haetaan vaan jos ei ole passattu parametrinä
-  if ($pankkiyhteys['bank'] == "nordea" and $target_id == "") {
+  if ($bank == "nordea" and $target_id == "") {
     $target_id = sepa_target_id_for_file_type($params);
 
     if ($target_id === false) {
@@ -389,7 +391,7 @@ function sepa_upload_file($params) {
       "file_type"              => $file_type,
       "content"                => $maksuaineisto
     ),
-    "url"     => "https://sepa.devlab.fi/api/{$pankkiyhteys['bank']}/upload_file",
+    "url"     => "https://sepa.devlab.fi/api/{$bank}/upload_file",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"

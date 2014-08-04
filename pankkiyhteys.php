@@ -92,6 +92,8 @@ if ($tee == "hae_aineistot") {
   $salasana = $_COOKIE[$cookie_secret];
   $pankkiyhteys_tunnus = $_COOKIE[$cookie_tunnus];
 
+  echo "<br>";
+
   if (count($tiliote_references) > 0) {
     $params = array(
       "file_type"             => "TITO",

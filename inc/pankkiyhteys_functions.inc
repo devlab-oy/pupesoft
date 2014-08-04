@@ -68,6 +68,80 @@ function tiedostot_table($tiedostot) {
   echo "<br/><br/>";
 }
 
+function toggle_all($toggler_id, $toggled_class) {
+  echo "
+  <script type='text/javascript' language='javascript'>
+    $(function () {
+      $('#{$toggler_id}').toggle(
+        function() {
+          $('.{$toggled_class}').prop('checked', true);
+        },
+        function() {
+          $('.{$toggled_class}').prop('checked', false);
+        }
+    );
+    });
+  </script>
+  ";
+}
+
+function filelist_table($array, $type) {
+  global $kukarow, $yhtiorow;
+
+  if (!is_array($array) or count($array) == 0) {
+    echo "<font class='message>";
+    echo t("Yht‰‰n %s-aineistoa ei ole saavavilla!", $kukarow['kieli'], $type);
+    echo "</font>";
+    return;
+  }
+  echo "<table>";
+
+  echo "<thead>";
+  echo "<tr>";
+  echo "<th>" . t("Tiedosto") . "</th>";
+  echo "<th>" . t("Tili") . "</th>";
+  echo "<th>" . t("Aikaleima") . "</th>";
+  echo "<th>" . t("Status") . "</th>";
+  echo "<th>" . t("Valitse") . "</th>";
+  echo "</tr>";
+  echo "</thead>";
+
+  echo "<tbody>";
+
+  foreach ($array['files'] as $tiedosto) {
+    $_viite = $tiedosto["fileReference"];
+
+    echo "<tr>";
+    echo "<td>{$_viite}</td>";
+    echo "<td>{$tiedosto["serviceId"]}</td>";
+    echo "<td>{$tiedosto["fileTimestamp"]}</td>";
+    echo "<td>{$tiedosto["status"]}</td>";
+    echo "<td>";
+
+    if (strtolower($tiedosto["status"]) == 'new') {
+      $_class = "{$type}_boxes";
+    }
+    else {
+     $_class = '';
+    }
+
+    echo "<input type='checkbox' value='{$_viite}' name='{$type}_references[]' class='{$_class}'>";
+    echo "</td>";
+    echo "</tr>";
+  }
+
+  echo "<tr>";
+  echo "<th colspan='4'>";
+  echo t("Hae kaikki uudet %s-aineistot", $kukarow['kieli'], $type);
+  echo "</th>";
+  echo "<td>";
+  echo "<input type='checkbox' id='{$type}_toggler'>";
+  echo "</td>";
+  echo "</tr>";
+
+  echo "</tbody>";
+  echo "</table>";
+}
 
 /**
  *

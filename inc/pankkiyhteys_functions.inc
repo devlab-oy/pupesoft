@@ -110,7 +110,37 @@ function viesti($viesti) {
   echo "<br/>";
 }
 
+function sepa_pankkiyhteys_kunnossa() {
+  global $yhtiorow, $kukarow;
 
+  if (SEPA_PANKKIYHTEYS === false) {
+    echo "<font class='error'>";
+    echo t("SEPA-palvelua ei ole aktivoitu.");
+    echo "<br>";
+
+    if (empty($sepa_pankkiyhteys_token)) {
+      echo "<br>";
+      echo t("Sepa palvelun tunniste on asentamatta!");
+    }
+
+    if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on') {
+      echo "<br>";
+      echo t("Voit k‰ytt‰‰ pankkiyhteytt‰ vain salatulla yhteydell‰!");
+    }
+
+    if ($yhtiorow['pankkitiedostot'] != "F") {
+      echo "<br>";
+      echo t("Voit k‰ytt‰‰ pankkiyhteytt‰ vain pankkitiedostot -parametrill‰");
+      echo ": \"";
+      echo t("P‰iv‰t yhdistet‰‰n, yksi tiedosto per pankki");
+      echo "\"!";
+    }
+
+    echo "</font>";
+
+    exit;
+  }
+}
 // Pankkiyhteys tietokantafunktiot
 
 
@@ -334,9 +364,11 @@ function sepa_upload_file($params) {
     return false;
   }
 
+  $bank = $pankkiyhteys['bank'];
+
   // Nordealla, pit‰‰ hakea filetypen "target_id"
   // Haetaan vaan jos ei ole passattu parametrin‰
-  if ($pankkiyhteys['bank'] == "nordea" and $target_id == "") {
+  if ($bank == "nordea" and $target_id == "") {
     $target_id = sepa_target_id_for_file_type($params);
 
     if ($target_id === false) {
@@ -359,7 +391,7 @@ function sepa_upload_file($params) {
       "file_type"              => $file_type,
       "content"                => $maksuaineisto
     ),
-    "url"     => "https://sepa.devlab.fi/api/{$pankkiyhteys['bank']}/upload_file",
+    "url"     => "https://sepa.devlab.fi/api/{$bank}/upload_file",
     "headers" => array(
       "Content-Type: application/json",
       "Authorization: Token token={$sepa_pankkiyhteys_token}"

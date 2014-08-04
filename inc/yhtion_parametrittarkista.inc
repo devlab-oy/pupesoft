@@ -47,6 +47,21 @@ if (!function_exists("yhtion_parametrittarkista")) {
       }
     }
 
+    if ($fieldname == "pankkitiedostot") {
+      $query = "SELECT count(*) AS kpl
+                FROM lasku
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tila = 'P'";
+      $result = pupe_query($query);
+      $row = mysql_fetch_assoc($result);
+
+      if ($row['kpl'] > 0) {
+        $virhe[$i]  = "<font class='error'>";
+        $virhe[$i] .= t("Et voi vahtaa luontitapaa, koska sinulla on poimittuja laskuja!");
+        $virhe[$i] .= "<br></font>";
+      }
+    }
+
     if ($fieldname == "maksuehto_tuotenumero" or
       $fieldname == "rahti_tuotenumero" or
       $fieldname == "jalkivaatimus_tuotenumero" or

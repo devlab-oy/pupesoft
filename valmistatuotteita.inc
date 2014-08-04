@@ -506,7 +506,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
       // Jos on useampi valmiste
       if ((float) $kaikenkaikkiaan > 1) {
 
-        if( isset($valmisterow['valmistus_painoarvo']) ) {
+        if ( isset($valmisterow['valmistus_painoarvo']) ) {
           $uusiarvo = $valmisterow["kehahin"] * $kaikenkaikkiaan_arvot;
         }
         else {

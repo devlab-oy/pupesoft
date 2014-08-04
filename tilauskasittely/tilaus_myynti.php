@@ -4674,8 +4674,8 @@ if ($tee == '') {
       $tuoteno_lisa = $trow['tuoteno'];
     }
     else if (is_array($tuoteno_array)) {
-      $tuoteno_lisa = implode("','", $tuoteno_array);
-    }
+        $tuoteno_lisa = implode("','", $tuoteno_array);
+      }
     else {
       $tuoteno_lisa = $tuoteno;
     }

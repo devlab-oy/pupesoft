@@ -229,7 +229,7 @@ if ($tee == "valitse") {
   filelist_table($viite_tiedostot, "viite");
 
   echo "<br>";
-  echo "<input type='submit' value='" . t('Hae valitut') . "'>";
+  echo "<input type='submit' value='" . t('Hae valitut aineistot') . "'>";
 
   echo "</form>";
 }

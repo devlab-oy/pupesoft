@@ -26771,7 +26771,7 @@ if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
 
 if (!function_exists('merkkaa_saldovahvistus_lahetetyksi')) {
   function merkkaa_saldovahvistus_lahetetyksi($saldovahvistus) {
-    global $kukarow, $yhtiorow;
+    global $kukarow, $yhtiorow, $masterlink;
 
     $query = "INSERT INTO saldovahvistukset
               SET lahetys_pvm = CURRENT_DATE,
@@ -26779,7 +26779,7 @@ if (!function_exists('merkkaa_saldovahvistus_lahetetyksi')) {
               avoin_saldo_pvm       = '".date('Y-m-d', strtotime($saldovahvistus['laskun_avoin_paiva']))."',
               ryhmittely_tyyppi     = '{$saldovahvistus['ryhmittely_tyyppi']}',
               yhtio                 = '{$kukarow['yhtio']}'";
-    pupe_query($query);
+    pupe_query($query, $masterlink);
     $saldovahvistus_tunnus = mysql_insert_id();
 
     foreach ($saldovahvistus['laskut'] as $lasku) {
@@ -26799,7 +26799,7 @@ if (!function_exists('merkkaa_saldovahvistus_lahetetyksi')) {
                 era_pvm       = '{$lasku['erpcm']}',
                 summa         = {$lasku['avoin_saldo']},
                 yhtio         = '{$kukarow['yhtio']}'";
-      pupe_query($query);
+      pupe_query($query, $masterlink);
     }
   }
 }

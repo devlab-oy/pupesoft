@@ -6,19 +6,8 @@ require "inc/pankkiyhteys_functions.inc";
 echo "<font class='head'>" . t('SEPA-pankkiyhteys') . "</font>";
 echo "<hr>";
 
-if (SEPA_PANKKIYHTEYS === false) {
-  echo "<font class='error'>";
-  echo t("SEPA-palvelua ei ole aktivoitu.");
-
-  if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on') {
-    echo "<br>";
-    echo t("Voit k‰ytt‰‰ pankkiyhteytt‰ vain salatulla yhteydell‰!");
-  }
-
-  echo "</font>";
-
-  exit;
-}
+// Varmistetaan, ett‰ sepa pankkiyhteys on kunnossa. Funkio kuolee, jos ei ole.
+sepa_pankkiyhteys_kunnossa();
 
 $tee = empty($tee) ? '' : $tee;
 $customer_id = empty($customer_id) ? '' : $customer_id;

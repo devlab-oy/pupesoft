@@ -26391,6 +26391,7 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
               JOIN asiakas
               ON ( asiakas.yhtio = lasku.yhtio
                 AND asiakas.tunnus     = lasku.liitostunnus
+                AND asiakas.kauppatapahtuman_luonne != 21
                 {$asiakas_join} )
               JOIN tiliointi USE INDEX (tositerivit_index)
               ON ( tiliointi.yhtio = lasku.yhtio
@@ -26413,7 +26414,7 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
               asiakas.ytunnus ASC,
               lasku.tunnus ASC";
     $result = pupe_query($query);
-
+echo "26416 $query <br><br>";
     $laskut = array();
     while ($lasku = mysql_fetch_assoc($result)) {
       if (!$valitut) {

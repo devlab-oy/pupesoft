@@ -21,7 +21,7 @@ function error {
 
 # Jos failure niin dellataan tempdir ja kuollaan
 function failure {
-  rm -rf "${tmpdir}" &> /dev/null
+  nice -n 19 rm -rf "${tmpdir}" &> /dev/null
   error "$1"
 }
 
@@ -96,7 +96,7 @@ else
 fi
 
 # Puretaan backup
-tar -xf "${kasiteltava_backup}" ${compress_prog} -C "${tmpdir}"
+nice -n 19 tar -xf "${kasiteltava_backup}" ${compress_prog} -C "${tmpdir}"
 
 if [[ $? -ne 0 ]]; then
   failure "Purku epäonnistui!"
@@ -113,12 +113,12 @@ mkdir -p "${database_to}" &> /dev/null
 
 # Stopataan mysql, moovataan db, chown ja mysql takas
 ${mysql_stop} > /dev/null &&
-mv -f "${tmpdir}/"* "${database_to}/" > /dev/null &&
+nice -n 19 mv -f "${tmpdir}/"* "${database_to}/" > /dev/null &&
 chown -R ${mysql_owner} "${database_to}" > /dev/null &&
 ${mysql_start} > /dev/null
 
 if [[ $? -ne 0 ]]; then
-  rm -rf "${database_to}" &> /dev/null
+  nice -n 19 rm -rf "${database_to}" &> /dev/null
   failure "Siirto epäonnistui!"
 fi
 
@@ -203,14 +203,14 @@ WHERE asiakas != '';
 EOF
 
 if [[ $? -ne 0 ]]; then
-  rm -rf "${database_to}" &> /dev/null
+  nice -n 19 rm -rf "${database_to}" &> /dev/null
   failure "Puhdistus epäonnistui!"
 fi
 
 decho "Putsataan tmp -tiedostot.."
 
 # Poistetaan tmpdirikka
-rm -rf "${tmpdir}"
+nice -n 19 rm -rf "${tmpdir}"
 
 decho "Valmis."
 echo

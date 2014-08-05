@@ -29,6 +29,11 @@ if ($tee == "" and isset($_COOKIE[$cookie_secret])) {
   $tee = "valitse";
 }
 
+// Jos meill‰ on viel‰ cookie voimassa, menn‰‰n suoraan valintaan
+if ($indexvas == "1" and isset($_COOKIE[$cookie_secret])) {
+  $tee = "kirjaudu_ulos";
+}
+
 // Kirjaudutaan pankkiin
 if ($tee == "kirjaudu") {
   if (empty($salasana)) {
@@ -72,15 +77,6 @@ if ($tee == "kirjaudu_ulos") {
 // Jos meill‰ ei ole cookieta, niin menn‰‰n aina kirjautumiseen
 if ($tee != "" and !isset($_COOKIE[$cookie_secret])) {
   $tee = "";
-}
-
-// Jos meill‰ on cookie, tehd‰‰n uloskirjautumisnappi
-if (isset($_COOKIE[$cookie_secret])) {
-  echo "<form method='post' action='pankkiyhteys.php'>";
-  echo "<input type='hidden' name='tee' value='kirjaudu_ulos'/>";
-  echo "<input type='submit' value='" . t('Kirjaudu ulos') . "'>";
-  echo "</form>";
-  echo "<br>";
 }
 
 // Oikellisuustarkistukset

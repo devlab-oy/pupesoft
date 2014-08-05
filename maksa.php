@@ -106,7 +106,7 @@ if ($tee == 'H' and ($poikkeus == 'on' or ($kaale == "" and $poikkeus == ""))) {
 }
 
 // Jos ei saada poimia kun yhden pankin maksuja aineistoon
-if ($tee == 'H' and $yhtiorow['pankkitiedostot'] == 'F') {
+if ($tee == 'H' and ($yhtiorow['pankkitiedostot'] == 'F' or $yhtiorow['pankkitiedostot'] == 'E')) {
   $query = "SELECT lasku.tunnus
             FROM lasku
             WHERE lasku.yhtio     = '{$kukarow["yhtio"]}'

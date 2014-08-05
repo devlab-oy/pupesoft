@@ -118,20 +118,23 @@ function filelist_table($array, $type) {
   foreach ($array['files'] as $tiedosto) {
     $_viite = $tiedosto["fileReference"];
     $_date = date("d.m.Y h:i:s", strtotime($tiedosto["fileTimestamp"]));
+    $_status = $tiedosto["status"];
+
+    // Ruksataan, jos tiedosto on uusi ja tehd‰‰n selkokielisempi
+    if (strtolower($_status) == 'new') {
+      $_chk = "checked";
+      $_status = t("Uusi");
+    }
+    else {
+     $_chk = '';
+     $_status = t("Haettu");
+    }
 
     echo "<tr class='aktiivi'>";
     echo "<td>{$tiedosto["serviceId"]}</td>";
     echo "<td>{$_date}</td>";
-    echo "<td>{$tiedosto["status"]}</td>";
+    echo "<td>{$_status}</td>";
     echo "<td>";
-
-    if (strtolower($tiedosto["status"]) == 'new') {
-      $_chk = "checked";
-    }
-    else {
-     $_chk = '';
-    }
-
     echo "<input type='checkbox' {$_chk} value='{$_viite}' name='{$type}_references[]' class='{$type}_boxes'>";
     echo "</td>";
     echo "</tr>";

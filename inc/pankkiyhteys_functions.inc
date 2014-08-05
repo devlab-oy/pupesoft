@@ -124,8 +124,8 @@ function filelist_table($array, $type) {
       $_status = t("Uusi");
     }
     else {
-     $_chk = '';
-     $_status = t("Haettu");
+      $_chk = '';
+      $_status = t("Haettu");
     }
 
     echo "<tr class='aktiivi'>";
@@ -150,6 +150,7 @@ function filelist_table($array, $type) {
   echo "</tbody>";
   echo "</table>";
 }
+
 
 /**
  *

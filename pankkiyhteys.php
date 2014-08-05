@@ -69,6 +69,11 @@ if ($tee == "kirjaudu_ulos") {
   $tee = "";
 }
 
+// Jos meill‰ ei ole cookieta, niin menn‰‰n aina kirjautumiseen
+if ($tee != "" and !isset($_COOKIE[$cookie_secret])) {
+  $tee = "";
+}
+
 // Jos meill‰ on cookie, tehd‰‰n uloskirjautumisnappi
 if (isset($_COOKIE[$cookie_secret])) {
   echo "<form method='post' action='pankkiyhteys.php'>";
@@ -108,8 +113,10 @@ if ($tee == "hae_aineistot") {
     $tiedostot = sepa_download_files($params);
 
     if ($tiedostot) {
-      viesti("Ladatut tiliotteet:");
-      tiedostot_table($tiedostot);
+      viesti("Ladatut tiliote -aineistot:");
+
+      $_t = unserialize(base64_decode($tiliote_tiedostot));
+      tiedostot_table($tiedostot, $_t);
 
       // ker‰t‰‰n t‰h‰n kaikki filet
       $pankkitiedostot = array_merge($pankkitiedostot, $tiedostot);
@@ -130,8 +137,10 @@ if ($tee == "hae_aineistot") {
     $tiedostot = sepa_download_files($params);
 
     if ($tiedostot) {
-      viesti("Ladatut tiliotteet:");
-      tiedostot_table($tiedostot);
+      viesti("Ladatut viite -aineistot:");
+
+      $_v = unserialize(base64_decode($viite_tiedostot));
+      tiedostot_table($tiedostot, $_v);
 
       // ker‰t‰‰n t‰h‰n kaikki filet
       $pankkitiedostot = array_merge($pankkitiedostot, $tiedostot);
@@ -216,6 +225,14 @@ if ($tee == "valitse") {
   // Piirret‰‰n formi
   echo "<form method='post' action='pankkiyhteys.php'>";
   echo "<input type='hidden' name='tee' value='hae_aineistot'/>";
+
+  // V‰litet‰‰n tiliote ja viitetiedosto arrayt formissa,
+  // jotta saadaan n‰ytetty‰ selkokielist‰ formia downloadin j‰lkeen
+  $_t = base64_encode(serialize($tiliote_tiedostot));
+  $_v = base64_encode(serialize($viite_tiedostot));
+
+  echo "<input type='hidden' name='tiliote_tiedostot' value='{$_t}'>";
+  echo "<input type='hidden' name='viite_tiedostot' value='{$_v}'>";
 
   echo "<br>";
   echo "<font class='message'>";

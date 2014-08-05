@@ -794,6 +794,10 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
           $urltoim = "/EXTRANET";
         }
 
+        if (tarkista_oikeus('infobar.php')) {
+          require('infobar.php');
+        }
+
         if (isset($ohjewiki_url)) {
           $hreffi = $ohjewiki_url."/Ohjeet:".basename($phpnimi).$urltoim;
           echo "<div style='text-align:right; vertical-align:top;'><a target='_blank' href='$hreffi'>".t("OHJE")."</a></div>";

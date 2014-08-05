@@ -26937,15 +26937,15 @@ if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
 
 if (!function_exists('merkkaa_saldovahvistus_lahetetyksi')) {
   function merkkaa_saldovahvistus_lahetetyksi($saldovahvistus) {
-    global $kukarow, $yhtiorow;
+    global $kukarow, $yhtiorow, $masterlink;
 
-    $query = "  INSERT INTO saldovahvistukset
-          SET lahetys_pvm = CURRENT_DATE,
-          saldovahvistus_viesti = '{$saldovahvistus['saldovahvistus_viesti']['selite']}',
-          avoin_saldo_pvm = '".date('Y-m-d', strtotime($saldovahvistus['laskun_avoin_paiva']))."',
-          ryhmittely_tyyppi = '{$saldovahvistus['ryhmittely_tyyppi']}',
-          yhtio = '{$kukarow['yhtio']}'";
-    pupe_query($query);
+    $query = "INSERT INTO saldovahvistukset
+              SET lahetys_pvm = CURRENT_DATE,
+              saldovahvistus_viesti = '{$saldovahvistus['saldovahvistus_viesti']['selite']}',
+              avoin_saldo_pvm       = '".date('Y-m-d', strtotime($saldovahvistus['laskun_avoin_paiva']))."',
+              ryhmittely_tyyppi     = '{$saldovahvistus['ryhmittely_tyyppi']}',
+              yhtio                 = '{$kukarow['yhtio']}'";
+    pupe_query($query, $masterlink);
     $saldovahvistus_tunnus = mysql_insert_id();
 
     foreach ($saldovahvistus['laskut'] as $lasku) {
@@ -26956,16 +26956,16 @@ if (!function_exists('merkkaa_saldovahvistus_lahetetyksi')) {
         $lasku['tapvm'] = null;
       }
 
-      $query = "  INSERT INTO saldovahvistusrivit
-            SET saldovahvistus_tunnus = {$saldovahvistus_tunnus},
-            tyyppi = '{$lasku['saldovahvistusrivi_tyyppi']}',
-            lasku_tunnus = '{$lasku['lasku_tunnus']}',
-            laskunro = '{$lasku['laskunro']}',
-            tapahtuma_pvm = '{$lasku['tapvm']}',
-            era_pvm = '{$lasku['erpcm']}',
-            summa = {$lasku['avoin_saldo']},
-            yhtio = '{$kukarow['yhtio']}'";
-      pupe_query($query);
+      $query = "INSERT INTO saldovahvistusrivit
+                SET saldovahvistus_tunnus = {$saldovahvistus_tunnus},
+                tyyppi        = '{$lasku['saldovahvistusrivi_tyyppi']}',
+                lasku_tunnus  = '{$lasku['lasku_tunnus']}',
+                laskunro      = '{$lasku['laskunro']}',
+                tapahtuma_pvm = '{$lasku['tapvm']}',
+                era_pvm       = '{$lasku['erpcm']}',
+                summa         = {$lasku['avoin_saldo']},
+                yhtio         = '{$kukarow['yhtio']}'";
+      pupe_query($query, $masterlink);
     }
   }
 }
@@ -27212,7 +27212,8 @@ if (!function_exists("tallenna_tiliote_viite")) {
     $tiliotedataresult = pupe_query($query);
 
     // Etsitään aineistonumero
-    $query = "SELECT max(aineisto) + 1 AS aineisto FROM tiliotedata";
+    $query = "SELECT ifnull(max(aineisto), 0) + 1 AS aineisto
+              FROM tiliotedata";
     $aineistores = pupe_query($query);
     $aineistorow = mysql_fetch_assoc($aineistores);
 
@@ -27687,14 +27688,17 @@ if (!function_exists("kasittele_tiliote_viite")) {
     $meteidres = pupe_query($query);
     $meteidrow = mysql_fetch_assoc($meteidres);
 
+    $tiliotedatarow = mysql_fetch_assoc($tiliotedataresult);
+    mysql_data_seek($tiliotedataresult, 0);
+
+    $query = "SELECT *
+              FROM yriti
+              WHERE tilino = '{$tiliotedatarow['tilino']}'";
+    $yriti_result = pupe_query($query);
+    $yritirow = mysql_fetch_assoc($yriti_result);
+
     while ($tiliotedatarow = mysql_fetch_assoc($tiliotedataresult)) {
       $tietue = $tiliotedatarow['tieto'];
-
-      $query = "SELECT *
-                FROM yriti
-                WHERE tilino = '{$tiliotedatarow['tilino']}'";
-      $yriti_result = pupe_query($query);
-      $yritirow = mysql_fetch_assoc($yriti_result);
 
       // Setataan kukarow-yhtiö
       $kukarow["yhtio"] = $yritirow["yhtio"];

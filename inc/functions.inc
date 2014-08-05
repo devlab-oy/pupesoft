@@ -27593,3 +27593,32 @@ if (!function_exists("kasittele_tiliote_viite")) {
     $kukarow = $kukarow_talteen;
   }
 }
+
+if (!function_exists("hae_saldo")) {
+  function hae_saldo($tuote) {
+    global $kukarow, $yhtiorow, $maa;
+
+    $saldo = 0;
+
+    if ($tuote["tuoteperhe"] == $tuote["tuoteno"]) {
+      // Tuoteperheen isä
+      $saldot = tuoteperhe_myytavissa($tuote["tuoteno"],'KAIKKI','',0,'','','','','', $maa);
+
+      foreach ($saldot as $varasto => $myytavissa) {
+        $saldo += $myytavissa;
+      }
+      return $saldo;
+
+    }
+    elseif ($tuote['ei_saldoa'] != '') {
+      $saldo = 1;
+      return $saldo;
+    }
+    else {
+      list($a,$b,$myytavissa) = saldo_myytavissa($tuote["tuoteno"],'',0,'','','','','', $maa);
+      $saldo = $myytavissa;
+
+      return $saldo;
+    }
+  }
+}

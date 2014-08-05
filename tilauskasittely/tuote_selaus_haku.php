@@ -1,13 +1,13 @@
 <?php
 
-if (@include("../inc/parametrit.inc"));
-elseif (@include("parametrit.inc"));
+if (@include "../inc/parametrit.inc");
+elseif (@include "parametrit.inc");
 else exit;
 
-if (@include("verkkokauppa/ostoskori.inc")) {
+if (@include "verkkokauppa/ostoskori.inc") {
   $kori_polku = "../verkkokauppa/ostoskori.php";
 }
-elseif (@include("ostoskori.inc")) {
+elseif (@include "ostoskori.inc") {
   $kori_polku = "ostoskori.php";
 
   if ($tultiin == "futur") {
@@ -59,12 +59,12 @@ if ($kukarow['extranet'] == '' and $verkkokauppa == "") {
 }
 
 // Jos tullaan sivuvalikosta extranetissä tyhjätään kesken ettei lisätä tuotteita väärälle tilaukselle
-if((!isset($valittu_tarjous_tunnus)) and $kukarow['extranet'] != '' and $verkkokauppa == "") {
+if ((!isset($valittu_tarjous_tunnus)) and $kukarow['extranet'] != '' and $verkkokauppa == "") {
   $kukarow['kesken'] = '';
 }
 
 if (isset($toiminto) and $toiminto == "sarjanumeronlisatiedot_popup") {
-  @include('sarjanumeron_lisatiedot_popup.inc');
+  @include 'sarjanumeron_lisatiedot_popup.inc';
 
   if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
     $hinnat = 'MY';
@@ -73,7 +73,7 @@ if (isset($toiminto) and $toiminto == "sarjanumeronlisatiedot_popup") {
     $hinnat = '';
   }
 
-  list($divitx, , , ,) = sarjanumeronlisatiedot_popup($tunnus, '', '', $hinnat, '');
+  list($divitx, , , , ) = sarjanumeronlisatiedot_popup($tunnus, '', '', $hinnat, '');
   echo "$divitx";
   exit;
 }
@@ -444,7 +444,7 @@ if (trim($toim_tuoteno) != '') {
              LIMIT 500";
   $pres = pupe_query($query);
 
-  while($prow = mysql_fetch_assoc($pres)) {
+  while ($prow = mysql_fetch_assoc($pres)) {
     $toimtuotteet .= "'".$prow["tuoteno"]."',";
   }
 
@@ -471,7 +471,7 @@ if (trim($alkuperaisnumero) != '') {
              LIMIT 500";
   $pres = pupe_query($query);
 
-  while($prow = mysql_fetch_assoc($pres)) {
+  while ($prow = mysql_fetch_assoc($pres)) {
     $origtuotteet .= "'".$prow["tuoteno"]."',";
   }
 
@@ -523,7 +523,7 @@ if (isset($vierow) and $vierow["maa"] != "") {
 }
 
 if (file_exists('sarjanumeron_lisatiedot_popup.inc')) {
-  require("sarjanumeron_lisatiedot_popup.inc");
+  require "sarjanumeron_lisatiedot_popup.inc";
 }
 
 $orginaaalit = FALSE;
@@ -563,7 +563,7 @@ if ($verkkokauppa == "") {
 
   if ($hae_ja_selaa_row['selite'] == 'B') {
     echo "<fieldset>";
-    echo "<legend>",t("Pikahaku"),"</legend>";
+    echo "<legend>", t("Pikahaku"), "</legend>";
   }
 
   echo "<table style='display:inline-table; padding-right:4px; padding-top:4px;' valign='top'>";
@@ -628,8 +628,8 @@ if ($verkkokauppa == "") {
     echo "</fieldset>";
 
     echo "<fieldset>";
-    echo "<legend>",t("Rajaa tuotteita"),"</legend>";
-    echo "<span class='info'>",t("Aloita valitsemalla osasto / tuoteryhmä"),"</span>";
+    echo "<legend>", t("Rajaa tuotteita"), "</legend>";
+    echo "<span class='info'>", t("Aloita valitsemalla osasto / tuoteryhmä"), "</span>";
   }
 
   echo "<br/>";
@@ -652,7 +652,7 @@ if ($verkkokauppa == "") {
     $monivalintalaatikot_normaali = array();
   }
 
-  require ("monivalintalaatikot.inc");
+  require "monivalintalaatikot.inc";
 
   if ($hae_ja_selaa_row['selite'] == 'B') {
     echo "</fieldset>";
@@ -734,7 +734,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
 
   if (!function_exists("tuoteselaushaku_vastaavat_korvaavat")) {
     function tuoteselaushaku_vastaavat_korvaavat($tvk_taulu, $tvk_korvaavat, $tvk_tuoteno) {
-      global $kukarow, $kieltolisa, $poislisa, $hinta_rajaus,$extra_poislisa;
+      global $kukarow, $kieltolisa, $poislisa, $hinta_rajaus, $extra_poislisa;
 
       if ($tvk_taulu != "vastaavat") $kyselylisa = " and {$tvk_taulu}.tuoteno != '$tvk_tuoteno' ";
       else $kyselylisa = "";
@@ -777,7 +777,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
 
   if (!function_exists("tuoteselaushaku_tuoteperhe")) {
     function tuoteselaushaku_tuoteperhe($esiisatuoteno, $tuoteno, $isat_array, $kaikki_array, $rows, $tyyppi = "P") {
-      global $kukarow, $kieltolisa, $poislisa, $hinta_rajaus,$extra_poislisa;
+      global $kukarow, $kieltolisa, $poislisa, $hinta_rajaus, $extra_poislisa;
 
       if (!in_array($tuoteno, $isat_array)) {
         $isat_array[] = $tuoteno;
@@ -1081,16 +1081,16 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
           }
 
           if ($row_value["vastaavat"] != $row_value["tuoteno"] and $row_value["vastaavat"] > 0 and $row_value["vastaavamaara"] > 0 and isset($korjattavat_vastaavamaarat[$row_value["vastaavat"]])) {
-             $rows[$row_key]["vastaavamaara"] -= $korjattavat_vastaavamaarat[$row_value["vastaavat"]];
+            $rows[$row_key]["vastaavamaara"] -= $korjattavat_vastaavamaarat[$row_value["vastaavat"]];
           }
         }
       }
 
       if ($hae_ja_selaa_row['selite'] == 'B') {
-        echo "&raquo;  ".count($rows)." ",t("tuotetta")."</h3>";
+        echo "&raquo;  ".count($rows)." ", t("tuotetta")."</h3>";
       }
       else {
-        echo "&raquo;  ".count($rows)." ",t("tuotetta")."<br/><br/>";
+        echo "&raquo;  ".count($rows)." ", t("tuotetta")."<br/><br/>";
       }
 
       echo "<table>";
@@ -1113,9 +1113,9 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
       if ($kukarow['hinnat'] >= 0) {
         echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=hinta$ulisa'>".t("Hinta");
 
-      if ($lisatiedot != "" and $kukarow["extranet"] == "") {
-        echo "<br/><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=nettohinta$ulisa'>".t("Nettohinta");
-      }
+        if ($lisatiedot != "" and $kukarow["extranet"] == "") {
+          echo "<br/><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=nettohinta$ulisa'>".t("Nettohinta");
+        }
 
         echo "</th>";
       }
@@ -1254,7 +1254,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
               if ($sarjalask > 0) {
                 $row["korvaavat"] = $ind.$sarjalask;
                 array_splice($rows, $alask, 0, array($ind.$sarjalask => $row));
-               }
+              }
               else {
                 $rows[$ind] = $row;
               }
@@ -1285,7 +1285,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
       if ($hae_ja_selaa_asiakas != 0) {
         $vainaletuotteet = FALSE;
 
-        if ($verkkokauppa != "" AND $kukarow["naytetaan_tuotteet"] == "A") {
+        if ($verkkokauppa != "" and $kukarow["naytetaan_tuotteet"] == "A") {
           $vainaletuotteet = TRUE;
         }
 
@@ -1359,7 +1359,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
         $classrigh = "style='border-top: 1px solid #555555; border-right: 1px solid #555555;' ";
       }
       elseif (($row["tuoteperhe"] != "" and $row["tuoteperhe"] != $row_seuraava["tuoteperhe"]) or
-          ($row["osaluettelo"] != "" and $row["osaluettelo"] != $row_seuraava["osaluettelo"])) {
+        ($row["osaluettelo"] != "" and $row["osaluettelo"] != $row_seuraava["osaluettelo"])) {
         $classleft = "style='border-bottom: 1px solid #555555; border-left: 1px solid #555555;' ";
         $classmidl = "style='border-bottom: 1px solid #555555;' ";
         $classrigh = "style='border-bottom: 1px solid #555555; border-right: 1px solid #555555;' ";
@@ -1442,7 +1442,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             <th>".t("Hinta")."</th>
           </tr>";
 
-          while($orgrow = mysql_fetch_assoc($orgres)) {
+          while ($orgrow = mysql_fetch_assoc($orgres)) {
             $linkkilisa .= "<tr>
                 <td>$orgrow[orig_tuoteno]</td>
                 <td>$orgrow[merkki]</td>
@@ -1476,7 +1476,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
         echo "<td valign='top' class='$vari' $classleft>$row[tuoteno] $linkkilisa ";
       }
       else {
-        echo "<td valign='top' class='$vari' $classleft><a href='../$tuotekyslinkki?tuoteno=".urlencode($row["tuoteno"])."&tee=Z&lopetus=$PHP_SELF////submit_button=1//toim_kutsu=$toim_kutsu//sort=$edsort//ojarj=$ojarj".str_replace("&","//",$ulisa)."'>$row[tuoteno]</a>$linkkilisa ";
+        echo "<td valign='top' class='$vari' $classleft><a href='../$tuotekyslinkki?tuoteno=".urlencode($row["tuoteno"])."&tee=Z&lopetus=$PHP_SELF////submit_button=1//toim_kutsu=$toim_kutsu//sort=$edsort//ojarj=$ojarj".str_replace("&", "//", $ulisa)."'>$row[tuoteno]</a>$linkkilisa ";
       }
 
       if ($lisatiedot != "" and $verkkokauppa == "") {
@@ -1619,7 +1619,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
     }
   }
   else {
-    echo "<br/>",t("Yhtään tuotetta ei löytynyt"),"!";
+    echo "<br/>", t("Yhtään tuotetta ei löytynyt"), "!";
   }
 
   if (mysql_num_rows($result) == 500) {
@@ -1628,17 +1628,20 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
 }
 
 if ($verkkokauppa == "") {
-  if (@include("inc/footer.inc"));
-  elseif (@include("footer.inc"));
+  if (@include "inc/footer.inc");
+  elseif (@include "footer.inc");
   else exit;
 }
 
 /**
- * @param $row
+ *
+ * @param unknown $row
  */
+
+
 function piirra_extranet_saldo($row) {
   global $kukarow, $yhtiorow, $verkkokauppa, $noutovarres, $laskurow, $saldoaikalisa,
-         $rivin_yksikko, $vari, $verkkokauppa_saldoluku, $hinta_rajaus;
+  $rivin_yksikko, $vari, $verkkokauppa_saldoluku, $hinta_rajaus;
 
   $query = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
   $oleasres = pupe_query($query);
@@ -1752,8 +1755,10 @@ function piirra_extranet_saldo($row) {
   echo "</td>";
 }
 
+
 /**
- * @param $row
+ *
+ * @param unknown $row
  */
 function piirra_ostoskoriin_lisays($row) {
   global $oikeurow, $kukarow, $ostoskori, $vari, $yht_i;
@@ -1775,12 +1780,13 @@ function piirra_ostoskoriin_lisays($row) {
   }
 }
 
+
 /**
  * Piirtää formin aloitustagin ja hidden inputit
  */
 function piirra_formin_aloitus() {
   global $verkkokauppa, $edsort, $ojarj, $osasto, $try, $tuotemerkki, $ulisa, $toim_kutsu, $kukarow,
-         $ostoskori, $valittu_tarjous_tunnus, $tultiin, $variaatio;
+  $ostoskori, $valittu_tarjous_tunnus, $tultiin, $variaatio;
 
   if ($verkkokauppa != "") {
     echo avoin_kori();
@@ -1818,12 +1824,13 @@ function piirra_formin_aloitus() {
   }
 }
 
+
 /**
  * Tarkistetaan tilausrivin tiedot ja echotetaan ruudulle lisätyt tuotteet
  */
 function tarkista_tilausrivi() {
   global $tee, $ostoskori, $tilkpl, $kukarow, $toim_kutsu, $yhtiorow, $toim, $tiltuoteno,
-         $tilsarjatunnus, $verkkokauppa, $verkkokauppa_saldotsk, $myyntierahuom, $lisatty_tun;
+  $tilsarjatunnus, $verkkokauppa, $verkkokauppa_saldotsk, $myyntierahuom, $lisatty_tun;
 
   if (($tee == 'TI' or is_numeric($ostoskori)) and isset($tilkpl)) {
 
@@ -1840,7 +1847,7 @@ function tarkista_tilausrivi() {
     else {
       // Luodaan uusi myyntitilausotsikko
       if ($kukarow["extranet"] == "") {
-        require_once("tilauskasittely/luo_myyntitilausotsikko.inc");
+        require_once "tilauskasittely/luo_myyntitilausotsikko.inc";
 
         if ($toim_kutsu != "") {
           $lmyytoim = $toim_kutsu;
@@ -1854,7 +1861,7 @@ function tarkista_tilausrivi() {
         $kaytiin_otsikolla = "NOJOO!";
       }
       else {
-        require_once("luo_myyntitilausotsikko.inc");
+        require_once "luo_myyntitilausotsikko.inc";
         $tilausnumero = luo_myyntitilausotsikko("EXTRANET", $kukarow["oletus_asiakas"]);
         $kukarow["kesken"] = $tilausnumero;
         $kaytiin_otsikolla = "NOJOO!";
@@ -1943,10 +1950,10 @@ function tarkista_tilausrivi() {
             $kukarow["kesken"] = "";
           }
           elseif (file_exists("../tilauskasittely/lisaarivi.inc")) {
-            require("../tilauskasittely/lisaarivi.inc");
+            require "../tilauskasittely/lisaarivi.inc";
           }
           else {
-            require("lisaarivi.inc");
+            require "lisaarivi.inc";
           }
 
           $toim = $yllapita_toim_stash;
@@ -1984,7 +1991,7 @@ function tarkista_tilausrivi() {
 
           //Hanskataan sarjanumerollisten tuotteiden lisävarusteet
           if ($tilsarjatunnus[$yht_i] > 0 and $lisatty_tun > 0) {
-            require("sarjanumeron_lisavarlisays.inc");
+            require "sarjanumeron_lisavarlisays.inc";
 
             lisavarlisays($tilsarjatunnus[$yht_i], $lisatty_tun);
           }
@@ -2018,13 +2025,14 @@ function tarkista_tilausrivi() {
   }
 }
 
+
 /**
  * Hakee tuotteen saldon ja piirtää sen
  */
 function hae_ja_piirra_saldo($row, $yhtiot) {
   global $toim_kutsu, $verkkokauppa, $kukarow, $verkkokauppa_saldotsk, $laskurow,
-         $saldoaikalisa, $yhtiorow, $rivin_yksikko, $vari, $classrigh, $hinta_rajaus, $ostoskori,
-         $yht_i, $lisatiedot, $hae_ja_selaa_row;
+  $saldoaikalisa, $yhtiorow, $rivin_yksikko, $vari, $classrigh, $hinta_rajaus, $ostoskori,
+  $yht_i, $lisatiedot, $hae_ja_selaa_row;
 
   if ($toim_kutsu != "EXTENNAKKO" and ($verkkokauppa == "" or ($verkkokauppa != "" and $kukarow["kuka"] != "www" and $verkkokauppa_saldotsk))) {
     // Tuoteperheen isät, mutta ei sarjanumerollisisa isiä (Normi, Extranet ja Verkkokauppa)
@@ -2289,6 +2297,7 @@ function hae_ja_piirra_saldo($row, $yhtiot) {
   }
 }
 
+
 /**
  * Hakee yhtiöt, joille saldo näytetään
  *
@@ -2317,10 +2326,11 @@ function hae_yhtiot() {
   }
 }
 
+
 /**
  * Hakee tuotteen parametri_variaatio-tunnuksen tietokannasta
  *
- * @param $row
+ * @param unknown $row
  *
  * @return array
  */
@@ -2334,8 +2344,10 @@ function hae_parametri_variaatio($row) {
   return $parametri_variaatio;
 }
 
+
 /**
- * @param $parametri_variaatio
+ *
+ * @param unknown $parametri_variaatio
  */
 function piirra_nayta_variaatiot_nappula($parametri_variaatio) {
   global $yhtiorow;

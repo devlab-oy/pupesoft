@@ -1,49 +1,41 @@
 <?php
 
+// Startaan bufferi, koska pit‰‰ tehd‰ keksej‰ keskenkaiken
+ob_start();
+
 require "inc/parametrit.inc";
 require "inc/pankkiyhteys_functions.inc";
 
 echo "<font class='head'>" . t('SEPA-pankkiyhteys') . "</font>";
 echo "<hr>";
 
-if (SEPA_PANKKIYHTEYS === false) {
-  echo "<font class='error'>";
-  echo t("SEPA-palvelua ei ole aktivoitu.");
+// Varmistetaan, ett‰ sepa pankkiyhteys on kunnossa. Funkio kuolee, jos ei ole.
+sepa_pankkiyhteys_kunnossa();
 
-  if (!isset($_SERVER["HTTPS"]) or $_SERVER["HTTPS"] != 'on') {
-    echo "<br>";
-    echo t("Voit k‰ytt‰‰ pankkiyhteytt‰ vain salatulla yhteydell‰!");
-  }
-
-  echo "</font>";
-
-  exit;
-}
+toggle_all("viite_toggler", "viite_boxes");
+toggle_all("tiliote_toggler", "tiliote_boxes");
 
 $tee = empty($tee) ? '' : $tee;
 $hae_tiliotteet = empty($hae_tiliotteet) ? '' : $hae_tiliotteet;
 $hae_viitteet = empty($hae_viitteet) ? '' : $hae_viitteet;
 
 $pankkitiedostot = array();
+$virheet_count = 0;
+$cookie_secret = "pupesoft_pankkiyhteys_secret";
+$cookie_tunnus = "pupesoft_pankkiyhteys_tunnus";
 
-// Oikellisuustarkistukset
-if ($tee == "laheta") {
-  $komennot_count = 0;
-  $virheet_count = 0;
+// Jos meill‰ on viel‰ cookie voimassa, menn‰‰n suoraan valintaan
+if ($tee == "" and isset($_COOKIE[$cookie_secret])) {
+  $tee = "valitse";
+}
 
-  if ($hae_tiliotteet == "on") {
-    $komennot_count++;
-  }
+// Jos meill‰ on viel‰ cookie voimassa, menn‰‰n suoraan valintaan
+if ($indexvas == "1" and isset($_COOKIE[$cookie_secret])) {
+  $tee = "kirjaudu_ulos";
+}
 
-  if ($hae_viitteet == "on") {
-    $komennot_count++;
-  }
-
-  if ($komennot_count == 0) {
-    virhe("Et valinnut yht‰‰n komentoa!");
-    $virheet_count++;
-  }
-
+// Kirjaudutaan pankkiin
+if ($tee == "kirjaudu") {
   if (empty($salasana)) {
     virhe("Salasana t‰ytyy antaa!");
     $virheet_count++;
@@ -54,57 +46,109 @@ if ($tee == "laheta") {
   }
 
   if ($virheet_count > 0) {
-    echo "<br>";
-    $tee = "";
+    $tee = "kirjaudu_ulos";
+  }
+  else {
+    // Setataan SECURE cookiet, HTTP only
+    setcookie($cookie_secret, $salasana, time() + 300, '/', $pupesoft_server, true, true);
+    setcookie($cookie_tunnus, $pankkiyhteys_tunnus, time() + 300, '/', $pupesoft_server, true, true);
+
+    // Laitetaan samantien myˆs globaaliin
+    $_COOKIE[$cookie_secret] = $salasana;
+    $_COOKIE[$cookie_tunnus] = $pankkiyhteys_tunnus;
+
+    $tee = "valitse";
   }
 }
 
-// Tiliotteiden haku
-if ($tee == "laheta" and $hae_tiliotteet == "on") {
-  $params = array(
-    "file_type"             => "TITO",
-    "pankkiyhteys_tunnus"   => $pankkiyhteys_tunnus,
-    "pankkiyhteys_salasana" => $salasana
-  );
+// Kirjaudutaan ulos pankista
+if ($tee == "kirjaudu_ulos") {
+  // Unsetataan cookiet
+  setcookie($cookie_secret, "deleted", time() - 43200, '/', $pupesoft_server, true, true);
+  setcookie($cookie_tunnus, "deleted", time() - 43200, '/', $pupesoft_server, true, true);
 
-  $tiedostot = sepa_lataa_kaikki_uudet_tiedostot($params);
+  // Poistetaan myˆs globaalista
+  unset($_COOKIE[$cookie_secret]);
+  unset($_COOKIE[$cookie_tunnus]);
 
-  if ($tiedostot) {
-    viesti("Ladatut tiliotteet:");
-    tiedostot_table($tiedostot);
+  $tee = "";
+}
 
-    // ker‰t‰‰n t‰h‰n kaikki filet
-    $pankkitiedostot = array_merge($pankkitiedostot, $tiedostot);
-  }
-  else {
-    viesti("Ladattavia tiliotteita ei ollut saatavilla");
+// Jos meill‰ ei ole cookieta, niin menn‰‰n aina kirjautumiseen
+if ($tee != "" and !isset($_COOKIE[$cookie_secret])) {
+  $tee = "";
+}
+
+// Oikellisuustarkistukset
+if ($tee == "hae_aineistot") {
+  $viite_references = isset($viite_references) ? $viite_references : array();
+  $tiliote_references = isset($tiliote_references) ? $tiliote_references : array();
+
+  if (count($tiliote_references) + count($viite_references) == 0) {
+    virhe("Et valinnut yht‰‰n aineistoa");
+    $tee = "valitse";
   }
 }
 
-// Viitteiden haku
-if ($tee == "laheta" and $hae_viitteet == "on") {
-  $params = array(
-    "file_type"             => "KTL",
-    "pankkiyhteys_tunnus"   => $pankkiyhteys_tunnus,
-    "pankkiyhteys_salasana" => $salasana
-  );
+// Aineistojen haku
+if ($tee == "hae_aineistot") {
+  // Otetaa salasana + pankkiyhteyden tunnus cookiesta
+  $salasana = $_COOKIE[$cookie_secret];
+  $pankkiyhteys_tunnus = $_COOKIE[$cookie_tunnus];
 
-  $tiedostot = sepa_lataa_kaikki_uudet_tiedostot($params);
+  echo "<br>";
 
-  if ($tiedostot) {
-    viesti("Ladatut viitteet:");
-    tiedostot_table($tiedostot);
+  if (count($tiliote_references) > 0) {
+    $params = array(
+      "file_type"             => "TITO",
+      "viitteet"              => $tiliote_references,
+      "pankkiyhteys_tunnus"   => $pankkiyhteys_tunnus,
+      "pankkiyhteys_salasana" => $salasana
+    );
 
-    // ker‰t‰‰n t‰h‰n kaikki filet
-    $pankkitiedostot = array_merge($pankkitiedostot, $tiedostot);
+    $tiedostot = sepa_download_files($params);
+
+    if ($tiedostot) {
+      viesti("Ladatut tiliote -aineistot:");
+
+      $_t = unserialize(base64_decode($tiliote_tiedostot));
+      tiedostot_table($tiedostot, $_t);
+
+      // ker‰t‰‰n t‰h‰n kaikki filet
+      $pankkitiedostot = array_merge($pankkitiedostot, $tiedostot);
+    }
+    else {
+      viesti("Ladattavia tiliotteita ei ollut saatavilla");
+    }
   }
-  else {
-    viesti("Ladattavia viitteit‰ ei ollut saatavilla");
+
+  if (count($viite_references) > 0) {
+    $params = array(
+      "file_type"             => "KTL",
+      "viitteet"              => $viite_references,
+      "pankkiyhteys_tunnus"   => $pankkiyhteys_tunnus,
+      "pankkiyhteys_salasana" => $salasana
+    );
+
+    $tiedostot = sepa_download_files($params);
+
+    if ($tiedostot) {
+      viesti("Ladatut viite -aineistot:");
+
+      $_v = unserialize(base64_decode($viite_tiedostot));
+      tiedostot_table($tiedostot, $_v);
+
+      // ker‰t‰‰n t‰h‰n kaikki filet
+      $pankkitiedostot = array_merge($pankkitiedostot, $tiedostot);
+    }
+    else {
+      viesti("Ladattavia viitteit‰ ei ollut saatavilla");
+    }
   }
 }
 
 // K‰sitell‰‰n haetut tiedostot
-if ($tee == "laheta" and count($pankkitiedostot) > 0) {
+if ($tee == "hae_aineistot" and count($pankkitiedostot) > 0) {
   echo "<hr><br>";
 
   // K‰sitell‰‰n haetut tiedostot
@@ -147,70 +191,115 @@ if ($tee == "laheta" and count($pankkitiedostot) > 0) {
   }
 }
 
-// K‰yttˆliittym‰
-$kaytossa_olevat_pankkiyhteydet = hae_pankkiyhteydet();
+// Pankkiyhteyden k‰yttˆliittym‰
+if ($tee == "valitse") {
 
-if ($kaytossa_olevat_pankkiyhteydet) {
+  // Otetaa salasana + pankkiyhteyden tunnus cookiesta
+  $salasana = $_COOKIE[$cookie_secret];
+  $pankkiyhteys_tunnus = $_COOKIE[$cookie_tunnus];
 
+  // Haetaan tiliote-lista
+  $params = array(
+    "file_type"             => "TITO",
+    "status"                => "ALL",
+    "pankkiyhteys_tunnus"   => $pankkiyhteys_tunnus,
+    "pankkiyhteys_salasana" => $salasana
+  );
+
+  $tiliote_tiedostot = sepa_download_file_list($params);
+
+  // Haetaan viite-lista
+  $params = array(
+    "file_type"             => "KTL",
+    "status"                => "ALL",
+    "pankkiyhteys_tunnus"   => $pankkiyhteys_tunnus,
+    "pankkiyhteys_salasana" => $salasana
+  );
+
+  $viite_tiedostot = sepa_download_file_list($params);
+
+  // Piirret‰‰n formi
   echo "<form method='post' action='pankkiyhteys.php'>";
-  echo "<input type='hidden' name='tee' value='laheta'/>";
-  echo "<table>";
-  echo "<tbody>";
+  echo "<input type='hidden' name='tee' value='hae_aineistot'/>";
 
-  echo "<tr>";
-  echo "<th>";
-  echo t("Valitse pankki");
-  echo "</th>";
-  echo "<td>";
-  echo "<select name='pankkiyhteys_tunnus'>";
+  // V‰litet‰‰n tiliote ja viitetiedosto arrayt formissa,
+  // jotta saadaan n‰ytetty‰ selkokielist‰ formia downloadin j‰lkeen
+  $_t = base64_encode(serialize($tiliote_tiedostot));
+  $_v = base64_encode(serialize($viite_tiedostot));
 
-  foreach ($kaytossa_olevat_pankkiyhteydet as $pankkiyhteys) {
-    $selected = $pankkiyhteys_tunnus == $pankkiyhteys["tunnus"] ? " selected" : "";
-
-    echo "<option value='{$pankkiyhteys["tunnus"]}'{$selected}>";
-    echo "{$pankkiyhteys["pankin_nimi"]}</option>";
-  }
-
-  echo "</select>";
-  echo "</td>";
-  echo "</tr>";
-
-  echo "<tr>";
-  echo "<th>";
-  echo t("Valitse toiminnot");
-  echo "</th>";
-  echo "<td>";
-
-  $checked = $hae_tiliotteet == "on" ? " checked" : "";
-
-  echo "<input type='checkbox' name='hae_tiliotteet' id='hae_tiliotteet'{$checked}/>";
-  echo "<label for='hae_tiliotteet'>" . t("Hae uudet tiliotteet") . "</label>";
-  echo "<br>";
-
-  $checked = $hae_viitteet == "on" ? " checked" : "";
-
-  echo "<input type='checkbox' name='hae_viitteet' id='hae_viitteet'{$checked}/>";
-  echo "<label for='hae_viitteet'>" . t("Hae uudet viitteet") . "</label>";
-  echo "<br>";
-
-  echo "</td>";
-  echo "</tr>";
-
-  echo "<tr>";
-  echo "<th><label for='salasana'>" . t("Salasana") . "</label></th>";
-  echo "<td><input type='password' name='salasana' id='salasana'/></td>";
-  echo "</tr>";
-
-  echo "</tbody>";
-  echo "</table>";
+  echo "<input type='hidden' name='tiliote_tiedostot' value='{$_t}'>";
+  echo "<input type='hidden' name='viite_tiedostot' value='{$_v}'>";
 
   echo "<br>";
-  echo "<input type='submit' value='" . t('L‰het‰') . "'>";
+  echo "<font class='message'>";
+  echo t("Tiliotteet");
+  echo "</font>";
+  echo "<hr>";
+
+  filelist_table($tiliote_tiedostot, "tiliote");
+
+  echo "<br>";
+  echo "<font class='message'>";
+  echo t("Viitteet");
+  echo "</font>";
+  echo "<hr>";
+
+  filelist_table($viite_tiedostot, "viite");
+
+  echo "<br>";
+  echo "<input type='submit' value='" . t('Hae valitut aineistot') . "'>";
 
   echo "</form>";
 }
-else {
-  viesti("Yht‰‰n pankkiyhteytt‰ ei ole viel‰ luotu.");
+
+// Sis‰‰nkirjautumisen k‰yttˆliittym‰
+if ($tee == "") {
+  $kaytossa_olevat_pankkiyhteydet = hae_pankkiyhteydet();
+
+  if ($kaytossa_olevat_pankkiyhteydet) {
+
+    echo "<form method='post' action='pankkiyhteys.php'>";
+    echo "<input type='hidden' name='tee' value='kirjaudu'/>";
+    echo "<table>";
+    echo "<tbody>";
+
+    echo "<tr>";
+    echo "<th>";
+    echo t("Valitse pankki");
+    echo "</th>";
+    echo "<td>";
+    echo "<select name='pankkiyhteys_tunnus'>";
+
+    foreach ($kaytossa_olevat_pankkiyhteydet as $pankkiyhteys) {
+      $selected = $pankkiyhteys_tunnus == $pankkiyhteys["tunnus"] ? " selected" : "";
+
+      echo "<option value='{$pankkiyhteys["tunnus"]}'{$selected}>";
+      echo "{$pankkiyhteys["pankin_nimi"]}</option>";
+    }
+
+    echo "</select>";
+    echo "</td>";
+    echo "</tr>";
+
+    echo "<tr>";
+    echo "<th><label for='salasana'>" . t("Salasana") . "</label></th>";
+    echo "<td><input type='password' name='salasana' id='salasana'/></td>";
+    echo "</tr>";
+
+    echo "</tbody>";
+    echo "</table>";
+
+    echo "<br>";
+    echo "<input type='submit' value='" . t('Kirjaudu') . "'>";
+
+    echo "</form>";
+  }
+  else {
+    viesti("Yht‰‰n pankkiyhteytt‰ ei ole viel‰ luotu.");
+  }
 }
 
 require 'inc/footer.inc';
+
+// Flushataan bufferi t‰ss‰, koska cookiet on nyt done.
+ob_end_flush();

@@ -26414,7 +26414,7 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
               asiakas.ytunnus ASC,
               lasku.tunnus ASC";
     $result = pupe_query($query);
-echo "26416 $query <br><br>";
+
     $laskut = array();
     while ($lasku = mysql_fetch_assoc($result)) {
       if (!$valitut) {

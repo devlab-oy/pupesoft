@@ -42,8 +42,6 @@ function vastaus_kunnossa($koodi) {
  * @param unknown $tiedostot
  */
 function tiedostot_table($tiedostot, $filelist) {
-  echo "<br/>";
-
   echo "<table>";
 
   echo "<thead>";

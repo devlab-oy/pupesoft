@@ -41,23 +41,29 @@ function vastaus_kunnossa($koodi) {
  *
  * @param unknown $tiedostot
  */
-function tiedostot_table($tiedostot) {
-  echo "<br/>";
-
+function tiedostot_table($tiedostot, $filelist) {
   echo "<table>";
 
   echo "<thead>";
   echo "<tr>";
-  echo "<th>" . t("Viite") . "</th>";
-  echo "<th>" . t("Status") . "</th>";
+  echo "<th>" . t("Pankkitili") . "</th>";
+  echo "<th>" . t("Aineiston p‰iv‰ys") . "</th>";
+  echo "<th>" . t("Haun status") . "</th>";
   echo "</tr>";
   echo "</thead>";
 
   echo "<tbody>";
 
   foreach ($tiedostot as $tiedosto) {
-    echo "<tr>";
-    echo "<td>{$tiedosto["viite"]}</td>";
+
+    // Haetaan tiedoston tiedot filelistasta, ett‰ saadaan p‰iv‰m‰‰r‰ ja tilinumero
+    $tiedot = search_array_key_for_value_recursive($filelist, "fileReference", $tiedosto["viite"]);
+    $_date = date("d.m.Y h:i:s", strtotime($tiedot[0]["fileTimestamp"]));
+    $_tili = $tiedot[0]["serviceId"];
+
+    echo "<tr class='aktiivi'>";
+    echo "<td>{$_tili}</td>";
+    echo "<td>{$_date}</td>";
     echo "<td>{$tiedosto["status"]}</td>";
     echo "</tr>";
   }
@@ -68,6 +74,82 @@ function tiedostot_table($tiedostot) {
   echo "<br/><br/>";
 }
 
+function toggle_all($toggler_id, $toggled_class) {
+  echo "
+  <script type='text/javascript' language='javascript'>
+    $(function () {
+      $('#{$toggler_id}').toggle(
+        function() {
+          $('.{$toggled_class}').prop('checked', true);
+        },
+        function() {
+          $('.{$toggled_class}').prop('checked', false);
+        }
+    );
+    });
+  </script>
+  ";
+}
+
+function filelist_table($array, $type) {
+  global $kukarow, $yhtiorow;
+
+  if (!is_array($array) or count($array) == 0) {
+    echo "<font class='message>";
+    echo t("Yht‰‰n %s-aineistoa ei ole saavavilla!", $kukarow['kieli'], $type);
+    echo "</font>";
+    return;
+  }
+  echo "<table>";
+
+  echo "<thead>";
+  echo "<tr>";
+  echo "<th>" . t("Pankkitili") . "</th>";
+  echo "<th>" . t("Aineiston p‰iv‰ys") . "</th>";
+  echo "<th>" . t("Status") . "</th>";
+  echo "<th>" . t("Valitse") . "</th>";
+  echo "</tr>";
+  echo "</thead>";
+
+  echo "<tbody>";
+
+  foreach ($array['files'] as $tiedosto) {
+    $_viite = $tiedosto["fileReference"];
+    $_date = date("d.m.Y h:i:s", strtotime($tiedosto["fileTimestamp"]));
+    $_status = $tiedosto["status"];
+
+    // Ruksataan, jos tiedosto on uusi ja tehd‰‰n selkokielisempi
+    if (strtolower($_status) == 'new') {
+      $_chk = "checked";
+      $_status = t("Uusi");
+    }
+    else {
+     $_chk = '';
+     $_status = t("Haettu");
+    }
+
+    echo "<tr class='aktiivi'>";
+    echo "<td>{$tiedosto["serviceId"]}</td>";
+    echo "<td>{$_date}</td>";
+    echo "<td>{$_status}</td>";
+    echo "<td>";
+    echo "<input type='checkbox' {$_chk} value='{$_viite}' name='{$type}_references[]' class='{$type}_boxes'>";
+    echo "</td>";
+    echo "</tr>";
+  }
+
+  echo "<tr>";
+  echo "<th colspan='3'>";
+  echo t("Ruksaa kaikki");
+  echo "</th>";
+  echo "<td>";
+  echo "<input type='checkbox' id='{$type}_toggler'>";
+  echo "</td>";
+  echo "</tr>";
+
+  echo "</tbody>";
+  echo "</table>";
+}
 
 /**
  *
@@ -111,7 +193,7 @@ function viesti($viesti) {
 }
 
 function sepa_pankkiyhteys_kunnossa() {
-  global $yhtiorow, $kukarow;
+  global $yhtiorow, $kukarow, $sepa_pankkiyhteys_token;
 
   if (SEPA_PANKKIYHTEYS === false) {
     echo "<font class='error'>";

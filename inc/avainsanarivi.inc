@@ -662,7 +662,12 @@ if (($avain_sel["KARHUVIESTI"] == "SELECTED" or $avain_sel["TV_LISATIETO"] == "S
   $jatko  = 0;
 }
 
-if (($avain_sel["KARHUVIESTI"] == "SELECTED" or $avain_sel["TV_LISATIETO"] == "SELECTED" or $avain_sel['KAANTALVVIESTI'] == "SELECTED" or $avain_sel['TARJOUS_VAKIOTE'] == "SELECTED") and mysql_field_name($result, $i) == "selitetark") {
+if (($avain_sel["KARHUVIESTI"] == "SELECTED"
+    or $avain_sel["TV_LISATIETO"] == "SELECTED"
+    or $avain_sel['KAANTALVVIESTI'] == "SELECTED"
+    or $avain_sel['TARJOUS_VAKIOTE'] == "SELECTED"
+    or $avain_sel["SALDOVAHVISTUS"] == "SELECTED")
+  and mysql_field_name($result, $i) == "selitetark") {
   $ulos = "<td><textarea rows=10 cols=50 name='$nimi'>$trow[$i]</textarea></td>";
   $jatko = 0;
 }

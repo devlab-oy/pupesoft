@@ -84,7 +84,13 @@ function Hinta_laskuri(perheid, raakaaineiden_kehahinta_summa, valmisteiden_pain
 
     // Kun valmisteinputin arvo vaihtuu, jaetaan hinnan muutos muille lukottomille valmisteille.
     $input.change(function() {
-      var vanha_arvo = $input.data('vanha-arvo');
+
+      var vanha_arvo = $input.data('vanha-arvo'),
+          _val = parseFloat($input.val().replace(',','.'));
+
+      if (isNaN(_val)) _val = vanha_arvo;
+
+      $input.val(_val);
 
       // Jos hinnat menevät yli tai ali, palauta vanha arvo ja infoa käyttäjää.
       if (me.tarkista_hinnat()===false) {
@@ -96,6 +102,7 @@ function Hinta_laskuri(perheid, raakaaineiden_kehahinta_summa, valmisteiden_pain
       // Validit hinnat, jaa muutos lukottomille inputeille ja päivitä painoarvot.
       me.jaa_muutos_vapaille(vanha_arvo - $input.val());
       me.laske_painoarvot();
+      $input.data('vanha-arvo', $input.val());
     });
   });
 

@@ -54,7 +54,7 @@ if (in_array($table, array("asiakasalennus", "asiakashinta"))) {
 
 if ($table == "tuote") {
   echo "<tr><th>".t("Myyntihinnan p‰ivitys").":</th>
-        <td><select name='myyntihinnan_paivitys'>        
+        <td><select name='myyntihinnan_paivitys'>
         <option value='2'>".t("Oletus")."</option>
         <option value='1'>".t("P‰ivitet‰‰n myyntihinta vain jos tiedostossa oleva on suurempi kuin nykyinen")."</option>
         </select></td>

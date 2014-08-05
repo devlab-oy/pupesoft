@@ -2348,7 +2348,7 @@ if (!$cli and !isset($api_kentat)) {
   echo "</tr>";
 
   // Tiettyjen taulujen spessuvalinnat
-  require("inc/luedata_ja_dataimport_spessuvalinnat.inc");
+  require "inc/luedata_ja_dataimport_spessuvalinnat.inc";
 
   echo "  <tr><th>".t("Valitse tiedosto").":</th>
         <td><input name='userfile' type='file'></td>

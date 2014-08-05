@@ -2523,7 +2523,7 @@ else {
           }
 
           // Haetaan yhteyshenkilot erillisellä queryllä jos tarvitaan.
-          if (isset($ytun_yhteyshenk) and $ytun_yhteyshenk != '' and count($rows) > 0) {
+          if ($mukaan == "ytunnus" and isset($ytun_yhteyshenk) and $ytun_yhteyshenk != '' and count($rows) > 0) {
             $asiakas_tunnukset = array();
 
             foreach ($rows as $row) {
@@ -2531,6 +2531,7 @@ else {
             }
 
             $asiakas_tunnukset_sarja = implode(',', $asiakas_tunnukset);
+            
             $query = "SELECT *
                       FROM yhteyshenkilo
                       WHERE yhtio      = '$yhtiorow[yhtio]'

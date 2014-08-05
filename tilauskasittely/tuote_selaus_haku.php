@@ -734,7 +734,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
 
   if (!function_exists("tuoteselaushaku_vastaavat_korvaavat")) {
     function tuoteselaushaku_vastaavat_korvaavat($tvk_taulu, $tvk_korvaavat, $tvk_tuoteno) {
-      global $kukarow, $kieltolisa, $poislisa, $hinta_rajaus, $extra_poislisa;
+      global $kukarow, $kieltolisa, $poislisa, $hinta_rajaus, $extra_poislisa, $erikoisvarastolisa;
 
       if ($tvk_taulu != "vastaavat") $kyselylisa = " and {$tvk_taulu}.tuoteno != '$tvk_tuoteno' ";
       else $kyselylisa = "";
@@ -768,6 +768,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
                 $kieltolisa
                 $poislisa
                 $extra_poislisa
+                $erikoisvarastolisa
                 ORDER BY if({$tvk_taulu}.jarjestys=0, 9999, {$tvk_taulu}.jarjestys), {$tvk_taulu}.tuoteno";
       $kores = pupe_query($query);
 
@@ -777,7 +778,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
 
   if (!function_exists("tuoteselaushaku_tuoteperhe")) {
     function tuoteselaushaku_tuoteperhe($esiisatuoteno, $tuoteno, $isat_array, $kaikki_array, $rows, $tyyppi = "P") {
-      global $kukarow, $kieltolisa, $poislisa, $hinta_rajaus, $extra_poislisa;
+      global $kukarow, $kieltolisa, $poislisa, $hinta_rajaus, $extra_poislisa, $erikoisvarastolisa;
 
       if (!in_array($tuoteno, $isat_array)) {
         $isat_array[] = $tuoteno;
@@ -813,6 +814,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
                   $kieltolisa
                   $poislisa
                   $extra_poislisa
+                  $erikoisvarastolisa
                   ORDER BY tuoteperhe.tuoteno";
         $kores = pupe_query($query);
 
@@ -827,6 +829,17 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
 
       return array($isat_array, $kaikki_array, $rows);
     }
+  }
+
+  if ($kukarow['extranet'] != '') {
+    $vertailu = array();
+    $vertailu[] = $yhtiorow['erikoisvarastomyynti_alarajasumma'];
+    $vertailu[] = $yhtiorow['erikoisvarastomyynti_alarajasumma_rivi'];
+    $korkeampi = max($vertailu);
+    $erikoisvarastolisa = " AND tuote.myyntihinta >= $korkeampi ";
+  }
+  else{
+    $erikoisvarastolisa = '';
   }
 
   $query = "SELECT
@@ -863,6 +876,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             $extra_poislisa
             $poislisa
             $hinta_rajaus
+            $erikoisvarastolisa
             ORDER BY jarjestys, $jarjestys $sort
             LIMIT 500";
   $result = pupe_query($query);
@@ -1072,16 +1086,24 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             }
           }
         }
+      }
 
-        // Poistetaan vielä kokonaiset tuoteperheet
-        // Ja korjataan vastaavamaarat
+      // Poistetaan vielä kokonaiset tuoteperheet
+      // Ja korjataan vastaavamaarat
+      // ja samalla luuppauksella poistetaan extranetissä
+      // tuotteet joiden saldo normaalivarastossa <= 0
+      if ($saldotonrajaus != '' or $kukarow['extranet'] != '') {
         foreach ($rows as $row_key => $row_value) {
-          if ($row_value['tuoteperhe'] != "" and isset($poistettavat_perheet[$row_value['tuoteperhe']])) {
-            unset($rows[$row_key]);
+          if ($saldotonrajaus != '') {
+            if ($row_value['tuoteperhe'] != "" and isset($poistettavat_perheet[$row_value['tuoteperhe']])) {
+              unset($rows[$row_key]);
+            }
+            if ($row_value["vastaavat"] != $row_value["tuoteno"] and $row_value["vastaavat"] > 0 and $row_value["vastaavamaara"] > 0 and isset($korjattavat_vastaavamaarat[$row_value["vastaavat"]])) {
+              $rows[$row_key]["vastaavamaara"] -= $korjattavat_vastaavamaarat[$row_value["vastaavat"]];
+            }
           }
-
-          if ($row_value["vastaavat"] != $row_value["tuoteno"] and $row_value["vastaavat"] > 0 and $row_value["vastaavamaara"] > 0 and isset($korjattavat_vastaavamaarat[$row_value["vastaavat"]])) {
-            $rows[$row_key]["vastaavamaara"] -= $korjattavat_vastaavamaarat[$row_value["vastaavat"]];
+          if ($kukarow['extranet'] != '' and hae_saldo($row_value) <= 0) {
+            unset($rows[$row_key]);
           }
         }
       }

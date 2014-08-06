@@ -13,6 +13,7 @@ $tee = empty($tee) ? '' : $tee;
 $customer_id = empty($customer_id) ? '' : $customer_id;
 $pin = empty($pin) ? '' : $pin;
 $bank = "";
+$virheet_count = 0;
 
 // Debug moodissa, voidaan upata suoraan key/cert käyttöliittymästä
 $debug = empty($debug) ? 0 : 1;
@@ -29,6 +30,104 @@ if ($tee == "poista") {
   }
 
   $tee = "";
+}
+
+// Vaihdetaan salasana, oikeellisuustarkastukset
+if ($tee == "vaihda_salasana") {
+
+  if (empty($vanha_salasana)) {
+    virhe("Vanha salasana täytyy antaa!");
+    $virheet_count++;
+  }
+  else {
+    // Haetaan pankkiyhteys tässä, tätä käytetään salasanan vaihdossa
+    $vanha_pankkiyhteys = hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $vanha_salasana);
+
+    if ($vanha_pankkiyhteys === false) {
+      virhe("Antamasi vanha salasana on väärä!");
+      $virheet_count++;
+    }
+  }
+
+  if (empty($uusi_salasana1) or empty($uusi_salasana2)) {
+    virhe("Uudet salasanat täytyy antaa!");
+    $virheet_count++;
+  }
+  elseif ($uusi_salasana1 != $uusi_salasana2) {
+    virhe("Antamasi uudet salasanat ei täsmää!");
+    $virheet_count++;
+  }
+
+  if ($virheet_count > 0) {
+    echo "<br>";
+    $tee = "vaihda_salasana_form";
+  }
+}
+
+// Vaihdetaan salasana
+if ($tee == "vaihda_salasana") {
+  $spk = salaa(base64_decode($vanha_pankkiyhteys['signing_private_key']), $uusi_salasana1);
+  $epk = salaa(base64_decode($vanha_pankkiyhteys['encryption_private_key']), $uusi_salasana1);
+  $oec = salaa(base64_decode($vanha_pankkiyhteys["encryption_certificate"]), $uusi_salasana1);
+  $osc = salaa(base64_decode($vanha_pankkiyhteys["signing_certificate"]), $uusi_salasana1);
+  $bec = salaa(base64_decode($vanha_pankkiyhteys["bank_encryption_certificate"]), $uusi_salasana1);
+  $brc = salaa(base64_decode($vanha_pankkiyhteys["bank_root_certificate"]), $uusi_salasana1);
+  $bca = salaa(base64_decode($vanha_pankkiyhteys["ca_certificate"]), $uusi_salasana1);
+
+  $query = "UPDATE pankkiyhteys SET
+            signing_certificate         = '{$osc}',
+            signing_private_key         = '{$spk}',
+            encryption_certificate      = '{$oec}',
+            encryption_private_key      = '{$epk}',
+            bank_encryption_certificate = '{$bec}',
+            bank_root_certificate       = '{$brc}',
+            ca_certificate              = '{$bca}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = {$pankkiyhteys_tunnus}";
+  $result = pupe_query($query);
+
+  viesti("Salasana vaihdettu!");
+  echo "<br>";
+
+  $tee = "";
+}
+
+// Vaihda salasana formi
+if ($tee == "vaihda_salasana_form") {
+
+  echo "<form method='post'>";
+  echo "<input type='hidden' name='tee' value='vaihda_salasana'/>";
+  echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys_tunnus}'/>";
+
+  echo "<table>";
+
+  echo "<tr>";
+  echo "<th><label for='vanha_salasana'>";
+  echo t("Vanha salasana");
+  echo "</label></th>";
+  echo "<td><input type='password' name='vanha_salasana'></td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th><label for='uusi_salasana1'>";
+  echo t("Uusi salasana");
+  echo "</label></th>";
+  echo "<td><input type='password' name='uusi_salasana1'></td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<th><label for='uusi_salasana2'>";
+  echo t("Uusi salasana vahvistus");
+  echo "</label></th>";
+  echo "<td><input type='password' name='uusi_salasana2'></td>";
+  echo "</tr>";
+
+  echo "</table>";
+  echo "<br>";
+
+
+  echo "<input type='submit' value='" . t("Vaihda salasana") . "'/>";
+  echo "</form>";
 }
 
 // Uuden pankkiyhteyden oikeellisuustarkistus
@@ -123,161 +222,170 @@ if ($tee == "luo") {
             ca_certificate              = '{$bca}',
             customer_id                 = '{$customer_id}'";
   $result = pupe_query($query);
+
+  $tee = "";
 }
 
-// Käyttöliittymä
-$mahdolliset_pankkiyhteydet = mahdolliset_pankkiyhteydet();
+if ($tee == "") {
+  // Käyttöliittymä
+  $mahdolliset_pankkiyhteydet = mahdolliset_pankkiyhteydet();
 
-// Jos voidaan tehdä uusia pankkiyhteyksiä
-if (!empty($mahdolliset_pankkiyhteydet)) {
-  echo "<font class='message'>" . t("Uusi pankkiyhteys") . "</font>";
-  echo "<hr>";
+  // Jos voidaan tehdä uusia pankkiyhteyksiä
+  if (!empty($mahdolliset_pankkiyhteydet)) {
+    echo "<font class='message'>" . t("Uusi pankkiyhteys") . "</font>";
+    echo "<hr>";
 
-  echo "<form action='pankkiyhteysadmin.php' method='post' enctype='multipart/form-data'>";
-  echo "<input type='hidden' name='tee' value='luo'/>";
-  echo "<table>";
-  echo "<tbody>";
+    echo "<form action='pankkiyhteysadmin.php' method='post' enctype='multipart/form-data'>";
+    echo "<input type='hidden' name='tee' value='luo'/>";
+    echo "<table>";
+    echo "<tbody>";
 
-  echo "<tr>";
-  echo "<th><label for='pankki'>";
-  echo t("Pankki, jolle pankkiyhteys luodaan");
-  echo "</label></th>";
-  echo "<td>";
-  echo "<select name='pankki' id='pankki'>";
+    echo "<tr>";
+    echo "<th><label for='pankki'>";
+    echo t("Pankki, jolle pankkiyhteys luodaan");
+    echo "</label></th>";
+    echo "<td>";
+    echo "<select name='pankki' id='pankki'>";
 
-  foreach ($mahdolliset_pankkiyhteydet as $bic => $nimi) {
-    $selected = $pankki == $bic ? " selected" : "";
-    echo "<option value='{$bic}'{$selected}>{$nimi}</option>";
-  }
+    foreach ($mahdolliset_pankkiyhteydet as $bic => $nimi) {
+      $selected = $pankki == $bic ? " selected" : "";
+      echo "<option value='{$bic}'{$selected}>{$nimi}</option>";
+    }
 
-  echo "</select>";
-  echo "</td>";
-  echo "</tr>";
+    echo "</select>";
+    echo "</td>";
+    echo "</tr>";
 
-  echo "<tr>";
-  echo "<th><label for='customer_id'>";
-  echo t("Asiakastunnus");
-  echo "</label></th>";
-  echo "<td>";
-  echo "<input type='text' name='customer_id' id='customer_id' value='{$customer_id}'/>";
-  echo "</td>";
-  echo "</tr>";
+    echo "<tr>";
+    echo "<th><label for='customer_id'>";
+    echo t("Asiakastunnus");
+    echo "</label></th>";
+    echo "<td>";
+    echo "<input type='text' name='customer_id' id='customer_id' value='{$customer_id}'/>";
+    echo "</td>";
+    echo "</tr>";
 
-  echo "<tr>";
-  echo "<th><label for='pin'>";
-  echo t("Pankilta saatu PIN-koodi");
-  echo "</label></th>";
-  echo "<td><input type='text' name='pin' id='pin' value='{$pin}'/></td>";
-  echo "</tr>";
+    echo "<tr>";
+    echo "<th><label for='pin'>";
+    echo t("Pankilta saatu PIN-koodi");
+    echo "</label></th>";
+    echo "<td><input type='text' name='pin' id='pin' value='{$pin}'/></td>";
+    echo "</tr>";
 
-  if ($debug == 1) {
+    if ($debug == 1) {
+      echo "<tr>";
+      echo "<td class='back'></td>";
+      echo "</tr>";
+
+      echo "<tr>";
+      echo "<th>own_signing_certificate</th>";
+      echo "<td><input type='file' name='own_signing_certificate'/></td>";
+      echo "</tr>";
+
+      echo "<tr>";
+      echo "<th>own_signing_private_key</th>";
+      echo "<td><input type='file' name='signing_private_key'/></td>";
+      echo "</tr>";
+
+      echo "<tr>";
+      echo "<th>own_encryption_certificate</th>";
+      echo "<td><input type='file' name='own_encryption_certificate'/></td>";
+      echo "</tr>";
+
+      echo "<tr>";
+      echo "<th>own_encryption_private_key</th>";
+      echo "<td><input type='file' name='encryption_private_key'/></td>";
+      echo "</tr>";
+
+      echo "<tr>";
+      echo "<th>bank_encryption_certificate</th>";
+      echo "<td><input type='file' name='bank_encryption_certificate'/></td>";
+      echo "</tr>";
+
+      echo "<tr>";
+      echo "<th>bank_root_certificate</th>";
+      echo "<td><input type='file' name='bank_root_certificate'/></td>";
+      echo "</tr>";
+
+      echo "<tr>";
+      echo "<th>ca_certificate</th>";
+      echo "<td><input type='file' name='ca_certificate'/></td>";
+      echo "</tr>";
+    }
+
     echo "<tr>";
     echo "<td class='back'></td>";
     echo "</tr>";
 
     echo "<tr>";
-    echo "<th>own_signing_certificate</th>";
-    echo "<td><input type='file' name='own_signing_certificate'/></td>";
+    echo "<th><label for='salasana'>";
+    echo t("Salasana, jolla pankkiyhteystunnukset suojataan");
+    echo "</label></th>";
+    echo "<td><input type='password' name='salasana' id='salasana'/></td>";
     echo "</tr>";
 
     echo "<tr>";
-    echo "<th>own_signing_private_key</th>";
-    echo "<td><input type='file' name='signing_private_key'/></td>";
+    echo "<th><label for='salasanan_vahvistus'>";
+    echo t("Salasanan vahvistus");
+    echo "</label></th>";
+    echo "<td><input type='password' name='salasanan_vahvistus' id='salasanan_vahvistus'/></td>";
     echo "</tr>";
 
     echo "<tr>";
-    echo "<th>own_encryption_certificate</th>";
-    echo "<td><input type='file' name='own_encryption_certificate'/></td>";
+    echo "<td class='back'><input type='submit' value='" . t("Luo pankkiyhteys") . "'/></td>";
     echo "</tr>";
 
-    echo "<tr>";
-    echo "<th>own_encryption_private_key</th>";
-    echo "<td><input type='file' name='encryption_private_key'/></td>";
-    echo "</tr>";
-
-    echo "<tr>";
-    echo "<th>bank_encryption_certificate</th>";
-    echo "<td><input type='file' name='bank_encryption_certificate'/></td>";
-    echo "</tr>";
-
-    echo "<tr>";
-    echo "<th>bank_root_certificate</th>";
-    echo "<td><input type='file' name='bank_root_certificate'/></td>";
-    echo "</tr>";
-
-    echo "<tr>";
-    echo "<th>ca_certificate</th>";
-    echo "<td><input type='file' name='ca_certificate'/></td>";
-    echo "</tr>";
-  }
-
-  echo "<tr>";
-  echo "<td class='back'></td>";
-  echo "</tr>";
-
-  echo "<tr>";
-  echo "<th><label for='salasana'>";
-  echo t("Salasana, jolla pankkiyhteystunnukset suojataan");
-  echo "</label></th>";
-  echo "<td><input type='password' name='salasana' id='salasana'/></td>";
-  echo "</td>";
-  echo "</tr>";
-
-  echo "<tr>";
-  echo "<th><label for='salasanan_vahvistus'>";
-  echo t("Salasanan vahvistus");
-  echo "</label></th>";
-  echo "<td><input type='password' name='salasanan_vahvistus' id='salasanan_vahvistus'/></td>";
-  echo "</tr>";
-
-  echo "<tr>";
-  echo "<td class='back'><input type='submit' value='" . t("Luo pankkiyhteys") . "'/></td>";
-  echo "</tr>";
-
-  echo "</tbody>";
-  echo "</table>";
-  echo "</form>";
-}
-
-$pankkiyhteydet = hae_pankkiyhteydet();
-
-// Jos meillä on jo perustettuja pankkiyhteyksiä
-if (!empty($pankkiyhteydet)) {
-  echo "<br/>";
-  echo "<font class='message'>" . t("Pankkiyhteydet") . "</font>";
-  echo "<hr>";
-
-  echo "<table>";
-  echo "<thead>";
-
-  echo "<tr>";
-  echo "<th>" . t("Pankki") . "</th>";
-  echo "<th>" . t("Asiakastunnus") . "</th>";
-  echo "<th></th>";
-  echo "</tr>";
-
-  echo "</thead>";
-
-  echo "<tbody>";
-
-  $_confirm = t("Haluatko varmasti poistaa pankkiyhteyden?");
-
-  foreach ($pankkiyhteydet as $pankkiyhteys) {
-    echo "<tr class='aktiivi'>";
-    echo "<td>{$pankkiyhteys["pankin_nimi"]}</td>";
-    echo "<td>{$pankkiyhteys["customer_id"]}</td>";
-    echo "<td>";
-
-    echo "<form class='multisubmit' method='post' action='pankkiyhteysadmin.php'
-                onsubmit='return confirm(\"{$_confirm}\");'>";
-    echo "<input type='hidden' name='tee' value='poista'/>";
-    echo "<input type='hidden' name='pankkiyhteys' value='{$pankkiyhteys["pankki"]}'/>";
-    echo "<input type='submit' value='" . t("Poista") . "'/>";
+    echo "</tbody>";
+    echo "</table>";
     echo "</form>";
-    echo "</td>";
-    echo "</tr>";
   }
 
-  echo "</tbody>";
-  echo "</table>";
+  $pankkiyhteydet = hae_pankkiyhteydet();
+
+  // Jos meillä on jo perustettuja pankkiyhteyksiä
+  if (!empty($pankkiyhteydet)) {
+    echo "<br/>";
+    echo "<font class='message'>" . t("Pankkiyhteydet") . "</font>";
+    echo "<hr>";
+
+    echo "<table>";
+    echo "<thead>";
+
+    echo "<tr>";
+    echo "<th>" . t("Pankki") . "</th>";
+    echo "<th>" . t("Asiakastunnus") . "</th>";
+    echo "<th></th>";
+    echo "<th></th>";
+    echo "</tr>";
+
+    echo "</thead>";
+
+    echo "<tbody>";
+
+    $_confirm = t("Haluatko varmasti poistaa pankkiyhteyden?");
+
+    foreach ($pankkiyhteydet as $pankkiyhteys) {
+      echo "<tr class='aktiivi'>";
+      echo "<td>{$pankkiyhteys["pankin_nimi"]}</td>";
+      echo "<td>{$pankkiyhteys["customer_id"]}</td>";
+      echo "<td>";
+      echo "<form method='post'>";
+      echo "<input type='hidden' name='tee' value='vaihda_salasana_form'/>";
+      echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
+      echo "<input type='submit' value='" . t("Vaihda salasana") . "'/>";
+      echo "</form>";
+      echo "</td>";
+      echo "<td>";
+      echo "<form method='post' onsubmit='return confirm(\"{$_confirm}\");'>";
+      echo "<input type='hidden' name='tee' value='poista'/>";
+      echo "<input type='hidden' name='pankkiyhteys' value='{$pankkiyhteys["pankki"]}'/>";
+      echo "<input type='submit' value='" . t("Poista") . "'/>";
+      echo "</form>";
+      echo "</td>";
+      echo "</tr>";
+    }
+
+    echo "</tbody>";
+    echo "</table>";
+  }
 }

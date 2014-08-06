@@ -344,14 +344,14 @@ if ($tee == "") {
     echo "</label></th>";
     echo "<td><input type='password' name='salasanan_vahvistus' id='salasanan_vahvistus'/></td>";
     echo "</tr>";
-
-    echo "<tr>";
-    echo "<td class='back'><input type='submit' value='" . t("Luo pankkiyhteys") . "'/></td>";
-    echo "</tr>";
-
     echo "</tbody>";
     echo "</table>";
+
+    echo "<br>";
+    echo "<input type='submit' value='" . t("Tallenna uusi pankkiyhteys") . "'/>";
     echo "</form>";
+    echo "<br>";
+
   }
 
   $pankkiyhteydet = hae_pankkiyhteydet();
@@ -359,7 +359,7 @@ if ($tee == "") {
   // Jos meillä on jo perustettuja pankkiyhteyksiä
   if (!empty($pankkiyhteydet)) {
     echo "<br/>";
-    echo "<font class='message'>" . t("Pankkiyhteydet") . "</font>";
+    echo "<font class='message'>" . t("Perustetut pankkiyhteydet") . "</font>";
     echo "<hr>";
 
     echo "<table>";

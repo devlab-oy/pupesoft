@@ -385,7 +385,7 @@ if ($tee == "") {
   // Jos meillä on jo perustettuja pankkiyhteyksiä
   if (!empty($pankkiyhteydet)) {
     echo "<br/>";
-    echo "<font class='message'>" . t("Perustetut pankkiyhteydet") . "</font>";
+    echo "<font class='message'>" . t("Tallennetut pankkiyhteydet") . "</font>";
     echo "<hr>";
 
     echo "<table>";

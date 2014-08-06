@@ -11,6 +11,20 @@ if ($kukarow['toimipaikka'] > 0) {
   $res = pupe_query($query);
   $kpl = mysql_num_rows($res);
 
+  while ($row = mysql_fetch_assoc($res)) {
+    $query = "SELECT nimi, kuka
+              FROM kuka
+              WHERE yhtio  = '{$kukarow['yhtio']}'
+              AND kesken   = '{$row['otunnus']}'
+              AND kesken  != 0
+              AND kuka    != '{$kukarow['kuka']}'";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) != 0) {
+      $kpl -= 1;
+    }
+  }
+
   if ($kpl > 0) {
 
     echo "<div style='text-align:right; vertical-align:top;'>";

@@ -26384,6 +26384,7 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
               JOIN asiakas
               ON ( asiakas.yhtio = lasku.yhtio
                 AND asiakas.tunnus     = lasku.liitostunnus
+                AND asiakas.kauppatapahtuman_luonne != 21
                 {$asiakas_join} )
               JOIN tiliointi USE INDEX (tositerivit_index)
               ON ( tiliointi.yhtio = lasku.yhtio

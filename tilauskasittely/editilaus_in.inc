@@ -39,19 +39,19 @@ if (!function_exists('jt_toimita_editilaus')) {
   function jt_toimita_editilaus($asiakasno, $asiakasid, $asiakasmaa) {
     global $yhtiorow, $kukarow, $edi_ulos, $php_cli;
 
-    $automaaginen             = "automaaginen";
-    $tee                 = "JATKA";
-    $oikeurow['paivitys']         = '1';
-    $toimittaja              = "";
-    $toimittajaid            = "";
-    $jarj                 = "tuoteno";
-    $tuotenumero            = "";
-    $tilaus                = "";
-    $toimi                = "";
-    $suoratoimit          = "";
-    $tilaus_on_jo            = "KYLLA";
-    $from_varastoon_inc         = "editilaus_in.inc";
-    $ei_tehdastoimitus_tuotteita  = "EI";
+    $automaaginen                = "automaaginen";
+    $tee                         = "JATKA";
+    $oikeurow['paivitys']        = '1';
+    $toimittaja                  = "";
+    $toimittajaid                = "";
+    $jarj                        = "tuoteno";
+    $tuotenumero                 = "";
+    $tilaus                      = "";
+    $toimi                       = "";
+    $suoratoimit                 = "";
+    $tilaus_on_jo                = "KYLLA";
+    $from_varastoon_inc          = "editilaus_in.inc";
+    $ei_tehdastoimitus_tuotteita = "EI";
     $automaattinen_poiminta      = "JOO";
 
     if ($asiakasmaa != '') {
@@ -363,13 +363,18 @@ while ($tietue = fgets($fd)) {
     $yhtiorow = mysql_fetch_assoc($result);
     $yhtiorow = hae_yhtion_parametrit($yhtiorow["yhtio"]);
 
+    // Jos ajetaan komentorivilt‰, niin haetaan kukarow
+    if ($php_cli) {
+      $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
+    }
+
     $kukarow['yhtio'] = $yhtiorow['yhtio']; // T‰m‰ on vaarallista, mutta t‰t‰ ilman ei mik‰n toimi!
-    $kukarow['kuka'] = $edi_laatija;
+    $kukarow['kuka']  = $edi_laatija;
 
     // nollataan argv ja laitetaan ensimm‰iseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
-    $argv     = array();
-    $argv[0]   = "";
-    $argv[1]   = $kukarow["yhtio"];
+    $argv       = array();
+    $argv[0]    = "";
+    $argv[1]    = $kukarow["yhtio"];
     $editil_cli = TRUE;
 
     $edi_ulos .= "-> $yhtiorow[nimi] ($kukarow[yhtio])\n";
@@ -570,7 +575,10 @@ while ($tietue = fgets($fd)) {
     if (isset($crossdock911) and $tunnus == "NADCN") {
       // Tarkistetaan onko kyseess‰ koontikuljetuskeissi
       // haetaan toimitustavan tiedot tiedot
-      $toimiq = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$arow[toimitustapa]'";
+      $toimiq = " SELECT *
+                  FROM toimitustapa
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND selite  = '$arow[toimitustapa]'";
       $toimir = pupe_query($toimiq);
       $toimiro = mysql_fetch_assoc($toimir);
 
@@ -619,12 +627,12 @@ while ($tietue = fgets($fd)) {
 
       // Copy pastettu ylh‰‰lt‰ koko setti. :(
       $kukarow['yhtio'] = $yhtiorow['yhtio']; // T‰m‰ on vaarallista, mutta t‰t‰ ilman ei mik‰n toimi!
-      $kukarow['kuka'] = $edi_laatija;
+      $kukarow['kuka']  = $edi_laatija;
 
       // nollataan argv ja laitetaan ensimm‰iseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
-      $argv     = array();
-      $argv[0]   = "";
-      $argv[1]   = $kukarow["yhtio"];
+      $argv       = array();
+      $argv[0]    = "";
+      $argv[1]    = $kukarow["yhtio"];
       $editil_cli = TRUE;
 
       $edi_ulos .= "VASTAANOTTTAVAN YHTION TIETO PUUTTUU! -> $yhtiorow[nimi] ($kukarow[yhtio])\n";
@@ -871,7 +879,7 @@ while ($tietue = fgets($fd)) {
     // jos Magenton tilaus on jo maksettu luottokortilla niin p‰ivitet‰‰n maksuehto
     if ($edi_tyyppi == "magento" and ($tieto == 'processing' or $tieto == 'complete')) {
       $kukarow["kassamyyja"] = "";
-      $editilaus_kassalipas = "";
+      $editilaus_kassalipas  = "";
 
       $query = "SELECT tunnus
                 FROM maksuehto
@@ -910,7 +918,7 @@ while ($tietue = fgets($fd)) {
     if ($edi_tyyppi == "magento" and $tieto == 'pending_cashondelivery_asp') {
       // t‰m‰ on j‰lkivaatimus
       $kukarow["kassamyyja"] = "";
-      $editilaus_kassalipas = "";
+      $editilaus_kassalipas  = "";
 
       $query = "SELECT tunnus
                 FROM maksuehto
@@ -1006,7 +1014,10 @@ while ($tietue = fgets($fd)) {
       $editilaus_otsikko_ok = "KYLLA";
 
       // haetaan tomitustavan oletusmaksajan tiedot
-      $apuqu = "SELECT * from toimitustapa where yhtio='$kukarow[yhtio]' and selite='$arow[toimitustapa]'";
+      $apuqu = "  SELECT *
+                  FROM toimitustapa
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND selite  = '$arow[toimitustapa]'";
       $meapu = pupe_query($apuqu);
       $apuro = mysql_fetch_assoc($meapu);
 
@@ -1408,7 +1419,10 @@ while ($tietue = fgets($fd)) {
       $edi_ulos .= t("Tilausnumero")." $id\n\n";
 
       // haetaan tilauksen tiedot
-      $query    = "SELECT * from lasku where tunnus='$id' and yhtio='$kukarow[yhtio]'";
+      $query    = " SELECT *
+                    FROM lasku
+                    WHERE tunnus = '$id'
+                    AND yhtio    = '$kukarow[yhtio]'";
       $result   = pupe_query($query);
       $laskurow = mysql_fetch_assoc($result);
 
@@ -1832,16 +1846,16 @@ while ($tietue = fgets($fd)) {
             ${'ale'.$alepostfix} = "";
           }
 
-          $var          = "";
-          $alv          = "";
-          $toimaika         = $laskurow["toimaika"];
-          $kerayspvm        = $laskurow["kerayspvm"];
-          $paikka          = "";
-          $kukarow["kesken"]     = $laskurow["tunnus"];
-          $jtkielto         = $laskurow['jtkielto'];
-          $varasto         = array();
-          $kommentti        = $rivikommentti;
-          $laskurow["varasto"]  = "";
+          $var                 = "";
+          $alv                 = "";
+          $toimaika            = $laskurow["toimaika"];
+          $kerayspvm           = $laskurow["kerayspvm"];
+          $paikka              = "";
+          $kukarow["kesken"]   = $laskurow["tunnus"];
+          $jtkielto            = $laskurow['jtkielto'];
+          $varasto             = array();
+          $kommentti           = $rivikommentti;
+          $laskurow["varasto"] = "";
 
           if ($edi_tyyppi == "magento") {
             // N‰m‰ ovat ainoat varastot joista verkkokauppa saa myyd‰

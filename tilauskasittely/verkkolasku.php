@@ -40,9 +40,13 @@ if ($php_cli) {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
-  $_yhtio = pupesoft_cleanstring($argv[1]);
+  $_yhtio   = pupesoft_cleanstring($argv[1]);
   $yhtiorow = hae_yhtion_parametrit($_yhtio);
-  $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
+
+  // Kukarow setataan esim editilaus_in.inc:ssä
+  if (!isset($kukarow)) {
+    $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
+  }
 
   if (!is_array($kukarow)) {
     exit(1);

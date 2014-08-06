@@ -683,13 +683,15 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
         // Siirret‰‰n sarjanumerot valmistetulle tilausriville
         if (in_array($valmisterow["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
 
+          $int_isavarattu = (int) $isavarattu;
+
           //  Siirret‰‰n ostorivin tunnus valmistetulle riville
           $query = "SELECT tunnus
                     FROM sarjanumeroseuranta
                     WHERE yhtio        = '$kukarow[yhtio]'
                     and ostorivitunnus = '$tilrivirow[tunnus]'
-                    LIMIT ".(int) $isavarattu;
-                    $sarjares = pupe_query($query);
+                    LIMIT $int_isavarattu";
+          $sarjares = pupe_query($query);
 
           while ($sarjarow = mysql_fetch_assoc($sarjares)) {
             $query = "UPDATE sarjanumeroseuranta SET

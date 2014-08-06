@@ -22,12 +22,20 @@ $tuetut_pankit = tuetut_pankit();
 
 // Poistetaan pankkiyhteys
 if ($tee == "poista") {
-  if (poista_pankkiyhteys($pankkiyhteys)) {
-    ok("Pankkiyhteys poistettu");
+  $query = "DELETE
+            FROM pankkiyhteys
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND tunnus = {$pankkiyhteys_tunnus}";
+  $result = pupe_query($query);
+
+  if ($result) {
+    ok("Pankkiyhteys poistettu!");
   }
   else {
-    virhe("Pankkiyhteyttä ei poistettu");
+    virhe("Pankkiyhteyden poisto epäonnistui!");
   }
+
+  echo "<br>";
 
   $tee = "";
 }
@@ -86,7 +94,13 @@ if ($tee == "vaihda_salasana") {
             AND tunnus = {$pankkiyhteys_tunnus}";
   $result = pupe_query($query);
 
-  viesti("Salasana vaihdettu!");
+  if (mysql_affected_rows() == 1) {
+    ok("Salasana vaihdettu!");
+  }
+  else {
+    virhe("Salasanan vaihto epäonnistui!");
+  }
+
   echo "<br>";
 
   $tee = "";
@@ -378,7 +392,7 @@ if ($tee == "") {
       echo "<td>";
       echo "<form method='post' onsubmit='return confirm(\"{$_confirm}\");'>";
       echo "<input type='hidden' name='tee' value='poista'/>";
-      echo "<input type='hidden' name='pankkiyhteys' value='{$pankkiyhteys["pankki"]}'/>";
+      echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
       echo "<input type='submit' value='" . t("Poista") . "'/>";
       echo "</form>";
       echo "</td>";

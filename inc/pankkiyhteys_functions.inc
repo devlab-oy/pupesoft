@@ -280,23 +280,6 @@ function mahdolliset_pankkiyhteydet() {
 }
 
 
-/**
- *
- * @param string  $pankki
- *
- * @return resource
- */
-function poista_pankkiyhteys($pankki) {
-  global $kukarow, $yhtiorow;
-
-  $query = "DELETE
-            FROM  pankkiyhteys
-            WHERE pankki = '{$pankki}'
-            AND   yhtio  = '{$kukarow["yhtio"]}'";
-  return pupe_query($query);
-}
-
-
 // SEPA API fuktiot
 
 function sepa_download_file_list($params) {

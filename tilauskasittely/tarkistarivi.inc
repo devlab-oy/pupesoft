@@ -1140,14 +1140,18 @@ if ($row['tuoteno'] != '' and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A
       foreach ($ketjut as $ketju) {
         // Haetaan tuotteet ketjukohtaisesti
         $_tuotteet = $ketjun_tuotteet[$ketju];
-        foreach ($_tuotteet as $_tuote) {
-          list(, , $vmyytavissa) = saldo_myytavissa($_tuote["tuoteno"], '', $laskurow['varasto']);
 
-          if ($vmyytavissa > 0) {
-            $lisa_huomautus .= "<div style='float:right; position:relative; top:4px; right:8px;'>";
-            $lisa_huomautus .= t("VASTAAVIA PAIKALLISVARASTOSSA!");
-            $lisa_huomautus .= "</div>";
-            break 2;
+        foreach ($_tuotteet as $_tuote) {
+
+          if ($_tuote["tuoteno"] != $row["tuoteno"]) {
+            list(, , $vmyytavissa) = saldo_myytavissa($_tuote["tuoteno"], '', $laskurow['varasto']);
+
+            if ($vmyytavissa > 0) {
+              $lisa_huomautus .= "<div style='float:right; position:relative; top:4px; right:8px;'><font class='error'>";
+              $lisa_huomautus .= t("Vastaavaa tuotetta paikallisvarastossa");
+              $lisa_huomautus .= "!</font></div>";
+              break 2;
+            }
           }
         }
       }

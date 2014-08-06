@@ -15,7 +15,7 @@ if ($kukarow['toimipaikka'] > 0) {
     $query = "SELECT nimi, kuka
               FROM kuka
               WHERE yhtio  = '{$kukarow['yhtio']}'
-              AND kesken   = '{$row['otunnus']}'
+              AND kesken   = '{$row['tunnus']}'
               AND kesken  != 0
               AND kuka    != '{$kukarow['kuka']}'";
     $result = pupe_query($query);

@@ -36,7 +36,7 @@ echo "<SCRIPT type='text/javascript'>
     //-->
     </SCRIPT>";
 
-if ($kukarow['extranet'] == '' and $verkkokauppa == "") {
+if ($kukarow['extranet'] == '' and empty($verkkokauppa)) {
   echo "  <script type='text/javascript'>
 
         $(function() {
@@ -59,14 +59,14 @@ if ($kukarow['extranet'] == '' and $verkkokauppa == "") {
 }
 
 // Jos tullaan sivuvalikosta extranetiss‰ tyhj‰t‰‰n kesken ettei lis‰t‰ tuotteita v‰‰r‰lle tilaukselle
-if ((!isset($valittu_tarjous_tunnus)) and $kukarow['extranet'] != '' and $verkkokauppa == "") {
+if ((!isset($valittu_tarjous_tunnus)) and $kukarow['extranet'] != '' and empty($verkkokauppa)) {
   $kukarow['kesken'] = '';
 }
 
 if (isset($toiminto) and $toiminto == "sarjanumeronlisatiedot_popup") {
   @include 'sarjanumeron_lisatiedot_popup.inc';
 
-  if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
+  if ($kukarow["extranet"] != "" or empty($verkkokauppa)) {
     $hinnat = 'MY';
   }
   else {
@@ -78,7 +78,7 @@ if (isset($toiminto) and $toiminto == "sarjanumeronlisatiedot_popup") {
   exit;
 }
 
-if ($verkkokauppa == "") {
+if (empty($verkkokauppa)) {
   // selite     = k‰ytet‰‰nkˆ uutta vai vanhaa ulkoasua
   // selitetark   = n‰ytett‰v‰t monivalintalaatikot, jos tyhj‰‰, otetaan oletus alhaalla
   // selitetark_2 = mitk‰ n‰ytett‰vist‰ monivalintalaatikoista on normaaleja alasvetovalikoita
@@ -119,7 +119,7 @@ $result   = pupe_query($query);
 $laskurow = mysql_fetch_assoc($result);
 
 // Katsotaan, onko paramseissa annettu variaatio ja, jos on, n‰ytet‰‰n kyseisen variaation tuotteet
-if ($variaatio != "") {
+if (!empty($variaatio)) {
   tarkista_tilausrivi();
 
   $query = "SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.osasto
@@ -311,11 +311,17 @@ if ($piilota_tuoteperheen_lapset != '') {
   $ptlcheck = "CHECKED";
   $ulisa .= "&piilota_tuoteperheen_lapset=checked";
 }
+else{
+  $ptlcheck = "";
+}
 
 if (!isset($saldotonrajaus)) $saldotonrajaus = '';
 if ($saldotonrajaus != '') {
   $saldotoncheck = "CHECKED";
   $ulisa .= "&saldotonrajaus=checked";
+}
+else{
+  $saldotoncheck = "";
 }
 
 if (!isset($poistetut)) {

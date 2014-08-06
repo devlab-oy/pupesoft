@@ -27,8 +27,8 @@ if ($kukarow['toimipaikka'] > 0) {
 
   if ($kpl > 0) {
 
-    echo "<div style='text-align:right; vertical-align:top;'>";
-    echo "<font class='message'>";
+    echo "<div style='text-align:right; vertical-align:top; margin-right: 10px;'>";
+    echo "<font class='message ok'>";
     echo t("EXT-tilauksia %d kpl", "", $kpl);
     echo "</font></div>";
   }

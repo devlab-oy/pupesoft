@@ -394,6 +394,7 @@ if ($tee == "") {
     echo "<tr>";
     echo "<th>" . t("Pankki") . "</th>";
     echo "<th>" . t("Asiakastunnus") . "</th>";
+    echo "<th>" . t("Sertifikaattien voimassaolo") . "</th>";
     echo "<th></th>";
     echo "<th></th>";
     echo "</tr>";
@@ -406,8 +407,35 @@ if ($tee == "") {
 
     foreach ($pankkiyhteydet as $pankkiyhteys) {
       echo "<tr class='aktiivi'>";
+
       echo "<td>{$pankkiyhteys["pankin_nimi"]}</td>";
       echo "<td>{$pankkiyhteys["customer_id"]}</td>";
+
+      echo "<td>";
+
+      // Lisätään tauluun certifikaattien expire datet
+      $certit = array(
+        "signing_certificate_valid_to" => "Allekirjoitus-sertifikaatti",
+        "encryption_certificate_valid_to" => "Salaus-sertifikaatti",
+        "bank_encryption_certificate_valid_to" => "Pankin salaus-sertifikaatti",
+        "bank_root_certificate_valid_to" => "Pankin juuri-sertifikaatti",
+        "ca_certificate_valid_to" => "Pankin CA-sertifikaatti",
+      );
+
+      foreach ($certit as $valid => $nimi) {
+        $_time = $pankkiyhteys[$valid];
+
+        if ($_time == '0000-00-00 00:00:00') {
+          continue;
+        }
+
+        $_nimi = t($nimi);
+        $_time = tv1dateconv($_time);
+
+        echo "{$_nimi}: {$_time}<br>";
+      }
+      echo "</td>";
+
       echo "<td>";
       echo "<form method='post'>";
       echo "<input type='hidden' name='tee' value='vaihda_salasana_form'/>";
@@ -415,6 +443,7 @@ if ($tee == "") {
       echo "<input type='submit' value='" . t("Vaihda salasana") . "'/>";
       echo "</form>";
       echo "</td>";
+
       echo "<td>";
       echo "<form method='post' class='multisubmit' onsubmit='return confirm(\"{$_confirm}\");'>";
       echo "<input type='hidden' name='tee' value='poista'/>";
@@ -422,6 +451,7 @@ if ($tee == "") {
       echo "<input type='submit' value='" . t("Poista pankkiyhteys") . "'/>";
       echo "</form>";
       echo "</td>";
+
       echo "</tr>";
     }
 

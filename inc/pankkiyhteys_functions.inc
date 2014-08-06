@@ -688,6 +688,21 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
     $pankki[$key] = base64_encode(trim($_salaamaton));
   }
 
+  // Lisätään arrayseen vielä certifikaattien expire datet
+  $certit = array(
+    "signing_certificate",
+    "encryption_certificate",
+    "bank_encryption_certificate",
+    "bank_root_certificate",
+    "ca_certificate",
+  );
+
+  foreach ($certit as $cert) {
+    $_key = "{$cert}_valid_to";
+    $_cert = parse_sertificate(base64_decode($pankki[$cert]));
+    $pankki[$_key] = $_cert['valid_to'];
+  }
+
   return $pankki;
 }
 
@@ -844,6 +859,27 @@ function pura_salaus($salattu_data, $salasana) {
   return mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $avain, $salattu_data_binaari, MCRYPT_MODE_CBC, $iv);
 }
 
+function parse_sertificate($cert) {
+  // Otetaan sisään x509 sertificaatti
+
+  // Palautetaan tällänen array
+  $return = array(
+    "valid_to" => "",
+  );
+
+  if (empty($cert)) {
+    return $return;
+  }
+
+  // Parsitaan sertifikaatti
+  $_cert = openssl_x509_parse($cert);
+
+  // Otetaan valid to timestamp
+  $_valid_to = date('Y-m-d H:i:s', $_cert['validTo_time_t']);
+  $return["valid_to"] = $_valid_to;
+
+  return $return;
+}
 
 /**
  * Palauttaa arrayn tuetuista pankeista muodossa BIC => [lyhyt_nimi, pitka_nimi]

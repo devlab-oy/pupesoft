@@ -83,13 +83,18 @@ if ($tee == "vaihda_salasana") {
   $bca = salaa(base64_decode($vanha_pankkiyhteys["ca_certificate"]), $uusi_salasana1);
 
   $query = "UPDATE pankkiyhteys SET
-            signing_certificate         = '{$osc}',
-            signing_private_key         = '{$spk}',
-            encryption_certificate      = '{$oec}',
-            encryption_private_key      = '{$epk}',
-            bank_encryption_certificate = '{$bec}',
-            bank_root_certificate       = '{$brc}',
-            ca_certificate              = '{$bca}'
+            signing_certificate                  = '{$osc}',
+            signing_private_key                  = '{$spk}',
+            encryption_certificate               = '{$oec}',
+            encryption_private_key               = '{$epk}',
+            bank_encryption_certificate          = '{$bec}',
+            bank_root_certificate                = '{$brc}',
+            ca_certificate                       = '{$bca}',
+            signing_certificate_valid_to         = '{$vanha_pankkiyhteys['signing_certificate_valid_to']}',
+            encryption_certificate_valid_to      = '{$vanha_pankkiyhteys['encryption_certificate_valid_to']}',
+            bank_encryption_certificate_valid_to = '{$vanha_pankkiyhteys['bank_encryption_certificate_valid_to']}',
+            bank_root_certificate_valid_to       = '{$vanha_pankkiyhteys['bank_root_certificate_valid_to']}',
+            ca_certificate_valid_to              = '{$vanha_pankkiyhteys['ca_certificate_valid_to']}'
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tunnus = {$pankkiyhteys_tunnus}";
   $result = pupe_query($query);
@@ -224,17 +229,38 @@ if ($tee == "luo") {
   $brc = salaa($tunnukset_pankista["bank_root_certificate"], $salasana);
   $bca = salaa($tunnukset_pankista["ca_certificate"], $salasana);
 
+  // Tallennetaan certificaattien valid_to päivä kantaan
+  $_temp = parse_sertificate($tunnukset_pankista["own_encryption_certificate"]);
+  $oec_time = $_temp['valid_to'];
+
+  $_temp = parse_sertificate($tunnukset_pankista["own_signing_certificate"]);
+  $osc_time = $_temp['valid_to'];
+
+  $_temp = parse_sertificate($tunnukset_pankista["bank_encryption_certificate"]);
+  $bec_time = $_temp['valid_to'];
+
+  $_temp = parse_sertificate($tunnukset_pankista["bank_root_certificate"]);
+  $brc_time = $_temp['valid_to'];
+
+  $_temp = parse_sertificate($tunnukset_pankista["ca_certificate"]);
+  $bca_time = $_temp['valid_to'];
+
   $query = "INSERT INTO pankkiyhteys SET
-            yhtio                       = '{$kukarow['yhtio']}',
-            pankki                      = '{$pankki}',
-            signing_certificate         = '{$osc}',
-            signing_private_key         = '{$spk}',
-            encryption_certificate      = '{$oec}',
-            encryption_private_key      = '{$epk}',
-            bank_encryption_certificate = '{$bec}',
-            bank_root_certificate       = '{$brc}',
-            ca_certificate              = '{$bca}',
-            customer_id                 = '{$customer_id}'";
+            yhtio                                = '{$kukarow['yhtio']}',
+            pankki                               = '{$pankki}',
+            signing_certificate                  = '{$osc}',
+            signing_private_key                  = '{$spk}',
+            encryption_certificate               = '{$oec}',
+            encryption_private_key               = '{$epk}',
+            bank_encryption_certificate          = '{$bec}',
+            bank_root_certificate                = '{$brc}',
+            ca_certificate                       = '{$bca}',
+            signing_certificate_valid_to         = '{$osc_time}',
+            encryption_certificate_valid_to      = '{$oec_time}',
+            bank_encryption_certificate_valid_to = '{$bec_time}',
+            bank_root_certificate_valid_to       = '{$brc_time}',
+            ca_certificate_valid_to              = '{$bca_time}',
+            customer_id                          = '{$customer_id}'";
   $result = pupe_query($query);
 
   $tee = "";

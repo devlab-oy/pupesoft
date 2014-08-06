@@ -340,14 +340,18 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     $tt_vaihdettu = false;
 
     if ($varasto > 0 and $clearing > 0) {
+
+      $kohdevarasto = $clearing;
+      $lahdevarasto = $varasto;
+
       $ttqry = "SELECT tpa.selite AS toimitustapa
                 FROM avainsana AS ana
                 JOIN toimitustapa AS tpa
                 ON ( ana.yhtio = tpa.yhtio AND ana.selitetark_2 = tpa.tunnus )
                 WHERE ana.yhtio = '$kukarow[yhtio]'
-                AND ana.laji    = 'SIIRTOVARASTOT'
-                AND ana.selite  = $varasto
-                AND selitetark  = $clearing";
+                AND ana.laji = 'SIIRTOVARASTOT'
+                AND ana.selitetark = '$lahdevarasto'
+                AND ana.selite = '$kohdevarasto'";
       $ttresult = mysql_query($ttqry) or pupe_error($ttqry);
 
       if (mysql_num_rows($ttresult) > 0) {

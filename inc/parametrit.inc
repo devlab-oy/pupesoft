@@ -838,11 +838,11 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
           enable_ajax();
 
           while ($message_row = mysql_fetch_assoc($message_result)) {
-            echo "<div id='$message_row[tunnus]'>";
+            echo "<div id='{$message_row['tunnus']}'>";
             echo t("Viesti käyttäjältä").": ";
-            echo "$message_row[nimi] @ ".tv1dateconv($message_row['luontiaika'], 'yes').": ";
-            echo "$message_row[viesti] ";
-            echo "<input type='button' onClick=\"javascript:sndReq('$message_row[tunnus]','?tee=message_luettu&amp;message_tunnus=$message_row[tunnus]&amp;ohje=off&amp;no_css=yes', false, false)\" value='".t("Kuittaa")."'><br>";
+            echo "{$message_row['nimi']} @ ".tv1dateconv($message_row['luontiaika'], 'yes').": ";
+            echo "{$message_row['viesti']} ";
+            echo "<input type='button' onClick=\"javascript:sndReq('{$message_row['tunnus']}','?tee=message_luettu&amp;toim={$toim}&amp;message_tunnus={$message_row['tunnus']}&amp;ohje=off&amp;no_css=yes', false, false)\" value='".t("Kuittaa")."'><br>";
             echo "</div>";
           }
 

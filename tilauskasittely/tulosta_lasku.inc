@@ -2596,14 +2596,44 @@ if (!function_exists("tulosta_lasku")) {
 
     $kaanteinen_verotus = FALSE;
 
+
+    $laskurows = array();
+    
+    // tsekataan pitääkö tuote korvata osaluettelolla
     while ($row = mysql_fetch_assoc($result)) {
+      
       if ($row["alv"] >= 600) {
         $kaanteinen_verotus = TRUE;
-        break;
+      }
+      
+      
+      $query = "SELECT tuote.tuoteno, tuote.nimitys, tuoteperhe.kerroin      
+                FROM tuoteperhe
+                JOIN tuote ON (tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tuoteno=tuote.tuoteno)
+                WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
+                AND tuoteperhe.isatuoteno = '$row[tuoteno]'
+                AND tuoteperhe.tyyppi     = 'O'";
+      $tuoteperhe_result = pupe_query($query);
+
+      if (mysql_num_rows($tuoteperhe_result) > 0) {
+        while ($tuoteperhe_row = mysql_fetch_assoc($tuoteperhe_result)) {
+          
+          $lisarow = $row;
+          
+          $lisarow["tuoteno"] = $tuoteperhe_row["tuoteno"];
+          $lisarow["nimitys"] = $tuoteperhe_row["nimitys"];
+          $lisarow["tilkpl"]  = $tuoteperhe_row["kerroin"]*$row["tilkpl"];
+          $lisarow["varattu"] = $tuoteperhe_row["kerroin"]*$row["varattu"];
+          $lisarow["jt"]      = $tuoteperhe_row["kerroin"]*$row["jt"];
+          $lisarow["kpl"]     = $tuoteperhe_row["kerroin"]*$row["kpl"];
+          
+          $laskurows[] = $lisarow;
+        }
+      }
+      else {
+        $laskurows[] = $row;
       }
     }
-
-    mysql_data_seek($result, 0);
 
     // aloitellaan laskun teko
     list($page_lasku, $sivu, $kala) = alku($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, $kaanteinen_verotus, $page_lasku, $sivu);
@@ -2612,10 +2642,9 @@ if (!function_exists("tulosta_lasku")) {
     $yhteensamaara = 0;
 
     $lasrivilask  = 0;
-    $lasrivimaara = mysql_num_rows($result);
+    $lasrivimaara = count($laskurows);
 
-    while ($row = mysql_fetch_assoc($result)) {
-
+    foreach ($laskurows as $row) {
       $lasrivilask++;
 
       // Rivin toimitusaika

@@ -19077,47 +19077,47 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
     $riresult = pupe_query($query);
 
     $params_lahete = array(
-      'arvo'            => 0,
-      'asrow'            => $asrow,
-      'boldi'            => $boldi,
-      'ei_otsikoita'        => '',
-      'extranet_tilausvahvistus'  => $extranet_tilausvahvistus,
-      'iso'            => $iso,
-      'jtid'            => '',
-      'kala'            => 0,
-      'kassa_ale'          => '',
-      'kieli'            => $kieli,
-      'lahetetyyppi'        => $lahetetyyppi,
-      'laskurow'          => $laskurow,
+      'arvo'                     => 0,
+      'asrow'                    => $asrow,
+      'boldi'                    => $boldi,
+      'ei_otsikoita'             => '',
+      'extranet_tilausvahvistus' => $extranet_tilausvahvistus,
+      'iso'                      => $iso,
+      'jtid'                     => '',
+      'kala'                     => 0,
+      'kassa_ale'                => '',
+      'kieli'                    => $kieli,
+      'lahetetyyppi'             => $lahetetyyppi,
+      'laskurow'                 => $laskurow,
       'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
-      'norm'            => $norm,
-      'page'            => NULL,
-      'pdf'            => NULL,
-      'perheid'          => 0,
-      'pieni'            => $pieni,
-      'pieni_boldi'        => $pieni_boldi,
-      'pitkattuotteet'      => FALSE,
-      'rectparam'          => $rectparam,
-      'riviresult'        => $riresult,
-      'rivinkorkeus'        => $rivinkorkeus,
-      'rivinumerot'        => "",
-      'row'            => NULL,
-      'sivu'            => 1,
-      'summa'            => 0,
-      'tee'            => $tee,
-      'thispage'          => NULL,
-      'toim'            => $toim,
-      'tots'            => 0,
-      'tuotenopituus'        => '',
-      'nimityskohta'        => '',
-      'nimitysleveys'        => '',
-      'tyyppi'          => '',
-      'useita'          => '',
-      'komento'          => $komento,
-      'yhteensamaara'        => 0,
-      'lahetekpl'          => $lahetekpl,
-      'onko_kerayserat_kaytossa'   => $onko_kerayserat_kaytossa,
-      'koontilahete'        => $koontilahete,
+      'norm'                     => $norm,
+      'page'                     => NULL,
+      'pdf'                      => NULL,
+      'perheid'                  => 0,
+      'pieni'                    => $pieni,
+      'pieni_boldi'              => $pieni_boldi,
+      'pitkattuotteet'           => FALSE,
+      'rectparam'                => $rectparam,
+      'riviresult'               => $riresult,
+      'rivinkorkeus'             => $rivinkorkeus,
+      'rivinumerot'              => "",
+      'row'                      => NULL,
+      'sivu'                     => 1,
+      'summa'                    => 0,
+      'tee'                      => $tee,
+      'thispage'                 => NULL,
+      'toim'                     => $toim,
+      'tots'                     => 0,
+      'tuotenopituus'            => '',
+      'nimityskohta'             => '',
+      'nimitysleveys'            => '',
+      'tyyppi'                   => '',
+      'useita'                   => '',
+      'komento'                  => $komento,
+      'yhteensamaara'            => 0,
+      'lahetekpl'                => $lahetekpl,
+      'onko_kerayserat_kaytossa' => $onko_kerayserat_kaytossa,
+      'koontilahete'             => $koontilahete,
     );
 
     if ($laskurow["tila"] == "G") {
@@ -19130,8 +19130,42 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
     mysql_data_seek($riresult, 0);
 
     unset($sscc);
-
+    
+    $laheterows = array();
+    
+    // tsekataan pitääkö tuote korvata osaluettelolla
     while ($row = mysql_fetch_assoc($riresult)) {
+        
+      $query = "SELECT tuote.tuoteno, tuote.nimitys, tuoteperhe.kerroin      
+                FROM tuoteperhe
+                JOIN tuote ON (tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tuoteno=tuote.tuoteno)
+                WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
+                AND tuoteperhe.isatuoteno = '$row[tuoteno]'
+                AND tuoteperhe.tyyppi     = 'O'";
+      $tuoteperhe_result = pupe_query($query);
+
+      if (mysql_num_rows($tuoteperhe_result) > 0) {
+        while ($tuoteperhe_row = mysql_fetch_assoc($tuoteperhe_result)) {
+          
+          $lisarow = $row;
+          
+          $lisarow["tuoteno"] = $tuoteperhe_row["tuoteno"];
+          $lisarow["nimitys"] = $tuoteperhe_row["nimitys"];
+          $lisarow["tilkpl"]  = $tuoteperhe_row["kerroin"]*$row["tilkpl"];
+          $lisarow["varattu"] = $tuoteperhe_row["kerroin"]*$row["varattu"];
+          $lisarow["jt"]      = $tuoteperhe_row["kerroin"]*$row["jt"];
+          $lisarow["kpl"]     = $tuoteperhe_row["kerroin"]*$row["kpl"];
+          
+          $laheterows[] = $lisarow;
+        }
+      }
+      else {
+        $laheterows[] = $row;
+      }
+    }
+
+
+    foreach ($laheterows as $row) {
 
       $params_lahete["row"] = $row;
 

@@ -51,6 +51,8 @@ enable_ajax();
 
 if (strpos($_SERVER['SCRIPT_NAME'], "inventoi.php") !== FALSE) {
 
+  $koko_url = $_SERVER['SCRIPT_NAME'].'?'.$_SERVER['QUERY_STRING'];
+
   echo "  <script type='text/javascript'>
         $(function() {
           $('#inven_laji').on('change', function() {
@@ -65,7 +67,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "inventoi.php") !== FALSE) {
                 no_head: 'yes',
                 ohje: 'off'
               },
-              url: '{$_SERVER['SCRIPT_NAME']}'
+              url: '{$koko_url}'
             }).done(function(data) {
               $('#lisaselite').val(data);
             });

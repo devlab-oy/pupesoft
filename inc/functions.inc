@@ -11356,7 +11356,7 @@ if (!function_exists("liite_popup")) {
 
         $liitteet = "<input type='button' value='";
 
-        if ($pdf_exist) {
+        if (isset($pdf_exist)) {
           $liitteet .= t("Pdf");
         }
         else {

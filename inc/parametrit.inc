@@ -799,7 +799,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
           echo "<div style='text-align:right; vertical-align:top; margin-right: 10px;'><a target='_blank' href='$hreffi'>".t("OHJE")."</a></div>";
         }
 
-        if (tarkista_oikeus('infobar.php')) {
+        if ($kukarow['toimipaikka'] > 0 and tarkista_oikeus('infobar.php')) {
           require('infobar.php');
         }
       }

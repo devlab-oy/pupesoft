@@ -390,10 +390,10 @@ if ($tee == "") {
       echo "</form>";
       echo "</td>";
       echo "<td>";
-      echo "<form method='post' onsubmit='return confirm(\"{$_confirm}\");'>";
+      echo "<form method='post' class='multisubmit' onsubmit='return confirm(\"{$_confirm}\");'>";
       echo "<input type='hidden' name='tee' value='poista'/>";
       echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
-      echo "<input type='submit' value='" . t("Poista") . "'/>";
+      echo "<input type='submit' value='" . t("Poista pankkiyhteys") . "'/>";
       echo "</form>";
       echo "</td>";
       echo "</tr>";

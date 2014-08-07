@@ -338,6 +338,9 @@ if ($laskurow['tila'] == 'O' or $laskurow['tila'] == 'K') {
 elseif ($laskurow["tilaustyyppi"] == 'E') {
   $rivityyppi = 'E'; // Ennakkotilausrivi
 }
+elseif ($laskurow["tilaustyyppi"] == 'H') {
+  $rivityyppi = 'H';  // saldoa varaamaton extranet-tilaus
+}
 elseif ($laskurow["tila"] == 'T') {
   $rivityyppi = 'T'; // Tarjousrivi
 }
@@ -1580,7 +1583,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               }
 
               // Jos ei varata saldoa niin ei varata saldoa
-              if ($varataan_saldoa == "EI" and $rivityyppi == 'G') {
+              if ($varataan_saldoa == "EI" and ($rivityyppi == 'G' or $rivityyppi == 'H')) {
                 $varattu = 0;
               }
 

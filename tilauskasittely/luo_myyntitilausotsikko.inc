@@ -367,7 +367,19 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 
     $tilaustyyppi = $tilaustyyppi != '' ? $tilaustyyppi : "N";
 
-    if ($toim == "TARJOUS") {
+    // onko yhtiön tai asiakkaan takaa säädetty extranet-tilaukset saldoa varaamattomiksi
+    if ($yhtiorow['extranet_tilaus_ei_varaa_saldoa'] == '1'
+        or $asiakasrow['extranet_tilaus_ei_varaa_saldoa'] == '1') {
+      $ext_ei_varata = true;
+    }
+    else{
+      $ext_ei_varata = false;
+    }
+
+    if ($toim == "EXTRANET" and $ext_ei_varata) {
+      $tilaustyyppi = 'H';
+    }
+    elseif ($toim == "TARJOUS") {
       $tilaustyyppi = 'T';
     }
     elseif ($toim == "EXTRANET_REKLAMAATIO") {

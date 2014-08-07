@@ -314,14 +314,14 @@ function sepa_download_file_list($params) {
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
-      "signing_certificate"    => $pankkiyhteys["signing_certificate"],
-      "signing_private_key"    => $pankkiyhteys["signing_private_key"],
-      "encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
-      "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
-      "customer_id"            => $pankkiyhteys["customer_id"],
-      "target_id"              => $target_id,
-      "file_type"              => $file_type,
-      "status"                 => $status,
+      "own_signing_certificate"     => $pankkiyhteys["signing_certificate"],
+      "signing_private_key"         => $pankkiyhteys["signing_private_key"],
+      "bank_encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
+      "encryption_private_key"      => $pankkiyhteys["encryption_private_key"],
+      "customer_id"                 => $pankkiyhteys["customer_id"],
+      "target_id"                   => $target_id,
+      "file_type"                   => $file_type,
+      "status"                      => $status,
     ),
     "url" => "https://sepa.devlab.fi/api/{$bank}/download_file_list",
     "headers" => array(
@@ -377,14 +377,14 @@ function sepa_download_files($params) {
     $parameters = array(
       "method"  => "POST",
       "data"    => array(
-        "signing_certificate"    => $pankkiyhteys["signing_certificate"],
-        "signing_private_key"    => $pankkiyhteys["signing_private_key"],
-        "encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
-        "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
-        "customer_id"            => $pankkiyhteys["customer_id"],
-        "target_id"              => $target_id,
-        "file_type"              => $file_type,
-        "file_reference"         => $viite
+        "own_signing_certificate"     => $pankkiyhteys["signing_certificate"],
+        "signing_private_key"         => $pankkiyhteys["signing_private_key"],
+        "bank_encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
+        "encryption_private_key"      => $pankkiyhteys["encryption_private_key"],
+        "customer_id"                 => $pankkiyhteys["customer_id"],
+        "target_id"                   => $target_id,
+        "file_type"                   => $file_type,
+        "file_reference"              => $viite
       ),
       "url" => "https://sepa.devlab.fi/api/{$bank}/download_file",
       "headers" => array(
@@ -448,14 +448,14 @@ function sepa_upload_file($params) {
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
-      "signing_certificate"    => $pankkiyhteys["signing_certificate"],
-      "signing_private_key"    => $pankkiyhteys["signing_private_key"],
-      "encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
-      "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
-      "customer_id"            => $pankkiyhteys["customer_id"],
-      "target_id"              => $target_id,
-      "file_type"              => $file_type,
-      "content"                => $maksuaineisto
+      "own_signing_certificate"     => $pankkiyhteys["signing_certificate"],
+      "signing_private_key"         => $pankkiyhteys["signing_private_key"],
+      "bank_encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
+      "encryption_private_key"      => $pankkiyhteys["encryption_private_key"],
+      "customer_id"                 => $pankkiyhteys["customer_id"],
+      "target_id"                   => $target_id,
+      "file_type"                   => $file_type,
+      "content"                     => $maksuaineisto
     ),
     "url"     => "https://sepa.devlab.fi/api/{$bank}/upload_file",
     "headers" => array(
@@ -536,11 +536,11 @@ function sepa_get_user_info($params) {
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
-      "signing_certificate"    => $pankkiyhteys["signing_certificate"],
-      "signing_private_key"    => $pankkiyhteys["signing_private_key"],
-      "encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
-      "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
-      "customer_id"            => $pankkiyhteys["customer_id"],
+      "own_signing_certificate"     => $pankkiyhteys["signing_certificate"],
+      "signing_private_key"         => $pankkiyhteys["signing_private_key"],
+      "bank_encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
+      "encryption_private_key"      => $pankkiyhteys["encryption_private_key"],
+      "customer_id"                 => $pankkiyhteys["customer_id"],
     ),
     "url" => "https://sepa.devlab.fi/api/{$pankkiyhteys['bank']}/get_user_info",
     "headers" => array(

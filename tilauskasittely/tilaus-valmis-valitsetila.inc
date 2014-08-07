@@ -335,8 +335,9 @@ elseif ($kerattavia > 0 and $kutsuja != 'keraa.php') {
   // Poistetaan vanhat ker‰yser‰t kun palautetaan tilaus takaisin tulostusjonoon,
   // jottei ker‰yseri‰ luotaisi joka kerta vaan lis‰‰ ja lis‰‰,
   // kun palautetaan tilaus takaisin tulostusjonoon
-  if ($yhtiorow['kerayserat'] == 'P' or
-    ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A')) {
+  if ($yhtiorow['kerayserat'] == 'K'
+    or $yhtiorow['kerayserat'] == 'P'
+    or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A')) {
     $query = "SELECT tunnus
               FROM kerayserat
               WHERE yhtio = '{$kukarow['yhtio']}'

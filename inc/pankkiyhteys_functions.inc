@@ -322,6 +322,7 @@ function sepa_download_file_list($params) {
       "target_id"                   => $target_id,
       "file_type"                   => $file_type,
       "status"                      => $status,
+      "environment"                 => 'production',
     ),
     "url" => "https://sepa.devlab.fi/api/{$bank}/download_file_list",
     "headers" => array(
@@ -384,7 +385,8 @@ function sepa_download_files($params) {
         "customer_id"                 => $pankkiyhteys["customer_id"],
         "target_id"                   => $target_id,
         "file_type"                   => $file_type,
-        "file_reference"              => $viite
+        "file_reference"              => $viite,
+        "environment"                 => 'production',
       ),
       "url" => "https://sepa.devlab.fi/api/{$bank}/download_file",
       "headers" => array(
@@ -455,7 +457,8 @@ function sepa_upload_file($params) {
       "customer_id"                 => $pankkiyhteys["customer_id"],
       "target_id"                   => $target_id,
       "file_type"                   => $file_type,
-      "content"                     => $maksuaineisto
+      "content"                     => $maksuaineisto,
+      "environment"                 => 'production',
     ),
     "url"     => "https://sepa.devlab.fi/api/{$bank}/upload_file",
     "headers" => array(
@@ -541,6 +544,7 @@ function sepa_get_user_info($params) {
       "bank_encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
       "encryption_private_key"      => $pankkiyhteys["encryption_private_key"],
       "customer_id"                 => $pankkiyhteys["customer_id"],
+      "environment"                 => 'production',
     ),
     "url" => "https://sepa.devlab.fi/api/{$pankkiyhteys['bank']}/get_user_info",
     "headers" => array(

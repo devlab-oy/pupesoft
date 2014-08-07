@@ -2428,7 +2428,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and
       $laskurow["tilaustyyppi"] != "U" and
       ($_tarjouksella or $_osto_myyntitilaukselta or $_extranetista) and
-      !in_array($var, array('V', 'H'))) {
+      !in_array($var, array('V', 'H', 'P'))) {
 
       if (!empty($laskurow['varasto'])) {
         $kohde_varastot = array($laskurow['varasto']);

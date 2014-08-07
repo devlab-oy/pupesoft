@@ -4234,8 +4234,19 @@ if ($tee == '') {
 
       $varasto = $laskurow["varasto"];
 
-      // Ennakkotilaukset, Tarjoukset, Ylläpitosopimukset ja Valmistukset eivät tee saldotsekkiä
-      if ($laskurow["tilaustyyppi"] == "E" or $laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
+      // Ennakkotilaukset,
+      // Tarjoukset,
+      // Ylläpitosopimukset,
+      // tietyt extranet-tilaukset
+      // ja Valmistukset eivät tee saldotsekkiä
+
+      $_1 = ($laskurow["tilaustyyppi"] == "E");
+      $_2 = ($laskurow["tila"] == "T");
+      $_3 = ($laskurow["tilaustyyppi"] == "0");
+      $_4 = ($laskurow["tila"] == "V");
+      $_5 = ($laskurow["tilaustyyppi"] == "H");
+
+      if ($_1 or $_2 or $_3 or $_4 or $_5) {
         $varataan_saldoa = "EI";
       }
       else {
@@ -5072,6 +5083,11 @@ if ($tee == '') {
     }
     elseif ($toim == "SIIRTOLISTA" or $toim == "SIIRTOTYOMAARAYS" or $toim == "MYYNTITILI") {
       $tilrivity  = "'G'";
+      $tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
+    }
+    elseif ($toim == "EXTRANET" and ($yhtiorow['extranet_tilaus_ei_varaa_saldoa'] == '1'
+            or $asiakasrow['extranet_tilaus_ei_varaa_saldoa'] == '1')) {
+      $tilrivity  = "'H'";
       $tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
     }
     elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {

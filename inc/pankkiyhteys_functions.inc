@@ -387,6 +387,7 @@ function sepa_download_files($params) {
         "file_type"                   => $file_type,
         "file_reference"              => $viite,
         "environment"                 => 'production',
+        "status"                      => 'NEW',
       ),
       "url" => "https://sepa.devlab.fi/api/{$bank}/download_file",
       "headers" => array(

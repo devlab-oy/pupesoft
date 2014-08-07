@@ -317,7 +317,6 @@ elseif ($kerattavia == 0) {
 elseif ($kerattavia > 0 and $kutsuja != 'keraa.php') {
   // T‰ss‰ meill‰ ON jotain ker‰tt‰v‰‰
   // laitetaan l‰hete tulostusjonoon
-
   $tila = 'N';
   $alatila = 'A';
 

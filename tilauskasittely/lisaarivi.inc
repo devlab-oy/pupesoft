@@ -592,8 +592,11 @@ if (substr($paikka, 0, 3) == "¡¡S") {
       $tuotepaikkojen_saldot = varaston_tuotepaikkojen_saldo($tuoteno, array($varasto_tunnukset[2]));
       $lahdevarasto_tuotepaikka = $tuotepaikkojen_saldot[0];
 
+      $updatelisa_lapsi = $lapsirivi['var'] == 'P' ? "varattu = tilkpl," : "";
+
       $query = "UPDATE tilausrivi
                 SET var     = 'S',
+                {$updatelisa_lapsi}
                 hyllyalue   = '{$lahdevarasto_tuotepaikka['hyllyalue']}',
                 hyllynro    = '{$lahdevarasto_tuotepaikka['hyllynro']}',
                 hyllyvali   = '{$lahdevarasto_tuotepaikka['hyllyvali']}',

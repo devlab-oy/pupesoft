@@ -1005,6 +1005,21 @@ if (mysql_field_name($result, $i) == "lahetteen_jarjestys_suunta" or
   $jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == "extranet_tilaus_ei_varaa_saldoa") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array();
+  $apu = $trow[$i];
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = ''>".t("Extranet-tilaus varaa saldoa")."</option>";
+  $ulos .= "<option value = '1' $sel[1]>".t("Extranet-tilaus ei varaa saldoa")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == "extranet_tilaus_varaa_saldoa") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";

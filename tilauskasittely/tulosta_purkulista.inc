@@ -260,7 +260,7 @@ if ($mista == "vastaanota" and $vainlistaus == '') {
             tuote.purkukommentti,
             tilausrivi.laadittu,
             tilausrivin_lisatiedot.tilausrivilinkki,
-            IF((tilausrivin_lisatiedot.tilausrivilinkki = 0 OR t_lasku.tila = 'C'), 0, 1) tilausrivilinkki_sorttaus
+            IF((tilausrivin_lisatiedot.tilausrivilinkki = 0 OR t_lasku.tila = 'C'), 1, 0) tilausrivilinkki_sorttaus
             FROM tilausrivi
             JOIN tuote USING (yhtio, tuoteno)
             JOIN tapahtuma ON tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus and tapahtuma.kpl > 0 and laji = 'siirto'
@@ -290,7 +290,7 @@ elseif ($mista == "vastaanota" and $vainlistaus != '') {
             tuote.purkukommentti,
             tilausrivi.laadittu,
             tilausrivin_lisatiedot.tilausrivilinkki,
-            IF((tilausrivin_lisatiedot.tilausrivilinkki = 0 OR t_lasku.tila = 'C'), 0, 1) tilausrivilinkki_sorttaus
+            IF((tilausrivin_lisatiedot.tilausrivilinkki = 0 OR t_lasku.tila = 'C'), 1, 0) tilausrivilinkki_sorttaus
             FROM tilausrivi
             JOIN tuote USING (yhtio, tuoteno)
             JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio  and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)

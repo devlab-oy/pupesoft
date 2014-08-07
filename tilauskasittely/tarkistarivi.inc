@@ -844,7 +844,8 @@ if (
 
   if ($_siirtolista_myyntitilaukselta and
     $_ei_ole_takuu and
-    !in_array($toim, array("VALMISTAVARASTOON", "SIIRTOLISTA", "SIIRTOTYOMAARAYS", "REKLAMAATIO"))) {
+    !in_array($toim, array("VALMISTAVARASTOON", "SIIRTOLISTA", "SIIRTOTYOMAARAYS", "REKLAMAATIO")) and
+    in_array($laskurow['tila'], array('N','T'))) {
 
     $sel4 = "";
 

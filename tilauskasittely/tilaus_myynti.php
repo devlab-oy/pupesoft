@@ -64,7 +64,7 @@ $tilauskaslisa = "";
 
 // extranet vai normipupe?
 if (strpos(dirname(__FILE__), "/tilauskasittely") !== FALSE) {
-  $tilauskaslisa = "tilauskasittely/";
+  #$tilauskaslisa = "tilauskasittely/";
 }
 if (isset($liite_popup_toiminto) and $liite_popup_toiminto == "AK") {
   liite_popup("AK", $tuotetunnus, $width, $height);
@@ -308,6 +308,47 @@ else {
 if (($kukarow["extranet"] != '' and $toim != 'EXTRANET' and $toim != 'EXTRANET_REKLAMAATIO') or ($kukarow["extranet"] == "" and ($toim == "EXTRANET" or $toim == "EXTRANET_REKLAMAATIO"))) {
   //aika jännä homma jos tänne jouduttiin
   exit;
+}
+
+if ($tee == 'TARKISTA' and $kukarow["extranet"] != '') {
+
+  $uquery = "UPDATE lasku
+             SET tilaustyyppi = 'L'
+             WHERE yhtio = '{$kukarow['yhtio']}'
+             AND tunnus = $tilausnumero";
+  $uresult = pupe_query($uquery);
+
+  $lquery = "SELECT *
+            FROM lasku
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = $tilausnumero";
+  $lresult = pupe_query($lquery);
+  $laskurow = mysql_fetch_assoc($lresult);
+
+  $xquery = "SELECT *
+             FROM tilausrivi
+             WHERE yhtio = '{$kukarow['yhtio']}'
+             AND otunnus = $tilausnumero";
+  $xresult = pupe_query($xquery);
+
+  while ($xrow = mysql_fetch_assoc($xresult)) {
+
+    $tuoteno = $xrow['tuoteno'];
+    $kpl = $xrow['tilkpl'];
+    $hinta = $xrow['hinta'];
+
+    $query  = "SELECT *
+               from tuote
+               where tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]'";
+    $result = pupe_query($query);
+    $trow = mysql_fetch_assoc($result);
+
+    $dquery = "DELETE FROM tilausrivi WHERE tunnus = $xrow[tunnus]";
+    $dresult = pupe_query($dquery);
+
+    require 'lisaarivi.inc';
+  }
+  $tee = '';
 }
 
 if ($tee == 'PAIVITA_SARJANUMERO' and $rivitunnus > 0) {
@@ -5087,7 +5128,7 @@ if ($tee == '') {
     }
     elseif ($toim == "EXTRANET" and ($yhtiorow['extranet_tilaus_ei_varaa_saldoa'] == '1'
             or $asiakasrow['extranet_tilaus_ei_varaa_saldoa'] == '1')) {
-      $tilrivity  = "'H'";
+      $tilrivity  = "'H','L'";
       $tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
     }
     elseif ($toim == "VALMISTAVARASTOON" or $toim == "VALMISTAASIAKKAALLE") {
@@ -8718,12 +8759,19 @@ if ($tee == '') {
       }
       elseif ($kukarow['tilaus_valmis'] != "4" and ($toim != 'REKLAMAATIO' or $yhtiorow['reklamaation_kasittely'] != 'U')) {
 
+        if ($laskurow['tilaustyyppi'] == 'H') {
+          $tee_value = 'TARKISTA';
+        }
+        else{
+          $tee_value = 'VALMIS';
+        }
+
         echo "<form name='kaikkyht' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' $javalisa>
           <input type='hidden' name='toim' value='$toim'>
           <input type='hidden' name='lopetus' value='$lopetus'>
           <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
           <input type='hidden' name='projektilla' value='$projektilla'>
-          <input type='hidden' name='tee' value='VALMIS'>
+          <input type='hidden' name='tee' value='$tee_value'>
           <input type='hidden' name='tilausnumero' value='$tilausnumero'>
           <input type='hidden' name='mista' value = '$mista'>
           <input type='hidden' name='rahtipainohinta' value='$rahtihinta'>

@@ -2608,7 +2608,7 @@ if (!function_exists("tulosta_lasku")) {
       
       // Korvataanko tilauksella oleva rivi osaluettelolla
       $query = "SELECT tuote.tuoteno, tuote.myyntihinta, tuote.yksikko, tuote.nimitys, tuoteperhe.kerroin,
-                round(tuote.myyntihinta / if ('$yhtiorow[alv_kasittely]' = '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * (1-{$row['aleyhteensa']}/100), $yhtiorow[hintapyoristys]) hinta,
+                tuote.myyntihinta hinta,
                 round(tuote.myyntihinta / if ('$yhtiorow[alv_kasittely]' = '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * {$row['kpl']} * (1-{$row['aleyhteensa']}/100), $yhtiorow[hintapyoristys]) rivihinta,
                 round(tuote.myyntihinta * if ('$yhtiorow[alv_kasittely]' != '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * {$row['kpl']} * (1-{$row['aleyhteensa']}/100), $yhtiorow[hintapyoristys]) rivihinta_verollinen,
                 ((tuote.myyntihinta / {$laskurow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]'  = '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * {$row['kpl']} * (1-{$row['aleyhteensa']}/100)) rivihinta_valuutassa

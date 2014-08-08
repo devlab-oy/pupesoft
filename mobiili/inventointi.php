@@ -28,13 +28,19 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 
   // Poistetaan tuotepaikasta v‰limerkit
   $hylly = preg_replace("/[^a-zA-ZÂ‰ˆ≈ƒ÷0-9]/", "", $tuotepaikka);
+  $_hylly = substr($hylly, 0, 1);
 
   // Hakuehdot
   if ($tuoteno != '')    $params['tuoteno'] = "tuote.tuoteno = '{$tuoteno}'";
-  if ($tuotepaikka != '') $params['tuotepaikka'] = "concat(tuotepaikat.hyllyalue,
-                     tuotepaikat.hyllynro,
-                     tuotepaikat.hyllyvali,
-                     tuotepaikat.hyllytaso) LIKE '$hylly%'";
+
+  if ($tuotepaikka != '') {
+    $params['tuotepaikka'] = "concat(tuotepaikat.hyllyalue,
+      tuotepaikat.hyllynro,
+      tuotepaikat.hyllyvali,
+      tuotepaikat.hyllytaso) LIKE '{$hylly}%'
+      AND tuotepaikat.hyllyalue LIKE '{$_hylly}%'";
+  }
+
   // Viivakoodi case
   if ($viivakoodi != '') {
     $tuotenumerot = hae_viivakoodilla($viivakoodi);
@@ -67,7 +73,9 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
               FROM tuotepaikat
               JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                 AND varastopaikat.tunnus      = tuotepaikat.varasto
-                AND varastopaikat.toimipaikka = '{$kukarow['toimipaikka']}')
+                AND varastopaikat.toimipaikka = '{$kukarow['toimipaikka']}'
+                AND varastopaikat.tyyppi = ''
+              )
               JOIN tuote on (tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno)
               WHERE tuotepaikat.yhtio         = '{$kukarow['yhtio']}'
               AND $haku_ehto

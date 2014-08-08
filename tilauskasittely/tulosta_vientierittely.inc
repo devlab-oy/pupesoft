@@ -63,11 +63,11 @@ if ($Xtunnukset2 != "") {
              (SELECT tuotteen_toimittajat.alkuperamaa from tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno ORDER BY if (tuotteen_toimittajat.alkuperamaa='$yhtiorow[maa]', concat('2', tuotteen_toimittajat.alkuperamaa), concat('1', tuotteen_toimittajat.alkuperamaa)) LIMIT 1) alkuperamaa,
              tuote.vakkoodi,
              tuote.vak_imdg_koodi,";
-  if ($yhtiorow['vientierittely_ryhmittely'] == 'T') {
+  if (in_array($yhtiorow['vienti_erittelyn_tulostus'], array('T', 'P'))) {
     $group = 'tuote.tullinimike1';
     $select = 'tuote.tullinimike1,';
 
-    if ($yhtiorow['vienti_erittelyn_tulostus'] == '') {
+    if (in_array($yhtiorow['vienti_erittelyn_tulostus'], array('T'))) {
       $select .= "(SELECT tuotteen_toimittajat.alkuperamaa from tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno ORDER BY if (tuotteen_toimittajat.alkuperamaa='$yhtiorow[maa]', concat('2', tuotteen_toimittajat.alkuperamaa), concat('1', tuotteen_toimittajat.alkuperamaa)) LIMIT 1) alkuperamaa,";
     }
   }
@@ -155,7 +155,7 @@ if ($Xtunnukset2 != "") {
       $Xpdf->draw_text(310, 708, t("Kommentti", $kieli),     $Xfirstpage, $Xpieni);
       $Xpdf->draw_text(310, 698, $laskurow["viesti"],     $Xfirstpage, $Xnorm);
 
-      if ($yhtiorow['vientierittely_ryhmittely'] == 'T') {
+      if (in_array($yhtiorow['vienti_erittelyn_tulostus'], array('T', 'P'))) {
         $Xpdf->draw_text(30,  572, t("Nimike", $kieli),      $Xfirstpage, $Xpieni);
       }
       else {
@@ -171,7 +171,7 @@ if ($Xtunnukset2 != "") {
       $Xpdf->draw_text(430, 572, t("Hinta", $kieli),      $Xfirstpage, $Xpieni);
       $Xpdf->draw_text(470, 572, t("Paino", $kieli),      $Xfirstpage, $Xpieni);
 
-      if ($yhtiorow["vienti_erittelyn_tulostus"] != "I") {
+      if (!in_array($yhtiorow['vienti_erittelyn_tulostus'], array('I', 'P'))) {
         $Xpdf->draw_text(520, 572, t("Alkuperämaa", $kieli),  $Xfirstpage, $Xpieni);
       }
 
@@ -190,7 +190,7 @@ if ($Xtunnukset2 != "") {
         $Xlask = 1;
       }
 
-      if ($yhtiorow['vientierittely_ryhmittely'] == '') {
+      if (in_array($yhtiorow['vienti_erittelyn_tulostus'], array('', 'I'))) {
         $Xpdf->draw_text(30, $Xkala, $Xrow["tullinimike1"], $Xfirstpage, $Xnorm);
         $Xpdf->draw_text(100, $Xkala, $Xrow["tullikohtelu"], $Xfirstpage, $Xnorm);
 

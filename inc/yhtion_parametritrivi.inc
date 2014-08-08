@@ -1884,35 +1884,19 @@ if ($fieldname == "vienti_erittelyn_tulostus") {
   elseif ($trow[$i] == "E") {
     $sel3 = "selected";
   }
+  elseif ($trow[$i] == "T") {
+    $sel4 = "selected";
+  }
+  elseif ($trow[$i] == "P") {
+    $sel5 = "selected";
+  }
 
   $ulos .= "<option value=''  $sel1>".t("Vientierittely tulostetaan")."</option>";
+  $ulos .= "<option value='T' $sel4>".t("Vientierittely tulostetaan tullinimikkeell‰ ryhmiteltyn‰")."</option>";
   $ulos .= "<option value='I' $sel2>".t("Vientierittely tulostetaan ilman alkuper‰maatietoja")."</option>";
+  $ulos .= "<option value='P' $sel5>".t("Vientierittely tulostetaan ilman alkuper‰maatietoja tullinimikkeell‰ ryhmiteltyn‰")."</option>";
   $ulos .= "<option value='E' $sel3>".t("Vientierittely‰ ei tulosteta")."</option>";
   $ulos .= "</select></td>";
-
-  $jatko = 0;
-}
-
-if ($fieldname == "vientierittely_ryhmittely") {
-
-  $ulos = "<td>";
-  $ulos .= "<select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-
-  $sel1 = "";
-  $sel2 = "";
-  $sel3 = "";
-
-  if ($trow[$i] == "") {
-    $sel1 = "selected";
-  }
-  elseif ($trow[$i] == "T") {
-    $sel2 = "selected";
-  }
-
-  $ulos .= "<option value=''  $sel1>".t("Vientierittely‰ ei ryhmitell‰")."</option>";
-  $ulos .= "<option value='T' $sel2>".t("Vientierittely ryhmitell‰‰n tullinimikkeen mukaan")."</option>";
-  $ulos .= "</select>";
-  $ulos .= "</td>";
 
   $jatko = 0;
 }

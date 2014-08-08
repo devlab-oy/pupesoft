@@ -2531,7 +2531,7 @@ else {
             }
 
             $asiakas_tunnukset_sarja = implode(',', $asiakas_tunnukset);
-            
+
             $query = "SELECT *
                       FROM yhteyshenkilo
                       WHERE yhtio      = '$yhtiorow[yhtio]'

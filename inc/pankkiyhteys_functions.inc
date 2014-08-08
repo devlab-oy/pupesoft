@@ -124,8 +124,8 @@ function filelist_table($array, $type) {
       $_status = t("Uusi");
     }
     else {
-     $_chk = '';
-     $_status = t("Haettu");
+      $_chk = '';
+      $_status = t("Haettu");
     }
 
     echo "<tr class='aktiivi'>";
@@ -150,6 +150,7 @@ function filelist_table($array, $type) {
   echo "</tbody>";
   echo "</table>";
 }
+
 
 /**
  *
@@ -279,23 +280,6 @@ function mahdolliset_pankkiyhteydet() {
 }
 
 
-/**
- *
- * @param string  $pankki
- *
- * @return resource
- */
-function poista_pankkiyhteys($pankki) {
-  global $kukarow, $yhtiorow;
-
-  $query = "DELETE
-            FROM  pankkiyhteys
-            WHERE pankki = '{$pankki}'
-            AND   yhtio  = '{$kukarow["yhtio"]}'";
-  return pupe_query($query);
-}
-
-
 // SEPA API fuktiot
 
 function sepa_download_file_list($params) {
@@ -330,14 +314,15 @@ function sepa_download_file_list($params) {
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
-      "signing_certificate"    => $pankkiyhteys["signing_certificate"],
-      "signing_private_key"    => $pankkiyhteys["signing_private_key"],
-      "encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
-      "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
-      "customer_id"            => $pankkiyhteys["customer_id"],
-      "target_id"              => $target_id,
-      "file_type"              => $file_type,
-      "status"                 => $status,
+      "own_signing_certificate"     => $pankkiyhteys["signing_certificate"],
+      "signing_private_key"         => $pankkiyhteys["signing_private_key"],
+      "bank_encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
+      "encryption_private_key"      => $pankkiyhteys["encryption_private_key"],
+      "customer_id"                 => $pankkiyhteys["customer_id"],
+      "target_id"                   => $target_id,
+      "file_type"                   => $file_type,
+      "status"                      => $status,
+      "environment"                 => 'production',
     ),
     "url" => "https://sepa.devlab.fi/api/{$bank}/download_file_list",
     "headers" => array(
@@ -393,14 +378,16 @@ function sepa_download_files($params) {
     $parameters = array(
       "method"  => "POST",
       "data"    => array(
-        "signing_certificate"    => $pankkiyhteys["signing_certificate"],
-        "signing_private_key"    => $pankkiyhteys["signing_private_key"],
-        "encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
-        "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
-        "customer_id"            => $pankkiyhteys["customer_id"],
-        "target_id"              => $target_id,
-        "file_type"              => $file_type,
-        "file_reference"         => $viite
+        "own_signing_certificate"     => $pankkiyhteys["signing_certificate"],
+        "signing_private_key"         => $pankkiyhteys["signing_private_key"],
+        "bank_encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
+        "encryption_private_key"      => $pankkiyhteys["encryption_private_key"],
+        "customer_id"                 => $pankkiyhteys["customer_id"],
+        "target_id"                   => $target_id,
+        "file_type"                   => $file_type,
+        "file_reference"              => $viite,
+        "environment"                 => 'production',
+        "status"                      => 'NEW',
       ),
       "url" => "https://sepa.devlab.fi/api/{$bank}/download_file",
       "headers" => array(
@@ -464,14 +451,15 @@ function sepa_upload_file($params) {
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
-      "signing_certificate"    => $pankkiyhteys["signing_certificate"],
-      "signing_private_key"    => $pankkiyhteys["signing_private_key"],
-      "encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
-      "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
-      "customer_id"            => $pankkiyhteys["customer_id"],
-      "target_id"              => $target_id,
-      "file_type"              => $file_type,
-      "content"                => $maksuaineisto
+      "own_signing_certificate"     => $pankkiyhteys["signing_certificate"],
+      "signing_private_key"         => $pankkiyhteys["signing_private_key"],
+      "bank_encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
+      "encryption_private_key"      => $pankkiyhteys["encryption_private_key"],
+      "customer_id"                 => $pankkiyhteys["customer_id"],
+      "target_id"                   => $target_id,
+      "file_type"                   => $file_type,
+      "content"                     => $maksuaineisto,
+      "environment"                 => 'production',
     ),
     "url"     => "https://sepa.devlab.fi/api/{$bank}/upload_file",
     "headers" => array(
@@ -552,11 +540,12 @@ function sepa_get_user_info($params) {
   $parameters = array(
     "method"  => "POST",
     "data"    => array(
-      "signing_certificate"    => $pankkiyhteys["signing_certificate"],
-      "signing_private_key"    => $pankkiyhteys["signing_private_key"],
-      "encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
-      "encryption_private_key" => $pankkiyhteys["encryption_private_key"],
-      "customer_id"            => $pankkiyhteys["customer_id"],
+      "own_signing_certificate"     => $pankkiyhteys["signing_certificate"],
+      "signing_private_key"         => $pankkiyhteys["signing_private_key"],
+      "bank_encryption_certificate" => $pankkiyhteys["bank_encryption_certificate"],
+      "encryption_private_key"      => $pankkiyhteys["encryption_private_key"],
+      "customer_id"                 => $pankkiyhteys["customer_id"],
+      "environment"                 => 'production',
     ),
     "url" => "https://sepa.devlab.fi/api/{$pankkiyhteys['bank']}/get_user_info",
     "headers" => array(
@@ -702,6 +691,21 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
 
     // Base64 enkoodataan ja setataan takasin arrayseen
     $pankki[$key] = base64_encode(trim($_salaamaton));
+  }
+
+  // Lisätään arrayseen vielä certifikaattien expire datet
+  $certit = array(
+    "signing_certificate",
+    "encryption_certificate",
+    "bank_encryption_certificate",
+    "bank_root_certificate",
+    "ca_certificate",
+  );
+
+  foreach ($certit as $cert) {
+    $_key = "{$cert}_valid_to";
+    $_cert = parse_sertificate(base64_decode($pankki[$cert]));
+    $pankki[$_key] = $_cert['valid_to'];
   }
 
   return $pankki;
@@ -860,6 +864,27 @@ function pura_salaus($salattu_data, $salasana) {
   return mcrypt_decrypt(MCRYPT_RIJNDAEL_256, $avain, $salattu_data_binaari, MCRYPT_MODE_CBC, $iv);
 }
 
+function parse_sertificate($cert) {
+  // Otetaan sisään x509 sertificaatti
+
+  // Palautetaan tällänen array
+  $return = array(
+    "valid_to" => "",
+  );
+
+  if (empty($cert)) {
+    return $return;
+  }
+
+  // Parsitaan sertifikaatti
+  $_cert = openssl_x509_parse($cert);
+
+  // Otetaan valid to timestamp
+  $_valid_to = date('Y-m-d H:i:s', $_cert['validTo_time_t']);
+  $return["valid_to"] = $_valid_to;
+
+  return $return;
+}
 
 /**
  * Palauttaa arrayn tuetuista pankeista muodossa BIC => [lyhyt_nimi, pitka_nimi]

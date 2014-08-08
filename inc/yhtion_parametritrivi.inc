@@ -4148,6 +4148,18 @@ if ($fieldname == 'lapsituotteen_poiston_esto') {
   $jatko = 0;
 }
 
+if ($fieldname == 'pura_osaluettelot') {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == '1' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>".t("Tuotteen osaluetteloa ei pureta auki")."</option>";
+  $ulos .= "<option value = '1' {$sel}>".t("Tuotteen osaluettelo puretaan auki tilausvahvistuksella, lähetteellä ja laskulla")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == 'takuuvarasto') {
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 

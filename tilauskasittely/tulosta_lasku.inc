@@ -2608,11 +2608,13 @@ if (!function_exists("tulosta_lasku")) {
 
       if ($yhtiorow["pura_osaluettelot"] != "") {
         // Korvataanko tilauksella oleva rivi osaluettelolla
-        $query = "SELECT tuote.tuoteno, tuote.myyntihinta, tuote.yksikko, tuote.nimitys, tuoteperhe.kerroin,
-                  tuote.myyntihinta hinta,
-                  round(tuote.myyntihinta / if ('$yhtiorow[alv_kasittely]' = '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * {$row['kpl']} * (1-{$row['aleyhteensa']}/100), $yhtiorow[hintapyoristys]) rivihinta,
-                  round(tuote.myyntihinta * if ('$yhtiorow[alv_kasittely]' != '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * {$row['kpl']} * (1-{$row['aleyhteensa']}/100), $yhtiorow[hintapyoristys]) rivihinta_verollinen,
-                  ((tuote.myyntihinta / {$laskurow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]'  = '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * {$row['kpl']} * (1-{$row['aleyhteensa']}/100)) rivihinta_valuutassa
+        $query = "SELECT tuote.tuoteno, tuote.yksikko, tuote.nimitys, 
+                  tuoteperhe.kerroin,
+                  tuoteperhe.hintakerroin myyntihinta,
+                  tuoteperhe.hintakerroin hinta,
+                  round(tuoteperhe.hintakerroin / if ('$yhtiorow[alv_kasittely]' = '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * {$row['kpl']} * (1-{$row['aleyhteensa']}/100), $yhtiorow[hintapyoristys]) rivihinta,
+                  round(tuoteperhe.hintakerroin * if ('$yhtiorow[alv_kasittely]' != '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * {$row['kpl']} * (1-{$row['aleyhteensa']}/100), $yhtiorow[hintapyoristys]) rivihinta_verollinen,
+                  ((tuoteperhe.hintakerroin / {$laskurow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]'  = '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * {$row['kpl']} * (1-{$row['aleyhteensa']}/100)) rivihinta_valuutassa
                   FROM tuoteperhe
                   JOIN tuote ON (tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tuoteno=tuote.tuoteno)
                   WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'

@@ -19142,8 +19142,10 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 
       if ($yhtiorow["pura_osaluettelot"] != "") {
         // Korvataanko tilauksella oleva rivi osaluettelolla
-        $query = "SELECT tuote.tuoteno, tuote.myyntihinta, tuote.yksikko, tuote.nimitys, tuoteperhe.kerroin,
-                  round(tuote.myyntihinta * ({$row['varattu']}+{$row['jt']}+{$row['kpl']}) * (1-{$row['aleyhteensa']}/100),'$yhtiorow[hintapyoristys]') rivihinta
+        $query = "SELECT tuote.tuoteno, tuote.yksikko, tuote.nimitys, 
+                  tuoteperhe.kerroin,
+                  tuoteperhe.hintakerroin myyntihinta,
+                  round(tuoteperhe.hintakerroin * ({$row['varattu']}+{$row['jt']}+{$row['kpl']}) * (1-{$row['aleyhteensa']}/100),'$yhtiorow[hintapyoristys]') rivihinta
                   FROM tuoteperhe
                   JOIN tuote ON (tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tuoteno=tuote.tuoteno)
                   WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'

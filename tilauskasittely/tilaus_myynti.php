@@ -64,7 +64,7 @@ $tilauskaslisa = "";
 
 // extranet vai normipupe?
 if (strpos(dirname(__FILE__), "/tilauskasittely") !== FALSE) {
-  #$tilauskaslisa = "tilauskasittely/";
+  $tilauskaslisa = "tilauskasittely/";
 }
 if (isset($liite_popup_toiminto) and $liite_popup_toiminto == "AK") {
   liite_popup("AK", $tuotetunnus, $width, $height);

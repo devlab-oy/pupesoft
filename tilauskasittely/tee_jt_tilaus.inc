@@ -860,9 +860,9 @@ if (!function_exists("tee_jt_tilaus")) {
             }
 
             // Setataan lisaarivi.inc varten mistä tullaan muuttujaan JT_TILAUS,
-            // jotta ei pyöristettäisi enään tässä vaiheessa täysiin myyntieriin,
+            // jotta ei pyöristettäisi enää tässä vaiheessa täysiin myyntieriin,
             // jos kerran ollaan jo kertaalleen hyväksytty, että myydään vajaa erä
-            // niin ei pitäisi enään tässä vaiheessa olla tarvetta pyöristellä täyteen erään.
+            // niin ei pitäisi enää tässä vaiheessa olla tarvetta pyöristellä täyteen erään.
             // Otetaan kuitenkin varmuuden vuoksi talteen alkuperäinen mistä tulaan
             // ja setataan se sitten kun ollaan tultu takasin lisaarivi.incstä.
             $alk_mista_tullaan = $mista_tullaan;

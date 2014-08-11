@@ -360,8 +360,8 @@ if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
       }
 
       if ($error == '') {
-        $kerroin     = str_replace(',', '.', $kerroin);
-        $hintakerroin   = str_replace(',', '.', $hintakerroin);
+        $kerroin      = str_replace(',', '.', $kerroin);
+        $hintakerroin = str_replace(',', '.', $hintakerroin);
         $alekerroin   = str_replace(',', '.', $alekerroin);
 
         //lis‰t‰‰n rivi...
@@ -394,17 +394,17 @@ if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
         }
 
         $query  .= "  tuoteperhe set
-                isatuoteno    = '{$isatrow['tuoteno']}',
-                tuoteno     = '{$laptrow['tuoteno']}',
-                kerroin     = '$kerroin',
-                omasivu      = '$kpl2',
-                hintakerroin  = '$hintakerroin',
+                isatuoteno     = '{$isatrow['tuoteno']}',
+                tuoteno        = '{$laptrow['tuoteno']}',
+                kerroin        = '$kerroin',
+                omasivu        = '$kpl2',
+                hintakerroin   = '$hintakerroin',
                 alekerroin     = '$alekerroin',
-                #rivikommentti   = '$rivikommentti',
-                yhtio       = '$kukarow[yhtio]',
-                tyyppi       = '$hakutyyppi',
+                #rivikommentti = '$rivikommentti',
+                yhtio          = '$kukarow[yhtio]',
+                tyyppi         = '$hakutyyppi',
                 {$querylisa}
-                ei_nayteta    = '$ei_nayteta'
+                ei_nayteta     = '$ei_nayteta'
                 $postq";
         $result = pupe_query($query);
 
@@ -865,12 +865,14 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<th>".t("Osaluettelot")."</th>";
         echo "<th>".t("Nimitys")."</th>";
         echo "<th>".t("Kerroin")."</th>";
+        echo "<th>".t("Hinta")."</th>";
         echo "<th>".t("Kehahin")."</th>";
         echo "<th>".t("Kehahin*Kerroin")."</th>";
 
         $worksheet->writeString($excelrivi, $excelsarake++, t("Osaluettelot"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kerroin"));
+        $worksheet->writeString($excelrivi, $excelsarake++, t("Hinta"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin*Kerroin"));
       }
       elseif ($toim == "TUOTEKOOSTE") {
@@ -926,6 +928,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       $res = pupe_query($query);
 
       $resyht = 0;
+      $reshikeyht = 0;
 
       $kop_index   = 0;
       $kop_tuoteno = array();
@@ -967,6 +970,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         }
         elseif ($toim == "OSALUETTELO") {
           echo "<td><input type='text' name='kerroin' size='10'></td>";
+          echo "<td><input type='text' name='hintakerroin' size='10'></td>";
           echo "<td></td>";
           echo "<td></td>";
         }
@@ -1024,6 +1028,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
         $lapsiyht = $tuoterow['kehahin']*$prow['kerroin'];
         $resyht += $lapsiyht;
+        $reshikeyht += $prow['hintakerroin'];
 
         $excelsarake = 0;
         $worksheet->writeString($excelrivi, $excelsarake++, $prow["isatuoteno"]);
@@ -1048,6 +1053,11 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             $worksheet->writeNumber($excelrivi, $excelsarake++, $prow["hintakerroin"]);
             $worksheet->writeNumber($excelrivi, $excelsarake++, $prow["alekerroin"]);
             //echo "<td align='right'>$prow[rivikommentti]</td>";
+          }
+
+          if ($toim == "OSALUETTELO") {
+            echo "<td align='right'>$prow[hintakerroin]</td>";
+            $worksheet->writeNumber($excelrivi, $excelsarake++, $prow["hintakerroin"]);
           }
 
           if ($toim == "RESEPTI") {
@@ -1165,6 +1175,12 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
             echo "</td>";
           }
 
+          if ($toim == "OSALUETTELO") {
+            echo "<td>";
+            echo "<input type='text' name='hintakerroin' size='10' value='$zrow[hintakerroin]'>";
+            echo "</td>";
+          }
+
           if ($toim != "VSUUNNITTELU") {
             echo "<td>$tuoterow[kehahin]</td>";
             echo "<td>".round($lapsiyht, 6)."</td>";
@@ -1236,7 +1252,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           echo "<td class='back' colspan='2'></td>";
         }
         elseif ($toim == "OSALUETTELO") {
-          echo "<td class='back' colspan='3'></td>";
+          echo "<td class='back' colspan='2'></td>";
         }
         elseif ($toim == "TUOTEKOOSTE") {
           echo "<td class='back' colspan='3'></td>";
@@ -1249,8 +1265,15 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         }
 
         if ($toim != "VSUUNNITTELU") {
-          $_yhteensa = round($resyht, 6);
+
           echo "<th>".t("Yhteens‰")."</th>";
+
+          if ($toim == "OSALUETTELO") {
+            $_yhteensa = sprintf('%.2f', round($reshikeyht, 6));
+            echo "<td class='tumma' align='right'>{$_yhteensa}</td>";
+          }
+
+          $_yhteensa = round($resyht, 6);
           echo "<td class='tumma' align='right'>{$_yhteensa}</td>";
         }
       }

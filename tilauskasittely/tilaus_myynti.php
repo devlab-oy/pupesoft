@@ -336,6 +336,7 @@ if ($tee == 'TARKISTA' and $kukarow["extranet"] != '') {
     $tuoteno = $xrow['tuoteno'];
     $kpl = $xrow['tilkpl'];
     $hinta = $xrow['hinta'];
+    $kommentti = $xrow['kommentti'];
 
     $query  = "SELECT *
                from tuote

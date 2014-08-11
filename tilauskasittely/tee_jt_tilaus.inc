@@ -865,12 +865,9 @@ if (!function_exists("tee_jt_tilaus")) {
             // niin ei pit‰isi en‰‰ t‰ss‰ vaiheessa olla tarvetta pyˆristell‰ t‰yteen er‰‰n.
             // Otetaan kuitenkin varmuuden vuoksi talteen alkuper‰inen mist‰ tulaan
             // ja setataan se sitten kun ollaan tultu takasin lisaarivi.incst‰.
-            $alk_mista_tullaan = $mista_tullaan;
-            $mista_tullaan = "JT_TILAUS";
+            $from_tee_jt_tilaus = TRUE;
 
             require "lisaarivi.inc";
-
-            $mista_tullaan = $alk_mista_tullaan;
 
             $kpl = $talteen_kpl; // lis‰‰rivi rikko t‰n, otetaan haltuun
 

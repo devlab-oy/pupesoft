@@ -348,11 +348,18 @@ if ($tee == 'TARKISTA' and $kukarow["extranet"] != '') {
 
     require 'lisaarivi.inc';
   }
-  $tee = '';
+
   unset($tuoteno);
   unset($kpl);
   unset($hinta);
   unset($trow);
+
+  if (count($lisatyt_rivit2) < 1) {
+    $tee = 'VALMIS';
+  }
+  else {
+    $tee = '';
+  }
 }
 
 if ($tee == 'PAIVITA_SARJANUMERO' and $rivitunnus > 0) {
@@ -5647,7 +5654,13 @@ if ($tee == '') {
         }
       }
 
+      $puutetta_on = false;
+
       while ($row = mysql_fetch_assoc($result)) {
+
+        if ($row['var'] == 'P') {
+          $puutetta_on = true;
+        }
 
         if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K"
           and $row["tyyppi"] != "V" and isset($tuotteenpainotettukehayht["keha"])) {
@@ -8444,6 +8457,10 @@ if ($tee == '') {
 
       }
     }
+  }
+
+  if ($puutetta_on) {
+    echo "<font class='message'>".t("Tarkista tilaus, kaikille riveille eri riitä saldoa")."</font><br>";
   }
 
   // tulostetaan loppuun parit napit..

@@ -745,6 +745,12 @@ if ($tila == 'tee_kohdistus') {
     );
 
     kopioitiliointi($tiliointi2['tunnus'], "", $params);
+
+    $kohdistus_qry = "INSERT INTO suorituksen_kohdistus SET
+                      yhtio           = '{$kukarow['yhtio']}',
+                      suoritus_tunnus = $suoritus[tunnus],
+                      lasku_tunnus    = $lasku[tunnus]";
+    $kohdistus_result = pupe_query($kohdistus_qry);
   }
   else {
     //*** T‰ss‰ k‰sitell‰‰n tavallinen suoritus ***/
@@ -1272,6 +1278,12 @@ if ($tila == 'tee_kohdistus') {
                   WHERE tunnus              = $lasku[tunnus]
                   AND yhtio                 = '$kukarow[yhtio]'";
         $result = pupe_query($query);
+
+        $kohdistus_qry = "INSERT INTO suorituksen_kohdistus SET
+                          yhtio           = '{$kukarow['yhtio']}',
+                          suoritus_tunnus = $suoritus[tunnus],
+                          lasku_tunnus    = $lasku[tunnus]";
+        $kohdistus_result = pupe_query($kohdistus_qry);
       }
 
       // Myyntisaamiset (suorituksen summa * -1)

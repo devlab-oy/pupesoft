@@ -179,7 +179,8 @@ if ($tila == 'tee_kohdistus') {
             tiliointi as tiliointi2 WRITE,
             sanakirja WRITE,
             yhtion_toimipaikat READ,
-            avainsana as avainsana_kieli READ";
+            avainsana as avainsana_kieli READ,
+            suorituksen_kohdistus WRITE";
   $result = pupe_query($query);
 
   // haetaan suorituksen tiedot
@@ -748,8 +749,8 @@ if ($tila == 'tee_kohdistus') {
 
     $kohdistus_qry = "INSERT INTO suorituksen_kohdistus SET
                       yhtio           = '{$kukarow['yhtio']}',
-                      suoritus_tunnus = $suoritus[tunnus],
-                      lasku_tunnus    = $lasku[tunnus]";
+                      suoritus_tunnus = '$suoritus[tunnus]',
+                      lasku_tunnus    = '$lasku[tunnus]'";
     $kohdistus_result = pupe_query($kohdistus_qry);
   }
   else {
@@ -1281,8 +1282,8 @@ if ($tila == 'tee_kohdistus') {
 
         $kohdistus_qry = "INSERT INTO suorituksen_kohdistus SET
                           yhtio           = '{$kukarow['yhtio']}',
-                          suoritus_tunnus = $suoritus[tunnus],
-                          lasku_tunnus    = $lasku[tunnus]";
+                          suoritus_tunnus = '$suoritus[tunnus]',
+                          lasku_tunnus    = '$lasku[tunnus]'";
         $kohdistus_result = pupe_query($kohdistus_qry);
       }
 

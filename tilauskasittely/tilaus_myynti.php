@@ -349,6 +349,10 @@ if ($tee == 'TARKISTA' and $kukarow["extranet"] != '') {
     require 'lisaarivi.inc';
   }
   $tee = '';
+  unset($tuoteno);
+  unset($kpl);
+  unset($hinta);
+  unset($trow);
 }
 
 if ($tee == 'PAIVITA_SARJANUMERO' and $rivitunnus > 0) {
@@ -422,7 +426,8 @@ if ($kukarow["extranet"] != '') {
   // Haetaan asiakkaan tunnuksella
   $query  = "SELECT *
              FROM asiakas
-             WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[oletus_asiakas]'";
+             WHERE yhtio = '$kukarow[yhtio]'
+             AND tunnus = '$kukarow[oletus_asiakas]'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
@@ -471,10 +476,10 @@ if ($kukarow["extranet"] != '') {
         $kesken_row = mysql_fetch_assoc($result);
         $tilausnumero = $kukarow['kesken'] = $kesken_row["tunnus"];
 
-        $query = "UPDATE kuka SET
-                  kesken        = '$tilausnumero'
-                  WHERE yhtio   = '{$kukarow['yhtio']}'
-                  AND kuka      = '{$kukarow['kuka']}'
+        $query = "UPDATE kuka
+                  SET kesken   = '$tilausnumero'
+                  WHERE yhtio  = '{$kukarow['yhtio']}'
+                  AND kuka     = '{$kukarow['kuka']}'
                   AND extranet != ''";
         $result = pupe_query($query);
       }

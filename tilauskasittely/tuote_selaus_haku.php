@@ -292,7 +292,12 @@ if (($tee == 'TI' or is_numeric($ostoskori)) and isset($tilkpl)) {
         $paikka       = "";
 
         // Ennakkotilaukset, Tarjoukset, Ylläpitosopimukset ja Valmistukset eivät tee saldotsekkiä
-        if (($verkkokauppa != "" and $verkkokauppa_saldotsk === FALSE) or $laskurow["tilaustyyppi"] == "E" or $laskurow["tila"] == "T" or $laskurow["tilaustyyppi"] == "0" or $laskurow["tila"] == "V") {
+        if (($verkkokauppa != "" and $verkkokauppa_saldotsk === FALSE)
+            or $laskurow["tilaustyyppi"] == "E"
+            or $laskurow["tila"] == "T"
+            or $laskurow["tilaustyyppi"] == "0"
+            or $laskurow["tila"] == "V"
+            or $laskurow["tilaustyyppi"] == "H") {
           $varataan_saldoa = "EI";
         }
 

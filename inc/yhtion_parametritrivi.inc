@@ -1255,6 +1255,7 @@ if ($fieldname == "kerayspoikkeamaviestin_lahetys") {
   $sel[$trow[$i]]  = " selected";
 
   $ulos .= "<option value='0' $sel[0]>".t("Ker‰yspoikkeamaviesti l‰hetet‰‰n asiakkaalle ja myyj‰lle")."</option>";
+  $ulos .= "<option value='3' $sel[3]>".t("Ker‰yspoikkeamaviesti l‰hetet‰‰n vain tilauksen laatijalle")."</option>";
   $ulos .= "<option value='2' $sel[2]>".t("Ker‰yspoikkeamaviesti l‰hetet‰‰n vain myyj‰lle")."</option>";
   $ulos .= "<option value='1' $sel[1]>".t("Ker‰yspoikkeamaviesti‰ ei l‰hetet‰ ollenkaan")."</option>";
   $ulos .= "</select></td>";

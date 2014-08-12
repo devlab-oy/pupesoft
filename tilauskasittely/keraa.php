@@ -1328,10 +1328,15 @@ if ($tee == 'P') {
         $query = "SELECT lasku.*,
                   kuka.kieli AS kieli,
                   kuka.nimi AS kukanimi,
-                  kuka.eposti AS kukamail
+                  kuka.eposti AS kukamail,
+                  kuka_laatija.nimi AS laatija_nimi,
+                  kuka_laatija.email AS laatija_email
                   FROM lasku
                   LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio
                     AND kuka.kuka     = lasku.hyvak1
+                    AND kuka.extranet = '')
+                  LEFT JOIN kuka AS kuka_laatija ON (kuka_laatija.yhtio = lasku.yhtio
+                    AND kuka.kuka = lasku.laatija
                     AND kuka.extranet = '')
                   WHERE lasku.tunnus  = '$poikkeamatilaus'
                   AND lasku.yhtio     = '$kukarow[yhtio]'";
@@ -1344,13 +1349,18 @@ if ($tee == 'P') {
                   asiakas.kieli,
                   kuka.nimi AS kukanimi,
                   kuka.eposti AS kukamail,
-                  kuka_ext.nimi AS kuka_ext_nimi
+                  kuka_ext.nimi AS kuka_ext_nimi,
+                  kuka_laatija.nimi AS laatija_nimi,
+                  kuka_laatija.eposti AS laatija_email
                   FROM lasku
                   JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
                     AND asiakas.tunnus     = lasku.liitostunnus)
                   LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio
                     AND kuka.tunnus        = lasku.myyja
                     AND kuka.extranet      = '')
+                  LEFT JOIN kuka AS kuka_laatija ON (kuka_laatija.yhtio = lasku.yhtio
+                    AND kuka.kuka = lasku.laatija
+                    AND kuka.extranet = '')
                   LEFT JOIN kuka AS kuka_ext ON (kuka_ext.yhtio = lasku.yhtio
                     AND kuka_ext.kuka      = lasku.laatija
                     AND kuka_ext.extranet != '')
@@ -1470,6 +1480,14 @@ if ($tee == 'P') {
 
         $boob = mail($yhtiorow['extranet_kerayspoikkeama_email'], mb_encode_mimeheader("{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f {$yhtiorow['postittaja_email']}");
         if ($boob === FALSE) echo " - ", t("\"Extranet keräyspoikkeama\"-sähköpostin lähetys epäonnistui"), "!<br>";
+      }
+
+      if ($laskurow["kerayspoikkeama"] == 3 and $laskurow['laatija_email'] != '') {
+        $uloslisa .= t("Tilauksen keräsi").": $keraaja[nimi]<br><br>";
+        $ulos = str_replace("</font><hr><br><br><table>", "</font><hr><br><br>$uloslisa<table>", $ulos);
+
+        $boob = mail($laskurow['laatija_email'], mb_encode_mimeheader("{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f {$yhtiorow['postittaja_email']}");
+        if ($boob === FALSE) echo " - ".t("Email lähetys epäonnistui")."!<br>";
       }
 
       unset($ulos);

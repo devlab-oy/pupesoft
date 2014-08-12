@@ -68,6 +68,7 @@ $query = "SELECT lasku.tunnus tilaus,
           tilausrivi.varattu,
           tilausrivi.hinta,
           tilausrivi.kommentti,
+          tilausrivi.tunnus tilausrivitunnus,
           tilausrivin_lisatiedot.sopimuksen_lisatieto1 sarjanumero,
           tilausrivin_lisatiedot.sopimuksen_lisatieto2 vasteaika,
           laskun_lisatiedot.sopimus_lisatietoja sisainen_kommentti
@@ -95,7 +96,24 @@ while ($rivit = mysql_fetch_assoc($result)) {
   echo "<td nowrap>{$rivit["varattu"]}</td>";
   echo "<td nowrap align='right'>".hintapyoristys($rivit["hinta"])."</td>";
   echo "<td nowrap align='right'>{$rivit["rivihinta"]}</td>";
-  echo "<td>{$rivit['sarjanumero']}</td>";
+
+  // Haetaan sarjanumerot laiterekisteristä, jos ei löydy sieltä näytetään niinkuin ennen
+  $query = "SELECT
+            group_concat(laite.sarjanro SEPARATOR '<br>') sarjanumerot
+            FROM laitteen_sopimukset
+            JOIN laite ON laite.tunnus = laitteen_sopimukset.laitteen_tunnus
+            WHERE laitteen_sopimukset.sopimusrivin_tunnus = '{$rivit['tilausrivitunnus']}'
+            ORDER BY laite.tunnus";
+  $res = pupe_query($query);
+  $sarjanumerotrivi = mysql_fetch_assoc($res);
+
+  if (empty($sarjanumerotrivi['sarjanumerot'])) {
+    echo "<td>{$rivit['sarjanumero']}</td>";
+  }
+  else {
+    echo "<td>{$sarjanumerotrivi['sarjanumerot']}</td>";
+  }
+
   echo "<td>{$rivit['vasteaika']}</td>";
   echo "</tr>";
 }

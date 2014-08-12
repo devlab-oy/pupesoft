@@ -2775,6 +2775,16 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
             ORDER BY yhtio, tyyppi, nimitys";
   $vtresult = pupe_query($query);
 
+  if ($onkolaajattoimipaikat and isset($toimipaikka) and mysql_num_rows($vtresult) == 0) {
+
+    $query = "SELECT *
+              FROM varastopaikat
+              WHERE {$konsyhtiot}
+              AND toimipaikka = 0
+              ORDER BY yhtio, tyyppi, nimitys";
+    $vtresult = pupe_query($query);
+  }
+
   $vlask = 0;
 
   while ($vrow = mysql_fetch_assoc($vtresult)) {

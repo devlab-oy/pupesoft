@@ -325,12 +325,15 @@ elseif ($kerattavia > 0 and $kutsuja != 'keraa.php') {
     $alatila = 'D';
   }
 
-  // Haetaan kerayseratieto asiakkaan takaa
-  $query = "SELECT kerayserat
-            FROM asiakas
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$laskurow['liitostunnus']}'";
-  $asrow = mysql_fetch_assoc(pupe_query($query));
+  // Jos yhtiön parametreissä on keräyserät A tarkistetaan asiakkaan takaa
+  if ($yhtiorow['kerayserat'] == 'A') {
+    // Haetaan kerayseratieto asiakkaan takaa
+    $query = "SELECT kerayserat
+              FROM asiakas
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$laskurow['liitostunnus']}'";
+    $asrow = mysql_fetch_assoc(pupe_query($query));
+  }
 
   // Poistetaan vanhat keräyserät kun palautetaan tilaus takaisin tulostusjonoon,
   // jottei keräyseriä luotaisi joka kerta vaan lisää ja lisää,
@@ -338,19 +341,11 @@ elseif ($kerattavia > 0 and $kutsuja != 'keraa.php') {
   if ($yhtiorow['kerayserat'] == 'K'
     or $yhtiorow['kerayserat'] == 'P'
     or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A')) {
-    $query = "SELECT tunnus
-              FROM kerayserat
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND otunnus = '{$laskurow['tunnus']}'
-              LIMIT 1";
-    $tarkistus = mysql_fetch_assoc(pupe_query($query));
 
-    if ($tarkistus["tunnus"] > 0) {
-      $query = "DELETE FROM kerayserat
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND otunnus = '{$laskurow['tunnus']}'";
-      pupe_query($query);
-    }
+    $query = "DELETE FROM kerayserat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND otunnus = '{$laskurow['tunnus']}'";
+    pupe_query($query);
   }
 
   $query  = "UPDATE lasku SET

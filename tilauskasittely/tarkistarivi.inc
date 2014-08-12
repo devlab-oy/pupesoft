@@ -1119,7 +1119,7 @@ if ($row["alv"] == -999.99) {
   $saako_hyvaksya = 0;
 }
 
-if ($row['tuoteno'] != '' and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A'  or (($row["var"] == 'J' or $row["var"] == 'P') and !in_array($row["var2"], array("OK", "PK"))))) {
+if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A'  or (($row["var"] == 'J' or $row["var"] == 'P') and !in_array($row["var2"], array("OK", "PK"))))) {
 
   // Haetaan vastaavuusketjut korvaavat ketjun p‰‰tuotteella
   require_once 'vastaavat.class.php';

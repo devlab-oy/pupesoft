@@ -76,7 +76,7 @@ if ($tee == 'X' or $tee == 'XX' or $tee == "XS" or $tee == "XXS") {
               AND alku    > '$pvm'
               AND tilino  = '$tilino'
               AND tyyppi  = '1'
-              ORDER BY tunnus
+              ORDER BY alku
               LIMIT 1";
     $tyyppi = 1;
   }
@@ -88,7 +88,7 @@ if ($tee == 'X' or $tee == 'XX' or $tee == "XS" or $tee == "XXS") {
               AND alku    < '$pvm'
               AND tilino  = '$tilino'
               AND tyyppi  = '1'
-              ORDER BY tunnus desc
+              ORDER BY alku desc
               LIMIT 1";
     $tyyppi = 1;
   }
@@ -100,19 +100,19 @@ if ($tee == 'X' or $tee == 'XX' or $tee == "XS" or $tee == "XXS") {
               AND alku    > '$pvm'
               AND tilino  = '$tilino'
               AND tyyppi  = '3'
-              ORDER BY tunnus
+              ORDER BY alku
               LIMIT 1";
     $tyyppi = 3;
   }
   elseif ($tee == 'XXS') {
-    // Pyyntö seuraavasta viiteaineistosta
+    // Pyyntö edellisestä viiteaineistosta
     $query = "SELECT *
               FROM tiliotedata use index (yhtio_tilino_alku)
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND alku    < '$pvm'
               AND tilino  = '$tilino'
               AND tyyppi  = '3'
-              ORDER BY tunnus desc
+              ORDER BY alku desc
               LIMIT 1";
     $tyyppi = 3;
   }

@@ -55,7 +55,7 @@ if (mysql_field_name($result, $i) == "isa_varasto") {
             WHERE yhtio      = '$kukarow[yhtio]'
             AND tyyppi      != 'P'
             AND isa_varasto  = 0
-            AND tunnus      != $trow[tunnus]";
+            AND tunnus      != '{$trow['tunnus']}'";
   $vresult =  pupe_query($query);
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";

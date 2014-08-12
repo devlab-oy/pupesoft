@@ -17,7 +17,7 @@ if (isset($tallennetaan_muutokset) and isset($muokattava_laite) and $muokattava_
             AND tunnus = '{$muokattava_laite}'";
   pupe_query($kveri);
 }
-elseif (isset($tallenna_uusi_laite) and isset($valitse_sarjanumero) and $valitse_sarjanumero > 0) {
+elseif (isset($tallenna_uusi_laite) and isset($valitse_sarjanumero) and $valitse_sarjanumero > 0 and !isset($muokattava_laite)) {
   // Lisätään uusi laite
   $kveri = "INSERT INTO laite
             SET yhtio = '{$kukarow['yhtio']}',
@@ -76,7 +76,7 @@ if ($toiminto == 'LINKKAA') {
   array_unshift($headerit, '');
 
   // Joka kierroksella haetaan valitut laitteet uudestaan
-  if (isset($valitut_laitteet) or isset($vanhat_laitteet)) {
+  if (isset($valitut_laitteet) and isset($vanhat_laitteet)) {
 
     foreach ($valitut_laitteet as $laite) {
       // Tarkistetaan oliko valittu laite jo linkattu
@@ -107,6 +107,23 @@ if ($toiminto == 'LINKKAA') {
                 laitteen_tunnus = '{$laite}'";
       pupe_query($query);
     }
+  }
+
+  // Päivitetään (palvelu)tilausriville oikea kappalemäärä
+  $query = "SELECT 
+            count(*) lkm
+            FROM laitteen_sopimukset
+            WHERE sopimusrivin_tunnus = '{$tilausrivin_tunnus}'";
+  $res = pupe_query($query);
+  $laiterivi = mysql_fetch_assoc($res);
+
+  if ($laiterivi['lkm'] > 0) {
+    $query = "UPDATE tilausrivi
+              SET tilkpl = '{$laiterivi['lkm']}',
+              varattu = '{$laiterivi['lkm']}'
+              WHERE tunnus = '{$tilausrivin_tunnus}'
+              AND yhtio = '{$kukarow['yhtio']}'";
+    pupe_query($query);
   }
   unset($valitut_laitteet);
   unset($vanhat_laitteet);
@@ -282,7 +299,7 @@ else {
           }
 
           $ed_sop_tun = $lelo['sopimusnumero'];
-          $sopimuslinkki = "<a href='{$palvelin2}/tilauskasittely/tilaus_myynti.php?toim=YLLAPITO&tilausnumero=$lelo[sopimusnumero]&lopetus={$palvelin2}laiterekisteri.php////tilausrivin_tunnus=$tilausrivin_tunnus//toiminto=LINKKAA'>{$lelo['sopimusnumero']}</a><br>";
+          $sopimuslinkki = "<a href='{$palvelin2}/tilauskasittely/tilaus_myynti.php?toim=YLLAPITO&tilausnumero=$lelo[sopimusnumero]'>{$lelo['sopimusnumero']}</a><br>";
           $puuttuja .= "<br>Sopimusnumero: {$sopimuslinkki}<table><tr><th>Nimitys</th><th>Hinta</th><th>Alkupvm</th><th>Loppupvm</th></tr>";
           $kveeri = "SELECT
                      lasku.nimi asiakas,
@@ -359,6 +376,7 @@ else {
   else {
     echo "<input type='hidden' name='toiminto' value ='UUSILAITE' />";
     echo "<input type='submit' name='uusi_laite' value='Uusi laite' />";
-  } 
+  }
+  echo "<input type='hidden' name='lopetus' value='$lopetus' />";
   echo "</form>";
 }

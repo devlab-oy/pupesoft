@@ -526,10 +526,10 @@ if (!function_exists('rivi_valm')) {
     if ($row["tunnus"] == $row["perheid"] and $laskurow['asiakkaan_tilausnumero'] != "") {
       $row["kommentti"] .= "\n".t("Asiakkaan tilausnumero", $kieli).": ".$laskurow['asiakkaan_tilausnumero'];
     }
-    
+
     if ($yhtiorow["pura_osaluettelot"] != "") {
       // Näytetäänkö osaluettelo
-      $query = "SELECT tuote.tuoteno, tuote.yksikko, tuote.nimitys, 
+      $query = "SELECT tuote.tuoteno, tuote.yksikko, tuote.nimitys,
                 tuoteperhe.kerroin
                 FROM tuoteperhe
                 JOIN tuote ON (tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tuoteno=tuote.tuoteno)
@@ -541,7 +541,7 @@ if (!function_exists('rivi_valm')) {
 
       if (mysql_num_rows($tuoteperhe_result) > 0) {
         while ($tuoteperhe_row = mysql_fetch_assoc($tuoteperhe_result)) {
-            $row["kommentti"] .= "$tuoteperhe_row[tuoteno] - $tuoteperhe_row[nimitys]\n";
+          $row["kommentti"] .= "$tuoteperhe_row[tuoteno] - $tuoteperhe_row[nimitys]\n";
         }
       }
     }

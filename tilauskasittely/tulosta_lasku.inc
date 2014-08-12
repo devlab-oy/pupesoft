@@ -2608,7 +2608,7 @@ if (!function_exists("tulosta_lasku")) {
 
       if ($yhtiorow["pura_osaluettelot"] != "") {
         // Korvataanko tilauksella oleva rivi osaluettelolla
-        $query = "SELECT tuote.tuoteno, tuote.yksikko, tuote.nimitys, 
+        $query = "SELECT tuote.tuoteno, tuote.yksikko, tuote.nimitys,
                   tuoteperhe.kerroin,
                   tuoteperhe.hintakerroin myyntihinta,
                   tuoteperhe.hintakerroin hinta,

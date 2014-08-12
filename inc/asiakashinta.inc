@@ -10,7 +10,7 @@ if ($from == "") {
   asiakashinta.ytunnus 'Ytunnus',
 #    concat_ws('<br>', asiakashinta.ytunnus, (SELECT group_concat(distinct asiakas.nimi separator '<br>') FROM asiakas WHERE asiakashinta.yhtio = asiakas.yhtio and asiakashinta.ytunnus = asiakas.ytunnus and asiakas.ytunnus != '')) 'Ytunnus',
   (SELECT concat(dynaaminen_puu.tunnus, '<br>', dynaaminen_puu.nimi) FROM dynaaminen_puu WHERE dynaaminen_puu.tunnus = asiakashinta.asiakas_segmentti AND dynaaminen_puu.yhtio = asiakashinta.yhtio) 'Asiakaspuu',
-  asiakashinta.asiakas_ryhma 'Asiakasryhmä',
+  (SELECT concat(avainsana.selite, '<br>', avainsana.selitetark) FROM avainsana WHERE avainsana.laji = 'asiakasryhma' and avainsana.selite = asiakashinta.asiakas_ryhma and avainsana.yhtio = asiakashinta.yhtio) 'Asiakasryhma',
   (SELECT concat(avainsana.selite, '<br>', avainsana.selitetark) FROM avainsana WHERE avainsana.laji = 'piiri' and avainsana.selite = asiakashinta.piiri and avainsana.yhtio = asiakashinta.yhtio) 'Piiri',
   asiakashinta.tuoteno,
   asiakashinta.ryhma 'Alennusryhmä',

@@ -2923,6 +2923,18 @@ if ($fieldname == "extranet_nayta_saldo") {
   $jatko = 0;
 }
 
+if ($fieldname == "ext_tilauksen_hyvaksyja_myyjaksi") {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'X' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>".t("Hyv‰ksyj‰‰ ei tallenneta tilauksen myyj‰ksi")."</option>";
+  $ulos .= "<option value = 'X' {$sel}>".t("Hyv‰ksyj‰ tallennetaan tilauksen myyj‰ksi")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "tuoteperhe_suoratoimitus") {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

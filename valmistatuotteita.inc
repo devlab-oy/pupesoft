@@ -506,7 +506,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
       // Jos on useampi valmiste
       if ((float) $kaikenkaikkiaan > 1) {
 
-        if (!empty($tilrivirow['valmistus_painoarvo'])) {
+        if ($yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K" and !empty($tilrivirow['valmistus_painoarvo'])) {
           # jyvitet‰‰n $uusiarvo valmisteille kappaleiden ja painoarvon mukaan
           $uusiarvo *= $tilrivirow['valmistus_painoarvo'];
         }

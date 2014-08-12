@@ -508,7 +508,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
 
         if (!empty($tilrivirow['valmistus_painoarvo'])) {
           # jyvitetään $uusiarvo valmisteille kappaleiden ja painoarvon mukaan
-          $uusiarvo *= ($tilrivirow['valmistus_painoarvo'] / $isavarattu);
+          $uusiarvo *= $tilrivirow['valmistus_painoarvo'];
         }
         else {
           if ((float) $kaikenkaikkiaan_arvot > 0) {

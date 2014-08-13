@@ -394,10 +394,11 @@ while ($row = mysql_fetch_assoc($suorires)) {
               and tunnus  = '$row[suoritunnus]'";
     $updres = pupe_query($query);
 
+    // ja kohdistusrelaatio
     $kohdistus_qry = "INSERT INTO suorituksen_kohdistus SET
                       yhtio           = '{$kukarow[yhtio]}',
-                      suoritus_tunnus = '$row[suoritunnus]',
-                      lasku_tunnus    = '$row[laskutunnus]'";
+                      suoritus_tunnus = '{$row[suoritunnus]}',
+                      lasku_tunnus    = '{$row[laskutunnus]}'";
     $kohdistus_result = pupe_query($kohdistus_qry);
   }
 }

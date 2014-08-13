@@ -894,7 +894,7 @@ if ($tila == "" and !isset($jatka)) {
   echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
 
   // Myyntitili oikeellisuustarkistus
-  if ($tilaustyyppi == 'M') {
+  if ($tilaustyyppi === 'M') {
     $query = "SELECT tunnus
               FROM varastopaikat
               WHERE yhtio        = '{$kukarow["yhtio"]}'

@@ -368,9 +368,16 @@ if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
         if ($kerroin == '') {
           $kerroin = '1';
         }
+
         if ($hintakerroin == '') {
-          $hintakerroin = '1';
+          if ($yhtiorow["pura_osaluettelot"] != "" and $toim == "OSALUETTELO") {
+            $hintakerroin = $laptrow['myyntihinta'];
+          }
+          else {
+            $hintakerroin = '1';
+          }
         }
+
         if ($alekerroin == '') {
           $alekerroin = '1';
         }
@@ -378,13 +385,13 @@ if ($tee == 'LISAA' and $oikeurow['paivitys'] == '1') {
         if ($tunnus == "") {
           $query = "  INSERT INTO ";
           $postq = " , laatija  = '$kukarow[kuka]',
-                  luontiaika  = now()";
+                       luontiaika  = now()";
         }
         else {
           $query = "   UPDATE ";
-          $postq = "   , muuttaja='$kukarow[kuka]',
-                muutospvm=now()
-                WHERE tunnus='$tunnus' ";
+          $postq = "   , muuttaja = '$kukarow[kuka]',
+                         muutospvm = now()
+                         WHERE tunnus = '$tunnus' ";
         }
 
         $querylisa = "";

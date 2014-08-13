@@ -1673,36 +1673,39 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
               ORDER BY nimi";
     $toimiresult = pupe_query($query);
 
-    echo "<input type='hidden' name='tee_myos_tuotteen_toimittaja_liitos' value='JOO'>";
-    echo "<tr>";
-    echo "<th align='left'>".t("Toimittaja")."</th>";
-    echo "<td>";
-    echo "<select name='liitostunnus' />";
-    echo "<option value=''>".t("Ei toimittajaa")."</option>";
+    if (mysql_num_rows($toimiresult) > 0) {
 
-    while ($toimirow = mysql_fetch_assoc($toimiresult)) {
-      $selected = (isset($liitostunnus) and $toimirow['tunnus'] == $liitostunnus) ? 'SELECTED': '';
-      $toimittajanrolisa = (trim($toimirow['toimittajanro']) != '') ? "(".$toimirow['toimittajanro'].")" : '';
-      echo "<option value='{$toimirow['tunnus']}' {$selected}> {$toimirow['nimi']} $toimittajanrolisa</option>";
+      echo "<input type='hidden' name='tee_myos_tuotteen_toimittaja_liitos' value='JOO'>";
+      echo "<tr>";
+      echo "<th align='left'>".t("Toimittaja")."</th>";
+      echo "<td>";
+      echo "<select name='liitostunnus' />";
+      echo "<option value=''>".t("Ei toimittajaa")."</option>";
+
+      while ($toimirow = mysql_fetch_assoc($toimiresult)) {
+        $selected = (isset($liitostunnus) and $toimirow['tunnus'] == $liitostunnus) ? 'SELECTED': '';
+        $toimittajanrolisa = (trim($toimirow['toimittajanro']) != '') ? "(".$toimirow['toimittajanro'].")" : '';
+        echo "<option value='{$toimirow['tunnus']}' {$selected}> {$toimirow['nimi']} $toimittajanrolisa</option>";
+      }
+
+      echo "</select>";
+      echo "</td>";
+      echo "</tr>";
+
+      echo "<tr>";
+      echo "<th align='left'>".t("Ostohinta")."</th>";
+      echo "<td>";
+      echo "<input type='text' size='35' name='toimittaja_liitos_ostohinta'>";
+      echo "</td>";
+      echo "</tr>";
+
+      echo "<tr>";
+      echo "<th align='left'>".t("Toimittajan tuotenumero")."</th>";
+      echo "<td>";
+      echo "<input type='text' size='35' name='toimittaja_liitos_tuoteno'>";
+      echo "</td>";
+      echo "</tr>";
     }
-
-    echo "</select>";
-    echo "</td>";
-    echo "</tr>";
-
-    echo "<tr>";
-    echo "<th align='left'>".t("Ostohinta")."</th>";
-    echo "<td>";
-    echo "<input type='text' size='35' name='toimittaja_liitos_ostohinta'>";
-    echo "</td>";
-    echo "</tr>";
-
-    echo "<tr>";
-    echo "<th align='left'>".t("Toimittajan tuotenumero")."</th>";
-    echo "<td>";
-    echo "<input type='text' size='35' name='toimittaja_liitos_tuoteno'>";
-    echo "</td>";
-    echo "</tr>";
   }
 
   for ($i=0; $i < mysql_num_fields($result) - 1; $i++) {

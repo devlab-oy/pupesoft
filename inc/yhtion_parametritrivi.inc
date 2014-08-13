@@ -4148,6 +4148,18 @@ if ($fieldname == 'lapsituotteen_poiston_esto') {
   $jatko = 0;
 }
 
+if ($fieldname == 'varastonarvon_jako_usealle_valmisteelle') {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>".t("Raaka-aineen arvo jaetaan valmisteille m‰‰rien ja valmisteiden keskihankintahinnan mukaan kun raaka-aine/aineet jaetaan useaksi valmisteeksi")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("Raaka-aineen arvo voidaan manuaaliesti jakaa valmisteille kun raaka-aine/aineet jaetaan useaksi valmisteeksi")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == 'pura_osaluettelot') {
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 

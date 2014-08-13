@@ -93,6 +93,12 @@ if (trim($konserni) != '') {
 echo "  <th>".t("Työm").".<br>".t("Viite")."</th>
     <th>".t("Prio")."</th>
     <th>".t("Ytunnus")."<br>".t("Asiakas")."</th>
+
+    <th>Manufacturer</th>
+    <th>Model</th>
+    <th>Device</th>
+    <th>SLA</th>
+
     <th>".t("Työaika")."<br>".t("Työn suorittaja")."</th>
     <th>".t("Toimitetaan")."</th>
     <th>".t("Myyjä")."<br>".t("Tyyppi")."</th>
@@ -121,6 +127,10 @@ while ($prioriteetti_row = mysql_fetch_assoc($prioriteetti_result)) {
 echo "</select></td>";
 
 echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_asiakasnimi_haku'></td>";
+echo "<td>manuhaku</td>";
+echo "<td>modelhaku</td>";
+echo "<td>sarjanrohaku</td>";
+echo "<td>slahaku</td>";
 echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_suorittaja_haku'></td>";
 echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_toimitetaan_haku'></td>";
 echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_myyja_haku'></td>";
@@ -237,7 +247,11 @@ $query = "SELECT
           a5.selitetark tyom_prioriteetti,
           lasku.luontiaika,
           group_concat(a4.selitetark_2) asekalsuorittajanimi,
-          group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', if(a4.selitetark_2 is null or a4.selitetark_2 = '', kalenteri.kuka, a4.selitetark_2), '##', kalenteri.tunnus, '##', a4.selitetark, '##', timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) asennuskalenteri
+          group_concat(concat(left(kalenteri.pvmalku,16), '##', left(kalenteri.pvmloppu,16), '##', if(a4.selitetark_2 is null or a4.selitetark_2 = '', kalenteri.kuka, a4.selitetark_2), '##', kalenteri.tunnus, '##', a4.selitetark, '##', timestampdiff(SECOND, kalenteri.pvmalku, kalenteri.pvmloppu))) asennuskalenteri,
+          tyomaarays.valmnro,
+          tyomaarays.mallivari,
+          tyomaarays.merkki,
+          tyomaarays.luvattu
           FROM lasku
           JOIN yhtio ON (lasku.yhtio=yhtio.yhtio)
           JOIN tyomaarays ON (tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus )
@@ -309,7 +323,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
 
   $lopetusx = "";
   if ($lopetus != "") $lopetusx = $lopetus;
-  $lopetusx .= "/SPLIT/{$palvelin2}tyomaarays/tyojono.php////konserni=$konserni//toim=$toim";
+  $lopetusx .= "/SPLIT/{$palvelin2}tyomaarays/tyojono.php////konserni=$konserni//toim=$toim//tyojonotyyppi=$tyojonotyyppi";
 //KISSA - pitäis tunkata $olenko_asentaja truu setit tosta viiskyt riviä alempaa
   if ($toim != 'TYOMAARAYS_ASENTAJA' or $olenko_asentaja_tassa_hommassa) {
     if ($vrow["yhtioyhtio"] != $kukarow["yhtio"]) {
@@ -320,7 +334,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
     }
   }
   else {
-    $muoklinkki = "";
+    $muoklinkki = $vrow['tunnus'];
   }
 
   if (trim($vrow["komm1"]) != "") {
@@ -337,6 +351,11 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
   echo "<td>$vrow[tyom_prioriteetti]</td>";
 
   echo "<td valign='top'>$vrow[ytunnus]<br>$vrow[nimi]</td>";
+
+  echo "<td>$vrow[merkki]</td>";
+  echo "<td>$vrow[mallivari]</td>";
+  echo "<td>$vrow[valmnro]</td>";
+  echo "<td></td>";
 
   echo "<td valign='top' nowrap>";
 
@@ -408,16 +427,16 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
   echo "</td>";
 
   if ($vrow["tyojono"] != "" and $toim != 'TYOMAARAYS_ASENTAJA') {
-    list($ankkuri_pp, $ankkuri_kk, $ankkuri_vv) = explode(".", tv1dateconv($vrow["toimaika"]));
+    list($ankkuri_pp, $ankkuri_kk, $ankkuri_vv) = explode(".", tv1dateconv($vrow["luvattu"]));
     $ankkuri_pp = (strlen($ankkuri_pp) == 2 and substr($ankkuri_pp, 0, 1) == 0) ? substr($ankkuri_pp, 1, 1) : $ankkuri_pp;
     $ankkuri_kk = (strlen($ankkuri_kk) == 2 and substr($ankkuri_kk, 0, 1) == 0) ? substr($ankkuri_kk, 1, 1) : $ankkuri_kk;
 
     $ankkuri = "{$ankkuri_pp}_{$ankkuri_kk}_{$ankkuri_vv}";
 
-    echo "<td valign='top'><a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]&lopetus=$lopetusx#$ankkuri'>{$vrow["toimaika"]}</a></td>";
+    echo "<td valign='top'><a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]&lopetus=$lopetusx#$ankkuri'>{$vrow["luvattu"]}</a></td>";
   }
   else {
-    echo "<td valign='top'>{$vrow["toimaika"]}</td>";
+    echo "<td valign='top'>{$vrow["luvattu"]}</td>";
   }
 
   echo "<td valign='top'>$vrow[myyja]<br>".t("$laskutyyppi")." ".t("$alatila")."</td>";
@@ -490,7 +509,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
         $tyostatus_result = t_avainsana("TYOM_TYOSTATUS", "", " AND avainsana.jarjestys >= {$hakunumero} ");
       }
       else {
-      echo "<option value='EISTATUSTA'>".t("Ei statusta")."</option>";
+        echo "<option value='EISTATUSTA'>".t("Ei statusta")."</option>";
         $tyostatus_result = t_avainsana("TYOM_TYOSTATUS");
       }
 
@@ -523,15 +542,8 @@ echo "</table>";
 echo "<br><br>";
 
 // Konffataan datatablesit
-$datatables_conf = array();
-
-if (trim($konserni) != '') {
-  $datatables_conf[] = array($pupe_DataTables[0],8,7,true,true);
-
-}
-else {
-  $datatables_conf[] = array($pupe_DataTables[0],8,7,true,true);
-}
+//$datatables_conf[] = array($pupe_DataTables[0],8,7,true,true);
+$datatables_conf[] = array($pupe_DataTables[0],12,11,true,true);
 
 if (count($tyomaarays_tunti_yhteensa) > 0 and $toim == 'TYOMAARAYS_ASENTAJA') {
 

@@ -19145,7 +19145,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
         $query = "SELECT tuote.tuoteno, tuote.yksikko, tuote.nimitys,
                   tuoteperhe.kerroin,
                   tuoteperhe.hintakerroin myyntihinta,
-                  round(tuoteperhe.hintakerroin * ({$row['varattu']}+{$row['jt']}+{$row['kpl']}) * (1-{$row['aleyhteensa']}/100),'$yhtiorow[hintapyoristys]') rivihinta
+                  round(tuoteperhe.hintakerroin * tuoteperhe.kerroin * ({$row['varattu']}+{$row['jt']}+{$row['kpl']}) * (1-{$row['aleyhteensa']}/100),'$yhtiorow[hintapyoristys]') rivihinta
                   FROM tuoteperhe
                   JOIN tuote ON (tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tuoteno=tuote.tuoteno)
                   WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'

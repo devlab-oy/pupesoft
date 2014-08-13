@@ -56,6 +56,7 @@ if ($Xtunnukset2 != "") {
             tuote.tullinimike1,
             tuote.tullikohtelu,
             alkuperamaa';
+
   $select = "tuote.tuoteno,
              tullinimike.su,
              tuote.tullinimike1,
@@ -63,9 +64,20 @@ if ($Xtunnukset2 != "") {
              (SELECT tuotteen_toimittajat.alkuperamaa from tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno ORDER BY if (tuotteen_toimittajat.alkuperamaa='$yhtiorow[maa]', concat('2', tuotteen_toimittajat.alkuperamaa), concat('1', tuotteen_toimittajat.alkuperamaa)) LIMIT 1) alkuperamaa,
              tuote.vakkoodi,
              tuote.vak_imdg_koodi,";
+
   if (in_array($yhtiorow['vienti_erittelyn_tulostus'], array('T', 'P'))) {
-    $group = 'tuote.tullinimike1';
-    $select = 'tuote.tullinimike1,';
+    $group = 'tuote.tullinimike1,
+              tullinimike.su,
+              tuote.tullikohtelu,
+              tuote.vakkoodi,
+              tuote.vak_imdg_koodi';
+
+    $select = 'tuote.tullinimike1,
+               tullinimike.su,
+               tuote.tullikohtelu,               
+               tuote.vakkoodi,
+               tuote.vak_imdg_koodi,
+               max(tuote.tuoteno) tuoteno,';
 
     if (in_array($yhtiorow['vienti_erittelyn_tulostus'], array('T'))) {
       $select .= "(SELECT tuotteen_toimittajat.alkuperamaa from tuotteen_toimittajat WHERE tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno ORDER BY if (tuotteen_toimittajat.alkuperamaa='$yhtiorow[maa]', concat('2', tuotteen_toimittajat.alkuperamaa), concat('1', tuotteen_toimittajat.alkuperamaa)) LIMIT 1) alkuperamaa,";
@@ -121,7 +133,6 @@ if ($Xtunnukset2 != "") {
       $Xpdf->draw_text(50, 634, $laskurow["toim_postino"]." ".$laskurow["toim_postitp"], $Xfirstpage, $Xnorm);
       $Xpdf->draw_text(50, 624, $laskurow["toim_maa"],     $Xfirstpage, $Xnorm);
 
-
       //Oikea sarake
       $Xpdf->draw_rectangle(800, 300, 779, 580, $Xfirstpage,   $Xrectparam);
       $Xpdf->draw_rectangle(800, 420, 779, 580, $Xfirstpage,   $Xrectparam);
@@ -155,17 +166,15 @@ if ($Xtunnukset2 != "") {
       $Xpdf->draw_text(310, 708, t("Kommentti", $kieli),     $Xfirstpage, $Xpieni);
       $Xpdf->draw_text(310, 698, $laskurow["viesti"],     $Xfirstpage, $Xnorm);
 
-      if (in_array($yhtiorow['vienti_erittelyn_tulostus'], array('T', 'P'))) {
-        $Xpdf->draw_text(30,  572, t("Nimike", $kieli),      $Xfirstpage, $Xpieni);
-      }
-      else {
-        $Xpdf->draw_text(30,  572, t("Nimike", $kieli),      $Xfirstpage, $Xpieni);
-        $Xpdf->draw_text(100, 572, t("Kohtelu", $kieli),    $Xfirstpage, $Xpieni);
-        $Xpdf->draw_text(150, 572, t("Tuote", $kieli),      $Xfirstpage, $Xpieni);
-
-        if ($vakkeja) $Xpdf->draw_text(310, 572, t("VAK/UN", $kieli), $Xfirstpage, $Xpieni);
-      }
       //rivien otsikkotiedot
+      $Xpdf->draw_text(30,  572, t("Nimike", $kieli),      $Xfirstpage, $Xpieni);
+      $Xpdf->draw_text(100, 572, t("Kohtelu", $kieli),    $Xfirstpage, $Xpieni);
+
+      if (!in_array($yhtiorow['vienti_erittelyn_tulostus'], array('T', 'P'))) {
+        $Xpdf->draw_text(150, 572, t("Tuote", $kieli),      $Xfirstpage, $Xpieni);
+      }
+
+      if ($vakkeja) $Xpdf->draw_text(310, 572, t("VAK/UN", $kieli), $Xfirstpage, $Xpieni);
 
       $Xpdf->draw_text(370, 572, t("Määrä", $kieli),      $Xfirstpage, $Xpieni);
       $Xpdf->draw_text(430, 572, t("Hinta", $kieli),      $Xfirstpage, $Xpieni);
@@ -178,6 +187,7 @@ if ($Xtunnukset2 != "") {
       return $Xfirstpage;
     }
   }
+  
   if (!function_exists('erittely_rivi')) {
     function erittely_rivi($Xfirstpage) {
       global $Xfirstpage, $yhtiorow, $Xpdf, $Xrow, $Xkala, $Xsivu, $Xlask, $Xrectparam, $Xnorm, $Xpieni, $kieli, $vakkeja;
@@ -190,30 +200,28 @@ if ($Xtunnukset2 != "") {
         $Xlask = 1;
       }
 
-      if (in_array($yhtiorow['vienti_erittelyn_tulostus'], array('', 'I'))) {
-        $Xpdf->draw_text(30, $Xkala, $Xrow["tullinimike1"], $Xfirstpage, $Xnorm);
-        $Xpdf->draw_text(100, $Xkala, $Xrow["tullikohtelu"], $Xfirstpage, $Xnorm);
 
-        if ($vakkeja) {
+      $Xpdf->draw_text(30, $Xkala, $Xrow["tullinimike1"], $Xfirstpage, $Xnorm);
+      $Xpdf->draw_text(100, $Xkala, $Xrow["tullikohtelu"], $Xfirstpage, $Xnorm);
+
+      if ($vakkeja) {
+
+        if (!in_array($yhtiorow['vienti_erittelyn_tulostus'], array('T', 'P'))) {
           list($ff_string, $ff_font) = pdf_fontfit($Xrow["tuoteno"], 155, $Xpdf, $Xnorm);
           $Xpdf->draw_text(150, $Xkala, $ff_string, $Xfirstpage, $ff_font);
-
-          $_vak_un = palauta_tuotteen_vak_koodi($Xrow["tuoteno"]);
-
-          if ($_vak_un != "") {
-            $oikpos = $Xpdf->strlen($_vak_un, $Xnorm);
-            $Xpdf->draw_text(340 - $oikpos, $Xkala, $_vak_un, $Xfirstpage, $Xnorm);
-          }
         }
-        else {
-          list($ff_string, $ff_font) = pdf_fontfit($Xrow["tuoteno"], 200, $Xpdf, $Xnorm);
-          $Xpdf->draw_text(150, $Xkala, $ff_string, $Xfirstpage, $ff_font);
+
+        $_vak_un = palauta_tuotteen_vak_koodi($Xrow["tuoteno"]);
+
+        if ($_vak_un != "") {
+          $oikpos = $Xpdf->strlen($_vak_un, $Xnorm);
+          $Xpdf->draw_text(340 - $oikpos, $Xkala, $_vak_un, $Xfirstpage, $Xnorm);
         }
       }
-      else {
-        $Xpdf->draw_text(30, $Xkala, $Xrow["tullinimike1"], $Xfirstpage, $Xnorm);
+      elseif (!in_array($yhtiorow['vienti_erittelyn_tulostus'], array('T', 'P'))) {
+        list($ff_string, $ff_font) = pdf_fontfit($Xrow["tuoteno"], 200, $Xpdf, $Xnorm);
+        $Xpdf->draw_text(150, $Xkala, $ff_string, $Xfirstpage, $ff_font);
       }
-
 
       $oikpos = $Xpdf->strlen($Xrow["kpl"], $Xnorm);
       $Xpdf->draw_text(390-$oikpos, $Xkala, $Xrow["kpl"],   $Xfirstpage, $Xnorm);
@@ -222,7 +230,6 @@ if ($Xtunnukset2 != "") {
 
       $oikpos = $Xpdf->strlen($Xrow["summa"], $Xnorm);
       $Xpdf->draw_text(450-$oikpos, $Xkala, $Xrow["summa"],   $Xfirstpage, $Xnorm);
-
 
       $Xpdf->draw_text(470, $Xkala, $Xrow["paino"],      $Xfirstpage, $Xnorm);
 

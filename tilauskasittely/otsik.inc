@@ -876,7 +876,7 @@ if ($tila == "" and !isset($jatka)) {
 
   // Setataan tilaustyyppi jos meillä on vaan yks vaihtoehto
   if (is_null($tilaustyyppi) and count($tilaustyypit) == 1) {
-    $tilaustyyppi = key($tilaustyypit);
+    $tilaustyyppi = (string) key($tilaustyypit);
   }
 
   echo "<font class='head'>{$tilaus_myynti_otsikko} ".t("otsikko")."</font><hr>";

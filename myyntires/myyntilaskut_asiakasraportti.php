@@ -668,7 +668,7 @@ if ($tee == "") {
         echo "<th valign='top'>".t("Ikä")."</th>";
         echo "<th valign='top'>".t("Korko")."</th>";
         echo "<th valign='top'>".t("Korkolasku")."<br>".t("pvm")."</th>";
-        echo "<th valign='top'>".t("Osasuoritukset")."</th>";
+        echo "<th valign='top'>".t("Maksusuoritukset")."</th>";
         echo "</tr>";
 
         echo "<tr>
@@ -694,14 +694,6 @@ if ($tee == "") {
         $avoimet = array();
         $korkoja = 0;
 
-        // haetaan kaikki yrityksen rahatilit mysql muodossa
-        $query  = "SELECT concat(group_concat(distinct concat('\'',oletus_rahatili) SEPARATOR '\', '),'\'') rahatilit
-                   FROM yriti
-                   WHERE yhtio          = '$kukarow[yhtio]'
-                   and kaytossa         = ''
-                   and oletus_rahatili != ''";
-        $ratire = pupe_query($query);
-        $ratiro = mysql_fetch_array($ratire);
 
         while ($maksurow = mysql_fetch_array($result)) {
 
@@ -713,6 +705,9 @@ if ($tee == "") {
           }
 
           echo "<a href='".$palvelin2."muutosite.php?tee=E&tunnus=$maksurow[tunnus]&lopetus=$lopetus/SPLIT/".$palvelin2."myyntires/myyntilaskut_asiakasraportti.php////tila=$tila//ytunnus=$ytunnus//asiakasid=$asiakasid//alatila=$alatila//lopetus=$lopetus//valintra=$valintra//savalkoodi=$savalkoodi//ppa=$ppa//kka=$kka//vva=$vva//ppl=$ppl//kkl=$kkl//vvl=$vvl'>$maksurow[laskunro]</a>";
+
+          echo '<br>';
+          echo 'laskutunnus: ', $maksurow['tunnus'];
           echo "</td>";
 
           echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['tapvm']).tv1dateconv($maksurow["tapvm"])."</td>";
@@ -765,51 +760,28 @@ if ($tee == "") {
 
           echo "<td align='right' nowrap>";
 
-          // jos rahatilejä löytyy etsitään suoritukst
-          if ($ratiro["rahatilit"] != "") {
+          hae_maksusuoritukset($maksurow);
 
-            // KASSALIPAS-BLOKKI
-            $tilinolisa = '';
+          echo '<br>';
 
-            // Etsitään kassalippaan tilinumerot
-            $query = "SELECT kassa, pankkikortti, luottokortti
-                      FROM kassalipas
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tunnus  = '{$maksurow['kassalipas']}'";
-            $keijo = pupe_query($query);
-            $ressukka = mysql_fetch_assoc($keijo);
 
-            if (!empty($ressukka['kassa']))        $tilinolisa .= ",'{$ressukka['kassa']}'";
-            if (!empty($ressukka['pankkikortti'])) $tilinolisa .= ",'{$ressukka['pankkikortti']}'";
-            if (!empty($ressukka['luottokortti'])) $tilinolisa .= ",'{$ressukka['luottokortti']}'";
+          /*
+          $sqry = "SELECT sk.kohdistuspvm, sk.kirjauspvm
+                    FROM suorituksen_kohdistus AS sk
+                    WHERE sk.yhtio = '{$kukarow['yhtio']}'
+                    AND sk.laskutunnus = '{$maksurow['tunnus']}'";
+          $sres = pupe_query($sqry);
 
-            $query = "SELECT *
-                      FROM tiliointi USE INDEX (tositerivit_index)
-                      WHERE yhtio  = '{$kukarow['yhtio']}'
-                      AND ltunnus  = '{$maksurow['tunnus']}'
-                      AND tilino   IN ({$ratiro['rahatilit']}{$tilinolisa})
-                      AND korjattu = ''";
-            $lasktilitre = pupe_query($query);
+          if (mysql_num_rows($sres) > 0) {
 
-            // listataan osasuoritukset jos maksupäivä on nollaa tai jos suorituksia on//oli enemmän kuin yksi
-            // (eli silloin kun lasku on osasuoritettu//tullaan osasuorittamaan)
-            if ($maksurow["mapvm"] == "0000-00-00" or mysql_num_rows($lasktilitre) > 1) {
-
-              while ($lasktilitro = mysql_fetch_array($lasktilitre)) {
-
-                if ($lasktilitro['tilino'] == $ressukka['kassa']) echo t("Käteisellä").": ";
-                elseif ($lasktilitro['tilino'] == $ressukka['pankkikortti']) echo t("Pankkikortilla").": ";
-                elseif ($lasktilitro['tilino'] == $ressukka['luottokortti']) echo t("Luottokortilla").": ";
-
-                if ($lasktilitro["summa_valuutassa"] != 0 and $lasktilitro["valkoodi"] != $yhtiorow["valkoodi"] and $lasktilitro["valkoodi"] != "") {
-                  echo "$lasktilitro[summa_valuutassa] $lasktilitro[valkoodi] ($lasktilitro[summa] $yhtiorow[valkoodi]) ", tv1dateconv($lasktilitro["tapvm"]), "<br>";
-                }
-                else {
-                  echo "$lasktilitro[summa] $yhtiorow[valkoodi] ", tv1dateconv($lasktilitro["tapvm"]), "<br>";
-                }
-              }
+            while ($suoritusrow = mysql_fetch_assoc($sres)) {
+              echo 'kohdistus: ', tv1dateconv($suoritusrow['kohdistuspvm']), '<br>';
+              echo 'kirjaus: ', tv1dateconv($suoritusrow['kirjauspvm']), '<br>';
             }
           }
+          */
+
+
           echo "</td>";
           echo "</tr>";
 
@@ -952,3 +924,132 @@ if ($tee == "") {
 }
 
 require "inc/footer.inc";
+
+
+function hae_maksusuoritukset($maksurow) {
+  global $kukarow, $yhtiorow;
+
+/*
+
+  // haetaan kaikki yrityksen rahatilit mysql muodossa
+  $query  = "SELECT concat(group_concat(distinct concat('\'',oletus_rahatili) SEPARATOR '\', '),'\'') rahatilit
+             FROM yriti
+             WHERE yhtio          = '$kukarow[yhtio]'
+             and kaytossa         = ''
+             and oletus_rahatili != ''";
+  $ratire = pupe_query($query);
+  $ratiro = mysql_fetch_array($ratire);
+
+
+  if ($ratiro["rahatilit"] != "") {
+
+    // KASSALIPAS-BLOKKI
+    $tilinolisa = '';
+
+    // Etsitään kassalippaan tilinumerot
+    $query = "SELECT kassa, pankkikortti, luottokortti
+              FROM kassalipas
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$maksurow['kassalipas']}'";
+    $keijo = pupe_query($query);
+    $ressukka = mysql_fetch_assoc($keijo);
+
+    if (!empty($ressukka['kassa']))        $tilinolisa .= ",'{$ressukka['kassa']}'";
+    if (!empty($ressukka['pankkikortti'])) $tilinolisa .= ",'{$ressukka['pankkikortti']}'";
+    if (!empty($ressukka['luottokortti'])) $tilinolisa .= ",'{$ressukka['luottokortti']}'";
+
+    $query = "SELECT *
+              FROM tiliointi USE INDEX (tositerivit_index)
+              WHERE yhtio  = '{$kukarow['yhtio']}'
+              AND ltunnus  = '{$maksurow['tunnus']}'
+              AND tilino   IN ({$ratiro['rahatilit']}{$tilinolisa})
+              AND korjattu = ''";
+    $lasktilitre = pupe_query($query);
+
+    // listataan osasuoritukset jos maksupäivä on nollaa tai jos suorituksia on//oli enemmän kuin yksi
+    // (eli silloin kun lasku on osasuoritettu//tullaan osasuorittamaan)
+    if ($maksurow["mapvm"] == "0000-00-00" or mysql_num_rows($lasktilitre) > 1) {
+
+      while ($lasktilitro = mysql_fetch_array($lasktilitre)) {
+
+        if (strtotime($lasktilitro['laadittu']) < strtotime('2014-08-13 00:00:00')) {
+          if ($lasktilitro['tilino'] == $ressukka['kassa']) echo t("Käteisellä").": ";
+          elseif ($lasktilitro['tilino'] == $ressukka['pankkikortti']) echo t("Pankkikortilla").": ";
+          elseif ($lasktilitro['tilino'] == $ressukka['luottokortti']) echo t("Luottokortilla").": ";
+
+          if ($lasktilitro["summa_valuutassa"] != 0 and $lasktilitro["valkoodi"] != $yhtiorow["valkoodi"] and $lasktilitro["valkoodi"] != "") {
+            echo "$lasktilitro[summa_valuutassa] $lasktilitro[valkoodi] ($lasktilitro[summa] $yhtiorow[valkoodi]) ", tv1dateconv($lasktilitro["tapvm"]), " <br>";
+          }
+          else {
+            echo "S - ", "$lasktilitro[summa] $yhtiorow[valkoodi] ", " - ", tv1dateconv($lasktilitro["tapvm"]), "<br>";
+          }
+        }
+      }
+    }
+  }
+
+
+*/
+
+  $sqry = "SELECT suoritustunnus
+           FROM suorituksen_kohdistus
+           WHERE yhtio = '{$kukarow['yhtio']}'
+           AND laskutunnus = '{$maksurow['tunnus']}'";
+  $sres = pupe_query($sqry);
+  $srow = mysql_fetch_assoc($sres);
+
+
+  $lqry =  "SELECT group_concat(laskutunnus) as laskut
+           FROM suorituksen_kohdistus
+           WHERE yhtio = '{$kukarow['yhtio']}'
+           AND suoritustunnus = '{$srow[suoritustunnus]}'";
+  $lres = pupe_query($lqry);
+  $lrow = mysql_fetch_assoc($lres);
+
+
+  $qry =  "SELECT *
+           FROM suoritus
+           WHERE yhtio = '{$kukarow['yhtio']}'
+           AND tunnus = '{$srow[suoritustunnus]}')";
+
+$qry =  "SELECT *
+         FROM lasku
+         WHERE yhtio = '{$kukarow['yhtio']}'
+         AND tunnus IN ({$lrow[laskut]})";
+echo $qry;
+
+
+
+/*
+
+  $res = pupe_query($qry);
+  $row = mysql_fetch_assoc($res);
+
+  print_r($row);
+
+
+
+
+  select * form suoritukset where tunnus in (sroq suoritukset)
+
+  select * from lasku where tunnus in (lrow laskut)
+
+  select * from tilioint where yhtio=kukatyhe and ltunnus = $maksurow['tunnus'] and tilino yhtiorow.luottotappio
+
+
+
+  if (mysql_num_rows($sres) > 0) {
+    while ($srow = mysql_fetch_assoc($sres)) {
+
+
+
+
+
+
+
+    }
+  }
+
+
+  */
+}

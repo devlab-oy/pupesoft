@@ -278,6 +278,9 @@ if ($tila == 'tee_kohdistus') {
       $laskutunnuksetkale = 0;
     }
 
+
+
+
     // Tarkistetaan muutama asia
     if ($laskutunnukset == 0 and $laskutunnuksetkale == 0) {
       echo "<font class='error'>".t("Olet kohdistamassa, mutta et ole valinnut mit‰‰n kohdistettavaa")."!</font><br><br>";
@@ -748,12 +751,42 @@ if ($tila == 'tee_kohdistus') {
     kopioitiliointi($tiliointi2['tunnus'], "", $params);
 
     $kohdistus_qry = "INSERT INTO suorituksen_kohdistus SET
-                      yhtio           = '{$kukarow['yhtio']}',
-                      suoritus_tunnus = '$suoritus[tunnus]',
-                      lasku_tunnus    = '$lasku[tunnus]'";
+                      yhtio          = '{$kukarow['yhtio']}',
+                      suoritustunnus = '{$suoritus[tunnus]}',
+                      laskutunnus    = '{$lasku[tunnus]}',
+                      kohdistuspvm   = NOW(),
+                      kirjauspvm     = '{$laskun_maksupvm}'";
     $kohdistus_result = pupe_query($kohdistus_qry);
+
   }
   else {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     //*** T‰ss‰ k‰sitell‰‰n tavallinen suoritus ***/
     $laskujen_summa = 0;
 
@@ -872,6 +905,8 @@ if ($tila == 'tee_kohdistus') {
 
       $kassaan = 0;
       $kassaan_valuutassa = 0;
+
+
 
       foreach ($laskut as $lasku) {
 
@@ -1281,11 +1316,14 @@ if ($tila == 'tee_kohdistus') {
         $result = pupe_query($query);
 
         $kohdistus_qry = "INSERT INTO suorituksen_kohdistus SET
-                          yhtio           = '{$kukarow['yhtio']}',
-                          suoritus_tunnus = '$suoritus[tunnus]',
-                          lasku_tunnus    = '$lasku[tunnus]'";
-        $kohdistus_result = pupe_query($kohdistus_qry);
+                          yhtio          = '{$kukarow['yhtio']}',
+                          suoritustunnus = '{$suoritus[tunnus]}',
+                          laskutunnus    = '{$lasku[tunnus]}',
+                          kohdistuspvm   = NOW(),
+                          kirjauspvm     = '{$laskun_maksupvm}'";
+          $kohdistus_result = pupe_query($kohdistus_qry);
       }
+
 
       // Myyntisaamiset (suorituksen summa * -1)
       $query = "SELECT *

@@ -74,7 +74,7 @@ if ($Xtunnukset2 != "") {
 
     $select = 'tuote.tullinimike1,
                tullinimike.su,
-               tuote.tullikohtelu,               
+               tuote.tullikohtelu,
                tuote.vakkoodi,
                tuote.vak_imdg_koodi,
                max(tuote.tuoteno) tuoteno,';
@@ -187,7 +187,7 @@ if ($Xtunnukset2 != "") {
       return $Xfirstpage;
     }
   }
-  
+
   if (!function_exists('erittely_rivi')) {
     function erittely_rivi($Xfirstpage) {
       global $Xfirstpage, $yhtiorow, $Xpdf, $Xrow, $Xkala, $Xsivu, $Xlask, $Xrectparam, $Xnorm, $Xpieni, $kieli, $vakkeja;

@@ -445,9 +445,9 @@ if ($tee == 'POISTA' and $oikeurow['paivitys'] == '1') {
   $result = pupe_query($query);
   $fakrow = mysql_fetch_array($result);
 
-  $fakta     = $fakrow["fakta"];
-  $fakta2   = $fakrow["fakta2"];
-  $omasivu   = $fakrow["omasivu"];
+  $fakta   = $fakrow["fakta"];
+  $fakta2  = $fakrow["fakta2"];
+  $omasivu = $fakrow["omasivu"];
   $tee     = "TALLENNAFAKTA";
 
   //poistetaan rivi..
@@ -503,7 +503,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
   $lisa = "";
   $tchk = "";
 
-  $isatuoteno = trim($isatuoteno);
+  $isatuoteno  = trim($isatuoteno);
   $hakutuoteno = trim($hakutuoteno);
 
   if ($isatuoteno != '') {
@@ -638,20 +638,26 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
     // Haulla lˆytyi yksi tuote
     elseif (mysql_num_rows($result) == 1) {
 
-      echo "<form method='post' action='tuoteperhe.php' autocomplete='off'>";
-      echo "<input type='hidden' name='toim' value='$toim'>";
-      echo "<input type='hidden' name='tee' value='TALLENNAFAKTA'>";
-      echo "<input type='hidden' name='tunnus' value='$prow[tunnus]'>";
-      echo "<input type='hidden' name='isatuoteno' value='$isatuoteno'>";
-      echo "<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>";
-
       $row = mysql_fetch_array($result);
       $isatuoteno  = $row['isatuoteno'];
 
+      if ($oikeurow['paivitys'] == '1') {
+        echo "<form method='post' action='tuoteperhe.php' autocomplete='off'>";
+        echo "<input type='hidden' name='toim' value='$toim'>";
+        echo "<input type='hidden' name='tee' value='TALLENNAFAKTA'>";
+        echo "<input type='hidden' name='tunnus' value='$prow[tunnus]'>";
+        echo "<input type='hidden' name='isatuoteno' value='$isatuoteno'>";
+        echo "<input type='hidden' name='hakutuoteno' value='$hakutuoteno'>";
+      }
+
       //is‰tuotteen checkki
       $error = "";
-      $query = "SELECT * from tuote where tuoteno='$isatuoteno' and yhtio='$kukarow[yhtio]'";
-      $res   = pupe_query($query);
+
+      $query = "SELECT *
+                FROM tuote
+                WHERE tuoteno = '$isatuoteno'
+                AND yhtio = '$kukarow[yhtio]'";
+      $res = pupe_query($query);
 
       if (mysql_num_rows($res) == 0) {
         echo "<font class='error'>".t("Tuote ei en‰‰ rekisteriss‰")."!</font><br>";
@@ -660,6 +666,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         $isarow = mysql_fetch_array($res);
       }
 
+      echo "<br>";
       echo "<table>";
       echo "<tr>";
 
@@ -697,20 +704,26 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         $ressu = pupe_query($query);
         $faktarow = mysql_fetch_array($ressu);
 
-        if ($faktarow["ei_nayteta"] == "") {
-          $sel1 = "SELECTED";
-        }
-        elseif ($faktarow["ei_nayteta"] == "E") {
-          $sel2 = "SELECTED";
-        }
-
         echo "<tr>";
         echo "<th>".t("Esitysmuoto")."</th>";
         echo "<td>";
-        echo "<select name='ei_nayteta'>";
-        echo "<option value='' $sel1>".t("Kaikki rivit n‰ytet‰‰n")."</option>";
-        echo "<option value='E' $sel2>".t("Lapsirivej‰ ei n‰ytet‰")."</option>";
-        echo "</select>";
+
+        if ($faktarow["ei_nayteta"] == "") {
+          $sel1 = "SELECTED";
+          if ($oikeurow['paivitys'] != '1') echo t("Kaikki rivit n‰ytet‰‰n");
+        }
+        elseif ($faktarow["ei_nayteta"] == "E") {
+          $sel2 = "SELECTED";
+          if ($oikeurow['paivitys'] != '1') echo t("Lapsirivej‰ ei n‰ytet‰");
+        }
+
+        if ($oikeurow['paivitys'] == '1') {
+          echo "<select name='ei_nayteta'>";
+          echo "<option value='' $sel1>".t("Kaikki rivit n‰ytet‰‰n")."</option>";
+          echo "<option value='E' $sel2>".t("Lapsirivej‰ ei n‰ytet‰")."</option>";
+          echo "</select>";
+        }
+
         echo "</td>";
         echo "</tr>";
       }
@@ -728,27 +741,29 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
       if ($toim == "RESEPTI") {
 
-        if ($faktarow["omasivu"] != "") {
-          $sel1 = "";
-          $sel2 = "SELECTED";
-        }
-        elseif ($omasivu != 'X') {
-          $sel1 = "SELECTED";
-          $sel2 = "";
-        }
-        else {
-          $sel1 = "";
-          $sel2 = "SELECTED";
-        }
-
         echo "<tr>";
         echo "<th>".t("Reseptin tulostus")."</th>";
 
         echo "<td>";
-        echo "<select name='omasivu'>";
-        echo "<option value='' $sel1>".t("Resepti tulostetaan normaalisti")."</option>";
-        echo "<option value='X' $sel2>".t("Resepti tulostetaan omalle sivulle")."</option>";
-        echo "</select>";
+
+        if ($faktarow['omasivu'] != 'X') {
+          $sel1 = "SELECTED";
+          $sel2 = "";
+          if ($oikeurow['paivitys'] != '1') echo t("Resepti tulostetaan normaalisti");
+        }
+        else {
+          $sel1 = "";
+          $sel2 = "SELECTED";
+          if ($oikeurow['paivitys'] != '1') echo t("Resepti tulostetaan omalle sivulle");
+        }
+
+        if ($oikeurow['paivitys'] == '1') {
+          echo "<select name='omasivu'>";
+          echo "<option value='' $sel1>".t("Resepti tulostetaan normaalisti")."</option>";
+          echo "<option value='X' $sel2>".t("Resepti tulostetaan omalle sivulle")."</option>";
+          echo "</select>";
+        }
+
         echo "</td>";
         echo "</tr>";
       }
@@ -794,7 +809,14 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
 
       echo "<tr>";
       echo "<td>";
-      echo "<textarea cols='35' rows='7' name='fakta'>{$faktarow["fakta"]}</textarea>";
+
+      if ($oikeurow['paivitys'] == '1') {
+        echo "<textarea cols='35' rows='7' name='fakta'>{$faktarow["fakta"]}</textarea>";
+      }
+      else {
+        echo "$faktarow[fakta]";
+      }
+
       echo "</td>";
 
       if ($toim == "RESEPTI") {
@@ -810,7 +832,14 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         $faktarow = mysql_fetch_array($ressu);
 
         echo "<td>";
-        echo "<textarea cols='35' rows='7' name='fakta2'>{$faktarow["fakta2"]}</textarea>";
+
+        if ($oikeurow['paivitys'] == '1') {
+          echo "<textarea cols='35' rows='7' name='fakta2'>{$faktarow["fakta2"]}</textarea>";
+        }
+        else {
+          echo "$faktarow[fakta2]";
+        }
+
         echo "</td>";
       }
 
@@ -947,7 +976,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       $kop_ohita_kerays = array();
       $kop_ei_nayteta = array();
 
-      if ($tunnus == "") {
+      if ($oikeurow['paivitys'] == '1' and $tunnus == "") {
         echo "<form method='post' action='tuoteperhe.php' name='lisaa' autocomplete='off'>";
         echo "<input type='hidden' name='toim' value='$toim'>";
         echo "<input type='hidden' name='tee' value='LISAA'>";
@@ -1000,7 +1029,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         }
 
         echo "<td class='back'>";
-        if ($oikeurow['paivitys'] == '1') echo "<input type='submit' value='".t("Lis‰‰")."'>";
+        echo "<input type='submit' value='".t("Lis‰‰")."'>";
         echo "</td>";
         echo "</tr>";
         echo "</form>";
@@ -1033,9 +1062,9 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
           $kop_index++;
         }
 
-        $lapsiyht = $tuoterow['kehahin']*$prow['kerroin'];
-        $resyht += $lapsiyht;
-        $reshikeyht += $prow['hintakerroin'];
+        $lapsiyht    = $tuoterow['kehahin'] * $prow['kerroin'];
+        $resyht     += $lapsiyht;
+        $reshikeyht += $prow['kerroin'] * $prow['hintakerroin'];
 
         $excelsarake = 0;
         $worksheet->writeString($excelrivi, $excelsarake++, $prow["isatuoteno"]);

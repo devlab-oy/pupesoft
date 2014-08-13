@@ -541,7 +541,7 @@ if (!function_exists('rivi_valm')) {
 
       if (mysql_num_rows($tuoteperhe_result) > 0) {
         while ($tuoteperhe_row = mysql_fetch_assoc($tuoteperhe_result)) {
-          $row["kommentti"] .= "$tuoteperhe_row[tuoteno] - $tuoteperhe_row[nimitys]\n";
+          $row["kommentti"] .= ((float) $tuoteperhe_row["kerroin"])." x $tuoteperhe_row[tuoteno] - $tuoteperhe_row[nimitys]\n";
         }
       }
     }

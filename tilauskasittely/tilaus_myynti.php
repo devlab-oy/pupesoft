@@ -2798,39 +2798,6 @@ if ($tee == '') {
 
   if ($kukarow['extranet'] == '' and ($laskurow["liitostunnus"] != 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS"))) {
 
-    echo "  <script type='text/javascript'>
-
-        $(function() {
-
-          $('#hae_asiakasta_linkki').on('click', function(e) {
-            e.preventDefault();
-
-            $('#hae_asiakasta_spani').hide();
-            $('#hae_asiakasta_boksi').show().focus();
-            $('#hae_asiakasta_boksi_button').show();
-          });
-
-          $('#hae_asiakasta_boksi').on('keyup', function(e) {
-            e.preventDefault();
-
-            $('#syotetty_ytunnus').val($(this).val());
-          });
-
-          $('#hae_asiakasta_boksi').keypress(function(e) {
-            if(e.keyCode == 13) {
-              $('#hae_asiakasta_formi').submit();
-            }
-          });
-
-          $('#hae_asiakasta_boksi_button').on('click', function(e) {
-            e.preventDefault();
-            $('#hae_asiakasta_formi').submit();
-          });
-
-        });
-
-        </script>";
-
     echo "<form id='hae_asiakasta_formi' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
     echo "  <input type='hidden' name='tilausnumero' value='{$tilausnumero}'>
         <input type='hidden' name='mista' value='{$mista}'>

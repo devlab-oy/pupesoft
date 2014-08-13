@@ -6477,7 +6477,18 @@ if ($tee == '') {
         }
 
         if ($toim == "YLLAPITO") {
-          echo "<br><br><a href='{$palvelin2}/laiterekisteri.php?toiminto=LINKKAA&tilausrivin_tunnus={$row['tunnus']}&sopimusnumero=$tilausnumero&lopetus={$palvelin2}tilauskasittely/tilaus_myynti.php////tilausnumero=$tilausnumero//toim=YLLAPITO'>Lis‰‰ laitteita</a>";
+          // Piirret‰‰n k‰yttˆliittym‰‰n liitettyjen laitteiden sarjanumerot
+          $query = "SELECT
+                    group_concat(laite.sarjanro SEPARATOR '<br>') sarjanumerot
+                    FROM laitteen_sopimukset
+                    JOIN laite ON laite.tunnus = laitteen_sopimukset.laitteen_tunnus
+                    WHERE laitteen_sopimukset.sopimusrivin_tunnus = '{$row['tunnus']}'
+                    ORDER BY laite.tunnus";
+          $res = pupe_query($query);
+          $sarjanumerotres = mysql_fetch_assoc($res);
+          echo "<br><br>Sarjanumerot:<br>{$sarjanumerotres['sarjanumerot']} <br>";
+          
+          echo "<a href='{$palvelin2}/laiterekisteri.php?toiminto=LINKKAA&tilausrivin_tunnus={$row['tunnus']}&sopimusnumero=$tilausnumero&lopetus={$palvelin2}tilauskasittely/tilaus_myynti.php////tilausnumero=$tilausnumero//toim=YLLAPITO'>Lis‰‰ laitteita</a>";
         }
 
         echo "</td>";

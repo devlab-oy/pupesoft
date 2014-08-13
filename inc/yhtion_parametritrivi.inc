@@ -1884,9 +1884,17 @@ if ($fieldname == "vienti_erittelyn_tulostus") {
   elseif ($trow[$i] == "E") {
     $sel3 = "selected";
   }
+  elseif ($trow[$i] == "T") {
+    $sel4 = "selected";
+  }
+  elseif ($trow[$i] == "P") {
+    $sel5 = "selected";
+  }
 
   $ulos .= "<option value=''  $sel1>".t("Vientierittely tulostetaan")."</option>";
+  $ulos .= "<option value='T' $sel4>".t("Vientierittely tulostetaan tullinimikkeellä ryhmiteltynä")."</option>";
   $ulos .= "<option value='I' $sel2>".t("Vientierittely tulostetaan ilman alkuperämaatietoja")."</option>";
+  $ulos .= "<option value='P' $sel5>".t("Vientierittely tulostetaan ilman alkuperämaatietoja tullinimikkeellä ryhmiteltynä")."</option>";
   $ulos .= "<option value='E' $sel3>".t("Vientierittelyä ei tulosteta")."</option>";
   $ulos .= "</select></td>";
 

@@ -797,7 +797,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
         }
 
         if ($kukarow['toimipaikka'] > 0 and tarkista_oikeus('infobar.php')) {
-          require('infobar.php');
+          require 'infobar.php';
         }
       }
       elseif (isset($_GET["sulje"]) and $_GET["sulje"] != "") {

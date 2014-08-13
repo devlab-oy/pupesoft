@@ -19,7 +19,9 @@ if ($from == "") {
   (SELECT concat(avainsana.selite, '<br>', avainsana.selitetark)
   FROM avainsana WHERE avainsana.laji = 'piiri' and avainsana.selite = asiakashinta.piiri
   AND avainsana.yhtio = asiakashinta.yhtio) 'Piiri',
-  asiakashinta.tuoteno,
+  (SELECT concat(tuote.tuoteno, '<br>', tuote.nimitys) FROM tuote
+  WHERE tuote.tuoteno = asiakashinta.tuoteno
+  AND tuote.yhtio = asiakashinta.yhtio) 'Tuoteno',
   asiakashinta.ryhma 'Alennusryhmä',
   asiakashinta.hinta,
   asiakashinta.laji,

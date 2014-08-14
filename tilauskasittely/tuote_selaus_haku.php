@@ -624,8 +624,14 @@ if ($verkkokauppa == "") {
   }
 
   if ($kukarow['extranet'] == "" and $verkkokauppa == "") {
-    echo "<tr><th>".t("Piilota tuoteperherakenne")."</th><td><input type='checkbox' name='piilota_tuoteperheen_lapset' $ptlcheck></td>";
-    echo "<th>".t("Näytä vain saldolliset tuotteet")."</th><td><input type='checkbox' name='saldotonrajaus' $saldotoncheck></td></tr>";
+    echo "<tr>";
+    echo "<th>".t("Piilota tuoteperherakenne")."</th>";
+    echo "<td><input type='checkbox' name='piilota_tuoteperheen_lapset' $ptlcheck></td>";
+    echo "</tr>";
+    echo "<tr>";
+    echo "<th>".t("Näytä vain saldolliset tuotteet")."</th>";
+    echo "<td><input type='checkbox' name='saldotonrajaus' $saldotoncheck></td>";
+    echo "</tr>";
   }
 
   echo "</table><br/>";

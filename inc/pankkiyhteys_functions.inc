@@ -886,6 +886,7 @@ function parse_sertificate($cert) {
   return $return;
 }
 
+
 /**
  * Palauttaa arrayn tuetuista pankeista muodossa BIC => [lyhyt_nimi, pitka_nimi]
  *

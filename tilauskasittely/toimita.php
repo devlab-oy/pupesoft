@@ -115,6 +115,15 @@ if ($tee=='P') {
               WHERE tunnus='$otunnus' and yhtio='$kukarow[yhtio]'";
     $result = pupe_query($query);
 
+    // Jos laskulla on maksupositioita, menee ne alatilaan J
+    // eli odottamaan loppulaskutusta
+    $query = "UPDATE lasku
+              SET alatila = 'J'
+              WHERE tunnus = '$otunnus'
+              AND jaksotettu != 0
+              AND yhtio = '$kukarow[yhtio]'";
+    $ures  = pupe_query($query);
+
     // jos kyseessä on käteismyyntiä, tulostetaaan käteislasku
     $query  = "SELECT *
                from lasku, maksuehto

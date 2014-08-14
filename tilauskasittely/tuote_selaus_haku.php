@@ -740,7 +740,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
 
   if (!function_exists("tuoteselaushaku_vastaavat_korvaavat")) {
     function tuoteselaushaku_vastaavat_korvaavat($tvk_taulu, $tvk_korvaavat, $tvk_tuoteno) {
-      global $kukarow, $kieltolisa, $poislisa, $hinta_rajaus, $extra_poislisa, $erikoisvarastolisa;
+      global $kukarow, $kieltolisa, $poislisa, $hinta_rajaus, $extra_poislisa;
 
       if ($tvk_taulu != "vastaavat") $kyselylisa = " and {$tvk_taulu}.tuoteno != '$tvk_tuoteno' ";
       else $kyselylisa = "";
@@ -774,7 +774,6 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
                 $kieltolisa
                 $poislisa
                 $extra_poislisa
-                $erikoisvarastolisa
                 ORDER BY if({$tvk_taulu}.jarjestys=0, 9999, {$tvk_taulu}.jarjestys), {$tvk_taulu}.tuoteno";
       $kores = pupe_query($query);
 
@@ -784,7 +783,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
 
   if (!function_exists("tuoteselaushaku_tuoteperhe")) {
     function tuoteselaushaku_tuoteperhe($esiisatuoteno, $tuoteno, $isat_array, $kaikki_array, $rows, $tyyppi = "P") {
-      global $kukarow, $kieltolisa, $poislisa, $hinta_rajaus, $extra_poislisa, $erikoisvarastolisa;
+      global $kukarow, $kieltolisa, $poislisa, $hinta_rajaus, $extra_poislisa;
 
       if (!in_array($tuoteno, $isat_array)) {
         $isat_array[] = $tuoteno;
@@ -820,7 +819,6 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
                   $kieltolisa
                   $poislisa
                   $extra_poislisa
-                  $erikoisvarastolisa
                   ORDER BY tuoteperhe.tuoteno";
         $kores = pupe_query($query);
 
@@ -835,17 +833,6 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
 
       return array($isat_array, $kaikki_array, $rows);
     }
-  }
-
-  if ($kukarow['extranet'] != '') {
-    $vertailu = array();
-    $vertailu[] = $yhtiorow['erikoisvarastomyynti_alarajasumma'];
-    $vertailu[] = $yhtiorow['erikoisvarastomyynti_alarajasumma_rivi'];
-    $korkeampi = max($vertailu);
-    $erikoisvarastolisa = " AND tuote.myyntihinta >= $korkeampi ";
-  }
-  else{
-    $erikoisvarastolisa = '';
   }
 
   $query = "SELECT
@@ -882,7 +869,6 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             $extra_poislisa
             $poislisa
             $hinta_rajaus
-            $erikoisvarastolisa
             ORDER BY jarjestys, $jarjestys $sort
             LIMIT 500";
   $result = pupe_query($query);
@@ -1109,62 +1095,77 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             }
           }
           if ($kukarow['extranet'] != '' and hae_saldo($row_value) <= 0) {
-            unset($rows[$row_key]);
+            $vertailu = array();
+            $vertailu[] = $yhtiorow['erikoisvarastomyynti_alarajasumma'];
+            $vertailu[] = $yhtiorow['erikoisvarastomyynti_alarajasumma_rivi'];
+            $korkeampi = max($vertailu);
+            if ($row_value["myyntihinta"] <= $korkeampi) {
+              unset($rows[$row_key]);
+            }
           }
         }
       }
 
+      if (count($rows) == 1) {
+        $muoto = 'tuote';
+      }
+      else{
+        $muoto = 'tuotetta';
+      }
+
       if ($hae_ja_selaa_row['selite'] == 'B') {
-        echo "&raquo;  ".count($rows)." ", t("tuotetta")."</h3>";
+        echo "&raquo;  ".count($rows)." ", t($muoto)."</h3>";
       }
       else {
-        echo "&raquo;  ".count($rows)." ", t("tuotetta")."<br/><br/>";
+        echo "&raquo;  ".count($rows)." ", t($muoto)."<br/><br/>";
       }
 
-      echo "<table>";
-      echo "<tr>";
+      if (count($rows) > 0) {
+        echo "<table>";
+        echo "<tr>";
 
-      echo "<td class='back'>&nbsp;</td>";
-      echo "<th>&nbsp;</th>";
+        echo "<td class='back'>&nbsp;</td>";
+        echo "<th>&nbsp;</th>";
 
-      echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=tuoteno$ulisa'>".t("Tuoteno")."</a>";
+        echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=tuoteno$ulisa'>".t("Tuoteno")."</a>";
 
-      if ($lisatiedot != "") {
-        echo "<br/><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=toim_tuoteno$ulisa'>".t("Toim Tuoteno");
-      }
-
-      echo "</th>";
-
-      echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=nimitys$ulisa'>".t("Nimitys")."</th>";
-      echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=osasto$ulisa'>".t("Osasto")."<br><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=try$ulisa'>".t("Try")."</th>";
-
-      if ($kukarow['hinnat'] >= 0) {
-        echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=hinta$ulisa'>".t("Hinta");
-
-        if ($lisatiedot != "" and $kukarow["extranet"] == "") {
-          echo "<br/><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=nettohinta$ulisa'>".t("Nettohinta");
+        if ($lisatiedot != "") {
+          echo "<br/><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=toim_tuoteno$ulisa'>".t("Toim Tuoteno");
         }
 
         echo "</th>";
-      }
 
-      if ($lisatiedot != "" and $kukarow["extranet"] == "") {
-        echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=aleryhma$ulisa'>".t("Aleryhm‰")."<br/><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=status$ulisa'>".t("Status")."</th>";
-      }
-      // Ext-ennakolla kun asiakas lis‰‰ rivej‰ ei ole tarpeellista n‰ytt‰‰ myyt‰viss‰-saraketta
-      if ($toim_kutsu != "EXTENNAKKO") {
-        echo "<th>".t("Myyt‰viss‰")."</th>";
-      }
+        echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=nimitys$ulisa'>".t("Nimitys")."</th>";
+        echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=osasto$ulisa'>".t("Osasto")."<br><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=try$ulisa'>".t("Try")."</th>";
 
-      if ($lisatiedot != "" and $kukarow["extranet"] == "") {
-        echo "<th>".t("Hyllyss‰")."</th>";
-      }
+        if ($kukarow['hinnat'] >= 0) {
+          echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=hinta$ulisa'>".t("Hinta");
 
-      if ($oikeurow["paivitys"] == 1 and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
-        echo "<th>&nbsp;</th>";
-      }
+          if ($lisatiedot != "" and $kukarow["extranet"] == "") {
+            echo "<br/><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=nettohinta$ulisa'>".t("Nettohinta");
+          }
 
-      echo "</tr>";
+          echo "</th>";
+        }
+
+        if ($lisatiedot != "" and $kukarow["extranet"] == "") {
+          echo "<th><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=aleryhma$ulisa'>".t("Aleryhm‰")."<br/><a href = '?submit_button=1&toim_kutsu=$toim_kutsu&sort=$sort&ojarj=status$ulisa'>".t("Status")."</th>";
+        }
+        // Ext-ennakolla kun asiakas lis‰‰ rivej‰ ei ole tarpeellista n‰ytt‰‰ myyt‰viss‰-saraketta
+        if ($toim_kutsu != "EXTENNAKKO") {
+          echo "<th>".t("Myyt‰viss‰")."</th>";
+        }
+
+        if ($lisatiedot != "" and $kukarow["extranet"] == "") {
+          echo "<th>".t("Hyllyss‰")."</th>";
+        }
+
+        if ($oikeurow["paivitys"] == 1 and ($kukarow["kuka"] != "" or is_numeric($ostoskori))) {
+          echo "<th>&nbsp;</th>";
+        }
+
+        echo "</tr>";
+      }
     }
     else {
       echo "<br/>";

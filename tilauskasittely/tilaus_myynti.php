@@ -201,8 +201,8 @@ if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
 }
 
 if ($kukarow["extranet"] == "") {
-  echo "<script src='../js/tilaus.js'></script>";
-  echo "<script src='../js/tilaus_myynti/tilaus_myynti.js'></script>";
+  echo "<script src='../js/tilaus.js?cachebuster=",uniqid(),"'></script>";
+  echo "<script src='../js/tilaus_myynti/tilaus_myynti.js?cachebuster=",uniqid(),"'></script>";
 }
 
 if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and (int) $kukarow["kesken"] > 0) {

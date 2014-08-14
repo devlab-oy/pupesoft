@@ -9948,7 +9948,7 @@ if (!function_exists('livesearch_vauriopoytakirjahaku')) {
     $submit = $_REQUEST["livesearch_submit"];
     $haku = trim($_REQUEST["livesearch_haku"]);
 
-    if (strlen($haku) > 2 and $haku{0} != "*" and substr($haku, -1) != '*' and $haku{0} != "?" and $haku{0} != "#") {
+    if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
 
       echo "
       <script TYPE='text/javascript' LANGUAGE='JavaScript'>

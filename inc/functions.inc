@@ -19093,7 +19093,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
         $onko_kerayserat_kaytossa = true;
       }
 
-      if ($onko_kerayserat_kaytossa === true and $yhtiorow['koontilahete_kerayserissa'] == '') {
+      if ($onko_kerayserat_kaytossa === true and $yhtiorow['koontilahete_kollitiedot'] == '') {
         $koontiselect  = " ifnull(kerayserat.sscc, 0) sscc, ifnull(kerayserat.sscc_ulkoinen, 99999999) sscc_ulkoinen, pakkaus.pakkaus, kerayserat.kpl_keratty AS varattu, 0 AS kpl, 0 as jt, ifnull(kerayserat.kpl, tilausrivi.tilkpl) AS tilkpl,";
         $koontirivihinta = "round(tilausrivi.hinta * ifnull(kerayserat.kpl_keratty, (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl)) * {$query_ale_lisa},'{$yhtiorow['hintapyoristys']}') rivihinta,";
         $koontijoin   = " LEFT JOIN kerayserat ON (kerayserat.tilausrivi = tilausrivi.tunnus AND kerayserat.yhtio = tilausrivi.yhtio)
@@ -19272,7 +19272,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
           $siirto = 20;
         }
 
-        if ($otsikoitu === false or $yhtiorow['koontilahete_kerayserissa'] == '') {
+        if ($otsikoitu === false or $yhtiorow['koontilahete_kollitiedot'] == '') {
           $params_lahete['kala'] = $params_lahete['kala'] -= $siirto;
           $params_lahete = rivi_otsikot_lahete($params_lahete);
           $otsikoitu = true;

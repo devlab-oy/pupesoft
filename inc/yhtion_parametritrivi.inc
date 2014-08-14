@@ -329,14 +329,14 @@ if ($fieldname == "koontilaskut_yhdistetaan") {
   $jatko = 0;
 }
 
-if ($fieldname == "koontilahete_kerayserissa") {
+if ($fieldname == "koontilahete_kollitiedot") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
   $selE = $trow[$i] == 'E' ? 'selected' : '';
 
-  $ulos .= "<option value = ''>".t("Koontilähetteen tuotteet niputetaan per SSCC")."</option>";
-  $ulos .= "<option value = 'E' {$selE}>".t("Koontilähetteen tuotteita ei niputeta SSCC:llä")."</option>";
+  $ulos .= "<option value = ''>".t("Keräysvahvistus/sähköinen lähete: Tuotteiden kollitiedot (SSCC) näytetään")."</option>";
+  $ulos .= "<option value = 'E' {$selE}>".t("Keräysvahvistus/sähköinen lähete: Tuotteiden kollitietoja (SSCC) ei näytetä")."</option>";
 
   $ulos .= "</select>";
   $ulos .=  "</td>";

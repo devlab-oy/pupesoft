@@ -422,13 +422,13 @@ else {
       $lasklisa .= " and lasku.ketjutus != '' ";
     }
 
-    // laskutetaan vain tietyt tilausket
+
     if (isset($laskutettavat) and $laskutettavat != "") {
+      // Laskutetaan vain tietyt tilausket
       $lasklisa .= " and lasku.tunnus in ($laskutettavat) ";
     }
-
-    // Komentoriviltä ei ikinä laskuteta käteismyyntejä ($php_cli ei kelpaa, koska $editil_cli virittää sen myös)
-    if (php_sapi_name() == 'cli') {
+    elseif (php_sapi_name() == 'cli') {
+      // Komentoriviltä ei ikinä laskuteta käteismyyntejä ($php_cli ei kelpaa, koska $editil_cli virittää sen myös)
       $lasklisa_eikateiset = " JOIN maksuehto ON (lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.kateinen='')";
     }
 

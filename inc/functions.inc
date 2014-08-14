@@ -10794,6 +10794,11 @@ if (!function_exists("t_avainsana")) {
     $paramshasharray = md5($laji.$kieli.$where.$yhtio.$eivielakaytossa.$return);
 
     if (isset($kaannetyt[$paramshasharray])) {
+
+      if (is_resource($kaannetyt[$paramshasharray])) {
+        mysql_data_seek($kaannetyt[$paramshasharray], 0);
+      }
+
       return $kaannetyt[$paramshasharray];
     }
 
@@ -19115,8 +19120,12 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
       $jtsort_lisa = "0 as jtsort,";
     }
 
+    $ale_query_select_lisa = generoi_alekentta_select('yhteen', 'M');
+
     //generoidaan lähetteelle ja keräyslistalle rivinumerot
-    $query = "SELECT tilausrivi.*, {$koontiselect}
+    $query = "SELECT tilausrivi.*,
+              $ale_query_select_lisa aleyhteensa,
+              {$koontiselect}
               round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
               round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
               {$koontirivihinta}
@@ -19140,47 +19149,47 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
     $riresult = pupe_query($query);
 
     $params_lahete = array(
-      'arvo'            => 0,
-      'asrow'            => $asrow,
-      'boldi'            => $boldi,
-      'ei_otsikoita'        => '',
-      'extranet_tilausvahvistus'  => $extranet_tilausvahvistus,
-      'iso'            => $iso,
-      'jtid'            => '',
-      'kala'            => 0,
-      'kassa_ale'          => '',
-      'kieli'            => $kieli,
-      'lahetetyyppi'        => $lahetetyyppi,
-      'laskurow'          => $laskurow,
+      'arvo'                     => 0,
+      'asrow'                    => $asrow,
+      'boldi'                    => $boldi,
+      'ei_otsikoita'             => '',
+      'extranet_tilausvahvistus' => $extranet_tilausvahvistus,
+      'iso'                      => $iso,
+      'jtid'                     => '',
+      'kala'                     => 0,
+      'kassa_ale'                => '',
+      'kieli'                    => $kieli,
+      'lahetetyyppi'             => $lahetetyyppi,
+      'laskurow'                 => $laskurow,
       'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
-      'norm'            => $norm,
-      'page'            => NULL,
-      'pdf'            => NULL,
-      'perheid'          => 0,
-      'pieni'            => $pieni,
-      'pieni_boldi'        => $pieni_boldi,
-      'pitkattuotteet'      => FALSE,
-      'rectparam'          => $rectparam,
-      'riviresult'        => $riresult,
-      'rivinkorkeus'        => $rivinkorkeus,
-      'rivinumerot'        => "",
-      'row'            => NULL,
-      'sivu'            => 1,
-      'summa'            => 0,
-      'tee'            => $tee,
-      'thispage'          => NULL,
-      'toim'            => $toim,
-      'tots'            => 0,
-      'tuotenopituus'        => '',
-      'nimityskohta'        => '',
-      'nimitysleveys'        => '',
-      'tyyppi'          => '',
-      'useita'          => '',
-      'komento'          => $komento,
-      'yhteensamaara'        => 0,
-      'lahetekpl'          => $lahetekpl,
-      'onko_kerayserat_kaytossa'   => $onko_kerayserat_kaytossa,
-      'koontilahete'        => $koontilahete,
+      'norm'                     => $norm,
+      'page'                     => NULL,
+      'pdf'                      => NULL,
+      'perheid'                  => 0,
+      'pieni'                    => $pieni,
+      'pieni_boldi'              => $pieni_boldi,
+      'pitkattuotteet'           => FALSE,
+      'rectparam'                => $rectparam,
+      'riviresult'               => $riresult,
+      'rivinkorkeus'             => $rivinkorkeus,
+      'rivinumerot'              => "",
+      'row'                      => NULL,
+      'sivu'                     => 1,
+      'summa'                    => 0,
+      'tee'                      => $tee,
+      'thispage'                 => NULL,
+      'toim'                     => $toim,
+      'tots'                     => 0,
+      'tuotenopituus'            => '',
+      'nimityskohta'             => '',
+      'nimitysleveys'            => '',
+      'tyyppi'                   => '',
+      'useita'                   => '',
+      'komento'                  => $komento,
+      'yhteensamaara'            => 0,
+      'lahetekpl'                => $lahetekpl,
+      'onko_kerayserat_kaytossa' => $onko_kerayserat_kaytossa,
+      'koontilahete'             => $koontilahete,
     );
 
     if ($laskurow["tila"] == "G") {
@@ -19195,7 +19204,57 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
     unset($sscc);
     $otsikoitu = false;
 
+    $laheterows = array();
+
+    // tsekataan pitääkö tuote korvata osaluettelolla
     while ($row = mysql_fetch_assoc($riresult)) {
+
+      if ($yhtiorow["pura_osaluettelot"] != "") {
+        // Korvataanko tilauksella oleva rivi osaluettelolla
+        $query = "SELECT tuote.tuoteno, tuote.yksikko, tuote.nimitys,
+                  tuoteperhe.kerroin,
+                  tuoteperhe.hintakerroin myyntihinta,
+                  round(tuoteperhe.hintakerroin * tuoteperhe.kerroin * ({$row['varattu']}+{$row['jt']}+{$row['kpl']}) * (1-{$row['aleyhteensa']}/100),'$yhtiorow[hintapyoristys]') rivihinta
+                  FROM tuoteperhe
+                  JOIN tuote ON (tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tuoteno=tuote.tuoteno)
+                  WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
+                  AND tuoteperhe.isatuoteno = '$row[tuoteno]'
+                  AND tuoteperhe.tyyppi     = 'O'
+                  ORDER BY tuote.tuoteno";
+        $tuoteperhe_result = pupe_query($query);
+
+        if (mysql_num_rows($tuoteperhe_result) > 0) {
+          while ($tuoteperhe_row = mysql_fetch_assoc($tuoteperhe_result)) {
+
+            $lisarow = $row;
+
+            $lisarow["tuoteno"] = $tuoteperhe_row["tuoteno"];
+            $lisarow["nimitys"] = $tuoteperhe_row["nimitys"];
+            $lisarow["yksikko"] = $tuoteperhe_row["yksikko"];
+
+            $lisarow["hinta"]       = $tuoteperhe_row["myyntihinta"];
+            $lisarow["myyntihinta"] = $tuoteperhe_row["myyntihinta"];
+            $lisarow["rivihinta"]   = $tuoteperhe_row["rivihinta"];
+
+            $lisarow["tilkpl"]  = $tuoteperhe_row["kerroin"]*$row["tilkpl"];
+            $lisarow["varattu"] = $tuoteperhe_row["kerroin"]*$row["varattu"];
+            $lisarow["jt"]      = $tuoteperhe_row["kerroin"]*$row["jt"];
+            $lisarow["kpl"]     = $tuoteperhe_row["kerroin"]*$row["kpl"];
+
+            $laheterows[] = $lisarow;
+          }
+        }
+        else {
+          $laheterows[] = $row;
+        }
+      }
+      else {
+        $laheterows[] = $row;
+      }
+    }
+
+
+    foreach ($laheterows as $row) {
 
       $params_lahete["row"] = $row;
 
@@ -26550,6 +26609,7 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
               JOIN asiakas
               ON ( asiakas.yhtio = lasku.yhtio
                 AND asiakas.tunnus     = lasku.liitostunnus
+                AND asiakas.kauppatapahtuman_luonne != 21
                 {$asiakas_join} )
               JOIN tiliointi USE INDEX (tositerivit_index)
               ON ( tiliointi.yhtio = lasku.yhtio
@@ -26930,7 +26990,7 @@ if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
 
 if (!function_exists('merkkaa_saldovahvistus_lahetetyksi')) {
   function merkkaa_saldovahvistus_lahetetyksi($saldovahvistus) {
-    global $kukarow, $yhtiorow;
+    global $kukarow, $yhtiorow, $masterlink;
 
     $query = "INSERT INTO saldovahvistukset
               SET lahetys_pvm = CURRENT_DATE,
@@ -26938,7 +26998,7 @@ if (!function_exists('merkkaa_saldovahvistus_lahetetyksi')) {
               avoin_saldo_pvm       = '".date('Y-m-d', strtotime($saldovahvistus['laskun_avoin_paiva']))."',
               ryhmittely_tyyppi     = '{$saldovahvistus['ryhmittely_tyyppi']}',
               yhtio                 = '{$kukarow['yhtio']}'";
-    pupe_query($query);
+    pupe_query($query, $masterlink);
     $saldovahvistus_tunnus = mysql_insert_id();
 
     foreach ($saldovahvistus['laskut'] as $lasku) {
@@ -26958,7 +27018,7 @@ if (!function_exists('merkkaa_saldovahvistus_lahetetyksi')) {
                 era_pvm       = '{$lasku['erpcm']}',
                 summa         = {$lasku['avoin_saldo']},
                 yhtio         = '{$kukarow['yhtio']}'";
-      pupe_query($query);
+      pupe_query($query, $masterlink);
     }
   }
 }
@@ -28736,7 +28796,8 @@ if (!function_exists("tallenna_tiliote_viite")) {
     $tiliotedataresult = pupe_query($query);
 
     // Etsitään aineistonumero
-    $query = "SELECT max(aineisto) + 1 AS aineisto FROM tiliotedata";
+    $query = "SELECT ifnull(max(aineisto), 0) + 1 AS aineisto
+              FROM tiliotedata";
     $aineistores = pupe_query($query);
     $aineistorow = mysql_fetch_assoc($aineistores);
 
@@ -29211,14 +29272,17 @@ if (!function_exists("kasittele_tiliote_viite")) {
     $meteidres = pupe_query($query);
     $meteidrow = mysql_fetch_assoc($meteidres);
 
+    $tiliotedatarow = mysql_fetch_assoc($tiliotedataresult);
+    mysql_data_seek($tiliotedataresult, 0);
+
+    $query = "SELECT *
+              FROM yriti
+              WHERE tilino = '{$tiliotedatarow['tilino']}'";
+    $yriti_result = pupe_query($query);
+    $yritirow = mysql_fetch_assoc($yriti_result);
+
     while ($tiliotedatarow = mysql_fetch_assoc($tiliotedataresult)) {
       $tietue = $tiliotedatarow['tieto'];
-
-      $query = "SELECT *
-                FROM yriti
-                WHERE tilino = '{$tiliotedatarow['tilino']}'";
-      $yriti_result = pupe_query($query);
-      $yritirow = mysql_fetch_assoc($yriti_result);
 
       // Setataan kukarow-yhtiö
       $kukarow["yhtio"] = $yritirow["yhtio"];

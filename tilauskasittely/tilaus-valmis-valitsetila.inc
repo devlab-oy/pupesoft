@@ -347,6 +347,29 @@ elseif ($kerattavia > 0 and $kutsuja != 'keraa.php' and !$tilaus_toimitetuksi) {
     $alatila = 'D';
   }
 
+  // Jos yhtiön parametreissä on keräyserät A tarkistetaan asiakkaan takaa
+  if ($yhtiorow['kerayserat'] == 'A') {
+    // Haetaan kerayseratieto asiakkaan takaa
+    $query = "SELECT kerayserat
+              FROM asiakas
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$laskurow['liitostunnus']}'";
+    $asrow = mysql_fetch_assoc(pupe_query($query));
+  }
+
+  // Poistetaan vanhat keräyserät kun palautetaan tilaus takaisin tulostusjonoon,
+  // jottei keräyseriä luotaisi joka kerta vaan lisää ja lisää,
+  // kun palautetaan tilaus takaisin tulostusjonoon
+  if ($yhtiorow['kerayserat'] == 'K'
+    or $yhtiorow['kerayserat'] == 'P'
+    or ($yhtiorow['kerayserat'] == 'A' and $asrow['kerayserat'] == 'A')) {
+
+    $query = "DELETE FROM kerayserat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND otunnus = '{$laskurow['tunnus']}'";
+    pupe_query($query);
+  }
+
   $query  = "UPDATE lasku SET
              tila        = '{$tila}',
              alatila     = '{$alatila}'

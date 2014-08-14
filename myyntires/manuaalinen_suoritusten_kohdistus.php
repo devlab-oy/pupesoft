@@ -277,10 +277,6 @@ if ($tila == 'tee_kohdistus') {
     else {
       $laskutunnuksetkale = 0;
     }
-
-
-
-
     // Tarkistetaan muutama asia
     if ($laskutunnukset == 0 and $laskutunnuksetkale == 0) {
       echo "<font class='error'>".t("Olet kohdistamassa, mutta et ole valinnut mit‰‰n kohdistettavaa")."!</font><br><br>";
@@ -760,33 +756,6 @@ if ($tila == 'tee_kohdistus') {
 
   }
   else {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     //*** T‰ss‰ k‰sitell‰‰n tavallinen suoritus ***/
     $laskujen_summa = 0;
 
@@ -905,8 +874,6 @@ if ($tila == 'tee_kohdistus') {
 
       $kassaan = 0;
       $kassaan_valuutassa = 0;
-
-
 
       foreach ($laskut as $lasku) {
 

@@ -742,7 +742,10 @@ else {
 
     if ($toim == 'YLLAPITO' and $etsi != "" and $haku != "") {
       $haku = substr($haku, 0, -2); // Poistetaan vika sulku $hausta
-      $haku .= " or tilausrivin_lisatiedot.sopimuksen_lisatieto1 like '%{$etsi}%' or tilausrivin_lisatiedot.sopimuksen_lisatieto2 like '%{$etsi}%' or lasku.asiakkaan_tilausnumero like '%{$etsi}%') ";
+      $haku .= " or tilausrivin_lisatiedot.sopimuksen_lisatieto1 like '%{$etsi}%'
+                 or tilausrivin_lisatiedot.sopimuksen_lisatieto2 like '%{$etsi}%'
+                 or lasku.asiakkaan_tilausnumero like '%{$etsi}%' 
+                 or laite.sarjanro like '%{$etsi}%') ";
     }
 
     // Myyntitilauksia voidaan etsiä myös asiakkaan tilausnumerolla
@@ -1669,9 +1672,11 @@ else {
               LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
               LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
               LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus)
+              LEFT JOIN laitteen_sopimukset ON laitteen_sopimukset.sopimusrivin_tunnus = tilausrivi.tunnus
+              LEFT JOIN laite ON laite.tunnus = laitteen_sopimukset.laitteen_tunnus
               WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-              AND tila          = '0'
-              AND alatila       NOT IN ('D')
+              AND lasku.tila          = '0'
+              AND lasku.alatila       NOT IN ('D')
               $haku
               GROUP BY 1,2,3,4,5,6
               $mt_order_by

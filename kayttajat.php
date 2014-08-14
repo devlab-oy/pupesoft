@@ -1411,10 +1411,10 @@ if ($tee == 'MUUTA') {
             $sel3 = "";
           }
           elseif ($krow['jyvitys'] == "S") {
-              $sel1 = "";
-              $sel2 = "";
-              $sel3 = "SELECTED";
-            }
+            $sel1 = "";
+            $sel2 = "";
+            $sel3 = "SELECTED";
+          }
           else {
             $sel1 = "";
             $sel2 = "SELECTED";

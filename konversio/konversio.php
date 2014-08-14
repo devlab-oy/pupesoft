@@ -32,22 +32,22 @@ if ($request['action'] == 'aja_konversio') {
   $dumper->aja();
 }
 elseif ($request['action'] == 'poista_konversio_aineisto_kannasta') {
-    $query_array = array(
-      'DELETE FROM tyomaarays',
-      'DELETE FROM lasku',
-      'DELETE FROM laskun_lisatiedot',
-      'DELETE FROM tilausrivi',
-      'DELETE FROM tilausrivin_lisatiedot',
-    );
-    foreach ($query_array as $query) {
-      pupe_query($query);
-    }
-
-    echo t('Poistettu');
-    echo "<br/>";
-
-    echo_kayttoliittyma($request);
+  $query_array = array(
+    'DELETE FROM tyomaarays',
+    'DELETE FROM lasku',
+    'DELETE FROM laskun_lisatiedot',
+    'DELETE FROM tilausrivi',
+    'DELETE FROM tilausrivin_lisatiedot',
+  );
+  foreach ($query_array as $query) {
+    pupe_query($query);
   }
+
+  echo t('Poistettu');
+  echo "<br/>";
+
+  echo_kayttoliittyma($request);
+}
 else {
   echo_kayttoliittyma($request);
 }

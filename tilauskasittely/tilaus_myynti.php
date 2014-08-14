@@ -1853,8 +1853,8 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
     }
   }
   elseif ($toim == 'VAURIOPOYTAKIRJA') {
-      require 'otsik_vauriopoytakirja.inc';
-    }
+    require 'otsik_vauriopoytakirja.inc';
+  }
   else {
     require 'otsik.inc';
   }
@@ -3501,11 +3501,11 @@ if ($tee == '') {
     }
   }
   elseif ($toim == 'VAURIOPOYTAKIRJA') {
-      echo "  <tr>$jarjlisa
+    echo "  <tr>$jarjlisa
           <th align='left'>".t("Operaattorin tikettinumero")."</th>
           <td>123321</td>
         </tr>";
-    }
+  }
 
   echo "</table>";
 
@@ -7739,13 +7739,13 @@ if ($tee == '') {
           echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
         }
         elseif ($yhtiorow['vauriopoytakirja'] == 'K') {
-            echo "<tr>$jarjlisa";
-            echo "<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>";
-            echo "<th colspan='5' align='right'>".t("Yhteensä").":</th>";
-            echo "<td class='spec' align='right'>".sprintf("%.2f", $summa)."</td>";
-            echo "<td class='spec'>$laskurow[valkoodi]</td>";
-            echo "</tr>";
-          }
+          echo "<tr>$jarjlisa";
+          echo "<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>";
+          echo "<th colspan='5' align='right'>".t("Yhteensä").":</th>";
+          echo "<td class='spec' align='right'>".sprintf("%.2f", $summa)."</td>";
+          echo "<td class='spec'>$laskurow[valkoodi]</td>";
+          echo "</tr>";
+        }
         else {
           echo "<tr>$jarjlisa
               <td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>
@@ -8598,14 +8598,14 @@ if ($tee == '') {
             </td>";
       }
       elseif ($laskurow['tyostatus'] == '3') {
-          echo "  <td class='back' valign='top'>
+        echo "  <td class='back' valign='top'>
               <form name='tlepaamaan' method='post' action='{$lopetus_temp}'>
                 <input type='hidden' name='tee' value='merkitse_maksetuksi' />
                 <input type='hidden' name='tyomaarays_tunnus' value='{$kukarow['kesken']}' />
                 <input type='submit' value='".t("Merkitse maksetuksi")."' />
               </form>
             </td>";
-        }
+      }
       else {
         echo "  <td class='back' valign='top'>
               <form name='tlepaamaan' method='post' action='{$lopetus_temp}'>

@@ -644,7 +644,7 @@ if (!function_exists("lopetus")) {
         if ($meta == "") {
           if ($palautavainurli) return $lopetus;
           elseif ($row["nimitys"] != "") echo "<a href='$lopetus'>&laquo; ".t("Palaa ohjelmaan").": ".t("$row[nimitys]")."$nlisa</a><br>";
-            else echo "<a href='$lopetus'>&laquo; ".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";
+          else echo "<a href='$lopetus'>&laquo; ".t("Palaa edelliseen n‰kym‰‰n")."</a><br>";
         }
 
         if ($edlopetus != "") {
@@ -22224,10 +22224,10 @@ if (!function_exists('_xls_jarjestetty_rivit')) {
           _kirjoita_solu($xls, $column_name, $rivi[$column_name], $rivi_numero, $sarake_numero, $force_to_string);
         }
         elseif (!isset($rivi[$column_name])) {
-            //jos aineisto on viallinen,
-            //lis‰t‰‰n tyhj‰ solu jotta solujen j‰rjestys pysyy oikeana
-            _kirjoita_solu($xls, $column_name, '', $rivi_numero, $sarake_numero, $force_to_string);
-          }
+          //jos aineisto on viallinen,
+          //lis‰t‰‰n tyhj‰ solu jotta solujen j‰rjestys pysyy oikeana
+          _kirjoita_solu($xls, $column_name, '', $rivi_numero, $sarake_numero, $force_to_string);
+        }
       }
       $rivi_numero++;
       $sarake_numero = 0;
@@ -22249,8 +22249,8 @@ if (!function_exists('_kirjoita_solu')) {
       $xls->writeNumber($rivi, $sarake, $string);
     }
     elseif (valid_date($string) != 0 and valid_date($string) !== false and !in_array($key, $force_to_string)) {
-        $xls->writeDate($rivi, $sarake, $string);
-      }
+      $xls->writeDate($rivi, $sarake, $string);
+    }
     else {
       $xls->write($rivi, $sarake, $string);
     }
@@ -25638,8 +25638,8 @@ if (!function_exists('hae_asiakashinnat')) {
       $poislisa = " and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0) ";
     }
     elseif ($tyyppi == 'kaikki') {
-        $poislisa = "";
-      }
+      $poislisa = "";
+    }
     else {
       $poislisa = " and tuote.status not in ('P','X') ";
     }
@@ -26389,11 +26389,11 @@ if (!function_exists('hae_lahetetyt_saldovahvistukset')) {
       $asiakas_join = "  AND asiakas.ytunnus = '{$request['ryhmittely_arvo']}'";
     }
     elseif ($request['ryhmittely_tyyppi'] == 'asiakasnro' and $request['ryhmittely_arvo'] != '') {
-        $asiakas_join = "  AND asiakas.asiakasnro = '{$request['ryhmittely_arvo']}'";
-      }
+      $asiakas_join = "  AND asiakas.asiakasnro = '{$request['ryhmittely_arvo']}'";
+    }
     elseif ($request['ryhmittely_tyyppi'] == 'nimi' and $request['ryhmittely_arvo'] != '') {
-        $asiakas_join = "  AND asiakas.nimi LIKE '%{$request['ryhmittely_arvo']}%'";
-      }
+      $asiakas_join = "  AND asiakas.nimi LIKE '%{$request['ryhmittely_arvo']}%'";
+    }
 
     $saldovahvistus_where = "";
     if (isset($request['alku_paiva']) and isset($request['loppu_paiva'])) {
@@ -26526,11 +26526,11 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
         $asiakas_join = "  AND asiakas.ytunnus = '{$request['ryhmittely_arvo']}'";
       }
       elseif ($request['ryhmittely_tyyppi'] == 'asiakasnro' and $request['ryhmittely_arvo'] != '') {
-          $asiakas_join = "  AND asiakas.asiakasnro = '{$request['ryhmittely_arvo']}'";
-        }
+        $asiakas_join = "  AND asiakas.asiakasnro = '{$request['ryhmittely_arvo']}'";
+      }
       elseif ($request['ryhmittely_tyyppi'] == 'nimi' and $request['ryhmittely_arvo'] != '') {
-          $asiakas_join = "  AND asiakas.nimi LIKE '%{$request['ryhmittely_arvo']}%'";
-        }
+        $asiakas_join = "  AND asiakas.nimi LIKE '%{$request['ryhmittely_arvo']}%'";
+      }
     }
 
     $lasku_where = "";
@@ -26813,21 +26813,21 @@ if (!function_exists('sum_array')) {
       }
       elseif ($params['direction'] == 'y') {
 
-          $keys = array_keys($array);
+        $keys = array_keys($array);
 
-          if (array_key_exists($params['key'], $array[$keys[0]])) {
-            for ($x = 0; $x < count($keys); $x++) {
-              if (!in_array($keys[$x], $exclusions)) {
-                $sum += $array[$keys[$x]][$params['key']];
-              }
+        if (array_key_exists($params['key'], $array[$keys[0]])) {
+          for ($x = 0; $x < count($keys); $x++) {
+            if (!in_array($keys[$x], $exclusions)) {
+              $sum += $array[$keys[$x]][$params['key']];
             }
+          }
 
-            return $sum;
-          }
-          else {
-            return false;
-          }
+          return $sum;
         }
+        else {
+          return false;
+        }
+      }
       else {
         return false;
       }

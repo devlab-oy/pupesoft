@@ -669,14 +669,14 @@ if ($tila == "" and !isset($jatka)) {
             </td>";
       }
       elseif ($srow['tyostatus'] == '3') {
-          echo "  <td class='back' valign='top'>
+        echo "  <td class='back' valign='top'>
               <form name='tlepaamaan' method='post' action='{$lopetus_temp}'>
                 <input type='hidden' name='tee' value='merkitse_maksetuksi' />
                 <input type='hidden' name='tyomaarays_tunnus' value='{$tilausnumero}' />
                 <input type='submit' value='".t("Merkitse maksetuksi")."' />
               </form>
             </td>";
-        }
+      }
       else {
         echo "  <td class='back' valign='top'>
               <form name='tlepaamaan' method='post' action='{$lopetus_temp}'>

@@ -44,65 +44,65 @@ if ($tee == 'siirra_tarkastajalle') {
   unset($tyomaarays_tunnus);
 }
 elseif ($tee == 'anna_laskutuslupa') {
-    if ($yhtiorow['lisakuluprosentti'] != 0) {
+  if ($yhtiorow['lisakuluprosentti'] != 0) {
 
-      // Lasketaan laskun summa ja lisätään lisäkuluprosentti
-      $hinta_query = "SELECT sum(hinta * tilkpl * ({$yhtiorow['lisakuluprosentti']} / 100)) as hinta
+    // Lasketaan laskun summa ja lisätään lisäkuluprosentti
+    $hinta_query = "SELECT sum(hinta * tilkpl * ({$yhtiorow['lisakuluprosentti']} / 100)) as hinta
                       FROM tilausrivi
                       WHERE yhtio = '{$kukarow['yhtio']}'
                       AND otunnus = '{$tyomaarays_tunnus}'";
-      $hinta_result = pupe_query($hinta_query);
-      $lisakulu = mysql_fetch_assoc($hinta_result);
+    $hinta_result = pupe_query($hinta_query);
+    $lisakulu = mysql_fetch_assoc($hinta_result);
 
-      $laskurow = hae_lasku($tyomaarays_tunnus);
+    $laskurow = hae_lasku($tyomaarays_tunnus);
 
-      // Lisäkuluprosentin tiedot
-      $kulutuote = array(
-        'tuoteno'     => 'kulu',
-        'nimitys'     => 'Lisäkuluprosentti',
-        'yksikko'     => 'KPL',
-        'ei_saldoa'     => 'o',
-        'tuotetyyppi'   => 'M'
-      );
+    // Lisäkuluprosentin tiedot
+    $kulutuote = array(
+      'tuoteno'     => 'kulu',
+      'nimitys'     => 'Lisäkuluprosentti',
+      'yksikko'     => 'KPL',
+      'ei_saldoa'     => 'o',
+      'tuotetyyppi'   => 'M'
+    );
 
-      $params = array(
-        'trow'         => $kulutuote,
-        'laskurow'       => $laskurow,
-        'tuoteno'       => 'kulu',
-        'kpl'         => '1',
-        'hinta'         => $lisakulu['hinta'],
-        'var'         => '',
-        'varataan_saldoa'   => 'EI'
-      );
-      lisaa_rivi($params);
-    }
+    $params = array(
+      'trow'         => $kulutuote,
+      'laskurow'       => $laskurow,
+      'tuoteno'       => 'kulu',
+      'kpl'         => '1',
+      'hinta'         => $lisakulu['hinta'],
+      'var'         => '',
+      'varataan_saldoa'   => 'EI'
+    );
+    lisaa_rivi($params);
+  }
 
-    $query = "UPDATE tyomaarays
+  $query = "UPDATE tyomaarays
               SET tyostatus = 3
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND otunnus = '{$tyomaarays_tunnus}'";
-    pupe_query($query);
-    unset($tee);
-    unset($tyomaarays_tunnus);
-  }
+  pupe_query($query);
+  unset($tee);
+  unset($tyomaarays_tunnus);
+}
 elseif ($tee == 'siirra_urakoitsijalle') {
-    $query = "UPDATE tyomaarays
+  $query = "UPDATE tyomaarays
               SET tyostatus = 1
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND otunnus = '{$tyomaarays_tunnus}'";
-    pupe_query($query);
-    unset($tee);
-    unset($tyomaarays_tunnus);
-  }
+  pupe_query($query);
+  unset($tee);
+  unset($tyomaarays_tunnus);
+}
 elseif ($tee == 'merkitse_maksetuksi') {
-    $query = "UPDATE tyomaarays
+  $query = "UPDATE tyomaarays
               SET tyostatus = 4
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND otunnus = '{$tyomaarays_tunnus}'";
-    pupe_query($query);
-    unset($tee);
-    unset($tyomaarays_tunnus);
-  }
+  pupe_query($query);
+  unset($tee);
+  unset($tyomaarays_tunnus);
+}
 else {
   unset($tee);
   unset($tyomaarays_tunnus);
@@ -395,8 +395,8 @@ function hae_vauriopoytakirja_rivit($vauriopoytakirja_tunnus) {
       }
     }
     elseif ($tilausrivi['tuotetyyppi'] == 'K') {
-        $tilausrivit['korjaajat'][] = $tilausrivi;
-      }
+      $tilausrivit['korjaajat'][] = $tilausrivi;
+    }
 
     $yhteensa += $tilausrivi['tilkpl'] * $tilausrivi['hinta'];
   }

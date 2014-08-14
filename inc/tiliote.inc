@@ -901,7 +901,7 @@ case 'T10':
               and alku     = '$tiliotedatarow[alku]'
               and tilino   = '$tiliotedatarow[tilino]'
               and tyyppi   = '$tiliotedatarow[tyyppi]'
-              and substr(tieto,13,18) = '".substr($tietue, 12, 18)."'
+              and substring(tieto,13,18) = '".substr($tietue, 12, 18)."'
               and tunnus  != '$tiliotedatarow[tunnus]'";
     $tdres2peek = mysql_query($query) or pupe_error($query);
 

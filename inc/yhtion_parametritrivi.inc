@@ -1884,9 +1884,17 @@ if ($fieldname == "vienti_erittelyn_tulostus") {
   elseif ($trow[$i] == "E") {
     $sel3 = "selected";
   }
+  elseif ($trow[$i] == "T") {
+    $sel4 = "selected";
+  }
+  elseif ($trow[$i] == "P") {
+    $sel5 = "selected";
+  }
 
   $ulos .= "<option value=''  $sel1>".t("Vientierittely tulostetaan")."</option>";
+  $ulos .= "<option value='T' $sel4>".t("Vientierittely tulostetaan tullinimikkeell‰ ryhmiteltyn‰")."</option>";
   $ulos .= "<option value='I' $sel2>".t("Vientierittely tulostetaan ilman alkuper‰maatietoja")."</option>";
+  $ulos .= "<option value='P' $sel5>".t("Vientierittely tulostetaan ilman alkuper‰maatietoja tullinimikkeell‰ ryhmiteltyn‰")."</option>";
   $ulos .= "<option value='E' $sel3>".t("Vientierittely‰ ei tulosteta")."</option>";
   $ulos .= "</select></td>";
 
@@ -4143,6 +4151,18 @@ if ($fieldname == 'lapsituotteen_poiston_esto') {
 
   $ulos .= "<option value = ''>".t("Sallitaan tuoteperheen lapsituotteen poisto myyntitilauksella")."</option>";
   $ulos .= "<option value = '1' {$sel}>".t("Ei sallita tuoteperheen lapsituotteen poistoa myyntitilauksella")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == 'varastonarvon_jako_usealle_valmisteelle') {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>".t("Raaka-aineen arvo jaetaan valmisteille m‰‰rien ja valmisteiden keskihankintahinnan mukaan kun raaka-aine/aineet jaetaan useaksi valmisteeksi")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("Raaka-aineen arvo voidaan manuaaliesti jakaa valmisteille kun raaka-aine/aineet jaetaan useaksi valmisteeksi")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

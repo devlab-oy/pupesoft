@@ -506,14 +506,22 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
       // Jos on useampi valmiste
       if ((float) $kaikenkaikkiaan > 1) {
 
-        if ((float) $kaikenkaikkiaan_arvot > 0) {
-          //jyvitet‰‰n $uusiarvo valmisteille kappaleiden ja kehahintojen mukaan
-          $uusiarvo = round($uusiarvo * (($isavarattu * $valmisterow["kehahin"])/$kaikenkaikkiaan_arvot), 6);
+        if ($yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K" and !empty($tilrivirow['valmistus_painoarvo'])) {
+          // jyvitet‰‰n $uusiarvo valmisteille kappaleiden ja painoarvon mukaan
+          $uusiarvo *= $tilrivirow['valmistus_painoarvo'];
         }
         else {
-          //jyvitet‰‰n $uusiarvo valmisteille valmisteiden m‰‰r‰n mukaan
-          $uusiarvo = round($uusiarvo/$kaikenkaikkiaan, 6);
+          if ((float) $kaikenkaikkiaan_arvot > 0) {
+            //jyvitet‰‰n $uusiarvo valmisteille kappaleiden ja kehahintojen mukaan
+            $uusiarvo = $uusiarvo * (($isavarattu * $valmisterow["kehahin"]) / $kaikenkaikkiaan_arvot);
+          }
+          else {
+            //jyvitet‰‰n $uusiarvo valmisteille valmisteiden m‰‰r‰n mukaan
+            $uusiarvo = $uusiarvo / $kaikenkaikkiaan;
+          }
         }
+
+        $uusiarvo = round($uusiarvo, 6);
       }
 
       if ($valmisterow["sarjanumeroseuranta"] == "S" or $valmisterow["sarjanumeroseuranta"] == "U" or $valmisterow["sarjanumeroseuranta"] == "G") {

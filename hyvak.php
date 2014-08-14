@@ -11,19 +11,19 @@ if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php")  !== FALSE) {
 
 enable_ajax();
 
-if (!isset($tee))          $tee = "";
-if (!isset($tila))          $tila = "";
-if (!isset($keikalla))        $keikalla = "";
+if (!isset($tee))            $tee = "";
+if (!isset($tila))           $tila = "";
+if (!isset($keikalla))       $keikalla = "";
 if (!isset($kutsuja))        $kutsuja = "";
-if (!isset($tunnus))       $tunnus = "";
-if (!isset($nayta))        $nayta = "";
-if (!isset($iframe))        $iframe = "";
+if (!isset($tunnus))         $tunnus = "";
+if (!isset($nayta))          $nayta = "";
+if (!isset($iframe))         $iframe = "";
 if (!isset($iframe_id))      $iframe_id = "";
-if (!isset($ok))          $ok = "";
-if (!isset($toimittajaid))      $toimittajaid = "";
-if (!isset($livesearch_tee))   $livesearch_tee = "";
-if (!isset($saako_hyvaksya))   $saako_hyvaksya = FALSE;
-if (!isset($lisaselite)) $lisaselite = "";
+if (!isset($ok))             $ok = "";
+if (!isset($toimittajaid))   $toimittajaid = "";
+if (!isset($livesearch_tee)) $livesearch_tee = "";
+if (!isset($saako_hyvaksya)) $saako_hyvaksya = FALSE;
+if (!isset($lisaselite))     $lisaselite = "";
 
 if ($livesearch_tee == "TILIHAKU") {
   livesearch_tilihaku();
@@ -33,7 +33,6 @@ if ($livesearch_tee == "TILIHAKU") {
 echo "  <script language='javascript'>
 
       $(function() {
-
         $('.hae_lisaselite').on('click', function() {
           $('.lisaselite').val($('#lisaselite').val());
         });
@@ -63,8 +62,8 @@ if ($keikalla == "on") {
     //  Jos meill‰ ei ole viel‰ toimittajaa valitaan ensin se
     if ($toimittajaid != "" or $ytunnus != "") {
       $keikkamonta = 0;
-      $hakutunnus = $ytunnus;
-      $hakuid    = $toimittajaid;
+      $hakutunnus  = $ytunnus;
+      $hakuid      = $toimittajaid;
 
       $PHP_SELF = "javascript:ajaxPost('kevyt_toimittajahaku', '{$palvelin2}hyvak.php?', 'keikka', '', '', '', 'post');";
 
@@ -139,7 +138,7 @@ if ($keikalla == "on") {
         }
       }
       else {
-        echo "Ei avoimia keikkoja..<br>";
+        echo t("Ei avoimia saapumisia").".<br>";
       }
     }
     else {
@@ -161,10 +160,10 @@ if ($keikalla == "on") {
   }
   elseif ($toimittajaid > 0) {
 
-    //  swapataan oikea tunnus talteen
-    $o_tunnus     = $tunnus;
-    $silent     = "JOO";
-    $laskutunnus   = $tunnus;
+    //swapataan oikea tunnus talteen
+    $o_tunnus       = $tunnus;
+    $silent         = "JOO";
+    $laskutunnus    = $tunnus;
     $keikanalatila  = "";
     $tee_kululaskut = $tee;
 
@@ -193,9 +192,6 @@ if ($keikalla == "on") {
     //  Palautetaan tunnus
     $tunnus = $o_tunnus;
     $tee = "";
-  }
-  else {
-    echo "Kui s‰‰ t‰nne p‰‰sit?!";
   }
 }
 

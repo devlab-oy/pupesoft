@@ -96,7 +96,22 @@ function alku($saldovahvistus) {
     $string = t('Ilmoitamme että avoin saldo ', $kieli)." ".date('d.m.Y', strtotime($saldovahvistus['laskun_avoin_paiva']))." ".t('on', $kieli).' '.$saldovahvistus['avoin_saldo_summa'].' '.$saldovahvistus['valkoodi'];
     $pdf->draw_text(30, 650, $string, $firstpage, $norm);
 
-    $pdf->draw_one_paragraph(640, 30, 540, ($pdf->currentPage['width'] - 30), $saldovahvistus['saldovahvistus_viesti']['selitetark'], $firstpage, $norm);
+    // tehdään riveistä max 90 merkkiä
+    $viesti = wordwrap($saldovahvistus['saldovahvistus_viesti']['selitetark'], 90, "\n");
+
+    $i = 0;
+    $rivit = array();
+    $rivit = explode("\n", $viesti);
+    $kala = 630;
+
+    foreach ($rivit as $rivi) {
+      // laitetaan
+      $pdf->draw_text(30, $kala, $rivi, $firstpage, $norm);
+
+      // seuraava rivi tulee 10 pistettä alemmas kuin tämä rivi
+      $kala -= 10;
+      $i++;
+    }
 
     //Rivit alkaa täsä kohtaa
     $object_keys = array_keys($pdf->objects);

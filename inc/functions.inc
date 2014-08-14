@@ -19082,72 +19082,76 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
       $jtsort_lisa = "0 as jtsort,";
     }
 
+    $ale_query_select_lisa = generoi_alekentta_select('yhteen', 'M');
+
     //generoidaan lähetteelle ja keräyslistalle rivinumerot
-    $query = "  SELECT tilausrivi.*, {$koontiselect}
-          round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
-          round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
-          {$koontirivihinta}
-          $sorttauskentta,
-          {$jtsort_lisa}
-          if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
-          if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
-          tuote.sarjanumeroseuranta
-          FROM tilausrivi
-          $koontijoin
-          JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
-          JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
-          LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
-            WHERE tilausrivi.otunnus in ($otunnus)
-          AND tilausrivi.yhtio = '$kukarow[yhtio]'
-          $tyyppilisa
-          {$koontilisa}
-          and tilausrivi.var != 'O'
-          AND (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
-          ORDER BY jtsort, $koontisort $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+    $query = "SELECT tilausrivi.*,
+              $ale_query_select_lisa aleyhteensa,
+              {$koontiselect}
+              round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]') ovhhinta,
+              round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
+              {$koontirivihinta}
+              $sorttauskentta,
+              {$jtsort_lisa}
+              if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
+              if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
+              tuote.sarjanumeroseuranta
+              FROM tilausrivi
+              $koontijoin
+              JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+              JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
+              LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+                WHERE tilausrivi.otunnus  in ($otunnus)
+              AND tilausrivi.yhtio        = '$kukarow[yhtio]'
+              $tyyppilisa
+              {$koontilisa}
+              and tilausrivi.var         != 'O'
+              AND (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
+              ORDER BY jtsort, $koontisort $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
     $riresult = pupe_query($query);
 
     $params_lahete = array(
-    'arvo'            => 0,
-    'asrow'            => $asrow,
-    'boldi'            => $boldi,
-    'ei_otsikoita'        => '',
-    'extranet_tilausvahvistus'  => $extranet_tilausvahvistus,
-    'iso'            => $iso,
-    'jtid'            => '',
-    'kala'            => 0,
-    'kassa_ale'          => '',
-    'kieli'            => $kieli,
-    'lahetetyyppi'        => $lahetetyyppi,
-    'laskurow'          => $laskurow,
-    'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
-    'norm'            => $norm,
-    'page'            => NULL,
-    'pdf'            => NULL,
-    'perheid'          => 0,
-    'pieni'            => $pieni,
-    'pieni_boldi'        => $pieni_boldi,
-    'pitkattuotteet'      => FALSE,
-    'rectparam'          => $rectparam,
-    'riviresult'        => $riresult,
-    'rivinkorkeus'        => $rivinkorkeus,
-    'rivinumerot'        => "",
-    'row'            => NULL,
-    'sivu'            => 1,
-    'summa'            => 0,
-    'tee'            => $tee,
-    'thispage'          => NULL,
-    'toim'            => $toim,
-    'tots'            => 0,
-    'tuotenopituus'        => '',
-    'nimityskohta'        => '',
-    'nimitysleveys'        => '',
-    'tyyppi'          => '',
-    'useita'          => '',
-    'komento'          => $komento,
-    'yhteensamaara'        => 0,
-    'lahetekpl'          => $lahetekpl,
-    'onko_kerayserat_kaytossa'   => $onko_kerayserat_kaytossa,
-    'koontilahete'        => $koontilahete,
+      'arvo'                     => 0,
+      'asrow'                    => $asrow,
+      'boldi'                    => $boldi,
+      'ei_otsikoita'             => '',
+      'extranet_tilausvahvistus' => $extranet_tilausvahvistus,
+      'iso'                      => $iso,
+      'jtid'                     => '',
+      'kala'                     => 0,
+      'kassa_ale'                => '',
+      'kieli'                    => $kieli,
+      'lahetetyyppi'             => $lahetetyyppi,
+      'laskurow'                 => $laskurow,
+      'naytetaanko_rivihinta'    => $naytetaanko_rivihinta,
+      'norm'                     => $norm,
+      'page'                     => NULL,
+      'pdf'                      => NULL,
+      'perheid'                  => 0,
+      'pieni'                    => $pieni,
+      'pieni_boldi'              => $pieni_boldi,
+      'pitkattuotteet'           => FALSE,
+      'rectparam'                => $rectparam,
+      'riviresult'               => $riresult,
+      'rivinkorkeus'             => $rivinkorkeus,
+      'rivinumerot'              => "",
+      'row'                      => NULL,
+      'sivu'                     => 1,
+      'summa'                    => 0,
+      'tee'                      => $tee,
+      'thispage'                 => NULL,
+      'toim'                     => $toim,
+      'tots'                     => 0,
+      'tuotenopituus'            => '',
+      'nimityskohta'             => '',
+      'nimitysleveys'            => '',
+      'tyyppi'                   => '',
+      'useita'                   => '',
+      'komento'                  => $komento,
+      'yhteensamaara'            => 0,
+      'lahetekpl'                => $lahetekpl,
+      'onko_kerayserat_kaytossa' => $onko_kerayserat_kaytossa,
+      'koontilahete'             => $koontilahete,
     );
 
     if ($laskurow["tila"] == "G") {
@@ -19161,7 +19165,57 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 
         unset($sscc);
 
+    $laheterows = array();
+
+    // tsekataan pitääkö tuote korvata osaluettelolla
     while ($row = mysql_fetch_assoc($riresult)) {
+
+      if ($yhtiorow["pura_osaluettelot"] != "") {
+        // Korvataanko tilauksella oleva rivi osaluettelolla
+        $query = "SELECT tuote.tuoteno, tuote.yksikko, tuote.nimitys,
+                  tuoteperhe.kerroin,
+                  tuoteperhe.hintakerroin myyntihinta,
+                  round(tuoteperhe.hintakerroin * tuoteperhe.kerroin * ({$row['varattu']}+{$row['jt']}+{$row['kpl']}) * (1-{$row['aleyhteensa']}/100),'$yhtiorow[hintapyoristys]') rivihinta
+                  FROM tuoteperhe
+                  JOIN tuote ON (tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tuoteno=tuote.tuoteno)
+                  WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
+                  AND tuoteperhe.isatuoteno = '$row[tuoteno]'
+                  AND tuoteperhe.tyyppi     = 'O'
+                  ORDER BY tuote.tuoteno";
+        $tuoteperhe_result = pupe_query($query);
+
+        if (mysql_num_rows($tuoteperhe_result) > 0) {
+          while ($tuoteperhe_row = mysql_fetch_assoc($tuoteperhe_result)) {
+
+            $lisarow = $row;
+
+            $lisarow["tuoteno"] = $tuoteperhe_row["tuoteno"];
+            $lisarow["nimitys"] = $tuoteperhe_row["nimitys"];
+            $lisarow["yksikko"] = $tuoteperhe_row["yksikko"];
+
+            $lisarow["hinta"]       = $tuoteperhe_row["myyntihinta"];
+            $lisarow["myyntihinta"] = $tuoteperhe_row["myyntihinta"];
+            $lisarow["rivihinta"]   = $tuoteperhe_row["rivihinta"];
+
+            $lisarow["tilkpl"]  = $tuoteperhe_row["kerroin"]*$row["tilkpl"];
+            $lisarow["varattu"] = $tuoteperhe_row["kerroin"]*$row["varattu"];
+            $lisarow["jt"]      = $tuoteperhe_row["kerroin"]*$row["jt"];
+            $lisarow["kpl"]     = $tuoteperhe_row["kerroin"]*$row["kpl"];
+
+            $laheterows[] = $lisarow;
+          }
+        }
+        else {
+          $laheterows[] = $row;
+        }
+      }
+      else {
+        $laheterows[] = $row;
+      }
+    }
+
+
+    foreach ($laheterows as $row) {
 
       $params_lahete["row"] = $row;
 
@@ -26403,45 +26457,46 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
     }
 
     //lasku.tunnus ASC koska sessioon tallennetaan implode tunnus ja tunnukset pitää olla tietyssä järjestyksessä, koska muuten riviä ei löydy.
-    $query = "  SELECT lasku.tunnus AS lasku_tunnus,
-          'L' AS saldovahvistusrivi_tyyppi,
-          asiakas.ytunnus,
-          asiakas.toim_ovttunnus,
-          lasku.nimi,
-          lasku.liitostunnus,
-          lasku.laskunro,
-          lasku.tapvm,
-          lasku.erpcm,
-          lasku.valkoodi,
-          asiakas.asiakasnro AS asiakasnumero,
-          asiakas.tunnus AS asiakas_tunnus,
-          lasku.summa,
-          ROUND(SUM(tiliointi.summa), 2) AS avoin_saldo
-          FROM lasku USE INDEX (yhtio_tila_mapvm)
-          JOIN asiakas
-          ON ( asiakas.yhtio = lasku.yhtio
-            AND asiakas.tunnus = lasku.liitostunnus
-            {$asiakas_join} )
-          JOIN tiliointi USE INDEX (tositerivit_index)
-          ON ( tiliointi.yhtio = lasku.yhtio
-            AND tiliointi.ltunnus = lasku.tunnus
-            AND tiliointi.korjattu = ''
-            AND tiliointi.tapvm <= '{$request['paiva']}'
-            AND tiliointi.tilino IN ('{$yhtiorow['myyntisaamiset']}', '{$yhtiorow['factoringsaamiset']}', '{$yhtiorow['konsernimyyntisaamiset']}') )
-          WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-          {$lasku_where}
-          AND (
-              lasku.mapvm > '{$request['paiva']}'
-              OR lasku.mapvm = '0000-00-00'
-            )
-          AND lasku.tapvm <= '{$request['paiva']}'
-          AND lasku.tapvm > '0000-00-00'
-          AND lasku.tila = 'U'
-          AND lasku.alatila = 'X'
-          GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
-          ORDER BY asiakas.toim_ovttunnus ASC,
-          asiakas.ytunnus ASC,
-          lasku.tunnus ASC";
+    $query = "SELECT lasku.tunnus AS lasku_tunnus,
+              'L' AS saldovahvistusrivi_tyyppi,
+              asiakas.ytunnus,
+              asiakas.toim_ovttunnus,
+              lasku.nimi,
+              lasku.liitostunnus,
+              lasku.laskunro,
+              lasku.tapvm,
+              lasku.erpcm,
+              lasku.valkoodi,
+              asiakas.asiakasnro AS asiakasnumero,
+              asiakas.tunnus AS asiakas_tunnus,
+              lasku.summa,
+              ROUND(SUM(tiliointi.summa), 2) AS avoin_saldo
+              FROM lasku USE INDEX (yhtio_tila_mapvm)
+              JOIN asiakas
+              ON ( asiakas.yhtio = lasku.yhtio
+                AND asiakas.tunnus     = lasku.liitostunnus
+                AND asiakas.kauppatapahtuman_luonne != 21
+                {$asiakas_join} )
+              JOIN tiliointi USE INDEX (tositerivit_index)
+              ON ( tiliointi.yhtio = lasku.yhtio
+                AND tiliointi.ltunnus  = lasku.tunnus
+                AND tiliointi.korjattu = ''
+                AND tiliointi.tapvm    <= '{$request['paiva']}'
+                AND tiliointi.tilino   IN ('{$yhtiorow['myyntisaamiset']}', '{$yhtiorow['factoringsaamiset']}', '{$yhtiorow['konsernimyyntisaamiset']}') )
+              WHERE lasku.yhtio        = '{$kukarow['yhtio']}'
+              {$lasku_where}
+              AND (
+                  lasku.mapvm          > '{$request['paiva']}'
+                  OR lasku.mapvm       = '0000-00-00'
+                )
+              AND lasku.tapvm          <= '{$request['paiva']}'
+              AND lasku.tapvm          > '0000-00-00'
+              AND lasku.tila           = 'U'
+              AND lasku.alatila        = 'X'
+              GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
+              ORDER BY asiakas.toim_ovttunnus ASC,
+              asiakas.ytunnus ASC,
+              lasku.tunnus ASC";
     $result = pupe_query($query);
 
     $laskut = array();

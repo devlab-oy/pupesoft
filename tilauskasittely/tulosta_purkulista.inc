@@ -231,7 +231,7 @@ else {
 }
 
 if ($mista == "vastaanota" and !isset($jarjestys)) {
-  $orderlisa2 = " tilausrivin_lisatiedot.tilausrivilinkki, sorttauskentta, ";
+  $orderlisa2 = " tilausrivilinkki_sorttaus, sorttauskentta, ";
 }
 else {
   $orderlisa2 = " ";
@@ -259,11 +259,14 @@ if ($mista == "vastaanota" and $vainlistaus == '') {
             concat(lpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'),lpad(upper(tapahtuma.hyllyvali), 5, '0'),lpad(upper(tapahtuma.hyllytaso), 5, '0')) sorttauskentta,
             tuote.purkukommentti,
             tilausrivi.laadittu,
-            tilausrivin_lisatiedot.tilausrivilinkki
+            tilausrivin_lisatiedot.tilausrivilinkki,
+            IF((tilausrivin_lisatiedot.tilausrivilinkki = 0 OR t_lasku.tilaustyyppi = 'R'), 1, 0) tilausrivilinkki_sorttaus
             FROM tilausrivi
             JOIN tuote USING (yhtio, tuoteno)
             JOIN tapahtuma ON tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus and tapahtuma.kpl > 0 and laji = 'siirto'
             JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio  and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
+            LEFT JOIN tilausrivi AS t_myynti ON (t_myynti.yhtio = tilausrivin_lisatiedot.yhtio AND t_myynti.tunnus = tilausrivin_lisatiedot.tilausrivilinkki)
+            LEFT JOIN lasku AS t_lasku ON (t_lasku.yhtio = t_myynti.yhtio AND t_lasku.tunnus = t_myynti.otunnus)
             WHERE tilausrivi.otunnus IN ({$otunnus})
             and tilausrivi.yhtio='$kukarow[yhtio]'
             ORDER BY $orderlisa2 tuote.tuoteno";
@@ -286,10 +289,13 @@ elseif ($mista == "vastaanota" and $vainlistaus != '') {
             concat(lpad(upper(tilausrivin_lisatiedot.kohde_hyllyalue), 5, '0'),lpad(upper(tilausrivin_lisatiedot.kohde_hyllynro), 5, '0'),lpad(upper(tilausrivin_lisatiedot.kohde_hyllyvali), 5, '0'),lpad(upper(tilausrivin_lisatiedot.kohde_hyllytaso), 5, '0')) sorttauskentta,
             tuote.purkukommentti,
             tilausrivi.laadittu,
-            tilausrivin_lisatiedot.tilausrivilinkki
+            tilausrivin_lisatiedot.tilausrivilinkki,
+            IF((tilausrivin_lisatiedot.tilausrivilinkki = 0 OR t_lasku.tilaustyyppi = 'R'), 1, 0) tilausrivilinkki_sorttaus
             FROM tilausrivi
             JOIN tuote USING (yhtio, tuoteno)
             JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio  and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
+            LEFT JOIN tilausrivi AS t_myynti ON (t_myynti.yhtio = tilausrivin_lisatiedot.yhtio AND t_myynti.tunnus = tilausrivin_lisatiedot.tilausrivilinkki)
+            LEFT JOIN lasku AS t_lasku ON (t_lasku.yhtio = t_myynti.yhtio AND t_lasku.tunnus = t_myynti.otunnus)
             WHERE tilausrivi.otunnus IN ({$otunnus})
             and tilausrivi.yhtio='$kukarow[yhtio]'
             ORDER BY $orderlisa2 tuote.tuoteno";

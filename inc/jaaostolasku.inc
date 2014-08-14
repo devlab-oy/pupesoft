@@ -104,7 +104,8 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
       $values .= "'$vahennettavasumma_valuutassa',";
       break;
     case 'kasumma':
-      $values .= "'0.00',";
+      $kasumma_uusi = $jaettavalaskurow["kasumma"] * $kerroin;
+      $values .= "'$kasumma_uusi',";
       break;
     case "kate_korjattu":
       $values .= "NULL,";
@@ -123,6 +124,9 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
   $result = pupe_query($query);
   $utunnus = mysql_insert_id();
 
+  // Lasketaan vanhalle laskulle uusi kasumma
+  $kasumma_vanha = $jaettavalaskurow["kasumma"] - $kasumma_uusi;
+
   if ($jaettavalaskurow["vanhatunnus"] == 0) {
     $alkuperainen_summa = $jaettavalaskurow["summa"];
     $alkuperainen_tunnus = $jaettavalaskurow["tunnus"];
@@ -135,6 +139,7 @@ function jaalasku($jaettavalasku, $vahennettavasumma_valuutassa) {
   // Päivitetään vanha lasku
   $query  = "UPDATE lasku SET
              summa       = $jaettavalaskurow[summa] - $vahennettavasumma_valuutassa,
+             kasumma     = $kasumma_vanha,
              arvo        = $alkuperainen_summa,
              vanhatunnus = $alkuperainen_tunnus
              WHERE yhtio = '$kukarow[yhtio]'

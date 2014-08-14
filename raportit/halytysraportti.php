@@ -66,7 +66,7 @@ if (!isset($kkl4)) $kkl4 = date("m");
 if (!isset($vvl4)) $vvl4 = date("Y");
 if (!isset($ppl4)) $ppl4 = date("d");
 
-//Edellisen vuoden vastaavat kaudet
+// Edellisen vuoden vastaavat kaudet
 $kka1ed = date("m", mktime(0, 0, 0, $kka1, $ppa1, $vva1-1));
 $vva1ed = date("Y", mktime(0, 0, 0, $kka1, $ppa1, $vva1-1));
 $ppa1ed = date("d", mktime(0, 0, 0, $kka1, $ppa1, $vva1-1));
@@ -95,7 +95,6 @@ $kkl4ed = date("m", mktime(0, 0, 0, $kkl4, $ppl4, $vvl4-1));
 $vvl4ed = date("Y", mktime(0, 0, 0, $kkl4, $ppl4, $vvl4-1));
 $ppl4ed = date("d", mktime(0, 0, 0, $kkl4, $ppl4, $vvl4-1));
 
-
 //katotaan pienin alkupvm ja isoin loppupvm
 $apaiva1 = (int) date('Ymd', mktime(0, 0, 0, $kka1, $ppa1, $vva1));
 $apaiva2 = (int) date('Ymd', mktime(0, 0, 0, $kka2, $ppa2, $vva2));
@@ -114,7 +113,6 @@ $lpaiva5 = (int) date('Ymd', mktime(0, 0, 0, $kkl1ed, $ppl1ed, $vvl1ed));
 $lpaiva6 = (int) date('Ymd', mktime(0, 0, 0, $kkl2ed, $ppl2ed, $vvl2ed));
 $lpaiva7 = (int) date('Ymd', mktime(0, 0, 0, $kkl3ed, $ppl3ed, $vvl3ed));
 $lpaiva8 = (int) date('Ymd', mktime(0, 0, 0, $kkl4ed, $ppl4ed, $vvl4ed));
-
 
 $apienin = 99999999;
 $lsuurin = 0;
@@ -147,6 +145,13 @@ $lpvm = substr($lsuurin, 0, 4)."-".substr($lsuurin, 4, 2)."-".substr($lsuurin, 6
 // Tulostettavat sarakkeet
 $sarakkeet = array();
 
+if (!isset($valitut))       $valitut = array();
+if (!isset($rappari))       $rappari = "";
+if (!isset($osasto))        $osasto = "";
+if (!isset($tuoryh))        $tuoryh = "";
+if (!isset($tuotemerkki))   $tuotemerkki = "";
+if (!isset($asiakasosasto)) $asiakasosasto = "";
+
 //Voidaan tarvita jotain muuttujaa täältä
 if (isset($muutparametrit)) {
   list($temp_osasto, $temp_tuoryh, $temp_ytunnus, $temp_tuotemerkki, $temp_asiakasosasto, $temp_asiakasno, $temp_toimittaja) = explode('#', $muutparametrit);
@@ -155,19 +160,19 @@ if (isset($muutparametrit)) {
 $sarakkeet["SARAKE1"]   = t("osasto")."\t";
 $sarakkeet["SARAKE2"]   = t("tuoteryhma")."\t";
 $sarakkeet["SARAKE3"]   = t("tuotemerkki")."\t";
-$sarakkeet["SARAKE3B"]   = t("malli")."\t";
-$sarakkeet["SARAKE3C"]   = t("mallitarkenne")."\t";
+$sarakkeet["SARAKE3B"]  = t("malli")."\t";
+$sarakkeet["SARAKE3C"]  = t("mallitarkenne")."\t";
 $sarakkeet["SARAKE4"]   = t("tahtituote")."\t";
-$sarakkeet["SARAKE4B"]   = t("status")."\t";
-$sarakkeet["SARAKE4C"]   = t("abc")."\t";
+$sarakkeet["SARAKE4B"]  = t("status")."\t";
+$sarakkeet["SARAKE4C"]  = t("abc")."\t";
 $sarakkeet["SARAKE4CA"] = t("abc osasto")."\t";
 $sarakkeet["SARAKE4CB"] = t("abc try")."\t";
-$sarakkeet["SARAKE4D"]   = t("luontiaika")."\t";
+$sarakkeet["SARAKE4D"]  = t("luontiaika")."\t";
 $sarakkeet["SARAKE5"]   = t("saldo")."\t";
 $sarakkeet["SARAKE6"]   = t("halytysraja")."\t";
-$sarakkeet["SARAKE6B"]   = t("tilausmaara")."\t";
+$sarakkeet["SARAKE6B"]  = t("tilausmaara")."\t";
 $sarakkeet["SARAKE7"]   = t("tilauksessa")."\t";
-$sarakkeet["SARAKE7B"]   = t("valmistuksessa")."\t";
+$sarakkeet["SARAKE7B"]  = t("valmistuksessa")."\t";
 $sarakkeet["SARAKE8"]   = t("ennpois")."\t";
 $sarakkeet["SARAKE9"]   = t("jt")."\t";
 
@@ -191,20 +196,20 @@ if ($valitut["KAUSI3"] != '') {
   $ehd_kausi_o3  = $lo;
 }
 
-$sarakkeet["SARAKE10"]   = t("Ostoehdotus")." $ehd_kausi_o1\t";
-$sarakkeet["SARAKE11"]   = t("Ostoehdotus")." $ehd_kausi_o2\t";
-$sarakkeet["SARAKE12"]   = t("Ostoehdotus")." $ehd_kausi_o3\t";
+$sarakkeet["SARAKE10"]  = t("Ostoehdotus")." $ehd_kausi_o1\t";
+$sarakkeet["SARAKE11"]  = t("Ostoehdotus")." $ehd_kausi_o2\t";
+$sarakkeet["SARAKE12"]  = t("Ostoehdotus")." $ehd_kausi_o3\t";
 
 $sarakkeet["SARAKE12B"] = t("Ostoehdotus status")."\t";
 $sarakkeet["SARAKE12C"] = t("Viimeinen hankintapäivä")."\t";
 
-$sarakkeet["SARAKE13"]   = t("ostettava haly")."\t";
+$sarakkeet["SARAKE13"]  = t("ostettava haly")."\t";
 $sarakkeet["SARAKE13B"] = t("ostettava tilausmaara")."\t";
-$sarakkeet["SARAKE14"]   = t("osto_era")."\t";
-$sarakkeet["SARAKE15"]   = t("myynti_era")."\t";
-$sarakkeet["SARAKE16"]   = t("toimittaja")."\t";
-$sarakkeet["SARAKE17"]   = t("toim_tuoteno")."\t";
-$sarakkeet["SARAKE18"]   = t("nimitys")."\t";
+$sarakkeet["SARAKE14"]  = t("osto_era")."\t";
+$sarakkeet["SARAKE15"]  = t("myynti_era")."\t";
+$sarakkeet["SARAKE16"]  = t("toimittaja")."\t";
+$sarakkeet["SARAKE17"]  = t("toim_tuoteno")."\t";
+$sarakkeet["SARAKE18"]  = t("nimitys")."\t";
 $sarakkeet["SARAKE18B"] = t("toim_nimitys")."\t";
 $sarakkeet["SARAKE18C"] = t("kuvaus")."\t";
 
@@ -215,14 +220,14 @@ $sarakkeet["SARAKE18G"] = t("tuotesyvyys")."\t";
 $sarakkeet["SARAKE18H"] = t("tuotemassa")."\t";
 $sarakkeet["SARAKE18I"] = t("hinnastoon")."\t";
 
-$sarakkeet["SARAKE19"]   = t("ostohinta")."\t";
-$sarakkeet["SARAKE20"]   = t("myyntihinta")."\t";
+$sarakkeet["SARAKE19"]  = t("ostohinta")."\t";
+$sarakkeet["SARAKE20"]  = t("myyntihinta")."\t";
 $sarakkeet["SARAKE20Z"] = t("epakurantti25pvm")."\t";
-$sarakkeet["SARAKE21"]   = t("epakurantti50pvm")."\t";
-$sarakkeet["SARAKE21B"]  = t("epakurantti75pvm")."\t";
-$sarakkeet["SARAKE22"]   = t("epakurantti100pvm")."\t";
-$sarakkeet["SARAKE23"]   = t("oletussaldo")."\t";
-$sarakkeet["SARAKE24"]   = t("hyllypaikka")."\t";
+$sarakkeet["SARAKE21"]  = t("epakurantti50pvm")."\t";
+$sarakkeet["SARAKE21B"] = t("epakurantti75pvm")."\t";
+$sarakkeet["SARAKE22"]  = t("epakurantti100pvm")."\t";
+$sarakkeet["SARAKE23"]  = t("oletussaldo")."\t";
+$sarakkeet["SARAKE24"]  = t("hyllypaikka")."\t";
 
 if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
   $kausi1 = "($ppa1.$kka1.$vva1-$ppl1.$kkl1.$vvl1)";
@@ -638,7 +643,6 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
     $splisa = "tuote.tuotesyvyys";
   }
 
-
   //Ajetaan raportti tuotteittain
   if ($paikoittain == '') {
     $query = "SELECT
@@ -737,7 +741,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
               and tuote.ei_saldoa        = ''
               and tuote.tuotetyyppi      NOT IN ('A', 'B')
               $varastot
-              order by id, tuote.tuoteno, varastopaikka";
+              ORDER BY id, tuote.tuoteno, varastopaikka";
   }
   $res = pupe_query($query);
 
@@ -1022,7 +1026,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
                   LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                     AND varastopaikat.tunnus = tuotepaikat.varasto)
                   WHERE tuotepaikat.$varastot_yhtiot
-                  and tuotepaikat.tuoteno='$row[tuoteno]'
+                  and tuotepaikat.tuoteno = '$row[tuoteno]'
                   GROUP BY varastopaikat.tunnus
                   $varastot";
         $result = pupe_query($query);
@@ -1170,7 +1174,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
         $asrow = mysql_fetch_assoc($asresult);
       }
 
-      if ($valitut['EHDOTETTAVAT'] == '' or $ostettavahalytilausmaara > 0 or $ostettavahaly > 0 or $ostettava4kk > 0) {
+      if ((!isset($valitut['EHDOTETTAVAT']) or $valitut['EHDOTETTAVAT'] == '') or $ostettavahalytilausmaara > 0 or $ostettavahaly > 0 or $ostettava4kk > 0) {
 
         // kirjotettaan rivi
         $rivi .= "\"$row[tuoteno]\"\t";
@@ -1839,7 +1843,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 
         unset($korvaresult1);
         unset($korvaresult2);
-        unset($korvaavat_tunrot);
+        $korvaavat_tunrot = "";
 
         //korvaavat tuotteet
         $query  = "SELECT id
@@ -1857,8 +1861,6 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
                      and id         = '$korvarow[id]'
                      and yhtio      = '$row[yhtio]'";
           $korvaresult2 = pupe_query($query);
-
-          $korvaavat_tunrot = "";
 
           //tulostetaan korvaavat
           while ($korvarow = mysql_fetch_assoc($korvaresult2)) {
@@ -1883,7 +1885,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
         }
 
         //Liitetäänkö myös tilauttu by varasto
-        if (is_resource($osvres)) {
+        if (isset($osvres) and is_resource($osvres)) {
           mysql_data_seek($osvres, 0);
 
           while ($vrow = mysql_fetch_assoc($osvres)) {
@@ -1900,7 +1902,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
         }
 
 
-        if (is_resource($korvaresult2) and mysql_num_rows($korvaresult2) > 0) {
+        if (isset($korvaresult2) and is_resource($korvaresult2) and mysql_num_rows($korvaresult2) > 0) {
 
           mysql_data_seek($korvaresult2, 0);
 
@@ -2240,7 +2242,7 @@ if ($tee == "") {
 
     echo "<th>", t("Toimipaikka"), "</th>";
 
-    echo "<td><select name='toimipaikka' onchange='submit();'>";
+    echo "<td><select name='toimipaikka'>";
 
     $sel = "";
 
@@ -2686,7 +2688,7 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
   $srow = mysql_fetch_assoc($sresult);
 
   $chk = "";
-  if (($srow["selitetark"] == "EHDOTETTAVAT" and $tee == "JATKA") or $valitut["EHDOTETTAVAT"] != '') {
+  if ((mysql_num_rows($sresult) > 0 and $srow["selitetark"] == "EHDOTETTAVAT" and $tee == "JATKA") or $valitut["EHDOTETTAVAT"] != '') {
     $chk = "CHECKED";
   }
 

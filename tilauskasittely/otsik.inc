@@ -876,7 +876,7 @@ if ($tila == "" and !isset($jatka)) {
 
   // Setataan tilaustyyppi jos meillä on vaan yks vaihtoehto
   if (is_null($tilaustyyppi) and count($tilaustyypit) == 1) {
-    $tilaustyyppi = key($tilaustyypit);
+    $tilaustyyppi = (string) key($tilaustyypit);
   }
 
   echo "<font class='head'>{$tilaus_myynti_otsikko} ".t("otsikko")."</font><hr>";
@@ -894,7 +894,7 @@ if ($tila == "" and !isset($jatka)) {
   echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
 
   // Myyntitili oikeellisuustarkistus
-  if ($tilaustyyppi == 'M') {
+  if ($tilaustyyppi === 'M') {
     $query = "SELECT tunnus
               FROM varastopaikat
               WHERE yhtio        = '{$kukarow["yhtio"]}'

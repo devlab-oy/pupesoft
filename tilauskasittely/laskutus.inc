@@ -589,7 +589,7 @@ else {
                   // v‰hennet‰‰n luupattavaa m‰‰r‰‰
                   $eraayht -= $eravahennetaan;
                 }
-                // Ei lˆytynyt (en‰‰n) ostettuja eri‰, eli "myyty pakkaselle" niin luodaan uusi er‰rivi jossa ostorivitunnus on nolla jonne laitetaan loppum‰‰r‰.
+                // Ei lˆytynyt (en‰‰) ostettuja eri‰, eli "myyty pakkaselle" niin luodaan uusi er‰rivi jossa ostorivitunnus on nolla jonne laitetaan loppum‰‰r‰.
                 else {
 
                   $query = "INSERT into sarjanumeroseuranta

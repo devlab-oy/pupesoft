@@ -793,9 +793,12 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
         if (isset($ohjewiki_url)) {
           $hreffi = $ohjewiki_url."/Ohjeet:".basename($phpnimi).$urltoim;
-          echo "<div style='text-align:right; vertical-align:top;'><a target='_blank' href='$hreffi'>".t("OHJE")."</a></div>";
+          echo "<div style='text-align:right; vertical-align:top; margin-right: 10px;'><a target='_blank' href='$hreffi'>".t("OHJE")."</a></div>";
         }
 
+        if ($kukarow['toimipaikka'] > 0 and tarkista_oikeus('infobar.php')) {
+          require 'infobar.php';
+        }
       }
       elseif (isset($_GET["sulje"]) and $_GET["sulje"] != "") {
         echo "<div><a href='#' onclick=\"divi=document.getElementById('$_GET[sulje]'); document.body.removeChild(divi); return false;\"><font style='color: red;'>x</font></a><br></div>";
@@ -838,11 +841,11 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
           enable_ajax();
 
           while ($message_row = mysql_fetch_assoc($message_result)) {
-            echo "<div id='$message_row[tunnus]'>";
+            echo "<div id='{$message_row['tunnus']}'>";
             echo t("Viesti käyttäjältä").": ";
-            echo "$message_row[nimi] @ ".tv1dateconv($message_row['luontiaika'], 'yes').": ";
-            echo "$message_row[viesti] ";
-            echo "<input type='button' onClick=\"javascript:sndReq('$message_row[tunnus]','?tee=message_luettu&amp;message_tunnus=$message_row[tunnus]&amp;ohje=off&amp;no_css=yes', false, false)\" value='".t("Kuittaa")."'><br>";
+            echo "{$message_row['nimi']} @ ".tv1dateconv($message_row['luontiaika'], 'yes').": ";
+            echo "{$message_row['viesti']} ";
+            echo "<input type='button' onClick=\"javascript:sndReq('{$message_row['tunnus']}','?tee=message_luettu&amp;toim={$toim}&amp;message_tunnus={$message_row['tunnus']}&amp;ohje=off&amp;no_css=yes', false, false)\" value='".t("Kuittaa")."'><br>";
             echo "</div>";
           }
 

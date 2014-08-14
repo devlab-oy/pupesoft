@@ -241,8 +241,8 @@ if ($tee == 'selaa') {
             FROM lasku
             LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.kuka = lasku.maksaja)
             LEFT JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili)
-            WHERE lasku.yhtio = '$kukarow[yhtio]'
-            AND lasku.tila in ('P', 'Q', 'Y')
+            WHERE lasku.yhtio   = '$kukarow[yhtio]'
+            AND lasku.tila      in ('P', 'Q', 'Y')
             AND lasku.maksuaika > '0000-00-00 00:00:00'
             $lisa
             ORDER BY lasku.liitostunnus, lasku.tapvm, lasku.summa ASC";

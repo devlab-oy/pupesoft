@@ -1224,8 +1224,16 @@ if ($tee == "") {
     }
   }
   else {
-    echo "<font class='message'>".t("Yhtään toimitettavaa ei löytynyt")."...</font>";
+    if ($toim == "") {
+      echo "<font class='message'>".t("Ei toimitettavia tilauksia")."...</font>";
+    }
+    elseif ($toim == "VAINLASKUTA" or $toim == "VAINOMATLASKUTA") {
+      echo "<font class='message'>".t("Ei laskutettavia tilauksia")."...</font>";
+    }
+    elseif ($toim == "VIENTI") {
+      echo "<font class='message'>".t("Ei laskutettavia vienti-tilauksia")."...</font>";
+    }
   }
 }
 
-require "../inc/footer.inc";
+require "inc/footer.inc";

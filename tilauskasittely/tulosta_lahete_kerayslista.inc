@@ -35,21 +35,10 @@ if (!function_exists('alku_kerayslista')) {
 
     if ($kerayslistatyyppi == 'EXCEL1') {
 
-      require_once 'Spreadsheet/Excel/Writer.php';
+      include 'inc/pupeExcel.inc';
 
-      //keksitään uudelle failille joku varmasti uniikki nimi:
-      list($usec, $sec) = explode(' ', microtime());
-      mt_srand((float) $sec + ((float) $usec * 100000));
-      $page = "/tmp/Outbound_order-{$laskurow['tunnus']}.xls";
-
-      $pdf = new Spreadsheet_Excel_Writer($page);
-
-      $pdf->setVersion(8);
-
-      $thispage = $pdf->addWorksheet('MAKIA Order');
-
-      $boldi = $pdf->addFormat();
-      $boldi->setBold();
+      $thispage    = new pupeExcel();
+      $boldi = array("bold" => TRUE);
 
       $thispage->writeString(0, 0, "Outbound Order", $boldi);
       $thispage->writeString(1, 0, $laskurow['tunnus']);
@@ -64,21 +53,10 @@ if (!function_exists('alku_kerayslista')) {
     }
     elseif ($kerayslistatyyppi == 'EXCEL2') {
 
-      require_once 'Spreadsheet/Excel/Writer.php';
+      include 'inc/pupeExcel.inc';
 
-      //keksitään uudelle failille joku varmasti uniikki nimi:
-      list($usec, $sec) = explode(' ', microtime());
-      mt_srand((float) $sec + ((float) $usec * 100000));
-      $page = "/tmp/Outbound_order-{$laskurow['tunnus']}.xls";
-
-      $pdf = new Spreadsheet_Excel_Writer($page);
-
-      $pdf->setVersion(8);
-
-      $thispage = $pdf->addWorksheet('MAKIA Order');
-
-      $boldi = $pdf->addFormat();
-      $boldi->setBold();
+      $thispage    = new pupeExcel();
+      $boldi = array("bold" => TRUE);
 
       $thispage->writeString(0, 0, "Level", $boldi);
       $thispage->writeString(0, 1, "Ordernr", $boldi);
@@ -512,7 +490,9 @@ if (!function_exists('alku_kerayslista')) {
         $pdf->draw_text(580-$oikpos, $bottom_barcode_text, t("Asnro")." ".$asrow["asiakasnro"], $thispage, $norm);
       }
     }
-
+    if (isset($thispage)) {
+      $params['thispage']=$thispage;
+    }
     // Luodaan palautettavat
     $return = compact(array_keys($params));
 
@@ -1368,11 +1348,10 @@ if (!function_exists('print_pdf_kerayslista')) {
     $returnvalue = 0;
 
     if ($kerayslistatyyppi == 'EXCEL1' or $kerayslistatyyppi == 'EXCEL2') {
-      // We need to explicitly close the workbook
-      $pdf->close();
+      $excelnimi = $thispage->close();
 
-      $liite = $page;
-      $ctype = "excel";
+      $liite['excel'] = "/tmp/".$excelnimi;
+      $ctype['excel']= "excel";
 
       if ($tyyppi == "SIIRTOLISTA") {
         $kutsu = t("Siirtolista", $kieli);

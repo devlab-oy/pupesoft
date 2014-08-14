@@ -2,7 +2,7 @@
 
 if (!function_exists("xml_float")) {
   function xml_float($value) {
-    $value = (float) utf8_decode($value);
+    $value = (string) utf8_decode($value);
 
     return pupesoft_cleannumber($value);
   }

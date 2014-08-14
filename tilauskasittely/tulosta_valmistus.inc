@@ -541,7 +541,7 @@ if (!function_exists('rivi_valm')) {
 
       if (mysql_num_rows($tuoteperhe_result) > 0) {
         while ($tuoteperhe_row = mysql_fetch_assoc($tuoteperhe_result)) {
-          $row["kommentti"] .= "$tuoteperhe_row[tuoteno] - $tuoteperhe_row[nimitys]\n";
+          $row["kommentti"] .= ((float) $tuoteperhe_row["kerroin"])." x $tuoteperhe_row[tuoteno] - $tuoteperhe_row[nimitys]\n";
         }
       }
     }
@@ -622,11 +622,22 @@ if (!function_exists('rivi_valmistus')) {
 
     $pdf->draw_text(125, $kala, t_tuotteen_avainsanat($row, 'nimitys'),  $thispage, $pb);
 
-    if (trim($row["kommentti"]) != '') {
+    // Ei piirretä kommenttia, kun testataan mahtuuko, koska pitkä komentti osaa vaihtaa sivua ihan itsekin
+    if (!empty($thispage) and trim($row["kommentti"]) != '') {
 
       $komm = t("Kommentti", $kieli).":\n".trim($row["kommentti"]);
 
       foreach (explode("\n", wordwrap(trim($komm), 90, "\n")) as $kommentti) {
+
+        if ($kala <= 85) {
+          $sivu++;
+
+          loppu_valm($thispage, 0);
+
+          $page[$sivu] = uusi_sivu_valm($tyyppi);
+          $thispage    = $page[$sivu];
+        }
+
         $kala = $kala - $rivinkorkeus;
         $lask_valm++;
 

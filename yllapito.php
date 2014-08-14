@@ -1413,9 +1413,9 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
 
         echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&lopetus=$lopetus&ojarj=".($i+1)."_".$edosuu."$ulisa&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji'{$tuote_status_lisa}>" . t(mysql_field_name($result, $i)) . "</a>";
 
-        if      (mysql_field_len($result, $i)>10) $size='15';
-        elseif  (mysql_field_len($result, $i)<5)  $size='5';
-        else     $size='10';
+        if (mysql_num_fields($result) <= 6 and mysql_field_len($result, $i) > 10) $size='15';
+        elseif (mysql_field_len($result, $i) < 5)  $size='5';
+        else $size='10';
 
         if ($toim == 'varaston_hyllypaikat' and ($i == 1 or $i == 2)) {
           if (!isset($haku[$i])) $haku[$i] = "";

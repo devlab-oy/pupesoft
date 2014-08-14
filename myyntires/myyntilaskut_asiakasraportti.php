@@ -80,6 +80,8 @@ if (!isset($tila)) $tila = "";
 if (!isset($asiakasid)) $asiakasid = 0;
 if (!isset($savalkoodi)) $savalkoodi = "";
 if (!isset($valintra)) $valintra = "";
+if (!isset($alkupvm)) $alkupvm = "";
+if (!isset($loppupvm)) $loppupvm = "";
 
 if ($tee == "") {
 
@@ -971,57 +973,56 @@ function hae_maksusuoritukset($maksurow) {
 
   // sitten uudet suorituksen_kohdistus taulun kautta haetut tapahtumat
   // haetaan käytetyn suorituksen tunnus
-  $qry1 = "SELECT suoritustunnus
+
+  $qry1 = "SELECT group_concat(suoritustunnus) as suoritukset
            FROM suorituksen_kohdistus
            WHERE yhtio = '{$kukarow['yhtio']}'
            AND laskutunnus = '{$maksurow['tunnus']}'";
   $res1 = pupe_query($qry1);
+  $row1 = mysql_fetch_assoc($res1);
 
-  // jos löytyy suoritus niin jatketaan
-  if (mysql_num_rows($res1) > 0) {
-
-    $row1 = mysql_fetch_assoc($res1);
+  // jos löytyy suorituksia niin jatketaan
+  if (!empty($row1['suoritukset'])) {
 
     // haetaan asiaan kuuluvien laskujen tunnukset
     $qry2 = "SELECT group_concat(laskutunnus) as laskut
              FROM suorituksen_kohdistus
              WHERE yhtio = '{$kukarow['yhtio']}'
-             AND suoritustunnus = '{$row1['suoritustunnus']}'";
+             AND suoritustunnus IN ({$row1['suoritukset']})";
     $res2 = pupe_query($qry2);
     $row2 = mysql_fetch_assoc($res2);
 
-    // haetaan käytetyn suorituksen tiedot
-    $qry3 = "SELECT *
-             FROM suoritus
-             WHERE yhtio = '{$kukarow['yhtio']}'
-             AND tunnus = '{$row1['suoritustunnus']}'";
-    $res3 = pupe_query($qry3);
-    $row3 = mysql_fetch_assoc($res3);
-
-    // echotaan suorituksen tiedot
-    echo "<span style='font-weight:bold'>S</span> &#124; ", $row3['summa'], " ";
-    echo $yhtiorow['valkoodi'], " &#124; ", tv1dateconv($row3['maksupvm']), "<br>";
-
-    // ja mahdollinen kommentti
-    if (!empty($row3['viesti'])) {
-      echo $row3['viesti'], '<br><br>';
-    }
-
     if (!empty($row2['laskut'])) {
-
-      // jos löytyi laskuja niin haetaan niitten tiedot
-      $qry4 = "SELECT *
-               FROM lasku
+      $qry3 = "SELECT *
+               FROM suoritus
                WHERE yhtio = '{$kukarow['yhtio']}'
-               AND tunnus IN ({$row2['laskut']})
-               AND tunnus != '{$maksurow['tunnus']}'";
-      $res4 = pupe_query($qry4);
+               AND tunnus IN ({$row1['suoritukset']})";
+      $res3 = pupe_query($qry3);
 
-      //  echotaan laskujen tiedot
-      while ($row4 = mysql_fetch_assoc($res4)) {
-        echo "<span style='font-weight:bold'>L</span> &#124; ", $row4['summa'], " ";
-        echo $yhtiorow['valkoodi'], " &#124; ", tv1dateconv($row4['tapvm']), "<br>";
+      // echotaan suoritusten tiedot
+      while ($row3 = mysql_fetch_assoc($res3)) {
+        echo "<span style='font-weight:bold'>S</span> &#124; ", $row3['summa'], " ";
+        echo $yhtiorow['valkoodi'], " &#124; ", tv1dateconv($row3['maksupvm']), "<br>";
+
+        // ja mahdollinen kommentti
+        if (!empty($row3['viesti'])) {
+          echo $row3['viesti'], '<br><br>';
+        }
       }
+
+        // haetaan laskujen tiedot
+        $qry4 = "SELECT *
+                 FROM lasku
+                 WHERE yhtio = '{$kukarow['yhtio']}'
+                 AND tunnus IN ({$row2['laskut']})
+                 AND tunnus != '{$maksurow['tunnus']}'";
+        $res4 = pupe_query($qry4);
+
+        //  echotaan laskujen tiedot
+        while ($row4 = mysql_fetch_assoc($res4)) {
+          echo "<span style='font-weight:bold'>L</span> &#124; ", $row4['summa'], " ";
+          echo $yhtiorow['valkoodi'], " &#124; ", tv1dateconv($row4['tapvm']), "<br>";
+        }
     }
   }
 

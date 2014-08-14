@@ -43,7 +43,7 @@ if ($tee == 'siirra_tarkastajalle') {
   unset($tee);
   unset($tyomaarays_tunnus);
 }
-else if ($tee == 'anna_laskutuslupa') {
+elseif ($tee == 'anna_laskutuslupa') {
     if ($yhtiorow['lisakuluprosentti'] != 0) {
 
       // Lasketaan laskun summa ja lis‰t‰‰n lis‰kuluprosentti
@@ -85,7 +85,7 @@ else if ($tee == 'anna_laskutuslupa') {
     unset($tee);
     unset($tyomaarays_tunnus);
   }
-else if ($tee == 'siirra_urakoitsijalle') {
+elseif ($tee == 'siirra_urakoitsijalle') {
     $query = "UPDATE tyomaarays
               SET tyostatus = 1
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -94,7 +94,7 @@ else if ($tee == 'siirra_urakoitsijalle') {
     unset($tee);
     unset($tyomaarays_tunnus);
   }
-else if ($tee == 'merkitse_maksetuksi') {
+elseif ($tee == 'merkitse_maksetuksi') {
     $query = "UPDATE tyomaarays
               SET tyostatus = 4
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -394,7 +394,7 @@ function hae_vauriopoytakirja_rivit($vauriopoytakirja_tunnus) {
         $tilausrivit['kustannukset']['tsf'][] = $tilausrivi;
       }
     }
-    else if ($tilausrivi['tuotetyyppi'] == 'K') {
+    elseif ($tilausrivi['tuotetyyppi'] == 'K') {
         $tilausrivit['korjaajat'][] = $tilausrivi;
       }
 

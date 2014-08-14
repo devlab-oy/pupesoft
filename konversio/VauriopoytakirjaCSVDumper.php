@@ -74,7 +74,7 @@ class VauriopoytakirjaCSVDumper extends CSVDumper {
 
           $rivi_temp[$konvertoitu_header] = "$year-$month-$day $hour:$minutes:00";
         }
-        else if ($konvertoitu_header == 'prioriteetti') {
+        elseif ($konvertoitu_header == 'prioriteetti') {
             $rivi_temp[$konvertoitu_header] = 'A'.$rivi[$csv_header];
           }
         else {

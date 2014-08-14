@@ -668,7 +668,7 @@ if ($tila == "" and !isset($jatka)) {
               </form>
             </td>";
       }
-      else if ($srow['tyostatus'] == '3') {
+      elseif ($srow['tyostatus'] == '3') {
           echo "  <td class='back' valign='top'>
               <form name='tlepaamaan' method='post' action='{$lopetus_temp}'>
                 <input type='hidden' name='tee' value='merkitse_maksetuksi' />

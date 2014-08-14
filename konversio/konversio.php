@@ -31,7 +31,7 @@ if ($request['action'] == 'aja_konversio') {
 
   $dumper->aja();
 }
-else if ($request['action'] == 'poista_konversio_aineisto_kannasta') {
+elseif ($request['action'] == 'poista_konversio_aineisto_kannasta') {
     $query_array = array(
       'DELETE FROM tyomaarays',
       'DELETE FROM lasku',

@@ -1852,7 +1852,7 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
       pupe_query($query);
     }
   }
-  else if ($toim == 'VAURIOPOYTAKIRJA') {
+  elseif ($toim == 'VAURIOPOYTAKIRJA') {
       require 'otsik_vauriopoytakirja.inc';
     }
   else {
@@ -3500,7 +3500,7 @@ if ($tee == '') {
         </tr>";
     }
   }
-  else if ($toim == 'VAURIOPOYTAKIRJA') {
+  elseif ($toim == 'VAURIOPOYTAKIRJA') {
       echo "  <tr>$jarjlisa
           <th align='left'>".t("Operaattorin tikettinumero")."</th>
           <td>123321</td>
@@ -7738,7 +7738,7 @@ if ($tee == '') {
 
           echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
         }
-        else if ($yhtiorow['vauriopoytakirja'] == 'K') {
+        elseif ($yhtiorow['vauriopoytakirja'] == 'K') {
             echo "<tr>$jarjlisa";
             echo "<td class='back' colspan='".($sarakkeet_alku-5)."'>&nbsp;</td>";
             echo "<th colspan='5' align='right'>".t("Yhteensä").":</th>";
@@ -8597,7 +8597,7 @@ if ($tee == '') {
               </form>
             </td>";
       }
-      else if ($laskurow['tyostatus'] == '3') {
+      elseif ($laskurow['tyostatus'] == '3') {
           echo "  <td class='back' valign='top'>
               <form name='tlepaamaan' method='post' action='{$lopetus_temp}'>
                 <input type='hidden' name='tee' value='merkitse_maksetuksi' />

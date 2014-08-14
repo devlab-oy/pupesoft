@@ -96,10 +96,10 @@ if (!function_exists('alku_kerayslista')) {
 
       if ($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) {
 
-        $query = "  SELECT count(distinct liitostunnus) asiakkaita
-              FROM lasku
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus IN ($tilausnumeroita)";
+        $query = "SELECT count(distinct liitostunnus) asiakkaita
+                  FROM lasku
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  IN ($tilausnumeroita)";
         $chk_res = pupe_query($query);
         $chk_row = mysql_fetch_assoc($chk_res);
 
@@ -133,10 +133,10 @@ if (!function_exists('alku_kerayslista')) {
       }
 
       // haetaan maksuehdon tiedot
-      $query  = "  SELECT *
-            FROM maksuehto
-            WHERE yhtio='$kukarow[yhtio]'
-            AND tunnus='$laskurow[maksuehto]'";
+      $query  = "SELECT *
+                 FROM maksuehto
+                 WHERE yhtio='$kukarow[yhtio]'
+                 AND tunnus='$laskurow[maksuehto]'";
       $masresult = pupe_query($query);
       $masrow = mysql_fetch_assoc($masresult);
 
@@ -249,12 +249,12 @@ if (!function_exists('alku_kerayslista')) {
         $pdf->draw_text(310, 729, t("Ker‰‰j‰", $kieli),     $thispage, $pieni);
 
         //etsit‰‰n myyj‰n nimi
-        $query  = "  SELECT kuka.nimi
-              FROM kerayserat
-              JOIN kuka ON (kuka.yhtio = kerayserat.yhtio AND kuka.kuka = kerayserat.laatija)
-              WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
-              AND kerayserat.nro = '{$kerayseran_numero}'
-              LIMIT 1";
+        $query  = "SELECT kuka.nimi
+                   FROM kerayserat
+                   JOIN kuka ON (kuka.yhtio = kerayserat.yhtio AND kuka.kuka = kerayserat.laatija)
+                   WHERE kerayserat.yhtio = '{$kukarow['yhtio']}'
+                   AND kerayserat.nro     = '{$kerayseran_numero}'
+                   LIMIT 1";
         $keraaja_res = pupe_query($query);
         $keraaja_row = mysql_fetch_assoc($keraaja_res);
 
@@ -265,10 +265,10 @@ if (!function_exists('alku_kerayslista')) {
         $pdf->draw_text(310, 729, t("Myyj‰", $kieli),     $thispage, $pieni);
 
         //etsit‰‰n myyj‰n nimi
-        $query  = "  SELECT nimi, kuka
-              FROM kuka
-              WHERE tunnus = '$laskurow[myyja]'
-              AND yhtio    = '$kukarow[yhtio]'";
+        $query  = "SELECT nimi, kuka
+                   FROM kuka
+                   WHERE tunnus = '$laskurow[myyja]'
+                   AND yhtio    = '$kukarow[yhtio]'";
         $myyresult = pupe_query($query);
         $myyrow = mysql_fetch_assoc($myyresult);
 
@@ -311,9 +311,9 @@ if (!function_exists('alku_kerayslista')) {
 
       if ($myyrow['kuka'] != $laskurow['laatija']) {
         //etsit‰‰n laatijan nimi
-        $query  = "  SELECT nimi
-              from kuka
-              where kuka='$laskurow[laatija]' and yhtio='$kukarow[yhtio]'";
+        $query  = "SELECT nimi
+                   from kuka
+                   where kuka='$laskurow[laatija]' and yhtio='$kukarow[yhtio]'";
         $laaresult = pupe_query($query);
         $laarow = mysql_fetch_assoc($laaresult);
 
@@ -328,11 +328,11 @@ if (!function_exists('alku_kerayslista')) {
       if ($laskurow['pakkaamo'] > 0 and $yhtiorow['pakkaamolokerot'] != '') {
         $keraaja_teksti = "";
 
-        $query = "  SELECT nimi, lokero
-              FROM pakkaamo
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND tunnus = '$laskurow[pakkaamo]'
-              LIMIT 1";
+        $query = "SELECT nimi, lokero
+                  FROM pakkaamo
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND tunnus  = '$laskurow[pakkaamo]'
+                  LIMIT 1";
         $pakkaamo_fetch_res = pupe_query($query);
 
         if (mysql_num_rows($pakkaamo_fetch_res) == 1) {
@@ -763,42 +763,42 @@ if (!function_exists('rivi_kerayslista')) {
         if ($row["perheid"] > 0 and $perheid != $row["perheid"]) {
           $numrows = 0;
 
-          $query = "  SELECT vanhatunnus
-                FROM lasku
-                WHERE yhtio  = '$kukarow[yhtio]'
-                and tunnus  = '$row[otunnus]'";
+          $query = "SELECT vanhatunnus
+                    FROM lasku
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    and tunnus  = '$row[otunnus]'";
           $vtunres = pupe_query($query);
           $vtunrow = mysql_fetch_assoc($vtunres);
 
           if ($vtunrow["vanhatunnus"] != 0) {
-            $query = "   SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
-                  FROM lasku use index (yhtio_vanhatunnus)
-                  WHERE yhtio    = '$kukarow[yhtio]'
-                  and vanhatunnus = '$vtunrow[vanhatunnus]'";
+            $query = "SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
+                      FROM lasku use index (yhtio_vanhatunnus)
+                      WHERE yhtio     = '$kukarow[yhtio]'
+                      and vanhatunnus = '$vtunrow[vanhatunnus]'";
             $perheresult = pupe_query($query);
             $numrows = mysql_num_rows($perheresult);
           }
 
           if ($numrows == 0 or $vtunrow["vanhatunnus"] == 0) {
-            $query = "  SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
-                  FROM lasku use index (PRIMARY)
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tunnus  = '$row[otunnus]'";
+            $query = "SELECT GROUP_CONCAT(distinct tunnus SEPARATOR ',') tunnukset
+                      FROM lasku use index (PRIMARY)
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      and tunnus  = '$row[otunnus]'";
             $perheresult = pupe_query($query);
           }
 
           if (mysql_num_rows($perheresult) > 0) {
             $perherow = mysql_fetch_assoc($perheresult);
 
-            $query = "  SELECT distinct tilausrivi.tuoteno, tilausrivi.nimitys, varattu
-                  FROM tilausrivi
-                  JOIN tuote tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
-                  WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
-                  and tilausrivi.otunnus in ($perherow[tunnukset])
-                  AND tilausrivi.tyyppi != 'D'
-                  and tilausrivi.var != 'O'
-                  and tilausrivi.perheid = '$row[perheid]'
-                  ORDER BY tilausrivi.tunnus";
+            $query = "SELECT distinct tilausrivi.tuoteno, tilausrivi.nimitys, varattu
+                      FROM tilausrivi
+                      JOIN tuote tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
+                      WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
+                      and tilausrivi.otunnus  in ($perherow[tunnukset])
+                      AND tilausrivi.tyyppi  != 'D'
+                      and tilausrivi.var     != 'O'
+                      and tilausrivi.perheid  = '$row[perheid]'
+                      ORDER BY tilausrivi.tunnus";
             $perheresult = pupe_query($query);
 
             if (mysql_num_rows($perheresult) > 1) {
@@ -865,11 +865,11 @@ if (!function_exists('rivi_kerayslista')) {
         $pdf->draw_text(42,  $kala, $ff_string,           $thispage, $ff_font);
         $pdf->draw_text(125,  $kala, $row["tuoteno"],        $thispage, $norm);
 
-        $query = "  SELECT tuote.*, group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno
-              FROM tuote
-              LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno
-              WHERE tuote.yhtio='$kukarow[yhtio]' and tuote.tuoteno = '$row[tuoteno]'
-              GROUP BY tuote.tuoteno";
+        $query = "SELECT tuote.*, group_concat(distinct tuotteen_toimittajat.toim_tuoteno order by tuotteen_toimittajat.tunnus separator '/') toim_tuoteno
+                  FROM tuote
+                  LEFT JOIN tuotteen_toimittajat ON tuote.yhtio = tuotteen_toimittajat.yhtio and tuote.tuoteno = tuotteen_toimittajat.tuoteno
+                  WHERE tuote.yhtio='$kukarow[yhtio]' and tuote.tuoteno = '$row[tuoteno]'
+                  GROUP BY tuote.tuoteno";
         $tresult = pupe_query($query);
         $trow   = mysql_fetch_assoc($tresult);
 
@@ -881,10 +881,10 @@ if (!function_exists('rivi_kerayslista')) {
         // jos rekkulalla on suoraan toimittajalle palautettvia rivej‰
         if ($row['asiakkaan_positio'] > 0) {
 
-          $query = "  SELECT nimi
-                FROM asiakas
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = '{$row['asiakkaan_positio']}'";
+          $query = "SELECT nimi
+                    FROM asiakas
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '{$row['asiakkaan_positio']}'";
           $asiakas_check_res = pupe_query($query);
           $asiakas_check_row   = mysql_fetch_assoc($asiakas_check_res);
 
@@ -892,10 +892,10 @@ if (!function_exists('rivi_kerayslista')) {
         }
 
         //varaston sis‰isen siirron kohdetuotepaikka, tsekataan onko tietoja ja onko kyseess‰ varmasti varaston sis‰inen siirto. Jos, laitetaan siirtolistalle kohdetuotepaikasta infoa.
-        $query = "  SELECT kohde_hyllyalue, kohde_hyllynro, kohde_hyllyvali, kohde_hyllytaso
-              FROM tilausrivin_lisatiedot as tlt2
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tilausrivitunnus = '$row[tunnus]'";
+        $query = "SELECT kohde_hyllyalue, kohde_hyllynro, kohde_hyllyvali, kohde_hyllytaso
+                  FROM tilausrivin_lisatiedot as tlt2
+                  WHERE yhtio          = '$kukarow[yhtio]'
+                  and tilausrivitunnus = '$row[tunnus]'";
         $kohderesult = pupe_query($query);
         $kohderow   = mysql_fetch_assoc($kohderesult);
         $varastopaikkakohde = '';
@@ -916,11 +916,11 @@ if (!function_exists('rivi_kerayslista')) {
 
           if ($onkolaajattoimipaikat and $laskurow['yhtio_toimipaikka'] != 0) {
 
-            $query  = "  SELECT GROUP_CONCAT(tunnus) AS tunnukset
-                  FROM varastopaikat
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tyyppi != 'P'
-                  AND toimipaikka = '{$laskurow['yhtio_toimipaikka']}'";
+            $query  = "SELECT GROUP_CONCAT(tunnus) AS tunnukset
+                       FROM varastopaikat
+                       WHERE yhtio      = '{$kukarow['yhtio']}'
+                       AND tyyppi      != 'P'
+                       AND toimipaikka  = '{$laskurow['yhtio_toimipaikka']}'";
             $vares = pupe_query($query);
             $varow = mysql_fetch_assoc($vares);
 
@@ -931,45 +931,45 @@ if (!function_exists('rivi_kerayslista')) {
 
           //saldot per varastopaikka
           if ($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") {
-            $query = "  SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
-                  tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
-                  sarjanumeroseuranta.sarjanumero era,
-                  concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta,
-                  varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
-                   FROM tuote
-                  JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
-                  JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-                  and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-                  and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-                  and varastopaikat.tunnus IN ({$rivipaikka})
-                  JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
-                  and sarjanumeroseuranta.tuoteno = tuote.tuoteno
-                  and sarjanumeroseuranta.hyllyalue = tuotepaikat.hyllyalue
-                  and sarjanumeroseuranta.hyllynro  = tuotepaikat.hyllynro
-                  and sarjanumeroseuranta.hyllyvali = tuotepaikat.hyllyvali
-                  and sarjanumeroseuranta.hyllytaso = tuotepaikat.hyllytaso
-                  and sarjanumeroseuranta.myyntirivitunnus = 0
-                  and sarjanumeroseuranta.era_kpl != 0
-                  WHERE tuote.yhtio = '$kukarow[yhtio]'
-                  and tuote.tuoteno = '$row[tuoteno]'
-                  GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
-                  ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
+            $query = "SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
+                      tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
+                      sarjanumeroseuranta.sarjanumero era,
+                      concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso), 5, '0')) sorttauskentta,
+                      varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
+                       FROM tuote
+                      JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
+                      JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
+                      and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+                      and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+                      and varastopaikat.tunnus                  IN ({$rivipaikka})
+                      JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
+                      and sarjanumeroseuranta.tuoteno           = tuote.tuoteno
+                      and sarjanumeroseuranta.hyllyalue         = tuotepaikat.hyllyalue
+                      and sarjanumeroseuranta.hyllynro          = tuotepaikat.hyllynro
+                      and sarjanumeroseuranta.hyllyvali         = tuotepaikat.hyllyvali
+                      and sarjanumeroseuranta.hyllytaso         = tuotepaikat.hyllytaso
+                      and sarjanumeroseuranta.myyntirivitunnus  = 0
+                      and sarjanumeroseuranta.era_kpl          != 0
+                      WHERE tuote.yhtio                         = '$kukarow[yhtio]'
+                      and tuote.tuoteno                         = '$row[tuoteno]'
+                      GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+                      ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
           }
           else {
-            $query = "  SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
-                  tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
-                  '' era,
-                  concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
-                  varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
-                   FROM tuote
-                  JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
-                  JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-                  and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-                  and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-                  and varastopaikat.tunnus IN ({$rivipaikka})
-                  WHERE tuote.yhtio = '$kukarow[yhtio]'
-                  and tuote.tuoteno = '$row[tuoteno]'
-                  ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
+            $query = "SELECT tuote.yhtio, tuote.tuoteno, tuote.ei_saldoa, varastopaikat.tunnus varasto, varastopaikat.tyyppi varastotyyppi, varastopaikat.maa varastomaa,
+                      tuotepaikat.oletus, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso,
+                      '' era,
+                      concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'),lpad(upper(hyllyvali), 5, '0'),lpad(upper(hyllytaso), 5, '0')) sorttauskentta,
+                      varastopaikat.nimitys, if(varastopaikat.tyyppi!='', concat('(',varastopaikat.tyyppi,')'), '') tyyppi
+                       FROM tuote
+                      JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
+                      JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
+                      and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+                      and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
+                      and varastopaikat.tunnus IN ({$rivipaikka})
+                      WHERE tuote.yhtio        = '$kukarow[yhtio]'
+                      and tuote.tuoteno        = '$row[tuoteno]'
+                      ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
           }
           $sresult = pupe_query($query);
 
@@ -1092,13 +1092,13 @@ if (!function_exists('rivi_kerayslista')) {
             $sarjanutunnus = "myyntirivitunnus";
           }
 
-          $query = "  SELECT DISTINCT sarjanumero, parasta_ennen
-                FROM sarjanumeroseuranta
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tuoteno = '$row[tuoteno]'
-                and $sarjanutunnus='$row[tunnus]'
-                and sarjanumero != ''
-                ORDER BY sarjanumero";
+          $query = "SELECT DISTINCT sarjanumero, parasta_ennen
+                    FROM sarjanumeroseuranta
+                    WHERE yhtio      = '$kukarow[yhtio]'
+                    and tuoteno      = '$row[tuoteno]'
+                    and $sarjanutunnus='$row[tunnus]'
+                    and sarjanumero != ''
+                    ORDER BY sarjanumero";
           $sarjares = pupe_query($query);
 
           if (mysql_num_rows($sarjares) > 0) {
@@ -1134,11 +1134,11 @@ if (!function_exists('rivi_kerayslista')) {
           $row['kommentti'] .= t("Tilausnumero", $kieli).": {$row['otunnus']}";
 
           //etsit‰‰n myyj‰n nimi
-          $query  = "  SELECT kuka.nimi
-                FROM lasku
-                JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja AND kuka.yhtio = lasku.yhtio)
-                WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-                AND lasku.tunnus = '{$row['otunnus']}'";
+          $query  = "SELECT kuka.nimi
+                     FROM lasku
+                     JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja AND kuka.yhtio = lasku.yhtio)
+                     WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                     AND lasku.tunnus  = '{$row['otunnus']}'";
           $myyresult = pupe_query($query);
           $myyrow = mysql_fetch_assoc($myyresult);
 
@@ -1165,10 +1165,10 @@ if (!function_exists('rivi_kerayslista')) {
 
           $kala -= 10;
 
-          $query = "  SELECT CONCAT(pakkaus, ' ', pakkauskuvaus) pakkaus
-                FROM pakkaus
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = '{$row['pakkaus']}'";
+          $query = "SELECT CONCAT(pakkaus, ' ', pakkauskuvaus) pakkaus
+                    FROM pakkaus
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '{$row['pakkaus']}'";
           $pak_nimi_res = pupe_query($query);
           $pak_nimi_row = mysql_fetch_assoc($pak_nimi_res);
 

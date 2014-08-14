@@ -35,10 +35,10 @@ echo "<font class='head'>".t("Vauriopöytäkirja")."</font><hr>";
 
 //Nämä requestit tulee tilaus_myynti.php puolelta
 if ($tee == 'siirra_tarkastajalle') {
-  $query = "  UPDATE tyomaarays
-        SET tyostatus = 2
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND otunnus = '{$tyomaarays_tunnus}'";
+  $query = "UPDATE tyomaarays
+            SET tyostatus = 2
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND otunnus = '{$tyomaarays_tunnus}'";
   pupe_query($query);
   unset($tee);
   unset($tyomaarays_tunnus);
@@ -48,9 +48,9 @@ else if ($tee == 'anna_laskutuslupa') {
 
       // Lasketaan laskun summa ja lisätään lisäkuluprosentti
       $hinta_query = "SELECT sum(hinta * tilkpl * ({$yhtiorow['lisakuluprosentti']} / 100)) as hinta
-            FROM tilausrivi
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND otunnus = '{$tyomaarays_tunnus}'";
+                      FROM tilausrivi
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND otunnus = '{$tyomaarays_tunnus}'";
       $hinta_result = pupe_query($hinta_query);
       $lisakulu = mysql_fetch_assoc($hinta_result);
 
@@ -77,28 +77,28 @@ else if ($tee == 'anna_laskutuslupa') {
       lisaa_rivi($params);
     }
 
-    $query = "  UPDATE tyomaarays
-        SET tyostatus = 3
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND otunnus = '{$tyomaarays_tunnus}'";
+    $query = "UPDATE tyomaarays
+              SET tyostatus = 3
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND otunnus = '{$tyomaarays_tunnus}'";
     pupe_query($query);
     unset($tee);
     unset($tyomaarays_tunnus);
   }
 else if ($tee == 'siirra_urakoitsijalle') {
-    $query = "  UPDATE tyomaarays
-        SET tyostatus = 1
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND otunnus = '{$tyomaarays_tunnus}'";
+    $query = "UPDATE tyomaarays
+              SET tyostatus = 1
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND otunnus = '{$tyomaarays_tunnus}'";
     pupe_query($query);
     unset($tee);
     unset($tyomaarays_tunnus);
   }
 else if ($tee == 'merkitse_maksetuksi') {
-    $query = "  UPDATE tyomaarays
-        SET tyostatus = 4
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        AND otunnus = '{$tyomaarays_tunnus}'";
+    $query = "UPDATE tyomaarays
+              SET tyostatus = 4
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND otunnus = '{$tyomaarays_tunnus}'";
     pupe_query($query);
     unset($tee);
     unset($tyomaarays_tunnus);
@@ -337,18 +337,18 @@ function hae_vauriopöytäkirjat($request) {
     $tyomaarays_where .= "  AND tyomaarays.suorittaja IN ('".implode("','", $tuoteryhmat)."')";
   }
 
-  $query = "  SELECT tyomaarays.*,
-        tyomaarays.viite as tyomaarays_viite,
-        lasku.tunnus as tunnus,
-        lasku.tila as tila,
-        lasku.alatila as alatila,
-        lasku.*
-        FROM tyomaarays
-        JOIN lasku
-        ON ( lasku.yhtio = tyomaarays.yhtio
-          AND lasku.tunnus = tyomaarays.otunnus )
-        WHERE tyomaarays.yhtio = '{$kukarow['yhtio']}'
-        {$tyomaarays_where}";
+  $query = "SELECT tyomaarays.*,
+            tyomaarays.viite as tyomaarays_viite,
+            lasku.tunnus as tunnus,
+            lasku.tila as tila,
+            lasku.alatila as alatila,
+            lasku.*
+            FROM tyomaarays
+            JOIN lasku
+            ON ( lasku.yhtio = tyomaarays.yhtio
+              AND lasku.tunnus     = tyomaarays.otunnus )
+            WHERE tyomaarays.yhtio = '{$kukarow['yhtio']}'
+            {$tyomaarays_where}";
   $result = pupe_query($query);
 
   $vauriopoytakirjat = array();
@@ -373,14 +373,14 @@ function hae_vauriopoytakirja_rivit($vauriopoytakirja_tunnus) {
     return false;
   }
 
-  $query = "  SELECT tilausrivi.*,
-        tuote.tuotetyyppi
-        FROM tilausrivi
-        JOIN tuote
-        ON ( tuote.yhtio = tilausrivi.yhtio
-          AND tuote.tuoteno = tilausrivi.tuoteno )
-        WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-        AND tilausrivi.otunnus = '{$vauriopoytakirja_tunnus}'";
+  $query = "SELECT tilausrivi.*,
+            tuote.tuotetyyppi
+            FROM tilausrivi
+            JOIN tuote
+            ON ( tuote.yhtio = tilausrivi.yhtio
+              AND tuote.tuoteno    = tilausrivi.tuoteno )
+            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+            AND tilausrivi.otunnus = '{$vauriopoytakirja_tunnus}'";
   $result = pupe_query($query);
 
   $tilausrivit = array();

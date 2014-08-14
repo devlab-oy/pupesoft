@@ -115,13 +115,13 @@ if ($tee == "file") {
               continue;
             }
 
-            $query = "  SELECT tunnus
-                    FROM tilausrivi
-                    WHERE yhtio='$kukarow[yhtio]'
-                    AND tyyppi = 'G'
-                    AND var = ''
-                    AND otunnus='$kukarow[kesken]'
-                    AND tuoteno='$tuoteno'";
+            $query = "SELECT tunnus
+                      FROM tilausrivi
+                      WHERE yhtio='$kukarow[yhtio]'
+                      AND tyyppi = 'G'
+                      AND var    = ''
+                      AND otunnus='$kukarow[kesken]'
+                      AND tuoteno='$tuoteno'";
 
             $result = pupe_query($query);
 
@@ -130,14 +130,14 @@ if ($tee == "file") {
               $rivitunnus = $row['tunnus'];
             }
             else {
-              $query = "  SELECT tunnus
-                      FROM tilausrivi
-                      WHERE yhtio='$kukarow[yhtio]'
-                      AND tyyppi = 'G'
-                      AND var = ''
-                      AND otunnus='$kukarow[kesken]'
-                      AND tuoteno='$tuoteno'
-                      AND kpl = '$kpl'";
+              $query = "SELECT tunnus
+                        FROM tilausrivi
+                        WHERE yhtio='$kukarow[yhtio]'
+                        AND tyyppi = 'G'
+                        AND var    = ''
+                        AND otunnus='$kukarow[kesken]'
+                        AND tuoteno='$tuoteno'
+                        AND kpl    = '$kpl'";
 
               $result = pupe_query($query);
 
@@ -384,14 +384,14 @@ if ($tee == "file") {
               }
 
               if ($mikrotila_tuotenumero == "koodilla") {
-                $query = "  SELECT *
-                        FROM tuote
-                        WHERE eankoodi='$tuoteno' and yhtio='$kukarow[yhtio]'";
+                $query = "SELECT *
+                          FROM tuote
+                          WHERE eankoodi='$tuoteno' and yhtio='$kukarow[yhtio]'";
               }
               else {
-                $query = "  SELECT *
-                        FROM tuote
-                        WHERE tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+                $query = "SELECT *
+                          FROM tuote
+                          WHERE tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
               }
 
               $rarresult = pupe_query($query);
@@ -446,10 +446,10 @@ if ($tee == "file") {
 
                     foreach ($tuoteno_array as $tuoteno_temp) {
 
-                      $query = "  SELECT *
-                              FROM tuote
-                              WHERE yhtio = '{$kukarow["yhtio"]}'
-                              AND tuoteno = '{$tuoteno_temp}'";
+                      $query = "SELECT *
+                                FROM tuote
+                                WHERE yhtio = '{$kukarow["yhtio"]}'
+                                AND tuoteno = '{$tuoteno_temp}'";
                       $tuotearray_result = pupe_query($query);
                       $tuotearray_row = mysql_fetch_array($tuotearray_result);
 
@@ -539,13 +539,13 @@ if ($tee == "file") {
             continue;
           }
 
-          $query = "  SELECT tunnus
-                  FROM tilausrivi
-                  WHERE yhtio='$kukarow[yhtio]'
-                  AND tyyppi = 'G'
-                  AND var = ''
-                  AND otunnus='$kukarow[kesken]'
-                  AND tuoteno='$tuoteno'";
+          $query = "SELECT tunnus
+                    FROM tilausrivi
+                    WHERE yhtio='$kukarow[yhtio]'
+                    AND tyyppi = 'G'
+                    AND var    = ''
+                    AND otunnus='$kukarow[kesken]'
+                    AND tuoteno='$tuoteno'";
 
           $result = pupe_query($query);
 
@@ -554,14 +554,14 @@ if ($tee == "file") {
             $rivitunnus = $row['tunnus'];
           }
           else {
-            $query = "  SELECT tunnus
-                    FROM tilausrivi
-                    WHERE yhtio='$kukarow[yhtio]'
-                    AND tyyppi = 'G'
-                    AND var = ''
-                    AND otunnus='$kukarow[kesken]'
-                    AND tuoteno='$tuoteno'
-                    AND kpl = '$kpl'";
+            $query = "SELECT tunnus
+                      FROM tilausrivi
+                      WHERE yhtio='$kukarow[yhtio]'
+                      AND tyyppi = 'G'
+                      AND var    = ''
+                      AND otunnus='$kukarow[kesken]'
+                      AND tuoteno='$tuoteno'
+                      AND kpl    = '$kpl'";
 
             $result = pupe_query($query);
 
@@ -808,14 +808,14 @@ if ($tee == "file") {
             }
 
             if ($mikrotila_tuotenumero == "koodilla") {
-              $query = "  SELECT *
-                      FROM tuote
-                      WHERE eankoodi='$tuoteno' and yhtio='$kukarow[yhtio]'";
+              $query = "SELECT *
+                        FROM tuote
+                        WHERE eankoodi='$tuoteno' and yhtio='$kukarow[yhtio]'";
             }
             else {
-              $query = "  SELECT *
-                      FROM tuote
-                      WHERE tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+              $query = "SELECT *
+                        FROM tuote
+                        WHERE tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
             }
 
             $rarresult = pupe_query($query);
@@ -870,10 +870,10 @@ if ($tee == "file") {
 
                   foreach ($tuoteno_array as $tuoteno_temp) {
 
-                    $query = "  SELECT *
-                            FROM tuote
-                            WHERE yhtio = '{$kukarow["yhtio"]}'
-                            AND tuoteno = '{$tuoteno_temp}'";
+                    $query = "SELECT *
+                              FROM tuote
+                              WHERE yhtio = '{$kukarow["yhtio"]}'
+                              AND tuoteno = '{$tuoteno_temp}'";
                     $tuotearray_result = pupe_query($query);
                     $tuotearray_row = mysql_fetch_array($tuotearray_result);
 

@@ -126,10 +126,10 @@ if (mysql_field_name($result, $i) == "selite") {
             <select name='$nimi'>
               <option value=''>".t("Ei oletustoimintoa")."</option>";
 
-    $olquery = "  SELECT toimi.tunnus, toimi.nimi
-              FROM tuotteen_toimittajat
-              JOIN toimi ON toimi.yhtio=tuotteen_toimittajat.yhtio and toimi.tunnus=tuotteen_toimittajat.liitostunnus
-              WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]' and tuoteno = '$trow[tuoteno]' and liitostunnus > 0";
+    $olquery = "SELECT toimi.tunnus, toimi.nimi
+                FROM tuotteen_toimittajat
+                JOIN toimi ON toimi.yhtio=tuotteen_toimittajat.yhtio and toimi.tunnus=tuotteen_toimittajat.liitostunnus
+                WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]' and tuoteno = '$trow[tuoteno]' and liitostunnus > 0";
     $oltarkres = pupe_query($olquery);
 
     if (mysql_num_rows($oltarkres) > 0) {
@@ -140,12 +140,12 @@ if (mysql_field_name($result, $i) == "selite") {
       }
     }
 
-    $olquery = "  SELECT tunnus
-              FROM tuoteperhe
-              WHERE yhtio = '$kukarow[yhtio]'
-              AND isatuoteno = '$trow[tuoteno]'
-              AND tyyppi = 'R'
-              LIMIT 1";
+    $olquery = "SELECT tunnus
+                FROM tuoteperhe
+                WHERE yhtio    = '$kukarow[yhtio]'
+                AND isatuoteno = '$trow[tuoteno]'
+                AND tyyppi     = 'R'
+                LIMIT 1";
     $oltarkres = pupe_query($olquery);
 
     if (mysql_num_rows($oltarkres) > 0) {

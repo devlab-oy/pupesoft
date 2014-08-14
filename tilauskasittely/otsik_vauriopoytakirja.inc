@@ -130,23 +130,23 @@ if (isset($jatka)) {
 
 //tyomaarays.viite as tyomaarays_viite, selectoidaan erikseen koska resultista löytyy 2 viite kenttää: tyomaarays.viite ja lasku.viite. mysql driveri yliajaa tyomaarays.viiteen lasku.viitteellä
 //kts. n rivi. 2717 Dynaaminen osio
-$squery = "  SELECT asiakas.*,
-      tyomaarays.viite as tyomaarays_viite,
-      tyomaarays.*,
-      laskun_lisatiedot.*,
-      lasku.*,
-      lasku.hyvaksynnanmuutos as luokka
-      FROM lasku
-      JOIN asiakas
-      ON ( asiakas.yhtio = lasku.yhtio
-        AND asiakas.tunnus = lasku.liitostunnus )
-      LEFT JOIN laskun_lisatiedot
-      ON ( laskun_lisatiedot.yhtio = lasku.yhtio
-        AND laskun_lisatiedot.otunnus = lasku.tunnus )
-      LEFT JOIN tyomaarays
-      ON ( tyomaarays.yhtio = lasku.yhtio
-        AND tyomaarays.otunnus = lasku.tunnus )
-      WHERE lasku.tunnus = '{$kukarow['kesken']}'";
+$squery = "SELECT asiakas.*,
+           tyomaarays.viite as tyomaarays_viite,
+           tyomaarays.*,
+           laskun_lisatiedot.*,
+           lasku.*,
+           lasku.hyvaksynnanmuutos as luokka
+           FROM lasku
+           JOIN asiakas
+           ON ( asiakas.yhtio = lasku.yhtio
+             AND asiakas.tunnus            = lasku.liitostunnus )
+           LEFT JOIN laskun_lisatiedot
+           ON ( laskun_lisatiedot.yhtio = lasku.yhtio
+             AND laskun_lisatiedot.otunnus = lasku.tunnus )
+           LEFT JOIN tyomaarays
+           ON ( tyomaarays.yhtio = lasku.yhtio
+             AND tyomaarays.otunnus        = lasku.tunnus )
+           WHERE lasku.tunnus              = '{$kukarow['kesken']}'";
 $srow_from = "LASKU";
 
 $sresult = pupe_query($squery);
@@ -822,11 +822,11 @@ if (isset($jatka)) {
   $id = mysql_insert_id();
 
   if ($id != 0) {
-    $query = "  UPDATE kuka
-          SET kesken = '{$id}'
-          WHERE yhtio = '{$kukarow['yhtio']}'
-          AND kuka = '{$kukarow['kuka']}'
-          AND session = '{$session}'";
+    $query = "UPDATE kuka
+              SET kesken = '{$id}'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND kuka    = '{$kukarow['kuka']}'
+              AND session = '{$session}'";
     pupe_query($query);
 
     $kukarow["kesken"] = $id;
@@ -883,13 +883,13 @@ if (isset($jatka)) {
     }
 
     if ($insert) {
-      $query = "  INSERT INTO tyomaarays
-            SET laatija = '{$kukarow['kuka']}',
-            luontiaika = NOW(),";
+      $query = "INSERT INTO tyomaarays
+                SET laatija = '{$kukarow['kuka']}',
+                luontiaika = NOW(),";
     }
     else {
-      $query = "  UPDATE tyomaarays
-            SET ";
+      $query = "UPDATE tyomaarays
+                SET ";
     }
 
     $query .= "  yhtio      = '$kukarow[yhtio]',
@@ -938,13 +938,13 @@ if (isset($jatka)) {
     $ylatila = 'A';
 
     if ($insert) {
-      $query = "  INSERT INTO laskun_lisatiedot
-            SET laatija = '{$kukarow['kuka']}',
-            luontiaika = NOW(),";
+      $query = "INSERT INTO laskun_lisatiedot
+                SET laatija = '{$kukarow['kuka']}',
+                luontiaika = NOW(),";
     }
     else {
-      $query = "  UPDATE laskun_lisatiedot
-            SET ";
+      $query = "UPDATE laskun_lisatiedot
+                SET ";
     }
 
     $query .= "  laskutus_nimi = '{$laskutus_nimi}',

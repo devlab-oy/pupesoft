@@ -37,12 +37,12 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
     }
 
     // Jos tunnus löytyy avoimista laskuista niin skipataan.
-    $query = "  SELECT laskunro, tunnus
-          FROM lasku
-          WHERE yhtio='{$kukarow['yhtio']}'
-          AND mapvm = '0000-00-00'
-          AND tila = 'A'
-          AND alatila = ''";
+    $query = "SELECT laskunro, tunnus
+              FROM lasku
+              WHERE yhtio='{$kukarow['yhtio']}'
+              AND mapvm   = '0000-00-00'
+              AND tila    = 'A'
+              AND alatila = ''";
     $result = pupe_query($query);
 
     echo "<font class='message'>";
@@ -54,17 +54,17 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
      * sisäänluettavasta tiedostosta.
      */
     // Päivitetään ne laskut maksetuksi joita ei löydy maksamattomat_laskut-listasta
-    $query = "  UPDATE lasku
-          JOIN tyomaarays
-          ON ( tyomaarays.yhtio = lasku.yhtio
-            AND tyomaarays.otunnus = lasku.tunnus
-            AND tyomaarays.takuunumero NOT IN (".implode(', ', $maksamattomat_laskut).") )
-          SET lasku.mapvm = now(),
-          tyomaarays.tyostatus = '5'
-          WHERE lasku.yhtio='{$kukarow['yhtio']}'
-          AND lasku.mapvm = '0000-00-00'
-          AND lasku.tila = 'A'
-          AND lasku.alatila = ''";
+    $query = "UPDATE lasku
+              JOIN tyomaarays
+              ON ( tyomaarays.yhtio = lasku.yhtio
+                AND tyomaarays.otunnus     = lasku.tunnus
+                AND tyomaarays.takuunumero NOT IN (".implode(', ', $maksamattomat_laskut).") )
+              SET lasku.mapvm = now(),
+              tyomaarays.tyostatus         = '5'
+              WHERE lasku.yhtio='{$kukarow['yhtio']}'
+              AND lasku.mapvm              = '0000-00-00'
+              AND lasku.tila               = 'A'
+              AND lasku.alatila            = ''";
     $result = pupe_query($query);
 
     echo "<font class='message'>";
@@ -73,16 +73,16 @@ if (isset($_FILES['userfile']['tmp_name']) and is_uploaded_file($_FILES['userfil
 
     // Päivitetään kaikki kaikki laskut jotka löytyvät maksamattomat listasta.
     // Tämä on vain varokeino jos joku lasku on merkattu maksetuksi.
-    $query = "  UPDATE lasku
-          JOIN tyomaarays
-          ON ( tyomaarays.yhtio = lasku.yhtio
-            AND tyomaarays.otunnus = lasku.tunnus
-            AND tyomaarays.takuunumero IN (".implode(', ', $maksamattomat_laskut)."))
-          SET lasku.mapvm = '0000-00-00'
-          WHERE lasku.yhtio='{$kukarow['yhtio']}'
-          AND lasku.tila = 'A'
-          AND lasku.alatila = ''
-          AND lasku.mapvm != '0000-00-00'";
+    $query = "UPDATE lasku
+              JOIN tyomaarays
+              ON ( tyomaarays.yhtio = lasku.yhtio
+                AND tyomaarays.otunnus      = lasku.tunnus
+                AND tyomaarays.takuunumero  IN (".implode(', ', $maksamattomat_laskut)."))
+              SET lasku.mapvm = '0000-00-00'
+              WHERE lasku.yhtio='{$kukarow['yhtio']}'
+              AND lasku.tila                = 'A'
+              AND lasku.alatila             = ''
+              AND lasku.mapvm              != '0000-00-00'";
     $result = pupe_query($query);
 
     echo "<font class='message'>";

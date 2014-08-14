@@ -4472,12 +4472,12 @@ if ($tee == '') {
     if ($lisatty_tun > 0 and $lisatied_row["suoraan_laskutukseen"] != "" and $lisatied_row["tilausrivilinkki"] > 0) {
       //Tutkitaan löytyykö ostorivi ja sen toimitettuaika
       $query = "SELECT tilausrivin_lisatiedot.suoratoimitettuaika
-                   FROM tilausrivi
-                   LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
-                   WHERE tilausrivi.yhtio                          = '$kukarow[yhtio]'
-                   AND tilausrivi.tyyppi                           = 'O'
-                   AND tilausrivi.tunnus                           = '$tilausrivi[tilausrivilinkki]'
-                   AND tilausrivin_lisatiedot.suoratoimitettuaika != '0000-00-00'";
+                FROM tilausrivi
+                LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+                WHERE tilausrivi.yhtio                          = '$kukarow[yhtio]'
+                AND tilausrivi.tyyppi                           = 'O'
+                AND tilausrivi.tunnus                           = '$tilausrivi[tilausrivilinkki]'
+                AND tilausrivin_lisatiedot.suoratoimitettuaika != '0000-00-00'";
       $suoratoimresult = pupe_query($query);
 
       if ($suoratoimrow = mysql_fetch_assoc($suoratoimresult)) {
@@ -4588,13 +4588,13 @@ if ($tee == '') {
 
     //Jos ollaan toimittamassa riviä tai jos ollaan käsittelemässä perheetöntä tuotetta tai lapsituotetta niin silloin halutaan päivittää vain kyseinen rivi eikä tarvitse päivitellä lapsia (kun niitä ei ole)
     if ($tapa == "POISJTSTA" or $tilausrivi["perheid"] == "" or $tilausrivi["perheid"] != $tilausrivi["tunnus"]) {
-      $query =  " UPDATE tilausrivi
-                  SET
-                    var = '$var',
-                    varattu = $varattukpl,
-                    jt = $jtkpl
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = '{$tilausrivi['tunnus']}'";
+      $query =  "UPDATE tilausrivi
+                 SET
+                   var       = '$var',
+                   varattu   = $varattukpl,
+                   jt        = $jtkpl
+                 WHERE yhtio = '{$kukarow['yhtio']}'
+                 AND tunnus  = '{$tilausrivi['tunnus']}'";
       pupe_query($query);
     }
     //kun ollaan tekemässä isätuotteesta JT-riviä tai merkitsemässä sitä puutteeksi niin tehdään samat jutu myös perheen lapsille
@@ -4607,13 +4607,13 @@ if ($tee == '') {
       $mriviresult = pupe_query($query);
 
       while ($muutettavarivi = mysql_fetch_assoc($mriviresult)) {
-        $query =  " UPDATE tilausrivi
-                    SET
-                      var = '$var',
-                      varattu = $varattukpl,
-                      jt = $jtkpl
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus = '{$muutettavarivi['tunnus']}'";
+        $query =  "UPDATE tilausrivi
+                   SET
+                     var       = '$var',
+                     varattu   = $varattukpl,
+                     jt        = $jtkpl
+                   WHERE yhtio = '{$kukarow['yhtio']}'
+                   AND tunnus  = '{$muutettavarivi['tunnus']}'";
         pupe_query($query);
       }
     }
@@ -5227,7 +5227,7 @@ if ($tee == '') {
                WHERE tilausrivi.yhtio='$kukarow[yhtio]'
                $tunnuslisa
                and tilausrivi.tyyppi in ($tilrivity)
-          ORDER BY tilausrivi.otunnus, $sorttauslisa tuote.try, sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus
+               ORDER BY tilausrivi.otunnus, $sorttauslisa tuote.try, sorttauskentta $yhtiorow[tilauksen_jarjestys_suunta], tilausrivi.tunnus
                $limitlisa";
     $result = pupe_query($query);
     $tilausrivit_talteen = $result;
@@ -6342,11 +6342,11 @@ if ($tee == '') {
 
             if (($trow["sarjanumeroseuranta"] == "E" or $trow["sarjanumeroseuranta"] == "F" or $trow["sarjanumeroseuranta"] == "G") and !in_array($row["var"], array('P', 'J', 'S', 'T', 'U'))) {
               $query  = "SELECT sarjanumeroseuranta.sarjanumero era, sarjanumeroseuranta.parasta_ennen
-                            FROM sarjanumeroseuranta
-                            WHERE yhtio          = '$kukarow[yhtio]'
-                            and tuoteno          = '$row[tuoteno]'
-                            and myyntirivitunnus = '$row[tunnus]'
-                            LIMIT 1";
+                         FROM sarjanumeroseuranta
+                         WHERE yhtio          = '$kukarow[yhtio]'
+                         and tuoteno          = '$row[tuoteno]'
+                         and myyntirivitunnus = '$row[tunnus]'
+                         LIMIT 1";
               $sarjares = pupe_query($query);
               $sarjarow = mysql_fetch_assoc($sarjares);
 
@@ -7893,19 +7893,19 @@ if ($tee == '') {
           echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
         }
         else {
-          $kulu_query = "  SELECT *
-                  FROM tilausrivi
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND otunnus = '{$laskurow['tunnus']}'
-                  AND tuoteno = 'kulu'";
+          $kulu_query = "SELECT *
+                         FROM tilausrivi
+                         WHERE yhtio = '{$kukarow['yhtio']}'
+                         AND otunnus = '{$laskurow['tunnus']}'
+                         AND tuoteno = 'kulu'";
           $kulu_result = pupe_query($kulu_query);
           $kulurow = mysql_fetch_assoc($kulu_result);
 
           if (empty($kulurow)) {
             $hinta_query = "SELECT sum(hinta * tilkpl * ({$yhtiorow['lisakuluprosentti']} / 100)) as hinta
-                    FROM tilausrivi
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND otunnus = '{$laskurow['tunnus']}'";
+                            FROM tilausrivi
+                            WHERE yhtio = '{$kukarow['yhtio']}'
+                            AND otunnus = '{$laskurow['tunnus']}'";
             $hinta_result = pupe_query($hinta_query);
             $lisakulu = mysql_fetch_assoc($hinta_result);
 

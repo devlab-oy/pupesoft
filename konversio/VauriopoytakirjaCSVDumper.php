@@ -122,36 +122,36 @@ class VauriopoytakirjaCSVDumper extends CSVDumper {
 
       $this->kukarow['kesken'] = 0;
 
-      $query = "  UPDATE laskun_lisatiedot
-            SET laskutus_nimi = '',
-            laskutus_nimitark = '',
-            laskutus_osoite = '',
-            laskutus_postino = '',
-            laskutus_postitp = ''
-            WHERE yhtio = '{$this->kukarow['yhtio']}'
-            AND otunnus = {$lasku_tunnus}";
+      $query = "UPDATE laskun_lisatiedot
+                SET laskutus_nimi = '',
+                laskutus_nimitark = '',
+                laskutus_osoite   = '',
+                laskutus_postino  = '',
+                laskutus_postitp  = ''
+                WHERE yhtio       = '{$this->kukarow['yhtio']}'
+                AND otunnus       = {$lasku_tunnus}";
       pupe_query($query);
 
-      $query = "  UPDATE lasku
-            SET toim_nimi = '',
-            toim_nimitark = '',
-            toim_osoite = '',
-            toim_postino = '',
-            toim_postitp = '',
-            alv = 0,
-            valkoodi = 'EUR'
-            WHERE yhtio = '{$this->kukarow['yhtio']}'
-            AND tunnus = {$lasku_tunnus}";
+      $query = "UPDATE lasku
+                SET toim_nimi = '',
+                toim_nimitark = '',
+                toim_osoite   = '',
+                toim_postino  = '',
+                toim_postitp  = '',
+                alv           = 0,
+                valkoodi      = 'EUR'
+                WHERE yhtio   = '{$this->kukarow['yhtio']}'
+                AND tunnus    = {$lasku_tunnus}";
       pupe_query($query);
       $progress_bar->increase();
     }
   }
 
   private function hae_asiakas($tyonantaja) {
-    $query = "  SELECT *
-          FROM asiakas
-          WHERE yhtio = '{$this->kukarow['yhtio']}'
-          AND tyonantaja = '{$tyonantaja}'";
+    $query = "SELECT *
+              FROM asiakas
+              WHERE yhtio    = '{$this->kukarow['yhtio']}'
+              AND tyonantaja = '{$tyonantaja}'";
     $result = pupe_query($query);
 
     return mysql_fetch_assoc($result);

@@ -261,10 +261,10 @@ abstract class CSVDumper {
     $progress_bar = new ProgressBar(t('Ajetaan rivit tietokantaan'));
     $progress_bar->initialize(count($this->rivit));
     foreach ($this->rivit as $rivi) {
-      $query = '  INSERT INTO '.$this->table.'
-          ('.implode(", ", array_keys($rivi)).')
-          VALUES
-          ("'.implode('", "', array_values($rivi)).'")';
+      $query = 'INSERT INTO '.$this->table.'
+                ('.implode(", ", array_keys($rivi)).')
+                VALUES
+                ("'.implode('", "', array_values($rivi)).'")';
 
       pupe_query($query);
       $progress_bar->increase();

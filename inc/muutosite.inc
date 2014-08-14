@@ -668,45 +668,157 @@ if ($tila == 'Q') {
 if ($tila == 'Q') {
 
   // Pilkut pisteiksi
-  $summa = str_replace( ",", ".", $summa);
-  $summa = $summa * 1;
+  $laskun_summa = (float) str_replace( ",", ".", $summa);
 
   // P‰ivitet‰‰n ostovelkatapahtuma siis euroina!
-  $query = "LOCK table tiliointi WRITE";
+  $query = "LOCK table lasku WRITE, tiliointi WRITE";
   $result = pupe_query($query);
 
-  $query = "SELECT tunnus
+  // Hetaan laskun tiedot
+  $query  = " SELECT *
+              FROM lasku
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+              AND lasku.tunnus  = $tunnus";
+  $lasres = pupe_query($query);
+  $lasrow = mysql_fetch_assoc($lasres);
+
+  // Haetaan tiliˆinnit
+  $query = "SELECT *
             FROM tiliointi
-            WHERE tilino in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
-            and ltunnus  = '$tunnus'
-            and yhtio    = '$kukarow[yhtio]'
-            and korjattu = ''";
-  $result = pupe_query($query);
+            WHERE yhtio   = '$kukarow[yhtio]'
+            AND ltunnus   = $lasrow[tunnus]
+            AND aputunnus = 0
+            AND korjattu  = ''";
+  $xres = pupe_query($query);
 
-  while ($xrow = mysql_fetch_assoc($result)) {
-    kopioitiliointi($xrow['tunnus'], $kukarow['kuka']);
+  $oletusalv = 0;
+  $tiliointien_maara = mysql_num_rows($xres);
+  $korjattujen_tiliointien_maara = 0;
+
+  // katotaan onko verkollisia kirjauksia ja otetaan eka verokanta oletusveroksi
+  while ($xrow = mysql_fetch_assoc($xres)) {
+    if ($xrow['vero'] > 0) {
+      $oletusalv = $xrow['vero'];
+      break;
+    }
   }
 
-  $query = "UPDATE tiliointi SET
-            summa            = round(-1 * $summa * $trow[vienti_kurssi],2),
-            summa_valuutassa = -1 * $summa,
-            laadittu         = now(),
-            laatija          = '$kukarow[kuka]'
-            WHERE tilino     in ('$yhtiorow[ostovelat]', '$yhtiorow[konserniostovelat]')
-            and ltunnus      = '$tunnus'
-            and yhtio        = '$kukarow[yhtio]'
-            and korjattu     = ''";
-  $result = pupe_query($query);
+  mysql_data_seek($xres, 0);
 
-  $query = "UNLOCK table";
-  $result = pupe_query($query);
+  while ($xrow = mysql_fetch_assoc($xres)) {
+
+    $korjataan = 0;
+
+    // Korjataan summat vain jos tiliˆinnin summa on sama ku laskun summa tai veroton laskun summa
+    if ($xrow['vero'] == 0 and $lasrow['summa'] == $xrow['summa']) {
+      $korjataan = 1;
+
+      $summa            = round($laskun_summa * $lasrow["vienti_kurssi"], 2);
+      $summa_valuutassa = $laskun_summa;
+      $alv              = 0;
+      $alv_valuutassa   = 0;
+    }
+    elseif ($xrow['vero'] == 0 and $lasrow['summa'] == (-1 * $xrow['summa'])) {
+      $korjataan = 1;
+
+      $summa            = round(-1 * $laskun_summa * $lasrow["vienti_kurssi"], 2);
+      $summa_valuutassa = -1 * $laskun_summa;
+      $alv              = 0;
+      $alv_valuutassa   = 0;
+    }
+    elseif ($oletusalv > 0 and $xrow['vero'] == 0 and $lasrow['summa'] == round($xrow['summa'] * (1 + $oletusalv/100), 2)) {
+      $korjataan = 1;
+
+      $summa            = round($laskun_summa / (1 + $oletusalv / 100) * $lasrow["vienti_kurssi"], 2);
+      $summa_valuutassa = $laskun_summa / (1 + $oletusalv / 100);
+      $alv              = 0;
+      $alv_valuutassa   = 0;
+    }
+    elseif ($oletusalv > 0 and $xrow['vero'] == 0 and $lasrow['summa'] == round(-1 * $xrow['summa'] * (1 + $oletusalv/100), 2)) {
+      $korjataan = 1;
+
+      $summa            = round(-1 * $laskun_summa / (1 + $oletusalv / 100) * $lasrow["vienti_kurssi"], 2);
+      $summa_valuutassa = -1 * $laskun_summa / (1 + $oletusalv / 100);
+      $alv              = 0;
+      $alv_valuutassa   = 0;
+    }
+    elseif ($xrow['vero'] > 0 and $lasrow['summa'] == round($xrow['summa'] * (1 + $xrow['vero']/100), 2)) {
+      $korjataan = 2;
+
+      $summa            = round($laskun_summa / (1 + $xrow['vero'] / 100) * $lasrow["vienti_kurssi"], 2);
+      $summa_valuutassa = $laskun_summa / (1 + $xrow['vero'] / 100);
+      $alv              = round(($laskun_summa * $lasrow["vienti_kurssi"]) - $summa, 2);
+      $alv_valuutassa   = round($laskun_summa - $summa_valuutassa, 2);
+    }
+    elseif ($xrow['vero'] > 0 and $lasrow['summa'] == round(-1 * $xrow['summa'] * (1 + $xrow['vero']/100), 2)) {
+      $korjataan = 2;
+
+      $summa            = round(-1 * $laskun_summa / (1 + $xrow['vero'] / 100) * $lasrow["vienti_kurssi"], 2);
+      $summa_valuutassa = -1 * $laskun_summa / (1 + $xrow['vero'] / 100);
+      $alv              = round((-1 *  $laskun_summa * $lasrow["vienti_kurssi"]) - $summa, 2);
+      $alv_valuutassa   = round((-1 * $laskun_summa) - $summa_valuutassa, 2);
+    }
+
+    if ($korjataan != 0) {
+      // Tehd‰‰n alkuper‰isest‰ yliviivattu kopio
+      kopioitiliointi($xrow['tunnus'], $kukarow['kuka']);
+
+      // Korjataan kirjaus
+      $query = "UPDATE tiliointi SET
+                summa            = $summa,
+                summa_valuutassa = $summa_valuutassa,
+                laadittu         = now(),
+                laatija          = '$kukarow[kuka]'
+                WHERE tunnus = $xrow[tunnus]";
+      pupe_query($query);
+
+      $korjattujen_tiliointien_maara++;
+
+      if ($korjataan == 2) {
+        $query = "SELECT *
+                  FROM tiliointi
+                  WHERE aputunnus = $xrow[tunnus]
+                  AND ltunnus     = $lasrow[tunnus]
+                  AND yhtio       = '$kukarow[yhtio]'
+                  AND korjattu    = ''";
+        $ares = pupe_query($query);
+
+        if (mysql_num_rows($ares) == 1) {
+          $arow = mysql_fetch_assoc($ares);
+
+          // Tehd‰‰n alkuper‰isest‰ verokirjauksesta yliviivattu kopio
+          kopioitiliointi($arow['tunnus'], $kukarow['kuka']);
+
+          // Korjataan verokirjaus
+          $query = "UPDATE tiliointi SET
+                    summa            = $alv,
+                    summa_valuutassa = $alv_valuutassa,
+                    laadittu         = now(),
+                    laatija          = '$kukarow[kuka]'
+                    WHERE tunnus = $arow[tunnus]";
+          pupe_query($query);
+        }
+      }
+    }
+  }
 
   // P‰ivitet‰‰n lasku
   $query = "UPDATE lasku SET
-            summa        = $summa
-            WHERE tunnus = '$tunnus' and
-            yhtio        = '$kukarow[yhtio]'";
-  $result = pupe_query($query);
+            summa = $laskun_summa
+            WHERE tunnus = '$tunnus'
+            and yhtio    = '$kukarow[yhtio]'";
+  pupe_query($query);
+
+  $query = "UNLOCK tables";
+  pupe_query($query);
+
+  echo t("Laskun summa p‰ivitetty")."! ";
+
+  if ($tiliointien_maara != $korjattujen_tiliointien_maara) {
+    echo "<font class='error'>".t("HUOM: Kaikkia tiliˆintej‰ ei osattu p‰ivitt‰‰")."!</font>";
+  }
+
+  echo "<br><br>";
 
   $tee  = 'E';
   $tila = 'X';

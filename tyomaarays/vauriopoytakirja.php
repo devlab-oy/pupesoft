@@ -48,9 +48,9 @@ elseif ($tee == 'anna_laskutuslupa') {
 
     // Lasketaan laskun summa ja lis‰t‰‰n lis‰kuluprosentti
     $hinta_query = "SELECT sum(hinta * tilkpl * ({$yhtiorow['lisakuluprosentti']} / 100)) as hinta
-                      FROM tilausrivi
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND otunnus = '{$tyomaarays_tunnus}'";
+                    FROM tilausrivi
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND otunnus = '{$tyomaarays_tunnus}'";
     $hinta_result = pupe_query($hinta_query);
     $lisakulu = mysql_fetch_assoc($hinta_result);
 
@@ -78,27 +78,27 @@ elseif ($tee == 'anna_laskutuslupa') {
   }
 
   $query = "UPDATE tyomaarays
-              SET tyostatus = 3
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND otunnus = '{$tyomaarays_tunnus}'";
+            SET tyostatus = 3
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND otunnus = '{$tyomaarays_tunnus}'";
   pupe_query($query);
   unset($tee);
   unset($tyomaarays_tunnus);
 }
 elseif ($tee == 'siirra_urakoitsijalle') {
   $query = "UPDATE tyomaarays
-              SET tyostatus = 1
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND otunnus = '{$tyomaarays_tunnus}'";
+            SET tyostatus = 1
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND otunnus = '{$tyomaarays_tunnus}'";
   pupe_query($query);
   unset($tee);
   unset($tyomaarays_tunnus);
 }
 elseif ($tee == 'merkitse_maksetuksi') {
   $query = "UPDATE tyomaarays
-              SET tyostatus = 4
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND otunnus = '{$tyomaarays_tunnus}'";
+            SET tyostatus = 4
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND otunnus = '{$tyomaarays_tunnus}'";
   pupe_query($query);
   unset($tee);
   unset($tyomaarays_tunnus);

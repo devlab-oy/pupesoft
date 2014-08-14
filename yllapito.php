@@ -19,6 +19,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
   require "inc/parametrit.inc";
 }
 
+  if ($toim == 'yriti') {
+    die (t("Pankkitilien yll‰pito siirretty toiseen n‰kym‰‰n"));
+  }
+
 if (function_exists("js_popup")) {
   echo js_popup(-100);
 }
@@ -1314,7 +1318,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
         <input type = 'submit' value = '".t("N‰yt‰ kaikki")."'></form>";
   }
 
-  if ($toim == "asiakas" or $toim == "maksuehto" or $toim == "toimi" or $toim == "tuote" or $toim == "yriti" or $toim == "kustannuspaikka" or $toim == "lahdot" or $toim == "toimitustavan_lahdot") {
+    if ($toim == "asiakas" or $toim == "maksuehto" or $toim == "toimi" or $toim == "tuote" or $toim == "kustannuspaikka" or $toim == "lahdot" or $toim == "toimitustavan_lahdot") {
     echo "  <form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
         <input type = 'hidden' name = 'toim' value = '$aputoim'>
         <input type = 'hidden' name = 'lopetus' value = '$lopetus'>
@@ -1484,7 +1488,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
 
     if (($toim == "asiakas" and $trow["HIDDEN_laji"] == "P") or
       ($toim == "toimi" and $trow["HIDDEN_tyyppi"] == "P") or
-      (($toim == "yriti" or $toim == 'maksuehto') and $trow["HIDDEN_kaytossa"] == "E") or
+        (($toim == 'maksuehto') and $trow["HIDDEN_kaytossa"] == "E") or
       ($toim == "tuote" and $trow["HIDDEN_status"] == "P") or
       ($toim == "kustannuspaikka" and $trow["HIDDEN_kaytossa"] == "E") or
       ($toim == "lahdot" and $trow["HIDDEN_aktiivi"] == "E") or

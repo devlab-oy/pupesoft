@@ -1,4 +1,30 @@
 $(document).ready(function() {
+
+  $('#hae_asiakasta_linkki').on('click', function(e) {
+    e.preventDefault();
+
+    $('#hae_asiakasta_spani').hide();
+    $('#hae_asiakasta_boksi').show().focus();
+    $('#hae_asiakasta_boksi_button').show();
+  });
+
+  $('#hae_asiakasta_boksi').on('keyup', function(e) {
+    e.preventDefault();
+
+    $('#syotetty_ytunnus').val($(this).val());
+  });
+
+  $('#hae_asiakasta_boksi').keypress(function(e) {
+    if(e.keyCode == 13) {
+      $('#hae_asiakasta_formi').submit();
+    }
+  });
+
+  $('#hae_asiakasta_boksi_button').on('click', function(e) {
+    e.preventDefault();
+    $('#hae_asiakasta_formi').submit();
+  });
+
   desimaalia = parseInt($('#desimaalia').val());
 
   bind_valitut_rivit_checkbox_click();

@@ -35,7 +35,7 @@ if (!function_exists('alku_kerayslista')) {
 
     if ($kerayslistatyyppi == 'EXCEL1') {
 
-      include('inc/pupeExcel.inc');
+      include 'inc/pupeExcel.inc';
 
       $thispage    = new pupeExcel();
       $boldi = array("bold" => TRUE);
@@ -53,7 +53,7 @@ if (!function_exists('alku_kerayslista')) {
     }
     elseif ($kerayslistatyyppi == 'EXCEL2') {
 
-      include('inc/pupeExcel.inc');
+      include 'inc/pupeExcel.inc';
 
       $thispage    = new pupeExcel();
       $boldi = array("bold" => TRUE);
@@ -490,9 +490,9 @@ if (!function_exists('alku_kerayslista')) {
         $pdf->draw_text(580-$oikpos, $bottom_barcode_text, t("Asnro")." ".$asrow["asiakasnro"], $thispage, $norm);
       }
     }
-if (isset($thispage)){
-  $params['thispage']=$thispage;
-}
+    if (isset($thispage)) {
+      $params['thispage']=$thispage;
+    }
     // Luodaan palautettavat
     $return = compact(array_keys($params));
 

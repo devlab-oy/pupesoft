@@ -51,7 +51,7 @@ if (!function_exists("yhtion_parametrittarkista")) {
       $query = "SELECT count(*) AS kpl
                 FROM lasku
                 WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tila = 'P'";
+                AND tila    = 'P'";
       $result = pupe_query($query);
       $row = mysql_fetch_assoc($result);
 

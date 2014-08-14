@@ -3,24 +3,24 @@
 if (!function_exists("pupesoft_login")) {
   function pupesoft_login($params) {
 
-    $user     = $params['user'];
+    $user       = $params['user'];
     $salasana   = $params['salasana'];
-    $salamd5   = $params['salamd5'];
-    $mikayhtio   = $params['mikayhtio'];
-    $uusi1     = $params['uusi1'];
-    $uusi2     = $params['uusi2'];
-    $yhtio     = $params['yhtio'];
-    $browkieli   = $params['browkieli'];
+    $salamd5    = $params['salamd5'];
+    $mikayhtio  = $params['mikayhtio'];
+    $uusi1      = $params['uusi1'];
+    $uusi2      = $params['uusi2'];
+    $yhtio      = $params['yhtio'];
+    $browkieli  = $params['browkieli'];
     $palvelin   = $params['palvelin'];
-    $palvelin2   = $params['palvelin2'];
-    $mobile   = $params['mobile'];
+    $palvelin2  = $params['palvelin2'];
+    $mobile     = $params['mobile'];
 
     $session = "";
     $usea    = 0;
 
     $return = array(
-      'status' => false,
-      'error' => '',
+      'status'  => false,
+      'error'   => '',
       'message' => ''
     );
 
@@ -49,9 +49,9 @@ if (!function_exists("pupesoft_login")) {
         while ($vaihdarow = mysql_fetch_assoc($result)) {
 
           if ($mikayhtio != $vaihdarow["yhtio"]) {
-            $krow = $vaihdarow;
+            $krow  = $vaihdarow;
             $yhtio = $vaihdarow["yhtio"];
-            $usea = 0;
+            $usea  = 0;
           }
         }
       }
@@ -1514,7 +1514,7 @@ if (!function_exists("saldo_myytavissa")) {
                   FROM tuotepaikat
                   {$kvjoini}
                   LEFT JOIN varastopaikat on (varastopaikat.yhtio = tuotepaikat.yhtio
-                  and $valinta1
+                    and $valinta1
                     varastopaikat.tunnus                    = tuotepaikat.varasto)
                   JOIN sarjanumeroseuranta  use index (yhtio_tuoteno_sarjanumero)  ON sarjanumeroseuranta.yhtio = tuotepaikat.yhtio
                   and sarjanumeroseuranta.tuoteno           = tuotepaikat.tuoteno
@@ -1541,7 +1541,7 @@ if (!function_exists("saldo_myytavissa")) {
                   FROM tuotepaikat
                   {$kvjoini}
                   LEFT JOIN varastopaikat on (varastopaikat.yhtio = tuotepaikat.yhtio
-                  and $valinta1
+                    and $valinta1
                     varastopaikat.tunnus  = tuotepaikat.varasto)
                   WHERE tuotepaikat.yhtio = '$yhtiolisa'
                   and tuotepaikat.tuoteno = '$tuoteno'
@@ -8928,12 +8928,12 @@ if (!function_exists("livesearch_tuotehaku")) {
   function livesearch_tuotehaku() {
     global $yhtiorow, $kukarow, $palvelin2, $verkkokauppa;
 
-    $tee    = $_REQUEST["livesearch_tee"];
-    $nimi   = $_REQUEST["livesearch_nimi"];
-    $formi  = $_REQUEST["livesearch_form"];
+    $tee = $_REQUEST["livesearch_tee"];
+    $nimi = $_REQUEST["livesearch_nimi"];
+    $formi = $_REQUEST["livesearch_form"];
     $hakuid = $_REQUEST["livesearch_hakuid"];
     $submit = $_REQUEST["livesearch_submit"];
-    $haku   = trim($_REQUEST["livesearch_haku"]);
+    $haku = trim($_REQUEST["livesearch_haku"]);
 
     if (mb_detect_encoding($haku, mb_detect_order(), TRUE) == "UTF-8") {
       $haku = iconv("UTF-8", "latin1//TRANSLIT", $haku);
@@ -17060,10 +17060,10 @@ if (!function_exists("tee_keraysera")) {
                 pakkaus.minimi_tilavuus * pow({$mittakerroin}, 3) as minimi_tilavuus,
                 pakkaus.minimi_paino,
                 (pakkaus.kayttoprosentti / 100) AS kayttoprosentti,
-                if(pakkaus.leveys * {$mittakerroin} < 1, 1, pakkaus.leveys * {$mittakerroin}) leveys,
+                if(pakkaus.leveys  * {$mittakerroin} < 1, 1, pakkaus.leveys  * {$mittakerroin}) leveys,
                 if(pakkaus.korkeus * {$mittakerroin} < 1, 1, pakkaus.korkeus * {$mittakerroin}) korkeus,
-                if(pakkaus.syvyys * {$mittakerroin} < 1, 1, pakkaus.syvyys * {$mittakerroin}) syvyys,
-                if(pakkaus.leveys * {$mittakerroin} < 1, 1, pakkaus.leveys * {$mittakerroin}) * if(pakkaus.korkeus * {$mittakerroin} < 1, 1, pakkaus.korkeus * {$mittakerroin}) * if(pakkaus.syvyys * {$mittakerroin} < 1, 1, pakkaus.syvyys * {$mittakerroin}) AS tilavuus
+                if(pakkaus.syvyys  * {$mittakerroin} < 1, 1, pakkaus.syvyys  * {$mittakerroin}) syvyys,
+                if(pakkaus.leveys  * {$mittakerroin} < 1, 1, pakkaus.leveys  * {$mittakerroin}) * if(pakkaus.korkeus * {$mittakerroin} < 1, 1, pakkaus.korkeus * {$mittakerroin}) * if(pakkaus.syvyys * {$mittakerroin} < 1, 1, pakkaus.syvyys * {$mittakerroin}) AS tilavuus
                 FROM pakkaus
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND paino   > 0
@@ -19093,7 +19093,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
         $onko_kerayserat_kaytossa = true;
       }
 
-      if ($onko_kerayserat_kaytossa === true) {
+      if ($onko_kerayserat_kaytossa === true and $yhtiorow['koontilahete_kollitiedot'] == '') {
         $koontiselect  = " ifnull(kerayserat.sscc, 0) sscc, ifnull(kerayserat.sscc_ulkoinen, 99999999) sscc_ulkoinen, pakkaus.pakkaus, kerayserat.kpl_keratty AS varattu, 0 AS kpl, 0 as jt, ifnull(kerayserat.kpl, tilausrivi.tilkpl) AS tilkpl,";
         $koontirivihinta = "round(tilausrivi.hinta * ifnull(kerayserat.kpl_keratty, (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl)) * {$query_ale_lisa},'{$yhtiorow['hintapyoristys']}') rivihinta,";
         $koontijoin   = " LEFT JOIN kerayserat ON (kerayserat.tilausrivi = tilausrivi.tunnus AND kerayserat.yhtio = tilausrivi.yhtio)
@@ -19202,6 +19202,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
     mysql_data_seek($riresult, 0);
 
     unset($sscc);
+    $otsikoitu = false;
 
     $laheterows = array();
 
@@ -19262,16 +19263,20 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 
         if ($row['sscc'] != 0) {
           $params_lahete = kollirivi_lahete($params_lahete);
-          $params_lahete['kala'] = $params_lahete['kala'] -= 5;
+          $siirto =  5;
         }
         elseif (isset($sscc)) {
-          $params_lahete['kala'] = $params_lahete['kala'] -= 60;
+          $siirto = 60;
         }
         else {
-          $params_lahete['kala'] = $params_lahete['kala'] -= 20;
+          $siirto = 20;
         }
 
-        $params_lahete = rivi_otsikot_lahete($params_lahete);
+        if ($otsikoitu === false or $yhtiorow['koontilahete_kollitiedot'] == '') {
+          $params_lahete['kala'] = $params_lahete['kala'] -= $siirto;
+          $params_lahete = rivi_otsikot_lahete($params_lahete);
+          $otsikoitu = true;
+        }
       }
 
       $params_lahete = rivi_lahete($params_lahete);
@@ -20217,14 +20222,14 @@ if (!function_exists("pupesoft_sahkoposti")) {
     global $yhtiorow, $kukarow;
 
     // Tarvitaan seuraavat parametrit
-    $email_to      = isset($parametrit["to"]) ? $parametrit["to"] : "";
-    $email_cc      = isset($parametrit["cc"]) ? $parametrit["cc"] : "";
-    $email_subject = isset($parametrit["subject"]) ? $parametrit["subject"] : "";
+    $email_to    = isset($parametrit["to"]) ? $parametrit["to"] : "";
+    $email_cc    = isset($parametrit["cc"]) ? $parametrit["cc"] : "";
+    $email_subject  = isset($parametrit["subject"]) ? $parametrit["subject"] : "";
     $email_ctype   = isset($parametrit["ctype"]) ? strtoupper($parametrit["ctype"]) : "";
-    $email_body    = isset($parametrit["body"]) ? $parametrit["body"] : "";
+    $email_body   = isset($parametrit["body"]) ? $parametrit["body"] : "";
 
     // Liitetiedostoja tulee parametreiss‰ arrayna
-    $liitteet      = (isset($parametrit["attachements"]) and is_array($parametrit["attachements"])) ? $parametrit["attachements"] : "";
+    $liitteet    = (isset($parametrit["attachements"]) and is_array($parametrit["attachements"])) ? $parametrit["attachements"] : "";
 
     // Kaikki pit‰‰ tulla kunnossa (paitsi body ja cc)
     if ($email_to == "" or $email_subject == "" or $email_ctype == "") {
@@ -20270,8 +20275,8 @@ if (!function_exists("pupesoft_sahkoposti")) {
 
         // Tarkistetaan $liite arrayn oikeellisuus
         $attachement_filename    = isset($liite["filename"]) ? $liite["filename"] : "";
-        $attachement_newfilename = isset($liite["newfilename"]) ? $liite["newfilename"] : "";
-        $attachement_ctype       = isset($liite["ctype"]) ? strtoupper($liite["ctype"]) : "";
+        $attachement_newfilename  = isset($liite["newfilename"]) ? $liite["newfilename"] : "";
+        $attachement_ctype      = isset($liite["ctype"]) ? strtoupper($liite["ctype"]) : "";
 
         // Selvitet‰‰n ctype jos ei annettu, PHP version mukaan
         if ($attachement_ctype == "") {
@@ -20894,7 +20899,7 @@ if (!function_exists('lisaa_tuotepaikka')) {
               halytysraja = '{$halytysraja}',
               tilausmaara = '{$tilausmaara}',
               laatija     = '{$kukarow['kuka']}',
-              luontiaika= now()";
+              luontiaika  = now()";
     pupe_query($query);
     $lisatty_tun = mysql_insert_id();
 
@@ -27857,7 +27862,7 @@ if (!function_exists('hae_toimitustavat')) {
 
     $asiakkaan_toimitustavat = hae_asiakkaan_toimitustavat($asiakas_tunnus);
 
-    $toimipaikan_toimitustavat = hae_toimipaikan_toimitustavat($toimipaikka);
+    $toimipaikan_toimitustavat   = hae_toimipaikan_toimitustavat($toimipaikka);
 
     // kohde- ja l‰hdevaraston v‰liset oletustoimitustavat
     if (isset($params['kohdevarasto']) and isset($params['lahdevarasto'])) {

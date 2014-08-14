@@ -1,7 +1,7 @@
 <?php
 
-if(!function_exists("asiakashintatarkista")) {
-  function asiakashintatarkista (&$t, $i, $result, $tunnus, &$virhe, $trow) {
+if (!function_exists("asiakashintatarkista")) {
+  function asiakashintatarkista(&$t, $i, $result, $tunnus, &$virhe, $trow) {
     global $kukarow, $yhtiorow, $alias_set, $alasveto;
 
     static $chytunnus, $chasiakas_ryhma, $chtuoteno, $chryhma, $chminkpl, $chmaxkpl, $chalkupvm, $chloppupvm, $chastunn, $chtuoteno_ind, $chsegmentti, $chpiiri;
@@ -65,7 +65,7 @@ if(!function_exists("asiakashintatarkista")) {
             $t[$i]  = $asiakasid;
             $chastunn = $asiakasid;
             if (strpos($_SERVER['SCRIPT_NAME'], "lue_data.php") === FALSE) {
-//              $virhe[$i] = t("Asiakas löytyi!");
+              //              $virhe[$i] = t("Asiakas löytyi!");
             }
           }
           else {

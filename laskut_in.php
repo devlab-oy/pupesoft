@@ -4,6 +4,8 @@
  * P‰ivitt‰‰ myyntireskontran laskuja maksetuksi Excel-tiedostosta.
  *
  */
+
+
 include "inc/parametrit.inc";
 
 $errors = array();

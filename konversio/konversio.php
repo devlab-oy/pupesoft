@@ -2,8 +2,8 @@
 
 ini_set("memory_limit", "5G");
 $compression=false;
-require("../inc/parametrit.inc");
-require_once('VauriopoytakirjaCSVDumper.php');
+require "../inc/parametrit.inc";
+require_once 'VauriopoytakirjaCSVDumper.php';
 
 $request = array(
   'action'       => $action,
@@ -20,39 +20,39 @@ if ($request['action'] == 'aja_konversio') {
   echo "<br/>";
 
   switch ($request['konversio_tyyppi']) {
-    case 'vauriopoytakirja':
-      $dumper = new VauriopoytakirjaCSVDumper($kukarow);
-      break;
+  case 'vauriopoytakirja':
+    $dumper = new VauriopoytakirjaCSVDumper($kukarow);
+    break;
 
-    default:
-      die('Ei onnistu tämä');
-      break;
+  default:
+    die('Ei onnistu tämä');
+    break;
   }
 
   $dumper->aja();
 }
 else if ($request['action'] == 'poista_konversio_aineisto_kannasta') {
-  $query_array = array(
-    'DELETE FROM tyomaarays',
-    'DELETE FROM lasku',
-    'DELETE FROM laskun_lisatiedot',
-    'DELETE FROM tilausrivi',
-    'DELETE FROM tilausrivin_lisatiedot',
-  );
-  foreach ($query_array as $query) {
-    pupe_query($query);
+    $query_array = array(
+      'DELETE FROM tyomaarays',
+      'DELETE FROM lasku',
+      'DELETE FROM laskun_lisatiedot',
+      'DELETE FROM tilausrivi',
+      'DELETE FROM tilausrivin_lisatiedot',
+    );
+    foreach ($query_array as $query) {
+      pupe_query($query);
+    }
+
+    echo t('Poistettu');
+    echo "<br/>";
+
+    echo_kayttoliittyma($request);
   }
-
-  echo t('Poistettu');
-  echo "<br/>";
-
-  echo_kayttoliittyma($request);
-}
 else {
   echo_kayttoliittyma($request);
 }
 
-require('inc/footer.inc');
+require 'inc/footer.inc';
 
 function echo_kayttoliittyma($request) {
   global $kukarow, $yhtiorow;

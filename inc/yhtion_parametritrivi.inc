@@ -499,7 +499,7 @@ if ($fieldname == "lisakuluprosentti") {
   $sel = array();
   $sel[$apu] = "selected";
 
-  foreach (range(0,99) as $kulu) {
+  foreach (range(0, 99) as $kulu) {
     $ulos .= "<option value='$kulu' $sel[$kulu]>$kulu %</option>";
   }
 
@@ -1553,7 +1553,7 @@ if ($fieldname == "lahetteen_jarjestys" or
   $ulos .= "<option value = '9' $sel[9]>".t("Tilausjärjestys");
   $ulos .= "<option value = 'M' $sel[M]>".t("Käyttäjän asettama järjestys");
 
-  if(  $fieldname == "valmistus_kerayslistan_jarjestys" or
+  if (  $fieldname == "valmistus_kerayslistan_jarjestys" or
     $fieldname == "kerayslistan_jarjestys") {
     $ulos .= "<option value = 'S' $sel[S]>".t("Rivit summattuina");
   }
@@ -1650,7 +1650,7 @@ if ($fieldname == "lahete_allekirjoitus") {
   $jatko = 0;
 }
 
-if($fieldname == "lomakkeiden_allekirjoitus") {
+if ($fieldname == "lomakkeiden_allekirjoitus") {
   $sela = $selb = "";
 
   if ($trow[$i] == 'X') {

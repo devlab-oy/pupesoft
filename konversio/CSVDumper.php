@@ -1,6 +1,6 @@
 <?php
 
-require_once('inc/ProgressBar.class.php');
+require_once 'inc/ProgressBar.class.php';
 
 abstract class CSVDumper {
 
@@ -98,10 +98,10 @@ abstract class CSVDumper {
             $this->kasittele_tiedosto($tiedosto_polku);
 
             //jos halutaan jonkun sortin error handläys niin uncomment this
-//            if (!empty($this->errors)) {
-//              $this->siirra_tiedosto_kansioon($tiedosto_polku, $this->error_folder);
-//              throw new Exception('Aineistossa oli virheitä');
-//            }
+            //            if (!empty($this->errors)) {
+            //              $this->siirra_tiedosto_kansioon($tiedosto_polku, $this->error_folder);
+            //              throw new Exception('Aineistossa oli virheitä');
+            //            }
 
             $this->siirra_tiedosto_kansioon($tiedosto_polku, $this->valmis_folder);
           }
@@ -314,8 +314,8 @@ abstract class CSVDumper {
       $uusi_filename = $tiedosto_array2[$hakemiston_syvyys - 1].'_'.date('YmdHis').'.'.$tiedosto_array[1];
     }
 
-//    exec('cp "'.$tiedosto_polku.'" "'.$kansio.$uusi_filename.'"');
-//    unlink($tiedosto_polku);
+    //    exec('cp "'.$tiedosto_polku.'" "'.$kansio.$uusi_filename.'"');
+    //    unlink($tiedosto_polku);
   }
 
   abstract protected function konvertoi_rivit();

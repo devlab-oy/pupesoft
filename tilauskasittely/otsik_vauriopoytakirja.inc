@@ -28,7 +28,7 @@ if (($nimi != '' and !isset($jatka) and $asiakasid == 0 and !isset($vaihdatoim_a
   $ahlopetus = "tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//mista=$mista//tila=$tila//from=ASIAKASYLLAPITO";
   $lause = "<font class='head'>".t("Valitse asiakas").":</font><hr><br>";
 
-  require ("inc/asiakashaku.inc");
+  require "inc/asiakashaku.inc";
 
   if ($asiakasid == '' and $monta > 1) {
     //Löytyi monta sopivaa, näytetään formi, mutta ei otsikkoa
@@ -630,7 +630,7 @@ if ($tila == "" and !isset($jatka)) {
     echo "<td class='back' valign='top'>";
     echo "<input type='submit' value='".t('Jatka')."' />";
     echo "</td>";
-    
+
     echo "</tr>";
 
     echo "</table>";
@@ -669,14 +669,14 @@ if ($tila == "" and !isset($jatka)) {
             </td>";
       }
       else if ($srow['tyostatus'] == '3') {
-        echo "  <td class='back' valign='top'>
+          echo "  <td class='back' valign='top'>
               <form name='tlepaamaan' method='post' action='{$lopetus_temp}'>
                 <input type='hidden' name='tee' value='merkitse_maksetuksi' />
                 <input type='hidden' name='tyomaarays_tunnus' value='{$tilausnumero}' />
                 <input type='submit' value='".t("Merkitse maksetuksi")."' />
               </form>
             </td>";
-      }
+        }
       else {
         echo "  <td class='back' valign='top'>
               <form name='tlepaamaan' method='post' action='{$lopetus_temp}'>

@@ -28,17 +28,12 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 
   // Poistetaan tuotepaikasta välimerkit
   $hylly = preg_replace("/[^a-zA-ZåäöÅÄÖ0-9]/", "", $tuotepaikka);
-  $_hylly = substr($hylly, 0, 1);
 
   // Hakuehdot
   if ($tuoteno != '')    $params['tuoteno'] = "tuote.tuoteno = '{$tuoteno}'";
 
   if ($tuotepaikka != '') {
-    $params['tuotepaikka'] = "concat(tuotepaikat.hyllyalue,
-      tuotepaikat.hyllynro,
-      tuotepaikat.hyllyvali,
-      tuotepaikat.hyllytaso) LIKE '{$hylly}%'
-      AND tuotepaikat.hyllyalue LIKE '{$_hylly}%'";
+    $params['tuotepaikka'] = "hyllypaikka LIKE '{$hylly}%'";
   }
 
   // Viivakoodi case

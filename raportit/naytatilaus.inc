@@ -332,7 +332,7 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
 if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $kukarow["extranet"] == "") {
 
   $query = "SELECT
-            max(if(tilausrivi.keratty = 'saldoton', '9999-99-99 23:25:59', tilausrivi.kerattyaika)) kerattyaika,
+            max(tilausrivi.kerattyaika) kerattyaika,
             max(tilausrivi.toimaika) toimaika,
             max(tilausrivi.toimitettuaika) toimitettuaika
             FROM tilausrivi

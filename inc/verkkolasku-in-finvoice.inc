@@ -2,7 +2,11 @@
 
 if (!function_exists("xml_float")) {
   function xml_float($value) {
-    $value = (string) utf8_decode($value);
+    $value = (string) $value;
+
+    if (mb_detect_encoding($value, 'UTF-8', true) !== FALSE) {
+      $value = utf8_decode($value);
+    }
 
     return pupesoft_cleannumber($value);
   }
@@ -10,7 +14,11 @@ if (!function_exists("xml_float")) {
 
 if (!function_exists("xml_string")) {
   function xml_string($value) {
-    $value = (string) utf8_decode($value);
+    $value = (string) $value;
+
+    if (mb_detect_encoding($value, 'UTF-8', true) !== FALSE) {
+      $value = utf8_decode($value);
+    }
 
     return pupesoft_cleanstring($value);
   }

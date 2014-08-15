@@ -1100,7 +1100,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
               $rows[$row_key]["vastaavamaara"] -= $korjattavat_vastaavamaarat[$row_value["vastaavat"]];
             }
           }
-          if ($kukarow['extranet'] != '' and hae_saldo($row_value) <= 0) {
+          if ($kukarow['extranet'] != '' and hae_saldo($row_value, 'NORMI') <= 0) {
             $vertailu = array();
             $vertailu[] = $yhtiorow['erikoisvarastomyynti_alarajasumma'];
             $vertailu[] = $yhtiorow['erikoisvarastomyynti_alarajasumma_rivi'];

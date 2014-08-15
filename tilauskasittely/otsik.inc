@@ -3,6 +3,7 @@
 $DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
 
 if (php_sapi_name() != 'cli' and (!isset($ei_kayttoliittymaa) or $ei_kayttoliittymaa != "kylla")) {
+  
   // ToimehtoTarkenne javascript funktio
   js_toimehtoTarkenne();
 
@@ -64,6 +65,38 @@ if ($tee == '' or $kopioitava_otsikko != 0) {
 if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesken"] != 0)) {
   echo "<br><br><br>".t("VIRHE: Tilaus ei ole aktiivisena")."! ".t("Käy aktivoimassa tilaus uudestaan Tilaukset-ohjelmasta").".<br><br><br>";
   exit;
+}
+
+if (isset($valmnro) and !empty($valmnro)) {
+  // Katsotaan löytyykö valittu sarjanumero laiterekisteristä
+  $query = "SELECT 
+            laite.sla,
+            avainsana.selitetark valmistaja,
+            tuote.tuotemerkki malli
+            FROM laite
+            JOIN tuote on tuote.yhtio = laite.yhtio
+              AND tuote.tuoteno = laite.tuoteno
+            JOIN avainsana on avainsana.yhtio = tuote.yhtio
+              AND avainsana.laji = 'TRY'
+              AND avainsana.selite = tuote.try
+            WHERE laite.yhtio = '{$kukarow['yhtio']}'
+            AND laite.sarjanro = '{$valmnro}'
+            GROUP BY laite.sarjanro, laite.tuoteno";
+  $res = pupe_query($query);
+
+  if (mysql_affected_rows() == 1) {
+    // Jos laite löytyy päivitetään arvot formiin
+    $rivi = mysql_fetch_assoc($res);
+    $_REQUEST['mallivari'] = $rivi['malli'];
+    $_REQUEST['merkki'] =  $rivi['valmistaja'];
+    $slamaara = $rivi['sla'] > 0 ? $rivi['sla'] : '';
+
+    $_REQUEST['tuotu'] = date('Y-m-j');
+    // Jos laitteelta löytyi SLA niin lasketaan luvattupvm
+    if ($slamaara != '') {
+      $_REQUEST['luvattu'] = date('Y-m-j', strtotime ( "$slamaara weekdays" ));
+    }
+  }
 }
 
 // Halutaan vaihtaa asiakas tilauksella
@@ -2576,7 +2609,7 @@ if ($tila == "" and !isset($jatka)) {
       echo "</select>";
       echo "</td></tr>";
 
-      echo "<tr><td>".t("Prioriteetti").":</td><td colspan=3>";
+      echo "<tr><td>".t("Prioriteetti").":</td><td>";
       echo "<select name='prioriteetti'>";
 
       $vresult = t_avainsana("TYOM_PRIORIT");
@@ -2595,7 +2628,7 @@ if ($tila == "" and !isset($jatka)) {
       }
 
       echo "</select>";
-      echo "</td></tr>";
+      echo "</td><td>SLA workdays:</td><td><input type='text' name='slamaara' size='4' value='$slamaara'></td></tr>";
     }
 
     if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A") {
@@ -2629,7 +2662,7 @@ if ($tila == "" and !isset($jatka)) {
         }
         elseif (strtoupper($al_row["selitetark_2"]) == "DATE") {
 
-          list($al_vv, $al_kk, $al_pp) = explode('-', $srow["$kentta"]);
+          list($al_vv, $al_kk, $al_pp) = isset($_REQUEST[$kentta]) ? explode('-', $_REQUEST[$kentta]) : explode('-', $srow["$kentta"]);
 
           if ($al_kk == "00")   $al_kk = date("m");
           if ($al_vv == "0000")   $al_vv = date("Y");
@@ -2656,6 +2689,7 @@ if ($tila == "" and !isset($jatka)) {
         }
         elseif (strtoupper($al_row["selitetark_2"]) == "LIVESEARCH") {
           $mika_livesearch = $al_row["selitetark_3"];
+          $submitvaiei = $al_row['selitetark_4'] == '' ? 'EISUBMIT' : '';
           echo "<td>";
           echo $al_row["selitetark"];
           echo "</td>";
@@ -2667,7 +2701,7 @@ if ($tila == "" and !isset($jatka)) {
           else {
             $livesearch_value = $srow[$kentta];
           }
-          echo livesearch_kentta("paaformi", $mika_livesearch, $al_row['selite'], 140, $livesearch_value, 'EISUBMIT', '', '', 'ei_break_all');
+          echo livesearch_kentta("paaformi", $mika_livesearch, $al_row['selite'], 140, $livesearch_value, $submitvaiei, '', '', 'ei_break_all');
           echo "</td>";
         }
         elseif ($kentta == "suorittaja") {
@@ -2736,11 +2770,12 @@ if ($tila == "" and !isset($jatka)) {
 
             echo "</select> ".t("tai")." ";
           }
-
-          echo "<input type='text' name='$kentta' size='15' value='$srow[$kentta]'></td>";
+          $arvo = isset($_REQUEST[$kentta]) ? $_REQUEST[$kentta] : $srow[$kentta];
+          echo "<input type='text' name='$kentta' size='15' value='{$arvo}'></td>";
         }
         else {
-          echo "<td>$al_row[selitetark]:</td><td><input type='text' name='$kentta' size='15' value='$srow[$kentta]'></td>";
+          $arvo = isset($_REQUEST[$kentta]) ? $_REQUEST[$kentta] : $srow[$kentta];
+          echo "<td>$al_row[selitetark]:</td><td><input type='text' name='$kentta' size='15' value='{$arvo}'></td>";
         }
 
         $al_lask++;

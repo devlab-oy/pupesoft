@@ -8,6 +8,7 @@ if (isset($tallennetaan_muutokset) and isset($muokattava_laite) and $muokattava_
   // Tallennetaan muutokset laitteelle
   $kveri = "UPDATE laite
             SET kommentti = '{$kommentti}',
+            sla = '{$sla}',
             lcm_info = '{$lcm_info}',
             ip_osoite = '{$ip_osoite}',
             mac_osoite = '{$mac_osoite}',
@@ -28,6 +29,7 @@ elseif (isset($tallenna_uusi_laite) and isset($valitse_sarjanumero) and $valitse
             ip_osoite = '{$ip_osoite}',
             mac_osoite = '{$mac_osoite}',
             kommentti = '{$kommentti}',
+            sla = '{$sla}',
             luontiaika = now(),
             laatija = '{$kukarow['kuka']}'";
   pupe_query($kveri);
@@ -58,6 +60,7 @@ $headerit = array(
   "tuotenumero",
   "sopimustiedot",
   "asiakastiedot",
+  "sla",
   "kommentti",
   "lcm info",
   "ip",
@@ -122,7 +125,8 @@ if ($toiminto == 'LINKKAA') {
               SET tilkpl = '{$laiterivi['lkm']}',
               varattu = '{$laiterivi['lkm']}'
               WHERE tunnus = '{$tilausrivin_tunnus}'
-              AND yhtio = '{$kukarow['yhtio']}'";
+              AND yhtio = '{$kukarow['yhtio']}'
+              AND netto = ''";
     pupe_query($query);
   }
   unset($valitut_laitteet);
@@ -174,9 +178,10 @@ if ($toiminto == 'MUOKKAA') {
     echo "<td nowrap>".$rowi['tuoteno']."</td>";
     echo "<td></td><td></td>";
      // Sopimukset 2/2
+    echo "<td><input type='text' name='sla' value='{$rowi['sla']}'/></td>";
     echo "<td><textarea name='kommentti' rows='5' columns='30'>{$rowi['kommentti']}</textarea></td>";
     echo "<td><textarea name='lcm_info' rows='5' columns='30'>{$rowi['lcm_info']}</textarea></td>";
-    echo "<td><input type='text' name='ip_osoite' value='{$rowi['ip_osoite']}'</td>";
+    echo "<td><input type='text' name='ip_osoite' value='{$rowi['ip_osoite']}'/></td>";
     echo "<td><input type='text' name='mac_osoite' value='{$rowi['mac_osoite']}'/></td>";
     echo "<td class='back'><input type='submit' name='tallennetaan_muutokset' value='Tallenna'/></td>";
     echo "<td class='back'><input type='submit' name='peruuta'  value='Peruuta'/></td>";
@@ -241,6 +246,7 @@ elseif ($toiminto == 'UUSILAITE') {
   
   echo "<td>{$esiv_tuotenumero}</td>";
   echo "<td></td><td></td>";
+  echo "<td><input type='text' name='sla' value='{$rowi['sla']}'/></td>";
   echo "<td><textarea name='kommentti' rows='5' columns='30'>{$rowi['kommentti']}</textarea></td>";
   echo "<td><textarea name='lcm_info' rows='5' columns='30'>{$rowi['lcm_info']}</textarea></td>";
   echo "<td><input type='text' name='ip_osoite'/></td>";
@@ -359,6 +365,7 @@ else {
     echo "<td>$puuttuja</td>";
 
     echo "<td>$asiakas</td>";
+    echo "<td>".$rowi['sla']."</td>";    
     echo "<td style='width:300px;'>".$rowi['kommentti']."</td>";
     echo "<td>".$rowi['lcm_info']."</td>";
     echo "<td nowrap>".$rowi['ip_osoite']."</td>";

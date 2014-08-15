@@ -856,13 +856,13 @@ case 'T10':
     $maara *= -1;
   }
 
-  $maara      = sprintf('%.2f', $maara);
+  $maara       = sprintf('%.2f', $maara);
   $kuittikoodi = substr($tietue, 106, 1);
-  $erialla    = "";
-  $maksaa    = pupesoft_cleanstring(trim(substr($tietue, 108, 35)));
-  $tilino    = substr($tietue, 144, 14);
-  $iban     = "";
-  $omataso    = substr($tietue, 187, 1);
+  $erialla     = "";
+  $maksaa      = pupesoft_cleanstring(trim(substr($tietue, 108, 35)));
+  $tilino      = substr($tietue, 144, 14);
+  $iban        = "";
+  $omataso     = substr($tietue, 187, 1);
   $koodiselite = trim(substr($tietue, 52, 35));
   $maksuviite  = trim(substr($tietue, 159, 20));
 
@@ -991,7 +991,22 @@ case 'T10':
         <td name='td_{$td_perheid}' class='$class'></td>
         <td name='td_{$td_perheid}' class='$class'></td>";
   echo "<td class='back' style='width:200px;'></td></tr>";
+  
   $vientiselite = "$maksaa<br>\n$koodi $koodiselite<br>\n";
+  
+  if ($maksuviite != "") {
+    echo "<tr class='aktiivi'>";
+
+    if ($tee == 'S') echo "<td name='td_{$td_perheid}' class='$class'></td>";
+
+    echo "<td name='td_{$td_perheid}' class='$class'></td>";
+    echo "<td name='td_{$td_perheid}' class='$class'></td>";
+    echo "<td name='td_{$td_perheid}' class='$class'>".t("Maksuviite").": $maksuviite</td>";
+    echo "<td name='td_{$td_perheid}' class='$class'></td>
+          <td name='td_{$td_perheid}' class='$class'></td>
+          <td name='td_{$td_perheid}' class='$class'></td>";
+    echo "<td class='back' style='width:200px;'></td></tr>";
+  }
   break;
 case 'T11':
 

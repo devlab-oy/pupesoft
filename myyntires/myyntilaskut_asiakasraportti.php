@@ -758,7 +758,15 @@ if ($tee == "") {
 
           echo "<td align='right' nowrap>";
 
-          hae_maksusuoritukset($maksurow);
+          $linkki  = "<a href='".$palvelin2."muutosite.php?tee=E&tunnus=##TUNNUS##";
+          $linkki .= "&lopetus=".$lopetus."/SPLIT/".$palvelin2."myyntires/";
+          $linkki .= "myyntilaskut_asiakasraportti.php////tila=".$tila."//ytunnus=".$ytunnus;
+          $linkki .= "//asiakasid=".$asiakasid."//alatila=".$alatila."//lopetus=".$lopetus;
+          $linkki .= "//valintra=".$valintra."//savalkoodi=".$savalkoodi."//ppa=".$ppa;
+          $linkki .= "//kka=".$kka."//vva=".$vva."//ppl=".$ppl."//kkl=".$kkl."//vvl=".$vvl;
+          $linkki .= "'>##NUMERO##</a>";
+
+          hae_maksusuoritukset($maksurow, $linkki);
 
           echo '<br>';
           echo "</td>";
@@ -904,7 +912,7 @@ if ($tee == "") {
 
 require "inc/footer.inc";
 
-function hae_maksusuoritukset($maksurow) {
+function hae_maksusuoritukset($maksurow, $linkki) {
   global $kukarow, $yhtiorow;
 
   // tiliöinneistä haettavat osasuoritukset ensin
@@ -1010,19 +1018,25 @@ function hae_maksusuoritukset($maksurow) {
         }
       }
 
-        // haetaan laskujen tiedot
-        $qry4 = "SELECT *
-                 FROM lasku
-                 WHERE yhtio = '{$kukarow['yhtio']}'
-                 AND tunnus IN ({$row2['laskut']})
-                 AND tunnus != '{$maksurow['tunnus']}'";
-        $res4 = pupe_query($qry4);
+      // haetaan laskujen tiedot
+      $qry4 = "SELECT *
+               FROM lasku
+               WHERE yhtio = '{$kukarow['yhtio']}'
+               AND tunnus IN ({$row2['laskut']})
+               AND tunnus != '{$maksurow['tunnus']}'";
+      $res4 = pupe_query($qry4);
 
-        //  echotaan laskujen tiedot
-        while ($row4 = mysql_fetch_assoc($res4)) {
-          echo "<span style='font-weight:bold'>L</span> &#124; ", $row4['summa'], " ";
-          echo $yhtiorow['valkoodi'], " &#124; ", tv1dateconv($row4['tapvm']), "<br>";
-        }
+      // echotaan laskujen tiedot
+      while ($row4 = mysql_fetch_assoc($res4)) {
+
+        $vaihdot = array("##TUNNUS##" => $row4['tunnus'], "##NUMERO##" => $row4['laskunro']);
+
+        echo "<span style='font-weight:bold'>L</span> &#124; ";
+        echo strtr($linkki, $vaihdot);
+        echo " &#124; ", $row4['summa'], " ";
+        echo $yhtiorow['valkoodi'], " &#124; ", tv1dateconv($row4['tapvm']), "<br>";
+
+      }
     }
   }
 
@@ -1038,5 +1052,4 @@ function hae_maksusuoritukset($maksurow) {
     echo "<span style='font-weight:bold'>T</span> &#124; ", $row5['summa'], " ";
     echo $yhtiorow['valkoodi'], ' &#124; ', tv1dateconv($row5['tapvm']), '<br>';
   }
-
 }

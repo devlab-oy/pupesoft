@@ -27109,10 +27109,6 @@ if (!function_exists("tallenna_tiliote_viite")) {
 
     while (!feof($fd)) {
 
-      if (mb_detect_encoding($tietue, 'UTF-8', true) !== FALSE) {
-        $tietue = utf8_decode($tietue);
-      }
-
       $tietue      = str_replace($serc, $repl, $tietue);
       $tietue_type = substr($tietue, 0, 3);
       $tietue_eka  = substr($tietue, 0, 1);

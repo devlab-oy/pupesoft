@@ -667,8 +667,11 @@ elseif ($var == "S" and substr($paikka, 0, 3) != "¡¡S" and substr($paikka, 0, 3)
         $lahdevarasto_tuotepaikka = $tuotepaikkojen_saldot[0];
       }
 
+      $updatelisa_lapsi = $_var == 'P' ? "varattu = 0," : "";
+
       $query = "UPDATE tilausrivi
                 SET var = '{$_var}',
+                {$updatelisa_lapsi}
                 hyllyalue   = '{$lahdevarasto_tuotepaikka['hyllyalue']}',
                 hyllynro    = '{$lahdevarasto_tuotepaikka['hyllynro']}',
                 hyllyvali   = '{$lahdevarasto_tuotepaikka['hyllyvali']}',

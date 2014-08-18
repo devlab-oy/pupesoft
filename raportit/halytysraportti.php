@@ -440,7 +440,10 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 
   if ($onkolaajattoimipaikat) {
 
-    if ($toimipaikka > 0) {
+    if ("{$toimipaikka}" == "kaikki") {
+      $toimipaikka_nimi = t("Kaikki toimipaikat");
+    }
+    elseif ($toimipaikka > 0) {
       $toimipaikka_res = hae_yhtion_toimipaikat($kukarow['yhtio'], $toimipaikka);
       $toimipaikka_row = mysql_fetch_assoc($toimipaikka_res);
 
@@ -2079,7 +2082,7 @@ if ($tee == "" or $tee == "JATKA") {
 
   $muutparametrit = $osasto."#".$tuoryh."#".$ytunnus."#".$tuotemerkki."#".$asiakasosasto."#".$asiakasno."#";
 
-  if ($tuoryh !='' or $osasto != '' or $ytunnus != '' or $tuotemerkki != '' or $KAIKKIJT != '' or $toimipaikka != 0) {
+  if ($tuoryh !='' or $osasto != '' or $ytunnus != '' or $tuotemerkki != '' or $KAIKKIJT != '' or ("{$toimipaikka}" == "kaikki" or $toimipaikka != 0)) {
     if ($ytunnus != '' and !isset($ylatila)) {
 
       require "../inc/kevyt_toimittajahaku.inc";
@@ -2091,7 +2094,7 @@ if ($tee == "" or $tee == "JATKA") {
     elseif ($ytunnus != '' and isset($ylatila)) {
       $tee = "JATKA";
     }
-    elseif ($tuoryh !='' or $osasto != '' or $tuotemerkki != '' or $KAIKKIJT != '' or $toimipaikka != 0) {
+    elseif ($tuoryh !='' or $osasto != '' or $tuotemerkki != '' or $KAIKKIJT != '' or ("{$toimipaikka}" == "kaikki" or $toimipaikka != 0)) {
       $tee = "JATKA";
     }
     else {
@@ -2243,15 +2246,12 @@ if ($tee == "") {
     echo "<th>", t("Toimipaikka"), "</th>";
 
     echo "<td><select name='toimipaikka'>";
+    echo "<option value='kaikki'>",t("Kaikki"),"</option>";
 
     $sel = "";
 
-    $toimipaikka_requestista = (isset($toimipaikka) and $toimipaikka == 0);
-    $toimipaikka_kayttajalta = (!isset($toimipaikka) and $kukarow['toimipaikka'] == 0);
-
-    if ($toimipaikka_requestista or $toimipaikka_kayttajalta) {
-      $sel = "selected";
-      $toimipaikka = 0;
+    if ("{$toimipaikka}" != 'kaikki' and ($toimipaikka == 0 or $kukarow['toimipaikka'] == 0)) {
+      $sel = 'selected';
     }
 
     echo "<option value='0' {$sel}>".t('Ei toimipaikkaa')."</option>";
@@ -2391,7 +2391,10 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
 
   if ($onkolaajattoimipaikat) {
 
-    if ($toimipaikka > 0) {
+    if ("{$toimipaikka}" == "kaikki") {
+      $toimipaikka_nimi = t("Kaikki toimipaikat");
+    }
+    elseif ($toimipaikka > 0) {
       $toimipaikka_res = hae_yhtion_toimipaikat($kukarow['yhtio'], $toimipaikka);
       $toimipaikka_row = mysql_fetch_assoc($toimipaikka_res);
 
@@ -2763,7 +2766,7 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
     $konsyhtiot = " yhtio = '$kukarow[yhtio]' ";
   }
 
-  if ($onkolaajattoimipaikat and isset($toimipaikka)) {
+  if ($onkolaajattoimipaikat and isset($toimipaikka) and "{$toimipaikka}" != "kaikki") {
     $toimipaikkalisa = "AND toimipaikka = '{$toimipaikka}'";
   }
   else {

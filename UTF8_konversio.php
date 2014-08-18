@@ -84,19 +84,11 @@ foreach ($files as $file) {
     $koodi = preg_replace('/charset=\\\\"iso-8859-15?\\\\"/i', 'charset=\"utf-8\"', $koodi);
     $koodi = preg_replace('/charset = "iso-8859-15?"/i', 'charset = "utf-8"', $koodi);
 
-    // Find: utf8_encode\(([^\)]+?)\)
-    // Replace: $1
-    $koodi = preg_replace('/utf8_encode\(([^\)]+?)\)/', '$1', $koodi);
-
-    // Find: utf8_decode\(([^\)]+?)\)
-    // Replace: $1
-    $koodi = preg_replace('/utf8_decode\(([^\)]+?)\)/', '$1', $koodi);
-
-    // Find: utf8_decode\(([^\)]+?)\)
+    // Find: (drawText.*?)\'LATIN1\'
     // Replace: $1
     $koodi = preg_replace('/(drawText.*?)\'LATIN1\'/', '$1\'UTF-8\'', $koodi);
 
-    // Find: mb_encode_mimeheader("VIRHE: FTP-get!", "ISO-8859-1", "Q")
+    // Find: (mb_encode_mimeheader\(.*?")ISO-8859-1"
     // Replace: $1
     $koodi = preg_replace('/(mb_encode_mimeheader\(.*?")ISO-8859-1"/', '$1UTF-8"', $koodi);
 
@@ -130,6 +122,9 @@ foreach ($files as $file) {
         }
 
         if ($php and !$jsc and stripos($rivi, "NO_MB_OVERLOAD") === FALSE) {
+          $rivi = preg_replace('/utf8_encode\(([^\)]+?)\)/', '$1', $rivi);
+          $rivi = preg_replace('/utf8_decode\(([^\)]+?)\)/', '$1', $rivi);
+
           $rivi = preg_replace('/([^_])strlen ?\(/',        '$1mb_strlen(',        $rivi);
           $rivi = preg_replace('/([^_])strpos ?\(/',        '$1mb_strpos(',        $rivi);
           $rivi = preg_replace('/([^_])strrpos ?\(/',       '$1mb_strrpos(',       $rivi);

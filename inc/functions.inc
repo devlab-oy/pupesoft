@@ -27718,7 +27718,8 @@ if (!function_exists('hae_toimipaikat')) {
 
     $query   = "SELECT *
                 FROM yhtion_toimipaikat
-                WHERE yhtio = '{$kukarow['yhtio']}'";
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                ORDER BY nimi";
     $result   = pupe_query($query);
 
     $toimipaikat = array();

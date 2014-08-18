@@ -10563,6 +10563,12 @@ if (!function_exists("laheta_tilausvahvistus")) {
         $tuoteperheetyhdessa = TRUE;
       }
     }
+    elseif (strpos($laskurow['tilausvahvistus'], '12') !== FALSE) {
+      $naytatvale = 12; // jos meill‰ on tilausvahvistuksessa 12, niin n‰ytet‰‰n asiakkaan hinta, viivakoodi ja alennuksia
+      if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
+        $tuoteperheetyhdessa = TRUE;
+      }
+    }
     elseif (strpos($laskurow['tilausvahvistus'], '10') !== FALSE) {
       $naytatvale = 10; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
       if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {

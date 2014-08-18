@@ -2690,7 +2690,7 @@ if ($tila == "" and !isset($jatka)) {
         }
         elseif (strtoupper($al_row["selitetark_2"]) == "LIVESEARCH") {
           $mika_livesearch = $al_row["selitetark_3"];
-          $submitvaiei = $al_row['selitetark_4'] == '' ? 'EISUBMIT' : '';
+          $submitvaiei = $al_row['selitetark_4'] != 'autosubmit' ? 'EISUBMIT' : '';
           echo "<td>";
           echo $al_row["selitetark"];
           echo "</td>";

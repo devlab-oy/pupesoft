@@ -151,6 +151,7 @@ if (!isset($osasto))        $osasto = "";
 if (!isset($tuoryh))        $tuoryh = "";
 if (!isset($tuotemerkki))   $tuotemerkki = "";
 if (!isset($asiakasosasto)) $asiakasosasto = "";
+if (!isset($toimipaikka))   $toimipaikka = "kaikki";
 
 //Voidaan tarvita jotain muuttujaa t‰‰lt‰
 if (isset($muutparametrit)) {
@@ -2082,7 +2083,7 @@ if ($tee == "" or $tee == "JATKA") {
 
   $muutparametrit = $osasto."#".$tuoryh."#".$ytunnus."#".$tuotemerkki."#".$asiakasosasto."#".$asiakasno."#";
 
-  if ($tuoryh !='' or $osasto != '' or $ytunnus != '' or $tuotemerkki != '' or $KAIKKIJT != '' or ("{$toimipaikka}" == "kaikki" or $toimipaikka != 0)) {
+  if ($tuoryh !='' or $osasto != '' or $ytunnus != '' or $tuotemerkki != '' or $KAIKKIJT != '' or "{$toimipaikka}" == "kaikki" or $toimipaikka != 0) {
     if ($ytunnus != '' and !isset($ylatila)) {
 
       require "../inc/kevyt_toimittajahaku.inc";
@@ -2094,7 +2095,10 @@ if ($tee == "" or $tee == "JATKA") {
     elseif ($ytunnus != '' and isset($ylatila)) {
       $tee = "JATKA";
     }
-    elseif ($tuoryh !='' or $osasto != '' or $tuotemerkki != '' or $KAIKKIJT != '' or ("{$toimipaikka}" == "kaikki" or $toimipaikka != 0)) {
+    elseif (($tuoryh !='' or $osasto != '' or $tuotemerkki != '' or $KAIKKIJT != '') and "{$toimipaikka}" == "kaikki") {
+      $tee = "JATKA";
+    }
+    elseif ($tuoryh !='' or $osasto != '' or $tuotemerkki != '' or $KAIKKIJT != '' or $toimipaikka != 0) {
       $tee = "JATKA";
     }
     else {
@@ -2250,7 +2254,7 @@ if ($tee == "") {
 
     $sel = "";
 
-    if ("{$toimipaikka}" != 'kaikki' and ($toimipaikka == 0 or $kukarow['toimipaikka'] == 0)) {
+    if ("{$toimipaikka}" != 'kaikki' and $toimipaikka == 0) {
       $sel = 'selected';
     }
 

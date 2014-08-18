@@ -464,7 +464,15 @@ if (!function_exists('alku_lahete')) {
         $pdf->draw_text(310, 656, $ff_string, $thispage, $ff_font);
       }
 
-      if (($base_lahetetyyppi == "tulosta_lahete.inc" or $base_lahetetyyppi == "tulosta_lahete_ean.inc" or $base_lahetetyyppi == "tulosta_lahete_ean_eiale.inc") or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $base_lahetetyyppi == "tulosta_lahete_hae_hinnat.inc")) {
+      if (  ($base_lahetetyyppi == "tulosta_lahete.inc"
+          or $base_lahetetyyppi == "tulosta_lahete_ean.inc"
+          or $base_lahetetyyppi == "tulosta_lahete_ean_eiale.inc"
+          or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc")
+        or
+          (   isset($GLOBALS['eta_yhtio'])
+          and $GLOBALS['eta_yhtio'] != ''
+          and $base_lahetetyyppi == "tulosta_lahete_hae_hinnat.inc")) {
+
         if ($yhtiorow['alv_kasittely'] == '' or strpos($lahetetyyppi, "_verollinen") !== FALSE) {
           $pdf->draw_text(310, 640, t("Hinnat sisältävät arvonlisäveron", $kieli).".", $thispage, $boldi);
         }
@@ -857,7 +865,7 @@ if (!function_exists('rivi_otsikot_lahete')) {
 
     $base_lahetetyyppi = hae_base_lahetetyyppi($lahetetyyppi);
 
-    if ($base_lahetetyyppi == "tulosta_lahete.inc" or $base_lahetetyyppi == "tulosta_lahete_ean.inc" or $base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc') {
+    if ($base_lahetetyyppi == "tulosta_lahete.inc" or $base_lahetetyyppi == "tulosta_lahete_ean.inc" or $base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc' or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc") {
       // tulosta_lahete.inc
 
       $pdf->draw_rectangle($kala+30, 20,  $kala+10, 40,    $thispage, $rectparam);
@@ -1655,7 +1663,7 @@ if (!function_exists('rivi_lahete')) {
       if ($base_lahetetyyppi == "tulosta_lahete.inc" or $base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc') {
         $returntest = rivi_hinta_ale_lahete($returntest);
       }
-      elseif ($base_lahetetyyppi == "tulosta_lahete_ean.inc") {
+      elseif ($base_lahetetyyppi == "tulosta_lahete_ean.inc" or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc") {
         $returntest = rivi_hinta_ale_lahete_ean($returntest);
       }
       elseif ($base_lahetetyyppi == "tulosta_lahete_ean_eiale.inc") {
@@ -1743,7 +1751,7 @@ if (!function_exists('rivi_lahete')) {
 
         $return = rivi_hinta_ale_lahete($return);
       }
-      elseif ($base_lahetetyyppi == "tulosta_lahete_ean.inc") {
+      elseif ($base_lahetetyyppi == "tulosta_lahete_ean.inc" or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc") {
         // tulosta_lahete.inc
         if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
           if ($yhtiorow['alv_kasittely'] == '') {
@@ -2198,27 +2206,45 @@ if (!function_exists('rivi_hinta_ale_lahete_ean')) {
     $pdf->draw_text(465-$oikpos, $kala, hintapyoristys($row["hinta"]), $thispage, $norm);
 
     if (trim($naytetaanko_rivihinta) == '') {
-      $oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
-      $pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
+      if ($lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc") {
+        // näytetään rivihinta laskettuna vain ale1 mukaan
+
+        $kplhinta = (float)$row['hinta'];
+        $ale1 = (float)$row['ale1'];
+        $ale = (100 - $ale1) / 100;
+        $rhinta = $row["tilkpl"] * $kplhinta * $ale;
+
+        $oikpos = $pdf->strlen(hintapyoristys($rhinta), $norm);
+        $pdf->draw_text(575-$oikpos, $kala, hintapyoristys($rhinta), $thispage, $norm);
+      }
+      else{
+        $oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
+        $pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
+      }
     }
 
-    $lisakala = '';
-    $ed_ale = array();
+    if ($lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc") {
+      $lisakala = ($row["ale1"] * 1);
+    }
+    else{
+      $lisakala = '';
+      $ed_ale = array();
 
-    for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+      for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
 
-      if (trim($row["ale{$alepostfix}"]) != 0) {
-        if ($alepostfix > 1) {
-          if (count($ed_ale) > 0) {
-            $lisakala .= "+";
+        if (trim($row["ale{$alepostfix}"]) != 0) {
+          if ($alepostfix > 1) {
+            if (count($ed_ale) > 0) {
+              $lisakala .= "+";
+            }
+            $lisakala .= ($row["ale{$alepostfix}"] * 1);
           }
-          $lisakala .= ($row["ale{$alepostfix}"] * 1);
-        }
-        else {
-          $lisakala .= ($row["ale{$alepostfix}"] * 1);
-        }
+          else {
+            $lisakala .= ($row["ale{$alepostfix}"] * 1);
+          }
 
-        $ed_ale[$alepostfix] = $row["ale{$alepostfix}"];
+          $ed_ale[$alepostfix] = $row["ale{$alepostfix}"];
+        }
       }
     }
 

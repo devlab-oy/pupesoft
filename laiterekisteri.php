@@ -1,8 +1,13 @@
 <?php
 
+// DataTables päälle
+$pupe_DataTables = "selaalaitteita";
+
 if (strpos($_SERVER['SCRIPT_NAME'], "laiterekisteri.php") !== FALSE) {
   require("inc/parametrit.inc");
 }
+
+pupe_DataTables(array(array($pupe_DataTables, 13, 13, true, true)));
 
 if (isset($tallennetaan_muutokset) and isset($muokattava_laite) and $muokattava_laite > 0) {
   // Tallennetaan muutokset laitteelle
@@ -135,13 +140,23 @@ if ($toiminto == 'LINKKAA') {
 
 
 // Ekotellaan headerit
-echo "<table>";
+echo "<table class='display dataTable' id='$pupe_DataTables'>";
+echo "<thead>";
 echo "<tr>";
 foreach ($headerit as $hiid) {
   echo "<th>{$hiid}</th>";
 }
 echo "</tr>";
 
+// Hakukentät
+if (empty($toiminto)) {
+  echo "<tr>";
+  foreach ($headerit as $hiid) {
+    echo "<td><input type='text' class='search_field' name='search_{$hiid}'/></td>";
+  }
+  echo "</tr>";
+}
+echo "</thead>";
 // Haetaan kaikkien laiterekisterin laitteiden tuotteiden ja sopimusten tiedot
 $query = "SELECT
           laite.*,
@@ -163,8 +178,10 @@ $res = pupe_query($query);
 
 
 if ($toiminto == 'MUOKKAA') {
+
   // Halutaan muuttaa laitteen tietoja
   while ($rowi = mysql_fetch_assoc($res)) {
+    
     echo "<tr>";
     echo "<form>";
     echo "<input type='hidden' name='muokattava_laite' value='{$rowi['tunnus']}'>";
@@ -188,6 +205,7 @@ if ($toiminto == 'MUOKKAA') {
     echo "</form>";
     echo "</tr>";
   }
+
   echo "</table>";
 }
 elseif ($toiminto == 'UUSILAITE') {
@@ -259,10 +277,10 @@ elseif ($toiminto == 'UUSILAITE') {
 else {
 
   if ($toiminto == "LINKKAA") echo "Muokataan sopimusrivin {$tilausrivin_tunnus} laitteita<br><br>";
-
+  echo "<form>";
   while ($rowi = mysql_fetch_assoc($res)) {
     $asiakas = '';
-    echo "<form>";
+    
     echo "<tr>";
     if ($toiminto == "LINKKAA") {
       $sel = '';
@@ -373,7 +391,7 @@ else {
 
     echo "</tr>";
   }
-  echo "</table>";
+
   echo "<br><br>";
 
   if ($toiminto == 'LINKKAA') {
@@ -386,4 +404,5 @@ else {
   }
   echo "<input type='hidden' name='lopetus' value='$lopetus' />";
   echo "</form>";
+  echo "</table>";
 }

@@ -13,9 +13,10 @@ if ($from == "") {
   WHERE asiakashinta.yhtio = asiakas.yhtio
     AND asiakashinta.asiakas = asiakas.tunnus))
   Asiakas, asiakashinta.ytunnus 'Ytunnus',
-#    concat_ws('<br>', asiakashinta.ytunnus, (SELECT group_concat(distinct asiakas.nimi separator '<br>')
-#    FROM asiakas
-#    WHERE asiakashinta.yhtio = asiakas.yhtio
+#   concat_ws('<br>', asiakashinta.ytunnus,
+#   (SELECT group_concat(distinct asiakas.nimi separator '<br>')
+#   FROM asiakas
+#   WHERE asiakashinta.yhtio = asiakas.yhtio
 #     AND asiakashinta.ytunnus = asiakas.ytunnus
 #     AND asiakas.ytunnus != '')) 'Ytunnus',
   (SELECT concat(dynaaminen_puu.tunnus, '<br>', dynaaminen_puu.nimi)

@@ -52,6 +52,18 @@ if ($tee == 'kopioi') {
           case 'toimipaikka':
             $query .= " toimipaikka = '{$kohdetoimipaikka}',";
             break;
+          case 'laatija':
+            $query .= " laatija = '{$kukarow['kuka']}',";
+            break;
+          case 'luontiaika':
+            $query .= " luontiaika = now(),";
+            break;
+          case 'muuttaja':
+            $query .= " muuttaja = '',";
+            break;
+          case 'muutospvm':
+            $query .= " muutospvm = 0000-00-00 00:00:00,";
+            break;
           default:
             $query .= mysql_field_name($res, $i)." = '".$row[mysql_field_name($res, $i)]."',";
         }

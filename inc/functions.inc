@@ -212,6 +212,10 @@ if (!function_exists("pupe_error")) {
     // tarvitaan yhtiˆrowta ja kukarowta
     global $yhtiorow, $kukarow, $toim;
 
+    $_display = ini_get("display_errors");
+    $_cli = (php_sapi_name() == 'cli');
+    $_pupedebug = (isset($GLOBALS["pupe_query_debug"]) and $GLOBALS["pupe_query_debug"] > 0);
+
     // trimmataan, tabit, rivinvaihdot ja tuplaspacet pois queryst‰..
     $query = trim($query);
     $query = str_replace("\t", " ", $query);
@@ -222,23 +226,35 @@ if (!function_exists("pupe_error")) {
     $debuggi = array_reverse(debug_backtrace());
 
     // tehd‰‰n errorimessage
-    $puperror  = "SQL-ERROR\n\nUser:   $kukarow[nimi] ($kukarow[kuka]) @ $yhtiorow[nimi] ($yhtiorow[yhtio])\n\n";
+    $puperror = "SQL-ERROR";
+    $puperror .= "\n\n";
+    $puperror .= "User:   {$kukarow['nimi']} ";
+    $puperror .= "({$kukarow['kuka']}) @ {$yhtiorow['nimi']} ({$yhtiorow['yhtio']})";
+    $puperror .= "\n\n";
 
     $nro = 1;
     foreach ($debuggi as $debuggii) {
-      $puperror .= "File $nro:   $debuggii[file]\n";
-      $puperror .= "Line $nro:   $debuggii[line]\n";
+      $puperror .= "File {$nro}:   {$debuggii['file']}\n";
+      $puperror .= "Line {$nro}:   {$debuggii['line']}\n";
       $nro++;
     }
 
     $puperror .= "\n";
-    $puperror .= "Script: $_SERVER[PHP_SELF]\n";
-    $puperror .= "Toim:   $toim\n\n";
+    $puperror .= "Script: {$_SERVER['PHP_SELF']}\n";
+    $puperror .= "Toim:   {$toim}\n\n";
     $puperror .= "Error:  ".mysql_error()."\n\n";
     $puperror .= "$query\n\n";
 
-    // l‰hetet‰‰n se meilitse adminille
-    mail($yhtiorow['admin_email'], mb_encode_mimeheader($yhtiorow['nimi']." - SQL Error", "ISO-8859-1", "Q"), $puperror, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+    // L‰hetet‰‰n virheviesti meilitse adminille, jos debug ei ole p‰‰ll‰
+    if ($_pupedebug === false) {
+      $parametrit = array(
+        "to"      => $yhtiorow['admin_email'],
+        "subject" => "{$yhtiorow['nimi']} - SQL Error",
+        "body"    => $puperror,
+      );
+
+      pupesoft_sahkoposti($parametrit);
+    }
 
     if (ob_get_level() > 1) {
       $fleur = ob_get_contents();
@@ -258,15 +274,14 @@ if (!function_exists("pupe_error")) {
       file_put_contents("/home/nagios/nagios-pupesoft.log", $_msg, FILE_APPEND);
     }
 
-    $_display = ini_get("display_errors");
-    $_cli = (php_sapi_name() == 'cli');
-
     if (!$_cli and isset($yhtiorow['css'])) {
       echo "<style type = 'text/css'>";
       echo $yhtiorow['css'];
       echo "</style>";
 
       echo "<font class = 'error'>";
+
+      $puperror = htmlentities($puperror, ENT_SUBSTITUTE);
     }
 
     if ($_display == '1') {
@@ -20160,8 +20175,8 @@ if (!function_exists("pupesoft_sahkoposti")) {
     // Liitetiedostoja tulee parametreiss‰ arrayna
     $liitteet      = (isset($parametrit["attachements"]) and is_array($parametrit["attachements"])) ? $parametrit["attachements"] : "";
 
-    // Kaikki pit‰‰ tulla kunnossa (paitsi body ja cc)
-    if ($email_to == "" or $email_subject == "" or $email_ctype == "") {
+    // To ja Subject pit‰‰ olla kunnossa, ett‰ voidaan jatkaa
+    if ($email_to == "" or $email_subject == "") {
       return false;
     }
 

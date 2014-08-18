@@ -67,6 +67,7 @@ if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesk
   exit;
 }
 
+// TODO tänne ei pitäis mennä enää kun arvot on kerran setattu - SLA pitää repiä kuitenkin jostain
 if (isset($valmnro) and !empty($valmnro)) {
   // Katsotaan löytyykö valittu sarjanumero laiterekisteristä
   $query = "SELECT 

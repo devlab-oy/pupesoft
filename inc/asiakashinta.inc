@@ -4,7 +4,6 @@ $otsikko     = 'Asiakkaan sopimushinnat';
 $otsikko_nappi   = 'asiakashinta';
 
 if ($from == "") {
-
   // HUOM HUOM: ethän muuta näitä ilman, että korjaat myös yllapito.php:ssä iframen lukitse_avaimeen muuttujat
   $kentat = "asiakashinta.tunnus,
   concat_ws('<br>', asiakashinta.asiakas,

@@ -10996,14 +10996,13 @@ if (!function_exists('t_tuotteen_avainsanat')) {
       $row = mysql_fetch_assoc($result);
       // jos löydettiin käännös palautetaan se
       if ($row["selitetark"] != "") {
-        $palautus = array();
-        $palautaus["selite"] = $row["selite"];
-        $palautaus["selitetark"] = $row["selitetark"];
+        $palautus = "";
+        $palautus = "{$row["selite"]} {$row["selitetark"]}";
       }
       else {
-        $palautaus = $row["selite"];
+        $palautus = $row["selite"];
       }
-      return $palautaus;
+      return $palautus;
     }
 
     // muuten palautetaan se mitä kysyttiin

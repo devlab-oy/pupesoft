@@ -10564,7 +10564,7 @@ if (!function_exists("laheta_tilausvahvistus")) {
       }
     }
     elseif (strpos($laskurow['tilausvahvistus'], '12') !== FALSE) {
-      $naytatvale = 12; // jos meill‰ on tilausvahvistuksessa 12, niin n‰ytet‰‰n asiakkaan hinta, viivakoodi ja alennuksia
+      $naytatvale = 12; // jos meill‰ on tilausvahvistuksessa 12, niin n‰ytet‰‰n viivakoodi, ale1, ja ale1:n mukaan laskettu hinta
       if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
         $tuoteperheetyhdessa = TRUE;
       }

@@ -100,7 +100,7 @@ echo "  <th>".t("Työm").".<br>".t("Viite")."</th>
     <th>SLA</th>
 
     <th>".t("Työaika")."<br>".t("Työn suorittaja")."</th>
-    <th>".t("Toimitetaan")."</th>
+    <th>".t("Luvattu")."</th>
     <th>".t("Myyjä")."<br>".t("Tyyppi")."</th>
     <th>".t("Työjono")."/<br>".t("Työstatus")."</th>
     <th style='visibility:hidden; display:none;'></th>
@@ -127,10 +127,10 @@ while ($prioriteetti_row = mysql_fetch_assoc($prioriteetti_result)) {
 echo "</select></td>";
 
 echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_asiakasnimi_haku'></td>";
-echo "<td>manuhaku</td>";
-echo "<td>modelhaku</td>";
-echo "<td>sarjanrohaku</td>";
-echo "<td>slahaku</td>";
+echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_valmistaja_haku'></td>";
+echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_malli_haku'></td>";
+echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_sarjanumero_haku'></td>";
+echo "<td valign='top'><input type='text' size='4' class='search_field' name='search_sla_haku'></td>";
 echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_suorittaja_haku'></td>";
 echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_toimitetaan_haku'></td>";
 echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_myyja_haku'></td>";
@@ -184,7 +184,8 @@ if ($asiakasnumero_haku != "") {
   $lisa .= " and lasku.ytunnus like '$asiakasnumero_haku%' ";
 }
 
-if ($tyojono_haku != "") {
+if ($tyojono_haku != "" or (isset($tyojonotyyppi) and !empty($tyojonotyyppi))) {
+  if ($tyojonotyyppi != '') $tyojono_haku = $tyojonotyyppi;
   $lisa .= " and a1.selitetark like '$tyojono_haku%' ";
 }
 
@@ -251,7 +252,8 @@ $query = "SELECT
           tyomaarays.valmnro,
           tyomaarays.mallivari,
           tyomaarays.merkki,
-          tyomaarays.luvattu
+          tyomaarays.luvattu,
+          laite.sla
           FROM lasku
           JOIN yhtio ON (lasku.yhtio=yhtio.yhtio)
           JOIN tyomaarays ON (tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus )
@@ -263,6 +265,7 @@ $query = "SELECT
           LEFT JOIN kalenteri ON (kalenteri.yhtio = lasku.yhtio and kalenteri.tyyppi = 'asennuskalenteri' and kalenteri.liitostunnus = lasku.tunnus)
           LEFT JOIN avainsana a4 ON (a4.yhtio=kalenteri.yhtio and a4.laji='TYOM_TYOLINJA'  and a4.selitetark=kalenteri.kuka)
           LEFT JOIN avainsana a5 ON (a5.yhtio=tyomaarays.yhtio and a5.laji='TYOM_PRIORIT' and a5.selite=tyomaarays.prioriteetti)
+          LEFT JOIN laite ON (laite.yhtio = lasku.yhtio and laite.sarjanro = tyomaarays.valmnro)
           WHERE $konsernit
           and lasku.tila     in ('A','L','N','S','C')
           and lasku.alatila != 'X'
@@ -355,7 +358,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
   echo "<td>$vrow[merkki]</td>";
   echo "<td>$vrow[mallivari]</td>";
   echo "<td>$vrow[valmnro]</td>";
-  echo "<td></td>";
+  echo "<td>$vrow[sla]</td>";
 
   echo "<td valign='top' nowrap>";
 
@@ -426,17 +429,22 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
 
   echo "</td>";
 
+  $paivan_vari = '';
+  // Jos luvattupvm on ohitettu tai lähellä muutetaan taustaväri
+  if (strtotime($vrow["luvattu"]) < strtotime(date('Y-m-j'))) {
+    $paivan_vari = "style='background-color: #FF0000;'";
+  }
+
   if ($vrow["tyojono"] != "" and $toim != 'TYOMAARAYS_ASENTAJA') {
     list($ankkuri_pp, $ankkuri_kk, $ankkuri_vv) = explode(".", tv1dateconv($vrow["luvattu"]));
     $ankkuri_pp = (strlen($ankkuri_pp) == 2 and substr($ankkuri_pp, 0, 1) == 0) ? substr($ankkuri_pp, 1, 1) : $ankkuri_pp;
     $ankkuri_kk = (strlen($ankkuri_kk) == 2 and substr($ankkuri_kk, 0, 1) == 0) ? substr($ankkuri_kk, 1, 1) : $ankkuri_kk;
 
     $ankkuri = "{$ankkuri_pp}_{$ankkuri_kk}_{$ankkuri_vv}";
-
-    echo "<td valign='top'><a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]&lopetus=$lopetusx#$ankkuri'>{$vrow["luvattu"]}</a></td>";
+    echo "<td $paivan_vari valign='top' nowrap><a href='asennuskalenteri.php?liitostunnus=$vrow[tunnus]&tyojono=$vrow[tyojonokoodi]&lopetus=$lopetusx#$ankkuri'>{$vrow["luvattu"]}</a></td>";
   }
   else {
-    echo "<td valign='top'>{$vrow["luvattu"]}</td>";
+    echo "<td $paivan_vari valign='top' nowrap>{$vrow["luvattu"]}</td>";
   }
 
   echo "<td valign='top'>$vrow[myyja]<br>".t("$laskutyyppi")." ".t("$alatila")."</td>";

@@ -295,9 +295,6 @@ if ($tee == 'paikat') {
               and tilausrivi.toimitettu              = ''";
     $result = pupe_query($query);
   }
-}
-
-if ($tee == 'paikat' and $vainlistaus == '') {
 
   $virheita = 0;
 

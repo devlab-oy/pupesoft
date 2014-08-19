@@ -675,6 +675,13 @@ if ((int) $kukarow["kesken"] > 0) {
 
   $laskurow = mysql_fetch_assoc($result);
 
+  $a_qry = "SELECT *
+            FROM asiakas
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = '{$laskurow['liitostunnus']}'";
+  $a_res = pupe_query($a_qry);
+  $asiakasrow = mysql_fetch_assoc($a_res);
+
   if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0 and $yhtiorow["suoratoim_ulkomaan_alarajasumma"] > 0) {
     $yhtiorow["suoratoim_ulkomaan_alarajasumma"] = round(laskuval($yhtiorow["suoratoim_ulkomaan_alarajasumma"], $laskurow["vienti_kurssi"]), 0);
   }
@@ -5121,8 +5128,8 @@ if ($tee == '') {
       $tilrivity  = "'G'";
       $tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
     }
-    elseif ($toim == "EXTRANET" and ($yhtiorow['extranet_tilaus_ei_varaa_saldoa'] == '1'
-            or $asiakasrow['extranet_tilaus_ei_varaa_saldoa'] == '1')) {
+    elseif ($toim == "EXTRANET" and ($yhtiorow['extranet_tilaus_varaa_saldoa'] == 'E'
+            or $asiakasrow['extranet_tilaus_varaa_saldoa'] == 'E')) {
       $tilrivity  = "'H','L'";
       $tunnuslisa = " and tilausrivi.otunnus='$kukarow[kesken]' ";
     }
@@ -5621,23 +5628,15 @@ if ($tee == '') {
       }
 
       if ($toim == 'EXTRANET' and $kukarow['extranet'] != '') {
-        $query = "SELECT extranet_tilaus_varaa_saldoa
-                  FROM asiakas
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus  = '{$laskurow['liitostunnus']}'";
-        $ext_tilaus_var_chk = pupe_query($query);
-        $ext_tilaus_var_row = mysql_fetch_assoc($ext_tilaus_var_chk);
-
         $ei_saldoa_varausaika = '';
-
-        if ($ext_tilaus_var_row['extranet_tilaus_varaa_saldoa'] != 'X') {
-          if ($ext_tilaus_var_row['extranet_tilaus_varaa_saldoa'] == '') {
+        if ($asiakasrow['extranet_tilaus_varaa_saldoa'] != 'X') {
+          if ($asiakasrow['extranet_tilaus_varaa_saldoa'] == '') {
             if ($yhtiorow['extranet_tilaus_varaa_saldoa'] != '') {
               $ei_saldoa_varausaika = $yhtiorow['extranet_tilaus_varaa_saldoa'];
             }
           }
           else {
-            $ei_saldoa_varausaika = $ext_tilaus_var_row['extranet_tilaus_varaa_saldoa'];
+            $ei_saldoa_varausaika = $asiakasrow['extranet_tilaus_varaa_saldoa'];
           }
         }
       }
@@ -8537,7 +8536,7 @@ if ($tee == '') {
   }
 
   if ($puutetta_on) {
-    echo "<font class='message'>".t("Tarkista tilaus, kaikille riveille eri riitä saldoa")."</font><br>";
+    echo "<font class='message'>".t("Tarkista tilaus, kaikille riveille ei riitä saldoa")."</font><br>";
   }
 
   // tulostetaan loppuun parit napit..

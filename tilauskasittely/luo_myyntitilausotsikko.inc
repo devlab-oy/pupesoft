@@ -368,8 +368,8 @@ if (!function_exists("luo_myyntitilausotsikko")) {
     $tilaustyyppi = $tilaustyyppi != '' ? $tilaustyyppi : "N";
 
     // onko yhtiön tai asiakkaan takaa säädetty extranet-tilaukset saldoa varaamattomiksi
-    if ($yhtiorow['extranet_tilaus_ei_varaa_saldoa'] == '1'
-        or $asiakasrow['extranet_tilaus_ei_varaa_saldoa'] == '1') {
+    if ($yhtiorow['extranet_tilaus_varaa_saldoa'] == 'E'
+        or $asiakasrow['extranet_tilaus_varaa_saldoa'] == 'E') {
       $ext_ei_varata = true;
     }
     else{

@@ -68,9 +68,9 @@ if ($fieldname == "verkkolasku_lah") {
     $sel1 = "selected";
   }
 
-  $ulos .= "<option value = '' $sel1>".t("Pupevoice");
+  $ulos .= "<option value = '' $sel1>".t("Pupevoice Itella");
   $ulos .= "<option value = 'finvoice' $sel2>".t("Finvoice");
-  $ulos .= "<option value = 'iPost' $sel3>".t("Finvoice iPost");
+  $ulos .= "<option value = 'iPost' $sel3>".t("Finvoice Itella iPost");
   $ulos .= "<option value = 'apix' $sel4>".t("Apix-verkkolaskut");
   $ulos .= "<option value = 'maventa' $sel5>".t("Maventa-verkkolaskut");
   $ulos .= "<option value = 'servinet' $sel6>".t("Pupevoice Servinet");

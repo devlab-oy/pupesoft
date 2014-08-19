@@ -1070,6 +1070,8 @@ if ($tee == "ETSILASKU") {
 
     echo "</tr>";
 
+    $oikmuutosite = tarkista_oikeus("muutosite.php");
+
     while ($row = mysql_fetch_assoc($result)) {
       echo "<tr>";
 
@@ -1085,7 +1087,7 @@ if ($tee == "ETSILASKU") {
         echo $row['tunnus'];
       }
 
-      if ($row['tila'] == "U" and tarkista_oikeus("muutosite.php")) {
+      if ($row['tila'] == "U" and $oikmuutosite) {
         echo "<br><a href = '{$palvelin2}muutosite.php?tee=E&tunnus=$row[tunnus]&lopetus=$PHP_SELF////asiakasid=$asiakasid//ytunnus=$ytunnus//kka=$kka//vva=$vva//ppa=$ppa//kkl=$kkl//vvl=$vvl//ppl=$ppl//toim=$toim//tee=$tee//otunnus=$otunnus//laskunro=$laskunro//laskunroloppu=$laskunroloppu'>$row[laskunro]</a>";
       }
       else {

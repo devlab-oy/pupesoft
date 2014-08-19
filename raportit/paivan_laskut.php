@@ -36,9 +36,9 @@ if ($naytalaskut == 1) $chk2 = "CHECKED";
 
 echo "<tr><th>".t("Näytä laskut")."</th>
     <td colspan='3'><input type='checkbox' name='naytalaskut' value='1' $chk2></td>";
+echo "</tr></table>";
 
-echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td></tr>";
-echo "</table>";
+echo "<br><input type='submit' value='".t("Aja raportti")."'>";
 echo "</form><br><br>";
 
 if (isset($teerappari)) {
@@ -65,6 +65,7 @@ if (isset($teerappari)) {
   $lasres = pupe_query($query);
 
   $operaattorille = 0;
+  $oikmuutosite   = tarkista_oikeus("muutosite.php");
 
   while ($lasrow = mysql_fetch_assoc($lasres)) {
 
@@ -78,7 +79,16 @@ if (isset($teerappari)) {
 
     if ($naytalaskut == 1) {
       echo "<tr>";
-      echo "<td>$lasrow[laskunro]</td>";
+      echo "<td>";
+
+      if ($oikmuutosite) {
+        echo "<a  name='$lasrow[tunnus]' href = '{$palvelin2}muutosite.php?tee=E&tunnus=$lasrow[tunnus]&lopetus=$PHP_SELF////teerappari=$teerappari//pp=$pp//kk=$kk//vv=$vv//naytalaskut=$naytalaskut///$lasrow[tunnus]'>$lasrow[laskunro]</a>";
+      }
+      else {
+        echo "$lasrow[laskunro]";
+      }
+
+      echo "</td>";
       echo "<td>$lasrow[nimi]</td>";
       echo "<td align='right'>$lasrow[summa]</td>";
 

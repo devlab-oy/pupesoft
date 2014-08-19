@@ -352,6 +352,7 @@ if ($tee == 'TARKISTA' and $kukarow["extranet"] != '') {
     $kpl = $xrow['tilkpl'];
     $hinta = $xrow['hinta'];
     $kommentti = $xrow['kommentti'];
+    $varataan_saldoa = '';
 
     $query  = "SELECT *
                from tuote

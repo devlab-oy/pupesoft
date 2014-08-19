@@ -1045,23 +1045,21 @@ while ($tietue = fgets($fd)) {
 
         if ($arow["maa"] != $yhtiorow["maa"] and $arow["maa"] != "") {
           // katsotaan mimmosesta viennistä on kysymys
-          $maa_eu_query = "SELECT distinct eu
+          $maa_eu_query = "SELECT DISTINCT eu
                            FROM maat
                            WHERE koodi = '$arow[maa]'";
           $maa_eu_res = pupe_query($maa_eu_query);
           $maa_eu_row = mysql_fetch_assoc($maa_eu_res);
 
-          if ($maa_eu_row["eu"] == "") {
+          // Jos yksityishenkilkölle menee verollisena
+          if ($veromaara != 0) {
+            $arow["vienti"] = "";
+          }
+          elseif ($maa_eu_row["eu"] == "") {
             $arow["vienti"] = "K";
           }
           else {
-            // Jos EU-yksityishenkilkölle menee verollisena
-            if ($veromaara != 0) {
-              $arow["vienti"] = "";
-            }
-            else {
-              $arow["vienti"] = "E";
-            }
+            $arow["vienti"] = "E";
           }
         }
       }

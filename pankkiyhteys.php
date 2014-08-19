@@ -241,7 +241,10 @@ if ($tee == "valitse") {
   echo "<input type='hidden' name='tiliote_tiedostot' value='{$_t}'>";
   echo "<input type='hidden' name='viite_tiedostot' value='{$_v}'>";
 
-  echo "<br>";
+  echo "<table>";
+  echo "<tr>";
+  echo "<td class='back' style='vertical-align:top;'>";
+
   echo "<font class='message'>";
   echo t("Tiliotteet");
   echo "</font>";
@@ -249,13 +252,18 @@ if ($tee == "valitse") {
 
   filelist_table($tiliote_tiedostot, "tiliote");
 
-  echo "<br>";
+  echo "</td>";
+  echo "<td class='back' style='vertical-align:top;'>";
+
   echo "<font class='message'>";
   echo t("Viitteet");
   echo "</font>";
   echo "<hr>";
 
   filelist_table($viite_tiedostot, "viite");
+
+  echo "</tr>";
+  echo "</table>";
 
   echo "<br>";
   echo "<input type='submit' value='" . t('Hae valitut aineistot') . "'>";

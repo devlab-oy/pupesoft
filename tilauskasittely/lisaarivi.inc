@@ -553,11 +553,14 @@ if ($lisaarivi_debug == 1) echo "Tilattu m‰‰r‰: $toimittamatta<br>";
 // Jos kyseess‰ on rivi joka halutaan siirt‰‰ varastosiirtona (siirtolista) var = S
 $kohde_varasto_update = "";
 $paivita_hyllyt_varastosiirto = false;
+
 if (substr($paikka, 0, 3) == "°°S") {
   $paivita_hyllyt_varastosiirto = true;
   $var = "S";
-  $varasto_tunnukset = explode('°°S', $paikka);
+
   //$varasto_tunnukset: 0 = tyhj‰, 1 = avainsana.tunnus, 2 = lahdevarasto.tunnus, 3 = kohdevarasto.tunnus
+  $varasto_tunnukset = explode('°°S', $paikka);
+
   $toimittajan_tunnus = $varasto_tunnukset[1];
   $kohde_ja_lahde_varasto = hae_mahdolliset_siirto_varastot(array($varasto_tunnukset[3]));
   $kohde_ja_lahde_varasto = search_array_key_for_value_recursive($kohde_ja_lahde_varasto, 'tunnus', $varasto_tunnukset[1]);
@@ -653,7 +656,7 @@ elseif ($var == "S" and substr($paikka, 0, 3) != "°°S" and substr($paikka, 0, 3)
     $_hae_tuotepaikka = false;
   }
 
-   if (!empty($perheid)) {
+  if (!empty($perheid)) {
     $query = "SELECT *
               FROM tilausrivi
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -3465,7 +3468,7 @@ if ($_yhteen_varastoon and $_sopivatilaustoimi and !in_array($var, array('S', 'U
 
   $_normi_tyhja       = (empty($myy_hyllyalue) and empty($myy_hyllynro));
   $_puute_ei_tyhja    = ($p_hyllyalue != "" and $p_hyllynro != "");
-  $_puutteesta_hyllyt = ( $_normi_tyhja and $_puute_ei_tyhja);
+  $_puutteesta_hyllyt = ($_normi_tyhja and $_puute_ei_tyhja);
 
   if ($_puutteesta_hyllyt) {
     $myy_hyllyalue_temp = $p_hyllyalue;

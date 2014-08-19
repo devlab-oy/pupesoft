@@ -1005,21 +1005,6 @@ if (mysql_field_name($result, $i) == "lahetteen_jarjestys_suunta" or
   $jatko = 0;
 }
 
-if (mysql_field_name($result, $i) == "extranet_tilaus_ei_varaa_saldoa") {
-
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
-
-  $sel = array();
-  $apu = $trow[$i];
-  $sel[$apu] = "selected";
-
-  $ulos .= "<option value = ''>".t("Extranet-tilaus varaa saldoa")."</option>";
-  $ulos .= "<option value = '1' $sel[1]>".t("Extranet-tilaus ei varaa saldoa")."</option>";
-  $ulos .= "</select></td>";
-
-  $jatko = 0;
-}
-
 if (mysql_field_name($result, $i) == "extranet_tilaus_varaa_saldoa") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
@@ -1030,6 +1015,7 @@ if (mysql_field_name($result, $i) == "extranet_tilaus_varaa_saldoa") {
 
   $ulos .= "<option value = ''>".t("Yhtiön oletus")."</option>";
   $ulos .= "<option value = 'X'>".t("Extranet-tilaus varaa saldoa")."</option>";
+  $ulos .= "<option value = 'E' $sel[E]>".t("Extranet-tilaus ei varaa saldoa")."</option>";
   $ulos .= "<option value = '1' $sel[1]>".t("Extranet-tilaus varaa saldoa 1 tunnin")."</option>";
   $ulos .= "<option value = '8' $sel[8]>".t("Extranet-tilaus varaa saldoa 8 tuntia")."</option>";
   $ulos .= "<option value = '24' $sel[24]>".t("Extranet-tilaus varaa saldoa 24 tuntia")."</option>";

@@ -922,6 +922,15 @@ if ($tila == 'tee_kohdistus') {
             echo "<font class='message'>".t("Uusi kassa-ale").": $lasku[alennus] $suoritus[valkoodi]</font> ";
           }
 
+          $kohdistus_qry = "INSERT INTO suorituksen_kohdistus SET
+                            yhtio          = '{$kukarow['yhtio']}',
+                            suoritustunnus = '{$suoritus[tunnus]}',
+                            laskutunnus    = '{$lasku[tunnus]}',
+                            kaatosumma     = '{$kaatosumma}',
+                            kohdistuspvm   = NOW(),
+                            kirjauspvm     = NOW()";
+          $kohdistus_result = pupe_query($kohdistus_qry);
+
           $kaatosumma = 0;
         }
 

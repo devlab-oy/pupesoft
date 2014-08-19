@@ -201,7 +201,7 @@ if ($tee == "AJA") {
             and tuoteno != ''
             and ytunnus  = ''
             and asiakas  = 0
-            and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) <= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+            and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
             GROUP BY piiri, tuoteno, valkoodi, minkpl
             HAVING count(*) > 1";
   $hresult = pupe_query($query);

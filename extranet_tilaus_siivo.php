@@ -51,7 +51,7 @@ while ($row = mysql_fetch_assoc($result)) {
   // X = Extranet-tilaus varaa saldoa
   // numero = Extranet-tilaus varaa saldoa x tuntia
   // E = Extranet-tilaus ei varaa saldoa
-  if ($row['extranet_tilaus_varaa_saldoa'] != 'X') {
+  if ($row['extranet_tilaus_varaa_saldoa'] != 'X' and $row['extranet_tilaus_varaa_saldoa'] != 'E') {
 
     // tyhjä on yhtiön oletus
     if ($row['extranet_tilaus_varaa_saldoa'] == '') {

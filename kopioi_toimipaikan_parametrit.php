@@ -1,9 +1,6 @@
 <?php
 
-if (@include "../inc/parametrit.inc");
-elseif (@include "inc/parametrit.inc");
-elseif (@include "parametrit.inc");
-else exit;
+include "inc/parametrit.inc";
 
 if (!isset($lahdetoimipaikka)) $lahdetoimipaikka = 0;
 if (!isset($kohdetoimipaikka)) $kohdetoimipaikka = 0;
@@ -138,6 +135,4 @@ echo "<tr><td class='back'><input type='submit' value='", t("Kopioi"), "' /></td
 echo "</table>";
 echo "</form>";
 
-if (@include "inc/footer.inc");
-elseif (@include "footer.inc");
-else exit;
+include "inc/footer.inc";

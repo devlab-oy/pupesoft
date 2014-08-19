@@ -22454,46 +22454,78 @@ if  (!function_exists('hae_chn_teksti')) {
 }
 
 if  (!function_exists('verkkolaskuputkeen')) {
-  function verkkolaskuputkeen($lasrow, $masrow) {
+  function verkkolaskuputkeen($lasrow, $masrow, $info = FALSE) {
     global $yhtiorow;
 
     // Tässä pohditaan laitetaanko verkkolaskuputkeen...
 
     // Maksuehdon takaa voidaan säätää, että laskut eivät mene verkkolaskuputkeen
     if ($masrow["itsetulostus"] != "") {
+      if ($info) {
+        echo t("Itsetulostus maksuehto");
+      }
       return FALSE;
     }
 
     // Sisäiset laskut eivät mene verkkolaskuputkeen
     if ($lasrow["sisainen"] != "") {
+      if ($info) {
+        echo t("Sisäinen lasku");
+      }
       return FALSE;
     }
 
     // Käteislaskut eivät mene verkkolaskuputkeen
     if ($masrow["kateinen"] != "") {
+      if ($info) {
+        echo t("Käteiskuitti");
+      }
       return FALSE;
     }
 
-    // Sähköposti- ja 'chn-itsetulostus'-laskut eivät mene verkkolaskuputkeen
-    if ($lasrow["chn"] == '666' or $lasrow["chn"] == '667') {
+    // Sähköposti-laskut eivät mene verkkolaskuputkeen
+    if ($lasrow["chn"] == '666') {
+      if ($info) {
+        echo t("Kanavointitieto: Sähköposti");
+      }
+      return FALSE;
+    }
+
+    // 'chn-itsetulostus'-laskut eivät mene verkkolaskuputkeen
+    if ($lasrow["chn"] == '667') {
+      if ($info) {
+        echo t("Kanavointitieto: Paperilasku, tulostetaan manuaalisesti");
+      }
       return FALSE;
     }
 
     // Nollasummalaskut eivät mene verkkolaskuputkeen
     if (abs($lasrow["summa"]) == 0) {
+      if ($info) {
+        echo t("Nollasummainen lasku");
+      }
       return FALSE;
     }
 
     // EU-viennit eivät mene verkkolaskuputkeen, paitsko jos CHN tai verkkolasku_vienti salii verkkolaskutuksen
     if ($lasrow["vienti"] == "E" and $yhtiorow['verkkolasku_vienti'] == "" and $lasrow["chn"] != "020" and $lasrow["chn"] != "030") {
+      if ($info) {
+        echo t("EU-vientiä");
+      }
       return FALSE;
     }
 
     // EI-EU-viennit eivät mene verkkolaskuputkeen, paitsko jos verkkolasku_vienti sallii verkkolaskutuksen
     if ($lasrow["vienti"] == "K" and $yhtiorow['verkkolasku_vienti'] != "K") {
+      if ($info) {
+        echo t("Vientiä EU:n ulkopuolelle");
+      }
       return FALSE;
     }
 
+    if ($info) {
+      echo t("Kanavointitieto").": ".hae_chn_teksti($lasrow["chn"]);
+    }
     return TRUE;
   }
 }

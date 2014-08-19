@@ -172,8 +172,19 @@ if ($tee == "hae_aineistot" and count($pankkitiedostot) > 0) {
       continue;
     }
 
-    // K‰sitell‰‰n aineisto
-    $aineistotunnus = tallenna_tiliote_viite($filenimi);
+    $aineistotunnus = false;
+
+    // Jos aineistot pit‰‰ k‰sitell‰
+    if ($kasittele_aineistot != "ei") {
+      // K‰sitell‰‰n aineisto
+      $aineistotunnus = tallenna_tiliote_viite($filenimi);
+    }
+    else {
+      echo "<font class='error'>";
+      echo t("Aineistoa ei k‰sitelty.");
+      echo "</font>";
+      echo "<br/>";
+    }
 
     if ($aineistotunnus !== false) {
       kasittele_tiliote_viite($aineistotunnus);
@@ -248,6 +259,16 @@ if ($tee == "valitse") {
 
   echo "<br>";
   echo "<input type='submit' value='" . t('Hae valitut aineistot') . "'>";
+
+  // Jos meill‰ on oikkarit pankkiyhteysadminiin, ni voidaan hakea filet ilman, ett‰ k‰sitell‰‰n
+  if (tarkista_oikeus("pankkiyhteysadmin.php")) {
+    echo "<br><br>";
+    echo "<label for='kasittele_aineistot'>" . t("ƒl‰ k‰sittele haettuja aineistoja") . "</label>";
+    echo "<input type='checkbox' id='kasittele_aineistot' name='kasittele_aineistot' value='ei'>";
+  }
+  else {
+    echo "<input type='hidden' name='kasittele_aineistot' value='kylla'>";
+  }
 
   echo "</form>";
 }

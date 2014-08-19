@@ -47,25 +47,25 @@ if ($tee == 'kopioi') {
       for ($i = 0; $i < mysql_num_fields($res) - 1; $i++) {
 
         switch (mysql_field_name($res, $i)) {
-          case 'tunnus':
-            break;
-          case 'toimipaikka':
-            $query .= " toimipaikka = '{$kohdetoimipaikka}',";
-            break;
-          case 'laatija':
-            $query .= " laatija = '{$kukarow['kuka']}',";
-            break;
-          case 'luontiaika':
-            $query .= " luontiaika = now(),";
-            break;
-          case 'muuttaja':
-            $query .= " muuttaja = '',";
-            break;
-          case 'muutospvm':
-            $query .= " muutospvm = '0000-00-00 00:00:00',";
-            break;
-          default:
-            $query .= mysql_field_name($res, $i)." = '".$row[mysql_field_name($res, $i)]."',";
+        case 'tunnus':
+          break;
+        case 'toimipaikka':
+          $query .= " toimipaikka = '{$kohdetoimipaikka}',";
+          break;
+        case 'laatija':
+          $query .= " laatija = '{$kukarow['kuka']}',";
+          break;
+        case 'luontiaika':
+          $query .= " luontiaika = now(),";
+          break;
+        case 'muuttaja':
+          $query .= " muuttaja = '',";
+          break;
+        case 'muutospvm':
+          $query .= " muutospvm = '0000-00-00 00:00:00',";
+          break;
+        default:
+          $query .= mysql_field_name($res, $i)." = '".$row[mysql_field_name($res, $i)]."',";
         }
       }
 
@@ -73,13 +73,13 @@ if ($tee == 'kopioi') {
       $ins_res = pupe_query($query);
     }
 
-    echo "<font class='ok'>",t("Toimipaikan parametrit kopioitu"),"!</font><br />";
+    echo "<font class='ok'>", t("Toimipaikan parametrit kopioitu"), "!</font><br />";
   }
 
   $tee = '';
 }
 
-echo "<font class='head'>",t("Kopioi toimipaikan parametrit"),"</font><hr />";
+echo "<font class='head'>", t("Kopioi toimipaikan parametrit"), "</font><hr />";
 
 if (!empty($errors)) {
   echo "<br /><font class='error'>";
@@ -102,10 +102,10 @@ $query = "SELECT DISTINCT ytp.nimi, ytp.tunnus
 $res = pupe_query($query);
 
 echo "<tr>";
-echo "<th>",t("Valitse lähdetoimipaikka"),"</th>";
+echo "<th>", t("Valitse lähdetoimipaikka"), "</th>";
 echo "<td>";
 echo "<select name='lahdetoimipaikka'>";
-echo "<option value=''>",t("Valitse"),"</option>";
+echo "<option value=''>", t("Valitse"), "</option>";
 
 while ($row = mysql_fetch_assoc($res)) {
   $sel = $lahdetoimipaikka == $row['tunnus'] ? "selected" : "";
@@ -119,10 +119,10 @@ echo "</tr>";
 $_kohdetoimipaikat_arr = hae_toimipaikat();
 
 echo "<tr>";
-echo "<th>",t("Valitse kohdetoimipaikka"),"</th>";
+echo "<th>", t("Valitse kohdetoimipaikka"), "</th>";
 echo "<td>";
 echo "<select name='kohdetoimipaikka'>";
-echo "<option value=''>",t("Valitse"),"</option>";
+echo "<option value=''>", t("Valitse"), "</option>";
 
 foreach ($_kohdetoimipaikat_arr as $row) {
   $sel = $kohdetoimipaikka == $row['tunnus'] ? "selected" : "";
@@ -133,7 +133,7 @@ echo "</select>";
 echo "</td>";
 echo "</tr>";
 
-echo "<tr><td class='back'><input type='submit' value='",t("Kopioi"),"' /></td></tr>";
+echo "<tr><td class='back'><input type='submit' value='", t("Kopioi"), "' /></td></tr>";
 
 echo "</table>";
 echo "</form>";

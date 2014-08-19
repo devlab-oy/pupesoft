@@ -1583,7 +1583,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               }
 
               // Jos ei varata saldoa niin ei varata saldoa
-              if ($varataan_saldoa == "EI" and $rivityyppi == 'G') {
+              if ($varataan_saldoa == "EI" and ($rivityyppi == 'G' or $rivityyppi == 'H')) {
                 $varattu = 0;
               }
 

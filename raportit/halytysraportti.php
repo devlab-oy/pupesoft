@@ -203,6 +203,7 @@ $sarakkeet["SARAKE12"]  = t("Ostoehdotus")." $ehd_kausi_o3\t";
 
 $sarakkeet["SARAKE12B"] = t("Ostoehdotus status")."\t";
 $sarakkeet["SARAKE12C"] = t("Viimeinen hankintapäivä")."\t";
+$sarakkeet["SARAKE12D"] = t("Viimeinen myyntipäivä")."\t";
 
 $sarakkeet["SARAKE13"]  = t("ostettava haly")."\t";
 $sarakkeet["SARAKE13B"] = t("ostettava tilausmaara")."\t";
@@ -922,7 +923,8 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
                 sum(if (tilausrivi.laskutettuaika >= '$vva1-$kka1-$ppa1' and tilausrivi.laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,tilausrivi.rivihinta,0)) rivihinta1,
                 sum(if (tilausrivi.laskutettuaika >= '$vva2-$kka2-$ppa2' and tilausrivi.laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,tilausrivi.rivihinta,0)) rivihinta2,
                 sum(if (tilausrivi.laskutettuaika >= '$vva3-$kka3-$ppa3' and tilausrivi.laskutettuaika <= '$vvl3-$kkl3-$ppl3' ,tilausrivi.rivihinta,0)) rivihinta3,
-                sum(if (tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,tilausrivi.rivihinta,0)) rivihinta4
+                sum(if (tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,tilausrivi.rivihinta,0)) rivihinta4,
+                max(tilausrivi.laskutettuaika) myyntipvm
                 FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
                 WHERE tilausrivi.yhtio = '$row[yhtio]'
                 {$varastowherelisa}
@@ -1357,6 +1359,12 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
           $excelsarake++;
         }
 
+        if ($valitut["SARAKE12D"] != '') {
+          $rivi .= $laskurow['myyntipvm']."\t";
+
+          $worksheet->writeString($excelrivi, $excelsarake, $laskurow['myyntipvm']);
+          $excelsarake++;
+        }
 
         if ($valitut["SARAKE13"] != '') {
           $rivi .= "$ostettavahaly\t";
@@ -2843,8 +2851,16 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
   }
 
   echo "</table><br><br>";
-  echo "<table>";
-  echo "<tr><th colspan='4'>".t("Omat hälytysraportit")."</th></tr>";
+  echo "<table><tr>";
+  echo "<th colspan='4'>";
+  echo t("Omat hälytysraportit");
+
+  echo "<span style='float: right;'>";
+  echo t("Ruksaa kaikki")," ";
+  echo "<input type='checkbox' class='valitut_checkbox_kaikki' />";
+  echo "</span>";
+
+  echo "</th></tr>";
 
   if (isset($POISTA) and isset($rappari) and $rappari != "") {
     $query = "DELETE FROM avainsana
@@ -2888,6 +2904,19 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
 
   echo "</td></tr>";
 
+  echo "<script type='text/javascript'>
+          $(function() {
+            $('input.valitut_checkbox_kaikki').on('click', function() {
+              if ($(this).is(':checked')) {
+                $('input.valitut_checkbox').attr('checked', true);
+              }
+              else {
+                $('input.valitut_checkbox').attr('checked', false);
+              }
+            });
+          });
+        </script>";
+
   $lask = 0;
   echo "<tr>";
 
@@ -2910,7 +2939,7 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
       echo "</tr><tr>";
     }
 
-    echo "<td><input type='checkbox' name='valitut[$key]' value='$key' $sel>".ucfirst($sarake)."</td>";
+    echo "<td><input type='checkbox' class='valitut_checkbox' name='valitut[$key]' value='$key' $sel>".ucfirst($sarake)."</td>";
     $lask++;
   }
 

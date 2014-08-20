@@ -81,7 +81,7 @@ if ($toiminto == 'LINKKAA') {
   }
 
   // Uusi sarake mihin piirretään checkboxit
-  array_unshift($headerit, '');
+  array_unshift($headerit, 'valittu');
 
   // Joka kierroksella haetaan valitut laitteet uudestaan
   if (isset($valitut_laitteet) and isset($vanhat_laitteet)) {

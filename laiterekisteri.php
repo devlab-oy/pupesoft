@@ -1,13 +1,13 @@
 <?php
 
 // DataTables päälle
-$pupe_DataTables = "selaalaitteita";
+//$pupe_DataTables = "selaalaitteita";
 
 if (strpos($_SERVER['SCRIPT_NAME'], "laiterekisteri.php") !== FALSE) {
   require("inc/parametrit.inc");
 }
 
-pupe_DataTables(array(array($pupe_DataTables, 13, 13, true, true)));
+//pupe_DataTables(array(array($pupe_DataTables, 13, 13, true, true)));
 
 if (isset($tallennetaan_muutokset) and isset($muokattava_laite) and $muokattava_laite > 0) {
   // Tallennetaan muutokset laitteelle
@@ -140,7 +140,8 @@ if ($toiminto == 'LINKKAA') {
 
 
 // Ekotellaan headerit
-echo "<table class='display dataTable' id='$pupe_DataTables'>";
+//echo "<table class='display dataTable' id='$pupe_DataTables'>";
+echo "<table>";
 echo "<thead>";
 echo "<tr>";
 foreach ($headerit as $hiid) {
@@ -149,7 +150,7 @@ foreach ($headerit as $hiid) {
 echo "</tr>";
 
 // Hakukentät
-if (empty($toiminto)) {
+if (false and empty($toiminto)) {
   echo "<tr>";
   foreach ($headerit as $hiid) {
     echo "<td><input type='text' class='search_field' name='search_{$hiid}'/></td>";

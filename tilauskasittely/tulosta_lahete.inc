@@ -1754,6 +1754,17 @@ if (!function_exists('rivi_lahete')) {
       elseif ($base_lahetetyyppi == "tulosta_lahete_ean.inc" or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc") {
         // tulosta_lahete.inc
         if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
+
+          if ($lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc") {
+            // palautetaan rivihinta laskettuna vain ale1:n mukaan
+            if (trim($row["ale3"]) != 0) {
+              $row["rivihinta"] = $row["rivihinta"] / $row['ale3'] * 100;
+            }
+            if (trim($row["ale2"]) != 0) {
+              $row["rivihinta"] = $row["rivihinta"] / $row['ale2'] * 100;
+            }
+          }
+
           if ($yhtiorow['alv_kasittely'] == '') {
             $return["summa"] += $row['rivihinta'];
             $return["arvo"]  += ($row['rivihinta'] / (1 + (($row['alv'] >= 500) ? 0 : $row['alv']) / 100));
@@ -2206,21 +2217,19 @@ if (!function_exists('rivi_hinta_ale_lahete_ean')) {
     $pdf->draw_text(465-$oikpos, $kala, hintapyoristys($row["hinta"]), $thispage, $norm);
 
     if (trim($naytetaanko_rivihinta) == '') {
+
       if ($lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc") {
-        // näytetään rivihinta laskettuna vain ale1 mukaan
-
-        $kplhinta = (float)$row['hinta'];
-        $ale1 = (float)$row['ale1'];
-        $ale = (100 - $ale1) / 100;
-        $rhinta = $row["tilkpl"] * $kplhinta * $ale;
-
-        $oikpos = $pdf->strlen(hintapyoristys($rhinta), $norm);
-        $pdf->draw_text(575-$oikpos, $kala, hintapyoristys($rhinta), $thispage, $norm);
+        // palautetaan rivihinta laskettuna vain ale1:n mukaan
+        if (trim($row["ale3"]) != 0) {
+          $row["rivihinta"] = $row["rivihinta"] / $row['ale3'] * 100;
+        }
+        if (trim($row["ale2"]) != 0) {
+          $row["rivihinta"] = $row["rivihinta"] / $row['ale2'] * 100;
+        }
       }
-      else{
+
         $oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
         $pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
-      }
     }
 
     if ($lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc") {

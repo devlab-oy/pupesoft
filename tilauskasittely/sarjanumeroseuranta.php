@@ -631,8 +631,8 @@ if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
       if ($tunnuskentta == "myyntirivitunnus" and $rivitunnus > 0) {
         // Täälläkö pitäisi poistaa laitetaulusta myyntirivitunnus
         $spessukveri = "SELECT *
-                FROM sarjanumeroseuranta
-                WHERE tunnus = '$sarjatun'";
+                        FROM sarjanumeroseuranta
+                        WHERE tunnus = '$sarjatun'";
         $spessures = pupe_query($spessukveri);
         $spessurivi = mysql_fetch_assoc($spessures);
         

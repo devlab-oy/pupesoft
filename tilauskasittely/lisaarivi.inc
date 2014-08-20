@@ -1836,7 +1836,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                     $sarjares = pupe_query($query);
                   }
 
-                  $kveri = "UPDATE laite
+                  /*$kveri = "UPDATE laite
                             SET paikka = '{$srow['tunnus']}',
                             muutospvm = now(),
                             muuttaja = '{$kukarow['kuka']}'
@@ -1854,7 +1854,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                               tuoteno = '{$myy_tuoteno[$indeksi]}',
                               laatija = '{$kukarow['kuka']}'";
                     pupe_query($kveri);
-                }
+                }*/
                 }
 
                 $myy_sarjatunnus = "";

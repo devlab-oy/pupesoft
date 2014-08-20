@@ -1664,7 +1664,7 @@ else {
               lasku.tunnus,
               lasku.varasto,
               tunnusnippu,
-              tilausrivi.tunnus tilausrivitunnus,
+              group_concat(tilausrivi.tunnus) tilausrivitunnus,
               sopimus_loppupvm
               FROM lasku use index (tila_index)
               JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
@@ -2312,11 +2312,10 @@ else {
           elseif ($whiletoim == "YLLAPITO" and $fieldname == 'sarjanumero') {
             // Haetaan sopimusriviin liitetyt sarjanumerot laiterekisteristä/laitteen_sopimuksista
             $query = "SELECT
-                      group_concat(laite.sarjanro SEPARATOR '<br>') sarjanumerot
+                      group_concat(distinct laite.sarjanro SEPARATOR '<br>') sarjanumerot
                       FROM laitteen_sopimukset
                       JOIN laite ON laite.tunnus = laitteen_sopimukset.laitteen_tunnus
-                      WHERE laitteen_sopimukset.sopimusrivin_tunnus = '{$row['tilausrivitunnus']}'
-                      ORDER BY laite.tunnus";
+                      WHERE laitteen_sopimukset.sopimusrivin_tunnus IN ({$row['tilausrivitunnus']})";
             $res = pupe_query($query);
             $sarjanumerotrivi = mysql_fetch_assoc($res);
 

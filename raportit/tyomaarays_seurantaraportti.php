@@ -1,11 +1,5 @@
 <?php
 
-//* Tämä skripti käyttää slave-tietokantapalvelinta *//
-$useslave = 1;
-
-// Ei käytetä pakkausta
-$compression = FALSE;
-
 if (isset($_REQUEST["tee"])) {
   if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto = 1;
   if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/", "", $_REQUEST["kaunisnimi"]);
@@ -72,40 +66,44 @@ function count_workdays($date1,$date2){
   return $workdays;
 }
 
-
 echo "<font class='head'>".t("Työmääräysraportti").":</font><hr>";
 
 if ($raptee == "AJA") {
 
   include('inc/pupeExcel.inc');
 
-  $worksheet    = new pupeExcel();
+  $worksheet = new pupeExcel();
   $format_bold = array("bold" => TRUE);
-  $excelrivi    = 0;
-  $i        = 0;
+  $excelrivi = 0;
+  $i = 0;
 
-  $valmistajahakulisa = isset($valmistajahaku) ? " and tyomaarays.merkki = '{$valmistajahaku}' " : "" ;
+  $valmistajalisa = !empty($valmistajarajaus) ? " and tm.merkki = '{$valmistajarajaus}' " : "" ;
   $aloituspaiva = "{$aloitusvv}-{$aloituskk}-{$aloituspp}";
   $lopetuspaiva = "{$lopetusvv}-{$lopetuskk}-{$lopetuspp}";
 
-  $query = "SELECT 
-            tyomaarays_tunnus,
-            min(tyomaarayksen_tapahtumat.luontiaika) alkupvm,
-            a1.selitetark alkustatus,
-            a2.selitetark alkujono
-            FROM tyomaarayksen_tapahtumat 
-            LEFT JOIN avainsana a1 ON (a1.yhtio = tyomaarayksen_tapahtumat.yhtio 
+  $query = "SELECT
+            tt1.tyomaarays_tunnus,
+            min(tt1.luontiaika) alkupvm,
+            a1.selitetark alku_nimitys,
+            max(tt2.luontiaika) loppupvm,
+            a2.selitetark loppu_nimitys
+            FROM tyomaarayksen_tapahtumat tt1
+            JOIN tyomaarays tm ON (tm.yhtio = tt1.yhtio
+              AND tm.otunnus = tt1.tyomaarays_tunnus {$valmistajalisa})
+            LEFT JOIN avainsana a1 ON (a1.yhtio = tt1.yhtio
               AND a1.laji = 'tyom_tyostatus' 
-              AND a1.selite = tyomaarayksen_tapahtumat.tyostatus_selite)
-            LEFT JOIN avainsana a2 ON (a2.yhtio = tyomaarayksen_tapahtumat.yhtio 
-              AND a2.laji = 'tyom_tyojono' 
-              AND a2.selite = tyomaarayksen_tapahtumat.tyojono_selite)
-            LEFT JOIN tyomaarays ON (tyomaarays.yhtio = tyomaarayksen_tapahtumat.yhtio 
-              AND tyomaarays.otunnus = tyomaarayksen_tapahtumat.tyomaarays_tunnus)
-            WHERE tyomaarayksen_tapahtumat.yhtio = '{$kukarow['yhtio']}'
-            AND tyomaarayksen_tapahtumat.luontiaika > '{$aloituspaiva}'
-            {$valmistajahakulisa}
-            GROUP BY tyomaarays_tunnus";
+              AND a1.selite = tt1.tyostatus_selite)
+            LEFT JOIN tyomaarayksen_tapahtumat tt2 ON (tt2.yhtio = tt1.yhtio 
+              AND tt2.tyomaarays_tunnus = tt1.tyomaarays_tunnus)
+            LEFT JOIN avainsana a2 ON (a2.yhtio = tt1.yhtio
+              AND a2.laji = 'tyom_tyostatus'
+              AND a2.selite = tt2.tyostatus_selite)
+            WHERE tt1.yhtio = '{$kukarow['yhtio']}'
+            AND tt1.tyostatus_selite = 'c'
+            AND tt2.tyostatus_selite = 'o'
+            GROUP BY tt1.tyomaarays_tunnus
+            HAVING alkupvm >= '{$aloituspaiva}'
+            AND loppupvm <= '{$lopetuspaiva}'";
   $result = pupe_query($query);
 
   $worksheet->write($excelrivi, $i, t('Työmääräysnumero'), $format_bold);
@@ -125,38 +123,17 @@ if ($raptee == "AJA") {
   while ($rivi = mysql_fetch_array($result)) {
     $worksheet->writeString($excelrivi, $i, $rivi['tyomaarays_tunnus']);
     $i++;
-    $worksheet->writeString($excelrivi, $i, $rivi['alkustatus']." / ".$rivi['alkujono']);
+    $worksheet->writeString($excelrivi, $i, $rivi['alku_nimitys']);
     $i++;
     $worksheet->writeString($excelrivi, $i, $rivi['alkupvm']);
     $i++;
-
-    $subuquery = "SELECT 
-                  max(tyomaarayksen_tapahtumat.luontiaika) loppupvm,
-                  a1.selitetark loppustatus,
-                  a2.selitetark loppujono
-                  FROM tyomaarayksen_tapahtumat
-                  LEFT JOIN avainsana a1 ON (a1.yhtio = tyomaarayksen_tapahtumat.yhtio
-                    AND a1.laji = 'tyom_tyostatus'
-                    AND a1.selite = tyomaarayksen_tapahtumat.tyostatus_selite)
-                  LEFT JOIN avainsana a2 ON (a2.yhtio = tyomaarayksen_tapahtumat.yhtio
-                    AND a2.laji = 'tyom_tyojono'
-                    AND a2.selite = tyomaarayksen_tapahtumat.tyojono_selite)
-                  LEFT JOIN tyomaarays ON (tyomaarays.yhtio = tyomaarayksen_tapahtumat.yhtio
-                    AND tyomaarays.otunnus = tyomaarayksen_tapahtumat.tyomaarays_tunnus)
-                  WHERE tyomaarayksen_tapahtumat.yhtio = '{$kukarow['yhtio']}'
-                  AND tyomaarayksen_tapahtumat.luontiaika < '{$lopetuspaiva} 23:59:59'
-                  AND tyomaarayksen_tapahtumat.tyomaarays_tunnus = '{$rivi['tyomaarays_tunnus']}'";
-    $suburesult = pupe_query($subuquery);
-
-    $suburivi = mysql_fetch_assoc($suburesult);
-
-    $worksheet->writeString($excelrivi, $i, $suburivi['loppustatus']." / ".$suburivi['loppujono']);
+    $worksheet->writeString($excelrivi, $i, $rivi['loppu_nimitys']);
     $i++;
-    $worksheet->writeString($excelrivi, $i, $suburivi['loppupvm']);
+    $worksheet->writeString($excelrivi, $i, $rivi['loppupvm']);
     $i++;
     
     // Lasketaan business days ensimmäisen ja viimeisen tapahtuman välillä
-    $businessdays = count_workdays($rivi['alkupvm'],$suburivi['loppupvm']);
+    $businessdays = count_workdays($rivi['alkupvm'],$rivi['loppupvm']);
     $worksheet->writeString($excelrivi, $i, $businessdays);
     $i=0;
     $excelrivi++;
@@ -177,15 +154,10 @@ if ($raptee == "AJA") {
 
 echo "<br><form method='post'>";
 echo "<input type='hidden' name='raptee' value='AJA'>";
-echo "<table>";
 
 $tyostatus_result = t_avainsana("TYOM_TYOSTATUS");
 
-$optiot = '';
-while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
-  $optiot .= "<option value='$tyostatus_row[selite]'>$tyostatus_row[selitetark]</option>";
-}
-
+echo "<table>";
 echo "<tr>
   <th>".t("Aloituspäivä (pp-kk-vvvv)")."</th>
   <td>
@@ -194,7 +166,12 @@ echo "<tr>
   <input type='text' size='4' maxlength='4' name='aloitusvv' value='$aloitusvv'>
   </td>
   <td><select name='aloitustila'>";
-  echo $optiot;
+  echo "<option value=''>Ei valintaa</option>";
+  while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
+    $sel = $aloitustila == $tyostatus_row['selite'] ? " SELECTED " : '';
+    echo "<option value='$tyostatus_row[selite]' $sel>$tyostatus_row[selitetark]</option>";
+  }
+  mysql_data_seek($tyostatus_result, 0);
   echo "</select></td>";
   echo "</tr>";
 
@@ -206,7 +183,11 @@ echo "<tr>
   <input type='text' size='4' maxlength='4' name='lopetusvv' value='$lopetusvv'>
   </td>
   <td><select name='lopetustila'>";
-  echo $optiot;
+  echo "<option value=''>Ei valintaa</option>";
+  while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
+    $sel = $lopetustila == $tyostatus_row['selite'] ? " SELECTED " : '';
+    echo "<option value='$tyostatus_row[selite]' $sel>$tyostatus_row[selitetark]</option>";
+  }
   echo "</select></td>";
   echo "</tr>";
   

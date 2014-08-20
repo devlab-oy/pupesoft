@@ -21,22 +21,8 @@ if (isset($_POST['piirtele_laiteluettelo'])) {
   // Piirrellään laiteluettelo-valikko
   echo "<br><br>";
 
-  // Haetaan sopimuskentät, tilausrivien(palveluiden) ja valittavat laitetiedot
-  $query = "SELECT lasku.tunnus,laitteen_sopimukset.laitteen_tunnus, laite.sarjanro, tuote.tuotemerkki, avainsana.selitetark valmistaja, laite.sla,tilausrivi.nimitys, laskun_lisatiedot.sopimus_lisatietoja, laskun_lisatiedot.sopimus_lisatietoja2,
-            tilausrivin_lisatiedot.sopimus_alkaa, tilausrivin_lisatiedot.sopimus_loppuu, laskun_lisatiedot.sopimus_alkupvm, laskun_lisatiedot.sopimus_loppupvm
-            FROM laitteen_sopimukset
-            JOIN laite ON laite.tunnus = laitteen_sopimukset.laitteen_tunnus
-            JOIN tilausrivi ON tilausrivi.tunnus = laitteen_sopimukset.sopimusrivin_tunnus AND tilausrivi.yhtio = '{$kukarow['yhtio']}'
-            JOIN tuote ON tuote.yhtio = tilausrivi.yhtio AND  tuote.tuoteno = laite.tuoteno
-            JOIN avainsana ON avainsana.yhtio = tuote.yhtio AND avainsana.laji = 'TRY' AND avainsana.selite = tuote.try
-            JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-            JOIN lasku ON lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus
-            JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus
-            WHERE lasku.tunnus = '{$tilausnumero}' ORDER BY nimitys, laitteen_tunnus";
-  $result = pupe_query($query);
-  $lelli = mysql_fetch_assoc($result);
-
-  $kiissit = array_keys($lelli);
+  // Määritellään jostain halutut kentät
+  $kiissit = array("tunnus","laitteen_tunnus","sarjanro","tuotemerkki","valmistaja","sla","nimitys","sopimus_lisatietoja","sopimus_lisatietoja2","sopimus_alkaa","sopimus_loppuu","sopimus_alkupvm","sopimus_loppupvm");
 
   echo "<form>";
   echo "<table border='0' cellpadding='5' cellspacing='0' width='600'>";
@@ -85,5 +71,26 @@ if (isset($_POST['piirtele_laiteluettelo'])) {
         </td>
       </tr>";
   echo "</table>";
-  echo "</form>";
+  echo "</form>"; 
+}
+elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
+  // täällä ajellaan rapsa ja tallennetaan henkseliin
+  // Haetaan sopimuskentät, tilausrivien(palveluiden) ja valittavat laitetiedot
+  $query = "SELECT lasku.tunnus,laitteen_sopimukset.laitteen_tunnus, laite.sarjanro, tuote.tuotemerkki, avainsana.selitetark valmistaja, laite.sla,tilausrivi.nimitys, laskun_lisatiedot.sopimus_lisatietoja, laskun_lisatiedot.sopimus_lisatietoja2,
+            tilausrivin_lisatiedot.sopimus_alkaa, tilausrivin_lisatiedot.sopimus_loppuu, laskun_lisatiedot.sopimus_alkupvm, laskun_lisatiedot.sopimus_loppupvm
+            FROM laitteen_sopimukset
+            JOIN laite ON laite.tunnus = laitteen_sopimukset.laitteen_tunnus
+            JOIN tilausrivi ON tilausrivi.tunnus = laitteen_sopimukset.sopimusrivin_tunnus AND tilausrivi.yhtio = '{$kukarow['yhtio']}'
+            JOIN tuote ON tuote.yhtio = tilausrivi.yhtio AND  tuote.tuoteno = laite.tuoteno
+            JOIN avainsana ON avainsana.yhtio = tuote.yhtio AND avainsana.laji = 'TRY' AND avainsana.selite = tuote.try
+            JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+            JOIN lasku ON lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus
+            JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus
+            WHERE lasku.tunnus = '{$tilausnumero}' ORDER BY nimitys, laitteen_tunnus";
+  $result = pupe_query($query);
+
+  // Rustaillaan henkseliin kaikki valitut sarakkeet (osan vois laittaa pakollisiks tietenkin)
+  while ($row = mysql_fetch_assoc($result)) {
+    var_dump($row);
+  }
 }

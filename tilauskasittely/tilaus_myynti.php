@@ -173,6 +173,7 @@ if (!isset($kommentti_select))     $kommentti_select = '';
 if (!isset($yksi_suoratoimittaja))   $yksi_suoratoimittaja = '';
 if (!isset($tuotteenpainotettukehayht)) $tuotteenpainotettukehayht = array();
 if (!isset($painotettukehayhteensa)) $painotettukehayhteensa = 0;
+if (!isset($hintojen_vaihto)) $hintojen_vaihto = "EI";
 
 // Setataan lopetuslinkki, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla
 $tilmyy_lopetus = "{$palvelin2}{$tilauskaslisa}tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";

@@ -9155,6 +9155,24 @@ if ($tee == '') {
       }
     }
 
+    if ($toim == "YLLAPITO" and !isset($piirtele_laiteluettelo)) {
+      echo "  <tr>
+          <td align='left' class='back' valign='top'>
+          <form name='excel_laiteluettelo' method='post'>
+          <input type='hidden' name='lopetus' value='$lopetus'>
+          <input type='hidden' name='otunnus' value='$tilausnumero'>
+          <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+          <input type='hidden' name='mista' value = '$mista'>
+          <input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
+          <input type='hidden' name='toim' value='$toim'>
+          <input type='hidden' name='tee' value='$tee'>
+          <input type='hidden' name='naantali' value='EIENAA'>
+          <input type='submit' name='piirtele_laiteluettelo' value='".t("Laiteluettelo")."'>
+          </form>
+          </td>
+        </tr>";
+    }
+
     echo "</table>";
 
   }
@@ -9162,6 +9180,9 @@ if ($tee == '') {
 
 if ($yhtiorow['tilauksen_myyntieratiedot'] != '' and isset($naantali) and $naantali == "KIVAPAIKKA") {
   require "myyntierat_ja_tuotetiedot.inc";
+}
+elseif ($toim == "YLLAPITO" and isset($naantali) and $naantali == "EIENAA") {
+  require "laiteluettelo.php";
 }
 
 if (@include "inc/footer.inc");

@@ -2,9 +2,9 @@
 
 require "inc/salasanat.php";
 
-$STATE_OK     = 0;
+$STATE_OK        = 0;
 $STATE_WARNING   = 1;
-$STATE_CRITICAL   = 2;
+$STATE_CRITICAL  = 2;
 $STATE_UNKNOWN   = 3;
 $STATE_DEPENDENT = 4;
 
@@ -18,22 +18,64 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
     exit;
   }
 
-  if ($_GET["tee"] == "CONNECTION_USAGE" or $_GET["tee"] == "CONNECTION_USAGE_SLAVE") {
+  if ($_GET["tee"] == "CONNECTION_USAGE_SLAVE") {
+    if (!isset($slavedb)) {
+      echo "CRITICAL - Slave username/password/database not set $STATE_CRITICAL";
+      exit;
+    }
 
-    if ($_GET["tee"] == "CONNECTION_USAGE_SLAVE") {
-      if (isset($slavedb[1]) and $slavedb[1] != "" and isset($slaveuser[1]) and $slaveuser[1] != "" and isset($slavepass[1]) and $slavepass[1] != "") {
-        $link = mysql_connect($slavedb[1], $slaveuser[1], $slavepass[1]) or die ("CRITICAL - mysql_connect() failed on slave $STATE_CRITICAL");
+    $critical = array();
+    $warning  = array();
+
+    foreach ($slavedb as $si => $devnull) {
+      if (isset($slavedb[$si]) and $slavedb[$si] != "" and isset($slaveuser[$si]) and $slaveuser[$si] != "" and isset($slavepass[$si]) and $slavepass[$si] != "") {
+        $link = mysql_connect($slavedb[$si], $slaveuser[$si], $slavepass[$si]) or die ("CRITICAL - mysql_connect() failed on slave $STATE_CRITICAL");
         mysql_select_db($dbkanta) or die ("CRITICAL - mysql_select_db() failed on slave $STATE_CRITICAL");
+
+        $query = "SHOW /*!50000 GLOBAL */ VARIABLES like 'max_connections'";
+        $res = mysql_query($query) or die(mysql_error());
+        $row = mysql_fetch_assoc($res);
+
+        $max_connections = (int) $row["Value"];
+
+        $query = "SHOW /*!50000 GLOBAL */ STATUS like 'max_used_connections'";
+        $res = mysql_query($query) or die(mysql_error());
+        $row = mysql_fetch_assoc($res);
+
+        $max_used_connections = (int) $row["Value"];
+
+        $used_percentage = round($max_used_connections / $max_connections * 100);
+
+        // Nostetaan virhe jos tilanne on huolestuttava
+        if ($used_percentage >= 60 and $used_percentage < 80) {
+          $warning[] = "WARNING - Slave$si highest usage of available connections: {$used_percentage}% ({$max_used_connections}/{$max_connections})";
+        }
+        elseif ($used_percentage > 80) {
+          $critical[] = "CRITICAL - Slave$si highest usage of available connections: {$used_percentage}% ({$max_used_connections}/{$max_connections})";
+        }
       }
       else {
-        echo "CRITICAL - Slave username/password/database not set $STATE_CRITICAL";
+        echo "CRITICAL - Slave$si username/password/database not set $STATE_CRITICAL";
         exit;
       }
     }
-    else {
-      $link = mysql_connect($dbhost, $dbuser, $dbpass) or die ("CRITICAL - mysql_connect() failed $STATE_CRITICAL");
-      mysql_select_db($dbkanta) or die ("CRITICAL - mysql_select_db() failed $STATE_CRITICAL");
+
+    if (count($critical) > 0) {
+      echo implode(" ", array_merge($critical,$warning))." ".$STATE_CRITICAL;
     }
+    elseif (count($warning) > 0) {
+      echo implode(" ", $warning)." ".$STATE_WARNING;
+    }
+    else {
+      echo "OK - Highest usage of available connections on slaves is normal $STATE_OK";
+    }
+    exit;
+  }
+
+  if ($_GET["tee"] == "CONNECTION_USAGE") {
+
+    $link = mysql_connect($dbhost, $dbuser, $dbpass) or die ("CRITICAL - mysql_connect() failed $STATE_CRITICAL");
+    mysql_select_db($dbkanta) or die ("CRITICAL - mysql_select_db() failed $STATE_CRITICAL");
 
     $query = "SHOW /*!50000 GLOBAL */ VARIABLES like 'max_connections'";
     $res = mysql_query($query) or die(mysql_error());
@@ -65,45 +107,56 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
   }
 
   if ($_GET["tee"] == "SLAVE_STATUS") {
-
-    if (isset($slavedb[1]) and $slavedb[1] != "" and isset($slaveuser[1]) and $slaveuser[1] != "" and isset($slavepass[1]) and $slavepass[1] != "") {
-
-      $link = mysql_connect($slavedb[1], $slaveuser[1], $slavepass[1]) or die ("CRITICAL - mysql_connect() failed on slave $STATE_CRITICAL");
-      mysql_select_db($dbkanta) or die ("CRITICAL - mysql_select_db() failed on slave $STATE_CRITICAL");
-
-      $query = "SHOW /*!50000 SLAVE */ STATUS";
-      $res = mysql_query($query) or die(mysql_error());
-      $row = mysql_fetch_assoc($res);
-
-      if ($row["Slave_IO_Running"] != "Yes") {
-        echo "CRITICAL - Slave IO Not running $STATE_CRITICAL";
-        exit;
-      }
-      elseif ($row["Slave_SQL_Running"] != "Yes") {
-        echo "CRITICAL - Slave SQL Not running $STATE_CRITICAL";
-        exit;
-      }
-      elseif ($row["Seconds_Behind_Master"] == "NULL") {
-        echo "CRITICAL - Seconds_Behind_Master is NULL $STATE_CRITICAL";
-        exit;
-      }
-      elseif ($row["Seconds_Behind_Master"] > 600) {
-        echo "CRITICAL - Slave 10 minutes behind master $STATE_CRITICAL";
-        exit;
-      }
-      elseif ($row["Seconds_Behind_Master"] > 300) {
-        echo "WARNING - Slave 5 minutes behind master $STATE_WARNING";
-        exit;
-      }
-      else {
-        echo "OK - Slave OK $STATE_OK";
-        exit;
-      }
-    }
-    else {
+    if (!isset($slavedb)) {
       echo "CRITICAL - Slave username/password/database not set $STATE_CRITICAL";
       exit;
     }
+
+    $critical = array();
+    $warning  = array();
+
+    foreach ($slavedb as $si => $devnull) {
+      if (isset($slavedb[$si]) and $slavedb[$si] != "" and isset($slaveuser[$si]) and $slaveuser[$si] != "" and isset($slavepass[$si]) and $slavepass[$si] != "") {
+
+        $link = mysql_connect($slavedb[$si], $slaveuser[$si], $slavepass[$si]) or die ("CRITICAL - mysql_connect() failed on slave $STATE_CRITICAL");
+        mysql_select_db($dbkanta) or die ("CRITICAL - mysql_select_db() failed on slave $STATE_CRITICAL");
+
+        $query = "SHOW /*!50000 SLAVE */ STATUS";
+        $res = mysql_query($query) or die(mysql_error());
+        $row = mysql_fetch_assoc($res);
+
+        if ($row["Slave_IO_Running"] != "Yes") {
+          $critical[] = "CRITICAL - Slave$si IO Not running";
+        }
+        elseif ($row["Slave_SQL_Running"] != "Yes") {
+          $critical[] = "CRITICAL - Slave$si SQL Not running";
+        }
+        elseif ($row["Seconds_Behind_Master"] == "NULL") {
+          $critical[] = "CRITICAL - Slave$si Seconds_Behind_Master is NULL";
+        }
+        elseif ($row["Seconds_Behind_Master"] > 600) {
+          $critical[] = "CRITICAL - Slave$si 10 minutes behind master";
+        }
+        elseif ($row["Seconds_Behind_Master"] > 300) {
+          $warning[] = "WARNING - Slave$si 5 minutes behind master";
+        }
+      }
+      else {
+        echo "CRITICAL - Slave$si username/password/database not set $STATE_CRITICAL";
+        exit;
+      }
+    }
+
+    if (count($critical) > 0) {
+      echo implode(" ", array_merge($critical,$warning))." ".$STATE_CRITICAL;
+    }
+    elseif (count($warning) > 0) {
+      echo implode(" ", $warning)." ".$STATE_WARNING;
+    }
+    else {
+      echo "OK - Slaves OK $STATE_OK";
+    }
+    exit;
   }
 
   if ($_GET["tee"] == "VERKKOLASKU_FTP_STATUS") {

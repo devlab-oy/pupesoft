@@ -172,8 +172,19 @@ if ($tee == "hae_aineistot" and count($pankkitiedostot) > 0) {
       continue;
     }
 
-    // K‰sitell‰‰n aineisto
-    $aineistotunnus = tallenna_tiliote_viite($filenimi);
+    $aineistotunnus = false;
+
+    // Jos aineistot pit‰‰ k‰sitell‰
+    if ($kasittele_aineistot != "ei") {
+      // K‰sitell‰‰n aineisto
+      $aineistotunnus = tallenna_tiliote_viite($filenimi);
+    }
+    else {
+      echo "<font class='error'>";
+      echo t("Aineistoa ei k‰sitelty.");
+      echo "</font>";
+      echo "<br/>";
+    }
 
     if ($aineistotunnus !== false) {
       kasittele_tiliote_viite($aineistotunnus);
@@ -230,7 +241,10 @@ if ($tee == "valitse") {
   echo "<input type='hidden' name='tiliote_tiedostot' value='{$_t}'>";
   echo "<input type='hidden' name='viite_tiedostot' value='{$_v}'>";
 
-  echo "<br>";
+  echo "<table>";
+  echo "<tr>";
+  echo "<td class='back' style='vertical-align:top;'>";
+
   echo "<font class='message'>";
   echo t("Tiliotteet");
   echo "</font>";
@@ -238,7 +252,9 @@ if ($tee == "valitse") {
 
   filelist_table($tiliote_tiedostot, "tiliote");
 
-  echo "<br>";
+  echo "</td>";
+  echo "<td class='back' style='vertical-align:top;'>";
+
   echo "<font class='message'>";
   echo t("Viitteet");
   echo "</font>";
@@ -246,8 +262,21 @@ if ($tee == "valitse") {
 
   filelist_table($viite_tiedostot, "viite");
 
+  echo "</tr>";
+  echo "</table>";
+
   echo "<br>";
   echo "<input type='submit' value='" . t('Hae valitut aineistot') . "'>";
+
+  // Jos meill‰ on oikkarit pankkiyhteysadminiin, ni voidaan hakea filet ilman, ett‰ k‰sitell‰‰n
+  if (tarkista_oikeus("pankkiyhteysadmin.php")) {
+    echo "<br><br>";
+    echo "<label for='kasittele_aineistot'>" . t("ƒl‰ k‰sittele haettuja aineistoja") . "</label>";
+    echo "<input type='checkbox' id='kasittele_aineistot' name='kasittele_aineistot' value='ei'>";
+  }
+  else {
+    echo "<input type='hidden' name='kasittele_aineistot' value='kylla'>";
+  }
 
   echo "</form>";
 }

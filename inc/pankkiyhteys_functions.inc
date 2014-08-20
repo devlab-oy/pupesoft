@@ -100,6 +100,20 @@ function filelist_table($array, $type) {
     echo "</font>";
     return;
   }
+
+  // Tiedostolista tulee files -arrayssa
+  $tiedostot = $array['files'];
+
+  // Sortataan array päivämäärän mukaan. Pitää ensiksi tehdä sortattavasta keystä oma array.
+  $sort_by = array();
+
+  foreach ($tiedostot as $apusort_key => $apusort_row) {
+    $sort_by[$apusort_key] = $apusort_row['fileTimestamp'];
+  }
+
+  // Sortataan by date desc
+  array_multisort($sort_by, SORT_DESC, $tiedostot);
+
   echo "<table>";
 
   echo "<thead>";
@@ -113,7 +127,7 @@ function filelist_table($array, $type) {
 
   echo "<tbody>";
 
-  foreach ($array['files'] as $tiedosto) {
+  foreach ($tiedostot as $tiedosto) {
     $_viite = $tiedosto["fileReference"];
     $_date = date("d.m.Y h:i:s", strtotime($tiedosto["fileTimestamp"]));
     $_status = $tiedosto["status"];

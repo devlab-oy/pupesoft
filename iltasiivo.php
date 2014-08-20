@@ -461,11 +461,12 @@ if ($yhtiorow['iltasiivo_mitatoi_ext_tilauksia'] != '') {
   $query = "SELECT lasku.tunnus laskutunnus
             FROM lasku
             JOIN kuka ON (kuka.yhtio = lasku.yhtio
-                AND kuka.kuka      = lasku.laatija
-                AND kuka.extranet != '')
-            WHERE lasku.yhtio      = '{$kukarow['yhtio']}'
-            AND lasku.tila         = 'N'
-            AND lasku.alatila      = ''
+                AND kuka.kuka       = lasku.laatija
+                AND kuka.extranet  != '')
+            WHERE lasku.yhtio       = '{$kukarow['yhtio']}'
+            AND lasku.tila          = 'N'
+            AND lasku.alatila       = ''
+            AND lasku.tilaustyyppi != 'H'
             AND lasku.clearing     NOT IN ('EXTENNAKKO','EXTTARJOUS')
             AND lasku.luontiaika   < DATE_SUB(now(), INTERVAL $aikaraja HOUR)";
   $result = pupe_query($query);

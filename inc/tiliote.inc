@@ -119,7 +119,16 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
     if (!$maksutositetehty) {
       switch ($koodi) {
       case '702' : // Maksettu jotain tililt‰, etsit‰‰n tilinolla ja summalla....
+      case '706' : // Maksum‰‰r‰ys maksettu jotain tililt‰, etsit‰‰n nimell‰ ja summalla....
       case '720' : // Maksum‰‰r‰ys maksettu jotain tililt‰, etsit‰‰n nimell‰ ja summalla....
+
+        $_tilisiirto   = stripos($koodiselite, "TILISIIRTO");
+        $_maksupalvelu = stripos($koodiselite, "MAKSUPALVELU");
+
+        // 706 hyv‰ksyt‰‰n vain jos selitteess‰ lukee MAKSUPALVELU tai TILISIIRTO
+        if ($koodi == "706" and $_maksupalvelu === FALSE and $_tilisiirto === FALSE) {
+          break;
+        }
 
         $tehdaanselvittelytosite = TRUE;
         unset($result);

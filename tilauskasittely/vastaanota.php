@@ -475,7 +475,9 @@ if ($tee == 'paikat') {
   }
 
   if ($virheita == 0) {
-    $tee = 'valmis';
+    if ($vainlistaus == '') {
+      $tee = 'valmis';
+    }
   }
   else {
     $tee = '';

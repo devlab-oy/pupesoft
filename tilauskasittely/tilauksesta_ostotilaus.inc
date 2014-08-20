@@ -114,8 +114,14 @@ if (!function_exists("tilauksesta_ostotilaus")) {
           // toimittaja löytyi, tehdään tästä ostotilaus
           $tiltoi = mysql_fetch_assoc($erres);
 
-          $ohjausmerkki = ($tiltoi['ostotilauksen_kasittely'] == 4) ? '' : $myytilrow['ohjausmerkki'] ;
+          $toim_ostilkas = $tiltoi['ostotilauksen_kasittely'];
 
+          if ($toim_ostilkas == 4 or ($toim_ostilkas == '' and $ostotilauksen_kasittely == 4)) {
+            $ohjausmerkki = '';
+          }
+          else {
+            $ohjausmerkki = $myytilrow['ohjausmerkki'] ;
+          }
 
           // Katsotaan onko toimittajalla avoimia ostotilauksia
           // Pitää olla myös oikeat osoitetiedot

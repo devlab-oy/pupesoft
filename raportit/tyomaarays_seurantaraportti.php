@@ -77,7 +77,7 @@ if ($raptee == "AJA") {
   $excelrivi = 0;
   $i = 0;
 
-  $valmistajalisa = !empty($valmistajarajaus) ? " and tm.merkki = '{$valmistajarajaus}' " : "" ;
+  $valmistajalisa = !empty($valmistajarajaus) ? " and tm.merkki like '%{$valmistajarajaus}%' " : "" ;
   $aloituspaiva = "{$aloitusvv}-{$aloituskk}-{$aloituspp}";
   $lopetuspaiva = "{$lopetusvv}-{$lopetuskk}-{$lopetuspp}";
 
@@ -89,7 +89,8 @@ if ($raptee == "AJA") {
             a2.selitetark loppu_nimitys
             FROM tyomaarayksen_tapahtumat tt1
             JOIN tyomaarays tm ON (tm.yhtio = tt1.yhtio
-              AND tm.otunnus = tt1.tyomaarays_tunnus {$valmistajalisa})
+              AND tm.otunnus = tt1.tyomaarays_tunnus 
+              {$valmistajalisa})
             LEFT JOIN avainsana a1 ON (a1.yhtio = tt1.yhtio
               AND a1.laji = 'tyom_tyostatus' 
               AND a1.selite = tt1.tyostatus_selite)
@@ -192,7 +193,7 @@ echo "<tr>
   echo "</tr>";
   
 echo "<tr>
-  <th>".t("Rajaa valmistajalla")."</th>
+  <th>".t("Rajaa tuotemerkillä")."</th>
   <td><input type='text' name='valmistajarajaus' value='$valmistajarajaus'></td>
   </tr>";
 

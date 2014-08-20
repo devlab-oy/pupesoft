@@ -598,7 +598,6 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
       echo "</tr>";
       echo "</table>";
     }
-
   }
 
   // jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..

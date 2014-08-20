@@ -100,8 +100,8 @@ if ($raptee == "AJA") {
               AND a2.laji = 'tyom_tyostatus'
               AND a2.selite = tt2.tyostatus_selite)
             WHERE tt1.yhtio = '{$kukarow['yhtio']}'
-            AND tt1.tyostatus_selite = 'c'
-            AND tt2.tyostatus_selite = 'o'
+            AND tt1.tyostatus_selite = '{$aloitustila}'
+            AND tt2.tyostatus_selite = '{$lopetustila}'
             GROUP BY tt1.tyomaarays_tunnus
             HAVING alkupvm >= '{$aloituspaiva}'
             AND loppupvm <= '{$lopetuspaiva}'";

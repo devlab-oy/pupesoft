@@ -1,5 +1,9 @@
 $(document).ready(function() {
 
+  $('#hintojen_vaihto').on('change', function() {
+    $('.hv_hidden').val( this.checked ? 'JOO' : 'EI' );
+  });
+
   $('#hae_asiakasta_linkki').on('click', function(e) {
     e.preventDefault();
 

@@ -920,6 +920,13 @@ if (
       $siirto_varastot_text = t('Varastosiirto'). " {$siirto_varasto['lahde_nimi']} --> {$siirto_varasto['kohde_nimi']} ".t('Myytävissä').": {$saldo_myytavissa} ({$siirto_varasto['toimitustapa_selite']})";
       $paikat .= "<option value='¡¡S{$siirto_varasto['tunnus']}¡¡S{$siirto_varasto['lahde_tunnus']}¡¡S{$siirto_varasto['kohde_tunnus']}' {$sel4}>{$siirto_varastot_text}</option>";
       $paikatlask++;
+
+      $siirto_varastot_paikka = "";
+
+      if (!empty($sel4)) {
+        $siirto_varastot_paikka = "¡¡S{$siirto_varasto['tunnus']}¡¡S{$siirto_varasto['lahde_tunnus']}¡¡S{$siirto_varasto['kohde_tunnus']}";
+      }
+
       $sel4 = "";
     }
   }

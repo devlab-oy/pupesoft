@@ -189,6 +189,7 @@ if (!isset($varasto)) {$varasto="";}
 if (!isset($variaatio_tuoteno)) {$variaatio_tuoteno="";}
 if (!isset($yksi_suoratoimittaja)) {$yksi_suoratoimittaja='';}
 if (!isset($ylatila)) {$ylatila='';}
+if (!isset($siirto_varastot_paikka)) {$siirto_varastot_paikka='';}
 
 // Setataan lopetuslinkki, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla
 $tilmyy_lopetus = "{$palvelin2}{$tilauskaslisa}tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
@@ -7189,6 +7190,7 @@ if ($tee == '') {
                 <input type='hidden' name='orig_alatila'  value = '$orig_alatila'>
                 <input type='hidden' name='tila'       value = 'MUUTA'>
                 <input type='hidden' name='tapa'       value = 'MUOKKAA'>
+                <input type='hidden' name='siirto_varastot_paikka' value = '{$siirto_varastot_paikka}'>
                 <input type='Submit' value='".t("Muokkaa")."'>
                 </form> ";
 

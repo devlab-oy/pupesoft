@@ -254,6 +254,11 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
     echo "<input type='hidden' name='myy_sarjatunnus' value='$myy_sarjatunnus'>";
     echo "<input type='hidden' name='jaksotettu' value='$jaksotettu'>";
     echo "<input type='hidden' name='paikka' value='$paikka'>";
+
+    if (!empty($siirto_varastot_paikka)) {
+      echo "<input type='hidden' name='siirto_varastot_paikka' value='$siirto_varastot_paikka'>";
+    }
+
     echo "<input type='hidden' name='kpl2' value='$kpl2'>";
   }
 
@@ -611,6 +616,10 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     echo "<input type='hidden' name='rivinumero' value='$rivinumero'>";
     echo "<input type='hidden' name='paikka' value='$paikka'>";
     echo "<input type='hidden' name='kpl2' value='$kpl2'>";
+
+    if (!empty($siirto_varastot_paikka)) {
+      echo "<input type='hidden' name='siirto_varastot_paikka' value='$siirto_varastot_paikka'>";
+    }
   }
 
   echo "<input type='hidden' name='perheid' value = '$perheid'>";

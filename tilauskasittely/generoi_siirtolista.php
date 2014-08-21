@@ -489,6 +489,10 @@ if ($tee == 'M' and isset($generoi)) {
     //  Otetaan luodut otsikot talteen
     $otsikot = array();
 
+    if (isset($siirtolista_email)) {
+      $ei_siirretty = array();
+    }
+
     // tehd‰‰n jokaiselle valitulle lahdevarastolle erikseen
     foreach ($lahdevarastot as $lahdevarasto) {
 
@@ -616,6 +620,16 @@ if ($tee == 'M' and isset($generoi)) {
 
             if ($ei_siirreta_jos_tarve_ylittyy == "X") {
               $siirretaan = 0;
+
+              if (isset($siirtolista_email)) {
+                $ei_siirretty[] = array(
+                  'mista' => $lahdevarasto,
+                  'mihin' => $kohdevarasto,
+                  'mita'  => $pairow["tuoteno"],
+                  'tarve' => $tarve_kohdevarasto,
+                  'saldo' => $saldo_myytavissa_lahde
+                  );
+              }
             }
             elseif ($saldo_myytavissa_lahde == 1) {
               $siirretaan = $saldo_myytavissa_lahde;
@@ -746,6 +760,40 @@ if ($tee == 'M' and isset($generoi)) {
     }
 
     if (!$php_cli) echo "</table><br />";
+
+    if (isset($siirtolista_email) and count($ei_siirretty) > 0) {
+
+      $body = t("Seuraavat varastosiirrot j‰iv‰t tekem‰tt‰").":<br><br>\n\n";
+
+      foreach ($ei_siirretty as $value) {
+
+        $mista_query = "SELECT nimitys
+                        FROM varastopaikat
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tunnus = '{$value['mista']}'";
+        $mista_result = pupe_query($mista_query);
+        $mista = mysql_result($mista_result, 0);
+
+        $mihin_query = "SELECT nimitys
+                        FROM varastopaikat
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tunnus = '{$value['mihin']}'";
+        $mihin_result = pupe_query($mihin_query);
+        $mihin = mysql_result($mihin_result, 0);
+
+        $body .= $mista.' -> '.$mihin.' '.t("j‰i siirt‰m‰tt‰ tuoteno").': '.$value['mita'].'. '.t("tarve").': '.$value['tarve'].' '.t("kpl mutta, oli vain").' : '.$value['saldo'].' '.t("kpl").".<br>\n";
+      }
+
+      $params = array(
+        'to' => $siirtolista_email,
+        'cc' => '',
+        'subject' => t("Siirt‰m‰tt‰ j‰‰neet tuotteet"),
+        'ctype' => 'html',
+        'body' => $body,
+      );
+
+      pupesoft_sahkoposti($params);
+    }
 
     if (count($otsikot) == 0) {
       if (!$php_cli) echo "<font class='error'>", t("Yht‰‰n siirtolistaa ei luotu"), "!</font><br />";

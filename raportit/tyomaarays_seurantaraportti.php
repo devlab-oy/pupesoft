@@ -36,28 +36,31 @@ function count_workdays($date1,$date2){
 
     //workdays of first week 
     if ($firstday==0){ 
-         //so we don't count weekend 
-         $firstweek = 5;  
-         }else { 
-         $firstweek = 6-$firstday; 
-         } 
+      //so we don't count weekend 
+      $firstweek = 5;  
+    }
+    else { 
+      $firstweek = 6-$firstday; 
+    } 
     $totalfw = 7-$firstday; 
     
     //workdays of last week 
     if ($lastday==6){ 
-         //so we don't count sat, sun=0 so it won't be counted anyway 
-         $lastweek = 5; 
-         }else { 
-         $lastweek = $lastday; 
-         } 
+      //so we don't count sat, sun=0 so it won't be counted anyway 
+      $lastweek = 5; 
+    }
+    else { 
+      $lastweek = $lastday; 
+    } 
     $totallw = $lastday+1; 
         
     //check for any mid-weeks  
     if (($totalfw+$totallw)>=$totaldays){ 
-         $midweeks = 0; 
-         } else { //count midweeks 
-         $midweeks = (($totaldays-$totalfw-$totallw)/7)*5; 
-         } 
+      $midweeks = 0; 
+    } 
+    else { //count midweeks 
+      $midweeks = (($totaldays-$totalfw-$totallw)/7)*5; 
+    } 
     
     //total num of workdays 
     $workdays = $firstweek+$midweeks+$lastweek; 
@@ -82,6 +85,7 @@ if ($raptee == "AJA") {
   $lopetuspaiva = "{$lopetusvv}-{$lopetuskk}-{$lopetuspp}";
 
   $query = "SELECT
+            tm.merkki valmistaja,
             tt1.tyomaarays_tunnus,
             min(tt1.luontiaika) alkupvm,
             a1.selitetark alku_nimitys,
@@ -109,6 +113,10 @@ if ($raptee == "AJA") {
 
   $worksheet->write($excelrivi, $i, t('Työmääräysnumero'), $format_bold);
   $i++;
+  if (!empty($valmistajarajaus)) {
+    $worksheet->write($excelrivi, $i, t('Tuotemerkki'), $format_bold);
+    $i++;
+  }
   $worksheet->write($excelrivi, $i, t('Aloitustapahtuma'), $format_bold);
   $i++;
   $worksheet->write($excelrivi, $i, t('Aloitusaika'), $format_bold);
@@ -118,12 +126,19 @@ if ($raptee == "AJA") {
   $worksheet->write($excelrivi, $i, t('Lopetusaika'), $format_bold);
   $i++;
   $worksheet->write($excelrivi, $i, t('Kesto'), $format_bold);
+
+
+
   $i=0;
   $excelrivi++;
 
   while ($rivi = mysql_fetch_array($result)) {
     $worksheet->writeString($excelrivi, $i, $rivi['tyomaarays_tunnus']);
     $i++;
+    if (!empty($valmistajarajaus)) {
+      $worksheet->writeString($excelrivi, $i, $rivi['valmistaja']);
+      $i++;
+    }
     $worksheet->writeString($excelrivi, $i, $rivi['alku_nimitys']);
     $i++;
     $worksheet->writeString($excelrivi, $i, $rivi['alkupvm']);

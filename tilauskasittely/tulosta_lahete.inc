@@ -1757,12 +1757,7 @@ if (!function_exists('rivi_lahete')) {
 
           if ($lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc") {
             // palautetaan rivihinta laskettuna vain ale1:n mukaan
-            if (trim($row["ale3"]) != 0) {
-              $row["rivihinta"] = $row["rivihinta"] / $row['ale3'] * 100;
-            }
-            if (trim($row["ale2"]) != 0) {
-              $row["rivihinta"] = $row["rivihinta"] / $row['ale2'] * 100;
-            }
+            $row["rivihinta"] = $row["rivihinta"] / (1 - $row['ale3'] / 100) / (1 - $row['ale2'] / 100);
           }
 
           if ($yhtiorow['alv_kasittely'] == '') {
@@ -2220,12 +2215,7 @@ if (!function_exists('rivi_hinta_ale_lahete_ean')) {
 
       if ($lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc") {
         // palautetaan rivihinta laskettuna vain ale1:n mukaan
-        if (trim($row["ale3"]) != 0) {
-          $row["rivihinta"] = $row["rivihinta"] / $row['ale3'] * 100;
-        }
-        if (trim($row["ale2"]) != 0) {
-          $row["rivihinta"] = $row["rivihinta"] / $row['ale2'] * 100;
-        }
+        $row["rivihinta"] = $row["rivihinta"] / (1 - $row['ale3'] / 100) / (1 - $row['ale2'] / 100);
       }
 
         $oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);

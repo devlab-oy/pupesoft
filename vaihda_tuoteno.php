@@ -472,6 +472,16 @@ if ($error == 0 and $tee == "file") {
                 $result2 = pupe_query($query);
               }
             }
+            elseif ($uusi_on_jo == "OK" and $taulu == "tuote" and $jatavanha == '') {
+              // Kun molemmat tuotenumerot ovat jo olleet olemassa niin poistetaan vanha tuotenumero,
+              // jos vanhaa tuotenumeroa ei ole tarkoitus j‰tt‰‰ korvaavaksi
+              $query = "DELETE
+                        FROM tuote
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tuoteno = '$vantuoteno'";
+              pupe_query($query);
+
+            }
           }
 
           if ($jatavanha != '' and $uusi_on_jo != "SAMA") {
@@ -498,6 +508,22 @@ if ($error == 0 and $tee == "file") {
                         yhtio       = '$kukarow[yhtio]'";
               $result3 = pupe_query($query);
             }
+            elseif ($uusi_on_jo == "OK") {
+              // P‰ivitet‰‰n olemassa olevan tuotteen
+              $query = "UPDATE tuote
+                        SET
+                        nimitys     = '". t("Korvaava tuoteno", $yhtiorow["kieli"]) ." $uustuoteno',
+                        osasto      = '999999',
+                        try         = '999999',
+                        alv         = '$alv',
+                        status      = '$status',
+                        hinnastoon  = '$hinnastoon',
+                        ostoehdotus = '$ostoehdotus'
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tuoteno = '$vantuoteno'";
+              pupe_query($query);
+            }
+
 
             $querykorv = "SELECT max(id)+1 maxi from korvaavat where yhtio = '$kukarow[yhtio]'";
             $korvresult = pupe_query($querykorv);

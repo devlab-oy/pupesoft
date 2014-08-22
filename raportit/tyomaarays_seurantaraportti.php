@@ -85,6 +85,9 @@ if ($raptee == "AJA") {
   $lopetuspaiva = "{$lopetusvv}-{$lopetuskk}-{$lopetuspp}";
 
   $query = "SELECT
+            concat(lasku.toim_nimi,'<br>',
+            lasku.toim_osoite,'<br>',
+            lasku.toim_postitp) asiakastiedot,
             tm.merkki valmistaja,
             tt1.tyomaarays_tunnus,
             min(tt1.luontiaika) alkupvm,
@@ -103,6 +106,8 @@ if ($raptee == "AJA") {
             LEFT JOIN avainsana a2 ON (a2.yhtio = tt1.yhtio
               AND a2.laji = 'tyom_tyostatus'
               AND a2.selite = tt2.tyostatus_selite)
+            LEFT JOIN lasku ON (lasku.yhtio = tm.yhtio 
+              AND lasku.tunnus = tm.otunnus)
             WHERE tt1.yhtio = '{$kukarow['yhtio']}'
             AND tt1.tyostatus_selite = '{$aloitustila}'
             AND tt2.tyostatus_selite = '{$lopetustila}'
@@ -112,6 +117,8 @@ if ($raptee == "AJA") {
   $result = pupe_query($query);
 
   $worksheet->write($excelrivi, $i, t('Työmääräysnumero'), $format_bold);
+  $i++;
+  $worksheet->write($excelrivi, $i, t('Asiakastiedot'), $format_bold);
   $i++;
   if (!empty($valmistajarajaus)) {
     $worksheet->write($excelrivi, $i, t('Tuotemerkki'), $format_bold);
@@ -134,6 +141,8 @@ if ($raptee == "AJA") {
 
   while ($rivi = mysql_fetch_array($result)) {
     $worksheet->writeString($excelrivi, $i, $rivi['tyomaarays_tunnus']);
+    $i++;
+    $worksheet->writeString($excelrivi, $i, $rivi['asiakastiedot']);
     $i++;
     if (!empty($valmistajarajaus)) {
       $worksheet->writeString($excelrivi, $i, $rivi['valmistaja']);

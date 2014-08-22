@@ -3,8 +3,13 @@
 require "salasanat.php";
 
 // $masterlink on aina linkki master-kantaan.
-// $link on linkki master- tai slave-kantaan. Jos slave on käytössä ja aktivoitu $useslave-muuttujalla niin silloin tuo pointaa siis slave-kantaan.
+// $slavelink on aina linkki slave-kantaan jos slave kanta on olemassa.
+// $link on linkki master- tai slave-kantaan. Jos slave on käytössä ja aktivoitu $useslave-muuttujalla niin silloin tuo pointtaa siis slave-kantaan.
+
 // $temporarylink on linkki omaan kantaan johon pupe tekee temporary tablet. Jos $tempdbhost:ia ei oo määritelty, niin silloin $temporarylink pointaa master-kantaan.
+
+// Setataan tämä ja tyhjennetään se. Tällä voidaan ohjata mihin kantaan pupe_query()-funkkari tekee kyselynsä
+$pupedatabaselink = "";
 
 // Katsotaan halutaanko käyttää slavea
 if (isset($useslave)) {
@@ -42,8 +47,18 @@ if ($useslave > 0) {
   mysql_query("set group_concat_max_len=1000000", $masterlink);
 
   $link = mysql_connect($slavedb[$useslave], $slaveuser[$useslave], $slavepass[$useslave]) or die ("Ongelma tietokantapalvelimessa: '$slavedb[$useslave]'");
+  $slavelink = $link;
 }
+// Käytetään master kantaa
 else {
+  // Onko slave olemassa? Jos on, niin otetaan linkki siihenkin
+  if (isset($slavedb[1]) and $slavedb[1] != "" and isset($slaveuser[1]) and $slaveuser[1] != "" and isset($slavepass[1]) and $slavepass[1] != "") {
+    $slavelink = mysql_connect($slavedb[1], $slaveuser[1], $slavepass[1]) or die ("Ongelma tietokantapalvelimessa: '$slavedb[1]'");
+    mysql_select_db($dbkanta, $slavelink) or die ("Tietokantaa $dbkanta ei löydy palvelimelta $slavedb[1]! (connect.inc)");
+    mysql_set_charset("latin1", $slavelink);
+    mysql_query("set group_concat_max_len=1000000", $slavelink);
+  }
+
   $link = mysql_connect($dbhost, $dbuser, $dbpass) or die ("Ongelma tietokantapalvelimessa $dbhost");
   $masterlink = $link;
 }

@@ -3478,20 +3478,22 @@ if ($tee == '') {
     js_popup();
 
     // Parametrejä saatanat.php:lle
-    $sytunnus       = $laskurow['ytunnus'];
+    $sytunnus        = $laskurow['ytunnus'];
     $sliitostunnus   = $laskurow['liitostunnus'];
-    $eiliittymaa    = "ON";
+    $eiliittymaa     = "ON";
     $luottorajavirhe = "";
-    $jvvirhe      = "";
-    $ylivito      = 0;
-    $trattavirhe    = "";
-    $laji        = "MA";
+    $jvvirhe         = "";
+    $ylivito         = 0;
+    $trattavirhe     = "";
+    $laji            = "MA";
     $grouppaus       = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "ytunnus" : "";
 
+    pupeslave_start();
     ob_start();
     require "raportit/saatanat.php";
     $retval = ob_get_contents();
     ob_end_clean();
+    pupeslave_stop();
 
     if (trim($retval) != "" and $kukarow['hinnat'] == 0) {
       echo "<br>$retval";

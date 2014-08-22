@@ -518,61 +518,16 @@ if ($tee == "laheta_pankkiin") {
 }
 
 $pankkitili_tunnus = empty($pankkitili_tunnus) ? 0 : (int) $pankkitili_tunnus;
-$pankkirajaus = "";
-
-// Jos halutaan tiedosto per pankki(tili?)
-if ($yhtiorow["pankkitiedostot"] == "F" and $tee != "virhe") {
-  $pankkirajaus = "AND lasku.maksu_tili = $pankkitili_tunnus";
-
-  $query = "SELECT *
-            FROM yriti
-            WHERE yhtio   = '{$kukarow['yhtio']}'
-            AND kaytossa  = ''
-            AND iban     != ''
-            AND bic      != ''
-            ORDER BY nimi";
-  $result = pupe_query($query);
-
-  echo "<form name = 'valinta' method='post'>";
-  echo "<input type = 'hidden' name = 'tee' value = ''>";
-
-  echo "<table>";
-  echo "<tr>";
-  echo "<th>";
-  echo t("Valitse pankkitili");
-  echo "</th>";
-  echo "<td>";
-  echo "<select name='pankkitili_tunnus' onchange='submit();'>";
-  echo "<option value='0'>" . t("Valitse pankkitili") . "</option>";
-
-  while ($row = mysql_fetch_assoc($result)) {
-    $selected = $row["tunnus"] == $pankkitili_tunnus ? " selected" : "";
-
-    echo "<option value='{$row["tunnus"]}'{$selected}>";
-    echo "{$row['nimi']} - {$row['tilino']}";
-    echo "</option>";
-  }
-
-  echo "</select>";
-  echo "</td>";
-
-  echo "<td>";
-  echo "<input type = 'submit' value = '".t("Hae")."'>";
-  echo "</td>";
-
-  echo "</tr>";
-  echo "</table>";
-
-  echo "</form>";
-}
 
 // Jos halutaan tiedosto per pankki per päivä
 if ($yhtiorow["pankkitiedostot"] == "E") {
-  echo "<font class='message'>";
-  echo "SEPA-aineston voi luoda ainoastaan per pankkitili tai kaikki pankit yhteen tiedostoon.<br>";
-  echo "Tarkista pankkitiedostot -yhtiön parametrti.";
+  echo "<font class='error'>";
+  echo t("SEPA-aineston voi luoda ainoastaan per pankki tai kaikki pankit yhteen tiedostoon.");
+  echo "<br>";
+  echo t("Tarkista pankkitiedostot -yhtiön parametrti.");
   echo "</font>";
-  $tee = "";
+
+  $tee = "virhe";
 }
 
 if ($tee == "KIRJOITAKOPIO") {
@@ -588,6 +543,7 @@ $haku_query = "SELECT lasku.*,
                yriti.iban yriti_iban,
                yriti.bic yriti_bic,
                yriti.asiakastunnus yriti_asiakastunnus,
+               yriti.tunnus AS yriti_tunnus,
                date_format(lasku.popvm, '%d.%m.%y.%H.%i.%s') popvm_dmy
                FROM lasku
                INNER JOIN valuu ON (valuu.yhtio = lasku.yhtio
@@ -597,7 +553,6 @@ $haku_query = "SELECT lasku.*,
                 AND yriti.kaytossa = '')
                WHERE lasku.yhtio   = '{$kukarow["yhtio"]}'
                {$lisa}
-               {$pankkirajaus}
                ORDER BY maksu_tili, olmapvm, ultilno";
 $result = pupe_query($haku_query);
 
@@ -608,6 +563,13 @@ if ($tee == "") {
   echo "<br>";
   echo "<font class='message'>".t("Sinulla on")." {$_num} ".t("laskua poimittuna").".</font>";
   echo "<br><br>";
+
+  // Jos meillä on pankkiyhteys käytössä, niin pitää hakea pankkitilin tunnus
+  if (SEPA_PANKKIYHTEYS and $_num > 0) {
+    $_temp = mysql_fetch_assoc($result);
+    $pankkitili_tunnus = $_temp['yriti_tunnus'];
+    mysql_data_seek($result, 0);
+  }
 
   $virheita = 0;
 
@@ -727,7 +689,6 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
             FROM lasku
             WHERE yhtio = '$kukarow[yhtio]'
             {$lisa}
-            {$pankkirajaus}
             AND summa   < 0
             GROUP BY maksu_tili, ultilno, olmapvm, valkoodi";
   $result = pupe_query($query);
@@ -740,7 +701,6 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
               FROM lasku
               WHERE yhtio    = '$kukarow[yhtio]'
               {$lisa}
-              {$pankkirajaus}
               AND ultilno    = '$laskurow[ultilno]'
               AND valkoodi   = '$laskurow[valkoodi]'
               AND maksu_tili = '$laskurow[maksu_tili]'
@@ -858,7 +818,6 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
                   AND yriti.kaytossa = '')
                  WHERE lasku.yhtio   = '{$kukarow["yhtio"]}'
                  {$lisa}
-                 {$pankkirajaus}
                  ORDER BY maksu_tili, olmapvm, ultilno";
   $result = pupe_query($haku_query);
 

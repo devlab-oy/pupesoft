@@ -50,7 +50,7 @@ if (!function_exists('alku_valm')) {
 
       // haetaan maksuehdon tiedot
       $query  = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
-      $masresult = mysql_query($query) or pupe_error($query);
+      $masresult = pupe_query($query);
       $masrow = mysql_fetch_array($masresult);
 
       //maksuehto tekstinä
@@ -136,7 +136,7 @@ if (!function_exists('alku_valm')) {
       $query  = "  select nimi
             from kuka
             where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
-      $myyresult = mysql_query($query) or pupe_error($query);
+      $myyresult = pupe_query($query);
       $myyrow = mysql_fetch_array($myyresult);
 
       $pdf->draw_text(310, 719, $myyrow["nimi"],                     $thispage, $norm);
@@ -274,7 +274,7 @@ if (!function_exists('uusi_sivu_valm')) {
 
     // haetaan maksuehdon tiedot
     $query  = "SELECT * from maksuehto where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
-    $masresult = mysql_query($query) or pupe_error($query);
+    $masresult = pupe_query($query);
     $masrow = mysql_fetch_array($masresult);
 
     //maksuehto tekstinä
@@ -444,7 +444,7 @@ if (!function_exists('rivi_valm')) {
     if ($tyyppi != "ETUSIVU" and ($row["tunnus"] == $row["perheid"] or $row["tunnus"] == $row["perheid2"])) {
       //  Tulostetaanko aina uusi sivu?
       $query = "SELECT tunnus FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'R' and isatuoteno = '$row[tuoteno]' and omasivu != ''";
-      $pres = mysql_query($query) or pupe_error($query);
+      $pres = pupe_query($query);
 
       if (mysql_num_rows($pres) > 0) {
         //  Uusi sivu
@@ -493,10 +493,10 @@ if (!function_exists('rivi_valm')) {
                 FROM sarjanumeroseuranta
                 WHERE yhtio      = '$kukarow[yhtio]'
                 and tuoteno      = '$row[tuoteno]'
-                and $tunken    = '$row[tunnus]'
+                and $tunken      = '$row[tunnus]'
                 and sarjanumero != ''
                 ORDER BY sarjanumero";
-      $sarjares = mysql_query($query) or pupe_error($query);
+      $sarjares = pupe_query($query);
 
       if (mysql_num_rows($sarjares) > 0) {
         if ($row["kommentti"] != '') {
@@ -525,6 +525,25 @@ if (!function_exists('rivi_valm')) {
 
     if ($row["tunnus"] == $row["perheid"] and $laskurow['asiakkaan_tilausnumero'] != "") {
       $row["kommentti"] .= "\n".t("Asiakkaan tilausnumero", $kieli).": ".$laskurow['asiakkaan_tilausnumero'];
+    }
+
+    if ($yhtiorow["pura_osaluettelot"] != "") {
+      // Näytetäänkö osaluettelo
+      $query = "SELECT tuote.tuoteno, tuote.yksikko, tuote.nimitys,
+                tuoteperhe.kerroin
+                FROM tuoteperhe
+                JOIN tuote ON (tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tuoteno=tuote.tuoteno)
+                WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
+                AND tuoteperhe.isatuoteno = '$row[tuoteno]'
+                AND tuoteperhe.tyyppi     = 'O'
+                ORDER BY tuote.tuoteno";
+      $tuoteperhe_result = pupe_query($query);
+
+      if (mysql_num_rows($tuoteperhe_result) > 0) {
+        while ($tuoteperhe_row = mysql_fetch_assoc($tuoteperhe_result)) {
+          $row["kommentti"] .= ((float) $tuoteperhe_row["kerroin"])." x $tuoteperhe_row[tuoteno] - $tuoteperhe_row[nimitys]\n";
+        }
+      }
     }
 
     // Mahtuuko rivi tälle sivulle
@@ -603,11 +622,22 @@ if (!function_exists('rivi_valmistus')) {
 
     $pdf->draw_text(125, $kala, t_tuotteen_avainsanat($row, 'nimitys'),  $thispage, $pb);
 
-    if (trim($row["kommentti"]) != '') {
+    // Ei piirretä kommenttia, kun testataan mahtuuko, koska pitkä komentti osaa vaihtaa sivua ihan itsekin
+    if (!empty($thispage) and trim($row["kommentti"]) != '') {
 
       $komm = t("Kommentti", $kieli).":\n".trim($row["kommentti"]);
 
       foreach (explode("\n", wordwrap(trim($komm), 90, "\n")) as $kommentti) {
+
+        if ($kala <= 85) {
+          $sivu++;
+
+          loppu_valm($thispage, 0);
+
+          $page[$sivu] = uusi_sivu_valm($tyyppi);
+          $thispage    = $page[$sivu];
+        }
+
         $kala = $kala - $rivinkorkeus;
         $lask_valm++;
 
@@ -624,7 +654,7 @@ if (!function_exists('rivi_valmistus')) {
                 and trim(fakta) != ''
                 ORDER BY LENGTH(fakta) desc
                 LIMIT 1";
-      $ressu = mysql_query($query) or pupe_error($query);
+      $ressu = pupe_query($query);
 
       if (mysql_num_rows($ressu) == 1) {
         $faktarow = mysql_fetch_array($ressu);

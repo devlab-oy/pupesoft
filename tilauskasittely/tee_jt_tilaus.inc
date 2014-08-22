@@ -859,6 +859,14 @@ if (!function_exists("tee_jt_tilaus")) {
               $siirtolista_row = mysql_fetch_assoc($siirtolista_result);
             }
 
+            // Setataan lisaarivi.inc varten mistä tullaan muuttujaan JT_TILAUS,
+            // jotta ei pyöristettäisi enää tässä vaiheessa täysiin myyntieriin,
+            // jos kerran ollaan jo kertaalleen hyväksytty, että myydään vajaa erä
+            // niin ei pitäisi enää tässä vaiheessa olla tarvetta pyöristellä täyteen erään.
+            // Otetaan kuitenkin varmuuden vuoksi talteen alkuperäinen mistä tulaan
+            // ja setataan se sitten kun ollaan tultu takasin lisaarivi.incstä.
+            $from_tee_jt_tilaus = TRUE;
+
             require "lisaarivi.inc";
 
             $kpl = $talteen_kpl; // lisäärivi rikko tän, otetaan haltuun

@@ -33,7 +33,7 @@ if (!isset($tee) or $tee == '') {
              FROM kuka
              JOIN yhtio using (yhtio)
              WHERE kuka = '$kukarow[kuka]'";
-  $kukres = mysql_query($query) or pupe_error($query);
+  $kukres = pupe_query($query);
 
   while ($kukrow = mysql_fetch_array($kukres)) {
 
@@ -41,14 +41,14 @@ if (!isset($tee) or $tee == '') {
               FROM lasku
               WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukrow[yhtio]' and alatila = 'H' and tila!='D'
               ORDER BY erpcm";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
     $piilorow = mysql_fetch_array($result);
 
     $query = "SELECT tapvm, erpcm, ytunnus, nimi, round(summa * vienti_kurssi, 2) 'kotisumma', if(erpcm<=now(), 1, 0) wanha
               FROM lasku
               WHERE hyvaksyja_nyt = '$kukarow[kuka]' and yhtio = '$kukrow[yhtio]' and alatila!='H' and tila!='D'
               ORDER BY erpcm";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if ((mysql_num_rows($result) > 0) or ($piilorow[0] > 0)) {
 
@@ -106,7 +106,7 @@ if (!isset($tee) or $tee == '') {
               and tila     in ('N','L')
               and alatila != 'X'
               and chn      = '999'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0) {
       echo "<table width='100%'>";
@@ -153,7 +153,7 @@ if (!isset($tee) or $tee == '') {
             and kalenteri.kuittaus = 'K'
             and kalenteri.yhtio    = '$kukarow[yhtio]'
             ORDER BY kalenteri.pvmalku desc";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
     echo "<table width='100%'>";
@@ -175,7 +175,7 @@ if (!isset($tee) or $tee == '') {
                   WHERE tyyppi = 'kalenteri'
                   AND pvmalku  like '$prow[Muistutukset]%'
                   AND kentta02 = '$prow[kentta02]'";
-        $asentajien_merkkaukset_res = mysql_query($query) or pupe_error($query);
+        $asentajien_merkkaukset_res = pupe_query($query);
 
         if (mysql_num_rows($asentajien_merkkaukset_res) > 0) {
 
@@ -183,7 +183,7 @@ if (!isset($tee) or $tee == '') {
                     kuittaus    = ''
                     WHERE yhtio = '$kukarow[yhtio]'
                     AND tunnus  = '$prow[tunnus]'";
-          $muistutus_kuittaus_res = mysql_query($query) or pupe_error($query);
+          $muistutus_kuittaus_res = pupe_query($query);
 
           continue;
         }
@@ -285,7 +285,7 @@ if (!isset($tee) or $tee == '') {
                 AND lasku.tila    = 'X'
                 AND lasku.nimi    = 'ALVTOSITEMAKSUUN$alvpvm'
                 LIMIT 1";
-      $tositelinkki_result = mysql_query($query) or pupe_error($query);
+      $tositelinkki_result = pupe_query($query);
 
       if (mysql_num_rows($tositelinkki_result) == 0) {
 

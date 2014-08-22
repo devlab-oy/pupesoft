@@ -189,6 +189,12 @@ if (!function_exists("pupe_query")) {
     if (is_resource($link)) {
       $res = mysql_query($query, $link) or pupe_error($query);
     }
+    elseif ($GLOBALS["pupedatabaselink"] == "MASTER") {
+      $res = mysql_query($query, $GLOBALS["masterlink"]) or pupe_error($query);
+    }
+    elseif ($GLOBALS["pupedatabaselink"] == "SLAVE") {
+      $res = mysql_query($query, $GLOBALS["slavelink"]) or pupe_error($query);
+    }
     else {
       $res = mysql_query($query) or pupe_error($query);
     }
@@ -202,6 +208,36 @@ if (!function_exists("pupe_query")) {
     }
 
     return $res;
+  }
+}
+
+// K‰ytet‰‰n slavea jos sellainen on
+if (!function_exists("pupeslave_start")) {
+  function pupeslave_start() {
+    if (isset($GLOBALS["slavelink"]) and is_resource($GLOBALS["slavelink"])) {
+      $GLOBALS["pupedatabaselink"] = "SLAVE";
+    }
+  }
+}
+
+// Palataan k‰ytt‰m‰‰n oletustietokantalinkki‰
+if (!function_exists("pupeslave_stop")) {
+  function pupeslave_stop() {
+    $GLOBALS["pupedatabaselink"] = "";
+  }
+}
+
+// K‰ytet‰‰n masteria
+if (!function_exists("pupemaster_start")) {
+  function pupemaster_start() {
+    $GLOBALS["pupedatabaselink"] = "MASTER";
+  }
+}
+
+// Palataan k‰ytt‰m‰‰n oletustietokantalinkki‰
+if (!function_exists("pupemaster_stop")) {
+  function pupemaster_stop() {
+    $GLOBALS["pupedatabaselink"] = "";
   }
 }
 

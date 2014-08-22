@@ -125,5 +125,4 @@ elseif ($type == '9') {
 else {
   echo "<font class='error'>Tuntematon tietuetunnus $type</font><br>\n";
   $errcnt++;
-  continue;
 }

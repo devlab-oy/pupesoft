@@ -4,6 +4,7 @@
 if ($_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "" and $_GET["ostoskori"] != "") {
 
   require "connect.inc";
+  require "functions.inc";
 
   $ostoskori_user      = mysql_real_escape_string($_GET["user"]);
   $ostoskori_pass      = mysql_real_escape_string($_GET["pass"]);

@@ -41,13 +41,13 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
         mysql_select_db($dbkanta) or die ("CRITICAL - mysql_select_db() failed on slave$si $STATE_CRITICAL");
 
         $query = "SHOW /*!50000 GLOBAL */ VARIABLES like 'max_connections'";
-        $res = pupe_query($query);
+        $res = mysql_query($query) or die(mysql_error());
         $row = mysql_fetch_assoc($res);
 
         $max_connections = (int) $row["Value"];
 
         $query = "SHOW /*!50000 GLOBAL */ STATUS like 'max_used_connections'";
-        $res = pupe_query($query);
+        $res = mysql_query($query) or die(mysql_error());
         $row = mysql_fetch_assoc($res);
 
         $max_used_connections = (int) $row["Value"];
@@ -86,13 +86,13 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
     mysql_select_db($dbkanta) or die ("CRITICAL - mysql_select_db() failed $STATE_CRITICAL");
 
     $query = "SHOW /*!50000 GLOBAL */ VARIABLES like 'max_connections'";
-    $res = pupe_query($query);
+    $res = mysql_query($query) or die(mysql_error());
     $row = mysql_fetch_assoc($res);
 
     $max_connections = (int) $row["Value"];
 
     $query = "SHOW /*!50000 GLOBAL */ STATUS like 'max_used_connections'";
-    $res = pupe_query($query);
+    $res = mysql_query($query) or die(mysql_error());
     $row = mysql_fetch_assoc($res);
 
     $max_used_connections = (int) $row["Value"];
@@ -137,7 +137,7 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
         mysql_select_db($dbkanta) or die ("CRITICAL - mysql_select_db() failed on slave$si $STATE_CRITICAL");
 
         $query = "SHOW /*!50000 SLAVE */ STATUS";
-        $res = pupe_query($query);
+        $res = mysql_query($query) or die(mysql_error());
         $row = mysql_fetch_assoc($res);
 
         if ($row["Slave_IO_Running"] != "Yes") {
@@ -248,7 +248,7 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
         mysql_select_db($dbkanta) or die ("CRITICAL - mysql_select_db() failed on HaProxy$si $STATE_CRITICAL");
 
         $query = "SELECT 1+1 as summa";
-        $res = pupe_query($query);
+        $res = mysql_query($query) or die(mysql_error());
         $row = mysql_fetch_assoc($res);
 
         // Nostetaan virhe jos tilanne on huolestuttava

@@ -3,11 +3,14 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-if (file_exists("inc/connect.inc")) {
-  require "inc/connect.inc";
+if (@include("inc/connect.inc")) {
+  require "inc/functions.inc";
+}
+elseif (@include("connect.inc")) {
+  require "functions.inc";
 }
 else {
-  require "connect.inc";
+  exit;
 }
 
 $id = (int) $_GET["id"];

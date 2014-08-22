@@ -272,30 +272,6 @@ if ($tee == 'failista') {
 
 if ($tee == 'paikat') {
 
-  foreach ($tunnus as $tun) {
-
-    $t1[$tun] = trim($t1[$tun]);
-    $t2[$tun] = trim($t2[$tun]);
-    $t3[$tun] = trim($t3[$tun]);
-    $t4[$tun] = trim($t4[$tun]);
-
-    $t1[$tun] = strtoupper($t1[$tun]);
-
-    // PÄivitetään syötetyt paikat tilausrivin_lisätietoihin
-    $query = "UPDATE tilausrivi
-              JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio  and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-              SET
-              tilausrivin_lisatiedot.kohde_hyllyalue = '{$t1[$tun]}',
-              tilausrivin_lisatiedot.kohde_hyllynro  = '{$t2[$tun]}',
-              tilausrivin_lisatiedot.kohde_hyllyvali = '{$t3[$tun]}',
-              tilausrivin_lisatiedot.kohde_hyllytaso = '{$t4[$tun]}'
-              WHERE tilausrivi.tunnus                = '$tun'
-              and tilausrivi.yhtio                   = '$kukarow[yhtio]'
-              and tilausrivi.tyyppi                  = 'G'
-              and tilausrivi.toimitettu              = ''";
-    $result = pupe_query($query);
-  }
-
   $virheita = 0;
 
   //käydään kaikki rivit läpi ja tarkastetaan varastopaika ja perustetaan uusia jos on tarvis
@@ -440,6 +416,23 @@ if ($tee == 'paikat') {
         $t2[$tun] = $paikkarow['hyllynro'];
         $t3[$tun] = $paikkarow['hyllyvali'];
         $t4[$tun] = $paikkarow['hyllytaso'];
+      }
+
+      if ($virheita === 0) {
+
+        // PÄivitetään syötetyt paikat tilausrivin_lisätietoihin
+        $query = "UPDATE tilausrivi
+                  JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio  and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
+                  SET
+                  tilausrivin_lisatiedot.kohde_hyllyalue = '{$t1[$tun]}',
+                  tilausrivin_lisatiedot.kohde_hyllynro  = '{$t2[$tun]}',
+                  tilausrivin_lisatiedot.kohde_hyllyvali = '{$t3[$tun]}',
+                  tilausrivin_lisatiedot.kohde_hyllytaso = '{$t4[$tun]}'
+                  WHERE tilausrivi.tunnus                = '$tun'
+                  and tilausrivi.yhtio                   = '$kukarow[yhtio]'
+                  and tilausrivi.tyyppi                  = 'G'
+                  and tilausrivi.toimitettu              = ''";
+        $result = pupe_query($query);
       }
     }
 

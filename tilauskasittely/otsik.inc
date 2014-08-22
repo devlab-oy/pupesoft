@@ -589,6 +589,8 @@ if ($tila == "" and !isset($jatka)) {
     echo "<font class='head'>".t("Myyntitilauksen otsikko")."</font><hr>";
   }
 
+  $hintojen_vaihto = isset($hintojen_vaihto) ? $hintojen_vaihto : 'EI';
+
   echo "<form method='post' autocomplete='off' name='paaformi' enctype='multipart/form-data'>";
   echo "<input type='hidden' name='tee' value='OTSIK'>";
   echo "<input type='hidden' name='lopetus' value='$lopetus'>";
@@ -600,7 +602,7 @@ if ($tila == "" and !isset($jatka)) {
   echo "<input type='hidden' name='mista' value='$mista'>";
   echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
   echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
-  echo "<input type='hidden' id='hv_hidden' name='hintojen_vaihto' value='$hintojen_vaihto'>";
+  echo "<input type='hidden' class='hv_hidden' name='hintojen_vaihto' value='$hintojen_vaihto'>";
 
   if ($asiakasid != "" or $kukarow["kesken"] != 0 or $kopioitava_otsikko != 0) {
 
@@ -1002,8 +1004,6 @@ if ($tila == "" and !isset($jatka)) {
       echo "<tr><td></td><td><a href='".$palvelin2."yllapito.php?toim=$ealisa&tunnus=$srow[liitostunnus]&lopetus=tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//mista=$mista//tila=$tila//from=ASIAKASYLLAPITO//asiakasid=$asiakasid'>".t("Muuta asiakkaan tietoja")."</a></td></tr>";
     }
   }
-
-  $hintojen_vaihto = isset($hintojen_vaihto) ? $hintojen_vaihto : 'EI';
 
   if ($templ > 0 and $asiakasid == '' and $hintojen_vaihto == 'JOO') {
     echo "<tr><td colspan='2'><br><font class='message'>".t("HUOM: Jos vaihdat asiakasta, tarkista hinnat ja alennukset")."!</font></td></tr>";
@@ -3004,7 +3004,7 @@ if ($tila == "" and !isset($jatka)) {
 
     if ($tilausnumero != "") {
 
-      if ($hintojen_vaihto == 'JOO' or ($hintojen_vaihto == 'EI' and $from != 'vaihdaasiakas')) {
+      if ($hintojen_vaihto == 'JOO') {
         $hv_check = 'CHECKED';
       }
       else{
@@ -3024,7 +3024,8 @@ if ($tila == "" and !isset($jatka)) {
       echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
       echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
       echo "<td class='back'><input type='submit' ACCESSKEY='A' value='".t("Vaihda asiakas")."'>";
-      echo "<input type='checkbox' id='hintojen_vaihto' name='hintojen_vaihto' value='JOO' $hv_check />";
+      echo "<input type='checkbox' id='hintojen_vaihto' $hv_check />";
+      echo "<input type='hidden' name='hintojen_vaihto' class='hv_hidden' value='$hintojen_vaihto'>";
       echo "<span style='position:relative; top:1px;'>" . t("Vaihda myös hinnat") . "</span>";
       echo "</td></form>";
     }

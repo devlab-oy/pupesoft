@@ -119,9 +119,9 @@ if ($tee=='P') {
     // eli odottamaan loppulaskutusta
     $query = "UPDATE lasku
               SET alatila = 'J'
-              WHERE tunnus = '$otunnus'
+              WHERE tunnus    = '$otunnus'
               AND jaksotettu != 0
-              AND yhtio = '$kukarow[yhtio]'";
+              AND yhtio       = '$kukarow[yhtio]'";
     $ures  = pupe_query($query);
 
     // jos kyseessä on käteismyyntiä, tulostetaaan käteislasku

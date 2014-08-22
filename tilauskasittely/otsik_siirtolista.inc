@@ -14,11 +14,11 @@ if ($tila == '') {
 if ($toim == "VALMISTAVARASTOON" and isset($jatka) and $clearing != "" and $varasto != "") {
   //  Valmistuksia voi tehdä vain saman maan sisällä!
   $query  = "SELECT maa from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$clearing'";
-  $abures = mysql_query($query) or pupe_error($query);
+  $abures = pupe_query($query);
   $kohdev = mysql_fetch_array($abures);
 
   $query  = "SELECT maa from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$varasto'";
-  $abures = mysql_query($query) or pupe_error($query);
+  $abures = pupe_query($query);
   $lahdev = mysql_fetch_array($abures);
 
   if ($lahdev["maa"] != $kohdev["maa"]) {
@@ -57,7 +57,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
       $query = "UPDATE kuka
                 SET kesken = 0
                 WHERE session = '$session'";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
 
       $kukarow['kesken']   = 0;
       $tilausnumero     = 0;
@@ -69,7 +69,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
                  $qlisa
                  WHERE tunnus = '$kukarow[kesken]'";
     }
-    $sresult = mysql_query($squery) or pupe_error($squery);
+    $sresult = pupe_query($squery);
     $srow = mysql_fetch_array($sresult);
 
     // jos meillä on jo alatila ja tila ei muokkailla niitä!
@@ -99,7 +99,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
             FROM varastopaikat
             WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
             ORDER BY tyyppi, nimitys";
-  $vtresult = mysql_query($query) or pupe_error($query);
+  $vtresult = pupe_query($query);
 
   echo "<form method='post'>";
   echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
@@ -150,7 +150,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
                FROM varastopaikat
                WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
                ORDER BY tyyppi, nimitys";
-    $vares = mysql_query($query) or pupe_error($query);
+    $vares = pupe_query($query);
 
     while ($varow = mysql_fetch_array($vares)) {
 
@@ -294,7 +294,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
               WHERE yhtio = '$kukarow[yhtio]'
               and (sallitut_maat = '' or sallitut_maat like '%$srow[toim_maa]%')
               ORDER BY jarjestys, selite";
-    $tresult = mysql_query($query) or pupe_error($query);
+    $tresult = pupe_query($query);
 
     echo "<select name='toimitustapa'>";
 
@@ -361,12 +361,12 @@ if (isset($jatka)) {
     $query = "UPDATE tilausrivi
               SET kerayspvm = '$kervv-$kerkk-$kerpp'
               WHERE otunnus = '$kukarow[kesken]' and kerayspvm='$vkerayspvm' and yhtio='$kukarow[yhtio]'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     $query = "UPDATE tilausrivi
               SET toimaika = '$toimvv-$toimkk-$toimpp'
               WHERE otunnus = '$kukarow[kesken]' and toimaika='$vtoimaika' and yhtio='$kukarow[yhtio]'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if ($yhtiorow['valmistuksien_kasittely'] == 'Y' and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON")) {
       $query = "UPDATE tilausrivi
@@ -377,7 +377,7 @@ if (isset($jatka)) {
                 WHERE tilausrivi.otunnus                      = '{$kukarow['kesken']}'
                 AND tilausrivin_lisatiedot.positio            = '{$vvalmistuslinja}'
                 AND tilausrivi.yhtio                          = '{$kukarow['yhtio']}'";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
     }
 
     $query = "UPDATE ";
@@ -394,7 +394,7 @@ if (isset($jatka)) {
              FROM varastopaikat
              WHERE yhtio = '$kukarow[yhtio]'
              and tunnus  = '$clearing'";
-  $vtresult = mysql_query($aquery) or pupe_error($aquery);
+  $vtresult = pupe_query($aquery);
   $vtrow = mysql_fetch_array($vtresult);
 
   if ($toim_nimitark == '' and $toim_nimi == '') {
@@ -480,7 +480,7 @@ if (isset($jatka)) {
   }
 
   $query .= $postquery;
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $id = mysql_insert_id();
 
   if (!isset($nokeskupdate) and (int) $kukarow["kesken"] == 0 and $id != 0 and $id !== FALSE and $session != "") {
@@ -489,7 +489,7 @@ if (isset($jatka)) {
               WHERE yhtio = '$kukarow[yhtio]' AND
               kuka        = '$kukarow[kuka]' AND
               session     = '$session'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     $kukarow["kesken"] = $id;
     $tilausnumero = $id;
@@ -525,7 +525,7 @@ if (isset($jatka)) {
           viite       = '$viite',
           otunnus     = '$kukarow[kesken]'";
     $query2 .= $postquery2;
-    $result = mysql_query($query2) or pupe_error($query2);
+    $result = pupe_query($query2);
   }
 
   if ($toim == 'SIIRTOLISTA' and $tilausnumero != '' and $varasto != '' and $clearing != '') {
@@ -536,7 +536,7 @@ if (isset($jatka)) {
         $query = "UPDATE kuka
                   SET kesken=0
                   WHERE session = '$session'";
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
 
         $kukarow['kesken']   = 0;
         $tilausnumero     = 0;

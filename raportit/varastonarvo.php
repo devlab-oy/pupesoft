@@ -109,7 +109,7 @@ $query  = "SELECT tunnus, nimitys
            WHERE yhtio = '$kukarow[yhtio]'
            $piilotetut_varastot_where
            ORDER BY tyyppi, nimitys";
-$vares = mysql_query($query) or pupe_error($query);
+$vares = pupe_query($query);
 
 while ($varow = mysql_fetch_array($vares)) {
   $sel = '';
@@ -223,7 +223,7 @@ if (isset($ajetaan)) {
             and tuotepaikat.saldo                           <> 0
             $groupby
             $orderby";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<table>";
 
@@ -288,7 +288,7 @@ if (isset($ajetaan)) {
                 WHERE tuote.yhtio   = '$kukarow[yhtio]'
                 and tuote.tuoteno   in ($row[tuotteet])
                 and tuote.ei_saldoa = ''";
-      $vres = mysql_query($query) or pupe_error($query);
+      $vres = pupe_query($query);
       $vrow = mysql_fetch_assoc($vres);
 
       // haetaan tuotteen myydyt kappaleet
@@ -299,7 +299,7 @@ if (isset($ajetaan)) {
                  WHERE tuote.yhtio   = '$kukarow[yhtio]'
                  and tuote.tuoteno   in ($row[tuotteet])
                  and tuote.ei_saldoa = ''";
-      $xmyyres = mysql_query($query) or pupe_error($query);
+      $xmyyres = pupe_query($query);
       $xmyyrow = mysql_fetch_assoc($xmyyres);
 
       // lasketaan varaston kiertonopeus

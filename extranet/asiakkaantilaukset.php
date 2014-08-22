@@ -6,7 +6,7 @@ require "parametrit.inc";
 $query  = "SELECT *
            FROM asiakas
            WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 if (mysql_num_rows($result) == 1) {
   $asiakas = mysql_fetch_array($result);
@@ -36,7 +36,7 @@ if ($otunnus > 0) {
             WHERE tunnus     = '$otunnus'
             and liitostunnus = '$asiakastunnus'
             and yhtio        = '$kukarow[yhtio]' ";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $row = mysql_fetch_array($result);
 
   if ($row["laskunro"] > 0) {
@@ -49,7 +49,7 @@ elseif ($laskunro > 0) {
             WHERE laskunro='$laskunro'
             and liitostunnus = '$asiakastunnus'
             and yhtio        = '$kukarow[yhtio]' ";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $row = mysql_fetch_array($result);
 
   $laskunro = $row["laskunro"];
@@ -123,7 +123,7 @@ else {
             and luontiaika <='$vvl-$kkl-$ppl 23:59:59'
             $jarj , tila";
 }
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 if (mysql_num_rows($result)!=0) {
 

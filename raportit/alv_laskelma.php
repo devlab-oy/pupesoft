@@ -36,7 +36,7 @@ function alvlaskelma($kk, $vv) {
                 FROM tili
                 WHERE yhtio = '$kukarow[yhtio]'
                 and (alv_taso like '%$taso%' $_309lisa)";
-      $tilires = mysql_query($query) or pupe_error($query);
+      $tilires = pupe_query($query);
       $tilirow = mysql_fetch_array($tilires);
 
       $vero = 0.0;
@@ -65,7 +65,7 @@ function alvlaskelma($kk, $vv) {
         $query .= "  )
               AND tiliointi.tapvm >= '$startmonth'
               AND tiliointi.tapvm <= '$endmonth'";
-        $verores = mysql_query($query) or pupe_error($query);
+        $verores = pupe_query($query);
 
         while ($verorow = mysql_fetch_array($verores)) {
           if ($tulos == '22') $tulos = 'veronmaara';
@@ -90,7 +90,7 @@ function alvlaskelma($kk, $vv) {
     $query = "SELECT group_concat(concat(\"'\",tilino,\"'\")) tilit
               FROM tili
               WHERE yhtio = '$kukarow[yhtio]' and alv_taso like '%fi300%'";
-    $tilires = mysql_query($query) or pupe_error($query);
+    $tilires = pupe_query($query);
 
     $fi201 = 0.0;
     $fi202 = 0.0;
@@ -108,7 +108,7 @@ function alvlaskelma($kk, $vv) {
                 AND tapvm    <= '$endmonth'
                 AND vero     > 0
                 GROUP BY vero";
-      $verores = mysql_query($query) or pupe_error($query);
+      $verores = pupe_query($query);
 
       while ($verorow = mysql_fetch_array($verores)) {
         //        echo "$verorow[vero] $verorow[kpl] / ";
@@ -205,7 +205,7 @@ function alvlaskelma($kk, $vv) {
               AND tiliointi.tilino   = '$yhtiorow[alv]'
               AND tiliointi.tapvm    >= '$startmonth'
               AND tiliointi.tapvm    <= '$endmonth'";
-    $verores = mysql_query($query) or pupe_error($query);
+    $verores = pupe_query($query);
     $verorow = mysql_fetch_array($verores);
 
     echo "<table>";
@@ -337,7 +337,7 @@ if ($tee == 'VSRALVKK_VANHA_erittele') {
             ifnull(group_concat(if(alv_taso not like '%fi300%', concat(\"'\",tilino,\"'\"), NULL)), '') tilitMUU
             FROM tili
             WHERE yhtio = '$kukarow[yhtio]' and alv_taso like '%$taso'";
-  $tilires = mysql_query($query) or pupe_error($query);
+  $tilires = pupe_query($query);
   $tilirow = mysql_fetch_array($tilires);
 
   if ($tilirow['tilit300'] != '' or $tilirow['tilitMUU'] != '') {
@@ -391,7 +391,7 @@ if ($tee == 'VSRALVKK_VANHA_erittele') {
     $query .= "  )
           GROUP BY 1, 2, 3, 4, 5
           ORDER BY maa, valuutta, vero, tilino, nimi";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     echo "<table><tr>";
     echo "<th valign='top'>" . t("Maa") . "</th>";
@@ -469,7 +469,7 @@ if ($tee == 'VSRALVKK_VANHA_erittele') {
       $query = "SELECT group_concat(concat(\"'\",tilino,\"'\")) tilit
                 FROM tili
                 WHERE yhtio = '$kukarow[yhtio]' and alv_taso in ('fi305', 'fi306')";
-      $tilires = mysql_query($query) or pupe_error($query);
+      $tilires = pupe_query($query);
       $tilirow = mysql_fetch_array($tilires);
 
       $vero = 0.0;
@@ -482,7 +482,7 @@ if ($tee == 'VSRALVKK_VANHA_erittele') {
                   AND tilino   in ($tilirow[tilit])
                   AND tapvm    >= '$alkupvm'
                   AND tapvm    <= '$loppupvm'";
-        $verores = mysql_query($query) or pupe_error($query);
+        $verores = pupe_query($query);
 
         while ($verorow = mysql_fetch_array($verores)) {
           $vero += $verorow['veronmaara'];

@@ -12,7 +12,7 @@ if (mysql_field_name($result, $i) == "piiri") {
   $preq = "SELECT avainsana.selite piiri, avainsana.selitetark selitetark
            FROM avainsana
            WHERE  avainsana.yhtio='$kukarow[yhtio]' and avainsana.laji='piiri'";
-  $preres = mysql_query($preq) or pupe_error($preq);
+  $preres = pupe_query($preq);
 
   $ulos = "<td><select id='piiri' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
   $ulos .= "<option value = ''>".t("Ei piiri‰")."</option>";
@@ -39,7 +39,7 @@ if (mysql_field_name($result, $i) == "asiakas_segmentti") {
            AND node.laji    = 'asiakas'
            GROUP BY node.tunnus
            ORDER BY node.lft";
-  $preres = mysql_query($preq) or pupe_error($preq);
+  $preres = pupe_query($preq);
 
   $ulos = "<td><select id='asiakas_segmentti' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
   $ulos .= "<option value=''>".t("Ei asiakassegmentti‰")."</option>";
@@ -61,7 +61,7 @@ if (mysql_field_name($result, $i) == "ryhma") {
             FROM perusalennus
             WHERE yhtio='$kukarow[yhtio]'
             ORDER BY ryhma";
-  $sresult = mysql_query($query) or pupe_error($query);
+  $sresult = pupe_query($query);
 
   $ulos = "<td><select id='ryhma' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
   $ulos .= "<option value = ''>".t("Ei ryhm‰‰")."</option>";
@@ -142,7 +142,7 @@ elseif (mysql_field_name($result, $i) == "asiakas") {
     $query  = "SELECT *
                FROM asiakas
                WHERE yhtio='$kukarow[yhtio]' and tunnus='$trow[$i]'";
-    $sresult = mysql_query($query) or pupe_error($query);
+    $sresult = pupe_query($query);
     $srow = mysql_fetch_array($sresult);
     $ssize = strlen($trow[$i])+2;
 

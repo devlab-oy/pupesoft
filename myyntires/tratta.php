@@ -59,7 +59,7 @@ if ($tee == "ALOITATRATTAAMINEN") {
     $query = "SELECT *
               FROM factoring
               WHERE yhtio = '$kukarow[yhtio]' and tunnus=$ktunnus";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
       $factoringrow = mysql_fetch_array($result);
@@ -67,7 +67,7 @@ if ($tee == "ALOITATRATTAAMINEN") {
       $query = "SELECT GROUP_CONCAT(tunnus) karhuttavat
                 FROM maksuehto
                 WHERE yhtio = '$kukarow[yhtio]' and factoring = '$factoringrow[factoringyhtio]' $maa_lisa";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
         $maksuehdotrow = mysql_fetch_array($result);
@@ -83,7 +83,7 @@ if ($tee == "ALOITATRATTAAMINEN") {
     $query = "SELECT GROUP_CONCAT(tunnus) karhuttavat
               FROM maksuehto
               WHERE yhtio = '$kukarow[yhtio]' and factoring = '' $maa_lisa";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
       $maksuehdotrow = mysql_fetch_array($result);
@@ -94,7 +94,7 @@ if ($tee == "ALOITATRATTAAMINEN") {
   $query = "SELECT GROUP_CONCAT(distinct concat('\'',ovttunnus,'\'')) konsrernyhtiot
             FROM yhtio
             WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   $konslisa = "";
   if (mysql_num_rows($result) > 0) {
@@ -135,7 +135,7 @@ if ($tee == "ALOITATRATTAAMINEN") {
             $asiakaslisa
             GROUP BY asiakas.ytunnus, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp
             ORDER BY lasku.ytunnus";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
     $tratattavat = array();
@@ -172,7 +172,7 @@ if ($tee == 'TRATTAA') {
             and lasku.tunnus  in ($tratattavat[0])
             GROUP BY lasku.tunnus
             ORDER BY lasku.erpcm";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   //otetaan asiakastiedot ekalta laskulta
   $asiakastiedot = mysql_fetch_array($result);
@@ -186,7 +186,7 @@ if ($tee == 'TRATTAA') {
             FROM asiakas
             WHERE yhtio = '$kukarow[yhtio]'
             and tunnus  = '$asiakastiedot[liitostunnus]'";
-  $asiakasresult = mysql_query($query) or pupe_error($query);
+  $asiakasresult = pupe_query($query);
   $asiakastiedot = mysql_fetch_array($asiakasresult);
 
   //ja kelataan akuun
@@ -230,7 +230,7 @@ if ($tee == 'TRATTAA') {
             FROM lasku
             WHERE lasku.yhtio = '$kukarow[yhtio]'
             and lasku.tunnus  in ($tratattavat[0])";
-  $lires = mysql_query($query) or pupe_error($query);
+  $lires = pupe_query($query);
   $lirow = mysql_fetch_array($lires);
 
   $query = "SELECT sum(summa) summa
@@ -239,7 +239,7 @@ if ($tee == 'TRATTAA') {
             and ltunnus        > 0
             and kohdpvm        = '0000-00-00'
             and asiakas_tunnus in ($lirow[liitokset])";
-  $summaresult = mysql_query($query) or pupe_error($query);
+  $summaresult = pupe_query($query);
   $kaato = mysql_fetch_array($summaresult);
 
   $kaatosumma=$kaato["summa"];
@@ -350,7 +350,7 @@ if ($tee == "") {
   $apuqu = "  select concat(nimitys,' ', valkoodi, ' (',sopimusnumero,')') nimi, tunnus
         from factoring
         where yhtio = '$kukarow[yhtio]'";
-  $meapu = mysql_query($apuqu) or pupe_error($apuqu);
+  $meapu = pupe_query($apuqu);
 
   if (mysql_num_rows($meapu) > 0) {
 
@@ -371,7 +371,7 @@ if ($tee == "") {
   $apuqu = "SELECT distinct sallitut_maat
             from maksuehto
             where yhtio = '$kukarow[yhtio]' and sallitut_maat != ''";
-  $meapu = mysql_query($apuqu) or pupe_error($apuqu);
+  $meapu = pupe_query($apuqu);
 
   if (mysql_num_rows($meapu) > 0) {
 
@@ -395,7 +395,7 @@ if ($tee == "") {
               FROM maat
               where nimi != '' $maa_lisa
               ORDER BY koodi";
-    $meapu = mysql_query($query) or pupe_error($query);
+    $meapu = pupe_query($query);
 
     while ($row = mysql_fetch_array($meapu)) {
       $sel = '';
@@ -414,7 +414,7 @@ if ($tee == "") {
   $apuqu = "  select kuka, nimi, puhno, eposti, tunnus
         from kuka
         where yhtio='$kukarow[yhtio]' and nimi!='' and puhno!='' and eposti!='' and extranet=''";
-  $meapu = mysql_query($apuqu) or pupe_error($apuqu);
+  $meapu = pupe_query($apuqu);
 
   echo "<tr><th>".t("Yhteyshenkilö").":</th>";
   echo "<td><select name='yhteyshenkilo'>";

@@ -46,22 +46,22 @@ if (isset($teerappari)) {
   if ($naytalaskut == 1) {
     echo "<table>";
     echo "<tr>";
-    echo "<th>",t("Laskunro"),"</th>";
-    echo "<th>",t("Asiakas"),"</th>";
-    echo "<th>",t("Summa"),"</th>";
-    echo "<th>",t("Kanava"),"</th>";
-    echo "<th>",t("Operaattori"),"</th>";
+    echo "<th>", t("Laskunro"), "</th>";
+    echo "<th>", t("Asiakas"), "</th>";
+    echo "<th>", t("Summa"), "</th>";
+    echo "<th>", t("Kanava"), "</th>";
+    echo "<th>", t("Operaattori"), "</th>";
     echo "</tr>";
   }
 
-  $query  = " SELECT lasku.*
-              FROM lasku
-              WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
-              AND lasku.tila     = 'U'
-              AND lasku.alatila  = 'X'
-              AND lasku.laskutettu >= '$vv-$kk-$pp 00:00:00'
-              AND lasku.laskutettu <= '$vv-$kk-$pp 23:59:59'
-              ORDER BY lasku.laskunro";
+  $query  = "SELECT lasku.*
+             FROM lasku
+             WHERE lasku.yhtio    = '{$kukarow['yhtio']}'
+             AND lasku.tila       = 'U'
+             AND lasku.alatila    = 'X'
+             AND lasku.laskutettu >= '$vv-$kk-$pp 00:00:00'
+             AND lasku.laskutettu <= '$vv-$kk-$pp 23:59:59'
+             ORDER BY lasku.laskunro";
   $lasres = pupe_query($query);
 
   $operaattorille = 0;
@@ -69,10 +69,10 @@ if (isset($teerappari)) {
 
   while ($lasrow = mysql_fetch_assoc($lasres)) {
 
-    $query  = " SELECT *
-                FROM maksuehto
-                WHERE maksuehto.yhtio = '{$kukarow['yhtio']}'
-                AND maksuehto.tunnus  = '{$lasrow['maksuehto']}'";
+    $query  = "SELECT *
+               FROM maksuehto
+               WHERE maksuehto.yhtio = '{$kukarow['yhtio']}'
+               AND maksuehto.tunnus  = '{$lasrow['maksuehto']}'";
     $masres = pupe_query($query);
     $masrow = mysql_fetch_assoc($masres);
 
@@ -103,26 +103,26 @@ if (isset($teerappari)) {
           echo t("FTP-siirto");
         }
         elseif ($yhtiorow['verkkolasku_lah'] == 'iPost') {
-          echo "<font class='ok'>",t("Finvoice iPost"),"</font>";
+          echo "<font class='ok'>", t("Finvoice iPost"), "</font>";
           $operaattorille++;
         }
         elseif ($yhtiorow['verkkolasku_lah'] == 'apix') {
-          echo "<font class='ok'>",t("Apix-verkkolaskut"),"</font>";
+          echo "<font class='ok'>", t("Apix-verkkolaskut"), "</font>";
           $operaattorille++;
         }
         elseif ($yhtiorow['verkkolasku_lah'] == 'finvoice') {
           echo t("Finvoice");
         }
         elseif ($yhtiorow['verkkolasku_lah'] == 'maventa') {
-          echo "<font class='ok'>",t("Maventa-verkkolaskut"),"</font>";
+          echo "<font class='ok'>", t("Maventa-verkkolaskut"), "</font>";
           $operaattorille++;
         }
         elseif ($yhtiorow['verkkolasku_lah'] == 'servinet') {
-          echo "<font class='ok'>",t("Pupevoice Servinet"),"</font>";
+          echo "<font class='ok'>", t("Pupevoice Servinet"), "</font>";
           $operaattorille++;
         }
         else {
-          echo "<font class='ok'>",t("Pupevoice Itella"),"</font>";
+          echo "<font class='ok'>", t("Pupevoice Itella"), "</font>";
           $operaattorille++;
         }
       }

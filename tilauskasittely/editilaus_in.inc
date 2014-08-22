@@ -579,10 +579,10 @@ while ($tietue = fgets($fd)) {
     if (isset($crossdock911) and $tunnus == "NADCN") {
       // Tarkistetaan onko kyseessä koontikuljetuskeissi
       // haetaan toimitustavan tiedot tiedot
-      $toimiq = " SELECT *
-                  FROM toimitustapa
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND selite  = '$arow[toimitustapa]'";
+      $toimiq = "SELECT *
+                 FROM toimitustapa
+                 WHERE yhtio = '$kukarow[yhtio]'
+                 AND selite  = '$arow[toimitustapa]'";
       $toimir = pupe_query($toimiq);
       $toimiro = mysql_fetch_assoc($toimir);
 
@@ -1018,10 +1018,10 @@ while ($tietue = fgets($fd)) {
       $editilaus_otsikko_ok = "KYLLA";
 
       // haetaan tomitustavan oletusmaksajan tiedot
-      $apuqu = "  SELECT *
-                  FROM toimitustapa
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND selite  = '$arow[toimitustapa]'";
+      $apuqu = "SELECT *
+                FROM toimitustapa
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND selite  = '$arow[toimitustapa]'";
       $meapu = pupe_query($apuqu);
       $apuro = mysql_fetch_assoc($meapu);
 
@@ -1423,10 +1423,10 @@ while ($tietue = fgets($fd)) {
       $edi_ulos .= t("Tilausnumero")." $id\n\n";
 
       // haetaan tilauksen tiedot
-      $query    = " SELECT *
-                    FROM lasku
-                    WHERE tunnus = '$id'
-                    AND yhtio    = '$kukarow[yhtio]'";
+      $query    = "SELECT *
+                   FROM lasku
+                   WHERE tunnus = '$id'
+                   AND yhtio    = '$kukarow[yhtio]'";
       $result   = pupe_query($query);
       $laskurow = mysql_fetch_assoc($result);
 

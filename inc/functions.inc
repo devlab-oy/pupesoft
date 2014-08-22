@@ -26526,25 +26526,25 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
               FROM lasku USE INDEX (yhtio_tila_mapvm)
               JOIN asiakas
               ON ( asiakas.yhtio = lasku.yhtio
-                AND asiakas.tunnus     = lasku.liitostunnus
+                AND asiakas.tunnus                   = lasku.liitostunnus
                 AND asiakas.kauppatapahtuman_luonne != 21
                 {$asiakas_join} )
               JOIN tiliointi USE INDEX (tositerivit_index)
               ON ( tiliointi.yhtio = lasku.yhtio
-                AND tiliointi.ltunnus  = lasku.tunnus
-                AND tiliointi.korjattu = ''
-                AND tiliointi.tapvm    <= '{$request['paiva']}'
-                AND tiliointi.tilino   IN ('{$yhtiorow['myyntisaamiset']}', '{$yhtiorow['factoringsaamiset']}', '{$yhtiorow['konsernimyyntisaamiset']}') )
-              WHERE lasku.yhtio        = '{$kukarow['yhtio']}'
+                AND tiliointi.ltunnus                = lasku.tunnus
+                AND tiliointi.korjattu               = ''
+                AND tiliointi.tapvm                  <= '{$request['paiva']}'
+                AND tiliointi.tilino                 IN ('{$yhtiorow['myyntisaamiset']}', '{$yhtiorow['factoringsaamiset']}', '{$yhtiorow['konsernimyyntisaamiset']}') )
+              WHERE lasku.yhtio                      = '{$kukarow['yhtio']}'
               {$lasku_where}
               AND (
-                  lasku.mapvm          > '{$request['paiva']}'
-                  OR lasku.mapvm       = '0000-00-00'
+                  lasku.mapvm                        > '{$request['paiva']}'
+                  OR lasku.mapvm                     = '0000-00-00'
                 )
-              AND lasku.tapvm          <= '{$request['paiva']}'
-              AND lasku.tapvm          > '0000-00-00'
-              AND lasku.tila           = 'U'
-              AND lasku.alatila        = 'X'
+              AND lasku.tapvm                        <= '{$request['paiva']}'
+              AND lasku.tapvm                        > '0000-00-00'
+              AND lasku.tila                         = 'U'
+              AND lasku.alatila                      = 'X'
               GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
               ORDER BY asiakas.toim_ovttunnus ASC,
               asiakas.ytunnus ASC,

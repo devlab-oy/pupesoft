@@ -54,14 +54,14 @@ if (isset($teerappari)) {
     echo "</tr>";
   }
 
-  $query  = " SELECT lasku.*
-              FROM lasku
-              WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
-              AND lasku.tila     = 'U'
-              AND lasku.alatila  = 'X'
-              AND lasku.laskutettu >= '$vv-$kk-$pp 00:00:00'
-              AND lasku.laskutettu <= '$vv-$kk-$pp 23:59:59'
-              ORDER BY lasku.laskunro";
+  $query  = "SELECT lasku.*
+             FROM lasku
+             WHERE lasku.yhtio    = '{$kukarow['yhtio']}'
+             AND lasku.tila       = 'U'
+             AND lasku.alatila    = 'X'
+             AND lasku.laskutettu >= '$vv-$kk-$pp 00:00:00'
+             AND lasku.laskutettu <= '$vv-$kk-$pp 23:59:59'
+             ORDER BY lasku.laskunro";
   $lasres = pupe_query($query);
 
   $operaattorille = 0;
@@ -69,10 +69,10 @@ if (isset($teerappari)) {
 
   while ($lasrow = mysql_fetch_assoc($lasres)) {
 
-    $query  = " SELECT *
-                FROM maksuehto
-                WHERE maksuehto.yhtio = '{$kukarow['yhtio']}'
-                AND maksuehto.tunnus  = '{$lasrow['maksuehto']}'";
+    $query  = "SELECT *
+               FROM maksuehto
+               WHERE maksuehto.yhtio = '{$kukarow['yhtio']}'
+               AND maksuehto.tunnus  = '{$lasrow['maksuehto']}'";
     $masres = pupe_query($query);
     $masrow = mysql_fetch_assoc($masres);
 

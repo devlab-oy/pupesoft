@@ -758,7 +758,7 @@ if ($tee2 == '') {
             varastopaikat.nimitys,
             lasku.tulostusalue,
             varastopaikat.yhtio";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
 

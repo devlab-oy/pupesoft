@@ -579,7 +579,7 @@ if (isset($jatka)) {
                FROM varastopaikat
                WHERE yhtio = '$kukarow[yhtio]'
                AND tunnus  = '$varasto'";
-    $vares = mysql_query($edique) or pupe_error($edique);
+    $vares = pupe_query($edique);
     $varow = mysql_fetch_array($vares);
 
     if ($yhtiorow['pakollinen_varasto'] == 'K' and isset($toimipiste) and (trim($toimipiste) == '' or $toimipiste == 0) and $varow['toimipaikka'] != 0) {
@@ -606,7 +606,7 @@ if (isset($jatka)) {
                FROM yhtion_toimipaikat
                WHERE yhtio = '$kukarow[yhtio]'
                AND tunnus  = '$toimipiste'";
-    $ediotr = mysql_query($edique) or pupe_error($edique);
+    $ediotr = pupe_query($edique);
     $edioro = mysql_fetch_array($ediotr);
 
     // laitetaan toimipisteen tiedot toimitusosoitteeseen jos siellä ei vielä muuta ole

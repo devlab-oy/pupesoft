@@ -352,7 +352,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
                 AND ana.laji = 'SIIRTOVARASTOT'
                 AND ana.selite = '$lahdevarasto'
                 AND ana.selitetark = '$kohdevarasto'";
-      $ttresult = mysql_query($ttqry) or pupe_error($ttqry);
+      $ttresult = pupe_query($ttqry);
 
       if (mysql_num_rows($ttresult) > 0) {
         $ttrow = mysql_fetch_assoc($ttresult);

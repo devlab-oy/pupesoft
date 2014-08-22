@@ -171,7 +171,7 @@ else {
               and tilausrivi.hyllyalue != ''
               and tilausrivi.tyyppi    != 'D'
               ORDER BY $sorttaus";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     //tässä muuttujassa on sit kaikki tunnukset splitin jälkeen
     $tvs_tilausnumerot   = array();
@@ -383,7 +383,7 @@ else {
       while ($row = mysql_fetch_array($result)) {
         $upviesti = $row["sisviesti2"]." ".t("Tilaus jakaantunut")." $montakotilausta ".t("tilaukseksi").": ".$numerot." ".t("Tilaus").": ".$tilauksia."/".$montakotilausta;
         $query = "UPDATE lasku set sisviesti2 = '$upviesti' where yhtio = '$kukarow[yhtio]' and tunnus = '$row[tunnus]'";
-        $upresult = mysql_query($query) or pupe_error($query);
+        $upresult = pupe_query($query);
         $splitatut[] = $row['tunnus'];
         $tilauksia++;
       }
@@ -468,7 +468,7 @@ else {
                     SET tila='$tvs_tila', alatila='T'
                     WHERE yhtio='$kukarow[yhtio]'
                     AND tunnus='$laskurow[tunnus]'";
-          $yresult = mysql_query($query) or pupe_error($query);
+          $yresult = pupe_query($query);
           echo "<font class='message'>";
           echo t("Siirtolista siirrettiin jälkitoimitukseksi odottamaan tuotteita") . ' ';
           echo $laskurow['tunnus'];
@@ -480,7 +480,7 @@ else {
                     SET tyyppi='D'
                     WHERE yhtio='$kukarow[yhtio]'
                     AND otunnus='$kukarow[kesken]'";
-          $result = mysql_query($query) or pupe_error($query);
+          $result = pupe_query($query);
 
           $kommentti = $kukarow['nimi'] . " " . "(" . $kukarow['kuka'] . ")" . " ";
           $kommentti .= t("mitätöi siirtolistan") . " " . date("d.m.y @ G:i:s");
@@ -488,7 +488,7 @@ else {
                     SET tila='D', alatila='$laskurow[tila]', comments='$kommentti'
                     WHERE yhtio='$kukarow[yhtio]'
                     AND tunnus='$kukarow[kesken]'";
-          $result = mysql_query($query) or pupe_error($query);
+          $result = pupe_query($query);
           echo "<font class='message'>";
           echo t("Siirtolista mitätöitiin, koska sillä ei ollut mitään kerättävää") . " ";
           echo $laskurow['tunnus'];
@@ -505,7 +505,7 @@ else {
                   WHERE yhtio = '$kukarow[yhtio]'
                   and tunnus  = '$laskurow[tunnus]'
                   and tila    = '$tvs_tila'";
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
 
         if ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON") {
           echo "<font class='message'>";

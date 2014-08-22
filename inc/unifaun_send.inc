@@ -79,7 +79,7 @@ class Unifaun {
                 FROM asiakas
                 WHERE yhtio = '{$this->kukarow['yhtio']}'
                 and tunnus  = '{$this->postirow['liitostunnus']}'";
-      $asres = mysql_query($query);
+      $asres = pupe_query($query);
       $this->asiakasrow = mysql_fetch_assoc($asres);
     }
   }

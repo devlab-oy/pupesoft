@@ -169,7 +169,7 @@ if (mysql_num_rows($pakkaamore) != 0) {
               and tilausrivi.otunnus      = '$row[tunnus]'
               and tilausrivi.kerattyaika != '0000-00-00 00:00:00'
               and tilausrivi.var          not in ('P','J','O','S')";
-    $kerayspvmres = mysql_query($query) or pupe_error($query);
+    $kerayspvmres = pupe_query($query);
     $kerayspvmrow = mysql_fetch_array($kerayspvmres);
 
     echo "<td>".$row['ytunnus']."</td>";

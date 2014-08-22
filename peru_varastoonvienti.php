@@ -228,7 +228,7 @@ if ($id != 0) {
                       AND tyyppi  != 'P'
                       order by alkuhyllyalue, alkuhyllynro
                       limit 1";
-            $korjres = mysql_query($query) or pupe_error($query);
+            $korjres = pupe_query($query);
             $hyllyrow = mysql_fetch_array($korjres);
 
             echo "<br><font class='error'>".t("Tehtiin oletuspaikka")." $rivirow[tuoteno]: $rivirow[alkuhyllyalue] $rivirow[alkuhyllynro] 0 0</font><br><br>";

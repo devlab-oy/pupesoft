@@ -110,7 +110,7 @@ if (!function_exists("tulosta_tilaustuotetarrat")) {
                       WHERE varastopaikat.yhtio     = '$kukarow[yhtio]'
                       and varastopaikat.printteri2 != ''
                       AND varastopaikat.tunnus      = {$row["varasto"]}";
-            $kirres = mysql_query($query) or pupe_error($query);
+            $kirres = pupe_query($query);
             $kirrow = mysql_fetch_array($kirres);
             $arvaakirjoitin[$kirrow["printteri2"]]++;
           }

@@ -309,11 +309,11 @@ if ($temp_asiakasno != '' or $asiakasno != '') {
 
 // aika karseeta, mutta katotaan voidaanko tällästä optiota näyttää yks tosi firma specific juttu
 $query = "describe yhteensopivuus_rekisteri";
-$res = mysql_query($query);
+$res = pupe_query($query);
 
 if (mysql_error() == "") {
   $query = "select count(*) kpl from yhteensopivuus_rekisteri where yhtio='$kukarow[yhtio]'";
-  $res = mysql_query($query);
+  $res = pupe_query($query);
   $row = mysql_fetch_assoc($res);
   if ($row["kpl"] > 0) {
     $sarakkeet["SARAKE64"] = "Rekisteröidyt kpl\t";

@@ -1,7 +1,7 @@
 $(document).ready(function() {
 
   $('#hintojen_vaihto').on('change', function() {
-    $('#hv_hidden').val( this.checked ? 'JOO' : 'EI' );
+    $('.hv_hidden').val( this.checked ? 'JOO' : 'EI' );
   });
 
   $('#hae_asiakasta_hintavaihto_cb').on('change', function() {

@@ -1,6 +1,6 @@
 <?php
 
-// lisÃ¤tÃ¤Ã¤n includepathiin pupe-root
+// lisätään includepathiin pupe-root
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
 error_reporting(E_ALL);
 ini_set("display_errors", 1);
@@ -11,14 +11,14 @@ require "inc/functions.inc";
 
 function alv_update_lisaa_avainsanat($query_where_lisa = "") {
 
-  // Loopataan lÃ¤pi kaikki asennuksen suomalaiset yhtiot
+  // Loopataan läpi kaikki asennuksen suomalaiset yhtiot
   $query = "SELECT yhtio
             FROM yhtio
             WHERE maa = 'FI'
             $query_where_lisa";
-  $yhtio_result = mysql_query($query) or die($query);
+  $yhtio_result = pupe_query($query);
 
-  // LisÃ¤tÃ¤Ã¤n uuset verokannat
+  // Lisätään uuset verokannat
   while ($row = mysql_fetch_assoc($yhtio_result)) {
 
     $yhtio = $row['yhtio'];
@@ -26,14 +26,14 @@ function alv_update_lisaa_avainsanat($query_where_lisa = "") {
 
     echo date("H:i:s d.m.Y"), ": Avainsanat yritykselle $yhtio\n";
 
-    // Poistetaan uuden alvit jos kÃ¤yttÃ¤jÃ¤t on itse lisÃ¤nnyt niitÃ¤
+    // Poistetaan uuden alvit jos käyttäjät on itse lisännyt niitä
     $query = "DELETE from avainsana
               where yhtio = '$yhtio'
               and laji    = 'ALV'
               and selite  in ('10', '14', '24')";
     $result = pupe_query($query);
 
-    // LisÃ¤tÃ¤Ã¤n 10 verokanta
+    // Lisätään 10 verokanta
     $query = "INSERT into avainsana SET
               yhtio      = '$yhtio',
               kieli      = 'fi',
@@ -44,7 +44,7 @@ function alv_update_lisaa_avainsanat($query_where_lisa = "") {
               luontiaika = now()";
     $result = pupe_query($query);
 
-    // LisÃ¤tÃ¤Ã¤n 14 verokanta
+    // Lisätään 14 verokanta
     $query = "INSERT into avainsana SET
               yhtio      = '$yhtio',
               kieli      = 'fi',
@@ -55,7 +55,7 @@ function alv_update_lisaa_avainsanat($query_where_lisa = "") {
               luontiaika = now()";
     $result = pupe_query($query);
 
-    // LisÃ¤tÃ¤Ã¤n 24 verokanta
+    // Lisätään 24 verokanta
     $query = "INSERT into avainsana SET
               yhtio      = '$yhtio',
               kieli      = 'fi',
@@ -66,7 +66,7 @@ function alv_update_lisaa_avainsanat($query_where_lisa = "") {
               luontiaika = now()";
     $result = pupe_query($query);
 
-    // Poistetaan oletus verokanta ja pÃ¤ivitetÃ¤Ã¤n perheet
+    // Poistetaan oletus verokanta ja päivitetään perheet
     $query = "UPDATE avainsana SET
               selitetark  = '',
               perhe       = tunnus
@@ -74,7 +74,7 @@ function alv_update_lisaa_avainsanat($query_where_lisa = "") {
               and laji    = 'ALV'";
     $result = pupe_query($query);
 
-    // PÃ¤ivitetÃ¤Ã¤n uusi oletusverokanta
+    // Päivitetään uusi oletusverokanta
     $query = "UPDATE avainsana SET
               selitetark  = 'o'
               where yhtio = '$yhtio'
@@ -86,14 +86,14 @@ function alv_update_lisaa_avainsanat($query_where_lisa = "") {
 
 function alv_update_paivita_tuote_ja_asiakas($query_where_lisa = "") {
 
-  // Loopataan lÃ¤pi kaikki asennuksen suomalaiset yhtiot
+  // Loopataan läpi kaikki asennuksen suomalaiset yhtiot
   $query = "SELECT yhtio
             FROM yhtio
             WHERE maa = 'FI'
             $query_where_lisa";
-  $yhtio_result = mysql_query($query) or die($query);
+  $yhtio_result = pupe_query($query);
 
-  // LisÃ¤tÃ¤Ã¤n uuset verokannat
+  // Lisätään uuset verokannat
   while ($row = mysql_fetch_assoc($yhtio_result)) {
 
     $yhtio = $row['yhtio'];
@@ -136,14 +136,14 @@ function alv_update_paivita_tuote_ja_asiakas($query_where_lisa = "") {
 
 function alv_update_paivita_avoimet($query_where_lisa = "") {
 
-  // Loopataan lÃ¤pi kaikki asennuksen suomalaiset yhtiot
+  // Loopataan läpi kaikki asennuksen suomalaiset yhtiot
   $query = "SELECT yhtio
             FROM yhtio
             WHERE maa = 'FI'
             $query_where_lisa";
-  $yhtio_result = mysql_query($query) or die($query);
+  $yhtio_result = pupe_query($query);
 
-  // pÃ¤ivitetÃ¤Ã¤n uudet verokannat
+  // päivitetään uudet verokannat
   while ($row = mysql_fetch_assoc($yhtio_result)) {
 
     $yhtio = $row['yhtio'];
@@ -165,7 +165,7 @@ function alv_update_paivita_avoimet($query_where_lisa = "") {
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
-    // YllÃ¤pitosopimus
+    // Ylläpitosopimus
     $query = "UPDATE tilausrivi
               JOIN lasku on (lasku.yhtio = tilausrivi.yhtio
                 AND lasku.tunnus      = tilausrivi.otunnus
@@ -178,7 +178,7 @@ function alv_update_paivita_avoimet($query_where_lisa = "") {
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
-    // TyÃ¶mÃ¤Ã¤rÃ¤ys, Reklamaatio, Myyntitilaus, Myyntitilaus kesken, Ennakkotilaus, Tallennettu web-tilaus/tarjous
+    // Työmääräys, Reklamaatio, Myyntitilaus, Myyntitilaus kesken, Ennakkotilaus, Tallennettu web-tilaus/tarjous
     $query = "UPDATE tilausrivi
               JOIN lasku on (lasku.yhtio = tilausrivi.yhtio
                 AND lasku.tunnus             = tilausrivi.otunnus
@@ -226,18 +226,18 @@ function alv_update_paivita_avoimet($query_where_lisa = "") {
 
 function alv_update_paivita_hinnat($query_where_lisa = "") {
 
-  // HUOM!! TÃ¤mÃ¤ funktio olettaa, ettÃ¤ tuotteiden verokantaa EI OLE vielÃ¤ pÃ¤ivitetty!
+  // HUOM!! Tämä funktio olettaa, että tuotteiden verokantaa EI OLE vielä päivitetty!
 
-  // Loopataan lÃ¤pi kaikki asennuksen suomalaiset yhtiot, joilla on verolliset myyntihinnat
+  // Loopataan läpi kaikki asennuksen suomalaiset yhtiot, joilla on verolliset myyntihinnat
   $query = "SELECT yhtio.yhtio
             FROM yhtio
             JOIN yhtion_parametrit on (yhtion_parametrit.yhtio = yhtio.yhtio
               AND yhtion_parametrit.alv_kasittely = '')
             WHERE yhtio.maa                       = 'FI'
             $query_where_lisa";
-  $yhtio_result = mysql_query($query) or die($query);
+  $yhtio_result = pupe_query($query);
 
-  // LisÃ¤tÃ¤Ã¤n uuset verokannat
+  // Lisätään uuset verokannat
   while ($row = mysql_fetch_assoc($yhtio_result)) {
 
     $yhtio = $row['yhtio'];
@@ -300,7 +300,7 @@ function alv_update_paivita_hinnat($query_where_lisa = "") {
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
-    // Oletetaan, ettÃ¤ toimitustapojen JV-kulut ovat alv 23% (pyÃ¶ristys aina kaksi)
+    // Oletetaan, että toimitustapojen JV-kulut ovat alv 23% (pyöristys aina kaksi)
     $query = "UPDATE toimitustapa set
               toimitustapa.jvkulu      = round(toimitustapa.jvkulu / 1.23 * 1.24, 2)
               WHERE toimitustapa.yhtio = '$yhtio'";
@@ -337,7 +337,7 @@ function alv_update_paivita_hinnat($query_where_lisa = "") {
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
-    // HUOM!! Oletetaan, ettÃ¤ kaikki asiakashinnat, jota ei olla liitetty tuotteisiin on 23%
+    // HUOM!! Oletetaan, että kaikki asiakashinnat, jota ei olla liitetty tuotteisiin on 23%
     $query = "UPDATE asiakashinta set
               asiakashinta.hinta       = round(asiakashinta.hinta / 1.23 * 1.24, {$yhtiorow['hintapyoristys']})
               WHERE asiakashinta.yhtio = '$yhtio'
@@ -345,14 +345,14 @@ function alv_update_paivita_hinnat($query_where_lisa = "") {
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
-    // HUOM!! Oletetaan, ettÃ¤ kaikki rahtimaksut on 23% (pyÃ¶ristys aina kaksi)
+    // HUOM!! Oletetaan, että kaikki rahtimaksut on 23% (pyöristys aina kaksi)
     $query = "UPDATE rahtimaksut set
               rahtimaksut.rahtihinta  = round(rahtimaksut.rahtihinta / 1.23 * 1.24, 2)
               WHERE rahtimaksut.yhtio = '$yhtio'";
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
-    // HUOM!! Oletetaan, ettÃ¤ rajasummat ovat 23%
+    // HUOM!! Oletetaan, että rajasummat ovat 23%
     $query = "UPDATE yhtion_parametrit set
               yhtion_parametrit.suoratoim_ulkomaan_alarajasumma        = round(yhtion_parametrit.suoratoim_ulkomaan_alarajasumma / 1.23 * 1.24, 2),
               yhtion_parametrit.erikoisvarastomyynti_alarajasumma      = round(yhtion_parametrit.erikoisvarastomyynti_alarajasumma / 1.23 * 1.24, 2),
@@ -368,7 +368,7 @@ function alv_update_paivita_hinnat($query_where_lisa = "") {
     $result = pupe_query($query);
     $update_count += mysql_affected_rows();
 
-    // HUOM!! Oletetaan ettÃ¤ asiakkaan rajasumma on 23%
+    // HUOM!! Oletetaan että asiakkaan rajasumma on 23%
     $query = "UPDATE asiakas set
               asiakas.rahtivapaa_alarajasumma = round(asiakas.rahtivapaa_alarajasumma / 1.23 * 1.24, 2)
               WHERE asiakas.yhtio             = '$yhtio'";
@@ -382,18 +382,18 @@ function alv_update_paivita_hinnat($query_where_lisa = "") {
 echo "\n";
 echo date("H:i:s d.m.Y"), ": Aloitetaan alv-update\n";
 
-// LisÃ¤tÃ¤Ã¤n uudet verokannat (kaikille)
+// Lisätään uudet verokannat (kaikille)
 // alv_update_lisaa_avainsanat();
 
-// Nostetaan hintoja, mikÃ¤li kÃ¤ytÃ¶ssÃ¤ on verolliset myyntihinnat
-// HUOM1! TÃ¤mÃ¤ pitÃ¤Ã¤ ajaa ennenkuin tuotteet pÃ¤ivitetÃ¤Ã¤n!
-// HUOM2! TÃ¤mÃ¤ EI nosta tuotteiden myyntihintoja avoimilta tilauksilta, tarjouksilta, sopimuksilta, jne...
+// Nostetaan hintoja, mikäli käytössä on verolliset myyntihinnat
+// HUOM1! Tämä pitää ajaa ennenkuin tuotteet päivitetään!
+// HUOM2! Tämä EI nosta tuotteiden myyntihintoja avoimilta tilauksilta, tarjouksilta, sopimuksilta, jne...
 // alv_update_paivita_hinnat("and yhtio.yhtio in ('mast', 'flmar')");
 
-// PÃ¤ivitetÃ¤Ã¤n tuotteiden ja asiakkaiden oletus alv
+// Päivitetään tuotteiden ja asiakkaiden oletus alv
 // alv_update_paivita_tuote_ja_asiakas("and yhtio.yhtio in ('savt', 'allr', 'mast', 'flmar', 'colly', 'vipme', 'oga', 'tkp', 'maant', 'harda', 'makia', 'mmg', 'tawas', 'digi', 'optra', 'vizu', 'ota', 'resta', 'mara ', 'osuus', 'jarj ', 'henri', 'etela', 'suome', 'kahvi', 'matka', 'signa', 'srs', 'kike', 'kikes', 'artr', 'atarv', 'turva', 'asifi', 'merca', 'mertr', 'kiilt', '1', '2', 'aino', 'datap', 'demo', 'demo9', 'gift', 'hanki', 'hasse', 'iadv2', 'iadve', 'ieasy', 'ielon', 'ifinn', 'ifunh', 'iguar', 'ihoht', 'iholm', 'ihuon', 'iinte', 'ileca', 'ilii2', 'iliik', 'imapi', 'ipoin', 'ispee', 'itime', 'iunel', 'ivend', 'kaupp', 'khaal', 'kolma', 'kunta', 'kyyti', 'liima', 'media', 'moope', 'myyra', 'nelio', 'orien', 'pankk', 'posti', 'prii', 'roiko', 'saik', 'saikk', 'tadfl', 'tanto', 'tarom', 'tclem', 'tclus', 'tcoce', 'tekof', 'teles', 'terv.', 'tfeim', 'tgift', 'tgrav', 'tideo', 'tinno', 'tjoba', 'tkalu', 'tkoko', 'tkybi', 'tmaal', 'tmaka', 'tmapp', 'tmeri', 'tmydr', 'tnice', 'todec', 'toffi', 'tpiha', 'tpint', 'tpres', 'treil', 'tsafe', 'tseif', 'tspla', 'tsund', 'tswan', 'tsyne', 'ttert', 'ttoim', 'tturv', 'turma', 'tvest', 'twant', 'twear', 'vero', 'virta')");
 
-// PÃ¤ivitetÃ¤Ã¤n verokannat avoimilta tilauksilta, tarjouksilta, sopimuksilta, jne...
+// Päivitetään verokannat avoimilta tilauksilta, tarjouksilta, sopimuksilta, jne...
 alv_update_paivita_avoimet("and yhtio.yhtio in ('allr', 'mast', 'flmar', 'colly', 'vipme', 'oga', 'tkp', 'maant', 'harda', 'makia', 'mmg', 'tawas', 'digi', 'optra', 'vizu', 'ota', 'resta', 'mara ', 'osuus', 'jarj ', 'henri', 'etela', 'suome', 'kahvi', 'matka', 'signa', 'srs', 'kike', 'kikes', 'artr', 'atarv', 'turva', 'asifi', 'merca', 'mertr', 'kiilt', '1', '2', 'aino', 'datap', 'demo', 'demo9', 'gift', 'hanki', 'hasse', 'iadv2', 'iadve', 'ieasy', 'ielon', 'ifinn', 'ifunh', 'iguar', 'ihoht', 'iholm', 'ihuon', 'iinte', 'ileca', 'ilii2', 'iliik', 'imapi', 'ipoin', 'ispee', 'itime', 'iunel', 'ivend', 'kaupp', 'khaal', 'kolma', 'kunta', 'kyyti', 'liima', 'media', 'moope', 'myyra', 'nelio', 'orien', 'pankk', 'posti', 'prii', 'roiko', 'saik', 'saikk', 'tadfl', 'tanto', 'tarom', 'tclem', 'tclus', 'tcoce', 'tekof', 'teles', 'terv.', 'tfeim', 'tgift', 'tgrav', 'tideo', 'tinno', 'tjoba', 'tkalu', 'tkoko', 'tkybi', 'tmaal', 'tmaka', 'tmapp', 'tmeri', 'tmydr', 'tnice', 'todec', 'toffi', 'tpiha', 'tpint', 'tpres', 'treil', 'tsafe', 'tseif', 'tspla', 'tsund', 'tswan', 'tsyne', 'ttert', 'ttoim', 'tturv', 'turma', 'tvest', 'twant', 'twear', 'vero', 'virta')");
 
 echo date("H:i:s d.m.Y"), ": Valmis\n\n";

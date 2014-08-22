@@ -22,7 +22,7 @@ $query = "SELECT * FROM tiliotesaanto
           koodiselite = '$koodiselite' and
           nimitieto   = '$maksaa' and
           locate(selite, '$vientiselite') > 0";
-$tiliotesaantoresult = mysql_query($query) or pupe_error($query);
+$tiliotesaantoresult = pupe_query($query);
 
 // Jotain löytyy
 if (mysql_num_rows($tiliotesaantoresult) > 0) {
@@ -44,7 +44,7 @@ else {
             koodiselite = '$koodiselite' and
             nimitieto   = '$maksaa' and
             selite      = ''";
-  $tiliotesaantoresult = mysql_query($query) or pupe_error($query);
+  $tiliotesaantoresult = pupe_query($query);
 
   // Jotain löytyy
   if (mysql_num_rows($tiliotesaantoresult) > 0) {
@@ -65,7 +65,7 @@ else {
               koodiselite = '$koodiselite' and
               nimitieto   = '' and
               selite      = ''";
-    $tiliotesaantoresult = mysql_query($query) or pupe_error($query);
+    $tiliotesaantoresult = pupe_query($query);
 
     // Jotain löytyy
     if (mysql_num_rows($tiliotesaantoresult) > 0) {
@@ -86,7 +86,7 @@ else {
                 koodiselite = '' and
                 nimitieto   = '' and
                 selite      = ''";
-      $tiliotesaantoresult = mysql_query($query) or pupe_error($query);
+      $tiliotesaantoresult = pupe_query($query);
 
       // Jotain löytyy
       if (mysql_num_rows($tiliotesaantoresult) > 0) {
@@ -108,7 +108,7 @@ else {
                   koodiselite = '$koodiselite' and
                   nimitieto   = '' and
                   locate(selite, '$vientiselite') > 0";
-        $tiliotesaantoresult = mysql_query($query) or pupe_error($query);
+        $tiliotesaantoresult = pupe_query($query);
 
         // Jotain löytyy
         if (mysql_num_rows($tiliotesaantoresult) > 0) {

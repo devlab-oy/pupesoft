@@ -35,7 +35,7 @@ else {
 
     // hehe, näin on helpompi verrata päivämääriä
     $query  = "SELECT TO_DAYS('$vvl-$kkl-$ppl')-TO_DAYS('$vva-$kka-$ppa') ero";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
     $row    = mysql_fetch_array($result);
 
     if ($row["ero"] > 365 and $ajotapa != 'tilausauki') {
@@ -305,7 +305,7 @@ else {
       // ja sitten ajetaan itte query
       if ($query != "") {
         //echo "<pre>".str_replace("\t", " ", $query)."</pre><br>";
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
 
         $rivilimitti = 1000;
 
@@ -436,7 +436,7 @@ else {
                           and myyja   = '$row[$i]'
                           AND myyja   > 0
                           limit 1";
-                $osre = mysql_query($query) or pupe_error($query);
+                $osre = pupe_query($query);
 
                 if (mysql_num_rows($osre) == 1) {
                   $osrow = mysql_fetch_array($osre);
@@ -452,7 +452,7 @@ else {
                           and myyja   = '$row[$i]'
                           AND myyja   > 0
                           limit 1";
-                $osre = mysql_query($query) or pupe_error($query);
+                $osre = pupe_query($query);
                 if (mysql_num_rows($osre) == 1) {
                   $osrow = mysql_fetch_array($osre);
                   $row[$i] = $row[$i] ." ". $osrow['nimi'];
@@ -466,7 +466,7 @@ else {
                           FROM kustannuspaikka
                           WHERE yhtio = '$kukarow[yhtio]'
                           and tunnus  = '$row[$i]'";
-                $osre = mysql_query($query) or pupe_error($query);
+                $osre = pupe_query($query);
 
                 if (mysql_num_rows($osre) == 1) {
                   $osrow = mysql_fetch_array($osre);
@@ -632,7 +632,7 @@ else {
     $query = "SELECT *
               FROM yhtio
               WHERE $logistiikka_yhtiolisa";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     // voidaan valita listaukseen useita konserniyhtiöitä, jos käyttäjällä on "PÄIVITYS" oikeus tähän raporttiin
     if (mysql_num_rows($result) > 0 and $oikeurow['paivitys'] != "") {
@@ -786,7 +786,7 @@ else {
               WHERE yhtio = '$kukarow[yhtio]'
               AND myyja>0
               ORDER BY myyja";
-    $sresult = mysql_query($query) or pupe_error($query);
+    $sresult = pupe_query($query);
 
     echo "<select name='mul_tuotemyyja[]' multiple='TRUE' size='10' style='width:100%;'>";
 
@@ -819,7 +819,7 @@ else {
               WHERE yhtio='$kukarow[yhtio]'
               AND myyja>0
               ORDER BY myyja";
-    $sresult = mysql_query($query) or pupe_error($query);
+    $sresult = pupe_query($query);
 
     echo "<select name='mul_tuoteostaja[]' multiple='TRUE' size='10' style='width:100%;'>";
 
@@ -853,7 +853,7 @@ else {
               and kaytossa != 'E'
               and tyyppi    = 'K'
               ORDER BY koodi+0, koodi, nimi";
-    $res2  = mysql_query($query) or die($query);
+    $res2  = pupe_query($query);
 
     echo "<select name='mul_kustp[]' multiple='TRUE' size='10' style='width:100%;'>";
 
@@ -899,7 +899,7 @@ else {
                FROM varastopaikat
                WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
                ORDER BY tyyppi, nimitys";
-    $vares = mysql_query($query) or pupe_error($query);
+    $vares = pupe_query($query);
 
     echo "<select name='mul_varastot[]' multiple='TRUE' size='10' style='width:100%;'>";
 
@@ -954,7 +954,7 @@ else {
               AND aktiivinen = 1
               and extranet   = ''
               ORDER BY nimi";
-    $sresult = mysql_query($query) or pupe_error($query);
+    $sresult = pupe_query($query);
 
     echo "<select name='mul_invaaja[]' multiple='TRUE' size='10' style='width:100%;'>";
 

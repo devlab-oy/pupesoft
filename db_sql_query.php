@@ -59,7 +59,7 @@ else {
               and selite       like '{$table}.%'
               and selitetark_2 = ''
               and selitetark_3 = 'PAKOLLINEN'";
-    $al_res = mysql_query($query) or pupe_error($query);
+    $al_res = pupe_query($query);
 
     if (mysql_num_rows($al_res) > 0) {
       while ($pakollisuuden_tarkistus_rivi = mysql_fetch_assoc($al_res)) {
@@ -174,7 +174,7 @@ else {
                 WHERE $table.yhtio = '$kukarow[yhtio]'
                 $where
                 $order";
-    $result = mysql_query($sqlhaku) or pupe_error($sqlhaku);
+    $result = pupe_query($sqlhaku);
 
     echo "<font class='message'><pre>$sqlhaku</pre><br>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("riviä").".</font><br><br>";
 
@@ -255,7 +255,7 @@ else {
   echo "<table cellpadding='5'><tr><td valign='top' class='back'>";
 
   $query  = "SHOW tables FROM $dbkanta";
-  $result =  mysql_query($query);
+  $result =  pupe_query($query);
 
   while ($row = mysql_fetch_array($result)) {
 
@@ -281,7 +281,7 @@ else {
     $fields = array();
 
     $query  = "SHOW columns from $table";
-    $fieldres =  mysql_query($query);
+    $fieldres =  pupe_query($query);
 
     while ($row = mysql_fetch_array($fieldres)) {
 
@@ -299,7 +299,7 @@ else {
                 WHERE yhtio        = '$kukarow[yhtio]'
                 and avainsana.laji = 'PARAMETRI'
                 ORDER BY selite";
-      $al_res = mysql_query($query) or pupe_error($query);
+      $al_res = pupe_query($query);
 
       foreach ($kielet as $kieli) {
 
@@ -343,7 +343,7 @@ else {
               and tallennetut_parametrit.sovellus = '$_SERVER[SCRIPT_NAME]'
               and tallennetut_parametrit.data     like '%$data%'
               ORDER BY tallennetut_parametrit.nimitys";
-    $sresult = mysql_query($query) or pupe_error($query);
+    $sresult = pupe_query($query);
 
     echo "<select name='kysely' onchange='submit()'>";
     echo "<option value=''>".t("Valitse")."</option>";

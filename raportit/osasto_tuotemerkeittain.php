@@ -37,7 +37,7 @@ if ($tee == 'go') {
   $err = 0;
 
   $query  = "SELECT TO_DAYS('$vvl-$kkl-$ppl')-TO_DAYS('$vva-$kka-$ppa') ero";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $row    = mysql_fetch_array($result);
 
   if ($row["ero"] > 365) {
@@ -137,7 +137,7 @@ if ($tee == 'go') {
           $lisa2
           GROUP by tilausrivi.osasto, tuote.tuotemerkki
           ORDER BY tilausrivi.osasto, tuote.tuotemerkki";
-    $yhtresulta = mysql_query($query) or pupe_error($query);
+    $yhtresulta = pupe_query($query);
 
     if (mysql_num_rows($yhtresulta) != 0) {
 
@@ -246,7 +246,7 @@ if ($tee == 'go') {
                       and tuote.osasto            = '$yhtrow[osasto]'
                       and tuote.ei_saldoa         = ''
                       and tuote.epakurantti100pvm = '0000-00-00'";
-            $vresult = mysql_query($query) or pupe_error($query);
+            $vresult = pupe_query($query);
             $vrow = mysql_fetch_array($vresult);
 
             echo "<td align='right'><b>".str_replace(".", ",", sprintf('%.2f', $vrow["varasto"]))."</b></td>";
@@ -306,7 +306,7 @@ if ($tee == 'go') {
                     and tuote.try               = '$yhtrow[try]'
                     and tuote.ei_saldoa         = ''
                     and tuote.epakurantti100pvm = '0000-00-00'";
-          $vresult = mysql_query($query) or pupe_error($query);
+          $vresult = pupe_query($query);
           $vrow = mysql_fetch_array($vresult);
 
           echo "<td align='right'>".str_replace(".", ",", sprintf('%.2f', $vrow["varasto"]))."</td>";
@@ -403,7 +403,7 @@ if ($kukarow["extranet"] == '') {
   $query = "SELECT distinct b.nimi, a.maa
             FROM asiakas a, maat b
             WHERE a.yhtio='$kukarow[yhtio]' and a.maa = b.koodi order by 1";
-  $sresult = mysql_query($query) or pupe_error($query);
+  $sresult = pupe_query($query);
 
   echo "<select name='maa'>";
   echo "<option value=''>".t("Kaikki maat")."</option>";
@@ -424,7 +424,7 @@ if ($kukarow["extranet"] == '') {
   $query = "SELECT distinct osasto
             FROM asiakas
             WHERE yhtio='$kukarow[yhtio]' and osasto != '' order by 1";
-  $asosresult = mysql_query($query) or pupe_error($query);
+  $asosresult = pupe_query($query);
 
   echo "<select name='asos'>";
   echo "<option value=''>".t("Kaikki osastot")."</option>";

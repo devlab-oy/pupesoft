@@ -32,7 +32,7 @@ if ($toiminto == "sarjanumeronlisatiedot_popup") {
 
 // Tarkastetaan käsitelläänkö lisätietoja
 $query = "describe sarjanumeron_lisatiedot";
-$sarjatestres = mysql_query($query);
+$sarjatestres = pupe_query($query);
 
 if (mysql_error() == "") {
 

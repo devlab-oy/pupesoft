@@ -53,7 +53,7 @@ if ($tee != '') {
             and tilausrivi.var     not in ('P','J','O','S')
             and tilausrivi.tilkpl  <> tilausrivi.kpl
             ORDER BY sorttauskentta, tuoteno";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0 ) {
     echo "<table><tr>
@@ -88,7 +88,7 @@ if ($tee != '') {
                 and tuoteno = '$row[tuoteno]'
                 and tyyppi='O'
                 and varattu > 0";
-      $result2 = mysql_query($query) or pupe_error($query);
+      $result2 = pupe_query($query);
       $prow = mysql_fetch_array($result2);
 
       echo "<tr>

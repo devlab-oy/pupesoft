@@ -34,7 +34,7 @@ if (!function_exists('alku_dgd')) {
               WHERE r1.otsikkonro = '$laskurow[tunnus]'
                     AND r1.yhtio  = '$kukarow[yhtio]'
               GROUP BY 1";
-    $res = mysql_query($query) or pupe_error($query);
+    $res = pupe_query($query);
     $rahtikirjanro = mysql_fetch_assoc($res);
 
     if ($rahtikirjanro["rahtikirjanro"] != "") {

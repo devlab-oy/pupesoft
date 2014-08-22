@@ -15,7 +15,7 @@ if (!function_exists("tilauksesta_valmistustilaus")) {
               FROM lasku
               WHERE yhtio = '$kukarow[yhtio]'
               and tunnus  = '$otunnus'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
     $myytilrow = mysql_fetch_array($result);
 
     //otetaan ensin vain lisävarusteettomat tuotteet tai lisävarusteperheiden isät
@@ -29,7 +29,7 @@ if (!function_exists("tilauksesta_valmistustilaus")) {
               and tilausrivi.perheid   = 0
               and tilausrivi.perheid2  = 0
               ORDER BY tilausrivi.tunnus";
-    $lsresult = mysql_query($query) or pupe_error($query);
+    $lsresult = pupe_query($query);
 
     if (mysql_num_rows($lsresult) > 0) {
       while ($valmlisaarivi = mysql_fetch_array($lsresult)) {
@@ -55,7 +55,7 @@ if (!function_exists("tilauksesta_valmistustilaus")) {
                   and viesti        = '$viesti'
                   and left(luontiaika,10) = left(now(),10)
                   and laatija       = '$kukarow[kuka]'";
-        $jtsre = mysql_query($query) or pupe_error($query);
+        $jtsre = pupe_query($query);
 
         // ei löydy, tehdään uus otsikko
         if (mysql_num_rows($jtsre) == 0) {
@@ -66,7 +66,7 @@ if (!function_exists("tilauksesta_valmistustilaus")) {
                     and tyyppi  != 'E'
                     ORDER BY tyyppi, nimitys
                     LIMIT 1";
-          $vtresult = mysql_query($query) or pupe_error($query);
+          $vtresult = pupe_query($query);
           $vrow = mysql_fetch_array($vtresult);
 
           $jatka         = TRUE;
@@ -115,7 +115,7 @@ if (!function_exists("tilauksesta_valmistustilaus")) {
                     FROM lasku
                     WHERE yhtio = '$kukarow[yhtio]'
                     and tunnus  = '$tunnus'";
-          $lresult = mysql_query($query) or pupe_error($query);
+          $lresult = pupe_query($query);
           $laskurow = mysql_fetch_array($lresult);
         }
 
@@ -163,12 +163,12 @@ if (!function_exists("tilauksesta_valmistustilaus")) {
                   muutospvm            = now(),
                   muuttaja             = '$kukarow[kuka]'
                   WHERE yhtio          = '$kukarow[yhtio]' and tilausrivitunnus = '$valmlisaarivi[tunnus]'";
-        $updres = mysql_query($query) or pupe_error($query);
+        $updres = pupe_query($query);
 
         //Kopioidaan otsikon lisatiedot
         if ($tehtiin_uusi_otsikko) {
           $query = "SELECT * FROM laskun_lisatiedot WHERE otunnus='$otunnus' and yhtio ='$kukarow[yhtio]'";
-          $lisatiedotres = mysql_query($query) or pupe_error($query);
+          $lisatiedotres = pupe_query($query);
           $lisatiedotrow = mysql_fetch_array($lisatiedotres);
 
           $fields = mysql_field_name($lisatiedotres, 0);
@@ -188,7 +188,7 @@ if (!function_exists("tilauksesta_valmistustilaus")) {
           }
 
           $kysely  = "INSERT into laskun_lisatiedot ($fields) VALUES ($values)";
-          $insres2 = mysql_query($kysely) or pupe_error($kysely);
+          $insres2 = pupe_query($kysely);
 
           $tehtiin_uusi_otsikko = false;
         }
@@ -197,7 +197,7 @@ if (!function_exists("tilauksesta_valmistustilaus")) {
         $query = "SELECT *
                   FROM tilausrivin_lisatiedot
                   WHERE tilausrivitunnus='$valmlisaarivi[tunnus]' and yhtio ='$kukarow[yhtio]'";
-        $trlisatiedotres = mysql_query($query) or pupe_error($query);
+        $trlisatiedotres = pupe_query($query);
         $trlisatiedotrow = mysql_fetch_array($trlisatiedotres);
 
         $values = mysql_field_name($trlisatiedotres, 0)." = '".$trlisatiedotrow[0]."'";
@@ -222,11 +222,11 @@ if (!function_exists("tilauksesta_valmistustilaus")) {
         }
 
         $kysely  = "UPDATE tilausrivin_lisatiedot SET $values WHERE yhtio='$kukarow[yhtio]' and tilausrivitunnus = '$perheid_lisaarivi'";
-        $insres2 = mysql_query($kysely) or pupe_error($kysely);
+        $insres2 = pupe_query($kysely);
 
         //  Tehdään rivistä normi JT
         $query = "UPDATE tilausrivi set var='J' where yhtio='$kukarow[yhtio]' and tunnus='$valmlisaarivi[tunnus]'";
-        $updre = mysql_query($query) or pupe_error($query);
+        $updre = pupe_query($query);
       }
     }
 

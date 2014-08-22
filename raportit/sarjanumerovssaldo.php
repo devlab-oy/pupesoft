@@ -13,7 +13,7 @@ $query = "SELECT *
           WHERE tuote.yhtio              = '$kukarow[yhtio]'
           and tuote.sarjanumeroseuranta != ''
           ORDER BY tuoteno";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 echo "<table>";
 echo "<tr>
@@ -34,7 +34,7 @@ while ($row = mysql_fetch_array($result)) {
             WHERE tuote.yhtio          = '$kukarow[yhtio]'
             and tuote.tuoteno          = '$row[tuoteno]'
             ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
-  $sresult = mysql_query($query) or pupe_error($query);
+  $sresult = pupe_query($query);
 
   if (mysql_num_rows($sresult) > 0) {
     while ($saldorow = mysql_fetch_array($sresult)) {
@@ -60,7 +60,7 @@ while ($row = mysql_fetch_array($result)) {
                       and sarjanumeroseuranta.hyllynro    = tt.hyllynro and sarjanumeroseuranta.hyllyvali = tt.hyllyvali and sarjanumeroseuranta.hyllytaso = tt.hyllytaso) is null))
                 and ((tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00') and tilausrivi_osto.laskutettuaika != '0000-00-00')
                 ORDER BY sarjanumero+0";
-      $sarjares = mysql_query($query) or pupe_error($query);
+      $sarjares = pupe_query($query);
       $sarjarow = mysql_fetch_array($sarjares);
 
       if ((in_array($row["sarjanumeroseuranta"], array("S", "T", "U", "V")) and (float) $saldo != (float) $sarjarow["kpl"]) or (in_array($row["sarjanumeroseuranta"], array("E", "F", "G")) and (float) $saldo != (float) $sarjarow["era_kpl"])) {

@@ -48,7 +48,7 @@ if ($tee == "file") {
                 and laskunro= '$lasku'
                 and tila    = 'U'
                 and alatila = 'X'";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
 

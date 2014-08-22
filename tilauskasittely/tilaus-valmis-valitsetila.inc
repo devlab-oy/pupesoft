@@ -353,7 +353,7 @@ elseif ($kerattavia > 0 and $kutsuja != 'keraa.php' and !$tilaus_toimitetuksi) {
     $query = "SELECT kerayserat
               FROM asiakas
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus = '{$laskurow['liitostunnus']}'";
+              AND tunnus  = '{$laskurow['liitostunnus']}'";
     $asrow = mysql_fetch_assoc(pupe_query($query));
   }
 

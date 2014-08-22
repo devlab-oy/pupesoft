@@ -37,7 +37,7 @@ while (!feof($file)) {
       $query  = "SELECT *
                  FROM maat
                  WHERE koodi = '$rivi[$i]'";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
       $maarow = mysql_fetch_array($result);
 
 
@@ -46,7 +46,7 @@ while (!feof($file)) {
                 koodi        = '$rivi[$i]',
                 nimi         = '$maarow[nimi]',
                 ryhma_tunnus = '$ryhmakoodi'";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
 
       //echo "$lask $query\n\n";
       //if ($lask > 10) exit;

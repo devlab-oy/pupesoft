@@ -8,7 +8,7 @@ if ($tee == "kuittaa") {       //lisataan tapahtuma kalenteriin
             SET kuittaus = '$kukarow[nimi]'
             WHERE tunnus='$tunnus'
             and yhtio='$yhtio'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo t("Loma kuitattu hyväksytyksi")."!<br><br>";
   $tee = "";
@@ -19,7 +19,7 @@ if ($tee == "ei_kuittaa") {       //lisataan tapahtuma kalenteriin
             SET kuittaus = ''
             WHERE tunnus='$tunnus'
             and yhtio='$yhtio'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo t("Loman hyväksyntä peruttu")."!<br><br>";
   $tee = "";
@@ -57,7 +57,7 @@ if ($tee == "") {
     $chk2 = "CHECKED";
 
     $query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
     $konsernit = "";
 
     while ($row = mysql_fetch_array($result)) {
@@ -92,7 +92,7 @@ if ($tee == "") {
               $lisa1
               and kuka.osasto='$osasto'
               ORDER BY kalenteri.kuka, kalenteri.tapa, kalenteri.pvmalku";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0) {
       echo "<table>";

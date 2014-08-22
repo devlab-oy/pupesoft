@@ -87,17 +87,17 @@ class Unifaun {
   public function setPostiRow($postirow) {
     $this->postirow = $postirow;
 
-    // haetaan varaston osoitetiedot, k√§ytet√§√§n niit√§ l√§hetystietoina
+    // haetaan varaston osoitetiedot, k‰ytet‰‰n niit‰ l‰hetystietoina
     $query = "SELECT nimi, nimitark, osoite, postino, postitp, maa
               FROM varastopaikat
               WHERE yhtio  = '{$this->kukarow['yhtio']}'
               AND tunnus   = '{$this->postirow['varasto']}'
               AND nimi    != ''
               AND osoite  != ''";
-    $tempr = mysql_query($query);
+    $tempr = pupe_query($query);
     $postirow_varasto = mysql_fetch_assoc($tempr);
 
-    // jos varastolle on annettu joku osoite, k√§ytet√§√§n sit√§
+    // jos varastolle on annettu joku osoite, k‰ytet‰‰n sit‰
     if ($postirow_varasto["nimi"] != "") {
       $this->postirow["yhtio_nimi"]     = $postirow_varasto["nimi"];
       $this->postirow['yhtio_nimitark'] = $postirow_varasto["nimitark"];
@@ -120,7 +120,7 @@ class Unifaun {
 
     //kirjoitetaan faili levylle..
     if (file_put_contents($filenimi, $this->xml->asXML()) === FALSE) {
-      echo "<br><font class='error'>".t("VIRHE: tiedoston kirjoitus ep√§onnistui")."!</font><br>";
+      echo "<br><font class='error'>".t("VIRHE: tiedoston kirjoitus ep‰onnistui")."!</font><br>";
     }
 
     if ($this->hostname != "" and $this->username != "" and $this->password != "" and $this->ftppath != "") {
@@ -147,7 +147,7 @@ class Unifaun {
 
     //kirjoitetaan faili levylle..
     if (file_put_contents($filenimi, $this->xml->asXML()) === FALSE) {
-      echo "<br><font class='error'>".t("VIRHE: tiedoston kirjoitus ep√§onnistui")."!</font><br>";
+      echo "<br><font class='error'>".t("VIRHE: tiedoston kirjoitus ep‰onnistui")."!</font><br>";
     }
   }
 
@@ -230,10 +230,10 @@ class Unifaun {
     //$uni_meta_val = $uni_meta->addChild('val', ''); # Defines the profile group where the shipment should be stored in the online system.
     //$uni_meta_val->addAttribute('n', 'partition');
 
-    // L√§hett√§j√§n tiedot
+    // L‰hett‰j‰n tiedot
     /**
-     * tehd√§√§n yhti√∂n parametri "unifaun pikahakuarvo"
-     * voidaan silloin j√§tt√§√§ nimitiedot tyhjiksi
+     * tehd‰‰n yhtiˆn parametri "unifaun pikahakuarvo"
+     * voidaan silloin j‰tt‰‰ nimitiedot tyhjiksi
      */
 
 
@@ -280,7 +280,7 @@ class Unifaun {
     //$uni_snd_val = $uni_sender->addChild('val', ""); # Mobile phone number. In Sweden the number must begin with 07 and contain 10 digits.
     //$uni_snd_val->addAttribute('n', "sms");
 
-    // L√§hett√§j√§n rahtisopimustiedot
+    // L‰hett‰j‰n rahtisopimustiedot
     $uni_sender_partner = $uni_sender->addChild('partner'); // Attribute parid corresponds to carrier's ID. See SUP-112-Services-en.xls.
     $uni_sender_partner->addAttribute('parid', utf8_encode($this->toitarow['rahdinkuljettaja']));
 
@@ -327,7 +327,7 @@ class Unifaun {
     // jos vastaanottaja maksaa rahdin, haetaan sopimusnumero asiakkaan rahtisopimukselta
     if ($this->toitarow['merahti'] == '') {
 
-      // L√§hett√§j√§n rahtisopimustiedot
+      // L‰hett‰j‰n rahtisopimustiedot
       $uni_receiver_partner = $uni_receiver->addChild('partner'); // Attribute parid corresponds to carrier's ID. See SUP-112-Services-en.xls.
       $uni_receiver_partner->addAttribute('parid', utf8_encode($this->toitarow['rahdinkuljettaja']));
 
@@ -369,7 +369,7 @@ class Unifaun {
       $uni_par_val = $uni_receiver_partner->addChild('val', utf8_encode($rahtisopimusnro));   // Customer number
       $uni_par_val->addAttribute('n', "custno");
 
-      // N√§m√§ ovat nyt k√§yt√∂ss√§:
+      // N‰m‰ ovat nyt k‰ytˆss‰:
       //FREEG     --> OPAY tai RPAY, numeric, minlength(1), maxlength(15)
       //H48     --> RPAY
       //IT09     --> OPAY
@@ -401,7 +401,7 @@ class Unifaun {
     }
 
     if ($this->toitarow['rahdinkuljettaja'] == 'HIT') {
-      // HITin id4user -kent√§n arvo m√§√§ritet√§√§n asiakas/toimitusosoitekohtaiseksi
+      // HITin id4user -kent‰n arvo m‰‰ritet‰‰n asiakas/toimitusosoitekohtaiseksi
       if (trim($this->asiakasrow["toim_nimi"]) == "") {
         $toim_osoite  = $this->asiakasrow["osoite"];
         $toim_postino  = $this->asiakasrow["postino"];
@@ -414,11 +414,11 @@ class Unifaun {
       }
 
       if ($this->postirow["toim_osoite"]  == $toim_osoite and $this->postirow["toim_postino"] == $toim_postino and $this->postirow["toim_postitp"] == $toim_postitp) {
-        // Asiakkaan oletustoimitusosoite, k√§ytet√§√§n asiakkaan tunnusta
+        // Asiakkaan oletustoimitusosoite, k‰ytet‰‰n asiakkaan tunnusta
         $id4user = $this->postirow["liitostunnus"];
       }
       else {
-        // K√§sin sy√∂tetty toimitusosite, generoidaan md5
+        // K‰sin syˆtetty toimitusosite, generoidaan md5
         $id4user = md5($this->postirow["liitostunnus"].$this->postirow["toim_osoite"].$this->postirow["toim_postino"].$this->postirow["toim_postitp"]);
       }
 
@@ -444,7 +444,7 @@ class Unifaun {
     //$uni_rcv_val = $uni_receiver->addChild('val', ""); # State
     //$uni_rcv_val->addAttribute('n', "state");
 
-    // jos asiakkaan toim_maa on tyhj√§ niin oletetaan, ett√§ se on sama ku yhti√∂n maa
+    // jos asiakkaan toim_maa on tyhj‰ niin oletetaan, ett‰ se on sama ku yhtiˆn maa
     $toim_maa = ($this->rakir_row['toim_maa'] != "") ? $this->rakir_row['toim_maa'] : $this->postirow["yhtio_maa"];
 
     $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($toim_maa)); // Country code according to ISO standard
@@ -475,7 +475,7 @@ class Unifaun {
     //$uni_rcv_val->addAttribute('n', "doorcode");
 
     // Vastaanottajan rahtisopimustiedot
-    // t√§m√§ on jo setattu ylemp√§√§
+    // t‰m‰ on jo setattu ylemp‰‰
     //$uni_partner = $uni_receiver->addChild('partner'); # Attribute parid corresponds to carrier's ID. See SUP-112-Services-en.xls.
     //$uni_partner->addAttribute('parid', "");
 
@@ -500,7 +500,7 @@ class Unifaun {
     //$uni_par_val = $uni_receiver_partner->addChild('val', "");   # Agent's identity, mandatory value for DBSchenker PrivPak. Normally set by application.
     //$uni_par_val->addAttribute('n', "agentno");
 
-    // L√§hetyksen tiedot
+    // L‰hetyksen tiedot
     $uni_shipment = $xml->addChild('shipment');  // Unique order number. Any contents. Mandatory. Order number is searchable in the system but not printed on shipping documents.
     $uni_shipment->addAttribute('orderno', utf8_encode($this->postirow["shipment_unique_id"]));
 
@@ -583,7 +583,7 @@ class Unifaun {
     //$uni_shi_val = $uni_shipment->addChild('val', ""); # Number of EUR pallets in the shipment. Requires palletregno for sender and receiver.
     //$uni_shi_val->addAttribute('n', "eurpallets");
 
-    // l√§hett√§j√§n viite
+    // l‰hett‰j‰n viite
     $reference = utf8_encode(substr(preg_replace("/[^\x20-\xFF]/", "", trim($this->postirow["viesti"])), 0, 17));
 
     $uni_shi_val = $uni_shipment->addChild('val', $reference); // Shipment reference. Any contents. Max. 17 characters.
@@ -772,7 +772,7 @@ class Unifaun {
     $uni_parcel = $this->xml->shipment->addChild('container'); // Parcel information can be supplied in various ways. See p. 7.
     $uni_parcel->addAttribute('type', "parcel");
 
-    $uni_par_val = $uni_parcel->addChild('val', round(utf8_encode($pakkaustiedot['maara']))); // Number of parcels, py√∂ristet√§√§n varmuuden vuoksi l√§himp√§√§n kokonaislukuun
+    $uni_par_val = $uni_parcel->addChild('val', round(utf8_encode($pakkaustiedot['maara']))); // Number of parcels, pyˆristet‰‰n varmuuden vuoksi l‰himp‰‰n kokonaislukuun
     $uni_par_val->addAttribute('n', "copies");
 
     //$uni_par_val = $uni_parcel->addChild('val', ""); # Parcel ID. Used only for custom parcel ID. UFPS only. Cntid is to be incremented according to number of parcels.
@@ -814,9 +814,9 @@ class Unifaun {
 
     /*
     Otamme pakkauksen kaksi mittaa (pohjan mitat) syvyys ja leveys, korkeuden laskemme tilavuudesta jakamalla tilavuuden pohjan alalla.
-    Teoreettisesti ajatelle n√§in saisimme tarkimmin viedyksi rahtitietoihin kollin mitat.
+    Teoreettisesti ajatelle n‰in saisimme tarkimmin viedyksi rahtitietoihin kollin mitat.
     Pohjan alahan ei muutu, mutta pakkausta puukotetaan matalammaksi (pahvilaatikon reunoja leikataan/viikataan matalammaksi)
-    tai lavapakkausta rakennetaan alhaalta yl√∂sp√§in niin korkealle kuin tavaraa on laittaa.
+    tai lavapakkausta rakennetaan alhaalta ylˆsp‰in niin korkealle kuin tavaraa on laittaa.
     */
     if ($pakkaustiedot['kuutiot'] > 0) {
       $pakkaustiedot['korkeus'] = $pakkaustiedot['kuutiot'] / ($pakkaustiedot['syvyys'] * $pakkaustiedot['leveys']);
@@ -854,7 +854,7 @@ class Unifaun {
 
     if ($this->toitarow['rahdinkuljettaja'] == 'POSTI' and (count($pakkaustiedot['vakkoodi']) > 0 or $pakkaustiedot['pakkauskuvaus'] == 'MUU KOLLI')) {
       /*
-      TEHD√Ñ√ÑN T√ÑM√Ñ JOS VAK TAI MUU KOLLI
+      TEHDƒƒN TƒMƒ JOS VAK TAI MUU KOLLI
       $uni_addon = $uni_service->addChild('addon'); # Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
       $uni_addon->addAttribute('adnid', "SPTR");
       */

@@ -21,7 +21,7 @@ if (!function_exists("tulosta_tilaustuotetarrat")) {
               LEFT JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio=tilausrivi.yhtio and sarjanumeroseuranta.ostorivitunnus = tilausrivi.tunnus and sarjanumeroseuranta.myyntirivitunnus=0
               LEFT JOIN tuotteen_avainsanat tarratyyppi ON tarratyyppi.yhtio=tilausrivi.yhtio and tarratyyppi.tuoteno = tilausrivi.tuoteno and tarratyyppi.laji='tarratyyppi'
               WHERE tilausrivi.yhtio='$kukarow[yhtio]' and $lisa tilausrivi.tyyppi = 'O'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0) {
 
@@ -71,13 +71,13 @@ if (!function_exists("tulosta_tilaustuotetarrat")) {
           $query = "SELECT laskutettuaika
                     FROM tilausrivi
                     WHERE yhtio='$kukarow[yhtio]' and tunnus = '$row[ostorivitunnus]'";
-          $alres = mysql_query($query) or pupe_error($query);
+          $alres = pupe_query($query);
           $aikarow = mysql_fetch_array($alres);
 
           $query = "SELECT *
                     FROM sarjanumeroseuranta
                     WHERE yhtio='$kukarow[yhtio]' and ostorivitunnus = '$row[ostorivitunnus]' and sarjanumero = '$row[sarjanumero]' and tuoteno = '$row[tuoteno]'";
-          $sarjares = mysql_query($query) or pupe_error($query);
+          $sarjares = pupe_query($query);
           $sarjarow = mysql_fetch_array($sarjares);
 
           if (table_exists("sarjanumeron_lisatiedot")) {
@@ -85,7 +85,7 @@ if (!function_exists("tulosta_tilaustuotetarrat")) {
                       FROM sarjanumeron_lisatiedot use index (yhtio_liitostunnus)
                       WHERE yhtio      = '$kukarow[yhtio]'
                       and liitostunnus = '$row[sarjatunnus]'";
-            $lisares = mysql_query($query) or pupe_error($query);
+            $lisares = pupe_query($query);
             $lisarow = mysql_fetch_array($lisares);
           }
 
@@ -129,7 +129,7 @@ if (!function_exists("tulosta_tilaustuotetarrat")) {
           $query = "SELECT *
                     FROM kirjoittimet
                     WHERE yhtio='$kukarow[yhtio]' and tunnus = '".key($arvaakirjoitin)."'";
-          $kirres = mysql_query($query) or pupe_error($query);
+          $kirres = pupe_query($query);
           $kirrow = mysql_fetch_array($kirres);
           $komento = $kirrow["komento"];
         }

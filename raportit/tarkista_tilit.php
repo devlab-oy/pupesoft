@@ -14,7 +14,7 @@ $query = "SELECT distinct tili.tilino t, tiliointi.tilino
           and tiliointi.korjattu = ''
           and tiliointi.tilino   > 0
           HAVING t IS NULL";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 while ($tili = mysql_fetch_array($result)) {
   $query = "SELECT tapvm viimeisin, selite
@@ -24,7 +24,7 @@ while ($tili = mysql_fetch_array($result)) {
             and korjattu = ''
             ORDER BY tapvm asc
             LIMIT 1";
-  $res = mysql_query($query) or pupe_error($query);
+  $res = pupe_query($query);
   $viimrow = mysql_fetch_array($res);
 
   echo "<br><font class='error'>Tiliä $tili[tilino] ei ole enää olemassa! Viimeisin tiliöinti $viimrow[viimeisin], $viimrow[selite]</font><br>";
@@ -34,7 +34,7 @@ $tables  = array("asiakas", "tuote", "toimi");
 $columnit = array("tilino", "tilino_eu", "tilino_ei_eu");
 
 $query = "SHOW TABLES";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 while ($table = mysql_fetch_array($result)) {
 
@@ -43,7 +43,7 @@ while ($table = mysql_fetch_array($result)) {
     echo "<br><font class='message'>Tarkastetaan taulu $table[0]</font><br>";
 
     $query = "  SHOW columns FROM $table[0]";
-    $res = mysql_query($query) or pupe_error($query);
+    $res = pupe_query($query);
 
     while ($col = mysql_fetch_array($res)) {
       if (in_array($col[0], $columnit)) {
@@ -52,13 +52,13 @@ while ($table = mysql_fetch_array($result)) {
                     FROM $table[0]
                     WHERE yhtio = '$kukarow[yhtio]'
                     and $c != ''";
-          $haku = mysql_query($query);
+          $haku = pupe_query($query);
 
           while ($row = mysql_fetch_array($haku)) {
             $query = "SELECT tunnus
                       FROM tili
                       WHERE yhtio = '$kukarow[yhtio]' and tilino = '".$row[$c]."'";
-            $tarkresr = mysql_query($query) or pupe_error($query);
+            $tarkresr = pupe_query($query);
 
             if (mysql_num_rows($tarkresr) == 0) {
               echo "<font class='error'>[$c] Tiliä ei löydy '".$row[$c]."'</font><br>";

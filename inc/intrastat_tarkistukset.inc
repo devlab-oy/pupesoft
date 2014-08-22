@@ -24,7 +24,7 @@ elseif ($row["tullinimike1"] != "") {
             WHERE cn   = '$row[tullinimike1]'
             AND kieli  = '$yhtiorow[kieli]'
             AND cn    != ''";
-  $tulserul = mysql_query($query) or pupe_error($query);
+  $tulserul = pupe_query($query);
 
   if (mysql_num_rows($tulserul) == 0) {
 
@@ -65,7 +65,7 @@ else {
   $query = "SELECT distinct koodi
             FROM maat
             WHERE koodi = '$row[alkuperamaa]'";
-  $maaresult = mysql_query($query) or pupe_error($query);
+  $maaresult = pupe_query($query);
 
   if (mysql_num_rows($maaresult) == 0) {
     foreach ($tuotteet as $tuotetiedot) {
@@ -86,7 +86,7 @@ $query = "SELECT lasku.*,
           LEFT JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto)
           WHERE lasku.yhtio = '$kukarow[yhtio]'
           AND lasku.tunnus  in ($row[kaikkitunnukset])";
-$intrlasres = mysql_query($query) or pupe_error($query);
+$intrlasres = pupe_query($query);
 
 while ($intrlasrow = mysql_fetch_array($intrlasres)) {
 
@@ -134,7 +134,7 @@ while ($intrlasrow = mysql_fetch_array($intrlasres)) {
       $query = "SELECT distinct koodi, eu
                 FROM maat
                 WHERE koodi = '$intrlasrow[maalahetys]'";
-      $maaresult = mysql_query($query) or pupe_error($query);
+      $maaresult = pupe_query($query);
 
       if (mysql_num_rows($maaresult) == 0) {
         $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("L‰hetysmaa on virheellinen")."!<br>";
@@ -166,7 +166,7 @@ while ($intrlasrow = mysql_fetch_array($intrlasres)) {
       $query = "SELECT distinct koodi, eu
                 FROM maat
                 WHERE koodi = '$intrlasrow[maamaara]'";
-      $maaresult = mysql_query($query) or pupe_error($query);
+      $maaresult = pupe_query($query);
 
       if (mysql_num_rows($maaresult) == 0) {
         $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("M‰‰r‰maa on virheellinen")."!<br>";

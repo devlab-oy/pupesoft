@@ -416,7 +416,7 @@ if ($upd == 1) {
         foreach ($poista_liite as $key => $val) {
           if ($val > 0) {
             $delquery = " DELETE FROM liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and liitos = 'Yllapito' and tunnus = '$val'";
-            $delres = mysql_query($delquery);
+            $delres = pupe_query($delquery);
             if (mysql_affected_rows() == 1) {
               $t[$key] = "";
             }

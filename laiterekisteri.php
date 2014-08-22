@@ -17,6 +17,8 @@ if (isset($tallennetaan_muutokset) and isset($muokattava_laite) and $muokattava_
             lcm_info = '{$lcm_info}',
             ip_osoite = '{$ip_osoite}',
             mac_osoite = '{$mac_osoite}',
+            valmistajan_sopimusnumero = '{$valmistajan_sopimusnumero}',
+            valmistajan_sopimus_paattymispaiva = '{$vcloppuvv}-{$vcloppukk}-{$vcloppupp}',
             muutospvm = now(),
             muuttaja = '{$kukarow['kuka']}'
             WHERE yhtio='{$kukarow['yhtio']}'
@@ -35,6 +37,8 @@ elseif (isset($tallenna_uusi_laite) and isset($valitse_sarjanumero) and $valitse
             mac_osoite = '{$mac_osoite}',
             kommentti = '{$kommentti}',
             sla = '{$sla}',
+            valmistajan_sopimusnumero = '{$valmistajan_sopimusnumero}',
+            valmistajan_sopimus_paattymispaiva = '{$vcloppuvv}-{$vcloppukk}-{$vcloppupp}',
             luontiaika = now(),
             laatija = '{$kukarow['kuka']}'";
   pupe_query($kveri);
@@ -47,6 +51,10 @@ elseif (isset($peruuta_uusi)) {
   unset($lcm_info);
   unset($ip_osoite);
   unset($mac_osoite);
+  unset($sla);
+  unset($kommentti);
+  unset($valmistajan_sopimusnumero);
+  unset($sopimuspaattyypvm);
 }
 
 echo "<font class='head'>".t("Laiterekisteri")."</font><hr>";
@@ -66,6 +74,8 @@ $headerit = array(
   "sopimustiedot",
   "asiakastiedot",
   "sla",
+  "vc",
+  "vc end",
   "kommentti",
   "lcm info",
   "ip",
@@ -175,6 +185,7 @@ $query = "SELECT
           WHERE laite.yhtio = '{$kukarow['yhtio']}'
           {$laiterajaus}
           GROUP BY laite.sarjanro,laite.tuoteno";
+
 $res = pupe_query($query);
 
 
@@ -188,15 +199,22 @@ if ($toiminto == 'MUOKKAA') {
     echo "<input type='hidden' name='muokattava_laite' value='{$rowi['tunnus']}'>";
     echo "<td nowrap>{$rowi['tunnus']}</td>";
     echo "<td>".$rowi['sopimusrivi']."</td>";
-    // Tuote
+
     echo "<td nowrap>".$rowi['valmistaja']."</td>";
     echo "<td nowrap>".$rowi['malli']."</td>";
-    // Sopimukset 1/2
+
     echo "<td nowrap>".$rowi['sarjanro']."</td>";
     echo "<td nowrap>".$rowi['tuoteno']."</td>";
     echo "<td></td><td></td>";
-     // Sopimukset 2/2
+
     echo "<td><input type='text' name='sla' value='{$rowi['sla']}'/></td>";
+    echo "<td><input type='text' name='valmistajan_sopimusnumero' value='{$rowi['valmistajan_sopimusnumero']}'/></td>";
+    // Taivutellaan p‰iv‰m‰‰r‰
+    list ($vcloppuvv, $vcloppukk, $vcloppupp) = explode("-", $rowi['valmistajan_sopimus_paattymispaiva']);
+    list ($vcloppupp) = explode(" ", $vcloppupp);
+    echo "<td nowrap><input type='text' name='vcloppupp' maxlength='2' size='2' value='{$vcloppupp}'/>
+      <input type='text' name='vcloppukk' maxlength='2' size='2' value='{$vcloppukk}'/>
+      <input type='text' name='vcloppuvv' maxlength='4' size='4' value='{$vcloppuvv}'/></td>";
     echo "<td><textarea name='kommentti' rows='5' columns='30'>{$rowi['kommentti']}</textarea></td>";
     echo "<td><textarea name='lcm_info' rows='5' columns='30'>{$rowi['lcm_info']}</textarea></td>";
     echo "<td><input type='text' name='ip_osoite' value='{$rowi['ip_osoite']}'/></td>";
@@ -265,9 +283,14 @@ elseif ($toiminto == 'UUSILAITE') {
   
   echo "<td>{$esiv_tuotenumero}</td>";
   echo "<td></td><td></td>";
-  echo "<td><input type='text' name='sla' value='{$rowi['sla']}'/></td>";
-  echo "<td><textarea name='kommentti' rows='5' columns='30'>{$rowi['kommentti']}</textarea></td>";
-  echo "<td><textarea name='lcm_info' rows='5' columns='30'>{$rowi['lcm_info']}</textarea></td>";
+  echo "<td><input type='text' name='sla'/></td>";
+  echo "<td><input type='text' name='valmistajan_sopimusnumero'/></td>";
+
+  echo "<td nowrap><input type='text' name='vcloppupp' maxlength='2' size='2'/>
+    <input type='text' name='vcloppukk' maxlength='2' size='2'/>
+    <input type='text' name='vcloppuvv' maxlength='4' size='4'/></td>";
+  echo "<td><textarea name='kommentti' rows='5' columns='30'></textarea></td>";
+  echo "<td><textarea name='lcm_info' rows='5' columns='30'></textarea></td>";
   echo "<td><input type='text' name='ip_osoite'/></td>";
   echo "<td><input type='text' name='mac_osoite'/></td>";
   echo "<td class='back'><input type='submit' name='tallenna_uusi_laite' value='Tallenna'/></td>";
@@ -338,7 +361,10 @@ else {
           $ressukka = pupe_query($kveeri);
 
           $lassurivi = mysql_fetch_assoc($ressukka);
-          $asiakas .= $lassurivi['asiakas']."<br><br>";
+
+          $asiakas .= $lassurivi['toim_nimi']."<br>";
+          $asiakas .= $lassurivi['toim_postitp']."<br>";
+          $asiakas .= "<br><br>";
         }
 
         $puuttuja .= "<tr nowrap><td>";
@@ -359,7 +385,8 @@ else {
     }
     else {
       $query = "SELECT
-                lasku.nimi asiakas
+                lasku.nimi asiakas,
+                lasku.*
                 FROM sarjanumeroseuranta
                 JOIN tilausrivi ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio
                   AND tilausrivi.tunnus = sarjanumeroseuranta.myyntirivitunnus
@@ -372,7 +399,9 @@ else {
                 LIMIT 1";
       $sarjanumerores = pupe_query($query);
       $sarjanumerorow = mysql_fetch_assoc($sarjanumerores);
-      $asiakas = $sarjanumerorow['asiakas'];
+
+      $asiakas = $sarjanumerorow['toim_nimi']."<br>";
+      $asiakas .= $sarjanumerorow['toim_postitp']."<br>";
     }
 
     echo "<td nowrap>".$rowi['valmistaja']."</td>";
@@ -383,8 +412,11 @@ else {
 
     echo "<td>$puuttuja</td>";
 
-    echo "<td>$asiakas</td>";
-    echo "<td>".$rowi['sla']."</td>";    
+    echo "<td nowrap>$asiakas</td>";
+    echo "<td>".$rowi['sla']."</td>"; 
+    echo "<td nowrap>{$rowi['valmistajan_sopimusnumero']}</td>";
+
+    echo "<td nowrap>{$rowi['valmistajan_sopimus_paattymispaiva']}</td>";   
     echo "<td style='width:300px;'>".$rowi['kommentti']."</td>";
     echo "<td>".$rowi['lcm_info']."</td>";
     echo "<td nowrap>".$rowi['ip_osoite']."</td>";

@@ -46,11 +46,11 @@ if (isset($teerappari)) {
   if ($naytalaskut == 1) {
     echo "<table>";
     echo "<tr>";
-    echo "<th>",t("Laskunro"),"</th>";
-    echo "<th>",t("Asiakas"),"</th>";
-    echo "<th>",t("Summa"),"</th>";
-    echo "<th>",t("Kanava"),"</th>";
-    echo "<th>",t("Operaattori"),"</th>";
+    echo "<th>", t("Laskunro"), "</th>";
+    echo "<th>", t("Asiakas"), "</th>";
+    echo "<th>", t("Summa"), "</th>";
+    echo "<th>", t("Kanava"), "</th>";
+    echo "<th>", t("Operaattori"), "</th>";
     echo "</tr>";
   }
 
@@ -103,26 +103,26 @@ if (isset($teerappari)) {
           echo t("FTP-siirto");
         }
         elseif ($yhtiorow['verkkolasku_lah'] == 'iPost') {
-          echo "<font class='ok'>",t("Finvoice iPost"),"</font>";
+          echo "<font class='ok'>", t("Finvoice iPost"), "</font>";
           $operaattorille++;
         }
         elseif ($yhtiorow['verkkolasku_lah'] == 'apix') {
-          echo "<font class='ok'>",t("Apix-verkkolaskut"),"</font>";
+          echo "<font class='ok'>", t("Apix-verkkolaskut"), "</font>";
           $operaattorille++;
         }
         elseif ($yhtiorow['verkkolasku_lah'] == 'finvoice') {
           echo t("Finvoice");
         }
         elseif ($yhtiorow['verkkolasku_lah'] == 'maventa') {
-          echo "<font class='ok'>",t("Maventa-verkkolaskut"),"</font>";
+          echo "<font class='ok'>", t("Maventa-verkkolaskut"), "</font>";
           $operaattorille++;
         }
         elseif ($yhtiorow['verkkolasku_lah'] == 'servinet') {
-          echo "<font class='ok'>",t("Pupevoice Servinet"),"</font>";
+          echo "<font class='ok'>", t("Pupevoice Servinet"), "</font>";
           $operaattorille++;
         }
         else {
-          echo "<font class='ok'>",t("Pupevoice Itella"),"</font>";
+          echo "<font class='ok'>", t("Pupevoice Itella"), "</font>";
           $operaattorille++;
         }
       }

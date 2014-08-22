@@ -367,6 +367,9 @@ while ($tietue = fgets($fd)) {
     // Jos ajetaan komentoriviltä, niin haetaan kukarow
     if ($php_cli) {
       $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
+      
+      // Komentoriviltä ku ajetaan, niin ei haluta posteja admin-käyttäjälle
+      $kukarow["eposti"] = "";
     }
 
     $kukarow['yhtio'] = $yhtiorow['yhtio']; // Tämä on vaarallista, mutta tätä ilman ei mikän toimi!

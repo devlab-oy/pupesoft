@@ -1,5 +1,8 @@
 <?php
 
+///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+$useslave = 1;
+
 if (isset($_POST["tee"])) {
   if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
   if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
@@ -26,9 +29,10 @@ if (isset($tee) and $tee == 'MITATOI_TARJOUS') {
 }
 
 if ($toim == 'TARJOUS' and $tee == 'MITATOI_TARJOUS_KAIKKI' and $tunnukset != "") {
+  pupemaster_start();
 
   $query = "UPDATE lasku
-            SET tila = 'D',
+            SET tila    = 'D',
             alatila     = 'T',
             comments    = CONCAT(comments, ' $kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen ohjelmassa muokkaatilaus.php")." 1')
             WHERE yhtio = '{$kukarow['yhtio']}'
@@ -47,10 +51,13 @@ if ($toim == 'TARJOUS' and $tee == 'MITATOI_TARJOUS_KAIKKI' and $tunnukset != ""
     //Nollataan sarjanumerolinkit
     vapauta_sarjanumerot("", $sarjatun);
   }
+  
+  pupemaster_stop();
 }
 
 if (isset($tee) and $tee == 'TOIMITA_ENNAKKO' and $yhtiorow["ennakkotilausten_toimitus"] == "M") {
-
+  pupemaster_start();
+  
   $toimita_ennakko = explode(",", $toimita_ennakko);
 
   foreach ($toimita_ennakko as $tilausnro) {
@@ -73,10 +80,10 @@ if (isset($tee) and $tee == 'TOIMITA_ENNAKKO' and $yhtiorow["ennakkotilausten_to
                  and tunnus   = '$laskurow[tunnus]'";
       $apure  = pupe_query($query);
 
-      $laskurow["tila"]       = "N";
-      $laskurow["alatila"]     = "";
+      $laskurow["tila"]         = "N";
+      $laskurow["alatila"]      = "";
       $laskurow["clearing"]     = "ENNAKKOTILAUS";
-      $laskurow["tilaustyyppi"]   = "";
+      $laskurow["tilaustyyppi"] = "";
 
       // Päivitetään rivit
       $query  = "SELECT tunnus, tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
@@ -151,6 +158,7 @@ if (isset($tee) and $tee == 'TOIMITA_ENNAKKO' and $yhtiorow["ennakkotilausten_to
     }
   }
 
+  pupemaster_stop();
   unset($tee);
 }
 
@@ -312,6 +320,8 @@ else {
   }
 
   if (($toim == "TARJOUS" or $toim == "TARJOUSSUPER") and $tee == '' and $tilausnumero != "") {
+    pupemaster_start();
+    
     $query_tarjous = "UPDATE lasku
                       SET alatila = tila,
                       tila        = 'D',
@@ -332,6 +342,7 @@ else {
     vapauta_sarjanumerot("", $tilausnumero);
 
     echo "<font class='message'>".t("Mitätöitiin tilaus").": $tilausnumero</font><br><br>";
+    pupemaster_stop();
   }
 
   if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {

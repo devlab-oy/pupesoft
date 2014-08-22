@@ -600,7 +600,7 @@ if ($tila == "" and !isset($jatka)) {
   echo "<input type='hidden' name='mista' value='$mista'>";
   echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
   echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
-  echo "<input type='hidden' class='hv_hidden' name='hintojen_vaihto' value='$hintojen_vaihto'>";
+  echo "<input type='hidden' id='hv_hidden' name='hintojen_vaihto' value='$hintojen_vaihto'>";
 
   if ($asiakasid != "" or $kukarow["kesken"] != 0 or $kopioitava_otsikko != 0) {
 

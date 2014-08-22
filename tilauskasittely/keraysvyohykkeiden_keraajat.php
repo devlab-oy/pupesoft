@@ -1,5 +1,8 @@
 <?php
 
+///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+$useslave = 1;
+
 require "../inc/parametrit.inc";
 
 echo "  <script type='text/javascript' src='https://www.google.com/jsapi'></script>";

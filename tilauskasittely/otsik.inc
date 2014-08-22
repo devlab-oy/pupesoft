@@ -67,11 +67,12 @@ if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesk
   exit;
 }
 
-// TODO tänne ei pitäis mennä enää kun arvot on kerran setattu - SLA pitää repiä kuitenkin jostain
+// TODO tänne ei pitäis mennä enää kun arvot on kerran setattu - SLA ja VC pitää repiä kuitenkin jostain
 if (isset($valmnro) and !empty($valmnro)) {
   // Katsotaan löytyykö valittu sarjanumero laiterekisteristä
   $query = "SELECT 
             laite.sla,
+            if(laite.valmistajan_sopimus_paattymispaiva > now(), laite.valmistajan_sopimusnumero, '".t("Ei voimassa")."') vcsoppari,
             avainsana.selitetark valmistaja,
             tuote.tuotemerkki malli
             FROM laite
@@ -90,12 +91,13 @@ if (isset($valmnro) and !empty($valmnro)) {
     $rivi = mysql_fetch_assoc($res);
     $_REQUEST['mallivari'] = $rivi['malli'];
     $_REQUEST['merkki'] =  $rivi['valmistaja'];
-    $slamaara = $rivi['sla'] > 0 ? $rivi['sla'] : '';
 
+    $_REQUEST['sla'] = $rivi['sla'] > 0 ? $rivi['sla'] : 15;
+    $_REQUEST['valmistajan_sopimusnumero'] = $rivi['vcsoppari'];
     $_REQUEST['tuotu'] = date('Y-m-j');
     // Jos laitteelta löytyi SLA niin lasketaan luvattupvm
-    if ($slamaara != '') {
-      $_REQUEST['luvattu'] = date('Y-m-j', strtotime ( "$slamaara weekdays" ));
+    if ($_REQUEST['sla'] != '') {
+      $_REQUEST['luvattu'] = date('Y-m-j', strtotime ( "{$_REQUEST['sla']} weekdays" ));
     }
   }
 }
@@ -2628,8 +2630,7 @@ if ($tila == "" and !isset($jatka)) {
         echo "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";
       }
 
-      echo "</select>";
-      echo "</td><td>SLA workdays:</td><td><input type='text' name='slamaara' size='4' value='$slamaara'></td></tr>";
+      echo "</select></tr>";
     }
 
     if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A") {
@@ -4057,6 +4058,8 @@ if (isset($jatka)) {
             valmnro     = '$valmnro',
             tuotu       = '$tuotuvv-$tuotukk-$tuotupp',
             luvattu     = '$luvattuvv-$luvattukk-$luvattupp',
+            sla = '$sla',
+            valmistajan_sopimusnumero = '$valmistajan_sopimusnumero',
             komm1       = '$komm1',
             komm2       = '$komm2',
             suorittaja     = '$suorittaja',

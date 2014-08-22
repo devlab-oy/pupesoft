@@ -535,8 +535,8 @@ if ($monta > 1 and $monta <= $limit) {
 
       $hintojen_vaihto = isset($hintojen_vaihto) ? $hintojen_vaihto : 'EI';
 
-      echo "<form method='post'>";
       echo "<td class='back'>";
+      echo "<form method='post'>";
       echo "<input type='hidden' name='asiakasid'     value='$asiakas[tunnus]'>";
       echo "<input type='hidden' name='tee'         value='$tee'>";
       echo "<input type='hidden' name='konserni'      value='$konserni'>";
@@ -576,8 +576,8 @@ if ($monta > 1 and $monta <= $limit) {
       }
 
       echo "<input type='submit' name='valitse_asiakas' value='".t("Valitse")."'>";
+     echo "</form>";
       echo "</td>";
-      echo "</form>";
       echo "</tr>";
     }
     else {

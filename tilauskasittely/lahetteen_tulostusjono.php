@@ -210,7 +210,7 @@ if ($tee2 == 'TULOSTA') {
                 FROM kuka
                 WHERE kesken in ($tilausnumeroita)
                 and yhtio='$kukarow[yhtio]'";
-      $keskenresult = mysql_query($query) or pupe_error($query);
+      $keskenresult = pupe_query($query);
 
       //jos kaikki on ok...
       if (mysql_num_rows($keskenresult)==0) {
@@ -222,7 +222,7 @@ if ($tee2 == 'TULOSTA') {
                      and yhtio    = '$kukarow[yhtio]'
                      ORDER BY clearing DESC
                      LIMIT 1";
-        $result   = mysql_query($query) or pupe_error($query);
+        $result   = pupe_query($query);
 
         if (mysql_num_rows($result) > 0) {
 
@@ -234,7 +234,7 @@ if ($tee2 == 'TULOSTA') {
                       FROM toimitustapa
                       WHERE yhtio = '$kukarow[yhtio]'
                       AND selite  = '$laskurow[toimitustapa]'";
-            $ei_pakkaamoa_res = mysql_query($query) or pupe_error($query);
+            $ei_pakkaamoa_res = pupe_query($query);
             $ei_pakkaamoa_row = mysql_fetch_assoc($ei_pakkaamoa_res);
 
             if ($ei_pakkaamoa_row['ei_pakkaamoa'] == '1' or $tilrow["t_tyyppi"] == "E") {
@@ -336,7 +336,7 @@ if ($tee2 == 'VALITSE') {
             $tilaustyyppi
             GROUP BY lasku.tunnus
             ORDER BY prioriteetti, kerayspvm";
-  $tilre = mysql_query($query) or pupe_error($query);
+  $tilre = pupe_query($query);
 
   if (mysql_num_rows($tilre)==0) {
     $tee2     = "";
@@ -350,7 +350,7 @@ if ($tee2 == 'VALITSE') {
               FROM kuka
               WHERE kesken in ($tilaukset)
               and yhtio='$kukarow[yhtio]'";
-    $keskenresult = mysql_query($query) or pupe_error($query);
+    $keskenresult = pupe_query($query);
 
     //jos kaikki on ok...
     if (mysql_num_rows($keskenresult)==0) {
@@ -526,7 +526,7 @@ if ($tee2 == 'VALITSE') {
                     FROM toimitustapa
                     WHERE yhtio = '$kukarow[yhtio]'
                     AND selite  = '$tilrow[toimitustapa]'";
-          $ei_pakkaamoa_res = mysql_query($query) or pupe_error($query);
+          $ei_pakkaamoa_res = pupe_query($query);
           $ei_pakkaamoa_row = mysql_fetch_assoc($ei_pakkaamoa_res);
 
           if ($ei_pakkaamoa_row['ei_pakkaamoa'] == '1' or $tilrow["t_tyyppi"] == "E") {
@@ -545,7 +545,7 @@ if ($tee2 == 'VALITSE') {
                 FROM varastopaikat
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND tunnus  = '$tul_varastoon'";
-      $prires = mysql_query($query) or pupe_error($query);
+      $prires = pupe_query($query);
       $prirow = mysql_fetch_array($prires);
       $kirjoitin = $toim == 'VASTAANOTA_REKLAMAATIO' ? $prirow['printteri9'] : $prirow['printteri0'];
 
@@ -563,7 +563,7 @@ if ($tee2 == 'VALITSE') {
                 WHERE yhtio  = '$kukarow[yhtio]'
                 AND komento != 'EDI'
                 ORDER by kirjoitin";
-      $kirre = mysql_query($query) or pupe_error($query);
+      $kirre = pupe_query($query);
 
       echo "<select name='valittu_tulostin'>";
 
@@ -689,7 +689,7 @@ if ($tee2 == '') {
               WHERE maa != ''
               and $logistiikka_yhtiolisa
               and maa    = '$tumaa'";
-    $maare = mysql_query($query) or pupe_error($query);
+    $maare = pupe_query($query);
     $maarow = mysql_fetch_array($maare);
     $haku .= " and lasku.varasto in ($maarow[tunnukset]) ";
   }
@@ -737,7 +737,7 @@ if ($tee2 == '') {
             WHERE varastopaikat.$logistiikka_yhtiolisa AND varastopaikat.tyyppi != 'P'
             GROUP BY lasku.yhtio_nimi, varastopaikat.tunnus, varastopaikat.nimitys, lasku.tulostusalue
             ORDER BY varastopaikat.tyyppi, varastopaikat.nimitys, lasku.tulostusalue, varastopaikat.yhtio";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
 
@@ -767,7 +767,7 @@ if ($tee2 == '') {
             WHERE varastopaikat.maa != '' and varastopaikat.$logistiikka_yhtiolisa AND varastopaikat.tyyppi != 'P'
             GROUP BY varastopaikat.maa
             ORDER BY varastopaikat.maa";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 1) {
     echo "<select name='tumaa' onchange='submit()'>";
@@ -829,7 +829,7 @@ if ($tee2 == '') {
             WHERE toimitustapa.$logistiikka_yhtiolisa
             GROUP BY toimitustapa.selite
             ORDER BY toimitustapa.selite";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
 
@@ -996,7 +996,7 @@ if ($tee2 == '') {
             $jarjx";
 
   if ($valid) {
-    $tilre = mysql_query($query) or pupe_error($query);
+    $tilre = pupe_query($query);
   }
 
   if (mysql_num_rows($tilre)==0 or !$valid) {
@@ -1161,7 +1161,7 @@ if ($tee2 == '') {
                   from varastopaikat
                   where yhtio = '$kukarow[yhtio]'
                   and tunnus  = '$tilrow[varasto]'";
-        $prires = mysql_query($query) or pupe_error($query);
+        $prires = pupe_query($query);
         $prirow = mysql_fetch_array($prires);
         $kirjoitin = $toim == 'VASTAANOTA_REKLAMAATIO' ? $prirow['printteri9'] : $prirow['printteri0'];
 
@@ -1185,7 +1185,7 @@ if ($tee2 == '') {
                       FROM toimitustapa
                       WHERE yhtio = '$kukarow[yhtio]'
                       AND selite  = '$tilrow[toimitustapa]'";
-            $ei_pakkaamoa_res = mysql_query($query) or pupe_error($query);
+            $ei_pakkaamoa_res = pupe_query($query);
             $ei_pakkaamoa_row = mysql_fetch_assoc($ei_pakkaamoa_res);
 
             if ($ei_pakkaamoa_row['ei_pakkaamoa'] == '1' or $tilrow["t_tyyppi"] == "E") {
@@ -1206,7 +1206,7 @@ if ($tee2 == '') {
                   WHERE yhtio  = '$kukarow[yhtio]'
                   AND komento != 'EDI'
                   ORDER BY kirjoitin";
-        $kirre = mysql_query($query) or pupe_error($query);
+        $kirre = pupe_query($query);
 
         echo "<$ero valign='top'><select name='valittu_tulostin'>";
 
@@ -1316,7 +1316,7 @@ if ($tee2 == '') {
                 AND komento != 'EDI'
                 GROUP BY komento
                 ORDER BY jarjestys, kirjoitin";
-      $kirre = mysql_query($query) or pupe_error($query);
+      $kirre = pupe_query($query);
 
       echo "<tr><td><select name='valittu_tulostin'>";
 

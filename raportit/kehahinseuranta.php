@@ -30,7 +30,7 @@ if ($tee != '') {
             WHERE tuote.yhtio  = '$kukarow[yhtio]'
             $lisaa
             ORDER BY tuoteno, laadittu";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<table>";
   echo "<tr><th>".t("Tuoteno")."</th>";
@@ -55,7 +55,7 @@ if ($tee != '') {
               and laji     in ('laskutus', 'kulutus')
               ORDER BY laadittu desc
               LIMIT 1";
-    $eresult = mysql_query($query) or pupe_error($query);
+    $eresult = pupe_query($query);
 
     if (mysql_num_rows($eresult) > 0) {
       $erow = mysql_fetch_array($eresult);

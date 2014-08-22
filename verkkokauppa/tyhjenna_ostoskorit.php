@@ -16,4 +16,4 @@ $yhtio = mysql_real_escape_string($argv[1]);
 
 //  Poistetaan rivi
 $query = "DELETE FROM tilausrivi WHERE tyyppi = 'B' and yhtio = '$yhtio'";
-$delres = mysql_query($query) or pupe_error($query);
+$delres = pupe_query($query);

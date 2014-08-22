@@ -18,7 +18,7 @@ if (!function_exists("kohdetarkista")) {
                      WHERE yhtio  = '$kukarow[yhtio]'
                      and laji    != 'P'
                      and tunnus   = '$chastunn'";
-          $chasresult = mysql_query($query) or pupe_error($query);
+          $chasresult = pupe_query($query);
         }
 
         if (!isset($chasresult) or (isset($chasresult) and mysql_num_rows($chasresult) != 1)) {

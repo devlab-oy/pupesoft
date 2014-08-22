@@ -26,7 +26,7 @@ if (($lukitse_laji == "tuote" or $lukitse_laji == "sarjanumeron_lisatiedot" or $
 if ($lukitse_laji == "lasku" and $lukitse_avaimeen > 0) {
 
   $query = "SELECT * from lasku where tunnus='$lukitse_avaimeen' and yhtio='$kukarow[yhtio]'";
-  $lasres = mysql_query($query) or pupe_error($query);
+  $lasres = pupe_query($query);
   $lasrow = mysql_fetch_array($lasres);
 
   $laskutyyppi = $lasrow["tila"];
@@ -48,7 +48,7 @@ if ($lukitse_laji == "lasku" and $lukitse_avaimeen > 0) {
   //  Ostoreskontran laskut
   if (in_array($lasrow['tila'], array('H', 'Y', 'M', 'P', 'Q', 'X'))) {
     $query = "SELECT * from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi LIKE '%ulask.php'";
-    $res = mysql_query($query) or pupe_error($query);
+    $res = pupe_query($query);
 
     if (mysql_num_rows($res) > 0) {
       $uusilukko = "";
@@ -81,7 +81,7 @@ if ($lukitse_laji == "lasku" and $lukitse_avaimeen > 0) {
                 WHERE tunnus  = $lasrow[tunnus]
                 and yhtio     = '$kukarow[yhtio]'
                 and tila      in ('H','M')";
-      $ares = mysql_query($query) or pupe_error($query);
+      $ares = pupe_query($query);
     }
   }
 }

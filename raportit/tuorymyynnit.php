@@ -85,7 +85,7 @@ if ($ytunnus!='' and $try!='') {
              and tilausrivi.yhtio       = lasku.yhtio
              group by 1
              having myynti <> 0 or kate <> 0";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   // otetaan suurin myynti talteen
   $maxeur=0;

@@ -45,7 +45,7 @@ if (isset($tee) and $tee == 'TULOSTA') {
             $where
             and yhtio ='$kukarow[yhtio]'
             ORDER BY laskunro";
-  $laskurrrresult = mysql_query($query) or pupe_error($query);
+  $laskurrrresult = pupe_query($query);
 
   while ($sislaskrow = mysql_fetch_array($laskurrrresult)) {
 
@@ -75,7 +75,7 @@ if (!isset($tee) or $tee == '') {
             WHERE
             yhtio = '$kukarow[yhtio]'
             ORDER by kirjoitin";
-  $kirre = mysql_query($query) or pupe_error($query);
+  $kirre = pupe_query($query);
 
   while ($kirrow = mysql_fetch_array($kirre)) {
     $sel = "";
@@ -131,7 +131,7 @@ if (!isset($tee) or $tee == '') {
             WHERE
             yhtio = '$kukarow[yhtio]'
             ORDER by kirjoitin";
-  $kirre = mysql_query($query) or pupe_error($query);
+  $kirre = pupe_query($query);
 
   while ($kirrow = mysql_fetch_array($kirre)) {
     $sel = "";

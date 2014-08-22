@@ -366,7 +366,7 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
     $tilauksesta_myyntitilaus .= "<font class='message'>".t("Lis‰t‰‰n valitut rivit")." $tymlisa: $utunnus</font><br>";
 
     $query    = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$utunnus'";
-    $laskures = mysql_query($query);
+    $laskures = pupe_query($query);
     $laskurow = mysql_fetch_array($laskures);
 
     $query = "SELECT tilausrivi.*, tilausrivin_lisatiedot.positio, tilausrivin_lisatiedot.toimittajan_tunnus

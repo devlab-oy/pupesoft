@@ -18,7 +18,7 @@ if ($_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "" and $_G
             AND salasana        = md5('$ostoskori_pass')
             AND extranet       != ''
             AND oletus_asiakas != ''";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
 
@@ -32,7 +32,7 @@ if ($_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "" and $_G
               AND lasku.tila         = 'B'
               AND lasku.liitostunnus = '$kukarivi[oletus_asiakas]'
               AND lasku.alatila      = '$ostoskori_ostoskori'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     while ($rivit = mysql_fetch_array($result)) {
       echo sprintf("%-20.20s", $rivit['tuoteno']);
@@ -46,7 +46,7 @@ if ($_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "" and $_G
                 WHERE yhtio = '$ostoskori_yhtio'
                 AND tyyppi  = 'B'
                 AND tunnus  = '$rivit[tunnus]'";
-      $delres = mysql_query($query) or pupe_error($query);
+      $delres = pupe_query($query);
     }
   }
 }

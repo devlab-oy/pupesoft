@@ -16,7 +16,7 @@ $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
 $query = "SELECT *
           FROM kuka
           WHERE session = '$session'";
-$result = mysql_query($query) or die(mysql_error());
+$result = pupe_query($query);
 $kuka_check_row = mysql_fetch_assoc($result);
 
 if (mysql_num_rows($result) != 1) {
@@ -36,7 +36,7 @@ else {
 $id = (int) $_GET["id"];
 
 $query = "SELECT * FROM liitetiedostot where tunnus = '$id'";
-$liiteres = mysql_query($query) or die(mysql_error());
+$liiteres = pupe_query($query);
 $liiterow = mysql_fetch_assoc($liiteres);
 
 if ($kuka_check_row['yhtio'] != $liiterow['yhtio'] and $liiterow['liitos'] != 'kalenteri') {

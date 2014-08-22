@@ -6,7 +6,7 @@ $query = "SELECT nimi, selite, l.tapvm, sum(t.summa) summa
           left join tiliointi t on t.yhtio=l.yhtio and t.ltunnus=l.tunnus and tilino = '$yhtiorow[kassa]'
           where l.yhtio='$kukarow[yhtio]' and l.tunnus = '$tunnus'
           group by 1,2,3";
-$tempr = mysql_query($query) or pupe_error($query);
+$tempr = pupe_query($query);
 
 if (mysql_num_rows($tempr) == 0) {
   echo "<font class='error'>".t("Tosite kateissa")." '$tunnus'</font><br>";
@@ -19,7 +19,7 @@ $query = "SELECT komento
           from kirjoittimet
           where yhtio = '$kukarow[yhtio]'
           and tunnus  = '$kukarow[kirjoitin]'";
-$tempr = mysql_query($query) or pupe_error($query);
+$tempr = pupe_query($query);
 
 if (mysql_num_rows($tempr) == 0) {
   echo "<font class='error'>".t("Kirjoitin kateissa")." '$kukarow[kirjoitin]'</font><br>";

@@ -25,7 +25,7 @@ if ((!isset($verkkokauppa) or $verkkokauppa == "") and require "connect.inc") {
              suoritusaika  = '$aika',
              laatija       = '$kukarow[kuka]',
              luontiaika    = now()";
-  $suores = mysql_query($suoque) or pupe_error($suoque);
+  $suores = pupe_query($suoque);
 }
 
 $lopeta_body = TRUE;

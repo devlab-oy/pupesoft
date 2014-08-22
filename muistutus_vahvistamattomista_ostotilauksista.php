@@ -26,7 +26,7 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
     $query = "SELECT *
               FROM yhtion_parametrit
               WHERE yhtio='$yhtiorow[yhtio]'";
-    $result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
       $yhtion_parametritrow = mysql_fetch_array($result);

@@ -81,7 +81,7 @@ if (!function_exists("piirra_tuntiraportti")) {
               $lisa
               GROUP BY 1,2,3,4,5,6,7,8
               ORDER BY lasku.tunnus";
-    $sresult = mysql_query($query) or pupe_error($query);
+    $sresult = pupe_query($query);
 
     if (mysql_num_rows($sresult) > 0) {
 
@@ -110,7 +110,7 @@ if (!function_exists("piirra_tuntiraportti")) {
                    and tilausrivi.kpl       > 0
                    and tilausrivi.tyyppi   != 'D'
                    $keiklisa";
-        $keikkares = mysql_query($query) or pupe_error($query);
+        $keikkares = pupe_query($query);
 
         if ($asentaja == "" or mysql_num_rows($keikkares) > 0 or $row["asennuskalenteri"] != "") {
 
@@ -156,7 +156,7 @@ if (!function_exists("piirra_tuntiraportti")) {
                     JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
                     WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
                     AND tilausrivi.otunnus = '$row[tunnus]'";
-          $rivihinta_res = mysql_query($query) or pupe_error($query);
+          $rivihinta_res = pupe_query($query);
           $rivihinta_row = mysql_fetch_assoc($rivihinta_res);
 
           if (!isset($rivihinnat['Tuotteet'][$row['valkoodi']])) $rivihinnat['Tuotteet'][$row['valkoodi']] = 0;
@@ -181,7 +181,7 @@ if (!function_exists("piirra_tuntiraportti")) {
                       WHERE kalenteri2.yhtio  = '$kukarow[yhtio]'
                       AND kalenteri2.tyyppi   = 'kalenteri'
                       AND kalenteri2.kentta02 = '$row[tunnus]'";
-            $kalenteri_res = mysql_query($query) or pupe_error($query);
+            $kalenteri_res = pupe_query($query);
 
             while ($kalenteri_row = mysql_fetch_assoc($kalenteri_res)) {
               echo "<table width='100%'>";
@@ -487,7 +487,7 @@ if ($tee == 'raportoi') {
 
   if ($asentaja == "ASENTAJITTAIN") {
     $query = "SELECT kuka, nimi from kuka where yhtio = '$kukarow[yhtio]'";
-    $vresult = mysql_query($query) or pupe_error($query);
+    $vresult = pupe_query($query);
 
     while ($vrow=mysql_fetch_array($vresult)) {
       piirra_tuntiraportti($vrow["kuka"], $kukarow, $yhtiorow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $tyom_nro, $asiakasid, $asiakasosasto, $asiakasryhma, $tyojono, $tyostatus, $ytunnus);

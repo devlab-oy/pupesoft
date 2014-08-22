@@ -51,7 +51,7 @@ $query = "SELECT kuka.nimi, group_concat(DISTINCT kuka.puhno SEPARATOR ' ') puhn
           $lisa
           group by kuka.kuka
           $sort";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 echo "<table>";
 echo "<form name='haku' action='yhteystiedot.php' method='post'>";

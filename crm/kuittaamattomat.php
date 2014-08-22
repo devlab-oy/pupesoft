@@ -13,7 +13,7 @@ if ($tee == 'B') {
               LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.tyyppi = 'A'
               WHERE kalenteri.tunnus = '$kaletunnus'
               and kalenteri.yhtio    = '$kukarow[yhtio]'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
     $prow = mysql_fetch_array($result);
 
     $viesti = $kukarow["nimi"]." ".t("kuittasi").": ".$muuta;
@@ -30,13 +30,13 @@ if ($tee == 'B') {
                kuittaus     = '',
                pvmalku      = now(),
                perheid      = '$kaletunnus'";
-    $result = mysql_query($kysely) or pupe_error($kysely);
+    $result = pupe_query($kysely);
 
     $query = "UPDATE kalenteri
               SET kuittaus   = ''
               WHERE tunnus = '$kaletunnus'
               and yhtio    = '$kukarow[yhtio]'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     $tee = "";
   }
@@ -51,7 +51,7 @@ if ($tee == 'A') {
             LEFT JOIN yhteyshenkilo ON kalenteri.henkilo=yhteyshenkilo.tunnus and yhteyshenkilo.yhtio=kalenteri.yhtio and yhteyshenkilo.tyyppi = 'A'
             WHERE kalenteri.tunnus = '$kaletunnus'
             and kalenteri.yhtio    = '$kukarow[yhtio]'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<table>";
 
@@ -70,7 +70,7 @@ if ($tee == 'A') {
               FROM asiakas
               WHERE yhtio = '$kukarow[yhtio]'
               and tunnus  = '$prow[liitostunnus]'";
-    $asresult = mysql_query($query) or pupe_error($query);
+    $asresult = pupe_query($query);
     $asrow = mysql_fetch_array($asresult);
 
     $aslisa = "<a href='".$palvelin2."crm/asiakasmemo.php?ytunnus=$prow[asiakas]&asiakasid=$prow[liitostunnus]'>$asrow[nimi]</a>";
@@ -120,7 +120,7 @@ if ($tee == "LISAAMUISTUTUS") {
                kentta01 = '$viesti',
                kuittaus = '$kuittaus',
                pvmalku  = $pvmalku";
-    $result = mysql_query($kysely) or pupe_error($kysely);
+    $result = pupe_query($kysely);
     $muist = mysql_insert_id();
 
     echo t("Lis‰tty muistutus p‰iv‰lle:")."  <b>$pvmalku</b><br><br>";
@@ -129,7 +129,7 @@ if ($tee == "LISAAMUISTUTUS") {
               FROM kuka
               WHERE yhtio = '$kukarow[yhtio]'
               and kuka    = '$kuka'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
     $row = mysql_fetch_array($result);
 
     // K‰yt‰j‰lle l‰hetet‰‰n tekstiviestimuistutus
@@ -187,7 +187,7 @@ if ($tee == "MUISTUTUS") {
             and oikeu.nimi   = 'crm/kalenteri.php'
             and kuka.kuka    <> '$kukarow[kuka]'
             ORDER BY kuka.nimi";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   while ($row = mysql_fetch_array($result)) {
     if ($row["kuka"] == $kuka) {
@@ -282,7 +282,7 @@ if ($tee == "") {
               and oikeu.nimi   = 'crm/kalenteri.php'
               and kuka.tunnus  <> '$kukarow[tunnus]'
               ORDER BY kuka.nimi";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     while ($row = mysql_fetch_array($result)) {
       $sel = '';
@@ -320,7 +320,7 @@ if ($tee == "") {
             and kalenteri.yhtio  = '$kukarow[yhtio]'
             and left(kalenteri.tyyppi,7) != 'DELETED'
             ORDER BY kalenteri.pvmalku desc";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
     echo "<table>";
@@ -343,7 +343,7 @@ if ($tee == "") {
                   FROM asiakas
                   WHERE yhtio = '$kukarow[yhtio]'
                   and tunnus  = '$prow[liitostunnus]'";
-        $asresult = mysql_query($query) or pupe_error($query);
+        $asresult = pupe_query($query);
         $asrow = mysql_fetch_array($asresult);
 
         $aslisa = "<a href='".$palvelin2."crm/asiakasmemo.php?ytunnus=$prow[asiakas]&asiakasid=$prow[liitostunnus]'>$asrow[nimi]</a>";

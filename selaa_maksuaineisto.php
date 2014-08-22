@@ -149,7 +149,7 @@ if ($tee == '') {
               ORDER BY tyyppi ASC, aika DESC";
 
   }
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
 
@@ -246,7 +246,7 @@ if ($tee == 'selaa') {
             AND lasku.maksuaika > '0000-00-00 00:00:00'
             $lisa
             ORDER BY lasku.liitostunnus, lasku.tapvm, lasku.summa ASC";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
 

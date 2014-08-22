@@ -10,6 +10,7 @@ $pupesoft_polku = dirname(__FILE__);
 
 // otetaan tietokanta connect
 require $pupesoft_polku."/inc/connect.inc";
+require $pupesoft_polku."/inc/functions.inc";
 
 // Otetaan defaultit, jos ei olla yliajettu salasanat.php:ssä
 $verkkolaskut_in     = empty($verkkolaskut_in)     ? "/home/verkkolaskut"        : rtrim($verkkolaskut_in, "/");
@@ -35,7 +36,7 @@ $sql_query = "SELECT yhtion_parametrit.maventa_api_avain, yhtion_parametrit.mave
               JOIN yhtion_parametrit USING (yhtio)
               WHERE yhtion_parametrit.maventa_api_avain          != ''
               AND yhtion_parametrit.maventa_ohjelmisto_api_avain != ''";
-$maventa_result = mysql_query($sql_query) or die("Error in query: ".$sql_query);
+$maventa_result = pupe_query($sql_query);
 
 while ($maventa_keys = mysql_fetch_assoc($maventa_result)) {
 
@@ -78,7 +79,7 @@ while ($maventa_keys = mysql_fetch_assoc($maventa_result)) {
   $aika_query = "UPDATE yhtion_parametrit
                  SET maventa_aikaleima = '$maventan_kellonaika'
                  WHERE yhtio = '$maventa_keys[yhtio]'";
-  $aika_res = mysql_query($aika_query) or die("Error in query: ".$aika_query);
+  $aika_res = pupe_query($aika_query);
 
   // Jos uusia laskuja ei löydy
   if (!$uudet_laskut) {

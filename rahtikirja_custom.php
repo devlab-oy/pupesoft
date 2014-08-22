@@ -451,7 +451,7 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
             FROM maat
             WHERE nimi != ''
             ORDER BY koodi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   echo "<tr>
       <td valign='top'>".t("Postitp").": </td>
@@ -720,7 +720,7 @@ function pupe_rahtikirja_insert($data) {
  */
 function pupe_rahtikirja_fetch($otsikkonro) {
   $query = sprintf("SELECT * from rahtikirjat where otsikkonro=%d", (int) $otsikkonro);
-  $result = mysql_query($query);
+  $result = pupe_query($query);
 
   $data = array(
     'lotsikot'      => array(),

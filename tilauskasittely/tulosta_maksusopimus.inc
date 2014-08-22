@@ -10,12 +10,12 @@ $query = "SELECT *
           FROM lasku
           WHERE yhtio = '{$kukarow['yhtio']}'
           AND tunnus  = '{$tunnus}'";
-$laskures = mysql_query($query) or pupe_error($query);
+$laskures = pupe_query($query);
 $laskurow = mysql_fetch_assoc($laskures);
 
 if ($kieli == '') {
   $querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' and ytunnus = '{$laskurow['ytunnus']}'";
-  $kielresult = mysql_query($querykiel) or pupe_error($querykiel);
+  $kielresult = pupe_query($querykiel);
   $kielnum = mysql_num_rows($kielresult);
   $kielrow = mysql_fetch_assoc($kielresult);
   $kieli = strtolower($kielrow['kieli']);
@@ -59,7 +59,7 @@ if (!function_exists('tulosta_maksusopimus')) {
               and otunnus     = '{$laskurow['jaksotettu']}'
               and uusiotunnus = 0
               ORDER BY tunnus";
-    $posres = mysql_query($query) or pupe_error($query);
+    $posres = pupe_query($query);
 
     $query_ale_lisa = generoi_alekentta('M');
 
@@ -72,7 +72,7 @@ if (!function_exists('tulosta_maksusopimus')) {
               WHERE lasku.yhtio    = '{$kukarow['yhtio']}'
               and lasku.jaksotettu = '{$laskurow['jaksotettu']}'
               GROUP by lasku.jaksotettu";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
     $sumrow = mysql_fetch_array($result);
 
     $query = "SELECT
@@ -83,7 +83,7 @@ if (!function_exists('tulosta_maksusopimus')) {
               WHERE lasku.yhtio    = '{$kukarow['yhtio']}'
               and lasku.jaksotettu = '{$laskurow['jaksotettu']}'
               GROUP BY lasku.jaksotettu, alv";
-    $sresult = mysql_query($query) or pupe_error($query);
+    $sresult = pupe_query($query);
     $tot = 0;
 
     $otsikko_len = $pdf->strlen(t("Tilauksen {$laskurow['tunnus']} maksupositiot", $kieli), $iso);

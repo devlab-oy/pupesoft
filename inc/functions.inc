@@ -10795,11 +10795,13 @@ if (!function_exists("t")) {
           }
         }
 
-        //P‰ivitet‰‰n aikaleima
+        // P‰ivitet‰‰n aikaleima
+        /*
         if ($verkkokauppa == "") {
           $sanakirjaqueryupd  = "UPDATE sanakirja SET aikaleima=now(), kysytty=kysytty+1 WHERE tunnus='$sanakirjarow[tunnus]'";
           $sanakirjaresultupd = pupe_query($sanakirjaqueryupd, $GLOBALS["masterlink"]);
         }
+        */
       }
       elseif ($verkkokauppa == "") {
         $sanakirjaquery  = "INSERT INTO sanakirja SET fi = '$stringi_sql', aikaleima=now(), kysytty=1, laatija='$kukarow[kuka]', luontiaika=now()";

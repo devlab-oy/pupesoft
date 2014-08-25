@@ -36,7 +36,7 @@ $query = "SELECT *
           WHERE yhtio  = '$kukarow[yhtio]'
           and komento != 'email'
           order by kirjoitin";
-$kires = mysql_query($query) or pupe_error($query);
+$kires = pupe_query($query);
 
 while ($kirow = mysql_fetch_array($kires)) {
   if ($kirow['tunnus'] == $kirjoitin or $kirow['kirjoitin'] == "Lexmark tarratulostin") $select = 'SELECTED';

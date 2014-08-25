@@ -12,7 +12,7 @@ $query  = "SELECT *
            FROM asiakas
            WHERE yhtio = '$kukarow[yhtio]'
            and tunnus  = '$kukarow[oletus_asiakas]'";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 if (mysql_num_rows($result) == 1) {
   $asiakas = mysql_fetch_array($result);
@@ -56,7 +56,7 @@ if ($tee != '') {
             and a.tuotetyyppi  NOT IN ('A', 'B')
             $lisa
             ORDER BY 1";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
     $rivi .= t("Valitettavasti ei löytynyt yhtään tuotetta.")."\t";

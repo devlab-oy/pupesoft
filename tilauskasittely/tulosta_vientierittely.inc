@@ -26,7 +26,7 @@ $Xquery = "SELECT distinct otunnus
            FROM tilausrivi
            WHERE tilausrivi.uusiotunnus = '$uusiotunnus'
            and tilausrivi.yhtio         = '$kukarow[yhtio]'";
-$Xuresult = mysql_query($Xquery) or pupe_error($Xquery);
+$Xuresult = pupe_query($Xquery);
 
 $Xtunnukset2 = '';
 while ($Xurow = mysql_fetch_array($Xuresult)) {
@@ -44,7 +44,7 @@ if ($Xtunnukset2 != "") {
   $Xquery = "SELECT sum(kilot) kilot
              FROM rahtikirjat
              WHERE otsikkonro in ($Xtunnukset2) and yhtio='$kukarow[yhtio]'";
-  $Xrahtiresult = mysql_query($Xquery) or pupe_error($Xquery);
+  $Xrahtiresult = pupe_query($Xquery);
   $Xrahtirow = mysql_fetch_array($Xrahtiresult);
 
   if ($Xrahtirow["kilot"] > 0) {
@@ -97,7 +97,7 @@ if ($Xtunnukset2 != "") {
              and tilausrivi.tyyppi        = 'L'
              and tilausrivi.kpl<>0
              GROUP BY {$group}";
-  $Xriviresult = mysql_query($Xquery);
+  $Xriviresult = pupe_query($Xquery);
 
   if (mysql_num_rows($Xriviresult) < 1) {
     echo t("Yhtään tilausriviä ei löytynyt")."!<br>";

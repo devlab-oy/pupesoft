@@ -1512,8 +1512,8 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
     // Käyttäjä jonka tilaukset on hyväksytettävä
     if ($kukarow["tilaus_valmis"] == "2") {
       $query  = "UPDATE lasku set
-                 tila    = 'N',
-                 alatila = 'F'
+                 tila        = 'N',
+                 alatila     = 'F'
                  where yhtio='$kukarow[yhtio]'
                  and tunnus='$kukarow[kesken]'
                  and tila    = 'N'
@@ -4315,7 +4315,7 @@ if ($tee == '') {
       $query  = "SELECT *
                  FROM tuote
                  WHERE tuoteno = '$tuoteno'
-                 AND yhtio = '$kukarow[yhtio]'";
+                 AND yhtio     = '$kukarow[yhtio]'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) > 0) {

@@ -35,7 +35,7 @@ if ($tee == 'X') {
             WHERE asiakas.yhtio        = '$kukarow[yhtio]'
             AND asiakas.konserniyhtio != ''
             GROUP BY lasku.ytunnus, lasku.nimi";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<table>";
   echo "<tr>";

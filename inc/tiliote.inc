@@ -912,7 +912,7 @@ case 'T10':
               and tyyppi   = '$tiliotedatarow[tyyppi]'
               and substring(tieto,13,18) = '".substr($tietue, 12, 18)."'
               and tunnus  != '$tiliotedatarow[tunnus]'";
-    $tdres2peek = mysql_query($query) or pupe_error($query);
+    $tdres2peek = pupe_query($query);
 
     // Jos koodi on 710 ja koodiselite on PANO ja kuittikoodi on "E", mutta samalla arkistointitunnuksella EI löydy toista tapahtumaa, niin nollataan kuittikoodi.
     if (mysql_num_rows($tdres2peek) == 0) {

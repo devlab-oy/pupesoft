@@ -85,7 +85,7 @@ function datansisalto_e3($e3_ehdotuskansio, $dfile, $otunnus, $toimituspaiva) {
                  FROM lasku
                  WHERE yhtio = '$kukarow[yhtio]'
                  AND tunnus  = '$otunnus'";
-  $lasku_result = mysql_query($laskuquery) or pupe_error($laskuquery);
+  $lasku_result = pupe_query($laskuquery);
   $laskurow = mysql_fetch_array($lasku_result);
 
   $lines = file($e3_ehdotuskansio."/".$dfile);
@@ -114,7 +114,7 @@ function datansisalto_e3($e3_ehdotuskansio, $dfile, $otunnus, $toimituspaiva) {
                     AND tuote.tuoteno = '$tuoteno'
                     ORDER BY tuotepaikat.oletus DESC
                     LIMIT 1";
-    $tuote_result = mysql_query($tuote_query) or pupe_error($tuote_query);
+    $tuote_result = pupe_query($tuote_query);
     $tuote_row = mysql_fetch_array($tuote_result);
 
     if ($tuote_row['tuoteno'] == '') {
@@ -149,7 +149,7 @@ function datansisalto_e3($e3_ehdotuskansio, $dfile, $otunnus, $toimituspaiva) {
                        hyllynro  = '$tuote_row[hyllynro]',
                        hyllytaso = '$tuote_row[hyllytaso]',
                        hyllyvali = '$tuote_row[hyllyvali]'";
-      $insertdata = mysql_query($insert_query) or pupe_error($insert_query);
+      $insertdata = pupe_query($insert_query);
     }
   }
 
@@ -199,7 +199,7 @@ if (isset($tee) and trim($tee) == 'aja') {
                  and myyja   = '$myyjannumero'
                  ORDER BY tunnus desc
                  LIMIT 1";
-      $kresult = mysql_query($kquery) or pupe_error($kquery);
+      $kresult = pupe_query($kquery);
 
       if (mysql_num_rows($kresult) == 1) {
         $myyja = mysql_fetch_array($kresult);
@@ -222,7 +222,7 @@ if (isset($tee) and trim($tee) == 'aja') {
                 AND tyyppi        != 'P'
                 ORDER BY tunnus
                 LIMIT 1";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {
         echo "<br>";
@@ -236,7 +236,7 @@ if (isset($tee) and trim($tee) == 'aja') {
                    FROM valuu
                    WHERE yhtio = '$kukarow[yhtio]'
                    and nimi    = '$trow[oletus_valkoodi]'";
-        $vresult = mysql_query($vquery) or pupe_error($vquery);
+        $vresult = pupe_query($vquery);
         $vrow = mysql_fetch_array($vresult);
 
         $insquery = "INSERT into lasku SET
@@ -265,7 +265,7 @@ if (isset($tee) and trim($tee) == 'aja') {
                      comments      = '$e3ostotilausnumero',
                      laatija       = 'E3',
                      luontiaika    = now()";
-        $otsikkoinsert = mysql_query($insquery) or pupe_error($insquery);
+        $otsikkoinsert = pupe_query($insquery);
         $id = mysql_insert_id();
 
         // Luetaan tilauksen rivit

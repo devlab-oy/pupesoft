@@ -51,13 +51,13 @@ if ($toim == 'TARJOUS' and $tee == 'MITATOI_TARJOUS_KAIKKI' and $tunnukset != ""
     //Nollataan sarjanumerolinkit
     vapauta_sarjanumerot("", $sarjatun);
   }
-  
+
   pupemaster_stop();
 }
 
 if (isset($tee) and $tee == 'TOIMITA_ENNAKKO' and $yhtiorow["ennakkotilausten_toimitus"] == "M") {
   pupemaster_start();
-  
+
   $toimita_ennakko = explode(",", $toimita_ennakko);
 
   foreach ($toimita_ennakko as $tilausnro) {
@@ -321,7 +321,7 @@ else {
 
   if (($toim == "TARJOUS" or $toim == "TARJOUSSUPER") and $tee == '' and $tilausnumero != "") {
     pupemaster_start();
-    
+
     $query_tarjous = "UPDATE lasku
                       SET alatila = tila,
                       tila        = 'D',

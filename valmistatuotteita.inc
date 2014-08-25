@@ -31,7 +31,7 @@ if ($tee == 'UV') {
             and tilausrivi.tyyppi          in ('W','M')
             and tilausrivi.toimitettuaika  = '0000-00-00 00:00:00'
             ORDER by tilausrivi.tuoteno";
-  $uvresult = mysql_query($query) or pupe_error($query);
+  $uvresult = pupe_query($query);
 
   if (mysql_num_rows($uvresult) > 0) {
     $useavalmiste = "ON";

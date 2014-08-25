@@ -8,8 +8,9 @@ require "salasanat.php";
 
 // $temporarylink on linkki omaan kantaan johon pupe tekee temporary tablet. Jos $tempdbhost:ia ei oo m‰‰ritelty, niin silloin $temporarylink pointaa master-kantaan.
 
-// Setataan t‰m‰ ja tyhjennet‰‰n se. T‰ll‰ voidaan ohjata mihin kantaan pupe_query()-funkkari tekee kyselyns‰
-$pupedatabaselink = "";
+// Setataan muuttujat joilla voidaan ohjata tiettyjen blokkien pupe_query()-funkkarin l‰pi menev‰t kyselyt joko masteriin tai slaveen.
+$pupe_masterdb = 0;
+$pupe_slavedb  = 0;
 
 // Katsotaan halutaanko k‰ytt‰‰ slavea
 if (isset($useslave)) {

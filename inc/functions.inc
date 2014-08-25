@@ -3,17 +3,17 @@
 if (!function_exists("pupesoft_login")) {
   function pupesoft_login($params) {
 
-    $user       = $params['user'];
-    $salasana   = $params['salasana'];
-    $salamd5    = $params['salamd5'];
-    $mikayhtio  = $params['mikayhtio'];
-    $uusi1      = $params['uusi1'];
-    $uusi2      = $params['uusi2'];
-    $yhtio      = $params['yhtio'];
-    $browkieli  = $params['browkieli'];
-    $palvelin   = $params['palvelin'];
-    $palvelin2  = $params['palvelin2'];
-    $mobile     = $params['mobile'];
+    $user      = $params['user'];
+    $salasana  = $params['salasana'];
+    $salamd5   = $params['salamd5'];
+    $mikayhtio = $params['mikayhtio'];
+    $uusi1     = $params['uusi1'];
+    $uusi2     = $params['uusi2'];
+    $yhtio     = $params['yhtio'];
+    $browkieli = $params['browkieli'];
+    $palvelin  = $params['palvelin'];
+    $palvelin2 = $params['palvelin2'];
+    $mobile    = $params['mobile'];
 
     $session = "";
     $usea    = 0;
@@ -189,10 +189,10 @@ if (!function_exists("pupe_query")) {
     if (is_resource($link)) {
       $res = mysql_query($query, $link) or pupe_error($query);
     }
-    elseif ($GLOBALS["pupedatabaselink"] == "MASTER") {
+    elseif ($GLOBALS["pupe_masterdb"] > 0) {
       $res = mysql_query($query, $GLOBALS["masterlink"]) or pupe_error($query);
     }
-    elseif ($GLOBALS["pupedatabaselink"] == "SLAVE") {
+    elseif ($GLOBALS["pupe_slavedb"] > 0) {
       $res = mysql_query($query, $GLOBALS["slavelink"]) or pupe_error($query);
     }
     else {
@@ -215,7 +215,7 @@ if (!function_exists("pupe_query")) {
 if (!function_exists("pupeslave_start")) {
   function pupeslave_start() {
     if (isset($GLOBALS["slavelink"]) and is_resource($GLOBALS["slavelink"])) {
-      $GLOBALS["pupedatabaselink"] = "SLAVE";
+      $GLOBALS["pupe_slavedb"]++;
     }
   }
 }
@@ -223,21 +223,21 @@ if (!function_exists("pupeslave_start")) {
 // Palataan käyttämään oletustietokantalinkkiä
 if (!function_exists("pupeslave_stop")) {
   function pupeslave_stop() {
-    $GLOBALS["pupedatabaselink"] = "";
+    $GLOBALS["pupe_slavedb"]--;
   }
 }
 
 // Käytetään masteria
 if (!function_exists("pupemaster_start")) {
   function pupemaster_start() {
-    $GLOBALS["pupedatabaselink"] = "MASTER";
+    $GLOBALS["pupe_masterdb"]++;
   }
 }
 
 // Palataan käyttämään oletustietokantalinkkiä
 if (!function_exists("pupemaster_stop")) {
   function pupemaster_stop() {
-    $GLOBALS["pupedatabaselink"] = "";
+    $GLOBALS["pupe_masterdb"]--;
   }
 }
 
@@ -320,11 +320,11 @@ if (!function_exists("pupe_error")) {
       $puperror = htmlentities($puperror, ENT_SUBSTITUTE);
     }
 
-    if ($_display == '1') {
+    if ($_display == '1' or $_pupedebug !== false) {
       echo nl2br($puperror);
     }
     else {
-      echo t("Tietokantayhteydessä virhe!");
+      echo "Tietokantayhteydessä virhe!"; # Älä t-funktioi tätä.
     }
 
     // kuollaan pois
@@ -404,7 +404,6 @@ if (!function_exists("paivita_aktiiviset_kayttajat")) {
     }
   }
 }
-
 
 // flock lockfilekäsittely
 if (!function_exists("pupesoft_flock")) {
@@ -788,8 +787,7 @@ if (!function_exists("avoin_kori")) {
 
 if (!function_exists("maa")) {
   function maa($code, $kieli="") {
-    // tarvitaan yhtiörowta, kukarowta ja tieto slaven:n käytöstä
-    global $yhtiorow, $kukarow, $useslave, $link, $verkkokauppa;
+    global $yhtiorow, $kukarow, $verkkokauppa;
 
     $query = sprintf("SELECT nimi FROM maat where koodi = '%s' LIMIT 1", mysql_real_escape_string(substr($code, 0 , 2)));
     $res = pupe_query($query);
@@ -10749,8 +10747,7 @@ if (!function_exists("laheta_tilausvahvistus")) {
 // Tämä funktio kääntää sanoja sanakirjasta
 if (!function_exists("t")) {
   function t($stringi, $kieli = "") {
-    // tarvitaan yhtiörowta, kukarowta ja tieto slaven:n käytöstä
-    global $yhtiorow, $kukarow, $link, $masterlink, $verkkokauppa, $kaannetyt_sanat;
+    global $yhtiorow, $kukarow, $verkkokauppa, $kaannetyt_sanat;
 
     if (trim($kieli) != '') {
       $indeksi = trim(strtolower($kieli));
@@ -10773,7 +10770,7 @@ if (!function_exists("t")) {
       $stringi_sql = mysql_real_escape_string($stringi);
 
       $sanakirjaquery  = "SELECT fi, $indeksi, tunnus FROM sanakirja WHERE fi = BINARY '$stringi_sql'";
-      $sanakirjaresult = pupe_query($sanakirjaquery, $link);
+      $sanakirjaresult = pupe_query($sanakirjaquery);
 
       if (isset($kaannetyt_sanat) and !in_array($stringi, $kaannetyt_sanat)) $kaannetyt_sanat[] = $stringi;
 
@@ -10795,12 +10792,12 @@ if (!function_exists("t")) {
         //Päivitetään aikaleima
         if ($verkkokauppa == "") {
           $sanakirjaqueryupd  = "UPDATE sanakirja SET aikaleima=now(), kysytty=kysytty+1 WHERE tunnus='$sanakirjarow[tunnus]'";
-          $sanakirjaresultupd = pupe_query($sanakirjaqueryupd, $masterlink);
+          $sanakirjaresultupd = pupe_query($sanakirjaqueryupd, $GLOBALS["masterlink"]);
         }
       }
       elseif ($verkkokauppa == "") {
         $sanakirjaquery  = "INSERT INTO sanakirja SET fi = '$stringi_sql', aikaleima=now(), kysytty=1, laatija='$kukarow[kuka]', luontiaika=now()";
-        $sanakirjaresult = pupe_query($sanakirjaquery, $masterlink);
+        $sanakirjaresult = pupe_query($sanakirjaquery, $GLOBALS["masterlink"]);
       }
     }
     elseif (isset($kaannetyt_sanat) and !in_array($stringi, $kaannetyt_sanat)) {
@@ -10828,7 +10825,7 @@ if (!function_exists("t")) {
 // Tämä funktio hakee ja kääntää avainsanoja
 if (!function_exists("t_avainsana")) {
   function t_avainsana($laji, $kieli = '', $where = '', $yhtio = '', $eivielakaytossa = '', $return = "") {
-    global $kukarow, $yhtiorow, $link;
+    global $kukarow, $yhtiorow;
     static $kaannetyt = array();
 
     $laji = mysql_real_escape_string($laji);
@@ -10880,7 +10877,7 @@ if (!function_exists("t_avainsana")) {
                 WHERE $yhtiolisa
                 and laji  = '$laji'
                 and kieli = '$yhtiorow[kieli]'";
-      $result = pupe_query($query, $link);
+      $result = pupe_query($query);
 
       $onko_numero = $onko_alpha = 0;
 
@@ -10925,7 +10922,7 @@ if (!function_exists("t_avainsana")) {
               and avainsana.kieli in ('$yhtiorow[kieli]', '')
               $wherelisa
               $orderlisa";
-    $result = pupe_query($query, $link);
+    $result = pupe_query($query);
 
     if ($return != "") {
       if (mysql_num_rows($result) > 0) {
@@ -18969,7 +18966,6 @@ if (!function_exists("tee_keraysera")) {
     return $erat;
   }
 }
-
 
 if (!function_exists("pupesoft_lahetetyyppi")) {
   function pupesoft_lahetetyyppi($laskutunnus, $asiakastunnus = 0) {
@@ -27072,7 +27068,7 @@ if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
 
 if (!function_exists('merkkaa_saldovahvistus_lahetetyksi')) {
   function merkkaa_saldovahvistus_lahetetyksi($saldovahvistus) {
-    global $kukarow, $yhtiorow, $masterlink;
+    global $kukarow, $yhtiorow;
 
     $query = "INSERT INTO saldovahvistukset
               SET lahetys_pvm = CURRENT_DATE,
@@ -27080,7 +27076,7 @@ if (!function_exists('merkkaa_saldovahvistus_lahetetyksi')) {
               avoin_saldo_pvm       = '".date('Y-m-d', strtotime($saldovahvistus['laskun_avoin_paiva']))."',
               ryhmittely_tyyppi     = '{$saldovahvistus['ryhmittely_tyyppi']}',
               yhtio                 = '{$kukarow['yhtio']}'";
-    pupe_query($query, $masterlink);
+    pupe_query($query, $GLOBALS["masterlink"]);
     $saldovahvistus_tunnus = mysql_insert_id();
 
     foreach ($saldovahvistus['laskut'] as $lasku) {
@@ -27100,7 +27096,7 @@ if (!function_exists('merkkaa_saldovahvistus_lahetetyksi')) {
                 era_pvm       = '{$lasku['erpcm']}',
                 summa         = {$lasku['avoin_saldo']},
                 yhtio         = '{$kukarow['yhtio']}'";
-      pupe_query($query, $masterlink);
+      pupe_query($query, $GLOBALS["masterlink"]);
     }
   }
 }

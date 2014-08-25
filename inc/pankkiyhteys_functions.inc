@@ -312,18 +312,20 @@ function sepa_download_file_list($params) {
 
   $bank = $pankkiyhteys['bank'];
 
+  // Varmistetaan, että ei kutsuta väärällä filetypellä
+  $file_type = sepa_file_type_check($bank, $file_type);
+
   // Nordealla, pitää hakea filetypen "target_id"
   // Haetaan vaan jos ei ole passattu parametrinä
   if ($bank == "nordea" and $target_id == "") {
+    $params["file_type"] = $file_type;
+
     $target_id = sepa_target_id_for_file_type($params);
 
     if ($target_id === false) {
       return false;
     }
   }
-
-  // Varmistetaan, että ei kutsuta väärällä filetypellä
-  $file_type = sepa_file_type_check($bank, $file_type);
 
   $parameters = array(
     "method"  => "POST",
@@ -373,18 +375,20 @@ function sepa_download_files($params) {
 
   $bank = $pankkiyhteys['bank'];
 
+  // Varmistetaan, että ei kutsuta väärällä filetypellä
+  $file_type = sepa_file_type_check($bank, $file_type);
+
   // Nordealla, pitää hakea filetypen "target_id"
   // Haetaan vaan jos ei ole passattu parametrinä
   if ($bank == "nordea" and $target_id == "") {
+    $params["file_type"] = $file_type;
+
     $target_id = sepa_target_id_for_file_type($params);
 
     if ($target_id === false) {
       return false;
     }
   }
-
-  // Varmistetaan, että ei kutsuta väärällä filetypellä
-  $file_type = sepa_file_type_check($bank, $file_type);
 
   $tiedostot = array();
 
@@ -449,18 +453,20 @@ function sepa_upload_file($params) {
 
   $bank = $pankkiyhteys['bank'];
 
+  // Varmistetaan, että ei kutsuta väärällä filetypellä
+  $file_type = sepa_file_type_check($bank, $file_type);
+
   // Nordealla, pitää hakea filetypen "target_id"
   // Haetaan vaan jos ei ole passattu parametrinä
   if ($bank == "nordea" and $target_id == "") {
+    $params["file_type"] = $file_type;
+
     $target_id = sepa_target_id_for_file_type($params);
 
     if ($target_id === false) {
       return false;
     }
   }
-
-  // Varmistetaan, että ei kutsuta väärällä filetypellä
-  $file_type = sepa_file_type_check($bank, $file_type);
 
   $parameters = array(
     "method"  => "POST",

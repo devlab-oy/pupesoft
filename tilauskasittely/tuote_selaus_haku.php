@@ -2387,9 +2387,12 @@ function hae_parametri_variaatio($row) {
 function piirra_nayta_variaatiot_nappula($parametri_variaatio) {
   global $yhtiorow;
 
+  $new_window = 'window.open(this.href, "Tuotteen variaatiot", "width=1000,height=800,resizable");
+                 return false;';
+
   if ($parametri_variaatio and $yhtiorow["nayta_variaatiot"] == "Y") {
     echo "<br>";
-    echo "<a href='?variaatio={$parametri_variaatio["selite"]}' target='_blank'>" .
+    echo "<a href='?variaatio={$parametri_variaatio["selite"]}' onclick='{$new_window}'>" .
       t("Näytä variaatiot") .
       "</a>";
   }

@@ -282,7 +282,7 @@ if ($luodaan_aineisto) {
                  tilaajanrivinro = tunnus
                  WHERE yhtio     = '$kukarow[yhtio]'
                  AND tunnus      = '$tilausrivi_row[tunnus]'";
-    $tresult = pupe_query($sqlquery, $masterlink);
+    $tresult = pupe_query($sqlquery, $GLOBALS["masterlink"]);
 
   }
 
@@ -293,7 +293,7 @@ if ($luodaan_aineisto) {
                 SET kirjoitin = 'edi'
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tunnus  = '{$laskurow['tunnus']}'";
-      pupe_query($query, $masterlink);
+      pupe_query($query, $GLOBALS["masterlink"]);
     }
 
     $edi_order .= "*ME\n";

@@ -24,7 +24,7 @@ if (!isset($verkkokauppa) or $verkkokauppa == "") {
              suoritusaika  = '$aika',
              laatija       = '$kukarow[kuka]',
              luontiaika    = now()";
-  $suores = pupe_query($suoque, $masterlink);
+  $suores = pupe_query($suoque, $GLOBALS["masterlink"]);
 }
 
 $lopeta_body = TRUE;

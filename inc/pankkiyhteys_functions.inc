@@ -625,6 +625,10 @@ function sepa_file_type_check($bank, $file_type) {
     if ($file_type == "C2BL") {
       $file_type = "NDCORPAYS";
     }
+    // Maksuaineiston palautesanoma
+    if ($file_type == "C2BN") {
+      $file_type = "NDCORPAYL";
+    }
   }
 
   // Danskemuunnokset
@@ -640,6 +644,10 @@ function sepa_file_type_check($bank, $file_type) {
     // XML maksuaineisto
     if ($file_type == "NDCORPAYS") {
       $file_type = "C2BL";
+    }
+    // Maksuaineiston palautesanoma
+    if ($file_type == "NDCORPAYL") {
+      $file_type = "C2BN";
     }
   }
 

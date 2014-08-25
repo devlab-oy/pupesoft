@@ -2612,7 +2612,7 @@ if ($tila == "" and !isset($jatka)) {
       echo "</select>";
       echo "</td></tr>";
 
-      echo "<tr><td>".t("Prioriteetti").":</td><td>";
+      echo "<tr><td>".t("Prioriteetti").":</td><td colspan='3'>";
       echo "<select name='prioriteetti'>";
 
       $vresult = t_avainsana("TYOM_PRIORIT");

@@ -31,23 +31,18 @@ if ($toiminto == "sarjanumeronlisatiedot_popup") {
 }
 
 // Tarkastetaan käsitelläänkö lisätietoja
-$query = "describe sarjanumeron_lisatiedot";
-$sarjatestres = pupe_query($query);
+if (table_exists("sarjanumeron_lisatiedot")) {
+  $query = "SELECT count(*) kpl
+            FROM sarjanumeron_lisatiedot
+            WHERE yhtio = '$kukarow[yhtio]'";
+  $sarjatestres = pupe_query($query);
+  $sarjatarkrow = mysql_fetch_assoc($sarjatestres);
 
-if (mysql_error() == "") {
-
-  $oletussarja = "";
-
-  //  Tutkitaan onko meillä venelisätiedot vai ei..
-  while ($sarjatarkrow = mysql_fetch_assoc($sarjatestres)) {
-
-    if ($sarjatarkrow["field"] == "Suurin_henkiloluku") {
-      $oletussarja = "JOO";
+  if ($sarjatarkrow["field"] == "Suurin_henkiloluku") {
+    $oletussarja = "JOO";
+    $sarjanumeronLisatiedot = "OK";
     }
   }
-
-  $sarjanumeronLisatiedot = "OK";
-}
 else {
   $sarjanumeronLisatiedot = "";
 }

@@ -491,6 +491,7 @@ if (
 
     $paikat .= "<option value='EIERAAVIELA#!¡!#EIEI'>".t("Valitse erä")."</option>";
     $paikatlask++;
+    $omapaikatraja = 1;
 
     if ($trow["sarjanumeroseuranta"] == "F") {
       $pepvmlisa1 = " sarjanumeroseuranta.parasta_ennen, ";

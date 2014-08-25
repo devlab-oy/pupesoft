@@ -7,7 +7,7 @@ if ($tee == '') {
     $query = "UPDATE kuka
               SET kesken=0
               WHERE session = '$session'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     $kukarow['kesken']   = 0;
     $tilausnumero     = 0;
@@ -93,7 +93,7 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
                  FROM lasku
                  WHERE tunnus = '{$kukarow['kesken']}'";
     }
-    $sresult = mysql_query($squery) or pupe_error($squery);
+    $sresult = pupe_query($squery);
     $srow = mysql_fetch_array($sresult);
 
     if ($tunnus != "") {
@@ -274,7 +274,7 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
               AND kuka.aktiivinen = 1
               and kuka.extranet   = ''
               ORDER BY kuka.nimi";
-    $yresult = mysql_query($query) or pupe_error($query);
+    $yresult = pupe_query($query);
 
     echo "<td>".t("Ostaja").":</td>";
     echo "<td><select name='myyja'>";
@@ -428,7 +428,7 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
                     and liitostunnus         = '$srow[liitostunnus]'
                     and tyyppi               = 'T'
                     and tilausyhteyshenkilo != ''";
-    $yhteysresult = mysql_query($yhteysquery) or pupe_error($yhteysquery);
+    $yhteysresult = pupe_query($yhteysquery);
 
     if (mysql_num_rows($yhteysresult) > 0) {
       echo "<td colspan = '3'><select name='seltilausyhteyshenkilo'>";
@@ -497,7 +497,7 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
               AND otunnus     = '{$tilausnumero}'
               AND uusiotunnus > 0
               LIMIT 1";
-    $vresult = mysql_query($query) or pupe_error($query);
+    $vresult = pupe_query($query);
 
     if (mysql_num_rows($vresult) == 0) {
       echo "<td class='back'>
@@ -525,7 +525,7 @@ if (isset($jatka)) {
                FROM valuu
                WHERE yhtio = '$kukarow[yhtio]'
                and nimi    = '$valkoodi'";
-    $vresult = mysql_query($vquery) or pupe_error($vquery);
+    $vresult = pupe_query($vquery);
     $vrow = mysql_fetch_array($vresult);
 
     $postquery = ", vienti_kurssi = '$vrow[kurssi]', laatija = '$kukarow[kuka]', luontiaika=now()";
@@ -537,14 +537,14 @@ if (isset($jatka)) {
               WHERE otunnus = '$kukarow[kesken]'
               and kerayspvm = '$vkerayspvm'
               and yhtio     = '$kukarow[yhtio]'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     $query = "UPDATE tilausrivi
               SET toimaika = '".$toimvv."-".$toimkk."-".$toimpp."'
               WHERE otunnus = '$kukarow[kesken]'
               and toimaika  = '$vtoimaika'
               and yhtio     = '$kukarow[yhtio]'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     $query = "UPDATE ";
     $postquery = " WHERE tunnus = '$kukarow[kesken]'";
@@ -556,7 +556,7 @@ if (isset($jatka)) {
                 FROM varastopaikat
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tunnus  = '$varasto'";
-    $vares = mysql_query($edique) or pupe_error($edique);
+    $vares = pupe_query($edique);
     $varow = mysql_fetch_array($vares);
 
     if ($yhtiorow['pakollinen_varasto'] == 'K' and isset($toimipiste) and (trim($toimipiste) == '' or $toimipiste == 0) and $varow['toimipaikka'] != 0) {
@@ -581,7 +581,7 @@ if (isset($jatka)) {
                 from yhtion_toimipaikat
                 where yhtio = '$kukarow[yhtio]'
                 and tunnus  = '$toimipiste'";
-    $ediotr = mysql_query($edique) or pupe_error($edique);
+    $ediotr = pupe_query($edique);
     $edioro = mysql_fetch_array($ediotr);
 
     // laitetaan toimipisteen tiedot toimitusosoitteeseen jos siellä ei vielä muuta ole
@@ -662,7 +662,7 @@ if (isset($jatka)) {
         ytunnus        = '$ytunnus',
         erikoisale      = '$erikoisale'";
   $query .= $postquery;
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $id = mysql_insert_id();
 
   // Jos erikoisalennus muuttuu
@@ -686,7 +686,7 @@ if (isset($jatka)) {
               WHERE yhtio = '$kukarow[yhtio]' AND
               kuka        = '$kukarow[kuka]' AND
               session     = '$session'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     $kukarow["kesken"] = $id;
     $tilausnumero = $id;

@@ -46,6 +46,9 @@ if ($php_cli) {
   // Kukarow setataan esim editilaus_in.inc:ssä
   if (!isset($kukarow)) {
     $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
+
+    // Komentoriviltä ku ajetaan, niin ei haluta posteja admin-käyttäjälle
+    $kukarow["eposti"] = "";
   }
 
   if (!is_array($kukarow)) {

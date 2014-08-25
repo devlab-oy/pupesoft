@@ -355,7 +355,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     $query = "SELECT *
               FROM yhtio
               WHERE yhtio = '$kukarow[yhtio]'";
-    $result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
       echo "<b>".t("Käyttäjän yritys ei löydy")."! ($kukarow[yhtio])";
@@ -367,7 +367,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     $query = "SELECT *
               FROM yhtion_parametrit
               WHERE yhtio='$kukarow[yhtio]'";
-    $result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
       $yhtion_parametritrow = mysql_fetch_assoc($result);

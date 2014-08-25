@@ -38,7 +38,7 @@ if ($tee == 'tarjous') {
             lasku.tila         = 'B' and
             lasku.liitostunnus = '$kukarow[oletus_asiakas]' and
             lasku.alatila      = '$ostoskori'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
     $laskurow = mysql_fetch_array($result);
@@ -48,7 +48,7 @@ if ($tee == 'tarjous') {
               WHERE otunnus = '$laskurow[laskutunnus]'
               and yhtio     = '$kukarow[yhtio]'
               ORDER BY tunnus";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     //kuollaan jos yhtään riviä ei löydy
     if (mysql_num_rows($result) == 0) {
@@ -100,7 +100,7 @@ if ($tee == "poistakori") {
             tila         = 'B' and
             liitostunnus = '$kukarow[oletus_asiakas]' and
             alatila='$ostoskori'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
     // löyty vaan yks dellataan se
@@ -111,13 +111,13 @@ if ($tee == "poistakori") {
               where yhtio = '$kukarow[yhtio]' and
               tyyppi      = 'B' and
               otunnus     = '$kalakori[tunnus]'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     $query = "DELETE from lasku
               where yhtio = '$kukarow[yhtio]' and
               tila        = 'B' and
               tunnus      = '$kalakori[tunnus]'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     echo "<font class='message'>".t("Ostoskori tyhjennetty").".</font><br>";
   }
@@ -134,7 +134,7 @@ if ($tee == "poistarivi") {
             tila         = 'B' and
             liitostunnus = '$kukarow[oletus_asiakas]' and
             alatila='$ostoskori'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
     // löyty vaan yks dellataan siitä rivi
@@ -145,7 +145,7 @@ if ($tee == "poistarivi") {
               where yhtio = '$kukarow[yhtio]' and
               tyyppi      = 'B' and
               tunnus      = '$rivitunnus'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
   }
   else {
     echo "<font class='message'>".t("Rivin poisto epäonnistui").".</font><br>";
@@ -175,7 +175,7 @@ if ($tee == "") {
               tila              = 'B' and
               liitostunnus      = '$kukarow[oletus_asiakas]' and
               alatila='$ostoskori'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0 and file_exists("tulosta_tarjous.inc")) {
       echo "  <form method='post' action='ostoskori.php' target='_blank'>
@@ -206,7 +206,7 @@ if ($tee == "") {
             GROUP BY lasku.tunnus
             HAVING rivit > 0
             ORDER BY alatila";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
 
@@ -244,7 +244,7 @@ if ($tee == "") {
                 WHERE yhtio = '$kukarow[yhtio]' and
                 otunnus     = '$ostoskori[tunnus]' and
                 tyyppi      = 'B'";
-      $riviresult = mysql_query($query) or pupe_error($query);
+      $riviresult = pupe_query($query);
 
       while ($koririvi = mysql_fetch_array($riviresult)) {
 

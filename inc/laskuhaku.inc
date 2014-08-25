@@ -361,7 +361,7 @@ if ($tee != '') {
             $lisa
               ORDER BY $jarj
               LIMIT $alku, 50";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $seraavako = mysql_num_rows($result);
 
   if (mysql_num_rows($result) == 0) {

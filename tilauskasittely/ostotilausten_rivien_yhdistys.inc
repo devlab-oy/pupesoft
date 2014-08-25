@@ -2,7 +2,7 @@
 
 // haetaan keikan tiedot
 $query    = "SELECT * FROM lasku WHERE tunnus='$otunnus' AND yhtio ='$kukarow[yhtio]'";
-$result   = mysql_query($query) or pupe_error($query);
+$result   = pupe_query($query);
 $laskurow = mysql_fetch_array($result);
 
 // yhdistet‰‰n ruksatut keikat "is‰saapumiseen" $otunnus
@@ -13,35 +13,35 @@ if ($tee == "teeyhdistys") {
     foreach ($yhdistakeikka as $keikkatunnus) {
 
       $query = "select laskunro from lasku where yhtio='$kukarow[yhtio]' and tila='K' and tunnus='$keikkatunnus'";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
         $keikkarow = mysql_fetch_array($result);
 
         //p‰ivitet‰‰n otunnus jo kohdistetuille riveille jotta ne ev‰t j‰isi ilman otsikkoa
         $query = "update tilausrivi set otunnus='$otunnus' where yhtio='$kukarow[yhtio]' and tyyppi='O' and uusiotunnus='$keikkatunnus' and otunnus=uusiotunnus order by yhtio";
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
 
         //p‰ivitet‰‰n otunnus niille riveille joiden otunnus pointtaa dellattavaan otsikkoon jotta ne ev‰t j‰isi ilman otsikkoa
         $query = "update tilausrivi set otunnus='$otunnus' where yhtio='$kukarow[yhtio]' and tyyppi='O' and otunnus='$keikkatunnus' order by yhtio";
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
 
         //liitet‰‰n jo liitetyt rivit uuteen otsikkoon
         $query = "update tilausrivi set uusiotunnus='$otunnus' where yhtio='$kukarow[yhtio]' and tyyppi='O' and uusiotunnus='$keikkatunnus' order by yhtio";
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
 
         //poistetaan keikat, mutta ei en‰‰ sanota delete from
         $komm = "(" . $kukarow['kuka'] . "@" . date('Y-m-d') .") ".t("Mit‰tˆitiin ohjelmassa ostotilausten_rivien_yhdistys.inc (1)")."<br>";
         $query = "update lasku set alatila='K', tila='D',  comments = '$komm' where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkarow[laskunro]' and vanhatunnus = 0";
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
 
         //liitet‰‰n liitosotsikot uudestaan
         $query = "update lasku set laskunro = '$laskurow[laskunro]' where yhtio='$kukarow[yhtio]' and tila='K' and laskunro='$keikkarow[laskunro]' and vanhatunnus != 0";
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
 
         //Varmistetaan ett‰ keikka ei ole merkitty kohdistetuks
         $query = "update lasku set kohdistettu = '' where yhtio='$kukarow[yhtio]' and tila='K' and tunnus = '$otunnus'";
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
       }
       else {
         echo "<font class='error'>".t("Saapuminen katosi, mit‰‰n ei tehty")."!</font><br><br>";
@@ -79,7 +79,7 @@ if ($tee == "") {
         where yhtio='$kukarow[yhtio]' and liitostunnus='$toimittajaid' and tila='K' and alatila='' and kohdistettu in ('', 'K') and vanhatunnus=0
         order by laskunro asc";
 
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
 
@@ -120,14 +120,14 @@ if ($tee == "") {
 
       // tutkitaan onko kaikilla tuotteilla on joku varastopaikka
       $query  = "select * from tilausrivi where yhtio='$kukarow[yhtio]' and uusiotunnus='$row[tunnus]' and tyyppi='O'";
-      $tilres = mysql_query($query) or pupe_error($query);
+      $tilres = pupe_query($query);
 
       $kplyhteensa = 0;  // apumuuttuja
       $kplvarasto  = 0;  // apumuuttuja
 
       while ($rivirow = mysql_fetch_array($tilres)) {
         $query = "select * from tuote where tuoteno='$rivirow[tuoteno]' and yhtio='$kukarow[yhtio]'";
-        $tuore = mysql_query($query) or pupe_error($query);
+        $tuore = pupe_query($query);
         $tuote = mysql_fetch_array($tuore);
 
         $kplyhteensa++; // lasketaan montako tilausrivi‰ on kohdistettu
@@ -148,7 +148,7 @@ if ($tee == "") {
             sum(if(vienti!='C' and vienti!='F' and vienti!='I' and vienti!='J' and vienti!='K' and vienti!='L',arvo,0)) kusumma
             from lasku
             where yhtio='$kukarow[yhtio]' and tila='K' and vanhatunnus<>0 and laskunro='$row[laskunro]'";
-      $llres = mysql_query($query) or pupe_error($query);
+      $llres = pupe_query($query);
       $llrow = mysql_fetch_array($llres);
 
       if ($llrow["vosumma"] != 0) $llrow["vosumma"] = "($llrow[vosumma])"; else $llrow["vosumma"]=""; // kaunistellaan summa sulkuihin

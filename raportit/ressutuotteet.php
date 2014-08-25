@@ -42,7 +42,7 @@ if ($tee != '') {
             GROUP BY tuotepaikat.tuoteno
             HAVING oletuspaikalla <= 0 and muillapaikoilla > 0 and oletuspaikkoja > 0
             ORDER BY paikka, tuoteno";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "  <table><tr><th>Tuoteno</th><th>Nimitys</th><th>Toim_tuoteno</th><th>Varastopaikka</th><th>Oletus</th><th>Saldo</th></tr>";
 
@@ -63,7 +63,7 @@ if ($tee != '') {
               and tuotepaikat.tuoteno='$row[tuoteno]'
               $varastot
               ORDER BY oletus desc, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuoteno";
-    $aresult = mysql_query($query) or pupe_error($query);
+    $aresult = pupe_query($query);
 
     while ($arow = mysql_fetch_array($aresult)) {
       echo "<tr><td>$arow[tuoteno]</td><td>".t_tuotteen_avainsanat($arow, 'nimitys')."</td><td>$arow[toim_tuoteno]</td><td>$arow[tuotepaikka]</td><td>$arow[oletus]</td><td>$arow[saldo]</td></tr>";
@@ -83,7 +83,7 @@ $query = "SELECT *
           FROM varastopaikat
           WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
           ORDER BY tyyppi, nimitys";
-$vtresult = mysql_query($query) or pupe_error($query);
+$vtresult = pupe_query($query);
 
 while ($vrow = mysql_fetch_array($vtresult)) {
   $sel = "";

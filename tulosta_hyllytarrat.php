@@ -36,7 +36,7 @@ if ($tee == 'Z') {
               concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) >= concat(rpad(upper('$ahyllyalue'), 5, '0'),lpad(upper('$ahyllynro'), 5, '0'),lpad(upper('$ahyllyvali'), 5, '0'),lpad(upper('$ahyllytaso'), 5, '0')) and
               concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) <= concat(rpad(upper('$lhyllyalue'), 5, '0'),lpad(upper('$lhyllynro'), 5, '0'),lpad(upper('$lhyllyvali'), 5, '0'),lpad(upper('$lhyllytaso'), 5, '0'))
               ORDER BY hyllyalue,hyllynro+0,hyllyvali+0,hyllytaso+0";
-    $paikatres = mysql_query($query) or pupe_error($query);
+    $paikatres = pupe_query($query);
 
     if (mysql_num_rows($paikatres) > 0) {
       while ($paikatrow=mysql_fetch_array($paikatres)) {
@@ -59,7 +59,7 @@ if ($tee=='Y') echo "<font class='error'>$varaosavirhe</font>";
 
 if ($tee== 'Z' and $ulos == '') {
   $query = "SELECT komento from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = '$kirjoitin'";
-  $komres = mysql_query($query) or pupe_error($query);
+  $komres = pupe_query($query);
   $komrow = mysql_fetch_array($komres);
   $komento = $komrow['komento'];
 
@@ -102,7 +102,7 @@ echo "<input type='text' name='lhyllytaso' size='5' maxlength='5' value='$lhylly
 echo "<tr><th>".t("Kirjoitin")."</th><th>".t("Malli")."</th></tr>";
 
 $query = "SELECT * from kirjoittimet where yhtio='$kukarow[yhtio]' order by kirjoitin";
-$kires = mysql_query($query) or pupe_error($query);
+$kires = pupe_query($query);
 
 echo "<td><select name='kirjoitin'>";
 echo "<option value=''>".t("Ei kirjoitinta")."</option>";

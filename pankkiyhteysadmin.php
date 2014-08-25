@@ -25,7 +25,7 @@ if ($tee == "poista") {
   $query = "DELETE
             FROM pankkiyhteys
             WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tunnus = {$pankkiyhteys_tunnus}";
+            AND tunnus  = {$pankkiyhteys_tunnus}";
   $result = pupe_query($query);
 
   if ($result) {
@@ -95,8 +95,8 @@ if ($tee == "vaihda_salasana") {
             bank_encryption_certificate_valid_to = '{$vanha_pankkiyhteys['bank_encryption_certificate_valid_to']}',
             bank_root_certificate_valid_to       = '{$vanha_pankkiyhteys['bank_root_certificate_valid_to']}',
             ca_certificate_valid_to              = '{$vanha_pankkiyhteys['ca_certificate_valid_to']}'
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = {$pankkiyhteys_tunnus}";
+            WHERE yhtio                          = '{$kukarow['yhtio']}'
+            AND tunnus                           = {$pankkiyhteys_tunnus}";
   $result = pupe_query($query);
 
   if (mysql_affected_rows() == 1) {

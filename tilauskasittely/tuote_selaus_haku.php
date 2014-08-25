@@ -1,5 +1,8 @@
 <?php
 
+///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+$useslave = 1;
+
 if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
@@ -186,6 +189,8 @@ if (!isset($tee)) {
 // Tarkistetaan tilausrivi
 if (($tee == 'TI' or is_numeric($ostoskori)) and isset($tilkpl)) {
 
+  pupemaster_start();
+
   if (is_numeric($ostoskori)) {
     $kori = check_ostoskori($ostoskori, $kukarow["oletus_asiakas"]);
     $kukarow["kesken"] = $kori["tunnus"];
@@ -353,37 +358,39 @@ if (($tee == 'TI' or is_numeric($ostoskori)) and isset($tilkpl)) {
 
   echo "<br>";
 
-  $trow       = "";
+  $trow            = "";
   $ytunnus         = "";
   $kpl             = "";
   $tuoteno         = "";
   $toimaika        = "";
   $kerayspvm       = "";
-  $hinta          = "";
-  $netto          = "";
-  $alv         = "";
-  $var       = "";
-  $varasto        = "";
-  $rivitunnus     = "";
-  $korvaavakielto   = "";
+  $hinta           = "";
+  $netto           = "";
+  $alv             = "";
+  $var             = "";
+  $varasto         = "";
+  $rivitunnus      = "";
+  $korvaavakielto  = "";
   $varataan_saldoa = "";
   $myy_sarjatunnus = "";
-  $paikka       = "";
-  $tee        = "";
+  $paikka          = "";
+  $tee             = "";
 
   for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
     ${'ale'.$alepostfix} = '';
   }
+
+  pupemaster_stop();
 }
 
 $jarjestys = "tuote.tuoteno";
 
-$lisa          = "";
-$ulisa         = "";
-$toimtuotteet     = "";
-$origtuotteet     = "";
-$poislisa_mulsel   = "";
-$lisa_parametri    = "";
+$lisa            = "";
+$ulisa           = "";
+$toimtuotteet    = "";
+$origtuotteet    = "";
+$poislisa_mulsel = "";
+$lisa_parametri  = "";
 $hinta_rajaus    = "";
 
 if (!isset($ojarj)) {

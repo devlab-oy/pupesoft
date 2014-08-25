@@ -12,7 +12,7 @@ if ($tee == 'P') {
             FROM tiliotesaanto
             WHERE tunnus = '$tunnus'
             and yhtio    = '$kukarow[yhtio]'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
     echo t("Sääntöä ei löydy")."! $query";
@@ -33,7 +33,7 @@ if ($tee == 'P') {
   $ok       = 1;
 
   $query = "DELETE from tiliotesaanto WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 }
 
 if ($tee == 'U') {
@@ -43,7 +43,7 @@ if ($tee == 'U') {
     $query = "SELECT tilino
               FROM tili
               WHERE tilino = '$tilino' and yhtio = '$kukarow[yhtio]'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
       $virhe .= t("Tiliä ei löydy")."<br>";
@@ -57,7 +57,7 @@ if ($tee == 'U') {
       $query = "SELECT tilino
                 FROM tili
                 WHERE tilino = '$tilino2' and yhtio = '$kukarow[yhtio]'";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {
         $virhe .= t("Palkkiotiliä ei löydy")."<br>";
@@ -72,7 +72,7 @@ if ($tee == 'U') {
                   and yhtio     = '$kukarow[yhtio]'
                   and kaytossa != 'E'
                   and tyyppi    = 'K'";
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
 
         if (mysql_num_rows($result) == 0) {
           $virhe.= t("Kustannuspaikkaa ei löydy")."<br>";
@@ -108,7 +108,7 @@ if ($tee == 'U') {
               WHERE tilino = '$pankkitili'
               and yhtio    = '$kukarow[yhtio]'
               and kaytossa = ''";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
       $virhe.= t("Pankkitiliä ei enää löydy")."<br>";
@@ -123,7 +123,7 @@ if ($tee == 'U') {
   $query = "INSERT into tiliotesaanto
             (yhtio, pankkitili, koodi, koodiselite, nimitieto, selite,  tilino, tilino2, kustp, kustp2, erittely)
             VALUES ('$kukarow[yhtio]', '$pankkitili', '$koodi', '$koodiselite', '$nimitieto', '$selite', '$tilino', '$tilino2', '$kustp', '$kustp2', '$erittely')";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 }
 
 if (strlen($pankkitili) != 0) {
@@ -134,7 +134,7 @@ if (strlen($pankkitili) != 0) {
               WHERE tilino = '$pankkitili'
               and yhtio    = '$kukarow[yhtio]'
               and kaytossa = ''";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) != 1) {
       echo "<b>".t("Pankkitili")." $pankkitili ".t("katosi")."</b><br>";
@@ -177,7 +177,7 @@ if (strlen($pankkitili) != 0) {
               and pankkitili = '$pankkitili'
               ORDER BY 2";
   }
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<tr>";
   for ($i = 1; $i < mysql_num_fields($result); $i++) {
@@ -197,7 +197,7 @@ if (strlen($pankkitili) != 0) {
                     and tunnus    = '$tiliointirow[$i]'
                     and kaytossa != 'E'
                     and tyyppi    = 'K'";
-          $xresult = mysql_query($query) or pupe_error($query);
+          $xresult = pupe_query($query);
           $xrow = mysql_fetch_array($xresult);
           echo "$xrow[0]";
         }
@@ -212,7 +212,7 @@ if (strlen($pankkitili) != 0) {
                     and tunnus    = '$tiliointirow[$i]'
                     and kaytossa != 'E'
                     and tyyppi    = 'K'";
-          $xresult = mysql_query($query) or pupe_error($query);
+          $xresult = pupe_query($query);
           $xrow = mysql_fetch_array($xresult);
 
           echo "$xrow[0]";
@@ -253,7 +253,7 @@ if (strlen($pankkitili) != 0) {
             and tyyppi    = 'K'
             and kaytossa != 'E'
             ORDER BY koodi+0, koodi, nimi";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   $ulos = "<select ".js_alasvetoMaxWidth($nimi, 100)." name = 'kustp'><option value = ' '>".t("Ei kustannuspaikkaa")."</option>";
 
@@ -324,7 +324,7 @@ else {
             WHERE yhtio  = '$kukarow[yhtio]'
             and kaytossa = ''
             ORDER BY nimi";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<form name = 'valinta' method='post'>
       <input type='hidden' name='lopetus' value = '$lopetus'>

@@ -296,11 +296,11 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
   $ostoskori     = isset($_REQUEST["ostoskori"]) ? (int) $_REQUEST["ostoskori"] : 0;
 
   $query = "SELECT * FROM kuka WHERE yhtio='$_GET[yhtio]' AND kuka='$_GET[user]' AND salasana='$_GET[pass]'";
-  $result = mysql_query($query) or die ("Sisäänkirjaus epäonnistui!");
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
     $query = "SELECT * FROM kuka WHERE yhtio='$_GET[yhtio]' AND kuka='$_GET[user]' AND salasana=md5('$_GET[pass]')";
-    $result = mysql_query($query) or die ("Sisäänkirjaus epäonnistui!");
+    $result = pupe_query($query);
   }
 
   if (mysql_num_rows($result) == 1) {
@@ -312,7 +312,7 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
       $query = "UPDATE kuka
                 SET session = ''
                 WHERE session = '" . mysql_real_escape_string($session) . "'";
-      $result = mysql_query($query) or die ("Päivitys epäonnistui sisäänkirjautumisessa");
+      $result = pupe_query($query);
     }
 
     $session = "";
@@ -325,13 +325,13 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
               lastlogin  = now()
               WHERE kuka = '$apukukarow[kuka]'
                and yhtio = '$apukukarow[yhtio]'";
-    $result = mysql_query($query) or die ("Päivitys epäonnistui sisäänkirjautumisessa");
+    $result = pupe_query($query);
 
     $query = "UPDATE kuka
               SET session = ''
               WHERE kuka  = '$apukukarow[kuka]'
                and yhtio != '$apukukarow[yhtio]'";
-    $result = mysql_query($query) or die ("Päivitys epäonnistui sisäänkirjautumisessa");
+    $result = pupe_query($query);
 
     $bool = setcookie("pupesoft_session", $session, time()+43200, "/"); // 12 tuntia voimassa
 
@@ -403,7 +403,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     $query = "SELECT *
               FROM kuka
               WHERE session='" . mysql_real_escape_string($session) . "'";
-    $result = mysql_query($query) or die ("Kysely ei onnistu kuka $query");
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) != 1 or strlen($session) != 25) {
       if (isset($nayta_pdf) and $nayta_pdf == 1) {
@@ -799,7 +799,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
                   and kuka    = '$kukarow[kuka]'
                   and nimi    = 'sanakirja.php'
                   and alanimi = ''";
-        $ksres = mysql_query($query) or pupe_error($query);
+        $ksres = pupe_query($query);
 
         if (mysql_num_rows($ksres) > 0) $kaannetyt_sanat = array();
       }
@@ -808,7 +808,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     if (isset($tee) and $tee == "message_luettu") {
       $message_tunnus = mysql_real_escape_string($message_tunnus);
       $query = "UPDATE messenger SET status='' WHERE vastaanottaja='$kukarow[kuka]' AND tunnus='$message_tunnus'";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
       exit;
     }
 
@@ -822,7 +822,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
                         AND messenger.vastaanottaja = '$kukarow[kuka]'
                         AND kuka.extranet           = ''
                         AND messenger.status        = 'X'";
-      if ($message_result = mysql_query($message_query)) {
+      if ($message_result = pupe_query($message_query)) {
         if (mysql_num_rows($message_result) > 0) {
 
           enable_ajax();

@@ -23,7 +23,7 @@ if ($tee == "aja") {
               FROM tilikaudet
               WHERE yhtio = '$kukarow[yhtio]'
               and tunnus  = '$tkausi'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) != 1) {
       echo "<font class='error'>".t("Sopivaa yrityksen tilikautta ei löytynyt")."</font>";
@@ -50,7 +50,7 @@ if ($tee == "aja") {
 
   if ($maa!="") {
     $query = "SELECT nimi from maat where koodi='$maa' and nimi!='' limit 1";
-    $result=mysql_query($query) or pupe_error($query);
+    $result=pupe_query($query);
     $row=mysql_fetch_array($result);
 
     $lisa["lisatiedot"] .= " and tilausrivin_lisatiedot.kulun_kohdemaa='$maa'";
@@ -61,7 +61,7 @@ if ($tee == "aja") {
               from kustannuspaikka
               where yhtio='$kukarow[yhtio]'
               and tunnus='$kustp'";
-    $result=mysql_query($query) or pupe_error($query);
+    $result=pupe_query($query);
     $row=mysql_fetch_array($result);
 
     $lisa["where"] .= " and tiliointi.kustp='$kustp'";
@@ -72,7 +72,7 @@ if ($tee == "aja") {
               from kustannuspaikka
               where yhtio='$kukarow[yhtio]'
               and tunnus='$kohde'";
-    $result=mysql_query($query) or pupe_error($query);
+    $result=pupe_query($query);
     $row=mysql_fetch_array($result);
 
     $lisa["where"] .= " and tiliointi.kohde='$kohde'";
@@ -83,7 +83,7 @@ if ($tee == "aja") {
               from kustannuspaikka
               where yhtio='$kukarow[yhtio]'
               and tunnus='$proj'";
-    $result=mysql_query($query) or pupe_error($query);
+    $result=pupe_query($query);
     $row=mysql_fetch_array($result);
 
     $lisa["where"] .= " and tiliointi.projekti='$proj'";
@@ -116,7 +116,7 @@ if ($tee == "aja") {
             {$lisa["where"]}
             and kulun_kohdemaa NOT IN ('','{$yhtiorow[maa]}')
             ORDER BY kulun_kohdemaa, tapvm";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result)>0) {
     $summat=array();
@@ -250,7 +250,7 @@ if ($tee == '') {
             FROM tilikaudet
             WHERE yhtio = '$kukarow[yhtio]'
             ORDER BY tilikausi_alku";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
   echo "<td><select name='tkausi'><option value='0'>".t("Ei valintaa");
   while ($vrow=mysql_fetch_array($vresult)) {
     $sel="";
@@ -270,7 +270,7 @@ if ($tee == '') {
             and kaytossa != 'E'
             and tyyppi    = 'K'
             ORDER BY koodi+0, koodi, nimi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   echo "<td><select name='kustp'><option value=''>".t("Ei valintaa");
 
@@ -292,7 +292,7 @@ if ($tee == '') {
             and kaytossa != 'E'
             and tyyppi    = 'O'
             ORDER BY koodi+0, koodi, nimi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   echo "<td><select name='kohde'><option value=''>Ei valintaa";
 
@@ -314,7 +314,7 @@ if ($tee == '') {
             and kaytossa != 'E'
             and tyyppi    = 'P'
             ORDER BY koodi+0, koodi, nimi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   echo "<td><select name='proj'><option value=''>".t("Ei valintaa");
 
@@ -334,7 +334,7 @@ if ($tee == '') {
             FROM maat
             WHERE nimi != ''
             ORDER BY koodi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
   echo "<td><select name='maa'>";
 
   echo "<option value = '' >".t("Ei valintaa")."</option>";

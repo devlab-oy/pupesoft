@@ -12,7 +12,7 @@ if (is_numeric($toimittajaid) and $toimittajaid > 0) {
              FROM toimi
              WHERE yhtio = '{$kukarow["yhtio"]}'
              AND tunnus  = '{$toimittajaid}'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $monta  = mysql_num_rows($result);
 }
 
@@ -24,7 +24,7 @@ if ($monta == 0 and $ytunnus != '') {
              AND ytunnus  = '{$ytunnus}'
              AND tyyppi  != 'P'
              ORDER BY ytunnus, selaus, nimi";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $monta  = mysql_num_rows($result);
 }
 
@@ -36,7 +36,7 @@ if ($monta == 0 and $ytunnus != '') {
              AND toimittajanro  = '{$ytunnus}'
              AND tyyppi        != 'P'
              ORDER BY toimittajanro, selaus, nimi";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $monta  = mysql_num_rows($result);
 }
 
@@ -54,7 +54,7 @@ if ($monta == 0 and $ytunnus != '') {
               AND toimittajanro  like '{$ytunnus}%'
               AND tyyppi        != 'P')
               ORDER BY ytunnus, toimittajanro, selaus, nimi";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $monta  = mysql_num_rows($result);
 }
 
@@ -66,7 +66,7 @@ if ($monta == 0 and $ytunnus != '') {
              AND (nimi like '%{$ytunnus}%' or nimitark like '%{$ytunnus}%')
              AND tyyppi  != 'P'
              ORDER BY selaus, nimi";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $monta  = mysql_num_rows($result);
 }
 

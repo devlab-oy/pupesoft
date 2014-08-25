@@ -21,20 +21,20 @@ if (!isset($eiliittymaa) or $eiliittymaa != 'ON') {
   }
 }
 
-if (!isset($eiliittymaa))     $eiliittymaa = "";
-if (!isset($ylilimiitin))     $ylilimiitin = "";
-if (!isset($sytunnus))       $sytunnus = "";
-if (!isset($sanimi))       $sanimi = "";
-if (!isset($grouppaus))     $grouppaus = "asiakas";
-if (!isset($savalkoodi))     $savalkoodi = "";
-if (!isset($yli))         $yli = "";
+if (!isset($eiliittymaa))      $eiliittymaa = "";
+if (!isset($ylilimiitin))      $ylilimiitin = "";
+if (!isset($sytunnus))         $sytunnus = "";
+if (!isset($sanimi))           $sanimi = "";
+if (!isset($grouppaus))        $grouppaus = "asiakas";
+if (!isset($savalkoodi))       $savalkoodi = "";
+if (!isset($yli))              $yli = "";
 if (!isset($valuutassako))     $valuutassako = "";
-if (!isset($laji))         $laji = "";
-if (!isset($luottovakuutettu))  $luottovakuutettu = "";
-if (!isset($tee))         $tee = "";
-if (!isset($pupe_DataTables))   $pupe_DataTables = "";
-if (!isset($luottolisa))     $luottolisa = "";
-if (!isset($sliitostunnus))   $sliitostunnus = "";
+if (!isset($laji))             $laji = "";
+if (!isset($luottovakuutettu)) $luottovakuutettu = "";
+if (!isset($tee))              $tee = "";
+if (!isset($pupe_DataTables))  $pupe_DataTables = "";
+if (!isset($luottolisa))       $luottolisa = "";
+if (!isset($sliitostunnus))    $sliitostunnus = "";
 
 $pvmraja = $yhtiorow['erapaivan_ylityksen_raja'] >= 1 ? $yhtiorow['erapaivan_ylityksen_raja'] : 15;
 

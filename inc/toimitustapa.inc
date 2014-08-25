@@ -11,7 +11,7 @@ if ($tunnus != '' and $upd != 1) {
             FROM toimitustapa
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tunnus  = '{$tunnus}'";
-  $toimitustapa_check_res = mysql_query($query) or pupe_error($query);
+  $toimitustapa_check_res = pupe_query($query);
 
   if (mysql_num_rows($toimitustapa_check_res) == 1) {
     $toimitustapa_check_row = mysql_fetch_assoc($toimitustapa_check_res);

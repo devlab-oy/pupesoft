@@ -16,14 +16,14 @@ if ($Y.$K.$P < $y.$k.$p) {
 $query = "SELECT kuka, tapa, year(pvmalku), month(pvmalku), dayofmonth(pvmalku)
           from kalenteri
           where tunnus='$tunnus' and yhtio='$kukarow[yhtio]'";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 $row = mysql_fetch_array($result);
 
 if ($row["kuka"] == $kukarow["kuka"]) {
   $query = "DELETE
             from kalenteri
             where tunnus='$tunnus' and yhtio='$kukarow[yhtio]'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   echo "<br><br>Tapahtuma poistettu!";
   $jatko = 1;
 

@@ -227,7 +227,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
             and tila     = 'U'
             and alatila  = 'X'
             and laskunro in ($laskunumerot)";
-  $res   = mysql_query($query) or pupe_error($query);
+  $res   = pupe_query($query);
 
   $lkm = count(explode(',', $laskunumerot));
 
@@ -242,7 +242,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
                FROM maksuehto
                LEFT JOIN pankkiyhteystiedot on (pankkiyhteystiedot.yhtio=maksuehto.yhtio and pankkiyhteystiedot.tunnus=maksuehto.pankkiyhteystiedot)
                WHERE maksuehto.yhtio='$kukarow[yhtio]' and maksuehto.tunnus='$lasrow[maksuehto]'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
       $masrow = array();
@@ -262,7 +262,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
                 WHERE yhtio        = '$kukarow[yhtio]'
                 and factoringyhtio = '$masrow[factoring]'
                 and valkoodi       = '$lasrow[valkoodi]'";
-      $fres = mysql_query($query) or pupe_error($query);
+      $fres = pupe_query($query);
       $frow = mysql_fetch_assoc($fres);
     }
     else {
@@ -320,7 +320,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
                           FROM asiakas
                           WHERE yhtio = '$kukarow[yhtio]'
                           AND tunnus  = '$lasrow[liitostunnus]'";
-    $asiakas_apu_res = mysql_query($asiakas_apu_query) or pupe_error($asiakas_apu_query);
+    $asiakas_apu_res = pupe_query($asiakas_apu_query);
 
     if (mysql_num_rows($asiakas_apu_res) == 1) {
       $asiakas_apu_row = mysql_fetch_assoc($asiakas_apu_res);
@@ -359,7 +359,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
                   FROM kuka
                   WHERE tunnus = '$lasrow[myyja]'
                   and yhtio    = '$kukarow[yhtio]'";
-      $myyresult = mysql_query($mquery) or pupe_error($mquery);
+      $myyresult = pupe_query($mquery);
       $myyrow = mysql_fetch_assoc($myyresult);
 
       //HUOM: Tässä kaikki sallitut verkkopuolen chn:ät
@@ -392,7 +392,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
                    and uusiotunnus in ($lasrow[tunnus])
                    and tyyppi      = 'L'
                    and alv         >= 600";
-      $alvresult = mysql_query($alvquery) or pupe_error($alvquery);
+      $alvresult = pupe_query($alvquery);
 
       if (mysql_num_rows($alvresult) > 0) {
         $komm .= t_avainsana("KAANTALVVIESTI", $laskun_kieli, "", "", "", "selitetark");
@@ -443,7 +443,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
                 WHERE yhtio         = '$kukarow[yhtio]'
                 and uusiotunnus     = '$lasrow[tunnus]'
                 and toimitettuaika != '0000-00-00 00:00:00'";
-      $toimaikares = mysql_query($query) or pupe_error($query);
+      $toimaikares = pupe_query($query);
       $toimaikarow = mysql_fetch_assoc($toimaikares);
 
       if ($toimaikarow["mint"] == "0000-00-00") {
@@ -477,7 +477,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
                    and uusiotunnus = '$lasrow[tunnus]'
                    and tyyppi      = 'L'
                    ORDER BY alv";
-      $alvresult = mysql_query($alvquery) or pupe_error($alvquery);
+      $alvresult = pupe_query($alvquery);
 
       while ($alvrow1 = mysql_fetch_assoc($alvresult)) {
 
@@ -499,7 +499,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
                      WHERE tilausrivi.uusiotunnus = '$lasrow[tunnus]' and tilausrivi.yhtio = '$kukarow[yhtio]' and tilausrivi.alv = '$alvrow1[alv]' and tilausrivi.tyyppi = 'L'
                      GROUP BY alv";
         }
-        $aresult = mysql_query($aquery) or pupe_error($aquery);
+        $aresult = pupe_query($aquery);
         $alvrow = mysql_fetch_assoc($aresult);
 
         // Kirjotetaan failiin arvierittelyt
@@ -615,7 +615,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
                 and tilausrivi.uusiotunnus  = '$lasrow[tunnus]'
                 GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23
                 ORDER BY tilausrivi.otunnus, if(tilausrivi.tuoteno in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]'), 2, 1), $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
-      $tilres = mysql_query($query) or pupe_error($query);
+      $tilres = pupe_query($query);
 
       $rivinumerot = array(0 => 0);
       $rivilaskuri = 1;
@@ -733,7 +733,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
                   and tuoteno      = '$tilrow[tuoteno]'
                   and $sarjanutunnus in ($tilrow[rivitunnukset])
                   and sarjanumero != ''";
-        $sarjares = mysql_query($query) or pupe_error($query);
+        $sarjares = pupe_query($query);
 
         if ($tilrow["kommentti"] != '' and mysql_num_rows($sarjares) > 0) {
           $tilrow["kommentti"] .= " ";
@@ -754,7 +754,7 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
                     AND tuoteno = '{$tilrow['tuoteno']}'
                     AND ytunnus = '{$lasrow['ytunnus']}'
                     ORDER BY tunnus";
-          $asiakaskommentti_res = mysql_query($query) or pupe_error($query);
+          $asiakaskommentti_res = pupe_query($query);
 
           if (mysql_num_rows($asiakaskommentti_res) > 0) {
             while ($asiakaskommentti_row = mysql_fetch_assoc($asiakaskommentti_res)) {

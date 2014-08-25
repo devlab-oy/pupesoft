@@ -85,8 +85,8 @@ if ($raptee == "AJA") {
   $lopetuspaiva = "{$lopetusvv}-{$lopetuskk}-{$lopetuspp}";
 
   $query = "SELECT
-            concat(lasku.toim_nimi,'<br>',
-            lasku.toim_osoite,'<br>',
+            concat(lasku.toim_nimi,'\n',
+            lasku.toim_osoite,'\n',
             lasku.toim_postitp) asiakastiedot,
             tm.merkki valmistaja,
             tt1.tyomaarays_tunnus,
@@ -162,6 +162,51 @@ if ($raptee == "AJA") {
     $worksheet->writeString($excelrivi, $i, $businessdays);
     $i=0;
     $excelrivi++;
+
+    // Jos halutaan näyttää koko tapahtumahistoria kyseiselle työmääräykselle
+    if (isset($nayta_koko_historia)) {
+      $queryy = "SELECT tyomaarayksen_tapahtumat.tyomaarays_tunnus,tyomaarayksen_tapahtumat.luontiaika,
+                 ifnull(tilataulu.selitetark, '') tilassa,
+                 ifnull(jonotaulu.selitetark, '') jonossa
+                 FROM tyomaarayksen_tapahtumat
+                 LEFT JOIN avainsana tilataulu ON tilataulu.yhtio = tyomaarayksen_tapahtumat.yhtio 
+                   AND tilataulu.laji = 'TYOM_TYOSTATUS'
+                   AND tilataulu.selite = tyomaarayksen_tapahtumat.tyostatus_selite
+                 LEFT JOIN avainsana jonotaulu ON jonotaulu.yhtio = tyomaarayksen_tapahtumat.yhtio 
+                   AND jonotaulu.laji = 'TYOM_TYOJONO'
+                   AND jonotaulu.selite = tyomaarayksen_tapahtumat.tyojono_selite
+                 WHERE tyomaarayksen_tapahtumat.yhtio = 'signa'
+                 AND tyomaarays_tunnus = '{$rivi['tyomaarays_tunnus']}'
+                 ORDER BY tyomaarayksen_tapahtumat.luontiaika DESC";
+      $ressuu = pupe_query($queryy);
+      
+      if (mysql_affected_rows() > 0) {
+        $worksheet->write($excelrivi, $i, t('Työmääräyksen koko tapahtumahistoria'), $format_bold);
+        $excelrivi++;
+        $i++;
+
+        $worksheet->write($excelrivi, $i, t('Luontiaika'), $format_bold);
+        $i++;
+        $worksheet->write($excelrivi, $i, t('Jonossa'), $format_bold);
+        $i++;
+        $worksheet->write($excelrivi, $i, t('Tilassa'), $format_bold);
+        $i++;
+
+        $excelrivi++;
+        while ($rowi = mysql_fetch_assoc($ressuu)) {
+          $i=1;
+          $worksheet->writeString($excelrivi, $i, $rowi['luontiaika']);
+          $i++;
+          $worksheet->writeString($excelrivi, $i, $rowi['jonossa']);
+          $i++;
+          $worksheet->writeString($excelrivi, $i, $rowi['tilassa']);
+          $i++;
+
+          $excelrivi++;
+        }
+        $i=0;
+      }
+    }
   }
 
   $excelnimi = $worksheet->close();
@@ -215,11 +260,16 @@ echo "<tr>
   }
   echo "</select></td>";
   echo "</tr>";
-  
+
 echo "<tr>
   <th>".t("Rajaa tuotemerkillä")."</th>
   <td><input type='text' name='valmistajarajaus' value='$valmistajarajaus'></td>
   </tr>";
+
+  echo "<tr>
+    <th>".t("Näytä koko tapahtumahistoria")."</th>
+    <td><input type='checkbox' name='nayta_koko_historia'></td>
+    </tr>";
 
 echo "</table><br>";
 echo "<br><input type='submit' value='".t("Aja työmääräysraportti")."'>";

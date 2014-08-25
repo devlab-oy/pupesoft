@@ -49,7 +49,7 @@ if ($tee == "1") {
   if ($konserni == 'on') {
     // haetaan konsernin kaikki yhtiot ja tehd‰‰n mysql lauseke
     $query = "SELECT yhtio from yhtio where konserni='$yhtiorow[konserni]' and konserni != ''";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     $yhtio = "";
     while ($rivi = mysql_fetch_array($result)) {
@@ -66,7 +66,7 @@ if ($tee == "1") {
     $query = "SELECT konserni
               FROM yhtio
               WHERE yhtio = '$kukarow[yhtio]'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
       $trow = mysql_fetch_array($result);
@@ -80,7 +80,7 @@ if ($tee == "1") {
     $query = "SELECT yhtio, konserni, nimi
               FROM yhtio
               WHERE konserni = '$yhtiorow[konserni]' and konserni != ''";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) < 2) {
       echo t("Pyysit konsernin‰kˆkulmaa, mutta yritys ei ole konsernin osa").".<br>";
@@ -121,7 +121,7 @@ if ($tee == "1") {
             WHERE lasku.yhtio in ($yhtio) and ((lasku.tila in ('H','M','P','Q','U') and (alatila != 'X' or tila='U')) or (lasku.vanhatunnus = 0 and lasku.tila='K')) and lasku.mapvm = '0000-00-00'
             GROUP BY 1
             HAVING myynti<>0 or osto<>0 or summa<>0";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<table>";
   echo "<tr><th>".t("Pvm")."</th><th>".t("Myyntireskontra")."</th><th>".t("Ostoreskontra")."</th><th>".t("Yhteens‰")."</th><th>".t("Kumulatiivinen")."</th><th>".t("Ostotilauksen arvo")."</th></tr>";

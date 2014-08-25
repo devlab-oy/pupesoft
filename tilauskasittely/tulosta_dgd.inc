@@ -34,7 +34,7 @@ if (!function_exists('alku_dgd')) {
               WHERE r1.otsikkonro = '$laskurow[tunnus]'
                     AND r1.yhtio  = '$kukarow[yhtio]'
               GROUP BY 1";
-    $res = mysql_query($query) or pupe_error($query);
+    $res = pupe_query($query);
     $rahtikirjanro = mysql_fetch_assoc($res);
 
     if ($rahtikirjanro["rahtikirjanro"] != "") {
@@ -211,6 +211,11 @@ if (!function_exists('rivi_dgd')) {
 
     $kala-=2;
 
+    $riveja = count($vaktuotetiedot);
+    $total_netto = filter_var($vaktuotetiedot[$riveja-1], FILTER_SANITIZE_NUMBER_INT);
+    $total_brutto = filter_var($vaktuotetiedot[$riveja-2], FILTER_SANITIZE_NUMBER_INT);
+    $suhde = $total_netto / $total_brutto;
+
     foreach ($vaktuotetiedot as $vaktuoterivi) {
 
       list($vaktuoterivi, $vaktuotepaino) = explode("###", $vaktuoterivi);
@@ -242,6 +247,8 @@ if (!function_exists('rivi_dgd')) {
       $pdf->pages[$sivu]->drawText($vaktuoterivi, mm_pt(45), mm_pt($kala), 'LATIN1');
 
       if ($vaktuotepaino != "") {
+        $bruttopaino = round($vaktuotepaino / $suhde);
+        $pdf->pages[$sivu]->drawText($bruttopaino, mm_pt(145), mm_pt($kala), 'LATIN1');
         $pdf->pages[$sivu]->drawText($vaktuotepaino, mm_pt(167), mm_pt($kala), 'LATIN1');
       }
 

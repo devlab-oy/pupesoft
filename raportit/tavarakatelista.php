@@ -21,12 +21,12 @@ if ($tee != '') {
             AND tuote.status       NOT IN ('P','X')
             GROUP BY tullinimike1, alkuperamaa
             ORDER BY tullinimike1, alkuperamaa";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   while ($row  = mysql_fetch_array($result)) {
     // katotaanonko oikea tullinimike
     $query = "SELECT cn, dm FROM tullinimike WHERE cn = '$row[tullinimike1]' AND kieli = '$yhtiorow[kieli]'";
-    $tulre = mysql_query($query) or pupe_error($query);
+    $tulre = pupe_query($query);
 
     $tullinimikeres = mysql_fetch_array($tulre);
 
@@ -65,7 +65,7 @@ if ($tee != '') {
 
     $virtu = substr($virtu, 0, -1); // vika pilkku pois
     $query = "SELECT tuoteno, osasto, try, nimitys, tullinimike1 FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tullinimike1 IN ($virtu) ORDER BY osasto, try, tuoteno";
-    $virre = mysql_query($query) or pupe_error($query);
+    $virre = pupe_query($query);
 
     echo "<font class='message'>".t("Virheellisiä tullinimikkeitä seuraavilla tuotteilla. Nämä on korjattava ennen lähetystä.")."</font><hr>";
 

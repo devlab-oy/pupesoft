@@ -157,7 +157,7 @@ else {
 
   // näytetään soveltuvat tuotemerkit
   $query = "  SELECT distinct tuotemerkki FROM tuote use index (yhtio_tuotemerkki) WHERE yhtio='$kukarow[yhtio]' and tuotemerkki != '' ORDER BY tuotemerkki";
-  $res2  = mysql_query($query) or die($query);
+  $res2  = pupe_query($query);
 
   if (mysql_num_rows($res2) > 11) {
     echo "<div style='height:320px;overflow:auto;'>";

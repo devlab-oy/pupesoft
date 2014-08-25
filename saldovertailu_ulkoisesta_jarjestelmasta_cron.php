@@ -111,7 +111,8 @@ if ($handle = opendir($path)) {
                       AND tilausrivi.tyyppi       = 'L'
                       AND tilausrivi.var         != 'P'
                       AND tilausrivi.keratty      = ''
-                      AND tilausrivi.kerattyaika  = '0000-00-00 00:00:00'";
+                      AND tilausrivi.kerattyaika  = '0000-00-00 00:00:00'
+                      AND tilausrivi.tuoteno      = '{$tuoterow['tuoteno']}'";
             $ker_result = pupe_query($query);
             $ker_rivi = mysql_fetch_assoc($ker_result);
 

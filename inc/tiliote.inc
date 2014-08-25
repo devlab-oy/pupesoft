@@ -1,17 +1,17 @@
 <?php
 
-if (!isset($lopetus)) $lopetus = "";
-if (!isset($lopetuslisa)) $lopetuslisa = "";
-if (!isset($silent)) $silent = "";
-if (!isset($tee)) $tee = "";
-if (!isset($tiliotejarjestys)) $tiliotejarjestys = "";
-if (!isset($td_perheid)) $td_perheid = $tiliotedatarow['perheid'];
-if (!isset($maksu)) $maksu = 0;
-if (!isset($tkesken)) $tkesken = 0;
-if (!isset($tilinvaluutta)) $tilinvaluutta = "";
-if (!isset($toim)) $toim = "";
+if (!isset($lopetus))             $lopetus = "";
+if (!isset($lopetuslisa))         $lopetuslisa = "";
+if (!isset($silent))              $silent = "";
+if (!isset($tee))                 $tee = "";
+if (!isset($tiliotejarjestys))    $tiliotejarjestys = "";
+if (!isset($td_perheid))          $td_perheid = $tiliotedatarow['perheid'];
+if (!isset($maksu))               $maksu = 0;
+if (!isset($tkesken))             $tkesken = 0;
+if (!isset($tilinvaluutta))       $tilinvaluutta = "";
+if (!isset($toim))                $toim = "";
 if (!isset($selite_maksuavarten)) $selite_maksuavarten = "";
-if (!isset($eiselitetta)) $eiselitetta = 0;
+if (!isset($eiselitetta))         $eiselitetta = 0;
 
 $tunnus = substr($tietue, 0, 3);
 
@@ -119,7 +119,16 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
     if (!$maksutositetehty) {
       switch ($koodi) {
       case '702' : // Maksettu jotain tililtä, etsitään tilinolla ja summalla....
+      case '706' : // Maksumääräys maksettu jotain tililtä, etsitään nimellä ja summalla....
       case '720' : // Maksumääräys maksettu jotain tililtä, etsitään nimellä ja summalla....
+
+        $_tilisiirto   = stripos($koodiselite, "TILISIIRTO");
+        $_maksupalvelu = stripos($koodiselite, "MAKSUPALVELU");
+
+        // 706 hyväksytään vain jos selitteessä lukee MAKSUPALVELU tai TILISIIRTO
+        if ($koodi == "706" and $_maksupalvelu === FALSE and $_tilisiirto === FALSE) {
+          break;
+        }
 
         $tehdaanselvittelytosite = TRUE;
         unset($result);
@@ -396,7 +405,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
       if ($erialla == "E") {
         echo "<font class='message'>".t("Erittely alla").".</font><br>\n";
       }
-      else {
+      elseif ($erialla != "VIITEAINEISTO") {
 
         $erilinkkiekotus = FALSE;
 
@@ -856,13 +865,13 @@ case 'T10':
     $maara *= -1;
   }
 
-  $maara      = sprintf('%.2f', $maara);
+  $maara       = sprintf('%.2f', $maara);
   $kuittikoodi = substr($tietue, 106, 1);
-  $erialla    = "";
-  $maksaa    = pupesoft_cleanstring(trim(substr($tietue, 108, 35)));
-  $tilino    = substr($tietue, 144, 14);
-  $iban     = "";
-  $omataso    = substr($tietue, 187, 1);
+  $erialla     = "";
+  $maksaa      = pupesoft_cleanstring(trim(substr($tietue, 108, 35)));
+  $tilino      = substr($tietue, 144, 14);
+  $iban        = "";
+  $omataso     = substr($tietue, 187, 1);
   $koodiselite = trim(substr($tietue, 52, 35));
   $maksuviite  = trim(substr($tietue, 159, 20));
 
@@ -885,7 +894,7 @@ case 'T10':
       // Tämä on case Sampo ja erittelyt onkin ilmoitettu tasoissa!
       // eli jos valmista maksua seuraava tapahuma on suurempitasoinen T10 ei tätä edeltävää maksua käsitellä
       if (substr($tdrow2peek['tieto'], 187, 1) > $omataso and $tdr2tunn == 'T10') {
-        $kuittikoodi   = "E";
+        $kuittikoodi = "E";
         $erialla     = "E";
       }
 
@@ -901,9 +910,9 @@ case 'T10':
               and alku     = '$tiliotedatarow[alku]'
               and tilino   = '$tiliotedatarow[tilino]'
               and tyyppi   = '$tiliotedatarow[tyyppi]'
-              and substr(tieto,13,18) = '".substr($tietue, 12, 18)."'
+              and substring(tieto,13,18) = '".substr($tietue, 12, 18)."'
               and tunnus  != '$tiliotedatarow[tunnus]'";
-    $tdres2peek = mysql_query($query) or pupe_error($query);
+    $tdres2peek = pupe_query($query);
 
     // Jos koodi on 710 ja koodiselite on PANO ja kuittikoodi on "E", mutta samalla arkistointitunnuksella EI löydy toista tapahtumaa, niin nollataan kuittikoodi.
     if (mysql_num_rows($tdres2peek) == 0) {
@@ -991,7 +1000,22 @@ case 'T10':
         <td name='td_{$td_perheid}' class='$class'></td>
         <td name='td_{$td_perheid}' class='$class'></td>";
   echo "<td class='back' style='width:200px;'></td></tr>";
+
   $vientiselite = "$maksaa<br>\n$koodi $koodiselite<br>\n";
+
+  if ($maksuviite != "") {
+    echo "<tr class='aktiivi'>";
+
+    if ($tee == 'S') echo "<td name='td_{$td_perheid}' class='$class'></td>";
+
+    echo "<td name='td_{$td_perheid}' class='$class'></td>";
+    echo "<td name='td_{$td_perheid}' class='$class'></td>";
+    echo "<td name='td_{$td_perheid}' class='$class'>".t("Maksuviite").": $maksuviite</td>";
+    echo "<td name='td_{$td_perheid}' class='$class'></td>
+          <td name='td_{$td_perheid}' class='$class'></td>
+          <td name='td_{$td_perheid}' class='$class'></td>";
+    echo "<td class='back' style='width:200px;'></td></tr>";
+  }
   break;
 case 'T11':
 
@@ -1087,6 +1111,12 @@ case 'T11':
   // Nordea Viro häkki
   if ($yhtiorow['maa'] == "EE" and $koodi == '705' and $kuittikoodi != "E" and stripos($arvo, "REFERENCE PAYMENT") !== FALSE) {
     $kuittikoodi = "E";
+  }
+
+  // Swedbank Viro häkki
+  if ($yhtiorow['maa'] == "EE" and $koodi == '710' and $koodiselite == "DOMESTIC CREDIT TRANSFER" and $kuittikoodi != "E" and (int) $maksuviite > 0) {
+    $kuittikoodi = "E";
+    $erialla     = "VIITEAINEISTO";
   }
 
   echo "<tr class='aktiivi'><td name='td_{$td_perheid}' class='$class'></td><td name='td_{$td_perheid}' class='$class'></td>";

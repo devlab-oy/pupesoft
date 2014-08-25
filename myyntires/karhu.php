@@ -337,7 +337,7 @@ if ($tee == 'KARHUA') {
             where laji = 'KARHUVIESTI'
             and yhtio  = '$yhtiorow[yhtio]'
             order by sorttaus, jarjestys";
-  $res = mysql_query($query) or pupe_error();
+  $res = pupe_query($query);
 
   echo "<form name='lahetaformi' method='post'>";
   echo "<select name='karhuviesti'>";

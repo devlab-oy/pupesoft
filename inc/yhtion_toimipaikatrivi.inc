@@ -13,7 +13,7 @@ if (mysql_field_name($result, $i) == "maa") {
             FROM maat
             WHERE nimi != ''
             ORDER BY koodi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
   $ulos = "<td><select name='$nimi'>";
 
   while ($vrow = mysql_fetch_array($vresult)) {
@@ -54,7 +54,7 @@ if ((mysql_field_name($result, $i) == "tilino") or
     $query = "SELECT nimi
               FROM tili
               WHERE yhtio='$kukarow[yhtio]' and tilino = '$trow[$i]'";
-    $vresult = mysql_query($query) or pupe_error($query);
+    $vresult = pupe_query($query);
 
     if (mysql_num_rows($vresult) == 1) {
       $vrow = mysql_fetch_array($vresult);
@@ -78,7 +78,7 @@ if (mysql_field_name($result, $i) == "projekti" or mysql_field_name($result, $i)
             and tyyppi    = '$kptyyppi'
             and kaytossa != 'E'
             ORDER BY koodi+0, koodi, nimi";
-  $vresult = mysql_query($tpque) or pupe_error($tpque);
+  $vresult = pupe_query($tpque);
 
   $sel="";
   if ($trow[$i] == "") {

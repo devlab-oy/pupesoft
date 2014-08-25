@@ -48,7 +48,7 @@ if ($xml !== FALSE) {
       $query = "INSERT INTO valuu_historia (kotivaluutta, valuutta, kurssi, kurssipvm)
                 VALUES ('EUR', '$valkoodi', round(1 / $kurssi, 9), '$pvm_mysql')
                   ON DUPLICATE KEY UPDATE kurssi = round(1 / $kurssi, 9)";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
     }
 
     echo "</tr>";

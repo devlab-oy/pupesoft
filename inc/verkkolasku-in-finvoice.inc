@@ -2,13 +2,25 @@
 
 if (!function_exists("xml_float")) {
   function xml_float($value) {
-    return pupesoft_cleannumber(utf8_decode($value));
+    $value = (string) $value;
+
+    if (mb_detect_encoding($value, 'UTF-8', true) !== FALSE) {
+      $value = utf8_decode($value);
+    }
+
+    return pupesoft_cleannumber($value);
   }
 }
 
 if (!function_exists("xml_string")) {
   function xml_string($value) {
-    return pupesoft_cleanstring(utf8_decode($value));
+    $value = (string) $value;
+
+    if (mb_detect_encoding($value, 'UTF-8', true) !== FALSE) {
+      $value = utf8_decode($value);
+    }
+
+    return pupesoft_cleanstring($value);
   }
 }
 
@@ -77,9 +89,9 @@ if ($yhtio == "") {
   $yhtio = xml_string($xml->BuyerPartyDetails->BuyerOrganisationTaxCode);
 }
 
-// Onko tunnus IBAN-muodossa, jos ei niin varmistetaan, ett‰ se on ovtmuodossa
+// Onko tunnus IBAN-muodossa, jos ei niin varmistetaan, ett√§ se on ovtmuodossa
 if (strlen($yhtio) != 18 or strtoupper(substr($yhtio, 0, 2)) != "FI") {
-  // Varmistetaan, ett‰ tunnus on ovtunnus muodossa
+  // Varmistetaan, ett√§ tunnus on ovtunnus muodossa
   $yhtio = preg_replace("/[^0-9]/", "", $yhtio);
 
   if (strpos($yhtio, "0037") === false) {
@@ -103,12 +115,12 @@ if ($laskun_summa_eur == 0) {
   $laskun_summa_eur = xml_float($xml->InvoiceDetails->InvoiceTotalVatIncludedAmount);
 }
 
-// Varmistetaan, ett‰ tunnus on ytunnus muodossa
-// Finvoicessa t‰‰ll‰ tulee vastanottajan ytunnus FI etuliitteell‰
+// Varmistetaan, ett√§ tunnus on ytunnus muodossa
+// Finvoicessa t√§√§ll√§ tulee vastanottajan ytunnus FI etuliitteell√§
 $verkkotunnus_vas = preg_replace("/[^0-9]/", "", $verkkotunnus_vas);
 
 if ($laskun_tyyppi == "INV02") {
-  // Hyvityslaskut pit‰‰ merkata hyvitykseksi jotta ne osataan k‰sitell‰ oikein
+  // Hyvityslaskut pit√§√§ merkata hyvitykseksi jotta ne osataan k√§sitell√§ oikein
   $laskun_tyyppi = "381";
 }
 
@@ -144,7 +156,7 @@ if (count($tuotetiedot) > 0) {
       // maventa-case
       $rtuoteno[$i]['ostotilausnro'] = $laskun_asiakkaan_tilausnumero;
 
-      // Tallennetaan riville jos t‰m‰ on kauttalaskutusta
+      // Tallennetaan riville jos t√§m√§ on kauttalaskutusta
       if ($kauttalaskutus == "KAUTTALASKUTUS") {
         $rtuoteno[$i]["kauttalaskutus"] = "KAUTTALASKUTUS";
       }
@@ -158,7 +170,7 @@ if (count($tuotetiedot) > 0) {
 
       $rivien_summa_yhteensa += $rtuoteno[$i]["rivihinta_verolli"];
 
-      // T‰m‰ pit‰‰ olla stringi (?!?), koska sit‰ k‰sittell‰‰n niin verkkolasku-in.inciss‰
+      // T√§m√§ pit√§√§ olla stringi (?!?), koska sit√§ k√§sittell√§√§n niin verkkolasku-in.inciss√§
       $xvati = str_replace(",", ".", $tuotetieto->RowVatRatePercent);
 
       $rtuoteno[$i]["alv"] = $xvati;
@@ -167,7 +179,7 @@ if (count($tuotetiedot) > 0) {
       $rtuoteno[$i]["ale"] = xml_float($tuotetieto->RowDiscountPercent);
       $rtuoteno[$i]["hinta"] = round(xml_float($tuotetieto->UnitPriceAmount), 2);
 
-      // rivikommentti (kommentti putsataan ja decoodataan kokonaisuudessaan myˆhemmin)
+      // rivikommentti (kommentti putsataan ja decoodataan kokonaisuudessaan my√∂hemmin)
       $xrinfo = $tuotetieto->RowFreeText;
 
       if (is_array($xrinfo)) {
@@ -179,11 +191,11 @@ if (count($tuotetiedot) > 0) {
         $rtuoteno[$i]["kommentti"] = $xrinfo;
       }
 
-      // tilausnumero putsataan ja decoodataan kokonaisuudessaan myˆhemmin
+      // tilausnumero putsataan ja decoodataan kokonaisuudessaan my√∂hemmin
       $_tilausnumero = trim($tuotetieto->RowIdentifierUrlText);
 
       if ($_tilausnumero != "") {
-        // alkuper‰inen tilausnumero rivikommenttiin mukaan
+        // alkuper√§inen tilausnumero rivikommenttiin mukaan
         $rtuoteno[$i]["kommentti"] = "Tilausnumero: {$_tilausnumero}\n" . $rtuoteno[$i]["kommentti"];
       }
 
@@ -194,7 +206,7 @@ if (count($tuotetiedot) > 0) {
       $rtuoteno[$i]["lapsi"] = "";
     }
     else {
-      // Poistetaan t‰m‰ tietue
+      // Poistetaan t√§m√§ tietue
       unset($rtuoteno[$i]);
       $i--;
     }

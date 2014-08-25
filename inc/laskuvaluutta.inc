@@ -8,7 +8,7 @@ $query = "SELECT valkoodi, sum(summa) summa, sum(summa * valuu.kurssi) kotisumma
           and lasku.tila    in ('H','M','P','Q')
           GROUP BY valkoodi
           ORDER BY valkoodi";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 echo "<table>";
 echo "<tr><th>".t("Valkoodi")."</th><th>".t("Summa valuutassa")."</th><th>".t("Summa")."</th><th>".t("Kpl")."</th></tr>";

@@ -1,14 +1,19 @@
 <?php
 //sis‰‰n tulee $row jossa on tilausrivi kaikki tiedot
 
-$riviok         = 0;
-$saako_hyvaksya     = 0;
-$saako_jalkitoimittaa   = 0;
+$riviok               = 0;
+$saako_hyvaksya       = 0;
+$saako_jalkitoimittaa = 0;
 $vastaavattuotteet    = 0;
-$varaosavirhe       = "";
-$vastaavat_html      = "";
+$varaosavirhe         = "";
+$vastaavat_html       = "";
 
-$tquery  = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
+pupeslave_start();
+
+$tquery  = "SELECT *
+            FROM tuote
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tuoteno = '$row[tuoteno]'";
 $tres  = pupe_query($tquery);
 $trow   = mysql_fetch_assoc($tres); // haetaan tuotteen tiedot..
 
@@ -16,34 +21,27 @@ if ($toim == "YLLAPITO") {
   // Jos ollaan syˆtetty poikkeavat sopimuksen alku-/loppup‰iv‰t tilausriville, tarkistetaan ett‰ ne on oikeelliset
   if ($row["kerayspvm"] != '0000-00-00' or $row["toimaika"] != '0000-00-00') {
 
-    $sopimusquery = "SELECT sopimus_alkupvm, sopimus_loppupvm
-                     FROM laskun_lisatiedot
-                     WHERE yhtio = '{$kukarow["yhtio"]}'
-                     AND otunnus = '{$laskurow["tunnus"]}'";
-    $sopimus_result = pupe_query($sopimusquery);
-    $sopimus_row = mysql_fetch_assoc($sopimus_result);
-
     // tilausrivi.kerayspvm == poikkeava alkup‰iv‰
-    if ($row["kerayspvm"] != '0000-00-00' and $row["kerayspvm"] < $sopimus_row["sopimus_alkupvm"]) {
+    if ($row["kerayspvm"] != '0000-00-00' and $row["kerayspvm"] < $laskurow["sopimus_alkupvm"]) {
       $varaosavirhe .= t("VIRHE: Poikkeava alkup‰iv‰ ei voi olla vanhempi kun sopimuksen alkup‰iv‰!")."<br>";
       $riviok++;
       $tilausok++;
     }
 
-    if ($row["kerayspvm"] != '0000-00-00' and $row["kerayspvm"] > $sopimus_row["sopimus_loppupvm"]) {
+    if ($row["kerayspvm"] != '0000-00-00' and $row["kerayspvm"] > $laskurow["sopimus_loppupvm"]) {
       $varaosavirhe .= t("VIRHE: Poikkeava alkup‰iv‰ ei voi olla uudempi kun sopimuksen loppup‰iv‰!")."<br>";
       $riviok++;
       $tilausok++;
     }
 
     // tilausrivi.toimaika == poikkeava loppup‰iv‰
-    if ($row["toimaika"] != '0000-00-00' and $row["toimaika"] < $sopimus_row["sopimus_alkupvm"]) {
+    if ($row["toimaika"] != '0000-00-00' and $row["toimaika"] < $laskurow["sopimus_alkupvm"]) {
       $varaosavirhe .= t("VIRHE: Poikkeava loppup‰iv‰ ei voi olla vanhempi kun sopimuksen alkup‰iv‰!")."<br>";
       $riviok++;
       $tilausok++;
     }
 
-    if ($row["toimaika"] != '0000-00-00' and $row["toimaika"] > $sopimus_row["sopimus_loppupvm"] and $sopimus_row["sopimus_loppupvm"] != "0000-00-00") {
+    if ($row["toimaika"] != '0000-00-00' and $row["toimaika"] > $laskurow["sopimus_loppupvm"] and $laskurow["sopimus_loppupvm"] != "0000-00-00") {
       $varaosavirhe .= t("VIRHE: Poikkeava loppup‰iv‰ ei voi olla uudempi kun sopimuksen loppup‰iv‰!")."<br>";
       $riviok++;
       $tilausok++;
@@ -58,7 +56,10 @@ if ($toim == "YLLAPITO") {
 }
 
 if ($trow['panttitili'] == 'K' and in_array($toim, array('PIKATILAUS', 'RIVISYOTTO', 'REKLAMAATIO'))) {
-  $query = "SELECT panttitili FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['liitostunnus']}'";
+  $query = "SELECT panttitili
+            FROM asiakas
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = '{$laskurow['liitostunnus']}'";
   $chk_res = pupe_query($query);
   $chk_row = mysql_fetch_assoc($chk_res);
 
@@ -340,7 +341,8 @@ if ($row["var"] == 'S') {
   // otetaan maksuehto selville..
   $query = "SELECT *
             from maksuehto
-            where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
+            where yhtio = '$kukarow[yhtio]'
+            and tunnus  = '$laskurow[maksuehto]'";
   $maksuehtoresult = pupe_query($query);
   $maksuehtorow = mysql_fetch_assoc($maksuehtoresult);
 
@@ -553,7 +555,7 @@ if (
                  and tuoteno          = '$row[tuoteno]'
                  and myyntirivitunnus = '$row[tunnus]'
                  LIMIT 1";
-      $sarjares = pupe_query($query);
+      $sarjares = pupe_query($query, $masterlink);
       $sarjarow = mysql_fetch_assoc($sarjares);
     }
 
@@ -923,7 +925,7 @@ elseif (
             WHERE yhtio = '$kukarow[yhtio]'
             AND perheid = '$row[tunnus]'
             AND otunnus = '$row[otunnus]'";
-  $perhe_tuoteno_res = pupe_query($query);
+  $perhe_tuoteno_res = pupe_query($query, $masterlink);
 
   $perheen_tuotteet = '';
 
@@ -1069,7 +1071,7 @@ if ($row["alv"] == -999.99) {
   $saako_hyvaksya = 0;
 }
 
-if ($row['tuoteno'] != '' and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A'  or (($row["var"] == 'J' or $row["var"] == 'P') and !in_array($row["var2"], array("OK", "PK"))))) {
+if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A'  or (($row["var"] == 'J' or $row["var"] == 'P') and !in_array($row["var2"], array("OK", "PK"))))) {
 
   // Haetaan vastaavuusketjut korvaavat ketjun p‰‰tuotteella
   require_once 'vastaavat.class.php';
@@ -1375,3 +1377,5 @@ if ($sahkoinen_tilausliitanta and (!isset($vastaavat_html) or trim($vastaavat_ht
     }
   }
 }
+
+pupeslave_stop();

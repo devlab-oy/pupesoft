@@ -1882,7 +1882,7 @@ if (!function_exists('loppu')) {
     if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
       // haetaan toimipaikan tiedot
       $alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and tunnus='$laskurow[yhtio_toimipaikka]'";
-      $alhire = mysql_query($alhqur) or pupe_error($alhqur);
+      $alhire = pupe_query($alhqur);
 
       if (mysql_num_rows($alhire) == 1) {
         $alhiro = mysql_fetch_assoc($alhire);
@@ -1899,7 +1899,7 @@ if (!function_exists('loppu')) {
     if ($laskurow["yhtio_ovttunnus"] != "" and $laskurow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
       // haetaan toimipaikan tiedot
       $alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_ovttunnus]'";
-      $alhire = mysql_query($alhqur) or pupe_error($alhqur);
+      $alhire = pupe_query($alhqur);
 
       if (mysql_num_rows($alhire) == 1) {
         $alhiro = mysql_fetch_assoc($alhire);
@@ -1916,7 +1916,7 @@ if (!function_exists('loppu')) {
     if (!$y_tiedot_ok) {
       // haetaan toimipaikan tiedot
       $alhqur = "SELECT puhelin, fax, email, www from yhtio where yhtio='$laskurow[yhtio]'";
-      $alhire = mysql_query($alhqur) or pupe_error($alhqur);
+      $alhire = pupe_query($alhqur);
 
       if (mysql_num_rows($alhire) == 1) {
         $alhiro = mysql_fetch_assoc($alhire);
@@ -2509,6 +2509,7 @@ if (!function_exists("tulosta_lasku")) {
     else $pjat_sortlisa = "";
 
     $query_ale_lisa = generoi_alekentta('M');
+    $ale_query_select_lisa = generoi_alekentta_select('yhteen', 'M');
 
     if ($toim == 'PROFORMA') {
       $laskurow["tapvm"] = date("Y-m-d");
@@ -2521,10 +2522,10 @@ if (!function_exists("tulosta_lasku")) {
             sum(tilausrivi.kpl) kpl,";
     }
 
-    $sivu      = 1;
+    $sivu       = 1;
     $summa      = 0;
-    $arvo     = 0;
-    $varasto   = 0;
+    $arvo       = 0;
+    $varasto    = 0;
     $vientikala = 0;
     $page_lasku = array();
 
@@ -2542,6 +2543,7 @@ if (!function_exists("tulosta_lasku")) {
               tilausrivi.ale1,
               tilausrivi.ale2,
               tilausrivi.ale3,
+              $ale_query_select_lisa aleyhteensa,
               tilausrivi.alv,
               tuote.eankoodi,
               tuote.ei_saldoa,
@@ -2590,20 +2592,68 @@ if (!function_exists("tulosta_lasku")) {
               and (tilausrivi.perheid = 0 or tilausrivi.perheid=tilausrivi.tunnus or tilausrivin_lisatiedot.ei_nayteta !='E' or tilausrivin_lisatiedot.ei_nayteta is null)
               and tilausrivi.varattu+tilausrivi.kpl != 0
               $where
-              GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25
+              GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
               ORDER BY tilausrivi.otunnus, if(tilausrivi.tuoteno in ('$yhtiorow[kuljetusvakuutus_tuotenumero]','$yhtiorow[laskutuslisa_tuotenumero]'), 2, 1), $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
     $result = pupe_query($query);
 
     $kaanteinen_verotus = FALSE;
+    $laskurows          = array();
 
+    // tsekataan pitääkö tuote korvata osaluettelolla
     while ($row = mysql_fetch_assoc($result)) {
+
       if ($row["alv"] >= 600) {
         $kaanteinen_verotus = TRUE;
-        break;
+      }
+
+      if ($yhtiorow["pura_osaluettelot"] != "") {
+        // Korvataanko tilauksella oleva rivi osaluettelolla
+        $query = "SELECT tuote.tuoteno, tuote.yksikko, tuote.nimitys,
+                  tuoteperhe.kerroin,
+                  tuoteperhe.hintakerroin myyntihinta,
+                  tuoteperhe.hintakerroin hinta,
+                  round(tuoteperhe.hintakerroin / if ('$yhtiorow[alv_kasittely]' = '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * tuoteperhe.kerroin * {$row['kpl']} * (1-{$row['aleyhteensa']}/100), $yhtiorow[hintapyoristys]) rivihinta,
+                  round(tuoteperhe.hintakerroin * if ('$yhtiorow[alv_kasittely]' != '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * tuoteperhe.kerroin * {$row['kpl']} * (1-{$row['aleyhteensa']}/100), $yhtiorow[hintapyoristys]) rivihinta_verollinen,
+                  ((tuoteperhe.hintakerroin / {$laskurow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]'  = '' and {$row['alv']} < 500, (1+{$row['alv']}/100), 1) * tuoteperhe.kerroin * {$row['kpl']} * (1-{$row['aleyhteensa']}/100)) rivihinta_valuutassa
+                  FROM tuoteperhe
+                  JOIN tuote ON (tuoteperhe.yhtio=tuote.yhtio and tuoteperhe.tuoteno=tuote.tuoteno)
+                  WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
+                  AND tuoteperhe.isatuoteno = '$row[tuoteno]'
+                  AND tuoteperhe.tyyppi     = 'O'
+                  ORDER BY tuote.tuoteno";
+        $tuoteperhe_result = pupe_query($query);
+
+        if (mysql_num_rows($tuoteperhe_result) > 0) {
+          while ($tuoteperhe_row = mysql_fetch_assoc($tuoteperhe_result)) {
+
+            $lisarow = $row;
+
+            $lisarow["tuoteno"] = $tuoteperhe_row["tuoteno"];
+            $lisarow["nimitys"] = $tuoteperhe_row["nimitys"];
+            $lisarow["yksikko"] = $tuoteperhe_row["yksikko"];
+
+            $lisarow["hinta"]                = $tuoteperhe_row["hinta"];
+            $lisarow["myyntihinta"]          = $tuoteperhe_row["myyntihinta"];
+            $lisarow["rivihinta"]            = $tuoteperhe_row["rivihinta"];
+            $lisarow["rivihinta_verollinen"] = $tuoteperhe_row["rivihinta_verollinen"];
+            $lisarow["rivihinta_valuutassa"] = $tuoteperhe_row["rivihinta_valuutassa"];
+
+            $lisarow["tilkpl"]  = $tuoteperhe_row["kerroin"]*$row["tilkpl"];
+            $lisarow["varattu"] = $tuoteperhe_row["kerroin"]*$row["varattu"];
+            $lisarow["jt"]      = $tuoteperhe_row["kerroin"]*$row["jt"];
+            $lisarow["kpl"]     = $tuoteperhe_row["kerroin"]*$row["kpl"];
+
+            $laskurows[] = $lisarow;
+          }
+        }
+        else {
+          $laskurows[] = $row;
+        }
+      }
+      else {
+        $laskurows[] = $row;
       }
     }
-
-    mysql_data_seek($result, 0);
 
     // aloitellaan laskun teko
     list($page_lasku, $sivu, $kala) = alku($laskurow, $asiakasrow, $kieli, $pdf_lasku, $toim, $laskutyyppi, $kaanteinen_verotus, $page_lasku, $sivu);
@@ -2612,10 +2662,9 @@ if (!function_exists("tulosta_lasku")) {
     $yhteensamaara = 0;
 
     $lasrivilask  = 0;
-    $lasrivimaara = mysql_num_rows($result);
+    $lasrivimaara = count($laskurows);
 
-    while ($row = mysql_fetch_assoc($result)) {
-
+    foreach ($laskurows as $row) {
       $lasrivilask++;
 
       // Rivin toimitusaika

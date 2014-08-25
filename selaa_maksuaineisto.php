@@ -149,7 +149,7 @@ if ($tee == '') {
               ORDER BY tyyppi ASC, aika DESC";
 
   }
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
 
@@ -222,18 +222,19 @@ if ($tee == 'selaa') {
             lasku.nimitark,
             lasku.maksaja,
             lasku.maksuaika,
-            if(lasku.laskunro = 0, '', lasku.laskunro) laskunro,
+            if(lasku.laskunro = 0, '', lasku.laskunro) AS laskunro,
             lasku.summa,
-            if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) poimittusumma,
+            if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) AS poimittusumma,
             lasku.valkoodi,
-            ifnull(kuka.nimi, lasku.maksaja) kukanimi,
+            ifnull(kuka.nimi, lasku.maksaja) AS kukanimi,
             lasku.popvm,
             lasku.tapvm,
             lasku.olmapvm,
             lasku.mapvm,
             lasku.erpcm,
-            yriti.nimi maksu_tili,
-            yriti.iban yriti_iban,
+            yriti.nimi AS maksu_tili,
+            yriti.iban AS yriti_iban,
+            yriti.tunnus AS yriti_tunnus,
             date_format(lasku.popvm, '%d.%m.%y.%H.%i.%s') popvm_dmy,
             round(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) poimittusumma_eur,
             round(lasku.summa * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) summa_eur
@@ -245,7 +246,7 @@ if ($tee == 'selaa') {
             AND lasku.maksuaika > '0000-00-00 00:00:00'
             $lisa
             ORDER BY lasku.liitostunnus, lasku.tapvm, lasku.summa ASC";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
 
@@ -254,22 +255,22 @@ if ($tee == 'selaa') {
     echo "<br />";
     echo "<br />";
 
-    $row = mysql_fetch_assoc($result);
+    $eka_row = mysql_fetch_assoc($result);
 
     echo "<table>";
     echo "<tr class='aktiivi'>";
     echo "<th>", t("Poimija"), "</th>";
-    echo "<td>{$row['kukanimi']}</td>";
+    echo "<td>{$eka_row['kukanimi']}</td>";
     echo "</tr>";
     echo "<tr class='aktiivi'>";
     echo "<th>", t("Maksuaineisto"), "</th>";
     echo "<td>";
 
-    if (strtoupper($yhtiorow['maa']) == 'EE' and substr($row['yriti_iban'], 0, 2) == "EE") {
-      echo "EESEPA-$kukarow[yhtio]-".$row['popvm_dmy'].".xml";
+    if (strtoupper($yhtiorow['maa']) == 'EE' and substr($eka_row['yriti_iban'], 0, 2) == "EE") {
+      echo "EESEPA-$kukarow[yhtio]-".$eka_row['popvm_dmy'].".xml";
     }
     else {
-      echo "SEPA-$kukarow[yhtio]-".$row['popvm_dmy'].".xml";
+      echo "SEPA-$kukarow[yhtio]-".$eka_row['popvm_dmy'].".xml";
     }
 
     echo "</td>";
@@ -347,6 +348,7 @@ if ($tee == 'selaa') {
     if (tarkista_oikeus("sepa.php")) {
       echo "<br><br><form name = 'valinta' method='post' action = 'sepa.php'>";
       echo "<input type = 'hidden' name = 'tee' value = 'KIRJOITAKOPIO'>";
+      echo "<input type = 'hidden' name = 'pankkitili_tunnus' value = '{$eka_row['yriti_tunnus']}'>";
       echo "<input type = 'hidden' name = 'poimitut_laskut' value = '".implode(",", $poimitut_laskut)."'>";
       echo "<input type = 'submit' value = '".t("Tee maksuaineistokopio")."'>";
       echo "</form>";

@@ -40,9 +40,16 @@ if ($php_cli) {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
-  $_yhtio = pupesoft_cleanstring($argv[1]);
+  $_yhtio   = pupesoft_cleanstring($argv[1]);
   $yhtiorow = hae_yhtion_parametrit($_yhtio);
-  $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
+
+  // Kukarow setataan esim editilaus_in.inc:ssä
+  if (!isset($kukarow)) {
+    $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
+
+    // Komentoriviltä ku ajetaan, niin ei haluta posteja admin-käyttäjälle
+    $kukarow["eposti"] = "";
+  }
 
   if (!is_array($kukarow)) {
     exit(1);
@@ -410,13 +417,13 @@ else {
       $lasklisa .= " and lasku.ketjutus != '' ";
     }
 
-    // laskutetaan vain tietyt tilausket
+
     if (isset($laskutettavat) and $laskutettavat != "") {
+      // Laskutetaan vain tietyt tilausket
       $lasklisa .= " and lasku.tunnus in ($laskutettavat) ";
     }
-
-    // Komentoriviltä ei ikinä laskuteta käteismyyntejä ($php_cli ei kelpaa, koska $editil_cli virittää sen myös)
-    if (php_sapi_name() == 'cli') {
+    elseif (php_sapi_name() == 'cli') {
+      // Komentoriviltä ei ikinä laskuteta käteismyyntejä ($php_cli ei kelpaa, koska $editil_cli virittää sen myös)
       $lasklisa_eikateiset = " JOIN maksuehto ON (lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus and maksuehto.kateinen='')";
     }
 

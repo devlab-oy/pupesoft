@@ -26,7 +26,7 @@ if ($tee == '') { // Tämä on käyttöliittymä
             and kaytossa != 'E'
             and tyyppi    = 'K'
             ORDER BY koodi+0, koodi, nimi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   echo "<td><select name='kustp'><option value=' '>".t("Ei valintaa");
 
@@ -48,7 +48,7 @@ if ($tee == '') { // Tämä on käyttöliittymä
             and kaytossa != 'E'
             and tyyppi    = 'O'
             ORDER BY koodi+0, koodi, nimi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   echo "<td><select name='kohde'><option value=' '>".t("Ei valintaa");
 
@@ -70,7 +70,7 @@ if ($tee == '') { // Tämä on käyttöliittymä
             and kaytossa != 'E'
             and tyyppi    = 'P'
             ORDER BY koodi+0, koodi, nimi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   echo "<td><select name='proj'><option value=' '>".t("Ei valintaa");
 
@@ -119,7 +119,7 @@ $query = "SELECT taso
           and left(kausi,4) = '$alvv'
           $lisa
           ORDER BY taso";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 $timeparts = explode(" ", microtime());
 $valitime = $timeparts[1].substr($timeparts[0], 1);
@@ -151,7 +151,7 @@ while ($budjrow = mysql_fetch_array($result)) {
             and left(kausi,4) = '$alvv'
             $lisa
             GROUP BY kausi";
-  $aresult = mysql_query($query) or pupe_error($query);
+  $aresult = pupe_query($query);
 
   // Vähän otsikoita peliin...
   $query = "SELECT nimi
@@ -160,7 +160,7 @@ while ($budjrow = mysql_fetch_array($result)) {
             and taso    = '$budjrow[0]'
             and laji    = 'O'
             and tyyppi  = 'S'";
-  $xresult = mysql_query($query) or pupe_error($query);
+  $xresult = pupe_query($query);
 
   $tasorow[0] = "Taso '$hakutaso'";
 

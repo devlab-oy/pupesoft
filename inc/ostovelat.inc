@@ -9,7 +9,7 @@ if (isset($tkausi)) {
   $query = "SELECT *
             FROM tilikaudet
             WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   if (mysql_num_rows($vresult) == 1) {
     $tilikaudetrow = mysql_fetch_array($vresult);
@@ -50,7 +50,7 @@ for ($i=1; $i<8; $i++) {
             WHERE yhtio = '$kukarow[yhtio]'
             and taso    < '3'
             ORDER BY taso";
-  $sresult = mysql_query($query) or pupe_error($query);
+  $sresult = pupe_query($query);
 
   echo "<tr><td><select name='taso[$i]'>";
   echo "<option value=''>".t("Ei valintaa")."</option>";
@@ -109,7 +109,7 @@ for ($i=1; $i<8; $i++) {
               and taso.taso          = '$taso[$i]'
               and taso.tyyppi ='U'
               GROUP BY 1";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     while ($trow = mysql_fetch_array($result)) {
       for ($j=0; $j<mysql_num_fields($result); $j++) {
@@ -143,7 +143,7 @@ $query = "SELECT *
           FROM tilikaudet
           WHERE yhtio = '$kukarow[yhtio]'
           ORDER BY tilikausi_alku";
-$vresult = mysql_query($query) or pupe_error($query);
+$vresult = pupe_query($query);
 
 echo " <select name='tkausi'>";
 

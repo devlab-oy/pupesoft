@@ -1,5 +1,8 @@
 <?php
 
+///* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *///
+$useslave = 1;
+
 require "inc/parametrit.inc";
 
 if (!isset($tee))         $tee = "";
@@ -67,8 +70,12 @@ if ($tee == 'N' or $tee == 'E') {
   }
 }
 
-if (isset($tuoteno)) $tkysy_lopetus = "{$palvelin2}tuote.php////tuoteno=".urlencode($tuoteno)."//tee=Z///KALA";
-else $tkysy_lopetus = "";
+if (isset($tuoteno)) {
+  $tkysy_lopetus = "{$palvelin2}tuote.php////toim=$toim//tee=Z//tuoteno=".urlencode($tuoteno)."//toimipaikka=$toimipaikka//raportti=$raportti//historia=$historia//tapahtumalaji=$tapahtumalaji";
+}
+else {
+  $tkysy_lopetus = "";
+}
 
 if ($lopetus != "") {
   // Lis‰t‰‰n t‰m‰ lopetuslinkkiin
@@ -2026,7 +2033,8 @@ if ($tee == 'Z') {
                 tilausrivin_lisatiedot.osto_vai_hyvitys,
                 lasku2.tunnus lasku2tunnus,
                 lasku2.laskunro lasku2laskunro,
-                concat_ws(' / ', round(tilausrivi.hinta, $yhtiorow[hintapyoristys]), $ale_query_concat_lisa round(tilausrivi.rivihinta, $yhtiorow[hintapyoristys])) tilalehinta
+                concat_ws(' / ', round(tilausrivi.hinta, $yhtiorow[hintapyoristys]), $ale_query_concat_lisa round(tilausrivi.rivihinta, $yhtiorow[hintapyoristys])) tilalehinta,
+                tapahtuma.tunnus tapatunnus
                 FROM tapahtuma use index (yhtio_tuote_laadittu)
                 {$toimipaikkarajaus}
                 LEFT JOIN tilausrivi use index (primary) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
@@ -2081,6 +2089,8 @@ if ($tee == 'Z') {
 
       while ($prow = mysql_fetch_assoc($qresult)) {
 
+        $ankkuri = "ta_".$prow["tapatunnus"];
+
         $vararvo_nyt -= $prow["arvo"];
 
         // Ep‰kuranteissa saldo ei muutu
@@ -2095,16 +2105,16 @@ if ($tee == 'Z') {
           echo "<td nowrap valign='top'>";
 
           if ($prow["laji"] == "laskutus" and $prow["laskutunnus"] != "") {
-            echo "<a href='raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus=$tkysy_lopetus'>".t("$prow[laji]")."</a>";
+            echo "<a name='$ankkuri' href='raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus=$tkysy_lopetus///$ankkuri'>".t("$prow[laji]")."</a>";
           }
           elseif ($prow["laji"] == "tulo" and $prow["laskutunnus"] != "") {
-            echo "<a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus=$tkysy_lopetus'>".t("$prow[laji]")."</a>";
+            echo "<a name='$ankkuri' href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus=$tkysy_lopetus///$ankkuri'>".t("$prow[laji]")."</a>";
           }
           elseif ($prow["laji"] == "siirto" and $prow["laskutunnus"] != "") {
-            echo "<a href='$PHP_SELF?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus=$lopetus'>".t("$prow[laji]")."</a>";
+            echo "<a name='$ankkuri' href='$PHP_SELF?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus=$tkysy_lopetus///$ankkuri'>".t("$prow[laji]")."</a>";
           }
           elseif ($prow["laji"] == "valmistus" and $prow["laskutunnus"] != "") {
-            echo "<a href='$PHP_SELF?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus=$lopetus'>".t("$prow[laji]")."</a>";
+            echo "<a name='$ankkuri' href='$PHP_SELF?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus=$tkysy_lopetus///$ankkuri'>".t("$prow[laji]")."</a>";
 
             // N‰ytet‰‰n t‰m‰ vain jos k‰ytt‰j‰ll‰ on oikeus tehd‰ valmistuksia tai reseptej‰
             if ($oikeu_t1 or $oikeu_t2 or $oikeu_t3 or $oikeu_t4) {
@@ -2193,7 +2203,7 @@ if ($tee == 'Z') {
           echo "<td valign='top'>$prow[selite]";
 
           if ($prow["laji"] == "tulo" and $prow["lasku2tunnus"] != "") {
-            echo "<br><a href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[lasku2tunnus]&lopetus=$tkysy_lopetus'>".t("N‰yt‰ saapuminen")." $prow[lasku2laskunro]</a>";
+            echo "<br><a name='$ankkuri' href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[lasku2tunnus]&lopetus=$tkysy_lopetus///$ankkuri'>".t("N‰yt‰ saapuminen")." $prow[lasku2laskunro]</a>";
           }
 
           if (trim($prow["tapapaikka"]) != "" and $prow["tapahtuma_hyllyalue"] != "!!M") echo "<br>".t("Varastopaikka").": $prow[tapapaikka]";

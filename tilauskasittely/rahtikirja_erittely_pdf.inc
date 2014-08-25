@@ -237,7 +237,7 @@ if (!function_exists('rivi_erittely')) {
               AND yhtio        = '$kukarow[yhtio]'
               GROUP BY 1,2
               ORDER BY 1,2";
-    $pakka = mysql_query($query) or pupe_error($query);
+    $pakka = pupe_query($query);
 
     while ($pakkarow = mysql_fetch_assoc($pakka)) {
 
@@ -311,7 +311,7 @@ else {
             ORDER BY lasku.ytunnus, lasku.liitostunnus, lasku.tunnus";
 }
 
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0) {
 

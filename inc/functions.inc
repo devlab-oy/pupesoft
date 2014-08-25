@@ -10770,7 +10770,13 @@ if (!function_exists("t")) {
       $stringi_sql = mysql_real_escape_string($stringi);
 
       $sanakirjaquery  = "SELECT fi, $indeksi, tunnus FROM sanakirja WHERE fi = BINARY '$stringi_sql'";
-      $sanakirjaresult = pupe_query($sanakirjaquery);
+
+      if (is_resource($GLOBALS["slavelink"])) {
+        $sanakirjaresult = pupe_query($sanakirjaquery, $GLOBALS["slavelink"]);
+      }
+      else {
+        $sanakirjaresult = pupe_query($sanakirjaquery);
+      }
 
       if (isset($kaannetyt_sanat) and !in_array($stringi, $kaannetyt_sanat)) $kaannetyt_sanat[] = $stringi;
 

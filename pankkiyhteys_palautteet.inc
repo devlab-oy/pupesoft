@@ -61,8 +61,9 @@ if ($tee == "hae_aineistot") {
         // Haetaan tiedoston tiedot filelistasta, ett‰ saadaan p‰iv‰m‰‰r‰ ja tilinumero
         $tiedot = search_array_key_for_value_recursive($palaute_tiedostot, "fileReference", $aineisto["viite"]);
 
+        // Kaikki pankit ei osaa n‰ytt‰‰ tilinumeroa, n‰ytet‰‰n sillo filereference
+        $tili = $tiedot[0]["serviceId"] != "" ? $tiedot[0]["serviceId"] : $tiedot[0]["fileReference"];
         $date = date("d.m.Y h:i:s", strtotime($tiedot[0]["fileTimestamp"]));
-        $tili = $tiedot[0]["serviceId"];
 
         // Jos aineisto ei ollut ok
         if ($aineisto['status'] != "OK") {

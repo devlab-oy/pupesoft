@@ -965,12 +965,12 @@ function hae_maksusuoritukset($maksurow, $linkki) {
           if ($lasktilitro["summa_valuutassa"] != 0
               and $lasktilitro["valkoodi"] != $yhtiorow["valkoodi"]
               and $lasktilitro["valkoodi"] != "") {
-            echo "<span style='font-weight:bold'>Suoritus</span> &#124; $lasktilitro[summa_valuutassa] ";
+            echo "<span style='font-weight:bold'> ".t("Suoritus")."</span> &#124; $lasktilitro[summa_valuutassa] ";
             echo "$lasktilitro[valkoodi] ($lasktilitro[summa] $yhtiorow[valkoodi]) &#124; ";
             echo tv1dateconv($lasktilitro["tapvm"]), " <br>";
           }
           else {
-            echo "<span style='font-weight:bold'>Suoritus</span> &#124 ";
+            echo "<span style='font-weight:bold'> ".t("Suoritus")."</span> &#124 ";
             echo "$lasktilitro[summa] $yhtiorow[valkoodi] &#124; ";
             echo tv1dateconv($lasktilitro["tapvm"]), "<br>";
           }
@@ -1009,7 +1009,7 @@ function hae_maksusuoritukset($maksurow, $linkki) {
 
       // echotaan suoritusten tiedot
       while ($row3 = mysql_fetch_assoc($res3)) {
-        echo "<span style='font-weight:bold'>Suoritus</span> &#124; ", $row3['summa'], " ";
+        echo "<span style='font-weight:bold'> ".t("Suoritus")."</span> &#124; ", $row3['summa'], " ";
         echo $yhtiorow['valkoodi'], " &#124; ", tv1dateconv($row3['maksupvm']), "<br>";
 
         // ja mahdollinen kommentti
@@ -1031,7 +1031,7 @@ function hae_maksusuoritukset($maksurow, $linkki) {
 
         $vaihdot = array("##TUNNUS##" => $row4['tunnus'], "##NUMERO##" => $row4['laskunro']);
 
-        echo "<span style='font-weight:bold'>Lasku</span> &#124; ";
+        echo "<span style='font-weight:bold'> ".t("Lasku")."</span> &#124; ";
         echo strtr($linkki, $vaihdot);
         echo " &#124; ", $row4['summa'], " ";
         echo $yhtiorow['valkoodi'], " &#124; ", tv1dateconv($row4['tapvm']), "<br>";
@@ -1049,14 +1049,13 @@ function hae_maksusuoritukset($maksurow, $linkki) {
   $res5 = pupe_query($qry5);
   $row5 = mysql_fetch_assoc($res5);
 
-  if ($row5['kaatosumma']) {
-    $alennus  = -1 * abs($row5['kaatosumma']);
-    echo "<span style='font-weight:bold'>Kassa-ale</span> &#124; ", $alennus, " ";
+  if ($row5['kaatosumma'] != 0) {
+    echo "<span style='font-weight:bold'> ".t("Kassa-ale")."</span> &#124; ", $row5['kaatosumma'], " ";
     echo $yhtiorow['valkoodi'], ' &#124; ', tv1dateconv($row5['kohdistuspvm']), '<br>';
   }
 
   // haetaan vielä mahdolliset luottotappiot ja echotaan
-  $qry6 = "SELECT SUM(summa) as summa, tapvm
+  $qry6 = "SELECT round(SUM(summa*(1+vero/100)), 2) as summa, tapvm
            FROM tiliointi
            WHERE yhtio = '{$kukarow['yhtio']}'
            AND ltunnus = '{$maksurow['tunnus']}'
@@ -1064,8 +1063,8 @@ function hae_maksusuoritukset($maksurow, $linkki) {
   $res6 = pupe_query($qry6);
   $row6 = mysql_fetch_assoc($res6);
 
-  if ($row6['summa']) {
-    echo "<span style='font-weight:bold'>Luottotappio</span> &#124; ", $row6['summa'], " ";
+  if ($row6['summa'] != 0) {      
+    echo "<span style='font-weight:bold'> ".t("Luottotappio")."</span> &#124; ", $row6['summa'], " ";
     echo $yhtiorow['valkoodi'], ' &#124; ', tv1dateconv($row6['tapvm']), '<br>';
   }
 }

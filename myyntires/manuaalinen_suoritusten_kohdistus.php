@@ -926,7 +926,7 @@ if ($tila == 'tee_kohdistus') {
                             yhtio          = '{$kukarow['yhtio']}',
                             suoritustunnus = '{$suoritus[tunnus]}',
                             laskutunnus    = '{$lasku[tunnus]}',
-                            kaatosumma     = '{$kaatosumma}',
+                            kaatosumma     = $kaatosumma * -1,
                             kohdistuspvm   = NOW(),
                             kirjauspvm     = NOW()";
           $kohdistus_result = pupe_query($kohdistus_qry);

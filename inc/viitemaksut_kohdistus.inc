@@ -393,6 +393,15 @@ while ($row = mysql_fetch_assoc($suorires)) {
               WHERE yhtio = '$kukarow[yhtio]'
               and tunnus  = '$row[suoritunnus]'";
     $updres = pupe_query($query);
+
+    // ja kohdistusrelaatio
+    $kohdistus_qry = "INSERT INTO suorituksen_kohdistus SET
+                      yhtio          = '{$kukarow[yhtio]}',
+                      suoritustunnus = '{$row[suoritunnus]}',
+                      laskutunnus    = '{$row[laskutunnus]}'
+                      kohdistuspvm   = NOW(),
+                      kirjauspvm     = '{$row[tapvm]}'";
+    $kohdistus_result = pupe_query($kohdistus_qry);
   }
 }
 

@@ -165,6 +165,84 @@ function filelist_table($array, $type) {
   echo "</table>";
 }
 
+function kasittele_pain_palaute($pain_data) {
+  global $kukarow, $yhtiorow;
+
+  // Otetaan sisään base64enkoodattu data
+  // Palautetaan array, jossa "status" ja "selite"
+
+  // Dekoodataan data
+  $data = base64_decode($pain_data);
+
+  // Jos data on tyhjää
+  if ($pain_data == "" or $data == "") {
+    return array(
+      "status" => t("Virhe"),
+      "selite" => t("Palute oli tyhjä!"),
+    );
+  }
+
+  // Parsitaan XML
+  $xml = simplexml_load_string($data);
+
+  // Jos xml on virheellinen
+  if ($xml === false) {
+    return array(
+      "status" => t("Virhe"),
+      "selite" => t("Virheellinen XML palaute!"),
+    );
+  }
+
+  // Statuksia:
+  // Hyväksytty maksatukseen (Group status ACCP)
+  // Hyväksytty tekninen tarkastus (Group status ACTC)
+  // Rejected transaction (Transaction status RJCT)
+  $_ok = array("ACCP", "ACTC");
+  $_error = array("RJCT");
+
+  // Status voi tulla näissä elementeissä
+  $_status = array(
+    (string) $xml->{"pain.002.001.02"}->OrgnlGrpInfAndSts->GrpSts,
+    (string) $xml->{"pain.002.001.02"}->TxInfAndSts->TxSts,
+  );
+
+  // Virheviesti voi tulla näissä elementeissä
+  $_message = array(
+    (string) $xml->{"pain.002.001.02"}->OrgnlGrpInfAndSts->StsRsnInf->AddtlStsRsnInf,
+    (string) $xml->{"pain.002.001.02"}->TxInfAndSts->StsRsnInf->AddtlStsRsnInf,
+  );
+
+  // Intesect palauttaa arrayn elementeistä jotka matchaa, eli
+  // jos joku löytyneistä status elementeistä löytyy ok arraystä,
+  // niin tiedetään, että aineisto oli ok.
+  if (count(array_intersect($_status, $_ok)) > 0) {
+    $status = t("Ok");
+    $selite = t("Aineisto OK");
+  }
+  elseif (count(array_intersect($_status, $_error)) > 0) {
+    // Reversesortataan arrayt niin tyhjät menee loppuun
+    // ja meillä on ekassa elementissä aina oikea arvo
+    rsort($_message);
+
+    // Jos meillä oli joku virhekoodi, selitteeseen virheviesti
+    $status = t("Virhe");
+    $selite = $_message[0];
+  }
+  else {
+    // Reversesortataan arrayt niin tyhjät menee loppuun
+    // ja meillä on ekassa elementissä aina oikea arvo
+    rsort($_status);
+
+    // Jos ei tunnistettu statuskoodia, pistetään koko data selitteeseen
+    $status = $_status[0];
+    $selite = htmlentities($data);
+  }
+
+  return array(
+    "status" => $status,
+    "selite" => $selite,
+  );
+}
 
 /**
  *

@@ -142,8 +142,11 @@ function filelist_table($array, $type) {
       $_status = t("Haettu");
     }
 
+    // Kaikki pankit ei osaa n‰ytt‰‰ tilinumeroa, n‰ytet‰‰n sillo filereference
+    $_tilinumero = $tiedosto["serviceId"] != "" ? $tiedosto["serviceId"] : $tiedosto["fileReference"];
+
     echo "<tr class='aktiivi'>";
-    echo "<td>{$tiedosto["serviceId"]}</td>";
+    echo "<td>{$_tilinumero}</td>";
     echo "<td>{$_date}</td>";
     echo "<td>{$_status}</td>";
     echo "<td>";

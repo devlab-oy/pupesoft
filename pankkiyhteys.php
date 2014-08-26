@@ -84,12 +84,12 @@ if ($tee != "" and !isset($_COOKIE[$cookie_secret])) {
 
 // Jos toim on tyhjää, tehdään tiliotteen ja viitteen hommia
 if ($toim == "") {
-  require 'pankkiyhteys_tilioteviite.inc';
+  require 'inc/pankkiyhteys_tilioteviite.inc';
 }
 
 // Jos toim on "palaute", tehdään maksuaineistojen palautteiden hommia
 if ($toim == "palaute") {
-  require 'pankkiyhteys_palautteet.inc';
+  require 'inc/pankkiyhteys_palautteet.inc';
 }
 
 // Sisäänkirjautumisen käyttöliittymä

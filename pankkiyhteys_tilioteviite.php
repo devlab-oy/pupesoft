@@ -152,6 +152,7 @@ if ($tee == "valitse") {
 
   // Piirret‰‰n formi
   echo "<form method='post' action='pankkiyhteys.php'>";
+  echo "<input type='hidden' name='toim' value='$toim'/>";
   echo "<input type='hidden' name='tee' value='hae_aineistot'/>";
 
   // V‰litet‰‰n tiliote ja viitetiedosto arrayt formissa,

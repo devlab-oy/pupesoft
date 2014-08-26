@@ -651,7 +651,7 @@ if ($tila == 'tee_kohdistus') {
                       summa    = $summa,
                       selite   = 'Manuaalisesti kohdistettu suoritus (osasuoritus) $suoritus[viesti]'";
             $result = pupe_query($query);
-            $isa = mysql_insert_id($link);
+            $isa = mysql_insert_id($GLOBALS["masterlink"]);
 
             $totvesumma += $summa;
           }
@@ -1045,7 +1045,7 @@ if ($tila == 'tee_kohdistus') {
                         selite           = 'Manuaalisesti kohdistettu suoritus $suoritus[viesti]',
                         vero             = '$tiliointirow[vero]'";
               $result = pupe_query($query);
-              $isa = mysql_insert_id($link);
+              $isa = mysql_insert_id($GLOBALS["masterlink"]);
 
               if ($tiliointirow['vero'] != 0) {
                 // Kassa-ale alv
@@ -1232,7 +1232,7 @@ if ($tila == 'tee_kohdistus') {
                           summa    = $summa,
                           selite   = 'Manuaalisesti kohdistettu suoritus (osasuoritus) $suoritus[viesti]'";
                 $result = pupe_query($query);
-                $isa = mysql_insert_id($link);
+                $isa = mysql_insert_id($GLOBALS["masterlink"]);
 
                 $totvesumma += $summa;
               }

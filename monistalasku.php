@@ -1379,7 +1379,7 @@ if ($tee == 'MONISTA') {
 
       $kysely  = "INSERT into lasku ({$fields}) VALUES ({$values})";
       $insres  = pupe_query($kysely);
-      $utunnus = mysql_insert_id();
+      $utunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
       $query = "SELECT *
                 FROM lasku
@@ -1749,7 +1749,7 @@ if ($tee == 'MONISTA') {
 
         $kysely = "INSERT INTO tilausrivi ({$rfields}) VALUES ({$rvalues})";
         $insres = pupe_query($kysely);
-        $insid = mysql_insert_id();
+        $insid = mysql_insert_id($GLOBALS["masterlink"]);
 
         //Kopioidaan tilausrivin lisatiedot
         $query = "SELECT *

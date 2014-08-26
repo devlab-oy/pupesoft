@@ -266,7 +266,7 @@ if (isset($tee) and trim($tee) == 'aja') {
                      laatija       = 'E3',
                      luontiaika    = now()";
         $otsikkoinsert = pupe_query($insquery);
-        $id = mysql_insert_id();
+        $id = mysql_insert_id($GLOBALS["masterlink"]);
 
         // Luetaan tilauksen rivit
         datansisalto_e3($e3_ehdotuskansio, $dfile, $id, $toimituspaiva);

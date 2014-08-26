@@ -236,7 +236,7 @@ if ($tee == 'LISAA') {
           tyyppi     = 'kalenteri'";
     pupe_query($query);
 
-    $uusi_tunnus = mysql_insert_id();
+    $uusi_tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
     // P‰ivitet‰‰n liitetiedosto uudelle tunnukselle,
     // mik‰li aikaisempi kalenterimerkint‰ p‰ivittyi.

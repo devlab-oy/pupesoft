@@ -469,7 +469,7 @@ if ($upd == 1) {
     $result = pupe_query($query);
 
     if ($onko_tama_insert) {
-      $tunnus = mysql_insert_id();
+      $tunnus = mysql_insert_id($GLOBALS["masterlink"]);
     }
 
     if ($tunnus > 0 and $toim == "tuotteen_toimittajat_tuotenumerot") {

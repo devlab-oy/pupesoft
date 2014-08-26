@@ -17161,9 +17161,60 @@ if (!function_exists("tee_keraysera")) {
       $asiakas_join2 = "JOIN asiakas AS asiakas2 ON (asiakas2.yhtio = lasku2.yhtio AND asiakas2.tunnus = lasku2.liitostunnus)";
     }
 
+    $pienimman_pak_til = null;
+
+    # Etsitään pienin pakkaus
+    if (!empty($pakkaukset)) {
+      foreach ($pakkaukset as $_pak_id => $_pak_info) {
+        if (is_null($pienimman_pak_til) or $pienimman_pak_til > $_pak_info['tilavuus']) {
+          $pienimman_pak_til = $_pak_info['tilavuus'];
+        }
+      }
+    }
+
+    if (!is_null($pienimman_pak_til)) {
+      /*
+      # Esim. pienimmän laatikon (ltk 9) tilavuudesta 90%
+      # 4032 = 4480 * 0.9
+      */
+      $pienimman_pak_til *= 0.9;
+
+      $prioriteettilisa1 = "
+      IF(
+      lasku1.tila = 'G' AND 
+      lasku1.alatila = 'J' AND
+      round((TIME_TO_SEC(TIMEDIFF(CURTIME(), lahdot3.kerailyn_aloitusaika)) / 60) / (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, lahdot3.kerailyn_aloitusaika)) / 60) * 100, 2) < 30 AND
+      COUNT(tilausrivi1.tunnus) <= 2 AND
+      (
+        ROUND((if(tuote1.tuoteleveys * {$mittakerroin} < 1, 1, tuote1.tuoteleveys * {$mittakerroin}) * if(tuote1.tuotekorkeus * {$mittakerroin} < 1, 1, tuote1.tuotekorkeus * {$mittakerroin}) * if(tuote1.tuotesyvyys * {$mittakerroin} < 1, 1, tuote1.tuotesyvyys * {$mittakerroin})) * if(tilausrivi1.varattu < 1, 1, round(tilausrivi1.varattu)), 4)  < {$pienimman_pak_til} OR 
+        ROUND(tuote1.tuotemassa * if(tilausrivi1.varattu < 1, 1, round(tilausrivi1.varattu)), 4) < 1
+      ),
+      lasku1.prioriteettinro + 1, lasku1.prioriteettinro
+      ) AS prioriteetti,
+      ";
+
+      $prioriteettilisa2 = "
+      IF(
+      lasku2.tila = 'G' AND 
+      lasku2.alatila = 'J' AND
+      round((TIME_TO_SEC(TIMEDIFF(CURTIME(), lahdot3.kerailyn_aloitusaika)) / 60) / (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, lahdot3.kerailyn_aloitusaika)) / 60) * 100, 2) < 30 AND
+      COUNT(tilausrivi2.tunnus) <= 2 AND
+      (
+        ROUND((if(tuote2.tuoteleveys * {$mittakerroin} < 1, 1, tuote2.tuoteleveys * {$mittakerroin}) * if(tuote2.tuotekorkeus * {$mittakerroin} < 1, 1, tuote2.tuotekorkeus * {$mittakerroin}) * if(tuote2.tuotesyvyys * {$mittakerroin} < 1, 1, tuote2.tuotesyvyys * {$mittakerroin})) * if(tilausrivi2.varattu < 1, 1, round(tilausrivi2.varattu)), 4)  < {$pienimman_pak_til} OR 
+        ROUND(tuote2.tuotemassa * if(tilausrivi2.varattu < 1, 1, round(tilausrivi2.varattu)), 4) < 1
+      ),
+      lasku2.prioriteettinro + 1, lasku2.prioriteettinro
+      ) AS prioriteetti,
+      ";
+    }
+    else {
+      $prioriteettilisa1 = "lasku1.prioriteettinro as prioriteetti,";
+      $prioriteettilisa2 = "lasku2.prioriteettinro as prioriteetti,";
+    }
+
     if ($aikarajaus != 999999999999 and $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {
       $query = "SELECT SQL_NO_CACHE
-                lasku1.prioriteettinro as prioriteetti,
+                {$prioriteettilisa1}
                 (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, CURTIME())) / 60) as erotus,
                 lasku1.ohjausmerkki,
                 lasku1.liitostunnus,
@@ -17197,7 +17248,7 @@ if (!function_exists("tee_keraysera")) {
     }
     else {
       $query = "SELECT SQL_NO_CACHE
-                lasku2.prioriteettinro as prioriteetti,
+                {$prioriteettilisa2}
                 0 as erotus,
                 lasku2.ohjausmerkki,
                 lasku2.liitostunnus,

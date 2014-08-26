@@ -10770,7 +10770,7 @@ if (!function_exists("t")) {
 
       $sanakirjaquery  = "SELECT fi, $indeksi, tunnus FROM sanakirja WHERE fi = BINARY '$stringi_sql'";
 
-      if (is_resource($GLOBALS["slavelink"])) {
+      if (isset($GLOBALS["slavelink"]) and is_resource($GLOBALS["slavelink"])) {
         $sanakirjaresult = pupe_query($sanakirjaquery, $GLOBALS["slavelink"]);
       }
       else {

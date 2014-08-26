@@ -129,5 +129,5 @@ if ($lopeta_body) {
   echo "</html>";
 }
 
-if (is_resource($GLOBALS["masterlink"])) mysql_close($GLOBALS["masterlink"]);
-if (is_resource($GLOBALS["slavelink"]))  mysql_close($GLOBALS["slavelink"]);
+if (isset($GLOBALS["masterlink"])) mysql_close($GLOBALS["masterlink"]);
+if (isset($GLOBALS["slavelink"]))  mysql_close($GLOBALS["slavelink"]);

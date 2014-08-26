@@ -14,11 +14,13 @@ sepa_pankkiyhteys_kunnossa();
 
 toggle_all("viite_toggler", "viite_boxes");
 toggle_all("tiliote_toggler", "tiliote_boxes");
+toggle_all("palaute_toggler", "palaute_boxes");
 
 $tee = empty($tee) ? '' : $tee;
 $toim = empty($toim) ? '' : $toim;
 $hae_tiliotteet = empty($hae_tiliotteet) ? '' : $hae_tiliotteet;
 $hae_viitteet = empty($hae_viitteet) ? '' : $hae_viitteet;
+$hae_palautteet = empty($hae_palautteet) ? '' : $hae_palautteet;
 
 $pankkitiedostot = array();
 $virheet_count = 0;
@@ -83,6 +85,11 @@ if ($tee != "" and !isset($_COOKIE[$cookie_secret])) {
 // Jos toim on tyhj‰‰, tehd‰‰n tiliotteen ja viitteen hommia
 if ($toim == "") {
   require 'pankkiyhteys_tilioteviite.php';
+}
+
+// Jos toim on "palaute", tehd‰‰n maksuaineistojen palautteiden hommia
+if ($toim == "palaute") {
+  require 'pankkiyhteys_palautteet.php';
 }
 
 // Sis‰‰nkirjautumisen k‰yttˆliittym‰

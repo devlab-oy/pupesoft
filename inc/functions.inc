@@ -17164,7 +17164,8 @@ if (!function_exists("tee_keraysera")) {
     $pienimman_pak_til = null;
 
     # Etsitään pienin pakkaus
-    if (!empty($pakkaukset)) {
+    # Pakkauksia pitää olla enemmän kuin yksi
+    if (!empty($pakkaukset) and count($pakkaukset) > 1) {
       foreach ($pakkaukset as $_pak_id => $_pak_info) {
         if (is_null($pienimman_pak_til) or $pienimman_pak_til > $_pak_info['tilavuus']) {
           $pienimman_pak_til = $_pak_info['tilavuus'];

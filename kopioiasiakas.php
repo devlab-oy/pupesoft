@@ -42,7 +42,7 @@ if ($tee == "write") {
     $query .= ")";
 
     $result = pupe_query($query);
-    $uusiidee = mysql_insert_id();
+    $uusiidee = mysql_insert_id($GLOBALS["masterlink"]);
 
     //  Tämä funktio tekee myös oikeustarkistukset!
     synkronoi($kukarow["yhtio"], "asiakas", $uusiidee, "", "");

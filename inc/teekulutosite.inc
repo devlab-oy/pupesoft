@@ -19,7 +19,7 @@ $query = "INSERT into lasku set
           laatija       = 'tiliote',
           luontiaika    = now()";
 $result = pupe_query($query);
-$kulutunnus = mysql_insert_id();
+$kulutunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
 list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yritirow["oletus_rahatili"]);
 
@@ -59,7 +59,7 @@ $query = "INSERT into tiliointi set
           laatija  = 'tiliote',
           laadittu = now()";
 $result = pupe_query($query);
-$_tiliointi_id = mysql_insert_id();
+$_tiliointi_id = mysql_insert_id($GLOBALS["masterlink"]);
 
 $query = "UPDATE tiliotedata SET
           kasitelty       = now(),

@@ -182,7 +182,7 @@ else {
         $kysely  = "INSERT into lasku ($fields) VALUES ($values)";
         $uusires = pupe_query($kysely);
 
-        $laskurow['tunnus'] = (string) mysql_insert_id();
+        $laskurow['tunnus'] = (string) mysql_insert_id($GLOBALS["masterlink"]);
         $tvs_tilausnumerot[] = $laskurow["tunnus"];
 
         $query = "SELECT *

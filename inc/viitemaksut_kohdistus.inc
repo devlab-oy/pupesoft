@@ -256,7 +256,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
                     valkoodi         = '$row[suoritusvaluutta]',
                     selite           = 'Automaattikohdistettu asiakkaan suoritus (Kassa-Alennus)'";
           $insres = pupe_query($query);
-          $aputunnus = mysql_insert_id();
+          $aputunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
           // Etsit‰‰n korjattava vienti
           if ($alv != 0) {
@@ -362,7 +362,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
                       summa    = $summa,
                       selite   = 'Automaattikohdistettu asiakkaan suoritus'";
             $result = pupe_query($query);
-            $isa = mysql_insert_id($link);
+            $isa = mysql_insert_id($GLOBALS["masterlink"]);
 
             $totvesumma += $summa;
           }
@@ -458,7 +458,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
               luontiaika = now()";
     $insres = pupe_query($query);
 
-    $laskut[$row["yhtio"]] = mysql_insert_id();
+    $laskut[$row["yhtio"]] = mysql_insert_id($GLOBALS["masterlink"]);
   }
 
   if ($laskut[$row["yhtio"]] > 0) {
@@ -494,7 +494,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
               selite           = '$maksaja_espattu maksoi viitteell‰ v‰‰rin',
               lukko            = '1'";
     $insres = pupe_query($query);
-    $tlast_id = mysql_insert_id();
+    $tlast_id = mysql_insert_id($GLOBALS["masterlink"]);
 
     list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($row["oletus_rahatili"]);
 

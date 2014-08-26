@@ -481,7 +481,7 @@ if (isset($jatka)) {
 
   $query .= $postquery;
   $result = pupe_query($query);
-  $id = mysql_insert_id();
+  $id = mysql_insert_id($GLOBALS["masterlink"]);
 
   if (!isset($nokeskupdate) and (int) $kukarow["kesken"] == 0 and $id != 0 and $id !== FALSE and $session != "") {
     $query = "UPDATE kuka

@@ -663,7 +663,7 @@ if (isset($jatka)) {
         erikoisale      = '$erikoisale'";
   $query .= $postquery;
   $result = pupe_query($query);
-  $id = mysql_insert_id();
+  $id = mysql_insert_id($GLOBALS["masterlink"]);
 
   // Jos erikoisalennus muuttuu
   if ($laskurow["erikoisale"] != $erikoisale) {

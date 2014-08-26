@@ -85,7 +85,7 @@ else {
                    tilaajanrivinro = $lask
                    WHERE yhtio     = '$kukarow[yhtio]'
                    AND tunnus      = '$tilausrivirow[tunnus]'";
-      $tresult = pupe_query($sqlquery, $masterlink);
+      $tresult = pupe_query($sqlquery, $GLOBALS["masterlink"]);
 
       $lask++;
     }
@@ -94,7 +94,7 @@ else {
                  SET kirjoitin = 'edi'
                  WHERE yhtio = '$kukarow[yhtio]'
                  AND tunnus  = '$laskurow[tunnus]'";
-    $result = pupe_query($sqlquery, $masterlink);
+    $result = pupe_query($sqlquery, $GLOBALS["masterlink"]);
   }
   else {
     echo "<font class='error'>".t("Tilauksen lähetys epäonnistui")."!</font><br>";

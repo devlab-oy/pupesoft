@@ -379,7 +379,7 @@ else {
 
     foreach ($valitut as $val) {
       $query = "INSERT INTO avainsana set yhtio='$kukarow[yhtio]', laji='HALYRAP', selite='$rappari', selitetark='$val'";
-      $res = pupe_query($query, $masterlink);
+      $res = pupe_query($query, $GLOBALS["masterlink"]);
     }
   }
 
@@ -388,11 +388,11 @@ else {
 
     if ($rappari != '') {
       $query = "DELETE FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='HALYRAP' and selite='$rappari'";
-      $res = pupe_query($query, $masterlink);
+      $res = pupe_query($query, $GLOBALS["masterlink"]);
 
       foreach ($valitut as $val) {
         $query = "INSERT INTO avainsana set yhtio='$kukarow[yhtio]', laji='HALYRAP', selite='$rappari', selitetark='$val'";
-        $res = pupe_query($query, $masterlink);
+        $res = pupe_query($query, $GLOBALS["masterlink"]);
       }
     }
 

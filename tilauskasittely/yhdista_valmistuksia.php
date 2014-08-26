@@ -74,7 +74,7 @@ if ($tee=='YHDISTA') {
                 laatija           = '$kukarow[kuka]',
                 luontiaika        = NOW()";
       $result = pupe_query($query);
-      $otunnus = mysql_insert_id();
+      $otunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
       echo "<font class='message'>".t("Luotiin uusi otsikko")." $otunnus</font><br>";
 

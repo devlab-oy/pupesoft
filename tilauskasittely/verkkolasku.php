@@ -1424,7 +1424,7 @@ else {
                           jaksotettu      = '',
                           kerattyaika     = now()";
                 $addtil = pupe_query($query);
-                $lisatty_tun = mysql_insert_id();
+                $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
                 $query = "INSERT INTO tilausrivin_lisatiedot
                           SET yhtio           = '$kukarow[yhtio]',
@@ -1663,7 +1663,7 @@ else {
                         jaksotettu      = '',
                         kerattyaika     = now()";
               $addtil = pupe_query($query);
-              $lisatty_tun = mysql_insert_id();
+              $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
               $query = "INSERT INTO tilausrivin_lisatiedot
                         SET yhtio           = '$kukarow[yhtio]',

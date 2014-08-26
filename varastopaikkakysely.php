@@ -274,7 +274,7 @@ if ($tee == "W") {
                 laatija    = '$kukarow[kuka]',
                 luontiaika = now()";
       $result = pupe_query($query);
-      $minne = mysql_insert_id();
+      $minne = mysql_insert_id($GLOBALS["masterlink"]);
 
       $query = "INSERT into tapahtuma set
                 yhtio     = '$kukarow[yhtio]',

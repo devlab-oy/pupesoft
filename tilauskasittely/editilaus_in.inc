@@ -1397,7 +1397,7 @@ while ($tietue = fgets($fd)) {
                 ytunnus                 = '$arow[ytunnus]',
                 ohjelma_moduli          = '$ohjelmamoduli'";
       $result = pupe_query($query);
-      $id = mysql_insert_id();
+      $id = mysql_insert_id($GLOBALS["masterlink"]);
 
       $query = "INSERT INTO laskun_lisatiedot SET
                 laskutus_nimi     = '$arow[laskutus_nimi]',

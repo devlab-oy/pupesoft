@@ -545,7 +545,7 @@ if ($tee == 'N') {
                   '$kukarow[kuka]',
                   now())";
         $result = pupe_query($query);
-        $lisatty_tun = mysql_insert_id();
+        $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
         // Tuotepaikka jonne lis‰varuste vied‰‰n
         if ($lisavaruste[$iii] == "LISAVARUSTE") {

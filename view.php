@@ -18,7 +18,7 @@ $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
 $query = "SELECT *
           FROM kuka
           WHERE session = '$session'";
-$result = pupe_query($query, $masterlink);
+$result = pupe_query($query, $GLOBALS["masterlink"]);
 $kuka_check_row = mysql_fetch_assoc($result);
 
 if (mysql_num_rows($result) != 1) {

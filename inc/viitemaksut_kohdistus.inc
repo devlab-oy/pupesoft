@@ -138,7 +138,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
               summa_valuutassa = -$row[laskutettu_valuutassa],
               valkoodi         = '$row[laskuvaluutta]',
               selite           = 'Automaattikohdistettu asiakkaan suoritus'";
-    $insres = pupe_query($query);
+    pupe_query($query);
 
     if (strtoupper($row["suoritusvaluutta"]) != strtoupper($row['yhtiovaluutta'])) {
       $suoritettu_kassaan = round($row["suoritettu"] * $row["suorituskurssi"], 2);
@@ -166,7 +166,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
               summa_valuutassa = '$suoritettu_kassaan_valuutassa',
               valkoodi         = '$row[suoritusvaluutta]',
               selite           = 'Automaattikohdistettu asiakkaan suoritus'";
-    $insres = pupe_query($query);
+    pupe_query($query);
 
     // Mahdollinen kassa-alennus
     if ($alennus != 0) {
@@ -208,7 +208,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
                   valkoodi         = '$row[suoritusvaluutta]',
                   vero             = 0,
                   selite           = 'Automaattikohdistettu asiakkaan suoritus (alv ongelma)'";
-        $insres = pupe_query($query);
+        pupe_query($query);
       }
       else {
 
@@ -255,7 +255,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
                     vero             = '$tiliointirow[vero]',
                     valkoodi         = '$row[suoritusvaluutta]',
                     selite           = 'Automaattikohdistettu asiakkaan suoritus (Kassa-Alennus)'";
-          $insres = pupe_query($query);
+          pupe_query($query);
           $aputunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
           // Etsit‰‰n korjattava vienti
@@ -278,7 +278,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
                       laatija          = 'automaatti',
                       laadittu         = now(),
                       aputunnus        = '$aputunnus'";
-            $insres = pupe_query($query);
+            pupe_query($query);
           }
         }
 
@@ -292,7 +292,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
                     summa_valuutassa = summa_valuutassa - $heitto_valuutassa
                     WHERE tunnus     = '$aputunnus'
                     and yhtio        = '$kukarow[yhtio]'";
-          $xresult = pupe_query($query);
+          pupe_query($query);
 
           $aputunnus = 0;
         }
@@ -338,7 +338,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
                     projekti = '{$projekti_ins}',
                     summa    = $valero,
                     selite   = 'Automaattikohdistettu asiakkaan suoritus'";
-          $result = pupe_query($query);
+          pupe_query($query);
         }
         else {
           while ($tiliointirow = mysql_fetch_assoc($tilres)) {
@@ -361,7 +361,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
                       projekti = '{$projekti_ins}',
                       summa    = $summa,
                       selite   = 'Automaattikohdistettu asiakkaan suoritus'";
-            $result = pupe_query($query);
+            pupe_query($query);
             $isa = mysql_insert_id($GLOBALS["masterlink"]);
 
             $totvesumma += $summa;
@@ -373,7 +373,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
                       SET summa = summa - $totvesumma + $vesumma
                       WHERE tunnus = '$isa'
                       and yhtio    = '$kukarow[yhtio]'";
-            $xresult = pupe_query($query);
+            pupe_query($query);
           }
         }
       }
@@ -384,7 +384,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
               SET mapvm = '$row[kirjpvm]'
               WHERE yhtio = '$kukarow[yhtio]'
               and tunnus  = '$row[laskutunnus]'";
-    $updres = pupe_query($query);
+    pupe_query($query);
 
     //Ja suoritus kirjatuksi
     $query = "UPDATE suoritus
@@ -392,20 +392,18 @@ while ($row = mysql_fetch_assoc($suorires)) {
               ltunnus     = '$row[laskutunnus]'
               WHERE yhtio = '$kukarow[yhtio]'
               and tunnus  = '$row[suoritunnus]'";
-    $updres = pupe_query($query);
+    pupe_query($query);
 
     // ja kohdistusrelaatio
     $kohdistus_qry = "INSERT INTO suorituksen_kohdistus SET
-                      yhtio          = '{$kukarow[yhtio]}',
-                      suoritustunnus = '{$row[suoritunnus]}',
-                      laskutunnus    = '{$row[laskutunnus]}'
+                      yhtio          = '{$kukarow['yhtio']}',
+                      suoritustunnus = '{$row['suoritunnus']}',
+                      laskutunnus    = '{$row['laskutunnus']}',
                       kohdistuspvm   = NOW(),
-                      kirjauspvm     = '{$row[tapvm]}'";
-    $kohdistus_result = pupe_query($kohdistus_qry);
+                      kirjauspvm     = '{$row['tapvm']}'";
+    pupe_query($kohdistus_qry);
   }
 }
-
-
 
 //####################################
 //
@@ -456,7 +454,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
               tila       = 'X',
               laatija    = 'viitesiirrot',
               luontiaika = now()";
-    $insres = pupe_query($query);
+    pupe_query($query);
 
     $laskut[$row["yhtio"]] = mysql_insert_id($GLOBALS["masterlink"]);
   }
@@ -493,7 +491,7 @@ while ($row = mysql_fetch_assoc($suorires)) {
               valkoodi         = '$row[suoritusvaluutta]',
               selite           = '$maksaja_espattu maksoi viitteell‰ v‰‰rin',
               lukko            = '1'";
-    $insres = pupe_query($query);
+    pupe_query($query);
     $tlast_id = mysql_insert_id($GLOBALS["masterlink"]);
 
     list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($row["oletus_rahatili"]);
@@ -515,13 +513,13 @@ while ($row = mysql_fetch_assoc($suorires)) {
               selite           = '$maksaja_espattu maksoi viitteell‰ v‰‰rin',
               aputunnus        = '$tlast_id',
               lukko            = '1'";
-    $insres = pupe_query($query);
+    pupe_query($query);
 
     $query = "UPDATE suoritus
               SET ltunnus = '$tlast_id'
               WHERE yhtio = '$kukarow[yhtio]'
               and tunnus  = '$row[tunnus]'";
-    $updres = pupe_query($query);
+    pupe_query($query);
   }
   else {
     echo "<font class='error'>VIRHE: Tositteen otsikkoa ei saatu luotua!</font><br>\n";

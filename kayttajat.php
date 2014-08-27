@@ -144,6 +144,7 @@ if ($tee == 'deloikeu') {
   $query = "UPDATE kuka
             SET profiilit   = '',
             aktiivinen = 0,
+            hyvaksyja  = '',
             muuttaja   = '{$kukarow['kuka']}',
             muutospvm  = now()
             WHERE kuka = '{$selkuka}'

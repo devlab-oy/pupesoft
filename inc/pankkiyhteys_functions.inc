@@ -142,8 +142,11 @@ function filelist_table($array, $type) {
       $_status = t("Haettu");
     }
 
+    // Kaikki pankit ei osaa n‰ytt‰‰ tilinumeroa, n‰ytet‰‰n sillo filereference
+    $_tilinumero = $tiedosto["serviceId"] != "" ? $tiedosto["serviceId"] : $tiedosto["fileReference"];
+
     echo "<tr class='aktiivi'>";
-    echo "<td>{$tiedosto["serviceId"]}</td>";
+    echo "<td>{$_tilinumero}</td>";
     echo "<td>{$_date}</td>";
     echo "<td>{$_status}</td>";
     echo "<td>";
@@ -165,6 +168,84 @@ function filelist_table($array, $type) {
   echo "</table>";
 }
 
+function kasittele_pain_palaute($pain_data) {
+  global $kukarow, $yhtiorow;
+
+  // Otetaan sis‰‰n base64enkoodattu data
+  // Palautetaan array, jossa "status" ja "selite"
+
+  // Dekoodataan data
+  $data = base64_decode($pain_data);
+
+  // Jos data on tyhj‰‰
+  if ($pain_data == "" or $data == "") {
+    return array(
+      "status" => t("Virhe"),
+      "selite" => t("Palute oli tyhj‰!"),
+    );
+  }
+
+  // Parsitaan XML
+  $xml = simplexml_load_string($data);
+
+  // Jos xml on virheellinen
+  if ($xml === false) {
+    return array(
+      "status" => t("Virhe"),
+      "selite" => t("Virheellinen XML palaute!"),
+    );
+  }
+
+  // Statuksia:
+  // Hyv‰ksytty maksatukseen (Group status ACCP)
+  // Hyv‰ksytty tekninen tarkastus (Group status ACTC)
+  // Rejected transaction (Transaction status RJCT)
+  $_ok = array("ACCP", "ACTC");
+  $_error = array("RJCT");
+
+  // Status voi tulla n‰iss‰ elementeiss‰
+  $_status = array(
+    (string) $xml->{"pain.002.001.02"}->OrgnlGrpInfAndSts->GrpSts,
+    (string) $xml->{"pain.002.001.02"}->TxInfAndSts->TxSts,
+  );
+
+  // Virheviesti voi tulla n‰iss‰ elementeiss‰
+  $_message = array(
+    (string) $xml->{"pain.002.001.02"}->OrgnlGrpInfAndSts->StsRsnInf->AddtlStsRsnInf,
+    (string) $xml->{"pain.002.001.02"}->TxInfAndSts->StsRsnInf->AddtlStsRsnInf,
+  );
+
+  // Intesect palauttaa arrayn elementeist‰ jotka matchaa, eli
+  // jos joku lˆytyneist‰ status elementeist‰ lˆytyy ok arrayst‰,
+  // niin tiedet‰‰n, ett‰ aineisto oli ok.
+  if (count(array_intersect($_status, $_ok)) > 0) {
+    $status = t("Ok");
+    $selite = t("Aineisto OK");
+  }
+  elseif (count(array_intersect($_status, $_error)) > 0) {
+    // Reversesortataan arrayt niin tyhj‰t menee loppuun
+    // ja meill‰ on ekassa elementiss‰ aina oikea arvo
+    rsort($_message);
+
+    // Jos meill‰ oli joku virhekoodi, selitteeseen virheviesti
+    $status = t("Virhe");
+    $selite = $_message[0];
+  }
+  else {
+    // Reversesortataan arrayt niin tyhj‰t menee loppuun
+    // ja meill‰ on ekassa elementiss‰ aina oikea arvo
+    rsort($_status);
+
+    // Jos ei tunnistettu statuskoodia, pistet‰‰n koko data selitteeseen
+    $status = $_status[0];
+    $selite = htmlentities($data);
+  }
+
+  return array(
+    "status" => $status,
+    "selite" => $selite,
+  );
+}
 
 /**
  *
@@ -312,18 +393,20 @@ function sepa_download_file_list($params) {
 
   $bank = $pankkiyhteys['bank'];
 
+  // Varmistetaan, ett‰ ei kutsuta v‰‰r‰ll‰ filetypell‰
+  $file_type = sepa_file_type_check($bank, $file_type);
+
   // Nordealla, pit‰‰ hakea filetypen "target_id"
   // Haetaan vaan jos ei ole passattu parametrin‰
   if ($bank == "nordea" and $target_id == "") {
+    $params["file_type"] = $file_type;
+
     $target_id = sepa_target_id_for_file_type($params);
 
     if ($target_id === false) {
       return false;
     }
   }
-
-  // Varmistetaan, ett‰ ei kutsuta v‰‰r‰ll‰ filetypell‰
-  $file_type = sepa_file_type_check($bank, $file_type);
 
   $parameters = array(
     "method"  => "POST",
@@ -373,18 +456,20 @@ function sepa_download_files($params) {
 
   $bank = $pankkiyhteys['bank'];
 
+  // Varmistetaan, ett‰ ei kutsuta v‰‰r‰ll‰ filetypell‰
+  $file_type = sepa_file_type_check($bank, $file_type);
+
   // Nordealla, pit‰‰ hakea filetypen "target_id"
   // Haetaan vaan jos ei ole passattu parametrin‰
   if ($bank == "nordea" and $target_id == "") {
+    $params["file_type"] = $file_type;
+
     $target_id = sepa_target_id_for_file_type($params);
 
     if ($target_id === false) {
       return false;
     }
   }
-
-  // Varmistetaan, ett‰ ei kutsuta v‰‰r‰ll‰ filetypell‰
-  $file_type = sepa_file_type_check($bank, $file_type);
 
   $tiedostot = array();
 
@@ -449,18 +534,20 @@ function sepa_upload_file($params) {
 
   $bank = $pankkiyhteys['bank'];
 
+  // Varmistetaan, ett‰ ei kutsuta v‰‰r‰ll‰ filetypell‰
+  $file_type = sepa_file_type_check($bank, $file_type);
+
   // Nordealla, pit‰‰ hakea filetypen "target_id"
   // Haetaan vaan jos ei ole passattu parametrin‰
   if ($bank == "nordea" and $target_id == "") {
+    $params["file_type"] = $file_type;
+
     $target_id = sepa_target_id_for_file_type($params);
 
     if ($target_id === false) {
       return false;
     }
   }
-
-  // Varmistetaan, ett‰ ei kutsuta v‰‰r‰ll‰ filetypell‰
-  $file_type = sepa_file_type_check($bank, $file_type);
 
   $parameters = array(
     "method"  => "POST",
@@ -625,6 +712,10 @@ function sepa_file_type_check($bank, $file_type) {
     if ($file_type == "C2BL") {
       $file_type = "NDCORPAYS";
     }
+    // Maksuaineiston palautesanoma
+    if ($file_type == "C2BN") {
+      $file_type = "NDCORPAYL";
+    }
   }
 
   // Danskemuunnokset
@@ -640,6 +731,10 @@ function sepa_file_type_check($bank, $file_type) {
     // XML maksuaineisto
     if ($file_type == "NDCORPAYS") {
       $file_type = "C2BL";
+    }
+    // Maksuaineiston palautesanoma
+    if ($file_type == "NDCORPAYL") {
+      $file_type = "C2BN";
     }
   }
 

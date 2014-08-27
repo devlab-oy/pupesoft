@@ -210,7 +210,7 @@ function loop_packet($xml_element, $parameters) {
                        laatija            = '$kukarow[kuka]',
                        luontiaika         = now()";
         $result = pupe_query($sqlinsert);
-        $tunnus_liitetiedostoon = mysql_insert_id();
+        $tunnus_liitetiedostoon = mysql_insert_id($GLOBALS["masterlink"]);
       }
     }
 

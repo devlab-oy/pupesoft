@@ -119,7 +119,7 @@ else {
               luontiaika   = now(),
               laatija      = 'Invent'";
     $result = pupe_query($query);
-    $lid = mysql_insert_id();
+    $lid = mysql_insert_id($GLOBALS["masterlink"]);
 
     $query  = "SELECT *
                from lasku
@@ -192,7 +192,7 @@ else {
             tyyppi         = 'O',
             kommentti      = '$kukarow[nimi] lisäsi inventoimalla.'";
   $result = pupe_query($query);
-  $lid = mysql_insert_id();
+  $lid = mysql_insert_id($GLOBALS["masterlink"]);
 
   $ostorivitunnus = $lid;
   $toiminto     = "";

@@ -413,7 +413,7 @@ $kysely  = "INSERT into lasku ($fields) VALUES ($values)";
 $uusiotsikko = pupe_query($kysely);
 
 // otetaan uuden otsikon tunnus talteen
-$uusiotunnus = (string) mysql_insert_id();
+$uusiotunnus = (string) mysql_insert_id($GLOBALS["masterlink"]);
 
 // haetaan laskun lisätiedot ketjun ekalta laskulta
 $query = "SELECT *

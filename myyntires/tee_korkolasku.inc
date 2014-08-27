@@ -116,7 +116,7 @@ if (mysql_num_rows($result) == 1) {
             olmapvm         = now(),
             luontiaika      = now()";
   $result = pupe_query($query);
-  $otunnus = mysql_insert_id();
+  $otunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
   if (strlen(trim($asrow['laskutus_nimi'])) == 0) {
     $asrow['laskutus_nimi']     = $asrow['nimi'];

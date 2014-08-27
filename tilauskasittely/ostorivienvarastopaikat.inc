@@ -129,7 +129,7 @@ if ($tee == "valmis") {
               $insert_query = substr($insert_query, 0, -1);
               $insert_res = pupe_query($insert_query);
 
-              $tilausrivirow['tunnus'] = mysql_insert_id();
+              $tilausrivirow['tunnus'] = mysql_insert_id($GLOBALS["masterlink"]);
             }
 
             unset($result);

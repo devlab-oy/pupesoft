@@ -54,7 +54,7 @@ if (!function_exists("check_ostoskori")) {
                 tila         = 'B',
                 alatila      = '$ostoskori'";
       $koriin = pupe_query($query);
-      $tunnus = mysql_insert_id();
+      $tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
       // haetaan kori
       $query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";

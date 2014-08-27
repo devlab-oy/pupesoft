@@ -568,12 +568,15 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
     exit;
   }
 
+  $varastowherelisa = $tuotepaikatjoinlisa = "";
+
   if ($valitut['VARASTOHUOMIO'] != '') {
     $varastowherelisa = "and tilausrivi.varasto in ({$varastot})";
-    $tuotepaikatjoinlisa = "and tuotepaikat.varasto in ({$varastot})";
+    $tuotepaikatjoinlisa = " and tuotepaikat.varasto in ({$varastot}) ";
   }
-  else {
-    $varastowherelisa = $tuotepaikatjoinlisa = "";
+
+  if ($valitut['SALDOLLISET'] != '') {
+    $tuotepaikatjoinlisa .= " and tuotepaikat.saldo != 0 ";
   }
 
   if ($abcrajaus != "") {
@@ -2764,6 +2767,24 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
 
     echo "<tr><th>".t("Listaa vain 12kk sisällä perustetut tuotteet")."</th><td colspan='3'><input type='checkbox' name='valitut[VAINUUDETTUOTTEET]' value='VAINUUDETTUOTTEET' $chk></td></tr>";
   }
+
+  //Näytetäänkö ostot varastoittain
+  $query = "SELECT selitetark
+            FROM avainsana
+            WHERE yhtio    = '$kukarow[yhtio]'
+            and laji       = 'HALYRAP'
+            and selite     = '$rappari'
+            and selitetark = 'SALDOLLISET'";
+  $sresult = pupe_query($query);
+  $srow = mysql_fetch_assoc($sresult);
+
+  $chk = "";
+  if (($srow["selitetark"] == "SALDOLLISET" and $tee == "JATKA") or $valitut["SALDOLLISET"] != '') {
+    $chk = "CHECKED";
+  }
+
+  echo "<tr><th>",t("Näytä vain tuotteet joilla on saldoa"),"</th><td colspan='3'><input type='checkbox' name='valitut[SALDOLLISET]' {$chk}></td></tr>";
+
   echo "<tr><th>".t("Päätoimittajarajaus")."</th><td colspan='3'><input type='checkbox' name='nayta_vain_ykkostoimittaja' value='JOO'/></tr></td>";
   echo "<tr><td class='back'><br></td></tr>";
 

@@ -57,12 +57,13 @@ $tuoterajaus = "";
 
 // Päiväajoon otetaan mukaan vain viimeisen vuorokauden aikana muuttuneet
 if ($paiva_ajo) {
-  $tuotelista = "null";
+
+  $tuotelista       = "NULL";
   $namaonjotsekattu = "";
 
-  $query = "SELECT group_concat(concat('\'',tuote.tuoteno,'\'')) tuotteet
+  $query = "SELECT tuote.tuoteno
             FROM tuote
-            WHERE tuote.yhtio      = '$yhtio'
+            WHERE tuote.yhtio      = '{$yhtio}'
             AND tuote.status      != 'P'
             AND tuote.ei_saldoa    = ''
             AND tuote.tuotetyyppi  = ''
@@ -70,24 +71,21 @@ if ($paiva_ajo) {
             AND (tuote.muutospvm  >= date_sub(now(), interval 24 HOUR)
               OR tuote.luontiaika  >= date_sub(now(), interval 24 HOUR))";
   $res = pupe_query($query);
-  $row = mysql_fetch_assoc($res);
 
-  if ($row["tuotteet"] != "") {
-    $namaonjotsekattu = "AND tuotteen_toimittajat.tuoteno NOT IN ({$row["tuotteet"]})";
-    $tuotelista .= ", {$row["tuotteet"]}";
+  while ($row = mysql_fetch_assoc($res)) {
+    $tuotelista .= ",'".pupesoft_cleanstring($row["tuoteno"])."'";
   }
 
   $query = "SELECT group_concat(concat('\'',tuotteen_toimittajat.tuoteno,'\'')) tuotteet
             FROM tuotteen_toimittajat
             WHERE tuotteen_toimittajat.yhtio     = '{$yhtio}'
+            AND tuotteen_toimittajat.tuoteno not in ($tuotelista)
             AND (tuotteen_toimittajat.muutospvm  >= date_sub(now(), interval 24 HOUR)
-              OR tuotteen_toimittajat.luontiaika >= date_sub(now(), interval 24 HOUR))
-            {$namaonjotsekattu}";
+             OR tuotteen_toimittajat.luontiaika  >= date_sub(now(), interval 24 HOUR))";
   $res = pupe_query($query);
-  $row = mysql_fetch_assoc($res);
 
-  if ($row["tuotteet"] != "") {
-    $tuotelista .= ", {$row["tuotteet"]}";
+  while ($row = mysql_fetch_assoc($res)) {
+    $tuotelista .= ",'".pupesoft_cleanstring($row["tuoteno"])."'";
   }
 
   $tuoterajaus = " AND tuote.tuoteno IN ({$tuotelista}) ";

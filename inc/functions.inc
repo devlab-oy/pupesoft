@@ -20955,7 +20955,7 @@ if (!function_exists('lisaa_tuotepaikka')) {
               laatija     = '{$kukarow['kuka']}',
               luontiaika  = now()";
     pupe_query($query);
-    $lisatty_tun = mysql_insert_id();
+    $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
     $query = "INSERT INTO tapahtuma SET
               yhtio     = '{$kukarow['yhtio']}',

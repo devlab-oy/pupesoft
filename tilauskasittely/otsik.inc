@@ -67,7 +67,7 @@ if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesk
   exit;
 }
 
-// TODO tänne ei pitäis mennä enää kun arvot on kerran setattu - SLA ja VC pitää repiä kuitenkin jostain
+// TODO tänne ei pitäis mennä enää kun työmääräykselle on "lukittu" laite
 if (isset($valmnro) and !empty($valmnro)) {
   // Katsotaan löytyykö valittu sarjanumero laiterekisteristä
   $query = "SELECT 
@@ -2610,6 +2610,7 @@ if ($tila == "" and !isset($jatka)) {
       }
 
       echo "</select>";
+      echo "<input type='submit' name='paivita_tyomaarayksen_status' value='".t("Päivitä tila")."'>";
       echo "</td></tr>";
 
       echo "<tr><td>".t("Prioriteetti").":</td><td colspan='3'>";
@@ -2636,6 +2637,20 @@ if ($tila == "" and !isset($jatka)) {
     if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A") {
       //Täysin dynaaminen osio
       $al_res = t_avainsana("TYOM_TYOKENTAT", "", "and avainsana.selitetark != ''");
+
+      $disa = '';
+
+      // Jos työmääräys on jo avattu ja sille on valittu sarjanumero, niin aktivoidaan readonly
+      // dynaamisille kentille
+      $que = "SELECT valmnro
+              FROM tyomaarays
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND otunnus = '{$tilausnumero}'";  
+      $resa = pupe_query($que);
+      $rowi = mysql_fetch_assoc($resa);
+      if (!empty($rowi['valmnro'])) {
+        $disa = ' readonly';
+      }
 
       $al_lask = 0;
 
@@ -2664,16 +2679,16 @@ if ($tila == "" and !isset($jatka)) {
         }
         elseif (strtoupper($al_row["selitetark_2"]) == "DATE") {
 
-          list($al_vv, $al_kk, $al_pp) = isset($_REQUEST[$kentta]) ? explode('-', $_REQUEST[$kentta]) : explode('-', $srow["$kentta"]);
+          list($al_vv, $al_kk, $al_pp) = (isset($_REQUEST[$kentta]) and !empty($_REQUEST[$kentta])) ? explode('-', $_REQUEST[$kentta]) : explode('-', $srow["$kentta"]);
 
           if ($al_kk == "00")   $al_kk = date("m");
           if ($al_vv == "0000")   $al_vv = date("Y");
           if ($al_pp == "00")   $al_pp = date("d");
 
           echo "<td>$al_row[selitetark]:</td><td>
-              <input type='text' name='".$kentta."pp' size='3' value='$al_pp'>
-              <input type='text' name='".$kentta."kk' size='3' value='$al_kk'>
-              <input type='text' name='".$kentta."vv' size='5' value='$al_vv'></td>";
+              <input type='text' name='".$kentta."pp' size='3' value='$al_pp' $disa>
+              <input type='text' name='".$kentta."kk' size='3' value='$al_kk' $disa>
+              <input type='text' name='".$kentta."vv' size='5' value='$al_vv' $disa></td>";
         }
         elseif (strtoupper($al_row["selitetark_2"]) == "DROPDOWN") {
           $dropdown_arvot = explode("#", $al_row['selitetark_3']);
@@ -2697,13 +2712,20 @@ if ($tila == "" and !isset($jatka)) {
           echo "</td>";
           echo "<td>";
           //jos requestista tulee arvo valitaan se, muuten valitaan laskulta löytyvä arvo
-          if (isset(${$al_row['selite']})) {
+          if (isset(${$al_row['selite']}) and !empty($_REQUEST[$kentta])) {
             $livesearch_value = ${$al_row['selite']};
           }
           else {
             $livesearch_value = $srow[$kentta];
           }
-          echo livesearch_kentta("paaformi", $mika_livesearch, $al_row['selite'], 140, $livesearch_value, $submitvaiei, '', '', 'ei_break_all');
+
+          if ($disa == '') {
+            echo livesearch_kentta("paaformi", $mika_livesearch, $al_row['selite'], 140, $livesearch_value, $submitvaiei, '', '', 'ei_break_all');
+          }
+          else {
+            echo "<input type='text' name='".$kentta."' size='15' value='{$livesearch_value}' $disa>";
+          }
+
           echo "</td>";
         }
         elseif ($kentta == "suorittaja") {
@@ -2772,12 +2794,12 @@ if ($tila == "" and !isset($jatka)) {
 
             echo "</select> ".t("tai")." ";
           }
-          $arvo = isset($_REQUEST[$kentta]) ? $_REQUEST[$kentta] : $srow[$kentta];
-          echo "<input type='text' name='$kentta' size='15' value='{$arvo}'></td>";
+          $arvo = (isset($_REQUEST[$kentta]) and !empty($_REQUEST[$kentta])) ? $_REQUEST[$kentta] : $srow[$kentta];
+          echo "<input type='text' name='$kentta' size='15' value='{$arvo}' $disa></td>";
         }
         else {
-          $arvo = isset($_REQUEST[$kentta]) ? $_REQUEST[$kentta] : $srow[$kentta];
-          echo "<td>$al_row[selitetark]:</td><td><input type='text' name='$kentta' size='15' value='{$arvo}'></td>";
+          $arvo = (isset($_REQUEST[$kentta]) and !empty($_REQUEST[$kentta])) ? $_REQUEST[$kentta] : $srow[$kentta];
+          echo "<td>$al_row[selitetark]:</td><td><input type='text' name='$kentta' size='15' value='{$arvo}' $disa></td>";
         }
 
         $al_lask++;
@@ -2813,6 +2835,40 @@ if ($tila == "" and !isset($jatka)) {
 
     // Työmääräyksen tapahtumahistoria
     if ($toim == "TYOMAARAYS") {
+      
+      if (isset($paivita_tyomaarayksen_status)) {
+        // Päivitetään työmääräyshistoria myös silloin kuin painetaan erillistä päivitä-nappia
+        if (isset($eka_tuomaarays_row) and !empty($eka_tuomaarays_row)) {
+          $lokin_tyojono = $eka_tuomaarays_row['tyojono_selite'];
+          $lokin_tyostatus = $eka_tuomaarays_row['tyostatus_selite'];
+        }
+        else {
+          $tilaquery = "SELECT
+                        ifnull(tyojono_selite, '') tyojono_selite,
+                        ifnull(tyostatus_selite,'') tyostatus_selite
+                        FROM tyomaarayksen_tapahtumat
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tyomaarays_tunnus = '{$kukarow['kesken']}'
+                        ORDER BY luontiaika desc
+                        LIMIT 1"; 
+          $tilaresult = pupe_query($tilaquery);
+          $tilarivi = mysql_fetch_assoc($tilaresult);
+
+          $lokin_tyojono = $tilarivi['tyojono_selite'];
+          $lokin_tyostatus = $tilarivi['tyostatus_selite'];
+        }
+
+        if ($lokin_tyojono != $tyojono or $lokin_tyostatus != $tyostatus) {
+          $updquery = "INSERT INTO tyomaarayksen_tapahtumat SET
+                       tyomaarays_tunnus = '{$kukarow['kesken']}',
+                       tyojono_selite    = '$tyojono',
+                       tyostatus_selite  = '$tyostatus',
+                       yhtio             = '{$kukarow['yhtio']}',
+                       laatija           = '{$kukarow['kuka']}',
+                       luontiaika        = now()";
+          pupe_query($updquery);
+        }
+      }
 
       $query = "SELECT tyomaarayksen_tapahtumat.*,
                 ifnull(tilataulu.selitetark, '') tilassa,

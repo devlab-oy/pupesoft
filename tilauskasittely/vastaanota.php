@@ -817,7 +817,7 @@ if ($tee == 'valmis') {
                 WHERE tunnus = '{$apusummarow['otunnus']}'
                 and yhtio    = '$kukarow[yhtio]'
                 and tila     = 'G'";
-      $result = pupe_query($query);
+      $result_upd = pupe_query($query);
     }
   }
 }

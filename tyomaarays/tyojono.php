@@ -430,9 +430,14 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
   echo "</td>";
 
   $paivan_vari = '';
-  // Jos luvattupvm on ohitettu tai lähellä muutetaan taustaväri
-  if (strtotime($vrow["luvattu"]) < strtotime(date('Y-m-j'))) {
-    $paivan_vari = "style='background-color: #FF0000;'";
+  // Jos luvattupvm on ohitettu, tänään tai 3pv sisällä
+  if (strtotime($vrow["luvattu"]) <= strtotime(date('Y-m-j')) OR
+    strtotime($vrow['luvattu']) <= strtotime(date('Y-m-j', strtotime("+ 3 days")))) {
+    $paivan_vari = "style='background-color: #FF6600;'";
+  }
+  elseif (strtotime($vrow['luvattu']) <= strtotime(date('Y-m-j', strtotime("+ 5 days")))) {
+    // jos luvattupvm on 5pv sisällä
+    $paivan_vari = "style='background-color: #FFFF00;'";
   }
 
   if ($vrow["tyojono"] != "" and $toim != 'TYOMAARAYS_ASENTAJA') {

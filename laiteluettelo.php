@@ -3,23 +3,6 @@
 if (isset($_COOKIE['laiteluettelo_keksi'])) $valitut_sarakkeet = unserialize(urldecode($_COOKIE['laiteluettelo_keksi']));
 
 if (isset($_POST['piirtele_laiteluettelo'])) {
-  echo "<SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
-
-    $(function() {
-      console.log('funkka');
-      $('.check_all').on('click', function() {
-        console.log('klikki');
-        var id = $(this).val();
-  
-        if ($(this).is(':checked')) {
-          $('.'+id).attr('checked', true);
-        }
-        else {
-          $('.'+id).attr('checked', false);
-        }
-      });
-    });
-  </script>";
 
   // Piirrellään laiteluettelo-valikko
   echo "<br><br>";
@@ -33,6 +16,7 @@ if (isset($_POST['piirtele_laiteluettelo'])) {
     // Laite- ja palvelu(tilausrivi)kohtaiset
     "laitteen_tunnus",
     "sarjanro",
+    "tuoteno",
     "tuotemerkki",
     "valmistaja",
     "sla",
@@ -42,12 +26,12 @@ if (isset($_POST['piirtele_laiteluettelo'])) {
     "hinta",
     "palvelukohtainen_hinta",
     "valmistajan_sopimusnumero",
-    "valmistajan_sopimus_paattyy",
+    "valmistajan_sopimus_paattymispaiva",
   );
 
   echo "<form name='aja_ja_tallenna' method='post'>";
   echo "<table border='0' cellpadding='5' cellspacing='0' width='600'>";
-  echo "<tr><th>".t("Valitse sarakkeet")."<br><br><input type='checkbox' class='check_all' value='sarakeboksi'>".t("Valitse Kaikki")."</th></tr>";
+  echo "<tr><th>".t("Valitse sarakkeet")."</th></tr>";
 
   $secretcounter = 0;
   $eka_ajo = true;
@@ -113,11 +97,13 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
             lasku.toim_osoite,'\n',
             lasku.toim_postitp) asiakastiedot,
             laitteen_sopimukset.laitteen_tunnus,
+            laite.sla,
             laite.sarjanro,
             laite.tuoteno,
+            laite.valmistajan_sopimusnumero,
+            laite.valmistajan_sopimus_paattymispaiva,
             tuote.tuotemerkki,
             avainsana.selitetark valmistaja,
-            laite.sla,
             tilausrivi.nimitys,
             tilausrivi.hinta,
             tilausrivi.netto,
@@ -156,8 +142,6 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
     // Sopimuskohtaiset kentät
     if ($eka_ajo) {
       // Defaultkentät:
-      // Sopimusnumero
-      // Sopimus alkaa/loppuu
       $worksheet->write($excelrivi, $excelsarake, t("Sopimusnumero"),       $format_bold);
       $worksheet->write($excelrivi+1, $excelsarake++, $row['tunnus']);
       $worksheet->write($excelrivi, $excelsarake, t("Sopimus alkaa"),       $format_bold);
@@ -198,6 +182,7 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
 
         if (is_numeric($value) and $key == "hinta") {
           $value = str_replace(".", ",", hintapyoristys($value))." ".t("e / kk");
+          // Jos laitteiden kappalemäärä ei vaikuta palvelun hintaan
           if ($row['netto'] != '') {
             $value .= " **";
             $lisainffot = "".t("** Palvelukohtainen hinta");

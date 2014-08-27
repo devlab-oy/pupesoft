@@ -17,12 +17,6 @@ if (!isset($argv[1]) or $argv[1] == '') {
   die("Yhtiö on annettava!!");
 }
 
-$paiva_ajo = FALSE;
-
-if (isset($argv[2]) and $argv[1] != '') {
-  $paiva_ajo = TRUE;
-}
-
 ini_set("memory_limit", "5G");
 
 // Otetaan includepath aina rootista
@@ -30,6 +24,17 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(d
 
 require 'inc/connect.inc';
 require 'inc/functions.inc';
+
+$ajopaiva  = date("Y-m-d");
+$paiva_ajo = FALSE;
+
+if (isset($argv[2]) and $argv[2] != '') {
+  $paiva_ajo = TRUE;
+  
+  if ($argv[2] == "edpaiva") {
+      $ajopaiva = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+  }
+}
 
 // Yhtiö
 $yhtio = mysql_real_escape_string($argv[1]);
@@ -45,7 +50,7 @@ if (@include "inc/tecdoc.inc") {
 
 
 // Tallennetaan rivit tiedostoon
-$filepath = "/tmp/product_replacement_update_{$yhtio}_".date("Y-m-d").".csv";
+$filepath = "/tmp/product_replacement_update_{$yhtio}_$ajopaiva.csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
   die("Tiedoston avaus epäonnistui: $filepath\n");

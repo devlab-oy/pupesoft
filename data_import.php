@@ -301,6 +301,7 @@ $taulut = array(
   'kuka'                            => 'Käyttäjätietoja',
   'kustannuspaikka'                 => 'Kustannuspaikat',
   'lahdot'                    => 'Lähdöt',
+  'laite'                           => 'Laiterekisteri',
   'liitetiedostot'                  => 'Liitetiedostot',
   'maksuehto'                       => 'Maksuehto',
   'pakkaus'                         => 'Pakkaustiedot',

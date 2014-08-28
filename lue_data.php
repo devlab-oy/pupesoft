@@ -2265,6 +2265,7 @@ if (!$cli and !isset($api_kentat)) {
     'kuka'                            => 'Käyttäjätietoja',
     'kustannuspaikka'                 => 'Kustannuspaikat',
     'lahdot'                    => 'Lähdöt',
+    'laite'                           => 'Laiterekisteri',
     'liitetiedostot'                  => 'Liitetiedostot',
     'maksuehto'                       => 'Maksuehto',
     'pakkaus'                         => 'Pakkaustiedot',

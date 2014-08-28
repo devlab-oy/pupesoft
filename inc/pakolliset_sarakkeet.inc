@@ -371,6 +371,10 @@ if (!function_exists("pakolliset_sarakkeet")) {
       $wherelliset = array("PVM", "LAHDON_VIIKONPVM", "LAHDON_KELLONAIKA", "LIITOSTUNNUS", "VIIMEINEN_TILAUSAIKA", "KERAILYN_ALOITUSAIKA", "TERMINAALIALUE", "ASIAKASLUOKKA", "VARASTO");
       $kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
       break;
+    case "laite" :
+      $pakolliset = array("SARJANRO", "TUOTENO");
+      $kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+      break;
     case "rahtikirjanumero":
       $pakolliset = array("RAHTIKIRJANRO");
       $wherelliset = array();

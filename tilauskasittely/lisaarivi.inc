@@ -1835,26 +1835,6 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                               and alv     < 500";
                     $sarjares = pupe_query($query);
                   }
-
-                  /*$kveri = "UPDATE laite
-                            SET paikka = '{$srow['tunnus']}',
-                            muutospvm = now(),
-                            muuttaja = '{$kukarow['kuka']}'
-                            WHERE yhtio = '{$kukarow['yhtio']}'
-                            AND sarjanro = '{$srow['sarjanumero']}'
-                            AND tuoteno = '{$myy_tuoteno[$indeksi]}'";
-                  $kverires = pupe_query($kveri);
-
-                  if (mysql_affected_rows() == 0) {
-                    $kveri = "INSERT INTO laite
-                              SET yhtio = '{$kukarow['yhtio']}',
-                              luontiaika = now(),
-                              sarjanro = '{$srow['sarjanumero']}',
-                              paikka = '{$srow['tunnus']}',
-                              tuoteno = '{$myy_tuoteno[$indeksi]}',
-                              laatija = '{$kukarow['kuka']}'";
-                    pupe_query($kveri);
-                }*/
                 }
 
                 $myy_sarjatunnus = "";
@@ -1903,8 +1883,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                           hyllyvali     = '$myy_hyllyvali[$indeksi]',
                           sarjanumero   = '$myy_era[$indeksi]'";
                 $lisa_res = pupe_query($query);
-                
-                //kissa
+
               }
 
               if ($myy_tyyppi[$indeksi] == "LAPSITUOTE") {

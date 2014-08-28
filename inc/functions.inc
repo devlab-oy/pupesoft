@@ -1157,14 +1157,6 @@ if (!function_exists("vapauta_sarjanumerot")) {
           pupe_query($query);
         }
       }
-
-      // Nollataan myös laitetaulun myyntirivitunnus
-      /*$kveri = "UPDATE laite
-                SET paikka = NULL
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tuoteno = '{$srow['tuoteno']}'
-                AND paikka ='{$srow['tunnus']}'";
-      pupe_query($kveri);*/
     }
   }
 }

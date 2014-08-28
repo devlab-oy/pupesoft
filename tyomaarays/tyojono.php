@@ -327,8 +327,8 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
   $lopetusx = "";
   if ($lopetus != "") $lopetusx = $lopetus;
   $lopetusx .= "/SPLIT/{$palvelin2}tyomaarays/tyojono.php////konserni=$konserni//toim=$toim//tyojonotyyppi=$tyojonotyyppi";
-//KISSA - pitäis tunkata $olenko_asentaja truu setit tosta viiskyt riviä alempaa
-  if ($toim != 'TYOMAARAYS_ASENTAJA' or $olenko_asentaja_tassa_hommassa) {
+
+  if ($toim != 'TYOMAARAYS_ASENTAJA') {
     if ($vrow["yhtioyhtio"] != $kukarow["yhtio"]) {
       $muoklinkki = "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tilausnumero=$vrow[tunnus]&lopetus=$lopetusx'>{$vrow['tunnus']}</a>";
     }

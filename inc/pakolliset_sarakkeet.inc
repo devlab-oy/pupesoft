@@ -374,7 +374,11 @@ if (!function_exists("pakolliset_sarakkeet")) {
     case "laite" :
       $pakolliset = array("SARJANRO", "TUOTENO");
       $kielletyt = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
-      break;
+      break; 
+    case "laitteen_sopimukset" :
+      $pakolliset = array("LAITTEEN_TUNNUS", "SOPIMUSRIVIN_TUNNUS");
+      $saakopoistaa = TRUE;
+      break;  
     case "rahtikirjanumero":
       $pakolliset = array("RAHTIKIRJANRO");
       $wherelliset = array();

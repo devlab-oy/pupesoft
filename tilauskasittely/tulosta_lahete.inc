@@ -2225,7 +2225,7 @@ if (!function_exists('rivi_hinta_ale_lahete_ean')) {
     if ($lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc") {
       $lisakala = ($row["ale1"] * 1);
     }
-    else{
+    else {
       $lisakala = '';
       $ed_ale = array();
 

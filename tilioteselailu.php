@@ -14,6 +14,18 @@ if (!isset($tilino))  $tilino = "";
 if (!isset($tiliotejarjestys))  $tiliotejarjestys = "";
 if (!isset($kuitattava_tiliotedata_tunnus))  $kuitattava_tiliotedata_tunnus = 0;
 
+$tilioteselailu_oikrow = tarkista_oikeus("tilioteselailu.php", "%", "", "OK");
+
+if ($toim == "AVOIMET") {
+  $avoimetlisa = " and tiliotedata.alku >= '{$yhtiorow["tilikausi_alku"]}' ";
+
+  list($Tvv1, $Tkk1, $Tpp1) = explode("-", $yhtiorow["tilikausi_alku"]);
+
+  if (!isset($kk)) $kk = date("m", mktime(0, 0, 0, $Tkk1, $Tpp1, $Tvv1));
+  if (!isset($vv)) $vv = date("Y", mktime(0, 0, 0, $Tkk1, $Tpp1, $Tvv1));
+  if (!isset($pp)) $pp = date("d", mktime(0, 0, 0, $Tkk1, $Tpp1, $Tvv1));
+}
+
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
   exit;
@@ -26,6 +38,7 @@ if ($tee == 'T' and (int) $kuitattava_tiliotedata_tunnus > 0) {
   $query = "SELECT kuitattu
             FROM tiliotedata
             WHERE yhtio = '$kukarow[yhtio]'
+            {$avoimetlisa}
             AND perheid = '$kuitattava_tiliotedata_tunnus'";
   $kuitetaan_result = pupe_query($query);
   $kuitetaan_row = mysql_fetch_assoc($kuitetaan_result);
@@ -35,6 +48,7 @@ if ($tee == 'T' and (int) $kuitattava_tiliotedata_tunnus > 0) {
   $query = "UPDATE tiliotedata SET
             $kuitataan_lisa
             WHERE yhtio = '$kukarow[yhtio]'
+            {$avoimetlisa}
             AND perheid = '$kuitattava_tiliotedata_tunnus'";
   $kuitetaan_result = pupe_query($query);
 
@@ -73,6 +87,7 @@ if ($tee == 'X' or $tee == 'XX' or $tee == "XS" or $tee == "XXS") {
     $query = "SELECT *
               FROM tiliotedata use index (yhtio_tilino_alku)
               WHERE yhtio = '{$kukarow['yhtio']}'
+              {$avoimetlisa}
               AND alku    > '$pvm'
               AND tilino  = '$tilino'
               AND tyyppi  = '1'
@@ -85,6 +100,7 @@ if ($tee == 'X' or $tee == 'XX' or $tee == "XS" or $tee == "XXS") {
     $query = "SELECT *
               FROM tiliotedata use index (yhtio_tilino_alku)
               WHERE yhtio = '{$kukarow['yhtio']}'
+              {$avoimetlisa}
               AND alku    < '$pvm'
               AND tilino  = '$tilino'
               AND tyyppi  = '1'
@@ -97,6 +113,7 @@ if ($tee == 'X' or $tee == 'XX' or $tee == "XS" or $tee == "XXS") {
     $query = "SELECT *
               FROM tiliotedata use index (yhtio_tilino_alku)
               WHERE yhtio = '{$kukarow['yhtio']}'
+              {$avoimetlisa}
               AND alku    > '$pvm'
               AND tilino  = '$tilino'
               AND tyyppi  = '3'
@@ -109,6 +126,7 @@ if ($tee == 'X' or $tee == 'XX' or $tee == "XS" or $tee == "XXS") {
     $query = "SELECT *
               FROM tiliotedata use index (yhtio_tilino_alku)
               WHERE yhtio = '{$kukarow['yhtio']}'
+              {$avoimetlisa}
               AND alku    < '$pvm'
               AND tilino  = '$tilino'
               AND tyyppi  = '3'
@@ -203,6 +221,7 @@ if ($tee == 'S') {
               FROM tiliotedata
               LEFT JOIN kuka ON (kuka.yhtio = tiliotedata.yhtio AND kuka.kuka = tiliotedata.kuitattu)
               WHERE tiliotedata.yhtio = '{$kukarow['yhtio']}'
+              {$avoimetlisa}
               and tiliotedata.alku    = '$pvm'
               and tiliotedata.tilino  = '$tilino'
               and tiliotedata.tyyppi  = '$tyyppi'
@@ -222,6 +241,7 @@ if ($tee == 'S') {
               FROM tiliotedata
               LEFT JOIN kuka ON (kuka.yhtio = tiliotedata.yhtio AND kuka.kuka = tiliotedata.kuitattu)
               WHERE tiliotedata.yhtio = '{$kukarow['yhtio']}'
+              {$avoimetlisa}
               and tiliotedata.alku    = '$pvm'
               and tiliotedata.tilino  = '$tilino'
               and tiliotedata.tyyppi  = '$tyyppi'
@@ -275,6 +295,7 @@ if ($tee == 'S') {
 
     echo "<br>";
     echo "<form method='post' class='multisubmit'>";
+    echo "<input type='hidden' name='toim' value='$toim'>";
     echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
     echo "<input type='hidden' name='kaunisnimi' value='$txtfile'>";
     echo "<input type='hidden' name='tmpfilenimi' value='$filename'>";
@@ -308,7 +329,8 @@ if ($tee == '') {
       <tr>
       <th>".t("Tapahtumapvm")."</th>
       <td>
-        <input type='hidden' name='tee' value='S'>
+      <input type='hidden' name='toim' value='$toim'>
+      <input type='hidden' name='tee' value='S'>
       <input type='text' name='pp' maxlength='2' size=2 value='$pp'>
       <input type='text' name='kk' maxlength='2' size=2 value='$kk'>
       <input type='text' name='vv' maxlength='4' size=4 value='$vv'></td>
@@ -345,8 +367,9 @@ if ($tee == '') {
   $query = "SELECT alku, loppu, concat_ws(' ', yriti.nimi, yriti.tilino) tili, if(tyyppi='1', 'tiliote', if(tyyppi='2','lmp','viitesiirrot')) laji, tyyppi, yriti.tilino
             FROM tiliotedata
             JOIN yriti ON (yriti.yhtio = tiliotedata.yhtio and yriti.tilino = tiliotedata.tilino)
-                    WHERE tiliotedata.yhtio = '$kukarow[yhtio]'
-            and tiliotedata.alku            >= '$vv-$kk-$pp'
+            WHERE tiliotedata.yhtio = '$kukarow[yhtio]'
+            {$avoimetlisa}
+            and tiliotedata.alku   >= '$vv-$kk-$pp'
             $querylisa
             GROUP BY alku, tili, laji
             ORDER BY alku DESC, tiliotedata.tilino, laji";
@@ -380,16 +403,18 @@ if ($tee == '') {
 
     $edalku = $row["alku"];
 
-    echo "  <form name = 'valikko' method='post'>
-        <input type='hidden' name='tee' value='T'>
-        <input type='hidden' name='lopetus' value='${palvelin2}tilioteselailu.php////tee=//pp=$pp//kk=$kk//vv=$vv//tilino=$tilino//tyyppi=$tyyppi'>
-        <input type='hidden' name='pvm' value='$row[alku]'>
-        <input type='hidden' name='tyyppi' value='$row[tyyppi]'>
-        <input type='hidden' name='tilino' value='$row[tilino]'>
-        <td class='back'><input type = 'submit' value = '".t("Valitse")."'></td>
+    echo "<form name = 'valikko' method='post'>
+          <input type='hidden' name='toim' value='$toim'>
+          <input type='hidden' name='tee' value='T'>
+          <input type='hidden' name='lopetus' value='${palvelin2}tilioteselailu.php////toim=$toim//tee=//pp=$pp//kk=$kk//vv=$vv//tilino=$tilino//tyyppi=$tyyppi'>
+          <input type='hidden' name='pvm' value='$row[alku]'>
+          <input type='hidden' name='tyyppi' value='$row[tyyppi]'>
+          <input type='hidden' name='tilino' value='$row[tilino]'>
+          <td class='back'><input type = 'submit' value = '".t("Valitse")."'></td>
           </form>
           </tr>";
   }
+
   echo "</table></form>";
 
   $tee = "";

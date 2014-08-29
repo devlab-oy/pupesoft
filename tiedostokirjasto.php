@@ -10,6 +10,9 @@ $tee = empty($tee) ? '' : $tee;
 if ($tee == 'hae_tiedostot') {
   $tuotetunnukset = hae_tuotetunnukset($toimittaja);
   $tiedostot = hae_tiedostot($tuotetunnukset, $tiedostotyyppi);
+
+  piirra_formi();
+  piirra_tiedostolista($tiedostot);
 }
 
 if ($tee == '') {
@@ -90,7 +93,7 @@ function hae_tiedostot($tuotetunnukset, $tiedoston_tyyppi) {
 
   $tuotetunnukset_lista = implode(',', $tuotetunnukset);
 
-  $query = "SELECT liitetiedostot.filename
+  $query = "SELECT liitetiedostot.tunnus, liitetiedostot.selite
             FROM liitetiedostot
             WHERE liitetiedostot.liitostunnus IN ({$tuotetunnukset_lista})
             AND liitetiedostot.selite = '{$tiedoston_tyyppi}'
@@ -124,4 +127,31 @@ function hae_tuotetunnukset($toimittajan_tunnus) {
   }
 
   return $tunnukset;
+}
+
+function piirra_tiedostolista($tiedostot) {
+  echo "<table>";
+  echo "<thead>";
+
+  echo "<tr>";
+  echo "<th>" . t("Selite") . "</th>";
+  echo "<th></th>";
+  echo "</tr>";
+
+  echo "</thead>";
+  echo "<tbody>";
+
+  foreach ($tiedostot as $tiedosto) {
+    echo "<tr>";
+    echo "<td>{$tiedosto['selite']}</td>";
+    echo "<td>";
+    echo "<a href='view.php?id={$tiedosto['tunnus']}' target='Attachment'>";
+    echo t("Lataa tiedosto");
+    echo "</a>";
+    echo "</td>";
+    echo "</tr>";
+  }
+
+  echo "</tbody>";
+  echo "</table>";
 }

@@ -11,12 +11,12 @@ if ($tee == 'hae_tiedostot') {
   $tuotetunnukset = hae_tuotetunnukset($toimittaja);
   $tiedostot = hae_tiedostot($tuotetunnukset, $tiedostotyyppi);
 
-  piirra_formi();
+  piirra_formi($toimittaja, $tiedostotyyppi);
   piirra_tiedostolista($tiedostot);
 }
 
 if ($tee == '') {
-  piirra_formi();
+  piirra_formi($toimittaja, $tiedostotyyppi);
 }
 
 function hae_toimittajat() {
@@ -47,7 +47,7 @@ function tiedostotyypit() {
   );
 }
 
-function piirra_formi() {
+function piirra_formi($valittu_toimittaja, $valittu_tiedostotyyppi) {
   $toimittajat = hae_toimittajat();
 
   echo "<form action='tiedostokirjasto.php' method='post'>";
@@ -60,7 +60,8 @@ function piirra_formi() {
   echo "<td>";
   echo '<select id="toimittaja_id" name="toimittaja">';
   foreach ($toimittajat as $toimittaja) {
-    echo "<option value='{$toimittaja['tunnus']}'>{$toimittaja['nimi']}</option>";
+    $valittu = $valittu_toimittaja == $toimittaja['tunnus'] ? "selected" : "";
+    echo "<option {$valittu} value='{$toimittaja['tunnus']}'>{$toimittaja['nimi']}</option>";
   }
   echo '</select>';
   echo "</td>";
@@ -71,7 +72,8 @@ function piirra_formi() {
   echo "<td>";
   echo "<select id='tiedostotyyppi_id' name='tiedostotyyppi'>";
   foreach (tiedostotyypit() as $tiedostotyyppi) {
-    echo "<option>{$tiedostotyyppi}</option>";
+    $valittu = $valittu_tiedostotyyppi == $tiedostotyyppi ? "selected" : "";
+    echo "<option {$valittu}>{$tiedostotyyppi}</option>";
   }
   echo "</select>";
   echo "</td>";
@@ -97,7 +99,8 @@ function hae_tiedostot($tuotetunnukset, $tiedoston_tyyppi) {
             FROM liitetiedostot
             WHERE liitetiedostot.liitostunnus IN ({$tuotetunnukset_lista})
             AND liitetiedostot.selite = '{$tiedoston_tyyppi}'
-            AND liitetiedostot.yhtio = '{$kukarow['yhtio']}'";
+            AND liitetiedostot.yhtio = '{$kukarow['yhtio']}'
+            ORDER BY liitetiedostot.selite";
   $result = pupe_query($query);
 
   $tiedostot = array();
@@ -130,6 +133,10 @@ function hae_tuotetunnukset($toimittajan_tunnus) {
 }
 
 function piirra_tiedostolista($tiedostot) {
+  if (empty($tiedostot)) {
+    return;
+  }
+
   echo "<table>";
   echo "<thead>";
 

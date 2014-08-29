@@ -120,10 +120,8 @@ if ($raptee == "AJA") {
   $i++;
   $worksheet->write($excelrivi, $i, t('Asiakastiedot'), $format_bold);
   $i++;
-  if (!empty($valmistajarajaus)) {
-    $worksheet->write($excelrivi, $i, t('Tuotemerkki'), $format_bold);
-    $i++;
-  }
+  $worksheet->write($excelrivi, $i, t('Tuotemerkki'), $format_bold);
+  $i++;
   $worksheet->write($excelrivi, $i, t('Aloitustapahtuma'), $format_bold);
   $i++;
   $worksheet->write($excelrivi, $i, t('Aloitusaika'), $format_bold);
@@ -144,10 +142,8 @@ if ($raptee == "AJA") {
     $i++;
     $worksheet->writeString($excelrivi, $i, $rivi['asiakastiedot']);
     $i++;
-    if (!empty($valmistajarajaus)) {
-      $worksheet->writeString($excelrivi, $i, $rivi['valmistaja']);
-      $i++;
-    }
+    $worksheet->writeString($excelrivi, $i, $rivi['valmistaja']);
+    $i++;
     $worksheet->writeString($excelrivi, $i, $rivi['alku_nimitys']);
     $i++;
     $worksheet->writeString($excelrivi, $i, $rivi['alkupvm']);

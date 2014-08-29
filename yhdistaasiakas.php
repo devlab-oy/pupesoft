@@ -328,7 +328,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
                          luontiaika        = now()";
             $ahinsertresult = pupe_query($ahinsert);
 
-            synkronoi($kukarow["yhtio"], "asiakashinta", mysql_insert_id(), "", "");
+            synkronoi($kukarow["yhtio"], "asiakashinta", mysql_insert_id($GLOBALS["masterlink"]), "", "");
           }
         }
       }
@@ -389,7 +389,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
                          luontiaika        = now()";
             $ahinsertresult = pupe_query($ahinsert);
 
-            synkronoi($kukarow["yhtio"], "asiakashinta", mysql_insert_id(), "", "");
+            synkronoi($kukarow["yhtio"], "asiakashinta", mysql_insert_id($GLOBALS["masterlink"]), "", "");
           }
         }
       }
@@ -445,7 +445,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
                          luontiaika        = now()";
             $alinsertresult = pupe_query($alinsert);
 
-            synkronoi($kukarow["yhtio"], "asiakasalennus", mysql_insert_id(), "", "");
+            synkronoi($kukarow["yhtio"], "asiakasalennus", mysql_insert_id($GLOBALS["masterlink"]), "", "");
           }
         }
       }
@@ -503,7 +503,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
                          luontiaika        = now()";
             $alinsertresult = pupe_query($alinsert);
 
-            synkronoi($kukarow["yhtio"], "asiakasalennus", mysql_insert_id(), "", "");
+            synkronoi($kukarow["yhtio"], "asiakasalennus", mysql_insert_id($GLOBALS["masterlink"]), "", "");
           }
         }
       }
@@ -541,7 +541,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
                          luontiaika = now()";
             $ahinsertresult = pupe_query($ahinsert);
 
-            synkronoi($kukarow["yhtio"], "asiakaskommentti", mysql_insert_id(), "", "");
+            synkronoi($kukarow["yhtio"], "asiakaskommentti", mysql_insert_id($GLOBALS["masterlink"]), "", "");
           }
         }
       }
@@ -586,7 +586,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
                          luontiaika   = now()";
             $ahinsertresult = pupe_query($ahinsert);
 
-            synkronoi($kukarow["yhtio"], "rahtisopimukset", mysql_insert_id(), "", "");
+            synkronoi($kukarow["yhtio"], "rahtisopimukset", mysql_insert_id($GLOBALS["masterlink"]), "", "");
           }
         }
       }
@@ -628,7 +628,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
                          luontiaika   = now()";
             $ahinsertresult = pupe_query($ahinsert);
 
-            synkronoi($kukarow["yhtio"], "rahtisopimukset", mysql_insert_id(), "", "");
+            synkronoi($kukarow["yhtio"], "rahtisopimukset", mysql_insert_id($GLOBALS["masterlink"]), "", "");
           }
         }
       }
@@ -689,7 +689,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
                          luontiaika          = now()";
             $ahinsertresult = pupe_query($ahinsert);
 
-            synkronoi($kukarow["yhtio"], "yhteyshenkilo", mysql_insert_id(), "", "");
+            synkronoi($kukarow["yhtio"], "yhteyshenkilo", mysql_insert_id($GLOBALS["masterlink"]), "", "");
           }
         }
       }
@@ -731,7 +731,7 @@ function yhdista_asiakkaita($jataminut, $yhdista) {
                          luontiaika   = now()";
             $ahinsertresult = pupe_query($ahinsert);
 
-            synkronoi($kukarow["yhtio"], "asiakkaan_avainsanat", mysql_insert_id(), "", "");
+            synkronoi($kukarow["yhtio"], "asiakkaan_avainsanat", mysql_insert_id($GLOBALS["masterlink"]), "", "");
           }
         }
       }

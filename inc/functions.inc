@@ -189,10 +189,10 @@ if (!function_exists("pupe_query")) {
     if (is_resource($link)) {
       $res = mysql_query($query, $link) or pupe_error($query);
     }
-    elseif ($GLOBALS["pupe_masterdb"] > 0) {
+    elseif (isset($GLOBALS["pupe_masterdb"]) and $GLOBALS["pupe_masterdb"] > 0) {
       $res = mysql_query($query, $GLOBALS["masterlink"]) or pupe_error($query);
     }
-    elseif ($GLOBALS["pupe_slavedb"] > 0) {
+    elseif (isset($GLOBALS["pupe_slavedb"]) and $GLOBALS["pupe_slavedb"] > 0) {
       $res = mysql_query($query, $GLOBALS["slavelink"]) or pupe_error($query);
     }
     else {
@@ -2718,7 +2718,7 @@ if (!function_exists("synkronoi")) {
               }
 
               if (mysql_num_rows($abures) == 0) {
-                $utunnus = mysql_insert_id();
+                $utunnus = mysql_insert_id($GLOBALS["masterlink"]);
                 $synclog .= "Yhtiˆlle '$kohderow[yhtio]' lis‰ttiin tietue ($utunnus)\n";
 
                 synclog($kohderow["yhtio"], $table, "Uusi $table lis‰tty.$erot", $utunnus);
@@ -8528,7 +8528,7 @@ if (!function_exists('tallenna_liite')) {
                 laatija         = '$kukarow[kuka]',
                 luontiaika      = now()";
       $result = pupe_query($query);
-      $id = mysql_insert_id();
+      $id = mysql_insert_id($GLOBALS["masterlink"]);
     }
 
     return $id;
@@ -10771,7 +10771,7 @@ if (!function_exists("t")) {
 
       $sanakirjaquery  = "SELECT fi, $indeksi, tunnus FROM sanakirja WHERE fi = BINARY '$stringi_sql'";
 
-      if (is_resource($GLOBALS["slavelink"])) {
+      if (isset($GLOBALS["slavelink"]) and is_resource($GLOBALS["slavelink"])) {
         $sanakirjaresult = pupe_query($sanakirjaquery, $GLOBALS["slavelink"]);
       }
       else {
@@ -15869,7 +15869,7 @@ if (!function_exists("kopioi_tilausrivi")) {
 
       $kysely = "INSERT INTO tilausrivi ($rfields) VALUES ($rvalues)";
       $insres = pupe_query($kysely);
-      $insid  = mysql_insert_id();
+      $insid  = mysql_insert_id($GLOBALS["masterlink"]);
 
       // tarkistetaan onko alkuper‰inen rivi asn_sanomat-taulussa
       // jos on, lis‰t‰‰n uusi splitattu rivi kanssa sinne
@@ -16625,7 +16625,7 @@ if (!function_exists("splittaa_tilaus")) {
       $query = "INSERT INTO lasku ($fields) VALUES ($values)";
       $uusires = pupe_query($query);
 
-      $uusitunnus = mysql_insert_id();
+      $uusitunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
       if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "UUSI TILAUKSEN TUNNUS ON $uusitunnus<br><br>";
 
@@ -16702,7 +16702,7 @@ if (!function_exists("splittaa_tilaus")) {
 
           if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "$query<br><br>";
 
-          $uusitunnus_tilausrivi = mysql_insert_id();
+          $uusitunnus_tilausrivi = mysql_insert_id($GLOBALS["masterlink"]);
 
           $query = "SELECT *
                     FROM tilausrivin_lisatiedot
@@ -16784,7 +16784,7 @@ if (!function_exists("splittaa_tilaus")) {
               $kysely  = "INSERT INTO tilausrivi ({$fields}) VALUES ({$values})";
               $uusires = pupe_query($kysely);
 
-              $split_tilausrivin_tunnus_lapsi = mysql_insert_id();
+              $split_tilausrivin_tunnus_lapsi = mysql_insert_id($GLOBALS["masterlink"]);
 
               $query = "SELECT *
                         FROM tilausrivin_lisatiedot
@@ -20517,7 +20517,7 @@ if (!function_exists("kopioitiliointi")) {
       $query  = substr($query, 0, -1);
       $result = pupe_query($query);
 
-      return mysql_insert_id();
+      return mysql_insert_id($GLOBALS["masterlink"]);
     }
   }
 }
@@ -20562,7 +20562,7 @@ if (!function_exists("kopioitapahtuma")) {
 
       if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
 
-      return mysql_insert_id();
+      return mysql_insert_id($GLOBALS["masterlink"]);
     }
   }
 }
@@ -20852,7 +20852,7 @@ if (!function_exists('splittaa_tilausrivi')) {
 
     $query = substr($query, 0, -1);
     $result = pupe_query($query);
-    $uusi_id = mysql_insert_id();
+    $uusi_id = mysql_insert_id($GLOBALS["masterlink"]);
 
     if ($_tmp_hinta_alkuperainen != 0) {
 
@@ -20955,7 +20955,7 @@ if (!function_exists('lisaa_tuotepaikka')) {
               laatija     = '{$kukarow['kuka']}',
               luontiaika  = now()";
     pupe_query($query);
-    $lisatty_tun = mysql_insert_id();
+    $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
     $query = "INSERT INTO tapahtuma SET
               yhtio     = '{$kukarow['yhtio']}',
@@ -21529,7 +21529,7 @@ if (!function_exists('uusi_saapuminen')) {
               laatija                 = '$kukarow[kuka]'";
     $result = pupe_query($query);
 
-    $return = mysql_insert_id();
+    $return = mysql_insert_id($GLOBALS["masterlink"]);
 
     // Unlock table
     $lock_query = "UNLOCK TABLES";
@@ -24470,7 +24470,7 @@ if (!function_exists("splittaa_valmistukset")) {
                 '{$_kohde}',
                 '')";
       pupe_query($query);
-      $valmistus_tunnus = mysql_insert_id();
+      $valmistus_tunnus = mysql_insert_id($GLOBALS["masterlink"]);
       $valmistus_tunnukset[] = $valmistus_tunnus;
 
       // Siirret‰‰n koko perhe uudelle otsikolle
@@ -24733,7 +24733,7 @@ if (!function_exists('hyllysiirto')) {
               laatija    = '{$kukarow['kuka']}',
               laadittu   = now()";
     $result = pupe_query($query);
-    $mista_tapa_tunnus = mysql_insert_id();
+    $mista_tapa_tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
     $query = "INSERT into tapahtuma set
               yhtio      = '{$kukarow['yhtio']}',
@@ -24750,7 +24750,7 @@ if (!function_exists('hyllysiirto')) {
               laatija    = '{$kukarow['kuka']}',
               laadittu   = now()";
     $result = pupe_query($query);
-    $minne_tapa_tunnus = mysql_insert_id();
+    $minne_tapa_tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
     // Tehd‰‰n kirjanpito
     if ($yhtiorow["tarkenteiden_prioriteetti"] == "T") {
@@ -24888,7 +24888,7 @@ if (!function_exists('hyllysiirto')) {
                       laatija    = '$kukarow[kuka]',
                       luontiaika = current_date";
             $result = pupe_query($query);
-            $laskuid = mysql_insert_id();
+            $laskuid = mysql_insert_id($GLOBALS["masterlink"]);
           }
 
           // Mist‰ varasto
@@ -27085,7 +27085,7 @@ if (!function_exists('merkkaa_saldovahvistus_lahetetyksi')) {
               ryhmittely_tyyppi     = '{$saldovahvistus['ryhmittely_tyyppi']}',
               yhtio                 = '{$kukarow['yhtio']}'";
     pupe_query($query, $GLOBALS["masterlink"]);
-    $saldovahvistus_tunnus = mysql_insert_id();
+    $saldovahvistus_tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
     foreach ($saldovahvistus['laskut'] as $lasku) {
       if ($lasku['saldovahvistusrivi_tyyppi'] == 'K') {
@@ -29279,7 +29279,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
                   tyyppi   = '$xtyyppi',
                   tieto    = '$tietue'";
         $tiliotedataresult = pupe_query($query);
-        $tiliote_id = mysql_insert_id();
+        $tiliote_id = mysql_insert_id($GLOBALS["masterlink"]);
 
         // P‰ivitet‰‰n perheid
         if ($tietue_type != "T11" and $tietue_type != "T81") {
@@ -29343,6 +29343,8 @@ if (!function_exists("kasittele_tiliote_viite")) {
     $tee_viitemaksu_kohdistus = false;
     $vastavienti = 0;
     $vastavienti_valuutassa = 0;
+
+    $tilioteselailu_oikrow = tarkista_oikeus("tilioteselailu.php", "%", "", "OK");
 
     // Otetaan talteen, koska t‰‰ll‰ muutellaan
     $kukarow_talteen = $kukarow;

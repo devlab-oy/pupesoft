@@ -143,7 +143,7 @@ else {
 }
 
 $result = pupe_query($query);
-$isa = mysql_insert_id();
+$isa = mysql_insert_id($GLOBALS["masterlink"]);
 
 // Tiliöidään alv
 if ($vero != 0) {

@@ -110,7 +110,7 @@ if (isset($tee) and $tee == 'kuittaa_alv_ilmoitus') {
                 laatija    = '{$kukarow['kuka']}',
                 luontiaika = now()";
       $result = pupe_query($query);
-      $tunnus = mysql_insert_id($link);
+      $tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
       require "inc/teetiliointi.inc";
 

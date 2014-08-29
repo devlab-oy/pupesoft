@@ -1241,7 +1241,7 @@ else {
             $kysely  = "INSERT INTO tilausrivi ({$fields}) VALUES ({$values})";
             $uusires = pupe_query($kysely);
 
-            $split_tilausrivin_tunnus = mysql_insert_id();
+            $split_tilausrivin_tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
             $query = "SELECT *
                       FROM tilausrivin_lisatiedot
@@ -1318,7 +1318,7 @@ else {
                 $kysely  = "INSERT INTO tilausrivi ({$fields}) VALUES ({$values})";
                 $uusires = pupe_query($kysely);
 
-                $split_tilausrivin_tunnus_lapsi = mysql_insert_id();
+                $split_tilausrivin_tunnus_lapsi = mysql_insert_id($GLOBALS["masterlink"]);
 
                 $query = "SELECT *
                           FROM tilausrivin_lisatiedot
@@ -1601,7 +1601,7 @@ else {
           $kysely  = "INSERT into lasku ($fields) VALUES ($values)";
           $uusires = pupe_query($kysely);
 
-          $laskurow['tunnus'] = mysql_insert_id();
+          $laskurow['tunnus'] = mysql_insert_id($GLOBALS["masterlink"]);
 
           // Laitetaan uuden tilauksen varaston "ulkoinen_jarjestelma"-tieto talteen
           $varasto_chk_array[$laskurow['tunnus']] = $varaston_row['ulkoinen_jarjestelma'];

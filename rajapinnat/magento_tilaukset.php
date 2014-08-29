@@ -9,8 +9,6 @@ if (php_sapi_name() == 'cli') {
 
 date_default_timezone_set('Europe/Helsinki');
 
-
-
 // Kutsutaanko CLI:st‰
 if (!$php_cli) {
   die ("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!");
@@ -51,8 +49,15 @@ if ($magento->getErrorCount() > 0) {
   exit;
 }
 
-// Haetaan maksetut tilaukset magentosta
-$tilaukset = $magento->hae_tilaukset('Processing');
+try {
+  // Haetaan maksetut tilaukset magentosta
+  $tilaukset = $magento->hae_tilaukset('Processing');
+}
+catch (Exception $e) {
+  $message = "Tilausten haku ep‰onnistui";
+  $magento->log($message, $e, "order");
+  exit;
+}
 
 // Tehd‰‰n EDI-tilaukset
 foreach ($tilaukset as $tilaus) {

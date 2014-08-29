@@ -366,7 +366,7 @@ if (isset($tee) and $tee == "TEE_OSTOTILAUKSET") {
                   ovttunnus           = '{$toimittajarow["ovttunnus"]}',
                   tilausyhteyshenkilo = '{$toimittajarow["yhteyshenkilo"]}'";
         $result = pupe_query($query);
-        $otunnus = mysql_insert_id();
+        $otunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
         $rows++;
         $edellinen_toimittaja = $toimittaja;

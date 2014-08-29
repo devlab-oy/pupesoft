@@ -78,7 +78,7 @@ if ($tyyppi == 'yct') {
               piiri           = '$asiakasrow[piiri]',
               yhtio           = '$kukarow[yhtio]'";
     $result = pupe_query($query);
-    $id = mysql_insert_id();
+    $id = mysql_insert_id($GLOBALS["masterlink"]);
 
     if (strlen(trim($asiakasrow['laskutus_nimi'])) == 0) {
       $asiakasrow['laskutus_nimi']     = $asiakasrow['nimi'];
@@ -384,7 +384,7 @@ while ((!feof($fd)) and ($error!=1)) {
                 piiri            = '$asiakasrow[piiri]',
                 yhtio            = '$kukarow[yhtio]'";
       $result = pupe_query($query);
-      $id = mysql_insert_id();
+      $id = mysql_insert_id($GLOBALS["masterlink"]);
 
       if (strlen(trim($asiakasrow['laskutus_nimi'])) == 0) {
         $asiakasrow['laskutus_nimi']     = $asiakasrow['nimi'];
@@ -543,7 +543,7 @@ while ((!feof($fd)) and ($error!=1)) {
                 piiri            = '$asiakasrow[piiri]',
                 yhtio            = '$kukarow[yhtio]'";
       $result = pupe_query($query);
-      $id = mysql_insert_id();
+      $id = mysql_insert_id($GLOBALS["masterlink"]);
 
       if (strlen(trim($asiakasrow['laskutus_nimi'])) == 0) {
         $asiakasrow['laskutus_nimi']     = $asiakasrow['nimi'];

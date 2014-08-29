@@ -351,7 +351,7 @@ if (!function_exists("asn_kohdistus")) {
                          hyllyvali             = '{$tilausrivirow['hyllyvali']}',
                          tilaajanrivinro       = '{$tilausrivirow['tilaajanrivinro']}'";
           $inskres = pupe_query($lisaaquery);
-          $extraa = mysql_insert_id();
+          $extraa = mysql_insert_id($GLOBALS["masterlink"]);
 
           $kaytetyt_tilausrivit  = array_unique(array_merge($kaytetyt_tilausrivit, $lisa_array));
           $paketin_rivit      = array_unique(array_merge($paketin_rivit, $lisa_array));
@@ -504,7 +504,7 @@ if (!function_exists("asn_kohdistus")) {
                     hyllyvali             = '{$split_row['hyllyvali']}',
                     tilaajanrivinro       = '{$split_row['tilaajanrivinro']}'";
           $inskres = pupe_query($query);
-          $tilausrivi_id = mysql_insert_id();
+          $tilausrivi_id = mysql_insert_id($GLOBALS["masterlink"]);
 
           // etsitään ja splitataan myös myyntitilausrivi ISÄ
           $query = "SELECT tilausrivi.tunnus
@@ -652,7 +652,7 @@ if (!function_exists("asn_kohdistus")) {
 
                   $kysely  = "INSERT INTO tapahtuma ({$fields}) VALUES ({$values})";
                   $uusires = pupe_query($kysely);
-                  $tapahtuma_id = mysql_insert_id();
+                  $tapahtuma_id = mysql_insert_id($GLOBALS["masterlink"]);
 
                   $query = "UPDATE tapahtuma
                             SET kpl = '{$erotus}'
@@ -734,7 +734,7 @@ if (!function_exists("asn_kohdistus")) {
                   hyllyvali             = '{$tilausrivirow['hyllyvali']}',
                   tilaajanrivinro       = '{$tilausrivirow['tilaajanrivinro']}'";
         $inskres = pupe_query($query);
-        $tilausrivi_id = mysql_insert_id();
+        $tilausrivi_id = mysql_insert_id($GLOBALS["masterlink"]);
 
         // etsitään ja splitataan myös myyntitilausrivi ISÄ
         $query = "SELECT tilausrivi.tunnus
@@ -888,7 +888,7 @@ if (!function_exists("asn_kohdistus")) {
 
                 $kysely  = "INSERT INTO tapahtuma ({$fields}) VALUES ({$values})";
                 $uusires = pupe_query($kysely);
-                $tapahtuma_id = mysql_insert_id();
+                $tapahtuma_id = mysql_insert_id($GLOBALS["masterlink"]);
 
                 $query = "UPDATE tapahtuma
                           SET kpl = '{$row['kappalemaara']}'
@@ -1014,7 +1014,7 @@ if (!function_exists("asn_kohdista_suuntalava")) {
                   luontiaika              = now(),
                   laatija                 = '{$kukarow['kuka']}'";
         $insertres = pupe_query($query);
-        $keikan_tunnus = mysql_insert_id();
+        $keikan_tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
         $query  = "UNLOCK TABLE";
         $result = pupe_query($query);

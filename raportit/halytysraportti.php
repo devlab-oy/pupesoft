@@ -400,7 +400,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 
     foreach ($valitut as $val) {
       $query = "INSERT INTO avainsana set yhtio='$kukarow[yhtio]', laji='HALYRAP', selite='$rappari', selitetark='$val'";
-      $res = pupe_query($query, $masterlink);
+      $res = pupe_query($query, $GLOBALS["masterlink"]);
     }
   }
 

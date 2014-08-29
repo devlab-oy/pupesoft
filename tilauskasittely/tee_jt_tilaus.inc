@@ -523,7 +523,7 @@ if (!function_exists("tee_jt_tilaus")) {
 
         $query = substr($query, 0, -1);
         $stresult = pupe_query($query);
-        $id = mysql_insert_id();
+        $id = mysql_insert_id($GLOBALS["masterlink"]);
 
         $query = "INSERT INTO laskun_lisatiedot SET ";
 

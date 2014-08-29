@@ -354,23 +354,15 @@ if ($tee == 'paikat') {
           $aresult = pupe_query($query);
 
           if (mysql_num_rows($aresult) == 0) {
-            $oletus='X';
+            $oletus = 'X';
             echo t("oletus")." ";
           }
           else {
-            $oletus='';
+            $oletus = '';
           }
 
           if ($t1[$tun] != '' and $t2[$tun] != '' and $t3[$tun] != '' and $t4[$tun] != '') {
             $lisatty_paikka = lisaa_tuotepaikka($tilausrivirow["tuoteno"], $t1[$tun], $t2[$tun], $t3[$tun], $t4[$tun], "Varastosiirron vastaanotossa", $oletus, 0, 0, 0);
-
-            $query = "SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
-                      from tuotepaikat
-                      WHERE yhtio = '$kukarow[yhtio]'
-                      and tunnus  = '{$lisatty_paikka["tuotepaikan_tunnus"]}'
-                      and tuoteno = '$tilausrivirow[tuoteno]'";
-            $result = pupe_query($query);
-            $paikkarow = mysql_fetch_assoc($result);
 
             if ($echotaanko) {
               if ($toim == "MYYNTITILI") {
@@ -420,7 +412,7 @@ if ($tee == 'paikat') {
 
       if ($virheita === 0) {
 
-        // PÄivitetään syötetyt paikat tilausrivin_lisätietoihin
+        // Päivitetään syötetyt paikat tilausrivin_lisätietoihin
         $query = "UPDATE tilausrivi
                   JOIN tilausrivin_lisatiedot on (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio  and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
                   SET
@@ -467,10 +459,8 @@ if ($tee == 'paikat') {
     }
   }
 
-  if ($virheita == 0) {
-    if ($vainlistaus == '') {
-      $tee = 'valmis';
-    }
+  if ($virheita == 0 and $vainlistaus == '') {
+    $tee = 'valmis';
   }
   else {
     $tee = '';
@@ -509,7 +499,6 @@ if ($tee == 'valmis') {
       if ($echotaanko) {
         echo "<font class='error'>".t("VIRHE: Riviä ei löydy tai se on jo siirretty uudelle paikalle")."!</font><br>";
       }
-
     }
     else {
       $tilausrivirow = mysql_fetch_assoc($result);

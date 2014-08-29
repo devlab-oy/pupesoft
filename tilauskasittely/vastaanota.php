@@ -17,7 +17,7 @@ if ($tee == 'yhdista') {
 
   if (!empty($yhdistettavat_siirtolistat)) {
     $query = "LOCK TABLES avainsana WRITE";
-    $res   = pupe_query($query);
+    pupe_query($query);
 
     $query = "SELECT selite
               FROM avainsana
@@ -45,19 +45,19 @@ if ($tee == 'yhdista') {
                 luontiaika   = now(),
                 muutospvm    = now(),
                 muuttaja     = '{$kukarow['kuka']}'";
-      $insert_res = pupe_query($query);
+      pupe_query($query);
     }
     else {
       $query = "UPDATE avainsana
                 SET selite  = '{$vastaanottonro}'
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND laji    = 'SIIRTO_VASTNRO'";
-      $update_res = pupe_query($query);
+      pupe_query($query);
     }
 
     // poistetaan lukko
     $query = "UNLOCK TABLES";
-    $res   = pupe_query($query);
+    pupe_query($query);
 
     $yhdistettavat_siirtolistat = mysql_real_escape_string($yhdistettavat_siirtolistat);
 
@@ -65,7 +65,7 @@ if ($tee == 'yhdista') {
               siirtolistan_vastaanotto = '{$vastaanottonro}'
               WHERE yhtio              = '{$kukarow['yhtio']}'
               AND tunnus               IN ({$yhdistettavat_siirtolistat})";
-    $updres = pupe_query($query);
+    pupe_query($query);
   }
 
   $tee = '';
@@ -249,7 +249,6 @@ if ($tee == 'failista') {
                   and hyllyvali = '$paikka[2]'
                   and hyllytaso = '$paikka[3]'";
         $alkuresult = pupe_query($query);
-
 
         if (mysql_num_rows($alkuresult) == 1) {
           $alkurow = mysql_fetch_assoc($alkuresult);
@@ -436,7 +435,7 @@ if ($tee == 'paikat') {
                 WHERE yhtio   = '$kukarow[yhtio]'
                 AND tuoteno   = '$tilausrivirow[tuoteno]'
                 AND eankoodi != '$eankoodi[$tun]'";
-      $resulteankoodi = pupe_query($query);
+      pupe_query($query);
     }
 
     //haetaan antavan varastopaikan tunnus
@@ -618,6 +617,7 @@ if ($tee == 'valmis') {
           $query = "SELECT komento from kirjoittimet where yhtio='$kukarow[yhtio]' and tunnus = '$kirjoitin'";
           $komres = pupe_query($query);
           $komrow = mysql_fetch_assoc($komres);
+
           $komento = $komrow['komento'];
 
           for ($a = 0; $a < $tkpl; $a++) {
@@ -636,14 +636,14 @@ if ($tee == 'valmis') {
                       muuttaja      = '$kukarow[kuka]',
                       muutospvm     = now()
                       WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]'";
-            $rresult = pupe_query($query);
+            pupe_query($query);
 
             $query = "UPDATE tuotepaikat
                       SET oletus = 'X',
                       muuttaja      = '$kukarow[kuka]',
                       muutospvm     = now()
                       WHERE tuoteno = '$tuoteno' and yhtio = '$kukarow[yhtio]' and tunnus='$uusiol'";
-            $rresult = pupe_query($query);
+            pupe_query($query);
           }
         }
       }
@@ -661,7 +661,7 @@ if ($tee == 'valmis') {
                   and tilausrivi.tyyppi   = 'G'
                   and tuote.yhtio         = tilausrivi.yhtio
                   and tuote.tuoteno       = tilausrivi.tuoteno";
-        $result = pupe_query($query);
+        pupe_query($query);
 
         //Irrotetaan sarjanumerot
         if ($tilausrivirow["sarjanumeroseuranta"] != "") {
@@ -669,7 +669,7 @@ if ($tee == 'valmis') {
                     SET siirtorivitunnus = 0
                     WHERE siirtorivitunnus = '$tun'
                     and yhtio              = '$kukarow[yhtio]'";
-          $sarjares = pupe_query($query);
+          pupe_query($query);
         }
 
         if ($toim == "MYYNTITILI") {
@@ -678,8 +678,9 @@ if ($tee == 'valmis') {
                        hyllynro    = '$t2[$tun]',
                        hyllyvali   = '$t3[$tun]',
                        hyllytaso   = '$t4[$tun]'
-                       WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tun'";
-          $uprresult = pupe_query($uprquery);
+                       WHERE yhtio = '$kukarow[yhtio]'
+                       and tunnus  = '$tun'";
+          pupe_query($uprquery);
         }
       }
 
@@ -760,6 +761,7 @@ if ($tee == 'valmis') {
                 AND tilausrivin_lisatiedot.tilausrivitunnus = '$tun'";
       $varastoon_result = pupe_query($query);
       $varastoon_row = mysql_fetch_assoc($varastoon_result);
+
       $varastoon = array(kuuluukovarastoon($varastoon_row['hyllyalue'], $varastoon_row['hyllynro']));
     }
 
@@ -798,7 +800,7 @@ if ($tee == 'valmis') {
                 WHERE tunnus = '{$apusummarow['otunnus']}'
                 and yhtio    = '$kukarow[yhtio]'
                 and tila     = 'G'";
-      $result = pupe_query($query);
+      pupe_query($query);
     }
   }
 }
@@ -994,9 +996,11 @@ if (empty($id) and $echotaanko) {
 
   $group_per_lahto = $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'];
 
+  $having_lisa = $yhtiorow['siirtolistan_tulostustapa'] == 'U' ? "HAVING lahdot.aktiivi = 'S'" : "";
+
   $query = "SELECT IF(siirtolistan_vastaanotto = 0, 'x', siirtolistan_vastaanotto) siirtolistan_vastaanotto,
             IF((siirtolistan_vastaanotto != 0 OR toimitustavan_lahto = 0 OR '{$group_per_lahto}' = ''), 'x', toimitustavan_lahto) lahto,
-            lasku.clearing,
+            IF(siirtolistan_vastaanotto = 0, lasku.clearing, 0) clearing,
             lahdot.aktiivi AS lahdon_aktiivi,
             GROUP_CONCAT(DISTINCT tilausrivi.otunnus) otunnus
             FROM tilausrivi
@@ -1015,7 +1019,8 @@ if (empty($id) and $echotaanko) {
             and tilausrivi.keratty    != ''
             $varasto
             GROUP BY 1,2,3,4
-            ORDER BY siirtolistan_vastaanotto, lahto, lasku.clearing";
+            {$having_lisa}
+            ORDER BY siirtolistan_vastaanotto, lahto, clearing";
   $tilre = pupe_query($query);
 
   $selectlisa = $toim == "" ? ", viesti AS viite" : "";
@@ -1073,12 +1078,6 @@ if (empty($id) and $echotaanko) {
   $ed_lahto = $ed_vastaanottonro = null;
 
   while ($tilrow = mysql_fetch_assoc($tilre)) {
-
-    if ($yhtiorow['siirtolistan_tulostustapa'] == 'U' and !is_null($tilrow['lahdon_aktiivi']) and $tilrow['lahdon_aktiivi'] != 'S') {
-      //Jos siirtolistan_tulostustapa = Siirtolistat tulostetaan keräyserien kautta
-      //Ei näytetä siirtolistoja, joihin on liitetty aukioleva lähtö
-      continue;
-    }
 
     // etsitään sopivia tilauksia
     $query = "SELECT varasto,

@@ -7,10 +7,42 @@ echo "<hr>";
 
 $tee = empty($tee) ? '' : $tee;
 
-
 if ($tee == '') {
+  piirra_formi();
+}
+
+function hae_toimittajat() {
+  global $kukarow;
+
+  $query = "SELECT tuotteen_toimittajat.tunnus, tuotteen_toimittajat.toim_nimitys
+            FROM tuote
+            INNER JOIN tuotteen_toimittajat ON (tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+            WHERE tuotteen_toimittajat.toim_nimitys IS NOT NULL
+            AND tuotteen_toimittajat.toim_nimitys != ''
+            AND tuote.yhtio = '{$kukarow['yhtio']}'
+            ORDER BY tuotteen_toimittajat.toim_nimitys;";
+  $result = pupe_query($query);
+
+  $toimittajat = array();
+
+  while ($rivi = mysql_fetch_assoc($result)) {
+    array_push($toimittajat, $rivi);
+  }
+
+  return $toimittajat;
+}
+
+function tiedostotyypit() {
+  return array(
+    "Ohjekirja",
+    "Huoltotiedote"
+  );
+}
+
+function piirra_formi() {
   $toimittajat = hae_toimittajat();
 
+  echo "<form action='tiedostokirjasto.php' method='post'>";
   echo "<table>";
   echo "<tbody>";
 
@@ -19,7 +51,7 @@ if ($tee == '') {
   echo "<td>";
   echo '<select id="toimittaja_id" name="toimittaja">';
   foreach ($toimittajat as $toimittaja) {
-    echo "<option>{$toimittaja}</option>";
+    echo "<option value='{$toimittaja['tunnus']}'>{$toimittaja['toim_nimitys']}</option>";
   }
   echo '</select>';
   echo "</td>";
@@ -36,34 +68,13 @@ if ($tee == '') {
   echo "</td>";
   echo "</tr>";
 
+  echo "<tr>";
+  echo "<td class='back'>";
+  echo "<input type='submit' value='" . t("Hae") . "'/>";
+  echo "</td>";
+  echo "</tr>";
+
   echo "</tbody>";
   echo "</table>";
-}
-
-function hae_toimittajat() {
-  global $kukarow;
-
-  $query = "SELECT tuotteen_toimittajat.toim_nimitys
-            FROM tuote
-            INNER JOIN tuotteen_toimittajat ON (tuote.tuoteno = tuotteen_toimittajat.tuoteno)
-            WHERE tuotteen_toimittajat.toim_nimitys IS NOT NULL
-            AND tuotteen_toimittajat.toim_nimitys != ''
-            AND tuote.yhtio = '{$kukarow['yhtio']}'
-            ORDER BY tuotteen_toimittajat.toim_nimitys;";
-  $result = pupe_query($query);
-
-  $toimittajat = array();
-
-  while ($rivi = mysql_fetch_assoc($result)) {
-    array_push($toimittajat, $rivi['toim_nimitys']);
-  }
-
-  return $toimittajat;
-}
-
-function tiedostotyypit() {
-  return array(
-    "ohjekirja"     => "Ohjekirja",
-    "huoltotiedote" => "Huoltotiedote"
-  );
+  echo "</form>";
 }

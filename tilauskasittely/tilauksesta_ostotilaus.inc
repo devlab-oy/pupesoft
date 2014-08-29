@@ -115,8 +115,15 @@ if (!function_exists("tilauksesta_ostotilaus")) {
           $tiltoi = mysql_fetch_assoc($erres);
 
           $toim_ostilkas = $tiltoi['ostotilauksen_kasittely'];
+          $toim_ostilkas_chk = (is_numeric($toim_ostilkas) and $toim_ostilkas == 4);
+          $toim_ostilkas_chk_tyhja = (trim($toim_ostilkas) == '');
 
-          if ($toim_ostilkas == 4 or ($toim_ostilkas == '' and $ostotilauksen_kasittely == 4)) {
+          $ostilkas_chk = (is_numeric($ostotilauksen_kasittely) and $ostotilauksen_kasittely == 4);
+          $myynti_ostilkas_chk = ($toim_ostilkas_chk_tyhja and $ostilkas_chk);
+
+          $kumpi_ostotilkas = ($toim_ostilkas_chk or $myynti_ostilkas_chk);
+
+          if ($kumpi_ostotilkas) {
             $ohjausmerkki = '';
           }
           else {

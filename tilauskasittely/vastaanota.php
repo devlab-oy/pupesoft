@@ -461,7 +461,7 @@ if ($tee == 'paikat') {
   if ($virheita == 0 and $vainlistaus == '') {
     $tee = 'valmis';
   }
-  else {
+  elseif ($vainlistaus == '')  {
     $tee = '';
   }
 

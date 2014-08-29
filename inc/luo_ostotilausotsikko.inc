@@ -13,7 +13,7 @@ if (!function_exists('luo_ostotilausotsikko')) {
      *   $params['ostotilauksen_kasittely'];
      *   $params["nimi"];
      *   $params["nimitark"];
-     *  $params["osoite"];
+     *   $params["osoite"];
      *   $params["postino"];
      *   $params["postitp"];
      *   $params["maa"];
@@ -22,7 +22,7 @@ if (!function_exists('luo_ostotilausotsikko')) {
      *   $params['myyntitil_kerayspvm']
      *   $params['myytil_myyja']
      *   $params['myytil_sisviesti1']
-     *  $params['myytil_viesti']
+     *   $params['myytil_viesti']
      *   $params['myytil_toimaika']
      *   $params['myytil_toimitustapa']
      *   $params['myytil_liitostunnus']
@@ -189,7 +189,7 @@ if (!function_exists('luo_ostotilausotsikko')) {
                 toim_postino        = '{$toim_postino}',
                 toim_postitp        = '{$toim_postitp}',
                 valkoodi            = '{$valkoodi}',
-                vanhatunnus         = {$params['toimipaikka']},
+                vanhatunnus         = '{$params['toimipaikka']}',
                 varasto             = '{$params['varasto']}',
                 verkkotunnus        = '{$params['myytil_liitostunnus']}',
                 vienti_kurssi       = '{$vrow['kurssi']}',

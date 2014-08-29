@@ -406,10 +406,11 @@ if ($asirow['toimitusvahvistus'] != '') {
   $toitarow = mysql_fetch_assoc($toitares);
 
   // Jos Magento on käytössä, halutaan toimitusvahvistus, tämä on noutotilaus ja tullut Magentosta
-  $_magento_tv = ($asirow['toimitusvahvistus'] == 'Magento' and $toitarow['nouto'] != '');
-  $_magento_tilaus = ($laskurow['laatija'] == 'Magento');
+  $_magento_tv       = ($asirow['toimitusvahvistus'] == 'Magento' and $toitarow['nouto'] != '');
+  $_magento_tilaus   = ($laskurow['laatija'] == 'Magento');
+  $_magento_kaytossa = (!empty($magento_api_url) and !empty($magento_api_usr) and !empty($magento_api_pas));
 
-  if ($magento_kaytossa and $_magento_tilaus and $_magento_tv and $kutsuja == 'keraa.php') {
+  if ($_magento_kaytossa and $_magento_tilaus and $_magento_tv and $kutsuja == 'keraa.php') {
     $magento_api_met = $toitarow['selite_text'];
     $magento_api_rak = '';
     $magento_api_ord = $laskurow["asiakkaan_tilausnumero"];

@@ -27648,6 +27648,8 @@ if (!function_exists("kasittele_tiliote_viite")) {
     $vastavienti = 0;
     $vastavienti_valuutassa = 0;
 
+    $tilioteselailu_oikrow = tarkista_oikeus("tilioteselailu.php", "%", "", "OK");
+
     // Otetaan talteen, koska t‰‰ll‰ muutellaan
     $kukarow_talteen = $kukarow;
 

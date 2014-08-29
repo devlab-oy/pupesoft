@@ -54,9 +54,8 @@ try {
   $tilaukset = $magento->hae_tilaukset('Processing');
 }
 catch (Exception $e) {
-  $message = "TIlausten haku epäonnistui";
-  $message .= " (" . $e->faultstring . ") faultcode: " . $e->faultcode;
-  log_message($message);
+  $message = "Tilausten haku epäonnistui";
+  $magento->log($message, $e, "order");
   exit;
 }
 

@@ -200,6 +200,7 @@ if ($raptee == "AJA") {
 
           $excelrivi++;
         }
+        $excelrivi++;
         $i=0;
       }
     }

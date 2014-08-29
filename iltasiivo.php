@@ -719,7 +719,7 @@ if ($yhtiorow['kerayserat'] == 'K') {
 }
 
 // Poistetaan tuotepaikat jotka ovat varaston ensimmäisellä paikalla (esim. A-0-0-0) ja joilla
-// ei ole saldoa. Koska nämä ovat yleensä generoituja paikkoja. (ei poisteta oletuspaikkaa)
+// ei ole saldoa eikä hälytysrajaa. Koska nämä ovat yleensä generoituja paikkoja. (ei poisteta oletuspaikkaa)
 if ($yhtiorow['kerayserat'] == 'K') {
   $poistettu = 0;
 
@@ -733,6 +733,7 @@ if ($yhtiorow['kerayserat'] == 'K') {
             AND tuotepaikat.hyllytaso        = 0
             AND tuotepaikat.hyllyvali        = 0
             AND tuotepaikat.oletus           = ''
+            AND tuotepaikat.halytysraja      = 0
             AND tuotepaikat.poistettava     != 'D'
             GROUP BY 1";
   $result = pupe_query($query);

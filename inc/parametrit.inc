@@ -277,15 +277,7 @@ $sanakirja_kielet = array("fi" => "Suomi",
 
 //Initioidaan pari muuttujaa
 if (!isset($login))    $login = "";
-if (!isset($extranet))   $extranet = "";
-
-// Katsotaan onko Pupesoftissa Magento rajapinta asetettuna, eli verkkokauppa käytössä
-if (empty($magento_api_url) or empty($magento_api_usr) or empty($magento_api_pas)) {
-  $magento_kaytossa = false;
-}
-else {
-  $magento_kaytossa = true;
-}
+if (!isset($extranet)) $extranet = "";
 
 // jos saamme nämä muuttujat getissä, kokeillaan logata niillä sisään
 if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "") {

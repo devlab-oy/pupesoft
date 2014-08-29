@@ -13,26 +13,33 @@ if ($tee == '') {
 
   echo "<table>";
   echo "<tbody>";
+
   echo "<tr>";
   echo "<td><label for='toimittaja_id'>" . t("Valitse toimittaja") . "</label></td>";
   echo "<td>";
-
   echo '<select id="toimittaja_id" name="toimittaja">';
-
   foreach ($toimittajat as $toimittaja) {
     echo "<option>{$toimittaja}</option>";
   }
-
   echo '</select>';
   echo "</td>";
   echo "</tr>";
+
+  echo "<tr>";
+  echo "<td><label for='tyyppi_id'>" . t("Tiedoston tyyppi") . "</label></td>";
+  echo "<td>";
+  echo "<select id='tiedostotyyppi_id' name='tiedostotyyppi'>";
+  foreach (tiedostotyypit() as $tiedostotyyppi) {
+    echo "<option>{$tiedostotyyppi}</option>";
+  }
+  echo "</select>";
+  echo "</td>";
+  echo "</tr>";
+
   echo "</tbody>";
   echo "</table>";
 }
 
-/**
- * @return array
- */
 function hae_toimittajat() {
   global $kukarow;
 
@@ -52,4 +59,11 @@ function hae_toimittajat() {
   }
 
   return $toimittajat;
+}
+
+function tiedostotyypit() {
+  return array(
+    "ohjekirja"     => "Ohjekirja",
+    "huoltotiedote" => "Huoltotiedote"
+  );
 }

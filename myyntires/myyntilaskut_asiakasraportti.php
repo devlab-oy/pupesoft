@@ -955,9 +955,24 @@ function hae_maksusuoritukset($maksurow, $linkki) {
     // (eli silloin kun lasku on osasuoritettu//tullaan osasuorittamaan)
     if ($maksurow["mapvm"] == "0000-00-00" or mysql_num_rows($lasktilitre) > 1) {
 
+      // katsotaan kyseisen laskun ensimmäisen kohdistustiedon ajankohta ja
+      // otetaan vain sitä edeltävät suoritukset
+      $alku_query = "SELECT kohdistuspvm
+                     FROM suorituksen_kohdistus
+                     WHERE yhtio = '{$kukarow['yhtio']}'
+                     AND laskutunnus = '{$maksurow['tunnus']}'
+                     ORDER BY tunnus ASC
+                     LIMIT 1";
+      $alku_res = pupe_query($alku_query);
+      $alku = mysql_result($alku_res, 0);
+
+      if (!$alku) {
+        $alku = '3000-01-01';
+      }
+
       while ($lasktilitro = mysql_fetch_array($lasktilitre)) {
 
-        if (strtotime($lasktilitro['laadittu']) < strtotime('2014-08-13 00:00:00')) {
+        if (strtotime($lasktilitro['laadittu']) < strtotime($alku)) {
           if ($lasktilitro['tilino'] == $ressukka['kassa']) echo t("Käteisellä").": ";
           elseif ($lasktilitro['tilino'] == $ressukka['pankkikortti']) echo t("Pankkikortilla").": ";
           elseif ($lasktilitro['tilino'] == $ressukka['luottokortti']) echo t("Luottokortilla").": ";
@@ -1063,7 +1078,7 @@ function hae_maksusuoritukset($maksurow, $linkki) {
   $res6 = pupe_query($qry6);
   $row6 = mysql_fetch_assoc($res6);
 
-  if ($row6['summa'] != 0) {      
+  if ($row6['summa'] != 0) {
     echo "<span style='font-weight:bold'> ".t("Luottotappio")."</span> &#124; ", $row6['summa'], " ";
     echo $yhtiorow['valkoodi'], ' &#124; ', tv1dateconv($row6['tapvm']), '<br>';
   }

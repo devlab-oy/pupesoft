@@ -333,7 +333,7 @@ if (count($tuotetiedot) > 0) {
           $attribute = $node->AllowOrChargeIdentifier->attributes()->Value;
 
           // ei oteta alennuksia huomioon Klokkerholm-keississä
-          // eikä ZF-keississä (123007), eikä Valeolla ( 123342)
+          // eikä ZF-keississä (123007), eikä Valeolla ( 123342), eikä Schaefflerillä (123456)
           if (strtolower($attribute) == "allow" 
             and $laskuttajan_toimittajanumero != "123418" 
             and $laskuttajan_toimittajanumero != "123007" 

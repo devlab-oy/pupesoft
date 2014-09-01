@@ -42,8 +42,8 @@ function hae_toimittajat() {
 
 function tiedostotyypit() {
   return array(
-    "Ohjekirja",
-    "Huoltotiedote"
+    "ohjekirja",
+    "huoltotiedote"
   );
 }
 
@@ -56,7 +56,7 @@ function piirra_formi($valittu_toimittaja, $valittu_tiedostotyyppi) {
   echo "<tbody>";
 
   echo "<tr>";
-  echo "<td><label for='toimittaja_id'>" . t("Valitse toimittaja") . "</label></td>";
+  echo "<td><label for='toimittaja_id'>" . t("Toimittaja") . "</label></td>";
   echo "<td>";
   echo '<select id="toimittaja_id" name="toimittaja">';
   foreach ($toimittajat as $toimittaja) {
@@ -72,8 +72,9 @@ function piirra_formi($valittu_toimittaja, $valittu_tiedostotyyppi) {
   echo "<td>";
   echo "<select id='tiedostotyyppi_id' name='tiedostotyyppi'>";
   foreach (tiedostotyypit() as $tiedostotyyppi) {
+    $tiedostotyyppi_capitalized = ucfirst($tiedostotyyppi);
     $valittu = $valittu_tiedostotyyppi == $tiedostotyyppi ? "selected" : "";
-    echo "<option {$valittu}>{$tiedostotyyppi}</option>";
+    echo "<option value='{$tiedostotyyppi}' {$valittu}>{$tiedostotyyppi_capitalized}</option>";
   }
   echo "</select>";
   echo "</td>";
@@ -95,10 +96,12 @@ function hae_tiedostot($tuotetunnukset, $tiedoston_tyyppi) {
 
   $tuotetunnukset_lista = implode(',', $tuotetunnukset);
 
-  $query = "SELECT liitetiedostot.tunnus, liitetiedostot.selite
+  $query = "SELECT liitetiedostot.tunnus,
+              liitetiedostot.kayttotarkoitus,
+              liitetiedostot.selite
             FROM liitetiedostot
             WHERE liitetiedostot.liitostunnus IN ({$tuotetunnukset_lista})
-            AND liitetiedostot.selite = '{$tiedoston_tyyppi}'
+            AND liitetiedostot.kayttotarkoitus = '{$tiedoston_tyyppi}'
             AND liitetiedostot.yhtio = '{$kukarow['yhtio']}'
             ORDER BY liitetiedostot.selite";
   $result = pupe_query($query);
@@ -134,27 +137,21 @@ function hae_tuotetunnukset($toimittajan_tunnus) {
 
 function piirra_tiedostolista($tiedostot) {
   if (empty($tiedostot)) {
+    echo "<font class='error'>";
+    echo t("Valitulle toimittajalle ei löytynyt valitun tyyppisiä liitetiedostoja");
+    echo "</font>";
+
     return;
   }
 
   echo "<table>";
-  echo "<thead>";
-
-  echo "<tr>";
-  echo "<th>" . t("Selite") . "</th>";
-  echo "<th></th>";
-  echo "</tr>";
-
-  echo "</thead>";
   echo "<tbody>";
 
   foreach ($tiedostot as $tiedosto) {
     echo "<tr>";
-    echo "<td>{$tiedosto['selite']}</td>";
     echo "<td>";
-    echo "<a href='view.php?id={$tiedosto['tunnus']}' target='Attachment'>";
-    echo t("Lataa tiedosto");
-    echo "</a>";
+    echo "<a href='view.php?id={$tiedosto['tunnus']}'
+             target='Attachment'>{$tiedosto['selite']}</a>";
     echo "</td>";
     echo "</tr>";
   }

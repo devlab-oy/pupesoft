@@ -996,8 +996,6 @@ if (empty($id) and $echotaanko) {
 
   $group_per_lahto = $yhtiorow['siirtolistat_vastaanotetaan_per_lahto'];
 
-  $having_lisa = $yhtiorow['siirtolistan_tulostustapa'] == 'U' ? "HAVING lahdot.aktiivi = 'S'" : "";
-
   $query = "SELECT IF(siirtolistan_vastaanotto = 0, 'x', siirtolistan_vastaanotto) siirtolistan_vastaanotto,
             IF((siirtolistan_vastaanotto != 0 OR toimitustavan_lahto = 0 OR '{$group_per_lahto}' = ''), 'x', toimitustavan_lahto) lahto,
             IF(siirtolistan_vastaanotto = 0, lasku.clearing, 0) clearing,
@@ -1019,7 +1017,6 @@ if (empty($id) and $echotaanko) {
             and tilausrivi.keratty    != ''
             $varasto
             GROUP BY 1,2,3,4
-            {$having_lisa}
             ORDER BY siirtolistan_vastaanotto, lahto, clearing";
   $tilre = pupe_query($query);
 
@@ -1077,7 +1074,17 @@ if (empty($id) and $echotaanko) {
 
   $ed_lahto = $ed_vastaanottonro = null;
 
+  $_tulostustapa = ($yhtiorow['siirtolistan_tulostustapa'] == 'U');
+
   while ($tilrow = mysql_fetch_assoc($tilre)) {
+
+    $_suljettu_lahto = (!is_null($tilrow['lahdon_aktiivi']) and $tilrow['lahdon_aktiivi'] != 'S');
+
+     if ($_tulostustapa and $_suljettu_lahto) {
+        //Jos siirtolistan_tulostustapa = Siirtolistat tulostetaan keräyserien kautta
+        //Ei näytetä siirtolistoja, joihin on liitetty aukioleva lähtö
+        continue;
+    }
 
     // etsitään sopivia tilauksia
     $query = "SELECT varasto,

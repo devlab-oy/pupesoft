@@ -1,8 +1,6 @@
 <?php
 
-if (@include "inc/parametrit.inc");
-elseif (@include "parametrit.inc");
-else exit;
+(@include "inc/parametrit.inc") || (@include "parametric.inc") || exit;
 
 echo "<font class='head'>" . t('Tiedostokirjasto') . "</font>";
 echo "<hr>";
@@ -10,8 +8,7 @@ echo "<hr>";
 $tee = empty($tee) ? '' : $tee;
 
 if ($tee == 'hae_tiedostot') {
-  $tuotetunnukset = hae_tuotetunnukset($toimittaja);
-  $tiedostot = hae_tiedostot($tuotetunnukset, $tiedostotyyppi);
+  $tiedostot = hae_tiedostot($toimittaja, $tiedostotyyppi);
 
   piirra_formi($toimittaja, $tiedostotyyppi);
   piirra_tiedostolista($tiedostot);
@@ -91,19 +88,20 @@ function piirra_formi($valittu_toimittaja, $valittu_tiedostotyyppi) {
   echo "</form>";
 }
 
-function hae_tiedostot($tuotetunnukset, $tiedoston_tyyppi) {
+function hae_tiedostot($toimittajan_tunnus, $tiedoston_tyyppi) {
   global $kukarow;
 
   $tiedoston_tyyppi = strtolower($tiedoston_tyyppi);
-
-  $tuotetunnukset_lista = implode(',', $tuotetunnukset);
 
   $query = "SELECT liitetiedostot.tunnus,
               liitetiedostot.kayttotarkoitus,
               liitetiedostot.selite
             FROM liitetiedostot
-            WHERE liitetiedostot.liitostunnus IN ({$tuotetunnukset_lista})
-            AND liitetiedostot.kayttotarkoitus = '{$tiedoston_tyyppi}'
+            INNER JOIN tuote ON (tuote.tunnus = liitetiedostot.liitostunnus)
+            INNER JOIN tuotteen_toimittajat ON (tuote.tuoteno = tuotteen_toimittajat.tuoteno)
+            INNER JOIN toimi ON (toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+            WHERE toimi.tunnus = '{$toimittajan_tunnus}'
+            AND liitetiedostot.kayttotarkoitus = 'ohjekirja'
             AND liitetiedostot.yhtio = '{$kukarow['yhtio']}'
             ORDER BY liitetiedostot.selite";
   $result = pupe_query($query);
@@ -115,26 +113,6 @@ function hae_tiedostot($tuotetunnukset, $tiedoston_tyyppi) {
   }
 
   return $tiedostot;
-}
-
-function hae_tuotetunnukset($toimittajan_tunnus) {
-  global $kukarow;
-
-  $query = "SELECT tuote.tunnus
-            FROM tuote
-            INNER JOIN tuotteen_toimittajat ON (tuote.tuoteno = tuotteen_toimittajat.tuoteno
-              AND tuote.yhtio = tuotteen_toimittajat.yhtio)
-            WHERE tuotteen_toimittajat.liitostunnus = '{$toimittajan_tunnus}'
-            AND tuote.yhtio = '{$kukarow['yhtio']}'";
-  $result = pupe_query($query);
-
-  $tunnukset = array();
-
-  while ($tuote = mysql_fetch_assoc($result)) {
-    array_push($tunnukset, $tuote['tunnus']);
-  }
-
-  return $tunnukset;
 }
 
 function piirra_tiedostolista($tiedostot) {

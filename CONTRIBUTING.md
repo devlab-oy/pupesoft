@@ -186,3 +186,10 @@ nimi = 'Abc',
 myyjanro = 12,
 yhtio = 'demo'
 ```
+
+# Testaus
+
+Pupesoftissa ei ole käytössä testikehystä ([vielä](https://github.com/devlab-oy/pupenext)). Testaus tulee tehdä manuaalisesti.
+
+* Aja tiedosto, johon teit muutokset. Varmista, että testaat koodia jonka itse kirjoitit.
+* Tarkista missä ko. tiedostoa käytetään, etsimällä tiedostonimellä kaikista Pupesoft projekin tiedostoista. Varmista, että et muuta ohjelman vaatimuksia.

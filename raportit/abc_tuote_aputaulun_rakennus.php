@@ -416,6 +416,7 @@ if ($tee == 'YHTEENVETO') {
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND tuoteno = '$row[tuoteno]'
                 AND laji    = 'tulo'
+                AND selite  not like '%alkusaldo%'
                 ORDER BY laadittu
                 LIMIT 1";
       $insres = pupe_query($query);

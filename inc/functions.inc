@@ -17093,7 +17093,11 @@ if (!function_exists("tee_keraysera")) {
               yhdistelysaanto,
               lahtojen_valinen_enimmaisaika,
               ulkoinen_jarjestelma,
-              tunnus as keraysvyohyke
+              tunnus as keraysvyohyke,
+              keraysnippujen_priorisointi,
+              aikaraja,
+              mittaraja,
+              painoraja
               FROM keraysvyohyke
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tunnus  = '{$keraysvyohyke}'";
@@ -17161,24 +17165,17 @@ if (!function_exists("tee_keraysera")) {
       $asiakas_join2 = "JOIN asiakas AS asiakas2 ON (asiakas2.yhtio = lasku2.yhtio AND asiakas2.tunnus = lasku2.liitostunnus)";
     }
 
-    $pienimman_pak_til = null;
+    $_priorisointi_kaytossa = !empty($keraysvyohyketiedot['keraysnippujen_priorisointi']);
+    $_aikaraja_kaytossa = !empty($keraysvyohyketiedot['aikaraja']);
 
-    # Etsitään pienin pakkaus
-    # Pakkauksia pitää olla enemmän kuin yksi
-    if (!empty($pakkaukset) and count($pakkaukset) > 1) {
-      foreach ($pakkaukset as $_pak_id => $_pak_info) {
-        if (is_null($pienimman_pak_til) or $pienimman_pak_til > $_pak_info['tilavuus']) {
-          $pienimman_pak_til = $_pak_info['tilavuus'];
-        }
-      }
-    }
+    $_mittaraja = !empty($keraysvyohyketiedot['mittaraja']);
+    $_painoraja = !empty($keraysvyohyketiedot['painoraja']);
+    $_mitta_vai_paino = ($_mittaraja OR $_painoraja);
 
-    if (!is_null($pienimman_pak_til)) {
-      /*
-      # Esim. pienimmän laatikon (ltk 9) tilavuudesta 90%
-      # 4032 = 4480 * 0.9
-      */
-      $pienimman_pak_til *= 0.9;
+    if ($_priorisointi_kaytossa and $_mitta_vai_paino) {
+
+      $pienimman_pak_til = $keraysvyohyketiedot['mittaraja'];
+      $rivin_painoraja = $keraysvyohyketiedot['painoraja'];
 
       $prioriteettilisa1 = "
       IF(
@@ -17187,7 +17184,7 @@ if (!function_exists("tee_keraysera")) {
       round((TIME_TO_SEC(TIMEDIFF(CURTIME(), lahdot3.kerailyn_aloitusaika)) / 60) / (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, lahdot3.kerailyn_aloitusaika)) / 60) * 100, 2) < 30 AND
       (
         ROUND((if(tuote1.tuoteleveys * {$mittakerroin} < 1, 1, tuote1.tuoteleveys * {$mittakerroin}) * if(tuote1.tuotekorkeus * {$mittakerroin} < 1, 1, tuote1.tuotekorkeus * {$mittakerroin}) * if(tuote1.tuotesyvyys * {$mittakerroin} < 1, 1, tuote1.tuotesyvyys * {$mittakerroin})) * if(tilausrivi1.varattu < 1, 1, round(tilausrivi1.varattu)), 4)  < {$pienimman_pak_til} OR
-        ROUND(tuote1.tuotemassa * if(tilausrivi1.varattu < 1, 1, round(tilausrivi1.varattu)), 4) < 1
+        ROUND(tuote1.tuotemassa * if(tilausrivi1.varattu < 1, 1, round(tilausrivi1.varattu)), 4) < {$rivin_painoraja}
       ),
       lasku1.prioriteettinro + 1, lasku1.prioriteettinro
       ) AS prioriteetti,

@@ -1756,8 +1756,10 @@ if (!function_exists('rivi_lahete')) {
         if (($row["var"] != 'J' or ($tyyppi == "TILAUSVAHVISTUS" and strpos($laskurow['tilausvahvistus'], 'JT') !== FALSE)) and $row["var"] != 'P') {
 
           if ($lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc") {
-            // palautetaan rivihinta laskettuna vain ale1:n mukaan
-            $row["rivihinta"] = $row["rivihinta"] / (1 - $row['ale3'] / 100) / (1 - $row['ale2'] / 100);
+            $maara = $yhtiorow['myynnin_alekentat'];
+            for ($alenumero = $maara; $alenumero > 1; $alenumero--) {
+              $row["rivihinta"] = $row["rivihinta"] / (1 - $row["ale{$maara}"] / 100);
+            }
           }
 
           if ($yhtiorow['alv_kasittely'] == '') {
@@ -2214,8 +2216,10 @@ if (!function_exists('rivi_hinta_ale_lahete_ean')) {
     if (trim($naytetaanko_rivihinta) == '') {
 
       if ($lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc") {
-        // palautetaan rivihinta laskettuna vain ale1:n mukaan
-        $row["rivihinta"] = $row["rivihinta"] / (1 - $row['ale3'] / 100) / (1 - $row['ale2'] / 100);
+        $maara = $yhtiorow['myynnin_alekentat'];
+        for ($alenumero = $maara; $alenumero > 1; $alenumero--) {
+          $row["rivihinta"] = $row["rivihinta"] / (1 - $row["ale{$maara}"] / 100);
+        }
       }
 
       $oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);

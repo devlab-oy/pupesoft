@@ -98,8 +98,10 @@ function hae_tiedostot($toimittajan_tunnus, $tiedoston_tyyppi) {
               liitetiedostot.selite
             FROM liitetiedostot
             INNER JOIN tuote ON (tuote.tunnus = liitetiedostot.liitostunnus)
-            INNER JOIN toimi ON (toimi.tunnus = '{$toimittajan_tunnus}')
+            INNER JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.tuoteno = tuote.tuoteno)
+            INNER JOIN toimi ON (toimi.tunnus = tuotteen_toimittajat.liitostunnus)
             WHERE liitetiedostot.kayttotarkoitus = '{$tiedoston_tyyppi}'
+            AND toimi.tunnus = '{$toimittajan_tunnus}'
             AND liitetiedostot.yhtio = '{$kukarow['yhtio']}'
             ORDER BY liitetiedostot.selite";
   $result = pupe_query($query);

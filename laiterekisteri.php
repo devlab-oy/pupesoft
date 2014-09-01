@@ -78,24 +78,36 @@ if (isset($tallennetaan_muutokset) and isset($muokattava_laite) and $muokattava_
   pupe_query($kveri); 
   unset($toiminto);
 }
-elseif (isset($tallenna_uusi_laite) and isset($valitse_sarjanumero) and $valitse_sarjanumero > 0 and !isset($muokattava_laite)) {
-  // Lisätään uusi laite
-  $kveri = "INSERT INTO laite
-            SET yhtio = '{$kukarow['yhtio']}',
-            paikka = '{$uusilaite_myyntirivitunnus}',
-            sarjanro = '{$uusilaite_sarjanumero}',
-            tuoteno = '{$uusilaite_tuotenumero}',
-            lcm_info = '{$lcm_info}',
-            ip_osoite = '{$ip_osoite}',
-            mac_osoite = '{$mac_osoite}',
-            kommentti = '{$kommentti}',
-            sla = '{$sla}',
-            valmistajan_sopimusnumero = '{$valmistajan_sopimusnumero}',
-            valmistajan_sopimus_paattymispaiva = '{$vcloppuvv}-{$vcloppukk}-{$vcloppupp}',
-            luontiaika = now(),
-            laatija = '{$kukarow['kuka']}'";
-  pupe_query($kveri);
-  unset($toiminto);
+elseif (isset($tallenna_uusi_laite) and isset($valitse_sarjanumero) and !empty($valitse_sarjanumero) 
+  and !isset($muokattava_laite)) {
+  // Tarkistetaan ettei laite/sarjanumeropari ole jo taulussa
+  $query = "SELECT *
+            FROM laite
+            WHERE tuoteno = '{$uusilaite_tuotenumero}'
+            AND sarjanro = '{$uusilaite_sarjanumero}'";
+  $result = pupe_query($query);
+  if (mysql_affected_rows() == 0) {
+    // Lisätään uusi laite
+    $kveri = "INSERT INTO laite
+              SET yhtio = '{$kukarow['yhtio']}',
+              paikka = '{$uusilaite_myyntirivitunnus}',
+              sarjanro = '{$uusilaite_sarjanumero}',
+              tuoteno = '{$uusilaite_tuotenumero}',
+              lcm_info = '{$lcm_info}',
+              ip_osoite = '{$ip_osoite}',
+              mac_osoite = '{$mac_osoite}',
+              kommentti = '{$kommentti}',
+              sla = '{$sla}',
+              valmistajan_sopimusnumero = '{$valmistajan_sopimusnumero}',
+              valmistajan_sopimus_paattymispaiva = '{$vcloppuvv}-{$vcloppukk}-{$vcloppupp}',
+              luontiaika = now(),
+              laatija = '{$kukarow['kuka']}'";             
+    pupe_query($kveri);
+    unset($toiminto);
+  }
+  else {
+    echo "<br><font class='error'>".t("Sarjanumero %s löytyy jo laite-taulusta", "", $uusilaite_sarjanumero)."!</font><br/>";  
+  }
 }
 elseif (isset($peruuta_uusi)) {
   unset($toiminto);
@@ -307,7 +319,7 @@ elseif ($toiminto == 'UUSILAITE') {
   echo "<input type='hidden' name='toiminto' value='UUSILAITE' />";
 
   //Jos on selectoitu joku sarjanumero niin täytetään sarakkeet joihin ei voi vaikuttaa
-  if (isset($valitse_sarjanumero) and $valitse_sarjanumero > 0) {
+  if (isset($valitse_sarjanumero) and !empty($valitse_sarjanumero)) {
     $kveri = "SELECT
               sarjanumeroseuranta.sarjanumero,
               tuote.*,
@@ -320,7 +332,9 @@ elseif ($toiminto == 'UUSILAITE') {
                 AND avainsana.laji = 'TRY'
                 AND avainsana.selite = tuote.try
               WHERE sarjanumeroseuranta.yhtio = '{$kukarow['yhtio']}'
-              AND sarjanumeroseuranta.tunnus = '{$valitse_sarjanumero}'";
+              AND sarjanumeroseuranta.sarjanumero = '{$valitse_sarjanumero}'
+              ORDER BY muutospvm desc
+              LIMIT 1";
     $resu = pupe_query($kveri);
     $rivikka = mysql_fetch_assoc($resu);
 

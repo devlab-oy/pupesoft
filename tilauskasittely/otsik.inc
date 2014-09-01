@@ -2836,7 +2836,7 @@ if ($tila == "" and !isset($jatka)) {
     // Työmääräyksen tapahtumahistoria
     if ($toim == "TYOMAARAYS") {
       
-      if (isset($paivita_tyomaarayksen_status)) {
+      if (isset($paivita_tyomaarayksen_status) and $kukarow['kesken'] > 0) {
         // Päivitetään työmääräyshistoria myös silloin kuin painetaan erillistä päivitä-nappia
         if (isset($eka_tuomaarays_row) and !empty($eka_tuomaarays_row)) {
           $lokin_tyojono = $eka_tuomaarays_row['tyojono_selite'];

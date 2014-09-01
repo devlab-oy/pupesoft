@@ -17182,12 +17182,11 @@ if (!function_exists("tee_keraysera")) {
 
       $prioriteettilisa1 = "
       IF(
-      lasku1.tila = 'G' AND 
+      lasku1.tila = 'G' AND
       lasku1.alatila = 'J' AND
       round((TIME_TO_SEC(TIMEDIFF(CURTIME(), lahdot3.kerailyn_aloitusaika)) / 60) / (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, lahdot3.kerailyn_aloitusaika)) / 60) * 100, 2) < 30 AND
-      COUNT(tilausrivi1.tunnus) <= 2 AND
       (
-        ROUND((if(tuote1.tuoteleveys * {$mittakerroin} < 1, 1, tuote1.tuoteleveys * {$mittakerroin}) * if(tuote1.tuotekorkeus * {$mittakerroin} < 1, 1, tuote1.tuotekorkeus * {$mittakerroin}) * if(tuote1.tuotesyvyys * {$mittakerroin} < 1, 1, tuote1.tuotesyvyys * {$mittakerroin})) * if(tilausrivi1.varattu < 1, 1, round(tilausrivi1.varattu)), 4)  < {$pienimman_pak_til} OR 
+        ROUND((if(tuote1.tuoteleveys * {$mittakerroin} < 1, 1, tuote1.tuoteleveys * {$mittakerroin}) * if(tuote1.tuotekorkeus * {$mittakerroin} < 1, 1, tuote1.tuotekorkeus * {$mittakerroin}) * if(tuote1.tuotesyvyys * {$mittakerroin} < 1, 1, tuote1.tuotesyvyys * {$mittakerroin})) * if(tilausrivi1.varattu < 1, 1, round(tilausrivi1.varattu)), 4)  < {$pienimman_pak_til} OR
         ROUND(tuote1.tuotemassa * if(tilausrivi1.varattu < 1, 1, round(tilausrivi1.varattu)), 4) < 1
       ),
       lasku1.prioriteettinro + 1, lasku1.prioriteettinro
@@ -17196,12 +17195,11 @@ if (!function_exists("tee_keraysera")) {
 
       $prioriteettilisa2 = "
       IF(
-      lasku2.tila = 'G' AND 
+      lasku2.tila = 'G' AND
       lasku2.alatila = 'J' AND
       round((TIME_TO_SEC(TIMEDIFF(CURTIME(), lahdot3.kerailyn_aloitusaika)) / 60) / (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, lahdot3.kerailyn_aloitusaika)) / 60) * 100, 2) < 30 AND
-      COUNT(tilausrivi2.tunnus) <= 2 AND
       (
-        ROUND((if(tuote2.tuoteleveys * {$mittakerroin} < 1, 1, tuote2.tuoteleveys * {$mittakerroin}) * if(tuote2.tuotekorkeus * {$mittakerroin} < 1, 1, tuote2.tuotekorkeus * {$mittakerroin}) * if(tuote2.tuotesyvyys * {$mittakerroin} < 1, 1, tuote2.tuotesyvyys * {$mittakerroin})) * if(tilausrivi2.varattu < 1, 1, round(tilausrivi2.varattu)), 4)  < {$pienimman_pak_til} OR 
+        ROUND((if(tuote2.tuoteleveys * {$mittakerroin} < 1, 1, tuote2.tuoteleveys * {$mittakerroin}) * if(tuote2.tuotekorkeus * {$mittakerroin} < 1, 1, tuote2.tuotekorkeus * {$mittakerroin}) * if(tuote2.tuotesyvyys * {$mittakerroin} < 1, 1, tuote2.tuotesyvyys * {$mittakerroin})) * if(tilausrivi2.varattu < 1, 1, round(tilausrivi2.varattu)), 4)  < {$pienimman_pak_til} OR
         ROUND(tuote2.tuotemassa * if(tilausrivi2.varattu < 1, 1, round(tilausrivi2.varattu)), 4) < 1
       ),
       lasku2.prioriteettinro + 1, lasku2.prioriteettinro

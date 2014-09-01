@@ -1,8 +1,6 @@
 <?php
 
-if (@include "../inc/parametrit.inc");
-elseif (@include "parametrit.inc");
-else exit;
+require "inc/parametrit.inc";
 
 echo "<font class='head'>" . t('Tiedostokirjasto') . "</font>";
 echo "<hr>";
@@ -24,12 +22,10 @@ if ($tee == '') {
 function hae_toimittajat() {
   global $kukarow;
 
-  $query = "SELECT toimi.tunnus, toimi.nimi
-            FROM toimi
-            WHERE toimi.yhtio = 'Mesta'
-            AND EXISTS (SELECT tuotteen_toimittajat.liitostunnus
-              FROM tuotteen_toimittajat
-              WHERE tuotteen_toimittajat.liitostunnus = toimi.tunnus)
+  $query = "SELECT DISTINCT toimi.tunnus, toimi.nimi
+            FROM tuotteen_toimittajat
+            INNER JOIN toimi ON (toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+            WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
             ORDER BY toimi.nimi";
   $result = pupe_query($query);
 

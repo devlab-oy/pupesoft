@@ -20942,36 +20942,53 @@ if (!function_exists('lisaa_tuotepaikka')) {
       return false;
     }
 
-    $query = "INSERT INTO tuotepaikat SET
-              yhtio       = '{$kukarow['yhtio']}',
-              tuoteno     = '{$tuoteno}',
-              hyllyalue   = '{$hyllyalue}',
-              hyllynro    = '{$hyllynro}',
-              hyllyvali   = '{$hyllyvali}',
-              hyllytaso   = '{$hyllytaso}',
-              oletus      = '{$oletus}',
-              halytysraja = '{$halytysraja}',
-              tilausmaara = '{$tilausmaara}',
-              laatija     = '{$kukarow['kuka']}',
-              luontiaika  = now()";
-    pupe_query($query);
-    $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
+    // Tsekataan, ettei tätä paikkaa oo jo perustettu
+    $query = "SELECT *
+              FROM tuotepaikat
+              WHERE yhtio   = '{$kukarow['yhtio']}'
+              AND tuoteno   = '{$tuoteno}'
+              AND hyllyalue = '{$hyllyalue}'
+              AND hyllynro  = '{$hyllynro}'
+              AND hyllyvali = '{$hyllyvali}'
+              AND hyllytaso = '{$hyllytaso}'";
+    $result = pupe_query($query);
 
-    $query = "INSERT INTO tapahtuma SET
-              yhtio     = '{$kukarow['yhtio']}',
-              tuoteno   = '{$tuoteno}',
-              kpl       = 0,
-              kplhinta  = 0,
-              hinta     = 0,
-              laji      = 'uusipaikka',
-              hyllyalue = '{$hyllyalue}',
-              hyllynro  = '{$hyllynro}',
-              hyllyvali = '{$hyllyvali}',
-              hyllytaso = '{$hyllytaso}',
-              selite    = trim('".t("{$viesti} lisättiin tuotepaikka")." {$hyllyalue} {$hyllynro} {$hyllyvali} {$hyllytaso}'),
-              laatija   = '{$kukarow['kuka']}',
-              laadittu  = now()";
-    pupe_query($query);
+    if (mysql_num_rows($result) == 0) {
+      $query = "INSERT INTO tuotepaikat SET
+                yhtio       = '{$kukarow['yhtio']}',
+                tuoteno     = '{$tuoteno}',
+                hyllyalue   = '{$hyllyalue}',
+                hyllynro    = '{$hyllynro}',
+                hyllyvali   = '{$hyllyvali}',
+                hyllytaso   = '{$hyllytaso}',
+                oletus      = '{$oletus}',
+                halytysraja = '{$halytysraja}',
+                tilausmaara = '{$tilausmaara}',
+                laatija     = '{$kukarow['kuka']}',
+                luontiaika  = now()";
+      pupe_query($query);
+      $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
+
+      $query = "INSERT INTO tapahtuma SET
+                yhtio     = '{$kukarow['yhtio']}',
+                tuoteno   = '{$tuoteno}',
+                kpl       = 0,
+                kplhinta  = 0,
+                hinta     = 0,
+                laji      = 'uusipaikka',
+                hyllyalue = '{$hyllyalue}',
+                hyllynro  = '{$hyllynro}',
+                hyllyvali = '{$hyllyvali}',
+                hyllytaso = '{$hyllytaso}',
+                selite    = trim('".t("{$viesti} lisättiin tuotepaikka")." {$hyllyalue} {$hyllynro} {$hyllyvali} {$hyllytaso}'),
+                laatija   = '{$kukarow['kuka']}',
+                laadittu  = now()";
+      pupe_query($query);
+    }
+    else {
+      $tuoepaikkarow = mysql_fetch_assoc($result);
+      $lisatty_tun = $tuoepaikkarow["tunnus"];
+    }
 
     return array("hyllyalue" => $hyllyalue, "hyllynro" => $hyllynro, "hyllytaso" => $hyllytaso, "hyllyvali" => $hyllyvali, "tuotepaikan_tunnus" => $lisatty_tun);
   }

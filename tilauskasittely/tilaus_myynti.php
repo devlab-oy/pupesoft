@@ -3789,6 +3789,27 @@ if ($tee == '') {
         if ($tapa != "POISTA") {
           $myy_sarjatunnus = $sarjarow["tunnukset"];
         }
+
+        if(true) { ##TODO parametri käytössä
+          // Nollataan myyntirivitunnus laite-taulusta
+          $spessukveri = "SELECT *
+                          FROM sarjanumeroseuranta
+                          WHERE myyntirivitunnus = '$rivitunnus'
+                          ORDER BY luontiaika desc
+                          LIMIT 1";
+          $spessures = pupe_query($spessukveri);
+          $spessurivi = mysql_fetch_assoc($spessures);
+
+          $laiteupdate = "UPDATE laite
+                          SET paikka = '',
+                          muutospvm = now(),
+                          muuttaja = '{$kukarow['kuka']}'
+                          WHERE yhtio = '{$kukarow['yhtio']}'
+                          AND sarjanro = '{$spessurivi['sarjanumero']}'
+                          AND tuoteno = '{$spessurivi['tuoteno']}'
+                          AND paikka = '{$rivitunnus}'";
+          pupe_query($laiteupdate);
+        }
       }
 
       if ($tapa == "VAIHDA" and ($tilausrivi["sarjanumeroseuranta"] == "E" or $tilausrivi["sarjanumeroseuranta"] == "F" or $tilausrivi["sarjanumeroseuranta"] == "G")) {
@@ -3822,6 +3843,7 @@ if ($tee == '') {
                   and otunnus     = '$kukarow[kesken]'
                   and yhtio       = '$kukarow[yhtio]'";
         $result = pupe_query($query);
+
       }
 
       if ($tapa == "POISTA" and $kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and !empty($tilausrivi['vanha_otunnus']) and $tilausrivi['vanha_otunnus'] != $tilausrivi['otunnus'] and $tilausrivi['positio'] == 'JT' and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $yhtiorow['jt_automatiikka_mitatoi_tilaus'] == 'E') {

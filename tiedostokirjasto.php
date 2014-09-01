@@ -94,6 +94,8 @@ function piirra_formi($valittu_toimittaja, $valittu_tiedostotyyppi) {
 function hae_tiedostot($tuotetunnukset, $tiedoston_tyyppi) {
   global $kukarow;
 
+  $tiedoston_tyyppi = strtolower($tiedoston_tyyppi);
+
   $tuotetunnukset_lista = implode(',', $tuotetunnukset);
 
   $query = "SELECT liitetiedostot.tunnus,

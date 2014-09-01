@@ -469,7 +469,7 @@ if (!function_exists('alku_lahete')) {
           or $base_lahetetyyppi == "tulosta_lahete_ean_eiale.inc"
           or $base_lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc")
         or
-          (   isset($GLOBALS['eta_yhtio'])
+        (   isset($GLOBALS['eta_yhtio'])
           and $GLOBALS['eta_yhtio'] != ''
           and $base_lahetetyyppi == "tulosta_lahete_hae_hinnat.inc")) {
 
@@ -2218,8 +2218,8 @@ if (!function_exists('rivi_hinta_ale_lahete_ean')) {
         $row["rivihinta"] = $row["rivihinta"] / (1 - $row['ale3'] / 100) / (1 - $row['ale2'] / 100);
       }
 
-        $oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
-        $pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
+      $oikpos = $pdf->strlen(hintapyoristys($row["rivihinta"]), $norm);
+      $pdf->draw_text(575-$oikpos, $kala, hintapyoristys($row["rivihinta"]), $thispage, $norm);
     }
 
     if ($lahetetyyppi == "tulosta_lahete_viivakoodi_ale1.inc") {

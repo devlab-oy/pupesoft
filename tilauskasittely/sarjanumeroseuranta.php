@@ -629,7 +629,7 @@ if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
 
       
       if ($tunnuskentta == "myyntirivitunnus" and $rivitunnus > 0) {
-        // Täälläkö pitäisi poistaa laitetaulusta myyntirivitunnus
+        // Täällä pitäisi poistaa laitetaulusta myyntirivitunnus
         $spessukveri = "SELECT *
                         FROM sarjanumeroseuranta
                         WHERE tunnus = '$sarjatun'";

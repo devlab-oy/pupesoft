@@ -163,6 +163,9 @@ if ($tee == "valitse") {
   echo "<input type='hidden' name='tiliote_tiedostot' value='{$_t}'>";
   echo "<input type='hidden' name='viite_tiedostot' value='{$_v}'>";
 
+  echo "<input type='submit' value='" . t('Hae valitut aineistot') . "'>";
+  echo "<br><br>";
+
   echo "<table>";
   echo "<tr>";
   echo "<td class='back' style='vertical-align:top;'>";

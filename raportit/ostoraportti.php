@@ -25,10 +25,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 }
 else {
 
-  if (!@include 'Spreadsheet/Excel/Writer.php') {
-    echo "<font class='error'>".t("VIRHE: Pupe-asennuksesi ei tue Excel-kirjoitusta.")."</font><br>";
-    exit;
-  }
+ include 'inc/pupeExcel.inc';
 
   $ala_tallenna = array(  "kysely",
     "uusirappari",
@@ -884,60 +881,51 @@ else {
 
     flush();
 
-    //keksitään failille joku varmasti uniikki nimi:
-    list($usec, $sec) = explode(' ', microtime());
-    mt_srand((float) $sec + ((float) $usec * 100000));
-    $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-
-    $workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-    $workbook->setVersion(8);
-    $worksheet =& $workbook->addWorksheet('Sheet 1');
-
-    $format_bold =& $workbook->addFormat();
-    $format_bold->setBold();
-
-    $format_center =& $workbook->addFormat();
+    $worksheet    = new pupeExcel();
+    $format_bold = array("bold" => TRUE);
+      
+    $format_center =& $worksheet->addFormat();
     $format_center->setBold();
     $format_center->setHAlign('left');
 
-    $workbook->setCustomColor(12, 255, 255, 0);
-    $format_bg_yellow =& $workbook->addFormat();
+    $worksheet->setCustomColor(12, 255, 255, 0);
+    $format_bg_yellow =& $worksheet->addFormat();
     $format_bg_yellow->setFgColor(12);
     $format_bg_yellow->setPattern(1);
 
-    $format_bg_yellow_text_red =& $workbook->addFormat();
+    $format_bg_yellow_text_red =& $worksheet->addFormat();
     $format_bg_yellow_text_red->setFgColor(12);
-    $workbook->setCustomColor(17, 255, 0, 0);
+    $worksheet->setCustomColor(17, 255, 0, 0);
     $format_bg_yellow_text_red->setColor(17);
     $format_bg_yellow_text_red->setPattern(1);
 
-    $workbook->setCustomColor(13, 200, 100, 180);
-    $format_bg_magenta =& $workbook->addFormat();
+    $worksheet->setCustomColor(13, 200, 100, 180);
+    $format_bg_magenta =& $worksheet->addFormat();
     $format_bg_magenta->setFgColor(13);
     $format_bg_magenta->setPattern(1);
 
-    $format_bg_magenta_text_red =& $workbook->addFormat();
+    $format_bg_magenta_text_red =& $worksheet->addFormat();
     $format_bg_magenta_text_red->setFgColor(13);
     $format_bg_magenta_text_red->setColor(17);
     $format_bg_magenta_text_red->setPattern(1);
 
-    $workbook->setCustomColor(14, 150, 255, 170);
-    $format_bg_green =& $workbook->addFormat();
+    $worksheet->setCustomColor(14, 150, 255, 170);
+    $format_bg_green =& $worksheet->addFormat();
     $format_bg_green->setFgColor(14);
     $format_bg_green->setPattern(1);
 
-    $workbook->setCustomColor(15, 255, 170, 70);
-    $format_bg_brown =& $workbook->addFormat();
+    $worksheet->setCustomColor(15, 255, 170, 70);
+    $format_bg_brown =& $worksheet->addFormat();
     $format_bg_brown->setFgColor(15);
     $format_bg_brown->setPattern(1);
 
-    $workbook->setCustomColor(16, 200, 200, 200);
-    $format_bg_grey =& $workbook->addFormat();
+    $worksheet->setCustomColor(16, 200, 200, 200);
+    $format_bg_grey =& $worksheet->addFormat();
     $format_bg_grey->setFgColor(16);
     $format_bg_grey->setPattern(1);
 
-    $workbook->setCustomColor(18, 255, 255, 255);
-    $format_bg_text_red =& $workbook->addFormat();
+    $worksheet->setCustomColor(18, 255, 255, 255);
+    $format_bg_text_red =& $worksheet->addFormat();
     $format_bg_text_red->setFgColor(18);
     $format_bg_text_red->setColor(17);
     $format_bg_text_red->setPattern(1);
@@ -1774,13 +1762,13 @@ else {
     flush();
     echo "<br><br>";
 
-    $workbook->close();
+    $excelnimi = $worksheet->close();
 
     echo "<table>";
-    echo "<tr><th>".t("Tallenna raportti (xls)").":</th>";
+    echo "<tr><th>".t("Tallenna raportti (xlsx)").":</th>";
     echo "<form method='post' class='multisubmit'>";
     echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-    echo "<input type='hidden' name='kaunisnimi' value='Ostoraportti.xls'>";
+    echo "<input type='hidden' name='kaunisnimi' value='Ostoraportti.xlsx'>";
     echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
     echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
     echo "</table><br>";

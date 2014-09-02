@@ -1586,12 +1586,15 @@ if ($tee == 'MONISTA') {
         $palautus = array();
 
         if ($toim == '' and $kumpi == 'REKLAMA' and isset($kaytetaanhyvityshintoja[$lasku]) and $kaytetaanhyvityshintoja[$lasku] != '') {
-          $palautus = hae_hyvityshinta($laskurow["liitostunnus"], $rivirow['tuoteno'], ($rivirow["kpl"] + $rivirow["jt"] + $rivirow["varattu"]));
+
+          $_kpl = $rivirow["kpl"] + $rivirow["jt"] + $rivirow["varattu"];
+
+          $palautus = hae_hyvityshinta($laskurow["liitostunnus"], $rivirow['tuoteno'], $_kpl);
 
           if (count($palautus) > 0) {
             $rivirow['hinta'] = $palautus[0]["hinta"];
             $rivirow['kommentti'] = trim($rivirow['kommentti']) != '' ? "{$rivirow['kommentti']} {$palautus[0]['kommentti']}" : $palautus[0]['kommentti'];
-            $rivirow['varattu'] = $palautus[0]["kpl"];
+            $rivirow['kpl'] = $palautus[0]["kpl"];
             $rivirow['ale1'] = $palautus[0]['ale'];
             for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
               $rivirow['ale'.$alepostfix] = 0;
@@ -1741,6 +1744,9 @@ if ($tee == 'MONISTA') {
             else {
               $rvalues .= ", '".$rivirow[$i]."'";
             }
+            break;
+          case 'ale1':
+            $rvalues .= ", '{$rivirow['ale1']}'";
             break;
           default:
             $rvalues .= ", '".$rivirow[$i]."'";

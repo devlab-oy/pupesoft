@@ -2111,7 +2111,7 @@ if ($tee == "" or $tee == "JATKA") {
     elseif (($tuoryh !='' or $osasto != '' or $tuotemerkki != '' or $KAIKKIJT != '') and "{$toimipaikka}" == "kaikki") {
       $tee = "JATKA";
     }
-    elseif ($tuoryh !='' or $osasto != '' or $tuotemerkki != '' or $KAIKKIJT != '' or (is_numeric($toimipaikka) and ($toimipaikka != 0 or $toimipaikka == 0))) {
+    elseif ($tuoryh !='' or $osasto != '' or $tuotemerkki != '' or $KAIKKIJT != '' or is_numeric($toimipaikka)) {
       $tee = "JATKA";
     }
     else {

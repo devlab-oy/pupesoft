@@ -883,52 +883,53 @@ else {
 
     $worksheet    = new pupeExcel();
     $format_bold = array("bold" => TRUE);
+    $excelrivi    = 0;
       
-    $format_center =& $worksheet->addFormat();
-    $format_center->setBold();
-    $format_center->setHAlign('left');
-
-    $worksheet->setCustomColor(12, 255, 255, 0);
-    $format_bg_yellow =& $worksheet->addFormat();
-    $format_bg_yellow->setFgColor(12);
-    $format_bg_yellow->setPattern(1);
-
-    $format_bg_yellow_text_red =& $worksheet->addFormat();
-    $format_bg_yellow_text_red->setFgColor(12);
-    $worksheet->setCustomColor(17, 255, 0, 0);
-    $format_bg_yellow_text_red->setColor(17);
-    $format_bg_yellow_text_red->setPattern(1);
-
-    $worksheet->setCustomColor(13, 200, 100, 180);
-    $format_bg_magenta =& $worksheet->addFormat();
-    $format_bg_magenta->setFgColor(13);
-    $format_bg_magenta->setPattern(1);
-
-    $format_bg_magenta_text_red =& $worksheet->addFormat();
-    $format_bg_magenta_text_red->setFgColor(13);
-    $format_bg_magenta_text_red->setColor(17);
-    $format_bg_magenta_text_red->setPattern(1);
-
-    $worksheet->setCustomColor(14, 150, 255, 170);
-    $format_bg_green =& $worksheet->addFormat();
-    $format_bg_green->setFgColor(14);
-    $format_bg_green->setPattern(1);
-
-    $worksheet->setCustomColor(15, 255, 170, 70);
-    $format_bg_brown =& $worksheet->addFormat();
-    $format_bg_brown->setFgColor(15);
-    $format_bg_brown->setPattern(1);
-
-    $worksheet->setCustomColor(16, 200, 200, 200);
-    $format_bg_grey =& $worksheet->addFormat();
-    $format_bg_grey->setFgColor(16);
-    $format_bg_grey->setPattern(1);
-
-    $worksheet->setCustomColor(18, 255, 255, 255);
-    $format_bg_text_red =& $worksheet->addFormat();
-    $format_bg_text_red->setFgColor(18);
-    $format_bg_text_red->setColor(17);
-    $format_bg_text_red->setPattern(1);
+//    $format_center =& $worksheet->addFormat();
+//    $format_center->setBold();
+//    $format_center->setHAlign('left');
+//
+//    $worksheet->setCustomColor(12, 255, 255, 0);
+//    $format_bg_yellow =& $worksheet->addFormat();
+//    $format_bg_yellow->setFgColor(12);
+//    $format_bg_yellow->setPattern(1);
+//
+//    $format_bg_yellow_text_red =& $worksheet->addFormat();
+//    $format_bg_yellow_text_red->setFgColor(12);
+//    $worksheet->setCustomColor(17, 255, 0, 0);
+//    $format_bg_yellow_text_red->setColor(17);
+//    $format_bg_yellow_text_red->setPattern(1);
+//
+//    $worksheet->setCustomColor(13, 200, 100, 180);
+//    $format_bg_magenta =& $worksheet->addFormat();
+//    $format_bg_magenta->setFgColor(13);
+//    $format_bg_magenta->setPattern(1);
+//
+//    $format_bg_magenta_text_red =& $worksheet->addFormat();
+//    $format_bg_magenta_text_red->setFgColor(13);
+//    $format_bg_magenta_text_red->setColor(17);
+//    $format_bg_magenta_text_red->setPattern(1);
+//
+//    $worksheet->setCustomColor(14, 150, 255, 170);
+//    $format_bg_green =& $worksheet->addFormat();
+//    $format_bg_green->setFgColor(14);
+//    $format_bg_green->setPattern(1);
+//
+//    $worksheet->setCustomColor(15, 255, 170, 70);
+//    $format_bg_brown =& $worksheet->addFormat();
+//    $format_bg_brown->setFgColor(15);
+//    $format_bg_brown->setPattern(1);
+//
+//    $worksheet->setCustomColor(16, 200, 200, 200);
+//    $format_bg_grey =& $worksheet->addFormat();
+//    $format_bg_grey->setFgColor(16);
+//    $format_bg_grey->setPattern(1);
+//
+//    $worksheet->setCustomColor(18, 255, 255, 255);
+//    $format_bg_text_red =& $worksheet->addFormat();
+//    $format_bg_text_red->setFgColor(18);
+//    $format_bg_text_red->setColor(17);
+//    $format_bg_text_red->setPattern(1);
 
     $excelrivi    = 0;
     $excelsarake = 0;

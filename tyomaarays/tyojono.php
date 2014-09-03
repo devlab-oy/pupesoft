@@ -430,9 +430,12 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
   echo "</td>";
 
   $paivan_vari = '';
-  // Jos luvattupvm on ohitettu, t‰n‰‰n tai 3pv sis‰ll‰
-  if (strtotime($vrow["luvattu"]) <= strtotime(date('Y-m-j')) OR
-    strtotime($vrow['luvattu']) <= strtotime(date('Y-m-j', strtotime("+ 3 days")))) {
+  // Jos luvattupvm on ohitettu tai t‰n‰‰n
+  if (strtotime($vrow["luvattu"]) <= strtotime(date('Y-m-j'))) {
+    $paivan_vari = "style='background-color: #000000;'";
+  }
+  elseif (strtotime($vrow['luvattu']) <= strtotime(date('Y-m-j', strtotime("+ 3 days")))) {
+    // jos luvattupvm on 3pv sis‰ll‰
     $paivan_vari = "style='background-color: #FF6600;'";
   }
   elseif (strtotime($vrow['luvattu']) <= strtotime(date('Y-m-j', strtotime("+ 5 days")))) {

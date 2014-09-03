@@ -2038,7 +2038,6 @@ else {
     echo "  <input type='hidden' name='mul_osasto' value='".urlencode(serialize($mul_osasto))."'>
         <input type='hidden' name='mul_try' value='".urlencode(serialize($mul_try))."'>
         <input type='hidden' name='mul_tme' value='".urlencode(serialize($mul_tme))."'>
-        <input type='hidden' name='lisa' value='$lisa'>
         <input type='hidden' name='lisa_parametri' value='$lisa_parametri'>
         <input type='hidden' name='ytunnus' value='$ytunnus'>
         <input type='hidden' name='edrappari' value='$rappari'>
@@ -2192,7 +2191,6 @@ else {
         <input type='hidden' name='mul_osasto' value='".urlencode(serialize($mul_osasto))."'>
         <input type='hidden' name='mul_try' value='".urlencode(serialize($mul_try))."'>
         <input type='hidden' name='mul_tme' value='".urlencode(serialize($mul_tme))."'>
-        <input type='hidden' name='lisa' value='$lisa'>
         <input type='hidden' name='lisa_parametri' value='$lisa_parametri'>
         <input type='hidden' name='ytunnus' value='$ytunnus'>
         <input type='hidden' name='edrappari' value='$rappari'>

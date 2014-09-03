@@ -2846,6 +2846,8 @@ else {
                     $serialisoitavat_muuttujat["ruksit"]["try"] = "tuoteryhma";
                   }
 
+                  $tuoteosasto_temp = $row[$ken_nimi];
+
                   $row[$ken_nimi] = "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>{$osrow['selite']} {$osrow['selitetark']}</a>";
                 }
 
@@ -3162,10 +3164,7 @@ else {
                   }
                   else {
                     if ($rivimaara <= $rivilimitti) {
-                      if ($ken_nimi != 'asiakasosasto' and $ken_nimi != 'tuoteosasto') {
-                        echo "<td valign='top'>{$row[$ken_nimi]}</td>";
-                      }
-                      else {
+                      if ($ken_nimi == 'asiakasosasto') {
                         unset($serialisoitavat_muuttujat["ruksit"]["asiakasryhma"]);
                         unset($serialisoitavat_muuttujat["mul_asiakasryhma"]);
                         if ($ruksit['asiakasosasto'] != '' and $ruksit[20] != '') {
@@ -3179,6 +3178,24 @@ else {
 
                         echo "<td valign='top'>{$row[$ken_nimi]}</td>";
                         echo "<td><a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>" . t('Näytä') . "</a></td>";
+                      }
+                      else if ($ken_nimi == 'tuoteosasto') {
+                        unset($serialisoitavat_muuttujat["ruksit"]["try"]);
+                        unset($serialisoitavat_muuttujat["mul_try"]);
+                        if ($ruksit['osasto'] != '' and $ruksit[30] != '') {
+                          $serialisoitavat_muuttujat["mul_osasto"][$ken_nimi] = '';
+                          $serialisoitavat_muuttujat['ruksit'][30] = '';
+                        }
+                        else {
+                          $serialisoitavat_muuttujat["mul_osasto"][$ken_nimi] = $tuoteosasto_temp;
+                          $serialisoitavat_muuttujat['ruksit'][30] = 'tuote';
+                        }
+
+                        echo "<td valign='top'>{$row[$ken_nimi]}</td>";
+                        echo "<td><a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>" . t('Näytä') . "</a></td>";
+                      }
+                      else {
+                        echo "<td valign='top'>{$row[$ken_nimi]}</td>";
                       }
                     }
 

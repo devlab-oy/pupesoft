@@ -25,10 +25,10 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
 }
 else {
 
-//  if (!@include 'Spreadsheet/Excel/Writer.php') {
-//    echo "<font class='error'>".t("VIRHE: Pupe-asennuksesi ei tue Excel-kirjoitusta.")."</font><br>";
-//    exit;
-//  }
+  if (!@include 'Spreadsheet/Excel/Writer.php') {
+    echo "<font class='error'>".t("VIRHE: Pupe-asennuksesi ei tue Excel-kirjoitusta.")."</font><br>";
+    exit;
+  }
 
   $ala_tallenna = array(  "kysely",
     "uusirappari",

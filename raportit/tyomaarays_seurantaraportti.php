@@ -12,7 +12,9 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 
-function count_workdays($date1,$date2){ 
+function count_workdays($date1,$date2) {
+  list ($date1) = explode(" ", $date1);
+  list ($date2) = explode(" ", $date2); 
   $firstdate = strtotime($date1); 
   $lastdate = strtotime($date2); 
   $firstday = date(w,$firstdate); 

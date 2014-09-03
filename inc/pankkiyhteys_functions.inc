@@ -199,8 +199,11 @@ function kasittele_pain_palaute($pain_data) {
   // Statuksia:
   // Hyväksytty maksatukseen (Group status ACCP)
   // Hyväksytty tekninen tarkastus (Group status ACTC)
+  // Cancellation is accepted (ACCR)
+  // AcceptedSettlementInProcess (ACSP)
+  // Settlement on the debtor's account has been completed (ACSC)
   // Rejected transaction (Transaction status RJCT)
-  $_ok = array("ACCP", "ACTC");
+  $_ok = array("ACCP", "ACTC", "ACSC", "ACCR", "ACSP");
   $_error = array("RJCT");
 
   // Status voi tulla näissä elementeissä

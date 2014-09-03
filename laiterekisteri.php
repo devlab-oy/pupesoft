@@ -15,10 +15,10 @@ if (isset($livesearch_tee) and $livesearch_tee == "SARJANUMEROHAKU") {
 enable_ajax();
 
 if ($toiminto == 'LINKKAA') {
-  pupe_DataTables(array(array($pupe_DataTables, 16, 16, true, true)));  
+  pupe_DataTables(array(array($pupe_DataTables, 17, 17, true, true)));  
 } 
 else {
-  pupe_DataTables(array(array($pupe_DataTables, 15, 15, true, true)));
+  pupe_DataTables(array(array($pupe_DataTables, 16, 16, true, true)));
 }
 
 $maara_paivitetty = false;
@@ -66,6 +66,7 @@ if (isset($tallennetaan_muutokset) and isset($muokattava_laite) and $muokattava_
   $kveri = "UPDATE laite
             SET kommentti = '{$kommentti}',
             sla = '{$sla}',
+            sd_sla = '{$sd_sla}',
             lcm_info = '{$lcm_info}',
             ip_osoite = '{$ip_osoite}',
             mac_osoite = '{$mac_osoite}',
@@ -98,6 +99,7 @@ elseif (isset($tallenna_uusi_laite) and isset($valitse_sarjanumero) and !empty($
               mac_osoite = '{$mac_osoite}',
               kommentti = '{$kommentti}',
               sla = '{$sla}',
+              sd_sla = '{$sd_sla}',
               valmistajan_sopimusnumero = '{$valmistajan_sopimusnumero}',
               valmistajan_sopimus_paattymispaiva = '{$vcloppuvv}-{$vcloppukk}-{$vcloppupp}',
               luontiaika = now(),
@@ -139,6 +141,7 @@ $headerit = array(
   "sopimustiedot",
   "asiakastiedot",
   "sla",
+  "sd_sla",
   "vc",
   "vc end",
   "kommentti",
@@ -173,6 +176,7 @@ if ($toiminto == "LINKKAA") {
   echo "<th>Sarjanumero</th>";
   echo "<th>Tuotenumero</th>";
   echo "<th>SLA</th>";
+  echo "<th>SD SLA</th>";
   echo "<th>VC</th>";
   echo "<th>VC End</th>";  
   echo "<th>Kommentti</th>";
@@ -206,7 +210,8 @@ if ($toiminto == "LINKKAA") {
     echo "<td nowrap>{$vanhalaiterivi['malli']}</td>";
     echo "<td nowrap>{$vanhalaiterivi['sarjanro']}</td>";
     echo "<td nowrap>{$vanhalaiterivi['tuoteno']}</td>";
-    echo "<td>{$vanhalaiterivi['sla']}</td>"; 
+    echo "<td>{$vanhalaiterivi['sla']}</td>";
+    echo "<td>{$vanhalaiterivi['sd_sla']}</td>"; 
     echo "<td nowrap>{$vanhalaiterivi['valmistajan_sopimusnumero']}</td>";
     echo "<td nowrap>{$vanhalaiterivi['valmistajan_sopimus_paattymispaiva']}</td>";   
     echo "<td style='width:300px;'>{$vanhalaiterivi['kommentti']}</td>";
@@ -293,6 +298,7 @@ if ($toiminto == 'MUOKKAA') {
     echo "<td nowrap>{$rowi['tuoteno']}</td>";
     echo "<td></td><td></td>";
     echo "<td><input type='text' name='sla' value='{$rowi['sla']}'/></td>";
+    echo "<td><input type='text' name='sd_sla' value='{$rowi['sd_sla']}'/></td>";
     echo "<td><input type='text' name='valmistajan_sopimusnumero' value='{$rowi['valmistajan_sopimusnumero']}'/></td>";
     // Taivutellaan p‰iv‰m‰‰r‰
     list ($vcloppuvv, $vcloppukk, $vcloppupp) = explode("-", $rowi['valmistajan_sopimus_paattymispaiva']);
@@ -358,6 +364,7 @@ elseif ($toiminto == 'UUSILAITE') {
   echo "<td>{$esiv_tuotenumero}</td>";
   echo "<td></td><td></td>";
   echo "<td><input type='text' name='sla'/></td>";
+  echo "<td><input type='text' name='sd_sla'/></td>";   
   echo "<td><input type='text' name='valmistajan_sopimusnumero'/></td>";
 
   echo "<td nowrap><input type='text' name='vcloppupp' maxlength='2' size='2'/>
@@ -478,7 +485,8 @@ else {
     echo "<td nowrap>{$rowi['tuoteno']}</td>";
     echo "<td>{$puuttuja}</td>";
     echo "<td nowrap>{$asiakas}</td>";
-    echo "<td>{$rowi['sla']}</td>"; 
+    echo "<td>{$rowi['sla']}</td>";
+    echo "<td>{$rowi['sd_sla']}</td>";  
     echo "<td nowrap>{$rowi['valmistajan_sopimusnumero']}</td>";
     echo "<td nowrap>{$rowi['valmistajan_sopimus_paattymispaiva']}</td>";   
     echo "<td style='width:300px;'>{$rowi['kommentti']}</td>";

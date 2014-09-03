@@ -2611,6 +2611,7 @@ if ($tila == "" and !isset($jatka)) {
 
       echo "</select>";
       echo "<input type='submit' name='paivita_tyomaarayksen_status' value='".t("Päivitä tila")."'>";
+      echo "<br><textarea name='tapahtuma_kommentti' rows='2' cols='40' maxlength='60' placeholder='".t("Tapahtuman kommentti")."'></textarea>";
       echo "</td></tr>";
 
       echo "<tr><td>".t("Prioriteetti").":</td><td colspan='3'>";
@@ -2667,13 +2668,25 @@ if ($tila == "" and !isset($jatka)) {
 
         $kentta = $al_row["selite"];
 
+        $aina_editoitavissa = false;
+        // Tarkistetaan onko kenttä merkattu aina lukitsemattomaksi
+        // HUOM! Ei kosketa spesifisesti nimettyjä kenttiä kuten: suorittaja, merkki
+        if (strtoupper($al_row['selitetark_5']) == 'EDITABLE') {
+          $aina_editoitavissa = true;
+        }
+        
         if (strtoupper($al_row["selitetark_2"]) == "TEXT") {
 
           if ($al_lask == 1) {
             echo "<td></td><td></td></tr><tr>";
           }
-
-          echo "<td valign='top'>$al_row[selitetark]:</td><td colspan='3'><textarea name='$kentta' rows='6' cols='50'>$srow[$kentta]</textarea></td>";
+          
+          if ($aina_editoitavissa) {
+            echo "<td valign='top'>$al_row[selitetark]:</td><td colspan='3'><textarea name='$kentta' rows='6' cols='50'>$srow[$kentta]</textarea></td>";
+          }
+          else {
+            echo "<td valign='top'>$al_row[selitetark]:</td><td colspan='3'><textarea name='$kentta' rows='6' cols='50' $disa>$srow[$kentta]</textarea></td>";
+          }
 
           $al_lask++;
         }
@@ -2685,10 +2698,18 @@ if ($tila == "" and !isset($jatka)) {
           if ($al_vv == "0000")   $al_vv = date("Y");
           if ($al_pp == "00")   $al_pp = date("d");
 
-          echo "<td>$al_row[selitetark]:</td><td>
-              <input type='text' name='".$kentta."pp' size='3' value='$al_pp' $disa>
-              <input type='text' name='".$kentta."kk' size='3' value='$al_kk' $disa>
-              <input type='text' name='".$kentta."vv' size='5' value='$al_vv' $disa></td>";
+          if ($aina_editoitavissa) {
+            echo "<td>$al_row[selitetark]:</td><td>
+                  <input type='text' name='".$kentta."pp' size='3' value='$al_pp'>
+                  <input type='text' name='".$kentta."kk' size='3' value='$al_kk'>
+                  <input type='text' name='".$kentta."vv' size='5' value='$al_vv'></td>";
+          }
+          else {
+            echo "<td>$al_row[selitetark]:</td><td>
+                  <input type='text' name='".$kentta."pp' size='3' value='$al_pp' $disa>
+                  <input type='text' name='".$kentta."kk' size='3' value='$al_kk' $disa>
+                  <input type='text' name='".$kentta."vv' size='5' value='$al_vv' $disa></td>";
+          }
         }
         elseif (strtoupper($al_row["selitetark_2"]) == "DROPDOWN") {
           $dropdown_arvot = explode("#", $al_row['selitetark_3']);
@@ -2706,7 +2727,7 @@ if ($tila == "" and !isset($jatka)) {
         }
         elseif (strtoupper($al_row["selitetark_2"]) == "LIVESEARCH") {
           $mika_livesearch = $al_row["selitetark_3"];
-          $submitvaiei = $al_row['selitetark_4'] != 'autosubmit' ? 'EISUBMIT' : '';
+          $submitvaiei = $al_row['selitetark_5'] != 'autosubmit' ? 'EISUBMIT' : '';
           echo "<td>";
           echo $al_row["selitetark"];
           echo "</td>";
@@ -2738,7 +2759,7 @@ if ($tila == "" and !isset($jatka)) {
                     and kuka.extranet   = ''
                     ORDER BY sort, kuka.nimi";
           $yresult = pupe_query($query);
-
+                                          
           echo "<td>$al_row[selitetark]:</td><td><select name='$kentta'>";
           echo "<option value=''>".t("Valitse")."</option>";
 
@@ -2798,8 +2819,14 @@ if ($tila == "" and !isset($jatka)) {
           echo "<input type='text' name='$kentta' size='15' value='{$arvo}' $disa></td>";
         }
         else {
+
           $arvo = (isset($_REQUEST[$kentta]) and !empty($_REQUEST[$kentta])) ? $_REQUEST[$kentta] : $srow[$kentta];
-          echo "<td>$al_row[selitetark]:</td><td><input type='text' name='$kentta' size='15' value='{$arvo}' $disa></td>";
+          if ($aina_editoitavissa) {
+            echo "<td>$al_row[selitetark]:</td><td><input type='text' name='$kentta' size='15' value='{$arvo}'></td>";
+          }
+          else {
+             echo "<td>$al_row[selitetark]:</td><td><input type='text' name='$kentta' size='15' value='{$arvo}' $disa></td>";
+          }
         }
 
         $al_lask++;
@@ -2863,6 +2890,7 @@ if ($tila == "" and !isset($jatka)) {
                        tyomaarays_tunnus = '{$kukarow['kesken']}',
                        tyojono_selite    = '$tyojono',
                        tyostatus_selite  = '$tyostatus',
+                       kommentti         = '$tapahtuma_kommentti',
                        yhtio             = '{$kukarow['yhtio']}',
                        laatija           = '{$kukarow['kuka']}',
                        luontiaika        = now()";
@@ -2891,12 +2919,13 @@ if ($tila == "" and !isset($jatka)) {
 
       if (mysql_affected_rows() > 0) {
         echo "<table>";
-        echo "<tr><th colspan='4'>".t("Työmääräyksen tapahtumat").":</th></font></tr>";
+        echo "<tr><th colspan='5'>".t("Työmääräyksen tapahtumat").":</th></font></tr>";
         echo "<tr>";
         echo "<td>".t("Työstatus").":</td>";
         echo "<td>".t("Työjono").":</td>";
         echo "<td>".t("Muutosaika").":</td>";
         echo "<td>".t("Muuttaja").":</td>";
+        echo "<td>".t("Kommentti").":</td>";
         echo "</tr>";
 
         while ($row = mysql_fetch_assoc($ress)) {
@@ -2905,6 +2934,7 @@ if ($tila == "" and !isset($jatka)) {
           echo "<td>{$row['jonossa']}</td>";
           echo "<td>{$row['luontiaika']}</td>";
           echo "<td>{$row['laatija']}</td>";
+          echo "<td>{$row['kommentti']}</td>";
           echo "</tr>";
         }
         echo "</table><br>";
@@ -4161,6 +4191,7 @@ if (isset($jatka)) {
                        tyomaarays_tunnus = '{$kukarow['kesken']}',
                        tyojono_selite    = '$tyojono',
                        tyostatus_selite  = '$tyostatus',
+                       kommentti         = '{$tapahtuma_kommentti}',
                        yhtio             = '{$kukarow['yhtio']}',
                        laatija           = '{$kukarow['kuka']}',
                        luontiaika        = now()";

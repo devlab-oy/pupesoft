@@ -92,6 +92,10 @@ echo "<div class='main'>
 <form method='post' action=''>
 <table>
   <tr>
+    <th><label for='sarjanumero'>", t("Sarjanumero"), "</label></th>
+    <td><input type='text' id='sarjanumero' name='data[sarjanumero]' /><td>
+  </tr>
+  <tr>
     <th><label for='viivakoodi'>", t("Viivakoodi"), "</label></th>
     <td><input type='text' id='viivakoodi' name='data[viivakoodi]' /><td>
   </tr>

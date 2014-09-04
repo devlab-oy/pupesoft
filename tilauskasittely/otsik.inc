@@ -3,7 +3,6 @@
 $DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
 
 if (php_sapi_name() != 'cli' and (!isset($ei_kayttoliittymaa) or $ei_kayttoliittymaa != "kylla")) {
-  
   // ToimehtoTarkenne javascript funktio
   js_toimehtoTarkenne();
 
@@ -67,8 +66,7 @@ if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesk
   exit;
 }
 
-// TODO tänne ei pitäis mennä enää kun työmääräykselle on "lukittu" laite
-if (isset($valmnro) and !empty($valmnro)) {
+if ($yhtiorow['laiterekisteri_kaytossa'] != '' and isset($valmnro) and !empty($valmnro)) {
   // Katsotaan löytyykö valittu sarjanumero laiterekisteristä
   $query = "SELECT 
             laite.sla,
@@ -2610,8 +2608,12 @@ if ($tila == "" and !isset($jatka)) {
       }
 
       echo "</select>";
-      echo "<input type='submit' name='paivita_tyomaarayksen_status' value='".t("Päivitä tila")."'>";
-      echo "<br><textarea name='tapahtuma_kommentti' rows='2' cols='40' maxlength='60' placeholder='".t("Tapahtuman kommentti")."'></textarea>";
+
+      if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
+        echo "<input type='submit' name='paivita_tyomaarayksen_status' value='".t("Päivitä tila")."'>";
+        echo "<br><textarea name='tapahtuma_kommentti' rows='2' cols='40' maxlength='60' placeholder='".t("Tapahtuman kommentti")."'></textarea>";
+      }
+
       echo "</td></tr>";
 
       echo "<tr><td>".t("Prioriteetti").":</td><td colspan='3'>";
@@ -2632,7 +2634,7 @@ if ($tila == "" and !isset($jatka)) {
         echo "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";
       }
 
-      echo "</select></tr>";
+      echo "</select></td></tr>";
     }
 
     if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A") {
@@ -2640,19 +2642,20 @@ if ($tila == "" and !isset($jatka)) {
       $al_res = t_avainsana("TYOM_TYOKENTAT", "", "and avainsana.selitetark != ''");
 
       $disa = '';
+      if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
+        // Jos työmääräys on jo avattu ja sille on valittu sarjanumero, niin aktivoidaan readonly
+        // dynaamisille kentille
+        $que = "SELECT valmnro
+                FROM tyomaarays
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND otunnus = '{$tilausnumero}'";  
+        $resa = pupe_query($que);
+        $rowi = mysql_fetch_assoc($resa);
 
-      // Jos työmääräys on jo avattu ja sille on valittu sarjanumero, niin aktivoidaan readonly
-      // dynaamisille kentille
-      $que = "SELECT valmnro
-              FROM tyomaarays
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND otunnus = '{$tilausnumero}'";  
-      $resa = pupe_query($que);
-      $rowi = mysql_fetch_assoc($resa);
-      if (!empty($rowi['valmnro'])) {
-        $disa = ' readonly';
+        if (!empty($rowi['valmnro'])) {
+          $disa = ' readonly';
+        }
       }
-
       $al_lask = 0;
 
       while ($al_row = mysql_fetch_assoc($al_res)) {
@@ -2861,7 +2864,7 @@ if ($tila == "" and !isset($jatka)) {
     echo "</table><br>";
 
     // Työmääräyksen tapahtumahistoria
-    if ($toim == "TYOMAARAYS") {
+    if ($toim == "TYOMAARAYS" and $yhtiorow['laiterekisteri_kaytossa'] != '') {
       
       if (isset($paivita_tyomaarayksen_status) and $kukarow['kesken'] > 0) {
         // Päivitetään työmääräyshistoria myös silloin kuin painetaan erillistä päivitä-nappia
@@ -4164,38 +4167,40 @@ if (isset($jatka)) {
       if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
         $query2 .= ",  tyojono      = '$tyojono',
                 tyostatus    = '$tyostatus'";
-
-        // Jos käyttöliittymästä on muutettu työjonoa/työstatusta kirjataan se myös tyomaarayksen_tapahtumiin
-        if (isset($eka_tuomaarays_row) and !empty($eka_tuomaarays_row)) {
-          $lokin_tyojono = $eka_tuomaarays_row['tyojono_selite'];
-          $lokin_tyostatus = $eka_tuomaarays_row['tyostatus_selite'];
-        }
-        else {
-          $tilaquery = "SELECT
-                        ifnull(tyojono_selite, '') tyojono_selite,
-                        ifnull(tyostatus_selite,'') tyostatus_selite
-                        FROM tyomaarayksen_tapahtumat
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tyomaarays_tunnus = '{$kukarow['kesken']}'
-                        ORDER BY luontiaika desc
-                        LIMIT 1"; 
-          $tilaresult = pupe_query($tilaquery);
-          $tilarivi = mysql_fetch_assoc($tilaresult);
-
-          $lokin_tyojono = $tilarivi['tyojono_selite'];
-          $lokin_tyostatus = $tilarivi['tyostatus_selite'];
-        }
-
-        if ($lokin_tyojono != $tyojono or $lokin_tyostatus != $tyostatus) {
-          $updquery = "INSERT INTO tyomaarayksen_tapahtumat SET
-                       tyomaarays_tunnus = '{$kukarow['kesken']}',
-                       tyojono_selite    = '$tyojono',
-                       tyostatus_selite  = '$tyostatus',
-                       kommentti         = '{$tapahtuma_kommentti}',
-                       yhtio             = '{$kukarow['yhtio']}',
-                       laatija           = '{$kukarow['kuka']}',
-                       luontiaika        = now()";
-          pupe_query($updquery);
+        
+        if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
+          // Jos käyttöliittymästä on muutettu työjonoa/työstatusta kirjataan se myös tyomaarayksen_tapahtumiin
+          if (isset($eka_tuomaarays_row) and !empty($eka_tuomaarays_row)) {
+            $lokin_tyojono = $eka_tuomaarays_row['tyojono_selite'];
+            $lokin_tyostatus = $eka_tuomaarays_row['tyostatus_selite'];
+          }
+          else {
+            $tilaquery = "SELECT
+                          ifnull(tyojono_selite, '') tyojono_selite,
+                          ifnull(tyostatus_selite,'') tyostatus_selite
+                          FROM tyomaarayksen_tapahtumat
+                          WHERE yhtio = '{$kukarow['yhtio']}'
+                          AND tyomaarays_tunnus = '{$kukarow['kesken']}'
+                          ORDER BY luontiaika desc
+                          LIMIT 1"; 
+            $tilaresult = pupe_query($tilaquery);
+            $tilarivi = mysql_fetch_assoc($tilaresult);
+          
+            $lokin_tyojono = $tilarivi['tyojono_selite'];
+            $lokin_tyostatus = $tilarivi['tyostatus_selite'];
+          }
+          
+          if ($lokin_tyojono != $tyojono or $lokin_tyostatus != $tyostatus) {
+            $updquery = "INSERT INTO tyomaarayksen_tapahtumat SET
+                         tyomaarays_tunnus = '{$kukarow['kesken']}',
+                         tyojono_selite    = '$tyojono',
+                         tyostatus_selite  = '$tyostatus',
+                         kommentti         = '{$tapahtuma_kommentti}',
+                         yhtio             = '{$kukarow['yhtio']}',
+                         laatija           = '{$kukarow['kuka']}',
+                         luontiaika        = now()";
+            pupe_query($updquery);
+          }
         }
       }
       $query2 .= $postquery2;

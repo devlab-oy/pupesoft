@@ -1,10 +1,13 @@
 <?php
+
 // DataTables päälle
-$pupe_DataTables = "selaalaitteita"; 
+$pupe_DataTables = "selaalaitteita";
 
 if (strpos($_SERVER['SCRIPT_NAME'], "laiterekisteri.php") !== FALSE) {
   require("inc/parametrit.inc");
 }
+
+if ($yhtiorow['laiterekisteri_kaytossa'] == '') die(t("Yhtiön parametrit - Laiterekisteri ei ole käytössä"));  
 
 if (isset($livesearch_tee) and $livesearch_tee == "SARJANUMEROHAKU") {
   livesearch_sarjanumerohaku();

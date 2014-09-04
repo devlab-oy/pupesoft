@@ -7,68 +7,72 @@ if (isset($_REQUEST["tee"])) {
 
 require('../inc/parametrit.inc');
 
+if ($yhtiorow['laiterekisteri_kaytossa'] == '') die(t("Yhtiön parametrit - Laiterekisteri ei ole käytössä"));
+
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
   exit;
 }
 
-function count_workdays($date1,$date2) {
-  list ($date1) = explode(" ", $date1);
-  list ($date2) = explode(" ", $date2); 
-  $firstdate = strtotime($date1); 
-  $lastdate = strtotime($date2); 
-  $firstday = date(w,$firstdate); 
-  $lastday = date(w,$lastdate); 
-  $totaldays = intval(($lastdate-$firstdate)/86400)+1; 
-
-  //check for one week only 
-  if ($totaldays<=7 && $firstday<=$lastday){ 
-    $workdays = $lastday-$firstday+1; 
-    //check for weekend 
-    if ($firstday==0){ 
-      $workdays = $workdays-1; 
-    } 
-    if ($lastday==6){ 
-      $workdays = $workdays-1; 
-    } 
-      
-  }
-  else { 
-  //more than one week
-
-    //workdays of first week 
-    if ($firstday==0){ 
-      //so we don't count weekend 
-      $firstweek = 5;  
-    }
-    else { 
-      $firstweek = 6-$firstday; 
-    } 
-    $totalfw = 7-$firstday; 
-    
-    //workdays of last week 
-    if ($lastday==6){ 
-      //so we don't count sat, sun=0 so it won't be counted anyway 
-      $lastweek = 5; 
-    }
-    else { 
-      $lastweek = $lastday; 
-    } 
-    $totallw = $lastday+1; 
+if (!function_exists("count_workdays")) {
+  function count_workdays($date1, $date2) {
+    list ($date1) = explode(" ", $date1);
+    list ($date2) = explode(" ", $date2); 
+    $firstdate = strtotime($date1); 
+    $lastdate = strtotime($date2); 
+    $firstday = date(w,$firstdate); 
+    $lastday = date(w,$lastdate); 
+    $totaldays = intval(($lastdate-$firstdate)/86400)+1; 
+  
+    //check for one week only 
+    if ($totaldays<=7 && $firstday<=$lastday){ 
+      $workdays = $lastday-$firstday+1; 
+      //check for weekend 
+      if ($firstday==0){ 
+        $workdays = $workdays-1; 
+      } 
+      if ($lastday==6){ 
+        $workdays = $workdays-1; 
+      } 
         
-    //check for any mid-weeks  
-    if (($totalfw+$totallw)>=$totaldays){ 
-      $midweeks = 0; 
-    } 
-    else { //count midweeks 
-      $midweeks = (($totaldays-$totalfw-$totallw)/7)*5; 
-    } 
-    
-    //total num of workdays 
-    $workdays = $firstweek+$midweeks+$lastweek; 
+    }
+    else { 
+    //more than one week
+  
+      //workdays of first week 
+      if ($firstday==0){ 
+        //so we don't count weekend 
+        $firstweek = 5;  
+      }
+      else { 
+        $firstweek = 6-$firstday; 
+      } 
+      $totalfw = 7-$firstday; 
+      
+      //workdays of last week 
+      if ($lastday==6){ 
+        //so we don't count sat, sun=0 so it won't be counted anyway 
+        $lastweek = 5; 
+      }
+      else { 
+        $lastweek = $lastday; 
+      } 
+      $totallw = $lastday+1; 
+          
+      //check for any mid-weeks  
+      if (($totalfw+$totallw)>=$totaldays){ 
+        $midweeks = 0; 
+      } 
+      else { //count midweeks 
+        $midweeks = (($totaldays-$totalfw-$totallw)/7)*5; 
+      } 
+      
+      //total num of workdays 
+      $workdays = $firstweek+$midweeks+$lastweek; 
+    }
+  
+    return $workdays;
   }
-
-  return $workdays;
 }
 
 echo "<font class='head'>".t("Työmääräysraportti").":</font><hr>";

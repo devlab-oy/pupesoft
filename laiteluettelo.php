@@ -136,7 +136,7 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
   $eka_laiterivi = true;
   $kokonaishinta = 0;
   $lisainffot = '';
-  // Rustaillaan henkseliin kaikki valitut sarakkeet (osan vois laittaa pakollisiks tietenkin)
+  // Rustaillaan henkseliin kaikki valitut sarakkeet
   while ($row = mysql_fetch_assoc($result)) {
     
     // Sopimuskohtaiset kentät

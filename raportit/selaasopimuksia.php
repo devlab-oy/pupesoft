@@ -86,7 +86,8 @@ $result = pupe_query($query);
 
 while ($rivit = mysql_fetch_assoc($result)) {
   echo "<tr class='aktiivi'>";
-  echo "<td nowrap>{$rivit["tilaus"]}<br><br>{$rivit['sopimusmyyja']}</td>";
+
+  echo "<td nowrap>{$rivit["tilaus"]}<br><br>{$rivit['sopimusmyyja']} <br><br> <a href='#'>".t("Rapsalinkki")."</a></td>";
   echo "<td>{$rivit["asiakkaan_tilausnumero"]}</td>";
   echo "<td>{$rivit["asiakas"]}</td>";
   echo "<td nowrap>{$rivit["tuoteno"]}</td>";

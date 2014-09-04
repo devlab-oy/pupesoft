@@ -190,7 +190,7 @@ if ($ytunnus != '') {
                    laatija         = '$kukarow[kuka]',
                    luontiaika      = now()";
         $result = pupe_query($kysely);
-        $muist = mysql_insert_id();
+        $muist = mysql_insert_id($GLOBALS["masterlink"]);
 
         if ($tyyppi == "Muistutus") {
 

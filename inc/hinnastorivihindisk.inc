@@ -8,7 +8,7 @@ function hinnastorivi($tuote) {
             FROM tuote a
             LEFT JOIN perusalennus b use index (yhtio_ryhma) ON a.yhtio = b.yhtio and a.aleryhma = b.ryhma
             WHERE a.tuoteno = '{$tuote['tuoteno']}' and a.yhtio = '{$kukarow['yhtio']}'";
-  $aleresult = mysql_query($query) or pupe_error($query);
+  $aleresult = pupe_query($query);
   $alerow = mysql_fetch_array($aleresult);
 
   $aletun = $alerow['tunnus'];
@@ -37,7 +37,7 @@ function hinnastorivi($tuote) {
               WHERE id='{$tuote['id']}'
               AND yhtio='{$kukarow['yhtio']}'
               ORDER BY jarjestys, tuoteno";
-    $korvaresult = mysql_query($query) or pupe_error($query);
+    $korvaresult = pupe_query($query);
 
     $lask = 0;
     while ($korvarow = mysql_fetch_array($korvaresult)) {

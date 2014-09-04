@@ -987,7 +987,7 @@ if ($tee == 'P') {
 
                   $kysely  = "INSERT INTO lasku ($fields) VALUES ($values)";
                   $insres  = pupe_query($kysely);
-                  $tilausnumerot[$tilrivirow["otunnus"]] = mysql_insert_id();
+                  $tilausnumerot[$tilrivirow["otunnus"]] = mysql_insert_id($GLOBALS["masterlink"]);
 
                   $kysely2 = "SELECT laskutus_nimi, laskutus_nimitark, laskutus_osoite, laskutus_postino, laskutus_postitp, laskutus_maa, laatija, luontiaika, otunnus
                               FROM laskun_lisatiedot
@@ -1082,7 +1082,7 @@ if ($tee == 'P') {
                          nimitys         = '$tilrivirow[nimitys]',
                          jaksotettu      = '$tilrivirow[jaksotettu]'";
               $riviresult = pupe_query($querys);
-              $lisatty_tun = mysql_insert_id();
+              $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
               //Kopioidaan tilausrivin lisatiedot
               $querys = "SELECT *
@@ -1336,13 +1336,49 @@ if ($tee == 'P') {
   if ($muuttuiko == 'kylsemuuttu') {
     foreach ($poikkeamat as $poikkeamatilaus => $poikkeamatilausrivit) {
 
-      $query = "SELECT lasku.*, asiakas.email, asiakas.kerayspoikkeama, asiakas.keraysvahvistus_lahetys, kuka.nimi kukanimi, kuka.eposti as kukamail, asiakas.kieli, kuka_ext.nimi kuka_ext_nimi
-                FROM lasku
-                JOIN asiakas ON asiakas.yhtio=lasku.yhtio AND asiakas.tunnus=lasku.liitostunnus
-                LEFT JOIN kuka ON (kuka.yhtio=lasku.yhtio AND kuka.tunnus=lasku.myyja AND kuka.extranet = '')
-                LEFT JOIN kuka AS kuka_ext ON (kuka_ext.yhtio = lasku.yhtio AND kuka_ext.kuka = lasku.laatija AND kuka_ext.extranet != '')
-                WHERE lasku.tunnus = '$poikkeamatilaus'
-                and lasku.yhtio    = '$kukarow[yhtio]'";
+      $qry = "SELECT tila
+              FROM lasku
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND tunnus = $poikkeamatilaus";
+      $res = pupe_query($qry);
+      $ptilarow = mysql_fetch_assoc($res);
+      $ptila = $ptilarow['tila'];
+
+      // Siirtolistoilla k‰ytt‰j‰ pit‰‰ joinata hyvak1 kent‰ll‰ (+ niiss‰ ei ole asiakasta)
+      if ($ptila == 'G') {
+        $query = "SELECT lasku.*,
+                  kuka.kieli AS kieli,
+                  kuka.nimi AS kukanimi,
+                  kuka.eposti AS kukamail
+                  FROM lasku
+                  LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio
+                    AND kuka.kuka = lasku.hyvak1
+                    AND kuka.extranet = '')
+                  WHERE lasku.tunnus = '$poikkeamatilaus'
+                  AND lasku.yhtio = '$kukarow[yhtio]'";
+      }
+      else {
+        $query = "SELECT lasku.*,
+                  asiakas.email,
+                  asiakas.kerayspoikkeama,
+                  asiakas.keraysvahvistus_lahetys,
+                  asiakas.kieli,
+                  kuka.nimi AS kukanimi,
+                  kuka.eposti AS kukamail,
+                  kuka_ext.nimi AS kuka_ext_nimi
+                  FROM lasku
+                  JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
+                    AND asiakas.tunnus = lasku.liitostunnus)
+                  LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio
+                    AND kuka.tunnus = lasku.myyja
+                    AND kuka.extranet = '')
+                  LEFT JOIN kuka AS kuka_ext ON (kuka_ext.yhtio = lasku.yhtio
+                    AND kuka_ext.kuka = lasku.laatija
+                    AND kuka_ext.extranet != '')
+                  WHERE lasku.tunnus = '$poikkeamatilaus'
+                  AND lasku.yhtio = '$kukarow[yhtio]'";
+      }
+
       $result = pupe_query($query);
       $laskurow = mysql_fetch_assoc($result);
 

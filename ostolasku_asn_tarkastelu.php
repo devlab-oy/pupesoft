@@ -451,7 +451,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
                                perheid     = '{$isa_chk_row['tunnus']}'";
                 $inskres = pupe_query($lisainsert);
 
-                $id = mysql_insert_id();
+                $id = mysql_insert_id($GLOBALS["masterlink"]);
                 $paketin_rivit[] = $id;
 
                 // p‰ivitet‰‰n is‰
@@ -499,7 +499,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
 
                 $kysely  = "INSERT INTO asn_sanomat ({$fields}) VALUES ({$values})";
                 $uusires = pupe_query($kysely);
-                $asn_lapsi_uusi_id = mysql_insert_id();
+                $asn_lapsi_uusi_id = mysql_insert_id($GLOBALS["masterlink"]);
 
                 $paketin_tunnukset[] = $asn_lapsi_uusi_id;
               }
@@ -1187,7 +1187,7 @@ if ($tee == 'kohdista_tilausrivi') {
 
         $kysely  = "INSERT INTO tilausrivi ({$fields}) VALUES ({$values})";
         $uusires = pupe_query($kysely);
-        $tilausrivi_id = mysql_insert_id();
+        $tilausrivi_id = mysql_insert_id($GLOBALS["masterlink"]);
 
         if ($ostotilausrivirow['kpl'] != 0) {
 
@@ -1224,7 +1224,7 @@ if ($tee == 'kohdista_tilausrivi') {
 
           $kysely  = "INSERT INTO tapahtuma ({$fields}) VALUES ({$values})";
           $uusires = pupe_query($kysely);
-          $tapahtuma_id = mysql_insert_id();
+          $tapahtuma_id = mysql_insert_id($GLOBALS["masterlink"]);
 
           $query = "UPDATE tapahtuma SET
                     kpl            = '{$upd_kpl}'

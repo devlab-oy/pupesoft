@@ -150,7 +150,7 @@ if (!function_exists("toimitarkista")) {
           require "tarkistaytunnus.inc";
 
           if ($ok == 0) {
-            $virhe[$i] = t("Virheellinen ytunnus!")." $t[$i] -> $ytunnus. ".t("Voit tarkistaa ytunnuksen")." <a target='uusiytj' href='http://www.ytj.fi/yrit_sel2.asp?kielikoodi=1'>".t("täältä")."</a>.";
+            $virhe[$i] = t("Virheellinen ytunnus!")." $t[$i] -> $ytunnus. ".t("Voit tarkistaa ytunnuksen")." <a target='uusiytj' href='http://www.ytj.fi/yrityshaku.aspx?path=1547%3b1631%3b1678&kielikoodi=1'>".t("täältä")."</a>.";
           }
           else {
             $t[$i] = $ytunnus;

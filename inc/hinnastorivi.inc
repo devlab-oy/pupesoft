@@ -14,7 +14,7 @@ if (mysql_field_name($result, $i) == "valkoodi") {
             FROM valuu
             WHERE yhtio = '$kukarow[yhtio]'
              ORDER BY jarjestys";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   $ulos = "<td><select name='$nimi'>";
 
@@ -63,7 +63,7 @@ if (mysql_field_name($result, $i) == "maa") {
             FROM maat
             where nimi != ''
             ORDER BY koodi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   $ulos =  "<td><select name='$nimi'>";
   $ulos .= "<option value=''>".t("Kaikki maat")."</option>";

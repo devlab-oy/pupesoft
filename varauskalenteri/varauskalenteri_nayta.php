@@ -4,7 +4,7 @@
 $query = "  select *
       from kalenteri
       where tunnus='$tunnus'";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 $row = mysql_fetch_array($result);
 
 echo "<br><table>";

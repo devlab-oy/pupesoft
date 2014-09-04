@@ -113,7 +113,7 @@ $query = "SELECT *
           FROM tilikaudet
           WHERE yhtio = '$kukarow[yhtio]'
           ORDER BY tilikausi_alku desc";
-$vresult = mysql_query($query) or pupe_error($query);
+$vresult = pupe_query($query);
 
 echo "<td><select name='tkausi' onchange='submit();'>";
 
@@ -196,7 +196,7 @@ if ($tee == "TARKISTA") {
             FROM tilikaudet
             WHERE yhtio = '$kukarow[yhtio]'
             and tunnus  = $tkausi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   if (mysql_num_rows($vresult) == 1) {
     $tilikausirow = mysql_fetch_assoc($vresult);
@@ -271,7 +271,7 @@ if ($tee == "TARKISTA") {
               AND tiliointi.tilino between '{$tilinalku}' AND '{$tilinloppu}'
               {$where}
               GROUP BY tilino {$groupby}";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     echo "  <script type='text/javascript'>
 
@@ -358,7 +358,7 @@ if ($tee == "TARKISTA") {
               WHERE tallennetut_parametrit.yhtio  = '$kukarow[yhtio]'
               and tallennetut_parametrit.sovellus = '$_SERVER[SCRIPT_NAME]'
               ORDER BY tallennetut_parametrit.nimitys";
-    $sresult = mysql_query($query) or pupe_error($query);
+    $sresult = pupe_query($query);
 
     echo "<tr><td>", t("Valitse raportti"), ":</td>";
     echo "<td><select name='kysely' onchange='document.getElementById(\"tee\").value = \"lataavanha\";submit();'>";
@@ -414,7 +414,7 @@ if ($tee == "TARKISTA") {
                    FROM kustannuspaikka
                    WHERE yhtio = '$kukarow[yhtio]'
                    AND tunnus  = '$trow[kustp]'";
-        $result2 = mysql_query($query2) or pupe_error($query2);
+        $result2 = pupe_query($query2);
         $tarkenne = mysql_fetch_assoc($result2);
 
         if ($tarkenne["nimi"] == '') {
@@ -447,7 +447,7 @@ if ($tee == "TARKISTA") {
                  FROM kustannuspaikka
                  WHERE yhtio = '{$kukarow['yhtio']}'
                  AND tunnus  = '{$kp_tunn}'";
-      $result2 = mysql_query($query2) or pupe_error($query2);
+      $result2 = pupe_query($query2);
       $tarkenne = mysql_fetch_assoc($result2);
 
       if ($tarkenne["nimi"] != '') {
@@ -526,7 +526,7 @@ if ($tee == "TARKISTA") {
                  FROM kustannuspaikka
                  WHERE yhtio = '{$kukarow['yhtio']}'
                  AND tunnus  = '{$kp_tunn}'";
-      $result2 = mysql_query($query2) or pupe_error($query2);
+      $result2 = pupe_query($query2);
       $tarkenne = mysql_fetch_assoc($result2);
 
       if ($tarkenne["nimi"] != '') {

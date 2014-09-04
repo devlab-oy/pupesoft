@@ -10,20 +10,20 @@ if ($tee == "VALMIS") {
   $query = "UPDATE sarjanumeroseuranta
             SET siirtorivitunnus = 0
             WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and siirtorivitunnus='$siirtorivitunnus'";
-  $sarjares = mysql_query($query) or pupe_error($query);
+  $sarjares = pupe_query($query);
 
 
   $query = "UPDATE tilausrivi
             SET perheid2 = 0
             WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and tunnus='$rivitunnus'";
-  $sarjares = mysql_query($query) or pupe_error($query);
+  $sarjares = pupe_query($query);
 
 
   // P‰ivitet‰‰n saldo_varattu-kentt‰‰
   $query = "SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso, tilkpl
             FROM tilausrivi
             WHERE yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and tunnus='$rivitunnus'";
-  $sarjares = mysql_query($query) or pupe_error($query);
+  $sarjares = pupe_query($query);
   $sarjarow = mysql_fetch_array($sarjares);
 
   $query = "UPDATE tuotepaikat
@@ -35,7 +35,7 @@ if ($tee == "VALMIS") {
             and hyllyvali = '$sarjarow[hyllyvali]'
             and hyllytaso = '$sarjarow[hyllytaso]'
             LIMIT 1";
-  $sarjares = mysql_query($query) or pupe_error($query);
+  $sarjares = pupe_query($query);
 
   echo t("Lis‰varuste irrotettu laitteesta")."!<br><br>";
 
@@ -63,7 +63,7 @@ if ($tee == "") {
               JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus and tilausrivi_osto.tunnus=tilausrivi_osto.perheid2
               WHERE sarjanumeroseuranta.yhtio     = '$kukarow[yhtio]'
               and sarjanumeroseuranta.sarjanumero = '$etsi'";
-    $sarjares = mysql_query($query) or pupe_error($query);
+    $sarjares = pupe_query($query);
 
     echo "<br><br><table>";
 
@@ -76,7 +76,7 @@ if ($tee == "") {
                 and tyyppi   != 'D'
                 and tunnus   != '$sarjarow[perheid2]'
                 and perheid2!= 0";
-      $sarjares1 = mysql_query($query) or pupe_error($query);
+      $sarjares1 = pupe_query($query);
 
       if (mysql_num_rows($sarjares1) > 0) {
         echo "<tr><th>$sarjarow[tuoteno]</th><th>$sarjarow[sarjanumero]</th></tr>";
@@ -143,7 +143,7 @@ $query  = "SELECT sarjanumeroseuranta.*,
            and tilausrivi_osto.laskutettuaika       != '0000-00-00'
            HAVING osto_rivitunnus = osto_perheid2
            ORDER BY sarjanumeroseuranta.kaytetty, sarjanumeroseuranta.tuoteno, sarjanumeroseuranta.myyntirivitunnus";
-$sarjares = mysql_query($query) or pupe_error($query);
+$sarjares = pupe_query($query);
 
 while ($sarjarow = mysql_fetch_array($sarjares)) {
 
@@ -155,7 +155,7 @@ while ($sarjarow = mysql_fetch_array($sarjares)) {
             and tyyppi   != 'D'
             and tunnus   != '$sarjarow[osto_perheid2]'
             and perheid2!= 0";
-  $sarjares1 = mysql_query($query) or pupe_error($query);
+  $sarjares1 = pupe_query($query);
 
   if (mysql_num_rows($sarjares1) > 0) {
     echo "<br><br><table>";
@@ -172,7 +172,7 @@ while ($sarjarow = mysql_fetch_array($sarjares)) {
                 and hyllynro  = '$sarjarow[hyllynro]'
                 and hyllyvali = '$sarjarow[hyllyvali]'
                 and hyllytaso = '$sarjarow[hyllytaso]'";
-      $rresult = mysql_query($query) or pupe_error($query);
+      $rresult = pupe_query($query);
 
       echo "</tr>";
     }

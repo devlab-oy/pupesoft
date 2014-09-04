@@ -67,7 +67,7 @@ if ($tee == "tee") {
              WHERE l.yhtio = '$kukarow[yhtio]' and l.tapvm >= '$vv-$kk-$pp' and
                  l.tapvm   <= '$vv1-$kk1-$pp1' and l.tila $valinta
              GROUP BY 1,2,3,4";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   echo "<table>";
   echo "<tr>";
   for ($i = 0; $i < mysql_num_fields($result); $i++) {

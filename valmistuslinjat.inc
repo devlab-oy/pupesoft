@@ -710,7 +710,7 @@ function jaa_valmistus($tunnus, $params) {
         }
 
         // Kopioidun laskun tunnus talteen
-        $copy['tunnus'] = mysql_insert_id();
+        $copy['tunnus'] = mysql_insert_id($GLOBALS["masterlink"]);
       }
 
       // Kopioidaan valmiste

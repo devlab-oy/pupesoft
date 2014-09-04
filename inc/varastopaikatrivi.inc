@@ -234,7 +234,7 @@ if (mysql_field_name($result, $i) == "projekti" or mysql_field_name($result, $i)
             and tyyppi    = '$kptyyppi'
             and kaytossa != 'E'
             ORDER BY koodi+0, koodi, nimi";
-  $vresult = mysql_query($tpque) or pupe_error($tpque);
+  $vresult = pupe_query($tpque);
 
   $sel="";
   if ($trow[$i] == "") {

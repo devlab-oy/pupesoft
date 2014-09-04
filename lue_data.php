@@ -2138,7 +2138,7 @@ if ($kasitellaan_tiedosto) {
             if (stripos($yhtiorow["synkronoi"], $table_mysql) !== FALSE) {
               if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA') {
                 $syncrow = array();
-                $tunnus  = mysql_insert_id();
+                $tunnus  = mysql_insert_id($GLOBALS["masterlink"]);
               }
               else {
                 $syncrow = mysql_fetch_array($syncres);

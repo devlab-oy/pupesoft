@@ -129,7 +129,7 @@ if ($tee == "valmis") {
               $insert_query = substr($insert_query, 0, -1);
               $insert_res = pupe_query($insert_query);
 
-              $tilausrivirow['tunnus'] = mysql_insert_id();
+              $tilausrivirow['tunnus'] = mysql_insert_id($GLOBALS["masterlink"]);
             }
 
             unset($result);
@@ -220,7 +220,7 @@ if ($tee == "valmis") {
                         values ('".$t1[$tilausrivirow["tunnus"]]."','".$t2[$tilausrivirow["tunnus"]]."','".$t3[$tilausrivirow["tunnus"]]."','".$t4[$tilausrivirow["tunnus"]]."','$oletus','0',now(),'$tilausrivirow[tuoteno]','$kukarow[yhtio]','$kukarow[kuka]',now())";
                   $insre = pupe_query($query);
 
-                  $uusipaikka = mysql_insert_id();
+                  $uusipaikka = mysql_insert_id($GLOBALS["masterlink"]);
 
                   $query = "SELECT tuoteno, hyllyalue, hyllynro, hyllyvali, hyllytaso
                             from tuotepaikat

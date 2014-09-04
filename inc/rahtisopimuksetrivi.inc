@@ -14,7 +14,7 @@ if (mysql_field_name($result, $i) == "toimitustapa") {
   $query = "SELECT *
             from toimitustapa
             WHERE yhtio='$kukarow[yhtio]'";
-  $sresult = mysql_query($query) or pupe_error($query);
+  $sresult = pupe_query($query);
 
   $ulos = "<td><select name='$nimi'>";
   while ($srow = mysql_fetch_array($sresult)) {
@@ -55,7 +55,7 @@ elseif (mysql_field_name($result, $i) == "asiakas") {
     $query  = "SELECT *
                FROM asiakas
                WHERE yhtio='$kukarow[yhtio]' and tunnus='$trow[$i]'";
-    $sresult = mysql_query($query) or pupe_error($query);
+    $sresult = pupe_query($query);
     $srow = mysql_fetch_array($sresult);
     $ssize = strlen($trow[$i])+2;
 

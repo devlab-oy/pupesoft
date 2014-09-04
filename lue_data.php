@@ -201,6 +201,8 @@ elseif (isset($api_kentat) and count($api_kentat) > 0) {
   $kasitellaan_tiedosto = TRUE;
 }
 
+$muutetut_sopimusrivitunnukset = array();
+
 if ($kasitellaan_tiedosto) {
 
   $lue_data_autoid = file_exists("lue_data_autoid.php");
@@ -566,6 +568,7 @@ if ($kasitellaan_tiedosto) {
 
       // $trows sisältää kaikki taulun sarakkeet ja tyypit tietokannasta
       // $taulunotsikot[$taulu] sisältää kaikki sarakkeet saadusta tiedostosta
+
       foreach ($taulunotsikot[$taulu] as $key => $column) {
         if ($column != '') {
           if ($column == "TOIMINTO") {
@@ -1048,6 +1051,11 @@ if ($kasitellaan_tiedosto) {
 
             $valinta .= " and {$taulunotsikot[$taulu][$j]} = '$tpttrow[tunnus]' ";
           }
+        }
+        elseif ($table_mysql == 'laitteen_sopimukset' and $taulunotsikot[$taulu][$j] == 'SOPIMUSRIVIN_TUNNUS') {
+          // Otetaan talteen muutetut sopimusrivitunnukset
+          $muutetut_sopimusrivitunnukset[$taulunrivit[$taulu][$eriviindex][$j]] = $taulunrivit[$taulu][$eriviindex][$j];
+          $valinta .= " and {$taulunotsikot[$taulu][$j]} = '{$taulunrivit[$taulu][$eriviindex][$j]}' ";
         }
         else {
           $valinta .= " and {$taulunotsikot[$taulu][$j]} = '{$taulunrivit[$taulu][$eriviindex][$j]}' ";
@@ -2374,6 +2382,10 @@ if (!$cli and !isset($api_kentat)) {
       </table>
     </form>
     <br>";
+}
+// Jos on muutettu sopimusrivitunnuksia niin ajetaan sopimusrivien päivitysfunktio
+if (count($muutetut_sopimusrivitunnukset) > 0) {  
+  paivita_sopimusrivit($muutetut_sopimusrivitunnukset);
 }
 
 if (!isset($api_kentat)) require "inc/footer.inc";

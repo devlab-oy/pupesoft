@@ -41,30 +41,8 @@ elseif ($toiminto == "LINKKAA" and isset($tilausrivin_tunnus) and isset($lisaa_l
 }
 
 if ($maara_paivitetty and isset($tilausrivin_tunnus)) {
-  // Päivitetään sopimusriville oikea kappalemäärä mutta ei ikinä nollata 
-  $query = "SELECT 
-            count(*) lkm
-            FROM laitteen_sopimukset
-            WHERE sopimusrivin_tunnus = '{$tilausrivin_tunnus}'";
-  $res = pupe_query($query);
-  $laiterivi = mysql_fetch_assoc($res);
-
-  $paivitettava_kpl = $laiterivi['lkm'] > 0 ? $laiterivi['lkm'] : 1;
-  
-  // Jos tuote on asetettu avainsanalla rivikohtaiseksi niin ei päivitetä kappalemäärää
-  $query = "UPDATE tilausrivi
-            SET 
-            tilkpl = '{$paivitettava_kpl}',
-            varattu = '{$paivitettava_kpl}'
-            WHERE tunnus = '{$tilausrivin_tunnus}'
-            AND yhtio = '{$kukarow['yhtio']}'
-            AND NOT EXISTS (SELECT * 
-              FROM tuotteen_avainsanat 
-              WHERE yhtio = '{$kukarow['yhtio']}' 
-              AND tuoteno = tilausrivi.tuoteno 
-              AND laji = 'laatuluokka' 
-              AND selitetark = 'rivikohtainen')";
-  pupe_query($query);
+  $paivita_params = array(0 => $tilausrivin_tunnus);
+  paivita_sopimusrivit($paivita_params);
 }
 
 if (isset($tallennetaan_muutokset) and isset($muokattava_laite) and $muokattava_laite > 0) {

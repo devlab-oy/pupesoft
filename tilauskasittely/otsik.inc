@@ -2759,7 +2759,7 @@ if ($tila == "" and !isset($jatka)) {
                     and kuka.extranet   = ''
                     ORDER BY sort, kuka.nimi";
           $yresult = pupe_query($query);
-                                          
+
           echo "<td>$al_row[selitetark]:</td><td><select name='$kentta'>";
           echo "<option value=''>".t("Valitse")."</option>";
 

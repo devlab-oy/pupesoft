@@ -634,26 +634,26 @@ if ($monta > 1 and $monta <= $limit) {
 
   if (($ytunnus or $asiakasnro) and $kutsuja == "otsik.inc" and $toim == "TARJOUS") {
     echo "<form method='post'>";
-    echo "<input type='hidden' name='myos_prospektit' value='TRUE'>";
-    echo "<input type='hidden' name='tee'         value='$tee'>";
-    echo "<input type='hidden' name='konserni'      value='$konserni'>";
-    echo "<input type='hidden' name='toim'         value='$toim'>";
+    echo "<input type='hidden' name='myos_prospektit'  value='TRUE'>";
+    echo "<input type='hidden' name='tee'              value='$tee'>";
+    echo "<input type='hidden' name='konserni'         value='$konserni'>";
+    echo "<input type='hidden' name='toim'             value='$toim'>";
     echo "<input type='hidden' name='tilausnumero'     value='$tilausnumero'>";
-    echo "<input type='hidden' name='from'           value='$from'>";
-    echo "<input type='hidden' name='tila'         value='$tila'>";
-    echo "<input type='hidden' name='muutparametrit'  value='$muutparametrit'>";
-    echo "<input type='hidden' name='ytunnus'        value='$ytunnus'>";
-    echo "<input type='hidden' name='syotetty_ytunnus'value='$ytunnus'>";
-    echo "<input type='hidden' name='asiakasnro'      value='$asiakasnro'>";
-    echo "<input type='hidden' name='toimittajaid'    value='$toimittajaid'>";
-    echo "<input type='hidden' name='asiakasyhtio'    value='$asiakas[yhtio]'>";
-    echo "<input type='hidden' name='alatila'      value='$alatila'>";
-    echo "<input type='hidden' name='ylatila'        value='$ylatila'>";
-    echo "<input type='hidden' name='lopetus'       value='$lopetus'>";
-    echo "<input type='hidden' name='myyja'       value='$myyja'>";
-    echo "<input type='hidden' name='myyjanro'       value='$myyjanro'>";
-    echo "<input type='hidden' name='tuoteno'       value='$tuoteno'>";
-    echo "<input type='hidden' name='tarra_aineisto'  value='$tarra_aineisto'>";
+    echo "<input type='hidden' name='from'             value='$from'>";
+    echo "<input type='hidden' name='tila'             value='$tila'>";
+    echo "<input type='hidden' name='muutparametrit'   value='$muutparametrit'>";
+    echo "<input type='hidden' name='ytunnus'          value='$ytunnus'>";
+    echo "<input type='hidden' name='syotetty_ytunnus' value='$ytunnus'>";
+    echo "<input type='hidden' name='asiakasnro'       value='$asiakasnro'>";
+    echo "<input type='hidden' name='toimittajaid'     value='$toimittajaid'>";
+    echo "<input type='hidden' name='asiakasyhtio'     value='$asiakas[yhtio]'>";
+    echo "<input type='hidden' name='alatila'          value='$alatila'>";
+    echo "<input type='hidden' name='ylatila'          value='$ylatila'>";
+    echo "<input type='hidden' name='lopetus'          value='$lopetus'>";
+    echo "<input type='hidden' name='myyja'            value='$myyja'>";
+    echo "<input type='hidden' name='myyjanro'         value='$myyjanro'>";
+    echo "<input type='hidden' name='tuoteno'          value='$tuoteno'>";
+    echo "<input type='hidden' name='tarra_aineisto'   value='$tarra_aineisto'>";
 
     if (is_array($varastosta)) {
       foreach ($varastosta as $varatunnu) {

@@ -1594,7 +1594,7 @@ if ($tee == 'MONISTA') {
           if (count($palautus) > 0) {
             $rivirow['hinta'] = $palautus[0]["hinta"];
             $rivirow['kommentti'] = trim($rivirow['kommentti']) != '' ? "{$rivirow['kommentti']} {$palautus[0]['kommentti']}" : $palautus[0]['kommentti'];
-            $rivirow['kpl'] = $palautus[0]["kpl"];
+            $rivirow['varattu'] = $palautus[0]["kpl"];
             $rivirow['ale1'] = $palautus[0]['ale'];
             for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
               $rivirow['ale'.$alepostfix] = 0;

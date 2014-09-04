@@ -2768,11 +2768,9 @@ else {
                   if ($ruksit["asiakasosasto"] != '' and $ruksit["asiakasryhma"] != '') {
                     // Nollataan asiakasosasto sek‰ asiakaryhm‰valinnat
                     unset($serialisoitavat_muuttujat["mul_asiakasosasto"]);
-                    unset($serialisoitavat_muuttujat["mul_asiakasryhma"]);
 
                     // Nollataan asiakasryhm‰ruksi sek‰ tuotettainruksi
                     $serialisoitavat_muuttujat["ruksit"]["asiakasryhma"] = "";
-                    $serialisoitavat_muuttujat["ruksit"][30] = "";
                   }
                   else {
                     // jos asiakasosostoittain ja asiakasryhmitt‰in ei ole chekattu, osastoa klikkaamalla menn‰‰n eteenp‰in
@@ -2806,14 +2804,16 @@ else {
                   $serialisoitavat_muuttujat = $kaikki_muuttujat_array;
 
                   // jos asiakasosastot, asiakasryhm‰t ja tuottetain on valittu, menn‰‰n taaksep‰in
-                  if ($ruksit[10] != '' and $ruksit[20] != '' and $ruksit[80] != '') {
+                  if ($ruksit["asiakasosasto"] != '' and $ruksit["asiakasryhma"] != '' and $ruksit[80] != '') {
                     unset($serialisoitavat_muuttujat["mul_asiakasryhma"]);
                     $serialisoitavat_muuttujat["ruksit"][80] = "";
                   }
                   else {
                     // jos vain asiakasosastot, asiakasryhm‰t ja tuottetain on valittu, menn‰‰n eteenp‰in
                     $serialisoitavat_muuttujat["mul_asiakasryhma"][$ken_nimi] = $row[$ken_nimi];
-                    $serialisoitavat_muuttujat["ruksit"][20] = "asiakasryhma";
+                    $serialisoitavat_muuttujat["mul_asiakasosasto"]['asiakasosasto'] = $asiakasosasto_temp;
+                    $serialisoitavat_muuttujat["ruksit"]['asiakasosasto'] = 'asiakasosasto';
+                    $serialisoitavat_muuttujat["ruksit"][20] = "asiakasnro";
                     $serialisoitavat_muuttujat["ruksit"][80] = "tuote";
                   }
 
@@ -3166,8 +3166,6 @@ else {
                   else {
                     if ($rivimaara <= $rivilimitti) {
                       if ($ken_nimi == 'asiakasosasto') {
-                        unset($serialisoitavat_muuttujat["ruksit"]["asiakasryhma"]);
-                        unset($serialisoitavat_muuttujat["mul_asiakasryhma"]);
                         if ($ruksit['asiakasosasto'] != '' and $ruksit[20] != '') {
                           $serialisoitavat_muuttujat["mul_asiakasosasto"][$ken_nimi] = '';
                           $serialisoitavat_muuttujat['ruksit'][20] = '';
@@ -3177,8 +3175,16 @@ else {
                           $serialisoitavat_muuttujat['ruksit'][20] = 'asiakasnro';
                         }
 
+                        $link_style = 'pointer-events: none;';
+                        if ($serialisoitavat_muuttujat["ruksit"]["asiakasryhma"] != '') {
+                          $link_style = '';
+                        }
+
+                        unset($serialisoitavat_muuttujat["ruksit"]["asiakasryhma"]);
+                        unset($serialisoitavat_muuttujat["mul_asiakasryhma"]);
+
                         echo "<td valign='top'>{$row[$ken_nimi]}</td>";
-                        echo "<td><a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>" . t('N‰yt‰') . "</a></td>";
+                        echo "<td><a style='{$link_style}' href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>" . t('N‰yt‰') . "</a></td>";
                       }
                       else if ($ken_nimi == 'tuoteosasto') {
                         unset($serialisoitavat_muuttujat["ruksit"]["try"]);

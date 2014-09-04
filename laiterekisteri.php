@@ -61,8 +61,8 @@ if ($maara_paivitetty and isset($tilausrivin_tunnus)) {
             AND NOT EXISTS (SELECT * 
               FROM tuotteen_avainsanat 
               WHERE yhtio = '{$kukarow['yhtio']}' 
-              AND tuoteno=tilausrivi.tuoteno 
-              AND laji ='laatuluokka' 
+              AND tuoteno = tilausrivi.tuoteno 
+              AND laji = 'laatuluokka' 
               AND selitetark = 'rivikohtainen')";
   pupe_query($query);
 }
@@ -117,7 +117,7 @@ elseif (isset($tallenna_uusi_laite) and isset($valitse_sarjanumero) and !empty($
     echo "<br><font class='error'>".t("Sarjanumero %s löytyy jo laite-taulusta", "", $uusilaite_sarjanumero)."!</font><br/>";  
   }
 }
-elseif (isset($peruuta_uusi)) {
+elseif (isset($peruuta_uusi) or isset($peruuta)) {
   unset($toiminto);
   unset($valitse_sarjanumero);
   unset($myyntirivitunnus);
@@ -396,7 +396,7 @@ else {
       echo "<td>{$rowi['tunnus']}</td>";
     }
     else {
-      echo "<td nowrap><a href='{$palvelin2}/laiterekisteri.php?toiminto=MUOKKAA&laitetunnus=$rowi[tunnus]&lopetus=$PHP_SELF'>{$rowi['tunnus']}</a></td>";  
+      echo "<td nowrap><a href='{$palvelin2}/laiterekisteri.php?toiminto=MUOKKAA&laitetunnus=$rowi[tunnus]'>{$rowi['tunnus']}</a></td>";  #&lopetus=$PHP_SELF
     }
     echo "<td>".$rowi['sopimusrivi']."</td>";
     $puuttuja = '';

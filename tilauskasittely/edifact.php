@@ -151,6 +151,7 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
         }
 
       }
+      $pakkaukset = array();
     }
 
     if (substr($value, 0, 7) == 'CPS+PKG') {
@@ -200,7 +201,7 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 
       $tuoteno = '123';
 
-      $pakkaukset[] = array(
+      $pakkaukset[$rivi] = array(
         'paino' => $paino,
         'ymparys' => $ymparys,
         'leveys' => $leveys,
@@ -209,7 +210,6 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
         );
 
       $tilaukset[$tilaus_id]['pakkaukset'] = $pakkaukset;
-
     }
   }
 
@@ -235,7 +235,7 @@ elseif($tee == 'luo') {
   $query = "SELECT *
             FROM toimi
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND nimi = '{$data['lahettaja']}'";
+            AND REPLACE(nimi, ' ', '') = '{$data['lahettaja']}'";
   $toimres = pupe_query($query);
   $toimrow = mysql_fetch_assoc($toimres);
 
@@ -251,17 +251,22 @@ elseif($tee == 'luo') {
   );
 
   $kukarow['kesken'] = 0;
+
   foreach ($data['tilaukset'] as $key => $tilaus) {
 
     $laskurow = luo_ostotilausotsikko($params);
 
-    $update_query = "UPDATE lasku
-                     SET asiakkaan_tilausnumero = '{$tilaus['tilausnro']}'
+    $kukarow['kesken'] = $laskurow['tunnus'];
+
+    $update_query = "UPDATE lasku SET
+                     asiakkaan_tilausnumero = '{$tilaus['tilausnro']}',
+                     alatila = 'A'
                      WHERE yhtio = '{$kukarow['yhtio']}'
                      AND tunnus = '{$laskurow['tunnus']}'";
     $update_result = pupe_query($update_query);
 
-    foreach ($tilaus['pakkaukset'] as $pakkaus) {
+    foreach ($tilaus['pakkaukset'] as $key => $pakkaus) {
+
       // haetaan tuotteen tiedot
       $query = "SELECT *
                 FROM tuote
@@ -314,6 +319,14 @@ elseif($tee == 'luo') {
     }
     $kukarow['kesken'] = 0;
   }
+
+
+  $ytunnus = 08274241;
+  $toimittajaid = 104;
+  require "inc/kevyt_toimittajahaku.inc";
+  // Toiminta funktioitu
+  $result = uusi_saapuminen($toimittajarow);
+
 }
 else{
 

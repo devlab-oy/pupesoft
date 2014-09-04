@@ -86,8 +86,13 @@ $result = pupe_query($query);
 
 while ($rivit = mysql_fetch_assoc($result)) {
   echo "<tr class='aktiivi'>";
-
-  echo "<td nowrap>{$rivit["tilaus"]}<br><br>{$rivit['sopimusmyyja']} <br><br> <a href='#'>".t("Rapsalinkki")."</a></td>";
+  $linkkilisa = '';
+  
+  // TODO linkki exceliin ajoon (oma ohjelma)
+  if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
+    $linkkilisa = "<br><br> <a href='#'>".t("Rapsalinkki")."</a>";
+  }
+  echo "<td nowrap>{$rivit["tilaus"]}<br><br>{$rivit['sopimusmyyja']} </td>";
   echo "<td>{$rivit["asiakkaan_tilausnumero"]}</td>";
   echo "<td>{$rivit["asiakas"]}</td>";
   echo "<td nowrap>{$rivit["tuoteno"]}</td>";
@@ -100,21 +105,26 @@ while ($rivit = mysql_fetch_assoc($result)) {
   echo "<td nowrap align='right'>".hintapyoristys($rivit["hinta"])."</td>";
   echo "<td nowrap align='right'>{$rivit["rivihinta"]}</td>";
 
-  // Haetaan sarjanumerot laiterekisteristä, jos ei löydy sieltä näytetään niinkuin ennen
-  $query = "SELECT
-            group_concat(laite.sarjanro SEPARATOR '<br>') sarjanumerot
-            FROM laitteen_sopimukset
-            JOIN laite ON laite.tunnus = laitteen_sopimukset.laitteen_tunnus
-            WHERE laitteen_sopimukset.sopimusrivin_tunnus = '{$rivit['tilausrivitunnus']}'
-            ORDER BY laite.tunnus";
-  $res = pupe_query($query);
-  $sarjanumerotrivi = mysql_fetch_assoc($res);
+  if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
+    // Haetaan sarjanumerot laiterekisteristä, jos ei löydy sieltä näytetään niinkuin ennen
+    $query = "SELECT
+              group_concat(laite.sarjanro SEPARATOR '<br>') sarjanumerot
+              FROM laitteen_sopimukset
+              JOIN laite ON laite.tunnus = laitteen_sopimukset.laitteen_tunnus
+              WHERE laitteen_sopimukset.sopimusrivin_tunnus = '{$rivit['tilausrivitunnus']}'
+              ORDER BY laite.tunnus";
+    $res = pupe_query($query);
+    $sarjanumerotrivi = mysql_fetch_assoc($res);
 
-  if (empty($sarjanumerotrivi['sarjanumerot'])) {
-    echo "<td>{$rivit['sarjanumero']}</td>";
+    if (empty($sarjanumerotrivi['sarjanumerot'])) {
+      echo "<td>{$rivit['sarjanumero']}</td>";
+    }
+    else {
+      echo "<td>{$sarjanumerotrivi['sarjanumerot']}</td>";
+    }
   }
   else {
-    echo "<td>{$sarjanumerotrivi['sarjanumerot']}</td>";
+    echo "<td>{$rivit['sarjanumero']}</td>";
   }
 
   echo "<td>{$rivit['vasteaika']}</td>";

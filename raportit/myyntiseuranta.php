@@ -94,6 +94,7 @@ else {
     echo "<br>\n\n\n";
     echo "<form method='post'>";
     echo "<input type='hidden' name='tee' value='go'>";
+    echo "<input type='hidden' name='kaikki_parametrit_serialisoituna' value=''>";
 
     // tässä on tämä "perusnäkymä" mikä tulisi olla kaikissa myynnin raportoinneissa..
 

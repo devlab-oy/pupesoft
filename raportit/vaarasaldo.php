@@ -17,6 +17,7 @@ if (!isset($nayta)) $nayta = '';
 if (!isset($tee)) $tee = '';
 if (!isset($rivityyppi)) $rivityyppi = '';
 if (!isset($varasto)) $varasto = 0;
+if (!isset($rivien_aika)) $rivien_aika = '';
 
 echo "<font class='head'>", t("Ker‰yspoikkeamat"), ":</font><hr>";
 
@@ -25,6 +26,10 @@ if ($tee != '') {
   if ($rivien_aika == 'laskutettuaika') {
     $aikalisa = " and tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}'
                and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}'";
+  }
+  elseif ($rivien_aika == 'toimitettuaika') {
+    $aikalisa = " and tilausrivi.toimitettuaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+               and tilausrivi.toimitettuaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'";
   }
   else {
     $aikalisa = " and tilausrivi.kerattyaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'
@@ -84,6 +89,7 @@ if ($tee != '') {
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             {$aikalisa}
             {$varastolisa}
+            {$rivityyppilisa}
             and tilausrivi.var     not in ('P','J','O','S')
             and tilausrivi.tilkpl  <> IF(
               tilausrivi.tyyppi = 'G',
@@ -188,14 +194,14 @@ echo "<option value='ei_ylijaamia'{$sel}>", t("Kaikki paitsi rivit jossa ker‰‰j‰
 echo "</select></td>";
 echo "</tr>";
 
+$sel = array($rivien_aika => 'selected') + array('toimitettuaika' => '', 'laskutettuaika' => '');
+
 echo "<tr>";
 echo "<th>", t("Hae rivit ajan mukaan"), "</th>";
 echo "<td><select name='rivien_aika'>";
 echo "<option value=''>", t("Ker‰ttyaika"), "</option>";
-
-$sel = $rivien_aika == 'laskutettuaika' ? ' selected' : '';
-
-echo "<option value='laskutettuaika'{$sel}>", t("Laskutettuaika"), "</option>";
+echo "<option value='toimitettuaika' {$sel['toimitettuaika']}>", t("Toimitettuaika"), "</option>";
+echo "<option value='laskutettuaika' {$sel['laskutettuaika']}>", t("Laskutettuaika"), " (",t("Vain myynnit"),")</option>";
 echo "</select></td>";
 echo "</tr>";
 

@@ -3782,7 +3782,7 @@ if ($tee == '') {
           $myy_sarjatunnus = $sarjarow["tunnukset"];
         }
 
-        if(true) { ##TODO parametri käytössä
+        if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
           // Nollataan myyntirivitunnus laite-taulusta
           $spessukveri = "SELECT *
                           FROM sarjanumeroseuranta
@@ -6559,7 +6559,7 @@ if ($tee == '') {
           }
         }
 
-        if ($toim == "YLLAPITO") {
+        if ($yhtiorow['laiterekisteri_kaytossa'] != '' and $toim == "YLLAPITO") {
           // Piirretään käyttöliittymään liitettyjen laitteiden sarjanumerot
           $query = "SELECT
                     group_concat(laite.sarjanro SEPARATOR '<br>') sarjanumerot
@@ -9167,7 +9167,7 @@ if ($tee == '') {
       }
     }
 
-    if ($toim == "YLLAPITO" and !isset($piirtele_laiteluettelo)) {
+    if ($yhtiorow['laiterekisteri_kaytossa'] != '' and $toim == "YLLAPITO" and !isset($piirtele_laiteluettelo)) {
       echo "  <tr>
           <td align='left' class='back' valign='top'>
           <form name='excel_laiteluettelo' method='post'>
@@ -9193,7 +9193,7 @@ if ($tee == '') {
 if ($yhtiorow['tilauksen_myyntieratiedot'] != '' and isset($naantali) and $naantali == "KIVAPAIKKA") {
   require "myyntierat_ja_tuotetiedot.inc";
 }
-elseif ($toim == "YLLAPITO" and isset($naantali) and $naantali == "EIENAA") {
+elseif ($yhtiorow['laiterekisteri_kaytossa'] != '' and $toim == "YLLAPITO" and isset($naantali) and $naantali == "EIENAA") {
   require "laiteluettelo.php";
 }
 

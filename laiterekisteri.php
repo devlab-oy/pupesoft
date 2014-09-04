@@ -51,7 +51,7 @@ if ($maara_paivitetty and isset($tilausrivin_tunnus)) {
 
   $paivitettava_kpl = $laiterivi['lkm'] > 0 ? $laiterivi['lkm'] : 1;
   
-  // Jos tuotehinta on asetettu avainsanalla rivikohtaiseksi niin ei p‰ivitet‰
+  // Jos tuote on asetettu avainsanalla rivikohtaiseksi niin ei p‰ivitet‰ kappalem‰‰r‰‰
   $query = "UPDATE tilausrivi
             SET 
             tilkpl = '{$paivitettava_kpl}',
@@ -175,20 +175,20 @@ if ($toiminto == "LINKKAA") {
   echo "<br><br>";  
   echo "<table>"; 
   echo "<tr>";
-  echo "<th>Poista</th>";  
-  echo "<th>Laitetunnus</th>";
-  echo "<th>Valmistaja</th>";
-  echo "<th>Malli</th>";
-  echo "<th>Sarjanumero</th>";
-  echo "<th>Tuotenumero</th>";
-  echo "<th>SLA</th>";
-  echo "<th>SD SLA</th>";
-  echo "<th>VC</th>";
-  echo "<th>VC End</th>";  
-  echo "<th>Kommentti</th>";
-  echo "<th>Lcm info</th>";
-  echo "<th>IP</th>";
-  echo "<th>MAC</th>";
+  echo "<th>".t("Poista")."</th>";  
+  echo "<th>".t("Laitetunnus")."</th>";
+  echo "<th>".t("Valmistaja")."</th>";
+  echo "<th>".t("Malli")."</th>";
+  echo "<th>".t("Sarjanumero")."</th>";
+  echo "<th>".t("Tuotenumero")."</th>";
+  echo "<th>".t("SLA")."</th>";
+  echo "<th>".t("SD SLA")."</th>";
+  echo "<th>".t("VC")."</th>";
+  echo "<th>".t("VC End")."</th>";  
+  echo "<th>".t("Kommentti")."</th>";
+  echo "<th>".t("Lcm info")."</th>";
+  echo "<th>".t("IP")."</th>";
+  echo "<th>".t("MAC")."</th>";
   echo "</tr>";
 
   // Linkattujen laitteiden tiedot
@@ -255,7 +255,7 @@ echo "<table class='display dataTable' id='$pupe_DataTables'>";
 echo "<thead>";
 echo "<tr>";
 foreach ($headerit as $hiid) {
-  echo "<th>{$hiid}</th>";
+  echo "<th>".t($hiid)."</th>";
 }
 echo "</tr>";
 

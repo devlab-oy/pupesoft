@@ -4180,6 +4180,19 @@ if ($fieldname == 'pura_osaluettelot') {
   $jatko = 0;
 }
 
+if ($fieldname == "laiterekisteri_kaytossa") {
+  $apu = $trow[$i];
+  $sel = array();
+  $sel[$apu] = "selected";
+
+  $ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value = ''>".t("Laiterekisteri ei ole käytössä");
+  $ulos .= "<option value = 'K' $sel[K]>".t("Laiterekisteri on käytössä");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == 'takuuvarasto') {
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 

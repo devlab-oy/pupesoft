@@ -68,7 +68,7 @@ if ($tee != '') {
             tilausrivi.tuoteno,
             tilausrivi.nimitys,
             tilausrivi.tilkpl,
-            tilausrivi.kpl,
+            IF(tilausrivi.tyyppi = 'G', tilausrivi.kpl+tilausrivi.varattu, tilausrivi.kpl) kpl,
             tilausrivi.keratty,
             concat_ws(' ',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) tuotepaikka,
             tilausrivi.nimitys,
@@ -85,7 +85,11 @@ if ($tee != '') {
             {$aikalisa}
             {$varastolisa}
             and tilausrivi.var     not in ('P','J','O','S')
-            and tilausrivi.tilkpl  <> tilausrivi.kpl
+            and tilausrivi.tilkpl  <> IF(
+              tilausrivi.tyyppi = 'G',
+              tilausrivi.kpl + tilausrivi.varattu,
+              tilausrivi.kpl
+            )
             ORDER BY sorttauskentta, tuoteno";
   $result = pupe_query($query);
 
@@ -153,7 +157,7 @@ if ($tee != '') {
       echo "<td align='right'>{$row['tilkpl']}</td>";
       echo "<td align='right'>{$row['kpl']}</td>";
       echo "<td align='right'>{$prow['varattu']}</td>";
-      echo "<td>{$prow['toimaika']}</td>";
+      echo "<td>",tv1dateconv($prow['toimaika']),"</td>";
       echo "<td align='right'>{$hyllyssa}</td>";
       echo "<td align='right'>{$saldo}</td>";
       echo "<td>{$row['keratty']}</td>";

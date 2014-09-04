@@ -27740,3 +27740,80 @@ if (!function_exists("kasittele_tiliote_viite")) {
     $kukarow = $kukarow_talteen;
   }
 }
+
+if (!function_exists("paivita_sopimusrivit")) {
+  function paivita_sopimusrivit(array $sopimusrivitunnukset = array()) {
+    global $kukarow;
+    
+    // Jos on annettu sopimusrivitunnukset p‰ivitet‰‰n vain niit‰ rivej‰, muuten p‰ivitet‰‰n kaikki
+    if (is_array($sopimusrivitunnukset) and count($sopimusrivitunnukset) > 0) {
+
+      foreach ($sopimusrivitunnukset as $muokattu_sopimusrivi) {
+        // P‰ivitet‰‰n sopimusriville oikea kappalem‰‰r‰ mutta ei ikin‰ nollata 
+        $query = "SELECT 
+                  count(*) lkm
+                  FROM laitteen_sopimukset
+                  WHERE sopimusrivin_tunnus = '{$muokattu_sopimusrivi}'";
+        $res = pupe_query($query);
+        $laiterivi = mysql_fetch_assoc($res);
+
+        $paivitettava_kpl = $laiterivi['lkm'] > 0 ? $laiterivi['lkm'] : 1;
+
+        // Jos tuote on asetettu avainsanalla rivikohtaiseksi niin ei p‰ivitet‰ kappalem‰‰r‰‰
+        $query = "UPDATE tilausrivi
+                  SET 
+                  tilkpl = '{$paivitettava_kpl}',
+                  varattu = '{$paivitettava_kpl}'
+                  WHERE tunnus = '{$muokattu_sopimusrivi}'
+                  AND yhtio = '{$kukarow['yhtio']}'
+                  AND NOT EXISTS (SELECT * 
+                    FROM tuotteen_avainsanat 
+                    WHERE yhtio = '{$kukarow['yhtio']}' 
+                    AND tuoteno = tilausrivi.tuoteno 
+                    AND laji = 'laatuluokka' 
+                    AND selitetark = 'rivikohtainen')";
+        pupe_query($query);     
+      }
+    }
+    else {
+
+      $query = "SELECT 
+                group_concat(DISTINCT sopimusrivin_tunnus) kaikki_rivitunnukset
+                FROM laitteen_sopimukset
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND sopimusrivin_tunnus != 0";
+      $kaikkiresult = pupe_query($query);
+      $kaikkirivi = mysql_fetch_assoc($kaikkiresult);
+      $kaikki_sopimusrivit = explode(",", $kaikkirivi['kaikki_rivitunnukset']);
+
+      foreach ($kaikki_sopimusrivit as $muokattu_sopimusrivi) {
+        // P‰ivitet‰‰n sopimusriville oikea kappalem‰‰r‰ mutta ei ikin‰ nollata 
+        $query = "SELECT 
+                  count(*) lkm
+                  FROM laitteen_sopimukset
+                  WHERE sopimusrivin_tunnus = '{$muokattu_sopimusrivi}'";
+        $res = pupe_query($query);
+        $laiterivi = mysql_fetch_assoc($res);
+
+        $paivitettava_kpl = $laiterivi['lkm'] > 0 ? $laiterivi['lkm'] : 1;
+
+        // Jos tuote on asetettu avainsanalla rivikohtaiseksi niin ei p‰ivitet‰ kappalem‰‰r‰‰
+        $query = "UPDATE tilausrivi
+                  SET 
+                  tilkpl = '{$paivitettava_kpl}',
+                  varattu = '{$paivitettava_kpl}'
+                  WHERE tunnus = '{$muokattu_sopimusrivi}'
+                  AND yhtio = '{$kukarow['yhtio']}'
+                  AND NOT EXISTS (SELECT * 
+                    FROM tuotteen_avainsanat 
+                    WHERE yhtio = '{$kukarow['yhtio']}' 
+                    AND tuoteno = tilausrivi.tuoteno 
+                    AND laji = 'laatuluokka' 
+                    AND selitetark = 'rivikohtainen')";
+        pupe_query($query);    
+      }
+    }
+
+    return "";
+  }
+}

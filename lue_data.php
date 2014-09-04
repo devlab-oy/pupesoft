@@ -2339,10 +2339,24 @@ if (!$cli and !isset($api_kentat)) {
   echo "<tr>";
   echo "<th>".t("Valitse tietokannan taulu").":</th>";
   echo "<td>";
-  echo "<select name='table' onchange='submit();'>";
+  echo "<select name='table' onchange='submit();'>";                
 
-  foreach ($taulut as $taulu => $nimitys) {
-    echo "<option value='$taulu' {$sel[$taulu]}>".t($nimitys)."</option>";
+  // Jos tullaan linkist‰ jossa halutaan muokata vain tietty‰ taulua
+  if (isset($taulurajaus)) {
+    $validi = $taulut[$taulurajaus];
+    // Tarkistetaan ett‰ taulu on m‰‰ritelty
+    if (!empty($validi)) {
+      echo "<option value='$taulurajaus' selected>".t("$validi")."</option>";
+    }
+    else {
+      echo "<option value='' selected>".t("Ei valintaa")."</option>"; 
+    }
+    
+  }
+  else {
+    foreach ($taulut as $taulu => $nimitys) {
+      echo "<option value='$taulu' {$sel[$taulu]}>".t($nimitys)."</option>";
+    }
   }
 
   echo "</select>";

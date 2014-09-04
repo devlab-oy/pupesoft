@@ -535,6 +535,7 @@ if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv
             JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
             LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tila != 'D'
             AND lasku.tunnus  in ({$otunnukset})
             ORDER BY lasku.tunnus";
   $desadv_laskures = pupe_query($query);

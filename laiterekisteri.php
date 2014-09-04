@@ -50,14 +50,20 @@ if ($maara_paivitetty and isset($tilausrivin_tunnus)) {
   $laiterivi = mysql_fetch_assoc($res);
 
   $paivitettava_kpl = $laiterivi['lkm'] > 0 ? $laiterivi['lkm'] : 1;
-
+  
+  // Jos tuotehinta on asetettu avainsanalla rivikohtaiseksi niin ei päivitetä
   $query = "UPDATE tilausrivi
             SET 
             tilkpl = '{$paivitettava_kpl}',
             varattu = '{$paivitettava_kpl}'
             WHERE tunnus = '{$tilausrivin_tunnus}'
             AND yhtio = '{$kukarow['yhtio']}'
-            AND netto = ''";
+            AND NOT EXISTS (SELECT * 
+              FROM tuotteen_avainsanat 
+              WHERE yhtio = '{$kukarow['yhtio']}' 
+              AND tuoteno=tilausrivi.tuoteno 
+              AND laji ='laatuluokka' 
+              AND selitetark = 'rivikohtainen')";
   pupe_query($query);
 }
 

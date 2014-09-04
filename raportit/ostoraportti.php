@@ -877,10 +877,7 @@ if (isset($RAPORTOI) and $tee == "RAPORTOI") {
               order by id, tuote.tuoteno, varastopaikka";
   }
 
-  echo "$query";
-  exit;
-
-  #$res = pupe_query($query);
+  $res = pupe_query($query);
 
   //  Oletetaan että käyttäjä ei halyua/saa ostaa poistuvia tai poistettuja tuotteita!
   if (!isset($valitut["poistetut"])) $valitut["poistetut"] = "checked";

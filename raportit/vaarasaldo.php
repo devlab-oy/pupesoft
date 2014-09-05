@@ -15,22 +15,50 @@ if (!isset($ppl)) $ppl = date("d");
 
 if (!isset($nayta)) $nayta = '';
 if (!isset($tee)) $tee = '';
-
+if (!isset($rivityyppi)) $rivityyppi = '';
 if (!isset($varasto)) $varasto = 0;
+if (!isset($rivien_aika)) $rivien_aika = '';
 
 echo "<font class='head'>", t("Ker‰yspoikkeamat"), ":</font><hr>";
 
 if ($tee != '') {
 
   if ($rivien_aika == 'laskutettuaika') {
-    $aikalisa = "  and tilausrivi.tyyppi = 'L'
-             and tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}'
+    $aikalisa = " and tilausrivi.laskutettuaika >= '{$vva}-{$kka}-{$ppa}'
                and tilausrivi.laskutettuaika <= '{$vvl}-{$kkl}-{$ppl}'";
   }
+  elseif ($rivien_aika == 'toimitettuaika') {
+    $aikalisa = " and tilausrivi.toimitettuaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+               and tilausrivi.toimitettuaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'";
+  }
   else {
-    $aikalisa = "  and tilausrivi.tyyppi in ('L','D')
-            and tilausrivi.kerattyaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'
+    $aikalisa = " and tilausrivi.kerattyaika >= '{$vva}-{$kka}-{$ppa} 00:00:00'
                and tilausrivi.kerattyaika <= '{$vvl}-{$kkl}-{$ppl} 23:59:59'";
+  }
+
+  if ($rivityyppi == 'M') {
+    if ($rivien_aika == 'laskutettuaika') {
+      $rivityyppilisa = " and tilausrivi.tyyppi = 'L' ";
+    }
+    else {
+      $rivityyppilisa = " and tilausrivi.tyyppi IN ('L','D') ";
+    }
+  }
+  elseif ($rivityyppi == 'S') {
+    if ($rivien_aika == 'laskutettuaika') {
+      $rivityyppilisa = " and tilausrivi.tyyppi = 'G' ";
+    }
+    else {
+      $rivityyppilisa = " and tilausrivi.tyyppi IN ('G','D') ";
+    }
+  }
+  else {
+    if ($rivien_aika == 'laskutettuaika') {
+      $rivityyppilisa = " and tilausrivi.tyyppi IN ('L','G') ";
+    }
+    else {
+      $rivityyppilisa = " and tilausrivi.tyyppi IN ('L','D','G') ";
+    }
   }
 
   if (!empty($varasto)) {
@@ -41,33 +69,55 @@ if ($tee != '') {
     $varastolisa = "";
   }
 
-  $query = "SELECT lasku.nimi asiakas, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilkpl, tilausrivi.kpl, tilausrivi.keratty,
+  $query = "SELECT lasku.nimi asiakas,
+            tilausrivi.tuoteno,
+            tilausrivi.nimitys,
+            tilausrivi.tilkpl,
+            IF(tilausrivi.tyyppi = 'G', tilausrivi.kpl+tilausrivi.varattu, tilausrivi.kpl) kpl,
+            tilausrivi.keratty,
             concat_ws(' ',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso) tuotepaikka,
-            tilausrivi.nimitys, tilausrivi.yksikko, tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllytaso, tilausrivi.hyllyvali,
+            tilausrivi.nimitys,
+            tilausrivi.yksikko,
+            tilausrivi.hyllyalue,
+            tilausrivi.hyllynro,
+            tilausrivi.hyllytaso,
+            tilausrivi.hyllyvali,
+            tilausrivi.tyyppi,
             concat(lpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
             FROM tilausrivi
             JOIN lasku ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus)
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             {$aikalisa}
             {$varastolisa}
+            {$rivityyppilisa}
             and tilausrivi.var     not in ('P','J','O','S')
-            and tilausrivi.tilkpl  <> tilausrivi.kpl
+            and tilausrivi.tilkpl  <> IF(
+              tilausrivi.tyyppi = 'G',
+              tilausrivi.kpl + tilausrivi.varattu,
+              tilausrivi.kpl
+            )
             ORDER BY sorttauskentta, tuoteno";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0 ) {
-    echo "<table><tr>
-        <th>".t("Varastopaikka")."</th>
-        <th>".t("Tuoteno")."</th>
-        <th>".t("Nimitys")."</th>
-        <th>".t("Asiakas")."</th>
-        <th>".t("Tilattu")."</th>
-        <th>".t("Toimitettu")."</th>
-        <th>".t("Tilauksessa")."</th>
-        <th>".t("Ensimm‰inen toimitus")."</th>
-        <th>".t("Hyllyss‰")."</th>
-        <th>".t("Saldo")."</th>
-        <th>".t("Ker‰‰j‰")."</th></tr>";
+    echo "<table><tr>";
+    echo "<th>",t("Varastopaikka"),"</th>";
+    echo "<th>",t("Tuoteno"),"</th>";
+    echo "<th>",t("Nimitys"),"</th>";
+    echo "<th>",t("Asiakas"),"</th>";
+
+    if (empty($rivityyppi)) {
+      echo "<th>",t("Rivityyppi"),"</th>";
+    }
+
+    echo "<th>",t("Tilattu"),"</th>";
+    echo "<th>",t("Toimitettu"),"</th>";
+    echo "<th>",t("Tilauksessa"),"</th>";
+    echo "<th>",t("Ensimm‰inen toimitus"),"</th>";
+    echo "<th>",t("Hyllyss‰"),"</th>";
+    echo "<th>",t("Saldo"),"</th>";
+    echo "<th>",t("Ker‰‰j‰"),"</th>";
+    echo "</tr>";
 
     while ($row = mysql_fetch_array($result)) {
 
@@ -91,18 +141,33 @@ if ($tee != '') {
       $result2 = pupe_query($query);
       $prow = mysql_fetch_array($result2);
 
-      echo "<tr>
-          <td>$row[tuotepaikka]</td>
-          <td>$row[tuoteno]</td>
-          <td>".t_tuotteen_avainsanat($row, 'nimitys')."</td>
-          <td>$row[asiakas]</td>
-          <td align='right'>{$row['tilkpl']}</td>
-          <td align='right'>{$row['kpl']}</td>
-          <td align='right'>{$prow['varattu']}</td>
-          <td>$prow[toimaika]</td>
-          <td align='right'>{$hyllyssa}</td>
-          <td align='right'>{$saldo}</td>
-          <td>$row[keratty]</td></tr>";
+      echo "<tr>";
+      echo "<td>{$row['tuotepaikka']}</td>";
+      echo "<td>{$row['tuoteno']}</td>";
+      echo "<td>",t_tuotteen_avainsanat($row, 'nimitys'),"</td>";
+      echo "<td>{$row['asiakas']}</td>";
+
+      if (empty($rivityyppi)) {
+        echo "<td>";
+
+        if ($row['tyyppi'] == 'G') {
+          echo t("Siirto");
+        }
+        else {
+          echo t("Myynti");
+        }
+
+        echo "</td>";
+      }
+
+      echo "<td align='right'>{$row['tilkpl']}</td>";
+      echo "<td align='right'>{$row['kpl']}</td>";
+      echo "<td align='right'>{$prow['varattu']}</td>";
+      echo "<td>",tv1dateconv($prow['toimaika']),"</td>";
+      echo "<td align='right'>{$hyllyssa}</td>";
+      echo "<td align='right'>{$saldo}</td>";
+      echo "<td>{$row['keratty']}</td>";
+      echo "</tr>";
     }
 
     echo "</table>";
@@ -129,14 +194,14 @@ echo "<option value='ei_ylijaamia'{$sel}>", t("Kaikki paitsi rivit jossa ker‰‰j‰
 echo "</select></td>";
 echo "</tr>";
 
+$sel = array($rivien_aika => 'selected') + array('toimitettuaika' => '', 'laskutettuaika' => '');
+
 echo "<tr>";
 echo "<th>", t("Hae rivit ajan mukaan"), "</th>";
 echo "<td><select name='rivien_aika'>";
 echo "<option value=''>", t("Ker‰ttyaika"), "</option>";
-
-$sel = $rivien_aika == 'laskutettuaika' ? ' selected' : '';
-
-echo "<option value='laskutettuaika'{$sel}>", t("Laskutettuaika"), "</option>";
+echo "<option value='toimitettuaika' {$sel['toimitettuaika']}>", t("Toimitettuaika"), "</option>";
+echo "<option value='laskutettuaika' {$sel['laskutettuaika']}>", t("Laskutettuaika"), " (",t("Vain myynnit"),")</option>";
 echo "</select></td>";
 echo "</tr>";
 
@@ -171,6 +236,19 @@ while ($_varasto = mysql_fetch_assoc($varastopaikat_result)) {
 }
 
 echo "</select></td></tr>";
+
+$sel = array($rivityyppi => 'selected') + array('M' => '', 'S' => '');
+
+echo "<tr>";
+echo "<th>",t("Rajaa rivityypill‰"),"</th>";
+echo "<td>";
+echo "<select name='rivityyppi'>";
+echo "<option value=''>",t("Myynti- ja siirtorivit"),"</option>";
+echo "<option value='M' {$sel['M']}>",t("Myyntirivit"),"</option>";
+echo "<option value='S' {$sel['S']}>",t("Siirtorivit"),"</option>";
+echo "</select>";
+echo "</td>";
+echo "</tr>";
 
 echo "<tr><th>", t("Syˆt‰ alkup‰iv‰m‰‰r‰ (pp-kk-vvvv)"), "</th>
     <td><input type='text' name='ppa' value='{$ppa}' size='3'>

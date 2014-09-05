@@ -2369,9 +2369,6 @@ if ($tee == "") {
     $monivalintalaatikot_normaali = array();
   }
 
-  $monivalintalaatikot[] = "OSASTO";
-  $monivalintalaatikot[] = "TRY";
-
   require "tilauskasittely/monivalintalaatikot.inc";
 
   echo " <input type='hidden' name='lisa' value='".urlencode(serialize($lisa))."'>

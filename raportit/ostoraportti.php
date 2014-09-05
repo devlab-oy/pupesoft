@@ -22,6 +22,11 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 
+if (!include 'Spreadsheet/Excel/Writer.php') {
+  echo "<font class='error'>".t("VIRHE: Pupe-asennuksesi ei tue Excel-kirjoitusta.")."</font><br>";
+  exit;
+}
+
 $ala_tallenna = array(
   "indexvas",
   "lisa",
@@ -590,9 +595,9 @@ if (isset($RAPORTOI) and $tee == "RAPORTOI") {
             ORDER BY yhtio, tyyppi, nimitys";
   $vtresult = pupe_query($query);
 
-  $varastot       = "";
-  $varastot2      = "";
-  $varastot_yhtiot   = "";
+  $varastot        = "";
+  $varastot2       = "";
+  $varastot_yhtiot = "";
 
   while ($vrow = mysql_fetch_array($vtresult)) {
     if ($valitut["VARASTO##$vrow[tunnus]"] == "VARASTO##".$vrow["tunnus"]) {
@@ -696,12 +701,12 @@ if (isset($RAPORTOI) and $tee == "RAPORTOI") {
   }
 
   if ($varastot != '') {
-    $varastolisa_korv = " AND varastopaikat.tunnus in ($varastot) ";
-    $varastot = " HAVING varastopaikat.tunnus in ($varastot) or varastopaikat.tunnus is null ";
+    $varastolisa_korv = " AND tuotepaikat.varasto in ($varastot) ";
+    $varastot = " AND (tuotepaikat.varasto in ($varastot) or tuotepaikat.varasto is null) ";
   }
 
   if ($varastot2 != '') {
-    $varastot2 = " HAVING varastopaikat.tunnus in ($varastot2) or varastopaikat.tunnus is null ";
+    $varastot2 = " AND (tuotepaikat.varasto in ($varastot2) or tuotepaikat.varasto is null) ";
   }
 
   if ($varastot_yhtiot != '') {
@@ -856,14 +861,11 @@ if (isset($RAPORTOI) and $tee == "RAPORTOI") {
               tuote.lyhytkuvaus,
               tuote.hinnastoon,
               concat_ws(' ',tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali,tuotepaikat.hyllytaso) varastopaikka,
-              varastopaikat.tunnus
+              tuotepaikat.varasto
               FROM tuote
               $lisaa2
               LEFT JOIN abc_aputaulu use index (yhtio_tyyppi_tuoteno) ON (abc_aputaulu.yhtio = tuote.yhtio and abc_aputaulu.tuoteno = tuote.tuoteno and abc_aputaulu.tyyppi = '$abcrajaustapa')
               JOIN tuotepaikat ON (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
-              LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-              and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-              and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0')))
               LEFT JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio and tuote.tuoteno = korvaavat.tuoteno)
               $lisa_parametri
               WHERE tuote.$yhtiot
@@ -1188,7 +1190,7 @@ if (isset($RAPORTOI) and $tee == "RAPORTOI") {
               sum(if(tyyppi = 'O', varattu, 0)) tilattu,
               sum(if(tyyppi = 'E' and var != 'O', varattu, 0)) ennakot, # toimittamattomat ennakot ilman optiorivejä
               sum(if(tyyppi in ('L','V') and var not in ('P','J','O','S'), varattu, 0)) ennpois, # saldon ennakkopoistoja
-              sum(if(tyyppi = 'L' and var in ('J','S'), jt $lisavarattu, 0)) jt
+              sum(if(tyyppi = 'L' and var = 'J', jt $lisavarattu, 0)) jt
               $varastolisa
               FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
               WHERE yhtio        = '$row[yhtio]'
@@ -1210,14 +1212,11 @@ if (isset($RAPORTOI) and $tee == "RAPORTOI") {
 
     if ($paikoittain == '' and $varastot_yhtiot != '') {
       // Kaikkien valittujen varastojen paikkojen saldo yhteensä, mukaan tulee myös aina ne saldot jotka ei kuulu mihinkään varastoalueeseen
-      $query = "SELECT sum(saldo) saldo, varastopaikat.tunnus
+      $query = "SELECT sum(saldo) saldo, tuotepaikat.varasto
                 FROM tuotepaikat
-                LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-                and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-                and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
                 WHERE tuotepaikat.$varastot_yhtiot
-                and tuotepaikat.tuoteno='$row[tuoteno]'
-                GROUP BY varastopaikat.tunnus
+                and tuotepaikat.tuoteno = '$row[tuoteno]'
+                GROUP BY tuotepaikat.varasto
                 $varastot";
       $result = pupe_query($query);
 
@@ -1230,14 +1229,11 @@ if (isset($RAPORTOI) and $tee == "RAPORTOI") {
       $saldo["saldo"] = $sumsaldo;
 
       if ($varastot2 != '') {
-        $query = "SELECT sum(saldo) saldo, varastopaikat.tunnus
+        $query = "SELECT sum(saldo) saldo, tuotepaikat.varasto
                   FROM tuotepaikat
-                  LEFT JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-                  and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-                  and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
                   WHERE tuotepaikat.$varastot_yhtiot
                   and tuotepaikat.tuoteno='$row[tuoteno]'
-                  GROUP BY varastopaikat.tunnus
+                  GROUP BY tuotepaikat.varasto
                   $varastot2";
         $result2 = pupe_query($query);
 
@@ -1616,9 +1612,6 @@ if (isset($RAPORTOI) and $tee == "RAPORTOI") {
 
                   $query = "SELECT sum(saldo) saldo
                             FROM tuotepaikat
-                            JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                            and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'))
-                            and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0')))
                             WHERE tuotepaikat.$varastot_yhtiot
                             and tuotepaikat.tuoteno in ('$korvarow[tuoteno]')
                             $varastolisa_korv";
@@ -1630,9 +1623,6 @@ if (isset($RAPORTOI) and $tee == "RAPORTOI") {
                             sum(if(tilausrivi.tyyppi in ('O','W','M'), varattu, 0)) tilattu,
                             sum(if(tilausrivi.tyyppi in ('L','V'), varattu, 0)) varattu
                             FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
-                            JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
-                            and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0'))
-                            and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper(tilausrivi.hyllyalue) ,5,'0'),lpad(upper(tilausrivi.hyllynro) ,5,'0')))
                             WHERE tilausrivi.yhtio = '$row[yhtio]'
                             and tilausrivi.tyyppi  in ('L','V','O','W','M')
                             and tilausrivi.tuoteno in ('$korvarow[tuoteno]')

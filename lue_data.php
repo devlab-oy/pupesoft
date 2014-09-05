@@ -413,7 +413,8 @@ if ($kasitellaan_tiedosto) {
   }
 
   // Korjataan spessujoini yhteensopivuus_tuote_lisatiedot/yhteensopivuus_tuote
-  if (in_array("yhteensopivuus_tuote", $taulut) and in_array("yhteensopivuus_tuote_lisatiedot", $taulut)) {
+  if ((in_array("yhteensopivuus_tuote", $taulut) or in_array("yhteensopivuus_tuote_sensori", $taulut))
+    and in_array("yhteensopivuus_tuote_lisatiedot", $taulut)) {
 
     foreach ($taulunotsikot["yhteensopivuus_tuote_lisatiedot"] as $key => $column) {
       if ($column == "TUOTENO") {
@@ -427,7 +428,12 @@ if ($kasitellaan_tiedosto) {
 
     // Tyhjennetään arvot
     foreach ($taulunrivit["yhteensopivuus_tuote_lisatiedot"] as $ind => $rivit) {
-      $taulunrivit["yhteensopivuus_tuote_lisatiedot"][$ind][$joinsarake] = "";
+      if (isset($joinsarake) and in_array("yhteensopivuus_tuote_sensori", $taulut)) {
+        array_unshift($taulunrivit['yhteensopivuus_tuote_lisatiedot'][$ind], "");
+      }
+      else {
+        $taulunrivit["yhteensopivuus_tuote_lisatiedot"][$ind][$joinsarake] = "";
+      }
     }
   }
 
@@ -834,13 +840,30 @@ if ($kasitellaan_tiedosto) {
           //ei haluta tätä tänne
         }
         elseif ($table_mysql == 'yhteensopivuus_tuote_lisatiedot' and $taulunotsikot[$taulu][$j] == "YHTEENSOPIVUUS_TUOTE_TUNNUS" and $taulunrivit[$taulu][$eriviindex][$j] == "") {
+
+          if (in_array("yhteensopivuus_tuote_sensori", $taulut)) {
+            $yhteensopivuus_taulun_nimi = "yhteensopivuus_tuote_sensori";
+          }
+          else {
+            $yhteensopivuus_taulun_nimi = "yhteensopivuus_tuote";
+          }
+
+
+          $_tyyppi = array_search("TYYPPI", $taulunotsikot[$yhteensopivuus_taulun_nimi]);
+          $_atunnus = array_search("ATUNNUS", $taulunotsikot[$yhteensopivuus_taulun_nimi]);
+          $_tuoteno = array_search("TUOTENO", $taulunotsikot[$yhteensopivuus_taulun_nimi]);
+
+          $_tyyppi = $taulunrivit[$yhteensopivuus_taulun_nimi][$eriviindex][$_tyyppi];
+          $_atunnus = $taulunrivit[$yhteensopivuus_taulun_nimi][$eriviindex][$_atunnus];
+          $_tuoteno = $taulunrivit[$yhteensopivuus_taulun_nimi][$eriviindex][$_tuoteno];
+
           // Hetaan liitostunnus yhteensopivuus_tuote-taulusta
           $apusql = "SELECT tunnus
                      FROM yhteensopivuus_tuote
                      WHERE yhtio = '$kukarow[yhtio]'
-                     and tyyppi  = '{$taulunrivit["yhteensopivuus_tuote"][$eriviindex][array_search("TYYPPI", $taulunotsikot["yhteensopivuus_tuote"])]}'
-                     and atunnus = '{$taulunrivit["yhteensopivuus_tuote"][$eriviindex][array_search("ATUNNUS", $taulunotsikot["yhteensopivuus_tuote"])]}'
-                     and tuoteno = '{$taulunrivit["yhteensopivuus_tuote"][$eriviindex][array_search("TUOTENO", $taulunotsikot["yhteensopivuus_tuote"])]}'";
+                     and tyyppi  = '{$_tyyppi}'
+                     and atunnus = '{$_atunnus}'
+                     and tuoteno = '{$_tuoteno}'";
           $apures = pupe_query($apusql);
 
           if (mysql_num_rows($apures) == 1) {
@@ -2317,6 +2340,7 @@ if (!$cli and !isset($api_kentat)) {
     $taulut['yhteensopivuus_rekisteri']        = 'Yhteensopivuus rekisterinumerot';
     $taulut['yhteensopivuus_tuote']            = 'Yhteensopivuus tuotteet';
     $taulut['yhteensopivuus_tuote_lisatiedot'] = 'Yhteensopivuus tuotteet lisätiedot';
+    $taulut['yhteensopivuus_tuote_sensori']    = 'Yhteensopivuus tuotteet sensorit';
     $taulut['rekisteritiedot_lisatiedot']      = 'Rekisteritiedot lisatiedot';
     $taulut['yhteensopivuus_valmistenumero']   = 'Yhteensopivuus valmistenumero';
   }

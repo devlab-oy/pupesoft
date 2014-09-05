@@ -7972,15 +7972,15 @@ if (!function_exists("tallenna_muisti")) {
 
     $kuka = trim($kuka) != '' ? mysql_real_escape_string($kuka) : $kukarow['kuka'];
 
-    $query = "  REPLACE INTO tallennetut_parametrit SET
-          yhtio    = '$kukarow[yhtio]',
-          kuka    = '$kuka',
-          nimitys    = '$nimitys',
-          sovellus  = '$_SERVER[SCRIPT_NAME]',
-          data    = '$data',
-          laatija    = '$kukarow[kuka]',
-          luontiaika  = now()";
-    $result = pupe_query($query);
+    $query = "REPLACE INTO tallennetut_parametrit SET
+              yhtio      = '$kukarow[yhtio]',
+              kuka       = '$kuka',
+              nimitys    = '$nimitys',
+              sovellus   = '$_SERVER[SCRIPT_NAME]',
+              data       = '$data',
+              laatija    = '$kukarow[kuka]',
+              luontiaika = now()";
+    $result = pupe_query($query, $GLOBALS["masterlink"]);
 
     return true;
   }
@@ -8036,7 +8036,7 @@ if (!function_exists("muistiin")) {
               and haku    = '$muisti'
               and kuka    = '$kukarow[kuka]'
               and nimi    = '$nimi'";
-    $result = pupe_query($query);
+    $result = pupe_query($query, $GLOBALS["masterlink"]);
 
     foreach ($muistettava as $key => $value) {
 
@@ -8063,7 +8063,7 @@ if (!function_exists("muistiin")) {
                   laatija    = '$kukarow[kuka]',
                   muokattu   = now(),
                   muokannut  = '$kukarow[kuka]'";
-        $result = pupe_query($query);
+        $result = pupe_query($query, $GLOBALS["masterlink"]);
       }
     }
 
@@ -14931,8 +14931,8 @@ if (!function_exists('piirra_vak_rivi')) {
 
     if ($ltq_til > $max_ltq_til) $max_ltq_til = $ltq_til;
 
-    $tuotepainot += round($row["tuotepaino"]);
-    $tuotepainot_yht += round($row["tuotepaino"]);
+    $tuotepainot += $row["tuotepaino"];
+    $tuotepainot_yht += $row["tuotepaino"];
 
     $return_params = array(
       'tuotepainot' => $tuotepainot,
@@ -14983,7 +14983,7 @@ if (!function_exists('piirra_vak_rivi_loppu')) {
     }
 
     if ($tyyppi == "DGD" and $tuotepainot > 0) {
-      $vakecho .= "###".round($tuotepainot);
+      $vakecho .= "###".$tuotepainot;
     }
 
     $max_ltq_til = 0;
@@ -15201,15 +15201,15 @@ if (!function_exists("palauta_vak_tiedot")) {
           if ($tyyppi == "DGD") {
 
             $vakkirakirri = "$row[kollit]###$row[kollit] x $pakkaus_en containing:###";
-            $vakkirakirri .= round($row["kilot"]);
+            $vakkirakirri .= $row["kilot"];
 
             $vakrakirtiedot[] = $vakkirakirri;
           }
           else {
-            $vakrakirtiedot[] = "$row[kollit] x $pakkaus_en (".t("Bruttopaino", $kieli)." ".round($row["kilot"])." kg) ".t("sisältäen", $kieli).":";
+            $vakrakirtiedot[] = "$row[kollit] x $pakkaus_en (".t("Bruttopaino", $kieli)." ".$row["kilot"]." kg) ".t("sisältäen", $kieli).":";
           }
 
-          $rakirkilot += round($row["kilot"]);
+          $rakirkilot += $row["kilot"];
         }
       }
     }
@@ -15317,8 +15317,8 @@ if (!function_exists("palauta_vak_tiedot")) {
       while ($row = mysql_fetch_assoc($riresult1));
 
       if ($rakirkilot > 0) {
-        $vaktuotetiedot[] = "TOTAL GROSS MASS: {$rakirkilot} kg";
-        $vaktuotetiedot[] = "TOTAL NET MASS: {$tuotepainot_yht} kg";
+        $vaktuotetiedot[] = "TOTAL GROSS MASS: " . round($rakirkilot,2) . " kg";
+        $vaktuotetiedot[] = "TOTAL NET MASS: " . round($tuotepainot_yht,2) . " kg";
       }
     }
 

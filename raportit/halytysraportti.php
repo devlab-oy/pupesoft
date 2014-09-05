@@ -151,7 +151,7 @@ if (!isset($osasto))        $osasto = "";
 if (!isset($tuoryh))        $tuoryh = "";
 if (!isset($tuotemerkki))   $tuotemerkki = "";
 if (!isset($asiakasosasto)) $asiakasosasto = "";
-if (!isset($toimipaikka))   $toimipaikka = "kaikki";
+if (!isset($toimipaikka))   $toimipaikka = "";
 
 //Voidaan tarvita jotain muuttujaa täältä
 if (isset($muutparametrit)) {
@@ -478,6 +478,9 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
   if ($valitut["poistuvat"] != '') {
     $lisaa .= " and tuote.status != 'X' ";
   }
+  if ($valitut["ehdokas"] != '') {
+    $lisaa .= " and tuote.status != 'E' ";
+  }
   if ($valitut["ei_ostoehd"] != '') {
     $lisaa .= " and tuote.ostoehdotus != 'E' ";
   }
@@ -568,12 +571,15 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
     exit;
   }
 
+  $varastowherelisa = $tuotepaikatjoinlisa = "";
+
   if ($valitut['VARASTOHUOMIO'] != '') {
     $varastowherelisa = "and tilausrivi.varasto in ({$varastot})";
-    $tuotepaikatjoinlisa = "and tuotepaikat.varasto in ({$varastot})";
+    $tuotepaikatjoinlisa = " and tuotepaikat.varasto in ({$varastot}) ";
   }
-  else {
-    $varastowherelisa = $tuotepaikatjoinlisa = "";
+
+  if ($valitut['SALDOLLISET'] != '') {
+    $tuotepaikatjoinlisa .= " and tuotepaikat.saldo != 0 ";
   }
 
   if ($abcrajaus != "") {
@@ -2090,7 +2096,7 @@ if ($tee == "" or $tee == "JATKA") {
 
   $muutparametrit = $osasto."#".$tuoryh."#".$ytunnus."#".$tuotemerkki."#".$asiakasosasto."#".$asiakasno."#";
 
-  if ($tuoryh !='' or $osasto != '' or $ytunnus != '' or $tuotemerkki != '' or $KAIKKIJT != '' or "{$toimipaikka}" == "kaikki" or $toimipaikka != 0) {
+  if ($tuoryh !='' or $osasto != '' or $ytunnus != '' or $tuotemerkki != '' or $KAIKKIJT != '' or $toimipaikka != "") {
     if ($ytunnus != '' and !isset($ylatila)) {
 
       require "../inc/kevyt_toimittajahaku.inc";
@@ -2105,7 +2111,7 @@ if ($tee == "" or $tee == "JATKA") {
     elseif (($tuoryh !='' or $osasto != '' or $tuotemerkki != '' or $KAIKKIJT != '') and "{$toimipaikka}" == "kaikki") {
       $tee = "JATKA";
     }
-    elseif ($tuoryh !='' or $osasto != '' or $tuotemerkki != '' or $KAIKKIJT != '' or $toimipaikka != 0) {
+    elseif ($tuoryh !='' or $osasto != '' or $tuotemerkki != '' or $KAIKKIJT != '' or is_numeric($toimipaikka)) {
       $tee = "JATKA";
     }
     else {
@@ -2261,7 +2267,7 @@ if ($tee == "") {
 
     $sel = "";
 
-    if ("{$toimipaikka}" != 'kaikki' and $toimipaikka == 0) {
+    if (is_numeric($toimipaikka) and $toimipaikka == 0) {
       $sel = 'selected';
     }
 
@@ -2640,6 +2646,23 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
 
   echo "<tr><th>".t("Älä näytä poistuvia tuotteita")."</th><td colspan='3'><input type='checkbox' name='valitut[poistuvat]' value='POISTUVAT' $chk></td></tr>";
 
+  //Näytetäänkö ehdokas-tuotteet
+  $query = "SELECT selitetark
+            FROM avainsana
+            WHERE yhtio    = '$kukarow[yhtio]'
+            and laji       = 'HALYRAP'
+            and selite     = '$rappari'
+            and selitetark = 'EHDOKAS'";
+  $sresult = pupe_query($query);
+  $srow = mysql_fetch_assoc($sresult);
+
+  $chk = "";
+  if (($srow["selitetark"] == "EHDOKAS" and $tee == "JATKA") or $valitut["ehdokas"] != '') {
+    $chk = "CHECKED";
+  }
+
+  echo "<tr><th>",t("Älä näytä ehdokas-tuotteita"),"</th><td colspan='3'><input type='checkbox' name='valitut[ehdokas]' value='EHDOKAS' {$chk}></td></tr>";
+
   //Näytetäänkö ostoehdottamattomat tuotteet
   $query = "SELECT selitetark
             FROM avainsana
@@ -2764,6 +2787,28 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
 
     echo "<tr><th>".t("Listaa vain 12kk sisällä perustetut tuotteet")."</th><td colspan='3'><input type='checkbox' name='valitut[VAINUUDETTUOTTEET]' value='VAINUUDETTUOTTEET' $chk></td></tr>";
   }
+
+  //Näytetäänkö ostot varastoittain
+  $query = "SELECT selitetark
+            FROM avainsana
+            WHERE yhtio    = '$kukarow[yhtio]'
+            and laji       = 'HALYRAP'
+            and selite     = '$rappari'
+            and selitetark = 'SALDOLLISET'";
+  $sresult = pupe_query($query);
+  $srow = mysql_fetch_assoc($sresult);
+
+  $chk = "";
+  if (($srow["selitetark"] == "SALDOLLISET" and $tee == "JATKA") or $valitut["SALDOLLISET"] != '') {
+    $chk = "CHECKED";
+  }
+
+  echo "<tr>";
+  echo "<th>",t("Näytä vain tuotteet joilla on saldoa"),"</th>";
+  echo "<td colspan='3'><input type='checkbox' name='valitut[SALDOLLISET]' {$chk}></td>";
+  echo "<td colspan='5' class='back'><font class='info'>",t("Raportti ajettava varastopaikoittain"),"</font></td>";
+  echo "</tr>";
+
   echo "<tr><th>".t("Päätoimittajarajaus")."</th><td colspan='3'><input type='checkbox' name='nayta_vain_ykkostoimittaja' value='JOO'/></tr></td>";
   echo "<tr><td class='back'><br></td></tr>";
 

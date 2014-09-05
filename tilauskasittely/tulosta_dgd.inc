@@ -212,8 +212,13 @@ if (!function_exists('rivi_dgd')) {
     $kala-=2;
 
     $riveja = count($vaktuotetiedot);
-    $total_netto = filter_var($vaktuotetiedot[$riveja-1], FILTER_SANITIZE_NUMBER_INT);
-    $total_brutto = filter_var($vaktuotetiedot[$riveja-2], FILTER_SANITIZE_NUMBER_INT);
+
+    $total_brutto = str_replace('TOTAL GROSS MASS: ', '', $vaktuotetiedot[$riveja-2]);
+    $total_brutto = str_replace(' kg', '', $total_brutto);
+
+    $total_netto = str_replace('TOTAL NET MASS: ', '', $vaktuotetiedot[$riveja-1]);
+    $total_netto = str_replace(' kg', '', $total_netto);
+
     $suhde = $total_netto / $total_brutto;
 
     foreach ($vaktuotetiedot as $vaktuoterivi) {
@@ -247,9 +252,9 @@ if (!function_exists('rivi_dgd')) {
       $pdf->pages[$sivu]->drawText($vaktuoterivi, mm_pt(45), mm_pt($kala), 'LATIN1');
 
       if ($vaktuotepaino != "") {
-        $bruttopaino = round($vaktuotepaino / $suhde);
-        $pdf->pages[$sivu]->drawText($bruttopaino, mm_pt(145), mm_pt($kala), 'LATIN1');
-        $pdf->pages[$sivu]->drawText($vaktuotepaino, mm_pt(167), mm_pt($kala), 'LATIN1');
+        $bruttopaino = $vaktuotepaino / $suhde;
+        $pdf->pages[$sivu]->drawText(round($bruttopaino,2), mm_pt(145), mm_pt($kala), 'LATIN1');
+        $pdf->pages[$sivu]->drawText(round($vaktuotepaino,2), mm_pt(167), mm_pt($kala), 'LATIN1');
       }
 
       $kala-=4;

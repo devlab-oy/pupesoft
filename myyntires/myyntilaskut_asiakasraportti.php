@@ -957,12 +957,10 @@ function hae_maksusuoritukset($maksurow, $linkki) {
 
       // katsotaan kyseisen laskun ensimmäisen kohdistustiedon ajankohta ja
       // otetaan vain sitä edeltävät suoritukset
-      $alku_query = "SELECT kohdistuspvm
+      $alku_query = "SELECT min(kohdistuspvm) kohdistuspvm
                      FROM suorituksen_kohdistus
                      WHERE yhtio = '{$kukarow['yhtio']}'
-                     AND laskutunnus = '{$maksurow['tunnus']}'
-                     ORDER BY tunnus ASC
-                     LIMIT 1";
+                     AND laskutunnus = '{$maksurow['tunnus']}'";
       $alku_res = pupe_query($alku_query);
       $alku = mysql_result($alku_res, 0);
 

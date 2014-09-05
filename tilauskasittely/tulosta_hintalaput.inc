@@ -23,26 +23,52 @@ function tulosta_hintalaput($tuotteet) {
   );
 
   foreach ($tuotteet as $tuote) {
-    $page = $pdf->new_page('49x30mm');
-    $nimitys = explode("\n", wordwrap($tuote['nimitys'], 22));
-    $hinta = hintapyoristys($tuote['myyntihinta']);
-    $viivakoodi = viivakoodi($tuote['tuoteno'], "code128", 120, 30, $tuote['tuoteno']);
-    $viivakoodin_asetukset = array(
-      "scale" => array(
-        "x" => 0.1,
-        "y" => 0.1
-      )
-    );
+    $montako_tulostetaan = $tuote['tarrakpl'] * $tuote['tarrakerroin'];
 
-    $pdf->draw_text(0, 27, $nimitys[0], $page, $text_normal);
-    $pdf->draw_text(0, 24, $nimitys[1], $page, $text_normal);
-    $pdf->draw_text(40, 18, $hinta, $page, $text_bold);
+    for ($i = 0; $i < $montako_tulostetaan; $i++) {
+      $page = $pdf->new_page('49x30mm');
+      $nimitys = explode("\n", wordwrap($tuote['nimitys'], 22));
+      $hinta = hintapyoristys($tuote['myyntihinta']);
+      $viivakoodi = viivakoodi($tuote['tuoteno'], "code128", 120, 30, $tuote['tuoteno']);
+      $viivakoodin_asetukset = array(
+        "scale" => array(
+          "x" => 0.1,
+          "y" => 0.1
+        )
+      );
 
-    $kuva = $pdf->jfif_embed($viivakoodi);
-    $pdf->image_place($kuva, 2, 6, $page, $viivakoodin_asetukset);
+      $pdf->draw_text(0, 27, $nimitys[0], $page, $text_normal);
+      $pdf->draw_text(0, 24, $nimitys[1], $page, $text_normal);
+      $pdf->draw_text(40, 18, $hinta, $page, $text_bold);
+
+      $kuva = $pdf->jfif_embed($viivakoodi);
+      $pdf->image_place($kuva, 2, 6, $page, $viivakoodin_asetukset);
+    }
   }
 
   $pdf_tiedosto = $pdf->generate();
 
   file_put_contents('/tmp/testing.pdf', $pdf_tiedosto);
+}
+
+function hae_tuotteet_hintalappuja_varten($otunnus, $kukarow) {
+  $query = "SELECT tuote.tuoteno,
+            tuote.myyntihinta,
+            tuote.nimitys,
+            if (tuote.tarrakpl > 0, tuote.tarrakpl, 1) AS tarrakpl,
+            if (tuote.tarrakerroin > 0, tuote.tarrakerroin, 1) AS tarrakerroin
+            FROM tilausrivi
+            INNER JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio
+              AND tilausrivi.tuoteno = tuote.tuoteno)
+            WHERE tilausrivi.uusiotunnus = '{$otunnus}'
+            AND tilausrivi.yhtio='{$kukarow['yhtio']}'";
+  $result = pupe_query($query);
+
+  $tuotteet = array();
+
+  while ($tuote = mysql_fetch_assoc($result)) {
+    array_push($tuotteet, $tuote);
+  }
+
+  return $tuotteet;
 }

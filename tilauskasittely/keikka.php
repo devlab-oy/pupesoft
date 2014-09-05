@@ -240,6 +240,14 @@ if ($toiminto == "tulosta") {
   }
 }
 
+if ($toiminto == "tulosta_hintalaput") {
+  require "tulosta_hintalaput.inc";
+
+  $tuotteet = hae_tuotteet_hintalappuja_varten($otunnus, $kukarow);
+
+  tulosta_hintalaput($tuotteet);
+}
+
 // syötetään keikan lisätietoja
 if ($toiminto == "lisatiedot") {
   require "ostotilauksen_lisatiedot.inc";
@@ -1446,6 +1454,11 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
     $nappikeikka .= "<input type='hidden' name='toiminto' value='tulosta'>";
     $nappikeikka .= "<input type='submit' value='".t("Tulosta paperit")."'>";
     $nappikeikka .= "$formloppu";
+
+    $nappikeikka .= $formalku;
+    $nappikeikka .= "<input type='hidden' name='toiminto' value='tulosta_hintalaput'/>";
+    $nappikeikka .= "<input type='submit' value='" . t("Tulosta hintalaput") . "'/>";
+    $nappikeikka .= $formloppu;
   }
 
   // jos on kohdistettuja rivejä ja lisätiedot on syötetty ja varastopaikat on ok ja on vielä jotain vietävää varastoon

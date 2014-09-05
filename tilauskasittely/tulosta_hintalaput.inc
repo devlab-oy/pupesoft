@@ -23,25 +23,25 @@ function tulosta_hintalaput($tuotteet) {
   );
 
   foreach ($tuotteet as $tuote) {
+    $nimitys = explode("\n", wordwrap($tuote['nimitys'], 22));
+    $hinta = hintapyoristys($tuote['myyntihinta']);
+    $viivakoodi = viivakoodi($tuote['tuoteno'], "code128", 120, 30, $tuote['tuoteno']);
+    $viivakoodin_asetukset = array(
+      "scale" => array(
+        "x" => 0.1,
+        "y" => 0.1
+      )
+    );
+    $kuva = $pdf->jfif_embed($viivakoodi);
+
     $montako_tulostetaan = $tuote['tarrakpl'] * $tuote['tarrakerroin'];
 
     for ($i = 0; $i < $montako_tulostetaan; $i++) {
       $page = $pdf->new_page('49x30mm');
-      $nimitys = explode("\n", wordwrap($tuote['nimitys'], 22));
-      $hinta = hintapyoristys($tuote['myyntihinta']);
-      $viivakoodi = viivakoodi($tuote['tuoteno'], "code128", 120, 30, $tuote['tuoteno']);
-      $viivakoodin_asetukset = array(
-        "scale" => array(
-          "x" => 0.1,
-          "y" => 0.1
-        )
-      );
 
       $pdf->draw_text(0, 27, $nimitys[0], $page, $text_normal);
       $pdf->draw_text(0, 24, $nimitys[1], $page, $text_normal);
       $pdf->draw_text(40, 18, $hinta, $page, $text_bold);
-
-      $kuva = $pdf->jfif_embed($viivakoodi);
       $pdf->image_place($kuva, 2, 6, $page, $viivakoodin_asetukset);
     }
   }

@@ -234,14 +234,6 @@ if ($asiakasid > 0) {
     $alehi_assegmenttirow["tunnukset"] = 0;
   }
 
-  if ($tee != "eposti") {
-    include 'inc/pupeExcel.inc';
-
-    $worksheet   = new pupeExcel();
-    $format_bold = array("bold" => TRUE);
-    $excelrivi   = 0;
-  }
-
   echo "<table><tr>";
   echo "<th valign='top'>".t("Ytunnus")."</th>";
   echo "<th valign='top'>".t("Asiakasnumero")."</th>";
@@ -648,6 +640,12 @@ if ($asiakasid > 0) {
 
     if ($asale != '' or $aletaulu != '' or $yhdistetty != "" or $tee == "eposti") {
 
+      include 'inc/pupeExcel.inc';
+
+      $worksheet   = new pupeExcel();
+      $format_bold = array("bold" => TRUE);
+      $excelrivi   = 0;
+
       $taulu  = "";
 
       if ($aletaulu != "" or $tee == "eposti") {
@@ -852,7 +850,6 @@ if ($asiakasid > 0) {
       $asale     = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&asale=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("Alennustaulukko")."</a>";
       $aletaulu   = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("Alennustaulukko")."<br>".t("osastoittain/tuoteryhmittäin")."</a>";
     }
-
 
     if ($ashin != "" or $yhdistetty != "") {
       // haetaan asiakashintoja
@@ -1073,7 +1070,6 @@ if ($asiakasid > 0) {
       echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
       echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
       echo "</table><br><br>";
-
     }
 
     if ($tee == 'eposti') {

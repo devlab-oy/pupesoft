@@ -244,8 +244,11 @@ if ($toiminto == "tulosta_hintalaput") {
   require "tulosta_hintalaput.inc";
 
   $tuotteet = hae_tuotteet_hintalappuja_varten($otunnus, $kukarow);
-
   tulosta_hintalaput($tuotteet);
+
+  echo "<font class='ok'>" . t("Hintalaput tulostettu") . "</font>";
+
+  $toiminto = "";
 }
 
 // syötetään keikan lisätietoja

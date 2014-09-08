@@ -17203,10 +17203,12 @@ if (!function_exists("tee_keraysera")) {
       lasku2.prioriteettinro + 1, lasku2.prioriteettinro
       ) AS prioriteetti,
       ";
+      $_group_by_lisa = "GROUP BY 2,3,4,5,6,7";
     }
     else {
       $prioriteettilisa1 = "lasku1.prioriteettinro as prioriteetti,";
       $prioriteettilisa2 = "lasku2.prioriteettinro as prioriteetti,";
+      $_group_by_lisa = "GROUP BY 1,2,3,4,5,6,7";
     }
 
     if ($aikarajaus != 999999999999 and $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {
@@ -17240,7 +17242,7 @@ if (!function_exists("tee_keraysera")) {
                 AND lasku1.vakisin_kerays = ''
                 AND lasku1.varasto        = '{$varasto}'
                 AND kuka.tunnus is null
-                GROUP BY 1,2,3,4,5,6,7
+                {$_group_by_lisa}
                 ORDER BY prioriteetti,erotus,h1time,liitostunnus,ohjausmerkki,lahdon_tiedot";
     }
     else {
@@ -17270,7 +17272,7 @@ if (!function_exists("tee_keraysera")) {
                 AND lasku2.vakisin_kerays != ''
                 AND lasku2.varasto         = '{$varasto}'
                 AND kuka2.tunnus is null
-                GROUP BY 1,2,3,4,5,6,7
+                {$_group_by_lisa}
                 ORDER BY prioriteetti,erotus,h1time,liitostunnus,ohjausmerkki,lahdon_tiedot";
     }
     $res = pupe_query($query);

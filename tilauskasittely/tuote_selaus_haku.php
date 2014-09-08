@@ -1,5 +1,8 @@
 <?php
 
+///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+$useslave = 1;
+
 if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
@@ -1867,6 +1870,8 @@ function tarkista_tilausrivi() {
   global $tee, $ostoskori, $tilkpl, $kukarow, $toim_kutsu, $yhtiorow, $toim, $tiltuoteno,
   $tilsarjatunnus, $verkkokauppa, $verkkokauppa_saldotsk, $myyntierahuom, $lisatty_tun;
 
+  pupemaster_start();
+
   if (($tee == 'TI' or is_numeric($ostoskori)) and isset($tilkpl)) {
 
     if (is_numeric($ostoskori)) {
@@ -2058,6 +2063,8 @@ function tarkista_tilausrivi() {
       ${'ale' . $alepostfix} = '';
     }
   }
+
+  pupemaster_stop();
 }
 
 

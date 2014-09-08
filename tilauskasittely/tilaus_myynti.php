@@ -3539,7 +3539,18 @@ if ($tee == '') {
     $numres_saatavt = mysql_num_rows($numres);
   }
 
-  if ($kukarow['extranet'] == '' and ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1') and $laskurow['liitostunnus'] > 0 and ($kaytiin_otsikolla == "NOJOO!" or $numres_saatavt == 0) and ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS" or $toim == "ENNAKKO" or $toim == "EXTENNAKKO")) {
+  $_kukaextranet = ($kukarow['extranet'] == '');
+
+  $_saako_nahda = ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1');
+  $_saako_nahda = ($_saako_nahda or $yhtiorow['luottorajan_tarkistus'] == 'K');
+
+  $_saako_nayttaa = ($kaytiin_otsikolla == "NOJOO!" or $numres_saatavt == 0);
+  $_saako_nayttaa = ($_saako_nayttaa or $yhtiorow['luottorajan_tarkistus'] == 'K');
+
+  $_asiakas = ($laskurow['liitostunnus'] > 0);
+  $_mika_toim = in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "ENNAKKO", "EXTENNAKKO"));
+
+  if ($_kukaextranet and $_saako_nahda and $_asiakas and $_saako_nayttaa and $_mika_toim) {
 
     js_popup();
 
@@ -3561,7 +3572,7 @@ if ($tee == '') {
     ob_end_clean();
     pupeslave_stop();
 
-    if (trim($retval) != "" and $kukarow['hinnat'] == 0) {
+    if (trim($retval) != "" and $kukarow['hinnat'] == 0 and $yhtiorow['luottorajan_tarkistus'] == '') {
       echo "<br>$retval";
     }
 

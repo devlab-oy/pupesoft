@@ -3797,6 +3797,18 @@ if ($fieldname == 'luottorajan_ylitys') {
   $jatko = 0;
 }
 
+if ($fieldname == 'luottorajan_tarkistus') {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? "selected" : "";
+
+  $ulos .= "<option value = ''>".t("Myyntitilauksen luottoraja tarkistetaan normaalisti tilauksen aktivoinnin ja otsikolla k‰ynnin yhteydess‰")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("Myyntitilauksen luottoraja tarkistetaan aina jokaisen muutoksen yhteydess‰ ja n‰ytet‰‰n vain luottorajavirheet")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == 'erapaivan_ylityksen_toimenpide') {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

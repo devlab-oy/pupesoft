@@ -30,7 +30,7 @@ if ($updateean != '' and $uuseankoodi != '' and $tee != '' and $toim != 'YKS') {
             SET eankoodi = '$uuseankoodi'
             WHERE yhtio = '$kukarow[yhtio]'
             and tuoteno = '$tuoteno'";
-  $resulteankoodi = mysql_query($query) or pupe_error($query);
+  $resulteankoodi = pupe_query($query);
 }
 
 $koodi = 'eankoodi';
@@ -61,7 +61,7 @@ if ($tee == 'H') {
             concat(rpad(upper(hyllyalue),  5, '0'),lpad(upper(hyllynro),  5, '0'),lpad(upper(hyllyvali),  5, '0'),lpad(upper(hyllytaso),  5, '0')) <= concat(rpad(upper('$lhyllyalue'), 5, '0'),lpad(upper('$lhyllynro'), 5, '0'),lpad(upper('$lhyllyvali'), 5, '0'),lpad(upper('$lhyllytaso'), 5, '0'))
             $lisa
             ORDER BY 1";
-    $res = mysql_query($sql) or pupe_error($sql);
+    $res = pupe_query($sql);
 
     $tuotteet = array();
 
@@ -96,7 +96,7 @@ if ($ulos != "") {
 if ($tee != 'H') {
 
   $query = "SELECT $koodi FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tuoteno = '$tuoteno'";
-  $eankoodires = mysql_query($query) or pupe_error($query);
+  $eankoodires = pupe_query($query);
   $eankoodirow = mysql_fetch_array($eankoodires);
 
   if ($eankoodirow[0] != 0 and $eankoodirow[0] != '') {
@@ -130,7 +130,7 @@ if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
               FROM kirjoittimet
               WHERE yhtio = '$kukarow[yhtio]'
               and tunnus  = '$kirjoitin'";
-    $komres = mysql_query($query) or pupe_error($query);
+    $komres = pupe_query($query);
     $komrow = mysql_fetch_array($komres);
     $komento = $komrow['komento'];
 
@@ -227,7 +227,7 @@ if (!isset($nayta_pdf)) {
             WHERE yhtio  = '$kukarow[yhtio]'
             and komento != 'email'
             order by kirjoitin";
-  $kires = mysql_query($query) or pupe_error($query);
+  $kires = pupe_query($query);
 
   while ($kirow = mysql_fetch_array($kires)) {
     if ($kirow['tunnus'] == $kirjoitin) $select = 'SELECTED';

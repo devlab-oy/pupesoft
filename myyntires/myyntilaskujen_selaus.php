@@ -36,7 +36,7 @@ $query = "SELECT COALESCE(l.laskunro,'-') laskunro, l.nimi nimi, l.nimitark nimi
 // Mikä on maksaja?
 
 
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 echo "<form action = '?tila=$tila' method='post'>";
 

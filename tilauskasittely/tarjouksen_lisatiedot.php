@@ -181,7 +181,7 @@ if ($tee == "ETSILASKU") {
     $query = "SELECT laskunro
               FROM lasku
               WHERE tunnus = '$otunnus' and lasku.yhtio = '$kukarow[yhtio]'";
-    $laresult = mysql_query($query) or pupe_error($query);
+    $laresult = pupe_query($query);
     $larow = mysql_fetch_array($laresult);
 
     if ($larow["laskunro"] > 0) {
@@ -212,7 +212,7 @@ if ($tee == "ETSILASKU") {
             and lasku.yhtio  = '$kukarow[yhtio]'
             and lasku.tila  != 'D'
             ORDER BY $jarj";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
 

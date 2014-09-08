@@ -396,7 +396,8 @@ if ($kukarow["extranet"] != '') {
   // Haetaan asiakkaan tunnuksella
   $query  = "SELECT *
              FROM asiakas
-             WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[oletus_asiakas]'";
+             WHERE yhtio = '$kukarow[yhtio]'
+             AND tunnus  = '$kukarow[oletus_asiakas]'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
@@ -1512,7 +1513,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
     if ($kukarow["tilaus_valmis"] == "2") {
       $query  = "UPDATE lasku set
                  tila        = 'N',
-                 alatila='F'
+                 alatila     = 'F'
                  where yhtio='$kukarow[yhtio]'
                  and tunnus='$kukarow[kesken]'
                  and tila    = 'N'
@@ -2490,27 +2491,20 @@ if ($tee == '') {
           </form>";
     }
 
-    if ($yhtiorow["myyntitilauksen_liitteet"] != "") {
-
-      $queryoik = "SELECT tunnus from oikeu where nimi like '%yllapito.php' and alanimi='liitetiedostot' and kuka='$kukarow[kuka]' and yhtio='$yhtiorow[yhtio]'";
-      $res = pupe_query($queryoik);
-
-      if (mysql_num_rows($res) > 0) {
-
-        if ($laskurow["tunnusnippu"] > 0) {
-          $id = $laskurow["tunnusnippu"];
-        }
-        else {
-          $id = $laskurow["tunnus"];
-        }
-
-        echo "<form method='POST' action='{$palvelin2}yllapito.php?toim=liitetiedostot&from=tilausmyynti&ohje=off&haku[7]=@lasku&haku[8]=@$id&lukitse_avaimeen=$id&lukitse_laji=lasku'>
-            <input type='hidden' name='lopetus' value='$tilmyy_lopetus//from=VALITSETOIMITUS//tyojono=$tyojono'>
-            <input type='hidden' name='toim_kutsu' value='$toim'>
-            <input type='hidden' name='tyojono' value='$tyojono'>
-            <input type='submit' value='" . t('Tilauksen liitetiedostot')."'>
-            </form>";
+    if ($yhtiorow["myyntitilauksen_liitteet"] != "" and tarkista_oikeus('yllapito.php', 'liitetiedostot')) {
+      if ($laskurow["tunnusnippu"] > 0) {
+        $id = $laskurow["tunnusnippu"];
       }
+      else {
+        $id = $laskurow["tunnus"];
+      }
+
+      echo "<form method='POST' action='{$palvelin2}yllapito.php?toim=liitetiedostot&from=tilausmyynti&ohje=off&haku[7]=@lasku&haku[8]=@$id&lukitse_avaimeen=$id&lukitse_laji=lasku'>
+          <input type='hidden' name='lopetus' value='$tilmyy_lopetus//from=VALITSETOIMITUS//tyojono=$tyojono'>
+          <input type='hidden' name='toim_kutsu' value='$toim'>
+          <input type='hidden' name='tyojono' value='$tyojono'>
+          <input type='submit' value='" . t('Tilauksen liitetiedostot')."'>
+          </form>";
     }
 
     if ($kukarow["extranet"] == "" and $saako_liitaa_laskuja_tilaukseen == "") {
@@ -2557,7 +2551,7 @@ if ($tee == '') {
       }
     }
 
-    if ($kukarow["extranet"] == "" and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T" or $yhtiorow["myynti_asiakhin_tallenna"] == "K") and in_array($toim, array("TARJOUS", "EXTTARJOUS", "PIKATILAUS", "RIVISYOTTO", "VALMISTAASIAKKAALLE", "TYOMAARAYS", "PROJEKTI"))) {
+    if ($kukarow["extranet"] == "" and tarkista_oikeus("yllapito.php", "asiakashinta", "x") and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T" or $yhtiorow["myynti_asiakhin_tallenna"] == "K") and in_array($toim, array("TARJOUS", "EXTTARJOUS", "PIKATILAUS", "RIVISYOTTO", "VALMISTAASIAKKAALLE", "TYOMAARAYS", "PROJEKTI"))) {
       echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
           <input type='hidden' name='tee' value='tuotteetasiakashinnastoon'>
           <input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -2603,15 +2597,9 @@ if ($tee == '') {
     }
 
     // JT-rivit n‰ytet‰‰n vain jos siihen on oikeus!
-    $query = "SELECT yhtio
-              FROM oikeu
-              WHERE yhtio = '$kukarow[yhtio]'
-              and kuka    = '$kukarow[kuka]'
-              and nimi    = '{$tilauskaslisa}jtselaus.php'
-              and alanimi = ''";
-    $result = pupe_query($query);
+    if (tarkista_oikeus('jtselaus.php')) {
 
-    if (mysql_num_rows($result) > 0) {
+      pupeslave_start();
 
       if ($yhtiorow["varaako_jt_saldoa"] != "") {
         $lisavarattu = " + tilausrivi.varattu";
@@ -2659,6 +2647,8 @@ if ($tee == '') {
         }
         echo "</form>";
       }
+
+      pupeslave_stop();
     }
 
     // aivan karseeta, mutta joskus pit‰‰ olla n‰in asiakasyst‰v‰llinen... toivottavasti ei h‰iritse ket‰‰n
@@ -3478,20 +3468,22 @@ if ($tee == '') {
     js_popup();
 
     // Parametrej‰ saatanat.php:lle
-    $sytunnus       = $laskurow['ytunnus'];
+    $sytunnus        = $laskurow['ytunnus'];
     $sliitostunnus   = $laskurow['liitostunnus'];
-    $eiliittymaa    = "ON";
+    $eiliittymaa     = "ON";
     $luottorajavirhe = "";
-    $jvvirhe      = "";
-    $ylivito      = 0;
-    $trattavirhe    = "";
-    $laji        = "MA";
+    $jvvirhe         = "";
+    $ylivito         = 0;
+    $trattavirhe     = "";
+    $laji            = "MA";
     $grouppaus       = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "ytunnus" : "";
 
+    pupeslave_start();
     ob_start();
     require "raportit/saatanat.php";
     $retval = ob_get_contents();
     ob_end_clean();
+    pupeslave_stop();
 
     if (trim($retval) != "" and $kukarow['hinnat'] == 0) {
       echo "<br>$retval";
@@ -4321,8 +4313,9 @@ if ($tee == '') {
       }
 
       $query  = "SELECT *
-                 from tuote
-                 where tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
+                 FROM tuote
+                 WHERE tuoteno = '$tuoteno'
+                 AND yhtio     = '$kukarow[yhtio]'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) > 0) {
@@ -4612,6 +4605,9 @@ if ($tee == '') {
   $sarakkeet++;
 
   if ($toim == "REKLAMAATIO") {
+
+    pupeslave_start();
+
     $query = "SELECT asiakas.*
               FROM asiakkaan_avainsanat
               JOIN asiakas ON (asiakas.yhtio=asiakkaan_avainsanat.yhtio and asiakas.tunnus=asiakkaan_avainsanat.liitostunnus)
@@ -4632,6 +4628,8 @@ if ($tee == '') {
 
       $toimpalautusasiakkat = substr($toimpalautusasiakkat, 0, -1);
     }
+
+    pupeslave_stop();
   }
 
   // erikoisceisi, jos halutaan PIENITUOTEKYSELY tilaustaulussa, mutta emme halua n‰ytt‰‰ niit‰ kun lis‰t‰‰n lis‰varusteita
@@ -4646,6 +4644,8 @@ if ($tee == '') {
     else {
       $tuoteno_lisa = $tuoteno;
     }
+
+    pupeslave_start();
 
     $query  = "SELECT *
                from tuote
@@ -4987,6 +4987,8 @@ if ($tee == '') {
 
       }
     }
+
+    pupeslave_stop();
   }
 
   // jos ollaan jo saatu tilausnumero aikaan listataan kaikki tilauksen rivit..
@@ -5334,7 +5336,7 @@ if ($tee == '') {
     $headerit .= "<th>".t("Tuotenumero")."</th><th>".t("M‰‰r‰")."</th><th>".t("Var")."</th>";
     $sarakkeet += 3;
 
-    if ($yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K") {
+    if ($_onko_valmistus and $yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K") {
       $headerit .= "<th>".t("Arvo")."</th><th>".t("Lukitse arvo")."</th>";
       $sarakkeet += 2;
     }
@@ -5579,7 +5581,7 @@ if ($tee == '') {
       while ($row = mysql_fetch_assoc($result)) {
         $rows[]  = $row;
 
-        if ($yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K") {
+        if ($_onko_valmistus and $yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K") {
 
           $perheid = $row['perheid'];
 
@@ -5616,7 +5618,7 @@ if ($tee == '') {
         }
       }
 
-      if ($yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K") {
+      if ($_onko_valmistus and $yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K") {
         foreach ($hinta_laskurit as $perheid => $hinta_kokoelma) {
           // Jos valmisteissa on yksikin painoarvoton, lasketaan painoarvot uusiks.
           if ($hinta_kokoelma['valmisteissa_painoarvoton']) {
@@ -6722,7 +6724,7 @@ if ($tee == '') {
           echo "</td>";
         }
 
-        if ($yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K") {
+        if ($_onko_valmistus and $yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K") {
           echo "<td $class>";
           if ($row['tyyppi'] == 'W' and count($hinta_laskurit[$row['perheid']]['valmisteet']) > 1 and $hinta_laskurit[$row['perheid']]['raakaaineiden_kehahinta_summa']>0) {
             echo '<input type="text" name="valmiste_valuutta['.$row['tunnus'].']" data-tunnus="'.$row['tunnus'].'" data-perheid="'.$row['perheid'].'" />';
@@ -8141,17 +8143,11 @@ if ($tee == '') {
             if (file_exists("tulosta_tarjous.inc") and ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI")) {
               echo "<option value='TARJOUS'>".t("Tarjous")."</option>";
 
-              $query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='' and nimi='{$tilauskaslisa}tulostakopio.php' and alanimi='TARJOUS!!!VL' LIMIT 1";
-              $tarkres = pupe_query($query);
-
-              if (mysql_num_rows($tarkres) > 0) {
+              if (tarkista_oikeus('tulostakopio.php', 'TARJOUS!!!VL')) {
                 echo "<option value='TARJOUS!!!VL'>".("Tarjous VL")."</option>";
               }
 
-              $query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='' and nimi='{$tilauskaslisa}tulostakopio.php' and alanimi='TARJOUS!!!BR' LIMIT 1";
-              $tarkres = pupe_query($query);
-
-              if (mysql_num_rows($tarkres) > 0) {
+              if (tarkista_oikeus('tulostakopio.php', 'TARJOUS!!!BR')) {
                 echo "<option value='TARJOUS!!!BR'>".t("Tarjous BR")."</option>";
               }
             }
@@ -8163,17 +8159,11 @@ if ($tee == '') {
             if (file_exists("tulosta_myyntisopimus.inc")) {
               echo "<option value='MYYNTISOPIMUS'>".t("Myyntisopimus")."</option>";
 
-              $query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='' and nimi='{$tilauskaslisa}tulostakopio.php' and alanimi='MYYNTISOPIMUS!!!VL' LIMIT 1";
-              $tarkres = pupe_query($query);
-
-              if (mysql_num_rows($tarkres) > 0) {
+              if (tarkista_oikeus('tulostakopio.php', 'MYYNTISOPIMUS!!!VL')) {
                 echo "<option value='MYYNTISOPIMUS!!!VL'>".t("Myyntisopimus VL")."</option>";
               }
 
-              $query = "SELECT tunnus from oikeu where yhtio='$kukarow[yhtio]' and kuka='' and nimi='{$tilauskaslisa}tulostakopio.php' and alanimi='MYYNTISOPIMUS!!!BR' LIMIT 1";
-              $tarkres = pupe_query($query);
-
-              if (mysql_num_rows($tarkres) > 0) {
+              if (tarkista_oikeus('tulostakopio.php', 'MYYNTISOPIMUS!!!BR')) {
                 echo "<option value='MYYNTISOPIMUS!!!BR'>".t("Myyntisopimus BR")."</option>";
               }
             }

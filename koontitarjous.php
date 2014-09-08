@@ -103,7 +103,7 @@ if ($submit and (trim($asiakasnimi) != '' or trim($asiakasytunnus) != '' or trim
             WHERE yhtio  = '{$kukarow['yhtio']}'
             and laji    != 'P'
             $wherelisa";
-  $asiakasres = mysql_query($query) or pupe_error($query);
+  $asiakasres = pupe_query($query);
 
   echo "<table>";
   echo "<tr><th>", t("Nimi"), "</th><th>", t("Ytunnus"), "</th><th>", t("Asiakasnumero"), "</th></tr>";
@@ -150,7 +150,7 @@ if ($submit and (trim($asiakasnimi) != '' or trim($asiakasytunnus) != '' or trim
               $tarjouslisa
               GROUP BY lasku.tunnus
               LIMIT 100";
-    $tarjousres = mysql_query($query) or pupe_error($query);
+    $tarjousres = pupe_query($query);
 
     if (mysql_num_rows($tarjousres) > 0) {
 

@@ -50,7 +50,7 @@ if ($ytunnus!='') {
         where yhtio='$kukarow[yhtio]' and tapvm>='$ayy-01-01'
         and liitostunnus='$asiakasid' and tila='U' and alatila='X'
         group by 1";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   // otetaan suurin myynti talteen
   $maxeur=0;

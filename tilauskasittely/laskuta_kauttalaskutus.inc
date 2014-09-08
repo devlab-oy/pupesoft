@@ -1,9 +1,9 @@
 <?php
 
-// jos ollaan saavuttamassa tuotteita varastoon, jota on ollu JT-SUPER jÃ¤lkkÃ¤rissÃ¤ tehdÃ¤Ã¤n niistÃ¤ automaattisesti tilaus joka laskutetaan
-// eli tÃ¤ppÃ¤ "suoraan laskutukseen" pÃ¤Ã¤lle tilaukselle...
+// jos ollaan saavuttamassa tuotteita varastoon, jota on ollu JT-SUPER jälkkärissä tehdään niistä automaattisesti tilaus joka laskutetaan
+// eli täppä "suoraan laskutukseen" päälle tilaukselle...
 // tarvitaan keikan tunnus muuttujassa $otunnus
-// jos $mista ei ole tyhjÃ¤ tullaan kÃ¤yttÃ¶liittymÃ¤stÃ¤, jolloin aina kutsutaan tÃ¤tÃ¤ failia eikÃ¤ haluta pilata kÃ¤yttÃ¤jÃ¤n pÃ¤ivÃ¤Ã¤ echoamalla ettÃ¤ epÃ¤onnistui
+// jos $mista ei ole tyhjä tullaan käyttöliittymästä, jolloin aina kutsutaan tätä failia eikä haluta pilata käyttäjän päivää echoamalla että epäonnistui
 
 $kaikkimeniok = "OK";
 
@@ -21,7 +21,7 @@ $asquery = "SELECT tunnus
             AND laji           != 'P'
             AND ytunnus         in ('$asiytunnus1','$asiytunnus2', '$asiytunnus3','$asiytunnus4','$osrow[maa]$asiytunnus1','$osrow[maa]$asiytunnus2', '$osrow[maa]$asiytunnus3','$osrow[maa]$asiytunnus4')
             AND toim_ovttunnus  = '{$GLOBALS["toim_asiakkaantiedot"]["toim_ovttunnus"]}'";
-$result = mysql_query($asquery) or pupe_error($asquery);
+$result = pupe_query($asquery);
 $asirow = mysql_fetch_assoc($result);
 
 $tilausnumero = 0;
@@ -34,7 +34,7 @@ if ((int) $asirow["tunnus"] > 0) {
   ob_end_clean();
 }
 
-// Jos luo_myyntitilausotsikko feilaa niin tehdÃ¤Ã¤n kÃ¤sin uusi myyntiotsikko
+// Jos luo_myyntitilausotsikko feilaa niin tehdään käsin uusi myyntiotsikko
 if ((int) $tilausnumero == 0) {
 
   $kaikkimeniok = "";
@@ -55,14 +55,14 @@ if ((int) $tilausnumero == 0) {
             alv               = '".alv_oletus()."',
             laatija           = 'verkkolas',
             luontiaika        = now()";
-  $result = mysql_query($query) or pupe_error($query);
-  $tilausnumero = mysql_insert_id();
+  $result = pupe_query($query);
+  $tilausnumero = mysql_insert_id($GLOBALS["masterlink"]);
 }
 
-// ViritetÃ¤Ã¤n kukarow kesken
+// Viritetään kukarow kesken
 $kukarow["kesken"] = $tilausnumero;
 
-// NÃ¤mÃ¤ laskut menevÃ¤t suoraan laskutukseen eikÃ¤ niitÃ¤ ketjuteta
+// Nämä laskut menevät suoraan laskutukseen eikä niitä ketjuteta
 $query = "UPDATE lasku SET
           eilahetetta = 'o',
           ketjutus    = 'o',
@@ -71,14 +71,14 @@ $query = "UPDATE lasku SET
           kohdistettu = 'K'
           WHERE yhtio = '$kukarow[yhtio]'
           and tunnus  = '$tilausnumero'";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
-//Laitetaan alkuperÃ¤inen ostolasku liitteeksi OLETETAAN ETTÃ„ SE ON FINVOISSIA...
+//Laitetaan alkuperäinen ostolasku liitteeksi OLETETAAN ETTÄ SE ON FINVOISSIA...
 $query = "SELECT ebid, nimi, summa, valkoodi
           FROM lasku
           WHERE yhtio = '$kukarow[yhtio]'
           and tunnus  = '$tunnus'";
-$kuvalaskures = mysql_query($query) or pupe_error($query);
+$kuvalaskures = pupe_query($query);
 
 if (mysql_num_rows($kuvalaskures) > 0) {
 
@@ -110,7 +110,7 @@ if (mysql_num_rows($kuvalaskures) > 0) {
               jarjestys       = '1',
               laatija         = 'verkkolas',
               luontiaika      = now()";
-    $Xresult = mysql_query($query) or pupe_error($query);
+    $Xresult = pupe_query($query);
   }
 }
 
@@ -118,7 +118,7 @@ $query = "SELECT *
           from lasku
           where yhtio = '$kukarow[yhtio]'
           and tunnus  = '$tilausnumero'";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 $laskurow = mysql_fetch_assoc($result);
 
 for ($i=0; $i<count($rtuoteno); $i++) {
@@ -127,7 +127,7 @@ for ($i=0; $i<count($rtuoteno); $i++) {
             FROM tuote
             where yhtio = '$kukarow[yhtio]'
             and tuoteno = '".$rtuoteno[$i]["tuoteno"]."'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $rivirow = mysql_fetch_assoc($result);
 
   if ($rtuoteno[$i]["saldoton"] == "") {
@@ -138,7 +138,7 @@ for ($i=0; $i<count($rtuoteno); $i++) {
                   and tuoteno  = '".$rtuoteno[$i]["tuoteno"]."'
                   and oletus  != ''
                   LIMIT 1";
-    $olpares = mysql_query($query) or pupe_error($query);
+    $olpares = pupe_query($query);
     $olparow = mysql_fetch_assoc($olpares);
   }
   else {
@@ -170,7 +170,7 @@ for ($i=0; $i<count($rtuoteno); $i++) {
     $alehinta_alv   = $rtuoteno[$i]["alv"];
 
     if ($yhtiorow["alv_kasittely"] == "") {
-      // Myyntihinnat verollisia, lisÃ¤tÃ¤Ã¤n vero
+      // Myyntihinnat verollisia, lisätään vero
       $lis_hinta = round($lis_hinta * (1+$alehinta_alv/100), 2);
     }
   }
@@ -221,14 +221,14 @@ for ($i=0; $i<count($rtuoteno); $i++) {
             perheid2        = '',
             nimitys         = '".$rtuoteno[$i]["nimitys"]."',
             jaksotettu      = ''";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 }
 
-// Laitetaan tilaus eteenpÃ¤in jos kaikki meni ok
+// Laitetaan tilaus eteenpäin jos kaikki meni ok
 if ($kaikkimeniok == "OK") {
   require "tilauskasittely/tilaus-valmis.inc";
 }
 else {
-  // Laitetaan maili, ettÃ¤ virheitÃ¤ oli, tilaus jÃ¤i kesken jne.
-  mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun kauttalaskutus epÃ¤onnistui yhtiÃ¶ssÃ¤ $yhtiorow[nimi]", "ISO-8859-1", "Q"), "Myyntitilaukselle: $tilausnumero ei lÃ¶ytynyt sopivaa asiakasta!", "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+  // Laitetaan maili, että virheitä oli, tilaus jäi kesken jne.
+  mail($yhtiorow['talhal_email'], mb_encode_mimeheader("Verkkolaskun kauttalaskutus epäonnistui yhtiössä $yhtiorow[nimi]", "ISO-8859-1", "Q"), "Myyntitilaukselle: $tilausnumero ei löytynyt sopivaa asiakasta!", "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
 }

@@ -700,7 +700,7 @@ if (mysql_field_name($result, $i) == "vak_kielto") {
             WHERE yhtio    = '{$kukarow['yhtio']}'
             AND vak_kielto = ''
             AND nouto      = ''";
-  $alt_toimitustapa_res = mysql_query($query) or pupe_error($query);
+  $alt_toimitustapa_res = pupe_query($query);
 
   while ($alt_toimitustapa_row = mysql_fetch_assoc($alt_toimitustapa_res)) {
     $ulos .= "<option value='$alt_toimitustapa_row[selite]' ".$sel[$alt_toimitustapa_row['selite']].">".t("VAK-tuotteet toimitetaan toimitustavalla")." $alt_toimitustapa_row[selite]</option>";
@@ -794,7 +794,7 @@ if (mysql_field_name($result, $i) == "sallitut_alustat") {
   $query = "SELECT *
             FROM pakkaus
             WHERE yhtio = '{$kukarow['yhtio']}'";
-  $pakkaus_result = mysql_query($query) or pupe_error($query);
+  $pakkaus_result = pupe_query($query);
 
   $ulos .= "<input type='hidden' name='{$nimi}[]' value='default' />";
 

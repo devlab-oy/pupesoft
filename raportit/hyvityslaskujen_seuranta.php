@@ -30,7 +30,7 @@ if (isset($submit)) {
             WHERE yhtio='$kukarow[yhtio]' AND tila='U' AND alatila='X' AND tapvm >= '$vva-01-01' AND tapvm <= '$vva-12-31'
             GROUP BY 2
             ORDER BY 2";
-  $laskures = mysql_query($query) or pupe_error($query);
+  $laskures = pupe_query($query);
 
   while ($laskurow = mysql_fetch_array($laskures)) {
     $lasku[] = $laskurow;
@@ -71,7 +71,7 @@ if (isset($submit)) {
             GROUP BY 2
             ORDER BY 2";
 
-  $hyvityslaskures = mysql_query($query) or pupe_error($query);
+  $hyvityslaskures = pupe_query($query);
 
   while ($hyvityslaskurow = mysql_fetch_array($hyvityslaskures)) {
     $hyvityslasku[] = $hyvityslaskurow;

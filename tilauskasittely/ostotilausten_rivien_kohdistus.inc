@@ -636,7 +636,7 @@ if ($tila == 'tee_siirto') {
 
                 $kysely = "INSERT into tilausrivi ($rfields) VALUES ($rvalues)";
                 $insres = pupe_query($kysely);
-                $insid  = mysql_insert_id();
+                $insid  = mysql_insert_id($GLOBALS["masterlink"]);
 
                 $query = "SELECT *
                           FROM tilausrivin_lisatiedot

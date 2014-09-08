@@ -443,7 +443,7 @@ if (isset($tee) and $tee == "TEE_VALMISTUKSET") {
                   tilaustyyppi  = 'W',
                   liitostunnus  = '9999999999'";
         $result = pupe_query($query);
-        $otunnus = mysql_insert_id();
+        $otunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
         $query = "SELECT *
                   FROM lasku

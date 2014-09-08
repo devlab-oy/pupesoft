@@ -484,7 +484,7 @@ if ($tee == 'G') {
                     laatija          = '$kukarow[kuka]',
                     laadittu         = now()";
           $xresult = pupe_query($query);
-          $isa = mysql_insert_id($link); // Näin löydämme tähän liittyvät alvit....
+          $isa = mysql_insert_id($GLOBALS["masterlink"]); // Näin löydämme tähän liittyvät alvit....
 
           if ($tiliointirow['vero'] != 0) {
             // Kassa-alen alv
@@ -564,7 +564,7 @@ if ($tee == 'G') {
                         laatija  = '$kukarow[kuka]',
                         laadittu = now()";
               $xresult = pupe_query($query);
-              $isa = mysql_insert_id($link);
+              $isa = mysql_insert_id($GLOBALS["masterlink"]);
 
               $totvesumma += $summa;
             }

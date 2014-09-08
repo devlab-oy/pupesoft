@@ -642,7 +642,7 @@ if ($tee == "tiliointi") {
             laatija    = '$kukarow[kuka]',
             luontiaika = now()";
   $result = pupe_query($query);
-  $laskuid = mysql_insert_id();
+  $laskuid = mysql_insert_id($GLOBALS["masterlink"]);
 
   $maksutapa       = "";
   $kassalipas     = "";

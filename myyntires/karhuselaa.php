@@ -213,7 +213,7 @@ if ((isset($tee_hae) and $tee_hae != "") or (isset($tee_kaikki) and $tee_kaikki 
                 FROM karhu_lasku
                 JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.tyyppi = '$tyyppi')
                 WHERE ltunnus = $row[ltunnus]";
-      $ka_res = mysql_query($query);
+      $ka_res = pupe_query($query);
       $karhuttu = mysql_fetch_assoc($ka_res);
 
       $query = "SELECT group_concat(karhu_lasku.ltunnus) laskutunnukset

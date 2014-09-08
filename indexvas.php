@@ -96,7 +96,7 @@ $query = "SELECT distinct sovellus
           and kuka    = '$kukarow[kuka]'
           $extralisa
           ORDER BY sovellus";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 // löytyi usea sovellus
 if (mysql_num_rows($result) > 1) {
@@ -110,7 +110,7 @@ if (mysql_num_rows($result) > 1) {
               sovellus    = '$goso'
               ORDER BY sovellus, jarjestys
               LIMIT 1";
-    $gores = mysql_query($query) or pupe_error($query);
+    $gores = pupe_query($query);
     $gorow = mysql_fetch_array($gores);
     $sovellus = $gorow["sovellus"];
   }
@@ -159,7 +159,7 @@ $query = "SELECT nimi, jarjestys
           and jarjestys2 = '0'
           and hidden     = ''
           ORDER BY jarjestys";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 while ($orow = mysql_fetch_array($result)) {
 
@@ -172,7 +172,7 @@ while ($orow = mysql_fetch_array($result)) {
             and jarjestys = '$orow[jarjestys]'
             and hidden    = ''
             ORDER BY jarjestys, jarjestys2";
-  $xresult = mysql_query($query) or pupe_error($query);
+  $xresult = pupe_query($query);
   $mrow = mysql_fetch_array($xresult);
 
   $nimitys_lukumaara = "";

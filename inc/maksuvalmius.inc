@@ -49,7 +49,7 @@ if ($aika != '') {
   $query = "SELECT konserni
             FROM yhtio
             WHERE yhtio = '$kukarow[yhtio]'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
     $trow = mysql_fetch_array($result);
@@ -62,7 +62,7 @@ if ($aika != '') {
   // Poistetaan vanhat tapahtumat
   $query = "DELETE from maksu
             WHERE (konserni='$trow[konserni]' or yhtio='$kukarow[yhtio]') and tyyppi != 'MU'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   // Lisätään uudet
   // Onko meillä konserninäkökulma??
@@ -71,7 +71,7 @@ if ($aika != '') {
               FROM yhtio
               WHERE konserni  = '$trow[konserni]'
               and konserni   != ''";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) < 2) {
       echo t("Pyysit konserninäkökulmaa, mutta yritys ei ole konsernin osa").".<br>";
@@ -95,7 +95,7 @@ if ($aika != '') {
                 FROM lasku
                 WHERE yhtio = '$yrow[yhtio]' and lasku.tila = 'U' and mapvm='0000-00-00'
                 GROUP BY 1";
-      $yresult = mysql_query($query) or pupe_error($query);
+      $yresult = pupe_query($query);
 
       while ($trow=mysql_fetch_array($yresult)) {
         $query = "INSERT into maksu values (
@@ -108,7 +108,7 @@ if ($aika != '') {
                   'Ostolaskuja',
                   '',
                   '')";
-        $xresult = mysql_query($query) or pupe_error($query);
+        $xresult = pupe_query($query);
       }
 
       //Ostoreskontra
@@ -125,7 +125,7 @@ if ($aika != '') {
                 WHERE lasku.yhtio  = '$yrow[yhtio]' and valuu.yhtio = '$yrow[yhtio]' and
                     lasku.valkoodi = valuu.nimi and lasku.tila in ($tilat)
                 GROUP BY olmapvm";
-      $yresult = mysql_query($query) or pupe_error($query);
+      $yresult = pupe_query($query);
       while ($trow=mysql_fetch_array($yresult)) {
         $query = "INSERT into maksu values (
                   '$yrow[yhtio]',
@@ -137,7 +137,7 @@ if ($aika != '') {
                   'Ostolaskuja',
                   '',
                   '')";
-        $xresult = mysql_query($query) or pupe_error($query);
+        $xresult = pupe_query($query);
       }
     }
   }
@@ -152,7 +152,7 @@ if ($aika != '') {
                 and mapvm='0000-00-00'
               GROUP BY 1";
 
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     //echo "Laskuja '". mysql_num_rows($result) . "'<br>";
 
@@ -167,7 +167,7 @@ if ($aika != '') {
                 'Ostolaskuja',
                 '',
                 '')";
-      $xresult = mysql_query($query) or pupe_error($query);
+      $xresult = pupe_query($query);
     }
 
     //Ostoreskontra
@@ -186,7 +186,7 @@ if ($aika != '') {
               and lasku.valkoodi = valuu.nimi
               and lasku.tila     in ($tilat)
               GROUP BY olmapvm";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
     //echo "Laskuja '". mysql_num_rows($result) . "'<br>";
     while ($trow=mysql_fetch_array($result)) {
       $query = "INSERT into maksu values (
@@ -199,7 +199,7 @@ if ($aika != '') {
                 'Ostolaskuja',
                 '',
                 '')";
-      $xresult = mysql_query($query) or pupe_error($query);
+      $xresult = pupe_query($query);
     }
   }
 
@@ -222,7 +222,7 @@ if ($aika != '') {
             and maksettu <> 1
             GROUP BY Aika ASC
                 WITH ROLLUP";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<table><tr>";
   echo "<th>".t("Jakso")."</th>";

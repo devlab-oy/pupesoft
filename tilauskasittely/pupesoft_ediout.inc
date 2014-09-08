@@ -70,7 +70,7 @@ $query = "SELECT tilausrivi.tunnus, toim_tuoteno, ostohinta, eankoodi, tilausriv
           and varattu   > 0
           and tilausrivi.yhtio='$kukarow[yhtio]'
           ORDER BY toim_tuoteno";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 if (mysql_num_rows($result) == 0) {
   $pupesoft_ediout_ulos .= "<font class='error'>Lähetettäviä tilausrivejä ei löydy</font>";
@@ -80,7 +80,7 @@ else {
   // katotaan ollaanko valittu tilaajaksi joku muu toimipiste
   if ($laskurow["vanhatunnus"] != 0) {
     $query  = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[yhtio_toimipaikka]'";
-    $ediotr = mysql_query($query) or pupe_error($query);
+    $ediotr = pupe_query($query);
 
     if (mysql_num_rows($ediotr) == 1) {
       $edioro = mysql_fetch_array($ediotr);

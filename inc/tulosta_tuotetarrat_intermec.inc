@@ -2,7 +2,7 @@
 //Kun tullaan tänne tarvitaan $komento joka on se komento jolla tulostetaan esim. lpr -P tarrakirjoitin
 //ja tarvitaan myös $tuoteno
 $query = "select * from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
-$tarrares = mysql_query($query) or pupe_error($query);
+$tarrares = pupe_query($query);
 //tuote pitää löytyä
 if (mysql_num_rows($tarrares) == 1) {
   $tarrarow = mysql_fetch_array($tarrares);

@@ -2766,10 +2766,7 @@ else {
 
                   // jos asiakasosostoittain ja asiakasryhmittäin ruksin on chekattu, osastoa klikkaamalla palataan taaksepäin
                   if ($ruksit["asiakasosasto"] != '' and $ruksit["asiakasryhma"] != '') {
-                    // Nollataan asiakasosasto sekä asiakaryhmävalinnat
-                    unset($serialisoitavat_muuttujat["mul_asiakasosasto"]);
-
-                    // Nollataan asiakasryhmäruksi sekä tuotettainruksi
+                    // Nollataan asiakasryhmäruksi
                     $serialisoitavat_muuttujat["ruksit"]["asiakasryhma"] = "";
                   }
                   else {
@@ -2813,7 +2810,6 @@ else {
                     $serialisoitavat_muuttujat["mul_asiakasryhma"][$ken_nimi] = $row[$ken_nimi];
                     $serialisoitavat_muuttujat["mul_asiakasosasto"]['asiakasosasto'] = $asiakasosasto_temp;
                     $serialisoitavat_muuttujat["ruksit"]['asiakasosasto'] = 'asiakasosasto';
-                    $serialisoitavat_muuttujat["ruksit"][20] = "asiakasnro";
                     $serialisoitavat_muuttujat["ruksit"][80] = "tuote";
                   }
 
@@ -3175,16 +3171,14 @@ else {
                           $serialisoitavat_muuttujat['ruksit'][20] = 'asiakasnro';
                         }
 
-                        $link_style = 'pointer-events: none;';
-                        if ($serialisoitavat_muuttujat["ruksit"]["asiakasryhma"] != '') {
-                          $link_style = '';
-                        }
-
-                        unset($serialisoitavat_muuttujat["ruksit"]["asiakasryhma"]);
-                        unset($serialisoitavat_muuttujat["mul_asiakasryhma"]);
-
                         echo "<td valign='top'>{$row[$ken_nimi]}</td>";
-                        echo "<td><a style='{$link_style}' href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>" . t('Näytä') . "</a></td>";
+                        echo "<td>";
+                        if ($serialisoitavat_muuttujat["ruksit"]["asiakasryhma"] != '') {
+                          unset($serialisoitavat_muuttujat["ruksit"]["asiakasryhma"]);
+                          unset($serialisoitavat_muuttujat["mul_asiakasryhma"]);
+                          echo "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>" . t('Näytä') . "</a>";
+                        }
+                        echo "</td>";
                       }
                       else if ($ken_nimi == 'tuoteosasto') {
                         unset($serialisoitavat_muuttujat["ruksit"]["try"]);

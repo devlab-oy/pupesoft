@@ -3454,6 +3454,7 @@ if ($tee == '') {
                            $('input[name=myyjanumero]').focus();
                          } else {
                            $('#myyjanumero_error').html('');
+                           e.target.submit();
                          }
                        });
                      }";

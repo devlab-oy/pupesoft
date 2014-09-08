@@ -17195,7 +17195,7 @@ if (!function_exists("tee_keraysera")) {
       IF(
       lasku2.tila = 'G' AND
       lasku2.alatila = 'J' AND
-      round((TIME_TO_SEC(TIMEDIFF(CURTIME(), lahdot3.kerailyn_aloitusaika)) / 60) / (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, lahdot3.kerailyn_aloitusaika)) / 60) * 100, 2) < 30 AND
+      round((TIME_TO_SEC(TIMEDIFF(CURTIME(), lahdot3.kerailyn_aloitusaika)) / 60) / (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, lahdot3.kerailyn_aloitusaika)) / 60) * 100, 2) < {$_aikaraja} AND
       (
         SUM(ROUND((if(tuote2.tuoteleveys * {$mittakerroin} < 1, 1, tuote2.tuoteleveys * {$mittakerroin}) * if(tuote2.tuotekorkeus * {$mittakerroin} < 1, 1, tuote2.tuotekorkeus * {$mittakerroin}) * if(tuote2.tuotesyvyys * {$mittakerroin} < 1, 1, tuote2.tuotesyvyys * {$mittakerroin})) * if(tilausrivi2.varattu < 1, 1, round(tilausrivi2.varattu)), 4))  < {$pienimman_pak_til} OR
         SUM(ROUND(tuote2.tuotemassa * if(tilausrivi2.varattu < 1, 1, round(tilausrivi2.varattu)), 4)) < 1

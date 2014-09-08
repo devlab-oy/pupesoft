@@ -17096,7 +17096,7 @@ if (!function_exists("tee_keraysera")) {
               tunnus as keraysvyohyke,
               keraysnippujen_priorisointi,
               aikaraja,
-              (mittaraja * {$mittakerroin}) mittaraja,
+              (mittaraja * pow({$mittakerroin}, 3)) mittaraja,
               painoraja
               FROM keraysvyohyke
               WHERE yhtio = '{$kukarow['yhtio']}'

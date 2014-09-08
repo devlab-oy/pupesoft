@@ -26,7 +26,7 @@ if ($tee != '') {
             and vienti        in ('C','F','I')
             and kuljetusmuoto = '$kuljetusmuoto'
             order by laskunro";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<table><tr>
       <th>".t("Saapuminen")."</th>

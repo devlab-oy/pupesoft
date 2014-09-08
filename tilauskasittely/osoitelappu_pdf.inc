@@ -269,7 +269,7 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
               WHERE yhtio     = '$kukarow[yhtio]'
               and tunnus      = '$laskurow[yhtio_toimipaikka]'
               and lasku_logo != ''";
-    $result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
       $yhtion_toimipaikkarow = mysql_fetch_array($result);
@@ -280,7 +280,7 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
     $query = "SELECT *
               FROM yhtion_parametrit
               WHERE yhtio = '$laskurow[yhtio]'";
-    $result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
       $yhtion_parametritrow = mysql_fetch_array($result);

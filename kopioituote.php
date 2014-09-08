@@ -104,7 +104,7 @@ if ($tee == 'PERUSTA') {
       $query = substr($query, 0, -1);
       $stresult = pupe_query($query);
 
-      $tuote_id = mysql_insert_id();
+      $tuote_id = mysql_insert_id($GLOBALS["masterlink"]);
 
       //  Tämä funktio tekee myös oikeustarkistukset!
       synkronoi($kukarow["yhtio"], "tuote", $tuote_id, "", "");
@@ -154,7 +154,7 @@ if ($tee == 'PERUSTA') {
           $query .= substr($query_fields, 0, -1);
 
           $astresult = pupe_query($query);
-          $id2 = mysql_insert_id();
+          $id2 = mysql_insert_id($GLOBALS["masterlink"]);
 
           synkronoi($kukarow["yhtio"], "tuotteen_toimittajat", $id2, "", "");
         }
@@ -209,7 +209,7 @@ if ($tee == 'PERUSTA') {
 
           $puunalkio_result = pupe_query($query);
 
-          $id2 = mysql_insert_id();
+          $id2 = mysql_insert_id($GLOBALS["masterlink"]);
 
           synkronoi($kukarow["yhtio"], "puun_alkio", $id2, "", "");
         }

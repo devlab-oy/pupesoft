@@ -24,14 +24,14 @@ echo date("d.m.Y @ G:i:s")." - Varastoryhmien päivitys\n";
 $query = "DELETE FROM tuotteen_avainsanat
           WHERE yhtio = '{$kukarow['yhtio']}'
           AND laji    like 'VARASTORYHMA%'";
-$tuotteen_avainsana_res = mysql_query($query) or die("Virhe poistettaessa tuotteen avainsanoja!\n".mysql_error($query)."\n\n");
+$tuotteen_avainsana_res = pupe_query($query);
 
 $query = "SELECT *
           FROM avainsana
           WHERE yhtio     = '{$kukarow['yhtio']}'
           AND laji        = 'VARASTORYHMA'
           AND selitetark != ''";
-$avainsana_res = mysql_query($query) or die("Virhe haettaessa varastoryhma avainsanoja!\n".mysql_error($query)."\n\n");
+$avainsana_res = pupe_query($query);
 
 if (mysql_num_rows($avainsana_res) == 0) {
   echo date("d.m.Y @ G:i:s")." - Varastoryhmiä ei ole perustettu.\n";
@@ -40,7 +40,7 @@ else {
   $query = "SELECT tuote.tuoteno, ifnull((SELECT isatuoteno FROM tuoteperhe WHERE tuoteperhe.yhtio = tuote.yhtio AND tuoteperhe.isatuoteno = tuote.tuoteno AND tuoteperhe.tyyppi = 'P' LIMIT 1), '') isa
             FROM tuote
             WHERE tuote.yhtio = '$kukarow[yhtio]'";
-  $res = mysql_query($query) or die("Virhe haettaessa tuotteita!\n".mysql_error($query)."\n\n");
+  $res = pupe_query($query);
 
   echo date("d.m.Y @ G:i:s")." - Aloitetaan ".mysql_num_rows($res)." tuotteen päivitys. ($kukarow[yhtio])\n";
 
@@ -75,7 +75,7 @@ else {
                   luontiaika = now(),
                   muutospvm  = now(),
                   muuttaja   = '{$kukarow['kuka']}'";
-        $tuotteen_avainsana_res = mysql_query($query) or die("Virhe lisattaessa tuotteen avainsanoja!\n".mysql_error($query)."\n\n");
+        $tuotteen_avainsana_res = pupe_query($query);
       }
     }
   }

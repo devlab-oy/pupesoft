@@ -13,7 +13,7 @@ if (mysql_field_name($result, $i) == "toimitustapa") {
   $query = "SELECT *
             from toimitustapa
             WHERE yhtio='$kukarow[yhtio]'";
-  $sresult = mysql_query($query) or pupe_error($query);
+  $sresult = pupe_query($query);
 
   $ulos = "<td><select name='$nimi'>";
 

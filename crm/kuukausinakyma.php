@@ -11,7 +11,7 @@ js_popup();
 //N‰ytet‰‰n aina konsernikohtaisesti
 if ($yhtiorow["konserni"] != "") {
   $query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   while ($row = mysql_fetch_array($result)) {
     $konsernit .= " '".$row["yhtio"]."' ,";
@@ -124,7 +124,7 @@ $query = "SELECT distinct kuka.osasto
           and kuka.osasto   != ''
           $konsernit3
           ORDER BY kuka.osasto";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 // jos ei olla valittu osastoa ja k‰ytt‰j‰ll‰ on oma osasto valitaan se
 if ($osasto == "" and $kukarow["osasto"] != "") {
@@ -178,7 +178,7 @@ $query = "SELECT distinct if(kuka.nimi!='', kuka.nimi, kuka.kuka) nimi, kuka.kuk
           $konsernit3
           $osastolisa
           ORDER BY kuka.osasto, kuka.nimi";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 while ($row = mysql_fetch_array($result)) {
 
@@ -239,7 +239,7 @@ while ($row = mysql_fetch_array($result)) {
               (pvmalku < '$year-$mymonth-$pva 00:00:00' and pvmloppu > '$year-$mymonth-$pva 00:00:00'))
               $konsernit2
               order by pvmalku";
-    $kresult = mysql_query($query) or pupe_error($query);
+    $kresult = pupe_query($query);
 
     if (mysql_num_rows($kresult) > 0) {
       $krow = mysql_fetch_array($kresult);
@@ -336,7 +336,7 @@ if ($osasto == "" or $osasto == "varauskalenterit") {
             and oikeu.kuka = ''
             and yhtio      = '$kukarow[yhtio]'
             ORDER BY alanimi";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   while ($row = mysql_fetch_array($result)) {
 
@@ -356,7 +356,7 @@ if ($osasto == "" or $osasto == "varauskalenterit") {
                 and kalenteri.kuka     = kuka.kuka
                 $konsernit2
                 order by pvmalku";
-      $kresult = mysql_query($query) or pupe_error($query);
+      $kresult = pupe_query($query);
       $krow = mysql_fetch_array($kresult);
 
       if ($krow["nimi"] == '') {

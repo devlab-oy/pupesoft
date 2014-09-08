@@ -276,7 +276,7 @@ if ($tee == 'paikat' and $vainlistaus == '') {
             $query = "INSERT into tuotepaikat (hyllyalue, hyllynro, hyllyvali, hyllytaso, oletus, saldo, saldoaika, tuoteno, yhtio, laatija, luontiaika)
                       values ('$t1[$tun]','$t2[$tun]','$t3[$tun]','$t4[$tun]','$oletus','0',now(),'$tilausrivirow[tuoteno]','$kukarow[yhtio]','$kukarow[kuka]',now())";
             $ynsre = pupe_query($query);
-            $uusipaikka = mysql_insert_id();
+            $uusipaikka = mysql_insert_id($GLOBALS["masterlink"]);
 
             $tapahtumaquery = "INSERT into tapahtuma set
                                yhtio     = '$kukarow[yhtio]',

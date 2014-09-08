@@ -206,7 +206,7 @@ if ($tee == '') {
             WHERE yhtio = '$kukarow[yhtio]'
             AND komento not in ('email','EDI')
             ORDER BY kirjoitin";
-  $kires = mysql_query($query) or pupe_error($query);
+  $kires = pupe_query($query);
 
   while ($kirow = mysql_fetch_array($kires)) {
     echo "<option value='$kirow[komento]'>$kirow[kirjoitin]</option>";
@@ -372,7 +372,7 @@ function hae_asiakkaat($params, $laheta_sahkopostit) {
             asiakas.postitp
             {$group}
             HAVING sum(arvo) > {$params['raja']}";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   $asiakkaat = array();
   while ($row = mysql_fetch_assoc($result)) {

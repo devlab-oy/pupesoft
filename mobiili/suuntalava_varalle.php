@@ -97,7 +97,7 @@ if (isset($submit) and trim($submit) != '') {
                       FROM tilausrivi
                       WHERE yhtio = '{$kukarow['yhtio']}'
                       AND tunnus  = '{$_tun}'";
-            $chk_varattu_res = mysql_query($query);
+            $chk_varattu_res = pupe_query($query);
             $chk_varattu_row = mysql_fetch_assoc($chk_varattu_res);
 
             if ((int) ($_maara * 10000) <= (int) ($chk_varattu_row['varattu'] * 10000)) {
@@ -130,7 +130,7 @@ if (isset($submit) and trim($submit) != '') {
                         FROM tilausrivi
                         WHERE yhtio = '{$kukarow['yhtio']}'
                         AND tunnus  = '{$_tunnus}'";
-              $chk_varattu_res = mysql_query($query);
+              $chk_varattu_res = pupe_query($query);
               $chk_varattu_row = mysql_fetch_assoc($chk_varattu_res);
 
               // Tehdään insertti erotukselle
@@ -195,12 +195,13 @@ if (isset($submit) and trim($submit) != '') {
 }
 
 // Haetaan SSCC
-$sscc_query = mysql_query("  SELECT s.sscc, ss.saapuminen
-              FROM suuntalavat AS s
-              JOIN suuntalavat_saapuminen AS ss ON (ss.yhtio = s.yhtio AND ss.suuntalava = s.tunnus)
-              WHERE s.tunnus='{$alusta_tunnus}'
-              AND s.yhtio='{$kukarow['yhtio']}'");
-$sscc = mysql_fetch_assoc($sscc_query);
+$sscc_query = "SELECT s.sscc, ss.saapuminen
+               FROM suuntalavat AS s
+               JOIN suuntalavat_saapuminen AS ss ON (ss.yhtio = s.yhtio AND ss.suuntalava = s.tunnus)
+               WHERE s.tunnus='{$alusta_tunnus}'
+               AND s.yhtio='{$kukarow['yhtio']}'";
+$ssccres = pupe_query($sscc_query);
+$sscc = mysql_fetch_assoc($ssccres);
 
 $url = "alusta_tunnus={$alusta_tunnus}&liitostunnus={$liitostunnus}";
 
@@ -264,7 +265,7 @@ $query = "SELECT *
           AND tyyppi      = 'O'
           AND suuntalava  = '{$alusta_tunnus}'
           AND uusiotunnus = '{$sscc['saapuminen']}'";
-$tuotteet_res = mysql_query($query);
+$tuotteet_res = pupe_query($query);
 
 if (mysql_num_rows($tuotteet_res) > 0) {
 

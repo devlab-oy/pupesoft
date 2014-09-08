@@ -92,7 +92,7 @@ if ($Xtunnukset2 != "") {
              FROM tilausrivi
              JOIN tuote ON tuote.yhtio=tilausrivi.yhtio 
                and tuote.tuoteno=tilausrivi.tuoteno 
-               and tuote.tuotetyyppi != 'M'
+               and tuote.ei_saldoa = ''
              LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn 
                and tullinimike.kieli = '$yhtiorow[kieli]'
              WHERE tilausrivi.uusiotunnus = '$uusiotunnus'

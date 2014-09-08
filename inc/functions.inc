@@ -17097,7 +17097,8 @@ if (!function_exists("tee_keraysera")) {
               keraysnippujen_priorisointi,
               aikaraja,
               mittaraja,
-              painoraja
+              painoraja,
+              kappaleraja
               FROM keraysvyohyke
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tunnus  = '{$keraysvyohyke}'";
@@ -17170,13 +17171,15 @@ if (!function_exists("tee_keraysera")) {
 
     $_mittaraja = !empty($keraysvyohyketiedot['mittaraja']);
     $_painoraja = !empty($keraysvyohyketiedot['painoraja']);
-    $_mitta_vai_paino = ($_mittaraja OR $_painoraja);
+    $_kappaleraja = !empty($keraysvyohyketiedot['kappaleraja']);
+    $_mitta_vai_paino_kappale = ($_mittaraja OR $_painoraja OR $_kappaleraja);
 
-    if ($_priorisointi_kaytossa and $_aikaraja_kaytossa and $_mitta_vai_paino) {
+    if ($_priorisointi_kaytossa and $_aikaraja_kaytossa and $_mitta_vai_paino_kappale) {
 
       $pienimman_pak_til = $keraysvyohyketiedot['mittaraja'];
       $rivin_painoraja = $keraysvyohyketiedot['painoraja'];
       $_aikaraja = $keraysvyohyketiedot['aikaraja'];
+      $_kappaleraja = $keraysvyohyketiedot['kappaleraja'];
 
       $prioriteettilisa1 = "
       IF(
@@ -17185,7 +17188,8 @@ if (!function_exists("tee_keraysera")) {
       round((TIME_TO_SEC(TIMEDIFF(CURTIME(), lahdot3.kerailyn_aloitusaika)) / 60) / (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, lahdot3.kerailyn_aloitusaika)) / 60) * 100, 2) < {$_aikaraja} AND
       (
         SUM(ROUND((if(tuote1.tuoteleveys * {$mittakerroin} < 1, 1, tuote1.tuoteleveys * {$mittakerroin}) * if(tuote1.tuotekorkeus * {$mittakerroin} < 1, 1, tuote1.tuotekorkeus * {$mittakerroin}) * if(tuote1.tuotesyvyys * {$mittakerroin} < 1, 1, tuote1.tuotesyvyys * {$mittakerroin})) * if(tilausrivi1.varattu < 1, 1, round(tilausrivi1.varattu)), 4))  < {$pienimman_pak_til} OR
-        SUM(ROUND(tuote1.tuotemassa * if(tilausrivi1.varattu < 1, 1, round(tilausrivi1.varattu)), 4)) < {$rivin_painoraja}
+        SUM(ROUND(tuote1.tuotemassa * if(tilausrivi1.varattu < 1, 1, round(tilausrivi1.varattu)), 4)) < {$rivin_painoraja} OR
+        SUM(tilausrivi1.varattu) <= {$_kappaleraja}
       ),
       lasku1.prioriteettinro + 1, lasku1.prioriteettinro
       ) AS prioriteetti,
@@ -17198,7 +17202,8 @@ if (!function_exists("tee_keraysera")) {
       round((TIME_TO_SEC(TIMEDIFF(CURTIME(), lahdot3.kerailyn_aloitusaika)) / 60) / (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, lahdot3.kerailyn_aloitusaika)) / 60) * 100, 2) < {$_aikaraja} AND
       (
         SUM(ROUND((if(tuote2.tuoteleveys * {$mittakerroin} < 1, 1, tuote2.tuoteleveys * {$mittakerroin}) * if(tuote2.tuotekorkeus * {$mittakerroin} < 1, 1, tuote2.tuotekorkeus * {$mittakerroin}) * if(tuote2.tuotesyvyys * {$mittakerroin} < 1, 1, tuote2.tuotesyvyys * {$mittakerroin})) * if(tilausrivi2.varattu < 1, 1, round(tilausrivi2.varattu)), 4))  < {$pienimman_pak_til} OR
-        SUM(ROUND(tuote2.tuotemassa * if(tilausrivi2.varattu < 1, 1, round(tilausrivi2.varattu)), 4)) < 1
+        SUM(ROUND(tuote2.tuotemassa * if(tilausrivi2.varattu < 1, 1, round(tilausrivi2.varattu)), 4)) < 1 OR
+        SUM(tilausrivi2.varattu) <= {$_kappaleraja}
       ),
       lasku2.prioriteettinro + 1, lasku2.prioriteettinro
       ) AS prioriteetti,

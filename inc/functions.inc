@@ -17189,7 +17189,7 @@ if (!function_exists("tee_keraysera")) {
       (
         SUM(ROUND((if(tuote1.tuoteleveys * {$mittakerroin} < 1, 1, tuote1.tuoteleveys * {$mittakerroin}) * if(tuote1.tuotekorkeus * {$mittakerroin} < 1, 1, tuote1.tuotekorkeus * {$mittakerroin}) * if(tuote1.tuotesyvyys * {$mittakerroin} < 1, 1, tuote1.tuotesyvyys * {$mittakerroin})) * if(tilausrivi1.varattu < 1, 1, round(tilausrivi1.varattu)), 4))  < {$pienimman_pak_til} OR
         SUM(ROUND(tuote1.tuotemassa * if(tilausrivi1.varattu < 1, 1, round(tilausrivi1.varattu)), 4)) < {$rivin_painoraja} OR
-        SUM(tilausrivi1.varattu) <= {$_kappaleraja}
+        SUM(tilausrivi1.varattu) < {$_kappaleraja}
       ),
       lasku1.prioriteettinro + 1, lasku1.prioriteettinro
       ) AS prioriteetti,
@@ -17203,7 +17203,7 @@ if (!function_exists("tee_keraysera")) {
       (
         SUM(ROUND((if(tuote2.tuoteleveys * {$mittakerroin} < 1, 1, tuote2.tuoteleveys * {$mittakerroin}) * if(tuote2.tuotekorkeus * {$mittakerroin} < 1, 1, tuote2.tuotekorkeus * {$mittakerroin}) * if(tuote2.tuotesyvyys * {$mittakerroin} < 1, 1, tuote2.tuotesyvyys * {$mittakerroin})) * if(tilausrivi2.varattu < 1, 1, round(tilausrivi2.varattu)), 4))  < {$pienimman_pak_til} OR
         SUM(ROUND(tuote2.tuotemassa * if(tilausrivi2.varattu < 1, 1, round(tilausrivi2.varattu)), 4)) < 1 OR
-        SUM(tilausrivi2.varattu) <= {$_kappaleraja}
+        SUM(tilausrivi2.varattu) < {$_kappaleraja}
       ),
       lasku2.prioriteettinro + 1, lasku2.prioriteettinro
       ) AS prioriteetti,

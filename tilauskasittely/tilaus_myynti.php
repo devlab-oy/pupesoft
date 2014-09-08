@@ -3443,7 +3443,7 @@ if ($tee == '') {
         </tr>";
       echo "<tr>$jarjlisa
         <th align='left'>".t("Myyjänro")."</th>
-        <td><input type='text' size='10' name='myyjanumero' value='$my'></td>
+        <td><input type='text' size='10' name='myyjanumero' value='$my' autofocus required></td>
         </tr>";
     }
   }

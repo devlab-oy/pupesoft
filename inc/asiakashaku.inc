@@ -533,7 +533,7 @@ if ($monta > 1 and $monta <= $limit) {
           <td>$asiakas[postino] $brpostino</td>
           <td>$asiakas[postitp] $brpostitp</td>";
 
-      $hintojen_vaihto = isset($hintojen_vaihto) ? $hintojen_vaihto : 'EI';
+      $hintojen_vaihto = isset($hintojen_vaihto) ? $hintojen_vaihto : 'JOO';
 
       echo "<td class='back'>";
       echo "<form method='post'>";

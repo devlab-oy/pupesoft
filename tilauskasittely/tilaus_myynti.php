@@ -3526,104 +3526,6 @@ if ($tee == '') {
 
   echo "</table>";
 
-  $numres_saatavt  = 0;
-
-  if ((int) $kukarow["kesken"] > 0) {
-    //Näytetäänko asiakkaan saatavat!
-    $query  = "SELECT yhtio
-               FROM tilausrivi
-               WHERE yhtio  = '$kukarow[yhtio]'
-               AND otunnus  = '$kukarow[kesken]'
-               AND tyyppi  != 'D'";
-    $numres = pupe_query($query);
-    $numres_saatavt = mysql_num_rows($numres);
-  }
-
-  $_kukaextranet = ($kukarow['extranet'] == '');
-
-  $_saako_nahda = ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1');
-  $_saako_nahda = ($_saako_nahda or $yhtiorow['luottorajan_tarkistus'] == 'K');
-
-  $_saako_nayttaa = ($kaytiin_otsikolla == "NOJOO!" or $numres_saatavt == 0);
-  $_saako_nayttaa = ($_saako_nayttaa or $yhtiorow['luottorajan_tarkistus'] == 'K');
-
-  $_asiakas = ($laskurow['liitostunnus'] > 0);
-  $_mika_toim = in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "ENNAKKO", "EXTENNAKKO"));
-
-  if ($_kukaextranet and $_saako_nahda and $_asiakas and $_saako_nayttaa and $_mika_toim) {
-
-    js_popup();
-
-    // Parametrejä saatanat.php:lle
-    $sytunnus        = $laskurow['ytunnus'];
-    $sliitostunnus   = $laskurow['liitostunnus'];
-    $eiliittymaa     = "ON";
-    $luottorajavirhe = "";
-    $jvvirhe         = "";
-    $ylivito         = 0;
-    $trattavirhe     = "";
-    $laji            = "MA";
-    $grouppaus       = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "ytunnus" : "";
-
-    pupeslave_start();
-    ob_start();
-    require "raportit/saatanat.php";
-    $retval = ob_get_contents();
-    ob_end_clean();
-    pupeslave_stop();
-
-    if (trim($retval) != "" and $kukarow['hinnat'] == 0 and $yhtiorow['luottorajan_tarkistus'] == '') {
-      echo "<br>$retval";
-    }
-
-    if ($luottorajavirhe != '') {
-      echo "<br/>";
-
-      echo "<font class='error'>", t("HUOM: Luottoraja ylittynyt"),", ";
-      echo t("ota yhteys luotonvalvontaan tai mitätöi myyntitilaus"),"!";
-
-      if ($yhtiorow['luottorajan_ylitys'] == "L" or $yhtiorow['luottorajan_ylitys'] == "M") {
-        $muokkauslukko = 'LUKOSSA';
-        $myyntikielto = 'MYYNTIKIELTO';
-      }
-      else {
-        echo " ", t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"), ".";
-      }
-
-      echo "</font><br />";
-    }
-
-    if ($jvvirhe != '') {
-      echo "<br/>";
-      echo "<font class='error'>", t("HUOM: Tämä on jälkivaatimusasiakas"), "!</font>";
-      echo "<br/>";
-    }
-
-    if ($ylivito > 0) {
-      echo "<br/>";
-      echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s päivää sitten erääntyneitä laskuja, olkaa ystävällinen ja ottakaa yhteyttä myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."!</font>";
-      echo "<br/>";
-
-      if ($yhtiorow['erapaivan_ylityksen_toimenpide'] == "L" or $yhtiorow['erapaivan_ylityksen_toimenpide'] == "M") {
-        $muokkauslukko = 'LUKOSSA';
-        $myyntikielto = 'MYYNTIKIELTO';
-      }
-    }
-
-    if ($trattavirhe != '') {
-      echo "<br/>";
-      echo "<font class='error'>".t("HUOM: Asiakkaalla on maksamattomia trattoja")."!<br></font>";
-      echo "<br/>";
-    }
-
-    if ($yhtiorow["myyntitilaus_asiakasmemo"] == "K") {
-      echo "<br>";
-      $ytunnus  = $laskurow['ytunnus'];
-      $asiakasid  = $laskurow['liitostunnus'];
-      require "crm/asiakasmemo.php";
-    }
-  }
-
   if ($laskurow['tila'] == 'N' and $laskurow['alatila'] == 'F' and $laskurow['sisviesti3'] != '') {
 
     echo "<br>";
@@ -4706,6 +4608,176 @@ if ($tee == '') {
     $toimaika       = "";
     $tuoteno       = "";
     $var = "";
+  }
+
+  $numres_saatavt  = 0;
+
+  if ((int) $kukarow["kesken"] > 0) {
+    //Näytetäänko asiakkaan saatavat!
+    $query  = "SELECT yhtio
+               FROM tilausrivi
+               WHERE yhtio  = '$kukarow[yhtio]'
+               AND otunnus  = '$kukarow[kesken]'
+               AND tyyppi  != 'D'";
+    $numres = pupe_query($query);
+    $numres_saatavt = mysql_num_rows($numres);
+  }
+
+  $_kukaextranet = ($kukarow['extranet'] == '');
+
+  $_saako_nahda = ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1');
+
+  $_saako_nayttaa = ($kaytiin_otsikolla == "NOJOO!" or $numres_saatavt == 0);
+
+  $_asiakas = ($laskurow['liitostunnus'] > 0);
+  $_mika_toim = in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "ENNAKKO", "EXTENNAKKO"));
+
+  if ($_kukaextranet and $_saako_nahda and $_asiakas and $_saako_nayttaa and $_mika_toim) {
+
+    js_popup();
+
+    // Parametrejä saatanat.php:lle
+    $sytunnus        = $laskurow['ytunnus'];
+    $sliitostunnus   = $laskurow['liitostunnus'];
+    $eiliittymaa     = "ON";
+    $luottorajavirhe = "";
+    $jvvirhe         = "";
+    $ylivito         = 0;
+    $trattavirhe     = "";
+    $laji            = "MA";
+    $grouppaus       = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "ytunnus" : "";
+    $_avoimia_yhteensa = 0;
+
+    pupeslave_start();
+    ob_start();
+    require "raportit/saatanat.php";
+    $retval = ob_get_contents();
+    ob_end_clean();
+    pupeslave_stop();
+
+    $query_ale_lisa = generoi_alekentta('M');
+
+    $query = "SELECT sum(round(
+                hinta * (varattu+jt+kpl) * {$query_ale_lisa},
+                {$yhtiorow['hintapyoristys']}
+              )) rivihinta
+              FROM tilausrivi
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tyyppi = 'L'
+              AND otunnus = '{$laskurow['tunnus']}'";
+    $_tilauksen_rivihinnat_res = pupe_query($query);
+    $_tilauksen_rivihinnat_row = mysql_fetch_assoc($_tilauksen_rivihinnat_res);
+
+    if (!empty($_avoimia_yhteensa)) {
+      $_avoimia_yhteensa = (float) $_avoimia_yhteensa;
+      $_tilauksen_rivihinnat_row['rivihinta'] = (float) $_tilauksen_rivihinnat_row['rivihinta'];
+
+      $query = "UPDATE lasku SET
+                luottoraja = {$_avoimia_yhteensa} - {$_tilauksen_rivihinnat_row['rivihinta']}
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tila = 'N'
+                AND alatila = ''
+                AND tunnus = '{$laskurow['tunnus']}'";
+      $upd_res = pupe_query($query);
+
+      $laskurow['luottoraja'] = $_avoimia_yhteensa - $_tilauksen_rivihinnat_row['rivihinta'];
+    }
+
+    if (trim($retval) != "" and $kukarow['hinnat'] == 0 and $yhtiorow['luottorajan_tarkistus'] == '') {
+      echo "<br>$retval";
+    }
+
+    if ($luottorajavirhe != '') {
+      echo "<br/>";
+
+      echo "<font class='error'>", t("HUOM: Luottoraja ylittynyt"),", ";
+      echo t("ota yhteys luotonvalvontaan tai mitätöi myyntitilaus"),"!";
+
+      if ($yhtiorow['luottorajan_ylitys'] == "L" or $yhtiorow['luottorajan_ylitys'] == "M") {
+        $muokkauslukko = 'LUKOSSA';
+        $myyntikielto = 'MYYNTIKIELTO';
+      }
+      else {
+        echo " ", t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"), ".";
+      }
+
+      echo "</font><br />";
+    }
+
+    if ($jvvirhe != '') {
+      echo "<br/>";
+      echo "<font class='error'>", t("HUOM: Tämä on jälkivaatimusasiakas"), "!</font>";
+      echo "<br/>";
+    }
+
+    if ($ylivito > 0) {
+      echo "<br/>";
+      echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s päivää sitten erääntyneitä laskuja, olkaa ystävällinen ja ottakaa yhteyttä myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."!</font>";
+      echo "<br/>";
+
+      if ($yhtiorow['erapaivan_ylityksen_toimenpide'] == "L" or $yhtiorow['erapaivan_ylityksen_toimenpide'] == "M") {
+        $muokkauslukko = 'LUKOSSA';
+        $myyntikielto = 'MYYNTIKIELTO';
+      }
+    }
+
+    if ($trattavirhe != '') {
+      echo "<br/>";
+      echo "<font class='error'>".t("HUOM: Asiakkaalla on maksamattomia trattoja")."!<br></font>";
+      echo "<br/>";
+    }
+
+    if ($yhtiorow["myyntitilaus_asiakasmemo"] == "K") {
+      echo "<br>";
+      $ytunnus  = $laskurow['ytunnus'];
+      $asiakasid  = $laskurow['liitostunnus'];
+      require "crm/asiakasmemo.php";
+    }
+  }
+  elseif ($yhtiorow['luottorajan_tarkistus'] == 'K' and !empty($laskurow['luottoraja'])) {
+
+    $query = "SELECT luottoraja
+              FROM asiakas
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              and tunnus = '{$laskurow['liitostunnus']}'";
+    $asresult = pupe_query($query);
+    $asrow = mysql_fetch_assoc($asresult);
+
+    if (!empty($asrow['luottoraja'])) {
+
+      $query_ale_lisa = generoi_alekentta('M');
+
+      $query = "SELECT sum(round(
+              hinta * (varattu+jt+kpl) * {$query_ale_lisa},
+              {$yhtiorow['hintapyoristys']}
+            )) rivihinta
+            FROM tilausrivi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tyyppi = 'L'
+            AND otunnus = '{$laskurow['tunnus']}'";
+      $tilauksen_rivihinnat_res = pupe_query($query);
+      $tilauksen_rivihinnat_row = mysql_fetch_assoc($tilauksen_rivihinnat_res);
+
+      if ($tilauksen_rivihinnat_row['rivihinta'] + $laskurow['luottoraja'] > $asrow['luottoraja']) {
+
+        $luottorajavirhe = 'kyllä';
+
+        echo "<br/>";
+
+        echo "<font class='error'>", t("HUOM: Luottoraja ylittynyt"),", ";
+        echo t("ota yhteys luotonvalvontaan tai mitätöi myyntitilaus"),"!";
+
+        if ($yhtiorow['luottorajan_ylitys'] == "L" or $yhtiorow['luottorajan_ylitys'] == "M") {
+          $muokkauslukko = 'LUKOSSA';
+          $myyntikielto = 'MYYNTIKIELTO';
+        }
+        else {
+          echo " ", t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"), ".";
+        }
+
+        echo "</font><br />";
+      }
+    }
   }
 
   // Allr specific!

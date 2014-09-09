@@ -90,7 +90,7 @@ else {
     // Valitaan myyntitili, jos rivillä on alv yli 500 niin kyseessä on marginaalimyyntiä
     if ($xrow["alv"] >= 500 and $xrow["alv"] < 600 and $xrow["marginaaliostot"] == "EI" and $xrow["marginaalihyvitys"] == "EI") {
       // Valitaan myyntitili, tässä on marginaalimyyntiä
-      $selite = t("Marginaaliverolasku/Myynti")." ". $lasku['nimi']." ".$lasku['nimitark'];
+      $selite = t("Marginaaliverolasku/Myynti").": ". $lasku['laskunro']." ". $lasku['nimi']." ".$lasku['nimitark'];
 
       // tässä on kaikki marginaali-myyntitilausrivit
       $query = "SELECT *
@@ -179,7 +179,7 @@ else {
     }
     else {
       // Valitaan myyntitili, tässä on normaalimyyntiä
-      $selite       = t("Lasku", $yhtiorow["kieli"])." ". $lasku['nimi']." ".$lasku['nimitark'];
+      $selite       = t("Lasku", $yhtiorow["kieli"]).": ". $lasku['laskunro']." ". $lasku['nimi']." ".$lasku['nimitark'];
 
       $tilino       = (int) $xrow['tilino'];
       $tilino_eu       = (int) $xrow['tilino_eu'];
@@ -468,7 +468,7 @@ else {
     $myysaatili  = $yhtiorow['myyntisaamiset'];
   }
 
-  $selite = t("Lasku", $yhtiorow["kieli"])." ". $lasku['nimi']." ".$lasku['nimitark'];
+  $selite = t("Lasku", $yhtiorow["kieli"]).": ". $lasku['laskunro']." ". $lasku['nimi']." ".$lasku['nimitark'];
 
   if (isset($kateismaksu)) {
 

@@ -445,7 +445,7 @@ if ($kasitellaan_tiedosto) {
 
     // Tyhjennetään arvot
     foreach ($taulunrivit["yhteensopivuus_tuote_sensori_lisatiedot"] as $ind => $rivit) {
-      array_unshift($taulunrivit['yhteensopivuus_tuote_sensori_lisatiedot'][$ind], "");
+      $taulunrivit["yhteensopivuus_tuote_sensori_lisatiedot"][$ind][$joinsarake] = "";
     }
   }
 
@@ -851,8 +851,8 @@ if ($kasitellaan_tiedosto) {
         elseif ($table_mysql == 'tuotepaikat' and $taulunotsikot[$taulu][$j] == "OLETUS") {
           //ei haluta tätä tänne
         }
-        elseif ($table_mysql == 'yhteensopivuus_tuote_lisatiedot'
-          and in_array($taulunotsikot[$taulu][$j], array("YHTEENSOPIVUUS_TUOTE_TUNNUS","YHTEENSOPIVUUS_TUOTE_SENSORI_TUNNUS")
+        elseif (in_array($table_mysql, array('yhteensopivuus_tuote_lisatiedot', 'yhteensopivuus_tuote_sensori_lisatiedot'))
+          and in_array($taulunotsikot[$taulu][$j], array("YHTEENSOPIVUUS_TUOTE_TUNNUS","YHTEENSOPIVUUS_TUOTE_SENSORI_TUNNUS"))
           and $taulunrivit[$taulu][$eriviindex][$j] == "") {
 
           if (in_array("yhteensopivuus_tuote_sensori", $taulut)) {

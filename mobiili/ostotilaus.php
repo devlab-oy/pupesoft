@@ -68,7 +68,14 @@ if (isset($submit)) {
     // Rakennetaan parametrit kentistä
     $url = http_build_query($data);
 
-    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tuotteella_useita_tilauksia.php?{$url}'>"; exit();
+    if ($sarjanumerotuloutus == 1) {
+      $url_lisa = "&sarjanumerotuloutus=1";
+    }
+    else{
+      $url_lisa = "";
+    }
+
+    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tuotteella_useita_tilauksia.php?{$url}{$url_lisa}'>"; exit();
     break;
   case 'takaisin':
     echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tulouta.php'>"; exit();
@@ -88,27 +95,43 @@ echo "
   <h1>", t("OSTOTILAUS"), "</h1>
 </div>";
 
-echo "<div class='main'>
-<form method='post' action=''>
-<table>
-  <tr>
-    <th><label for='sarjanumero'>", t("Sarjanumero"), "</label></th>
-    <td><input type='text' id='sarjanumero' name='data[sarjanumero]' /><td>
-  </tr>
-  <tr>
-    <th><label for='viivakoodi'>", t("Viivakoodi"), "</label></th>
-    <td><input type='text' id='viivakoodi' name='data[viivakoodi]' /><td>
-  </tr>
-  <tr>
-    <th><label for='tuotenumero'>", t("Tuotenumero"), "</label></th>
-    <td><input type='text' id='tuotenumero' name='data[tuotenumero]'/><td>
-  </tr>
-  <tr>
-    <th><label for='ostotilaus'>", t("Ostotilaus"), "</label></th>
-    <td><input type='text' id='ostotilaus' name='data[ostotilaus]' value='{$ostotilaus}'/><td>
-  </tr>
-</table>
-</div>";
+
+if ($sarjanumerotuloutus == 1) {
+
+  echo "<div class='main'>
+  <form method='post' action=''>
+  <table>
+    <tr>
+      <th><label for='viivakoodi'>", t("Sarjanumero"), "</label></th>
+      <td><input type='text' id='viivakoodi' name='data[viivakoodi]' /><td>
+    </tr>
+  </table>
+  </div>";
+
+}
+else{
+
+  echo "<div class='main'>
+  <form method='post' action=''>
+  <table>
+    <tr>
+      <th><label for='viivakoodi'>", t("Viivakoodi"), "</label></th>
+      <td><input type='text' id='viivakoodi' name='data[viivakoodi]' /><td>
+    </tr>
+    <tr>
+      <th><label for='tuotenumero'>", t("Tuotenumero"), "</label></th>
+      <td><input type='text' id='tuotenumero' name='data[tuotenumero]'/><td>
+    </tr>
+    <tr>
+      <th><label for='ostotilaus'>", t("Ostotilaus"), "</label></th>
+      <td><input type='text' id='ostotilaus' name='data[ostotilaus]' value='{$ostotilaus}'/><td>
+    </tr>
+  </table>
+  </div>";
+
+}
+
+
 
 echo "<div class='controls'>
   <button name='submit' id='haku_nappi' value='ok' onclick='submit();' class='button'>", t("OK"), "</button>

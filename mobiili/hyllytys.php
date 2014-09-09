@@ -109,7 +109,15 @@ if (isset($submit)) {
   switch ($submit) {
   case 'ok':
     // Vahvista ker‰yspaikka
-    echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=vahvista_kerayspaikka.php?hyllytys&".http_build_query($url_array)."{$url}&saapuminen={$saapuminen}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}'>"; exit();
+
+    if ($sarjanumerotuloutus == 1) {
+      $url_lisa = "&sarjanumerotuloutus=1";
+    }
+    else{
+      $url_lisa = "";
+    }
+
+    echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=vahvista_kerayspaikka.php?hyllytys&".http_build_query($url_array)."{$url}&saapuminen={$saapuminen}&alusta_tunnus={$row['suuntalava']}&liitostunnus={$row['liitostunnus']}{$url_lisa}'>"; exit();
     break;
   case 'suuntalavalle':
     if (!is_numeric($hyllytetty) or $hyllytetty < 0) {
@@ -162,39 +170,57 @@ echo "<div class='main'>
 <input type='hidden' name='tilausten_lukumaara' value='{$tilausten_lukumaara}' />
 <input type='hidden' name='manuaalisesti_syotetty_ostotilausnro' value='{$manuaalisesti_syotetty_ostotilausnro}' />
 <input type='hidden' name='tuotenumero' value='{$tuotenumero}' />
-<table>
-    <tr>
-        <th>", t("Tilattu m‰‰r‰"), "</th>
-        <td>{$row['siskpl']}</td>
-        <td>({$row['ulkkpl']})</td>
-    </tr>
-    <tr>
-        <th>", t("Hyllytetty m‰‰r‰"), "</th>
-        <td><input id='numero' class='numero' type='text' name='hyllytetty' value='{$row['siskpl']}' onchange='update_label()'></input> {$row['tilausrivi_tyyppi']}</td>
-        <td><span id='hylytetty_label'>{$row['ulkkpl']}</span></td>
-    </tr>
-    <tr>
+<table>";
+
+if ($sarjanumerotuloutus != 1) {
+  echo "<tr>
+          <th>", t("Tilattu m‰‰r‰"), "</th>
+          <td>{$row['siskpl']}</td>
+          <td>({$row['ulkkpl']})</td>
+      </tr>
+      <tr>
+          <th>", t("Hyllytetty m‰‰r‰"), "</th>
+          <td><input id='numero' class='numero' type='text' name='hyllytetty' value='{$row['siskpl']}' onchange='update_label()'></input> {$row['tilausrivi_tyyppi']}</td>
+          <td><span id='hylytetty_label'>{$row['ulkkpl']}</span></td>
+      </tr>";
+}
+
+ echo "<tr>
         <th>", t("Tuote"), "</th>
         <td>{$row['tuoteno']}</td>
     </tr>";
 
-echo "<tr>";
+if ($sarjanumerotuloutus != 1) {
 
-if (trim($row['selaus']) != "") {
-  echo "<th>{$row['selaus']}</th>";
+  echo "<tr>";
+  if (trim($row['selaus']) != "") {
+    echo "<th>{$row['selaus']}</th>";
+  }
+  else {
+    echo "<th>", t("Toim. Tuotekoodi"), "</th>";
+  }
+
+  echo "<td>{$row['toim_tuoteno']}</td>";
+  echo "</tr>";
+
+  echo "<tr>
+          <th>", t("Ker‰yspaikka"), "</th>
+          <td>{$row['kerayspaikka']}</td>
+          <td>({$row['varattu']} {$row['yksikko']})</td>
+      </tr>";
+
 }
-else {
-  echo "<th>", t("Toim. Tuotekoodi"), "</th>";
+else{
+
+  echo "<tr>
+          <th>", t("Ker‰yspaikka"), "</th>
+          <td>{$row['kerayspaikka']}<br><input type='text' id='uusi_kpaikka' name='uusi_kpaikka'</td>
+          <td></td>
+      </tr>";
+
 }
 
-echo "<td>{$row['toim_tuoteno']}</td>";
-echo "</tr>";
 
-echo "<tr>
-        <th>", t("Ker‰yspaikka"), "</th>
-        <td>{$row['kerayspaikka']}</td>
-        <td>({$row['varattu']} {$row['yksikko']})</td>
-    </tr>";
 
 if ($row['tilausrivitunnus'] != 0) {
 
@@ -251,4 +277,13 @@ echo "<script type='text/javascript'>
         var label = document.getElementById('hylytetty_label');
         label.innerHTML = tuotekerroin;
     }
+
+    $(document).ready(function() {
+      var focusElementId = 'uusi_kpaikka';
+      var textBox = document.getElementById(focusElementId);
+      textBox.focus();
+    });
+
+
+
 </script>";

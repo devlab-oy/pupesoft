@@ -26,42 +26,74 @@ $params = array();
 // Joku parametri tarvii olla setattu.
 if ($ostotilaus != '' or $tuotenumero != '' or $viivakoodi != '') {
 
-  if (strpos($tuotenumero, "%") !== FALSE) $tuotenumero = urldecode($tuotenumero);
-
-  if ($tuotenumero != '') $params['tuoteno'] = "tilausrivi.tuoteno = '{$tuotenumero}'";
-  if ($ostotilaus != '')   $params['otunnus'] = "tilausrivi.otunnus = '{$ostotilaus}'";
-
-  // Viivakoodi case
   if ($viivakoodi != '') {
-    $tuotenumerot = hae_viivakoodilla($viivakoodi);
 
-    if (count($tuotenumerot) > 0) {
+    $sarjanumero_query = "SELECT tunnus
+                          FROM sarjanumeroseuranta
+                          WHERE yhtio = '{$kukarow['yhtio']}'
+                          AND sarjanumero = '{$viivakoodi}'";
+    $sarjanumero_result = pupe_query($sarjanumero_query);
 
-      $param_viivakoodi = array();
-
-      foreach ($tuotenumerot as $_tuoteno => $_arr) {
-        foreach ($_arr as $_liitostunnus) {
-          if (trim($_liitostunnus) != "") {
-            array_push($param_viivakoodi, "(tuote.tuoteno = '{$_tuoteno}' AND lasku.liitostunnus = '{$_liitostunnus}')");
-          }
-        }
-      }
-
-      if (empty($param_viivakoodi)) {
-        $params['viivakoodi'] = "tuote.tuoteno IN ('".implode(array_keys($tuotenumerot), "','")."')";
-      }
-      else {
-        $params['viivakoodi'] = "(".implode($param_viivakoodi, " OR ").")";
-      }
-    }
-    else {
-      $errors[] = t("Viivakoodilla %s ei löytynyt tuotetta", '', $viivakoodi)."<br />";
-      $viivakoodi = "";
+    if (mysql_num_rows($sarjanumero_result) > 0) {
+      $sarjanumero_osuma = true;
     }
   }
 
-  $query_lisa = count($params) > 0 ? " AND ".implode($params, " AND ") : "";
+  if ($sarjanumero_osuma) {
 
+    $query =   "SELECT tilausrivi.tunnus, tilausrivi.otunnus
+                FROM sarjanumeroseuranta
+                JOIN tilausrivi ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio
+                AND tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
+                AND tilausrivi.tyyppi='O'
+                AND tilausrivi.varattu != 0
+                AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)
+                WHERE sarjanumeroseuranta.yhtio = '{$kukarow['yhtio']}'
+                AND sarjanumeroseuranta.sarjanumero = '{$viivakoodi}'";
+    $result = pupe_query($query);
+
+    $orig_tilausten_lukumaara = 1;
+
+  }
+  else{
+
+    if (strpos($tuotenumero, "%") !== FALSE) $tuotenumero = urldecode($tuotenumero);
+
+    if ($tuotenumero != '') $params['tuoteno'] = "tilausrivi.tuoteno = '{$tuotenumero}'";
+    if ($ostotilaus != '')   $params['otunnus'] = "tilausrivi.otunnus = '{$ostotilaus}'";
+
+    // Viivakoodi case
+    if ($viivakoodi != '') {
+      $tuotenumerot = hae_viivakoodilla($viivakoodi);
+
+      if (count($tuotenumerot) > 0) {
+
+        $param_viivakoodi = array();
+
+        foreach ($tuotenumerot as $_tuoteno => $_arr) {
+          foreach ($_arr as $_liitostunnus) {
+            if (trim($_liitostunnus) != "") {
+              array_push($param_viivakoodi, "(tuote.tuoteno = '{$_tuoteno}' AND lasku.liitostunnus = '{$_liitostunnus}')");
+            }
+          }
+        }
+
+        if (empty($param_viivakoodi)) {
+          $params['viivakoodi'] = "tuote.tuoteno IN ('".implode(array_keys($tuotenumerot), "','")."')";
+        }
+        else {
+          $params['viivakoodi'] = "(".implode($param_viivakoodi, " OR ").")";
+        }
+      }
+      else {
+        $errors[] = t("Viivakoodilla %s ei löytynyt tuotetta", '', $viivakoodi)."<br />";
+        $viivakoodi = "";
+      }
+    }
+
+    $query_lisa = count($params) > 0 ? " AND ".implode($params, " AND ") : "";
+
+  }
 }
 else {
   // Tänne ei pitäis päätyä, tarkistetaan jo ostotilaus.php:ssä
@@ -103,52 +135,9 @@ if (isset($sort_by)) {
   }
 }
 
-// Haetaan ostotilaukset
-$query = "SELECT
-          lasku.tunnus as ostotilaus,
-          lasku.liitostunnus,
-          tilausrivi.tunnus,
-          tilausrivi.otunnus,
-          tilausrivi.tuoteno,
-          tilausrivi.varattu,
-          tilausrivi.kpl,
-          (tilausrivi.varattu + tilausrivi.kpl) as sorttaus_kpl,
-          tilausrivi.tilkpl,
-          tilausrivi.uusiotunnus,
-          concat_ws('-',tilausrivi.hyllyalue,tilausrivi.hyllynro,tilausrivi.hyllyvali,tilausrivi.hyllytaso) as hylly,
-          IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin) tuotekerroin,
-          tuotteen_toimittajat.liitostunnus,
-          IF(IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') = '', 'JT', IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, '')) as tilausrivi_tyyppi
-          FROM lasku
-          JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus AND tilausrivi.tyyppi='O'
-            AND tilausrivi.varattu != 0 AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)
-          JOIN tuote on tuote.tuoteno=tilausrivi.tuoteno AND tuote.yhtio=tilausrivi.yhtio
-          JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
-            AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
-            AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
-          LEFT JOIN tilausrivin_lisatiedot
-          ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
-          WHERE lasku.tila          = 'O'
-          AND lasku.alatila         = 'A'
-          AND lasku.yhtio='{$kukarow['yhtio']}'
-          AND lasku.vanhatunnus     = '{$kukarow['toimipaikka']}'
-          {$query_lisa}
-          ORDER BY {$orderby} {$ascdesc}
-          ";
-$result = pupe_query($query);
-$tilausten_lukumaara = mysql_num_rows($result);
+if (!$sarjanumero_osuma) {
 
-if ($orig_tilausten_lukumaara == 0) $orig_tilausten_lukumaara = $tilausten_lukumaara;
-
-// Jos etsitään viivakoodilla ja kyseistä tuotetta ei löydy esim. ostotilaukselta, tehdään uusi haku ilman viivakoodia
-if ($tilausten_lukumaara == 0 and (isset($_viivakoodi) and $_viivakoodi != "") and count($params) > 1) {
-
-  $errors[] = t("Viivakoodilla %s ei löytynyt tuotetta", '', $_viivakoodi)."<br />";
-
-  unset($params['viivakoodi']);
-
-  $query_lisa = " AND ".implode($params, " AND ");
-
+  // Haetaan ostotilaukset
   $query = "SELECT
             lasku.tunnus as ostotilaus,
             lasku.liitostunnus,
@@ -182,8 +171,54 @@ if ($tilausten_lukumaara == 0 and (isset($_viivakoodi) and $_viivakoodi != "") a
             ";
   $result = pupe_query($query);
   $tilausten_lukumaara = mysql_num_rows($result);
+
+  if ($orig_tilausten_lukumaara == 0) $orig_tilausten_lukumaara = $tilausten_lukumaara;
+
+  // Jos etsitään viivakoodilla ja kyseistä tuotetta ei löydy esim. ostotilaukselta, tehdään uusi haku ilman viivakoodia
+  if ($tilausten_lukumaara == 0 and (isset($_viivakoodi) and $_viivakoodi != "") and count($params) > 1) {
+
+    $errors[] = t("Viivakoodilla %s ei löytynyt tuotetta", '', $_viivakoodi)."<br />";
+
+    unset($params['viivakoodi']);
+
+    $query_lisa = " AND ".implode($params, " AND ");
+
+    $query = "SELECT
+              lasku.tunnus as ostotilaus,
+              lasku.liitostunnus,
+              tilausrivi.tunnus,
+              tilausrivi.otunnus,
+              tilausrivi.tuoteno,
+              tilausrivi.varattu,
+              tilausrivi.kpl,
+              (tilausrivi.varattu + tilausrivi.kpl) as sorttaus_kpl,
+              tilausrivi.tilkpl,
+              tilausrivi.uusiotunnus,
+              concat_ws('-',tilausrivi.hyllyalue,tilausrivi.hyllynro,tilausrivi.hyllyvali,tilausrivi.hyllytaso) as hylly,
+              IF(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin) tuotekerroin,
+              tuotteen_toimittajat.liitostunnus,
+              IF(IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, 'NORM') = '', 'JT', IFNULL(tilausrivin_lisatiedot.suoraan_laskutukseen, '')) as tilausrivi_tyyppi
+              FROM lasku
+              JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio AND tilausrivi.otunnus=lasku.tunnus AND tilausrivi.tyyppi='O'
+                AND tilausrivi.varattu != 0 AND (tilausrivi.uusiotunnus = 0 OR tilausrivi.suuntalava = 0)
+              JOIN tuote on tuote.tuoteno=tilausrivi.tuoteno AND tuote.yhtio=tilausrivi.yhtio
+              JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio=tilausrivi.yhtio
+                AND tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno
+                AND tuotteen_toimittajat.liitostunnus=lasku.liitostunnus
+              LEFT JOIN tilausrivin_lisatiedot
+              ON ( tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivilinkki = tilausrivi.tunnus )
+              WHERE lasku.tila          = 'O'
+              AND lasku.alatila         = 'A'
+              AND lasku.yhtio='{$kukarow['yhtio']}'
+              AND lasku.vanhatunnus     = '{$kukarow['toimipaikka']}'
+              {$query_lisa}
+              ORDER BY {$orderby} {$ascdesc}
+              ";
+    $result = pupe_query($query);
+  }
 }
 
+$tilausten_lukumaara = mysql_num_rows($result);
 $tilaukset = mysql_fetch_assoc($result);
 
 // Submit
@@ -214,7 +249,15 @@ if (isset($submit)) {
 
 // Ei osumia, palataan ostotilaus sivulle
 if ($tilausten_lukumaara == 0) {
-  echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?tuotenumero={$tuotenumero}&ostotilaus={$ostotilaus}&virhe'>";
+
+  if ($sarjanumerotuloutus == 1) {
+    $url_lisa = "&sarjanumerotuloutus=1";
+  }
+  else{
+    $url_lisa = "";
+  }
+
+  echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=ostotilaus.php?tuotenumero={$tuotenumero}&ostotilaus={$ostotilaus}&virhe{$url_lisa}'>";
   exit();
 }
 
@@ -226,6 +269,7 @@ if ($tilausten_lukumaara == 1 and $orig_tilausten_lukumaara == 1 and $_viivakood
   $url_array['saapuminen'] = $saapuminen;
   $url_array['manuaalisesti_syotetty_ostotilausnro'] = empty($manuaalisesti_syotetty_ostotilausnro) ? 0 : 1;
   $url_array['tilausten_lukumaara'] = $tilausten_lukumaara;
+  $url_array['sarjanumerotuloutus'] = $sarjanumerotuloutus;
 
   echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys.php?".http_build_query($url_array)."'>";
   exit();

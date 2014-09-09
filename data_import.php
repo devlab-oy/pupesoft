@@ -351,6 +351,7 @@ if (table_exists('yhteensopivuus_tuote')) {
   $taulut['yhteensopivuus_rekisteri']        = 'Yhteensopivuus rekisterinumerot';
   $taulut['yhteensopivuus_tuote']            = 'Yhteensopivuus tuotteet';
   $taulut['yhteensopivuus_tuote_lisatiedot'] = 'Yhteensopivuus tuotteet lisätiedot';
+  $taulut['yhteensopivuus_tuote_sensori']    = 'Yhteensopivuus tuotteet sensorit';
   $taulut['rekisteritiedot_lisatiedot']      = 'Rekisteritiedot lisatiedot';
   $taulut['yhteensopivuus_valmistenumero']   = 'Yhteensopivuus valmistenumero';
 }

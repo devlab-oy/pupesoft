@@ -141,7 +141,7 @@ if ($tee == 'LISAA') {
             tapa    = '$tapa'";
       $query .= $postquery;
       $result = pupe_query($query);
-      $katunnus = mysql_insert_id();
+      $katunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
       if ($liitostunnus != 0 && $kuva != '') {
         // p‰ivitet‰‰n kuvalle viel‰ linkki toiseensuuntaa

@@ -121,7 +121,7 @@ if ($tee == "LISAAMUISTUTUS") {
                kuittaus = '$kuittaus',
                pvmalku  = $pvmalku";
     $result = pupe_query($kysely);
-    $muist = mysql_insert_id();
+    $muist = mysql_insert_id($GLOBALS["masterlink"]);
 
     echo t("Lisätty muistutus päivälle:")."  <b>$pvmalku</b><br><br>";
 

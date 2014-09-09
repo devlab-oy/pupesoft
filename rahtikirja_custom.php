@@ -699,7 +699,7 @@ function pupe_rahtikirja_insert($data) {
   );
   pupe_query($query);
 
-  return mysql_insert_id();
+  return mysql_insert_id($GLOBALS["masterlink"]);
 }
 
 

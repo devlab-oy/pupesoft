@@ -184,7 +184,7 @@ if (!function_exists("ennakkolaskuta")) {
 
     $query = substr($query, 0, -1);
     $stresult = pupe_query($query);
-    $id = mysql_insert_id();
+    $id = mysql_insert_id($GLOBALS["masterlink"]);
 
     // tehd‰‰n vanhan laskun lis‰tiedoista 1:1 kopio...
     $query = "SELECT *

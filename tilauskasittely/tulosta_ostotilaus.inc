@@ -634,8 +634,14 @@ else {
           $liite = $pdffilenimi;
           $kutsu = t("Ostotilaus", $kieli)." $laskurow[tunnus]";
 
+          $korvattavat = array("/", "\\");
+          $laskunimi = ", ";
+          $laskunimi .= trim(str_replace($korvattavat, " ", $laskurow["nimi"]));
+          $laskunimi .= ", ";
+          $laskunimi .= trim(str_replace($korvattavat, " ", $laskurow["toim_nimi"]));
+
           if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-            $kutsu .= ", ".trim($laskurow["nimi"]).", ".trim($laskurow["toim_nimi"]);
+            $kutsu .= $laskunimi;
           }
 
           require "inc/sahkoposti.inc";

@@ -465,7 +465,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
   $result = pupe_query($query);
 
   // otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
-  $tapahtumaid = mysql_insert_id();
+  $tapahtumaid = mysql_insert_id($GLOBALS["masterlink"]);
 
   if (!isset($php_cli) or !$php_cli) {
     echo "<font class='message'>";
@@ -597,7 +597,7 @@ if ($toim == "VAIHDAKEHAHIN" and $tee == "vaihda_kehahin") {
   $result = pupe_query($query);
 
   // otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
-  $tapahtumaid = mysql_insert_id();
+  $tapahtumaid = mysql_insert_id($GLOBALS["masterlink"]);
 
   mysql_data_seek($paikatres, 0);
 
@@ -688,7 +688,7 @@ if ($tee == "sarjanro_paalle") {
   $result = pupe_query($query);
 
   // otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
-  $tapahtumaid = mysql_insert_id();
+  $tapahtumaid = mysql_insert_id($GLOBALS["masterlink"]);
 
   if (!isset($php_cli) or !$php_cli) {
     echo "<font class='message'>";
@@ -716,7 +716,7 @@ if ($varaston_muutos != 0 and (in_array($tee, array("paalle", "25paalle", "puoli
               laatija    = '$kukarow[kuka]',
               luontiaika = now()";
     $result = pupe_query($query);
-    $laskuid = mysql_insert_id($link);
+    $laskuid = mysql_insert_id($GLOBALS["masterlink"]);
   }
 
   if ($toim != "VAIHDAKEHAHIN" and $yhtiorow["varastonmuutos_epakurantti"] != "") {

@@ -90,8 +90,11 @@ if ($Xtunnukset2 != "") {
              sum(tilausrivi.kpl) kpl,
              round(sum((tilausrivi.rivihinta/$laskurow[summa])*$Xkilot),0) paino
              FROM tilausrivi
-             JOIN tuote ON tuote.yhtio=tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
-             LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn and tullinimike.kieli = '$yhtiorow[kieli]'
+             JOIN tuote ON tuote.yhtio=tilausrivi.yhtio 
+               and tuote.tuoteno=tilausrivi.tuoteno 
+               and tuote.ei_saldoa = ''
+             LEFT JOIN tullinimike ON tuote.tullinimike1=tullinimike.cn 
+               and tullinimike.kieli = '$yhtiorow[kieli]'
              WHERE tilausrivi.uusiotunnus = '$uusiotunnus'
              and tilausrivi.yhtio         = '$kukarow[yhtio]'
              and tilausrivi.tyyppi        = 'L'

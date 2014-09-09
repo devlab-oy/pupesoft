@@ -56,7 +56,7 @@ if ((int) $tilausnumero == 0) {
             laatija           = 'verkkolas',
             luontiaika        = now()";
   $result = pupe_query($query);
-  $tilausnumero = mysql_insert_id();
+  $tilausnumero = mysql_insert_id($GLOBALS["masterlink"]);
 }
 
 // Viritet‰‰n kukarow kesken

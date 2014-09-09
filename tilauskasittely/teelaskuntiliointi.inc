@@ -245,7 +245,7 @@ else {
                 laatija          = '$kukarow[kuka]',
                 laadittu         = now()";
       $laskutusres = pupe_query($query);
-      $isa = mysql_insert_id($link);
+      $isa = mysql_insert_id($GLOBALS["masterlink"]);
 
       $lukko = "";
 
@@ -295,7 +295,7 @@ else {
                   laatija          = '$kukarow[kuka]',
                   laadittu         = now()";
         $laskutusres = pupe_query($query);
-        $isa = mysql_insert_id($link);
+        $isa = mysql_insert_id($GLOBALS["masterlink"]);
 
         if ($xrow["alv"] != 0) {
 

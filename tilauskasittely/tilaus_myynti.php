@@ -2551,7 +2551,7 @@ if ($tee == '') {
       }
     }
 
-    if ($kukarow["extranet"] == "" and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T" or $yhtiorow["myynti_asiakhin_tallenna"] == "K") and in_array($toim, array("TARJOUS", "EXTTARJOUS", "PIKATILAUS", "RIVISYOTTO", "VALMISTAASIAKKAALLE", "TYOMAARAYS", "PROJEKTI"))) {
+    if ($kukarow["extranet"] == "" and tarkista_oikeus("yllapito.php", "asiakashinta", "x") and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T" or $yhtiorow["myynti_asiakhin_tallenna"] == "K") and in_array($toim, array("TARJOUS", "EXTTARJOUS", "PIKATILAUS", "RIVISYOTTO", "VALMISTAASIAKKAALLE", "TYOMAARAYS", "PROJEKTI"))) {
       echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
           <input type='hidden' name='tee' value='tuotteetasiakashinnastoon'>
           <input type='hidden' name='tilausnumero' value='$tilausnumero'>
@@ -5336,7 +5336,7 @@ if ($tee == '') {
     $headerit .= "<th>".t("Tuotenumero")."</th><th>".t("M‰‰r‰")."</th><th>".t("Var")."</th>";
     $sarakkeet += 3;
 
-    if ($yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K") {
+    if ($_onko_valmistus and $yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K") {
       $headerit .= "<th>".t("Arvo")."</th><th>".t("Lukitse arvo")."</th>";
       $sarakkeet += 2;
     }
@@ -5581,7 +5581,7 @@ if ($tee == '') {
       while ($row = mysql_fetch_assoc($result)) {
         $rows[]  = $row;
 
-        if ($yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K") {
+        if ($_onko_valmistus and $yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K") {
 
           $perheid = $row['perheid'];
 
@@ -5618,7 +5618,7 @@ if ($tee == '') {
         }
       }
 
-      if ($yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K") {
+      if ($_onko_valmistus and $yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K") {
         foreach ($hinta_laskurit as $perheid => $hinta_kokoelma) {
           // Jos valmisteissa on yksikin painoarvoton, lasketaan painoarvot uusiks.
           if ($hinta_kokoelma['valmisteissa_painoarvoton']) {
@@ -6724,7 +6724,7 @@ if ($tee == '') {
           echo "</td>";
         }
 
-        if ($yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K") {
+        if ($_onko_valmistus and $yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K") {
           echo "<td $class>";
           if ($row['tyyppi'] == 'W' and count($hinta_laskurit[$row['perheid']]['valmisteet']) > 1 and $hinta_laskurit[$row['perheid']]['raakaaineiden_kehahinta_summa']>0) {
             echo '<input type="text" name="valmiste_valuutta['.$row['tunnus'].']" data-tunnus="'.$row['tunnus'].'" data-perheid="'.$row['perheid'].'" />';

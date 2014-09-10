@@ -1,11 +1,19 @@
 $(document).ready(function() {
 
+  $('#hintojen_vaihto').on('change', function() {
+    $('.hv_hidden').val( this.checked ? 'JOO' : 'EI' );
+  });
+
+  $('#hae_asiakasta_hintavaihto_cb').on('change', function() {
+    $('#hae_asiakasta_hv_hidden').val( this.checked ? 'JOO' : 'EI' );
+  });
+
   $('#hae_asiakasta_linkki').on('click', function(e) {
     e.preventDefault();
 
     $('#hae_asiakasta_spani').hide();
-    $('#hae_asiakasta_boksi').show().focus();
-    $('#hae_asiakasta_boksi_button').show();
+    $('#hae_asiakasta_piilospan').show();
+    $('#hae_asiakasta_boksi').focus();
   });
 
   $('#hae_asiakasta_boksi').on('keyup', function(e) {

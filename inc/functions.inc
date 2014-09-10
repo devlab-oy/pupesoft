@@ -17099,7 +17099,12 @@ if (!function_exists("tee_keraysera")) {
               yhdistelysaanto,
               lahtojen_valinen_enimmaisaika,
               ulkoinen_jarjestelma,
-              tunnus as keraysvyohyke
+              tunnus as keraysvyohyke,
+              keraysnippujen_priorisointi,
+              aikaraja,
+              mittaraja,
+              painoraja,
+              kappaleraja
               FROM keraysvyohyke
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tunnus  = '{$keraysvyohyke}'";
@@ -17167,9 +17172,59 @@ if (!function_exists("tee_keraysera")) {
       $asiakas_join2 = "JOIN asiakas AS asiakas2 ON (asiakas2.yhtio = lasku2.yhtio AND asiakas2.tunnus = lasku2.liitostunnus)";
     }
 
+    $_priorisointi_kaytossa = !empty($keraysvyohyketiedot['keraysnippujen_priorisointi']);
+    $_aikaraja_kaytossa = !empty($keraysvyohyketiedot['aikaraja']);
+
+    $_mittaraja = !empty($keraysvyohyketiedot['mittaraja']);
+    $_painoraja = !empty($keraysvyohyketiedot['painoraja']);
+    $_kappaleraja = !empty($keraysvyohyketiedot['kappaleraja']);
+    $_mitta_vai_paino_kappale = ($_mittaraja OR $_painoraja OR $_kappaleraja);
+
+    if ($_priorisointi_kaytossa and $_aikaraja_kaytossa and $_mitta_vai_paino_kappale) {
+
+      $pienimman_pak_til = $keraysvyohyketiedot['mittaraja'];
+      $rivin_painoraja = $keraysvyohyketiedot['painoraja'];
+      $_aikaraja = $keraysvyohyketiedot['aikaraja'];
+      $_kappaleraja = $keraysvyohyketiedot['kappaleraja'];
+
+      $prioriteettilisa1 = "
+      IF(
+      lasku1.tila = 'G' AND
+      lasku1.alatila = 'J' AND
+      round((TIME_TO_SEC(TIMEDIFF(CURTIME(), lahdot3.kerailyn_aloitusaika)) / 60) / (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, lahdot3.kerailyn_aloitusaika)) / 60) * 100, 2) < {$_aikaraja} AND
+      (
+        SUM(ROUND((if(tuote1.tuoteleveys * {$mittakerroin} < 1, 1, tuote1.tuoteleveys * {$mittakerroin}) * if(tuote1.tuotekorkeus * {$mittakerroin} < 1, 1, tuote1.tuotekorkeus * {$mittakerroin}) * if(tuote1.tuotesyvyys * {$mittakerroin} < 1, 1, tuote1.tuotesyvyys * {$mittakerroin})) * if(tilausrivi1.varattu < 1, 1, round(tilausrivi1.varattu)), 4))  < {$pienimman_pak_til} OR
+        SUM(ROUND(tuote1.tuotemassa * if(tilausrivi1.varattu < 1, 1, round(tilausrivi1.varattu)), 4)) < {$rivin_painoraja} OR
+        SUM(tilausrivi1.varattu) < {$_kappaleraja}
+      ),
+      lasku1.prioriteettinro + 1, lasku1.prioriteettinro
+      ) AS prioriteetti,
+      ";
+
+      $prioriteettilisa2 = "
+      IF(
+      lasku2.tila = 'G' AND
+      lasku2.alatila = 'J' AND
+      round((TIME_TO_SEC(TIMEDIFF(CURTIME(), lahdot3.kerailyn_aloitusaika)) / 60) / (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, lahdot3.kerailyn_aloitusaika)) / 60) * 100, 2) < {$_aikaraja} AND
+      (
+        SUM(ROUND((if(tuote2.tuoteleveys * {$mittakerroin} < 1, 1, tuote2.tuoteleveys * {$mittakerroin}) * if(tuote2.tuotekorkeus * {$mittakerroin} < 1, 1, tuote2.tuotekorkeus * {$mittakerroin}) * if(tuote2.tuotesyvyys * {$mittakerroin} < 1, 1, tuote2.tuotesyvyys * {$mittakerroin})) * if(tilausrivi2.varattu < 1, 1, round(tilausrivi2.varattu)), 4))  < {$pienimman_pak_til} OR
+        SUM(ROUND(tuote2.tuotemassa * if(tilausrivi2.varattu < 1, 1, round(tilausrivi2.varattu)), 4)) < 1 OR
+        SUM(tilausrivi2.varattu) < {$_kappaleraja}
+      ),
+      lasku2.prioriteettinro + 1, lasku2.prioriteettinro
+      ) AS prioriteetti,
+      ";
+      $_group_by_lisa = "GROUP BY 2,3,4,5,6,7";
+    }
+    else {
+      $prioriteettilisa1 = "lasku1.prioriteettinro as prioriteetti,";
+      $prioriteettilisa2 = "lasku2.prioriteettinro as prioriteetti,";
+      $_group_by_lisa = "GROUP BY 1,2,3,4,5,6,7";
+    }
+
     if ($aikarajaus != 999999999999 and $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {
       $query = "SELECT SQL_NO_CACHE
-                lasku1.prioriteettinro as prioriteetti,
+                {$prioriteettilisa1}
                 (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, CURTIME())) / 60) as erotus,
                 lasku1.ohjausmerkki,
                 lasku1.liitostunnus,
@@ -17198,12 +17253,12 @@ if (!function_exists("tee_keraysera")) {
                 AND lasku1.vakisin_kerays = ''
                 AND lasku1.varasto        = '{$varasto}'
                 AND kuka.tunnus is null
-                GROUP BY 1,2,3,4,5,6,7
+                {$_group_by_lisa}
                 ORDER BY prioriteetti,erotus,h1time,liitostunnus,ohjausmerkki,lahdon_tiedot";
     }
     else {
       $query = "SELECT SQL_NO_CACHE
-                lasku2.prioriteettinro as prioriteetti,
+                {$prioriteettilisa2}
                 0 as erotus,
                 lasku2.ohjausmerkki,
                 lasku2.liitostunnus,
@@ -17228,7 +17283,7 @@ if (!function_exists("tee_keraysera")) {
                 AND lasku2.vakisin_kerays != ''
                 AND lasku2.varasto         = '{$varasto}'
                 AND kuka2.tunnus is null
-                GROUP BY 1,2,3,4,5,6,7
+                {$_group_by_lisa}
                 ORDER BY prioriteetti,erotus,h1time,liitostunnus,ohjausmerkki,lahdon_tiedot";
     }
     $res = pupe_query($query);

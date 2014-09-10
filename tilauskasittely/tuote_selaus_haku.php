@@ -2376,19 +2376,16 @@ function hae_yhtiot() {
   }
 }
 
-
-/**
- * Hakee tuotteen parametri_variaatio-tunnuksen tietokannasta
- *
- * @param unknown $row
- *
- * @return array
- */
 function hae_parametri_variaatio($row) {
+  global $kukarow, $yhtiorow;
+
   $query = "SELECT selite
-            FROM   tuotteen_avainsanat
-            WHERE  tuoteno = '{$row["tuoteno"]}'
-            AND    laji    = 'parametri_variaatio'";
+            FROM tuotteen_avainsanat
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND kieli   = '{$yhtiorow['kieli']}'
+            AND laji    = 'parametri_variaatio'
+            AND tuoteno = '{$row['tuoteno']}'
+";
   $result = pupe_query($query);
   $parametri_variaatio = mysql_fetch_assoc($result);
   return $parametri_variaatio;

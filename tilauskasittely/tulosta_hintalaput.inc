@@ -18,7 +18,7 @@ function tulosta_hintalaput($tuotteet) {
   );
 
   $text_bold = array(
-    "height" => 3,
+    "height" => 4,
     "font"   => "Times-Bold"
   );
 
@@ -41,7 +41,7 @@ function tulosta_hintalaput($tuotteet) {
 
       $pdf->draw_text(0, 27, $nimitys[0], $page, $text_normal);
       $pdf->draw_text(0, 24, $nimitys[1], $page, $text_normal);
-      $pdf->draw_text(40, 18, $hinta, $page, $text_bold);
+      $pdf->draw_text(38, 18, $hinta, $page, $text_bold);
       $pdf->image_place($kuva, 2, 6, $page, $viivakoodin_asetukset);
     }
   }

@@ -826,31 +826,33 @@ if ($tee == 'VALMIS') {
               $result = pupe_query($query);
               $laskuid = mysql_insert_id($GLOBALS["masterlink"]);
 
-              if ($inven_laji_tilino != "") {
-                $inventointitili = $inven_laji_tilino;
+              // Seuraako myyntitiliˆinti tuotteen tyyppi‰ ja onko kyseess‰ raaka-aine?
+              $seuraa_tyyppia = $yhtiorow["seuraako_myyntitiliointi_tuotteen_tyyppia"];
+              $raaka_ainetililta = ($seuraa_tyyppia == "Y" and $row["tuotetyyppi"] == "R");
+
+
+              // M‰‰ritet‰‰n varastonmuutostili
+              if ($yhtiorow["varastonmuutos_inventointi"] != "") {
+                if ($inven_laji_tilino != "") {
+                  $varastonmuutos_tili = $inven_laji_tilino;
+                }
+                else {
+                  $varastonmuutos_tili = $yhtiorow["varastonmuutos_inventointi"];
+                }
+              }
+              elseif ($raaka_ainetililta) {
+                $varastonmuutos_tili = $yhtiorow["raaka_ainevarastonmuutos"];
               }
               else {
-                $inventointitili = $yhtiorow["varastonmuutos_inventointi"];
+                $varastonmuutos_tili = $yhtiorow["varastonmuutos"];
               }
 
-              if ($yhtiorow["varastonmuutos_inventointi"] != "" and
-                  $yhtiorow["seuraako_myyntitiliointi_tuotteen_tyyppia"] == "Y" and
-                  $row["tuotetyyppi"] == "R") {
-                $varastonmuutos_tili = $inventointitili;
-                $varastotili = $yhtiorow["raaka_ainevarasto"];
-              }
-              elseif ($yhtiorow["varastonmuutos_inventointi"] != "") {
-                $varastonmuutos_tili = $inventointitili;
-                $varastotili = $yhtiorow["varasto"];
-              }
-              elseif ($yhtiorow["seuraako_myyntitiliointi_tuotteen_tyyppia"] == "Y" and
-                      $row["tuotetyyppi"] == "R") {
-                $varastonmuutos_tili = $yhtiorow["raaka_ainevarastonmuutos"];
+              // M‰‰ritet‰‰n varastotili
+              if ($raaka_ainetililta) {
                 $varastotili = $yhtiorow["raaka_ainevarasto"];
               }
               else {
                 $varastotili = $yhtiorow["varasto"];
-                $varastonmuutos_tili = $yhtiorow["varastonmuutos"];
               }
 
               if ($yhtiorow["tarkenteiden_prioriteetti"] == "T") {

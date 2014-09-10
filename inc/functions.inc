@@ -27729,3 +27729,11 @@ if (!function_exists("kasittele_tiliote_viite")) {
     $kukarow = $kukarow_talteen;
   }
 }
+
+function mb_str_pad($input, $pad_length, $pad_string = ' ', $pad_type = STR_PAD_RIGHT) {
+    // Tässä on "//NO_MB_OVERLOAD"-kommentti
+    // jotta UTF8-konversio ei osu tähän riviin
+    $diff = strlen($input) - mb_strlen($input); //NO_MB_OVERLOAD
+    return str_pad($input, $pad_length + $diff, $pad_string, $pad_type); //NO_MB_OVERLOAD
+}
+

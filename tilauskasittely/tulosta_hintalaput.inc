@@ -41,7 +41,8 @@ function tulosta_hintalaput($tuotteet) {
 
       $pdf->draw_text(0, 27, $nimitys[0], $page, $text_normal);
       $pdf->draw_text(0, 24, $nimitys[1], $page, $text_normal);
-      $pdf->draw_text(38, 18, $hinta, $page, $text_bold);
+      $pdf->draw_text(30, 18, $hinta, $page, $text_bold);
+      $pdf->draw_text(40, 18, $tuote['yksikko'], $page, $text_normal);
       $pdf->image_place($kuva, 2, 6, $page, $viivakoodin_asetukset);
     }
   }
@@ -57,14 +58,15 @@ function tulosta_hintalaput($tuotteet) {
 function hae_tuotteet_hintalappuja_varten($otunnus, $kukarow) {
   $query = "SELECT tuote.tuoteno,
             tuote.myyntihinta,
+            tuote.yksikko,
             tuote.nimitys,
-            if (tuote.tarrakpl > 0, tuote.tarrakpl, 1) AS tarrakpl,
-            if (tuote.tarrakerroin > 0, tuote.tarrakerroin, 1) AS tarrakerroin
+            if(tuote.tarrakpl > 0, tuote.tarrakpl, 1)         AS tarrakpl,
+            if(tuote.tarrakerroin > 0, tuote.tarrakerroin, 1) AS tarrakerroin
             FROM tilausrivi
             INNER JOIN tuote ON (tilausrivi.yhtio = tuote.yhtio
               AND tilausrivi.tuoteno = tuote.tuoteno)
             WHERE tilausrivi.uusiotunnus = '{$otunnus}'
-            AND tilausrivi.yhtio='{$kukarow['yhtio']}'";
+            AND tilausrivi.yhtio = '{$kukarow['yhtio']}'";
   $result = pupe_query($query);
 
   $tuotteet = array();

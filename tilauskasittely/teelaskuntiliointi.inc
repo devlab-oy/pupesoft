@@ -14,6 +14,7 @@ else {
 if ($yhtiorow["seuraako_myyntitiliointi_tuotteen_tyyppia"] == "Y") {
   $myyntitiliointi_seuraa_tuotteen_tyyppia = "if(tuote.tuotetyyppi = 'R', 'raaka-aine', " .
     "'normaalituote') tuotetyyppi,";
+  $myyntitiliointi_group = ",15";
 }
 
 // Tehtaan tiliointiaineisto suoraan sql:lla
@@ -48,7 +49,7 @@ $query = "SELECT tilausrivi.alv alv,
           WHERE tilausrivi.uusiotunnus = '$lasku[tunnus]'
           AND tilausrivi.tyyppi        = 'L'
           AND tilausrivi.yhtio         = '$kukarow[yhtio]'
-          GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15";
+          GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14{$myyntitiliointi_group}";
 $xresult = pupe_query($query);
 
 if (mysql_num_rows($xresult) == 0) {

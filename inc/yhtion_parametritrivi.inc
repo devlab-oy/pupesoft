@@ -2936,8 +2936,9 @@ if ($fieldname == "nayta_variaatiot") {
 
   $sel = $trow[$i] == 'Y' ? ' selected' : '';
 
-  $ulos .= "<option value = ''>" . t("Ei n‰ytet‰ tuotteen variaatiot-nappulaa");
-  $ulos .= "<option value = 'Y' $sel>" . t("N‰ytet‰‰n tuotteen variaatiot-nappula");
+  $ulos .= "<option value = ''>" . t("Ei n‰ytet‰ tuotteiden variaatioita tuotelistauksessa");
+  $ulos .= "<option value = 'Y' $sel>" . t("Tuotteiden listauksessa Hae ja selaa-ohjelmassa " .
+      "mahdollisuus n‰hd‰ tuotteen variaatiot (Esim. eri koot ja v‰rit)");
   $ulos .= "</select></td>";
 
   $jatko = 0;

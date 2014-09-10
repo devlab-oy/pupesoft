@@ -111,7 +111,9 @@ if ($toim == "LAHETE" and $yhtiorow["lahete_tyyppi_tulostus"] != '' and $otunnus
   $mista = 'asiakas';
 }
 
-if ($toim == "TILAUSVAHVISTUS" and $yhtiorow["tilausvahvistus_tyyppi_tulostus"] == '' and $otunnus != '') {
+if ($toim == "TILAUSVAHVISTUS"
+  and $yhtiorow["tilausvahvistus_tyyppi_tulostus"] != ''
+  and $otunnus != '') {
 
   $query2 = "SELECT tilausvahvistus, liitostunnus
              FROM lasku

@@ -857,9 +857,13 @@ if ($kasitellaan_tiedosto) {
 
           if (in_array("yhteensopivuus_tuote_sensori", $taulut)) {
             $yhteensopivuus_taulun_nimi = "yhteensopivuus_tuote_sensori";
+            $_sensori = array_search("SENSORITUOTENO", $taulunotsikot["yhteensopivuus_tuote_sensori"]);
+            $_sensori = $taulunrivit["yhteensopivuus_tuote_sensori"][$eriviindex][$_sensori];
+            $_wherelisa = "and sensorituoteno = '{$_sensori}'";
           }
           else {
             $yhteensopivuus_taulun_nimi = "yhteensopivuus_tuote";
+            $_wherelisa = "";
           }
 
           $_tyyppi = array_search("TYYPPI", $taulunotsikot[$yhteensopivuus_taulun_nimi]);
@@ -876,7 +880,8 @@ if ($kasitellaan_tiedosto) {
                      WHERE yhtio = '$kukarow[yhtio]'
                      and tyyppi  = '{$_tyyppi}'
                      and atunnus = '{$_atunnus}'
-                     and tuoteno = '{$_tuoteno}'";
+                     and tuoteno = '{$_tuoteno}'
+                     {$_wherelisa}";
           $apures = pupe_query($apusql);
 
           if (mysql_num_rows($apures) == 1) {

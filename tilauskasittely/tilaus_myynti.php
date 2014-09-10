@@ -2923,7 +2923,7 @@ if ($tee == '') {
         echo "<input type='text' name='hae_asiakasta_boksi' id='hae_asiakasta_boksi' value='' /> ";
         echo "<input type='button' name='hae_asiakasta_boksi_button' id='hae_asiakasta_boksi_button' value='", t("Vaihda asiakas"), "'>";
         echo "<div style='text-align:right;'>";
-        echo "<span id='hae_asiakasta_hintavaihto_txt' style='position:relative; top:1px;'>" . t("Vaihda myös hinnat") . "</span>";
+        echo "<span id='hae_asiakasta_hintavaihto_txt' style='position:relative; top:1px;'>" . t("Asiakashinnat ja -alennukset lasketaan uudestaan") . "</span>";
         echo "<input type='checkbox' id='hae_asiakasta_hintavaihto_cb' name='hintojen_vaihto' value='JOO' CHECKED />";
         echo "</div>";
         echo "</span>";

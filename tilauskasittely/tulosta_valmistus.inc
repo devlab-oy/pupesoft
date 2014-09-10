@@ -433,6 +433,8 @@ if (!function_exists('rivi_valm')) {
   function rivi_valm($thispage, $tyyppi="") {
     global $pdf, $page, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $perheid2, $norm, $pieni, $rivinkorkeus, $paino, $uusisivu;
 
+    global $_rivityyppi;
+
     static $tuoteperhe_omallesivulle = "";
 
     // viivat rivien väliin...
@@ -574,6 +576,8 @@ if (!function_exists('rivi_valmistus')) {
   function rivi_valmistus($thispage, $tyyppi = "") {
     global $pdf, $page, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $perheid2, $norm, $pieni, $rivinkorkeus, $paino, $isakpl;
 
+    global $_rivityyppi;
+
     $p["height"]  = 10;
     $p["font"]    = "Times-Roman";
 
@@ -582,7 +586,7 @@ if (!function_exists('rivi_valmistus')) {
 
     $varastopaikka = $row["hyllyalue"] . " " . $row["hyllynro"] . " " . $row["hyllyvali"] . " " . $row["hyllytaso"];
 
-    if ($row["tunnus"] == $row["perheid"]) {
+    if ($row["tyyppi"] != 'V') {
       $isakpl  = $row["tilkpl"];
       $lapskpl = ' ';
 
@@ -599,6 +603,11 @@ if (!function_exists('rivi_valmistus')) {
       else {
         $lapskpl = round($row["tilkpl"]/$isakpl, 8);
       }
+    }
+
+    if ($row['tyyppi'] == 'V' and !empty($_rivityyppi) and $_rivityyppi != $row['tyyppi']) {
+      $pdf->draw_text(35,  $kala, "Raaka-aineet:",  $thispage, $p);
+      $kala -= $rivinkorkeus;
     }
 
     $pdf->draw_text(25,  $kala, $rivinumerot[$row["tunnus"]],                $thispage, $pp);
@@ -675,19 +684,14 @@ if (!function_exists('rivi_valmistus')) {
         }
       }
       else {
-        $kala = $kala - $rivinkorkeus;
         $lask_valm++;
-      }
-
-      if ($tyyppi != "ETUSIVU") {
-        $pdf->draw_text(35,  $kala, "Raaka-aineet:",  $thispage, $p);
       }
     }
 
     $kala = $kala - $rivinkorkeus;
 
     $perheid  = $row["perheid"];
-    $perheid2 = $row["perheid2"];
+    $perheid2 = $row["perheid2"];    
   }
 }
 

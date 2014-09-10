@@ -1679,12 +1679,6 @@ if ($verkkokauppa == "") {
   else exit;
 }
 
-/**
- *
- * @param unknown $row
- */
-
-
 function piirra_extranet_saldo($row) {
   global $kukarow, $yhtiorow, $verkkokauppa, $noutovarres, $laskurow, $saldoaikalisa,
   $rivin_yksikko, $vari, $verkkokauppa_saldoluku, $hinta_rajaus;
@@ -1801,11 +1795,6 @@ function piirra_extranet_saldo($row) {
   echo "</td>";
 }
 
-
-/**
- *
- * @param unknown $row
- */
 function piirra_ostoskoriin_lisays($row) {
   global $oikeurow, $kukarow, $ostoskori, $vari, $yht_i;
 
@@ -2075,10 +2064,6 @@ function tarkista_tilausrivi() {
   pupemaster_stop();
 }
 
-
-/**
- * Hakee tuotteen saldon ja piirtää sen
- */
 function hae_ja_piirra_saldo($row, $yhtiot) {
   global $toim_kutsu, $verkkokauppa, $kukarow, $verkkokauppa_saldotsk, $laskurow,
   $saldoaikalisa, $yhtiorow, $rivin_yksikko, $vari, $classrigh, $hinta_rajaus, $ostoskori,
@@ -2347,12 +2332,6 @@ function hae_ja_piirra_saldo($row, $yhtiot) {
   }
 }
 
-
-/**
- * Hakee yhtiöt, joille saldo näytetään
- *
- * @return array
- */
 function hae_yhtiot() {
   global $yhtiorow, $kukarow;
 
@@ -2391,11 +2370,6 @@ function hae_parametri_variaatio($row) {
   return $parametri_variaatio;
 }
 
-
-/**
- *
- * @param unknown $parametri_variaatio
- */
 function piirra_nayta_variaatiot_nappula($parametri_variaatio) {
   global $yhtiorow;
 

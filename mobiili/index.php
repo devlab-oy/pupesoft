@@ -22,8 +22,9 @@ if (tarkista_oikeus("mobiili/siirto.php")) {
 }
 
 if (tarkista_oikeus("mobiili/tulouta.php")) {
-  echo "<p><a href='tulouta.php' class='button'>", t("Tulouta", $browkieli), "</a></p>";
-  echo "<p><a href='ostotilaus.php?sarjanumerotuloutus=1&uusi' class='button'>", t("Tulouta sarjanumerolla", $browkieli), "</a></p>";
+  echo "<p><a href='tulouta.php' class='button'>", t("Tulouta", $browkieli), "</a>&nbsp;";
+
+  echo "<a href='ostotilaus_sarjanumero.php' class='button'>", t("Tulouta sarjanumerolla", $browkieli), "</a></p>";
 }
 
 if (tarkista_oikeus("mobiili/inventointi.php")) {

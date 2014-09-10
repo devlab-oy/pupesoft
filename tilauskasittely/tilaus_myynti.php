@@ -1107,7 +1107,7 @@ if (isset($tyhjenna)) {
 }
 
 if ($tee == "VALMIS"
-  and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS"))
+  and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "VALMISTAASIAKKAALLE"))
   and $kateinen != ''
   and $kukarow['extranet'] == ''
   and (
@@ -5589,8 +5589,16 @@ if ($tee == '') {
       $rows = array();
       $hinta_laskurit = array();
 
+      // Onko valmistettavaa?
+      $_onkovalmistettavaa = FALSE;
+
       while ($row = mysql_fetch_assoc($result)) {
         $rows[]  = $row;
+
+        // Katotaan onko tilauksella valmistettavia rivejä
+        if ($_onko_valmistus and !$_onkovalmistettavaa and in_array($row['tyyppi'], array('W', 'M', 'V')) and $row['varattu'] > 0) {
+          $_onkovalmistettavaa = TRUE;
+        }
 
         if ($_onko_valmistus and $yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K") {
 
@@ -8872,7 +8880,14 @@ if ($tee == '') {
           echo "</select>";
         }
 
-        if (in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS")) and $kukarow["extranet"] == "" and $kateinen == 'X' and ($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "")) {
+        if ((
+            in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS"))
+            or ($toim == "VALMISTAASIAKKAALLE" and !$_onkovalmistettavaa)
+          )
+          and $kukarow["extranet"] == ""
+          and $kateinen == 'X'
+          and ($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "")
+        ) {
 
           if (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "")) {
             echo "<br><br>".t("Valitse kassalipas").":<br>

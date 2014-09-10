@@ -589,6 +589,8 @@ if ($tila == "" and !isset($jatka)) {
     echo "<font class='head'>".t("Myyntitilauksen otsikko")."</font><hr>";
   }
 
+  $hintojen_vaihto = isset($hintojen_vaihto) ? $hintojen_vaihto : 'JOO';
+
   echo "<form method='post' autocomplete='off' name='paaformi' enctype='multipart/form-data'>";
   echo "<input type='hidden' name='tee' value='OTSIK'>";
   echo "<input type='hidden' name='lopetus' value='$lopetus'>";
@@ -1003,7 +1005,22 @@ if ($tila == "" and !isset($jatka)) {
   }
 
   if ($templ > 0 and $asiakasid == '') {
-    echo "<tr><td colspan='2'><br><font class='message'>".t("HUOM: Jos vaihdat asiakasta, tarkista hinnat ja alennukset")."!</font></td></tr>";
+    echo "<tr><td colspan='2'>";
+
+    if ($hintojen_vaihto == 'JOO') {
+      $hv_check = 'CHECKED';
+    }
+    else{
+     $hv_check = '';
+    }
+
+    echo "<input type='checkbox' id='hintojen_vaihto' $hv_check />";
+    echo "<input type='hidden' name='hintojen_vaihto' class='hv_hidden' value='$hintojen_vaihto'>";
+    echo "<span style='position:relative; top:1px;'>" . t("Asiakashinnat ja -alennukset lasketaan uudestaan") . "</span>";
+    echo "</td></tr>";
+  }
+  else {
+    echo "<input type='hidden' name='hintojen_vaihto' value='$hintojen_vaihto'>";
   }
 
   echo "</table>";
@@ -1018,7 +1035,6 @@ if ($tila == "" and !isset($jatka)) {
     }
 
     echo "<input type='submit' value='".t("Hae")."'>";
-
     echo "</form>";
 
     $formi  = "paaformi";
@@ -3010,7 +3026,8 @@ if ($tila == "" and !isset($jatka)) {
       echo "<input type='hidden' name='tila' value='vaihdaasiakas'>";
       echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
       echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
-      echo "<td class='back'><input type='submit' ACCESSKEY='A' value='".t("Vaihda asiakas")."'></td></form>";
+      echo "<td class='back'><input type='submit' ACCESSKEY='A' value='".t("Vaihda asiakas")."'>";
+      echo "</td></form>";
     }
 
     echo "</tr></table>";
@@ -3064,11 +3081,14 @@ if (isset($jatka)) {
 
       // Hinnat lasketaan uudestaan vain jos asiakas vaihdetaan
       // Ei esim jos vain alvi tai vientikentt‰‰ muutetaan
-      if (($from == 'vaihdaasiakas' or $apuro["liitostunnus"] != $asiakasid) and $asiakasid > 0) {
+      if (($from == 'vaihdaasiakas' or $apuro["liitostunnus"] != $asiakasid)
+        and $asiakasid > 0
+        and $hintojen_vaihto == 'JOO') {
 
         $paivitetaanko = TRUE;
 
-        // hinnat p‰ivitet‰‰n vain jos asiakkaalla on asiakashinta tai asiakasalennus (saako_myyda_private_label palauttaa TRUE jos on asiakashinta tai alennus)
+        // hinnat p‰ivitet‰‰n vain jos asiakkaalla on asiakashinta tai asiakasalennus
+        // (saako_myyda_private_label palauttaa TRUE jos on asiakashinta tai alennus)
         if ($yhtiorow["vaihda_asiakas_hintapaiv"] == "A") {
           if (!saako_myyda_private_label($laskurow['liitostunnus'], $trow["tuoteno"], $row['tilkpl'], TRUE)) {
             $paivitetaanko = FALSE;

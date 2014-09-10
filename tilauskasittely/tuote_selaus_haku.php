@@ -129,11 +129,15 @@ if (!empty($variaatio)) {
             tuote.tuoteno,
             tuote.nimitys,
             tuote.osasto,
-            tuote.myyntihinta
+            tuote.myyntihinta,
+            tuote.yhtio
             FROM tuote
             INNER JOIN tuotteen_avainsanat ON (tuote.tuoteno = tuotteen_avainsanat.tuoteno
-              AND tuotteen_avainsanat.kieli = '{$yhtiorow["kieli"]}')
-            WHERE tuotteen_avainsanat.selite = '{$variaatio}'";
+              AND tuotteen_avainsanat.kieli = '{$yhtiorow['kieli']}'
+              AND tuotteen_avainsanat.laji = 'parametri_variaatio')
+              AND tuotteen_avainsanat.yhtio = tuote.yhtio
+            WHERE tuotteen_avainsanat.selite = '{$variaatio}'
+            AND tuote.yhtio = '{$kukarow['yhtio']}'";
   $result = pupe_query($query);
 
   $tuotteet = array();

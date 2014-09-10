@@ -533,8 +533,10 @@ if ($monta > 1 and $monta <= $limit) {
           <td>$asiakas[postino] $brpostino</td>
           <td>$asiakas[postitp] $brpostitp</td>";
 
-      echo "<form method='post'>";
+      $hintojen_vaihto = isset($hintojen_vaihto) ? $hintojen_vaihto : 'JOO';
+
       echo "<td class='back'>";
+      echo "<form method='post'>";
       echo "<input type='hidden' name='asiakasid'     value='$asiakas[tunnus]'>";
       echo "<input type='hidden' name='tee'         value='$tee'>";
       echo "<input type='hidden' name='konserni'      value='$konserni'>";
@@ -556,6 +558,7 @@ if ($monta > 1 and $monta <= $limit) {
       echo "<input type='hidden' name='tuoteno'       value='$tuoteno'>";
       echo "<input type='hidden' name='lasku_yhtio'    value='$asiakas[yhtio]'>";
       echo "<input type='hidden' name='tarra_aineisto'  value='$tarra_aineisto'>";
+      echo "<input type='hidden' name='hintojen_vaihto' value='$hintojen_vaihto'>";
 
       if (isset($yhtiotoimipaikka)) echo "<input type='hidden' name='yhtiotoimipaikka'  value='{$yhtiotoimipaikka}' />";
       if (isset($tilaustyyppi)) echo "<input type='hidden' name='tilaustyyppi'  value='{$tilaustyyppi}' />";
@@ -573,8 +576,8 @@ if ($monta > 1 and $monta <= $limit) {
       }
 
       echo "<input type='submit' name='valitse_asiakas' value='".t("Valitse")."'>";
+     echo "</form>";
       echo "</td>";
-      echo "</form>";
       echo "</tr>";
     }
     else {

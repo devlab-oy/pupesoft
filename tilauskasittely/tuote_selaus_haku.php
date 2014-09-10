@@ -125,11 +125,15 @@ $laskurow = mysql_fetch_assoc($result);
 if (!empty($variaatio)) {
   tarkista_tilausrivi();
 
-  $query = "SELECT tuote.tunnus, tuote.tuoteno, tuote.nimitys, tuote.osasto
+  $query = "SELECT tuote.tunnus,
+            tuote.tuoteno,
+            tuote.nimitys,
+            tuote.osasto,
+            tuote.myyntihinta
             FROM tuote
-            INNER JOIN tuotteen_avainsanat ON (tuote.tuoteno = tuotteen_avainsanat.tuoteno AND
-                                               tuotteen_avainsanat.kieli = '{$yhtiorow["kieli"]}')
-            WHERE tuotteen_avainsanat.selite                             = '{$variaatio}'";
+            INNER JOIN tuotteen_avainsanat ON (tuote.tuoteno = tuotteen_avainsanat.tuoteno
+              AND tuotteen_avainsanat.kieli = '{$yhtiorow["kieli"]}')
+            WHERE tuotteen_avainsanat.selite = '{$variaatio}'";
   $result = pupe_query($query);
 
   $tuotteet = array();
@@ -261,12 +265,12 @@ tarkista_tilausrivi();
 
 $jarjestys = "tuote.tuoteno";
 
-$lisa          = "";
-$ulisa         = "";
-$toimtuotteet     = "";
-$origtuotteet     = "";
-$poislisa_mulsel   = "";
-$lisa_parametri    = "";
+$lisa            = "";
+$ulisa           = "";
+$toimtuotteet    = "";
+$origtuotteet    = "";
+$poislisa_mulsel = "";
+$lisa_parametri  = "";
 $hinta_rajaus    = "";
 
 if (!isset($ojarj)) {

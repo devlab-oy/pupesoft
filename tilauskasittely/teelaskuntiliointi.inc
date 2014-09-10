@@ -140,7 +140,7 @@ else {
       $vastasumma_valuutassa += $tiliointisumma_valuutassa;
 
       //Sitten pitää vielä tilioidä itse marginaali joka on normaalia verollista myyntiä
-      $selite = t("Marginaaliverolasku/Marginaali", $yhtiorow["kieli"])." ". $lasku['nimi']." ".$lasku['nimitark'];
+      $selite = t("Marginaaliverolasku/Marginaali", $yhtiorow["kieli"]).": ". $lasku['laskunro']." ". $lasku['nimi']." ".$lasku['nimitark'];
 
       $tilino       = (int) $xrow['tilino'];
       $tilino_eu       = (int) $xrow['tilino_eu'];
@@ -162,7 +162,7 @@ else {
     }
     elseif ($xrow["alv"] >= 500 and $xrow["alv"] < 600 and ($xrow["marginaaliostot"] == "KYLLA" or $xrow["marginaalihyvitys"] == "KYLLA")) {
       // Valitaan ostotili, tässä on marginaaliostoa
-      $selite        = t("Marginaaliverolasku/Osto", $yhtiorow["kieli"])." ". $lasku['nimi']." ".$lasku['nimitark'];
+      $selite        = t("Marginaaliverolasku/Osto", $yhtiorow["kieli"]).": ". $lasku['laskunro']." ". $lasku['nimi']." ".$lasku['nimitark'];
 
       $tilino       = (int) $xrow['osto_marginaali'];
       $tilino_eu       = (int) $xrow['osto_marginaali'];

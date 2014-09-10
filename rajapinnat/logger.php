@@ -22,12 +22,33 @@ class Logger {
     }
   }
 
-  public function log($message) {
-    $message = $this->formatMessage($message);
+  /**
+   *
+   * @param string $message
+   * @param Exception $exception
+   */
+  public function log($message, $exception = null) {
+    if (!is_null($exception)) {
+      $message = $this->exception_message($exception, $message);
+    }
+    $message = $this->format_message($message, $exception);
     $this->write($message);
   }
 
-  public function write($message) {
+  /**
+   *
+   * @param string $date_format
+   */
+  public function set_date_format($date_format) {
+    $this->date_format = $date_format;
+  }
+
+  /**
+   *
+   * @param string $message
+   * @throws RuntimeException
+   */
+  private function write($message) {
     if (!is_null($this->file_handle)) {
       if (fwrite($this->file_handle, $message) === false) {
         throw new RuntimeException('Tiedostoon ei pystynyt kirjoittamaan');
@@ -35,14 +56,31 @@ class Logger {
     }
   }
 
-  public function set_date_format($date_format) {
-    $this->date_format = $date_format;
+  /**
+   * Returns message with exception message
+   *
+   * @param Exception $exception
+   * @param string $message
+   * @return string
+   */
+  private function exception_message($exception, $message = '') {
+    return "{$message} (" . $exception->getMessage() . ") faultcode: " . $exception->faultcode;
   }
 
-  private function formatMessage($message) {
-    return "[{$this->get_timestamp()}] {$message}" . PHP_EOL;
+  /**
+   * Timestamps log lines
+   *
+   * @param string $message
+   * @return string
+   */
+  private function format_message($message) {
+    return utf8_encode("[{$this->get_timestamp()}] {$message}" . PHP_EOL);
   }
 
+  /**
+   *
+   * @return string
+   */
   private function get_timestamp() {
     return date($this->date_format);
   }

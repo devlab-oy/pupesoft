@@ -2932,15 +2932,28 @@ if ($fieldname == "extranet_nayta_saldo") {
 }
 
 if ($fieldname == "seuraako_myyntitiliointi_tuotteen_tyyppia") {
-  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
 
-  $sel = $trow[$i] == 'Y' ? ' selected' : '';
+  // Tarkistetaan, että sekä, raaka-ainevarasto ja raaka-ainevarastonmuutos tilit ovat olemassa
+  $query = "SELECT COUNT(*) AS tilien_maara
+            FROM tili
+            WHERE tili.yhtio = '{$kukarow['yhtio']}'
+            AND tili.tilino IN ('{$yhtiorow['raaka_ainevarasto']}',
+                                '{$yhtiorow['raaka_ainevarastonmuutos']}')";
+  $result = pupe_query($query);
+  $tilien_maara = mysql_fetch_assoc($result);
+  $tilien_maara = $tilien_maara['tilien_maara'];
 
-  $ulos .= "<option value = ''>" . t("Myyntitiliointi ei seuraa tuotteen tyyppiä");
-  $ulos .= "<option value = 'Y' $sel>" . t("Myyntitiliointi seuraa tuotteen tyyppiä");
-  $ulos .= "</select></td>";
+  if ($tilien_maara == "2") {
+    $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
 
-  $jatko = 0;
+    $sel = $trow[$i] == 'Y' ? ' selected' : '';
+
+    $ulos .= "<option value = ''>" . t("Myyntitiliointi ei seuraa tuotteen tyyppiä");
+    $ulos .= "<option value = 'Y' $sel>" . t("Myyntitiliointi seuraa tuotteen tyyppiä");
+    $ulos .= "</select></td>";
+
+    $jatko = 0;
+  }
 }
 
 if ($fieldname == "tuoteperhe_suoratoimitus") {

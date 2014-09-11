@@ -3679,7 +3679,7 @@ if (!function_exists("alehinta")) {
     $hperuste     = "";
     $alehinta_alv   = 0;
     $hintaperuste  = FALSE;
-    $aleperuste    = FALSE;
+    $aleperuste    = array();
     $vanha_yhtio  = "";
     $vanha_liitostunnus = 0;
 
@@ -5943,7 +5943,7 @@ if (!function_exists("alehinta_osto")) {
 
     $aperuste     = "";
     $hintaperuste  = FALSE;
-    $aleperuste    = FALSE;
+    $aleperuste    = array();
 
     // oletetaan yhtiön valuutta jos sitä ei tiedetä
     if ($laskurow["valkoodi"] == "") $laskurow["valkoodi"] = $yhtiorow["valkoodi"];

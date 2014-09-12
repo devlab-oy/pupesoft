@@ -4683,7 +4683,7 @@ if ($tee == '') {
       $laskurow['luottoraja'] = $_avoimia_yhteensa - $_tilauksen_rivihinnat_row['rivihinta'];
     }
 
-    if (trim($retval) != "" and $kukarow['hinnat'] == 0 and $yhtiorow['luottorajan_tarkistus'] == '') {
+    if (trim($retval) != "" and $kukarow['hinnat'] == 0 and $_saako_nayttaa) {
       echo "<br>$retval";
     }
 
@@ -4757,7 +4757,9 @@ if ($tee == '') {
             AND otunnus = '{$laskurow['tunnus']}'";
       $tilauksen_rivihinnat_res = pupe_query($query);
       $tilauksen_rivihinnat_row = mysql_fetch_assoc($tilauksen_rivihinnat_res);
-
+echo "<br>$tilauksen_rivihinnat_row[rivihinta]";
+echo "<br>$laskurow[luottoraja]";
+echo "<br>$asrow[luottoraja]<br>";
       if ($tilauksen_rivihinnat_row['rivihinta'] + $laskurow['luottoraja'] > $asrow['luottoraja']) {
 
         $luottorajavirhe = 'kyllä';

@@ -3803,7 +3803,7 @@ if ($fieldname == 'luottorajan_tarkistus') {
   $sel = $trow[$i] == 'K' ? "selected" : "";
 
   $ulos .= "<option value = ''>".t("Myyntitilauksen luottoraja tarkistetaan normaalisti tilauksen aktivoinnin ja otsikolla k‰ynnin yhteydess‰")."</option>";
-  $ulos .= "<option value = 'K' {$sel}>".t("Myyntitilauksen luottoraja tarkistetaan aina jokaisen muutoksen yhteydess‰ ja n‰ytet‰‰n vain luottorajavirheet")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("Myyntitilauksen luottoraja tarkistetaan aina jokaisen muutoksen yhteydess‰")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

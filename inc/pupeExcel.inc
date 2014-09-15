@@ -11,23 +11,25 @@ class pupeExcel {
     $this->_exceldblink = $temporarylink;
 
     // Tehdään Excel dataa varten temporary tietokantataulu
-    $query = "  CREATE temporary table temporary_excel_data (
-          excelrivi int(11) default null,
-          excelsarake int(11) default null,
-          type char(1) default null,
-          value varchar(100),
-          string_id int(11) default null,
-          style text default null)";
+    $query = "CREATE temporary table temporary_excel_data (
+              excelrivi int(11) default null,
+              excelsarake int(11) default null,
+              type char(1) default null,
+              value varchar(100),
+              string_id int(11) default null,
+              style text default null)
+              ENGINE=myisam";
     $result = pupe_query($query, $this->_exceldblink);
 
     // Tehdään Excel stringejä varten temporary tietokantataulu
-    $query = "  CREATE temporary table temporary_excel_sharedstrings (
-          string_key varchar(100) not null,
-          string text default null,
-          id int(11) not null AUTO_INCREMENT,
-          times_used int(11) not null,
-          PRIMARY KEY (id),
-          UNIQUE KEY string_key_ind (string_key));";
+    $query = "CREATE temporary table temporary_excel_sharedstrings (
+              string_key varchar(100) not null,
+              string text default null,
+              id int(11) not null AUTO_INCREMENT,
+              times_used int(11) not null,
+              PRIMARY KEY (id),
+              UNIQUE KEY string_key_ind (string_key)) 
+              ENGINE=myisam";
     $result = pupe_query($query, $this->_exceldblink);
   }
 
@@ -192,7 +194,7 @@ class pupeExcel {
     $edellinen_excelrivi = -1;
 
     // Kirjoitetaan itse xml:ä
-    while ($data_row = mysql_fetch_assoc($result)) {
+    while ($data_row = mysql_fetch_assoc($result)) {        
 
       if ($data_row["excelrivi"] != $edellinen_excelrivi) {
         // Create the line
@@ -287,7 +289,7 @@ class pupeExcel {
     $result = pupe_query($query, $this->_exceldblink);
 
     $query = "DROP TABLE temporary_excel_data;";
-    $result = pupe_query($query, $this->_exceldblink);
+     $result = pupe_query($query, $this->_exceldblink);
 
     return $xlsxfile;
   }

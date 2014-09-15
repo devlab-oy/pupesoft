@@ -4626,13 +4626,19 @@ if ($tee == '') {
   $_kukaextranet = ($kukarow['extranet'] == '');
 
   $_saako_nahda = ($kukarow['kassamyyja'] == '' or $kukarow['saatavat'] == '1');
-
   $_saako_nayttaa = ($kaytiin_otsikolla == "NOJOO!" or $numres_saatavt == 0);
+  $_saako = ($_saako_nahda and $_saako_nayttaa);
+
+  $_kateinen = empty($meapurow['kateinen']);
+  $_jv = empty($meapurow['jv']);
+  $_kat_jv = ($_kateinen and $_jv);
 
   $_asiakas = ($laskurow['liitostunnus'] > 0);
   $_mika_toim = in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "ENNAKKO", "EXTENNAKKO"));
 
-  if ($_kukaextranet and $_saako_nahda and $_asiakas and $_saako_nayttaa and $_mika_toim) {
+  $_luottoraja_param = ($yhtiorow['luottorajan_tarkistus'] == 'K');
+
+  if ($_kukaextranet and $_kat_jv and $_asiakas and $_saako and $_mika_toim) {
 
     js_popup();
 
@@ -4734,7 +4740,7 @@ if ($tee == '') {
       require "crm/asiakasmemo.php";
     }
   }
-  elseif ($_mika_toim and $yhtiorow['luottorajan_tarkistus'] == 'K' and !empty($laskurow['luottoraja'])) {
+  elseif ($_mika_toim and $_kat_jv and $_luottoraja_param and !empty($laskurow['luottoraja'])) {
 
     $query = "SELECT luottoraja
               FROM asiakas

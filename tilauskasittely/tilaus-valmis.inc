@@ -93,7 +93,7 @@ $luottoraja_chk = ((in_array($yhtiorow["luottorajan_ylitys"], array("K", "J", "L
       and ($kukarow["extranet"] != ""
         or $tilausvalmiskutsuja != "TILAUSMYYNTI")))
   and $tilausvalmis_asiakas_row['luottoraja'] != 0
-  and $maksuehtorow['kateinen'] == ''
+  and $maksuehtorow['kateinen'] == '' and empty($maksuehtorow['jv'])
   and strpos($_SERVER['SCRIPT_NAME'], "korkolasku.php") === FALSE
   and mysql_num_rows($veloitus_result) > 0) ? 1 : 0;
 

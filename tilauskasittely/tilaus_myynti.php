@@ -4734,7 +4734,7 @@ if ($tee == '') {
       require "crm/asiakasmemo.php";
     }
   }
-  elseif ($yhtiorow['luottorajan_tarkistus'] == 'K' and !empty($laskurow['luottoraja'])) {
+  elseif ($_mika_toim and $yhtiorow['luottorajan_tarkistus'] == 'K' and !empty($laskurow['luottoraja'])) {
 
     $query = "SELECT luottoraja
               FROM asiakas

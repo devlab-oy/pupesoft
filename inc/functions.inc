@@ -5943,7 +5943,7 @@ if (!function_exists("alehinta_osto")) {
 
     $aperuste     = "";
     $hintaperuste  = FALSE;
-    $aleperuste    = array();
+    $aleperuste    = FALSE;
 
     // oletetaan yhtiön valuutta jos sitä ei tiedetä
     if ($laskurow["valkoodi"] == "") $laskurow["valkoodi"] = $yhtiorow["valkoodi"];

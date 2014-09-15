@@ -7971,15 +7971,15 @@ if (!function_exists("tallenna_muisti")) {
 
     $kuka = trim($kuka) != '' ? mysql_real_escape_string($kuka) : $kukarow['kuka'];
 
-    $query = "  REPLACE INTO tallennetut_parametrit SET
-          yhtio    = '$kukarow[yhtio]',
-          kuka    = '$kuka',
-          nimitys    = '$nimitys',
-          sovellus  = '$_SERVER[SCRIPT_NAME]',
-          data    = '$data',
-          laatija    = '$kukarow[kuka]',
-          luontiaika  = now()";
-    $result = pupe_query($query);
+    $query = "REPLACE INTO tallennetut_parametrit SET
+              yhtio      = '$kukarow[yhtio]',
+              kuka       = '$kuka',
+              nimitys    = '$nimitys',
+              sovellus   = '$_SERVER[SCRIPT_NAME]',
+              data       = '$data',
+              laatija    = '$kukarow[kuka]',
+              luontiaika = now()";
+    $result = pupe_query($query, $GLOBALS["masterlink"]);
 
     return true;
   }
@@ -8035,7 +8035,7 @@ if (!function_exists("muistiin")) {
               and haku    = '$muisti'
               and kuka    = '$kukarow[kuka]'
               and nimi    = '$nimi'";
-    $result = pupe_query($query);
+    $result = pupe_query($query, $GLOBALS["masterlink"]);
 
     foreach ($muistettava as $key => $value) {
 
@@ -8062,7 +8062,7 @@ if (!function_exists("muistiin")) {
                   laatija    = '$kukarow[kuka]',
                   muokattu   = now(),
                   muokannut  = '$kukarow[kuka]'";
-        $result = pupe_query($query);
+        $result = pupe_query($query, $GLOBALS["masterlink"]);
       }
     }
 
@@ -10608,6 +10608,12 @@ if (!function_exists("laheta_tilausvahvistus")) {
     }
     elseif (strpos($laskurow['tilausvahvistus'], '11') !== FALSE) {
       $naytatvale = 11; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n N‰ytet‰‰n asiakkaan hinta, viivakoodi ja jt-rivit normaaleina. Ei alennuksia
+      if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
+        $tuoteperheetyhdessa = TRUE;
+      }
+    }
+    elseif (strpos($laskurow['tilausvahvistus'], '12') !== FALSE) {
+      $naytatvale = 12; // jos meill‰ on tilausvahvistuksessa 12, niin n‰ytet‰‰n viivakoodi, ale1, ja ale1:n mukaan laskettu hinta
       if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
         $tuoteperheetyhdessa = TRUE;
       }

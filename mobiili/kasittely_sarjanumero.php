@@ -10,14 +10,6 @@ elseif (@include_once "inc/parametrit.inc");
 
 $tilausrivi = (int) $tilausrivi;
 
-$data = array(
-  'tilausrivi' => $tilausrivi,
-  'ostotilaus' => $ostotilaus,
-  'saapuminen' => $saapuminen
-);
-
-$url = http_build_query($data);
-
 // Virheet
 $errors = array();
 if (!isset($tuotepaikka)) $tuotepaikka = '';
@@ -84,8 +76,6 @@ if (isset($tuotepaikka)) {
         "hyllytaso" => $hyllytaso
       );
 
-      paivita_tilausrivin_hylly($tilausrivi, $hylly);
-
       $query = "SELECT * FROM tilausrivi
                 WHERE tunnus = '{$tilausrivi}'
                 AND yhtio = '{$kukarow['yhtio']}'";
@@ -121,12 +111,7 @@ if (isset($tuotepaikka)) {
         pupe_query($query);
       }
 
-      $maara = 1;
-
-      // Tarkistetaan m‰‰r‰
-      if (!is_numeric($maara) or $maara < 1) {
-        $errors[] = t("Virheellinen m‰‰r‰");
-      }
+      paivita_tilausrivin_hylly($tilausrivi, $hylly);
 
       $tilausrivit = array();
 
@@ -143,10 +128,19 @@ if (isset($tuotepaikka)) {
         pupe_query($query);
       }
 
-      vie_varastoon($saapuminen, 0, $hylly);
+      vie_varastoon($saapuminen, 0, $hylly, $row['tunnus']);
+
+      // katsotaan onko tilauksen rivej‰ viel‰ hyllytt‰m‰tt‰
+      $query = "SELECT COUNT(tunnus)
+                FROM tilausrivi
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND otunnus = '{$ostotilaus}'
+                AND uusiotunnus = 0";
+      $result = pupe_query($query);
+      $viemattomia = mysql_result($result, 0);
 
       echo t("Odota hetki...");
-      echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=ostotilaus_sarjanumero.php'>"; exit();
+      echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=ostotilaus_sarjanumero.php?saapuminen={$saapuminen}&v={$viemattomia}'>"; exit();
     }
 }
 

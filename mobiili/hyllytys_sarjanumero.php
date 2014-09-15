@@ -26,7 +26,7 @@ $tilausrivi = $row['tunnus'];
 $ostotilaus = $row['otunnus'];
 
 if (empty($ostotilaus) or empty($tilausrivi)) {
-  exit("Virheelliset parametrit");
+  echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=ostotilaus_sarjanumero.php?virhe'>"; exit();
 }
 
 // Haetaan tilausrivin ja laskun tiedot

@@ -11,15 +11,6 @@ elseif (@include_once "inc/parametrit.inc");
 
 if (!isset($errors)) $errors = array();
 
-// nollataan kuka.kesken
-if (!isset($virhe)) {
-  $nollaus_query = "UPDATE kuka
-                    SET kesken = 0
-                    WHERE yhtio='{$kukarow['yhtio']}'
-                    AND kuka='{$kukarow['kuka']}'";
-  $result = pupe_query($nollaus_query);
-}
-
 // Jos haulla ei löytyny mitään, ollaan palattu tälle sivulle virheparametrilla.
 if (isset($virhe)) {
   $errors[] = t("Ei löytynyt. Hae uudestaan.");
@@ -32,7 +23,8 @@ if (isset($submit)) {
       $errors[] = t("Syötä sarjanumero");
       break;
     }
-    $query_string = "?sarjanumero={$sarjanumero}";
+    $query_string = "?sarjanumero={$sarjanumero}&saapuminen={$saapuminen}";
+
     echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys_sarjanumero.php{$query_string}'>"; exit();
     break;
   case 'takaisin':
@@ -54,7 +46,14 @@ echo "
 </div>";
 
 
-  echo "<div class='main' style='text-align:center;padding:10px;'>
+echo "<div class='error' style='text-align:center'>";
+foreach ($errors as $error) {
+  echo $error."<br>";
+}
+echo "</div>";
+
+
+echo "<div class='main' style='text-align:center;padding:10px;'>
   <form method='post' action=''>
   <label for='sarjanumero'>", t("Sarjanumero"), "</label><br>
   <input type='text' id='sarjanumero' name='sarjanumero' />
@@ -62,15 +61,8 @@ echo "
   <div class='controls' style='text-align:center'>
   <button name='submit' id='haku_nappi' value='ok' onclick='submit();' class='button'>", t("OK"), "</button>
 </form>
-</div>";
-
-echo "<div class='error' style='text-align:center'>";
-foreach ($errors as $error) {
-  echo $error."<br>";
-}
-echo "</div>";
-
-echo "<script type='text/javascript'>
+</div>
+<script type='text/javascript'>
   $(document).ready(function() {
     var focusElementId = 'sarjanumero';
     var textBox = document.getElementById(focusElementId);

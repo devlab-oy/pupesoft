@@ -215,6 +215,8 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 
   $kuorma[$kuormakirja_id]['tilaukset'] = $tilaukset;
 
+
+
   $edidata = base64_encode(serialize($kuorma));
 
   echo "<form method='post'>
@@ -235,7 +237,7 @@ elseif($tee == 'luo') {
   $query = "SELECT *
             FROM toimi
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND REPLACE(nimi, ' ', '') = '{$data['lahettaja']}'";
+            AND REPLACE(nimi, ' ', '') = REPLACE('{$data['lahettaja']}', ' ', '')";
   $toimres = pupe_query($query);
   $toimrow = mysql_fetch_assoc($toimres);
 
@@ -321,11 +323,6 @@ elseif($tee == 'luo') {
   }
 
 
-  $ytunnus = 08274241;
-  $toimittajaid = 104;
-  require "inc/kevyt_toimittajahaku.inc";
-  // Toiminta funktioitu
-  $result = uusi_saapuminen($toimittajarow);
 
 }
 else{

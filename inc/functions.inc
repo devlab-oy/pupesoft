@@ -3679,7 +3679,7 @@ if (!function_exists("alehinta")) {
     $hperuste     = "";
     $alehinta_alv   = 0;
     $hintaperuste  = FALSE;
-    $aleperuste    = array();
+    $aleperuste    = FALSE;
     $vanha_yhtio  = "";
     $vanha_liitostunnus = 0;
 

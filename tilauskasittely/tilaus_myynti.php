@@ -4745,7 +4745,8 @@ if ($tee == '') {
     $query = "SELECT luottoraja
               FROM asiakas
               WHERE yhtio = '{$kukarow['yhtio']}'
-              and tunnus = '{$laskurow['liitostunnus']}'";
+              and tunnus = '{$laskurow['liitostunnus']}'
+              AND luottoraja != 0";
     $asresult = pupe_query($query);
     $asrow = mysql_fetch_assoc($asresult);
 

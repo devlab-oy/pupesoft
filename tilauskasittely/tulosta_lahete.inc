@@ -3687,7 +3687,7 @@ if (!function_exists('loppu_lahete')) {
 
         $pdf->draw_text(50, $kala-71, t("Salassapito", $kieli), $thispage, $boldi);
         $pdf->draw_text(200, $kala-71, t("T‰m‰ asiakirja liitteineen on luottamuksellinen eik‰ sit‰ saa ilman ", $kieli).$yhtiorow['nimi'].':n ', $thispage, $norm);
-        $pdf->draw_text(200, $kala-81, t("lupaa n‰ytt‰‰ kolmannelle", $kieli), $thispage, $norm);
+        $pdf->draw_text(200, $kala-81, t("lupaa n‰ytt‰‰ kolmannelle osapuolelle.", $kieli), $thispage, $norm);
         // Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
         if ($kala-253 <= 58) {
           $sivu++;

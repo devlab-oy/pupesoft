@@ -1274,7 +1274,7 @@ if (!function_exists('loppu_tarjous')) {
 
           $pdf_tarjous->draw_text(50, $kala-90, t("Salassapito", $kieli), $page_tarjous[$sivu], $boldi);
           $pdf_tarjous->draw_text(200, $kala-90, t("T‰m‰ asiakirja liitteineen on luottamuksellinen eik‰ sit‰ saa ilman ", $kieli).$yhtiorow['nimi'].':n ', $page_tarjous[$sivu], $norm);
-          $pdf_tarjous->draw_text(200, $kala-103, t("lupaa n‰ytt‰‰ kolmannelle", $kieli), $page_tarjous[$sivu], $norm);
+          $pdf_tarjous->draw_text(200, $kala-103, t("lupaa n‰ytt‰‰ kolmannelle osapuolelle.", $kieli), $page_tarjous[$sivu], $norm);
 
           // Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
           if ($kala-253 <= 230) {
@@ -1302,7 +1302,7 @@ if (!function_exists('loppu_tarjous')) {
           $pdf_tarjous->draw_text(50, $kala-150, '2. '.t("Allekirjoitettu tarjous", $kieli), $page_tarjous[$sivu], $pieni);
           $pdf_tarjous->draw_text(50, $kala-160, "3. $yhtiorow[nimi]".t(":n yleiset kauppaehdot", $kieli)." 30.6.2014", $page_tarjous[$sivu], $pieni);
           $pdf_tarjous->draw_text(50, $kala-170, "4. ".t("Rakennustuotteiden yleisi‰ hankinta- ja toimitusehtoja (RYHT 2000) ja betonielementtien asennusehdot", $kieli).'.', $page_tarjous[$sivu], $pieni);
-          
+
           $pdf_tarjous->draw_text(50, $kala-190, t("Olen tutustunut", $kieli)." $yhtiorow[nimi]".t(":n yleisiin sopimusehtoihin ja hyv‰ksyn ne sellaisenaan").'.', $page_tarjous[$sivu], $pieni);
 
           $x[0] = 50;

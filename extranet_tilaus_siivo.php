@@ -41,7 +41,7 @@ $query = "SELECT lasku.tunnus laskutunnus, asiakas.extranet_tilaus_varaa_saldoa
           AND lasku.tila        = 'N'
           AND lasku.alatila     = ''
           AND lasku.clearing    NOT IN ('EXTENNAKKO','EXTTARJOUS')";
-$result = mysql_query($query) or die($query);
+$result = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($result)) {
 
@@ -91,7 +91,7 @@ while ($row = mysql_fetch_assoc($result)) {
             AND tilausrivi.varattu                        > 0
             GROUP BY 1, 2, 3, 4
             HAVING laskuri = 0";
-  $rivi_check_res = mysql_query($query) or die($query);
+  $rivi_check_res = pupe_query($query);
 
   $jt_saldo_lisa = $yhtiorow["varaako_jt_saldoa"] == "" ? ", jt = varattu, varattu = 0 " : '';
 
@@ -104,7 +104,7 @@ while ($row = mysql_fetch_assoc($result)) {
                 $jt_saldo_lisa
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tunnus  = '{$rivi_check_row['tunnus']}'";
-      $rivi_res = mysql_query($query) or die($query);
+      $rivi_res = pupe_query($query);
       $laskuri_jt++;
     }
     else {
@@ -112,13 +112,13 @@ while ($row = mysql_fetch_assoc($result)) {
                 varattu     = 0
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tunnus  = '{$rivi_check_row['tunnus']}'";
-      $rivi_res = mysql_query($query) or die($query);
+      $rivi_res = pupe_query($query);
 
       $query = "UPDATE tilausrivin_lisatiedot SET
                 positio              = 'Ei varaa saldoa'
                 WHERE yhtio          = '{$kukarow['yhtio']}'
                 AND tilausrivitunnus = '{$rivi_check_row['tunnus']}'";
-      $rivi_res = mysql_query($query) or die($query);
+      $rivi_res = pupe_query($query);
       $laskuri_norm++;
     }
   }

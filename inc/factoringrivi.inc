@@ -54,7 +54,7 @@ if (mysql_field_name($result, $i) == "valkoodi") { //valuutta
             FROM valuu
             WHERE yhtio = '$kukarow[yhtio]'
              ORDER BY jarjestys";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   $ulos = "<td><select name='$nimi'>";
 
@@ -76,7 +76,7 @@ if (mysql_field_name($result, $i) == "pankki_tili") { //valuutta
             WHERE yhtio  = '$kukarow[yhtio]'
             and kaytossa = ''
              ORDER BY nimi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   $ulos = "<td><select name='$nimi'>";
 

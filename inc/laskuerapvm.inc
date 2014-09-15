@@ -47,7 +47,7 @@ if ($aika != '') {
             and lasku.tila     in ('H','M','P','Q')
             GROUP BY Aika
             ORDER BY Aika";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<table>";
   echo "<tr><th>".t("Jakso")."</th><th>".t("Eräpvm")."</th><th>".t("Summa")."</th><th>".t("Kpl")."</th></tr>";

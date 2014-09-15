@@ -97,7 +97,7 @@ $query = "SELECT distinct otunnus
           FROM tilausrivi
           WHERE tilausrivi.uusiotunnus = '$uusiotunnus'
           and tilausrivi.yhtio='$kukarow[yhtio]'";
-$uresult = mysql_query($query) or pupe_error($query);
+$uresult = pupe_query($query);
 
 $tunnukset = '';
 
@@ -115,7 +115,7 @@ if ($tunnukset != "") {
             FROM rahtikirjat
             WHERE otsikkonro in ($tunnukset)
             and yhtio='$kukarow[yhtio]'";
-  $rahtiresult = mysql_query($query) or pupe_error($query);
+  $rahtiresult = pupe_query($query);
 
   $kilot  = 0;
   $kollit = 0;
@@ -155,7 +155,7 @@ if ($tunnukset != "") {
             and tilausrivi.yhtio         = '$kukarow[yhtio]'
             and tilausrivi.kpl           > 0
             GROUP BY tuote.tullinimike1, tuote.tullinimike2, tuote.tullikohtelu, alkuperamaa, tullinimike.su, tullinimike.su_vientiilmo, tullinimike.dm";
-  $riviresult = mysql_query($query) or pupe_error($query);
+  $riviresult = pupe_query($query);
 
   if (mysql_num_rows($riviresult) < 1) {
     echo "VIRHE: Laskulla ei ollut yhtään tilausriviä/nimikettä!<br>";
@@ -564,7 +564,7 @@ if ($tunnukset != "") {
             WHERE tunnus  = '$laskurow[varasto]'
             and yhtio     = '$kukarow[yhtio]'
             and osoite   != ''";
-  $varresult = mysql_query($query) or pupe_error($query);
+  $varresult = pupe_query($query);
 
   if (mysql_num_rows($varresult) > 0) {
     $varrow = mysql_fetch_array($varresult);

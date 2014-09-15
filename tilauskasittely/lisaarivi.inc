@@ -1686,7 +1686,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               }
 
               $result = pupe_query($query);
-              $lisatty_tun = mysql_insert_id();
+              $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
               $trivtyrow = array("selite" => "");
 
@@ -2874,7 +2874,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     }
 
     $result = pupe_query($query);
-    $lisatty_tun = mysql_insert_id();
+    $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
     if ($suoratoimitus_splittaus and $rivitunnus == $lisatty_tun) {
       // Päivitetään suoratoimitus-myyntitilausrivin määrät

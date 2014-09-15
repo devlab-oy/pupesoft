@@ -25,7 +25,7 @@ $query = "SELECT tunnus, tapvm, CONCAT_WS(' ', nimi, nimitark, postino, postitp)
           FROM lasku
           WHERE yhtio = '$kukarow[yhtio]' and $ehto
           ORDER BY $jarj";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 if (mysql_num_rows($result) > 100) {
   echo "<font class='message'>".t("Tuloksesksi tuli yli 100 laskua. Anna pienempi väli")."</font>";

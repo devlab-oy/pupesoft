@@ -10,7 +10,7 @@ $query = "SELECT *
           WHERE yhtio          = '$kukarow[yhtio]'
           and myyntirivitunnus > 0
           and ostorivitunnus   = 0";
-$sarres1 = mysql_query($query) or pupe_error($query);
+$sarres1 = pupe_query($query);
 
 echo "<table>";
 
@@ -26,7 +26,7 @@ while ($sarrow1 = mysql_fetch_array($sarres1)) {
             and myyntirivitunnus = 0
             and ostorivitunnus   > 0
             LIMIT 1";
-  $sarres2 = mysql_query($query) or pupe_error($query);
+  $sarres2 = pupe_query($query);
 
   if (mysql_num_rows($sarres2) == 1) {
 
@@ -40,13 +40,13 @@ while ($sarrow1 = mysql_fetch_array($sarres1)) {
                 SET ostorivitunnus = '$sarrow2[ostorivitunnus]'
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tunnus  = '$sarrow1[tunnus]'";
-      $sres = mysql_query($query) or pupe_error($query);
+      $sres = pupe_query($query);
 
       $query = "DELETE
                 FROM sarjanumeroseuranta
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tunnus  = '$sarrow2[tunnus]'";
-      $sres = mysql_query($query) or pupe_error($query);
+      $sres = pupe_query($query);
     }
 
     $lask++;

@@ -24,13 +24,13 @@ if (isset($tee)) {
               WHERE yhtio = '$kukarow[yhtio]'
               AND '$alvv-$blvk-$blvp' >= tilikausi_alku
               AND '$alvv-$blvk-$blvp' <= tilikausi_loppu";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
   }
   else {
     $query = "SELECT *
               FROM tilikaudet
               WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tkausi'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
   }
 
   if (mysql_num_rows($result) != 1) {
@@ -92,7 +92,7 @@ if (isset($tee)) {
               and tiliointi.korjattu = ''
               and tiliointi.tapvm    >= '$tilikaudetrow[tilikausi_alku]'
               and $lisa2";
-    $result   = mysql_query($query) or pupe_error($query);
+    $result   = pupe_query($query);
     $alkurow  = mysql_fetch_array($result);
     $kumsumma = $alkurow["saldo"];
   }
@@ -113,7 +113,7 @@ if (isset($tee)) {
             AND tiliointi.korjattu = ''
             AND $lisa
             ORDER BY tiliointi.tilino, tiliointi.tapvm, tiliointi.summa";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
     echo "<table>";
@@ -247,7 +247,7 @@ if (isset($tee)) {
               $query = "SELECT nimi
                         FROM kustannuspaikka
                         WHERE tunnus = '$trow[$i]'";
-              $vresult = mysql_query($query) or pupe_error($query);
+              $vresult = pupe_query($query);
               $vrow = mysql_fetch_array($vresult);
               $trow[$i] = $vrow[0];
             }
@@ -392,7 +392,7 @@ $query = "SELECT *
           FROM tilikaudet
           WHERE yhtio = '$kukarow[yhtio]'
           ORDER BY tilikausi_alku";
-$vresult = mysql_query($query) or pupe_error($query);
+$vresult = pupe_query($query);
 
 echo "<td><select name='tkausi'>
     <option value='0'>".t("Ei valintaa")."</option>";
@@ -421,7 +421,7 @@ $query = "SELECT tunnus, nimi
           and kaytossa != 'E'
           and tyyppi    = 'K'
           ORDER BY koodi+0, koodi, nimi";
-$vresult = mysql_query($query) or pupe_error($query);
+$vresult = pupe_query($query);
 
 echo "<td><select name='kustp'>
     <option value=' '>".t("Ei valintaa")."</option>";
@@ -445,7 +445,7 @@ $query = "SELECT tunnus, nimi
           and kaytossa != 'E'
           and tyyppi    = 'O'
           ORDER BY koodi+0, koodi, nimi";
-$vresult = mysql_query($query) or pupe_error($query);
+$vresult = pupe_query($query);
 
 echo "<td>
     <select name='kohde'>
@@ -469,7 +469,7 @@ $query = "SELECT tunnus, nimi
           and kaytossa != 'E'
           and tyyppi    = 'P'
           ORDER BY koodi+0, koodi, nimi";
-$vresult = mysql_query($query) or pupe_error($query);
+$vresult = pupe_query($query);
 
 echo "<td>
     <select name='proj'>

@@ -53,7 +53,7 @@ if ($tee == "muuta") {
 
   // katotaan, että tullinimike1 löytyy
   $query = "SELECT cn FROM tullinimike WHERE cn = '$uusitullinimike1' and kieli = '$yhtiorow[kieli]'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1 or $uusitullinimike1 == "") {
     $ok = 1;
@@ -76,7 +76,7 @@ if ($tee == "muuta") {
     else $lisa = "";
 
     $query = "update tuote set tullinimike1='$uusitullinimike1', tullinimike2='$uusitullinimike2' where yhtio='$kukarow[yhtio]' and tullinimike1='$tullinimike1' $lisa";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     echo sprintf("<font class='message'>Päivitettiin %s tuotetta.</font><br><br>", mysql_affected_rows());
 
@@ -109,7 +109,7 @@ if ($tee == "synkronoi") {
 
   // Poistetaan nykyiset nimikkeet....
   $query  = "  DELETE FROM tullinimike";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   // Päivitetään tuotteet 2012 - 2013
   $muunnosavaimet = array(
@@ -161,7 +161,7 @@ if ($tee == "synkronoi") {
                tullinimike1     = '$uusi'
                WHERE yhtio      = '$kukarow[yhtio]'
                AND tullinimike1 = '$vanha'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
   }
 
   // Eka rivi roskikseen
@@ -185,7 +185,7 @@ if ($tee == "synkronoi") {
                kieli         = '$kieli',
                laatija       = '$kukarow[kuka]',
                luontiaika    = now()";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
   }
 
   echo t("Päivitys valmis")."...<br><br><hr>";
@@ -225,7 +225,7 @@ if ($tullinimike1 != "") {
             where yhtio      = '$kukarow[yhtio]'
             and tullinimike1 = '$tullinimike1' $lisa
             order by tuoteno";
-  $resul = mysql_query($query) or pupe_error($query);
+  $resul = pupe_query($query);
 
   if (mysql_num_rows($resul) == 0) {
     echo "<font class='error'>Yhtään tuotetta ei löytynyt!</font><br>";

@@ -126,7 +126,7 @@ if ($tee == 'VALMIS') {
                           laatija   = '$kukarow[kuka]',
                           laadittu  = now()";
                 $result = pupe_query($query);
-                $tapahtumaid = mysql_insert_id();
+                $tapahtumaid = mysql_insert_id($GLOBALS["masterlink"]);
 
                 $query = "INSERT into lasku set
                           yhtio      = '$kukarow[yhtio]',
@@ -136,7 +136,7 @@ if ($tee == 'VALMIS') {
                           viite      = '$tapahtumaid',
                           luontiaika = now()";
                 $result = pupe_query($query);
-                $laskuid = mysql_insert_id($link);
+                $laskuid = mysql_insert_id($GLOBALS["masterlink"]);
 
                 if ($yhtiorow["tarkenteiden_prioriteetti"] == "T") {
 

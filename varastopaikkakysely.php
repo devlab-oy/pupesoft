@@ -273,8 +273,8 @@ if ($tee == "W") {
                 tuoteno    = '$tuoteno',
                 laatija    = '$kukarow[kuka]',
                 luontiaika = now()";
-      $result = mysql_query($query) or pupe_error($query);
-      $minne = mysql_insert_id();
+      $result = pupe_query($query);
+      $minne = mysql_insert_id($GLOBALS["masterlink"]);
 
       $query = "INSERT into tapahtuma set
                 yhtio     = '$kukarow[yhtio]',
@@ -290,7 +290,7 @@ if ($tee == "W") {
                 selite    = '".t("Lisättiin tuotepaikka")." $thyllyalue $thyllynro $thyllyvali $thyllytaso',
                 laatija   = '$kukarow[kuka]',
                 laadittu  = now()";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
     }
     else {
       $row = mysql_fetch_assoc($result);

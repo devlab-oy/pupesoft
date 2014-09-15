@@ -25,7 +25,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "lahetamuistutus.php")  === FALSE or $tee ==
             lasku.hyvaksyja_nyt=kuka.kuka and kuka.eposti <> '' and
             lasku.tila = 'H'
             ORDER BY kuka.eposti, tapvm";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   while ($trow = mysql_fetch_array($result)) {
     $laskuja++;

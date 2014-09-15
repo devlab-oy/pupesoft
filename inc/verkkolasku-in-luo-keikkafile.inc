@@ -638,7 +638,7 @@ if (!function_exists('kopioi_tapahtuma')) {
 
       $kysely  = "INSERT INTO tapahtuma ({$fields}) VALUES ({$values})";
       $uusires = pupe_query($kysely);
-      $tapahtuma_id = mysql_insert_id();
+      $tapahtuma_id = mysql_insert_id($GLOBALS["masterlink"]);
 
       $query = "UPDATE tapahtuma
                 SET kpl = '{$kpl}'
@@ -957,7 +957,7 @@ if ($osrow["ebid"] != "TECCOM-INVOICE" and $osrow['ebid'] != "MAVENTAXML" and $t
             laatija                 = 'verkkolas'";
   $result = pupe_query($query);
 
-  $keikantunnus = mysql_insert_id(); // tätä tarvitaan tilausrivien uusiotunnukseen
+  $keikantunnus = mysql_insert_id($GLOBALS["masterlink"]); // tätä tarvitaan tilausrivien uusiotunnukseen
   $laskuvirhe .= "\n".t("Perustettiin saapuminen").": $id $trow[nimi]\n";
 
   $query  = "UNLOCK TABLE";
@@ -1524,7 +1524,7 @@ for ($i = 0; $i < count($rtuoteno); $i++) {
           }
 
           $uusires = pupe_query($kysely);
-          $extraa = mysql_insert_id();
+          $extraa = mysql_insert_id($GLOBALS["masterlink"]);
           $lisa_array[]      = $extraa;
 
           // Tarkistetaan onko tämä isärivi ($i+1 tarkoittaa sitä että ollaan laitettu lapsialkiolle isän tunnus talteen "isa_olemassa"-kenttään)
@@ -1743,7 +1743,7 @@ if ($osrow["ebid"] == "TECCOM-INVOICE" or ($osrow['ebid'] == 'MAVENTAXML' and $t
               luontiaika              = now(),
               laatija                 = '$kukarow[kuka]'";
     $insertres = pupe_query($query);
-    $keikan_tunnus = mysql_insert_id();
+    $keikan_tunnus = mysql_insert_id($GLOBALS["masterlink"]);
     if ($debug == 1) {
       echo "<pre>", str_replace("\t", "", $query), "</pre>Keikan tunnus:$keikan_tunnus<br><br>";
       echo "<font class='message'>Liitetty saapumiseen {$id}</font><br><br>";
@@ -1842,7 +1842,7 @@ if ($osrow["ebid"] == "TECCOM-INVOICE" or ($osrow['ebid'] == 'MAVENTAXML' and $t
                 luontiaika              = now(),
                 laatija                 = '$kukarow[kuka]'";
       $insertres = pupe_query($query);
-      $keikan_tunnus = mysql_insert_id();
+      $keikan_tunnus = mysql_insert_id($GLOBALS["masterlink"]);
       if ($debug == 1) {
         echo "<pre>", str_replace("\t", "", $query), "</pre>Keikan tunnus:$keikan_tunnus<br><br>";
       }

@@ -10,7 +10,7 @@ echo "<font class='head'>".t("Uudelleenlähetä tilausvahvistus")."</font><hr>";
 if ($tee == "laheta" and $tunnukset != "") {
 
   $query = "SELECT * FROM lasku WHERE yhtio = '$kukarow[yhtio]' AND tila in ('N','L') AND tunnus in ($tunnukset)";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
 

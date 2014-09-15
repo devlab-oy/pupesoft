@@ -20,7 +20,7 @@ if ($tee == "") {
             and lasku.tila       = 'P'
             and lasku.valkoodi   = valuu.nimi
             and lasku.maksaja    = '$kukarow[kuka]'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<br>";
   echo "<font class='message'>".t("Sinulla on")." ".mysql_num_rows($result)." ".t("laskua poimittuna").".</font>";
@@ -87,7 +87,7 @@ if ($tee == "KIRJOITA") {
               WHERE yhtio         = '$kukarow[yhtio]'
               and tilino         != ''
               and yriti.kaytossa  = ''";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     //Haetaan funktio joka tuo pankin tietoja
     require_once "inc/pankkitiedot.inc";
@@ -106,7 +106,7 @@ if ($tee == "KIRJOITA") {
       }
       elseif ($row["tilino"] != $pankkitili) {
         $query = "UPDATE yriti SET tilino = '$pankkitili' WHERE tunnus = $row[tunnus]";
-        $xresult = mysql_query($query) or pupe_error($query);
+        $xresult = pupe_query($query);
         echo "Päivitin tilin $row[nimi]<br><br>";
       }
 
@@ -124,7 +124,7 @@ if ($tee == "KIRJOITA") {
             and maa     = '$kotimaa'
             and maksaja = '$kukarow[kuka]'
             ORDER BY 1";
-  $pvmresult = mysql_query($query) or pupe_error($query);
+  $pvmresult = pupe_query($query);
 
   if (mysql_num_rows($pvmresult) == 0) {
     echo "<font class='message'>".t("Sopivia laskuja ei löydy")."</font>";
@@ -153,7 +153,7 @@ if ($tee == "KIRJOITA") {
               and maksaja = '$kukarow[kuka]'
               and olmapvm = '$pvmrow[olmapvm]'
               GROUP BY maksu_tili, tilinumero";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     //Löytyykö hyvityksiä?
     while ($laskurow = mysql_fetch_array($result)) {
@@ -166,7 +166,7 @@ if ($tee == "KIRJOITA") {
                 and tilinumero = '$laskurow[tilinumero]'
                 and maksu_tili = '$laskurow[maksu_tili]'
                 and olmapvm    = '$pvmrow[olmapvm]'";
-      $xresult = mysql_query($query) or pupe_error($query);
+      $xresult = pupe_query($query);
 
       $hyvityssumma = 0;
 
@@ -205,7 +205,7 @@ if ($tee == "KIRJOITA") {
               and maksaja        = '$kukarow[kuka]'
               and olmapvm        = '$pvmrow[olmapvm]'
               GROUP BY yriti.tilino";
-    $yritiresult = mysql_query($query) or pupe_error($query);
+    $yritiresult = pupe_query($query);
 
     if (mysql_num_rows($yritiresult) != 0) {
 
@@ -278,7 +278,7 @@ if ($tee == "KIRJOITA") {
                   and maksu_tili     = $yritirow[tunnus]
                   and olmapvm        = '$pvmrow[olmapvm]'
                   ORDER BY tilinumero, summa desc";
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
 
         while ($laskurow = mysql_fetch_array($result)) {
 
@@ -380,7 +380,7 @@ if ($tee == "KIRJOITA") {
                         and maksu_tili = '$yritirow[tunnus]'
                         and olmapvm    = '$pvmrow[olmapvm]'
                         ORDER BY yhtio, tila";
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
 
         $makskpl   = 0;
         $makssumma   = 0;
@@ -450,7 +450,7 @@ if ($tee == "KIRJOITA") {
             and yriti.yhtio    = lasku.yhtio
             and yriti.kaytossa = ''
             GROUP BY maksu_tili, lasku.valkoodi";
-  $pvmresult = mysql_query($query) or pupe_error($query);
+  $pvmresult = pupe_query($query);
 
   if (mysql_num_rows($pvmresult) != 0) {
 
@@ -495,7 +495,7 @@ if ($tee == "KIRJOITA") {
                 and maksu_tili    = '$pvmrow[maksu_tili]'
                 and valkoodi      = '$pvmrow[valkoodi]'
                 GROUP BY maksu_tili, valkoodi, olmapvm, ultilno, swift, pankki1, pankki2, pankki3, pankki4, sisviesti1";
-      $hyvitysresult = mysql_query($query) or pupe_error($query);
+      $hyvitysresult = pupe_query($query);
 
       if (mysql_num_rows($hyvitysresult) > 0 ) {
 
@@ -533,7 +533,7 @@ if ($tee == "KIRJOITA") {
                     and pankki4        = '$hyvitysrow[pankki4]'
                     and sisviesti1     = '$hyvitysrow[sisviesti1]'
                     GROUP BY maksu_tili, lasku.valkoodi, olmapvm, ultilno, swift, pankki1, pankki2, pankki3, pankki4, sisviesti1";
-          $maksuresult = mysql_query($query) or pupe_error($query);
+          $maksuresult = pupe_query($query);
 
           if (mysql_num_rows($maksuresult) > 0 ) {
 
@@ -635,7 +635,7 @@ if ($tee == "KIRJOITA") {
                       and pankki4       = '$hyvitysrow[pankki4]'
                       and sisviesti1    = '$hyvitysrow[sisviesti1]'
                         ORDER BY yhtio, tila";
-            $result = mysql_query($query) or pupe_error($query);
+            $result = pupe_query($query);
           }
           else {
             echo "Meillä oli hyvityksiä, mutta ne kaikki katosivat yhdistelyssä!";
@@ -667,7 +667,7 @@ if ($tee == "KIRJOITA") {
                 and maksu_tili     = '$pvmrow[maksu_tili]'
                 and lasku.valkoodi = '$pvmrow[valkoodi]'
                 ORDER BY summa";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
 
       if (mysql_num_rows($result) > 0) {
 
@@ -749,7 +749,7 @@ if ($tee == "KIRJOITA") {
                             WHERE koodi       = '$laskumaakoodi'
                             and eu           != ''
                             and ryhma_tunnus  = ''";
-                  $aburesult = mysql_query($query) or pupe_error($query);
+                  $aburesult = pupe_query($query);
 
                   if (mysql_num_rows($aburesult) == 1) {
                     // meillä on siis EU maksukelpoinen lasku
@@ -856,7 +856,7 @@ if ($tee == "KIRJOITA") {
                   and maksu_tili    = '$pvmrow[maksu_tili]'
                   and valkoodi      = '$pvmrow[valkoodi]'
                     ORDER BY yhtio, tila";
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
       }
     }
 

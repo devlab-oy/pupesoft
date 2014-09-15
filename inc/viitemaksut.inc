@@ -104,7 +104,7 @@ elseif ($type == '3' or ($type == 'S' and $factoring_oikaisutunnus == '0' )) {
             maksupvm     = '$payment_date',
             kirjpvm      = '$entry_date'";
   $result = pupe_query($query);
-  $tiliointitunnus = mysql_insert_id();
+  $tiliointitunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
   // p‰ivitet‰‰n suorituksen tunnnus tiliotedataan ja tiliotedata k‰sitellyksi
   $query = "UPDATE tiliotedata SET
@@ -125,5 +125,4 @@ elseif ($type == '9') {
 else {
   echo "<font class='error'>Tuntematon tietuetunnus $type</font><br>\n";
   $errcnt++;
-  continue;
 }

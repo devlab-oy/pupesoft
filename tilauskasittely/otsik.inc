@@ -204,7 +204,7 @@ if ($kukarow['kesken'] > 0 and isset($laskurow) and (($laskurow['tila'] == 'N' a
   $c = $tarkistus_meapu_row['jv'];
   $d = $tarkistus_meapu_row2['jv'];
 
-  if (((empty($a) and !empty($b)) or empty($a)) or ((empty($c) and !empty($d)) or empty($c)) {
+  if (((empty($a) and !empty($b)) or empty($a)) or ((empty($c) and !empty($d)) or empty($c))) {
 
     // Parametrejä saatanat.php:lle
     $sytunnus       = $laskurow['ytunnus'];

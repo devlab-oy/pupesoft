@@ -194,7 +194,7 @@ class pupeExcel {
     $edellinen_excelrivi = -1;
 
     // Kirjoitetaan itse xml:ä
-    while ($data_row = mysql_fetch_assoc($result)) {        
+    while ($data_row = mysql_fetch_assoc($result)) {
 
       if ($data_row["excelrivi"] != $edellinen_excelrivi) {
         // Create the line
@@ -289,7 +289,7 @@ class pupeExcel {
     $result = pupe_query($query, $this->_exceldblink);
 
     $query = "DROP TABLE temporary_excel_data;";
-     $result = pupe_query($query, $this->_exceldblink);
+    $result = pupe_query($query, $this->_exceldblink);
 
     return $xlsxfile;
   }

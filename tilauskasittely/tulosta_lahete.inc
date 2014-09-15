@@ -3685,9 +3685,9 @@ if (!function_exists('loppu_lahete')) {
         $pdf->draw_text(200, $kala-51, $yhtiorow['nimi'].t(":n yleiset kauppaehdot", $kieli)." 30.6.2014", $thispage, $norm);
         $pdf->draw_text(200, $kala-61, $yhtiorow['nimi'].':n '.t("tilaajavastuulain mukaiset asiakirjat lˆyd‰t www.tilaajavastuulaki.fi", $kieli), $thispage, $norm);
 
-        $pdf->draw_text(50, $kala-81, t("Salassapito", $kieli), $thispage, $boldi);
-        $pdf->draw_text(200, $kala-81, t("T‰m‰ asiakirja liitteineen on luottamuksellinen eik‰ sit‰ saa ilman ", $kieli).$yhtiorow['nimi'].':n ', $thispage, $norm);
-        $pdf->draw_text(200, $kala-91, t("lupaa n‰ytt‰‰ kolmannelle", $kieli), $thispage, $norm);
+        $pdf->draw_text(50, $kala-71, t("Salassapito", $kieli), $thispage, $boldi);
+        $pdf->draw_text(200, $kala-71, t("T‰m‰ asiakirja liitteineen on luottamuksellinen eik‰ sit‰ saa ilman ", $kieli).$yhtiorow['nimi'].':n ', $thispage, $norm);
+        $pdf->draw_text(200, $kala-81, t("lupaa n‰ytt‰‰ kolmannelle", $kieli), $thispage, $norm);
         // Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
         if ($kala-253 <= 58) {
           $sivu++;

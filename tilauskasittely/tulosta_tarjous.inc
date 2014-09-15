@@ -1272,12 +1272,12 @@ if (!function_exists('loppu_tarjous')) {
           $pdf_tarjous->draw_text(200, $kala-64, $yhtiorow['nimi'].t(":n yleiset kauppaehdot", $kieli)." 30.6.2010", $page_tarjous[$sivu], $norm);
           $pdf_tarjous->draw_text(200, $kala-77, $yhtiorow['nimi'].':n '.t("tilaajavastuulain mukaiset asiakirjat lˆyd‰t www.tilaajavastuulaki.fi", $kieli), $page_tarjous[$sivu], $norm);
 
-          $pdf_tarjous->draw_text(50, $kala-100, t("Salassapito", $kieli), $page_tarjous[$sivu], $boldi);
-          $pdf_tarjous->draw_text(200, $kala-100, t("T‰m‰ asiakirja liitteineen on luottamuksellinen eik‰ sit‰ saa ilman ", $kieli).$yhtiorow['nimi'].':n ', $page_tarjous[$sivu], $norm);
-          $pdf_tarjous->draw_text(200, $kala-113, t("lupaa n‰ytt‰‰ kolmannelle", $kieli), $page_tarjous[$sivu], $norm);
+          $pdf_tarjous->draw_text(50, $kala-90, t("Salassapito", $kieli), $page_tarjous[$sivu], $boldi);
+          $pdf_tarjous->draw_text(200, $kala-90, t("T‰m‰ asiakirja liitteineen on luottamuksellinen eik‰ sit‰ saa ilman ", $kieli).$yhtiorow['nimi'].':n ', $page_tarjous[$sivu], $norm);
+          $pdf_tarjous->draw_text(200, $kala-103, t("lupaa n‰ytt‰‰ kolmannelle", $kieli), $page_tarjous[$sivu], $norm);
 
           // Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
-          if ($kala-253 <= 300) {
+          if ($kala-253 <= 230) {
             list($page_tarjous, $sivu) = loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $sivu, 0, $total_uudet, $total_vanhat);
 
             $sivu++;
@@ -1294,7 +1294,7 @@ if (!function_exists('loppu_tarjous')) {
             $yhteystiedot_len = $pdf_tarjous->strlen($y_www, $pieni);
             $pdf_tarjous->draw_text((595 / 2) - ($yhteystiedot_len / 2), 42, $y_www, $page_tarjous[$sivu], $pieni);
 
-            $kala += 60;
+            $kala += 50;
           }
 
           $pdf_tarjous->draw_text(50, $kala-130, t("Sopimusasiakirjojen etusijaj‰rjestys on seuraava", $kieli).':', $page_tarjous[$sivu], $pieni);
@@ -1317,8 +1317,8 @@ if (!function_exists('loppu_tarjous')) {
           $myyresult = pupe_query($query);
           $myyrow = mysql_fetch_assoc($myyresult);
 
-          $pdf_tarjous->draw_text(50, $kala-253, $myyrow['nimi'], $page_tarjous[$sivu], $norm);
-          $pdf_tarjous->draw_text(50, $kala-283, t("Myyj‰n allekirjoitus"), $page_tarjous[$sivu], $boldi);
+          $pdf_tarjous->draw_text(50, $kala-233, $myyrow['nimi'], $page_tarjous[$sivu], $norm);
+          $pdf_tarjous->draw_text(50, $kala-263, t("Myyj‰n allekirjoitus"), $page_tarjous[$sivu], $boldi);
 
           $x[0] = 280;
           $x[1] = 460;
@@ -1329,7 +1329,7 @@ if (!function_exists('loppu_tarjous')) {
           $x[1] = 460;
           $y[0] = $y[1] = $kala-250;
           $pdf_tarjous->draw_line($x, $y, $page_tarjous[$sivu], $rectparam);
-          $pdf_tarjous->draw_text(280, $kala-273, t("Ostajan allekirjoitus ja nimenselvennys"), $page_tarjous[$sivu], $boldi);
+          $pdf_tarjous->draw_text(270, $kala-263, t("Ostajan allekirjoitus ja nimenselvennys"), $page_tarjous[$sivu], $boldi);
         }
 
       }

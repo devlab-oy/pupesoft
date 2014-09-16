@@ -227,6 +227,16 @@ if ($tee == '1') {
         $worksheet->write($excelrivi, $iiiiii, $trow["tilino"]);
         $iiiiii++;
         $worksheet->write($excelrivi, $iiiiii, $trow["nimi"]);
+
+        if ($kustannuspaikoittain != "") {
+          $worksheet->write($excelrivi, $iiiiii, $trow["kustp"]);
+          $iiiiii++;
+          $worksheet->write($excelrivi, $iiiiii, $trow["kohde"]);
+          $iiiiii++;
+          $worksheet->write($excelrivi, $iiiiii, $trow["projekti"]);
+          $iiiiii++;
+        }
+
         $iiiiii++;
         $worksheet->write($excelrivi, $iiiiii, $trow["Vientejä"]);
         $iiiiii++;

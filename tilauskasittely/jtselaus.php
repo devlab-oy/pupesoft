@@ -1251,7 +1251,7 @@ if ($tee == "JATKA") {
                                            AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
                                          JOIN lasku USE INDEX (primary) ON (lasku.yhtio = tilausrivi.yhtio
                                            AND lasku.tunnus                            = tilausrivi.otunnus
-                                           AND (lasku.tila != 'N' OR lasku.alatila != ''))
+                                           AND (lasku.tila != 'N' OR lasku.alatila != '') $laskulisa)
                                          JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio
                                            AND tuote.tuoteno                           = tilausrivi.tuoteno)
                                          WHERE tilausrivi.yhtio                        = '{$kukarow['yhtio']}'

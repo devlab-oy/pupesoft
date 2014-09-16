@@ -65,15 +65,17 @@ class PrestaClient {
   public function create_products(array $products) {
     try {
       $this->schema = $this->get_empty_schema('products');
-      $xml_messages = $this->generate_products_xml($products);
 
       $opt = array('resource' => 'products');
-      foreach ($xml_messages as $xml_message) {
-        $opt['postXml'] = $xml_message['product']->asXML();
+      foreach ($products as $product) {
+        $opt['postXml'] = $this->generate_product_xml($product)->asXML();
         $response_xml = $this->ws->add($opt);
 
-        if (!empty($xml_message['images'])) {
-          $this->create_product_images((string) $response_xml->product->id, $xml_message['images']);
+        $this->logger->log("Luotiin tuote: {$product['tuoteno']}");
+
+        if (!empty($product['images'])) {
+          $this->create_product_images((string) $response_xml->product->id, $product['images']);
+          $this->logger->log('Luotiin ' . count($product['images']) . ' tuotekuvaa');
         }
       }
     }
@@ -101,6 +103,8 @@ class PrestaClient {
       );
 
       $response = $this->ws->executeImageRequest($opt);
+
+      $this->logger->log("Luotiin tuotekuva");
     }
     catch (Exception $e) {
       $msg = "Tuotteen: {$product_id} tuotekuvan luonti epäonnistui";
@@ -110,21 +114,7 @@ class PrestaClient {
     return $response;
   }
 
-  /**
-   *
-   * @param array $products
-   */
-  private function generate_products_xml($products) {
-    $xml_messages = array();
-    foreach ($products as $product) {
-      $xml_messages[$product['tunnus']]['images'] = $product['images'];
-      $xml_messages[$product['tunnus']]['product'] = $this->populate_product_xml($product);
-    }
-
-    return $xml_messages;
-  }
-
-  private function populate_product_xml($product, $create = true) {
+  private function generate_product_xml($product, $create = true) {
     $xml = new SimpleXMLElement($this->schema->asXML());
 //    $request_xml->product->new = $create;
     $xml->product->reference = $product['tuoteno'];

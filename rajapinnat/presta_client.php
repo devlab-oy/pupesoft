@@ -38,7 +38,7 @@ class PrestaClient {
   /**
    *
    * @param int $id
-   * @return SimpleXML
+   * @return \SimpleXMLElement
    */
   public function get_product($id) {
     $opt = array(
@@ -52,6 +52,7 @@ class PrestaClient {
     catch (Exception $e) {
       $msg = "Tuotteen: {$id} haku epäonnistui";
       $this->logger->log($msg, $e);
+      throw $e;
     }
 
     return $response_xml;
@@ -60,18 +61,25 @@ class PrestaClient {
   /**
    *
    * @param array $products
-   * @return SimpleXML
+   * @return \SimpleXMLElement
    */
-  public function create_products(array $products) {
+  public function sync_products(array $products) {
     try {
       $this->schema = $this->get_empty_schema('products');
+      //Fetch all products with ID's and SKU's only
+      $existing_products = $this->all_products(array('id', 'reference'));
+      $existing_products = xml_to_array($existing_products);
+      $existing_products = $existing_products['products']['product'];
+      $existing_products = array_column($existing_products, 'reference', 'id');
 
-      $opt = array('resource' => 'products');
       foreach ($products as $product) {
-        $opt['postXml'] = $this->generate_product_xml($product)->asXML();
-        $response_xml = $this->ws->add($opt);
-
-        $this->logger->log("Luotiin tuote: {$product['tuoteno']}");
+        if (in_array($product['tuoteno'], $existing_products)) {
+          $id = array_search($product['tuoteno'], $existing_products);
+          $response_xml = $this->update_product($id, $product);
+        }
+        else {
+          $response_xml = $this->create_product($product);
+        }
 
         if (!empty($product['images'])) {
           $this->create_product_images((string) $response_xml->product->id, $product['images']);
@@ -80,8 +88,41 @@ class PrestaClient {
       }
     }
     catch (Exception $e) {
-      $msg = 'Tuotteiden luonti epäonnistui';
+      //Exception logging happens in create / update. No need to do anything here
+    }
+
+    return $response_xml;
+  }
+
+  public function create_product($product) {
+    try {
+      $opt = array('resource' => 'products');
+      $opt['postXml'] = $this->generate_product_xml($product)->asXML();
+      $response_xml = $this->ws->add($opt);
+      $this->logger->log("Luotiin tuote: {$product['tuoteno']}");
+    }
+    catch (Exception $e) {
+      $msg = "Tuotteen {$product['tuoteno']} luonti epäonnistui";
       $this->logger->log($msg, $e);
+      throw $e;
+    }
+
+    return $response_xml;
+  }
+
+  public function update_product($id, $product) {
+    try {
+      $opt = array('resource' => 'products');
+      $opt['id'] = $id;
+      $existing_product = $this->get_product($id);
+      $opt['putXml'] = $this->generate_product_xml($product, $existing_product)->asXML();
+      $response_xml = $this->ws->edit($opt);
+      $this->logger->log("Päivitettiin tuote: {$product['tuoteno']}");
+    }
+    catch (Exception $e) {
+      $msg = "Tuotteen {$product['tuoteno']} päivittäminen epäonnistui";
+      $this->logger->log($msg, $e);
+      throw $e;
     }
 
     return $response_xml;
@@ -104,7 +145,7 @@ class PrestaClient {
 
       $response = $this->ws->executeImageRequest($opt);
 
-      $this->logger->log("Luotiin tuotekuva");
+      $this->logger->log("Luotiin tuotekuva tuotteelle {$product_id}");
     }
     catch (Exception $e) {
       $msg = "Tuotteen: {$product_id} tuotekuvan luonti epäonnistui";
@@ -114,15 +155,57 @@ class PrestaClient {
     return $response;
   }
 
-  private function generate_product_xml($product, $create = true) {
+  /**
+   *
+   * @param array $display
+   * @return \SimpleXMLElement
+   * @throws Exception
+   */
+  public function all_products($display = array()) {
+    try {
+      if (!empty($display)) {
+        $display = '[' . implode(',', $display) . ']';
+      }
+      else {
+        $display = 'full';
+      }
+      $opt = array(
+          'resource' => 'products',
+          'display'  => $display,
+      );
+
+      $response = $this->ws->get($opt);
+    }
+    catch (Exception $e) {
+      $msg = "Kaikkien tuotteiden haku epäonnistui";
+      $this->logger->log($msg, $e);
+      throw $e;
+    }
+
+    return $response;
+  }
+
+  /**
+   *
+   * @param array $product
+   * @return \SimpleXMLElement
+   */
+  private function generate_product_xml($product, $existing_product = null) {
     $xml = new SimpleXMLElement($this->schema->asXML());
-//    $request_xml->product->new = $create;
+
+    if (!is_null($existing_product)) {
+      $xml = $existing_product;
+      unset($xml->product->position_in_category);
+      unset($xml->product->manufacturer_name);
+      unset($xml->product->quantity);
+    }
+
     $xml->product->reference = $product['tuoteno'];
     $xml->product->supplier_reference = $product['tuoteno'];
     $xml->product->price = $product['myyntihinta'];
 
-    $xml->product->link_rewrite->language[0] = $product['nimitys'];
-    $xml->product->link_rewrite->language[1] = $product['nimitys'];
+    $xml->product->link_rewrite->language[0] = $product['nimitys'].'a';
+    $xml->product->link_rewrite->language[1] = $product['nimitys'].'a';
     $xml->product->name->language[0] = $product['nimitys'];
     $xml->product->name->language[1] = $product['nimitys'];
 

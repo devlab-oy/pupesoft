@@ -25,7 +25,7 @@ $rectparam["width"]   = 0.3;
 $rivinkorkeus      = 17;
 
 if (!function_exists('alku_valm')) {
-  function alku_valm($tyyppi = "") {
+  function alku_valm() {
     global $pdf, $sivu, $laskurow, $yhtiorow, $viite, $pieni, $norm, $boldi, $pieni_boldi, $iso, $kala, $rectparam, $kukarow, $kieli, $asrow, $tilausnumeroita;
 
     //PDF parametrit
@@ -38,7 +38,7 @@ if (!function_exists('alku_valm')) {
     }
 
     if ($laskurow["tilaustyyppi"] == "W") {
-      return uusi_sivu_valm($tyyppi);
+      return uusi_sivu_valm();
     }
     else {
 
@@ -253,7 +253,7 @@ if (!function_exists('alku_valm')) {
 }
 
 if (!function_exists('uusi_sivu_valm')) {
-  function uusi_sivu_valm($tyyppi = "") {
+  function uusi_sivu_valm() {
     global $yhtiorow, $kukarow, $toim, $pdf, $laskurow, $sivu, $rectparam, $norm, $pieni, $iso, $maksuehto, $kateistyyppi, $kieli, $boldi, $kala, $tilausnumeroita;
 
     $thispage = $pdf->new_page("a4");
@@ -430,7 +430,7 @@ if (!function_exists('rivi_otsikot_valm')) {
 }
 
 if (!function_exists('rivi_valm')) {
-  function rivi_valm($thispage, $tyyppi="") {
+  function rivi_valm($thispage) {
     global $pdf, $page, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $perheid2, $norm, $pieni, $rivinkorkeus, $paino, $uusisivu;
 
     static $tuoteperhe_omallesivulle = "";
@@ -441,7 +441,7 @@ if (!function_exists('rivi_valm')) {
     $y[0] = $y[1] = $kala + $rivinkorkeus - 4;
     $uusisivu = "";
 
-    if ($tyyppi != "ETUSIVU" and ($row["tunnus"] == $row["perheid"] or $row["tunnus"] == $row["perheid2"])) {
+    if ($row["tunnus"] == $row["perheid"] or $row["tunnus"] == $row["perheid2"]) {
       //  Tulostetaanko aina uusi sivu?
       $query = "SELECT tunnus FROM tuoteperhe WHERE yhtio = '$kukarow[yhtio]' and tyyppi = 'R' and isatuoteno = '$row[tuoteno]' and omasivu != ''";
       $pres = pupe_query($query);
@@ -449,7 +449,7 @@ if (!function_exists('rivi_valm')) {
       if (mysql_num_rows($pres) > 0) {
         //  Uusi sivu
         if (isset($perheid) and isset($perheid2)) {
-          $page[$sivu]   = uusi_sivu_valm($tyyppi);
+          $page[$sivu]   = uusi_sivu_valm();
           $thispage      = $page[$sivu];
         }
 
@@ -464,7 +464,7 @@ if (!function_exists('rivi_valm')) {
     if (isset($perheid) and isset($perheid2) and (($perheid == 0 and $perheid2 == 0) or $perheid != $row["perheid"] or $perheid2 != $row["perheid2"])) {
       if ($uusisivu == "JOO") {
         //  Uusi sivu
-        $page[$sivu]  = uusi_sivu_valm($tyyppi);
+        $page[$sivu]  = uusi_sivu_valm();
         $thispage      = $page[$sivu];
         $uusisivu     = "";
       }
@@ -557,7 +557,7 @@ if (!function_exists('rivi_valm')) {
 
       loppu_valm($thispage, 0);
 
-      $page[$sivu] = uusi_sivu_valm($tyyppi);
+      $page[$sivu] = uusi_sivu_valm();
       $thispage    = $page[$sivu];
     }
     else {
@@ -566,12 +566,12 @@ if (!function_exists('rivi_valm')) {
 
     $rivinkorkeus  = 15;
 
-    rivi_valmistus($thispage, $tyyppi);
+    rivi_valmistus($thispage);
   }
 }
 
 if (!function_exists('rivi_valmistus')) {
-  function rivi_valmistus($thispage, $tyyppi = "") {
+  function rivi_valmistus($thispage) {
     global $pdf, $page, $sivu, $row, $kala, $rectparam, $kukarow, $rivinumerot, $kieli, $laskurow, $yhtiorow, $perheid, $perheid2, $norm, $pieni, $rivinkorkeus, $paino, $isakpl;
 
     $p["height"]  = 10;
@@ -582,7 +582,7 @@ if (!function_exists('rivi_valmistus')) {
 
     $varastopaikka = $row["hyllyalue"] . " " . $row["hyllynro"] . " " . $row["hyllyvali"] . " " . $row["hyllytaso"];
 
-    if ($row["tunnus"] == $row["perheid"]) {
+    if ($row['tyyppi'] == 'W' or $row['tyyppi'] == 'M') {
       $isakpl  = $row["tilkpl"];
       $lapskpl = ' ';
 
@@ -599,6 +599,11 @@ if (!function_exists('rivi_valmistus')) {
       else {
         $lapskpl = round($row["tilkpl"]/$isakpl, 8);
       }
+    }
+    
+    if ($row['tyyppi'] == 'V' and !empty($row['ed_tyyppi']) and $row['ed_tyyppi'] != $row['tyyppi']) {
+      $pdf->draw_text(35,  $kala, "Raaka-aineet:",  $thispage, $p);
+      $kala -= $rivinkorkeus;
     }
 
     $pdf->draw_text(25,  $kala, $rivinumerot[$row["tunnus"]],                $thispage, $pp);
@@ -621,10 +626,11 @@ if (!function_exists('rivi_valmistus')) {
     $lask_valm++;
 
     $pdf->draw_text(125, $kala, t_tuotteen_avainsanat($row, 'nimitys'),  $thispage, $pb);
-
+    $kala -= $rivinkorkeus;
+    
     // Ei piirretä kommenttia, kun testataan mahtuuko, koska pitkä komentti osaa vaihtaa sivua ihan itsekin
     if (!empty($thispage) and trim($row["kommentti"]) != '') {
-
+      
       $komm = t("Kommentti", $kieli).":\n".trim($row["kommentti"]);
 
       foreach (explode("\n", wordwrap(trim($komm), 90, "\n")) as $kommentti) {
@@ -634,14 +640,13 @@ if (!function_exists('rivi_valmistus')) {
 
           loppu_valm($thispage, 0);
 
-          $page[$sivu] = uusi_sivu_valm($tyyppi);
+          $page[$sivu] = uusi_sivu_valm();
           $thispage    = $page[$sivu];
         }
 
-        $kala = $kala - $rivinkorkeus;
-        $lask_valm++;
-
         $pdf->draw_text(125, $kala, $kommentti, $thispage, $p);
+        $kala -= $rivinkorkeus;
+        $lask_valm++;        
       }
     }
 
@@ -659,9 +664,7 @@ if (!function_exists('rivi_valmistus')) {
       if (mysql_num_rows($ressu) == 1) {
         $faktarow = mysql_fetch_array($ressu);
 
-        $kala -= $rivinkorkeus;
-
-        $faktarow["fakta"] = t("Työohje", $kieli).":\n".$faktarow["fakta"];
+        $faktarow["fakta"] = t("Työohje", $kieli).":\n".trim($faktarow["fakta"]);
 
         if ($row['valmistuslinja'] > 0) {
           $tuotantolinja = $row['valmistuslinja']. " - ". t_avainsana('valmistuslinja', $kieli, "and avainsana.selite='$row[valmistuslinja]'", "", "", "selitetark");
@@ -670,21 +673,18 @@ if (!function_exists('rivi_valmistus')) {
 
         foreach (explode("\n", wordwrap($faktarow["fakta"], 90, "\n")) as $kommentti) {
           $pdf->draw_text(125,  $kala, $kommentti, $thispage, $p);
-          $kala = $kala - $rivinkorkeus;
+          $kala -= $rivinkorkeus;
           $lask_valm++;
         }
       }
       else {
-        $kala = $kala - $rivinkorkeus;
         $lask_valm++;
-      }
-
-      if ($tyyppi != "ETUSIVU") {
-        $pdf->draw_text(35,  $kala, "Raaka-aineet:",  $thispage, $p);
-      }
+      }      
     }
-
-    $kala = $kala - $rivinkorkeus;
+    else {
+      $kala -= $rivinkorkeus;        
+    }
+    
 
     $perheid  = $row["perheid"];
     $perheid2 = $row["perheid2"];

@@ -600,7 +600,7 @@ if (!function_exists('rivi_valmistus')) {
         $lapskpl = round($row["tilkpl"]/$isakpl, 8);
       }
     }
-    
+
     if ($row['tyyppi'] == 'V' and !empty($row['ed_tyyppi']) and $row['ed_tyyppi'] != $row['tyyppi']) {
       $pdf->draw_text(35,  $kala, "Raaka-aineet:",  $thispage, $p);
       $kala -= $rivinkorkeus;
@@ -627,10 +627,10 @@ if (!function_exists('rivi_valmistus')) {
 
     $pdf->draw_text(125, $kala, t_tuotteen_avainsanat($row, 'nimitys'),  $thispage, $pb);
     $kala -= $rivinkorkeus;
-    
+
     // Ei piirretä kommenttia, kun testataan mahtuuko, koska pitkä komentti osaa vaihtaa sivua ihan itsekin
     if (!empty($thispage) and trim($row["kommentti"]) != '') {
-      
+
       $komm = t("Kommentti", $kieli).":\n".trim($row["kommentti"]);
 
       foreach (explode("\n", wordwrap(trim($komm), 90, "\n")) as $kommentti) {
@@ -646,7 +646,7 @@ if (!function_exists('rivi_valmistus')) {
 
         $pdf->draw_text(125, $kala, $kommentti, $thispage, $p);
         $kala -= $rivinkorkeus;
-        $lask_valm++;        
+        $lask_valm++;
       }
     }
 
@@ -679,12 +679,8 @@ if (!function_exists('rivi_valmistus')) {
       }
       else {
         $lask_valm++;
-      }      
+      }
     }
-    else {
-      $kala -= $rivinkorkeus;        
-    }
-    
 
     $perheid  = $row["perheid"];
     $perheid2 = $row["perheid2"];

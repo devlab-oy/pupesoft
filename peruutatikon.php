@@ -18,7 +18,7 @@ if (isset($kausi)) {
                and tosite   >= '91000000'
                and tosite   <= '91999999'";
 
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
       $row = mysql_fetch_array($result);
@@ -32,7 +32,7 @@ if (isset($kausi)) {
                and left(tapvm,7) = '$kausi'
                and tosite   >= '93000000'
                and tosite   <= '93999999'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
       $row = mysql_fetch_array($result);
@@ -46,7 +46,7 @@ if (isset($kausi)) {
                and left(tapvm,7) = '$kausi'
                and tosite   >= '50000000'
                and tosite   <= '50999999'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
       $row = mysql_fetch_array($result);
@@ -66,7 +66,7 @@ if (isset($kausi)) {
                and korjattu = ''
                and tosite   > 0
                and left(tapvm,7) = '$kausi'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     echo "<br><font class='message'>".t("Peruutin TIKON-siirron kaudelta").": $kausi</font><br><br>";
   }
@@ -84,7 +84,7 @@ if (!isset($kausi)) {
              and tosite <= '91999999'
              ORDER BY tosite desc
              LIMIT 1";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
     $row11 = mysql_fetch_array($result);
@@ -99,7 +99,7 @@ if (!isset($kausi)) {
              and tosite <= '93999999'
              ORDER BY tosite desc
              LIMIT 1";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
     $row30=mysql_fetch_array($result);
@@ -114,7 +114,7 @@ if (!isset($kausi)) {
              and tosite <= '50999999'
              ORDER BY tosite desc
              LIMIT 1";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
     $row41=mysql_fetch_array($result);

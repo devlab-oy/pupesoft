@@ -108,7 +108,7 @@ if ($tee == '' and (!isset($suuntalavat_ei_kayttoliittymaa) or $suuntalavat_ei_k
             AND komento != 'email'
             AND komento != 'edi'
             ORDER BY kirjoitin";
-  $kires = mysql_query($query) or pupe_error($query);
+  $kires = pupe_query($query);
 
   while ($kirow = mysql_fetch_assoc($kires)) {
     if ($kirow['tunnus'] == $kirjoitin) $select = ' selected';

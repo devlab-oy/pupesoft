@@ -569,8 +569,11 @@ if (isset($tee_Y) or isset($tee_Z) or isset($tee_X) or isset($tee_XKAIKKI) or is
           if ($tee !='KP') {
             echo "<td><a href = '$PHP_SELF?tee=E&tunnus=$edtunnus&viivatut=$viivatut&lopetus=$lopetus'>$trow[$kennimi]</td>"; // orkkis
           }
+          elseif (($toikrow = tarkista_oikeus("tilioteselailu.php", "%", "", "OK")) !== FALSE) {
+            echo "<td><a href = '{$palvelin2}tilioteselailu.php?toim={$toikrow['alanimi']}&tilino=$trow[tilino]&pvm=$orgpvm&tyyppi=1&tee=T&lopetus=$lopetus'>$trow[$kennimi]</td>";
+          }
           else {
-            echo "<td><a href = '".$palvelin2."tilioteselailu.php?tilino=$trow[tilino]&pvm=$orgpvm&tyyppi=1&tee=T&lopetus=$lopetus'>$trow[$kennimi]</td>";
+            echo "<td>$trow[$kennimi]</td>";
           }
         }
         elseif (is_numeric($trow[$kennimi]) and (mysql_field_type($result, $i) == 'real' or mysql_field_type($result, $i) == 'int')) {

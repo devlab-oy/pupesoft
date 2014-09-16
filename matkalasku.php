@@ -196,7 +196,7 @@ if ($tee == "UUSI") {
                 tilaustyyppi      = 'M',
                 laskunro          = '$maxmatkalasku'";
       $result = pupe_query($query);
-      $tilausnumero = mysql_insert_id();
+      $tilausnumero = mysql_insert_id($GLOBALS["masterlink"]);
 
       //  Tänne voisi laittaa myös tuon asiakasidn jos tästä voitaisiin lähettää myös lasku asiakkaalle
       $query = "INSERT into laskun_lisatiedot set
@@ -2598,8 +2598,8 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
                     toimitettuaika = '$_loppuaika'";
           $insres = pupe_query($query);
 
-          $perhe_id = ($perhe_id == null) ? mysql_insert_id() : $perhe_id;
-          $lisatty_tun = mysql_insert_id();
+          $perhe_id = ($perhe_id == null) ? mysql_insert_id($GLOBALS["masterlink"]) : $perhe_id;
+          $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
           //  Jos meillä on splitattu rivi niin pidetään nippu kasassa
           if (count($tuoteno_array) > 1) {
@@ -2660,7 +2660,7 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
                     laatija  = '$kukarow[kuka]',
                     laadittu = now()";
           $result = pupe_query($query);
-          $isa = mysql_insert_id(); // Näin löydämme tähän liittyvät alvit....
+          $isa = mysql_insert_id($GLOBALS["masterlink"]); // Näin löydämme tähän liittyvät alvit....
 
           if ($vero != 0) {
             // jos tilausrivillä on alvi tehdään sille oma tiliointi
@@ -2978,7 +2978,7 @@ function erittele_rivit($tilausnumero) {
                     kerattyaika    = '$alkuaika',
                     toimitettuaika = '$loppuaika'";
           $insres = pupe_query($query);
-          $lisatty_tun = mysql_insert_id();
+          $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
           //  Päivitetään perheid2
           $query = "UPDATE tilausrivi
@@ -3004,7 +3004,7 @@ function erittele_rivit($tilausnumero) {
                     laatija  = '$kukarow[kuka]',
                     laadittu = now()";
           $result = pupe_query($query);
-          $isa = mysql_insert_id();
+          $isa = mysql_insert_id($GLOBALS["masterlink"]);
 
           $query = "INSERT INTO tilausrivin_lisatiedot SET
                     yhtio               = '$kukarow[yhtio]',

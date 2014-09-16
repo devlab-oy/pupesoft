@@ -116,7 +116,7 @@ if (isset($tee) and $tee == 'I') {
               laatija    = '{$kukarow['kuka']}',
               luontiaika = now()";
     $result = pupe_query($query);
-    $tunnus = mysql_insert_id($link);
+    $tunnus = mysql_insert_id($GLOBALS["masterlink"]);
   }
   else {
     $tulos_row = mysql_fetch_assoc($result);

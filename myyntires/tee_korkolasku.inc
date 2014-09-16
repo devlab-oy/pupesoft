@@ -8,7 +8,7 @@
 
 //Haetaan asiakkaan tiedot
 $query = "SELECT * FROM asiakas WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$liitostunnus'";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 if (mysql_num_rows($result) != 1) {
   printf("<font class='error'>".t("Oho, asiakas katosi (%d)")."</font><br>", $ytunnus);
@@ -18,7 +18,7 @@ $asrow = mysql_fetch_array($result);
 
 //Etsit‰‰n t‰m‰ t‰ss‰ tilanteessa k‰ytett‰v‰ maksuehto
 $apuqu = "SELECT * FROM maksuehto WHERE yhtio = '$kukarow[yhtio]' AND tunnus = '$vmehto'";
-$meapu = mysql_query($apuqu) or pupe_error($apuqu);
+$meapu = pupe_query($apuqu);
 
 if (mysql_num_rows($meapu) != 1) {
   printf("<font class='error'>".t("Oho, maksuehto katosi (%d)")."</font><br>", $vmehto);
@@ -34,7 +34,7 @@ $query = "SELECT *
           FROM tuote
           WHERE yhtio = '$kukarow[yhtio]'
           AND tuoteno = 'Korko'";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 if (mysql_num_rows($result) == 1) {
 
@@ -47,7 +47,7 @@ if (mysql_num_rows($result) == 1) {
               and nimi    = '$yhtiorow[valkoodi]'
               and kurssi  > 0
               LIMIT 1";
-    $vres = mysql_query($query) or pupe_error($query);
+    $vres = pupe_query($query);
 
     if (mysql_num_rows($vres) == 1) {
       $vrow = mysql_fetch_array($vres);
@@ -115,8 +115,8 @@ if (mysql_num_rows($result) == 1) {
             piiri           = '$asrow[piiri]',
             olmapvm         = now(),
             luontiaika      = now()";
-  $result = mysql_query($query) or pupe_error($query);
-  $otunnus = mysql_insert_id();
+  $result = pupe_query($query);
+  $otunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
   if (strlen(trim($asrow['laskutus_nimi'])) == 0) {
     $asrow['laskutus_nimi']     = $asrow['nimi'];
@@ -138,7 +138,7 @@ if (mysql_num_rows($result) == 1) {
             luontiaika        = now(),
             otunnus           = '$otunnus',
             yhtio             = '$kukarow[yhtio]'";
-  $lisatiedot_result = mysql_query($query) or pupe_error($query);
+  $lisatiedot_result = pupe_query($query);
 
   $query = "INSERT INTO tilausrivi SET
             laatija  = '$kukarow[kuka]',
@@ -161,19 +161,19 @@ if (mysql_num_rows($result) == 1) {
             otunnus  = '$otunnus',
             tyyppi   = 'L',
             var      = ''";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   $kukarow["kesken"] = $otunnus;
   $korkolasku = "kylla";
 
   $query = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$otunnus'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $laskurow = mysql_fetch_array($result);
 
   if ($yhtiorow["kasittelykulu_tuotenumero"] != '') {
 
     $query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$yhtiorow[kasittelykulu_tuotenumero]'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
     $trow = mysql_fetch_array($result);
 
     $kasittelykulu = laskuval($kasittelykulu, $laskurow["vienti_kurssi"]);

@@ -43,7 +43,7 @@ if (isset($uusi)) {
             #AND komento != 'email'
             AND komento != 'edi'
             ORDER BY kirjoitin";
-  $kires = mysql_query($query) or pupe_error($query);
+  $kires = pupe_query($query);
 
   $kirjoittimet = array();
   $kirjoittimet[] = array('tunnus' => '', 'kirjoitin' => 'ei kirjoitinta');
@@ -75,7 +75,7 @@ if (isset($uusi)) {
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tunnus  = '{$tulostin}'
                 ORDER BY kirjoitin";
-      $kires = mysql_query($query) or pupe_error($query);
+      $kires = pupe_query($query);
       $kirow = mysql_fetch_assoc($kires);
       $komento = $kirow['komento'];
 

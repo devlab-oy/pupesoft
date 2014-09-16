@@ -14,7 +14,7 @@ $query = "SELECT tapvm, summa, selite, tunnus
           and maksettu <> '1'
           ORDER BY tapvm";
 
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 echo "<table><tr>";
 

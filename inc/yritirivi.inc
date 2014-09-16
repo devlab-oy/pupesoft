@@ -36,7 +36,7 @@ if (mysql_field_name($result, $i) == "valkoodi") { //valuutta
             FROM valuu
             WHERE yhtio = '$kukarow[yhtio]'
             ORDER BY jarjestys";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   $ulos = "<td><select name='$nimi'>";
 
@@ -79,7 +79,7 @@ if (mysql_field_name($result, $i) == "hyvak") { //hyväksyjät
             FROM kuka
             WHERE yhtio = '$kukarow[yhtio]'
             ORDER BY nimi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
   $ulos = "<td><select name='$nimi'><option value=''>".t("Ei kukaan");
 
   while ($vrow=mysql_fetch_array($vresult)) {
@@ -103,7 +103,7 @@ if (mysql_field_name($result, $i) == "oletus_kustp") {
             and kaytossa != 'E'
             and tyyppi    = 'K'
             ORDER BY koodi+0, koodi, nimi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
   $ulos = "<td><select name='$nimi'><option value=' '>".t("Ei kustannuspaikkaa")."</option>";
 
   while ($vrow=mysql_fetch_array($vresult)) {
@@ -124,7 +124,7 @@ if (mysql_field_name($result, $i) == "oletus_kohde") {
             and kaytossa != 'E'
             and tyyppi    = 'O'
             ORDER BY koodi+0, koodi, nimi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
   $ulos = "<td><select name='$nimi'><option value=' '>".t("Ei kohdetta")."</option>";
 
   while ($vrow=mysql_fetch_array($vresult)) {
@@ -145,7 +145,7 @@ if (mysql_field_name($result, $i) == "oletus_projekti") {
             and kaytossa != 'E'
             and tyyppi    = 'P'
             ORDER BY koodi+0, koodi, nimi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
   $ulos = "<td><select name='$nimi'><option value=' '>".t("Ei projektia")."</option>";
 
   while ($vrow=mysql_fetch_array($vresult)) {
@@ -172,7 +172,7 @@ if  (mysql_field_name($result, $i) == "oletus_kulutili" or
     $query = "SELECT nimi
               FROM tili
               WHERE yhtio='$kukarow[yhtio]' and tilino = '$trow[$i]'";
-    $vresult = mysql_query($query) or pupe_error($query);
+    $vresult = pupe_query($query);
 
     if (mysql_num_rows($vresult) == 1) {
       $vrow = mysql_fetch_array($vresult);

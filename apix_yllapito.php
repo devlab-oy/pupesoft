@@ -135,7 +135,7 @@ if ($tee == "RetrieveTransferID") {
                 finvoice_senderpartyid       = '$yhtiorow[ovttunnus]',
                 finvoice_senderintermediator = '003723327487'
                 WHERE yhtio                  = '$kukarow[yhtio]'";
-      $query = mysql_query($query) or pupe_error($query);
+      $query = pupe_query($query);
     }
     else {
       $status_message2 .= "<font class='error'>Päivitys epäonnistui!<br><br>";

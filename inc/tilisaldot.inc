@@ -11,7 +11,7 @@ if ($tee == '1') {
     $query = "SELECT nimi
               FROM tili
               WHERE yhtio = '$kukarow[yhtio]' and tilino = '$tilino'";
-    $sresult = mysql_query($query) or pupe_error($query);
+    $sresult = pupe_query($query);
 
     if (mysql_num_rows($sresult) != 1) {
       echo "<font class='error'>".t("Tili puuttuu tai sitä ei löydy")."!</font><br>";
@@ -28,7 +28,7 @@ if ($tee == '1') {
   $query = "SELECT tilikausi_alku, tilikausi_loppu
             FROM tilikaudet
             WHERE yhtio = '$kukarow[yhtio]' and tunnus = $tkausi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   if (mysql_num_rows($vresult) == 1) {
     $tilikausirow = mysql_fetch_array($vresult);
@@ -91,7 +91,7 @@ if ($tee == '1') {
             $tilinolisa2
             GROUP BY $tilinolisa1 tiliointi.tilino $kustannuspaikoittain_group
             ORDER BY $tilinolisa1 tiliointi.tilino";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<table><tr>";
 
@@ -206,7 +206,7 @@ if ($tee == '1') {
                 $lisa
                 GROUP BY tiliointi.valkoodi
                 HAVING summa_val != 0";
-      $summa_val_result = mysql_query($query) or pupe_error($query);
+      $summa_val_result = pupe_query($query);
 
       echo "<td align='right'>";
 
@@ -227,6 +227,16 @@ if ($tee == '1') {
         $worksheet->write($excelrivi, $iiiiii, $trow["tilino"]);
         $iiiiii++;
         $worksheet->write($excelrivi, $iiiiii, $trow["nimi"]);
+
+        if ($kustannuspaikoittain != "") {
+          $worksheet->write($excelrivi, $iiiiii, $trow["kustp"]);
+          $iiiiii++;
+          $worksheet->write($excelrivi, $iiiiii, $trow["kohde"]);
+          $iiiiii++;
+          $worksheet->write($excelrivi, $iiiiii, $trow["projekti"]);
+          $iiiiii++;
+        }
+
         $iiiiii++;
         $worksheet->write($excelrivi, $iiiiii, $trow["Vientejä"]);
         $iiiiii++;
@@ -282,7 +292,7 @@ $query = "SELECT *
           FROM tilikaudet
           WHERE yhtio = '$kukarow[yhtio]'
           ORDER BY tilikausi_alku desc";
-$vresult = mysql_query($query) or pupe_error($query);
+$vresult = pupe_query($query);
 
 echo "<td><select name='tkausi' onchange='submit();'>";
 

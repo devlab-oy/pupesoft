@@ -92,7 +92,7 @@ if ($teemaksutosite) {
                 laatija  = 'tiliote',
                 laadittu = now()";
       $xresult = pupe_query($query);
-      $isa = mysql_insert_id(); // Näin löydämme tähän liittyvät alvit....
+      $isa = mysql_insert_id($GLOBALS["masterlink"]); // Näin löydämme tähän liittyvät alvit....
 
       if ($tiliointirow['vero'] != 0) {
         // Kassa-alen alv
@@ -171,7 +171,7 @@ if ($teemaksutosite) {
                     laatija  = 'tiliote',
                     laadittu = now()";
           $xresult = pupe_query($query);
-          $isa = mysql_insert_id();
+          $isa = mysql_insert_id($GLOBALS["masterlink"]);
 
           $totvesumma += $summa;
         }
@@ -225,7 +225,7 @@ if ($teemaksutosite) {
             laatija  = 'tiliote',
             laadittu = now()";
   $result = pupe_query($query);
-  $_tiliointi_id = mysql_insert_id();
+  $_tiliointi_id = mysql_insert_id($GLOBALS["masterlink"]);
 
   $query = "UPDATE tiliotedata
             SET kasitelty = now(),

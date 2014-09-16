@@ -1,7 +1,9 @@
 <?php
-if (strpos($_SERVER['SCRIPT_NAME'], "siirtokehotus.php") !== FALSE) {
-  require "../inc/parametrit.inc";
-}
+
+//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+$useslave = 1;
+
+require "../inc/parametrit.inc";
 
 if ($tee == 'lataa_tiedosto') {
   $filepath = "/tmp/".$tmpfilenimi;
@@ -34,7 +36,6 @@ if (isset($tee) and $tee == 'lataa_pdf') {
   echo "</tr>";
   echo "</table>";
   echo "</form>";
-
 }
 
 if (isset($tee) and $tee == "hae_raportti" and count($varasto) < 1) {
@@ -92,7 +93,6 @@ if (isset($tee) and $tee == "hae_raportti") {
             AND varastopaikat.tunnus    IN ({$varastot})
             AND tuotepaikat.halytysraja > 0
             AND tuotepaikat.oletus      = 'X'";
-
   $result = pupe_query($query);
 
   $oletuspaikat = array();
@@ -111,7 +111,6 @@ if (isset($tee) and $tee == "hae_raportti") {
                          AND tp.tuoteno  = '{$row['tuoteno']}'
                          AND vp.tunnus   = {$row['varasto']}
                          AND tp.yhtio    = '{$kukarow['yhtio']}'";
-
     $varapaikka_result = pupe_query($varapaikka_query);
     $varapaikka_count = mysql_result($varapaikka_result, 0);
 
@@ -181,6 +180,7 @@ if (isset($tee) and $tee == "hae_raportti") {
       $varapaikka_echo = '';
       $varapaikat = array();
       $result2 = pupe_query($query2);
+
       while ($row2 = mysql_fetch_assoc($result2)) {
         $saldo_info = saldo_myytavissa($row['tuoteno'], '', $row['varasto'], $kukarow['yhtio'], $row2['alue'], $row2['nro'], $row2['vali'], $row2['taso'] );
         $row2['hyllyssa'] = $saldo_info[1];
@@ -277,7 +277,6 @@ if ( $tee != 'lataa_pdf' and $tee != 'hae_raportti') {
              FROM varastopaikat
              WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
              ORDER BY tyyppi, nimitys";
-
   $vares = pupe_query($query);
 
   $varastot_array = explode(",", $krow["varasto"]);
@@ -289,7 +288,10 @@ if ( $tee != 'lataa_pdf' and $tee != 'hae_raportti') {
     echo "<input type='checkbox' name='varasto[]' value='{$varow['tunnus']}' {$sel}> {$varow['nimitys']} {$eri}<br>";
   }
 
-  $query = "SELECT tunnus, nimitys FROM keraysvyohyke WHERE yhtio = '{$kukarow['yhtio']}' AND nimitys != ''";
+  $query = "SELECT tunnus, nimitys
+            FROM keraysvyohyke
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND nimitys != ''";
   $keraysvyohyke_result = pupe_query($query);
 
   if (mysql_num_rows($keraysvyohyke_result) > 0) {
@@ -309,9 +311,7 @@ if ( $tee != 'lataa_pdf' and $tee != 'hae_raportti') {
   echo "<br><input type='submit' name='hae_raportti' value='" . t("Hae raportti") . "'></form>";
 }
 
-if (strpos($_SERVER['SCRIPT_NAME'], "siirtokehotus.php") !== FALSE) {
-  require "../inc/footer.inc";
-}
+require "../inc/footer.inc";
 
 function aja_ruby($json_data_filepath, $ruby_tiedosto_nimi) {
   global $pupe_root_polku;

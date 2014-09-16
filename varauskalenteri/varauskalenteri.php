@@ -112,7 +112,7 @@ $tun = 8;
 
 //N‰ytet‰‰n aina konsernikohtaisesti
 $query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 $konsernit = "";
 
 while ($row = mysql_fetch_array($result)) {
@@ -133,7 +133,7 @@ for ($i=800; $i < 2200; $i++) {
           and tyyppi='varauskalenteri'
           and tapa='$toim'
           $konsernit";
-    $lres = mysql_query($query) or pupe_error($query);
+    $lres = pupe_query($query);
 
     if (mysql_num_rows($lres) == 0) {
       $query = "  select if('$year-$mymonth-$myday 00:00:00' > pvmalku, '08:00', substring(pvmalku,12,5)) aikaalku, substring(pvmloppu,12,5) aikaloppu, tapa, left(pvmloppu,10) pvmloppu, left(pvmalku,10) pvmalku, tunnus, kuka, kentta01, kentta02, kentta03, kentta04, kentta05, yhtio
@@ -155,7 +155,7 @@ for ($i=800; $i < 2200; $i++) {
           $konsernit";
   }
 
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 0) {
 
@@ -177,7 +177,7 @@ for ($i=800; $i < 2200; $i++) {
           from kuka
           where kuka='$row[kuka]'
           $konsernit";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
     $krow = mysql_fetch_array($result);
 
     if ($krow["nimi"] != '') {
@@ -291,7 +291,7 @@ for ($i=1; $i <= days_in_month($month, $year); $i++) {
         and tyyppi='varauskalenteri'
         and tapa='$toim'
         $konsernit";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (date("Y-n-j") == "$year-$mymonth-$myday") {
     $font=$today;

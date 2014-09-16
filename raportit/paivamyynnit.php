@@ -24,7 +24,7 @@ echo "<br>";
 if ($tee != '') {
 
   $query = "SELECT DISTINCT osasto FROM asiakas WHERE yhtio = '$kukarow[yhtio]' order by osasto";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   // haetaan kaikki osasto arrayseen
   $osastot = array();
@@ -52,7 +52,7 @@ if ($tee != '') {
             AND lasku.alatila = 'x'
             GROUP BY 1,2,3
             ORDER BY 1,2,3";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   while ($ressu = mysql_fetch_array($result)) {
     $apu = (int) $ressu['pvm'];

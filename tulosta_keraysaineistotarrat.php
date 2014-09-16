@@ -25,7 +25,7 @@ if ($tee == '') {
             and lasku.alatila = 'A'
             GROUP BY 1,2,3
             ORDER BY 1,2,3";
-  $tarrares = mysql_query($query) or pupe_error($query);
+  $tarrares = pupe_query($query);
 
   echo "<font class='message'>".t("Tulostamattomat")."</font><br><br>";
 
@@ -51,7 +51,7 @@ if ($tee == '') {
     $query = "SELECT *
               from kirjoittimet
               where yhtio = '$kukarow[yhtio]'";
-    $kires = mysql_query($query) or pupe_error($query);
+    $kires = pupe_query($query);
 
     echo "<select name='kirjoitin'>";
     echo "<option value='$kirow[komento]'>".t("Valitse kirjoitin")."</option>";
@@ -81,7 +81,7 @@ if ($tee == '') {
             and lasku.luontiaika >= date_sub(now(), INTERVAL 30 DAY)
             GROUP BY 1,2,3,4,5
             ORDER BY 1 DESC,2 DESC,3,4,5";
-  $tarrares = mysql_query($query) or pupe_error($query);
+  $tarrares = pupe_query($query);
 
   if (mysql_num_rows($tarrares) > 0) {
 
@@ -97,7 +97,7 @@ if ($tee == '') {
     $query = "SELECT *
               from kirjoittimet
               where yhtio = '$kukarow[yhtio]'";
-    $kires2 = mysql_query($query) or pupe_error($query);
+    $kires2 = pupe_query($query);
 
     while ($tarrarow = mysql_fetch_array($tarrares)) {
       echo "<tr><td>".tv1dateconv($tarrarow["luontiaika"], "P")."</td><td>".tv1dateconv($tarrarow["toimaika"])."</td><td>$tarrarow[ytunnus]</td><td>$tarrarow[nimi]</td><td>$tarrarow[toim_nimi]</td><td align='right'>$tarrarow[riveja]</td><td align='right'>$tarrarow[myyntieria]</td>";

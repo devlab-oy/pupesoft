@@ -18,7 +18,7 @@ if (isset($lisaa) and isset($polttoainelisa) and isset($toimitustapa)) {
               WHERE yhtio       = '{$kukarow['yhtio']}'
               AND rahtihinta   != 0
               AND toimitustapa  = '$toimitustapa'";
-    $rahtimaksut_res = mysql_query($query) or pupe_error($query);
+    $rahtimaksut_res = pupe_query($query);
 
     while ($rahtimaksut_row = mysql_fetch_assoc($rahtimaksut_res)) {
 
@@ -30,7 +30,7 @@ if (isset($lisaa) and isset($polttoainelisa) and isset($toimitustapa)) {
                 muuttaja    = '{$kukarow['kuka']}'
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tunnus  = '{$rahtimaksut_row['tunnus']}'";
-      $update_res = mysql_query($query) or pupe_error($query);
+      $update_res = pupe_query($query);
     }
 
     echo "<font class='message'>", t("Toimitustavan"), " $toimitustapa ", t("rahtihinnat kerrottiin kertoimella"), " $polttoainelisa.</font><br/><br/>";
@@ -43,7 +43,7 @@ $query = "SELECT DISTINCT rahtimaksut.toimitustapa
           WHERE rahtimaksut.yhtio     = '{$kukarow['yhtio']}'
           AND rahtimaksut.rahtihinta != ''
           ORDER BY rahtimaksut.toimitustapa ASC";
-$toimitustapa_res = mysql_query($query) or pupe_error($query);
+$toimitustapa_res = pupe_query($query);
 
 if (mysql_num_rows($toimitustapa_res) == 0) {
   echo "<font class='error'>", t("Yhdell‰k‰‰n toimitustavalla ei ole rahtimaksuja"), "!</font>";

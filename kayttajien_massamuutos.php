@@ -11,7 +11,7 @@ function massamuuttaja($taulu, $sarake, $korvattava, $korvaava) {
                      muutospvm   = now()
                      WHERE yhtio = '$kukarow[yhtio]'
                      AND $sarake = '$korvattava'";
-  $resultpaivitys  = mysql_query($paivityslause) or pupe_error($paivityslause);
+  $resultpaivitys  = pupe_query($paivityslause);
 
   return mysql_affected_rows();
 }
@@ -26,14 +26,14 @@ if ($MassaMuutos != '') {
                 FROM kuka
                 WHERE kuka.yhtio = '$kukarow[yhtio]'
                 AND kuka.kuka    = '$tokuka'";
-  $resulttarkista1 = mysql_query($tarkistus) or pupe_error($tarkistus);
+  $resulttarkista1 = pupe_query($tarkistus);
   $tarkistusrow1 = mysql_fetch_assoc($resulttarkista1);
 
   $tarkistus = "SELECT DISTINCT kuka.kuka, kuka.myyja, kuka.yhtio, kuka.nimi
                 FROM kuka
                 WHERE kuka.yhtio = '$kukarow[yhtio]'
                 AND kuka.kuka    = '$fromkuka'";
-  $resulttarkista2 = mysql_query($tarkistus) or pupe_error($tarkistus);
+  $resulttarkista2 = pupe_query($tarkistus);
   $tarkistusrow2 = mysql_fetch_assoc($resulttarkista2);
 
   if (($tarkistusrow1['myyja'] == 0 or $tarkistusrow2['myyja'] == 0) and ($tuote_myyja == 1 or $tuote_ostaja == 1 or $asiakas_myyja == 1)) {
@@ -127,7 +127,7 @@ $query = "SELECT distinct kuka.nimi, kuka.kuka
           WHERE kuka.extranet = ''
           AND kuka.yhtio      = '$kukarow[yhtio]'
           ORDER BY kuka.nimi";
-$kukar = mysql_query($query) or pupe_error($query);
+$kukar = pupe_query($query);
 
 echo "<table><tr><th align='left'>".t("Käyttäjä").":</th><td>
 <select name='fromkuka' onchange='submit()'>
@@ -152,7 +152,7 @@ $query = "SELECT distinct kuka.nimi, kuka.kuka
           WHERE kuka.extranet = ''
           AND kuka.yhtio      = '$kukarow[yhtio]'
           ORDER BY kuka.nimi";
-$kukar = mysql_query($query) or pupe_error($query);
+$kukar = pupe_query($query);
 
 echo "<table><tr><th align='left'>".t("Käyttäjä").":</th><td>
 <select name='tokuka' onchange='submit()'>

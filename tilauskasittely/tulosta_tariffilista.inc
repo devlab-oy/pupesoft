@@ -112,7 +112,7 @@ $query = "SELECT tuotteen_toimittajat.toim_tuoteno, tuote.tuoteno, tuote.nimitys
           WHERE tilausrivi.uusiotunnus = '$otunnus'
           and tilausrivi.yhtio='$kukarow[yhtio]'
           ORDER BY tilausrivi.toimaika, tuotteen_toimittajat.toim_tuoteno";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 $kala = 490;
 $lask = 1;

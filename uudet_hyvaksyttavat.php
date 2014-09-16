@@ -25,19 +25,19 @@ if (isset($argv[2]) and $argv[2] != "") {
 if ((int) $ajalta == 0) $ajalta = 1;
 
 $query    = "SELECT * from kuka where kuka='$argv[1]' limit 1";
-$kukares = mysql_query($query) or pupe_error($query);
+$kukares = pupe_query($query);
 if (mysql_num_rows($kukares) == 0) die("Karhuajaa ei löyry!\n$query\n");
 $kukarow = mysql_fetch_array($kukares);
 
 $query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
-$yhtiores = mysql_query($query) or pupe_error($query);
+$yhtiores = pupe_query($query);
 if (mysql_num_rows($yhtiores) == 0) die("Firmaa ei löyry!\n");
 $yhtiorow = mysql_fetch_array($yhtiores);
 
 $query = "SELECT *
           FROM yhtion_parametrit
           WHERE yhtio='$kukarow[yhtio]'";
-$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+$result = pupe_query($query);
 
 if (mysql_num_rows($result) == 1) {
   $yhtion_parametritrow = mysql_fetch_array($result);
@@ -65,7 +65,7 @@ $query = "SELECT concat_ws(' ',lasku.nimi, nimitark) nimi, tapvm, erpcm, round(s
           JOIN kuka ON kuka.yhtio=lasku.yhtio and lasku.hyvaksyja_nyt=kuka.kuka and kuka.eposti <> ''
           WHERE lasku.yhtio='$kukarow[yhtio]' and lasku.tila = 'H' and (tilaustyyppi != 'M' or h1time != '0000-00-00 00:00:00')
           ORDER BY kuka.eposti, tapvm";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 while ($trow=mysql_fetch_array($result)) {
   $muistuta = 0;

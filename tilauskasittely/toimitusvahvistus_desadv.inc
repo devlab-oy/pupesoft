@@ -298,7 +298,8 @@ if (!function_exists('desadv_row')) {
                     JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
                     JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
                     WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                    AND tilausrivi.tunnus  IN ({$keraysera_row['tilausrivit']})";
+                    AND tilausrivi.tunnus  IN ({$keraysera_row['tilausrivit']})
+                    AND tilausrivi.tyyppi  != 'D'";
           $paino_res = pupe_query($query);
           $paino_row = mysql_fetch_assoc($paino_res);
 
@@ -324,7 +325,7 @@ if (!function_exists('desadv_row')) {
                   FROM tilausrivi
                   JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
                   WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
-                   AND tilausrivi.tunnus  IN ({$keraysera_row['tilausrivit']})
+                  AND tilausrivi.tunnus  IN ({$keraysera_row['tilausrivit']})
                   AND tilausrivi.tyyppi  != 'D'
                   GROUP BY tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro";
         $tuotteet_res = pupe_query($query);
@@ -444,9 +445,9 @@ if (!function_exists('desadv_row')) {
                 SUM(tilausrivi.varattu+tilausrivi.kpl) varattu
                 FROM tilausrivi
                 JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-                WHERE tilausrivi.yhtio   = '{$kukarow['yhtio']}'
-                 AND tilausrivi.otunnus  = '{$desadv_laskurow['laskutunnus']}'
-                AND tilausrivi.tyyppi   != 'D'
+                WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
+                AND tilausrivi.otunnus  = '{$desadv_laskurow['laskutunnus']}'
+                AND tilausrivi.tyyppi  != 'D'
                 GROUP BY tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro";
       $tuotteet_res = pupe_query($query);
 
@@ -534,7 +535,8 @@ if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv
             FROM lasku
             JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
             LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
+            AND lasku.tila    != 'D'
             AND lasku.tunnus  in ({$otunnukset})
             ORDER BY lasku.tunnus";
   $desadv_laskures = pupe_query($query);
@@ -608,26 +610,26 @@ if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv
 
     $params = array(
       'desadv_laskurow'   => $desadv_laskurow,
-      'desadv_rakir_row'   => $desadv_rakir_row,
-      'desadv_message'  => $desadv_message,
-      'error'       => $error,
-      'x'         => $x,
-      'desadv_version'  => $desadv_version,
-      'yhteyshenkilo'   => $yhteyshenkilo,
+      'desadv_rakir_row'  => $desadv_rakir_row,
+      'desadv_message'    => $desadv_message,
+      'error'             => $error,
+      'x'                 => $x,
+      'desadv_version'    => $desadv_version,
+      'yhteyshenkilo'     => $yhteyshenkilo,
       'yhteyshenkilo_puh' => $yhteyshenkilo_puh,
-      'toitarow'      => $toitarow,
-      'lahtunniste'    => $lahtunniste,
+      'toitarow'          => $toitarow,
+      'lahtunniste'       => $lahtunniste,
     );
 
     list($desadv_message, $error, $x, $lahtunniste) = desadv_header($params);
 
     $params = array(
-      'desadv_laskurow'   => $desadv_laskurow,
-      'desadv_rakir_row'   => $desadv_rakir_row,
-      'desadv_message'  => $desadv_message,
-      'error'       => $error,
-      'x'         => $x,
-      'desadv_version'  => $desadv_version,
+      'desadv_laskurow'  => $desadv_laskurow,
+      'desadv_rakir_row' => $desadv_rakir_row,
+      'desadv_message'   => $desadv_message,
+      'error'            => $error,
+      'x'                => $x,
+      'desadv_version'   => $desadv_version,
       'rahtikirjanro'    => $rahtikirjanro,
     );
 

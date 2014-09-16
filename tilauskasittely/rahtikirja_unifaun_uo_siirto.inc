@@ -20,7 +20,7 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
                 and tunnus  in ($otunnukset)
                 order by tunnus
                 limit 1";
-      $tempr = mysql_query($query) or pupe_error($query);
+      $tempr = pupe_query($query);
       $postirow = mysql_fetch_assoc($tempr);
     }
 

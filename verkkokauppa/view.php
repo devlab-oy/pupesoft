@@ -3,11 +3,14 @@
 //* Tämä skripti käyttää slave-tietokantapalvelinta *//
 $useslave = 1;
 
-if (file_exists("inc/connect.inc")) {
-  require "inc/connect.inc";
+if (@include("inc/connect.inc")) {
+  require "inc/functions.inc";
+}
+elseif (@include("connect.inc")) {
+  require "functions.inc";
 }
 else {
-  require "connect.inc";
+  exit;
 }
 
 $id = (int) $_GET["id"];
@@ -16,7 +19,7 @@ $query = "SELECT *
           from liitetiedostot
           where tunnus = '$id'
           and liitos   in ('kalenteri','tuote','sarjanumeron_lisatiedot')";
-$liiteres = mysql_query($query) or die(mysql_error());
+$liiteres = pupe_query($query);
 
 if (mysql_num_rows($liiteres) > 0) {
   $liiterow = mysql_fetch_assoc($liiteres);

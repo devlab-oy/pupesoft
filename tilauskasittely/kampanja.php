@@ -306,7 +306,7 @@ function luo_kampanja_otsikko($kampanja_nimi) {
             luontiaika = CURRENT_DATE";
   pupe_query($query);
 
-  return mysql_insert_id();
+  return mysql_insert_id($GLOBALS["masterlink"]);
 }
 
 function luo_kampanja_ehto($kampanja_ehto, $kampanja_tunnus) {
@@ -323,7 +323,7 @@ function luo_kampanja_ehto($kampanja_ehto, $kampanja_tunnus) {
             luontiaika = CURRENT_DATE";
   pupe_query($query);
 
-  return mysql_insert_id();
+  return mysql_insert_id($GLOBALS["masterlink"]);
 }
 
 function luo_kampanja_aliehto($kampanja_aliehto, $kampanja_ehto_tunnus) {
@@ -340,7 +340,7 @@ function luo_kampanja_aliehto($kampanja_aliehto, $kampanja_ehto_tunnus) {
             luontiaika = CURRENT_DATE";
   pupe_query($query);
 
-  return mysql_insert_id();
+  return mysql_insert_id($GLOBALS["masterlink"]);
 }
 
 function luo_palkinto_rivi($palkinto_rivi, $kampanja_tunnus) {

@@ -67,7 +67,7 @@ if ($tila == 'K' and is_array($luottotappio)) {
                   laatija  = '$kukarow[kuka]',
                   laadittu = now()";
         $result = pupe_query($query);
-        $isa = mysql_insert_id($link);
+        $isa = mysql_insert_id($GLOBALS["masterlink"]);
 
         // Tiliöidään alv
         if ($lasku['vero'] != 0) {

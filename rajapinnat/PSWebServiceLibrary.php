@@ -400,6 +400,71 @@ class PrestaShopWebservice
 		return true;
 	}
 
+  //HUOM!! TÄMÄ ON ITSE LISÄTTY FUNKTIO
+  public function executeImageRequest(array $options)
+  {
+    if (empty($options['resource'])) {
+      throw new PrestaShopWebserviceException('Resource missing');
+    }
+    if (empty($options['id'])) {
+      throw new PrestaShopWebserviceException('ID missing');
+    }
+    if (empty($options['attachment'])) {
+      throw new PrestaShopWebserviceException('Data missing');
+    }
+    if ($options['method'] == 'POST') {
+      $post = true;
+    }
+    else if ($options['method'] == 'PUT') {
+      $post = false;
+    }
+    else {
+      throw new PrestaShopWebserviceException('Only POST and PUT are accepted');
+    }
+
+    $url = "{$this->url}api/images/{$options['resource']}/{$options['id']}";
+    $filepath = luo_temp_tiedosto($options['attachment']);
+    $imagedata = array(
+        'image' => curl_file_create($filepath, $options['attachment']['filetype'], $options['attachment']['filename'])
+    );
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    if ($post) {
+      $params[CURLOPT_POST] = true;
+    }
+    else {
+      $params[CURLOPT_PUT] = true;
+    }
+    curl_setopt($ch, CURLOPT_HEADER, true);
+    curl_setopt($ch, CURLINFO_HEADER_OUT, true);
+    curl_setopt($ch, CURLOPT_USERPWD, $this->key . ':');
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $imagedata);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $response = curl_exec($ch);
+
+    $index = strpos($response, "\r\n\r\n");
+
+    $header = substr($response, 0, $index);
+    $body = substr($response, $index + 4);
+
+    $status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+    if ($this->debug) {
+      $this->printDebug('HTTP REQUEST HEADER', curl_getinfo($ch, CURLINFO_HEADER_OUT));
+      $this->printDebug('HTTP RESPONSE HEADER', $header);
+      $this->printDebug('RETURN HTTP STATUS CODE', $status_code);
+      $this->printDebug('RETURN HTTP BODY', $body);
+    }
+
+    curl_close($ch);
+
+    unlink($filepath);
+
+    self::checkStatusCode($status_code);
+    return array('status_code' => $status_code, 'response' => $body, 'header' => $header);
+  }
+
 
 }
 

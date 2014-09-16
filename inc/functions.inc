@@ -27746,3 +27746,23 @@ if (!function_exists("kasittele_tiliote_viite")) {
     $kukarow = $kukarow_talteen;
   }
 }
+
+if (!function_exists('luo_temp_tiedosto')) {
+
+  function luo_temp_tiedosto($liitetiedosto) {
+    global $kukarow, $yhtiorow;
+
+    if (empty($liitetiedosto)) {
+      return '';
+    }
+
+    $fileparts = explode('.', $liitetiedosto['filename']);
+    $kpl = count($fileparts);
+    $extension = $fileparts[$kpl - 1];
+
+    $filepath = "/tmp/" . uniqid() . ".{$extension}";
+    file_put_contents($filepath, $liitetiedosto['data']);
+
+    return $filepath;
+  }
+}

@@ -268,7 +268,7 @@ if (!function_exists("tee_jt_tilaus")) {
                   $yhdlisa";
         $stresult = pupe_query($query);
       }
-
+echo "271 $query <br><br>";
       if (mysql_num_rows($stresult) != 0) {
         $otsikkorivi = mysql_fetch_assoc($stresult);
         $id = $otsikkorivi['tunnus'];
@@ -747,66 +747,75 @@ if (!function_exists("tee_jt_tilaus")) {
                 }
               }
 
+echo "750 "; var_dump($otsikkorivi); echo "<br><br><br>";
+              // Haetaan asiakkaan kieli, jotta saadaan systeemikommentit oikealle kielelle
+              $query = "SELECT kieli
+                        FROM asiakas
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tunnus = '{$otsikkorivi['liitostunnus']}'";
+              $kielirow = mysql_fetch_assoc(pupe_query($query));
+              $kieli = $kielirow["kieli"];
+echo "758 $kieli <br><br>";
               // Joitain tietoja alkuper‰iselt‰ tilaukselta, vain jos osatoimitus ei ole estetty ja jtrivit yhdistet‰‰n samalle otsikolle ja kyseess‰ ei ole ennakkotilaus
               if ($otsikkorivi["osatoimitus"] == "" and $toim != "ENNAKKO" and $otsikkorivi['jtkielto'] != "Y") {
 
-                if (strpos($kommentti, t("Alkuper‰inen tilaus").": ".trim($orig_laskurow['tunnus'])) === FALSE) {
+                if (strpos($kommentti, t("Alkuper‰inen tilaus", $kieli).": ".trim($orig_laskurow['tunnus'])) === FALSE) {
                   if (trim($kommentti) != "") $kommentti .= " / ";
                   // Tilausrivin systeemikommentti
-                  $kommentti .= t("Alkuper‰inen tilaus").": ".trim($orig_laskurow['tunnus']);
+                  $kommentti .= t("Alkuper‰inen tilaus", $kieli).": ".trim($orig_laskurow['tunnus']);
                 }
 
-                if (trim($orig_laskurow['asiakkaan_tilausnumero']) != "" and strpos($kommentti, t("Asiakkaan tilaus").": ".trim($orig_laskurow['asiakkaan_tilausnumero'])) === FALSE) {
+                if (trim($orig_laskurow['asiakkaan_tilausnumero']) != "" and strpos($kommentti, t("Asiakkaan tilaus", $kieli).": ".trim($orig_laskurow['asiakkaan_tilausnumero'])) === FALSE) {
                   if (trim($kommentti) != "") $kommentti .= " / ";
                   // Tilausrivin systeemikommentti
-                  $kommentti .= t("Asiakkaan tilaus").": ".trim($orig_laskurow['asiakkaan_tilausnumero']);
+                  $kommentti .= t("Asiakkaan tilaus", $kieli).": ".trim($orig_laskurow['asiakkaan_tilausnumero']);
                 }
 
-                if (trim($orig_laskurow['viesti']) != "" and strpos($kommentti, t("Tilausviite").": ".trim($orig_laskurow['viesti'])) === FALSE) {
+                if (trim($orig_laskurow['viesti']) != "" and strpos($kommentti, t("Tilausviite", $kieli).": ".trim($orig_laskurow['viesti'])) === FALSE) {
                   if (trim($kommentti) != "") $kommentti .= " / ";
                   // Tilausrivin systeemikommentti
-                  $kommentti .= t("Tilausviite").": ".trim($orig_laskurow['viesti']);
+                  $kommentti .= t("Tilausviite", $kieli).": ".trim($orig_laskurow['viesti']);
                 }
 
-                if (trim($orig_laskurow['tilausyhteyshenkilo']) != "" and strpos($kommentti, t("Tilaaja").": ".trim($orig_laskurow['tilausyhteyshenkilo'])) === FALSE) {
+                if (trim($orig_laskurow['tilausyhteyshenkilo']) != "" and strpos($kommentti, t("Tilaaja", $kieli).": ".trim($orig_laskurow['tilausyhteyshenkilo'])) === FALSE) {
                   if (trim($kommentti) != "") $kommentti .= " / ";
                   // Tilausrivin systeemikommentti
-                  $kommentti .= t("Tilaaja").": ".trim($orig_laskurow['tilausyhteyshenkilo']);
+                  $kommentti .= t("Tilaaja", $kieli).": ".trim($orig_laskurow['tilausyhteyshenkilo']);
                 }
 
-                if (trim($orig_laskurow['sisviesti1']) != "" and strpos($kommentti, t("Kommentti").": ".trim($orig_laskurow['sisviesti1'])) === FALSE) {
+                if (trim($orig_laskurow['sisviesti1']) != "" and strpos($kommentti, t("Kommentti", $kieli).": ".trim($orig_laskurow['sisviesti1'])) === FALSE) {
                   if (trim($kommentti) != "") $kommentti .= " / ";
                   // Tilausrivin systeemikommentti
-                  $kommentti .= t("Kommentti").": ".trim($orig_laskurow['sisviesti1']);
+                  $kommentti .= t("Kommentti", $kieli).": ".trim($orig_laskurow['sisviesti1']);
                 }
 
-                if (trim($orig_laskurow['kohde']) != "" and strpos($kommentti, t("Kohde").": ".trim($orig_laskurow['kohde'])) === FALSE) {
+                if (trim($orig_laskurow['kohde']) != "" and strpos($kommentti, t("Kohde", $kieli).": ".trim($orig_laskurow['kohde'])) === FALSE) {
                   if (trim($kommentti) != "") $kommentti .= " / ";
                   // Tilausrivin systeemikommentti
-                  $kommentti .= t("Kohde").": ".trim($orig_laskurow['kohde']);
+                  $kommentti .= t("Kohde", $kieli).": ".trim($orig_laskurow['kohde']);
                 }
 
               }
               elseif ($otsikkorivi["osatoimitus"] == "" and $otsikkorivi['jtkielto'] == "Y") {
-                if (strpos($kommentti, t("Alkuper‰inen tilaus").": ".trim($orig_laskurow['tunnus'])) === FALSE) {
+                if (strpos($kommentti, t("Alkuper‰inen tilaus", $kieli).": ".trim($orig_laskurow['tunnus'])) === FALSE) {
                   if (trim($kommentti) != "") $kommentti .= " / ";
                   // Tilausrivin systeemikommentti
-                  $kommentti .= t("Alkuper‰inen tilaus").": ".trim($orig_laskurow['tunnus']);
+                  $kommentti .= t("Alkuper‰inen tilaus", $kieli).": ".trim($orig_laskurow['tunnus']);
                 }
               }
               elseif ($toim == "ENNAKKO") {
-                if (strpos($kommentti, t("Ennakkotilaus").": ".trim($orig_laskurow['tunnus'])) === FALSE and $toim == "ENNAKKO") {
+                if (strpos($kommentti, t("Ennakkotilaus", $kieli).": ".trim($orig_laskurow['tunnus'])) === FALSE and $toim == "ENNAKKO") {
                   if (trim($kommentti) != "") $kommentti .= " / ";
                   // Tilausrivin systeemikommentti
-                  $kommentti .= t("Ennakkotilaus").": ".trim($orig_laskurow['tunnus']);
+                  $kommentti .= t("Ennakkotilaus", $kieli).": ".trim($orig_laskurow['tunnus']);
                 }
               }
             }
 
-            if ($automaattinen_poiminta != "" and $toim != "ENNAKKO" and $tilaus_on_jo == "KYLLA" and strpos($kommentti, t("Toimitettavissa oleva JT-rivi")."!") === FALSE) {
+            if ($automaattinen_poiminta != "" and $toim != "ENNAKKO" and $tilaus_on_jo == "KYLLA" and strpos($kommentti, t("Toimitettavissa oleva JT-rivi", $kieli)."!") === FALSE) {
               if (trim($kommentti) != "") $kommentti .= " / ";
               // Tilausrivin systeemikommentti
-              $kommentti .= t("Toimitettavissa oleva JT-rivi")."!";
+              $kommentti .= t("Toimitettavissa oleva JT-rivi", $kieli)."!";
             }
 
             if ($jt_huomioi_pvm != "") {
@@ -1021,7 +1030,7 @@ if (!function_exists("tee_jt_tilaus")) {
                                 kerattyaika    = $toimitettuaika,
                                 toimitettu     = '$kukarow[kuka]',
                                 toimitettuaika = $toimitettuaika,
-                                kommentti      = trim(concat(kommentti, ' ".t("Suoratoimitus")."'))
+                                kommentti      = trim(concat(kommentti, ' ".t("Suoratoimitus", $kieli)."'))
                                 WHERE yhtio    = '$kukarow[yhtio]'
                                 AND tunnus     = '$lisrow[tunnus]'";
                   $toimupdres = pupe_query($toimquery);
@@ -1079,7 +1088,7 @@ if (!function_exists("tee_jt_tilaus")) {
                   }
                 }
 
-                $uusi_kommentti = t("Toimitettu tilauksella").": " . $kukarow['kesken'];
+                $uusi_kommentti = t("Toimitettu tilauksella", $kieli).": " . $kukarow['kesken'];
 
                 $query = "UPDATE tilausrivi SET
                           tyyppi      = 'D',

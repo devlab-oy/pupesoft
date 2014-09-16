@@ -19,6 +19,11 @@ class PrestaClient {
    * @var SimpleXML
    */
   private $schema = null;
+
+  /**
+   *
+   * @var Logger
+   */
   private $logger = null;
 
   public function __construct($url, $api_key) {
@@ -62,10 +67,14 @@ class PrestaClient {
       $this->schema = $this->get_empty_schema('products');
       $xml_messages = $this->generate_products_xml($products);
 
-      $opt = array('resource' => 'products',);
+      $opt = array('resource' => 'products');
       foreach ($xml_messages as $xml_message) {
-        $opt['postXml'] = $xml_message->asXML();
+        $opt['postXml'] = $xml_message['product']->asXML();
         $response_xml = $this->ws->add($opt);
+
+        if (!empty($xml_message['images'])) {
+          $this->create_product_images((string) $response_xml->product->id, $xml_message['images']);
+        }
       }
     }
     catch (Exception $e) {
@@ -76,6 +85,31 @@ class PrestaClient {
     return $response_xml;
   }
 
+  public function create_product_images($product_id, $images) {
+    foreach ($images as $image) {
+      $this->create_product_image($product_id, $image);
+    }
+  }
+
+  public function create_product_image($product_id, $image) {
+    try {
+      $opt = array(
+          'resource'   => 'products',
+          'id'         => $product_id,
+          'attachment' => $image,
+          'method'     => 'POST'
+      );
+
+      $response = $this->ws->executeImageRequest($opt);
+    }
+    catch (Exception $e) {
+      $msg = "Tuotteen: {$product_id} tuotekuvan luonti epäonnistui";
+      $this->logger->log($msg, $e);
+    }
+
+    return $response;
+  }
+
   /**
    *
    * @param array $products
@@ -83,22 +117,26 @@ class PrestaClient {
   private function generate_products_xml($products) {
     $xml_messages = array();
     foreach ($products as $product) {
-      $xml_messages[] = $this->populate_product_xml($product);
+      $xml_messages[$product['tunnus']]['images'] = $product['images'];
+      $xml_messages[$product['tunnus']]['product'] = $this->populate_product_xml($product);
     }
 
     return $xml_messages;
   }
 
   private function populate_product_xml($product, $create = true) {
-    $request_xml = new SimpleXMLElement($this->schema->asXML());
+    $xml = new SimpleXMLElement($this->schema->asXML());
 //    $request_xml->product->new = $create;
-    $request_xml->product->reference = $product['tuoteno'];
-    $request_xml->product->supplier_reference = $product['tuoteno'];
-    $request_xml->product->price = $product['myyntihinta'];
-    $request_xml->product->link_rewrite->attributes()->language = $product['nimitys'];
-    $request_xml->product->name->attributes()->language = $product['nimitys'];
+    $xml->product->reference = $product['tuoteno'];
+    $xml->product->supplier_reference = $product['tuoteno'];
+    $xml->product->price = $product['myyntihinta'];
 
-    return $request_xml;
+    $xml->product->link_rewrite->language[0] = $product['nimitys'];
+    $xml->product->link_rewrite->language[1] = $product['nimitys'];
+    $xml->product->name->language[0] = $product['nimitys'];
+    $xml->product->name->language[1] = $product['nimitys'];
+
+    return $xml;
   }
 
   /**

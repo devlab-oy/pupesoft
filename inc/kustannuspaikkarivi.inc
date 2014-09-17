@@ -33,7 +33,7 @@ if (mysql_field_name($result, $i) == "isa_tarkenne") {
             WHERE yhtio   = '$kukarow[yhtio]'
             and kaytossa != 'E'
             ORDER BY koodi+0, koodi, nimi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 

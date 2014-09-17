@@ -48,7 +48,7 @@ if ($tee == 'TULOSTA') {
             and yhtio                          = '$kukarow[yhtio]'
             and lasku.kauppatapahtuman_luonne != '999'
             ORDER BY laskunro";
-  $laskuresult = mysql_query($query) or pupe_error($query);
+  $laskuresult = pupe_query($query);
 
   if (mysql_num_rows($laskuresult) == 0) {
     echo t("VIRHE: Aineisto on tyhj‰, t‰ydent‰v‰‰ vienti-ilmoitusta ei voida l‰hett‰‰")."!";
@@ -120,7 +120,7 @@ if ($tee == 'TULOSTA') {
       $query = "SELECT distinct koodi
                 FROM maat
                 WHERE koodi='$laskurow[maa_maara]'";
-      $maaresult = mysql_query($query) or pupe_error($query);
+      $maaresult = pupe_query($query);
 
       if (mysql_num_rows($maaresult) == 0) {
         echo t("Laskunumero").": $laskurow[laskunro]. ".t("M‰‰r‰maa on virheellinen")."!<br>";
@@ -156,7 +156,7 @@ if ($tee == 'TULOSTA') {
       $query = "SELECT distinct koodi
                 FROM maat
                 WHERE koodi='$laskurow[sisamaan_kuljetus_kansallisuus]'";
-      $maaresult = mysql_query($query) or pupe_error($query);
+      $maaresult = pupe_query($query);
 
       if (mysql_num_rows($maaresult) == 0) {
         echo t("Laskunumero").": $laskurow[laskunro]. ".t("Sis‰maan kuljetuksen kansallisuus on virheellinen")."!<br>";
@@ -177,7 +177,7 @@ if ($tee == 'TULOSTA') {
       $query = "SELECT distinct koodi
                 FROM maat
                 WHERE koodi='$laskurow[aktiivinen_kuljetus_kansallisuus]'";
-      $maaresult = mysql_query($query) or pupe_error($query);
+      $maaresult = pupe_query($query);
 
       if (mysql_num_rows($maaresult) == 0) {
         echo t("Laskunumero").": $laskurow[laskunro]. ".t("Aktiivisen kuljetuksen kansallisuus on virheellinen")."!<br>";
@@ -211,7 +211,7 @@ if ($tee == 'TULOSTA') {
                and tilausrivi.yhtio         = '$kukarow[yhtio]'
                and tilausrivi.kpl           > 0
                GROUP BY tuote.tullinimike1, tuote.tullinimike2, tuote.tullikohtelu, alkuperamaa";
-    $cresult = mysql_query($cquery) or pupe_error($cquery);
+    $cresult = pupe_query($cquery);
 
     if (mysql_num_rows($cresult) == 0) {
       ///* Tarkistetaan, ett‰ tilausrivej‰ lˆytyy*///
@@ -248,7 +248,7 @@ if ($tee == 'TULOSTA') {
           $query = "SELECT min(laskunro), max(laskunro), count(*)
                     FROM lasku
                     WHERE vienti='K' and tila='U' and tullausnumero!='' and tapvm ='$tapvm' and yhtio='$kukarow[yhtio]'";
-          $csresult = mysql_query($query) or pupe_error($query);
+          $csresult = pupe_query($query);
           $csrow = mysql_fetch_array($csresult);
 
           $pdf->draw_text(50,  810, $yhtiorow["nimi"], $firstpage);
@@ -307,7 +307,7 @@ if ($tee == 'TULOSTA') {
                 FROM tilausrivi
                 WHERE tilausrivi.uusiotunnus = '$laskurow[tunnus]'
                 and tilausrivi.yhtio='$kukarow[yhtio]'";
-      $uresult = mysql_query($query) or pupe_error($query);
+      $uresult = pupe_query($query);
 
       $tunnukset = '';
 
@@ -322,7 +322,7 @@ if ($tee == 'TULOSTA') {
                 FROM rahtikirjat
                 WHERE otsikkonro in ($tunnukset)
                 and yhtio='$kukarow[yhtio]'";
-      $rahtiresult = mysql_query($query) or pupe_error($query);
+      $rahtiresult = pupe_query($query);
 
       $kilot  = 0;
 
@@ -351,7 +351,7 @@ if ($tee == 'TULOSTA') {
                 and tilausrivi.yhtio         = '$kukarow[yhtio]'
                 and tilausrivi.kpl           > 0
                 GROUP BY tuote.tullinimike1, tuote.tullinimike2, tuote.tullikohtelu, alkuperamaa";
-      $riviresult = mysql_query($query) or pupe_error($query);
+      $riviresult = pupe_query($query);
 
       //piirret‰‰n rivi tarkastuslistaan
       tark_rivi();
@@ -388,7 +388,7 @@ if ($tee == 'TULOSTA') {
           $query = "SELECT cn
                     FROM tullinimike
                     WHERE cn='$rivirow[tullinimike1]' and kieli = '$yhtiorow[kieli]'";
-          $cnresult = mysql_query($query) or pupe_error($query);
+          $cnresult = pupe_query($query);
 
           if (mysql_num_rows($cnresult) != 1) {
             echo t("1. Rivin tunnus").":$rivirow[tunnus]. ".t("Tuoteno").": $rivirow[tuoteno]. ".t("Tullinimike on virheellinen")."!<br>";
@@ -496,7 +496,7 @@ if ($tee == 'TULOSTA') {
   $query = "SELECT min(laskunro), max(laskunro), count(*)
             FROM lasku
             WHERE vienti='K' and tila='U' and tullausnumero!='' and tapvm ='$tapvm' and yhtio='$kukarow[yhtio]'";
-  $csresult = mysql_query($query) or pupe_error($query);
+  $csresult = pupe_query($query);
   $csrow = mysql_fetch_array($csresult);
 
   $pdf->draw_text(50,  810, $yhtiorow["nimi"], $firstpage);

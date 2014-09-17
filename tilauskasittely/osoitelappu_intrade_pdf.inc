@@ -13,7 +13,7 @@ if ($phpnimi != "rahtikirja_custom.php") {
             LEFT JOIN yhteyshenkilo ON yhteyshenkilo.yhtio=laskun_lisatiedot.yhtio and yhteyshenkilo.tunnus=laskun_lisatiedot.yhteyshenkilo_tekninen and yhteyshenkilo.tyyppi = 'A'
             WHERE lasku.yhtio = '$kukarow[yhtio]'
             and lasku.tunnus  = '$tunnus'";
-  $tempr = mysql_query($query) or pupe_error($query);
+  $tempr = pupe_query($query);
   $laskurow = mysql_fetch_assoc($tempr);
 
   // Käytetäänkö VAK-tietokantaa
@@ -36,7 +36,7 @@ if ($phpnimi != "rahtikirja_custom.php") {
             and tilausrivi.var       in ('','H')
             and tilausrivi.tyyppi    in ('L','G')
             ORDER BY tuote.vakkoodi";
-  $vres = mysql_query($query) or pupe_error($query);
+  $vres = pupe_query($query);
 
   if (mysql_num_rows($vres) > 0) {
     $vak = mysql_fetch_assoc($vres);
@@ -53,7 +53,7 @@ $query = "SELECT *
           WHERE yhtio  = '{$kukarow['yhtio']}'
           AND TRIM(komento) LIKE CONCAT(TRIM('{$oslapp}'),'%')
           AND nimi    != ''";
-$pres  = mysql_query($query) or pupe_error($query);
+$pres  = pupe_query($query);
 
 if (mysql_num_rows($pres) > 0) {
   $print = mysql_fetch_assoc($pres);
@@ -281,7 +281,7 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
   $pdf->draw_text(mm_pt(100), mm_pt(170), date("d.m.Y") ,                  $firstpage, $norm);
 
   $query = "SELECT * FROM toimitustapa WHERE yhtio = '$kukarow[yhtio]' and selite = '$laskurow[toimitustapa]'";
-  $toitares = mysql_query($query) or pupe_error($query);
+  $toitares = pupe_query($query);
   $toitarow = mysql_fetch_assoc($toitares);
 
   $pdf->draw_text(mm_pt(22), mm_pt(157), "Terminaalitoimitus" ,              $firstpage, $norm);
@@ -320,7 +320,7 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
     $query = "SELECT sum(kollit) kollit
               FROM rahtikirjat
               WHERE yhtio='$kukarow[yhtio]' and otsikkonro = '$laskurow[tunnus]'";
-    $pakka = mysql_query($query) or pupe_error($query);
+    $pakka = pupe_query($query);
     $pak = mysql_fetch_assoc($pakka);
 
     if ((int) $pak["kollit"] > 0) {

@@ -10,7 +10,7 @@ if ($tee == "update") {
   }
 
   $query = "UPDATE yhtion_parametrit SET css='$yhtiorow[css]' WHERE yhtio='$kukarow[yhtio]'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=$PHP_SELF'>";
   exit;

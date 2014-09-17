@@ -11,7 +11,7 @@ require_once "pdflib/phppdflib.class.php";
 
 if ($kieli== '') {
   $querykiel = "SELECT kieli FROM asiakas WHERE yhtio = '$kukarow[yhtio]' and ytunnus = '$laskurow[ytunnus]'";
-  $kielresult = mysql_query($querykiel) or pupe_error($querykiel);
+  $kielresult = pupe_query($querykiel);
   $kielnum = mysql_num_rows($kielresult);
   $kielrow = mysql_fetch_array($kielresult);
   $kieli = strtolower($kielrow['kieli']);
@@ -130,7 +130,7 @@ if (!function_exists('alku')) {
               WHERE yhtio = '$kukarow[yhtio]'
               and tunnus  = '$laskurow[liitostunnus]'
               LIMIT 1";
-    $rarres = mysql_query($query) or pupe_error($query);
+    $rarres = pupe_query($query);
     $toimirow = mysql_fetch_array($rarres);
 
     //Oikea sarake

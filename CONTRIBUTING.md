@@ -108,6 +108,21 @@ $_today = date("Ymd");
 $output = "date is {$_today}";
 ```
 
+* Sisennä switch lauseessa case samalle tasolle switchin kanssa.
+
+```php
+switch ($value) {
+case 0:
+  echo "zero";
+  break;
+case 1:
+  echo "one";
+  break;
+default:
+  echo "two";
+}
+```
+
 * Käytä tyhjiä rivejä erottelemaan koodi loogisiin kappaleisiin.
 
 ```php

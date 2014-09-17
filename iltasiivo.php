@@ -779,12 +779,12 @@ $avoimet_rivit = array();
 
 // Jos on poistettavia, haetaan avoimet
 if (mysql_num_rows($poistettavat_tuotepaikat) > 0) {
-  // Haetaan avoimet tilausrivit arrayseen (myynti, osto, siirtolistat)
+  // Haetaan avoimet tilausrivit arrayseen (myynti, osto, siirtolistat, valmistukset)
   $query = "SELECT CONCAT(tuoteno, hyllyalue, hyllynro, hyllytaso, hyllyvali) AS id
             FROM tilausrivi
             WHERE yhtio        = '{$kukarow['yhtio']}'
             AND laskutettuaika = '0000-00-00'
-            AND tyyppi         IN ('L','O','G')";
+            AND tyyppi         IN ('L','O','G','V','W','M')";
   $avoinrivi_result = pupe_query($query);
 
   while ($avoinrivi = mysql_fetch_assoc($avoinrivi_result)) {

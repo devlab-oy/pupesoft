@@ -181,7 +181,7 @@ foreach ($tuotteet as $tuote) {
                      WHERE tuoteno='{$tuote['tuoteno']}'
                      AND oletus='X'
                      AND yhtio='{$yhtiorow['yhtio']}'";
-    $oletus_result = mysql_query($oletus_query);
+    $oletus_result = pupe_query($oletus_query);
     $oletus = mysql_fetch_assoc($oletus_result);
 
     $hylly = array(

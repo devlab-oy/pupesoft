@@ -35,7 +35,7 @@ else {
               laskutettuaika >= date_sub('$vv-$kk-$pp',interval 12 month) and
               laskutettuaika <= '$vv-$kk-$pp'
               ORDER BY osasto, try";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     $kate30=0;
     $kate90=0;
@@ -102,7 +102,7 @@ else {
                 and laskutettuaika >= date_sub('$vv-$kk-$pp',interval 12 month) and laskutettuaika <= '$vv-$kk-$pp'
                 group by 1,2";
 
-      $eresult = mysql_query($query) or pupe_error($query);
+      $eresult = pupe_query($query);
       $row = mysql_fetch_array($eresult);
 
       //varastonmuutos
@@ -116,7 +116,7 @@ else {
                 tapahtuma.yhtio=tuote.yhtio and
                 tapahtuma.tuoteno=tuote.tuoteno and
                 tapahtuma.laadittu > '$vv-$kk-$pp 23:59:59'";
-      $result5 = mysql_query($query) or pupe_error($query);
+      $result5 = pupe_query($query);
       $rowMUUTOS = mysql_fetch_array($result5);
       $muutosval = $rowMUUTOS["muutos"];
 
@@ -132,7 +132,7 @@ else {
                 and tuote.try               = '$trow[try]'
                 and tuote.ei_saldoa         = ''
                 and tuote.epakurantti100pvm = '0000-00-00'";
-      $result4 = mysql_query($query) or pupe_error($query);
+      $result4 = pupe_query($query);
       $rowARVO = mysql_fetch_array($result4);
       $varastonarvo = round($rowARVO["varasto"] - $muutosval, 2);
 

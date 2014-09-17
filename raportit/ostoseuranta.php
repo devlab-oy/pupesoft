@@ -50,7 +50,7 @@ else {
 
     // hehe, näin on helpompi verrata päivämääriä
     $query  = "SELECT TO_DAYS('$vvl-$kkl-$ppl')-TO_DAYS('$vva-$kka-$ppa') ero";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
     $row    = mysql_fetch_array($result);
 
     if ($row["ero"] > 365 and $ajotapa != 'tilausauki') {
@@ -400,7 +400,7 @@ else {
 
         //echo "<pre>$query</pre><br>";
 
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
 
         $rivilimitti = 1000;
 
@@ -522,7 +522,7 @@ else {
                         and myyja   = '$row[$i]'
                         AND myyja   > 0
                         limit 1";
-              $osre = mysql_query($query) or pupe_error($query);
+              $osre = pupe_query($query);
               if (mysql_num_rows($osre) == 1) {
                 $osrow = mysql_fetch_array($osre);
                 $row[$i] = $row[$i] ." ". $osrow['nimi'];
@@ -865,7 +865,7 @@ else {
       <td>";
 
     $query = "SELECT distinct myyja, nimi from kuka where yhtio='$kukarow[yhtio]' and myyja>0 order by myyja";
-    $vresult = mysql_query($query) or pupe_error($query);
+    $vresult = pupe_query($query);
 
     echo "<select name='rajaus[110]'>";
     echo "<option value = '' ></option>";

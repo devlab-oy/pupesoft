@@ -1882,7 +1882,7 @@ if (!function_exists('loppu')) {
     if ((int) $laskurow["yhtio_toimipaikka"] != 0) {
       // haetaan toimipaikan tiedot
       $alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and tunnus='$laskurow[yhtio_toimipaikka]'";
-      $alhire = mysql_query($alhqur) or pupe_error($alhqur);
+      $alhire = pupe_query($alhqur);
 
       if (mysql_num_rows($alhire) == 1) {
         $alhiro = mysql_fetch_assoc($alhire);
@@ -1899,7 +1899,7 @@ if (!function_exists('loppu')) {
     if ($laskurow["yhtio_ovttunnus"] != "" and $laskurow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
       // haetaan toimipaikan tiedot
       $alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$laskurow[yhtio]' and vat_numero='$laskurow[yhtio_ovttunnus]'";
-      $alhire = mysql_query($alhqur) or pupe_error($alhqur);
+      $alhire = pupe_query($alhqur);
 
       if (mysql_num_rows($alhire) == 1) {
         $alhiro = mysql_fetch_assoc($alhire);
@@ -1916,7 +1916,7 @@ if (!function_exists('loppu')) {
     if (!$y_tiedot_ok) {
       // haetaan toimipaikan tiedot
       $alhqur = "SELECT puhelin, fax, email, www from yhtio where yhtio='$laskurow[yhtio]'";
-      $alhire = mysql_query($alhqur) or pupe_error($alhqur);
+      $alhire = pupe_query($alhqur);
 
       if (mysql_num_rows($alhire) == 1) {
         $alhiro = mysql_fetch_assoc($alhire);

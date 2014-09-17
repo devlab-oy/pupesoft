@@ -31,7 +31,7 @@ if ($tee == 'UV') {
             and tilausrivi.tyyppi          in ('W','M')
             and tilausrivi.toimitettuaika  = '0000-00-00 00:00:00'
             ORDER by tilausrivi.tuoteno";
-  $uvresult = mysql_query($query) or pupe_error($query);
+  $uvresult = pupe_query($query);
 
   if (mysql_num_rows($uvresult) > 0) {
     $useavalmiste = "ON";
@@ -558,7 +558,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
                 laatija    = '$kukarow[kuka]',
                 laadittu   = now()";
       $result = pupe_query($query);
-      $tapahtumaid = mysql_insert_id();
+      $tapahtumaid = mysql_insert_id($GLOBALS["masterlink"]);
 
       $query = "UPDATE tuote
                 SET kehahin  = $kehahin,
@@ -622,7 +622,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
                     hyllytaso   = '$tilrivirow[hyllytaso]',
                     hyllyvali   = '$tilrivirow[hyllyvali]'";
           $insresult = pupe_query($query);
-          $valmistettavat .= ",".mysql_insert_id();
+          $valmistettavat .= ",".mysql_insert_id($GLOBALS["masterlink"]);
         }
 
         //  Kaikille sarjanumeroille tehd‰‰n varastoon saavutettu O-rivi, muuten mm ker‰ys ei toimi ja ehk‰ se on myˆs loogisempaa?
@@ -672,7 +672,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
                   hyllyvali   = '$tilrivirow[hyllyvali]'
                   $laskutettuLisa";
         $insresult = pupe_query($query);
-        $uusrivitunnus = mysql_insert_id();
+        $uusrivitunnus = mysql_insert_id($GLOBALS["masterlink"]);
         $valmistettavat .= ",".$uusrivitunnus;
 
         $jaljella = round($tilrivirow["varattu"] - $isavarattu, 2);
@@ -747,7 +747,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
                         (yhtio, tuoteno, sarjanumero, ostorivitunnus, myyntirivitunnus, laatija, luontiaika, hyllyalue, hyllynro, hyllyvali, hyllytaso)
                         VALUES ('$kukarow[yhtio]', '$tilrivirow[tuoteno]', '$sarjanro', '$uusrivitunnus', 0, '$kuka[kuka]', now(), '$tilrivirow[hyllyalue]', '$tilrivirow[hyllynro]', '$tilrivirow[hyllyvali]', '$tilrivirow[hyllytaso]')";
               $sarjares1 = pupe_query($query);
-              $uusisarjatunnus = mysql_insert_id();
+              $uusisarjatunnus = mysql_insert_id($GLOBALS["masterlink"]);
             }
           }
 

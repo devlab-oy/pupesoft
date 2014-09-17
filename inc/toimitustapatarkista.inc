@@ -27,44 +27,44 @@ if (!function_exists("toimitustapatarkista")) {
       $toita = str_replace("\"", "", $toita);
 
       $query = "SELECT tunnus from toimitustapa where selite='$toita' and yhtio='$kukarow[yhtio]' and tunnus != '$tunnus'";
-      $updre = mysql_query($query) or pupe_error($query);
+      $updre = pupe_query($query);
 
       if (mysql_num_rows($updre)!=0) {
         $virhe[$i] = t("Et voi muuttaa toimitustaavan nimeä, koska")." '$toita' ".t("on jo olemassa")."!";
       }
       else {
         $query = "UPDATE toimitustapa set selite='$toita' where selite='$trow[$i]' and yhtio='$kukarow[yhtio]'";
-        $updre = mysql_query($query) or pupe_error($query);
+        $updre = pupe_query($query);
 
         echo "<font class='message'>".t("Päivitettiin")." ".mysql_affected_rows()." ".t("toimitustapa");
 
         $query = "UPDATE asiakas set toimitustapa='$toita' where toimitustapa='$trow[$i]' and yhtio='$kukarow[yhtio]'";
-        $updre = mysql_query($query) or pupe_error($query);
+        $updre = pupe_query($query);
 
         echo ", ".mysql_affected_rows()." ".t("asiakasta");
 
         $query = "UPDATE asiakkaan_avainsanat set avainsana='$toita' where avainsana='$trow[$i]' and yhtio='$kukarow[yhtio]'";
-        $updre = mysql_query($query) or pupe_error($query);
+        $updre = pupe_query($query);
 
         echo ", ".mysql_affected_rows()." ".t("asiakkaan avainsanaa");
 
         $query = "UPDATE lasku set toimitustapa='$toita' where toimitustapa='$trow[$i]' and yhtio='$kukarow[yhtio]' and ((tila='L' and alatila in('A','C')) or tila='N')";
-        $updre = mysql_query($query) or pupe_error($query);
+        $updre = pupe_query($query);
 
         echo ", ".mysql_affected_rows()." ".t("otsikkoa");
 
         $query = "UPDATE rahtimaksut set toimitustapa='$toita' where toimitustapa='$trow[$i]' and yhtio='$kukarow[yhtio]'";
-        $updre = mysql_query($query) or pupe_error($query);
+        $updre = pupe_query($query);
 
         echo ", ".mysql_affected_rows()." ".t("rahtimaksua");
 
         $query = "UPDATE rahtisopimukset set toimitustapa='$toita' where toimitustapa='$trow[$i]' and yhtio='$kukarow[yhtio]'";
-        $updre = mysql_query($query) or pupe_error($query);
+        $updre = pupe_query($query);
 
         echo ", ".mysql_affected_rows()." rahtisopimusta";
 
         $query = "UPDATE rahtikirjat set toimitustapa='$toita' where toimitustapa='$trow[$i]' and yhtio='$kukarow[yhtio]' and tulostettu='0000-00-00 00:00:00'";
-        $updre = mysql_query($query) or pupe_error($query);
+        $updre = pupe_query($query);
 
         echo "ja ".mysql_affected_rows()." ".t("tulostamatonta rahtikirjaa").".</font><br><br>";
       }
@@ -94,7 +94,7 @@ if (!function_exists("toimitustapatarkista")) {
                   AND tuoteno    = '$tuote'
                   AND tuoteno   != ''
                   AND ei_saldoa != ''";
-        $xyresult = mysql_query($query) or pupe_error($query);
+        $xyresult = pupe_query($query);
 
         if (mysql_num_rows($xyresult) == 0) {
           $virhe[$i] = t("Tuotetta ei löydy!")." / ".t("Tuote pitää olla saldoton!");

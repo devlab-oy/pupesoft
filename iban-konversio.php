@@ -11,7 +11,7 @@ $query = "SELECT ultilno, swift, tilinumero, tunnus
           FROM toimi
           WHERE ultilno  = ''
           AND tilinumero not in ('', 0)";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 while ($toimirow = mysql_fetch_array($result)) {
 
@@ -24,7 +24,7 @@ while ($toimirow = mysql_fetch_array($result)) {
               ultilno      = '$iban',
               swift        = '$bic'
               WHERE tunnus = '$toimirow[tunnus]'";
-    $update = mysql_query($query) or pupe_error($query);
+    $update = pupe_query($query);
     $laskuri++;
   }
 }
@@ -32,7 +32,7 @@ while ($toimirow = mysql_fetch_array($result)) {
 $query = "SELECT tilino, iban, bic, tunnus
           FROM yriti
           WHERE iban = ''";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 while ($toimirow = mysql_fetch_array($result)) {
 
@@ -45,7 +45,7 @@ while ($toimirow = mysql_fetch_array($result)) {
               iban         = '$iban',
               bic          = '$bic'
               WHERE tunnus = '$toimirow[tunnus]'";
-    $update = mysql_query($query) or pupe_error($query);
+    $update = pupe_query($query);
     $laskuri++;
   }
 }
@@ -55,7 +55,7 @@ $query = "SELECT ultilno, swift, tilinumero, tunnus
           WHERE ultilno  = ''
           AND tilinumero not in ('', 0)
           AND tila       in ('H','M','P')";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 while ($toimirow = mysql_fetch_array($result)) {
 
@@ -68,7 +68,7 @@ while ($toimirow = mysql_fetch_array($result)) {
               ultilno      = '$iban',
               swift        = '$bic'
               WHERE tunnus = '$toimirow[tunnus]'";
-    $update = mysql_query($query) or pupe_error($query);
+    $update = pupe_query($query);
     $laskuri++;
   }
 }

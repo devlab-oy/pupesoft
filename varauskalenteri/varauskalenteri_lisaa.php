@@ -24,7 +24,7 @@ if ($vertailu_alkuaika >= $vertailu_loppuaika) {
 
 //Tarkisetetaan p‰‰llekk‰isyys konsernikohtaisesti
 $query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 $konsernit = "";
 
 while ($row = mysql_fetch_array($result)) {
@@ -39,7 +39,7 @@ $query = "  select tunnus
       or (pvmalku > '$year-$month-$day $kello' and pvmalku < '$lyear-$mylmonth-$mylday $lkello')
       or (pvmalku < '$year-$month-$day $kello' and pvmloppu > '$year-$month-$day $kello'))
       $konsernit";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0) {
   echo "<br><br>".t("VIRHE: P‰‰llekk‰isi‰ tapahtumia")."!";
@@ -83,7 +83,7 @@ $query = "INSERT into kalenteri SET
           kentta09 = '$kentta09',
           kentta10 = '$kentta10',
           tyyppi   = 'varauskalenteri'";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 echo "<br><br>".t("Tapahtuma lis‰tty varauskalenteriin")."!";
 

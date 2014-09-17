@@ -13,7 +13,7 @@ if (!isset($erittely)) {
             WHERE lasku.yhtio = '$kukarow[yhtio]'
             and lasku.tila    in ('H','M','P','Q')
             GROUP BY tila, alatila";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<table>";
   echo "<tr>";
@@ -48,7 +48,7 @@ if (isset($erittely)) {
             left join yriti on lasku.yhtio=yriti.yhtio and lasku.maksu_tili=yriti.tunnus
             WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tila = '$erittely' and lasku.alatila = '$alatila'
             ORDER BY lasku.tapvm";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<table><tr>";
   echo "<th valign='top'>".t("Pvm")."</th>";

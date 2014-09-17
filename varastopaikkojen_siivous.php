@@ -18,7 +18,7 @@ if ($tee == 'CLEAN') {
                 FROM tuotepaikat
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND tunnus  = '$rastit'";
-      $presult = mysql_query($query) or die($query);
+      $presult = pupe_query($query);
       $tuoterow = mysql_fetch_array($presult);
 
       //Poistetaan nollapaikka
@@ -665,7 +665,7 @@ if ($tee == "LISTAAVIRHEELLISETRIVIT") {
             AND tilausrivi.jt + tilausrivi.varattu != 0
             AND varastopaikat.tunnus is null
             ORDER BY tilausrivi.tuoteno";
-  $tilrivires = mysql_query($query) or die($query);
+  $tilrivires = pupe_query($query);
 
   echo "<form method='POST'>";
   echo "<input type='hidden' name='tee' value='CLEANRIVIT'>";

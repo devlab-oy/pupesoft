@@ -163,7 +163,7 @@ if ($tee == 'muuta') {
   if (trim($kayttaja) != '') {
 
     $query = "LOCK TABLES kerayserat WRITE";
-    $lock = mysql_query($query) or pupe_error($query);
+    $lock = pupe_query($query);
 
     // Tarkistetaan, että nykyisellä kerääjällä ei ole tätä keikkaa optiscanissa kesken
     $query = "SELECT tunnus
@@ -202,7 +202,7 @@ if ($tee == 'muuta') {
     }
 
     $query = "UNLOCK TABLES";
-    $lock = mysql_query($query) or pupe_error($query);
+    $lock = pupe_query($query);
   }
 
   if (count($pakkaukset) > 0) {

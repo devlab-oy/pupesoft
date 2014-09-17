@@ -13,7 +13,7 @@ $query = "SELECT lasku.*
           and lasku.vienti                = ''
           and lasku.factoringsiirtonumero = 0
           ORDER BY lasku.laskunro";
-$res = mysql_query($query) or pupe_error($query);
+$res = pupe_query($query);
 
 echo "<br><br><table>";
 echo "<tr><th>#</th><th>".t("Laskunumero")."</th><th>".t("P‰iv‰m‰‰r‰")."</th><th>".t("Asiakas")."</th><th>".t("Maksuehto")."</th><th>".t("Arvo")."</th></tr>";
@@ -28,7 +28,7 @@ $query = "SELECT max(factoringsiirtonumero)+1 seuraava
           and lasku.alatila               = 'X'
           and lasku.vienti                = ''
           and lasku.factoringsiirtonumero > 0";
-$aresult = mysql_query($query) or pupe_error($query);
+$aresult = pupe_query($query);
 $arow = mysql_fetch_array($aresult);
 
 while ($laskurow = mysql_fetch_array($res)) {
@@ -37,7 +37,7 @@ while ($laskurow = mysql_fetch_array($res)) {
              from maksuehto
              where yhtio = '$kukarow[yhtio]'
              and tunnus  = '$laskurow[maksuehto]'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $masrow = mysql_fetch_array($result);
 
   $query = "SELECT *
@@ -45,7 +45,7 @@ while ($laskurow = mysql_fetch_array($res)) {
             WHERE yhtio        = '$kukarow[yhtio]'
             and factoringyhtio = 'SEB'
             and valkoodi       = '$laskurow[valkoodi]'";
-  $fres = mysql_query($query) or pupe_error($query);
+  $fres = pupe_query($query);
   $frow = mysql_fetch_array($fres);
 
   if ($tee == 'LAHETA') {
@@ -59,7 +59,7 @@ while ($laskurow = mysql_fetch_array($res)) {
     $factoring_sisalto .= $sisalto;
 
     $query  = "UPDATE lasku set factoringsiirtonumero='$arow[seuraava]' where yhtio='$kukarow[yhtio]' and tunnus = '$laskurow[tunnus]'";
-    $sult = mysql_query($query) or pupe_error($query);
+    $sult = pupe_query($query);
 
   }
 

@@ -21,7 +21,7 @@ if (substr(mysql_field_name($result, $i), 0, 9)=='varasto') {
             FROM varastopaikat
             WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
             ORDER BY tyyppi, nimitys";
-  $kires = mysql_query($query) or pupe_error($query);
+  $kires = pupe_query($query);
 
   while ($kirow=mysql_fetch_array($kires)) {
     if ($kirow["tunnus"]==$row[$i]) $select='SELECTED';
@@ -43,7 +43,7 @@ if (mysql_field_name($result, $i)=='pakkaamo') {
   $ulos = "<td><select name='$nimi'>";
 
   $query = "select distinct nimi from pakkaamo where yhtio='$kukarow[yhtio]'";
-  $kires = mysql_query($query) or pupe_error($query);
+  $kires = pupe_query($query);
 
   $ulos .= "<option value=''>".t("Ei pakkaamoa")."</option>";
 
@@ -72,7 +72,7 @@ if (substr(mysql_field_name($result, $i), 0, 9) == 'printteri') {
             where yhtio  = '$kukarow[yhtio]'
             AND komento != 'EDI'
             ORDER BY kirjoitin";
-  $kires = mysql_query($query) or pupe_error($query);
+  $kires = pupe_query($query);
 
   $ulos .= "<option value=''>".t("Ei kirjoitinta")."</option>";
 

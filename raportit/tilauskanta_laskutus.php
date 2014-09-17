@@ -22,7 +22,7 @@ else {
 
   // hehe, näin on helpompi verrata päivämääriä
   $query  = "SELECT TO_DAYS('$vvl-$kkl-$ppl')-TO_DAYS('$vva-$kka-$ppa') ero";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $row    = mysql_fetch_array($result);
 
   if ($row["ero"] > 365) {
@@ -104,7 +104,7 @@ else {
           and lasku.alatila in ('','A','B','C','D','J','E','F','T','U','X')
           and ((lasku.tapvm = '0000-00-00') or (lasku.tapvm >= '$vva-$kka-$ppa' and lasku.tapvm <= '$vvl-$kkl-$ppl') or (lasku.tapvm >= '$vvaa-$kka-$ppa' and lasku.tapvm <= '$vvll-$kkl-$ppl'))
           $kustp2";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (strpos($_SERVER['SCRIPT_NAME'], "tilauskanta_laskutus.php") !== FALSE) {
       if (@include 'Spreadsheet/Excel/Writer.php') {
@@ -342,7 +342,7 @@ else {
               and kaytossa != 'E'
               and tyyppi    = 'K'
               ORDER BY koodi+0, koodi, nimi";
-    $sresult = mysql_query($query) or pupe_error($query);
+    $sresult = pupe_query($query);
 
     echo "<select name='kustannuspaikka'>";
     echo "<option value=''>".t("Kaikki kustannuspaikat")."</option>";

@@ -87,7 +87,7 @@ if ($tee != '' and isset($painoinnappia)) {
               from yhtio
               where konserni  = '$yhtiorow[konserni]'
               and konserni   != ''";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
     $rivi = mysql_fetch_assoc($result);
 
     if ($rivi["yhtiot"] != "") {

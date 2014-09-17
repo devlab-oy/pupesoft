@@ -68,7 +68,7 @@ if ($tee == "") {
   echo "<table>";
 
   $query = "SELECT * FROM avainsana WHERE yhtio = '$kukarow[yhtio]' AND laji = 'sms_palvelin' ORDER BY jarjestys";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   if (mysql_num_rows($vresult) > 0) {
 
@@ -141,7 +141,7 @@ function SendSms($sms_palvelintyyppi, $yhtio, $kuka, $vastaanottaja, $viesti) {
               viesti        = '".addslashes($viesti)."',
               luontiaika    = now(),
               laatija       = '$kuka'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
   }
 
   return true;
@@ -215,7 +215,7 @@ function SendClickatellSms($vastaanottaja, $viesti) {
             viesti        = '".addslashes($viesti)."',
             luontiaika    = now(),
             laatija       = '$kuka'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   return false;
 }
@@ -272,7 +272,7 @@ function SendKannelSms($receiver_number, $message) {
             viesti        = '".addslashes($viesti)."',
             luontiaika    = now(),
             laatija       = '$kuka'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
 }
 

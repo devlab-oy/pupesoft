@@ -285,7 +285,7 @@ function tee_laskuotsikko($kassalipas, $summa, $yleinen_kommentti, $date) {
             nimi       = '".t("Käteisotto kassalippaasta").": {$kassalipas['nimi']}'";
   pupe_query($query);
 
-  return mysql_insert_id();
+  return mysql_insert_id($GLOBALS["masterlink"]);
 }
 
 function tee_tiliointi($params, $kulu_tiliointi = false, $alv_tiliointi = false) {
@@ -336,7 +336,7 @@ function tee_tiliointi($params, $kulu_tiliointi = false, $alv_tiliointi = false)
 
   pupe_query($query);
 
-  return mysql_insert_id();
+  return mysql_insert_id($GLOBALS["masterlink"]);
 }
 
 function tarkista_saako_laskua_muuttaa($tapahtumapaiva) {

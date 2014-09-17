@@ -34,7 +34,7 @@ if ($tee == '') {
             AND lasku.vienti  in ('K','E')
             GROUP by 1,2,3,4,5,6,7
             ORDER by 1,2,3,4,5,6,7";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<table><tr>";
   echo "<th>".t("Tilaus")."</th>";

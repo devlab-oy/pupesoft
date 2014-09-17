@@ -1507,6 +1507,11 @@ if (!function_exists("saldo_myytavissa")) {
         $valinta2 = "";
         $valinta3 = " varastopaikat.tyyppi is null ";
       }
+      elseif ($tyyppi == "NORMI") {
+        $valinta1 = " varastopaikat.tyyppi = '' and ";
+        $valinta2 = "";
+        $valinta3 = " varastopaikat.tyyppi is not null ";
+      }
       else {
         $valinta1 = " (varastopaikat.tyyppi = '' or (varastopaikat.tyyppi = 'E' and varastopaikat.erikoistoimitus_alarajasumma > 0 and '$tuote[myyntihinta]' >= varastopaikat.erikoistoimitus_alarajasumma)) and ";
         $valinta2 = "";
@@ -11431,7 +11436,7 @@ if (!function_exists("liite_popup")) {
 
         $liitteet = "<input type='button' value='";
 
-        if ($pdf_exist) {
+        if (isset($pdf_exist)) {
           $liitteet .= t("Pdf");
         }
         else {
@@ -27758,5 +27763,34 @@ if (!function_exists("kasittele_tiliote_viite")) {
 
     // Palautetan kukarow
     $kukarow = $kukarow_talteen;
+  }
+}
+
+if (!function_exists("hae_saldo")) {
+  function hae_saldo($tuote, $tyyppi = '') {
+    global $kukarow, $yhtiorow, $maa;
+
+    $saldo = 0;
+
+    if ($tuote["tuoteperhe"] == $tuote["tuoteno"]) {
+      // Tuoteperheen isä
+      $saldot = tuoteperhe_myytavissa($tuote["tuoteno"],'KAIKKI',$tyyppi,0,'','','','','', $maa);
+
+      foreach ($saldot as $varasto => $myytavissa) {
+        $saldo += $myytavissa;
+      }
+      return $saldo;
+
+    }
+    elseif ($tuote['ei_saldoa'] != '') {
+      $saldo = 1;
+      return $saldo;
+    }
+    else {
+      list($a,$b,$myytavissa) = saldo_myytavissa($tuote["tuoteno"],$tyyppi,0,'','','','','', $maa);
+      $saldo = $myytavissa;
+
+      return $saldo;
+    }
   }
 }

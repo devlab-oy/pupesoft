@@ -1188,7 +1188,7 @@ if (!function_exists("verkkolasku_in")) {
                 osto_kulu_alv          = '{$osto_kulu_alv}',
                 osto_rivi_kulu_alv     = '{$osto_rivi_kulu_alv}'";
       $result = pupe_query($query);
-      $tunnus = mysql_insert_id();
+      $tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
       $omasumma        = round($summa * $vrow['kurssi'], 2);
       $omasumma_valuutassa = $summa;
@@ -1223,7 +1223,7 @@ if (!function_exists("verkkolasku_in")) {
                 laatija          = 'verkkolas',
                 laadittu         = now()";
       $result = pupe_query($query);
-      $ostovelkatiliointitunnus = mysql_insert_id();
+      $ostovelkatiliointitunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
       // Onko rivikohtaisia tiliöintisääntöjä
       $query = "SELECT *
@@ -1646,7 +1646,7 @@ if (!function_exists("verkkolasku_in")) {
                             vastaanottaja      = '{$ostaja_asiakkaantiedot['nimi']}',
                             yhtio              = '{$yhtio}'";
             $asn_ins_res = pupe_query($insertquery);
-            $rtuoteno[$i]["insert_id"] = mysql_insert_id();
+            $rtuoteno[$i]["insert_id"] = mysql_insert_id($GLOBALS["masterlink"]);
           }
         }
       }

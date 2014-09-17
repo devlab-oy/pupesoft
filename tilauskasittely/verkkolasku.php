@@ -46,6 +46,9 @@ if ($php_cli) {
   // Kukarow setataan esim editilaus_in.inc:ssä
   if (!isset($kukarow)) {
     $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
+
+    // Komentoriviltä ku ajetaan, niin ei haluta posteja admin-käyttäjälle
+    $kukarow["eposti"] = "";
   }
 
   if (!is_array($kukarow)) {
@@ -1421,7 +1424,7 @@ else {
                           jaksotettu      = '',
                           kerattyaika     = now()";
                 $addtil = pupe_query($query);
-                $lisatty_tun = mysql_insert_id();
+                $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
                 $query = "INSERT INTO tilausrivin_lisatiedot
                           SET yhtio           = '$kukarow[yhtio]',
@@ -1660,7 +1663,7 @@ else {
                         jaksotettu      = '',
                         kerattyaika     = now()";
               $addtil = pupe_query($query);
-              $lisatty_tun = mysql_insert_id();
+              $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
               $query = "INSERT INTO tilausrivin_lisatiedot
                         SET yhtio           = '$kukarow[yhtio]',

@@ -58,7 +58,7 @@ if ($submit) {
             AND tilausrivi.var            != 'P'
             GROUP BY $group_by
             ORDER BY $order_by";
-  $toimaikares = mysql_query($query) or pupe_error($query);
+  $toimaikares = pupe_query($query);
 
   if (isset($tuoteryhmittain) and trim($tuoteryhmittain) != '') {
     while ($toimaikarow = mysql_fetch_array($toimaikares)) {

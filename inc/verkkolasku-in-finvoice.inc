@@ -2,7 +2,11 @@
 
 if (!function_exists("xml_float")) {
   function xml_float($value) {
-    $value = (string) utf8_decode($value);
+    $value = (string) $value;
+
+    if (mb_detect_encoding($value, 'UTF-8', true) !== FALSE) {
+      $value = utf8_decode($value);
+    }
 
     return pupesoft_cleannumber($value);
   }
@@ -10,7 +14,11 @@ if (!function_exists("xml_float")) {
 
 if (!function_exists("xml_string")) {
   function xml_string($value) {
-    $value = (string) utf8_decode($value);
+    $value = (string) $value;
+
+    if (mb_detect_encoding($value, 'UTF-8', true) !== FALSE) {
+      $value = utf8_decode($value);
+    }
 
     return pupesoft_cleanstring($value);
   }
@@ -26,6 +34,7 @@ if (strpos($file, "maventa") !== false) {
 // parseroidaan xml
 $yhtio = xml_string($xml->BuyerOrganisationUnitNumber);
 $verkkotunnus_vas = xml_string($xml->BuyerPartyDetails->BuyerOrganisationTaxCode);
+$verkkotunnus_vas_inv = xml_string($xml->InvoiceRecipientPartyDetails->InvoiceRecipientOrganisationTaxCode);
 $laskun_tyyppi = xml_string($xml->InvoiceDetails->InvoiceTypeCode);
 $laskun_tyyppi_teksti = xml_string($xml->InvoiceDetails->InvoiceTypeText);
 $laskun_numero = xml_string($xml->InvoiceDetails->InvoiceNumber);
@@ -65,6 +74,10 @@ $ostaja_asiakkaantiedot["postitp"] = xml_string($xml->BuyerPartyDetails->BuyerPo
 
 if ($laskuttajan_vat == "" and $laskuttajan_identifier != "") {
   $laskuttajan_vat = $laskuttajan_identifier;
+}
+
+if ($verkkotunnus_vas == "" and $verkkotunnus_vas_inv != "") {
+  $verkkotunnus_vas = $verkkotunnus_vas_inv;
 }
 
 $laskuttajan_toimittajanumero = "";

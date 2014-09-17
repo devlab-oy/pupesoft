@@ -49,7 +49,7 @@ if ($tee == "lisaalisaa") {
             FROM taso
             WHERE yhtio = '$kukarow[yhtio]'
             and taso    = BINARY '$uusitaso'";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   if (mysql_num_rows($vresult) > 0) {
     echo "<font class='error'>Taso $uusitaso löytyy jo järjestelmästä!</font><br>";
@@ -65,7 +65,7 @@ if ($tee == "lisaalisaa") {
                 and taso    like BINARY '$taso%'
                 and tyyppi  = '$kirjain'
                 ORDER BY CHAR_LENGTH(taso) desc";
-      $vresult = mysql_query($query) or pupe_error($query);
+      $vresult = pupe_query($query);
 
       while ($vrow = mysql_fetch_array($vresult)) {
         $paivtaso = $taso.substr($uusitaso, -1).substr($vrow["taso"], strlen($taso));
@@ -78,27 +78,27 @@ if ($tee == "lisaalisaa") {
                   and taso     = BINARY '$vrow[taso]'
                   and taso    != BINARY '$taso'
                   and tyyppi   = '$kirjain'";
-        $res = mysql_query($query) or pupe_error($query);
+        $res = pupe_query($query);
 
         if ($kirjain == "S") {
           $query = "UPDATE tili
                     SET sisainen_taso = '$paivtaso'
                     WHERE yhtio       = '$kukarow[yhtio]'
                     and sisainen_taso = BINARY '$vrow[taso]'";
-          $res = mysql_query($query) or pupe_error($query);
+          $res = pupe_query($query);
 
           $query = "UPDATE budjetti
                     SET taso = '$paivtaso'
                     WHERE yhtio = '$kukarow[yhtio]'
                     and taso    = BINARY '$vrow[taso]'";
-          $res = mysql_query($query) or pupe_error($query);
+          $res = pupe_query($query);
         }
         else {
           $query = "UPDATE tili
                     SET ulkoinen_taso = '$paivtaso'
                     WHERE yhtio       = '$kukarow[yhtio]'
                     and ulkoinen_taso = BINARY '$vrow[taso]'";
-          $res = mysql_query($query) or pupe_error($query);
+          $res = pupe_query($query);
         }
       }
     }
@@ -111,7 +111,7 @@ if ($tee == "lisaalisaa") {
               laatija         = '$kukarow[kuka]',
               luontiaika      = now(),
               yhtio           = '$kukarow[yhtio]'";
-    $res = mysql_query($query) or pupe_error($query);
+    $res = pupe_query($query);
 
     echo "Taso $uusitaso lisätty tilikartan rakenteeseen!<br>";
 
@@ -190,7 +190,7 @@ if ($tee == "muutamuuta") {
             WHERE yhtio = '$kukarowkarow[yhtio]'
             and taso    = BINARY '$uusitaso'
             and tyyppi  = '$kirjain'";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   if (mysql_num_rows($vresult) > 0) {
     echo "<font class='error'>Taso $uusitaso löytyy jo järjestelmästä!</font><br>";
@@ -208,7 +208,7 @@ if ($tee == "muutamuuta") {
               and taso    like BINARY '$taso%'
               and tyyppi  = '$kirjain'
               ORDER BY CHAR_LENGTH(taso) desc";
-    $vresult = mysql_query($query) or pupe_error($query);
+    $vresult = pupe_query($query);
 
     while ($vrow = mysql_fetch_array($vresult)) {
 
@@ -221,27 +221,27 @@ if ($tee == "muutamuuta") {
                 WHERE yhtio = '$kukarow[yhtio]'
                 and taso    = BINARY '$vrow[taso]'
                 and tyyppi  = '$kirjain'";
-      $res = mysql_query($query) or pupe_error($query);
+      $res = pupe_query($query);
 
       if ($kirjain == "S") {
         $query = "UPDATE tili
                   SET sisainen_taso = '$uusitilitaso'
                   WHERE yhtio       = '$kukarow[yhtio]'
                   and sisainen_taso = BINARY '$vrow[taso]'";
-        $res = mysql_query($query) or pupe_error($query);
+        $res = pupe_query($query);
 
         $query = "UPDATE budjetti
                   SET taso = '$uusitilitaso'
                   WHERE yhtio = '$kukarow[yhtio]'
                   and taso    = BINARY '$vrow[taso]'";
-        $res = mysql_query($query) or pupe_error($query);
+        $res = pupe_query($query);
       }
       else {
         $query = "UPDATE tili
                   SET ulkoinen_taso = '$uusitilitaso'
                   WHERE yhtio       = '$kukarow[yhtio]'
                   and ulkoinen_taso = BINARY '$vrow[taso]'";
-        $res = mysql_query($query) or pupe_error($query);
+        $res = pupe_query($query);
       }
     }
   }
@@ -279,14 +279,14 @@ if ($tee == "tilitasotilitaso") {
               SET sisainen_taso = '$uusitaso'
               WHERE yhtio = '$kukarow[yhtio]'
               and tilino  in ($tiliarray)";
-    $res = mysql_query($query) or pupe_error($query);
+    $res = pupe_query($query);
   }
   else {
     $query = "UPDATE tili
               SET ulkoinen_taso = '$uusitaso'
               WHERE yhtio = '$kukarow[yhtio]'
               and tilino  in ($tiliarray)";
-    $res = mysql_query($query) or pupe_error($query);
+    $res = pupe_query($query);
   }
 
   echo "Tilit $tiliarray siiretty tasoon $uusitaso!<br>";
@@ -317,7 +317,7 @@ if ($tee == "tilitaso") {
             and tyyppi = '$kirjain'
             and left(taso,1) = BINARY '$taso'
             order by taso";
-  $tasoresu = mysql_query($query) or pupe_error($query);
+  $tasoresu = pupe_query($query);
 
   echo "<td><select name='uusitaso'>\n";
 

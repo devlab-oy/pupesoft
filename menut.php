@@ -232,7 +232,7 @@ if ((isset($synkronoireferenssi) or isset($synkronoireferenssialapaivita)) and c
                   muutospvm  = now(),
                   muuttaja   = '{$kukarow['kuka']}'";
         $insresult = pupe_query($query);
-        $insid = mysql_insert_id();
+        $insid = mysql_insert_id($GLOBALS["masterlink"]);
 
         if (isset($synkronoireferenssialapaivita)) {
           // Jos lisätään uusi väliin, niin loput pitää työntää vähän eteenpäin

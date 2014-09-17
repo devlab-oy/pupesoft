@@ -198,7 +198,7 @@ if (!function_exists('lisaa_suuntalava')) {
                 muutospvm          = now()";
 
       $insert_result = pupe_query($query);
-      $uusi_suuntalavan_tunnus = mysql_insert_id();
+      $uusi_suuntalavan_tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
       // Jos tehdään uusi lava ilman saapumista, ei tehdä liitosta suuntalava_saapuminen tauluun
       if ($otunnus != '') {

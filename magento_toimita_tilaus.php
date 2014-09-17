@@ -25,9 +25,10 @@ $default_kuittaukset = array(
   "toimitus"  => "Your order is shipped!");
 $kuittaukset = array_merge($default_kuittaukset, $magento_api_toimituskuittaus_viestit);
 
-$magento_api_ord = (int) $magento_api_ord;
+$magento_api_ord   = (int) $magento_api_ord;
+$_magento_kaytossa = (!empty($magento_api_url) and !empty($magento_api_usr) and !empty($magento_api_pas));
 
-if ($magento_kaytossa === false or $magento_api_ord <= 0) {
+if (!$_magento_kaytossa or $magento_api_ord <= 0) {
   exit;
 }
 
@@ -35,18 +36,9 @@ $proxy = new SoapClient($magento_api_url);
 $sessionId = $proxy->login($magento_api_usr, $magento_api_pas);
 
 $magento_api_met = utf8_encode($magento_api_met);
-$canShip   = true;
+$canShip    = true;
 $canInvoice = true;
 $magLinkurl = "";
-
-// Päivitetään tilauksen tilaksi 'completed_pupesoft'
-/*try {
-  $completed = $proxy->call($sessionId, 'sales_order.addComment', array($magento_api_ord, 'completed_pupesoft', 'Tilaus merkattu toimitetuksi Pupesoftista'));
-}
-catch(Exception $e) {
-  echo $e->faultstring."\n";
-  echo $e->faultcode."\n";
-}*/
 
 $message = "Toimitetaan tilaus {$magento_api_ord} Magentoon";
 log_message($message);
@@ -54,9 +46,9 @@ log_message($message);
 // Create new shipment
 try {
 
-  if (stripos($magento_api_rak, "JJFI") !== false) {
-    $magLinkurl = "Tracking number: ";
+  $magLinkurl = "Tracking number: ";
 
+  if (stripos($magento_api_rak, "JJFI") !== false) {
     preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $magento_api_rak, $match);
 
     foreach ($match[0] as $nro) {
@@ -66,11 +58,16 @@ try {
 
     $magLinkurl = substr($magLinkurl, 0, -4); // vika br pois
   }
+  elseif (stripos($magento_api_met, "mypack") !== FALSE) {
+    $magLinkurl .= "<a target=newikkuna href='http://www.postnordlogistics.fi/en/Online-services/Pages/Track-and-Trace.aspx?search={$magento_api_rak}'>{$magento_api_rak}</a><br>";
+  }
+  else {
+    $magLinkurl .= "$magento_api_met / $magento_api_rak<br>";
+  }
 
   // Shipment comment joka lisätään Magentosta asiakkaalle lähtevään sähköpostiin
   if (isset($magento_api_noutokuittaus) and $magento_api_noutokuittaus == "JOO") {
     $comment = $kuittaukset['nouto'];
-    //$canShip = FALSE; // Ei tarvita trackingia noutokeississä
   }
   else {
     $comment = $kuittaukset['toimitus']."<br><br>$magLinkurl";

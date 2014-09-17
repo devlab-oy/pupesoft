@@ -30,7 +30,7 @@ else {
 
   // poistetaan lukot
   $query = "LOCK TABLES yhtion_parametrit WRITE, asiakashinta WRITE, hinnasto WRITE, toimitustapa WRITE, rahtimaksut WRITE, tilausrivi WRITE, tuote WRITE, maksupositio WRITE, lasku READ, avainsana READ";
-  $locre = mysql_query($query) or pupe_error($query);
+  $locre = pupe_query($query);
 
   $query  = "UPDATE yhtion_parametrit
              SET alv_kasittely = '$yhtion_para'
@@ -232,5 +232,5 @@ else {
 
   // poistetaan lukot
   $query = "UNLOCK TABLES";
-  $locre = mysql_query($query) or pupe_error($query);
+  $locre = pupe_query($query);
 }

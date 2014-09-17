@@ -93,7 +93,7 @@ for ($a = 1; $a < count($argv); $a++) {
                     paljousyksikko         = '$paljousyksikko',
                     paljousyksikko_muunnin = '$paljousyksikko_muunnin',
                     voim_loppupvm          = '$vvl-$kkl-$ppl'";
-          $result = mysql_query($query) or pupe_error($query);
+          $result = pupe_query($query);
           $kala = mysql_affected_rows();
 
           if ($laji == 'tp_l.dat') {
@@ -151,7 +151,7 @@ for ($a = 1; $a < count($argv); $a++) {
                     and toimenpide_id      = '$toimenpide_id'
                     and voim_alkupvm       = '$vva-$kka-$ppa'
                     and duty_expr_id       = '$duty_expr_id'";
-          $result = mysql_query($query) or pupe_error($query);
+          $result = pupe_query($query);
           $kala = mysql_affected_rows();
 
           if ($kala != '1') {
@@ -178,7 +178,7 @@ for ($a = 1; $a < count($argv); $a++) {
                     and toimenpide_id = '$toimenpide_id'
                     and voim_alkupvm  = '$vva-$kka-$ppa'
                     and duty_expr_id  = '$duty_expr_id'";
-          $result = mysql_query($query) or pupe_error($query);
+          $result = pupe_query($query);
           $kala = mysql_affected_rows();
 
           if ($kala != '1') {
@@ -213,7 +213,7 @@ for ($a = 1; $a < count($argv); $a++) {
                     nimike        = '$nimike',
                     voim_alkupvm  = '$vva-$kka-$ppa',
                     voim_loppupvm = '$vvl-$kkl-$ppl'";
-          $result = mysql_query($query) or pupe_error($query);
+          $result = pupe_query($query);
           $kala = mysql_affected_rows();
 
           // echo "Lisättiin: $laji, $kala tietuetta.\n";
@@ -228,7 +228,7 @@ for ($a = 1; $a < count($argv); $a++) {
                     SET laji     = 'exc.dat',
                     toimenpide_id = '$toimenpide_id',
                     maa_ryhma     = '$poissuljettu_maa'";
-          $result = mysql_query($query) or pupe_error($query);
+          $result = pupe_query($query);
           $kala = mysql_affected_rows();
 
           // echo "Lisättiin: $laji, $kala tietuetta.\n";
@@ -246,7 +246,7 @@ for ($a = 1; $a < count($argv); $a++) {
                     toimenpide_id      = '$toimenpide_id',
                     alaviitteen_tyyppi = '$alaviitteen_tyyppi',
                     alaviitenumero     = '$alaviitenumero'";
-          $result = mysql_query($query) or pupe_error($query);
+          $result = pupe_query($query);
           $kala = mysql_affected_rows();
 
           // echo "Lisättiin: $laji, $kala tietuetta.\n";

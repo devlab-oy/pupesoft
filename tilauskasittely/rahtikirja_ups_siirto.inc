@@ -10,7 +10,7 @@ if ($kollityht > 0) {
             AND varasto = '{$laskurow['varasto']}'
             AND nimi    = '{$laskurow['tulostusalue']}'
             LIMIT 1";
-  $tulostusalue_check_res = mysql_query($query) or pupe_error($query);
+  $tulostusalue_check_res = pupe_query($query);
   $tulostusalue_check_row = mysql_fetch_assoc($tulostusalue_check_res);
 
   $ups_host_x = ($laskurow['pakkaamo'] == 0 or !isset($ups_host[strtolower($tulostusalue_check_row['pakkaamo'])])) ? $ups_host['oletus'] : $ups_host[strtolower($tulostusalue_check_row['pakkaamo'])];
@@ -110,7 +110,7 @@ if ($kollityht > 0) {
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND lasku.tunnus  in ($otunnukset)
               ORDER BY lasku.tunnus limit 1";
-    $ups_laskures = mysql_query($query) or pupe_error($query);
+    $ups_laskures = pupe_query($query);
     $ups_laskurow = mysql_fetch_array($ups_laskures);
 
     /*
@@ -125,7 +125,7 @@ if ($kollityht > 0) {
               AND liitostunnus = '$laskurow[liitostunnus]'
               AND nimi         = '$laskurow[tilausyhteyshenkilo]'
               and tyyppi       = 'A'";
-    $yhteyshenkiloresult = mysql_query($query) or pupe_error($query);
+    $yhteyshenkiloresult = pupe_query($query);
     $yhteyshenkiloasiakas = mysql_fetch_array($yhteyshenkiloresult);
 
     $asiakkaan_sahkopostiosoite = $yhteyshenkiloasiakas['email'] != '' ? $yhteyshenkiloasiakas['email'] : $ups_laskurow['email'];
@@ -145,7 +145,7 @@ if ($kollityht > 0) {
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tunnus  = '{$ups_laskurow['yhteyshenkilo_kaupallinen']}'
                 and tyyppi  = 'A'";
-      $yhteyshenkilo_kaupallinen_res = mysql_query($query) or pupe_error($query);
+      $yhteyshenkilo_kaupallinen_res = pupe_query($query);
       $yhteyshenkilo_kaupallinen_row = mysql_fetch_assoc($yhteyshenkilo_kaupallinen_res);
       if ($yhteyshenkilo_kaupallinen_row['nimi'] == '') {
         $yhteyshenkilo_kaupallinen_row['nimi'] = '.';
@@ -158,7 +158,7 @@ if ($kollityht > 0) {
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tunnus  = '{$ups_laskurow['yhteyshenkilo_tekninen']}'
                 and tyyppi  = 'A'";
-      $yhteyshenkilo_tekninen_res = mysql_query($query) or pupe_error($query);
+      $yhteyshenkilo_tekninen_res = pupe_query($query);
       $yhteyshenkilo_tekninen_row = mysql_fetch_assoc($yhteyshenkilo_tekninen_res);
       if ($yhteyshenkilo_tekninen_row['nimi'] == '') {
         $yhteyshenkilo_tekninen_row['nimi'] = '.';
@@ -304,7 +304,7 @@ if ($kollityht > 0) {
              GROUP BY 1
              ORDER BY 1";
     //and pakkauskuvaus = '$row[selitetark]'";
-    $ups_rakires = mysql_query($query) or pupe_error($query);
+    $ups_rakires = pupe_query($query);
     $ups_rakirow = mysql_fetch_array($ups_rakires);
 
     if ($ups_rakirow['kollit'] > 999) {

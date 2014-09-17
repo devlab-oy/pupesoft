@@ -299,14 +299,13 @@ else {
     $sarakkeet["SARAKE55"] = t("myynti asiakas")." $asiakasno $kausi4\t";
   }
 
-  // aika karseeta, mutta katotaan voidaanko tällästä optiota näyttää yks tosi firma specific juttu
-  $query = "describe yhteensopivuus_rekisteri";
-  $res = mysql_query($query);
-
-  if (mysql_error() == "") {
-    $query = "select count(*) kpl from yhteensopivuus_rekisteri where yhtio='$kukarow[yhtio]'";
-    $res = mysql_query($query);
+  if (table_exists("yhteensopivuus_rekisteri")) {
+    $query = "SELECT count(*) kpl
+              FROM yhteensopivuus_rekisteri
+              WHERE yhtio = '$kukarow[yhtio]'";
+    $res = pupe_query($query);
     $row = mysql_fetch_assoc($res);
+
     if ($row["kpl"] > 0) {
       $sarakkeet["SARAKE64"] = "Rekisteröidyt kpl\t";
     }
@@ -380,7 +379,7 @@ else {
 
     foreach ($valitut as $val) {
       $query = "INSERT INTO avainsana set yhtio='$kukarow[yhtio]', laji='HALYRAP', selite='$rappari', selitetark='$val'";
-      $res = pupe_query($query, $masterlink);
+      $res = pupe_query($query, $GLOBALS["masterlink"]);
     }
   }
 
@@ -389,11 +388,11 @@ else {
 
     if ($rappari != '') {
       $query = "DELETE FROM avainsana WHERE yhtio='$kukarow[yhtio]' and laji='HALYRAP' and selite='$rappari'";
-      $res = pupe_query($query, $masterlink);
+      $res = pupe_query($query, $GLOBALS["masterlink"]);
 
       foreach ($valitut as $val) {
         $query = "INSERT INTO avainsana set yhtio='$kukarow[yhtio]', laji='HALYRAP', selite='$rappari', selitetark='$val'";
-        $res = pupe_query($query, $masterlink);
+        $res = pupe_query($query, $GLOBALS["masterlink"]);
       }
     }
 

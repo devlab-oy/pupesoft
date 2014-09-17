@@ -42,7 +42,7 @@ if ($php_cli) {
     $query = "SELECT *
               FROM yhtion_parametrit
               WHERE yhtio = '$yhtiorow[yhtio]'";
-    $result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
       $yhtion_parametritrow = mysql_fetch_assoc($result);
@@ -260,7 +260,7 @@ function xauxi($tanaan) {
             LEFT JOIN korvaavat ON (korvaavat.yhtio = tuote.yhtio AND korvaavat.tuoteno = tuote.tuoteno)
             WHERE tuote.yhtio  = '$yhtiorow[yhtio]' $tuoterajaukset AND tuote.ostoehdotus = ''
             HAVING (korvaavatuoteno = tuote.tuoteno OR korvaavatuoteno is null)";
-  $rested = mysql_query($query) or pupe_error($query);
+  $rested = pupe_query($query);
   $rows = mysql_num_rows($rested);
 
   $fp = fopen($path_xauxi, 'w+');
@@ -276,7 +276,7 @@ function xauxi($tanaan) {
               AND tuotteen_toimittajat.tuoteno = '$tuote[tuoteno]'
               ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
               LIMIT 1";
-    $tutoq = mysql_query($query) or pupe_error($query);
+    $tutoq = pupe_query($query);
     $tuto = mysql_fetch_assoc($tutoq);
 
     if ($tuto['toimittaja'] == '' or $tuto['tyyppi'] == 'P') continue;
@@ -346,7 +346,7 @@ function xlto($tanaan) {
             AND tilausrivi.laskutettuaika = '$tanaan'
             GROUP BY tuoteno, luonti, lahete, tilausrivitunnus, korvaavatuoteno
             HAVING tilausrivin_lisatiedot.tilausrivitunnus is null AND (korvaavatuoteno = tilausrivi.tuoteno OR korvaavatuoteno is null)";
-  $rest = mysql_query($query) or pupe_error($query);
+  $rest = pupe_query($query);
 
   $rows  = mysql_num_rows($rest);
   $row  = 0;
@@ -363,7 +363,7 @@ function xlto($tanaan) {
               AND tuotteen_toimittajat.tuoteno = '$xlto[tuoteno]'
               ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
               LIMIT 1";
-    $tutoq = mysql_query($query) or pupe_error($query);
+    $tutoq = pupe_query($query);
     $tuto = mysql_fetch_assoc($tutoq);
 
     //tyhjät pois ja jos ostorivin toimittaja ei oo päätoimittaja, ni skipataan (vain päätoimittajan ostoja e3)
@@ -410,7 +410,7 @@ function xswp($tanaan, $korvatut) {
             $tuoterajaukset
             AND tuote.ostoehdotus = ''
             HAVING tuote.tuoteno = korvaavatuoteno";
-  $rest = mysql_query($query) or pupe_error($query);
+  $rest = pupe_query($query);
   $rows = mysql_num_rows($rest);
   $row  = 0;
 
@@ -430,7 +430,7 @@ function xswp($tanaan, $korvatut) {
               AND tuotteen_toimittajat.tuoteno = '$korvaavat[tuoteno]'
               ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
               LIMIT 1";
-    $tutoq = mysql_query($query) or pupe_error($query);
+    $tutoq = pupe_query($query);
     $tuto = mysql_fetch_assoc($tutoq);
 
     if ($tuto['toimittaja'] == '' or $tuto['tyyppi'] == 'P') continue;
@@ -440,7 +440,7 @@ function xswp($tanaan, $korvatut) {
               WHERE korvaavat.yhtio = '$yhtiorow[yhtio]' AND korvaavat.id = '$korvaavat[id]' AND if(korvaavat.jarjestys = 0, 9999, korvaavat.jarjestys) >= '$korvaavat[jarjestys]' AND korvaavat.tuoteno != '$korvaavat[tuoteno]'
               ORDER BY if(korvaavat.jarjestys = 0, 9999, korvaavat.jarjestys), korvaavat.tuoteno
               LIMIT 1";
-    $korvaavaresult = mysql_query($query) or pupe_error($query);
+    $korvaavaresult = pupe_query($query);
     $korvaavarows = mysql_num_rows($korvaavaresult);
     if ($korvaavarows == 0) continue;
     $korvaava = mysql_fetch_assoc($korvaavaresult);
@@ -452,7 +452,7 @@ function xswp($tanaan, $korvatut) {
                AND tuotteen_toimittajat.tuoteno = '$korvaava[tuoteno]'
                ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
                LIMIT 1";
-    $tutoq2 = mysql_query($query2) or pupe_error($query2);
+    $tutoq2 = pupe_query($query2);
     $tuto2 = mysql_fetch_assoc($tutoq2);
 
     if ($tuto2['toimittaja'] == '' or $tuto2['tyyppi'] == 'P') continue;
@@ -494,7 +494,7 @@ function xvni($tanaan) {
             AND toimi.toimittajanro not in ('0','')
             AND tyyppi              = '' $toimirajaus
             ORDER BY 1";
-  $resto = mysql_query($qxvni) or pupe_error($qxvni);
+  $resto = pupe_query($qxvni);
   $rows = mysql_num_rows($resto);
 
   $fp = fopen($path_xvni, 'w+');
@@ -585,7 +585,7 @@ function xf04($tanaan) {
             WHERE tuote.yhtio  = '$yhtiorow[yhtio]' $tuoterajaukset AND tuote.ostoehdotus = ''
             HAVING (korvaavatuoteno = tuote.tuoteno OR korvaavatuoteno is null)
             ORDER BY tuote.tuoteno";
-  $resto = mysql_query($qxf04) or pupe_error($qxf04);
+  $resto = pupe_query($qxf04);
   $rows = mysql_num_rows($resto);
 
   $fp = fopen($path_xf04, 'w+');
@@ -599,7 +599,7 @@ function xf04($tanaan) {
               AND tuotteen_toimittajat.tuoteno = '$xf04[tuoteno]'
               ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
               LIMIT 1";
-    $tutoq = mysql_query($query) or pupe_error($query);
+    $tutoq = pupe_query($query);
     $tuto = mysql_fetch_assoc($tutoq);
 
     if ($tuto['toimittaja'] == '' or $tuto['tyyppi'] == 'P') continue;
@@ -683,7 +683,7 @@ function xf01($tanaan) {
          WHERE tuote.yhtio          = '$yhtiorow[yhtio]' $tuoterajaukset AND tuote.ostoehdotus = ''
          GROUP BY tuote.tuoteno, tuote.status, korvaavatuoteno
          HAVING (korvaavatuoteno = tuote.tuoteno OR korvaavatuoteno is null)";
-  $rests = mysql_query($Q1) or pupe_error($Q1);
+  $rests = pupe_query($Q1);
   $rows = mysql_num_rows($rests);
 
   $fp = fopen($path_xf01, 'w+');
@@ -697,7 +697,7 @@ function xf01($tanaan) {
                         AND tuotteen_toimittajat.tuoteno = '$tuoterow[tuoteno]'
                         ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
                         LIMIT 1";
-    $toimires = mysql_query($toimittajaquery) or pupe_error($toimittajaquery);
+    $toimires = pupe_query($toimittajaquery);
     $toimirow = mysql_fetch_assoc($toimires);
 
     if ($toimirow['toimittaja'] == '' or $toimirow['tyyppi'] == 'P') continue;
@@ -719,7 +719,7 @@ function xf01($tanaan) {
            AND tilausrivi.tuoteno        = '$tuoterow[tuoteno]'
            AND tilausrivi.toimitettuaika >= '$tanaan 00:00:00'
            AND tilausrivi.toimitettuaika <= '$tanaan 23:59:59'";
-    $q2r =  mysql_query($Q2) or pupe_error($Q2);
+    $q2r =  pupe_query($Q2);
     $myyntirow = mysql_fetch_assoc($q2r);
 
     $Q2 = "SELECT round(SUM(tilausrivi.varattu), 0) myyty2
@@ -737,7 +737,7 @@ function xf01($tanaan) {
            AND tilausrivi.varattu        != 0
            AND tilausrivi.toimitettuaika  >= '$tanaan 00:00:00'
            AND tilausrivi.toimitettuaika  <= '$tanaan 23:59:59'";
-    $q2r2 =  mysql_query($Q2) or pupe_error($Q2);
+    $q2r2 =  pupe_query($Q2);
     $myyntirow2 = mysql_fetch_assoc($q2r2);
 
     // tarkistetaan ettei laitetan negatiivia arvoja
@@ -756,7 +756,7 @@ function xf01($tanaan) {
            AND tilausrivi.tuoteno        = '$tuoterow[tuoteno]'
            AND tilausrivi.laskutettuaika = '0000-00-00'
            HAVING tilausrivin_lisatiedot.tilausrivitunnus is null";
-    $q3r =   mysql_query($Q3) or pupe_error($Q3);
+    $q3r =   pupe_query($Q3);
     $ostorow = mysql_fetch_assoc($q3r);
 
     $tilauksessa = $ostorow['tilauksessa'];
@@ -795,7 +795,7 @@ function xf02($tanaan, $xf02loppulause) {
   $valuuttaQ = "SELECT nimi, kurssi
                 FROM valuu
                 WHERE yhtio = '$yhtiorow[yhtio]'";
-  $resaluutta = mysql_query($valuuttaQ) or pupe_error($valuuttaQ);
+  $resaluutta = pupe_query($valuuttaQ);
 
   $valuutat = array();
 
@@ -830,7 +830,7 @@ function xf02($tanaan, $xf02loppulause) {
                  GROUP BY tuote.tuoteno, tuote.tuotekorkeus, tuote.tuoteleveys, tuote.tuotesyvyys, tuote.nimitys, tuote.status, tuote.suoratoimitus, tuote.epakurantti25pvm, tuote.ostoehdotus, korvaavatuoteno
                  HAVING (korvaavatuoteno = tuote.tuoteno OR korvaavatuoteno is null)
                  ORDER BY 1";
-  $rests = mysql_query($kyselyxfo2) or pupe_error($kyselyxfo2);
+  $rests = pupe_query($kyselyxfo2);
   $rows = mysql_num_rows($rests);
 
   $fp = fopen($path_xf02, 'w+');
@@ -851,7 +851,7 @@ function xf02($tanaan, $xf02loppulause) {
               AND tuotteen_toimittajat.tuoteno = '$xf02[tuoteno]'
               ORDER BY if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys), tuotteen_toimittajat.tunnus
               LIMIT 1";
-    $rest_toimittajista = mysql_query($query) or pupe_error($query);
+    $rest_toimittajista = pupe_query($query);
     $toim_row = mysql_fetch_assoc($rest_toimittajista);
 
     if ($toim_row['toimittajanro'] == '' or $toim_row['tyyppi'] == 'P') continue;

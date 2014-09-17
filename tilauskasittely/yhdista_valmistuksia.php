@@ -26,7 +26,7 @@ if ($tee=='YHDISTA') {
               FROM  lasku
               WHERE yhtio = '$kukarow[yhtio]'
               and  tunnus = (SELECT otunnus from tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tunnus=$valmistettavat[0])";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
     $laskurow    = mysql_fetch_array($result);
 
     if ($tilaukseen > 0) {
@@ -37,7 +37,7 @@ if ($tee=='YHDISTA') {
                 WHERE yhtio = '$kukarow[yhtio]'
                 and  tunnus = '$tilaukseen'
                 and tila    = 'V'";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
       if (mysql_num_rows($result) == 0) {
         die("<font class='error'>VIRHE!!! Tilaus ei ole valmistus!</font>");
       }
@@ -52,7 +52,7 @@ if ($tee=='YHDISTA') {
                 viesti      = '$viesti'
                 WHERE yhtio = '$kukarow[yhtio]'
                 and  tunnus = '$otunnus'";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
     }
     else {
       $query = "INSERT into
@@ -73,8 +73,8 @@ if ($tee=='YHDISTA') {
                 ytunnus           = 'Valmistusajo',
                 laatija           = '$kukarow[kuka]',
                 luontiaika        = NOW()";
-      $result = mysql_query($query) or pupe_error($query);
-      $otunnus = mysql_insert_id();
+      $result = pupe_query($query);
+      $otunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
       echo "<font class='message'>".t("Luotiin uusi otsikko")." $otunnus</font><br>";
 
@@ -87,7 +87,7 @@ if ($tee=='YHDISTA') {
                 FROM tilausrivi
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tunnus  = '$rivitunnus'";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
       $otsikrow = mysql_fetch_array($result);
 
       //  Tallennetaan vanha otunnus
@@ -95,7 +95,7 @@ if ($tee=='YHDISTA') {
                 SET vanha_otunnus = (SELECT otunnus from tilausrivi WHERE yhtio = '$kukarow[yhtio]' and tunnus=$rivitunnus)
                 WHERE yhtio          = '$kukarow[yhtio]'
                 and tilausrivitunnus = '$rivitunnus'";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
 
       //Siirret‰‰n rivi uudelle otsikolle
       $query = "UPDATE tilausrivi
@@ -104,14 +104,14 @@ if ($tee=='YHDISTA') {
                 and perheid     = '$rivitunnus'
                 and tyyppi      in ('V','W','M')
                 and uusiotunnus = 0";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
 
       //Tsekataan onko alkuper‰isotsikolla viel‰ rivej‰
       $query = "SELECT count(*) jaljella
                 FROM tilausrivi
                 WHERE yhtio = '$kukarow[yhtio]'
                 and otunnus = '$otsikrow[otunnus]'";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
       $rivirow = mysql_fetch_array($result);
 
       if ($rivirow["jaljella"] == 0) {
@@ -120,7 +120,7 @@ if ($tee=='YHDISTA') {
                   SET alatila = 'Y'
                   WHERE yhtio = '$kukarow[yhtio]'
                   and tunnus  = '$otsikrow[otunnus]'";
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
       }
     }
 
@@ -132,7 +132,7 @@ if ($tee=='YHDISTA') {
                 WHERE yhtio = '$kukarow[yhtio]' and otunnus='$otunnus' and tyyppi IN ('W','M') and perheid = tunnus
                 GROUP BY tuoteno
                 HAVING rivei > 1";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
       if (mysql_num_rows($result)>0) {
         while ($row = mysql_fetch_array($result)) {
 
@@ -148,7 +148,7 @@ if ($tee=='YHDISTA') {
                     WHERE yhtio = '$kukarow[yhtio]' and otunnus='$otunnus' and perheid IN ($row[tunnukset])
                     GROUP BY perheid
                     ORDER BY stringi";
-          $sresult = mysql_query($query) or pupe_error($query);
+          $sresult = pupe_query($query);
 
           $edstringi = $edperheid = "";
           $yhdistettavat = array();
@@ -195,7 +195,7 @@ if ($tee=='YHDISTA') {
                           FROM tilausrivi
                           WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$otunnus' and perheid IN ($tunnukset)
                           GROUP BY tuoteno";
-                $sresult = mysql_query($query) or pupe_error($query);
+                $sresult = pupe_query($query);
                 while ($srow = mysql_fetch_array($sresult)) {
 
                   //  P‰ivitet‰‰n ekan perheen tiedot
@@ -206,14 +206,14 @@ if ($tee=='YHDISTA') {
                             jt          = '".round($srow['jt'], 2 )."',
                             kommentti   = '$srow[kommentti]'
                             WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$otunnus' and perheid = '$ekaperhe' and tuoteno = '$srow[tuoteno]'";
-                  $updres = mysql_query($query) or pupe_error($query);
+                  $updres = pupe_query($query);
 
                   //  Merkataan loput poistetuiksi
                   $query = "UPDATE tilausrivi SET
                             tyyppi      = 'D',
                             kommentti   = 'Tuote yhdistettiin perheeseen $ekaperhe'
                             WHERE yhtio = '$kukarow[yhtio]' and otunnus = '$otunnus' and perheid IN ($loput) and tuoteno = '$srow[tuoteno]'";
-                  $updres = mysql_query($query) or pupe_error($query);
+                  $updres = pupe_query($query);
 
                   //echo "<font class='info'>".t("Yhdistettiin")." $srow[tuoteno] !</font><br>";
                 }
@@ -254,7 +254,7 @@ if ($tee == "VALITSE") {
             and lasku.tunnus=tilausrivi.otunnus
             and lasku.yhtio=tilausrivi.yhtio
             and tilausrivi.uusiotunnus = 0";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $row    = mysql_fetch_array($result);
 
   for ($i=0; $i < mysql_num_fields($result); $i++) {
@@ -274,7 +274,7 @@ if ($tee == "VALITSE") {
             and tyyppi                 IN ('W','M')
             and tilausrivi.uusiotunnus = 0
             ORDER BY perheid";
-  $presult = mysql_query($query) or pupe_error($query);
+  $presult = pupe_query($query);
   $riveja = mysql_num_rows($presult);
 
   echo "<table border='0' cellspacing='1' cellpadding='2'><tr>";
@@ -305,7 +305,7 @@ if ($tee == "VALITSE") {
               and trim(fakta2) != ''
               ORDER BY LENGTH(fakta2) desc
               LIMIT 1";
-    $faktares = mysql_query($query) or pupe_error($query);
+    $faktares = pupe_query($query);
 
     if (mysql_num_rows($faktares) > 0) {
       $faktarow = mysql_fetch_array($faktares);
@@ -339,7 +339,7 @@ if ($tee == "VALITSE") {
             WHERE yhtio = '$kukarow[yhtio]'
             and tila    = 'V'
             and  tunnus = '$tilaukseen'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $laskurow = mysql_fetch_array($result);
 
   echo "
@@ -362,7 +362,7 @@ if ($tee == "VALITSE") {
   $query = "SELECT tunnus, viesti
             FROM lasku
             WHERE yhtio = '$kukarow[yhtio]' and tila = 'V' and alatila IN ('', 'J') and ytunnus = 'Valmistusajo'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<table><tr><th>".t("Yhdist‰ valitut valmistukseen").":</th>
       <td><input type='hidden' id='ohitus' name='ohitus' value=''><select name='tilaukseen' onchange = \"document.getElementById('ohitus').value='OHITA'; submit();\"><option value = ''>".t("Tee uusi valmistusajo")."</option>'";
@@ -437,7 +437,7 @@ if ($tee == "") {
             and tilausrivi.uusiotunnus  = 0
             and tilausrivi.tuoteno='$etsi'
             and tilausrivi.tyyppi       in ('W','V','M')";
-  $tilre = mysql_query($query) or pupe_error($query);
+  $tilre = pupe_query($query);
   $tilro = mysql_fetch_array($tilre);
 
   if ($tilro["haku"] != '') {
@@ -513,7 +513,7 @@ if ($tee == "") {
         $haku
         $grouppi
         $jarjestys";
-  $tilre = mysql_query($query) or pupe_error($query);
+  $tilre = pupe_query($query);
 
   if (mysql_num_rows($tilre) > 0) {
     echo "<table>";

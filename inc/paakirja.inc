@@ -191,7 +191,7 @@ $query = "SELECT *
           FROM tilikaudet
           WHERE yhtio = '$kukarow[yhtio]'
           ORDER BY tilikausi_alku DESC";
-$vresult = mysql_query($query) or pupe_error($query);
+$vresult = pupe_query($query);
 
 echo "<td colspan='3'><select name='tkausi'><option value='0'>".t("Ei valintaa")."</option>";
 
@@ -432,7 +432,7 @@ if ($tee != "") {
                 WHERE yhtio         = '$kukarow[yhtio]'
                 and tilikausi_alku  <= '$alvv-$blvk-$blvp'
                 and tilikausi_loppu >= '$alvv-$blvk-$blvp'";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
     }
     else {
       // Jos haetaan tilikaudella niin nollataan muut päivämäärät
@@ -447,7 +447,7 @@ if ($tee != "") {
                 FROM tilikaudet
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tunnus  = '$tkausi'";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
     }
 
     if (mysql_num_rows($result) != 1) {
@@ -726,7 +726,7 @@ if ($tee != "") {
                   and tiliointi.tapvm    >= '$tilikaudetrow[tilikausi_alku]'
                   and tiliointi.tilino   = '$trow[xtilino]'
                   $lisa2";
-        $alkres = mysql_query($query) or pupe_error($query);
+        $alkres = pupe_query($query);
         $alkurow = mysql_fetch_array($alkres);
         $kumsumma = $alkurow["saldo"];
 

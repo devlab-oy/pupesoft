@@ -24,7 +24,7 @@ if (count($tilinoarray[$yritirow['tunnus']]) > 0) {
               and lasku.maksu_tili = '$yritirow[tunnus]'
               and lasku.olmapvm    = '$pvmrow[olmapvm]'
                ORDER BY if(summa < 0, 1, 2), summa desc";
-    $nettolaskures = mysql_query($query) or pupe_error($query);
+    $nettolaskures = pupe_query($query);
 
     if (mysql_num_rows($nettolaskures) == 0) {
       echo "<font class='message'>".t("Sopivia laskuja ei löydy. This is bad, very bad")."!</font><br>";
@@ -74,7 +74,7 @@ if (count($tilinoarray[$yritirow['tunnus']]) > 0) {
                WHERE lasku.yhtio = '$kukarow[yhtio]'
               and lasku.tunnus   in ($nettolaskujen_tunnukset)
                ORDER BY if(summa < 0, 1, 2), summa desc";
-    $xresult = mysql_query($query) or pupe_error($query);
+    $xresult = pupe_query($query);
 
     if (mysql_num_rows($xresult) == 0) {
       echo "<font class='message'>".t("Sopivia laskuja ei löydy. This is bad, very bad")."!</font><br>";
@@ -173,7 +173,7 @@ if (count($tilinoarray[$yritirow['tunnus']]) > 0) {
                 SET tila = 'Q',
                 popvm        = '$popvm_nyt'
                 WHERE tunnus = $laskurow[tunnus]";
-      $uresult = mysql_query($query) or pupe_error($query);
+      $uresult = pupe_query($query);
     }
   }
 }

@@ -12,7 +12,7 @@ if (mysql_field_name($result, $i) == "varasto_postino") {
             FROM varastopaikat
             WHERE yhtio='$kukarow[yhtio]' AND postino != '' AND tyyppi != 'P'
             ORDER BY postino";
-  $varastoresult = mysql_query($query) or pupe_error($query);
+  $varastoresult = pupe_query($query);
   $ulos = "<td><select name='$nimi'>";
   $ulos .= "<option value = '' >".t("Ei varastoa")."</option>";
 

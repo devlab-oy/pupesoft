@@ -12,7 +12,7 @@ if (!function_exists("uusi_karhukierros")) {
     if (!mysql_num_rows($result)) {
       $query = "INSERT INTO karhukierros (pvm,yhtio) values (current_date,'$yhtio')";
       $result = pupe_query($query);
-      $uusid = mysql_insert_id();
+      $uusid = mysql_insert_id($GLOBALS["masterlink"]);
     }
     else {
       $row = mysql_fetch_assoc($result);
@@ -670,7 +670,7 @@ if (!isset($karhuviesti)) {
             FROM karhu_lasku
             WHERE ltunnus IN ($ltunnukset)
             GROUP BY ltunnus;";
-  $res = mysql_query($query) or pupe_error();
+  $res = pupe_query($query);
   $r = 0;
 
   while ($a = mysql_fetch_assoc($res)) {
@@ -688,7 +688,7 @@ if (!isset($karhuviesti)) {
   $query = "SELECT tunnus
             FROM avainsana
             WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys = '$avg' and kieli = '$kieli'";
-  $res = mysql_query($query) or pupe_error();
+  $res = pupe_query($query);
 
   if (mysql_num_rows($res) == 0) {
 
@@ -697,7 +697,7 @@ if (!isset($karhuviesti)) {
               WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys < '$avg' and kieli = '$kieli'
               ORDER BY jarjestys DESC
               LIMIT 1";
-    $res = mysql_query($query) or pupe_error();
+    $res = pupe_query($query);
 
     if (mysql_num_rows($res) == 0) {
 
@@ -706,7 +706,7 @@ if (!isset($karhuviesti)) {
                 WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys > '$avg' and kieli = '$kieli'
                 ORDER BY jarjestys ASC
                 LIMIT 1";
-      $res = mysql_query($query) or pupe_error();
+      $res = pupe_query($query);
     }
   }
 
@@ -715,7 +715,7 @@ if (!isset($karhuviesti)) {
     $query = "SELECT tunnus
               FROM avainsana
               WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys = '$avg' and kieli = '$yhtiorow[kieli]'";
-    $res = mysql_query($query) or pupe_error();
+    $res = pupe_query($query);
 
     if (mysql_num_rows($res) == 0) {
 
@@ -724,7 +724,7 @@ if (!isset($karhuviesti)) {
                 WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys < '$avg' and kieli = '$yhtiorow[kieli]'
                 ORDER BY jarjestys DESC
                 LIMIT 1";
-      $res = mysql_query($query) or pupe_error();
+      $res = pupe_query($query);
 
       if (mysql_num_rows($res) == 0) {
 
@@ -733,7 +733,7 @@ if (!isset($karhuviesti)) {
                   WHERE yhtio ='{$yhtiorow['yhtio']}' and laji = 'KARHUVIESTI' and jarjestys > '$avg' and kieli = '$yhtiorow[kieli]'
                   ORDER BY jarjestys ASC
                   LIMIT 1";
-        $res = mysql_query($query) or pupe_error();
+        $res = pupe_query($query);
       }
     }
   }
@@ -747,7 +747,7 @@ $query = "SELECT selitetark
           WHERE tunnus = '$karhuviesti'
           AND laji     = 'KARHUVIESTI'
           AND yhtio    = '{$yhtiorow['yhtio']}'";
-$res = mysql_query($query) or pupe_error();
+$res = pupe_query($query);
 $viestit = mysql_fetch_assoc($res);
 
 $karhuviesti = $viestit["selitetark"];

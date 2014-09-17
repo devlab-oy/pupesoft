@@ -105,7 +105,7 @@ if ($tee != '') {
               ORDER BY tilausrivi.osasto, tilausrivi.try $sellisa";
   }
 
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   include 'inc/pupeExcel.inc';
 
@@ -375,7 +375,7 @@ if ($tee != '') {
       $query = "SELECT sum(varattu) tilattu
                 FROM tilausrivi
                 WHERE yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and varattu>0 and tyyppi='O'";
-      $tulresult = mysql_query($query) or pupe_error($query);
+      $tulresult = pupe_query($query);
       $tulrow = mysql_fetch_array($tulresult);
 
       echo "<td class='$vari' style='text-align:right; vertical-align:top'>". (float) $tulrow['tilattu']."</td>";
@@ -392,7 +392,7 @@ if ($tee != '') {
                 WHERE tuote.yhtio='$kukarow[yhtio]'
                 and tuote.tuoteno='$row[tuoteno]'
                 GROUP BY 1,2,3";
-      $tuoteresult = mysql_query($query) or pupe_error($query);
+      $tuoteresult = pupe_query($query);
       $tuoterow = mysql_fetch_array($tuoteresult);
 
       //Rekisteröidyt kpl
@@ -404,7 +404,7 @@ if ($tee != '') {
                   AND yhteensopivuus_tuote.yhtio   = '$kukarow[yhtio]'
                   AND yhteensopivuus_tuote.tuoteno = '$row[tuoteno]'";
 
-        $rekresult = mysql_query($query) or pupe_error($query);
+        $rekresult = pupe_query($query);
         $rekrow = mysql_fetch_array($rekresult);
 
         echo "<td class='$vari' style='text-align:right; vertical-align:top'>$rekrow[0]</td>";
@@ -415,14 +415,14 @@ if ($tee != '') {
 
       ///* Korvaavat tuotteet *///
       $query  = "SELECT * from korvaavat where tuoteno='$row[tuoteno]' and yhtio='$kukarow[yhtio]'";
-      $korvaresult = mysql_query($query) or pupe_error($query);
+      $korvaresult = pupe_query($query);
 
       if (mysql_num_rows($korvaresult) > 0) {
         // tuote löytyi, joten haetaan sen id...
         $korvarow = mysql_fetch_array($korvaresult);
 
         $query = "SELECT * from korvaavat where id='$korvarow[id]' and tuoteno<>'$row[tuoteno]' and yhtio='$kukarow[yhtio]' order by jarjestys, tuoteno";
-        $korva2result = mysql_query($query) or pupe_error($query);
+        $korva2result = pupe_query($query);
 
         echo "<td class='$vari' style='vertical-align:top'>";
 
@@ -433,14 +433,14 @@ if ($tee != '') {
             //hateaan vielä korvaaville niiden saldot.
             //saldot per varastopaikka
             $query = "SELECT sum(saldo) alkusaldo from tuotepaikat where tuoteno='$krow2row[tuoteno]' and yhtio='$kukarow[yhtio]'";
-            $alkuresult = mysql_query($query) or pupe_error($query);
+            $alkuresult = pupe_query($query);
             $alkurow = mysql_fetch_array($alkuresult);
 
             //ennakkopoistot
             $query = "SELECT sum(varattu) varattu
                       FROM tilausrivi
                       WHERE tyyppi = 'L' and yhtio = '$kukarow[yhtio]' and tuoteno = '$krow2row[tuoteno]' and varattu>0";
-            $varatutresult = mysql_query($query) or pupe_error($query);
+            $varatutresult = pupe_query($query);
             $varatutrow = mysql_fetch_array($varatutresult);
 
             $vapaana = $alkurow["alkusaldo"] - $varatutrow["varattu"];

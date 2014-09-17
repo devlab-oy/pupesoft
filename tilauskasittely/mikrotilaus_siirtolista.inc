@@ -78,7 +78,7 @@ if ($tee == "file") {
         $query = "SELECT *
                   FROM tuote
                   WHERE tuoteno='$tuoteno' and yhtio='$kukarow[yhtio]'";
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
 
         if (mysql_num_rows($result) == 1) {
 
@@ -122,14 +122,14 @@ if ($tee == "file") {
                   WHERE yhtio = '$kukarow[yhtio]'
                   and tunnus  = '$laskurow[tunnus]'
                   and tila='G'";
-        $updresult = mysql_query($query) or pupe_error($query);
+        $updresult = pupe_query($query);
 
         $mtrivilask = 0;
 
         $jatka    = "kala";
 
         $query = "  UPDATE kuka SET kesken = 0 WHERE yhtio = '$kukarow[yhtio]' and kuka = '$kukarow[kuka]'";
-        $delresult = mysql_query($query) or pupe_error($query);
+        $delresult = pupe_query($query);
 
         $kukarow["kesken"] = 0;
 
@@ -151,7 +151,7 @@ if ($tee == "file") {
         $query = "SELECT *
                   FROM lasku
                   WHERE tunnus = '$kukarow[kesken]'";
-        $aresult = mysql_query($query) or pupe_error($query);
+        $aresult = pupe_query($query);
 
         if (mysql_num_rows($aresult) == 0) {
           echo "<font class='message'>".t("VIRHE: Tilausta ei löydy")."!<br><br></font>";
@@ -159,7 +159,7 @@ if ($tee == "file") {
         }
 
         $query = "SELECT nimitys from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus = '$varasto'";
-        $varres = mysql_query($query) or pupe_error($query);
+        $varres = pupe_query($query);
         $varrow = mysql_fetch_array($varres);
 
         //kutsutaan tilaus-valmis-siirtolista.inciä jotta saadaan tarvittaessa automaattisesti tulostettua siirtolistat kaikista luoduista siirtolistoista.

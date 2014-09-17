@@ -27,7 +27,7 @@ $query = "SELECT ytunnus, asiakkaan_tilausnumero tiltunnus, tilkpl, sisviesti2 a
           and lasku.alatila = '$alatila'
           $lisa
           ORDER BY sorttauskentta, tilausrivi.tuoteno, tilausrivi.tunnus";
-$tarrares = mysql_query($query) or pupe_error($query);
+$tarrares = pupe_query($query);
 
 if (mysql_num_rows($tarrares) > 0) {
   while ($tarrarow = mysql_fetch_array($tarrares)) {
@@ -98,7 +98,7 @@ if (mysql_num_rows($tarrares) > 0) {
                   set alatila = 'X'
                   where yhtio = '$kukarow[yhtio]'
                   and tunnus  = '$xtunnus'";
-        $res = mysql_query($query) or pupe_error($query);
+        $res = pupe_query($query);
         $vanhatunnus = $xtunnus;
       }
     }

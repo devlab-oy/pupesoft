@@ -17,12 +17,6 @@ if (!isset($argv[1]) or $argv[1] == '') {
   die("Yhtiö on annettava!!");
 }
 
-$paiva_ajo = FALSE;
-
-if (isset($argv[2]) and $argv[1] != '') {
-  $paiva_ajo = TRUE;
-}
-
 ini_set("memory_limit", "5G");
 
 // Otetaan includepath aina rootista
@@ -30,6 +24,17 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(d
 
 require 'inc/connect.inc';
 require 'inc/functions.inc';
+
+$ajopaiva  = date("Y-m-d");
+$paiva_ajo = FALSE;
+
+if (isset($argv[2]) and $argv[2] != '') {
+  $paiva_ajo = TRUE;
+  
+  if ($argv[2] == "edpaiva") {
+      $ajopaiva = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+  }
+}
 
 // Yhtiö
 $yhtio = mysql_real_escape_string($argv[1]);
@@ -47,7 +52,7 @@ if (@include "inc/tecdoc.inc") {
 require "vastaavat.class.php";
 
 // Tallennetaan tuoterivit tiedostoon
-$filepath = "/tmp/product_update_{$yhtio}_".date("Y-m-d").".csv";
+$filepath = "/tmp/product_update_{$yhtio}_$ajopaiva.csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
   die("Tiedoston avaus epäonnistui: $filepath\n");
@@ -57,12 +62,13 @@ $tuoterajaus = "";
 
 // Päiväajoon otetaan mukaan vain viimeisen vuorokauden aikana muuttuneet
 if ($paiva_ajo) {
-  $tuotelista = "null";
+
+  $tuotelista       = "NULL";
   $namaonjotsekattu = "";
 
-  $query = "SELECT group_concat(concat('\'',tuote.tuoteno,'\'')) tuotteet
+  $query = "SELECT tuote.tuoteno
             FROM tuote
-            WHERE tuote.yhtio      = '$yhtio'
+            WHERE tuote.yhtio      = '{$yhtio}'
             AND tuote.status      != 'P'
             AND tuote.ei_saldoa    = ''
             AND tuote.tuotetyyppi  = ''
@@ -70,24 +76,21 @@ if ($paiva_ajo) {
             AND (tuote.muutospvm  >= date_sub(now(), interval 24 HOUR)
               OR tuote.luontiaika  >= date_sub(now(), interval 24 HOUR))";
   $res = pupe_query($query);
-  $row = mysql_fetch_assoc($res);
 
-  if ($row["tuotteet"] != "") {
-    $namaonjotsekattu = "AND tuotteen_toimittajat.tuoteno NOT IN ({$row["tuotteet"]})";
-    $tuotelista .= ", {$row["tuotteet"]}";
+  while ($row = mysql_fetch_assoc($res)) {
+    $tuotelista .= ",'".pupesoft_cleanstring($row["tuoteno"])."'";
   }
 
-  $query = "SELECT group_concat(concat('\'',tuotteen_toimittajat.tuoteno,'\'')) tuotteet
+  $query = "SELECT tuotteen_toimittajat.tuoteno
             FROM tuotteen_toimittajat
             WHERE tuotteen_toimittajat.yhtio     = '{$yhtio}'
+            AND tuotteen_toimittajat.tuoteno not in ($tuotelista)
             AND (tuotteen_toimittajat.muutospvm  >= date_sub(now(), interval 24 HOUR)
-              OR tuotteen_toimittajat.luontiaika >= date_sub(now(), interval 24 HOUR))
-            {$namaonjotsekattu}";
+             OR tuotteen_toimittajat.luontiaika  >= date_sub(now(), interval 24 HOUR))";
   $res = pupe_query($query);
-  $row = mysql_fetch_assoc($res);
 
-  if ($row["tuotteet"] != "") {
-    $tuotelista .= ", {$row["tuotteet"]}";
+  while ($row = mysql_fetch_assoc($res)) {
+    $tuotelista .= ",'".pupesoft_cleanstring($row["tuoteno"])."'";
   }
 
   $tuoterajaus = " AND tuote.tuoteno IN ({$tuotelista}) ";
@@ -149,7 +152,7 @@ $header .= "\n";
 fwrite($fp, $header);
 
 // Tallennetaan tuotteentoimittajarivit tiedostoon
-$tfilepath = "/tmp/product_suppliers_update_{$yhtio}_".date("Y-m-d").".csv";
+$tfilepath = "/tmp/product_suppliers_update_{$yhtio}_$ajopaiva.csv";
 
 if (!$tfp = fopen($tfilepath, 'w+')) {
   die("Tiedoston avaus epäonnistui: $tfilepath\n");

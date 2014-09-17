@@ -19,7 +19,7 @@ if ($tunnus != '' and $upd != 1) {
             FROM maksuehto
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tunnus  = '{$tunnus}'";
-  $toimitustapa_check_res = mysql_query($query) or pupe_error($query);
+  $toimitustapa_check_res = pupe_query($query);
 
   if (mysql_num_rows($toimitustapa_check_res) == 1) {
 
@@ -28,14 +28,14 @@ if ($tunnus != '' and $upd != 1) {
               WHERE maksuehto = '{$tunnus}'
               AND yhtio       = '{$kukarow['yhtio']}'
               AND laji        NOT IN ('P', 'R')";
-    $chkres1 = mysql_query($query) or pupe_error($query);
+    $chkres1 = pupe_query($query);
 
     $query = "SELECT tunnus
               FROM lasku
               WHERE maksuehto = '{$tunnus}'
               AND yhtio       = '{$kukarow['yhtio']}'
               AND ((tila = 'L' AND alatila IN ('A','C')) OR tila = 'N')";
-    $chkres2 = mysql_query($query) or pupe_error($query);
+    $chkres2 = pupe_query($query);
 
     if (mysql_num_rows($chkres1) == 0 and mysql_num_rows($chkres2) == 0) {
       $kaytossa_disabled = '';

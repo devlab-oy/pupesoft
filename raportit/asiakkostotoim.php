@@ -100,7 +100,7 @@ if ($tee != '' and $asiakasid != "" and $toimittajaid != "" and $ytunnus != '' a
             and d.liitostunnus = '$toimittajaid'
             GROUP BY 1
             ORDER BY 1";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0 ) {
 

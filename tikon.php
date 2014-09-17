@@ -120,7 +120,7 @@ function rivit($result, $laji, $yhtio, $summataan) {
               FROM kustannuspaikka
               WHERE yhtio = '$yhtio'
               and tunnus  = '$row[kustp]'";
-    $vresult = mysql_query($query) or pupe_error("Kysely ei onnistu $query");
+    $vresult = pupe_query($query);
     $kustprow = mysql_fetch_assoc($vresult);
 
     //Projekti koodien haku
@@ -128,7 +128,7 @@ function rivit($result, $laji, $yhtio, $summataan) {
               FROM kustannuspaikka
               WHERE yhtio = '$yhtio'
               and tunnus  = '$row[projekti]'";
-    $vresult = mysql_query($query) or pupe_error("Kysely ei onnistu $query");
+    $vresult = pupe_query($query);
     $projprow = mysql_fetch_assoc($vresult);
 
     if ((int) $kustprow['nimi'] == 0) {

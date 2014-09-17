@@ -1,5 +1,8 @@
 <?php
 
+//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+pupeslave_start();
+
 if (!isset($monivalintalaatikot)) {
   $monivalintalaatikot = array();
 }
@@ -70,32 +73,31 @@ else {
   $kieli_selite = " avainsana.selite ";
 }
 
-
 // Setataan muuttujat
-$lisa_haku_osasto      = "";
-$lisa_haku_try        = "";
-$lisa_haku_tme        = "";
-$lisa_haku_malli      = "";
+$lisa_haku_osasto        = "";
+$lisa_haku_try           = "";
+$lisa_haku_tme           = "";
+$lisa_haku_malli         = "";
 $lisa_haku_mallitarkenne = "";
-$lisa_haku_asiakastila    = "";
-$lisa_haku_myyja     = "";
+$lisa_haku_asiakastila   = "";
+$lisa_haku_myyja         = "";
 $lisa_haku_asiakasmyyja  = "";
-$lisa_haku_ostaja     = "";
+$lisa_haku_ostaja        = "";
 $lisa_haku_asiakasosasto = "";
-$lisa_haku_asiakasryhma   = "";
-$lisa_haku_asiakaspiiri   = "";
+$lisa_haku_asiakasryhma  = "";
+$lisa_haku_asiakaspiiri  = "";
 $lisa_haku_toimipaikka   = "";
-$lisa_haku_kustp     = "";
-$lisa_haku_kohde     = "";
-$lisa_haku_projekti     = "";
-$lisa_parametri       = "";
-$lisa_dynaaminen     = array("tuote" => "", "asiakas" => "", "kuka" => "");
+$lisa_haku_kustp         = "";
+$lisa_haku_kohde         = "";
+$lisa_haku_projekti      = "";
+$lisa_parametri          = "";
+$lisa_dynaaminen         = array("tuote" => "", "asiakas" => "", "kuka" => "");
 
-$lisa = isset($lisa) ? trim($lisa) : "";
-$ulisa = isset($ulisa) ? trim($ulisa) : "";
-$kieltolisa = isset($kieltolisa) ? trim($kieltolisa) : "";
+$lisa           = isset($lisa) ? trim($lisa) : "";
+$ulisa          = isset($ulisa) ? trim($ulisa) : "";
+$kieltolisa     = isset($kieltolisa) ? trim($kieltolisa) : "";
 $extra_poislisa = isset($extra_poislisa) ? trim($extra_poislisa) : "";
-$avainlisa = isset($avainlisa) ? trim($avainlisa) : "";
+$avainlisa      = isset($avainlisa) ? trim($avainlisa) : "";
 
 if (!isset($piirivalinta) or $piirivalinta == 'lasku') {
   $laskuvalintachk    = "CHECKED";
@@ -126,23 +128,23 @@ else {
 }
 
 // Setataan muuttujat
-if (!isset($mul_osasto))     $mul_osasto = array();
-if (!isset($mul_try))       $mul_try = array();
-if (!isset($mul_tme))       $mul_tme = array();
-if (!isset($mul_malli))     $mul_malli = array();
+if (!isset($mul_osasto))        $mul_osasto = array();
+if (!isset($mul_try))           $mul_try = array();
+if (!isset($mul_tme))           $mul_tme = array();
+if (!isset($mul_malli))         $mul_malli = array();
 if (!isset($mul_mallitarkenne)) $mul_mallitarkenne = array();
-if (!isset($mul_laskumyyja))   $mul_laskumyyja = array();
+if (!isset($mul_laskumyyja))    $mul_laskumyyja = array();
 if (!isset($mul_asiakastila))   $mul_asiakastila = array();
-if (!isset($mul_tuotemyyja))   $mul_tuotemyyja = array();
-if (!isset($mul_asiakasmyyja))   $mul_asiakasmyyja = array();
+if (!isset($mul_tuotemyyja))    $mul_tuotemyyja = array();
+if (!isset($mul_asiakasmyyja))  $mul_asiakasmyyja = array();
 if (!isset($mul_tuoteostaja))   $mul_tuoteostaja = array();
 if (!isset($mul_asiakasosasto)) $mul_asiakasosasto = array();
-if (!isset($mul_asiakasryhma))   $mul_asiakasryhma = array();
-if (!isset($mul_asiakaspiiri))   $mul_asiakaspiiri = array();
+if (!isset($mul_asiakasryhma))  $mul_asiakasryhma = array();
+if (!isset($mul_asiakaspiiri))  $mul_asiakaspiiri = array();
 if (!isset($mul_toimipaikka))   $mul_toimipaikka = array();
-if (!isset($mul_kustp))     $mul_kustp = array();
-if (!isset($mul_kohde))     $mul_kohde = array();
-if (!isset($mul_projekti))     $mul_projekti = array();
+if (!isset($mul_kustp))         $mul_kustp = array();
+if (!isset($mul_kohde))         $mul_kohde = array();
+if (!isset($mul_projekti))      $mul_projekti = array();
 
 if (!isset($poislisa_mulsel))   $poislisa_mulsel = "";
 
@@ -2265,3 +2267,5 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 }
 
 if (!isset($php_cli) or !$php_cli) echo "<div style='clear: both;'></div>";
+
+pupeslave_stop();

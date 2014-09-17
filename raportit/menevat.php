@@ -50,7 +50,7 @@ $query = "SELECT nimi, tunnus
           FROM valuu
           WHERE yhtio = '$kukarow[yhtio]'
            ORDER BY jarjestys";
-$vresult = mysql_query($query) or pupe_error($query);
+$vresult = pupe_query($query);
 
 echo "<tr><th>Valitse valuutta:</th><td><select name='savalkoodi'>";
 echo "<option value = ''>".t("Kaikki")."</option>";
@@ -151,7 +151,7 @@ if ($tee == 'NAYTA') {
             GROUP BY {$grouppauslisa}
             $having
             order by 1,2,3";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   $aay = 0;
   $aabby = 0;

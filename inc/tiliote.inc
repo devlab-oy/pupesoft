@@ -9,7 +9,8 @@ if (!isset($td_perheid))          $td_perheid = $tiliotedatarow['perheid'];
 if (!isset($maksu))               $maksu = 0;
 if (!isset($tkesken))             $tkesken = 0;
 if (!isset($tilinvaluutta))       $tilinvaluutta = "";
-if (!isset($toim))                $toim = "";
+if (!isset($_tiliotetoim))        $_tiliotetoim = "";
+if (!isset($toim))                $toim = $tilioteselailu_oikrow['alanimi'];
 if (!isset($selite_maksuavarten)) $selite_maksuavarten = "";
 if (!isset($eiselitetta))         $eiselitetta = 0;
 
@@ -42,7 +43,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
     require "inc/kasitteleerittelysaanto.inc";
   }
 
-  if ($toim == 'K' and $kuittikoodi == ' ' and $tiliotedataka == '0000-00-00') {
+  if ($_tiliotetoim == 'K' and $kuittikoodi == ' ' and $tiliotedataka == '0000-00-00') {
 
     if (is_numeric($vasta_kurssi) and $vasta_kurssi != 0 and $vasta_kurssi != 1) {
       $kurssi = 1 / $vasta_kurssi;
@@ -421,7 +422,9 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
           $tiliointiresult = pupe_query($query);
 
           if ($tiliointirow = mysql_fetch_assoc($tiliointiresult)) {
-            echo "<a href='{$palvelin2}tilioteselailu.php?tee=T&pvm=$pvm&tyyppi=2&tilino=$tiliotedatarow[tilino]&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus$lopetuslisa'>".t("Avaa LMP-erittely")."</a><br>\n";
+            if ($tilioteselailu_oikrow !== FALSE) {
+              echo "<a href='{$palvelin2}tilioteselailu.php?toim=$toim&tee=T&pvm=$pvm&tyyppi=2&tilino=$tiliotedatarow[tilino]&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus$lopetuslisa'>".t("Avaa LMP-erittely")."</a><br>\n";
+            }
 
             $erilinkkiekotus = TRUE;
           }
@@ -438,7 +441,9 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
           $tiliointiresult = pupe_query($query);
 
           if ($tiliointirow = mysql_fetch_assoc($tiliointiresult)) {
-            echo "<a href='{$palvelin2}tilioteselailu.php?tee=T&pvm=$pvm&tyyppi=3&tilino=$tiliotedatarow[tilino]&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus$lopetuslisa'>".t("Avaa viiteaineisto")."</a><br>\n";
+            if ($tilioteselailu_oikrow !== FALSE) {
+              echo "<a href='{$palvelin2}tilioteselailu.php?toim=$toim&tee=T&pvm=$pvm&tyyppi=3&tilino=$tiliotedatarow[tilino]&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus$lopetuslisa'>".t("Avaa viiteaineisto")."</a><br>\n";
+            }
 
             $erilinkkiekotus = TRUE;
           }
@@ -450,7 +455,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
       }
     }
 
-    if ($toim != 'K') {
+    if ($_tiliotetoim != 'K') {
       echo "<font class='message'>".t("Tili, rahatili, kulutili tai tilin valuutta puuttuu/virheellinen")."!</font><br>\n";
     }
 
@@ -593,31 +598,34 @@ case 'T00':
       $seltiliotejarjestys = "";
       if ($tiliotejarjestys != "") $seltiliotejarjestys = "SELECTED";
 
-      echo "<tr>
-            <th><a href='{$palvelin2}tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XX&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus'>&laquo; ".t("Edellinen")."</th>
-            <th>";
-      echo "<form action='{$palvelin2}tilioteselailu.php' method='post'>";
-      echo "<input type='hidden' name='tee'     value='T'>";
-      echo "<input type='hidden' name='tyyppi'  value='$lopp_tyyppi'>";
-      echo "<input type='hidden' name='tilino'  value='$lopp_tilino'>";
-      echo "<input type='hidden' name='pvm'     value='$lopp_pvm'>";
-      echo "<input type='hidden' name='lopetus' value='$lopetus'>";
+      if ($tilioteselailu_oikrow !== FALSE) {
+        echo "<tr>
+              <th><a href='{$palvelin2}tilioteselailu.php?toim=$toim&tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XX&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus'>&laquo; ".t("Edellinen")."</th>
+              <th>";
+        echo "<form action='{$palvelin2}tilioteselailu.php' method='post'>";
+        echo "<input type='hidden' name='toim'    value='$toim'>";
+        echo "<input type='hidden' name='tee'     value='T'>";
+        echo "<input type='hidden' name='tyyppi'  value='$lopp_tyyppi'>";
+        echo "<input type='hidden' name='tilino'  value='$lopp_tilino'>";
+        echo "<input type='hidden' name='pvm'     value='$lopp_pvm'>";
+        echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
-      echo "<select name='tiliotejarjestys' onchange='submit();'>
-            <option value=''>".t("Oletusjärjestys")."</option>
-            <option value='K' $seltiliotejarjestys>".t("Kuitattaamattomat ensin")."</option>
-            </select>
-            </form>";
-      echo " </th>
-            <th><a href='{$palvelin2}tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=X&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus'>".t("Seuraava")." &raquo;</a></th></tr>";
+        echo "<select name='tiliotejarjestys' onchange='submit();'>
+              <option value=''>".t("Oletusjärjestys")."</option>
+              <option value='K' $seltiliotejarjestys>".t("Kuitattaamattomat ensin")."</option>
+              </select>
+              </form>";
+        echo " </th>
+              <th><a href='{$palvelin2}tilioteselailu.php?toim=$toim&tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=X&tiliotejarjestys=$tiliotejarjestys&lopetus=$lopetus'>".t("Seuraava")." &raquo;</a></th></tr>";
+      }
     }
   }
 
-  $laskuid     = 0;
-  $tkesken     = 1;
-  $maara       = 0;
+  $laskuid      = 0;
+  $tkesken      = 1;
+  $maara        = 0;
   $pankkitilino = substr($tietue, 9, 14);
-  $toim         = "K";
+  $_tiliotetoim = "K";
 
   if ($silent == "") {
     echo "<tr>";
@@ -680,7 +688,7 @@ case 'T00':
 
   if (mysql_num_rows($result) != 1) {
     echo "<font class='error'> ".t("Tiliä")." '$pankkitilino' ".t("ei löytynyt")."!</font><br>\n";
-    $toim = 'E';
+    $_tiliotetoim = 'E';
   }
   else {
     $yritirow = mysql_fetch_assoc($result);
@@ -707,7 +715,7 @@ case 'T00':
     // Tarkistetaan tilit
     if (strlen($yritirow['oletus_rahatili']) == 0 or strlen($yritirow['oletus_kulutili']) == 0) {
       echo "<font class='error'>".t("Tililtä puuttuu kulu tai rahatili")."</font>";
-      $toim = 'E';
+      $_tiliotetoim = 'E';
     }
     else {
       if ($silent == "") {
@@ -738,7 +746,7 @@ case 'T00':
 
     if (mysql_num_rows($result) != 1) {
       echo "<font class='error'>".t("Valuuttaa")." '$tilinvaluutta' ".t("ei löytynyt")."!</font><br>\n";
-      $toim = 'E';
+      $_tiliotetoim = 'E';
     }
     else {
       $valuuttarow = mysql_fetch_assoc($result);
@@ -751,7 +759,7 @@ case 'T00':
 
       if ($valuuttatili == "ON" and trim(strtoupper($tilinvaluutta)) != trim(strtoupper($yritirow["valkoodi"]))) {
         echo "<font class='error'>".t("Tiliotteen valuuttakoodi on eri kuin yrityksen pankkitilin valuutta")."!</font>";
-        $toim = 'E';
+        $_tiliotetoim = 'E';
       }
     }
   }
@@ -912,7 +920,7 @@ case 'T10':
               and tyyppi   = '$tiliotedatarow[tyyppi]'
               and substring(tieto,13,18) = '".substr($tietue, 12, 18)."'
               and tunnus  != '$tiliotedatarow[tunnus]'";
-    $tdres2peek = mysql_query($query) or pupe_error($query);
+    $tdres2peek = pupe_query($query);
 
     // Jos koodi on 710 ja koodiselite on PANO ja kuittikoodi on "E", mutta samalla arkistointitunnuksella EI löydy toista tapahtumaa, niin nollataan kuittikoodi.
     if (mysql_num_rows($tdres2peek) == 0) {
@@ -942,8 +950,9 @@ case 'T10':
     //Pidetään tallessa
     $tiliotedatarowtunnus = $tiliotedatarow["tunnus"];
 
-    $lopetuslisa = "/SPLIT/${palvelin2}tilioteselailu.php////tee=T//tyyppi=$lopp_tyyppi//tilino=$lopp_tilino//pvm=$lopp_pvm//tiliotejarjestys=$tiliotejarjestys///kuitattu_$tiliotedatarowtunnus";
-
+    if ($tilioteselailu_oikrow !== FALSE) {
+      $lopetuslisa = "/SPLIT/${palvelin2}tilioteselailu.php////toim=$toim//tee=T//tyyppi=$lopp_tyyppi//tilino=$lopp_tilino//pvm=$lopp_pvm//tiliotejarjestys=$tiliotejarjestys///kuitattu_$tiliotedatarowtunnus";
+    }
     // Kuitattu checkbox
     $kuitattu_checked = ($tiliotedatarow['kuitattu'] != '' and $tiliotedatarow['kuitattuaika'] > '0000-00-00 00:00:00') ? ' CHECKED' : '';
 
@@ -970,9 +979,13 @@ case 'T10':
     }
 
     echo "<td name='td_{$td_perheid}' class='$class'>";
-    echo "<form name='kuittaus' action='javascript:sndReq(\"tiliote\", \"{$palvelin2}tilioteselailu.php?tee=T&kuitattava_tiliotedata_tunnus={$tiliotedatarow['tunnus']}\");' method='GET'>";
-    echo "<input type='checkbox' name='kuitattu' $kuitattu_checked onchange=\"vaihdacss('{$tiliotedatarow['perheid']}'); submit();\">";
-    echo "</form>";
+
+    if ($tilioteselailu_oikrow !== FALSE) {
+      echo "<form name='kuittaus' action='javascript:sndReq(\"tiliote\", \"{$palvelin2}tilioteselailu.php?toim=$toim&tee=T&kuitattava_tiliotedata_tunnus={$tiliotedatarow['tunnus']}\");' method='GET'>";
+      echo "<input type='checkbox' name='kuitattu' $kuitattu_checked onchange=\"vaihdacss('{$tiliotedatarow['perheid']}'); submit();\">";
+      echo "</form>";
+    }
+
     echo "</td>";
   }
 
@@ -1296,7 +1309,7 @@ case 'T40':
   }
 
   // Päivitetään saldo yriti-tauluun, jos sellainen löytyi
-  if ($toim == 'K' and $tiliotedatarow['kasitelty'] == '0000-00-00') {
+  if ($_tiliotetoim == 'K' and $tiliotedatarow['kasitelty'] == '0000-00-00') {
 
     $tilisaldo = substr($tietue, 31, 19);
     if ($valuuttarow['kurssi'] != 0 and $valuuttarow['kurssi'] != 1) {

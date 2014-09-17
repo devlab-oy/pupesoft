@@ -1,4 +1,8 @@
 <?php
+
+///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+$useslave = 2;
+
 //Haetaan viikon päivät
 viikonpaivat($kausi);
 

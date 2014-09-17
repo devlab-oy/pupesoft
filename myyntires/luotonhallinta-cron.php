@@ -66,7 +66,7 @@ $query  = "SELECT $kasittely_periaate ytunnus,
            AND laji    != 'P'
            GROUP BY 1
            HAVING luottoraja > 0";
-$asiakasres = mysql_query($query) or pupe_error($query);
+$asiakasres = pupe_query($query);
 
 $content_body .= "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">";
 $content_body .= "<html>";

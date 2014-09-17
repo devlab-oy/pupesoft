@@ -33,7 +33,7 @@ if ($variaatio_tuoteno != "") {
             AND tuotteen_avainsanat.kieli   = '$yhtiorow[kieli]'
             AND tuotteen_avainsanat.selite  = '$variaatio_tuoteno'
             ORDER BY t3j3, tuotteen_avainsanat.tuoteno";
-  $variaatiores = mysql_query($query) or pupe_error($query);
+  $variaatiores = pupe_query($query);
 }
 
 if (is_resource($variaatiores) and mysql_num_rows($variaatiores) > 0) {
@@ -47,7 +47,7 @@ if (is_resource($variaatiores) and mysql_num_rows($variaatiores) > 0) {
             and laji    like 'parametri_%'
             and kieli   = '$yhtiorow[kieli]'
             and tuoteno = '$variaatiorow[tuoteno]'";
-  $parametrit_res = mysql_query($query) or pupe_error($query);
+  $parametrit_res = pupe_query($query);
   $variaatio_check = array();
 
   while ($parametritrivi = mysql_fetch_array($parametrit_res)) {
@@ -86,7 +86,7 @@ if (is_resource($variaatiores) and mysql_num_rows($variaatiores) > 0) {
                 and laji    like 'parametri_%'
                 and kieli   = '$yhtiorow[kieli]'
                 and tuoteno = '$variaatiorow[tuoteno]'";
-      $parametrit_res = mysql_query($query) or pupe_error($query);
+      $parametrit_res = pupe_query($query);
       $this_parametrit = array();
 
       while ($parametritrivi = mysql_fetch_array($parametrit_res)) {
@@ -189,7 +189,7 @@ if (is_resource($variaatiores) and mysql_num_rows($variaatiores) > 0) {
             AND tuotteen_avainsanat.kieli   = '$yhtiorow[kieli]'
             AND tuotteen_avainsanat.selite  = '$variaatio_tuoteno'
             ORDER BY t3j3, tuotteen_avainsanat.tuoteno";
-  $variaatiores = mysql_query($query) or pupe_error($query);
+  $variaatiores = pupe_query($query);
 
   while ($varirow = mysql_fetch_assoc($variaatiores)) {
 

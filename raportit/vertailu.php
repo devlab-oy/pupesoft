@@ -92,7 +92,7 @@ if ($kausi1!='' and $kausi2!='' and $osasto!='' and $try!='') {
               and tyyppi='L'
               and ((laskutettuaika>='$mkausi1' and laskutettuaika<='$mkausi1l') or (laskutettuaika>='$mkausi2' and laskutettuaika<='$mkausi2l'))
               GROUP BY osasto, try ";
-    $res  = mysql_query($query) or pupe_error($query);
+    $res  = pupe_query($query);
 
     $kate1 ='';
     $kate2 ='';
@@ -243,14 +243,14 @@ $query = "SELECT min(selite+0) minosasto, max(selite+0) maxosasto
           FROM avainsana
           WHERE yhtio = '$kukarow[yhtio]'
           and laji    = 'OSASTO'";
-$al_res = mysql_query($query) or pupe_error($query);
+$al_res = pupe_query($query);
 $os_row = mysql_fetch_array($al_res);
 
 $query = "SELECT min(selite+0) minosasto, max(selite+0) maxosasto
           FROM avainsana
           WHERE yhtio = '$kukarow[yhtio]'
           and laji    = 'TRY'";
-$al_res = mysql_query($query) or pupe_error($query);
+$al_res = pupe_query($query);
 $try_row = mysql_fetch_array($al_res);
 
 if ($osasto == "")  $osasto = $os_row["minosasto"];

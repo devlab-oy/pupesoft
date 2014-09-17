@@ -40,7 +40,7 @@ else {
               laatija      = '$kukarow[kuka]'";
     $result = pupe_query($query);
 
-    $otunnus = mysql_insert_id();
+    $otunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
     $query  = "SELECT *
                from lasku

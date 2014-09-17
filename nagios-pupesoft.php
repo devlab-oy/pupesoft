@@ -19,7 +19,15 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
   }
 
   if ($_GET["tee"] == "CONNECTION_USAGE_SLAVE") {
-    if (!isset($slavedb)) {
+
+    if (isset($nagios_slavedb)) {
+      $slaveprefix = "nagios_";
+    }
+    else {
+      $slaveprefix = "";
+    }
+
+    if (!isset(${$slaveprefix."slavedb"})) {
       echo "CRITICAL - Slave username/password/database not set $STATE_CRITICAL";
       exit;
     }
@@ -27,10 +35,10 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
     $critical = array();
     $warning  = array();
 
-    foreach ($slavedb as $si => $devnull) {
-      if (isset($slavedb[$si]) and $slavedb[$si] != "" and isset($slaveuser[$si]) and $slaveuser[$si] != "" and isset($slavepass[$si]) and $slavepass[$si] != "") {
-        $link = mysql_connect($slavedb[$si], $slaveuser[$si], $slavepass[$si]) or die ("CRITICAL - mysql_connect() failed on slave $STATE_CRITICAL");
-        mysql_select_db($dbkanta) or die ("CRITICAL - mysql_select_db() failed on slave $STATE_CRITICAL");
+    foreach (${$slaveprefix."slavedb"} as $si => $devnull) {
+      if (isset(${$slaveprefix."slavedb"}[$si]) and ${$slaveprefix."slavedb"}[$si] != "" and isset(${$slaveprefix."slaveuser"}[$si]) and ${$slaveprefix."slaveuser"}[$si] != "" and isset(${$slaveprefix."slavepass"}[$si]) and ${$slaveprefix."slavepass"}[$si] != "") {
+        $link = mysql_connect(${$slaveprefix."slavedb"}[$si], ${$slaveprefix."slaveuser"}[$si], ${$slaveprefix."slavepass"}[$si]) or die ("CRITICAL - mysql_connect() failed on slave$si $STATE_CRITICAL");
+        mysql_select_db($dbkanta) or die ("CRITICAL - mysql_select_db() failed on slave$si $STATE_CRITICAL");
 
         $query = "SHOW /*!50000 GLOBAL */ VARIABLES like 'max_connections'";
         $res = mysql_query($query) or die(mysql_error());
@@ -61,7 +69,7 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
     }
 
     if (count($critical) > 0) {
-      echo implode(" ", array_merge($critical,$warning))." ".$STATE_CRITICAL;
+      echo implode(" ", array_merge($critical, $warning))." ".$STATE_CRITICAL;
     }
     elseif (count($warning) > 0) {
       echo implode(" ", $warning)." ".$STATE_WARNING;
@@ -107,7 +115,14 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
   }
 
   if ($_GET["tee"] == "SLAVE_STATUS") {
-    if (!isset($slavedb)) {
+    if (isset($nagios_slavedb)) {
+      $slaveprefix = "nagios_";
+    }
+    else {
+      $slaveprefix = "";
+    }
+
+    if (!isset(${$slaveprefix."slavedb"})) {
       echo "CRITICAL - Slave username/password/database not set $STATE_CRITICAL";
       exit;
     }
@@ -115,11 +130,11 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
     $critical = array();
     $warning  = array();
 
-    foreach ($slavedb as $si => $devnull) {
-      if (isset($slavedb[$si]) and $slavedb[$si] != "" and isset($slaveuser[$si]) and $slaveuser[$si] != "" and isset($slavepass[$si]) and $slavepass[$si] != "") {
+    foreach (${$slaveprefix."slavedb"} as $si => $devnull) {
+      if (isset(${$slaveprefix."slavedb"}[$si]) and ${$slaveprefix."slavedb"}[$si] != "" and isset(${$slaveprefix."slaveuser"}[$si]) and ${$slaveprefix."slaveuser"}[$si] != "" and isset(${$slaveprefix."slavepass"}[$si]) and ${$slaveprefix."slavepass"}[$si] != "") {
 
-        $link = mysql_connect($slavedb[$si], $slaveuser[$si], $slavepass[$si]) or die ("CRITICAL - mysql_connect() failed on slave $STATE_CRITICAL");
-        mysql_select_db($dbkanta) or die ("CRITICAL - mysql_select_db() failed on slave $STATE_CRITICAL");
+        $link = mysql_connect(${$slaveprefix."slavedb"}[$si], ${$slaveprefix."slaveuser"}[$si], ${$slaveprefix."slavepass"}[$si]) or die ("CRITICAL - mysql_connect() failed on slave$si $STATE_CRITICAL");
+        mysql_select_db($dbkanta) or die ("CRITICAL - mysql_select_db() failed on slave$si $STATE_CRITICAL");
 
         $query = "SHOW /*!50000 SLAVE */ STATUS";
         $res = mysql_query($query) or die(mysql_error());
@@ -148,7 +163,7 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
     }
 
     if (count($critical) > 0) {
-      echo implode(" ", array_merge($critical,$warning))." ".$STATE_CRITICAL;
+      echo implode(" ", array_merge($critical, $warning))." ".$STATE_CRITICAL;
     }
     elseif (count($warning) > 0) {
       echo implode(" ", $warning)." ".$STATE_WARNING;
@@ -214,6 +229,49 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
       echo "CRITICAL - $kardex_sscc directory not set $STATE_CRITICAL";
       exit;
     }
+  }
+
+  if ($_GET["tee"] == "HA_PROXY") {
+
+    if (!isset($haproxy)) {
+      echo "CRITICAL - HaProxy username/password not set $STATE_CRITICAL";
+      exit;
+    }
+
+    $critical = array();
+    $warning  = array();
+
+    foreach ($haproxy as $si => $devnull) {
+      if (isset($haproxy[$si]) and $haproxy[$si] != "" and isset($haproxyuser[$si]) and $haproxyuser[$si] != "" and isset($haproxypass[$si]) and $haproxypass[$si] != "") {
+
+        $link = mysql_connect($haproxy[$si], $haproxyuser[$si], $haproxypass[$si]) or die ("CRITICAL - mysql_connect() failed on HaProxy$si $STATE_CRITICAL");
+        mysql_select_db($dbkanta) or die ("CRITICAL - mysql_select_db() failed on HaProxy$si $STATE_CRITICAL");
+
+        $query = "SELECT 1+1 as summa";
+        $res = mysql_query($query) or die(mysql_error());
+        $row = mysql_fetch_assoc($res);
+
+        // Nostetaan virhe jos tilanne on huolestuttava
+        if ($row["summa"] != 2) {
+          $critical[] = "CRITICAL - No MySQL connection from HaProxy$si";
+        }
+      }
+      else {
+        echo "CRITICAL - HaProxy$si username/password not set $STATE_CRITICAL";
+        exit;
+      }
+    }
+
+    if (count($critical) > 0) {
+      echo implode(" ", array_merge($critical, $warning))." ".$STATE_CRITICAL;
+    }
+    elseif (count($warning) > 0) {
+      echo implode(" ", $warning)." ".$STATE_WARNING;
+    }
+    else {
+      echo "OK - HaProxy$si running $STATE_OK";
+    }
+    exit;
   }
 }
 else {

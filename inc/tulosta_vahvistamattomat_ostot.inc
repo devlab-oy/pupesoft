@@ -25,7 +25,7 @@ if (!function_exists('tulosta_ostotilaus')) {
               LEFT JOIN maat toim_maa ON toim_maa.koodi=lasku.toim_maa
               WHERE lasku.yhtio = '$kukarow[yhtio]'
               $otunnuslisa";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
     $laskurow = mysql_fetch_array($result);
 
     if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"])) and $laskurow["vienti_kurssi"] != 0) {
@@ -37,7 +37,7 @@ if (!function_exists('tulosta_ostotilaus')) {
 
     if ($kieli== '') {
       $querykiel = "SELECT kieli FROM toimi WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$laskurow[liitostunnus]'";
-      $kielresult = mysql_query($querykiel) or pupe_error($querykiel);
+      $kielresult = pupe_query($querykiel);
       $kielnum = mysql_num_rows($kielresult);
       $kielrow = mysql_fetch_array($kielresult);
       $kieli = strtolower($kielrow['kieli']);
@@ -146,7 +146,7 @@ if (!function_exists('tulosta_ostotilaus')) {
               and tilausrivi.jaksotettu = '0'
               ORDER BY tilausrivi.otunnus, tilausrivi.toimaika, toim_tuoteno";
     $grand_total=0;
-    $riresult = mysql_query($query) or pupe_error($query);
+    $riresult = pupe_query($query);
 
     if (mysql_num_rows($riresult)>0) {
 
@@ -236,7 +236,7 @@ if (!function_exists('tulosta_ostotilaus')) {
                   and tuoteno      = '$row[tuoteno]'
                   and liitostunnus = '$laskurow[liitostunnus]'
                   LIMIT 1";
-        $rarres = mysql_query($query) or pupe_error($query);
+        $rarres = pupe_query($query);
         $rarrow   = mysql_fetch_array($rarres);
 
         //  Jos toimittajalla on yksikkö ohitetaan tuotteen yksikkö

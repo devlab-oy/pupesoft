@@ -16,7 +16,7 @@ if (!function_exists("perusalennustarkista")) {
                    FROM perusalennus
                    WHERE yhtio = '$kukarow[yhtio]'
                    and ryhma   = '".trim($t[$i])."'";
-        $chkressiresult = mysql_query($query) or pupe_error($query);
+        $chkressiresult = pupe_query($query);
 
         if (mysql_num_rows($chkressiresult) > 0) {
           $virhe[$i] = t("Alennusryhmä on jo perustettu järjestelmään");

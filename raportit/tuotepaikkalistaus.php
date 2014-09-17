@@ -59,7 +59,7 @@ if ($tee == "TULOSTA") {
                         WHERE tuotepaikat.yhtio='{$kukarow['yhtio']}'
                         $wherelisa
                         $jarj";
-  $tuotepaikka_result = mysql_query($tuotepaikka_query) or pupe_error($tuotepaikka_query);
+  $tuotepaikka_result = pupe_query($tuotepaikka_query);
 
   if (mysql_num_rows($tuotepaikka_result) == 0) {
     echo "<font class='error'>".t("Ei löytynyt tuotteita")."</font><br><br>";

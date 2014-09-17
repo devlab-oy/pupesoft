@@ -366,7 +366,7 @@ if (isset($tee) and $tee == "TEE_OSTOTILAUKSET") {
                   ovttunnus           = '{$toimittajarow["ovttunnus"]}',
                   tilausyhteyshenkilo = '{$toimittajarow["yhteyshenkilo"]}'";
         $result = pupe_query($query);
-        $otunnus = mysql_insert_id();
+        $otunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
         $rows++;
         $edellinen_toimittaja = $toimittaja;
@@ -757,7 +757,7 @@ if (!isset($tee) or $tee == "") {
               from toimi
               where yhtio = '{$kukarow["yhtio"]}'
               and tunnus  = '$toimittajaid'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
     $toimittaja = mysql_fetch_assoc($result);
 
     echo "$toimittaja[nimi] $toimittaja[nimitark]";

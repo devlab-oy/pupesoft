@@ -48,6 +48,7 @@ function tulosta_asiakkaan_kuitti($yhtio, $laskunro, $tulostimen_tunnus) {
     $kuitin_teksti .= "    Veroton arvo: {$rivihinta}\n";
     $kuitin_teksti .= "Alv-%: {$tilausrivi['alv']}\n";
     $kuitin_teksti .= "Verollinen arvo: {$bruttohinta}\n";
+    $kuitin_teksti .= "Tilausnumero: {$tilausrivi['otunnus']}\n";
   }
 
   // Hinta yhteens‰
@@ -66,11 +67,12 @@ function tulosta_asiakkaan_kuitti($yhtio, $laskunro, $tulostimen_tunnus) {
 
   // Maksup‰‰tetapahtumat
   foreach ($tapahtumat as $tapahtuma) {
-    $kuitin_teksti .= "TILAUSNUMERO: {$tapahtuma['tilausnumero']}\n";
-    $kuitin_teksti .= "{$tapahtuma['asiakkaan_kuitti']}\n\n";
+    if ($tapahtuma['asiakkaan_kuitti']) {
+      $kuitin_teksti .= "{$tapahtuma['asiakkaan_kuitti']}\n\n";
+    }
   }
 
-  $kuitin_teksti .= "\n\n\n\n\n\n";
+  $kuitin_teksti .= "\n\n\n\n";
   $kuitin_teksti .= $katkaisu;
 
   lpr($kuitin_teksti, $tulostimen_tunnus);

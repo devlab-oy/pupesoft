@@ -79,7 +79,7 @@ function tulosta_asiakkaan_kuitti($yhtio, $laskunro, $tulostimen_tunnus) {
 function hae_tapahtumat($yhtio, $laskunro) {
   $query  = "SELECT *
             FROM lasku
-            INNER JOIN maksupaatetapahtumat ON (lasku.tunnus = maksupaatetapahtumat.tilausnumero
+            LEFT JOIN maksupaatetapahtumat ON (lasku.tunnus = maksupaatetapahtumat.tilausnumero
               AND maksupaatetapahtumat.yhtio = '{$yhtio}')
             WHERE lasku.yhtio = '{$yhtio}'
             AND lasku.laskunro = '{$laskunro}'";

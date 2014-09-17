@@ -18,7 +18,7 @@ if (mysql_field_name($result, $i) == "sallitut_alustat") {
             FROM pakkaus
             WHERE yhtio = '{$kukarow['yhtio']}'
             ORDER BY pakkaus";
-  $pakkaus_result = mysql_query($query) or pupe_error($query);
+  $pakkaus_result = pupe_query($query);
 
   $ulos .= "<input type='hidden' name='{$nimi}[]' value='default' />";
 
@@ -97,6 +97,14 @@ if (mysql_field_name($result, $i) == "yhdistelysaanto") {
   $jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == "keraysnippujen_priorisointi") {
+
+  $chk = !empty($trow[$i]) ? "checked" : "";
+
+  $ulos = "<td><input type='checkbox' name='{$nimi}' {$chk} /></td>";
+  $jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == "varasto") {
   $ulos = "<td><select name='{$nimi}'>";
 
@@ -104,7 +112,7 @@ if (mysql_field_name($result, $i) == "varasto") {
             FROM varastopaikat
             WHERE yhtio = '{$kukarow['yhtio']}' AND tyyppi != 'P'
             ORDER BY tyyppi, nimitys";
-  $varasto_res = mysql_query($query) or pupe_error($query);
+  $varasto_res = pupe_query($query);
 
   while ($varasto_row = mysql_fetch_assoc($varasto_res)) {
 
@@ -130,7 +138,7 @@ if (substr(mysql_field_name($result, $i), 0, 9) == 'printteri') {
             {$printterilisa}
             AND komento != 'EDI'
             ORDER BY kirjoitin";
-  $kires = mysql_query($query) or pupe_error($query);
+  $kires = pupe_query($query);
 
   $ulos .= "<option value=''>".t("Ei kirjoitinta")."</option>";
 

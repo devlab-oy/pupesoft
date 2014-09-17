@@ -24,7 +24,6 @@ if ($tee == "TEE" or strpos($_SERVER['SCRIPT_NAME'], "iltasiivo.php") !== FALSE)
 
   // K‰‰nnet‰‰n aliakset UTF-8 muotoon, jos Pupe on UTF-8:ssa
   if ($utf8_enabled) {
-    // Funktionimen ja kaarisulun v‰liss‰ on tarkotuksella space, ett‰ UTF8 konversio ei osu t‰h‰n
     $aliakset = utf8_encode($aliakset);
   }
 

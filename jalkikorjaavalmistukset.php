@@ -30,7 +30,7 @@ if ($tee == "JALKILASKE" and checkdate($kka, $ppa, $vva)) {
             HAVING valmistusriveja > 0
             $havlisa
             ORDER BY toimitettuaikax";
-  $tilre = mysql_query($query) or pupe_error($query);
+  $tilre = pupe_query($query);
 
   if (mysql_num_rows($tilre) > 0) {
 

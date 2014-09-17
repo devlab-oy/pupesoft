@@ -29,7 +29,7 @@ if ($tee == "nollaa") {
               SET pakkaamo = 0
               WHERE $logistiikka_yhtiolisa
               AND tunnus in($tunnukset)";
-    $nollausres = mysql_query($query) or pupe_error($query);
+    $nollausres = pupe_query($query);
 
     echo t("Lokerot nollattiin tilauksista")." : ".$tunnukset;
   }
@@ -48,7 +48,7 @@ $query = "SELECT distinct nimi
           FROM pakkaamo
           WHERE $logistiikka_yhtiolisa
           ORDER BY nimi";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 echo "<option value='KAIKKI'>".t("Näytä kaikki")."</option>";
 
@@ -78,7 +78,7 @@ if ($tupakkaamo == '' and $kukarow['oletus_pakkaamo'] != '') {
             FROM pakkaamo
             WHERE $logistiikka_yhtiolisa
             AND nimi = '$kukarow[oletus_pakkaamo]'";
-  $etsire = mysql_query($query) or pupe_error($query);
+  $etsire = pupe_query($query);
   $etsirow = mysql_fetch_array($etsire);
 
   $haku .= " and lasku.pakkaamo in($etsirow[tunnukset])";
@@ -89,7 +89,7 @@ elseif ($tupakkaamo != '' and $tupakkaamo != 'KAIKKI') {
             FROM pakkaamo
             WHERE $logistiikka_yhtiolisa
             AND nimi = '$tupakkaamo'";
-  $etsire = mysql_query($query) or pupe_error($query);
+  $etsire = pupe_query($query);
   $etsirow = mysql_fetch_array($etsire);
 
   $haku .= " and lasku.pakkaamo in($etsirow[tunnukset])";
@@ -112,7 +112,7 @@ $query = "SELECT   pakkaamo.nimi pakkaamo,
           $haku
           GROUP BY pakkaamo.nimi, pakkaamo.lokero, lasku.ytunnus, lasku.tunnus, lasku.lahetepvm, lasku.yhtio, lasku.yhtio_nimi, asnimi
           ORDER BY pakkaamo.nimi, pakkaamo.lokero, lasku.ytunnus, lasku.lahetepvm, kerayspvm";
-$pakkaamore = mysql_query($query) or pupe_error($query);
+$pakkaamore = pupe_query($query);
 
 if (mysql_num_rows($pakkaamore) != 0) {
 
@@ -169,7 +169,7 @@ if (mysql_num_rows($pakkaamore) != 0) {
               and tilausrivi.otunnus      = '$row[tunnus]'
               and tilausrivi.kerattyaika != '0000-00-00 00:00:00'
               and tilausrivi.var          not in ('P','J','O','S')";
-    $kerayspvmres = mysql_query($query) or pupe_error($query);
+    $kerayspvmres = pupe_query($query);
     $kerayspvmrow = mysql_fetch_array($kerayspvmres);
 
     echo "<td>".$row['ytunnus']."</td>";

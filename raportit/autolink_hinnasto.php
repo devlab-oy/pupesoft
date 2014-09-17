@@ -91,7 +91,7 @@ if ($tee != '') {
               AND tuote.hinnastoon  != 'E'
               AND tuote.tuotetyyppi  NOT IN ('A', 'B')
               ORDER BY tuote.osasto, tuote.try";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     flush();
 
@@ -111,7 +111,7 @@ if ($tee != '') {
 
       if ($row["id"] > 0) {
         $query = "select * from korvaavat where id='$row[id]' and yhtio='$kukarow[yhtio]' order by jarjestys, tuoteno";
-        $korvaresult = mysql_query($query) or pupe_error($query);
+        $korvaresult = pupe_query($query);
 
         $lask = 0;
         while ($korvarow = mysql_fetch_array($korvaresult)) {

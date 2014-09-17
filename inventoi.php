@@ -785,7 +785,7 @@ if ($tee == 'VALMIS') {
             $result = pupe_query($query);
 
             // otetaan tapahtuman tunnus, laitetaan se tiliöinnin otsikolle
-            $tapahtumaid = mysql_insert_id($link);
+            $tapahtumaid = mysql_insert_id($GLOBALS["masterlink"]);
 
             // Päivitetään tuotepaikka
             $query = "UPDATE tuotepaikat";
@@ -826,7 +826,7 @@ if ($tee == 'VALMIS') {
                         viite      = '$tapahtumaid',
                         luontiaika = now()";
               $result = pupe_query($query);
-              $laskuid = mysql_insert_id($link);
+              $laskuid = mysql_insert_id($GLOBALS["masterlink"]);
 
               if ($yhtiorow["varastonmuutos_inventointi"] != "") {
                 $varastonmuutos_tili = $inven_laji_tilino != "" ? $inven_laji_tilino : $yhtiorow["varastonmuutos_inventointi"];

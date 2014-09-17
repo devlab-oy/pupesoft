@@ -878,6 +878,29 @@ class MagentoClient {
     return $count;
   }
 
+  /**
+   * Virhelogi
+   *
+   * @param string  $message   Virheviesti
+   * @param exception $exception Exception
+   * @param string  $type      Kirjataanko tuote vai tilauslogiin
+   */
+  public function log($message, $exception = '', $type = 'product') {
+
+    if (self::LOGGING == true) {
+      $timestamp = date('d.m.y H:i:s');
+      $message = utf8_encode($message);
+
+      if ($exception != '') {
+        $message .= " (" . $exception->getMessage() . ") faultcode: " . $exception->faultcode;
+      }
+
+      $message .= "\n";
+      $log_location = $type == 'product' ? '/tmp/magento_log.txt' : '/tmp/magento_order_log.txt';
+      error_log("{$timestamp}: {$message}", 3, $log_location);
+    }
+  }
+
   /// Private functions ///
 
   /**
@@ -1645,29 +1668,6 @@ class MagentoClient {
       $this->_error_count++;
       $this->log("Virhe! Storelistan hakemisessa", $e);
       $this->log(__METHOD__, $e);
-    }
-  }
-
-  /**
-   * Virhelogi
-   *
-   * @param string  $message   Virheviesti
-   * @param exception $exception Exception
-   * @param string  $type      Kirjataanko tuote vai tilauslogiin
-   */
-  private function log($message, $exception = '', $type = 'product') {
-
-    if (self::LOGGING == true) {
-      $timestamp = date('d.m.y H:i:s');
-      $message = utf8_encode($message);
-
-      if ($exception != '') {
-        $message .= " (" . $exception->getMessage() . ") faultcode: " . $exception->faultcode;
-      }
-
-      $message .= "\n";
-      $log_location = $type == 'product' ? '/tmp/magento_log.txt' : '/tmp/magento_order_log.txt';
-      error_log("{$timestamp}: {$message}", 3, $log_location);
     }
   }
 }

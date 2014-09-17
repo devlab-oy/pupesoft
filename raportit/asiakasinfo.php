@@ -234,32 +234,6 @@ if ($asiakasid > 0) {
     $alehi_assegmenttirow["tunnukset"] = 0;
   }
 
-  if ($tee != "eposti") {
-    if (@include 'Spreadsheet/Excel/Writer.php') {
-      //keksitään failille joku varmasti uniikki nimi:
-      list($usec, $sec) = explode(' ', microtime());
-      mt_srand((float) $sec + ((float) $usec * 100000));
-      $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-
-      $workbook_ale = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-      $worksheet =& $workbook_ale->addWorksheet(t('Asiakkaan alennukset'));
-
-      $format_bold =& $workbook_ale->addFormat();
-      $format_bold->setBold();
-
-      $format_percent =& $workbook_ale->addFormat();
-      $format_percent->setNumFormat('0.00%');
-
-      $format_date =& $workbook_ale->addFormat();
-      $format_date->setNumFormat('YYYY-MM-DD');
-
-      $format_curr =& $workbook_ale->addFormat();
-      $format_curr->setNumFormat('0.00');
-
-      $excelrivi = 0;
-    }
-  }
-
   echo "<table><tr>";
   echo "<th valign='top'>".t("Ytunnus")."</th>";
   echo "<th valign='top'>".t("Asiakasnumero")."</th>";
@@ -335,13 +309,24 @@ if ($asiakasid > 0) {
 
       $kuukausi = str_pad((int) $kuukausi, 2, 0, STR_PAD_LEFT);
 
-      // Ketaan asiakaskäynnit
+
+      $tapahaku = "'Asiakaskäynti'";
+
+      foreach ($sanakirja_kielet as $kieli => $devnull) {
+        $kaannettyna = t("Asiakaskäynti", $kieli);
+
+        if ($kaannettyna != "Asiakaskäynti") {
+          $tapahaku .= ",'$kaannettyna'";
+        }
+      }
+
+      // Asiakaskäynnit
       $query = "SELECT count(*) kaynnit
                 FROM kalenteri
                 WHERE yhtio      = '$kukarow[yhtio]'
                 AND liitostunnus = '{$asiakasid}'
-                and tapa         = 'Asiakaskäynti'
-                and tyyppi       in ('kalenteri','memo')
+                and tapa         IN ({$tapahaku})
+                and tyyppi       IN ('kalenteri','memo')
                 and ((left(pvmalku,7) = '$vuosi-$kuukausi') or (left(pvmalku,7) < '$vuosi-$kuukausi' and left(pvmloppu,7) >= '$vuosi-$kuukausi'))";
       $result = pupe_query($query);
       $askarow = mysql_fetch_assoc($result);
@@ -655,6 +640,12 @@ if ($asiakasid > 0) {
 
     if ($asale != '' or $aletaulu != '' or $yhdistetty != "" or $tee == "eposti") {
 
+      include 'inc/pupeExcel.inc';
+
+      $worksheet   = new pupeExcel();
+      $format_bold = array("bold" => TRUE);
+      $excelrivi   = 0;
+
       $taulu  = "";
 
       if ($aletaulu != "" or $tee == "eposti") {
@@ -715,16 +706,16 @@ if ($asiakasid > 0) {
         $ulos  .= "</tr>";
       }
 
-      if (isset($workbook_ale) and $yhdistetty == "") {
+      if ($yhdistetty == "") {
         foreach ($otsik_spread as $key => $value) {
-          $worksheet->write($excelrivi, $key, t(ucfirst($value)), $format_bold);
+          $worksheet->writeString($excelrivi, $key, t(ucfirst($value)), $format_bold);
         }
         $excelrivi++;
       }
 
       unset($edryhma);
       unset($edryhma2);
-      $osastot  = array();
+      $osastot = array();
       $tryt    = array();
 
       //  Haetaan osastot ja avainsanat muistiin
@@ -769,16 +760,19 @@ if ($asiakasid > 0) {
           $edtry     = $asrow["try"];
           $edtuoteno   = $asrow["tuoteno"];
 
-          if (isset($workbook_ale) and $yhdistetty == "") {
+          if ($yhdistetty == "") {
             foreach ($otsik_spread as $key => $value) {
               if ($value == "osasto_nimi") {
-                $worksheet->write($excelrivi, $key, $osastot[$asrow["osasto"]]);
+                $worksheet->writeString($excelrivi, $key, $osastot[$asrow["osasto"]]);
               }
               elseif ($value == "try_nimi") {
-                $worksheet->write($excelrivi, $key, $tryt[$asrow["try"]]);
+                $worksheet->writeString($excelrivi, $key, $tryt[$asrow["try"]]);
+              }
+              elseif ($value == "alennus" or $value == "alennuslaji" or $value == "hinta") {
+                $worksheet->writeNumber($excelrivi, $key, $asrow[$value]);
               }
               else {
-                $worksheet->write($excelrivi, $key, $asrow[$value]);
+                $worksheet->writeString($excelrivi, $key, $asrow[$value]);
               }
             }
             $excelrivi++;
@@ -857,7 +851,6 @@ if ($asiakasid > 0) {
       $aletaulu   = "<a href='$PHP_SELF?ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&aletaulu=kylla&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("Alennustaulukko")."<br>".t("osastoittain/tuoteryhmittäin")."</a>";
     }
 
-
     if ($ashin != "" or $yhdistetty != "") {
       // haetaan asiakashintoja
       $ashin  = "<table><caption><font class='message'>".t("Asiakashinnat")."</font></caption>";
@@ -882,9 +875,9 @@ if ($asiakasid > 0) {
       }
 
       // Otsikot
-      if (isset($workbook_ale) and $yhdistetty == "") {
+      if ($yhdistetty == "") {
         foreach ($otsik_spread as $key => $value) {
-          $worksheet->write($excelrivi, $key, t(ucfirst($value)), $format_bold);
+          $worksheet->writeString($excelrivi, $key, t(ucfirst($value)), $format_bold);
         }
         $excelrivi++;
       }
@@ -905,12 +898,17 @@ if ($asiakasid > 0) {
         if (($kukarow["extranet"] != "" or $tee == "eposti" or $yhdistetty != "" or $rajattunakyma == "JOO") or ($kukarow["extranet"] == "" and $tee != "eposti" and $yhdistetty == "" or $rajattunakyma != "JOO") ) {
           if ($edryhma != $asrow["alennusryhmä"] or $edtuoteno != $asrow["tuoteno"] or $edasryhma != $asrow["asiakasryhmä"]) {
             $edryhma   = $asrow["alennusryhmä"];
-            $edtuoteno   = $asrow["tuoteno"];
-            $edasryhma  = $asrow["asiakasryhmä"];
+            $edtuoteno = $asrow["tuoteno"];
+            $edasryhma = $asrow["asiakasryhmä"];
 
-            if (isset($workbook_ale) and $yhdistetty == "") {
+            if ($yhdistetty == "") {
               foreach ($otsik_spread as $key => $value) {
-                $worksheet->write($excelrivi, $key, $asrow[$value]);
+                if ($value == "alennus" or $value == "alennuslaji" or $value == "hinta") {
+                  $worksheet->writeNumber($excelrivi, $key, $asrow[$value]);
+                }
+                else {
+                 $worksheet->writeString($excelrivi, $key, $asrow[$value]);
+               }
               }
               $excelrivi++;
             }
@@ -987,12 +985,10 @@ if ($asiakasid > 0) {
       }
 
       // Otsikot
-      if (isset($workbook_ale)) {
-        foreach ($otsik_spread as $key => $value) {
-          $worksheet->write($excelrivi, $key, t(ucfirst($value)), $format_bold);
-        }
-        $excelrivi++;
+      foreach ($otsik_spread as $key => $value) {
+        $worksheet->writeString($excelrivi, $key, t(ucfirst($value)), $format_bold);
       }
+      $excelrivi++;
 
       $yhdistetty  .= "<tr>";
       foreach ($otsik as $o) {
@@ -1002,12 +998,15 @@ if ($asiakasid > 0) {
 
       foreach ($yhdistetty_array as $key => $value) {
 
-        if (isset($workbook_ale)) {
-          foreach ($otsik_spread as $key => $xvalue) {
-            $worksheet->write($excelrivi, $key, $value[$xvalue]);
+        foreach ($otsik_spread as $key => $xvalue) {
+          if ($xvalue == "alennus" or $xvalue == "alennuslaji" or $xvalue == "hinta") {
+            $worksheet->writeNumber($excelrivi, $key, $value[$xvalue]);
           }
-          $excelrivi++;
+          else {
+            $worksheet->writeString($excelrivi, $key, $value[$xvalue]);
+          }
         }
+        $excelrivi++;
 
         $yhdistetty .= "<tr>";
 
@@ -1060,18 +1059,17 @@ if ($asiakasid > 0) {
         <td valign='top' class='back'>$yhdistetty</td>
       </tr></table><br>";
 
-    if (isset($workbook_ale) and $excelrivi>1) {
-      $workbook_ale->close();
+    if ($excelrivi > 1) {
+      $excelnimi = $worksheet->close();
 
       echo "<table>";
       echo "<tr><th>".t("Tallenna tulos").":</th>";
       echo "<form method='post' class='multisubmit'>";
       echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-      echo "<input type='hidden' name='kaunisnimi' value='Alennustaulukko.xls'>";
+      echo "<input type='hidden' name='kaunisnimi' value='Alennustaulukko.xlsx'>";
       echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
       echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
       echo "</table><br><br>";
-
     }
 
     if ($tee == 'eposti') {

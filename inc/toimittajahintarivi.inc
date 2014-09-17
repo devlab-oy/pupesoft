@@ -22,7 +22,7 @@ if (mysql_field_name($result, $i) == "valkoodi") {
             FROM valuu
             WHERE yhtio = '$kukarow[yhtio]'
              ORDER BY jarjestys";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   $ulos = "<td><select name='$nimi'>";
 
@@ -44,7 +44,7 @@ if (mysql_field_name($result, $i) == "ryhma") {
             FROM perusalennus
             WHERE yhtio='$kukarow[yhtio]'
             ORDER BY ryhma";
-  $sresult = mysql_query($query) or pupe_error($query);
+  $sresult = pupe_query($query);
 
   $ulos = "<td><select id='ryhma' name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
   $ulos .= "<option value = ''>".t("Ei ryhm‰‰")."</option>";
@@ -81,7 +81,7 @@ elseif (mysql_field_name($result, $i) == "toimittaja") {
     $query  = "SELECT *
                FROM toimi
                WHERE yhtio='$kukarow[yhtio]' and tunnus='$trow[$i]'";
-    $sresult = mysql_query($query) or pupe_error($query);
+    $sresult = pupe_query($query);
     $srow = mysql_fetch_array($sresult);
     $ssize = strlen($trow[$i])+2;
 

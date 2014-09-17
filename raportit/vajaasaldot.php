@@ -13,7 +13,6 @@ $compression = FALSE;
 
 require "../inc/parametrit.inc";
 
-
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
   exit;
@@ -80,23 +79,11 @@ if ($tee != "" and isset($painoinnappia)) {
     $toimittaja_join = "";
   }
 
-  if (@include 'Spreadsheet/Excel/Writer.php') {
+  include 'inc/pupeExcel.inc';
 
-    //keksitään failille joku varmasti uniikki nimi:
-    list($usec, $sec) = explode(' ', microtime());
-    mt_srand((float) $sec + ((float) $usec * 100000));
-    $excelnimi = md5(uniqid(mt_rand(), true)).".xls";
-
-    $workbook = new Spreadsheet_Excel_Writer('/tmp/'.$excelnimi);
-    $workbook->setVersion(8);
-    $worksheet =& $workbook->addWorksheet('Vajaasaldot');
-
-    $format_bold =& $workbook->addFormat();
-    $format_bold->setBold();
-
-    $excelrivi = 0;
-  }
-
+  $worksheet    = new pupeExcel();
+  $format_bold = array("bold" => TRUE);
+  $excelrivi    = 0;
 
   $vajaasaldot_table = "<table>";
   $vajaasaldot_table .= "<th>".t("Osasto")."</th>";
@@ -108,18 +95,16 @@ if ($tee != "" and isset($painoinnappia)) {
   $vajaasaldot_table .= "<th>".t("Tulossa")."</th>";
   $vajaasaldot_table .= "<th>".t("Toimaika")."</th>";
 
-  if (isset($workbook)) {
-    $excelsarake = 0;
-    $worksheet->writeString($excelrivi, $excelsarake++, t("Osasto"));
-    $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhmä"));
-    $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteno"));
-    $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
-    $worksheet->writeString($excelrivi, $excelsarake++, t("Varastosaldo"));
-    $worksheet->writeString($excelrivi, $excelsarake++, t("Vapaa saldo"));
-    $worksheet->writeString($excelrivi, $excelsarake++, t("Tulossa"));
-    $worksheet->writeString($excelrivi, $excelsarake++, t("Toimitus aika"));
-    $excelrivi++;
-  }
+  $excelsarake = 0;
+  $worksheet->writeString($excelrivi, $excelsarake++, t("Osasto"));
+  $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteryhmä"));
+  $worksheet->writeString($excelrivi, $excelsarake++, t("Tuoteno"));
+  $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
+  $worksheet->writeString($excelrivi, $excelsarake++, t("Varastosaldo"));
+  $worksheet->writeString($excelrivi, $excelsarake++, t("Vapaa saldo"));
+  $worksheet->writeString($excelrivi, $excelsarake++, t("Tulossa"));
+  $worksheet->writeString($excelrivi, $excelsarake++, t("Toimitusaika"));
+  $excelrivi++;
 
   $query = "SELECT tuote.tuoteno, tuote.nimitys, tuote.osasto, tuote.try
             FROM tuote
@@ -198,20 +183,17 @@ if ($tee != "" and isset($painoinnappia)) {
         $vajaasaldot_table .= "<td>$ostorivi[toimaika]</td>";
         $vajaasaldot_table .= "</tr>";
 
-        if (isset($workbook)) {
-          $excelsarake = 0;
-          $worksheet->writeString($excelrivi, $excelsarake++, $row["osasto"]);
-          $worksheet->writeString($excelrivi, $excelsarake++, $row["try"]);
-          $worksheet->writeString($excelrivi, $excelsarake++, $row["tuoteno"]);
-          $worksheet->writeString($excelrivi, $excelsarake++, $row["nimitys"]);
-          $worksheet->writeNumber($excelrivi, $excelsarake++, $saldo);
-          $worksheet->writeNumber($excelrivi, $excelsarake++, ($myytavissa - $jurow["jt"]));
-          $worksheet->writeNumber($excelrivi, $excelsarake++, $ostorivi["tulossa"]);
-          $worksheet->writeString($excelrivi, $excelsarake++, $ostorivi["toimaika"]);
+        $excelsarake = 0;
+        $worksheet->writeString($excelrivi, $excelsarake++, $row["osasto"]);
+        $worksheet->writeString($excelrivi, $excelsarake++, $row["try"]);
+        $worksheet->writeString($excelrivi, $excelsarake++, $row["tuoteno"]);
+        $worksheet->writeString($excelrivi, $excelsarake++, $row["nimitys"]);
+        $worksheet->writeNumber($excelrivi, $excelsarake++, $saldo);
+        $worksheet->writeNumber($excelrivi, $excelsarake++, ($myytavissa - $jurow["jt"]));
+        $worksheet->writeNumber($excelrivi, $excelsarake++, $ostorivi["tulossa"]);
+        $worksheet->writeString($excelrivi, $excelsarake++, $ostorivi["toimaika"]);
 
-          $excelrivi++;
-        }
-
+        $excelrivi++;
         $current_row++;
       }
     }
@@ -223,18 +205,16 @@ if ($tee != "" and isset($painoinnappia)) {
     if ($current_row > 0) {
       echo "<br>", $vajaasaldot_table;
 
-      if (isset($workbook)) {
-        $workbook->close();
-        echo "<br>";
-        echo "<table>";
-        echo "<tr><th>".t("Tallenna excel").":</th>";
-        echo "<form method='post' class='multisubmit'>";
-        echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-        echo "<input type='hidden' name='kaunisnimi' value='Vajaasaldot.xls'>";
-        echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-        echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
-        echo "</table><br>";
-      }
+      $excelnimi = $worksheet->close();
+
+      echo "<br><br><table>";
+      echo "<tr><th>".t("Tallenna tulos").":</th>";
+      echo "<form method='post' class='multisubmit'>";
+      echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+      echo "<input type='hidden' name='kaunisnimi' value='Vajaasaldot.xlsx'>";
+      echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
+      echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+      echo "</table><br>";
     }
   }
 

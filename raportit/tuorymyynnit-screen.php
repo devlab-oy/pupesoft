@@ -60,7 +60,7 @@ if ($submit != '' and $vv != '' and $kk != '') {
              and laskutettuaika < '$lyy'
              $where
              group by osasto, try";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   // otetaan suurin myynti talteen
   $maxeur = 0;

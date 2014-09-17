@@ -198,7 +198,7 @@ if (!function_exists('luo_ostotilausotsikko')) {
                 yhtio               = '{$kukarow['yhtio']}',
                 ytunnus             = '{$tiltoi['ytunnus']}'";
       pupe_query($query);
-      $ostotilaus_tunnus = mysql_insert_id();
+      $ostotilaus_tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
       $query = "SELECT *
                 FROM lasku

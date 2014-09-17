@@ -101,7 +101,7 @@ if (!function_exists("yhtiotarkista")) {
       $query = "SELECT nimi
                 FROM tili
                 WHERE yhtio='$kukarow[yhtio]' and tilino = '$t[$i]'";
-      $sresult = mysql_query($query) or pupe_error($query);
+      $sresult = pupe_query($query);
 
       if (mysql_num_rows($sresult) != 1) {
         //Olisiko siellä nimi
@@ -110,7 +110,7 @@ if (!function_exists("yhtiotarkista")) {
                     FROM tili
                     WHERE yhtio = '$kukarow[yhtio]' and nimi like '%$t[$i]%'
                     ORDER BY tilino";
-          $sresult = mysql_query($query) or pupe_error($query);
+          $sresult = pupe_query($query);
 
           if (mysql_num_rows($sresult) > 0) {
             $ulosarray[$i] = "<td><select name='t[$i]'><option value = '' $sel>".t("Ei valintaa")."</option>";

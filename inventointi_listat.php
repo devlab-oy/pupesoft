@@ -996,7 +996,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
                   AND hyllynro                = '{$tuoterow['hyllynro']}'
                   AND hyllyvali               = '{$tuoterow['hyllyvali']}'
                   AND hyllytaso               = '{$tuoterow['hyllytaso']}'";
-        $munresult = pupe_query($query, $masterlink);
+        $munresult = pupe_query($query, $GLOBALS["masterlink"]);
       }
 
       if ($rivit >= 18) {

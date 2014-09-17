@@ -15,10 +15,14 @@ if ($type == '0' and substr($tietue, 0, 3) != "\$\$E" and substr($tietue, 0, 3) 
   $kk = substr($pvm, 2, 2);
   $pp = substr($pvm, 4, 2);
 
-  if (!isset($lopetus) or $lopetus == "") $lopetus = "/SPLIT/${palvelin2}tilioteselailu.php////tee=T//pvm=$vv-$kk-$pp//tyyppi=3//tilino=$tilino";
+  if (!isset($lopetus) or $lopetus == "") $lopetus = "/SPLIT/${palvelin2}tilioteselailu.php////toim=$toim//tee=T//pvm=$vv-$kk-$pp//tyyppi=3//tilino=$tilino";
 
   echo "<table>";
-  echo "<tr><td class='back'><a href='${palvelin2}tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XXS&lopetus=$lopetus'>&laquo; ".t("Edellinen")."</td><td class='back'><a href='${palvelin2}tilioteselailu.php?tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XS&lopetus=$lopetus'>".t("Seuraava")." &raquo;</a></td></tr>";
+  
+  if ($tilioteselailu_oikrow !== FALSE) {
+    echo "<tr><td class='back'><a href='${palvelin2}tilioteselailu.php?toim=$toim&tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XXS&lopetus=$lopetus'>&laquo; ".t("Edellinen")."</td><td class='back'><a href='${palvelin2}tilioteselailu.php?toim=$toim&tilino=$tiliotedatarow[tilino]&pvm=$tiliotedatarow[alku]&tee=XS&lopetus=$lopetus'>".t("Seuraava")." &raquo;</a></td></tr>";
+  }
+  
   echo "<tr><th>".t("Aineiston luontipv")."</th><td>".pankkipvm(substr($tietue, 1, 6))."</td></tr>";
   echo "<tr><th>".t("Aineiston luontiaika")."</th><td>".substr($tietue, 7, 4)."</td></tr>";
   echo "<tr><th>".t("Rahalaitostunnus")."</th><td>".substr($tietue, 11, 2)."</td></tr>";
@@ -63,7 +67,7 @@ elseif ($type == '3' or $type == 'S') {
             LEFT JOIN lasku ON (lasku.yhtio = suoritus.yhtio and lasku.tunnus = suoritus.ltunnus and lasku.tila = 'U')
             WHERE suoritus.yhtio = '$tiliotedatarow[yhtio]'
             AND suoritus.tunnus  = '$tiliotedatarow[tiliointitunnus]'";
-  $suoritusresult = mysql_query($query) or pupe_error($query);
+  $suoritusresult = pupe_query($query);
   $suoritusrow = mysql_fetch_array($suoritusresult);
 
   if ($suoritusrow['kohdpvm'] != '0000-00-00' and $suoritusrow["laskunro"] != 0) {

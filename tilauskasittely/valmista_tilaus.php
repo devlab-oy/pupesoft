@@ -1494,7 +1494,7 @@ if (!isset($from_kaikkikorj)) {
     $valmistuslinjat = hae_valmistuslinjat();
 
     // tehd‰‰n etsi valinta
-    echo "<br><form name='find' method='post'>";
+    echo "<br><form name='find' action='valmista_tilaus.php' method='post'>";
     echo "<input type='hidden' name='toim'  value='$toim'>";
 
     if ($toim == "TUOTE") {

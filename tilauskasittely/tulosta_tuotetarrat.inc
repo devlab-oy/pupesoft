@@ -8,7 +8,7 @@ $query = "SELECT tuote.tuoteno, tuote.yksikko, if(tuote.tarrakpl>0,tuote.tarrakp
           WHERE tilausrivi.uusiotunnus = '$otunnus'
           and tilausrivi.yhtio='$kukarow[yhtio]'
           ORDER BY tuote.tuoteno";
-$res= mysql_query($query) or pupe_error($query);
+$res= pupe_query($query);
 
 list($usec, $sec) = explode(' ', microtime());
 mt_srand((float) $sec + ((float) $usec * 100000));

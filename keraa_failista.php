@@ -55,7 +55,7 @@ if ($tee == "keraa") {
               AND tunnus  = $tilaus
               AND tila    = 'L'
               AND alatila = 'A'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) != 1) {
       echo "<font class='error'>".t("Tilausta: %s ei voida merkata ker‰tyksi. Tilaus v‰‰r‰ss‰ tilassa", "", $tilaus)."!</font><br>";

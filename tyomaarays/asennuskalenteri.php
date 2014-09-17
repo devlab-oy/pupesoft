@@ -7,7 +7,7 @@ if ((int) $liitostunnus > 0) {
   $query   = "SELECT *
               FROM lasku
               WHERE tunnus = '$liitostunnus' and yhtio = '$kukarow[yhtio]'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $laskurow = mysql_fetch_array($result);
 }
 
@@ -35,7 +35,7 @@ if (!isset($tyojono)) {
             and laji        = 'TYOM_TYOLINJA'
             and selitetark  = '$kukarow[kuka]'
             and selite     != ''";
-  $yres = mysql_query($query) or pupe_error($query);
+  $yres = pupe_query($query);
 
   if (mysql_num_rows($yres) > 0) {
     $yrow = mysql_fetch_array($yres);
@@ -124,7 +124,7 @@ function month_name($month) {
 
 if (trim($konserni) != '') {
   $query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $konsernit = "";
 
   while ($row = mysql_fetch_array($result)) {
@@ -162,7 +162,7 @@ if ($tee == "LISAA") {
                 (pvmloppu > '$year-$month-$day $aika:00' and pvmloppu<= '$lyear-$lmonth-$lday $laika:00'))
             and tunnus != '$tyotunnus'
             order by pvmalku";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
     echo "<font class='error'>".t("VIRHE: Päällekkäisiä tapahtumia")."!</font><br><br>";
@@ -183,7 +183,7 @@ if ($tee == "LISAA") {
               WHERE yhtio = '$kukarow[yhtio]'
               and tyyppi  = 'asennuskalenteri'
               and tunnus  = '$tyotunnus'";
-    mysql_query($query) or pupe_error($query);
+    pupe_query($query);
 
 
     if ($yhtiorow['tyomaarays_asennuskalenteri_muistutus'] == 'K' and isset($lisaa_muistutus) and trim($lisaa_muistutus) == 'kylla') {
@@ -196,7 +196,7 @@ if ($tee == "LISAA") {
                 AND kentta02      = '$liitostunnus'
                 AND kuittaus     != ''
                 ORDER BY tunnus DESC";
-      $muistutus_chk_res = mysql_query($query) or pupe_error($query);
+      $muistutus_chk_res = pupe_query($query);
 
       if (mysql_num_rows($muistutus_chk_res) != 0) {
         $muistutus_chk_row = mysql_fetch_assoc($muistutus_chk_res);
@@ -205,14 +205,14 @@ if ($tee == "LISAA") {
                   pvmloppu    = '$lyear-$lmonth-$lday $laika'
                   WHERE yhtio = '$kukarow[yhtio]'
                   AND tunnus  = '$muistutus_chk_row[tunnus]'";
-        $muistutus_insert_res = mysql_query($query) or pupe_error($query);
+        $muistutus_insert_res = pupe_query($query);
       }
       else {
         $kysely = "SELECT viesti, comments, sisviesti2
                    FROM lasku
                    WHERE yhtio = '$kukarow[yhtio]'
                    AND tunnus  = '$liitostunnus'";
-        $viestit_chk_res = mysql_query($kysely) or pupe_error($kysely);
+        $viestit_chk_res = pupe_query($kysely);
         $viestit_chk_row = mysql_fetch_assoc($viestit_chk_res);
 
         kalenteritapahtuma ("Muistutus", "Asentajan kuittaus", "Muista työmääräys $liitostunnus\n\n$viestit_chk_row[viesti]\n$viestit_chk_row[comments]\n$viestit_chk_row[sisviesti2]", $liitostunnus, "K", '', $liitostunnus, "'$year-$month-$day $aika'", "'$lyear-$lmonth-$lday $laika'", 'ASENTAJA');
@@ -246,7 +246,7 @@ if ($tee == "LISAA") {
                  AND kentta02      = '$liitostunnus'
                  AND kuittaus     != ''
                  ORDER BY tunnus DESC";
-      $muistutus_chk_res = mysql_query($kysely) or pupe_error($kysely);
+      $muistutus_chk_res = pupe_query($kysely);
 
       if (mysql_num_rows($muistutus_chk_res) != 0) {
         $muistutus_chk_row = mysql_fetch_assoc($muistutus_chk_res);
@@ -255,7 +255,7 @@ if ($tee == "LISAA") {
                    pvmloppu    = '$lyear-$lmonth-$lday $laika'
                    WHERE yhtio = '$kukarow[yhtio]'
                    AND tunnus  = '$muistutus_chk_row[tunnus]'";
-        $muistutus_insert_res = mysql_query($kysely) or pupe_error($kysely);
+        $muistutus_insert_res = pupe_query($kysely);
       }
       else {
 
@@ -263,14 +263,14 @@ if ($tee == "LISAA") {
                    FROM lasku
                    WHERE yhtio = '$kukarow[yhtio]'
                    AND tunnus  = '$liitostunnus'";
-        $viestit_chk_res = mysql_query($kysely) or pupe_error($kysely);
+        $viestit_chk_res = pupe_query($kysely);
         $viestit_chk_row = mysql_fetch_assoc($viestit_chk_res);
 
         kalenteritapahtuma ("Muistutus", "Asentajan kuittaus", "Muista työmääräys $liitostunnus\n\n$viestit_chk_row[viesti]\n$viestit_chk_row[comments]\n$viestit_chk_row[sisviesti2]", $liitostunnus, "K", '', $liitostunnus, "'$year-$month-$day $aika'", "'$lyear-$lmonth-$lday $laika'", 'ASENTAJA');
       }
     }
 
-    mysql_query($query) or pupe_error($query);
+    pupe_query($query);
 
     $tee = "";
   }
@@ -283,7 +283,7 @@ if ($tee == "MUOKKAA") {
             $konsernit
             and tunnus = '$tyotunnus'
             and tyyppi = 'asennuskalenteri'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
     $kalerow = mysql_fetch_array($result);
@@ -319,7 +319,7 @@ if ($tee == "POISTA") {
               #AND tapa = '$tyojono'
               AND tunnus       != '$tyotunnus'
               ORDER BY pvmloppu DESC";
-    $kappale_chk_res = mysql_query($query) or pupe_error($query);
+    $kappale_chk_res = pupe_query($query);
 
     $query = "SELECT *
               FROM kalenteri
@@ -330,7 +330,7 @@ if ($tee == "POISTA") {
               AND kentta02      = '$liitostunnus'
               AND kuittaus     != ''
               ORDER BY tunnus DESC";
-    $muistutus_chk_res = mysql_query($query) or pupe_error($query);
+    $muistutus_chk_res = pupe_query($query);
 
     if (mysql_num_rows($muistutus_chk_res) != 0) {
       $muistutus_chk_row = mysql_fetch_assoc($muistutus_chk_res);
@@ -344,7 +344,7 @@ if ($tee == "POISTA") {
                   AND liitostunnus = '$liitostunnus'
                   AND kentta02     = '$liitostunnus'
                   AND tunnus       = '$muistutus_chk_row[tunnus]'";
-        $muistutus_delete_res = mysql_query($query) or pupe_error($query);
+        $muistutus_delete_res = pupe_query($query);
       }
       else {
         while ($kappale_chk_row = mysql_fetch_assoc($kappale_chk_res)) {
@@ -353,7 +353,7 @@ if ($tee == "POISTA") {
                       pvmloppu    = '$kappale_chk_row[pvmloppu]'
                       WHERE yhtio = '$kukarow[yhtio]'
                       AND tunnus  = '$muistutus_chk_row[tunnus]'";
-            $muistutus_update_res = mysql_query($query) or pupe_error($query);
+            $muistutus_update_res = pupe_query($query);
             break;
           }
         }
@@ -367,7 +367,7 @@ if ($tee == "POISTA") {
             $konsernit
             and tunnus = '$tyotunnus'
             and tyyppi = 'asennuskalenteri'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<font class='message'>".t("Kalenterimerkintä poistettu")."!</font><br><br>";
   $tee = "";
@@ -607,7 +607,7 @@ if ($tee == "") {
                     (pvmalku <  '$year-$month-$i 00:00:00' and pvmloppu > '$year-$month-$i 00:00:00') or
                     (pvmloppu >='$year-$month-$i 00:00:00' and pvmloppu<= '$year-$month-$i 23:59:00'))
                 order by $orderlisa pvmalku";
-      $vres = mysql_query($query) or pupe_error($query);
+      $vres = pupe_query($query);
 
       $varaukset   = array();
 

@@ -1,5 +1,8 @@
 <?php
 
+///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+$useslave = 1;
+
 require "../inc/parametrit.inc";
 
 echo "  <script type='text/javascript' src='https://www.google.com/jsapi'></script>";
@@ -15,7 +18,6 @@ echo "  <script type='text/javascript'>
         data.addColumn('number', 'Kerätty');
         data.addColumn('number', 'Keräyksessä');
         data.addColumn('number', 'Aloittamatta');
-        data.addColumn('number', 'Siirretty');
 
         // data.addRows([
         //   ['08.00', 36, 0, 0, 0],
@@ -64,10 +66,6 @@ echo "  <script type='text/javascript'>
               color: 'red',
               visibleInLegend: true
             },
-            3:{
-              color: '#FE0',
-              visibleInLegend: true
-            }
           }
         };
 
@@ -799,7 +797,7 @@ if (isset($submit_form)) {
     if (count($arr) > 0) {
 
       foreach ($arr as $klo => $summat) {
-        $data[] = array($klo, $summat['keratty'], $summat['aloitettu'], $summat['aloittamatta'], 0);
+        $data[] = array($klo, $summat['keratty'], $summat['aloitettu'], $summat['aloittamatta']);
       }
 
     }

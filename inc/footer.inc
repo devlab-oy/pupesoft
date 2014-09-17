@@ -12,9 +12,8 @@ if (isset($formi) and isset($kentta)) {
 $timeparts = explode(" ", microtime());
 $endtime   = $timeparts[1].substr($timeparts[0], 1);
 $aika      = round($endtime-$starttime, 4);
-$useslave  = 0;
 
-if ((!isset($verkkokauppa) or $verkkokauppa == "") and require "connect.inc") {
+if (!isset($verkkokauppa) or $verkkokauppa == "") {
   $suoque = "INSERT INTO suorituskykyloki
              SET yhtio     = '$kukarow[yhtio]',
              skripti       = '".$_SERVER['SCRIPT_NAME']."',
@@ -25,14 +24,14 @@ if ((!isset($verkkokauppa) or $verkkokauppa == "") and require "connect.inc") {
              suoritusaika  = '$aika',
              laatija       = '$kukarow[kuka]',
              luontiaika    = now()";
-  $suores = mysql_query($suoque) or pupe_error($suoque);
+  $suores = pupe_query($suoque, $GLOBALS["masterlink"]);
 }
 
 $lopeta_body = TRUE;
 $piirra_sanakirja = TRUE;
 
 // Piilotetaan koko body
-if (isset($nayta_pdf) and $nayta_pdf == "1") {
+if ((isset($nayta_pdf) and $nayta_pdf == 1) or (isset($lataa_tiedosto) and $lataa_tiedosto == 1)) {
   $lopeta_body = FALSE;
   $piirra_sanakirja = FALSE;
 }
@@ -130,4 +129,5 @@ if ($lopeta_body) {
   echo "</html>";
 }
 
-mysql_close($link);
+if (isset($GLOBALS["masterlink"])) mysql_close($GLOBALS["masterlink"]);
+if (isset($GLOBALS["slavelink"]))  mysql_close($GLOBALS["slavelink"]);

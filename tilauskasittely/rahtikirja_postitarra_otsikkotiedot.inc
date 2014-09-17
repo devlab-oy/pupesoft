@@ -8,7 +8,7 @@ if ($phpnimi == "rahtikirja_custom.php") {
 }
 else {
   $query = "SELECT * from lasku where yhtio = '$kukarow[yhtio]' and tunnus in ($otunnukset) order by tunnus limit 1";
-  $tempr = mysql_query($query) or pupe_error($query);
+  $tempr = pupe_query($query);
   $postirow = mysql_fetch_array($tempr);
 }
 
@@ -17,7 +17,7 @@ $query = "SELECT nimi, nimitark, osoite, postino, postitp, maa
           FROM varastopaikat
           WHERE yhtio = '$kukarow[yhtio]'
           AND tunnus  = '$postirow[varasto]'";
-$tempr = mysql_query($query) or pupe_error($query);
+$tempr = pupe_query($query);
 $postirow_varasto = mysql_fetch_array($tempr);
 
 // jos varastolle on annettu joku osoite, k‰ytet‰‰n sit‰

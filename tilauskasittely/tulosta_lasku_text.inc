@@ -63,7 +63,7 @@ if (!function_exists('text_alku')) {
     $query  = "  select nimi
           from kuka
           where tunnus='$laskurow[myyja]' and yhtio='$kukarow[yhtio]'";
-    $myyresult = mysql_query($query) or pupe_error($query);
+    $myyresult = pupe_query($query);
     $myyrow = mysql_fetch_array($myyresult);
     $sisalto .= sprintf('%-20.20s', $myyrow["nimi"]);
 
@@ -154,7 +154,7 @@ if (!function_exists('text_alku')) {
               and $where
               and toimitettuaika!='0000-00-00'
               GROUP BY toimitettupaiva";
-    $toimaikares=mysql_query($query) or pupe_error($query);
+    $toimaikares=pupe_query($query);
 
     if (mysql_num_rows($toimaikares) > 1) {
       $sisalto .= t("useita");
@@ -305,7 +305,7 @@ if (!function_exists('text_alvierittely')) {
                  FROM tilausrivi
                  WHERE uusiotunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'
                  ORDER BY alv";
-    $alvresult = mysql_query($alvquery) or pupe_error($alvquery);
+    $alvresult = pupe_query($alvquery);
 
     $factoringlask++;
 
@@ -314,7 +314,7 @@ if (!function_exists('text_alvierittely')) {
                  FROM tilausrivi
                  WHERE uusiotunnus = '$laskurow[tunnus]' and yhtio='$kukarow[yhtio]' and alv='$alvrow[alv]'
                  ORDER BY alv";
-      $aresult = mysql_query($aquery) or pupe_error($aquery);
+      $aresult = pupe_query($aquery);
       $arow = mysql_fetch_array($aresult);
       $sisalto .= "\r\n";
       $sisalto .= sprintf('%-22.22s', '');

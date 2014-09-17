@@ -303,26 +303,26 @@ if ($toim == "TARJOUS") {
 }
 
 if ($tee == "paiva") {
-  $result = mysql_query($query2) or pupe_error($query2);
+  $result = pupe_query($query2);
   echo "<a href='$PHP_SELF?toim=$toim&tee=paiva&vv=$epv&kk=$epk&pp=$epp&haku=$haku&keikkanrohaku=$keikkanrohaku'>".t("Edellinen päivä")."</a> - <a href='$PHP_SELF?toim=$toim&tee=paiva&vv=$npv&kk=$npk&pp=$npp&haku=$haku&keikkanrohaku=$keikkanrohaku'>".t("Seuraava päivä")."</a>";
   echo " - <a href='$PHP_SELF?toim=$toim&tee=kk&vv=$vv&kk=$kk&haku=$haku&keikkanrohaku=$keikkanrohaku'>".t("Kuukausinäkymä")."</a>";
   echo "<br><br>";
   //echo "$query2<br><br>";
 }
 elseif ($tee == "kk") {
-  $result = mysql_query($query1) or pupe_error($query1);
+  $result = pupe_query($query1);
   echo "<a href='$PHP_SELF?toim=$toim&tee=kk&vv=$ekv&kk=$ekk&pp=$ekp&haku=$haku&keikkanrohaku=$keikkanrohaku'>".t("Edellinen kuukausi")."</a> - <a href='$PHP_SELF?toim=$toim&tee=kk&vv=$nkv&kk=$nkk&pp=$nkp&haku=$haku&keikkanrohaku=$keikkanrohaku'>".t("Seuraava kuukausi")."</a>";
   echo "<br><br>";
   //echo "$query1<br><br>";
 }
 elseif ($tee == "tilaus") {
-  $result = mysql_query($query3) or pupe_error($query3);
+  $result = pupe_query($query3);
   echo "<a href='$PHP_SELF?toim=$toim&tee=paiva&vv=$vv&kk=$kk&pp=$pp'>".t("Päivänäkymä")."</a> - <a href='$PHP_SELF?toim=$toim&tee=kk&vv=$vv&kk=$kk'>".t("Kuukausinäkymä")."</a>";
   echo "<br><br>";
   //echo "$query3<br><br>";
 }
 elseif ($tee == 'tilhaku' and $toim == 'KEIKKA') {
-  $result = mysql_query($query4) or pupe_error($query4);
+  $result = pupe_query($query4);
   echo "<a href='$PHP_SELF?toim=$toim&tee=paiva&vv=$vv&kk=$kk&pp=$pp'>".t("Päivänäkymä")."</a> - <a href='$PHP_SELF?toim=$toim&tee=kk&vv=$vv&kk=$kk'>".t("Kuukausinäkymä")."</a>";
   echo "<br><br>";
   //echo "$query4<br><br>";
@@ -398,7 +398,7 @@ if (mysql_num_rows($result) > 0) {
 
   // katotaan löytyykö oikeuksia vaihda_tilaan... tätä käytetään tuolla whilen sisällä
   $oikeuquery = "SELECT * from oikeu where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and nimi like '%vaihda_tila.php'";
-  $apuoikeures = mysql_query($oikeuquery) or pupe_error($oikeuquery);
+  $apuoikeures = pupe_query($oikeuquery);
 
   while ($row = mysql_fetch_array($result)) {
 
@@ -457,7 +457,7 @@ if (mysql_num_rows($result) > 0) {
 
       // haetaan tässä keisissä vielä tila ja alatila
       $aputilaquery = "SELECT tila, alatila from lasku where yhtio='$kukarow[yhtio]' and tunnus='$row[tunnus]'";
-      $aputilares = mysql_query($aputilaquery) or pupe_error($aputilaquery);
+      $aputilares = pupe_query($aputilaquery);
       $tila_row = mysql_fetch_array($aputilares);
 
       // vain laskuttamattomille myyntitilaukille voi tehdä jotain

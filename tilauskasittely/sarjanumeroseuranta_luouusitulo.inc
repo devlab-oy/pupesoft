@@ -8,7 +8,7 @@ if ($luousitee == "") {
              from tuote
              WHERE yhtio = '$kukarow[yhtio]'
              and tuoteno = '$tuoteno'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $tuoterow = mysql_fetch_array($result);
 
   if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "G" or $tuoterow["sarjanumeroseuranta"] == "U") {
@@ -22,7 +22,7 @@ if ($luousitee == "") {
                and sarjanumeroseuranta.myyntirivitunnus != -1
                and (tilausrivi_myynti.tunnus is null or tilausrivi_myynti.laskutettuaika = '0000-00-00')
                and tilausrivi_osto.laskutettuaika       != '0000-00-00'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
     $ikrow  = mysql_fetch_array($result);
 
     $kehahin = sprintf('%.2f', $ikrow["kehahin"]);
@@ -31,7 +31,7 @@ if ($luousitee == "") {
       $query = "SELECT kehahin
                 FROM tuote
                 WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$tuoteno'";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
       $ikrow  = mysql_fetch_array($result);
 
       $kehahin = sprintf('%.2f', $ikrow["kehahin"]);
@@ -98,12 +98,12 @@ else {
   $query  = "SELECT *
              FROM lasku
              WHERE yhtio = '$kukarow[yhtio]' and tila='K' and alatila='I' and tapvm='$tanaan'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
     // haetaan seuraava vapaa keikkaid
     $query  = "SELECT max(laskunro)+1 from lasku where yhtio='$kukarow[yhtio]' and tila='K'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
     $row    = mysql_fetch_array($result);
     $lid  = $row[0];
 
@@ -118,8 +118,8 @@ else {
               tapvm        = '$tanaan',
               luontiaika   = now(),
               laatija      = 'Invent'";
-    $result = mysql_query($query) or pupe_error($query);
-    $lid = mysql_insert_id();
+    $result = pupe_query($query);
+    $lid = mysql_insert_id($GLOBALS["masterlink"]);
 
     $query  = "SELECT *
                from lasku
@@ -128,7 +128,7 @@ else {
                and tila     = 'K'
                and alatila  = 'I'
                and tapvm    = '$tanaan'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
     $ikrow = mysql_fetch_array($result);
   }
   else {
@@ -140,7 +140,7 @@ else {
             FROM tuote
             WHERE yhtio = '$kukarow[yhtio]'
             and tuoteno = '$tuoteno'";
-  $result  = mysql_query($query) or pupe_error($query);
+  $result  = pupe_query($query);
   $trow = mysql_fetch_array($result);
 
   $era_kpl = (float) str_replace(",", ".", $era_kpl);
@@ -191,8 +191,8 @@ else {
             nimitys        = '$trow[nimitys]',
             tyyppi         = 'O',
             kommentti      = '$kukarow[nimi] lisäsi inventoimalla.'";
-  $result = mysql_query($query) or pupe_error($query);
-  $lid = mysql_insert_id();
+  $result = pupe_query($query);
+  $lid = mysql_insert_id($GLOBALS["masterlink"]);
 
   $ostorivitunnus = $lid;
   $toiminto     = "";

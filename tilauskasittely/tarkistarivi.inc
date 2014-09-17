@@ -472,6 +472,7 @@ if (
 
     $paikat .= "<option value='EIERAAVIELA#!¡!#EIEI'>".t("Valitse erä")."</option>";
     $paikatlask++;
+    $omapaikatraja = 1;
 
     if ($trow["sarjanumeroseuranta"] == "F") {
       $pepvmlisa1 = " sarjanumeroseuranta.parasta_ennen, ";
@@ -555,7 +556,7 @@ if (
                  and tuoteno          = '$row[tuoteno]'
                  and myyntirivitunnus = '$row[tunnus]'
                  LIMIT 1";
-      $sarjares = pupe_query($query, $masterlink);
+      $sarjares = pupe_query($query, $GLOBALS["masterlink"]);
       $sarjarow = mysql_fetch_assoc($sarjares);
     }
 
@@ -576,7 +577,7 @@ if (
           or ($alkurow["hyllyalue"] == $row["hyllyalue"] and $alkurow["hyllynro"] == $row["hyllynro"] and $alkurow["hyllyvali"] == $row["hyllyvali"] and $alkurow["hyllytaso"] == $row["hyllytaso"])
         )
       ) {
-        
+
         list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', '', '', $alkurow["hyllyalue"], $alkurow["hyllynro"], $alkurow["hyllyvali"], $alkurow["hyllytaso"], $laskurow["toim_maa"], $saldoaikalisa, $alkurow["era"]);
 
         $myytavissa = (float) $myytavissa;
@@ -925,7 +926,7 @@ elseif (
             WHERE yhtio = '$kukarow[yhtio]'
             AND perheid = '$row[tunnus]'
             AND otunnus = '$row[otunnus]'";
-  $perhe_tuoteno_res = pupe_query($query, $masterlink);
+  $perhe_tuoteno_res = pupe_query($query, $GLOBALS["masterlink"]);
 
   $perheen_tuotteet = '';
 

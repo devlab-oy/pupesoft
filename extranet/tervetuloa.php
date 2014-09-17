@@ -254,7 +254,7 @@ if ($tee == '') {
             $trow = mysql_fetch_array($tres);
 
             $query = "SELECT * FROM asiakas where yhtio = '$kukarow[yhtio]' and tunnus = '$kukarow[oletus_asiakas]'";
-            $asiakastempres = mysql_query($query);
+            $asiakastempres = pupe_query($query);
             $asiakastemprow = mysql_fetch_array($asiakastempres);
 
             $temp_laskurowwi['liitostunnus']  = $asiakastemprow['tunnus'];

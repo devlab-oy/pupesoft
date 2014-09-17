@@ -390,6 +390,10 @@ if (!function_exists("luo_myyntitilausotsikko")) {
     $override_ytunnus_check = "YES";
     $ei_kayttoliittymaa = "kylla";
 
+    if (isset($kukarow["hintojen_vaihto"])) {
+      $hintojen_vaihto = $kukarow["hintojen_vaihto"];
+    }
+
     require "otsik.inc";
 
     if ($session == "") {

@@ -49,7 +49,7 @@ if ($tee == 'etsi') {
              and lasku.tilaustyyppi = 'A'
              and $muu1 '$muu2'
              ORDER BY lasku.tunnus desc";
-  $sresult = mysql_query($squery) or pupe_error($query);
+  $sresult = pupe_query($squery);
 
   if (mysql_num_rows($sresult) > 0) {
     echo "<tr>

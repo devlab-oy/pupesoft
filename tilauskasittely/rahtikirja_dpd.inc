@@ -39,7 +39,7 @@ if ($kollityht > 0) {
               and tunnus  in ($otunnukset)
               ORDER BY tunnus
               LIMIT 1";
-    $tempr = mysql_query($query) or pupe_error($query);
+    $tempr = pupe_query($query);
     $laskurow = mysql_fetch_array($tempr);
 
     // haetaan varaston osoitetiedot, käytetään niitä lähetystietoina
@@ -47,7 +47,7 @@ if ($kollityht > 0) {
               FROM varastopaikat
               WHERE yhtio = '$kukarow[yhtio]'
               AND tunnus  = '$laskurow[varasto]'";
-    $tempr = mysql_query($query) or pupe_error($query);
+    $tempr = pupe_query($query);
     $postirow_varasto = mysql_fetch_array($tempr);
 
     // jos varastolle on annettu joku osoite, käytetään sitä
@@ -333,7 +333,7 @@ if ($kollityht > 0) {
     $query = "SELECT *
               FROM maat
               WHERE koodi = '$laskurow[toim_maa]'";
-    $tempr = mysql_query($query) or pupe_error($query);
+    $tempr = pupe_query($query);
     $maarow = mysql_fetch_array($tempr);
 
     $pdf->draw_text(mm_pt(15),  mm_pt(116), substr($maarow['nimi'], 5),                $firstpage, $iso);
@@ -342,7 +342,7 @@ if ($kollityht > 0) {
               FROM asiakas
               WHERE yhtio = '$kukarow[yhtio]'
               AND tunnus  = '$laskurow[liitostunnus]'";
-    $tempr = mysql_query($query) or pupe_error($query);
+    $tempr = pupe_query($query);
     $asiakasrow = mysql_fetch_array($tempr);
 
     $pdf->draw_text(mm_pt(15),  mm_pt(112),  "Puh -Tel - Tel: ",    $firstpage, $otsik);

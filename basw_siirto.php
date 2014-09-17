@@ -216,7 +216,7 @@ if ($tee == "TEEAINEISTO") {
             and tiliointi.tapvm    <= '$alvv-$alvk-$alvp'
             GROUP BY 1,2
             ORDER BY 1,2";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<table>";
 

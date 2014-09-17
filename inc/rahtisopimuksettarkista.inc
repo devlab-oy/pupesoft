@@ -19,7 +19,7 @@ if (!function_exists("rahtisopimuksettarkista")) {
         $query = "SELECT ytunnus
                   FROM asiakas
                   WHERE yhtio='$kukarow[yhtio]' and ytunnus = '$t[$i]'";
-        $sresult = mysql_query($query) or pupe_error($query);
+        $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) == 0) {
 
@@ -50,7 +50,7 @@ if (!function_exists("rahtisopimuksettarkista")) {
         $query  = "SELECT *
                    FROM asiakas
                    WHERE yhtio='$kukarow[yhtio]' and tunnus='$chastunn'";
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
 
         if (mysql_num_rows($result) != 1) {
 

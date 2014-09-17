@@ -2452,7 +2452,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
                    where yhtio = '$kukarow[yhtio]'
                    and laji    = 'RAHTIKIRJA'
                    and selite  = '$toitarow[rahtikirja]'";
-      $avainres = mysql_query($query) or pupe_error($query);
+      $avainres = pupe_query($query);
       $avainrow = mysql_fetch_assoc($avainres);
 
       if ($avainrow["selitetark_2"] == "1") {

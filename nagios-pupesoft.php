@@ -69,7 +69,7 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
     }
 
     if (count($critical) > 0) {
-      echo implode(" ", array_merge($critical,$warning))." ".$STATE_CRITICAL;
+      echo implode(" ", array_merge($critical, $warning))." ".$STATE_CRITICAL;
     }
     elseif (count($warning) > 0) {
       echo implode(" ", $warning)." ".$STATE_WARNING;
@@ -163,7 +163,7 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
     }
 
     if (count($critical) > 0) {
-      echo implode(" ", array_merge($critical,$warning))." ".$STATE_CRITICAL;
+      echo implode(" ", array_merge($critical, $warning))." ".$STATE_CRITICAL;
     }
     elseif (count($warning) > 0) {
       echo implode(" ", $warning)." ".$STATE_WARNING;
@@ -263,7 +263,7 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
     }
 
     if (count($critical) > 0) {
-      echo implode(" ", array_merge($critical,$warning))." ".$STATE_CRITICAL;
+      echo implode(" ", array_merge($critical, $warning))." ".$STATE_CRITICAL;
     }
     elseif (count($warning) > 0) {
       echo implode(" ", $warning)." ".$STATE_WARNING;

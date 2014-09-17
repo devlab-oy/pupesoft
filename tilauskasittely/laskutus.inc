@@ -192,7 +192,7 @@ else {
 
                 $kysely_insertti = "INSERT into tilausrivi ($rfields) VALUES ($rvalues)";
                 $insresultti = pupe_query($kysely_insertti);
-                $insid_uusi  = mysql_insert_id();
+                $insid_uusi  = mysql_insert_id($GLOBALS["masterlink"]);
 
                 $pantti_kpl -= $vanhin_pantti_row['kpl'];
 

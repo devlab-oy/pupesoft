@@ -39,6 +39,11 @@
 // debuggia varten, laita 1 jos haluut messuja
 $lisaarivi_debug = 0;
 
+// haluttaessa ei varata saldoa extranet-tilauksissa
+if ($laskurow['tilaustyyppi'] == 'H') {
+  $varataan_saldoa = "EI";
+}
+
 if (!isset($rivitunnus)) $rivitunnus = 0;
 else $rivitunnus = (int) $rivitunnus;
 
@@ -337,9 +342,6 @@ if ($laskurow['tila'] == 'O' or $laskurow['tila'] == 'K') {
 }
 elseif ($laskurow["tilaustyyppi"] == 'E') {
   $rivityyppi = 'E'; // Ennakkotilausrivi
-}
-elseif ($laskurow["tilaustyyppi"] == 'H') {
-  $rivityyppi = 'H';  // saldoa varaamaton extranet-tilaus
 }
 elseif ($laskurow["tila"] == 'T') {
   $rivityyppi = 'T'; // Tarjousrivi
@@ -1583,7 +1585,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               }
 
               // Jos ei varata saldoa niin ei varata saldoa
-              if ($varataan_saldoa == "EI" and ($rivityyppi == 'G' or $rivityyppi == 'H')) {
+              if ($varataan_saldoa == "EI" and $rivityyppi == 'G') {
                 $varattu = 0;
               }
 

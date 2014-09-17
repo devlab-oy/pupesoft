@@ -1,5 +1,9 @@
 <?php
 
+/*
+Appendix (form KMD INF) to the value added tax return since 01.10.2014
+*/
+
 require "../inc/parametrit.inc";
 
 /*

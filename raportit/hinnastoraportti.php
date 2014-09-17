@@ -57,7 +57,7 @@ if ($raptee == "AJA") {
                    AND tuote.tuotetyyppi  not in ('A','B')
                    AND (tuote.status != 'P' or (SELECT sum(tuotepaikat.saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
                    ORDER BY $order_extra";
-  $productqueryresult = mysql_query($productquery) or pupe_error($productquery);
+  $productqueryresult = pupe_query($productquery);
 
   $showprod = TRUE;
 

@@ -18,7 +18,7 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
             WHERE kuka.kuka          = '$user'
             AND kuka.extranet       != ''
             AND kuka.oletus_asiakas != ''";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $krow = mysql_fetch_array($result);
 
   if ($salamd5!='')
@@ -50,7 +50,7 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
         if (strlen($yhtio) > 0) {
           $query .= " and yhtio = '$yhtio'";
         }
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
 
         $bool = setcookie("pupesoft_session", $session, time()+43200, "/");
 
@@ -155,7 +155,7 @@ if (isset($usea) and $usea == 1) {
             FROM kuka, yhtio
             WHERE kuka='$user'
             and yhtio.yhtio=kuka.yhtio";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
     echo t("Sinulle löytyi monta käyttäjätunnusta, muttei yhtään yritystä")."!";

@@ -70,7 +70,7 @@ if ($ytunnus != '' or $ytunnus == 'TULKAIKKI') {
             $lisa
             GROUP BY 1,2,3,4,5
             ORDER BY lasku.toimaika $suunta, lasku.nimi, lasku.tunnus";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if ($vain_excel != '' or $vain_excel_kaikki != '') {
     include 'inc/pupeExcel.inc';

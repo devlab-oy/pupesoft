@@ -96,7 +96,7 @@ foreach ($ups_path as $ups_key => $ups_val) {
               $query = "SELECT yhtio
                         FROM yhtio
                         WHERE ytunnus = '$xml_yhtio'";
-              $result = mysql_query($query) or die("Ei saatu yhtiota ytunnuksella $xml_yhtio\n".mysql_error()."\n\n");
+              $result = pupe_query($query);
 
               if (mysql_num_rows($result) == 1) {
                 $row = mysql_fetch_assoc($result);
@@ -105,7 +105,7 @@ foreach ($ups_path as $ups_key => $ups_val) {
                           rahtikirjanro  = concat(rahtikirjanro, '$ups_tracking_number')
                           WHERE yhtio    = '$row[yhtio]'
                           AND otsikkonro = $reference_number";
-                $result = mysql_query($query) or die("Ei voitu paivittaa $reference_number $ups_tracking_number\n".mysql_error()."\n\n");
+                $result = pupe_query($query);
 
                 $ups_lisattuja++;
               }

@@ -96,7 +96,7 @@ if ($tee == "TULOSTA") {
             $joinilisa
             WHERE asiakas.yhtio = '$kukarow[yhtio]'
             and asiakas.tunnus  in ($otunnus)";
-  $res = mysql_query($query) or pupe_error($query);
+  $res = pupe_query($query);
 
   $laskuri = 1;
   $sarake  = 1;
@@ -173,7 +173,7 @@ if ($tee == "TULOSTA") {
                  kentta01     = '$kukarow[nimi] tulosti osoitetarrat.\n$asmemo_viesti',
                  laatija      = '$kukarow[kuka]',
                  luontiaika   = now()";
-      $result = mysql_query($kysely) or pupe_error($kysely);
+      $result = pupe_query($kysely);
     }
 
     // k‰ytet‰‰n toim_ tietoja jos niin halutaan
@@ -427,7 +427,7 @@ if ($tee == '') {
             $lisa
             ORDER BY $jarjestys
             $limit";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $lim = "";
   $lim[$limitti] = "SELECTED";
 

@@ -35,7 +35,7 @@ if (mysql_field_name($result, $i) == "keraysvyohyke") {
   $ulos .= "<option value=''>".t("Valitse")."</option>";
 
   $query = "SELECT tunnus, nimitys FROM keraysvyohyke WHERE yhtio = '{$kukarow['yhtio']}' AND nimitys != ''";
-  $keraysvyohyke_result = mysql_query($query) or pupe_error($query);
+  $keraysvyohyke_result = pupe_query($query);
 
   while ($keraysvyohyke_row = mysql_fetch_assoc($keraysvyohyke_result)) {
 

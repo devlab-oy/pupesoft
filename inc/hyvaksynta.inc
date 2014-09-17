@@ -23,7 +23,7 @@ if ($tee == '') {
             and hyvaksyja_nyt != ''
             GROUP BY 1,2
             ORDER BY nimi";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<table>";
   echo "<tr>";
@@ -53,7 +53,7 @@ if ($tee == 'T') {
     $query = "SELECT hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, hyvaksyja_nyt, h1time, h2time, h3time, h4time, h5time
               FROM lasku
               WHERE tunnus = '$mika' and yhtio = '$kukarow[yhtio]'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
       echo "<font class='error'>".t("Muutettavaa laskua ei löytynyt")."!</font>";
@@ -80,7 +80,7 @@ if ($tee == 'T') {
                 hyvaksyja_nyt  = '$nimi',
                 alatila        = ''
                   WHERE tunnus = '$mika'";
-      $result = mysql_query($query) or pupe_error($query);
+      $result = pupe_query($query);
       echo "<font class='message'>".t("Lasku siirrettiin").".. '$kuka' --> '$nimi'</font><br>";
     }
     else {
@@ -92,7 +92,7 @@ if ($tee == 'T') {
             FROM kuka
             WHERE yhtio = '$kukarow[yhtio]'
             and kuka    = '$kuka'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
     echo "<font class='message'>".t("Käyttäjää ei enää löydy tältä yhtiöltä")."!</font><br>";
@@ -113,7 +113,7 @@ if ($tee == 'T') {
             AND kuka.extranet   = ''
             AND kuka.hyvaksyja  = 'o'
             ORDER BY kuka.nimi";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   $ulos = "<select name='nimi'>";
 
@@ -133,7 +133,7 @@ if ($tee == 'T') {
             and yhtio = '$kukarow[yhtio]'
             and tila  in ('H','Y','M','P','Q')
             ORDER BY erpcm";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<table><tr>";
   echo "<th>".t("Tapvm")."</th>";

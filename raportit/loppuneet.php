@@ -44,7 +44,7 @@ if ($tee != '') {
             $varastot
             group by 1,2,3,4,5,6,7,8,9,10,11
             ORDER BY osasto, try, tuoteno";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 498) {
     // echo "<font class='message'>yli500tuotettaraj!</font><br>";
@@ -65,7 +65,7 @@ if ($tee != '') {
     $query = "SELECT sum(varattu) varattu, min(toimaika) toimaika
               FROM tilausrivi
               WHERE yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and varattu>0 and tyyppi='O'";
-    $result1 = mysql_query($query) or pupe_error($query);
+    $result1 = pupe_query($query);
     $prow    = mysql_fetch_array($result1);
 
     echo "  <tr><td>$row[osasto]</td><td>$row[try]</td><td>$row[tuoteno]</td><td>".t_tuotteen_avainsanat($row, 'nimitys')."</td>
@@ -99,7 +99,7 @@ $query = "SELECT *
           FROM varastopaikat
           WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
           ORDER BY tyyppi, nimitys";
-$vtresult = mysql_query($query) or pupe_error($query);
+$vtresult = pupe_query($query);
 
 while ($vrow = mysql_fetch_array($vtresult)) {
   $sel = "";

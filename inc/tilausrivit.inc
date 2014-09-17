@@ -21,7 +21,7 @@ elseif (in_array($trow['tila'], array('H', 'Y', 'M', 'P', 'Q')) and (int) $laskr
   $query = "SELECT laskunro
             FROM lasku
             WHERE vanhatunnus = '$tunnus' and yhtio='$kukarow[yhtio]' and tila = 'K' limit 1";
-  $laskresult = mysql_query($query) or pupe_error($query);
+  $laskresult = pupe_query($query);
   $laskrow = mysql_fetch_array($laskresult);
 
   $query = "SELECT nimitys Nimitys, tuoteno Tuotenumero, kpl, yksikko Yksikkö, tilausrivi.hinta Hinta, rivihinta Rivihinta, tilausrivi.laatija Laatija, otunnus Tilaukselta
@@ -47,7 +47,7 @@ else {
             and yhtio='$kukarow[yhtio]'
             ORDER BY toimaika, tunnus";
 }
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0) {
 

@@ -144,6 +144,7 @@ if ($tee == 'deloikeu') {
   $query = "UPDATE kuka
             SET profiilit   = '',
             aktiivinen = 0,
+            hyvaksyja  = '',
             muuttaja   = '{$kukarow['kuka']}',
             muutospvm  = now()
             WHERE kuka = '{$selkuka}'
@@ -382,7 +383,7 @@ if ($tee == 'UUSI') {
               budjetti                      = '{$budjetti}',
               yhtio                         = '{$yhtio}'";
     $result = pupe_query($query);
-    $selkuka = mysql_insert_id();
+    $selkuka = mysql_insert_id($GLOBALS["masterlink"]);
 
     echo "<font class='message'>", t("Käyttäjä perustettu"), "! ({$selkuka})</font><br><br>";
     echo "<font class='error'>", t("Valitse nyt käyttäjän oletusasiakas"), "!</font><br><br>";

@@ -8,7 +8,7 @@ if ($tee == 'P') {
   $query = "SELECT tapvm, summa, selite
             FROM maksu
             WHERE tunnus = '$tunnus'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
     echo t("Maksua ei löydy")."!";
@@ -23,14 +23,14 @@ if ($tee == 'P') {
 
   $query = "DELETE from maksu
             WHERE tunnus = '$tunnus'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 }
 
 if ($tee == 'M') {
 
   $query = "UPDATE maksu set maksettu = '1'
             WHERE tunnus = '$tunnus'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 }
 
 if ($tee == 'U') {
@@ -39,7 +39,7 @@ if ($tee == 'U') {
     $query = "SELECT konserni
               FROM yhtio
               WHERE yhtio = '$kukarow[yhtio]'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
     if (mysql_num_rows($result) == 0) {
       echo t("Yritystä ei löydy")."!";
       exit;
@@ -56,7 +56,7 @@ if ($tee == 'U') {
               '$selite',
               '',
               '')";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
   }
 }
 
@@ -65,7 +65,7 @@ $query = "SELECT tapvm, summa, selite, tunnus
           WHERE yhtio ='$kukarow[yhtio]' and tyyppi = 'MU' and maksettu <> '1'
           ORDER BY tapvm";
 
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 echo "<table><tr><th></th>";
 

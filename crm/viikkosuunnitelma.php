@@ -130,11 +130,28 @@ if ($tee == '') {
   $konsernit = " and kalenteri.yhtio in (".substr($konsernit, 0, -1).") ";
 
   $tapahaku = '';
+
   if ($vstk == 'Asiakaskäynti') {
-    $tapahaku = "'Asiakaskäynti', 'Kliendikülastus'";
+    $tapahaku = "'Asiakaskäynti'";
+
+    foreach ($sanakirja_kielet as $kieli => $devnull) {
+      $kaannettyna = t("Asiakaskäynti", $kieli);
+
+      if ($kaannettyna != "Asiakaskäynti") {
+        $tapahaku .= ",'$kaannettyna'";
+      }
+    }
   }
   elseif ($vstk == 'Viikkosuunnitelma') {
-    $tapahaku = "'Viikkosuunnitelma', 'Nädalaplaan'";
+    $tapahaku = "'Viikkosuunnitelma'";
+
+    foreach ($sanakirja_kielet as $kieli => $devnull) {
+      $kaannettyna = t("Viikkosuunnitelma", $kieli);
+
+      if ($kaannettyna != "Viikkosuunnitelma") {
+        $tapahaku .= ",'$kaannettyna'";
+      }
+    }
   }
 
   $query = "SELECT asiakas.postitp, asiakas.postino, asiakas.ytunnus, asiakas.asiakasnro, kalenteri.yhtio, asiakas.nimi,
@@ -148,7 +165,7 @@ if ($tee == '') {
             and kalenteri.kuka    = '$kukarow[kuka]'
             and kalenteri.pvmalku >= '$viikkoalku 00:00:00'
             and kalenteri.pvmalku <= '$viikkoloppu 23:59:59'
-            and kalenteri.tapa    IN ($tapahaku)
+            and kalenteri.tapa    IN ({$tapahaku})
             and kalenteri.tyyppi  IN ('kalenteri','memo')
             order by kalenteri.tunnus";
   $result = pupe_query($query);

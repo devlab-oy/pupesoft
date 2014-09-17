@@ -561,7 +561,7 @@ if ($upd == 1) {
         foreach ($poista_liite as $key => $val) {
           if ($val > 0) {
             $delquery = " DELETE FROM liitetiedostot WHERE yhtio = '$kukarow[yhtio]' and liitos = 'Yllapito' and tunnus = '$val'";
-            $delres = mysql_query($delquery);
+            $delres = pupe_query($delquery);
             if (mysql_affected_rows() == 1) {
               $t[$key] = "";
             }
@@ -614,7 +614,7 @@ if ($upd == 1) {
     $result = pupe_query($query);
 
     if ($onko_tama_insert) {
-      $tunnus = mysql_insert_id();
+      $tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
       //lisätään myös huoltosyklit jos on kyse laitteesta
       if ($toim == 'laite' and $yhtiorow['laite_huolto'] == 'X') {

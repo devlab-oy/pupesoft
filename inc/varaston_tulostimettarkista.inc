@@ -53,7 +53,7 @@ if (!function_exists("varaston_tulostimettarkista")) {
                 and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$alkuhyllyalue') ,5,'0'),lpad(upper('$alkuhyllynro') ,5,'0'))
                 and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$alkuhyllyalue') ,5,'0'),lpad(upper('$alkuhyllynro') ,5,'0'))
                 and yhtio  = '$kukarow[yhtio]'";
-      $vares = mysql_query($query) or pupe_error($query);
+      $vares = pupe_query($query);
 
       if (mysql_num_rows($vares) == 0) {
         //Katotaan osuuko loppuhyllyalue johonkin tulostusalueeseen
@@ -64,7 +64,7 @@ if (!function_exists("varaston_tulostimettarkista")) {
                   and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad(upper('$loppuhyllynro') ,5,'0'))
                   and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad(upper('$loppuhyllynro') ,5,'0'))
                   and yhtio  = '$kukarow[yhtio]'";
-        $vares = mysql_query($query) or pupe_error($query);
+        $vares = pupe_query($query);
 
         if (mysql_num_rows($vares) == 0) {
           //Katotaan onko jo jonkun tulostusalueen sisällä
@@ -75,7 +75,7 @@ if (!function_exists("varaston_tulostimettarkista")) {
                     and concat(rpad(upper(alkuhyllyalue)  ,5,'0'),lpad(upper(alkuhyllynro)  ,5,'0')) <= concat(rpad(upper('$loppuhyllyalue') ,5,'0'),lpad(upper('$loppuhyllynro') ,5,'0'))
                     and concat(rpad(upper(loppuhyllyalue) ,5,'0'),lpad(upper(loppuhyllynro) ,5,'0')) >= concat(rpad(upper('$alkuhyllyalue') ,5,'0'),lpad(upper('$alkuhyllynro') ,5,'0'))
                     and yhtio  = '$kukarow[yhtio]'";
-          $vares = mysql_query($query) or pupe_error($query);
+          $vares = pupe_query($query);
         }
       }
 

@@ -90,7 +90,7 @@ if ($kollityht > 0) {
               FROM lasku
               WHERE yhtio='$kukarow[yhtio]' and tunnus in ($otunnukset)
               ORDER BY tunnus limit 1";
-    $laskures = mysql_query($query) or pupe_error($query);
+    $laskures = pupe_query($query);
     $laskurow = mysql_fetch_array($laskures);
 
     for ($i=0;$i<mysql_num_fields($laskures);$i++) {
@@ -110,7 +110,7 @@ if ($kollityht > 0) {
     $query = "SELECT *
               FROM asiakas
               WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
-    $asres = mysql_query($query) or pupe_error($query);
+    $asres = pupe_query($query);
     $asrow = mysql_fetch_array($asres);
 
     for ($i=0;$i<mysql_num_fields($asres);$i++) {
@@ -187,7 +187,7 @@ if ($kollityht > 0) {
               WHERE laskun_lisatiedot.yhtio = '$kukarow[yhtio]'
               and otunnus                   IN ($otunnukset)
               and yhteyshenkilo_tekninen    > 0";
-    $yhres = mysql_query($query) or pupe_error($query);
+    $yhres = pupe_query($query);
 
     if (mysql_num_rows($yhres) == 0) {
       $query = "SELECT nimi, titteli, email, puh, gsm, fax
@@ -196,13 +196,13 @@ if ($kollityht > 0) {
                 WHERE laskun_lisatiedot.yhtio = '$kukarow[yhtio]'
                 and otunnus                   IN ($otunnukset)
                 and yhteyshenkilo_tekninen    > 0";
-      $yhres = mysql_query($query) or pupe_error($query);
+      $yhres = pupe_query($query);
 
       if (mysql_num_rows($yhres) == 0) {
         $query = "SELECT '2' O, '' nimi, '' titteli, email, puhelin puh, gsm, fax
                   FROM asiakas
                   WHERE yhtio='$kukarow[yhtio]' and tunnus='$laskurow[liitostunnus]'";
-        $yhres = mysql_query($query) or pupe_error($query);
+        $yhres = pupe_query($query);
       }
     }
 

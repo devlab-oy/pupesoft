@@ -46,7 +46,7 @@ if (!function_exists('pupevoice_otsik')) {
     if ((int) $lasrow["yhtio_toimipaikka"] != 0) {
       // haetaan toimipaikan tiedot
       $alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$lasrow[yhtio]' and tunnus='$lasrow[yhtio_toimipaikka]'";
-      $alhire = mysql_query($alhqur) or pupe_error($alhqur);
+      $alhire = pupe_query($alhqur);
 
       if (mysql_num_rows($alhire) == 1) {
         $alhiro = mysql_fetch_assoc($alhire);
@@ -63,7 +63,7 @@ if (!function_exists('pupevoice_otsik')) {
     if ($lasrow["yhtio_ovttunnus"] != "" and $lasrow["yhtio_ovttunnus"] != $yhtiorow["ovttunnus"]) {
       // haetaan toimipaikan tiedot
       $alhqur = "SELECT puhelin, fax, email, www from yhtion_toimipaikat where yhtio='$lasrow[yhtio]' and vat_numero='$lasrow[yhtio_ovttunnus]'";
-      $alhire = mysql_query($alhqur) or pupe_error($alhqur);
+      $alhire = pupe_query($alhqur);
 
       if (mysql_num_rows($alhire) == 1) {
         $alhiro = mysql_fetch_assoc($alhire);
@@ -80,7 +80,7 @@ if (!function_exists('pupevoice_otsik')) {
     if (!$y_tiedot_ok) {
       // haetaan toimipaikan tiedot
       $alhqur = "SELECT puhelin, fax, email, www from yhtio where yhtio='$lasrow[yhtio]'";
-      $alhire = mysql_query($alhqur) or pupe_error($alhqur);
+      $alhire = pupe_query($alhqur);
 
       if (mysql_num_rows($alhire) == 1) {
         $alhiro = mysql_fetch_assoc($alhire);

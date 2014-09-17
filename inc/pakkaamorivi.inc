@@ -21,7 +21,7 @@ if (substr(mysql_field_name($result, $i), 0, 9) == 'printteri') {
             WHERE yhtio  = '$kukarow[yhtio]'
             AND komento != 'EDI'
             ORDER BY kirjoitin";
-  $kires = mysql_query($query) or pupe_error($query);
+  $kires = pupe_query($query);
 
   $ulos .= "<option value=''>".t("Ei kirjoitinta")."</option>";
 
@@ -51,7 +51,7 @@ if (mysql_field_name($result, $i) == "varasto") {
             FROM varastopaikat
             WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
             ORDER BY tyyppi, nimitys";
-  $varasto_res = mysql_query($query) or pupe_error($query);
+  $varasto_res = pupe_query($query);
 
   while ($varasto_row = mysql_fetch_array($varasto_res)) {
     if ($varasto_row["tunnus"] == $row[$i]) {

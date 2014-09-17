@@ -97,7 +97,7 @@ $query  = "SELECT oletus_rahatili, nimi, tilino
            WHERE yhtio          = '$kukarow[yhtio]'
            AND kaytossa         = ''
            AND oletus_rahatili != ''";
-$ratire = mysql_query($query) or pupe_error($query);
+$ratire = pupe_query($query);
 
 echo "<th>".t("Pankkitili")."</th>";
 echo "<td>";
@@ -131,7 +131,7 @@ if ($tee == "1") {
              and kaytossa         = ''
              $rahatili_lisa
              and oletus_rahatili != ''";
-  $ratire = mysql_query($query) or pupe_error($query);
+  $ratire = pupe_query($query);
   $ratiro = mysql_fetch_array($ratire);
 
   if ($ratiro["rahatilit"] != "") {
@@ -184,7 +184,7 @@ if ($tee == "1") {
               and  $lisa
               GROUP BY lasku.tunnus
               ORDER BY o_pvm, o_sum";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     pupe_DataTables(array(array($pupe_DataTables, 7, 7)));
 

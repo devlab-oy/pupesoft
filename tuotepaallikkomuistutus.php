@@ -53,7 +53,7 @@
 						AND toimi.hintojenpaivityssykli in ($syklit))
 					WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
 					GROUP BY tuotteen_toimittajat.liitostunnus";
-		$result = mysql_query($sql) or pupe_error($sql);
+		$result = pupe_query($sql);
 
 		$laheta_meilit = array();
 
@@ -69,7 +69,7 @@
 									AND tuote.status not in ('P','X'))
 							WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
 							AND tuotteen_toimittajat.liitostunnus = '$ttrow[liitostunnus]'";
-				$result2 = mysql_query($tuotteet) or pupe_error($tuotteet);
+				$result2 = pupe_query($tuotteet);
 				$tuoterow = mysql_fetch_assoc($result2);
 
 				// 3. haetaan kyseisien tuotteiden tuotepäällikkönro
@@ -78,7 +78,7 @@
 							WHERE yhtio = '$kukarow[yhtio]'
 							AND tunnus in ($tuoterow[lista_tunnuksista])
 							AND tuotepaallikko != 0";
-				$result3 = mysql_query($tuotesql) or pupe_error($tuotesql);
+				$result3 = pupe_query($tuotesql);
 
 				while ($henkilot = mysql_fetch_assoc($result3)) {
 					$laheta_meilit[$henkilot["tuotepaallikko"]][$ttrow["liitostunnus"]] = $ttrow["nimi"];
@@ -100,7 +100,7 @@
 									FROM kuka
 									WHERE yhtio = '$kukarow[yhtio]'
 									AND myyja = '$key'";
-					$resuposti = mysql_query($postisql) or pupe_error($postisql);
+					$resuposti = pupe_query($postisql);
 
 					while ($posti = mysql_fetch_assoc($resuposti)) {
 

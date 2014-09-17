@@ -82,7 +82,7 @@ if ($tee == 'aja') {
              and lasku.toimaika >= '$alkupvm' and lasku.toimaika <= '$loppupvm')
 
              ORDER BY 1, 3 ";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   pupe_DataTables(array(array($pupe_DataTables, 7, 7, false, false)));
 
@@ -153,7 +153,7 @@ if ($tee == 'aja') {
                    JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
                    WHERE lasku.yhtio = '$kukarow[yhtio]'
                    and lasku.tunnus  = '$prow[Tilausnro]'";
-      $sumresult = mysql_query($sumquery) or pupe_error($sumquery);
+      $sumresult = pupe_query($sumquery);
       $sumrow = mysql_fetch_array($sumresult);
 
       $sumrow["arvo"]  = (float) $sumrow["arvo"];

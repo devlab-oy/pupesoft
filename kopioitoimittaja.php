@@ -7,7 +7,7 @@ if ($tee == "write") {
   $query = "SELECT *
             FROM toimi
             WHERE tunnus = '$id'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $trow = mysql_fetch_array($result);
 
   // Tarkistetaan
@@ -34,8 +34,8 @@ if ($tee == "write") {
     }
     $query .= ")";
 
-    $result = mysql_query($query) or pupe_error($query);
-    $uusiidee = mysql_insert_id();
+    $result = pupe_query($query);
+    $uusiidee = mysql_insert_id($GLOBALS["masterlink"]);
 
     //  Tämä funktio tekee myös oikeustarkistukset!
     synkronoi($kukarow["yhtio"], "toimi", $uusiidee, "", "");
@@ -57,7 +57,7 @@ if ($tee == "edit") {
   $query = "SELECT *
             FROM toimi
             WHERE tunnus='$id' and yhtio='$kukarow[yhtio]'";
-  $result = mysql_query($query) or die ("Kysely ei onnistu $query");
+  $result = pupe_query($query);
   $trow = mysql_fetch_array($result);
   echo "<table>";
 
@@ -138,7 +138,7 @@ if ($tee == '') {
   $query = "SELECT $kentat FROM toimi WHERE yhtio = '$kukarow[yhtio]' $lisa ";
   $query .= "$ryhma ORDER BY $jarjestys LIMIT 100";
 
-  $result = mysql_query($query)
+  $result = pupe_query($query)
     or die ("Kysely ei onnistu $query");
 
   echo "  <table><tr>

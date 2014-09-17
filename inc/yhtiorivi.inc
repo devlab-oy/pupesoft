@@ -38,7 +38,7 @@ if (mysql_field_name($result, $i) == "maa" or mysql_field_name($result, $i) == "
             FROM maat
             WHERE nimi != ''
             ORDER BY koodi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
   $ulos = "<td><select name='$nimi'>";
 
   while ($vrow = mysql_fetch_array($vresult)) {
@@ -58,7 +58,7 @@ if (mysql_field_name($result, $i) == "valkoodi") { //valuutta
             FROM valuu
             WHERE yhtio = '$kukarow[yhtio]'
             ORDER BY jarjestys";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
   $ulos = "<td><select name='$nimi'>";
 
   while ($vrow=mysql_fetch_array($vresult)) {
@@ -144,7 +144,7 @@ if ((mysql_field_name($result, $i) == "kassa") or
     $query = "SELECT nimi
               FROM tili
               WHERE yhtio='$kukarow[yhtio]' and tilino = '$trow[$i]'";
-    $vresult = mysql_query($query) or pupe_error($query);
+    $vresult = pupe_query($query);
 
     if (mysql_num_rows($vresult) == 1) {
       $vrow = mysql_fetch_array($vresult);
@@ -196,7 +196,7 @@ if ((mysql_field_name($result, $i) == "kassa") or
 
         $query .= " ORDER BY tilino";
 
-        $vresult = mysql_query($query) or pupe_error($query);
+        $vresult = pupe_query($query);
 
         if (mysql_num_rows($vresult) > 0) {
           $ulos .= "<table style='display:inline;'>";
@@ -227,7 +227,7 @@ if (mysql_field_name($result, $i) == "myynti_projekti" or mysql_field_name($resu
             and tyyppi    = '$kptyyppi'
             and kaytossa != 'E'
             ORDER BY koodi+0, koodi, nimi";
-  $vresult = mysql_query($tpque) or pupe_error($tpque);
+  $vresult = pupe_query($tpque);
 
   $sel="";
   if ($trow[$i] == "") {
@@ -252,7 +252,7 @@ if (mysql_field_name($result, $i) == "tilikauden_tulos") {
             from tili
             where yhtio = '$kukarow[yhtio]'
             and LEFT(tilino, 1) = BINARY '2'";
-  $vresult = mysql_query($tpque) or pupe_error($tpque);
+  $vresult = pupe_query($tpque);
 
   $ulos = "<td><select name='$nimi'><option value=''>".t("Ei valintaa")."</option>";
 

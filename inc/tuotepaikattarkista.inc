@@ -10,7 +10,7 @@ if (!function_exists("tuotepaikattarkista")) {
                 FROM tuote
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tuoteno = '$t[$i]'";
-      $chktuote = mysql_query($query) or pupe_error($query);
+      $chktuote = pupe_query($query);
 
       $tmp_tuotenoind = $i;
 

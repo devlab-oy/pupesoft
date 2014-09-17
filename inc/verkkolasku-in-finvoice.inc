@@ -34,6 +34,7 @@ if (strpos($file, "maventa") !== false) {
 // parseroidaan xml
 $yhtio = xml_string($xml->BuyerOrganisationUnitNumber);
 $verkkotunnus_vas = xml_string($xml->BuyerPartyDetails->BuyerOrganisationTaxCode);
+$verkkotunnus_vas_inv = xml_string($xml->InvoiceRecipientPartyDetails->InvoiceRecipientOrganisationTaxCode);
 $laskun_tyyppi = xml_string($xml->InvoiceDetails->InvoiceTypeCode);
 $laskun_tyyppi_teksti = xml_string($xml->InvoiceDetails->InvoiceTypeText);
 $laskun_numero = xml_string($xml->InvoiceDetails->InvoiceNumber);
@@ -73,6 +74,10 @@ $ostaja_asiakkaantiedot["postitp"] = xml_string($xml->BuyerPartyDetails->BuyerPo
 
 if ($laskuttajan_vat == "" and $laskuttajan_identifier != "") {
   $laskuttajan_vat = $laskuttajan_identifier;
+}
+
+if ($verkkotunnus_vas == "" and $verkkotunnus_vas_inv != "") {
+  $verkkotunnus_vas = $verkkotunnus_vas_inv;
 }
 
 $laskuttajan_toimittajanumero = "";

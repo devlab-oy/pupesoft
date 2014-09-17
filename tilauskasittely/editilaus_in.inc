@@ -121,59 +121,59 @@ unset($arow_terminaali);
 unset($yhtiorow);
 unset($crossdock911);
 
-$toimpvm          = date("Y-m-d");
-$vastaustapa       = "";
-$editilaus_tila         = "N"; // laskun tila
-$editilaus_alatila    = "";
-$editilaus_tyyppi       = "L"; // tilausrivi tyyppi
-$id                     = "";
-$edi_kommentti          = "";
-$vastaustapa            = "";
-$maksaja                = "";
-$viite                  = "";
-$asiakkaan_tilausnumero  = "";
-$editilaus_otsikko_ok   = "";
-$suunnistus             = "";
-$tnimi                  = "";
-$tnimitark              = "";
-$tpostitp               = "";
-$tpostino               = "";
-$tosoite                = "";
-$lnimi          = "";
-$lnimitark        = "";
-$lpostitp        = "";
-$lpostino        = "";
-$losoite        = "";
-$lopnumero              = "";
-$lopnimi                = "";
-$loppostitp             = "";
-$loppostino             = "";
-$loposoite              = "";
-$ltoim_maa        = "";
-$ltoim_puh        = "";
-$yhteyshenkilon_puhelin = "";
-$tilausyhteyshenkilo  = "";
-$lopviesti              = "";
-$veromaara        = "";
-$ohjausmerkki      = "";
-$ketjutus               = "";
-$editilaus_maksuehto  = "";
-$editilaus_maksuteksti  = "";
-$editilaus_toimitustapa = "";
-$editilaus_rahtivapaa  = "";
-$editilaus_tilaustyyppi = "";
-$editilaus_eilahetetta  = "";
-$editilaus_sisainen    = "";
-$editilaus_kassalipas  = "";
-$til_vienti        = "";
-$verkkokauppavarasto  = "";
-$verkkokauppavarasto_li  = "";
-$editilaus_loppuhinta  = "";
-$kieltolisa        = "";
-$verkkokauppa = "";
+$toimpvm                    = date("Y-m-d");
+$vastaustapa                = "";
+$editilaus_tila             = "N"; // laskun tila
+$editilaus_alatila          = "";
+$editilaus_tyyppi           = "L"; // tilausrivi tyyppi
+$id                         = "";
+$edi_kommentti              = "";
+$vastaustapa                = "";
+$maksaja                    = "";
+$viite                      = "";
+$asiakkaan_tilausnumero     = "";
+$editilaus_otsikko_ok       = "";
+$suunnistus                 = "";
+$tnimi                      = "";
+$tnimitark                  = "";
+$tpostitp                   = "";
+$tpostino                   = "";
+$tosoite                    = "";
+$lnimi                      = "";
+$lnimitark                  = "";
+$lpostitp                   = "";
+$lpostino                   = "";
+$losoite                    = "";
+$lopnumero                  = "";
+$lopnimi                    = "";
+$loppostitp                 = "";
+$loppostino                 = "";
+$loposoite                  = "";
+$ltoim_maa                  = "";
+$ltoim_puh                  = "";
+$yhteyshenkilon_puhelin     = "";
+$tilausyhteyshenkilo        = "";
+$lopviesti                  = "";
+$veromaara                  = "";
+$ohjausmerkki               = "";
+$ketjutus                   = "";
+$editilaus_maksuehto        = "";
+$editilaus_maksuteksti      = "";
+$editilaus_toimitustapa     = "";
+$editilaus_rahtivapaa       = "";
+$editilaus_tilaustyyppi     = "";
+$editilaus_eilahetetta      = "";
+$editilaus_sisainen         = "";
+$editilaus_kassalipas       = "";
+$til_vienti                 = "";
+$verkkokauppavarasto        = "";
+$verkkokauppavarasto_li     = "";
+$editilaus_loppuhinta       = "";
+$kieltolisa                 = "";
+$verkkokauppa               = "";
 $ot_verkkokauppa_asiakasnro = "";
-$OT_ASIAKASNRO      = "";
-$merkkitieto      = "";
+$OT_ASIAKASNRO              = "";
+$merkkitieto                = "";
 
 // nollataan kaikki rivin muuttujat (nämä samat pitää tehdä tuote insertin jälkeen)
 $tuoteerror        = 1; // oletetaan aina ettei  tuotetta löydy
@@ -1052,26 +1052,26 @@ while ($tietue = fgets($fd)) {
 
       // Verkkokauppatilauksissa luotamme tiedoston laskutustietoihin
       if ($edi_tyyppi == "magento") {
-        $arow["nimi"]    = $lnimi;
-        $arow["nimitark"]  = $lnimitark;
-        $arow["osoite"]    = $losoite;
-        $arow["postitp"]  = $lpostitp;
-        $arow["postino"]  = $lpostino;
-        $arow["maa"]    = $ltoim_maa;
-        $arow["toim_puh"]  = $ltoim_puh;
+        $arow["nimi"]       = $lnimi;
+        $arow["nimitark"]   = $lnimitark;
+        $arow["osoite"]     = $losoite;
+        $arow["postitp"]    = $lpostitp;
+        $arow["postino"]    = $lpostino;
+        $arow["maa"]        = $ltoim_maa;
+        $arow["toim_puh"]   = $ltoim_puh;
         $arow["toim_email"] = $ltoim_email;
-        $arow["vienti"]    = "";
+        $arow["vienti"]     = "";
 
         $arow['laskutus_nimi']     = $lnimi;
-        $arow['laskutus_nimitark']   = $lnimitark;
-        $arow['laskutus_osoite']  = $losoite;
-        $arow['laskutus_postitp']   = $lpostitp;
-        $arow['laskutus_postino']   = $lpostino;
-        $arow['laskutus_maa']    = $ltoim_maa;
+        $arow['laskutus_nimitark'] = $lnimitark;
+        $arow['laskutus_osoite']   = $losoite;
+        $arow['laskutus_postitp']  = $lpostitp;
+        $arow['laskutus_postino']  = $lpostino;
+        $arow['laskutus_maa']      = $ltoim_maa;
 
-        if ($arow["maa"] != $yhtiorow["maa"] and $arow["maa"] != "") {
+        if ($arow["maa"] != "" and $arow["maa"] != $yhtiorow["maa"]) {
           // katsotaan mimmosesta viennistä on kysymys
-          $maa_eu_query = "SELECT distinct eu
+          $maa_eu_query = "SELECT DISTINCT eu
                            FROM maat
                            WHERE koodi = '$arow[maa]'";
           $maa_eu_res = pupe_query($maa_eu_query);
@@ -1081,34 +1081,41 @@ while ($tietue = fgets($fd)) {
             $arow["vienti"] = "K";
           }
           else {
-            // Jos EU-yksityishenkilkölle menee verollisena
-            if ($veromaara != 0) {
-              $arow["vienti"] = "";
-            }
-            else {
-              $arow["vienti"] = "E";
-            }
+            $arow["vienti"] = "E";
+          }
+
+          // Jos yksityishenkilkölle menee verollisena
+          if ($veromaara != 0) {
+            $wquery = " SELECT selite
+                        FROM avainsana
+                        WHERE yhtio     = '$kukarow[yhtio]'
+                        AND laji        = 'alv'
+                        AND selitetark != ''";
+            $wtres  = pupe_query($wquery);
+            $wtrow  = mysql_fetch_assoc($wtres);
+
+            $arow["alv"] = $wtrow["selite"];
           }
         }
       }
 
       if (trim($arow['laskutus_nimi']) == '') {
         $arow['laskutus_nimi']     = $arow['nimi'];
-        $arow['laskutus_nimitark']  = $arow['nimitark'];
-        $arow['laskutus_osoite']  = $arow['osoite'];
+        $arow['laskutus_nimitark'] = $arow['nimitark'];
+        $arow['laskutus_osoite']   = $arow['osoite'];
         $arow['laskutus_postitp']  = $arow['postitp'];
         $arow['laskutus_postino']  = $arow['postino'];
-        $arow['laskutus_maa']    = $arow['maa'];
+        $arow['laskutus_maa']      = $arow['maa'];
       }
 
       // jos asiakkalla ei ole toimitusosoitetietoja, kopsataan laskutustiedot
       if (trim($arow['toim_nimi']) == "") {
-        $arow['toim_nimi']    = $arow['nimi'];
+        $arow['toim_nimi']      = $arow['nimi'];
         $arow['toim_nimitark']  = $arow['nimitark'];
-        $arow['toim_osoite']  = $arow['osoite'];
-        $arow['toim_postitp']  = $arow['postitp'];
-        $arow['toim_postino']  = $arow['postino'];
-        $arow['toim_maa']    = $arow['maa'];
+        $arow['toim_osoite']    = $arow['osoite'];
+        $arow['toim_postitp']   = $arow['postitp'];
+        $arow['toim_postino']   = $arow['postino'];
+        $arow['toim_maa']       = $arow['maa'];
       }
 
       // jos tilauksessa on tullut poikkeava nimi, postino ja postitp otetaan kaikki tiedot tilaukselta (PAITSI JO KYSESSÄ ON KOONTIKULJETUSKEISSI)
@@ -1118,9 +1125,9 @@ while ($tietue = fgets($fd)) {
           $tnimitark = "";
         }
 
-        $arow['toim_nimi']    = $tnimi;
-        $arow['toim_nimitark']  = $tnimitark;
-        $arow['toim_osoite']  = $tosoite;
+        $arow['toim_nimi']     = $tnimi;
+        $arow['toim_nimitark'] = $tnimitark;
+        $arow['toim_osoite']   = $tosoite;
         $arow['toim_postino']  = $tpostino;
         $arow['toim_postitp']  = $tpostitp;
       }
@@ -2276,17 +2283,17 @@ while ($tietue = fgets($fd)) {
     unset($arow_terminaali);
     unset($crossdock911);
 
-    $toimpvm          = date("Y-m-d");
-    $vastaustapa       = "";
+    $toimpvm                = date("Y-m-d");
+    $vastaustapa            = "";
     $editilaus_tila         = "N"; // laskun tila
-    $editilaus_alatila    = "";
+    $editilaus_alatila      = "";
     $editilaus_tyyppi       = "L"; // tilausrivi tyyppi
     $id                     = "";
     $edi_kommentti          = "";
     $vastaustapa            = "";
     $maksaja                = "";
     $viite                  = "";
-    $asiakkaan_tilausnumero  = "";
+    $asiakkaan_tilausnumero = "";
     $editilaus_otsikko_ok   = "";
     $suunnistus             = "";
     $tnimi                  = "";
@@ -2294,39 +2301,39 @@ while ($tietue = fgets($fd)) {
     $tpostitp               = "";
     $tpostino               = "";
     $tosoite                = "";
-    $lnimi          = "";
-    $lnimitark        = "";
-    $lpostitp        = "";
-    $lpostino        = "";
-    $losoite        = "";
+    $lnimi                  = "";
+    $lnimitark              = "";
+    $lpostitp               = "";
+    $lpostino               = "";
+    $losoite                = "";
     $lopnumero              = "";
     $lopnimi                = "";
     $loppostitp             = "";
     $loppostino             = "";
     $loposoite              = "";
-    $ltoim_maa        = "";
-    $ltoim_puh        = "";
+    $ltoim_maa              = "";
+    $ltoim_puh              = "";
     $yhteyshenkilon_puhelin = "";
-    $tilausyhteyshenkilo  = "";
+    $tilausyhteyshenkilo    = "";
     $lopviesti              = "";
-    $veromaara        = "";
-    $ohjausmerkki      = "";
+    $veromaara              = "";
+    $ohjausmerkki           = "";
     $ketjutus               = "";
-    $editilaus_maksuehto  = "";
+    $editilaus_maksuehto    = "";
     $editilaus_maksuteksti  = "";
     $editilaus_toimitustapa = "";
-    $editilaus_rahtivapaa  = "";
+    $editilaus_rahtivapaa   = "";
     $editilaus_tilaustyyppi = "";
     $editilaus_eilahetetta  = "";
-    $editilaus_sisainen    = "";
-    $editilaus_kassalipas  = "";
-    $til_vienti        = "";
-    $verkkokauppavarasto  = "";
-    $verkkokauppavarasto_li  = "";
-    $editilaus_loppuhinta  = "";
-    $kieltolisa        = "";
-    $OT_ASIAKASNRO      = "";
-    $merkkitieto       = "";
+    $editilaus_sisainen     = "";
+    $editilaus_kassalipas   = "";
+    $til_vienti             = "";
+    $verkkokauppavarasto    = "";
+    $verkkokauppavarasto_li = "";
+    $editilaus_loppuhinta   = "";
+    $kieltolisa             = "";
+    $OT_ASIAKASNRO          = "";
+    $merkkitieto            = "";
     break;
   }
 }

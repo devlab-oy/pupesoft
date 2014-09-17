@@ -1509,6 +1509,11 @@ if (!function_exists("saldo_myytavissa")) {
         $valinta2 = "";
         $valinta3 = " varastopaikat.tyyppi is null ";
       }
+      elseif ($tyyppi == "NORMI") {
+        $valinta1 = " varastopaikat.tyyppi = '' and ";
+        $valinta2 = "";
+        $valinta3 = " varastopaikat.tyyppi is not null ";
+      }
       else {
         $valinta1 = " (varastopaikat.tyyppi = '' or (varastopaikat.tyyppi = 'E' and varastopaikat.erikoistoimitus_alarajasumma > 0 and '$tuote[myyntihinta]' >= varastopaikat.erikoistoimitus_alarajasumma)) and ";
         $valinta2 = "";
@@ -3328,32 +3333,46 @@ if (!function_exists("alv")) {
     global $yhtiorow, $kukarow;
 
     ///* Sis‰‰n *///
-    // $alv                      --> K‰ytt‰j‰n syˆtt‰m‰ ALV
-    // $hinta            --> alehinta-funktion laskema hinta
-    // $trow[alv]               --> Tuotteen ALV
-    // $laskurow[vienti]          --> Laskun tyyppi (kotimaa '', vientieu 'E' , vienti eieu 'K')
-    // $laskurow[ytunnus]       --> Laskunsaajan y-tunnus
-    // $laskurow[tila]          --> Laskun tila O=osto, muut tilat on myynti‰
-    // $laskurow[alv]           --> Laskun otsikolla oleva alv
-    // $laskurow[valkoodi]      --> Laskun valuutta
+    // $alv                --> K‰ytt‰j‰n syˆtt‰m‰ ALV
+    // $hinta              --> alehinta-funktion laskema hinta
+    // $trow[alv]          --> Tuotteen ALV
+    // $laskurow[vienti]   --> Laskun tyyppi (kotimaa '', vientieu 'E' , vienti eieu 'K')
+    // $laskurow[ytunnus]  --> Laskunsaajan y-tunnus
+    // $laskurow[tila]     --> Laskun tila O=osto, muut tilat on myynti‰
+    // $laskurow[alv]      --> Laskun otsikolla oleva alv
+    // $laskurow[valkoodi] --> Laskun valuutta
 
     ///* Ulos *///
-    // $alv                      --> Uusi laskettu ALV
-    // $hinta                 --> Uusi laskettu kappalehinta
-
-    //yhtiˆn oletusalvi!
-    $wquery = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='alv' and selitetark!=''";
-    $wtres  = pupe_query($wquery);
-    $wtrow  = mysql_fetch_assoc($wtres);
+    // $alv                --> Uusi laskettu ALV
+    // $hinta              --> Uusi laskettu kappalehinta
 
     // jos meill‰ on tuotteelta tuleva poikkeava tuotteen alv, k‰ytet‰‰n sit‰
     if ($alehinta_alv != 0) {
       $trow["alv"]     = $alehinta_alv;
+
+      //yhtiˆn oletusalvi!
+      $wquery = "SELECT selite
+                 FROM avainsana
+                 WHERE yhtio     = '$kukarow[yhtio]'
+                 AND laji        = 'alv'
+                 AND selitetark != ''";
+      $wtres  = pupe_query($wquery);
+      $wtrow  = mysql_fetch_assoc($wtres);
+
       $wtrow["selite"] = $laskurow["alv"]; // otetaan "yhtiˆn oletus" laskulta, koska t‰ss‰ keisiss‰ siell‰ pit‰s olla yhtiˆn oletus aina
     }
 
+    if ($laskurow["tila"] != "O") {
+      $asque = "SELECT laji
+                FROM asiakas
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tunnus  = '$laskurow[liitostunnus]'";
+      $asres  = pupe_query($asque);
+      $asrow  = mysql_fetch_assoc($asres);
+    }
+
     if ($laskurow["tila"] == "O") {
-      //Jos k‰ytt‰j‰ on valinnut drop-downista jonkun nollasta poikkeavan alvin, niin lasketaan sen verran alvia pois hinnasta
+      // Jos k‰ytt‰j‰ on valinnut drop-downista jonkun nollasta poikkeavan alvin, niin lasketaan sen verran alvia pois hinnasta
       // Oletuksena ostohinnat ovat t‰ll‰ hetkell‰ ilman alvia
       if ($alv != 0) {
         $hinta = round($hinta / (1+$alv/100), $yhtiorow['hintapyoristys']);
@@ -3363,37 +3382,37 @@ if (!function_exists("alv")) {
     }
     elseif ($alv >= 600) {
       //T‰ss‰ keississ‰ on k‰‰nteisen verotuksen
-      if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 600;                      // Otsikolla on valittu veroton myynti, esim Ahvenanmaan mynti‰
-      if ($laskurow["vienti"] == ""  and $laskurow["alv"] != 0) $alv = $trow["alv"]+600;                // Otsikolla on valittu verollinen kotimaan myynti
-      if ($laskurow["vienti"] == "E" and $laskurow["ytunnus"] != "") $alv = 600;                     // EU-vienti ytunnuksella --> alviton
-      if ($laskurow["vienti"] == "K") $alv = 600;                                   // Vienti eu:n ulkopuolelle on aina verotonta
+      if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 600;              // Otsikolla on valittu veroton myynti, esim Ahvenanmaan mynti‰
+      if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0) $alv = $trow["alv"]+600; // Otsikolla on valittu verollinen kotimaan myynti
+      if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") $alv = 600;              // EU-vienti yritykselle --> alviton
+      if ($laskurow["vienti"] == "K" and $asrow["laji"] != "H") $alv = 600;              // Vienti eu:n ulkopuolelle yritykselle --> alviton
 
       $alv = (float) $alv;
     }
     elseif ($alv >= 500) {
       //T‰ss‰ keississ‰ on marginaalimyynti‰
-      if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 500;                      // Otsikolla on valittu veroton myynti, esim Ahvenanmaan mynti‰
-      if ($laskurow["vienti"] == ""  and $laskurow["alv"] != 0) $alv = $trow["alv"]+500;                // Otsikolla on valittu verollinen kotimaan myynti
-      if ($laskurow["vienti"] == "E" and $laskurow["ytunnus"] != "") $alv = 500;                     // EU-vienti ytunnuksella --> alviton
-      if ($laskurow["vienti"] == "K") $alv = 500;                                   // Vienti eu:n ulkopuolelle on aina verotonta
+      if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 500;              // Otsikolla on valittu veroton myynti, esim Ahvenanmaan mynti‰
+      if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0) $alv = $trow["alv"]+500; // Otsikolla on valittu verollinen kotimaan myynti
+      if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") $alv = 500;              // EU-vienti yritykselle --> alviton
+      if ($laskurow["vienti"] == "K" and $asrow["laji"] != "H") $alv = 500;              // Vienti eu:n ulkopuolelle yritykselle --> alviton
 
       $alv = (float) $alv;
     }
     elseif ($yhtiorow["alv_kasittely"] != "") {
       //T‰ss‰ keississ‰ kaikki hinnat ovat aina verottomia ja vero lis‰t‰‰n vasta laskutuksessa
-      if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 0;                        // Otsikolla on valittu veroton myynti, esim Ahvenanmaan mynti‰
-      if ($laskurow["vienti"] == ""  and $laskurow["alv"] != 0 and $alv == "") $alv = $trow["alv"];          // Otsikolla on valittu verollinen kotimaan myynti
-      if ($laskurow["vienti"] == "E" and $laskurow["ytunnus"] != "") $alv = 0;                     // EU-vienti ytunnuksella --> alviton
-      if ($laskurow["vienti"] == "K") $alv = 0;                                     // Vienti eu:n ulkopuolelle on aina verotonta
+      if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 0;                           // Otsikolla on valittu veroton myynti, esim Ahvenanmaan mynti‰
+      if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0 and $alv == "") $alv = $trow["alv"]; // Otsikolla on valittu verollinen kotimaan myynti
+      if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") $alv = 0;                           // EU-vienti yritykselle --> alviton
+      if ($laskurow["vienti"] == "K" and $asrow["laji"] != "H") $alv = 0;                           // Vienti eu:n ulkopuolelle yritykselle --> alviton
 
       $alv = (float) $alv;
     }
     else {
       //T‰ss‰ keississ‰ kaikki hinnat sis‰lt‰v‰t arvonlis‰veron
-      if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 0;                        // Otsikolla on valittu veroton myynti, esim Ahvenanmaan mynti‰
-      if ($laskurow["vienti"] == ""  and $laskurow["alv"] != 0 and $alv == "") $alv = $trow["alv"];          // Otsikolla on valittu verollinen kotimaan myynti
-      if ($laskurow["vienti"] == "E" and $laskurow["ytunnus"] != "") $alv = 0;                     // EU-vienti ytunnuksella --> alviton
-      if ($laskurow["vienti"] == "K") $alv = 0;                                     // Vienti eu:n ulkopuolelle on aina verotonta
+      if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 0;                           // Otsikolla on valittu veroton myynti, esim Ahvenanmaan mynti‰
+      if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0 and $alv == "") $alv = $trow["alv"]; // Otsikolla on valittu verollinen kotimaan myynti
+      if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") $alv = 0;                           // EU-vienti yritykselle --> alviton
+      if ($laskurow["vienti"] == "K" and $asrow["laji"] != "H") $alv = 0;                           // Vienti eu:n ulkopuolelle yritykselle --> alviton
 
       $alv = (float) $alv;
       $trow['alv'] = (float) $trow['alv'];
@@ -10613,6 +10632,12 @@ if (!function_exists("laheta_tilausvahvistus")) {
         $tuoteperheetyhdessa = TRUE;
       }
     }
+    elseif (strpos($laskurow['tilausvahvistus'], '12') !== FALSE) {
+      $naytatvale = 12; // jos meill‰ on tilausvahvistuksessa 12, niin n‰ytet‰‰n viivakoodi, ale1, ja ale1:n mukaan laskettu hinta
+      if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
+        $tuoteperheetyhdessa = TRUE;
+      }
+    }
     elseif (strpos($laskurow['tilausvahvistus'], '10') !== FALSE) {
       $naytatvale = 10; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
       if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
@@ -11452,7 +11477,7 @@ if (!function_exists("liite_popup")) {
 
         $liitteet = "<input type='button' value='";
 
-        if ($pdf_exist) {
+        if (isset($pdf_exist)) {
           $liitteet .= t("Pdf");
         }
         else {
@@ -17093,7 +17118,12 @@ if (!function_exists("tee_keraysera")) {
               yhdistelysaanto,
               lahtojen_valinen_enimmaisaika,
               ulkoinen_jarjestelma,
-              tunnus as keraysvyohyke
+              tunnus as keraysvyohyke,
+              keraysnippujen_priorisointi,
+              aikaraja,
+              mittaraja,
+              painoraja,
+              kappaleraja
               FROM keraysvyohyke
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tunnus  = '{$keraysvyohyke}'";
@@ -17161,9 +17191,59 @@ if (!function_exists("tee_keraysera")) {
       $asiakas_join2 = "JOIN asiakas AS asiakas2 ON (asiakas2.yhtio = lasku2.yhtio AND asiakas2.tunnus = lasku2.liitostunnus)";
     }
 
+    $_priorisointi_kaytossa = !empty($keraysvyohyketiedot['keraysnippujen_priorisointi']);
+    $_aikaraja_kaytossa = !empty($keraysvyohyketiedot['aikaraja']);
+
+    $_mittaraja = !empty($keraysvyohyketiedot['mittaraja']);
+    $_painoraja = !empty($keraysvyohyketiedot['painoraja']);
+    $_kappaleraja = !empty($keraysvyohyketiedot['kappaleraja']);
+    $_mitta_vai_paino_kappale = ($_mittaraja OR $_painoraja OR $_kappaleraja);
+
+    if ($_priorisointi_kaytossa and $_aikaraja_kaytossa and $_mitta_vai_paino_kappale) {
+
+      $pienimman_pak_til = $keraysvyohyketiedot['mittaraja'];
+      $rivin_painoraja = $keraysvyohyketiedot['painoraja'];
+      $_aikaraja = $keraysvyohyketiedot['aikaraja'];
+      $_kappaleraja = $keraysvyohyketiedot['kappaleraja'];
+
+      $prioriteettilisa1 = "
+      IF(
+      lasku1.tila = 'G' AND
+      lasku1.alatila = 'J' AND
+      round((TIME_TO_SEC(TIMEDIFF(CURTIME(), lahdot3.kerailyn_aloitusaika)) / 60) / (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, lahdot3.kerailyn_aloitusaika)) / 60) * 100, 2) < {$_aikaraja} AND
+      (
+        SUM(ROUND((if(tuote1.tuoteleveys * {$mittakerroin} < 1, 1, tuote1.tuoteleveys * {$mittakerroin}) * if(tuote1.tuotekorkeus * {$mittakerroin} < 1, 1, tuote1.tuotekorkeus * {$mittakerroin}) * if(tuote1.tuotesyvyys * {$mittakerroin} < 1, 1, tuote1.tuotesyvyys * {$mittakerroin})) * if(tilausrivi1.varattu < 1, 1, round(tilausrivi1.varattu)), 4))  < {$pienimman_pak_til} OR
+        SUM(ROUND(tuote1.tuotemassa * if(tilausrivi1.varattu < 1, 1, round(tilausrivi1.varattu)), 4)) < {$rivin_painoraja} OR
+        SUM(tilausrivi1.varattu) < {$_kappaleraja}
+      ),
+      lasku1.prioriteettinro + 1, lasku1.prioriteettinro
+      ) AS prioriteetti,
+      ";
+
+      $prioriteettilisa2 = "
+      IF(
+      lasku2.tila = 'G' AND
+      lasku2.alatila = 'J' AND
+      round((TIME_TO_SEC(TIMEDIFF(CURTIME(), lahdot3.kerailyn_aloitusaika)) / 60) / (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, lahdot3.kerailyn_aloitusaika)) / 60) * 100, 2) < {$_aikaraja} AND
+      (
+        SUM(ROUND((if(tuote2.tuoteleveys * {$mittakerroin} < 1, 1, tuote2.tuoteleveys * {$mittakerroin}) * if(tuote2.tuotekorkeus * {$mittakerroin} < 1, 1, tuote2.tuotekorkeus * {$mittakerroin}) * if(tuote2.tuotesyvyys * {$mittakerroin} < 1, 1, tuote2.tuotesyvyys * {$mittakerroin})) * if(tilausrivi2.varattu < 1, 1, round(tilausrivi2.varattu)), 4))  < {$pienimman_pak_til} OR
+        SUM(ROUND(tuote2.tuotemassa * if(tilausrivi2.varattu < 1, 1, round(tilausrivi2.varattu)), 4)) < 1 OR
+        SUM(tilausrivi2.varattu) < {$_kappaleraja}
+      ),
+      lasku2.prioriteettinro + 1, lasku2.prioriteettinro
+      ) AS prioriteetti,
+      ";
+      $_group_by_lisa = "GROUP BY 2,3,4,5,6,7";
+    }
+    else {
+      $prioriteettilisa1 = "lasku1.prioriteettinro as prioriteetti,";
+      $prioriteettilisa2 = "lasku2.prioriteettinro as prioriteetti,";
+      $_group_by_lisa = "GROUP BY 1,2,3,4,5,6,7";
+    }
+
     if ($aikarajaus != 999999999999 and $keraysvyohyketiedot['lahtojen_valinen_enimmaisaika'] > 0) {
       $query = "SELECT SQL_NO_CACHE
-                lasku1.prioriteettinro as prioriteetti,
+                {$prioriteettilisa1}
                 (TIME_TO_SEC(TIMEDIFF(lahdot3.lahdon_kellonaika, CURTIME())) / 60) as erotus,
                 lasku1.ohjausmerkki,
                 lasku1.liitostunnus,
@@ -17192,12 +17272,12 @@ if (!function_exists("tee_keraysera")) {
                 AND lasku1.vakisin_kerays = ''
                 AND lasku1.varasto        = '{$varasto}'
                 AND kuka.tunnus is null
-                GROUP BY 1,2,3,4,5,6,7
+                {$_group_by_lisa}
                 ORDER BY prioriteetti,erotus,h1time,liitostunnus,ohjausmerkki,lahdon_tiedot";
     }
     else {
       $query = "SELECT SQL_NO_CACHE
-                lasku2.prioriteettinro as prioriteetti,
+                {$prioriteettilisa2}
                 0 as erotus,
                 lasku2.ohjausmerkki,
                 lasku2.liitostunnus,
@@ -17222,7 +17302,7 @@ if (!function_exists("tee_keraysera")) {
                 AND lasku2.vakisin_kerays != ''
                 AND lasku2.varasto         = '{$varasto}'
                 AND kuka2.tunnus is null
-                GROUP BY 1,2,3,4,5,6,7
+                {$_group_by_lisa}
                 ORDER BY prioriteetti,erotus,h1time,liitostunnus,ohjausmerkki,lahdon_tiedot";
     }
     $res = pupe_query($query);
@@ -29451,5 +29531,34 @@ if (!function_exists("kasittele_tiliote_viite")) {
 
     // Palautetan kukarow
     $kukarow = $kukarow_talteen;
+  }
+}
+
+if (!function_exists("hae_saldo")) {
+  function hae_saldo($tuote, $tyyppi = '') {
+    global $kukarow, $yhtiorow, $maa;
+
+    $saldo = 0;
+
+    if ($tuote["tuoteperhe"] == $tuote["tuoteno"]) {
+      // Tuoteperheen is‰
+      $saldot = tuoteperhe_myytavissa($tuote["tuoteno"],'KAIKKI',$tyyppi,0,'','','','','', $maa);
+
+      foreach ($saldot as $varasto => $myytavissa) {
+        $saldo += $myytavissa;
+      }
+      return $saldo;
+
+    }
+    elseif ($tuote['ei_saldoa'] != '') {
+      $saldo = 1;
+      return $saldo;
+    }
+    else {
+      list($a,$b,$myytavissa) = saldo_myytavissa($tuote["tuoteno"],$tyyppi,0,'','','','','', $maa);
+      $saldo = $myytavissa;
+
+      return $saldo;
+    }
   }
 }

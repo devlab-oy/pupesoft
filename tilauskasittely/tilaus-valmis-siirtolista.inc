@@ -879,7 +879,7 @@ else {
                     and tilausrivi.yhtio      = '$kukarow[yhtio]'
                     and tilausrivi.var        in ('','H')
                     and tilausrivi.tyyppi    != 'D'
-                    ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, tilausrivi.tunnus";
+                    ORDER BY $pjat_sortlisa sorttauskentta $order_sorttaus, if(tilausrivi.tyyppi = 'V', '2', '1'), tilausrivi.tunnus";
           $result = pupe_query($query);
 
           require_once "tulosta_valmistus.inc";
@@ -903,12 +903,17 @@ else {
 
           $sivu  = 1;
           $paino = 0;
+          $_rivityyppi = "";
 
           // Aloitellaan lähetteen teko
-          $page[$sivu] = alku_valm($tyyppi);
+          $page[$sivu] = alku_valm();
 
-          while ($row = mysql_fetch_array($result)) {
-            rivi_valm($page[$sivu], $tyyppi);
+          while ($row = mysql_fetch_assoc($result)) {
+            $row['ed_tyyppi'] = $_rivityyppi;
+
+            rivi_valm($page[$sivu]);
+
+            $_rivityyppi = $row['tyyppi'];
           }
 
           loppu_valm($page[$sivu], 1);

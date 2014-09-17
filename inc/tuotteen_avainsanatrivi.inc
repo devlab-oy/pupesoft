@@ -232,11 +232,12 @@ if (mysql_field_name($result, $i) == 'status') {
 
 if (mysql_field_name($result, $i) == 'nakyvyys') {
   if (substr($trow['laji'], 0, 10) == 'lisatieto_') {
-    $sel = array_fill_keys(array($trow[$i]), " selected") + array('o' => '', 'K' => '');
+    $sel = array($trow[$i] => " selected") + array('o' => '', 'K' => '', 'P' => '');
 
     $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
     $ulos .= "<option value=''>".t("Kyll‰")."</option>";
-    $ulos .= "<option value='K'>".t("Kyll‰")." (".t("ei otsikkoa").")</option>";
+    $ulos .= "<option value='K'{$sel['K']}>".t("Kyll‰")." (".t("ei otsikkoa").")</option>";
+    $ulos .= "<option value='P'{$sel['P']}>".t("Kyll‰")." (".t("N‰ytet‰‰n vain tuotekortilla").")</option>";
     $ulos .= "<option value='o'{$sel['o']}>".t("Ei")."</option>";
     $ulos .= "</select></td>";
 

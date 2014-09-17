@@ -52,6 +52,8 @@ if (!isset($automaattinen_poiminta))$automaattinen_poiminta = "";
 if (!isset($mista_tullaan))      $mista_tullaan = "";
 if (!isset($jt_tyyppi))       $jt_tyyppi = "";
 
+$onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
+
 $DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
 
 // JT-selaus päivitysoikeus, joko JT-selaus päivitysoikeus tai tullaan keikalta ja kaikki saa toimittaa JT-rivejä
@@ -1249,7 +1251,7 @@ if ($tee == "JATKA") {
                                            AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
                                          JOIN lasku USE INDEX (primary) ON (lasku.yhtio = tilausrivi.yhtio
                                            AND lasku.tunnus                            = tilausrivi.otunnus
-                                           AND (lasku.tila != 'N' OR lasku.alatila != ''))
+                                           AND (lasku.tila != 'N' OR lasku.alatila != '') $laskulisa)
                                          JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio
                                            AND tuote.tuoteno                           = tilausrivi.tuoteno)
                                          WHERE tilausrivi.yhtio                        = '{$kukarow['yhtio']}'
@@ -2332,10 +2334,51 @@ if ($tilaus_on_jo == "" and $from_varastoon_inc == "" and $tee == '') {
 
   echo "<br><font class='message'>".t("Valinnat")."</font><br><br>";
 
+  if (!empty($kukarow['varasto'])) {
+    $_kukarow_varasto = mysql_real_escape_string($kukarow['varasto']);
+    $_varastolisa = "AND tunnus in ({$_kukarow_varasto})";
+  }
+  elseif ($onkolaajattoimipaikat) {
+    if ($kukarow['toimipaikka'] != 0) {
+      $_toimipaikat = array($kukarow['toimipaikka'], 0);
+    }
+    else {
+      $_toimipaikat = array(0);
+    }
+
+    foreach ($_toimipaikat as $_toimipaikka) {
+
+      $query  = "SELECT GROUP_CONCAT(tunnus) AS tunnukset
+                 FROM varastopaikat
+                 WHERE yhtio      = '{$kukarow['yhtio']}'
+                 AND tyyppi      != 'P'
+                 AND toimipaikka  = '{$_toimipaikka}'";
+      $vares = pupe_query($query);
+      $varow = mysql_fetch_assoc($vares);
+
+      // Jos meillä on toimipaikka setattuna ja ei löydetty tämän toimipaikan varastoja
+      // Fallback: etsitään varastoja joita ei ole liitetty toimipaikkaan
+      if (count($_toimipaikat) > 1 and $_toimipaikka != 0 and empty($varow['tunnukset'])) {
+        continue;
+      }
+
+      if (!empty($varow['tunnukset'])) {
+        $_varastolisa = "AND tunnus IN ({$varow['tunnukset']})";
+        break;
+      }
+
+      $_varastolisa = "";
+    }
+  }
+  else {
+    $_varastolisa = "";
+  }
+
   $query = "SELECT *
             FROM varastopaikat
-            WHERE yhtio  = '$kukarow[yhtio]'
+            WHERE yhtio  = '{$kukarow['yhtio']}'
             AND tyyppi  != 'P'
+            {$_varastolisa}
             ORDER BY tyyppi, nimitys";
   $vtresult = pupe_query($query);
 

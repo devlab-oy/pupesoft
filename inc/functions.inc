@@ -1970,8 +1970,10 @@ if (!function_exists("lpr")) {
       return;
     }
 
-    // sallitut merkit listattu, kaikki muut menee spaceks...
-    $str = ereg_replace("[^A-Za-z0-9ÖöÅåÄä .,-/!|+()%#\n\r]", " ", $str);
+    // sallitut merkit listattu, kaikki muut menee spaceks, paitsi jos kyseessä on kuittitulostin...
+    if ($kirjoitin['merkisto'] != 6) {
+      $str = ereg_replace("[^A-Za-z0-9ÖöÅåÄä .,-/!|+()%#\n\r]", " ", $str);
+    }
 
     // merkistökonversio
     $from = array('ä', 'å', 'ö', 'Ä', 'Å', 'Ö', '|');

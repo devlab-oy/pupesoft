@@ -3618,6 +3618,11 @@ if (isset($jatka)) {
     $clearing = $laskurow['clearing'];
   }
 
+  // verollisuus oletuksena nollaksi jos on vientipoka ja asiakas ei oo yksityishenkilö
+  if ($vienti != "" and $liitostunnus > 0 and $asiarow["laji"] != "H") {
+    $alv = 0;
+  }
+
   if (!empty($laskurow['tunnus']) and $piiri != $laskurow['piiri']) {
     $piiri_temp = $laskurow['piiri'];
     $laskurow['piiri'] = $piiri;
@@ -3632,7 +3637,7 @@ if (isset($jatka)) {
                           AND tilausrivi.otunnus = {$laskurow['tunnus']}";
     $tilausrivi_result = pupe_query($tilausrivi_query);
 
-    while($tilausrivi = mysql_fetch_assoc($tilausrivi_result)) {
+    while ($tilausrivi = mysql_fetch_assoc($tilausrivi_result)) {
       $ale_hinta = alehinta($laskurow, $tilausrivi, $tilausrivi['kpl'], $netto, $hinta, $ale, 'hinta,hperuste,hintaperuste');
 
       $ale_peruste = $ale_hinta['hperuste'] . '('.t('Aletaso').'): ' . $ale_hinta['hintaperuste'];
@@ -3645,11 +3650,6 @@ if (isset($jatka)) {
     }
 
     $laskurow['piiri'] = $piiri_temp;
-  }
-
-  // verollisuus oletuksena nollaksi jos on vientipoka ja asiakas ei oo yksityishenkilö
-  if ($vienti != "" and $liitostunnus > 0 and $asiarow["laji"] != "H") {
-    $alv = 0;
   }
 
   $query .= "  lasku SET

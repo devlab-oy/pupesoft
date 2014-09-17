@@ -43,7 +43,7 @@ $query  = "SELECT kuka, nimi, eposti
            and nimi       != ''
            and extranet    = ''
            ORDER BY nimi";
-$res = mysql_query($query) or pupe_error($query);
+$res = pupe_query($query);
 
 while ($row = mysql_fetch_array($res)) {
 
@@ -68,7 +68,7 @@ $query = "SELECT sovellus, nimi, alanimi, min(nimitys) nimitys, min(jarjestys) j
           and profiili = ''
           GROUP BY sovellus, nimi, alanimi
           ORDER BY sovellus, jarjestys, jarjestys2";
-$res = mysql_query($query) or pupe_error($query);
+$res = pupe_query($query);
 
 while ($row = mysql_fetch_array($res)) {
 
@@ -134,7 +134,7 @@ if (isset($tee) and $tee == 'listaa') {
             and suorituskykyloki.luontiaika <= '$vvl-$kkl-$ppl 23:59:59'
             ORDER BY suorituskykyloki.luontiaika
             LIMIT 500";
-  $res = mysql_query($query) or pupe_error($query);
+  $res = pupe_query($query);
 
   echo "<table>";
   echo "<tr><th>".t("Pvm")."</th><th>".t("Käyttäjä")."</th><th>".t("Ohjelma")."</th><th>".t("Muuttujat")."</th></tr>";

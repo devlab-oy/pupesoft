@@ -46,7 +46,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
                   and tyyppi    = 'P'
                   and kaytossa != 'E'
                   and nimi      = '$ikustp[$maara]'";
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
 
         if (mysql_num_rows($result) == 1) {
           $row = mysql_fetch_assoc($result);
@@ -79,7 +79,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
                   and tyyppi    = 'K'
                   and kaytossa != 'E'
                   and nimi      = '$ikustp_tsk'";
-        $ikustpres = mysql_query($query) or pupe_error($query);
+        $ikustpres = pupe_query($query);
 
         if (mysql_num_rows($ikustpres) == 1) {
           $ikustprow = mysql_fetch_assoc($ikustpres);
@@ -94,7 +94,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
                   and tyyppi    = 'K'
                   and kaytossa != 'E'
                   and koodi     = '$ikustp_tsk'";
-        $ikustpres = mysql_query($query) or pupe_error($query);
+        $ikustpres = pupe_query($query);
 
         if (mysql_num_rows($ikustpres) == 1) {
           $ikustprow = mysql_fetch_assoc($ikustpres);
@@ -112,7 +112,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
                   and tyyppi    = 'K'
                   and kaytossa != 'E'
                   and tunnus    = '$ikustp_tsk'";
-        $ikustpres = mysql_query($query) or pupe_error($query);
+        $ikustpres = pupe_query($query);
 
         if (mysql_num_rows($ikustpres) == 1) {
           $ikustprow = mysql_fetch_assoc($ikustpres);
@@ -173,7 +173,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
                       and tyyppi    = '$tsk_tyyppi'
                       and kaytossa != 'E'
                       and nimi      = '$tsk_nimi'";
-            $tskres = mysql_query($query) or pupe_error($query);
+            $tskres = pupe_query($query);
 
             if (mysql_num_rows($tskres) == 1) {
               $tskrow = mysql_fetch_assoc($tskres);
@@ -188,7 +188,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
                       and tyyppi    = '$tsk_tyyppi'
                       and kaytossa != 'E'
                       and koodi     = '$tsk_nimi'";
-            $tskres = mysql_query($query) or pupe_error($query);
+            $tskres = pupe_query($query);
 
             if (mysql_num_rows($tskres) == 1) {
               $tskrow = mysql_fetch_assoc($tskres);
@@ -206,7 +206,7 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
                       and tyyppi    = '$tsk_tyyppi'
                       and kaytossa != 'E'
                       and tunnus    = '$tsk_nimi'";
-            $tskres = mysql_query($query) or pupe_error($query);
+            $tskres = pupe_query($query);
 
             if (mysql_num_rows($tskres) == 1) {
               $tskrow = mysql_fetch_assoc($tskres);

@@ -3,7 +3,7 @@ $filename = '/home/jarmo/public_html/ostoresk/datain/' . $inyhtio . 'myyres.txt'
 
 if (file_exists($filename)) {
   $query = "DELETE from maksu WHERE yhtio = '$inyhtio' and tyyppi = 'MY'"; // Poistetaan vanhat myyntilaskut!
-  $xresult = mysql_query($query) or pupe_error($query);
+  $xresult = pupe_query($query);
   $fp = fopen($filename, "r");
   while (!feof($fp)) {
     $line = fgets($fp, 4096);
@@ -21,7 +21,7 @@ if (file_exists($filename)) {
               'Myyntireskontra',
               '',
               '')";
-    $xresult = mysql_query($query) or pupe_error($query);
+    $xresult = pupe_query($query);
   }
   fclose($fp);
 }

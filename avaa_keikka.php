@@ -16,7 +16,7 @@ if ($tee == "avaa") {
             and laskunro    = '$keikka'
             and tunnus      = '$tunnus'
             and vanhatunnus = 0";
-  $res = mysql_query($query) or pupe_error($query);
+  $res = pupe_query($query);
 
   if (mysql_affected_rows() != 1) {
     echo "<font class='error'>".t("Saapumisen avaus epäonnistui")."!</font>";
@@ -40,7 +40,7 @@ if ($tee == "etsi") {
             and vanhatunnus = 0
             and alatila     = 'X'
             and kohdistettu = 'X'";
-  $res = mysql_query($query) or pupe_error($query);
+  $res = pupe_query($query);
 
   if (mysql_num_rows($res) == 1) {
 

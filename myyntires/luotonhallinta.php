@@ -252,7 +252,7 @@ if ($tee == "2") {
               luottoraja   = '$summa'
               WHERE yhtio  = '$kukarow[yhtio]'
               AND $kasittely_periaate = '$ytunnus'";
-    $asiakasres = mysql_query($query) or pupe_error($query);
+    $asiakasres = pupe_query($query);
 
     if (mysql_affected_rows() != 0) {
       $update_message[$ytunnus] = t("Asiakastiedot päivitetty!");
@@ -281,7 +281,7 @@ if ($tee == "1") {
              $asiakasrajaus
              $lisa
              GROUP BY 1";
-  $asiakasres = mysql_query($query) or pupe_error($query);
+  $asiakasres = pupe_query($query);
 
   echo "<form name='paivitys' action='luotonhallinta.php' method='post' autocomplete='off'>";
   echo "<input type='hidden' name='tee' value='2'>";
@@ -325,7 +325,7 @@ if ($tee == "1") {
               AND lasku.liitostunnus IN ($asiakasrow[liitostunnukset])
               AND lasku.tapvm        >= '$pvm_alku'
               AND lasku.tapvm        <= '$pvm_loppu'";
-    $myyntires = mysql_query($query) or pupe_error($query);
+    $myyntires = pupe_query($query);
     $myyntirow = mysql_fetch_array($myyntires);
 
     // Näytä asiakkaat, joiden luottorajaa tulisi tarkistaa (myynnin/luottorajan ero yli muutosprosentin)
@@ -392,7 +392,7 @@ if ($tee == "1") {
                 GROUP BY karhu_lasku.ltunnus
                 $having_ehto
                 ORDER BY karhukerrat DESC";
-      $laskures = mysql_query($query) or pupe_error($query);
+      $laskures = pupe_query($query);
 
       if (mysql_num_rows($laskures) > 0) {
         $karhuttu = mysql_fetch_array($laskures);

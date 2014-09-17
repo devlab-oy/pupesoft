@@ -22,7 +22,7 @@ if (!function_exists("toimittajaalennustarkista")) {
                   WHERE yhtio  = '$kukarow[yhtio]'
                   and tyyppi  != 'P'
                   and ytunnus  = '$t[$i]'";
-        $sresult = mysql_query($query) or pupe_error($query);
+        $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) == 0) {
           $virhe[$i] = t("Ytunnuksella ei löydy toimittajaa!");
@@ -44,7 +44,7 @@ if (!function_exists("toimittajaalennustarkista")) {
                      WHERE yhtio  = '$kukarow[yhtio]'
                      and tyyppi  != 'P'
                      and tunnus   = '$chastunn'";
-          $chasresult = mysql_query($query) or pupe_error($query);
+          $chasresult = pupe_query($query);
         }
 
         if (!isset($chasresult) or (isset($chasresult) and mysql_num_rows($chasresult) != 1)) {
@@ -81,7 +81,7 @@ if (!function_exists("toimittajaalennustarkista")) {
         $query = "SELECT tuoteno
                   FROM tuote
                   WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$t[$i]'";
-        $sresult = mysql_query($query) or pupe_error($query);
+        $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) != 1) {
 
@@ -110,7 +110,7 @@ if (!function_exists("toimittajaalennustarkista")) {
         $query = "SELECT tunnus
                   FROM perusalennus
                   WHERE yhtio='$kukarow[yhtio]' and ryhma = '$t[$i]'";
-        $sresult = mysql_query($query) or pupe_error($query);
+        $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) != 1) {
           $virhe[$i] = t("Aleryhmä puuttuu tai sitä ei löydy!");
@@ -214,7 +214,7 @@ if (!function_exists("toimittajaalennustarkista")) {
                  and monikerta    = '$chmonikerta'
                  and alennuslaji  = $chalennuslaji
                  and tunnus      != '$trow[$i]'";
-      $dsresult = mysql_query($aquery) or pupe_error($aquery);
+      $dsresult = pupe_query($aquery);
 
       if (mysql_num_rows($dsresult) > 0) {
         // Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi

@@ -18,7 +18,7 @@ require 'inc/connect.inc';
 require 'inc/functions.inc';
 
 $query = "SELECT * FROM yhtio, yhtion_parametrit WHERE yhtio.yhtio = yhtion_parametrit.yhtio and yhtio.yhtio = '$kukarow[yhtio]'";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 $yhtiorow = mysql_fetch_array($result);
 
 $keissit = array("Asiakas", "Toimittaja", "Kustannupaikka", "Laskunumero", "Myynti", "Nimike", "Monivarasto", "Ostot", "Ostotilausnumero", "Varastonumero", "Tapahtumalaji", "Myyntitil", "Avointil");
@@ -168,7 +168,7 @@ foreach ($keissit as $keissi) {
   $filenimi = "/tmp/infoglove/$keissi.txt";
   if (!$handle = fopen($filenimi, "w")) die("Filen $filenimi luonti epäonnistui!");
 
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   while ($row = mysql_fetch_array($result)) {
     $ulos = "";

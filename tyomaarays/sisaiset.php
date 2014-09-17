@@ -55,7 +55,7 @@ $query = "SELECT id, maksuaika, maksutapa, maksutapa
           FROM asiakastiedot
           WHERE month(maksuaika)='$MonthToShow' and year(maksuaika)='$YearToShow' and (asnum='303' or asnum='660494')
           ORDER by id";
-$result = mysql_query($query)
+$result = pupe_query($query)
   or die ("Kysely ei onnistu $query");
 
 echo "  <tr><td>$thfont Työmääräys: </td>
@@ -66,13 +66,13 @@ while ($row = mysql_fetch_array($result)) {
   $query = "SELECT sum(rivihinta)
             FROM huoltotiedot
             WHERE kpl > 0 and id='$row[0]'";
-  $presult = mysql_query($query)
+  $presult = pupe_query($query)
     or die ("Kysely ei onnistu $query");
 
   $query = "SELECT sum(if (osanro='HT295',rivihinta,0))
             FROM varaosat
             WHERE kpl > 0 and id='$row[0]'";
-  $rresult = mysql_query($query)
+  $rresult = pupe_query($query)
     or die ("Kysely ei onnistu $query");
 
   $prow = mysql_fetch_array($presult);

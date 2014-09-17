@@ -13,13 +13,13 @@ require "../inc/connect.inc";
 require "../inc/functions.inc";
 
 $query = "SELECT DISTINCT yhtio FROM yhtio";
-$yhtio_result = mysql_query($query) or die($query);
+$yhtio_result = pupe_query($query);
 
 //$laskuri = 1;
 
 while ($yrow = mysql_fetch_array($yhtio_result)) {
   $query = "SELECT * FROM yhtio WHERE yhtio='$yrow[yhtio]'";
-  $result = mysql_query($query) or die($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
     $yhtiorow = mysql_fetch_array($result);
@@ -27,7 +27,7 @@ while ($yrow = mysql_fetch_array($yhtio_result)) {
     $query = "SELECT *
               FROM yhtion_parametrit
               WHERE yhtio='$yhtiorow[yhtio]'";
-    $result = mysql_query($query)
+    $result = pupe_query($query)
       or die ("Kysely ei onnistu yhtio $query");
 
     if (mysql_num_rows($result) == 1) {
@@ -43,7 +43,7 @@ while ($yrow = mysql_fetch_array($yhtio_result)) {
                 FROM yhtion_toimipaikat
                 WHERE yhtio                        = '$yhtiorow[yhtio]'
                 AND toim_automaattinen_jtraportti != ''";
-  $toimresult = mysql_query($toimquery) or die ("Kysely ei onnistu yhtio $query");
+  $toimresult = pupe_query($toimquery);
 
   while ($toimrow = mysql_fetch_array($toimresult)) {
     if ($toimrow["toim_automaattinen_jtraportti"] == "pv") {
@@ -90,12 +90,12 @@ while ($yrow = mysql_fetch_array($yhtio_result)) {
                            AND tilausrivi.uusiotunnus = 0
                            AND tilausrivi.kpl         = 0
                            AND tilausrivi.jt $lisavarattu  > 0";
-    $liitostunnus_result = mysql_query($liitostunnus_query) or die($liitostunnus_query);
+    $liitostunnus_result = pupe_query($liitostunnus_query);
 
     while ($liitostunnus_row = mysql_fetch_array($liitostunnus_result)) {
 
       $asiakasquery = "SELECT nimi, osoite, postino, postitp, maa, ytunnus, email, kieli, tunnus FROM asiakas WHERE yhtio='{$yhtiorow['yhtio']}' AND tunnus=$liitostunnus_row[liitostunnus]";
-      $asiakasresult = mysql_query($asiakasquery) or pupe_error($asiakasquery);
+      $asiakasresult = pupe_query($asiakasquery);
       $asiakasrow = mysql_fetch_array($asiakasresult);
 
       if ($asiakasrow["email"] != "") {
@@ -112,7 +112,7 @@ while ($yrow = mysql_fetch_array($yhtio_result)) {
                     AND tilausrivi.jt $lisavarattu  > 0
                     ORDER BY tilausrivi.otunnus";
 
-        $jtresult = mysql_query($jtquery) or pupe_error($jtquery);
+        $jtresult = pupe_query($jtquery);
 
         if (mysql_num_rows($jtresult) > 0) {
 

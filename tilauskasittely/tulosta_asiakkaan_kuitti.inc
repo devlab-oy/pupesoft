@@ -13,7 +13,22 @@ function tulosta_asiakkaan_kuitti($yhtio, $laskunro, $tulostimen_tunnus) {
   $emphasized_on  = "\x1B\x45\x01";
   $emphasized_off = "\x1B\x45\x00";
 
-  $kuitin_teksti = "{$logo}\n";
+  $kuitin_teksti = "{$logo}\n\n";
+
+  $yhtion_nimi             = $tapahtumat[0]['yhtio_nimi'];
+  $yhtion_osoite           = $tapahtumat[0]['yhtio_osoite'];
+  $yhtion_postinumero      = $tapahtumat[0]['yhtio_postino'];
+  $yhtion_postitoimipaikka = $tapahtumat[0]['yhtio_postitp'];
+  $yhtion_maa              = hae_maa(array("maakoodi" => $tapahtumat[0]['yhtio_maa']));
+  $yhtion_maa              = $yhtion_maa['nimi'];
+  $yhtion_ytunnus          = str_replace("0037", "", $tapahtumat[0]["yhtio_ovttunnus"]);
+  $yhtion_ytunnus          = tulosta_ytunnus($yhtion_ytunnus, $tapahtumat[0]['yhtio_maa']);
+
+  $kuitin_teksti .= "{$yhtion_nimi}\n";
+  $kuitin_teksti .= "{$yhtion_osoite}\n";
+  $kuitin_teksti .= "{$yhtion_postinumero} {$yhtion_postitoimipaikka}\n";
+  $kuitin_teksti .= "{$yhtion_maa}\n";
+  $kuitin_teksti .= "Y-tunnus: {$yhtion_ytunnus}\n\n\n\n";
 
   foreach ($tilausrivit as $tilausrivi) {
     $kappalehinta = $tilausrivi['rivihinta'] / $tilausrivi['kpl'];

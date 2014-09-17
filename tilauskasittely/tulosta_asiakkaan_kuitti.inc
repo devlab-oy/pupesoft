@@ -5,23 +5,39 @@ function tulosta_asiakkaan_kuitti($yhtio, $laskunro, $tulostimen_tunnus) {
   list($tilausrivit, $netto, $brutto, $vero) = hae_tilausrivit($yhtio, $laskunro);
 
   // Escape sequencejä printterille
-  $logo         = "\x1C\x70\x01\x10";
-  $katkaisu     = "\x1B\x69";
-  $align_left   = "\x1B\x61\x00";
-  $align_center = "\x1B\x61\x01";
-  $align_right  = "\x1B\x61\x02";
+  $logo           = "\x1C\x70\x01\x10";
+  $katkaisu       = "\x1B\x69";
+  $align_left     = "\x1B\x61\x00";
+  $align_center   = "\x1B\x61\x01";
+  $align_right    = "\x1B\x61\x02";
+  $emphasized_on  = "\x1B\x45\x01";
+  $emphasized_off = "\x1B\x45\x00";
 
   $kuitin_teksti = "{$logo}\n";
 
   foreach ($tilausrivit as $tilausrivi) {
+    $kappalehinta = $tilausrivi['rivihinta'] / $tilausrivi['kpl'];
+    $kappalehinta = hintapyoristys($kappalehinta);
+
+    $bruttohinta = $tilausrivi['rivihinta'] * (1 + $tilausrivi['alv'] / 100);
+    $bruttohinta = hintapyoristys($bruttohinta);
+
+    $rivihinta = hintapyoristys($tilausrivi['rivihinta']);
+
     $kuitin_teksti .= "{$align_left}{$tilausrivi['tuoteno']}";
     $kuitin_teksti .= " {$tilausrivi['nimitys']}\n";
     $kuitin_teksti .= "{$align_right}{$tilausrivi['kpl']} {$tilausrivi['yksikko']}";
-    $kuitin_teksti .= " a " . hintapyoristys($tilausrivi['hinta']);
-    $kuitin_teksti .= "    " . hintapyoristys($tilausrivi['rivihinta']) . "\n";
+    $kuitin_teksti .= " a {$kappalehinta}";
+    $kuitin_teksti .= "    Veroton arvo: {$rivihinta}\n";
+    $kuitin_teksti .= "Alv-%: {$tilausrivi['alv']}\n";
+    $kuitin_teksti .= "Verollinen arvo: {$bruttohinta}\n";
   }
 
   $kuitin_teksti .= "{$align_left}\n";
+
+  $kuitin_teksti .= "==========================================\n";
+  $kuitin_teksti .= "{$emphasized_on}YHTEENSÄ                          {$brutto}{$emphasized_off}" .
+    "\n\n";
 
   $kuitin_teksti .= "ALV        NETTO       VERO       BRUTTO\n";
   $kuitin_teksti .= "{$tapahtumat[0]['alv']} %    {$netto}       {$vero}       {$brutto}\n\n";

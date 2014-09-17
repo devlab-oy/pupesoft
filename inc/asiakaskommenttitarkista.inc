@@ -14,7 +14,7 @@ if (!function_exists("asiakaskommenttitarkista")) {
       $query = "SELECT ytunnus
                 FROM asiakas
                 WHERE yhtio='$kukarow[yhtio]' and ytunnus = '$t[$i]'";
-      $sresult = mysql_query($query) or pupe_error($query);
+      $sresult = pupe_query($query);
 
       if (mysql_num_rows($sresult) == 0) {
         $virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");
@@ -25,7 +25,7 @@ if (!function_exists("asiakaskommenttitarkista")) {
       $query = "SELECT tuoteno
                 FROM tuote
                 WHERE yhtio='$kukarow[yhtio]' and tuoteno = '$t[$i]'";
-      $sresult = mysql_query($query) or pupe_error($query);
+      $sresult = pupe_query($query);
       if (mysql_num_rows($sresult) != 1) {
         $virhe[$i] = t("Tuotenumero puuttuu tai sitä ei löydy!");
       }

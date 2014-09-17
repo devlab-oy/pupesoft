@@ -163,7 +163,7 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
       if ($perusta == "PROJEKTI" and $monistarow["tunnusnippu"] > 0 and $monistarow["tila"] == "T") {
         $kysely  = "INSERT into lasku ($fields) VALUES ($values)";
         $insres  = pupe_query($kysely);
-        $ptunnus = mysql_insert_id();
+        $ptunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
         $kysely = "UPDATE lasku SET tunnusnippu='$ptunnus', tila='R', alatila='' WHERE yhtio='$kukarow[yhtio]' and tunnus='$ptunnus'";
         $updres=pupe_query($kysely);
@@ -171,14 +171,14 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
         // avataan projekti kirjanpitoon
         $query = " INSERT into kustannuspaikka set yhtio  = '$kukarow[yhtio]', nimi = '$ptunnus - $monistarow[nimi]', tyyppi = 'P', kaytossa = 'o', luontiaika = now(), laatija = '$kukarow[kuka]'";
         $result = pupe_query($query);
-        $projekti = mysql_insert_id();
+        $projekti = mysql_insert_id($GLOBALS["masterlink"]);
 
         $tilauksesta_myyntitilaus = "<font class='message'>".t("PERUSTETTIIN PROJEKTI").": $ptunnus</font><br><br>";
       }
 
       $kysely  = "INSERT into lasku ($fields) VALUES ($values)";
       $insres  = pupe_query($kysely);
-      $utunnus = mysql_insert_id();
+      $utunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
       if ($perusta == "TYOMAARAYS") {
         // Kopioidaan työmääräys
@@ -366,7 +366,7 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
     $tilauksesta_myyntitilaus .= "<font class='message'>".t("Lisätään valitut rivit")." $tymlisa: $utunnus</font><br>";
 
     $query    = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$utunnus'";
-    $laskures = mysql_query($query);
+    $laskures = pupe_query($query);
     $laskurow = mysql_fetch_array($laskures);
 
     $query = "SELECT tilausrivi.*, tilausrivin_lisatiedot.positio, tilausrivin_lisatiedot.toimittajan_tunnus

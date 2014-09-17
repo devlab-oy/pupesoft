@@ -21,7 +21,7 @@ if ($tee == "laheta" and $tunnukset != "") {
             WHERE lasku.yhtio = '$kukarow[yhtio]'
             AND lasku.tila    in ('N','L')
             AND lasku.tunnus  in ($tunnukset)";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
     while ($laskurow = mysql_fetch_assoc($result)) {

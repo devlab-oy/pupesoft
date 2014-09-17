@@ -36,7 +36,7 @@ else {
                 laskutettuaika >= '$vva-$kka-$ppa' and
                 laskutettuaika <= '$vvl-$kkl-$ppl'
               ORDER BY osasto, try";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     $ulos  = "Os\t";
     $ulos .= "Try\t";
@@ -79,7 +79,7 @@ else {
                 and laskutettuaika <= '$vvl-$kkl-$ppl'
                 group by 1,2";
 
-      $eresult = mysql_query($query) or pupe_error($query);
+      $eresult = pupe_query($query);
       $row = mysql_fetch_array($eresult);
 
       //varaston arvo
@@ -92,7 +92,7 @@ else {
                 and tuote.try               = '$trow[try]'
                 and tuote.ei_saldoa         = ''
                 and tuote.epakurantti100pvm = '0000-00-00'";
-      $result4 = mysql_query($query) or pupe_error($query);
+      $result4 = pupe_query($query);
       $rowarvo = mysql_fetch_array($result4);
 
       $varastonarvo = $rowarvo["varasto"];

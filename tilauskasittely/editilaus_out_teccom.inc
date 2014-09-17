@@ -19,7 +19,7 @@ $query = "SELECT tilausrivi.tunnus,
           AND tilausrivi.varattu                > 0
           AND ta.tunnus IS NULL
           ORDER BY tilausrivi.tunnus";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 if (mysql_num_rows($result) == 0) {
   echo "<font class='error'>".t("Lähetettäviä tilausrivejä ei löydy")."</font>";
@@ -85,7 +85,7 @@ else {
                    tilaajanrivinro = $lask
                    WHERE yhtio     = '$kukarow[yhtio]'
                    AND tunnus      = '$tilausrivirow[tunnus]'";
-      $tresult = pupe_query($sqlquery, $masterlink);
+      $tresult = pupe_query($sqlquery, $GLOBALS["masterlink"]);
 
       $lask++;
     }
@@ -94,7 +94,7 @@ else {
                  SET kirjoitin = 'edi'
                  WHERE yhtio = '$kukarow[yhtio]'
                  AND tunnus  = '$laskurow[tunnus]'";
-    $result = pupe_query($sqlquery, $masterlink);
+    $result = pupe_query($sqlquery, $GLOBALS["masterlink"]);
   }
   else {
     echo "<font class='error'>".t("Tilauksen lähetys epäonnistui")."!</font><br>";

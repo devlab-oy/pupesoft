@@ -1,14 +1,16 @@
 <?php
 
-// Tämä skripti käyttää slave-tietokantapalvelinta,
-// mutta katsotaan sessio aina masterilta, koska slave voi olla jäljessä ja sessio ei vielä voimassa.
-unset($useslave);
+//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+$useslave = 1;
 
-if (file_exists("inc/connect.inc")) {
-  require "inc/connect.inc";
+if (@include("inc/connect.inc")) {
+  require "inc/functions.inc";
+}
+elseif (@include("connect.inc")) {
+  require "functions.inc";
 }
 else {
-  require "connect.inc";
+  exit;
 }
 
 $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
@@ -16,27 +18,19 @@ $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
 $query = "SELECT *
           FROM kuka
           WHERE session = '$session'";
-$result = mysql_query($query) or die(mysql_error());
+$result = pupe_query($query, $GLOBALS["masterlink"]);
 $kuka_check_row = mysql_fetch_assoc($result);
 
 if (mysql_num_rows($result) != 1) {
   exit;
 }
 
-// Otetaan slave yhteys
-$useslave = 1;
-
-if (file_exists("inc/connect.inc")) {
-  require "inc/connect.inc";
-}
-else {
-  require "connect.inc";
-}
-
 $id = (int) $_GET["id"];
 
-$query = "SELECT * FROM liitetiedostot where tunnus = '$id'";
-$liiteres = mysql_query($query) or die(mysql_error());
+$query = "SELECT *
+          FROM liitetiedostot
+          where tunnus = '$id'";
+$liiteres = pupe_query($query);
 $liiterow = mysql_fetch_assoc($liiteres);
 
 if ($kuka_check_row['yhtio'] != $liiterow['yhtio'] and $liiterow['liitos'] != 'kalenteri') {

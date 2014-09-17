@@ -656,7 +656,7 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
       $query = "SELECT *
                 FROM tuote
                 WHERE tuoteno = '$isatuoteno'
-                AND yhtio = '$kukarow[yhtio]'";
+                AND yhtio     = '$kukarow[yhtio]'";
       $res = pupe_query($query);
 
       if (mysql_num_rows($res) == 0) {

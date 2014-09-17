@@ -32,7 +32,7 @@ if ($tee == "PAIVITA" and (checkdate(substr($paivamaara, 5, 2), substr($paivamaa
              and tilausrivi.laskutettuaika  <= '$yhtiorow[tilikausi_loppu]'
              and tilausrivi.var2           != 'EIOST'
              ORDER BY tilausrivi.laskutettuaika";
-  $korjaaresult = mysql_query($query) or pupe_error($query);
+  $korjaaresult = pupe_query($query);
 
   echo "<table>";
 
@@ -83,7 +83,7 @@ if ($tee == "PAIVITA" and (checkdate(substr($paivamaara, 5, 2), substr($paivamaa
              and tilausrivi.laskutettuaika  >= '$yhtiorow[tilikausi_alku]'
              and tilausrivi.laskutettuaika  <= '$yhtiorow[tilikausi_loppu]'
              ORDER BY tilausrivi.laskutettuaika";
-  $korjaaresult = mysql_query($query) or pupe_error($query);
+  $korjaaresult = pupe_query($query);
 
   while ($korjaarow = mysql_fetch_array($korjaaresult)) {
 

@@ -1182,6 +1182,7 @@ else {
           $tuotegroups++;
         }
         //** Tuotegrouppaukset loppu **//
+
         //** Laskugrouppaukset start **//
         if ($mukaan == "laskumyyja") {
           $group .= ",lasku.myyja";
@@ -1229,7 +1230,6 @@ else {
 
           $laskugroups++;
         }
-        //** Laskugrouppaukset loppu **//
 
         if ($mukaan == "toimipaikka") {
           $group .= ",lasku.yhtio_toimipaikka";
@@ -1238,6 +1238,8 @@ else {
           $gluku++;
           $muutgroups++;
         }
+        //** Laskugrouppaukset loppu **//
+
         //** Asiakas_ja_tai_tuote grouppaukset start **//
         if ($mukaan == "kustp") {
           $group .= ",kustannuspaikka";
@@ -1513,15 +1515,25 @@ else {
       }
 
       if ($asiakaskaynnit != "") {
+        $tapahaku = "'Asiakaskäynti'";
+
+        foreach ($sanakirja_kielet as $kieli => $devnull) {
+          $kaannettyna = t("Asiakaskäynti", $kieli);
+
+          if ($kaannettyna != "Asiakaskäynti") {
+            $tapahaku .= ",'$kaannettyna'";
+          }
+        }
+
         $select .= "(SELECT count(*) kaynnit
-              FROM kalenteri
-              WHERE kalenteri.yhtio     = asiakas.yhtio
-              AND kalenteri.liitostunnus   = asiakas.tunnus
-              and kalenteri.tapa         = 'Asiakaskäynti'
-              and kalenteri.tyyppi     in ('kalenteri','memo')
-              and ((kalenteri.pvmalku  >= '{$vva}-{$kka}-{$ppa} 00:00:00' and kalenteri.pvmalku  <= '{$vvl}-{$kkl}-{$ppl} 23:59:59') or
-                 (kalenteri.pvmloppu >= '{$vva}-{$kka}-{$ppa} 00:00:00' and kalenteri.pvmloppu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59') or
-                 (kalenteri.pvmalku  <= '{$vva}-{$kka}-{$ppa} 00:00:00' and kalenteri.pvmloppu >= '{$vvl}-{$kkl}-{$ppl} 23:59:59'))) asiakaskaynnit,";
+                     FROM kalenteri
+                     WHERE kalenteri.yhtio      = asiakas.yhtio
+                     AND kalenteri.liitostunnus = asiakas.tunnus
+                     and kalenteri.tapa         IN ({$tapahaku})
+                     and kalenteri.tyyppi       IN ('kalenteri','memo')
+                     and ((kalenteri.pvmalku >= '{$vva}-{$kka}-{$ppa} 00:00:00' and kalenteri.pvmalku  <= '{$vvl}-{$kkl}-{$ppl} 23:59:59') or
+                       (kalenteri.pvmloppu   >= '{$vva}-{$kka}-{$ppa} 00:00:00' and kalenteri.pvmloppu <= '{$vvl}-{$kkl}-{$ppl} 23:59:59') or
+                       (kalenteri.pvmalku    <= '{$vva}-{$kka}-{$ppa} 00:00:00' and kalenteri.pvmloppu >= '{$vvl}-{$kkl}-{$ppl} 23:59:59'))) asiakaskaynnit,";
       }
 
       if ($eiOstSarjanumeroita != "") {

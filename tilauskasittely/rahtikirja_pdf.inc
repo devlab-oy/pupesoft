@@ -17,7 +17,7 @@ if (!isset($GLOBALS['tyhja'])) {
             AND tunnus  in ($otunnukset)
             ORDER BY tunnus
             LIMIT 1";
-  $tempr = mysql_query($query) or pupe_error($query);
+  $tempr = pupe_query($query);
   $postirow = mysql_fetch_array($tempr);
 
   // haetaan varaston osoitetiedot, k‰ytet‰‰n niit‰ l‰hetystietoina
@@ -25,7 +25,7 @@ if (!isset($GLOBALS['tyhja'])) {
             FROM varastopaikat
             WHERE yhtio = '$kukarow[yhtio]'
             AND tunnus  = '$postirow[varasto]'";
-  $tempr = mysql_query($query) or pupe_error($query);
+  $tempr = pupe_query($query);
   $postirow_varasto = mysql_fetch_array($tempr);
 
   // jos varastolle on annettu joku osoite, k‰ytet‰‰n sit‰
@@ -61,7 +61,7 @@ else {
             WHERE asiakas.yhtio = '$kukarow[yhtio]'
             and asiakas.tunnus  = '$GLOBALS[asiakasid]'
             LIMIT 1";
-  $tempr = mysql_query($query) or pupe_error($query);
+  $tempr = pupe_query($query);
   $rakir_row = mysql_fetch_array($tempr);
 
   if (empty($rakir_row['toim_postitp'])) {
@@ -246,7 +246,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
               WHERE yhtio     = '$kukarow[yhtio]'
               and tunnus      = '$postirow[yhtio_toimipaikka]'
               and lasku_logo != ''";
-    $result = mysql_query($query) or pupe_error("Kysely ei onnistu yhtio $query");
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
       $yhtion_toimipaikkarow = mysql_fetch_array($result);
@@ -257,7 +257,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
     $query = "SELECT *
               FROM yhtion_parametrit
               WHERE yhtio = '$postirow[yhtio]'";
-    $result = mysql_query($query) or pupe_error("Kysely ei onnistu yhtio $query");
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
       $yhtion_parametritrow = mysql_fetch_array($result);
@@ -377,7 +377,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
               where yhtio = '$kukarow[yhtio]'
               and tunnus  in ($otunnukset)
               order by tunnus ";
-    $viestires = mysql_query($query) or pupe_error($query);
+    $viestires = pupe_query($query);
     $viestirow = mysql_fetch_array($viestires);
   }
   else {

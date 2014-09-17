@@ -179,7 +179,8 @@ if ($tila == 'tee_kohdistus') {
             tiliointi as tiliointi2 WRITE,
             sanakirja WRITE,
             yhtion_toimipaikat READ,
-            avainsana as avainsana_kieli READ";
+            avainsana as avainsana_kieli READ,
+            suorituksen_kohdistus WRITE";
   $result = pupe_query($query);
 
   // haetaan suorituksen tiedot
@@ -281,7 +282,6 @@ if ($tila == 'tee_kohdistus') {
     else {
       $laskutunnuksetkale = 0;
     }
-
     // Tarkistetaan muutama asia
     if ($laskutunnukset == 0 and $laskutunnuksetkale == 0) {
       echo "<font class='error'>".t("Olet kohdistamassa, mutta et ole valinnut mit‰‰n kohdistettavaa")."!</font><br><br>";
@@ -656,7 +656,7 @@ if ($tila == 'tee_kohdistus') {
                       summa    = $summa,
                       selite   = 'Manuaalisesti kohdistettu suoritus (osasuoritus) $suoritus[viesti]'";
             $result = pupe_query($query);
-            $isa = mysql_insert_id ($link);
+            $isa = mysql_insert_id($GLOBALS["masterlink"]);
 
             $totvesumma += $summa;
           }
@@ -750,6 +750,15 @@ if ($tila == 'tee_kohdistus') {
     );
 
     kopioitiliointi($tiliointi2['tunnus'], "", $params);
+
+    $kohdistus_qry = "INSERT INTO suorituksen_kohdistus SET
+                      yhtio          = '{$kukarow['yhtio']}',
+                      suoritustunnus = '{$suoritus[tunnus]}',
+                      laskutunnus    = '{$lasku[tunnus]}',
+                      kohdistuspvm   = NOW(),
+                      kirjauspvm     = '{$laskun_maksupvm}'";
+    $kohdistus_result = pupe_query($kohdistus_qry);
+
   }
   else {
     //*** T‰ss‰ k‰sitell‰‰n tavallinen suoritus ***/
@@ -918,6 +927,15 @@ if ($tila == 'tee_kohdistus') {
             echo "<font class='message'>".t("Uusi kassa-ale").": $lasku[alennus] $suoritus[valkoodi]</font> ";
           }
 
+          $kohdistus_qry = "INSERT INTO suorituksen_kohdistus SET
+                            yhtio          = '{$kukarow['yhtio']}',
+                            suoritustunnus = '{$suoritus[tunnus]}',
+                            laskutunnus    = '{$lasku[tunnus]}',
+                            kaatosumma     = $kaatosumma * -1,
+                            kohdistuspvm   = NOW(),
+                            kirjauspvm     = NOW()";
+          $kohdistus_result = pupe_query($kohdistus_qry);
+
           $kaatosumma = 0;
          }
 
@@ -1032,7 +1050,7 @@ if ($tila == 'tee_kohdistus') {
                         selite           = 'Manuaalisesti kohdistettu suoritus $suoritus[viesti]',
                         vero             = '$tiliointirow[vero]'";
               $result = pupe_query($query);
-              $isa = mysql_insert_id ($link);
+              $isa = mysql_insert_id($GLOBALS["masterlink"]);
 
               if ($tiliointirow['vero'] != 0) {
                 // Kassa-ale alv
@@ -1219,7 +1237,7 @@ if ($tila == 'tee_kohdistus') {
                           summa    = $summa,
                           selite   = 'Manuaalisesti kohdistettu suoritus (osasuoritus) $suoritus[viesti]'";
                 $result = pupe_query($query);
-                $isa = mysql_insert_id ($link);
+                $isa = mysql_insert_id($GLOBALS["masterlink"]);
 
                 $totvesumma += $summa;
               }
@@ -1277,7 +1295,16 @@ if ($tila == 'tee_kohdistus') {
                   WHERE tunnus              = $lasku[tunnus]
                   AND yhtio                 = '$kukarow[yhtio]'";
         $result = pupe_query($query);
+
+        $kohdistus_qry = "INSERT INTO suorituksen_kohdistus SET
+                          yhtio          = '{$kukarow['yhtio']}',
+                          suoritustunnus = '{$suoritus[tunnus]}',
+                          laskutunnus    = '{$lasku[tunnus]}',
+                          kohdistuspvm   = NOW(),
+                          kirjauspvm     = '{$laskun_maksupvm}'";
+          $kohdistus_result = pupe_query($kohdistus_qry);
       }
+
 
       // Myyntisaamiset (suorituksen summa * -1)
       $query = "SELECT *

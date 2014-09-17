@@ -157,7 +157,7 @@ if (count($kieli) > 0) {
       if ($row['tunnus'] > $maxtunnus) $maxtunnus = $row['tunnus'];
 
       for ($i=2; $i<mysql_num_fields($result); $i++) {
-        echo "<td><input type='text' size='30' name='".mysql_field_name($result, $i)."[$row[tunnus]]' value='".trim(htmlspecialchars($row[$i], ENT_QUOTES))."'></td>";
+        echo "<td><input type='text' size='30' name='".mysql_field_name($result, $i)."[$row[tunnus]]' value='".trim($row[$i])."'></td>";
       }
 
       $laskkaannos++;

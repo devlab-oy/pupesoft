@@ -31,7 +31,7 @@ if (!function_exists("tasotarkista")) {
                   AND taso     = BINARY '$t[$i]'
                   AND tyyppi   = '$tyyppitalteen'
                   AND tunnus  != '$tunnus'";
-        $sresult = mysql_query($query) or pupe_error($query);
+        $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) > 0) {
           $virhe[$i] = t("Tämä taso on jo perustettu!");
@@ -53,7 +53,7 @@ if (!function_exists("tasotarkista")) {
                   AND taso     = BINARY '$sumtas'
                   AND tyyppi   = '$tyyppitalteen'
                   AND tunnus  != '$tunnus'";
-        $sresult = mysql_query($query) or pupe_error($query);
+        $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) == 0) {
           $virhe[$i] = t("Summattavaa tasoa %s ei ole perustettu!", "", $sumtas);

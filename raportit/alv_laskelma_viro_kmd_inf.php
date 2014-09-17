@@ -173,10 +173,19 @@ if ($tee == 'laskelma') {
 
   echo "<tbody>";
 
+  if ("{$rajaa}" == "1000") {
+    $rajaalisa = "HAVING veloitukset > 1000 or hyvitykset > 1000";
+  }
+  else {
+    $rajaalisa = "";
+  }
+
   while ($row = mysql_fetch_assoc($result)) {
 
     $query = "SELECT sum(round(tiliointi.summa * if('veronmaara'='$oletus_verokanta', $oletus_verokanta, vero) / 100, 2)) veronmaara,
-              sum(tiliointi.summa) summa
+              sum(tiliointi.summa) summa,
+              abs(sum(if(tiliointi.summa > 0, tiliointi.summa, 0))) veloitukset,
+              abs(sum(if(tiliointi.summa < 0, tiliointi.summa, 0))) hyvitykset
               FROM lasku
               JOIN tiliointi ON (
                 tiliointi.yhtio = lasku.yhtio AND
@@ -186,8 +195,12 @@ if ($tee == 'laskelma') {
               )
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               {$tilat}
-              AND lasku.tunnus = '{$row['ltunnus']}'";
+              AND lasku.tunnus = '{$row['ltunnus']}'
+              {$rajaalisa}";
     $verores = pupe_query($query);
+
+    if (!empty($rajaa) and mysql_num_rows($verores) == 0) continue;
+
     $verorow = mysql_fetch_assoc($verores);
 
     $_vero = $laskelma == 'a' ? $verorow['summa'] : $verorow['veronmaara'];

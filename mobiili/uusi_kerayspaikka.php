@@ -196,7 +196,7 @@ if (isset($submit) and trim($submit) != '') {
                                    AND hyllynro  = '$hyllynro'
                                    AND hyllyvali = '$hyllyvali'
                                    AND hyllytaso = '$hyllytaso'";
-      $oma_paikka = mysql_query($tuotteen_oma_hyllypaikka);
+      $oma_paikka = pupe_query($tuotteen_oma_hyllypaikka);
 
       // Jos syötettyä paikkaa ei ole tämän tuotteen, lisätään uusi tuotepaikka
       if (mysql_num_rows($oma_paikka) == 0) {
@@ -346,7 +346,7 @@ if (isset($submit) and trim($submit) != '') {
                             FROM tuote
                             WHERE yhtio = '{$kukarow['yhtio']}'
                             and tuoteno = '{$row['tuoteno']}'";
-          $kehahin_result = mysql_query($kehahin_query) or pupe_error($kehahin_query);
+          $kehahin_result = pupe_query($kehahin_query);
           $kehahin_row = mysql_fetch_array($kehahin_result);
           $keskihankintahinta = $kehahin_row['kehahin'];
 

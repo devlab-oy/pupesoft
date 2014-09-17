@@ -2062,7 +2062,7 @@ if ($tee == 'I') {
             osto_kulu_alv      = '{$osto_kulu_alv}',
             osto_rivi_kulu_alv = '{$osto_rivi_kulu_alv}'";
   $result = pupe_query($query);
-  $tunnus = mysql_insert_id($link);
+  $tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
   if ($kuva) {
     // päivitetään kuvalle vielä linkki toiseensuuntaa
@@ -2228,7 +2228,7 @@ if ($tee == 'I') {
 
       // Tiliöidään alv
       if ($ivero[$i] != 0) {
-        $isa = mysql_insert_id($link); // Näin löydämme tähän liittyvät alvit....
+        $isa = mysql_insert_id($GLOBALS["masterlink"]); // Näin löydämme tähän liittyvät alvit....
 
         // Kulun alv
         $query = "INSERT INTO tiliointi SET
@@ -2519,7 +2519,7 @@ if ($tee == 'I') {
 
         $query       = substr($query, 0, -1);
         $insresult   = pupe_query($query);
-        $kopiotunnus = mysql_insert_id($link);
+        $kopiotunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
         //Kopioidaan tiliöinnit
         mysql_data_seek($tilresult, 0);
@@ -2551,7 +2551,7 @@ if ($tee == 'I') {
 
           $query         = substr($query, 0, -1);
           $insresult     = pupe_query($query);
-          $kopiotiltunnus= mysql_insert_id($link);
+          $kopiotiltunnus= mysql_insert_id($GLOBALS["masterlink"]);
         }
         echo "<font class='message'>".t("Tehtiin kopio päivälle")." $kopiotpv-$kopiotpk-$kopiotpp</font><br>";
       }

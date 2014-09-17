@@ -8,7 +8,7 @@ require "../inc/parametrit.inc";
 echo "<font class='head'>".t("Lomaseuranta")."</font><hr>";
 
 $query = "SELECT distinct yhtio FROM yhtio WHERE (konserni = '$yhtiorow[konserni]' and konserni != '') or (yhtio = '$yhtiorow[yhtio]')";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 $konsernit = "";
 
 while ($row = mysql_fetch_array($result)) {
@@ -29,7 +29,7 @@ $query  = "SELECT distinct kuka, nimi
            WHERE $lisa2
            AND aktiivinen = 1
            AND extranet   = ''";
-$vares = mysql_query($query) or pupe_error($query);
+$vares = pupe_query($query);
 
 while ($varow = mysql_fetch_array($vares)) {
   $sel='';
@@ -43,7 +43,7 @@ echo "</form></table><br><br>";
 if ($kuka != '') {
 
   $query  = "SELECT max(lomaoikeus) lomaoikeus FROM kuka WHERE $lisa2 and kuka='$kuka'";
-  $vares = mysql_query($query) or pupe_error($query);
+  $vares = pupe_query($query);
   $varow = mysql_fetch_array($vares);
 
   echo "<table>";
@@ -64,7 +64,7 @@ if ($kuka != '') {
             and kalenteri.kuka=kuka.kuka
             and kuka.kuka='$kuka'
             ORDER BY kalenteri.kuka, kalenteri.tapa, kalenteri.pvmalku";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
     echo "<table>";

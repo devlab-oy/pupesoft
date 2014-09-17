@@ -114,8 +114,21 @@ if (!function_exists("tilauksesta_ostotilaus")) {
           // toimittaja löytyi, tehdään tästä ostotilaus
           $tiltoi = mysql_fetch_assoc($erres);
 
-          $ohjausmerkki = ($tiltoi['ostotilauksen_kasittely'] == 4) ? '' : $myytilrow['ohjausmerkki'] ;
+          $toim_ostilkas = $tiltoi['ostotilauksen_kasittely'];
+          $toim_ostilkas_chk = (is_numeric($toim_ostilkas) and $toim_ostilkas == 4);
+          $toim_ostilkas_chk_tyhja = (trim($toim_ostilkas) == '');
 
+          $ostilkas_chk = (is_numeric($ostotilauksen_kasittely) and $ostotilauksen_kasittely == 4);
+          $myynti_ostilkas_chk = ($toim_ostilkas_chk_tyhja and $ostilkas_chk);
+
+          $kumpi_ostotilkas = ($toim_ostilkas_chk or $myynti_ostilkas_chk);
+
+          if ($kumpi_ostotilkas) {
+            $ohjausmerkki = '';
+          }
+          else {
+            $ohjausmerkki = $myytilrow['ohjausmerkki'] ;
+          }
 
           // Katsotaan onko toimittajalla avoimia ostotilauksia
           // Pitää olla myös oikeat osoitetiedot
@@ -297,7 +310,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                       ytunnus             = '$tiltoi[ytunnus]'
                       {$suoratoimitus}";
             $updre = pupe_query($query);
-            $tunnus = (string) mysql_insert_id();
+            $tunnus = (string) mysql_insert_id($GLOBALS["masterlink"]);
 
             // hintojen ja alennuksien hakuun tarvitaan laskurow, tehdään tässä array kuntoon alehinta_osto() funktiota varten
             $jtsro = array(
@@ -418,7 +431,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                         nimitys         = '$tilrivirow[nimitys]',
                         jaksotettu      = ''";
               $updre = pupe_query($query);
-              $lisatty_tun = mysql_insert_id();
+              $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
               // Lisätään ostorivin lisätiedot
               $query = "INSERT INTO tilausrivin_lisatiedot

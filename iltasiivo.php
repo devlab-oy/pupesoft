@@ -719,7 +719,7 @@ if ($yhtiorow['kerayserat'] == 'K') {
 }
 
 // Poistetaan tuotepaikat jotka ovat varaston ensimmäisellä paikalla (esim. A-0-0-0) ja joilla
-// ei ole saldoa. Koska nämä ovat yleensä generoituja paikkoja. (ei poisteta oletuspaikkaa)
+// ei ole saldoa eikä hälytysrajaa. Koska nämä ovat yleensä generoituja paikkoja. (ei poisteta oletuspaikkaa)
 if ($yhtiorow['kerayserat'] == 'K') {
   $poistettu = 0;
 
@@ -733,6 +733,7 @@ if ($yhtiorow['kerayserat'] == 'K') {
             AND tuotepaikat.hyllytaso        = 0
             AND tuotepaikat.hyllyvali        = 0
             AND tuotepaikat.oletus           = ''
+            AND tuotepaikat.halytysraja      = 0
             AND tuotepaikat.poistettava     != 'D'
             GROUP BY 1";
   $result = pupe_query($query);
@@ -779,12 +780,12 @@ $avoimet_rivit = array();
 
 // Jos on poistettavia, haetaan avoimet
 if (mysql_num_rows($poistettavat_tuotepaikat) > 0) {
-  // Haetaan avoimet tilausrivit arrayseen (myynti, osto, siirtolistat)
+  // Haetaan avoimet tilausrivit arrayseen (myynti, osto, siirtolistat, valmistukset)
   $query = "SELECT CONCAT(tuoteno, hyllyalue, hyllynro, hyllytaso, hyllyvali) AS id
             FROM tilausrivi
             WHERE yhtio        = '{$kukarow['yhtio']}'
             AND laskutettuaika = '0000-00-00'
-            AND tyyppi         IN ('L','O','G')";
+            AND tyyppi         IN ('L','O','G','V','W','M')";
   $avoinrivi_result = pupe_query($query);
 
   while ($avoinrivi = mysql_fetch_assoc($avoinrivi_result)) {

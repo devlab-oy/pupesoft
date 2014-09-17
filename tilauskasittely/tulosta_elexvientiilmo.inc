@@ -4,8 +4,8 @@ echo "<font class='head'>".t("XML vienti-ilmoitus")."</font><hr>";
 
 function party($xml, $object, $params) {
   $Party = $object->appendChild($xml->createElement('Party'));
-  $Party->appendChild($xml->createElement('identity',           $params['identity']));           //Y-tunnus (tunnistenumero erotettuna v√§liviivalla, tunnuksen edess√§ maakoodi)
-  $Party->appendChild($xml->createElement('identityExtension',       $params['identityExtension']));     // Ilmoitetaan Tullin antama viej√§n tunnisteen viennin jatko-osa, mik√§li viej√§ on rekister√∂itynyt Tullin vientiasiakkaaksi.
+  $Party->appendChild($xml->createElement('identity',           $params['identity']));           //Y-tunnus (tunnistenumero erotettuna v‰liviivalla, tunnuksen edess‰ maakoodi)
+  $Party->appendChild($xml->createElement('identityExtension',       $params['identityExtension']));     // Ilmoitetaan Tullin antama viej‰n tunnisteen viennin jatko-osa, mik‰li viej‰ on rekisterˆitynyt Tullin vientiasiakkaaksi.
   $Party->appendChild($xml->createElement('codeListResponsibleAgency',  $params['codeListResponsibleAgency']));
   $Party->appendChild($xml->createElement('name1',             $params['name1']));
   $Party->appendChild($xml->createElement('name2',             $params['name2']));
@@ -55,14 +55,14 @@ function transportmeans($xml, $object, $params) {
   $transportmeans->appendChild($xml->createElement('registrationNationality', $params['registrationNationality']));
 }
 
-//hetaan kaikki otunnukset jotka l√∂ytyv√§t t√§n uusiotunnuksen alta
+//hetaan kaikki otunnukset jotka lˆytyv‰t t‰n uusiotunnuksen alta
 $query = "SELECT group_concat(distinct otunnus) tilaukset
           FROM tilausrivi
           WHERE uusiotunnus = '$laskurow[tunnus]'
           and yhtio         = '$kukarow[yhtio]'";
-$uresult = mysql_query($query) or pupe_error($query);
+$uresult = pupe_query($query);
 
-// varmistetaan, ett√§ l√∂ydettiin otsikoita
+// varmistetaan, ett‰ lˆydettiin otsikoita
 if (mysql_num_rows($uresult) > 0) {
 
   $urow = mysql_fetch_assoc($uresult);
@@ -73,18 +73,18 @@ if (mysql_num_rows($uresult) > 0) {
             FROM laskun_lisatiedot
             WHERE laskun_lisatiedot.otunnus = '$otunnarit[0]'
             and laskun_lisatiedot.yhtio='$kukarow[yhtio]'";
-  $lisres = mysql_query($query) or pupe_error($query);
+  $lisres = pupe_query($query);
   $lisrow = mysql_fetch_assoc($lisres);
 
 
-  //haetaan kollim√§√§r√§ ja bruttopaino
+  //haetaan kollim‰‰r‰ ja bruttopaino
   $query = "SELECT pakkaus, pakkauskuvaus, pakkauskuvaustark, sum(kilot) kilot, sum(kollit) kollit
             FROM rahtikirjat
             WHERE otsikkonro in ($urow[tilaukset])
             and yhtio='$kukarow[yhtio]'
             group by pakkaus, pakkauskuvaus, pakkauskuvaustark
             having kollit > 0";
-  $rahtiresult = mysql_query($query) or pupe_error($query);
+  $rahtiresult = pupe_query($query);
 
   $kilot  = 0;
   $kollit = 0;
@@ -101,7 +101,7 @@ if (mysql_num_rows($uresult) > 0) {
     $pakkaus_maara[$pakkauslask] = $rahtirow["kollit"];
     $pakkaus_kuvaus[$pakkauslask] = $rahtirow["pakkauskuvaustark"];
 
-    //Rahtikirjan mukaiset kilot ja kollim√§√§r√§t
+    //Rahtikirjan mukaiset kilot ja kollim‰‰r‰t
     $kilot  += $rahtirow["kilot"];
     $kollit += $rahtirow["kollit"];
 
@@ -121,7 +121,7 @@ if (mysql_num_rows($uresult) > 0) {
             WHERE tunnus  = '$laskurow[varasto]'
             and yhtio     = '$yhtiorow[yhtio]'
             and osoite   != ''";
-  $varresult = mysql_query($query) or pupe_error($query);
+  $varresult = pupe_query($query);
 
   if (mysql_num_rows($varresult) > 0) {
     $varrow = mysql_fetch_assoc($varresult);
@@ -131,7 +131,7 @@ if (mysql_num_rows($uresult) > 0) {
     $sijaintipaikka = $yhtiorow["osoite"];
   }
 
-  //ylim√§√§r√§isten erien vaikutus
+  //ylim‰‰r‰isten erien vaikutus
   $extrat = abs($laskurow["lisattava_era"])-abs($laskurow["vahennettava_era"]);
 
   $query = "SELECT
@@ -154,22 +154,22 @@ if (mysql_num_rows($uresult) > 0) {
             and tilausrivi.yhtio         = '$kukarow[yhtio]'
             and tilausrivi.kpl           > 0
             GROUP BY tuote.tullinimike1, tuote.tullinimike2, tuote.tullikohtelu, alkuperamaa, tullinimike.su, tullinimike.su_vientiilmo, tullinimike.dm";
-  $riviresult = mysql_query($query) or pupe_error($query);
+  $riviresult = pupe_query($query);
 
   if (mysql_num_rows($riviresult) > 0) {
 
     $tavaraerittelyt = mysql_num_rows($riviresult);
     $tavaraera = 1;
 
-    // Teh√§√§n xml entiteetit
+    // Teh‰‰n xml entiteetit
     foreach ($laskurow as $ind => $val) {
       $laskurow[$ind] = htmlspecialchars($val);
     }
-    // Teh√§√§n xml entiteetit
+    // Teh‰‰n xml entiteetit
     foreach ($yhtiorow as $ind => $val) {
       $yhtiorow[$ind] = htmlspecialchars($val);
     }
-    // Teh√§√§n xml entiteetit
+    // Teh‰‰n xml entiteetit
     foreach ($kukarow as $ind => $val) {
       $kukarow[$ind] = htmlspecialchars($val);
     }
@@ -336,7 +336,7 @@ if (mysql_num_rows($uresult) > 0) {
 
     while ($rivirow = mysql_fetch_assoc($riviresult)) {
 
-      // Teh√§√§n xml entiteetit
+      // Teh‰‰n xml entiteetit
       foreach ($rivirow as $ind => $val) {
         $rivirow[$ind] = htmlspecialchars($val);
       }
@@ -416,7 +416,7 @@ if (mysql_num_rows($uresult) > 0) {
         //$GoodsMeasure->appendChild($xml->createElement('measurementUnitQualifier', ''));
       }
 
-      //tullausarvi lis√§erineen
+      //tullausarvi lis‰erineen
       if ($extrat != 0 and $laskurow["summa"] != 0) {
         $tullarvo = round(($rivirow["rivihinta"]/$laskurow["summa"]*$extrat)+$rivirow["rivihinta"], 2);
       }

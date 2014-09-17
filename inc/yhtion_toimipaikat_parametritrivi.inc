@@ -32,7 +32,7 @@ if (mysql_field_name($result, $i) == "parametri") {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)." onchange='submit();'>";
 
   $query  = "SHOW columns FROM yhtion_parametrit";
-  $fields =  mysql_query($query);
+  $fields =  pupe_query($query);
 
   // ihan kaikkia parametrejä ei voi sallia toimipaikan taakse
   $poikkeukset = array(

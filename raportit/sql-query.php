@@ -54,7 +54,7 @@ else {
 
   if ($sqlhaku != '') {
 
-    $result = mysql_query($sqlhaku) or die ("<font class='error'>".mysql_error()."</font>");
+    $result = pupe_query($sqlhaku);
 
     if (mysql_num_rows($result) > 0) {
 

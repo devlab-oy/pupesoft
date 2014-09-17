@@ -227,7 +227,7 @@ if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
                       WHERE yhtio = '{$kukarow['yhtio']}'
                       AND selite  = '{$old_row['selite']}'";
             $toitares = pupe_query($query);
-            $toitarow = mysql_fetch_assoc($toitares);
+            $toitarow_old = mysql_fetch_assoc($toitares);
 
             $query = "SELECT *
                       FROM lasku
@@ -238,12 +238,12 @@ if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
 
             $unifaun_kaytossa = FALSE;
 
-            if (($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc'
+            if (($toitarow_old["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc'
                 and $unifaun_ps_host != ""
                 and $unifaun_ps_user != ""
                 and $unifaun_ps_pass != ""
                 and $unifaun_ps_path != "")
-              or($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc'
+              or($toitarow_old["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc'
                 and $unifaun_uo_host != ""
                 and $unifaun_uo_user != ""
                 and $unifaun_uo_pass != ""
@@ -251,12 +251,12 @@ if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
               $unifaun_kaytossa = TRUE;
             }
 
-            if ($toitarow['tulostustapa'] == 'E'
+            if ($toitarow_old['tulostustapa'] == 'E'
               and ((is_numeric($era_row['sscc_ulkoinen'])
                   and (int) $era_row['sscc_ulkoinen'] > 0)
                 or (!is_numeric($era_row['sscc_ulkoinen'])
                   and (string) $era_row['sscc_ulkoinen'] != ""))) {
-              if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc'
+              if ($toitarow_old["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc'
                 and $unifaun_ps_host != ""
                 and $unifaun_ps_user != ""
                 and $unifaun_ps_pass != ""
@@ -269,7 +269,7 @@ if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
                   $unifaun_ps_fail,
                   $unifaun_ps_succ);
               }
-              elseif ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc'
+              elseif ($toitarow_old["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc'
                 and $unifaun_uo_host != ""
                 and $unifaun_uo_user != ""
                 and $unifaun_uo_pass != ""
@@ -279,7 +279,7 @@ if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
 
               $mergeid = md5($row["toimitustavan_lahto"].$row["ytunnus"].$row["toim_osoite"].$row["toim_postino"].$row["toim_postitp"]);
 
-              $unifaun->setToimitustapaRow($toitarow);
+              $unifaun->setToimitustapaRow($toitarow_old);
               $unifaun->_discardParcel($mergeid, $sscc_chk_row['sscc_ulkoinen']);
               $unifaun->ftpSend();
             }
@@ -290,7 +290,23 @@ if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
                       WHERE yhtio = '$kukarow[yhtio]'
                       AND selite  = '{$new_row['selite']}'";
             $toitares = pupe_query($query);
-            $toitarow = mysql_fetch_assoc($toitares);
+            $toitarow_new = mysql_fetch_assoc($toitares);
+
+            if ($toitarow_old['tulostustapa'] == 'E' and $toitarow_new['tulostustapa'] == 'H') {
+              $query = "UPDATE rahtikirjat SET
+                        tulostettu = now()
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND otsikkonro = '{$row['tunnus']}'";
+              $updres = pupe_query($query);
+            }
+
+            if ($toitarow_old['tulostustapa'] == 'H' and $toitarow_new['tulostustapa'] == 'E') {
+              $query = "UPDATE rahtikirjat SET
+                        tulostettu = '0000-00-00 00:00:00'
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND otsikkonro = '{$row['tunnus']}'";
+              $updres = pupe_query($query);
+            }
 
             $query = "SELECT * FROM maksuehto
                       WHERE yhtio = '{$kukarow['yhtio']}'
@@ -379,14 +395,14 @@ if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
 
                 $row['shipment_unique_id'] = "{$row['tunnus']}_{$row['sscc']}";
 
-                if ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc'
+                if ($toitarow_new["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc'
                   and $unifaun_ps_host != ""
                   and $unifaun_ps_user != ""
                   and $unifaun_ps_pass != ""
                   and $unifaun_ps_path != "") {
                   $unifaun = new Unifaun($unifaun_ps_host, $unifaun_ps_user, $unifaun_ps_pass, $unifaun_ps_path, $unifaun_ps_port, $unifaun_ps_fail, $unifaun_ps_succ);
                 }
-                elseif ($toitarow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc'
+                elseif ($toitarow_new["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc'
                   and $unifaun_uo_host != ""
                   and $unifaun_uo_user != ""
                   and $unifaun_uo_pass != ""
@@ -397,7 +413,7 @@ if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
                 $unifaun->setYhtioRow($yhtiorow);
                 $unifaun->setKukaRow($kukarow);
                 $unifaun->setPostiRow($row);
-                $unifaun->setToimitustapaRow($toitarow);
+                $unifaun->setToimitustapaRow($toitarow_new);
                 $unifaun->setMehto($mehto);
 
                 $unifaun->setKirjoitin($kirjoitin_row['unifaun_nimi']);

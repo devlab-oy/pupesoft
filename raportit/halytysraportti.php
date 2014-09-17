@@ -151,6 +151,7 @@ if (!isset($osasto))        $osasto = "";
 if (!isset($tuoryh))        $tuoryh = "";
 if (!isset($tuotemerkki))   $tuotemerkki = "";
 if (!isset($asiakasosasto)) $asiakasosasto = "";
+if (!isset($toimipaikka))   $toimipaikka = "";
 
 //Voidaan tarvita jotain muuttujaa täältä
 if (isset($muutparametrit)) {
@@ -202,6 +203,7 @@ $sarakkeet["SARAKE12"]  = t("Ostoehdotus")." $ehd_kausi_o3\t";
 
 $sarakkeet["SARAKE12B"] = t("Ostoehdotus status")."\t";
 $sarakkeet["SARAKE12C"] = t("Viimeinen hankintapäivä")."\t";
+$sarakkeet["SARAKE12D"] = t("Viimeinen myyntipäivä")."\t";
 
 $sarakkeet["SARAKE13"]  = t("ostettava haly")."\t";
 $sarakkeet["SARAKE13B"] = t("ostettava tilausmaara")."\t";
@@ -305,14 +307,13 @@ if ($temp_asiakasno != '' or $asiakasno != '') {
   $sarakkeet["SARAKE55"] = t("myynti asiakas")." $asiakasno $kausi4\t";
 }
 
-// aika karseeta, mutta katotaan voidaanko tällästä optiota näyttää yks tosi firma specific juttu
-$query = "describe yhteensopivuus_rekisteri";
-$res = mysql_query($query);
-
-if (mysql_error() == "") {
-  $query = "select count(*) kpl from yhteensopivuus_rekisteri where yhtio='$kukarow[yhtio]'";
-  $res = mysql_query($query);
+if (table_exists("yhteensopivuus_rekisteri")) {
+  $query = "SELECT count(*) kpl
+            FROM yhteensopivuus_rekisteri
+            WHERE yhtio = '$kukarow[yhtio]'";
+  $res = pupe_query($query);
   $row = mysql_fetch_assoc($res);
+
   if ($row["kpl"] > 0) {
     $sarakkeet["SARAKE64"] = "Rekisteröidyt kpl\t";
   }
@@ -399,7 +400,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 
     foreach ($valitut as $val) {
       $query = "INSERT INTO avainsana set yhtio='$kukarow[yhtio]', laji='HALYRAP', selite='$rappari', selitetark='$val'";
-      $res = pupe_query($query, $masterlink);
+      $res = pupe_query($query, $GLOBALS["masterlink"]);
     }
   }
 
@@ -440,7 +441,10 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
 
   if ($onkolaajattoimipaikat) {
 
-    if ($toimipaikka > 0) {
+    if ("{$toimipaikka}" == "kaikki") {
+      $toimipaikka_nimi = t("Kaikki toimipaikat");
+    }
+    elseif ($toimipaikka > 0) {
       $toimipaikka_res = hae_yhtion_toimipaikat($kukarow['yhtio'], $toimipaikka);
       $toimipaikka_row = mysql_fetch_assoc($toimipaikka_res);
 
@@ -473,6 +477,9 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
   }
   if ($valitut["poistuvat"] != '') {
     $lisaa .= " and tuote.status != 'X' ";
+  }
+  if ($valitut["ehdokas"] != '') {
+    $lisaa .= " and tuote.status != 'E' ";
   }
   if ($valitut["ei_ostoehd"] != '') {
     $lisaa .= " and tuote.ostoehdotus != 'E' ";
@@ -564,12 +571,15 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
     exit;
   }
 
+  $varastowherelisa = $tuotepaikatjoinlisa = "";
+
   if ($valitut['VARASTOHUOMIO'] != '') {
     $varastowherelisa = "and tilausrivi.varasto in ({$varastot})";
-    $tuotepaikatjoinlisa = "and tuotepaikat.varasto in ({$varastot})";
+    $tuotepaikatjoinlisa = " and tuotepaikat.varasto in ({$varastot}) ";
   }
-  else {
-    $varastowherelisa = $tuotepaikatjoinlisa = "";
+
+  if ($valitut['SALDOLLISET'] != '') {
+    $tuotepaikatjoinlisa .= " and tuotepaikat.saldo != 0 ";
   }
 
   if ($abcrajaus != "") {
@@ -918,7 +928,8 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
                 sum(if (tilausrivi.laskutettuaika >= '$vva1-$kka1-$ppa1' and tilausrivi.laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,tilausrivi.rivihinta,0)) rivihinta1,
                 sum(if (tilausrivi.laskutettuaika >= '$vva2-$kka2-$ppa2' and tilausrivi.laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,tilausrivi.rivihinta,0)) rivihinta2,
                 sum(if (tilausrivi.laskutettuaika >= '$vva3-$kka3-$ppa3' and tilausrivi.laskutettuaika <= '$vvl3-$kkl3-$ppl3' ,tilausrivi.rivihinta,0)) rivihinta3,
-                sum(if (tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,tilausrivi.rivihinta,0)) rivihinta4
+                sum(if (tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,tilausrivi.rivihinta,0)) rivihinta4,
+                max(tilausrivi.laskutettuaika) myyntipvm
                 FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
                 WHERE tilausrivi.yhtio = '$row[yhtio]'
                 {$varastowherelisa}
@@ -1353,6 +1364,12 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
           $excelsarake++;
         }
 
+        if ($valitut["SARAKE12D"] != '') {
+          $rivi .= $laskurow['myyntipvm']."\t";
+
+          $worksheet->writeString($excelrivi, $excelsarake, $laskurow['myyntipvm']);
+          $excelsarake++;
+        }
 
         if ($valitut["SARAKE13"] != '') {
           $rivi .= "$ostettavahaly\t";
@@ -2079,7 +2096,7 @@ if ($tee == "" or $tee == "JATKA") {
 
   $muutparametrit = $osasto."#".$tuoryh."#".$ytunnus."#".$tuotemerkki."#".$asiakasosasto."#".$asiakasno."#";
 
-  if ($tuoryh !='' or $osasto != '' or $ytunnus != '' or $tuotemerkki != '' or $KAIKKIJT != '' or $toimipaikka != 0) {
+  if ($tuoryh !='' or $osasto != '' or $ytunnus != '' or $tuotemerkki != '' or $KAIKKIJT != '' or $toimipaikka != "") {
     if ($ytunnus != '' and !isset($ylatila)) {
 
       require "../inc/kevyt_toimittajahaku.inc";
@@ -2091,7 +2108,10 @@ if ($tee == "" or $tee == "JATKA") {
     elseif ($ytunnus != '' and isset($ylatila)) {
       $tee = "JATKA";
     }
-    elseif ($tuoryh !='' or $osasto != '' or $tuotemerkki != '' or $KAIKKIJT != '' or $toimipaikka != 0) {
+    elseif (($tuoryh !='' or $osasto != '' or $tuotemerkki != '' or $KAIKKIJT != '') and "{$toimipaikka}" == "kaikki") {
+      $tee = "JATKA";
+    }
+    elseif ($tuoryh !='' or $osasto != '' or $tuotemerkki != '' or $KAIKKIJT != '' or is_numeric($toimipaikka)) {
       $tee = "JATKA";
     }
     else {
@@ -2243,15 +2263,12 @@ if ($tee == "") {
     echo "<th>", t("Toimipaikka"), "</th>";
 
     echo "<td><select name='toimipaikka'>";
+    echo "<option value='kaikki'>",t("Kaikki"),"</option>";
 
     $sel = "";
 
-    $toimipaikka_requestista = (isset($toimipaikka) and $toimipaikka == 0);
-    $toimipaikka_kayttajalta = (!isset($toimipaikka) and $kukarow['toimipaikka'] == 0);
-
-    if ($toimipaikka_requestista or $toimipaikka_kayttajalta) {
-      $sel = "selected";
-      $toimipaikka = 0;
+    if (is_numeric($toimipaikka) and $toimipaikka == 0) {
+      $sel = 'selected';
     }
 
     echo "<option value='0' {$sel}>".t('Ei toimipaikkaa')."</option>";
@@ -2391,7 +2408,10 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
 
   if ($onkolaajattoimipaikat) {
 
-    if ($toimipaikka > 0) {
+    if ("{$toimipaikka}" == "kaikki") {
+      $toimipaikka_nimi = t("Kaikki toimipaikat");
+    }
+    elseif ($toimipaikka > 0) {
       $toimipaikka_res = hae_yhtion_toimipaikat($kukarow['yhtio'], $toimipaikka);
       $toimipaikka_row = mysql_fetch_assoc($toimipaikka_res);
 
@@ -2626,6 +2646,23 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
 
   echo "<tr><th>".t("Älä näytä poistuvia tuotteita")."</th><td colspan='3'><input type='checkbox' name='valitut[poistuvat]' value='POISTUVAT' $chk></td></tr>";
 
+  //Näytetäänkö ehdokas-tuotteet
+  $query = "SELECT selitetark
+            FROM avainsana
+            WHERE yhtio    = '$kukarow[yhtio]'
+            and laji       = 'HALYRAP'
+            and selite     = '$rappari'
+            and selitetark = 'EHDOKAS'";
+  $sresult = pupe_query($query);
+  $srow = mysql_fetch_assoc($sresult);
+
+  $chk = "";
+  if (($srow["selitetark"] == "EHDOKAS" and $tee == "JATKA") or $valitut["ehdokas"] != '') {
+    $chk = "CHECKED";
+  }
+
+  echo "<tr><th>",t("Älä näytä ehdokas-tuotteita"),"</th><td colspan='3'><input type='checkbox' name='valitut[ehdokas]' value='EHDOKAS' {$chk}></td></tr>";
+
   //Näytetäänkö ostoehdottamattomat tuotteet
   $query = "SELECT selitetark
             FROM avainsana
@@ -2750,6 +2787,28 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
 
     echo "<tr><th>".t("Listaa vain 12kk sisällä perustetut tuotteet")."</th><td colspan='3'><input type='checkbox' name='valitut[VAINUUDETTUOTTEET]' value='VAINUUDETTUOTTEET' $chk></td></tr>";
   }
+
+  //Näytetäänkö ostot varastoittain
+  $query = "SELECT selitetark
+            FROM avainsana
+            WHERE yhtio    = '$kukarow[yhtio]'
+            and laji       = 'HALYRAP'
+            and selite     = '$rappari'
+            and selitetark = 'SALDOLLISET'";
+  $sresult = pupe_query($query);
+  $srow = mysql_fetch_assoc($sresult);
+
+  $chk = "";
+  if (($srow["selitetark"] == "SALDOLLISET" and $tee == "JATKA") or $valitut["SALDOLLISET"] != '') {
+    $chk = "CHECKED";
+  }
+
+  echo "<tr>";
+  echo "<th>",t("Näytä vain tuotteet joilla on saldoa"),"</th>";
+  echo "<td colspan='3'><input type='checkbox' name='valitut[SALDOLLISET]' {$chk}></td>";
+  echo "<td colspan='5' class='back'><font class='info'>",t("Raportti ajettava varastopaikoittain"),"</font></td>";
+  echo "</tr>";
+
   echo "<tr><th>".t("Päätoimittajarajaus")."</th><td colspan='3'><input type='checkbox' name='nayta_vain_ykkostoimittaja' value='JOO'/></tr></td>";
   echo "<tr><td class='back'><br></td></tr>";
 
@@ -2763,7 +2822,7 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
     $konsyhtiot = " yhtio = '$kukarow[yhtio]' ";
   }
 
-  if ($onkolaajattoimipaikat and isset($toimipaikka)) {
+  if ($onkolaajattoimipaikat and isset($toimipaikka) and "{$toimipaikka}" != "kaikki") {
     $toimipaikkalisa = "AND toimipaikka = '{$toimipaikka}'";
   }
   else {
@@ -2836,8 +2895,16 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
   }
 
   echo "</table><br><br>";
-  echo "<table>";
-  echo "<tr><th colspan='4'>".t("Omat hälytysraportit")."</th></tr>";
+  echo "<table><tr>";
+  echo "<th colspan='4'>";
+  echo t("Omat hälytysraportit");
+
+  echo "<span style='float: right;'>";
+  echo t("Ruksaa kaikki")," ";
+  echo "<input type='checkbox' class='valitut_checkbox_kaikki' />";
+  echo "</span>";
+
+  echo "</th></tr>";
 
   if (isset($POISTA) and isset($rappari) and $rappari != "") {
     $query = "DELETE FROM avainsana
@@ -2881,6 +2948,19 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
 
   echo "</td></tr>";
 
+  echo "<script type='text/javascript'>
+          $(function() {
+            $('input.valitut_checkbox_kaikki').on('click', function() {
+              if ($(this).is(':checked')) {
+                $('input.valitut_checkbox').attr('checked', true);
+              }
+              else {
+                $('input.valitut_checkbox').attr('checked', false);
+              }
+            });
+          });
+        </script>";
+
   $lask = 0;
   echo "<tr>";
 
@@ -2903,7 +2983,7 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
       echo "</tr><tr>";
     }
 
-    echo "<td><input type='checkbox' name='valitut[$key]' value='$key' $sel>".ucfirst($sarake)."</td>";
+    echo "<td><input type='checkbox' class='valitut_checkbox' name='valitut[$key]' value='$key' $sel>".ucfirst($sarake)."</td>";
     $lask++;
   }
 

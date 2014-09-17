@@ -21,7 +21,7 @@ if ($php_cli) {
   $kukarow['yhtio']=$argv[1];
 
   $query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
-  $yhtiores = mysql_query($query) or pupe_error($query);
+  $yhtiores = pupe_query($query);
 
   if (mysql_num_rows($yhtiores)==1) {
     $yhtiorow = mysql_fetch_array($yhtiores);
@@ -52,7 +52,7 @@ if ($aja=='run') {
             AND hinnastoon  != 'E'
             AND tuotetyyppi  NOT IN ('A', 'B')
             AND status       NOT IN ('P','X')";
-  $res   = mysql_query($query) or pupe_error($query);
+  $res   = pupe_query($query);
 
   $echoulos .= "<font class='message'>K‰sitell‰‰n tuotteita (".mysql_num_rows($res)." kpl)...<br>";
 
@@ -74,7 +74,7 @@ if ($aja=='run') {
 
     // haetaan oletus varastopaikka
     $query  = "select * from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]' and oletus='X'";
-    $kores  = mysql_query($query) or pupe_error($query);
+    $kores  = pupe_query($query);
     $korow  = mysql_fetch_array($kores);
 
     $hyllyalue = $korow['hyllyalue'];
@@ -127,12 +127,12 @@ if ($aja=='run') {
 */
     // haetaan korvaavia tuotteita
     $query  = "select * from korvaavat where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
-    $kores  = mysql_query($query) or pupe_error($query);
+    $kores  = pupe_query($query);
 
     if (mysql_num_rows($kores)>0) {
       $korow  = mysql_fetch_array($kores);
       $query  = "select * from korvaavat where yhtio='$kukarow[yhtio]' and id='$korow[id]' order by jarjestys, tuoteno";
-      $kores  = mysql_query($query) or pupe_error($query);
+      $kores  = pupe_query($query);
       $nexti  = 0;
 
       while ($korow = mysql_fetch_array($kores)) {
@@ -185,7 +185,7 @@ if ($aja=='run') {
   $echoulos .= "<font class='message'>L‰hetet‰‰n tiedosto Asiakkaille...</font><br>";
 
   $query  = "select * from asiakas where yhtio='$kukarow[yhtio]' and fakta like '%ELMATUOTE-SƒHK÷POSTILLA%' and email!=''";
-  $kores  = mysql_query($query) or pupe_error($query);
+  $kores  = pupe_query($query);
 
   if (mysql_num_rows($kores) > 0) {
 

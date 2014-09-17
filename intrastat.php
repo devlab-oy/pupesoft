@@ -71,7 +71,7 @@ if ($tee == "tulosta") {
             where nimi != ''
             and eu     != ''
             ORDER BY koodi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   $eumaat = "";
   while ($row = mysql_fetch_array($vresult)) {
@@ -282,7 +282,7 @@ if ($tee == "tulosta") {
   }
 
   $query .= "  ORDER BY $ee_yhdistettyorder tullinimike1, maalahetys, alkuperamaa, maamaara, kuljetusmuoto, kauppatapahtuman_luonne, laskunro, tuoteno";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   $nim     = "";
   $lask    = 1;
@@ -504,7 +504,7 @@ if ($tee == "tulosta") {
             and tilausrivi.perheid2 > 0
             and tilausrivi.perheid2 != tilausrivi.tunnus
             and tilausrivi.perheid2 in ($row[perheid2set])";
-      $lisavarres = mysql_query($query) or pupe_error($query);
+      $lisavarres = pupe_query($query);
       $lisavarrow = mysql_fetch_array($lisavarres);
 
       $row["paino"]     += $lisavarrow["paino"];
@@ -1009,7 +1009,7 @@ echo"
   </tr>";
 
 $query = "SELECT tunnus from yhtion_toimipaikat where yhtio = '$kukarow[yhtio]' and vat_numero != ''";
-$vresult = mysql_query($query) or pupe_error($query);
+$vresult = pupe_query($query);
 
 if (mysql_num_rows($vresult) > 0) {
   echo "<tr>
@@ -1022,7 +1022,7 @@ if (mysql_num_rows($vresult) > 0) {
             FROM maat
             where nimi != '' and eu != '' and koodi != '$yhtiorow[maa]'
             ORDER BY koodi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   while ($row = mysql_fetch_array($vresult)) {
     $sel = '';

@@ -9,14 +9,19 @@ $varastot_array = sallitut_varastot($params);
 
 //sisään tulee $row jossa on tilausrivi kaikki tiedot
 
-$riviok         = 0;
-$saako_hyvaksya     = 0;
-$saako_jalkitoimittaa   = 0;
+$riviok               = 0;
+$saako_hyvaksya       = 0;
+$saako_jalkitoimittaa = 0;
 $vastaavattuotteet    = 0;
-$varaosavirhe       = "";
-$vastaavat_html      = "";
+$varaosavirhe         = "";
+$vastaavat_html       = "";
 
-$tquery  = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$row[tuoteno]'";
+pupeslave_start();
+
+$tquery  = "SELECT *
+            FROM tuote
+            WHERE yhtio = '$kukarow[yhtio]'
+            and tuoteno = '$row[tuoteno]'";
 $tres  = pupe_query($tquery);
 $trow   = mysql_fetch_assoc($tres); // haetaan tuotteen tiedot..
 
@@ -24,34 +29,27 @@ if ($toim == "YLLAPITO") {
   // Jos ollaan syötetty poikkeavat sopimuksen alku-/loppupäivät tilausriville, tarkistetaan että ne on oikeelliset
   if ($row["kerayspvm"] != '0000-00-00' or $row["toimaika"] != '0000-00-00') {
 
-    $sopimusquery = "SELECT sopimus_alkupvm, sopimus_loppupvm
-                     FROM laskun_lisatiedot
-                     WHERE yhtio = '{$kukarow["yhtio"]}'
-                     AND otunnus = '{$laskurow["tunnus"]}'";
-    $sopimus_result = pupe_query($sopimusquery);
-    $sopimus_row = mysql_fetch_assoc($sopimus_result);
-
     // tilausrivi.kerayspvm == poikkeava alkupäivä
-    if ($row["kerayspvm"] != '0000-00-00' and $row["kerayspvm"] < $sopimus_row["sopimus_alkupvm"]) {
+    if ($row["kerayspvm"] != '0000-00-00' and $row["kerayspvm"] < $laskurow["sopimus_alkupvm"]) {
       $varaosavirhe .= t("VIRHE: Poikkeava alkupäivä ei voi olla vanhempi kun sopimuksen alkupäivä!")."<br>";
       $riviok++;
       $tilausok++;
     }
 
-    if ($row["kerayspvm"] != '0000-00-00' and $row["kerayspvm"] > $sopimus_row["sopimus_loppupvm"]) {
+    if ($row["kerayspvm"] != '0000-00-00' and $row["kerayspvm"] > $laskurow["sopimus_loppupvm"]) {
       $varaosavirhe .= t("VIRHE: Poikkeava alkupäivä ei voi olla uudempi kun sopimuksen loppupäivä!")."<br>";
       $riviok++;
       $tilausok++;
     }
 
     // tilausrivi.toimaika == poikkeava loppupäivä
-    if ($row["toimaika"] != '0000-00-00' and $row["toimaika"] < $sopimus_row["sopimus_alkupvm"]) {
+    if ($row["toimaika"] != '0000-00-00' and $row["toimaika"] < $laskurow["sopimus_alkupvm"]) {
       $varaosavirhe .= t("VIRHE: Poikkeava loppupäivä ei voi olla vanhempi kun sopimuksen alkupäivä!")."<br>";
       $riviok++;
       $tilausok++;
     }
 
-    if ($row["toimaika"] != '0000-00-00' and $row["toimaika"] > $sopimus_row["sopimus_loppupvm"] and $sopimus_row["sopimus_loppupvm"] != "0000-00-00") {
+    if ($row["toimaika"] != '0000-00-00' and $row["toimaika"] > $laskurow["sopimus_loppupvm"] and $laskurow["sopimus_loppupvm"] != "0000-00-00") {
       $varaosavirhe .= t("VIRHE: Poikkeava loppupäivä ei voi olla uudempi kun sopimuksen loppupäivä!")."<br>";
       $riviok++;
       $tilausok++;
@@ -66,7 +64,10 @@ if ($toim == "YLLAPITO") {
 }
 
 if ($trow['panttitili'] == 'K' and in_array($toim, array('PIKATILAUS', 'RIVISYOTTO', 'REKLAMAATIO'))) {
-  $query = "SELECT panttitili FROM asiakas WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$laskurow['liitostunnus']}'";
+  $query = "SELECT panttitili
+            FROM asiakas
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = '{$laskurow['liitostunnus']}'";
   $chk_res = pupe_query($query);
   $chk_row = mysql_fetch_assoc($chk_res);
 
@@ -350,7 +351,8 @@ if ($row["var"] == 'S') {
   // otetaan maksuehto selville..
   $query = "SELECT *
             from maksuehto
-            where yhtio='$kukarow[yhtio]' and tunnus='$laskurow[maksuehto]'";
+            where yhtio = '$kukarow[yhtio]'
+            and tunnus  = '$laskurow[maksuehto]'";
   $maksuehtoresult = pupe_query($query);
   $maksuehtorow = mysql_fetch_assoc($maksuehtoresult);
 
@@ -405,6 +407,15 @@ if (isset($myyntierahuom) and is_array($myyntierahuom) and in_array($row['tunnus
 
 //Tässä on kaikki saldoihin ja varastopaikkoihin liittyvät tsekit, eli EI tehdä saldottomille tuotteille, eikä tuoteperheen saldollisille lapsille jos koko perhe suoratoimitetaan
 $paikat  = "";
+
+$_onko_isatuote = (!empty($row['perheid']) and $row['perheid'] == $row['tunnus']);
+$_onko_lapsituote = (!empty($row['perheid']) and $row['perheid'] != $row['tunnus']);
+//Jos tilausrivi on lapsituote ja se on varastosiirtotilassa,
+//niin laitetaan tilausrivin paikka dropdown disabled tilaan
+$paikka_disabled = "";
+if ($_onko_lapsituote and $row['var'] == 'S') {
+  $paikka_disabled = "disabled";
+}
 
 if (
   $trow["ei_saldoa"] == ""
@@ -480,6 +491,7 @@ if (
 
     $paikat .= "<option value='EIERAAVIELA#!¡!#EIEI'>".t("Valitse erä")."</option>";
     $paikatlask++;
+    $omapaikatraja = 1;
 
     if ($trow["sarjanumeroseuranta"] == "F") {
       $pepvmlisa1 = " sarjanumeroseuranta.parasta_ennen, ";
@@ -513,7 +525,7 @@ if (
                FROM tuote
               JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
               JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                AND varastopaikat.tunnus                = tuotepaikat.varasto)
+                AND varastopaikat.tunnus = tuotepaikat.varasto)
               JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
               and sarjanumeroseuranta.tuoteno           = tuote.tuoteno
               and sarjanumeroseuranta.hyllyalue         = tuotepaikat.hyllyalue
@@ -536,8 +548,8 @@ if (
               JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
               JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                 AND varastopaikat.tunnus = tuotepaikat.varasto)
-              WHERE tuote.yhtio          = '$kukarow[yhtio]'
-              and tuote.tuoteno          = '$row[tuoteno]'
+              WHERE tuote.yhtio = '$kukarow[yhtio]'
+              and tuote.tuoteno = '$row[tuoteno]'
               ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
   }
 
@@ -556,7 +568,7 @@ if (
                  and tuoteno          = '$row[tuoteno]'
                  and myyntirivitunnus = '$row[tunnus]'
                  LIMIT 1";
-      $sarjares = pupe_query($query);
+      $sarjares = pupe_query($query, $GLOBALS["masterlink"]);
       $sarjarow = mysql_fetch_assoc($sarjares);
     }
 
@@ -821,8 +833,8 @@ if (
                 JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                 JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                   AND varastopaikat.tunnus = tuotepaikat.varasto)
-                WHERE tuote.yhtio          = '$kukarow[yhtio]'
-                and tuote.tuoteno          = '$row[tuoteno]'";
+                WHERE tuote.yhtio = '$kukarow[yhtio]'
+                and tuote.tuoteno = '$row[tuoteno]'";
       $valmpaikatres = pupe_query($query);
 
       while ($valmpaikatrow  = mysql_fetch_assoc($valmpaikatres)) {
@@ -862,9 +874,45 @@ if (
 
     $siirto_varastot = hae_mahdolliset_siirto_varastot($kohde_varastot, $row['tuoteno']);
 
+    if (!isset($_isa_saldot)) {
+      $_isa_saldot = array();
+    }
+
     foreach ($siirto_varastot as $siirto_varasto) {
-      //Jos tilausrivin toimittajan_tunnus ja siirto_varasto.tunnus on samat, tarkoittaa se että tilausriville on valittu kyseinen siirtovarasto ja lisaarivi vaiheessa saldot on riittäneet.
-      if ($siirto_varasto['tuote']['myytavissa'] <= 0 and $row['toimittajan_tunnus'] != $siirto_varasto['tunnus']) {
+
+      $saldo_myytavissa = $siirto_varasto['tuote']['myytavissa'];
+      if ($_onko_isatuote) {
+        $tuoteperhe_saldomyytavissa = tuoteperhe_myytavissa($trow['tuoteno'], '', '', $siirto_varasto['lahde_tunnus']);
+        $saldo_myytavissa = $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']];
+        $_isa_saldot[$row['perheid']] = array(
+            'saldo_myytavissa' => $saldo_myytavissa,
+            'var' => $row['var'],
+        );
+      }
+      elseif ($_onko_lapsituote) {
+        if ($_isa_saldot[$row['perheid']]['var'] == 'S') {
+          $saldo_myytavissa = $_isa_saldot[$row['perheid']]['saldo_myytavissa'];
+        }
+        else {
+          continue;
+        }
+      }
+
+      //Jos tilausrivin toimittajan_tunnus ja siirto_varasto.tunnus on samat,
+      //tarkoittaa se että tilausriville on valittu kyseinen siirtovarasto
+      //ja lisaarivi vaiheessa saldot on riittäneet.
+      $_normirivi_onko_siirto = (
+              !isset($tuoteperhe_saldomyytavissa)
+              and $siirto_varasto['tuote']['myytavissa'] <= 0
+              and $row['toimittajan_tunnus'] != $siirto_varasto['tunnus']
+              );
+      $_perherivi_onko_siirto = (
+              isset($tuoteperhe_saldomyytavissa)
+              and $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']] <= 0
+              and $row['toimittajan_tunnus'] != $siirto_varasto['tunnus']
+              );
+
+      if ($_normirivi_onko_siirto or $_perherivi_onko_siirto) {
         continue;
       }
 
@@ -872,7 +920,7 @@ if (
         $sel4 = "SELECTED";
       }
 
-      $siirto_varastot_text = t('Varastosiirto'). " {$siirto_varasto['lahde_nimi']} --> {$siirto_varasto['kohde_nimi']} ".t('Myytävissä').": {$siirto_varasto['tuote']['myytavissa']} ({$siirto_varasto['toimitustapa_selite']})";
+      $siirto_varastot_text = t('Varastosiirto'). " {$siirto_varasto['lahde_nimi']} --> {$siirto_varasto['kohde_nimi']} ".t('Myytävissä').": {$saldo_myytavissa} ({$siirto_varasto['toimitustapa_selite']})";
       $paikat .= "<option value='¡¡S{$siirto_varasto['tunnus']}¡¡S{$siirto_varasto['lahde_tunnus']}¡¡S{$siirto_varasto['kohde_tunnus']}' {$sel4}>{$siirto_varastot_text}</option>";
       $paikatlask++;
       $sel4 = "";
@@ -880,7 +928,7 @@ if (
   }
 
   if ($paikat != "" and $paikatlask > 1 and $row["hyllyalue"] != "!!M") {
-    $paikat = "<select name='paikka' style='width:120px;' onchange='submit();'>".$paikat."</select>";
+    $paikat = "<select name='paikka' style='width:120px;' onchange='submit();' {$paikka_disabled}>".$paikat."</select>";
   }
   elseif ($row["hyllyalue"] == "!!M") {
     $paikat = " $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]";
@@ -906,8 +954,8 @@ elseif (
             JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.hyllyalue != '!!M'
             JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
               AND varastopaikat.tunnus = tuotepaikat.varasto)
-            WHERE tuote.yhtio          = '$kukarow[yhtio]'
-            and tuote.tuoteno          = '$row[tuoteno]'
+            WHERE tuote.yhtio = '$kukarow[yhtio]'
+            and tuote.tuoteno = '$row[tuoteno]'
             ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
   $omavarastores  = pupe_query($query);
 
@@ -947,7 +995,7 @@ elseif (
   }
 
   if ($paikat != "" and $paikatlask > 1) {
-    $paikat = "<select name='paikka' style='width:120px;' onchange='submit();'>".$paikat."</select>";
+    $paikat = "<select name='paikka' style='width:120px;' onchange='submit();' {$paikka_disabled}>".$paikat."</select>";
   }
   elseif ($row["hyllyalue"] == "!!M") {
     $paikat = " $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]";
@@ -973,7 +1021,7 @@ elseif (
             WHERE yhtio = '$kukarow[yhtio]'
             AND perheid = '$row[tunnus]'
             AND otunnus = '$row[otunnus]'";
-  $perhe_tuoteno_res = pupe_query($query);
+  $perhe_tuoteno_res = pupe_query($query, $GLOBALS["masterlink"]);
 
   $perheen_tuotteet = '';
 
@@ -1004,7 +1052,7 @@ elseif (
     $paikat .= "<option value='!!!$krow[liitostunnus]' title='$title' $sel1>$title</option>";
   }
 
-  $paikat = "<select name='paikka' style='width:120px;' onchange='submit();'>".$paikat."</select>";
+  $paikat = "<select name='paikka' style='width:120px;' onchange='submit();' {$paikka_disabled}>".$paikat."</select>";
 }
 
 //  Onko tätä varattuna siirtolistalla?
@@ -1459,3 +1507,5 @@ if ($sahkoinen_tilausliitanta and (!isset($vastaavat_html) or trim($vastaavat_ht
     }
   }
 }
+
+pupeslave_stop();

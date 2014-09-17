@@ -130,7 +130,7 @@ if ($mrow["summanjakoprososa2"] != 0 and $mrow["osamaksuehto1"] != 0 and $mrow["
 
     $query = substr($query, 0, -1);
     $laskuinsert_result = pupe_query($query);
-    $uusitunnus = (string) mysql_insert_id();
+    $uusitunnus = (string) mysql_insert_id($GLOBALS["masterlink"]);
 
     $query = "SELECT *
               FROM laskun_lisatiedot

@@ -766,7 +766,7 @@ if ($tee == "TALLENNA_BUDJETTI") {
                         AND kausi   = '$kausi'
                         AND try     = '$try'
                         AND osasto  = '$osasto'";
-              $result = pupe_query($query, $masterlink);
+              $result = pupe_query($query, $GLOBALS["masterlink"]);
               $pois++;
             }
             elseif ($update_vai_insert != "") {
@@ -789,7 +789,7 @@ if ($tee == "TALLENNA_BUDJETTI") {
                         indeksi    = '$tall_index',
                         muutospvm  = now(),
                         muuttaja   = '{$kukarow["kuka"]}'";
-              $result = pupe_query($query, $masterlink);
+              $result = pupe_query($query, $GLOBALS["masterlink"]);
               $lisaa++;
             }
           }

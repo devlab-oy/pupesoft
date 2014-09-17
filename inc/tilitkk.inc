@@ -26,7 +26,7 @@ if ($tee == '') {
             and kaytossa != 'E'
             and tyyppi    = 'K'
             ORDER BY koodi+0, koodi, nimi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   echo "<td><select name='kustp'><option value=' '>".t("Ei valintaa");
 
@@ -48,7 +48,7 @@ if ($tee == '') {
             and kaytossa != 'E'
             and tyyppi    = 'O'
             ORDER BY koodi+0, koodi, nimi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   echo "<td><select name='kohde'><option value=' '>".t("Ei valintaa");
 
@@ -70,7 +70,7 @@ if ($tee == '') {
             and kaytossa != 'E'
             and tyyppi    = 'P'
             ORDER BY koodi+0, koodi, nimi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   echo "<td><select name='proj'><option value=' '>".t("Ei valintaa");
 
@@ -117,7 +117,7 @@ $query = "SELECT sisainen_taso, tilino, nimi
           FROM tili
           WHERE yhtio='$kukarow[yhtio]'
           ORDER BY tilino";
-$result = mysql_query($query) or pupe_error($query);
+$result = pupe_query($query);
 
 echo "<font class='message'>".t("Vuosi")." $alvv $teksti</font>";
 echo "<table>";
@@ -138,7 +138,7 @@ while ($tilirow = mysql_fetch_array($result)) {
             and tapvm>='$alku' and tapvm<'$loppu'
             $lisa
              GROUP BY DATE_FORMAT(tapvm, '%Y-%m')";
-  $aresult = mysql_query($query) or pupe_error($query);
+  $aresult = pupe_query($query);
 
   $kausi='';
   $summa='';

@@ -9,7 +9,7 @@ if ($mista== 'jtselaus') {
             where yhtio = '$kukarow[yhtio]'
             and otunnus = '$kukarow[kesken]'
             and netto   = ''";
-  $jresultlask = mysql_query($query) or pupe_error($query);
+  $jresultlask = pupe_query($query);
 }
 elseif ($mista== 'jtrivit_tilaukselle.inc') {
   // Nyt alennukset ja hinnat ja alvi lasketaan automaattisesti uudestaan
@@ -18,7 +18,7 @@ elseif ($mista== 'jtrivit_tilaukselle.inc') {
             where yhtio = '$kukarow[yhtio]'
             and tunnus  = '$tunnus'
             and netto   = ''";
-  $jresultlask = mysql_query($query) or pupe_error($query);
+  $jresultlask = pupe_query($query);
 }
 elseif ($mista== 'jtrivit_tilaukselle.php' and $kukarow['extranet'] != '') {
   // Nyt alennukset ja hinnat ja alvi lasketaan automaattisesti uudestaan
@@ -27,7 +27,7 @@ elseif ($mista== 'jtrivit_tilaukselle.php' and $kukarow['extranet'] != '') {
             where yhtio = '$kukarow[yhtio]'
             and tunnus  = '$tunnus'
             and netto   = ''";
-  $jresultlask = mysql_query($query) or pupe_error($query);
+  $jresultlask = pupe_query($query);
 
   $laskurow["ytunnus"] = $kukarow["oletus_asiakas"];
 }
@@ -37,13 +37,13 @@ while ($jjrow = mysql_fetch_array($jresultlask)) {
   $query = "SELECT *
             from tuote
             where yhtio='$kukarow[yhtio]' and tuoteno='$jjrow[tuoteno]'";
-  $tres  = mysql_query($query) or pupe_error($query);
+  $tres  = pupe_query($query);
   $trow  = mysql_fetch_array($tres);
 
   $query = "SELECT alennus
             FROM asiakasalennus
             WHERE yhtio='$kukarow[yhtio]' and ryhma = '$trow[aleryhma]' and ytunnus = '$laskurow[ytunnus]'";
-  $aleresult = mysql_query($query) or pupe_error($query);
+  $aleresult = pupe_query($query);
 
   // TODO: Tämä koko osio on mystistä paskaa!
   if (mysql_num_rows($aleresult) != 0) {
@@ -74,7 +74,7 @@ while ($jjrow = mysql_fetch_array($jresultlask)) {
       }
 
       $query = "UPDATE tilausrivi set hinta='$hinta', {$ale_query_update_lisa} netto='$netto', alv='$alv' where yhtio='$kukarow[yhtio]' and tunnus='$jjrow[tunnus]'";
-      $tres  = mysql_query($query) or pupe_error($query);
+      $tres  = pupe_query($query);
 
       if ($debug == 1) {
         echo "$query<br>";

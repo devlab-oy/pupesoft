@@ -321,11 +321,12 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
 
         //$linkurl .= "<a target=newikkuna href='http://extranet.dpd.de/cgi-bin/delistrack.acl?typ=4&model=web_login.gws&username=$dpdtun&password=$dpdss&pknr=$sscc'>$sscc</a><br>";
         $linkurl .= "<a target=newikkuna href='http://$dpdtun:$dpdss@tracking.dpd.de/cgi-bin/delistrack.acl?typ=4&pknr=$sscc'>$sscc</a><br>";
-
       }
 
       $linkurl = substr($linkurl, 0, -4); // vika br pois
-
+    }
+    elseif (stripos($laskurow["toimitustapa"], "mypack") !== FALSE) {
+      $linkurl = "<a target=newikkuna href='http://www.postnordlogistics.fi/en/Online-services/Pages/Track-and-Trace.aspx?search={$rakirrow['rahtikirjanro']}'>{$rakirrow['rahtikirjanro']}</a>";
     }
     else {
       $linkurl = $rakirrow['rahtikirjanro'];

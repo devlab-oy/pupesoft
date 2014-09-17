@@ -75,7 +75,7 @@ if ($tee == 'YHTEENVETO') {
     $query = "DELETE from abc_aputaulu
               WHERE yhtio = '$kukarow[yhtio]'
               and tyyppi  = 'TV'";
-    pupe_query($query, $masterlink);
+    pupe_query($query, $GLOBALS["masterlink"]);
 
     $query = "SELECT
               tuote.tuoteno,
@@ -120,7 +120,7 @@ if ($tee == 'YHTEENVETO') {
     $query = "DELETE from abc_aputaulu
               WHERE yhtio = '$kukarow[yhtio]'
               and tyyppi  in ('TK','TP','TR','TM')";
-    pupe_query($query, $masterlink);
+    pupe_query($query, $GLOBALS["masterlink"]);
 
     $query = "SELECT
               tuote.tuoteno,
@@ -416,6 +416,7 @@ if ($tee == 'YHTEENVETO') {
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND tuoteno = '$row[tuoteno]'
                 AND laji    = 'tulo'
+                AND selite  not like '%alkusaldo%'
                 ORDER BY laadittu
                 LIMIT 1";
       $insres = pupe_query($query);
@@ -503,7 +504,7 @@ if ($tee == 'YHTEENVETO') {
                 luokka_osasto      = '$i_luokka',
                 luokka_try         = '$i_luokka',
                 luokka_tuotemerkki = '$i_luokka'";
-      pupe_query($query, $masterlink);
+      pupe_query($query, $GLOBALS["masterlink"]);
 
       // luokka vaihtuu
       if ($ryhmaprossa >= $ryhmaprossat[$i]) {
@@ -523,7 +524,7 @@ if ($tee == 'YHTEENVETO') {
               WHERE yhtio = '$kukarow[yhtio]'
               and tyyppi  = '$abcchar'
               order by osasto";
-    $kaikres = pupe_query($query, $masterlink);
+    $kaikres = pupe_query($query, $GLOBALS["masterlink"]);
 
     // tehdään osastokohtaiset luokat
     while ($arow = mysql_fetch_assoc($kaikres)) {
@@ -539,7 +540,7 @@ if ($tee == 'YHTEENVETO') {
                 and tyyppi  = '$abcchar'
                 and osasto  = '$arow[osasto]'
                 and $abcwhat > 0";
-      $resi   = pupe_query($query, $masterlink);
+      $resi   = pupe_query($query, $GLOBALS["masterlink"]);
       $yhtrow = mysql_fetch_assoc($resi);
 
       //rakennetaan aliluokat
@@ -555,7 +556,7 @@ if ($tee == 'YHTEENVETO') {
                 and osasto  = '$arow[osasto]'
                 and $abcwhat > 0
                 ORDER BY $abcwhat desc";
-      $res = pupe_query($query, $masterlink);
+      $res = pupe_query($query, $GLOBALS["masterlink"]);
 
       $i       = 0;
       $ryhmaprossa = 0;
@@ -574,7 +575,7 @@ if ($tee == 'YHTEENVETO') {
                   WHERE yhtio = '$kukarow[yhtio]'
                   and tyyppi  = '$abcchar'
                   and tunnus  = '$row[tunnus]'";
-        pupe_query($query, $masterlink);
+        pupe_query($query, $GLOBALS["masterlink"]);
 
         //luokka vaihtuu
         if (round($ryhmaprossa, 2) >= $ryhmaprossat[$i]) {
@@ -595,7 +596,7 @@ if ($tee == 'YHTEENVETO') {
               WHERE yhtio = '$kukarow[yhtio]'
               and tyyppi  = '$abcchar'
               order by try";
-    $kaikres = pupe_query($query, $masterlink);
+    $kaikres = pupe_query($query, $GLOBALS["masterlink"]);
 
     // tehdään try kohtaiset luokat
     while ($arow = mysql_fetch_assoc($kaikres)) {
@@ -611,7 +612,7 @@ if ($tee == 'YHTEENVETO') {
                 and tyyppi  = '$abcchar'
                 and try     = '$arow[try]'
                 and $abcwhat > 0";
-      $resi   = pupe_query($query, $masterlink);
+      $resi   = pupe_query($query, $GLOBALS["masterlink"]);
       $yhtrow = mysql_fetch_assoc($resi);
 
       //rakennetaan aliluokat
@@ -627,7 +628,7 @@ if ($tee == 'YHTEENVETO') {
                 and try     = '$arow[try]'
                 and $abcwhat > 0
                 ORDER BY $abcwhat desc";
-      $res = pupe_query($query, $masterlink);
+      $res = pupe_query($query, $GLOBALS["masterlink"]);
 
       $i       = 0;
       $ryhmaprossa = 0;
@@ -646,7 +647,7 @@ if ($tee == 'YHTEENVETO') {
                   WHERE yhtio = '$kukarow[yhtio]'
                   and tyyppi  = '$abcchar'
                   and tunnus  = '$row[tunnus]'";
-        pupe_query($query, $masterlink);
+        pupe_query($query, $GLOBALS["masterlink"]);
 
         //luokka vaihtuu
         if (round($ryhmaprossa, 2) >= $ryhmaprossat[$i]) {
@@ -667,7 +668,7 @@ if ($tee == 'YHTEENVETO') {
               WHERE yhtio = '$kukarow[yhtio]'
               AND tyyppi  = '$abcchar'
               ORDER BY tuotemerkki";
-    $kaikres = pupe_query($query, $masterlink);
+    $kaikres = pupe_query($query, $GLOBALS["masterlink"]);
 
     // tehdään try kohtaiset luokat
     while ($arow = mysql_fetch_assoc($kaikres)) {
@@ -683,7 +684,7 @@ if ($tee == 'YHTEENVETO') {
                 and tyyppi      = '$abcchar'
                 and tuotemerkki = '$arow[tuotemerkki]'
                 and $abcwhat > 0";
-      $resi   = pupe_query($query, $masterlink);
+      $resi   = pupe_query($query, $GLOBALS["masterlink"]);
       $yhtrow = mysql_fetch_assoc($resi);
 
       //rakennetaan aliluokat
@@ -699,7 +700,7 @@ if ($tee == 'YHTEENVETO') {
                 and tuotemerkki = '$arow[tuotemerkki]'
                 and $abcwhat > 0
                 ORDER BY $abcwhat desc";
-      $res = pupe_query($query, $masterlink);
+      $res = pupe_query($query, $GLOBALS["masterlink"]);
 
       $i       = 0;
       $ryhmaprossa = 0;
@@ -718,7 +719,7 @@ if ($tee == 'YHTEENVETO') {
                   WHERE yhtio = '$kukarow[yhtio]'
                   and tyyppi  = '$abcchar'
                   and tunnus  = '$row[tunnus]'";
-        pupe_query($query, $masterlink);
+        pupe_query($query, $GLOBALS["masterlink"]);
 
         //luokka vaihtuu
         if (round($ryhmaprossa, 2) >= $ryhmaprossat[$i]) {
@@ -736,7 +737,7 @@ if ($tee == 'YHTEENVETO') {
 
   if (!$php_cli) {
     $query = "OPTIMIZE table abc_aputaulu";
-    pupe_query($query, $masterlink);
+    pupe_query($query, $GLOBALS["masterlink"]);
 
     echo t("ABC-aputaulu rakennettu")."!<br><br>";
   }

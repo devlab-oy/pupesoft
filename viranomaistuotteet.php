@@ -72,7 +72,7 @@ if ($tee == 'PERUSTA') {
                vienti        = '$maa[$riviindex]',
                muuttaja      = '$kukarow[kuka]',
                muutospvm     = now()";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
   }
 
   echo "<br>".t("Ukomaanpäivärahat lisätty kantaan")."<br><br><br>";
@@ -89,7 +89,7 @@ if ($tee == 'POISTA') {
               OR (tuotetyyppi = 'B' and tuoteno like 'KM-%'))
             AND right(tuoteno, 2) > 0
             AND right(tuoteno, 2) < $annettuvuosipoista";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<br>".t("Vanhat päivärahat poistettu käytöstä")."<br><br><br>";
   unset($tee);
@@ -160,14 +160,14 @@ if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and isset($annett
       foreach ($rivit[$eriviindex] as $pyll => $eriv) {
         if ($pyll == 0) {
           $query = "  SELECT koodi from maat where nimi like '%$eriv%' limit 1";
-          $res = mysql_query($query) or pupe_error($query);
+          $res = pupe_query($query);
           $row = mysql_fetch_assoc($res);
           $calc = mysql_num_rows($res);
 
           echo "<td>";
 
           $query2 = "  SELECT distinct koodi, nimi from maat having nimi !='' order by koodi,nimi ";
-          $res2 = mysql_query($query2) or pupe_error($query2);
+          $res2 = pupe_query($query2);
 
           echo "<select name='maa[$eriviindex]' >";
           echo "<option value = ''>".t("VIRHE: Maatunnusta ei löytynyt")."!</option>";
@@ -220,7 +220,7 @@ if ($tee == "synkronoi") {
             WHERE yhtio  = '{$kukarow['yhtio']}'
             and tilino   = '{$ulkomaantilinumero}'
             and tilino  != ''";
-  $tilires = mysql_query($query) or pupe_error($query);
+  $tilires = pupe_query($query);
 
   if (mysql_num_rows($tilires) == 0) {
     echo "<font class='error'>".t("VIRHE: Ulkomaanpäivärahojen tilinumero puuttuu")."!</font><br>";
@@ -232,7 +232,7 @@ if ($tee == "synkronoi") {
             WHERE yhtio  = '{$kukarow['yhtio']}'
             and tilino   = '{$kotimaantilinumero}'
             and tilino  != ''";
-  $tilires = mysql_query($query) or pupe_error($query);
+  $tilires = pupe_query($query);
 
   if (mysql_num_rows($tilires) == 0) {
     echo "<font class='error'>".t("VIRHE: Kotimaanpäivärahojen tilinumero puuttuu")."!</font><br>";
@@ -302,7 +302,7 @@ if ($tee == "synkronoi") {
                myymalahinta  = '$myymalahinta',
                muuttaja      = '$kukarow[kuka]',
                muutospvm     = now()";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
   }
 
   fclose($file);
@@ -347,7 +347,7 @@ if ($tee == "synkronoi" or $tee == "synkronoimaat") {
                name         = '$iso_name',
                eu           = '$eu',
                ryhma_tunnus = '$ryhma_tunnus'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
   }
 
   fclose($file);

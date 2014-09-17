@@ -68,9 +68,9 @@ if ($fieldname == "verkkolasku_lah") {
     $sel1 = "selected";
   }
 
-  $ulos .= "<option value = '' $sel1>".t("Pupevoice");
+  $ulos .= "<option value = '' $sel1>".t("Pupevoice Itella");
   $ulos .= "<option value = 'finvoice' $sel2>".t("Finvoice");
-  $ulos .= "<option value = 'iPost' $sel3>".t("Finvoice iPost");
+  $ulos .= "<option value = 'iPost' $sel3>".t("Finvoice Itella iPost");
   $ulos .= "<option value = 'apix' $sel4>".t("Apix-verkkolaskut");
   $ulos .= "<option value = 'maventa' $sel5>".t("Maventa-verkkolaskut");
   $ulos .= "<option value = 'servinet' $sel6>".t("Pupevoice Servinet");
@@ -325,6 +325,21 @@ if ($fieldname == "koontilaskut_yhdistetaan") {
   $ulos .= "<option value = 'V' {$sel['V']}>".t("Asiakkaan laskutusosoitteella ja toimitusosoitteella, reklamaatiot/takuut erikseen")."</option>";
 
   $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "koontilahete_kollitiedot") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $selE = $trow[$i] == 'E' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>".t("Keräysvahvistus/sähköinen lähete: Tuotteiden kollitiedot (SSCC) näytetään")."</option>";
+  $ulos .= "<option value = 'E' {$selE}>".t("Keräysvahvistus/sähköinen lähete: Tuotteiden kollitietoja (SSCC) ei näytetä")."</option>";
+
+  $ulos .= "</select>";
+  $ulos .=  "</td>";
 
   $jatko = 0;
 }
@@ -1327,7 +1342,7 @@ if ($fieldname == "lasku_tulostin") {
             where yhtio  = '$kukarow[yhtio]'
             AND komento != 'EDI'
             ORDER BY kirjoitin";
-  $kires = mysql_query($query) or pupe_error($query);
+  $kires = pupe_query($query);
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
   $ulos .= "<option value=''>".t("Ei kirjoitinta")."</option>";
@@ -2943,6 +2958,19 @@ if ($fieldname == "ext_tilauksen_hyvaksyja_myyjaksi") {
   $jatko = 0;
 }
 
+if ($fieldname == "nayta_variaatiot") {
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel = $trow[$i] == 'Y' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>" . t("Ei näytetä tuotteiden variaatioita tuotelistauksessa");
+  $ulos .= "<option value = 'Y' $sel>" . t("Tuotteiden listauksessa Hae ja selaa-ohjelmassa " .
+      "mahdollisuus nähdä tuotteen variaatiot (Esim. eri koot ja värit)");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "tuoteperhe_suoratoimitus") {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 
@@ -3408,7 +3436,7 @@ if ($fieldname == "reklamaation_vastaanottovarasto" ) {
             FROM varastopaikat
             WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
             ORDER BY tyyppi, nimitys";
-  $sresult = mysql_query($query) or pupe_error($query);
+  $sresult = pupe_query($query);
 
   $ulos = "<td><select name='$nimi'>";
   $ulos .= "<option value=' '>".t("Ei oletusvarastoa valittu")."</option>";

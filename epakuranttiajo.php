@@ -118,7 +118,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
              GROUP BY 1,2,3,4,5,6,7,8,9,10
              HAVING saldo > 0
              ORDER BY tuoteno";
-  $epakurantti_result = mysql_query($query) or pupe_error($query);
+  $epakurantti_result = pupe_query($query);
 
   include 'inc/pupeExcel.inc';
 
@@ -198,7 +198,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
                  AND selite  not like '%alkusaldo%'
                  ORDER BY laadittu DESC
                  LIMIT 1;";
-      $tapres = mysql_query($query) or pupe_error($query);
+      $tapres = pupe_query($query);
 
       if (!$tulorow = mysql_fetch_assoc($tapres)) {
 
@@ -212,15 +212,16 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
         }
       }
 
-      // Haetaan tuotteen viimeisin laskutus
+      // Haetaan tuotteen viimeisin laskutus (ei huomioida hyvityksiä)
       $query  = "SELECT laadittu
                  FROM tapahtuma
-                 WHERE yhtio = '$kukarow[yhtio]'
-                 AND laji    in ('laskutus', 'kulutus')
-                 AND tuoteno = '$epakurantti_row[tuoteno]'
+                 WHERE yhtio  = '$kukarow[yhtio]'
+                 AND laji     in ('laskutus', 'kulutus')
+                 AND tuoteno  = '$epakurantti_row[tuoteno]'
+                 AND kpl      < 0
                  ORDER BY laadittu DESC
                  LIMIT 1;";
-      $tapres = mysql_query($query) or pupe_error($query);
+      $tapres = pupe_query($query);
 
       if (!$laskutusrow = mysql_fetch_assoc($tapres)) {
         // Jos ei löydy laskua, laitetaan jotain vanhaa

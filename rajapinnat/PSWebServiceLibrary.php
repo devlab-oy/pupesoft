@@ -172,8 +172,9 @@ class PrestaShopWebservice
 		{
 			if ($curl_params[CURLOPT_CUSTOMREQUEST] == 'PUT' || $curl_params[CURLOPT_CUSTOMREQUEST] == 'POST')
 				$this->printDebug('XML SENT', urldecode($curl_params[CURLOPT_POSTFIELDS]));
-			if ($curl_params[CURLOPT_CUSTOMREQUEST] != 'DELETE' && $curl_params[CURLOPT_CUSTOMREQUEST] != 'HEAD')
-				$this->printDebug('RETURN HTTP BODY', $body);
+
+      //@TODO HUOM TÄTÄ KOHTAA ON KANS MUOKATTU. JOS DEBUG PÄÄLLÄ AINA DEBUGATAAN RESPONSE BODY
+      $this->printDebug('RETURN HTTP BODY', $body);
 		}
 		return array('status_code' => $status_code, 'response' => $body, 'header' => $header);
 	}

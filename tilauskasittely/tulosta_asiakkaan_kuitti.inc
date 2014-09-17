@@ -24,7 +24,7 @@ function tulosta_asiakkaan_kuitti($yhtio, $laskunro, $tulostimen_tunnus) {
   $yhtion_ytunnus          = tulosta_ytunnus($yhtion_ytunnus, $tapahtumat[0]['yhtio_maa']);
 
   // Arvojen asettelu spritfillä
-  $yhteensa = sprintf("%35.35s", $brutto);
+  $yhteensa = sprintf("%34.34s", $brutto);
 
   $kuitin_teksti = "{$logo}\n\n";
   $kuitin_teksti .= "{$yhtion_nimi}\n";
@@ -56,8 +56,13 @@ function tulosta_asiakkaan_kuitti($yhtio, $laskunro, $tulostimen_tunnus) {
   $kuitin_teksti .= "{$emphasized_on}YHTEENSÄ{$yhteensa}{$emphasized_off}\n\n";
 
   // Verotiedot
-  $kuitin_teksti .= "ALV        NETTO       VERO       BRUTTO\n";
-  $kuitin_teksti .= "{$tapahtumat[0]['alv']} %    {$netto}       {$vero}       {$brutto}\n\n";
+  $alv    = sprintf("%-12.12s", "{$tapahtumat[0]["alv"]} %");
+  $netto  = sprintf("%-12.12s", $netto);
+  $vero   = sprintf("%-9.9s", $vero);
+  $brutto = sprintf("%9.9s", $brutto);
+
+  $kuitin_teksti .= "ALV         NETTO        VERO       BRUTTO\n";
+  $kuitin_teksti .= "{$alv}{$netto}{$vero}{$brutto}\n\n";
 
   // Maksupäätetapahtumat
   foreach ($tapahtumat as $tapahtuma) {

@@ -1982,7 +1982,7 @@ if (!function_exists("lpr")) {
       $to  = array('{', '}', '|', '[', ']', '\\', chr(179));                      // 7 bittiset
       $str = str_replace($from, $to, $str);
     }
-    elseif ($kirjoitin["merkisto"] == 2) {
+    elseif ($kirjoitin["merkisto"] == 2 or $kirjoitin["merkisto"] == 6) {
       $to  = array(chr(132), chr(134), chr(148), chr(142), chr(143), chr(153), chr(179));      // DOS charset
       $str = str_replace($from, $to, $str);
     }

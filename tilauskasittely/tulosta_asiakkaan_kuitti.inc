@@ -13,8 +13,7 @@ function tulosta_asiakkaan_kuitti($yhtio, $laskunro, $tulostimen_tunnus) {
   $emphasized_on  = "\x1B\x45\x01";
   $emphasized_off = "\x1B\x45\x00";
 
-  $kuitin_teksti = "{$logo}\n\n";
-
+  // Yhtiön tiedot
   $yhtion_nimi             = $tapahtumat[0]['yhtio_nimi'];
   $yhtion_osoite           = $tapahtumat[0]['yhtio_osoite'];
   $yhtion_postinumero      = $tapahtumat[0]['yhtio_postino'];
@@ -24,6 +23,10 @@ function tulosta_asiakkaan_kuitti($yhtio, $laskunro, $tulostimen_tunnus) {
   $yhtion_ytunnus          = str_replace("0037", "", $tapahtumat[0]["yhtio_ovttunnus"]);
   $yhtion_ytunnus          = tulosta_ytunnus($yhtion_ytunnus, $tapahtumat[0]['yhtio_maa']);
 
+  // Arvojen asettelu spritfillä
+  $yhteensa = sprintf("%35.35s", $brutto);
+
+  $kuitin_teksti = "{$logo}\n\n";
   $kuitin_teksti .= "{$yhtion_nimi}\n";
   $kuitin_teksti .= "{$yhtion_osoite}\n";
   $kuitin_teksti .= "{$yhtion_postinumero} {$yhtion_postitoimipaikka}\n";
@@ -47,15 +50,16 @@ function tulosta_asiakkaan_kuitti($yhtio, $laskunro, $tulostimen_tunnus) {
     $kuitin_teksti .= "Verollinen arvo: {$bruttohinta}\n";
   }
 
+  // Hinta yhteensä
   $kuitin_teksti .= "{$align_left}\n";
-
   $kuitin_teksti .= "==========================================\n";
-  $kuitin_teksti .= "{$emphasized_on}YHTEENSÄ                          {$brutto}{$emphasized_off}" .
-    "\n\n";
+  $kuitin_teksti .= "{$emphasized_on}YHTEENSÄ{$yhteensa}{$emphasized_off}\n\n";
 
+  // Verotiedot
   $kuitin_teksti .= "ALV        NETTO       VERO       BRUTTO\n";
   $kuitin_teksti .= "{$tapahtumat[0]['alv']} %    {$netto}       {$vero}       {$brutto}\n\n";
 
+  // Maksupäätetapahtumat
   foreach ($tapahtumat as $tapahtuma) {
     $kuitin_teksti .= "TILAUSNUMERO: {$tapahtuma['tilausnumero']}\n";
     $kuitin_teksti .= "{$tapahtuma['asiakkaan_kuitti']}\n\n";

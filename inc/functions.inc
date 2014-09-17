@@ -1503,6 +1503,11 @@ if (!function_exists("saldo_myytavissa")) {
         $valinta2 = "";
         $valinta3 = " varastopaikat.tyyppi is null ";
       }
+      elseif ($tyyppi == "NORMI") {
+        $valinta1 = " varastopaikat.tyyppi = '' and ";
+        $valinta2 = "";
+        $valinta3 = " varastopaikat.tyyppi is not null ";
+      }
       else {
         $valinta1 = " (varastopaikat.tyyppi = '' or (varastopaikat.tyyppi = 'E' and varastopaikat.erikoistoimitus_alarajasumma > 0 and '$tuote[myyntihinta]' >= varastopaikat.erikoistoimitus_alarajasumma)) and ";
         $valinta2 = "";
@@ -3326,32 +3331,46 @@ if (!function_exists("alv")) {
     global $yhtiorow, $kukarow;
 
     ///* Sis‰‰n *///
-    // $alv                      --> K‰ytt‰j‰n syˆtt‰m‰ ALV
-    // $hinta            --> alehinta-funktion laskema hinta
-    // $trow[alv]               --> Tuotteen ALV
-    // $laskurow[vienti]          --> Laskun tyyppi (kotimaa '', vientieu 'E' , vienti eieu 'K')
-    // $laskurow[ytunnus]       --> Laskunsaajan y-tunnus
-    // $laskurow[tila]          --> Laskun tila O=osto, muut tilat on myynti‰
-    // $laskurow[alv]           --> Laskun otsikolla oleva alv
-    // $laskurow[valkoodi]      --> Laskun valuutta
+    // $alv                --> K‰ytt‰j‰n syˆtt‰m‰ ALV
+    // $hinta              --> alehinta-funktion laskema hinta
+    // $trow[alv]          --> Tuotteen ALV
+    // $laskurow[vienti]   --> Laskun tyyppi (kotimaa '', vientieu 'E' , vienti eieu 'K')
+    // $laskurow[ytunnus]  --> Laskunsaajan y-tunnus
+    // $laskurow[tila]     --> Laskun tila O=osto, muut tilat on myynti‰
+    // $laskurow[alv]      --> Laskun otsikolla oleva alv
+    // $laskurow[valkoodi] --> Laskun valuutta
 
     ///* Ulos *///
-    // $alv                      --> Uusi laskettu ALV
-    // $hinta                 --> Uusi laskettu kappalehinta
-
-    //yhtiˆn oletusalvi!
-    $wquery = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='alv' and selitetark!=''";
-    $wtres  = pupe_query($wquery);
-    $wtrow  = mysql_fetch_assoc($wtres);
+    // $alv                --> Uusi laskettu ALV
+    // $hinta              --> Uusi laskettu kappalehinta
 
     // jos meill‰ on tuotteelta tuleva poikkeava tuotteen alv, k‰ytet‰‰n sit‰
     if ($alehinta_alv != 0) {
       $trow["alv"]     = $alehinta_alv;
+
+      //yhtiˆn oletusalvi!
+      $wquery = "SELECT selite
+                 FROM avainsana
+                 WHERE yhtio     = '$kukarow[yhtio]'
+                 AND laji        = 'alv'
+                 AND selitetark != ''";
+      $wtres  = pupe_query($wquery);
+      $wtrow  = mysql_fetch_assoc($wtres);
+
       $wtrow["selite"] = $laskurow["alv"]; // otetaan "yhtiˆn oletus" laskulta, koska t‰ss‰ keisiss‰ siell‰ pit‰s olla yhtiˆn oletus aina
     }
 
+    if ($laskurow["tila"] != "O") {
+      $asque = "SELECT laji
+                FROM asiakas
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tunnus  = '$laskurow[liitostunnus]'";
+      $asres  = pupe_query($asque);
+      $asrow  = mysql_fetch_assoc($asres);
+    }
+
     if ($laskurow["tila"] == "O") {
-      //Jos k‰ytt‰j‰ on valinnut drop-downista jonkun nollasta poikkeavan alvin, niin lasketaan sen verran alvia pois hinnasta
+      // Jos k‰ytt‰j‰ on valinnut drop-downista jonkun nollasta poikkeavan alvin, niin lasketaan sen verran alvia pois hinnasta
       // Oletuksena ostohinnat ovat t‰ll‰ hetkell‰ ilman alvia
       if ($alv != 0) {
         $hinta = round($hinta / (1+$alv/100), $yhtiorow['hintapyoristys']);
@@ -3361,37 +3380,37 @@ if (!function_exists("alv")) {
     }
     elseif ($alv >= 600) {
       //T‰ss‰ keississ‰ on k‰‰nteisen verotuksen
-      if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 600;                      // Otsikolla on valittu veroton myynti, esim Ahvenanmaan mynti‰
-      if ($laskurow["vienti"] == ""  and $laskurow["alv"] != 0) $alv = $trow["alv"]+600;                // Otsikolla on valittu verollinen kotimaan myynti
-      if ($laskurow["vienti"] == "E" and $laskurow["ytunnus"] != "") $alv = 600;                     // EU-vienti ytunnuksella --> alviton
-      if ($laskurow["vienti"] == "K") $alv = 600;                                   // Vienti eu:n ulkopuolelle on aina verotonta
+      if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 600;              // Otsikolla on valittu veroton myynti, esim Ahvenanmaan mynti‰
+      if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0) $alv = $trow["alv"]+600; // Otsikolla on valittu verollinen kotimaan myynti
+      if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") $alv = 600;              // EU-vienti yritykselle --> alviton
+      if ($laskurow["vienti"] == "K" and $asrow["laji"] != "H") $alv = 600;              // Vienti eu:n ulkopuolelle yritykselle --> alviton
 
       $alv = (float) $alv;
     }
     elseif ($alv >= 500) {
       //T‰ss‰ keississ‰ on marginaalimyynti‰
-      if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 500;                      // Otsikolla on valittu veroton myynti, esim Ahvenanmaan mynti‰
-      if ($laskurow["vienti"] == ""  and $laskurow["alv"] != 0) $alv = $trow["alv"]+500;                // Otsikolla on valittu verollinen kotimaan myynti
-      if ($laskurow["vienti"] == "E" and $laskurow["ytunnus"] != "") $alv = 500;                     // EU-vienti ytunnuksella --> alviton
-      if ($laskurow["vienti"] == "K") $alv = 500;                                   // Vienti eu:n ulkopuolelle on aina verotonta
+      if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 500;              // Otsikolla on valittu veroton myynti, esim Ahvenanmaan mynti‰
+      if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0) $alv = $trow["alv"]+500; // Otsikolla on valittu verollinen kotimaan myynti
+      if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") $alv = 500;              // EU-vienti yritykselle --> alviton
+      if ($laskurow["vienti"] == "K" and $asrow["laji"] != "H") $alv = 500;              // Vienti eu:n ulkopuolelle yritykselle --> alviton
 
       $alv = (float) $alv;
     }
     elseif ($yhtiorow["alv_kasittely"] != "") {
       //T‰ss‰ keississ‰ kaikki hinnat ovat aina verottomia ja vero lis‰t‰‰n vasta laskutuksessa
-      if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 0;                        // Otsikolla on valittu veroton myynti, esim Ahvenanmaan mynti‰
-      if ($laskurow["vienti"] == ""  and $laskurow["alv"] != 0 and $alv == "") $alv = $trow["alv"];          // Otsikolla on valittu verollinen kotimaan myynti
-      if ($laskurow["vienti"] == "E" and $laskurow["ytunnus"] != "") $alv = 0;                     // EU-vienti ytunnuksella --> alviton
-      if ($laskurow["vienti"] == "K") $alv = 0;                                     // Vienti eu:n ulkopuolelle on aina verotonta
+      if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 0;                           // Otsikolla on valittu veroton myynti, esim Ahvenanmaan mynti‰
+      if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0 and $alv == "") $alv = $trow["alv"]; // Otsikolla on valittu verollinen kotimaan myynti
+      if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") $alv = 0;                           // EU-vienti yritykselle --> alviton
+      if ($laskurow["vienti"] == "K" and $asrow["laji"] != "H") $alv = 0;                           // Vienti eu:n ulkopuolelle yritykselle --> alviton
 
       $alv = (float) $alv;
     }
     else {
       //T‰ss‰ keississ‰ kaikki hinnat sis‰lt‰v‰t arvonlis‰veron
-      if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 0;                        // Otsikolla on valittu veroton myynti, esim Ahvenanmaan mynti‰
-      if ($laskurow["vienti"] == ""  and $laskurow["alv"] != 0 and $alv == "") $alv = $trow["alv"];          // Otsikolla on valittu verollinen kotimaan myynti
-      if ($laskurow["vienti"] == "E" and $laskurow["ytunnus"] != "") $alv = 0;                     // EU-vienti ytunnuksella --> alviton
-      if ($laskurow["vienti"] == "K") $alv = 0;                                     // Vienti eu:n ulkopuolelle on aina verotonta
+      if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 0;                           // Otsikolla on valittu veroton myynti, esim Ahvenanmaan mynti‰
+      if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0 and $alv == "") $alv = $trow["alv"]; // Otsikolla on valittu verollinen kotimaan myynti
+      if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") $alv = 0;                           // EU-vienti yritykselle --> alviton
+      if ($laskurow["vienti"] == "K" and $asrow["laji"] != "H") $alv = 0;                           // Vienti eu:n ulkopuolelle yritykselle --> alviton
 
       $alv = (float) $alv;
       $trow['alv'] = (float) $trow['alv'];
@@ -7967,15 +7986,15 @@ if (!function_exists("tallenna_muisti")) {
 
     $kuka = trim($kuka) != '' ? mysql_real_escape_string($kuka) : $kukarow['kuka'];
 
-    $query = "  REPLACE INTO tallennetut_parametrit SET
-          yhtio    = '$kukarow[yhtio]',
-          kuka    = '$kuka',
-          nimitys    = '$nimitys',
-          sovellus  = '$_SERVER[SCRIPT_NAME]',
-          data    = '$data',
-          laatija    = '$kukarow[kuka]',
-          luontiaika  = now()";
-    $result = pupe_query($query);
+    $query = "REPLACE INTO tallennetut_parametrit SET
+              yhtio      = '$kukarow[yhtio]',
+              kuka       = '$kuka',
+              nimitys    = '$nimitys',
+              sovellus   = '$_SERVER[SCRIPT_NAME]',
+              data       = '$data',
+              laatija    = '$kukarow[kuka]',
+              luontiaika = now()";
+    $result = pupe_query($query, $GLOBALS["masterlink"]);
 
     return true;
   }
@@ -8031,7 +8050,7 @@ if (!function_exists("muistiin")) {
               and haku    = '$muisti'
               and kuka    = '$kukarow[kuka]'
               and nimi    = '$nimi'";
-    $result = pupe_query($query);
+    $result = pupe_query($query, $GLOBALS["masterlink"]);
 
     foreach ($muistettava as $key => $value) {
 
@@ -8058,7 +8077,7 @@ if (!function_exists("muistiin")) {
                   laatija    = '$kukarow[kuka]',
                   muokattu   = now(),
                   muokannut  = '$kukarow[kuka]'";
-        $result = pupe_query($query);
+        $result = pupe_query($query, $GLOBALS["masterlink"]);
       }
     }
 
@@ -10604,6 +10623,12 @@ if (!function_exists("laheta_tilausvahvistus")) {
         $tuoteperheetyhdessa = TRUE;
       }
     }
+    elseif (strpos($laskurow['tilausvahvistus'], '12') !== FALSE) {
+      $naytatvale = 12; // jos meill‰ on tilausvahvistuksessa 12, niin n‰ytet‰‰n viivakoodi, ale1, ja ale1:n mukaan laskettu hinta
+      if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
+        $tuoteperheetyhdessa = TRUE;
+      }
+    }
     elseif (strpos($laskurow['tilausvahvistus'], '10') !== FALSE) {
       $naytatvale = 10; // jos meill‰ on tilausvahvistuksessa seiska, niin tehd‰‰n N‰ytet‰‰n asiakkaan hinta, alennus, viivakoodi ja jt-rivit normaaleina
       if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
@@ -11403,7 +11428,7 @@ if (!function_exists("liite_popup")) {
 
         $liitteet = "<input type='button' value='";
 
-        if ($pdf_exist) {
+        if (isset($pdf_exist)) {
           $liitteet .= t("Pdf");
         }
         else {
@@ -14883,8 +14908,8 @@ if (!function_exists('piirra_vak_rivi')) {
 
     if ($ltq_til > $max_ltq_til) $max_ltq_til = $ltq_til;
 
-    $tuotepainot += round($row["tuotepaino"]);
-    $tuotepainot_yht += round($row["tuotepaino"]);
+    $tuotepainot += $row["tuotepaino"];
+    $tuotepainot_yht += $row["tuotepaino"];
 
     $return_params = array(
       'tuotepainot' => $tuotepainot,
@@ -14935,7 +14960,7 @@ if (!function_exists('piirra_vak_rivi_loppu')) {
     }
 
     if ($tyyppi == "DGD" and $tuotepainot > 0) {
-      $vakecho .= "###".round($tuotepainot);
+      $vakecho .= "###".$tuotepainot;
     }
 
     $max_ltq_til = 0;
@@ -15153,15 +15178,15 @@ if (!function_exists("palauta_vak_tiedot")) {
           if ($tyyppi == "DGD") {
 
             $vakkirakirri = "$row[kollit]###$row[kollit] x $pakkaus_en containing:###";
-            $vakkirakirri .= round($row["kilot"]);
+            $vakkirakirri .= $row["kilot"];
 
             $vakrakirtiedot[] = $vakkirakirri;
           }
           else {
-            $vakrakirtiedot[] = "$row[kollit] x $pakkaus_en (".t("Bruttopaino", $kieli)." ".round($row["kilot"])." kg) ".t("sis‰lt‰en", $kieli).":";
+            $vakrakirtiedot[] = "$row[kollit] x $pakkaus_en (".t("Bruttopaino", $kieli)." ".$row["kilot"]." kg) ".t("sis‰lt‰en", $kieli).":";
           }
 
-          $rakirkilot += round($row["kilot"]);
+          $rakirkilot += $row["kilot"];
         }
       }
     }
@@ -15269,8 +15294,8 @@ if (!function_exists("palauta_vak_tiedot")) {
       while ($row = mysql_fetch_assoc($riresult1));
 
       if ($rakirkilot > 0) {
-        $vaktuotetiedot[] = "TOTAL GROSS MASS: {$rakirkilot} kg";
-        $vaktuotetiedot[] = "TOTAL NET MASS: {$tuotepainot_yht} kg";
+        $vaktuotetiedot[] = "TOTAL GROSS MASS: " . round($rakirkilot,2) . " kg";
+        $vaktuotetiedot[] = "TOTAL NET MASS: " . round($tuotepainot_yht,2) . " kg";
       }
     }
 
@@ -27727,6 +27752,35 @@ if (!function_exists("kasittele_tiliote_viite")) {
 
     // Palautetan kukarow
     $kukarow = $kukarow_talteen;
+  }
+}
+
+if (!function_exists("hae_saldo")) {
+  function hae_saldo($tuote, $tyyppi = '') {
+    global $kukarow, $yhtiorow, $maa;
+
+    $saldo = 0;
+
+    if ($tuote["tuoteperhe"] == $tuote["tuoteno"]) {
+      // Tuoteperheen is‰
+      $saldot = tuoteperhe_myytavissa($tuote["tuoteno"],'KAIKKI',$tyyppi,0,'','','','','', $maa);
+
+      foreach ($saldot as $varasto => $myytavissa) {
+        $saldo += $myytavissa;
+      }
+      return $saldo;
+
+    }
+    elseif ($tuote['ei_saldoa'] != '') {
+      $saldo = 1;
+      return $saldo;
+    }
+    else {
+      list($a,$b,$myytavissa) = saldo_myytavissa($tuote["tuoteno"],$tyyppi,0,'','','','','', $maa);
+      $saldo = $myytavissa;
+
+      return $saldo;
+    }
   }
 }
 

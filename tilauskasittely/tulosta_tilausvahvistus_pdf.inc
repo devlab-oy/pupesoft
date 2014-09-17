@@ -42,6 +42,9 @@ elseif ($naytatvale == 10) {
 elseif ($naytatvale == 11) {
   $lahetetyyppi .= "tulosta_lahete_viivakoodi_ykshinta_normaali_eiale.inc";
 }
+elseif ($naytatvale == 12) {
+  $lahetetyyppi .= "tulosta_lahete_viivakoodi_ale1.inc";
+}
 else {
   $lahetetyyppi .= "tulosta_lahete.inc";
 }

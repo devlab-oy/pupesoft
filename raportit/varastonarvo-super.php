@@ -805,9 +805,9 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       // jos summaustaso on per paikka, otetaan varastonarvo vain siltä paikalta
       if ($summaustaso == "P") {
         $summaus_lisa = "  and sarjanumeroseuranta.hyllyalue = '$row[hyllyalue]'
-                  and sarjanumeroseuranta.hyllynro  = '$row[hyllynro]'
-                  and sarjanumeroseuranta.hyllyvali = '$row[hyllyvali]'
-                  and sarjanumeroseuranta.hyllytaso = '$row[hyllytaso]'";
+                           and sarjanumeroseuranta.hyllynro  = '$row[hyllynro]'
+                           and sarjanumeroseuranta.hyllyvali = '$row[hyllyvali]'
+                           and sarjanumeroseuranta.hyllytaso = '$row[hyllytaso]'";
       }
       else {
         $summaus_lisa = "";
@@ -988,7 +988,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     }
 
     $eitodgo = FALSE;
-    $ok    = FALSE;
+    $ok      = FALSE;
 
     // Summataan per variaatio
     if ($variaatiosummaus != "") {
@@ -1081,22 +1081,9 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         $kehasilloin = $row["kehahin_nyt"];    // nykyinen kehahin
       }
       else {
-        // sarjanumerollisilla tuotteilla ei ole keskihankintahintaa
-        if ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U" or $row["sarjanumeroseuranta"] == "G") {
-          if ($kpl == 0) {
-            $kehasilloin  = 0;
-            $bkehasilloin = 0;
-          }
-          else {
-            $kehasilloin  = round($varaston_arvo / $kpl, 6); // lasketaan "kehahin"
-            $bkehasilloin = $kehasilloin;
-          }
-        }
-        else {
-          // arvioidaan sen hetkinen kehahin jos se halutaan kerran nähdä
-          $kehasilloin  = round($muutoshinta / $muutoskpl, 6);
-          $bkehasilloin = round($bmuutoshinta / $muutoskpl, 6);
-        }
+        // arvioidaan sen hetkinen kehahin
+        $kehasilloin  = round($muutoshinta / $muutoskpl, 6);
+        $bkehasilloin = round($bmuutoshinta / $muutoskpl, 6);
 
         // jos summaustaso on per paikka, otetaan myynti ja kulutus vain siltä paikalta
         if ($summaustaso == "P") {

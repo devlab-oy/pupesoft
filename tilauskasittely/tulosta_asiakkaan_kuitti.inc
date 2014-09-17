@@ -21,10 +21,10 @@ function tulosta_asiakkaan_kuitti($yhtio, $laskunro, $tulostimen_tunnus) {
     $kuitin_teksti .= "    " . hintapyoristys($tilausrivi['rivihinta']) . "\n";
   }
 
-  $kuitin_teksti .= "{$align_left}\n\n";
+  $kuitin_teksti .= "{$align_left}\n";
 
-  $kuitin_teksti .= "ALV       NETTO       VERO       BRUTTO\n";
-  $kuitin_teksti .= "{$tapahtumat[0]['alv']}     {$netto}       {$vero}       {$brutto}\n\n";
+  $kuitin_teksti .= "ALV        NETTO       VERO       BRUTTO\n";
+  $kuitin_teksti .= "{$tapahtumat[0]['alv']} %    {$netto}       {$vero}       {$brutto}\n\n";
 
   foreach ($tapahtumat as $tapahtuma) {
     $kuitin_teksti .= "TILAUSNUMERO: {$tapahtuma['tilausnumero']}\n";

@@ -1,42 +1,42 @@
 <?php
 
 /* FILEFORMAATTI: (ilman sarakeotsikoita)
-Tuoteno (pakollinen)
-M‰‰r‰ (pakollinen)
-Arvioitu toimitusp‰iv‰ vvvv-kk-pp
-Hinta
-Ale1 - Ale3 (lasketaan yhtiˆn parametreist‰ monta myynnin alekentt‰‰ on k‰ytˆss‰)
-Netto
-Var
-Kommentti
-*/
+  Tuoteno (pakollinen)
+  M‰‰r‰ (pakollinen)
+  Arvioitu toimitusp‰iv‰ vvvv-kk-pp
+  Hinta
+  Ale1 - Ale3 (lasketaan yhtiˆn parametreist‰ monta myynnin alekentt‰‰ on k‰ytˆss‰)
+  Netto
+  Var
+  Kommentti
+  */
 
 /* VAIHTOEHTOINEN FILEFORMAATTI: (sarakeotsikoilla)
-Tuoteno (pakollinen)
-M‰‰r‰ (pakollinen)
-Arvioitu toimitusp‰iv‰ vvvv-kk-pp
-Nimitys
-Hinta
-Ale1 - Ale3 (lasketaan yhtiˆn parametreist‰ monta myynnin alekentt‰‰ on k‰ytˆss‰)
-Netto
-Var
-Kommentti
-*/
+  Tuoteno (pakollinen)
+  M‰‰r‰ (pakollinen)
+  Arvioitu toimitusp‰iv‰ vvvv-kk-pp
+  Nimitys
+  Hinta
+  Ale1 - Ale3 (lasketaan yhtiˆn parametreist‰ monta myynnin alekentt‰‰ on k‰ytˆss‰)
+  Netto
+  Var
+  Kommentti
+  */
 
 /* VAIHTOEHTOINEN FILEFORMAATTI (VALMISTUS) $yhtiorow['Valmistuksien_kasittely'] == Y: (sarakeotsikoilla)
-Tuoteno (pakollinen)
-M‰‰r‰ (pakollinen)
-Arvioitu toimitusp‰iv‰ vvvv-kk-pp
-Nimitys
-Hinta
-Ale1 - Ale3 (lasketaan yhtiˆn parametreist‰ monta myynnin alekentt‰‰ on k‰ytˆss‰)
-Netto
-Var
-Kommentti
-Valmistuslinja
-Toivottu ker‰ysajankohta
-Toivottu valmistusajankohta
-*/
+  Tuoteno (pakollinen)
+  M‰‰r‰ (pakollinen)
+  Arvioitu toimitusp‰iv‰ vvvv-kk-pp
+  Nimitys
+  Hinta
+  Ale1 - Ale3 (lasketaan yhtiˆn parametreist‰ monta myynnin alekentt‰‰ on k‰ytˆss‰)
+  Netto
+  Var
+  Kommentti
+  Valmistuslinja
+  Toivottu ker‰ysajankohta
+  Toivottu valmistusajankohta
+  */
 
 function choose_correct_date($date) {
   global $kukarow, $yhtiorow;
@@ -863,8 +863,8 @@ if ($tee == "file") {
                 elseif ($laskurow["tila"] == "V") {
                   // Valmistuksilla pit‰‰ huomioida rekursiiviset reseptit
                   // funktio populoi globaalit muuttujat $tuoteno_array $kpl_array $kommentti_array $lapsenlap_array
-                  $tuoteno_array = array($tuoteno);
-                  $kpl_array     = array($tuoteno => $kpl);
+                  $tuoteno_array   = array($tuoteno);
+                  $kpl_array       = array($tuoteno => $kpl);
 
                   pupesoft_lisaa_valmisteen_rekursiiviset_reseptit();
 
@@ -882,18 +882,18 @@ if ($tee == "file") {
                     }
 
                     $params = array(
-                      "trow"            => $tuotearray_row,
-                      "laskurow"        => $laskurow,
-                      "kpl"             => $kpl_array[$tuoteno_temp],
-                      "tuoteno"         => $tuoteno_temp,
-                      "hinta"           => 0,
-                      "varasto"         => $varasto,
-                      "varataan_saldoa" => "EI",
-                      "kommentti"       => $kommentti,
+                      "trow"              => $tuotearray_row,
+                      "laskurow"          => $laskurow,
+                      "kpl"               => $kpl_array[$tuoteno_temp],
+                      "tuoteno"           => $tuoteno_temp,
+                      "hinta"             => 0,
+                      "varasto"           => $varasto,
+                      "varataan_saldoa"   => "EI",
+                      "kommentti"         => $kommentti,
                       'valmistuslinja'  => $valmistuslinja,
-                      'toimaika'        => $toimaika,
-                      'kerayspvm'       => $kerayspvm,
-                      'toim'            => "{$toim}",
+                      'toimaika'      => $toimaika,
+                      'kerayspvm'      => $kerayspvm,
+                      'toim'        => "{$toim}",
                     );
 
                     lisaa_rivi($params);
@@ -1002,16 +1002,17 @@ if ($tee == 'mikrotila') {
   echo "<font class='head'>$otsikko</font><hr>";
 
   echo "<form method='post' name='sendfile' enctype='multipart/form-data'>
-      <input type='hidden' name='toim' value='$toim'>
-      <input type='hidden' name='lopetus' value='$lopetus'>
-      <input type='hidden' name='tilausnumero' value='$tilausnumero'>
-      <input type='hidden' name='tee' value='file'>
+        <input type='hidden' name='toim' value='$toim'>
+        <input type='hidden' name='toim_kuka' value='$toim_kuka'>
+        <input type='hidden' name='lopetus' value='$lopetus'>
+        <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+        <input type='hidden' name='tee' value='file'>
 
-      <font class='message'>".t("Tiedostomuoto").":</font><br><br>
+        <font class='message'>".t("Tiedostomuoto").":</font><br><br>
 
-      <table>
-      <tr><th colspan='{$colspan}'>".t("Sarkaineroteltu tekstitiedosto tai Excel-tiedosto").".</th></tr>
-      <tr>";
+        <table>
+        <tr><th colspan='{$colspan}'>".t("Sarkaineroteltu tekstitiedosto tai Excel-tiedosto").".</th></tr>
+        <tr>";
 
   echo "  <td>".t("Tuoteno")."</td><td>".t("M‰‰r‰")."</td>";
 

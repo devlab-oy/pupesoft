@@ -279,6 +279,7 @@ if ($tee == 'UUSI') {
     $extranet             = $monta['extranet'];
     $hyvaksyja             = $monta['hyvaksyja'];
     $naytetaan_katteet_tilauksella  = $monta['naytetaan_katteet_tilauksella'];
+    $naytetaan_var_tilauksella    = $monta['naytetaan_var_tilauksella'];
     $naytetaan_asiakashinta      = $monta['naytetaan_asiakashinta'];
     $naytetaan_tuotteet        = $monta['naytetaan_tuotteet'];
     $naytetaan_tilaukset      = $monta['naytetaan_tilaukset'];
@@ -310,6 +311,10 @@ if ($tee == 'UUSI') {
 
     if (count($varasto) > 0) {
       $varasto = implode(",", $varasto);
+    }
+
+    if (count($try) > 0) {
+      $try = implode(",", $try);
     }
 
     if (count($kassalipas_otto) > 0) {
@@ -348,6 +353,7 @@ if ($tee == 'UUSI') {
               myyja                         = '{$myyja}',
               tuuraaja                      = '{$tuuraaja}',
               varasto                       = '{$varasto}',
+              try                           = '{$try}',
               oletus_varasto                = '{$oletus_varasto}',
               oletus_ostovarasto            = '{$oletus_ostovarasto}',
               oletus_pakkaamo               = '{$oletus_pakkaamo}',
@@ -370,6 +376,7 @@ if ($tee == 'UUSI') {
               toimipaikka                   = '{$toimipaikka}',
               mitatoi_tilauksia             = '{$mitatoi_tilauksia}',
               naytetaan_katteet_tilauksella = '{$naytetaan_katteet_tilauksella}',
+              naytetaan_var_tilauksella     = '{$naytetaan_var_tilauksella}',
               naytetaan_asiakashinta        = '{$naytetaan_asiakashinta}',
               naytetaan_tuotteet            = '{$naytetaan_tuotteet}',
               naytetaan_tilaukset           = '{$naytetaan_tilaukset}',
@@ -540,6 +547,10 @@ if ($tee == 'MUUTA') {
       $varasto = implode(",", $varasto);
     }
 
+    if (count($try) > 0) {
+      $try = implode(",", $try);
+    }
+
     if (count($kassalipas_otto) > 0) {
       $kassalipas_otto = implode(",", $kassalipas_otto);
     }
@@ -573,6 +584,7 @@ if ($tee == 'MUUTA') {
               tuuraaja                      = '{$tuuraaja}',
               osasto                        = '{$osasto}',
               varasto                       = '{$varasto}',
+              try                           = '{$try}',
               oletus_varasto                = '{$oletus_varasto}',
               oletus_ostovarasto            = '{$oletus_ostovarasto}',
               oletus_pakkaamo               = '{$oletus_pakkaamo}',
@@ -595,6 +607,7 @@ if ($tee == 'MUUTA') {
               jyvitys                       = '{$jyvitys}',
               oletus_ohjelma                = '{$oletus_ohjelma}',
               naytetaan_katteet_tilauksella = '{$naytetaan_katteet_tilauksella}',
+              naytetaan_var_tilauksella     = '{$naytetaan_var_tilauksella}',
               naytetaan_asiakashinta        = '{$naytetaan_asiakashinta}',
               naytetaan_tuotteet            = '{$naytetaan_tuotteet}',
               naytetaan_tilaukset           = '{$naytetaan_tilaukset}',
@@ -728,8 +741,8 @@ if ($tee == 'MUUTA') {
 
     if ($selkuka != "UUSI" and $selkuka != "KOPSAAUUSI") {
       echo "  <input type='hidden' name='tee' value='MUUTA'>
-          <input type='hidden' name='selkuka' value='{$selkukarow['tunnus']}'>
-          <input type='hidden' name='kuka' value='{$selkukarow['kuka']}'>";
+            <input type='hidden' name='selkuka' value='{$selkukarow['tunnus']}'>
+            <input type='hidden' name='kuka' value='{$selkukarow['kuka']}'>";
       echo "<tr><th align='left'>", t("K‰ytt‰j‰tunnus"), ":</th><td><b>{$krow['kuka']}</b> ", t("Lastlogin"), ": {$krow['lastlogin']}</td></tr>";
     }
     else {
@@ -740,7 +753,7 @@ if ($tee == 'MUUTA') {
 
       echo "<input type='hidden' name='tee' value='UUSI'>";
       echo "<tr><th align='left'>", t("K‰ytt‰j‰tunnus"), ":</th>
-      <td><input type='text' size='50' maxlength='50' name='ktunnus'></td></tr>";
+        <td><input type='text' size='50' maxlength='50' name='ktunnus'></td></tr>";
     }
 
     if ($selkuka != "KOPSAAUUSI") {
@@ -1025,6 +1038,25 @@ if ($tee == 'MUUTA') {
 
       echo "</td><td class='back'>", t("Ilman rajausta saa myyd‰ kaikista normaalivarastoista"), "</td></tr>";
 
+      echo "<tr><th align='left'>", t("Valitse tuoteryhm‰t, joista k‰ytt‰j‰ saa myyd‰"), ":</td>";
+      echo "<td>";
+
+      $query  = "SELECT *
+                 FROM avainsana
+                 WHERE yhtio = '{$kukarow['yhtio']}'
+                 AND laji    = 'TRY'";
+      $tryres = pupe_query($query);
+
+      $try_array = explode(",", $krow["try"]);
+
+      while ($tryrow = mysql_fetch_assoc($tryres)) {
+        $sel = $eri = '';
+        if (in_array($tryrow['selite'], $try_array)) $sel = 'CHECKED';
+        echo "<input type='checkbox' name='try[]' value='{$tryrow['selite']}' {$sel}> {$tryrow['selitetark']} {$eri}<br>";
+      }
+
+      echo "</td><td class='back'>", t("Ilman rajausta saa myyd‰ kaikista tuoteryhmist‰"), "</td></tr>";
+
       if ($toim != 'extranet' and $yhtiorow['pakkaamolokerot'] != '') {
         echo "<tr><th align='left'>", t("Oletus pakkaamo"), ":</td>";
         echo "<td><select name='oletus_pakkaamo'><option value=''>", t("Ei pakkaamoa"), "</option>";
@@ -1157,7 +1189,7 @@ if ($tee == 'MUUTA') {
             $varow = mysql_fetch_assoc($vares);
 
             echo "<td>{$varow['ytunnus']} {$varow['nimi']} {$varow['nimitark']}<br>{$varow['toim_ovttunnus']} {$varow['toim_nimi']} {$varow['toim_nimitark']} {$varow['toim_postitp']}
-                <input type='hidden' name='oletus_asiakas' value='{$krow['oletus_asiakas']}'></td>";
+                  <input type='hidden' name='oletus_asiakas' value='{$krow['oletus_asiakas']}'></td>";
           }
           else {
             echo "<td>", t("Asiakas ei lˆydy"), "!</td>";
@@ -1188,7 +1220,7 @@ if ($tee == 'MUUTA') {
               $varow = mysql_fetch_assoc($vares);
 
               echo "<td>{$varow['ytunnus']} {$varow['nimi']} {$varow['nimitark']}<br>{$varow['toim_ovttunnus']} {$varow['toim_nimi']} {$varow['toim_nimitark']} {$varow['toim_postitp']}
-                  <input type='hidden' name='oletus_asiakastiedot' value='{$krow['oletus_asiakastiedot']}'></td>";
+                    <input type='hidden' name='oletus_asiakastiedot' value='{$krow['oletus_asiakastiedot']}'></td>";
             }
             else {
               echo "<td>", t("Asiakas ei lˆydy"), "!</td>";
@@ -1227,35 +1259,35 @@ if ($tee == 'MUUTA') {
         $sel = array_fill_keys(array($krow["naytetaan_asiakashinta"]), " selected") + array('A' => '');
 
         echo "<tr><th align='left'>", t("N‰ytet‰‰n asiakashinta tuotehaussa"), ":</th>
-            <td><select name='naytetaan_asiakashinta'>
-            <option value=''>", t("N‰ytet‰‰n tuotteen myyntihinta"), "</option>
-            <option value='A' {$sel['A']}>", t("N‰ytet‰‰n asiakashinta"), "</option>
-            </select></td></tr>";
+              <td><select name='naytetaan_asiakashinta'>
+              <option value=''>", t("N‰ytet‰‰n tuotteen myyntihinta"), "</option>
+              <option value='A' {$sel['A']}>", t("N‰ytet‰‰n asiakashinta"), "</option>
+              </select></td></tr>";
 
 
         $sel = array_fill_keys(array($krow["naytetaan_tuotteet"]), " selected") + array('A' => '');
 
         echo "<tr><th align='left'>", t("N‰ytett‰v‰t tuotteet verkkokaupan tuotehaussa"), ":</th>
-            <td><select name='naytetaan_tuotteet'>
-            <option value=''>", t("N‰ytet‰‰n kaikki tuotteet"), "</option>
-            <option value='A' {$sel['A']}>", t("N‰ytet‰‰n tuotteet joilla on asiakashinta tai asiakasale"), "</option>
-            </select></td></tr>";
+              <td><select name='naytetaan_tuotteet'>
+              <option value=''>", t("N‰ytet‰‰n kaikki tuotteet"), "</option>
+              <option value='A' {$sel['A']}>", t("N‰ytet‰‰n tuotteet joilla on asiakashinta tai asiakasale"), "</option>
+              </select></td></tr>";
 
         $sel = array_fill_keys(array($krow["naytetaan_tilaukset"]), " selected") + array('O' => '');
 
         echo "<tr><th align='left'>", t("N‰ytett‰v‰t tilaukset verkkokaupassa"), ":</th>
-            <td><select name='naytetaan_tilaukset'>
-            <option value=''>", t("N‰ytet‰‰n kaikki tilaukset"), "</option>
-            <option value='O' {$sel['O']}>", t("N‰ytet‰‰n vain omat tilaukset"), "</option>
-            </select></td></tr>";
+              <td><select name='naytetaan_tilaukset'>
+              <option value=''>", t("N‰ytet‰‰n kaikki tilaukset"), "</option>
+              <option value='O' {$sel['O']}>", t("N‰ytet‰‰n vain omat tilaukset"), "</option>
+              </select></td></tr>";
 
         $sel = array_fill_keys(array($krow["asema"]), " selected") + array('NE' => '');
 
         echo "<tr><th align='left'>", t("N‰ytet‰‰nkˆ poistetut tuotteet extranetiss‰"), ":</th>
-            <td><select name='asema'>
-            <option value=''>", t("Ei n‰ytet‰ extranetiss‰"), "</option>
-            <option value='NE' {$sel['NE']}>", t("N‰ytet‰‰n extranetiss‰"), "</option>
-            </select></td></tr>";
+              <td><select name='asema'>
+              <option value=''>", t("Ei n‰ytet‰ extranetiss‰"), "</option>
+              <option value='NE' {$sel['NE']}>", t("N‰ytet‰‰n extranetiss‰"), "</option>
+              </select></td></tr>";
 
       }
 
@@ -1292,11 +1324,11 @@ if ($tee == 'MUUTA') {
         }
 
         echo "<tr><th align='left'>", t("N‰ytˆn koko"), ":</th>
-            <td><select name='resoluutio'>
-            <option value='I' {$sel2}>", t("Iso"), "</option>
-            <option value='N' {$sel1}>", t("Normaali"), "</option>
-            <option value='P' {$sel3}>", t("Pieni"), "</option>
-            </select></td></tr>";
+              <td><select name='resoluutio'>
+              <option value='I' {$sel2}>", t("Iso"), "</option>
+              <option value='N' {$sel1}>", t("Normaali"), "</option>
+              <option value='P' {$sel3}>", t("Pieni"), "</option>
+              </select></td></tr>";
 
         if ($krow['naytetaan_katteet_tilauksella'] == "") {
           $sel1 = "SELECTED";
@@ -1324,15 +1356,21 @@ if ($tee == 'MUUTA') {
         }
 
         echo "<tr><th align='left'>", t("Katteet n‰ytet‰‰n tilauksentekovaiheessa ja CRM:ss‰"), ":</th>
-            <td><select name='naytetaan_katteet_tilauksella'>
-            <option value=''  {$sel1}>", t("Oletus"), "</option>
-            <option value='Y' {$sel2}>", t("Kate n‰ytet‰‰n"), "</option>
-            <option value='N' {$sel3}>", t("Katetta ei n‰ytet‰"), "</option>
-            <option value='B' {$sel4}>", t("Bruttokate n‰ytet‰‰n tilauksentekovaiheessa ja tuotekyselyss‰"), "</option>
-            </select></td></tr>";
+              <td><select name='naytetaan_katteet_tilauksella'>
+              <option value=''  {$sel1}>", t("Oletus"), "</option>
+              <option value='Y' {$sel2}>", t("Kate n‰ytet‰‰n"), "</option>
+              <option value='N' {$sel3}>", t("Katetta ei n‰ytet‰"), "</option>
+              <option value='B' {$sel4}>", t("Bruttokate n‰ytet‰‰n tilauksentekovaiheessa ja tuotekyselyss‰"), "</option>
+              </select></td></tr>";
+
+        echo "<tr><th align='left'>", t("N‰ytet‰‰n var myyntitilauksella"), ":</th>
+              <td><select name='naytetaan_var_tilauksella'>
+              <option value=''  {$sel1}>", t("Kyll‰"), "</option>
+              <option value='E' {$sel2}>", t("Ei"), "</option>
+              </select></td></tr>";
 
         echo "<tr><th align='left'>", t("Lomaoikeus"), ":</th>
-            <td><input type='text' name='lomaoikeus' size='3' value='{$krow['lomaoikeus']}'></td></tr>";
+              <td><input type='text' name='lomaoikeus' size='3' value='{$krow['lomaoikeus']}'></td></tr>";
 
         echo "<tr><th align='left'>", t("Asema"), ":</td>";
         echo "<td><select name='asema'><option value=''>", t("Ei asemaa"), "</option>";
@@ -1386,9 +1424,9 @@ if ($tee == 'MUUTA') {
 
           echo "<tr><th align='left'>", t("Jyvitys"), ":</td>";
           echo "<td><select name='jyvitys'>
-              <option value='' {$sel1}>", t("Ei saa jyvitt‰‰ myyntitilauksella"), "</option>
-              <option value='X' {$sel2}>", t("Saa jyvitt‰‰ myyntitilauksella"), "</option>
-              <option value='S' {$sel3}>", t("Saa jyvitt‰‰ sek‰ osajyvitt‰‰ myyntitilauksella"), "</option>";
+                <option value='' {$sel1}>", t("Ei saa jyvitt‰‰ myyntitilauksella"), "</option>
+                <option value='X' {$sel2}>", t("Saa jyvitt‰‰ myyntitilauksella"), "</option>
+                <option value='S' {$sel3}>", t("Saa jyvitt‰‰ sek‰ osajyvitt‰‰ myyntitilauksella"), "</option>";
           echo "</select></td></tr>";
         }
       }
@@ -1397,8 +1435,8 @@ if ($tee == 'MUUTA') {
 
       echo "<tr><th align='left'>", t("Tilausten mit‰tˆiminen"), ":</td>";
       echo "<td><select name='mitatoi_tilauksia'>
-          <option value=''>", t("K‰ytt‰j‰ saa mit‰tˆid‰ tilauksia"), "</option>
-          <option value='X' {$sel}>", t("K‰ytt‰j‰ ei saa mit‰tˆid‰ tilauksia"), "</option>";
+            <option value=''>", t("K‰ytt‰j‰ saa mit‰tˆid‰ tilauksia"), "</option>
+            <option value='X' {$sel}>", t("K‰ytt‰j‰ ei saa mit‰tˆid‰ tilauksia"), "</option>";
       echo "</select></td></tr>";
 
       $andextra = "";
@@ -1511,31 +1549,31 @@ if ($tee == 'MUUTA') {
       echo "<table><tr><td class='back'>";
 
       echo "<form method='post'>
-        <input type='hidden' name='selkuka' value='{$selkukarow['kuka']}'>
-        <input type='hidden' name='tee' value='delkesken'>
-        <input type='submit' value='* ", t("Vapauta k‰ytt‰j‰n"), " {$selkukarow['nimi']} ", t("keskenoleva tilaus"), " *'>
-        </form>";
+          <input type='hidden' name='selkuka' value='{$selkukarow['kuka']}'>
+          <input type='hidden' name='tee' value='delkesken'>
+          <input type='submit' value='* ", t("Vapauta k‰ytt‰j‰n"), " {$selkukarow['nimi']} ", t("keskenoleva tilaus"), " *'>
+          </form>";
       echo "</td><td class='back'>";
 
       echo "<form method='post'>
-        <input type='hidden' name='selkuka' value='{$selkukarow['kuka']}'>
-        <input type='hidden' name='tee' value='delpsw'>
-        <input type='submit' value='** ", t("Poista k‰ytt‰j‰n"), " {$selkukarow['nimi']} ", t("salasana"), " **'>
-        </form>";
+          <input type='hidden' name='selkuka' value='{$selkukarow['kuka']}'>
+          <input type='hidden' name='tee' value='delpsw'>
+          <input type='submit' value='** ", t("Poista k‰ytt‰j‰n"), " {$selkukarow['nimi']} ", t("salasana"), " **'>
+          </form>";
       echo "</td><td class='back'>";
 
       echo "<form method='post'>
-        <input type='hidden' name='selkuka' value='{$selkukarow['kuka']}'>
-        <input type='hidden' name='tee' value='deloikeu'>
-        <input type='submit' value='*** ", t("Poista k‰ytt‰j‰n"), " {$selkukarow['nimi']} ", t("k‰yttˆoikeudet"), " ***'>
-        </form>";
+          <input type='hidden' name='selkuka' value='{$selkukarow['kuka']}'>
+          <input type='hidden' name='tee' value='deloikeu'>
+          <input type='submit' value='*** ", t("Poista k‰ytt‰j‰n"), " {$selkukarow['nimi']} ", t("k‰yttˆoikeudet"), " ***'>
+          </form>";
       echo "</td><td class='back'>";
 
       echo "<form method='post'>
-        <input type='hidden' name='selkuka' value='{$selkukarow['kuka']}'>
-        <input type='hidden' name='tee' value='deluser'>
-        <input type='submit' value='**** ", t("Poista k‰ytt‰j‰"), " {$selkukarow['nimi']} ****'>
-        </form>";
+          <input type='hidden' name='selkuka' value='{$selkukarow['kuka']}'>
+          <input type='hidden' name='tee' value='deluser'>
+          <input type='submit' value='**** ", t("Poista k‰ytt‰j‰"), " {$selkukarow['nimi']} ****'>
+          </form>";
       echo "</td></tr></table>";
     }
   }
@@ -1590,13 +1628,13 @@ if ($tee == "") {
   echo "</optgroup></select></td><td><input type='submit' value='", t("Muokkaa k‰ytt‰j‰n tietoja"), "'></td></tr></form>";
 
   echo "<form method='post'>
-      <input type='hidden' name='tee' value='MUUTA'>
-      <input type='hidden' name='selkuka' value='UUSI'>";
+        <input type='hidden' name='tee' value='MUUTA'>
+        <input type='hidden' name='selkuka' value='UUSI'>";
   echo "<tr><th>", t("Perusta uusi k‰ytt‰j‰"), ":</th><td></td><td><input type='submit' value='", t("Luo uusi k‰ytt‰j‰"), "'></td></tr></form>";
 
   echo "<form method='post'>
-      <input type='hidden' name='tee' value='MUUTA'>
-      <input type='hidden' name='selkuka' value='KOPSAAUUSI'>";
+        <input type='hidden' name='tee' value='MUUTA'>
+        <input type='hidden' name='selkuka' value='KOPSAAUUSI'>";
   echo "<tr><th>", t("Kopioi k‰ytt‰j‰ toisesta yrityksest‰"), ":</th><td></td><td><input type='submit' value='", t("Luo uusi k‰ytt‰j‰"), "'></td></tr></form>";
 
   echo "</table>";

@@ -63,7 +63,10 @@ if (!function_exists("asiakashintatarkista")) {
           }
           elseif ($ytunnus != "" and $asiakasid > 0) {
             $t[$i]  = $asiakasid;
-            if (strpos($_SERVER['SCRIPT_NAME'], "lue_data.php") === FALSE) $virhe[$i] = t("Asiakas löytyi!");
+            $chastunn = $asiakasid;
+            if (strpos($_SERVER['SCRIPT_NAME'], "lue_data.php") === FALSE) {
+              //              $virhe[$i] = t("Asiakas löytyi!");
+            }
           }
           else {
             $virhe[$i] = t("Asiakas puuttuu tai sitä ei löydy!");

@@ -8995,12 +8995,12 @@ if (!function_exists("livesearch_tuotehaku")) {
   function livesearch_tuotehaku() {
     global $yhtiorow, $kukarow, $palvelin2, $verkkokauppa;
 
-    $tee    = $_REQUEST["livesearch_tee"];
-    $nimi   = $_REQUEST["livesearch_nimi"];
-    $formi  = $_REQUEST["livesearch_form"];
+    $tee = $_REQUEST["livesearch_tee"];
+    $nimi = $_REQUEST["livesearch_nimi"];
+    $formi = $_REQUEST["livesearch_form"];
     $hakuid = $_REQUEST["livesearch_hakuid"];
     $submit = $_REQUEST["livesearch_submit"];
-    $haku   = trim($_REQUEST["livesearch_haku"]);
+    $haku = trim($_REQUEST["livesearch_haku"]);
 
     if (mb_detect_encoding($haku, mb_detect_order(), TRUE) == "UTF-8") {
       $haku = iconv("UTF-8", "latin1//TRANSLIT", $haku);
@@ -9079,6 +9079,10 @@ if (!function_exists("livesearch_tuotehaku")) {
         else {
           $kieltolisa .= " and tuote.hinnastoon != 'E' ";
         }
+      }
+
+      if (!empty($kukarow['try'])) {
+        $kieltolisa .= tuoteryhma_rajaus();
       }
 
       // Näytetään poistuvat tuotteet mutta ei poistettuja
@@ -9991,6 +9995,90 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
       }
 
       livesearch_trimmaa_leveys($hakuid);
+    }
+    else {
+      echo "
+      <script TYPE='text/javascript' LANGUAGE='JavaScript'>
+        document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
+      </script>";
+    }
+  }
+}
+
+if (!function_exists('livesearch_vauriopoytakirjahaku')) {
+  function livesearch_vauriopoytakirjahaku($toim = '') {
+    global $yhtiorow, $kukarow, $palvelin2;
+
+    $tee = $_REQUEST["livesearch_tee"];
+    $nimi = $_REQUEST["livesearch_nimi"];
+    $formi = $_REQUEST["livesearch_form"];
+    $hakuid = $_REQUEST["livesearch_hakuid"];
+    $submit = $_REQUEST["livesearch_submit"];
+    $haku = trim($_REQUEST["livesearch_haku"]);
+
+    if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
+
+      echo "
+      <script TYPE='text/javascript' LANGUAGE='JavaScript'>
+        document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
+      </script>";
+
+      $tyomaarays_where = "";
+      if (!empty($kukarow['try'])) {
+        $tuoteryhma_result = t_avainsana('TRY', '', " AND selite IN ({$kukarow['try']})");
+        $tuoteryhmat = array();
+        while ($tuoteryhma = mysql_fetch_assoc($tuoteryhma_result)) {
+          $tuoteryhmat[] = $tuoteryhma['selitetark_2'];
+        }
+
+        $tyomaarays_where = "  AND tyomaarays.suorittaja IN ('".implode("','", $tuoteryhmat)."')";
+      }
+
+      $query = "SELECT DISTINCT takuunumero
+                FROM tyomaarays
+                WHERE yhtio     = '{$kukarow['yhtio']}'
+                AND takuunumero LIKE '%{$haku}%'
+                {$tyomaarays_where}
+                GROUP BY takuunumero";
+      $result = pupe_query($query);
+
+      $limit = 0;
+      if (mysql_num_rows($result) > 0) {
+        while ($row = mysql_fetch_assoc($result)) {
+          echo "  <div id='vauriopoytakirja_valinta_{$row['takuunumero']}'
+                name='selectOptions{$hakuid}'
+                onmouseover=\"this.className='liveSearchSelectedItem';
+                  keyStrokeIndex = -1;
+                  var aEls = document.getElementsByName('selectOptions{$hakuid}');
+                  for (var iEl = 0; iEl < aEls.length; iEl++) {
+                    if (aEls[iEl].id.substring(0,14) == 'kayttaja_valinta_' && aEls[iEl].id != 'vauriopoytakirja_valinta_{$row['takuunumero']}') {
+                      document.getElementById(aEls[iEl].id).className='';
+                    }
+                  } \"
+                onmouseout=\"this.className='';\"
+                onclick=\"document.getElementById('{$hakuid}').value='{$row['takuunumero']}';";
+          if ($submit == "") {
+            echo "document.{$formi}.submit();";
+          }
+          else {
+            echo "document.getElementById('livesearch_{$hakuid}').style.visibility = 'hidden';";
+          }
+          echo "\"
+                style='padding:2px;'>
+                <font style='font-weight:bold'>{$row['takuunumero']}</font>
+              </div><div name='selectValues{$hakuid}' id='{$row['takuunumero']}'></div>";
+          $limit++;
+
+          if ($limit > 49) {
+            break;
+          }
+        }
+
+        echo "<div style='padding-left:2px;padding-bottom:5px;padding-top:5px;'><font class='info'>", t("Haulla löytyi"), " ".mysql_num_rows($result)." ", t("Vauriopöytäkirjaa"), ", ".t("näytetään")." 50 ".t("tarkinta osumaa").".</font></div>";
+      }
+      else {
+        echo "<div style='padding:2px'><font class='message'>".t("Ei vauriopöytäkirjoja").".</font></div>";
+      }
     }
     else {
       echo "
@@ -11965,7 +12053,7 @@ if (!function_exists("hae_kaikki_alvit")) {
               selitetark_2
               FROM avainsana
               WHERE yhtio = '$kukarow[yhtio]' and laji = 'alv'
-              ORDER BY selitetark DESC, jarjestys, selite";
+                  ORDER BY selitetark DESC, jarjestys, selite";
     $vresult = pupe_query($query);
 
     $alvit = array();
@@ -20230,14 +20318,14 @@ if (!function_exists("pupesoft_sahkoposti")) {
     global $yhtiorow, $kukarow;
 
     // Tarvitaan seuraavat parametrit
-    $email_to      = isset($parametrit["to"]) ? $parametrit["to"] : "";
-    $email_cc      = isset($parametrit["cc"]) ? $parametrit["cc"] : "";
-    $email_subject = isset($parametrit["subject"]) ? $parametrit["subject"] : "";
+    $email_to    = isset($parametrit["to"]) ? $parametrit["to"] : "";
+    $email_cc    = isset($parametrit["cc"]) ? $parametrit["cc"] : "";
+    $email_subject  = isset($parametrit["subject"]) ? $parametrit["subject"] : "";
     $email_ctype   = isset($parametrit["ctype"]) ? strtoupper($parametrit["ctype"]) : "";
-    $email_body    = isset($parametrit["body"]) ? $parametrit["body"] : "";
+    $email_body   = isset($parametrit["body"]) ? $parametrit["body"] : "";
 
     // Liitetiedostoja tulee parametreissä arrayna
-    $liitteet      = (isset($parametrit["attachements"]) and is_array($parametrit["attachements"])) ? $parametrit["attachements"] : "";
+    $liitteet    = (isset($parametrit["attachements"]) and is_array($parametrit["attachements"])) ? $parametrit["attachements"] : "";
 
     // To ja Subject pitää olla kunnossa, että voidaan jatkaa
     if ($email_to == "" or $email_subject == "") {
@@ -20283,8 +20371,8 @@ if (!function_exists("pupesoft_sahkoposti")) {
 
         // Tarkistetaan $liite arrayn oikeellisuus
         $attachement_filename    = isset($liite["filename"]) ? $liite["filename"] : "";
-        $attachement_newfilename = isset($liite["newfilename"]) ? $liite["newfilename"] : "";
-        $attachement_ctype       = isset($liite["ctype"]) ? strtoupper($liite["ctype"]) : "";
+        $attachement_newfilename  = isset($liite["newfilename"]) ? $liite["newfilename"] : "";
+        $attachement_ctype      = isset($liite["ctype"]) ? strtoupper($liite["ctype"]) : "";
 
         // Selvitetään ctype jos ei annettu, PHP version mukaan
         if ($attachement_ctype == "") {
@@ -21913,7 +22001,6 @@ if (!function_exists('excel_column_name')) {
 
     return $string;
   }
-
 }
 
 if (!function_exists('koontilahete_check')) {
@@ -24192,6 +24279,8 @@ if (!function_exists("saako_myyda_private_label")) {
   }
 }
 
+require 'inc/tyomaarays_functions.inc';
+
 if (!function_exists("tuotteen_toimittajat_tuotenumerot_haku")) {
   function tuotteen_toimittajat_tuotenumerot_haku($tuoteno, $laskuttajan_toimittajanumero, $kpl = 0) {
     global $kukarow, $yhtiorow;
@@ -24955,8 +25044,8 @@ if (!function_exists('laske_siirrettava_maara')) {
                  t1.varattu        > 0
                )
                WHERE l1.yhtio      = '{$kukarow['yhtio']}'
-               AND ((l1.tila = 'N' AND l1.alatila != 'X')
-                 OR (l1.tila = 'G' AND l1.alatila IN ('', 'J'))))
+                    AND ((l1.tila = 'N' AND l1.alatila != 'X')
+                      OR (l1.tila = 'G' AND l1.alatila IN ('', 'J'))))
                UNION
                (SELECT t2.tunnus, t2.otunnus, t2.jt + t2.varattu AS varattu
                FROM tilausrivi AS t2
@@ -26004,6 +26093,56 @@ if (!function_exists('hae_asiakashinnat')) {
   }
 }
 
+if (!function_exists('hae_yhtion_oletusalv')) {
+  function hae_yhtion_oletusalv() {
+    global $kukarow, $yhtiorow;
+    //yhtiön oletusalvi!
+    $query = "SELECT selite
+              FROM avainsana
+              WHERE yhtio     = '{$kukarow['yhtio']}'
+              AND laji        = 'alv'
+              AND selitetark != ''";
+    $oletusalv_result = pupe_query($query);
+
+    $yhtion_oletusalv = mysql_fetch_assoc($oletusalv_result);
+    return $yhtion_oletusalv['selite'];
+  }
+
+}
+
+if (!function_exists('hae_tyomaarayksen_statukset')) {
+  function hae_tyomaarayksen_statukset() {
+    global $kukarow, $yhtiorow;
+
+    $status_result = t_avainsana('TYOM_TYOSTATUS');
+
+    $tyomaarays_statukset = array();
+    while ($tyomaarays_status = mysql_fetch_assoc($status_result)) {
+      $tyomaarays_statukset[] = $tyomaarays_status;
+    }
+
+    return $tyomaarays_statukset;
+  }
+
+}
+
+if (!function_exists('onko_liitetiedostoja')) {
+  function onko_liitetiedostoja($tunnus) {
+    global $kukarow, $yhtiorow;
+
+    $query = "SELECT *
+              FROM liitetiedostot
+              WHERE yhtio      = '{$kukarow['yhtio']}'
+              AND liitostunnus = '{$tunnus}'";
+    $liitetiedosto_result = pupe_query($query);
+    if (mysql_num_rows($liitetiedosto_result) > 0) {
+      return true;
+    }
+
+    return false;
+  }
+}
+
 if (!function_exists('posten_outbounddelivery')) {
   function posten_outbounddelivery($otunnus) {
 
@@ -26376,6 +26515,33 @@ if (!function_exists("tuotteen_budjetoitu_myynti")) {
     }
 
     return array($budjetoitu_myynti, $budjetin_peruste);
+  }
+}
+
+if (!function_exists('tuoteryhma_rajaus')) {
+  function tuoteryhma_rajaus() {
+    global $kukarow, $yhtiorow;
+
+    return "  AND tuote.try IN ({$kukarow['try']})";
+  }
+}
+
+if (!function_exists('aseta_kukarow_kesken')) {
+  function aseta_kukarow_kesken($kesken) {
+    global $kukarow;
+
+    $query = "UPDATE kuka
+              SET kesken = {$kesken}
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND kuka    = '{$kukarow['kuka']}'";
+    pupe_query($query);
+
+    if (mysql_affected_rows() == 0) {
+      return false;
+    }
+
+    $kukarow['kesken'] = $kesken;
+    return true;
   }
 }
 

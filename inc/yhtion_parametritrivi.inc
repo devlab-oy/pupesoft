@@ -479,6 +479,35 @@ if ($fieldname == "tyomaaraystyyppi") {
   $jatko = 0;
 }
 
+if ($fieldname == 'tyomaarayksen_kayttaytyminen') {
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel = array();
+  $sel[$trow[$i]] = "selected";
+
+  $ulos .= "<option value = ''>" . t("Normaali") . "</option>";
+  $ulos .= "<option value = 'K' $sel[K]>" . t("Kopioidaan myyntitilaus") . "</option>";
+
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
+
+if ($fieldname == "lisakuluprosentti") {
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $apu = $trow[$i];
+  $sel = array();
+  $sel[$apu] = "selected";
+
+  foreach (range(0, 99) as $kulu) {
+    $ulos .= "<option value='$kulu' $sel[$kulu]>$kulu %</option>";
+  }
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "viivakoodi_purkulistaan") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -3981,6 +4010,19 @@ if ($fieldname == 'seuraava_tuotenumero') {
   $ulos .= "<option value = ''>".t("Ei ehdoteta seuraavaa vapaata tuotenumeroa tuotetta perustettaessa")."</option>";
   $ulos .= "<option value = 'K' {$sel['K']}>".t("Ehdotetaan seuraava vapaa tuotenumero tuotetta perustettaessa")."</option>";
   $ulos .= "<option value = 'O' {$sel['O']}>".t("Ehdotetaan seuraava vapaa tuotenumero tuotetta perustettaessa (vain ostotilauksella)")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == 'vauriopoytakirja') {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array();
+  $sel['K'] = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>".t("Vauriopöytäkirjat pois käytöstä")."</option>";
+  $ulos .= "<option value = 'K' {$sel['K']}>".t("Vauriopöytäkirja käytössä")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

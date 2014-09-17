@@ -10,40 +10,40 @@ if (php_sapi_name() != 'cli' and (!isset($ei_kayttoliittymaa) or $ei_kayttoliitt
   js_open_yllapito();
 
   echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
-      <!--
+        <!--
 
-      function merahti_oletus(kentta) {
-        // Toimitustapa alasvetovalikon id
-        var ttdd_id = document.getElementById(kentta);
+        function merahti_oletus(kentta) {
+          // Toimitustapa alasvetovalikon id
+          var ttdd_id = document.getElementById(kentta);
 
-        // Valitun toimitustavan tunnus
-        var val = ttdd_id.options[ttdd_id.selectedIndex].id;
+          // Valitun toimitustavan tunnus
+          var val = ttdd_id.options[ttdd_id.selectedIndex].id;
 
-        // Haetaan valitun toimitustavan oletus merahti
-        var merahti = document.getElementById('merahti_'+val).innerHTML;
+          // Haetaan valitun toimitustavan oletus merahti
+          var merahti = document.getElementById('merahti_'+val).innerHTML;
 
-        //Selectöidään oikea rahtisopparivalinta toisesta alasvetovalikosta
-        var mrdd_id = document.getElementById('merahti');
-        var mrdd_sel = mrdd_id.selectedIndex;
+          //Selectöidään oikea rahtisopparivalinta toisesta alasvetovalikosta
+          var mrdd_id = document.getElementById('merahti');
+          var mrdd_sel = mrdd_id.selectedIndex;
 
-        // Katotaan onko rahtivapaa
-        var rvcb_ch = document.getElementById('rahtivapaa').checked;
+          // Katotaan onko rahtivapaa
+          var rvcb_ch = document.getElementById('rahtivapaa').checked;
 
-        // katotaan onks iPadkäyttäjä
-        var isiPad = navigator.userAgent.match(/iPad/i) != null;
+          // katotaan onks iPadkäyttäjä
+          var isiPad = navigator.userAgent.match(/iPad/i) != null;
 
-        if (merahti == 'K' && mrdd_sel != 1) {
-          mrdd_id.options[1].selected = '1';
-          if (!isiPad) alert('".t("HUOM: Käytettävä rahtisopimus vaihdettiin")."!');
+          if (merahti == 'K' && mrdd_sel != 1) {
+            mrdd_id.options[1].selected = '1';
+            if (!isiPad) alert('".t("HUOM: Käytettävä rahtisopimus vaihdettiin")."!');
+          }
+          else if (merahti != 'K' && mrdd_sel != 2 && rvcb_ch != true) {
+            mrdd_id.options[2].selected = '1';
+            if (!isiPad) alert('".t("HUOM: Käytettävä rahtisopimus vaihdettiin")."!');
+          }
         }
-        else if (merahti != 'K' && mrdd_sel != 2 && rvcb_ch != true) {
-          mrdd_id.options[2].selected = '1';
-          if (!isiPad) alert('".t("HUOM: Käytettävä rahtisopimus vaihdettiin")."!');
-        }
-      }
 
-      //-->
-      </script>";
+        //-->
+        </script>";
 }
 
 //tässä joko tehdään uutta otsikkoa tai muutetaan olemassa olevaa
@@ -936,20 +936,20 @@ if ($tila == "" and !isset($jatka)) {
 
   echo "<table>";
   echo "<tr>
-      <th colspan='2' align='left' valign='top'>".t("Ostaja").":</td></tr>";
+        <th colspan='2' align='left' valign='top'>".t("Ostaja").":</td></tr>";
   echo "<tr>
-      <td valign='top'>".t("Nimi").": </td>
-      <td><input type='text' name='nimi' size='35' value='$srow[nimi]'></td></tr>";
+        <td valign='top'>".t("Nimi").": </td>
+        <td><input type='text' name='nimi' size='35' value='$srow[nimi]'></td></tr>";
   echo "<tr>
-      <td></td>
-      <td><input type='text' name='nimitark' size='35' value='$srow[nimitark]'></td></tr>";
+        <td></td>
+        <td><input type='text' name='nimitark' size='35' value='$srow[nimitark]'></td></tr>";
   echo "<tr>
-      <td valign='top'>".t("Osoite").": </td>
-      <td><input type='text' name='osoite' size='35' value='$srow[osoite]'></td></tr>";
+        <td valign='top'>".t("Osoite").": </td>
+        <td><input type='text' name='osoite' size='35' value='$srow[osoite]'></td></tr>";
 
   echo "<tr>
-      <td valign='top'>".t("Postitp").": </td>
-      <td><input type='text' name='postino' size='10' value='$srow[postino]'> <input type='text' name='postitp' size='21' value='$srow[postitp]'></td></tr>";
+        <td valign='top'>".t("Postitp").": </td>
+        <td><input type='text' name='postino' size='10' value='$srow[postino]'> <input type='text' name='postitp' size='21' value='$srow[postitp]'></td></tr>";
 
   if ($srow["liitostunnus"] > 0) {
     $query = "SELECT distinct koodi, nimi
@@ -959,7 +959,7 @@ if ($tila == "" and !isset($jatka)) {
     $vresult = pupe_query($query);
 
     echo "<tr><td valign='top'> ".t("Maa").": </td>
-        <td><select name='maa' onChange='submit();' ".js_alasvetoMaxWidth("maa", 200).">";
+          <td><select name='maa' onChange='submit();' ".js_alasvetoMaxWidth("maa", 200).">";
 
     while ($vrow = mysql_fetch_assoc($vresult)) {
       $sel="";
@@ -1045,30 +1045,30 @@ if ($tila == "" and !isset($jatka)) {
   }
   else {
     echo "  <input type='hidden' name='asiakasid' value='$asiakasid'>
-        <input type='hidden' name='ylatila'              value = '$ylatila'>
-        <input type='hidden' name='alatila'              value = '$alatila'>
-        <input type='hidden' name='otsikolta'              value = 'YES'>
-        <input type='hidden' name='laskutusvkopv'            value = '$srow[laskutusvkopv]'>
-        <input type='hidden' name='ovttunnus'              value = '$srow[ovttunnus]'>
-        <input type='hidden' name='toim_ovttunnus'            value = '$srow[toim_ovttunnus]'>
-        <input type='hidden' name='kolm_ovttunnus'            value = '$srow[kolm_ovttunnus]'>
-        <input type='hidden' name='chn'                value = '$srow[chn]'>
-        <input type='hidden' name='verkkotunnus'            value = '$srow[verkkotunnus]'>
-        <input type='hidden' name='ytunnus'              value = '$srow[ytunnus]'>
-        <input type='hidden' name='kolm_maa'              value = '$srow[kolm_maa]'>
-        <input type='hidden' name='tunnusnippu'            value = '$srow[tunnusnippu]'>
-        <input type='hidden' name='projekti'             value = '$srow[projekti]'>
-        <input type='hidden' name='jaksotettu'              value = '$srow[jaksotettu]'>
-        <input type='hidden' name='tunnusnippu_tarjous'        value = '$srow[tunnusnippu_tarjous]'>
-        <input type='hidden' name='kauppatapahtuman_luonne'      value = '$srow[kauppatapahtuman_luonne]'>
-        <input type='hidden' name='asentaja'              value = '$asentaja'>
-        <input type='hidden' name='tyojono'              value = '$tyojono'>
-        <input type='hidden' name='liitostunnus'            value = '$srow[liitostunnus]'>";
+          <input type='hidden' name='ylatila'              value = '$ylatila'>
+          <input type='hidden' name='alatila'              value = '$alatila'>
+          <input type='hidden' name='otsikolta'              value = 'YES'>
+          <input type='hidden' name='laskutusvkopv'            value = '$srow[laskutusvkopv]'>
+          <input type='hidden' name='ovttunnus'              value = '$srow[ovttunnus]'>
+          <input type='hidden' name='toim_ovttunnus'            value = '$srow[toim_ovttunnus]'>
+          <input type='hidden' name='kolm_ovttunnus'            value = '$srow[kolm_ovttunnus]'>
+          <input type='hidden' name='chn'                value = '$srow[chn]'>
+          <input type='hidden' name='verkkotunnus'            value = '$srow[verkkotunnus]'>
+          <input type='hidden' name='ytunnus'              value = '$srow[ytunnus]'>
+          <input type='hidden' name='kolm_maa'              value = '$srow[kolm_maa]'>
+          <input type='hidden' name='tunnusnippu'            value = '$srow[tunnusnippu]'>
+          <input type='hidden' name='projekti'             value = '$srow[projekti]'>
+          <input type='hidden' name='jaksotettu'              value = '$srow[jaksotettu]'>
+          <input type='hidden' name='tunnusnippu_tarjous'        value = '$srow[tunnusnippu_tarjous]'>
+          <input type='hidden' name='kauppatapahtuman_luonne'      value = '$srow[kauppatapahtuman_luonne]'>
+          <input type='hidden' name='asentaja'              value = '$asentaja'>
+          <input type='hidden' name='tyojono'              value = '$tyojono'>
+          <input type='hidden' name='liitostunnus'            value = '$srow[liitostunnus]'>";
 
     echo "<td valign='top' style='padding:0px;'>";
     echo "<table>";
     echo "<tr>
-        <th colspan='2' align='left' valign='top'>".t("Toimitusosoite").":</td></tr>";
+          <th colspan='2' align='left' valign='top'>".t("Toimitusosoite").":</td></tr>";
 
     /* jos asiakkaalle ei ole tallennettu kohteita, ei piirretä kenttää */
     $kohde_ui = "";
@@ -1096,24 +1096,24 @@ if ($tila == "" and !isset($jatka)) {
 
     if ($kohde_ui != "") {
       echo "<tr>
-                      <td valign='top'> ".t("Kohde").": </td>
-                      <td><select name='tkohde' onChange='submit();'>
-                      <option value =''>" . t('ei kohdetta') . "</option>
-                      {$kohde_ui}
-                      </select></td></tr>";
+                        <td valign='top'> ".t("Kohde").": </td>
+                        <td><select name='tkohde' onChange='submit();'>
+                        <option value =''>" . t('ei kohdetta') . "</option>
+                        {$kohde_ui}
+                        </select></td></tr>";
     }
     echo "<tr>
-        <td valign='top'> ".t("Nimi").": </td>
-        <td><input type='text' name='tnimi' size='35' value='$srow[toim_nimi]'></td></tr>";
+          <td valign='top'> ".t("Nimi").": </td>
+          <td><input type='text' name='tnimi' size='35' value='$srow[toim_nimi]'></td></tr>";
     echo "<tr>
-        <td></td>
-        <td><input type='text' name='tnimitark' size='35' value='$srow[toim_nimitark]'></td></tr>";
+          <td></td>
+          <td><input type='text' name='tnimitark' size='35' value='$srow[toim_nimitark]'></td></tr>";
     echo "<tr>
-        <td valign='top'>".t("Osoite").": </td>
-        <td><input type='text' name='tosoite' size='35' value='$srow[toim_osoite]'></td></tr>";
+          <td valign='top'>".t("Osoite").": </td>
+          <td><input type='text' name='tosoite' size='35' value='$srow[toim_osoite]'></td></tr>";
     echo "<tr>
-        <td valign='top'>".t("Postitp").": </td>
-        <td><input type='text' name='tpostino' size='10' value='$srow[toim_postino]'> <input type='text' name='tpostitp' size='21' value='$srow[toim_postitp]'></td></tr>";
+          <td valign='top'>".t("Postitp").": </td>
+          <td><input type='text' name='tpostino' size='10' value='$srow[toim_postino]'> <input type='text' name='tpostitp' size='21' value='$srow[toim_postitp]'></td></tr>";
 
     $query = "SELECT distinct koodi, nimi
               FROM maat
@@ -1122,7 +1122,7 @@ if ($tila == "" and !isset($jatka)) {
     $vresult = pupe_query($query);
 
     echo "<tr><td valign='top'> ".t("Maa").": </td>
-        <td><select name='toim_maa' onChange='submit();' ".js_alasvetoMaxWidth("toim_maa", 200).">";
+          <td><select name='toim_maa' onChange='submit();' ".js_alasvetoMaxWidth("toim_maa", 200).">";
 
     while ($vrow=mysql_fetch_assoc($vresult)) {
       $sel="";
@@ -1143,19 +1143,19 @@ if ($tila == "" and !isset($jatka)) {
     echo "<td valign='top' style='padding:0px;'>";
     echo "<table>";
     echo "<tr>
-        <th colspan='2' align='left' valign='top'>&nbsp; ".t("Laskun postitusosoite").":</td></tr>";
+          <th colspan='2' align='left' valign='top'>&nbsp; ".t("Laskun postitusosoite").":</td></tr>";
     echo "<tr>
-        <td valign='top'> ".t("Nimi").": </td>
-        <td><input type='text' name='laskutus_nimi' size='35' value='$srow[laskutus_nimi]'></td></tr>";
+          <td valign='top'> ".t("Nimi").": </td>
+          <td><input type='text' name='laskutus_nimi' size='35' value='$srow[laskutus_nimi]'></td></tr>";
     echo "<tr>
-        <td></td>
-        <td><input type='text' name='laskutus_nimitark' size='35' value='$srow[laskutus_nimitark]'></td></tr>";
+          <td></td>
+          <td><input type='text' name='laskutus_nimitark' size='35' value='$srow[laskutus_nimitark]'></td></tr>";
     echo "<tr>
-        <td valign='top'>".t("Osoite").": </td>
-        <td><input type='text' name='laskutus_osoite' size='35' value='$srow[laskutus_osoite]'></td></tr>";
+          <td valign='top'>".t("Osoite").": </td>
+          <td><input type='text' name='laskutus_osoite' size='35' value='$srow[laskutus_osoite]'></td></tr>";
     echo "<tr>
-        <td valign='top'>".t("Postitp").": </td>
-        <td><input type='text' name='laskutus_postino' size='10' value='$srow[laskutus_postino]'> <input type='text' name='laskutus_postitp' size='21' value='$srow[laskutus_postitp]'></td></tr>";
+          <td valign='top'>".t("Postitp").": </td>
+          <td><input type='text' name='laskutus_postino' size='10' value='$srow[laskutus_postino]'> <input type='text' name='laskutus_postitp' size='21' value='$srow[laskutus_postitp]'></td></tr>";
 
     $query = "SELECT distinct koodi, nimi
               FROM maat
@@ -1164,7 +1164,7 @@ if ($tila == "" and !isset($jatka)) {
     $vresult = pupe_query($query);
 
     echo "<tr><td valign='top'> ".t("Maa").": </td>
-        <td><select name='laskutus_maa' ".js_alasvetoMaxWidth("laskutus_maa", 200).">";
+          <td><select name='laskutus_maa' ".js_alasvetoMaxWidth("laskutus_maa", 200).">";
 
     while ($vrow=mysql_fetch_assoc($vresult)) {
       $sel="";
@@ -1200,17 +1200,17 @@ if ($tila == "" and !isset($jatka)) {
       }
 
       echo "<tr>
-          <td valign='top'> ".t("Nimi").": </td>
-          <td><input type='text' name='kolm_nimi' size='35' value='$srow[kolm_nimi]'></td></tr>";
+            <td valign='top'> ".t("Nimi").": </td>
+            <td><input type='text' name='kolm_nimi' size='35' value='$srow[kolm_nimi]'></td></tr>";
       echo "<tr>
-          <td></td>
-          <td><input type='text' name='kolm_nimitark' size='35' value='$srow[kolm_nimitark]'></td></tr>";
+            <td></td>
+            <td><input type='text' name='kolm_nimitark' size='35' value='$srow[kolm_nimitark]'></td></tr>";
       echo "<tr>
-          <td valign='top'>".t("Osoite").": </td>
-          <td><input type='text' name='kolm_osoite' size='35' value='$srow[kolm_osoite]'></td></tr>";
+            <td valign='top'>".t("Osoite").": </td>
+            <td><input type='text' name='kolm_osoite' size='35' value='$srow[kolm_osoite]'></td></tr>";
       echo "<tr>
-          <td valign='top'>".t("Postitp").": </td>
-          <td><input type='text' name='kolm_postino' size='6' value='$srow[kolm_postino]'> <input type='text' name='kolm_postitp' size='21' value='$srow[kolm_postitp]'></td></tr>";
+            <td valign='top'>".t("Postitp").": </td>
+            <td><input type='text' name='kolm_postino' size='6' value='$srow[kolm_postino]'> <input type='text' name='kolm_postitp' size='21' value='$srow[kolm_postitp]'></td></tr>";
       echo "</table>";
       echo "</td>";
 
@@ -1218,20 +1218,20 @@ if ($tila == "" and !isset($jatka)) {
         echo "<td style='padding:0px;'>";
         echo "<table>";
         echo "<tr>
-            <td valign='top'> ".t("Sähköpostiosoite").": </td>
-            <td>$srow[email]</td></tr>";
+              <td valign='top'> ".t("Sähköpostiosoite").": </td>
+              <td>$srow[email]</td></tr>";
         echo "<tr>
-            <td valign='top'>".t("Kotipuhelin")."</td>
-            <td>$srow[puhelin]</td></tr>";
+              <td valign='top'>".t("Kotipuhelin")."</td>
+              <td>$srow[puhelin]</td></tr>";
         echo "<tr>
-            <td valign='top'>".t("Työpuhelin").": </td>
-            <td>$srow[fax]</td></tr>";
+              <td valign='top'>".t("Työpuhelin").": </td>
+              <td>$srow[fax]</td></tr>";
         echo "<tr>
-            <td valign='top'>&nbsp;</td>
-            <td></td></tr>";
+              <td valign='top'>&nbsp;</td>
+              <td></td></tr>";
         echo "<tr>
-            <td valign='top'></td>
-            <td></td></tr>";
+              <td valign='top'></td>
+              <td></td></tr>";
         echo "</table>";
         echo "</td>";
       }
@@ -1356,8 +1356,8 @@ if ($tila == "" and !isset($jatka)) {
     }
     else {
       $vasen_sarake[$vasen] .= "<input type='text' name='erpcmpp' value='$erpcmpp' size='3'>
-          <input type='text' name='erpcmkk' value='$erpcmkk' size='3'>
-          <input type='text' name='erpcmvv' value='$erpcmvv' size='6'>";
+            <input type='text' name='erpcmkk' value='$erpcmkk' size='3'>
+            <input type='text' name='erpcmvv' value='$erpcmvv' size='6'>";
     }
     $vasen_sarake[$vasen] .= "</td>";
     $vasen++;
@@ -1463,11 +1463,11 @@ if ($tila == "" and !isset($jatka)) {
     $sel[$apu_rahdinmaksaja] = "selected";
 
     $oikea_sarake[$oikea] = "<td>".t("Rahtisopimus").":</td>
-        <td><select id='merahti' name='maksaja' {$state_chk}>
-        <option value='O'>".t("Oletus")."</option>
-        <option value='K' $sel[K]>".t("Käytetään lähettäjän rahtisopimusta")."</option>
-        <option value=''  $sel[V]>".t("Käytetään vastaanottajan rahtisopimusta")."</option>
-        </select>";
+          <td><select id='merahti' name='maksaja' {$state_chk}>
+          <option value='O'>".t("Oletus")."</option>
+          <option value='K' $sel[K]>".t("Käytetään lähettäjän rahtisopimusta")."</option>
+          <option value=''  $sel[V]>".t("Käytetään vastaanottajan rahtisopimusta")."</option>
+          </select>";
 
     // HUOM: jos varsinainen on disabloitu niin siirretään tieto hidddenissä
     if ($state_chk == 'disabled') {
@@ -1535,8 +1535,8 @@ if ($tila == "" and !isset($jatka)) {
 
     if ($alv_velvollisuus != "") {
       $oikea_sarake[$oikea] .= " <td>".t("Verollinen myynti (ulkomaan VAT)")."
-          <input type='hidden' name='alv' value='$alv'>
-          </td>";
+            <input type='hidden' name='alv' value='$alv'>
+            </td>";
     }
     elseif ($srow["vienti"] == '' or $asiarow["laji"] == "H") {
       if (isset($srow)) {
@@ -1551,16 +1551,16 @@ if ($tila == "" and !isset($jatka)) {
       }
 
       $oikea_sarake[$oikea] .= "<td>
-          <select name='alv'>
-          <option value='$wtrow[selite]' $sel_verollinen>".t("Verollinen myynti")."</option>
-          <option value='0' $sel_veroton>".t("Veroton myynti")."</option>
-          </select>
-          </td>";
+            <select name='alv'>
+            <option value='$wtrow[selite]' $sel_verollinen>".t("Verollinen myynti")."</option>
+            <option value='0' $sel_veroton>".t("Veroton myynti")."</option>
+            </select>
+            </td>";
     }
     else {
       $oikea_sarake[$oikea] .= " <td>".t("Veroton myynti")."
-          <input type='hidden' name='alv' value='0'>
-          </td>";
+            <input type='hidden' name='alv' value='0'>
+            </td>";
     }
 
     $oikea++;
@@ -1596,7 +1596,7 @@ if ($tila == "" and !isset($jatka)) {
     }
     else {
       $vasen_sarake[$vasen] .= "<input type='text' name='kerpp' value='$kerpp' size='3'><input type='text' name='kerkk' value='$kerkk' size='3'><input type='text' name='kervv' value='$kervv' size='6'>
-          <input type='hidden' name='vkerayspvm' value='".substr($srow["kerayspvm"], 0, 10)."'>";
+            <input type='hidden' name='vkerayspvm' value='".substr($srow["kerayspvm"], 0, 10)."'>";
 
       if ($srow["keraysvko"] != '') {
         $keraysvko = date("W", strtotime($srow["kerayspvm"]));
@@ -1656,11 +1656,11 @@ if ($tila == "" and !isset($jatka)) {
     }
     else {
       $oikea_sarake[$oikea] .= "
-        <select name='vienti'>
-        <option value=''  $sel1>".t("Kotimaa")."</option>
-        <option value='E' $sel2>".t("Vienti EU")."</option>
-        <option value='K' $sel3>".t("Vienti ei-EU")."</option>
-        </select>";
+          <select name='vienti'>
+          <option value=''  $sel1>".t("Kotimaa")."</option>
+          <option value='E' $sel2>".t("Vienti EU")."</option>
+          <option value='K' $sel3>".t("Vienti ei-EU")."</option>
+          </select>";
 
       $sel = $srow['kolmikantakauppa'] != "" ? " selected" : "";
 
@@ -1692,7 +1692,7 @@ if ($tila == "" and !isset($jatka)) {
     }
     else {
       $vasen_sarake[$vasen] .= "<input type='text' name='toimpp' value='$toimpp' size='3'><input type='text' name='toimkk' value='$toimkk' size='3'><input type='text' name='toimvv' value='$toimvv' size='6'>
-        <input type='hidden' name='vtoimaika' value='".$srow["toimaika"]."'>";
+          <input type='hidden' name='vtoimaika' value='".$srow["toimaika"]."'>";
 
       if ($srow["toimvko"] != '') {
         $toimvko = date("W", strtotime($srow["toimaika"]));
@@ -1770,7 +1770,7 @@ if ($tila == "" and !isset($jatka)) {
     //  Jos halutaan niin voidaan liittää hieman yhteyshenkilöitä
     if ($yhtiorow["tilauksen_yhteyshenkilot"] == "K") {
       $vasen_sarake[$vasen] = "<td>".t("Tekninen yhteyshenkilö").":</td>
-                    <td><select id='yhteyshenkilo_tekninen' name='yhteyshenkilo_tekninen'>";
+                      <td><select id='yhteyshenkilo_tekninen' name='yhteyshenkilo_tekninen'>";
 
       $query = "SELECT tunnus, if (titteli != '', concat_ws(', ' ,nimi, titteli), nimi) nimi
                 FROM yhteyshenkilo
@@ -1800,7 +1800,7 @@ if ($tila == "" and !isset($jatka)) {
       $vasen++;
 
       $oikea_sarake[$oikea] = "<td>".t("Projektipaallikko").":</td>
-        <td><select name='projektipaallikko'>";
+          <td><select name='projektipaallikko'>";
 
       $oikea_sarake[$oikea] .= "<option value=''>".t("Ei projektipäällikköä")."</option>";
 
@@ -1826,7 +1826,7 @@ if ($tila == "" and !isset($jatka)) {
       $oikea++;
 
       $vasen_sarake[$vasen] = "<td>".t("Kaupallinen yhteyshenkilö").":</td>
-                  <td><select id='yhteyshenkilo_kaupallinen' name='yhteyshenkilo_kaupallinen'>";
+                    <td><select id='yhteyshenkilo_kaupallinen' name='yhteyshenkilo_kaupallinen'>";
 
       $vasen_sarake[$vasen] .= "<option value=''>".t("Ei kaupallista käsittelijää")."</option>";
       mysql_data_seek($yhresult, 0);
@@ -2277,12 +2277,12 @@ if ($tila == "" and !isset($jatka)) {
     $jtksel[$srow["jtkielto"]] = "SELECTED";
 
     $oikea_sarake[$oikea] = "<td>".t("JT-käsittely").":</td><td>
-        <select name='jtkielto' ".js_alasvetoMaxWidth("jtkielto", 200).">
-        <option value = ''>".t("Normaali")."</option>
-        <option value = 'Y' $jtksel[Y]>".t("Jälkitoimituksia ei yhdistetä")."</option>
-        <option value = 'Z' $jtksel[Z]>".t("Ei osatoimituksia")."</option>
-        <option value = 'o' $jtksel[o]>".t("Ei jälkitoimituksia")."</option>
-        </select></td>";
+          <select name='jtkielto' ".js_alasvetoMaxWidth("jtkielto", 200).">
+          <option value = ''>".t("Normaali")."</option>
+          <option value = 'Y' $jtksel[Y]>".t("Jälkitoimituksia ei yhdistetä")."</option>
+          <option value = 'Z' $jtksel[Z]>".t("Ei osatoimituksia")."</option>
+          <option value = 'o' $jtksel[o]>".t("Ei jälkitoimituksia")."</option>
+          </select></td>";
     $oikea++;
 
     //laskun valuuttakoodi
@@ -2470,9 +2470,9 @@ if ($tila == "" and !isset($jatka)) {
       }
 
       $vasen_sarake[$vasen] .= "<input type='text' name='voimaika_pp' value='$voimaika_pp' size='3'>
-          <input type='text' name='voimaika_kk' value='$voimaika_kk' size='3'>
-          <input type='text' name='voimaika_vv' value='$voimaika_vv' size='6'>
-          </td>";
+            <input type='text' name='voimaika_kk' value='$voimaika_kk' size='3'>
+            <input type='text' name='voimaika_vv' value='$voimaika_vv' size='6'>
+            </td>";
       $vasen++;
     }
 
@@ -2539,7 +2539,7 @@ if ($tila == "" and !isset($jatka)) {
       echo "<tr><th colspan='4'>".t("Työmääräyksen lisätiedot").":</th></tr>";
 
       echo "  <tr>
-          <td>".t("Työjono").":</td><td>";
+            <td>".t("Työjono").":</td><td>";
 
       if (!isset($srow["tyojono"])) {
         // Onko käyttäjällä oletustyöjono
@@ -2577,7 +2577,7 @@ if ($tila == "" and !isset($jatka)) {
       echo "</select>";
 
       echo "  </td>
-          <td>".t("Työstatus").":</td><td>";
+            <td>".t("Työstatus").":</td><td>";
 
       echo "<select name='tyostatus'>";
 
@@ -2659,9 +2659,16 @@ if ($tila == "" and !isset($jatka)) {
           if ($al_pp == "00")   $al_pp = date("d");
 
           echo "<td>$al_row[selitetark]:</td><td>
-              <input type='text' name='".$kentta."pp' size='3' value='$al_pp'>
-              <input type='text' name='".$kentta."kk' size='3' value='$al_kk'>
-              <input type='text' name='".$kentta."vv' size='5' value='$al_vv'></td>";
+                <input type='text' name='".$kentta."pp' size='3' value='$al_pp'>
+                <input type='text' name='".$kentta."kk' size='3' value='$al_kk'>
+                <input type='text' name='".$kentta."vv' size='5' value='$al_vv'></td>";
+        }
+        elseif (strtoupper($al_row["selitetark_2"]) == "DATETIME") {
+          echo "<td>$al_row[selitetark]:</td>";
+          echo "<td>";
+          echo "<input type='datetime' name='$al_row[selitetark]' value=''>";
+          echo "<input type='datetime' name='$al_row[selitetark]' value=''>";
+          echo "</td>";
         }
         elseif (strtoupper($al_row["selitetark_2"]) == "DROPDOWN") {
           $dropdown_arvot = explode("#", $al_row['selitetark_3']);
@@ -2676,6 +2683,44 @@ if ($tila == "" and !isset($jatka)) {
 
           echo "</select>";
           echo "</td>";
+        }
+        elseif (strtoupper($al_row["selitetark_2"]) == "CHECKBOX") {
+          $checkbox_arvot = explode("#", $al_row['selitetark_3']);
+
+          echo "<td>{$al_row['selitetark']}</td>";
+          echo "<td>";
+
+          echo "<table>";
+
+          foreach ($checkbox_arvot as $i => $checkbox) {
+            if (($i+1) % 3 == 1) echo "<tr>";
+
+            $valinnat = explode('#', $srow[$kentta]);
+            $selec = (in_array(str_replace(" ", "", $checkbox), $valinnat)) ? "CHECKED" : "";
+            echo "<td><input type='checkbox' name='{$al_row['selite']}[]' value='" . str_replace(" ", "", $checkbox) . "' $selec>$checkbox</td>";
+
+            if (($i+1) % 3 == 0) echo "</tr>"; // Joka kolmanella rivillä break
+          }
+          echo "</table>";
+
+          echo "</td>";
+
+        }
+        elseif (strtoupper($al_row["selitetark_2"]) == "RADIO") {
+          $radio_values = explode("#", $al_row['selitetark_3']);
+
+          echo "<td>{$al_row['selitetark']}</td>";
+          echo "<td>";
+          echo "<table>";
+
+          foreach ($radio_values as $value) {
+            $selec = ($srow[$kentta] == $value) ? "CHECKED" : "";
+            echo "<td><input type='radio' name='{$al_row['selite']}' value='$value' $selec>$value</input>";
+          }
+
+          echo "</table>";
+          echo "</td>";
+
         }
         elseif (strtoupper($al_row["selitetark_2"]) == "LIVESEARCH") {
           $mika_livesearch = $al_row["selitetark_3"];
@@ -2776,20 +2821,20 @@ if ($tila == "" and !isset($jatka)) {
 
     if ($toim == "REKLAMAATIO" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
       echo "  <tr>
-          <td>".t("Työn kuvaus").":</td><td colspan='3'><textarea name='komm1' rows='6' cols='50'>$srow[komm1]</textarea></td>
-          </tr>";
+            <td>".t("Työn kuvaus").":</td><td colspan='3'><textarea name='komm1' rows='6' cols='50'>$srow[komm1]</textarea></td>
+            </tr>";
     }
 
     if ($toim == 'REKLAMAATIO') {
       echo "  <tr>
-          <td>".t("Sisäiset kommentit").":</td><td colspan='3'><textarea name='komm2' rows='6' cols='50'>$srow[komm2]</textarea></td>
-          </tr>";
+            <td>".t("Sisäiset kommentit").":</td><td colspan='3'><textarea name='komm2' rows='6' cols='50'>$srow[komm2]</textarea></td>
+            </tr>";
     }
 
     if ($toim == "YLLAPITO") {
       echo "  <tr>
-          <td>".t("Sisäiset kommentit").":</td><td colspan='3'><textarea name='sopimus_lisatietoja' rows='6' cols='50'>$srow[sopimus_lisatietoja]</textarea></td>
-          </tr>";
+            <td>".t("Sisäiset kommentit").":</td><td colspan='3'><textarea name='sopimus_lisatietoja' rows='6' cols='50'>$srow[sopimus_lisatietoja]</textarea></td>
+            </tr>";
     }
 
     echo "</table><br>";
@@ -3992,36 +4037,36 @@ if (isset($jatka)) {
       }
 
       $query2 .= "tyomaarays SET
-            yhtio      = '$kukarow[yhtio]',
-            kotipuh     = '$kotipuh',
-            tyopuh       = '$tyopuh',
-            myyjaliike     = '$myyjaliike',
-            ostopvm     = '$ostopvmvv-$ostopvmkk-$ostopvmpp',
-            rekno       = '$rekno',
-            mittarilukema   = '$mittarilukema',
-            merkki       = '$merkki',
-            mallivari     = '$mallivari',
-            valmnro     = '$valmnro',
-            tuotu       = '$tuotuvv-$tuotukk-$tuotupp',
-            luvattu     = '$luvattuvv-$luvattukk-$luvattupp',
-            komm1       = '$komm1',
-            komm2       = '$komm2',
-            suorittaja     = '$suorittaja',
-            viite       = '$viite',
-            prioriteetti  = '$prioriteetti',
-            jalleenmyyja   = '$jalleenmyyja',
-            tehdas      = '$tehdas',
-            tyoaika      = '$tyoaika',
-            vikakoodi    = '$vikakoodi',
-            takuunumero    = '$takuunumero',
-            tyokoodi    = '$tyokoodi',
-            hyvaksy      = '$hyvaksy',
-            otunnus     = '$kukarow[kesken]'";
+              yhtio      = '$kukarow[yhtio]',
+              kotipuh     = '$kotipuh',
+              tyopuh       = '$tyopuh',
+              myyjaliike     = '$myyjaliike',
+              ostopvm     = '$ostopvmvv-$ostopvmkk-$ostopvmpp',
+              rekno       = '$rekno',
+              mittarilukema   = '$mittarilukema',
+              merkki       = '$merkki',
+              mallivari     = '$mallivari',
+              valmnro     = '$valmnro',
+              tuotu       = '$tuotuvv-$tuotukk-$tuotupp',
+              luvattu     = '$luvattuvv-$luvattukk-$luvattupp',
+              komm1       = '$komm1',
+              komm2       = '$komm2',
+              suorittaja     = '$suorittaja',
+              viite       = '$viite',
+              prioriteetti  = '$prioriteetti',
+              jalleenmyyja   = '$jalleenmyyja',
+              tehdas      = '$tehdas',
+              tyoaika      = '$tyoaika',
+              vikakoodi    = '$vikakoodi',
+              takuunumero    = '$takuunumero',
+              tyokoodi    = '$tyokoodi',
+              hyvaksy      = '$hyvaksy',
+              otunnus     = '$kukarow[kesken]'";
 
       //Nämä kentät päivitetään vain, jos päivitetään sitä työmääräykseltä tai muualta missä nuo kaksi kenttää näkyy..
       if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
         $query2 .= ",  tyojono      = '$tyojono',
-                tyostatus    = '$tyostatus'";
+                  tyostatus    = '$tyostatus'";
       }
       $query2 .= $postquery2;
       $result = pupe_query($query2);
@@ -4049,38 +4094,38 @@ if (isset($jatka)) {
       }
 
       $query3 .= "laskun_lisatiedot SET
-            yhtio            = '$kukarow[yhtio]',
-            sopimus_kk          = '$sopimus_kk',
-            sopimus_pp          = '$sopimus_pp',
-            sopimus_alkupvm        = '$yllapito_alkuvv-$yllapito_alkukk-$yllapito_alkupp',
-            sopimus_loppupvm      = '$yllapito_loppuvv-$yllapito_loppukk-$yllapito_loppupp',
-            {$sopimus_info}
-            kolm_ovttunnus        = '$kolm_ovttunnus',
-            kolm_nimi          = '$kolm_nimi',
-            kolm_nimitark        = '$kolm_nimitark',
-            kolm_osoite          = '$kolm_osoite',
-            kolm_postino        = '$kolm_postino',
-            kolm_postitp        = '$kolm_postitp',
-            kolm_maa          = '$kolm_maa',
-            laskutus_nimi        = '$laskutus_nimi',
-            laskutus_nimitark      = '$laskutus_nimitark',
-            laskutus_osoite        = '$laskutus_osoite',
-            laskutus_postino      = '$laskutus_postino',
-            laskutus_postitp      = '$laskutus_postitp',
-            laskutus_maa        = '$laskutus_maa',
-            toimitusehto2        = '$toimitusehto2',
-            projektipaallikko      = '$projektipaallikko',
-            yhteyshenkilo_kaupallinen  = '$yhteyshenkilo_kaupallinen',
-            yhteyshenkilo_tekninen    = '$yhteyshenkilo_tekninen',
-            seuranta          = '$seuranta',
-            projekti          = '$projekti',
-            saate            = '$saate',
-            tunnusnippu_tarjous      = '$tunnusnippu_tarjous',
-            rivihintoja_ei_nayteta    = '$rivihintoja_ei_nayteta',
-            kasinsyotetty_viite      = '$kasinsyotetty_viite',
-            kantaasiakastunnus      = '$kantaasiakastunnus',
-            asiakkaan_kohde        = '{$tkohde}',
-            otunnus           = '$kukarow[kesken]'";
+              yhtio            = '$kukarow[yhtio]',
+              sopimus_kk          = '$sopimus_kk',
+              sopimus_pp          = '$sopimus_pp',
+              sopimus_alkupvm        = '$yllapito_alkuvv-$yllapito_alkukk-$yllapito_alkupp',
+              sopimus_loppupvm      = '$yllapito_loppuvv-$yllapito_loppukk-$yllapito_loppupp',
+              {$sopimus_info}
+              kolm_ovttunnus        = '$kolm_ovttunnus',
+              kolm_nimi          = '$kolm_nimi',
+              kolm_nimitark        = '$kolm_nimitark',
+              kolm_osoite          = '$kolm_osoite',
+              kolm_postino        = '$kolm_postino',
+              kolm_postitp        = '$kolm_postitp',
+              kolm_maa          = '$kolm_maa',
+              laskutus_nimi        = '$laskutus_nimi',
+              laskutus_nimitark      = '$laskutus_nimitark',
+              laskutus_osoite        = '$laskutus_osoite',
+              laskutus_postino      = '$laskutus_postino',
+              laskutus_postitp      = '$laskutus_postitp',
+              laskutus_maa        = '$laskutus_maa',
+              toimitusehto2        = '$toimitusehto2',
+              projektipaallikko      = '$projektipaallikko',
+              yhteyshenkilo_kaupallinen  = '$yhteyshenkilo_kaupallinen',
+              yhteyshenkilo_tekninen    = '$yhteyshenkilo_tekninen',
+              seuranta          = '$seuranta',
+              projekti          = '$projekti',
+              saate            = '$saate',
+              tunnusnippu_tarjous      = '$tunnusnippu_tarjous',
+              rivihintoja_ei_nayteta    = '$rivihintoja_ei_nayteta',
+              kasinsyotetty_viite      = '$kasinsyotetty_viite',
+              kantaasiakastunnus      = '$kantaasiakastunnus',
+              asiakkaan_kohde        = '{$tkohde}',
+              otunnus           = '$kukarow[kesken]'";
       $query3 .= $postquery3;
       $result = pupe_query($query3);
     }

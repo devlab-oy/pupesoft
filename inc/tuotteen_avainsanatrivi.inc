@@ -29,6 +29,7 @@ if (mysql_field_name($result, $i) == "laji") {
   $ulos .= "<option value='pakkauskoko3' $sel[pakkauskoko3]>".t("Tuotteen pakkauskoko 3")."</option>";
   $ulos .= "<option value='ei_edi_ostotilaukseen' {$sel['ei_edi_ostotilaukseen']}>".t("Tuotetta ei lisätä EDI-ostotilaukselle")."</option>";
   $ulos .= "<option value='hammastus' $sel[hammastus]>".t("Tuotteen hammastus")."</option>";
+  $ulos .= "<option value='tyomaarayksen_ryhmittely' $sel[tyomaarayksen_ryhmittely]>".t("Työmääräyksen ryhmittely")."</option>";
   $ulos .= "<option value='laatuluokka' {$sel['laatuluokka']}>".t("Tuotteen laatuluokka")."</option>";
   $ulos .= "<option value='synkronointi' {$sel['synkronointi']}>".t("Tuotteen synkronointi")."</option>";
   $ulos .= "<option value='toimpalautus' {$sel['toimpalautus']}>".t("Palautus toimittajalle")."</option>";
@@ -122,8 +123,8 @@ if (mysql_field_name($result, $i) == "selite") {
 
 
     $ulos = "<td>
-          <select name='$nimi'>
-            <option value=''>".t("Ei oletustoimintoa")."</option>";
+            <select name='$nimi'>
+              <option value=''>".t("Ei oletustoimintoa")."</option>";
 
     $olquery = "SELECT toimi.tunnus, toimi.nimi
                 FROM tuotteen_toimittajat
@@ -134,8 +135,8 @@ if (mysql_field_name($result, $i) == "selite") {
     if (mysql_num_rows($oltarkres) > 0) {
       while ($olrow = mysql_fetch_array($oltarkres)) {
         $ulos .= "
-          <option value='!!!{$olrow["tunnus"]}' ".$sel["!!!{$olrow["tunnus"]}"].">$olrow[nimi] --> ".t("Tilataan asiakkaalle")."</option>
-          <option value='¡¡¡{$olrow["tunnus"]}' ".$sel["¡¡¡{$olrow["tunnus"]}"].">$olrow[nimi] --> ".t("Tilataan varastoon")."</option>";
+            <option value='!!!{$olrow["tunnus"]}' ".$sel["!!!{$olrow["tunnus"]}"].">$olrow[nimi] --> ".t("Tilataan asiakkaalle")."</option>
+            <option value='¡¡¡{$olrow["tunnus"]}' ".$sel["¡¡¡{$olrow["tunnus"]}"].">$olrow[nimi] --> ".t("Tilataan varastoon")."</option>";
       }
     }
 

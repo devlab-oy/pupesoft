@@ -268,7 +268,7 @@ if (!function_exists("tee_jt_tilaus")) {
                   $yhdlisa";
         $stresult = pupe_query($query);
       }
-echo "271 $query <br><br>";
+
       if (mysql_num_rows($stresult) != 0) {
         $otsikkorivi = mysql_fetch_assoc($stresult);
         $id = $otsikkorivi['tunnus'];
@@ -747,7 +747,6 @@ echo "271 $query <br><br>";
                 }
               }
 
-echo "750 "; var_dump($otsikkorivi); echo "<br><br><br>";
               // Haetaan asiakkaan kieli, jotta saadaan systeemikommentit oikealle kielelle
               $query = "SELECT kieli
                         FROM asiakas
@@ -755,7 +754,7 @@ echo "750 "; var_dump($otsikkorivi); echo "<br><br><br>";
                         AND tunnus = '{$otsikkorivi['liitostunnus']}'";
               $kielirow = mysql_fetch_assoc(pupe_query($query));
               $kieli = $kielirow["kieli"];
-echo "758 $kieli <br><br>";
+
               // Joitain tietoja alkuper‰iselt‰ tilaukselta, vain jos osatoimitus ei ole estetty ja jtrivit yhdistet‰‰n samalle otsikolle ja kyseess‰ ei ole ennakkotilaus
               if ($otsikkorivi["osatoimitus"] == "" and $toim != "ENNAKKO" and $otsikkorivi['jtkielto'] != "Y") {
 

@@ -882,6 +882,19 @@ if ($tee == 'P') {
 
                 $puurivires = t_avainsana("PUUTEKOMM");
 
+                $queryliitos = "SELECT liitostunnus
+                                FROM lasku
+                                WHERE yhtio = '{$kukarow['yhtio']}'
+                                AND tunnus = $rotunnus";
+                $asiakasliitos = mysql_fetch_assoc(pupe_query($queryliitos));
+
+                $querykieli = "SELECT kieli
+                               FROM asiakas
+                               WHERE yhtio = '{$kukarow['yhtio']}'
+                               AND tunnus = '{$asiakasliitos['liitostunnus']}'";
+                $kielirow = mysql_fetch_assoc(pupe_query($querykieli));
+                $kieli = $kielirow["kieli"];
+
                 if (mysql_num_rows($puurivires) > 0) {
                   $puurivirow = mysql_fetch_assoc($puurivires);
 
@@ -890,7 +903,7 @@ if ($tee == 'P') {
                 }
                 else {
                   // Tilausrivin systeemikommentti
-                  $rkomm = t("Tuote Loppu.");
+                  $rkomm = t("Tuote Loppu.", $kieli);
                 }
               }
               elseif ($poikkeama_kasittely[$apui] == "JT") {

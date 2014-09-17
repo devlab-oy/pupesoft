@@ -86,7 +86,7 @@ $query = "SELECT tunnus, nimi
           and kaytossa != 'E'
           and tyyppi    = 'K'
           ORDER BY koodi+0, koodi, nimi";
-$vresult = mysql_query($query) or pupe_error($query);
+$vresult = pupe_query($query);
 
 echo "<td><select name='mul_kustannuspaikka[]' multiple='TRUE' size='10' style='width:100%;'>";
 
@@ -295,7 +295,7 @@ if ($tee == "HAE") {
             $lisa
             group by lasku.toimaika, tilausrivi.tuoteno
             ORDER BY lasku.toimaika $suunta";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
     echo "<tr><td class='back'><font class='message'>", t("Yhtään tilausta ei löytynyt"), "!</font></td></tr>";
@@ -326,7 +326,7 @@ if ($tee == "HAE") {
                 AND tyyppi    = 'O'
                 AND toimaika  <= '{$tulrow['toimaika']}'
                 ORDER BY toimaika $suunta";
-      $ostotilausres = mysql_query($query) or pupe_error($query);
+      $ostotilausres = pupe_query($query);
 
       while ($ostotilausrow = mysql_fetch_assoc($ostotilausres)) {
         $ostotilaus_varattu_kpl += $ostotilausrow['varattu'];
@@ -348,7 +348,7 @@ if ($tee == "HAE") {
                   AND tyyppi    = 'O'
                   AND toimaika  >= '{$tulrow['toimaika']}'
                   ORDER BY toimaika $suunta";
-        $ostotilausres = mysql_query($query) or pupe_error($query);
+        $ostotilausres = pupe_query($query);
 
         while ($ostotilausrow = mysql_fetch_assoc($ostotilausres)) {
           $ostotilaus_varattu_kpl += $ostotilausrow['varattu'];
@@ -366,7 +366,7 @@ if ($tee == "HAE") {
                 WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
                 AND tilausrivi.tunnus  in ($tulrow[tunnukset])
                 ORDER BY tilausrivi.toimaika $suunta";
-      $myohastyneet_res = mysql_query($query) or pupe_error($query);
+      $myohastyneet_res = pupe_query($query);
 
       while ($myohastyneet_row = mysql_fetch_assoc($myohastyneet_res)) {
         echo "<tr class='aktiivi'>";

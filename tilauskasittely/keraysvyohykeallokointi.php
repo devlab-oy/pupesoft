@@ -10,7 +10,7 @@ if ($_POST['ajax_toiminto'] == 'paivita_keraysvyohyke') {
 
   if (trim($kuka) != '') {
     $query = "UPDATE kuka SET keraysvyohyke = '".implode(",", $keraysvyohyke)."' WHERE yhtio = '{$yhtio}' AND kuka = '{$kuka}'";
-    $upd_res = mysql_query($query);
+    $upd_res = pupe_query($query);
   }
 
   exit;

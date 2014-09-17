@@ -116,7 +116,7 @@ if ($tee == "raportti") {
             AND tiliointi.korjattu = ''
             GROUP BY tilino, nimi
             ORDER BY tilino, nimi";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
     echo "<table>";
@@ -183,12 +183,12 @@ if ($tee == "raportti") {
               AND lasku.tila    = 'X'
               GROUP BY lasku.tunnus
               ORDER BY lasku.tapvm, lasku.tunnus";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
   }
 
   if ($laji == "myynti" or $laji == "osto" or $laji == "tosite") {
 
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0) {
       echo "<br><table>";
@@ -205,7 +205,7 @@ if ($tee == "raportti") {
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND laji    = 'ALV'
                 ORDER by jarjestys, selite";
-      $alv_result = mysql_query($query) or pupe_error($query);
+      $alv_result = pupe_query($query);
 
       while ($alv_row = mysql_fetch_assoc($alv_result)) {
         echo "<th>".t("Alv")." $alv_row[selite]%</th>";
@@ -251,7 +251,7 @@ if ($tee == "raportti") {
                 FROM lasku
                 JOIN tilausrivi ON tilausrivi.yhtio=lasku.yhtio and tilausrivi.uusiotunnus=lasku.tunnus and tilausrivi.tyyppi!='D'
                 WHERE lasku.yhtio = '$kukarow[yhtio]' and lasku.tunnus = '$row[tunnus]'";
-          $alvres = mysql_query($query) or pupe_error($query);
+          $alvres = pupe_query($query);
           $alvrow = mysql_fetch_assoc($alvres);
         }
         else {
@@ -270,7 +270,7 @@ if ($tee == "raportti") {
                 and t1.ltunnus  = '$row[tunnus]'
                 and t1.korjattu = ''
                 and t1.vero    != 0";
-          $alvres = mysql_query($query) or pupe_error($query);
+          $alvres = pupe_query($query);
           $alvrow = mysql_fetch_assoc($alvres);
         }
 

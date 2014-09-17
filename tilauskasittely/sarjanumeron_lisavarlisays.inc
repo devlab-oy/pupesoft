@@ -7,7 +7,7 @@ if (!function_exists('lisavarlisays')) {
     $query   = "SELECT *
                 from lasku
                 where tunnus='$kukarow[kesken]' and yhtio='$kukarow[yhtio]'";
-    $result    = mysql_query($query) or pupe_error($query);
+    $result    = pupe_query($query);
     $laskurow   = mysql_fetch_array($result);
 
     //Tutkitaan lisävarusteita
@@ -21,7 +21,7 @@ if (!function_exists('lisavarlisays')) {
               JOIN tilausrivi tilausrivi_osto use index (PRIMARY) ON tilausrivi_osto.yhtio=sarjanumeroseuranta.yhtio and tilausrivi_osto.tunnus=sarjanumeroseuranta.ostorivitunnus and tilausrivi_osto.tunnus=tilausrivi_osto.perheid2
               WHERE sarjanumeroseuranta.yhtio = '$kukarow[yhtio]'
               and sarjanumeroseuranta.tunnus  = '$sarjatun'";
-    $sarjares = mysql_query($query) or pupe_error($query);
+    $sarjares = pupe_query($query);
 
     if (mysql_num_rows($sarjares) == 1) {
       $sarjarow_isa = mysql_fetch_array($sarjares);
@@ -32,7 +32,7 @@ if (!function_exists('lisavarlisays')) {
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tunnus  = '$sarjarow_isa[perheid2]'
                 and perheid2!= 0";
-      $sarjares = mysql_query($query) or pupe_error($query);
+      $sarjares = pupe_query($query);
       $ostorow = mysql_fetch_array($sarjares);
 
       // Haetaan muut lisävarusteet
@@ -55,14 +55,14 @@ if (!function_exists('lisavarlisays')) {
                 and tilausrivi.tyyppi   != 'D'
                 and tilausrivi.tunnus   != '$sarjarow_isa[perheid2]'
                 and tilausrivi.perheid2!= 0";
-      $sarjares1 = mysql_query($query) or pupe_error($query);
+      $sarjares1 = pupe_query($query);
 
       if (mysql_num_rows($sarjares1) > 0) {
         $query = "SELECT tunnus, perheid2, (varattu+jt+kpl) kpl
                   FROM tilausrivi
                   WHERE yhtio = '$kukarow[yhtio]'
                   and tunnus  = '$lisatty_tun'";
-        $myyres = mysql_query($query) or pupe_error($query);
+        $myyres = pupe_query($query);
         $myyrow = mysql_fetch_array($myyres);
 
         if (abs($myyrow["kpl"]) != 1) {
@@ -74,7 +74,7 @@ if (!function_exists('lisavarlisays')) {
                     SET perheid2 = tunnus
                     WHERE yhtio = '$kukarow[yhtio]'
                     and tunnus  = '$lisatty_tun'";
-          $myyres = mysql_query($query) or pupe_error($query);
+          $myyres = pupe_query($query);
 
           $myyrow["perheid2"] = $myyrow["tunnus"];
         }
@@ -86,7 +86,7 @@ if (!function_exists('lisavarlisays')) {
                     from tuote
                     where yhtio = '$kukarow[yhtio]'
                     and tuoteno = '$sarjarow[tuoteno]'";
-          $tuoteres = mysql_query($query);
+          $tuoteres = pupe_query($query);
 
           if (mysql_num_rows($tuoteres) == 0) {
             echo "<font class='error'>Tuotetta $sarjarow[tuoteno] ei löydy!</font><br>";
@@ -124,7 +124,7 @@ if (!function_exists('lisavarlisays')) {
                       WHERE yhtio  = '$kukarow[yhtio]'
                       and tuoteno  = '$tuoteno'
                       and perheid2 = '$perheid2'";
-            $tarkres = mysql_query($query) or pupe_error($query);
+            $tarkres = pupe_query($query);
 
             if (mysql_num_rows($tarkres) == 0) {
 
@@ -166,7 +166,7 @@ if (!function_exists('lisavarlisays')) {
                           WHERE yhtio          = '$kukarow[yhtio]'
                           and tunnus           = '$sarjarow[sistyomaarays_sarjatunnus]'
                           and siirtorivitunnus = '$sarjarow[perheid2]'";
-                $tarkres = mysql_query($query) or pupe_error($query);
+                $tarkres = pupe_query($query);
 
                 if (mysql_num_rows($tarkres) == 1) {
                   $myy_sarjatunnus = $sarjarow["sistyomaarays_sarjatunnus"];
@@ -211,7 +211,7 @@ if (!function_exists('lisavarlisays')) {
                         $Ulisa
                         WHERE yhtio = '$kukarow[yhtio]'
                         and tunnus  = '$tarkrow[tunnus]'";
-              $tarkres = mysql_query($query) or pupe_error($query);
+              $tarkres = pupe_query($query);
             }
           }
         }

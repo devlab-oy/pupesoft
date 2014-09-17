@@ -15,7 +15,7 @@ if (mysql_field_name($result, $i) == "sisainen_taso") {
   $sel[$trow[$i]] = "SELECTED";
 
   $query = "SELECT * from taso where yhtio='$kukarow[yhtio]' and tyyppi='S' order by taso";
-  $tasoresu = mysql_query($query) or pupe_error($query);
+  $tasoresu = pupe_query($query);
 
   $ulos = "<td><select name='$nimi'>\n";
   $ulos .= "<option value = ''>".t("Ei tasoa")."</option>\n";
@@ -35,7 +35,7 @@ if (mysql_field_name($result, $i) == "ulkoinen_taso") {
   $sel[$trow[$i]] = "SELECTED";
 
   $query = "SELECT * from taso where yhtio='$kukarow[yhtio]' and tyyppi='U' order by taso";
-  $tasoresu = mysql_query($query) or pupe_error($query);
+  $tasoresu = pupe_query($query);
 
   $ulos = "<td><select name='$nimi'>\n";
   $ulos .= "<option value = ''>".t("Ei tasoa")."</option>\n";
@@ -55,7 +55,7 @@ if (mysql_field_name($result, $i) == "tulosseuranta_taso") {
   $sel[$trow[$i]] = "SELECTED";
 
   $query = "SELECT * from taso where yhtio='$kukarow[yhtio]' and tyyppi='B' order by taso+1";
-  $tasoresu = mysql_query($query) or pupe_error($query);
+  $tasoresu = pupe_query($query);
 
   $ulos = "<td><select name='$nimi'>\n";
   $ulos .= "<option value = ''>".t("Ei tasoa")."</option>\n";
@@ -75,7 +75,7 @@ if (mysql_field_name($result, $i) == "alv_taso") {
   $sel[$trow[$i]] = "SELECTED";
 
   $query = "SELECT * from taso where yhtio='$kukarow[yhtio]' and tyyppi='A' order by taso";
-  $tasoresu = mysql_query($query) or pupe_error($query);
+  $tasoresu = pupe_query($query);
 
   $ulos = "<td><select name='$nimi'>\n";
   $ulos .= "<option value = ''>".t("Ei tasoa")."</option>\n";
@@ -104,7 +104,7 @@ if (mysql_field_name($result, $i) == "kustp" or mysql_field_name($result, $i) ==
             and tyyppi    = '$kustp_tyyppi'
             and kaytossa != 'E'
             ORDER BY koodi+0, koodi, nimi";
-  $tasoresu = mysql_query($query) or pupe_error($query);
+  $tasoresu = pupe_query($query);
 
   if (mysql_num_rows($tasoresu) > 0) {
     $ulos = "<td>";

@@ -82,7 +82,7 @@ if ($tee == "file") {
                     WHERE tuote.yhtio='$kukarow[yhtio]'
                     and tuote.tuoteno='$tuoteno'";
         }
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
 
         if (mysql_num_rows($result) == 1) {
 

@@ -16,7 +16,7 @@ if (!function_exists("yhtion_toimipaikattarkista")) {
       $query = "SELECT nimi
                 FROM tili
                 WHERE yhtio='$kukarow[yhtio]' and tilino = '$t[$i]'";
-      $sresult = mysql_query($query) or pupe_error($query);
+      $sresult = pupe_query($query);
 
       if (mysql_num_rows($sresult) != 1) {
         //Olisiko siellä nimi
@@ -25,7 +25,7 @@ if (!function_exists("yhtion_toimipaikattarkista")) {
                     FROM tili
                     WHERE yhtio = '$kukarow[yhtio]' and nimi like '%$t[$i]%'
                     ORDER BY tilino";
-          $sresult = mysql_query($query) or pupe_error($query);
+          $sresult = pupe_query($query);
 
           if (mysql_num_rows($sresult) > 0) {
             $ulosarray[$i] = "<td><select name='t[$i]'><option value = '' $sel>".t("Ei valintaa")."</option>";
@@ -101,7 +101,7 @@ if (!function_exists("yhtion_toimipaikattarkista")) {
         $query = "SELECT selite
                   FROM avainsana
                   WHERE yhtio = '$kukarow[yhtio]' and laji = 'alvulk' and selitetark_2 = '$tem_maa'";
-        $vresult = mysql_query($query) or pupe_error($query);
+        $vresult = pupe_query($query);
 
         if (mysql_num_rows($vresult) == 0) {
           $virhe[$tem_vatnumeroind] = $virhe[$i] = t("Yrityksen ALV-prosentit puuttuvat tälle maalle (%s)! Käy perustamassa ensin ne avainsanoihin.", "", $tem_maa);
@@ -113,7 +113,7 @@ if (!function_exists("yhtion_toimipaikattarkista")) {
                   and maa         = '$tem_maa'
                   and tunnus     != '$tunnus'
                   and vat_numero != ''";
-        $vresult = mysql_query($query) or pupe_error($query);
+        $vresult = pupe_query($query);
 
         if (mysql_num_rows($vresult) != 0) {
           $virhe[$tem_vatnumeroind] = $virhe[$i] = t("Yksi vat tunnus per maa sallittu!");

@@ -45,7 +45,7 @@ if (!function_exists("pakkaamotarkista")) {
                       WHERE yhtio = '$kukarow[yhtio]'
                       AND lokero  = '$pakkaamolokero'
                       AND varasto = '$pakkaamovarasto'";
-            $pakkaamo_chk_res = mysql_query($query) or pupe_error($query);
+            $pakkaamo_chk_res = pupe_query($query);
 
             if (mysql_num_rows($pakkaamo_chk_res) != 0) {
               $virhe[$i] .= t("P‰‰llekk‰isi‰ lokeroita samassa varastossa")."!";

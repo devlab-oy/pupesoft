@@ -54,7 +54,7 @@ if ($tee == '') {  //valitaan keikka
       having kpl > 0
       order by ytunnus";
 
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
     echo "<font class='message'>".t("Yhtään sopivaa saapumista ei löytynyt").".</font><br><br>";

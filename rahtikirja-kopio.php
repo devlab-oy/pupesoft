@@ -111,7 +111,7 @@ if ($tee == 'tulosta') {
               $querylisa
               GROUP BY 1,2
               LIMIT 1";
-    $ores  = mysql_query($query) or pupe_error($query);
+    $ores  = pupe_query($query);
     $rrow  = mysql_fetch_array($ores);
 
     $toimitustapa  = $rrow["toimitustapa"];
@@ -145,7 +145,7 @@ if ($tee == 'tulosta') {
                 FROM rahtikirjat
                 WHERE yhtio       = '$kukarow[yhtio]'
                 and rahtikirjanro in ('".implode("','", $rtunnukset)."')";
-      $ores  = mysql_query($query) or pupe_error($query);
+      $ores  = pupe_query($query);
       $rrow  = mysql_fetch_array($ores);
       unset($tultiin);
 
@@ -222,7 +222,7 @@ if ($tee == 'valitse' and $real_submit != '') {
               from rahtikirjat
               where otsikkonro = '$otunnus'
                     and yhtio  = '$kukarow[yhtio]'";
-    $res = mysql_query($query) or pupe_error($query);
+    $res = pupe_query($query);
     $rahtikirjanro = mysql_fetch_array($res);
 
     $query = "SELECT rahtikirjanro, sum(kilot) paino, yhtio
@@ -234,7 +234,7 @@ if ($tee == 'valitse' and $real_submit != '') {
     $toimitustapa   = "";
     $varasto     = "";
   }
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
 
@@ -282,7 +282,7 @@ if ($tee == 'valitse' and $real_submit != '') {
       if ($row['rahtikirjanro'] != '') {
 
         $query = "SELECT otsikkonro, tulostettu, pakkaustieto_tunnukset from rahtikirjat where yhtio='$kukarow[yhtio]' and rahtikirjanro='$row[rahtikirjanro]' limit 1";
-        $ores  = mysql_query($query) or pupe_error($query);
+        $ores  = pupe_query($query);
         $rrow  = mysql_fetch_array($ores);
 
         if (trim($rrow['pakkaustieto_tunnukset']) != '') {
@@ -293,7 +293,7 @@ if ($tee == 'valitse' and $real_submit != '') {
         }
 
         $query = "SELECT ytunnus, nimi, nimitark, toim_osoite, toim_postino, toim_postitp, tunnus from lasku where yhtio='$kukarow[yhtio]' $wherelisa ";
-        $ores  = mysql_query($query) or pupe_error($query);
+        $ores  = pupe_query($query);
         $orow  = mysql_fetch_array($ores);
 
         echo "<tr>";
@@ -323,7 +323,7 @@ if ($tee == 'valitse' and $real_submit != '') {
               WHERE yhtio='$kukarow[yhtio]'
               AND komento != 'EDI'
               ORDER BY kirjoitin";
-    $kirre = mysql_query($query) or pupe_error($query);
+    $kirre = pupe_query($query);
 
     echo t("Rahtikirjatulostin"), "<br>";
     echo "<select name='komento'>";
@@ -385,7 +385,7 @@ if ($tee == '') {
   echo "</td></tr>";
 
   $query  = "SELECT * FROM toimitustapa WHERE nouto='' and $logistiikka_yhtiolisa order by jarjestys, selite";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<tr><th>".t("Valitse toimitustapa").":</th>";
   echo "<td><select name='toimitustapa' {$onchange}>";
@@ -421,7 +421,7 @@ if ($tee == '') {
              FROM varastopaikat
              WHERE $logistiikka_yhtiolisa AND tyyppi != 'P'
              ORDER BY yhtio, tyyppi, nimitys";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   // jos löytyy enemmän kuin yksi, tehdään varasto popup..
   if (mysql_num_rows($result)>1) {
@@ -536,7 +536,7 @@ if ($tee == '') {
                {$toimitustapalisa}
                GROUP BY 1,2,3
                ORDER BY lahdot.lahdon_kellonaika, toimitustapa.selite";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     echo "<tr><th>".t("Valitse lähto").":</th>";
     echo "<td><select name='lahto'>";
@@ -555,7 +555,7 @@ if ($tee == '') {
               WHERE yhtio  = '$kukarow[yhtio]'
               AND komento != 'EDI'
               ORDER BY kirjoitin";
-    $kirre = mysql_query($query) or pupe_error($query);
+    $kirre = pupe_query($query);
 
     echo "<tr><th>".t("Tulostin"), "</th>";
     echo "<td><select name='kirjoitin'>";

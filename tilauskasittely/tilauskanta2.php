@@ -79,7 +79,7 @@ if ($tee == 'aja' and $atoimvko != '' and ($ltoimvko == '' or $ltoimvko >= $atoi
              AND tilausrivi.keratty        = ''
              AND (tilausrivi.varattu > 0 or tilausrivi.jt > 0)
              ORDER BY $jarjestys ";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<table><tr>";
 

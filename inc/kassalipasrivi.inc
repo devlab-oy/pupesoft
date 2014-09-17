@@ -27,7 +27,7 @@ if ((mysql_field_name($result, $i) == "kassa") or
               FROM tili
               WHERE yhtio = '$kukarow[yhtio]'
               and tilino  = '$trow[$i]'";
-    $vresult = mysql_query($query) or pupe_error($query);
+    $vresult = pupe_query($query);
 
     if (mysql_num_rows($vresult) == 1) {
       $vrow = mysql_fetch_array($vresult);
@@ -46,7 +46,7 @@ if (mysql_field_name($result, $i) == "kustp") {
             and kaytossa != 'E'
             and tyyppi    = 'K'
             ORDER BY koodi+0, koodi, nimi";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   while ($vrow = mysql_fetch_array($vresult)) {
     $sel = "";

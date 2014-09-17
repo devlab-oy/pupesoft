@@ -232,7 +232,7 @@ else {
                GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16
                HAVING saldo != 0
                ORDER BY tuote.tuoteno";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     echo "<br><font class='message'>".t("Löytyi")." ".mysql_num_rows($result)." ".t("sopivaa tuotetta. Lasketaan ehdotus.")."</font><br>";
 
@@ -317,7 +317,7 @@ else {
               WHERE yhtio  = '$kukarow[yhtio]'
               AND myyja    > 0
               AND extranet = ''";
-    $myyjares = mysql_query($query) or pupe_error($query);
+    $myyjares = pupe_query($query);
 
     while ($myyjarow = mysql_fetch_assoc($myyjares)) {
       $myyja_array[$myyjarow['myyja']] = $myyjarow['nimi'];
@@ -357,7 +357,7 @@ else {
                  AND tuoteno = '$row[tuoteno]'
                  AND selite  not like '%alkusaldo%'
                  AND laji    in ('tulo', 'valmistus')";
-      $tapres = mysql_query($query) or pupe_error($query);
+      $tapres = pupe_query($query);
       $taprow = mysql_fetch_assoc($tapres);
 
       // verrataan vähän päivämääriä. onpa ikävää PHP:ssä!
@@ -376,7 +376,7 @@ else {
                   JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
                   WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
                   and tuotteen_toimittajat.tuoteno = '$row[tuoteno]'";
-        $toimittajares = mysql_query($query) or pupe_error($query);
+        $toimittajares = pupe_query($query);
         $toimittajarow = mysql_fetch_assoc($toimittajares);
 
         // haetaan tuotteen myydyt kappaleet
@@ -387,7 +387,7 @@ else {
                    and tuoteno        = '$row[tuoteno]'
                    and laskutettuaika >= '$alkupvm'
                    and laskutettuaika <= '$loppupvm'";
-        $myyres = mysql_query($query) or pupe_error($query);
+        $myyres = pupe_query($query);
         $myyrow = mysql_fetch_assoc($myyres);
 
         // haetaan tuotteen kulutetut kappaleet
@@ -398,7 +398,7 @@ else {
                    and tuoteno        = '$row[tuoteno]'
                    and toimitettuaika >= '$alkupvm'
                    and toimitettuaika <= '$loppupvm'";
-        $kulres = mysql_query($query) or pupe_error($query);
+        $kulres = pupe_query($query);
         $kulrow = mysql_fetch_assoc($kulres);
 
         // haetaan tuotteen ennakkopoistot
@@ -408,7 +408,7 @@ else {
                    and tuoteno = '$row[tuoteno]'
                    and tyyppi  = 'L'
                    and varattu <> 0";
-        $ennres = mysql_query($query) or pupe_error($query);
+        $ennres = pupe_query($query);
         $ennrow = mysql_fetch_assoc($ennres);
 
         // lasketaan saldo (myytävissä)
@@ -432,7 +432,7 @@ else {
                     AND yhteensopivuus_tuote.atunnus = yhteensopivuus_rekisteri.autoid
                     AND yhteensopivuus_tuote.yhtio   = '$kukarow[yhtio]'
                     AND yhteensopivuus_tuote.tuoteno = '$row[tuoteno]'";
-          $yhteensopivuus_res = mysql_query($query) or pupe_error($query);
+          $yhteensopivuus_res = pupe_query($query);
           $yhteensopivuus_row = mysql_fetch_assoc($yhteensopivuus_res);
         }
 

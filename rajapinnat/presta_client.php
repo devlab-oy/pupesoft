@@ -76,14 +76,11 @@ class PrestaClient {
         if (in_array($product['tuoteno'], $existing_products)) {
           $id = array_search($product['tuoteno'], $existing_products);
           $response_xml = $this->update_product($id, $product);
+          $this->delete_product_images($id);
         }
         else {
           $response_xml = $this->create_product($product);
-        }
-
-        if (!empty($product['images'])) {
           $this->create_product_images((string) $response_xml->product->id, $product['images']);
-          $this->logger->log('Luotiin ' . count($product['images']) . ' tuotekuvaa');
         }
       }
     }
@@ -129,8 +126,19 @@ class PrestaClient {
   }
 
   public function create_product_images($product_id, $images) {
-    foreach ($images as $image) {
-      $this->create_product_image($product_id, $image);
+    if (empty($images)) {
+      return;
+    }
+
+    try {
+      foreach ($images as $image) {
+        $this->create_product_image($product_id, $image);
+      }
+
+      $this->logger->log('Luotiin ' . count($images) . ' tuotekuvaa');
+    }
+    catch (Exception $e) {
+      throw $e;
     }
   }
 
@@ -150,6 +158,7 @@ class PrestaClient {
     catch (Exception $e) {
       $msg = "Tuotteen: {$product_id} tuotekuvan luonti epäonnistui";
       $this->logger->log($msg, $e);
+      throw $e;
     }
 
     return $response;
@@ -180,6 +189,83 @@ class PrestaClient {
       $msg = "Kaikkien tuotteiden haku epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
+    }
+
+    return $response;
+  }
+
+  public function delete_product($id) {
+    $opt = array(
+        'resource' => 'products',
+        'id'       => $id,
+    );
+
+    try {
+      $response_xml = $this->ws->delete($opt);
+    }
+    catch (Exception $e) {
+      $msg = "Tuotteen: {$id} poistaminen epäonnistui";
+      $this->logger->log($msg, $e);
+      throw $e;
+    }
+
+    return $response_xml;
+  }
+
+  public function get_product_images($product_id) {
+    $opt = array(
+        'resource' => 'images/products',
+        'id'       => $product_id,
+    );
+
+    try {
+      $image_ids = array();
+      $response_xml = $this->ws->get($opt);
+      foreach ($response_xml->image->declination as $node) {
+        foreach ($node->attributes() as $key => $value) {
+          if ($key == 'id') {
+            $image_ids[] = (string) $value;
+          }
+        }
+      }
+
+      //For some reason API gives duplicate ids sometimes
+      $image_ids = array_unique($image_ids);
+    }
+    catch (Exception $e) {
+      $msg = "Tuotteen: {$product_id} tuotekuvien haku epäonnistui";
+      $this->logger->log($msg, $e);
+      throw $e;
+    }
+
+    return $image_ids;
+  }
+
+  public function delete_product_images($product_id, $image_ids = array()) {
+    try {
+      if (empty($image_ids)) {
+        $image_ids = $this->get_product_images($product_id);
+      }
+      foreach ($image_ids as $image_id) {
+        $this->delete_product_image($product_id, $image_id);
+      }
+    }
+    catch (Exception $e) {
+      throw $e;
+    }
+  }
+
+  public function delete_product_image($product_id, $image_id) {
+    try {
+      $opt = array(
+          'url' => "{$this->url}api/images/products/{$product_id}/{$image_id}",
+      );
+
+      $response = $this->ws->delete($opt);
+    }
+    catch (Exception $e) {
+      $msg = "Tuotteen: {$product_id} tuotekuvan {$image_id} poistaminen epäonnistui";
+      $this->logger->log($msg, $e);
     }
 
     return $response;

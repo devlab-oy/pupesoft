@@ -16,7 +16,7 @@ if (!function_exists("check_ostoskori")) {
     }
 
     $query = "select * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$liitostunnus'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) != 1) {
       echo "<font class='error'>".t("Asiakasta ei löydy")."!</font><br>";
@@ -27,7 +27,7 @@ if (!function_exists("check_ostoskori")) {
     }
 
     $query = "LOCK TABLE lasku WRITE, avainsana READ";
-    $koriresult = mysql_query($query) or pupe_error($query);
+    $koriresult = pupe_query($query);
 
     // kaikki ok, etsitään kori
     $query = "SELECT *
@@ -36,14 +36,14 @@ if (!function_exists("check_ostoskori")) {
               tila         = 'B' and
               liitostunnus = '$liitostunnus' and
               alatila      = '$ostoskori'";
-    $koriresult = mysql_query($query) or pupe_error($query);
+    $koriresult = pupe_query($query);
 
     // koria ei löydy, tehdään sellanen
     if (mysql_num_rows($koriresult) == 0) {
 
       //yhtiön oletusalvi!
       $wquery = "select selite from avainsana where yhtio='$kukarow[yhtio]' and laji='alv' and selitetark!=''";
-      $wtres  = mysql_query($wquery) or pupe_error($wquery);
+      $wtres  = pupe_query($wquery);
       $wtrow  = mysql_fetch_array($wtres);
 
       $query = "INSERT INTO lasku set
@@ -53,12 +53,12 @@ if (!function_exists("check_ostoskori")) {
                 liitostunnus = '$liitostunnus',
                 tila         = 'B',
                 alatila      = '$ostoskori'";
-      $koriin = mysql_query($query) or pupe_error($query);
-      $tunnus = mysql_insert_id();
+      $koriin = pupe_query($query);
+      $tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
       // haetaan kori
       $query = "select * from lasku where yhtio='$kukarow[yhtio]' and tunnus='$tunnus'";
-      $koriin = mysql_query($query) or pupe_error($query);
+      $koriin = pupe_query($query);
       $palautus = mysql_fetch_array($koriin);
     }
     elseif (mysql_num_rows($koriresult) == 1) {
@@ -70,7 +70,7 @@ if (!function_exists("check_ostoskori")) {
     }
 
     $query = "UNLOCK TABLES";
-    $koriresult = mysql_query($query) or pupe_error($query);
+    $koriresult = pupe_query($query);
 
     return $palautus;
   }
@@ -84,7 +84,7 @@ if (!function_exists("lisaa_ostoskoriin")) {
     global $kukarow, $yhtiorow;
 
     $query = "SELECT * from tuote where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) != 1) {
       echo "<font class='error'>".t("Tuotetta ei löydy")."!</font><br>";

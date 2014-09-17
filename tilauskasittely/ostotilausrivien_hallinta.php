@@ -531,7 +531,7 @@ function get_vahvistamattomat_rivit($tilaus_otunnukset, $toimittajaid, $laskurow
             and tilausrivi.tyyppi='O'
             and tilausrivi.jaksotettu = 0
             ORDER BY tilausrivi.otunnus";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   $rivit = array();
   $total = 0;
@@ -543,7 +543,7 @@ function get_vahvistamattomat_rivit($tilaus_otunnukset, $toimittajaid, $laskurow
               and tuoteno      = '$row[tuoteno]'
               and liitostunnus = '$laskurow[liitostunnus]'
               LIMIT 1";
-    $rarres = mysql_query($query) or pupe_error($query);
+    $rarres = pupe_query($query);
     $rarrow   = mysql_fetch_assoc($rarres);
 
     if ($row["yksikko"] == "") {

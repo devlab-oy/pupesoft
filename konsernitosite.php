@@ -52,7 +52,7 @@ if ($tee == 'I') {
               filesize   = '$filesize',
               filetype   = '$filetype'";
     $result = pupe_query($query);
-    $liitostunnus = mysql_insert_id();
+    $liitostunnus = mysql_insert_id($GLOBALS["masterlink"]);
     $fnimi = $liitostunnus;
   }
 
@@ -160,7 +160,7 @@ if ($tee == 'I') {
             laatija    = '$kukarow[kuka]',
             luontiaika = now()";
   $result = pupe_query($query);
-  $tunnus = mysql_insert_id($link);
+  $tunnus = mysql_insert_id($GLOBALS["masterlink"]);
   $turvatunnus = $tunnus;
 
   if ($fnimi) {
@@ -208,7 +208,7 @@ if ($tee == 'I') {
                 laatija    = '$kukarow[kuka]',
                 luontiaika = now()";
       $result = pupe_query($query);
-      $tunnus = mysql_insert_id($link);
+      $tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
       if (!empty($fnimi)) {
 

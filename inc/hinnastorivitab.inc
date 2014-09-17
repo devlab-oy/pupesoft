@@ -33,7 +33,7 @@ function hinnastorivi($tuote, $laskurow) {
 
   if ($tuote["id"] > 0) {
     $query = "SELECT * from korvaavat where id='$tuote[id]' and yhtio='$kukarow[yhtio]' order by jarjestys, tuoteno";
-    $korvaresult = mysql_query($query) or pupe_error($query);
+    $korvaresult = pupe_query($query);
 
     $lask = 0;
     while ($korvarow = mysql_fetch_array($korvaresult)) {

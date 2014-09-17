@@ -15,7 +15,7 @@ $query = "  select sum(varattu)
       and tuoteno='$tuotenumero'
       and tyyppi in ('L','G','V')
       and varattu!=0";
-$sres  = mysql_query($query) or pupe_error($query);
+$sres  = pupe_query($query);
 $srow  = mysql_fetch_array($sres);
 $ennakkopoistot  = $srow[0];
 
@@ -33,7 +33,7 @@ $query = "SELECT sum(jt) jt, lasku.ytunnus ytunnus
           and tilausrivi.kpl=0
           and tilausrivi.jt!=0
           GROUP BY lasku.ytunnus";
-$jsres  = mysql_query($query) or pupe_error($query);
+$jsres  = pupe_query($query);
 
 $jtssa = "";
 $jtsum = 0;
@@ -45,7 +45,7 @@ while ($jsrow  = mysql_fetch_array($jsres)) {
 
 
 $query = "select * from tuotepaikat where tuoteno='$tuotenumero' and yhtio='$kukarow[yhtio]' and hyllyalue='$hyllyalue' and hyllynro='$hyllynro' and hyllytaso='$hyllytaso' and hyllyvali='$hyllyvali'";
-$tpres = mysql_query($query) or pupe_error($query);
+$tpres = pupe_query($query);
 
 // jos pyydetyltä tuotepaikalta ei löydy saldoa laitetaan nollaksi
 if (mysql_num_rows($tpres)==0) {

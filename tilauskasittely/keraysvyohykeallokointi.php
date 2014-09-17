@@ -4,13 +4,16 @@ require "../inc/parametrit.inc";
 
 if ($_POST['ajax_toiminto'] == 'paivita_keraysvyohyke') {
 
-  $kuka = $_POST['kuka'];
+  $kuka          = $_POST['kuka'];
   $keraysvyohyke = $_POST['keraysvyohyke'];
-  $yhtio = $_POST['yhtio'];
+  $yhtio         = $_POST['yhtio'];
 
   if (trim($kuka) != '') {
-    $query = "UPDATE kuka SET keraysvyohyke = '".implode(",", $keraysvyohyke)."' WHERE yhtio = '{$yhtio}' AND kuka = '{$kuka}'";
-    $upd_res = mysql_query($query);
+    $query = "UPDATE kuka
+              SET keraysvyohyke = '".implode(",", $keraysvyohyke)."'
+              WHERE yhtio = '{$yhtio}'
+              AND kuka = '{$kuka}'";
+    pupe_query($query);
   }
 
   exit;

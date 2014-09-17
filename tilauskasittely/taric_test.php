@@ -27,7 +27,7 @@ $query = "SELECT distinct koodi, nimi
           FROM maat
           WHERE nimi != ''
           ORDER BY koodi";
-$vresult = mysql_query($query) or pupe_error($query);
+$vresult = pupe_query($query);
 
 echo "<td><select name='maa'>";
 echo "<option value = ''>".t("Tuotteen toimittajan oletus")."</option>";
@@ -49,7 +49,7 @@ $query = "SELECT distinct toimi.tunnus, toimi.nimi, toimi.nimitark
           JOIN toimi ON (toimi.yhtio=tuotteen_toimittajat.yhtio and toimi.tunnus=tuotteen_toimittajat.liitostunnus and toimi.tyyppi != 'P')
           WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
           ORDER BY toimi.nimi, toimi.nimitark";
-$vresult = mysql_query($query) or pupe_error($query);
+$vresult = pupe_query($query);
 
 echo "<td><select name='toimittaja'>";
 echo "<option value = ''>".t("Näytä kaikki")."</option>";
@@ -78,7 +78,7 @@ if ($tuoteno != '') {
             JOIN tuotteen_toimittajat using (yhtio,tuoteno)
             WHERE tuote.yhtio = '$kukarow[yhtio]'
             and tuote.tuoteno = '$tuoteno'";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
   $tuorow = mysql_fetch_array($result);
 
   echo "Tuotteen tiedot: $tuoteno, Tullinimike1: $tuorow[tullinimike1], Tullinimike2: $tuorow[tullinimike2], Alkuperämaa: $tuorow[alkuperamaa], Tulliprosentti: ";
@@ -125,7 +125,7 @@ if (isset($KAIKKI)) {
             and tuote.tullinimike1               not in ('', 0)
             $lisa
             ORDER BY tuotteen_toimittajat.alkuperamaa, tuote.tuoteno";
-  $result = mysql_query($query) or pupe_error($query);
+  $result = pupe_query($query);
 
   echo "<pre>";
 

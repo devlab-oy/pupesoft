@@ -18,7 +18,7 @@ if ($tee == "OSTOVAIHYVITYS") {
              FROM tilausrivin_lisatiedot
              WHERE yhtio          = '$kukarow[yhtio]'
              and tilausrivitunnus = '$rivitunnus'";
-  $lisatied_res = mysql_query($query) or pupe_error($query);
+  $lisatied_res = pupe_query($query);
 
   if (mysql_num_rows($lisatied_res) > 0) {
     $lisatied_row = mysql_fetch_array($lisatied_res);
@@ -30,7 +30,7 @@ if ($tee == "OSTOVAIHYVITYS") {
               WHERE yhtio          = '$kukarow[yhtio]'
               and tilausrivitunnus = '$rivitunnus'
               and tunnus           = '$lisatied_row[tunnus]'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
   }
   else {
     $query = "INSERT INTO tilausrivin_lisatiedot
@@ -39,7 +39,7 @@ if ($tee == "OSTOVAIHYVITYS") {
               osto_vai_hyvitys = '$osto_vai_hyvitys',
               luontiaika       = now(),
               laatija          = '$kukarow[kuka]'";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
   }
 
   $tee     = "";
@@ -180,7 +180,7 @@ if (($jarjestys_1 != '' or $jarjestys_2 != '' or $jarjestys_3 != '' or $jarjesty
                 order by tilausrivi.tunnus";
     }
 
-    $vresult = mysql_query($query) or pupe_error($query);
+    $vresult = pupe_query($query);
 
     while ($vrow = mysql_fetch_array($vresult)) {
 

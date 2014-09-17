@@ -575,7 +575,6 @@ if ($tila == "" and !isset($jatka)) {
                    AND oletusyhteyshenkilo != ''
                    ORDER BY nimi
                    LIMIT 1";
-
       $yhtresult = pupe_query($yhtquery);
       $yhtnimi = mysql_fetch_assoc($yhtresult);
 
@@ -879,6 +878,8 @@ if ($tila == "" and !isset($jatka)) {
     $tilaustyyppi = (string) key($tilaustyypit);
   }
 
+  $hintojen_vaihto = isset($hintojen_vaihto) ? $hintojen_vaihto : 'JOO';
+
   echo "<font class='head'>{$tilaus_myynti_otsikko} ".t("otsikko")."</font><hr>";
 
   echo "<form method='post' autocomplete='off' name='paaformi' enctype='multipart/form-data'>";
@@ -950,6 +951,13 @@ if ($tila == "" and !isset($jatka)) {
   // katsotaan miten vienti ja ALV käsitellään
   $alv_velvollisuus = "";
 
+  $asiaqu = "SELECT *
+            FROM asiakas
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND tunnus  = '{$srow['liitostunnus']}'";
+  $asiares = pupe_query($asiaqu);
+  $asiarow = mysql_fetch_assoc($asiares);
+
   // jos meillä on lasku menossa ulkomaille
   if ($yhtiorow['maa'] == $srow['maa'] and $yhtiorow['vat_numero'] != '') {
     // haetaan maan oletusalvi
@@ -971,12 +979,8 @@ if ($tila == "" and !isset($jatka)) {
     echo "<input type='hidden' name='alv_velvollisuus' value='{$yhtiorow['vat_numero']}'>";
   }
   elseif (isset($srow) and $srow['yhtio_toimipaikka'] != $yhtiotoimipaikka) {
-    $alhqur = "SELECT alv, vienti from asiakas where yhtio='$kukarow[yhtio]' and tunnus = '{$srow['liitostunnus']}'";
-    $alhire = pupe_query($alhqur);
-    $alhiro  = mysql_fetch_assoc($alhire);
-
-    $alv = $srow['alv'] = $alhiro['alv'];
-    $vienti = $srow['vienti'] = $alhiro['vienti'];
+    $alv    = $srow['alv']    = $asiarow['alv'];
+    $vienti = $srow['vienti'] = $asiarow['vienti'];
 
     unset($srow['eilahetetta']);
 
@@ -988,7 +992,8 @@ if ($tila == "" and !isset($jatka)) {
   if ($kukarow["oletus_asiakas"] != 0 and $srow["nimi"] == '') {
     $query  = "SELECT *
                FROM asiakas
-               WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
+               WHERE yhtio = '$kukarow[yhtio]'
+               and tunnus  = '$kukarow[oletus_asiakas]'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 1) {
@@ -1076,10 +1081,10 @@ if ($tila == "" and !isset($jatka)) {
       echo "</tr>";
     }
 
-
     $query  = "SELECT laji
                FROM asiakas
-               WHERE yhtio='$kukarow[yhtio]' and tunnus='$srow[liitostunnus]'";
+               WHERE yhtio = '$kukarow[yhtio]'
+               and tunnus  = '$srow[liitostunnus]'";
     $result = pupe_query($query);
     $eakas = mysql_fetch_assoc($result);
 
@@ -1096,7 +1101,22 @@ if ($tila == "" and !isset($jatka)) {
   }
 
   if ($templ > 0 and $asiakasid == '') {
-    echo "<tr><td colspan='2'><br><font class='message'>".t("HUOM: Jos vaihdat asiakasta, tarkista hinnat ja alennukset")."!</font></td></tr>";
+    echo "<tr><td colspan='2'>";
+
+    if ($hintojen_vaihto == 'JOO') {
+      $hv_check = 'CHECKED';
+    }
+    else{
+     $hv_check = '';
+    }
+
+    echo "<input type='checkbox' id='hintojen_vaihto' $hv_check />";
+    echo "<input type='hidden' name='hintojen_vaihto' class='hv_hidden' value='$hintojen_vaihto'>";
+    echo "<span style='position:relative; top:1px;'>" . t("Asiakashinnat ja -alennukset lasketaan uudestaan") . "</span>";
+    echo "</td></tr>";
+  }
+  else {
+    echo "<input type='hidden' name='hintojen_vaihto' value='$hintojen_vaihto'>";
   }
 
   echo "</table>";
@@ -1581,7 +1601,11 @@ if ($tila == "" and !isset($jatka)) {
     $vasen++;
 
     //yhtiön oletusalvi!
-    $wquery = "SELECT selite from avainsana where yhtio='$kukarow[yhtio]' and laji='alv' and selitetark!=''";
+    $wquery = " SELECT selite
+                FROM avainsana
+                WHERE yhtio     = '$kukarow[yhtio]'
+                AND laji        = 'alv'
+                AND selitetark != ''";
     $wtres  = pupe_query($wquery);
     $wtrow  = mysql_fetch_assoc($wtres);
 
@@ -1592,15 +1616,15 @@ if ($tila == "" and !isset($jatka)) {
           <input type='hidden' name='alv' value='$alv'>
           </td>";
     }
-    elseif ($srow["vienti"] == '') {
+    elseif ($srow["vienti"] == '' or $asiarow["laji"] == "H") {
       if (isset($srow)) {
         if ($srow['alv'] == 0) {
-          $sel_veroton   = 'selected';
+          $sel_veroton    = 'selected';
           $sel_verollinen = '';
         }
         if ($srow['alv'] == $wtrow["selite"]) {
           $sel_verollinen = 'selected';
-          $sel_veroton   = '';
+          $sel_veroton    = '';
         }
       }
 
@@ -3079,7 +3103,8 @@ if ($tila == "" and !isset($jatka)) {
       echo "<input type='hidden' name='tila' value='vaihdaasiakas'>";
       echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
       echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
-      echo "<td class='back'><input type='submit' ACCESSKEY='A' value='".t("Vaihda asiakas")."'></td></form>";
+      echo "<td class='back'><input type='submit' ACCESSKEY='A' value='".t("Vaihda asiakas")."'>";
+      echo "</td></form>";
     }
 
     echo "</tr></table>";
@@ -3183,11 +3208,14 @@ if (isset($jatka)) {
 
       // Hinnat lasketaan uudestaan vain jos asiakas vaihdetaan
       // Ei esim jos vain alvi tai vientikenttää muutetaan
-      if (($from == 'vaihdaasiakas' or $apuro["liitostunnus"] != $asiakasid) and $asiakasid > 0) {
+      if (($from == 'vaihdaasiakas' or $apuro["liitostunnus"] != $asiakasid)
+        and $asiakasid > 0
+        and $hintojen_vaihto == 'JOO') {
 
         $paivitetaanko = TRUE;
 
-        // hinnat päivitetään vain jos asiakkaalla on asiakashinta tai asiakasalennus (saako_myyda_private_label palauttaa TRUE jos on asiakashinta tai alennus)
+        // hinnat päivitetään vain jos asiakkaalla on asiakashinta tai asiakasalennus
+        // (saako_myyda_private_label palauttaa TRUE jos on asiakashinta tai alennus)
         if ($yhtiorow["vaihda_asiakas_hintapaiv"] == "A") {
           if (!saako_myyda_private_label($laskurow['liitostunnus'], $trow["tuoteno"], $row['tilkpl'], TRUE)) {
             $paivitetaanko = FALSE;
@@ -3314,19 +3342,19 @@ if (isset($jatka)) {
     $toimvko = strlen($toimvko) == 1 ? "0".$toimvko : $toimvko;
 
     $toimvv  = date("Y", strtotime("$nyvuosi-W$toimvko-$toimvkopva"));
-    $toimkk   = date("m", strtotime("$nyvuosi-W$toimvko-$toimvkopva"));
+    $toimkk  = date("m", strtotime("$nyvuosi-W$toimvko-$toimvkopva"));
     $toimpp  = date("d", strtotime("$nyvuosi-W$toimvko-$toimvkopva"));
 
     $toimvko = $toimvkopva;
   }
   else {
-    $toimvko  = "";
-    $toimvkopva  = "";
+    $toimvko    = "";
+    $toimvkopva = "";
   }
 
   if ($keraysvko != '') {
 
-    $nyvuosi  = date("Y");
+    $nyvuosi = date("Y");
 
     $keraysvkopva = $keraysvkopva == '' ? 7 : $keraysvkopva;
 
@@ -3543,16 +3571,22 @@ if (isset($jatka)) {
   // liitostunnusfixaus
   if ((int) $liitostunnus == 0) $liitostunnus = $asiakasid;
 
-  //jos oollaan haluttu laskutuskielto laitetaan chn kenttään 999
+  if ($liitostunnus > 0) {
+      $asiaqu = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tunnus  = '$liitostunnus'";
+      $asiares = pupe_query($asiaqu);
+      $asiarow = mysql_fetch_assoc($asiares);
+  }
+
+  //jos ollaan haluttu laskutuskielto laitetaan chn kenttään 999
   if ($laskutuskielto != '') {
-    //$srow['chn'] = '999';
     $chn = '999';
   }
   elseif ($liitostunnus != "") {
-    $apuqu = "SELECT chn from asiakas where yhtio='$kukarow[yhtio]' and tunnus = '$liitostunnus'";
-    $meapu = pupe_query($apuqu);
-    $apuro = mysql_fetch_assoc($meapu);
-    $chn = $apuro['chn'];
+    $chn = $asiarow['chn'];
+
     if ($chn == '') {
       $chn = '100';
     }
@@ -3567,11 +3601,11 @@ if (isset($jatka)) {
   }
 
   // yhtiön tiedot
-  $yhtionimi       = $yhtiorow["nimi"];
-  $yhtioosoite     = $yhtiorow["osoite"];
-  $yhtiopostino    = $yhtiorow["postino"];
-  $yhtiopostitp    = $yhtiorow["postitp"];
-  $yhtiomaa       = $yhtiorow["maa"];
+  $yhtionimi        = $yhtiorow["nimi"];
+  $yhtioosoite      = $yhtiorow["osoite"];
+  $yhtiopostino     = $yhtiorow["postino"];
+  $yhtiopostitp     = $yhtiorow["postitp"];
+  $yhtiomaa         = $yhtiorow["maa"];
   $yhtioovttunnus   = $yhtiorow["ovttunnus"];
   $yhtiokotipaikka  = $yhtiorow["kotipaikka"];
   $yhtioalv_tilino  = $yhtiorow["alv"];
@@ -3587,23 +3621,15 @@ if (isset($jatka)) {
     $alhiro = mysql_fetch_assoc($alhire);
 
     $yhtiotoimipaikka = $alhiro['tunnus'];
-    $yhtioovttunnus = $alhiro['vat_numero'];
-    $yhtioalv_tilino = $alhiro['toim_alv'];
+    $yhtioovttunnus   = $alhiro['vat_numero'];
+    $yhtioalv_tilino  = $alhiro['toim_alv'];
   }
 
   if (($kukarow['kesken'] == 0 and isset($predefined_yhtiotoimipaikka) and $predefined_yhtiotoimipaikka != $yhtiotoimipaikka) or
     (isset($otsikon_laskurow['yhtio_toimipaikka']) and $otsikon_laskurow['yhtio_toimipaikka'] != $yhtiotoimipaikka and ($yhtiorow['maa'] != $srow['maa'] or $yhtiorow['vat_numero'] == ''))
   ) {
-
-    $alhqur = "SELECT alv, vienti
-               FROM asiakas
-               WHERE yhtio = '{$kukarow['yhtio']}'
-               AND tunnus  = '{$liitostunnus}'";
-    $alhire = pupe_query($alhqur);
-    $alhiro  = mysql_fetch_assoc($alhire);
-
-    $alv = $alhiro['alv'];
-    $vienti = $alhiro['vienti'];
+    $alv    = $asiarow['alv'];
+    $vienti = $asiarow['vienti'];
 
     echo "<br /><font class='info'>", t("HUOM: Vaihdoit toimipaikkaa. Vienti- ja ALV-tiedot haettiin asiakastiedoista"), "!</font><br /><br />";
   }
@@ -3688,97 +3714,102 @@ if (isset($jatka)) {
     $clearing = $laskurow['clearing'];
   }
 
+  // verollisuus oletuksena nollaksi jos on vientipoka ja asiakas ei oo yksityishenkilö
+  if ($vienti != "" and $liitostunnus > 0 and $asiarow["laji"] != "H") {
+    $alv = 0;
+  }
+
   $query .= "  lasku SET
-        aktiivinen_kuljetus          = '',
-        alatila               = '$alatila',
-        alv                 = '$alv',
-        alv_tili              = '$yhtioalv_tilino',
-        asiakkaan_tilausnumero        = '$asiakkaan_tilausnumero',
-        chn                  = '$chn',
-        clearing              = '$clearing',
-        comments               = '$comments',
+        aktiivinen_kuljetus     = '',
+        alatila                 = '$alatila',
+        alv                     = '$alv',
+        alv_tili                = '$yhtioalv_tilino',
+        asiakkaan_tilausnumero  = '$asiakkaan_tilausnumero',
+        chn                     = '$chn',
+        clearing                = '$clearing',
+        comments                = '$comments',
         eilahetetta             = '$eilahe',
-        lahetetyyppi             = '$lahetetyyppi',
-        laskutyyppi              = '{$laskutyyppi}',
-        erikoisale               = '$erikoisale',
-        erpcm                = '$erpcmvv-$erpcmkk-$erpcmpp',
-        huolitsija               = '$huolitsija',
-        hyvaksynnanmuutos           = '$luokka',
-        prioriteettinro            = '$prioriteettinro',
-        jakelu                 = '$jakelu',
+        lahetetyyppi            = '$lahetetyyppi',
+        laskutyyppi             = '{$laskutyyppi}',
+        erikoisale              = '$erikoisale',
+        erpcm                   = '$erpcmvv-$erpcmkk-$erpcmpp',
+        huolitsija              = '$huolitsija',
+        hyvaksynnanmuutos       = '$luokka',
+        prioriteettinro         = '$prioriteettinro',
+        jakelu                  = '$jakelu',
         jaksotettu              = '$jaksotettu',
-        jtkielto              = '$jtkielto',
+        jtkielto                = '$jtkielto',
         kassalipas              = '$kassalipas',
-        kauppatapahtuman_luonne        = '$kauppatapahtuman_luonne',
+        kauppatapahtuman_luonne = '$kauppatapahtuman_luonne',
         kerayspvm               = '$kervv-$kerkk-$kerpp',
         keraysvko               = '$keraysvko',
-        ketjutus               = '$ketjutus',
-        kohde                = '$kohde',
+        ketjutus                = '$ketjutus',
+        kohde                   = '$kohde',
         kohdistettu             = '$maksaja',
-        kolmikantakauppa          = '{$kolmikantakauppa}',
-        kuljetus               = '$kuljetus',
-        kuljetusmuoto            = '',
-        label                = '{$label}',
-        laskutusvkopv             = '$laskutusvkopv',
+        kolmikantakauppa        = '{$kolmikantakauppa}',
+        kuljetus                = '$kuljetus',
+        kuljetusmuoto           = '',
+        label                   = '{$label}',
+        laskutusvkopv           = '$laskutusvkopv',
         liitostunnus            = '$liitostunnus',
-        maa                 = '$maa',
+        maa                     = '$maa',
         maksuehto               = '$maksuehto',
         maksuteksti             = '$maksuteksti',
-        myyja                 = '$myyja',
-        allekirjoittaja            = '$allekirjoittaja',
-        nimi                 = '$nimi',
-        nimitark               = '$nimitark',
+        myyja                   = '$myyja',
+        allekirjoittaja         = '$allekirjoittaja',
+        nimi                    = '$nimi',
+        nimitark                = '$nimitark',
         ohjausmerkki            = '$ohjausmerkki',
-        olmapvm                = '$voimaika_vv-$voimaika_kk-$voimaika_pp',
-        osatoimitus              = '$osatoimitus',
-        osoite                 = '$osoite',
-        ostotilauksen_kasittely       = '{$ostotilauksen_kasittely}',
+        olmapvm                 = '$voimaika_vv-$voimaika_kk-$voimaika_pp',
+        osatoimitus             = '$osatoimitus',
+        osoite                  = '$osoite',
+        ostotilauksen_kasittely = '{$ostotilauksen_kasittely}',
         ovttunnus               = '$ovttunnus',
-        piiri                 = '$piiri',
-        postino               = '$postino',
-        postitp               = '$postitp',
+        piiri                   = '$piiri',
+        postino                 = '$postino',
+        postitp                 = '$postitp',
         rahtivapaa              = '$rahtivapaa',
-        sisainen               = '$sisainen',
-        sisviesti1               = '$sisviesti1',
+        sisainen                = '$sisainen',
+        sisviesti1              = '$sisviesti1',
         sisviesti2              = '$sisviesti2',
         sisviesti3              = '$sisviesti3',
-        splittauskielto            = '$splittauskielto',
+        splittauskielto         = '$splittauskielto',
         tilaustyyppi            = '$tilaustyyppi',
-        tilausvahvistus           = '$tilausvahvistus',
-        tilausyhteyshenkilo          = '$tilausyhteyshenkilo',
-        toimaika               = '$toimvv-$toimkk-$toimpp',
-        toimitusehto             = '$toimitusehto',
-        toimitustapa             = '$toimitustapa',
+        tilausvahvistus         = '$tilausvahvistus',
+        tilausyhteyshenkilo     = '$tilausyhteyshenkilo',
+        toimaika                = '$toimvv-$toimkk-$toimpp',
+        toimitusehto            = '$toimitusehto',
+        toimitustapa            = '$toimitustapa',
         toimvko                 = '$toimvko',
-        toim_maa               = '$toim_maa',
+        toim_maa                = '$toim_maa',
         toim_nimi               = '$tnimi',
-        toim_nimitark             = '$tnimitark',
+        toim_nimitark           = '$tnimitark',
         toim_osoite             = '$tosoite',
-        toim_ovttunnus             = '$toim_ovttunnus',
-        toim_postino             = '$tpostino',
-        toim_postitp             = '$tpostitp',
-        tunnusnippu              = '$tunnusnippu',
-        valkoodi               = '$valkoodi',
-        varasto               = '$varasto',
+        toim_ovttunnus          = '$toim_ovttunnus',
+        toim_postino            = '$tpostino',
+        toim_postitp            = '$tpostitp',
+        tunnusnippu             = '$tunnusnippu',
+        valkoodi                = '$valkoodi',
+        varasto                 = '$varasto',
         verkkotunnus            = '$verkkotunnus',
-        vienti                 = '$vienti',
-        vienti_kurssi            = '$kurssi',
-        viesti                 = '$viesti',
-        viikorkopros             = '$yhtiorow[viivastyskorko]',
-        yhtio                 = '$kukarow[yhtio]',
-        yhtio_kotipaikka          = '$yhtiokotipaikka',
-        yhtio_maa              = '$yhtiomaa',
+        vienti                  = '$vienti',
+        vienti_kurssi           = '$kurssi',
+        viesti                  = '$viesti',
+        viikorkopros            = '$yhtiorow[viivastyskorko]',
+        yhtio                   = '$kukarow[yhtio]',
+        yhtio_kotipaikka        = '$yhtiokotipaikka',
+        yhtio_maa               = '$yhtiomaa',
         yhtio_nimi              = '$yhtionimi',
         yhtio_osoite            = '$yhtioosoite',
-        yhtio_ovttunnus            = '$yhtioovttunnus',
-        yhtio_postino            = '$yhtiopostino',
-        yhtio_postitp            = '$yhtiopostitp',
-        yhtio_toimipaikka          = '$yhtiotoimipaikka',
-        ytunnus                = '$ytunnus'";
+        yhtio_ovttunnus         = '$yhtioovttunnus',
+        yhtio_postino           = '$yhtiopostino',
+        yhtio_postitp           = '$yhtiopostitp',
+        yhtio_toimipaikka       = '$yhtiotoimipaikka',
+        ytunnus                 = '$ytunnus'";
 
   if ($toim == "MYYNTITILI") {
-    if ($ylatila=='') {
-      $ylatila='G';
+    if ($ylatila == '') {
+      $ylatila = 'G';
     }
     $tee = "";
   }
@@ -3854,7 +3885,7 @@ if (isset($jatka)) {
   $query .= ", tila = '$ylatila'";
   $query .= $postquery;
   $result = pupe_query($query);
-  $id = mysql_insert_id();
+  $id = mysql_insert_id($GLOBALS["masterlink"]);
 
   // Setataan laskun aluperäiset tilat
   $orig_tila    = $ylatila;
@@ -3954,7 +3985,7 @@ if (isset($jatka)) {
           //   Ja insertoidaan rivit kantaan
           $query = "  INSERT INTO tilausrivi ($fields) VALUES $values";
           $insres=pupe_query($query);
-          $lisattyRivitunnus = mysql_insert_id();
+          $lisattyRivitunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
           //  Otetaan korjattava perheid talteen
           if ($monistarow["perheid"] > 0 and $monistarow["perheid"] == $monistarow["tunnus"]) {
@@ -4044,7 +4075,7 @@ if (isset($jatka)) {
         // avataan projekti kirjanpitoon
         $query = " INSERT into kustannuspaikka set yhtio  = '$kukarow[yhtio]', nimi = '$id - $nimi', tyyppi = 'P', kaytossa = 'o', luontiaika = now(), laatija = '$kukarow[kuka]'";
         $result = pupe_query($query);
-        $projekti = mysql_insert_id();
+        $projekti = mysql_insert_id($GLOBALS["masterlink"]);
 
         $projektilla = $tilausnumero;
       }

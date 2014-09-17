@@ -80,7 +80,7 @@ if ($handle = opendir($path)) {
         if ($tilausnumero == 0 or trim($seurantakoodi) == '') continue;
 
         $query = "UPDATE rahtikirjat SET
-                  rahtikirjanro  = concat(rahtikirjanro, ' ', '{$seurantakoodi}'),
+                  rahtikirjanro  = trim(concat(rahtikirjanro, ' ', '{$seurantakoodi}')),
                   tulostettu     = now()
                   WHERE yhtio    = '{$kukarow['yhtio']}'
                   AND otsikkonro = '{$tilausnumero}'";
@@ -100,9 +100,10 @@ if ($handle = opendir($path)) {
 
         paivita_rahtikirjat_tulostetuksi_ja_toimitetuksi(array('otunnukset' => $tilausnumero, 'kilotyht' => $kilotrow['kilotyht']));
 
-        // Katsotaan onko Magento käytössä, silloin merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
-        if ($magento_kaytossa) {
+        $_magento_kaytossa = (!empty($magento_api_url) and !empty($magento_api_usr) and !empty($magento_api_pas));
 
+        // Katsotaan onko Magento käytössä, silloin merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
+        if ($_magento_kaytossa) {
           $query = "SELECT toimitustapa
                     FROM rahtikirjat
                     WHERE yhtio    = '{$kukarow['yhtio']}'

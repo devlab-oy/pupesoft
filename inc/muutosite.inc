@@ -678,10 +678,10 @@ if ($tila == 'Q') {
   $result = pupe_query($query);
 
   // Hetaan laskun tiedot
-  $query  = " SELECT *
-              FROM lasku
-              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-              AND lasku.tunnus  = $tunnus";
+  $query  = "SELECT *
+             FROM lasku
+             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+             AND lasku.tunnus  = $tunnus";
   $lasres = pupe_query($query);
   $lasrow = mysql_fetch_assoc($lasres);
 
@@ -772,7 +772,7 @@ if ($tila == 'Q') {
                 summa_valuutassa = $summa_valuutassa,
                 laadittu         = now(),
                 laatija          = '$kukarow[kuka]'
-                WHERE tunnus = $xrow[tunnus]";
+                WHERE tunnus     = $xrow[tunnus]";
       pupe_query($query);
 
       $korjattujen_tiliointien_maara++;
@@ -798,7 +798,7 @@ if ($tila == 'Q') {
                     summa_valuutassa = $alv_valuutassa,
                     laadittu         = now(),
                     laatija          = '$kukarow[kuka]'
-                    WHERE tunnus = $arow[tunnus]";
+                    WHERE tunnus     = $arow[tunnus]";
           pupe_query($query);
         }
       }
@@ -807,7 +807,7 @@ if ($tila == 'Q') {
 
   // P‰ivitet‰‰n lasku
   $query = "UPDATE lasku SET
-            summa = $laskun_summa
+            summa        = $laskun_summa
             WHERE tunnus = '$tunnus'
             and yhtio    = '$kukarow[yhtio]'";
   pupe_query($query);

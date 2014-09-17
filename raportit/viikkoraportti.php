@@ -10,6 +10,7 @@ if (php_sapi_name() != 'cli') {
 }
 
 require "../inc/connect.inc";
+require "../inc/functions.inc";
 
 // hmm.. jännää
 $kukarow['yhtio'] = addslashes(trim($argv[1]));
@@ -17,7 +18,7 @@ $pomomail = addslashes(trim($argv[2]));
 $pomomail2 = addslashes(trim($argv[3]));
 
 $query    = "SELECT * FROM yhtio WHERE yhtio='$kukarow[yhtio]'";
-$yhtiores = mysql_query($query) or die($query);
+$yhtiores = pupe_query($query);
 
 if (mysql_num_rows($yhtiores)==1) {
   $yhtiorow = mysql_fetch_array($yhtiores);
@@ -25,7 +26,7 @@ if (mysql_num_rows($yhtiores)==1) {
   $query = "SELECT *
             FROM yhtion_parametrit
             WHERE yhtio='$kukarow[yhtio]'";
-  $result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+  $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 1) {
     $yhtion_parametritrow = mysql_fetch_array($result);
@@ -43,12 +44,12 @@ else {
 echo "Viikkoraportti\n--------------\n\n";
 
 $query = "select distinct myyjanro from asiakas where yhtio='$kukarow[yhtio]' and myyjanro > 0";
-$myyre = mysql_query($query) or die($query);
+$myyre = pupe_query($query);
 
 echo "Myyjät haettu...";
 
 $query = "select distinct tuotemerkki from tuote where yhtio='$kukarow[yhtio]' order by 1";
-$merre = mysql_query($query) or die($query);
+$merre = pupe_query($query);
 
 echo "Merkit haettu... Alotellaan.\n";
 echo "--------------------------------------------\n";
@@ -60,7 +61,7 @@ while ($myyjarow = mysql_fetch_array($myyre)) {
             where yhtio  = '$kukarow[yhtio]'
             and myyjanro = '$myyjarow[myyjanro]'
             AND myyjanro > 0";
-  $asire = mysql_query($query) or die($query);
+  $asire = pupe_query($query);
 
   // merkit kelataan kalkuun
   mysql_data_seek($merre, 0);
@@ -92,7 +93,7 @@ while ($myyjarow = mysql_fetch_array($myyre)) {
               lasku.alatila      = 'X' and
               lasku.liitostunnus = '$asiakasrow[tunnus]' and
               lasku.tapvm        > date_sub(now(), INTERVAL 2 YEAR)";
-    $sumsumres = mysql_query($query) or die($query);
+    $sumsumres = pupe_query($query);
     $sumsumrow = mysql_fetch_array($sumsumres);
 
     $sumsumrow['ceur'] = str_replace('.', ',', $sumsumrow['ceur']);
@@ -112,7 +113,7 @@ while ($myyjarow = mysql_fetch_array($myyre)) {
                 lasku.alatila      = 'X' and
                 lasku.liitostunnus = '$asiakasrow[tunnus]' and
                 lasku.tapvm        > date_sub(now(),INTERVAL 2 YEAR)";
-      $sumres = mysql_query($query) or die($query);
+      $sumres = pupe_query($query);
       $sumrow = mysql_fetch_array($sumres);
 
       $sumrow['ceur'] = str_replace('.', ',', $sumrow['ceur']);
@@ -128,7 +129,7 @@ while ($myyjarow = mysql_fetch_array($myyre)) {
             where yhtio = '$kukarow[yhtio]'
             and myyja   = '$myyjarow[myyjanro]'
             AND myyja   > 0";
-  $kukre = mysql_query($query) or die($query);
+  $kukre = pupe_query($query);
   $kukro = mysql_fetch_array($kukre);
 
   if ($kukro["eposti"] == "") {

@@ -21,7 +21,7 @@ if ($fakt_lahetys == "") {
             FROM tilausrivi
             WHERE uusiotunnus='$laskurow[tunnus]' and yhtio='$kukarow[yhtio]'
             ORDER BY otunnus, sorttauskentta, tuoteno";
-  $ffaktresult = mysql_query($query) or pupe_error($query);
+  $ffaktresult = pupe_query($query);
 
   //kuollaan jos yhtään riviä ei löydy
   if (mysql_num_rows($ffaktresult) == 0) {

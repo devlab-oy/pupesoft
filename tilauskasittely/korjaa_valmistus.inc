@@ -67,7 +67,7 @@ while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
               laatija    = '$kukarow[kuka]',
               laadittu   = now()";
     $tapahtumaresult = pupe_query($query);
-    $tapahtumaid = mysql_insert_id();
+    $tapahtumaid = mysql_insert_id($GLOBALS["masterlink"]);
 
     $query = "SELECT *
               FROM tapahtuma

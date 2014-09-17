@@ -1,17 +1,17 @@
 <?php
 
-if (strpos($_SERVER['SCRIPT_NAME'], "siirtokehotus.php") !== FALSE) {
-  require "../inc/parametrit.inc";
-}
+//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+$useslave = 1;
+
+require "../inc/parametrit.inc";
 
 if (isset($tee) and $tee == 'lataa_tiedosto') {
   if (file_exists($tmpfilenimi)) {
     readfile($tmpfilenimi);
     unlink($tmpfilenimi);
   }
-  if (strpos($_SERVER['SCRIPT_NAME'], "siirtokehotus.php") !== FALSE) {
-    require "../inc/footer.inc";
-  }
+
+  require "inc/footer.inc";
   die;
 }
 
@@ -35,9 +35,8 @@ if (isset($tee) and $tee == 'lataa_pdf') {
   echo "</tr>";
   echo "</table>";
   echo "</form>";
-  if (strpos($_SERVER['SCRIPT_NAME'], "siirtokehotus.php") !== FALSE) {
-    require "../inc/footer.inc";
-  }
+
+  require "inc/footer.inc";
   die;
 }
 
@@ -286,9 +285,7 @@ if (!isset($tee)) {
   echo "<br><input type='submit' name='hae_raportti' value='" . t("Hae raportti") . "'></form>";
 }
 
-if (strpos($_SERVER['SCRIPT_NAME'], "siirtokehotus.php") !== FALSE) {
-  require "../inc/footer.inc";
-}
+require "inc/footer.inc";
 
 function siirtokehoitus_pdf($pdf_data) {
 

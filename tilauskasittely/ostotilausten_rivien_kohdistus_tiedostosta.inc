@@ -44,7 +44,7 @@ if ($faarao == 'TUTKHM') {
                   WHERE yhtio      = '$kukarow[yhtio]'
                   and toim_tuoteno = '$toim_tuoteno'
                   and liitostunnus = '$toimittajaid'";
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
 
         if (mysql_num_rows($result) > 0) {
           $rivi = mysql_fetch_array($result);
@@ -76,7 +76,7 @@ if ($faarao == 'TUTKHM') {
                   and tilausrivi.uusiotunnus = 0
                   and tilausrivi.tuoteno     in ($tuote_etsi)
                   ORDER BY tilausrivi.otunnus, tilausrivi.varattu";
-        $result = mysql_query($query) or pupe_error($query);
+        $result = pupe_query($query);
 
         $ok=0;
 
@@ -90,7 +90,7 @@ if ($faarao == 'TUTKHM') {
                       and toim_tuoteno = '$toim_tuoteno'
                       and liitostunnus = '$toimittajaid'
                       and tuoteno      = '$rivirow[tuoteno]'";
-            $kerroinres = mysql_query($query) or pupe_error($query);
+            $kerroinres = pupe_query($query);
 
             if (mysql_num_rows($kerroinres) > 1) {
               echo "<font class='error'>Samalle toimittajan tuotteelle löytyi useita tuotteita! Käytetään ensimmäistä!</font><br>";
@@ -126,7 +126,7 @@ if ($faarao == 'TUTKHM') {
                         and toim_tuoteno = '$toim_tuoteno'
                         and liitostunnus = '$toimittajaid'
                         and tuoteno      = '$rivirow[tuoteno]'";
-              $kerroinres = mysql_query($query) or pupe_error($query);
+              $kerroinres = pupe_query($query);
 
               if (mysql_num_rows($kerroinres) > 1) {
                 echo "<font class='error'>Samalle toimittajan tuotteelle löytyi useita tuotteita! Käytetään ensimmäistä!</font><br>";
@@ -163,7 +163,7 @@ if ($faarao == 'TUTKHM') {
                         and toim_tuoteno = '$toim_tuoteno'
                         and liitostunnus = '$toimittajaid'
                         and tuoteno      = '$rivirow[tuoteno]'";
-              $kerroinres = mysql_query($query) or pupe_error($query);
+              $kerroinres = pupe_query($query);
 
               if (mysql_num_rows($kerroinres) > 1) {
                 echo "<font class='error'>Samalle toimittajan tuotteelle löytyi useita tuotteita! Käytetään ensimmäistä!</font><br>";
@@ -191,7 +191,7 @@ if ($faarao == 'TUTKHM') {
                           and yhtio    = '$kukarow[yhtio]'
                           and tyyppi   = 'O'
                           and otunnus  = '$rivirow[otunnus]'";
-                $poistoresult = mysql_query($query) or pupe_error($query);
+                $poistoresult = pupe_query($query);
 
                 // Lisätään rivi ja splitataan se käyttäjän toiveita mukaillen
                 $kpl         = $apukpl;
@@ -225,7 +225,7 @@ if ($faarao == 'TUTKHM') {
                           FROM tuote
                           WHERE yhtio = '$kukarow[yhtio]'
                           and tuoteno = '$rivirow[tuoteno]'";
-                $tuoteresult = mysql_query($query) or pupe_error($query);
+                $tuoteresult = pupe_query($query);
                 $trow = mysql_fetch_array($tuoteresult);
 
                 require 'lisaarivi.inc';
@@ -265,7 +265,7 @@ if ($faarao == 'TUTKHM') {
             $res = pupe_query($query);
             if (mysql_num_rows($res) == 1) {
               $query = "UPDATE tilausrivi SET uusiotunnus='$otunnus' $kululisa $hintalisa WHERE tunnus = '$rivirow[tunnus]' AND yhtio='$kukarow[yhtio]'";
-              $result = mysql_query($query) or pupe_error($query);
+              $result = pupe_query($query);
               echo "<font class='message'>".t("Rivi")." $rivino ".t("Tuotenumero").": $rivirow[tuoteno] ".t("Määrä").": $apukpl ".t("kohdistettu laskuun")."!</font><br>";
 
               if ($hinta != 0 and $hinta != $rivirow["hinta"] and $paivi != 'JOO') {

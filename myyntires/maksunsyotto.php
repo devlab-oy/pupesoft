@@ -177,7 +177,7 @@ if ($tee == "SYOTTO") {
             laatija    = '$kukarow[kuka]',
             luontiaika = now()";
   $result = pupe_query($query);
-  $ltunnus = mysql_insert_id($link);
+  $ltunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
   $selite = pupesoft_cleanstring($selite);
 
@@ -200,7 +200,7 @@ if ($tee == "SYOTTO") {
             kohde            = '{$kohde_ins}',
             projekti         = '{$projekti_ins}'";
   $result = pupe_query($query);
-  $ttunnus = mysql_insert_id($link);
+  $ttunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
   list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($kassatili, $kustannuspaikka);
 
@@ -237,7 +237,7 @@ if ($tee == "SYOTTO") {
             valkoodi       = '$tilivaluutta',
             kurssi         = '$tilikurssi'";
   $result = pupe_query($query);
-  $suoritus_tunnus = mysql_insert_id();
+  $suoritus_tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
   echo "<font class='message'>".t("Suoritus tallennettu").".</font><br>";
 

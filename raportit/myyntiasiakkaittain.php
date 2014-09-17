@@ -112,7 +112,7 @@ else {
               $lisa
               GROUP BY $group
               ORDER BY nimi, nimitark, ytunnus";
-    $result = mysql_query($query) or pupe_error($query);
+    $result = pupe_query($query);
 
     if (mysql_num_rows($result) < 2000) {
       echo "<table>";
@@ -170,7 +170,7 @@ else {
         $query = "SELECT alennus, alennuslaji
                   FROM asiakasalennus
                   WHERE yhtio='$kukarow[yhtio]' and ryhma = '$lrow[aleryhma]' and ytunnus = '$lrow[ytunnus]'";
-        $hresult = mysql_query($query) or pupe_error($query);
+        $hresult = pupe_query($query);
 
         if (mysql_num_rows($hresult) != 0) {
           $hrow = mysql_fetch_array($hresult);
@@ -184,7 +184,7 @@ else {
           $query = "SELECT alennus
                     FROM perusalennus
                     WHERE yhtio='$kukarow[yhtio]' and ryhma = '$lrow[aleryhma]'";
-          $hresult = mysql_query($query) or pupe_error($query);
+          $hresult = pupe_query($query);
 
           if (mysql_num_rows($hresult) != 0) {
             $hrow=mysql_fetch_array($hresult);

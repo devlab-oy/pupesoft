@@ -107,7 +107,7 @@ if (mysql_field_name($result, $i) == "factoring") {
             FROM factoring
             WHERE yhtio = '$kukarow[yhtio]'
             ORDER BY factoringyhtio";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   $ulos = "<td><select name='$nimi'>";
   $ulos .= "<option value = ''>".t("Ei factoroida");
@@ -130,7 +130,7 @@ if (mysql_field_name($result, $i) == "osamaksuehto1" or mysql_field_name($result
             FROM maksuehto
             WHERE yhtio = '$kukarow[yhtio]'
             ORDER BY jarjestys, teksti";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   $ulos = "<td><select name='$nimi'>";
   $ulos .= "<option value = ''>".t("Tämä ei ole moniehto-maksuehto");
@@ -151,7 +151,7 @@ if (mysql_field_name($result, $i) == "pankkiyhteystiedot") {
             FROM pankkiyhteystiedot
             WHERE yhtio = '$kukarow[yhtio]'
             ORDER BY nimitys";
-  $vresult = mysql_query($query) or pupe_error($query);
+  $vresult = pupe_query($query);
 
   $ulos = "<td><select name='$nimi'>";
   $ulos .= "<option value='0'>".t("Käytä yrityksen oletuksia");

@@ -19,7 +19,7 @@ if (!function_exists("hinnastotarkista")) {
                   FROM tuote
                   WHERE yhtio = '$kukarow[yhtio]'
                   AND tuoteno = '$t[$i]'";
-        $sresult = mysql_query($query) or pupe_error($query);
+        $sresult = pupe_query($query);
       }
 
       if (mysql_num_rows($sresult) != 1 or $chtuoteno == "") {
@@ -27,7 +27,7 @@ if (!function_exists("hinnastotarkista")) {
                   FROM tuotteen_toimittajat
                   WHERE yhtio      = '$kukarow[yhtio]'
                   AND toim_tuoteno = '$t[$i]'";
-        $sresult = mysql_query($query) or pupe_error($query);
+        $sresult = pupe_query($query);
 
         if (mysql_num_rows($sresult) == 0 or $chtuoteno == "") {
           $virhe[$i] = t("Tuotenumero puuttuu tai sitä ei löydy!");

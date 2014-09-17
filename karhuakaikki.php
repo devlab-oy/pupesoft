@@ -23,19 +23,19 @@ if ($argv[3] != "") {
 }
 
 $query    = "SELECT * from kuka where kuka='$argv[1]' limit 1";
-$kukares = mysql_query($query) or pupe_error($query);
+$kukares = pupe_query($query);
 if (mysql_num_rows($kukares) == 0) die("Karhuajaa ei löyry!\n$query\n");
 $kukarow = mysql_fetch_array($kukares);
 
 $query    = "SELECT * from yhtio where yhtio='$kukarow[yhtio]'";
-$yhtiores = mysql_query($query) or pupe_error($query);
+$yhtiores = pupe_query($query);
 if (mysql_num_rows($yhtiores) == 0) die("Firmaa ei löyry!\n");
 $yhtiorow = mysql_fetch_array($yhtiores);
 
 $query = "SELECT *
           FROM yhtion_parametrit
           WHERE yhtio='$kukarow[yhtio]'";
-$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
+$result = pupe_query($query);
 
 if (mysql_num_rows($result) == 1) {
   $yhtion_parametritrow = mysql_fetch_array($result);

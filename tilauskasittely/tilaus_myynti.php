@@ -170,10 +170,11 @@ if (!isset($etayhtio_totaalisumma)) $etayhtio_totaalisumma = 0;
 if (!isset($nayta_sostolisateksti)) $nayta_sostolisateksti = "";
 if (!isset($sarjanumero_dropdown))   $sarjanumero_dropdown = "";
 if (!isset($kommentti_select))     $kommentti_select = '';
-if (!isset($yksi_suoratoimittaja))   $yksi_suoratoimittaja = '';
+if (!isset($yksi_suoratoimittaja)) $yksi_suoratoimittaja = '';
 if (!isset($tuotteenpainotettukehayht)) $tuotteenpainotettukehayht = array();
 if (!isset($painotettukehayhteensa)) $painotettukehayhteensa = 0;
 if (!isset($hintojen_vaihto)) $hintojen_vaihto = "JOO";
+if (!isset($avaa_rekursiiviset)) $avaa_rekursiiviset = "";
 
 // Setataan lopetuslinkki, jotta pääsemme takaisin tilaukselle jos käydään jossain muualla
 $tilmyy_lopetus = "{$palvelin2}{$tilauskaslisa}tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
@@ -1107,7 +1108,7 @@ if (isset($tyhjenna)) {
 }
 
 if ($tee == "VALMIS"
-  and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS"))
+  and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "VALMISTAASIAKKAALLE"))
   and $kateinen != ''
   and $kukarow['extranet'] == ''
   and (
@@ -4177,7 +4178,7 @@ if ($tee == '') {
     }
 
     // Valmistuksissa haetaan perheiden perheitä mukaan valmistukseen!!!!!! (vain kun rivi lisätään $rivitunnus == 0)
-    if ($laskurow['tila'] == 'V' and $var != "W" and $yhtiorow["rekursiiviset_reseptit"] == "Y" and (int) $rivitunnus == 0) {
+    if ($laskurow['tila'] == 'V' and $var != "W" and $avaa_rekursiiviset != "EI" and $yhtiorow["rekursiiviset_reseptit"] == "Y" and (int) $rivitunnus == 0) {
 
       if ($kpl != '' and !is_array($kpl_array)) {
         $kpl_array[$tuoteno_array[0]] = $kayttajan_kpl;
@@ -4511,6 +4512,7 @@ if ($tee == '') {
     if (!isset($lisaa_jatka)) $variaatio_tuoteno = "";
     $omalle_tilaukselle = "";
     $valmistuslinja     = "";
+    $avaa_rekursiiviset = "";
   }
   elseif ($tila == "VARMUUTOS" and ($tapa == "POISJTSTA" or $tapa == "PUUTE" or $tapa == "JT")) {
     //otetaan varattukpl ja jtkpl muuttuja käyttöön
@@ -5589,8 +5591,16 @@ if ($tee == '') {
       $rows = array();
       $hinta_laskurit = array();
 
+      // Onko valmistettavaa?
+      $_onkovalmistettavaa = FALSE;
+
       while ($row = mysql_fetch_assoc($result)) {
         $rows[]  = $row;
+
+        // Katotaan onko tilauksella valmistettavia rivejä
+        if ($_onko_valmistus and !$_onkovalmistettavaa and in_array($row['tyyppi'], array('W', 'M', 'V')) and $row['varattu'] > 0) {
+          $_onkovalmistettavaa = TRUE;
+        }
 
         if ($_onko_valmistus and $yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K") {
 
@@ -8872,7 +8882,14 @@ if ($tee == '') {
           echo "</select>";
         }
 
-        if (in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS")) and $kukarow["extranet"] == "" and $kateinen == 'X' and ($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "")) {
+        if ((
+            in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS"))
+            or ($toim == "VALMISTAASIAKKAALLE" and !$_onkovalmistettavaa)
+          )
+          and $kukarow["extranet"] == ""
+          and $kateinen == 'X'
+          and ($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "")
+        ) {
 
           if (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "")) {
             echo "<br><br>".t("Valitse kassalipas").":<br>

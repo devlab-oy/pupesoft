@@ -119,6 +119,9 @@ if ($tee == "valitse") {
 
   echo "<input type='hidden' name='palaute_tiedostot' value='{$_p}'>";
 
+  echo "<input type='submit' value='" . t('Hae valitut palautteet') . "'>";
+  echo "<br><br>";
+
   echo "<table>";
   echo "<tr>";
   echo "<td class='back' style='vertical-align:top;'>";

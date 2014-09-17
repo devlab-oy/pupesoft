@@ -290,6 +290,10 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     echo "<th align='left'>", t("Omalle tilaukselle"), "</th>";
   }
 
+  if ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow['rekursiiviset_reseptit'] != '') {
+    echo "<th align='left'>", t("Rekursiivisuus"), "</th>";
+  }
+
   if ($yhtiorow['rivinumero_syotto'] != '') {
     echo "<th align='left'></th>";
   }
@@ -431,6 +435,18 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     echo "</select></td>";
   }
 
+  if ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow['rekursiiviset_reseptit'] != '') {
+    echo "<td>";
+
+    $sel = (!empty($avaa_rekursiiviset)) ? "selected" : "";
+
+    echo "<select name='avaa_rekursiiviset'>";
+    echo "<option value = ''>".t("P‰‰ll‰")."</option>";
+    echo "<option value = 'EI' $sel>".t("Pois p‰‰lt‰")."</option>";
+    echo "</select>";
+    echo "</td>";
+  }
+
   if ($yhtiorow['rivinumero_syotto'] != '') {
     echo "<td valign='top'></td>";
   }
@@ -445,11 +461,14 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     echo "<th></th>";
   }
 
+  $nrospanni = 6;
+
   if ($yhtiorow['myyntitilausrivi_rekisterinumero'] == 'K' and in_array($toim, array('RIVISYOTTO', 'TARJOUS', 'REKLAMAATIO', 'PIKATILAUS'))) {
-    $nrospanni = 7;
+    $nrospanni++;
   }
-  else {
-    $nrospanni = 6;
+
+  if ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow['rekursiiviset_reseptit'] != '') {
+    $nrospanni++;
   }
 
   $nrospanni_vah = 0;
@@ -633,6 +652,11 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
   if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
     echo "<th align='left'>".t("Valmistuslinja")."</th>";
   }
+
+  if ($toim == "VALMISTAVARASTOON" and $yhtiorow['rekursiiviset_reseptit'] != '') {
+    echo "<th align='left'>".t("Rekursiivisuus")."</th>";
+  }
+
   echo "</tr>";
 
   echo "<tr>$jarjlisa";
@@ -675,6 +699,18 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
       echo "<option value='{$valmistuslinja_row["selite"]}' $sel>{$valmistuslinja_row["selitetark"]}</option>";
     }
 
+    echo "</select>";
+    echo "</td>";
+  }
+
+  if ($toim == "VALMISTAVARASTOON" and $yhtiorow['rekursiiviset_reseptit'] != '') {
+    echo "<td>";
+
+    $sel = (!empty($avaa_rekursiiviset)) ? "selected" : "";
+
+    echo "<select name='avaa_rekursiiviset'>";
+    echo "<option value = ''>".t("P‰‰ll‰")."</option>";
+    echo "<option value = 'EI' $sel>".t("Pois p‰‰lt‰")."</option>";
     echo "</select>";
     echo "</td>";
   }
@@ -758,6 +794,9 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
 
   if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
     $colspan = 3;
+  }
+  elseif ($toim == "VALMISTAVARASTOON" and $yhtiorow['rekursiiviset_reseptit'] != '') {
+   $colspan = 3;
   }
   else {
     $colspan = 2;

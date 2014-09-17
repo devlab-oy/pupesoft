@@ -1,6 +1,8 @@
 <?php
 
 function tulosta_asiakkaan_kuitti($yhtio, $laskunro, $tulostimen_tunnus) {
+  global $yhtiorow;
+
   $tapahtumat = hae_tapahtumat($yhtio, $laskunro);
   list($tilausrivit, $netto, $brutto, $vero) = hae_tilausrivit($yhtio, $laskunro);
 
@@ -14,8 +16,10 @@ function tulosta_asiakkaan_kuitti($yhtio, $laskunro, $tulostimen_tunnus) {
   $emphasized_off = "\x1B\x45\x00";
 
   // Yhtiön tiedot
-  $yhtion_nimi             = $tapahtumat[0]['yhtio_nimi'];
-  $yhtion_osoite           = $tapahtumat[0]['yhtio_osoite'];
+  $yhtion_nimi             = sprintf("%-21.21s", $tapahtumat[0]['yhtio_nimi']);
+  $yhtion_puhelinnumero    = sprintf("%21.21s", "Puh. {$yhtiorow['puhelin']}");
+  $yhtion_osoite           = sprintf("%-20.20s", $tapahtumat[0]['yhtio_osoite']);
+  $yhtion_email            = sprintf("%22.22s", $yhtiorow['email']);
   $yhtion_postinumero      = $tapahtumat[0]['yhtio_postino'];
   $yhtion_postitoimipaikka = $tapahtumat[0]['yhtio_postitp'];
   $yhtion_maa              = hae_maa(array("maakoodi" => $tapahtumat[0]['yhtio_maa']));
@@ -27,8 +31,8 @@ function tulosta_asiakkaan_kuitti($yhtio, $laskunro, $tulostimen_tunnus) {
   $yhteensa = sprintf("%34.34s", $brutto);
 
   $kuitin_teksti = "{$logo}\n\n";
-  $kuitin_teksti .= "{$yhtion_nimi}\n";
-  $kuitin_teksti .= "{$yhtion_osoite}\n";
+  $kuitin_teksti .= "{$yhtion_nimi}{$yhtion_puhelinnumero}\n";
+  $kuitin_teksti .= "{$yhtion_osoite}{$yhtion_email}\n";
   $kuitin_teksti .= "{$yhtion_postinumero} {$yhtion_postitoimipaikka}\n";
   $kuitin_teksti .= "{$yhtion_maa}\n";
   $kuitin_teksti .= "Y-tunnus: {$yhtion_ytunnus}\n\n\n\n";

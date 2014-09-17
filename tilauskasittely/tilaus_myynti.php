@@ -4563,7 +4563,8 @@ if ($tee == '') {
     // niin tehdään samat jutu myös perheen lapsille
     else {
       $query = "SELECT tunnus,
-                tuoteno
+                tuoteno,
+                tilkpl
                 FROM tilausrivi
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND perheid = '{$tilausrivi['tunnus']}'
@@ -4571,25 +4572,20 @@ if ($tee == '') {
       $mriviresult = pupe_query($query);
 
       while ($muutettavarivi = mysql_fetch_assoc($mriviresult)) {
-        // Haetaan lasten kertoimet, isän kerroin on aina 1,
-        // koska varattukpl ja jtkpl on isän luvut
-        $kerroin = 1;
-
-        if ($muutettavarivi['tuoteno'] != $tilausrivi['tuoteno']) {
-          $query = "SELECT kerroin
-                    FROM tuoteperhe
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND isatuoteno = '{$tilausrivi['tuoteno']}'
-                    AND tuoteno = '{$muutettavarivi['tuoteno']}'";
-          $kerroinrow = mysql_fetch_assoc(pupe_query($query));
-          $kerroin = $kerroinrow["kerroin"];
+        // Katotaan onko varattukpl vai jtkpl käytössä ja laitetaan tilkpl siihen
+        $tuotevarattukpl = 0;
+        $tuotejtkpl = 0;
+        if ($varattukpl != 0) {
+          $tuotevarattukpl = $muutettavarivi["tilkpl"];
+        } elseif ($jtkpl != 0) {
+          $tuotejtkpl = $muutettavarivi["tilkpl"];
         }
 
         $query =  "UPDATE tilausrivi
                    SET
-                     var       = '$var',
-                     varattu   = $varattukpl * $kerroin,
-                     jt        = $jtkpl * $kerroin
+                   var       = '$var',
+                   varattu   = $tuotevarattukpl,
+                   jt        = $tuotejtkpl
                    WHERE yhtio = '{$kukarow['yhtio']}'
                    AND tunnus  = '{$muutettavarivi['tunnus']}'";
         pupe_query($query);

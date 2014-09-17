@@ -33,14 +33,13 @@ function tulosta_asiakkaan_kuitti($yhtio, $laskunro, $tulostimen_tunnus) {
   foreach ($tilausrivit as $tilausrivi) {
     $kappalehinta = $tilausrivi['rivihinta'] / $tilausrivi['kpl'];
     $kappalehinta = hintapyoristys($kappalehinta);
+    $bruttohinta  = $tilausrivi['rivihinta'] * (1 + $tilausrivi['alv'] / 100);
+    $bruttohinta  = hintapyoristys($bruttohinta);
+    $rivihinta    = hintapyoristys($tilausrivi['rivihinta']);
+    $tuoteno      = sprintf("%-9.9s", $tilausrivi['tuoteno']);
+    $nimitys      = sprintf("%-31.31s", $tilausrivi['nimitys']);
 
-    $bruttohinta = $tilausrivi['rivihinta'] * (1 + $tilausrivi['alv'] / 100);
-    $bruttohinta = hintapyoristys($bruttohinta);
-
-    $rivihinta = hintapyoristys($tilausrivi['rivihinta']);
-
-    $kuitin_teksti .= "{$align_left}{$tilausrivi['tuoteno']}";
-    $kuitin_teksti .= " {$tilausrivi['nimitys']}\n";
+    $kuitin_teksti .= "{$align_left}{$tuoteno}  {$nimitys}\n";
     $kuitin_teksti .= "{$align_right}{$tilausrivi['kpl']} {$tilausrivi['yksikko']}";
     $kuitin_teksti .= " a {$kappalehinta}";
     $kuitin_teksti .= "    Veroton arvo: {$rivihinta}\n";

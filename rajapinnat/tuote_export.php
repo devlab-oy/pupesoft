@@ -10,14 +10,16 @@ if (php_sapi_name() == 'cli') {
 date_default_timezone_set('Europe/Helsinki');
 
 // Kutsutaanko CLI:stä
-if (!$php_cli) {
-  die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
-}
+//if (!$php_cli) {
+//  die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+//}
 
 $pupe_root_polku = dirname(dirname(__FILE__));
 
-require "{$pupe_root_polku}/inc/connect.inc";
-require "{$pupe_root_polku}/inc/functions.inc";
+//require "{$pupe_root_polku}/inc/connect.inc";
+//require "{$pupe_root_polku}/inc/functions.inc";
+
+require "../inc/parametrit.inc";
 
 $lock_params = array(
   "locktime" => 5400,
@@ -28,28 +30,38 @@ $lock_params = array(
 pupesoft_flock($lock_params);
 
 require "{$pupe_root_polku}/rajapinnat/magento_client.php";
+require "{$pupe_root_polku}/rajapinnat/presta_client.php";
 
 // Laitetaan unlimited execution time
 ini_set("max_execution_time", 0);
 
-if (trim($argv[1]) != '') {
-  $yhtio = mysql_real_escape_string($argv[1]);
-  $yhtiorow = hae_yhtion_parametrit($yhtio);
-  $kukarow = hae_kukarow('admin', $yhtio);
+//if (trim($argv[1]) != '') {
+//  $yhtio = mysql_real_escape_string($argv[1]);
+//  $yhtiorow = hae_yhtion_parametrit($yhtio);
+//  $kukarow = hae_kukarow('admin', $yhtio);
+//
+//  if ($kukarow === null) {
+//    die ("\n");
+//  }
+//}
+//else {
+//  die ("Et antanut yhtiötä.\n");
+//}
+//
+//$verkkokauppatyyppi = isset($argv[2]) ? trim($argv[2]) : "";
 
-  if ($kukarow === null) {
-    die ("\n");
-  }
-}
-else {
-  die ("Et antanut yhtiötä.\n");
-}
-
-$verkkokauppatyyppi = isset($argv[2]) ? trim($argv[2]) : "";
-
-if ($verkkokauppatyyppi != "magento" and $verkkokauppatyyppi != "anvia") {
+if ($verkkokauppatyyppi != "magento" and $verkkokauppatyyppi != "anvia" and $verkkokauppatyyppi != "presta") {
   die ("Et antanut verkkokaupan tyyppiä.\n");
 }
+
+if ($verkkokauppatyyppi == 'presta') {
+  $tuotteet = hae_tuotteet();
+  $presta_client = new PrestaClient($presta_url, $presta_api_key);
+//  $presta_client->sync_products($tuotteet);
+  $presta_client->delete_product_images(41103);
+}
+
+die();
 
 if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
 
@@ -951,6 +963,9 @@ elseif (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "anvia") {
     require "{$pupe_root_polku}/rajapinnat/lajitelmaxml.inc";
   }
 }
+elseif (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "presta") {
+
+}
 
 // Otetaan tietokantayhteys uudestaan (voi olla timeoutannu)
 unset($link);
@@ -968,4 +983,38 @@ pupe_query($query);
 
 if (mysql_affected_rows() != 1) {
   echo "Timestamp päivitys epäonnistui!\n";
+}
+
+function hae_tuotteet() {
+  global $kukarow, $yhtiorow;
+
+  $query = "SELECT *
+            FROM tuote
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tuoteno IN ('+10','+11')";
+  $result = pupe_query($query);
+  $tuotteet = array();
+  while ($tuote = mysql_fetch_assoc($result)) {
+    $tuote['images'] = hae_tuotekuvat($tuote['tunnus']);
+    $tuotteet[] = $tuote;
+  }
+
+  return $tuotteet;
+}
+
+function hae_tuotekuvat($tuote_tunnus) {
+  global $kukarow, $yhtiorow;
+
+  $query = "SELECT *
+            FROM liitetiedostot
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND liitos = 'tuote'
+            AND liitostunnus = '{$tuote_tunnus}'";
+  $result = pupe_query($query);
+  $tuotekuvat = array();
+  while ($tuotekuva = mysql_fetch_assoc($result)) {
+    $tuotekuvat[] = $tuotekuva;
+  }
+
+  return $tuotekuvat;
 }

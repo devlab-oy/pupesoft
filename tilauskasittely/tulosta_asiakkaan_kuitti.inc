@@ -97,12 +97,14 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   // Maksup‰‰tetapahtumat
   foreach ($laskut as $lasku) {
     if ($lasku['asiakkaan_kuitti']) {
-      $kuitin_teksti .= "{$lasku['asiakkaan_kuitti']}\n\n";
+      $kuitin_teksti .= "{$lasku['asiakkaan_kuitti']}\n";
     }
   }
 
   // Footer
-  $kuitin_teksti .= "{$align_center}{$emphasized_on}";
+  $kuitin_teksti .= "{$align_center}";
+  $kuitin_teksti .= t("Kuittinumero") . ": {$laskut[0]['laskunro']}\n\n\n";
+  $kuitin_teksti .= "{$emphasized_on}";
   $kuitin_teksti .= "{$yhtiorow['www']}\n\n";
   $kuitin_teksti .= "{$emphasized_off}";
   $kuitin_teksti .= "{$footer_teksti}\n\n";

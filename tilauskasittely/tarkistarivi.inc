@@ -127,7 +127,7 @@ if (
   }
 }
 
-if ($row["varattu"] == 0 and in_array($row["var"], array('', 'H')) and $row["tyyppi"] != "E" and $row["tyyppi"] != "G" and $row["tyyppi"] != "H") {
+if ($row["varattu"] == 0 and in_array($row["var"], array('', 'H')) and $row["tyyppi"] != "E" and $row["tyyppi"] != "G") {
   if ($kukarow['extranet'] != '' and $row['positio'] == 'Ei varaa saldoa') {
     // $varaosavirhe .= t("HUOM: Rivi on liian vanha ja tuote ei varaa saldoa")."! ($row[tilkpl] ".t("kpl").")<br/>";
   }

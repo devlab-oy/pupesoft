@@ -638,7 +638,7 @@ if ($asiakasid > 0) {
 
     echo "<br><a href='$PHP_SELF?tee=eposti&ytunnus=$ytunnus&asiakasid=$asiakasid&rajaus=$rajaus&rajattunakyma=$rajattunakyma&lopetus=$lopetus#alennukset'>".t("Tulosta alennustaulukko")."</a><br><br>";
 
-    if ($asale != '' or $aletaulu != '' or $yhdistetty != "" or $tee == "eposti") {
+    if ($asale != '' or $aletaulu != '' or $ashin != '' or $yhdistetty != "" or $tee == "eposti") {
 
       include 'inc/pupeExcel.inc';
 

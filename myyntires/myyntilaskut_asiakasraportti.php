@@ -436,6 +436,13 @@ if ($tee == "") {
 
       echo "</table><br>";
 
+      echo "<form action = 'myyntilaskut_asiakasraportti.php' method = 'post'>
+        <input type='hidden' name='toim' value='$toim'>
+        <input type='hidden' name='lopetus' value='$lopetus'>";
+      echo "<input type='submit' value='".t("Vaihda asiakasta")."'>";
+      echo "</form>";
+      echo "<br><br>";
+
       if (!isset($vv)) $vv = date("Y");
       if (!isset($kk)) $kk = date("n");
       if (!isset($pp)) $pp = date("j");

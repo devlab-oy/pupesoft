@@ -51,6 +51,7 @@ while ($row = mysql_fetch_assoc($result)) {
   // X = Extranet-tilaus varaa saldoa
   // numero = Extranet-tilaus varaa saldoa x tuntia
   // E = Extranet-tilaus ei varaa saldoa
+  // E-asetuksella  annetaan kuitenkin tunti varausaikaa siivouksen yhteydessä
 
   $asiakkaan_asetus = $row['extranet_tilaus_varaa_saldoa'];
   $yhtion_asetus = $yhtiorow['extranet_tilaus_varaa_saldoa'];

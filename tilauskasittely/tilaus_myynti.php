@@ -4695,7 +4695,7 @@ if ($tee == '') {
                 luottoraja = {$_avoimia_yhteensa} - {$_tilauksen_rivihinnat_row['rivihinta']}
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tila = 'N'
-                AND alatila = ''
+                AND alatila IN ('','F')
                 AND tunnus = '{$laskurow['tunnus']}'";
       $upd_res = pupe_query($query);
 
@@ -4735,7 +4735,7 @@ if ($tee == '') {
                 erapaivan_ylityksen_summa = '{$ylivito}'
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tila = 'N'
-                AND alatila = ''
+                AND alatila IN ('','F')
                 AND tunnus = '{$laskurow['tunnus']}'";
       $upd_res = pupe_query($query);
 

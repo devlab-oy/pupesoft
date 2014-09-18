@@ -81,18 +81,18 @@ class PrestaShopWebservice
 	 * Take the status code and throw an exception if the server didn't return 200 or 201 code
 	 * @param int $status_code Status code of an HTTP return
 	 */
-	protected function checkStatusCode($status_code)
+	protected function checkStatusCode($status_code, $message = '')
 	{
-		$error_label = 'This call to PrestaShop Web Services failed and returned an HTTP status of %d. That means: %s.';
+		$error_label = 'This call to PrestaShop Web Services failed and returned an HTTP status of %d. That means: %s. In detail: %s';
 		switch($status_code)
 		{
 			case 200:	case 201:	break;
-			case 204: throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'No content'));break;
-			case 400: throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Bad Request'));break;
-			case 401: throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Unauthorized'));break;
-			case 404: throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Not Found'));break;
-			case 405: throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Method Not Allowed'));break;
-			case 500: throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Internal Server Error'));break;
+      case 204: throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'No content', $message));break;
+			case 400: throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Bad Request', $message));break;
+			case 401: throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Unauthorized', $message));break;
+			case 404: throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Not Found', $message));break;
+			case 405: throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Method Not Allowed', $message));break;
+			case 500: throw new PrestaShopWebserviceException(sprintf($error_label, $status_code, 'Internal Server Error', $message));break;
 			default: throw new PrestaShopWebserviceException('This call to PrestaShop Web Services returned an unexpected HTTP status of:' . $status_code);
 		}
 	}
@@ -238,7 +238,14 @@ class PrestaShopWebservice
 			throw new PrestaShopWebserviceException('Bad parameters given');
 		$request = self::executeRequest($url, array(CURLOPT_CUSTOMREQUEST => 'POST', CURLOPT_POSTFIELDS => $xml));
 
-		self::checkStatusCode($request['status_code']);
+    //TÄMÄ BLOKKI ON ITSE MUOKATTU
+    $message = '';
+    if (!empty($request['response'])) {
+      $response_xml = self::parseXML($request['response']);
+      $message = (string) $response_xml->errors->error->message;
+    }
+    //TÄMÄ BLOKKI ON ITSE MUOKATTU
+		self::checkStatusCode($request['status_code'], $message);
 		return self::parseXML($request['response']);
 	}
 

@@ -4809,7 +4809,9 @@ if ($tee == '') {
       }
     }
 
-    if ($laskurow['erapaivan_ylityksen_summa'] > 0) {
+    $_ylivito_chk = $laskurow['erapaivan_ylityksen_summa'] * 100000;
+
+    if ($_ylivito_chk > 0) {
 
       $ylivito = $laskurow['erapaivan_ylityksen_summa'];
 

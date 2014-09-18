@@ -4725,15 +4725,15 @@ if ($tee == '') {
       echo "<br/>";
     }
 
+    $query = "UPDATE lasku SET
+              erapaivan_ylityksen_summa = '{$ylivito}'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$laskurow['tunnus']}'";
+    $upd_res = pupe_query($query);
+
+    $laskurow['erapaivan_ylityksen_summa'] = $ylivito;
+
     if ($ylivito > 0) {
-
-      $query = "UPDATE lasku SET
-                erapaivan_ylityksen_summa = '{$ylivito}'
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = '{$laskurow['tunnus']}'";
-      $upd_res = pupe_query($query);
-
-      $laskurow['erapaivan_ylityksen_summa'] = $ylivito;
 
       echo "<br/>";
       echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."!";

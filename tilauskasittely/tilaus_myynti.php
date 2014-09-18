@@ -4749,6 +4749,11 @@ if ($tee == '') {
         $muokkauslukko = 'LUKOSSA';
         $myyntikielto = 'MYYNTIKIELTO';
       }
+      else {
+        echo "<font class='error'>";
+        echo t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla");
+        echo ".</font><br />";
+      }
     }
 
     if ($trattavirhe != '') {
@@ -4822,6 +4827,11 @@ if ($tee == '') {
       if ($yhtiorow['erapaivan_ylityksen_toimenpide'] == "L" or $yhtiorow['erapaivan_ylityksen_toimenpide'] == "M") {
         $muokkauslukko = 'LUKOSSA';
         $myyntikielto = 'MYYNTIKIELTO';
+      }
+      else {
+        echo "<font class='error'>";
+        echo t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla");
+        echo ".</font><br />";
       }
     }
   }

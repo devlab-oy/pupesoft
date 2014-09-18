@@ -51,21 +51,24 @@ while ($row = mysql_fetch_assoc($result)) {
   // X = Extranet-tilaus varaa saldoa
   // numero = Extranet-tilaus varaa saldoa x tuntia
   // E = Extranet-tilaus ei varaa saldoa
-  if ($row['extranet_tilaus_varaa_saldoa'] != 'X') {
 
-    // tyhjä (tai E) on yhtiön oletus
-    if ($row['extranet_tilaus_varaa_saldoa'] == '' or $row['extranet_tilaus_varaa_saldoa'] == 'E') {
+  $asiakkaan_asetus = $row['extranet_tilaus_varaa_saldoa'];
+  $yhtion_asetus = $yhtiorow['extranet_tilaus_varaa_saldoa'];
 
-      // jos yhtiön oletus ei ole tyhjää, otetaan aikaraja tunteina
-      if ($yhtiorow['extranet_tilaus_varaa_saldoa'] != '') {
-        $aikaraja = (int) $yhtiorow['extranet_tilaus_varaa_saldoa'];
+  if ($asiakkaan_asetus != 'X') {
+    if ($asiakkaan_asetus == 'E') {
+      $aikaraja = 1;
+    }
+    elseif ($asiakkaan_asetus == '') {
+      if ($yhtion_asetus == 'E') {
+        $aikaraja = 1;
       }
       else {
-        continue;
-      }
+        $aikaraja = (int) $yhtion_asetus;
+       }
     }
     else {
-      $aikaraja = (int) $row['extranet_tilaus_varaa_saldoa'];
+      $aikaraja = (int) $asiakkaan_asetus;
     }
   }
   else {

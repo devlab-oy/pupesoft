@@ -1976,7 +1976,7 @@ if (!function_exists("lpr")) {
     }
 
     // sallitut merkit listattu, kaikki muut menee spaceks, paitsi jos kyseessä on kuittitulostin...
-    if ($kirjoitin['merkisto'] != 6) {
+    if ($kirjoitin['mediatyyppi'] != "kuittitulostin") {
       $str = ereg_replace("[^A-Za-z0-9ÖöÅåÄä .,-/!|+()%#\n\r]", " ", $str);
     }
 
@@ -1987,7 +1987,7 @@ if (!function_exists("lpr")) {
       $to  = array('{', '}', '|', '[', ']', '\\', chr(179));                      // 7 bittiset
       $str = str_replace($from, $to, $str);
     }
-    elseif ($kirjoitin["merkisto"] == 2 or $kirjoitin["merkisto"] == 6) {
+    elseif ($kirjoitin["merkisto"] == 2) {
       $to  = array(chr(132), chr(134), chr(148), chr(142), chr(143), chr(153), chr(179));      // DOS charset
       $str = str_replace($from, $to, $str);
     }

@@ -572,7 +572,8 @@ if ($tee == 'P') {
                      laskun_lisatiedot.laskutus_postino,
                      laskun_lisatiedot.laskutus_postitp,
                      laskun_lisatiedot.laskutus_maa,
-                     asiakas.kerayserat
+                     asiakas.kerayserat,
+                     asiakas.kieli
                      FROM lasku
                      JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
                      LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
@@ -882,19 +883,6 @@ if ($tee == 'P') {
 
                 $puurivires = t_avainsana("PUUTEKOMM");
 
-                $queryliitos = "SELECT liitostunnus
-                                FROM lasku
-                                WHERE yhtio = '{$kukarow['yhtio']}'
-                                AND tunnus = $rotunnus";
-                $asiakasliitos = mysql_fetch_assoc(pupe_query($queryliitos));
-
-                $querykieli = "SELECT kieli
-                               FROM asiakas
-                               WHERE yhtio = '{$kukarow['yhtio']}'
-                               AND tunnus = '{$asiakasliitos['liitostunnus']}'";
-                $kielirow = mysql_fetch_assoc(pupe_query($querykieli));
-                $kieli = $kielirow["kieli"];
-
                 if (mysql_num_rows($puurivires) > 0) {
                   $puurivirow = mysql_fetch_assoc($puurivires);
 
@@ -903,7 +891,7 @@ if ($tee == 'P') {
                 }
                 else {
                   // Tilausrivin systeemikommentti
-                  $rkomm = t("Tuote Loppu.", $kieli);
+                  $rkomm = t("Tuote Loppu.", $otsikkorivi["kieli"]);
                 }
               }
               elseif ($poikkeama_kasittely[$apui] == "JT") {

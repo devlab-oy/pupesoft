@@ -63,13 +63,13 @@ if (!isset($jo_syotetty_rekisterinumero)) $jo_syotetty_rekisterinumero = "";
 
 $reklamaatiohyvitys = false;
 
-	// Haetaan asiakkaan kieli erilaisten systeemikommenttien kääntämistä varten
-	$query = "SELECT kieli
-	          FROM asiakas
-	          WHERE yhtio = '{$kukarow['yhtio']}'
-	          AND tunnus = '{$laskurow['liitostunnus']}'";
-	$kielirow = mysql_fetch_assoc(pupe_query($query));
-	$kieli = $kielirow["kieli"];
+// Haetaan asiakkaan kieli erilaisten systeemikommenttien kääntämistä varten
+$query = "SELECT kieli
+          FROM asiakas
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND tunnus = '{$laskurow['liitostunnus']}'";
+$kielirow = mysql_fetch_assoc(pupe_query($query));
+$kieli = $kielirow["kieli"];
 
 if ($rekisterinumero == '') {
   //Kun yhtion_parametri myyntitilausrivi_rekisterinumero == K, käyttöliittymästä on mahdollisuus syöttää tilausriville rekisterinumero.

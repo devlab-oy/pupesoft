@@ -4710,13 +4710,11 @@ if ($tee == '') {
 
       echo "<font class='error'>", t("HUOM: Luottoraja ylittynyt"),", ";
       echo t("ota yhteys luotonvalvontaan tai mitätöi myyntitilaus"),"!";
+      echo " ", t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"), ".";
 
       if ($yhtiorow['luottorajan_ylitys'] == "L" or $yhtiorow['luottorajan_ylitys'] == "M") {
         $muokkauslukko = 'LUKOSSA';
         $myyntikielto = 'MYYNTIKIELTO';
-      }
-      else {
-        echo " ", t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"), ".";
       }
 
       echo "</font><br />";
@@ -4742,15 +4740,13 @@ if ($tee == '') {
       echo "<br/>";
       echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s päivää sitten erääntyneitä laskuja, olkaa ystävällinen ja ottakaa yhteyttä myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."!</font>";
       echo "<br/>";
+      echo "<font class='error'>";
+      echo t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla");
+      echo ".</font><br />";
 
       if ($yhtiorow['erapaivan_ylityksen_toimenpide'] == "L" or $yhtiorow['erapaivan_ylityksen_toimenpide'] == "M") {
         $muokkauslukko = 'LUKOSSA';
         $myyntikielto = 'MYYNTIKIELTO';
-      }
-      else {
-        echo "<font class='error'>";
-        echo t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla");
-        echo ".</font><br />";
       }
     }
 
@@ -4802,13 +4798,11 @@ if ($tee == '') {
 
           echo "<font class='error'>", t("HUOM: Luottoraja ylittynyt"),", ";
           echo t("ota yhteys luotonvalvontaan tai mitätöi myyntitilaus"),"!";
+          echo " ", t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"), ".";
 
           if ($yhtiorow['luottorajan_ylitys'] == "L" or $yhtiorow['luottorajan_ylitys'] == "M") {
             $muokkauslukko = 'LUKOSSA';
             $myyntikielto = 'MYYNTIKIELTO';
-          }
-          else {
-            echo " ", t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"), ".";
           }
 
           echo "</font><br />";
@@ -4821,15 +4815,13 @@ if ($tee == '') {
       echo "<br/>";
       echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s päivää sitten erääntyneitä laskuja, olkaa ystävällinen ja ottakaa yhteyttä myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."!</font>";
       echo "<br/>";
+      echo "<font class='error'>";
+      echo t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla");
+      echo ".</font><br />";
 
       if ($yhtiorow['erapaivan_ylityksen_toimenpide'] == "L" or $yhtiorow['erapaivan_ylityksen_toimenpide'] == "M") {
         $muokkauslukko = 'LUKOSSA';
         $myyntikielto = 'MYYNTIKIELTO';
-      }
-      else {
-        echo "<font class='error'>";
-        echo t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla");
-        echo ".</font><br />";
       }
     }
   }

@@ -301,7 +301,7 @@ class PrestaClient {
   /**
    *
    * @param int $product_id
-   * @param array $image_ids
+   * @param array $image_ids If empty delete all
    * @return int
    */
   public function delete_product_images($product_id, $image_ids = array()) {

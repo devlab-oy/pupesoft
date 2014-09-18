@@ -10,7 +10,7 @@ class PrestaClient {
 
   /**
    *
-   * @var PrestaShopWebservice
+   * @var PrestaShopWebservice REST-client
    */
   private $ws = null;
 

@@ -4816,7 +4816,7 @@ if ($tee == '') {
       }
     }
 
-    if (!empty($laskurow['erapaivan_ylityksen_summa'])) {
+    if ($laskurow['erapaivan_ylityksen_summa'] > 0) {
 
       echo "<br/>";
       echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."!</font>";

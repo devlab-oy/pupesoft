@@ -318,7 +318,7 @@ class PrestaClient {
       }
     }
     catch (Exception $e) {
-      //If get_product_images throws an exception with status code 500 it means that there is not existing
+      //If get_product_images throws an exception with status code 500 it means that there is no existing
       //product images.
       //@TODO For now we do not check for the status code but in future statuscodes other than 500
       //should retry get_product_images

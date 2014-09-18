@@ -1,10 +1,10 @@
 <?php
 
-function tulosta_asiakkaan_kuitti($yhtio, $laskunro, $tulostimen_tunnus) {
+function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus) {
   global $yhtiorow;
 
-  $tapahtumat = hae_tapahtumat($yhtio, $laskunro);
-  list($tilausrivit, $netto, $brutto, $vero) = hae_tilausrivit($yhtio, $laskunro);
+  $laskut = hae_laskut($laskunro);
+  list($tilausrivit, $netto, $brutto, $vero) = hae_tilausrivit($laskunro);
 
   // Escape sequencejä printterille
   $logo           = "\x1C\x70\x01\x10";
@@ -16,18 +16,18 @@ function tulosta_asiakkaan_kuitti($yhtio, $laskunro, $tulostimen_tunnus) {
   $emphasized_off = "\x1B\x45\x00";
 
   // Yhtiön tiedot
-  $yhtion_nimi            = sprintf("%-21.21s", $tapahtumat[0]['yhtio_nimi']);
+  $yhtion_nimi            = sprintf("%-21.21s", $laskut[0]['yhtio_nimi']);
   $yhtion_puhelinnumero   = sprintf("%21.21s", "Puh. {$yhtiorow['puhelin']}");
-  $yhtion_osoite          = sprintf("%-42.42s", $tapahtumat[0]['yhtio_osoite']);
+  $yhtion_osoite          = sprintf("%-42.42s", $laskut[0]['yhtio_osoite']);
   $yhtion_email           = sprintf("%-42.42s", $yhtiorow['email']);
-  $yhtion_postino         = $tapahtumat[0]['yhtio_postino'];
-  $yhtion_postitp         = $tapahtumat[0]['yhtio_postitp'];
+  $yhtion_postino         = $laskut[0]['yhtio_postino'];
+  $yhtion_postitp         = $laskut[0]['yhtio_postitp'];
   $yhtion_postino_postitp = sprintf("%-21.21s", "{$yhtion_postino} {$yhtion_postitp}");
-  $yhtion_maa             = hae_maa(array("maakoodi" => $tapahtumat[0]['yhtio_maa']));
+  $yhtion_maa             = hae_maa(array("maakoodi" => $laskut[0]['yhtio_maa']));
   $yhtion_maa             = sprintf("%-42.42s", $yhtion_maa['nimi']);
   $yhtion_www             = sprintf("%-42.42s", $yhtiorow['www']);
-  $yhtion_ytunnus         = str_replace("0037", "", $tapahtumat[0]["yhtio_ovttunnus"]);
-  $yhtion_ytunnus         = tulosta_ytunnus($yhtion_ytunnus, $tapahtumat[0]['yhtio_maa']);
+  $yhtion_ytunnus         = str_replace("0037", "", $laskut[0]["yhtio_ovttunnus"]);
+  $yhtion_ytunnus         = tulosta_ytunnus($yhtion_ytunnus, $laskut[0]['yhtio_maa']);
   $yhtion_ytunnus         = sprintf("%21.21s", "Y-tunnus: {$yhtion_ytunnus}");
 
   // Arvojen asettelu spritfillä
@@ -65,7 +65,7 @@ function tulosta_asiakkaan_kuitti($yhtio, $laskunro, $tulostimen_tunnus) {
   $kuitin_teksti .= "{$emphasized_on}YHTEENSÄ{$yhteensa}{$emphasized_off}\n\n";
 
   // Verotiedot
-  $alv    = sprintf("%-12.12s", "{$tapahtumat[0]["alv"]} %");
+  $alv    = sprintf("%-12.12s", "{$laskut[0]["alv"]} %");
   $netto  = sprintf("%-12.12s", $netto);
   $vero   = sprintf("%-9.9s", $vero);
   $brutto = sprintf("%9.9s", $brutto);
@@ -74,9 +74,9 @@ function tulosta_asiakkaan_kuitti($yhtio, $laskunro, $tulostimen_tunnus) {
   $kuitin_teksti .= "{$alv}{$netto}{$vero}{$brutto}\n\n";
 
   // Maksupäätetapahtumat
-  foreach ($tapahtumat as $tapahtuma) {
-    if ($tapahtuma['asiakkaan_kuitti']) {
-      $kuitin_teksti .= "{$tapahtuma['asiakkaan_kuitti']}\n\n";
+  foreach ($laskut as $lasku) {
+    if ($lasku['asiakkaan_kuitti']) {
+      $kuitin_teksti .= "{$lasku['asiakkaan_kuitti']}\n\n";
     }
   }
 
@@ -86,13 +86,14 @@ function tulosta_asiakkaan_kuitti($yhtio, $laskunro, $tulostimen_tunnus) {
   lpr($kuitin_teksti, $tulostimen_tunnus);
 }
 
-function hae_tapahtumat($yhtio, $laskunro) {
+function hae_laskut($laskunro) {
+  global $yhtiorow;
   $query  = "SELECT *
-            FROM lasku
-            LEFT JOIN maksupaatetapahtumat ON (lasku.tunnus = maksupaatetapahtumat.tilausnumero
-              AND maksupaatetapahtumat.yhtio = '{$yhtio}')
-            WHERE lasku.yhtio = '{$yhtio}'
-            AND lasku.laskunro = '{$laskunro}'";
+             FROM lasku
+             LEFT JOIN maksupaatetapahtumat ON (lasku.tunnus = maksupaatetapahtumat.tilausnumero
+               AND maksupaatetapahtumat.yhtio = '{$yhtiorow['yhtio']}')
+             WHERE lasku.yhtio  = '{$yhtiorow['yhtio']}'
+             AND lasku.laskunro = '{$laskunro}'";
   $result = pupe_query($query);
 
   $tapahtumat = array();
@@ -104,13 +105,15 @@ function hae_tapahtumat($yhtio, $laskunro) {
   return $tapahtumat;
 }
 
-function hae_tilausrivit($yhtio, $laskunro) {
+function hae_tilausrivit($laskunro) {
+  global $yhtiorow;
+
   $query  = "SELECT *
-            FROM tilausrivi
-            INNER JOIN lasku ON (lasku.tunnus = tilausrivi.otunnus
-              AND lasku.yhtio = tilausrivi.yhtio)
-            WHERE lasku.laskunro = '{$laskunro}'
-            AND tilausrivi.yhtio = '{$yhtio}'";
+             FROM tilausrivi
+             INNER JOIN lasku ON (lasku.tunnus = tilausrivi.otunnus
+               AND lasku.yhtio = '{$yhtiorow['yhtio']}')
+             WHERE lasku.laskunro = '{$laskunro}'
+             AND tilausrivi.yhtio = '{$yhtiorow['yhtio']}'";
   $result = pupe_query($query);
 
   $rivit  = array();

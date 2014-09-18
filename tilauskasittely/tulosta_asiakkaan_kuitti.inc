@@ -38,30 +38,31 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus) {
   $kuitin_teksti .= "{$yhtion_postino} {$yhtion_postitp}\n";
   $kuitin_teksti .= "Y-tunnus: {$yhtion_ytunnus}\n";
   $kuitin_teksti .= "Puh. {$yhtion_puhelinnumero}\n";
-  $kuitin_teksti .= "{$yhtion_aukioloajat}\n\n\n";
+  $kuitin_teksti .= "{$yhtion_aukioloajat}\n\n";
 
   $kuitin_teksti .= "{$align_left}";
 
   foreach ($tilausrivit as $tilausrivi) {
-    $kappalehinta = $tilausrivi['rivihinta'] / $tilausrivi['kpl'];
-    $kappalehinta = hintapyoristys($kappalehinta);
+    $kappalehinta = $tilausrivi['rivihinta_valuutassa'] / $tilausrivi['kpl'];
+    $kappalehinta = $kappalehinta * (1 + $tilausrivi['alv'] / 100);
+    $kappalehinta = hintapyoristys($kappalehinta, 1);
+    $kappalehinta = sprintf("%14.14s", "a {$kappalehinta}");
     $bruttohinta  = $tilausrivi['rivihinta'] * (1 + $tilausrivi['alv'] / 100);
-    $bruttohinta  = hintapyoristys($bruttohinta);
+    $bruttohinta  = hintapyoristys($bruttohinta, 1);
+    $bruttohinta  = sprintf("%14.14s", $bruttohinta);
     $rivihinta    = hintapyoristys($tilausrivi['rivihinta']);
-    $tuoteno      = sprintf("%-11.11s", $tilausrivi['tuoteno']);
-    $nimitys      = sprintf("%-31.31s", $tilausrivi['nimitys']);
+    $tuoteno      = sprintf("%-42.42s", $tilausrivi['tuoteno']);
+    $nimitys      = sprintf("%-42.42s", $tilausrivi['nimitys']);
+    $kpl          = sprintf("%-14.14s", "{$tilausrivi['kpl']} {$tilausrivi['yksikko']}");
 
-    $kuitin_teksti .= "{$align_left}{$tuoteno}{$nimitys}\n";
-    $kuitin_teksti .= "{$align_right}{$tilausrivi['kpl']} {$tilausrivi['yksikko']}";
-    $kuitin_teksti .= " a {$kappalehinta}";
-    $kuitin_teksti .= "    Veroton arvo: {$rivihinta}\n";
-    $kuitin_teksti .= "Alv-%: {$tilausrivi['alv']}\n";
-    $kuitin_teksti .= "Verollinen arvo: {$bruttohinta}\n";
-    $kuitin_teksti .= "Tilausnumero: {$tilausrivi['otunnus']}\n";
+    $kuitin_teksti .= "\n{$tuoteno}\n";
+    $kuitin_teksti .= "{$nimitys}\n";
+    $kuitin_teksti .= "{$kpl}";
+    $kuitin_teksti .= "{$kappalehinta}";
+    $kuitin_teksti .= "{$bruttohinta}\n";
   }
 
   // Hinta yhteensä
-  $kuitin_teksti .= "{$align_left}";
   $kuitin_teksti .= "==========================================\n";
   $kuitin_teksti .= "{$emphasized_on}YHTEENSÄ{$yhteensa}{$emphasized_off}\n\n";
 
@@ -132,7 +133,7 @@ function hae_tilausrivit($laskunro) {
   return array(
     $rivit,
     hintapyoristys($netto),
-    hintapyoristys($brutto),
+    hintapyoristys($brutto, 1),
     hintapyoristys($vero)
   );
 }

@@ -4811,6 +4811,8 @@ if ($tee == '') {
 
     if ($laskurow['erapaivan_ylityksen_summa'] > 0) {
 
+      $ylivito = $laskurow['erapaivan_ylityksen_summa'];
+
       echo "<br/>";
       echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."!";
       echo " ",t("Asiakkaalle voi kuitenkin myyd‰ k‰teismaksuehdolla"),".";

@@ -5,22 +5,22 @@ require "inc/parametrit.inc";
 echo "<font class='head'>".t("Tuotenumeroiden vaihto")."</font><hr>";
 flush();
 
-$vikaa      = 0;
-$tarkea      = 0;
-$kielletty    = 0;
-$lask      = 0;
-$postoiminto   = 'X';
-$tyhjatok      = "";
-$chekatut     = 0;
-$taulut     = '';
-$error       = 0;
-$failista    = "";
-$uusi_on_jo    = "";
-$vanmyyntihinta  = "";
-$vankehahin      = "";
-$vanvihahin      = "";
-$vanvihapvm      = "";
-$vanyksikko       = "";
+$vikaa          = 0;
+$tarkea         = 0;
+$kielletty      = 0;
+$lask           = 0;
+$postoiminto    = "X";
+$tyhjatok       = "";
+$chekatut       = 0;
+$taulut         = "";
+$error          = 0;
+$failista       = "";
+$uusi_on_jo     = "";
+$vanmyyntihinta = "";
+$vankehahin     = "";
+$vanvihahin     = "";
+$vanvihapvm     = "";
+$vanyksikko     = "";
 
 if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $tee == "file") {
   //Tuotenumerot tulevat tiedostosta
@@ -108,20 +108,6 @@ elseif (is_uploaded_file($_FILES['userfile']['tmp_name']) !== TRUE and $tee == "
       }
       else {
         //Jos molempien tuotteiden varastonarvo on nolla niin ei haittaa vaikka uusi tuote lˆytyy jo
-        $query = "SELECT sum(saldo) saldo
-                  FROM tuotepaikat
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tuoteno = '$vantuoteno'";
-        $result = pupe_query($query);
-        $vansaldorow = mysql_fetch_array($result);
-
-        $query = "SELECT sum(saldo) saldo
-                  FROM tuotepaikat
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tuoteno = '$uustuoteno'";
-        $result = pupe_query($query);
-        $uussaldorow = mysql_fetch_array($result);
-
         if ($uustuoterow["kehahin"] == 0 and $vantuoterow["kehahin"] == 0) {
           $uusi_on_jo = "OK";
         }
@@ -241,7 +227,7 @@ if ($error == 0 and $tee == "file") {
     if (trim($rivi[0]) != '' and trim($rivi[1]) != '') {
 
       $lokki = "LOCK TABLES $taulut";
-      $res   = pupe_query($lokki);
+      pupe_query($lokki);
 
       $vantuoteno = strtoupper(trim($rivi[0]));
       $uustuoteno = strtoupper(trim($rivi[1]));
@@ -256,18 +242,21 @@ if ($error == 0 and $tee == "file") {
 
         $trivi = mysql_fetch_assoc($tuoteresult);
 
-        $vanmyyntihinta   = $trivi['myyntihinta'];
-        $vankehahin       = $trivi['kehahin'];
-        $vanvihahin       = $trivi['vihahin'];
-        $vanvihapvm       = $trivi['vihapvm'];
-        $vanyksikko      = $trivi['yksikko'];
-        $vantuotepaallikko  = $trivi['tuotepaallikko'];
+        $vanmyyntihinta    = $trivi['myyntihinta'];
+        $vankehahin        = $trivi['kehahin'];
+        $vanvihahin        = $trivi['vihahin'];
+        $vanvihapvm        = $trivi['vihapvm'];
+        $vanyksikko        = $trivi['yksikko'];
+        $vantuotepaallikko = $trivi['tuotepaallikko'];
 
         if ($vantuotepaallikko > 0 and $muistutus == "KYLLA") {
           $postit[$vantuotepaallikko][] = $vantuoteno."###".$uustuoteno;
         }
 
-        $query  = "SELECT tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
+        $query  = " SELECT tunnus
+                    FROM tuote
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND tuoteno = '$uustuoteno'";
         $tuoteuresult = pupe_query($query);
 
         if (mysql_num_rows($tuoteuresult) == 0 or $uusi_on_jo == "OK" or $uusi_on_jo == "SAMA") {
@@ -289,14 +278,12 @@ if ($error == 0 and $tee == "file") {
             list($taulu, $sarake) = explode("##", $saraketaulu);
 
             if ($taulu == 'tilausrivi') {
-              $query = "UPDATE $taulu
-                        SET
-                        tuoteno     = '$uustuoteno'
-                        WHERE
-                        yhtio       = '$kukarow[yhtio]'
-                        and tyyppi  in ($tyyppi)
+              $query = "UPDATE tilausrivi
+                        SET tuoteno = '$uustuoteno'
+                        WHERE yhtio = '$kukarow[yhtio]'
+                        and tyyppi in ($tyyppi)
                         and tuoteno = '$vantuoteno'";
-              $result2 = pupe_query($query);
+              pupe_query($query);
             }
             elseif ($taulu == 'tuotepaikat' and $uusi_on_jo != "SAMA") {
               // Tuotepaikat k‰sitell‰‰n hieman eri lailla
@@ -328,7 +315,7 @@ if ($error == 0 and $tee == "file") {
                             and hyllynro  = '$pairow[hyllynro]'
                             and hyllyvali = '$pairow[hyllyvali]'
                             and hyllytaso = '$pairow[hyllytaso]'";
-                  $result2 = pupe_query($query);
+                  pupe_query($query);
                 }
                 else {
                   $query = "UPDATE tuotepaikat
@@ -339,7 +326,7 @@ if ($error == 0 and $tee == "file") {
                             and hyllynro  = '$pairow[hyllynro]'
                             and hyllyvali = '$pairow[hyllyvali]'
                             and hyllytaso = '$pairow[hyllytaso]'";
-                  $result2 = pupe_query($query);
+                  pupe_query($query);
 
                   $query = "DELETE from tuotepaikat
                             WHERE yhtio   = '$kukarow[yhtio]'
@@ -349,7 +336,7 @@ if ($error == 0 and $tee == "file") {
                             and hyllyvali = '$pairow[hyllyvali]'
                             and hyllytaso = '$pairow[hyllytaso]'
                             and tunnus    = '$pairow[tunnus]'";
-                  $result2 = pupe_query($query);
+                  pupe_query($query);
                 }
               }
 
@@ -368,17 +355,17 @@ if ($error == 0 and $tee == "file") {
                           and tuoteno = '$uustuoteno'
                           ORDER BY tunnus
                           LIMIT 1";
-                $result2 = pupe_query($query);
+                pupe_query($query);
               }
               elseif (mysql_num_rows($paires) > 1) {
                 $query = "UPDATE tuotepaikat
-                          SET oletus = ''
-                          WHERE yhtio  = '$kukarow[yhtio]'
-                          and tuoteno  = '$uustuoteno'
-                          and oletus  != ''
+                          SET oletus  = ''
+                          WHERE yhtio = '$kukarow[yhtio]'
+                          and tuoteno = '$uustuoteno'
+                          and oletus != ''
                           ORDER BY tunnus
                           LIMIT ".(mysql_num_rows($paires)-1);
-                $result2 = pupe_query($query);
+                pupe_query($query);
               }
             }
             elseif ($uusi_on_jo == "" or ($uusi_on_jo == "OK" and $taulu != 'tuote') or $uusi_on_jo == "SAMA") {
@@ -386,107 +373,96 @@ if ($error == 0 and $tee == "file") {
                 $query = "SELECT *
                           FROM $taulu
                           WHERE yhtio = '$kukarow[yhtio]'
-                          and tuoteno = '$uustuoteno'
-                          ORDER BY yhtio";
+                          and tuoteno = '$uustuoteno'";
                 $result2 = pupe_query($query);
 
                 if (mysql_num_rows($result2) > 0) {
                   $query = "DELETE
                             FROM $taulu
                             WHERE yhtio = '$kukarow[yhtio]'
-                            and tuoteno = '$vantuoteno'
-                            ORDER BY yhtio";
-                  $result2 = pupe_query($query);
+                            AND tuoteno = '$vantuoteno'";
+                  pupe_query($query);
                 }
               }
 
               if ($taulu == 'tuoteperhe') {
                 $query = "UPDATE $taulu
-                          SET
-                          $sarake  = '$uustuoteno'
-                          WHERE
-                          yhtio      = '$kukarow[yhtio]'
-                          and tyyppi in ($perhetyyppi)
-                          and $sarake  = '$vantuoteno'";
+                          SET $sarake  = '$uustuoteno'
+                          WHERE yhtio  = '$kukarow[yhtio]'
+                          AND tyyppi  in ($perhetyyppi)
+                          AND $sarake  = '$vantuoteno'";
                 $result2 = pupe_query($query);
               }
               elseif ($taulu == 'tuotteen_avainsanat') {
-                $query = "UPDATE $taulu
-                          SET
-                          $sarake  = '$uustuoteno'
-                          WHERE
-                          yhtio     = '$kukarow[yhtio]'
-                          and kieli in ($kielet)
-                          and $sarake  = '$vantuoteno'";
-                $result2 = pupe_query($query);
+                $query = "UPDATE IGNORE $taulu
+                          SET $sarake = '$uustuoteno'
+                          WHERE yhtio = '$kukarow[yhtio]'
+                          AND kieli  in ($kielet)
+                          AND $sarake = '$vantuoteno'";
+                pupe_query($query);
+
+                if ($uusi_on_jo != "SAMA") {
+                  $query = "DELETE FROM $taulu
+                            WHERE yhtio = '$kukarow[yhtio]'
+                            AND kieli  in ($kielet)
+                            AND $sarake = '$vantuoteno'";
+                  pupe_query($query);
+                }
               }
               elseif ($taulu == 'puun_alkio') {
-
-                $hquery = "SELECT *
-                           FROM puun_alkio
+                $query = " UPDATE IGNORE puun_alkio
+                           SET liitos  = '$uustuoteno'
                            WHERE yhtio = '$kukarow[yhtio]'
                            AND laji    = 'Tuote'
                            AND liitos  = '$vantuoteno'";
-                $hresult = pupe_query($hquery);
+                pupe_query($query);
 
-                while ($ahrow = mysql_fetch_assoc($hresult)) {
-
-                  $tarksql = "SELECT *
-                              FROM puun_alkio
-                              where yhtio     = '$kukarow[yhtio]'
-                              and liitos      = '$uustuoteno'
-                              and kieli       = '$ahrow[kieli]'
-                              and laji        = '$ahrow[laji]'
-                              and puun_tunnus = '$ahrow[puun_tunnus]'";
-                  $tarkesult = pupe_query($tarksql);
-
-                  if (mysql_num_rows($tarkesult) == 0) {
-                    $query = "UPDATE puun_alkio
-                              SET liitos  = '$uustuoteno'
-                              WHERE yhtio = '$kukarow[yhtio]'
-                              and tunnus  = '$ahrow[tunnus]'";
-                    $result2 = pupe_query($query);
-                  }
-                  else {
-                    $query = "DELETE FROM puun_alkio
-                              WHERE yhtio = '$kukarow[yhtio]'
-                              and tunnus  = '$ahrow[tunnus]'";
-                    $result2 = pupe_query($query);
-                  }
-                }
+                $query = "DELETE FROM puun_alkio
+                          WHERE yhtio = '$kukarow[yhtio]'
+                          AND laji    = 'Tuote'
+                          AND liitos  = '$vantuoteno'";
+                pupe_query($query);
               }
               elseif ($taulu == 'asn_sanomat') {
-                $query = "UPDATE {$taulu}
+                $query = "UPDATE asn_sanomat
                           SET {$sarake} = '{$uustuoteno}'
                           WHERE yhtio = '{$kukarow['yhtio']}'
                           and {$sarake} = '{$vantuoteno}'
                           AND status  not in ('E', 'D')";
-                $result2 = pupe_query($query);
+                pupe_query($query);
+              }
+              elseif ($taulu == 'tuotteen_alv') {
+                $query = "UPDATE IGNORE $taulu
+                          SET $sarake = '$uustuoteno'
+                          WHERE yhtio = '$kukarow[yhtio]'
+                          AND $sarake = '$vantuoteno'";
+                pupe_query($query);
 
+                if ($uusi_on_jo != "SAMA") {
+                  $query = "DELETE FROM $taulu
+                            WHERE yhtio = '$kukarow[yhtio]'
+                            AND $sarake = '$vantuoteno'";
+                  pupe_query($query);
+                }
               }
               else {
                 $query = "UPDATE $taulu
-                          SET $sarake  = '$uustuoteno'
+                          SET $sarake = '$uustuoteno'
                           WHERE yhtio = '$kukarow[yhtio]'
-                          and $sarake  = '$vantuoteno'";
-                $result2 = pupe_query($query);
+                          AND $sarake = '$vantuoteno'";
+                pupe_query($query);
               }
-            }
-            elseif ($uusi_on_jo == "OK" and $taulu == "tuote" and $jatavanha == '') {
-              // Kun molemmat tuotenumerot ovat jo olleet olemassa niin poistetaan vanha tuotenumero,
-              // jos vanhaa tuotenumeroa ei ole tarkoitus j‰tt‰‰ korvaavaksi
-              $query = "DELETE
-                        FROM tuote
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tuoteno = '$vantuoteno'";
-              pupe_query($query);
-
             }
           }
 
           if ($jatavanha != '' and $uusi_on_jo != "SAMA") {
             if ($uusi_on_jo == "") {
-              $query = "SELECT * from avainsana where yhtio = '$kukarow[yhtio]' and laji = 'alv' and selitetark = 'o' LIMIT 1";
+              $query = "SELECT *
+                        FROM avainsana
+                        WHERE yhtio = '$kukarow[yhtio]'
+                        AND laji = 'alv'
+                        AND selitetark = 'o'
+                        LIMIT 1";
               $alvresult = pupe_query($query);
               $alv = '0.00';
 
@@ -506,32 +482,21 @@ if ($error == 0 and $tee == "file") {
                         hinnastoon  = '$hinnastoon',
                         ostoehdotus = '$ostoehdotus',
                         yhtio       = '$kukarow[yhtio]'";
-              $result3 = pupe_query($query);
-            }
-            elseif ($uusi_on_jo == "OK") {
-              // P‰ivitet‰‰n olemassa olevan tuotteen
-              $query = "UPDATE tuote
-                        SET
-                        nimitys     = '". t("Korvaava tuoteno", $yhtiorow["kieli"]) ." $uustuoteno',
-                        osasto      = '999999',
-                        try         = '999999',
-                        alv         = '$alv',
-                        status      = '$status',
-                        hinnastoon  = '$hinnastoon',
-                        ostoehdotus = '$ostoehdotus'
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tuoteno = '$vantuoteno'";
               pupe_query($query);
             }
 
-
-            $querykorv = "SELECT max(id)+1 maxi from korvaavat where yhtio = '$kukarow[yhtio]'";
+            $querykorv = "SELECT max(id)+1 maxi
+                          FROM korvaavat
+                          WHERE yhtio = '$kukarow[yhtio]'";
             $korvresult = pupe_query($querykorv);
             $korvid = mysql_fetch_array($korvresult);
 
             $loytyikorv = '';
 
-            $querykorvv  = "SELECT id maxi, jarjestys from korvaavat where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
+            $querykorvv  = "SELECT id maxi, jarjestys
+                            FROM korvaavat
+                            WHERE yhtio = '$kukarow[yhtio]'
+                            AND tuoteno = '$uustuoteno'";
             $korvvresult = pupe_query($querykorvv);
             $jarjestys = '2';
 

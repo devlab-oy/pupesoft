@@ -65,8 +65,9 @@ class PrestaClient {
    * @return \SimpleXMLElement
    */
   public function sync_products(array $products) {
+    $this->logger->log('---------Start product sync---------');
+
     try {
-      $this->logger->log('---------Start product sync---------');
       $this->schema = $this->get_empty_schema('products');
       //Fetch all products with ID's and SKU's only
       $existing_products = $this->all_products(array('id', 'reference'));
@@ -109,8 +110,9 @@ class PrestaClient {
    * @throws Exception
    */
   public function create_product($product) {
+    $opt = array('resource' => 'products');
+
     try {
-      $opt = array('resource' => 'products');
       $opt['postXml'] = $this->generate_product_xml($product)->asXML();
       $response_xml = $this->ws->add($opt);
       $this->logger->log("Luotiin tuote: {$product['tuoteno']}");
@@ -132,9 +134,10 @@ class PrestaClient {
    * @throws Exception
    */
   public function update_product($id, $product) {
+    $opt = array('resource' => 'products');
+    $opt['id'] = $id;
+
     try {
-      $opt = array('resource' => 'products');
-      $opt['id'] = $id;
       $existing_product = $this->get_product($id);
       $opt['putXml'] = $this->generate_product_xml($product, $existing_product)->asXML();
       $response_xml = $this->ws->edit($opt);
@@ -186,14 +189,13 @@ class PrestaClient {
    * @throws Exception
    */
   public function create_product_image($product_id, $image) {
+    $opt = array(
+        'resource'   => 'products',
+        'id'         => $product_id,
+        'attachment' => $image,
+        'method'     => 'POST'
+    );
     try {
-      $opt = array(
-          'resource'   => 'products',
-          'id'         => $product_id,
-          'attachment' => $image,
-          'method'     => 'POST'
-      );
-
       $response = $this->ws->executeImageRequest($opt);
 
       $this->logger->log("Luotiin tuotekuva tuotteelle {$product_id}");
@@ -214,18 +216,18 @@ class PrestaClient {
    * @throws Exception
    */
   public function all_products($display = array()) {
-    try {
-      if (!empty($display)) {
-        $display = '[' . implode(',', $display) . ']';
-      }
-      else {
-        $display = 'full';
-      }
-      $opt = array(
-          'resource' => 'products',
-          'display'  => $display,
-      );
+    if (!empty($display)) {
+      $display = '[' . implode(',', $display) . ']';
+    }
+    else {
+      $display = 'full';
+    }
+    $opt = array(
+        'resource' => 'products',
+        'display'  => $display,
+    );
 
+    try {
       $response = $this->ws->get($opt);
     }
     catch (Exception $e) {
@@ -268,13 +270,13 @@ class PrestaClient {
    * @throws Exception
    */
   public function get_product_images($product_id) {
+    $image_ids = array();
     $opt = array(
         'resource' => 'images/products',
         'id'       => $product_id,
     );
 
     try {
-      $image_ids = array();
       $response_xml = $this->ws->get($opt);
       foreach ($response_xml->image->declination as $node) {
         foreach ($node->attributes() as $key => $value) {
@@ -336,11 +338,11 @@ class PrestaClient {
    * @throws Exception
    */
   public function delete_product_image($product_id, $image_id) {
-    try {
-      $opt = array(
-          'url' => "{$this->url}api/images/products/{$product_id}/{$image_id}",
-      );
+    $opt = array(
+        'url' => "{$this->url}api/images/products/{$product_id}/{$image_id}",
+    );
 
+    try {
       $response = $this->ws->delete($opt);
     }
     catch (Exception $e) {

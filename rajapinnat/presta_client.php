@@ -300,15 +300,21 @@ class PrestaClient {
    *
    * @param int $product_id
    * @param array $image_ids
+   * @return int
    */
   public function delete_product_images($product_id, $image_ids = array()) {
+    $deleted = 0;
+
     try {
       if (empty($image_ids)) {
         $image_ids = $this->get_product_images($product_id);
       }
 
       foreach ($image_ids as $image_id) {
-        $this->delete_product_image($product_id, $image_id);
+        $ok = $this->delete_product_image($product_id, $image_id);
+        if ($ok) {
+          $deleted++;
+        }
       }
     }
     catch (Exception $e) {
@@ -318,6 +324,8 @@ class PrestaClient {
       //should retry get_product_images
       //Do not throw exception here
     }
+
+    return $deleted;
   }
 
   /**
@@ -376,7 +384,7 @@ class PrestaClient {
    * Fetch empty xml schema for given resource
    *
    * @param string $resource
-   * @return SimpleXML
+   * @return SimpleXMLElement
    * @throws Exception
    */
   private function get_empty_schema($resource) {
@@ -390,7 +398,7 @@ class PrestaClient {
     catch (Exception $e) {
       $msg = "Resurssin {$resource} empty schema GET epäonnistui";
       $this->logger->log($msg, $e);
-      throw new Exception($msg);
+      throw $e;
     }
 
     return $schema;

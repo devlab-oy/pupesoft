@@ -1,7 +1,26 @@
 <?php
 
-function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus) {
+/**
+ * Tulostaa asiakkaan kuitin lämpösiirtotulostimelle. Kuitille tulostuu logo, yhtiön tiedot, laskun
+ * tilausrivit, laskun summa, verotiedot ja luottokorttitapahtumat
+ *
+ * @param  int  $laskunro
+ * @param  int  $tulostimen_tunnus
+ * @param array $params
+ *  Esimerkki config parametreistä:
+ *    array(
+ *      "footer_teksti" => "Tekstii footeriin"
+ *    );
+ */
+function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array()) {
   global $yhtiorow;
+
+  if (empty($params["footer_teksti"])) {
+    $footer_teksti = "Kiitos käynnistä ja tervetuloa uudelleen!";
+  }
+  else {
+    $footer_teksti = $params["footer_teksti"];
+  }
 
   $laskut = hae_laskut($laskunro);
   list($tilausrivit, $netto, $brutto, $vero) = hae_tilausrivit($laskunro);
@@ -82,7 +101,14 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus) {
     }
   }
 
-  $kuitin_teksti .= "\n\n\n\n";
+  // Footer
+  $kuitin_teksti .= "{$align_center}{$emphasized_on}";
+  $kuitin_teksti .= "{$yhtiorow['www']}\n\n";
+  $kuitin_teksti .= "{$emphasized_off}";
+  $kuitin_teksti .= "{$footer_teksti}\n\n";
+  $kuitin_teksti .= t("Teitä palveli") . " {$laskut[0]['myyjan_nimi']}";
+
+  $kuitin_teksti .= "\n\n\n\n\n\n";
   $kuitin_teksti .= $katkaisu;
 
   lpr($kuitin_teksti, $tulostimen_tunnus);
@@ -90,10 +116,14 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus) {
 
 function hae_laskut($laskunro) {
   global $yhtiorow;
-  $query  = "SELECT *
+  $query  = "SELECT lasku.*,
+             maksupaatetapahtumat.*,
+             kuka.nimi AS myyjan_nimi
              FROM lasku
              LEFT JOIN maksupaatetapahtumat ON (lasku.tunnus = maksupaatetapahtumat.tilausnumero
                AND maksupaatetapahtumat.yhtio = '{$yhtiorow['yhtio']}')
+             LEFT JOIN kuka ON (lasku.myyja = kuka.tunnus
+               AND kuka.yhtio = '{$yhtiorow['yhtio']}')
              WHERE lasku.yhtio  = '{$yhtiorow['yhtio']}'
              AND lasku.laskunro = '{$laskunro}'";
   $result = pupe_query($query);

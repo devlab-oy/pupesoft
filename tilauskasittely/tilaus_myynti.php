@@ -4553,10 +4553,9 @@ if ($tee == '') {
       or $tilausrivi["perheid"] == ""
       or $tilausrivi["perheid"] != $tilausrivi["tunnus"]) {
       $query =  "UPDATE tilausrivi
-                 SET
-                   var       = '$var',
-                   varattu   = $varattukpl,
-                   jt        = $jtkpl
+                 SET var = '$var',
+                 varattu = $varattukpl,
+                 jt      = $jtkpl
                  WHERE yhtio = '{$kukarow['yhtio']}'
                  AND tunnus  = '{$tilausrivi['tunnus']}'";
       pupe_query($query);
@@ -4576,18 +4575,19 @@ if ($tee == '') {
       while ($muutettavarivi = mysql_fetch_assoc($mriviresult)) {
         // Katotaan onko varattukpl vai jtkpl käytössä ja laitetaan tilkpl siihen
         $tuotevarattukpl = 0;
-        $tuotejtkpl = 0;
+        $tuotejtkpl      = 0;
+
         if ($varattukpl != 0) {
           $tuotevarattukpl = $muutettavarivi["tilkpl"];
-        } elseif ($jtkpl != 0) {
+        }
+        elseif ($jtkpl != 0) {
           $tuotejtkpl = $muutettavarivi["tilkpl"];
         }
 
         $query =  "UPDATE tilausrivi
-                   SET
-                   var       = '$var',
-                   varattu   = $tuotevarattukpl,
-                   jt        = $tuotejtkpl
+                   SET var = '$var',
+                   varattu = $tuotevarattukpl,
+                   jt      = $tuotejtkpl
                    WHERE yhtio = '{$kukarow['yhtio']}'
                    AND tunnus  = '{$muutettavarivi['tunnus']}'";
         pupe_query($query);

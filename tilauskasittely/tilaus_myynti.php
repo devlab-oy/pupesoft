@@ -4738,11 +4738,10 @@ if ($tee == '') {
       $laskurow['erapaivan_ylityksen_summa'] = $ylivito;
 
       echo "<br/>";
-      echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."!</font>";
+      echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."!";
+      echo " ",t("Asiakkaalle voi kuitenkin myyd‰ k‰teismaksuehdolla"),".";
+      echo "</font>";
       echo "<br/>";
-      echo "<font class='error'>";
-      echo t("Asiakkaalle voi kuitenkin myyd‰ k‰teismaksuehdolla");
-      echo ".</font><br />";
 
       if ($yhtiorow['erapaivan_ylityksen_toimenpide'] == "L" or $yhtiorow['erapaivan_ylityksen_toimenpide'] == "M") {
         $muokkauslukko = 'LUKOSSA';
@@ -4813,11 +4812,10 @@ if ($tee == '') {
     if ($laskurow['erapaivan_ylityksen_summa'] > 0) {
 
       echo "<br/>";
-      echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."!</font>";
+      echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s p‰iv‰‰ sitten er‰‰ntyneit‰ laskuja, olkaa yst‰v‰llinen ja ottakaa yhteytt‰ myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."!";
+      echo " ",t("Asiakkaalle voi kuitenkin myyd‰ k‰teismaksuehdolla"),".";
+      echo "</font>";
       echo "<br/>";
-      echo "<font class='error'>";
-      echo t("Asiakkaalle voi kuitenkin myyd‰ k‰teismaksuehdolla");
-      echo ".</font><br />";
 
       if ($yhtiorow['erapaivan_ylityksen_toimenpide'] == "L" or $yhtiorow['erapaivan_ylityksen_toimenpide'] == "M") {
         $muokkauslukko = 'LUKOSSA';

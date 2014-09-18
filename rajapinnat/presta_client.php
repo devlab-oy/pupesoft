@@ -39,6 +39,7 @@ class PrestaClient {
    *
    * @param int $id
    * @return \SimpleXMLElement
+   * @throws Exception
    */
   public function get_product($id) {
     $opt = array(
@@ -65,6 +66,7 @@ class PrestaClient {
    */
   public function sync_products(array $products) {
     try {
+      $this->logger->log('---------Start product sync---------');
       $this->schema = $this->get_empty_schema('products');
       //Fetch all products with ID's and SKU's only
       $existing_products = $this->all_products(array('id', 'reference'));
@@ -73,14 +75,22 @@ class PrestaClient {
       $existing_products = array_column($existing_products, 'reference', 'id');
 
       foreach ($products as $product) {
-        if (in_array($product['tuoteno'], $existing_products)) {
-          $id = array_search($product['tuoteno'], $existing_products);
-          $response_xml = $this->update_product($id, $product);
-          $this->delete_product_images($id);
+        try {
+          if (in_array($product['tuoteno'], $existing_products)) {
+            $id = array_search($product['tuoteno'], $existing_products);
+            $response_xml = $this->update_product($id, $product);
+            $this->delete_product_images($id);
+          }
+          else {
+            $response_xml = $this->create_product($product);
+            $id = (string) $response_xml->product->id;
+          }
+
+          $this->create_product_images($id, $product['images']);
         }
-        else {
-          $response_xml = $this->create_product($product);
-          $this->create_product_images((string) $response_xml->product->id, $product['images']);
+        catch (Exception $e) {
+          //Do nothing here. If create / update throws exception loggin happens inside those functions
+          //Exception is not thrown because we still want to continue syncing for other products
         }
       }
     }
@@ -88,9 +98,16 @@ class PrestaClient {
       //Exception logging happens in create / update. No need to do anything here
     }
 
+    $this->logger->log('---------End product sync---------');
     return $response_xml;
   }
 
+  /**
+   *
+   * @param array $product
+   * @return SimpleXMLElement
+   * @throws Exception
+   */
   public function create_product($product) {
     try {
       $opt = array('resource' => 'products');
@@ -107,6 +124,13 @@ class PrestaClient {
     return $response_xml;
   }
 
+  /**
+   *
+   * @param int $id
+   * @param array $product
+   * @return SimpleXMLElement
+   * @throws Exception
+   */
   public function update_product($id, $product) {
     try {
       $opt = array('resource' => 'products');
@@ -125,23 +149,42 @@ class PrestaClient {
     return $response_xml;
   }
 
+  /**
+   *
+   * @param int $product_id
+   * @param array $images
+   * @return int
+   */
   public function create_product_images($product_id, $images) {
     if (empty($images)) {
       return;
     }
 
-    try {
-      foreach ($images as $image) {
-        $this->create_product_image($product_id, $image);
+    $count = 0;
+    foreach ($images as $image) {
+      try {
+        $response = $this->create_product_image($product_id, $image);
+        if ($response['status_code'] == 200) {
+          $count++;
+        }
       }
+      catch (Exception $e) {
+        //Do not throw exception because one failed image create can not interrupt with other image create
+      }
+    }
 
-      $this->logger->log('Luotiin ' . count($images) . ' tuotekuvaa');
-    }
-    catch (Exception $e) {
-      throw $e;
-    }
+    $this->logger->log("Luotiin {$count} tuotekuvaa");
+
+    return $count;
   }
 
+  /**
+   *
+   * @param int $product_id
+   * @param array $image
+   * @return array
+   * @throws Exception
+   */
   public function create_product_image($product_id, $image) {
     try {
       $opt = array(
@@ -167,7 +210,7 @@ class PrestaClient {
   /**
    *
    * @param array $display
-   * @return \SimpleXMLElement
+   * @return SimpleXMLElement
    * @throws Exception
    */
   public function all_products($display = array()) {
@@ -194,6 +237,12 @@ class PrestaClient {
     return $response;
   }
 
+  /**
+   *
+   * @param int $id
+   * @return boolean
+   * @throws Exception
+   */
   public function delete_product($id) {
     $opt = array(
         'resource' => 'products',
@@ -201,7 +250,7 @@ class PrestaClient {
     );
 
     try {
-      $response_xml = $this->ws->delete($opt);
+      $response = $this->ws->delete($opt);
     }
     catch (Exception $e) {
       $msg = "Tuotteen: {$id} poistaminen epäonnistui";
@@ -209,9 +258,15 @@ class PrestaClient {
       throw $e;
     }
 
-    return $response_xml;
+    return $response;
   }
 
+  /**
+   *
+   * @param int $product_id
+   * @return array
+   * @throws Exception
+   */
   public function get_product_images($product_id) {
     $opt = array(
         'resource' => 'images/products',
@@ -241,20 +296,37 @@ class PrestaClient {
     return $image_ids;
   }
 
+  /**
+   *
+   * @param int $product_id
+   * @param array $image_ids
+   */
   public function delete_product_images($product_id, $image_ids = array()) {
     try {
       if (empty($image_ids)) {
         $image_ids = $this->get_product_images($product_id);
       }
+
       foreach ($image_ids as $image_id) {
         $this->delete_product_image($product_id, $image_id);
       }
     }
     catch (Exception $e) {
-      throw $e;
+      //If get_product_images throws an exception with status code 500 it means that there is not existing
+      //product images.
+      //@TODO For now we do not check for the status code but in future statuscodes other than 500
+      //should retry get_product_images
+      //Do not throw exception here
     }
   }
 
+  /**
+   *
+   * @param int $product_id
+   * @param int $image_id
+   * @return boolean
+   * @throws Exception
+   */
   public function delete_product_image($product_id, $image_id) {
     try {
       $opt = array(
@@ -266,6 +338,7 @@ class PrestaClient {
     catch (Exception $e) {
       $msg = "Tuotteen: {$product_id} tuotekuvan {$image_id} poistaminen epäonnistui";
       $this->logger->log($msg, $e);
+      throw $e;
     }
 
     return $response;
@@ -274,9 +347,10 @@ class PrestaClient {
   /**
    *
    * @param array $product
+   * @param SimpleXMLElement $existing_product
    * @return \SimpleXMLElement
    */
-  private function generate_product_xml($product, $existing_product = null) {
+  private function generate_product_xml($product, SimpleXMLElement $existing_product = null) {
     $xml = new SimpleXMLElement($this->schema->asXML());
 
     if (!is_null($existing_product)) {

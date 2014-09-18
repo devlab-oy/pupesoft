@@ -4519,18 +4519,20 @@ if ($tee == '') {
     $varattukpl = 0;
     $jtkpl = 0;
 
-    //katotaan varattu ja jt määrät kuntoon
-    //POISJTSTA eli ollaan merkitsemässä riviä toimitettavaksi -> jt => 0 ja varattu => tilkpl
+    // Katotaan varattu ja jt määrät kuntoon
+    // POISJTSTA eli ollaan merkitsemässä riviä toimitettavaksi -> jt => 0 ja varattu => tilkpl
     if ($tapa == "POISJTSTA") {
       $varattukpl = $kpl;
       $jtkpl = 0;
     }
-    //PUUTE eli ollaan tekemässä rivistä puuteriviä -> jt => 0 ja varattu => 0
+    // PUUTE eli ollaan tekemässä rivistä puuteriviä -> jt => 0 ja varattu => 0
     elseif ($tapa == "PUUTE") {
       $varattukpl = 0;
       $jtkpl = 0;
     }
-    //JT eli ollaan tekemässä rivistä JT-riviä, merkitään jt ja varattu sen mukaan varaavatko JT-rivit saldoa vai eivät; EI -> jt => tilkpl ja varattu => 0// KYLLÄ -> jt => 0 ja varattu => tilkpl
+    // JT eli ollaan tekemässä rivistä JT-riviä, merkitään jt ja varattu sen mukaan
+    // varaavatko JT-rivit saldoa vai eivät;
+    // EI -> jt => tilkpl ja varattu => 0// KYLLÄ -> jt => 0 ja varattu => tilkpl
     elseif ($tapa == "JT") {
       //varaako JT saldoa?
       if ($yhtiorow["varaako_jt_saldoa"] == "") {
@@ -4543,20 +4545,27 @@ if ($tee == '') {
       }
     }
 
-    //Jos ollaan toimittamassa riviä tai jos ollaan käsittelemässä perheetöntä tuotetta tai lapsituotetta niin silloin halutaan päivittää vain kyseinen rivi eikä tarvitse päivitellä lapsia (kun niitä ei ole)
-    if ($tapa == "POISJTSTA" or $tilausrivi["perheid"] == "" or $tilausrivi["perheid"] != $tilausrivi["tunnus"]) {
+    // Jos ollaan toimittamassa riviä
+    // tai jos ollaan käsittelemässä perheetöntä tuotetta
+    // tai lapsituotetta
+    // niin silloin halutaan päivittää vain kyseinen rivi eikä tarvitse päivitellä lapsia
+    if ($tapa == "POISJTSTA"
+      or $tilausrivi["perheid"] == ""
+      or $tilausrivi["perheid"] != $tilausrivi["tunnus"]) {
       $query =  "UPDATE tilausrivi
-                 SET
-                   var       = '$var',
-                   varattu   = $varattukpl,
-                   jt        = $jtkpl
+                 SET var = '$var',
+                 varattu = $varattukpl,
+                 jt      = $jtkpl
                  WHERE yhtio = '{$kukarow['yhtio']}'
                  AND tunnus  = '{$tilausrivi['tunnus']}'";
       pupe_query($query);
     }
-    //kun ollaan tekemässä isätuotteesta JT-riviä tai merkitsemässä sitä puutteeksi niin tehdään samat jutu myös perheen lapsille
+    // Kun ollaan tekemässä isätuotteesta JT-riviä tai merkitsemässä sitä puutteeksi
+    // niin tehdään samat jutu myös perheen lapsille
     else {
-      $query = "SELECT tunnus
+      $query = "SELECT tunnus,
+                tuoteno,
+                tilkpl
                 FROM tilausrivi
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND perheid = '{$tilausrivi['tunnus']}'
@@ -4564,11 +4573,21 @@ if ($tee == '') {
       $mriviresult = pupe_query($query);
 
       while ($muutettavarivi = mysql_fetch_assoc($mriviresult)) {
+        // Katotaan onko varattukpl vai jtkpl käytössä ja laitetaan tilkpl siihen
+        $tuotevarattukpl = 0;
+        $tuotejtkpl      = 0;
+
+        if ($varattukpl != 0) {
+          $tuotevarattukpl = $muutettavarivi["tilkpl"];
+        }
+        elseif ($jtkpl != 0) {
+          $tuotejtkpl = $muutettavarivi["tilkpl"];
+        }
+
         $query =  "UPDATE tilausrivi
-                   SET
-                     var       = '$var',
-                     varattu   = $varattukpl,
-                     jt        = $jtkpl
+                   SET var = '$var',
+                   varattu = $tuotevarattukpl,
+                   jt      = $tuotejtkpl
                    WHERE yhtio = '{$kukarow['yhtio']}'
                    AND tunnus  = '{$muutettavarivi['tunnus']}'";
         pupe_query($query);

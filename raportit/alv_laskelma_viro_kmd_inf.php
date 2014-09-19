@@ -118,12 +118,9 @@ if ($tee == 'laskelma') {
   $tilires = pupe_query($query);
   $tilirow = mysql_fetch_assoc($tilires);
 
-  # myyntilasku tila U
-  # ostolasku tilat HYMPQ
-
   $query = "SELECT lasku.tunnus ltunnus, lasku.laskunro laskunro,
             trim(concat(lasku.nimi, ' ', lasku.nimitark)) nimi, lasku.ytunnus,
-            lasku.tapvm, lasku.alv,
+            lasku.tapvm, lasku.alv, lasku.liitostunnus,
             sum(lasku.summa) laskun_summa
             #sum(tilausrivi.alv) alvia
             FROM lasku USE INDEX (yhtio_tila_tapvm)
@@ -136,20 +133,22 @@ if ($tee == 'laskelma') {
             and lasku.tapvm <= '{$loppupvm}'
             #and lasku.vienti = 'E'
             and lasku.tilaustyyppi != '9'
-            GROUP BY 1,2,3,4,5,6
+            GROUP BY 1,2,3,4,5,6,7
             #HAVING alvia > 0
             ORDER BY 1,2";
   $result = pupe_query($query);
 
   $verot_yht = 0;
 
-  pupe_DataTables(array(array($pupe_DataTables, 7, 7, true)));
+  pupe_DataTables(array(array($pupe_DataTables, 9, 9, true)));
 
   echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
 
   echo "<thead>";
 
   echo "<tr>";
+  echo "<th>#</th>";
+  echo "<th>aineistoon</th>";
   echo "<th>ytunnus</th>";
   echo "<th>nimi</th>";
   echo "<th>laskunro</th>";
@@ -160,6 +159,8 @@ if ($tee == 'laskelma') {
   echo "</tr>";
 
   echo "<tr>";
+  echo "<td><input type='text'   class='search_field' name='search_nr'></td>";
+  echo "<td><input type='text'   class='search_field' name='search_aineistoon'></td>";
   echo "<td><input type='text'   class='search_field' name='search_ytunnus'></td>";
   echo "<td><input type='text'   class='search_field' name='search_nimi'></td>";
   echo "<td><input type='text'   class='search_field' name='search_laskunro'></td>";
@@ -179,6 +180,8 @@ if ($tee == 'laskelma') {
   else {
     $rajaalisa = "";
   }
+
+  $_i = 1;
 
   while ($row = mysql_fetch_assoc($result)) {
 
@@ -205,7 +208,25 @@ if ($tee == 'laskelma') {
 
     $_vero = $laskelma == 'a' ? $verorow['summa'] : $verorow['veronmaara'];
 
-    echo "<tr>";
+    $aineistoon = 'X';
+
+    if ($laskelma == 'a') {
+
+      $query = "  SELECT tunnus
+                  FROM asiakas
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus = '{$row['liitostunnus']}'
+                  AND laji = 'H'";
+      $asiakasres = pupe_query($query);
+
+      if (mysql_num_rows($asiakasres) != 0) $aineistoon = '';
+    }
+
+    $_class = empty($aineistoon) ? 'spec' : '';
+
+    echo "<tr class='$_class aktiivi'>";
+    echo "<td>$_i</td>";
+    echo "<td>$aineistoon</td>";
     echo "<td>$row[ytunnus]</td>";
     echo "<td>$row[nimi]</td>";
     echo "<td>$row[laskunro] ($row[ltunnus])</td>";
@@ -216,11 +237,12 @@ if ($tee == 'laskelma') {
     echo "</tr>";
 
     $verot_yht += $_vero;
+    $_i++;
   }
 
   echo "<tfoot>";
   echo "<tr>";
-  echo "<th colspan='7'>";
+  echo "<th colspan='9'>";
   echo "verot yht";
   echo "<span style='float: right;'>",round($verot_yht, 2),"</span>";
   echo "</th>";

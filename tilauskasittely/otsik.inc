@@ -974,6 +974,13 @@ if ($tila == "" and !isset($jatka)) {
 
     echo "</select></td></tr>";
 
+    if ($asiarow['laji'] != 'H') {
+      echo "<tr>";
+      echo "<td valign='top'>",t("Ytunnus"),":</td>";
+      echo "<td><input type='text' name='ytunnus' value='{$srow['ytunnus']}' /></td>";
+      echo "</tr>";
+    }
+
     if (isset($srow['ryhma']) and $srow['ryhma'] != "") {
       echo "<tr>";
       echo "<td valign='top'>".t("Asiakasryhmä").":</td>";
@@ -1054,7 +1061,6 @@ if ($tila == "" and !isset($jatka)) {
         <input type='hidden' name='kolm_ovttunnus'            value = '$srow[kolm_ovttunnus]'>
         <input type='hidden' name='chn'                value = '$srow[chn]'>
         <input type='hidden' name='verkkotunnus'            value = '$srow[verkkotunnus]'>
-        <input type='hidden' name='ytunnus'              value = '$srow[ytunnus]'>
         <input type='hidden' name='kolm_maa'              value = '$srow[kolm_maa]'>
         <input type='hidden' name='tunnusnippu'            value = '$srow[tunnusnippu]'>
         <input type='hidden' name='projekti'             value = '$srow[projekti]'>
@@ -1064,6 +1070,10 @@ if ($tila == "" and !isset($jatka)) {
         <input type='hidden' name='asentaja'              value = '$asentaja'>
         <input type='hidden' name='tyojono'              value = '$tyojono'>
         <input type='hidden' name='liitostunnus'            value = '$srow[liitostunnus]'>";
+
+    if ($asiarow['laji'] == 'H') {
+      echo "<input type='hidden' name='ytunnus'              value = '$srow[ytunnus]'>";
+    }
 
     echo "<td valign='top' style='padding:0px;'>";
     echo "<table>";

@@ -206,6 +206,7 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
   }
   $worksheet->write($excelrivi, $excelsarake, $lisainffot);
   $excelnimi = $worksheet->close();
+        echo "ekselini nimi on $excelnimi <br>";
 
   if (isset($excelnimi)) {
     echo "<br><br><table>";

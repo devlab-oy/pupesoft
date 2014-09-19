@@ -243,6 +243,8 @@ if (isset($tee) and trim($tee) == 'aja') {
       );
 
       lisaa_rivi($params);
+
+      echo "Lis‰t‰‰n tuote {$tuote["tuoteno"]} $quantity {$tuote["yksikko"]} tilaukselle {$laskurow["tunnus"]}.<br>";
     }
   }
 }

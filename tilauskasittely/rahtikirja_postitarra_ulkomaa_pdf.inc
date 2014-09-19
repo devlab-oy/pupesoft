@@ -126,7 +126,8 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   // tehdään pdf:n uusi sivu
   $firstpage = $pdf->new_page("a5");
 
-  if (strtoupper($rirow["toimitustapa"]) != "ITELLA EXPRESS BUSINESS DAY PARCEL" and strtoupper($rirow["toimitustapa"]) != "ITELLA EXPRESS BUSINESS DAY PALLET") {
+  if (strtoupper($rirow["toimitustapa"]) != "ITELLA EXPRESS BUSINESS DAY PARCEL"
+    and strtoupper($rirow["toimitustapa"]) != "ITELLA EXPRESS BUSINESS DAY PALLET") {
     $data = file_get_contents($pupe_root_polku."/pics/Itella_priority.jpg");
     $image = $pdf->jfif_embed($data);
     $logoparam['scale'] = 0.105;

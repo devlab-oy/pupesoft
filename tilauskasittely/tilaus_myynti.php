@@ -34,7 +34,7 @@ if ($yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K" and isset($ajax_
   die();
 }
 
-if ($yhtiorow['tilauksen_myyntieratiedot'] != '' and isset($tappi) and $tappi == "lataa_tiedosto" and isset($tmpfilenimi)) {
+if (($yhtiorow['tilauksen_myyntieratiedot'] != '' or $yhtiorow['laiterekisteri_kaytossa'] != '') and isset($tappi) and $tappi == "lataa_tiedosto" and isset($tmpfilenimi)) {
   readfile("/tmp/".$tmpfilenimi);
   exit;
 }

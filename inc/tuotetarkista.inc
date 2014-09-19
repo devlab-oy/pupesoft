@@ -121,7 +121,7 @@ if (!function_exists("tuotetarkista")) {
           $tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '$fieldname' and SELITE = '$t[$i]'";
           $tpres = pupe_query($tpque);
 
-          if (mysql_num_rows($tpres) == 0) {
+          if (mysql_num_rows($tpres) == 0 and $t[$i] != 0) {
             $virhe[$i] .= t("Avainsanaa ei löydy")."!";
             return;
           }

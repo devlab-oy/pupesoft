@@ -142,13 +142,18 @@ if ($tee == 'laskelma') {
 
   pupe_DataTables(array(array($pupe_DataTables, 9, 9, true)));
 
+  $style = "width: 15px; height: 15px; display: inline-table; border-radius: 50%; -webkit-border-radius: 50%; -moz-border-radius: 50%;";
+
+  $_green = "<span style='{$style} background-color: #5D2; margin-right: 5px;'></span>";
+  $_red = "<span style='{$style} background-color: #E66; margin-right: 5px;'></span>";
+
   echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
 
   echo "<thead>";
 
   echo "<tr>";
+  echo "<th>CSV</th>";
   echo "<th>#</th>";
-  echo "<th>aineistoon</th>";
   echo "<th>ytunnus</th>";
   echo "<th>nimi</th>";
   echo "<th>laskunro</th>";
@@ -159,8 +164,8 @@ if ($tee == 'laskelma') {
   echo "</tr>";
 
   echo "<tr>";
-  echo "<td><input type='text'   class='search_field' name='search_nr'></td>";
   echo "<td><input type='text'   class='search_field' name='search_aineistoon'></td>";
+  echo "<td><input type='text'   class='search_field' name='search_nr'></td>";
   echo "<td><input type='text'   class='search_field' name='search_ytunnus'></td>";
   echo "<td><input type='text'   class='search_field' name='search_nimi'></td>";
   echo "<td><input type='text'   class='search_field' name='search_laskunro'></td>";
@@ -208,7 +213,7 @@ if ($tee == 'laskelma') {
 
     $_vero = $laskelma == 'a' ? $verorow['summa'] : $verorow['veronmaara'];
 
-    $aineistoon = 'X';
+    $aineistoon = $_green;
 
     if ($laskelma == 'a') {
 
@@ -219,14 +224,23 @@ if ($tee == 'laskelma') {
                   AND laji = 'H'";
       $asiakasres = pupe_query($query);
 
-      if (mysql_num_rows($asiakasres) != 0) $aineistoon = '';
+      if (mysql_num_rows($asiakasres) != 0) $aineistoon = $_red;
     }
 
-    $_class = empty($aineistoon) ? 'spec' : '';
+    $_class = $aineistoon == $_red ? 'spec' : '';
 
     echo "<tr class='$_class aktiivi'>";
+
+    echo "<td>";
+    echo $aineistoon;
+
+    if ($aineistoon == $_green) {
+      echo "<span style='display: none;'>X</span>";
+    }
+
+    echo "</td>";
+
     echo "<td>$_i</td>";
-    echo "<td>$aineistoon</td>";
     echo "<td>$row[ytunnus]</td>";
     echo "<td>$row[nimi]</td>";
     echo "<td>$row[laskunro] ($row[ltunnus])</td>";

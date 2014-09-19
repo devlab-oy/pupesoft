@@ -106,7 +106,9 @@ if (!function_exists("tuotetarkista")) {
       }
     }
 
-    if (($fieldname == "osasto"
+    if (trim($t[$i]) != ''
+      and $t[$i] != 0
+      and ($fieldname == "osasto"
         or $fieldname == "try"
         or $fieldname == "tuotemerkki"
         or $fieldname == "malli"
@@ -117,7 +119,6 @@ if (!function_exists("tuotetarkista")) {
 
       if (mysql_num_rows($tpres) > 0) {
 
-        if (trim($t[$i]) != '') {
           $tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '$fieldname' and SELITE = '$t[$i]'";
           $tpres = pupe_query($tpque);
 
@@ -125,7 +126,6 @@ if (!function_exists("tuotetarkista")) {
             $virhe[$i] .= t("Avainsanaa ei löydy")."!";
             return;
           }
-        }
 
         if ($fieldname == "try") {
           $tem_try = $t[$i];

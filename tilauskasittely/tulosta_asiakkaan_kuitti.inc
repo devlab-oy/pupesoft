@@ -23,7 +23,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   }
 
   $laskut = hae_laskut($laskunro);
-  list($tilausrivit, $tilausnumerot, $netto, $brutto, $vero) = hae_tilausrivit($laskunro);
+  list($tilausrivit, $tilausnumerot, $verot, $yhteensa) = hae_tilausrivit($laskunro);
 
   // Escape sequencejä printterille
   $logo           = "\x1C\x70\x01\x10";
@@ -45,9 +45,21 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $yhtion_ytunnus       = tulosta_ytunnus($yhtion_ytunnus, $laskut[0]['yhtio_maa']);
   $yhtion_aukioloajat   = "ARK. 8.30-18.00 VARD. / LA. 10-15 LÖ.";
 
-  // Arvojen asettelu spritfillä
-  $yhteensa = sprintf("%34.34s", $brutto);
+  // Arvojen asettelu spritfillä ja muu asettelu
+  $yhteensa = sprintf("%34.34s", $yhteensa);
 
+  $verorivit = array();
+
+  foreach ($verot as $alvi => $alvirivi) {
+    $verorivit[$alvi]['veroprosentti'] = sprintf("%-12.12s", "{$alvi} %");
+    $verorivit[$alvi]['netto']         = sprintf("%-12.12s", $alvirivi['netto']);
+    $verorivit[$alvi]['vero']          = sprintf("%-9.9s", $alvirivi['vero']);
+    $verorivit[$alvi]['brutto']        = sprintf("%9.9s", $alvirivi['brutto']);
+  }
+
+  $tilausnumero_teksti = count($tilausnumerot) > 1 ? "Tilausnumerot" : "Tilausnumero";
+
+  // Printattavan stringin luominen
   $kuitin_teksti = "{$logo}\n\n";
 
   $kuitin_teksti .= "{$align_center}";
@@ -86,13 +98,16 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $kuitin_teksti .= "{$emphasized_on}YHTEENSÄ{$yhteensa}{$emphasized_off}\n\n";
 
   // Verotiedot
-  $alv    = sprintf("%-12.12s", "{$laskut[0]["alv"]} %");
-  $netto  = sprintf("%-12.12s", $netto);
-  $vero   = sprintf("%-9.9s", $vero);
-  $brutto = sprintf("%9.9s", $brutto);
-
   $kuitin_teksti .= "ALV         NETTO        VERO       BRUTTO\n";
-  $kuitin_teksti .= "{$alv}{$netto}{$vero}{$brutto}\n\n";
+
+  foreach ($verorivit as $verorivi) {
+    $kuitin_teksti .= "{$verorivi['veroprosentti']}" .
+      "{$verorivi['netto']}" .
+      "{$verorivi['vero']}" .
+      "{$verorivi['brutto']}\n";
+  }
+
+  $kuitin_teksti .= "\n";
 
   // Maksupäätetapahtumat
   foreach ($laskut as $lasku) {
@@ -105,7 +120,6 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $kuitin_teksti .= "{$align_center}";
   $kuitin_teksti .= t("Kuittinumero") . ": {$laskut[0]['laskunro']}\n\n";
 
-  $tilausnumero_teksti = count($tilausnumerot) > 1 ? "Tilausnumerot" : "Tilausnumero";
   $kuitin_teksti .= t($tilausnumero_teksti) . ": " . implode(", ", $tilausnumerot) . "\n\n\n";
 
   $kuitin_teksti .= "{$emphasized_on}";
@@ -154,25 +168,35 @@ function hae_tilausrivit($laskunro) {
              AND tilausrivi.yhtio = '{$yhtiorow['yhtio']}'";
   $result = pupe_query($query);
 
-  $rivit         = array();
-  $tilausnumerot = array();
-  $netto         = 0;
-  $brutto        = 0;
-  $vero          = 0;
+  $tilausrivit       = array();
+  $tilausnumerot     = array();
+  $alvirivit         = array();
+  $pyoristetyt_verot = array();
+  $hinta_yhteensa    = 0;
 
   while ($rivi = mysql_fetch_assoc($result)) {
-    array_push($rivit, $rivi);
+    array_push($tilausrivit, $rivi);
     array_push($tilausnumerot, $rivi['otunnus']);
-    $netto += $rivi['rivihinta'];
-    $vero += $rivi['rivihinta'] * ($rivi['alv'] / 100);
-    $brutto += $rivi['rivihinta'] * (1 + ($rivi['alv'] / 100));
+
+    $alvirivit[$rivi['alv']]['netto'] += $rivi['rivihinta'];
+    $alvirivit[$rivi['alv']]['vero'] += $rivi['rivihinta'] * ($rivi['alv'] / 100);
+    $alvirivit[$rivi['alv']]['brutto'] += $rivi['rivihinta'] * (1 + $rivi['alv'] / 100);
+
+    $hinta_yhteensa += $rivi['rivihinta'] * (1 + $rivi['alv'] / 100);
+  }
+
+  foreach ($alvirivit as $alvi => $alvirivi) {
+    if ($alvirivi['netto'] != 0) {
+      $pyoristetyt_verot[$alvi]['netto']  = hintapyoristys($alvirivi['netto']);
+      $pyoristetyt_verot[$alvi]['vero']   = hintapyoristys($alvirivi['vero']);
+      $pyoristetyt_verot[$alvi]['brutto'] = hintapyoristys($alvirivi['brutto'], 1);
+    }
   }
 
   return array(
-    $rivit,
+    $tilausrivit,
     array_unique($tilausnumerot),
-    hintapyoristys($netto),
-    hintapyoristys($brutto, 1),
-    hintapyoristys($vero)
+    $pyoristetyt_verot,
+    hintapyoristys($hinta_yhteensa, 1)
   );
 }

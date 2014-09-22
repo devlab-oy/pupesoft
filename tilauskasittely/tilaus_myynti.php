@@ -8264,7 +8264,11 @@ if ($tee == '') {
           echo "<td class='spec'>$laskurow[valkoodi]</td></tr>";
         }
 
-        if ($yhtiorow['kerayserat'] == 'K' and $toimitustavan_tunnus > 0 and $kukarow['extranet'] == "" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS", "SIIRTOLISTA"))) {
+        $_lahdot_toim_check_myynnit = (in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "TYOMAARAYS")));
+        $_lahdot_toim_check_siirrot = (in_array($toim, array("SIIRTOLISTA")) and $yhtiorow['siirtolistan_tulostustapa'] == 'U');
+        $_lahdot_toim_check = ($_lahdot_toim_check_myynnit or $_lahdot_toim_check_siirrot);
+
+        if ($yhtiorow['kerayserat'] == 'K' and $toimitustavan_tunnus > 0 and $kukarow['extranet'] == "" and $_lahdot_toim_check) {
 
           echo "<tr>{$jarjlisa}";
 

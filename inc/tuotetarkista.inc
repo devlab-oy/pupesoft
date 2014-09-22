@@ -106,26 +106,38 @@ if (!function_exists("tuotetarkista")) {
       }
     }
 
-    if (trim($t[$i]) != ''
-      and $t[$i] != 0
-      and ($fieldname == "osasto"
-        or $fieldname == "try"
-        or $fieldname == "tuotemerkki"
-        or $fieldname == "malli"
-        or $fieldname == "mallitarkenne")) {
+    if ($fieldname == "osasto"
+      or $fieldname == "try"
+      or $fieldname == "tuotemerkki"
+      or $fieldname == "malli"
+      or $fieldname == "mallitarkenne") {
 
-      $tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '$fieldname'";
+      $t[$i] = trim($t[$i]);
+
+      // Ei tehdä tarkistuksia jos tietoa ei oo syötetty
+      if (empty($t[$i])) {
+        return;
+      }
+
+      $tpque = "SELECT tunnus
+                FROM avainsana
+                WHERE yhtio = '$kukarow[yhtio]'
+                and LAJI    = '$fieldname'";
       $tpres = pupe_query($tpque);
 
       if (mysql_num_rows($tpres) > 0) {
 
-          $tpque = "SELECT tunnus FROM avainsana WHERE yhtio = '$kukarow[yhtio]' and LAJI = '$fieldname' and SELITE = '$t[$i]'";
-          $tpres = pupe_query($tpque);
+        $tpque = "SELECT tunnus
+                  FROM avainsana
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND LAJI    = '$fieldname'
+                  AND SELITE  = '$t[$i]'";
+        $tpres = pupe_query($tpque);
 
-          if (mysql_num_rows($tpres) == 0 and $t[$i] != 0) {
-            $virhe[$i] .= t("Avainsanaa ei löydy")."!";
-            return;
-          }
+        if (mysql_num_rows($tpres) == 0) {
+          $virhe[$i] .= t("Avainsanaa ei löydy")."!";
+          return;
+        }
 
         if ($fieldname == "try") {
           $tem_try = $t[$i];
@@ -362,7 +374,6 @@ if (!function_exists("tuotetarkista")) {
         if ($yhtiorow["tarkista_eankoodi"] == "K" and tarkista_ean13(trim($t[$i])) === FALSE) {
           $virhe[$i] = t("EAN-koodi on virheellinen");
         }
-
       }
     }
 
@@ -553,6 +564,4 @@ if (!function_exists("tuotetarkista")) {
       }
     }
   }
-
-
 }

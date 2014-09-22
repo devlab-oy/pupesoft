@@ -14,12 +14,12 @@ function tulosta_hintalaput($tuotteet) {
 
   $text_normal = array(
     "height" => 3,
-    "font"   => "Times-Roman"
+    "font"   => "Helvetica"
   );
 
   $text_bold = array(
     "height" => 4,
-    "font"   => "Times-Bold"
+    "font"   => "Helvetica-Bold"
   );
 
   foreach ($tuotteet as $tuote) {

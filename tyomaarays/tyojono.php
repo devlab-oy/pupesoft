@@ -55,13 +55,13 @@ if ($tyojono_muutos != '' and $tyomaarayksen_tunnus != '') {
   $update_tyom_res = pupe_query($query);
 }
 
-if ($yhtiorow['laiterekisteri_kaytossa'] != '' 
+if ($yhtiorow['laiterekisteri_kaytossa'] != ''
   and ($tyojono_muutos != '' or $tyostatus_muutos != '') and $tyomaarayksen_tunnus != '') {
   // Paivitetaan myös tyomaarayksen_tapahtumat-taulu
   $tyojono_muutos = mysql_real_escape_string($tyojono_muutos);
   $tyostatus_muutos = mysql_real_escape_string($tyostatus_muutos);
   $tyomaarayksen_tunnus = (int) $tyomaarayksen_tunnus;
-  
+
   $query = "INSERT INTO tyomaarayksen_tapahtumat SET
             tyomaarays_tunnus = '$tyomaarayksen_tunnus',
             tyojono_selite    = '$tyojono_muutos',
@@ -343,7 +343,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
   $lopetusx = "";
   if ($lopetus != "") $lopetusx = $lopetus;
   $lopetusx .= "/SPLIT/{$palvelin2}tyomaarays/tyojono.php////konserni=$konserni//toim=$toim//tyojonotyyppi=$tyojonotyyppi";
-   
+
   if ($yhtiorow['laiterekisteri_kaytossa'] != '' and $toim != 'TYOMAARAYS_ASENTAJA') {
     if ($vrow["yhtioyhtio"] != $kukarow["yhtio"]) {
       $muoklinkki = "<a href='{$palvelin2}tilauskasittely/tilaus_myynti.php?user=$kukarow[kuka]&pass=$kukarow[salasana]&yhtio=$vrow[yhtioyhtio]&toim=$toimi&tilausnumero=$vrow[tunnus]&lopetus=$lopetusx'>{$vrow['tunnus']}</a>";
@@ -514,7 +514,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
       echo "<option value='EIJONOA'>".t("Ei jonossa")."</option>";
 
       while ($tyojono_row = mysql_fetch_assoc($tyojono_result)) {
-        $sel = ''; 
+        $sel = '';
         if ($vrow['tyojono'] == $tyojono_row['selitetark']) {
           $sel = 'SELECTED';
           $jonon_nimi = strtolower($tyojono_row['selitetark']);
@@ -529,13 +529,13 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
       // Jos halutaan rajata tietyn työjonon statusvalikoimaa tapahtumahistorian perusteella
       // Haetaan ensin tilauksen tapahtumahistorian viimeisimmän tapahtuman järjestysnumero
       if ($yhtiorow['laiterekisteri_kaytossa'] != '' and isset($tyojonotyyppi) and $tyojonotyyppi == $jonon_nimi) {
-        $kveeri = "SELECT 
+        $kveeri = "SELECT
                    ifnull(tyojono_selite, '') tyojono_selite,
                    ifnull(tyostatus_selite, '') tyostatus_selite,
                    ifnull(avainsana.jarjestys, 0) jarjestysnumero
                    FROM tyomaarayksen_tapahtumat
-                   LEFT JOIN avainsana ON avainsana.yhtio = tyomaarayksen_tapahtumat.yhtio 
-                    AND avainsana.laji = 'TYOM_TYOSTATUS' 
+                   LEFT JOIN avainsana ON avainsana.yhtio = tyomaarayksen_tapahtumat.yhtio
+                    AND avainsana.laji = 'TYOM_TYOSTATUS'
                     AND avainsana.selite = tyomaarayksen_tapahtumat.tyostatus_selite
                    WHERE tyomaarayksen_tapahtumat.yhtio = '{$kukarow['yhtio']}'
                    AND tyomaarayksen_tapahtumat.tyomaarays_tunnus = '{$vrow['tunnus']}'
@@ -567,7 +567,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
   }
 
   echo "</td>";
-  
+
   if ($yhtiorow['laiterekisteri_kaytossa'] == '' and $toim != 'TYOMAARAYS_ASENTAJA' or $olenko_asentaja_tassa_hommassa) {
     $muoklinkki = "";
     if ($vrow["yhtioyhtio"] != $kukarow["yhtio"]) {
@@ -594,12 +594,12 @@ echo "</tbody>";
 echo "</table>";
 echo "<br><br>";
 
-// Konffataan datatablesit 
+// Konffataan datatablesit
 if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
-  $datatables_conf[] = array($pupe_DataTables[0],12,11,true,true);
+  $datatables_conf[] = array($pupe_DataTables[0], 12, 11, true, true);
 }
 else {
-  $datatables_conf[] = array($pupe_DataTables[0],8,7,true,true);
+  $datatables_conf[] = array($pupe_DataTables[0], 8, 7, true, true);
 }
 
 if (count($tyomaarays_tunti_yhteensa) > 0 and $toim == 'TYOMAARAYS_ASENTAJA') {

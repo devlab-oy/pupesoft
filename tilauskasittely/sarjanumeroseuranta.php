@@ -41,8 +41,8 @@ if (table_exists("sarjanumeron_lisatiedot")) {
   if ($sarjatarkrow["field"] == "Suurin_henkiloluku") {
     $oletussarja = "JOO";
     $sarjanumeronLisatiedot = "OK";
-    }
   }
+}
 else {
   $sarjanumeronLisatiedot = "";
 }
@@ -622,7 +622,7 @@ if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
                 and tunnus  in ($sarjatun)";
       $sarjares = pupe_query($query);
 
-      
+
       if ($tunnuskentta == "myyntirivitunnus" and $rivitunnus > 0) {
         // Täällä pitäisi poistaa laitetaulusta myyntirivitunnus
         $spessukveri = "SELECT *
@@ -630,7 +630,7 @@ if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
                         WHERE tunnus = '$sarjatun'";
         $spessures = pupe_query($spessukveri);
         $spessurivi = mysql_fetch_assoc($spessures);
-        
+
         $laiteupdate = "UPDATE laite
                         SET paikka = '',
                         muutospvm = now(),
@@ -641,7 +641,7 @@ if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
                         AND paikka = '{$rivitunnus}'";
         pupe_query($laiteupdate);
       }
-      
+
       // Poistetaan erät jotka varaa tätä erää
       if ($sarrow["trivitunnus"] > 0 and $tunnuskentta == 'ostorivitunnus' and $from == "kohdista" and ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G")) {
         $query = "DELETE FROM sarjanumeroseuranta
@@ -714,7 +714,7 @@ if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
                   laatija = '{$kukarow['kuka']}'";
         pupe_query($kveri);
       }
-      
+
       if ($sarjarow["kaytetty"] == 'K') {
         $query = "UPDATE tilausrivi
                   SET alv=alv+500

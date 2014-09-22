@@ -324,7 +324,7 @@ if (!function_exists("pupe_error")) {
       echo nl2br($puperror);
     }
     else {
-      echo "Tietokantayhteydessä virhe!"; # Älä t-funktioi tätä.
+      echo "Tietokantayhteydessä virhe!"; // Älä t-funktioi tätä.
     }
 
     // kuollaan pois
@@ -15295,8 +15295,8 @@ if (!function_exists("palauta_vak_tiedot")) {
       while ($row = mysql_fetch_assoc($riresult1));
 
       if ($rakirkilot > 0) {
-        $vaktuotetiedot[] = "TOTAL GROSS MASS: " . round($rakirkilot,2) . " kg";
-        $vaktuotetiedot[] = "TOTAL NET MASS: " . round($tuotepainot_yht,2) . " kg";
+        $vaktuotetiedot[] = "TOTAL GROSS MASS: " . round($rakirkilot, 2) . " kg";
+        $vaktuotetiedot[] = "TOTAL NET MASS: " . round($tuotepainot_yht, 2) . " kg";
       }
     }
 
@@ -27851,7 +27851,7 @@ if (!function_exists("hae_saldo")) {
 
     if ($tuote["tuoteperhe"] == $tuote["tuoteno"]) {
       // Tuoteperheen isä
-      $saldot = tuoteperhe_myytavissa($tuote["tuoteno"],'KAIKKI',$tyyppi,0,'','','','','', $maa);
+      $saldot = tuoteperhe_myytavissa($tuote["tuoteno"], 'KAIKKI', $tyyppi, 0, '', '', '', '', '', $maa);
 
       foreach ($saldot as $varasto => $myytavissa) {
         $saldo += $myytavissa;
@@ -27864,7 +27864,7 @@ if (!function_exists("hae_saldo")) {
       return $saldo;
     }
     else {
-      list($a,$b,$myytavissa) = saldo_myytavissa($tuote["tuoteno"],$tyyppi,0,'','','','','', $maa);
+      list($a, $b, $myytavissa) = saldo_myytavissa($tuote["tuoteno"], $tyyppi, 0, '', '', '', '', '', $maa);
       $saldo = $myytavissa;
 
       return $saldo;

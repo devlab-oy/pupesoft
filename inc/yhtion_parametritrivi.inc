@@ -2938,7 +2938,7 @@ if ($fieldname == "nayta_variaatiot") {
 
   $ulos .= "<option value = ''>" . t("Ei näytetä tuotteiden variaatioita tuotelistauksessa");
   $ulos .= "<option value = 'Y' $sel>" . t("Tuotteiden listauksessa Hae ja selaa-ohjelmassa " .
-      "mahdollisuus nähdä tuotteen variaatiot (Esim. eri koot ja värit)");
+    "mahdollisuus nähdä tuotteen variaatiot (Esim. eri koot ja värit)");
   $ulos .= "</select></td>";
 
   $jatko = 0;

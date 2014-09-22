@@ -322,7 +322,7 @@ if ($piilota_tuoteperheen_lapset != '') {
   $ptlcheck = "CHECKED";
   $ulisa .= "&piilota_tuoteperheen_lapset=checked";
 }
-else{
+else {
   $ptlcheck = "";
 }
 
@@ -331,7 +331,7 @@ if ($saldotonrajaus != '') {
   $saldotoncheck = "CHECKED";
   $ulisa .= "&saldotonrajaus=checked";
 }
-else{
+else {
   $saldotoncheck = "";
 }
 
@@ -1125,7 +1125,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
       if (count($rows) == 1) {
         $muoto = 'tuote';
       }
-      else{
+      else {
         $muoto = 'tuotetta';
       }
 
@@ -1818,6 +1818,8 @@ function piirra_ostoskoriin_lisays($row) {
 /**
  * Piirt‰‰ formin aloitustagin ja hidden inputit
  */
+
+
 function piirra_formin_aloitus() {
   global $verkkokauppa, $edsort, $ojarj, $osasto, $try, $tuotemerkki, $ulisa, $toim_kutsu, $kukarow,
   $ostoskori, $valittu_tarjous_tunnus, $tultiin, $variaatio;

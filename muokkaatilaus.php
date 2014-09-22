@@ -761,7 +761,7 @@ else {
 
       $haku .= " or tilausrivin_lisatiedot.sopimuksen_lisatieto1 like '%{$etsi}%'
                  or tilausrivin_lisatiedot.sopimuksen_lisatieto2 like '%{$etsi}%'
-                 or lasku.asiakkaan_tilausnumero like '%{$etsi}%' 
+                 or lasku.asiakkaan_tilausnumero like '%{$etsi}%'
                  $laitelisa) ";
     }
 

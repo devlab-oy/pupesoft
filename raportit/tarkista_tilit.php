@@ -159,9 +159,9 @@ if ($tee != "") {
   $tables["yriti"][] = "oletus_selvittelytili";
 
   foreach ($tables as $taulu => $kentat) {
-  
+
     echo "<br><font class='message'>Tarkastetaan taulu $taulu</font><br>";
-  
+
     foreach ($kentat as $kentta) {
       $query = "SELECT distinct $kentta tilino
                 FROM $taulu

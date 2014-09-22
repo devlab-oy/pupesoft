@@ -4,10 +4,10 @@
 $pupe_DataTables = "selaalaitteita";
 
 if (strpos($_SERVER['SCRIPT_NAME'], "laiterekisteri.php") !== FALSE) {
-  require("inc/parametrit.inc");
+  require "inc/parametrit.inc";
 }
 
-if ($yhtiorow['laiterekisteri_kaytossa'] == '') die(t("Yhtiön parametrit - Laiterekisteri ei ole käytössä"));  
+if ($yhtiorow['laiterekisteri_kaytossa'] == '') die(t("Yhtiön parametrit - Laiterekisteri ei ole käytössä"));
 
 if (isset($livesearch_tee) and $livesearch_tee == "SARJANUMEROHAKU") {
   livesearch_sarjanumerohaku();
@@ -18,8 +18,8 @@ if (isset($livesearch_tee) and $livesearch_tee == "SARJANUMEROHAKU") {
 enable_ajax();
 
 if ($toiminto == 'LINKKAA') {
-  pupe_DataTables(array(array($pupe_DataTables, 17, 17, true, true)));  
-} 
+  pupe_DataTables(array(array($pupe_DataTables, 17, 17, true, true)));
+}
 else {
   pupe_DataTables(array(array($pupe_DataTables, 16, 16, true, true)));
 }
@@ -34,7 +34,7 @@ if ($toiminto == "LINKKAA" and isset($tilausrivin_tunnus) and isset($poista_lait
   pupe_query($query);
   $maara_paivitetty = true;
 }
-elseif ($toiminto == "LINKKAA" and isset($tilausrivin_tunnus) and isset($lisaa_laite_sopimusriville)) {  
+elseif ($toiminto == "LINKKAA" and isset($tilausrivin_tunnus) and isset($lisaa_laite_sopimusriville)) {
   // Lisätään laite sopimusriville
   $query = "INSERT INTO laitteen_sopimukset
             SET sopimusrivin_tunnus = '{$tilausrivin_tunnus}',
@@ -63,10 +63,10 @@ if (isset($tallennetaan_muutokset) and isset($muokattava_laite) and $muokattava_
             muuttaja = '{$kukarow['kuka']}'
             WHERE yhtio='{$kukarow['yhtio']}'
             AND tunnus = '{$muokattava_laite}'";
-  pupe_query($kveri); 
+  pupe_query($kveri);
   unset($toiminto);
 }
-elseif (isset($tallenna_uusi_laite) and isset($valitse_sarjanumero) and !empty($valitse_sarjanumero) 
+elseif (isset($tallenna_uusi_laite) and isset($valitse_sarjanumero) and !empty($valitse_sarjanumero)
   and !isset($muokattava_laite)) {
   // Tarkistetaan ettei laite/sarjanumeropari ole jo taulussa
   $query = "SELECT *
@@ -90,12 +90,12 @@ elseif (isset($tallenna_uusi_laite) and isset($valitse_sarjanumero) and !empty($
               valmistajan_sopimusnumero = '{$valmistajan_sopimusnumero}',
               valmistajan_sopimus_paattymispaiva = '{$vcloppuvv}-{$vcloppukk}-{$vcloppupp}',
               luontiaika = now(),
-              laatija = '{$kukarow['kuka']}'";             
+              laatija = '{$kukarow['kuka']}'";
     pupe_query($kveri);
     unset($toiminto);
   }
   else {
-    echo "<br><font class='error'>".t("Sarjanumero %s löytyy jo laite-taulusta", "", $uusilaite_sarjanumero)."!</font><br/>";  
+    echo "<br><font class='error'>".t("Sarjanumero %s löytyy jo laite-taulusta", "", $uusilaite_sarjanumero)."!</font><br/>";
   }
 }
 elseif (isset($peruuta_uusi) or isset($peruuta)) {
@@ -137,7 +137,7 @@ $headerit = array(
   "mac"
 );
 
-if ($toiminto == "LINKKAA") { 
+if ($toiminto == "LINKKAA") {
   // Halutaan linkata laitteita sopimuksen palveluriville
   if (!isset($tilausrivin_tunnus) or $tilausrivin_tunnus < 1) {
     echo "Et voi linkata laitteita ilman tilausrivin tunnusta";
@@ -145,7 +145,7 @@ if ($toiminto == "LINKKAA") {
   }
 
   // Uusi sarake mihin piirretään checkboxit
-  array_unshift($headerit, 'lisää'); 
+  array_unshift($headerit, 'lisää');
 
   // Valitut laitteet
   echo "<form>";
@@ -153,10 +153,10 @@ if ($toiminto == "LINKKAA") {
   echo "<input type='hidden' name='tilausrivin_tunnus' value='$tilausrivin_tunnus'>";
   echo "<input type='hidden' name='lopetus' value='$lopetus' />";
   echo "<font class='head'>".t("Sopimusriviin %s liitetyt laitteet", '', $tilausrivin_tunnus)."</font>";
-  echo "<br><br>";  
-  echo "<table>"; 
+  echo "<br><br>";
+  echo "<table>";
   echo "<tr>";
-  echo "<th>".t("Poista")."</th>";  
+  echo "<th>".t("Poista")."</th>";
   echo "<th>".t("Laitetunnus")."</th>";
   echo "<th>".t("Valmistaja")."</th>";
   echo "<th>".t("Malli")."</th>";
@@ -165,7 +165,7 @@ if ($toiminto == "LINKKAA") {
   echo "<th>".t("SLA")."</th>";
   echo "<th>".t("SD SLA")."</th>";
   echo "<th>".t("VC")."</th>";
-  echo "<th>".t("VC End")."</th>";  
+  echo "<th>".t("VC End")."</th>";
   echo "<th>".t("Kommentti")."</th>";
   echo "<th>".t("Lcm info")."</th>";
   echo "<th>".t("IP")."</th>";
@@ -187,20 +187,20 @@ if ($toiminto == "LINKKAA") {
               AND laitteen_sopimukset.sopimusrivin_tunnus = '{$tilausrivin_tunnus}'
             WHERE laite.yhtio = '{$kukarow['yhtio']}'
             GROUP BY laite.sarjanro,laite.tuoteno";
-  
-  $res = pupe_query($query); 
-  while ($vanhalaiterivi = mysql_fetch_assoc($res)) {    
+
+  $res = pupe_query($query);
+  while ($vanhalaiterivi = mysql_fetch_assoc($res)) {
     echo "<tr>";
     echo "<td><input type='checkbox' name='poista_laite_sopimusrivilta'  value='{$vanhalaiterivi['tunnus']}' onclick='submit();'/></td>";
-    echo "<td nowrap>{$vanhalaiterivi['tunnus']}</td>";       
+    echo "<td nowrap>{$vanhalaiterivi['tunnus']}</td>";
     echo "<td nowrap>{$vanhalaiterivi['valmistaja']}</td>";
     echo "<td nowrap>{$vanhalaiterivi['malli']}</td>";
     echo "<td nowrap>{$vanhalaiterivi['sarjanro']}</td>";
     echo "<td nowrap>{$vanhalaiterivi['tuoteno']}</td>";
     echo "<td>{$vanhalaiterivi['sla']}</td>";
-    echo "<td>{$vanhalaiterivi['sd_sla']}</td>"; 
+    echo "<td>{$vanhalaiterivi['sd_sla']}</td>";
     echo "<td nowrap>{$vanhalaiterivi['valmistajan_sopimusnumero']}</td>";
-    echo "<td nowrap>{$vanhalaiterivi['valmistajan_sopimus_paattymispaiva']}</td>";   
+    echo "<td nowrap>{$vanhalaiterivi['valmistajan_sopimus_paattymispaiva']}</td>";
     echo "<td style='width:300px;'>{$vanhalaiterivi['kommentti']}</td>";
     echo "<td>{$vanhalaiterivi['lcm_info']}</td>";
     echo "<td nowrap>{$vanhalaiterivi['ip_osoite']}</td>";
@@ -216,7 +216,7 @@ if ($toiminto == "LINKKAA") {
   $resu = pupe_query($kveri);
   $rivi = mysql_fetch_assoc($resu);
   if (!empty($rivi['sopimuksella'])) {
-    $laiterajaus = " AND laite.tunnus NOT IN ({$rivi['sopimuksella']})";              
+    $laiterajaus = " AND laite.tunnus NOT IN ({$rivi['sopimuksella']})";
   }
 }
 
@@ -227,7 +227,7 @@ if (empty($toiminto)) {
   echo "</form>";
 }
 
-// Ekotellaan headerit 
+// Ekotellaan headerit
 echo "<form id='laiterekisteriformi' name='laiterekisteriformi'>";
 echo "<input type='hidden' name='toiminto' value='$toiminto'>";
 echo "<input type='hidden' name='tilausrivin_tunnus' value='$tilausrivin_tunnus'>";
@@ -274,7 +274,7 @@ if ($toiminto == 'MUOKKAA') {
 
   // Halutaan muuttaa laitteen tietoja
   while ($rowi = mysql_fetch_assoc($res)) {
-    
+
     echo "<tr>";
     echo "<input type='hidden' name='muokattava_laite' value='{$rowi['tunnus']}'>";
     echo "<td nowrap>{$rowi['tunnus']}</td>";
@@ -344,14 +344,14 @@ elseif ($toiminto == 'UUSILAITE') {
   echo "<td>{$esiv_valmistaja}</td>";
   echo "<td>{$esiv_malli}</td>";
 
-  echo "<td>";  
+  echo "<td>";
   echo livesearch_kentta("laiterekisteriformi", "SARJANUMEROHAKU", "valitse_sarjanumero", 140, $valitse_sarjanumero, '', '', '', 'ei_break_all');
   echo "</td>";
 
   echo "<td>{$esiv_tuotenumero}</td>";
   echo "<td></td><td></td>";
   echo "<td><input type='text' name='sla'/></td>";
-  echo "<td><input type='text' name='sd_sla'/></td>";   
+  echo "<td><input type='text' name='sd_sla'/></td>";
   echo "<td><input type='text' name='valmistajan_sopimusnumero'/></td>";
 
   echo "<td nowrap><input type='text' name='vcloppupp' maxlength='2' size='2'/>
@@ -370,18 +370,18 @@ else {
 
   while ($rowi = mysql_fetch_assoc($res)) {
     $asiakas = '';
-    
+
     echo "<tr>";
     if ($toiminto == "LINKKAA") {
       echo "<td><input type='checkbox' name='lisaa_laite_sopimusriville'  value='{$rowi['tunnus']}' onclick='submit();'/></td>";
       echo "<td>{$rowi['tunnus']}</td>";
     }
     else {
-      echo "<td nowrap><a href='{$palvelin2}/laiterekisteri.php?toiminto=MUOKKAA&laitetunnus=$rowi[tunnus]'>{$rowi['tunnus']}</a></td>";  #&lopetus=$PHP_SELF
+      echo "<td nowrap><a href='{$palvelin2}/laiterekisteri.php?toiminto=MUOKKAA&laitetunnus=$rowi[tunnus]'>{$rowi['tunnus']}</a></td>";  //&lopetus=$PHP_SELF
     }
     echo "<td>".$rowi['sopimusrivi']."</td>";
     $puuttuja = '';
-    
+
     if (isset($rowi['sopimusrivin_tunnukset'])) {
 
       $kveri = "SELECT
@@ -414,12 +414,12 @@ else {
           $puuttuja .= "<br>Sopimusnumero: {$sopimuslinkki}<table><tr><th>Nimitys</th><th>Hinta</th><th>Alkupvm</th><th>Loppupvm</th></tr>";
           $kveeri = "SELECT
                      lasku.nimi asiakas,
-                     lasku.*, 
-                     laskun_lisatiedot.* 
-                     FROM lasku 
-                     JOIN laskun_lisatiedot ON lasku.yhtio = laskun_lisatiedot.yhtio 
-                       AND lasku.tunnus = laskun_lisatiedot.otunnus 
-                     WHERE lasku.tunnus = '{$lelo['sopimusnumero']}' 
+                     lasku.*,
+                     laskun_lisatiedot.*
+                     FROM lasku
+                     JOIN laskun_lisatiedot ON lasku.yhtio = laskun_lisatiedot.yhtio
+                       AND lasku.tunnus = laskun_lisatiedot.otunnus
+                     WHERE lasku.tunnus = '{$lelo['sopimusnumero']}'
                      AND lasku.yhtio = '{$kukarow['yhtio']}'";
           $ressukka = pupe_query($kveeri);
 
@@ -444,7 +444,7 @@ else {
         $puuttuja .= "</td></tr>";
       }
       $puuttuja .= "</table>";
-      
+
     }
     else {
       $query = "SELECT
@@ -473,9 +473,9 @@ else {
     echo "<td>{$puuttuja}</td>";
     echo "<td nowrap>{$asiakas}</td>";
     echo "<td>{$rowi['sla']}</td>";
-    echo "<td>{$rowi['sd_sla']}</td>";  
+    echo "<td>{$rowi['sd_sla']}</td>";
     echo "<td nowrap>{$rowi['valmistajan_sopimusnumero']}</td>";
-    echo "<td nowrap>{$rowi['valmistajan_sopimus_paattymispaiva']}</td>";   
+    echo "<td nowrap>{$rowi['valmistajan_sopimus_paattymispaiva']}</td>";
     echo "<td style='width:300px;'>{$rowi['kommentti']}</td>";
     echo "<td>{$rowi['lcm_info']}</td>";
     echo "<td nowrap>{$rowi['ip_osoite']}</td>";
@@ -483,6 +483,6 @@ else {
     echo "</tr>";
   }
   echo "<br><br>";
-  echo "</table>"; 
-  echo "</form>";  
+  echo "</table>";
+  echo "</form>";
 }

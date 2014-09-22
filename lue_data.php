@@ -2347,7 +2347,7 @@ if (!$cli and !isset($api_kentat)) {
   echo "<tr>";
   echo "<th>".t("Valitse tietokannan taulu").":</th>";
   echo "<td>";
-  echo "<select name='table' onchange='submit();'>";                
+  echo "<select name='table' onchange='submit();'>";
 
   // Jos tullaan linkistä jossa halutaan muokata vain tiettyä taulua
   if (isset($taulurajaus)) {
@@ -2357,9 +2357,9 @@ if (!$cli and !isset($api_kentat)) {
       echo "<option value='$taulurajaus' selected>".t("$validi")."</option>";
     }
     else {
-      echo "<option value='' selected>".t("Ei valintaa")."</option>"; 
+      echo "<option value='' selected>".t("Ei valintaa")."</option>";
     }
-    
+
   }
   else {
     foreach ($taulut as $taulu => $nimitys) {
@@ -2384,7 +2384,7 @@ if (!$cli and !isset($api_kentat)) {
     <br>";
 }
 // Jos on muutettu sopimusrivitunnuksia niin ajetaan sopimusrivien päivitysfunktio
-if (count($muutetut_sopimusrivitunnukset) > 0) {  
+if (count($muutetut_sopimusrivitunnukset) > 0) {
   paivita_sopimusrivit($muutetut_sopimusrivitunnukset);
 }
 

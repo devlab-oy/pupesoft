@@ -796,7 +796,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
     $colspan = 3;
   }
   elseif ($toim == "VALMISTAVARASTOON" and $yhtiorow['rekursiiviset_reseptit'] != '') {
-   $colspan = 3;
+    $colspan = 3;
   }
   else {
     $colspan = 2;

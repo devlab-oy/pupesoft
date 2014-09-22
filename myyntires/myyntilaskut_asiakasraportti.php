@@ -976,8 +976,8 @@ function hae_maksusuoritukset($maksurow, $linkki) {
           elseif ($lasktilitro['tilino'] == $ressukka['luottokortti']) echo t("Luottokortilla").": ";
 
           if ($lasktilitro["summa_valuutassa"] != 0
-              and $lasktilitro["valkoodi"] != $yhtiorow["valkoodi"]
-              and $lasktilitro["valkoodi"] != "") {
+            and $lasktilitro["valkoodi"] != $yhtiorow["valkoodi"]
+            and $lasktilitro["valkoodi"] != "") {
             echo "<span style='font-weight:bold'> ".t("Suoritus")."</span> &#124; $lasktilitro[summa_valuutassa] ";
             echo "$lasktilitro[valkoodi] ($lasktilitro[summa] $yhtiorow[valkoodi]) &#124; ";
             echo tv1dateconv($lasktilitro["tapvm"]), " <br>";

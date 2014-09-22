@@ -87,7 +87,7 @@ $result = pupe_query($query);
 while ($rivit = mysql_fetch_assoc($result)) {
   echo "<tr class='aktiivi'>";
   $linkkilisa = '';
-  
+
   // TODO linkki exceliin ajoon (oma ohjelma)
   if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
     $linkkilisa = "<br><br> <a href='#'>".t("Rapsalinkki")."</a>";

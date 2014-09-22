@@ -73,12 +73,12 @@ if (isset($_POST['piirtele_laiteluettelo'])) {
         </td>
       </tr>";
   echo "</table>";
-  echo "</form>"; 
+  echo "</form>";
 }
 elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
   // täällä ajellaan rapsa ja tallennetaan henkseliin
-  
-  include ('inc/pupeExcel.inc');
+
+  include 'inc/pupeExcel.inc';
 
   $worksheet    = new pupeExcel();
   $format_bold = array("bold" => TRUE);
@@ -115,20 +115,20 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
             laskun_lisatiedot.sopimus_loppupvm
             FROM laitteen_sopimukset
             JOIN laite ON laite.tunnus = laitteen_sopimukset.laitteen_tunnus
-            JOIN tilausrivi ON tilausrivi.tunnus = laitteen_sopimukset.sopimusrivin_tunnus 
+            JOIN tilausrivi ON tilausrivi.tunnus = laitteen_sopimukset.sopimusrivin_tunnus
               AND tilausrivi.yhtio = '{$kukarow['yhtio']}'
-            JOIN tuote ON tuote.yhtio = tilausrivi.yhtio 
+            JOIN tuote ON tuote.yhtio = tilausrivi.yhtio
               AND tuote.tuoteno = laite.tuoteno
-            JOIN avainsana ON avainsana.yhtio = tuote.yhtio 
-              AND avainsana.laji = 'TRY' 
+            JOIN avainsana ON avainsana.yhtio = tuote.yhtio
+              AND avainsana.laji = 'TRY'
               AND avainsana.selite = tuote.try
-            JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio 
+            JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
               AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-            JOIN lasku ON lasku.yhtio = tilausrivi.yhtio 
+            JOIN lasku ON lasku.yhtio = tilausrivi.yhtio
               AND lasku.tunnus = tilausrivi.otunnus
-            JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = lasku.yhtio 
+            JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = lasku.yhtio
               AND laskun_lisatiedot.otunnus = lasku.tunnus
-            WHERE lasku.tunnus = '{$tilausnumero}' 
+            WHERE lasku.tunnus = '{$tilausnumero}'
             ORDER BY laitteen_tunnus, nimitys";
   $result = pupe_query($query);
 
@@ -138,7 +138,7 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
   $lisainffot = '';
   // Rustaillaan henkseliin kaikki valitut sarakkeet
   while ($row = mysql_fetch_assoc($result)) {
-    
+
     // Sopimuskohtaiset kentät
     if ($eka_ajo) {
       // Defaultkentät:
@@ -148,7 +148,7 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
       $worksheet->write($excelrivi+1, $excelsarake++, $row['sopimus_alkupvm']);
       $worksheet->write($excelrivi, $excelsarake, t("Sopimus loppuu"),     $format_bold);
       $worksheet->write($excelrivi+1, $excelsarake++, $row['sopimus_loppupvm']);
-      
+
       // Valinnaiset sopimuskohtaiset kentät:
       // Sopimuslisatietoja 1/2
       // Asiakastiedot
@@ -164,7 +164,7 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
     }
 
     // Laite-/palvelukohtaiset valinnaiset kentät
-    
+
     // Laitetunnus
     // Sarjanumero
     // Tuotenumero
@@ -197,7 +197,7 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
         else {
           $worksheet->write($excelrivi, $excelsarake++, $value);
         }
-        
+
       }
     }
     $excelsarake = 0;

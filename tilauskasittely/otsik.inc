@@ -68,7 +68,7 @@ if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesk
 
 if ($yhtiorow['laiterekisteri_kaytossa'] != '' and isset($valmnro) and !empty($valmnro)) {
   // Katsotaan löytyykö valittu sarjanumero laiterekisteristä
-  $query = "SELECT 
+  $query = "SELECT
             laite.sla,
             if(laite.valmistajan_sopimus_paattymispaiva > now(), laite.valmistajan_sopimusnumero, '".t("Ei voimassa")."') vcsoppari,
             avainsana.selitetark valmistaja,
@@ -95,7 +95,7 @@ if ($yhtiorow['laiterekisteri_kaytossa'] != '' and isset($valmnro) and !empty($v
     $_REQUEST['tuotu'] = date('Y-m-j');
     // Jos laitteelta löytyi SLA niin lasketaan luvattupvm
     if ($_REQUEST['sla'] != '') {
-      $_REQUEST['luvattu'] = date('Y-m-j', strtotime ( "{$_REQUEST['sla']} weekdays" ));
+      $_REQUEST['luvattu'] = date('Y-m-j', strtotime( "{$_REQUEST['sla']} weekdays" ));
     }
   }
 }
@@ -1047,8 +1047,8 @@ if ($tila == "" and !isset($jatka)) {
     if ($hintojen_vaihto == 'JOO') {
       $hv_check = 'CHECKED';
     }
-    else{
-     $hv_check = '';
+    else {
+      $hv_check = '';
     }
 
     echo "<input type='checkbox' id='hintojen_vaihto' $hv_check />";
@@ -2671,7 +2671,7 @@ if ($tila == "" and !isset($jatka)) {
         $que = "SELECT valmnro
                 FROM tyomaarays
                 WHERE yhtio = '{$kukarow['yhtio']}'
-                AND otunnus = '{$tilausnumero}'";  
+                AND otunnus = '{$tilausnumero}'";
         $resa = pupe_query($que);
         $rowi = mysql_fetch_assoc($resa);
 
@@ -2700,13 +2700,13 @@ if ($tila == "" and !isset($jatka)) {
         if (strtoupper($al_row['selitetark_5']) == 'EDITABLE') {
           $aina_editoitavissa = true;
         }
-        
+
         if (strtoupper($al_row["selitetark_2"]) == "TEXT") {
 
           if ($al_lask == 1) {
             echo "<td></td><td></td></tr><tr>";
           }
-          
+
           if ($aina_editoitavissa) {
             echo "<td valign='top'>$al_row[selitetark]:</td><td colspan='3'><textarea name='$kentta' rows='6' cols='50'>$srow[$kentta]</textarea></td>";
           }
@@ -2851,7 +2851,7 @@ if ($tila == "" and !isset($jatka)) {
             echo "<td>$al_row[selitetark]:</td><td><input type='text' name='$kentta' size='15' value='{$arvo}'></td>";
           }
           else {
-             echo "<td>$al_row[selitetark]:</td><td><input type='text' name='$kentta' size='15' value='{$arvo}' $disa></td>";
+            echo "<td>$al_row[selitetark]:</td><td><input type='text' name='$kentta' size='15' value='{$arvo}' $disa></td>";
           }
         }
 
@@ -2888,7 +2888,7 @@ if ($tila == "" and !isset($jatka)) {
 
     // Työmääräyksen tapahtumahistoria
     if ($toim == "TYOMAARAYS" and $yhtiorow['laiterekisteri_kaytossa'] != '') {
-      
+
       if (isset($paivita_tyomaarayksen_status) and $kukarow['kesken'] > 0) {
         // Päivitetään työmääräyshistoria myös silloin kuin painetaan erillistä päivitä-nappia
         if (isset($eka_tuomaarays_row) and !empty($eka_tuomaarays_row)) {
@@ -2903,7 +2903,7 @@ if ($tila == "" and !isset($jatka)) {
                         WHERE yhtio = '{$kukarow['yhtio']}'
                         AND tyomaarays_tunnus = '{$kukarow['kesken']}'
                         ORDER BY luontiaika desc
-                        LIMIT 1"; 
+                        LIMIT 1";
           $tilaresult = pupe_query($tilaquery);
           $tilarivi = mysql_fetch_assoc($tilaresult);
 
@@ -2928,10 +2928,10 @@ if ($tila == "" and !isset($jatka)) {
                 ifnull(tilataulu.selitetark, '') tilassa,
                 ifnull(jonotaulu.selitetark, '') jonossa
                 FROM tyomaarayksen_tapahtumat
-                LEFT JOIN avainsana tilataulu ON tilataulu.yhtio = tyomaarayksen_tapahtumat.yhtio 
+                LEFT JOIN avainsana tilataulu ON tilataulu.yhtio = tyomaarayksen_tapahtumat.yhtio
                   AND tilataulu.laji = 'TYOM_TYOSTATUS'
                   AND tilataulu.selite = tyomaarayksen_tapahtumat.tyostatus_selite
-                LEFT JOIN avainsana jonotaulu ON jonotaulu.yhtio = tyomaarayksen_tapahtumat.yhtio 
+                LEFT JOIN avainsana jonotaulu ON jonotaulu.yhtio = tyomaarayksen_tapahtumat.yhtio
                   AND jonotaulu.laji = 'TYOM_TYOJONO'
                   AND jonotaulu.selite = tyomaarayksen_tapahtumat.tyojono_selite
                 WHERE tyomaarayksen_tapahtumat.yhtio = '{$kukarow['yhtio']}'
@@ -3625,12 +3625,12 @@ if (isset($jatka)) {
   if ((int) $liitostunnus == 0) $liitostunnus = $asiakasid;
 
   if ($liitostunnus > 0) {
-      $asiaqu = "SELECT *
+    $asiaqu = "SELECT *
                 FROM asiakas
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND tunnus  = '$liitostunnus'";
-      $asiares = pupe_query($asiaqu);
-      $asiarow = mysql_fetch_assoc($asiares);
+    $asiares = pupe_query($asiaqu);
+    $asiarow = mysql_fetch_assoc($asiares);
   }
 
   //jos ollaan haluttu laskutuskielto laitetaan chn kenttään 999
@@ -4197,7 +4197,7 @@ if (isset($jatka)) {
       if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
         $query2 .= ",  tyojono      = '$tyojono',
                 tyostatus    = '$tyostatus'";
-        
+
         if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
           // Jos käyttöliittymästä on muutettu työjonoa/työstatusta kirjataan se myös tyomaarayksen_tapahtumiin
           if (isset($eka_tuomaarays_row) and !empty($eka_tuomaarays_row)) {
@@ -4212,14 +4212,14 @@ if (isset($jatka)) {
                           WHERE yhtio = '{$kukarow['yhtio']}'
                           AND tyomaarays_tunnus = '{$kukarow['kesken']}'
                           ORDER BY luontiaika desc
-                          LIMIT 1"; 
+                          LIMIT 1";
             $tilaresult = pupe_query($tilaquery);
             $tilarivi = mysql_fetch_assoc($tilaresult);
-          
+
             $lokin_tyojono = $tilarivi['tyojono_selite'];
             $lokin_tyostatus = $tilarivi['tyostatus_selite'];
           }
-          
+
           if ($lokin_tyojono != $tyojono or $lokin_tyostatus != $tyostatus) {
             $updquery = "INSERT INTO tyomaarayksen_tapahtumat SET
                          tyomaarays_tunnus = '{$kukarow['kesken']}',

@@ -6610,7 +6610,7 @@ if ($tee == '') {
           $res = pupe_query($query);
           $sarjanumerotres = mysql_fetch_assoc($res);
           echo "<br><br>Sarjanumerot:<br>{$sarjanumerotres['sarjanumerot']} <br>";
-          
+
           echo "<a href='{$palvelin2}/laiterekisteri.php?toiminto=LINKKAA&tilausrivin_tunnus={$row['tunnus']}&sopimusnumero=$tilausnumero&lopetus={$palvelin2}tilauskasittely/tilaus_myynti.php////tilausnumero=$tilausnumero//toim=YLLAPITO'>Lis‰‰ laitteita</a>";
         }
 

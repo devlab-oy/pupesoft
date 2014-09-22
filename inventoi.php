@@ -880,7 +880,7 @@ if ($tee == 'VALMIS') {
                         kohde    = '{$kohde_ins}',
                         projekti = '{$projekti_ins}',
                         tapvm    = now(),
-                        summa    = '$summa',
+                        summa    = $summa,
                         vero     = 0,
                         lukko    = '',
                         selite   = 'Inventointi: ".t("Tuotteen")." {$row["tuoteno"]} $selite',

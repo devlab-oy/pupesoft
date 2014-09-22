@@ -44,7 +44,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
   // Yhtiön tiedot
   $yhtion_nimi          = $laskut[0]['yhtio_nimi'];
-  $yhtion_puhelinnumero = wordwrap($yhtiorow['puhelin'], 3, " ", true);
+  $yhtion_puhelinnumero = $yhtiorow['puhelin'];
   $yhtion_osoite        = $laskut[0]['yhtio_osoite'];
   $yhtion_postino       = $laskut[0]['yhtio_postino'];
   $yhtion_postitp       = $laskut[0]['yhtio_postitp'];

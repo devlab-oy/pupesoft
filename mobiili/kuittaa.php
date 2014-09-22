@@ -4,6 +4,7 @@ $_GET['ohje'] = 'off';
 $_GET["no_css"] = 'yes';
 
 $mobile = true;
+$valinta = "Etsi";
 
 if (@include_once "../inc/parametrit.inc");
 elseif (@include_once "inc/parametrit.inc");
@@ -41,7 +42,7 @@ $ostotilaus = (!empty($ostotilaus)) ? $ostotilaus : '';
 echo "
 <div class='header'>
   <button onclick='window.location.href=\"index.php\"' class='button left'><img src='back2.png'></button>
-  <h1>", t("OSTOTILAUS"), "</h1>
+  <h1>", t("RAHDIN KUITTAUS VASTAANOTETUKSI"), "</h1>
 </div>";
 
 
@@ -54,8 +55,8 @@ echo "</div>";
 
 echo "<div class='main' style='text-align:center;padding:10px;'>
   <form method='post' action=''>
-  <label for='sarjanumero'>", t("Sarjanumero"), "</label><br>
-  <input type='text' id='sarjanumero' name='sarjanumero' />
+  <label for='rahtikirjanumero'>", t("Syötä rahtikirjanumero"), "</label><br>
+  <input type='text' id='rahtikirjanumero' name='rahtikirjanumero' />
   </div>
   <div class='controls' style='text-align:center'>
   <button name='submit' id='haku_nappi' value='ok' onclick='submit();' class='button'>", t("OK"), "</button>

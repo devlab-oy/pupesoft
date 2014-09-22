@@ -10,7 +10,7 @@ elseif (@include_once "inc/parametrit.inc");
 
 if (!isset($errors)) $errors = array();
 
-$query =   "SELECT tilausrivi.tunnus, tilausrivi.otunnus
+$query =   "SELECT tilausrivi.tunnus, tilausrivi.otunnus, sarjanumeroseuranta.lisatieto
             FROM sarjanumeroseuranta
             JOIN tilausrivi ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio
             AND tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
@@ -25,12 +25,14 @@ $row = mysql_fetch_assoc($result);
 $tilausrivi = $row['tunnus'];
 $ostotilaus = $row['otunnus'];
 
+$tmp_array = explode('#!#', $row['lisatieto']);
+$rahtikirja = $tmp_array[1];
+
 if (empty($ostotilaus) or empty($tilausrivi)) {
   echo "<META HTTP-EQUIV='Refresh'CONTENT='2;URL=ostotilaus_sarjanumero.php?virhe'>"; exit();
 }
 
 // Haetaan tilausrivin ja laskun tiedot
-/* Ostotilausten_kohdistus rivi 847 - 895 */
 $query = "SELECT
           tilausrivi.varattu+tilausrivi.kpl AS siskpl,
           tilausrivi.tuoteno,
@@ -115,7 +117,11 @@ if (isset($submit)) {
 
   $tuotepaikka = urlencode($tuotepaikka);
 
-  echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=kasittely_sarjanumero.php?ostotilaus={$ostotilaus}&saapuminen={$saapuminen}&tilausrivi={$tilausrivi}&tuotepaikka={$tuotepaikka}&tuotenumero={$tuotenumero}'>"; exit();
+  $ohjaus  = "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=kasittely_sarjanumero.php";
+  $ohjaus .= "?ostotilaus={$ostotilaus}&saapuminen={$saapuminen}&tilausrivi={$tilausrivi}";
+  $ohjaus .= "&tuotepaikka={$tuotepaikka}&tuotenumero={$tuotenumero}&rahtikirja={$rahtikirja}'>";
+
+  echo $ohjaus; exit();
 }
 
 //####### UI ##########

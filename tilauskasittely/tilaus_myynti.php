@@ -576,6 +576,8 @@ if (
 
   $kukarow["hintojen_vaihto"] = $hintojen_vaihto;
 
+  echo $toim;die;
+
   $tilausnumero = luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero, $myyjanumero, '', $kantaasiakastunnus, '', $tilaustyyppi, $yhtiotoimipaikka);
   $kukarow["kesken"] = $tilausnumero;
   $kaytiin_otsikolla = "NOJOO!";

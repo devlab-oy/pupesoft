@@ -369,7 +369,7 @@ if ($tee == '') {
             JOIN yriti ON (yriti.yhtio = tiliotedata.yhtio and yriti.tilino = tiliotedata.tilino)
             WHERE tiliotedata.yhtio = '$kukarow[yhtio]'
             {$avoimetlisa}
-            and tiliotedata.alku   >= '$vv-$kk-$pp'
+            and tiliotedata.alku    >= '$vv-$kk-$pp'
             $querylisa
             GROUP BY alku, tili, laji
             ORDER BY alku DESC, tiliotedata.tilino, laji";

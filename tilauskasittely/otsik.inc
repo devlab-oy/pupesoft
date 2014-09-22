@@ -75,12 +75,12 @@ if ($yhtiorow['laiterekisteri_kaytossa'] != '' and isset($valmnro) and !empty($v
             tuote.tuotemerkki malli
             FROM laite
             JOIN tuote on tuote.yhtio = laite.yhtio
-              AND tuote.tuoteno = laite.tuoteno
+              AND tuote.tuoteno    = laite.tuoteno
             JOIN avainsana on avainsana.yhtio = tuote.yhtio
-              AND avainsana.laji = 'TRY'
+              AND avainsana.laji   = 'TRY'
               AND avainsana.selite = tuote.try
-            WHERE laite.yhtio = '{$kukarow['yhtio']}'
-            AND laite.sarjanro = '{$valmnro}'
+            WHERE laite.yhtio      = '{$kukarow['yhtio']}'
+            AND laite.sarjanro     = '{$valmnro}'
             GROUP BY laite.sarjanro, laite.tuoteno";
   $res = pupe_query($query);
 
@@ -909,9 +909,9 @@ if ($tila == "" and !isset($jatka)) {
   $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
   $asiaqu = "SELECT *
-            FROM asiakas
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND tunnus  = '{$srow['liitostunnus']}'";
+             FROM asiakas
+             WHERE yhtio = '$kukarow[yhtio]'
+             AND tunnus  = '{$srow['liitostunnus']}'";
   $asiares = pupe_query($asiaqu);
   $asiarow = mysql_fetch_assoc($asiares);
 
@@ -1557,11 +1557,11 @@ if ($tila == "" and !isset($jatka)) {
     $vasen++;
 
     //yhtiön oletusalvi!
-    $wquery = " SELECT selite
-                FROM avainsana
-                WHERE yhtio     = '$kukarow[yhtio]'
-                AND laji        = 'alv'
-                AND selitetark != ''";
+    $wquery = "SELECT selite
+               FROM avainsana
+               WHERE yhtio     = '$kukarow[yhtio]'
+               AND laji        = 'alv'
+               AND selitetark != ''";
     $wtres  = pupe_query($wquery);
     $wtrow  = mysql_fetch_assoc($wtres);
 
@@ -2900,7 +2900,7 @@ if ($tila == "" and !isset($jatka)) {
                         ifnull(tyojono_selite, '') tyojono_selite,
                         ifnull(tyostatus_selite,'') tyostatus_selite
                         FROM tyomaarayksen_tapahtumat
-                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        WHERE yhtio           = '{$kukarow['yhtio']}'
                         AND tyomaarays_tunnus = '{$kukarow['kesken']}'
                         ORDER BY luontiaika desc
                         LIMIT 1";
@@ -2929,12 +2929,12 @@ if ($tila == "" and !isset($jatka)) {
                 ifnull(jonotaulu.selitetark, '') jonossa
                 FROM tyomaarayksen_tapahtumat
                 LEFT JOIN avainsana tilataulu ON tilataulu.yhtio = tyomaarayksen_tapahtumat.yhtio
-                  AND tilataulu.laji = 'TYOM_TYOSTATUS'
-                  AND tilataulu.selite = tyomaarayksen_tapahtumat.tyostatus_selite
+                  AND tilataulu.laji                           = 'TYOM_TYOSTATUS'
+                  AND tilataulu.selite                         = tyomaarayksen_tapahtumat.tyostatus_selite
                 LEFT JOIN avainsana jonotaulu ON jonotaulu.yhtio = tyomaarayksen_tapahtumat.yhtio
-                  AND jonotaulu.laji = 'TYOM_TYOJONO'
-                  AND jonotaulu.selite = tyomaarayksen_tapahtumat.tyojono_selite
-                WHERE tyomaarayksen_tapahtumat.yhtio = '{$kukarow['yhtio']}'
+                  AND jonotaulu.laji                           = 'TYOM_TYOJONO'
+                  AND jonotaulu.selite                         = tyomaarayksen_tapahtumat.tyojono_selite
+                WHERE tyomaarayksen_tapahtumat.yhtio           = '{$kukarow['yhtio']}'
                 AND tyomaarayksen_tapahtumat.tyomaarays_tunnus = '$tilausnumero'
                 ORDER BY tyomaarayksen_tapahtumat.luontiaika desc";
       $ress = pupe_query($query);
@@ -3626,9 +3626,9 @@ if (isset($jatka)) {
 
   if ($liitostunnus > 0) {
     $asiaqu = "SELECT *
-                FROM asiakas
-                WHERE yhtio = '$kukarow[yhtio]'
-                AND tunnus  = '$liitostunnus'";
+               FROM asiakas
+               WHERE yhtio = '$kukarow[yhtio]'
+               AND tunnus  = '$liitostunnus'";
     $asiares = pupe_query($asiaqu);
     $asiarow = mysql_fetch_assoc($asiares);
   }
@@ -4209,7 +4209,7 @@ if (isset($jatka)) {
                           ifnull(tyojono_selite, '') tyojono_selite,
                           ifnull(tyostatus_selite,'') tyostatus_selite
                           FROM tyomaarayksen_tapahtumat
-                          WHERE yhtio = '{$kukarow['yhtio']}'
+                          WHERE yhtio           = '{$kukarow['yhtio']}'
                           AND tyomaarays_tunnus = '{$kukarow['kesken']}'
                           ORDER BY luontiaika desc
                           LIMIT 1";

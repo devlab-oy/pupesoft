@@ -165,7 +165,7 @@ if ($tee != "") {
     foreach ($kentat as $kentta) {
       $query = "SELECT distinct $kentta tilino
                 FROM $taulu
-                WHERE yhtio  = '$kukarow[yhtio]'
+                WHERE yhtio = '$kukarow[yhtio]'
                 and $kentta not in ('','0')";
       $haku = pupe_query($query);
 

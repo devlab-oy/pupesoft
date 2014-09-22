@@ -133,11 +133,11 @@ if (!empty($variaatio)) {
             tuote.yhtio
             FROM tuote
             INNER JOIN tuotteen_avainsanat ON (tuote.tuoteno = tuotteen_avainsanat.tuoteno
-              AND tuotteen_avainsanat.kieli = '{$yhtiorow['kieli']}'
-              AND tuotteen_avainsanat.laji = 'parametri_variaatio'
-              AND tuotteen_avainsanat.yhtio = tuote.yhtio
+              AND tuotteen_avainsanat.kieli  = '{$yhtiorow['kieli']}'
+              AND tuotteen_avainsanat.laji   = 'parametri_variaatio'
+              AND tuotteen_avainsanat.yhtio  = tuote.yhtio
               AND tuotteen_avainsanat.selite = '{$variaatio}')
-            WHERE tuote.yhtio = '{$kukarow['yhtio']}'";
+            WHERE tuote.yhtio                = '{$kukarow['yhtio']}'";
   $result = pupe_query($query);
 
   $tuotteet = array();
@@ -2193,7 +2193,7 @@ function hae_ja_piirra_saldo($row, $yhtiot) {
                   JOIN tuotepaikat ON (tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno)
                   JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                   $sallitut_maat_lisa
-                  AND varastopaikat.tunnus = tuotepaikat.varasto)
+                  AND varastopaikat.tunnus                  = tuotepaikat.varasto)
                   JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
                   AND sarjanumeroseuranta.tuoteno           = tuote.tuoteno
                   AND sarjanumeroseuranta.hyllyalue         = tuotepaikat.hyllyalue
@@ -2217,8 +2217,8 @@ function hae_ja_piirra_saldo($row, $yhtiot) {
                   JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                   $sallitut_maat_lisa
                   AND varastopaikat.tunnus = tuotepaikat.varasto)
-                  WHERE tuote.yhtio in ('" . implode("','", $yhtiot) . "')
-                  AND tuote.tuoteno = '$row[tuoteno]'
+                  WHERE tuote.yhtio        in ('" . implode("','", $yhtiot) . "')
+                  AND tuote.tuoteno        = '$row[tuoteno]'
                   ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta";
       }
       $varresult = pupe_query($query);
@@ -2363,7 +2363,7 @@ function hae_parametri_variaatio($row) {
             AND kieli   = '{$yhtiorow['kieli']}'
             AND laji    = 'parametri_variaatio'
             AND tuoteno = '{$row['tuoteno']}'
-";
+            ";
   $result = pupe_query($query);
   $parametri_variaatio = mysql_fetch_assoc($result);
   return $parametri_variaatio;

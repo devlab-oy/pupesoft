@@ -535,9 +535,9 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
                    ifnull(avainsana.jarjestys, 0) jarjestysnumero
                    FROM tyomaarayksen_tapahtumat
                    LEFT JOIN avainsana ON avainsana.yhtio = tyomaarayksen_tapahtumat.yhtio
-                    AND avainsana.laji = 'TYOM_TYOSTATUS'
-                    AND avainsana.selite = tyomaarayksen_tapahtumat.tyostatus_selite
-                   WHERE tyomaarayksen_tapahtumat.yhtio = '{$kukarow['yhtio']}'
+                    AND avainsana.laji                            = 'TYOM_TYOSTATUS'
+                    AND avainsana.selite                          = tyomaarayksen_tapahtumat.tyostatus_selite
+                   WHERE tyomaarayksen_tapahtumat.yhtio           = '{$kukarow['yhtio']}'
                    AND tyomaarayksen_tapahtumat.tyomaarays_tunnus = '{$vrow['tunnus']}'
                    ORDER BY tyomaarayksen_tapahtumat.luontiaika DESC
                    LIMIT 1";

@@ -29,7 +29,7 @@ $maara_paivitetty = false;
 if ($toiminto == "LINKKAA" and isset($tilausrivin_tunnus) and isset($poista_laite_sopimusrivilta)) {
   // Poistetaan laite sopimusrivilt‰
   $query = "DELETE FROM laitteen_sopimukset
-            WHERE laitteen_tunnus = '{$poista_laite_sopimusrivilta}'
+            WHERE laitteen_tunnus   = '{$poista_laite_sopimusrivilta}'
             AND sopimusrivin_tunnus = '{$tilausrivin_tunnus}'";
   pupe_query($query);
   $maara_paivitetty = true;
@@ -52,17 +52,17 @@ if (isset($tallennetaan_muutokset) and isset($muokattava_laite) and $muokattava_
   // Tallennetaan muutokset laitteen tietoihin
   $kveri = "UPDATE laite
             SET kommentti = '{$kommentti}',
-            sla = '{$sla}',
-            sd_sla = '{$sd_sla}',
-            lcm_info = '{$lcm_info}',
-            ip_osoite = '{$ip_osoite}',
-            mac_osoite = '{$mac_osoite}',
-            valmistajan_sopimusnumero = '{$valmistajan_sopimusnumero}',
+            sla                                = '{$sla}',
+            sd_sla                             = '{$sd_sla}',
+            lcm_info                           = '{$lcm_info}',
+            ip_osoite                          = '{$ip_osoite}',
+            mac_osoite                         = '{$mac_osoite}',
+            valmistajan_sopimusnumero          = '{$valmistajan_sopimusnumero}',
             valmistajan_sopimus_paattymispaiva = '{$vcloppuvv}-{$vcloppukk}-{$vcloppupp}',
-            muutospvm = now(),
-            muuttaja = '{$kukarow['kuka']}'
+            muutospvm                          = now(),
+            muuttaja                           = '{$kukarow['kuka']}'
             WHERE yhtio='{$kukarow['yhtio']}'
-            AND tunnus = '{$muokattava_laite}'";
+            AND tunnus                         = '{$muokattava_laite}'";
   pupe_query($kveri);
   unset($toiminto);
 }
@@ -72,25 +72,25 @@ elseif (isset($tallenna_uusi_laite) and isset($valitse_sarjanumero) and !empty($
   $query = "SELECT *
             FROM laite
             WHERE tuoteno = '{$uusilaite_tuotenumero}'
-            AND sarjanro = '{$uusilaite_sarjanumero}'";
+            AND sarjanro  = '{$uusilaite_sarjanumero}'";
   $result = pupe_query($query);
   if (mysql_affected_rows() == 0) {
     // Lis‰t‰‰n uusi laite
     $kveri = "INSERT INTO laite
               SET yhtio = '{$kukarow['yhtio']}',
-              paikka = '{$uusilaite_myyntirivitunnus}',
-              sarjanro = '{$uusilaite_sarjanumero}',
-              tuoteno = '{$uusilaite_tuotenumero}',
-              lcm_info = '{$lcm_info}',
-              ip_osoite = '{$ip_osoite}',
-              mac_osoite = '{$mac_osoite}',
-              kommentti = '{$kommentti}',
-              sla = '{$sla}',
-              sd_sla = '{$sd_sla}',
-              valmistajan_sopimusnumero = '{$valmistajan_sopimusnumero}',
+              paikka                             = '{$uusilaite_myyntirivitunnus}',
+              sarjanro                           = '{$uusilaite_sarjanumero}',
+              tuoteno                            = '{$uusilaite_tuotenumero}',
+              lcm_info                           = '{$lcm_info}',
+              ip_osoite                          = '{$ip_osoite}',
+              mac_osoite                         = '{$mac_osoite}',
+              kommentti                          = '{$kommentti}',
+              sla                                = '{$sla}',
+              sd_sla                             = '{$sd_sla}',
+              valmistajan_sopimusnumero          = '{$valmistajan_sopimusnumero}',
               valmistajan_sopimus_paattymispaiva = '{$vcloppuvv}-{$vcloppukk}-{$vcloppupp}',
-              luontiaika = now(),
-              laatija = '{$kukarow['kuka']}'";
+              luontiaika                         = now(),
+              laatija                            = '{$kukarow['kuka']}'";
     pupe_query($kveri);
     unset($toiminto);
   }
@@ -179,13 +179,13 @@ if ($toiminto == "LINKKAA") {
             tuote.tuotemerkki malli
             FROM laite
             JOIN tuote on tuote.yhtio = laite.yhtio
-              AND tuote.tuoteno = laite.tuoteno
+              AND tuote.tuoteno                           = laite.tuoteno
             JOIN avainsana on avainsana.yhtio = tuote.yhtio
-              AND avainsana.laji = 'TRY'
-              AND avainsana.selite = tuote.try
+              AND avainsana.laji                          = 'TRY'
+              AND avainsana.selite                        = tuote.try
             JOIN laitteen_sopimukset on laitteen_sopimukset.laitteen_tunnus = laite.tunnus
               AND laitteen_sopimukset.sopimusrivin_tunnus = '{$tilausrivin_tunnus}'
-            WHERE laite.yhtio = '{$kukarow['yhtio']}'
+            WHERE laite.yhtio                             = '{$kukarow['yhtio']}'
             GROUP BY laite.sarjanro,laite.tuoteno";
 
   $res = pupe_query($query);
@@ -259,12 +259,12 @@ $query = "SELECT
           group_concat(laitteen_sopimukset.sopimusrivin_tunnus) sopimusrivin_tunnukset
           FROM laite
           JOIN tuote on tuote.yhtio = laite.yhtio
-            AND tuote.tuoteno = laite.tuoteno
+            AND tuote.tuoteno    = laite.tuoteno
           JOIN avainsana on avainsana.yhtio = tuote.yhtio
-            AND avainsana.laji = 'TRY'
+            AND avainsana.laji   = 'TRY'
             AND avainsana.selite = tuote.try
           LEFT JOIN laitteen_sopimukset on laitteen_sopimukset.laitteen_tunnus = laite.tunnus
-          WHERE laite.yhtio = '{$kukarow['yhtio']}'
+          WHERE laite.yhtio      = '{$kukarow['yhtio']}'
           {$laiterajaus}
           GROUP BY laite.sarjanro,laite.tuoteno";
 
@@ -320,11 +320,11 @@ elseif ($toiminto == 'UUSILAITE') {
               tuote.tuotemerkki malli
               FROM sarjanumeroseuranta
               JOIN tuote on tuote.yhtio = sarjanumeroseuranta.yhtio
-                AND tuote.tuoteno = sarjanumeroseuranta.tuoteno
+                AND tuote.tuoteno                 = sarjanumeroseuranta.tuoteno
               JOIN avainsana on avainsana.yhtio = sarjanumeroseuranta.yhtio
-                AND avainsana.laji = 'TRY'
-                AND avainsana.selite = tuote.try
-              WHERE sarjanumeroseuranta.yhtio = '{$kukarow['yhtio']}'
+                AND avainsana.laji                = 'TRY'
+                AND avainsana.selite              = tuote.try
+              WHERE sarjanumeroseuranta.yhtio     = '{$kukarow['yhtio']}'
               AND sarjanumeroseuranta.sarjanumero = '{$valitse_sarjanumero}'
               ORDER BY muutospvm desc
               LIMIT 1";
@@ -420,7 +420,7 @@ else {
                      JOIN laskun_lisatiedot ON lasku.yhtio = laskun_lisatiedot.yhtio
                        AND lasku.tunnus = laskun_lisatiedot.otunnus
                      WHERE lasku.tunnus = '{$lelo['sopimusnumero']}'
-                     AND lasku.yhtio = '{$kukarow['yhtio']}'";
+                     AND lasku.yhtio    = '{$kukarow['yhtio']}'";
           $ressukka = pupe_query($kveeri);
 
           $lassurivi = mysql_fetch_assoc($ressukka);
@@ -452,12 +452,12 @@ else {
                 lasku.*
                 FROM sarjanumeroseuranta
                 JOIN tilausrivi ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio
-                  AND tilausrivi.tunnus = sarjanumeroseuranta.myyntirivitunnus
+                  AND tilausrivi.tunnus             = sarjanumeroseuranta.myyntirivitunnus
                 JOIN lasku ON lasku.yhtio = sarjanumeroseuranta.yhtio
-                  AND lasku.tunnus = tilausrivi.otunnus
-                WHERE sarjanumeroseuranta.yhtio = '{$kukarow['yhtio']}'
+                  AND lasku.tunnus                  = tilausrivi.otunnus
+                WHERE sarjanumeroseuranta.yhtio     = '{$kukarow['yhtio']}'
                 AND sarjanumeroseuranta.sarjanumero = '{$rowi['sarjanro']}'
-                AND sarjanumeroseuranta.tuoteno = '{$rowi['tuoteno']}'
+                AND sarjanumeroseuranta.tuoteno     = '{$rowi['tuoteno']}'
                 ORDER BY sarjanumeroseuranta.luontiaika desc
                 LIMIT 1";
       $sarjanumerores = pupe_query($query);

@@ -102,24 +102,24 @@ if ($raptee == "AJA") {
             a2.selitetark loppu_nimitys
             FROM tyomaarayksen_tapahtumat tt1
             JOIN tyomaarays tm ON (tm.yhtio = tt1.yhtio
-              AND tm.otunnus = tt1.tyomaarays_tunnus
+              AND tm.otunnus            = tt1.tyomaarays_tunnus
               {$valmistajalisa})
             LEFT JOIN avainsana a1 ON (a1.yhtio = tt1.yhtio
-              AND a1.laji = 'tyom_tyostatus'
-              AND a1.selite = tt1.tyostatus_selite)
+              AND a1.laji               = 'tyom_tyostatus'
+              AND a1.selite             = tt1.tyostatus_selite)
             LEFT JOIN tyomaarayksen_tapahtumat tt2 ON (tt2.yhtio = tt1.yhtio
               AND tt2.tyomaarays_tunnus = tt1.tyomaarays_tunnus)
             LEFT JOIN avainsana a2 ON (a2.yhtio = tt1.yhtio
-              AND a2.laji = 'tyom_tyostatus'
-              AND a2.selite = tt2.tyostatus_selite)
+              AND a2.laji               = 'tyom_tyostatus'
+              AND a2.selite             = tt2.tyostatus_selite)
             LEFT JOIN lasku ON (lasku.yhtio = tm.yhtio
-              AND lasku.tunnus = tm.otunnus)
-            WHERE tt1.yhtio = '{$kukarow['yhtio']}'
-            AND tt1.tyostatus_selite = '{$aloitustila}'
-            AND tt2.tyostatus_selite = '{$lopetustila}'
+              AND lasku.tunnus          = tm.otunnus)
+            WHERE tt1.yhtio             = '{$kukarow['yhtio']}'
+            AND tt1.tyostatus_selite    = '{$aloitustila}'
+            AND tt2.tyostatus_selite    = '{$lopetustila}'
             GROUP BY tt1.tyomaarays_tunnus
             HAVING alkupvm >= '{$aloituspaiva}'
-            AND loppupvm <= '{$lopetuspaiva}'";
+            AND loppupvm                <= '{$lopetuspaiva}'";
   $result = pupe_query($query);
 
   $worksheet->write($excelrivi, $i, t('Työmääräysnumero'), $format_bold);
@@ -172,13 +172,13 @@ if ($raptee == "AJA") {
                  ifnull(jonotaulu.selitetark, '') jonossa
                  FROM tyomaarayksen_tapahtumat
                  LEFT JOIN avainsana tilataulu ON tilataulu.yhtio = tyomaarayksen_tapahtumat.yhtio
-                   AND tilataulu.laji = 'TYOM_TYOSTATUS'
-                   AND tilataulu.selite = tyomaarayksen_tapahtumat.tyostatus_selite
+                   AND tilataulu.laji                 = 'TYOM_TYOSTATUS'
+                   AND tilataulu.selite               = tyomaarayksen_tapahtumat.tyostatus_selite
                  LEFT JOIN avainsana jonotaulu ON jonotaulu.yhtio = tyomaarayksen_tapahtumat.yhtio
-                   AND jonotaulu.laji = 'TYOM_TYOJONO'
-                   AND jonotaulu.selite = tyomaarayksen_tapahtumat.tyojono_selite
+                   AND jonotaulu.laji                 = 'TYOM_TYOJONO'
+                   AND jonotaulu.selite               = tyomaarayksen_tapahtumat.tyojono_selite
                  WHERE tyomaarayksen_tapahtumat.yhtio = 'signa'
-                 AND tyomaarays_tunnus = '{$rivi['tyomaarays_tunnus']}'
+                 AND tyomaarays_tunnus                = '{$rivi['tyomaarays_tunnus']}'
                  ORDER BY tyomaarayksen_tapahtumat.luontiaika DESC";
       $ressuu = pupe_query($queryy);
 

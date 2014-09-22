@@ -1696,8 +1696,8 @@ else {
               LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus)
               {$laitejoini}
               WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-              AND lasku.tila          = '0'
-              AND lasku.alatila       NOT IN ('D')
+              AND lasku.tila    = '0'
+              AND lasku.alatila NOT IN ('D')
               $haku
               GROUP BY 1,2,3,4,5,6
               $mt_order_by

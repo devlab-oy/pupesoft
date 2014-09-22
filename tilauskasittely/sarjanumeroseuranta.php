@@ -633,12 +633,12 @@ if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
 
         $laiteupdate = "UPDATE laite
                         SET paikka = '',
-                        muutospvm = now(),
-                        muuttaja = '{$kukarow['kuka']}'
-                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        muutospvm    = now(),
+                        muuttaja     = '{$kukarow['kuka']}'
+                        WHERE yhtio  = '{$kukarow['yhtio']}'
                         AND sarjanro = '{$spessurivi['sarjanumero']}'
-                        AND tuoteno = '{$spessurivi['tuoteno']}'
-                        AND paikka = '{$rivitunnus}'";
+                        AND tuoteno  = '{$spessurivi['tuoteno']}'
+                        AND paikka   = '{$rivitunnus}'";
         pupe_query($laiteupdate);
       }
 
@@ -697,21 +697,21 @@ if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
       // P‰ivitet‰‰n laitetaulu kun ruksataan sarjanumero myyntiriville
       $kveri = "UPDATE laite
                 SET paikka = '{$rivitunnus}',
-                muutospvm = now(),
-                muuttaja = '{$kukarow['kuka']}'
-                WHERE yhtio = '{$kukarow['yhtio']}'
+                muutospvm    = now(),
+                muuttaja     = '{$kukarow['kuka']}'
+                WHERE yhtio  = '{$kukarow['yhtio']}'
                 AND sarjanro = '{$sarjarow['sarjanumero']}'
-                AND tuoteno = '{$sarjarow['tuoteno']}'";
+                AND tuoteno  = '{$sarjarow['tuoteno']}'";
       $kverires = pupe_query($kveri);
 
       if (mysql_affected_rows() == 0) {
         $kveri = "INSERT INTO laite
                   SET yhtio = '{$kukarow['yhtio']}',
                   luontiaika = now(),
-                  sarjanro = '{$sarjarow['sarjanumero']}',
-                  paikka = '{$rivitunnus}',
-                  tuoteno = '{$sarjarow['tuoteno']}',
-                  laatija = '{$kukarow['kuka']}'";
+                  sarjanro   = '{$sarjarow['sarjanumero']}',
+                  paikka     = '{$rivitunnus}',
+                  tuoteno    = '{$sarjarow['tuoteno']}',
+                  laatija    = '{$kukarow['kuka']}'";
         pupe_query($kveri);
       }
 

@@ -83,10 +83,10 @@ if ($paiva_ajo) {
 
   $query = "SELECT tuotteen_toimittajat.tuoteno
             FROM tuotteen_toimittajat
-            WHERE tuotteen_toimittajat.yhtio     = '{$yhtio}'
-            AND tuotteen_toimittajat.tuoteno not in ($tuotelista)
+            WHERE tuotteen_toimittajat.yhtio    = '{$yhtio}'
+            AND tuotteen_toimittajat.tuoteno    not in ($tuotelista)
             AND (tuotteen_toimittajat.muutospvm  >= date_sub(now(), interval 24 HOUR)
-             OR tuotteen_toimittajat.luontiaika  >= date_sub(now(), interval 24 HOUR))";
+             OR tuotteen_toimittajat.luontiaika >= date_sub(now(), interval 24 HOUR))";
   $res = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($res)) {

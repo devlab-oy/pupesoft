@@ -116,19 +116,19 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
             FROM laitteen_sopimukset
             JOIN laite ON laite.tunnus = laitteen_sopimukset.laitteen_tunnus
             JOIN tilausrivi ON tilausrivi.tunnus = laitteen_sopimukset.sopimusrivin_tunnus
-              AND tilausrivi.yhtio = '{$kukarow['yhtio']}'
+              AND tilausrivi.yhtio                        = '{$kukarow['yhtio']}'
             JOIN tuote ON tuote.yhtio = tilausrivi.yhtio
-              AND tuote.tuoteno = laite.tuoteno
+              AND tuote.tuoteno                           = laite.tuoteno
             JOIN avainsana ON avainsana.yhtio = tuote.yhtio
-              AND avainsana.laji = 'TRY'
-              AND avainsana.selite = tuote.try
+              AND avainsana.laji                          = 'TRY'
+              AND avainsana.selite                        = tuote.try
             JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
               AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
             JOIN lasku ON lasku.yhtio = tilausrivi.yhtio
-              AND lasku.tunnus = tilausrivi.otunnus
+              AND lasku.tunnus                            = tilausrivi.otunnus
             JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = lasku.yhtio
-              AND laskun_lisatiedot.otunnus = lasku.tunnus
-            WHERE lasku.tunnus = '{$tilausnumero}'
+              AND laskun_lisatiedot.otunnus               = lasku.tunnus
+            WHERE lasku.tunnus                            = '{$tilausnumero}'
             ORDER BY laitteen_tunnus, nimitys";
   $result = pupe_query($query);
 

@@ -3806,12 +3806,12 @@ if ($tee == '') {
 
           $laiteupdate = "UPDATE laite
                           SET paikka = '',
-                          muutospvm = now(),
-                          muuttaja = '{$kukarow['kuka']}'
-                          WHERE yhtio = '{$kukarow['yhtio']}'
+                          muutospvm    = now(),
+                          muuttaja     = '{$kukarow['kuka']}'
+                          WHERE yhtio  = '{$kukarow['yhtio']}'
                           AND sarjanro = '{$spessurivi['sarjanumero']}'
-                          AND tuoteno = '{$spessurivi['tuoteno']}'
-                          AND paikka = '{$rivitunnus}'";
+                          AND tuoteno  = '{$spessurivi['tuoteno']}'
+                          AND paikka   = '{$rivitunnus}'";
           pupe_query($laiteupdate);
         }
       }
@@ -4576,8 +4576,8 @@ if ($tee == '') {
       or $tilausrivi["perheid"] != $tilausrivi["tunnus"]) {
       $query =  "UPDATE tilausrivi
                  SET var = '$var',
-                 varattu = $varattukpl,
-                 jt      = $jtkpl
+                 varattu     = $varattukpl,
+                 jt          = $jtkpl
                  WHERE yhtio = '{$kukarow['yhtio']}'
                  AND tunnus  = '{$tilausrivi['tunnus']}'";
       pupe_query($query);
@@ -4608,8 +4608,8 @@ if ($tee == '') {
 
         $query =  "UPDATE tilausrivi
                    SET var = '$var',
-                   varattu = $tuotevarattukpl,
-                   jt      = $tuotejtkpl
+                   varattu     = $tuotevarattukpl,
+                   jt          = $tuotejtkpl
                    WHERE yhtio = '{$kukarow['yhtio']}'
                    AND tunnus  = '{$muutettavarivi['tunnus']}'";
         pupe_query($query);

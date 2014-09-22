@@ -67,7 +67,7 @@ $reklamaatiohyvitys = false;
 $query = "SELECT kieli
           FROM asiakas
           WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus = '{$laskurow['liitostunnus']}'";
+          AND tunnus  = '{$laskurow['liitostunnus']}'";
 $kielirow = mysql_fetch_assoc(pupe_query($query));
 $kieli = $kielirow["kieli"];
 

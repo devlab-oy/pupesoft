@@ -100,8 +100,20 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
     echo "<td valign='top'>$ulos</td>";
   }
 
-  echo "  <td valign='top'><input type='text' name='kpl' size='5' maxlength='13' value='$kpl'></td>
-      <td valign='top'><input type='text' name='var' size='2' maxlength='1' value='$var'></td>";
+  // Tarkistetaan onko tuote jo valittu ja jos on defaultataan yhteen tuotteeseen
+  if (empty($kpl) and !empty($tuoteno)) {
+    $maara = 1;
+  }
+  else {
+    $maara = $kpl;
+  }
+
+  echo "<td valign='top'>
+          <input type='text' name='kpl' size='5' maxlength='13' value='{$maara}'>
+        </td>
+        <td valign='top'>
+          <input type='text' name='var' size='2' maxlength='1' value='{$var}'>
+        </td>";
 
   if ($kukarow['hinnat'] == 0) {
     $siemenluku = strlen((int) $hinta) > 5 ? strlen((int) $hinta) : 5;

@@ -254,14 +254,21 @@ function sepa_credittransfer($laskurow, $popvm_nyt, $netotetut_rivit = '') {
   }
   $PstlAdr = $Cdtr->addChild('PstlAdr', '');                                                // PostalAddress
   // $AdrTp = $PstlAdr->addChild('AdrTp', '');
-  $AdrLine = $PstlAdr->addChild('AdrLine', sprintf("%-1.70s", $laskurow['osoite']));                          // AddressLine 1-70
-  $AdrLine = $PstlAdr->addChild('AdrLine', sprintf("%-1.70s", $laskurow['maa']."-".$laskurow['postino']." ".$laskurow['postitp']));
-  $StrtNm = $PstlAdr->addChild('StrtNm', sprintf("%-1.70s", $laskurow['osoite']));                          // StreetName 1-70
-  // $BldgNb = $PstlAdr->addChild('BldgNb', '');                                              // BuildingNumber
-  $PstCd = $PstlAdr->addChild('PstCd', sprintf("%-1.16s", $laskurow['maa']."-".$laskurow['postino']));                // PostCode 1-16
-  $TwnNm = $PstlAdr->addChild('TwnNm', sprintf("%-1.35s", $laskurow['postitp']));                            // TownName 1-35
+
+  // Danske hylkää (joskus) aineistot, jos on vaan space, laitetaan tyhjässä tapauksessa aina viiva
+  $_osoite  = trim($laskurow['osoite']) == ''  ? '-' : $laskurow['osoite'];
+  $_postino = trim($laskurow['postino']) == '' ? '-' : $laskurow['postino'];
+  $_postitp = trim($laskurow['postitp']) == '' ? '-' : $laskurow['postitp'];
+  $_maa     = trim($laskurow['maa']) == ''     ? '-' : $laskurow['maa'];
+
+  $AdrLine = $PstlAdr->addChild('AdrLine', sprintf("%-1.70s", $_osoite)); // AddressLine 1-70
+  $AdrLine = $PstlAdr->addChild('AdrLine', sprintf("%-1.70s", "{$_maa}-{$_postino}-{$_postitp}"));
+  $StrtNm = $PstlAdr->addChild('StrtNm', sprintf("%-1.70s", $_osoite)); // StreetName 1-70
+  // $BldgNb = $PstlAdr->addChild('BldgNb', ''); // BuildingNumber
+  $PstCd = $PstlAdr->addChild('PstCd', sprintf("%-1.16s", "{$_maa}-{$_postino}")); // PostCode 1-16
+  $TwnNm = $PstlAdr->addChild('TwnNm', sprintf("%-1.35s", $_postitp)); // TownName 1-35
   // $CtrySubDvsn = $PstlAdr->addChild('CtrySubDvsn', '');
-  $Ctry = $PstlAdr->addChild('Ctry', sprintf("%-2.2s", $laskurow['maa']));                              // Country
+  $Ctry = $PstlAdr->addChild('Ctry', sprintf("%-2.2s", $_maa)); // Country
 
   // $Id = $Cdtr->addChild('Id', '');
   //   $OrgId = $Id->addChild('OrgId', '');
@@ -277,7 +284,7 @@ function sepa_credittransfer($laskurow, $popvm_nyt, $netotetut_rivit = '') {
   //       $Id = $PrtryId->addChild('Id', '');
   //       $Issr = $PrtryId->addChild('Issr', '');
 
-  $CtryOfRes = $Cdtr->addChild('CtryOfRes', sprintf("%-2.2s", $laskurow['maa']));
+  $CtryOfRes = $Cdtr->addChild('CtryOfRes', sprintf("%-2.2s", $_maa));
   $CdtrAcct = $CdtTrfTxInf->addChild('CdtrAcct', '');                  // CreditorAccount
   $Id = $CdtrAcct->addChild('Id', '');                      // Identification
   if (tarkista_sepa($laskurow["iban_maa"]) !== FALSE) {

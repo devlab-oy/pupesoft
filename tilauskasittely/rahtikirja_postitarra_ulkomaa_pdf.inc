@@ -136,7 +136,6 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
     $pdf->draw_text(65, 570,  $rirow["toimitustapa"],             $firstpage, $norm);
   }
 
-
   if (class_exists("Image_Barcode")) {
     // Lähetystunnus
     $data = viivakoodi($viiva1, "code39", 280, 70, "");

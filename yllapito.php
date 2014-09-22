@@ -501,51 +501,22 @@ if ($upd == 1) {
     else {
       if ($yhtiorow['laite_huolto'] == 'X' and $toim == 'laite') {
         $huoltovalit = huoltovali_options();
-        foreach ($laite['huoltosyklit'] as $tyyppi => $sykli) {
+        foreach ($laite['huoltosyklit'] as &$huoltosyklit_laitteet) {
 
-          $huoltosykli_laite_tunnus = $sykli['huoltosykli_laite_tunnus'];
-          $huoltosykli_tunnus = $sykli['huoltosykli_tunnus'];
-          $huoltovali = $huoltovalit[$sykli['huoltovali']];
-          $kuka = $kukarow['kuka'];
-          $yhtio = $kukarow['yhtio'];
-
-          if (!empty($sykli['seuraava_tuleva_tapahtuma'])) {
-            $seuraava_tuleva_tapahtuma = date('Y-m-d', strtotime($sykli['seuraava_tuleva_tapahtuma']));
-            $viimeinen_tapahtuma = date('Y-m-d', strtotime("{$seuraava_tuleva_tapahtuma} - {$huoltovali['years']} years"));
-
-            $viimeinen_tapahtuma_query = "viimeinen_tapahtuma = '{$viimeinen_tapahtuma}',";
-          }
+          $huoltosykli_laite_tunnus = $huoltosyklit_laitteet['huoltosykli_laite_tunnus'];
+          $huoltosykli_tunnus = $huoltosyklit_laitteet['huoltosykli_tunnus'];
+          $huoltovali = $huoltovalit[$huoltosyklit_laitteet['huoltovali']];
 
           if ($huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus != 0) {
-            $sykli_query = "UPDATE huoltosyklit_laitteet SET
-                              huoltosykli_tunnus = {$huoltosykli_tunnus},
-                              huoltovali         = {$huoltovali['days']},
-                              {$viimeinen_tapahtuma_query}
-                              muutospvm          = now(),
-                              muuttaja           = '{$kuka}'
-                              WHERE tunnus       = {$huoltosykli_laite_tunnus}";
+            paivita_laitteen_huoltosykli($huoltosyklit_laitteet);
           }
           elseif ($huoltosykli_laite_tunnus == 0 and $huoltosykli_tunnus != 0) {
-            $sykli_query = "INSERT INTO huoltosyklit_laitteet
-                              SET yhtio = '{$yhtio}',
-                              huoltosykli_tunnus = {$huoltosykli_tunnus},
-                              laite_tunnus       = {$tunnus},
-                              huoltovali         = {$huoltovali['days']},
-                              {$viimeinen_tapahtuma_query}
-                              pakollisuus        = 1,
-                              laatija            = '{$kuka}',
-                              luontiaika         = now(),
-                              muutospvm          =  now(),
-                              muuttaja           = '{$kuka}'";
+            $huoltosyklit_laitteet['laite_tunnus'] = $tunnus;
+            lisaa_laitteen_huoltosykli($huoltosyklit_laitteet);
           }
           elseif ($huoltosykli_laite_tunnus != 0 and $huoltosykli_tunnus == 0) {
-            $sykli_query = "DELETE FROM huoltosyklit_laitteet
-                              WHERE tunnus = $huoltosykli_laite_tunnus";
+            poista_laitteen_huoltosykli($huoltosykli_laite_tunnus);
           }
-          if (isset($sykli_query)) {
-            pupe_query($sykli_query);
-          }
-          unset($sykli_query);
         }
 
         if (empty($errori)) {
@@ -620,38 +591,11 @@ if ($upd == 1) {
       if ($toim == 'laite' and $yhtiorow['laite_huolto'] == 'X') {
 
         $huoltovalit = huoltovali_options();
-        foreach ($laite['huoltosyklit'] as $sykli) {
+        foreach ($laite['huoltosyklit'] as &$huoltosyklit_laitteet) {
 
-          if ($sykli['huoltosykli_tunnus'] != 0) {
-
-            $huoltosykli_tunnus = $sykli['huoltosykli_tunnus'];
-            $huoltovali = $huoltovalit[$sykli['huoltovali']];
-            $kuka = $kukarow['kuka'];
-            $yhtio = $kukarow['yhtio'];
-
-            $viimeinen_tapahtuma_query = "";
-            if (!empty($sykli['seuraava_tuleva_tapahtuma'])) {
-              $seuraava_tuleva_tapahtuma = date('Y-m-d', strtotime($sykli['seuraava_tuleva_tapahtuma']));
-              $viimeinen_tapahtuma = date('Y-m-d', strtotime("{$seuraava_tuleva_tapahtuma} - {$huoltovali['years']} years"));
-
-              $viimeinen_tapahtuma_query = "viimeinen_tapahtuma = '{$viimeinen_tapahtuma}',";
-            }
-            else {
-              $viimeinen_tapahtuma_query = "viimeinen_tapahtuma = CURRENT_DATE,";
-            }
-
-            $sykli_query = "INSERT INTO huoltosyklit_laitteet
-                            SET yhtio = '{$yhtio}',
-                            huoltosykli_tunnus = {$huoltosykli_tunnus},
-                            laite_tunnus       = {$tunnus},
-                            huoltovali         = {$huoltovali['days']},
-                            {$viimeinen_tapahtuma_query}
-                            pakollisuus        = 1,
-                            laatija            = '{$kuka}',
-                            luontiaika         = NOW(),
-                            muutospvm          = NOW(),
-                            muuttaja           = '{$kuka}'";
-            pupe_query($sykli_query);
+          if ($huoltosyklit_laitteet['huoltosykli_tunnus'] != 0) {
+            $huoltosyklit_laitteet['laite_tunnus'] = $tunnus;
+            lisaa_laitteen_huoltosykli($huoltosyklit_laitteet);
           }
         }
       }

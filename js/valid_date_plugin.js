@@ -44,6 +44,8 @@
 
         var $error_element = $(this).parent().find('.error_element');
         if ($error_element.length === 0) {
+          //@TODO n‰in ei varmaan voida tehd‰. Jos error elementti‰ ei ole setattu niin pit‰isi
+          //keksi‰ parempi tapa n‰ytt‰‰ virhe
           $error_element = $(this);
         }
 

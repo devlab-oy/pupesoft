@@ -102,12 +102,14 @@ if ($tee == 'laskelma') {
     $eetasolisa = "or alv_taso like '%ee110%'";
     $tilat = "and lasku.tila = 'U'";
     $tilausrivijoin = "JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)";
+    $tilaustyyppi = "and lasku.tilaustyyppi != '9'";
   }
   else {
     $taso = 'ee500';
     $eetasolisa = "or alv_taso like '%ee510%' or alv_taso like '%ee520%'";
     $tilat = "and lasku.tila IN ('H','Y','M','P','Q')";
     $tilausrivijoin = "";
+    $tilaustyyppi = "";
   }
 
   $query = "SELECT
@@ -148,6 +150,7 @@ if ($tee == 'laskelma') {
             )
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             {$tilat}
+            {$tilaustyyppi}
             GROUP BY 1,2,3,4,5,6,7
             {$rajaalisa}";
   $result = pupe_query($query);

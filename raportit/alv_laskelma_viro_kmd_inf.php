@@ -118,24 +118,38 @@ if ($tee == 'laskelma') {
   $tilires = pupe_query($query);
   $tilirow = mysql_fetch_assoc($tilires);
 
-  $query = "SELECT lasku.tunnus ltunnus, lasku.laskunro laskunro,
-            trim(concat(lasku.nimi, ' ', lasku.nimitark)) nimi, lasku.ytunnus,
-            lasku.tapvm, lasku.alv, lasku.liitostunnus,
-            sum(lasku.summa) laskun_summa
-            #sum(tilausrivi.alv) alvia
-            FROM lasku USE INDEX (yhtio_tila_tapvm)
-            {$tilausrivijoin}
-            #JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuoteno != '{$yhtiorow['ennakkomaksu_tuotenumero']}')
-            #JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus AND asiakas.laji != 'H')
+  if ("{$rajaa}" == "1000") {
+    $rajaalisa = "HAVING veloitukset > 1000 or hyvitykset > 1000";
+  }
+  else {
+    $rajaalisa = "";
+  }
+
+  $query = "SELECT lasku.tunnus ltunnus,
+            lasku.laskunro laskunro,
+            trim(concat(lasku.nimi, ' ', lasku.nimitark)) nimi,
+            lasku.ytunnus,
+            lasku.tapvm,
+            lasku.alv,
+            lasku.liitostunnus,
+            sum(lasku.summa) laskun_summa,
+            sum(round(tiliointi.summa * if('veronmaara'='$oletus_verokanta', $oletus_verokanta, vero) / 100, 2)) veronmaara,
+            sum(tiliointi.summa) summa,
+            abs(sum(if(tiliointi.summa > 0, tiliointi.summa, 0))) veloitukset,
+            abs(sum(if(tiliointi.summa < 0, tiliointi.summa, 0))) hyvitykset
+            FROM lasku
+            JOIN tiliointi ON (
+              tiliointi.yhtio = lasku.yhtio AND
+              tiliointi.ltunnus = lasku.tunnus AND
+              tiliointi.korjattu = '' AND
+              tiliointi.tapvm    >= '{$alkupvm}' AND
+              tiliointi.tapvm    <= '{$loppupvm}' AND
+              tiliointi.tilino in ({$tilirow['tilitMUU']})
+            )
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             {$tilat}
-            and lasku.tapvm >= '{$alkupvm}'
-            and lasku.tapvm <= '{$loppupvm}'
-            #and lasku.vienti = 'E'
-            and lasku.tilaustyyppi != '9'
             GROUP BY 1,2,3,4,5,6,7
-            #HAVING alvia > 0
-            ORDER BY 1,2";
+            {$rajaalisa}";
   $result = pupe_query($query);
 
   $verot_yht = 0;
@@ -179,39 +193,13 @@ if ($tee == 'laskelma') {
 
   echo "<tbody>";
 
-  if ("{$rajaa}" == "1000") {
-    $rajaalisa = "HAVING veloitukset > 1000 or hyvitykset > 1000";
-  }
-  else {
-    $rajaalisa = "";
-  }
-
   $_i = 1;
 
   while ($row = mysql_fetch_assoc($result)) {
 
-    $query = "SELECT sum(round(tiliointi.summa * if('veronmaara'='$oletus_verokanta', $oletus_verokanta, vero) / 100, 2)) veronmaara,
-              sum(tiliointi.summa) summa,
-              abs(sum(if(tiliointi.summa > 0, tiliointi.summa, 0))) veloitukset,
-              abs(sum(if(tiliointi.summa < 0, tiliointi.summa, 0))) hyvitykset
-              FROM lasku
-              JOIN tiliointi ON (
-                tiliointi.yhtio = lasku.yhtio AND
-                tiliointi.ltunnus = lasku.tunnus AND
-                tiliointi.korjattu = '' AND
-                tiliointi.tilino in ({$tilirow['tilitMUU']})
-              )
-              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-              {$tilat}
-              AND lasku.tunnus = '{$row['ltunnus']}'
-              {$rajaalisa}";
-    $verores = pupe_query($query);
+    // if (!empty($rajaa) and mysql_num_rows($verores) == 0) continue;
 
-    if (!empty($rajaa) and mysql_num_rows($verores) == 0) continue;
-
-    $verorow = mysql_fetch_assoc($verores);
-
-    $_vero = $laskelma == 'a' ? $verorow['summa'] : $verorow['veronmaara'];
+    $_vero = $laskelma == 'a' ? $row['summa'] : $row['veronmaara'];
 
     $aineistoon = $_green;
 

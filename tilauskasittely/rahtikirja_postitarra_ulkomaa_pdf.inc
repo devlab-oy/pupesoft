@@ -132,7 +132,8 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
     $image = $pdf->jfif_embed($data);
     $logoparam['scale'] = 0.105;
     $pdf->image_place($image, 560, 70, $firstpage, $logoparam);
-  } else {
+  }
+  else {
     $pdf->draw_text(65, 570,  $rirow["toimitustapa"],             $firstpage, $norm);
   }
 

@@ -23,7 +23,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   }
 
   $laskut = hae_laskut($laskunro);
-  list($tilausrivit, $netto, $brutto, $vero) = hae_tilausrivit($laskunro);
+  list($tilausrivit, $tilausnumerot, $netto, $brutto, $vero) = hae_tilausrivit($laskunro);
 
   // Escape sequencejä printterille
   $logo           = "\x1C\x70\x01\x10";
@@ -103,7 +103,11 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
   // Footer
   $kuitin_teksti .= "{$align_center}";
-  $kuitin_teksti .= t("Kuittinumero") . ": {$laskut[0]['laskunro']}\n\n\n";
+  $kuitin_teksti .= t("Kuittinumero") . ": {$laskut[0]['laskunro']}\n\n";
+
+  $tilausnumero_teksti = count($tilausnumerot) > 1 ? "Tilausnumerot" : "Tilausnumero";
+  $kuitin_teksti .= t($tilausnumero_teksti) . ": " . implode(", ", $tilausnumerot) . "\n\n\n";
+
   $kuitin_teksti .= "{$emphasized_on}";
   $kuitin_teksti .= "{$yhtiorow['www']}\n\n";
   $kuitin_teksti .= "{$emphasized_off}";
@@ -150,13 +154,15 @@ function hae_tilausrivit($laskunro) {
              AND tilausrivi.yhtio = '{$yhtiorow['yhtio']}'";
   $result = pupe_query($query);
 
-  $rivit  = array();
-  $netto  = 0;
-  $brutto = 0;
-  $vero   = 0;
+  $rivit         = array();
+  $tilausnumerot = array();
+  $netto         = 0;
+  $brutto        = 0;
+  $vero          = 0;
 
   while ($rivi = mysql_fetch_assoc($result)) {
     array_push($rivit, $rivi);
+    array_push($tilausnumerot, $rivi['otunnus']);
     $netto += $rivi['rivihinta'];
     $vero += $rivi['rivihinta'] * ($rivi['alv'] / 100);
     $brutto += $rivi['rivihinta'] * (1 + ($rivi['alv'] / 100));
@@ -164,6 +170,7 @@ function hae_tilausrivit($laskunro) {
 
   return array(
     $rivit,
+    array_unique($tilausnumerot),
     hintapyoristys($netto),
     hintapyoristys($brutto, 1),
     hintapyoristys($vero)

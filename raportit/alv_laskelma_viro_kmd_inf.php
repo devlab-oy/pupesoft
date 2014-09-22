@@ -69,7 +69,7 @@ $chk = !empty($per_paiva) ? "checked" : "";
 
 echo "<tr>";
 echo "<th>",t("Aja laskelma per päivä"),"</th>";
-echo "<td><input type='checkbox' name='per_paiva' {$chk} /></td>";
+echo "<td><input type='checkbox' name='per_paiva' value='1' {$chk} /></td>";
 echo "</tr>";
 
 $chk = !empty($tee_excel) ? "checked" : "";
@@ -90,8 +90,24 @@ if ($tee == 'laskelma') {
 
   $oletus_verokanta = 20;
 
-  $alkupvm = date("Y-m-d", mktime(0, 0, 0, $kk,   1, $vv));
-  $loppupvm = date("Y-m-d", mktime(0, 0, 0, $kk+1, 0, $vv));
+  if (!empty($per_paiva)) {
+
+    echo "<br />";
+
+    $_url = "{$palvelin2}raportit/alv_laskelma_viro_kmd_inf.php";
+    $_url .= "?tee=laskelma&laskelma={$laskelma}&rajaa={$rajaa}&kk={$kk}&vv={$vv}";
+
+    echo "<a href='{$_url}&per_paiva=",($per_paiva-1),"'>",t("Edellinen päivä"),"</a> ";
+    echo t("ALV-laskelma KMD INF")," ",t("päivältä")," {$per_paiva}.{$kk}.{$vv} ";
+    echo "<a href='{$_url}&per_paiva=",($per_paiva+1),"'>",t("Seuraava päivä"),"</a>";
+
+    $alkupvm     = date("Y-m-d", mktime(0, 0, 0, $kk, $per_paiva, $vv));
+    $loppupvm    = date("Y-m-d", mktime(0, 0, 0, $kk, $per_paiva, $vv));
+  }
+  else {
+    $alkupvm = date("Y-m-d", mktime(0, 0, 0, $kk,   1, $vv));
+    $loppupvm = date("Y-m-d", mktime(0, 0, 0, $kk+1, 0, $vv));
+  }
 
   # ee100 = myynti
   # ee500 = osto

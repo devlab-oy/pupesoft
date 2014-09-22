@@ -134,10 +134,6 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
     $pdf->image_place($image, 560, 70, $firstpage, $logoparam);
   } else {
     $pdf->draw_text(65, 570,  $rirow["toimitustapa"],             $firstpage, $norm);
-    $data = file_get_contents($pupe_root_polku."/pics/Itella_logo.jpg");
-    $image = $pdf->jfif_embed($data);
-    $logoparam['scale'] = 0.105;
-    $pdf->image_place($image, 555, 0, $firstpage, $logoparam);
   }
 
 

@@ -255,11 +255,11 @@ function sepa_credittransfer($laskurow, $popvm_nyt, $netotetut_rivit = '') {
   $PstlAdr = $Cdtr->addChild('PstlAdr', '');                                                // PostalAddress
   // $AdrTp = $PstlAdr->addChild('AdrTp', '');
 
-  // Danske hylkää (joskus) aineistot, jos on vaan space, laitetaan tyhjässä tapauksessa aina viiva
-  $_osoite  = trim($laskurow['osoite']) == ''  ? '-' : $laskurow['osoite'];
-  $_postino = trim($laskurow['postino']) == '' ? '-' : $laskurow['postino'];
-  $_postitp = trim($laskurow['postitp']) == '' ? '-' : $laskurow['postitp'];
-  $_maa     = trim($laskurow['maa']) == ''     ? '-' : $laskurow['maa'];
+  // Danske hylkää (joskus) aineistot, jos on vaan space, laitetaan tyhjässä tapauksessa defaultteja
+  $_osoite  = trim($laskurow['osoite']) == ''  ? '-'  : $laskurow['osoite'];
+  $_postino = trim($laskurow['postino']) == '' ? '-'  : $laskurow['postino'];
+  $_postitp = trim($laskurow['postitp']) == '' ? '-'  : $laskurow['postitp'];
+  $_maa     = trim($laskurow['maa']) == ''     ? 'FI' : $laskurow['maa'];
 
   $AdrLine = $PstlAdr->addChild('AdrLine', sprintf("%-1.70s", $_osoite)); // AddressLine 1-70
   $AdrLine = $PstlAdr->addChild('AdrLine', sprintf("%-1.70s", "{$_maa}-{$_postino}-{$_postitp}"));

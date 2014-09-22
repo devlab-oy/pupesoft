@@ -7,9 +7,10 @@
  * @param  int  $laskunro
  * @param  int  $tulostimen_tunnus
  * @param array $params
- *  Esimerkki config parametreistä:
+ *  Esimerkki config parametreistä arvoina defaultit:
  *    array(
- *      "footer_teksti" => "Tekstii footeriin"
+ *      "header_teksti" => "ARK. 8.30-18.00 VARD. / LA. 10-15 LÖ.",
+ *      "footer_teksti" => "Kiitos käynnistä ja tervetuloa uudelleen!"
  *    );
  */
 function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array()) {
@@ -20,6 +21,13 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   }
   else {
     $footer_teksti = $params["footer_teksti"];
+  }
+
+  if (empty($params["header_teksti"])) {
+    $header_teksti = "ARK. 8.30-18.00 VARD. / LA. 10-15 LÖ.";
+  }
+  else {
+    $header_teksti = $params["header_teksti"];
   }
 
   $laskut = hae_laskut($laskunro);
@@ -43,7 +51,6 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $yhtion_www           = sprintf("%-42.42s", $yhtiorow['www']);
   $yhtion_ytunnus       = str_replace("0037", "", $laskut[0]["yhtio_ovttunnus"]);
   $yhtion_ytunnus       = tulosta_ytunnus($yhtion_ytunnus, $laskut[0]['yhtio_maa']);
-  $yhtion_aukioloajat   = "ARK. 8.30-18.00 VARD. / LA. 10-15 LÖ.";
 
   // Arvojen asettelu spritfillä ja muu asettelu
   $yhteensa = sprintf("%34.34s", $yhteensa);
@@ -69,7 +76,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $kuitin_teksti .= "{$yhtion_postino} {$yhtion_postitp}\n";
   $kuitin_teksti .= "Y-tunnus: {$yhtion_ytunnus}\n";
   $kuitin_teksti .= "Puh. {$yhtion_puhelinnumero}\n";
-  $kuitin_teksti .= "{$yhtion_aukioloajat}\n\n";
+  $kuitin_teksti .= "{$header_teksti}\n\n";
 
   $kuitin_teksti .= "{$align_left}";
 

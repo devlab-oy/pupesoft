@@ -150,6 +150,7 @@ if ($tee == 'laskelma') {
             lasku.tapvm,
             lasku.alv,
             lasku.liitostunnus,
+            sum(tiliointi.vero) veropros,
             sum(lasku.summa) laskun_summa,
             sum(round(tiliointi.summa * if('veronmaara'='$oletus_verokanta', $oletus_verokanta, vero) / 100, 2)) veronmaara,
             sum(tiliointi.summa) summa,
@@ -216,7 +217,7 @@ if ($tee == 'laskelma') {
 
   while ($row = mysql_fetch_assoc($result)) {
 
-    // if (!empty($rajaa) and mysql_num_rows($verores) == 0) continue;
+    if ($laskelma == 'a' and $row['veropros'] == 0) continue;
 
     $_vero = $laskelma == 'a' ? $row['summa'] : $row['veronmaara'];
 

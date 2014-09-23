@@ -62,6 +62,10 @@ if (!function_exists('alku')) {
       elseif ($laskurow["kateistyyppi"] != '') {
         $pdf_lasku->draw_text(310, 815, t("Käteiskuitti", $kieli),  $page_lasku[$sivu], $iso);
       }
+      elseif ($laskurow["maa"] == "IN") {
+        // Jos lasku menee Intiaan, niin laiitetaan hieman eri otsikko
+        $pdf_lasku->draw_text(310, 815, "Commercial Invoice", $page_lasku[$sivu], $iso);
+      }
       elseif ($laskurow["summa"] >= 0) {
         $pdf_lasku->draw_text(310, 815, t("Vientilasku", $kieli), $page_lasku[$sivu], $iso);
       }

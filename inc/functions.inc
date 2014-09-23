@@ -23879,13 +23879,11 @@ if (!function_exists('hae_kayttajaan_linkitetty_extranet_kayttaja')) {
     if ($yhtio == "") $yhtio = $kukarow['yhtio'];
 
     $query = "SELECT kuka.*
-              FROM kuka
-              JOIN extranet_kayttajan_lisatiedot
-              ON ( extranet_kayttajan_lisatiedot.yhtio = kuka.yhtio
-              AND extranet_kayttajan_lisatiedot.liitostunnus = kuka.tunnus
-              AND extranet_kayttajan_lisatiedot.selite       = '{$kuka}'
-              AND extranet_kayttajan_lisatiedot.laji         = 'LINKITYS' )
-              WHERE kuka.yhtio                               = '{$yhtio}'";
+              FROM extranet_kayttajan_lisatiedot
+              JOIN kuka ON (kuka.yhtio = extranet_kayttajan_lisatiedot.yhtio AND kuka.tunnus = extranet_kayttajan_lisatiedot.liitostunnus)
+              WHERE extranet_kayttajan_lisatiedot.yhtio = '{$yhtio}'
+              AND extranet_kayttajan_lisatiedot.selite  = '{$kuka}'
+              AND extranet_kayttajan_lisatiedot.laji    = 'LINKITYS'";
     $result = pupe_query($query);
 
     return mysql_fetch_assoc($result);

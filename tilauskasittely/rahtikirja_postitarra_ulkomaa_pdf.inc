@@ -133,7 +133,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
     $pdf->image_place($image, 560, 70, $firstpage, $logoparam);
   }
   else {
-    $pdf->draw_text(65, 570,  $toitarow['virallinen_selite'], $firstpage, $norm);
+    $pdf->draw_text(65, 570,  $selite_chk, $firstpage, $norm);
   }
 
   if (class_exists("Image_Barcode")) {

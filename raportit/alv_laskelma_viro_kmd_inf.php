@@ -2,7 +2,17 @@
 
 $pupe_DataTables = 'alv_laskelma_viro_kmd_inf';
 
+if (isset($_REQUEST["tee"])) {
+  if ($_REQUEST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
+  if ($_REQUEST["kaunisnimi"] != '') $_REQUEST["kaunisnimi"] = str_replace("/", "", $_REQUEST["kaunisnimi"]);
+}
+
 require "../inc/parametrit.inc";
+
+if (isset($tee) and $tee == "lataa_tiedosto") {
+  readfile("/tmp/".$tmpfilenimi);
+  exit;
+}
 
 if (!isset($laskelma)) $laskelma = 'a';
 if (!isset($vv)) $vv = date("Y");
@@ -88,6 +98,24 @@ echo "</form>";
 
 if ($tee == 'laskelma') {
 
+  $_csv = array(
+    'header' => array(
+      'taxPayerRegCode' => $yhtiorow['ytunnus'],
+      'submitterPersonCode' => $kukarow['kuka'],
+      'year' => $vv,
+      'month' => $kk,
+      'declarationType' => 1
+    ),
+  );
+
+  if (!empty($tee_excel)) {
+    include 'inc/pupeExcel.inc';
+
+    $worksheet = new pupeExcel();
+    $format_bold = array("bold" => TRUE);
+    $excelrivi = $excelsarake = 0;
+  }
+
   $oletus_verokanta = 20;
 
   if (!empty($per_paiva)) {
@@ -168,6 +196,8 @@ if ($tee == 'laskelma') {
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             {$tilat}
             {$tilaustyyppi}
+            AND lasku.tapvm    >= '{$alkupvm}'
+            AND lasku.tapvm    <= '{$loppupvm}'
             GROUP BY 1,2,3,4,5,6,7
             {$rajaalisa}";
   $result = pupe_query($query);
@@ -196,6 +226,37 @@ if ($tee == 'laskelma') {
   echo "<th>alv</th>";
   echo "<th>verot</th>";
   echo "</tr>";
+
+  if (isset($worksheet)) {
+    $worksheet->writeString($excelrivi, $excelsarake, t("CSV"), $format_bold);
+    $excelsarake++;
+
+    $worksheet->writeString($excelrivi, $excelsarake, "#", $format_bold);
+    $excelsarake++;
+
+    $worksheet->writeString($excelrivi, $excelsarake, t("Ytunnus"), $format_bold);
+    $excelsarake++;
+
+    $worksheet->writeString($excelrivi, $excelsarake, t("Nimi"), $format_bold);
+    $excelsarake++;
+
+    $worksheet->writeString($excelrivi, $excelsarake, t("Laskunro"), $format_bold);
+    $excelsarake++;
+
+    $worksheet->writeString($excelrivi, $excelsarake, t("Pvm"), $format_bold);
+    $excelsarake++;
+
+    $worksheet->writeString($excelrivi, $excelsarake, t("Laskun summa"), $format_bold);
+    $excelsarake++;
+
+    $worksheet->writeString($excelrivi, $excelsarake, t("ALV"), $format_bold);
+    $excelsarake++;
+
+    $worksheet->writeString($excelrivi, $excelsarake, t("Verot"), $format_bold);
+    $excelsarake++;
+
+    $excelrivi++;
+  }
 
   echo "<tr>";
   echo "<td><input type='text'   class='search_field' name='search_aineistoon'></td>";
@@ -258,6 +319,66 @@ if ($tee == 'laskelma') {
     echo "<td>$_vero</td>";
     echo "</tr>";
 
+    if (isset($worksheet)) {
+
+      $excelsarake = 0;
+
+      $worksheet->writeString($excelrivi, $excelsarake, ($aineistoon == $_green ? "X" : ""));
+      $excelsarake++;
+
+      $worksheet->write($excelrivi, $excelsarake, $_i);
+      $excelsarake++;
+
+      $worksheet->write($excelrivi, $excelsarake, $row['ytunnus']);
+      $excelsarake++;
+
+      $worksheet->writeString($excelrivi, $excelsarake, $row['nimi']);
+      $excelsarake++;
+
+      $worksheet->write($excelrivi, $excelsarake, $row['laskunro']);
+      $excelsarake++;
+
+      $worksheet->write($excelrivi, $excelsarake, tv1dateconv($row['tapvm']));
+      $excelsarake++;
+
+      $worksheet->write($excelrivi, $excelsarake, $row['laskun_summa']);
+      $excelsarake++;
+
+      $worksheet->write($excelrivi, $excelsarake, $row['alv']);
+      $excelsarake++;
+
+      $worksheet->write($excelrivi, $excelsarake, $_vero);
+      $excelsarake++;
+
+      $excelrivi++;
+    }
+
+    if ($laskelma == 'a') {
+      $_csv['A'][] = array(
+        'buyerRegCode' => $row['ytunnus'],
+        'buyerName' => $row['nimi'],
+        'invoiceNumber' => $row['laskunro'],
+        'invoiceDate' => tv1dateconv($row['tapvm']),
+        'invoiceSum' => $row['laskun_summa'],
+        'taxRate' => $row['alv'],
+        'invoiceSumForRate' => $row['laskun_summa'],
+        'sumForRateInPeriod' => $_vero,
+        'comments' => '',
+      );
+    }
+    else {
+      $_csv['B'][] = array(
+        'sellerRegCode' => $row['ytunnus'],
+        'sellerName' => $row['nimi'],
+        'invoiceNumber' => $row['laskunro'],
+        'invoiceDate' => tv1dateconv($row['tapvm']),
+        'invoiceSumVat' => $row['laskun_summa'],
+        'vatSum' => $_vero,
+        'vatInPeriod' => $_vero,
+        'comments' => '',
+      );
+    }
+
     $verot_yht += $_vero;
     $_i++;
   }
@@ -275,6 +396,59 @@ if ($tee == 'laskelma') {
 
   echo "</table>";
 
+  if (isset($worksheet)) {
+
+    $excelnimi = $worksheet->close();
+
+    echo "<br />";
+    echo "<br />";
+    echo "<form method='post' class='multisubmit'>";
+    echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+    echo "<input type='hidden' name='kaunisnimi' value='ee_vat_kmd_inf.xlsx'>";
+    echo "<input type='hidden' name='tmpfilenimi' value='{$excelnimi}'>";
+    echo "<table>";
+    echo "<tr><th>", t("Tallenna (xlsx)"), ":</th>";
+    echo "<td class='back'><input type='submit' value='", t("Tallenna"), "'></td></tr>";
+    echo "</table>";
+    echo "</form>";
+  }
+
+  if (count($_csv['A']) > 0) {
+    $_csv_file = "header;".implode(";", $_csv['header'])."\n";
+
+    foreach ($_csv['A'] as $_a) {
+      $_csv_file .= "A;".implode(";", $_a)."\n";
+    }
+  }
+  elseif (count($_csv['B']) > 0) {
+    $_csv_file = "header;".implode(";", $_csv['header'])."\n";
+
+    foreach ($_csv['B'] as $_b) {
+      $_csv_file .= "B;".implode(";", $_b)."\n";
+    }
+  }
+  else {
+    $_csv_file = "";
+  }
+
+  if (!empty($_csv_file)) {
+
+    $_csv_file = utf8_encode($_csv_file);
+    $csvnimi = md5(uniqid(mt_rand(), true))."csv";
+
+    file_put_contents("/tmp/".$csvnimi, $_csv_file);
+
+    echo "<br />";
+    echo "<form method='post' class='multisubmit'>";
+    echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+    echo "<input type='hidden' name='kaunisnimi' value='ee_vat_kmd_inf.csv'>";
+    echo "<input type='hidden' name='tmpfilenimi' value='{$csvnimi}'>";
+    echo "<table>";
+    echo "<tr><th>", t("Tallenna (csv)"), ":</th>";
+    echo "<td class='back'><input type='submit' value='", t("Tallenna"), "'></td></tr>";
+    echo "</table>";
+    echo "</form>";
+  }
 }
 
 require "inc/footer.inc";

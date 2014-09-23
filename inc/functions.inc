@@ -1012,15 +1012,15 @@ if (!function_exists("maventa_invoice_put_file")) {
       $files_out = $files_out_resend;
     }
     else {
-      $files_out['files']   = array();
+      $files_out['files']     = array();
       $files_out['filenames'] = array();
 
-      //Finvoice
-      $files_out['files'][0]      = base64_encode($xmlstring);
+      // Finvoice
+      $files_out['files'][0]     = base64_encode($xmlstring);
       $files_out['filenames'][0] = "$invoice_number.xml";
 
-      //PDFä
-      $files_out['files'][1]      = base64_encode(tulosta_lasku("LASKU:".$invoice_number, $kieli, "VERKKOLASKU_MAVENTA", "", "", "", ""));
+      // PDFä
+      $files_out['files'][1]     = base64_encode(tulosta_lasku("LASKU:".$invoice_number, $kieli, "VERKKOLASKU_MAVENTA", "", "", "", ""));
       $files_out['filenames'][1] = "$invoice_number.pdf";
     }
 

@@ -105,10 +105,9 @@ if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
 echo "<th>".t("Työaika")."<br>".t("Työn suorittaja")."</th>
     <th>".t("Luvattu")."</th>
     <th>".t("Myyjä")."<br>".t("Tyyppi")."</th>
-    <th>".t("Työjono")."/<br>".t("Työstatus")."</th>
-    <th style='visibility:hidden; display:none;'></th>
-      <th style='visibility:hidden; display:none;'></th>
-    </tr>";
+    <th>".t("Työjono")."/<br>".t("Työstatus")."</th>";
+if ($yhtiorow['laiterekisteri_kaytossa'] == '') echo "<th></th>";
+echo "<th style='visibility:hidden; display:none;'></th></tr>";
 
 echo "<tr>";
 
@@ -599,7 +598,7 @@ if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
   $datatables_conf[] = array($pupe_DataTables[0], 12, 11, true, true);
 }
 else {
-  $datatables_conf[] = array($pupe_DataTables[0], 8, 7, true, true);
+  $datatables_conf[] = array($pupe_DataTables[0], 9, 8, true, true);
 }
 
 if (count($tyomaarays_tunti_yhteensa) > 0 and $toim == 'TYOMAARAYS_ASENTAJA') {

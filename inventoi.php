@@ -872,6 +872,8 @@ if ($tee == 'VALMIS') {
               // Toissijaisesti kokeillaan vielä varasto-tilin oletuskustannuspaikkaa
               list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
 
+              $tiliointisumma = round($summa, 2);
+
               $query = "INSERT into tiliointi set
                         yhtio    = '$kukarow[yhtio]',
                         ltunnus  = '$laskuid',
@@ -880,7 +882,7 @@ if ($tee == 'VALMIS') {
                         kohde    = '{$kohde_ins}',
                         projekti = '{$projekti_ins}',
                         tapvm    = now(),
-                        summa    = $summa,
+                        summa    = $tiliointisumma,
                         vero     = 0,
                         lukko    = '',
                         selite   = 'Inventointi: ".t("Tuotteen")." {$row["tuoteno"]} $selite',
@@ -896,7 +898,7 @@ if ($tee == 'VALMIS') {
                         kohde    = '{$kohde_ins}',
                         projekti = '{$projekti_ins}',
                         tapvm    = now(),
-                        summa    = $summa * -1,
+                        summa    = $tiliointisumma * -1,
                         vero     = 0,
                         lukko    = '',
                         selite   = 'Inventointi: ".t("Tuotteen")." {$row["tuoteno"]} $selite',

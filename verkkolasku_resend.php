@@ -168,6 +168,10 @@ if ($handle = opendir($kansio)) {
 $kansio = "{$pupe_root_polku}/dataout/maventa_error/";
 
 if ($handle = opendir($kansio)) {
+
+  // Laitetaan laskut yhtiˆkohtaiseen arrayseen, jotta voidaan l‰hett‰‰ yhdell‰ soap-kutsulla per yritys
+  $mave_laskut = array();
+
   while (($lasku = readdir($handle)) !== FALSE) {
 
     // Ei k‰sitell‰ kun Maventa tiedostoja
@@ -175,14 +179,13 @@ if ($handle = opendir($kansio)) {
       continue;
     }
 
-    $yhtio = $matsit[1];
-    $yhtiorow = hae_yhtion_parametrit($yhtio);
-    $kukarow = hae_kukarow('admin', $yhtio);
+    $mave_laskut[$matsit[1]][$matsit[2]] = $lasku;
+  }
 
-    // Jos lasku on liian vanha, ei k‰sitell‰, l‰hetet‰‰n maililla
-    if (onko_lasku_liian_vanha($kansio.$lasku)) {
-      continue;
-    }
+  foreach ($mave_laskut as $yhtio => $laskut) {
+
+    $yhtiorow = hae_yhtion_parametrit($yhtio);
+    $kukarow  = hae_kukarow('admin', $yhtio);
 
     // T‰ytet‰‰n api_keys, n‰ill‰ kirjaudutaan Maventaan
     $api_keys = array();
@@ -196,23 +199,31 @@ if ($handle = opendir($kansio)) {
 
     try {
       // Testaus
-      //$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+      // $client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
 
       // Tuotanto
       $client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+    }
+    catch (Exception $exVirhe) {
+      echo "VIRHE: Yhteys Maventaan ep‰onnistui: ".$exVirhe->getMessage()."\n";
+      continue;
+    }
+
+    foreach ($laskut as $laskunro => $lasku) {
+
+      // Jos lasku on liian vanha, ei k‰sitell‰, l‰hetet‰‰n maililla
+      if (onko_lasku_liian_vanha($kansio.$lasku)) {
+        continue;
+      }
 
       // Haetaan tarvittavat tiedot filest‰
       $files_out = unserialize(file_get_contents($kansio.$lasku));
 
-      $status = maventa_invoice_put_file($client, $api_keys, $matsit[2], "", $kukarow['kieli'], $files_out);
+      $status = maventa_invoice_put_file($client, $api_keys, $laskunro, "", $kukarow['kieli'], $files_out);
 
       // Siirret‰‰n dataout kansioon jos kaikki meni ok
       rename($kansio.$lasku, "{$pupe_root_polku}/dataout/$lasku");
-
-      echo  "Maventa-lasku $matsit[2]: $status<br>\n";
-    }
-    catch (Exception $exVirhe) {
-      echo "VIRHE: Yhteys Maventaan ep‰onnistui: ".$exVirhe->getMessage()."\n";
+      echo "Maventa-lasku $laskunro: $status<br>\n";
     }
   }
 

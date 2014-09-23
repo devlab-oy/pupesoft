@@ -8786,6 +8786,8 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
   function livesearch_asiakkaantilausnumero($toim) {
     global $yhtiorow, $kukarow, $palvelin2;
 
+    pupeslave_start();
+
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
     $formi = $_REQUEST["livesearch_form"];
@@ -8899,12 +8901,16 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
         document.getElementById('livesearch_$hakuid').style.innerHTML = '';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists("livesearch_tilihaku")) {
   function livesearch_tilihaku() {
     global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -8989,12 +8995,16 @@ if (!function_exists("livesearch_tilihaku")) {
         document.getElementById('livesearch_$hakuid').style.innerHTML = '';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists("livesearch_tuotehaku")) {
   function livesearch_tuotehaku() {
     global $yhtiorow, $kukarow, $palvelin2, $verkkokauppa;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -9202,12 +9212,16 @@ if (!function_exists("livesearch_tuotehaku")) {
         document.getElementById('livesearch_{$hakuid}').style.visibility = 'hidden';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists('livesearch_tuotekategoriahaku')) {
   function livesearch_tuotekategoriahaku() {
     global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -9294,12 +9308,16 @@ if (!function_exists('livesearch_tuotekategoriahaku')) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists('livesearch_tuoteryhmahaku')) {
   function livesearch_tuoteryhmahaku() {
     global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -9379,12 +9397,16 @@ if (!function_exists('livesearch_tuoteryhmahaku')) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists("livesearch_kayttajahaku")) {
   function livesearch_kayttajahaku($toim = '') {
     global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -9480,12 +9502,16 @@ if (!function_exists("livesearch_kayttajahaku")) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists("livesearch_asiakashaku")) {
   function livesearch_asiakashaku() {
     global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -9574,12 +9600,16 @@ if (!function_exists("livesearch_asiakashaku")) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists('livesearch_asiakasytunnushaku')) {
   function livesearch_asiakasytunnushaku() {
     global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -9664,12 +9694,16 @@ if (!function_exists('livesearch_asiakasytunnushaku')) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists('livesearch_asiakaskategoriahaku')) {
   function livesearch_asiakaskategoriahaku() {
     global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -9756,12 +9790,16 @@ if (!function_exists('livesearch_asiakaskategoriahaku')) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists("livesearch_varastohaku")) {
   function livesearch_varastohaku() {
     global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -9841,12 +9879,16 @@ if (!function_exists("livesearch_varastohaku")) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists("livesearch_toimittajahaku")) {
   function livesearch_toimittajahaku($toim = '') {
     global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -9923,12 +9965,16 @@ if (!function_exists("livesearch_toimittajahaku")) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists("livesearch_sarjanumerohaku")) {
   function livesearch_sarjanumerohaku($toim = '') {
     global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -9999,6 +10045,8 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 

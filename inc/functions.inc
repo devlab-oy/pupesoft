@@ -1024,19 +1024,27 @@ if (!function_exists("maventa_invoice_put_file")) {
       $files_out['filenames'][1] = "$invoice_number.pdf";
     }
 
-    try {
-      if ($client === FALSE) {
-        throw new Exception('VIRHE: Yhteys Maventaan ei ole auki.');
-      }
-      else {
-        $return_value = $client->invoice_put_finvoice($api_keys, $files_out);
-        return $return_value->status;
-      }
+    if ($client === NULL and $api_keys === NULL) {
+      // Siirret‰‰n l‰hetysjonoon
+      file_put_contents("{$pupe_root_polku}/dataout/maventa_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number-serialized.txt", serialize($files_out));
+      return "Lasku siirretty l‰hetysjonoon";
     }
-    catch (Exception $exVirhe) {
-      // Siirret‰‰n error-kansioon, paitsi jos faili on seill‰ jo ennest‰‰n...
-      if (count($files_out_resend) == 0) file_put_contents("{$pupe_root_polku}/dataout/maventa_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number-serialized.txt", serialize($files_out));
-      return $exVirhe->getMessage();
+    else {
+      // L‰hetet‰‰n lasku
+      try {
+        if ($client === FALSE) {
+          throw new Exception('VIRHE: Yhteys Maventaan ei ole auki.');
+        }
+        else {
+          $return_value = $client->invoice_put_finvoice($api_keys, $files_out);
+          return $return_value->status;
+        }
+      }
+      catch (Exception $exVirhe) {
+        // Siirret‰‰n error-kansioon, paitsi jos faili on seill‰ jo ennest‰‰n...
+        if (count($files_out_resend) == 0) file_put_contents("{$pupe_root_polku}/dataout/maventa_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number-serialized.txt", serialize($files_out));
+        return $exVirhe->getMessage();
+      }
     }
   }
 }
@@ -1046,14 +1054,14 @@ if (!function_exists("apix_invoice_put_file")) {
     global $kukarow, $yhtiorow, $pupe_root_polku;
 
     // siirret‰‰n laskutiedosto operaattorille
-    //$url        = "https://test-api.apix.fi/invoices";
+    //$url       = "https://test-api.apix.fi/invoices";
     $url         = "https://api.apix.fi/invoices";
     $transferkey = $yhtiorow['apix_avain'];
     $transferid  = $yhtiorow['apix_tunnus'];
     $software    = "Pupesoft";
     $version     = "1.0";
     $timestamp   = gmdate("YmdHis");
-    $apix_ulos    = "";
+    $apix_ulos   = "";
 
     if ($apixzipfile_resend != "") {
       // Filenimi joka uudelleenl‰hetet‰‰n

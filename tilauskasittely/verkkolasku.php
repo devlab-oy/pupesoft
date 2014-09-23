@@ -2749,28 +2749,6 @@ else {
         }
       }
       elseif ($yhtiorow["verkkolasku_lah"] == "maventa" and file_exists(realpath($nimifinvoice))) {
-        // T‰ytet‰‰n api_keys, n‰ill‰ kirjaudutaan Maventaan
-        $api_keys = array();
-        $api_keys["user_api_key"]   = $yhtiorow['maventa_api_avain'];
-        $api_keys["vendor_api_key"] = $yhtiorow['maventa_ohjelmisto_api_avain'];
-
-        // Vaihtoehtoinen company_uuid
-        if ($yhtiorow['maventa_yrityksen_uuid'] != "") {
-          $api_keys["company_uuid"] = $yhtiorow['maventa_yrityksen_uuid'];
-        }
-
-        try {
-          // Testaus
-          //$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
-
-          // Tuotanto
-          $client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
-        }
-        catch (Exception $exVirhe) {
-          $client = FALSE;
-          $tulos_ulos .= "VIRHE: Yhteys Maventaan ep‰onnistui: ".$exVirhe->getMessage()."\n";
-        }
-
         // Splitataan file ja l‰hetet‰‰n YKSI lasku kerrallaan
         $maventa_laskuarray = explode("<SOAP-ENV:Envelope", file_get_contents($nimifinvoice));
         $maventa_laskumaara = count($maventa_laskuarray);
@@ -2780,9 +2758,9 @@ else {
 
           for ($a = 1; $a < $maventa_laskumaara; $a++) {
             preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $maventa_laskuarray[$a], $invoice_number);
-
-            $status = maventa_invoice_put_file($client, $api_keys, $invoice_number[1], "<SOAP-ENV:Envelope".$maventa_laskuarray[$a], $kieli);
-
+            
+            $status = maventa_invoice_put_file(NULL, NULL, $invoice_number[1], "<SOAP-ENV:Envelope".$maventa_laskuarray[$a], $kieli);
+            
             $tulos_ulos .= "Maventa-lasku $invoice_number[1]: $status<br>\n";
           }
         }

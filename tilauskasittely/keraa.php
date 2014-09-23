@@ -580,7 +580,8 @@ if ($tee == 'P') {
                      laskun_lisatiedot.laskutus_postino,
                      laskun_lisatiedot.laskutus_postitp,
                      laskun_lisatiedot.laskutus_maa,
-                     asiakas.kerayserat
+                     asiakas.kerayserat,
+                     asiakas.kieli
                      FROM lasku
                      JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
                      LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
@@ -898,7 +899,7 @@ if ($tee == 'P') {
                 }
                 else {
                   // Tilausrivin systeemikommentti
-                  $rkomm = t("Tuote Loppu.");
+                  $rkomm = t("Tuote Loppu.", $otsikkorivi["kieli"]);
                 }
               }
               elseif ($poikkeama_kasittely[$apui] == "JT") {

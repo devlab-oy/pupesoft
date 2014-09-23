@@ -603,18 +603,18 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
         //muuten perustetaan uusi otsikko.
         //luo_ostotilausotsikko()-funktio handaa uuden otsikon luonnin ja olemassa olevan hakemisen
         $params = array(
-          'liitostunnus' => $toimi_tunnus,
-          'ohjausmerkki' => $laskurow['ohjausmerkki'],
-          'nimi' => $laskurow['toim_nimi'],
-          'nimitark' => $laskurow['toim_nimitark'],
-          'osoite' => $laskurow['toim_osoite'],
-          'postino' => $laskurow['toim_postino'],
-          'postitp' => $laskurow['toim_postitp'],
-          'maa' => $laskurow['toim_maa'],
-          'myytil_toimaika' => $laskurow['toimaika'],
-          'toimipaikka' => $laskurow['vanhatunnus'],
+          'liitostunnus'            => $toimi_tunnus,
+          'ohjausmerkki'            => $laskurow['ohjausmerkki'],
+          'nimi'                    => $laskurow['toim_nimi'],
+          'nimitark'                => $laskurow['toim_nimitark'],
+          'osoite'                  => $laskurow['toim_osoite'],
+          'postino'                 => $laskurow['toim_postino'],
+          'postitp'                 => $laskurow['toim_postitp'],
+          'maa'                     => $laskurow['toim_maa'],
+          'myytil_toimaika'         => $laskurow['toimaika'],
+          'toimipaikka'             => $laskurow['vanhatunnus'],
           'ostotilauksen_kasittely' => $ostotilauksen_kasittely,
-          'tilaustyyppi' => $laskurow['tilaustyyppi'],
+          'tilaustyyppi'            => $laskurow['tilaustyyppi'],
         );
 
         if (!empty($tilausrivirow['tilausrivilinkki'])) {
@@ -664,23 +664,23 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
       }
     }
     else {
-      $hinta       = $tilausrivirow["hinta"];
-      $tuoteno     = $tilausrivirow["tuoteno"];
-      $tuotenimitys  = $tilausrivirow["nimitys"];
-      $kpl       = $tilausrivirow["tilkpl"];
+      $hinta        = $tilausrivirow["hinta"];
+      $tuoteno      = $tilausrivirow["tuoteno"];
+      $tuotenimitys = $tilausrivirow["nimitys"];
+      $kpl          = $tilausrivirow["tilkpl"];
 
       for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
         ${'ale'.$alepostfix} = $tilausrivirow["ale{$alepostfix}"];
       }
 
       $toimaika     = $tilausrivirow["toimaika"];
-      $kerayspvm     = $tilausrivirow["kerayspvm"];
-      $alv       = $tilausrivirow["alv"];
-      $kommentti     = $tilausrivirow["kommentti"];
+      $kerayspvm    = $tilausrivirow["kerayspvm"];
+      $alv          = $tilausrivirow["alv"];
+      $kommentti    = $tilausrivirow["kommentti"];
       $perheid2     = $tilausrivirow["perheid2"];
       $rivitunnus   = $tilausrivirow["tunnus"];
-      $automatiikka   = "ON";
-      $tee       = "Y";
+      $automatiikka = "ON";
+      $tee          = "Y";
 
       if ($tilausrivirow["myyntihinta_maara"] != 0 and $hinta != 0) {
         $hinta = hintapyoristys($hinta * $tilausrivirow["myyntihinta_maara"]);

@@ -126,15 +126,14 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   // tehdään pdf:n uusi sivu
   $firstpage = $pdf->new_page("a5");
 
-  if (strtoupper($rirow["toimitustapa"]) != "ITELLA EXPRESS BUSINESS DAY PARCEL"
-    and strtoupper($rirow["toimitustapa"]) != "ITELLA EXPRESS BUSINESS DAY PALLET") {
+  if ($toitarow['virallinen_selite'] == "Priority Ulkomaa") {
     $data = file_get_contents($pupe_root_polku."/pics/Itella_priority.jpg");
     $image = $pdf->jfif_embed($data);
     $logoparam['scale'] = 0.105;
     $pdf->image_place($image, 560, 70, $firstpage, $logoparam);
   }
   else {
-    $pdf->draw_text(65, 570,  $rirow["toimitustapa"],             $firstpage, $norm);
+    $pdf->draw_text(65, 570,  $toitarow['virallinen_selite'], $firstpage, $norm);
   }
 
   if (class_exists("Image_Barcode")) {

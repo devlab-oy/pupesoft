@@ -396,12 +396,12 @@ if ($tee == 'laskelma') {
 
   echo "</table>";
 
+  echo "<br /><br />";
+
   if (isset($worksheet)) {
 
     $excelnimi = $worksheet->close();
 
-    echo "<br />";
-    echo "<br />";
     echo "<form method='post' class='multisubmit'>";
     echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
     echo "<input type='hidden' name='kaunisnimi' value='ee_vat_kmd_inf.xlsx'>";
@@ -438,7 +438,6 @@ if ($tee == 'laskelma') {
 
     file_put_contents("/tmp/".$csvnimi, $_csv_file);
 
-    echo "<br />";
     echo "<form method='post' class='multisubmit'>";
     echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
     echo "<input type='hidden' name='kaunisnimi' value='ee_vat_kmd_inf.csv'>";

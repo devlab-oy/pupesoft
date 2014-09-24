@@ -3450,7 +3450,7 @@ if ($tee == '') {
     }
 
     if ($toim == "PIKATILAUS") {
-      if ($yhtiorow['pikatilauksessa_focus_myyjanroon'] == "Y") {
+      if ($yhtiorow['pikatilauksessa_myyjanro_pakollinen'] == "Y") {
         if ($myyjanumero and !loytyyko_myyja_tunnuksella($myyjanumero)) {
           $myyjanumero_virhe = "<font class='error'>" . t("Virheellinen myyjänro") . "</font>";
           $tuoteno           = "";
@@ -3490,7 +3490,7 @@ if ($tee == '') {
         </tr>";
       echo "<tr>$jarjlisa
         <th align='left'>".t("Myyjänro")."</th>
-        <td><input type='number' size='10' name='myyjanumero' value='$my' required></td>
+        <td><input type='number' size='10' name='myyjanumero' value='$my' {$required}></td>
         </tr>";
     }
   }

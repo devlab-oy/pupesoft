@@ -13,19 +13,19 @@ function tulosta_hintalaput($tuotteet) {
   $pdf->set_default('margin-left', 0);
 
   $text_normal = array(
-    "height" => 3,
+    "height" => 8,
     "font"   => "Helvetica"
   );
 
   $text_bold = array(
-    "height" => 4,
+    "height" => 10,
     "font"   => "Helvetica-Bold"
   );
 
   foreach ($tuotteet as $tuote) {
-    $nimitys = explode("\n", wordwrap($tuote['nimitys'], 22));
+    $nimitys = explode("\n", wordwrap($tuote['nimitys'], 28));
     $hinta = hintapyoristys($tuote['myyntihinta']);
-    $viivakoodi = viivakoodi($tuote['tuoteno'], "code128", 120, 30, $tuote['tuoteno']);
+    $viivakoodi = viivakoodi($tuote['tuoteno'], "code128", 360, 90, $tuote['tuoteno']);
     $viivakoodin_asetukset = array(
       "scale" => array(
         "x" => 0.1,
@@ -39,11 +39,12 @@ function tulosta_hintalaput($tuotteet) {
     for ($i = 0; $i < $montako_tulostetaan; $i++) {
       $page = $pdf->new_page('4.9x3cm');
 
-      $pdf->draw_text(0, 27, $nimitys[0], $page, $text_normal);
-      $pdf->draw_text(0, 24, $nimitys[1], $page, $text_normal);
-      $pdf->draw_text(30, 18, $hinta, $page, $text_bold);
-      $pdf->draw_text(40, 18, $tuote['yksikko'], $page, $text_normal);
-      $pdf->image_place($kuva, 2, 6, $page, $viivakoodin_asetukset);
+      // Kuva ensin, jotta ei mene tekstin päälle
+      $pdf->image_place($kuva, 5, 17, $page, $viivakoodin_asetukset);
+      $pdf->draw_text(0, 77, $nimitys[0], $page, $text_normal);
+      $pdf->draw_text(0, 68, $nimitys[1], $page, $text_normal);
+      $pdf->draw_text(80, 50, str_replace(".", ",", $hinta) . " EUR", $page, $text_bold);
+      $pdf->draw_text(115, 40, $tuote['yksikko'], $page, $text_normal);
     }
   }
 

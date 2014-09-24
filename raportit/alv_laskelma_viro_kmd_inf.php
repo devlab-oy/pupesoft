@@ -164,11 +164,36 @@ if ($tee == 'laskelma') {
   $tilires = pupe_query($query);
   $tilirow = mysql_fetch_assoc($tilires);
 
+  $rajaalisa = "";
+
   if ("{$rajaa}" == "1000") {
-    $rajaalisa = "HAVING veloitukset > 1000 or hyvitykset > 1000";
-  }
-  else {
-    $rajaalisa = "";
+
+    $query = "SELECT trim(concat(lasku.nimi, ' ', lasku.nimitark)) nimi,
+          lasku.ytunnus,
+          group_concat(DISTINCT lasku.liitostunnus) exclude_asiakkaat,
+          sum(tiliointi.summa) summa
+          FROM lasku
+          JOIN tiliointi ON (
+            tiliointi.yhtio = lasku.yhtio AND
+            tiliointi.ltunnus = lasku.tunnus AND
+            tiliointi.korjattu = '' AND
+            tiliointi.tapvm    >= '{$alkupvm}' AND
+            tiliointi.tapvm    <= '{$loppupvm}' AND
+            tiliointi.tilino in ({$tilirow['tilitMUU']})
+          )
+          WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+          {$tilat}
+          {$tilaustyyppi}
+          AND lasku.tapvm    >= '{$alkupvm}'
+          AND lasku.tapvm    <= '{$loppupvm}'
+          GROUP BY 1,2
+          HAVING sum(tiliointi.summa) < {$rajaa}";
+    $result = pupe_query($query);
+    $row = mysql_fetch_assoc($result);
+
+    if (!empty($row['exclude_asiakkaat'])) {
+      $rajaalisa = "and lasku.liitostunnus NOT IN ({$row['exclude_asiakkaat']})";
+    }
   }
 
   $query = "SELECT lasku.tunnus ltunnus,
@@ -198,8 +223,8 @@ if ($tee == 'laskelma') {
             {$tilaustyyppi}
             AND lasku.tapvm    >= '{$alkupvm}'
             AND lasku.tapvm    <= '{$loppupvm}'
-            GROUP BY 1,2,3,4,5,6,7
-            {$rajaalisa}";
+            {$rajaalisa}
+            GROUP BY 1,2,3,4,5,6,7";
   $result = pupe_query($query);
 
   $verot_yht = 0;

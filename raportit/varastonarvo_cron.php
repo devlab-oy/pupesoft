@@ -8,6 +8,9 @@ if (php_sapi_name() != 'cli') {
 require_once "../inc/functions.inc";
 require_once "../inc/connect.inc";
 
+// Logitetaan ajo
+cron_log();
+
 ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
 error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 ini_set("display_errors", 0);
@@ -19,9 +22,6 @@ if ($argv[1] == '') {
 if ($argv[2] == '') {
   die ("Sähköpostiosoite on pakollinen tieto!\n");
 }
-
-// Logitetaan ajo
-cron_log();
 
 if ($argv[0] == 'varastonarvo_cron.php' and $argv[1] != '' and $argv[2] != '') {
 

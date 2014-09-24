@@ -12,13 +12,13 @@ if (php_sapi_name() != 'cli') {
 require "../inc/connect.inc";
 require "../inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
+
 // hmm.. j‰nn‰‰
 $kukarow['yhtio'] = addslashes(trim($argv[1]));
 $pomomail = addslashes(trim($argv[2]));
 $pomomail2 = addslashes(trim($argv[3]));
-
-// Logitetaan ajo
-cron_log();
 
 $query    = "SELECT * FROM yhtio WHERE yhtio='$kukarow[yhtio]'";
 $yhtiores = pupe_query($query);

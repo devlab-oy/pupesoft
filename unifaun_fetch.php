@@ -27,9 +27,6 @@ if ($php_cli and count(debug_backtrace()) <= 1) {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
-  // Logitetaan ajo
-  cron_log();  
-
   $kukarow['yhtio'] = (string) $argv[1];
   $kukarow['kuka']  = 'admin';
   $kukarow['kieli'] = 'fi';
@@ -165,7 +162,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
       }
 
       rename($ftpget_dest[$operaattori]."/".$file, $ftpget_dest[$operaattori]."/ok/".$file);
-      
+
       // Logitetaan ajo
       cron_log($ftpget_dest[$operaattori]."/ok/".$file);
     }

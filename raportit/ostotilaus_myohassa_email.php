@@ -12,6 +12,9 @@ if (php_sapi_name() == 'cli') {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   $yhtio          = trim($argv[1]);
   $paivamaararaja = trim($argv[2]);
   $kieli          = "";
@@ -31,9 +34,6 @@ if (php_sapi_name() == 'cli') {
     echo "\nUsage: php ".basename($argv[0])." yhtio 3\n\n";
     die;
   }
-
-  // Logitetaan ajo
-  cron_log();
 
   $yhtiorow = hae_yhtion_parametrit($yhtio);
 

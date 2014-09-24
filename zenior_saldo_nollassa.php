@@ -32,9 +32,6 @@ if ($yhtiorow["epakurantoinnin_myyntihintaleikkuri"] != 'Z') {
   die(t("Tämä toiminto on käytettävissä vain, jos yhtiöparametri epakurantoinnin_myyntihintaleikkuri on 'Z'"));
 }
 
-// Logitetaan ajo
-cron_log();
-
 // hae nollasaldoiset epäkurantit, tarvitaan tuoteno ja avainsanalle tallennettu alkuperäinen hinta
 $query  = "SELECT t.tuoteno,
            a.selitetark        as orig_myyntihinta,

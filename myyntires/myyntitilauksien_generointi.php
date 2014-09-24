@@ -16,6 +16,9 @@ if (php_sapi_name() == 'cli') {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   $yhtio = $argv[1];
   $email = $argv[2];
 
@@ -24,9 +27,6 @@ if (php_sapi_name() == 'cli') {
     echo "\nUsage: php ".basename($argv[0])." yhtio to@example.com\n\n";
     die;
   }
-
-  // Logitetaan ajo
-  cron_log();
 
   $yhtiorow = hae_yhtion_parametrit($yhtio);
 

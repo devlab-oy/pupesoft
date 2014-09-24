@@ -6,9 +6,6 @@ if (php_sapi_name() != 'cli') {
   exit(1);
 }
 
-echo $_SERVER['SCRIPT_NAME']."\n";
-
-
 date_default_timezone_set('Europe/Helsinki');
 
 // otetaan includepath aina rootista

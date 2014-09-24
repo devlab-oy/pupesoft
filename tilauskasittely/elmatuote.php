@@ -17,6 +17,9 @@ if ($php_cli) {
   require "../inc/connect.inc";
   require "../inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   // hmm.. jännää
   $kukarow['yhtio']=$argv[1];
 
@@ -30,9 +33,6 @@ if ($php_cli) {
   else {
     die ("Yhtiö $kukarow[yhtio] ei löydy!");
   }
-
-  // Logitetaan ajo
-  cron_log();
 }
 else {
   require "../inc/parametrit.inc";

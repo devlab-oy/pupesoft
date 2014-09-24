@@ -25,6 +25,9 @@ if ($php_cli) {
   require "../inc/connect.inc";
   require "../inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   $kukarow['yhtio'] = trim($argv[1]);
 
   $abclaji      = "";
@@ -38,9 +41,6 @@ if ($php_cli) {
   if (isset($argv[3]) and trim($argv[3]) != "") {
     $saldottomatmukaan = trim($argv[3]);
   }
-
-  // Logitetaan ajo
-  cron_log();
 
   $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 

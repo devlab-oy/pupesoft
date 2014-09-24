@@ -21,6 +21,9 @@ if ($php_cli) {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log($argv[1]);
+
   // ja parametri komentoriviltä
   $filename = $argv[1];
 
@@ -33,9 +36,6 @@ if ($php_cli) {
 
   // Pupeasennuksen root
   $pupe_root_polku = dirname(dirname(__FILE__));
-  
-  // Logitetaan ajo
-  cron_log($filename);
 }
 
 if (!function_exists('jt_toimita_editilaus')) {

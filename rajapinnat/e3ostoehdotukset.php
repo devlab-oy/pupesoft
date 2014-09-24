@@ -29,9 +29,6 @@ if ($php_cli) {
     "locktime" => 900,
   );
 
-  // Logitetaan ajo
-  cron_log();
-
   // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
   pupesoft_flock($lock_params);
 

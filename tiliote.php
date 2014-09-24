@@ -31,16 +31,13 @@ if ($php_cli) {
   require "inc/functions.inc";
 
   // Logitetaan ajo
-  cron_log();
+  cron_log($argv[2]);
 
   $userfile = trim($argv[2]);
   $filenimi = $userfile;
   $ok = 1;
   $palvelin2 = "";
-
-  // Logitetaan ajo
-  cron_log($filenimi);
-
+  
   ob_start();
 }
 else {

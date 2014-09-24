@@ -83,8 +83,8 @@ if ($handle = opendir($laskut)) {
     if ($luotiinlaskuja > 0) {
 
       // Logitetaan ajo
-      cron_log($nimi);      
-      
+      cron_log($origlaskut."/".$file);
+
       rename($laskut."/".$file, $origlaskut."/".$file);
     }
   }

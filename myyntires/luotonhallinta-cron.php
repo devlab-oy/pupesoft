@@ -11,6 +11,9 @@ if (php_sapi_name() != 'cli') {
 require "../inc/connect.inc";
 require "../inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
+
 // Tarvitaan 3 parametria
 // 1 = Yhtio
 // 2 = Luottorajaprosentti
@@ -30,9 +33,6 @@ if (!isset($argv[3]) or $argv[3] == '') {
   echo "Anna sähkopostiosoite!!!\n";
   die;
 }
-
-// Logitetaan ajo
-cron_log();
 
 // Otetaan parametrit
 $yhtiorow = hae_yhtion_parametrit($argv[1]);

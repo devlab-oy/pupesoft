@@ -11,6 +11,9 @@ if ($php_cli) {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   if (!isset($argv[1])) {
     echo "Anna yhtio!\n";
     die;
@@ -20,9 +23,6 @@ if ($php_cli) {
     echo "Anna tiedostonimi\n";
     die;
   }
-
-  // Logitetaan ajo
-  cron_log();
 
   // Tehd‰‰n parametrit
   $tee = "file";

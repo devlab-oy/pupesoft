@@ -44,8 +44,13 @@ function tulosta_hintalaput($tuotteet) {
       $pdf->draw_text(0, 77, $nimitys[0], $page, $text_normal);
       $pdf->draw_text(0, 68, $nimitys[1], $page, $text_normal);
       $pdf->draw_text(0, 59, $nimitys[2], $page, $text_normal);
-      $pdf->draw_text(80, 50, str_replace(".", ",", $hinta) . " EUR", $page, $text_bold);
-      $pdf->draw_text(115, 40, $tuote['yksikko'], $page, $text_normal);
+
+      $hinta = str_replace(".", ",", $hinta);
+      $hinnan_leveys = $pdf->strlen($hinta, $text_normal);
+      $pdf->draw_text(100 - $hinnan_leveys, 50, $hinta . " EUR", $page, $text_bold);
+
+      $yksikon_leveys = $pdf->strlen($tuote['yksikko'], $text_normal);
+      $pdf->draw_text(129 - $yksikon_leveys, 40, $tuote['yksikko'], $page, $text_normal);
       $pdf->draw_text(50, 8, $tuote['tuoteno'], $page, $text_normal);
     }
   }

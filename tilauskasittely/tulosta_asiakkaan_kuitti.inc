@@ -9,8 +9,9 @@
  * @param array $params
  *  Esimerkki config parametreistä arvoina defaultit:
  *    array(
- *      "header_teksti" => "ARK. 8.30-18.00 VARD. / LA. 10-15 LÖ.",
- *      "footer_teksti" => "Kiitos käynnistä ja tervetuloa uudelleen!"
+ *      "header_teksti"     => "ARK. 8.30-18.00 VARD. / LA. 10-15 LÖ.",
+ *      "footer_teksti"     => "Kiitos käynnistä ja tervetuloa uudelleen!",
+ *      "avaa_lipas_lopuksi => false
  *    );
  */
 function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array()) {
@@ -30,6 +31,13 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
     $header_teksti = $params["header_teksti"];
   }
 
+  if (empty($params["avaa_lipas_lopuksi"])) {
+    $avaa_lipas_lopuksi = false;
+  }
+  else {
+    $avaa_lipas_lopuksi = true;
+  }
+
   $laskut = hae_laskut($laskunro);
   list($tilausrivit, $tilausnumerot, $verot, $yhteensa) = hae_tilausrivit($laskunro);
 
@@ -41,6 +49,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $align_right    = "\x1B\x61\x02";
   $emphasized_on  = "\x1B\x45\x01";
   $emphasized_off = "\x1B\x45\x00";
+  $avaa_lipas     = "\x1B\x70\x00\n\n";
 
   // Yhtiön tiedot
   $yhtion_nimi          = $laskut[0]['yhtio_nimi'];
@@ -137,6 +146,10 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
   $kuitin_teksti .= "\n\n\n\n\n\n";
   $kuitin_teksti .= $katkaisu;
+
+  if ($avaa_lipas_lopuksi) {
+    $kuitin_teksti .= $avaa_lipas;
+  }
 
   lpr($kuitin_teksti, $tulostimen_tunnus);
 }

@@ -480,6 +480,10 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
         setcookie("avainsanalaji_keksi", urlencode(serialize($lajit)), strtotime('+90 days'), "/");
         $_COOKIE["avainsanalaji_keksi"] = urlencode(serialize($lajit));
       }
+      if (isset($valitut_sarakkeet)) {
+        setcookie("laiteluettelo_keksi", urlencode(serialize($valitut_sarakkeet)), strtotime('+90 days'), "/");
+        $_COOKIE["laiteluettelo_keksi"] = urlencode(serialize($valitut_sarakkeet));
+      }
     }
 
     if ($phpnimi == 'generoi_siirtolista.php') {

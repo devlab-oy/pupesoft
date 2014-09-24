@@ -2938,7 +2938,7 @@ if ($fieldname == "nayta_variaatiot") {
 
   $ulos .= "<option value = ''>" . t("Ei näytetä tuotteiden variaatioita tuotelistauksessa");
   $ulos .= "<option value = 'Y' $sel>" . t("Tuotteiden listauksessa Hae ja selaa-ohjelmassa " .
-      "mahdollisuus nähdä tuotteen variaatiot (Esim. eri koot ja värit)");
+    "mahdollisuus nähdä tuotteen variaatiot (Esim. eri koot ja värit)");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -4188,6 +4188,19 @@ if ($fieldname == 'pura_osaluettelot') {
 
   $ulos .= "<option value = ''>".t("Tuotteen osaluetteloa ei pureta auki")."</option>";
   $ulos .= "<option value = '1' {$sel}>".t("Tuotteen osaluettelo puretaan auki tilausvahvistuksella, lähetteellä ja laskulla")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "laiterekisteri_kaytossa") {
+  $apu = $trow[$i];
+  $sel = array();
+  $sel[$apu] = "selected";
+
+  $ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value = ''>".t("Laiterekisteri ei ole käytössä");
+  $ulos .= "<option value = 'K' $sel[K]>".t("Laiterekisteri on käytössä");
   $ulos .= "</select></td>";
 
   $jatko = 0;

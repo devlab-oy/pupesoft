@@ -959,7 +959,7 @@ function hae_maksusuoritukset($maksurow, $linkki) {
       // otetaan vain sitä edeltävät suoritukset
       $alku_query = "SELECT min(kohdistuspvm) kohdistuspvm
                      FROM suorituksen_kohdistus
-                     WHERE yhtio = '{$kukarow['yhtio']}'
+                     WHERE yhtio     = '{$kukarow['yhtio']}'
                      AND laskutunnus = '{$maksurow['tunnus']}'";
       $alku_res = pupe_query($alku_query);
       $alku = mysql_result($alku_res, 0);
@@ -976,8 +976,8 @@ function hae_maksusuoritukset($maksurow, $linkki) {
           elseif ($lasktilitro['tilino'] == $ressukka['luottokortti']) echo t("Luottokortilla").": ";
 
           if ($lasktilitro["summa_valuutassa"] != 0
-              and $lasktilitro["valkoodi"] != $yhtiorow["valkoodi"]
-              and $lasktilitro["valkoodi"] != "") {
+            and $lasktilitro["valkoodi"] != $yhtiorow["valkoodi"]
+            and $lasktilitro["valkoodi"] != "") {
             echo "<span style='font-weight:bold'> ".t("Suoritus")."</span> &#124; $lasktilitro[summa_valuutassa] ";
             echo "$lasktilitro[valkoodi] ($lasktilitro[summa] $yhtiorow[valkoodi]) &#124; ";
             echo tv1dateconv($lasktilitro["tapvm"]), " <br>";
@@ -997,7 +997,7 @@ function hae_maksusuoritukset($maksurow, $linkki) {
 
   $qry1 = "SELECT group_concat(suoritustunnus) as suoritukset
            FROM suorituksen_kohdistus
-           WHERE yhtio = '{$kukarow['yhtio']}'
+           WHERE yhtio     = '{$kukarow['yhtio']}'
            AND laskutunnus = '{$maksurow['tunnus']}'";
   $res1 = pupe_query($qry1);
   $row1 = mysql_fetch_assoc($res1);
@@ -1008,7 +1008,7 @@ function hae_maksusuoritukset($maksurow, $linkki) {
     // haetaan asiaan kuuluvien laskujen tunnukset
     $qry2 = "SELECT group_concat(laskutunnus) as laskut
              FROM suorituksen_kohdistus
-             WHERE yhtio = '{$kukarow['yhtio']}'
+             WHERE yhtio        = '{$kukarow['yhtio']}'
              AND suoritustunnus IN ({$row1['suoritukset']})";
     $res2 = pupe_query($qry2);
     $row2 = mysql_fetch_assoc($res2);
@@ -1017,7 +1017,7 @@ function hae_maksusuoritukset($maksurow, $linkki) {
       $qry3 = "SELECT *
                FROM suoritus
                WHERE yhtio = '{$kukarow['yhtio']}'
-               AND tunnus IN ({$row1['suoritukset']})";
+               AND tunnus  IN ({$row1['suoritukset']})";
       $res3 = pupe_query($qry3);
 
       // echotaan suoritusten tiedot
@@ -1034,9 +1034,9 @@ function hae_maksusuoritukset($maksurow, $linkki) {
       // haetaan laskujen tiedot
       $qry4 = "SELECT *
                FROM lasku
-               WHERE yhtio = '{$kukarow['yhtio']}'
-               AND tunnus IN ({$row2['laskut']})
-               AND tunnus != '{$maksurow['tunnus']}'";
+               WHERE yhtio  = '{$kukarow['yhtio']}'
+               AND tunnus   IN ({$row2['laskut']})
+               AND tunnus  != '{$maksurow['tunnus']}'";
       $res4 = pupe_query($qry4);
 
       // echotaan laskujen tiedot
@@ -1056,7 +1056,7 @@ function hae_maksusuoritukset($maksurow, $linkki) {
   // haetaan mahdollista kassa-alennusta
   $qry5 = "SELECT *
            FROM suorituksen_kohdistus
-           WHERE yhtio = '{$kukarow['yhtio']}'
+           WHERE yhtio     = '{$kukarow['yhtio']}'
            AND laskutunnus = '{$maksurow['tunnus']}'
            AND kaatosumma IS NOT NULL";
   $res5 = pupe_query($qry5);
@@ -1072,7 +1072,7 @@ function hae_maksusuoritukset($maksurow, $linkki) {
            FROM tiliointi
            WHERE yhtio = '{$kukarow['yhtio']}'
            AND ltunnus = '{$maksurow['tunnus']}'
-           AND tilino = '{$yhtiorow['luottotappiot']}'";
+           AND tilino  = '{$yhtiorow['luottotappiot']}'";
   $res6 = pupe_query($qry6);
   $row6 = mysql_fetch_assoc($res6);
 

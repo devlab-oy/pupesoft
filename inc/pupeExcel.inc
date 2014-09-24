@@ -28,7 +28,7 @@ class pupeExcel {
               id int(11) not null AUTO_INCREMENT,
               times_used int(11) not null,
               PRIMARY KEY (id),
-              UNIQUE KEY string_key_ind (string_key)) 
+              UNIQUE KEY string_key_ind (string_key))
               ENGINE=myisam";
     $result = pupe_query($query, $this->_exceldblink);
   }

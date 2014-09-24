@@ -43,6 +43,7 @@ function tulosta_hintalaput($tuotteet) {
       $pdf->image_place($kuva, 5, 17, $page, $viivakoodin_asetukset);
       $pdf->draw_text(0, 77, $nimitys[0], $page, $text_normal);
       $pdf->draw_text(0, 68, $nimitys[1], $page, $text_normal);
+      $pdf->draw_text(0, 59, $nimitys[2], $page, $text_normal);
       $pdf->draw_text(80, 50, str_replace(".", ",", $hinta) . " EUR", $page, $text_bold);
       $pdf->draw_text(115, 40, $tuote['yksikko'], $page, $text_normal);
     }

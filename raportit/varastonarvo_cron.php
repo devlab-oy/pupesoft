@@ -20,6 +20,9 @@ if ($argv[2] == '') {
   die ("Sähköpostiosoite on pakollinen tieto!\n");
 }
 
+// Logitetaan ajo
+cron_log();
+
 if ($argv[0] == 'varastonarvo_cron.php' and $argv[1] != '' and $argv[2] != '') {
 
   $kukarow['yhtio'] = mysql_real_escape_string($argv[1]);

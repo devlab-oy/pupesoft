@@ -30,6 +30,9 @@ if ($php_cli) {
   else {
     die ("Yhtiö $kukarow[yhtio] ei löydy!");
   }
+
+  // Logitetaan ajo
+  cron_log();
 }
 else {
   require "../inc/parametrit.inc";

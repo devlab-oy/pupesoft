@@ -29588,6 +29588,20 @@ if (!function_exists("kasittele_tiliote_viite")) {
   }
 }
 
+if (!function_exists("cron_log")) {
+  function cron_log($file) {
+    GLOBAL $argv;
+
+    // Logitetaan ajo
+    if (file_exists("/tmp/logall.log")) {
+      $_msg  = microtime().";$file;".serialize($argv)."\n";
+
+      file_put_contents("/tmp/logall.log", $_msg, FILE_APPEND);
+    }
+  }
+}
+
+
 if (!function_exists("hae_saldo")) {
   function hae_saldo($tuote, $tyyppi = '') {
     global $kukarow, $yhtiorow, $maa;

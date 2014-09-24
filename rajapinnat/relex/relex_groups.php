@@ -36,6 +36,9 @@ if (isset($argv[2]) and $argv[2] != '') {
   }
 }
 
+// Logitetaan ajo
+cron_log();
+
 // Yhtiö
 $yhtio = mysql_real_escape_string($argv[1]);
 

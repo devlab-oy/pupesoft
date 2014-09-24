@@ -14,6 +14,9 @@ ini_set("display_errors", 1);
 require "inc/connect.inc";
 require "inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
+
 function decho($string) {
   echo date("d.m.Y @ G:i:s").": {$string}\n";
 }

@@ -20,9 +20,12 @@ require "../inc/functions.inc";
 
 // hmm.. j‰nn‰‰
 $kukarow['yhtio']     = $argv[1];
-$kieli           = $argv[2];
+$kieli                = $argv[2];
 $kukarow['kuka']      = "admin";
-$kukarow["kirjoitin"]   = "";
+$kukarow["kirjoitin"] = "";
+
+// Logitetaan ajo
+cron_log();
 
 // Haetaan yhtion tiedot (virhetsekki funktiossa....)
 $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);

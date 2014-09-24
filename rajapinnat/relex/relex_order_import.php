@@ -40,7 +40,9 @@ if ($php_cli) {
   if ($yhtiorow["yhtio"] == "") {
     die ("Yhtiö $kukarow[yhtio] ei löydy!");
   }
-
+  
+  // Logitetaan ajo
+  cron_log();  
 }
 else {
   require "../../inc/parametrit.inc";

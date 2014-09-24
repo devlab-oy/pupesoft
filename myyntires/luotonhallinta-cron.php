@@ -31,6 +31,9 @@ if (!isset($argv[3]) or $argv[3] == '') {
   die;
 }
 
+// Logitetaan ajo
+cron_log();
+
 // Otetaan parametrit
 $yhtiorow = hae_yhtion_parametrit($argv[1]);
 $luottorajaprosentti = (float) $argv[2];

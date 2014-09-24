@@ -14,6 +14,9 @@
 	require ("inc/connect.inc");
 	require ("inc/functions.inc");
 
+  // Logitetaan ajo
+  cron_log();
+
 	if ($argv[1] == '') {
 		echo "Yhtiötä ei ole annettu, ei voida toimia\n";
 		die;

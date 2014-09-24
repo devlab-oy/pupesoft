@@ -17,6 +17,9 @@ if (php_sapi_name() == 'cli') {
     die;
   }
 
+  // Logitetaan ajo
+  cron_log();
+
   $yhtiorow = hae_yhtion_parametrit($yhtio);
 
   // Haetaan käyttäjän tiedot

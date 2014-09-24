@@ -44,9 +44,9 @@ if (!function_exists("pupe_register_globals")) {
   }
 }
 
-$_GET    = pupe_register_globals($_GET);
+$_GET     = pupe_register_globals($_GET);
 $_POST    = pupe_register_globals($_POST);
-$_REQUEST  = pupe_register_globals($_REQUEST);
+$_REQUEST = pupe_register_globals($_REQUEST);
 
 // Hoidetaan pakkaus
 if ((isset($compression) and !$compression) or (isset($nayta_pdf) and $nayta_pdf == 1) or (isset($lataa_tiedosto) and $lataa_tiedosto == 1)) {
@@ -863,3 +863,16 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
   define('SEPA_PANKKIYHTEYS', $_sepa_pankkiyhteys == 1 ? true : false);
 }
+
+// Logitetaan ajo
+if (file_exists("/tmp/logall.log")) {
+  $_msg  = time().";{$kukarow["yhtio"]};{$kukarow["kuka"]};{$_SERVER["SCRIPT_NAME"]};".serialize($_REQUEST).";".serialize($_FILES)."\n";
+
+  if (isset($_FILES)) {
+    
+  }
+
+
+  file_put_contents("/tmp/logall.log", $_msg, FILE_APPEND);
+}
+

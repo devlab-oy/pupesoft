@@ -33,6 +33,9 @@ else {
   error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
   ini_set("display_errors", 0);
 
+  // Logitetaan ajo
+  cron_log();
+
   $tyyppi     = "";
   $email_osoite = "";
   $pupe_root_polku = dirname(dirname(__FILE__));

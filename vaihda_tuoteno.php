@@ -21,6 +21,9 @@ if ($php_cli) {
     die;
   }
 
+  // Logitetaan ajo
+  cron_log();
+
   // Tehd‰‰n parametrit
   $tee = "file";
 

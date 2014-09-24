@@ -11,6 +11,9 @@ if (php_sapi_name() != 'cli') {
 require 'inc/connect.inc';
 require 'inc/functions.inc';
 
+// Logitetaan ajo
+cron_log();
+
 if ($argv[1] != "") {
   // ja yhtio riviltä ensimmäinen arg
   $yhtio = mysql_real_escape_string($argv[1]);

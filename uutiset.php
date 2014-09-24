@@ -182,7 +182,7 @@ if ($tee == "SYOTA") {
     }
   }
 
-  echo "<form enctype='multipart/form-data' name='sendfile' method='post'>
+  echo "<form enctype='multipart/form-data' name='sendfile' action='?juppe=ok' method='post'>
     <input type='hidden' name='tee' value='LISAA'>
     <input type='hidden' name='toim' value='$toim'>
     <input type='hidden' name='tunnus' value='$rivi[tunnus]'>

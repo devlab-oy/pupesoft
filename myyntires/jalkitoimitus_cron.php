@@ -27,6 +27,9 @@ if (empty($yhtio) or empty($varastot)) {
   die();
 }
 
+// Logitetaan ajo
+cron_log();
+
 $oikeurow = array(
   'paivitys' => 1
 );

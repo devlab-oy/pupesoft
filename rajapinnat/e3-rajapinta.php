@@ -26,6 +26,9 @@ if ($php_cli) {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   // hmm.. j‰nn‰‰
   $kukarow['yhtio'] = $argv[1];
 

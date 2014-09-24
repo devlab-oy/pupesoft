@@ -30,11 +30,14 @@ $paiva_ajo = FALSE;
 
 if (isset($argv[2]) and $argv[2] != '') {
   $paiva_ajo = TRUE;
-  
+
   if ($argv[2] == "edpaiva") {
       $ajopaiva = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
   }
 }
+
+// Logitetaan ajo
+cron_log();
 
 // Yhtiö
 $yhtio = mysql_real_escape_string($argv[1]);

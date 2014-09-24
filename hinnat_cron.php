@@ -40,6 +40,9 @@ ini_set("memory_limit", "2G");
 require "inc/connect.inc";
 require "inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
+
 $lock_params = array(
   "locktime" => 5400,
 );

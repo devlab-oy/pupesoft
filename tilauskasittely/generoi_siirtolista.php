@@ -47,6 +47,9 @@ if ($php_cli) {
     exit;
   }
 
+  // Logitetaan ajo
+  cron_log();
+
   $yhtio = mysql_real_escape_string($argv[1]);
 
   $yhtiorow = hae_yhtion_parametrit($yhtio);

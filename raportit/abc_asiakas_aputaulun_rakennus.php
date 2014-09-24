@@ -31,6 +31,9 @@ if ($php_cli) {
   if (isset($argv[2]) and trim($argv[2]) != "") {
     $saldottomatmukaan = trim($argv[2]);
   }
+  
+  // Logitetaan ajo
+  cron_log();  
 
   $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 

@@ -20,6 +20,9 @@ ini_set("display_errors", 0);
 require "inc/connect.inc";
 require "inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
+
 // Tehdään oletukset
 $kukarow['yhtio'] = $argv[1];
 $kukarow['kuka'] = "admin";
@@ -28,6 +31,9 @@ $yhtiorow = hae_yhtion_parametrit($argv[1]);
 if ($yhtiorow["epakurantoinnin_myyntihintaleikkuri"] != 'Z') {
   die(t("Tämä toiminto on käytettävissä vain, jos yhtiöparametri epakurantoinnin_myyntihintaleikkuri on 'Z'"));
 }
+
+// Logitetaan ajo
+cron_log();
 
 // hae nollasaldoiset epäkurantit, tarvitaan tuoteno ja avainsanalle tallennettu alkuperäinen hinta
 $query  = "SELECT t.tuoteno,

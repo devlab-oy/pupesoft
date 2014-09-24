@@ -39,6 +39,9 @@ if ($php_cli) {
     $saldottomatmukaan = trim($argv[3]);
   }
 
+  // Logitetaan ajo
+  cron_log();
+
   $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
   $tee = "YHTEENVETO";

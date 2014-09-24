@@ -11,6 +11,9 @@ else {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   if ($argv[1] == '') {
     echo "Yhtiötä ei ole annettu, ei voida toimia\n";
     die;
@@ -32,14 +35,14 @@ if (!isset($teccomkansio_error)) {
 }
 
 // setataan käytetyt muuttujat:
-$asn_numero          = "";
-$kukarow["kuka"]       = "admin";
-$poikkeukset         = array("123001", "123067", "123310", "123312", "123342", "123108", "123036", "123049", "123317", "123441", "123080", "123007", "123453", "123506", "123110");
-$tavarantoimittajanumero   = "";
-$tiedosto_sisalto      = "";
-$toimituspvm        = "";
-$vastaanottaja        = "";
-$_yhtion_toimipaikka    = 0;
+$asn_numero               = "";
+$kukarow["kuka"]          = "admin";
+$poikkeukset              = array("123001", "123067", "123310", "123312", "123342", "123108", "123036", "123049", "123317", "123441", "123080", "123007", "123453", "123506", "123110");
+$tavarantoimittajanumero  = "";
+$tiedosto_sisalto         = "";
+$toimituspvm              = "";
+$vastaanottaja            = "";
+$_yhtion_toimipaikka      = 0;
 
 if (!function_exists('teccom_asn_paketti')) {
   function teccom_asn_paketti($element, $tavarantoimittajanumero, $asn_numero) {
@@ -239,9 +242,7 @@ function loop_packet($xml_element, $parameters) {
 }
 
 if ($handle = opendir($teccomkansio)) {
-
   while (($file = readdir($handle)) !== FALSE) {
-
     if (is_file($teccomkansio."/".$file)) {
 
       $tiedosto = $teccomkansio."/".$file;
@@ -377,6 +378,9 @@ if ($handle = opendir($teccomkansio)) {
                          luontiaika      = now()";
             $Xresult = pupe_query($tecquery);
             rename($teccomkansio."/".$file, $teccomkansio_valmis."/".$file);
+
+            // Logitetaan ajo
+            cron_log($teccomkansio_valmis."/".$file);
           }
         }
         else {
@@ -390,9 +394,9 @@ if ($handle = opendir($teccomkansio)) {
       }
     }
   }
+
   require "inc/asn_kohdistus.inc";
   asn_kohdistus($tavarantoimittajanumero);
-
 }
 else {
   echo "Hakemistoa $teccomkansio ei löydy\n";

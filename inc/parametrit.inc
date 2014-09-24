@@ -231,6 +231,8 @@ unset($magento_api_url);
 unset($magento_api_usr);
 unset($magento_api_pas);
 
+unset($pupesoft_commandlinelog);
+
 $pupe_query_debug = 0;
 $aika_debug_array = array();
 $quer_debug_array = array();
@@ -863,16 +865,3 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
   define('SEPA_PANKKIYHTEYS', $_sepa_pankkiyhteys == 1 ? true : false);
 }
-
-// Logitetaan ajo
-if (file_exists("/tmp/logall.log")) {
-  $_msg  = time().";{$kukarow["yhtio"]};{$kukarow["kuka"]};{$_SERVER["SCRIPT_NAME"]};".serialize($_REQUEST).";".serialize($_FILES)."\n";
-
-  if (isset($_FILES)) {
-    
-  }
-
-
-  file_put_contents("/tmp/logall.log", $_msg, FILE_APPEND);
-}
-

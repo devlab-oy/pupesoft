@@ -35,14 +35,15 @@ $order_tietosisalto = explode("'", $order_tietosisalto);
 // Toimitus ja tuotetiedot
 $arska = array();
 
-$current_customer = '';
-$current_product = '';
+$current_customer      = '';
+$current_product       = '';
 $current_product_price = '';
-$current_product_desc = '';
-$delivery_date = '';
-$edi_rivi_temp = array();
+$current_product_desc  = '';
+$delivery_date         = '';
+$edi_rivi_temp         = array();
 
 $edi_rivi_temp[] = "EDIFACT_CROSSDOCK_SPLIT";
+
 foreach ($order_tietosisalto as $key => $value) {
 
   $value = trim($value);
@@ -91,7 +92,6 @@ foreach ($order_tietosisalto as $key => $value) {
       // Kaikki tilauksen muut rivit talteen
       $edi_rivi_temp[] = $value;
     }
-
   }
 }
 

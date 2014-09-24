@@ -44,9 +44,9 @@ if (!function_exists("pupe_register_globals")) {
   }
 }
 
-$_GET    = pupe_register_globals($_GET);
+$_GET     = pupe_register_globals($_GET);
 $_POST    = pupe_register_globals($_POST);
-$_REQUEST  = pupe_register_globals($_REQUEST);
+$_REQUEST = pupe_register_globals($_REQUEST);
 
 // Hoidetaan pakkaus
 if ((isset($compression) and !$compression) or (isset($nayta_pdf) and $nayta_pdf == 1) or (isset($lataa_tiedosto) and $lataa_tiedosto == 1)) {
@@ -230,6 +230,8 @@ unset($loginkieli);
 unset($magento_api_url);
 unset($magento_api_usr);
 unset($magento_api_pas);
+
+unset($pupesoft_commandlinelog);
 
 $pupe_query_debug = 0;
 $aika_debug_array = array();

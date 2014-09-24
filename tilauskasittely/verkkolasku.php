@@ -40,6 +40,9 @@ if ($php_cli) {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   $_yhtio   = pupesoft_cleanstring($argv[1]);
   $yhtiorow = hae_yhtion_parametrit($_yhtio);
 
@@ -128,11 +131,11 @@ else {
   $tulostettavat_email = array();
   $tulos_ulos          = "";
 
-  $verkkolaskuputkeen_pupevoice    = array();
-  $verkkolaskuputkeen_finvoice    = array();
+  $verkkolaskuputkeen_pupevoice = array();
+  $verkkolaskuputkeen_finvoice  = array();
   $verkkolaskuputkeen_suora     = array();
   $verkkolaskuputkeen_elmaedi   = array();
-  $verkkolaskuputkeen_apix    = array();
+  $verkkolaskuputkeen_apix      = array();
 
   if (!isset($silent)) {
     $silent = "";
@@ -2758,9 +2761,9 @@ else {
 
           for ($a = 1; $a < $maventa_laskumaara; $a++) {
             preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $maventa_laskuarray[$a], $invoice_number);
-            
+
             $status = maventa_invoice_put_file(NULL, NULL, $invoice_number[1], "<SOAP-ENV:Envelope".$maventa_laskuarray[$a], $kieli);
-            
+
             $tulos_ulos .= "Maventa-lasku $invoice_number[1]: $status<br>\n";
           }
         }

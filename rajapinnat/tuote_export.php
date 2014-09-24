@@ -24,6 +24,9 @@ $lock_params = array(
   "lockfile" => '##tuote-export-flock.lock',
 );
 
+// Logitetaan ajo
+cron_log();
+
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock($lock_params);
 

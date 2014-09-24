@@ -29588,6 +29588,18 @@ if (!function_exists("kasittele_tiliote_viite")) {
   }
 }
 
+if (!function_exists("cron_log")) {
+  function cron_log($file = "") {
+    GLOBAL $argv, $pupesoft_commandlinelog;
+
+    if (isset($pupesoft_commandlinelog) and substr($pupesoft_commandlinelog, -23) == "pupesoft-commanline.log") {
+      $_msg  = microtime(TRUE)."|$file|".serialize($argv)."\n";
+      file_put_contents($pupesoft_commandlinelog, $_msg, FILE_APPEND);
+    }
+  }
+}
+
+
 if (!function_exists("hae_saldo")) {
   function hae_saldo($tuote, $tyyppi = '') {
     global $kukarow, $yhtiorow, $maa;

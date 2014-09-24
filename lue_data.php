@@ -26,6 +26,9 @@ if (php_sapi_name() == 'cli') {
   require "{$pupe_root_polku}/inc/connect.inc";
   require "{$pupe_root_polku}/inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   $cli = true;
   ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear".PATH_SEPARATOR."/usr/share/php/");
 

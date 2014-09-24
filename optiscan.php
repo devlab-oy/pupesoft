@@ -81,7 +81,7 @@ if (!isset($matches[1]) or !isset($matches[2])) {
   die("1, Virheellinen sanomamuoto\r\n\r\n");
 }
 
-$sanoma = $matches[1];
+$sanoma  = $matches[1];
 $sisalto = $matches[2];
 
 // Sallittuja sanomia
@@ -113,6 +113,12 @@ $response = "";
 
 require 'inc/connect.inc';
 require 'inc/functions.inc';
+
+// Laitetaan mukaan logiin
+$argv[] = $lines[0];
+
+// Logitetaan ajo
+cron_log();
 
 if ($sanoma == "SignOn") {
 

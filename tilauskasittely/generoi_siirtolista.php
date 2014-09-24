@@ -20,6 +20,9 @@ if ($php_cli) {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   if (trim($argv[1]) == '') {
     die ("Et antanut lähettävää yhtiötä!\n");
   }

@@ -43,6 +43,9 @@ if ($handle = opendir($kansio)) {
       continue;
     }
 
+    // Logitetaan ajo
+    cron_log("{$pupe_root_polku}/dataout/$lasku");
+
     $ftphost = (isset($verkkohost_lah) and trim($verkkohost_lah) != '') ? $verkkohost_lah : "ftp.verkkolasku.net";
     $ftpuser = $yhtiorow['verkkotunnus_lah'];
     $ftppass = $yhtiorow['verkkosala_lah'];
@@ -77,6 +80,9 @@ if ($handle = opendir($kansio)) {
     if (onko_lasku_liian_vanha($kansio.$lasku)) {
       continue;
     }
+
+    // Logitetaan ajo
+    cron_log("{$pupe_root_polku}/dataout/$lasku");
 
     $ftphost     = "ftp.itella.net";
     $ftpuser     = $yhtiorow['verkkotunnus_lah'];
@@ -114,6 +120,9 @@ if ($handle = opendir($kansio)) {
       continue;
     }
 
+    // Logitetaan ajo
+    cron_log("{$pupe_root_polku}/dataout/$lasku");
+
     $ftphost = $edi_ftphost;
     $ftpuser = $edi_ftpuser;
     $ftppass = $edi_ftppass;
@@ -148,6 +157,9 @@ if ($handle = opendir($kansio)) {
     if (onko_lasku_liian_vanha($kansio.$lasku)) {
       continue;
     }
+
+    // Logitetaan ajo
+    cron_log("{$pupe_root_polku}/dataout/$lasku");
 
     $ftphost = $sisainenfoinvoice_ftphost;
     $ftpuser = $sisainenfoinvoice_ftpuser;
@@ -216,6 +228,9 @@ if ($handle = opendir($kansio)) {
         continue;
       }
 
+      // Logitetaan ajo
+      cron_log("{$pupe_root_polku}/dataout/$lasku");
+
       // Haetaan tarvittavat tiedot filestä
       $files_out = unserialize(file_get_contents($kansio.$lasku));
 
@@ -249,6 +264,9 @@ if ($handle = opendir($kansio)) {
     if (onko_lasku_liian_vanha($kansio.$lasku)) {
       continue;
     }
+
+    // Logitetaan ajo
+    cron_log("{$pupe_root_polku}/dataout/$lasku");
 
     $status = apix_invoice_put_file("", $kukarow['kieli'], $lasku);
     echo "APIX-lähetys $status<br>\n";

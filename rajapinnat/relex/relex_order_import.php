@@ -23,6 +23,9 @@ if ($php_cli) {
   require "inc/functions.inc";
   require "inc/luo_ostotilausotsikko.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   $lock_params = array(
     "locktime" => 900,
   );
@@ -40,7 +43,6 @@ if ($php_cli) {
   if ($yhtiorow["yhtio"] == "") {
     die ("Yhtiö $kukarow[yhtio] ei löydy!");
   }
-
 }
 else {
   require "../../inc/parametrit.inc";

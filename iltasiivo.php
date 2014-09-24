@@ -26,9 +26,12 @@ if ($php_cli) {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   // Haetaan yhtiörow ja kukarow
   $yhtiorow = hae_yhtion_parametrit($argv[1]);
-  $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
+  $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
   $aja = 'run';
 }

@@ -253,8 +253,8 @@ if (!function_exists('rivi_dgd')) {
 
       if ($vaktuotepaino != "") {
         $bruttopaino = $vaktuotepaino / $suhde;
-        $pdf->pages[$sivu]->drawText(round($bruttopaino,2), mm_pt(145), mm_pt($kala), 'LATIN1');
-        $pdf->pages[$sivu]->drawText(round($vaktuotepaino,2), mm_pt(167), mm_pt($kala), 'LATIN1');
+        $pdf->pages[$sivu]->drawText(round($bruttopaino, 2), mm_pt(145), mm_pt($kala), 'LATIN1');
+        $pdf->pages[$sivu]->drawText(round($vaktuotepaino, 2), mm_pt(167), mm_pt($kala), 'LATIN1');
       }
 
       $kala-=4;

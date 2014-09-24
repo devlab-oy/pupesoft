@@ -751,7 +751,7 @@ if (!function_exists("tee_jt_tilaus")) {
               $query = "SELECT kieli
                         FROM asiakas
                         WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tunnus = '{$otsikkorivi['liitostunnus']}'";
+                        AND tunnus  = '{$otsikkorivi['liitostunnus']}'";
               $kielirow = mysql_fetch_assoc(pupe_query($query));
               $kieli = $kielirow["kieli"];
 

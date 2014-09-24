@@ -253,10 +253,10 @@ if ($error == 0 and $tee == "file") {
           $postit[$vantuotepaallikko][] = $vantuoteno."###".$uustuoteno;
         }
 
-        $query  = " SELECT tunnus
-                    FROM tuote
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    AND tuoteno = '$uustuoteno'";
+        $query  = "SELECT tunnus
+                   FROM tuote
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   AND tuoteno = '$uustuoteno'";
         $tuoteuresult = pupe_query($query);
 
         if (mysql_num_rows($tuoteuresult) == 0 or $uusi_on_jo == "OK" or $uusi_on_jo == "SAMA") {
@@ -281,7 +281,7 @@ if ($error == 0 and $tee == "file") {
               $query = "UPDATE tilausrivi
                         SET tuoteno = '$uustuoteno'
                         WHERE yhtio = '$kukarow[yhtio]'
-                        and tyyppi in ($tyyppi)
+                        and tyyppi  in ($tyyppi)
                         and tuoteno = '$vantuoteno'";
               pupe_query($query);
             }
@@ -360,9 +360,9 @@ if ($error == 0 and $tee == "file") {
               elseif (mysql_num_rows($paires) > 1) {
                 $query = "UPDATE tuotepaikat
                           SET oletus  = ''
-                          WHERE yhtio = '$kukarow[yhtio]'
-                          and tuoteno = '$uustuoteno'
-                          and oletus != ''
+                          WHERE yhtio  = '$kukarow[yhtio]'
+                          and tuoteno  = '$uustuoteno'
+                          and oletus  != ''
                           ORDER BY tunnus
                           LIMIT ".(mysql_num_rows($paires)-1);
                 pupe_query($query);
@@ -388,7 +388,7 @@ if ($error == 0 and $tee == "file") {
               if ($taulu == 'tuoteperhe') {
                 $query = "UPDATE $taulu
                           SET $sarake  = '$uustuoteno'
-                          WHERE yhtio  = '$kukarow[yhtio]'
+                          WHERE yhtio = '$kukarow[yhtio]'
                           AND tyyppi  in ($perhetyyppi)
                           AND $sarake  = '$vantuoteno'";
                 $result2 = pupe_query($query);
@@ -397,24 +397,24 @@ if ($error == 0 and $tee == "file") {
                 $query = "UPDATE IGNORE $taulu
                           SET $sarake = '$uustuoteno'
                           WHERE yhtio = '$kukarow[yhtio]'
-                          AND kieli  in ($kielet)
+                          AND kieli   in ($kielet)
                           AND $sarake = '$vantuoteno'";
                 pupe_query($query);
 
                 if ($uusi_on_jo != "SAMA") {
                   $query = "DELETE FROM $taulu
                             WHERE yhtio = '$kukarow[yhtio]'
-                            AND kieli  in ($kielet)
+                            AND kieli   in ($kielet)
                             AND $sarake = '$vantuoteno'";
                   pupe_query($query);
                 }
               }
               elseif ($taulu == 'puun_alkio') {
-                $query = " UPDATE IGNORE puun_alkio
-                           SET liitos  = '$uustuoteno'
-                           WHERE yhtio = '$kukarow[yhtio]'
-                           AND laji    = 'Tuote'
-                           AND liitos  = '$vantuoteno'";
+                $query = "UPDATE IGNORE puun_alkio
+                          SET liitos  = '$uustuoteno'
+                          WHERE yhtio = '$kukarow[yhtio]'
+                          AND laji    = 'Tuote'
+                          AND liitos  = '$vantuoteno'";
                 pupe_query($query);
 
                 $query = "DELETE FROM puun_alkio
@@ -459,8 +459,8 @@ if ($error == 0 and $tee == "file") {
             if ($uusi_on_jo == "") {
               $query = "SELECT *
                         FROM avainsana
-                        WHERE yhtio = '$kukarow[yhtio]'
-                        AND laji = 'alv'
+                        WHERE yhtio    = '$kukarow[yhtio]'
+                        AND laji       = 'alv'
                         AND selitetark = 'o'
                         LIMIT 1";
               $alvresult = pupe_query($query);

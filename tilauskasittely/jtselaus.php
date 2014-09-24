@@ -990,21 +990,21 @@ if ($tee == "JATKA") {
                 JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
                   AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus {$j_manual_lisa})
                 JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio
-                  AND lasku.tunnus         = tilausrivi.otunnus
+                  AND lasku.tunnus                            = tilausrivi.otunnus
                   AND (lasku.tila != 'N' OR lasku.alatila != '') $laskulisa $summarajauslisa
-                  AND lasku.toim_osoite    = '{$tilaus_on_jo_row['toim_osoite']}'
-                  AND lasku.toim_postino   = '{$tilaus_on_jo_row['toim_postino']}'
-                  AND lasku.toim_postitp   = '{$tilaus_on_jo_row['toim_postitp']}'
-                  AND lasku.toim_maa       = '{$tilaus_on_jo_row['toim_maa']}')
+                  AND lasku.toim_osoite                       = '{$tilaus_on_jo_row['toim_osoite']}'
+                  AND lasku.toim_postino                      = '{$tilaus_on_jo_row['toim_postino']}'
+                  AND lasku.toim_postitp                      = '{$tilaus_on_jo_row['toim_postitp']}'
+                  AND lasku.toim_maa                          = '{$tilaus_on_jo_row['toim_maa']}')
                 JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio
-                  AND tuote.tuoteno = tilausrivi.tuoteno $tuotelisa)
+                  AND tuote.tuoteno                           = tilausrivi.tuoteno $tuotelisa)
                 $toimittajalisa
-                WHERE tilausrivi.yhtio     = '$kukarow[yhtio]'
-                AND tilausrivi.tyyppi      IN ('L','G')
-                AND tilausrivi.var         = 'J'
-                AND tilausrivi.keratty IN ('', 'saldoton')
-                AND tilausrivi.uusiotunnus = 0
-                AND tilausrivi.kpl         = 0
+                WHERE tilausrivi.yhtio                        = '$kukarow[yhtio]'
+                AND tilausrivi.tyyppi                         IN ('L','G')
+                AND tilausrivi.var                            = 'J'
+                AND tilausrivi.keratty                        IN ('', 'saldoton')
+                AND tilausrivi.uusiotunnus                    = 0
+                AND tilausrivi.kpl                            = 0
                 AND tilausrivi.jt + tilausrivi.varattu  > 0
                 AND ((tilausrivi.tunnus = tilausrivi.perheid AND tilausrivi.perheid2 = 0)
                   OR (tilausrivi.tunnus = tilausrivi.perheid2)
@@ -1061,17 +1061,17 @@ if ($tee == "JATKA") {
                 JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
                   AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus {$j_manual_lisa})
                 JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio
-                  AND lasku.tunnus = tilausrivi.otunnus
+                  AND lasku.tunnus                            = tilausrivi.otunnus
                   AND (lasku.tila != 'N' OR lasku.alatila != '') $laskulisa $summarajauslisa)
                 JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio
-                  AND tuote.tuoteno = tilausrivi.tuoteno $tuotelisa)
+                  AND tuote.tuoteno                           = tilausrivi.tuoteno $tuotelisa)
                 $toimittajalisa
-                WHERE tilausrivi.yhtio     = '$kukarow[yhtio]'
-                AND tilausrivi.tyyppi      IN ('L','G')
-                AND tilausrivi.var         = 'J'
-                AND tilausrivi.keratty IN ('', 'saldoton')
-                AND tilausrivi.uusiotunnus = 0
-                AND tilausrivi.kpl         = 0
+                WHERE tilausrivi.yhtio                        = '$kukarow[yhtio]'
+                AND tilausrivi.tyyppi                         IN ('L','G')
+                AND tilausrivi.var                            = 'J'
+                AND tilausrivi.keratty                        IN ('', 'saldoton')
+                AND tilausrivi.uusiotunnus                    = 0
+                AND tilausrivi.kpl                            = 0
                 AND tilausrivi.jt  + tilausrivi.varattu  > 0
                 AND ((tilausrivi.tunnus = tilausrivi.perheid AND tilausrivi.perheid2 = 0)
                   OR (tilausrivi.tunnus = tilausrivi.perheid2)

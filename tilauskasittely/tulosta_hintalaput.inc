@@ -25,7 +25,7 @@ function tulosta_hintalaput($tuotteet) {
   foreach ($tuotteet as $tuote) {
     $nimitys = explode("\n", wordwrap($tuote['nimitys'], 28));
     $hinta = hintapyoristys($tuote['myyntihinta']);
-    $viivakoodi = viivakoodi($tuote['tuoteno'], "code128", 360, 90, $tuote['tuoteno']);
+    $viivakoodi = viivakoodi($tuote['tuoteno'], "code128", 360, 60);
     $viivakoodin_asetukset = array(
       "scale" => array(
         "x" => 0.1,
@@ -40,12 +40,13 @@ function tulosta_hintalaput($tuotteet) {
       $page = $pdf->new_page('4.9x3cm');
 
       // Kuva ensin, jotta ei mene tekstin päälle
-      $pdf->image_place($kuva, 5, 17, $page, $viivakoodin_asetukset);
+      $pdf->image_place($kuva, 15, 17, $page, $viivakoodin_asetukset);
       $pdf->draw_text(0, 77, $nimitys[0], $page, $text_normal);
       $pdf->draw_text(0, 68, $nimitys[1], $page, $text_normal);
       $pdf->draw_text(0, 59, $nimitys[2], $page, $text_normal);
       $pdf->draw_text(80, 50, str_replace(".", ",", $hinta) . " EUR", $page, $text_bold);
       $pdf->draw_text(115, 40, $tuote['yksikko'], $page, $text_normal);
+      $pdf->draw_text(50, 8, $tuote['tuoteno'], $page, $text_normal);
     }
   }
 

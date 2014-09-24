@@ -1232,6 +1232,20 @@ if ($fieldname == "dynaaminen_kassamyynti") {
   $jatko = 0;
 }
 
+if ($fieldname == "pikatilauksessa_focus_myyjanroon") {
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel = $trow[$i] == 'Y' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>" . t("Focus ei mene myyj‰numeronkentt‰‰n pikatilausohjelmaan " .
+      "ment‰ess‰");
+  $ulos .= "<option value = 'Y' $sel>" . t("Focus menee myyj‰numerokentt‰‰n pikatilausohjelmaan " .
+      "ment‰ess‰");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "kerayspoikkeama_kasittely") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

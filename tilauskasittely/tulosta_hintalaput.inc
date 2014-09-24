@@ -37,7 +37,7 @@ function tulosta_hintalaput($tuotteet) {
     $montako_tulostetaan = $tuote['tarrakpl'] * $tuote['tarrakerroin'];
 
     for ($i = 0; $i < $montako_tulostetaan; $i++) {
-      $page = $pdf->new_page('49x30mm');
+      $page = $pdf->new_page('4.9x3cm');
 
       $pdf->draw_text(0, 27, $nimitys[0], $page, $text_normal);
       $pdf->draw_text(0, 24, $nimitys[1], $page, $text_normal);

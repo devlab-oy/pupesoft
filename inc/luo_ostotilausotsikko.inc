@@ -152,7 +152,7 @@ if (!function_exists('luo_ostotilausotsikko')) {
     $ostotilaus_result = pupe_query($query);
 
     // ei löydy, tehdään uus otsikko
-    if (mysql_num_rows($ostotilaus_result) == 0) {
+    if (mysql_num_rows($ostotilaus_result) == 0 or $params['edi'] == 'X') {
 
       $query = "INSERT INTO lasku SET
                 alatila             = '',

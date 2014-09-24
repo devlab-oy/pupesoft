@@ -41,7 +41,7 @@ $ostotilaus = (!empty($ostotilaus)) ? $ostotilaus : '';
 echo "
 <div class='header'>
   <button onclick='window.location.href=\"index.php\"' class='button left'><img src='back2.png'></button>
-  <h1>", t("OSTOTILAUS"), "</h1>
+  <h1>", t("Rullan hylk‰‰minen"), "</h1>
 </div>";
 
 
@@ -50,11 +50,6 @@ foreach ($errors as $error) {
   echo $error."<br>";
 }
 echo "</div>";
-
-$saapumisextra = '';
-if (isset($saapuminen)) {
-  $saapumisextra = "?saapuminen={$saapuminen}";
-}
 
 echo "
   <div style='text-align:center;padding:10px;'>
@@ -66,9 +61,9 @@ echo "
     <button name='submit' id='haku_nappi' value='ok' onclick='submit();' class='button'>", t("OK"), "</button>
     </form>
     <br><br>
-    <button onclick='window.location.href=\"lusaus.php{$saapumisextra}\"' class='button'>", t("Suorita lusaus", $browkieli), "</button>
+    <a href='lusaus.php' class='button'>", t("Suorita lusaus", $browkieli), "</a>
     <br><br>
-    <button onclick='window.location.href=\"hylky.php\"' class='button'>", t("Hylk‰‰ rulla", $browkieli), "</button>
+    <a href='hylky.php' class='button'>", t("Hylk‰‰ rulla", $browkieli), "</a>
   </div>";
 
 if (isset($r) and isset($t)) {

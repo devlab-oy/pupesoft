@@ -111,9 +111,7 @@ if (isset($tuotepaikka)) {
         pupe_query($query);
       }
 
-      paivita_tilausrivin_hylly($tilausrivi, $hylly);
-
-      $tilausrivit = array();
+      paivita_tilausrivit_ja_sarjanumeroseuranta($tilausrivi, $hylly);
 
       // Jos rivi on jo kohdistettu eri saapumiselle
       if (!empty($row['uusiotunnus'])) {
@@ -130,18 +128,76 @@ if (isset($tuotepaikka)) {
 
       vie_varastoon($saapuminen, 0, $hylly, $row['tunnus']);
 
-      // katsotaan onko tilauksen rivejä vielä hyllyttämättä
-      $query = "SELECT COUNT(tunnus)
+      sscanf($row['kommentti'], 'rahtikirjanumero:%d', $rahtikirjanumero);
+
+      $query = "SELECT
+                sum(CASE WHEN kommentti LIKE 'rahtikirjanumero:{$rahtikirjanumero}%'
+                  AND uusiotunnus = 0
+                  THEN 1 ELSE 0 END) viemattomia_rahdin_riveja,
+                sum(CASE WHEN otunnus = '{$ostotilaus}'
+                  AND uusiotunnus = 0
+                  THEN 1 ELSE 0 END) viemattomia_tilauksen_riveja
                 FROM tilausrivi
                 WHERE yhtio = '{$kukarow['yhtio']}'
-                AND otunnus = '{$ostotilaus}'
-                AND uusiotunnus = 0";
+                AND tyyppi = 'O'";
       $result = pupe_query($query);
-      $viemattomia = mysql_result($result, 0);
+      $tilanne = mysql_fetch_assoc($result);
 
       echo t("Odota hetki...");
-      echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=ostotilaus_sarjanumero.php?saapuminen={$saapuminen}&v={$viemattomia}'>"; exit();
+      echo "<META HTTP-EQUIV='Refresh'CONTENT='1;URL=ostotilaus_sarjanumero.php?saapuminen={$saapuminen}&r={$tilanne['viemattomia_rahdin_riveja']}&t={$tilanne['viemattomia_tilauksen_riveja']}'>"; exit();
     }
 }
 
 require 'inc/footer.inc';
+
+function paivita_tilausrivit_ja_sarjanumeroseuranta($ostorivitunnus, $hylly) {
+  global $kukarow;
+
+  $query = "SELECT myyntirivitunnus
+            FROM sarjanumeroseuranta
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND ostorivitunnus = '{$ostorivitunnus}'";
+  $result = pupe_query($query);
+  $myyntirivitunnus = mysql_result($result,0);
+
+  $query = "SELECT varasto
+            FROM tilausrivi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$ostorivitunnus}'";
+  $result = pupe_query($query);
+  $varasto = mysql_result($result,0);
+
+  $hyllyalue = strtoupper($hylly['hyllyalue']);
+  $hyllynro  = strtoupper($hylly['hyllynro']);
+  $hyllyvali = strtoupper($hylly['hyllyvali']);
+  $hyllytaso = strtoupper($hylly['hyllytaso']);
+
+  $query = "UPDATE tilausrivi SET
+            hyllyalue = '{$hyllyalue}',
+            hyllynro = '{$hyllynro}',
+            hyllyvali = '{$hyllyvali}',
+            hyllytaso = '{$hyllytaso}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$ostorivitunnus}'";
+  $result = pupe_query($query);
+
+  $query = "UPDATE tilausrivi SET
+            hyllyalue = '{$hyllyalue}',
+            hyllynro = '{$hyllynro}',
+            hyllyvali = '{$hyllyvali}',
+            hyllytaso = '{$hyllytaso}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$myyntirivitunnus}'";
+  $result = pupe_query($query);
+
+  $query = "UPDATE sarjanumeroseuranta SET
+            hyllyalue = '{$hyllyalue}',
+            hyllynro = '{$hyllynro}',
+            hyllyvali = '{$hyllyvali}',
+            hyllytaso = '{$hyllytaso}',
+            varasto = '{$varasto}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND ostorivitunnus = '{$ostorivitunnus}'";
+  $result = pupe_query($query);
+
+}

@@ -175,9 +175,9 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 
         if (substr($edi_data[$luetaan], 0, 14) == "MEA+AAE+DI+MMT") {
           $osat = explode("+", $edi_data[$luetaan]);
-          $ymparys_info = $osat[3];
-          $ymparys_info_osat = explode(":", $ymparys_info);
-          $ymparys = $ymparys_info_osat[1];
+          $halkaisija_info = $osat[3];
+          $halkaisija_info_osat = explode(":", $halkaisija_info);
+          $halkaisija = $halkaisija_info_osat[1];
         }
 
         if (substr($edi_data[$luetaan], 0, 14) == "MEA+AAE+WD+MMT") {
@@ -203,7 +203,7 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 
       $pakkaukset[$rivi] = array(
         'paino' => $paino,
-        'ymparys' => $ymparys,
+        'halkaisija' => $halkaisija,
         'leveys' => $leveys,
         'tuoteno' => $tuoteno,
         'sarjanumero' => $sarjanumero
@@ -229,8 +229,12 @@ elseif($tee == 'luo') {
   $data = unserialize(base64_decode($data));
   $data = $data[key($data)];
 
-
-
+  /*
+  foreach ($data['tilaukset'][43]['pakkaukset'] as $pakkaus) {
+    echo $pakkaus['sarjanumero'], '<br>';
+  }
+  die;
+  */
 
   require_once "../inc/luo_ostotilausotsikko.inc";
 
@@ -250,7 +254,8 @@ elseif($tee == 'luo') {
     'osoite' => $toimrow['osoite'],
     'postino' => $toimrow['postino'],
     'postitp' => $toimrow['postitp'],
-    'maa' => $toimrow['maa']
+    'maa' => $toimrow['maa'],
+    'edi' => 'X'
   );
 
   $kukarow['kesken'] = 0;
@@ -279,13 +284,12 @@ elseif($tee == 'luo') {
       $laskurow = mysql_fetch_assoc($result);
 
     }
-    else { // löytyi myyntitilaus, muttai ostotilausta
+    else { // ei ostotilausta
 
       $laskurow = luo_ostotilausotsikko($params);
 
       $update_query = "UPDATE lasku SET
-                       asiakkaan_tilausnumero = '{$tilaus['tilausnro']}',
-                       alatila = 'A'
+                       asiakkaan_tilausnumero = '{$tilaus['tilausnro']}'
                        WHERE yhtio = '{$kukarow['yhtio']}'
                        AND tunnus = '{$laskurow['tunnus']}'";
       $update_result = pupe_query($update_query);
@@ -307,6 +311,12 @@ elseif($tee == 'luo') {
 
       require "lisaarivi.inc";
 
+      $update_query = "UPDATE tilausrivi SET
+                       kommentti = 'rahtikirjanumero:{$data['kuorma_id']}.'
+                       WHERE yhtio = '{$kukarow['yhtio']}'
+                       AND tunnus = '{$lisatty_tun}'";
+      $update_result = pupe_query($update_query);
+
       $query = "SELECT *
                 FROM tilausrivi
                 WHERE yhtio = '{$kukarow['yhtio']}'
@@ -316,32 +326,24 @@ elseif($tee == 'luo') {
 
       $sarjanumero = trim($pakkaus['sarjanumero']);
 
-      $query = "SELECT *
+      $query = "SELECT tunnus
                 FROM sarjanumeroseuranta use index (yhtio_sarjanumero)
                 WHERE yhtio     = '{$kukarow['yhtio']}'
-                AND sarjanumero = '{$sarjanumero}'
-                AND tuoteno     = '{$rivirow['tuoteno']}'
-                AND (ostorivitunnus = 0 or myyntirivitunnus = 0)";
+                AND sarjanumero = '{$sarjanumero}'";
       $sarjares = pupe_query($query);
 
       if (mysql_num_rows($sarjares) == 0) {
-
         $query = "INSERT INTO sarjanumeroseuranta SET
                   yhtio           = '{$kukarow['yhtio']}',
                   tuoteno         = '{$rivirow['tuoteno']}',
                   sarjanumero     = '{$sarjanumero}',
-                  lisatieto       = 'rahtikirjanumero:#!#{$data['kuorma_id']}#!#',
                   massa           = '{$pakkaus['paino']}',
                   leveys          = '{$pakkaus['leveys']}',
-                  ymparysmitta    = '{$pakkaus['ymparys']}',
+                  halkaisija      = '{$pakkaus['halkaisija']}',
                   ostorivitunnus  = '{$lisatty_tun}',
                   era_kpl         = '1',
                   laatija         = '{$kukarow['kuka']}',
-                  luontiaika      = NOW(),
-                  hyllyalue       = '{$rivirow['hyllyalue']}',
-                  hyllynro        = '{$rivirow['hyllynro']}',
-                  hyllyvali       = '{$rivirow['hyllyvali']}',
-                  hyllytaso       = '{$rivirow['hyllytaso']}'";
+                  luontiaika      = NOW()";
         $sarjares = pupe_query($query);
       }
     }
@@ -350,21 +352,23 @@ elseif($tee == 'luo') {
 
     if ($myyntitilaus) { // bookkaussanoma tullut ennen rahtikirjaa
 
-      $query = "SELECT tunnus
-                FROM lasku
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND asiakkaan_tilausnumero = '{$tilaus['tilausnro']}'";
-      $result = pupe_query($query);
-      $otunnus = mysql_result($result,0);
-
       $query = "SELECT *
                 FROM tilausrivi
                 WHERE yhtio = '{$kukarow['yhtio']}'
-                AND otunnus = '{$otunnus}'";
+                AND otunnus = '{$laskurow['tunnus']}'";
+      $oresult = pupe_query($query);
+
+      $query = "SELECT *
+                FROM lasku
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND asiakkaan_tilausnumero = '{$tilaus['tilausnro']}'
+                AND tilaustyyppi = 'N'";
       $result = pupe_query($query);
+      $laskurow = mysql_fetch_assoc($result);
 
-      while ($tilausrivi = mysql_fetch_assoc($result)) {
+      $kukarow['kesken'] = $laskurow['tunnus'];
 
+      while ($tilausrivi = mysql_fetch_assoc($oresult)) {
         // haetaan tuotteen tiedot
         $query = "SELECT *
                   FROM tuote
@@ -375,6 +379,14 @@ elseif($tee == 'luo') {
         $trow = mysql_fetch_assoc($tuoteres);
         $kpl = 1;
         require "lisaarivi.inc";
+
+        $uusi_rivi = $lisatyt_rivit1[0];
+
+        $update_query = "UPDATE sarjanumeroseuranta
+                         SET myyntirivitunnus = '{$uusi_rivi}'
+                         WHERE yhtio = '{$kukarow['yhtio']}'
+                         AND ostorivitunnus = '{$tilausrivi['tunnus']}'";
+        $update_result = pupe_query($update_query);
       }
     }
   }

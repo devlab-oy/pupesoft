@@ -3450,17 +3450,20 @@ if ($tee == '') {
     }
 
     if ($toim == "PIKATILAUS") {
-      if ($myyjanumero and !loytyyko_myyja_tunnuksella($myyjanumero)) {
-        $myyjanumero_virhe = "<font class='error'>" . t("Virheellinen myyjänro") . "</font>";
-        $tuoteno           = "";
-        $kentta            = 'myyjanumero';
-      }
-      else {
-        $kentta = empty($myyjanumero) ? 'myyjanumero' : 'tuoteno';
-      }
+      if ($yhtiorow['pikatilauksessa_focus_myyjanroon'] == "Y") {
+        if ($myyjanumero and !loytyyko_myyja_tunnuksella($myyjanumero)) {
+          $myyjanumero_virhe = "<font class='error'>" . t("Virheellinen myyjänro") . "</font>";
+          $tuoteno           = "";
+          $kentta            = 'myyjanumero';
+        }
+        else {
+          $kentta = empty($myyjanumero) ? 'myyjanumero' : 'tuoteno';
+        }
 
-      // Tarvitaan, koska safari ei tue HTML5 validaatiota
-      $javascript = "function hasHtml5Validation() {
+        $required = 'required';
+
+        // Tarvitaan, koska safari ei tue HTML5 validaatiota
+        $javascript = "function hasHtml5Validation() {
                       return typeof document.createElement('input').checkValidity === 'function';
                      }
 
@@ -3477,6 +3480,7 @@ if ($tee == '') {
                          }
                        });
                      }";
+      }
 
       echo "<tr>$jarjlisa
         <th align='left'>".t("Asiakas")."</th>

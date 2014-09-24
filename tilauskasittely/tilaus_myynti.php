@@ -3450,7 +3450,14 @@ if ($tee == '') {
     }
 
     if ($toim == "PIKATILAUS") {
-      $kentta = empty($myyjanumero) ? 'myyjanumero' : 'tuoteno';
+      if ($myyjanumero and !loytyyko_myyja_tunnuksella($myyjanumero)) {
+        $myyjanumero_virhe = "<font class='error'>" . t("Virheellinen myyjänro") . "</font>";
+        $tuoteno           = "";
+        $kentta            = 'myyjanumero';
+      }
+      else {
+        $kentta = empty($myyjanumero) ? 'myyjanumero' : 'tuoteno';
+      }
 
       // Tarvitaan, koska safari ei tue HTML5 validaatiota
       $javascript = "function hasHtml5Validation() {
@@ -3479,14 +3486,14 @@ if ($tee == '') {
         </tr>";
       echo "<tr>$jarjlisa
         <th align='left'>".t("Myyjänro")."</th>
-        <td><input type='text' size='10' name='myyjanumero' value='$my' required></td>
+        <td><input type='number' size='10' name='myyjanumero' value='$my' required></td>
         </tr>";
     }
   }
 
   echo "</table>
 
-  <span id='myyjanumero_error'></span>
+  <span id='myyjanumero_error'>{$myyjanumero_virhe}</span>
 
   <script>{$javascript}</script>";
 
@@ -9217,3 +9224,17 @@ if ($yhtiorow['tilauksen_myyntieratiedot'] != '' and isset($naantali) and $naant
 if (@include "inc/footer.inc");
 elseif (@include "footer.inc");
 else exit;
+
+function loytyyko_myyja_tunnuksella($tunnus) {
+  global $kukarow;
+
+  $query  = "SELECT COUNT(*) AS maara
+             FROM  kuka
+             WHERE yhtio   = '{$kukarow['yhtio']}'
+             AND   tunnus  = '{$tunnus}'";
+  $result = pupe_query($query);
+
+  $maara = mysql_fetch_assoc($result);
+
+  return $maara['maara'] > 0;
+}

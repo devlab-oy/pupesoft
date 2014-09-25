@@ -147,6 +147,12 @@ if ($tee == 'laskelma') {
     $tilat = "and lasku.tila = 'U'";
     $tilausrivijoin = "JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)";
     $tilaustyyppi = "and lasku.tilaustyyppi != '9'";
+    $laskun_lisatiedot_lisa = "
+      JOIN laskun_lisatiedot AS ll ON (
+        ll.yhtio = lasku.yhtio AND
+        ll.otunnus = lasku.tunnus
+      )";
+    $laskun_nimi_lisa_select = "trim(concat(ll.laskutus_nimi, ' ', ll.laskutus_nimitark)) nimi,";
   }
   else {
     $taso = 'ee500';
@@ -154,6 +160,8 @@ if ($tee == 'laskelma') {
     $tilat = "and lasku.tila IN ('H','Y','M','P','Q')";
     $tilausrivijoin = "";
     $tilaustyyppi = "";
+    $laskun_lisatiedot_lisa = "";
+    $laskun_nimi_lisa_select = "trim(concat(lasku.nimi, ' ', lasku.nimitark)) nimi,";
   }
 
   $query = "SELECT
@@ -168,10 +176,9 @@ if ($tee == 'laskelma') {
 
   if ("{$rajaa}" == "1000") {
 
-    $query = "SELECT trim(concat(lasku.nimi, ' ', lasku.nimitark)) nimi,
-          lasku.ytunnus,
-          group_concat(DISTINCT lasku.liitostunnus) exclude_asiakkaat,
-          sum(tiliointi.summa) summa
+    $query = "SELECT lasku.ytunnus,
+          lasku.liitostunnus exclude_asiakkaat,
+          sum(abs(tiliointi.summa)) summa
           FROM lasku
           JOIN tiliointi ON (
             tiliointi.yhtio = lasku.yhtio AND
@@ -187,29 +194,35 @@ if ($tee == 'laskelma') {
           AND lasku.tapvm    >= '{$alkupvm}'
           AND lasku.tapvm    <= '{$loppupvm}'
           GROUP BY 1,2
-          HAVING sum(tiliointi.summa) < {$rajaa}";
+          HAVING sum(abs(tiliointi.summa)) < {$rajaa}";
     $result = pupe_query($query);
-    $row = mysql_fetch_assoc($result);
 
-    if (!empty($row['exclude_asiakkaat'])) {
-      $rajaalisa = "and lasku.liitostunnus NOT IN ({$row['exclude_asiakkaat']})";
+    $_exclude_asiakkaat = array();
+
+    while ($row = mysql_fetch_assoc($result)) {
+      $_exclude_asiakkaat[$row['exclude_asiakkaat']] = $row['exclude_asiakkaat'];
+    }
+
+    if (!empty($_exclude_asiakkaat)) {
+      $rajaalisa = "and lasku.liitostunnus NOT IN (".implode(",", $_exclude_asiakkaat).")";
     }
   }
 
-  $query = "SELECT lasku.tunnus ltunnus,
-            lasku.laskunro laskunro,
-            trim(concat(lasku.nimi, ' ', lasku.nimitark)) nimi,
+  $query = "SELECT lasku.laskunro laskunro,
+            {$laskun_nimi_lisa_select}
             lasku.ytunnus,
             lasku.tapvm,
             lasku.alv,
             lasku.liitostunnus,
+            group_concat(tiliointi.tunnus) til_tun,
             sum(tiliointi.vero) veropros,
-            sum(lasku.summa) laskun_summa,
+            round(sum(lasku.summa / (1+lasku.alv/100)), {$yhtiorow['hintapyoristys']}) laskun_summa,
             sum(round(tiliointi.summa * if('veronmaara'='$oletus_verokanta', $oletus_verokanta, vero) / 100, 2)) veronmaara,
             sum(tiliointi.summa) summa,
             abs(sum(if(tiliointi.summa > 0, tiliointi.summa, 0))) veloitukset,
             abs(sum(if(tiliointi.summa < 0, tiliointi.summa, 0))) hyvitykset
             FROM lasku
+            {$laskun_lisatiedot_lisa}
             JOIN tiliointi ON (
               tiliointi.yhtio = lasku.yhtio AND
               tiliointi.ltunnus = lasku.tunnus AND
@@ -224,12 +237,13 @@ if ($tee == 'laskelma') {
             AND lasku.tapvm    >= '{$alkupvm}'
             AND lasku.tapvm    <= '{$loppupvm}'
             {$rajaalisa}
-            GROUP BY 1,2,3,4,5,6,7";
+            GROUP BY 1,2,3,4,5,6";
   $result = pupe_query($query);
 
   $verot_yht = 0;
+  $verot_csv_yht = 0;
 
-  pupe_DataTables(array(array($pupe_DataTables, 9, 9, true)));
+  pupe_DataTables(array(array($pupe_DataTables, 10, 10, true)));
 
   $style = "width: 15px; height: 15px; display: inline-table; border-radius: 50%; -webkit-border-radius: 50%; -moz-border-radius: 50%;";
 
@@ -250,6 +264,7 @@ if ($tee == 'laskelma') {
   echo "<th>laskun summa</th>";
   echo "<th>alv</th>";
   echo "<th>verot</th>";
+  echo "<th>erikoiskoodi</th>";
   echo "</tr>";
 
   if (isset($worksheet)) {
@@ -280,6 +295,9 @@ if ($tee == 'laskelma') {
     $worksheet->writeString($excelrivi, $excelsarake, t("Verot"), $format_bold);
     $excelsarake++;
 
+    $worksheet->writeString($excelrivi, $excelsarake, t("Erikoiskoodi"), $format_bold);
+    $excelsarake++;
+
     $excelrivi++;
   }
 
@@ -293,6 +311,7 @@ if ($tee == 'laskelma') {
   echo "<td><input type='text'   class='search_field' name='search_laskun_summa'></td>";
   echo "<td><input type='text'   class='search_field' name='search_alv'></td>";
   echo "<td><input type='text'   class='search_field' name='search_verot'></td>";
+  echo "<td><input type='text'   class='search_field' name='search_erikoiskoodi'></td>";
   echo "</tr>";
 
   echo "</thead>";
@@ -305,7 +324,13 @@ if ($tee == 'laskelma') {
 
     if ($laskelma == 'a' and $row['veropros'] == 0) continue;
 
-    $_vero = $laskelma == 'a' ? $row['summa'] : $row['veronmaara'];
+    if ($laskelma == 'a') {
+      $row['summa'] *= -1;
+      $_vero = $row['summa'];
+    }
+    else {
+      $_vero = $row['veronmaara'];
+    }
 
     $aineistoon = $_green;
 
@@ -320,6 +345,8 @@ if ($tee == 'laskelma') {
 
       if (mysql_num_rows($asiakasres) != 0) $aineistoon = $_red;
     }
+
+    $erikoiskoodi = $row['alv'] == 0 ? '03' : '';
 
     $_class = $aineistoon == $_red ? 'spec' : '';
 
@@ -337,11 +364,12 @@ if ($tee == 'laskelma') {
     echo "<td>$_i</td>";
     echo "<td>$row[ytunnus]</td>";
     echo "<td>$row[nimi]</td>";
-    echo "<td>$row[laskunro] ($row[ltunnus])</td>";
+    echo "<td>$row[laskunro]</td>";
     echo "<td>",pupe_DataTablesEchoSort($row['tapvm']).tv1dateconv($row['tapvm']),"</td>";
     echo "<td>$row[laskun_summa]</td>";
     echo "<td>$row[alv]</td>";
     echo "<td>$_vero</td>";
+    echo "<td>{$erikoiskoodi}</td>";
     echo "</tr>";
 
     if (isset($worksheet)) {
@@ -375,46 +403,59 @@ if ($tee == 'laskelma') {
       $worksheet->write($excelrivi, $excelsarake, $_vero);
       $excelsarake++;
 
+      $worksheet->write($excelrivi, $excelsarake, $erikoiskoodi);
+      $excelsarake++;
+
       $excelrivi++;
     }
 
-    if ($laskelma == 'a') {
-      $_csv['A'][] = array(
-        'buyerRegCode' => $row['ytunnus'],
-        'buyerName' => $row['nimi'],
-        'invoiceNumber' => $row['laskunro'],
-        'invoiceDate' => tv1dateconv($row['tapvm']),
-        'invoiceSum' => $row['laskun_summa'],
-        'taxRate' => $row['alv'],
-        'invoiceSumForRate' => $row['laskun_summa'],
-        'sumForRateInPeriod' => $_vero,
-        'comments' => '',
-      );
-    }
-    else {
-      $_csv['B'][] = array(
-        'sellerRegCode' => $row['ytunnus'],
-        'sellerName' => $row['nimi'],
-        'invoiceNumber' => $row['laskunro'],
-        'invoiceDate' => tv1dateconv($row['tapvm']),
-        'invoiceSumVat' => $row['laskun_summa'],
-        'vatSum' => $_vero,
-        'vatInPeriod' => $_vero,
-        'comments' => '',
-      );
+    if ($aineistoon == $_green) {
+
+      if ($laskelma == 'a') {
+        $_csv['A'][] = array(
+          'buyerRegCode' => $row['ytunnus'],
+          'buyerName' => $row['nimi'],
+          'invoiceNumber' => $row['laskunro'],
+          'invoiceDate' => tv1dateconv($row['tapvm']),
+          'invoiceSum' => $row['laskun_summa'],
+          'taxRate' => $row['alv'],
+          'invoiceSumForRate' => $row['laskun_summa'],
+          'sumForRateInPeriod' => $_vero,
+          'comments' => $erikoiskoodi,
+        );
+      }
+      else {
+        $_csv['B'][] = array(
+          'sellerRegCode' => $row['ytunnus'],
+          'sellerName' => $row['nimi'],
+          'invoiceNumber' => $row['laskunro'],
+          'invoiceDate' => tv1dateconv($row['tapvm']),
+          'invoiceSumVat' => $row['laskun_summa'],
+          'vatSum' => $_vero,
+          'vatInPeriod' => $_vero,
+          'comments' => $erikoiskoodi,
+        );
+      }
     }
 
     $verot_yht += $_vero;
+    $verot_csv_yht += $aineistoon == $_green ? $_vero : 0;
+
     $_i++;
   }
 
   echo "<tfoot>";
-  echo "<tr>";
-  echo "<th colspan='9'>";
-  echo "verot yht";
+
+  echo "<tr><th colspan='10'>";
+  echo t("Yhteensä")," (",t("ilman ALV"),")";
   echo "<span style='float: right;'>",round($verot_yht, 2),"</span>";
-  echo "</th>";
-  echo "</tr>";
+  echo "</th></tr>";
+
+  echo "<tr><th colspan='10'>";
+  echo t("Yhteensä")," CSV (",t("ilman ALV"),")";
+  echo "<span style='float: right;'>",round($verot_csv_yht, 2),"</span>";
+  echo "</th></tr>";
+
   echo "</tfoot>";
 
   echo "</tbody>";

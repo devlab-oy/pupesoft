@@ -343,6 +343,29 @@ while ($row = mysql_fetch_assoc($res)) {
 
     while ($ttrow = mysql_fetch_assoc($ttres)) {
 
+      // Haetaan tän toimittajan viimeisimmät tulot.
+      $emaq = "SELECT
+               datediff(tilausrivi.laskutettuaika, tilausrivi.laadittu) toimitusaika
+               FROM tilausrivi
+               JOIN lasku ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.uusiotunnus and lasku.liitostunnus = {$ttrow['toimittaja']})
+               WHERE tilausrivi.yhtio        = '{$yhtio}'
+               AND tilausrivi.tyyppi         = 'O'
+               AND tilausrivi.tuoteno        = '{$row['tuoteno']}'
+               AND tilausrivi.laskutettuaika > date_sub(current_date, interval 1 year)
+               ORDER BY laskutettuaika desc
+               LIMIT 5";
+      $emares = pupe_query($emaq);
+
+      $ema = 0;
+
+      if (mysql_num_rows($emares)) {
+        while ($emarow = mysql_fetch_assoc($emares)) {
+          $ema += $emarow["toimitusaika"];
+        }
+
+        $ema = round($ema / mysql_num_rows($emares));
+      }
+
       // Hetaan kaikki ostohinnat yhtiön oletusvaluutassa
       $laskurow = array(
         'liitostunnus'  => $ttrow['toimittaja'],
@@ -394,7 +417,7 @@ while ($row = mysql_fetch_assoc($res)) {
       $trivi .= "{$ttrow['toim_yksikko']};";
       $trivi .= "{$ttrow['tuotekerroin']};";
       $trivi .= "{$ttrow['jarjestys']};";
-      $trivi .= "1";
+      $trivi .= "$ema";
       $trivi .= "\n";
 
       fwrite($tfp, $trivi);

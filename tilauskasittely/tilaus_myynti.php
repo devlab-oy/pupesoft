@@ -175,6 +175,7 @@ if (!isset($tuotteenpainotettukehayht)) $tuotteenpainotettukehayht = array();
 if (!isset($painotettukehayhteensa)) $painotettukehayhteensa = 0;
 if (!isset($hintojen_vaihto)) $hintojen_vaihto = "JOO";
 if (!isset($avaa_rekursiiviset)) $avaa_rekursiiviset = "";
+if (!isset($valmiste_vai_raakaaine)) $valmiste_vai_raakaaine = 'raakaaine';
 
 // Setataan lopetuslinkki, jotta pääsemme takaisin tilaukselle jos käydään jossain muualla
 $tilmyy_lopetus = "{$palvelin2}{$tilauskaslisa}tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
@@ -4644,6 +4645,15 @@ if ($tee == '') {
   //Syöttörivi
   if ($muokkauslukko == "" and ($toim != "PROJEKTI" or $rivitunnus != 0) or $toim == "YLLAPITO") {
     echo "<table><tr>$jarjlisa<td class='back'><font class='head'>".t("Lisää rivi").": </font></td></tr></table>";
+
+    if (in_array($toim, array('VALMISTAVARASTOON', 'VALMISTAASIAKKAALLE')) and $tila != 'LISAAKERTARESEPTIIN' and $tila != 'LISAAISAKERTARESEPTIIN') {
+
+      $_chk = array($valmiste_vai_raakaaine => 'checked') + array('raakaaine' => '', 'valmiste' => '');
+
+      echo t("Raaka-aine")," <input type='radio' name='valmiste_vai_raakaaine' value='raakaaine' {$_chk['raakaaine']} /> ";
+      echo t("Valmiste")," <input type='radio' name='valmiste_vai_raakaaine' value='valmiste' {$_chk['valmiste']} />";
+    }
+
     require "syotarivi.inc";
   }
   else {

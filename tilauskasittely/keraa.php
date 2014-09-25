@@ -1247,7 +1247,7 @@ if ($tee == 'P') {
               $keraysera_update_res = pupe_query($query_upd);
             }
 
-            if (trim($maara[$apui]) != '') {
+            if (trim($maara[$apui]) != '' and $maara[$apui] != 0) {
               // haetaan lapset joilla on ohita_kerays täpätty ja tehdään poikkeama myös niille
               $query_lapset = "SELECT tilausrivi.tunnus, tilausrivi.varattu
                                FROM tilausrivi

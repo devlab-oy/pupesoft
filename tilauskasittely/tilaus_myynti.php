@@ -4086,52 +4086,56 @@ if ($tee == '') {
     }
   }
 
-  if ($kukarow["extranet"] == "" and $tila == 'MUUTAKAIKKI') {
-    if (!empty($tilausnumero)) {
+  $_ei_extranet = ($kukarow["extranet"] == "");
 
-      // Riippuen yhtiˆn parametrist‰, k‰sitell‰‰n jt eri tavalla
-      if ($yhtiorow["varaako_jt_saldoa"] == "") {
-        $updatelisa = "jt = if(var='P',tilkpl,if(var='J',jt,varattu)), varattu = 0,";
+  if ($_ei_extranet) {
+
+    $_varastoon_asiakkaalle = (in_array($toim, array('VALMISTAVARASTOON', 'VALMISTAASIAKKAALLE')));
+    $_tila_check = (!in_array($tila, array('LISAAKERTARESEPTIIN', 'LISAAISAKERTARESEPTIIN')));
+
+    if ($_varastoon_asiakkaalle and $_tila_check) {
+
+      if ($valmiste_vai_raakaaine == 'valmiste') {
+        $perheid2 = -100;
       }
       else {
-        $updatelisa = "varattu = if(var='P',tilkpl,varattu),";
+        $perheid2 = 0;
       }
-
-      $query = "UPDATE tilausrivi
-                SET $updatelisa
-                var         = 'J',
-                kerayspvm   = '".date('Y-m-d', strtotime('now + 3 month'))."'
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND otunnus = '{$tilausnumero}'";
-      pupe_query($query);
     }
-  }
 
-  //Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
-  if ($kukarow["extranet"] == "" and $tila == "LISAARESEPTIIN" and $teeperhe == "OK") {
-    $query = "UPDATE tilausrivi
-              SET perheid2 = '$isatunnus'
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tunnus  = '$isatunnus'";
-    $presult = pupe_query($query);
-    $perheid2 = $isatunnus;
-  }
+    if ($tila == 'MUUTAKAIKKI') {
+      if (!empty($tilausnumero)) {
 
-  //Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
-  if ($kukarow["extranet"] == "" and $tila == "LISAAKERTARESEPTIIN" and $teeperhe == "OK") {
-    $query = "UPDATE tilausrivi
-              SET
-              perheid     = '$isatunnus',
-              tyyppi      = 'W'
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tunnus  = '$isatunnus'";
-    $presult = pupe_query($query);
-    $perheid = $isatunnus;
-  }
+        // Riippuen yhtiˆn parametrist‰, k‰sitell‰‰n jt eri tavalla
+        if ($yhtiorow["varaako_jt_saldoa"] == "") {
+          $updatelisa = "jt = if(var='P',tilkpl,if(var='J',jt,varattu)), varattu = 0,";
+        }
+        else {
+          $updatelisa = "varattu = if(var='P',tilkpl,varattu),";
+        }
 
-  //Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
-  if ($kukarow["extranet"] == "" and $tila == "LISAAISAKERTARESEPTIIN") {
-    if ($teeperhe == "OK") {
+        $query = "UPDATE tilausrivi
+                  SET $updatelisa
+                  var         = 'J',
+                  kerayspvm   = '".date('Y-m-d', strtotime('now + 3 month'))."'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND otunnus = '{$tilausnumero}'";
+        pupe_query($query);
+      }
+    }
+
+    //Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
+    if ($tila == "LISAARESEPTIIN" and $teeperhe == "OK") {
+      $query = "UPDATE tilausrivi
+                SET perheid2 = '$isatunnus'
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$isatunnus'";
+      $presult = pupe_query($query);
+      $perheid2 = $isatunnus;
+    }
+
+    //Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
+    if ($tila == "LISAAKERTARESEPTIIN" and $teeperhe == "OK") {
       $query = "UPDATE tilausrivi
                 SET
                 perheid     = '$isatunnus',
@@ -4142,8 +4146,22 @@ if ($tee == '') {
       $perheid = $isatunnus;
     }
 
-    // useamman valmisteen reseptit...
-    $perheid2 = -100;
+    //Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
+    if ($tila == "LISAAISAKERTARESEPTIIN") {
+      if ($teeperhe == "OK") {
+        $query = "UPDATE tilausrivi
+                  SET
+                  perheid     = '$isatunnus',
+                  tyyppi      = 'W'
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '$isatunnus'";
+        $presult = pupe_query($query);
+        $perheid = $isatunnus;
+      }
+
+      // useamman valmisteen reseptit...
+      $perheid2 = -100;
+    }
   }
 
   if ($tuoteno != '') {

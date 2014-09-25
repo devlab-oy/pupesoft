@@ -684,7 +684,7 @@ if ($tee == 'valmis') {
         }
       }
 
-      if ($tee == "X") {
+      if ($tee == "X" and $mista == '' and $minne == '') {
         // Summataan virhecountteria
         $virheita++;
       }

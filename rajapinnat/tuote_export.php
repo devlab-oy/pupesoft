@@ -54,7 +54,7 @@ if ($verkkokauppatyyppi != "magento" and $verkkokauppatyyppi != "anvia") {
 if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
 
   // Varmistetaan, että kaikki muuttujat on kunnossa
-  if (empty($magento_api_ana_url) or empty($magento_api_ana_usr) or empty($magento_api_ana_pas) or empty($magento_tax_class_id)) {
+  if (empty($magento_api_te_url) or empty($magento_api_te_usr) or empty($magento_api_te_pas) or empty($magento_tax_class_id)) {
     echo "Magento parametrit puuttuu, päivitystä ei voida ajaa.";
     exit;
   }
@@ -811,7 +811,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
 
   $time_start = microtime(true);
 
-  $magento_client = new MagentoClient($magento_api_ana_url, $magento_api_ana_usr, $magento_api_ana_pas);
+  $magento_client = new MagentoClient($magento_api_te_url, $magento_api_te_usr, $magento_api_te_pas);
 
   if ($magento_client->getErrorCount() > 0) {
     exit;

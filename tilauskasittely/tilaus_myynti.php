@@ -3220,8 +3220,9 @@ if ($tee == '') {
                  ORDER BY nimi";
       $yresult = pupe_query($query);
 
-      if (($yhtiorow['pikatilauksessa_myyjanro_pakollinen'] == 'Y') and empty($myyja)) {
-        $myyjanumero = empty($myyjanro) ? $myyjanumero : $myyjanro;
+      $myyjanumero = empty($myyjanro) ? $myyjanumero : $myyjanro;
+
+      if ($yhtiorow['pikatilauksessa_myyjanro_pakollinen'] == 'Y' and empty($myyja)) {
         $required    = 'required';
 
         if (!loytyyko_myyja_tunnuksella($myyjanumero)) {
@@ -3477,6 +3478,7 @@ if ($tee == '') {
     if ($toim == "PIKATILAUS") {
       if ($yhtiorow['pikatilauksessa_myyjanro_pakollinen'] == "Y") {
         if ($myyjanumero and !loytyyko_myyja_tunnuksella($myyjanumero)) {
+          $my                = "";
           $myyjanumero_virhe = "<font class='error'>" . t("Virheellinen myyjänro") . "</font>";
           $tuoteno           = "";
           $kentta            = 'myyjanumero';

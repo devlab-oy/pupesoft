@@ -3220,10 +3220,7 @@ if ($tee == '') {
                  ORDER BY nimi";
       $yresult = pupe_query($query);
 
-      $ehto1 = ($yhtiorow['pikatilauksessa_myyjanro_pakollinen'] == 'Y') and empty($myyja);
-      $ehto2 = ($yhtiorow['pikatilauksessa_myyjanro_pakollinen'] == 'Y') and !empty($myyjanro);
-
-      if ($ehto1 or $ehto2) {
+      if (($yhtiorow['pikatilauksessa_myyjanro_pakollinen'] == 'Y') and empty($myyja)) {
         $myyjanumero = empty($myyjanro) ? $myyjanumero : $myyjanro;
         $required    = 'required';
 
@@ -3235,12 +3232,14 @@ if ($tee == '') {
 
       echo "<td>" .
         "<input " .
+        "id='myyjanro_id'" .
         "type='number' " .
         "min='1'" .
         "name='myyjanro' " .
         "size='8' " .
         "value='{$myyjanumero}' {$required} $state> ".t("tai")." ";
-      echo "<select name='myyja' onchange='submit();' $state>";
+
+      echo "<select id='myyja_id' name='myyja' $state>";
 
       while ($row = mysql_fetch_assoc($yresult)) {
         $sel = "";

@@ -160,8 +160,14 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
 function hae_laskut($laskunro) {
   global $yhtiorow;
-  $query  = "SELECT lasku.*,
-             maksupaatetapahtumat.*,
+  $query  = "SELECT lasku.yhtio_nimi,
+             lasku.yhtio_osoite,
+             lasku.yhtio_postino,
+             lasku.yhtio_postitp,
+             lasku.yhtio_ovttunnus,
+             lasku.yhtio_maa,
+             lasku.laskunro,
+             maksupaatetapahtumat.asiakkaan_kuitti,
              kuka.nimi AS myyjan_nimi
              FROM lasku
              LEFT JOIN maksupaatetapahtumat ON (lasku.tunnus = maksupaatetapahtumat.tilausnumero
@@ -172,19 +178,26 @@ function hae_laskut($laskunro) {
              AND lasku.laskunro = '{$laskunro}'";
   $result = pupe_query($query);
 
-  $tapahtumat = array();
+  $laskut = array();
 
-  while ($tapahtuma = mysql_fetch_assoc($result)) {
-    array_push($tapahtumat, $tapahtuma);
+  while ($lasku = mysql_fetch_assoc($result)) {
+    array_push($laskut, $lasku);
   }
 
-  return $tapahtumat;
+  return $laskut;
 }
 
 function hae_tilausrivit($laskunro) {
   global $yhtiorow;
 
-  $query  = "SELECT *
+  $query  = "SELECT tilausrivi.rivihinta_valuutassa,
+             tilausrivi.kpl,
+             tilausrivi.alv,
+             tilausrivi.rivihinta,
+             tilausrivi.tuoteno,
+             tilausrivi.nimitys,
+             tilausrivi.yksikko,
+             tilausrivi.otunnus
              FROM tilausrivi
              INNER JOIN lasku ON (lasku.tunnus = tilausrivi.otunnus
                AND lasku.yhtio = '{$yhtiorow['yhtio']}')

@@ -214,9 +214,9 @@ if ($tee == 'laskelma') {
             lasku.tapvm,
             lasku.alv,
             lasku.liitostunnus,
+            round(lasku.summa / (1+lasku.alv/100), {$yhtiorow['hintapyoristys']}) laskun_summa,
             group_concat(tiliointi.tunnus) til_tun,
             sum(tiliointi.vero) veropros,
-            round(sum(lasku.summa / (1+lasku.alv/100)), {$yhtiorow['hintapyoristys']}) laskun_summa,
             sum(round(tiliointi.summa * if('veronmaara'='$oletus_verokanta', $oletus_verokanta, vero) / 100, 2)) veronmaara,
             sum(tiliointi.summa) summa,
             abs(sum(if(tiliointi.summa > 0, tiliointi.summa, 0))) veloitukset,
@@ -237,7 +237,7 @@ if ($tee == 'laskelma') {
             AND lasku.tapvm    >= '{$alkupvm}'
             AND lasku.tapvm    <= '{$loppupvm}'
             {$rajaalisa}
-            GROUP BY 1,2,3,4,5,6";
+            GROUP BY 1,2,3,4,5,6,7";
   $result = pupe_query($query);
 
   $verot_yht = 0;

@@ -533,8 +533,15 @@ if (isset($from) and $from == "ASIAKASYLLAPITO" and $yllapidossa == "asiakas" an
 }
 
 // asiakasnumero on annettu, etsit‰‰n tietokannasta...
-if (($tee == "" or ($myos_prospektit == "TRUE" and ($toim == "TARJOUS" or $toim == "EXTTARJOUS"))) and (($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0) or ($kukarow["extranet"] == "" and ($syotetty_ytunnus != '' or $asiakasid != '')))) {
+$ehto1 = ($tee == "" or
+  ($myos_prospektit == "TRUE" and ($toim == "TARJOUS" or $toim == "EXTTARJOUS")));
 
+$ehto2 = (($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0) or
+  ($kukarow["extranet"] == "" and
+    ($syotetty_ytunnus != '' or $asiakasid != '') and
+    loytyyko_myyja_tunnuksella($myyjanumero)));
+
+if ($ehto1 and $ehto2) {
   if (substr($ytunnus, 0, 1) == "£") {
     $ytunnus = $asiakasid;
   }
@@ -3213,9 +3220,12 @@ if ($tee == '') {
                  ORDER BY nimi";
       $yresult = pupe_query($query);
 
-      if ($yhtiorow['pikatilauksessa_myyjanro_pakollinen'] == 'Y') {
+      $ehto1 = ($yhtiorow['pikatilauksessa_myyjanro_pakollinen'] == 'Y') and empty($myyja);
+      $ehto2 = ($yhtiorow['pikatilauksessa_myyjanro_pakollinen'] == 'Y') and !empty($myyjanro);
+
+      if ($ehto1 or $ehto2) {
         $myyjanumero = empty($myyjanro) ? $myyjanumero : $myyjanro;
-        $required = 'required';
+        $required    = 'required';
 
         if (!loytyyko_myyja_tunnuksella($myyjanumero)) {
           $tuoteno = '';

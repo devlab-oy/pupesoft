@@ -40,7 +40,8 @@ function hae_toimittajat() {
 function tiedostotyypit() {
   return array(
     "ohjekirja",
-    "huoltotiedote"
+    "huoltotiedote",
+    "esite"
   );
 }
 

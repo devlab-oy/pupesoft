@@ -10,12 +10,41 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
   }
   else {
     if ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $laskurow['tilaustyyppi'] == 'U') {
-      $tulostimet[0] = "Takuu";
+      // Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰ takuul‰hetett‰ varten
+      if (!empty($laskurow['yhtio_toimipaikka'])) {
+        $avainsana_where = " and avainsana.selite       = '{$laskurow['varasto']}'
+                             and avainsana.selitetark   = '{$laskurow['yhtio_toimipaikka']}'
+                             and avainsana.selitetark_2 = 'printteri1'";
+
+        $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
+
+        if (!empty($tp_tulostin)) {
+          $valittu_tulostin = $tp_tulostin;
+        }
+       
+      // k‰sinvalittu printteri
+        if (isset($valittu_tulostin) and $valittu_tulostin != '') {
+          $apuprintteri = $valittu_tulostin;
+
+        //haetaan l‰hetteen tulostuskomento
+          $query = "SELECT komento
+                    FROM kirjoittimet
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    AND tunnus  = '$apuprintteri'";
+          $kirres = pupe_query($query);
+          $kirrow = mysql_fetch_assoc($kirres);
+
+          $komento = $kirrow['komento'];
+        }
+        else {
+          $tulostimet[0] = "Takuu";
+        }
+      }
     }
     else {
       $tulostimet[0] = "Reklamaatio";
     }
-
+    
     require_once "tilauskasittely/tulosta_lahete_kerayslista.inc";
   }
 

@@ -30,10 +30,10 @@ pupesoft_flock($lock_params);
 require "{$pupe_root_polku}/rajapinnat/magento_client.php";
 require "{$pupe_root_polku}/rajapinnat/edi.php";
 
-if (empty($magento_api_ana_edi)
-  or empty($magento_api_ana_url)
-  or empty($magento_api_ana_usr)
-  or empty($magento_api_ana_pas)
+if (empty($magento_api_ht_edi)
+  or empty($magento_api_ht_url)
+  or empty($magento_api_ht_usr)
+  or empty($magento_api_ht_pas)
   or empty($ovt_tunnus)
   or empty($pupesoft_tilaustyyppi)
   or empty($verkkokauppa_asiakasnro)
@@ -43,7 +43,7 @@ if (empty($magento_api_ana_edi)
 }
 
 // Magenton soap client
-$magento = new MagentoClient($magento_api_ana_url, $magento_api_ana_usr, $magento_api_ana_pas);
+$magento = new MagentoClient($magento_api_ht_url, $magento_api_ht_usr, $magento_api_ht_pas);
 
 if ($magento->getErrorCount() > 0) {
   exit;

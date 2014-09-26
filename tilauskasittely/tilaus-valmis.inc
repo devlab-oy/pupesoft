@@ -83,7 +83,6 @@ $query = "SELECT tunnus
           AND tyyppi  != 'D'
           AND (varattu + jt) > 0 ";
 $veloitus_result = pupe_query($query);
-$veloitusrow = mysql_fetch_assoc($veloitus_result);
 
 // Myynti estete‰‰n jos luottoraja on ylitetty (K - kaikki estet‰‰n, E -  kaikki muu ku myyjien tekem‰ estet‰‰n)
 // Jos maksuehto on k‰teinen, sallitaan luottorajan ylitys

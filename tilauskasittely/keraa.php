@@ -3007,7 +3007,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
             if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
               echo "<span id='maaran_paivitys_{$row['tunnus']}'></span>";
 
-              if ($row['ohita_kerays'] != "") {
+              if ($row['ohita_kerays'] != "" or $row["var"] == 'J') {
                 // ohita_kerays tuotteet ei mee keräyseriin
                 $keraysera_row['kpl'] = $row["varattu"];
               }

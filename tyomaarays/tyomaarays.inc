@@ -10,22 +10,20 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
   }
   else {
     if ((isset($tilaustyyppi) and $tilaustyyppi == 'U') or $laskurow['tilaustyyppi'] == 'U') {
-      // Katsotaan onko avainsanoihin määritelty varaston toimipaikan läheteprintteriä takuulähetettä varten
-      if (!empty($laskurow['yhtio_toimipaikka'])) {
+      // Katsotaan onko avainsanoihin määritelty varaston toimipaikan läheteprintteriä takuulähetettä varten laajassa toimipaikkakäsittelyssä
+      $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikkares) > 0) ? TRUE : FALSE;
+      
+      if (!empty($laskurow['yhtio_toimipaikka']) and $onkolaajattoimipaikat) {
         $avainsana_where = " and avainsana.selite       = '{$laskurow['varasto']}'
                              and avainsana.selitetark   = '{$laskurow['yhtio_toimipaikka']}'
                              and avainsana.selitetark_2 = 'printteri1'";
 
         $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
 
-        if (!empty($tp_tulostin)) {
-          $valittu_tulostin = $tp_tulostin;
-        }
-       
       // käsinvalittu printteri
-        if (isset($valittu_tulostin) and $valittu_tulostin != '') {
-          $apuprintteri = $valittu_tulostin;
-
+        if (!empty($tp_tulostin)) {         
+          $apuprintteri = $valittu_tulostin = $tp_tulostin;
+          $kappaleet = "";
         //haetaan lähetteen tulostuskomento
           $query = "SELECT komento
                     FROM kirjoittimet
@@ -39,6 +37,9 @@ if ($tee ==  "VALMIS" or $tee == "LEPAA") {
         else {
           $tulostimet[0] = "Takuu";
         }
+      }
+      else {
+        $tulostimet[0] = "Takuu";
       }
     }
     else {

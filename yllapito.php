@@ -28,7 +28,13 @@ if (function_exists("js_popup") and !isset($ajax_request)) {
   echo js_popup(-100);
 }
 
-if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote" or $toim == "avainsana" or $toim == "laite") {
+//onko_toim_laite muuttujaa käytetään custom näkymien takia. toim on tällöin laite!!!....
+$onko_toim_laite = false;
+if ($yhtiorow['laite_huolto'] == 'X' and stristr($toim, 'laite')) {
+  $onko_toim_laite = true;
+}
+
+if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote" or $toim == "avainsana" or $onko_toim_laite) {
   enable_ajax();
 }
 
@@ -291,7 +297,7 @@ if ($del == 3) {
     }
   }
 
-  if ($toim != 'laite') {
+  if (!$onko_toim_laite) {
     $delete_query = "SET poistettu = 1";
   }
   else {
@@ -499,7 +505,7 @@ if ($upd == 1) {
     }
     // Päivitetään
     else {
-      if ($yhtiorow['laite_huolto'] == 'X' and $toim == 'laite') {
+      if ($yhtiorow['laite_huolto'] == 'X' and $onko_toim_laite) {
         $huoltovalit = huoltovali_options();
         foreach ($laite['huoltosyklit'] as &$huoltosyklit_laitteet) {
 
@@ -588,7 +594,7 @@ if ($upd == 1) {
       $tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
       //lisätään myös huoltosyklit jos on kyse laitteesta
-      if ($toim == 'laite' and $yhtiorow['laite_huolto'] == 'X') {
+      if ($onko_toim_laite and $yhtiorow['laite_huolto'] == 'X') {
 
         $huoltovalit = huoltovali_options();
         foreach ($laite['huoltosyklit'] as &$huoltosyklit_laitteet) {
@@ -600,7 +606,7 @@ if ($upd == 1) {
         }
       }
 
-      if ($yhtiorow['laite_huolto'] == 'X' and $toim == 'laite' and empty($errori)) {
+      if ($yhtiorow['laite_huolto'] == 'X' and $onko_toim_laite and empty($errori)) {
         $asiakas = hae_paikan_asiakas($t['paikka']);
         $laitteet = hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy($asiakas['tunnus']);
         list($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta) = paata_mitka_huollot_tehdaan($laitteet);
@@ -1851,7 +1857,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   $result = pupe_query($query);
   $trow = mysql_fetch_array($result);
 
-  if ($toim == 'laite') {
+  if ($onko_toim_laite) {
     js_laite();
   }
 
@@ -1903,7 +1909,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       echo "</tr>";
     }
   }
-  elseif ($uusi == '' and $toim == 'laite') {
+  elseif ($uusi == '' and $onko_toim_laite) {
     echo "<th align='left'>".t("Kopioi")."</th>";
     echo "<td>";
     $checked = "";
@@ -2163,7 +2169,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     }
   }
 
-  if ($toim == 'laite') {
+  if ($onko_toim_laite) {
     $query = "SELECT DISTINCT selite
               FROM tuotteen_avainsanat
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -2443,9 +2449,10 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
   $saako_poistaa = true;
   if ($yhtiorow['laite_huolto'] == 'X') {
-    $poistamattomat = array("kohde", "tuote", "paikka", "laite", "asiakas");
-    $onko_admin = stristr($kukarow['profiilit'], 'admin');
-    if (!$onko_admin and in_array($toim, $poistamattomat)) {
+    $poistamattomat = array('kohde', 'tuote', 'paikka', 'laite', 'asiakas');
+    $_onko_admin = stristr($kukarow['profiilit'], 'admin');
+    $_ei_saa_poistaa = (in_array($toim, $poistamattomat) or $onko_toim_laite);
+    if (!$_onko_admin and $_ei_saa_poistaa) {
       $saako_poistaa = false;
     }
   }

@@ -74,7 +74,7 @@ if ($paiva_ajo) {
             AND tuote.tuotetyyppi  = ''
             AND tuote.ostoehdotus  = ''
             AND (tuote.muutospvm  >= date_sub(now(), interval 24 HOUR)
-              OR tuote.luontiaika  >= date_sub(now(), interval 24 HOUR))";
+              OR tuote.luontiaika >= date_sub(now(), interval 24 HOUR))";
   $res = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($res)) {
@@ -85,7 +85,7 @@ if ($paiva_ajo) {
             FROM tuotteen_toimittajat
             WHERE tuotteen_toimittajat.yhtio    = '{$yhtio}'
             AND tuotteen_toimittajat.tuoteno    not in ($tuotelista)
-            AND (tuotteen_toimittajat.muutospvm  >= date_sub(now(), interval 24 HOUR)
+            AND (tuotteen_toimittajat.muutospvm >= date_sub(now(), interval 24 HOUR)
              OR tuotteen_toimittajat.luontiaika >= date_sub(now(), interval 24 HOUR))";
   $res = pupe_query($query);
 
@@ -332,7 +332,8 @@ while ($row = mysql_fetch_assoc($res)) {
       'valuutta'                        => '',
       'toim_yksikko'                    => '',
       'tuotekerroin'                    => '',
-      'jarjestys'                       => '')
+      'jarjestys'                       => '',
+      'toimitusaika_ema'                => '')
   );
 
   if (mysql_num_rows($ttres) > 0) {
@@ -341,6 +342,29 @@ while ($row = mysql_fetch_assoc($res)) {
     $toimittajat_a = array();
 
     while ($ttrow = mysql_fetch_assoc($ttres)) {
+
+      // Haetaan tän toimittajan viimeisimmät tulot.
+      $emaq = "SELECT
+               datediff(tilausrivi.laskutettuaika, tilausrivi.laadittu) toimitusaika
+               FROM tilausrivi
+               JOIN lasku ON (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.uusiotunnus and lasku.liitostunnus = {$ttrow['toimittaja']})
+               WHERE tilausrivi.yhtio        = '{$yhtio}'
+               AND tilausrivi.tyyppi         = 'O'
+               AND tilausrivi.tuoteno        = '{$row['tuoteno']}'
+               AND tilausrivi.laskutettuaika > date_sub(current_date, interval 1 year)
+               ORDER BY laskutettuaika desc
+               LIMIT 5";
+      $emares = pupe_query($emaq);
+
+      $ema = 0;
+
+      if (mysql_num_rows($emares)) {
+        while ($emarow = mysql_fetch_assoc($emares)) {
+          $ema += $emarow["toimitusaika"];
+        }
+
+        $ema = round($ema / mysql_num_rows($emares));
+      }
 
       // Hetaan kaikki ostohinnat yhtiön oletusvaluutassa
       $laskurow = array(
@@ -392,7 +416,8 @@ while ($row = mysql_fetch_assoc($res)) {
       $trivi .= "{$yhtiorow["valkoodi"]};";
       $trivi .= "{$ttrow['toim_yksikko']};";
       $trivi .= "{$ttrow['tuotekerroin']};";
-      $trivi .= "{$ttrow['jarjestys']}";
+      $trivi .= "{$ttrow['jarjestys']};";
+      $trivi .= "$ema";
       $trivi .= "\n";
 
       fwrite($tfp, $trivi);

@@ -191,6 +191,9 @@ if (!isset($variaatio_tuoteno)) $variaatio_tuoteno = "";
 if (!isset($var_array)) $var_array = "";
 if (!isset($yksi_suoratoimittaja)) $yksi_suoratoimittaja = "";
 if (!isset($ylatila)) $ylatila = "";
+if (!isset($muokkauslukko)) $muokkauslukko = "";
+if (!isset($muokkauslukko_rivi)) $muokkauslukko_rivi = "";
+if (!isset($myyntikielto)) $myyntikielto = "";
 
 // Setataan lopetuslinkki, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla
 $tilmyy_lopetus = "{$palvelin2}{$tilauskaslisa}tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
@@ -4729,8 +4732,9 @@ if ($tee == '') {
       echo " ", t("Asiakkaalle voi kuitenkin myyd‰ k‰teismaksuehdolla"), ".";
 
       if ($yhtiorow['luottorajan_ylitys'] == "L" or $yhtiorow['luottorajan_ylitys'] == "M") {
-        $muokkauslukko = 'LUKOSSA';
-        $myyntikielto = 'MYYNTIKIELTO';
+        $muokkauslukko      = 'LUKOSSA';
+        $muokkauslukko_rivi = 'LUKOSSA';
+        $myyntikielto       = 'MYYNTIKIELTO';
       }
 
       echo "</font><br />";
@@ -4759,8 +4763,9 @@ if ($tee == '') {
       echo "<br/>";
 
       if ($yhtiorow['erapaivan_ylityksen_toimenpide'] == "L" or $yhtiorow['erapaivan_ylityksen_toimenpide'] == "M") {
-        $muokkauslukko = 'LUKOSSA';
-        $myyntikielto = 'MYYNTIKIELTO';
+        $muokkauslukko      = 'LUKOSSA';
+        $muokkauslukko_rivi = 'LUKOSSA';
+        $myyntikielto       = 'MYYNTIKIELTO';
       }
     }
 
@@ -4815,8 +4820,9 @@ if ($tee == '') {
           echo " ", t("Asiakkaalle voi kuitenkin myyd‰ k‰teismaksuehdolla"), ".";
 
           if ($yhtiorow['luottorajan_ylitys'] == "L" or $yhtiorow['luottorajan_ylitys'] == "M") {
-            $muokkauslukko = 'LUKOSSA';
-            $myyntikielto = 'MYYNTIKIELTO';
+            $muokkauslukko      = 'LUKOSSA';
+            $muokkauslukko_rivi = 'LUKOSSA';
+            $myyntikielto       = 'MYYNTIKIELTO';
           }
 
           echo "</font><br />";
@@ -4837,8 +4843,9 @@ if ($tee == '') {
       echo "<br/>";
 
       if ($yhtiorow['erapaivan_ylityksen_toimenpide'] == "L" or $yhtiorow['erapaivan_ylityksen_toimenpide'] == "M") {
-        $muokkauslukko = 'LUKOSSA';
-        $myyntikielto = 'MYYNTIKIELTO';
+        $muokkauslukko      = 'LUKOSSA';
+        $muokkauslukko_rivi = 'LUKOSSA';
+        $myyntikielto       = 'MYYNTIKIELTO';
       }
     }
   }
@@ -6037,9 +6044,6 @@ if ($tee == '') {
         // voidaan lukita t‰m‰ tilausrivi
         if ($row["uusiotunnus"] > 0 or $laskurow["tunnus"] != $row["otunnus"] or ($laskurow["tila"] == "V" and $row["kpl"] != 0)) {
           $muokkauslukko_rivi = "LUKOSSA";
-        }
-        else {
-          $muokkauslukko_rivi = "";
         }
 
         // Rivin tarkistukset

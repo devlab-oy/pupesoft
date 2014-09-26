@@ -97,6 +97,7 @@ $luottoraja_chk = ((in_array($yhtiorow["luottorajan_ylitys"], array("K", "J", "L
   and mysql_num_rows($veloitus_result) > 0) ? 1 : 0;
 
 $erapaiva_chk   =  ($maksuehtorow['kateinen'] == '' and empty($maksuehtorow['jv'])
+  and mysql_num_rows($veloitus_result) > 0
   and (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("K", "J", "L", "M"))
     or (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("E", "F"))
       and ($kukarow["extranet"] != ""

@@ -25,7 +25,8 @@ if ($_selitetark_5 or
 
 if ($_selitetark_5 and
   $avain_sel['MYSQLALIAS'] == "SELECTED" or
-  $avain_sel["SAHKTILTUN"] == "SELECTED") {
+  $avain_sel["SAHKTILTUN"] == "SELECTED" or
+  $avain_sel['TYOM_TYOKENTAT']) {
   $tyyppi = 1;
 }
 

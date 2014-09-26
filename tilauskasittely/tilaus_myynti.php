@@ -35,10 +35,11 @@ if ($yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K" and isset($ajax_
 }
 
 $e1 = (isset($yhtiorow['tilauksen_myyntieratiedot']) and $yhtiorow['tilauksen_myyntieratiedot'] != '');
-$e2 = (isset($tappi) and $tappi == "lataa_tiedosto");
-$e3 = isset($tmpfilenimi);
+$e2 = (isset($yhtiorow['laiterekisteri_kaytossa']) and $yhtiorow['laiterekisteri_kaytossa'] != '');
+$e3 = (isset($tappi) and $tappi == "lataa_tiedosto");
+$e4 = isset($tmpfilenimi);
 
-if ($e1 and $e2 and $e3) {
+if ($e1 and $e2 and $e3 and $e4) {
   readfile("/tmp/".$tmpfilenimi);
   exit;
 }
@@ -3820,6 +3821,27 @@ if ($tee == '') {
         if ($tapa != "POISTA") {
           $myy_sarjatunnus = $sarjarow["tunnukset"];
         }
+
+        if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
+          // Nollataan myyntirivitunnus laite-taulusta
+          $spessukveri = "SELECT *
+                          FROM sarjanumeroseuranta
+                          WHERE myyntirivitunnus = '$rivitunnus'
+                          ORDER BY luontiaika desc
+                          LIMIT 1";
+          $spessures = pupe_query($spessukveri);
+          $spessurivi = mysql_fetch_assoc($spessures);
+
+          $laiteupdate = "UPDATE laite
+                          SET paikka = '',
+                          muutospvm    = now(),
+                          muuttaja     = '{$kukarow['kuka']}'
+                          WHERE yhtio  = '{$kukarow['yhtio']}'
+                          AND sarjanro = '{$spessurivi['sarjanumero']}'
+                          AND tuoteno  = '{$spessurivi['tuoteno']}'
+                          AND paikka   = '{$rivitunnus}'";
+          pupe_query($laiteupdate);
+        }
       }
 
       if ($tapa == "VAIHDA" and ($tilausrivi["sarjanumeroseuranta"] == "E" or $tilausrivi["sarjanumeroseuranta"] == "F" or $tilausrivi["sarjanumeroseuranta"] == "G")) {
@@ -3853,6 +3875,7 @@ if ($tee == '') {
                   and otunnus     = '$kukarow[kesken]'
                   and yhtio       = '$kukarow[yhtio]'";
         $result = pupe_query($query);
+
       }
 
       if ($tapa == "POISTA" and $kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and !empty($tilausrivi['vanha_otunnus']) and $tilausrivi['vanha_otunnus'] != $tilausrivi['otunnus'] and $tilausrivi['positio'] == 'JT' and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $yhtiorow['jt_automatiikka_mitatoi_tilaus'] == 'E') {
@@ -4585,8 +4608,8 @@ if ($tee == '') {
       or $tilausrivi["perheid"] != $tilausrivi["tunnus"]) {
       $query =  "UPDATE tilausrivi
                  SET var = '$var',
-                 varattu = $varattukpl,
-                 jt      = $jtkpl
+                 varattu     = $varattukpl,
+                 jt          = $jtkpl
                  WHERE yhtio = '{$kukarow['yhtio']}'
                  AND tunnus  = '{$tilausrivi['tunnus']}'";
       pupe_query($query);
@@ -4617,8 +4640,8 @@ if ($tee == '') {
 
         $query =  "UPDATE tilausrivi
                    SET var = '$var',
-                   varattu = $tuotevarattukpl,
-                   jt      = $tuotejtkpl
+                   varattu     = $tuotevarattukpl,
+                   jt          = $tuotejtkpl
                    WHERE yhtio = '{$kukarow['yhtio']}'
                    AND tunnus  = '{$muutettavarivi['tunnus']}'";
         pupe_query($query);
@@ -6939,6 +6962,21 @@ if ($tee == '') {
               }
             }
           }
+        }
+
+        if ($yhtiorow['laiterekisteri_kaytossa'] != '' and $toim == "YLLAPITO") {
+          // Piirret‰‰n k‰yttˆliittym‰‰n liitettyjen laitteiden sarjanumerot
+          $query = "SELECT
+                    group_concat(laite.sarjanro SEPARATOR '<br>') sarjanumerot
+                    FROM laitteen_sopimukset
+                    JOIN laite ON laite.tunnus = laitteen_sopimukset.laitteen_tunnus
+                    WHERE laitteen_sopimukset.sopimusrivin_tunnus = '{$row['tunnus']}'
+                    ORDER BY laite.tunnus";
+          $res = pupe_query($query);
+          $sarjanumerotres = mysql_fetch_assoc($res);
+          echo "<br><br>Sarjanumerot:<br>{$sarjanumerotres['sarjanumerot']} <br>";
+
+          echo "<a href='{$palvelin2}/laiterekisteri.php?toiminto=LINKKAA&tilausrivin_tunnus={$row['tunnus']}&sopimusnumero=$tilausnumero&lopetus={$palvelin2}tilauskasittely/tilaus_myynti.php////tilausnumero=$tilausnumero//toim=YLLAPITO'>Lis‰‰ laitteita</a>";
         }
 
         echo "</td>";
@@ -9570,6 +9608,24 @@ if ($tee == '') {
       }
     }
 
+    if ($yhtiorow['laiterekisteri_kaytossa'] != '' and $toim == "YLLAPITO" and !isset($piirtele_laiteluettelo)) {
+      echo "  <tr>
+          <td align='left' class='back' valign='top'>
+          <form name='excel_laiteluettelo' method='post'>
+          <input type='hidden' name='lopetus' value='$lopetus'>
+          <input type='hidden' name='otunnus' value='$tilausnumero'>
+          <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+          <input type='hidden' name='mista' value = '$mista'>
+          <input type='hidden' name='toim_nimitykset' value='$toim_nimitykset'>
+          <input type='hidden' name='toim' value='$toim'>
+          <input type='hidden' name='tee' value='$tee'>
+          <input type='hidden' name='naantali' value='EIENAA'>
+          <input type='submit' name='piirtele_laiteluettelo' value='".t("Laiteluettelo")."'>
+          </form>
+          </td>
+        </tr>";
+    }
+
     echo "</table>";
 
   }
@@ -9581,6 +9637,9 @@ if (isset($yhtiorow['tilauksen_myyntieratiedot'])
   and $naantali == "KIVAPAIKKA"
 ) {
   require "myyntierat_ja_tuotetiedot.inc";
+}
+elseif ($yhtiorow['laiterekisteri_kaytossa'] != '' and $toim == "YLLAPITO" and isset($naantali) and $naantali == "EIENAA") {
+  require "laiteluettelo.php";
 }
 
 if (@include "inc/footer.inc");

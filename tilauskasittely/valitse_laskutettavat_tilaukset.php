@@ -900,10 +900,18 @@ if ($tee == "VALITSE") {
 
     echo "</table>";
     echo "<br><input type='submit' value='".t("Laskuta")."'>";
+    
+    echo "<br>";
 
     echo "<input type='hidden' name='laskutusviikonteksti' value = '$teksti'>";
     echo "<input type='hidden' name='laskutusviikonpaiva' value = '$js_laskutusvkopv'>";
 
+    echo "</form>";
+    
+    echo "<form action = 'valitse_laskutettavat_tilaukset.php' method = 'post'>
+      <input type='hidden' name='toim' value='$toim'>
+      <input type='hidden' name='lopetus' value='$lopetus'>";
+    echo "<br><input type='submit' value='".t("Takaisin tilauksen valintaan")."'>";
     echo "</form>";
 
     echo "  <SCRIPT LANGUAGE=JAVASCRIPT>

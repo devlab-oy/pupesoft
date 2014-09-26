@@ -1885,10 +1885,17 @@ if ($tee == 'P') {
             $lahetekpl = $yhtiorow["oletus_lahetekpl_siirtolista"];
           }
 
+          $_keraysvahvistus_lahetys = array('k', 'L', 'M', 'N', 'Q', 'P');
+
           if (($komento != "" and $lahetekpl > 0)
-            or (
-              (in_array($laskurow["keraysvahvistus_lahetys"], array('k', 'L', 'M', 'N', 'Q', 'P')) or (in_array($yhtiorow["keraysvahvistus_lahetys"], array('k', 'L', 'M', 'N', 'Q', 'P')) and $laskurow["keraysvahvistus_lahetys"] == ''))
-              or (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != "")
+            or ($laskurow["tila"] != 'V'
+              and ((in_array($laskurow["keraysvahvistus_lahetys"], $_keraysvahvistus_lahetys)
+                  or (in_array($yhtiorow["keraysvahvistus_lahetys"], $_keraysvahvistus_lahetys)
+                    and $laskurow["keraysvahvistus_lahetys"] == ''))
+                or (($laskurow["keraysvahvistus_lahetys"] == 'o'
+                  or ($yhtiorow["keraysvahvistus_lahetys"] == 'o'
+                    and $laskurow["keraysvahvistus_lahetys"] == ''))
+                    and $laskurow['email'] != ""))
             )
           ) {
 

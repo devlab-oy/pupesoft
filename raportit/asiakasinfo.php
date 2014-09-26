@@ -907,8 +907,8 @@ if ($asiakasid > 0) {
                   $worksheet->writeNumber($excelrivi, $key, $asrow[$value]);
                 }
                 else {
-                 $worksheet->writeString($excelrivi, $key, $asrow[$value]);
-               }
+                  $worksheet->writeString($excelrivi, $key, $asrow[$value]);
+                }
               }
               $excelrivi++;
             }

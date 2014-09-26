@@ -66,6 +66,40 @@ if ($tilausnumero != $kukarow["kesken"] and ($tilausnumero!='' or $kukarow["kesk
   exit;
 }
 
+if ($yhtiorow['laiterekisteri_kaytossa'] != '' and isset($valmnro) and !empty($valmnro)) {
+  // Katsotaan löytyykö valittu sarjanumero laiterekisteristä
+  $query = "SELECT
+            laite.sla,
+            if(laite.valmistajan_sopimus_paattymispaiva > now(), laite.valmistajan_sopimusnumero, '".t("Ei voimassa")."') vcsoppari,
+            avainsana.selitetark valmistaja,
+            tuote.tuotemerkki malli
+            FROM laite
+            JOIN tuote on tuote.yhtio = laite.yhtio
+              AND tuote.tuoteno    = laite.tuoteno
+            JOIN avainsana on avainsana.yhtio = tuote.yhtio
+              AND avainsana.laji   = 'TRY'
+              AND avainsana.selite = tuote.try
+            WHERE laite.yhtio      = '{$kukarow['yhtio']}'
+            AND laite.sarjanro     = '{$valmnro}'
+            GROUP BY laite.sarjanro, laite.tuoteno";
+  $res = pupe_query($query);
+
+  if (mysql_affected_rows() == 1) {
+    // Jos laite löytyy päivitetään arvot formiin
+    $rivi = mysql_fetch_assoc($res);
+    $_REQUEST['mallivari'] = $rivi['malli'];
+    $_REQUEST['merkki'] =  $rivi['valmistaja'];
+
+    $_REQUEST['sla'] = $rivi['sla'] > 0 ? $rivi['sla'] : 15;
+    $_REQUEST['valmistajan_sopimusnumero'] = $rivi['vcsoppari'];
+    $_REQUEST['tuotu'] = date('Y-m-j');
+    // Jos laitteelta löytyi SLA niin lasketaan luvattupvm
+    if ($_REQUEST['sla'] != '') {
+      $_REQUEST['luvattu'] = date('Y-m-j', strtotime( "{$_REQUEST['sla']} weekdays" ));
+    }
+  }
+}
+
 // Halutaan vaihtaa asiakas tilauksella
 if ($tila == "vaihdaasiakas") {
   $query = "UPDATE lasku
@@ -955,9 +989,9 @@ if ($tila == "" and !isset($jatka)) {
   $alv_velvollisuus = "";
 
   $asiaqu = "SELECT *
-            FROM asiakas
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND tunnus  = '{$srow['liitostunnus']}'";
+             FROM asiakas
+             WHERE yhtio = '$kukarow[yhtio]'
+             AND tunnus  = '{$srow['liitostunnus']}'";
   $asiares = pupe_query($asiaqu);
   $asiarow = mysql_fetch_assoc($asiares);
 
@@ -1109,8 +1143,8 @@ if ($tila == "" and !isset($jatka)) {
     if ($hintojen_vaihto == 'JOO') {
       $hv_check = 'CHECKED';
     }
-    else{
-     $hv_check = '';
+    else {
+      $hv_check = '';
     }
 
     echo "<input type='checkbox' id='hintojen_vaihto' $hv_check />";
@@ -1604,11 +1638,11 @@ if ($tila == "" and !isset($jatka)) {
     $vasen++;
 
     //yhtiön oletusalvi!
-    $wquery = " SELECT selite
-                FROM avainsana
-                WHERE yhtio     = '$kukarow[yhtio]'
-                AND laji        = 'alv'
-                AND selitetark != ''";
+    $wquery = "SELECT selite
+               FROM avainsana
+               WHERE yhtio     = '$kukarow[yhtio]'
+               AND laji        = 'alv'
+               AND selitetark != ''";
     $wtres  = pupe_query($wquery);
     $wtrow  = mysql_fetch_assoc($wtres);
 
@@ -2669,9 +2703,15 @@ if ($tila == "" and !isset($jatka)) {
       }
 
       echo "</select>";
+
+      if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
+        echo "<input type='submit' name='paivita_tyomaarayksen_status' value='".t("Päivitä tila")."'>";
+        echo "<br><textarea name='tapahtuma_kommentti' rows='2' cols='40' maxlength='60' placeholder='".t("Tapahtuman kommentti")."'></textarea>";
+      }
+
       echo "</td></tr>";
 
-      echo "<tr><td>".t("Prioriteetti").":</td><td colspan=3>";
+      echo "<tr><td>".t("Prioriteetti").":</td><td colspan='3'>";
       echo "<select name='prioriteetti'>";
 
       $vresult = t_avainsana("TYOM_PRIORIT");
@@ -2689,14 +2729,28 @@ if ($tila == "" and !isset($jatka)) {
         echo "<option value = '$vrow[selite]' $sel>$vrow[selitetark]</option>";
       }
 
-      echo "</select>";
-      echo "</td></tr>";
+      echo "</select></td></tr>";
     }
 
     if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A") {
       //Täysin dynaaminen osio
       $al_res = t_avainsana("TYOM_TYOKENTAT", "", "and avainsana.selitetark != ''");
 
+      $disa = '';
+      if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
+        // Jos työmääräys on jo avattu ja sille on valittu sarjanumero, niin aktivoidaan readonly
+        // dynaamisille kentille
+        $que = "SELECT valmnro
+                FROM tyomaarays
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND otunnus = '{$tilausnumero}'";
+        $resa = pupe_query($que);
+        $rowi = mysql_fetch_assoc($resa);
+
+        if (!empty($rowi['valmnro'])) {
+          $disa = ' readonly';
+        }
+      }
       $al_lask = 0;
 
       while ($al_row = mysql_fetch_assoc($al_res)) {
@@ -2712,28 +2766,48 @@ if ($tila == "" and !isset($jatka)) {
 
         $kentta = $al_row["selite"];
 
+        $aina_editoitavissa = false;
+        // Tarkistetaan onko kenttä merkattu aina lukitsemattomaksi
+        // HUOM! Ei kosketa spesifisesti nimettyjä kenttiä kuten: suorittaja, merkki
+        if (strtoupper($al_row['selitetark_5']) == 'EDITABLE') {
+          $aina_editoitavissa = true;
+        }
+
         if (strtoupper($al_row["selitetark_2"]) == "TEXT") {
 
           if ($al_lask == 1) {
             echo "<td></td><td></td></tr><tr>";
           }
 
-          echo "<td valign='top'>$al_row[selitetark]:</td><td colspan='3'><textarea name='$kentta' rows='6' cols='50'>$srow[$kentta]</textarea></td>";
+          if ($aina_editoitavissa) {
+            echo "<td valign='top'>$al_row[selitetark]:</td><td colspan='3'><textarea name='$kentta' rows='6' cols='50'>$srow[$kentta]</textarea></td>";
+          }
+          else {
+            echo "<td valign='top'>$al_row[selitetark]:</td><td colspan='3'><textarea name='$kentta' rows='6' cols='50' $disa>$srow[$kentta]</textarea></td>";
+          }
 
           $al_lask++;
         }
         elseif (strtoupper($al_row["selitetark_2"]) == "DATE") {
 
-          list($al_vv, $al_kk, $al_pp) = explode('-', $srow["$kentta"]);
+          list($al_vv, $al_kk, $al_pp) = (isset($_REQUEST[$kentta]) and !empty($_REQUEST[$kentta])) ? explode('-', $_REQUEST[$kentta]) : explode('-', $srow["$kentta"]);
 
           if ($al_kk == "00")   $al_kk = date("m");
           if ($al_vv == "0000")   $al_vv = date("Y");
           if ($al_pp == "00")   $al_pp = date("d");
 
-          echo "<td>$al_row[selitetark]:</td><td>
-              <input type='text' name='".$kentta."pp' size='3' value='$al_pp'>
-              <input type='text' name='".$kentta."kk' size='3' value='$al_kk'>
-              <input type='text' name='".$kentta."vv' size='5' value='$al_vv'></td>";
+          if ($aina_editoitavissa) {
+            echo "<td>$al_row[selitetark]:</td><td>
+                  <input type='text' name='".$kentta."pp' size='3' value='$al_pp'>
+                  <input type='text' name='".$kentta."kk' size='3' value='$al_kk'>
+                  <input type='text' name='".$kentta."vv' size='5' value='$al_vv'></td>";
+          }
+          else {
+            echo "<td>$al_row[selitetark]:</td><td>
+                  <input type='text' name='".$kentta."pp' size='3' value='$al_pp' $disa>
+                  <input type='text' name='".$kentta."kk' size='3' value='$al_kk' $disa>
+                  <input type='text' name='".$kentta."vv' size='5' value='$al_vv' $disa></td>";
+          }
         }
         elseif (strtoupper($al_row["selitetark_2"]) == "DROPDOWN") {
           $dropdown_arvot = explode("#", $al_row['selitetark_3']);
@@ -2751,18 +2825,26 @@ if ($tila == "" and !isset($jatka)) {
         }
         elseif (strtoupper($al_row["selitetark_2"]) == "LIVESEARCH") {
           $mika_livesearch = $al_row["selitetark_3"];
+          $submitvaiei = $al_row['selitetark_5'] != 'autosubmit' ? 'EISUBMIT' : '';
           echo "<td>";
           echo $al_row["selitetark"];
           echo "</td>";
           echo "<td>";
           //jos requestista tulee arvo valitaan se, muuten valitaan laskulta löytyvä arvo
-          if (isset(${$al_row['selite']})) {
+          if (isset(${$al_row['selite']}) and !empty($_REQUEST[$kentta])) {
             $livesearch_value = ${$al_row['selite']};
           }
           else {
             $livesearch_value = $srow[$kentta];
           }
-          echo livesearch_kentta("paaformi", $mika_livesearch, $al_row['selite'], 140, $livesearch_value, 'EISUBMIT', '', '', 'ei_break_all');
+
+          if ($disa == '') {
+            echo livesearch_kentta("paaformi", $mika_livesearch, $al_row['selite'], 140, $livesearch_value, $submitvaiei, '', '', 'ei_break_all');
+          }
+          else {
+            echo "<input type='text' name='".$kentta."' size='15' value='{$livesearch_value}' $disa>";
+          }
+
           echo "</td>";
         }
         elseif ($kentta == "suorittaja") {
@@ -2831,11 +2913,18 @@ if ($tila == "" and !isset($jatka)) {
 
             echo "</select> ".t("tai")." ";
           }
-
-          echo "<input type='text' name='$kentta' size='15' value='$srow[$kentta]'></td>";
+          $arvo = (isset($_REQUEST[$kentta]) and !empty($_REQUEST[$kentta])) ? $_REQUEST[$kentta] : $srow[$kentta];
+          echo "<input type='text' name='$kentta' size='15' value='{$arvo}' $disa></td>";
         }
         else {
-          echo "<td>$al_row[selitetark]:</td><td><input type='text' name='$kentta' size='15' value='$srow[$kentta]'></td>";
+
+          $arvo = (isset($_REQUEST[$kentta]) and !empty($_REQUEST[$kentta])) ? $_REQUEST[$kentta] : $srow[$kentta];
+          if ($aina_editoitavissa) {
+            echo "<td>$al_row[selitetark]:</td><td><input type='text' name='$kentta' size='15' value='{$arvo}'></td>";
+          }
+          else {
+            echo "<td>$al_row[selitetark]:</td><td><input type='text' name='$kentta' size='15' value='{$arvo}' $disa></td>";
+          }
         }
 
         $al_lask++;
@@ -2862,9 +2951,93 @@ if ($tila == "" and !isset($jatka)) {
       echo "  <tr>
           <td>".t("Sisäiset kommentit").":</td><td colspan='3'><textarea name='sopimus_lisatietoja' rows='6' cols='50'>$srow[sopimus_lisatietoja]</textarea></td>
           </tr>";
+      echo "  <tr>
+          <td>".t("Sisäiset kommentit")." 2:</td><td colspan='3'><textarea name='sopimus_lisatietoja2' rows='6' cols='50'>$srow[sopimus_lisatietoja2]</textarea></td>
+          </tr>";
     }
 
     echo "</table><br>";
+
+    // Työmääräyksen tapahtumahistoria
+    if ($toim == "TYOMAARAYS" and $yhtiorow['laiterekisteri_kaytossa'] != '') {
+
+      if (isset($paivita_tyomaarayksen_status) and $kukarow['kesken'] > 0) {
+        // Päivitetään työmääräyshistoria myös silloin kuin painetaan erillistä päivitä-nappia
+        if (isset($eka_tuomaarays_row) and !empty($eka_tuomaarays_row)) {
+          $lokin_tyojono = $eka_tuomaarays_row['tyojono_selite'];
+          $lokin_tyostatus = $eka_tuomaarays_row['tyostatus_selite'];
+        }
+        else {
+          $tilaquery = "SELECT
+                        ifnull(tyojono_selite, '') tyojono_selite,
+                        ifnull(tyostatus_selite,'') tyostatus_selite
+                        FROM tyomaarayksen_tapahtumat
+                        WHERE yhtio           = '{$kukarow['yhtio']}'
+                        AND tyomaarays_tunnus = '{$kukarow['kesken']}'
+                        ORDER BY luontiaika desc
+                        LIMIT 1";
+          $tilaresult = pupe_query($tilaquery);
+          $tilarivi = mysql_fetch_assoc($tilaresult);
+
+          $lokin_tyojono = $tilarivi['tyojono_selite'];
+          $lokin_tyostatus = $tilarivi['tyostatus_selite'];
+        }
+
+        if ($lokin_tyojono != $tyojono or $lokin_tyostatus != $tyostatus) {
+          $updquery = "INSERT INTO tyomaarayksen_tapahtumat SET
+                       tyomaarays_tunnus = '{$kukarow['kesken']}',
+                       tyojono_selite    = '$tyojono',
+                       tyostatus_selite  = '$tyostatus',
+                       kommentti         = '$tapahtuma_kommentti',
+                       yhtio             = '{$kukarow['yhtio']}',
+                       laatija           = '{$kukarow['kuka']}',
+                       luontiaika        = now()";
+          pupe_query($updquery);
+        }
+      }
+
+      $query = "SELECT tyomaarayksen_tapahtumat.*,
+                ifnull(tilataulu.selitetark, '') tilassa,
+                ifnull(jonotaulu.selitetark, '') jonossa
+                FROM tyomaarayksen_tapahtumat
+                LEFT JOIN avainsana tilataulu ON tilataulu.yhtio = tyomaarayksen_tapahtumat.yhtio
+                  AND tilataulu.laji                           = 'TYOM_TYOSTATUS'
+                  AND tilataulu.selite                         = tyomaarayksen_tapahtumat.tyostatus_selite
+                LEFT JOIN avainsana jonotaulu ON jonotaulu.yhtio = tyomaarayksen_tapahtumat.yhtio
+                  AND jonotaulu.laji                           = 'TYOM_TYOJONO'
+                  AND jonotaulu.selite                         = tyomaarayksen_tapahtumat.tyojono_selite
+                WHERE tyomaarayksen_tapahtumat.yhtio           = '{$kukarow['yhtio']}'
+                AND tyomaarayksen_tapahtumat.tyomaarays_tunnus = '$tilausnumero'
+                ORDER BY tyomaarayksen_tapahtumat.luontiaika desc";
+      $ress = pupe_query($query);
+
+      // Otetaan uusin tapahtumarivi talteen
+      $eka_tuomaarays_row = mysql_fetch_assoc($ress);
+      mysql_data_seek($ress, 0);
+
+      if (mysql_affected_rows() > 0) {
+        echo "<table>";
+        echo "<tr><th colspan='5'>".t("Työmääräyksen tapahtumat").":</th></font></tr>";
+        echo "<tr>";
+        echo "<td>".t("Työstatus").":</td>";
+        echo "<td>".t("Työjono").":</td>";
+        echo "<td>".t("Muutosaika").":</td>";
+        echo "<td>".t("Muuttaja").":</td>";
+        echo "<td>".t("Kommentti").":</td>";
+        echo "</tr>";
+
+        while ($row = mysql_fetch_assoc($ress)) {
+          echo "<tr>";
+          echo "<td>{$row['tilassa']}</td>";
+          echo "<td>{$row['jonossa']}</td>";
+          echo "<td>{$row['luontiaika']}</td>";
+          echo "<td>{$row['laatija']}</td>";
+          echo "<td>{$row['kommentti']}</td>";
+          echo "</tr>";
+        }
+        echo "</table><br>";
+      }
+    }
 
     // tehdään ylläpitosopimista varten laskutusaikataulu taulu
     if ($toim == "YLLAPITO") {
@@ -3575,12 +3748,12 @@ if (isset($jatka)) {
   if ((int) $liitostunnus == 0) $liitostunnus = $asiakasid;
 
   if ($liitostunnus > 0) {
-      $asiaqu = "SELECT *
-                FROM asiakas
-                WHERE yhtio = '$kukarow[yhtio]'
-                AND tunnus  = '$liitostunnus'";
-      $asiares = pupe_query($asiaqu);
-      $asiarow = mysql_fetch_assoc($asiares);
+    $asiaqu = "SELECT *
+               FROM asiakas
+               WHERE yhtio = '$kukarow[yhtio]'
+               AND tunnus  = '$liitostunnus'";
+    $asiares = pupe_query($asiaqu);
+    $asiarow = mysql_fetch_assoc($asiares);
   }
 
   //jos ollaan haluttu laskutuskielto laitetaan chn kenttään 999
@@ -4103,6 +4276,8 @@ if (isset($jatka)) {
             valmnro     = '$valmnro',
             tuotu       = '$tuotuvv-$tuotukk-$tuotupp',
             luvattu     = '$luvattuvv-$luvattukk-$luvattupp',
+            sla = '$sla',
+            valmistajan_sopimusnumero = '$valmistajan_sopimusnumero',
             komm1       = '$komm1',
             komm2       = '$komm2',
             suorittaja     = '$suorittaja',
@@ -4121,6 +4296,41 @@ if (isset($jatka)) {
       if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
         $query2 .= ",  tyojono      = '$tyojono',
                 tyostatus    = '$tyostatus'";
+
+        if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
+          // Jos käyttöliittymästä on muutettu työjonoa/työstatusta kirjataan se myös tyomaarayksen_tapahtumiin
+          if (isset($eka_tuomaarays_row) and !empty($eka_tuomaarays_row)) {
+            $lokin_tyojono = $eka_tuomaarays_row['tyojono_selite'];
+            $lokin_tyostatus = $eka_tuomaarays_row['tyostatus_selite'];
+          }
+          else {
+            $tilaquery = "SELECT
+                          ifnull(tyojono_selite, '') tyojono_selite,
+                          ifnull(tyostatus_selite,'') tyostatus_selite
+                          FROM tyomaarayksen_tapahtumat
+                          WHERE yhtio           = '{$kukarow['yhtio']}'
+                          AND tyomaarays_tunnus = '{$kukarow['kesken']}'
+                          ORDER BY luontiaika desc
+                          LIMIT 1";
+            $tilaresult = pupe_query($tilaquery);
+            $tilarivi = mysql_fetch_assoc($tilaresult);
+
+            $lokin_tyojono = $tilarivi['tyojono_selite'];
+            $lokin_tyostatus = $tilarivi['tyostatus_selite'];
+          }
+
+          if ($lokin_tyojono != $tyojono or $lokin_tyostatus != $tyostatus) {
+            $updquery = "INSERT INTO tyomaarayksen_tapahtumat SET
+                         tyomaarays_tunnus = '{$kukarow['kesken']}',
+                         tyojono_selite    = '$tyojono',
+                         tyostatus_selite  = '$tyostatus',
+                         kommentti         = '{$tapahtuma_kommentti}',
+                         yhtio             = '{$kukarow['yhtio']}',
+                         laatija           = '{$kukarow['kuka']}',
+                         luontiaika        = now()";
+            pupe_query($updquery);
+          }
+        }
       }
       $query2 .= $postquery2;
       $result = pupe_query($query2);
@@ -4144,7 +4354,8 @@ if (isset($jatka)) {
 
       $sopimus_info = '';
       if ($toim != 'EXTENNAKKO' and $toim != 'EXTTARJOUS') {
-        $sopimus_info = "sopimus_lisatietoja      = '$sopimus_lisatietoja',";
+        $sopimus_info = "sopimus_lisatietoja      = '$sopimus_lisatietoja',
+                         sopimus_lisatietoja2     = '$sopimus_lisatietoja2', ";
       }
 
       $query3 .= "laskun_lisatiedot SET

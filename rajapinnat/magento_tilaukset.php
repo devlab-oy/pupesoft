@@ -19,13 +19,8 @@ $pupe_root_polku = dirname(dirname(__FILE__));
 require "{$pupe_root_polku}/inc/connect.inc";
 require "{$pupe_root_polku}/inc/functions.inc";
 
-$lock_params = array(
-  "locktime" => 5400,
-  "lockfile" => '##tuote-export-flock.lock',
-);
-
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
-pupesoft_flock($lock_params);
+pupesoft_flock();
 
 require "{$pupe_root_polku}/rajapinnat/magento_client.php";
 require "{$pupe_root_polku}/rajapinnat/edi.php";

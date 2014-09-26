@@ -4668,8 +4668,6 @@ if ($tee == '') {
   $_asiakas = ($laskurow['liitostunnus'] > 0);
   $_mika_toim = in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "ENNAKKO", "EXTENNAKKO"));
 
-  $_luottoraja_param = ($yhtiorow['luottorajan_tarkistus'] == 'K');
-
   if ($_kukaextranet and $_kat_jv and $_asiakas and $_saako and $_mika_toim) {
 
     js_popup();
@@ -4779,7 +4777,7 @@ if ($tee == '') {
       require "crm/asiakasmemo.php";
     }
   }
-  elseif ($_mika_toim and $_kat_jv and $_luottoraja_param) {
+  elseif ($_mika_toim and $_kat_jv) {
 
     if (!empty($laskurow['luottoraja'])) {
 

@@ -51,7 +51,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $emphasized_off = "\x1B\x45\x00";
   $avaa_lipas     = "\x1B\x70\x00\n\n";
 
-  // Yhtiön tiedot
+  // Yhtiön ja tapahtuman tiedot
   $yhtion_nimi          = $laskut[0]['yhtio_nimi'];
   $yhtion_puhelinnumero = $yhtiorow['puhelin'];
   $yhtion_osoite        = $laskut[0]['yhtio_osoite'];
@@ -60,6 +60,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $yhtion_www           = sprintf("%-42.42s", $yhtiorow['www']);
   $yhtion_ytunnus       = str_replace("0037", "", $laskut[0]["yhtio_ovttunnus"]);
   $yhtion_ytunnus       = tulosta_ytunnus($yhtion_ytunnus, $laskut[0]['yhtio_maa']);
+  $myyjan_nimi          = $laskut[0]['myyjan_nimi'];
 
   // Arvojen asettelu spritfillä ja muu asettelu
   $yhteensa = sprintf("%34.34s", $yhteensa);
@@ -142,7 +143,10 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $kuitin_teksti .= "{$yhtiorow['www']}\n\n";
   $kuitin_teksti .= "{$emphasized_off}";
   $kuitin_teksti .= "{$footer_teksti}\n\n";
-  $kuitin_teksti .= t("Teitä palveli") . " {$laskut[0]['myyjan_nimi']}";
+
+  if ($myyjan_nimi) {
+    $kuitin_teksti .= t("Teitä palveli") . " {$myyjan_nimi}";
+  }
 
   $kuitin_teksti .= "\n\n\n\n\n\n";
   $kuitin_teksti .= $katkaisu;

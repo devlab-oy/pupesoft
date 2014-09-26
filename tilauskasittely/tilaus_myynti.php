@@ -3213,7 +3213,22 @@ if ($tee == '') {
                  ORDER BY nimi";
       $yresult = pupe_query($query);
 
-      echo "<td><input type='text' name='myyjanro' size='8' $state> ".t("tai")." ";
+      if ($yhtiorow['pikatilauksessa_myyjanro_pakollinen'] == 'Y') {
+        $myyjanumero = empty($myyjanro) ? $myyjanumero : $myyjanro;
+        $required = 'required';
+
+        if (!loytyyko_myyja_tunnuksella($myyjanumero)) {
+          $tuoteno = '';
+          $kentta  = 'myyjanro';
+        }
+      }
+
+      echo "<td>" .
+        "<input " .
+        "type='number' " .
+        "name='myyjanro' " .
+        "size='8' " .
+        "value='{$myyjanumero}' {$required} $state> ".t("tai")." ";
       echo "<select name='myyja' onchange='submit();' $state>";
 
       while ($row = mysql_fetch_assoc($yresult)) {

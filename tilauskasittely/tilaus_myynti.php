@@ -3226,6 +3226,7 @@ if ($tee == '') {
       echo "<td>" .
         "<input " .
         "type='number' " .
+        "min='1'" .
         "name='myyjanro' " .
         "size='8' " .
         "value='{$myyjanumero}' {$required} $state> ".t("tai")." ";
@@ -3505,7 +3506,14 @@ if ($tee == '') {
         </tr>";
       echo "<tr>$jarjlisa
         <th align='left'>".t("Myyjänro")."</th>
-        <td><input type='number' size='10' name='myyjanumero' value='$my' {$required}></td>
+        <td>" .
+        "<input " .
+        "type='number' min='1'" .
+        "size='10' " .
+        "name='myyjanumero' " .
+        "value='$my' " .
+        "{$required}>" .
+        "</td>
         </tr>";
     }
   }
@@ -9306,9 +9314,9 @@ function loytyyko_myyja_tunnuksella($tunnus) {
   global $kukarow;
 
   $query  = "SELECT COUNT(*) AS maara
-             FROM  kuka
+             FROM kuka
              WHERE yhtio = '{$kukarow['yhtio']}'
-             AND   myyja = '{$tunnus}'";
+             AND myyja = '{$tunnus}' AND myyja != ''";
   $result = pupe_query($query);
 
   $maara = mysql_fetch_assoc($result);

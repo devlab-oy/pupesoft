@@ -7370,10 +7370,10 @@ if ($tee == '') {
         $varaosakommentti = "";
 
         $_luottorajaparams = (!in_array($yhtiorow['luottorajan_ylitys'], array('L', 'M')));
-        $_luottorajaparams = (trim($luottorajavirhe) != "" and $_luottorajaparams);
+        $_luottorajaparams = (trim($luottorajavirhe) == "" and $_luottorajaparams);
 
         $_erapv_params = (!in_array($yhtiorow['erapaivan_ylityksen_toimenpide'], array('L', 'M')));
-        $_erapv_params = ($_erapv_params and trim($ylivito) != "");
+        $_erapv_params = ($_erapv_params and trim($ylivito) == "");
 
         $_luottoraja_ylivito = ($_luottorajaparams and $_erapv_params);
 

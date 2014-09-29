@@ -7370,10 +7370,12 @@ if ($tee == '') {
         $varaosakommentti = "";
 
         $_luottorajaparams = (!in_array($yhtiorow['luottorajan_ylitys'], array('L', 'M')));
-        $_erapv_params = (!in_array($yhtiorow['erapaivan_ylityksen_toimenpide'], array('L', 'M')));
-        $_not_empty_params = (empty($luottorajavirhe) and empty($ylivito));
+        $_luottorajaparams = (empty($luottorajavirhe) and $_luottorajaparams);
 
-        $_luottoraja_ylivito = (($_luottorajaparams or $_erapv_params) and $_not_empty_params);
+        $_erapv_params = (!in_array($yhtiorow['erapaivan_ylityksen_toimenpide'], array('L', 'M')));
+        $_erapv_params = ($_erapv_params and empty($ylivito));
+
+        $_luottoraja_ylivito = ($_luottorajaparams or $_erapv_params);
 
 
         if ((((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and $kukarow['extranet'] != '') or $kukarow['extranet'] == '') and (($muokkauslukko == "" and $muokkauslukko_rivi == "") or ($luottorajavirhe != "" or $ylivito > 0)) or $toim == "YLLAPITO") {

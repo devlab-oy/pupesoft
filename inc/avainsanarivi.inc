@@ -265,6 +265,12 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "TUOTE_EXP_CRON")    $ulos .= "<option value='TUOTE_EXP_CRON' {$avain_sel['TUOTE_EXP_CRON']}>  ".t("Tuote Export-cronin aikaleima (vvvv-kk-pp tt:mm:ss)")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "SALDOVAHVISTUS")  $ulos .= "<option value='SALDOVAHVISTUS' {$avain_sel['SALDOVAHVISTUS']}>  ".t("Saldovahvistuksen viesti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "DPAVAINSANALAJI")     $ulos .= "<option value='DPAVAINSANALAJI' {$avain_sel['DPAVAINSANALAJI']}>        ".t("Dynaamisen puun avainsanojen laji")."</option>";
+  if ($lukitse_laji == "" or $lukitse_laji == "LIITETYYPPI") {
+    $ulos .= "<option " .
+      "value='LIITETYYPPI' {$avain_sel['LIITETYYPPI']}>" .
+      t("Tiedostokirjastossa selailtava tiedostotyyppi") .
+      "</option>";
+  }
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";

@@ -372,7 +372,7 @@ if ($tee == 'laskelma') {
     echo "<td>",pupe_DataTablesEchoSort($laskurow['tapvm']).tv1dateconv($laskurow['tapvm']),"</td>";
     echo "<td>$laskurow[laskun_summa]</td>";
     echo "<td>$row[veropros]</td>";
-    echo "<td>$_vero</td>";
+    echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[ltunnus]'>$_vero</a></td>";
     echo "<td>{$erikoiskoodi}</td>";
     echo "</tr>";
 

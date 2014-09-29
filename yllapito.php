@@ -38,8 +38,8 @@ if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote" or $toim == "avai
   enable_ajax();
 }
 
-if (file_exists("inc/laite_huolto_functions.inc")) {
-  require_once 'inc/laite_huolto_functions.inc';
+if ($yhtiorow['laite_huolto'] == 'X') {
+  pupesoft_require('inc/laite_huolto_functions.inc');
 }
 
 if (isset($livesearch_tee) and $livesearch_tee == "TILIHAKU") {

@@ -7522,7 +7522,14 @@ if ($tee == '') {
             and $laskurow["jtkielto"] != "o"
             and $row["status"] != 'P'
             and $row["status"] != 'X'
-            and empty($luottorajavirhe) and empty($ylivito)) {
+            and
+            (
+              (
+                ($yhtiorow['luottorajan_ylitys'] == "L" or $yhtiorow['luottorajan_ylitys'] == "M") or
+                ($yhtiorow['erapaivan_ylityksen_toimenpide'] == "L" or $yhtiorow['erapaivan_ylityksen_toimenpide'] == "M")
+              )
+              and empty($luottorajavirhe) and empty($ylivito))
+            ) {
 
             echo "<br />";
 

@@ -157,7 +157,7 @@ if ($tee == 'laskelma') {
   else {
     $taso = 'ee500';
     $eetasolisa = "or alv_taso like '%ee510%' or alv_taso like '%ee520%'";
-    $tilat = "and lasku.tila IN ('H','Y','M','P','Q')";
+    $tilat = "and lasku.tila IN ('H','Y','M','P','Q','X')";
     $tilausrivijoin = "";
     $tilaustyyppi = "";
     $laskun_lisatiedot_lisa = "";
@@ -208,36 +208,19 @@ if ($tee == 'laskelma') {
     }
   }
 
-  $query = "SELECT lasku.laskunro laskunro,
-            {$laskun_nimi_lisa_select}
-            lasku.ytunnus,
-            lasku.tapvm,
-            lasku.alv,
-            lasku.liitostunnus,
-            round(lasku.summa / (1+lasku.alv/100), {$yhtiorow['hintapyoristys']}) laskun_summa,
-            group_concat(tiliointi.tunnus) til_tun,
-            sum(tiliointi.vero) veropros,
-            sum(round(tiliointi.summa * if('veronmaara'='$oletus_verokanta', $oletus_verokanta, vero) / 100, 2)) veronmaara,
+  $query = "SELECT tiliointi.ltunnus,
+            max(tiliointi.vero) veropros,
+            sum(round(tiliointi.summa * vero / 100, 2)) veronmaara,
             sum(tiliointi.summa) summa,
             abs(sum(if(tiliointi.summa > 0, tiliointi.summa, 0))) veloitukset,
             abs(sum(if(tiliointi.summa < 0, tiliointi.summa, 0))) hyvitykset
-            FROM lasku
-            {$laskun_lisatiedot_lisa}
-            JOIN tiliointi ON (
-              tiliointi.yhtio = lasku.yhtio AND
-              tiliointi.ltunnus = lasku.tunnus AND
-              tiliointi.korjattu = '' AND
-              tiliointi.tapvm    >= '{$alkupvm}' AND
-              tiliointi.tapvm    <= '{$loppupvm}' AND
-              tiliointi.tilino in ({$tilirow['tilitMUU']})
-            )
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            {$tilat}
-            {$tilaustyyppi}
-            AND lasku.tapvm    >= '{$alkupvm}'
-            AND lasku.tapvm    <= '{$loppupvm}'
-            {$rajaalisa}
-            GROUP BY 1,2,3,4,5,6,7";
+            FROM tiliointi
+            WHERE tiliointi.yhtio = '{$kukarow['yhtio']}'
+            AND tiliointi.korjattu = ''
+            AND tiliointi.tapvm    >= '{$alkupvm}'
+            AND tiliointi.tapvm    <= '{$loppupvm}'
+            AND tiliointi.tilino in ({$tilirow['tilitMUU']})
+            GROUP BY 1";
   $result = pupe_query($query);
 
   $verot_yht = 0;
@@ -322,6 +305,25 @@ if ($tee == 'laskelma') {
 
   while ($row = mysql_fetch_assoc($result)) {
 
+  $query = "SELECT lasku.laskunro laskunro,
+            {$laskun_nimi_lisa_select}
+            lasku.ytunnus,
+            lasku.tapvm,
+            lasku.alv,
+            lasku.liitostunnus,
+            round(lasku.summa / (1+lasku.alv/100), {$yhtiorow['hintapyoristys']}) laskun_summa
+            FROM lasku
+            {$laskun_lisatiedot_lisa}
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            {$tilat}
+            {$tilaustyyppi}
+            AND lasku.tapvm    >= '{$alkupvm}'
+            AND lasku.tapvm    <= '{$loppupvm}'
+            AND lasku.tunnus = '{$row['ltunnus']}'
+            {$rajaalisa}";
+    $laskures = pupe_query($query);
+    $laskurow = mysql_fetch_assoc($laskures);
+
     if ($laskelma == 'a' and $row['veropros'] == 0) continue;
 
     if ($laskelma == 'a') {
@@ -339,14 +341,14 @@ if ($tee == 'laskelma') {
       $query = "  SELECT tunnus
                   FROM asiakas
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = '{$row['liitostunnus']}'
+                  AND tunnus = '{$laskurow['liitostunnus']}'
                   AND laji = 'H'";
       $asiakasres = pupe_query($query);
 
       if (mysql_num_rows($asiakasres) != 0) $aineistoon = $_red;
     }
 
-    $erikoiskoodi = $row['alv'] == 0 ? '03' : '';
+    $erikoiskoodi = $row['veropros'] == 0 ? '03' : '';
 
     $_class = $aineistoon == $_red ? 'spec' : '';
 
@@ -362,12 +364,12 @@ if ($tee == 'laskelma') {
     echo "</td>";
 
     echo "<td>$_i</td>";
-    echo "<td>$row[ytunnus]</td>";
-    echo "<td>$row[nimi]</td>";
-    echo "<td>$row[laskunro]</td>";
-    echo "<td>",pupe_DataTablesEchoSort($row['tapvm']).tv1dateconv($row['tapvm']),"</td>";
-    echo "<td>$row[laskun_summa]</td>";
-    echo "<td>$row[alv]</td>";
+    echo "<td>$laskurow[ytunnus]</td>";
+    echo "<td>$laskurow[nimi]</td>";
+    echo "<td>$laskurow[laskunro]</td>";
+    echo "<td>",pupe_DataTablesEchoSort($laskurow['tapvm']).tv1dateconv($laskurow['tapvm']),"</td>";
+    echo "<td>$laskurow[laskun_summa]</td>";
+    echo "<td>$row[veropros]</td>";
     echo "<td>$_vero</td>";
     echo "<td>{$erikoiskoodi}</td>";
     echo "</tr>";
@@ -382,22 +384,22 @@ if ($tee == 'laskelma') {
       $worksheet->write($excelrivi, $excelsarake, $_i);
       $excelsarake++;
 
-      $worksheet->write($excelrivi, $excelsarake, $row['ytunnus']);
+      $worksheet->write($excelrivi, $excelsarake, $laskurow['ytunnus']);
       $excelsarake++;
 
-      $worksheet->writeString($excelrivi, $excelsarake, $row['nimi']);
+      $worksheet->writeString($excelrivi, $excelsarake, $laskurow['nimi']);
       $excelsarake++;
 
-      $worksheet->write($excelrivi, $excelsarake, $row['laskunro']);
+      $worksheet->write($excelrivi, $excelsarake, $laskurow['laskunro']);
       $excelsarake++;
 
-      $worksheet->write($excelrivi, $excelsarake, tv1dateconv($row['tapvm']));
+      $worksheet->write($excelrivi, $excelsarake, tv1dateconv($laskurow['tapvm']));
       $excelsarake++;
 
-      $worksheet->write($excelrivi, $excelsarake, $row['laskun_summa']);
+      $worksheet->write($excelrivi, $excelsarake, $laskurow['laskun_summa']);
       $excelsarake++;
 
-      $worksheet->write($excelrivi, $excelsarake, $row['alv']);
+      $worksheet->write($excelrivi, $excelsarake, $row['veropros']);
       $excelsarake++;
 
       $worksheet->write($excelrivi, $excelsarake, $_vero);
@@ -413,24 +415,24 @@ if ($tee == 'laskelma') {
 
       if ($laskelma == 'a') {
         $_csv['A'][] = array(
-          'buyerRegCode' => $row['ytunnus'],
-          'buyerName' => $row['nimi'],
-          'invoiceNumber' => $row['laskunro'],
-          'invoiceDate' => tv1dateconv($row['tapvm']),
-          'invoiceSum' => $row['laskun_summa'],
-          'taxRate' => $row['alv'],
-          'invoiceSumForRate' => $row['laskun_summa'],
+          'buyerRegCode' => $laskurow['ytunnus'],
+          'buyerName' => $laskurow['nimi'],
+          'invoiceNumber' => $laskurow['laskunro'],
+          'invoiceDate' => tv1dateconv($laskurow['tapvm']),
+          'invoiceSum' => $laskurow['laskun_summa'],
+          'taxRate' => $row['veropros'],
+          'invoiceSumForRate' => $laskurow['laskun_summa'],
           'sumForRateInPeriod' => $_vero,
           'comments' => $erikoiskoodi,
         );
       }
       else {
         $_csv['B'][] = array(
-          'sellerRegCode' => $row['ytunnus'],
-          'sellerName' => $row['nimi'],
-          'invoiceNumber' => $row['laskunro'],
-          'invoiceDate' => tv1dateconv($row['tapvm']),
-          'invoiceSumVat' => $row['laskun_summa'],
+          'sellerRegCode' => $laskurow['ytunnus'],
+          'sellerName' => $laskurow['nimi'],
+          'invoiceNumber' => $laskurow['laskunro'],
+          'invoiceDate' => tv1dateconv($laskurow['tapvm']),
+          'invoiceSumVat' => $laskurow['laskun_summa'],
           'vatSum' => $_vero,
           'vatInPeriod' => $_vero,
           'comments' => $erikoiskoodi,

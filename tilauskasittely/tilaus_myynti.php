@@ -7369,6 +7369,13 @@ if ($tee == '') {
         $varaosavirhe = "";
         $varaosakommentti = "";
 
+        $_luottorajaparams = (!in_array($yhtiorow['luottorajan_ylitys'], array('L', 'M')));
+        $_erapv_params = (!in_array($yhtiorow['erapaivan_ylityksen_toimenpide'], array('L', 'M')));
+        $_not_empty_params = (empty($luottorajavirhe) and empty($ylivito));
+
+        $_luottoraja_ylivito = (($_luottorajaparams or $_erapv_params) and $_not_empty_params);
+
+
         if ((((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and $kukarow['extranet'] != '') or $kukarow['extranet'] == '') and (($muokkauslukko == "" and $muokkauslukko_rivi == "") or ($luottorajavirhe != "" or $ylivito > 0)) or $toim == "YLLAPITO") {
 
           if (($yhtiorow['lapsituotteen_poiston_esto'] == 0 or (($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0)) and
@@ -7421,7 +7428,8 @@ if ($tee == '') {
                 </form> ";
           }
 
-          if ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and $toim == 'VALMISTAVARASTOON' and $kukarow['extranet'] == '' and empty($luottorajavirhe) and empty($ylivito)) {
+          if ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and $toim == 'VALMISTAVARASTOON' and $kukarow['extranet'] == ''
+            and $_luottoraja_ylivito) {
 
             if ($row["perheid"] == 0) {
               $lisax = "<input type='hidden' name='teeperhe'  value = 'OK'>";
@@ -7459,7 +7467,8 @@ if ($tee == '') {
                 <input type='Submit' value='".t("Lisää valmiste")."'>
                 </form>";
           }
-          elseif ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0 and ($toim != "VALMISTAASIAKKAALLE" or $yhtiorow["raaka_aineet_valmistusmyynti"] != "N")) or ($row["tunnus"] == $row["perheid2"] and $row["perheid2"] != 0) or (($toim == 'SIIRTOLISTA' or $toim == "SIIRTOTYOMAARAYS" or $toim == "TARJOUS" or $toim == "EXTTARJOUS" or $laskurow["tilaustyyppi"] == "T") and $row["perheid2"] == 0 and $row["perheid"] == 0)) and $kukarow['extranet'] == '' and empty($luottorajavirhe) and empty($ylivito)) {
+          elseif ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0 and ($toim != "VALMISTAASIAKKAALLE" or $yhtiorow["raaka_aineet_valmistusmyynti"] != "N")) or ($row["tunnus"] == $row["perheid2"] and $row["perheid2"] != 0) or (($toim == 'SIIRTOLISTA' or $toim == "SIIRTOTYOMAARAYS" or $toim == "TARJOUS" or $toim == "EXTTARJOUS" or $laskurow["tilaustyyppi"] == "T") and $row["perheid2"] == 0 and $row["perheid"] == 0)) and $kukarow['extranet'] == ''
+            and $_luottoraja_ylivito) {
             if ($row["perheid2"] == 0 and $row["perheid"] == 0) {
               $lisax = "<input type='hidden' name='teeperhe'  value = 'OK'>";
             }
@@ -7489,7 +7498,7 @@ if ($tee == '') {
                 </form>";
           }
 
-          if ($row["var"] == "J" and empty($luottorajavirhe) and empty($ylivito) and (($row["ei_saldoa"] != "" or $selpaikkamyytavissa >= $kpl_ruudulle) and $kukarow['extranet'] == '')) {
+          if ($row["var"] == "J" and $_luottoraja_ylivito and (($row["ei_saldoa"] != "" or $selpaikkamyytavissa >= $kpl_ruudulle) and $kukarow['extranet'] == '')) {
             echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='toimita'>
                 <input type='hidden' name='toim'       value = '$toim'>
                 <input type='hidden' name='lopetus'     value = '$lopetus'>
@@ -7522,13 +7531,7 @@ if ($tee == '') {
             and $laskurow["jtkielto"] != "o"
             and $row["status"] != 'P'
             and $row["status"] != 'X'
-            and
-            (
-              (
-                (!in_array($yhtiorow['luottorajan_ylitys'], array('L', 'M'))) or
-                (!in_array($yhtiorow['erapaivan_ylityksen_toimenpide'], array('L', 'M')))
-              )
-              and empty($luottorajavirhe) and empty($ylivito))
+            and $_luottoraja_ylivito
             ) {
 
             echo "<br />";
@@ -7597,7 +7600,7 @@ if ($tee == '') {
             }
           }
 
-          if ($row["jt"] != 0 and $yhtiorow["puute_jt_oletus"] == "J" and empty($luottorajavirhe) and empty($ylivito)) {
+          if ($row["jt"] != 0 and $yhtiorow["puute_jt_oletus"] == "J" and $_luottoraja_ylivito) {
             echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='puutetoimita'>
                 <input type='hidden' name='toim'       value = '$toim'>
                 <input type='hidden' name='lopetus'     value = '$lopetus'>
@@ -7618,7 +7621,7 @@ if ($tee == '') {
                 </form> ";
           }
 
-          if ($saako_hyvaksya > 0 and empty($luottorajavirhe) and empty($ylivito)) {
+          if ($saako_hyvaksya > 0 and $_luottoraja_ylivito) {
             echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='hyvaksy'>
                 <input type='hidden' name='toim'       value = '$toim'>
                 <input type='hidden' name='lopetus'     value = '$lopetus'>
@@ -7637,7 +7640,7 @@ if ($tee == '') {
                 </form> ";
           }
 
-          if (isset($pikaperustus_naytetaan) and $pikaperustus_naytetaan > 0 and tarkista_oikeus("yllapito.php", "tuote!!!PIKAPERUSTA!!!true", "JOO") and empty($luottorajavirhe) and empty($ylivito)) {
+          if (isset($pikaperustus_naytetaan) and $pikaperustus_naytetaan > 0 and tarkista_oikeus("yllapito.php", "tuote!!!PIKAPERUSTA!!!true", "JOO") and $_luottoraja_ylivito) {
             echo " <form method='post' action='{$palvelin2}yllapito.php' name='pikaperusta'>
                 <input type='hidden' name='toim' value='tuote!!!PIKAPERUSTA!!!true'>
                 <input type='hidden' name='lopetus' value='$tilmyy_lopetus//from=LASKUTATILAUS''>
@@ -7653,7 +7656,7 @@ if ($tee == '') {
           if (!empty($row['jt_manual']) or (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $row['var'] == 'J')) echo "<br />";
 
           if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $row['var'] == 'J' and (strtotime($row['kerayspvm']) > strtotime($laskurow['kerayspvm']) or $row['jt_manual'] == 'K')
-              and empty($luottorajavirhe) and empty($ylivito)) {
+              and $_luottoraja_ylivito) {
             echo " <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='jalkitoimita'>
                   <input type='hidden' name='toim'       value = '$toim'>
                   <input type='hidden' name='lopetus'     value = '$lopetus'>
@@ -7676,7 +7679,7 @@ if ($tee == '') {
           }
 
           if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $row['var'] == 'J' and strtotime($row['kerayspvm']) == strtotime($laskurow['kerayspvm'])
-              and empty($luottorajavirhe) and empty($ylivito)) {
+              and $_luottoraja_ylivito) {
             echo " <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='jalkitoimita'>
                   <input type='hidden' name='toim'       value = '$toim'>
                   <input type='hidden' name='lopetus'     value = '$lopetus'>
@@ -7698,7 +7701,7 @@ if ($tee == '') {
                   </form> ";
           }
 
-          if (!empty($yhtiorow['jt_manual']) and $row['var'] == 'J' and $row['jt_manual'] == '' and empty($luottorajavirhe) and empty($ylivito)) {
+          if (!empty($yhtiorow['jt_manual']) and $row['var'] == 'J' and $row['jt_manual'] == '' and $_luottoraja_ylivito) {
             echo " <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='jalkitoimita'>
                 <input type='hidden' name='toim'       value = '$toim'>
                 <input type='hidden' name='lopetus'     value = '$lopetus'>

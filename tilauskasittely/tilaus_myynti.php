@@ -7375,7 +7375,7 @@ if ($tee == '') {
         $_erapv_params = (!in_array($yhtiorow['erapaivan_ylityksen_toimenpide'], array('L', 'M')));
         $_erapv_params = ($_erapv_params and empty($ylivito));
 
-        $_luottoraja_ylivito = ($_luottorajaparams or $_erapv_params);
+        $_luottoraja_ylivito = ($_luottorajaparams and $_erapv_params);
 
 
         if ((((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0) and $kukarow['extranet'] != '') or $kukarow['extranet'] == '') and (($muokkauslukko == "" and $muokkauslukko_rivi == "") or ($luottorajavirhe != "" or $ylivito > 0)) or $toim == "YLLAPITO") {

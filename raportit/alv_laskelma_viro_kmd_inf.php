@@ -324,7 +324,7 @@ if ($tee == 'laskelma') {
     $laskures = pupe_query($query);
     $laskurow = mysql_fetch_assoc($laskures);
 
-    if ($laskelma == 'a' and $row['veropros'] == 0) continue;
+    if ($row['veropros'] == 0) continue;
 
     if ($laskelma == 'a') {
       $row['summa'] *= -1;

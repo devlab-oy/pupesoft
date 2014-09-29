@@ -324,8 +324,6 @@ if ($tee == 'laskelma') {
     $laskures = pupe_query($query);
     $laskurow = mysql_fetch_assoc($laskures);
 
-    if ($row['veropros'] == 0) continue;
-
     if ($laskelma == 'a') {
       $row['summa'] *= -1;
       $_vero = $row['summa'];
@@ -333,6 +331,8 @@ if ($tee == 'laskelma') {
     else {
       $_vero = $row['veronmaara'];
     }
+
+    if ($row['veropros'] == 0 or $_vero == 0) continue;
 
     $aineistoon = $_green;
 

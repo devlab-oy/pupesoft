@@ -2056,6 +2056,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       ($tyyppi == 2 and $tunnus!="") or
       ($tyyppi == 3 and $tunnus!="")  or
       $tyyppi == 5) {
+      $column_name = mysql_field_name($result, $i);
       echo "<tr>";
 
       $infolinkki = "";
@@ -2094,7 +2095,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
       echo "<td>";
       if ($tyyppi == 1.6) {
-        echo "<select class='{$otsikko}_tpp' name='tpp[{$i}]'>";
+        echo "<select class='{$column_name}_tpp' name='tpp[{$i}]'>";
         $sel = "";
         foreach (range(1, 31) as $paiva) {
           if ($ppa == $paiva) {
@@ -2106,9 +2107,9 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
         echo "</select>";
       }
       else {
-        echo "<input type='hidden' class='{$otsikko}_tpp' name='tpp[{$i}]' value='1' />";
+        echo "<input type='hidden' class='{$column_name}_tpp' name='tpp[{$i}]' value='1' />";
       }
-      echo "<select class='{$otsikko}_tkk' name='tkk[$i]'>";
+      echo "<select class='{$column_name}_tkk' name='tkk[$i]'>";
       $sel = "";
       foreach (range(1, 12) as $kuukausi) {
         if ($kka == $kuukausi) {
@@ -2118,7 +2119,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
         $sel = "";
       }
       echo "</select>";
-      echo "<select class='{$otsikko}_tvv' name='tvv[$i]'>";
+      echo "<select class='{$column_name}_tvv' name='tvv[$i]'>";
       $sel = "";
       if (empty($vuosi_vaihteluvali)) {
         $vuosi_vaihteluvali['min'] = 1970;

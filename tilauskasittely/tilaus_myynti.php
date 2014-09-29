@@ -4828,6 +4828,7 @@ if ($tee == '') {
               FROM tilausrivi
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tyyppi = 'L'
+              AND var != 'P'
               AND otunnus = '{$laskurow['tunnus']}'";
         $tilauksen_rivihinnat_res = pupe_query($query);
         $tilauksen_rivihinnat_row = mysql_fetch_assoc($tilauksen_rivihinnat_res);

@@ -539,7 +539,8 @@ $ehto1 = ($tee == "" or
 $ehto2 = (($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0) or
   ($kukarow["extranet"] == "" and
     ($syotetty_ytunnus != '' or $asiakasid != '') and
-    loytyyko_myyja_tunnuksella($myyjanumero)));
+    (!$yhtiorow['pikatilauksessa_myyjanro_pakollinen'] == "Y" or
+      loytyyko_myyja_tunnuksella($myyjanumero))));
 
 if ($ehto1 and $ehto2) {
   if (substr($ytunnus, 0, 1) == "£") {

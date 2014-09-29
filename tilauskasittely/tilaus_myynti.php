@@ -7525,8 +7525,8 @@ if ($tee == '') {
             and
             (
               (
-                ($yhtiorow['luottorajan_ylitys'] == "L" or $yhtiorow['luottorajan_ylitys'] == "M") or
-                ($yhtiorow['erapaivan_ylityksen_toimenpide'] == "L" or $yhtiorow['erapaivan_ylityksen_toimenpide'] == "M")
+                (in_array($yhtiorow['luottorajan_ylitys'], array('L', 'M'))) or
+                (in_array($yhtiorow['erapaivan_ylityksen_toimenpide'], array('L', 'M')))
               )
               and empty($luottorajavirhe) and empty($ylivito))
             ) {

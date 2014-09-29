@@ -67,7 +67,7 @@ $reklamaatiohyvitys = false;
 $query = "SELECT kieli
           FROM asiakas
           WHERE yhtio = '{$kukarow['yhtio']}'
-          AND tunnus = '{$laskurow['liitostunnus']}'";
+          AND tunnus  = '{$laskurow['liitostunnus']}'";
 $kielirow = mysql_fetch_assoc(pupe_query($query));
 $kieli = $kielirow["kieli"];
 
@@ -1815,7 +1815,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   $tunken = "ostorivitunnus";
                 }
 
-                $query = "SELECT sarjanumeroseuranta.tunnus, sarjanumeroseuranta.kaytetty
+                $query = "SELECT sarjanumeroseuranta.tunnus, sarjanumeroseuranta.kaytetty, sarjanumeroseuranta.sarjanumero
                           FROM sarjanumeroseuranta
                           LEFT JOIN tilausrivi ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.$tunken
                           LEFT JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.tunnus=tilausrivi.otunnus
@@ -1891,6 +1891,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                           hyllyvali     = '$myy_hyllyvali[$indeksi]',
                           sarjanumero   = '$myy_era[$indeksi]'";
                 $lisa_res = pupe_query($query);
+
               }
 
               if ($myy_tyyppi[$indeksi] == "LAPSITUOTE") {

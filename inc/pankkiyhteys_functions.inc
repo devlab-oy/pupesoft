@@ -250,6 +250,7 @@ function kasittele_pain_palaute($pain_data) {
   );
 }
 
+
 /**
  *
  * @param string  $viesti

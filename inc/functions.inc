@@ -477,7 +477,7 @@ if (!function_exists("pupesoft_flock")) {
   }
 }
 
-// Tehd‰‰n REST-kutsuja. Data aina JSON:ia.
+// Tehd‰‰n REST-kutsuja
 if (!function_exists("pupesoft_rest")) {
 
   function pupesoft_rest($parameters) {
@@ -523,13 +523,15 @@ if (!function_exists("pupesoft_rest")) {
       curl_setopt($handle, CURLOPT_COOKIE, $parameters["cookie"]);
     }
 
-    if (isset($parameters["posttype"]) and $parameters["posttype"] == "array") {
+    switch ($parameters["posttype"]) {
+    case "array":
+    case "form":
       $post_data = $parameters["data"];
-    }
-    elseif (isset($parameters["posttype"]) and $parameters["posttype"] == "xml") {
+      break;
+    case "xml":
       $post_data = $parameters["data"][0];
-    }
-    else {
+      break;
+    default:
       $post_data = json_encode($parameters["data"]);
     }
 
@@ -552,10 +554,12 @@ if (!function_exists("pupesoft_rest")) {
 
     $response_json = curl_exec($handle);
 
-    if (isset($parameters["posttype"]) and $parameters["posttype"] == "xml") {
+    switch ($parameters["posttype"]) {
+    case "form":
+    case "xml":
       $response = $response_json;
-    }
-    else {
+      break;
+    default:
       $response = json_decode($response_json, true);
     }
 

@@ -108,7 +108,7 @@ if ($tee == 'laskelma') {
     ),
   );
 
-  if (!empty($tee_excel)) {
+  if (!empty($tee_excel) and "{$rajaa}" == "1000") {
     include 'inc/pupeExcel.inc';
 
     $worksheet = new pupeExcel();
@@ -250,7 +250,7 @@ if ($tee == 'laskelma') {
   echo "<th>erikoiskoodi</th>";
   echo "</tr>";
 
-  if (isset($worksheet)) {
+  if ("{$rajaa}" == "1000" and isset($worksheet)) {
     $worksheet->writeString($excelrivi, $excelsarake, t("CSV"), $format_bold);
     $excelsarake++;
 
@@ -376,44 +376,44 @@ if ($tee == 'laskelma') {
     echo "<td>{$erikoiskoodi}</td>";
     echo "</tr>";
 
-    if (isset($worksheet)) {
+    if ("{$rajaa}" == "1000" and $aineistoon == $_green) {
 
-      $excelsarake = 0;
+      if (isset($worksheet)) {
 
-      $worksheet->writeString($excelrivi, $excelsarake, ($aineistoon == $_green ? "X" : ""));
-      $excelsarake++;
+        $excelsarake = 0;
 
-      $worksheet->write($excelrivi, $excelsarake, $_i);
-      $excelsarake++;
+        $worksheet->writeString($excelrivi, $excelsarake, ($aineistoon == $_green ? "X" : ""));
+        $excelsarake++;
 
-      $worksheet->write($excelrivi, $excelsarake, $laskurow['ytunnus']);
-      $excelsarake++;
+        $worksheet->write($excelrivi, $excelsarake, $_i);
+        $excelsarake++;
 
-      $worksheet->writeString($excelrivi, $excelsarake, $laskurow['nimi']);
-      $excelsarake++;
+        $worksheet->write($excelrivi, $excelsarake, $laskurow['ytunnus']);
+        $excelsarake++;
 
-      $worksheet->write($excelrivi, $excelsarake, $laskurow['laskunro']);
-      $excelsarake++;
+        $worksheet->writeString($excelrivi, $excelsarake, $laskurow['nimi']);
+        $excelsarake++;
 
-      $worksheet->write($excelrivi, $excelsarake, tv1dateconv($laskurow['tapvm']));
-      $excelsarake++;
+        $worksheet->write($excelrivi, $excelsarake, $laskurow['laskunro']);
+        $excelsarake++;
 
-      $worksheet->write($excelrivi, $excelsarake, $laskurow['laskun_summa']);
-      $excelsarake++;
+        $worksheet->write($excelrivi, $excelsarake, tv1dateconv($laskurow['tapvm']));
+        $excelsarake++;
 
-      $worksheet->write($excelrivi, $excelsarake, $row['veropros']);
-      $excelsarake++;
+        $worksheet->write($excelrivi, $excelsarake, $laskurow['laskun_summa']);
+        $excelsarake++;
 
-      $worksheet->write($excelrivi, $excelsarake, $_vero);
-      $excelsarake++;
+        $worksheet->write($excelrivi, $excelsarake, $row['veropros']);
+        $excelsarake++;
 
-      $worksheet->write($excelrivi, $excelsarake, $erikoiskoodi);
-      $excelsarake++;
+        $worksheet->write($excelrivi, $excelsarake, $_vero);
+        $excelsarake++;
 
-      $excelrivi++;
-    }
+        $worksheet->write($excelrivi, $excelsarake, $erikoiskoodi);
+        $excelsarake++;
 
-    if ($aineistoon == $_green) {
+        $excelrivi++;
+      }
 
       if ($laskelma == 'a') {
         $_csv['A'][] = array(
@@ -443,7 +443,13 @@ if ($tee == 'laskelma') {
     }
 
     $verot_yht += $_vero;
-    $verot_csv_yht += $aineistoon == $_green ? $_vero : 0;
+
+    if ("{$rajaa}" == "1000") {
+      $verot_csv_yht += $aineistoon == $_green ? $_vero : 0;
+    }
+    else {
+      $verot_csv_yht += $_vero;
+    }
 
     $_i++;
   }

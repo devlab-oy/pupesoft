@@ -1615,7 +1615,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
         }
       }
 
-      if ($_tehdaan_varastosiirto and $luottorajavirhe = '' and $ylivito = 0) {
+      if ($_tehdaan_varastosiirto and $luottorajavirhe == '' and $ylivito == 0) {
         require 'tilauksesta_varastosiirto.inc';
 
         tilauksesta_varastosiirto($laskurow['tunnus'], 'N');

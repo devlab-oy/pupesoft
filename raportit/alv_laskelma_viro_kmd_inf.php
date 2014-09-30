@@ -328,7 +328,6 @@ if ($tee == 'laskelma') {
     $laskurow = mysql_fetch_assoc($laskures);
 
     if ($laskelma == 'a') {
-      $row['summa'] *= -1;
       $_vero = $row['summa'];
     }
     else {
@@ -375,7 +374,7 @@ if ($tee == 'laskelma') {
     echo "<td>",pupe_DataTablesEchoSort($laskurow['tapvm']).tv1dateconv($laskurow['tapvm']),"</td>";
     echo "<td>$laskurow[laskun_summa]</td>";
     echo "<td>$row[veropros]</td>";
-    echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[ltunnus]'>$_vero</a></td>";
+    echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[ltunnus]'>",abs($_vero),"</a></td>";
     echo "<td>{$erikoiskoodi}</td>";
     echo "</tr>";
 
@@ -416,7 +415,7 @@ if ($tee == 'laskelma') {
         $worksheet->write($excelrivi, $excelsarake, $row['veropros']);
         $excelsarake++;
 
-        $worksheet->write($excelrivi, $excelsarake, $_vero);
+        $worksheet->write($excelrivi, $excelsarake, abs($_vero));
         $excelsarake++;
 
         $worksheet->write($excelrivi, $excelsarake, $erikoiskoodi);
@@ -437,7 +436,7 @@ if ($tee == 'laskelma') {
           'invoiceSum' => $laskurow['laskun_summa'],
           'taxRate' => $row['veropros'],
           'invoiceSumForRate' => $laskurow['laskun_summa'],
-          'sumForRateInPeriod' => $_vero,
+          'sumForRateInPeriod' => abs($_vero),
           'comments' => $erikoiskoodi,
         );
       }
@@ -448,8 +447,8 @@ if ($tee == 'laskelma') {
           'invoiceNumber' => $laskurow['laskunro'],
           'invoiceDate' => tv1dateconv($laskurow['tapvm']),
           'invoiceSumVat' => $laskurow['laskun_summa'],
-          'vatSum' => $_vero,
-          'vatInPeriod' => $_vero,
+          'vatSum' => abs($_vero),
+          'vatInPeriod' => abs($_vero),
           'comments' => $erikoiskoodi,
         );
       }
@@ -471,13 +470,13 @@ if ($tee == 'laskelma') {
 
   echo "<tr><th colspan='10'>";
   echo t("Yhteensä")," (",t("ilman ALV"),")";
-  echo "<span style='float: right;'>",round($verot_yht, 2),"</span>";
+  echo "<span style='float: right;'>",round(abs($verot_yht), 2),"</span>";
   echo "</th></tr>";
 
   if ($_rajaa_chk) {
     echo "<tr><th colspan='10'>";
     echo t("Yhteensä")," CSV (",t("ilman ALV"),")";
-    echo "<span style='float: right;'>",round($verot_csv_yht, 2),"</span>";
+    echo "<span style='float: right;'>",round(abs($verot_csv_yht), 2),"</span>";
     echo "</th></tr>";
   }
 

@@ -221,6 +221,8 @@ if ($handle = opendir($kansio)) {
       continue;
     }
 
+    $mavelask = 0;
+
     foreach ($laskut as $laskunro => $lasku) {
 
       // Jos lasku on liian vanha, ei k‰sitell‰, l‰hetet‰‰n maililla
@@ -239,6 +241,28 @@ if ($handle = opendir($kansio)) {
       // Siirret‰‰n dataout kansioon jos kaikki meni ok
       rename($kansio.$lasku, "{$pupe_root_polku}/dataout/$lasku");
       echo "Maventa-lasku $laskunro: $status<br>\n";
+
+      $mavelask++;
+
+      // Pidet‰‰n sadan laskun j‰lkeen pieni paussi
+      if ($mavelask == 100) {
+        unset($client);
+        sleep(10);
+
+        try {
+          // Testaus
+          // $client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+
+          // Tuotanto
+          $client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+        }
+        catch (Exception $exVirhe) {
+          echo "VIRHE: Yhteys Maventaan ep‰onnistui: ".$exVirhe->getMessage()."\n";
+          break;
+        }
+
+        $mavelask = 0;
+      }
     }
   }
 

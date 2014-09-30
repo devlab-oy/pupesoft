@@ -85,7 +85,7 @@ echo "</tr>";
 $chk = !empty($tee_excel) ? "checked" : "";
 
 echo "<tr>";
-echo "<th>",t("Tee Excel"),"</th>";
+echo "<th>",t("Tee Excel"),"<br /></th>";
 echo "<td><input type='checkbox' name='tee_excel' {$chk} /></td>";
 echo "</tr>";
 
@@ -108,7 +108,7 @@ if ($tee == 'laskelma') {
     ),
   );
 
-  if (!empty($tee_excel) and "{$rajaa}" == "1000") {
+  if (!empty($tee_excel)) {
     include 'inc/pupeExcel.inc';
 
     $worksheet = new pupeExcel();
@@ -250,7 +250,7 @@ if ($tee == 'laskelma') {
   echo "<th>erikoiskoodi</th>";
   echo "</tr>";
 
-  if ("{$rajaa}" == "1000" and isset($worksheet)) {
+  if (isset($worksheet)) {
     $worksheet->writeString($excelrivi, $excelsarake, t("CSV"), $format_bold);
     $excelsarake++;
 
@@ -376,12 +376,22 @@ if ($tee == 'laskelma') {
     echo "<td>{$erikoiskoodi}</td>";
     echo "</tr>";
 
-    if ("{$rajaa}" == "1000" and $aineistoon == $_green) {
+    if (isset($worksheet)) {
 
-      if (isset($worksheet)) {
+      $excelsarake = 0;
 
-        $excelsarake = 0;
+      $_exceliin = false;
 
+      if ("{$rajaa}" == "1000") {
+        if ($aineistoon == $_green) {
+          $_exceliin = true;
+        }
+      }
+      else {
+        $_exceliin = true;
+      }
+
+      if ($_exceliin) {
         $worksheet->writeString($excelrivi, $excelsarake, ($aineistoon == $_green ? "X" : ""));
         $excelsarake++;
 
@@ -414,6 +424,9 @@ if ($tee == 'laskelma') {
 
         $excelrivi++;
       }
+    }
+
+    if ("{$rajaa}" == "1000" and $aineistoon == $_green) {
 
       if ($laskelma == 'a') {
         $_csv['A'][] = array(
@@ -461,10 +474,12 @@ if ($tee == 'laskelma') {
   echo "<span style='float: right;'>",round($verot_yht, 2),"</span>";
   echo "</th></tr>";
 
-  echo "<tr><th colspan='10'>";
-  echo t("Yhteensä")," CSV (",t("ilman ALV"),")";
-  echo "<span style='float: right;'>",round($verot_csv_yht, 2),"</span>";
-  echo "</th></tr>";
+  if ("{$rajaa}" == "1000") {
+    echo "<tr><th colspan='10'>";
+    echo t("Yhteensä")," CSV (",t("ilman ALV"),")";
+    echo "<span style='float: right;'>",round($verot_csv_yht, 2),"</span>";
+    echo "</th></tr>";
+  }
 
   echo "</tfoot>";
 
@@ -489,14 +504,14 @@ if ($tee == 'laskelma') {
     echo "</form>";
   }
 
-  if (count($_csv['A']) > 0) {
+  if ("{$rajaa}" == "1000" and !empty($_csv['A'])) {
     $_csv_file = "header;".implode(";", $_csv['header'])."\n";
 
     foreach ($_csv['A'] as $_a) {
       $_csv_file .= "A;".implode(";", $_a)."\n";
     }
   }
-  elseif (count($_csv['B']) > 0) {
+  elseif ("{$rajaa}" == "1000" and !empty($_csv['B'])) {
     $_csv_file = "header;".implode(";", $_csv['header'])."\n";
 
     foreach ($_csv['B'] as $_b) {

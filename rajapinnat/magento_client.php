@@ -413,15 +413,54 @@ class MagentoClient {
         }
       }
 
+      // P‰ivitet‰‰n tuotteen kieliversiot kauppan‰kym‰kohtaisesti ja samalla myˆs mahdollinen sivustokohtainen hinta
+      // jos n‰m‰ on asetettu konffissa
+      if (isset($verkkokauppatuotteet_erikoisparametrit['kieliversiot']) 
+        and count($verkkokauppatuotteet_erikoisparametrit['kieliversiot']) > 0) {
+
+        try {
+
+          // Kieliversiot-erikoisparametrin tulee sis‰lt‰‰ array jossa annetaan keyksi kauppatunnus 
+          // ja arvoksi kieli (ee, en, se)
+          
+          $kieliversio_data = $this->hae_kieliversiot($tuote['tunnus'], $tuetut_kielet);
+
+          foreach ($kieliversio_data as $kauppatunnus => $kauppakohtainen_data) {
+
+            $tuotteen_kauppakohtainen_data = array(
+              'description' => $kauppakohtainen_data['kuvaus'],
+              'name'        => $kauppakohtainen_data['nimitys']
+            );
+        
+            // Jos kauppaan pit‰‰ p‰ivitt‰‰ eri hinta
+            // TODO miss‰ t‰m‰ setataan
+            $tuotteen_kauppakohtainen_data['price'] = $tuote['myymalahinta'];
+        
+            $this->_proxy->call($this->_session, 'catalog_product.update',
+              array(
+                $tuote['tuoteno'],
+                $tuotteen_kauppakohtainen_data, 
+                $kauppatunnus)
+            );
+          }
+          $this->log("Tuotteen '{$tuote['tuoteno']}' kieliversiot p‰ivitetty (simple) " . print_r($kieliversio_data, true));
+        }
+        catch (Exception $e) {
+          $this->_error_count++;
+          $this->log("Virhe! Tuotteen '{$tuote['tuoteno']}' kieliversioiden p‰ivitys ep‰onnistui (simple) " . print_r($kieliversio_data, true), $e);
+        }
+      }
       // Haetaan tuotekuvat Pupesoftista
       $tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus']);
 
       // Lis‰t‰‰n kuvat Magentoon
       $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
 
+      // P‰ivitet‰‰n tuotteen p‰ivitetty-aikaleima Pupesoftiin
+      $this->paivita_aikaleima($tuote['tunnus']);
+
       // Lis‰t‰‰n tuote countteria
       $count++;
-
     }
 
     $this->log("$count tuotetta p‰ivitetty (simple)");
@@ -1497,6 +1536,51 @@ class MagentoClient {
     return $count;
   }
 
+  /**
+   * Hakee tuotteen kieliversiot Pupesoftista
+   *
+   * @param int     $tunnus Tuoteen tuotenumero (tuote.tuoteno)
+   * @return array   $kieliversiot_data   Palauttaa arrayn joka kelpaa magenton soap clientille suoraan
+   */
+  public function hae_kieliversiot($tuotenumero) {
+    global $kukarow, $dbhost, $dbuser, $dbpass, $dbkanta;
+
+    // Populoidaan kieliversiot array
+    $kieliversiot_data = array();
+
+    try {
+      // Tietokantayhteys
+      $db = new PDO("mysql:host=$dbhost;dbname=$dbkanta", $dbuser, $dbpass);
+
+      // Tuotekuva query
+      $stmt = $db->prepare("  SELECT 
+                              * 
+                              FROM 
+                              tuotteen_avainsanat 
+                              WHERE yhtio = ? 
+                              AND tuoteno = ?
+                              AND laji IN ('nimitys','kuvaus')");
+      $stmt->execute(array($kukarow['yhtio'], $tuotenumero));
+
+      while ($liite = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $file = array(
+          'content'   => base64_encode($liite['data']),
+          'mime'    => $liite['filetype'],
+          'name'    => $liite['filename']
+        );
+        $kieliversiot_data[kauppatunnus] = $file;
+      }
+    }
+    catch (Exception $e) {
+      $this->_error_count++;
+      $this->log("Virhe! PDO yhteys on poikki. Yritet‰‰n uudelleen.", $e);
+    }
+
+    $db = null;
+
+    // Palautetaan tuotekuvat
+    return $kieliversiot_data;
+  }
   /**
    * Asettaa tax_class_id:n
    * Oletus 0

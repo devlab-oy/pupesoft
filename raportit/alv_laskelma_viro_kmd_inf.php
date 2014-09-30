@@ -22,6 +22,8 @@ if (!isset($per_paiva)) $per_paiva = "";
 if (!isset($tee_excel)) $tee_excel = "";
 if (!isset($tee)) $tee = "";
 
+$_rajaa_chk = ("{$rajaa}" == "1000");
+
 echo "<font class='head'>",t("ALV-laskelma KMD INF"),"</font><hr />";
 
 echo "<form method='post'>";
@@ -63,7 +65,7 @@ echo "</select>";
 echo "</td>";
 echo "</tr>";
 
-$sel = "{$rajaa}" == "1000" ? "selected" : "";
+$sel = $_rajaa_chk ? "selected" : "";
 
 echo "<tr>";
 echo "<th>",t("Rajaa"),"</th>";
@@ -174,7 +176,7 @@ if ($tee == 'laskelma') {
 
   $rajaalisa = "";
 
-  if ("{$rajaa}" == "1000") {
+  if ($_rajaa_chk) {
 
     $query = "SELECT lasku.ytunnus,
           lasku.liitostunnus exclude_asiakkaat,
@@ -251,9 +253,6 @@ if ($tee == 'laskelma') {
   echo "</tr>";
 
   if (isset($worksheet)) {
-    $worksheet->writeString($excelrivi, $excelsarake, t("CSV"), $format_bold);
-    $excelsarake++;
-
     $worksheet->writeString($excelrivi, $excelsarake, "#", $format_bold);
     $excelsarake++;
 
@@ -305,22 +304,26 @@ if ($tee == 'laskelma') {
 
   while ($row = mysql_fetch_assoc($result)) {
 
-  $query = "SELECT lasku.laskunro laskunro,
-            {$laskun_nimi_lisa_select}
-            lasku.ytunnus,
-            lasku.tapvm,
-            lasku.alv,
-            lasku.liitostunnus,
-            round(lasku.summa / (1+lasku.alv/100), {$yhtiorow['hintapyoristys']}) laskun_summa
-            FROM lasku
-            {$laskun_lisatiedot_lisa}
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            {$tilat}
-            {$tilaustyyppi}
-            AND lasku.tapvm    >= '{$alkupvm}'
-            AND lasku.tapvm    <= '{$loppupvm}'
-            AND lasku.tunnus = '{$row['ltunnus']}'
-            {$rajaalisa}";
+    if ($laskelma == 'a' and $_rajaa_chk and $row['veloitukset'] < $rajaa and $row['hyvitykset'] < $rajaa) {
+      continue;
+    }
+
+    $query = "SELECT lasku.laskunro laskunro,
+              {$laskun_nimi_lisa_select}
+              lasku.ytunnus,
+              lasku.tapvm,
+              lasku.alv,
+              lasku.liitostunnus,
+              round(lasku.summa / (1+lasku.alv/100), {$yhtiorow['hintapyoristys']}) laskun_summa
+              FROM lasku
+              {$laskun_lisatiedot_lisa}
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+              {$tilat}
+              {$tilaustyyppi}
+              AND lasku.tapvm    >= '{$alkupvm}'
+              AND lasku.tapvm    <= '{$loppupvm}'
+              AND lasku.tunnus = '{$row['ltunnus']}'
+              {$rajaalisa}";
     $laskures = pupe_query($query);
     $laskurow = mysql_fetch_assoc($laskures);
 
@@ -382,7 +385,7 @@ if ($tee == 'laskelma') {
 
       $_exceliin = false;
 
-      if ("{$rajaa}" == "1000") {
+      if ($_rajaa_chk) {
         if ($aineistoon == $_green) {
           $_exceliin = true;
         }
@@ -392,9 +395,6 @@ if ($tee == 'laskelma') {
       }
 
       if ($_exceliin) {
-        $worksheet->writeString($excelrivi, $excelsarake, ($aineistoon == $_green ? "X" : ""));
-        $excelsarake++;
-
         $worksheet->write($excelrivi, $excelsarake, $_i);
         $excelsarake++;
 
@@ -426,7 +426,7 @@ if ($tee == 'laskelma') {
       }
     }
 
-    if ("{$rajaa}" == "1000" and $aineistoon == $_green) {
+    if ($_rajaa_chk and $aineistoon == $_green) {
 
       if ($laskelma == 'a') {
         $_csv['A'][] = array(
@@ -457,7 +457,7 @@ if ($tee == 'laskelma') {
 
     $verot_yht += $_vero;
 
-    if ("{$rajaa}" == "1000") {
+    if ($_rajaa_chk) {
       $verot_csv_yht += $aineistoon == $_green ? $_vero : 0;
     }
     else {
@@ -474,7 +474,7 @@ if ($tee == 'laskelma') {
   echo "<span style='float: right;'>",round($verot_yht, 2),"</span>";
   echo "</th></tr>";
 
-  if ("{$rajaa}" == "1000") {
+  if ($_rajaa_chk) {
     echo "<tr><th colspan='10'>";
     echo t("Yhteensä")," CSV (",t("ilman ALV"),")";
     echo "<span style='float: right;'>",round($verot_csv_yht, 2),"</span>";
@@ -504,14 +504,14 @@ if ($tee == 'laskelma') {
     echo "</form>";
   }
 
-  if ("{$rajaa}" == "1000" and !empty($_csv['A'])) {
+  if ($_rajaa_chk and !empty($_csv['A'])) {
     $_csv_file = "header;".implode(";", $_csv['header'])."\n";
 
     foreach ($_csv['A'] as $_a) {
       $_csv_file .= "A;".implode(";", $_a)."\n";
     }
   }
-  elseif ("{$rajaa}" == "1000" and !empty($_csv['B'])) {
+  elseif ($_rajaa_chk and !empty($_csv['B'])) {
     $_csv_file = "header;".implode(";", $_csv['header'])."\n";
 
     foreach ($_csv['B'] as $_b) {

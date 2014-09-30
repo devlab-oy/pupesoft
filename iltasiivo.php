@@ -800,9 +800,9 @@ if (mysql_num_rows($poistettavat_tuotepaikat) > 0) {
   $query = "SELECT CONCAT(tilausrivi.tuoteno, tilausrivin_lisatiedot.kohde_hyllyalue, tilausrivin_lisatiedot.kohde_hyllynro, tilausrivin_lisatiedot.kohde_hyllytaso, tilausrivin_lisatiedot.kohde_hyllyvali) AS id
             FROM tilausrivi
             JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.kohde_hyllyalue != '')
-            WHERE tilausrivin_lisatiedot.yhtio        = '{$kukarow['yhtio']}'
-            AND tilausrivin_lisatiedot.laskutettuaika = '0000-00-00'
-            AND tilausrivin_lisatiedot.tyyppi         = 'G'";
+            WHERE tilausrivi.yhtio        = '{$kukarow['yhtio']}'
+            AND tilausrivi.laskutettuaika = '0000-00-00'
+            AND tilausrivi.tyyppi         = 'G'";
   $avoinrivi_result = pupe_query($query);
 
   while ($avoinrivi = mysql_fetch_assoc($avoinrivi_result)) {

@@ -1634,7 +1634,7 @@ if ($tee == 'P') {
         if ($yhtiorow['jt_valmis_sms'] == "Y" and $otsikkorivi['clearing'] == "JT-TILAUS") {
           require("../sms_viesti.inc");
 
-          $viesti = t("Kaikki tilauksen ") . $laskurow['tunnus'] . "osat ovat noudettavissa, " .
+          $viesti = t("Kaikki tilauksen ") . $laskurow['tunnus'] . " osat ovat noudettavissa, " .
             t("terveisin ") . $yhtiorow['nimi'];
 
           laheta_sms($zoner_tunnarit["username"],

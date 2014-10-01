@@ -18,6 +18,10 @@ function laheta_sms($username, $salasana, $asiakkaan_tunnus, $viesti) {
 
   $asiakas = hae_asiakas_sms_viestia_varten($asiakkaan_tunnus);
 
+  if (empty($asiakas["gsm"])) {
+    return false;
+  }
+
   $parameters = array(
     "method"   => "POST",
     "data"     => array(

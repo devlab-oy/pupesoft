@@ -251,6 +251,7 @@ if ($mista == "vastaanota" and $vainlistaus == '') {
             tilausrivi.perheid2,
             tilausrivi.kommentti,
             tilausrivi.otunnus,
+            tilausrivi.uusiotunnus,
             tilausrivi.tunnus,
             tilausrivi.hyllyalue trhyllyalue,
             tilausrivi.hyllynro trhyllynro,
@@ -281,6 +282,7 @@ elseif ($mista == "vastaanota" and $vainlistaus != '') {
             tilausrivi.perheid2,
             tilausrivi.kommentti,
             tilausrivi.otunnus,
+            tilausrivi.uusiotunnus,
             tilausrivi.tunnus,
             tilausrivi.hyllyalue trhyllyalue,
             tilausrivi.hyllynro trhyllynro,
@@ -323,6 +325,7 @@ else {
             tilausrivi.perheid2,
             tilausrivi.kommentti,
             tilausrivi.otunnus,
+            tilausrivi.uusiotunnus,
             tilausrivi.tunnus,
             tuote.purkukommentti,
             tilausrivi.laadittu,
@@ -505,7 +508,13 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
     $row = mysql_fetch_assoc($result);
 
     if ($row['otunnus'] != $laskurow['tunnus']) {
-      $query  = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='{$row['otunnus']}'";
+      $query  = "SELECT lasku.*,
+                 saapuminen.laskunro
+                 FROM lasku
+                 JOIN lasku AS saapuminen
+                  ON (saapuminen.yhtio = lasku.yhtio AND saapuminen.tunnus = '{$row['uusiotunnus']}')
+                 WHERE lasku.yhtio = '$kukarow[yhtio]'
+                 AND lasku.tunnus = '{$row['otunnus']}'";
       $result_lasku = pupe_query($query);
       $laskurow = mysql_fetch_assoc($result_lasku);
     }

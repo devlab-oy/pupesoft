@@ -905,7 +905,7 @@ if ($tila == "" and !isset($jatka)) {
     );
 
     // Jos tilauksella on jo rivejä, ei saa enää vaihtaa tilaustyyppiä Ennakkotilauksella
-    if ($templ > 0 and isset($tilaustyyppi["E"])) {
+    if ($templ > 0 and $tilaustyyppi == 'E') {
       $tilaustyypit = array($tilaustyyppi => $tilaustyypit[$tilaustyyppi]);
     }
   }

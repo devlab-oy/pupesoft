@@ -527,7 +527,7 @@ if ($upd == 1) {
 
         if (empty($errori)) {
           $asiakas = hae_paikan_asiakas($t['paikka']);
-          $laitteet = hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy($asiakas['tunnus']);
+          $laitteet = hae_laitteet_ja_niiden_huoltosyklit($asiakas['tunnus']);
           list($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta) = paata_mitka_huollot_tehdaan($laitteet);
           $tyomaarays_kpl = generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta);
         }
@@ -608,7 +608,7 @@ if ($upd == 1) {
 
       if ($yhtiorow['laite_huolto'] == 'X' and $onko_toim_laite and empty($errori)) {
         $asiakas = hae_paikan_asiakas($t['paikka']);
-        $laitteet = hae_laitteet_ja_niiden_huoltosyklit_joiden_huolto_lahestyy($asiakas['tunnus']);
+        $laitteet = hae_laitteet_ja_niiden_huoltosyklit($asiakas['tunnus']);
         list($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta) = paata_mitka_huollot_tehdaan($laitteet);
         $tyomaarays_kpl = generoi_tyomaaraykset_huoltosykleista($huollettavien_laitteiden_huoltosyklirivit, $laitteiden_huoltosyklirivit_joita_ei_huolleta);
       }

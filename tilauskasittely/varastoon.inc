@@ -1244,7 +1244,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
 
   $varastoon_msg .= "</tr>";
 
-  if ($mobiili_keikka == "yes") {
+  if ($mobiili_keikka == "yes" and $kukarow['ei_echoa'] != 'joo') {
     echo "<font class='message'>".t("Vietiin tuotetta")." $tilrivirow[tuoteno] ".t("varastoon").": $tilrivirow[varattu] ".t("kappaletta").".</font><br>";
   }
 }

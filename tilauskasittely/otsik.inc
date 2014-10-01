@@ -908,9 +908,8 @@ if ($tila == "" and !isset($jatka)) {
     if ($templ > 0 and isset($tilaustyyppi["E"])) {
     #if ($templ > 0 and $tilaustyyppi == 'E') {
       $tilaustyypit = array($tilaustyyppi => $tilaustyypit[$tilaustyyppi]);
-    } 
+    }
   }
-echo "<pre>",var_dump($tilaustyypit),"</pre>";
 
   // Setataan tilaustyyppi jos meillä on vaan yks vaihtoehto
   if (is_null($tilaustyyppi) and count($tilaustyypit) == 1) {

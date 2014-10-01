@@ -1,6 +1,6 @@
 <?php
 
-function luo_edifact_kuittaus_parametrit($rahtikirjanumero) {
+function kuittaus_parametrit($rahtikirjanumero) {
   global $kukarow, $yhtiorow;
 
   $query = "SELECT lasku.ovttunnus,
@@ -68,6 +68,51 @@ function luo_edifact_kuittaus_parametrit($rahtikirjanumero) {
   return $parametrit;
 }
 
+function hylky_lusaus_parametrit($sarjanumero) {
+  global $kukarow, $yhtiorow;
+
+  $query = "SELECT lasku.ovttunnus,
+            lasku.asiakkaan_tilausnumero AS tilauskoodi,
+            tilausrivi.kommentti,
+            varastopaikat.tunnus AS varastokoodi,
+            varastopaikat.nimitys AS varastonimi,
+            sarjanumeroseuranta.massa AS paino
+            FROM sarjanumeroseuranta
+            JOIN tilausrivi ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio AND tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
+            JOIN lasku ON lasku.yhtio = lasku.yhtio AND lasku.tunnus = tilausrivi.otunnus
+            JOIN varastopaikat ON varastopaikat.yhtio = tilausrivi.yhtio AND varastopaikat.tunnus = tilausrivi.varasto
+            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+            AND sarjanumeroseuranta.sarjanumero = '{$sarjanumero}'";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) == 0) {
+    return false;
+  }
+
+  $row = mysql_fetch_assoc($result);
+  $kommentti_info = explode("#", $row['kommentti']);
+  $sanomaid = "RP" . time();
+  $sanomanumero = time();
+  $juoksunumero = $kommentti_info[1];
+  $paino = (int) $row['paino'];
+
+  $parametrit = array(
+    'tyyppi' => 'INVRPT',
+    'lahettajan_ovt' => $yhtiorow['ovttunnus'],
+    'vastaanottajan_ovt' => $row['ovttunnus'],
+    'sanomaid' => $sanomaid,
+    'sanomanumero' => $sanomanumero,
+    'sarjanumero' => $sarjanumero,
+    'juoksunumero' => $juoksunumero,
+    'varastonimi' => $row['varastonimi'],
+    'varastokoodi' => $row['varastokoodi'],
+    'tilauskoodi' => $row['tilauskoodi'],
+    'paino' => $paino
+  );
+
+  return $parametrit;
+}
+
 function laadi_edifact_sanoma($parametrit) {
   global $kukarow;
 
@@ -79,18 +124,22 @@ function laadi_edifact_sanoma($parametrit) {
     case 'kuittaus':
       $lajikoodi = '632';
       $assosiaatiokoodi = 'EXGR13';
+      $merkityskoodi = '9';
       break;
     case 'lusaus':
       $lajikoodi = '6';
       $assosiaatiokoodi = 'EXSC13';
+      $merkityskoodi = '5';
       break;
     case 'hylky':
       $lajikoodi = '34';
       $assosiaatiokoodi = 'EXSC13';
+      $merkityskoodi = '5';
       break;
     case 'kontitus':
       $lajikoodi = '833';
       $assosiaatiokoodi = 'EXTU11';
+      $merkityskoodi = '9';
       break;
     default:
       return NULL;
@@ -113,7 +162,7 @@ function laadi_edifact_sanoma($parametrit) {
 
   // BGM -segmentti
   $etuliite = ($tyyppi == 'RECADV') ? 'GRI' : '';
-  $s .= "BGM+" .  $lajikoodi . "+" . $etuliite . $sanomanumero . "+9" . "'";
+  $s .= "BGM+" .  $lajikoodi . "+" . $etuliite . $sanomanumero . "+" . $merkityskoodi . "'";
   $segmentit++;
 
   // DTM -segmentti
@@ -161,8 +210,20 @@ function laadi_edifact_sanoma($parametrit) {
   }
 
   if ($tyyppi == 'INVRPT') {
+    // RFF+CU -segmentti
+    $s .= "RFF+CU:" . $tilauskoodi . ":1'";
+    $segmentit++;
+
     // NAD+GG  -segmentti
-    $s .= "NAD+GG+" . $varastokoodi . ":100'";
+    $s .= "NAD+GG+" . $varastonimi . ":100'";
+    $segmentit++;
+
+    // LOC+18  -segmentti
+    $s .= "LOC+18+" . $varastokoodi . ":ZZZ'";
+    $segmentit++;
+
+    // LIN  -segmentti
+    $s .= "LIN+1+9++++ZSG'";
     $segmentit++;
   }
 
@@ -213,7 +274,7 @@ function laadi_edifact_sanoma($parametrit) {
 
   if ($tyyppi == 'INVRPT') {
     // RFF+ALE  -segmentti
-    $s .= "RFF+ALE" . $sanomanumero . "'";
+    $s .= "RFF+ALE:" . $sanomanumero . "'";
     $segmentit++;
 
     // DTM -segmentti
@@ -223,16 +284,18 @@ function laadi_edifact_sanoma($parametrit) {
     $segmentit++;
 
     // INV -segmentti
-    $s .= "INV+999:";
+    $s .= "INV+999'";
     $segmentit++;
   }
 
   if ($laji == 'lusaus') {
     // QTY  -segmentit (poistettu paino ja millit)
     $s .= "QTY+11:" . $poistettu_paino . ":KGM'";
-    $s .= "QTY+11:" . $poistettu_halkaisija . ":MMT'";
     $segmentit++;
-    $segmentit++;
+
+    // ilmeisesti ei tulla muuttamaan halkaisijaa
+    // $s .= "QTY+11:" . $poistettu_halkaisija . ":MMT'";
+    // $segmentit++;
   }
 
   if ($tyyppi == 'INVRPT') {
@@ -251,8 +314,7 @@ function laadi_edifact_sanoma($parametrit) {
   if ($laji == 'hylky') {
     // STS+ACT  -segmenti
     $s .= "STS+RJC:ZSN+7::86+3::86+1::86+7::86'";
-    $s .= "STS+SUS:ZSP'";
-    $segmentit += 2;
+    $segmentit++;
   }
 
   if ($tyyppi == 'INVRPT') {

@@ -6,19 +6,32 @@
  *
  * @param string $username Zonerin käyttäjätunnus
  * @param string $salasana Zonerin salasana
- * @param int    $asiakkaan_tunnus
- * @param string $viesti Viesti, joka halutaan lähettää. Yhden viestin maksimipituus on 160
- *   merkkiä, mutta jos annettu viesti on pidetty, se jaetaan useampaan tekstiviestiin, jolloin
- *   yksi viesti voi olla korkeintaan 153 merkkiä pitkä.
+ * @param int    $tilausnumero
+ * @param bool   $kerattu Onko kaikki tilauksen rivit jo kerätty
  *
  * @return array Vastauskoodi ja viesti palvelimelta
  */
-function laheta_sms($username, $salasana, $asiakkaan_tunnus, $viesti) {
+function laheta_sms($username, $salasana, $tilausnumero, $kerattu = false) {
   global $yhtiorow;
 
-  $asiakas = hae_asiakas_sms_viestia_varten($asiakkaan_tunnus);
+  $tilaus  = hae_tilaus($tilausnumero);
+  $asiakas = hae_asiakas_sms_viestia_varten($tilaus['liitostunnus']);
 
   if (empty($asiakas["gsm"])) {
+    return false;
+  }
+
+  if ($tilaus["clearing"] == "JT-TILAUS") {
+    $viesti = t("Kaikki tilauksen ") .
+      $tilausnumero .
+      t(" osat ovat noudettavissa, terveisin ") .
+      $yhtiorow["nimi"];
+  }
+  elseif (loytyy_tyomaarays($tilausnumero) or $kerattu) {
+    $viesti = t("Huoltotyösi on valmis, terveisin ") . $yhtiorow["nimi"];
+  }
+
+  if (empty($viesti)) {
     return false;
   }
 
@@ -52,4 +65,29 @@ function hae_asiakas_sms_viestia_varten($tunnus) {
   $asiakas = mysql_fetch_assoc($result);
 
   return $asiakas;
+}
+
+function hae_tilaus($tilausnumero) {
+  global $kukarow;
+
+  $query  = "SELECT *
+             FROM lasku
+             WHERE yhtio = '{$kukarow['yhtio']}'
+             AND tunnus = '{$tilausnumero}'";
+  $result = pupe_query($query);
+
+  return mysql_fetch_assoc($result);
+}
+
+function loytyy_tyomaarays($tilausnumero) {
+  global $kukarow;
+
+  $query  = "SELECT COUNT(*) AS maara
+             FROM tyomaarays
+             WHERE yhtio = '{$kukarow['yhtio']}'
+             AND otunnus = '{$tilausnumero}'";
+  $result = pupe_query($query);
+  $result = mysql_fetch_assoc($result);
+
+  return (int) $result["maara"] > 0;
 }

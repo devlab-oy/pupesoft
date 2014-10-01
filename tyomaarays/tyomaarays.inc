@@ -298,6 +298,14 @@ if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == 'VALMI
   else {
     require "tilauskasittely/tilaus-valmis.inc";
   }
+
+  // Lähetetään tekstiviesti asiakkaalle työmääräyksen valmistumisesta jo tässä vaiheessa,
+  // jos kerättäviä tuotteita ei ole, muuten lähetys tapahtuu keräys.php:ssä
+  if ($yhtiorow['jt_valmis_sms'] == "Y" and $kerattavia == 0) {
+    require("../sms_viesti.inc");
+    laheta_sms($zoner_tunnarit["username"], $zoner_tunnarit["salasana"], $tilausnumero, true);
+  }
+
   $tee = "";
 }
 

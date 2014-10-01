@@ -1621,6 +1621,11 @@ if ($tee == 'P') {
           $alatilak = "C";
         }
 
+        if ($yhtiorow['jt_valmis_sms'] == "Y") {
+          require("../sms_viesti.inc");
+          laheta_sms($zoner_tunnarit["username"], $zoner_tunnarit["salasana"], $id);
+        }
+
         // Lasku päivitetään vasta kuin tilausrivit on päivitetty...
         $query  = "UPDATE lasku SET
                    alatila     = '$alatilak'
@@ -1628,28 +1633,6 @@ if ($tee == 'P') {
                    WHERE yhtio = '$kukarow[yhtio]'
                    AND tunnus  = '$laskurow[tunnus]'";
         $result = pupe_query($query);
-
-        // Lähetetään tekstiviesti asiakkaalle tilauksen valmistumisesta, jos kyseessä on
-        // jälkitoimitus tai työmääräys
-        $jalkitoimitus = $otsikkorivi['clearing'] == "JT-TILAUS";
-        $tyomaarays = ($tila == "'L'" and $alatilak == "C");
-
-        if ($yhtiorow['jt_valmis_sms'] == "Y" and ($jalkitoimitus or $tyomaarays)) {
-          require("../sms_viesti.inc");
-
-          if ($jalkitoimitus) {
-            $viesti = t("Kaikki tilauksen ") . $laskurow['tunnus'] . " osat ovat noudettavissa, " .
-              t("terveisin ") . $yhtiorow['nimi'];
-          }
-          else {
-            $viesti = t("Huoltotyösi on valmis, terveisin ") . $yhtiorow['nimi'];
-          }
-
-          laheta_sms($zoner_tunnarit["username"],
-            $zoner_tunnarit["salasana"],
-            $laskurow['liitostunnus'],
-            $viesti);
-        }
 
         if ($lask_nro == '') {
           $lask_nro = $laskurow['tunnus'];

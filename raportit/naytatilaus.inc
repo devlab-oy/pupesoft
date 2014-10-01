@@ -671,7 +671,7 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
   $osuus_eturahdista_yhteensa   = "";
   $aputullimaara_yhteensa     = "";
   $rivinlisakulu_yhteensa     = "";
-  
+
   $lopetus = $palvelin2;
   $lopetus .= "raportit/asiakkaantilaukset.php";
   $lopetus .= "////tee=NAYTATILAUS";
@@ -1299,7 +1299,7 @@ else {
         echo "<td $class align='left' valign='top'></td>";
       }
     }
-    
+
     $lopetus = $palvelin2;
     $lopetus .= "raportit/asiakkaantilaukset.php";
     $lopetus .= "////tee=NAYTATILAUS";

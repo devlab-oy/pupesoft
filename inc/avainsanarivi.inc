@@ -690,6 +690,22 @@ if (($avain_sel['VAKIOVIESTI'] == "SELECTED" or $avain_sel['VAKIOVIESTI_TIL']) a
 }
 
 // Tuoteryhmiss‰ voidaan antaa oletusker‰ysprioriteetti selitetark_4 kentt‰‰n
+if ($avain_sel["LITETY_TKIRJAST"] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
+
+  $vresult = t_avainsana("LITETY");
+
+  $ulos = "<td><select name = '$nimi'>";
+
+  while ($row = mysql_fetch_assoc($vresult)) {
+    $sel = ($row["selite"] == $trow[$i]) ? ' selected' : '';
+    $ulos .= "<option value = '{$row["selite"]}'$sel>{$row["selite"]} - {$row["selitetark"]}</option>";
+  }
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+// Tuoteryhmiss‰ voidaan antaa oletusker‰ysprioriteetti selitetark_4 kentt‰‰n
 if ($avain_sel["TRY"] == "SELECTED" and mysql_field_name($result, $i) == "selitetark_4") {
 
   $vresult = t_avainsana("ASIAKASLUOKKA");

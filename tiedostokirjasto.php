@@ -79,10 +79,10 @@ function piirra_formi($valittu_toimittaja, $valittu_tiedostotyyppi) {
   echo "<td><label for='tyyppi_id'>" . t("Tiedoston tyyppi") . "</label></td>";
   echo "<td>";
   echo "<select id='tiedostotyyppi_id' name='tiedostotyyppi'>";
-  foreach (tiedostotyypit() as $tiedostotyyppi) {
-    $tiedostotyyppi_capitalized = ucfirst($tiedostotyyppi);
-    $valittu                    = $valittu_tiedostotyyppi == $tiedostotyyppi ? "selected" : "";
-    echo "<option value='{$tiedostotyyppi}' {$valittu}>{$tiedostotyyppi_capitalized}</option>";
+  foreach (tiedostotyypit() as $tiedostotyyppi) {    
+    $tiedostotyyppinimi = t_avainsana("LITETY", '', "and selite = '{$tiedostotyyppi}'", '', '', "selitetark");
+    $valittu = $valittu_tiedostotyyppi == $tiedostotyyppi ? "selected" : "";
+    echo "<option value='{$tiedostotyyppi}' {$valittu}>{$tiedostotyyppinimi}</option>";
   }
   echo "</select>";
   echo "</td>";

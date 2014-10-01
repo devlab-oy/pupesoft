@@ -19,13 +19,21 @@ if (isset($virhe)) {
 if (isset($submit)) {
   switch ($submit) {
   case 'ok':
-    if (empty($sarjanumero)) {
-      $errors[] = t("Syötä sarjanumero");
+    if (empty($rahtikirjanumero)) {
+      $errors[] = t("Syötä rahtikirjanumero");
       break;
     }
-    $query_string = "?sarjanumero={$sarjanumero}&saapuminen={$saapuminen}";
 
-    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys_sarjanumero.php{$query_string}'>"; exit();
+    require 'generoi_edifact.inc';
+    $parametrit = kuittaus_parametrit($rahtikirjanumero);
+
+    if ($parametrit) {
+      $sanoma = laadi_edifact_sanoma($parametrit);
+    }
+    else{
+      $errors[] = t("Rahtikirjaa ei löytynyt!");
+    }
+
     break;
   case 'takaisin':
     echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=index.php'>"; exit();
@@ -36,15 +44,12 @@ if (isset($submit)) {
   }
 }
 
-$ostotilaus = (!empty($ostotilaus)) ? $ostotilaus : '';
-
 //## UI ###
 echo "
 <div class='header'>
   <button onclick='window.location.href=\"index.php\"' class='button left'><img src='back2.png'></button>
-  <h1>", t("RAHDIN KUITTAUS VASTAANOTETUKSI"), "</h1>
+  <h1>", t("Rahdin kuittaus vastaanotetuksi"), "</h1>
 </div>";
-
 
 echo "<div class='error' style='text-align:center'>";
 foreach ($errors as $error) {
@@ -52,19 +57,25 @@ foreach ($errors as $error) {
 }
 echo "</div>";
 
+if (isset($sanoma)) {
+  echo "<div>";
+  echo $sanoma;
+  echo "</div>";
+}
 
-echo "<div class='main' style='text-align:center;padding:10px;'>
-  <form method='post' action=''>
-  <label for='rahtikirjanumero'>", t("Syötä rahtikirjanumero"), "</label><br>
-  <input type='text' id='rahtikirjanumero' name='rahtikirjanumero' />
+echo "
+<form method='post' action=''>
+  <div style='text-align:center;padding:10px;'>
+    <label for='rahtikirjanumero'>", t("Rahtikirjanumero"), "</label><br>
+    <input type='text' id='rahtikirjanumero' name='rahtikirjanumero' style='margin:10px;' />
+    <br>
+    <button name='submit' value='rahtikirjanumero' onclick='submit();' class='button'>", t("OK"), "</button>
   </div>
-  <div class='controls' style='text-align:center'>
-  <button name='submit' id='haku_nappi' value='ok' onclick='submit();' class='button'>", t("OK"), "</button>
 </form>
-</div>
+
 <script type='text/javascript'>
   $(document).ready(function() {
-    var focusElementId = 'sarjanumero';
+    var focusElementId = 'rahtikirjanumero';
     var textBox = document.getElementById(focusElementId);
     textBox.focus();
   });

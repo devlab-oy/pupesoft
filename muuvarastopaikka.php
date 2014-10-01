@@ -1142,13 +1142,13 @@ if ($tee == 'M') {
       if ($saldorow["saldo"] != 0 and $saldorow["oletus"] != "") {
         echo "<td></td>";
       }
-      elseif ($saldorow["saldo"] != 0) {
+      elseif ($saldorow["saldo"] != 0 or $hyllyssa != 0 or $myytavissa != 0) {
 
         $chk = $poistoteksti = "";
 
         if ($saldorow["poistettava"] != "") {
           $chk = "CHECKED";
-          $poistoteksti = "(".t("Poistetaan kun saldo loppuu").")";
+          $poistoteksti = "(".t("Poistetaan kun saldo loppuu/myytävissä nolla").")";
         }
 
         echo "<td><input type = 'checkbox' name='flagaa_poistettavaksi[$saldorow[tunnus]]' value='$saldorow[tunnus]' $chk> {$poistoteksti}

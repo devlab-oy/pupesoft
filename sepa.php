@@ -839,7 +839,8 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
       $edmaksutili = $laskurow['maksu_tili'];
     }
 
-    if ($edpvm != $laskurow['olmapvm'] or $edtili != $laskurow['ultilno']) {
+    #if ($edpvm != $laskurow['olmapvm'] or $edtili != $laskurow['ultilno']) {
+    if ($edpvm != $laskurow['olmapvm']) {  
       sepa_paymentinfo($laskurow);
       $edpvm = $laskurow['olmapvm'];
       $edtili = $laskurow['ultilno'];

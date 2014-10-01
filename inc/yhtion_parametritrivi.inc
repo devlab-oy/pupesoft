@@ -2490,6 +2490,20 @@ if ($fieldname == "jt_toimitusaika_email_vahvistus") {
   $jatko = 0;
 }
 
+if ($fieldname == "jt_valmis_sms") {
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel = $trow[$i] == 'Y' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>" .
+    t("Ei l‰hetet‰ asiakkaalle sms-viesti‰, kun j‰lkitilaustuotteet ovat valmiina noudettaviksi");
+  $ulos .= "<option value = 'Y' $sel>" .
+    t("L‰hetet‰‰n asiakkaalle sms-viesti, kun j‰lkitilaustuotteet ovat valmiina noudettaviksi");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "jt_manual") {
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";

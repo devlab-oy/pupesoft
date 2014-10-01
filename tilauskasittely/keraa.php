@@ -1629,6 +1629,20 @@ if ($tee == 'P') {
                    AND tunnus  = '$laskurow[tunnus]'";
         $result = pupe_query($query);
 
+        // L‰hetet‰‰n tekstiviesti asiakkaalle tilauksen valmistumisesta, jos kyseess‰ on
+        // j‰lkitoimitus
+        if ($yhtiorow['jt_valmis_sms'] == "Y" and $otsikkorivi['clearing'] == "JT-TILAUS") {
+          require("../sms_viesti.inc");
+
+          $viesti = t("Kaikki tilauksen ") . $laskurow['tunnus'] . "osat ovat noudettavissa, " .
+            t("terveisin ") . $yhtiorow['nimi'];
+
+          laheta_sms($zoner_tunnarit["username"],
+            $zoner_tunnarit["salasana"],
+            $laskurow['liitostunnus'],
+            $viesti);
+        }
+
         if ($lask_nro == '') {
           $lask_nro = $laskurow['tunnus'];
         }

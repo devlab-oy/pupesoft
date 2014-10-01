@@ -34,8 +34,8 @@ $varastoresult = pupe_query($query);
 // Kaikki tuotteet
 $query = "SELECT tuoteno
           FROM tuote
-          WHERE yhtio = '$yhtio'
-          AND ei_saldoa = ''
+          WHERE yhtio     = '$yhtio'
+          AND ei_saldoa   = ''
           AND tuotetyyppi not in ('A','B')";
 $tuoteresult = pupe_query($query);
 

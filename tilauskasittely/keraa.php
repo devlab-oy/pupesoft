@@ -1888,9 +1888,9 @@ if ($tee == 'P') {
                   or (in_array($yhtiorow["keraysvahvistus_lahetys"], $_keraysvahvistus_lahetys)
                     and $laskurow["keraysvahvistus_lahetys"] == ''))
                 or (($laskurow["keraysvahvistus_lahetys"] == 'o'
-                  or ($yhtiorow["keraysvahvistus_lahetys"] == 'o'
-                    and $laskurow["keraysvahvistus_lahetys"] == ''))
-                    and $laskurow['email'] != ""))
+                    or ($yhtiorow["keraysvahvistus_lahetys"] == 'o'
+                      and $laskurow["keraysvahvistus_lahetys"] == ''))
+                  and $laskurow['email'] != ""))
             )
           ) {
 

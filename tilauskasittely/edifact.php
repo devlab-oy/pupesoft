@@ -111,7 +111,6 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
         );
     }
 
-
     if (substr($value, 0, 7) == 'CPS+MOL') {
 
       $valmis = false;
@@ -190,13 +189,17 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
         if (substr($edi_data[$luetaan], 0, 7) == "GIN+ZUN") {
           $osat = explode("+", $edi_data[$luetaan]);
           $sarjanumero = $osat[2];
+        }
+
+        if (substr($edi_data[$luetaan], 0, 7) == "GIN+ZPI") {
+          $osat = explode("+", $edi_data[$luetaan]);
+          $juoksu = $osat[2];
           $valmis = true;
         }
 
         if (substr($edi_data[$luetaan], 0, 7) == "CPS+PKG" or $luetaan >= $rivimaara) {
           $valmis = true;
         }
-
       }
 
       $tuoteno = '123';
@@ -206,6 +209,7 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
         'halkaisija' => $halkaisija,
         'leveys' => $leveys,
         'tuoteno' => $tuoteno,
+        'juoksu' => $juoksu,
         'sarjanumero' => $sarjanumero
         );
 
@@ -311,8 +315,11 @@ elseif($tee == 'luo') {
 
       require "lisaarivi.inc";
 
+      // keksisköhän tälle tiedolle parempaa paikkaa?
+      $kommentti = "{$data['kuorma_id']}#{$pakkaus['juoksu']}#{$tilaus['paino']}#{$data[rekisterinumero]}";
+
       $update_query = "UPDATE tilausrivi SET
-                       kommentti = 'rahtikirjanumero:{$data['kuorma_id']}.'
+                       kommentti = '{$kommentti}'
                        WHERE yhtio = '{$kukarow['yhtio']}'
                        AND tunnus = '{$lisatty_tun}'";
       $update_result = pupe_query($update_query);
@@ -324,8 +331,6 @@ elseif($tee == 'luo') {
       $rivires = pupe_query($query);
       $rivirow = mysql_fetch_assoc($rivires);
 
-      $sarjanumero = trim($pakkaus['sarjanumero']);
-
       $query = "SELECT tunnus
                 FROM sarjanumeroseuranta use index (yhtio_sarjanumero)
                 WHERE yhtio     = '{$kukarow['yhtio']}'
@@ -336,7 +341,7 @@ elseif($tee == 'luo') {
         $query = "INSERT INTO sarjanumeroseuranta SET
                   yhtio           = '{$kukarow['yhtio']}',
                   tuoteno         = '{$rivirow['tuoteno']}',
-                  sarjanumero     = '{$sarjanumero}',
+                  sarjanumero     = '{$pakkaus['sarjanumero']}',
                   massa           = '{$pakkaus['paino']}',
                   leveys          = '{$pakkaus['leveys']}',
                   halkaisija      = '{$pakkaus['halkaisija']}',

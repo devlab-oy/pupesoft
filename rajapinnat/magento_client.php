@@ -420,10 +420,10 @@ class MagentoClient {
 
         try {
 
-          // Kieliversiot-erikoisparametrin tulee sis‰lt‰‰ array jossa annetaan keyksi kauppatunnus 
-          // ja arvoksi kieli (ee, en, se)
-          
-          $kieliversio_data = $this->hae_kieliversiot($tuote['tunnus'], $tuetut_kielet);
+          // Kieliversiot-magentoerikoisparametrin tulee sis‰lt‰‰ array jossa annetaan keyksi kauppatunnus 
+          // ja arvoksi haluttu kieli (ee, en, se)
+
+          $kieliversio_data = $this->hae_kieliversiot($tuote['tuotenumero']);
 
           foreach ($kieliversio_data as $kauppatunnus => $kauppakohtainen_data) {
 
@@ -457,7 +457,7 @@ class MagentoClient {
       $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
 
       // P‰ivitet‰‰n tuotteen p‰ivitetty-aikaleima Pupesoftiin
-      $this->paivita_aikaleima($tuote['tunnus']);
+      $this->paivita_aikaleima($tuote['tuotenumero']);
 
       // Lis‰t‰‰n tuote countteria
       $count++;
@@ -1537,38 +1537,44 @@ class MagentoClient {
   }
 
   /**
-   * Hakee tuotteen kieliversiot Pupesoftista
+   * Hakee tuotteen kieliversiot(tuotenimitys, tuotekuvaus) Pupesoftista
    *
-   * @param int     $tunnus Tuoteen tuotenumero (tuote.tuoteno)
-   * @return array   $kieliversiot_data   Palauttaa arrayn joka kelpaa magenton soap clientille suoraan
+   * @param string   $tuotenumero         Tuotteen tuotenumero (tuote.tuoteno)
+   * @return array   $kieliversiot_data   Palauttaa arrayn joka on valmiiksi utf8-enkoodattu
+   *
+   * Esim.
+   * $kieliversiot_data['en'] = array(
+   *   'nimitys' => 'ADAPTOR',
+   *   'kuvaus' => 'ADAPTOR circular IP44- 2 components'
+   * );
+   *
    */
   public function hae_kieliversiot($tuotenumero) {
     global $kukarow, $dbhost, $dbuser, $dbpass, $dbkanta;
 
-    // Populoidaan kieliversiot array
     $kieliversiot_data = array();
 
     try {
       // Tietokantayhteys
       $db = new PDO("mysql:host=$dbhost;dbname=$dbkanta", $dbuser, $dbpass);
 
-      // Tuotekuva query
-      $stmt = $db->prepare("  SELECT 
-                              * 
-                              FROM 
-                              tuotteen_avainsanat 
-                              WHERE yhtio = ? 
+      // Tuotteen avainsanat-query
+      $stmt = $db->prepare("  SELECT
+                              kieli, laji, selite
+                              FROM
+                              tuotteen_avainsanat
+                              WHERE yhtio = ?
                               AND tuoteno = ?
                               AND laji IN ('nimitys','kuvaus')");
       $stmt->execute(array($kukarow['yhtio'], $tuotenumero));
 
-      while ($liite = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $file = array(
-          'content'   => base64_encode($liite['data']),
-          'mime'    => $liite['filetype'],
-          'name'    => $liite['filename']
-        );
-        $kieliversiot_data[kauppatunnus] = $file;
+      while ($avainsana = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $kieli  = $avainsana['kieli'];
+        $laji   = utf8_encode($avainsana['laji']);
+        $selite = utf8_encode($avainsana['selite']);
+
+        // J‰sennell‰‰n tuotteen avainsanat kieliversioittain
+        $kieliversiot_data[$kieli][$laji] = $selite;
       }
     }
     catch (Exception $e) {
@@ -1578,9 +1584,60 @@ class MagentoClient {
 
     $db = null;
 
-    // Palautetaan tuotekuvat
+    // Palautetaan kieliversiot
     return $kieliversiot_data;
   }
+
+  /**
+   * P‰ivitt‰‰ tuotteen magentop‰ivitys-aikaleiman
+   *
+   * @param string   $tuotenumero Tuotteen tuotenumero
+   */
+  public function paivita_aikaleima($tuotenumero) {
+    global $kukarow, $dbhost, $dbuser, $dbpass, $dbkanta;
+
+    $onnistuiko = false;
+
+    try {
+      // Tietokantayhteys
+      $db = new PDO("mysql:host=$dbhost;dbname=$dbkanta", $dbuser, $dbpass);
+
+      // Koitetaan updatea
+      $stmt = $db->prepare("  UPDATE
+                              tuotteen_avainsanat
+                              SET selite = now()
+                              WHERE yhtio = ?
+                              AND tuoteno = ?
+                              AND laji = 'paivitetty_magentoon'");
+      $stmt->execute(array($kukarow['yhtio'], $tuotenumero));
+
+      if ($stmt == 0) {
+        // Jos update ei osunut, tehd‰‰n insert
+        $stmt = $db->prepare("  INSERT into
+                                tuotteen_avainsanat
+                                SET
+                                yhtio = ?,
+                                tuoteno = ?,
+                                laji = 'paivitetty_magentoon',
+                                selite = now(),
+                                luontiaika = now(),
+                                muutospvm = now(),
+                                laatija = 'magento',
+                                muuttaja = 'magento'");
+        $stmt->execute(array($kukarow['yhtio'], $tuotenumero));
+      }
+    }
+    catch (Exception $e) {
+      $this->_error_count++;
+      $this->log("Virhe! PDO yhteys on poikki. Yritet‰‰n uudelleen.", $e);
+    }
+
+    $db = null;
+
+    // Onnistuiko aikaleiman p‰ivitys
+    return $onnistuiko;
+  }
+
   /**
    * Asettaa tax_class_id:n
    * Oletus 0

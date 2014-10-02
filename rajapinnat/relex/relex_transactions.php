@@ -67,13 +67,15 @@ fwrite($fp, $header);
 */
 
 $tapahtumarajaus = "";
+$kerivirajaus    = "";
 
 // Otetaan mukaan vain viimeisen vuorokauden j‰lkeen tehdyt
 if ($paiva_ajo) {
   $tapahtumarajaus = " AND tapahtuma.laadittu >= date_sub(now(), interval 24 HOUR) ";
+  $kerivirajaus    = " AND tilausrivi.kerattyaika >= date_sub(now(), interval 24 HOUR) ";
 }
 
-// Haetaan tapahtumat
+// Haetaan tapahtumat, ei myyntej‰ ne haetaan tilausriveilt‰
 $query = "SELECT
           yhtio.maa,
           date_format(tapahtuma.laadittu, '%Y-%m-%d') pvm,
@@ -95,11 +97,38 @@ $query = "SELECT
           JOIN yhtio ON (tapahtuma.yhtio = yhtio.yhtio)
           LEFT JOIN tilausrivi USE INDEX (PRIMARY) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
           LEFT JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-          WHERE tapahtuma.yhtio    = '$yhtio'
-          AND tapahtuma.laji       in ('tulo', 'laskutus', 'siirto', 'valmistus', 'kulutus','inventointi')
+          WHERE tapahtuma.yhtio = '$yhtio'
+          AND tapahtuma.laji in ('tulo', 'siirto', 'valmistus', 'kulutus','inventointi')
           {$tapahtumarajaus}
           ORDER BY tapahtuma.laadittu, tapahtuma.tuoteno";
-$res = pupe_query($query);
+$tapahtumares = pupe_query($query);
+
+// Ker‰tyt myyntirivit ja siirtorivit
+$query = "SELECT
+          yhtio.maa,
+          date_format(tilausrivi.kerattyaika, '%Y-%m-%d') pvm,
+          tilausrivi.varasto,
+          tilausrivi.tuoteno,
+          if(tilausrivi.tyyppi='L', 'laskutus', 'siirto') laji,
+          tilausrivi.kpl,
+          tilausrivi.hinta,
+          lasku.tilaustyyppi,
+          lasku.clearing vastaanottovarasto,
+          lasku.liitostunnus
+          FROM tilausrivi
+          JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
+            AND tuote.tuoteno      = tilausrivi.tuoteno
+            AND tuote.status      != 'P'
+            AND tuote.ei_saldoa    = ''
+            AND tuote.tuotetyyppi  = ''
+            AND tuote.ostoehdotus  = '')
+          JOIN yhtio ON (tilausrivi.yhtio = yhtio.yhtio)
+          LEFT JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+          WHERE tilausrivi.yhtio = '$yhtio'
+          AND tilausrivi.tyyppi IN ('L','G')
+          {$kerivirajaus}
+          ORDER BY tilausrivi.kerattyaika, tilausrivi.tuoteno";
+$kerivires = pupe_query($query);
 
 // Kerrotaan montako rivi‰ k‰sitell‰‰n
 $rows = mysql_num_rows($res);

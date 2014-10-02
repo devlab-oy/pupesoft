@@ -566,9 +566,9 @@ if ($tee == 'V') {
 if ($tee == 'L') {
   $query = "SELECT *
             FROM lasku
-            WHERE tunnus='$tunnus' and
-            yhtio = '$kukarow[yhtio]' and
-            hyvaksyja_nyt='$kukarow[kuka]'";
+            WHERE tunnus = '$tunnus'
+            AND yhtio = '$kukarow[yhtio]'
+            AND hyvaksyja_nyt = '$kukarow[kuka]'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
@@ -587,13 +587,38 @@ if ($tee == 'L') {
     exit;
   }
 
+  // Katsotaan monennelaako hyv‰ksyj‰ll‰ lasku on hyv‰ksytt‰v‰n‰
+  // ja p‰ivitet‰‰n hyvaksyja_nyt sen mukaan
+  if ($trow['h1time'] == '0000-00-00 00:00:00') {
+    $_hyvaksyja_nyt = $eka_hyvaksyja;
+  }
+  elseif ($trow['h2time'] == '0000-00-00 00:00:00') {
+    $_hyvaksyja_nyt = $hyvak[2];
+  }
+  elseif ($trow['h3time'] == '0000-00-00 00:00:00') {
+    $_hyvaksyja_nyt = $hyvak[3];
+  }
+  elseif ($trow['h4time'] == '0000-00-00 00:00:00') {
+    $_hyvaksyja_nyt = $hyvak[4];
+  }
+  elseif ($trow['h5time'] == '0000-00-00 00:00:00') {
+    $_hyvaksyja_nyt = $hyvak[5];
+  }
+  else {
+    echo "<font class='error'>".t("Laskun hyv‰ksymisketjun p‰ivitys ei onnistunut").".</font> <br>";
+
+    require "inc/footer.inc";
+    exit;
+  }
+
   $query = "UPDATE lasku SET
             hyvak2                = '$hyvak[2]',
             hyvak3                = '$hyvak[3]',
             hyvak4                = '$hyvak[4]',
-            hyvak5                = '$hyvak[5]'
-                      WHERE yhtio = '$kukarow[yhtio]'
-            and tunnus            = '$tunnus'";
+            hyvak5                = '$hyvak[5]',
+            hyvaksyja_nyt         = $_hyvaksyja_nyt
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND tunnus            = '$tunnus'";
   $result = pupe_query($query);
 
   $tee = '';

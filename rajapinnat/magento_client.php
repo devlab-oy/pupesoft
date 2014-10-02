@@ -301,6 +301,8 @@ class MagentoClient {
 
       $multi_data = array();
 
+      $tuetut_kieliversiot = array();
+
       // Simple tuotteiden parametrit kuten koko ja väri
       foreach ($tuote['tuotteen_parametrit'] as $parametri) {
         $key = $parametri['option_name'];
@@ -310,6 +312,12 @@ class MagentoClient {
       if (count($verkkokauppatuotteet_erikoisparametrit) > 0) {
         foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
           $key = $erikoisparametri['nimi'];
+          // Kieliversiot poimitaan talteen koska niitä käytetään toisaalla
+          if ($key == 'kieliversiot') {
+            $tuetut_kieliversiot = $erikoisparametri['arvo'];
+            continue;
+          }
+
           if (isset($tuote[$erikoisparametri['arvo']])) {
             $multi_data[$key] = $this->get_option_id($key, $tuote[$erikoisparametri['arvo']]);
           }
@@ -415,27 +423,31 @@ class MagentoClient {
 
       // Päivitetään tuotteen kieliversiot kauppanäkymäkohtaisesti ja samalla myös mahdollinen sivustokohtainen hinta
       // jos nämä on asetettu konffissa
-      if (isset($verkkokauppatuotteet_erikoisparametrit['kieliversiot']) 
-        and count($verkkokauppatuotteet_erikoisparametrit['kieliversiot']) > 0) {
+
+      if (isset($tuetut_kieliversiot) 
+        and count($tuetut_kieliversiot) > 0) {
 
         try {
 
-          // Kieliversiot-magentoerikoisparametrin tulee sisältää array jossa annetaan keyksi kauppatunnus 
-          // ja arvoksi haluttu kieli (ee, en, se)
+          // Kieliversiot-magentoerikoisparametrin tulee sisältää array jossa määritellään mikä kieliversio
+          // siirretään mihinkin kauppatunnukseen
+          // Esim. array("en" => '4', "se" => '9');
 
-          $kieliversio_data = $this->hae_kieliversiot($tuote['tuotenumero']);
+          $kieliversio_data = $this->hae_kieliversiot($tuote_clean);
 
-          foreach ($kieliversio_data as $kauppatunnus => $kauppakohtainen_data) {
+          foreach ($tuetut_kieliversiot as $kieli => $kauppatunnus) {
+            $kaannokset = $kieliversio_data[$kieli];
 
+            if (empty($kaannokset)) continue;
             $tuotteen_kauppakohtainen_data = array(
-              'description' => $kauppakohtainen_data['kuvaus'],
-              'name'        => $kauppakohtainen_data['nimitys']
+              'description' => $kaannokset['kuvaus'],
+              'name'        => $kaannokset['nimitys']
             );
-        
+
             // Jos kauppaan pitää päivittää eri hinta
             // TODO missä tämä setataan
             $tuotteen_kauppakohtainen_data['price'] = $tuote['myymalahinta'];
-        
+
             $this->_proxy->call($this->_session, 'catalog_product.update',
               array(
                 $tuote['tuoteno'],
@@ -443,6 +455,7 @@ class MagentoClient {
                 $kauppatunnus)
             );
           }
+
           $this->log("Tuotteen '{$tuote['tuoteno']}' kieliversiot päivitetty (simple) " . print_r($kieliversio_data, true));
         }
         catch (Exception $e) {
@@ -457,7 +470,7 @@ class MagentoClient {
       $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
 
       // Päivitetään tuotteen päivitetty-aikaleima Pupesoftiin
-      $this->paivita_aikaleima($tuote['tuotenumero']);
+      $this->paivita_aikaleima($tuote_clean);
 
       // Lisätään tuote countteria
       $count++;
@@ -1591,7 +1604,8 @@ class MagentoClient {
   /**
    * Päivittää tuotteen magentopäivitys-aikaleiman
    *
-   * @param string   $tuotenumero Tuotteen tuotenumero
+   * @param string   $tuotenumero Tuotteen tuotenumero HUOM! tähän tarvitaan Pupen tuotenumero
+   * eikä mahdollinen sku-alkuinen magento-safe tuotenumero
    */
   public function paivita_aikaleima($tuotenumero) {
     global $kukarow, $dbhost, $dbuser, $dbpass, $dbkanta;
@@ -1611,7 +1625,7 @@ class MagentoClient {
                               AND laji = 'paivitetty_magentoon'");
       $stmt->execute(array($kukarow['yhtio'], $tuotenumero));
 
-      if ($stmt == 0) {
+      if (true) {#$count == 0) {
         // Jos update ei osunut, tehdään insert
         $stmt = $db->prepare("  INSERT into
                                 tuotteen_avainsanat
@@ -1626,6 +1640,7 @@ class MagentoClient {
                                 muuttaja = 'magento'");
         $stmt->execute(array($kukarow['yhtio'], $tuotenumero));
       }
+      $this->log("Tuotteen '$tuotenumero' aikaleima päivitetty Pupesoftiin");
     }
     catch (Exception $e) {
       $this->_error_count++;

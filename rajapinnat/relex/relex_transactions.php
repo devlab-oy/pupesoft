@@ -75,18 +75,21 @@ if ($paiva_ajo) {
   $kerivirajaus    = " AND tilausrivi.kerattyaika >= date_sub(now(), interval 24 HOUR) ";
 }
 
-// Haetaan tapahtumat, ei myyntejä ne haetaan tilausriveiltä
-$query = "SELECT
+// Haetaan tapahtumat ja keräytyt myynnit sekä varastosiirrot
+$query = "(SELECT
           yhtio.maa,
+          tapahtuma.laadittu laadittu,
           date_format(tapahtuma.laadittu, '%Y-%m-%d') pvm,
           tapahtuma.varasto,
           tapahtuma.tuoteno,
           tapahtuma.laji,
           tapahtuma.kpl,
-          tapahtuma.kplhinta,
+          if (tapahtuma.laji = 'tulo', tapahtuma.kplhinta, tapahtuma.hinta) kplhinta,
           lasku.tilaustyyppi,
+          lasku.varasto lahdevarasto,
           lasku.clearing vastaanottovarasto,
-          lasku.liitostunnus
+          lasku.liitostunnus,
+          if (lasku.tila is not null and lasku.tila = 'G' and tapahtuma.kpl < 0, 1, 0) keratty_siirto
           FROM tapahtuma
           JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio
             AND tuote.tuoteno      = tapahtuma.tuoteno
@@ -100,21 +103,24 @@ $query = "SELECT
           WHERE tapahtuma.yhtio = '$yhtio'
           AND tapahtuma.laji in ('tulo', 'siirto', 'valmistus', 'kulutus','inventointi')
           {$tapahtumarajaus}
-          ORDER BY tapahtuma.laadittu, tapahtuma.tuoteno";
-$tapahtumares = pupe_query($query);
+          HAVING keratty_siirto = 0)
 
-// Kerätyt myyntirivit ja siirtorivit
-$query = "SELECT
+          UNION
+
+          (SELECT
           yhtio.maa,
+          tilausrivi.kerattyaika laadittu,
           date_format(tilausrivi.kerattyaika, '%Y-%m-%d') pvm,
           tilausrivi.varasto,
           tilausrivi.tuoteno,
-          if(tilausrivi.tyyppi='L', 'laskutus', 'siirto') laji,
-          tilausrivi.kpl,
-          tilausrivi.hinta,
+          if (tilausrivi.tyyppi='L', 'myynti', 'siirtolista') laji,
+          (tilausrivi.kpl+tilausrivi.varattu) * -1 kpl,
+          tilausrivi.hinta kplhinta,
           lasku.tilaustyyppi,
+          lasku.varasto lahdevarasto,
           lasku.clearing vastaanottovarasto,
-          lasku.liitostunnus
+          lasku.liitostunnus,
+          '' keratty_siirto
           FROM tilausrivi
           JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
             AND tuote.tuoteno      = tilausrivi.tuoteno
@@ -123,24 +129,25 @@ $query = "SELECT
             AND tuote.tuotetyyppi  = ''
             AND tuote.ostoehdotus  = '')
           JOIN yhtio ON (tilausrivi.yhtio = yhtio.yhtio)
-          LEFT JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+          JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
           WHERE tilausrivi.yhtio = '$yhtio'
           AND tilausrivi.tyyppi IN ('L','G')
-          {$kerivirajaus}
-          ORDER BY tilausrivi.kerattyaika, tilausrivi.tuoteno";
-$kerivires = pupe_query($query);
+          {$kerivirajaus})
+
+          ORDER BY laadittu, tuoteno";
+$res = pupe_query($query);
 
 // Kerrotaan montako riviä käsitellään
 $rows = mysql_num_rows($res);
 
-echo "Tapahtumarivejä {$rows} kappaletta.\n";
+echo "\nTapahtumarivejä {$rows} kappaletta.\n";
 
 $k_rivi = 0;
 
 while ($row = mysql_fetch_assoc($res)) {
 
   // Rivin arvo
-  $arvo = round($row['kplhinta']*$row['kpl'], 2);
+  $arvo = abs(round($row['kplhinta']*$row['kpl'], 2));
 
   // Määritellään transaktiotyyppi
   switch (strtolower($row['laji'])) {
@@ -148,12 +155,17 @@ while ($row = mysql_fetch_assoc($res)) {
     $type    = "DELIVERY";
     $partner = $row['liitostunnus'];
     break;
-  case 'laskutus':
+  case 'myynti':
     $type    = "SALE";
     $partner = $row['liitostunnus'];
-    $arvo   *= -1;
     break;
   case 'siirto':
+    // vastaanotetut siirtolistat ja manuaalisiirrot
+    $type    = "TRANSFER";
+    $partner = $row['lahdevarasto'];
+    break;
+  case 'siirtolista':
+    // kerätyt siirtolistat
     $type    = "TRANSFER";
     $partner = $row['vastaanottovarasto'];
     break;

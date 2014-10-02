@@ -1074,14 +1074,11 @@ if (empty($id) and $echotaanko) {
 
   $ed_lahto = $ed_vastaanottonro = null;
 
-  $_tulostustapa = ($yhtiorow['siirtolistan_tulostustapa'] == 'U');
-
   while ($tilrow = mysql_fetch_assoc($tilre)) {
 
     $_suljettu_lahto = (!is_null($tilrow['lahdon_aktiivi']) and $tilrow['lahdon_aktiivi'] != 'S');
 
-     if ($_tulostustapa and $_suljettu_lahto) {
-        //Jos siirtolistan_tulostustapa = Siirtolistat tulostetaan keräyserien kautta
+     if ($_suljettu_lahto) {
         //Ei näytetä siirtolistoja, joihin on liitetty aukioleva lähtö
         continue;
     }

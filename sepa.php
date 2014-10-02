@@ -827,7 +827,7 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
                   AND yriti.kaytossa = '')
                  WHERE lasku.yhtio   = '{$kukarow["yhtio"]}'
                  {$lisa}
-                 ORDER BY maksu_tili, olmapvm, ultilno, iban_maa";
+                 ORDER BY maksu_tili, olmapvm, iban_maa, ultilno";
   $result = pupe_query($haku_query);
 
   while ($laskurow = mysql_fetch_assoc($result)) {

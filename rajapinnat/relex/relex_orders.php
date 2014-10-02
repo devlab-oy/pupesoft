@@ -59,6 +59,23 @@ fwrite($fp, $header);
  ORDER = Open purchase order (can be linked to DELIVERY with a reference number)
 */
 
+function add_open_orders_line($fp, $row) {
+  $rivi  = "{$row['maa']}-{$row['varasto']};";                       // Inventory location code
+  $rivi .= "{$row['maa']}-".pupesoft_csvstring($row['tuoteno']).";"; // Item code
+  $rivi .= pupesoft_csvstring($row['tuoteno']).";";                  // Clean Item code
+  $rivi .= "{$row['type']};";                                        // Open order type
+  $rivi .= "{$row['maara']};";                                       // Open order quantity in inventory units
+  $rivi .= "{$row['toimituspaiva']};";                               // Estimated delivery date of the order
+  $rivi .= ";";                                                      // Open order value in currency
+  $rivi .= ";";                                                      // Sales or purchase order number
+  $rivi .= ";";                                                      // Sales or purchase order row number
+  $rivi .= ";";                                                      // Additional order type that can be used to distinct normal sales and deliveries from special sales and deliveries
+  $rivi .= "{$row['partner']}";                                      // Customer for sales orders and Supplier for purchase orders
+  $rivi .= "\n";
+
+  fwrite($fp, $rivi);
+}
+
 // Haetaan avoimet ostot ja myynnit
 $query = "SELECT
           yhtio.maa,
@@ -67,7 +84,9 @@ $query = "SELECT
           tilausrivi.tyyppi,
           tilausrivi.varattu+tilausrivi.jt maara,
           tilausrivi.toimaika toimituspaiva,
-          lasku.liitostunnus partner
+          tilausrivi.keratty,
+          lasku.liitostunnus partner,
+          lasku.clearing vastaanottovarasto
           FROM tilausrivi
           JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
           JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
@@ -79,7 +98,7 @@ $query = "SELECT
           JOIN yhtio ON (tilausrivi.yhtio = yhtio.yhtio)
           WHERE tilausrivi.yhtio         = '$yhtio'
           AND tilausrivi.varattu        != 0
-          AND tilausrivi.tyyppi          IN ('L','O')
+          AND tilausrivi.tyyppi          IN ('L','O','G')
           AND tilausrivi.laskutettuaika  = '0000-00-00'
           ORDER BY tilausrivi.laadittu";
 $res = pupe_query($query);
@@ -93,34 +112,36 @@ $k_rivi = 0;
 
 while ($row = mysql_fetch_assoc($res)) {
 
-  // M‰‰ritell‰‰n transaktiotyyppi
-  if ($row['tyyppi'] == "L") {
-    $type = "SALES_ORDER";
-
-    $row['maara'] *= -1; // Quantity sign defines the transaction direction as seen by the warehouse, e.g. outgoing sales order is sent as negative quantity
-  }
-  else {
-    $type = "ORDER";
-  }
-
   if ($row['partner'] > 0) {
     $row['partner'] = $row['maa']."-".$row['partner'];
   }
 
-  $rivi  = "{$row['maa']}-{$row['varasto']};";                       // Inventory location code
-  $rivi .= "{$row['maa']}-".pupesoft_csvstring($row['tuoteno']).";"; // Item code
-  $rivi .= pupesoft_csvstring($row['tuoteno']).";";                  // Clean Item code
-  $rivi .= "{$type};";                                               // Open order type
-  $rivi .= "{$row['maara']};";                                       // Open order quantity in inventory units
-  $rivi .= "{$row['toimituspaiva']};";                               // Estimated delivery date of the order
-  $rivi .= ";";                                                      // Open order value in currency
-  $rivi .= ";";                                                      // Sales or purchase order number
-  $rivi .= ";";                                                      // Sales or purchase order row number
-  $rivi .= ";";                                                      // Additional order type that can be used to distinct normal sales and deliveries from special sales and deliveries
-  $rivi .= "{$row['partner']}";                                      // Customer for sales orders and Supplier for purchase orders
-  $rivi .= "\n";
+  // M‰‰ritell‰‰n transaktiotyyppi
+  if ($row['tyyppi'] == "G") {
+    // Siirtorivit laitetaan failiin avoimena myyntin‰ l‰hdevarastosta ja avoimena ostona kohdevarastoon.
+    // Kun siirtorivi on ker‰tty, niin se ei en‰‰ n‰y avoimena myyntin‰, pelk‰st‰‰n ostona kohdevarastoon.
+    if ($row['keratty'] == "") {
+      // Kirjataan "myyntirivi"
+      $myyntirow = $row;
+      $myyntirow['type'] = "SALES_ORDER";
+      $myyntirow['maara'] *= -1;
 
-  fwrite($fp, $rivi);
+      add_open_orders_line($fp, $myyntirow);
+    }
+
+    // Kirjataan "ostorivi"
+    $row['type'] = "ORDER";
+    $row['varasto'] = $row['vastaanottovarasto'];
+  }
+  elseif ($row['tyyppi'] == "L") {
+    $row['type'] = "SALES_ORDER";
+    $row['maara'] *= -1; // Quantity sign defines the transaction direction as seen by the warehouse, e.g. outgoing sales order is sent as negative quantity
+  }
+  else {
+    $row['type'] = "ORDER";
+  }
+
+  add_open_orders_line($fp, $row);
 
   $k_rivi++;
 

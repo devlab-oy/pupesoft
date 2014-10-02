@@ -1610,8 +1610,6 @@ class MagentoClient {
   public function paivita_aikaleima($tuotenumero) {
     global $kukarow, $dbhost, $dbuser, $dbpass, $dbkanta;
 
-    $onnistuiko = false;
-
     try {
       // Tietokantayhteys
       $db = new PDO("mysql:host=$dbhost;dbname=$dbkanta", $dbuser, $dbpass);
@@ -1624,8 +1622,9 @@ class MagentoClient {
                               AND tuoteno = ?
                               AND laji = 'paivitetty_magentoon'");
       $stmt->execute(array($kukarow['yhtio'], $tuotenumero));
+      $count = $stmt->rowCount();
 
-      if (true) {#$count == 0) {
+      if ($count == 0) {
         // Jos update ei osunut, tehdään insert
         $stmt = $db->prepare("  INSERT into
                                 tuotteen_avainsanat
@@ -1640,7 +1639,7 @@ class MagentoClient {
                                 muuttaja = 'magento'");
         $stmt->execute(array($kukarow['yhtio'], $tuotenumero));
       }
-      $this->log("Tuotteen '$tuotenumero' aikaleima päivitetty Pupesoftiin");
+      $this->log("Tuotteen '$tuotenumero' paivitetty_magentoon aika päivitetty Pupesoftiin");
     }
     catch (Exception $e) {
       $this->_error_count++;
@@ -1649,8 +1648,7 @@ class MagentoClient {
 
     $db = null;
 
-    // Onnistuiko aikaleiman päivitys
-    return $onnistuiko;
+    return true;
   }
 
   /**

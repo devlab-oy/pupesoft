@@ -504,8 +504,11 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
   else {
     $row = mysql_fetch_assoc($result);
 
-    if ($row['otunnus'] != $laskurow['tunnus']) {
-      $query  = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='{$row['otunnus']}'";
+    if ($row['otunnus'] != $laskurow['tunnus'] and $mista == "vastaanota") {
+      $query  = "SELECT lasku.*
+                 FROM lasku
+                 WHERE lasku.yhtio = '$kukarow[yhtio]'
+                 AND lasku.tunnus = '{$row['otunnus']}'";
       $result_lasku = pupe_query($query);
       $laskurow = mysql_fetch_assoc($result_lasku);
     }

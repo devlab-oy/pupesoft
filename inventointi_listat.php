@@ -421,7 +421,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     $extra = "";
   }
 
-  function il_topmyydyt($top, $where, $kutsujoinlisa = "", $rajauslisa, $rajauslisatuote, $invaamatta, $extra) {
+  function il_topmyydyt($top, $where, $kutsujoinlisa, $rajauslisa, $rajauslisatuote, $invaamatta, $extra) {
     global $kukarow, $kutsu;
 
     $tuotenoarray = array();
@@ -460,7 +460,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     }
   }
 
-  function il_varvaikutus($varastonarvo, $varastoonvaikutus, $where, $kutsujoinlisa = "", $rajauslisa, $rajauslisatuote, $invaamatta, $extra) {
+  function il_varvaikutus($varastonarvo, $varastoonvaikutus, $where, $kutsujoinlisa, $rajauslisa, $rajauslisatuote, $invaamatta, $extra) {
     global $kukarow, $kutsu;
 
     $tuotenoarray = array();
@@ -585,6 +585,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
   if ($tryt != '' or $osastot != '' or ($ahyllyalue != '' and $lhyllyalue != '') or $toimittaja != '' or $tuotemerkki != '') {
     ///* Inventoidaan *///
     $where = "";
+    $kutsujoinlisa = "";
 
     if ($tryt != '' or $osastot != '') {
       ///* Inventoidaan osaston tai tuoteryhmän perusteella *///
@@ -645,19 +646,21 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
 
       if ($from == '') {
         $yhtiotaulu = "tuotteen_toimittajat";
-        $from     = " FROM tuotteen_toimittajat
-                 JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus";
 
-        $join     = " JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio=tuotteen_toimittajat.yhtio and tuotepaikat.tuoteno=tuotteen_toimittajat.tuoteno and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $rajauslisa $invaamatta $extra
-                JOIN tuote on tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno and tuote.ei_saldoa = '' {$rajauslisatuote}";
-        $where    = " and toimi.ytunnus = '$toimittaja'";
+        $from = " FROM tuotteen_toimittajat
+                   JOIN toimi ON toimi.yhtio = tuotteen_toimittajat.yhtio AND toimi.tunnus = tuotteen_toimittajat.liitostunnus";
+
+        $join = " JOIN tuotepaikat use index (tuote_index) ON tuotepaikat.yhtio=tuotteen_toimittajat.yhtio and tuotepaikat.tuoteno=tuotteen_toimittajat.tuoteno and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $rajauslisa $invaamatta $extra
+                   JOIN tuote on tuote.yhtio=tuotteen_toimittajat.yhtio and tuote.tuoteno=tuotteen_toimittajat.tuoteno and tuote.ei_saldoa = '' {$rajauslisatuote}";
+
+        $where = " and toimi.ytunnus = '$toimittaja'";
 
         $kutsujoinlisa = " JOIN tuotteen_toimittajat
-                            ON tuotteen_toimittajat.yhtio = tuote.yhtio
-                            AND tuotteen_toimittajat.tuoteno = tuote.tuoteno
+                            ON (tuotteen_toimittajat.yhtio = tuote.yhtio
+                            AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)
                            JOIN toimi
-                            ON toimi.yhtio = tuotteen_toimittajat.yhtio
-                            AND toimi.tunnus = tuotteen_toimittajat.liitostunnus";
+                            ON (toimi.yhtio = tuotteen_toimittajat.yhtio
+                            AND toimi.tunnus = tuotteen_toimittajat.liitostunnus)";
       }
       else {
         $join      .= " JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno

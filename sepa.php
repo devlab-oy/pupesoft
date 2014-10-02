@@ -684,10 +684,12 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
   }
 
   // Alustetaan muuttujat
-  $edmaksutili    = 0;
+  $edmaksutili      = 0;
   $tapahtuma_maara  = 0;
-  $edpvm        = "0000-00-00";
-  $edtili        = "";
+  $edpvm            = "0000-00-00";
+  $edtili           = "";
+  $ediban_maa       = "";
+  $edpituus         = 
   $netotettava_laskut  = array();
   $netotettava_summa  = array();
 
@@ -825,7 +827,7 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
                   AND yriti.kaytossa = '')
                  WHERE lasku.yhtio   = '{$kukarow["yhtio"]}'
                  {$lisa}
-                 ORDER BY maksu_tili, olmapvm, ultilno";
+                 ORDER BY maksu_tili, olmapvm, ultilno, iban_maa";
   $result = pupe_query($haku_query);
 
   while ($laskurow = mysql_fetch_assoc($result)) {
@@ -838,12 +840,21 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
     if ($edmaksutili != $laskurow['maksu_tili']) {
       $edmaksutili = $laskurow['maksu_tili'];
     }
-
-    #if ($edpvm != $laskurow['olmapvm'] or $edtili != $laskurow['ultilno']) {
-    if ($edpvm != $laskurow['olmapvm']) {  
-      sepa_paymentinfo($laskurow);
-      $edpvm = $laskurow['olmapvm'];
-      $edtili = $laskurow['ultilno'];
+    // Sepa-maiden maksuista oma er‰ ja ei-sepa-maiden maksut toiseen er‰‰n
+    if ($ediban_maa != $laskurow['iban_maa']) {
+      $ediban_maa = $laskurow['iban_maa'];
+      if (tarkista_sepa($laskurow["iban_maa"]) !== FALSE) {
+        $sepa = 'SEPA';
+      }
+      else  {
+        $sepa = '';
+      }
+    }
+     
+    if ($edpvm != $laskurow['olmapvm'] or $edsepa != $sepa) {        
+        sepa_paymentinfo($laskurow);
+        $edpvm = $laskurow['olmapvm'];
+        $edsepa = $sepa;
     }
 
     sepa_credittransfer($laskurow, $popvm_nyt);

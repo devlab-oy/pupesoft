@@ -587,28 +587,15 @@ if ($tee == 'L') {
     exit;
   }
 
-  // Katsotaan monennelaako hyväksyjällä lasku on hyväksyttävänä
+  // Katsotaan monennellako hyväksyjällä lasku on hyväksyttävänä
   // ja päivitetään hyvaksyja_nyt sen mukaan
+  // Käytännössä lasku voi olla ekalla tai tokalla hyväksyjällä,
+  // joten tämän takia ei muita tarvitse tarkistaa.
   if ($trow['h1time'] == '0000-00-00 00:00:00') {
-    $_hyvaksyja_nyt = $eka_hyvaksyja;
+    $_hyvaksyja_nyt = $laskurow["hyvak1"];
   }
   elseif ($trow['h2time'] == '0000-00-00 00:00:00') {
     $_hyvaksyja_nyt = $hyvak[2];
-  }
-  elseif ($trow['h3time'] == '0000-00-00 00:00:00') {
-    $_hyvaksyja_nyt = $hyvak[3];
-  }
-  elseif ($trow['h4time'] == '0000-00-00 00:00:00') {
-    $_hyvaksyja_nyt = $hyvak[4];
-  }
-  elseif ($trow['h5time'] == '0000-00-00 00:00:00') {
-    $_hyvaksyja_nyt = $hyvak[5];
-  }
-  else {
-    echo "<font class='error'>".t("Laskun hyväksymisketjun päivitys ei onnistunut").".</font> <br>";
-
-    require "inc/footer.inc";
-    exit;
   }
 
   $query = "UPDATE lasku SET
@@ -616,7 +603,7 @@ if ($tee == 'L') {
             hyvak3                = '$hyvak[3]',
             hyvak4                = '$hyvak[4]',
             hyvak5                = '$hyvak[5]',
-            hyvaksyja_nyt         = $_hyvaksyja_nyt
+            hyvaksyja_nyt         = '$_hyvaksyja_nyt'
             WHERE yhtio = '$kukarow[yhtio]'
             AND tunnus            = '$tunnus'";
   $result = pupe_query($query);

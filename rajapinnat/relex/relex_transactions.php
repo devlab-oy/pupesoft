@@ -100,7 +100,8 @@ $query = "(SELECT
           lasku.clearing vastaanottovarasto,
           lasku.liitostunnus,
           if (lasku.tila is not null and lasku.tila = 'G' and tapahtuma.kpl < 0, 1, 0) keratty_siirto,
-          if (tapahtuma.laji = 'laskutus' and (tapahtuma.kpl < 0 or tapahtuma.kpl > 0 and lasku.tilaustyyppi = 'R'), 1, 0) keratty_myynti
+          if (tapahtuma.laji = 'laskutus' and (tapahtuma.kpl < 0 or tapahtuma.kpl > 0 and lasku.tilaustyyppi = 'R'), 1, 0) keratty_myynti,
+          if (tapahtuma.laji = 'siirto' and tilausrivi.varasto = lasku.clearing, 1, 0) sisainen_siirto
           FROM tapahtuma
           JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio
             AND tuote.tuoteno      = tapahtuma.tuoteno
@@ -115,7 +116,7 @@ $query = "(SELECT
           AND tapahtuma.laji in ('laskutus', 'tulo', 'siirto', 'valmistus','inventointi')
           AND tapahtuma.kpl != 0
           {$tapahtumarajaus}
-          HAVING keratty_siirto = 0 AND keratty_myynti = 0)
+          HAVING keratty_siirto = 0 AND keratty_myynti = 0 AND sisainen_siirto = 0)
 
           UNION
 
@@ -133,7 +134,8 @@ $query = "(SELECT
           lasku.clearing vastaanottovarasto,
           lasku.liitostunnus,
           '' keratty_siirto,
-          '' keratty_myynti
+          '' keratty_myynti,
+          if (tilausrivi.tyyppi = 'G' and tilausrivi.varasto = lasku.clearing, 1, 0) sisainen_siirto
           FROM tilausrivi
           JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
             AND tuote.tuoteno      = tilausrivi.tuoteno
@@ -146,7 +148,9 @@ $query = "(SELECT
           WHERE tilausrivi.yhtio = '$yhtio'
           AND tilausrivi.tyyppi IN ('L','G','V')
           AND (tilausrivi.varattu+tilausrivi.kpl > 0 OR (tilausrivi.varattu+tilausrivi.kpl < 0 and lasku.tilaustyyppi = 'R'))
-          {$kerivirajaus})
+          {$kerivirajaus}
+          HAVING sisainen_siirto = 0)
+
           ORDER BY laadittu, tuoteno";
 $res = pupe_query($query);
 

@@ -87,7 +87,8 @@ $query = "(SELECT
           tilausrivi.toimaika toimituspaiva,
           tilausrivi.keratty,
           lasku.liitostunnus partner,
-          '' vastaanottovarasto
+          '' vastaanottovarasto,
+          '' sisainen_siirto
           FROM tilausrivi USE INDEX (yhtio_tyyppi_laskutettuaika)
           JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
           JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
@@ -114,7 +115,8 @@ $query = "(SELECT
           tilausrivi.toimaika toimituspaiva,
           tilausrivi.keratty,
           lasku.liitostunnus partner,
-          '' vastaanottovarasto
+          '' vastaanottovarasto,
+          '' sisainen_siirto
           FROM tilausrivi USE INDEX (yhtio_tyyppi_kerattyaika)
           JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
           JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
@@ -141,7 +143,8 @@ $query = "(SELECT
           tilausrivi.toimaika toimituspaiva,
           tilausrivi.keratty,
           lasku.liitostunnus partner,
-          lasku.clearing vastaanottovarasto
+          lasku.clearing vastaanottovarasto,
+          if (tilausrivi.tyyppi = 'G' and tilausrivi.varasto = lasku.clearing, 1, 0) sisainen_siirto
           FROM tilausrivi USE INDEX (yhtio_tyyppi_toimitettuaika)
           JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
           JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
@@ -154,7 +157,8 @@ $query = "(SELECT
           WHERE tilausrivi.yhtio         = '$yhtio'
           AND tilausrivi.varattu        != 0
           AND tilausrivi.tyyppi          in ('G','W','M')
-          AND tilausrivi.toimitettuaika  = 0)
+          AND tilausrivi.toimitettuaika  = 0
+          HAVING sisainen_siirto = 0)
 
           ORDER BY laadittu";
 $res = pupe_query($query);

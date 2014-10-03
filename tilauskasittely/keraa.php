@@ -1622,7 +1622,7 @@ if ($tee == 'P') {
         }
 
         if ($yhtiorow['jt_ja_tyomaarays_valmis_vahvistusviesti'] == "Y") {
-          require("../sms_viesti.inc");
+          require("../inc/jt_ja_tyomaarays_valmis_viesti.inc");
           laheta_vahvistusviesti($zoner_tunnarit["username"], $zoner_tunnarit["salasana"], $id);
         }
 

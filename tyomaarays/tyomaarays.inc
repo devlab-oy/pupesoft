@@ -304,7 +304,7 @@ if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == 'VALMI
   $ei_kerattavia_riveja = (isset($kerattavia) and $kerattavia == 0);
 
   if ($yhtiorow['jt_ja_tyomaarays_valmis_vahvistusviesti'] == "Y" and $ei_kerattavia_riveja) {
-    require("../sms_viesti.inc");
+    require("../inc/jt_ja_tyomaarays_valmis_viesti.inc");
     laheta_vahvistusviesti($zoner_tunnarit["username"],
       $zoner_tunnarit["salasana"],
       $tilausnumero,

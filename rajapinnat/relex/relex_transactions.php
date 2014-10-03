@@ -67,7 +67,7 @@ fwrite($fp, $header);
 */
 
 $tapahtumarajaus = "";
-$kerivirajaus    = "";
+$kerivirajaus    = " AND tilausrivi.kerattyaika > 0 ";
 
 // Otetaan mukaan vain viimeisen vuorokauden jälkeen tehdyt
 if ($paiva_ajo) {
@@ -75,7 +75,17 @@ if ($paiva_ajo) {
   $kerivirajaus    = " AND tilausrivi.kerattyaika >= date_sub(now(), interval 24 HOUR) ";
 }
 
-// Haetaan tapahtumat ja keräytyt myynnit sekä varastosiirrot
+// Haetaan tapahtumista:
+//  varastosiirrot (paitsi kerätyt siirtolistarivit)
+//  tulot
+//  valmistukset
+//  hyvitysrivit
+
+// Haetaan tilausriveiltä:
+//  kerätyt myyntirivit (ei normihyväreitä, mutta kerätyt reklamatiot kyllä)
+//  kerätyt siirtorivit
+//  kerätyt kulutukset
+
 $query = "(SELECT
           yhtio.maa,
           tapahtuma.laadittu laadittu,
@@ -89,7 +99,8 @@ $query = "(SELECT
           lasku.varasto lahdevarasto,
           lasku.clearing vastaanottovarasto,
           lasku.liitostunnus,
-          if (lasku.tila is not null and lasku.tila = 'G' and tapahtuma.kpl < 0, 1, 0) keratty_siirto
+          if (lasku.tila is not null and lasku.tila = 'G' and tapahtuma.kpl < 0, 1, 0) keratty_siirto,
+          if (tapahtuma.laji = 'laskutus' and (tapahtuma.kpl < 0 or tapahtuma.kpl > 0 and lasku.tilaustyyppi = 'R'), 1, 0) keratty_myynti
           FROM tapahtuma
           JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio
             AND tuote.tuoteno      = tapahtuma.tuoteno
@@ -101,9 +112,10 @@ $query = "(SELECT
           LEFT JOIN tilausrivi USE INDEX (PRIMARY) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
           LEFT JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
           WHERE tapahtuma.yhtio = '$yhtio'
-          AND tapahtuma.laji in ('tulo', 'siirto', 'valmistus', 'kulutus','inventointi')
+          AND tapahtuma.laji in ('laskutus', 'tulo', 'siirto', 'valmistus','inventointi')
+          AND tapahtuma.kpl != 0
           {$tapahtumarajaus}
-          HAVING keratty_siirto = 0)
+          HAVING keratty_siirto = 0 AND keratty_myynti = 0)
 
           UNION
 
@@ -113,14 +125,15 @@ $query = "(SELECT
           date_format(tilausrivi.kerattyaika, '%Y-%m-%d') pvm,
           tilausrivi.varasto,
           tilausrivi.tuoteno,
-          if (tilausrivi.tyyppi='L', 'myynti', 'siirtolista') laji,
+          if (tilausrivi.tyyppi='G', 'siirtolista', 'myynti') laji,
           (tilausrivi.kpl+tilausrivi.varattu) * -1 kpl,
           tilausrivi.hinta kplhinta,
           lasku.tilaustyyppi,
           lasku.varasto lahdevarasto,
           lasku.clearing vastaanottovarasto,
           lasku.liitostunnus,
-          '' keratty_siirto
+          '' keratty_siirto,
+          '' keratty_myynti
           FROM tilausrivi
           JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
             AND tuote.tuoteno      = tilausrivi.tuoteno
@@ -131,16 +144,16 @@ $query = "(SELECT
           JOIN yhtio ON (tilausrivi.yhtio = yhtio.yhtio)
           JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
           WHERE tilausrivi.yhtio = '$yhtio'
-          AND tilausrivi.tyyppi IN ('L','G')
+          AND tilausrivi.tyyppi IN ('L','G','V')
+          AND (tilausrivi.varattu+tilausrivi.kpl > 0 OR (tilausrivi.varattu+tilausrivi.kpl < 0 and lasku.tilaustyyppi = 'R'))
           {$kerivirajaus})
-
           ORDER BY laadittu, tuoteno";
 $res = pupe_query($query);
 
 // Kerrotaan montako riviä käsitellään
 $rows = mysql_num_rows($res);
 
-echo "\nTapahtumarivejä {$rows} kappaletta.\n";
+echo "Tapahtumarivejä {$rows} kappaletta.\n";
 
 $k_rivi = 0;
 
@@ -156,6 +169,7 @@ while ($row = mysql_fetch_assoc($res)) {
     $partner = $row['liitostunnus'];
     break;
   case 'myynti':
+  case 'laskutus':
     $type    = "SALE";
     $partner = $row['liitostunnus'];
     break;

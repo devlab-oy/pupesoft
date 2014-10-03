@@ -189,6 +189,7 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
   // Jos myyj‰t saa hyv‰ksy‰, mutta EDI/EXTRANET ei mee l‰pi jos luottotiedot on kuralla niin laitetaan F-alatilaan.
   // Jos kukaan ei saa myyd‰ kun luottotiedot on kuralla niin sillo laitetaan kaikki G-alatilaan
   if (($tilausvalmiskutsuja == "EDITILAUS" or $tilausvalmiskutsuja == "VERKKOKAUPPA" or $kukarow["extranet"] != "") and (($luottorajavirhe != '' and in_array($yhtiorow["luottorajan_ylitys"], array("E", "F"))) or ($ylivito > 0 and in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("E", "F"))))) {
+
     // laitetaan tilaan Odottaa hyv‰ksynt‰‰ tai kesken
     if ($yhtiorow["luottorajan_ylitys"] == "F" or $yhtiorow["erapaivan_ylityksen_toimenpide"] == "F") {
       $alatila = "";
@@ -198,8 +199,13 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
     }
   }
   else {
+
     // laitetaan tilaan Odottaa asiakkaan suoritusta tai kesken
-    if ($yhtiorow["luottorajan_ylitys"] == "J" or $yhtiorow["erapaivan_ylityksen_toimenpide"] == "J" or $yhtiorow["luottorajan_ylitys"] == "L" or $yhtiorow["erapaivan_ylityksen_toimenpide"] == "L") {
+    // jos kuitenkin oltiin jo hyv‰ksym‰ss‰ tilausta, j‰tet‰‰n hyv‰ksytt‰v‰ksi
+    if ($laskurow['alatila'] == 'F') {
+      $alatila = "F";
+    }
+    elseif ($yhtiorow["luottorajan_ylitys"] == "J" or $yhtiorow["erapaivan_ylityksen_toimenpide"] == "J" or $yhtiorow["luottorajan_ylitys"] == "L" or $yhtiorow["erapaivan_ylityksen_toimenpide"] == "L") {
       $alatila = "";
     }
     else {
@@ -348,6 +354,59 @@ elseif ($laskurow["tila"] == 'T') {
 }
 else {
   // T‰ss‰ on normaalit tilaukset
+
+  // Luodaan valituista riveist‰ suoraan normaali ostotilaus
+  if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) and $yhtiorow["tee_osto_myyntitilaukselta"] != '') {
+    require "tilauksesta_ostotilaus.inc";
+
+    // Jos halutaan tehd‰ tilauksesta ostotilauksia, niin tehd‰‰n kaikista ostotilaus
+    if ($tee_osto != "") {
+      $tilauksesta_ostotilaus = tilauksesta_ostotilaus($kukarow["kesken"], 'KAIKKI');
+
+      // P‰ivitet‰‰n tilaukselle, ett‰ sit‰ ei osatoimiteta jos koko tilauksesta tehtiin ostotilaus
+      $query  = "UPDATE lasku set
+                 osatoimitus = 'o'
+                 where yhtio = '$kukarow[yhtio]'
+                 and tunnus  = '$kukarow[kesken]'";
+      $result = pupe_query($query);
+    }
+    else {
+      $tilauksesta_ostotilaus  = tilauksesta_ostotilaus($kukarow["kesken"], 'T');
+      $tilauksesta_ostotilaus .= tilauksesta_ostotilaus($kukarow["kesken"], 'U');
+    }
+
+    if ($tilauksesta_ostotilaus != '') echo "$tilauksesta_ostotilaus<br><br>";
+  }
+
+  if ($kukarow["extranet"] == "" and $yhtiorow["tee_valmistus_myyntitilaukselta"] != '') {
+    //  Voimme myˆs tehd‰ tilaukselta suoraan valmistuksia!
+    require "tilauksesta_valmistustilaus.inc";
+
+    $tilauksesta_valmistustilaus = tilauksesta_valmistustilaus($kukarow["kesken"]);
+    if ($tilauksesta_valmistustilaus != '') echo "$tilauksesta_valmistustilaus<br><br>";
+  }
+
+  //Tarkistetaan onko myyntitilaukselle tehty varastosiirto ja jos ei ole niin tehd‰‰n
+  $_tehdaan_varastosiirto = false;
+
+  if ($kukarow["extranet"] == "" and $yhtiorow["tee_siirtolista_myyntitilaukselta"] == 'K' and $laskurow['tila'] == 'N') {
+    $query = "SELECT tilausrivi.tunnus
+              FROM tilausrivi
+              WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+              AND tilausrivi.otunnus = {$laskurow['tunnus']}
+              AND tilausrivi.var     = 'S'";
+    $varastosiirto_result = pupe_query($query);
+
+    if (mysql_num_rows($varastosiirto_result) > 0) {
+      $_tehdaan_varastosiirto = true;
+    }
+  }
+
+  if ($_tehdaan_varastosiirto) {
+    require 'tilauksesta_varastosiirto.inc';
+
+    tilauksesta_varastosiirto($laskurow['tunnus'], 'N');
+  }
 
   // Jos meill‰ ei ole ker‰ysprioriteettia t‰ll‰ tilauksella,
   // katsotaan onko t‰lle prioriteetti tuoteryhm‰n takaa.

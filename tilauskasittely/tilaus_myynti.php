@@ -1566,61 +1566,6 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
     }
     else {
 
-      $laskurow['ohjausmerkki'] = paivita_ohjausmerkki($laskurow);
-
-      // Luodaan valituista riveist‰ suoraan normaali ostotilaus
-      if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) and $yhtiorow["tee_osto_myyntitilaukselta"] != '') {
-        require "tilauksesta_ostotilaus.inc";
-
-        // Jos halutaan tehd‰ tilauksesta ostotilauksia, niin tehd‰‰n kaikista ostotilaus
-        if ($tee_osto != "") {
-          $tilauksesta_ostotilaus = tilauksesta_ostotilaus($kukarow["kesken"], 'KAIKKI');
-
-          // P‰ivitet‰‰n tilaukselle, ett‰ sit‰ ei osatoimiteta jos koko tilauksesta tehtiin ostotilaus
-          $query  = "UPDATE lasku set
-                     osatoimitus = 'o'
-                     where yhtio = '$kukarow[yhtio]'
-                     and tunnus  = '$kukarow[kesken]'";
-          $result = pupe_query($query);
-        }
-        else {
-          $tilauksesta_ostotilaus  = tilauksesta_ostotilaus($kukarow["kesken"], 'T');
-          $tilauksesta_ostotilaus .= tilauksesta_ostotilaus($kukarow["kesken"], 'U');
-        }
-
-        if ($tilauksesta_ostotilaus != '') echo "$tilauksesta_ostotilaus<br><br>";
-      }
-
-      if ($kukarow["extranet"] == "" and $yhtiorow["tee_valmistus_myyntitilaukselta"] != '') {
-        //  Voimme myˆs tehd‰ tilaukselta suoraan valmistuksia!
-        require "tilauksesta_valmistustilaus.inc";
-
-        $tilauksesta_valmistustilaus = tilauksesta_valmistustilaus($kukarow["kesken"]);
-        if ($tilauksesta_valmistustilaus != '') echo "$tilauksesta_valmistustilaus<br><br>";
-      }
-
-      //Tarkistetaan onko myyntitilaukselle tehty varastosiirto ja jos ei ole niin tehd‰‰n
-      $_tehdaan_varastosiirto = false;
-
-      if ($kukarow["extranet"] == "" and $yhtiorow["tee_siirtolista_myyntitilaukselta"] == 'K' and $laskurow['tila'] == 'N') {
-        $query = "SELECT tilausrivi.tunnus
-                  FROM tilausrivi
-                  WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                  AND tilausrivi.otunnus = {$laskurow['tunnus']}
-                  AND tilausrivi.var     = 'S'";
-        $varastosiirto_result = pupe_query($query);
-
-        if (mysql_num_rows($varastosiirto_result) > 0) {
-          $_tehdaan_varastosiirto = true;
-        }
-      }
-
-      if ($_tehdaan_varastosiirto and $luottorajavirhe == '' and $ylivito == 0) {
-        require 'tilauksesta_varastosiirto.inc';
-
-        tilauksesta_varastosiirto($laskurow['tunnus'], 'N');
-      }
-
       if ($kukarow["extranet"] != "") {
         //Pyydet‰‰n tilaus-valmista olla echomatta mit‰‰n
         $silent = "SILENT";

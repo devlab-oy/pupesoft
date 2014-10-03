@@ -43,6 +43,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $yhtion_ytunnus       = str_replace("0037", "", $lasku["yhtio_ovttunnus"]);
   $yhtion_ytunnus       = tulosta_ytunnus($yhtion_ytunnus, $lasku['yhtio_maa']);
   $myyjan_nimi          = $lasku['myyjan_nimi'];
+  $asiakkaan_kieli      = $lasku["asiakkaan_kieli"];
 
   // Arvojen asettelu spritfillä ja muu asettelu
   $yhteensa = sprintf("%34.34s", $yhteensa);
@@ -119,9 +120,12 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
   // Footer
   $kuitin_teksti .= "{$align_center}";
-  $kuitin_teksti .= t("Kuittinumero") . ": {$lasku['laskunro']}\n\n";
+  $kuitin_teksti .= t("Kuittinumero", $asiakkaan_kieli) . ": {$lasku['laskunro']}\n\n";
 
-  $kuitin_teksti .= t($tilausnumero_teksti) . ": " . implode(", ", $tilausnumerot) . "\n\n\n";
+  $kuitin_teksti .= t($tilausnumero_teksti, $asiakkaan_kieli) .
+    ": " .
+    implode(", ", $tilausnumerot) .
+    "\n\n\n";
 
   $kuitin_teksti .= "{$emphasized_on}";
   $kuitin_teksti .= "{$yhtiorow['www']}\n\n";
@@ -134,7 +138,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $kuitin_teksti .= "\n\n";
 
   if ($myyjan_nimi) {
-    $kuitin_teksti .= t("Teitä palveli") . " {$myyjan_nimi}";
+    $kuitin_teksti .= t("Teitä palveli", $asiakkaan_kieli) . " {$myyjan_nimi}";
   }
 
   $kuitin_teksti .= "\n\n\n\n\n\n";
@@ -148,7 +152,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 }
 
 function hae_myyntilasku($laskunro) {
-  global $yhtiorow;
+  global $kukarow;
 
   $query = "SELECT lasku.yhtio_nimi,
             lasku.yhtio_osoite,
@@ -157,11 +161,14 @@ function hae_myyntilasku($laskunro) {
             lasku.yhtio_ovttunnus,
             lasku.yhtio_maa,
             lasku.laskunro,
-            kuka.nimi AS myyjan_nimi
+            kuka.nimi AS myyjan_nimi,
+            asiakas.kieli AS asiakkaan_kieli
             FROM lasku
-            LEFT JOIN kuka ON (lasku.myyja = kuka.tunnus
-              AND kuka.yhtio = '{$yhtiorow['yhtio']}')
-            WHERE lasku.yhtio  = '{$yhtiorow['yhtio']}'
+            LEFT JOIN kuka ON (kuka.tunnus = lasku.myyja
+              AND kuka.yhtio = lasku.yhtio)
+            LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
+              AND asiakas.tunnus = lasku.liitostunnus)
+            WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
             AND lasku.tila     = 'U'
             AND lasku.alatila  = 'X'
             AND lasku.laskunro = '{$laskunro}'";

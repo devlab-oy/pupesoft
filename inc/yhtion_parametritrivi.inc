@@ -2497,11 +2497,11 @@ if ($fieldname == "jt_ja_tyomaarays_valmis_vahvistusviesti") {
   $sel = $trow[$i] == 'Y' ? ' selected' : '';
 
   $ulos .= "<option value = ''>" .
-    t("Ei lähetetä asiakkaalle viestiä, kun jälkitilaustuotteet ovat valmiina noudettaviksi, tai " .
-      "kun työmääräys on valmis");
+    t("Ei lähetetä asiakkaalle viestiä, kun jälkitoimitustuotteet ovat valmiina noudettaviksi, " .
+      "tai kun työmääräys on valmis");
   $ulos .= "<option value = 'Y' $sel>" .
-    t("Lähetetään asiakkaalle tekstiviesti ja sähköposti, kun jälkitilaustuotteet ovat valmiina " .
-      "noudettaviksi, tai kun työmääräys on valmis");
+    t("Lähetetään asiakkaalle tekstiviesti ja sähköposti, kun jälkitoimitustuotteet ovat " .
+      "valmiina noudettaviksi, tai kun työmääräys on valmis");
   $ulos .= "</select></td>";
 
   $jatko = 0;

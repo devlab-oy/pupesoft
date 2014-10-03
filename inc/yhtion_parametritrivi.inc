@@ -2491,15 +2491,17 @@ if ($fieldname == "jt_toimitusaika_email_vahvistus") {
   $jatko = 0;
 }
 
-if ($fieldname == "jt_valmis_sms") {
+if ($fieldname == "jt_ja_tyomaarays_valmis_vahvistusviesti") {
   $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
 
   $sel = $trow[$i] == 'Y' ? ' selected' : '';
 
   $ulos .= "<option value = ''>" .
-    t("Ei lähetetä asiakkaalle sms-viestiä, kun jälkitilaustuotteet ovat valmiina noudettaviksi");
+    t("Ei lähetetä asiakkaalle viestiä, kun jälkitilaustuotteet ovat valmiina noudettaviksi, tai " .
+      "kun työmääräys on valmis");
   $ulos .= "<option value = 'Y' $sel>" .
-    t("Lähetetään asiakkaalle sms-viesti, kun jälkitilaustuotteet ovat valmiina noudettaviksi");
+    t("Lähetetään asiakkaalle tekstiviesti ja sähköposti, kun jälkitilaustuotteet ovat valmiina " .
+      "noudettaviksi, tai kun työmääräys on valmis");
   $ulos .= "</select></td>";
 
   $jatko = 0;

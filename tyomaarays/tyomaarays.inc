@@ -301,7 +301,7 @@ if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == 'VALMI
 
   // Lähetetään tekstiviesti asiakkaalle työmääräyksen valmistumisesta jo tässä vaiheessa,
   // jos kerättäviä tuotteita ei ole, muuten lähetys tapahtuu keräys.php:ssä
-  if ($yhtiorow['jt_valmis_sms'] == "Y" and $kerattavia == 0) {
+  if ($yhtiorow['jt_ja_tyomaarays_valmis_vahvistusviesti'] == "Y" and $kerattavia == 0) {
     require("../sms_viesti.inc");
     laheta_vahvistusviesti($zoner_tunnarit["username"],
       $zoner_tunnarit["salasana"],

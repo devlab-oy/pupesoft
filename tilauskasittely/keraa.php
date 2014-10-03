@@ -1621,7 +1621,7 @@ if ($tee == 'P') {
           $alatilak = "C";
         }
 
-        if ($yhtiorow['jt_valmis_sms'] == "Y") {
+        if ($yhtiorow['jt_ja_tyomaarays_valmis_vahvistusviesti'] == "Y") {
           require("../sms_viesti.inc");
           laheta_vahvistusviesti($zoner_tunnarit["username"], $zoner_tunnarit["salasana"], $id);
         }

@@ -854,6 +854,12 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   if (isset($magento_sticky_kategoriat) and count($magento_sticky_kategoriat) > 0) {
     $magento_client->setStickyKategoriat($magento_sticky_kategoriat);
   }
+  // Halutaanko estää tilausten tuplasisäänluku, eli jos tilaushistoriasta löytyy käsittely
+  // 'processing_pupesoft'-tilassa niin tilausta ei lueta sisään jos sisäänluvun esto on päällä
+  // Default on: YES
+  if (isset($magento_sisaanluvun_esto) and !empty($sisaanluvun_esto)) {
+     $magento_client->setSisaanluvunEsto($magento_sisaanluvun_esto);
+  }
 
   // lisaa_kategoriat
   if (count($dnstuoteryhma) > 0) {

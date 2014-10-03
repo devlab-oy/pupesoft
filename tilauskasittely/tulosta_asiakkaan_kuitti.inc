@@ -9,34 +9,17 @@
  * @param array $params
  *  Esimerkki config parametreistä arvoina defaultit:
  *    array(
- *      "header_teksti"     => "ARK. 8.30-18.00 VARD. / LA. 10-15 LÖ.",
- *      "footer_teksti"     => "Kiitos käynnistä ja tervetuloa uudelleen!",
+ *      "header_teksti"     => false,
+ *      "footer_teksti"     => false,
  *      "avaa_lipas_lopuksi => false
  *    );
  */
 function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array()) {
   global $yhtiorow;
 
-  if (empty($params["footer_teksti"])) {
-    $footer_teksti = "Kiitos käynnistä ja tervetuloa uudelleen!";
-  }
-  else {
-    $footer_teksti = $params["footer_teksti"];
-  }
-
-  if (empty($params["header_teksti"])) {
-    $header_teksti = "ARK. 8.30-18.00 VARD. / LA. 10-15 LÖ.";
-  }
-  else {
-    $header_teksti = $params["header_teksti"];
-  }
-
-  if (empty($params["avaa_lipas_lopuksi"])) {
-    $avaa_lipas_lopuksi = false;
-  }
-  else {
-    $avaa_lipas_lopuksi = true;
-  }
+  $footer_teksti      = empty($params["footer_teksti"]) ? false : $params["footer_teksti"];
+  $header_teksti      = empty($params["header_teksti"]) ? false : $params["header_teksti"];
+  $avaa_lipas_lopuksi = $params["avaa_lipas_lopuksi"];
 
   $laskut = hae_laskut($laskunro);
   list($tilausrivit, $tilausnumerot, $verot, $yhteensa) = hae_tilausrivit($laskunro);
@@ -85,10 +68,13 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $kuitin_teksti .= "{$yhtion_osoite}\n";
   $kuitin_teksti .= "{$yhtion_postino} {$yhtion_postitp}\n";
   $kuitin_teksti .= "Y-tunnus: {$yhtion_ytunnus}\n";
-  $kuitin_teksti .= "Puh. {$yhtion_puhelinnumero}\n";
-  $kuitin_teksti .= "{$header_teksti}\n\n";
+  $kuitin_teksti .= "Puh. {$yhtion_puhelinnumero}";
 
-  $kuitin_teksti .= "{$align_left}";
+  if ($header_teksti) {
+    $kuitin_teksti .= "\n{$header_teksti}";
+  }
+
+  $kuitin_teksti .= "\n\n{$align_left}";
 
   foreach ($tilausrivit as $tilausrivi) {
     $kappalehinta = $tilausrivi['rivihinta_valuutassa'] / $tilausrivi['kpl'];
@@ -142,7 +128,12 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $kuitin_teksti .= "{$emphasized_on}";
   $kuitin_teksti .= "{$yhtiorow['www']}\n\n";
   $kuitin_teksti .= "{$emphasized_off}";
-  $kuitin_teksti .= "{$footer_teksti}\n\n";
+
+  if ($footer_teksti) {
+    $kuitin_teksti .= $footer_teksti;
+  }
+
+  $kuitin_teksti .= "\n\n";
 
   if ($myyjan_nimi) {
     $kuitin_teksti .= t("Teitä palveli") . " {$myyjan_nimi}";

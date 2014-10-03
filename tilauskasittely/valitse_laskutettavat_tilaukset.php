@@ -79,7 +79,14 @@ if ($tee == 'TOIMITA' and isset($maksutapa) and $maksutapa == 'seka') {
   }
 
   $query_rivi = "SELECT lasku.valkoodi, lasku.maksuehto, lasku.hinta,
-                 sum(round(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv<500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa},$yhtiorow[hintapyoristys])) loppusumma
+                 sum(round(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]' = '' 
+                   and tilausrivi.alv = 0, (1+tilausrivi.alv/100), 1) 
+                   * (tilausrivi.varattu+tilausrivi.kpl) 
+                   * {$query_ale_lisa},$yhtiorow[hintapyoristys])) verollinen,
+                 sum(round(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' 
+                   and tilausrivi.alv > 0 and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) 
+                   * (tilausrivi.varattu+tilausrivi.kpl) 
+                   * {$query_ale_lisa},$yhtiorow[hintapyoristys])) veroton
                  FROM tilausrivi
                  JOIN lasku ON (lasku.yhtio=tilausrivi.yhtio AND lasku.tunnus=tilausrivi.otunnus)
                  WHERE var            != 'J'
@@ -95,8 +102,13 @@ if ($tee == 'TOIMITA' and isset($maksutapa) and $maksutapa == 'seka') {
             and yhtio='$kukarow[yhtio]'";
   $asres = pupe_query($query);
   $asrow = mysql_fetch_array($asres);
-
-  $summa = $laskurow["loppusumma"];
+  
+  if ($yhtiorow[alv_kasittely] = '') {
+    $summa = $laskurow["verollinen"];
+  }
+  else {
+    $summa = $laskurow["veroton"];
+  }
 
   //Käsin syötetty summa johon lasku pyöristetään
   if ($laskurow["hinta"] <> 0 and abs($laskurow["hinta"]-$summa) <= 0.5 and abs($summa) >= 0.5) {

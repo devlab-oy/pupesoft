@@ -76,18 +76,19 @@ function add_open_orders_line($fp, $row) {
   fwrite($fp, $rivi);
 }
 
-// Haetaan avoimet ostot ja myynnit
-$query = "SELECT
+// Haetaan avoimet ostot : myynnit ja kulutukset : varastosiirrot ja valmistukset
+$query = "(SELECT
+          tilausrivi.laadittu,
           yhtio.maa,
           tilausrivi.varasto,
           tilausrivi.tuoteno,
           tilausrivi.tyyppi,
-          tilausrivi.varattu+tilausrivi.jt maara,
+          tilausrivi.varattu maara,
           tilausrivi.toimaika toimituspaiva,
           tilausrivi.keratty,
           lasku.liitostunnus partner,
-          lasku.clearing vastaanottovarasto
-          FROM tilausrivi
+          '' vastaanottovarasto
+          FROM tilausrivi USE INDEX (yhtio_tyyppi_laskutettuaika)
           JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
           JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
             AND tuote.tuoteno            = tilausrivi.tuoteno
@@ -98,9 +99,64 @@ $query = "SELECT
           JOIN yhtio ON (tilausrivi.yhtio = yhtio.yhtio)
           WHERE tilausrivi.yhtio         = '$yhtio'
           AND tilausrivi.varattu        != 0
-          AND tilausrivi.tyyppi          IN ('L','O','G')
-          AND tilausrivi.laskutettuaika  = '0000-00-00'
-          ORDER BY tilausrivi.laadittu";
+          AND tilausrivi.tyyppi          = 'O'
+          AND tilausrivi.laskutettuaika  = 0)
+
+          UNION
+
+          (SELECT
+          tilausrivi.laadittu,
+          yhtio.maa,
+          tilausrivi.varasto,
+          tilausrivi.tuoteno,
+          tilausrivi.tyyppi,
+          tilausrivi.varattu+tilausrivi.jt maara,
+          tilausrivi.toimaika toimituspaiva,
+          tilausrivi.keratty,
+          lasku.liitostunnus partner,
+          '' vastaanottovarasto
+          FROM tilausrivi USE INDEX (yhtio_tyyppi_kerattyaika)
+          JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+          JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
+            AND tuote.tuoteno            = tilausrivi.tuoteno
+            AND tuote.status            != 'P'
+            AND tuote.ei_saldoa          = ''
+            AND tuote.tuotetyyppi        = ''
+            AND tuote.ostoehdotus        = '')
+          JOIN yhtio ON (tilausrivi.yhtio = yhtio.yhtio)
+          WHERE tilausrivi.yhtio         = '$yhtio'
+          AND tilausrivi.varattu        != 0
+          AND tilausrivi.tyyppi          in ('L','V')
+          AND tilausrivi.kerattyaika     = 0)
+
+          UNION
+
+          (SELECT
+          tilausrivi.laadittu,
+          yhtio.maa,
+          tilausrivi.varasto,
+          tilausrivi.tuoteno,
+          tilausrivi.tyyppi,
+          tilausrivi.varattu+tilausrivi.jt maara,
+          tilausrivi.toimaika toimituspaiva,
+          tilausrivi.keratty,
+          lasku.liitostunnus partner,
+          lasku.clearing vastaanottovarasto
+          FROM tilausrivi USE INDEX (yhtio_tyyppi_toimitettuaika)
+          JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+          JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
+            AND tuote.tuoteno            = tilausrivi.tuoteno
+            AND tuote.status            != 'P'
+            AND tuote.ei_saldoa          = ''
+            AND tuote.tuotetyyppi        = ''
+            AND tuote.ostoehdotus        = '')
+          JOIN yhtio ON (tilausrivi.yhtio = yhtio.yhtio)
+          WHERE tilausrivi.yhtio         = '$yhtio'
+          AND tilausrivi.varattu        != 0
+          AND tilausrivi.tyyppi          in ('G','W','M')
+          AND tilausrivi.toimitettuaika  = 0)
+
+          ORDER BY laadittu";
 $res = pupe_query($query);
 
 // Kerrotaan montako rivi‰ k‰sitell‰‰n
@@ -133,7 +189,7 @@ while ($row = mysql_fetch_assoc($res)) {
     $row['type'] = "ORDER";
     $row['varasto'] = $row['vastaanottovarasto'];
   }
-  elseif ($row['tyyppi'] == "L") {
+  elseif ($row['tyyppi'] == "L" or $row['tyyppi'] == "V") {
     $row['type'] = "SALES_ORDER";
     $row['maara'] *= -1; // Quantity sign defines the transaction direction as seen by the warehouse, e.g. outgoing sales order is sent as negative quantity
   }

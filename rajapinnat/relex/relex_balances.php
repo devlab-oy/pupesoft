@@ -58,10 +58,6 @@ $query = "SELECT
           yhtio.maa,
           tuotepaikat.tuoteno,
           tuotepaikat.varasto,
-          tuotepaikat.hyllyalue,
-          tuotepaikat.hyllynro,
-          tuotepaikat.hyllyvali,
-          tuotepaikat.hyllytaso,
           sum(tuotepaikat.saldo) saldo
           FROM tuote
           JOIN tuotepaikat ON (tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio)
@@ -94,10 +90,7 @@ while ($row = mysql_fetch_assoc($res)) {
             and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
             and tilausrivi.tuoteno   = '$row[tuoteno]'
             and (tilausrivi.varattu > 0 or (tilausrivi.varattu < 0 and lasku.tilaustyyppi = 'R'))
-            and tilausrivi.hyllyalue = '$row[hyllyalue]'
-            and tilausrivi.hyllynro  = '$row[hyllynro]'
-            and tilausrivi.hyllyvali = '$row[hyllyvali]'
-            and tilausrivi.hyllytaso = '$row[hyllytaso]'";
+            and tilausrivi.varasto  = '$row[varasto]'";
   $kerres = pupe_query($query);
   $kerrow = mysql_fetch_assoc($kerres);
 

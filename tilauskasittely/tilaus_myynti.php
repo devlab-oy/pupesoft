@@ -709,7 +709,7 @@ elseif ($toim == "YLLAPITO") {
 elseif ($toim == "EXTENNAKKO") {
   $otsikko = t("Ext-Ennakkotilaus");
 }
-elseif ($toim == "ENNAKKO" or $laskurow["tilaustyyppi"] == "E") {
+elseif ($toim == "ENNAKKO" or (isset($tilaustyyppi) and $tilaustyyppi == 'E')) {
   $otsikko = t("Ennakkotilaus");
 }
 else {

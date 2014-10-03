@@ -10009,6 +10009,12 @@ if (!function_exists('livesearch_kohdehaku')) {
     $hakuid = $_REQUEST["livesearch_hakuid"];
     $submit = $_REQUEST["livesearch_submit"];
     $haku = trim($_REQUEST["livesearch_haku"]);
+    $relaatio_tunnus = trim($_REQUEST["relaatio_tunnus"]);
+
+    $join = "";
+    if (!empty($relaatio_tunnus)) {
+      $join = " AND asiakas.tunnus = {$relaatio_tunnus}";
+    }
 
     if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
 
@@ -10030,9 +10036,10 @@ if (!function_exists('livesearch_kohdehaku')) {
                 FROM kohde
                 JOIN asiakas
                 ON ( asiakas.yhtio = kohde.yhtio
-                  AND asiakas.tunnus = kohde.asiakas )
-                WHERE kohde.yhtio    = '{$kukarow['yhtio']}'
-                AND kohde.nimi       LIKE '%{$haku}%'";
+                  AND asiakas.tunnus = kohde.asiakas
+                  {$join} )
+                WHERE kohde.yhtio = '{$kukarow['yhtio']}'
+                AND kohde.nimi LIKE '%{$haku}%'";
       $result = pupe_query($query);
 
       $limit = 0;
@@ -10083,7 +10090,7 @@ if (!function_exists('livesearch_kohdehaku')) {
 }
 
 if (!function_exists("livesearch_kentta")) {
-  function livesearch_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '', $vero_field = '', $class = '', $break_all_div = '') {
+  function livesearch_kentta($formi, $tee = 'TUOTEHAKU', $nimi = 'liveseach_hakukentta', $width = '300', $value = '', $submit = '', $vero_field = '', $class = '', $break_all_div = '', $relaatio_tunnus = 0) {
     global $kukarow, $toim;
 
     if (stripos($_SERVER['HTTP_USER_AGENT'], "MSIE") !== FALSE or stripos($_SERVER['HTTP_USER_AGENT'], "EXPLORER") !== FALSE) {
@@ -10097,14 +10104,32 @@ if (!function_exists("livesearch_kentta")) {
       $result_width = $width * 2;
     }
 
+    $relaatio_string = "";
+    if (!empty($relaatio_tunnus)) {
+      $relaatio_string = "&relaatio_tunnus={$relaatio_tunnus}";
+    }
+
     $hakuID = "haku".uniqid();
+
+    //Huom! &livesearch_haku=' <- ' tarvitaan jotta inputti_value ei käsitellä stringinä
+    //Vastaavasti sndReq:sta se puuttuu
+    $url = "$_SERVER[SCRIPT_NAME]?livesearch_tee=$tee"
+            ."&livesearch_form=$formi"
+            ."&livesearch_hakuid=$hakuID"
+            ."&livesearch_nimi=$nimi"
+            ."&livesearch_submit=$submit"
+            ."&livesearch_vero_field=$vero_field"
+            ."&ohje=off"
+            ."&toim=$toim"
+            ."{$relaatio_string}"
+            ."&livesearch_haku='+inputti_value";
 
     $return = "<input type='text' id='$hakuID' class='$class' name='$nimi' autocomplete='off' style='width:".$width."px;' value='$value'
           onkeydown=\"return livesearch_keyhandler(event, '$hakuID', '$formi', '$submit', '$vero_field');\"
           onkeyup=\"if ((event.keyCode < 37 || event.keyCode > 40) && event.keyCode != 13) {
               var inputti_value = this.value;
               delay_ms(function() {
-                sndReq('livesearch_$hakuID', '$_SERVER[SCRIPT_NAME]?livesearch_tee=$tee&livesearch_form=$formi&livesearch_hakuid=$hakuID&livesearch_nimi=$nimi&livesearch_submit=$submit&livesearch_vero_field=$vero_field&ohje=off&toim=$toim&livesearch_haku='+inputti_value);
+                sndReq('livesearch_$hakuID', '{$url});
               }, 500);
               keyStrokeIndex = -1;";
     if ($vero_field) {

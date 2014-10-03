@@ -11,48 +11,65 @@
  *
  * @return array Vastauskoodi ja viesti palvelimelta
  */
-function laheta_sms($username, $salasana, $tilausnumero, $kerattu = false) {
+function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $kerattu = false) {
   global $yhtiorow;
 
-  $tilaus  = hae_tilaus($tilausnumero);
-  $asiakas = hae_asiakas_sms_viestia_varten($tilaus['liitostunnus']);
+  $lahetetty = false;
 
-  if (empty($asiakas["gsm"])) {
-    return false;
-  }
+  $tilaus  = hae_tilaus($tilausnumero);
+  $asiakas = hae_asiakas_vahvistusta_varten($tilaus['liitostunnus']);
 
   if ($tilaus["clearing"] == "JT-TILAUS") {
-    $viesti = t("Kaikki tilauksen ") .
+    $otsikko = t("Tilaus noudettavissa");
+    $viesti  = t("Kaikki tilauksen ") .
       $tilausnumero .
       t(" osat ovat noudettavissa, terveisin ") .
       $yhtiorow["nimi"];
   }
   elseif (loytyy_tyomaarays($tilausnumero) or $kerattu) {
-    $viesti = t("Huoltotyösi on valmis, terveisin ") . $yhtiorow["nimi"];
+    $otsikko = t("Huoltotyö valmis");
+    $viesti  = t("Huoltotyösi on valmis, terveisin ") . $yhtiorow["nimi"];
   }
 
   if (empty($viesti)) {
     return false;
   }
 
-  $parameters = array(
-    "method"   => "POST",
-    "data"     => array(
-      "username"   => $username,
-      "password"   => $salasana,
-      "numberto"   => $asiakas['gsm'],
-      "numberfrom" => $yhtiorow['nimi'],
-      "message"    => $viesti
-    ),
-    "url"      => "https://sms.zoner.fi/sms.php",
-    "headers"  => array(),
-    "posttype" => "form"
-  );
+  if (!empty($asiakas["gsm"])) {
+    $parameters = array(
+      "method"   => "POST",
+      "data"     => array(
+        "username"   => $username,
+        "password"   => $salasana,
+        "numberto"   => $asiakas['gsm'],
+        "numberfrom" => $yhtiorow['nimi'],
+        "message"    => $viesti
+      ),
+      "url"      => "https://sms.zoner.fi/sms.php",
+      "headers"  => array(),
+      "posttype" => "form"
+    );
 
-  return pupesoft_rest($parameters);
+    pupesoft_rest($parameters);
+    $lahetetty = true;
+  }
+
+  if (!empty($asiakas["email"])) {
+    $parametrit = array(
+      "to"      => $asiakas["email"],
+      "cc"      => "",
+      "subject" => $otsikko,
+      "body"    => $viesti
+    );
+
+    pupesoft_sahkoposti($parametrit);
+    $lahetetty = true;
+  }
+
+  return $lahetetty;
 }
 
-function hae_asiakas_sms_viestia_varten($tunnus) {
+function hae_asiakas_vahvistusta_varten($tunnus) {
   global $kukarow;
 
   $query  = "SELECT gsm,

@@ -1623,7 +1623,7 @@ if ($tee == 'P') {
 
         if ($yhtiorow['jt_valmis_sms'] == "Y") {
           require("../sms_viesti.inc");
-          laheta_sms($zoner_tunnarit["username"], $zoner_tunnarit["salasana"], $id);
+          laheta_vahvistusviesti($zoner_tunnarit["username"], $zoner_tunnarit["salasana"], $id);
         }
 
         // Lasku päivitetään vasta kuin tilausrivit on päivitetty...

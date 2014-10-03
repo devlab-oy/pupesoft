@@ -82,9 +82,9 @@ function hae_asiakas_vahvistusta_varten($tunnus) {
 
   $query  = "SELECT gsm,
              email
-             FROM asiakas
-             WHERE yhtio = '{$kukarow['yhtio']}'
-             AND tunnus = '{$tunnus}'";
+             FROM  asiakas
+             WHERE yhtio   = '{$kukarow['yhtio']}'
+             AND   tunnus  = '{$tunnus}'";
   $result = pupe_query($query);
 
   $asiakas = mysql_fetch_assoc($result);
@@ -95,10 +95,11 @@ function hae_asiakas_vahvistusta_varten($tunnus) {
 function hae_tilaus($tilausnumero) {
   global $kukarow;
 
-  $query  = "SELECT *
-             FROM lasku
-             WHERE yhtio = '{$kukarow['yhtio']}'
-             AND tunnus = '{$tilausnumero}'";
+  $query  = "SELECT clearing,
+             liitostunnus
+             FROM  lasku
+             WHERE yhtio  = '{$kukarow['yhtio']}'
+             AND   tunnus = '{$tilausnumero}'";
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);
@@ -108,9 +109,9 @@ function loytyy_tyomaarays($tilausnumero) {
   global $kukarow;
 
   $query  = "SELECT COUNT(*) AS maara
-             FROM tyomaarays
-             WHERE yhtio = '{$kukarow['yhtio']}'
-             AND otunnus = '{$tilausnumero}'";
+             FROM  tyomaarays
+             WHERE yhtio   = '{$kukarow['yhtio']}'
+             AND   otunnus = '{$tilausnumero}'";
   $result = pupe_query($query);
   $result = mysql_fetch_assoc($result);
 

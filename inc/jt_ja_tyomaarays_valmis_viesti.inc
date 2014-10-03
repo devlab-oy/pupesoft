@@ -1,15 +1,16 @@
 <?php
 
 /**
- * Lähettää parametrina annetun viestin sms-viestinä parametrina annetun asiakkaan gms-numeroon.
- * Toistaiseksi ainut tuettu palvelu on Zoner.
+ * Lähettää parametrina annetun viestin sms-viestinä parametrina annetun asiakkaan gms-numeroon,
+ * jos sellainen löytyy. Toistaiseksi ainut tuettu palvelu on Zoner. Lähettää myös sähköpostin, jos
+ * asiakkaalta sellainen löytyy
  *
  * @param string $username Zonerin käyttäjätunnus
  * @param string $salasana Zonerin salasana
  * @param int    $tilausnumero
  * @param bool   $kerattu Onko kaikki tilauksen rivit jo kerätty
  *
- * @return array Vastauskoodi ja viesti palvelimelta
+ * @return bool Jos tekstiviestin tai sähköpostin lähetys onnistui, palauttaa true
  */
 function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $kerattu = false) {
   global $yhtiorow;
@@ -50,8 +51,14 @@ function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $kerattu = 
       "posttype" => "form"
     );
 
-    pupesoft_rest($parameters);
-    $lahetetty = true;
+    $vastaus = pupesoft_rest($parameters);
+    $vastaus = $vastaus[1];
+    $vastaus = explode(" ", $vastaus);
+    $vastaus = $vastaus[0];
+
+    if ($vastaus == "OK") {
+      $lahetetty = true;
+    }
   }
 
   if (!empty($asiakas["email"])) {
@@ -62,8 +69,9 @@ function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $kerattu = 
       "body"    => $viesti
     );
 
-    pupesoft_sahkoposti($parametrit);
-    $lahetetty = true;
+    if (pupesoft_sahkoposti($parametrit)) {
+      $lahetetty = true;
+    }
   }
 
   return $lahetetty;

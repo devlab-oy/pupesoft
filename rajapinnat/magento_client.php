@@ -471,14 +471,27 @@ class MagentoClient {
       // Päivitetään tuotteen kauppanäkymäkohtaiset hinnat
       if (isset($kauppakohtaiset_hinnat) and count($kauppakohtaiset_hinnat) > 0) {
         try {
-          foreach ($kauppakohtaiset_hinnat) {
-            $tuotteen_kauppakohtainen_data = array(
-              'price'=> $tuote['myymalahinta']
-            );#['price'] = $tuote['myymalahinta'];
+          foreach ($kauppakohtaiset_hinnat as $tuotekentta => $kauppatunnukset) {
+
+            foreach ($kauppatunnukset as $kauppatunnus) {
+
+              $tuotteen_kauppakohtainen_data = array(
+                'price' => $tuote[$tuotekentta]
+              );
+
+              $this->_proxy->call($this->_session, 'catalog_product.update',
+                array(
+                  $tuote['tuoteno'],
+                  $tuotteen_kauppakohtainen_data, 
+                  $kauppatunnus
+                )
+              );
+            }
+            $this->log("Tuotteen '{$tuote['tuoteno']}' kauppakohtainen hinta päivitetty (simple) " . print_r($tuotteen_kauppakohtainen_data, true));
           }
         }
         catch (Exception $e) {
-          
+          $this->log("Virhe! Tuotteen '{$tuote['tuoteno']}' kauppakohtaisen hinnan päivitys epäonnistui (simple) " . print_r($tuotteen_kauppakohtainen_data, true), $e);
         }
       }
 

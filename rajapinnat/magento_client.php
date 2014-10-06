@@ -470,9 +470,6 @@ class MagentoClient {
       // Lis‰t‰‰n kuvat Magentoon
       $this->lisaa_tuotekuvat($product_id, $tuotekuvat);
 
-      // P‰ivitet‰‰n tuotteen p‰ivitetty-aikaleima Pupesoftiin
-      $this->paivita_aikaleima($tuote_clean);
-
       // Lis‰t‰‰n tuote countteria
       $count++;
     }
@@ -1607,56 +1604,6 @@ class MagentoClient {
 
     // Palautetaan kieliversiot
     return $kieliversiot_data;
-  }
-
-  /**
-   * P‰ivitt‰‰ tuotteen magentop‰ivitys-aikaleiman
-   *
-   * @param string   $tuotenumero Tuotteen tuotenumero HUOM! t‰h‰n tarvitaan Pupen tuotenumero
-   * eik‰ mahdollinen sku-alkuinen magento-safe tuotenumero
-   */
-  public function paivita_aikaleima($tuotenumero) {
-    global $kukarow, $dbhost, $dbuser, $dbpass, $dbkanta;
-
-    try {
-      // Tietokantayhteys
-      $db = new PDO("mysql:host=$dbhost;dbname=$dbkanta", $dbuser, $dbpass);
-
-      // Koitetaan updatea
-      $stmt = $db->prepare("  UPDATE
-                              tuotteen_avainsanat
-                              SET selite = now()
-                              WHERE yhtio = ?
-                              AND tuoteno = ?
-                              AND laji = 'paivitetty_magentoon'");
-      $stmt->execute(array($kukarow['yhtio'], $tuotenumero));
-      $count = $stmt->rowCount();
-
-      if ($count == 0) {
-        // Jos update ei osunut, tehd‰‰n insert
-        $stmt = $db->prepare("  INSERT into
-                                tuotteen_avainsanat
-                                SET
-                                yhtio = ?,
-                                tuoteno = ?,
-                                laji = 'paivitetty_magentoon',
-                                selite = now(),
-                                luontiaika = now(),
-                                muutospvm = now(),
-                                laatija = 'magento',
-                                muuttaja = 'magento'");
-        $stmt->execute(array($kukarow['yhtio'], $tuotenumero));
-      }
-      $this->log("Tuotteen '$tuotenumero' paivitetty_magentoon aika p‰ivitetty Pupesoftiin");
-    }
-    catch (Exception $e) {
-      $this->_error_count++;
-      $this->log("Virhe! PDO yhteys on poikki. Yritet‰‰n uudelleen.", $e);
-    }
-
-    $db = null;
-
-    return true;
   }
 
   /**

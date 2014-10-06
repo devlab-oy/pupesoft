@@ -3043,7 +3043,37 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
         $edi_vastaavat_tuotteet = array();
         $edi_vaihtoehtoiset_tuotteet = array();
-
+        $myyntivarastot = array();
+        
+        if ($laskurow["varasto"] == 0) {
+          if ($laskurow["yhtio_toimipaikka"] != 0) {
+            $query  = "SELECT *
+                       FROM varastopaikat
+                       WHERE yhtio      = '$kukarow[yhtio]'
+                       AND toimipaikka  = '$laskurow[yhtio_toimipaikka]'
+                       AND tyyppi       = ''";
+            $varresult = pupe_query($query);
+            
+            while ($myyntivar = mysql_fetch_assoc($varresult)) {
+              $myyntivarastot[] = $myyntivar["tunnus"];
+            }
+          }
+          else {
+            $query  = "SELECT *
+                       FROM varastopaikat
+                       WHERE yhtio      = '$kukarow[yhtio]'
+                       AND toimipaikka  = '0'
+                       AND tyyppi       = ''";
+            $varresult = pupe_query($query);
+            
+            while ($myyntivar = mysql_fetch_assoc($varresult)) {
+              $myyntivarastot[] = $myyntivar["tunnus"];
+            }
+          }
+        }
+        else {
+          $myyntivarastot[] = $laskurow["varasto"];
+        }
         $vrow = mysql_fetch_assoc($ediresult);
 
         $query = "SELECT *
@@ -3056,7 +3086,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
         while ($edirow = mysql_fetch_assoc($edi2result)) {
 
-          list(, , $vmyytavissa) = saldo_myytavissa($edirow["tuoteno"]);
+          list(, , $vmyytavissa) = saldo_myytavissa($edirow["tuoteno"],'' , $myyntivarastot);
 
           if ($vmyytavissa > 0) {
             $tvsql = "SELECT *

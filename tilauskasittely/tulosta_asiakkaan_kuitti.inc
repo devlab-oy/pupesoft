@@ -23,7 +23,8 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
   $lasku                = hae_myyntilasku($laskunro);
   $maksupaatetapahtumat = hae_maksupaatetapahtumat($laskunro);
-  list($tilausrivit, $tilausnumerot, $verot, $yhteensa) = hae_tilausrivit($laskunro);
+  list($tilausrivit, $tilausnumerot, $verot) = hae_tilausrivit($laskunro);
+  list($yhteensa, $pyoristys, $loppusumma) = summat($lasku);
 
   // Escape sequencejä printterille
   $logo           = "\x1C\x70\x01\x10";
@@ -47,6 +48,11 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
   // Arvojen asettelu spritfillä ja muu asettelu
   $yhteensa = sprintf("%34.34s", $yhteensa);
+
+  if ($pyoristys) {
+    $pyoristys  = sprintf("%33.33s", $pyoristys);
+    $loppusumma = sprintf("%32.32s", $loppusumma);
+  }
 
   $verorivit = array();
 
@@ -97,10 +103,15 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
   // Hinta yhteensä
   $kuitin_teksti .= "==========================================\n";
-  $kuitin_teksti .= "{$emphasized_on}YHTEENSÄ{$yhteensa}{$emphasized_off}\n\n";
+  $kuitin_teksti .= "{$emphasized_on}YHTEENSÄ{$yhteensa}{$emphasized_off}\n";
+
+  if ($pyoristys) {
+    $kuitin_teksti .= "{$emphasized_on}PYÖRISTYS{$pyoristys}{$emphasized_off}\n";
+    $kuitin_teksti .= "{$emphasized_on}LOPPUSUMMA{$loppusumma}{$emphasized_off}\n";
+  }
 
   // Verotiedot
-  $kuitin_teksti .= "ALV         NETTO        VERO       BRUTTO\n";
+  $kuitin_teksti .= "\nALV         NETTO        VERO       BRUTTO\n";
 
   foreach ($verorivit as $verorivi) {
     $kuitin_teksti .= "{$verorivi['veroprosentti']}" .
@@ -161,6 +172,10 @@ function hae_myyntilasku($laskunro) {
             lasku.yhtio_ovttunnus,
             lasku.yhtio_maa,
             lasku.laskunro,
+            lasku.valkoodi,
+            lasku.summa_valuutassa,
+            lasku.pyoristys_valuutassa,
+            lasku.pyoristys,
             kuka.nimi AS myyjan_nimi,
             asiakas.kieli AS asiakkaan_kieli
             FROM lasku
@@ -224,7 +239,6 @@ function hae_tilausrivit($laskunro) {
   $tilausnumerot     = array();
   $alvirivit         = array();
   $pyoristetyt_verot = array();
-  $hinta_yhteensa    = 0;
 
   while ($rivi = mysql_fetch_assoc($result)) {
     array_push($tilausrivit, $rivi);
@@ -233,8 +247,6 @@ function hae_tilausrivit($laskunro) {
     $alvirivit[$rivi['alv']]['netto'] += $rivi['rivihinta'];
     $alvirivit[$rivi['alv']]['vero'] += $rivi['rivihinta'] * ($rivi['alv'] / 100);
     $alvirivit[$rivi['alv']]['brutto'] += $rivi['rivihinta'] * (1 + $rivi['alv'] / 100);
-
-    $hinta_yhteensa += $rivi['rivihinta'] * (1 + $rivi['alv'] / 100);
   }
 
   foreach ($alvirivit as $alvi => $alvirivi) {
@@ -249,6 +261,36 @@ function hae_tilausrivit($laskunro) {
     $tilausrivit,
     array_unique($tilausnumerot),
     $pyoristetyt_verot,
-    hintapyoristys($hinta_yhteensa, 1)
   );
+}
+
+function summat($lasku) {
+  if ($lasku["valkoodi"] != '' and trim(strtoupper($lasku["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+    $yhteensa = $kassa_ale != '' ? ($lasku["summa_valuutassa"] + $lasku["pyoristys_valuutassa"]) * (1 - $kassa_ale / 100) : $lasku["summa_valuutassa"] + $lasku["pyoristys_valuutassa"];
+    $yhteensa = hintapyoristys($yhteensa);
+
+    if ($lasku["pyoristys_valuutassa"] != 0) {
+
+      $pyoristys = $kassa_ale != '' ? $lasku["pyoristys_valuutassa"] * (1 - $kassa_ale / 100) : $lasku["pyoristys_valuutassa"];
+      $pyoristys *= -1;
+      $pyoristys = hintapyoristys($pyoristys);
+    }
+  }
+  else {
+    $yhteensa = $kassa_ale != '' ? ($lasku["summa"] + $lasku["pyoristys"]) * (1 - $kassa_ale / 100) : $lasku["summa"] + $lasku["pyoristys"];
+    $yhteensa = hintapyoristys($yhteensa);
+    if ($lasku["pyoristys"] != 0) {
+      $pyoristys = $kassa_ale != '' ? $lasku["pyoristys"] * (1 - $kassa_ale / 100) : $lasku["pyoristys"];
+      $pyoristys = hintapyoristys($pyoristys);
+    }
+  }
+
+  if ($lasku["valkoodi"] != '' and trim(strtoupper($lasku["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+    $loppusumma = $lasku["summa_valuutassa"];
+  }
+  else {
+    $loppusumma = $lasku["summa"];
+  }
+
+  return array($yhteensa, $pyoristys, $loppusumma);
 }

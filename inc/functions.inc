@@ -20369,11 +20369,16 @@ if (!function_exists("pupesoft_sahkoposti")) {
     // Vikassa boundissa pitää olla -- lopussa.
     $content .= "--\n";
 
-    $boob = mail($email_to, mb_encode_mimeheader($email_subject, "ISO-8859-1", "Q"), $content, $header, "-f {$yhtiorow["postittaja_email"]}");
+    $resque_args = array(
+            'to'      => $email_to,
+            'subject' => mb_encode_mimeheader($email_subject, "ISO-8859-1", "Q"),
+            'content' => $content,
+            'header'  => $header,
+            'from'    => "-f {$yhtiorow["postittaja_email"]}");
 
-    if ($boob === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $email_to<br>";
+    Resque::enqueue('pupe_email', 'pupesoft_email_worker', $resque_args);
 
-    return $boob;
+    return TRUE;
   }
 }
 

@@ -302,6 +302,7 @@ class MagentoClient {
       $multi_data = array();
 
       $tuetut_kieliversiot = array();
+      $kauppakohtaiset_hinnat = array();
 
       // Simple tuotteiden parametrit kuten koko ja väri
       foreach ($tuote['tuotteen_parametrit'] as $parametri) {
@@ -312,9 +313,13 @@ class MagentoClient {
       if (count($verkkokauppatuotteet_erikoisparametrit) > 0) {
         foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
           $key = $erikoisparametri['nimi'];
-          // Kieliversiot poimitaan talteen koska niitä käytetään toisaalla
+          // Kieliversiot ja kauppakohtaiset_hinnat poimitaan talteen koska niitä käytetään toisaalla
           if ($key == 'kieliversiot') {
             $tuetut_kieliversiot = $erikoisparametri['arvo'];
+            continue;
+          }
+          elseif ($key == 'kauppakohtaiset_hinnat') {
+            $kauppakohtaiset_hinnat = $erikoisparametri['arvo'];
             continue;
           }
 
@@ -421,7 +426,7 @@ class MagentoClient {
         }
       }
 
-      // Päivitetään tuotteen kieliversiot kauppanäkymäkohtaisesti ja samalla myös mahdollinen sivustokohtainen hinta
+      // Päivitetään tuotteen kieliversiot kauppanäkymäkohtaisesti
       // jos nämä on asetettu konffissa
 
       if (isset($tuetut_kieliversiot) 
@@ -431,39 +436,52 @@ class MagentoClient {
 
           // Kieliversiot-magentoerikoisparametrin tulee sisältää array jossa määritellään mikä kieliversio
           // siirretään mihinkin kauppatunnukseen
-          // Esim. array("en" => '4', "se" => '9');
 
+          // Esim. array("en" => array('4','13'), "se" => array('9'));
           $kieliversio_data = $this->hae_kieliversiot($tuote_clean);
 
-          foreach ($tuetut_kieliversiot as $kieli => $kauppatunnus) {
+          foreach ($tuetut_kieliversiot as $kieli => $kauppatunnukset) {
             $kaannokset = $kieliversio_data[$kieli];
-
             if (empty($kaannokset)) continue;
-            $tuotteen_kauppakohtainen_data = array(
-              'description' => $kaannokset['kuvaus'],
-              'name'        => $kaannokset['nimitys']
-            );
 
-            // Jos kauppaan pitää päivittää eri hinta
-            // TODO missä tämä setataan
-            $tuotteen_kauppakohtainen_data['price'] = $tuote['myymalahinta'];
+            // Päivitetään jokaiseen kauppatunnukseen haluttu käännös
+            foreach ($kauppatunnukset as $kauppatunnus) {
+              $tuotteen_kauppakohtainen_data = array(
+                'description' => $kaannokset['kuvaus'],
+                'name'        => $kaannokset['nimitys']
+              );
 
-            $this->_proxy->call($this->_session, 'catalog_product.update',
-              array(
-                $tuote['tuoteno'],
-                $tuotteen_kauppakohtainen_data, 
-                $kauppatunnus
-              )
-            );
+              $this->_proxy->call($this->_session, 'catalog_product.update',
+                array(
+                  $tuote['tuoteno'],
+                  $tuotteen_kauppakohtainen_data, 
+                  $kauppatunnus
+                )
+              );
+            }
           }
 
           $this->log("Tuotteen '{$tuote['tuoteno']}' kieliversiot päivitetty (simple) " . print_r($kieliversio_data, true));
         }
         catch (Exception $e) {
-          $this->_error_count++;
           $this->log("Virhe! Tuotteen '{$tuote['tuoteno']}' kieliversioiden päivitys epäonnistui (simple) " . print_r($kieliversio_data, true), $e);
         }
       }
+
+      // Päivitetään tuotteen kauppanäkymäkohtaiset hinnat
+      if (isset($kauppakohtaiset_hinnat) and count($kauppakohtaiset_hinnat) > 0) {
+        try {
+          foreach ($kauppakohtaiset_hinnat) {
+            $tuotteen_kauppakohtainen_data = array(
+              'price'=> $tuote['myymalahinta']
+            );#['price'] = $tuote['myymalahinta'];
+          }
+        }
+        catch (Exception $e) {
+          
+        }
+      }
+
       // Haetaan tuotekuvat Pupesoftista
       $tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus']);
 

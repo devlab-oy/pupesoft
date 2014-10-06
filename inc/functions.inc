@@ -12511,7 +12511,7 @@ if (!function_exists("tarkista_sepa")) {
       
     if ($palauta_maat == 'K') {
       // Palautetaan kaikki SEPA-maat
-      return array($sepa_maat);
+      return array_keys($sepa_maat);
     }
     // Maa ei ole sepa maa, palautetaan FALSE
     elseif (!isset($sepa_maat[$maa])) {

@@ -169,7 +169,7 @@ if ($tee_kululaskut == "liita") {
   }
 
   //lisätään lasku
-  if ($verotonsumma != 0 and $verosumma != 0) {
+  if ($verotonsumma != 0 and $verosumma != 0 or ($apurow["laskunrot"] == "" and $verotonsumma == 0)) {
 
     $osto_kulu = (!isset($osto_kulu) or trim($osto_kulu) == '') ? 0 : (float) $osto_kulu;
     $osto_rahti = (!isset($osto_rahti) or trim($osto_rahti) == '') ? 0 : (float) $osto_rahti;
@@ -839,7 +839,7 @@ if ($silent == "") {
 
         $summa_kaytettavissa = round(abs($verotonsumma) - abs($apurow["arvo"]), 2);
 
-        if ($summa_kaytettavissa > 0) {
+        if ($summa_kaytettavissa > 0 or ($apurow["laskunrot"] == "" and $verotonsumma == 0)) {
           if ($listaustapa == "liittamattomat" or $listaustapa == "") {
             // checkkaus tässä ettei piiretä turhaan
             $voikolisata = "";
@@ -921,7 +921,7 @@ if ($silent == "") {
 
         echo "<td valign='top'>$vienti_teksti</td>";
 
-        if ($summa_kaytettavissa > 0) {
+        if ($summa_kaytettavissa > 0 or ($apurow["laskunrot"] == "" and $verotonsumma == 0)) {
 
           if ($verotonsumma < 0) {
             $lw = -1;

@@ -21,11 +21,11 @@ if ($tee == '') {
 function hae_toimittajat() {
   global $kukarow;
 
-  $query = "SELECT DISTINCT toimi.tunnus, toimi.nimi
-            FROM tuotteen_toimittajat
-            INNER JOIN toimi ON (toimi.tunnus = tuotteen_toimittajat.liitostunnus)
-            WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-            ORDER BY toimi.nimi";
+  $query  = "SELECT DISTINCT toimi.tunnus, toimi.nimi
+             FROM tuotteen_toimittajat
+             INNER JOIN toimi ON (toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+             WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+             ORDER BY toimi.nimi";
   $result = pupe_query($query);
 
   $toimittajat = array();
@@ -38,10 +38,21 @@ function hae_toimittajat() {
 }
 
 function tiedostotyypit() {
-  return array(
-    "ohjekirja",
-    "huoltotiedote"
-  );
+  global $kukarow;
+
+  $query  = "SELECT selite
+             FROM avainsana
+             WHERE yhtio = '{$kukarow['yhtio']}'
+             AND laji    = 'LITETY_TKIRJAST'";
+  $result = pupe_query($query);
+
+  $tiedostotyypit = array();
+
+  while ($tiedostotyyppi = mysql_fetch_assoc($result)) {
+    array_push($tiedostotyypit, strtolower($tiedostotyyppi['selite']));
+  }
+
+  return $tiedostotyypit;
 }
 
 function piirra_formi($valittu_toimittaja, $valittu_tiedostotyyppi) {
@@ -68,10 +79,10 @@ function piirra_formi($valittu_toimittaja, $valittu_tiedostotyyppi) {
   echo "<td><label for='tyyppi_id'>" . t("Tiedoston tyyppi") . "</label></td>";
   echo "<td>";
   echo "<select id='tiedostotyyppi_id' name='tiedostotyyppi'>";
-  foreach (tiedostotyypit() as $tiedostotyyppi) {
-    $tiedostotyyppi_capitalized = ucfirst($tiedostotyyppi);
+  foreach (tiedostotyypit() as $tiedostotyyppi) {    
+    $tiedostotyyppinimi = t_avainsana("LITETY", '', "and selite = '{$tiedostotyyppi}'", '', '', "selitetark");
     $valittu = $valittu_tiedostotyyppi == $tiedostotyyppi ? "selected" : "";
-    echo "<option value='{$tiedostotyyppi}' {$valittu}>{$tiedostotyyppi_capitalized}</option>";
+    echo "<option value='{$tiedostotyyppi}' {$valittu}>{$tiedostotyyppinimi}</option>";
   }
   echo "</select>";
   echo "</td>";
@@ -93,19 +104,19 @@ function hae_tiedostot($toimittajan_tunnus, $tiedoston_tyyppi) {
 
   $tiedoston_tyyppi = strtolower($tiedoston_tyyppi);
 
-  $query = "SELECT liitetiedostot.tunnus,
-            liitetiedostot.kayttotarkoitus,
-            liitetiedostot.selite
-            FROM tuotteen_toimittajat
-            INNER JOIN tuote ON (tuotteen_toimittajat.yhtio = tuote.yhtio
-              AND tuotteen_toimittajat.tuoteno    = tuote.tuoteno)
-            INNER JOIN liitetiedostot ON (liitetiedostot.yhtio = tuote.yhtio
-              AND liitetiedostot.liitos           = 'tuote'
-              AND liitetiedostot.liitostunnus     = tuote.tunnus
-              AND liitetiedostot.kayttotarkoitus  = '{$tiedoston_tyyppi}')
-            WHERE tuotteen_toimittajat.yhtio      = '{$kukarow['yhtio']}'
-            AND tuotteen_toimittajat.liitostunnus = '{$toimittajan_tunnus}'
-            ORDER BY liitetiedostot.selite";
+  $query  = "SELECT liitetiedostot.tunnus,
+             liitetiedostot.kayttotarkoitus,
+             liitetiedostot.selite
+             FROM tuotteen_toimittajat
+             INNER JOIN tuote ON (tuote.yhtio = '{$kukarow['yhtio']}'
+               AND tuotteen_toimittajat.tuoteno    = tuote.tuoteno)
+             INNER JOIN liitetiedostot ON (liitetiedostot.yhtio = '{$kukarow['yhtio']}'
+               AND liitetiedostot.liitos           = 'tuote'
+               AND liitetiedostot.liitostunnus     = tuote.tunnus
+               AND liitetiedostot.kayttotarkoitus  = '{$tiedoston_tyyppi}')
+             WHERE tuotteen_toimittajat.yhtio      = '{$kukarow['yhtio']}'
+             AND tuotteen_toimittajat.liitostunnus = '{$toimittajan_tunnus}'
+             ORDER BY liitetiedostot.selite";
   $result = pupe_query($query);
 
   $tiedostot = array();

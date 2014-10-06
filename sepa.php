@@ -65,7 +65,7 @@ function sepa_paymentinfo($laskurow) {
   $PmtInfId = $PmtInf->addChild('PmtInfId', $laskurow['tunnus']);                                  // PaymentInformationIdentification, Pakollinen kentt‰
   $PmtMtd = $PmtInf->addChild('PmtMtd', 'TRF');                                           // PaymentMethod, Pakollinen kentt‰ (TRF = transfer)
 
-  if (tarkista_sepa($laskurow["iban_maa"]) !== FALSE) {
+  if ($laskurow["sepa"] === 'SEPA') {
     $PmtTpInf = $PmtInf->addChild('PmtTpInf');                                            // Jos SEPA maa, laitetaan n‰m‰ segmentit mukaan
     // $InstrPrty = $PmtTpInf->addChild('InstrPrty');
     $SvcLvl = $PmtTpInf->addChild('SvcLvl');
@@ -550,22 +550,14 @@ $ediban_maa       = '';
 $sepa_maat_array  = array();
 
 $sepa_maat_array  = tarkista_sepa($ediban_maa, 'K');
-foreach ($sepa_maat_array as $maa => $pituus) {
-  $sepamaat .= $maa.", ";
-}
-#echo "<pre>",var_dump($sepamaat),"</pre>"; die;
-#$sepamaat = implode(",", $sepa_maat_array);
-#echo "701: $sepamaat <br><br>"; die;
-$sepa_maat = array('AL','AD','AT','BE','BA','BG','HR','CY','CZ','DK','EE','FO','FI','FR','GE','DE','GI','GR','GL','HU','IS','IE','IL','IT','KZ','LV','LB','LI','LT','LU','MK','MT','MU','MC','ME','NL','NO','PL','PT','RO','SM','SA','RS','SK','SI','ES','SE','CH','TN','TR','GB'); 
-
-$sepamaat = implode("','",$sepa_maat);
-$sepamaat = "'', '".$sepamaat."'";
-
-echo "$sepamaat <br><br>";
+$sepamaat = "'".implode("','", $sepa_maat_array)."'";
 
 // Haetaan poimitut maksut (HUOM: sama selecti alempana!!!!)
-$haku_query = "(SELECT lasku.*,
+$haku_query = "SELECT lasku.*,
                if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
+               if((lasku.ultilno_maa != '' 
+                 AND lasku.ultilno_maa in ($sepamaat)) 
+                 OR lasku.maa in ($sepamaat), 'SEPA', '') sepa,
                yriti.iban yriti_iban,
                yriti.bic yriti_bic,
                yriti.asiakastunnus yriti_asiakastunnus,
@@ -579,30 +571,9 @@ $haku_query = "(SELECT lasku.*,
                 AND yriti.kaytossa = '')
                WHERE lasku.yhtio   = '{$kukarow["yhtio"]}'
                {$lisa}
-               AND lasku.ultilno_maa in ($sepamaat)
-               AND lasku.maa in ($sepamaat)
-               ORDER BY maksu_tili, olmapvm, iban_maa, ultilno)
-               UNION
-               (SELECT lasku.*,
-               if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
-               yriti.iban yriti_iban,
-               yriti.bic yriti_bic,
-               yriti.asiakastunnus yriti_asiakastunnus,
-               yriti.tunnus AS yriti_tunnus,
-               date_format(lasku.popvm, '%d.%m.%y.%H.%i.%s') popvm_dmy
-               FROM lasku
-               INNER JOIN valuu ON (valuu.yhtio = lasku.yhtio
-                AND valuu.nimi     = lasku.valkoodi)
-               INNER JOIN yriti ON (yriti.yhtio = lasku.yhtio
-                AND yriti.tunnus   = lasku.maksu_tili
-                AND yriti.kaytossa = '')
-               WHERE lasku.yhtio   = '{$kukarow["yhtio"]}'
-                {$lisa}
-                #AND lasku.ultilno_maa not in ($sepamaat)
-                AND lasku.maa not in ($sepamaat)
-               ORDER BY maksu_tili, olmapvm, ultilno)";
+               ORDER BY maksu_tili, olmapvm, sepa, ultilno";
 $result = pupe_query($haku_query);
-echo "$haku_query <br><br>";
+
 if ($tee == "") {
 
   $_num = mysql_num_rows($result);
@@ -728,7 +699,7 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
   $tapahtuma_maara  = 0;
   $edpvm            = "0000-00-00";
   $edtili           = "";
-  $ediban_maa       = "";
+  $edsepa           = "";
   $edpituus         = 
   $netotettava_laskut  = array();
   $netotettava_summa  = array();
@@ -812,9 +783,14 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
   // Tehd‰‰n netotetut tapahtumat
   foreach ($netotettava_laskut as $i => $tunnukset) {
     $query = "SELECT lasku.*, if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
+              if((lasku.ultilno_maa != '' 
+                AND lasku.ultilno_maa in ($sepamaat)) 
+                or lasku.maa in ($sepamaat), 'SEPA', '') sepa,
               yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus
               FROM lasku
-              JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili AND yriti.kaytossa = '')
+              JOIN yriti ON (yriti.yhtio = lasku.yhtio 
+                AND yriti.tunnus = lasku.maksu_tili 
+                AND yriti.kaytossa = '')
               WHERE lasku.yhtio = '$kukarow[yhtio]'
               AND lasku.tunnus  in ($tunnukset)
               LIMIT 1";
@@ -850,10 +826,13 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
   if ($netotetut_laskut != "") {
     $lisa .= " and lasku.tunnus not in ($netotetut_laskut) ";
   }
-echo "825: $sepamaat, $sepa_maat <br><br>";
+
   // Haetaan poimitut maksut (HUOM: sama selecti ylemp‰n‰!!!!)
-  $haku_query = "(SELECT lasku.*,
+  $haku_query = "SELECT lasku.*,
                  if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
+                 if((lasku.ultilno_maa != '' 
+                   AND lasku.ultilno_maa in ($sepamaat)) 
+                   OR lasku.maa in ($sepamaat), 'SEPA', '') sepa,
                  yriti.iban yriti_iban,
                  yriti.bic yriti_bic,
                  yriti.asiakastunnus yriti_asiakastunnus,
@@ -866,27 +845,7 @@ echo "825: $sepamaat, $sepa_maat <br><br>";
                   AND yriti.kaytossa = '')
                  WHERE lasku.yhtio   = '{$kukarow["yhtio"]}'
                  {$lisa}
-                 AND lasku.ultilno_maa in ($sepamaat)
-                 AND lasku.maa in ($sepamaat)
-                 ORDER BY maksu_tili, olmapvm, iban_maa, ultilno)
-                 UNION
-                 (SELECT lasku.*,
-                 if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
-                 yriti.iban yriti_iban,
-                 yriti.bic yriti_bic,
-                 yriti.asiakastunnus yriti_asiakastunnus,
-                 date_format(lasku.popvm, '%d.%m.%y.%H.%i.%s') popvm_dmy
-                 FROM lasku
-                 INNER JOIN valuu ON (valuu.yhtio = lasku.yhtio
-                  AND valuu.nimi     = lasku.valkoodi)
-                 INNER JOIN yriti ON (yriti.yhtio = lasku.yhtio
-                  AND yriti.tunnus   = lasku.maksu_tili
-                  AND yriti.kaytossa = '')
-                 WHERE lasku.yhtio   = '{$kukarow["yhtio"]}'
-                 {$lisa}
-                 #AND lasku.ultilno_maa not in ($sepamaat)
-                 AND lasku.maa not in ($sepamaat)
-                 ORDER BY maksu_tili, olmapvm, iban_maa, ultilno)";
+                 ORDER BY maksu_tili, olmapvm, sepa, ultilno";
   $result = pupe_query($haku_query);
 
   while ($laskurow = mysql_fetch_assoc($result)) {
@@ -899,21 +858,12 @@ echo "825: $sepamaat, $sepa_maat <br><br>";
     if ($edmaksutili != $laskurow['maksu_tili']) {
       $edmaksutili = $laskurow['maksu_tili'];
     }
+    
     // Sepa-maiden maksuista oma er‰ ja ei-sepa-maiden maksut toiseen er‰‰n
-    if ($ediban_maa != $laskurow['iban_maa']) {
-      $ediban_maa = $laskurow['iban_maa'];
-      if (tarkista_sepa($laskurow["iban_maa"]) !== FALSE) {
-        $sepa = 'SEPA';
-      }
-      else  {
-        $sepa = '';
-      }
-    }
-     
-    if ($edpvm != $laskurow['olmapvm'] or $edsepa != $sepa) {        
+    if ($edpvm != $laskurow['olmapvm'] or $edsepa != $laskurow['sepa']) {        
         sepa_paymentinfo($laskurow);
         $edpvm = $laskurow['olmapvm'];
-        $edsepa = $sepa;
+        $edsepa = $laskurow['sepa'];
     }
 
     sepa_credittransfer($laskurow, $popvm_nyt);

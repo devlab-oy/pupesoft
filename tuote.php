@@ -478,15 +478,12 @@ if ($tee == 'Z') {
     echo "<td>".t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite");
 
     $palautus = t_tuotteen_avainsanat($tuoterow, "pakkauskoko2");
-    if (is_array($palautus) and count($palautus) > 0) {
-      echo "<br>";
-      echo "{$palautus["selite"]} ".t_avainsana("Y", "", "and avainsana.selite='{$palautus["selitetark"]}'", "", "", "selite");
-    }
+    if ($palautus != '' and $palautus != 'pakkauskoko2') {
+      echo "<br>$palautus";    }
 
     $palautus = t_tuotteen_avainsanat($tuoterow, "pakkauskoko3");
-    if (is_array($palautus) and count($palautus) > 0) {
-      echo "<br>";
-      echo "{$palautus["selite"]} ".t_avainsana("Y", "", "and avainsana.selite='{$palautus["selitetark"]}'", "", "", "selite");
+    if ($palautus != '' and $palautus != 'pakkauskoko3') {
+      echo "<br>$palautus";
     }
 
     echo "</td>";

@@ -11136,7 +11136,6 @@ if (!function_exists('t_tuotteen_avainsanat')) {
       $row = mysql_fetch_assoc($result);
       // jos löydettiin käännös palautetaan se
       if ($row["selitetark"] != "") {
-        $palautus = "";
         $palautus = "{$row["selite"]} {$row["selitetark"]}";
       }
       else {

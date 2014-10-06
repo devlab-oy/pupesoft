@@ -1502,17 +1502,23 @@ class MagentoClient {
         }
       }
 
-      // Haetaan ensin asiakkaan laskutus- ja toimitusosoitteet
-      $address_array = $this->_proxy->call(
-        $this->_session,
-        'customer_address.list',
-        $asiakas['magento_tunnus']);
-      // Ja poistetaan ne
-      if (count($address_array) > 0) {
-        foreach ($address_array as $address) {
-          $result = $this->_proxy->call(
-            $this->_session, 'customer_address.delete', $address['customer_address_id']);
+      try {
+        // Haetaan ensin asiakkaan laskutus- ja toimitusosoitteet
+        $address_array = $this->_proxy->call(
+          $this->_session,
+          'customer_address.list',
+          $asiakas['magento_tunnus']);
+        // Ja poistetaan ne
+        if (count($address_array) > 0) {
+          foreach ($address_array as $address) {
+            $result = $this->_proxy->call(
+              $this->_session, 'customer_address.delete', $address['customer_address_id']);
+          }
         }
+
+      }
+      catch (Exception $e) {
+         $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' osoitteiden haku epäonnistui " . print_r("Asiakkaan magento_tunnus: {$asiakas['magento_tunnus']}", true), $e);   
       }
 
       if (isset($laskutus_osoite_data['firstname']) and !empty($laskutus_osoite_data['firstname'])) {

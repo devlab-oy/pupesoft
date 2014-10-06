@@ -86,13 +86,10 @@ if ($ajetaanko_kaikki == "NO") {
   $muutoslisa = "AND (tuote.muutospvm >= '{$datetime_checkpoint}'
             OR ta_nimitys_se.muutospvm >= '{$datetime_checkpoint}'
             OR ta_nimitys_en.muutospvm >= '{$datetime_checkpoint}'
-            )
-            HAVING tuote.muutospvm >= magento_paivitysaika ";
-  $aikalisa = " ifnull(paivitetty_magentoon.selite, '{$datetime_checkpoint}') magento_paivitysaika, ";
+            )";
 }
 else {
   $muutoslisa = "";
-  $aikalisa = "";
 }
 
 echo date("d.m.Y @ G:i:s")." - Aloitetaan tuote-export.\n";
@@ -103,7 +100,6 @@ $query = "SELECT
           tuote.*,
           tuote.mallitarkenne campaign_code,
           tuote.malli target,
-          $aikalisa
           tuote.leimahduspiste onsale,
           ta_nimitys_se.selite nimi_swe,
           ta_nimitys_en.selite nimi_eng,
@@ -121,10 +117,6 @@ $query = "SELECT
             and tuote.tuoteno        = ta_nimitys_en.tuoteno
             and ta_nimitys_en.laji   = 'nimitys'
             and ta_nimitys_en.kieli  = 'en'
-          LEFT JOIN tuotteen_avainsanat AS paivitetty_magentoon ON tuote.yhtio = paivitetty_magentoon.yhtio
-            AND tuote.tuoteno = paivitetty_magentoon.tuoteno
-            AND paivitetty_magentoon.laji = 'paivitetty_magentoon'
-            AND paivitetty_magentoon.kieli = ''
           WHERE tuote.yhtio          = '{$kukarow["yhtio"]}'
             AND tuote.status        != 'P'
             AND tuote.tuotetyyppi    NOT in ('A','B')

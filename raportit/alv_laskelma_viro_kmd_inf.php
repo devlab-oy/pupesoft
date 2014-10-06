@@ -179,8 +179,7 @@ if ($tee == 'laskelma') {
   if ($_rajaa_chk) {
 
     $query = "SELECT lasku.ytunnus,
-          lasku.liitostunnus exclude_asiakkaat,
-          sum(abs(tiliointi.summa)) summa
+          lasku.liitostunnus exclude_asiakkaat
           FROM lasku
           JOIN tiliointi ON (
             tiliointi.yhtio = lasku.yhtio AND
@@ -304,9 +303,9 @@ if ($tee == 'laskelma') {
 
   while ($row = mysql_fetch_assoc($result)) {
 
-    if ($laskelma == 'a' and $_rajaa_chk and $row['veloitukset'] < $rajaa and $row['hyvitykset'] < $rajaa) {
-      continue;
-    }
+    // if ($laskelma == 'a' and $_rajaa_chk and $row['veloitukset'] < $rajaa and $row['hyvitykset'] < $rajaa) {
+    //   continue;
+    // }
 
     $query = "SELECT lasku.laskunro laskunro,
               {$laskun_nimi_lisa_select}
@@ -334,7 +333,7 @@ if ($tee == 'laskelma') {
       $_vero = $row['veronmaara'];
     }
 
-    if ($row['veropros'] == 0 or $_vero == 0) continue;
+    if ($_vero == 0) continue;
 
     $aineistoon = $_green;
 

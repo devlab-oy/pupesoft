@@ -271,34 +271,62 @@ function hae_tilausrivit($laskunro) {
 }
 
 function summat($lasku) {
-  if ($lasku["valkoodi"] != '' and trim(strtoupper($lasku["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-    $yhteensa = $kassa_ale != '' ? ($lasku["summa_valuutassa"] + $lasku["pyoristys_valuutassa"]) * (1 - $kassa_ale / 100) : $lasku["summa_valuutassa"] + $lasku["pyoristys_valuutassa"];
+  $summa_valuutassa     = $lasku["summa_valuutassa"];
+  $pyoristys_valuutassa = $lasku["pyoristys_valuutassa"];
+  $pyoristys            = $lasku["pyoristys"];
+  $valkoodi             = $lasku["valkoodi"];
+  $summa                = $lasku["summa"];
+
+  $ehto1 = $valkoodi != '';
+  $ehto2 = trim(strtoupper($valkoodi)) != trim(strtoupper($yhtiorow["valkoodi"]));
+
+  if ($ehto1 and $ehto2) {
+    if ($kassa_ale != '') {
+      $yhteensa = ($summa_valuutassa + $pyoristys_valuutassa) * (1 - $kassa_ale / 100);
+    }
+    else {
+      $yhteensa = $summa_valuutassa + $pyoristys_valuutassa;
+    }
+
     $yhteensa = hintapyoristys($yhteensa);
 
-    if ($lasku["pyoristys_valuutassa"] != 0) {
+    if ($pyoristys_valuutassa != 0) {
 
-      $pyoristys = $kassa_ale != '' ? $lasku["pyoristys_valuutassa"] * (1 - $kassa_ale / 100) : $lasku["pyoristys_valuutassa"];
-      $pyoristys *= -1;
-      $pyoristys = hintapyoristys($pyoristys);
+      if ($kassa_ale != '') {
+        $lopullinen_pyoristys = $pyoristys_valuutassa * (1 - $kassa_ale / 100);
+      }
+      else {
+        $lopullinen_pyoristys = $pyoristys_valuutassa;
+      }
+
+      $lopullinen_pyoristys *= -1;
+      $lopullinen_pyoristys = hintapyoristys($lopullinen_pyoristys);
     }
   }
   else {
-    $yhteensa = $kassa_ale != '' ? ($lasku["summa"] + $lasku["pyoristys"]) * (1 - $kassa_ale / 100) : $lasku["summa"] + $lasku["pyoristys"];
+    if ($kassa_ale != '') {
+      $yhteensa = ($summa + $pyoristys) * (1 - $kassa_ale / 100);
+    }
+    else {
+      $yhteensa = $summa + $pyoristys;
+    }
+
     $yhteensa = hintapyoristys($yhteensa);
-    if ($lasku["pyoristys"] != 0) {
-      $pyoristys = $kassa_ale != '' ? $lasku["pyoristys"] * (1 - $kassa_ale / 100) : $lasku["pyoristys"];
-      $pyoristys = hintapyoristys($pyoristys);
+
+    if ($pyoristys != 0) {
+      $lopullinen_pyoristys = $kassa_ale != '' ? $pyoristys * (1 - $kassa_ale / 100) : $pyoristys;
+      $lopullinen_pyoristys = hintapyoristys($lopullinen_pyoristys);
     }
   }
 
-  if ($lasku["valkoodi"] != '' and trim(strtoupper($lasku["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-    $loppusumma = $lasku["summa_valuutassa"];
+  if ($valkoodi != '' and trim(strtoupper($valkoodi)) != trim(strtoupper($yhtiorow["valkoodi"]))) {
+    $loppusumma = $summa_valuutassa;
   }
   else {
-    $loppusumma = $lasku["summa"];
+    $loppusumma = $summa;
   }
 
-  return array($yhteensa, $pyoristys, $loppusumma);
+  return array($yhteensa, $lopullinen_pyoristys, $loppusumma);
 }
 
 function laske_yksikkohinta($tilausrivi) {

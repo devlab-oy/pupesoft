@@ -590,7 +590,7 @@ class MagentoClient {
       if (count($verkkokauppatuotteet_erikoisparametrit) > 0) {
         foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
           $key = $erikoisparametri['nimi'];
-          if ($key == 'kieliversiot') continue;
+          if ($key == 'kieliversiot' or $key == 'kauppakohtaiset_hinnat') continue;
           if (isset($tuotteet[0][$erikoisparametri['arvo']])) {
             $configurable_multi_data[$key] = $this->get_option_id($key, $tuotteet[0][$erikoisparametri['arvo']]);
           }

@@ -333,7 +333,7 @@ if ($tee == 'laskelma') {
       $_vero = $row['veronmaara'];
     }
 
-    if (empty($_vero)) continue;
+    if (trim($_vero) == '' or $_vero == 0) continue;
     if (($laskurow['laskun_summa'] == '' or $laskurow['laskun_summa'] == 0) and ($row['veropros'] == '' or $row['veropros'] == 0)) continue;
 
     $aineistoon = $_green;

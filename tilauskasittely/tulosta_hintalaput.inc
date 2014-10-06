@@ -26,18 +26,10 @@ function tulosta_hintalaput($tuotteet) {
     $nimitys = explode("\n", wordwrap($tuote['nimitys'], 28));
     $hinta   = hintapyoristys($tuote['myyntihinta']);
 
-    if (empty($tuote['eankoodi'])) {
-      $viivakoodi              = viivakoodi($tuote['tuoteno'], "code128", 360, 60);
-      $viivakoodin_teksti      = $tuote['tuoteno'];
-      $viivakoodi_teksti_vasen = 50;
-      $viivakoodi_vasen        = 17;
-    }
-    else {
-      $viivakoodi              = viivakoodi($tuote['eankoodi'], "ean", 360, 60);
-      $viivakoodin_teksti      = $tuote['eankoodi'];
-      $viivakoodi_teksti_vasen = 42;
-      $viivakoodi_vasen        = 14;
-    }
+    $viivakoodi              = viivakoodi($tuote['tuoteno'], "code128", 360, 60);
+    $viivakoodin_teksti      = $tuote['tuoteno'];
+    $viivakoodi_teksti_vasen = 50;
+    $viivakoodi_vasen        = 17;
 
     $viivakoodin_asetukset = array(
       "scale" => array(

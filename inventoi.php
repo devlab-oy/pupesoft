@@ -12,12 +12,12 @@ if (strpos($_SERVER['SCRIPT_NAME'], "inventoi.php") !== FALSE) {
   }
 }
 
-if (!isset($fileesta))      $fileesta = "";
-if (!isset($filusta))      $filusta = "";
-if (!isset($livesearch_tee))  $livesearch_tee = "";
-if (!isset($mobiili))      $mobiili = "";
-if (!isset($laadittuaika))    $laadittuaika = "";
-if (!isset($enarifocus))    $enarifocus = "";
+if (!isset($fileesta))       $fileesta = "";
+if (!isset($filusta))        $filusta = "";
+if (!isset($livesearch_tee)) $livesearch_tee = "";
+if (!isset($mobiili))        $mobiili = "";
+if (!isset($laadittuaika))   $laadittuaika = "";
+if (!isset($enarifocus))     $enarifocus = "";
 
 $validi_kasinsyotetty_inventointipaivamaara = 0;
 
@@ -186,28 +186,6 @@ if ($tee == "FILE") {
   }
 }
 
-// lukitaan tableja
-$query = "LOCK TABLES tuotepaikat WRITE,
-          tapahtuma WRITE,
-          lasku WRITE,
-          tiliointi WRITE,
-          sanakirja WRITE,
-          tuote READ,
-          tilausrivi WRITE,
-          tuotteen_avainsanat READ,
-          sarjanumeroseuranta WRITE,
-          sarjanumeroseuranta_arvomuutos READ,
-          tilausrivi as tilausrivi_myynti READ,
-          tilausrivi as tilausrivi_osto READ,
-          tuotepaikat as tt READ,
-          avainsana as avainsana_kieli READ,
-          avainsana READ,
-          tili READ,
-          asiakas READ,
-          varastopaikat READ,
-          yhtion_toimipaikat READ";
-$result = pupe_query($query);
-
 //tuotteen varastostatus
 if ($tee == 'VALMIS') {
 
@@ -222,21 +200,38 @@ if ($tee == 'VALMIS') {
   }
 
   if (count($tuote) > 0) {
+
+    // lukitaan tableja
+    $query = "LOCK TABLES
+              avainsana READ,
+              lasku WRITE,
+              sanakirja WRITE,
+              sarjanumeroseuranta WRITE,
+              sarjanumeroseuranta_arvomuutos READ,
+              tapahtuma WRITE,
+              tilausrivi WRITE,
+              tili READ,
+              tiliointi WRITE,
+              tuote READ,
+              tuotepaikat WRITE,
+              varastopaikat READ,
+              yhtion_toimipaikat READ";
+    pupe_query($query);
+
     foreach ($tuote as $i => $tuotteet) {
 
       $tuotetiedot = explode("###", $tuotteet);
 
-      //näitä muuttujia me tarvitaan
-      $tuoteno       = $tuotetiedot[0];
-      $hyllyalue       = $tuotetiedot[1];
-      $hyllynro      = $tuotetiedot[2];
-      $hyllyvali      = $tuotetiedot[3];
-      $hyllytaso      = $tuotetiedot[4];
-      $kpl        = str_replace(",", ".", $maara[$i]);
-      $poikkeama      = 0;
-      $skp        = 0;
-      $inven_laji_tilino  = "";
-      $laadittuaika     = "now()";
+      $tuoteno           = $tuotetiedot[0];
+      $hyllyalue         = $tuotetiedot[1];
+      $hyllynro          = $tuotetiedot[2];
+      $hyllyvali         = $tuotetiedot[3];
+      $hyllytaso         = $tuotetiedot[4];
+      $kpl               = str_replace(",", ".", $maara[$i]);
+      $poikkeama         = 0;
+      $skp               = 0;
+      $inven_laji_tilino = "";
+      $laadittuaika      = "now()";
 
       if ($fileesta == "ON") {
         $inven_laji = $lajis[$i];
@@ -445,15 +440,14 @@ if ($tee == 'VALMIS') {
 
         //Haetaan tuotepaikan tiedot
         $query = "SELECT *
-                  FROM tuotepaikat, tuote
+                  FROM tuotepaikat
+                  JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
                   WHERE tuotepaikat.yhtio   = '$kukarow[yhtio]'
                   and tuotepaikat.tuoteno   = '$tuoteno'
                   and tuotepaikat.hyllyalue = '$hyllyalue'
                   and tuotepaikat.hyllynro  = '$hyllynro'
                   and tuotepaikat.hyllyvali = '$hyllyvali'
-                  and tuotepaikat.hyllytaso = '$hyllytaso'
-                  and tuote.tuoteno         = tuotepaikat.tuoteno
-                  and tuote.yhtio           = tuotepaikat.yhtio";
+                  and tuotepaikat.hyllytaso = '$hyllytaso'";
         $result = pupe_query($query);
 
         if (mysql_num_rows($result) == 0 and $virhe != 1) {
@@ -468,7 +462,11 @@ if ($tee == 'VALMIS') {
             if (mysql_num_rows($result) == 1) {
 
               // katotaan onko tuotteella jo oletuspaikka
-              $query = "SELECT * from tuotepaikat where yhtio='$kukarow[yhtio]' and tuoteno='$tuoteno' and oletus!=''";
+              $query = "SELECT *
+                        FROM tuotepaikat
+                        WHERE yhtio  = '$kukarow[yhtio]'
+                        AND tuoteno  = '$tuoteno'
+                        AND oletus  != ''";
               $result = pupe_query($query);
 
               if (mysql_num_rows($result) > 0) {
@@ -482,15 +480,14 @@ if ($tee == 'VALMIS') {
 
               // haetaan perustettu resultti (sama query ku ylhäällä)
               $query = "SELECT *
-                        FROM tuotepaikat, tuote
+                        FROM tuotepaikat
+                        JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
                         WHERE tuotepaikat.yhtio   = '$kukarow[yhtio]'
                         and tuotepaikat.tuoteno   = '$tuoteno'
                         and tuotepaikat.hyllyalue = '$hyllyalue'
                         and tuotepaikat.hyllynro  = '$hyllynro'
                         and tuotepaikat.hyllyvali = '$hyllyvali'
-                        and tuotepaikat.hyllytaso = '$hyllytaso'
-                        and tuote.tuoteno         = tuotepaikat.tuoteno
-                        and tuote.yhtio           = tuotepaikat.yhtio";
+                        and tuotepaikat.hyllytaso = '$hyllytaso'";
               $result = pupe_query($query);
 
               if (mysql_num_rows($result) == 1) {
@@ -530,16 +527,17 @@ if ($tee == 'VALMIS') {
               //katotaan paljonko saldot on muuttunut listan ajoajankohdasta
               $query = "SELECT sum(tapahtuma.kpl) muutos
                         FROM tapahtuma
-                        JOIN tilausrivi ON tapahtuma.yhtio = tilausrivi.yhtio and tapahtuma.rivitunnus = tilausrivi.tunnus
-                        and tilausrivi.hyllyalue  = '$hyllyalue'
-                        and tilausrivi.hyllynro   = '$hyllynro'
-                        and tilausrivi.hyllyvali  = '$hyllyvali'
-                        and tilausrivi.hyllytaso  = '$hyllytaso'
-                        WHERE tapahtuma.yhtio     = '$kukarow[yhtio]'
-                        and tapahtuma.tuoteno     = '$tuoteno'
-                        and tapahtuma.laadittu    >= {$row[inventointilista_aika]}
-                        and tapahtuma.kpl         <> 0
-                        and laji                 != 'Inventointi'";
+                        JOIN tilausrivi ON (tapahtuma.yhtio = tilausrivi.yhtio
+                          and tapahtuma.rivitunnus  = tilausrivi.tunnus
+                          and tilausrivi.hyllyalue  = '$hyllyalue'
+                          and tilausrivi.hyllynro   = '$hyllynro'
+                          and tilausrivi.hyllyvali  = '$hyllyvali'
+                          and tilausrivi.hyllytaso  = '$hyllytaso')
+                        WHERE tapahtuma.yhtio       = '$kukarow[yhtio]'
+                        and tapahtuma.tuoteno       = '$tuoteno'
+                        and tapahtuma.laadittu      >= {$row[inventointilista_aika]}
+                        and tapahtuma.kpl           <> 0
+                        and tapahtuma.laji         != 'Inventointi'";
               $result = pupe_query($query);
               $trow = mysql_fetch_assoc($result);
 
@@ -547,7 +545,7 @@ if ($tee == 'VALMIS') {
                 $saldomuutos = $trow["muutos"];
               }
 
-              //kuinka monta kerättyä oli listan ajohetkellä, mutta nyt ne ovat laskutettu tai laskuttamatta
+              // kuinka monta kerättyä oli listan ajohetkellä, mutta nyt ne ovat laskutettu tai laskuttamatta
               $query = "SELECT ifnull(sum(if(laskutettuaika='0000-00-00 00:00:00', varattu, kpl)), 0) keratty
                         FROM tilausrivi
                         WHERE yhtio     = '$kukarow[yhtio]'
@@ -798,18 +796,18 @@ if ($tee == 'VALMIS') {
               $query .= " SET saldo = saldo, ";
             }
 
-            $query .= " saldoaika         = now(),
-                  inventointiaika     = {$laadittuaika},
-                  inventointipoikkeama   = '$poikkeama',
-                  inventointilista_aika  = '0000-00-00 00:00:00',
-                  muuttaja         = '$kukarow[kuka]',
-                  muutospvm         = now()
-                  WHERE yhtio        = '$kukarow[yhtio]'
-                  and tuoteno        = '$tuoteno'
-                  and hyllyalue      = '$hyllyalue'
-                  and hyllynro      = '$hyllynro'
-                  and hyllyvali      = '$hyllyvali'
-                  and hyllytaso      = '$hyllytaso'";
+            $query .= " saldoaika             = now(),
+                        inventointiaika       = {$laadittuaika},
+                        inventointipoikkeama  = '$poikkeama',
+                        inventointilista_aika = '0000-00-00 00:00:00',
+                        muuttaja              = '$kukarow[kuka]',
+                        muutospvm             = now()
+                        WHERE yhtio           = '$kukarow[yhtio]'
+                        and tuoteno           = '$tuoteno'
+                        and hyllyalue         = '$hyllyalue'
+                        and hyllynro          = '$hyllynro'
+                        and hyllyvali         = '$hyllyvali'
+                        and hyllytaso         = '$hyllytaso'";
             $result = pupe_query($query);
 
             // Jos pävitettiin saldoa, tehdään kirjanpito. Vaikka summa olisi nolla. Muuten jälkilaskenta ei osaa korjata tätä, jos tiliöintejä ei tehdä.
@@ -859,14 +857,14 @@ if ($tee == 'VALMIS') {
 
                 $query = "SELECT toimipaikka
                           FROM varastopaikat
-                          WHERE
-                          concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper('$hyllyalue'), 5, '0'),lpad(upper('$hyllynro'), 5, '0')) and
-                          concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper('$hyllyalue'), 5, '0'),lpad(upper('$hyllynro'), 5, '0')) and
-                          yhtio = '$kukarow[yhtio]'";
+                          WHERE yhtio = '$kukarow[yhtio]'
+                          AND concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper('$hyllyalue'), 5, '0'),lpad(upper('$hyllynro'), 5, '0'))
+                          AND concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper('$hyllyalue'), 5, '0'),lpad(upper('$hyllynro'), 5, '0'))";
                 $varcheckres = pupe_query($query);
                 $varcheckrow = mysql_fetch_assoc($varcheckres);
 
                 unset($toimipaikkarow);
+
                 if ($varcheckrow['toimipaikka'] > 0) {
                   $query = "SELECT kustp, kohde, projekti
                             FROM yhtion_toimipaikat
@@ -879,7 +877,7 @@ if ($tee == 'VALMIS') {
                 // Otetaan ensisijaisesti kustannuspaikka toimipaikan takaa
                 $kustp_ins     = (isset($toimipaikkarow) and $toimipaikkarow["kustp"] > 0) ? $toimipaikkarow["kustp"] : $tuote_row["kustp"];
                 $kohde_ins     = (isset($toimipaikkarow) and $toimipaikkarow["kohde"] > 0) ? $toimipaikkarow["kohde"] : $tuote_row["kohde"];
-                $projekti_ins   = (isset($toimipaikkarow) and $toimipaikkarow["projekti"] > 0) ? $toimipaikkarow["projekti"] : $tuote_row["projekti"];
+                $projekti_ins  = (isset($toimipaikkarow) and $toimipaikkarow["projekti"] > 0) ? $toimipaikkarow["projekti"] : $tuote_row["projekti"];
               }
               else {
                 // Otetaan ensisijaisesti kustannuspaikka tuotteen takaa
@@ -894,6 +892,8 @@ if ($tee == 'VALMIS') {
               // Toissijaisesti kokeillaan vielä varasto-tilin oletuskustannuspaikkaa
               list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
 
+              $tiliointisumma = round($summa, 2);
+
               $query = "INSERT into tiliointi set
                         yhtio    = '$kukarow[yhtio]',
                         ltunnus  = '$laskuid',
@@ -902,7 +902,7 @@ if ($tee == 'VALMIS') {
                         kohde    = '{$kohde_ins}',
                         projekti = '{$projekti_ins}',
                         tapvm    = now(),
-                        summa    = '$summa',
+                        summa    = $tiliointisumma,
                         vero     = 0,
                         lukko    = '',
                         selite   = 'Inventointi: ".t("Tuotteen")." {$row["tuoteno"]} $selite',
@@ -918,7 +918,7 @@ if ($tee == 'VALMIS') {
                         kohde    = '{$kohde_ins}',
                         projekti = '{$projekti_ins}',
                         tapvm    = now(),
-                        summa    = $summa * -1,
+                        summa    = $tiliointisumma * -1,
                         vero     = 0,
                         lukko    = '',
                         selite   = 'Inventointi: ".t("Tuotteen")." {$row["tuoteno"]} $selite',
@@ -1100,6 +1100,9 @@ if ($tee == 'VALMIS') {
         //echo "Tuote $tuoteno $hyllyalue $hyllynro $hyllyvali $hyllytaso Kappalemäärää ei syötetty!<br>";
       }
     }
+
+    $query = "UNLOCK TABLES";
+    pupe_query($query);
   }
 
   if ($virhe == 0 and $mobiili != "YES") {
@@ -1121,12 +1124,12 @@ if ($tee == 'VALMIS') {
     }
 
     // seuraava sivu
-    $tuoteno   = "";
-    $hyllyalue   = "";
-    $hyllynro  = "";
+    $tuoteno    = "";
+    $hyllyalue  = "";
+    $hyllynro   = "";
     $hyllyvali  = "";
     $hyllytaso  = "";
-    $kpl    = "";
+    $kpl        = "";
     $poikkeama  = "";
   }
   elseif ($mobiili == "YES") {
@@ -1137,9 +1140,6 @@ if ($tee == 'VALMIS') {
   }
 
   if ($tee == "" and $lopetus != '') {
-    $query = "UNLOCK TABLES";
-    $result = pupe_query($query);
-
     lopetus($lopetus, "META");
   }
 }
@@ -1697,9 +1697,8 @@ if ($tee == 'INVENTOI') {
     echo "<input type='hidden' name='enarifocus' value='1'>";
   }
 
-  if (mysql_num_rows($saldoresult) == $rivimaara) {
+  if ($lista != "" and mysql_num_rows($saldoresult) == $rivimaara) {
     echo "<input type='submit' name='next' value='".t("Inventoi/Seuraava sivu")."'>";
-    //echo "<input type='submit' name='prev' value='".t("Inventoi/Edellinen sivu")."'> ";
   }
   else {
     echo "<input type='submit' name='valmis' value='".t("Inventoi/Valmis")."'>";
@@ -1717,7 +1716,7 @@ if ($tee == 'MITATOI') {
 
   echo t("Inventointilista")." $lista ".t("kuitattu pois")."!<br>";
 
-  $lista   = "";
+  $lista = "";
   $tee   = "";
 }
 
@@ -1885,10 +1884,6 @@ if ($tee == '') {
     echo "</table>";
   }
 }
-
-// lukitaan tableja
-$query = "UNLOCK TABLES";
-$result = pupe_query($query);
 
 if ($mobiili != "YES") {
   require "inc/footer.inc";

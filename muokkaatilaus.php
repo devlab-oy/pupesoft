@@ -753,7 +753,16 @@ else {
 
     if ($toim == 'YLLAPITO' and $etsi != "" and $haku != "") {
       $haku = substr($haku, 0, -2); // Poistetaan vika sulku $hausta
-      $haku .= " or tilausrivin_lisatiedot.sopimuksen_lisatieto1 like '%{$etsi}%' or tilausrivin_lisatiedot.sopimuksen_lisatieto2 like '%{$etsi}%' or lasku.asiakkaan_tilausnumero like '%{$etsi}%') ";
+      $laitelisa = '';
+
+      if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
+        $laitelisa = " or laite.sarjanro like '%{$etsi}%' ";
+      }
+
+      $haku .= " or tilausrivin_lisatiedot.sopimuksen_lisatieto1 like '%{$etsi}%'
+                 or tilausrivin_lisatiedot.sopimuksen_lisatieto2 like '%{$etsi}%'
+                 or lasku.asiakkaan_tilausnumero like '%{$etsi}%'
+                 $laitelisa) ";
     }
 
     // Myyntitilauksia voidaan etsiä myös asiakkaan tilausnumerolla
@@ -1659,6 +1668,11 @@ else {
     $miinus = 6;
   }
   elseif ($toim == 'YLLAPITO') {
+    $laitejoini = '';
+    if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
+      $laitejoini = " LEFT JOIN laitteen_sopimukset ON laitteen_sopimukset.sopimusrivin_tunnus = tilausrivi.tunnus
+                      LEFT JOIN laite ON laite.tunnus = laitteen_sopimukset.laitteen_tunnus ";
+    }
     $query = "SELECT lasku.tunnus tilaus,
               lasku.asiakkaan_tilausnumero 'asiak. tilno',
               $asiakasstring asiakas,
@@ -1672,6 +1686,7 @@ else {
               lasku.tunnus,
               lasku.varasto,
               tunnusnippu,
+              group_concat(tilausrivi.tunnus) tilausrivitunnukset,
               sopimus_loppupvm
               FROM lasku use index (tila_index)
               JOIN tilausrivi on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
@@ -1679,9 +1694,10 @@ else {
               LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
               LEFT JOIN kuka as kuka2 ON (kuka2.yhtio = lasku.yhtio and kuka2.tunnus = lasku.myyja)
               LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus)
+              {$laitejoini}
               WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-              AND tila          = '0'
-              AND alatila       NOT IN ('D')
+              AND lasku.tila    = '0'
+              AND lasku.alatila NOT IN ('D')
               $haku
               GROUP BY 1,2,3,4,5,6
               $mt_order_by
@@ -2313,6 +2329,18 @@ else {
           }
           elseif (is_numeric($row[$fieldname])) {
             echo "<td class='$class' align='right' valign='top'>".$row[$fieldname]."</td>";
+          }
+          elseif ($yhtiorow['laiterekisteri_kaytossa'] != '' and $whiletoim == "YLLAPITO" and $fieldname == 'sarjanumero') {
+            // Haetaan sopimusriviin liitetyt sarjanumerot laiterekisteristä/laitteen_sopimuksista
+            $query = "SELECT
+                      group_concat(distinct laite.sarjanro SEPARATOR '<br>') sarjanumerot
+                      FROM laitteen_sopimukset
+                      JOIN laite ON laite.tunnus = laitteen_sopimukset.laitteen_tunnus
+                      WHERE laitteen_sopimukset.sopimusrivin_tunnus IN ({$row['tilausrivitunnukset']})";
+            $res = pupe_query($query);
+            $sarjanumerotrivi = mysql_fetch_assoc($res);
+
+            echo "<td class='$class' valign='top'>{$sarjanumerotrivi['sarjanumerot']}</td>";
           }
           else {
             echo "<td class='$class' valign='top'>".$row[$fieldname]."</td>";

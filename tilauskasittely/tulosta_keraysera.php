@@ -542,8 +542,6 @@ if ($tee != '') {
       }
 
       while ($loop_counter) {
-
-        // HUOM!!! FUNKTIOSSA TEHDƒƒN LOCK TABLESIT, LUKKOJA EI AVATA TƒSSƒ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KƒYT÷N JƒLKEEN!!!!!!!!!!
         $erat = tee_keraysera($keraajarow['keraysvyohyke'], $select_varasto);
 
         if (isset($erat['tilaukset']) and count($erat['tilaukset']) > 0) {
@@ -555,7 +553,8 @@ if ($tee != '') {
           if (isset($lisatyt_tilaukset) and count($lisatyt_tilaukset) > 0) {
 
             $otunnukset = implode(",", $lisatyt_tilaukset);
-            $kerayslistatunnus = array_shift(array_keys($lisatyt_tilaukset));
+            $lisatyt_tilaukset_keys = array_keys($lisatyt_tilaukset);
+            $kerayslistatunnus = array_shift($lisatyt_tilaukset_keys);
 
             $query = "SELECT *
                       FROM lasku
@@ -564,10 +563,10 @@ if ($tee != '') {
             $res = pupe_query($query);
             $laskurow = mysql_fetch_assoc($res);
 
-            $tilausnumeroita      = $otunnukset;
-            $valittu_tulostin     = $kerayslistatulostin;
-            $keraysvyohyke      = $erat['keraysvyohyketiedot']['keraysvyohyke'];
-            $laskuja         = count($erat['tilaukset']);
+            $tilausnumeroita  = $otunnukset;
+            $valittu_tulostin = $kerayslistatulostin;
+            $keraysvyohyke    = $erat['keraysvyohyketiedot']['keraysvyohyke'];
+            $laskuja          = count($erat['tilaukset']);
             $lukotetaan       = FALSE;
 
             require "tilauskasittely/tilaus-valmis-tulostus.inc";
@@ -590,10 +589,9 @@ if ($tee != '') {
           echo "<font class='message'>", t("Ei ole yht‰‰n ker‰tt‰v‰‰ ker‰yser‰‰"), ".</font><br />";
           $loop_counter = FALSE;
         }
-
-        // lukitaan tableja
-        $query = "UNLOCK TABLES";
-        $result = pupe_query($query);
+        
+        // Vapautetaan ker‰syer‰n nappaamat tilaukset
+        release_tee_keraysera();
 
         if (isset($lisatyt_tilaukset) and count($lisatyt_tilaukset) > 0) {
 
@@ -853,7 +851,7 @@ if ($tee != '') {
                       lasku.liitostunnus,
                       CONCAT(tilausrivi.hyllyalue, ' ', tilausrivi.hyllynro, ' ', tilausrivi.hyllyvali, ' ', tilausrivi.hyllytaso) hyllypaikka,
                       tilausrivi.tunnus AS tilausrivin_tunnus
-                       FROM kerayserat
+                      FROM kerayserat
                       JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
                       JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
                       JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)

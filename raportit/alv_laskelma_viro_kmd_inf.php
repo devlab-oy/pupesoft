@@ -178,8 +178,7 @@ if ($tee == 'laskelma') {
 
   if ($_rajaa_chk) {
 
-    $query = "SELECT lasku.ytunnus,
-          lasku.liitostunnus exclude_asiakkaat
+    $query = "SELECT lasku.ytunnus
           FROM lasku
           JOIN tiliointi ON (
             tiliointi.yhtio = lasku.yhtio AND
@@ -193,7 +192,7 @@ if ($tee == 'laskelma') {
           WHERE lasku.yhtio = '{$kukarow['yhtio']}'
           {$tilat}
           {$tilaustyyppi}
-          GROUP BY 1,2
+          GROUP BY 1
           HAVING abs(sum(if(tiliointi.summa > 0, tiliointi.summa, 0))) < {$rajaa}
           AND abs(sum(if(tiliointi.summa < 0, tiliointi.summa, 0))) < {$rajaa}";
     $result = pupe_query($query);
@@ -201,11 +200,11 @@ if ($tee == 'laskelma') {
     $_exclude_asiakkaat = array();
 
     while ($row = mysql_fetch_assoc($result)) {
-      $_exclude_asiakkaat[$row['exclude_asiakkaat']] = $row['exclude_asiakkaat'];
+      $_exclude_asiakkaat[$row['ytunnus']] = $row['ytunnus'];
     }
 
     if (!empty($_exclude_asiakkaat)) {
-      $rajaalisa = "and lasku.liitostunnus NOT IN (".implode(",", $_exclude_asiakkaat).")";
+      $rajaalisa = "and lasku.ytunnus NOT IN (".implode(",", $_exclude_asiakkaat).")";
     }
   }
 

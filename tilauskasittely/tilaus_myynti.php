@@ -206,6 +206,10 @@ if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
   enable_ajax();
 }
 
+if ($yhtiorow['laite_huolto'] == 'X') {
+  require_once('inc/laite_huolto_functions.inc');
+}
+
 if ($kukarow["extranet"] == "") {
   echo "<script src='../js/tilaus.js'></script>";
   echo "<script src='../js/tilaus_myynti/tilaus_myynti.js'></script>";
@@ -226,6 +230,12 @@ if ($kukarow["extranet"] == "" and in_array($toim, array("PIKATILAUS", "RIVISYOT
   require_once 'tilauskasittely/ostoskorin_haku.inc';
 }
 
+//$laite_tunnus tulee tyojono2.php Muu toimenpiteestä. Tunnus laitetaan sessioon, koska jos
+//käyttäjä klikkailee tilaus_myynnissä niin laite_tunnus katoaa ensimmäisessä submitissa
+//jolloin se pitäisi olla joka formissa. Se laitetaan siis sessioon turvaan.
+//Sessioon laitettavaa laite_tunnusta ei käytetä itse toimenpiteen vaihtoon (tällöin laite_tunnus
+//saadaan tilausrivi.tilausrivin_lisatiedot.asiakkaan_positio) vaan jos muu toimenpiteellä lisätään
+//rivejä.
 if ($yhtiorow['laite_huolto'] == 'X' and !empty($laite_tunnus)) {
   $_SESSION['laite_tunnus'] = $laite_tunnus;
 }
@@ -4425,26 +4435,19 @@ if ($tee == '') {
           $lisatiedot_result = pupe_query($query);
           $tilausrivin_lisatiedot = mysql_fetch_assoc($lisatiedot_result);
 
-
           $query = "UPDATE tilausrivin_lisatiedot
                     SET asiakkaan_positio = 0
                     WHERE yhtio          = '{$kukarow['yhtio']}'
                     AND tilausrivitunnus = '{$vaihdettava_rivi}'";
           pupe_query($query);
 
-          $_asiakkaan_positio = $tilausrivin_lisatiedot['asiakkaan_positio'];
+          $_laite_tunnus = $tilausrivin_lisatiedot['asiakkaan_positio'];
         }
         else {
-          $_asiakkaan_positio = $_SESSION['laite_tunnus'];
+          $_laite_tunnus = $_SESSION['laite_tunnus'];
         }
 
-        $query = "UPDATE tilausrivin_lisatiedot
-                  SET tilausrivilinkki = '{$vaihdettava_rivi}',
-                  asiakkaan_positio    = '{$_asiakkaan_positio}'
-                  WHERE yhtio          = '{$kukarow['yhtio']}'
-                  AND tilausrivitunnus = '{$lisatty_tun}'";
-        pupe_query($query);
-
+        paivita_uuden_toimenpide_rivin_tilausrivi_linkki($lisatty_tun, $vaihdettava_rivi, $_laite_tunnus);
       }
 
       $hinta   = '';

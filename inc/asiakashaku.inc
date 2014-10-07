@@ -282,7 +282,9 @@ elseif ($ytunnus != '') {
     }
 
     // arvailuhaku
-    $query  = "(SELECT asiakas.*, yhtio.nimi yhtionimi
+    $query  = "(SELECT asiakas.*, yhtio.nimi yhtionimi,
+                if (asiakas.nimi = '{$ytunnus2}', 1, if(left(asiakas.nimi, length('{$ytunnus2}')) = '{$ytunnus2}', 2, 3)) apujarjestys,
+                '1' apujarjestys2
                 FROM asiakas
                 JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                 WHERE asiakas.$konsyhtiot
@@ -294,7 +296,9 @@ elseif ($ytunnus != '') {
                 $postinolisa
                 $lajilisa $asiakasrajaus)
                 UNION
-                (SELECT asiakas.*, yhtio.nimi yhtionimi
+                (SELECT asiakas.*, yhtio.nimi yhtionimi,
+                if (asiakas.nimitark = '{$ytunnus2}', 1, if(left(asiakas.nimitark, length('{$ytunnus2}')) = '{$ytunnus2}', 2, 3)) apujarjestys,
+                '2' apujarjestys2
                 FROM asiakas
                 JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                 WHERE asiakas.$konsyhtiot
@@ -306,7 +310,9 @@ elseif ($ytunnus != '') {
                 $postinolisa
                 $lajilisa $asiakasrajaus)
                 UNION
-                (SELECT asiakas.*, yhtio.nimi yhtionimi
+                (SELECT asiakas.*, yhtio.nimi yhtionimi,
+                if (asiakas.toim_nimi = '{$ytunnus2}', 1, if(left(asiakas.toim_nimi, length('{$ytunnus2}')) = '{$ytunnus2}', 2, 3)) apujarjestys,
+                '3' apujarjestys2
                 FROM asiakas
                 JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                 WHERE asiakas.$konsyhtiot
@@ -318,7 +324,9 @@ elseif ($ytunnus != '') {
                 $postino_toim_lisa
                 $lajilisa $asiakasrajaus)
                 UNION
-                (SELECT asiakas.*, yhtio.nimi yhtionimi
+                (SELECT asiakas.*, yhtio.nimi yhtionimi,
+                if (asiakas.toim_nimitark = '{$ytunnus2}', 1, if(left(asiakas.toim_nimitark, length('{$ytunnus2}')) = '{$ytunnus2}', 2, 3)) apujarjestys,
+                '4' apujarjestys2
                 FROM asiakas
                 JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                 WHERE asiakas.$konsyhtiot
@@ -330,7 +338,9 @@ elseif ($ytunnus != '') {
                 $postino_toim_lisa
                 $lajilisa $asiakasrajaus)
                 UNION
-                (SELECT asiakas.*, yhtio.nimi yhtionimi
+                (SELECT asiakas.*, yhtio.nimi yhtionimi,
+                if (asiakas.asiakasnro = '{$ytunnus2}', 1, if(left(asiakas.asiakasnro, length('{$ytunnus2}')) = '{$ytunnus2}', 2, 3)) apujarjestys,
+                '5' apujarjestys2
                 FROM asiakas
                 JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                 WHERE asiakas.$konsyhtiot
@@ -342,7 +352,9 @@ elseif ($ytunnus != '') {
                 $postinolisa
                 $lajilisa $asiakasrajaus)
                 UNION
-                (SELECT asiakas.*, yhtio.nimi yhtionimi
+                (SELECT asiakas.*, yhtio.nimi yhtionimi,
+                if (asiakas.ovttunnus = '{$ytunnus2}', 1, if(left(asiakas.ovttunnus, length('{$ytunnus2}')) = '{$ytunnus2}', 2, 3)) apujarjestys,
+                '6' apujarjestys2
                 FROM asiakas
                 JOIN yhtio on asiakas.yhtio=yhtio.yhtio
                 WHERE asiakas.$konsyhtiot
@@ -356,7 +368,9 @@ elseif ($ytunnus != '') {
 
     if (trim($postitplisa) == '') {
       $query .= "  UNION
-            (SELECT asiakas.*, yhtio.nimi yhtionimi
+            (SELECT asiakas.*, yhtio.nimi yhtionimi,
+              if (asiakas.postitp = '{$ytunnus2}', 1, if(left(asiakas.postitp, length('{$ytunnus2}')) = '{$ytunnus2}', 2, 3)) apujarjestys,
+              '7' apujarjestys2
               FROM asiakas
               JOIN yhtio on asiakas.yhtio=yhtio.yhtio
               WHERE asiakas.$konsyhtiot
@@ -365,9 +379,9 @@ elseif ($ytunnus != '') {
               $toimipaikkalisa
               $osoitelisa
               $postinolisa
-              $lajilisa $asiakasrajaus)
-            ORDER BY nimi";
+              $lajilisa $asiakasrajaus)";
     }
+    $query .= "ORDER BY apujarjestys, apujarjestys2, nimi";
     $result = pupe_query($query);
     $monta  = mysql_num_rows($result);
   }
@@ -506,7 +520,17 @@ if ($monta > 1 and $monta <= $limit) {
     echo "<td class='back'></td></tr>";
   }
 
+  // talteen tunnukset
+  $_asiakas_tunnukset = array();
+
   while ($asiakas = mysql_fetch_array($result)) {
+
+    if (in_array($asiakas['tunnus'], $_asiakas_tunnukset)) {
+      continue;
+    }
+    else {
+      $_asiakas_tunnukset[$asiakas['tunnus']] = $asiakas['tunnus'];
+    }
 
     if     ($asiakas['ytunnus']    != '') $numero = trim($asiakas['ytunnus']);
     elseif ($asiakas['asiakasnro'] != '') $numero = trim($asiakas['asiakasnro']);

@@ -352,6 +352,13 @@ if ($tee == 'laskelma') {
 
     $erikoiskoodi = $row['veropros'] == 0 ? '03' : '';
 
+    $_sum_vertailu_a = 10000 * abs($laskurow['laskun_summa']);
+    $_sum_vertailu_b = 10000 * abs($_vero);
+
+    if (!empty($laskurow['laskun_summa']) and $_sum_vertailu_a != $_sum_vertailu_b) {
+      $erikoiskoodi = '03';
+    }
+
     $_class = $aineistoon == $_red ? 'spec' : '';
 
     echo "<tr class='$_class aktiivi'>";

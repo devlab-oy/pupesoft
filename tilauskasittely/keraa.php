@@ -3007,8 +3007,10 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
             if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
               echo "<span id='maaran_paivitys_{$row['tunnus']}'></span>";
 
-              if ($row['ohita_kerays'] != "" or ($maara[$i] == 0 and ($row["var"] == 'J' or $row["var"] == 'P'))) {
-                // ohita_kerays tuotteet ei mee keräyseriin
+              if ($row['ohita_kerays'] != "" or (!isset($maara[$i]) and ($row["var"] == 'J' or $row["var"] == 'P'))) {
+                // Ohita_kerays tuotteet ei mee keräyseriin
+                // Myös ohitetaan ne tuotteet joilla var == J tai var == P
+                // & poikkeavaa maaraa ei ole käsin syötetty
                 $keraysera_row['kpl'] = $row["varattu"];
               }
               else {

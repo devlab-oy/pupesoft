@@ -54,6 +54,11 @@ function tiedostot_table($tiedostot, $filelist) {
 
   echo "<tbody>";
 
+  // Pankkitiedostot on laskevassa p‰iv‰m‰‰r‰j‰rjestyksess‰
+  // Reversataan array, ett‰ n‰ytet‰‰n aineistot aina vanhimmasta uusimpaan,
+  // koska ne ajetaan sis‰‰n myˆs vanhimmasta uusimpaan
+  $tiedostot = array_reverse($tiedostot);
+
   foreach ($tiedostot as $tiedosto) {
 
     // Haetaan tiedoston tiedot filelistasta, ett‰ saadaan p‰iv‰m‰‰r‰ ja tilinumero

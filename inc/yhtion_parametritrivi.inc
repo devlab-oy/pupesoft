@@ -1763,15 +1763,16 @@ if ($fieldname == "rekursiiviset_reseptit") {
   $sel1 = "";
   $sel2 = "";
 
-  if ($trow[$i] == "") {
+  if ($trow[$i] == "Y") {
     $sel1 = "selected";
   }
-  elseif ($trow[$i] == "Y") {
+  elseif ($trow[$i] == "X") {
     $sel2 = "selected";
   }
 
-  $ulos .= "<option value=''  $sel1>".t("Resepteiss‰ vain yksi taso")."</option>";
-  $ulos .= "<option value='Y' $sel2>".t("Reseptit k‰sitell‰‰n rekursiivisesti")."</option>";
+  $ulos .= "<option value=''>".t("Resepteiss‰ vain yksi taso")."</option>";
+  $ulos .= "<option value='Y' $sel1>".t("Reseptit k‰sitell‰‰n rekursiivisesti")."</option>";
+  $ulos .= "<option value='X' $sel2>".t("Reseptit k‰sitell‰‰n rekursiivisesti. Oletuksena lapsireseptej‰ ei avata.")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

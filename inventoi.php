@@ -466,9 +466,9 @@ if ($tee == 'VALMIS') {
               // katotaan onko tuotteella jo oletuspaikka
               $query = "SELECT *
                         FROM tuotepaikat
-                        WHERE yhtio = '$kukarow[yhtio]'
-                        AND tuoteno = '$tuoteno'
-                        AND oletus != ''";
+                        WHERE yhtio  = '$kukarow[yhtio]'
+                        AND tuoteno  = '$tuoteno'
+                        AND oletus  != ''";
               $result = pupe_query($query);
 
               if (mysql_num_rows($result) > 0) {
@@ -530,16 +530,16 @@ if ($tee == 'VALMIS') {
               $query = "SELECT sum(tapahtuma.kpl) muutos
                         FROM tapahtuma
                         JOIN tilausrivi ON (tapahtuma.yhtio = tilausrivi.yhtio
-                          and tapahtuma.rivitunnus = tilausrivi.tunnus
-                          and tilausrivi.hyllyalue = '$hyllyalue'
-                          and tilausrivi.hyllynro  = '$hyllynro'
-                          and tilausrivi.hyllyvali = '$hyllyvali'
-                          and tilausrivi.hyllytaso = '$hyllytaso')
-                        WHERE tapahtuma.yhtio     = '$kukarow[yhtio]'
-                        and tapahtuma.tuoteno     = '$tuoteno'
-                        and tapahtuma.laadittu    >= {$row[inventointilista_aika]}
-                        and tapahtuma.kpl         <> 0
-                        and tapahtuma.laji        != 'Inventointi'";
+                          and tapahtuma.rivitunnus  = tilausrivi.tunnus
+                          and tilausrivi.hyllyalue  = '$hyllyalue'
+                          and tilausrivi.hyllynro   = '$hyllynro'
+                          and tilausrivi.hyllyvali  = '$hyllyvali'
+                          and tilausrivi.hyllytaso  = '$hyllytaso')
+                        WHERE tapahtuma.yhtio       = '$kukarow[yhtio]'
+                        and tapahtuma.tuoteno       = '$tuoteno'
+                        and tapahtuma.laadittu      >= {$row[inventointilista_aika]}
+                        and tapahtuma.kpl           <> 0
+                        and tapahtuma.laji         != 'Inventointi'";
               $result = pupe_query($query);
               $trow = mysql_fetch_assoc($result);
 

@@ -4228,7 +4228,10 @@ if ($tee == '') {
     }
 
     // Valmistuksissa haetaan perheiden perheitä mukaan valmistukseen!!!!!! (vain kun rivi lisätään $rivitunnus == 0)
-    if ($laskurow['tila'] == 'V' and $var != "W" and $avaa_rekursiiviset != "EI" and $yhtiorow["rekursiiviset_reseptit"] == "Y" and (int) $rivitunnus == 0) {
+    if ($laskurow['tila'] == 'V'
+      and $var != "W"
+      and (int) $rivitunnus == 0
+      and ($yhtiorow["rekursiiviset_reseptit"] == "Y" or ($yhtiorow["rekursiiviset_reseptit"] == "X" and $avaa_rekursiiviset == "JOO"))) {
 
       if ($kpl != '' and !is_array($kpl_array)) {
         $kpl_array[$tuoteno_array[0]] = $kayttajan_kpl;

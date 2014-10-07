@@ -298,6 +298,22 @@ if ($tee == 'laskelma') {
 
   echo "<tbody>";
 
+  $_lopetus_arr = array(
+    'tee' => $tee,
+    'laskelma' => $laskelma,
+    'vv' => $vv,
+    'kk' => $kk,
+    'rajaa' => $rajaa,
+    'per_paiva' => $per_paiva,
+    'tee_excel' => $tee_excel,
+  );
+
+  $lopetus = "{$palvelin2}raportit/alv_laskelma_viro_kmd_inf.php////";
+
+  foreach ($_lopetus_arr as $_key => $_val) {
+    $lopetus .= "{$_key}={$_val}//";
+  }
+
   $_i = 1;
 
   while ($row = mysql_fetch_assoc($result)) {
@@ -388,7 +404,7 @@ if ($tee == 'laskelma') {
     echo "<td>",pupe_DataTablesEchoSort($laskurow['tapvm']).tv1dateconv($laskurow['tapvm']),"</td>";
     echo "<td>$laskurow[laskun_summa]</td>";
     echo "<td>$row[veropros]</td>";
-    echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[ltunnus]'>",abs($_vero),"</a></td>";
+    echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[ltunnus]&lopetus={$lopetus}'>",abs($_vero),"</a></td>";
     echo "<td>{$erikoiskoodi}</td>";
     echo "</tr>";
 

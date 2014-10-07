@@ -147,22 +147,22 @@ if ($tee == 'laskelma') {
     $taso = 'ee100';
     $eetasolisa = "or alv_taso like '%ee110%'";
     $tilat = "and lasku.tila = 'U'";
-    $tilausrivijoin = "JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)";
     $tilaustyyppi = "and lasku.tilaustyyppi != '9'";
     $laskun_lisatiedot_lisa = "
-      JOIN laskun_lisatiedot AS ll ON (
+      LEFT JOIN laskun_lisatiedot AS ll ON (
         ll.yhtio = lasku.yhtio AND
         ll.otunnus = lasku.tunnus
       )";
+    $verolisa = "AND tiliointi.vero > 0";
     $laskun_nimi_lisa_select = "trim(concat(ll.laskutus_nimi, ' ', ll.laskutus_nimitark)) nimi,";
   }
   else {
     $taso = 'ee500';
     $eetasolisa = "or alv_taso like '%ee510%' or alv_taso like '%ee520%'";
     $tilat = "and lasku.tila IN ('H','Y','M','P','Q','X')";
-    $tilausrivijoin = "";
     $tilaustyyppi = "";
     $laskun_lisatiedot_lisa = "";
+    $verolisa = "";
     $laskun_nimi_lisa_select = "trim(concat(lasku.nimi, ' ', lasku.nimitark)) nimi,";
   }
 
@@ -188,12 +188,11 @@ if ($tee == 'laskelma') {
             tiliointi.tapvm    >= '{$alkupvm}' AND
             tiliointi.tapvm    <= '{$loppupvm}' AND
             tiliointi.tilino in ({$tilirow['tilitMUU']})
+            {$verolisa}
           )
           WHERE lasku.yhtio = '{$kukarow['yhtio']}'
           {$tilat}
           {$tilaustyyppi}
-          AND lasku.tapvm    >= '{$alkupvm}'
-          AND lasku.tapvm    <= '{$loppupvm}'
           GROUP BY 1,2
           HAVING sum(abs(tiliointi.summa)) < {$rajaa}";
     $result = pupe_query($query);
@@ -221,6 +220,7 @@ if ($tee == 'laskelma') {
             AND tiliointi.tapvm    >= '{$alkupvm}'
             AND tiliointi.tapvm    <= '{$loppupvm}'
             AND tiliointi.tilino in ({$tilirow['tilitMUU']})
+            {$verolisa}
             GROUP BY 1";
   $result = pupe_query($query);
 
@@ -319,8 +319,6 @@ if ($tee == 'laskelma') {
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               {$tilat}
               {$tilaustyyppi}
-              AND lasku.tapvm    >= '{$alkupvm}'
-              AND lasku.tapvm    <= '{$loppupvm}'
               AND lasku.tunnus = '{$row['ltunnus']}'
               {$rajaalisa}";
     $laskures = pupe_query($query);

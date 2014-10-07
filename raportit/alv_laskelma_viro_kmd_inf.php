@@ -212,9 +212,7 @@ if ($tee == 'laskelma') {
   $query = "SELECT tiliointi.ltunnus,
             max(tiliointi.vero) veropros,
             sum(round(tiliointi.summa * vero / 100, 2)) veronmaara,
-            sum(tiliointi.summa) summa,
-            abs(sum(if(tiliointi.summa > 0, tiliointi.summa, 0))) veloitukset,
-            abs(sum(if(tiliointi.summa < 0, tiliointi.summa, 0))) hyvitykset
+            sum(tiliointi.summa) summa
             FROM tiliointi
             WHERE tiliointi.yhtio = '{$kukarow['yhtio']}'
             AND tiliointi.korjattu = ''
@@ -303,10 +301,6 @@ if ($tee == 'laskelma') {
   $_i = 1;
 
   while ($row = mysql_fetch_assoc($result)) {
-
-    // if ($laskelma == 'a' and $_rajaa_chk and $row['veloitukset'] < $rajaa and $row['hyvitykset'] < $rajaa) {
-    //   continue;
-    // }
 
     $query = "SELECT lasku.laskunro laskunro,
               {$laskun_nimi_lisa_select}

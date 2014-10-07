@@ -520,7 +520,7 @@ if ($monta > 1 and $monta <= $limit) {
     echo "<td class='back'></td></tr>";
   }
 
-  // talteen tunnukset
+  // talteen tunnukset, näytetään asiakas vain kerran
   $_asiakas_tunnukset = array();
 
   while ($asiakas = mysql_fetch_array($result)) {

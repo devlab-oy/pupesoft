@@ -86,6 +86,8 @@ if ($paiva_ajo) {
 //  kerätyt siirtorivit
 //  kerätyt kulutukset
 
+$query_ale_lisa = generoi_alekentta('M');
+
 $query = "(SELECT
           yhtio.maa,
           tapahtuma.laadittu laadittu,
@@ -128,7 +130,7 @@ $query = "(SELECT
           tilausrivi.tuoteno,
           if (tilausrivi.tyyppi='G', 'siirtolista', 'myynti') laji,
           (tilausrivi.kpl+tilausrivi.varattu) * -1 kpl,
-          tilausrivi.hinta kplhinta,
+          if (tilausrivi.tyyppi='G', tuote.kehahin, round(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * {$query_ale_lisa}, 2)) kplhinta,
           lasku.tilaustyyppi,
           lasku.varasto lahdevarasto,
           lasku.clearing vastaanottovarasto,

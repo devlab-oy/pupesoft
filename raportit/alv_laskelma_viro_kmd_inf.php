@@ -194,7 +194,8 @@ if ($tee == 'laskelma') {
           {$tilat}
           {$tilaustyyppi}
           GROUP BY 1,2
-          HAVING sum(abs(tiliointi.summa)) < {$rajaa}";
+          HAVING abs(sum(if(tiliointi.summa > 0, tiliointi.summa, 0))) < {$rajaa}
+          AND abs(sum(if(tiliointi.summa < 0, tiliointi.summa, 0))) < {$rajaa}";
     $result = pupe_query($query);
 
     $_exclude_asiakkaat = array();

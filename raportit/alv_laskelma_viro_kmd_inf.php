@@ -308,6 +308,7 @@ if ($tee == 'laskelma') {
               lasku.tapvm,
               lasku.alv,
               lasku.liitostunnus,
+              lasku.tunnus,
               round(lasku.summa / (1+lasku.alv/100), {$yhtiorow['hintapyoristys']}) laskun_summa
               FROM lasku
               {$laskun_lisatiedot_lisa}
@@ -318,6 +319,19 @@ if ($tee == 'laskelma') {
               {$rajaalisa}";
     $laskures = pupe_query($query);
     $laskurow = mysql_fetch_assoc($laskures);
+
+    if (!empty($laskurow['tunnus'])) {
+      $query = "SELECT round(sum(rivihinta), {$yhtiorow['hintapyoristys']}) rivihinta_summa
+                FROM tilausrivi
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND uusiotunnus = '{$laskurow['tunnus']}'
+                AND var NOT IN ('P','J','O','S')
+                AND tyyppi != 'D'";
+      $_tilsum_res = pupe_query($query);
+      $_tilsum_row = mysql_fetch_assoc($_tilsum_res);
+
+      $laskurow['laskun_summa'] = $_tilsum_row['rivihinta_summa'];
+    }
 
     if ($laskelma == 'a') {
       $_vero = $row['summa'];

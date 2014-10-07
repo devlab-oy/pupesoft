@@ -336,7 +336,7 @@ if ($tee == 'laskelma') {
     $laskures = pupe_query($query);
     $laskurow = mysql_fetch_assoc($laskures);
 
-    if (!empty($laskurow['tunnus'])) {
+    if (!empty($laskurow['tunnus']) and $laskelma == 'a') {
       $query = "SELECT round(sum(rivihinta), {$yhtiorow['hintapyoristys']}) rivihinta_summa
                 FROM tilausrivi
                 WHERE yhtio = '{$kukarow['yhtio']}'

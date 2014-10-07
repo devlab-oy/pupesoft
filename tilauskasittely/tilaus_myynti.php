@@ -4442,6 +4442,9 @@ if ($tee == '') {
           pupe_query($query);
 
           $_laite_tunnus = $tilausrivin_lisatiedot['asiakkaan_positio'];
+
+          //@TODO tässä pitäisi hakea uuden rivin sisältyvät työt ja päivittää näiden viimeinen_tapahtuma
+          //olemaan sama kuin vaihdettavan rivin viimeinen_tapahtuma
         }
         else {
           $_laite_tunnus = $_SESSION['laite_tunnus'];

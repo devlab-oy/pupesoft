@@ -381,7 +381,7 @@ elseif ($ytunnus != '') {
               $postinolisa
               $lajilisa $asiakasrajaus)";
     }
-    $query .= "ORDER BY apujarjestys, apujarjestys2, nimi";
+    $query .= "ORDER BY apujarjestys2, apujarjestys, nimi";
     $result = pupe_query($query);
     $monta  = mysql_num_rows($result);
   }

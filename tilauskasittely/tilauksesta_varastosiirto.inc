@@ -431,6 +431,18 @@ if (!function_exists('hae_tilausrivit')) {
         $select .= "l.varasto AS varasto, ";
         $tilausrivi_where .= " AND tl.palautus_varasto != 0 ";
       }
+      else {
+
+        # Kirjanpidollisessa varastosiirrossa ei ole keräysvyöhykkeitä
+        # Ei lähde- eikä kohdevarastoa
+        # Eikä avainsanoja
+        $varasto_avainsana_join = '';
+
+        $select = ' 0 AS lahdevarasto_tunnus,
+                    0 AS kohdevarasto_tunnus,
+                    0 AS toimitustapa_tunnus,
+                    0 AS keraysvyohyke,';
+      }
     }
 
     if ($onko_myyntitilaus) {

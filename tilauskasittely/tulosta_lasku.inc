@@ -1607,7 +1607,8 @@ if (!function_exists('rivi_perhe')) {
         if ($toim == 'PROFORMA') {
           $lisa = " sum(tilausrivi.hinta
                       / if ('$yhtiorow[alv_kasittely]' = '' AND tilausrivi.alv < 500,
-                          (1+tilausrivi.alv / 100), 1)
+                          (1 + tilausrivi.alv / 100),
+                          1)
                         * (tilausrivi.varattu + tilausrivi.kpl)
                         * {$query_ale_lisa}) rivihinta,
                     round(sum(tilausrivi.hinta

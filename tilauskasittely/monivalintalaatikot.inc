@@ -709,7 +709,7 @@ if (count($mul_projekti) > 0) {
 
   $projektit = substr($projektit, 0, -1);
 
-  if (trim($projektit) != '') {
+  if (trim($projektit) != '' and trim($projektit) != "'ei_projektia'") {
     if ($mulselprefix == 'asiakas') {
       $lisa_haku_kustp = " and asiakas.projekti in ($projektit) ";
       $lisa .= " and asiakas.projekti in ($projektit) ";
@@ -727,6 +727,26 @@ if (count($mul_projekti) > 0) {
     else {
       $lisa_haku_projekti = " and tiliointi.projekti in ($projektit) ";
       $lisa .= " and tiliointi.projekti in ($projektit) ";
+    }
+  }
+  elseif (trim($projektit) == "'ei_projektia'") {
+    if ($mulselprefix == 'asiakas') {
+      $lisa_haku_kustp = " and asiakas.projekti = 0 ";
+      $lisa .= " and asiakas.projekti in = 0 ";
+    }
+    elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== false) {
+      if (isset($projektivalinta) and $projektivalinta == "tuote") {
+        $lisa_haku_kustp = " and tuote.projekti = 0 ";
+        $lisa .= " and tuote.projekti = 0 ";
+      }
+      else {
+        $lisa_haku_kustp = " and asiakas.projekti = 0 ";
+        $lisa .= " and asiakas.projekti = 0 ";
+      }
+    }
+    else {
+      $lisa_haku_projekti = " and tiliointi.projekti = 0 ";
+      $lisa .= " and tiliointi.projekti = 0 ";
     }
   }
 }
@@ -2256,6 +2276,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
       echo "<td nowrap style='padding:0px'><select name='mul_projekti[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
       echo "<option value=''>".t("Ei valintaa")."</option>";
+      echo "<option value='ei_projektia'>" . t("Ei projektia") . "</option>";
 
       while ($sxrow = mysql_fetch_array($sresult)) {
         $sel = '';

@@ -380,10 +380,11 @@ if ($tee == 'TEE_MYYNTITILAUKSESTA_TARJOUS' and (int) $kukarow["kesken"] > 0 and
 
   $query = "UPDATE lasku SET
             tila         = 'T',
+            alatila      = '',
             tilaustyyppi = 'T'
             WHERE yhtio  = '{$kukarow['yhtio']}'
             AND tila     = 'N'
-            AND alatila  = ''
+            AND alatila  IN ('','F')
             AND tunnus   = '{$kukarow['kesken']}'";
   $upd_res = pupe_query($query);
 
@@ -9423,7 +9424,7 @@ if ($tee == '') {
         echo "</form>";
       }
 
-      if ($yhtiorow['myyntitilaus_tarjoukseksi'] == 'K' and in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) and $laskurow['tila'] == 'N' and $laskurow['alatila'] == '' and tarkista_oikeus("tilaus_myynti.php", "TARJOUS")) {
+      if ($yhtiorow['myyntitilaus_tarjoukseksi'] == 'K' and in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) and $laskurow['tila'] == 'N' and in_array($laskurow['alatila'], array('','F')) and tarkista_oikeus("tilaus_myynti.php", "TARJOUS")) {
         echo "  <br><br><form action='' method='post'>
             <input type='hidden' name='toim' value='{$toim}'>
             <input type='hidden' name='tilausnumero' value='{$tilausnumero}'>

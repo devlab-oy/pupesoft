@@ -1,6 +1,10 @@
 <?php
 
 /**
+ * @todo Muuta tiedoston nimi paremmaksi
+ */
+
+/**
  * Tulostaa asiakkaan kuitin lämpösiirtotulostimelle. Kuitille tulostuu logo, yhtiön tiedot, laskun
  * tilausrivit, laskun summa, verotiedot ja luottokorttitapahtumat
  *
@@ -354,4 +358,8 @@ function laske_yksikkohinta($tilausrivi) {
   }
 
   return $yksikkohinta;
+}
+
+function tulosta_kauppiaan_kuitti($teksti, $tulostimen_tunnus) {
+  lpr("{$teksti}\n\n\n\n\n\n\x1B\x69", $tulostimen_tunnus);
 }

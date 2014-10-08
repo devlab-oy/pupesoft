@@ -158,8 +158,12 @@ foreach($suoritukset as $suoritus) {
         $kuitti2 = $clientti->getMerchantReceipt();
         $kuitti2 = utf8_decode($kuitti2);
         if (strpos($kuitti2, "ALLEKIRJOITUS")) {
-          // TODO Kauppiaan kuitin tulostus
-          //tulostakuittifunktio($kuitti2);
+          require("../tilauskasittely/tulosta_asiakkaan_kuitti.inc");
+
+          /**
+           * @todo Poista hardkoodattu tulostimen tunnus
+           */
+          tulosta_kauppiaan_kuitti($kuitti2, 105);
         }
         break;
     }

@@ -63,6 +63,7 @@ else {
         // tilaus on jo tilassa N A, p‰ivitet‰‰n nyt tilaus "ker‰yslista tulostettu" eli L A
         $query = "UPDATE lasku SET
                   tila 	      = 'L',
+                  alatila     = 'A',
                   lahetepvm   = now(),
                   kerayslista = '{$kerayslistatunnus}'
                   WHERE yhtio = '{$kukarow['yhtio']}'

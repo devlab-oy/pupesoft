@@ -1635,9 +1635,9 @@ if (!function_exists('rivi_perhe')) {
                     $yhtiorow[hintapyoristys]) rivihinta_verollinen,
                   sum((tilausrivi.hinta / {$laskurow["vienti_kurssi"]})
                     / if ('$yhtiorow[alv_kasittely]'  = '' AND tilausrivi.alv < 500,
-                      (1+tilausrivi.alv / 100),
+                      (1 + tilausrivi.alv / 100),
                       1)
-                    * (tilausrivi.varattu+tilausrivi.kpl)
+                    * (tilausrivi.varattu + tilausrivi.kpl)
                     * {$query_ale_lisa}) rivihinta_valuutassa
                   FROM tilausrivi
                   WHERE tilausrivi.yhtio     = '$kukarow[yhtio]'

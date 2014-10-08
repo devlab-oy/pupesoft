@@ -13,10 +13,10 @@ class Edi {
   static function create($order) {
 
     // require 'magento_salasanat.php' muuttujat
-    global $magento_api_ana_edi, $ovt_tunnus, $pupesoft_tilaustyyppi;
+    global $magento_api_ht_edi, $ovt_tunnus, $pupesoft_tilaustyyppi;
     global $verkkokauppa_asiakasnro, $rahtikulu_tuoteno, $rahtikulu_nimitys;
 
-    if (empty($magento_api_ana_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi)) exit("Parametrej‰ puuttuu\n");
+    if (empty($magento_api_ht_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi)) exit("Parametrej‰ puuttuu\n");
     if (empty($verkkokauppa_asiakasnro) or empty($rahtikulu_tuoteno) or empty($rahtikulu_nimitys)) exit("Parametrej‰ puuttuu\n");
 
     //Tilauksella k‰ytetyt lahjakortit ei saa vehent‰‰ myynti pupen puolella
@@ -218,7 +218,7 @@ class Edi {
 
     $edi_order = iconv("UTF-8", "ISO-8859-1//TRANSLIT", $edi_order);
 
-    $filename = $magento_api_ana_edi."/magento-order-{$order['increment_id']}-".date("Ymd")."-".md5(uniqid(rand(), true)).".txt";
+    $filename = $magento_api_ht_edi."/magento-order-{$order['increment_id']}-".date("Ymd")."-".md5(uniqid(rand(), true)).".txt";
     file_put_contents($filename, $edi_order);
 
     return true;

@@ -59,9 +59,7 @@ $argv[1] = $operaattori;
 require 'ftp-get.php';
 
 if ($handle = opendir($ftpget_dest[$operaattori])) {
-
   while (($file = readdir($handle)) !== FALSE) {
-
     if (is_file($ftpget_dest[$operaattori]."/".$file)) {
 
       /*
@@ -151,17 +149,21 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
         $upd_res = pupe_query($query);
       }
       else {
-
         $eranumero_sscc = preg_replace("/[^0-9\,]/", "", str_replace("_", ",", $eranumero_sscc));
 
-        $query = "UPDATE rahtikirjat SET
-                  sscc_ulkoinen = '{$sscc_ulkoinen}'
-                  WHERE yhtio   = '{$kukarow['yhtio']}'
-                  AND tunnus    in ($eranumero_sscc)";
-        $upd_res  = pupe_query($query);
+        if (!empty($eranumero_sscc)) {
+          $query = "UPDATE rahtikirjat SET
+                    sscc_ulkoinen = '{$sscc_ulkoinen}'
+                    WHERE yhtio   = '{$kukarow['yhtio']}'
+                    AND tunnus    in ($eranumero_sscc)";
+          $upd_res  = pupe_query($query);
+        }
       }
 
       rename($ftpget_dest[$operaattori]."/".$file, $ftpget_dest[$operaattori]."/ok/".$file);
+
+      // Logitetaan ajo
+      cron_log($ftpget_dest[$operaattori]."/ok/".$file);
     }
   }
 }

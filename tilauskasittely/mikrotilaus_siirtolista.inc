@@ -105,6 +105,7 @@ if ($tee == "file") {
           $toimaika  = '';
           $paikka    = '';
           $alv    = 'X';
+          unset($kohde_alue);
 
           for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
             ${'ale'.$alepostfix} = '';

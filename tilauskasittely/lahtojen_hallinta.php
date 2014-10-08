@@ -659,6 +659,7 @@ if (isset($muokkaa_lahto) and $onko_paivitysoikeuksia_ohjelmaan) {
 
             $lasku_where = "AND ((lasku.tila = 'N' AND lasku.alatila = 'A')
                             OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C')))";
+
             if ($nayta_myos_siirrot) {
               $lasku_where = "AND ((lasku.tila = 'N' AND lasku.alatila = 'A')
                               OR (lasku.tila = 'L' AND lasku.alatila IN ('A','B','C'))
@@ -2173,15 +2174,44 @@ if ($tee == "") {
 if ($select_varasto > 0) {
 
   $ohita_kerays_lapset = array();
+  $lasku_where = "and lasku.tunnus in (0,";
+
+  // Haetaan käsiteltävät tilaukset
+  $query = "SELECT group_concat(lasku.tunnus) tunnukset
+            FROM lasku
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tila = 'N'
+            AND lasku.alatila = 'A'
+            UNION
+            SELECT group_concat(lasku.tunnus) tunnukset
+            FROM lasku
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tila = 'L'
+            AND lasku.alatila IN ('A', 'B', 'C')";
+  $result = pupe_query($query);
+
+  while ($row = mysql_fetch_assoc($result)) {
+    if ($row["tunnukset"] != "") {
+      $lasku_where .= $row["tunnukset"].",";
+    }
+  }
 
   if ($nayta_myos_siirrot) {
-    $lasku_where = "AND ((lasku.tila = 'N' AND lasku.alatila = 'A')
-                      OR (lasku.tila = 'L' AND lasku.alatila IN ('A', 'B', 'C'))
-                      OR (lasku.tila = 'G' AND lasku.alatila IN ('J', 'A', 'B', 'C')))";
+    $query = "SELECT group_concat(lasku.tunnus) tunnukset
+              FROM lasku
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+              AND lasku.tila = 'G'
+              AND lasku.alatila IN ('J', 'A', 'B', 'C')";
+    $result = pupe_query($query);
+    $row = mysql_fetch_assoc($result);
+
+    if ($row["tunnukset"] != "") {
+      $lasku_where .= $row["tunnukset"].",";
+    }
   }
-  else {
-    $lasku_where = "AND ((lasku.tila = 'N' AND lasku.alatila = 'A')
-                      OR (lasku.tila = 'L' AND lasku.alatila IN ('A', 'B', 'C')))";
+
+  if ($lasku_where != "") {
+    $lasku_where = substr($lasku_where, 0, -1).")";
   }
 
   $query = "SELECT tilausrivi.perheid, tilausrivi.tuoteno, tilausrivi.tunnus
@@ -2269,8 +2299,8 @@ if ($select_varasto > 0) {
   echo "</form>";
 
   if ($tee == '') {
-
-    $query = "SELECT lahdot.tunnus AS 'lahdon_tunnus',
+    $query = "SELECT
+              lahdot.tunnus AS 'lahdon_tunnus',
               lahdot.pvm AS 'lahdon_pvm',
               substring(lahdot.viimeinen_tilausaika, 1, 5) AS 'viimeinen_tilausaika',
               substring(lahdot.lahdon_kellonaika, 1, 5) AS 'lahdon_kellonaika',
@@ -2305,8 +2335,6 @@ if ($select_varasto > 0) {
                 AND tilausrivi.var          not in ('P', 'J', 'O', 'S')
                 AND tilausrivi.varasto      = '{$select_varasto}'
                 {$ei_lapsia_lisa})
-              JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
-                AND tuote.tuoteno           = tilausrivi.tuoteno)
               WHERE lasku.yhtio             = '{$kukarow['yhtio']}'
               {$lasku_where}
               GROUP BY 1,2,3,4,5,6,7,8,9

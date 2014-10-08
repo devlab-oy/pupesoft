@@ -17,6 +17,9 @@ $kukarow['yhtio'] = $argv[1];
 require 'inc/connect.inc';
 require 'inc/functions.inc';
 
+// Logitetaan ajo
+cron_log();
+
 $query = "SELECT * FROM yhtio, yhtion_parametrit WHERE yhtio.yhtio = yhtion_parametrit.yhtio and yhtio.yhtio = '$kukarow[yhtio]'";
 $result = pupe_query($query);
 $yhtiorow = mysql_fetch_array($result);

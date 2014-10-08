@@ -61,15 +61,26 @@ if [ ! -d ${BACKUPDIR} ]; then
   exit
 fi
 
+TMPBACKUPDIR="/tmp/pupe_backup"
+
+# Jos temppikansio lˆytyy, nin dellataan
+if [ -d ${TMPBACKUPDIR} ]; then
+  rm -rf ${TMPBACKUPDIR}
+fi
+
 # Oletuksena s‰‰stet‰‰n 30 backuppia
 if [ -z ${BACKUPPAIVAT} ]; then
   BACKUPPAIVAT=30
 fi
 
+# Onnistuiko ecryptaus
+ENCRYPT_EXIT=0
+
 function encrypt_file {
 
   if [[ -z $1 || -z $2 ]]; then
     echo "Funktio tarvitsee ekaksi parametriksi salausavaimen ja toiseksi parametriksi salattavan filen nimen"
+    ENCRYPT_EXIT=1
   else
     # Otetaan parametrit muuttujiin
     F_SALAUSAVAIN=$1
@@ -85,16 +96,21 @@ function encrypt_file {
 
     # Salataan tiedosto k‰ytt‰en Rijndael-256 algoritmia
     mcrypt -a rijndael-256 -f ${F_TEMP_SALAUSAVAIN} --quiet ${F_TIEDOSTO}
+    MCRYPT_EXIT=$?
 
     # T‰ss‰ talteen sama salaus k‰ytt‰en openssl:‰‰.
     #openssl aes-256-cbc -in ${F_TIEDOSTO} -out ${F_TIEDOSTO}.nc -pass file:"${F_TEMP_SALAUSAVAIN}"
 
-    if [[ $? -ne 0 ]]; then
+    # Dellataan salausavain file
+    rm -f "${F_TEMP_SALAUSAVAIN}"
+
+    if [[ MCRYPT_EXIT -ne 0 ]]; then
       # Poistetaan salattu tiedosto
       rm -f "${F_TIEDOSTO}.nc"
 
       echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
       echo "Encrypt ${F_TIEDOSTO} FAILED!"
+      ENCRYPT_EXIT=1
     else
       # Poistetaan salaamaton tiedosto
       rm -f "${F_TIEDOSTO}"
@@ -104,10 +120,8 @@ function encrypt_file {
 
       echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
       echo ": Encrypt done."
+      ENCRYPT_EXIT=0
     fi
-
-    # Dellataan salausavain file
-    rm -f "${F_TEMP_SALAUSAVAIN}"
   fi
 }
 
@@ -128,20 +142,20 @@ if $MYSQLBACKUP; then
     exit
   fi
 
-  mkdir /tmp/${DBKANTA}
+  mkdir ${TMPBACKUPDIR}
 
-  if [ ! -d /tmp/${DBKANTA} ]; then
+  if [ ! -d ${TMPBACKUPDIR} ]; then
     echo
-    echo "ERROR! Hakemistoa /tmp/${DBKANTA} ei lˆydy!"
+    echo "ERROR! Hakemistoa ${TMPBACKUPDIR} ei lˆydy!"
     echo
     exit
   fi
 
   # Siirryt‰‰n temppidirriin
-  cd /tmp/${DBKANTA}
+  cd ${TMPBACKUPDIR}
 
   # Lukitaan taulut, Flushataan binlogit, Otetaan masterin positio ylˆs, Kopioidaan mysql kanta ja lopuksi vapautetaan taulut.
-  mysql -u ${DBKAYTTAJA} ${DBKANTA} --password=${DBSALASANA} -e "FLUSH STATUS; FLUSH TABLES WITH READ LOCK; FLUSH LOGS; SHOW MASTER STATUS; system cp -R ${MYSQLPOLKU}${DBKANTA}/ /tmp/; UNLOCK TABLES;" > /tmp/${DBKANTA}/backup-binlog.info
+  mysql -u ${DBKAYTTAJA} ${DBKANTA} --password=${DBSALASANA} -e "FLUSH STATUS; FLUSH TABLES WITH READ LOCK; FLUSH LOGS; SHOW MASTER STATUS; system cp -R ${MYSQLPOLKU}${DBKANTA}/ ${TMPBACKUPDIR}/; UNLOCK TABLES;" > ${TMPBACKUPDIR}/backup-binlog.info
 
   # Jos backup onnistui!
   if [[ $? -eq 0 ]]; then
@@ -149,8 +163,15 @@ if $MYSQLBACKUP; then
     echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
     echo ": Database copy done."
 
+    # Kopsataan t‰m‰n backupin logipositio myˆs kantazipin sis‰lle
+    cp -f ${TMPBACKUPDIR}/backup-binlog.info ${TMPBACKUPDIR}/${DBKANTA}/backup-binlog.info
+
+    # Kopsataan t‰m‰n backupin logipositio aina backup dirikkaan -0000 nimell‰.
+    cp -f ${TMPBACKUPDIR}/backup-binlog.info ${TMPBACKUPDIR}/backup-binlog-0000.info
+    mv -f ${TMPBACKUPDIR}/backup-binlog-0000.info ${BACKUPDIR}/backup-binlog-0000.info
+
     # Pakataan failit
-    tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 *
+    tar -cf ${TMPBACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2  -C ${TMPBACKUPDIR}/${DBKANTA} .
 
     # Jos pakkaus onnistui!
     if [[ $? -eq 0 ]]; then
@@ -160,11 +181,18 @@ if $MYSQLBACKUP; then
 
       # Salataan tiedosto
       if [ ! -z "${SALAUSAVAIN}" ]; then
-        encrypt_file "${SALAUSAVAIN}" "${BACKUPDIR}/${FILENAME}"
+        encrypt_file "${SALAUSAVAIN}" "${TMPBACKUPDIR}/${FILENAME}"
+
+        if [[ ${ENCRYPT_EXIT} -eq 0 ]]; then
+           FILENAME="${FILENAME}.nc"
+        fi
       fi
 
+      # Siirret‰‰n pakattu backuppi backupkansioon
+      mv -f ${TMPBACKUPDIR}/${FILENAME} ${BACKUPDIR}/${FILENAME}
+
       # T‰m‰n backupin binlog-info
-      binlog_new_log=$(< /tmp/${DBKANTA}/backup-binlog.info)
+      binlog_new_log=$(< ${TMPBACKUPDIR}/backup-binlog.info)
 
       # Tuorein binlog-info mik‰ meill‰ on tallella
       tmp_filename=`ls ${BACKUPDIR}/backup-binlog* | sort -r | head -1`
@@ -202,23 +230,31 @@ if $MYSQLBACKUP; then
         if [[ ! -z ${binlog_all} ]]; then
 
           # Tehd‰‰n binlogeista SQL-lausekkeita ja pakataan ne zippiin
-          mysqlbinlog --start-position=${binlog_last_position} --stop-position=${binlog_new_position} ${binlog_all} | pbzip2 > ${BACKUPDIR}/${binlog_backup}
+          mysqlbinlog --start-position=${binlog_last_position} --stop-position=${binlog_new_position} ${binlog_all} | pbzip2 > ${TMPBACKUPDIR}/${binlog_backup}
 
-          # Jos pakkaus onnistui!
+          # Jos mysqlbinlogin teko onnistui
           if [[ $? -eq 0 ]]; then
             # Kopsataan t‰m‰n backupin logipositio paikalleen, ett‰ tiedet‰‰n ottaa t‰st‰ eteenp‰in seuraavalla kerralla
-            cp -f /tmp/${DBKANTA}/backup-binlog.info ${BACKUPDIR}/backup-binlog-${FILEDATE}.info
+            mv -f ${TMPBACKUPDIR}/backup-binlog.info ${BACKUPDIR}/backup-binlog-${FILEDATE}.info
 
             echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
             echo ": Binlog bzip2 done."
 
             # Salataan tiedosto
             if [ ! -z "${SALAUSAVAIN}" ]; then
-              encrypt_file "${SALAUSAVAIN}" "${BACKUPDIR}/${binlog_backup}"
+              encrypt_file "${SALAUSAVAIN}" "${TMPBACKUPDIR}/${binlog_backup}"
+
+              if [[ ${ENCRYPT_EXIT} -eq 0 ]]; then
+                binlog_backup="${binlog_backup}.nc"
+              fi
             fi
+
+            # Kopsataan t‰m‰n backupin logipositio paikalleen
+            mv -f ${TMPBACKUPDIR}/${binlog_backup} ${BACKUPDIR}/${binlog_backup}
+
           else
             # Jos pakkaus ep‰onnistui! Poistetaan rikkin‰inen tiedosto.
-            rm -f ${BACKUPDIR}/${binlog_backup}
+            rm -f ${TMPBACKUPDIR}/${binlog_backup}
             echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
             echo ": Binlog bzip2 FAILED!"
           fi
@@ -230,13 +266,9 @@ if $MYSQLBACKUP; then
         echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
         echo ": Binlog info not found!"
       fi
-
-      # Kopsataan t‰m‰n backupin logipositio aina backup dirikkaan samalle nimell‰. Ylemp‰n‰ kopsataan "oikea versio" p‰iv‰m‰‰r‰n kanssa.
-      # T‰m‰ siksi, ett‰ helpottaa ekalla kerralla kun backup ajetaan ja debuggia ongelmatilanteissa.
-      cp -f /tmp/${DBKANTA}/backup-binlog.info ${BACKUPDIR}/backup-binlog-0000.info
     else
       # Jos pakkaus ep‰onnistui! Poistetaan rikkin‰inen tiedosto.
-      rm -f ${BACKUPDIR}/${FILENAME}
+      rm -f ${TMPBACKUPDIR}/${FILENAME}
       echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
       echo ": Database bzip2 FAILED!"
       fi
@@ -246,7 +278,7 @@ if $MYSQLBACKUP; then
   fi
 
   # Dellataan pois tempit
-  rm -rf /tmp/${DBKANTA}
+  rm -rf ${TMPBACKUPDIR}
 else
   echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
   echo ": Databasea ei backupata!"
@@ -331,11 +363,14 @@ fi
 
 # Jos meill‰ on jotain pakattavaa, niin pakataan
 if [ ! -z "${BACKUPFILET}" ]; then
-  tar -cf ${BACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 ${BACKUPFILET}
+
+  mkdir ${TMPBACKUPDIR}
+
+  tar -cf ${TMPBACKUPDIR}/${FILENAME} --use-compress-prog=pbzip2 ${BACKUPFILET}
 
   # Jos pakkaus ep‰onnistui! Poistetaan rikkin‰inen tiedosto.
   if [[ $? -ne 0 ]]; then
-    rm -f ${BACKUPDIR}/${FILENAME}
+    rm -f ${TMPBACKUPDIR}/${FILENAME}
     echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
     echo ": Config files copy FAILED."
   else
@@ -344,9 +379,20 @@ if [ ! -z "${BACKUPFILET}" ]; then
 
     # Salataan tiedosto
     if [ ! -z "${SALAUSAVAIN}" ]; then
-      encrypt_file "${SALAUSAVAIN}" "${BACKUPDIR}/${FILENAME}"
+      encrypt_file "${SALAUSAVAIN}" "${TMPBACKUPDIR}/${FILENAME}"
+
+      if [[ ${ENCRYPT_EXIT} -eq 0 ]]; then
+         FILENAME="${FILENAME}.nc"
+      fi
     fi
+
+    # Siirret‰‰n backupkansioon
+    mv -f ${TMPBACKUPDIR}/${FILENAME} ${BACKUPDIR}/${FILENAME}
   fi
+
+  # Dellataan pois tempit
+  rm -rf ${TMPBACKUPDIR}
+
 else
   echo -n `date "+%d.%m.%Y @ %H:%M:%S"`
   echo ": Config files not found!"

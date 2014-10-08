@@ -324,7 +324,7 @@ if (!function_exists("pupe_error")) {
       echo nl2br($puperror);
     }
     else {
-      echo "Tietokantayhteydessä virhe!"; # Älä t-funktioi tätä.
+      echo "Tietokantayhteydessä virhe!"; // Älä t-funktioi tätä.
     }
 
     // kuollaan pois
@@ -1012,31 +1012,39 @@ if (!function_exists("maventa_invoice_put_file")) {
       $files_out = $files_out_resend;
     }
     else {
-      $files_out['files']   = array();
+      $files_out['files']     = array();
       $files_out['filenames'] = array();
 
-      //Finvoice
-      $files_out['files'][0]      = base64_encode($xmlstring);
+      // Finvoice
+      $files_out['files'][0]     = base64_encode($xmlstring);
       $files_out['filenames'][0] = "$invoice_number.xml";
 
-      //PDFä
-      $files_out['files'][1]      = base64_encode(tulosta_lasku("LASKU:".$invoice_number, $kieli, "VERKKOLASKU_MAVENTA", "", "", "", ""));
+      // PDFä
+      $files_out['files'][1]     = base64_encode(tulosta_lasku("LASKU:".$invoice_number, $kieli, "VERKKOLASKU_MAVENTA", "", "", "", ""));
       $files_out['filenames'][1] = "$invoice_number.pdf";
     }
 
-    try {
-      if ($client === FALSE) {
-        throw new Exception('VIRHE: Yhteys Maventaan ei ole auki.');
-      }
-      else {
-        $return_value = $client->invoice_put_finvoice($api_keys, $files_out);
-        return $return_value->status;
-      }
+    if ($client === NULL and $api_keys === NULL) {
+      // Siirretään lähetysjonoon
+      file_put_contents("{$pupe_root_polku}/dataout/maventa_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number-serialized.txt", serialize($files_out));
+      return "Lasku siirretty lähetysjonoon";
     }
-    catch (Exception $exVirhe) {
-      // Siirretään error-kansioon, paitsi jos faili on seillä jo ennestään...
-      if (count($files_out_resend) == 0) file_put_contents("{$pupe_root_polku}/dataout/maventa_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number-serialized.txt", serialize($files_out));
-      return $exVirhe->getMessage();
+    else {
+      // Lähetetään lasku
+      try {
+        if ($client === FALSE) {
+          throw new Exception('VIRHE: Yhteys Maventaan ei ole auki.');
+        }
+        else {
+          $return_value = $client->invoice_put_finvoice($api_keys, $files_out);
+          return $return_value->status;
+        }
+      }
+      catch (Exception $exVirhe) {
+        // Siirretään error-kansioon, paitsi jos faili on seillä jo ennestään...
+        if (count($files_out_resend) == 0) file_put_contents("{$pupe_root_polku}/dataout/maventa_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number-serialized.txt", serialize($files_out));
+        return $exVirhe->getMessage();
+      }
     }
   }
 }
@@ -1046,14 +1054,14 @@ if (!function_exists("apix_invoice_put_file")) {
     global $kukarow, $yhtiorow, $pupe_root_polku;
 
     // siirretään laskutiedosto operaattorille
-    //$url        = "https://test-api.apix.fi/invoices";
+    //$url       = "https://test-api.apix.fi/invoices";
     $url         = "https://api.apix.fi/invoices";
     $transferkey = $yhtiorow['apix_avain'];
     $transferid  = $yhtiorow['apix_tunnus'];
     $software    = "Pupesoft";
     $version     = "1.0";
     $timestamp   = gmdate("YmdHis");
-    $apix_ulos    = "";
+    $apix_ulos   = "";
 
     if ($apixzipfile_resend != "") {
       // Filenimi joka uudelleenlähetetään
@@ -1973,8 +1981,10 @@ if (!function_exists("lpr")) {
       return;
     }
 
-    // sallitut merkit listattu, kaikki muut menee spaceks...
-    $str = ereg_replace("[^A-Za-z0-9ÖöÅåÄä .,-/!|+()%#\n\r]", " ", $str);
+    // sallitut merkit listattu, kaikki muut menee spaceks, paitsi jos kyseessä on kuittitulostin...
+    if ($kirjoitin['mediatyyppi'] != "kuittitulostin") {
+      $str = ereg_replace("[^A-Za-z0-9ÖöÅåÄä .,-/!|+()%#\n\r]", " ", $str);
+    }
 
     // merkistökonversio
     $from = array('ä', 'å', 'ö', 'Ä', 'Å', 'Ö', '|');
@@ -8786,6 +8796,8 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
   function livesearch_asiakkaantilausnumero($toim) {
     global $yhtiorow, $kukarow, $palvelin2;
 
+    pupeslave_start();
+
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
     $formi = $_REQUEST["livesearch_form"];
@@ -8899,12 +8911,16 @@ if (!function_exists("livesearch_asiakkaantilausnumero")) {
         document.getElementById('livesearch_$hakuid').style.innerHTML = '';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists("livesearch_tilihaku")) {
   function livesearch_tilihaku() {
     global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -8989,12 +9005,16 @@ if (!function_exists("livesearch_tilihaku")) {
         document.getElementById('livesearch_$hakuid').style.innerHTML = '';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists("livesearch_tuotehaku")) {
   function livesearch_tuotehaku() {
     global $yhtiorow, $kukarow, $palvelin2, $verkkokauppa;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -9202,12 +9222,16 @@ if (!function_exists("livesearch_tuotehaku")) {
         document.getElementById('livesearch_{$hakuid}').style.visibility = 'hidden';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists('livesearch_tuotekategoriahaku')) {
   function livesearch_tuotekategoriahaku() {
     global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -9294,12 +9318,16 @@ if (!function_exists('livesearch_tuotekategoriahaku')) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists('livesearch_tuoteryhmahaku')) {
   function livesearch_tuoteryhmahaku() {
     global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -9379,12 +9407,16 @@ if (!function_exists('livesearch_tuoteryhmahaku')) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists("livesearch_kayttajahaku")) {
   function livesearch_kayttajahaku($toim = '') {
     global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -9480,12 +9512,16 @@ if (!function_exists("livesearch_kayttajahaku")) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists("livesearch_asiakashaku")) {
   function livesearch_asiakashaku() {
     global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -9574,12 +9610,16 @@ if (!function_exists("livesearch_asiakashaku")) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists('livesearch_asiakasytunnushaku')) {
   function livesearch_asiakasytunnushaku() {
     global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -9664,12 +9704,16 @@ if (!function_exists('livesearch_asiakasytunnushaku')) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists('livesearch_asiakaskategoriahaku')) {
   function livesearch_asiakaskategoriahaku() {
     global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -9756,12 +9800,16 @@ if (!function_exists('livesearch_asiakaskategoriahaku')) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists("livesearch_varastohaku")) {
   function livesearch_varastohaku() {
     global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -9841,12 +9889,16 @@ if (!function_exists("livesearch_varastohaku")) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists("livesearch_toimittajahaku")) {
   function livesearch_toimittajahaku($toim = '') {
     global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -9923,12 +9975,16 @@ if (!function_exists("livesearch_toimittajahaku")) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
 if (!function_exists("livesearch_sarjanumerohaku")) {
   function livesearch_sarjanumerohaku($toim = '') {
     global $yhtiorow, $kukarow, $palvelin2;
+
+    pupeslave_start();
 
     $tee = $_REQUEST["livesearch_tee"];
     $nimi = $_REQUEST["livesearch_nimi"];
@@ -9999,6 +10055,8 @@ if (!function_exists("livesearch_sarjanumerohaku")) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'hidden';
       </script>";
     }
+
+    pupeslave_stop();
   }
 }
 
@@ -11080,7 +11138,6 @@ if (!function_exists('t_tuotteen_avainsanat')) {
       $row = mysql_fetch_assoc($result);
       // jos löydettiin käännös palautetaan se
       if ($row["selitetark"] != "") {
-        $palautus = "";
         $palautus = "{$row["selite"]} {$row["selitetark"]}";
       }
       else {
@@ -15342,8 +15399,8 @@ if (!function_exists("palauta_vak_tiedot")) {
       while ($row = mysql_fetch_assoc($riresult1));
 
       if ($rakirkilot > 0) {
-        $vaktuotetiedot[] = "TOTAL GROSS MASS: " . round($rakirkilot,2) . " kg";
-        $vaktuotetiedot[] = "TOTAL NET MASS: " . round($tuotepainot_yht,2) . " kg";
+        $vaktuotetiedot[] = "TOTAL GROSS MASS: " . round($rakirkilot, 2) . " kg";
+        $vaktuotetiedot[] = "TOTAL NET MASS: " . round($tuotepainot_yht, 2) . " kg";
       }
     }
 
@@ -23879,13 +23936,11 @@ if (!function_exists('hae_kayttajaan_linkitetty_extranet_kayttaja')) {
     if ($yhtio == "") $yhtio = $kukarow['yhtio'];
 
     $query = "SELECT kuka.*
-              FROM kuka
-              JOIN extranet_kayttajan_lisatiedot
-              ON ( extranet_kayttajan_lisatiedot.yhtio = kuka.yhtio
-              AND extranet_kayttajan_lisatiedot.liitostunnus = kuka.tunnus
-              AND extranet_kayttajan_lisatiedot.selite       = '{$kuka}'
-              AND extranet_kayttajan_lisatiedot.laji         = 'LINKITYS' )
-              WHERE kuka.yhtio                               = '{$yhtio}'";
+              FROM extranet_kayttajan_lisatiedot
+              JOIN kuka ON (kuka.yhtio = extranet_kayttajan_lisatiedot.yhtio AND kuka.tunnus = extranet_kayttajan_lisatiedot.liitostunnus)
+              WHERE extranet_kayttajan_lisatiedot.yhtio = '{$yhtio}'
+              AND extranet_kayttajan_lisatiedot.selite  = '{$kuka}'
+              AND extranet_kayttajan_lisatiedot.laji    = 'LINKITYS'";
     $result = pupe_query($query);
 
     return mysql_fetch_assoc($result);
@@ -24249,9 +24304,9 @@ if (!function_exists("lisaa_rivi")) {
     $tuotenimitys_force = (!empty($parametrit['tuotenimitys_force'])) ? $parametrit['tuotenimitys_force'] : '';  // tuotteen nimitys muutetaan systemitasolla
     $kommentti          = (!empty($parametrit['kommentti']))          ? $parametrit['kommentti'] : '';           // rivikommentti
     $valmistuslinja     = (!empty($parametrit['valmistuslinja']))     ? $parametrit['valmistuslinja'] : '';      // valmistuslinja
-    $alv        = (!empty($parametrit['alv']))              ? $parametrit['alv'] : '';         // rivi alv
-    $toim        = (!empty($parametrit['toim']))              ? $parametrit['toim'] : '';         // toim
-    $rekisterinumero  = (!empty($parametrit['rekisterinumero']))    ? $parametrit['rekisterinumero'] : '';   // rekisterinumero
+    $alv                = (!empty($parametrit['alv']))                ? $parametrit['alv'] : '';                 // rivi alv
+    $toim               = (!empty($parametrit['toim']))               ? $parametrit['toim'] : '';                // toim
+    $rekisterinumero    = (!empty($parametrit['rekisterinumero']))    ? $parametrit['rekisterinumero'] : '';     // rekisterinumero
 
     for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
       $ale_temp = str_replace(',', '.', $parametrit{'ale'.$alepostfix});
@@ -29534,6 +29589,94 @@ if (!function_exists("kasittele_tiliote_viite")) {
   }
 }
 
+if (!function_exists("cron_log")) {
+  function cron_log($file = "") {
+    GLOBAL $argv, $pupesoft_commandlinelog;
+
+    if (isset($pupesoft_commandlinelog) and substr($pupesoft_commandlinelog, -23) == "pupesoft-commanline.log") {
+      $_msg  = microtime(TRUE)."|$file|".serialize($argv)."\n";
+      file_put_contents($pupesoft_commandlinelog, $_msg, FILE_APPEND);
+    }
+  }
+}
+
+if (!function_exists("paivita_sopimusrivit")) {
+  function paivita_sopimusrivit(array $sopimusrivitunnukset = array()) {
+    global $kukarow;
+
+    // Jos on annettu sopimusrivitunnukset päivitetään vain niitä rivejä, muuten päivitetään kaikki
+    if (is_array($sopimusrivitunnukset) and count($sopimusrivitunnukset) > 0) {
+
+      foreach ($sopimusrivitunnukset as $muokattu_sopimusrivi) {
+        // Päivitetään sopimusriville oikea kappalemäärä mutta ei ikinä nollata
+        $query = "SELECT
+                  count(*) lkm
+                  FROM laitteen_sopimukset
+                  WHERE sopimusrivin_tunnus = '{$muokattu_sopimusrivi}'";
+        $res = pupe_query($query);
+        $laiterivi = mysql_fetch_assoc($res);
+
+        $paivitettava_kpl = $laiterivi['lkm'] > 0 ? $laiterivi['lkm'] : 1;
+
+        // Jos tuote on asetettu avainsanalla rivikohtaiseksi niin ei päivitetä kappalemäärää
+        $query = "UPDATE tilausrivi
+                  SET
+                  tilkpl           = '{$paivitettava_kpl}',
+                  varattu          = '{$paivitettava_kpl}'
+                  WHERE tunnus     = '{$muokattu_sopimusrivi}'
+                  AND yhtio        = '{$kukarow['yhtio']}'
+                  AND NOT EXISTS (SELECT *
+                    FROM tuotteen_avainsanat
+                    WHERE yhtio    = '{$kukarow['yhtio']}'
+                    AND tuoteno    = tilausrivi.tuoteno
+                    AND laji       = 'laatuluokka'
+                    AND selitetark = 'rivikohtainen')";
+        pupe_query($query);
+      }
+    }
+    else {
+
+      $query = "SELECT
+                group_concat(DISTINCT sopimusrivin_tunnus) kaikki_rivitunnukset
+                FROM laitteen_sopimukset
+                WHERE yhtio              = '{$kukarow['yhtio']}'
+                AND sopimusrivin_tunnus != 0";
+      $kaikkiresult = pupe_query($query);
+      $kaikkirivi = mysql_fetch_assoc($kaikkiresult);
+      $kaikki_sopimusrivit = explode(",", $kaikkirivi['kaikki_rivitunnukset']);
+
+      foreach ($kaikki_sopimusrivit as $muokattu_sopimusrivi) {
+        // Päivitetään sopimusriville oikea kappalemäärä mutta ei ikinä nollata
+        $query = "SELECT
+                  count(*) lkm
+                  FROM laitteen_sopimukset
+                  WHERE sopimusrivin_tunnus = '{$muokattu_sopimusrivi}'";
+        $res = pupe_query($query);
+        $laiterivi = mysql_fetch_assoc($res);
+
+        $paivitettava_kpl = $laiterivi['lkm'] > 0 ? $laiterivi['lkm'] : 1;
+
+        // Jos tuote on asetettu avainsanalla rivikohtaiseksi niin ei päivitetä kappalemäärää
+        $query = "UPDATE tilausrivi
+                  SET
+                  tilkpl           = '{$paivitettava_kpl}',
+                  varattu          = '{$paivitettava_kpl}'
+                  WHERE tunnus     = '{$muokattu_sopimusrivi}'
+                  AND yhtio        = '{$kukarow['yhtio']}'
+                  AND NOT EXISTS (SELECT *
+                    FROM tuotteen_avainsanat
+                    WHERE yhtio    = '{$kukarow['yhtio']}'
+                    AND tuoteno    = tilausrivi.tuoteno
+                    AND laji       = 'laatuluokka'
+                    AND selitetark = 'rivikohtainen')";
+        pupe_query($query);
+      }
+    }
+
+    return "";
+  }
+}
+
 if (!function_exists("hae_saldo")) {
   function hae_saldo($tuote, $tyyppi = '') {
     global $kukarow, $yhtiorow, $maa;
@@ -29542,7 +29685,7 @@ if (!function_exists("hae_saldo")) {
 
     if ($tuote["tuoteperhe"] == $tuote["tuoteno"]) {
       // Tuoteperheen isä
-      $saldot = tuoteperhe_myytavissa($tuote["tuoteno"],'KAIKKI',$tyyppi,0,'','','','','', $maa);
+      $saldot = tuoteperhe_myytavissa($tuote["tuoteno"], 'KAIKKI', $tyyppi, 0, '', '', '', '', '', $maa);
 
       foreach ($saldot as $varasto => $myytavissa) {
         $saldo += $myytavissa;
@@ -29555,7 +29698,7 @@ if (!function_exists("hae_saldo")) {
       return $saldo;
     }
     else {
-      list($a,$b,$myytavissa) = saldo_myytavissa($tuote["tuoteno"],$tyyppi,0,'','','','','', $maa);
+      list($a, $b, $myytavissa) = saldo_myytavissa($tuote["tuoteno"], $tyyppi, 0, '', '', '', '', '', $maa);
       $saldo = $myytavissa;
 
       return $saldo;

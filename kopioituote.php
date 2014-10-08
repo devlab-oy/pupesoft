@@ -294,6 +294,12 @@ if ($tee == 'AVALITTU' and $tuoteno != '') {
   echo "<td class='back'><input type='Submit' value='".t("Kopioi")."'></td>";
   echo "<td class='back'><font class='error'>$varaosavirhe</font></td>";
   echo "</form></tr></table>";
+
+  echo "<form action = 'kopioituote.php' method = 'post'>
+    <input type='hidden' name='toim' value='$toim'>
+    <input type='hidden' name='lopetus' value='$lopetus'>";
+  echo "<br><input type='submit' value='".t("Tee uusi haku")."'>";
+  echo "</form>";
 }
 
 if (($tee == 'HAKU' or $tee == "Y") and $ulos != '') {

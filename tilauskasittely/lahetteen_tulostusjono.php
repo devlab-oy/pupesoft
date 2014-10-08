@@ -586,6 +586,13 @@ if ($tee2 == 'VALITSE') {
       echo "</table><br><br>";
       echo "<input type='hidden' name='lasku_yhtio' value='$kukarow[yhtio]'>";
       echo "<input type='submit' name='tila' value='".t("Tulosta")."'></form>";
+
+      echo "<br>";
+      echo "<form action = 'lahetteen_tulostusjono.php' method = 'post'>
+        <input type='hidden' name='toim' value='$toim'>
+        <input type='hidden' name='lopetus' value='$lopetus'>";
+      echo "<br><input type='submit' value='".t("Takaisin tilauksen valintaan")."'>";
+      echo "</form>";
     }
   }
 }

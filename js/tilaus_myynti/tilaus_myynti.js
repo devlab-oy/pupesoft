@@ -1,5 +1,10 @@
 $(document).ready(function() {
 
+  $('#myyja_id').on('change', function () {
+    $(this).siblings('#myyjanro_id').val('');
+    $(this).closest('form').submit();
+  });
+
   $('#hintojen_vaihto').on('change', function() {
     $('.hv_hidden').val( this.checked ? 'JOO' : 'EI' );
   });
@@ -125,6 +130,12 @@ function Hinta_laskuri(perheid, raakaaineiden_kehahinta_summa, valmisteiden_pain
       if (isNaN(_val)) _val = vanha_arvo;
 
       $input.val(_val);
+
+      if ($input.val() < 0) {
+        $input.val(vanha_arvo);
+        alert('Hinta ei saa olla negatiivinen');
+        return;
+      }
 
       // Jos hinnat menevät yli tai ali, palauta vanha arvo ja infoa käyttäjää.
       if (me.tarkista_hinnat()===false) {

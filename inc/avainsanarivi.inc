@@ -25,7 +25,8 @@ if ($_selitetark_5 or
 
 if ($_selitetark_5 and
   $avain_sel['MYSQLALIAS'] == "SELECTED" or
-  $avain_sel["SAHKTILTUN"] == "SELECTED") {
+  $avain_sel["SAHKTILTUN"] == "SELECTED" or
+  $avain_sel['TYOM_TYOKENTAT']) {
   $tyyppi = 1;
 }
 
@@ -254,32 +255,33 @@ if (mysql_field_name($result, $i) == "laji") {
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Muut avainsanat")."'>";
   if ($lukitse_laji== "" or $lukitse_laji == "VAKIOVIESTI")     $ulos .= "<option value='VAKIOVIESTI' $avain_sel[VAKIOVIESTI]>        ".t("Laskun vakioviesti")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "VAKIOVIESTI_TIL")  $ulos .= "<option value='VAKIOVIESTI_TIL' {$avain_sel['VAKIOVIESTI_TIL']}>  ".t("Tilausvahvistuksen vakioviesti")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "VAKIOVIESTI_TIL") $ulos .= "<option value='VAKIOVIESTI_TIL' {$avain_sel['VAKIOVIESTI_TIL']}>  ".t("Tilausvahvistuksen vakioviesti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KAANTALVVIESTI")  $ulos .= "<option value='KAANTALVVIESTI' $avain_sel[KAANTALVVIESTI]>    ".t("Tilauksen/Laskun käänteisen verotuksen viesti")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "LITETY")       $ulos .= "<option value='LITETY' $avain_sel[LITETY]>            ".t("Liitetiedostotyyppi")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "TIL-LITETY")     $ulos .= "<option value='TIL-LITETY' ".$avain_sel["TIL-LITETY"].">      ".t("Tilauksen liitetiedostotyyppi")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "LITETY")          $ulos .= "<option value='LITETY' $avain_sel[LITETY]>            ".t("Liitetiedostotyyppi")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "TIL-LITETY")      $ulos .= "<option value='TIL-LITETY' ".$avain_sel["TIL-LITETY"].">      ".t("Tilauksen liitetiedostotyyppi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "JAKELULISTA")     $ulos .= "<option value='JAKELULISTA' $avain_sel[JAKELULISTA]>        ".t("Email jakelulista")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "LUETTELO")       $ulos .= "<option value='LUETTELO' $avain_sel[LUETTELO]>          ".t("Luettelotyyppi")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "LUETTELO")        $ulos .= "<option value='LUETTELO' $avain_sel[LUETTELO]>          ".t("Luettelotyyppi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TRIVITYYPPI")     $ulos .= "<option value='TRIVITYYPPI' $avain_sel[TRIVITYYPPI]>        ".t("Tilausrivin tyyppi")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "LASKUTUS_SAATE")  $ulos .= "<option value='LASKUTUS_SAATE' $avain_sel[LASKUTUS_SAATE]>    ".t("Laskun sähköpostisaatekirje asiakkaalle")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "PALAUTUS_SAATE")  $ulos .= "<option value='PALAUTUS_SAATE' $avain_sel[PALAUTUS_SAATE]>    ".t("Palautuksen sähköpostisaatekirje asiakkaalle")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "TV_LISATIETO")     $ulos .= "<option value='TV_LISATIETO' $avain_sel[TV_LISATIETO]>      ".t("Tilausvahvistuksen lisätiedot")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "INVEN_LAJI")     $ulos .= "<option value='INVEN_LAJI' $avain_sel[INVEN_LAJI]>        ".t("Inventoinnin laji")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "HAE_JA_SELAA")     $ulos .= "<option value='HAE_JA_SELAA' $avain_sel[HAE_JA_SELAA]>      ".t("Hae ja selaa -ohjelman parametrit")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "PUUTEKOMM")     $ulos .= "<option value='PUUTEKOMM' $avain_sel[PUUTEKOMM]>          ".t("Puuterivin kommentti")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "EXTRANET_TEEMA")   $ulos .= "<option value='EXTRANET_TEEMA' $avain_sel[EXTRANET_TEEMA]>    ".t("Extranet ulkoasuteema")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "SOPIMUS_KENTTA")   $ulos .= "<option value='SOPIMUS_KENTTA' $avain_sel[SOPIMUS_KENTTA]>    ".t("Ylläpitosopimuksen rivien kentät")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "LABEL")       $ulos .= "<option value='LABEL' {$avain_sel['LABEL']}>            ".t("Myyntitilauksen luokitus")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "OSTOTIL_TILTYYP")   $ulos .= "<option value='OSTOTIL_TILTYYP' {$avain_sel['OSTOTIL_TILTYYP']}>  ".t("Ostotilauksen tilaustyyppi")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "TARJOUS_VAKIOTE")   $ulos .= "<option value='TARJOUS_VAKIOTE' {$avain_sel['TARJOUS_VAKIOTE']}>  ".t("Tarjouksen vakioteksti")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "KATEISOTTO")    $ulos .= "<option value='KATEISOTTO' {$avain_sel['KATEISOTTO']}>      ".t("Käteisoton luonne")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "TV_LISATIETO")    $ulos .= "<option value='TV_LISATIETO' $avain_sel[TV_LISATIETO]>      ".t("Tilausvahvistuksen lisätiedot")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "INVEN_LAJI")      $ulos .= "<option value='INVEN_LAJI' $avain_sel[INVEN_LAJI]>        ".t("Inventoinnin laji")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "HAE_JA_SELAA")    $ulos .= "<option value='HAE_JA_SELAA' $avain_sel[HAE_JA_SELAA]>      ".t("Hae ja selaa -ohjelman parametrit")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "PUUTEKOMM")       $ulos .= "<option value='PUUTEKOMM' $avain_sel[PUUTEKOMM]>          ".t("Puuterivin kommentti")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "EXTRANET_TEEMA")  $ulos .= "<option value='EXTRANET_TEEMA' $avain_sel[EXTRANET_TEEMA]>    ".t("Extranet ulkoasuteema")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "SOPIMUS_KENTTA")  $ulos .= "<option value='SOPIMUS_KENTTA' $avain_sel[SOPIMUS_KENTTA]>    ".t("Ylläpitosopimuksen rivien kentät")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "LABEL")           $ulos .= "<option value='LABEL' {$avain_sel['LABEL']}>            ".t("Myyntitilauksen luokitus")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "OSTOTIL_TILTYYP") $ulos .= "<option value='OSTOTIL_TILTYYP' {$avain_sel['OSTOTIL_TILTYYP']}>  ".t("Ostotilauksen tilaustyyppi")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "TARJOUS_VAKIOTE") $ulos .= "<option value='TARJOUS_VAKIOTE' {$avain_sel['TARJOUS_VAKIOTE']}>  ".t("Tarjouksen vakioteksti")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "KATEISOTTO")      $ulos .= "<option value='KATEISOTTO' {$avain_sel['KATEISOTTO']}>      ".t("Käteisoton luonne")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "KOHDE_TYYPPI")    $ulos .= "<option value='KOHDE_TYYPPI' {$avain_sel['KOHDE_TYYPPI']}>        ".t("Kohteen tyyppi")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "MYYNNISTA_OSTO")    $ulos .= "<option value='MYYNNISTA_OSTO' {$avain_sel['MYYNNISTA_OSTO']}>    ".t("Ostotilauksen käsittely myyntitilauksella")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "PAIKALLISVARAST")  $ulos .= "<option value='PAIKALLISVARAST' {$avain_sel['PAIKALLISVARAST']}>  ".t("Paikallisvarasto")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "HINNAT_CRON")      $ulos .= "<option value='HINNAT_CRON' {$avain_sel['HINNAT_CRON']}>          ".t("Hinnat-cronin aikaleima (vvvv-kk-pp tt:mm:ss)")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "TUOTE_EXP_CRON")    $ulos .= "<option value='TUOTE_EXP_CRON' {$avain_sel['TUOTE_EXP_CRON']}>  ".t("Tuote Export-cronin aikaleima (vvvv-kk-pp tt:mm:ss)")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "MYYNNISTA_OSTO")  $ulos .= "<option value='MYYNNISTA_OSTO' {$avain_sel['MYYNNISTA_OSTO']}>    ".t("Ostotilauksen käsittely myyntitilauksella")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "PAIKALLISVARAST") $ulos .= "<option value='PAIKALLISVARAST' {$avain_sel['PAIKALLISVARAST']}>  ".t("Paikallisvarasto")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "HINNAT_CRON")     $ulos .= "<option value='HINNAT_CRON' {$avain_sel['HINNAT_CRON']}>          ".t("Hinnat-cronin aikaleima (vvvv-kk-pp tt:mm:ss)")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "TUOTE_EXP_CRON")  $ulos .= "<option value='TUOTE_EXP_CRON' {$avain_sel['TUOTE_EXP_CRON']}>  ".t("Tuote Export-cronin aikaleima (vvvv-kk-pp tt:mm:ss)")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "SALDOVAHVISTUS")  $ulos .= "<option value='SALDOVAHVISTUS' {$avain_sel['SALDOVAHVISTUS']}>  ".t("Saldovahvistuksen viesti")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "DPAVAINSANALAJI")     $ulos .= "<option value='DPAVAINSANALAJI' {$avain_sel['DPAVAINSANALAJI']}>        ".t("Dynaamisen puun avainsanojen laji")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "DPAVAINSANALAJI") $ulos .= "<option value='DPAVAINSANALAJI' {$avain_sel['DPAVAINSANALAJI']}>        ".t("Dynaamisen puun avainsanojen laji")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "LITETY_TKIRJAST") $ulos .= "<option value='LITETY_TKIRJAST' {$avain_sel['LITETY_TKIRJAST']}>".t("Tiedostokirjastossa selailtava tiedostotyyppi")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -841,8 +843,23 @@ if (($avain_sel['VAKIOVIESTI'] == "SELECTED" or $avain_sel['VAKIOVIESTI_TIL']) a
 }
 
 // Tuoteryhmissä voidaan antaa oletuskeräysprioriteetti selitetark_4 kenttään
-if ($avain_sel["TRY"] == "SELECTED" and $_selitetark_4) {
+if ($avain_sel["LITETY_TKIRJAST"] == "SELECTED" and mysql_field_name($result, $i) == "selite") {
 
+  $vresult = t_avainsana("LITETY");
+
+  $ulos = "<td><select name = '$nimi'>";
+
+  while ($row = mysql_fetch_assoc($vresult)) {
+    $sel = ($row["selite"] == $trow[$i]) ? ' selected' : '';
+    $ulos .= "<option value = '{$row["selite"]}'$sel>{$row["selite"]} - {$row["selitetark"]}</option>";
+  }
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+// Tuoteryhmissä voidaan antaa oletuskeräysprioriteetti selitetark_4 kenttään
+if ($avain_sel["TRY"] == "SELECTED" and $_selitetark_4) {
   $vresult = t_avainsana("ASIAKASLUOKKA");
 
   $ulos = "<td><select name = '$nimi'>";

@@ -10,8 +10,10 @@ echo "Luetaan maaryhmiä\n\n";
 require "/var/www/html/pupesoft/inc/connect.inc";
 require "/var/www/html/pupesoft/inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
 
-$file=fopen($argv[1], "r") or die ("Ei aukea!\n");
+$file = fopen($argv[1], "r") or die ("Ei aukea!\n");
 
 // luetaan tiedosto alusta loppuun...
 $rivi = fgets($file, 4096);

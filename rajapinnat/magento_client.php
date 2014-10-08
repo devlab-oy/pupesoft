@@ -102,6 +102,11 @@ class MagentoClient {
   private $_sticky_kategoriat = array ();
 
   /**
+   * Estetäänkö tilauksen sisäänluku, jos se on jo kerran merkattu "processing_pupesoft"-tilaan
+   */
+  private $_sisaanluvun_esto = "YES";
+
+  /**
    * Tämän yhteyden aikana sattuneiden virheiden määrä
    */
   private $_error_count = 0;
@@ -687,7 +692,7 @@ class MagentoClient {
         // Jos tilaus on ollut kerran jo processing_pupesoft, ei haeta sitä enää
         $_status = $historia['status'];
 
-        if ($_status == "processing_pupesoft") {
+        if ($_status == "processing_pupesoft" and $this->_sisaanluvun_esto == "YES") {
           $this->log("Tilausta on käsitelty {$_status} tilassa, ohitetaan sisäänluku", '', $type = 'order');
           // Skipataan tämä $order
           continue 2;
@@ -1582,6 +1587,14 @@ class MagentoClient {
    */
   public function setStickyKategoriat($magento_sticky_kategoriat) {
     $this->_sticky_kategoriat = $magento_sticky_kategoriat;
+  }
+
+  /**
+   * Estetäänkö tilauksen sisäänluku jos sitä on jo historian aikana käsitelty tilassa
+   * 'processing_pupesoft' Oletus YES
+   */
+  public function setSisaanluvunEsto($sisaanluvun_esto) {
+    $this->_sisaanluvun_esto = $sisaanluvun_esto;
   }
 
   /**

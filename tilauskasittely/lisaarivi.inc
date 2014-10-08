@@ -68,6 +68,14 @@ if (!isset($jo_syotetty_rekisterinumero)) $jo_syotetty_rekisterinumero = "";
 
 $reklamaatiohyvitys = false;
 
+// Haetaan asiakkaan kieli erilaisten systeemikommenttien kääntämistä varten
+$query = "SELECT kieli
+          FROM asiakas
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND tunnus  = '{$laskurow['liitostunnus']}'";
+$kielirow = mysql_fetch_assoc(pupe_query($query));
+$kieli = $kielirow["kieli"];
+
 if ($rekisterinumero == '') {
   //Kun yhtion_parametri myyntitilausrivi_rekisterinumero == K, käyttöliittymästä on mahdollisuus syöttää tilausriville rekisterinumero.
   //Käyttöliittymässä on 2 valintaa. input rekisterinumero ja dropdown jo_syotetty_rekisterinumero. Jos rekisterinumero on syötetty, yliajaa se dropdownin
@@ -1533,8 +1541,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
               if ($yhtiorow['huomautetaanko_poistuvasta'] == 'K' and ($trow['status'] == 'X' or $trow['status'] == 'P')) {
                 // Tilausrivin systeemikommentti
-                if (stripos($kommentti, t("HUOM:")." $alkupera_trow[tuoteno] ".t("on poistuva tuote!")) === FALSE) {
-                  $kommentti .= " ".t("HUOM:")." $alkupera_trow[tuoteno] ".t("on poistuva tuote!");
+                if (stripos($kommentti, t("HUOM:", $kieli)." $alkupera_trow[tuoteno] ".t("on poistuva tuote!", $kieli)) === FALSE) {
+                  $kommentti .= " ".t("HUOM:", $kieli)." $alkupera_trow[tuoteno] ".t("on poistuva tuote!", $kieli);
                 }
               }
 
@@ -1812,7 +1820,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   $tunken = "ostorivitunnus";
                 }
 
-                $query = "SELECT sarjanumeroseuranta.tunnus, sarjanumeroseuranta.kaytetty
+                $query = "SELECT sarjanumeroseuranta.tunnus, sarjanumeroseuranta.kaytetty, sarjanumeroseuranta.sarjanumero
                           FROM sarjanumeroseuranta
                           LEFT JOIN tilausrivi ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.$tunken
                           LEFT JOIN lasku ON lasku.yhtio=sarjanumeroseuranta.yhtio and lasku.tunnus=tilausrivi.otunnus
@@ -1888,6 +1896,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                           hyllyvali     = '$myy_hyllyvali[$indeksi]',
                           sarjanumero   = '$myy_era[$indeksi]'";
                 $lisa_res = pupe_query($query);
+
               }
 
               if ($myy_tyyppi[$indeksi] == "LAPSITUOTE") {
@@ -2471,9 +2480,9 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
         $puurivires = t_avainsana("PUUTEKOMM");
 
         if ($kutsuja == "EDITILAUS" and $trow['status'] == 'T') {
-          if (stripos($kommentti, t("Tilaustuote.")) === FALSE) {
+          if (stripos($kommentti, t("Tilaustuote.", $kieli)) === FALSE) {
             // Tilausrivin systeemikommentti
-            $kommentti .= " ".t("Tilaustuote.");
+            $kommentti .= " ".t("Tilaustuote.", $kieli);
           }
         }
         elseif (mysql_num_rows($puurivires) > 0) {
@@ -2486,9 +2495,9 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           }
         }
         elseif ($kutsuja == "EDITILAUS") {
-          if (stripos($kommentti, t("Tuote Loppu.")) === FALSE) {
+          if (stripos($kommentti, t("Tuote Loppu.", $kieli)) === FALSE) {
             // Tilausrivin systeemikommentti
-            $kommentti .= " ".t("Tuote loppu.");
+            $kommentti .= " ".t("Tuote loppu.", $kieli);
           }
         }
       }
@@ -2685,9 +2694,9 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
     if ($rivitunnus == 0 and ($trow["status"] == "P" or $trow["status"] == "X")) {
       // Tilausrivin systeemikommentti
-      if (stripos($kommentti, t("Poistunut tuote")) === FALSE) {
+      if (stripos($kommentti, t("Poistunut tuote", $kieli)) === FALSE) {
         if (trim($kommentti) != "")  $kommentti .= "\n";
-        $kommentti .= t("Poistunut tuote");
+        $kommentti .= t("Poistunut tuote", $kieli);
       }
     }
 

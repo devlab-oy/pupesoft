@@ -62,11 +62,11 @@ else {
 
         // tilaus on jo tilassa N A, p‰ivitet‰‰n nyt tilaus "ker‰yslista tulostettu" eli L A
         $query = "UPDATE lasku SET
-        			    tila 	      = 'L',
-        			    lahetepvm   = now(),
-        			    kerayslista = '{$kerayslistatunnus}'
-        			    WHERE yhtio = '{$kukarow['yhtio']}'
-        			    AND tunnus in ({$otunnukset})
+                  tila 	      = 'L',
+                  lahetepvm   = now(),
+                  kerayslista = '{$kerayslistatunnus}'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus in ({$otunnukset})
                   AND tila    = 'N'
                   AND alatila = 'KA'";
         pupe_query($query);
@@ -74,11 +74,11 @@ else {
         if ($yhtiorow['kerayserat'] != '' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
           // siirtolista on jo tilassa G J, p‰ivitet‰‰n nyt tilaus "siirtolista tulostettu" eli G A
           $query = "UPDATE lasku SET
-          			    alatila     = 'A',
-          			    lahetepvm   = now(),
-          			    kerayslista = '{$kerayslistatunnus}'
-          			    WHERE yhtio = '{$kukarow['yhtio']}'
-          			    AND tunnus in ({$otunnukset})
+                    alatila     = 'A',
+                    lahetepvm   = now(),
+                    kerayslista = '{$kerayslistatunnus}'
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus in ({$otunnukset})
                     AND tila    = 'G'
                     AND alatila = 'KJ'";
           pupe_query($query);

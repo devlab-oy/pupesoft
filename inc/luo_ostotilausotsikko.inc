@@ -1,31 +1,29 @@
 <?php
 
 if (!function_exists('luo_ostotilausotsikko')) {
-
   function luo_ostotilausotsikko(array $params) {
-
     global $kukarow, $yhtiorow;
 
-    /*   Pakolliset parametrit
-     *   $params['liitostunnus'];
+    /* Pakolliset parametrit
+     * $params['liitostunnus'];
      *
-     *   Muut parametrit
-     *   $params['ostotilauksen_kasittely'];
-     *   $params["nimi"];
-     *   $params["nimitark"];
-     *   $params["osoite"];
-     *   $params["postino"];
-     *   $params["postitp"];
-     *   $params["maa"];
-     *   $params['ohjausmerkki']
-     *   $params['jakelu']
-     *   $params['myyntitil_kerayspvm']
-     *   $params['myytil_myyja']
-     *   $params['myytil_sisviesti1']
-     *   $params['myytil_viesti']
-     *   $params['myytil_toimaika']
-     *   $params['myytil_toimitustapa']
-     *   $params['myytil_liitostunnus']
+     * Muut parametrit
+     * $params['ostotilauksen_kasittely'];
+     * $params["nimi"];
+     * $params["nimitark"];
+     * $params["osoite"];
+     * $params["postino"];
+     * $params["postitp"];
+     * $params["maa"];
+     * $params['ohjausmerkki']
+     * $params['jakelu']
+     * $params['myyntitil_kerayspvm']
+     * $params['myytil_myyja']
+     * $params['myytil_sisviesti1']
+     * $params['myytil_viesti']
+     * $params['myytil_toimaika']
+     * $params['myytil_toimitustapa']
+     * $params['myytil_liitostunnus']
      */
 
     $params['ostotilauksen_kasittely'] = (!empty($params['ostotilauksen_kasittely'])) ? $params['ostotilauksen_kasittely'] : '';
@@ -67,19 +65,19 @@ if (!function_exists('luo_ostotilausotsikko')) {
     // Jos ostotilausta ei ole luotu myyntitilaukselta (tilaus_osto.php ~545), käytetään toimittajan oletuksia
     if (empty($params['nimi'])) {
       $toim_nimi     = $tiltoi["nimi"];
-      $toim_nimitark   = $tiltoi["nimitark"];
+      $toim_nimitark = $tiltoi["nimitark"];
       $toim_osoite   = $tiltoi["osoite"];
-      $toim_postino   = $tiltoi["postino"];
-      $toim_postitp   = $tiltoi["postitp"];
-      $toim_maa     = $tiltoi["maa"];
+      $toim_postino  = $tiltoi["postino"];
+      $toim_postitp  = $tiltoi["postitp"];
+      $toim_maa      = $tiltoi["maa"];
     }
     else {
       $toim_nimi     = $params["nimi"];
-      $toim_nimitark   = $params["nimitark"];
+      $toim_nimitark = $params["nimitark"];
       $toim_osoite   = $params["osoite"];
-      $toim_postino   = $params["postino"];
-      $toim_postitp   = $params["postitp"];
-      $toim_maa     = $params["maa"];
+      $toim_postino  = $params["postino"];
+      $toim_postitp  = $params["postitp"];
+      $toim_maa      = $params["maa"];
     }
 
     $valkoodi = $tiltoi["oletus_valkoodi"];
@@ -93,7 +91,7 @@ if (!function_exists('luo_ostotilausotsikko')) {
                WHERE yhtio = '$kukarow[yhtio]'
                and nimi    = '$valkoodi'";
     $vresult = pupe_query($vquery);
-    $vrow = mysql_fetch_array($vresult);
+    $vrow = mysql_fetch_assoc($vresult);
 
     $ostotilauksen_kasittely_wherelisa = "";
 
@@ -102,52 +100,52 @@ if (!function_exists('luo_ostotilausotsikko')) {
     case '5':
     case '4':
       $ostotilauksen_kasittely_wherelisa .= "
-          and toim_nimi    = '{$toim_nimi}'
-          and toim_nimitark  = '{$toim_nimitark}'
-          and toim_osoite    = '{$toim_osoite}'
+          and toim_nimi     = '{$toim_nimi}'
+          and toim_nimitark = '{$toim_nimitark}'
+          and toim_osoite   = '{$toim_osoite}'
           and toim_postino  = '{$toim_postino}'
           and toim_postitp  = '{$toim_postitp}'
-          and toim_maa    = '{$toim_maa}'
-          and varasto     = '{$params['varasto']}'
-          and ohjausmerkki   = '{$params['ohjausmerkki']}'
-          and chn        = '$chn'
+          and toim_maa      = '{$toim_maa}'
+          and varasto       = '{$params['varasto']}'
+          and ohjausmerkki  = '{$params['ohjausmerkki']}'
+          and chn           = '$chn'
           and tilaustyyppi  = '{$params['tilaustyyppi']}'";
       break;
     case '2':
     case '3':
       $ostotilauksen_kasittely_wherelisa .= "
-          and toim_nimi    = '{$toim_nimi}'
-          and toim_nimitark  = '{$toim_nimitark}'
-          and toim_osoite    = '{$toim_osoite}'
+          and toim_nimi     = '{$toim_nimi}'
+          and toim_nimitark = '{$toim_nimitark}'
+          and toim_osoite   = '{$toim_osoite}'
           and toim_postino  = '{$toim_postino}'
           and toim_postitp  = '{$toim_postitp}'
-          and toim_maa    = '{$toim_maa}'
-          and chn        = '$chn'
+          and toim_maa      = '{$toim_maa}'
+          and chn           = '$chn'
           and tilaustyyppi  = '{$params['tilaustyyppi']}'";
       break;
     case '1':
     case '0':
     default:
       $ostotilauksen_kasittely_wherelisa .= "
-          and toim_nimi    = '{$toim_nimi}'
-          and toim_nimitark  = '{$toim_nimitark}'
-          and toim_osoite    = '{$toim_osoite}'
+          and toim_nimi     = '{$toim_nimi}'
+          and toim_nimitark = '{$toim_nimitark}'
+          and toim_osoite   = '{$toim_osoite}'
           and toim_postino  = '{$toim_postino}'
           and toim_postitp  = '{$toim_postitp}'
-          and toim_maa    = '{$toim_maa}'
+          and toim_maa      = '{$toim_maa}'
           and left(luontiaika,10) = left(now(),10)
-          and laatija     = '{$kukarow['kuka']}'
-          and chn        = '$chn'
+          and laatija       = '{$kukarow['kuka']}'
+          and chn           = '$chn'
           and tilaustyyppi  = '{$params['tilaustyyppi']}'";
       break;
     }
 
     $query = "SELECT *
-              from lasku
-              where yhtio      = '$kukarow[yhtio]'
-              and liitostunnus = '$tiltoi[tunnus]'
-              and tila         = 'O'
-              and alatila      = ''
+              FROM lasku
+              WHERE yhtio      = '$kukarow[yhtio]'
+              AND liitostunnus = '$tiltoi[tunnus]'
+              AND tila         = 'O'
+              AND alatila      = ''
               {$ostotilauksen_kasittely_wherelisa}";
     $ostotilaus_result = pupe_query($query);
 

@@ -1372,30 +1372,27 @@ class MagentoClient {
    * @return array   $tuotekuvat   Palauttaa arrayn joka kelpaa magenton soap clientille suoraan
    */
   public function hae_tuotekuvat($tunnus) {
-    global $kukarow, $dbhost, $dbuser, $dbpass, $dbkanta;
+    global $kukarow;
 
     // Populoidaan tuotekuvat array
     $tuotekuvat = array();
 
     try {
-      // Tietokantayhteys
-      $db = new PDO("mysql:host=$dbhost;dbname=$dbkanta", $dbuser, $dbpass);
 
-      // Tuotekuva query
-      $stmt = $db->prepare("  SELECT
-                  liitetiedostot.data,
-                  liitetiedostot.filetype,
-                  liitetiedostot.filename
-                  FROM liitetiedostot
-                  WHERE liitetiedostot.yhtio = ?
-                  AND liitetiedostot.liitostunnus = ?
-                  AND liitetiedostot.liitos = 'tuote'
-                  AND liitetiedostot.kayttotarkoitus = 'TK'
-                  ORDER BY liitetiedostot.jarjestys DESC,
-                  liitetiedostot.tunnus DESC");
-      $stmt->execute(array($kukarow['yhtio'], $tunnus));
+      $query = "SELECT
+                liitetiedostot.data,
+                liitetiedostot.filetype,
+                liitetiedostot.filename
+                FROM liitetiedostot
+                WHERE liitetiedostot.yhtio = '{$kukarow['yhtio']}'
+                AND liitetiedostot.liitostunnus = '{$tunnus}'
+                AND liitetiedostot.liitos = 'tuote'
+                AND liitetiedostot.kayttotarkoitus = 'TK'
+                ORDER BY liitetiedostot.jarjestys DESC,
+                liitetiedostot.tunnus DESC";
+      $result = pupe_query($query);
 
-      while ($liite = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      while ($liite = mysql_fetch_assoc($result)) {
         $file = array(
           'content'   => base64_encode($liite['data']),
           'mime'    => $liite['filetype'],
@@ -1406,10 +1403,8 @@ class MagentoClient {
     }
     catch (Exception $e) {
       $this->_error_count++;
-      $this->log("Virhe! PDO yhteys on poikki. Yritet‰‰n uudelleen.", $e);
+      $this->log("Virhe! Tietokantayhteys on poikki. Yritet‰‰n uudelleen.", $e);
     }
-
-    $db = null;
 
     // Palautetaan tuotekuvat
     return $tuotekuvat;
@@ -1604,25 +1599,21 @@ class MagentoClient {
    *
    */
   public function hae_kieliversiot($tuotenumero) {
-    global $kukarow, $dbhost, $dbuser, $dbpass, $dbkanta;
+    global $kukarow;
 
     $kieliversiot_data = array();
 
     try {
-      // Tietokantayhteys
-      $db = new PDO("mysql:host=$dbhost;dbname=$dbkanta", $dbuser, $dbpass);
+      $query = "SELECT
+                kieli, laji, selite
+                FROM
+                tuotteen_avainsanat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tuoteno = '{$tuotenumero}'
+                AND laji IN ('nimitys','kuvaus')";
+      $result = pupe_query($query);
 
-      // Tuotteen avainsanat-query
-      $stmt = $db->prepare("  SELECT
-                              kieli, laji, selite
-                              FROM
-                              tuotteen_avainsanat
-                              WHERE yhtio = ?
-                              AND tuoteno = ?
-                              AND laji IN ('nimitys','kuvaus')");
-      $stmt->execute(array($kukarow['yhtio'], $tuotenumero));
-
-      while ($avainsana = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      while ($avainsana = mysql_fetch_assoc($result)) {
         $kieli  = $avainsana['kieli'];
         $laji   = utf8_encode($avainsana['laji']);
         $selite = utf8_encode($avainsana['selite']);
@@ -1633,10 +1624,8 @@ class MagentoClient {
     }
     catch (Exception $e) {
       $this->_error_count++;
-      $this->log("Virhe! PDO yhteys on poikki. Yritet‰‰n uudelleen.", $e);
+      $this->log("Virhe! Tietokantayhteys on poikki. Yritet‰‰n uudelleen.", $e);
     }
-
-    $db = null;
 
     // Palautetaan kieliversiot
     return $kieliversiot_data;

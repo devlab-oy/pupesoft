@@ -61,7 +61,11 @@ $query_ale_lisa = generoi_alekentta('M');
 
 if ($otunnukset != "") {
   // Tilausken arvo
-  $query = "SELECT lasku.valkoodi, sum(round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa}, '$yhtiorow[hintapyoristys]')) rivihinta
+  $query = "SELECT lasku.valkoodi,
+            sum(round(tilausrivi.hinta
+              * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl)
+              * {$query_ale_lisa}, '$yhtiorow[hintapyoristys]')) rivihinta,
+            lasku.toimitustapa
             FROM tilausrivi
             JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
             where tilausrivi.otunnus in ($otunnukset)
@@ -122,10 +126,15 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   // tehdään pdf:n uusi sivu
   $firstpage = $pdf->new_page("a5");
 
-  $data = file_get_contents($pupe_root_polku."/pics/Itella_priority.jpg");
-  $image = $pdf->jfif_embed($data);
-  $logoparam['scale'] = 0.105;
-  $pdf->image_place($image, 560, 70, $firstpage, $logoparam);
+  if ($toitarow['virallinen_selite'] == "Priority Ulkomaa") {
+    $data = file_get_contents($pupe_root_polku."/pics/Itella_priority.jpg");
+    $image = $pdf->jfif_embed($data);
+    $logoparam['scale'] = 0.105;
+    $pdf->image_place($image, 560, 70, $firstpage, $logoparam);
+  }
+  else {
+    $pdf->draw_text(65, 570,  $selite_chk, $firstpage, $norm);
+  }
 
   if (class_exists("Image_Barcode")) {
     // Lähetystunnus

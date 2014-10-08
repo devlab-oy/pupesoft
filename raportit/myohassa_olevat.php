@@ -19,115 +19,117 @@ if (isset($supertee)) {
 
 echo "<font class='head'>".t("Myˆh‰ss‰ olevat myyntitilaukset")."</font><hr>";
 
-if ($ytunnus != '') {
-  require "inc/kevyt_toimittajahaku.inc";
-}
-
-if ($myovv == '') {
-  $myopp = date("j");
-  $myokk = date("n");
-  $myovv = date("Y");
-}
-
-echo "<form name=asiakas method='post' autocomplete='off'>";
-echo "<input type='hidden' name='tee' value = 'HAE'>";
-echo "<table><tr>";
-echo "<th>".t("Anna toimitusp‰iv‰")."</th>";
-echo "<td><input type='text' name='myopp' value='$myopp' size='3'>";
-echo "<input type='text' name='myokk' value='$myokk' size='3'>";
-echo "<input type='text' name='myovv' value='$myovv' size='6'></td>";
-echo "</tr>";
-
-$kayta_ostotilausta_check = isset($kayta_ostotilausta) ? " checked='checked'" : '';
-
-echo "<tr><th>", t("Vertaa ostotilauksen toimitusp‰iv‰m‰‰r‰‰n"), "</th><td><input type='checkbox' name='kayta_ostotilausta'{$kayta_ostotilausta_check}></td></tr>";
-
-if (!isset($ytunnus)) {
-  $ytunnus = '';
-}
-
-echo "<tr><th>".t("Toimittajan nimi")."</th><td><input type='text' size='10' name='ytunnus' value='$ytunnus'></td></tr>";
-
-echo "<tr><th>".t("Valitse tuoteryhm‰")."</th>";
-
-$sresult = t_avainsana("TRY");
-
-echo "<td>";
-
-echo "<select name='mul_tuoteryhma[]' multiple='TRUE' size='10' style='width:100%;'>";
-
-$mul_check = '';
-if ($mul_tuoteryhma!="") {
-  if (in_array("PUPEKAIKKIMUUT", $mul_tuoteryhma)) {
-    $mul_check = 'SELECTED';
+if (!isset($tee) or $tee != "NAYTATILAUS") {
+  if ($ytunnus != '') {
+    require "inc/kevyt_toimittajahaku.inc";
   }
-}
-echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei tuoteryhm‰‰")."</option>";
 
-while ($rivi = mysql_fetch_array($sresult)) {
+  if ($myovv == '') {
+    $myopp = date("j");
+    $myokk = date("n");
+    $myovv = date("Y");
+  }
+
+  echo "<form name=asiakas method='post' autocomplete='off'>";
+  echo "<input type='hidden' name='tee' value = 'HAE'>";
+  echo "<table><tr>";
+  echo "<th>".t("Anna toimitusp‰iv‰")."</th>";
+  echo "<td><input type='text' name='myopp' value='$myopp' size='3'>";
+  echo "<input type='text' name='myokk' value='$myokk' size='3'>";
+  echo "<input type='text' name='myovv' value='$myovv' size='6'></td>";
+  echo "</tr>";
+
+  $kayta_ostotilausta_check = isset($kayta_ostotilausta) ? " checked='checked'" : '';
+
+  echo "<tr><th>", t("Vertaa ostotilauksen toimitusp‰iv‰m‰‰r‰‰n"), "</th><td><input type='checkbox' name='kayta_ostotilausta'{$kayta_ostotilausta_check}></td></tr>";
+
+  if (!isset($ytunnus)) {
+    $ytunnus = '';
+  }
+
+  echo "<tr><th>".t("Toimittajan nimi")."</th><td><input type='text' size='10' name='ytunnus' value='$ytunnus'></td></tr>";
+
+  echo "<tr><th>".t("Valitse tuoteryhm‰")."</th>";
+
+  $sresult = t_avainsana("TRY");
+
+  echo "<td>";
+
+  echo "<select name='mul_tuoteryhma[]' multiple='TRUE' size='10' style='width:100%;'>";
+
   $mul_check = '';
   if ($mul_tuoteryhma!="") {
-    if (in_array($rivi["selite"], $mul_tuoteryhma)) {
+    if (in_array("PUPEKAIKKIMUUT", $mul_tuoteryhma)) {
       $mul_check = 'SELECTED';
     }
   }
+  echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei tuoteryhm‰‰")."</option>";
 
-  echo "<option value='$rivi[selite]' $mul_check>$rivi[selite] - $rivi[selitetark]</option>";
-}
+  while ($rivi = mysql_fetch_array($sresult)) {
+    $mul_check = '';
+    if ($mul_tuoteryhma!="") {
+      if (in_array($rivi["selite"], $mul_tuoteryhma)) {
+        $mul_check = 'SELECTED';
+      }
+    }
 
-echo "</select>";
-echo "</td></tr>";
-
-echo "<tr><th>".t("Valitse kustannuspaikka")."</th>";
-
-$query = "SELECT tunnus, nimi
-          FROM kustannuspaikka
-          WHERE yhtio   = '$kukarow[yhtio]'
-          and kaytossa != 'E'
-          and tyyppi    = 'K'
-          ORDER BY koodi+0, koodi, nimi";
-$vresult = pupe_query($query);
-
-echo "<td><select name='mul_kustannuspaikka[]' multiple='TRUE' size='10' style='width:100%;'>";
-
-$mul_check = '';
-if ($mul_kustannuspaikka!="") {
-  if (in_array("PUPEKAIKKIMUUT", $mul_kustannuspaikka)) {
-    $mul_check = 'SELECTED';
+    echo "<option value='$rivi[selite]' $mul_check>$rivi[selite] - $rivi[selitetark]</option>";
   }
-}
-echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei kustannuspaikkaa")."</option>";
 
-while ($rivi = mysql_fetch_array($vresult)) {
+  echo "</select>";
+  echo "</td></tr>";
+
+  echo "<tr><th>".t("Valitse kustannuspaikka")."</th>";
+
+  $query = "SELECT tunnus, nimi
+            FROM kustannuspaikka
+            WHERE yhtio   = '$kukarow[yhtio]'
+            and kaytossa != 'E'
+            and tyyppi    = 'K'
+            ORDER BY koodi+0, koodi, nimi";
+  $vresult = pupe_query($query);
+
+  echo "<td><select name='mul_kustannuspaikka[]' multiple='TRUE' size='10' style='width:100%;'>";
+
   $mul_check = '';
   if ($mul_kustannuspaikka!="") {
-    if (in_array($rivi[0], $mul_kustannuspaikka)) {
+    if (in_array("PUPEKAIKKIMUUT", $mul_kustannuspaikka)) {
       $mul_check = 'SELECTED';
     }
   }
+  echo "<option value='PUPEKAIKKIMUUT' $mul_check>".t("Ei kustannuspaikkaa")."</option>";
 
-  echo "<option value='$rivi[0]' $mul_check>$rivi[1]</option>";
+  while ($rivi = mysql_fetch_array($vresult)) {
+    $mul_check = '';
+    if ($mul_kustannuspaikka!="") {
+      if (in_array($rivi[0], $mul_kustannuspaikka)) {
+        $mul_check = 'SELECTED';
+      }
+    }
+
+    echo "<option value='$rivi[0]' $mul_check>$rivi[1]</option>";
+  }
+
+  $vain_excelchk = "";
+  if ($vain_excel != '') {
+    $vain_excelchk = "CHECKED";
+  }
+
+  echo "</select></td></tr>";
+  echo "<tr><th>".t("Raportti Exceliin")."</th>";
+  echo "<td><input type='checkbox' name='vain_excel' $vain_excelchk></td><tr>";
+  echo "<tr><td class='back'><input type='submit' value='".t("Hae")."'></td>";
+  echo "</tr>";
+  echo "</form></table><br>";
+
 }
-
-$vain_excelchk = "";
-if ($vain_excel != '') {
-  $vain_excelchk = "CHECKED";
-}
-
-echo "</select></td></tr>";
-echo "<tr><th>".t("Raportti Exceliin")."</th>";
-echo "<td><input type='checkbox' name='vain_excel' $vain_excelchk></td><tr>";
-echo "<tr><td class='back'><input type='submit' value='".t("Hae")."'></td>";
-echo "</tr>";
-echo "</form></table><br>";
 
 if ($tee == 'NAYTATILAUS') {
   echo "<font class='head'>Tilausnro: $tunnus</font><hr>";
   require "naytatilaus.inc";
   echo "<br><br><br>";
-  $tee = "HAE";
-  $mul_tuoteryhma = unserialize(base64_decode($se_tuoteryhma));
-  $mul_kustannuspaikka = unserialize(base64_decode($se_kustannuspaikka));
+
+  $tee = "XXX";
 }
 
 if ($tee == 'JARJESTA') {
@@ -370,10 +372,10 @@ if ($tee == "HAE") {
 
       while ($myohastyneet_row = mysql_fetch_assoc($myohastyneet_res)) {
         echo "<tr class='aktiivi'>";
-        echo "<td>$tulrow[tuoteno]</td>";
+        echo "<td><a href='#' onclick=\"window.open('{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($tulrow["tuoteno"])."', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=800'); return false;\">{$tulrow['tuoteno']}</a></td>";
         echo "<td>".tv1dateconv($tulrow["toimaika"])."</td>";
         echo "<td align='right'>$myohastyneet_row[varattu]</td>";
-        echo "<td><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$myohastyneet_row[tunnus]&myovv=$myovv&myokk=$myokk&myopp=$myopp&se_tuoteryhma=$se_tuoteryhma&se_kustannuspaikka=$se_kustannuspaikka&kayta_ostotilausta=$kayta_ostotilausta'>$myohastyneet_row[tunnus]</td></td>";
+        echo "<td><a href='#' onclick=\"window.open('$PHP_SELF?tee=NAYTATILAUS&tunnus=$myohastyneet_row[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=800'); return false;\">$myohastyneet_row[tunnus]</a></td>";
         echo "<td>$myohastyneet_row[ytunnus]</td>";
         echo "<td>$myohastyneet_row[nimi]</td>";
 
@@ -455,8 +457,8 @@ if ($tee == "HAE") {
       echo "<td>$tulrow[ytunnus]</td>";
       echo "<td>$tulrow[nimi]</td>";
       echo "<td>$tulrow[postitp]</td>";
-      echo "<td><a href='$PHP_SELF?tee=NAYTATILAUS&tunnus=$tulrow[tunnus]&myovv=$myovv&myokk=$myokk&myopp=$myopp&se_tuoteryhma=$se_tuoteryhma&se_kustannuspaikka=$se_kustannuspaikka&kayta_ostotilausta=$kayta_ostotilausta'>$tulrow[tunnus]</a></td>";
-      echo "<td>$tulrow[tuoteno]</td>";
+      echo "<td><a href='#' onclick=\"window.open('$PHP_SELF?tee=NAYTATILAUS&tunnus=$tulrow[tunnus]', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=800'); return false;\">$tulrow[tunnus]</a></td>";
+      echo "<td><a href='#' onclick=\"window.open('{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($tulrow["tuoteno"])."', '_blank' ,'toolbar=0,scrollbars=1,location=0,statusbar=0,menubar=0,resizable=1,left=200,top=100,width=1000,height=800'); return false;\">{$tulrow['tuoteno']}</a></td>";
       echo "<td>$tulrow[nimitys]</td>";
       echo "<td align='right'>$tulrow[myydyt]</td>";
       echo "<td>".t_avainsana("Y", "", "and avainsana.selite='$tulrow[yksikko]'", "", "", "selite")."</td>";

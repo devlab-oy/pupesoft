@@ -25,6 +25,9 @@ if ($php_cli) {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   $yhtio = pupesoft_cleanstring($argv[1]);
   $yhtiorow = hae_yhtion_parametrit($yhtio);
 

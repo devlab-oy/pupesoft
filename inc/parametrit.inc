@@ -44,9 +44,9 @@ if (!function_exists("pupe_register_globals")) {
   }
 }
 
-$_GET    = pupe_register_globals($_GET);
+$_GET     = pupe_register_globals($_GET);
 $_POST    = pupe_register_globals($_POST);
-$_REQUEST  = pupe_register_globals($_REQUEST);
+$_REQUEST = pupe_register_globals($_REQUEST);
 
 // Hoidetaan pakkaus
 if ((isset($compression) and !$compression) or (isset($nayta_pdf) and $nayta_pdf == 1) or (isset($lataa_tiedosto) and $lataa_tiedosto == 1)) {
@@ -227,9 +227,20 @@ unset($tee_keraysera_debugdir);
 
 unset($loginkieli);
 
-unset($magento_api_url);
-unset($magento_api_usr);
-unset($magento_api_pas);
+unset($magento_api_tt_url);
+unset($magento_api_tt_usr);
+unset($magento_api_tt_pas);
+
+unset($magento_api_te_url);
+unset($magento_api_te_usr);
+unset($magento_api_te_pas);
+
+unset($magento_api_ht_url);
+unset($magento_api_ht_usr);
+unset($magento_api_ht_pas);
+unset($magento_api_ht_edi);
+
+unset($pupesoft_commandlinelog);
 
 $pupe_query_debug = 0;
 $aika_debug_array = array();
@@ -479,6 +490,10 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       if (isset($lajit)) {
         setcookie("avainsanalaji_keksi", urlencode(serialize($lajit)), strtotime('+90 days'), "/");
         $_COOKIE["avainsanalaji_keksi"] = urlencode(serialize($lajit));
+      }
+      if (isset($valitut_sarakkeet)) {
+        setcookie("laiteluettelo_keksi", urlencode(serialize($valitut_sarakkeet)), strtotime('+90 days'), "/");
+        $_COOKIE["laiteluettelo_keksi"] = urlencode(serialize($valitut_sarakkeet));
       }
     }
 

@@ -24,6 +24,9 @@ ini_set("display_errors", 0);
 require 'inc/connect.inc';
 require 'inc/functions.inc';
 
+// Logitetaan ajo
+cron_log();
+
 $path = "/tmp/logisticar_siirto_$yhtio/";
 
 // Sivotaan eka vanha pois

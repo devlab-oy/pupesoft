@@ -41,8 +41,8 @@ if (table_exists("sarjanumeron_lisatiedot")) {
   if ($sarjatarkrow["field"] == "Suurin_henkiloluku") {
     $oletussarja = "JOO";
     $sarjanumeronLisatiedot = "OK";
-    }
   }
+}
 else {
   $sarjanumeronLisatiedot = "";
 }
@@ -622,6 +622,26 @@ if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
                 and tunnus  in ($sarjatun)";
       $sarjares = pupe_query($query);
 
+
+      if ($tunnuskentta == "myyntirivitunnus" and $rivitunnus > 0) {
+        // T‰‰ll‰ pit‰isi poistaa laitetaulusta myyntirivitunnus
+        $spessukveri = "SELECT *
+                        FROM sarjanumeroseuranta
+                        WHERE tunnus = '$sarjatun'";
+        $spessures = pupe_query($spessukveri);
+        $spessurivi = mysql_fetch_assoc($spessures);
+
+        $laiteupdate = "UPDATE laite
+                        SET paikka = '',
+                        muutospvm    = now(),
+                        muuttaja     = '{$kukarow['kuka']}'
+                        WHERE yhtio  = '{$kukarow['yhtio']}'
+                        AND sarjanro = '{$spessurivi['sarjanumero']}'
+                        AND tuoteno  = '{$spessurivi['tuoteno']}'
+                        AND paikka   = '{$rivitunnus}'";
+        pupe_query($laiteupdate);
+      }
+
       // Poistetaan er‰t jotka varaa t‰t‰ er‰‰
       if ($sarrow["trivitunnus"] > 0 and $tunnuskentta == 'ostorivitunnus' and $from == "kohdista" and ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G")) {
         $query = "DELETE FROM sarjanumeroseuranta
@@ -673,6 +693,27 @@ if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
                 WHERE tunnus = '$sarjatun'";
       $sarres = pupe_query($query);
       $sarjarow = mysql_fetch_assoc($sarres);
+
+      // P‰ivitet‰‰n laitetaulu kun ruksataan sarjanumero myyntiriville
+      $kveri = "UPDATE laite
+                SET paikka = '{$rivitunnus}',
+                muutospvm    = now(),
+                muuttaja     = '{$kukarow['kuka']}'
+                WHERE yhtio  = '{$kukarow['yhtio']}'
+                AND sarjanro = '{$sarjarow['sarjanumero']}'
+                AND tuoteno  = '{$sarjarow['tuoteno']}'";
+      $kverires = pupe_query($kveri);
+
+      if (mysql_affected_rows() == 0) {
+        $kveri = "INSERT INTO laite
+                  SET yhtio = '{$kukarow['yhtio']}',
+                  luontiaika = now(),
+                  sarjanro   = '{$sarjarow['sarjanumero']}',
+                  paikka     = '{$rivitunnus}',
+                  tuoteno    = '{$sarjarow['tuoteno']}',
+                  laatija    = '{$kukarow['kuka']}'";
+        pupe_query($kveri);
+      }
 
       if ($sarjarow["kaytetty"] == 'K') {
         $query = "UPDATE tilausrivi
@@ -751,6 +792,7 @@ if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
                       and tunnus           = '$sarjatun'
                       and myyntirivitunnus = 0";
             $sarjares = pupe_query($query);
+
           }
         }
       }

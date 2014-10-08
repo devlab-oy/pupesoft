@@ -21,6 +21,9 @@ if ($php_cli) {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log($argv[1]);
+
   // ja parametri komentoriviltä
   $filename = $argv[1];
 
@@ -1086,11 +1089,11 @@ while ($tietue = fgets($fd)) {
 
           // Jos yksityishenkilkölle menee verollisena
           if ($veromaara != 0) {
-            $wquery = " SELECT selite
-                        FROM avainsana
-                        WHERE yhtio     = '$kukarow[yhtio]'
-                        AND laji        = 'alv'
-                        AND selitetark != ''";
+            $wquery = "SELECT selite
+                       FROM avainsana
+                       WHERE yhtio     = '$kukarow[yhtio]'
+                       AND laji        = 'alv'
+                       AND selitetark != ''";
             $wtres  = pupe_query($wquery);
             $wtrow  = mysql_fetch_assoc($wtres);
 

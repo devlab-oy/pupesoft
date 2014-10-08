@@ -57,9 +57,7 @@ $argv[1] = $operaattori;
 require 'ftp-get.php';
 
 if ($kardex_handle = opendir($ftpget_dest[$operaattori])) {
-
   while (($file = readdir($kardex_handle)) !== FALSE) {
-
     if (is_file($ftpget_dest[$operaattori]."/".$file)) {
 
       $kerayserat_array = array();
@@ -196,6 +194,9 @@ if ($kardex_handle = opendir($ftpget_dest[$operaattori])) {
 
       fclose($_fh);
       rename($ftpget_dest[$operaattori]."/".$file, $ftpget_dest[$operaattori]."/ok/".$file);
+
+      // Logitetaan ajo
+      cron_log($ftpget_dest[$operaattori]."/ok/".$file);
     }
   }
 }

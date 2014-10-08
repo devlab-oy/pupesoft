@@ -683,6 +683,17 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
   $aputullimaara_yhteensa     = "";
   $rivinlisakulu_yhteensa     = "";
 
+  $lopetus = $palvelin2;
+  $lopetus .= "raportit/asiakkaantilaukset.php";
+  $lopetus .= "////tee=NAYTATILAUS";
+  $lopetus .= "//toim=$toim";
+  $lopetus .= "//asiakasid=$asiakasid";
+  $lopetus .= "//toimittajaid=$toimittajaid";
+  $lopetus .= "//laskunro=$laskunro";
+  $lopetus .= "//lasku_yhtio=$row[yhtio]";
+  $lopetus .= "//ytunnus=$ytunnus";
+  $lopetus .= "//tunnus=$tunnus";
+
   while ($prow = mysql_fetch_assoc($presult)) {
 
     echo "<tr class='aktiivi'>";
@@ -1300,6 +1311,17 @@ else {
         echo "<td $class align='left' valign='top'></td>";
       }
     }
+
+    $lopetus = $palvelin2;
+    $lopetus .= "raportit/asiakkaantilaukset.php";
+    $lopetus .= "////tee=NAYTATILAUS";
+    $lopetus .= "//toim=$toim";
+    $lopetus .= "//asiakasid=$asiakasid";
+    $lopetus .= "//toimittajaid=$toimittajaid";
+    $lopetus .= "//laskunro=$laskunro";
+    $lopetus .= "//lasku_yhtio=$row[yhtio]";
+    $lopetus .= "//ytunnus=$ytunnus";
+    $lopetus .= "//tunnus=$tunnus";
 
     if ($kukarow['extranet'] == '') {
       echo "<td $class valign='top'><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."&lopetus=$lopetus'>$row[tuoteno]</a></td>";

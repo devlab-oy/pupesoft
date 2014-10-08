@@ -3,10 +3,10 @@
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-if (@include("inc/connect.inc")) {
+if (@include "inc/connect.inc") {
   require "inc/functions.inc";
 }
-elseif (@include("connect.inc")) {
+elseif (@include "connect.inc") {
   require "functions.inc";
 }
 else {

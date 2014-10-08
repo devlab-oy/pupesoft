@@ -611,7 +611,7 @@ if (count($mul_kustp) > 0) {
 
   $kustpt = substr($kustpt, 0, -1);
 
-  if (trim($kustpt) != '') {
+  if (trim($kustpt) != '' and trim($kustpt) != "'ei_kustannuspaikkaa'") {
     if ($mulselprefix == 'asiakas') {
       $lisa_haku_kustp = " and asiakas.kustannuspaikka in ($kustpt) ";
       $lisa .= " and asiakas.kustannuspaikka in ($kustpt) ";
@@ -633,6 +633,30 @@ if (count($mul_kustp) > 0) {
     else {
       $lisa_haku_kustp = " and tiliointi.kustp in ($kustpt) ";
       $lisa .= " and tiliointi.kustp in ($kustpt) ";
+    }
+  }
+  elseif (trim($kustpt) == "'ei_kustannuspaikkaa'") {
+    if ($mulselprefix == 'asiakas') {
+      $lisa_haku_kustp = " and asiakas.kustannuspaikka = 0 ";
+      $lisa .= " and asiakas.kustannuspaikka = 0 ";
+    }
+    elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== false) {
+      if (isset($kustapvalinta) and $kustapvalinta == "tuote") {
+        $lisa_haku_kustp = " and tuote.kustp = 0 ";
+        $lisa .= " and tuote.kustp = 0 ";
+      }
+      else {
+        $lisa_haku_kustp = " and asiakas.kustannuspaikka = 0 ";
+        $lisa .= " and asiakas.kustannuspaikka = 0 ";
+      }
+    }
+    elseif (strpos($_SERVER['SCRIPT_NAME'], "tulosseuranta") !== false) {
+      $lisa_haku_kustp = " and tuote.kustp = 0 ";
+      $lisa .= " and tiliointi.kustp = 0 ";
+    }
+    else {
+      $lisa_haku_kustp = " and tiliointi.kustp = 0 ";
+      $lisa .= " and tiliointi.kustp = 0 ";
     }
   }
 }
@@ -2107,6 +2131,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
 
       echo "<option value=''>".t("Ei valintaa")."</option>";
+      echo "<option value='ei_kustannuspaikkaa'>" . t("Ei kustannuspaikkaa" . "</option>");
 
       lapsitasot(0, -1, "0,", $kustparray);
 

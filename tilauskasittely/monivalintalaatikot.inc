@@ -611,12 +611,12 @@ if (count($mul_kustp) > 0) {
 
   $kustpt = substr($kustpt, 0, -1);
 
-  if (trim($kustpt) != '' and trim($kustpt) != "'ei_kustannuspaikkaa'") {
+  if (trim($kustpt) != '') {
     if ($mulselprefix == 'asiakas') {
       $lisa_haku_kustp = " and asiakas.kustannuspaikka in ($kustpt) ";
       $lisa .= " and asiakas.kustannuspaikka in ($kustpt) ";
     }
-    elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
+    elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== false) {
       if (isset($kustapvalinta) and $kustapvalinta == "tuote") {
         $lisa_haku_kustp = " and tuote.kustp in ($kustpt) ";
         $lisa .= " and tuote.kustp in ($kustpt) ";
@@ -626,37 +626,13 @@ if (count($mul_kustp) > 0) {
         $lisa .= " and asiakas.kustannuspaikka in ($kustpt) ";
       }
     }
-    elseif (strpos($_SERVER['SCRIPT_NAME'], "tulosseuranta") !== FALSE) {
+    elseif (strpos($_SERVER['SCRIPT_NAME'], "tulosseuranta") !== false) {
       $lisa_haku_kustp = " and tuote.kustp in ($kustpt) ";
       $lisa .= " and tiliointi.kustp in ($kustpt) ";
     }
     else {
       $lisa_haku_kustp = " and tiliointi.kustp in ($kustpt) ";
       $lisa .= " and tiliointi.kustp in ($kustpt) ";
-    }
-  }
-  elseif (trim($kustpt) == "'ei_kustannuspaikkaa'") {
-    if ($mulselprefix == 'asiakas') {
-      $lisa_haku_kustp = " and asiakas.kustannuspaikka = 0 ";
-      $lisa .= " and asiakas.kustannuspaikka = 0 ";
-    }
-    elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== false) {
-      if (isset($kustapvalinta) and $kustapvalinta == "tuote") {
-        $lisa_haku_kustp = " and tuote.kustp = 0 ";
-        $lisa .= " and tuote.kustp = 0 ";
-      }
-      else {
-        $lisa_haku_kustp = " and asiakas.kustannuspaikka = 0 ";
-        $lisa .= " and asiakas.kustannuspaikka = 0 ";
-      }
-    }
-    elseif (strpos($_SERVER['SCRIPT_NAME'], "tulosseuranta") !== false) {
-      $lisa_haku_kustp = " and tuote.kustp = 0 ";
-      $lisa .= " and tiliointi.kustp = 0 ";
-    }
-    else {
-      $lisa_haku_kustp = " and tiliointi.kustp = 0 ";
-      $lisa .= " and tiliointi.kustp = 0 ";
     }
   }
 }
@@ -709,7 +685,7 @@ if (count($mul_projekti) > 0) {
 
   $projektit = substr($projektit, 0, -1);
 
-  if (trim($projektit) != '' and trim($projektit) != "'ei_projektia'") {
+  if (trim($projektit) != '') {
     if ($mulselprefix == 'asiakas') {
       $lisa_haku_kustp = " and asiakas.projekti in ($projektit) ";
       $lisa .= " and asiakas.projekti in ($projektit) ";
@@ -727,26 +703,6 @@ if (count($mul_projekti) > 0) {
     else {
       $lisa_haku_projekti = " and tiliointi.projekti in ($projektit) ";
       $lisa .= " and tiliointi.projekti in ($projektit) ";
-    }
-  }
-  elseif (trim($projektit) == "'ei_projektia'") {
-    if ($mulselprefix == 'asiakas') {
-      $lisa_haku_kustp = " and asiakas.projekti = 0 ";
-      $lisa .= " and asiakas.projekti in = 0 ";
-    }
-    elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== false) {
-      if (isset($projektivalinta) and $projektivalinta == "tuote") {
-        $lisa_haku_kustp = " and tuote.projekti = 0 ";
-        $lisa .= " and tuote.projekti = 0 ";
-      }
-      else {
-        $lisa_haku_kustp = " and asiakas.projekti = 0 ";
-        $lisa .= " and asiakas.projekti = 0 ";
-      }
-    }
-    else {
-      $lisa_haku_projekti = " and tiliointi.projekti = 0 ";
-      $lisa .= " and tiliointi.projekti = 0 ";
     }
   }
 }
@@ -2151,7 +2107,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
 
       echo "<option value=''>".t("Ei valintaa")."</option>";
-      echo "<option value='ei_kustannuspaikkaa'>" . t("Ei kustannuspaikkaa" . "</option>");
+      echo "<option value='0'>" . t("Ei kustannuspaikkaa" . "</option>");
 
       lapsitasot(0, -1, "0,", $kustparray);
 
@@ -2276,7 +2232,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
       echo "<td nowrap style='padding:0px'><select name='mul_projekti[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
       echo "<option value=''>".t("Ei valintaa")."</option>";
-      echo "<option value='ei_projektia'>" . t("Ei projektia") . "</option>";
+      echo "<option value='0'>" . t("Ei projektia") . "</option>";
 
       while ($sxrow = mysql_fetch_array($sresult)) {
         $sel = '';

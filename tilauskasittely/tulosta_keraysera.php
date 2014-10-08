@@ -68,7 +68,8 @@ if ($tee == '') {
             WHERE yhtio        = '{$kukarow['yhtio']}'
             AND extranet       = ''
             AND keraajanro     > 0
-            AND keraysvyohyke != ''";
+            AND keraysvyohyke != ''
+            ORDER BY nimi";
   $kuresult = pupe_query($query);
 
   echo "<tr><th>", t("Ker‰‰j‰"), "</th><td><input type='text' size='5' name='keraajanro'> ", t("tai"), " ";

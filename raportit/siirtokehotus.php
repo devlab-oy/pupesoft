@@ -290,7 +290,7 @@ if ( $tee != 'lataa_pdf' and $tee != 'hae_raportti') {
 
   $query = "SELECT tunnus, nimitys
             FROM keraysvyohyke
-            WHERE yhtio = '{$kukarow['yhtio']}'
+            WHERE yhtio  = '{$kukarow['yhtio']}'
             AND nimitys != ''";
   $keraysvyohyke_result = pupe_query($query);
 

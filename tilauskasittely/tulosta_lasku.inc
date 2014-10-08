@@ -62,6 +62,10 @@ if (!function_exists('alku')) {
       elseif ($laskurow["kateistyyppi"] != '') {
         $pdf_lasku->draw_text(310, 815, t("Käteiskuitti", $kieli),  $page_lasku[$sivu], $iso);
       }
+      elseif ($laskurow["maa"] == "IN") {
+        // Jos lasku menee Intiaan, niin laiitetaan hieman eri otsikko
+        $pdf_lasku->draw_text(310, 815, "Commercial Invoice", $page_lasku[$sivu], $iso);
+      }
       elseif ($laskurow["summa"] >= 0) {
         $pdf_lasku->draw_text(310, 815, t("Vientilasku", $kieli), $page_lasku[$sivu], $iso);
       }
@@ -649,12 +653,12 @@ if (!function_exists('rivi_lasku')) {
 
       for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
         if (trim($row["ale{$alepostfix}"]) > 0) {
-          $alekomm .= t("Ale")."{$alepostfix} ".($row["ale{$alepostfix}"]*1)." %\n";
+          $alekomm .= t("Ale", $kieli)."{$alepostfix} ".($row["ale{$alepostfix}"]*1)." %\n";
         }
       }
 
       if ($row['erikoisale'] > 0) {
-        $alekomm .= t("Erikoisale")." ".($row["erikoisale"]*1)." %\n";
+        $alekomm .= t("Erikoisale", $kieli)." ".($row["erikoisale"]*1)." %\n";
       }
 
       $row["kommentti"] = $alekomm.$row["kommentti"];
@@ -2249,9 +2253,14 @@ if (!function_exists('alvierittely')) {
           $ueloes = '';
           $paivvaa = tv1dateconv($lasktilitro["tapvm"]);
 
-          // haetaan pisin osasuoritustavan nimitys
+          $osasuoritustapanimet = array();
+          $osasuoritustapanimet[] = t("Käteisellä", $kieli);
+          $osasuoritustapanimet[] = t("Pankkikortilla", $kieli);
+          $osasuoritustapanimet[] = t("Luottokortilla", $kieli);
+
+          // Haetaan pisin osasuoritustavan nimitys
           $olen_pena = 0;
-          foreach (array(t("Käteisellä"), t("Pankkikortilla"), t("Luottokortilla")) as $arggi) {
+          foreach ($osasuoritustapanimet as $arggi) {
             $pitkulainen = $pdf_lasku->strlen($arggi, $norm);
             if ($pitkulainen > $olen_pena) $olen_pena = $pitkulainen;
           }

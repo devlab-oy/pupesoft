@@ -26,14 +26,14 @@ $default_kuittaukset = array(
 $kuittaukset = array_merge($default_kuittaukset, $magento_api_toimituskuittaus_viestit);
 
 $magento_api_ord   = (int) $magento_api_ord;
-$_magento_kaytossa = (!empty($magento_api_url) and !empty($magento_api_usr) and !empty($magento_api_pas));
+$_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
 
 if (!$_magento_kaytossa or $magento_api_ord <= 0) {
   exit;
 }
 
-$proxy = new SoapClient($magento_api_url);
-$sessionId = $proxy->login($magento_api_usr, $magento_api_pas);
+$proxy = new SoapClient($magento_api_tt_url);
+$sessionId = $proxy->login($magento_api_tt_usr, $magento_api_tt_pas);
 
 $magento_api_met = utf8_encode($magento_api_met);
 $canShip    = true;

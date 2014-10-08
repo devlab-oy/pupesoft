@@ -1,5 +1,10 @@
 $(document).ready(function() {
 
+  $('#myyja_id').on('change', function () {
+    $(this).siblings('#myyjanro_id').val('');
+    $(this).closest('form').submit();
+  });
+
   $('#hintojen_vaihto').on('change', function() {
     $('.hv_hidden').val( this.checked ? 'JOO' : 'EI' );
   });

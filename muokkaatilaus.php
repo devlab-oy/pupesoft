@@ -633,7 +633,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
       else {
         echo "<form method='post' action='tilauskasittely/tilaus_myynti.php'>";
       }
-      
+
       $lopetus = "{$palvelin2}muokkaatilaus.php////toim={$toim}//asiakastiedot={$asiakastiedot}//limit={$limit}//etsi={$etsi}";
 
       if (isset($toimipaikka)) {
@@ -930,7 +930,8 @@ if (empty($asiakastiedot)) {
 }
 
 if ($asiakastiedot == "toimitus") {
-  $asiakasstring = " concat_ws('<br>', lasku.ytunnus, lasku.nimi, lasku.nimitark, if(lasku.nimi != lasku.toim_nimi, concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark, if(lasku.postitp != lasku.toim_postitp, lasku.toim_postitp, NULL)), NULL))";
+  $asiakasstring = "  concat_ws('<br>', lasku.ytunnus, concat_ws(' ', lasku.nimi, lasku.nimitark),
+                      concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_postitp))";
   $assel1 = "";
   $assel2 = "CHECKED";
 }

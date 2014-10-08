@@ -915,7 +915,7 @@ if ($tee == 'tulosta') {
       }
 
       // Katsotaan onko Magento käytössä, silloin merkataan tilaus toimitetuksi Magentoon kun rahtikirja tulostetaan
-      $_magento_kaytossa = (!empty($magento_api_url) and !empty($magento_api_usr) and !empty($magento_api_pas));
+      $_magento_kaytossa = (!empty($magento_api_tt_url) and !empty($magento_api_tt_usr) and !empty($magento_api_tt_pas));
 
       if ($_magento_kaytossa) {
         $query = "SELECT asiakkaan_tilausnumero

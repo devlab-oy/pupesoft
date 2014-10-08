@@ -21,6 +21,9 @@
 
 //$silent = '';
 
+// Tämä vaatii paljon muistia
+ini_set("memory_limit", "5G");
+
 // Kutsutaanko CLI:stä
 $php_cli = (php_sapi_name() == 'cli' or isset($editil_cli));
 

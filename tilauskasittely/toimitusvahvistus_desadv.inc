@@ -297,8 +297,8 @@ if (!function_exists('desadv_row')) {
                     FROM tilausrivi
                     JOIN kerayserat ON (kerayserat.yhtio = tilausrivi.yhtio AND kerayserat.tilausrivi = tilausrivi.tunnus)
                     JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
-                    WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                    AND tilausrivi.tunnus  IN ({$keraysera_row['tilausrivit']})
+                    WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
+                    AND tilausrivi.tunnus   IN ({$keraysera_row['tilausrivit']})
                     AND tilausrivi.tyyppi  != 'D'";
           $paino_res = pupe_query($query);
           $paino_row = mysql_fetch_assoc($paino_res);
@@ -325,7 +325,7 @@ if (!function_exists('desadv_row')) {
                   FROM tilausrivi
                   JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno)
                   WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
-                  AND tilausrivi.tunnus  IN ({$keraysera_row['tilausrivit']})
+                  AND tilausrivi.tunnus   IN ({$keraysera_row['tilausrivit']})
                   AND tilausrivi.tyyppi  != 'D'
                   GROUP BY tuote.eankoodi, tilausrivi.tuoteno, tilausrivi.nimitys, tilausrivi.tilaajanrivinro";
         $tuotteet_res = pupe_query($query);
@@ -537,7 +537,7 @@ if ($desadv_host != '' and $desadv_user != '' and $desadv_pass != '' and $desadv
             LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus)
             WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
             AND lasku.tila    != 'D'
-            AND lasku.tunnus  in ({$otunnukset})
+            AND lasku.tunnus   in ({$otunnukset})
             ORDER BY lasku.tunnus";
   $desadv_laskures = pupe_query($query);
 

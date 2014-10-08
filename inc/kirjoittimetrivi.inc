@@ -39,6 +39,7 @@ if (mysql_field_name($result, $i) == "mediatyyppi") {
       <option value='LSN59X40' $sel[LSN59X40]>".t("Lämpösiirto/nauha")." 59X40mm</option>
       <option value='LS149X104' $sel[LS149X104]>".t("Lämpösiirto")." 149X104mm</option>
       <option value='LS59X40' $sel[LS59X40]>".t("Lämpösiirto")." 59X40mm</option>
+      <option value='kuittitulostin' {$sel['kuittitulostin']}>" . t("Kuittitulostin") . "</option>
       </select></td>";
   $jatko = 0;
 }

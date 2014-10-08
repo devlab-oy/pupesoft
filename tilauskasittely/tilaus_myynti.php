@@ -539,7 +539,7 @@ $ehto1 = ($tee == "" or
 $ehto2 = (($kukarow["extranet"] != "" and (int) $kukarow["kesken"] == 0) or
   ($kukarow["extranet"] == "" and
     ($syotetty_ytunnus != '' or $asiakasid != '') and
-    (!$yhtiorow['pikatilauksessa_myyjanro_pakollinen'] == "Y" or
+    ($yhtiorow['pikatilaus_focus'] != "Y" or
       loytyyko_myyja_tunnuksella($myyjanumero))));
 
 if ($ehto1 and $ehto2) {
@@ -1282,7 +1282,7 @@ if ($tee == "VALMIS"
 
     echo "</form><br><br>";
 
-    $formi = "laskuri";
+    $formi  = "laskuri";
     $kentta = "kateismaksu";
 
     exit;
@@ -1648,7 +1648,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
         echo "<tr><th>".t("Annettu")."</th><td><input size='7' autocomplete='off' type='text' id='kateisraha' name='kateisraha' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
         echo "<tr><th>".t("Takaisin")."</th><td name='loppusumma' id='loppusumma' align='right'><strong>0.00</strong></td><td>$laskurow[valkoodi]</td></tr>";
         echo "</form></table><br><br>";
-        $formi = "laskuri";
+        $formi  = "laskuri";
         $kentta = "kateisraha";
       }
     }
@@ -2114,7 +2114,6 @@ if ($tee == "MUUTA_EXT_ENNAKKO" and $kukarow['extranet'] == '') {
 
 // n‰ytet‰‰n tilaus-ruutu...
 if ($tee == '') {
-  $focus = "tuotenumero";
   $formi = "tilaus";
 
   echo "<font class='head'>$otsikko</font><hr>";
@@ -3223,8 +3222,8 @@ if ($tee == '') {
 
       $myyjanumero = empty($myyjanro) ? $myyjanumero : $myyjanro;
 
-      if ($yhtiorow['pikatilauksessa_myyjanro_pakollinen'] == 'Y' and empty($myyja)) {
-        $required    = 'required';
+      if ($yhtiorow['pikatilaus_focus'] == 'Y' and empty($myyja)) {
+        $required = 'required';
 
         if (!loytyyko_myyja_tunnuksella($myyjanumero)) {
           $tuoteno = '';
@@ -3235,8 +3234,6 @@ if ($tee == '') {
       echo "<td>" .
         "<input " .
         "id='myyjanro_id'" .
-        "type='number' " .
-        "min='1'" .
         "name='myyjanro' " .
         "size='8' " .
         "value='{$myyjanumero}' {$required} $state> ".t("tai")." ";
@@ -3460,7 +3457,8 @@ if ($tee == '') {
     if ($kukarow["oletus_asiakas"] != 0) {
       $query  = "SELECT *
                  FROM asiakas
-                 WHERE yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
+                 WHERE yhtio = '$kukarow[yhtio]' 
+                 and tunnus  = '$kukarow[oletus_asiakas]'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
@@ -3477,11 +3475,17 @@ if ($tee == '') {
     }
 
     if ($toim == "PIKATILAUS") {
-      if ($yhtiorow['pikatilauksessa_myyjanro_pakollinen'] == "Y") {
+      
+      if ($yhtiorow['pikatilaus_focus'] == 'A' and isset($indexvas) and $indexvas == 1) {
+        $kentta = 'syotetty_ytunnus';
+      }
+      elseif ($yhtiorow['pikatilaus_focus'] == 'M' and isset($indexvas) and $indexvas == 1) {
+        $kentta = 'myyjanumero';
+      }
+      elseif ($yhtiorow['pikatilaus_focus'] == "Y") {
         if ($myyjanumero and !loytyyko_myyja_tunnuksella($myyjanumero)) {
           $my                = "";
           $myyjanumero_virhe = "<font class='error'>" . t("Virheellinen myyj‰nro") . "</font>";
-          $tuoteno           = "";
           $kentta            = 'myyjanumero';
         }
         else {
@@ -3520,7 +3524,7 @@ if ($tee == '') {
         <th align='left'>".t("Myyj‰nro")."</th>
         <td>" .
         "<input " .
-        "type='number' min='1'" .
+        "type='text' " .
         "size='10' " .
         "name='myyjanumero' " .
         "value='$my' " .

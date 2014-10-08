@@ -1232,13 +1232,16 @@ if ($fieldname == "dynaaminen_kassamyynti") {
   $jatko = 0;
 }
 
-if ($fieldname == "pikatilauksessa_myyjanro_pakollinen") {
+if ($fieldname == "pikatilaus_focus") {
   $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
 
-  $sel = $trow[$i] == 'Y' ? ' selected' : '';
-
-  $ulos .= "<option value = ''>" . t("Myyjänumero ei ole pakollinen pikatilausohjelmassa");
-  $ulos .= "<option value = 'Y' $sel>" . t("Myyjänumero on pakollinen pikatilausohjelmassa");
+  $sel = array();
+  $sel[$trow[$i]]  = " selected";
+  
+  $ulos .= "<option value = ''>" . t("Uudella pikatilauksella kursori oletuksena tuotenumero-kentässä");
+  $ulos .= "<option value = 'A' $sel[A]>" . t("Uudella pikatilauksella kursori oletuksena asiakas-kentässä");
+  $ulos .= "<option value = 'M' $sel[M]>" . t("Uudella pikatilauksella kursori oletuksena myyjänro-kentässä");
+  $ulos .= "<option value = 'Y' $sel[Y]>" . t("Uudella pikatilauksella kursori oletuksena myyjänro-kentässä. Myyjänumero on syötettävä");  
   $ulos .= "</select></td>";
 
   $jatko = 0;

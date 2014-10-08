@@ -1595,6 +1595,7 @@ if ($tee == 'MONISTA') {
             $rivirow['hinta'] = $palautus[0]["hinta"];
             $rivirow['kommentti'] = trim($rivirow['kommentti']) != '' ? "{$rivirow['kommentti']} {$palautus[0]['kommentti']}" : $palautus[0]['kommentti'];
             $rivirow['varattu'] = $palautus[0]["kpl"];
+            $rivirow['kpl'] = 0;
             $rivirow['ale1'] = $palautus[0]['ale'];
             for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
               $rivirow['ale'.$alepostfix] = 0;
@@ -1747,6 +1748,9 @@ if ($tee == 'MONISTA') {
             break;
           case 'ale1':
             $rvalues .= ", '{$rivirow['ale1']}'";
+            break;
+          case 'hinta':
+            $rvalues .= ", '{$rivirow['hinta']}'";
             break;
           default:
             $rvalues .= ", '".$rivirow[$i]."'";

@@ -591,10 +591,10 @@ if ($tee == 'L') {
   // ja päivitetään hyvaksyja_nyt sen mukaan
   // Käytännössä lasku voi olla ekalla tai tokalla hyväksyjällä,
   // joten tämän takia ei muita tarvitse tarkistaa.
-  if ($trow['h1time'] == '0000-00-00 00:00:00') {
+  if ($laskurow['h1time'] == '0000-00-00 00:00:00') {
     $_hyvaksyja_nyt = $laskurow["hyvak1"];
   }
-  elseif ($trow['h2time'] == '0000-00-00 00:00:00') {
+  elseif ($laskurow['h2time'] == '0000-00-00 00:00:00') {
     $_hyvaksyja_nyt = $hyvak[2];
   }
 

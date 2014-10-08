@@ -919,5 +919,5 @@ if ($formi == '') {
 }
 
 if ($kentta == '') {
-  $kentta='tuoteno';
+  $kentta = 'tuoteno';
 }

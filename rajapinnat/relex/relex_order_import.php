@@ -92,17 +92,17 @@ if (isset($tee) and trim($tee) == 'aja') {
 
       $order_number  = pupesoft_cleanstring($fields[0]);
       $product_code  = pupesoft_cleanstring($fields[1]);
-      $quantity	     = pupesoft_cleannumber($fields[2]);
-      $order_type	   = pupesoft_cleanstring($fields[3]);
+      $quantity      = pupesoft_cleannumber($fields[2]);
+      $order_type    = pupesoft_cleanstring($fields[3]);
       $location_code = pupesoft_cleanstring($fields[4]);
       $supplier_code = pupesoft_cleanstring($fields[5]);
       $delivery_date = pupesoft_cleanstring($fields[6]);
-      $comment_1	   = pupesoft_cleanstring($fields[7]);
-      $comment_2	   = pupesoft_cleanstring($fields[8]);
-      $comment_3	   = pupesoft_cleanstring($fields[9]);
-      $comment_4	   = pupesoft_cleanstring($fields[10]);
-      $comment_5	   = pupesoft_cleanstring($fields[11]);
-      $order_date	   = pupesoft_cleanstring($fields[12]);
+      $comment_1     = pupesoft_cleanstring($fields[7]);
+      $comment_2     = pupesoft_cleanstring($fields[8]);
+      $comment_3     = pupesoft_cleanstring($fields[9]);
+      $comment_4     = pupesoft_cleanstring($fields[10]);
+      $comment_5     = pupesoft_cleanstring($fields[11]);
+      $order_date    = pupesoft_cleanstring($fields[12]);
 
       // Poistetaan maa-etuliitteet
       $product_code  = substr($product_code, 3);

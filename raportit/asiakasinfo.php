@@ -640,7 +640,8 @@ if ($asiakasid > 0) {
 
     if ($asale != '' or $aletaulu != '' or $ashin != '' or $yhdistetty != "" or $tee == "eposti") {
 
-      include 'inc/pupeExcel.inc';
+      if (@include 'inc/pupeExcel.inc');
+      else include 'pupeExcel.inc';
 
       $worksheet   = new pupeExcel();
       $format_bold = array("bold" => TRUE);
@@ -907,8 +908,8 @@ if ($asiakasid > 0) {
                   $worksheet->writeNumber($excelrivi, $key, $asrow[$value]);
                 }
                 else {
-                 $worksheet->writeString($excelrivi, $key, $asrow[$value]);
-               }
+                  $worksheet->writeString($excelrivi, $key, $asrow[$value]);
+                }
               }
               $excelrivi++;
             }
@@ -1059,7 +1060,7 @@ if ($asiakasid > 0) {
         <td valign='top' class='back'>$yhdistetty</td>
       </tr></table><br>";
 
-    if ($excelrivi > 1) {
+    if (isset($worksheet) and $excelrivi > 1) {
       $excelnimi = $worksheet->close();
 
       echo "<table>";

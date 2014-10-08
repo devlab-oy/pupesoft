@@ -267,7 +267,10 @@ if (!isset($tee)) {
     echo "<input type='checkbox' name='varasto[]' value='{$varow['tunnus']}' > {$varow['nimitys']} {$eri}<br>";
   }
 
-  $query = "SELECT tunnus, nimitys FROM keraysvyohyke WHERE yhtio = '{$kukarow['yhtio']}' AND nimitys != ''";
+  $query = "SELECT tunnus, nimitys
+            FROM keraysvyohyke
+            WHERE yhtio  = '{$kukarow['yhtio']}'
+            AND nimitys != ''";
   $keraysvyohyke_result = pupe_query($query);
 
   if (mysql_num_rows($keraysvyohyke_result) > 0) {

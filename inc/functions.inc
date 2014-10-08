@@ -324,7 +324,7 @@ if (!function_exists("pupe_error")) {
       echo nl2br($puperror);
     }
     else {
-      echo "Tietokantayhteydessä virhe!"; # Älä t-funktioi tätä.
+      echo "Tietokantayhteydessä virhe!"; // Älä t-funktioi tätä.
     }
 
     // kuollaan pois
@@ -1981,8 +1981,10 @@ if (!function_exists("lpr")) {
       return;
     }
 
-    // sallitut merkit listattu, kaikki muut menee spaceks...
-    $str = ereg_replace("[^A-Za-z0-9ÖöÅåÄä .,-/!|+()%#\n\r]", " ", $str);
+    // sallitut merkit listattu, kaikki muut menee spaceks, paitsi jos kyseessä on kuittitulostin...
+    if ($kirjoitin['mediatyyppi'] != "kuittitulostin") {
+      $str = ereg_replace("[^A-Za-z0-9ÖöÅåÄä .,-/!|+()%#\n\r]", " ", $str);
+    }
 
     // merkistökonversio
     $from = array('ä', 'å', 'ö', 'Ä', 'Å', 'Ö', '|');
@@ -11136,7 +11138,6 @@ if (!function_exists('t_tuotteen_avainsanat')) {
       $row = mysql_fetch_assoc($result);
       // jos löydettiin käännös palautetaan se
       if ($row["selitetark"] != "") {
-        $palautus = "";
         $palautus = "{$row["selite"]} {$row["selitetark"]}";
       }
       else {
@@ -15398,8 +15399,8 @@ if (!function_exists("palauta_vak_tiedot")) {
       while ($row = mysql_fetch_assoc($riresult1));
 
       if ($rakirkilot > 0) {
-        $vaktuotetiedot[] = "TOTAL GROSS MASS: " . round($rakirkilot,2) . " kg";
-        $vaktuotetiedot[] = "TOTAL NET MASS: " . round($tuotepainot_yht,2) . " kg";
+        $vaktuotetiedot[] = "TOTAL GROSS MASS: " . round($rakirkilot, 2) . " kg";
+        $vaktuotetiedot[] = "TOTAL NET MASS: " . round($tuotepainot_yht, 2) . " kg";
       }
     }
 
@@ -29599,6 +29600,82 @@ if (!function_exists("cron_log")) {
   }
 }
 
+if (!function_exists("paivita_sopimusrivit")) {
+  function paivita_sopimusrivit(array $sopimusrivitunnukset = array()) {
+    global $kukarow;
+
+    // Jos on annettu sopimusrivitunnukset päivitetään vain niitä rivejä, muuten päivitetään kaikki
+    if (is_array($sopimusrivitunnukset) and count($sopimusrivitunnukset) > 0) {
+
+      foreach ($sopimusrivitunnukset as $muokattu_sopimusrivi) {
+        // Päivitetään sopimusriville oikea kappalemäärä mutta ei ikinä nollata
+        $query = "SELECT
+                  count(*) lkm
+                  FROM laitteen_sopimukset
+                  WHERE sopimusrivin_tunnus = '{$muokattu_sopimusrivi}'";
+        $res = pupe_query($query);
+        $laiterivi = mysql_fetch_assoc($res);
+
+        $paivitettava_kpl = $laiterivi['lkm'] > 0 ? $laiterivi['lkm'] : 1;
+
+        // Jos tuote on asetettu avainsanalla rivikohtaiseksi niin ei päivitetä kappalemäärää
+        $query = "UPDATE tilausrivi
+                  SET
+                  tilkpl           = '{$paivitettava_kpl}',
+                  varattu          = '{$paivitettava_kpl}'
+                  WHERE tunnus     = '{$muokattu_sopimusrivi}'
+                  AND yhtio        = '{$kukarow['yhtio']}'
+                  AND NOT EXISTS (SELECT *
+                    FROM tuotteen_avainsanat
+                    WHERE yhtio    = '{$kukarow['yhtio']}'
+                    AND tuoteno    = tilausrivi.tuoteno
+                    AND laji       = 'laatuluokka'
+                    AND selitetark = 'rivikohtainen')";
+        pupe_query($query);
+      }
+    }
+    else {
+
+      $query = "SELECT
+                group_concat(DISTINCT sopimusrivin_tunnus) kaikki_rivitunnukset
+                FROM laitteen_sopimukset
+                WHERE yhtio              = '{$kukarow['yhtio']}'
+                AND sopimusrivin_tunnus != 0";
+      $kaikkiresult = pupe_query($query);
+      $kaikkirivi = mysql_fetch_assoc($kaikkiresult);
+      $kaikki_sopimusrivit = explode(",", $kaikkirivi['kaikki_rivitunnukset']);
+
+      foreach ($kaikki_sopimusrivit as $muokattu_sopimusrivi) {
+        // Päivitetään sopimusriville oikea kappalemäärä mutta ei ikinä nollata
+        $query = "SELECT
+                  count(*) lkm
+                  FROM laitteen_sopimukset
+                  WHERE sopimusrivin_tunnus = '{$muokattu_sopimusrivi}'";
+        $res = pupe_query($query);
+        $laiterivi = mysql_fetch_assoc($res);
+
+        $paivitettava_kpl = $laiterivi['lkm'] > 0 ? $laiterivi['lkm'] : 1;
+
+        // Jos tuote on asetettu avainsanalla rivikohtaiseksi niin ei päivitetä kappalemäärää
+        $query = "UPDATE tilausrivi
+                  SET
+                  tilkpl           = '{$paivitettava_kpl}',
+                  varattu          = '{$paivitettava_kpl}'
+                  WHERE tunnus     = '{$muokattu_sopimusrivi}'
+                  AND yhtio        = '{$kukarow['yhtio']}'
+                  AND NOT EXISTS (SELECT *
+                    FROM tuotteen_avainsanat
+                    WHERE yhtio    = '{$kukarow['yhtio']}'
+                    AND tuoteno    = tilausrivi.tuoteno
+                    AND laji       = 'laatuluokka'
+                    AND selitetark = 'rivikohtainen')";
+        pupe_query($query);
+      }
+    }
+
+    return "";
+  }
+}
 
 if (!function_exists("hae_saldo")) {
   function hae_saldo($tuote, $tyyppi = '') {
@@ -29608,7 +29685,7 @@ if (!function_exists("hae_saldo")) {
 
     if ($tuote["tuoteperhe"] == $tuote["tuoteno"]) {
       // Tuoteperheen isä
-      $saldot = tuoteperhe_myytavissa($tuote["tuoteno"],'KAIKKI',$tyyppi,0,'','','','','', $maa);
+      $saldot = tuoteperhe_myytavissa($tuote["tuoteno"], 'KAIKKI', $tyyppi, 0, '', '', '', '', '', $maa);
 
       foreach ($saldot as $varasto => $myytavissa) {
         $saldo += $myytavissa;
@@ -29621,7 +29698,7 @@ if (!function_exists("hae_saldo")) {
       return $saldo;
     }
     else {
-      list($a,$b,$myytavissa) = saldo_myytavissa($tuote["tuoteno"],$tyyppi,0,'','','','','', $maa);
+      list($a, $b, $myytavissa) = saldo_myytavissa($tuote["tuoteno"], $tyyppi, 0, '', '', '', '', '', $maa);
       $saldo = $myytavissa;
 
       return $saldo;

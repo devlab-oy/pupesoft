@@ -204,6 +204,8 @@ elseif (isset($api_kentat) and count($api_kentat) > 0) {
   $kasitellaan_tiedosto = TRUE;
 }
 
+$muutetut_sopimusrivitunnukset = array();
+
 if ($kasitellaan_tiedosto) {
 
   $lue_data_autoid = file_exists("lue_data_autoid.php");
@@ -587,6 +589,7 @@ if ($kasitellaan_tiedosto) {
 
       // $trows sis‰lt‰‰ kaikki taulun sarakkeet ja tyypit tietokannasta
       // $taulunotsikot[$taulu] sis‰lt‰‰ kaikki sarakkeet saadusta tiedostosta
+
       foreach ($taulunotsikot[$taulu] as $key => $column) {
         if ($column != '') {
           if ($column == "TOIMINTO") {
@@ -1092,6 +1095,11 @@ if ($kasitellaan_tiedosto) {
 
             $valinta .= " and {$taulunotsikot[$taulu][$j]} = '$tpttrow[tunnus]' ";
           }
+        }
+        elseif ($table_mysql == 'laitteen_sopimukset' and $taulunotsikot[$taulu][$j] == 'SOPIMUSRIVIN_TUNNUS') {
+          // Otetaan talteen muutetut sopimusrivitunnukset
+          $muutetut_sopimusrivitunnukset[$taulunrivit[$taulu][$eriviindex][$j]] = $taulunrivit[$taulu][$eriviindex][$j];
+          $valinta .= " and {$taulunotsikot[$taulu][$j]} = '{$taulunrivit[$taulu][$eriviindex][$j]}' ";
         }
         else {
           $valinta .= " and {$taulunotsikot[$taulu][$j]} = '{$taulunrivit[$taulu][$eriviindex][$j]}' ";
@@ -2309,6 +2317,8 @@ if (!$cli and !isset($api_kentat)) {
     'kuka'                            => 'K‰ytt‰j‰tietoja',
     'kustannuspaikka'                 => 'Kustannuspaikat',
     'lahdot'                    => 'L‰hdˆt',
+    'laite'                           => 'Laiterekisteri',
+    'laitteen_sopimukset'             => 'Laitteen sopimukset',
     'liitetiedostot'                  => 'Liitetiedostot',
     'maksuehto'                       => 'Maksuehto',
     'pakkaus'                         => 'Pakkaustiedot',
@@ -2385,8 +2395,22 @@ if (!$cli and !isset($api_kentat)) {
   echo "<td>";
   echo "<select name='table' onchange='submit();'>";
 
-  foreach ($taulut as $taulu => $nimitys) {
-    echo "<option value='$taulu' {$sel[$taulu]}>".t($nimitys)."</option>";
+  // Jos tullaan linkist‰ jossa halutaan muokata vain tietty‰ taulua
+  if (isset($taulurajaus)) {
+    $validi = $taulut[$taulurajaus];
+    // Tarkistetaan ett‰ taulu on m‰‰ritelty
+    if (!empty($validi)) {
+      echo "<option value='$taulurajaus' selected>".t("$validi")."</option>";
+    }
+    else {
+      echo "<option value='' selected>".t("Ei valintaa")."</option>";
+    }
+
+  }
+  else {
+    foreach ($taulut as $taulu => $nimitys) {
+      echo "<option value='$taulu' {$sel[$taulu]}>".t($nimitys)."</option>";
+    }
   }
 
   echo "</select>";
@@ -2404,6 +2428,10 @@ if (!$cli and !isset($api_kentat)) {
       </table>
     </form>
     <br>";
+}
+// Jos on muutettu sopimusrivitunnuksia niin ajetaan sopimusrivien p‰ivitysfunktio
+if (count($muutetut_sopimusrivitunnukset) > 0) {
+  paivita_sopimusrivit($muutetut_sopimusrivitunnukset);
 }
 
 if (!isset($api_kentat)) require "inc/footer.inc";

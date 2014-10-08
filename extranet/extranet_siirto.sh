@@ -74,6 +74,7 @@ inc/jquery.min.js
 inc/laskutyyppi.inc
 inc/parametrit.inc
 inc/ProgressBar.class.php
+inc/pupeExcel.inc
 inc/sahkoposti.inc
 inc/tuotehaku.inc
 indexvas.php

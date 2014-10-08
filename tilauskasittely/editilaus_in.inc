@@ -1089,11 +1089,11 @@ while ($tietue = fgets($fd)) {
 
           // Jos yksityishenkilkölle menee verollisena
           if ($veromaara != 0) {
-            $wquery = " SELECT selite
-                        FROM avainsana
-                        WHERE yhtio     = '$kukarow[yhtio]'
-                        AND laji        = 'alv'
-                        AND selitetark != ''";
+            $wquery = "SELECT selite
+                       FROM avainsana
+                       WHERE yhtio     = '$kukarow[yhtio]'
+                       AND laji        = 'alv'
+                       AND selitetark != ''";
             $wtres  = pupe_query($wquery);
             $wtrow  = mysql_fetch_assoc($wtres);
 

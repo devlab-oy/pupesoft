@@ -25,14 +25,17 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(d
 require 'inc/connect.inc';
 require 'inc/functions.inc';
 
+// Logitetaan ajo
+cron_log();
+
 $ajopaiva  = date("Y-m-d");
 $paiva_ajo = FALSE;
 
 if (isset($argv[2]) and $argv[2] != '') {
   $paiva_ajo = TRUE;
-  
+
   if ($argv[2] == "edpaiva") {
-      $ajopaiva = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+    $ajopaiva = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
   }
 }
 

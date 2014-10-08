@@ -81,6 +81,10 @@ if ($handle = opendir($laskut)) {
 
     // Jos tiedostosta luotiin laskuja siirretään se tieltä pois
     if ($luotiinlaskuja > 0) {
+
+      // Logitetaan ajo
+      cron_log($origlaskut."/".$file);
+
       rename($laskut."/".$file, $origlaskut."/".$file);
     }
   }

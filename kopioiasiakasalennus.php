@@ -150,6 +150,11 @@ if ($tee == "edit") {
     echo "<input type='submit' value='", t("Kopioi"), "'>";
     echo "</form>";
 
+    echo "<form action = 'kopioiasiakasalennus.php' method = 'post'>
+      <input type='hidden' name='toim' value='$toim'>
+      <input type='hidden' name='lopetus' value='$lopetus'>";
+    echo "<input type='submit' value='".t("Takaisin alennuksen valintaan")."'>";
+    echo "</form>";
   }
   else {
     echo "<br /><br />", t("T‰ll‰ asiakaalla ei ole yht‰‰n asiakasalennusta"), "!<br /><br />";

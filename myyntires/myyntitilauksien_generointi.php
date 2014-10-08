@@ -16,6 +16,9 @@ if (php_sapi_name() == 'cli') {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   $yhtio = $argv[1];
   $email = $argv[2];
 

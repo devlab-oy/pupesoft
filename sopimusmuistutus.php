@@ -11,6 +11,9 @@ if (php_sapi_name() != 'cli') {
 require 'inc/connect.inc';
 require 'inc/functions.inc';
 
+// Logitetaan ajo
+cron_log();
+
 if ($argv[1] != "") {
   // ja yhtio riviltä ensimmäinen arg
   $yhtio = mysql_real_escape_string($argv[1]);
@@ -49,7 +52,7 @@ $query = "(SELECT distinct lasku.tunnus, lasku.ytunnus, lasku.nimi, lasku.asiakk
            FROM lasku
            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
              AND tilausrivi.otunnus         = lasku.tunnus
-             AND tilausrivi.tyyppi          = 'L'
+             AND tilausrivi.tyyppi          = '0'
              AND tilausrivi.toimaika       != '0000-00-00'
              AND datediff(now(), tilausrivi.toimaika) = -30)
            WHERE lasku.yhtio                = '$yhtio'

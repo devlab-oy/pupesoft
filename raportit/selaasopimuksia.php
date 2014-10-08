@@ -18,7 +18,7 @@ echo "<font class='head'>".t("Selaa Sopimuksia")."</font><hr>";
 echo "<table class='display dataTable' id='$pupe_DataTables'>";
 echo "<thead>";
 echo "<tr>";
-echo "<th>".t("Sopimus")."</th>";
+echo "<th>".t("Sopimus")."<br>".t("Myyjä")."</th>";
 echo "<th>".t("Asiakkaan")."<br>".t("Tilausnumero")."</th>";
 echo "<th>".t("Asiakas")."</th>";
 echo "<th>".t("Tuoteno")."</th>";
@@ -68,13 +68,16 @@ $query = "SELECT lasku.tunnus tilaus,
           tilausrivi.varattu,
           tilausrivi.hinta,
           tilausrivi.kommentti,
+          tilausrivi.tunnus tilausrivitunnus,
           tilausrivin_lisatiedot.sopimuksen_lisatieto1 sarjanumero,
           tilausrivin_lisatiedot.sopimuksen_lisatieto2 vasteaika,
-          laskun_lisatiedot.sopimus_lisatietoja sisainen_kommentti
+          laskun_lisatiedot.sopimus_lisatietoja sisainen_kommentti,
+          kuka.nimi sopimusmyyja
           FROM lasku use index (tila_index)
           JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus and (laskun_lisatiedot.sopimus_loppupvm >= now() or laskun_lisatiedot.sopimus_loppupvm = '0000-00-00'))
           JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = '0')
           JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+          LEFT JOIN kuka ON kuka.tunnus = lasku.myyja
           WHERE lasku.yhtio  = '{$kukarow["yhtio"]}'
           AND tila           = '0'
           AND alatila       != 'D'
@@ -83,7 +86,13 @@ $result = pupe_query($query);
 
 while ($rivit = mysql_fetch_assoc($result)) {
   echo "<tr class='aktiivi'>";
-  echo "<td nowrap>{$rivit["tilaus"]}</td>";
+  $linkkilisa = '';
+
+  // TODO linkki exceliin ajoon (oma ohjelma)
+  if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
+    $linkkilisa = "<br><br> <a href='#'>".t("Rapsalinkki")."</a>";
+  }
+  echo "<td nowrap>{$rivit["tilaus"]}<br><br>{$rivit['sopimusmyyja']} </td>";
   echo "<td>{$rivit["asiakkaan_tilausnumero"]}</td>";
   echo "<td>{$rivit["asiakas"]}</td>";
   echo "<td nowrap>{$rivit["tuoteno"]}</td>";
@@ -95,7 +104,29 @@ while ($rivit = mysql_fetch_assoc($result)) {
   echo "<td nowrap>{$rivit["varattu"]}</td>";
   echo "<td nowrap align='right'>".hintapyoristys($rivit["hinta"])."</td>";
   echo "<td nowrap align='right'>{$rivit["rivihinta"]}</td>";
-  echo "<td>{$rivit['sarjanumero']}</td>";
+
+  if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
+    // Haetaan sarjanumerot laiterekisteristä, jos ei löydy sieltä näytetään niinkuin ennen
+    $query = "SELECT
+              group_concat(laite.sarjanro SEPARATOR '<br>') sarjanumerot
+              FROM laitteen_sopimukset
+              JOIN laite ON laite.tunnus = laitteen_sopimukset.laitteen_tunnus
+              WHERE laitteen_sopimukset.sopimusrivin_tunnus = '{$rivit['tilausrivitunnus']}'
+              ORDER BY laite.tunnus";
+    $res = pupe_query($query);
+    $sarjanumerotrivi = mysql_fetch_assoc($res);
+
+    if (empty($sarjanumerotrivi['sarjanumerot'])) {
+      echo "<td>{$rivit['sarjanumero']}</td>";
+    }
+    else {
+      echo "<td>{$sarjanumerotrivi['sarjanumerot']}</td>";
+    }
+  }
+  else {
+    echo "<td>{$rivit['sarjanumero']}</td>";
+  }
+
   echo "<td>{$rivit['vasteaika']}</td>";
   echo "</tr>";
 }

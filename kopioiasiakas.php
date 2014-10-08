@@ -166,6 +166,12 @@ if ($tee == "edit") {
   echo "</td></tr>";
   echo "</table>";
   echo "</form>";
+
+  echo "<form action = 'kopioiasiakas.php' method = 'post'>
+    <input type='hidden' name='toim' value='$toim'>
+    <input type='hidden' name='lopetus' value='$lopetus'>";
+  echo "<input type='submit' value='".t("Takaisin asiakkaan valintaan")."'>";
+  echo "</form>";
 }
 
 if ($tee == '') {

@@ -72,6 +72,10 @@ if ($tee == "hae_aineistot") {
 if ($tee == "hae_aineistot" and count($pankkitiedostot) > 0) {
   echo "<hr><br>";
 
+  // Pankkitiedostot on laskevassa p‰iv‰m‰‰r‰j‰rjestyksess‰
+  // Reversataan array, ett‰ ajetaan aineistot aina vanhimmasta uusimpaan
+  $pankkitiedostot = array_reverse($pankkitiedostot);
+
   // K‰sitell‰‰n haetut tiedostot
   foreach ($pankkitiedostot as $aineisto) {
     // Jos aineisto ei ollut ok, ei teh‰ mit‰‰n

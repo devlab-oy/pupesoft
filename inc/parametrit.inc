@@ -227,9 +227,18 @@ unset($tee_keraysera_debugdir);
 
 unset($loginkieli);
 
-unset($magento_api_url);
-unset($magento_api_usr);
-unset($magento_api_pas);
+unset($magento_api_tt_url);
+unset($magento_api_tt_usr);
+unset($magento_api_tt_pas);
+
+unset($magento_api_te_url);
+unset($magento_api_te_usr);
+unset($magento_api_te_pas);
+
+unset($magento_api_ht_url);
+unset($magento_api_ht_usr);
+unset($magento_api_ht_pas);
+unset($magento_api_ht_edi);
 
 $pupe_query_debug = 0;
 $aika_debug_array = array();

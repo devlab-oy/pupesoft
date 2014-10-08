@@ -74,7 +74,7 @@ if ($paiva_ajo) {
             AND tuote.tuotetyyppi  = ''
             AND tuote.ostoehdotus  = ''
             AND (tuote.muutospvm  >= date_sub(now(), interval 24 HOUR)
-              OR tuote.luontiaika >= date_sub(now(), interval 24 HOUR))";
+              OR tuote.luontiaika  >= date_sub(now(), interval 24 HOUR))";
   $res = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($res)) {
@@ -171,7 +171,8 @@ $header .= "alennus;";
 $header .= "valuutta;";
 $header .= "suppliers_unit;";
 $header .= "tuotekerroin;";
-$header .= "jarjestys\n";
+$header .= "jarjestys;";
+$header .= "toimitusaika_ema\n";
 fwrite($tfp, $header);
 
 // Haetaan tuotteet

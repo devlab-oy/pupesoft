@@ -1232,6 +1232,21 @@ if ($fieldname == "dynaaminen_kassamyynti") {
   $jatko = 0;
 }
 
+if ($fieldname == "pikatilaus_focus") {
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel = array();
+  $sel[$trow[$i]]  = " selected";
+  
+  $ulos .= "<option value = ''>" . t("Uudella pikatilauksella kursori oletuksena tuotenumero-kent‰ss‰");
+  $ulos .= "<option value = 'A' $sel[A]>" . t("Uudella pikatilauksella kursori oletuksena asiakas-kent‰ss‰");
+  $ulos .= "<option value = 'M' $sel[M]>" . t("Uudella pikatilauksella kursori oletuksena myyj‰nro-kent‰ss‰");
+  $ulos .= "<option value = 'Y' $sel[Y]>" . t("Uudella pikatilauksella kursori oletuksena myyj‰nro-kent‰ss‰. Myyj‰numero on syˆtett‰v‰");  
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "kerayspoikkeama_kasittely") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -1748,15 +1763,16 @@ if ($fieldname == "rekursiiviset_reseptit") {
   $sel1 = "";
   $sel2 = "";
 
-  if ($trow[$i] == "") {
+  if ($trow[$i] == "Y") {
     $sel1 = "selected";
   }
-  elseif ($trow[$i] == "Y") {
+  elseif ($trow[$i] == "X") {
     $sel2 = "selected";
   }
 
-  $ulos .= "<option value=''  $sel1>".t("Resepteiss‰ vain yksi taso")."</option>";
-  $ulos .= "<option value='Y' $sel2>".t("Reseptit k‰sitell‰‰n rekursiivisesti")."</option>";
+  $ulos .= "<option value=''>".t("Resepteiss‰ vain yksi taso")."</option>";
+  $ulos .= "<option value='Y' $sel1>".t("Reseptit k‰sitell‰‰n rekursiivisesti")."</option>";
+  $ulos .= "<option value='X' $sel2>".t("Reseptit k‰sitell‰‰n rekursiivisesti. Oletuksena lapsireseptej‰ ei avata.")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

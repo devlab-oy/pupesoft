@@ -336,8 +336,10 @@ if (isset($teearkistointi) and $teearkistointi != "") {
     // Tiliöinnit
     $query = "DELETE tiliointi
               FROM tiliointi
+              LEFT JOIN lasku ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus)
               WHERE yhtio = '$kukarow[yhtio]'
-              AND tapvm   <= '$vv-$kk-$pp'";
+              AND tapvm   <= '$vv-$kk-$pp'
+              AND lasku.tunnus is null";
     pupe_query($query);
     $del = mysql_affected_rows();
 

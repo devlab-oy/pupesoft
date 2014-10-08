@@ -171,7 +171,8 @@ $header .= "alennus;";
 $header .= "valuutta;";
 $header .= "suppliers_unit;";
 $header .= "tuotekerroin;";
-$header .= "jarjestys\n";
+$header .= "jarjestys;";
+$header .= "toimitusaika_ema\n";
 fwrite($tfp, $header);
 
 // Haetaan tuotteet

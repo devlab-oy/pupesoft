@@ -22,8 +22,7 @@ $pupe_root_polku = dirname(dirname(__FILE__));
 require "../inc/parametrit.inc";
 
 $lock_params = array(
-  "locktime" => 5400,
-  "lockfile" => '##tuote-export-flock.lock',
+  "locktime" => 5400
 );
 
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
@@ -283,7 +282,7 @@ if ($verkkokauppatyyppi != "magento" and $verkkokauppatyyppi != "anvia" and $ver
 if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
 
   // Varmistetaan, että kaikki muuttujat on kunnossa
-  if (empty($magento_api_ana_url) or empty($magento_api_ana_usr) or empty($magento_api_ana_pas) or empty($magento_tax_class_id)) {
+  if (empty($magento_api_te_url) or empty($magento_api_te_usr) or empty($magento_api_te_pas) or empty($magento_tax_class_id)) {
     echo "Magento parametrit puuttuu, päivitystä ei voida ajaa.";
     exit;
   }
@@ -1041,7 +1040,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
 
   $time_start = microtime(true);
 
-  $magento_client = new MagentoClient($magento_api_ana_url, $magento_api_ana_usr, $magento_api_ana_pas);
+  $magento_client = new MagentoClient($magento_api_te_url, $magento_api_te_usr, $magento_api_te_pas);
 
   if ($magento_client->getErrorCount() > 0) {
     exit;
@@ -1084,6 +1083,12 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   // Magentossa käsin hallitut kategoriat jotka säilytetään aina tuotepäivityksessä
   if (isset($magento_sticky_kategoriat) and count($magento_sticky_kategoriat) > 0) {
     $magento_client->setStickyKategoriat($magento_sticky_kategoriat);
+  }
+  // Halutaanko estää tilausten tuplasisäänluku, eli jos tilaushistoriasta löytyy käsittely
+  // 'processing_pupesoft'-tilassa niin tilausta ei lueta sisään jos sisäänluvun esto on päällä
+  // Default on: YES
+  if (isset($magento_sisaanluvun_esto) and !empty($magento_sisaanluvun_esto)) {
+     $magento_client->setSisaanluvunEsto($magento_sisaanluvun_esto);
   }
 
   // lisaa_kategoriat

@@ -204,6 +204,26 @@ if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
 
 if ($kukarow["extranet"] == "") {
   echo "<script src='../js/tilaus.js'></script>";
+
+  echo "<script>
+    $(document).ready(function () {
+      $('#loader').hide();
+
+      $('#korttimaksunappi').click(function () {
+        $('#seka').val('X');
+        $('#maksupaatetapahtuma').val('X');
+        $('#loader').show();
+        $('#maksustatus').text('');
+        $('#laskuri').submit();
+      });
+
+      $('#hyvaksy_nappi').click(function () {
+        $('#seka').val('kylla');
+        $('#laskuri').submit();
+      });
+    });
+  </script>";
+
   echo "<script src='../js/tilaus_myynti/tilaus_myynti.js'></script>";
 }
 
@@ -1232,23 +1252,7 @@ if ($tee == "VALMIS"
     echo "<input type='hidden' name='maksupaatetapahtuma' id='maksupaatetapahtuma' value=''>";
 
     echo "  <script type='text/javascript' language='JavaScript'>
-        <!--
-
-          $(document).ready(function () { 
-            $('#loader').hide();
-            $('#korttimaksunappi').click(function () {
-                $('#seka').val('X');
-                $('#maksupaatetapahtuma').val('X');
-                $('#loader').show();
-                $('#maksustatus').text('');
-                $('#laskuri').submit();
-            });
-            $('#hyvaksy_nappi').click(function () {
-                $('#seka').val('kylla');
-                $('#laskuri').submit();
-            });
-          });
-          
+      <!--
           function update_summa(kaikkiyhteensa) {
 
             kateinen = Number(document.getElementById('kateismaksu').value.replace(\",\",\".\"));

@@ -572,7 +572,8 @@ if ($tee == 'P') {
                      laskun_lisatiedot.laskutus_postino,
                      laskun_lisatiedot.laskutus_postitp,
                      laskun_lisatiedot.laskutus_maa,
-                     asiakas.kerayserat
+                     asiakas.kerayserat,
+                     asiakas.kieli
                      FROM lasku
                      JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
                      LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus)
@@ -890,7 +891,7 @@ if ($tee == 'P') {
                 }
                 else {
                   // Tilausrivin systeemikommentti
-                  $rkomm = t("Tuote Loppu.");
+                  $rkomm = t("Tuote Loppu.", $otsikkorivi["kieli"]);
                 }
               }
               elseif ($poikkeama_kasittely[$apui] == "JT") {
@@ -1339,7 +1340,7 @@ if ($tee == 'P') {
       $qry = "SELECT tila
               FROM lasku
               WHERE yhtio = '$kukarow[yhtio]'
-              AND tunnus = $poikkeamatilaus";
+              AND tunnus  = $poikkeamatilaus";
       $res = pupe_query($qry);
       $ptilarow = mysql_fetch_assoc($res);
       $ptila = $ptilarow['tila'];
@@ -1352,10 +1353,10 @@ if ($tee == 'P') {
                   kuka.eposti AS kukamail
                   FROM lasku
                   LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio
-                    AND kuka.kuka = lasku.hyvak1
+                    AND kuka.kuka     = lasku.hyvak1
                     AND kuka.extranet = '')
-                  WHERE lasku.tunnus = '$poikkeamatilaus'
-                  AND lasku.yhtio = '$kukarow[yhtio]'";
+                  WHERE lasku.tunnus  = '$poikkeamatilaus'
+                  AND lasku.yhtio     = '$kukarow[yhtio]'";
       }
       else {
         $query = "SELECT lasku.*,
@@ -1368,15 +1369,15 @@ if ($tee == 'P') {
                   kuka_ext.nimi AS kuka_ext_nimi
                   FROM lasku
                   JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
-                    AND asiakas.tunnus = lasku.liitostunnus)
+                    AND asiakas.tunnus     = lasku.liitostunnus)
                   LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio
-                    AND kuka.tunnus = lasku.myyja
-                    AND kuka.extranet = '')
+                    AND kuka.tunnus        = lasku.myyja
+                    AND kuka.extranet      = '')
                   LEFT JOIN kuka AS kuka_ext ON (kuka_ext.yhtio = lasku.yhtio
-                    AND kuka_ext.kuka = lasku.laatija
+                    AND kuka_ext.kuka      = lasku.laatija
                     AND kuka_ext.extranet != '')
-                  WHERE lasku.tunnus = '$poikkeamatilaus'
-                  AND lasku.yhtio = '$kukarow[yhtio]'";
+                  WHERE lasku.tunnus       = '$poikkeamatilaus'
+                  AND lasku.yhtio          = '$kukarow[yhtio]'";
       }
 
       $result = pupe_query($query);
@@ -1874,10 +1875,17 @@ if ($tee == 'P') {
             $oslapp_mediatyyppi = $kirrow['mediatyyppi'];
           }
 
+          $_keraysvahvistus_lahetys = array('k', 'L', 'M', 'N', 'Q', 'P');
+
           if (($valittu_tulostin != '' and $komento != "" and $lahetekpl > 0)
-            or (
-              (in_array($laskurow["keraysvahvistus_lahetys"], array('k', 'L', 'M', 'N', 'Q', 'P')) or (in_array($yhtiorow["keraysvahvistus_lahetys"], array('k', 'L', 'M', 'N', 'Q', 'P')) and $laskurow["keraysvahvistus_lahetys"] == ''))
-              or (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow['email'] != "")
+            or ($laskurow["tila"] != 'V'
+              and ((in_array($laskurow["keraysvahvistus_lahetys"], $_keraysvahvistus_lahetys)
+                  or (in_array($yhtiorow["keraysvahvistus_lahetys"], $_keraysvahvistus_lahetys)
+                    and $laskurow["keraysvahvistus_lahetys"] == ''))
+                or (($laskurow["keraysvahvistus_lahetys"] == 'o'
+                    or ($yhtiorow["keraysvahvistus_lahetys"] == 'o'
+                      and $laskurow["keraysvahvistus_lahetys"] == ''))
+                  and $laskurow['email'] != ""))
             )
           ) {
 

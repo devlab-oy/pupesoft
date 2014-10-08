@@ -135,7 +135,7 @@ if (!function_exists("avainsanatarkista")) {
         }
       }
 
-      if ($tem_selite != '' and ($tem_laji == 'TRY' or $tem_laji == 'OSASTO' or $tem_laji == 'DPAVAINSANALAJI')) {
+      if ($tem_selite != '' and ($tem_laji == 'TRY' or $tem_laji == 'OSASTO' or $tem_laji == 'DPAVAINSANALAJI' or $tem_laji == 'LITETY_TKIRJAST')) {
         $query = "SELECT tunnus
                   FROM avainsana
                   WHERE yhtio  = '$kukarow[yhtio]'

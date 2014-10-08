@@ -159,13 +159,13 @@ if ($tee != "") {
   $tables["yriti"][] = "oletus_selvittelytili";
 
   foreach ($tables as $taulu => $kentat) {
-  
+
     echo "<br><font class='message'>Tarkastetaan taulu $taulu</font><br>";
-  
+
     foreach ($kentat as $kentta) {
       $query = "SELECT distinct $kentta tilino
                 FROM $taulu
-                WHERE yhtio  = '$kukarow[yhtio]'
+                WHERE yhtio = '$kukarow[yhtio]'
                 and $kentta not in ('','0')";
       $haku = pupe_query($query);
 

@@ -63,8 +63,7 @@ if (!empty($ytunnus) or !empty($try) or !empty($osasto)) {
   $ckatepr = "#00dd00";
   $maxcol  = 12; // montako columnia näyttö on
 
-  $_katteet_tilauksella = $kukarow["naytetaan_katteet_tilauksella"];
-  $katteet_naytetaan = (in_array($_katteet_tilauksella, array('Y',''))) ? true : false;
+  $katteet_naytetaan = (in_array($kukarow["naytetaan_katteet_tilauksella"], array('Y','')));
 
   // tehdään asiakkaan ostot tuoteryhmästä
   echo "<br />";

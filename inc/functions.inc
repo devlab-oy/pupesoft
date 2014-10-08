@@ -1981,8 +1981,10 @@ if (!function_exists("lpr")) {
       return;
     }
 
-    // sallitut merkit listattu, kaikki muut menee spaceks...
-    $str = ereg_replace("[^A-Za-z0-9ÖöÅåÄä .,-/!|+()%#\n\r]", " ", $str);
+    // sallitut merkit listattu, kaikki muut menee spaceks, paitsi jos kyseessä on kuittitulostin...
+    if ($kirjoitin['mediatyyppi'] != "kuittitulostin") {
+      $str = ereg_replace("[^A-Za-z0-9ÖöÅåÄä .,-/!|+()%#\n\r]", " ", $str);
+    }
 
     // merkistökonversio
     $from = array('ä', 'å', 'ö', 'Ä', 'Å', 'Ö', '|');
@@ -11136,7 +11138,6 @@ if (!function_exists('t_tuotteen_avainsanat')) {
       $row = mysql_fetch_assoc($result);
       // jos löydettiin käännös palautetaan se
       if ($row["selitetark"] != "") {
-        $palautus = "";
         $palautus = "{$row["selite"]} {$row["selitetark"]}";
       }
       else {

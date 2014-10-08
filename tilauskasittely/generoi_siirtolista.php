@@ -489,8 +489,19 @@ if ($tee == 'M' and isset($generoi)) {
     //  Otetaan luodut otsikot talteen
     $otsikot = array();
 
+    if ($yhtiorow['siirtolista_email'] != '') {
+      $ei_siirretty = array();
+    }
+
     // tehdään jokaiselle valitulle lahdevarastolle erikseen
     foreach ($lahdevarastot as $lahdevarasto) {
+
+      $query = "SELECT nimitys
+                FROM varastopaikat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$lahdevarasto}'";
+      $varres = pupe_query($query);
+      $varrow = mysql_fetch_assoc($varres);
 
       $tt_vaihdettu = false;
       if ($valittu_toimitustapa == 'Ei toimitustapaa') {
@@ -644,6 +655,16 @@ if ($tee == 'M' and isset($generoi)) {
 
             if ($ei_siirreta_jos_tarve_ylittyy == "X") {
               $siirretaan = 0;
+
+              if ($yhtiorow['siirtolista_email'] != '') {
+                $ei_siirretty[] = array(
+                  'mista' => $varrow["nimitys"],
+                  'mihin' => $varow["nimitys"],
+                  'mita'  => $pairow["tuoteno"],
+                  'tarve' => $tarve_kohdevarasto,
+                  'saldo' => $saldo_myytavissa_lahde
+                  );
+              }
             }
             elseif ($saldo_myytavissa_lahde == 1) {
               $siirretaan = $saldo_myytavissa_lahde;
@@ -696,13 +717,6 @@ if ($tee == 'M' and isset($generoi)) {
                 if (!$php_cli) echo "<font class='message'>", t("VIRHE: Tilausta ei löydy"), "!<br /><br /></font>";
                 exit;
               }
-
-              $query = "SELECT nimitys
-                        FROM varastopaikat
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tunnus  = '{$lahdevarasto}'";
-              $varres = pupe_query($query);
-              $varrow = mysql_fetch_assoc($varres);
 
               if (!$php_cli) {
                 echo "<br /><font class='message'>";
@@ -790,6 +804,27 @@ if ($tee == 'M' and isset($generoi)) {
     }
 
     if (!$php_cli) echo "</table><br />";
+
+    if ($yhtiorow['siirtolista_email'] != '' and count($ei_siirretty) > 0) {
+
+      $body = t("Seuraavat varastosiirrot jäivät tekemättä").":<br><br>\n\n";
+
+      foreach ($ei_siirretty as $value) {
+        $body .= $value['mista'].' -> '.$value['mihin'].' '.t("jäi siirtämättä tuoteno").': ';
+        $body .= $value['mita'].'. '.t("tarve").': '.$value['tarve'].' '.t("kpl mutta, oli vain");
+        $body .= ' : '.$value['saldo'].' '.t("kpl").".<br>\n";
+      }
+
+      $params = array(
+        'to' => $yhtiorow['siirtolista_email'],
+        'cc' => '',
+        'subject' => t("Siirtämättä jääneet tuotteet"),
+        'ctype' => 'html',
+        'body' => $body,
+      );
+
+      pupesoft_sahkoposti($params);
+    }
 
     if (count($otsikot) == 0) {
       if (!$php_cli) echo "<font class='error'>", t("Yhtään siirtolistaa ei luotu"), "!</font><br />";

@@ -504,8 +504,11 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
   else {
     $row = mysql_fetch_assoc($result);
 
-    if ($row['otunnus'] != $laskurow['tunnus']) {
-      $query  = "SELECT * from lasku where yhtio='$kukarow[yhtio]' and tunnus='{$row['otunnus']}'";
+    if ($row['otunnus'] != $laskurow['tunnus'] and $mista == "vastaanota") {
+      $query  = "SELECT lasku.*
+                 FROM lasku
+                 WHERE lasku.yhtio = '$kukarow[yhtio]'
+                 AND lasku.tunnus = '{$row['otunnus']}'";
       $result_lasku = pupe_query($query);
       $laskurow = mysql_fetch_assoc($result_lasku);
     }
@@ -911,6 +914,9 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
         }
       }
 
+      $laskurow_query_lisa = "";
+      if (isset($laskurow['varasto']) and $laskurow['varasto'] != 0) $laskurow_query_lisa = " AND varasto = '{$laskurow['varasto']}'";
+
       // katsotaan onko tuotetta jälkitoimituksessa
       $query = "SELECT sum(varattu+jt) kpl
                 FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
@@ -918,7 +924,8 @@ if ($tee == 'NAYTATILAUS' or $komento["Purkulista"] != '' or $komento["Vastaanot
                 AND tyyppi         = 'L'
                 AND tuoteno        = '{$row['tuoteno']}'
                 AND laskutettuaika = '0000-00-00'
-                AND var            = 'J'";
+                AND var            = 'J'
+                $laskurow_query_lisa";
       $jt_check_res = pupe_query($query);
       $jt_check_row = mysql_fetch_assoc($jt_check_res);
 

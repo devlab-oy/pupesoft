@@ -1371,7 +1371,13 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
   $rrrresult = pupe_query($query);
 
   while ($laskurow = mysql_fetch_assoc($rrrresult)) {
-
+    
+    if ($toim == "TARJOUS") {
+      if ($kukarow['toimipaikka'] != $laskurow['yhtio_toimipaikka'] and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+        $kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];
+        $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+      }
+    }
     if ($toim == "VAKADR") {
       tulosta_vakadr_erittely($laskurow["tunnus"], $komento["VAK_ADR"], $tee);
       $tee = '';

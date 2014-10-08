@@ -97,11 +97,11 @@ if (isset($tee) and trim($tee) == 'aja') {
       $location_code = pupesoft_cleanstring($fields[4]);
       $supplier_code = pupesoft_cleanstring($fields[5]);
       $delivery_date = pupesoft_cleanstring($fields[6]);
-      $comment_1    = pupesoft_cleanstring($fields[7]);
-      $comment_2    = pupesoft_cleanstring($fields[8]);
-      $comment_3    = pupesoft_cleanstring($fields[9]);
-      $comment_4    = pupesoft_cleanstring($fields[10]);
-      $comment_5    = pupesoft_cleanstring($fields[11]);
+      $comment_1     = pupesoft_cleanstring($fields[7]);
+      $comment_2     = pupesoft_cleanstring($fields[8]);
+      $comment_3     = pupesoft_cleanstring($fields[9]);
+      $comment_4     = pupesoft_cleanstring($fields[10]);
+      $comment_5     = pupesoft_cleanstring($fields[11]);
       $order_date    = pupesoft_cleanstring($fields[12]);
 
       // Poistetaan maa-etuliitteet

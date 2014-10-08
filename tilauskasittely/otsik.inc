@@ -885,12 +885,20 @@ if ($tila == "" and !isset($jatka)) {
     $tilaus_myynti_otsikko = t("Ylläpitosopimus");
     $tilaustyypit = array('0' => $tilaus_myynti_otsikko);
   }
-  elseif ($toim == "ENNAKKO" or $tilaustyyppi == 'E') {
+  elseif ($toim == "ENNAKKO") {
     $tilaus_myynti_otsikko = t("Ennakkotilaus");
     $tilaustyypit = array('E' => $tilaus_myynti_otsikko);
   }
   else {
-    $tilaus_myynti_otsikko = t("Myyntitilaus");
+
+    // myyntitilaukselle voi laittaa tilaustyypin "ennakkotilaus", joten vaihdetaan otsikko
+    if ($tilaustyyppi == 'E') {
+      $tilaus_myynti_otsikko = t("Ennakkotilaus");
+    }
+    else {
+      $tilaus_myynti_otsikko = t("Myyntitilaus");
+    }
+
     $tilaustyypit = array(
       'N' => t("Normaalitilaus"),
       'E' => t("Ennakkotilaus"),
@@ -903,11 +911,6 @@ if ($tila == "" and !isset($jatka)) {
       'T' => t("Tarjoustilaus"),
       'U' => t("Takuutilaus"),
     );
-
-    // Jos tilauksella on jo rivejä, ei saa enää vaihtaa tilaustyyppiä
-    if ($templ > 0) {
-      $tilaustyypit = array($tilaustyyppi => $tilaustyypit[$tilaustyyppi]);
-    }
   }
 
   // Setataan tilaustyyppi jos meillä on vaan yks vaihtoehto

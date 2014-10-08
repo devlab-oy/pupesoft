@@ -525,28 +525,27 @@ if ($monta > 1 and $monta <= $limit) {
 
   while ($asiakas = mysql_fetch_array($result)) {
 
-    if (in_array($asiakas['tunnus'], $_asiakas_tunnukset)) {
+    if (isset($_asiakas_tunnukset[$asiakas['tunnus']])) {
       continue;
     }
-    else {
-      $_asiakas_tunnukset[$asiakas['tunnus']] = $asiakas['tunnus'];
-    }
+
+    $_asiakas_tunnukset[$asiakas['tunnus']] = TRUE;
 
     if     ($asiakas['ytunnus']    != '') $numero = trim($asiakas['ytunnus']);
     elseif ($asiakas['asiakasnro'] != '') $numero = trim($asiakas['asiakasnro']);
 
     $brnim     = '';
-    $bros     = '';
-    $brpostino  = '';
-    $brpostitp  = '';
+    $bros      = '';
+    $brpostino = '';
+    $brpostitp = '';
 
     $asiakas['toim_nimi']    = trim($asiakas['toim_nimi']);
-    $asiakas['toim_osoite']    = trim($asiakas['toim_osoite']);
-    $asiakas['toim_postino']  = trim($asiakas['toim_postino']);
-    $asiakas['toim_postitp']  = trim($asiakas['toim_postitp']);
+    $asiakas['toim_osoite']  = trim($asiakas['toim_osoite']);
+    $asiakas['toim_postino'] = trim($asiakas['toim_postino']);
+    $asiakas['toim_postitp'] = trim($asiakas['toim_postitp']);
 
-    $asiakas['nimi']      = trim($asiakas['nimi']);
-    $asiakas['osoite']      = trim($asiakas['osoite']);
+    $asiakas['nimi']         = trim($asiakas['nimi']);
+    $asiakas['osoite']       = trim($asiakas['osoite']);
     $asiakas['postino']      = trim($asiakas['postino']);
     $asiakas['postitp']      = trim($asiakas['postitp']);
 

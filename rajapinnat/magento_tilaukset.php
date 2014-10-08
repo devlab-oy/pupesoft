@@ -19,21 +19,16 @@ $pupe_root_polku = dirname(dirname(__FILE__));
 require "{$pupe_root_polku}/inc/connect.inc";
 require "{$pupe_root_polku}/inc/functions.inc";
 
-$lock_params = array(
-  "locktime" => 5400,
-  "lockfile" => '##tuote-export-flock.lock',
-);
-
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
-pupesoft_flock($lock_params);
+pupesoft_flock();
 
 require "{$pupe_root_polku}/rajapinnat/magento_client.php";
 require "{$pupe_root_polku}/rajapinnat/edi.php";
 
-if (empty($magento_api_ana_edi)
-  or empty($magento_api_ana_url)
-  or empty($magento_api_ana_usr)
-  or empty($magento_api_ana_pas)
+if (empty($magento_api_ht_edi)
+  or empty($magento_api_ht_url)
+  or empty($magento_api_ht_usr)
+  or empty($magento_api_ht_pas)
   or empty($ovt_tunnus)
   or empty($pupesoft_tilaustyyppi)
   or empty($verkkokauppa_asiakasnro)
@@ -43,7 +38,14 @@ if (empty($magento_api_ana_edi)
 }
 
 // Magenton soap client
-$magento = new MagentoClient($magento_api_ana_url, $magento_api_ana_usr, $magento_api_ana_pas);
+$magento = new MagentoClient($magento_api_ht_url, $magento_api_ht_usr, $magento_api_ht_pas);
+
+// Halutaanko estää tilausten tuplasisäänluku, eli jos tilaushistoriasta löytyy käsittely
+// 'processing_pupesoft'-tilassa niin tilausta ei lueta sisään jos sisäänluvun esto on päällä
+// Default on: YES
+if (isset($magento_sisaanluvun_esto) and !empty($magento_sisaanluvun_esto)) {
+   $magento->setSisaanluvunEsto($magento_sisaanluvun_esto);
+}
 
 if ($magento->getErrorCount() > 0) {
   exit;

@@ -54,6 +54,11 @@ function tiedostot_table($tiedostot, $filelist) {
 
   echo "<tbody>";
 
+  // Pankkitiedostot on laskevassa päivämääräjärjestyksessä
+  // Reversataan array, että näytetään aineistot aina vanhimmasta uusimpaan,
+  // koska ne ajetaan sisään myös vanhimmasta uusimpaan
+  $tiedostot = array_reverse($tiedostot);
+
   foreach ($tiedostot as $tiedosto) {
 
     // Haetaan tiedoston tiedot filelistasta, että saadaan päivämäärä ja tilinumero
@@ -249,6 +254,7 @@ function kasittele_pain_palaute($pain_data) {
     "selite" => $selite,
   );
 }
+
 
 /**
  *

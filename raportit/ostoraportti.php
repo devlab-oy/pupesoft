@@ -563,8 +563,8 @@ if (isset($RAPORTOI) and $tee == "RAPORTOI") {
   //Yhtiövalinnat
   $query  = "SELECT distinct yhtio, nimi
              FROM yhtio
-             WHERE konserni = '$yhtiorow[konserni]'
-             AND konserni != ''";
+             WHERE konserni  = '$yhtiorow[konserni]'
+             AND konserni   != ''";
   $presult = pupe_query($query);
 
   $yhtiot   = "";
@@ -2125,8 +2125,8 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
   //Yhtiövalinnat
   $query  = "SELECT distinct yhtio, nimi
              FROM yhtio
-             WHERE konserni = '$yhtiorow[konserni]'
-             AND konserni != ''";
+             WHERE konserni  = '$yhtiorow[konserni]'
+             AND konserni   != ''";
   $presult = pupe_query($query);
 
   $yhtiot   = "";

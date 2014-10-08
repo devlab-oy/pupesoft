@@ -113,6 +113,7 @@ mkdir -p "${database_to}" &> /dev/null
 
 # Stopataan mysql, moovataan db, chown ja mysql takas
 ${mysql_stop} > /dev/null &&
+nice -n 19 rm -f "${database_to}/*" > /dev/null &&
 nice -n 19 mv -f "${tmpdir}/"* "${database_to}/" > /dev/null &&
 chown -R ${mysql_owner} "${database_to}" > /dev/null &&
 ${mysql_start} > /dev/null

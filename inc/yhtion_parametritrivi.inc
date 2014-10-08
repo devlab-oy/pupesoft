@@ -1765,15 +1765,16 @@ if ($fieldname == "rekursiiviset_reseptit") {
   $sel1 = "";
   $sel2 = "";
 
-  if ($trow[$i] == "") {
+  if ($trow[$i] == "Y") {
     $sel1 = "selected";
   }
-  elseif ($trow[$i] == "Y") {
+  elseif ($trow[$i] == "X") {
     $sel2 = "selected";
   }
 
-  $ulos .= "<option value=''  $sel1>".t("Resepteissä vain yksi taso")."</option>";
-  $ulos .= "<option value='Y' $sel2>".t("Reseptit käsitellään rekursiivisesti")."</option>";
+  $ulos .= "<option value=''>".t("Resepteissä vain yksi taso")."</option>";
+  $ulos .= "<option value='Y' $sel1>".t("Reseptit käsitellään rekursiivisesti")."</option>";
+  $ulos .= "<option value='X' $sel2>".t("Reseptit käsitellään rekursiivisesti. Oletuksena lapsireseptejä ei avata.")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -2955,7 +2956,7 @@ if ($fieldname == "nayta_variaatiot") {
 
   $ulos .= "<option value = ''>" . t("Ei näytetä tuotteiden variaatioita tuotelistauksessa");
   $ulos .= "<option value = 'Y' $sel>" . t("Tuotteiden listauksessa Hae ja selaa-ohjelmassa " .
-      "mahdollisuus nähdä tuotteen variaatiot (Esim. eri koot ja värit)");
+    "mahdollisuus nähdä tuotteen variaatiot (Esim. eri koot ja värit)");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -4205,6 +4206,19 @@ if ($fieldname == 'pura_osaluettelot') {
 
   $ulos .= "<option value = ''>".t("Tuotteen osaluetteloa ei pureta auki")."</option>";
   $ulos .= "<option value = '1' {$sel}>".t("Tuotteen osaluettelo puretaan auki tilausvahvistuksella, lähetteellä ja laskulla")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "laiterekisteri_kaytossa") {
+  $apu = $trow[$i];
+  $sel = array();
+  $sel[$apu] = "selected";
+
+  $ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value = ''>".t("Laiterekisteri ei ole käytössä");
+  $ulos .= "<option value = 'K' $sel[K]>".t("Laiterekisteri on käytössä");
   $ulos .= "</select></td>";
 
   $jatko = 0;

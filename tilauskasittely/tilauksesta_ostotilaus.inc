@@ -290,7 +290,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                       vanhatunnus         = '{$myytilrow['yhtio_toimipaikka']}',
                       varasto             = '{$oletusostovarasto}',
                       verkkotunnus        = '$myytilrow[liitostunnus]',
-                       vienti_kurssi      = '$vrow[kurssi]',
+                      vienti_kurssi       = '$vrow[kurssi]',
                       viesti              = '$myytilrow[viesti]',
                       viikorkopros        = '$yhtiorow[viivastyskorko]',
                       yhtio               = '$kukarow[yhtio]',

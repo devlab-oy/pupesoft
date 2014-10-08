@@ -1297,7 +1297,7 @@ if ($tila == 'tee_kohdistus') {
                           laskutunnus    = '{$lasku[tunnus]}',
                           kohdistuspvm   = NOW(),
                           kirjauspvm     = '{$laskun_maksupvm}'";
-          $kohdistus_result = pupe_query($kohdistus_qry);
+        $kohdistus_result = pupe_query($kohdistus_qry);
       }
 
 

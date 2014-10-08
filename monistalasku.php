@@ -913,6 +913,13 @@ if ($tee == "ETSILASKU") {
 
     echo "</table><br>";
     echo "<input type='submit' value='".t("Monista")."'></form>";
+
+    echo "<br>";
+    echo "<form action = 'monistalasku.php' method = 'post'>
+      <input type='hidden' name='toim' value='$toim'>
+      <input type='hidden' name='lopetus' value='$lopetus'>";
+    echo "<br><input type='submit' value='".t("Tee uusi haku")."'>";
+    echo "</form>";
   }
   else {
     echo "<font class='error'>", t("Haulla ei löytynyt yhtään tilausta").".<br>";

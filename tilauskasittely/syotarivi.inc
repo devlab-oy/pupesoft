@@ -290,8 +290,8 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     echo "<th align='left'>", t("Omalle tilaukselle"), "</th>";
   }
 
-  if ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow['rekursiiviset_reseptit'] != '') {
-    echo "<th align='left'>", t("Rekursiivisuus"), "</th>";
+  if ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow['rekursiiviset_reseptit'] == 'X') {
+    echo "<th align='left'>", t("Pura lapset"), "</th>";
   }
 
   if ($yhtiorow['rivinumero_syotto'] != '') {
@@ -435,14 +435,14 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     echo "</select></td>";
   }
 
-  if ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow['rekursiiviset_reseptit'] != '') {
+  if ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow['rekursiiviset_reseptit'] == 'X') {
     echo "<td>";
 
     $sel = (!empty($avaa_rekursiiviset)) ? "selected" : "";
 
     echo "<select name='avaa_rekursiiviset'>";
-    echo "<option value = ''>".t("P‰‰ll‰")."</option>";
-    echo "<option value = 'EI' $sel>".t("Pois p‰‰lt‰")."</option>";
+    echo "<option value = ''>".t("Ei")."</option>";
+    echo "<option value = 'JOO' $sel>".t("Kyll‰")."</option>";
     echo "</select>";
     echo "</td>";
   }
@@ -476,7 +476,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
     $nrospanni++;
   }
 
-  if ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow['rekursiiviset_reseptit'] != '') {
+  if ($toim == "VALMISTAASIAKKAALLE" and $yhtiorow['rekursiiviset_reseptit'] == 'X') {
     $nrospanni++;
   }
 
@@ -662,8 +662,8 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
     echo "<th align='left'>".t("Valmistuslinja")."</th>";
   }
 
-  if ($toim == "VALMISTAVARASTOON" and $yhtiorow['rekursiiviset_reseptit'] != '') {
-    echo "<th align='left'>".t("Rekursiivisuus")."</th>";
+  if ($toim == "VALMISTAVARASTOON" and $yhtiorow['rekursiiviset_reseptit'] == 'X') {
+    echo "<th align='left'>".t("Pura lapset")."</th>";
   }
 
   echo "</tr>";
@@ -712,14 +712,14 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
     echo "</td>";
   }
 
-  if ($toim == "VALMISTAVARASTOON" and $yhtiorow['rekursiiviset_reseptit'] != '') {
+  if ($toim == "VALMISTAVARASTOON" and $yhtiorow['rekursiiviset_reseptit'] == 'X') {
     echo "<td>";
 
     $sel = (!empty($avaa_rekursiiviset)) ? "selected" : "";
 
     echo "<select name='avaa_rekursiiviset'>";
-    echo "<option value = ''>".t("P‰‰ll‰")."</option>";
-    echo "<option value = 'EI' $sel>".t("Pois p‰‰lt‰")."</option>";
+    echo "<option value = ''>".t("Ei")."</option>";
+    echo "<option value = 'JOO' $sel>".t("Kyll‰")."</option>";
     echo "</select>";
     echo "</td>";
   }
@@ -804,8 +804,8 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
   if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
     $colspan = 3;
   }
-  elseif ($toim == "VALMISTAVARASTOON" and $yhtiorow['rekursiiviset_reseptit'] != '') {
-   $colspan = 3;
+  elseif ($toim == "VALMISTAVARASTOON" and $yhtiorow['rekursiiviset_reseptit'] == 'X') {
+    $colspan = 3;
   }
   else {
     $colspan = 2;
@@ -928,5 +928,5 @@ if ($formi == '') {
 }
 
 if ($kentta == '') {
-  $kentta='tuoteno';
+  $kentta = 'tuoteno';
 }

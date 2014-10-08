@@ -228,9 +228,18 @@ unset($tee_keraysera_debugdir);
 unset($myyntiseuranta_access_list);
 unset($loginkieli);
 
-unset($magento_api_url);
-unset($magento_api_usr);
-unset($magento_api_pas);
+unset($magento_api_tt_url);
+unset($magento_api_tt_usr);
+unset($magento_api_tt_pas);
+
+unset($magento_api_te_url);
+unset($magento_api_te_usr);
+unset($magento_api_te_pas);
+
+unset($magento_api_ht_url);
+unset($magento_api_ht_usr);
+unset($magento_api_ht_pas);
+unset($magento_api_ht_edi);
 
 $pupe_query_debug = 0;
 $aika_debug_array = array();
@@ -480,6 +489,10 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       if (isset($lajit)) {
         setcookie("avainsanalaji_keksi", urlencode(serialize($lajit)), strtotime('+90 days'), "/");
         $_COOKIE["avainsanalaji_keksi"] = urlencode(serialize($lajit));
+      }
+      if (isset($valitut_sarakkeet)) {
+        setcookie("laiteluettelo_keksi", urlencode(serialize($valitut_sarakkeet)), strtotime('+90 days'), "/");
+        $_COOKIE["laiteluettelo_keksi"] = urlencode(serialize($valitut_sarakkeet));
       }
     }
 

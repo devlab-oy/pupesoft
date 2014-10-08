@@ -185,16 +185,17 @@ else {
       $toimitustavan_lahto = unserialize(urldecode($toimitustavan_lahto));
     }
 
-    if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {
-      $toimitustavan_lahto_arvo = $toimitustavan_lahto[$varasto];
-    }
-    else {
-      $toimitustavan_lahto_arvo = 0;
-    }
-
     while ($row = mysql_fetch_assoc($result)) {
+
       // Mihin varastoon
       $varasto = kuuluukovarastoon($row["hyllyalue"], $row["hyllynro"]);
+
+      if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {
+        $toimitustavan_lahto_arvo = $toimitustavan_lahto[$varasto];
+      }
+      else {
+        $toimitustavan_lahto_arvo = 0;
+      }
 
       $varasto_row = hae_varasto($varasto);
       $varasto_toimipaikka = $varasto_row['toimipaikka'];

@@ -634,9 +634,15 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
         echo "<form method='post' action='tilauskasittely/tilaus_myynti.php'>";
       }
 
+      $lopetus = "{$palvelin2}muokkaatilaus.php////toim={$toim}//asiakastiedot={$asiakastiedot}//limit={$limit}//etsi={$etsi}";
+
+      if (isset($toimipaikka)) {
+        $lopetus .= "//toimipaikka=$toimipaikka";
+      }
+
       echo "<input type='hidden' name='toim' value='$aputoim1'>";
       echo "<input type='hidden' name='kaytiin_otsikolla' value='NOJOO!' />";
-      echo "<input type='hidden' name='lopetus'    value='{$palvelin2}muokkaatilaus.php////toim={$toim}//asiakastiedot={$asiakastiedot}//limit={$limit}//etsi={$etsi}'>";
+      echo "<input type='hidden' name='lopetus' value='$lopetus'>";
 
       echo "<br><table>
           <tr>
@@ -924,7 +930,8 @@ if (empty($asiakastiedot)) {
 }
 
 if ($asiakastiedot == "toimitus") {
-  $asiakasstring = " concat_ws('<br>', lasku.ytunnus, lasku.nimi, lasku.nimitark, if(lasku.nimi != lasku.toim_nimi, concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark, if(lasku.postitp != lasku.toim_postitp, lasku.toim_postitp, NULL)), NULL))";
+  $asiakasstring = "  concat_ws('<br>', lasku.ytunnus, concat_ws(' ', lasku.nimi, lasku.nimitark),
+                      concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_postitp))";
   $assel1 = "";
   $assel2 = "CHECKED";
 }
@@ -2759,13 +2766,19 @@ if (mysql_num_rows($result) != 0) {
         echo "  <input type='hidden' name='projektilla' value='$row[tunnusnippu]'>";
       }
 
-      echo "  <input type='hidden' name='lopetus'    value='{$palvelin2}muokkaatilaus.php////toim={$toim}//asiakastiedot={$asiakastiedot}//limit={$limit}//etsi={$etsi}'>
-          <input type='hidden' name='mista'     value='muokkaatilaus'>
-          <input type='hidden' name='toim'     value='$aputoim1'>
-          <input type='hidden' name='orig_tila'   value='{$row["tila"]}'>
-          <input type='hidden' name='orig_alatila' value='{$row["alatila"]}'>
-          <input type='hidden' class='tilausnumero' name='tilausnumero' value='$row[tunnus]'>
-          <input type='hidden' name='kaytiin_otsikolla' value='NOJOO!' />";
+      $lopetus = "{$palvelin2}muokkaatilaus.php////toim={$toim}//asiakastiedot={$asiakastiedot}//limit={$limit}//etsi={$etsi}";
+
+      if (isset($toimipaikka)) {
+        $lopetus .= "//toimipaikka=$toimipaikka";
+      }
+
+      echo "<input type='hidden' name='lopetus' value='$lopetus'>
+            <input type='hidden' name='mista' value='muokkaatilaus'>
+            <input type='hidden' name='toim' value='$aputoim1'>
+            <input type='hidden' name='orig_tila' value='{$row["tila"]}'>
+            <input type='hidden' name='orig_alatila' value='{$row["alatila"]}'>
+            <input type='hidden' class='tilausnumero' name='tilausnumero' value='$row[tunnus]'>
+            <input type='hidden' name='kaytiin_otsikolla' value='NOJOO!' />";
 
       if ($toim == "VASTAANOTA_REKLAMAATIO") {
         echo "  <input type='hidden' name='mista' value='vastaanota'>";

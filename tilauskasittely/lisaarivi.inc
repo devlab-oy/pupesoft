@@ -3056,7 +3056,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
         while ($edirow = mysql_fetch_assoc($edi2result)) {
 
-          list(, , $vmyytavissa) = saldo_myytavissa($edirow["tuoteno"]);
+          list(, , $vmyytavissa) = saldo_myytavissa($edirow["tuoteno"],'' , $varasto);
 
           if ($vmyytavissa > 0) {
             $tvsql = "SELECT *

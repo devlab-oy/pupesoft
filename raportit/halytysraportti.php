@@ -854,6 +854,44 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
         $lisa = " and concat_ws(' ',tilausrivi.hyllyalue, tilausrivi.hyllynro, tilausrivi.hyllyvali, tilausrivi.hyllytaso)='$row[varastopaikka]' ";
       }
 
+      if ($paikoittain == '') {
+        // Kaikkien valittujen varastojen paikkojen saldo yhteensä, mukaan tulee myös aina ne saldot jotka ei kuulu mihinkään varastoalueeseen
+        $query = "SELECT sum(saldo) saldo, varastopaikat.tunnus
+                  FROM tuotepaikat
+                  LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                    AND varastopaikat.tunnus = tuotepaikat.varasto)
+                  WHERE tuotepaikat.$varastot_yhtiot
+                  and tuotepaikat.tuoteno = '$row[tuoteno]'
+                  GROUP BY varastopaikat.tunnus
+                  $varastot";
+        $result = pupe_query($query);
+
+        $sumsaldo = 0;
+
+        while ($saldo = mysql_fetch_assoc($result)) {
+          $sumsaldo += $saldo["saldo"];
+        }
+
+        if ($valitut['SALDOLLISET'] != '' and $sumsaldo == 0) {
+          continue;
+        }
+
+        $saldo["saldo"] = $sumsaldo;
+      }
+      else {
+
+        $lisa_tuotepaikat = str_replace("tilausrivi.", "", $lisa);
+
+        // Ajetaan varastopaikoittain eli tässä on just tän paikan saldo
+        $query = "SELECT saldo
+                  from tuotepaikat
+                  where yhtio='$row[yhtio]'
+                  and tuoteno='$row[tuoteno]'
+                  {$lisa_tuotepaikat}";
+        $result = pupe_query($query);
+        $saldo = mysql_fetch_assoc($result);
+      }
+
       //toimittajatiedot
       if ($toimittajaid == '') {
         if (isset($nayta_vain_ykkostoimittaja)) {
@@ -1028,40 +1066,6 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
         $ykkostoimittajarajattuna   = mysql_fetch_assoc($result);
 
         $ennp['tilattu'] = empty($ykkostoimittajarajattuna['tilattu']) ? 0 : $ykkostoimittajarajattuna['tilattu'];
-      }
-
-      if ($paikoittain == '') {
-        // Kaikkien valittujen varastojen paikkojen saldo yhteensä, mukaan tulee myös aina ne saldot jotka ei kuulu mihinkään varastoalueeseen
-        $query = "SELECT sum(saldo) saldo, varastopaikat.tunnus
-                  FROM tuotepaikat
-                  LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                    AND varastopaikat.tunnus = tuotepaikat.varasto)
-                  WHERE tuotepaikat.$varastot_yhtiot
-                  and tuotepaikat.tuoteno = '$row[tuoteno]'
-                  GROUP BY varastopaikat.tunnus
-                  $varastot";
-        $result = pupe_query($query);
-
-        $sumsaldo = 0;
-
-        while ($saldo = mysql_fetch_assoc($result)) {
-          $sumsaldo += $saldo["saldo"];
-        }
-
-        $saldo["saldo"] = $sumsaldo;
-      }
-      else {
-
-        $lisa_tuotepaikat = str_replace("tilausrivi.", "", $lisa);
-
-        // Ajetaan varastopaikoittain eli tässä on just tän paikan saldo
-        $query = "SELECT saldo
-                  from tuotepaikat
-                  where yhtio='$row[yhtio]'
-                  and tuoteno='$row[tuoteno]'
-                  {$lisa_tuotepaikat}";
-        $result = pupe_query($query);
-        $saldo = mysql_fetch_assoc($result);
       }
 
       // oletuspaikan saldo ja hyllypaikka
@@ -2806,7 +2810,7 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
   echo "<tr>";
   echo "<th>",t("Näytä vain tuotteet joilla on saldoa"),"</th>";
   echo "<td colspan='3'><input type='checkbox' name='valitut[SALDOLLISET]' {$chk}></td>";
-  echo "<td colspan='5' class='back'><font class='info'>",t("Raportti ajettava varastopaikoittain"),"</font></td>";
+  echo "<td colspan='5' class='back'></td>";
   echo "</tr>";
 
   echo "<tr><th>".t("Päätoimittajarajaus")."</th><td colspan='3'><input type='checkbox' name='nayta_vain_ykkostoimittaja' value='JOO'/></tr></td>";

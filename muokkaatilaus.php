@@ -847,7 +847,8 @@ else {
   }
 
   if ($asiakastiedot == "toimitus") {
-    $asiakasstring = " concat_ws('<br>', lasku.ytunnus, lasku.nimi, lasku.nimitark, if(lasku.nimi != lasku.toim_nimi, concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark, if(lasku.postitp != lasku.toim_postitp, lasku.toim_postitp, NULL)), NULL))";
+    $asiakasstring = "  concat_ws('<br>', lasku.ytunnus, concat_ws(' ', lasku.nimi, lasku.nimitark),
+                        concat_ws(' ', lasku.toim_nimi, lasku.toim_nimitark, lasku.toim_postitp))";
     $assel1 = "";
     $assel2 = "CHECKED";
   }

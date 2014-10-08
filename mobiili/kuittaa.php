@@ -18,7 +18,7 @@ if (isset($virhe)) {
 
 if (isset($submit)) {
   switch ($submit) {
-  case 'ok':
+  case 'rahtikirjanumero':
     if (empty($rahtikirjanumero)) {
       $errors[] = t("Syötä rahtikirjanumero");
       break;
@@ -33,7 +33,6 @@ if (isset($submit)) {
     else{
       $errors[] = t("Rahtikirjaa ei löytynyt!");
     }
-
     break;
   case 'takaisin':
     echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=index.php'>"; exit();
@@ -44,7 +43,6 @@ if (isset($submit)) {
   }
 }
 
-//## UI ###
 echo "
 <div class='header'>
   <button onclick='window.location.href=\"index.php\"' class='button left'><img src='back2.png'></button>
@@ -75,10 +73,8 @@ echo "
 
 <script type='text/javascript'>
   $(document).ready(function() {
-    var focusElementId = 'rahtikirjanumero';
-    var textBox = document.getElementById(focusElementId);
-    textBox.focus();
+    $('#rahtikirjanumero').focus();
   });
-</script>
-";
+</script>";
+
 require 'inc/footer.inc';

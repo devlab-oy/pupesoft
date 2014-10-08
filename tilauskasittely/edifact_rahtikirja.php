@@ -2,20 +2,22 @@
 
 require "../inc/parametrit.inc";
 
-// tehdään tiedostolle uniikki nimi
-$filename = "$pupe_root_polku/datain/$tyyppi-order-".md5(uniqid(rand(), true)).".txt";
-
+$filename = "$pupe_root_polku/datain/rahti-".md5(uniqid(rand(), true)).".txt";
 
 if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 
   $edi_data = file_get_contents($filename);
   $edi_data = str_replace("\n", "", $edi_data);
+
+  // otetaan talteen liitetiedoston lisäämistä varten
+  $filesize = strlen($liitedata);
+  $liitedata = mysql_real_escape_string($edi_data);
+
   $edi_data = explode("'", $edi_data);
 
   $kuorma = array();
   $pakkaukset = array();
   $tilaukset = array();
-  $varasto_setattu = false;
   $rivimaara = count($edi_data);
 
   foreach ($edi_data as $rivi => $value) {
@@ -219,26 +221,9 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
 
   $kuorma[$kuormakirja_id]['tilaukset'] = $tilaukset;
 
-  $edidata = base64_encode(serialize($kuorma));
 
-  echo "<form method='post'>
-  <input type='hidden' name='data' value='$edidata' />
-  <input type='hidden' name='tee' value='luo' />
-  <input type='submit' />
-  </form>";
-
-}
-elseif($tee == 'luo') {
-
-  $data = unserialize(base64_decode($data));
+  $data = $kuorma;
   $data = $data[key($data)];
-
-  /*
-  foreach ($data['tilaukset'][43]['pakkaukset'] as $pakkaus) {
-    echo $pakkaus['sarjanumero'], '<br>';
-  }
-  die;
-  */
 
   require_once "../inc/luo_ostotilausotsikko.inc";
 
@@ -299,6 +284,19 @@ elseif($tee == 'luo') {
       $update_result = pupe_query($update_query);
     }
 
+    $query = "INSERT INTO liitetiedostot set
+              yhtio        = '{$kukarow['yhtio']}',
+              liitos       = 'lasku',
+              selite       = 'rahtikirjasanoma',
+              liitostunnus = '{$laskurow['tunnus']}',
+              laatija      = '{$kukarow['kuka']}',
+              luontiaika   = now(),
+              data         = '$liitedata',
+              filename     = 'rahtikirjasanoma',
+              filesize     = '$filesize',
+              filetype     = 'text/plain'";
+    pupe_query($query);
+
     $kukarow['kesken'] = $laskurow['tunnus'];
 
     foreach ($tilaus['pakkaukset'] as $key => $pakkaus) {
@@ -312,17 +310,18 @@ elseif($tee == 'luo') {
 
       $trow = mysql_fetch_assoc($tuoteres);
       $kpl = 1;
+      $kerayspvm = $toimaika = $data['toimitusaika'];
 
       require "lisaarivi.inc";
 
-      // keksisköhän tälle tiedolle parempaa paikkaa?
-      $kommentti = "{$data['kuorma_id']}#{$pakkaus['juoksu']}#{$tilaus['paino']}#{$data[rekisterinumero]}";
-
-      $update_query = "UPDATE tilausrivi SET
-                       kommentti = '{$kommentti}'
+      $update_query = "UPDATE tilausrivin_lisatiedot SET
+                       rahtikirja_id = '{$data['kuorma_id']}',
+                       juoksu = '{$pakkaus['juoksu']}',
+                       tilauksen_paino = '{$tilaus['paino']}',
+                       kuljetuksen_rekno = '{$data['rekisterinumero']}'
                        WHERE yhtio = '{$kukarow['yhtio']}'
-                       AND tunnus = '{$lisatty_tun}'";
-      $update_result = pupe_query($update_query);
+                       AND tilausrivitunnus = '{$lisatty_tun}'";
+      pupe_query($update_query);
 
       $query = "SELECT *
                 FROM tilausrivi
@@ -383,23 +382,41 @@ elseif($tee == 'luo') {
 
         $trow = mysql_fetch_assoc($tuoteres);
         $kpl = 1;
+        $var = 'P';
+
         require "lisaarivi.inc";
 
-        $uusi_rivi = $lisatyt_rivit1[0];
+        $update_query = "UPDATE tilausrivi
+                         SET var2 = 'OK'
+                         WHERE yhtio = '{$kukarow['yhtio']}'
+                         AND tunnus = '{$lisatty_tun}'";
+        pupe_query($update_query);
 
         $update_query = "UPDATE sarjanumeroseuranta
-                         SET myyntirivitunnus = '{$uusi_rivi}'
+                         SET myyntirivitunnus = '{$lisatty_tun}'
                          WHERE yhtio = '{$kukarow['yhtio']}'
                          AND ostorivitunnus = '{$tilausrivi['tunnus']}'";
-        $update_result = pupe_query($update_query);
+        pupe_query($update_query);
       }
+
+      $query = "INSERT INTO liitetiedostot set
+                yhtio        = '{$kukarow['yhtio']}',
+                liitos       = 'lasku',
+                selite       = 'rahtikirjasanoma',
+                liitostunnus = '{$laskurow['tunnus']}',
+                laatija      = '{$kukarow['kuka']}',
+                luontiaika   = now(),
+                data         = '$liitedata',
+                filename     = 'rahtikirjasanoma',
+                filesize     = '$filesize',
+                filetype     = 'text/plain'";
+      pupe_query($query);
     }
   }
 }
 else{
 
-  echo "<font class='head'>".t("Tiedoston sisäänluku")."</font><hr>";
-
+  echo "<font class='head'>".t("Rahtikirjasanoman sisäänluku")."</font><hr>";
   echo "<form enctype='multipart/form-data' name='sendfile' method='post'>
     <table>
     <tr>
@@ -407,7 +424,6 @@ else{
       <td><input type='file' name='userfile'></td>
     </tr>
     </table>";
-
   echo "<br><input type='submit' value='".t("Käsittele tiedosto")."'>";
   echo "</form>";
 

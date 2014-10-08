@@ -2,22 +2,23 @@
 
 require "../inc/parametrit.inc";
 
-// tehd‰‰n tiedostolle uniikki nimi
-$filename = "$pupe_root_polku/datain/$tyyppi-order-".md5(uniqid(rand(), true)).".txt";
+$filename = "$pupe_root_polku/datain/bookki-".md5(uniqid(rand(), true)).".txt";
 
+if (!isset($tee)) {
+  $tee = '';
+}
 
-if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
+if (move_uploaded_file($_FILES['file']['tmp_name'], $filename)) {
 
   $edi_data = file_get_contents($filename);
   $edi_data = str_replace("\n", "", $edi_data);
+  $liitedata = $edi_data;
   $edi_data = str_replace("?'", "#%#", $edi_data);
   $edi_data = explode("'", $edi_data);
 
   $kuorma = array();
   $pakkaukset = array();
   $tilaukset = array();
-  $varasto_setattu = false;
-  $rivimaara = count($edi_data);
 
   foreach ($edi_data as $rivi => $value) {
 
@@ -45,19 +46,7 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
     'tilausnro' => $tilausnro
   );
 
-
-  $edidata = base64_encode(serialize($bookkaus));
-
-  echo "<form method='post'>
-  <input type='hidden' name='data' value='$edidata' />
-  <input type='hidden' name='tee' value='luo' />
-  <input type='submit' />
-  </form>";
-
-}
-elseif($tee == 'luo') {
-
-  $data = unserialize(base64_decode($data));
+  $data = $bookkaus;
 
   // katsotaan onko tilauksesta luotu jo osto- tai myyntitilaus
   $query = "SELECT group_concat(tila)
@@ -67,7 +56,12 @@ elseif($tee == 'luo') {
             GROUP BY yhtio";
   $result = pupe_query($query);
 
-  $tilat = mysql_result($result, 0);
+  if (mysql_num_rows($result) > 0) {
+    $tilat = mysql_result($result, 0);
+  }
+  else {
+    $tilat = '';
+  }
 
   $ostotilaus = strpos($tilat, "O") === false ? false : true;
   $myyntitilaus = strpos($tilat, "N") === false ? false : true;
@@ -100,6 +94,22 @@ elseif($tee == 'luo') {
     $result = pupe_query($query);
     $tunnus = mysql_result($result, 0);
   }
+
+  $filesize = strlen($liitedata);
+  $liitedata = mysql_real_escape_string($liitedata);
+
+  $query = "INSERT INTO liitetiedostot set
+            yhtio        = '{$kukarow['yhtio']}',
+            liitos       = 'lasku',
+            liitostunnus = '$tunnus',
+            selite       = 'bookkaussanoma',
+            laatija      = '{$kukarow['kuka']}',
+            luontiaika   = now(),
+            data         = '$liitedata',
+            filename     = 'bookkaussanoma',
+            filesize     = '$filesize',
+            filetype     = 'text/plain'";
+  pupe_query($query);
 
   if ($ostotilaus) {
 
@@ -136,6 +146,7 @@ elseif($tee == 'luo') {
     $tuoteres = pupe_query($query);
     $trow = mysql_fetch_assoc($tuoteres);
     $kpl = 1;
+    $var = 'P';
 
     while ($tilausrivi = mysql_fetch_assoc($result)) {
       $ostorivit[] = $tilausrivi;
@@ -145,27 +156,33 @@ elseif($tee == 'luo') {
 
       require "lisaarivi.inc";
 
+      $update_query = "UPDATE tilausrivi
+                       SET var2 = 'OK'
+                       WHERE yhtio = '{$kukarow['yhtio']}'
+                       AND tunnus = '{$lisatty_tun}'";
+      pupe_query($update_query);
+
       $update_query = "UPDATE sarjanumeroseuranta
                        SET myyntirivitunnus = '{$lisatty_tun}'
                        WHERE yhtio = '{$kukarow['yhtio']}'
                        AND ostorivitunnus = '{$ostorivi['tunnus']}'";
-
       $update_result = pupe_query($update_query);
-
     }
   }
 }
 else{
+
   echo "<font class='head'>".t("Bookkaus-sanoman sis‰‰nluku")."</font><hr>";
   echo "<form enctype='multipart/form-data' name='sendfile' method='post'>
     <table>
     <tr>
       <th>".t("Valitse tiedosto")."</th>
-      <td><input type='file' name='userfile'></td>
+      <td><input type='file' name='file'></td>
     </tr>
     </table>";
   echo "<br><input type='submit' value='".t("K‰sittele tiedosto")."'>";
   echo "</form>";
+
 }
 
 require "inc/footer.inc";

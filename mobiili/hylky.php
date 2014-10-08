@@ -40,41 +40,28 @@ echo "
   <h1>", t("Rullan hylk‰‰minen"), "</h1>
 </div>";
 
-echo "<div class='error' style='text-align:center'>";
-foreach ($errors as $error) {
-  echo $error."<br>";
+if (count($errors) > 0) {
+  echo "<div class='error' style='text-align:center'>";
+  foreach ($errors as $error) {
+    echo $error."<br>";
+  }
+  echo "</div>";
 }
-echo "</div>";
 
 echo "
-<form method='post' action=''>
+<form method='post' action='hylky.php'>
   <div style='text-align:center;padding:10px;'>
     <label for='sarjanumero'>", t("Sarjanumero"), "</label><br>
     <input type='text' id='sarjanumero' name='sarjanumero' style='margin:10px;' />
     <br>
     <button name='submit' value='sarjanumero' onclick='submit();' class='button'>", t("OK"), "</button>
   </div>
-</form>";
+</form>
 
-if (isset($r) and isset($t)) {
-  echo "
-  <div class='main' style='text-align:center;padding:5px;'>
-    koko tilauksesta tulouttamatta {$t} pakkausta
-  </div>";
-
-  echo "
-  <div class='main' style='text-align:center;padding:5px;'>
-    koko rahdista tulouttamatta {$r} pakkausta
-  </div>";
-}
-
-echo "
 <script type='text/javascript'>
   $(document).ready(function() {
-    var focusElementId = 'sarjanumero';
-    var textBox = document.getElementById(focusElementId);
-    textBox.focus();
+    $('#sarjanumero').focus();
   });
-</script>
-";
+</script>";
+
 require 'inc/footer.inc';

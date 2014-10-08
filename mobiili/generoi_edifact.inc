@@ -9,12 +9,22 @@ function kuittaus_parametrit($rahtikirjanumero) {
             sarjanumeroseuranta.massa AS paino,
             sarjanumeroseuranta.leveys,
             tilausrivi.tuoteno,
-            tilausrivi.kommentti
+            tilausrivin_lisatiedot.juoksu,
+            tilausrivin_lisatiedot.kuljetuksen_rekno,
+            tilausrivin_lisatiedot.tilauksen_paino
             FROM tilausrivi
-            JOIN lasku ON lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus
-            JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = lasku.yhtio AND sarjanumeroseuranta.ostorivitunnus = tilausrivi.tunnus
+            JOIN tilausrivin_lisatiedot
+              ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+            JOIN lasku
+              ON lasku.yhtio = tilausrivi.yhtio
+              AND lasku.tunnus = tilausrivi.otunnus
+            JOIN sarjanumeroseuranta
+              ON sarjanumeroseuranta.yhtio = lasku.yhtio
+              AND sarjanumeroseuranta.ostorivitunnus = tilausrivi.tunnus
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-            AND tilausrivi.kommentti LIKE '{$rahtikirjanumero}#%'";
+            AND tilausrivin_lisatiedot.rahtikirja_id = '{$rahtikirjanumero}'
+            ORDER BY tilausrivin_lisatiedot.juoksu";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -24,9 +34,8 @@ function kuittaus_parametrit($rahtikirjanumero) {
   while ($row = mysql_fetch_assoc($result)) {
     $pakkaukset[] = $row;
     if (!isset($tilaukset[$row['asiakkaan_tilausnumero']])) {
-      $kommentti_info = explode("#", $row['kommentti']);
-      $rekno = $kommentti_info[3];
-      $tilaukset[$row['asiakkaan_tilausnumero']] = array('paino' => $kommentti_info[2], 'id' => $row['asiakkaan_tilausnumero']);
+      $rekno = $row['kuljetuksen_rekno'];
+      $tilaukset[$row['asiakkaan_tilausnumero']] = array('paino' => $row['tilauksen_paino'], 'id' => $row['asiakkaan_tilausnumero']);
     }
   }
 
@@ -34,8 +43,7 @@ function kuittaus_parametrit($rahtikirjanumero) {
     foreach ($pakkaukset as $pakkaus) {
       if ($pakkaus['asiakkaan_tilausnumero'] == $tilaus['id']) {
 
-        $kommentti_info = explode("#", $pakkaus['kommentti']);
-        $pakkaus['juoksu'] = $kommentti_info[1];
+        $pakkaus['juoksu'] = $pakkaus['juoksu'];
         $pakkaus['paino'] = (int) $pakkaus['paino'];
         $pakkaus['leveys'] = (int) $pakkaus['leveys'];
         unset($pakkaus['ovttunnus'], $pakkaus['asiakkaan_tilausnumero'], $pakkaus['kommentti']);

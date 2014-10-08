@@ -29,18 +29,18 @@ if (isset($submit)) {
     }
     else{
       $sarjanumerotieto = mysql_fetch_assoc($result);
-      $vanhapaino = (int) $sarjanumerotieto['massa'];
+      $vanha_paino = (int) $sarjanumerotieto['massa'];
       $tilaus_id = $sarjanumerotieto['asiakkaan_tilausnumero'];
     }
   }
 
-  if (isset($uusipaino)) {
+  if (isset($uusi_paino)) {
 
     require 'generoi_edifact.inc';
     $parametrit = hylky_lusaus_parametrit($sarjanumero);
 
     if ($parametrit) {
-      $parametrit['poistettu_paino'] = $vanhapaino - $uusipaino;
+      $parametrit['poistettu_paino'] = $vanha_paino - $uusi_paino;
       $parametrit['paino'] = $uusipaino;
       $parametrit['laji'] = 'lusaus';
       $sanoma = laadi_edifact_sanoma($parametrit);
@@ -50,13 +50,13 @@ if (isset($submit)) {
     }
 
     $query = "UPDATE sarjanumeroseuranta
-              SET massa = '{$uusipaino}'
+              SET massa = '{$uusi_paino}'
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND sarjanumero = '{$sarjanumero}'";
     pupe_query($query);
 
     $query_string = "?sarjanumero={$sarjanumero}&submit=sarjanumero";
-    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=hyllytys_sarjanumero.php{$query_string}'>";
+    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tuloutus_sarjanumero.php{$query_string}'>";
     die;
   }
 }
@@ -76,7 +76,7 @@ echo "</div>";
 if (isset($sarjanumero) and count($errors) < 1) {
 
   echo "
-  <form method='post' action=''>
+  <form method='post' action='lusaus.php'>
 
     <div style='text-align:center;padding:10px;'>",
     t("Syötä uusi paino sarjanumerolle:"), "<br>
@@ -89,8 +89,8 @@ if (isset($sarjanumero) and count($errors) < 1) {
     </div>
 
     <div style='text-align:center;padding:10px;'>
-    <label for='uusipaino'>", t("Uusi paino (kg)"), "</label><br>
-    <input type='text' id='uusipaino' name='uusipaino' />
+    <label for='uusi_paino'>", t("Uusi paino (kg)"), "</label><br>
+    <input type='text' id='uusi_paino' name='uusi_paino' />
     </div>
 
     <div style='text-align:center'>
@@ -99,42 +99,27 @@ if (isset($sarjanumero) and count($errors) < 1) {
     <input type='hidden' name='sarjanumero' value='{$sarjanumero}' />
     <input type='hidden' name='vanha_paino' value='{$vanha_paino}' />
   </form>";
-
-  $input = "uusipaino";
+  $input = "uusi_paino";
 
 }
 else {
 
-    echo "
-    <form method='post' action=''>
-      <div style='text-align:center;padding:10px;'>
-        <label for='sarjanumero'>", t("Sarjanumero"), "</label><br>
-        <input type='text' id='sarjanumero' name='sarjanumero' style='margin:10px;' />
-        <br>
-        <button name='submit' value='sarjanumero' onclick='submit();' class='button'>", t("OK"), "</button>
-      </div>
-    </form>";
-
-    $input = "sarjanumero";
-}
-
-if (isset($r) and isset($t)) {
-
   echo "
-  <div class='main' style='text-align:center;padding:5px;'>
-    koko tilauksesta tulouttamatta {$t} pakkausta
-  </div>
-  <div class='main' style='text-align:center;padding:5px;'>
-    koko rahdista tulouttamatta {$r} pakkausta
-  </div>";
+  <form method='post' action='lusaus.php'>
+    <div style='text-align:center;padding:10px;'>
+      <label for='sarjanumero'>", t("Sarjanumero"), "</label><br>
+      <input type='text' id='sarjanumero' name='sarjanumero' style='margin:10px;' />
+      <br>
+      <button name='submit' value='sarjanumero' onclick='submit();' class='button'>", t("OK"), "</button>
+    </div>
+  </form>";
+  $input = "sarjanumero";
 }
 
 echo "
 <script type='text/javascript'>
   $(document).ready(function() {
-    var focusElementId = '{$input}';
-    var textBox = document.getElementById(focusElementId);
-    textBox.focus();
+    $('#{$input}').focus();
   });
 </script>";
 

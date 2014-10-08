@@ -44,22 +44,25 @@ if (isset($submit)) {
     break;
   case 'sarjanumero_tuotepaikka':
     // Haetaan tilausrivi
-    $query =   "SELECT tr.*
+    $query =   "SELECT tr.*,
+                trlt.rahtikirja_id
                 FROM sarjanumeroseuranta AS ss
                 JOIN tilausrivi AS tr ON tr.yhtio = ss.yhtio AND tr.tunnus = ss.ostorivitunnus
+                JOIN tilausrivin_lisatiedot AS trlt ON trlt.yhtio = tr.yhtio AND trlt.tilausrivitunnus = tr.tunnus
                 WHERE ss.yhtio = '{$kukarow['yhtio']}'
                 AND ss.sarjanumero = '{$sarjanumero}'";
     $result = pupe_query($query);
     $tilausrivi = mysql_fetch_assoc($result);
 
-    sscanf($tilausrivi['kommentti'], 'rahtikirjanumero:%d', $rahtikirjanumero);
+    $rahtikirja_id = $tilausrivi['rahtikirja_id'];
 
     // katsotaan onko saman rahdin paketteja laitettu saapumisella
-    $query = "SELECT uusiotunnus
-              FROM tilausrivi
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND kommentti LIKE 'rahtikirjanumero:{$rahtikirjanumero}%'
-              AND uusiotunnus != 0
+    $query = "SELECT tilausrivi.uusiotunnus
+              FROM tilausrivin_lisatiedot AS trlt
+              JOIN tilausrivi ON tilausrivi.yhtio = trlt.yhtio AND tilausrivi.tunnus = trlt.tilausrivitunnus
+              WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+              AND trlt.rahtikirja_id = '{$rahtikirja_id}'
+              AND tilausrivi.uusiotunnus != 0
               LIMIT 1";
     $result = pupe_query($query);
 
@@ -177,17 +180,48 @@ if (isset($submit)) {
 
       // tutkitaan rahdin ja tilauksen tulouttamisen tila
       $query = "SELECT
-                sum(CASE WHEN kommentti LIKE 'rahtikirjanumero:{$rahtikirjanumero}%'
-                  AND uusiotunnus = 0
+                sum(CASE WHEN trlt.rahtikirja_id = '{$rahtikirja_id}'
+                  AND tr.uusiotunnus = 0
                   THEN 1 ELSE 0 END) viemattomia_rahdin_riveja,
-                sum(CASE WHEN otunnus = '{$tilausrivi['otunnus']}'
-                  AND uusiotunnus = 0
+                sum(CASE WHEN tr.otunnus = '{$tilausrivi['otunnus']}'
+                  AND tr.uusiotunnus = 0
                   THEN 1 ELSE 0 END) viemattomia_tilauksen_riveja
-                FROM tilausrivi
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tyyppi = 'O'";
+                FROM tilausrivi AS tr
+                JOIN tilausrivin_lisatiedot AS trlt ON trlt.yhtio = tr.yhtio AND trlt.tilausrivitunnus = tr.tunnus
+                WHERE tr.yhtio = '{$kukarow['yhtio']}'
+                AND tr.tyyppi = 'O'";
       $result = pupe_query($query);
       $tilanne = mysql_fetch_assoc($result);
+
+      if ($tilanne['viemattomia_tilauksen_riveja'] == 0) {
+
+        $query = "SELECT ola.tunnus AS osto, mla.tunnus AS myynti
+                  FROM sarjanumeroseuranta AS ss
+                  JOIN tilausrivi AS mtr
+                    ON mtr.yhtio = ss.yhtio AND mtr.tunnus = ss.myyntirivitunnus
+                  JOIN tilausrivi AS otr
+                    ON otr.yhtio = ss.yhtio AND otr.tunnus = ss.ostorivitunnus
+                  JOIN lasku AS ola
+                    ON ola.yhtio = otr.yhtio AND ola.tunnus = otr.otunnus
+                  JOIN lasku AS mla
+                    ON mla.yhtio = mtr.yhtio AND mla.tunnus = mtr.otunnus
+                  WHERE ss.yhtio = '{$kukarow['yhtio']}'
+                  AND ss.ostorivitunnus = '{$tilausrivi['tunnus']}'";
+        $result = pupe_query($query);
+        $tunnukset = mysql_fetch_assoc($result);
+
+        $query = "UPDATE lasku
+                  SET tila = 'L', alatila = 'A'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  = '{$tunnukset['myynti']}'";
+        pupe_query($query);
+
+        $query = "UPDATE lasku
+                  SET alatila = 'X'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  = '{$tunnukset['osto']}'";
+        pupe_query($query);
+      }
 
       $view = 'sarjanumero';
     }
@@ -218,7 +252,7 @@ echo "</div>";
 if ($view == 'sarjanumero') {
 
   echo "
-  <form method='post' action=''>
+  <form method='post' action='tuloutus_sarjanumero.php'>
     <div style='text-align:center;padding:10px;'>
       <label for='sarjanumero'>", t("Sarjanumero"), "</label><br>
       <input type='text' id='sarjanumero' name='sarjanumero' style='margin:10px;' />
@@ -248,21 +282,13 @@ echo "
     <button onclick='window.location.href=\"lusaus.php\"' class='button'>", t("Suorita lusaus"), "</button>
     <br><br>
     <button onclick='window.location.href=\"hylky.php\"' class='button'>", t("Hylk‰‰ rulla"), "</button>
-  </div>
-
-  <script type='text/javascript'>
-    $(document).ready(function() {
-      var focusElementId = 'sarjanumero';
-      var textBox = document.getElementById(focusElementId);
-      textBox.focus();
-    });
-  </script>";
+  </div>";
 }
 
 if ($view == 'tuotepaikka') {
 
   echo "
-  <form method='post' action=''>
+  <form method='post' action='tuloutus_sarjanumero.php'>
     <div style='text-align:center;padding:10px;'>
     <input type='hidden' name='sarjanumero' value='{$sarjanumero}' />
       <label for='sarjanumero'>", t("Tuotepaikka"), "</label><br>
@@ -276,9 +302,7 @@ if ($view == 'tuotepaikka') {
 echo "
 <script type='text/javascript'>
   $(document).ready(function() {
-    var focusElementId = '{$view}';
-    var textBox = document.getElementById(focusElementId);
-    textBox.focus();
+    $('#{$view}').focus();
   });
 </script>";
 
@@ -316,6 +340,8 @@ function paivita_tilausrivit_ja_sarjanumeroseuranta($ostorivitunnus, $hylly) {
   $result = pupe_query($query);
 
   $query = "UPDATE tilausrivi SET
+            var = '',
+            varattu = 1,
             hyllyalue = '{$hyllyalue}',
             hyllynro = '{$hyllynro}',
             hyllyvali = '{$hyllyvali}',

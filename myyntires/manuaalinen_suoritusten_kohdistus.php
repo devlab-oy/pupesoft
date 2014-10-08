@@ -196,7 +196,6 @@ if ($tila == 'tee_kohdistus') {
             suoritus.valkoodi valkoodi,
             suoritus.kurssi kurssi,
             suoritus.asiakas_tunnus asiakastunnus,
-            suoritus.kirjpvm maksupvm,
             suoritus.maksupvm maksupvm_clean,
             suoritus.ltunnus ltunnus,
             suoritus.nimi_maksaja nimi_maksaja,
@@ -236,13 +235,19 @@ if ($tila == 'tee_kohdistus') {
     $makpvm = explode("-", $suoritus['maksupvm']);
 
     // Verrataan v‰h‰n p‰iv‰m‰‰ri‰.
-    $myyresktilalk = (int) date('Ymd', mktime(0, 0, 0, $tilalk[1], $tilalk[2], $tilalk[0]));
-    $myyresktillop = (int) date('Ymd', mktime(0, 0, 0, $tillop[1], $tillop[2], $tillop[0]));
-    $maksupvmint   = (int) date('Ymd', mktime(0, 0, 0, $makpvm[1], $makpvm[2], $makpvm[0]));
+    $myyresktilalk = (int) date('Ymd', mktime(0,0,0, $tilalk[1], $tilalk[2], $tilalk[0]));
+    $myyresktillop = (int) date('Ymd', mktime(0,0,0, $tillop[1], $tillop[2], $tillop[0]));
+    $maksupvmint   = (int) date('Ymd', mktime(0,0,0, $makpvm[1], $makpvm[2], $makpvm[0]));
 
     if ($maksupvmint < $myyresktilalk) {
-      $maksupvm    = $yhtiorow["myyntireskontrakausi_alku"];
-      $maksupvmint = $myyresktilalk;
+      if ($yhtiorow["vanhojen_suoritusten_kohdistus"] == "") {
+        $maksupvm    = $yhtiorow["myyntireskontrakausi_alku"];
+        $maksupvmint = $myyresktilalk;
+      }
+      elseif ($yhtiorow["vanhojen_suoritusten_kohdistus"] == "K") {
+        $maksupvm = date('Y-m-d');
+        $maksupvmint = date('Ymd');
+      }
     }
     elseif ($maksupvmint > $myyresktillop) {
       $maksupvm    = $yhtiorow["myyntireskontrakausi_loppu"];
@@ -257,7 +262,7 @@ if ($tila == 'tee_kohdistus') {
     $laskutunnuksetkale = "";
 
     // $lasku_tunnukset[]
-    if (is_array($lasku_tunnukset)) {
+    if (is_array($lasku_tunnukset)){
       for ($i=0;$i<count($lasku_tunnukset);$i++) {
         if ($i!=0) $laskutunnukset = $laskutunnukset . ",";
         $laskutunnukset = $laskutunnukset."$lasku_tunnukset[$i]";
@@ -317,7 +322,7 @@ if ($tila == 'tee_kohdistus') {
       $jarow = mysql_fetch_assoc($jaresult);
 
       if ($suoritus["summa"] < 0 and $jarow["summa"] < 0) {
-        $jaljella = round($jarow["summa"]-$suoritus["summa"]);
+          $jaljella = round($jarow["summa"]-$suoritus["summa"]);
       }
       else {
         $jaljella = round($suoritus["summa"]-$jarow["summa"]);
@@ -380,7 +385,7 @@ if ($tila == 'tee_kohdistus') {
       $result = pupe_query($query);
     }
 
-    $errorrow = mysql_fetch_assoc($result);
+    $errorrow = mysql_fetch_assoc ($result);
 
     $query = "SELECT *
               FROM tiliointi
@@ -489,7 +494,7 @@ if ($tila == 'tee_kohdistus') {
 
     // Verrataan v‰h‰n p‰iv‰m‰‰ri‰.
     $lapvm = explode("-", $lasku["tapvm"]);
-    $lapvmint = (int) date('Ymd', mktime(0, 0, 0, $lapvm[1], $lapvm[2], $lapvm[0]));
+    $lapvmint = (int) date('Ymd', mktime(0,0,0, $lapvm[1], $lapvm[2], $lapvm[0]));
 
     // Jos suoritus on vanhempi kuin lasku, niin merkataan lasku maksetuksi laskun p‰iv‰m‰‰r‰ll‰
     if ($maksupvmint < $lapvmint) {
@@ -503,7 +508,7 @@ if ($tila == 'tee_kohdistus') {
     $suoritussumma    = $suoritus["summa"];
     $suoritussummaval  = $suoritus["summa"];
 
-    if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) $suoritussumma = round($suoritussummaval * $suoritus["kurssi"], 2);
+    if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) $suoritussumma = round($suoritussummaval * $suoritus["kurssi"],2);
 
     $query_korko = "SELECT viikorkopros * $suoritussumma * (if (to_days('$suoritus[maksupvm]')-to_days(erpcm) > 0, to_days('$suoritus[maksupvm]')-to_days(erpcm), 0))/36500 korkosumma
                     FROM lasku
@@ -572,7 +577,7 @@ if ($tila == 'tee_kohdistus') {
 
     // Suoritetaan valuuttalaskua
     if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) {
-      $valuuttaero = round($suoritussummaval * $lasku["vienti_kurssi"], 2) - round($suoritussummaval * $suoritus["kurssi"], 2);
+      $valuuttaero = round($suoritussummaval * $lasku["vienti_kurssi"], 2) - round($suoritussummaval * $suoritus["kurssi"],2);
 
       // Tuliko valuuttaeroa?
       if (abs($valuuttaero) >= 0.01) {
@@ -674,13 +679,13 @@ if ($tila == 'tee_kohdistus') {
 
       // Jos t‰m‰n suorituksen j‰lkeen ei en‰‰ j‰‰ maksettavaa valuutassa
       if ($lasku["summa_valuutassa"] == $suoritus["summa"]) {
-        $lisa = ", mapvm=now()";
+         $lisa = ", mapvm=now()";
       }
     }
     else {
       //jos t‰m‰n suorituksen j‰lkeen ei en‰‰ j‰‰ maksettavaa niin merkataan lasku maksetuksi
       if ($lasku["summa"] == $suoritus["summa"]) {
-        $lisa = ", mapvm=now()";
+         $lisa = ", mapvm=now()";
       }
     }
 
@@ -792,7 +797,7 @@ if ($tila == 'tee_kohdistus') {
         exit;
       }
 
-      while ($lasku = mysql_fetch_assoc($result)) {
+      while ($lasku = mysql_fetch_assoc($result)){
         $laskut[] = $lasku;
         $laskujen_summa        +=$lasku["summa"];
         $laskujen_summa_valuutassa  +=$lasku["summa_valuutassa"];
@@ -830,7 +835,7 @@ if ($tila == 'tee_kohdistus') {
         exit;
       }
 
-      while ($lasku = mysql_fetch_assoc($result)) {
+        while ($lasku = mysql_fetch_assoc($result)) {
         $laskut[] = $lasku;
         $laskujen_summa        += $lasku["summa"] - $lasku["alennus"];
         $laskujen_summa_valuutassa  += $lasku["summa_valuutassa"] - $lasku["alennus_valuutassa"];
@@ -838,12 +843,12 @@ if ($tila == 'tee_kohdistus') {
     }
 
     if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) {
-      $kaatosumma = round($suoritus["summa"] - $laskujen_summa_valuutassa, 2);
+      $kaatosumma = round($suoritus["summa"] - $laskujen_summa_valuutassa,2);
 
       echo "<font class='message'>".t("Tilitapahtumalle j‰‰ pyˆristyksen j‰lkeen")." $kaatosumma $suoritus[valkoodi]</font><br>";
     }
     else {
-      $kaatosumma = round($suoritus["summa"] - $laskujen_summa, 2);
+      $kaatosumma = round($suoritus["summa"] - $laskujen_summa,2);
 
       echo "<font class='message'>".t("Tilitapahtumalle j‰‰ pyˆristyksen j‰lkeen")." $kaatosumma $suoritus[valkoodi]</font><br>";
     }
@@ -879,7 +884,7 @@ if ($tila == 'tee_kohdistus') {
 
         // Verrataan v‰h‰n p‰iv‰m‰‰ri‰.
         $lapvm = explode("-", $lasku["tapvm"]);
-        $lapvmint = (int) date('Ymd', mktime(0, 0, 0, $lapvm[1], $lapvm[2], $lapvm[0]));
+        $lapvmint = (int) date('Ymd', mktime(0,0,0, $lapvm[1], $lapvm[2], $lapvm[0]));
 
         // Jos suoritus on vanhempi kuin lasku, niin merkataan lsaku maksetuksi laskun p‰iv‰m‰‰r‰ll‰
         if ($lapvmint > $maksupvmint) {
@@ -894,7 +899,7 @@ if ($tila == 'tee_kohdistus') {
         $suoritussumma    = $suoritus["summa"];
         $suoritussummaval  = $suoritus["summa"];
 
-        if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) $suoritussumma = round($suoritussummaval * $suoritus["kurssi"], 2);
+        if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) $suoritussumma = round($suoritussummaval * $suoritus["kurssi"],2);
 
         $query_korko = "SELECT viikorkopros * $suoritussumma * (if (to_days('$suoritus[maksupvm]')-to_days(erpcm) > 0, to_days('$suoritus[maksupvm]')-to_days(erpcm), 0))/36500 korkosumma from lasku WHERE tunnus='$ltunnus'";
         $result_korko = pupe_query($query_korko);
@@ -908,16 +913,16 @@ if ($tila == 'tee_kohdistus') {
         }
 
         //Kohdistammeko pyˆristykset ym:t t‰h‰n?
-        if ($kaatosumma != 0 and $pyoristys_virhe_ok == 1 and $lasku["tunnus"] == $kohdistuslasku["tunnus"]) {
-          echo "<font class='message'>".t("Sijoitin lis‰kassa-alen laskulle").": $kohdistuslasku[laskunro]</font> ";
+         if ($kaatosumma != 0 and $pyoristys_virhe_ok == 1 and $lasku["tunnus"] == $kohdistuslasku["tunnus"]) {
+           echo "<font class='message'>".t("Sijoitin lis‰kassa-alen laskulle").": $kohdistuslasku[laskunro]</font> ";
 
           if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) {
-            $lasku["alennus_valuutassa"] = round($lasku["alennus_valuutassa"] - $kaatosumma, 2);
+            $lasku["alennus_valuutassa"] = round($lasku["alennus_valuutassa"] - $kaatosumma,2);
 
             echo "<font class='message'>".t("Uusi kassa-ale").": $lasku[alennus_valuutassa] $suoritus[valkoodi]</font> ";
           }
           else {
-            $lasku["alennus"] = round($lasku["alennus"] - $kaatosumma, 2);
+            $lasku["alennus"] = round($lasku["alennus"] - $kaatosumma,2);
 
             echo "<font class='message'>".t("Uusi kassa-ale").": $lasku[alennus] $suoritus[valkoodi]</font> ";
           }
@@ -932,7 +937,7 @@ if ($tila == 'tee_kohdistus') {
           $kohdistus_result = pupe_query($kohdistus_qry);
 
           $kaatosumma = 0;
-        }
+         }
 
         // Tehd‰‰n valuuttakonversio kassa-alennukselle
         if (strtoupper($suoritus["valkoodi"]) != strtoupper($yhtiorow['valkoodi'])) {
@@ -1672,7 +1677,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 
     //N‰ytet‰‰n laskut!
     $kentat = 'summa, kasumma, laskunro, erpcm, kapvm, viite, ytunnus';
-    $kentankoko = array(10, 10, 15, 10, 10, 15);
+    $kentankoko = array(10,10,15,10,10,15);
     $array   = explode(",", $kentat);
     $count   = count($array);
     $lisa  = '';
@@ -1732,7 +1737,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
     echo "<table><tr><th colspan='2'></th>";
 
     for ($i = 0; $i < mysql_num_fields($result)-1; $i++) {
-      echo "<th><a href='$PHP_SELF?suoritus_tunnus=$suoritus_tunnus&asiakas_tunnus=$asiakas_tunnus&asiakas_nimi=$asiakas_nimi&tila=$tila&ojarj=".$i.$ulisa."&lopetus=$lopetus'>" . t(mysql_field_name($result, $i))."</a></th>";
+      echo "<th><a href='$PHP_SELF?suoritus_tunnus=$suoritus_tunnus&asiakas_tunnus=$asiakas_tunnus&asiakas_nimi=$asiakas_nimi&tila=$tila&ojarj=".$i.$ulisa."&lopetus=$lopetus'>" . t(mysql_field_name($result,$i))."</a></th>";
     }
 
     echo "<th></th></tr>";
@@ -1752,7 +1757,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
 
     if ($asiakas_nimi != '') echo "<input type='hidden' name='asiakas_nimi' value='$asiakas_nimi'>";
 
-    while ($maksurow = mysql_fetch_assoc($result)) {
+    while ($maksurow = mysql_fetch_assoc ($result)) {
 
       $query = "SELECT count(*) maara
                 from tiliointi
@@ -1760,10 +1765,10 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
                 and ltunnus = '$maksurow[tunnus]'
                 and tilino  = '$suoritus_ttilino'";
       $cresult = pupe_query($query);
-      $maararow = mysql_fetch_assoc($cresult);
+      $maararow = mysql_fetch_assoc ($cresult);
 
       if ($maararow['maara'] > 0) {
-        $laskucount++;
+          $laskucount++;
         $lasku_tunnus = $maksurow['tunnus'];
         $bruttokale = $maksurow['summa']-$maksurow['kasumma'];
 
@@ -1815,7 +1820,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
       function paivita1(checkboxi) {";
 
     if ($laskucount==1)
-      echo "
+         echo "
         if (checkboxi==document.forms[3].elements['lasku_tunnukset[]']) {
                document.forms[3].elements['lasku_tunnukset_kale[]'].checked=false;
           }";
@@ -1834,7 +1839,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
       function paivita2(checkboxi) {";
 
     if ($laskucount==1) {
-      echo "
+         echo "
         if (checkboxi==document.forms[3].elements['lasku_tunnukset_kale[]']) {
                document.forms[3].elements['lasku_tunnukset[]'].checked=false;
           }";
@@ -1855,7 +1860,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
           var summa=0.0;";
 
     if ($laskucount == 1) {
-      echo "
+         echo "
         if (document.forms[3].elements['lasku_tunnukset[]'].checked) {
               summa+=1.0*document.forms[3].lasku_summa.value;
             }
@@ -2112,7 +2117,7 @@ if ($tila == '') {
               and tila  = 'U'
               and (ytunnus = '$asiakas[ytunnus]' or nimi = '$asiakas[nimi]' or liitostunnus = '$asiakas[tunnus]')";
     $lresult = pupe_query($query);
-    $lasku = mysql_fetch_assoc($lresult);
+    $lasku = mysql_fetch_assoc ($lresult);
 
     echo "<tr class='aktiivi'>
         <td valign='top'>$asiakas[ytunnus]</td>

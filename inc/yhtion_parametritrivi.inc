@@ -1539,7 +1539,7 @@ if ($fieldname == "lahetteen_jarjestys" or
   $ulos .= "<option value = '9' $sel[9]>".t("Tilausj‰rjestys");
   $ulos .= "<option value = 'M' $sel[M]>".t("K‰ytt‰j‰n asettama j‰rjestys");
 
-  if (  $fieldname == "valmistus_kerayslistan_jarjestys" or
+  if(  $fieldname == "valmistus_kerayslistan_jarjestys" or
     $fieldname == "kerayslistan_jarjestys") {
     $ulos .= "<option value = 'S' $sel[S]>".t("Rivit summattuina");
   }
@@ -1636,7 +1636,7 @@ if ($fieldname == "lahete_allekirjoitus") {
   $jatko = 0;
 }
 
-if ($fieldname == "lomakkeiden_allekirjoitus") {
+if($fieldname == "lomakkeiden_allekirjoitus") {
   $sela = $selb = "";
 
   if ($trow[$i] == 'X') {
@@ -3774,6 +3774,20 @@ if ($fieldname == 'viitemaksujen_kohdistus_sallittu_heitto') {
   $ulos .= "<option value = '0.90' {$sel[90]}>0.90</option>";
   $ulos .= "<option value = '0.95' {$sel[95]}>0.95</option>";
   $ulos .= "<option value = '1.00' {$sel[100]}>1.00</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == 'vanhojen_suoritusten_kohdistus') {
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array();
+  $sel[$trow[$i]] = "selected";
+
+  $ulos .= "<option value = ''>".t("Suoritukset kohdistetaan per avoimen kauden ensimm‰inen p‰iv‰")."</option>";
+  $ulos .= "<option value = 'K' $sel[K]>".t("Suoritukset kohdistetaan kohdistusp‰iv‰m‰‰r‰n mukaan")."</option>";
 
   $ulos .= "</select></td>";
 

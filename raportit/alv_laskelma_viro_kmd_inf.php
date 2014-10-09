@@ -406,10 +406,10 @@ if ($tee == 'laskelma') {
     echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[ltunnus]&lopetus={$lopetus}'>";
 
     if ($laskurow['laskun_summa'] < 0 and $_vero > 0) {
-      $vero *= -1;
+      $_vero *= -1;
     }
     else {
-      $vero = abs($_vero);
+      $_vero = abs($_vero);
     }
 
     echo "</a></td>";

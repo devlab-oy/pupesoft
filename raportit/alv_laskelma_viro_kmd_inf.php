@@ -406,10 +406,10 @@ if ($tee == 'laskelma') {
     echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[ltunnus]&lopetus={$lopetus}'>";
 
     if ($laskurow['laskun_summa'] < 0 and $_vero > 0) {
-      echo $_vero * -1;
+      $vero *= -1;
     }
     else {
-      echo abs($_vero);
+      $vero = abs($_vero);
     }
 
     echo "</a></td>";
@@ -453,7 +453,7 @@ if ($tee == 'laskelma') {
         $worksheet->write($excelrivi, $excelsarake, $row['veropros']);
         $excelsarake++;
 
-        $worksheet->write($excelrivi, $excelsarake, abs($_vero));
+        $worksheet->write($excelrivi, $excelsarake, $_vero);
         $excelsarake++;
 
         $worksheet->write($excelrivi, $excelsarake, $erikoiskoodi);
@@ -474,7 +474,7 @@ if ($tee == 'laskelma') {
           'invoiceSum' => $laskurow['laskun_summa'],
           'taxRate' => $row['veropros'],
           'invoiceSumForRate' => $laskurow['laskun_summa'],
-          'sumForRateInPeriod' => abs($_vero),
+          'sumForRateInPeriod' => $_vero,
           'comments' => $erikoiskoodi,
         );
       }
@@ -485,8 +485,8 @@ if ($tee == 'laskelma') {
           'invoiceNumber' => $laskurow['laskunro'],
           'invoiceDate' => tv1dateconv($laskurow['tapvm']),
           'invoiceSumVat' => $laskurow['laskun_summa'],
-          'vatSum' => abs($_vero),
-          'vatInPeriod' => abs($_vero),
+          'vatSum' => $_vero,
+          'vatInPeriod' => $_vero,
           'comments' => $erikoiskoodi,
         );
       }

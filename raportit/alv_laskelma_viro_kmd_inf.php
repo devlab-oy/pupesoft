@@ -448,7 +448,7 @@ if ($tee == 'laskelma') {
         $worksheet->write($excelrivi, $excelsarake, $laskurow['laskunro']);
         $excelsarake++;
 
-        $worksheet->write($excelrivi, $excelsarake, tv1dateconv($laskurow['tapvm']));
+        $worksheet->write($excelrivi, $excelsarake, date('j.m.Y', strtotime($laskurow['tapvm'])));
         $excelsarake++;
 
         $worksheet->write($excelrivi, $excelsarake, $laskurow['laskun_summa']);

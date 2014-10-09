@@ -358,6 +358,8 @@ if ($tee == 'laskelma') {
     if (trim($_vero) == '' or $_vero == 0) continue;
     if (($laskurow['laskun_summa'] == '' or $laskurow['laskun_summa'] == 0) and ($row['veropros'] == '' or $row['veropros'] == 0)) continue;
 
+    if (!fmod($row['veropros'], 1)) $row['veropros'] = round($row['veropros']);
+
     $aineistoon = $_green;
 
     if ($laskelma == 'a') {

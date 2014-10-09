@@ -204,7 +204,7 @@ if ($tee == 'laskelma') {
     }
 
     if (!empty($_exclude_asiakkaat)) {
-      $rajaalisa = "and lasku.ytunnus NOT IN (".implode(",", $_exclude_asiakkaat).")";
+      $rajaalisa = "and lasku.ytunnus NOT IN ('".implode("','", $_exclude_asiakkaat)."')";
     }
   }
 

@@ -184,7 +184,7 @@ if ($tee == "") {
               nrot.push($(this).val());
             });
 
-            $('#laskunrot').val(nrot.join(','));
+            $('.laskunrot').val(nrot.join(','));
 
           }
 
@@ -197,16 +197,16 @@ if ($tee == "") {
             laskunrot_loop();
           });
 
-          $('#laskunrot_submit').on('click', function(event) {
+          $('.laskunrot_submit').on('click', function(event) {
 
             event.preventDefault();
 
-            if ($('#laskunrot').val() == '') {
+            if ($(this).closest('.laskunrot').val() == '') {
               alert('".t("Et valinnut yhtään laskua")."!');
               return false;
             }
 
-            $('#tulosta_lasku_email').submit();
+            $(this).closest('form').submit();
           });
 
         });
@@ -902,38 +902,38 @@ if ($tee == "") {
           echo t("Lähetä laskukopiot valituista laskuista asiakkaan sähköpostiin"),": ";
 
           if (!empty($asiakasrow['email'])) {
-            echo "<form id='tulosta_lasku_email' name='tulosta_lasku_email' method='post'>
+            echo "<form class='tulosta_lasku_email' name='tulosta_lasku_email' method='post'>
                   <input type='hidden' name = 'tee' value = 'TULOSTA_EMAIL_LASKUT'>
-                  <input type='hidden' name = 'laskunrot' id='laskunrot' value = ''>
+                  <input type='hidden' name = 'laskunrot' class='laskunrot' value = ''>
                   <input type='hidden' name = 'asiakasemail' value = '{$asiakasrow['email']}' />
                   <input type='hidden' name = 'asiakasid' value='{$asiakasrow['tunnus']}' />
                   <input type='hidden' name = 'ytunnus' value='{$ytunnus}' />
                   <input type='hidden' name = 'valintra' value='{$valintra}' />
-                  <input type='submit' id='laskunrot_submit' value='{$asiakasrow['email']}' />
+                  <input type='submit' class='laskunrot_submit' value='{$asiakasrow['email']}' />
                   </form>";
           }
 
           if (!empty($asiakasrow['talhal_email'])) {
-            echo "<form id='tulosta_lasku_email' name='tulosta_lasku_email' method='post'>
+            echo "<form class='tulosta_lasku_email' name='tulosta_lasku_email' method='post'>
                   <input type='hidden' name = 'tee' value = 'TULOSTA_EMAIL_LASKUT'>
-                  <input type='hidden' name = 'laskunrot' id='laskunrot' value = ''>
+                  <input type='hidden' name = 'laskunrot' class='laskunrot' value = ''>
                   <input type='hidden' name = 'asiakasemail' value = '{$asiakasrow['talhal_email']}' />
                   <input type='hidden' name = 'asiakasid' value='{$asiakasrow['tunnus']}' />
                   <input type='hidden' name = 'ytunnus' value='{$ytunnus}' />
                   <input type='hidden' name = 'valintra' value='{$valintra}' />
-                  <input type='submit' id='laskunrot_submit' value='{$asiakasrow['talhal_email']}' />
+                  <input type='submit' class='laskunrot_submit' value='{$asiakasrow['talhal_email']}' />
                   </form>";
           }
 
           if (!empty($asiakasrow['lasku_email'])) {
-            echo "<form id='tulosta_lasku_email' name='tulosta_lasku_email' method='post'>
+            echo "<form class='tulosta_lasku_email' name='tulosta_lasku_email' method='post'>
                   <input type='hidden' name = 'tee' value = 'TULOSTA_EMAIL_LASKUT'>
-                  <input type='hidden' name = 'laskunrot' id='laskunrot' value = ''>
+                  <input type='hidden' name = 'laskunrot' class='laskunrot' value = ''>
                   <input type='hidden' name = 'asiakasemail' value = '{$asiakasrow['lasku_email']}' />
                   <input type='hidden' name = 'asiakasid' value='{$asiakasrow['tunnus']}' />
                   <input type='hidden' name = 'ytunnus' value='{$ytunnus}' />
                   <input type='hidden' name = 'valintra' value='{$valintra}' />
-                  <input type='submit' id='laskunrot_submit' value='{$asiakasrow['lasku_email']}' />
+                  <input type='submit' class='laskunrot_submit' value='{$asiakasrow['lasku_email']}' />
                   </form>";
           }
 

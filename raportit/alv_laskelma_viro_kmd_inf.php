@@ -403,7 +403,16 @@ if ($tee == 'laskelma') {
     echo "<td>",pupe_DataTablesEchoSort($laskurow['tapvm']).tv1dateconv($laskurow['tapvm']),"</td>";
     echo "<td>$laskurow[laskun_summa]</td>";
     echo "<td>$row[veropros]</td>";
-    echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[ltunnus]&lopetus={$lopetus}'>",abs($_vero),"</a></td>";
+    echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[ltunnus]&lopetus={$lopetus}'>";
+
+    if ($laskurow['laskun_summa'] < 0 and $_vero > 0) {
+      echo $_vero * -1;
+    }
+    else {
+      echo abs($_vero);
+    }
+
+    echo "</a></td>";
     echo "<td>{$erikoiskoodi}</td>";
     echo "</tr>";
 

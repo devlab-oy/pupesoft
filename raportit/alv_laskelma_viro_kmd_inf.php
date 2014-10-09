@@ -105,7 +105,7 @@ if ($tee == 'laskelma') {
       'taxPayerRegCode' => $yhtiorow['ytunnus'],
       'submitterPersonCode' => $kukarow['kuka'],
       'year' => $vv,
-      'month' => $kk,
+      'month' => str_pad($kk, 2, floor($kk / 10), STR_PAD_LEFT),
       'declarationType' => 1
     ),
   );

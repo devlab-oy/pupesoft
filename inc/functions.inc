@@ -1054,6 +1054,7 @@ if (!function_exists("apix_invoice_put_file")) {
     $version     = "1.0";
     $timestamp   = gmdate("YmdHis");
     $apix_ulos    = "";
+    $apixerrorreport = "";
 
     if ($apixzipfile_resend != "") {
       // Filenimi joka uudelleenlähetetään
@@ -1131,9 +1132,6 @@ if (!function_exists("apix_invoice_put_file")) {
 
     $xml = simplexml_load_string($response);
 
-    file_put_contents("/home/devlab/apixvirheecho.txt", "\n----------------------------------------------------------------------------------------------\n", FILE_APPEND);
-    file_put_contents("/home/devlab/apixvirheecho.txt", "\n$real_url\n\n$ch\n\n$xml\n\n", FILE_APPEND);
-
     if ($xml->Status == "OK") {
       $apix_ulos .= "Lähetys onnistui!";
 
@@ -1145,6 +1143,28 @@ if (!function_exists("apix_invoice_put_file")) {
 
       $apix_ulos .= "Tila: ".$xml->Status."<br>";
       $apix_ulos .= "Tilakoodi: ".$xml->StatusCode."<br>";
+
+      // Rakennetaan sähköpostiin lähetettävä virheviesti
+      $apixerrorreport .= "{$yhtiorow["yhtio"]} Apix laskutuksen virheviesti!";
+      $apixerrorreport .= " $apixzipfile ";
+      $apixerrorreport .= "<br><br>";
+      $apixerrorreport .= $real_url;
+      $apixerrorreport .= "<br><br>";
+      $apixerrorreport .= $ch;
+      $apixerrorreport .= "<br><br>";
+      ob_start();
+      var_dump($apix_lasnot);
+      var_dump($xml);
+      $apixerrorreport .= ob_get_clean();
+
+      $params = array(
+        "to" => $yhtiorow["admin_email"],
+        "subject" => "Apix virheilmoitus '{$yhtiorow["yhtio"]}'",
+        "ctype" => "text",
+        "body"=> $apixerrorreport
+      );
+
+      pupesoft_sahkoposti($params);
 
       foreach ($xml->FreeText as $teksti) {
         $apix_ulos .= "Tilaviesti: ".$teksti."<br>";

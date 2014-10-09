@@ -213,7 +213,7 @@ if ($tee == "") {
 
         </script>";
 
-    if ((int) $asiakasid > 0) {
+    if ($alatila == 'T' and (int) $asiakasid > 0) {
       $haku_sql = "tunnus = '$asiakasid'";
     }
     else {
@@ -221,7 +221,7 @@ if ($tee == "") {
       $haku_sql = "ytunnus = '$ytunnus'";
     }
 
-    $query = "SELECT SQL_NO_CACHE tunnus,
+    $query = "SELECT tunnus,
               ytunnus,
               trim(concat(nimi, ' ', nimitark)) nimi,
               osoite,

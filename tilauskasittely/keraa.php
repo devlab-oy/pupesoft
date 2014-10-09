@@ -616,9 +616,9 @@ if ($tee == 'P') {
             $maara[$apui] = (float) $maara[$apui];
 
             // Kerätään tietoa poikkeama-maileja varten
-            $poikkeamat[$tilrivirow["otunnus"]][$i]["tuoteno"]   = $tilrivirow["tuoteno"];
-            $poikkeamat[$tilrivirow["otunnus"]][$i]["nimitys"]   = $tilrivirow["nimitys"];
-            $poikkeamat[$tilrivirow["otunnus"]][$i]["tilkpl"]   = $tilrivirow["tilkpl"];
+            $poikkeamat[$tilrivirow["otunnus"]][$i]["tuoteno"] = $tilrivirow["tuoteno"];
+            $poikkeamat[$tilrivirow["otunnus"]][$i]["nimitys"] = $tilrivirow["nimitys"];
+            $poikkeamat[$tilrivirow["otunnus"]][$i]["tilkpl"]  = $tilrivirow["tilkpl"];
             $poikkeamat[$tilrivirow["otunnus"]][$i]["var"]     = $tilrivirow["var"];
             $poikkeamat[$tilrivirow["otunnus"]][$i]["maara"]   = $maara[$apui];
 
@@ -627,8 +627,8 @@ if ($tee == 'P') {
             if ($tilrivirow["var"] == 'P' and $maara[$apui] > 0) {
 
               // Puuterivi löytyi poistetaan VAR
-              $query .= "  , var    = ''
-                    , varattu  = '".$maara[$apui]."'";
+              $query .= " , var    = ''
+                          , varattu  = '".$maara[$apui]."'";
 
               //Poistetaan 'tuote loppu'-kommentti jos tuotetta sittenkin löytyi
               $puurivires = t_avainsana("PUUTEKOMM");
@@ -649,27 +649,27 @@ if ($tee == 'P') {
 
                 $poikkeamat[$tilrivirow["otunnus"]][$i]["loput"] = "Jätettiin puuteriviksi.";
 
-                $rotunnus  = $tilrivirow['otunnus'];
-                $rtyyppi  = $tilrivirow['tyyppi'];
-                $rtilkpl   = round($tilrivirow['tilkpl']-$maara[$apui], 2);
-                $rvarattu  = 0;
-                $rjt      = 0;
-                $rvar    = $tilrivirow['var'];
-                $keratty  = "'$who'";
-                $kerattyaik  = "now()";
-                $rkomm     = $tilrivirow["kommentti"];
+                $rotunnus   = $tilrivirow['otunnus'];
+                $rtyyppi    = $tilrivirow['tyyppi'];
+                $rtilkpl    = round($tilrivirow['tilkpl']-$maara[$apui], 2);
+                $rvarattu   = 0;
+                $rjt        = 0;
+                $rvar       = $tilrivirow['var'];
+                $keratty    = "'$who'";
+                $kerattyaik = "now()";
+                $rkomm      = $tilrivirow["kommentti"];
               }
             }
             elseif ($tilrivirow["var"] == 'J' and $maara[$apui] > 0) {
               // JT-rivi löytyi, poistetaan VAR ja merkataan rivi kerätyksi, jos virhetsekit ok
               if ($keraysvirhe == 0) {
                 $query .= ", keratty = '$who',
-                       kerattyaika = now()";
+                             kerattyaika = now()";
               }
 
-              $query .= "  , var      = ''
-                    , jt      = 0
-                    , varattu    = '".$maara[$apui]."'";
+              $query .= " , var     = ''
+                          , jt      = 0
+                          , varattu = '".$maara[$apui]."'";
 
               if ($yhtiorow["varaako_jt_saldoa"] == "") {
                 $jtsek = $tilrivirow['jt'];
@@ -683,23 +683,23 @@ if ($tee == 'P') {
 
                 $poikkeamat[$tilrivirow["otunnus"]][$i]["loput"] = "Jätettiin JT-riviksi.";
 
-                $rotunnus    = $tilrivirow['otunnus'];
+                $rotunnus   = $tilrivirow['otunnus'];
                 $rtyyppi    = $tilrivirow['tyyppi'];
-                $rtilkpl     = round($jtsek-$maara[$apui], 2);
+                $rtilkpl    = round($jtsek-$maara[$apui], 2);
 
                 if ($yhtiorow["varaako_jt_saldoa"] == "") {
-                  $rvarattu  = 0;
+                  $rvarattu = 0;
                   $rjt      = round($jtsek-$maara[$apui], 2);
                 }
                 else {
-                  $rvarattu  = round($jtsek-$maara[$apui], 2);
+                  $rvarattu = round($jtsek-$maara[$apui], 2);
                   $rjt      = 0;
                 }
 
-                $rvar      = $tilrivirow['var'];
+                $rvar       = $tilrivirow['var'];
                 $keratty    = "''";
-                $kerattyaik    = "''";
-                $rkomm       = $tilrivirow["kommentti"];
+                $kerattyaik = "''";
+                $rkomm      = $tilrivirow["kommentti"];
               }
             }
             elseif (($tilrivirow["var"] == 'J' or $tilrivirow["var"] == 'P') and $maara[$apui] == 0 and $poikkeama_kasittely[$apui] == "MI") {
@@ -1127,25 +1127,28 @@ if ($tee == 'P') {
               }
             }
 
-            //päivitetään tuoteperheiden saldottomat jäsenet oikeisiin määriin (ne voi olla alkuperäiselläkin lähetteellä == vanhatunnus)
-            if ($tilrivirow["perheid"] != 0) {
+            // Päivitetään tuoteperheiden saldottomat jäsenet oikeisiin määriin (ne voi olla alkuperäiselläkin lähetteellä == vanhatunnus)
+            if ($tilrivirow["perheid"] != 0 and trim($maara[$apui]) != ''
+              and ($tilrivirow["var"] != 'J' and $tilrivirow["var"] != 'P'
+                or ($tilrivirow["var"] == 'P' and $maara[$apui] > 0)
+                or ($tilrivirow["var"] == 'J' and $maara[$apui] > 0)
+                or (($tilrivirow["var"] == 'J' or $tilrivirow["var"] == 'P') and $maara[$apui] == 0 and $poikkeama_kasittely[$apui] == "MI"))
+            ) {
               $query1 = "SELECT tilausrivi.tunnus, tilausrivi.tuoteno
-                         FROM tilausrivi, tuote
+                         FROM tilausrivi
+                         JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa != '')
                          WHERE tilausrivi.otunnus  in ('$tilrivirow[otunnus]', '$otsikkorivi[vanhatunnus]')
                          and tilausrivi.tunnus    != '$apui'
                          and tilausrivi.perheid    = '$tilrivirow[perheid]'
-                         and tilausrivi.yhtio      = '$kukarow[yhtio]'
-                         and tuote.yhtio           = tilausrivi.yhtio
-                         and tuote.tuoteno         = tilausrivi.tuoteno
-                         and tuote.ei_saldoa      != ''";
+                         and tilausrivi.yhtio      = '$kukarow[yhtio]'";
               $result = pupe_query($query1);
 
               while ($tilrivirow2 = mysql_fetch_assoc($result)) {
                 $query2 = "SELECT kerroin
                            FROM tuoteperhe
-                           WHERE yhtio = '$kukarow[yhtio]' AND
-                           isatuoteno  = '$tilrivirow[tuoteno]' AND
-                           tuoteno     = '$tilrivirow2[tuoteno]'";
+                           WHERE yhtio    = '$kukarow[yhtio]'
+                           AND isatuoteno = '$tilrivirow[tuoteno]'
+                           AND tuoteno    = '$tilrivirow2[tuoteno]'";
                 $result2 = pupe_query($query2);
 
                 // oltiin muokkaamassa isätuotteen kappalemäärää, päivitetään saldottomien lasten määrät kertoimella
@@ -1156,8 +1159,8 @@ if ($tee == 'P') {
 
                   $query1 = "UPDATE tilausrivi
                              SET varattu = '$tilrivimaara'
-                             WHERE tunnus = '$tilrivirow2[tunnus]' AND
-                             yhtio        = '$kukarow[yhtio]'";
+                             WHERE tunnus = '$tilrivirow2[tunnus]'
+                             AND yhtio    = '$kukarow[yhtio]'";
                   $result1 = pupe_query($query1);
                 }
               }
@@ -1255,7 +1258,12 @@ if ($tee == 'P') {
               $keraysera_update_res = pupe_query($query_upd);
             }
 
-            if (trim($maara[$apui]) != '') {
+            if ($tilrivirow["perheid"] != 0 and trim($maara[$apui]) != ''
+              and ($tilrivirow["var"] != 'J' and $tilrivirow["var"] != 'P'
+                or ($tilrivirow["var"] == 'P' and $maara[$apui] > 0)
+                or ($tilrivirow["var"] == 'J' and $maara[$apui] > 0)
+                or (($tilrivirow["var"] == 'J' or $tilrivirow["var"] == 'P') and $maara[$apui] == 0 and $poikkeama_kasittely[$apui] == "MI"))
+            ) {
               // haetaan lapset joilla on ohita_kerays täpätty ja tehdään poikkeama myös niille
               $query_lapset = "SELECT tilausrivi.tunnus, tilausrivi.varattu
                                FROM tilausrivi

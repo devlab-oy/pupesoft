@@ -1131,6 +1131,9 @@ if (!function_exists("apix_invoice_put_file")) {
 
     $xml = simplexml_load_string($response);
 
+    file_put_contents("/home/devlab/apixvirheecho.txt", "\n----------------------------------------------------------------------------------------------\n", FILE_APPEND);
+    file_put_contents("/home/devlab/apixvirheecho.txt", "\n$real_url\n\n$ch\n\n$xml\n\n", FILE_APPEND);
+
     if ($xml->Status == "OK") {
       $apix_ulos .= "Lähetys onnistui!";
 

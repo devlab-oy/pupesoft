@@ -12510,7 +12510,7 @@ if (!function_exists("tarkista_sepa")) {
       "TN" => "24",
       "TR" => "26",
       "GB" => "22");
-      
+
     if ($palauta_maat == 'K') {
       // Palautetaan kaikki SEPA-maat
       return array_keys($sepa_maat);
@@ -12519,11 +12519,10 @@ if (!function_exists("tarkista_sepa")) {
     elseif (!isset($sepa_maat[$maa])) {
       return FALSE;
     }
-    else  {
+    else {
       // Palautetaan IBAN:in pituus, jos on SEPA maa
       return $sepa_maat[$maa];
     }
-
   }
 }
 

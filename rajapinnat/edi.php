@@ -51,6 +51,7 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:".$ovt_tunnus."\n";
     $edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:$pupesoft_tilaustyyppi\n";
     $edi_order .= "OSTOTIL.VERKKOKAUPPA:".str_replace("\n", " ", $order['store_name'])."\n";
+    $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO:".$order['customer_id']."\n"; 
     $edi_order .= "OSTOTIL.OT_TILAUSAIKA:\n";
     $edi_order .= "OSTOTIL.OT_KASITTELIJA:\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUSAIKA:\n";
@@ -76,7 +77,6 @@ class Edi {
 
     //Asiakkaan ovt_tunnus MUISTA MUUTTAA
     $edi_order .= "OSTOTIL.OT_ASIAKASNRO:".$verkkokauppa_asiakasnro."\n";
-    $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO:".$order['customer_id']."\n";
     $edi_order .= "OSTOTIL.OT_YRITYS:".$order['billing_address']['company']."\n";
     $edi_order .= "OSTOTIL.OT_KATUOSOITE:".$billingadress."\n";
     $edi_order .= "OSTOTIL.OT_POSTITOIMIPAIKKA:".$order['billing_address']['city']."\n";

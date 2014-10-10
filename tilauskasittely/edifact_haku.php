@@ -8,6 +8,7 @@ if ($task == 'hae') {
   $user = $ftp_info['user'];
   $pass = $ftp_info['pass'];
 
+
   // Connect to host
   $yhteys = ftp_connect($host);
 
@@ -50,6 +51,8 @@ if ($task == 'hae') {
 
   foreach ($files as $file) {
 
+    echo $file, '<br>';continue;
+
     if (ftp_mdtm($yhteys, $file) > 1412772935) {
      // echo $file, ' - ', ftp_mdtm($yhteys, $file);
      // echo '<br>';
@@ -65,7 +68,7 @@ if ($task == 'hae') {
     }
   }
 
-  echo '<hr>';
+  echo '<hr>';die;
 
 
 /*

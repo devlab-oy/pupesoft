@@ -910,7 +910,6 @@ while ($tietue = fgets($fd)) {
        if (count($result) > 0) {
          // Tyhjätään tämä ja haetaan maksuehto myöhemmin asiakkaan takaa
          $tieto = '';
-         $editilaus_toimitustapa = '';
          break;
        }
     }

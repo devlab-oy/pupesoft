@@ -1,5 +1,40 @@
 <?php
 
+function laheta_sanoma($sanoma){
+  global $kukarow, $ftp_info;
+
+  $host = $ftp_info['host'];
+  $user = $ftp_info['user'];
+  $pass = $ftp_info['pass'];
+
+  // Connect to host
+  $yhteys = ftp_connect($host);
+
+  // Open a session to an external ftp site
+  $login = ftp_login($yhteys, $user, $pass);
+
+  // Check open
+  if ((!$yhteys) || (!$login)) {
+    die('ei yhteyttä');
+  }
+
+  ftp_chdir($yhteys, 'in-test');
+  ftp_pasv($yhteys, true);
+
+  $file = fopen('php://temp', 'r+');
+  fwrite($file, $sanoma);
+  rewind($file);
+
+  $nimi = time().'.REC';
+
+  if (ftp_fput($yhteys, $nimi, $file, FTP_ASCII)) {
+
+    ftp_close($yhteys);
+    return true;
+  }
+  return false;
+}
+
 function kuittaus_parametrit($rahtikirjanumero) {
   global $kukarow, $yhtiorow;
 
@@ -11,7 +46,8 @@ function kuittaus_parametrit($rahtikirjanumero) {
             tilausrivi.tuoteno,
             tilausrivin_lisatiedot.juoksu,
             tilausrivin_lisatiedot.kuljetuksen_rekno,
-            tilausrivin_lisatiedot.tilauksen_paino
+            tilausrivin_lisatiedot.tilauksen_paino,
+            tilausrivin_lisatiedot.asiakkaan_rivinumero
             FROM tilausrivi
             JOIN tilausrivin_lisatiedot
               ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
@@ -33,9 +69,14 @@ function kuittaus_parametrit($rahtikirjanumero) {
 
   while ($row = mysql_fetch_assoc($result)) {
     $pakkaukset[] = $row;
-    if (!isset($tilaukset[$row['asiakkaan_tilausnumero']])) {
+
+    $vastaanottajan_ovt = $row['ovttunnus'];
+
+    $tilaus_ja_rivi = $row['asiakkaan_tilausnumero'] .':'. $row['asiakkaan_rivinumero'];
+
+    if (!isset($tilaukset[[$tilaus_ja_rivi]])) {
       $rekno = $row['kuljetuksen_rekno'];
-      $tilaukset[$row['asiakkaan_tilausnumero']] = array('paino' => $row['tilauksen_paino'], 'id' => $row['asiakkaan_tilausnumero']);
+      $tilaukset[$tilaus_ja_rivi] = array('paino' => $row['tilauksen_paino'], 'id' => $row['asiakkaan_tilausnumero'], 'rivi' => $row['asiakkaan_rivinumero']);
     }
   }
 
@@ -66,7 +107,7 @@ function kuittaus_parametrit($rahtikirjanumero) {
     'tyyppi' => 'RECADV',
     'rekisterinumero' => $rekno,
     'lahettajan_ovt' => $yhtiorow['ovttunnus'],
-    'vastaanottajan_ovt' => $row['ovttunnus'],
+    'vastaanottajan_ovt' => $vastaanottajan_ovt,
     'sanomaid' => $sanomaid,
     'sanomanumero' => $rahtikirjanumero,
     'tilaukset' => $tilaukset,
@@ -74,6 +115,7 @@ function kuittaus_parametrit($rahtikirjanumero) {
     );
 
   return $parametrit;
+
 }
 
 function hylky_lusaus_parametrit($sarjanumero) {
@@ -84,9 +126,11 @@ function hylky_lusaus_parametrit($sarjanumero) {
             tilausrivi.kommentti,
             varastopaikat.tunnus AS varastokoodi,
             varastopaikat.nimitys AS varastonimi,
-            sarjanumeroseuranta.massa AS paino
+            sarjanumeroseuranta.massa AS paino,
+            tilausrivin_lisatiedot.juoksu
             FROM sarjanumeroseuranta
             JOIN tilausrivi ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio AND tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
+            JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
             JOIN lasku ON lasku.yhtio = lasku.yhtio AND lasku.tunnus = tilausrivi.otunnus
             JOIN varastopaikat ON varastopaikat.yhtio = tilausrivi.yhtio AND varastopaikat.tunnus = tilausrivi.varasto
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
@@ -101,7 +145,7 @@ function hylky_lusaus_parametrit($sarjanumero) {
   $kommentti_info = explode("#", $row['kommentti']);
   $sanomaid = "RP" . time();
   $sanomanumero = time();
-  $juoksunumero = $kommentti_info[1];
+  $juoksunumero = $row['juoksu'];
   $paino = (int) $row['paino'];
 
   $parametrit = array(
@@ -119,6 +163,26 @@ function hylky_lusaus_parametrit($sarjanumero) {
   );
 
   return $parametrit;
+}
+
+
+function kontitus_parametrit($laskunumero) {
+  global $kukarow;
+
+  $parametrit = array(
+    'tyyppi' => 'DESADV',
+    'lahettajan_ovt' => $yhtiorow['ovttunnus'],
+    'vastaanottajan_ovt' => $row['ovttunnus'],
+    'sanomaid' => $sanomaid,
+    'sanomanumero' => $sanomanumero,
+    'sarjanumero' => $sarjanumero,
+    'juoksunumero' => $juoksunumero,
+    'varastonimi' => $row['varastonimi'],
+    'varastokoodi' => $row['varastokoodi'],
+    'tilauskoodi' => $row['tilauskoodi'],
+    'paino' => $paino
+  );
+
 }
 
 function laadi_edifact_sanoma($parametrit) {
@@ -359,7 +423,7 @@ function laadi_edifact_sanoma($parametrit) {
       $segmentit++;
 
       // RFF -segmentti
-      $s .= "RFF+CU:" . $tilaus['id'] . ":1'";
+      $s .= "RFF+CU:" . $tilaus['id'] . ":" . $tilaus['rivi'] . "'";
       $segmentit++;
 
       foreach ($tilaus['pakkaukset'] as  $pakkaus) {

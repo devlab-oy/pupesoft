@@ -33,6 +33,19 @@ if (isset($submit)) {
     else{
       $errors[] = t("Rahtikirjaa ei löytynyt!");
     }
+
+    if ($sanoma) {
+      $lahetys = 'X';
+      if (laheta_sanoma($sanoma)) {
+        $lahetys = 'OK';
+      }
+      else{
+        $errors[] = t("Lähetys ei onnistunut");
+      }
+    }
+    else{
+      $errors[] = t("Ei sanomaa");
+    }
     break;
   case 'takaisin':
     echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=index.php'>"; exit();
@@ -55,9 +68,9 @@ foreach ($errors as $error) {
 }
 echo "</div>";
 
-if (isset($sanoma)) {
+if ($lahetys == 'OK';) {
   echo "<div>";
-  echo $sanoma;
+  echo "Sanoma lähetetty!";
   echo "</div>";
 }
 

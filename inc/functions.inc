@@ -1159,7 +1159,7 @@ if (!function_exists("apix_invoice_put_file")) {
 
       if (mb_detect_encoding($apixerrorreport, 'UTF-8', true) !== FALSE) {
   			$apixerrorreport = utf8_decode($apixerrorreport);
-  		}
+      }
 
       $params = array(
         "to" => $yhtiorow["admin_email"],

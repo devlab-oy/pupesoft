@@ -611,7 +611,7 @@ while ($tietue = fgets($fd)) {
     }
 
     // Käytetään Magenton asiakasnumeroa jos sellainen löytyy ennalta määritellyistä kaupoista tulevilla tilauksilla
-    // ja on setattu $verkkokauppa_erikoiskasittely:n 
+    // ja on setattu $verkkokauppa_erikoiskasittely:n
     if ($edi_tyyppi == "magento" and $ot_verkkokauppa_asiakasnro != ''
       and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
       and count($verkkokauppa_erikoiskasittely) > 0) {

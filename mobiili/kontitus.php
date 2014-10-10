@@ -51,6 +51,32 @@ if (isset($submit)) {
       $view = 'kontituslista';
     }
     break;
+  case 'sarjanumero':
+    $query = "SELECT myyntirivitunnus
+              FROM sarjanumeroseuranta
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND sarjanumero = '{$sarjanumero}'";
+    $result = pupe_query($query);
+    $rivitunnus = mysql_result($result, 0);
+
+    $query = "UPDATE tilausrivi SET
+              keratty = '{$kukarow['kuka']}',
+              kerattyaika = NOW()
+              WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$rivitunnus}'";
+    pupe_query($query);
+
+    $tilauksen_rullat = tilauksen_rullat($tilausnumero);
+
+    if(count($tilauksen_rullat) == 0) {
+      $view = 'vahvistus';
+    }
+    else{
+      $view = 'kontituslista';
+    }
+    break;
+  case 'vahvista':
+    $view = 'vahvistus';
+    break;
   case 'takaisin':
     echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=index.php'>";
     die;
@@ -79,7 +105,7 @@ if ($view == 'tilausnumero') {
   echo "
   <form method='post' action=''>
     <div style='text-align:center;padding:10px;'>
-      <label for='sarjanumero'>", t("Tilausnumero"), "</label><br>
+      <label for='tilausnumero'>", t("Tilausnumero"), "</label><br>
       <input type='text' id='tilausnumero' name='tilausnumero' style='margin:10px;' />
       <br>
       <button name='submit' value='tilausnumero' onclick='submit();' class='button'>", t("OK"), "</button>
@@ -107,20 +133,61 @@ if ($view == 'vahvistus') {
 }
 
 if ($view == 'kontituslista') {
+
+
+  echo "
+  <form method='post' action=''>
+    <div style='text-align:center;padding:10px;'>
+      <label for='sarjanumero'>", t("Sarjanumero"), "</label><br>
+      <input type='text' id='sarjanumero' name='sarjanumero' style='margin:10px;' />
+      <input type='hidden' name='tilausnumero' value='{$tilausnumero}' />
+      <br>
+      <button name='submit' value='sarjanumero' onclick='submit();' class='button'>", t("OK"), "</button>
+    </div>
+  </form>
+
+  <script type='text/javascript'>
+    $(document).ready(function() {
+      $('#sarjanumero').focus();
+    });
+  </script>";
+
+
+
   echo "<div style='text-align:center;padding:10px;'>";
 
+  $keraamattomat = 0;
+
   foreach ($tilauksen_rullat as $key => $lista) {
-    echo 'Tilauksesta ' . $key . ' kontittamatta :<br><br>';
+    echo 'Tilauksen ' . $key . ' rullat :<br><br>';
     foreach ($lista as $rulla) {
-      echo  'Rulla ' . $rulla['sn'] . ' ('.$rulla['tunnus'].')';
-      echo "
-      <form method='post' action='kontitus.php'>
-        <input type='hidden' name='rivitunnus' value='{$rulla['tunnus']}' />
-        <input type='hidden' name='tilausnumero' value='{$tilausnumero}' />
-        <button name='submit' value='kontitus' onclick='submit();' class='button'>", t("Kontita"), "</button>
-      </form><br>";
+
+      if ($rulla['keratty'] == '') {
+        echo  "Rulla  {$rulla['sarjanumero']}  ({$rulla['tunnus']})
+        <form method='post' action='kontitus.php'>
+          <input type='hidden' name='rivitunnus' value='{$rulla['tunnus']}' />
+          <input type='hidden' name='tilausnumero' value='{$tilausnumero}' />
+          <button name='submit' value='kontitus' onclick='submit();' class='button'>", t("Kontita"), "</button>
+        </form><br>";
+
+        $keraamattomat++;
+      }
+      else{
+        echo  "Rulla  {$rulla['sarjanumero']}  ({$rulla['tunnus']}) Kerätty!<br>";
+      }
     }
   }
+
+  if ($keraamattomat == 0) {
+    echo "
+    <br>
+    Kaikki tilauksen rullat kerätty.<br>
+    <form method='post' action='kontitus.php'>
+      <input type='hidden' name='tilausnumero' value='{$tilausnumero}' />
+      <button name='submit' value='vahvista' onclick='submit();' class='button'>", t("Vahvista"), "</button>
+    </form>";
+  }
+
   echo "</div>";
 }
 
@@ -150,21 +217,20 @@ function tilauksen_rullat($tilausnumero) {
 
     foreach ($tilaukset as $tilaus) {
 
-      $query = "SELECT ss.sarjanumero, tr.tunnus
+      $query = "SELECT ss.sarjanumero, tr.tunnus, tr.keratty
                 FROM lasku AS la
                 JOIN tilausrivi AS tr
                   ON tr.yhtio = la.yhtio AND tr.otunnus = la.tunnus
                 JOIN sarjanumeroseuranta AS ss
                   ON ss.yhtio = tr.yhtio AND ss.myyntirivitunnus = tr.tunnus
                 WHERE la.yhtio = '{$kukarow['yhtio']}'
-                AND la.tunnus = '{$tilaus['tunnus']}'
-                AND tr.keratty = ''";
+                AND la.tunnus = '{$tilaus['tunnus']}'";
       $result = pupe_query($query);
 
       $tilauksen_rullat = array();
 
       while ($row = mysql_fetch_assoc($result)) {
-        $tilauksen_rullat[$tilaus['asiakkaan_tilausnumero']][] = array('sn' => $row['sarjanumero'], 'tunnus' => $row['tunnus']);
+        $tilauksen_rullat[$tilaus['asiakkaan_tilausnumero']][] = $row;
       }
     }
     return $tilauksen_rullat;

@@ -1145,17 +1145,21 @@ if (!function_exists("apix_invoice_put_file")) {
       $apix_ulos .= "Tilakoodi: ".$xml->StatusCode."<br>";
 
       // Rakennetaan sähköpostiin lähetettävä virheviesti
-      $apixerrorreport .= "{$yhtiorow["yhtio"]} Apix laskutuksen virheviesti!";
+      $apixerrorreport .= "{$yhtiorow["yhtio"]} Apix laskutuksen virheviesti! \n";
       $apixerrorreport .= " $apixzipfile ";
-      $apixerrorreport .= "<br><br>";
+      $apixerrorreport .= "\n\n";
       $apixerrorreport .= $real_url;
-      $apixerrorreport .= "<br><br>";
+      $apixerrorreport .= "\n\n";
       $apixerrorreport .= $ch;
-      $apixerrorreport .= "<br><br>";
+      $apixerrorreport .= "\n\n";
       ob_start();
       var_dump($apix_lasnot);
       var_dump($xml);
       $apixerrorreport .= ob_get_clean();
+
+      if (mb_detect_encoding($apixerrorreport, 'UTF-8', true) !== FALSE) {
+  			$apixerrorreport = utf8_decode($apixerrorreport);
+  		}
 
       $params = array(
         "to" => $yhtiorow["admin_email"],

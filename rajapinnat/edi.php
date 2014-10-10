@@ -50,6 +50,7 @@ class Edi {
     //Yrityksen ovt_tunnus MUISTA MUUTTAA
     $edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:".$ovt_tunnus."\n";
     $edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:$pupesoft_tilaustyyppi\n";
+    $edi_order .= "OSTOTIL.VERKKOKAUPPA:".str_replace("\n", " ", $order['store_name'])."\n";
     $edi_order .= "OSTOTIL.OT_TILAUSAIKA:\n";
     $edi_order .= "OSTOTIL.OT_KASITTELIJA:\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUSAIKA:\n";
@@ -63,7 +64,6 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_VEROMAARA:".$order['tax_amount']."\n";
     $edi_order .= "OSTOTIL.OT_SUMMA:".$grand_total."\n";
     $edi_order .= "OSTOTIL.OT_VALUUTTAKOODI:".$order['order_currency_code']."\n";
-    $edi_order .= "OSTOTIL.VERKKOKAUPPA:".str_replace("\n", " ", $order['store_name'])."\n";
     $edi_order .= "OSTOTIL.OT_KLAUSUULI1:\n";
     $edi_order .= "OSTOTIL.OT_KLAUSUULI2:\n";
     $edi_order .= "OSTOTIL.OT_KULJETUSOHJE:\n";

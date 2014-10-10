@@ -14,7 +14,7 @@ if (!function_exists("tilauksesta_varastosiirto")) {
    */
 
 
-  function tilauksesta_varastosiirto($myyntitilaus_tunnus, $varastosiirto_tyyppi = 'N') {
+  function tilauksesta_varastosiirto($myyntitilaus_tunnus, $varastosiirto_tyyppi = 'N', $_poikkeavalaskutuspvm = '') {
     global $yhtiorow, $kukarow;
 
     if (empty($myyntitilaus_tunnus)) {
@@ -25,7 +25,7 @@ if (!function_exists("tilauksesta_varastosiirto")) {
     $myyntitilaus['tilausrivit'] = hae_tilausrivit($myyntitilaus_tunnus, $varastosiirto_tyyppi, true);
 
     if ($varastosiirto_tyyppi == 'K') {
-      $ok = kirjanpidollinen_varastosiirto($myyntitilaus);
+      $ok = kirjanpidollinen_varastosiirto($myyntitilaus, $_poikkeavalaskutuspvm);
     }
     elseif ($varastosiirto_tyyppi == 'N') {
       $ok = normaali_varastosiirto($myyntitilaus);
@@ -39,7 +39,7 @@ if (!function_exists("tilauksesta_varastosiirto")) {
 }
 
 if (!function_exists('kirjanpidollinen_varastosiirto')) {
-  function kirjanpidollinen_varastosiirto($myyntitilaus) {
+  function kirjanpidollinen_varastosiirto($myyntitilaus, $_poikkeavalaskutuspvm) {
     global $kukarow, $yhtiorow;
 
     //Kirjanpidollisessa varastosiirrossa yhdellä myyntitilauksella voi olla vain 1 lähde-kohdevarasto kombinaatio.
@@ -77,8 +77,7 @@ if (!function_exists('kirjanpidollinen_varastosiirto')) {
     aseta_kukarow_kesken($myyntitilaus['tunnus']);
 
     $varastosiirtorivit = hae_tilausrivit($varastosiirto['tunnus'], 'K', false);
-
-    $varastosiirtorivit = aseta_varastosiirto_vastaanotetuksi($varastosiirto, $varastosiirtorivit);
+    $varastosiirtorivit = aseta_varastosiirto_vastaanotetuksi($varastosiirto, $varastosiirtorivit, $_poikkeavalaskutuspvm);
     paivita_myyntitilausrivien_tuotepaikat($varastosiirtorivit);
     linkkaa_varastosiirto_myyntitilaukseen($varastosiirto, $myyntitilaus);
 
@@ -327,7 +326,7 @@ if (!function_exists('aseta_kukarow_kesken')) {
 }
 
 if (!function_exists('aseta_varastosiirto_vastaanotetuksi')) {
-  function aseta_varastosiirto_vastaanotetuksi($varastosiirto, $varastosiirtorivit) {
+  function aseta_varastosiirto_vastaanotetuksi($varastosiirto, $varastosiirtorivit, $_poikkeavalaskutuspvm) {
     global $kukarow, $yhtiorow;
 
     if (empty($varastosiirto) or empty($varastosiirtorivit)) {

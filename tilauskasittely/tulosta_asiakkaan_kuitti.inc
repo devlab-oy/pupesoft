@@ -21,7 +21,7 @@
 function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array()) {
   global $yhtiorow;
 
-  if (tulostimen_tyyppi($tulostimen_tunnus) != "kuittitulostin") {
+  if (tulostimen_tyyppi($tulostimen_tunnus) != "kuittitulostin" or empty($laskunro)) {
     return false;
   }
 

@@ -75,5 +75,9 @@ if (isset($GLOBALS["pupe_query_debug"]) and $GLOBALS["pupe_query_debug"] > 0 and
 
 if (!isset($temporarylink)) $temporarylink = $masterlink;
 
-// Otetaan
-require_once "../php-resque/lib/resque.php";
+$pupe_resque = FALSE;
+
+// Otetaan php-resque käyttöön jos se on asennettu
+if (@include_once "php-resque/lib/Resque.php") {
+    $pupe_resque = TRUE;
+}

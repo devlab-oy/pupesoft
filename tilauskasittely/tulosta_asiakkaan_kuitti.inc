@@ -21,6 +21,10 @@
 function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array()) {
   global $yhtiorow;
 
+  if (tulostimen_tyyppi($tulostimen_tunnus) != "kuittitulostin") {
+    return false;
+  }
+
   $footer_teksti      = empty($params["footer_teksti"]) ? false : $params["footer_teksti"];
   $header_teksti      = empty($params["header_teksti"]) ? false : $params["header_teksti"];
   $avaa_lipas_lopuksi = $params["avaa_lipas_lopuksi"];
@@ -362,4 +366,18 @@ function laske_yksikkohinta($tilausrivi) {
 
 function tulosta_kauppiaan_kuitti($teksti, $tulostimen_tunnus) {
   lpr("{$teksti}\n\n\n\n\n\n\x1B\x69", $tulostimen_tunnus);
+}
+
+function tulostimen_tyyppi($tulostimen_tunnus) {
+  global $kukarow;
+
+  $query = "SELECT mediatyyppi
+            FROM kirjoittimet
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$tulostimen_tunnus}'";
+
+  $result = pupe_query($query);
+  $result = mysql_fetch_assoc($result);
+
+  return $result["mediatyyppi"];
 }

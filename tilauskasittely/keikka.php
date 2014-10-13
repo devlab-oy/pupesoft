@@ -2,9 +2,6 @@
 
 $pupe_DataTables = 'keikka';
 
-// Ei käytetä pakkausta
-$compression = FALSE;
-
 if (isset($_POST["tee"])) {
   if ($_POST["tee"] == 'lataa_tiedosto') {
     $lataa_tiedosto = 1;

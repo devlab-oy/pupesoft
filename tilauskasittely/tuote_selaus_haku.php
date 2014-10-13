@@ -121,6 +121,44 @@ $query    = "SELECT *
 $result   = pupe_query($query);
 $laskurow = mysql_fetch_assoc($result);
 
+// vientikieltokäsittely:
+// +maa tarkoittaa että myynti on kielletty tähän maahan ja sallittu kaikkiin muihin
+// -maa tarkoittaa että ainoastaan tähän maahan saa myydä
+// eli näytetään vaan tuotteet jossa vienti kentässä on tyhjää tai -maa.. ja se ei saa olla +maa
+$kieltolisa = "";
+unset($vierow);
+
+if ($kukarow["kesken"] > 0) {
+  $query  = "SELECT if (toim_maa != '', toim_maa, maa) maa
+             FROM lasku
+             WHERE yhtio = '$kukarow[yhtio]'
+             and tunnus  = '$kukarow[kesken]'";
+  $vieres = pupe_query($query);
+  $vierow = mysql_fetch_assoc($vieres);
+}
+elseif ($verkkokauppa != "") {
+  $vierow = array();
+
+  if ($maa != "") {
+    $vierow["maa"] = $maa;
+  }
+  else {
+    $vierow["maa"] = $yhtiorow["maa"];
+  }
+}
+elseif ($kukarow["extranet"] != "") {
+  $query  = "SELECT if (toim_maa != '', toim_maa, maa) maa
+             FROM asiakas
+             WHERE yhtio = '$kukarow[yhtio]'
+             and tunnus  = '$kukarow[oletus_asiakas]'";
+  $vieres = pupe_query($query);
+  $vierow = mysql_fetch_assoc($vieres);
+}
+
+if (isset($vierow) and $vierow["maa"] != "") {
+  $kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
+}
+
 // Katsotaan, onko paramseissa annettu variaatio ja, jos on, näytetään kyseisen variaation tuotteet
 if (!empty($variaatio)) {
   tarkista_tilausrivi();
@@ -137,7 +175,10 @@ if (!empty($variaatio)) {
               AND tuotteen_avainsanat.laji   = 'parametri_variaatio'
               AND tuotteen_avainsanat.yhtio  = tuote.yhtio
               AND tuotteen_avainsanat.selite = '{$variaatio}')
-            WHERE tuote.yhtio                = '{$kukarow['yhtio']}'";
+            WHERE tuote.yhtio                = '{$kukarow['yhtio']}'
+            AND tuote.tuotetyyppi NOT IN ('A', 'B')
+            {$kieltolisa}";
+
   $result = pupe_query($query);
 
   $tuotteet = array();
@@ -498,44 +539,6 @@ if (trim($alkuperaisnumero) != '') {
   }
 
   $ulisa .= "&alkuperaisnumero=$alkuperaisnumero";
-}
-
-// vientikieltokäsittely:
-// +maa tarkoittaa että myynti on kielletty tähän maahan ja sallittu kaikkiin muihin
-// -maa tarkoittaa että ainoastaan tähän maahan saa myydä
-// eli näytetään vaan tuotteet jossa vienti kentässä on tyhjää tai -maa.. ja se ei saa olla +maa
-$kieltolisa = "";
-unset($vierow);
-
-if ($kukarow["kesken"] > 0) {
-  $query  = "SELECT if (toim_maa != '', toim_maa, maa) maa
-             FROM lasku
-             WHERE yhtio = '$kukarow[yhtio]'
-             and tunnus  = '$kukarow[kesken]'";
-  $vieres = pupe_query($query);
-  $vierow = mysql_fetch_assoc($vieres);
-}
-elseif ($verkkokauppa != "") {
-  $vierow = array();
-
-  if ($maa != "") {
-    $vierow["maa"] = $maa;
-  }
-  else {
-    $vierow["maa"] = $yhtiorow["maa"];
-  }
-}
-elseif ($kukarow["extranet"] != "") {
-  $query  = "SELECT if (toim_maa != '', toim_maa, maa) maa
-             FROM asiakas
-             WHERE yhtio = '$kukarow[yhtio]'
-             and tunnus  = '$kukarow[oletus_asiakas]'";
-  $vieres = pupe_query($query);
-  $vierow = mysql_fetch_assoc($vieres);
-}
-
-if (isset($vierow) and $vierow["maa"] != "") {
-  $kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
 }
 
 if (file_exists('sarjanumeron_lisatiedot_popup.inc')) {

@@ -156,7 +156,8 @@ elseif ($kukarow["extranet"] != "") {
 }
 
 if (isset($vierow) and $vierow["maa"] != "") {
-  $kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
+  $kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' " .
+    "or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
 }
 
 if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
@@ -198,8 +199,15 @@ if ($poistetut != "") {
                   JOIN varastopaikat ON (varastopaikat.yhtio=tuotepaikat.yhtio
                   AND varastopaikat.tunnus = tuotepaikat.varasto
                   AND varastopaikat.tyyppi = '')
-                  WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0 ";
-    $hinta_rajaus    = ($yhtiorow["yhtio"] == 'allr') ? " AND tuote.myymalahinta > tuote.myyntihinta " : " ";
+                  WHERE tuotepaikat.yhtio=tuote.yhtio
+                  AND tuotepaikat.tuoteno=tuote.tuoteno
+                  AND tuotepaikat.saldo > 0) > 0 ";
+    if (($yhtiorow["yhtio"] == 'allr')) {
+      $hinta_rajaus = " AND tuote.myymalahinta > tuote.myyntihinta ";
+    }
+    else {
+      $hinta_rajaus = " ";
+    }
     $poislisa_mulsel = " and tuote.status in ('P','X') ";
   }
   else {
@@ -209,12 +217,20 @@ if ($poistetut != "") {
 }
 else {
   $poislisa = " and (tuote.status not in ('P','X')
-          or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0) ";
+          or (SELECT sum(saldo)
+              FROM tuotepaikat
+              WHERE tuotepaikat.yhtio=tuote.yhtio
+              AND tuotepaikat.tuoteno=tuote.tuoteno
+              AND tuotepaikat.saldo > 0) > 0) ";
   //$poislisa_mulsel  = " and tuote.status not in ('P','X') ";
   $poischeck = "";
 }
 
-if (isset($extrapoistetut) and $extrapoistetut != "" and $kukarow["extranet"] != "" and $kukarow['asema'] == "NE") {
+if (isset($extrapoistetut)
+  and $extrapoistetut != ""
+  and $kukarow["extranet"] != ""
+  and $kukarow['asema'] == "NE"
+) {
   $extrapoischeck = "CHECKED";
   $ulisa .= "&extrapoistetut=checked";
   $poislisa = "";

@@ -77,3 +77,10 @@ if (!isset($temporarylink)) $temporarylink = $masterlink;
 
 mb_language('uni');
 mb_internal_encoding("UTF-8");
+
+$pupe_resque = FALSE;
+
+// Otetaan php-resque käyttöön jos se on asennettu
+if (@include_once "php-resque/lib/Resque.php") {
+    $pupe_resque = TRUE;
+}

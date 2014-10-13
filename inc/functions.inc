@@ -1050,6 +1050,7 @@ if (!function_exists("apix_invoice_put_file")) {
     $version     = "1.0";
     $timestamp   = gmdate("YmdHis");
     $apix_ulos    = "";
+    $apixerrorreport = "";
 
     if ($apixzipfile_resend != "") {
       // Filenimi joka uudelleenlähetetään
@@ -1138,6 +1139,32 @@ if (!function_exists("apix_invoice_put_file")) {
 
       $apix_ulos .= "Tila: ".$xml->Status."<br>";
       $apix_ulos .= "Tilakoodi: ".$xml->StatusCode."<br>";
+
+      // Rakennetaan sähköpostiin lähetettävä virheviesti
+      $apixerrorreport .= "{$yhtiorow["yhtio"]} Apix laskutuksen virheviesti! \n";
+      $apixerrorreport .= " $apixzipfile ";
+      $apixerrorreport .= "\n\n";
+      $apixerrorreport .= $real_url;
+      $apixerrorreport .= "\n\n";
+      $apixerrorreport .= $ch;
+      $apixerrorreport .= "\n\n";
+      ob_start();
+      var_dump($apix_lasnot);
+      var_dump($xml);
+      $apixerrorreport .= ob_get_clean();
+
+      if (mb_detect_encoding($apixerrorreport, 'UTF-8', true) !== FALSE) {
+  			$apixerrorreport = utf8_decode($apixerrorreport);
+      }
+
+      $params = array(
+        "to" => $yhtiorow["admin_email"],
+        "subject" => "Apix virheilmoitus '{$yhtiorow["yhtio"]}'",
+        "ctype" => "text",
+        "body"=> $apixerrorreport
+      );
+
+      pupesoft_sahkoposti($params);
 
       foreach ($xml->FreeText as $teksti) {
         $apix_ulos .= "Tilaviesti: ".$teksti."<br>";
@@ -12455,7 +12482,7 @@ if (!function_exists("luoiban")) {
 }
 
 if (!function_exists("tarkista_sepa")) {
-  function tarkista_sepa($maa) {
+  function tarkista_sepa($maa, $palauta_maat = '') {
 
     // SEPA (Single Euro Payments Area) maat ja niiden IBAN tilinumeron pituus
     $sepa_maat  = array("AL" => "28",
@@ -12510,14 +12537,18 @@ if (!function_exists("tarkista_sepa")) {
       "TR" => "26",
       "GB" => "22");
 
+    if ($palauta_maat == 'K') {
+      // Palautetaan kaikki SEPA-maat
+      return array_keys($sepa_maat);
+    }
     // Maa ei ole sepa maa, palautetaan FALSE
-    if (!isset($sepa_maat[$maa])) {
+    elseif (!isset($sepa_maat[$maa])) {
       return FALSE;
     }
-
-    // Palautetaan IBAN:in pituus, jos on SEPA maa
-    return $sepa_maat[$maa];
-
+    else {
+      // Palautetaan IBAN:in pituus, jos on SEPA maa
+      return $sepa_maat[$maa];
+    }
   }
 }
 
@@ -20364,11 +20395,23 @@ if (!function_exists("pupesoft_sahkoposti")) {
     // Vikassa boundissa pitää olla -- lopussa.
     $content .= "--\n";
 
-    $boob = mail($email_to, mb_encode_mimeheader($email_subject, "ISO-8859-1", "Q"), $content, $header, "-f {$yhtiorow["postittaja_email"]}");
+    // Laitetaan php-resque jonoon
+    if ($GLOBALS["pupe_resque"] === TRUE) {
+      $resque_args = array(
+              'to'      => $email_to,
+              'subject' => mb_encode_mimeheader($email_subject, "ISO-8859-1", "Q"),
+              'content' => $content,
+              'header'  => $header,
+              'from'    => "-f {$yhtiorow["postittaja_email"]}");
 
-    if ($boob === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $email_to<br>";
-
-    return $boob;
+      Resque::enqueue('pupe_email', 'pupesoft_email_worker', $resque_args);
+      return TRUE;
+    }
+    else {
+      $boob = mail($email_to, mb_encode_mimeheader($email_subject, "ISO-8859-1", "Q"), $content, $header, "-f {$yhtiorow["postittaja_email"]}");
+      if ($boob === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $email_to<br>";
+      return $boob;
+    }
   }
 }
 

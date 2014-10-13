@@ -568,7 +568,6 @@ if ($tee != '') {
             $valittu_tulostin = $kerayslistatulostin;
             $keraysvyohyke    = $erat['keraysvyohyketiedot']['keraysvyohyke'];
             $laskuja          = count($erat['tilaukset']);
-            $lukotetaan       = FALSE;
 
             require "tilauskasittely/tilaus-valmis-tulostus.inc";
 

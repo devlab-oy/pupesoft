@@ -36,13 +36,16 @@ function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $kerattu = 
     return false;
   }
 
-  if (!empty($asiakas["gsm"])) {
+  $gsm   = empty($tilaus["toim_puh"]) ? $asiakas["gsm"] : $tilaus["toim_puh"];
+  $email = empty($tilaus["toim_email"]) ? $asiakas["email"] : $tilaus["toim_email"];
+
+  if (!empty($gsm)) {
     $parameters = array(
       "method"   => "POST",
       "data"     => array(
         "username"   => $username,
         "password"   => $salasana,
-        "numberto"   => $asiakas['gsm'],
+        "numberto"   => $gsm,
         "numberfrom" => $yhtiorow['nimi'],
         "message"    => $viesti
       ),
@@ -61,10 +64,9 @@ function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $kerattu = 
     }
   }
 
-  if (!empty($asiakas["email"])) {
+  if (!empty($email)) {
     $parametrit = array(
-      "to"      => $asiakas["email"],
-      "cc"      => "",
+      "to"      => $email,
       "subject" => $otsikko,
       "body"    => $viesti
     );
@@ -96,7 +98,9 @@ function hae_tilaus($tilausnumero) {
   global $kukarow;
 
   $query  = "SELECT clearing,
-             liitostunnus
+             liitostunnus,
+             toim_puh,
+             toim_email
              FROM  lasku
              WHERE yhtio  = '{$kukarow['yhtio']}'
              AND   tunnus = '{$tilausnumero}'";

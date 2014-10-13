@@ -181,6 +181,45 @@ else {
   $avainlisa      = "";
 }
 
+if (!isset($poistetut)) {
+  $poistetut = '';
+}
+
+if ($poistetut != "") {
+
+  $poischeck = "CHECKED";
+  $ulisa .= "&poistetut=checked";
+
+  if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
+    // Näytetään vain poistettuja tuotteita
+    $poislisa        = " AND tuote.status in ('P','X')
+                  AND (SELECT sum(saldo)
+                  FROM tuotepaikat
+                  JOIN varastopaikat ON (varastopaikat.yhtio=tuotepaikat.yhtio
+                  AND varastopaikat.tunnus = tuotepaikat.varasto
+                  AND varastopaikat.tyyppi = '')
+                  WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0 ";
+    $hinta_rajaus    = ($yhtiorow["yhtio"] == 'allr') ? " AND tuote.myymalahinta > tuote.myyntihinta " : " ";
+    $poislisa_mulsel = " and tuote.status in ('P','X') ";
+  }
+  else {
+    $poislisa = "";
+    //$poislisa_mulsel  = "";
+  }
+}
+else {
+  $poislisa = " and (tuote.status not in ('P','X')
+          or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0) ";
+  //$poislisa_mulsel  = " and tuote.status not in ('P','X') ";
+  $poischeck = "";
+}
+
+if (isset($extrapoistetut) and $extrapoistetut != "" and $kukarow["extranet"] != "" and $kukarow['asema'] == "NE") {
+  $extrapoischeck = "CHECKED";
+  $ulisa .= "&extrapoistetut=checked";
+  $poislisa = "";
+}
+
 // Katsotaan, onko paramseissa annettu variaatio ja, jos on, näytetään kyseisen variaation tuotteet
 if (!empty($variaatio)) {
   tarkista_tilausrivi();
@@ -200,7 +239,8 @@ if (!empty($variaatio)) {
             WHERE tuote.yhtio                = '{$kukarow['yhtio']}'
             AND tuote.tuotetyyppi NOT IN ('A', 'B')
             {$kieltolisa}
-            {$extra_poislisa}";
+            {$extra_poislisa}
+            {$poislisa}";
 
   $result = pupe_query($query);
 
@@ -397,45 +437,6 @@ if ($saldotonrajaus != '') {
 }
 else {
   $saldotoncheck = "";
-}
-
-if (!isset($poistetut)) {
-  $poistetut = '';
-}
-
-if ($poistetut != "") {
-
-  $poischeck = "CHECKED";
-  $ulisa .= "&poistetut=checked";
-
-  if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
-    // Näytetään vain poistettuja tuotteita
-    $poislisa = " AND tuote.status in ('P','X')
-                  AND (SELECT sum(saldo)
-                  FROM tuotepaikat
-                  JOIN varastopaikat ON (varastopaikat.yhtio=tuotepaikat.yhtio
-                  AND varastopaikat.tunnus = tuotepaikat.varasto
-                  AND varastopaikat.tyyppi = '')
-                  WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0 ";
-    $hinta_rajaus      = ($yhtiorow["yhtio"] == 'allr') ? " AND tuote.myymalahinta > tuote.myyntihinta " : " ";
-    $poislisa_mulsel  = " and tuote.status in ('P','X') ";
-  }
-  else {
-    $poislisa         = "";
-    //$poislisa_mulsel  = "";
-  }
-}
-else {
-  $poislisa  = " and (tuote.status not in ('P','X')
-          or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0) ";
-  //$poislisa_mulsel  = " and tuote.status not in ('P','X') ";
-  $poischeck = "";
-}
-
-if (isset($extrapoistetut) and $extrapoistetut != "" and $kukarow["extranet"] != "" and $kukarow['asema'] == "NE") {
-  $extrapoischeck = "CHECKED";
-  $ulisa .= "&extrapoistetut=checked";
-  $poislisa         = "";
 }
 
 if (!isset($lisatiedot)) {

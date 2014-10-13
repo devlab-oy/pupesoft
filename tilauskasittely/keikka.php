@@ -253,14 +253,14 @@ if ($toiminto == "tulosta_hintalaput") {
   require "tulosta_hintalaput.inc";
 
   $tuotteet = hae_tuotteet_hintalappuja_varten($otunnus, $kukarow);
-  $tiedostonimi = tulosta_hintalaput($tuotteet);
+  list($tiedostonimi, $kaunisnimi) = tulosta_hintalaput($tuotteet);
 
   echo "<font class='ok'>" . t("Hintalaput tulostettu") . "</font>";
 
   echo "<form method='post' class='multisubmit'>";
   echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
   echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
-  echo "<input type='hidden' name='kaunisnimi' value='{$tiedostonimi}'>";
+  echo "<input type='hidden' name='kaunisnimi' value='{$kaunisnimi}'>";
   echo "<input type='hidden' name='tmpfilenimi' value='{$tiedostonimi}'>";
   echo "<input type='submit' value='" . t("Tallenna hintalaput") . "'>";
   echo "</form>";

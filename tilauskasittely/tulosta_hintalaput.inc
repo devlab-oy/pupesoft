@@ -62,10 +62,11 @@ function tulosta_hintalaput($tuotteet) {
 
   $pdf_tiedosto = $pdf->generate();
 
-  $tiedostonimi = "hintalaput.pdf";
+  $kaunisnimi   = "hintalaput.pdf";
+  $tiedostonimi = "hintalaput-" . md5(uniqid(rand())) . ".pdf";
   file_put_contents("/tmp/{$tiedostonimi}", $pdf_tiedosto);
 
-  return $tiedostonimi;
+  return array($tiedostonimi, $kaunisnimi);
 }
 
 function hae_tuotteet_hintalappuja_varten($otunnus, $kukarow) {

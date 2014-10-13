@@ -159,6 +159,28 @@ if (isset($vierow) and $vierow["maa"] != "") {
   $kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
 }
 
+if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
+  if ($verkkokauppa != "") {
+
+    if ($kukarow["kuka"] == "www") {
+      $extra_poislisa = " and tuote.hinnastoon = 'W' ";
+    }
+    else {
+      $extra_poislisa = " and tuote.hinnastoon in ('W','V') ";
+    }
+
+    $avainlisa = " and avainsana.nakyvyys = '' ";
+  }
+  else {
+    $extra_poislisa = " and tuote.hinnastoon != 'E' ";
+    $avainlisa      = " and avainsana.jarjestys < 10000 ";
+  }
+}
+else {
+  $extra_poislisa = "";
+  $avainlisa      = "";
+}
+
 // Katsotaan, onko paramseissa annettu variaatio ja, jos on, näytetään kyseisen variaation tuotteet
 if (!empty($variaatio)) {
   tarkista_tilausrivi();
@@ -177,7 +199,8 @@ if (!empty($variaatio)) {
               AND tuotteen_avainsanat.selite = '{$variaatio}')
             WHERE tuote.yhtio                = '{$kukarow['yhtio']}'
             AND tuote.tuotetyyppi NOT IN ('A', 'B')
-            {$kieltolisa}";
+            {$kieltolisa}
+            {$extra_poislisa}";
 
   $result = pupe_query($query);
 
@@ -425,28 +448,6 @@ if ($lisatiedot != "") {
 }
 else {
   $lisacheck = "";
-}
-
-if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
-  if ($verkkokauppa != "") {
-
-    if ($kukarow["kuka"] == "www") {
-      $extra_poislisa = " and tuote.hinnastoon = 'W' ";
-    }
-    else {
-      $extra_poislisa = " and tuote.hinnastoon in ('W','V') ";
-    }
-
-    $avainlisa = " and avainsana.nakyvyys = '' ";
-  }
-  else {
-    $extra_poislisa = " and tuote.hinnastoon != 'E' ";
-    $avainlisa = " and avainsana.jarjestys < 10000 ";
-  }
-}
-else {
-  $extra_poislisa = "";
-  $avainlisa = "";
 }
 
 if (!isset($nimitys)) {

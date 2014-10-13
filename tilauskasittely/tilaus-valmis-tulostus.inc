@@ -42,13 +42,13 @@ if (strpos($_SERVER['SCRIPT_NAME'], "tulosta_keraysera.php") === FALSE) {
             lasku WRITE";
   pupe_query($query);
 
-	$tilausalatila = "A";
-	$siirtoalatila = "J";
+  $tilausalatila = "A";
+  $siirtoalatila = "J";
 }
 else {
-	// Keräsyerien luonnista kun tullaa, niin ei lukita tauluja koska tilauket on päivitetty eri alatilaa.
-	$tilausalatila = "KA";
-	$siirtoalatila = "KJ";
+  // Keräsyerien luonnista kun tullaa, niin ei lukita tauluja koska tilauket on päivitetty eri alatilaa.
+  $tilausalatila = "KA";
+  $siirtoalatila = "KJ";
 }
 
 if ($toim == 'VASTAANOTA_REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {

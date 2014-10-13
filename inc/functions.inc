@@ -16996,19 +16996,19 @@ if (!function_exists("tee_keraysera")) {
 		$yrityskerta   = 0;
 		$max_yritykset = 5;
 
-		// yritetään ottaa flock lukko
-		do {
-			if ($yrityskerta > 0) {
-				// odotetaan 1-2 sekkaa
-				usleep(rand(1000000, 2000000));
-			}
-			$yrityskerta++;
-		} while (!pupesoft_flock($lock_params) and $yrityskerta < $max_yritykset);
+    // yritetään ottaa flock lukko
+    do {
+      if ($yrityskerta > 0) {
+        // odotetaan 1-2 sekkaa
+        usleep(rand(1000000, 2000000));
+      }
+      $yrityskerta++;
+    } while (!pupesoft_flock($lock_params) and $yrityskerta < $max_yritykset);
 
-		// jos ei saatu flock lukkoa!
-		if ($yrityskerta == $max_yritykset) {
-			return FALSE;
-		}
+    // jos ei saatu flock lukkoa!
+    if ($yrityskerta == $max_yritykset) {
+      return FALSE;
+    }
 
     $varasto = (int) $varasto;
 

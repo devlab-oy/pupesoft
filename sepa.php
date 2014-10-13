@@ -63,7 +63,7 @@ function sepa_paymentinfo($laskurow) {
   $PmtInfId = $PmtInf->addChild('PmtInfId', $laskurow['tunnus']);                                  // PaymentInformationIdentification, Pakollinen kentt‰
   $PmtMtd = $PmtInf->addChild('PmtMtd', 'TRF');                                           // PaymentMethod, Pakollinen kentt‰ (TRF = transfer)
 
-  if (tarkista_sepa($laskurow["iban_maa"]) !== FALSE) {
+  if ($laskurow["sepa"] === 'SEPA') {
     $PmtTpInf = $PmtInf->addChild('PmtTpInf');                                            // Jos SEPA maa, laitetaan n‰m‰ segmentit mukaan
     // $InstrPrty = $PmtTpInf->addChild('InstrPrty');
     $SvcLvl = $PmtTpInf->addChild('SvcLvl');
@@ -544,9 +544,16 @@ else {
   $lisa = " and lasku.tila = 'P' and lasku.maksaja = '$kukarow[kuka]' ";
 }
 
+// Haetaan kaiki SEPA-maat
+$sepa_maat_array = tarkista_sepa('', 'K');
+$sepamaat        = "'".implode("','", $sepa_maat_array)."'";
+
 // Haetaan poimitut maksut (HUOM: sama selecti alempana!!!!)
 $haku_query = "SELECT lasku.*,
                if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
+               if((lasku.ultilno_maa != ''
+                 AND lasku.ultilno_maa in ($sepamaat))
+                 OR lasku.maa in ($sepamaat), 'SEPA', '') sepa,
                yriti.iban yriti_iban,
                yriti.bic yriti_bic,
                yriti.asiakastunnus yriti_asiakastunnus,
@@ -560,7 +567,7 @@ $haku_query = "SELECT lasku.*,
                 AND yriti.kaytossa = '')
                WHERE lasku.yhtio   = '{$kukarow["yhtio"]}'
                {$lisa}
-               ORDER BY maksu_tili, olmapvm, ultilno";
+               ORDER BY maksu_tili, olmapvm, sepa, ultilno";
 $result = pupe_query($haku_query);
 
 if ($tee == "") {
@@ -684,11 +691,11 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
   }
 
   // Alustetaan muuttujat
-  $edmaksutili    = 0;
-  $tapahtuma_maara  = 0;
-  $edpvm        = "0000-00-00";
-  $edtili        = "";
-  $netotettava_laskut  = array();
+  $tapahtuma_maara    = 0;
+  $edpvm              = "0000-00-00";
+  $edsepa             = "";
+  $edtili             = "";
+  $netotettava_laskut = array();
   $netotettava_summa  = array();
 
   // Tarkistetaan ensin mahdolliset netotettavat hyvitykset
@@ -762,7 +769,7 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
     }
 
     $netotettava_laskut[] = $nettolaskujen_tunnukset;
-    $netotettava_summa[] = $nettosumma_yhteensa;
+    $netotettava_summa[]  = $nettosumma_yhteensa;
   }
 
   // SEPA header
@@ -771,9 +778,14 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
   // Tehd‰‰n netotetut tapahtumat
   foreach ($netotettava_laskut as $i => $tunnukset) {
     $query = "SELECT lasku.*, if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
+              if((lasku.ultilno_maa != ''
+                AND lasku.ultilno_maa in ($sepamaat))
+                OR lasku.maa in ($sepamaat), 'SEPA', '') sepa,
               yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus
               FROM lasku
-              JOIN yriti ON (yriti.yhtio = lasku.yhtio AND yriti.tunnus = lasku.maksu_tili AND yriti.kaytossa = '')
+              JOIN yriti ON (yriti.yhtio = lasku.yhtio
+                AND yriti.tunnus = lasku.maksu_tili
+                AND yriti.kaytossa = '')
               WHERE lasku.yhtio = '$kukarow[yhtio]'
               AND lasku.tunnus  in ($tunnukset)
               LIMIT 1";
@@ -796,7 +808,7 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
       // p‰ivitet‰‰n laskut "odottaa suoritusta" tilaan
       $query = "UPDATE lasku
                 SET tila = 'Q',
-                popvm       = '$popvm_nyt'
+                popvm    = '$popvm_nyt'
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND tunnus  in ($tunnukset)";
       $uresult = pupe_query($query);
@@ -813,6 +825,9 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
   // Haetaan poimitut maksut (HUOM: sama selecti ylemp‰n‰!!!!)
   $haku_query = "SELECT lasku.*,
                  if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
+                 if((lasku.ultilno_maa != ''
+                   AND lasku.ultilno_maa in ($sepamaat))
+                   OR lasku.maa in ($sepamaat), 'SEPA', '') sepa,
                  yriti.iban yriti_iban,
                  yriti.bic yriti_bic,
                  yriti.asiakastunnus yriti_asiakastunnus,
@@ -825,7 +840,7 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
                   AND yriti.kaytossa = '')
                  WHERE lasku.yhtio   = '{$kukarow["yhtio"]}'
                  {$lisa}
-                 ORDER BY maksu_tili, olmapvm, ultilno";
+                 ORDER BY maksu_tili, olmapvm, sepa, ultilno";
   $result = pupe_query($haku_query);
 
   while ($laskurow = mysql_fetch_assoc($result)) {
@@ -835,14 +850,20 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
       $laskurow['viesti'] = (trim($laskurow['viesti']) == "") ? $laskurow['laskunro'] : $laskurow['viesti']." ".$laskurow['laskunro'];
     }
 
-    if ($edmaksutili != $laskurow['maksu_tili']) {
-      $edmaksutili = $laskurow['maksu_tili'];
+    if ($kukarow["yhtio"] == "kiko") {
+      // Tehd‰‰n er‰t per p‰iv‰ ja sepa-maksut yhteen ja muut toiseen
+      if ($edpvm != $laskurow['olmapvm'] or $edsepa != $laskurow['sepa']) {
+        sepa_paymentinfo($laskurow);
+        $edpvm  = $laskurow['olmapvm'];
+        $edsepa = $laskurow['sepa'];
+      }
     }
-
-    if ($edpvm != $laskurow['olmapvm'] or $edtili != $laskurow['ultilno']) {
-      sepa_paymentinfo($laskurow);
-      $edpvm = $laskurow['olmapvm'];
-      $edtili = $laskurow['ultilno'];
+    else {
+      if ($edpvm != $laskurow['olmapvm'] or $edtili != $laskurow['ultilno']) {
+        sepa_paymentinfo($laskurow);
+        $edpvm  = $laskurow['olmapvm'];
+        $edtili = $laskurow['ultilno'];
+      }
     }
 
     sepa_credittransfer($laskurow, $popvm_nyt);

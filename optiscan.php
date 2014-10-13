@@ -205,6 +205,11 @@ elseif ($sanoma == "GetPicks") {
 
       $erat = tee_keraysera($row['keraysvyohyke'], $row['oletus_varasto']);
 
+      // Ei saatu lukkoa j‰rkev‰ss‰ ajassa
+      if ($erat === FALSE) {
+        $response = "N,,,,,,,,,,,,,1,Ker‰yserien luonnissa ruuhkaa. Yrit‰ pian uudelleen.";
+      }
+
       if (isset($erat['tilaukset']) and count($erat['tilaukset']) > 0) {
         // Tallennetaan miss‰ t‰‰ er‰ on tehty
         $ohjelma_moduli = "OPTISCAN";
@@ -259,9 +264,6 @@ elseif ($sanoma == "GetPicks") {
 
       // Vapautetaan ker‰syer‰n nappaamat tilaukset
       release_tee_keraysera();
-
-      // Vapautetaan flocki
-      flock("$kukarow[yhtio]-tee_keraysera.lock", LOCK_UN);
     }
   }
 

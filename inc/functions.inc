@@ -16959,7 +16959,7 @@ if (!function_exists('arrcmp')) {
 
 if (!function_exists("release_tee_keraysera")) {
   function release_tee_keraysera() {
-    global $kukarow, $yhtiorow;
+    global $flock, $kukarow, $yhtiorow;
 
     // Vapautetaan muutkin käsittelyyn otetut tilaukset
     $query = "UPDATE lasku
@@ -16979,7 +16979,7 @@ if (!function_exists("release_tee_keraysera")) {
     }
 
     // Vapautetaan flocki
-    flock("$kukarow[yhtio]-tee_keraysera.lock", LOCK_UN);
+    flock($flock, LOCK_UN);
   }
 }
 
@@ -16993,10 +16993,22 @@ if (!function_exists("tee_keraysera")) {
       "return"   => TRUE
     );
 
-    if (!pupesoft_flock($lock_params)) {
-      echo "Keräyserien luonti kesken yritä uudestaan!";
-      return;
-    }
+		$yrityskerta   = 0;
+		$max_yritykset = 5;
+
+		// yritetään ottaa flock lukko
+		do {
+			if ($yrityskerta > 0) {
+				// odotetaan 1-2 sekkaa
+				usleep(rand(1000000, 2000000));
+			}
+			$yrityskerta++;
+		} while (!pupesoft_flock($lock_params) and $yrityskerta < $max_yritykset);
+
+		// jos ei saatu flock lukkoa!
+		if ($yrityskerta == $max_yritykset) {
+			return FALSE;
+		}
 
     $varasto = (int) $varasto;
 

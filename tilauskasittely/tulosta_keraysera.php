@@ -537,13 +537,19 @@ if ($tee != '') {
       $loop_counter = TRUE;
 
       if ($tulosta_kaikki == "JOO" and $naytetaan_tulosta_kaikki == 0) {
-        //jos yritetään tulostaa kaikki niin tsekataan vielä käyttöoikeudet
+        // jos yritetään tulostaa kaikki niin tsekataan vielä käyttöoikeudet
         $tulosta_kaikki = "";
         echo "<font class='message'>", t("Yritit tulostaa kaikki keräyserät mutta käyttöoikeus puuttuu"), ".</font><br />";
       }
 
       while ($loop_counter) {
         $erat = tee_keraysera($keraajarow['keraysvyohyke'], $select_varasto);
+
+        // Ei saatu lukkoa järkevässä ajassa
+        if ($erat === FALSE) {
+          echo "<font class='error'>".t("VIRHE: Keräyserien luonnissa ruuhkaa. Yritä pian uudelleen")."!</font><br>";
+          break;
+        }
 
         if (isset($erat['tilaukset']) and count($erat['tilaukset']) > 0) {
 
@@ -589,7 +595,7 @@ if ($tee != '') {
           echo "<font class='message'>", t("Ei ole yhtään kerättävää keräyserää"), ".</font><br />";
           $loop_counter = FALSE;
         }
-        
+
         // Vapautetaan keräsyerän nappaamat tilaukset
         release_tee_keraysera();
 

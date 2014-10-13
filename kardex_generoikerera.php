@@ -44,8 +44,15 @@ else {
   $gen_ker_res_result = pupe_query($query);
 
   while ($gen_ker_row = mysql_fetch_assoc($gen_ker_res_result)) {
+    
     $erat = tee_keraysera($gen_ker_row["tunnus"], $gen_ker_row["varasto"]);
 
+    // Ei saatu lukkoa järkevässä ajassa
+    if ($erat === FALSE) {
+      // echo t("VIRHE: Keräyserien luonnissa ruuhkaa. Yritä pian uudelleen!<br>";
+      continue;
+    }
+    
     if (isset($erat['tilaukset']) and count($erat['tilaukset']) > 0) {
       // Tallennetaan missä tää erä on tehty
       $ohjelma_moduli = "KARDEX";
@@ -89,9 +96,6 @@ else {
 
     // Vapautetaan keräsyerän nappaamat tilaukset
     release_tee_keraysera();
-
-    // Vapautetaan flocki
-    flock("$kukarow[yhtio]-tee_keraysera.lock", LOCK_UN);
 
     if (isset($lisatyt_tilaukset) and count($lisatyt_tilaukset) > 0) {
 

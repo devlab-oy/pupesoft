@@ -1211,7 +1211,7 @@ else {
           $gluku++;
 
           if ($rajaus[$i] != "") {
-            $lisa .= " and lasku.clearing='{$rajaus[$i]}' ";
+            $lisa .= " and lasku.tilaustyyppi='{$rajaus[$i]}' ";
           }
           $laskugroups++;
         }
@@ -2270,7 +2270,7 @@ else {
         if ($query != "") {
 
           //echo "<pre>".str_replace("\t", "", str_replace("and", "\nand", $query))."</pre><br>";
-
+echo "$query <br><br>";
           $result = pupe_query($query);
 
           $rivimaara   = mysql_num_rows($result);

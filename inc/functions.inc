@@ -1032,18 +1032,13 @@ if (!function_exists("maventa_invoice_put_file")) {
     else {
       // Lähetetään lasku
       try {
-        if ($client === FALSE) {
-          throw new Exception('VIRHE: Yhteys Maventaan ei ole auki.');
-        }
-        else {
-          $return_value = $client->invoice_put_finvoice($api_keys, $files_out);
-          return $return_value->status;
-        }
+        $return_value = $client->invoice_put_finvoice($api_keys, $files_out);
+        return $return_value->status;
       }
       catch (Exception $exVirhe) {
         // Siirretään error-kansioon, paitsi jos faili on seillä jo ennestään...
         if (count($files_out_resend) == 0) file_put_contents("{$pupe_root_polku}/dataout/maventa_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number-serialized.txt", serialize($files_out));
-        return $exVirhe->getMessage();
+        return FALSE;
       }
     }
   }

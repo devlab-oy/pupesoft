@@ -477,7 +477,7 @@ if ($tee == 'laskelma') {
           'invoiceDate' => date('j.m.Y', strtotime($laskurow['tapvm'])),
           'invoiceSum' => $laskurow['laskun_summa'],
           'taxRate' => $row['veropros'],
-          'invoiceSumForRate' => $laskurow['laskun_summa'],
+          'invoiceSumForRate' => '',
           'sumForRateInPeriod' => $_vero,
           'comments' => $erikoiskoodi,
         );

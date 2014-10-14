@@ -3475,7 +3475,7 @@ if ($tee == '') {
     if ($kukarow["oletus_asiakas"] != 0) {
       $query  = "SELECT *
                  FROM asiakas
-                 WHERE yhtio = '$kukarow[yhtio]' 
+                 WHERE yhtio = '$kukarow[yhtio]'
                  and tunnus  = '$kukarow[oletus_asiakas]'";
       $result = pupe_query($query);
 
@@ -3493,7 +3493,7 @@ if ($tee == '') {
     }
 
     if ($toim == "PIKATILAUS") {
-      
+
       if ($yhtiorow['pikatilaus_focus'] == 'A' and isset($indexvas) and $indexvas == 1) {
         $kentta = 'syotetty_ytunnus';
       }
@@ -4533,21 +4533,24 @@ if ($tee == '') {
         if (!empty($vaihdettava_rivi)) {
           $query = "SELECT asiakkaan_positio
                     FROM tilausrivin_lisatiedot
-                    WHERE yhtio          = '{$kukarow['yhtio']}'
-                    AND tilausrivitunnus = '{$vaihdettava_rivi}'";
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tilausrivitunnus = {$vaihdettava_rivi}";
           $lisatiedot_result = pupe_query($query);
           $tilausrivin_lisatiedot = mysql_fetch_assoc($lisatiedot_result);
 
           $query = "UPDATE tilausrivin_lisatiedot
                     SET asiakkaan_positio = 0
-                    WHERE yhtio          = '{$kukarow['yhtio']}'
-                    AND tilausrivitunnus = '{$vaihdettava_rivi}'";
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tilausrivitunnus = {$vaihdettava_rivi}";
           pupe_query($query);
 
           $_laite_tunnus = $tilausrivin_lisatiedot['asiakkaan_positio'];
 
-          //@TODO tässä pitäisi hakea uuden rivin sisältyvät työt ja päivittää näiden viimeinen_tapahtuma
-          //olemaan sama kuin vaihdettavan rivin viimeinen_tapahtuma
+          $sisaltyvat_tyot = hae_riviin_sisaltyvat_tyot($_laite_tunnus, $tuoteno);
+          $_vaihdettava_rivi = hae_tilausrivi($vaihdettava_rivi);
+          foreach ($sisaltyvat_tyot as $sisaltyva_tyo) {
+            paivita_viimenen_tapahtuma_laitteen_huoltosyklille($_laite_tunnus, $sisaltyva_tyo['huoltosykli_tunnus'], $_vaihdettava_rivi['toimaika']);
+          }
         }
         else {
           $_laite_tunnus = $_SESSION['laite_tunnus'];

@@ -28186,3 +28186,21 @@ if (!function_exists("hae_saldo")) {
     }
   }
 }
+
+if (!function_exists('hae_tilausrivi')) {
+  function hae_tilausrivi($tilausrivi_tunnus) {
+    global $kukarow, $yhtiorow;
+
+    if (empty($tilausrivi_tunnus)) {
+      return false;
+    }
+
+    $query = "SELECT *
+              FROM tilausrivi
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = {$tilausrivi_tunnus}";
+    $result = pupe_query($query);
+
+    return mysql_fetch_assoc($result);
+  }
+}

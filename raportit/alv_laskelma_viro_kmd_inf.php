@@ -154,7 +154,7 @@ if ($tee == 'laskelma') {
         ll.otunnus = lasku.tunnus
       )";
     $verolisa = "AND tiliointi.vero > 0";
-    $laskun_nimi_lisa_select = "trim(concat(ll.laskutus_nimi, ' ', ll.laskutus_nimitark)) nimi,";
+    $laskun_nimi_lisa_select = "trim(concat(ll.laskutus_nimi, ' ', ll.laskutus_nimitark)) nimi, lasku.nimi AS nimicsv,";
   }
   else {
     $taso = 'ee500';
@@ -472,7 +472,7 @@ if ($tee == 'laskelma') {
       if ($laskelma == 'a') {
         $_csv['A'][] = array(
           'buyerRegCode' => $laskurow['ytunnus'],
-          'buyerName' => $laskurow['nimi'],
+          'buyerName' => $laskurow['nimicsv'],
           'invoiceNumber' => $laskurow['laskunro'],
           'invoiceDate' => date('j.m.Y', strtotime($laskurow['tapvm'])),
           'invoiceSum' => $laskurow['laskun_summa'],

@@ -1752,15 +1752,24 @@ if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $tee == "ODOTTAA" 
   }
 }
 
-if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VASTAANOTTO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
+if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' 
+  and ($tee == 'VASTAANOTTO' or $tee == 'VALMIS')
+  and $yhtiorow['reklamaation_kasittely'] == 'U') {
   // Joka tarkoittaa ett‰ "Reklamaatio on vastaanotettu
   // t‰m‰n j‰lkeen kun seuraavassa vaiheessa tullaan niin "Tulostetaan Purkulista"
+  
+  if ($tee == 'VALMIS') {
+    $alatila_lisa = "AND alatila = ''";              // takuu
+  }
+  else {
+    $alatila_lisa = "AND alatila = 'A'";             // reklamaatio
+  }
   $query = "UPDATE lasku set
             alatila     = 'B'
             WHERE yhtio = '$kukarow[yhtio]'
             AND tunnus  = '$tilausnumero'
             AND tila    = 'C'
-            AND alatila = 'A'";
+            $alatila_lisa";
   $result = pupe_query($query);
 
   $query  = "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and kesken = '$tilausnumero'";
@@ -1788,12 +1797,20 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VASTAANOT
   }
 }
 
-if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VALMIS_VAINSALDOTTOMIA' and $yhtiorow['reklamaation_kasittely'] == 'U') {
-  // Reklamaatio on valmis laskutettavaksi
+if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' 
+  and ($tee == 'VALMIS_VAINSALDOTTOMIA' or $tee == 'VALMIS')
+  and $yhtiorow['reklamaation_kasittely'] == 'U') {
+  // Reklamaatio/takuu on valmis laskutettavaksi
   // katsotaan onko tilausrivit Unikko-j‰rjestelm‰‰n
+  if ($laskurow['tilaustyyppi'] == 'U') {
+    $saldoton_lisa = "and tuote.ei_saldoa=''";
+  }
+  else {
+    $saldoton_lisa = "";
+  }
   $query = "SELECT tilausrivi.tunnus
             FROM tilausrivi
-            JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno and tuote.ei_saldoa='')
+            JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno $saldoton_lisa)
             WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
             AND tilausrivi.otunnus  = '{$tilausnumero}'
             AND tilausrivi.tyyppi  != 'D'";

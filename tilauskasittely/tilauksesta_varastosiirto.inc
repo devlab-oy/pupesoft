@@ -61,7 +61,7 @@ if (!function_exists('kirjanpidollinen_varastosiirto')) {
     aseta_kukarow_kesken(0);
 
     //Kaikilla myyntitilausriveillä on sama toimitustapa, joka määritellään avainsanoissa SIIRTOVARASTOT. Tällöin voidaan viitata indeksillä.
-    $varastosiirto = luo_varastosiirto($lahde_ja_kohde_varasto_yhdistelma['lahdevarasto_tunnus'], $lahde_ja_kohde_varasto_yhdistelma['kohdevarasto_tunnus'], $myyntitilausrivit[0]['toimitustapa_tunnus'], $myyntitilaus['tunnus']);
+    $varastosiirto = luo_varastosiirto($lahde_ja_kohde_varasto_yhdistelma['lahdevarasto_tunnus'], $lahde_ja_kohde_varasto_yhdistelma['kohdevarasto_tunnus'], $myyntitilausrivit[0]['toimitustapa_tunnus'], $myyntitilaus['tunnus'], "K");
 
     if (empty($varastosiirto)) {
       return false;
@@ -276,7 +276,7 @@ if (!function_exists('luo_varastosiirtorivi')) {
 }
 
 if (!function_exists('luo_varastosiirto')) {
-  function luo_varastosiirto($lahdevarasto_tunnus, $kohdevaraston_tunnus, $toimitustapa_tunnus, $myyntitilaus_tunnus) {
+  function luo_varastosiirto($lahdevarasto_tunnus, $kohdevaraston_tunnus, $toimitustapa_tunnus, $myyntitilaus_tunnus, $varastosiirtotyyppi = 'N') {
     global $kukarow, $yhtiorow;
 
     $toimitustapa = hae_toimitustapa($toimitustapa_tunnus);
@@ -292,6 +292,10 @@ if (!function_exists('luo_varastosiirto')) {
     $viesti       = $kukarow["nimi"]." ".t("Myyntitilaus/varastonsiirto").": {$myyntitilaus_tunnus}";
     $varasto      = $lahdevarasto_tunnus;
     $toim         = "SIIRTOLISTA";
+
+    if ($varastosiirtotyyppi == "K") {
+      $chn = 'KIR';
+    }
 
     $lahdevarasto = hae_varasto($lahdevarasto_tunnus);
     $yhtio_toimipaikka = $lahdevarasto['toimipaikka'];
@@ -394,10 +398,10 @@ if (!function_exists('hae_tilausrivit')) {
   function hae_tilausrivit($otunnus, $varastosiirtotyyppi = 'N', $onko_myyntitilaus = true) {
     global $kukarow, $yhtiorow;
 
-    $tilausrivi_where     = '';
-    $varasto_avainsana_join   = '';
-    $select           = '';
-    $lasku_join         = "";
+    $tilausrivi_where       = '';
+    $varasto_avainsana_join = '';
+    $select                 = '';
+    $lasku_join             = "";
 
     if ($varastosiirtotyyppi == 'N') {
       $tilausrivi_where = "AND t.var = 'S'";
@@ -467,7 +471,7 @@ if (!function_exists('hae_tilausrivit')) {
                 WHERE t.yhtio             = '{$kukarow['yhtio']}'
                 AND t.otunnus             = {$otunnus}
                 {$tilausrivi_where}";
-    $result   = pupe_query($query);
+    $result = pupe_query($query);
 
     $tilausrivit = array();
 
@@ -516,8 +520,9 @@ if (!function_exists('linkkaa_varastosiirto_myyntitilaukseen')) {
       return false;
     }
 
+    // Tällä merkataan jos ollaan tehty KIRJANPIDOLLINEN varastosiirto.
     $query = "UPDATE lasku SET
-              vanhatunnus = {$varastosiirto['tunnus']}
+              varastosiirto_tunnus = {$varastosiirto['tunnus']}
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tunnus  = {$myyntitilaus['tunnus']}";
     pupe_query($query);

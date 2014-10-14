@@ -86,7 +86,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     if (isset($kopioitava_otsikko) and $kopioitava_otsikko == 0 and $srow['alatila'] != '') {
       $alatila=$srow['alatila'];
     }
-    if ($srow['tila'] != '')    $ylatila=$srow['tila'];
+    if ($srow['tila'] != '') $ylatila = $srow['tila'];
   }
 
   if (!isset($srow)) {
@@ -124,7 +124,6 @@ if ($tila == 'Muuta' and !isset($jatka)) {
   echo "<input type='hidden' name='tunnusnippu' value='{$srow["tunnusnippu"]}'>";
   echo "<input type='hidden' name='ylatila' value='$ylatila'>";
   echo "<input type='hidden' name='alatila' value='$alatila'>";
-
   echo "<td><select name='varasto' onchange='submit()' >";
 
   if ($toim == "SIIRTOLISTA") {
@@ -241,9 +240,8 @@ if ($tila == 'Muuta' and !isset($jatka)) {
   else {
     list($toimvv, $toimkk, $toimpp) = explode('-', $srow["toimaika"]);
     list($kervv, $kerkk, $kerpp)    = explode('-', $srow["kerayspvm"]);
-    $kerpp = substr($kerpp, 0, 2);
+    $kerpp  = substr($kerpp, 0, 2);
     $toimpp = substr($toimpp, 0, 2);
-
   }
 
   // Jos valmistuksessa käytetään tilakoodeja asetetaan keräysajankohta tulevaisuuteen.
@@ -423,7 +421,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
         <input type='text' name='luvattukk' size='3' value='$luvattukk'>-
         <input type='text' name='luvattuvv' size='6' value='$luvattuvv'>
         </td>
-        <td>Työn suorittaja:</td><td><input type='text' name='suorittaja' size='35' maxlengtd='15' value='$srow[suorittaja]'></td></tr>";
+        <td> ".t("Työn suorittaja").":</td><td><input type='text' name='suorittaja' size='35' maxlengtd='15' value='$srow[suorittaja]'></td></tr>";
     echo "<tr><td>".t("Työn kuvaus").":</td><td colspan='3'><textarea name='komm1' rows='4' cols='40'>$srow[komm1]</textarea></td></tr>";
     echo "<tr><td>".t("Sisäiset kommentit").":</td><td colspan='3'><textarea name='komm2' rows='4' cols='40'>$srow[komm2]</textarea></td></tr>";
     echo "</table><br>";
@@ -550,40 +548,40 @@ if (isset($jatka)) {
   if (!is_numeric($prioriteettinro)) $prioriteettinro = 9;
 
   $query .= "  lasku SET
-        yhtio_nimi      = '$yhtiorow[nimi]',
-        yhtio_osoite    = '$yhtiorow[osoite]',
-        yhtio_postino    = '$yhtiorow[postino]',
-        yhtio_postitp    = '$yhtiorow[postitp]',
-        yhtio_maa      = '$yhtiorow[maa]',
-        yhtio_ovttunnus    = '$yhtiorow[ovttunnus]',
+        yhtio_nimi        = '$yhtiorow[nimi]',
+        yhtio_osoite      = '$yhtiorow[osoite]',
+        yhtio_postino     = '$yhtiorow[postino]',
+        yhtio_postitp     = '$yhtiorow[postitp]',
+        yhtio_maa         = '$yhtiorow[maa]',
+        yhtio_ovttunnus   = '$yhtiorow[ovttunnus]',
         yhtio_kotipaikka  = '$yhtiorow[kotipaikka]',
-        yhtio_toimipaikka  = '$yhtio_toimipaikka',
-        clearing      = '$clearing',
-        maa          = '$vtrow[maa]',
-        nimi         = '$vtrow[nimitys]',
-        nimitark      = '$vtrow[nimi]',
-        osoite        = '$vtrow[osoite]',
-        postino        = '$vtrow[postino]',
-        postitp        = '$vtrow[postitp]',
-        toim_maa      = '$toim_maa',
-        toim_nimi      = '$toim_nimi',
-        toim_nimitark    = '$toim_nimitark',
-        toim_osoite      = '$toim_osoite',
-        toim_postino    = '$toim_postino',
-        toim_postitp    = '$toim_postitp',
-        toimaika       = '".$toimvv."-".$toimkk."-".$toimpp."',
-        kerayspvm       = '".$kervv."-".$kerkk."-".$kerpp."',
-        comments       = '$comments',
-        eilahetetta     = '$eilahe',
-        viesti         = '$viesti',
-        yhtio         = '$kukarow[yhtio]',
-        alatila       = '$alatila',
-        varasto       = '$varasto',
-        hyvaksynnanmuutos   = '$luokka',
-        prioriteettinro     = '$prioriteettinro',
-        tunnusnippu      = '$tunnusnippu',
-        kohde        = '$valmistuslinja',
-        toimitustapa    = '$toimitustapa'";
+        yhtio_toimipaikka = '$yhtio_toimipaikka',
+        clearing          = '$clearing',
+        maa               = '$vtrow[maa]',
+        nimi              = '$vtrow[nimitys]',
+        nimitark          = '$vtrow[nimi]',
+        osoite            = '$vtrow[osoite]',
+        postino           = '$vtrow[postino]',
+        postitp           = '$vtrow[postitp]',
+        toim_maa          = '$toim_maa',
+        toim_nimi         = '$toim_nimi',
+        toim_nimitark     = '$toim_nimitark',
+        toim_osoite       = '$toim_osoite',
+        toim_postino      = '$toim_postino',
+        toim_postitp      = '$toim_postitp',
+        toimaika          = '".$toimvv."-".$toimkk."-".$toimpp."',
+        kerayspvm         = '".$kervv."-".$kerkk."-".$kerpp."',
+        comments          = '$comments',
+        eilahetetta       = '$eilahe',
+        viesti            = '$viesti',
+        yhtio             = '$kukarow[yhtio]',
+        alatila           = '$alatila',
+        varasto           = '$varasto',
+        hyvaksynnanmuutos = '$luokka',
+        prioriteettinro   = '$prioriteettinro',
+        tunnusnippu       = '$tunnusnippu',
+        kohde             = '$valmistuslinja',
+        toimitustapa      = '$toimitustapa'";
 
   if ($toim == "VALMISTAVARASTOON") {
     $query .= ",tilaustyyppi = 'W', tila='V', ytunnus='$vtrow[nimitys]', liitostunnus='999999999'";

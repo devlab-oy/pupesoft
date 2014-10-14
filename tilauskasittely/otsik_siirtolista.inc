@@ -598,6 +598,10 @@ if (isset($jatka)) {
       $query .= ",chn = 'GEN'"; // tällä erotellaan "tulosta siirtolista"-kohdassa generoidut ja käsin tehdyt siirtolistat
     }
 
+    if (isset($chn) and $chn == 'KIR') {
+      $query .= ",chn = 'KIR'"; // tällä erotellaan kirjanpidolliset varastosiirrot
+    }
+
     $tee = "";
   }
   elseif ($toim == "SIIRTOTYOMAARAYS") {

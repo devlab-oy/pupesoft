@@ -86,7 +86,7 @@ if ($paiva_ajo) {
 
 // Haetaan tilausriveiltä:
 //  kerätyt myyntirivit (ei normihyväreitä, mutta kerätyt reklamatiot kyllä)
-//  kerätyt siirtorivit
+//  kerätyt siirtorivit (paitsi sisäiset siirrot, eikä kirjanpidollisia siirtoja)
 //  kerätyt kulutukset
 
 $query_ale_lisa = generoi_alekentta('M');
@@ -131,7 +131,7 @@ $query = "(SELECT
           date_format(tilausrivi.kerattyaika, '%Y-%m-%d') pvm,
           if (tilausrivi.tyyppi = 'L' and lasku.varastosiirto_tunnus > 0, kirjanpidollinen_siirto.varasto, tilausrivi.varasto) varasto,
           tilausrivi.tuoteno,
-          if (tilausrivi.tyyppi='G' and lasku.chn != 'KIR', 'siirtolista', 'myynti') laji,
+          if (tilausrivi.tyyppi='G', 'siirtolista', 'myynti') laji,
           (tilausrivi.kpl+tilausrivi.varattu) * -1 kpl,
           if (tilausrivi.tyyppi='G', tuote.kehahin, round(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * {$query_ale_lisa}, 2)) kplhinta,
           lasku.tilaustyyppi,

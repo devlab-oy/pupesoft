@@ -1211,13 +1211,31 @@ if ($tee == 'E' or $tee == 'F') {
       echo "<tr><td colspan='3'>".wordwrap($faktarow["fakta"], 120, "<br>")."</td></tr>";
     }
 
-    if ($trow['varastosiirto_tunnus'] > 0) {
-      echo "<tr>";
-      echo "<th>".t('Varastosiirtotosite')."</th>";
-      echo "<td colspan='5'>";
-      echo "<a href='{$palvelin2}muutosite.php?tee=E&tunnus={$trow['varastosiirto_tunnus']}&lopetus={$palvelin2}myyntires/myyntilaskuhaku.php////tee=N'>".t('Varastosiirto').": {$trow['vanhatunnus']}</a>";
-      echo "</td>";
-      echo "</tr>";
+    $_kirjanpidollinen_varastosiirto = ($yhtiorow['kirjanpidollinen_varastosiirto_myyntitilaukselta'] == 'K');
+
+    if ($_kirjanpidollinen_varastosiirto AND $trow['tila'] == "U") {
+
+      $query = "SELECT varastosiirto_tunnus
+                FROM lasku
+                WHERE yhtio  = '{$kukarow['yhtio']}'
+                AND tila     = 'L'
+                AND alatila  = 'X'
+                AND laskunro = '{$trow['laskunro']}'
+                AND varastosiirto_tunnus > 0";
+      $varastosiirto_result = pupe_query($query);
+
+      if (mysql_num_rows($varastosiirto_result) > 0) {
+        echo "<tr>";
+        echo "<th>".t('Varastosiirtotosite')."</th>";
+        echo "<td colspan='5'>";
+
+        while ($varastosiirto = mysql_fetch_assoc($varastosiirto_result)) {        
+          echo "<a href='{$palvelin2}muutosite.php?tee=E&tunnus={$varastosiirto['varastosiirto_tunnus']}&lopetus={$palvelin2}myyntires/myyntilaskuhaku.php////tee=N'>{$varastosiirto['varastosiirto_tunnus']}</a> ";          
+        }
+        
+        echo "</td>";
+        echo "</tr>";
+      }
     }
 
     echo "<tr><th colspan='3'>".t("Selite tiliöinneille")."</th></tr><tr><td colspan='3'><input type='text' id='lisaselite' value='{$lisaselite}' maxlength='150' size='60'></td></tr>";

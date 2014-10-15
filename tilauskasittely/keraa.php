@@ -1610,13 +1610,24 @@ if ($tee == 'P') {
 
         $_siirtolista         = ($laskurow['tila'] == 'G');
         $_siirrolla_ei_lahtoa = ($laskurow['toimitustavan_lahto'] == 0);
+        $_siirrolla_lahto     = ($laskurow['toimitustavan_lahto'] != 0);
         $_laaja_toimipaikka   = ($yhtiorow['toimipaikkakasittely'] == "L");
 
         if ($_siirtolista and $_siirrolla_ei_lahtoa and $_laaja_toimipaikka) {
           paivita_siirtolistan_toimipaikka($laskurow['tunnus']);
+        }
 
-          if ($keraamaton == count($kerivi)) {
-            $alatilak = "X";
+        if ($_siirtolista and $_siirrolla_lahto and $_laaja_toimipaikka) {
+
+          $query = "SELECT SUM(IF(varattu = 0, 1, 0)) keraamaton, COUNT(*) kaikki
+                    FROM tilausrivi
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND otunnus = '{$laskurow['tunnus']}'";
+          $_keraamaton_chk_res = pupe_query($query);
+          $_ker_chk_row = mysql_fetch_assoc($_keraamaton_chk_res);
+
+          if ($_ker_chk_row['keraamaton'] == $_ker_chk_row['kaikki']) {
+            $alatilak = 'X';
           }
         }
 
@@ -2022,6 +2033,7 @@ if ($tee == 'P') {
           $query = "UPDATE lasku
                     SET alatila = 'B'
                     WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND alatila != 'X'
                     AND tunnus  IN ({$tilausnumeroita_backup})";
           $alatila_upd_res = pupe_query($query);
         }

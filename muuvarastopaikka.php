@@ -584,6 +584,7 @@ if ($tee == 'N') {
       'sarjano_array' => !isset($sarjano_array) ? array() : $sarjano_array,
       'selite' => !isset($selite) ? '' : $selite,
       'tun' => !isset($tun) ? 0 : $tun,
+      'poikkeavalaskutuspvm' => $_poikkeavalaskutuspvm,
     );
 
     hyllysiirto($params);

@@ -25107,7 +25107,7 @@ if (!function_exists('hyllysiirto')) {
                     tapahtumatunnus = $mista_tapa_tunnus,
                     selite          = '".t("Paikalta")." {$mista_texti} ".t("vähennettiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
                     laatija         = '$kukarow[kuka]',
-                    laadittu        = '$_laadittu'";
+                    laadittu        = now()";
           $result = pupe_query($query);
 
           // Mistä varastonmuutos
@@ -25125,7 +25125,7 @@ if (!function_exists('hyllysiirto')) {
                     tapahtumatunnus = $mista_tapa_tunnus,
                     selite          = '".t("Paikalta")." {$mista_texti} ".t("vähennettiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
                     laatija         = '$kukarow[kuka]',
-                    laadittu        = '$_laadittu'";
+                    laadittu        = now()";
           $result = pupe_query($query);
 
           // jos ostotili löytyy, tehdään sinne kirjaukset kanssa
@@ -25145,7 +25145,7 @@ if (!function_exists('hyllysiirto')) {
                       tapahtumatunnus = $mista_tapa_tunnus,
                       selite          = '".t("Paikalta")." {$mista_texti} ".t("vähennettiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
                       laatija         = '$kukarow[kuka]',
-                      laadittu        = '$_laadittu'";
+                      laadittu        = now()";
             $result = pupe_query($query);
 
             // Minne ostotili
@@ -25163,7 +25163,7 @@ if (!function_exists('hyllysiirto')) {
                       tapahtumatunnus = $minne_tapa_tunnus,
                       selite          = '".t("Paikalle")." {$minne_texti} ".t("lisättiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
                       laatija         = '$kukarow[kuka]',
-                      laadittu        = '$_laadittu'";
+                      laadittu        = now()";
             $result = pupe_query($query);
           }
 
@@ -25182,7 +25182,7 @@ if (!function_exists('hyllysiirto')) {
                     tapahtumatunnus = $minne_tapa_tunnus,
                     selite          = '".t("Paikalle")." {$minne_texti} ".t("lisättiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
                     laatija         = '$kukarow[kuka]',
-                    laadittu        = '$_laadittu'";
+                    laadittu        = now()";
           $result = pupe_query($query);
 
           // Minne varastonmuutos
@@ -25200,7 +25200,7 @@ if (!function_exists('hyllysiirto')) {
                     tapahtumatunnus = $minne_tapa_tunnus,
                     selite          = '".t("Paikalle")." {$minne_texti} ".t("lisättiin")." ".t("tuotetta")." {$tuoteno} {$kappaleet}{$selite}',
                     laatija         = '$kukarow[kuka]',
-                    laadittu        = '$_laadittu'";
+                    laadittu        = now()";
           $result = pupe_query($query);
         }
       }

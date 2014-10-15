@@ -249,7 +249,11 @@ if (!function_exists('luo_varastosiirtorivi')) {
     $korvaavakielto   = 1;
     $perhekielto      = $lapsituotteet == "" ? 1 : 0;
     $orvoteikiinnosta = "EITOD";
-    $var              = 'H';
+
+    // Generoiduille listoille ei laiteta väkisin
+    if ($varastosiirtotyyppi != "G") {
+      $var = 'H';
+    }
 
     //Laitetaan tuote oletusvaraston tuotepaikalle
     $tuotteen_oletuspaikka = hae_tuotteen_tuotepaikat($tilausrivi['tuoteno'], $tilausrivi['kohdevarasto_tunnus']);
@@ -288,13 +292,27 @@ if (!function_exists('luo_varastosiirto')) {
     $toimpp       = $kerpp = date("j");
     $toimkk       = $kerkk = date("n");
     $toimvv       = $kervv = date("Y");
-    $comments     = $kukarow["nimi"]." ".t("Myyntitilaus/varastonsiirto").": {$myyntitilaus_tunnus}";
-    $viesti       = $kukarow["nimi"]." ".t("Myyntitilaus/varastonsiirto").": {$myyntitilaus_tunnus}";
+
+    if ($varastosiirtotyyppi == "G") {
+      $comments   = t("Relex-varastosiirto");
+      $viesti     = t("Relex-varastosiirto");
+    }
+    else {
+      $comments   = $kukarow["nimi"]." ".t("Myyntitilaus/varastonsiirto").": {$myyntitilaus_tunnus}";
+      $viesti     = $kukarow["nimi"]." ".t("Myyntitilaus/varastonsiirto").": {$myyntitilaus_tunnus}";
+    }
+
     $varasto      = $lahdevarasto_tunnus;
     $toim         = "SIIRTOLISTA";
 
+    // Kirjanpidollinen siirto
     if ($varastosiirtotyyppi == "K") {
       $chn = 'KIR';
+    }
+
+    // Generoitu siirto
+    if ($varastosiirtotyyppi == "G") {
+      $chn = 'GEN';
     }
 
     $lahdevarasto = hae_varasto($lahdevarasto_tunnus);
@@ -532,11 +550,17 @@ if (!function_exists('linkkaa_varastosiirto_myyntitilaukseen')) {
 }
 
 if (!function_exists('hae_avoin_varastosiirto')) {
-  function hae_avoin_varastosiirto($lahdevarasto_tunnus, $kohdevarasto_tunnus) {
+  function hae_avoin_varastosiirto($lahdevarasto_tunnus, $kohdevarasto_tunnus, $varastosiirtotyyppi = 'N') {
     global $kukarow, $yhtiorow;
 
     if (empty($lahdevarasto_tunnus) or empty($kohdevarasto_tunnus)) {
       return false;
+    }
+
+    $lisa = "";
+
+    if ($varastosiirtotyyppi == "G") {
+      $lisa = " and chn = 'GEN' ";
     }
 
     $query   = "SELECT *
@@ -544,6 +568,7 @@ if (!function_exists('hae_avoin_varastosiirto')) {
                 WHERE yhtio  = '{$kukarow['yhtio']}'
                 AND tila     = 'G'
                 AND alatila  = ''
+                {$lisa}
                 AND varasto  = '{$lahdevarasto_tunnus}'
                 AND clearing = '{$kohdevarasto_tunnus}'";
     $result   = pupe_query($query);

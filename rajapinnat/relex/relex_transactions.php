@@ -45,6 +45,10 @@ $yhtio = mysql_real_escape_string($argv[1]);
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
+$tuoterajaus = " AND tuote.status not in ('P','E')
+                 AND tuote.ei_saldoa    = ''
+                 AND tuote.tuotetyyppi  = '' ";
+
 // Tallennetaan rivit tiedostoon
 $filepath = "/tmp/input_transactions_{$yhtio}_$ajopaiva.csv";
 
@@ -110,11 +114,8 @@ $query = "(SELECT
           if (tapahtuma.laji = 'siirto' and (tilausrivi.varasto = lasku.clearing or lasku.chn = 'KIR'), 1, 0) sisainen_tai_kir_siirto
           FROM tapahtuma
           JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio
-            AND tuote.tuoteno      = tapahtuma.tuoteno
-            AND tuote.status      != 'P'
-            AND tuote.ei_saldoa    = ''
-            AND tuote.tuotetyyppi  = ''
-            AND tuote.ostoehdotus  = '')
+            AND tuote.tuoteno = tapahtuma.tuoteno
+            {$tuoterajaus})
           JOIN yhtio ON (tapahtuma.yhtio = yhtio.yhtio)
           LEFT JOIN tilausrivi USE INDEX (PRIMARY) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
           LEFT JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
@@ -145,11 +146,8 @@ $query = "(SELECT
           if (tilausrivi.tyyppi = 'G' and (tilausrivi.varasto = lasku.clearing or lasku.chn = 'KIR'), 1, 0) sisainen_tai_kir_siirto
           FROM tilausrivi
           JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
-            AND tuote.tuoteno      = tilausrivi.tuoteno
-            AND tuote.status      != 'P'
-            AND tuote.ei_saldoa    = ''
-            AND tuote.tuotetyyppi  = ''
-            AND tuote.ostoehdotus  = '')
+            AND tuote.tuoteno = tilausrivi.tuoteno
+            {$tuoterajaus})
           JOIN yhtio ON (tilausrivi.yhtio = yhtio.yhtio)
           JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
           LEFT JOIN lasku kirjanpidollinen_siirto USE INDEX (PRIMARY) ON (lasku.yhtio = kirjanpidollinen_siirto.yhtio and lasku.varastosiirto_tunnus = kirjanpidollinen_siirto.tunnus and lasku.varastosiirto_tunnus > 0)

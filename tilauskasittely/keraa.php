@@ -1618,7 +1618,7 @@ if ($tee == 'P') {
 
         if ($_siirtolista) {
 
-          $query = "SELECT COUNT(IF(varattu = 0, 1, 0)) keraamaton, COUNT(*) kaikki
+          $query = "SELECT SUM(varattu) keratty
                     FROM tilausrivi
                     WHERE yhtio = '{$kukarow['yhtio']}'
                     AND otunnus = '{$laskurow['tunnus']}'
@@ -1627,7 +1627,7 @@ if ($tee == 'P') {
           $_keraamaton_chk_res = pupe_query($query);
           $_ker_chk_row = mysql_fetch_assoc($_keraamaton_chk_res);
 
-          if ($_ker_chk_row['keraamaton'] == $_ker_chk_row['kaikki']) {
+          if ($_ker_chk_row['keratty'] == 0) {
             $alatilak = 'X';
           }
         }

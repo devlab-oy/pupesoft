@@ -104,6 +104,7 @@ $query = "(SELECT
           lasku.varasto lahdevarasto,
           lasku.clearing vastaanottovarasto,
           lasku.liitostunnus,
+          tapahtuma.tunnus as sorttaustunnus,
           if (lasku.tila is not null and lasku.tila = 'G' and tapahtuma.kpl < 0, 1, 0) keratty_siirto,
           if (tapahtuma.laji = 'laskutus' and (tapahtuma.kpl < 0 or tapahtuma.kpl > 0 and lasku.tilaustyyppi = 'R'), 1, 0) keratty_myynti,
           if (tapahtuma.laji = 'siirto' and (tilausrivi.varasto = lasku.clearing or lasku.chn = 'KIR'), 1, 0) sisainen_tai_kir_siirto
@@ -138,6 +139,7 @@ $query = "(SELECT
           lasku.varasto lahdevarasto,
           lasku.clearing vastaanottovarasto,
           lasku.liitostunnus,
+          tilausrivi.tunnus as sorttaustunnus,
           '' keratty_siirto,
           '' keratty_myynti,
           if (tilausrivi.tyyppi = 'G' and (tilausrivi.varasto = lasku.clearing or lasku.chn = 'KIR'), 1, 0) sisainen_tai_kir_siirto
@@ -157,7 +159,7 @@ $query = "(SELECT
           {$kerivirajaus}
           HAVING sisainen_tai_kir_siirto = 0)
 
-          ORDER BY laadittu, tuoteno";
+          ORDER BY laadittu, tuoteno, sorttaustunnus";
 $res = pupe_query($query);
 
 // Kerrotaan montako riviä käsitellään
@@ -165,9 +167,15 @@ $rows = mysql_num_rows($res);
 
 echo "Tapahtumarivejä {$rows} kappaletta.\n";
 
-$k_rivi = 0;
+$relex_transactions = array();
 
 while ($row = mysql_fetch_assoc($res)) {
+    $relex_transactions[] = $row;
+}
+
+$k_rivi = 0;
+
+foreach ($relex_transactions as $row) {
 
   // Rivin arvo
   $arvo = abs(round($row['kplhinta']*$row['kpl'], 2));
@@ -223,6 +231,36 @@ while ($row = mysql_fetch_assoc($res)) {
 
   if ($partner > 0) {
     $partner = $row['maa']."-".$partner;
+  }
+
+  // Tsekataan manuaalisiirron kohde
+  if ($type == "TRANSFER" and $row['kpl'] < 0 and empty($partner)) {
+    $row_seuraava = $relex_transactions[$k_rivi+1];
+
+    if ($row_seuraava['tuoteno'] == $row['tuoteno'] and ($row_seuraava['kpl']*-1) == $row['kpl']) {
+      //Jos varastonsisäinen sirto niin ei lisätä failiin
+      if ($row['varasto'] == $row_seuraava['varasto']) {
+        $k_rivi++;
+        continue;
+      }
+
+      $partner = "{$row_seuraava['maa']}-{$row_seuraava['varasto']}";
+    }
+  }
+
+  // Tsekataan manuaalisiirron lähde
+  if ($type == "TRANSFER" and $row['kpl'] > 0 and empty($partner)) {
+    $row_edellinen = $relex_transactions[$k_rivi-1];
+
+    if ($row_edellinen['tuoteno'] == $row['tuoteno'] and ($row_edellinen['kpl']*-1) == $row['kpl']) {
+      //Jos varastonsisäinen sirto niin ei lisätä failiin
+      if ($row['varasto'] == $row_edellinen['varasto']) {
+        $k_rivi++;
+        continue;
+      }
+
+      $partner = "{$row_edellinen['maa']}-{$row_edellinen['varasto']}";
+    }
   }
 
   $rivi  = "{$row['pvm']};";                                         // Transaction posting date

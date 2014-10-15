@@ -19,6 +19,28 @@ if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
   require "inc/parametrit.inc";
 }
 
+$psx_ohjelmat = array(
+  "valuu" => "{$palvelin2}pupenext/currencies",
+);
+
+if (array_key_exists($toim, $psx_ohjelmat)) {
+
+  $psx_url = $psx_ohjelmat[$toim];
+
+  echo "<font class='head'>",t("Virhe"),"</font><hr>";
+
+  echo "<br />";
+
+  echo "<a href='{$psx_url}'>";
+  echo t("%s ylläpito on siirtynyt uuteen ympäristöön", '', $toim);
+  echo " &raquo;</a>";
+
+  echo "<br />";
+
+  require "inc/footer.inc";
+  exit;
+}
+
 if (function_exists("js_popup")) {
   echo js_popup(-100);
 }
@@ -114,22 +136,6 @@ if (isset($_POST["toim"]) and $_POST["toim"] == "yhtion_parametrit") {
   if (isset($apuwebseuranta)) {
     $t[$webseuranta] = mysql_real_escape_string($apuwebseuranta);
   }
-}
-
-$psx_ohjelmat = array(
-  "valuu" => "{$palvelin2}pupenext/currencies",
-);
-
-if (array_key_exists($toim, $psx_ohjelmat)) {
-
-  $psx_url = $psx_ohjelmat[$toim];
-
-  echo "<a href='{$psx_url}'>";
-  echo t("%s ylläpito on siirtynyt uuteen ympäristöön", '', $toim);
-  echo " &raquo;</a>";
-
-  require "inc/footer.inc";
-  exit;
 }
 
 require "inc/$toim.inc";

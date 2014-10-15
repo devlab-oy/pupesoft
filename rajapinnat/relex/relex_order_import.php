@@ -220,6 +220,7 @@ if (isset($tee) and trim($tee) == 'aja') {
           'varasto'                 => $varasto['tunnus'],
           'myytil_toimaika'         => $ehdotus_pvm,
           'tilaustyyppi'            => $tilaustyyppi,
+          'myytil_viesti'           => t("Relex-ostotilaus"),
           'ostotilauksen_kasittely' => "GEN", // tällä erotellaan generoidut ja käsin tehdyt ostotilaukset
         );
 

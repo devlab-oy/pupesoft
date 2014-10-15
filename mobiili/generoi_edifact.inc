@@ -1,5 +1,58 @@
 <?php
 
+function kontit_rullineen($konttiviite) {
+  global $kukarow;
+
+  // haetaan kaikki konttiviitteen alaiset rullat
+  $query = "SELECT GROUP_CONCAT(lasku.tunnus)
+            FROM laskun_lisatiedot
+            JOIN lasku
+              ON lasku.yhtio = laskun_lisatiedot.yhtio
+              AND lasku.tunnus = laskun_lisatiedot.otunnus
+            WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+            AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
+            GROUP BY lasku.yhtio";
+  $result = pupe_query($query);
+  $laskujen_tunnukset = mysql_result($result, 0);
+
+  $query = "SELECT ss.sarjanumero,
+            tr.tunnus,
+            tr.keratty,
+            tr.toimitettu,
+            ss.massa as paino,
+            trlt.juoksu,
+            trlt.asiakkaan_rivinumero as rivinro
+            FROM lasku AS la
+            JOIN tilausrivi AS tr
+              ON tr.yhtio = la.yhtio AND tr.otunnus = la.tunnus
+            JOIN tilausrivin_lisatiedot AS trlt
+              ON trlt.yhtio = tr.yhtio AND trlt.tilausrivitunnus = tr.tunnus
+            JOIN sarjanumeroseuranta AS ss
+              ON ss.yhtio = tr.yhtio AND ss.myyntirivitunnus = tr.tunnus
+            WHERE la.yhtio = '{$kukarow['yhtio']}'
+            AND la.tunnus IN ({$laskujen_tunnukset})
+            AND ss.lisatieto IS NULL";
+  $result = pupe_query($query);
+
+  $kontit = array();
+
+  $kontti = 1;
+  $kilot = 0;
+
+  while ($row = mysql_fetch_assoc($result)) {
+
+    if ($kilot + $row['paino'] >= 20000) {
+      $kontti++;
+      $kilot = 0;
+    }
+
+    $kontit[$kontti][] = $row;
+    $kilot = $kilot + $row['paino'];
+
+  }
+  return $kontit;
+}
+
 function laheta_sanoma($sanoma){
   global $kukarow, $ftp_info;
 
@@ -25,7 +78,17 @@ function laheta_sanoma($sanoma){
   fwrite($file, $sanoma);
   rewind($file);
 
-  $nimi = time().'.REC';
+  if (strpos($sanoma, "UNH+1+RECADV") == true) {
+   $extension = ".RAD";
+  }
+  elseif (strpos($sanoma, "UNH+1+DESADV") == true) {
+   $extension = ".DAD";
+  }
+  elseif (strpos($sanoma, "UNH+1+INVRPT") == true) {
+   $extension = ".IRP";
+  }
+
+  $nimi = time().$extension;
 
   if (ftp_fput($yhteys, $nimi, $file, FTP_ASCII)) {
 
@@ -100,7 +163,8 @@ function kuittaus_parametrit($rahtikirjanumero) {
     'koodi1' => 'koodi-1',
     'koodi2' => 'koodi-2',
     'koodi3' => 'koodi-3',
-    'kaupunki' => 'KOTKA');
+    'kaupunki' => 'KOTKA'
+  );
 
   $parametrit = array(
     'laji' => 'kuittaus',
@@ -112,7 +176,7 @@ function kuittaus_parametrit($rahtikirjanumero) {
     'sanomanumero' => $rahtikirjanumero,
     'tilaukset' => $tilaukset,
     'varasto_info' => $varasto_info
-    );
+  );
 
   return $parametrit;
 
@@ -127,12 +191,17 @@ function hylky_lusaus_parametrit($sarjanumero) {
             varastopaikat.tunnus AS varastokoodi,
             varastopaikat.nimitys AS varastonimi,
             sarjanumeroseuranta.massa AS paino,
-            tilausrivin_lisatiedot.juoksu
+            tilausrivin_lisatiedot.juoksu,
+            tilausrivin_lisatiedot.asiakkaan_rivinumero
             FROM sarjanumeroseuranta
-            JOIN tilausrivi ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio AND tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
-            JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-            JOIN lasku ON lasku.yhtio = lasku.yhtio AND lasku.tunnus = tilausrivi.otunnus
-            JOIN varastopaikat ON varastopaikat.yhtio = tilausrivi.yhtio AND varastopaikat.tunnus = tilausrivi.varasto
+            JOIN tilausrivi ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio
+              AND tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
+            JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+            JOIN lasku ON lasku.yhtio = lasku.yhtio
+              AND lasku.tunnus = tilausrivi.otunnus
+            JOIN varastopaikat ON varastopaikat.yhtio = tilausrivi.yhtio
+              AND varastopaikat.tunnus = tilausrivi.varasto
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             AND sarjanumeroseuranta.sarjanumero = '{$sarjanumero}'";
   $result = pupe_query($query);
@@ -159,6 +228,7 @@ function hylky_lusaus_parametrit($sarjanumero) {
     'varastonimi' => $row['varastonimi'],
     'varastokoodi' => $row['varastokoodi'],
     'tilauskoodi' => $row['tilauskoodi'],
+    'tilausrivi' => $row['asiakkaan_rivinumero'],
     'paino' => $paino
   );
 
@@ -166,23 +236,71 @@ function hylky_lusaus_parametrit($sarjanumero) {
 }
 
 
-function kontitus_parametrit($laskunumero) {
-  global $kukarow;
+function kontitus_parametrit($rullat_kontissa) {
+  global $kukarow, $yhtiorow;
+
+  $query = "SELECT ss.sarjanumero,
+            tr.tunnus,
+            tr.keratty,
+            tr.toimitettu,
+            ss.massa as paino,
+            trlt.juoksu,
+            trlt.asiakkaan_rivinumero as rivinro,
+            laskun_lisatiedot.matkakoodi,
+            laskun_lisatiedot.konttiviite
+            FROM tilausrivi AS tr
+            JOIN tilausrivin_lisatiedot AS trlt
+              ON trlt.yhtio = tr.yhtio
+              AND trlt.tilausrivitunnus = tr.tunnus
+            JOIN sarjanumeroseuranta AS ss
+              ON ss.yhtio = tr.yhtio
+              AND ss.myyntirivitunnus = tr.tunnus
+            JOIN lasku
+              ON lasku.yhtio = tr.yhtio
+              AND lasku.tunnus = tr.otunnus
+            JOIN laskun_lisatiedot
+              ON laskun_lisatiedot.yhtio = lasku.yhtio
+              AND laskun_lisatiedot.otunnus = lasku.tunnus
+            WHERE tr.yhtio = '{$kukarow['yhtio']}'
+            AND tr.tunnus IN ({$rullat_kontissa})
+            AND ss.lisatieto IS NULL";
+  $result = pupe_query($query);
+
+  $rullarivit = array();
+  $total_paino = 0;
+
+  while ($row = mysql_fetch_assoc($result)) {
+    $rullarivit[$rulla['rivinro']][] = $row;
+    $total_paino = $total_paino + $row['paino'];
+
+    $matkakoodi = $row['matkakoodi'];
+    $konttiviite = $row['konttiviite'];
+  }
+
+  $kontitus_info  = array(
+    'lastaaja_ovt' => $yhtiorow['ovttunnus'],
+    'omistaja' => $yhtiorow['nimi'],
+    'matkakoodi' => $matkakoodi,
+    'viite' => $konttiviite,
+    'sinetoija' => $yhtiorow['nimi']
+  );
+
+  $sanomaid = "RP" . time();
+  $sanomanumero = time();
 
   $parametrit = array(
     'tyyppi' => 'DESADV',
     'lahettajan_ovt' => $yhtiorow['ovttunnus'],
-    'vastaanottajan_ovt' => $row['ovttunnus'],
+    'vastaanottajan_ovt' => '003708274241',
     'sanomaid' => $sanomaid,
     'sanomanumero' => $sanomanumero,
-    'sarjanumero' => $sarjanumero,
-    'juoksunumero' => $juoksunumero,
-    'varastonimi' => $row['varastonimi'],
-    'varastokoodi' => $row['varastokoodi'],
-    'tilauskoodi' => $row['tilauskoodi'],
-    'paino' => $paino
+    'rullarivit' => $rullarivit,
+    'tilauskoodi' => $konttiviite,
+    'kontitus_info' => $kontitus_info,
+    'total_paino' => $total_paino
   );
 
+  return $parametrit;
 }
 
 function laadi_edifact_sanoma($parametrit) {
@@ -283,7 +401,7 @@ function laadi_edifact_sanoma($parametrit) {
 
   if ($tyyppi == 'INVRPT') {
     // RFF+CU -segmentti
-    $s .= "RFF+CU:" . $tilauskoodi . ":1'";
+    $s .= "RFF+CU:" . $tilauskoodi . ":" . $tilausrivi . "'";
     $segmentit++;
 
     // NAD+GG  -segmentti
@@ -319,13 +437,21 @@ function laadi_edifact_sanoma($parametrit) {
 
   if ($laji == 'kontitus' and !empty($kontitus_info['lastaaja_ovt'])) {
     // NAD+LP -segmentti (3. osapuoli lastaajan OVT)
-    $s .= "NAD+LP" . $kontitus_info['lastaaja_ovt'] . "'";
+    $s .= "NAD+LP+" . $kontitus_info['lastaaja_ovt'] . "'";
     $segmentit++;
   }
 
-  if ($laji == 'kontitus' and !empty($kontitus_info['numero'])) {
+  if ($laji == 'kontitus') {
     // EQD+CN -segmentti (kontti-infoa)
-    $s .= "EQD+CN" . $kontitus_info['numero'] . "+42GP::86+++5";
+    $s .= "EQD+CN+" . $kontitus_info['konttinumero'] . "+42GP::86+++5'";
+    $segmentit++;
+
+    // kokonaispaino
+    $s .= "MEA+AAE+ACX+KGM:" . $total_paino ."'";
+    $segmentit++;
+
+    // sinetti
+    $s .= "SEL+" . $kontitus_info['sinettinumero'] ."+TO:::" . $kontitus_info['sinetoija'] . "'";
     $segmentit++;
   }
 
@@ -378,14 +504,14 @@ function laadi_edifact_sanoma($parametrit) {
   }
 
   if ($laji == 'lusaus') {
-    // STS+ACT  -segmenti
-    $s .= "STS+ACT:ZSN+2::86+1::86+1::86+7::86'";
+    // STS+G  -segmenti
+    $s .= "STS+G:ZSN+2::86+1::86+1::86+7::86'";
     $segmentit++;
   }
 
   if ($laji == 'hylky') {
-    // STS+ACT  -segmenti
-    $s .= "STS+RJC:ZSN+7::86+3::86+1::86+7::86'";
+    // STS+X  -segmenti
+    $s .= "STS+X:ZSN+7::86+3::86+1::86+7::86'";
     $segmentit++;
   }
 
@@ -396,6 +522,58 @@ function laadi_edifact_sanoma($parametrit) {
     $s .= "PAC+1++RL'";
     $s .= "MEA+AAE+G+KGM:" . $paino . "'";
     $segmentit += 4;
+  }
+
+  if ($laji == 'kontitus') {
+
+    foreach ($rullarivit as $key => $rullarivi) {
+
+      $s .= "CPS+MOL++3'";
+      $segmentit++;
+
+      $s .= "PAC+" . count($rullarivi) . "++RL'";
+      $segmentit++;
+
+      // kokonaispaino
+      $s .= "MEA+AAE+G+KGM:" . $total_paino ."'";
+      $segmentit++;
+
+      $s .= "LIN+999'";
+      $segmentit++;
+
+      // DTM -segmentti
+      $s .= "DTM+411:";
+      $s .= date("YdmHi");
+      $s .= ":203'";
+      $segmentit++;
+
+      $s .= "RFF+CU:" . $tilauskoodi . ":" . $key . "'";
+      $segmentit++;
+
+      $s .= "RFF+TN:1'";
+      $segmentit++;
+
+
+      foreach ($rullarivi as $rulla) {
+        $s .= "CPS+PKG++3'";
+        $segmentit++;
+
+        $s .= "PAC+999'";
+        $segmentit++;
+
+        $s .= "MEA+AAE+G+KGM:" . (int) $rulla['paino'] . "'";
+        $segmentit++;
+
+        $s .= "PCI+999'";
+        $segmentit++;
+
+        $s .= "GIN+ZPI+" . $rulla['juoksu'] ."'";
+        $segmentit++;
+
+        $s .= "GIN+ZUN+" . $rulla['sarjanumero'] . "'";
+        $segmentit++;
+      }
+    }
   }
 
   if ($laji == 'kuittaus') {

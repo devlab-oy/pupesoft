@@ -116,6 +116,20 @@ if (isset($_POST["toim"]) and $_POST["toim"] == "yhtion_parametrit") {
   }
 }
 
+$psx_ohjelmat = array(
+  "valuu" => "{$palvelin2}pupenext/currencies",
+);
+
+if (array_key_exists($toim, $psx_ohjelmat)) {
+
+  $psx_url = $psx_ohjelmat[$toim];
+
+  echo "<font class='error'>",t("%s ylläpito on siirtynyt %s", '', $toim, $psx_url),"</font>";
+
+  require "inc/footer.inc";
+  exit;
+}
+
 require "inc/$toim.inc";
 
 if ($otsikko == "") {

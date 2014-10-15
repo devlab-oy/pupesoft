@@ -20,7 +20,7 @@ function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $kerattu = 
   $tilaus  = hae_tilaus($tilausnumero);
   $asiakas = hae_asiakas_vahvistusta_varten($tilaus['liitostunnus']);
 
-  if ($tilaus["clearing"] == "JT-TILAUS") {
+  if (loytyy_jt_riveja($tilausnumero)) {
     $otsikko = t("Tilaus noudettavissa");
     $viesti  = t("Kaikki tilauksen ") .
       $tilausnumero .
@@ -120,4 +120,34 @@ function loytyy_tyomaarays($tilausnumero) {
   $result = mysql_fetch_assoc($result);
 
   return (int) $result["maara"] > 0;
+}
+
+function loytyy_jt_riveja($tilausnumero) {
+  global $kukarow;
+
+  $query = "SELECT tilausrivin_lisatiedot.vanha_otunnus
+            FROM tilausrivi
+            INNER JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+              AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
+            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+            AND tilausrivi.otunnus = '{$tilausnumero}'";
+
+  $result = pupe_query($query);
+
+  while ($rivi = mysql_fetch_assoc($result)) {
+    $query = "SELECT count(*) AS jt_rivien_maara
+              FROM tilausrivi
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND otunnus = '{$rivi['vanha_otunnus']}'
+              AND     var = 'J'";
+
+    $result2 = pupe_query($query);
+    $result2 = mysql_fetch_assoc($result2);
+
+    if ((int) $result2['jt_rivien_maara'] > 0) {
+      return true;
+    }
+  }
+
+  return false;
 }

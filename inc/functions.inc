@@ -11638,8 +11638,7 @@ if (!function_exists("lue_kurssit")) {
                 muutospvm              = now(),
                 muuttaja               = '{$kukarow['kuka']}'
                 WHERE yhtio            = '{$kukarow['yhtio']}'
-                AND nimi               = '$valuutta'
-                AND automaattipaivitys = ''";
+                AND nimi               = '$valuutta'";
       $result = pupe_query($query);
 
       // tämä valuutta on nyt päivitetty!

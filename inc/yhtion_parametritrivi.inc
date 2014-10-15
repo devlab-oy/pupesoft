@@ -2506,14 +2506,13 @@ if ($fieldname == "jt_toimitusaika_email_vahvistus") {
   $jatko = 0;
 }
 
-if ($fieldname == "jt_ja_tyomaarays_valmis_vahvistusviesti") {
+if ($fieldname == "vahvistusviesti_asiakkaalle") {
   $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
 
   $sel = $trow[$i] == 'Y' ? ' selected' : '';
 
   $ulos .= "<option value = ''>" .
-    t("Ei lähetetä asiakkaalle viestiä, kun jälkitoimitustuotteet ovat valmiina noudettaviksi, " .
-      "tai kun työmääräys on valmis");
+    t("Ei lähetetä asiakkaalle vahvistusviestiä");
   $ulos .= "<option value = 'Y' $sel>" .
     t("Lähetetään asiakkaalle tekstiviesti ja sähköposti, kun jälkitoimitustuotteet ovat " .
       "valmiina noudettaviksi, tai kun työmääräys on valmis");

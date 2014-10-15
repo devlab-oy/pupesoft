@@ -1621,8 +1621,8 @@ if ($tee == 'P') {
           $alatilak = "C";
         }
 
-        if ($yhtiorow['jt_ja_tyomaarays_valmis_vahvistusviesti'] == "Y") {
-          require("../inc/jt_ja_tyomaarays_valmis_viesti.inc");
+        if ($yhtiorow['vahvistusviesti_asiakkaalle'] == "Y") {
+          require_once("inc/jt_ja_tyomaarays_valmis_viesti.inc");
           laheta_vahvistusviesti($zoner_tunnarit["username"], $zoner_tunnarit["salasana"], $id);
         }
 

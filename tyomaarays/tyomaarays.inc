@@ -303,7 +303,7 @@ if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == 'VALMI
   // jos kerättäviä tuotteita ei ole, muuten lähetys tapahtuu keräys.php:ssä
   $ei_kerattavia_riveja = (isset($kerattavia) and $kerattavia == 0);
 
-  if ($yhtiorow['jt_ja_tyomaarays_valmis_vahvistusviesti'] == "Y" and $ei_kerattavia_riveja) {
+  if ($yhtiorow['vahvistusviesti_asiakkaalle'] == "Y" and $ei_kerattavia_riveja) {
     require("../inc/jt_ja_tyomaarays_valmis_viesti.inc");
     laheta_vahvistusviesti($zoner_tunnarit["username"],
       $zoner_tunnarit["salasana"],

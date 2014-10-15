@@ -1618,7 +1618,7 @@ if ($tee == 'P') {
 
         if ($_siirtolista) {
 
-          $query = "SELECT SUM(IF(varattu = 0, 1, 0)) keraamaton, COUNT(*) kaikki
+          $query = "SELECT COUNT(IF(varattu = 0, 1, 0)) keraamaton, COUNT(*) kaikki
                     FROM tilausrivi
                     WHERE yhtio = '{$kukarow['yhtio']}'
                     AND otunnus = '{$laskurow['tunnus']}'

@@ -84,7 +84,6 @@ if (isset($submit)) {
                 AND tunnus IN ({$rullat_kontissa})";
       pupe_query($query);
 
-
       $parametrit = kontitus_parametrit($rullat_kontissa);
 
       if ($parametrit) {
@@ -92,32 +91,25 @@ if (isset($submit)) {
         $parametrit['kontitus_info']['konttinumero'] = $konttinumero;
         $parametrit['kontitus_info']['sinettinumero'] = $sinettinumero;
         $sanoma = laadi_edifact_sanoma($parametrit);
-
-        echo $sanoma;die;
-
-
       }
       else {
         $errors[] = t("Tilausta ei löytynyt!");
       }
 
+echo $sanoma;
+
       if ($sanoma) {
         $lahetys = 'X';
         if (laheta_sanoma($sanoma)) {
           $lahetys = 'OK';
-          $view = 'lahetetty';
         }
         else {
           $errors[] = t("Lähetys ei onnistunut");
-          $view = 'kontituslista';
         }
       }
       else {
         $errors[] = t("Ei sanomaa");
-        $view = 'kontituslista';
       }
-
-
     }
     else {
       $errors[] = t("Syötä konttitiedot");

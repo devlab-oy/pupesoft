@@ -54,6 +54,9 @@ function kontit_rullineen($konttiviite) {
 }
 
 function laheta_sanoma($sanoma){
+
+return true;
+
   global $kukarow, $ftp_info;
 
   $host = $ftp_info['host'];
@@ -246,6 +249,7 @@ function kontitus_parametrit($rullat_kontissa) {
             ss.massa as paino,
             trlt.juoksu,
             trlt.asiakkaan_rivinumero as rivinro,
+            lasku.asiakkaan_tilausnumero as tilauskoodi,
             laskun_lisatiedot.matkakoodi,
             laskun_lisatiedot.konttiviite
             FROM tilausrivi AS tr
@@ -270,7 +274,10 @@ function kontitus_parametrit($rullat_kontissa) {
   $total_paino = 0;
 
   while ($row = mysql_fetch_assoc($result)) {
-    $rullarivit[$rulla['rivinro']][] = $row;
+
+    $index = $row['tilauskoodi'] . ":" .$row['rivinro'];
+
+    $rullarivit[$index][] = $row;
     $total_paino = $total_paino + $row['paino'];
 
     $matkakoodi = $row['matkakoodi'];
@@ -547,7 +554,7 @@ function laadi_edifact_sanoma($parametrit) {
       $s .= ":203'";
       $segmentit++;
 
-      $s .= "RFF+CU:" . $tilauskoodi . ":" . $key . "'";
+      $s .= "RFF+CU:" . $key . "'";
       $segmentit++;
 
       $s .= "RFF+TN:1'";

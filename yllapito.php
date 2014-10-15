@@ -124,7 +124,9 @@ if (array_key_exists($toim, $psx_ohjelmat)) {
 
   $psx_url = $psx_ohjelmat[$toim];
 
-  echo "<font class='error'>",t("%s ylläpito on siirtynyt %s", '', $toim, $psx_url),"</font>";
+  echo "<a href='{$psx_url}'>";
+  echo t("%s ylläpito on siirtynyt uuteen ympäristöön", '', $toim);
+  echo " &raquo;</a>";
 
   require "inc/footer.inc";
   exit;

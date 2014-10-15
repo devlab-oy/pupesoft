@@ -47,6 +47,17 @@ class LumoClient {
         $this->_error_count++;
       }
 
+      $this->log("Bindataan socketti...");
+
+      if (socket_bind($this->_socket, "0.0.0.0")) {
+        $this->log("Socketti bindattu");
+      }
+      else {
+
+        $socket_last_error = socket_last_error($this->_socket);
+        $this->log("Bindauksessa tapahtui seuraava virhe: " . socket_strerror($socket_last_error));
+      }
+
       $this->log("Yhdistetään '$address' porttiin '$service_port'...");
       $this->_connection = socket_connect($this->_socket, $address, $service_port);
       if ($this->_connection === false) {

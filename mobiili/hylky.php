@@ -23,12 +23,33 @@ if (isset($submit)) {
     if ($parametrit) {
       $parametrit['laji'] = 'hylky';
       $sanoma = laadi_edifact_sanoma($parametrit);
-
-      echo $sanoma;die;
     }
     else{
       $errors[] = t("Sarjanumerolla ei löytynyt mitään.");
     }
+
+    if ($sanoma) {
+      if (laheta_sanoma($sanoma)) {
+
+        $lahetys = 'OK';
+        $viesti = "Sarjanumero $sarjanumero on hylätty.";
+
+        $query = "UPDATE sarjanumeroseuranta
+                  SET lisatieto = 'Hylätty'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND sarjanumero = '{$sarjanumero}'";
+        pupe_query($query);
+
+      }
+      else{
+        $errors[] = t("Lähetys ei onnistunut");
+      }
+    }
+    else{
+      $errors[] = t("Ei sanomaa");
+    }
+
+
 
   }
 }
@@ -47,6 +68,14 @@ if (count($errors) > 0) {
   }
   echo "</div>";
 }
+
+
+if ($lahetys == 'OK') {
+  echo "<div style='text-align:center;'>";
+  echo $viesti;
+  echo "</div>";
+}
+
 
 echo "
 <form method='post' action='hylky.php'>

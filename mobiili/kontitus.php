@@ -8,25 +8,28 @@ $mobile = true;
 if (@include_once "../inc/parametrit.inc");
 elseif (@include_once "inc/parametrit.inc");
 
+require 'generoi_edifact.inc';
+
 $errors = array();
 
 if (isset($submit)) {
 
   switch ($submit) {
-  case 'tilausnumero':
-    if (empty($tilausnumero)) {
-      $errors[] = t("Syötä tilausnumero");
-      $view = 'tilausnumero';
+
+  case 'konttiviite':
+    if (empty($konttiviite)) {
+      $errors[] = t("Syötä konttiviite");
+      $view = 'konttiviite';
     }
     else {
 
-      $tilauksen_rullat = tilauksen_rullat($tilausnumero);
+      $kontit_rullineen = kontit_rullineen($konttiviite);
 
-      if ($tilauksen_rullat === false) {
+      if ($kontit_rullineen === false) {
         $errors[] = t("Tilausnumerolla ei löydy tilausta.");
         $view = 'tilausnumero';
       }
-      elseif(count($tilauksen_rullat) == 0) {
+      elseif(count($kontit_rullineen) == 0) {
         $errors[] = t("Tilausksella ei ole kontitettavia rullia.");
         $view = 'tilausnumero';
       }
@@ -35,22 +38,18 @@ if (isset($submit)) {
       }
     }
     break;
+
   case 'kontitus':
     $query = "UPDATE tilausrivi SET
               keratty = '{$kukarow['kuka']}',
               kerattyaika = NOW()
-              WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$rivitunnus}'";
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$rivitunnus}'";
     pupe_query($query);
-
-    $tilauksen_rullat = tilauksen_rullat($tilausnumero);
-
-    if(count($tilauksen_rullat) == 0) {
-      $view = 'vahvistus';
-    }
-    else{
-      $view = 'kontituslista';
-    }
+    $kontit_rullineen = kontit_rullineen($konttiviite);
+    $view = 'kontituslista';
     break;
+
   case 'sarjanumero':
     $query = "SELECT myyntirivitunnus
               FROM sarjanumeroseuranta
@@ -62,30 +61,81 @@ if (isset($submit)) {
     $query = "UPDATE tilausrivi SET
               keratty = '{$kukarow['kuka']}',
               kerattyaika = NOW()
-              WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$rivitunnus}'";
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$rivitunnus}'";
     pupe_query($query);
 
-    $tilauksen_rullat = tilauksen_rullat($tilausnumero);
-
-    if(count($tilauksen_rullat) == 0) {
-      $view = 'vahvistus';
-    }
-    else{
-      $view = 'kontituslista';
-    }
+    $kontit_rullineen = kontit_rullineen($konttiviite);
+    $view = 'kontituslista';
     break;
+
   case 'vahvista':
     $view = 'vahvistus';
     break;
+
+  case 'konttitiedot':
+    if (isset($sinettinumero) and isset($konttinumero)) {
+
+      $rullat_kontissa = rtrim($rullat_kontissa,",");
+
+      $query = "UPDATE tilausrivi
+                SET toimitettu = '{$konttinumero}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus IN ({$rullat_kontissa})";
+      pupe_query($query);
+
+
+      $parametrit = kontitus_parametrit($rullat_kontissa);
+
+      if ($parametrit) {
+        $parametrit['laji'] = 'kontitus';
+        $parametrit['kontitus_info']['konttinumero'] = $konttinumero;
+        $parametrit['kontitus_info']['sinettinumero'] = $sinettinumero;
+        $sanoma = laadi_edifact_sanoma($parametrit);
+
+        echo $sanoma;die;
+
+
+      }
+      else {
+        $errors[] = t("Tilausta ei löytynyt!");
+      }
+
+      if ($sanoma) {
+        $lahetys = 'X';
+        if (laheta_sanoma($sanoma)) {
+          $lahetys = 'OK';
+          $view = 'lahetetty';
+        }
+        else {
+          $errors[] = t("Lähetys ei onnistunut");
+          $view = 'kontituslista';
+        }
+      }
+      else {
+        $errors[] = t("Ei sanomaa");
+        $view = 'kontituslista';
+      }
+
+
+    }
+    else {
+      $errors[] = t("Syötä konttitiedot");
+    }
+    $kontit_rullineen = kontit_rullineen($konttiviite);
+    $view = 'kontituslista';
+    break;
+
   case 'takaisin':
     echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=index.php'>";
     die;
+
   default:
     $errors[] = 'error';
   }
 }
 else {
-  $view = 'tilausnumero';
+  $view = 'konttiviite';
 }
 
 echo "
@@ -101,46 +151,42 @@ foreach ($errors as $error) {
 }
 echo "</div>";
 
-if ($view == 'tilausnumero') {
+
+
+
+
+
+if ($view == 'konttiviite') {
   echo "
   <form method='post' action=''>
     <div style='text-align:center;padding:10px;'>
-      <label for='tilausnumero'>", t("Tilausnumero"), "</label><br>
-      <input type='text' id='tilausnumero' name='tilausnumero' style='margin:10px;' />
+      <label for='konttiviite'>", t("Konttiviite"), "</label><br>
+      <input type='text' id='konttiviite' name='konttiviite' style='margin:10px;' />
       <br>
-      <button name='submit' value='tilausnumero' onclick='submit();' class='button'>", t("OK"), "</button>
+      <button name='submit' value='konttiviite' onclick='submit();' class='button'>", t("OK"), "</button>
     </div>
   </form>
 
   <script type='text/javascript'>
     $(document).ready(function() {
-      $('#tilausnumero').focus();
+      $('#konttiviite').focus();
     });
   </script>";
 }
 
-if ($view == 'vahvistus') {
-  echo "
-  <form method='post' action=''>
-    <div style='text-align:center;padding:10px;'>
-      <label for='konttinumero'>", t("Konttinumero"), "</label><br>
-      <input type='text' id='konttinumero' name='konttinumero' style='margin:10px;' /><br>
-      <label for='sinettinumero'>", t("Sinettinumero"), "</label><br>
-      <input type='text' id='sinettinumero' name='sinettinumero' style='margin:10px;' /><br>
-      <button name='submit' value='vahvista' onclick='submit();' class='button'>", t("Vahvista"), "</button>
-    </div>
-  </form>";
-}
+
+
+
+
 
 if ($view == 'kontituslista') {
-
 
   echo "
   <form method='post' action=''>
     <div style='text-align:center;padding:10px;'>
       <label for='sarjanumero'>", t("Sarjanumero"), "</label><br>
       <input type='text' id='sarjanumero' name='sarjanumero' style='margin:10px;' />
-      <input type='hidden' name='tilausnumero' value='{$tilausnumero}' />
+      <input type='hidden' name='konttiviite' value='{$konttiviite}' />
       <br>
       <button name='submit' value='sarjanumero' onclick='submit();' class='button'>", t("OK"), "</button>
     </div>
@@ -152,87 +198,83 @@ if ($view == 'kontituslista') {
     });
   </script>";
 
-
-
   echo "<div style='text-align:center;padding:10px;'>";
 
-  $keraamattomat = 0;
 
-  foreach ($tilauksen_rullat as $key => $lista) {
-    echo 'Tilauksen ' . $key . ' rullat :<br><br>';
-    foreach ($lista as $rulla) {
 
-      if ($rulla['keratty'] == '') {
-        echo  "Rulla  {$rulla['sarjanumero']}  ({$rulla['tunnus']})
-        <form method='post' action='kontitus.php'>
-          <input type='hidden' name='rivitunnus' value='{$rulla['tunnus']}' />
-          <input type='hidden' name='tilausnumero' value='{$tilausnumero}' />
-          <button name='submit' value='kontitus' onclick='submit();' class='button'>", t("Kontita"), "</button>
-        </form><br>";
+    foreach ($kontit_rullineen as $key => $kontti) {
 
-        $keraamattomat++;
+      echo "<a name='{$key}'><h1>{$key}</h1></a><br>";
+
+      $keraamattomat = 0;
+      $rullat_kontissa = '';
+      $kontitettu = true;
+
+      foreach ($kontti as $rulla) {
+        if ($rulla['keratty'] == '') {
+          echo "
+          Rulla  {$rulla['sarjanumero']}
+          <form method='post' action='kontitus.php#{$key}'>
+            <input type='hidden' name='rivitunnus' value='{$rulla['tunnus']}' />
+            <input type='hidden' name='konttiviite' value='{$konttiviite}' />
+            <button name='submit' value='kontitus' onclick='submit();' class='button'>", t("Kontita"), "</button>
+          </form><br>";
+          $keraamattomat++;
+        }
+        else{
+          echo  "Rulla  {$rulla['sarjanumero']} Kerätty!<br>";
+          $rullat_kontissa .= $rulla['tunnus'] . ',';
+        }
+        if ($rulla['toimitettu'] == '') {
+          $kontitettu = false;
+        }
       }
-      else{
-        echo  "Rulla  {$rulla['sarjanumero']}  ({$rulla['tunnus']}) Kerätty!<br>";
+
+      if ($keraamattomat == 0 and $kontitettu === false) {
+        echo "
+        <br>
+        Kaikki kontin rullat kerätty. Syötä kontin tiedot:<br>
+
+        <form method='post' action=''>
+          <div style='text-align:center;padding:10px;'>
+            <label for='konttinumero'>", t("Konttinumero"), "</label><br>
+            <input type='text' id='konttinumero' name='konttinumero' style='margin:10px;' /><br>
+            <label for='sinettinumero'>", t("Sinettinumero"), "</label><br>
+            <input type='text' id='sinettinumero' name='sinettinumero' style='margin:10px;' /><br>
+            <input type='hidden' name='konttiviite' value='{$konttiviite}' />
+            <input type='hidden' name='rullat_kontissa' value='{$rullat_kontissa}' />
+            <button name='submit' value='konttitiedot' onclick='submit();' class='button'>", t("Lähetä kontitussanoma"), "</button>
+          </div>
+        </form>";
+
       }
+      elseif ($keraamattomat == 0 and $kontitettu === true) {
+        echo "
+        <br>
+        Kaikki kontin rullat kerätty ja kontitettu.
+        <br>
+        Kontitussanoma lähetetty.
+        <br>
+        Kontti#: {$kontti[$key]['toimitettu']}
+        <br><br>";
+      }
+
+      echo "<hr>";
     }
-  }
-
-  if ($keraamattomat == 0) {
-    echo "
-    <br>
-    Kaikki tilauksen rullat kerätty.<br>
-    <form method='post' action='kontitus.php'>
-      <input type='hidden' name='tilausnumero' value='{$tilausnumero}' />
-      <button name='submit' value='vahvista' onclick='submit();' class='button'>", t("Vahvista"), "</button>
-    </form>";
-  }
 
   echo "</div>";
 }
 
+
+
+
+if ($view == 'lahetetty') {
+  echo "<div style='text-align:center;'>";
+  echo "Sanoma lähetetty.";
+  echo "</div>";
+}
+
+
+
 require 'inc/footer.inc';
 
-
-function tilauksen_rullat($tilausnumero) {
-  global $kukarow;
-
-  // Katsotaan löytyykö tilaus
-  $query = "SELECT *
-            FROM lasku
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tila = 'L'
-            AND alatila = 'A'
-            AND asiakkaan_tilausnumero = '{$tilausnumero}'";
-  $result = pupe_query($query);
-
-  if (mysql_num_rows($result) == 0) {
-    return false;
-  }
-  else{
-
-    while($tilaus = mysql_fetch_assoc($result)){
-      $tilaukset[] = $tilaus;
-    }
-
-    foreach ($tilaukset as $tilaus) {
-
-      $query = "SELECT ss.sarjanumero, tr.tunnus, tr.keratty
-                FROM lasku AS la
-                JOIN tilausrivi AS tr
-                  ON tr.yhtio = la.yhtio AND tr.otunnus = la.tunnus
-                JOIN sarjanumeroseuranta AS ss
-                  ON ss.yhtio = tr.yhtio AND ss.myyntirivitunnus = tr.tunnus
-                WHERE la.yhtio = '{$kukarow['yhtio']}'
-                AND la.tunnus = '{$tilaus['tunnus']}'";
-      $result = pupe_query($query);
-
-      $tilauksen_rullat = array();
-
-      while ($row = mysql_fetch_assoc($result)) {
-        $tilauksen_rullat[$tilaus['asiakkaan_tilausnumero']][] = $row;
-      }
-    }
-    return $tilauksen_rullat;
-  }
-}

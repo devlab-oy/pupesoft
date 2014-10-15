@@ -68,8 +68,8 @@ foreach ($errors as $error) {
 }
 echo "</div>";
 
-if ($lahetys == 'OK';) {
-  echo "<div>";
+if ($lahetys == 'OK') {
+  echo "<div style='text-align:center;'>";
   echo "Sanoma lähetetty!";
   echo "</div>";
 }

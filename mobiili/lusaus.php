@@ -12,6 +12,8 @@ if (!isset($errors)) $errors = array();
 
 if (isset($submit)) {
 
+  $lahetys = 'X';
+
   if (empty($sarjanumero)) {
     $errors[] = t("Syötä sarjanumero");
   }
@@ -41,7 +43,7 @@ if (isset($submit)) {
 
     if ($parametrit) {
       $parametrit['poistettu_paino'] = $vanha_paino - $uusi_paino;
-      $parametrit['paino'] = $uusipaino;
+      $parametrit['paino'] = $uusi_paino;
       $parametrit['laji'] = 'lusaus';
       $sanoma = laadi_edifact_sanoma($parametrit);
     }
@@ -49,17 +51,36 @@ if (isset($submit)) {
       $errors[] = t("Sarjanumerolla ei löytynyt mitään.");
     }
 
-    $query = "UPDATE sarjanumeroseuranta
-              SET massa = '{$uusi_paino}'
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND sarjanumero = '{$sarjanumero}'";
-    pupe_query($query);
+    if ($sanoma) {
+      if (laheta_sanoma($sanoma)) {
 
-    $query_string = "?sarjanumero={$sarjanumero}&submit=sarjanumero";
-    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tuloutus_sarjanumero.php{$query_string}'>";
-    die;
+        $lahetys = 'OK';
+        $viesti = "Sarjanumeron $sarjanumero uudeksi painoksi on päivitetty $uusi_paino kg.";
+
+        $query = "UPDATE sarjanumeroseuranta
+                  SET massa = '{$uusi_paino}'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND sarjanumero = '{$sarjanumero}'";
+        pupe_query($query);
+
+      }
+      else{
+        $errors[] = t("Lähetys ei onnistunut");
+      }
+    }
+    else{
+      $errors[] = t("Ei sanomaa");
+    }
+
+    //$query_string = "?sarjanumero={$sarjanumero}&submit=sarjanumero";
+    //echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tuloutus_sarjanumero.php{$query_string}'>";
+    //die;
   }
 }
+
+
+
+
 
 echo "
 <div class='header'>
@@ -73,7 +94,7 @@ foreach ($errors as $error) {
 }
 echo "</div>";
 
-if (isset($sarjanumero) and count($errors) < 1) {
+if (isset($sarjanumero) and count($errors) < 1 and $lahetys != 'OK') {
 
   echo "
   <form method='post' action='lusaus.php'>
@@ -103,6 +124,13 @@ if (isset($sarjanumero) and count($errors) < 1) {
 
 }
 else {
+
+  if ($lahetys == 'OK') {
+    echo "<div style='text-align:center;'>";
+    echo $viesti;
+    echo "</div>";
+  }
+
 
   echo "
   <form method='post' action='lusaus.php'>

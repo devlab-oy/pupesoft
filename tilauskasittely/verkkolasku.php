@@ -1716,7 +1716,10 @@ else {
         // laskutus tarttee kukarow[kesken]
         $kukarow['kesken']=$row['tunnus'];
 
-        tee_kirjanpidollinen_varastosiirto($row['tunnus']);
+        $_poikkeavalaskutuspvm = '';
+        if ($poikkeava_pvm != '') $_poikkeavalaskutuspvm = $laskvv."-".$laskkk."-".$laskpp;
+
+        tee_kirjanpidollinen_varastosiirto($row['tunnus'], $_poikkeavalaskutuspvm);
 
         require "laskutus.inc";
         $laskutetttu++;

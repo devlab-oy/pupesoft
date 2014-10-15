@@ -1614,6 +1614,10 @@ if ($tee == 'P') {
 
         if ($_siirtolista and $_siirrolla_ei_lahtoa and $_laaja_toimipaikka) {
           paivita_siirtolistan_toimipaikka($laskurow['tunnus']);
+
+          if ($keraamaton == count($kerivi)) {
+            $alatilak = "X";
+          }
         }
 
         // Lasku p‰ivitet‰‰n vasta kuin tilausrivit on p‰ivitetty...

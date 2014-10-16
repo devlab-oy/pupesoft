@@ -1121,7 +1121,7 @@ if (!function_exists('tyomaarays_print_pdf')) {
         require "sahkoposti.inc";
       }
     }
-    elseif ($tee == 'NAYTATILAUS') {
+    elseif ($tee == 'NAYTATILAUS' or $komento == "PDF_RUUDULLE") {
       //Työnnetään tuo pdf vaan putkeen!
       echo file_get_contents($pdffilenimi);
     }

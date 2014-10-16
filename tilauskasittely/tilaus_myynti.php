@@ -1403,6 +1403,8 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
       require "inc/valitse_tulostin.inc";
     }
 
+    if (isset($nayta_pdf)) $tee = "NAYTATILAUS";
+
     require_once 'tulosta_tarjous.inc';
 
     tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli,  $tee, '', $verolliset_verottomat_hinnat, $naytetaanko_rivihinta, $naytetaanko_tuoteno);
@@ -3457,7 +3459,7 @@ if ($tee == '') {
     if ($kukarow["oletus_asiakas"] != 0) {
       $query  = "SELECT *
                  FROM asiakas
-                 WHERE yhtio = '$kukarow[yhtio]' 
+                 WHERE yhtio = '$kukarow[yhtio]'
                  and tunnus  = '$kukarow[oletus_asiakas]'";
       $result = pupe_query($query);
 
@@ -3475,7 +3477,7 @@ if ($tee == '') {
     }
 
     if ($toim == "PIKATILAUS") {
-      
+
       if ($yhtiorow['pikatilaus_focus'] == 'A' and isset($indexvas) and $indexvas == 1) {
         $kentta = 'syotetty_ytunnus';
       }

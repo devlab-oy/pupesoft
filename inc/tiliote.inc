@@ -125,9 +125,17 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
 
         $_tilisiirto   = stripos($koodiselite, "TILISIIRTO");
         $_maksupalvelu = stripos($koodiselite, "MAKSUPALVELU");
+        $_luoton_nosto = stripos($koodiselite, "PANO LUOTON NOSTOSTA");
+        $_lainan_hoito = stripos($koodiselite, "LAINAN TAKAISINMAKSU");
+        //$_muut_sallitut = TRUE;
 
-        // 706 hyväksytään vain jos selitteessä lukee MAKSUPALVELU tai TILISIIRTO
-        if ($koodi == "706" and $_maksupalvelu === FALSE and $_tilisiirto === FALSE) {
+        // 706 hyväksytään vain jos selitteessä lukee MAKSUPALVELU, TILISIIRTO,
+        //      PANO LUOTON NOSTOSTA tai LAINAN TAKAISINMAKSU
+        if ($koodi == "706" 
+          and $_maksupalvelu === FALSE 
+          and $_tilisiirto === FALSE
+          and $_muut_sallitut === FALSE
+          and $_lainan_hoito === FALSE) {
           break;
         }
 
@@ -400,6 +408,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
   }
   else {
     // Miksi ei tiliöity?
+
     if ($kuittikoodi != ' ') {
       echo "<font class='message'>".t("Hylätty, koska erittely tulossa")." ($kuittikoodi) </font><br>\n";
 

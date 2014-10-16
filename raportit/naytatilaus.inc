@@ -27,6 +27,8 @@ if (!isset($kieli)) $kieli = "";
 if (!isset($tee)) $tee = "";
 $toimittajan_ostotilaus = array();
 
+$_asiakkaantilaus = (strpos($_SERVER['SCRIPT_NAME'], "asiakkaantilaukset.php") !== FALSE);
+
 $query = "SELECT lasku.*,
           laskun_lisatiedot.laskutus_nimi,
           laskun_lisatiedot.laskutus_nimitark,
@@ -473,7 +475,7 @@ if ($laskurow["sisviesti2"] != "" and $kukarow["extranet"] == "") {
 
   $pregit = FALSE;
 
-  if (strpos($_SERVER['SCRIPT_NAME'], "asiakkaantilaukset.php") !== FALSE and (preg_match_all("/Tilaus jakaantunut [0-9]* tilaukseksi: ([0-9, ]*) Tilaus:/", $laskurow['sisviesti2'], $tilausnumerotlista))) {
+  if ($_asiakkaantilaus and (preg_match_all("/Tilaus jakaantunut [0-9]* tilaukseksi: ([0-9, ]*) Tilaus:/", $laskurow['sisviesti2'], $tilausnumerotlista))) {
     foreach ($tilausnumerotlista[1] as $tilausnumerolis) {
       foreach (explode(",", $tilausnumerolis) as $tilnro) {
 
@@ -686,7 +688,7 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
   $lopetus = $palvelin2;
   $lopetus .= "raportit/asiakkaantilaukset.php";
   $lopetus .= "////tee=NAYTATILAUS";
-  $lopetus .= "//toim=$toim";
+  $lopetus .= "//toim=OSTO";
   $lopetus .= "//asiakasid=$asiakasid";
   $lopetus .= "//toimittajaid=$toimittajaid";
   $lopetus .= "//laskunro=$laskunro";
@@ -1312,10 +1314,19 @@ else {
       }
     }
 
+    $_myyntispessut = (in_array($toim, array('LASKU','TILAUSVAHVISTUS','LAHETE')));
+
     $lopetus = $palvelin2;
     $lopetus .= "raportit/asiakkaantilaukset.php";
     $lopetus .= "////tee=NAYTATILAUS";
-    $lopetus .= "//toim=$toim";
+
+    if (!$_asiakkaantilaus and $_myyntispessut) {
+      $lopetus .= "//toim=MYYNTI";
+    }
+    else {
+      $lopetus .= "//toim=$toim";
+    }
+
     $lopetus .= "//asiakasid=$asiakasid";
     $lopetus .= "//toimittajaid=$toimittajaid";
     $lopetus .= "//laskunro=$laskunro";

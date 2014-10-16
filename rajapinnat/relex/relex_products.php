@@ -354,18 +354,40 @@ while ($row = mysql_fetch_assoc($res)) {
                AND tilausrivi.tyyppi         = 'O'
                AND tilausrivi.tuoteno        = '{$row['tuoteno']}'
                AND tilausrivi.laskutettuaika > date_sub(current_date, interval 1 year)
+               HAVING toimitusaika > 0
                ORDER BY laskutettuaika desc
                LIMIT 5";
       $emares = pupe_query($emaq);
 
-      $ema = 0;
+      $ema_tulot = array();
+      $ema       = 0;
+      $alfa      = 0.35;
 
       if (mysql_num_rows($emares)) {
         while ($emarow = mysql_fetch_assoc($emares)) {
-          $ema += $emarow["toimitusaika"];
+          $ema_tulot[] = $emarow["toimitusaika"];
         }
 
-        $ema = round($ema / mysql_num_rows($emares));
+        $ema_tulot = array_reverse($ema_tulot);
+        $ema_maara = count($ema_tulot);
+
+        // Ema ekan tulos perusteella on sama kuin ekan tulon toimitusaika
+        $ema = $ema_tulot[0];
+
+        if ($ema_maara > 1) {
+
+          $poikpros = array();
+
+          for ($i = 1; $i < $ema_maara; $i++) {
+            $ema = $alfa * $ema_tulot[$i] + (1 - $alfa) * $ema;
+            $poikpros[] = abs($ema - $ema_tulot[$i]) / $ema;
+          }
+
+          // EMA:n ja toimitusajan poikkeamaprossat keskimäärin
+          $avg_poikpros = array_sum($poikpros) / count($poikpros);
+
+          $korjattu_ema = round($ema * (1 + $avg_poikpros / 2), 2);
+        }
       }
 
       // Hetaan kaikki ostohinnat yhtiön oletusvaluutassa
@@ -419,7 +441,7 @@ while ($row = mysql_fetch_assoc($res)) {
       $trivi .= "{$ttrow['toim_yksikko']};";
       $trivi .= "{$ttrow['tuotekerroin']};";
       $trivi .= "{$ttrow['jarjestys']};";
-      $trivi .= "$ema";
+      $trivi .= "$korjattu_ema";
       $trivi .= "\n";
 
       fwrite($tfp, $trivi);

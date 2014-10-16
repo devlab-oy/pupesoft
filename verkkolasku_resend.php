@@ -239,7 +239,7 @@ if ($handle = opendir($kansio)) {
       continue;
     }
 
-    $status = apix_invoice_put_file("", $kukarow['kieli'], $lasku);
+    $status = apix_invoice_put_file(TRUE, "", "", $lasku);
     echo "APIX-lähetys $status<br>\n";
   }
 

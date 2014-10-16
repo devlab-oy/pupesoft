@@ -359,9 +359,10 @@ while ($row = mysql_fetch_assoc($res)) {
                LIMIT 5";
       $emares = pupe_query($emaq);
 
-      $ema_tulot = array();
-      $ema       = 0;
-      $alfa      = 0.35;
+      $ema_tulot    = array();
+      $ema          = 0;
+      $alfa         = 0.35;
+      $korjattu_ema = 0;
 
       if (mysql_num_rows($emares)) {
         while ($emarow = mysql_fetch_assoc($emares)) {

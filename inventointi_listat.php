@@ -1286,6 +1286,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
         echo "<table>";
         echo "<tr><th>".t("Tallenna Excel-tiedosto").":</th>";
         echo "<form method='post' class='multisubmit'>";
+        echo "<input type='hidden' name='toim' value='$toim'>";
         echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
         echo "<input type='hidden' name='kaunisnimi' value='$lopullinen_nimi'>";
         echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";

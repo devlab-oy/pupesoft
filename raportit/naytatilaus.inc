@@ -1314,25 +1314,27 @@ else {
       }
     }
 
-    $_myyntispessut = (in_array($toim, array('LASKU','TILAUSVAHVISTUS','LAHETE')));
+    $_myyntispessut = (in_array($toim, array('LASKU','TILAUSVAHVISTUS','LAHETE','TYOMAARAYS')));
 
     $lopetus = $palvelin2;
     $lopetus .= "raportit/asiakkaantilaukset.php";
     $lopetus .= "////tee=NAYTATILAUS";
-
-    if (!$_asiakkaantilaus and $_myyntispessut) {
-      $lopetus .= "//toim=MYYNTI";
-    }
-    else {
-      $lopetus .= "//toim=$toim";
-    }
-
     $lopetus .= "//asiakasid=$asiakasid";
     $lopetus .= "//toimittajaid=$toimittajaid";
     $lopetus .= "//laskunro=$laskunro";
     $lopetus .= "//lasku_yhtio=$row[yhtio]";
     $lopetus .= "//ytunnus=$ytunnus";
     $lopetus .= "//tunnus=$tunnus";
+    
+    if (!$_asiakkaantilaus and $_myyntispessut) {
+      $lopetus .= "//toim=MYYNTI";
+    }
+    elseif ($_asiakkaantilaus) {
+      $lopetus .= "//toim=$toim";
+    }
+    else {
+      $lopetus = '';
+    }
 
     if ($kukarow['extranet'] == '') {
       echo "<td $class valign='top'><a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($row["tuoteno"])."&lopetus=$lopetus'>$row[tuoteno]</a></td>";

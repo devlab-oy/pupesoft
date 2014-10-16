@@ -1616,6 +1616,22 @@ if ($tee == 'P') {
           paivita_siirtolistan_toimipaikka($laskurow['tunnus']);
         }
 
+        if ($_siirtolista) {
+
+          $query = "SELECT SUM(varattu) keratty
+                    FROM tilausrivi
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND otunnus = '{$laskurow['tunnus']}'
+                    AND tyyppi  = 'G'
+                    AND var     not in ('P','J')";
+          $_keraamaton_chk_res = pupe_query($query);
+          $_ker_chk_row = mysql_fetch_assoc($_keraamaton_chk_res);
+
+          if ($_ker_chk_row['keratty'] == 0) {
+            $alatilak = 'X';
+          }
+        }
+
         // Lasku p‰ivitet‰‰n vasta kuin tilausrivit on p‰ivitetty...
         $query  = "UPDATE lasku SET
                    alatila     = '$alatilak'
@@ -2018,6 +2034,7 @@ if ($tee == 'P') {
           $query = "UPDATE lasku
                     SET alatila = 'B'
                     WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND alatila != 'X'
                     AND tunnus  IN ({$tilausnumeroita_backup})";
           $alatila_upd_res = pupe_query($query);
         }

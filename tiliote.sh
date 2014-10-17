@@ -54,6 +54,10 @@ fi
 
 for file in `find "${local_dir}" -maxdepth 1 -type f`
 do
+
+  # Poistetaan polku filenamesta
+  file=`basename ${file}`
+
   # Tehdään timestamp
   timestamp=$( date +%Y%d%m-%H%M%S )
 

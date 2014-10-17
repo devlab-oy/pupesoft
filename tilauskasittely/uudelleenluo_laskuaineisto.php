@@ -63,7 +63,8 @@ if (isset($tee) and $tee == "apix_siirto") {
       $apix_laskut_20l[$invoice_number[1]] = "<?xml version=\"1.0\"".$apix_laskuarray[$a];
 
       if (count($apix_laskut_20l) == 20 or $a == ($apix_laskumaara-1)) {
-        echo apix_invoice_put_file($apix_laskut_20l, $kieli);
+        // Laitetaan laskut lähetysjonoon
+        echo apix_invoice_put_file(FALSE, $apix_laskut_20l, $kieli);
 
         // Nollataan tämä
         $apix_laskut_20l = array();

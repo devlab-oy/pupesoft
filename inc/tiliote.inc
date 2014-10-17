@@ -127,14 +127,12 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
         $_maksupalvelu = stripos($koodiselite, "MAKSUPALVELU");
         $_luoton_nosto = stripos($koodiselite, "PANO LUOTON NOSTOSTA");
         $_lainan_hoito = stripos($koodiselite, "LAINAN TAKAISINMAKSU");
-        //$_muut_sallitut = TRUE;
 
         // 706 hyv‰ksyt‰‰n vain jos selitteess‰ lukee MAKSUPALVELU, TILISIIRTO,
         //      PANO LUOTON NOSTOSTA tai LAINAN TAKAISINMAKSU
-        if ($koodi == "706" 
-          and $_maksupalvelu === FALSE 
+        if ($koodi == "706"
+          and $_maksupalvelu === FALSE
           and $_tilisiirto === FALSE
-          and $_muut_sallitut === FALSE
           and $_lainan_hoito === FALSE) {
           break;
         }

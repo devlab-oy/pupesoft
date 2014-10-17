@@ -15,8 +15,11 @@
  *    array(
  *      "header_teksti"     => false,
  *      "footer_teksti"     => false,
- *      "avaa_lipas_lopuksi => false
+ *      "avaa_lipas_lopuksi => false,
+ *      "kateinen"          => false
  *    );
+ *
+ * @return bool
  */
 function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array()) {
   global $yhtiorow;
@@ -27,12 +30,18 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
   $footer_teksti      = empty($params["footer_teksti"]) ? false : $params["footer_teksti"];
   $header_teksti      = empty($params["header_teksti"]) ? false : $params["header_teksti"];
+  $kateinen           = empty($params["kateinen"]) ? false : hintapyoristys($params["kateinen"]);
   $avaa_lipas_lopuksi = $params["avaa_lipas_lopuksi"];
 
-  $lasku                = hae_myyntilasku($laskunro);
-  $maksupaatetapahtumat = hae_maksupaatetapahtumat($laskunro);
+  list($maksupaatetapahtumat, $maksupaatesumma) = hae_maksupaatetapahtumat($laskunro);
   list($tilausrivit, $tilausnumerot, $verot) = hae_tilausrivit($laskunro);
+  $lasku = hae_myyntilasku($laskunro);
   list($yhteensa, $pyoristys, $loppusumma) = summat($lasku);
+
+  if ($kateinen) {
+    $takaisin = $kateinen - $loppusumma;
+    $takaisin = hintapyoristys($takaisin);
+  }
 
   // Escape sequencejä printterille
   $logo           = "\x1C\x70\x01\x10";
@@ -60,6 +69,18 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   if ($pyoristys) {
     $pyoristys  = sprintf("%33.33s", $pyoristys);
     $loppusumma = sprintf("%32.32s", $loppusumma);
+  }
+
+  if ($maksupaatesumma != 0) {
+    $maksupaatesumma = sprintf("%36.36s", $maksupaatesumma);
+  }
+
+  if ($kateinen != 0) {
+    $kateinen = sprintf("%34.34s", $kateinen);
+
+    if (isset($takaisin)) {
+      $takaisin = sprintf("%34.34s", $takaisin);
+    }
   }
 
   $verorivit = array();
@@ -115,6 +136,19 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
     $kuitin_teksti .= "{$emphasized_on}LOPPUSUMMA{$loppusumma}{$emphasized_off}\n";
   }
 
+  // Maksutapaerottelu
+  if ($maksupaatesumma != 0) {
+    $kuitin_teksti .= t("KORTTI") . "{$maksupaatesumma}\n";
+  }
+
+  if ($kateinen != 0) {
+    $kuitin_teksti .= t("KÄTEINEN") . "{$kateinen}\n";
+
+    if (isset($takaisin)) {
+      $kuitin_teksti .= t("TAKAISIN") . "{$takaisin}\n";
+    }
+  }
+
   // Verotiedot
   $kuitin_teksti .= "\nALV         NETTO        VERO       BRUTTO\n";
 
@@ -165,6 +199,8 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   }
 
   lpr($kuitin_teksti, $tulostimen_tunnus);
+
+  return true;
 }
 
 function hae_myyntilasku($laskunro) {
@@ -211,12 +247,14 @@ function hae_maksupaatetapahtumat($laskunro) {
   $result = pupe_query($query);
 
   $tapahtumat = array();
+  $summa      = 0;
 
   while ($tapahtuma = mysql_fetch_assoc($result)) {
     array_push($tapahtumat, $tapahtuma);
+    $summa += $tapahtuma["summa_valuutassa"];
   }
 
-  return $tapahtumat;
+  return array($tapahtumat, hintapyoristys($summa));
 }
 
 function hae_tilausrivit($laskunro) {

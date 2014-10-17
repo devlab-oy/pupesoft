@@ -19,6 +19,16 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
+if ($tulosta_kuitti) {
+  require "tilauskasittely/tulosta_asiakkaan_kuitti.inc";
+
+  $kuitin_parametrit = array(
+    "kateinen" => $kateisraha
+  );
+
+  tulosta_asiakkaan_kuitti($laskunro, $kukarow["kuittitulostin"], $kuitin_parametrit);
+}
+
 if ($yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K" and isset($ajax_toiminto) and trim($ajax_toiminto) == 'tallenna_painoarvot') {
 
   foreach ($painoarvot as $tunnus => $painoarvo) {
@@ -1767,6 +1777,10 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
             </script>";
         echo "<table><form name='laskuri' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
 
+        if ($yhtiorow["maksupaate_kassamyynti"] == "K") {
+          echo "<input type='hidden' name='laskunro' value='{$laskurow["laskunro"]}'";
+        }
+
         if (!isset($kateismaksu['kateinen']) or $kateismaksu['kateinen'] == '') {
           $yhteensa_teksti = t("Yhteensä");
         }
@@ -1778,7 +1792,17 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
         echo "<tr><th>$yhteensa_teksti</th><td align='right'>$kaikkiyhteensa</td><td>$laskurow[valkoodi]</td></tr>";
         echo "<tr><th>".t("Annettu")."</th><td><input size='7' autocomplete='off' type='text' id='kateisraha' name='kateisraha' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
         echo "<tr><th>".t("Takaisin")."</th><td name='loppusumma' id='loppusumma' align='right'><strong>0.00</strong></td><td>$laskurow[valkoodi]</td></tr>";
-        echo "</form></table><br><br>";
+
+        if ($yhtiorow["maksupaate_kassamyynti"] == "K") {
+          echo "<tr>
+                  <td class='back'>
+                    <input name='tulosta_kuitti' type='submit' value='" . t("Tulosta kuitti") . "'
+                  </td>
+                </tr>";
+
+          echo "</form></table><br><br>";
+        }
+
         $formi  = "laskuri";
         $kentta = "kateisraha";
       }

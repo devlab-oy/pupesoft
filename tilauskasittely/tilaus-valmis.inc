@@ -972,9 +972,11 @@ else {
       /**
        * Tulostetaan kassakuitti
        */
-      require "tilauskasittely/tulosta_asiakkaan_kuitti.inc";
+      if ((int) $kateismaksu["kateinen"] == 0) {
+        require "tilauskasittely/tulosta_asiakkaan_kuitti.inc";
 
-      tulosta_asiakkaan_kuitti($laskurow["laskunro"], $kukarow["kuittitulostin"]);
+        tulosta_asiakkaan_kuitti($laskurow["laskunro"], $kukarow["kuittitulostin"]);
+      }
 
       unset($valittu_tulostin);
     }

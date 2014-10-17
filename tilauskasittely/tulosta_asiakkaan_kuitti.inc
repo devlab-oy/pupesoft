@@ -338,30 +338,7 @@ function summat($lasku) {
 }
 
 function laske_yksikkohinta($tilausrivi) {
-  global $yhtiorow;
-
-  if ($yhtiorow["alv_kasittely"] == '') {
-    $laskalv = $tilausrivi["alv"];
-
-    if ($tilausrivi["alv"] >= 500) {
-      $laskalv = 0;
-    }
-
-    $ehto1 = $laskurow["valkoodi"] != '';
-    $ehto2 = trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]));
-
-    if ($ehto1 and $ehto2) {
-      $yksikkohinta = $tilausrivi["hinta"] / (1 + $laskalv / 100);
-    }
-    else {
-      $yksikkohinta = round($tilausrivi["hinta"] / (1 + $laskalv / 100), 2);
-    }
-  }
-  else {
-    $yksikkohinta = $tilausrivi["hinta"];
-  }
-
-  return $yksikkohinta;
+  return $tilausrivi["hinta"];
 }
 
 function tulosta_kauppiaan_kuitti($teksti, $tulostimen_tunnus) {

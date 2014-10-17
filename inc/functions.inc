@@ -24804,6 +24804,9 @@ if (!function_exists('hyllysiirto')) {
 
     if (!isset($params['tun'])) $error = true;
     else $tun = (int) $params['tun'];
+    
+    if (!isset($params['poikkeavalaskutuspvm'])) $_poikkeavalaskutuspvm = '';
+    else $_poikkeavalaskutuspvm = $params['poikkeavalaskutuspvm'];
 
     if ($error) return false;
 
@@ -24907,6 +24910,15 @@ if (!function_exists('hyllysiirto')) {
       $selite = "";
     }
 
+    if ($_poikkeavalaskutuspvm != '') {
+      $_laadittu = $_poikkeavalaskutuspvm." 23:59:59";
+      $_tapvm = $_poikkeavalaskutuspvm;
+    }
+    else {
+      $_laadittu = date("Y-m-d H:i:s");
+      $_tapvm = date("Y-m-d");
+    }
+
     $query = "INSERT into tapahtuma set
               yhtio      = '{$kukarow['yhtio']}',
               tuoteno    = '{$tuoteno}',
@@ -24920,7 +24932,7 @@ if (!function_exists('hyllysiirto')) {
               rivitunnus = {$tun},
               selite     = '".t("Paikalta")." {$mista_texti} ".t("vähennettiin")." {$kappaleet}{$selite}',
               laatija    = '{$kukarow['kuka']}',
-              laadittu   = now()";
+              laadittu   = '$_laadittu'";
     $result = pupe_query($query);
     $mista_tapa_tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
@@ -24937,7 +24949,7 @@ if (!function_exists('hyllysiirto')) {
               rivitunnus = {$tun},
               selite     = '".t("Paikalle")." {$minne_texti} ".t("lisättiin")." {$kappaleet}{$selite}',
               laatija    = '{$kukarow['kuka']}',
-              laadittu   = now()";
+              laadittu   = '$_laadittu'";
     $result = pupe_query($query);
     $minne_tapa_tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
@@ -25058,7 +25070,7 @@ if (!function_exists('hyllysiirto')) {
                       FROM lasku
                       WHERE tila  = 'X'
                       and alatila = 'G'
-                      and tapvm   = current_date
+                      and tapvm   = '$_tapvm'
                       and yhtio   = '$kukarow[yhtio]'";
             $result = pupe_query($query);
 
@@ -25071,11 +25083,11 @@ if (!function_exists('hyllysiirto')) {
           if ($laskuid == 0) {
             $query = "INSERT into lasku set
                       yhtio      = '$kukarow[yhtio]',
-                      tapvm      = now(),
+                      tapvm      = '$_tapvm',
                       tila       = 'X',
                       alatila    = 'G',
                       laatija    = '$kukarow[kuka]',
-                      luontiaika = current_date";
+                      luontiaika = '$_laadittu'";
             $result = pupe_query($query);
             $laskuid = mysql_insert_id($GLOBALS["masterlink"]);
           }
@@ -25088,7 +25100,7 @@ if (!function_exists('hyllysiirto')) {
                     kustp           = '{$mista_kustp}',
                     kohde           = '{$mista_kohde}',
                     projekti        = '{$mista_projekti}',
-                    tapvm           = current_date,
+                    tapvm           = '$_tapvm',
                     summa           = {$varastonmuutos_neg},
                     vero            = 0,
                     lukko           = '',
@@ -25106,7 +25118,7 @@ if (!function_exists('hyllysiirto')) {
                     kustp           = '{$mista_kustp}',
                     kohde           = '{$mista_kohde}',
                     projekti        = '{$mista_projekti}',
-                    tapvm           = current_date,
+                    tapvm           = '$_tapvm',
                     summa           = {$varastonmuutos},
                     vero            = 0,
                     lukko           = '',
@@ -25126,7 +25138,7 @@ if (!function_exists('hyllysiirto')) {
                       kustp           = '{$mista_kustp}',
                       kohde           = '{$mista_kohde}',
                       projekti        = '{$mista_projekti}',
-                      tapvm           = current_date,
+                      tapvm           = '$_tapvm',
                       summa           = {$varastonmuutos_neg},
                       vero            = 0,
                       lukko           = '',
@@ -25144,7 +25156,7 @@ if (!function_exists('hyllysiirto')) {
                       kustp           = '{$minne_kustp}',
                       kohde           = '{$minne_kohde}',
                       projekti        = '{$minne_projekti}',
-                      tapvm           = current_date,
+                      tapvm           = '$_tapvm',
                       summa           = {$varastonmuutos},
                       vero            = 0,
                       lukko           = '',
@@ -25163,7 +25175,7 @@ if (!function_exists('hyllysiirto')) {
                     kustp           = '{$minne_kustp}',
                     kohde           = '{$minne_kohde}',
                     projekti        = '{$minne_projekti}',
-                    tapvm           = current_date,
+                    tapvm           = '$_tapvm',
                     summa           = {$varastonmuutos},
                     vero            = 0,
                     lukko           = '',
@@ -25181,7 +25193,7 @@ if (!function_exists('hyllysiirto')) {
                     kustp           = '{$minne_kustp}',
                     kohde           = '{$minne_kohde}',
                     projekti        = '{$minne_projekti}',
-                    tapvm           = current_date,
+                    tapvm           = '$_tapvm',
                     summa           = {$varastonmuutos_neg},
                     vero            = 0,
                     lukko           = '',
@@ -27790,7 +27802,7 @@ if (!function_exists('array_column')) {
 }
 
 if (!function_exists('tee_kirjanpidollinen_varastosiirto')) {
-  function tee_kirjanpidollinen_varastosiirto($myyntitilaus_tunnus) {
+  function tee_kirjanpidollinen_varastosiirto($myyntitilaus_tunnus, $_poikkeavalaskutuspvm) {
     global $kukarow, $yhtiorow;
 
     if ($yhtiorow['kirjanpidollinen_varastosiirto_myyntitilaukselta'] == '') {
@@ -27806,7 +27818,7 @@ if (!function_exists('tee_kirjanpidollinen_varastosiirto')) {
       require 'tilauskasittely/tilauksesta_varastosiirto.inc';
 
       //Myyntitilaukselle valittu varasto ei ole yhtion toimipaikan varastoissa. Tällöin tehdään kirjanpidollinen varastosiirto
-      tilauksesta_varastosiirto($myyntitilaus_tunnus, 'K');
+      tilauksesta_varastosiirto($myyntitilaus_tunnus, 'K', $_poikkeavalaskutuspvm);
     }
   }
 }

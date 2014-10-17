@@ -21,7 +21,7 @@ if ($php_cli) {
 
   require "inc/connect.inc";
   require "inc/functions.inc";
-  require "inc/luo_ostotilausotsikko.inc";
+  require "tilauskasittely/tilauksesta_varastosiirto.inc";
 
   // Logitetaan ajo
   cron_log();
@@ -46,9 +46,9 @@ if ($php_cli) {
 }
 else {
   require "../../inc/parametrit.inc";
-  require "inc/luo_ostotilausotsikko.inc";
+  require "tilauskasittely/tilauksesta_varastosiirto.inc";
 
-  echo "<font class='head'>".t("Relex-ostoehdotuksen sisäänluku")."</font><hr>";
+  echo "<font class='head'>".t("Relex-varastosiirron sisäänluku")."</font><hr>";
 
   if (isset($tee) and trim($tee) == 'aja') {
     if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
@@ -109,11 +109,8 @@ if (isset($tee) and trim($tee) == 'aja') {
       $location_code = substr($location_code, 3);
       $supplier_code = substr($supplier_code, 3);
 
-      // Normaali tilaus
-      $tilaustyyppi  = 2;
-
       // Haetaan tuotteen tiedot
-      $query = "SELECT *
+      $query = "SELECT tuoteno
                 FROM tuote
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND tuoteno = '{$product_code}'";
@@ -127,22 +124,22 @@ if (isset($tee) and trim($tee) == 'aja') {
         continue;
       }
 
-      // Haetaan toimittajan tiedot
+      // Haetaan lähdevaraston tiedot
       $query = "SELECT *
-                FROM toimi
+                FROM varastopaikat
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND tunnus  = '{$supplier_code}'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
-        $toimittaja = mysql_fetch_assoc($result);
+        $lahde = mysql_fetch_assoc($result);
       }
       else {
-        echo "Toimittajaa '$supplier_code' ei löydy. Ohitetaan rivi!<br>";
+        echo "Lähdevarastoa '$supplier_code' ei löydy. Ohitetaan rivi!<br>";
         continue;
       }
 
-      // Haetaan varaston tiedot
+      // Haetaan kohdevaraston tiedot
       $query = "SELECT *
                 FROM varastopaikat
                 WHERE yhtio = '$kukarow[yhtio]'
@@ -150,26 +147,10 @@ if (isset($tee) and trim($tee) == 'aja') {
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {
-        $varasto = mysql_fetch_assoc($result);
+        $kohde = mysql_fetch_assoc($result);
       }
       else {
         echo "Varastoa '$location_code' ei löydy. Ohitetaan rivi!<br>";
-        continue;
-      }
-
-      // Haetaan varaston tiedot
-      $query = "SELECT *
-                FROM tuotteen_toimittajat
-                WHERE yhtio      = '$kukarow[yhtio]'
-                AND tuoteno      = '{$tuote["tuoteno"]}'
-                AND liitostunnus = '{$toimittaja["tunnus"]}'";
-      $result = pupe_query($query);
-
-      if (mysql_num_rows($result) == 1) {
-        $tuotteentoimittaja = mysql_fetch_assoc($result);
-      }
-      else {
-        echo "Tuotteen toimittajatietoa ei löydy. Ohitetaan rivi!<br>";
         continue;
       }
 
@@ -180,74 +161,26 @@ if (isset($tee) and trim($tee) == 'aja') {
         $ehdotus_pvm = $order_date;
       }
 
-      // Lasketaan rivin arvioitu toimitusaika
-      if ($tuotteentoimittaja["toimitusaika"] != 0 and $tuotteentoimittaja["toimitusaika"] != '') {
-        $ehdotus_pvm = date('Y-m-d', strtotime($ehdotus_pvm) + $tuotteentoimittaja["toimitusaika"] * 24 * 60 * 60);
-      }
-      elseif ($toimittaja["oletus_toimaika"] != 0 and $toimittaja["oletus_toimaika"] != '') {
-        $ehdotus_pvm = date('Y-m-d', strtotime($ehdotus_pvm) + $toimittaja["oletus_toimaika"] * 24 * 60 * 60);
-      }
-
       // Löytyykö sopiva tilaus?
-      $query = "SELECT *
-                FROM lasku
-                WHERE yhtio       = '$kukarow[yhtio]'
-                AND tila          = 'O'
-                AND alatila       = ''
-                AND chn           = 'GEN'
-                AND liitostunnus  = '{$toimittaja["tunnus"]}'
-                and toim_nimi     = '{$varasto["nimi"]}'
-                AND toim_nimitark = '{$varasto["nimitark"]}'
-                AND toim_osoite   = '{$varasto["osoite"]}'
-                AND toim_postino  = '{$varasto["postino"]}'
-                AND toim_postitp  = '{$varasto["postitp"]}'
-                AND toim_maa      = '{$varasto["maa"]}'
-                AND varasto       = '{$varasto["tunnus"]}'
-                AND tilaustyyppi  = '{$tilaustyyppi}'";
-      $result = pupe_query($query);
+      $varastosiirto = hae_avoin_varastosiirto($lahde["tunnus"], $kohde["tunnus"], "G");
 
-      // Ei löydy, tehdään uus tilaus
-      if (mysql_num_rows($result) == 0) {
-
-        $params = array(
-          'liitostunnus'            => $toimittaja["tunnus"],
-          'nimi'                    => $varasto['nimi'],
-          'nimitark'                => $varasto['nimitark'],
-          'osoite'                  => $varasto['osoite'],
-          'postino'                 => $varasto['postino'],
-          'postitp'                 => $varasto['postitp'],
-          'maa'                     => $varasto['maa'],
-          'varasto'                 => $varasto['tunnus'],
-          'myytil_toimaika'         => $ehdotus_pvm,
-          'tilaustyyppi'            => $tilaustyyppi,
-          'myytil_viesti'           => t("Relex-ostotilaus"),
-          'ostotilauksen_kasittely' => "GEN", // tällä erotellaan generoidut ja käsin tehdyt ostotilaukset
-        );
-
-        $laskurow = luo_ostotilausotsikko($params);
-        $kukarow['kesken'] = $laskurow['tunnus'];
-      }
-      else {
-        $laskurow = mysql_fetch_assoc($result);
-        $kukarow['kesken'] = $laskurow['tunnus'];
+      // Ei löydy, tehdään uus siirto
+      if (empty($varastosiirto)) {
+        aseta_kukarow_kesken(0);
+        $varastosiirto = luo_varastosiirto($lahde["tunnus"], $kohde["tunnus"], "", "", "G");
       }
 
-      $params = array(
-        "trow"      => $tuote,
-        "laskurow"  => $laskurow,
-        "kpl"       => $quantity,
-        "tuoteno"   => $tuote["tuoteno"],
-        "hinta"     => 0,
-        "varasto"   => $varasto['tunnus'],
-        "kommentti" => "",
-        "toimaika"  => $ehdotus_pvm,
-        "kerayspvm" => $ehdotus_pvm,
-        "toim"      => "OSTO",
+      aseta_kukarow_kesken($varastosiirto['tunnus']);
+
+      $tilausrivi = array(
+        "tuoteno"             => $tuote["tuoteno"],
+        "varattu"             => $quantity,
+        "kohdevarasto_tunnus" => $kohde["tunnus"],
       );
 
-      lisaa_rivi($params);
+      $lisatyt_rivit1 = luo_varastosiirtorivi($varastosiirto, $tilausrivi, $lahde["tunnus"], "G");
 
-      echo "Lisätään tuote {$tuote["tuoteno"]} $quantity {$tuote["yksikko"]} tilaukselle {$laskurow["tunnus"]}.<br>";
+      echo "Lisätään tuote {$tuote["tuoteno"]} $quantity {$tuote["yksikko"]} siirtolistalle {$varastosiirto["tunnus"]}.<br>";
     }
   }
 }

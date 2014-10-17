@@ -1045,26 +1045,23 @@ if (!function_exists("maventa_invoice_put_file")) {
 }
 
 if (!function_exists("apix_invoice_put_file")) {
-  function apix_invoice_put_file($lahetettavat_apix, $kieli, $apixzipfile_resend = "") {
+  function apix_invoice_put_file($send, $lahetettavat_apix, $kieli, $apixzipfile_resend = "") {
     global $kukarow, $yhtiorow, $pupe_root_polku;
 
     // siirret‰‰n laskutiedosto operaattorille
-    //$url       = "https://test-api.apix.fi/invoices";
-    $url         = "https://api.apix.fi/invoices";
-    $transferkey = $yhtiorow['apix_avain'];
-    $transferid  = $yhtiorow['apix_tunnus'];
-    $software    = "Pupesoft";
-    $version     = "1.0";
-    $timestamp   = gmdate("YmdHis");
-    $apix_ulos   = "";
+    //$url           = "https://test-api.apix.fi/invoices";
+    $url             = "https://api.apix.fi/invoices";
+    $transferkey     = $yhtiorow['apix_avain'];
+    $transferid      = $yhtiorow['apix_tunnus'];
+    $software        = "Pupesoft";
+    $version         = "1.0";
+    $timestamp       = gmdate("YmdHis");
+    $apix_ulos       = "";
+    $apixerrorreport = "";
 
     if ($apixzipfile_resend != "") {
       // Filenimi joka uudelleenl‰hetet‰‰n
       $apixzipfile  = $apixzipfile_resend;
-
-      // Filen koko ja pointteri siihen
-      $apixfilesize = filesize("$pupe_root_polku/dataout/apix_error/$apixzipfile");
-      $apix_fh      = fopen("$pupe_root_polku/dataout/apix_error/$apixzipfile", 'r');
     }
     else {
       // Filenimi
@@ -1098,88 +1095,93 @@ if (!function_exists("apix_invoice_put_file")) {
         exec("cd $apix_tmpdirnimi; zip $apixzipfile *;");
 
         // Aineisto dataouttiin
-        exec("cp $apix_tmpdirnimi/$apixzipfile $pupe_root_polku/dataout/");
+        exec("cp $apix_tmpdirnimi/$apixzipfile {$pupe_root_polku}/dataout/apix_error/");
 
         // Poistetaan apix-tmpdir
         exec("rm -rf $apix_tmpdirnimi");
 
-        // Filen koko ja pointteri siihen
-        $apixfilesize = filesize("$pupe_root_polku/dataout/$apixzipfile");
-        $apix_fh = fopen("$pupe_root_polku/dataout/$apixzipfile", 'r');
+        if ($send !== TRUE) {
+          $apix_ulos .= "Lasku siirretty l‰hetysjonoon";
+        }
       }
       else {
-        $apix_ulos .= "APIX tmpdirrin teko feilas!<br>";
+        $apix_ulos .= "APIX tmpdirrin teko feilas!<br>\n";
         return $apix_ulos;
       }
     }
 
-    // Siirret‰‰n aineisto APIXiin
-    $digest_src = $software."+".$version."+".$transferid."+".$timestamp."+".$transferkey;
-    $dt = substr(hash('sha256', $digest_src), 0, 64);
+    if ($send === TRUE) {
+      // Filen koko ja pointteri siihen
+      $apixfilesize = filesize("{$pupe_root_polku}/dataout/apix_error/$apixzipfile");
+      $apix_fh = fopen("{$pupe_root_polku}/dataout/apix_error/$apixzipfile", 'r');
 
-    $real_url = "$url?soft=$software&ver=$version&TraID=$transferid&t=$timestamp&d=SHA-256:$dt";
+      // Siirret‰‰n aineisto APIXiin
+      $digest_src = $software."+".$version."+".$transferid."+".$timestamp."+".$transferkey;
+      $dt = substr(hash('sha256', $digest_src), 0, 64);
 
-    $ch = curl_init($real_url);
-    curl_setopt($ch, CURLOPT_PUT, true);
-    curl_setopt($ch, CURLOPT_INFILE, $apix_fh);
-    curl_setopt($ch, CURLOPT_INFILESIZE, $apixfilesize);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+      $real_url = "$url?soft=$software&ver=$version&TraID=$transferid&t=$timestamp&d=SHA-256:$dt";
 
-    $apix_ulos .= "L‰hetet‰‰n aineisto APIX:lle...<br>";
-    $response = curl_exec($ch);
+      $ch = curl_init($real_url);
+      curl_setopt($ch, CURLOPT_PUT, true);
+      curl_setopt($ch, CURLOPT_INFILE, $apix_fh);
+      curl_setopt($ch, CURLOPT_INFILESIZE, $apixfilesize);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
-    curl_close($ch);
-    fclose($apix_fh);
+      $apix_ulos .= "L‰hetet‰‰n aineisto APIX:lle...<br>\n";
+      $response = curl_exec($ch);
 
-    $xml = simplexml_load_string($response);
+      curl_close($ch);
+      fclose($apix_fh);
 
-    if ($xml->Status == "OK") {
-      $apix_ulos .= "L‰hetys onnistui!";
+      $xml = simplexml_load_string($response);
 
-      // Siirret‰‰n pois error kansiosta...
-      if ($apixzipfile_resend != "") rename("{$pupe_root_polku}/dataout/apix_error/$apixzipfile_resend", "{$pupe_root_polku}/dataout/$apixzipfile_resend");
-    }
-    else {
-      $apix_ulos .= "L‰hetys ep‰onnistui:<br>";
+      if ($xml->Status == "OK") {
+        $apix_ulos .= "L‰hetys onnistui!";
 
-      $apix_ulos .= "Tila: ".$xml->Status."<br>";
-      $apix_ulos .= "Tilakoodi: ".$xml->StatusCode."<br>";
-
-      // Rakennetaan s‰hkˆpostiin l‰hetett‰v‰ virheviesti
-      $apixerrorreport .= "{$yhtiorow["yhtio"]} Apix laskutuksen virheviesti! \n";
-      $apixerrorreport .= " $apixzipfile ";
-      $apixerrorreport .= "\n\n";
-      $apixerrorreport .= $real_url;
-      $apixerrorreport .= "\n\n";
-      $apixerrorreport .= $ch;
-      $apixerrorreport .= "\n\n";
-      ob_start();
-      var_dump($apix_lasnot);
-      var_dump($xml);
-      $apixerrorreport .= ob_get_clean();
-
-      if (mb_detect_encoding($apixerrorreport, 'UTF-8', true) !== FALSE) {
-  			$apixerrorreport = utf8_decode($apixerrorreport);
+        // Siirret‰‰n pois error kansiosta...
+        if ($apixzipfile_resend != "") rename("{$pupe_root_polku}/dataout/apix_error/$apixzipfile_resend", "{$pupe_root_polku}/dataout/$apixzipfile_resend");
       }
+      else {
+        $apix_ulos .= "L‰hetys ep‰onnistui:<br>\n";
 
-      $params = array(
-        "to" => $yhtiorow["admin_email"],
-        "subject" => "Apix virheilmoitus '{$yhtiorow["yhtio"]}'",
-        "ctype" => "text",
-        "body"=> $apixerrorreport
-      );
+        $apix_ulos .= "Tila: ".$xml->Status."<br>\n";
+        $apix_ulos .= "Tilakoodi: ".$xml->StatusCode."<br>\n";
 
-      pupesoft_sahkoposti($params);
+        // Rakennetaan s‰hkˆpostiin l‰hetett‰v‰ virheviesti
+        $apixerrorreport .= "{$yhtiorow["yhtio"]} Apix laskutuksen virheviesti! \n";
+        $apixerrorreport .= " $apixzipfile ";
+        $apixerrorreport .= "\n\n";
+        $apixerrorreport .= $real_url;
+        $apixerrorreport .= "\n\n";
+        $apixerrorreport .= $ch;
+        $apixerrorreport .= "\n\n";
+        ob_start();
+        var_dump($xml);
+        $apixerrorreport .= ob_get_clean();
 
-      foreach ($xml->FreeText as $teksti) {
-        $apix_ulos .= "Tilaviesti: ".$teksti."<br>";
+        if (mb_detect_encoding($apixerrorreport, 'UTF-8', true) !== FALSE) {
+    			$apixerrorreport = utf8_decode($apixerrorreport);
+        }
+
+        $params = array(
+          "to" => $yhtiorow["admin_email"],
+          "subject" => "Apix virheilmoitus '{$yhtiorow["yhtio"]}'",
+          "ctype" => "text",
+          "body"=> $apixerrorreport
+        );
+
+        pupesoft_sahkoposti($params);
+
+        foreach ($xml->FreeText as $teksti) {
+          $apix_ulos .= "Tilaviesti: ".$teksti."<br>\n";
+        }
+
+        if ($apixzipfile_resend == "") $apix_ulos .= "Laskut: ".implode(", ", $apix_lasnot)."<br>\n";
+
+        // Siirret‰‰n error-kansioon, paitsi jos faili on seill‰ jo ennest‰‰n...
+        if ($apixzipfile_resend == "") rename("{$pupe_root_polku}/dataout/$apixzipfile", "{$pupe_root_polku}/dataout/apix_error/$apixzipfile");
       }
-
-      if ($apixzipfile_resend == "") $apix_ulos .= "Laskut: ".implode(", ", $apix_lasnot)."<br>";
-
-      // Siirret‰‰n error-kansioon, paitsi jos faili on seill‰ jo ennest‰‰n...
-      if ($apixzipfile_resend == "") rename("{$pupe_root_polku}/dataout/$apixzipfile", "{$pupe_root_polku}/dataout/apix_error/$apixzipfile");
     }
 
     return $apix_ulos;

@@ -296,7 +296,7 @@ if ($handle = opendir($kansio)) {
     // Logitetaan ajo
     cron_log("{$pupe_root_polku}/dataout/$lasku");
 
-    $status = apix_invoice_put_file("", $kukarow['kieli'], $lasku);
+    $status = apix_invoice_put_file(TRUE, "", "", $lasku);
     echo "APIX-lähetys $status<br>\n";
   }
 

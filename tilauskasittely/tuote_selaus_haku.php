@@ -121,6 +121,121 @@ $query    = "SELECT *
 $result   = pupe_query($query);
 $laskurow = mysql_fetch_assoc($result);
 
+// vientikieltokäsittely:
+// +maa tarkoittaa että myynti on kielletty tähän maahan ja sallittu kaikkiin muihin
+// -maa tarkoittaa että ainoastaan tähän maahan saa myydä
+// eli näytetään vaan tuotteet jossa vienti kentässä on tyhjää tai -maa.. ja se ei saa olla +maa
+$kieltolisa = "";
+unset($vierow);
+
+if ($kukarow["kesken"] > 0) {
+  $query  = "SELECT if (toim_maa != '', toim_maa, maa) maa
+             FROM lasku
+             WHERE yhtio = '$kukarow[yhtio]'
+             and tunnus  = '$kukarow[kesken]'";
+  $vieres = pupe_query($query);
+  $vierow = mysql_fetch_assoc($vieres);
+}
+elseif ($verkkokauppa != "") {
+  $vierow = array();
+
+  if ($maa != "") {
+    $vierow["maa"] = $maa;
+  }
+  else {
+    $vierow["maa"] = $yhtiorow["maa"];
+  }
+}
+elseif ($kukarow["extranet"] != "") {
+  $query  = "SELECT if (toim_maa != '', toim_maa, maa) maa
+             FROM asiakas
+             WHERE yhtio = '$kukarow[yhtio]'
+             and tunnus  = '$kukarow[oletus_asiakas]'";
+  $vieres = pupe_query($query);
+  $vierow = mysql_fetch_assoc($vieres);
+}
+
+if (isset($vierow) and $vierow["maa"] != "") {
+  $kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' " .
+    "or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
+}
+
+if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
+  if ($verkkokauppa != "") {
+
+    if ($kukarow["kuka"] == "www") {
+      $extra_poislisa = " and tuote.hinnastoon = 'W' ";
+    }
+    else {
+      $extra_poislisa = " and tuote.hinnastoon in ('W','V') ";
+    }
+
+    $avainlisa = " and avainsana.nakyvyys = '' ";
+  }
+  else {
+    $extra_poislisa = " and tuote.hinnastoon != 'E' ";
+    $avainlisa      = " and avainsana.jarjestys < 10000 ";
+  }
+}
+else {
+  $extra_poislisa = "";
+  $avainlisa      = "";
+}
+
+if (!isset($poistetut)) {
+  $poistetut = '';
+}
+
+if ($poistetut != "") {
+
+  $poischeck = "CHECKED";
+  $ulisa .= "&poistetut=checked";
+
+  if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
+    // Näytetään vain poistettuja tuotteita
+    $poislisa        = " AND tuote.status in ('P','X')
+                  AND (SELECT sum(saldo)
+                  FROM tuotepaikat
+                  JOIN varastopaikat ON (varastopaikat.yhtio=tuotepaikat.yhtio
+                  AND varastopaikat.tunnus = tuotepaikat.varasto
+                  AND varastopaikat.tyyppi = '')
+                  WHERE tuotepaikat.yhtio=tuote.yhtio
+                  AND tuotepaikat.tuoteno=tuote.tuoteno
+                  AND tuotepaikat.saldo > 0) > 0 ";
+    if (($yhtiorow["yhtio"] == 'allr')) {
+      $hinta_rajaus = " AND tuote.myymalahinta > tuote.myyntihinta ";
+    }
+    else {
+      $hinta_rajaus = " ";
+    }
+    $poislisa_mulsel = " and tuote.status in ('P','X') ";
+  }
+  else {
+    $poislisa = "";
+    //$poislisa_mulsel  = "";
+  }
+}
+else {
+  $poislisa = " and (tuote.status not in ('P','X')
+          or (SELECT sum(saldo)
+              FROM tuotepaikat
+              WHERE tuotepaikat.yhtio=tuote.yhtio
+              AND tuotepaikat.tuoteno=tuote.tuoteno
+              AND tuotepaikat.saldo > 0) > 0) ";
+  //$poislisa_mulsel  = " and tuote.status not in ('P','X') ";
+  $poischeck = "";
+}
+
+if (isset($extrapoistetut)
+  and $extrapoistetut != ""
+  and $kukarow["extranet"] != ""
+  and $kukarow['asema'] == "NE"
+) {
+  $extrapoischeck = "CHECKED";
+  $ulisa .= "&extrapoistetut=checked";
+  $poislisa = "";
+}
+
 // Katsotaan, onko paramseissa annettu variaatio ja, jos on, näytetään kyseisen variaation tuotteet
 if (!empty($variaatio)) {
   tarkista_tilausrivi();
@@ -137,7 +252,12 @@ if (!empty($variaatio)) {
               AND tuotteen_avainsanat.laji   = 'parametri_variaatio'
               AND tuotteen_avainsanat.yhtio  = tuote.yhtio
               AND tuotteen_avainsanat.selite = '{$variaatio}')
-            WHERE tuote.yhtio                = '{$kukarow['yhtio']}'";
+            WHERE tuote.yhtio                = '{$kukarow['yhtio']}'
+            AND tuote.tuotetyyppi NOT IN ('A', 'B')
+            {$kieltolisa}
+            {$extra_poislisa}
+            {$poislisa}";
+
   $result = pupe_query($query);
 
   $tuotteet = array();
@@ -335,45 +455,6 @@ else {
   $saldotoncheck = "";
 }
 
-if (!isset($poistetut)) {
-  $poistetut = '';
-}
-
-if ($poistetut != "") {
-
-  $poischeck = "CHECKED";
-  $ulisa .= "&poistetut=checked";
-
-  if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
-    // Näytetään vain poistettuja tuotteita
-    $poislisa = " AND tuote.status in ('P','X')
-                  AND (SELECT sum(saldo)
-                  FROM tuotepaikat
-                  JOIN varastopaikat ON (varastopaikat.yhtio=tuotepaikat.yhtio
-                  AND varastopaikat.tunnus = tuotepaikat.varasto
-                  AND varastopaikat.tyyppi = '')
-                  WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0 ";
-    $hinta_rajaus      = ($yhtiorow["yhtio"] == 'allr') ? " AND tuote.myymalahinta > tuote.myyntihinta " : " ";
-    $poislisa_mulsel  = " and tuote.status in ('P','X') ";
-  }
-  else {
-    $poislisa         = "";
-    //$poislisa_mulsel  = "";
-  }
-}
-else {
-  $poislisa  = " and (tuote.status not in ('P','X')
-          or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0) ";
-  //$poislisa_mulsel  = " and tuote.status not in ('P','X') ";
-  $poischeck = "";
-}
-
-if (isset($extrapoistetut) and $extrapoistetut != "" and $kukarow["extranet"] != "" and $kukarow['asema'] == "NE") {
-  $extrapoischeck = "CHECKED";
-  $ulisa .= "&extrapoistetut=checked";
-  $poislisa         = "";
-}
-
 if (!isset($lisatiedot)) {
   $lisatiedot = '';
 }
@@ -384,28 +465,6 @@ if ($lisatiedot != "") {
 }
 else {
   $lisacheck = "";
-}
-
-if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
-  if ($verkkokauppa != "") {
-
-    if ($kukarow["kuka"] == "www") {
-      $extra_poislisa = " and tuote.hinnastoon = 'W' ";
-    }
-    else {
-      $extra_poislisa = " and tuote.hinnastoon in ('W','V') ";
-    }
-
-    $avainlisa = " and avainsana.nakyvyys = '' ";
-  }
-  else {
-    $extra_poislisa = " and tuote.hinnastoon != 'E' ";
-    $avainlisa = " and avainsana.jarjestys < 10000 ";
-  }
-}
-else {
-  $extra_poislisa = "";
-  $avainlisa = "";
 }
 
 if (!isset($nimitys)) {
@@ -498,44 +557,6 @@ if (trim($alkuperaisnumero) != '') {
   }
 
   $ulisa .= "&alkuperaisnumero=$alkuperaisnumero";
-}
-
-// vientikieltokäsittely:
-// +maa tarkoittaa että myynti on kielletty tähän maahan ja sallittu kaikkiin muihin
-// -maa tarkoittaa että ainoastaan tähän maahan saa myydä
-// eli näytetään vaan tuotteet jossa vienti kentässä on tyhjää tai -maa.. ja se ei saa olla +maa
-$kieltolisa = "";
-unset($vierow);
-
-if ($kukarow["kesken"] > 0) {
-  $query  = "SELECT if (toim_maa != '', toim_maa, maa) maa
-             FROM lasku
-             WHERE yhtio = '$kukarow[yhtio]'
-             and tunnus  = '$kukarow[kesken]'";
-  $vieres = pupe_query($query);
-  $vierow = mysql_fetch_assoc($vieres);
-}
-elseif ($verkkokauppa != "") {
-  $vierow = array();
-
-  if ($maa != "") {
-    $vierow["maa"] = $maa;
-  }
-  else {
-    $vierow["maa"] = $yhtiorow["maa"];
-  }
-}
-elseif ($kukarow["extranet"] != "") {
-  $query  = "SELECT if (toim_maa != '', toim_maa, maa) maa
-             FROM asiakas
-             WHERE yhtio = '$kukarow[yhtio]'
-             and tunnus  = '$kukarow[oletus_asiakas]'";
-  $vieres = pupe_query($query);
-  $vierow = mysql_fetch_assoc($vieres);
-}
-
-if (isset($vierow) and $vierow["maa"] != "") {
-  $kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
 }
 
 if (file_exists('sarjanumeron_lisatiedot_popup.inc')) {

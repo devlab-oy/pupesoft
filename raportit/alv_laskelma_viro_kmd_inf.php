@@ -376,12 +376,12 @@ if ($tee == 'laskelma') {
 
     if (mysql_num_rows($laskures) == 0) $aineistoon = $_red;
 
-    $erikoiskoodi = $row['veropros'] == 0 ? '03' : '';
+    $erikoiskoodi = ($laskelma == 'a' and $row['veropros'] == 0) ? '03' : '';
 
-    $_sum_vertailu_a = 10000 * abs($laskurow['laskun_summa']);
-    $_sum_vertailu_b = 10000 * abs($_vero);
+    $_sum_a = 10000 * abs($laskurow['laskun_summa']);
+    $_sum_b = 10000 * abs($_vero);
 
-    if (!empty($laskurow['laskun_summa']) and $_sum_vertailu_a != $_sum_vertailu_b) {
+    if ($laskelma == 'a' and !empty($laskurow['laskun_summa']) and $_sum_a != $_sum_b) {
       $erikoiskoodi = '03';
     }
 
@@ -407,14 +407,19 @@ if ($tee == 'laskelma') {
     echo "<td>$row[veropros]</td>";
     echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[ltunnus]&lopetus={$lopetus}'>";
 
-    if ($laskurow['laskun_summa'] < 0 and $_vero > 0) {
-      $_vero = $_vero * -1;
+    if ($laskelma == 'a') {
+      if ($laskurow['laskun_summa'] < 0 and $_vero > 0) {
+        $_vero = $_vero * -1;
+        echo $_vero;
+      }
+      else {
+        $_vero = abs($_vero);
+        echo $_vero;
+      }
     }
     else {
-      $_vero = abs($_vero);
+      echo abs($_vero);
     }
-
-    echo $_vero;
 
     echo "</a></td>";
     echo "<td>{$erikoiskoodi}</td>";

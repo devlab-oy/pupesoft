@@ -19,10 +19,14 @@ if (isset($submit)) {
     }
     else {
       // Katsotaan löytyykö sarjanumero
-      $query = "SELECT *
+      $query = "SELECT sarjanumeroseuranta.*,
+                tilausrivi.toimitettuaika
                 FROM sarjanumeroseuranta
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND sarjanumero = '{$sarjanumero}'";
+                JOIN tilausrivi
+                 ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio
+                 AND tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
+                WHERE sarjanumeroseuranta.yhtio = '{$kukarow['yhtio']}'
+                AND sarjanumeroseuranta.sarjanumero = '{$sarjanumero}'";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {
@@ -30,7 +34,11 @@ if (isset($submit)) {
       }
       else{
         $pakkaus = mysql_fetch_assoc($result);
-        if ($pakkaus['varasto'] != null) {
+
+        if ($pakkaus['toimitettuaika'] == "0000-00-00 00:00:00") {
+          $errors[] = t("Rahtia ei ole vielä kuitattu vastaanotetuksi.");
+        }
+        elseif ($pakkaus['varasto'] != null) {
           $errors[] = t("Pakkaus on jo varastopaikalla") . " {$pakkaus['hyllyalue']}-{$pakkaus['hyllynro']}-{$pakkaus['hyllyvali']}-{$pakkaus['hyllytaso']}";
         }
       }
@@ -271,18 +279,12 @@ if ($view == 'sarjanumero') {
   if (isset($tilanne)) {
     echo "
     <div class='main' style='text-align:center;padding:5px;'>
-      koko tilauksesta tulouttamatta {$tilanne['viemattomia_tilauksen_riveja']} pakkausta
+      koko tilauksesta tulouttamatta {$tilanne['viemattomia_tilauksen_riveja']} rullaa
       <br>
-      koko rahdista tulouttamatta {$tilanne['viemattomia_rahdin_riveja']} pakkausta
+      koko rahdista tulouttamatta {$tilanne['viemattomia_rahdin_riveja']} rullaa
     </div>";
   }
 
-echo "
-  <div style='text-align:center;padding:10px;'>
-    <button onclick='window.location.href=\"lusaus.php\"' class='button'>", t("Suorita lusaus"), "</button>
-    <br><br>
-    <button onclick='window.location.href=\"hylky.php\"' class='button'>", t("Hylkää rulla"), "</button>
-  </div>";
 }
 
 if ($view == 'tuotepaikka') {

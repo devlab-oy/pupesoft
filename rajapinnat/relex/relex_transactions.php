@@ -361,7 +361,7 @@ foreach ($relex_transactions as $row) {
 fclose($fp);
 
 // Tehd‰‰n FTP-siirto
-if ($paiva_ajo and !empty($relex_ftphost)) {
+if (($paiva_ajo or $kuukausi_ajo) and !empty($relex_ftphost)) {
   $ftphost = $relex_ftphost;
   $ftpuser = $relex_ftpuser;
   $ftppass = $relex_ftppass;

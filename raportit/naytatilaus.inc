@@ -978,6 +978,20 @@ else {
   $ennaa_yht    = 0;
   $rihin_yht    = 0;
 
+  $_myyntispessut = (in_array($toim, array('LASKU','TILAUSVAHVISTUS','LAHETE','TYOMAARAYS')));
+
+  if ($lopetus != '') $lopetus .= "/SPLIT/";
+  $lopetus .= $palvelin2;
+  $lopetus .= "raportit/asiakkaantilaukset.php";
+  $lopetus .= "////tee=NAYTATILAUS";
+  $lopetus .= "//asiakasid=$asiakasid";
+  $lopetus .= "//toimittajaid=$toimittajaid";
+  $lopetus .= "//laskunro=$laskunro";
+  $lopetus .= "//lasku_yhtio=$row[yhtio]";
+  $lopetus .= "//ytunnus=$ytunnus";
+  $lopetus .= "//tunnus=$tunnus";
+  $lopetus_apu = 'X';
+
   while ($row = mysql_fetch_assoc($result)) {
     $linjannimi = "";
 
@@ -1314,19 +1328,6 @@ else {
         echo "<td $class align='left' valign='top'></td>";
       }
     }
-
-    $_myyntispessut = (in_array($toim, array('LASKU','TILAUSVAHVISTUS','LAHETE','TYOMAARAYS')));
-
-    if ($lopetus != '') $lopetus .= "/SPLIT/";
-    $lopetus .= $palvelin2;
-    $lopetus .= "raportit/asiakkaantilaukset.php";
-    $lopetus .= "////tee=NAYTATILAUS";
-    $lopetus .= "//asiakasid=$asiakasid";
-    $lopetus .= "//toimittajaid=$toimittajaid";
-    $lopetus .= "//laskunro=$laskunro";
-    $lopetus .= "//lasku_yhtio=$row[yhtio]";
-    $lopetus .= "//ytunnus=$ytunnus";
-    $lopetus .= "//tunnus=$tunnus";
     
     if (!$_asiakkaantilaus and $_myyntispessut) {
       $lopetus .= "//toim=MYYNTI";

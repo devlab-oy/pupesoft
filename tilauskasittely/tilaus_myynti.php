@@ -1,5 +1,12 @@
 <?php
 
+if (isset($_REQUEST["komento"]) and in_array("PDF_RUUDULLE", $_REQUEST["komento"])) {
+  $nayta_pdf = 1; //Generoidaan .pdf-file
+}
+else {
+  unset($nayta_pdf);
+}
+
 if (isset($_REQUEST['tulosta_maksusopimus']) and is_numeric(trim($_REQUEST['tulosta_maksusopimus']))) {
   $nayta_pdf = 1;
   $ohje = 'off';
@@ -1543,6 +1550,8 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
       $tulostimet[0] = "Tarjous";
       require "inc/valitse_tulostin.inc";
     }
+
+    if (isset($nayta_pdf)) $tee = "NAYTATILAUS";
 
     require_once 'tulosta_tarjous.inc';
 
@@ -3612,7 +3621,7 @@ if ($tee == '') {
     if ($kukarow["oletus_asiakas"] != 0) {
       $query  = "SELECT *
                  FROM asiakas
-                 WHERE yhtio = '$kukarow[yhtio]' 
+                 WHERE yhtio = '$kukarow[yhtio]'
                  and tunnus  = '$kukarow[oletus_asiakas]'";
       $result = pupe_query($query);
 
@@ -3630,7 +3639,7 @@ if ($tee == '') {
     }
 
     if ($toim == "PIKATILAUS") {
-      
+
       if ($yhtiorow['pikatilaus_focus'] == 'A' and isset($indexvas) and $indexvas == 1) {
         $kentta = 'syotetty_ytunnus';
       }

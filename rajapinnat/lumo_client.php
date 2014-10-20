@@ -70,11 +70,8 @@ class LumoClient
   function startTransaction($amount, $transaction_type = 0, $archive_id = '') {
     $return = false;
 
-    // Jos kutsussa on setattu archive_id lisätään se myös sanomaan koska kyseessä on
-    // Peruutus/hyvitystapahtuma
     if ($archive_id != '') {
-      $archive_node = "<SetArchiveID><Value>{$archive_id}</Value></SetArchiveID>";
-      $tyyppi       = 'hyvitys/peruutus';
+      $tyyppi = 'hyvitys/peruutus';
     }
     else {
       $tyyppi = "maksu";
@@ -84,8 +81,17 @@ class LumoClient
              <SetAmount>
                <Value>{$amount}</Value>
              </SetAmount>
-             {$archive_node}
            </EMVLumo>\0";
+
+    // Jos kutsussa on setattu archive_id lisätään se myös sanomaan koska kyseessä on
+    // Peruutus/hyvitystapahtuma
+    if ($archive_id != '') {
+      $in .= "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'>
+                <SetArchiveID>
+                  <Value>{$archive_id}</Value>
+                </SetArchiveID>
+              </EMVLumo>\0";
+    }
 
     $in .= "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'>
              <MakeTransaction>

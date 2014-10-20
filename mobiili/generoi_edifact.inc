@@ -1,6 +1,6 @@
 <?php
 
-function kontit_rullineen($konttiviite) {
+function kontit_rullineen($konttiviite, $maxkg) {
   global $kukarow;
 
   // haetaan kaikki konttiviitteen alaiset rullat
@@ -15,13 +15,18 @@ function kontit_rullineen($konttiviite) {
   $result = pupe_query($query);
   $laskujen_tunnukset = mysql_result($result, 0);
 
+  if (mysql_num_rows($result) == 0) {
+    return false;
+  }
+
   $query = "SELECT ss.sarjanumero,
             tr.tunnus,
             tr.keratty,
             tr.toimitettu,
             ss.massa as paino,
             trlt.juoksu,
-            trlt.asiakkaan_rivinumero as rivinro
+            trlt.asiakkaan_rivinumero as rivinro,
+            la.sisviesti1 as ohje
             FROM lasku AS la
             JOIN tilausrivi AS tr
               ON tr.yhtio = la.yhtio AND tr.otunnus = la.tunnus
@@ -41,7 +46,7 @@ function kontit_rullineen($konttiviite) {
 
   while ($row = mysql_fetch_assoc($result)) {
 
-    if ($kilot + $row['paino'] >= 20000) {
+    if ($kilot + $row['paino'] >= $maxkg) {
       $kontti++;
       $kilot = 0;
     }
@@ -55,8 +60,7 @@ function kontit_rullineen($konttiviite) {
 
 function laheta_sanoma($sanoma){
 
-return true;
-
+  return true;
   global $kukarow, $ftp_info;
 
   $host = $ftp_info['host'];
@@ -101,8 +105,31 @@ return true;
   return false;
 }
 
-function kuittaus_parametrit($rahtikirjanumero) {
+function kuittaus_parametrit($hakunumero, $tyyppi) {
   global $kukarow, $yhtiorow;
+
+  if ($tyyppi == 'R') {
+    $rahtikirjanumero = $hakunumero;
+  }
+  else {
+    $query = "SELECT tilausrivin_lisatiedot.rahtikirja_id
+              FROM sarjanumeroseuranta
+              JOIN tilausrivi
+                ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio
+                AND tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
+              JOIN tilausrivin_lisatiedot
+                ON tilausrivin_lisatiedot.yhtio = sarjanumeroseuranta.yhtio
+                AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+              WHERE sarjanumeroseuranta.sarjanumero = '{$hakunumero}'";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) == 0) {
+      return false;
+    }
+    else {
+      $rahtikirjanumero = mysql_result($result, 0);
+    }
+  }
 
   $query = "SELECT lasku.ovttunnus,
             lasku.asiakkaan_tilausnumero,
@@ -110,6 +137,8 @@ function kuittaus_parametrit($rahtikirjanumero) {
             sarjanumeroseuranta.massa AS paino,
             sarjanumeroseuranta.leveys,
             tilausrivi.tuoteno,
+            tilausrivi.toimitettuaika,
+            tilausrivi.tunnus,
             tilausrivin_lisatiedot.juoksu,
             tilausrivin_lisatiedot.kuljetuksen_rekno,
             tilausrivin_lisatiedot.tilauksen_paino,
@@ -133,22 +162,40 @@ function kuittaus_parametrit($rahtikirjanumero) {
     return false;
   }
 
+  $rivitunnukset = "";
+
   while ($row = mysql_fetch_assoc($result)) {
+
+    if ($row['toimitettuaika'] != "0000-00-00 00:00:00") {
+      return $rahtikirjanumero;
+    }
+
     $pakkaukset[] = $row;
 
     $vastaanottajan_ovt = $row['ovttunnus'];
 
     $tilaus_ja_rivi = $row['asiakkaan_tilausnumero'] .':'. $row['asiakkaan_rivinumero'];
 
-    if (!isset($tilaukset[[$tilaus_ja_rivi]])) {
+    if (!isset($tilaukset[$tilaus_ja_rivi])) {
       $rekno = $row['kuljetuksen_rekno'];
       $tilaukset[$tilaus_ja_rivi] = array('paino' => $row['tilauksen_paino'], 'id' => $row['asiakkaan_tilausnumero'], 'rivi' => $row['asiakkaan_rivinumero']);
     }
+
+    $rivitunnukset .= $row['tunnus'] . ",";
   }
+
+  $rivitunnukset = rtrim($rivitunnukset, ",");
+
+  $update_query = "UPDATE tilausrivi SET
+                   toimitettuaika = NOW(),
+                   toimitettu = '{$rekno}'
+                   WHERE yhtio = '{$kukarow['yhtio']}'
+                   AND tunnus IN ({$rivitunnukset})";
+  pupe_query($update_query);
 
   foreach ($tilaukset as $key => $tilaus) {
     foreach ($pakkaukset as $pakkaus) {
-      if ($pakkaus['asiakkaan_tilausnumero'] == $tilaus['id']) {
+      if ($pakkaus['asiakkaan_tilausnumero'].$pakkaus['asiakkaan_rivinumero'] == $tilaus['id'].$tilaus['rivi']) {
 
         $pakkaus['juoksu'] = $pakkaus['juoksu'];
         $pakkaus['paino'] = (int) $pakkaus['paino'];
@@ -344,7 +391,9 @@ function laadi_edifact_sanoma($parametrit) {
   }
 
   // UNA -segmentti - (sama kaikissa sanomissa, ei lasketa segmenttilukemaan)
-  $s = "UNA:+.? '";
+  //$s = "UNA:+.? '";
+
+  $s = '';
 
   // UNB -segmentti (ei lasketa segmenttilukemaan)
   $s .= "UNB+UNOC:2+";
@@ -364,26 +413,26 @@ function laadi_edifact_sanoma($parametrit) {
 
   // DTM -segmentti
   $s .= "DTM+137:";
-  $s .= date("YdmHi");
+  $s .= date("YmdHi");
   $s .= ":203'";
   $segmentit++;
 
   if ($laji == 'kuittaus') {
     // DTM -segmentti
     $s .= "DTM+178:";
-    $s .= date("YdmHi");
+    $s .= date("YmdHi");
     $s .= ":203'";
     $segmentit++;
 
     // DTM -segmentti
     $s .= "DTM+163:";
-    $s .= date("YdmHi");
+    $s .= date("YmdHi");
     $s .= ":203'";
     $segmentit++;
 
     // DTM -segmentti
     $s .= "DTM+413:";
-    $s .= date("YdmHi");
+    $s .= date("YmdHi");
     $s .= ":203'";
     $segmentit++;
   }
@@ -484,7 +533,7 @@ function laadi_edifact_sanoma($parametrit) {
 
     // DTM -segmentti
     $s .= "DTM+351:";
-    $s .= date("YdmHi");
+    $s .= date("YmdHi");
     $s .= ":203'";
     $segmentit++;
 
@@ -550,7 +599,7 @@ function laadi_edifact_sanoma($parametrit) {
 
       // DTM -segmentti
       $s .= "DTM+411:";
-      $s .= date("YdmHi");
+      $s .= date("YmdHi");
       $s .= ":203'";
       $segmentit++;
 

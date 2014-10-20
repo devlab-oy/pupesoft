@@ -26,15 +26,15 @@ if (tarkista_oikeus("mobiili/tulouta.php")) {
 }
 
 if (tarkista_oikeus("mobiili/tuloutus_sarjanumero.php")) {
-  echo "<a href='tuloutus_sarjanumero.php' class='button'>", t("Tulouta sarjanumerolla", $browkieli), "</a></p>";
+  echo "<p><a href='tuloutus_sarjanumero.php' class='button'>", t("Tulouta sarjanumerolla", $browkieli), "</a></p>";
 }
 
 if (tarkista_oikeus("mobiili/kuittaa.php")) {
-  echo "<a href='kuittaa.php' class='button'>", t("Kuittaa rahti vastaanotetuksi", $browkieli), "</a></p>";
+  echo "<p><a href='kuittaa.php' class='button'>", t("Kuittaa rahti vastaanotetuksi", $browkieli), "</a></p>";
 }
 
 if (tarkista_oikeus("mobiili/kontitus.php")) {
-  echo "<a href='kontitus.php' class='button'>", t("Kontitus", $browkieli), "</a></p>";
+  echo "<p><a href='kontitus.php' class='button'>", t("Kontitus", $browkieli), "</a></p>";
 }
 
 if (tarkista_oikeus("mobiili/inventointi.php")) {
@@ -45,8 +45,16 @@ if (tarkista_oikeus("mobiili/hyllysiirrot.php")) {
   echo "<p><a href='hyllysiirrot.php' class='button'>", t("Hyllysiirrot", $browkieli), "</a></p>";
 }
 
+if (tarkista_oikeus("mobiili/lusaus.php")) {
+  echo "<p><a href='lusaus.php' class='button'>", t("Suorita lusaus", $browkieli), "</a></p>";
+}
+
+if (tarkista_oikeus("mobiili/hylky.php")) {
+  echo "<p><a href='hylky.php' class='button'>", t("Hylk‰‰ rulla", $browkieli), "</a></p>";
+}
+
 if (tarkista_oikeus("mobiili/tuki.php")) {
-  echo "<button class='button' value=''>", t("Tuki", $browkieli), "</button>";
+  echo "<p><button class='button' value=''>", t("Tuki", $browkieli), "</button></p>";
 }
 
 echo "<p><a href='{$palvelin2}logout.php?location={$palvelin2}mobiili' class='button'>", t("Lopeta", $browkieli), "</a></p>";

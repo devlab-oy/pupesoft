@@ -3458,7 +3458,7 @@ if ($tee == '') {
     if ($kukarow["oletus_asiakas"] != 0) {
       $query  = "SELECT *
                  FROM asiakas
-                 WHERE yhtio = '$kukarow[yhtio]' 
+                 WHERE yhtio = '$kukarow[yhtio]'
                  and tunnus  = '$kukarow[oletus_asiakas]'";
       $result = pupe_query($query);
 
@@ -3476,7 +3476,7 @@ if ($tee == '') {
     }
 
     if ($toim == "PIKATILAUS") {
-      
+
       if ($yhtiorow['pikatilaus_focus'] == 'A' and isset($indexvas) and $indexvas == 1) {
         $kentta = 'syotetty_ytunnus';
       }
@@ -4214,10 +4214,13 @@ if ($tee == '') {
 
     //Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
     if ($tila == "LISAAKERTARESEPTIIN" and $teeperhe == "OK") {
+
+      $_tyyppilisa = $valmiste_vai_raakaaine == 'raakaaine' ? 'V' : 'W';
+
       $query = "UPDATE tilausrivi
                 SET
                 perheid     = '$isatunnus',
-                tyyppi      = 'W'
+                tyyppi      = '{$_tyyppilisa}'
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tunnus  = '$isatunnus'";
       $presult = pupe_query($query);
@@ -4227,10 +4230,13 @@ if ($tee == '') {
     //Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
     if ($tila == "LISAAISAKERTARESEPTIIN") {
       if ($teeperhe == "OK") {
+
+        $_tyyppilisa = $valmiste_vai_raakaaine == 'raakaaine' ? 'V' : 'W';
+
         $query = "UPDATE tilausrivi
                   SET
                   perheid     = '$isatunnus',
-                  tyyppi      = 'W'
+                  tyyppi      = '{$_tyyppilisa}'
                   WHERE yhtio = '$kukarow[yhtio]'
                   and tunnus  = '$isatunnus'";
         $presult = pupe_query($query);
@@ -7177,6 +7183,7 @@ if ($tee == '') {
                 <input type='hidden' name='perheid'       value = '$row[perheid]'>
                 <input type='hidden' name='orig_tila'     value = '$orig_tila'>
                 <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
+                <input type='hidden' name='valmiste_vai_raakaaine' value='raakaaine' />
                 <input type='Submit' value='".t("Lis‰‰ raaka-aine")."'>
                 </form>";
 
@@ -7194,10 +7201,12 @@ if ($tee == '') {
                 <input type='hidden' name='perheid'       value = '$row[perheid]'>
                 <input type='hidden' name='orig_tila'     value = '$orig_tila'>
                 <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
+                <input type='hidden' name='valmiste_vai_raakaaine' value='valmiste' />
                 <input type='Submit' value='".t("Lis‰‰ valmiste")."'>
                 </form>";
           }
           elseif ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0 and ($toim != "VALMISTAASIAKKAALLE" or $yhtiorow["raaka_aineet_valmistusmyynti"] != "N")) or ($row["tunnus"] == $row["perheid2"] and $row["perheid2"] != 0) or (($toim == 'SIIRTOLISTA' or $toim == "SIIRTOTYOMAARAYS" or $toim == "TARJOUS" or $toim == "EXTTARJOUS" or $laskurow["tilaustyyppi"] == "T") and $row["perheid2"] == 0 and $row["perheid"] == 0)) and $kukarow['extranet'] == '') {
+
             if ($row["perheid2"] == 0 and $row["perheid"] == 0) {
               $lisax = "<input type='hidden' name='teeperhe'  value = 'OK'>";
             }

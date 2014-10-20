@@ -28,7 +28,6 @@ if ($xml !== FALSE) {
               valuu.muutospvm              = now(),
               valuu.muuttaja               = 'crond'
               WHERE valuu.nimi             = '$valkoodi'
-              AND valuu.automaattipaivitys = ''
               AND yhtio.yhtio              = valuu.yhtio
               AND yhtio.valkoodi           = 'EUR'";
     $result = pupe_query($query);

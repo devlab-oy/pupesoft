@@ -6,7 +6,7 @@
 */
 
 //* T‰m‰ skripti k‰ytt‰‰ slave-tietokantapalvelinta *//
-$useslave = 1;
+$useslave = 2;
 
 // Kutsutaanko CLI:st‰
 if (php_sapi_name() != 'cli') {
@@ -91,8 +91,32 @@ fwrite($fp, $header);
 $tapahtumarajaus = "";
 $kerivirajaus    = " AND tilausrivi.kerattyaika > 0 ";
 
-// Otetaan mukaan vain viimeisen vuorokauden j‰lkeen tehdyt
-if ($paiva_ajo) {
+$datetime_checkpoint_res = t_avainsana("RELEX_TRAN_CRON");
+
+if (mysql_num_rows($datetime_checkpoint_res) != 1) {
+  $query = "DELETE FROM avainsana
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND laji    = 'RELEX_TRAN_CRON'";
+  pupe_query($query);
+  
+  $query = "INSERT INTO avainsana SET
+            yhtio = '{$kukarow['yhtio']}',
+            laji  = 'RELEX_TRAN_CRON'";
+  pupe_query($query);
+  
+  $datetime_checkpoint = "";
+}
+else {
+  $datetime_checkpoint_row = mysql_fetch_assoc($datetime_checkpoint_res);
+  $datetime_checkpoint = pupesoft_cleanstring($datetime_checkpoint_row['selite']);
+}
+
+// Otetaan mukaan vain edellisen ajon j‰lkeen tehdyt tapahtumat
+if ($paiva_ajo and $datetime_checkpoint != "") {
+  $tapahtumarajaus = " AND tapahtuma.laadittu > '$datetime_checkpoint' ";
+  $kerivirajaus    = " AND tilausrivi.kerattyaika > '$datetime_checkpoint' ";
+}
+elseif ($paiva_ajo) {
   $tapahtumarajaus = " AND tapahtuma.laadittu >= date_sub(now(), interval 24 HOUR) ";
   $kerivirajaus    = " AND tilausrivi.kerattyaika >= date_sub(now(), interval 24 HOUR) ";
 }
@@ -187,6 +211,20 @@ $query = "(SELECT
 
           ORDER BY laadittu, tuoteno, sorttaustunnus";
 $res = pupe_query($query);
+
+if ($kuukausi_ajo) {
+  $datetime_checkpoint_uusi = "$vuosi-$kuukausi-$vikapaiva 23:59:59";
+}
+else {
+  $datetime_checkpoint_uusi = date('Y-m-d H:i:s');
+}
+  
+// P‰ivitet‰‰n timestamppi talteen jolloin tuotteet on haettu
+$query = "UPDATE avainsana SET
+          selite      = '{$datetime_checkpoint_uusi}'
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND laji    = 'RELEX_TRAN_CRON'";
+pupe_query($query);
 
 // Kerrotaan montako rivi‰ k‰sitell‰‰n
 $rows = mysql_num_rows($res);

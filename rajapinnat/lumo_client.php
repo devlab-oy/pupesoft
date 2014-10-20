@@ -4,8 +4,8 @@
  * LUMO-API simple TCP/IP maksupääteclient, jolla voi lähettää ja vastaanottaa XML-sanomia
  * maksupäätteelle
  */
-
-class LumoClient {
+class LumoClient
+{
 
   /**
    * Logging päällä/pois
@@ -16,12 +16,12 @@ class LumoClient {
    *  Avattu socket
    */
   private $_socket = false;
-  
+
   /**
    *  Yhteyden tila
    */
   private $_connection = false;
-   
+
   /**
    * Tämän yhteyden aikana sattuneiden virheiden määrä
    */
@@ -30,41 +30,20 @@ class LumoClient {
   /**
    * Constructor
    *
-   * @param string  $address          IP address where Lumo is listening
-   * @param string  $service_port     PORT number where Lumo is listening
+   * @param string $address IP address where Lumo is listening
+   * @param string $service_port PORT number where Lumo is listening
    */
   function __construct($address, $service_port) {
-
     try {
-
       $this->log("Avataan maksupääteyhteyttä");
-      set_time_limit(0);
-      ob_implicit_flush();
+      $this->_socket = stream_socket_client("{$address}:{$service_port}", $errno, $errstr, 10);
 
-      $this->_socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
-      if ($this->_socket === false) {
-        $this->log("socket_create() failed: reason: " . socket_strerror(socket_last_error()));
-        $this->_error_count++;
-      }
-
-      $this->log("Bindataan socketti...");
-
-      if (socket_bind($this->_socket, "0.0.0.0")) {
-        $this->log("Socketti bindattu");
+      if (!$this->_socket) {
+        $this->log("{$errno} {$errstr}");
       }
       else {
-
-        $socket_last_error = socket_last_error($this->_socket);
-        $this->log("Bindauksessa tapahtui seuraava virhe: " . socket_strerror($socket_last_error));
+        $this->log("Maksupääteyhteys avattu");
       }
-
-      $this->log("Yhdistetään '$address' porttiin '$service_port'...");
-      $this->_connection = socket_connect($this->_socket, $address, $service_port);
-      if ($this->_connection === false) {
-        $this->log("socket_connect() failed.\nReason: ($this->_connection) " . socket_strerror(socket_last_error($this->_socket)));
-        $this->_error_count++;
-      }
-
     }
     catch (Exception $e) {
       $this->_error_count++;
@@ -76,59 +55,86 @@ class LumoClient {
    * Destructor
    */
   function __destruct() {
-    $this->log("Maksupääteyhteys suljettiin");
-    socket_close($this->_socket);
+    if (fclose($this->_socket)) {
+      $this->log("Maksupääteyhteys suljettiin");
+    }
+    else {
+      $this->log("Maksupääteyhteyttä ei suljettu onnistuneesti");
+    }
   }
 
   /**
    * Start transaction
    */
   function startTransaction($amount, $transaction_type = 0, $archive_id = '') {
-
     $return = false;
 
     // Setataan transaction amount
     $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'> 
-      <SetAmount><Value>{$amount}</Value></SetAmount></EMVLumo>\0";
+             <SetAmount>
+               <Value>{$amount}</Value>
+             </SetAmount>
+           </EMVLumo>\0";
 
-    socket_write($this->_socket, $in, strlen($in));
+    fwrite($this->_socket, $in);
 
     // Jos kutsussa on setattu archive_id lisätään se myös sanomaan koska kyseessä on
     // Peruutus/hyvitystapahtuma
     $tyyppi = 'maksu';
+
     if ($archive_id != '') {
       $bonusin = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'>
-        <SetArchiveID><Value>{$archive_id}</Value></SetArchiveID></EMVLumo>\0";
-      $tyyppi = 'hyvitys/peruutus';
-      socket_write($this->_socket, $bonusin, strlen($bonusin));
+                    <SetArchiveID>
+                      <Value>{$archive_id}</Value>
+                    </SetArchiveID>
+                  </EMVLumo>\0";
+      $tyyppi  = 'hyvitys/peruutus';
+      fwrite($this->_socket, $bonusin);
     }
 
-    $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'><MakeTransaction><TransactionType>{$transaction_type}</TransactionType></MakeTransaction></EMVLumo>\0";
+    $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'>
+             <MakeTransaction>
+               <TransactionType>{$transaction_type}</TransactionType>
+             </MakeTransaction>
+           </EMVLumo>\0";
+
     $out = '';
-    
-    $this->log("Aloitetaan {$tyyppi}tapahtuma,\t Tyyppi: {$transaction_type}\t/ Summa:{$amount}\t/ Viite: {$archive_id}");
-    socket_write($this->_socket, $in, strlen($in));
 
-    while ($out = socket_read($this->_socket, 2048)) {
+    $viesti = "Aloitetaan {$tyyppi}tapahtuma,\t" .
+      "Tyyppi: {$transaction_type}\t/" .
+      "Summa:{$amount}\t/" .
+      "Viite: {$archive_id}";
 
-      $xml = @simplexml_load_string($out);
-      /*ob_start();
-      var_dump($xml);
-      $result = ob_get_clean();
-      $this->log($result);*/
-      if (isset($xml) and isset($xml->MakeTransaction->Result)) {
-        $return = $xml->MakeTransaction->Result == "True" ? TRUE : FALSE;
-        $arvo = $return === TRUE ? "OK" : "HYLÄTTY";
-        $this->log("\t{$tyyppi}tapahtuma {$arvo}");
-      }
-      if (isset($xml) and isset($xml->StatusUpdate->StatusInfo)) {
-        $leelo = $xml->StatusUpdate->StatusInfo;
-        if ($leelo == "CMD MANUAL_AUTH") $this->log("Käsivarmenne havaittu");
+    $this->log($viesti);
+
+    fwrite($this->_socket, $in);
+
+    while ($out = fgets($this->_socket)) {
+      $stringit = explode("\0", $out);
+
+      foreach ($stringit as $stringi) {
+        $xml = @simplexml_load_string($stringi);
+
+        if (isset($xml) and isset($xml->MakeTransaction->Result)) {
+          $return = $xml->MakeTransaction->Result == "True" ? true : false;
+          $arvo   = $return === true ? "OK" : "HYLÄTTY";
+
+          $this->log("\t{$tyyppi}tapahtuma {$arvo}");
+        }
+
+        if (isset($xml) and isset($xml->StatusUpdate->StatusInfo)) {
+          $leelo = $xml->StatusUpdate->StatusInfo;
+
+          if ($leelo == "CMD MANUAL_AUTH") {
+            $this->log("Käsivarmenne havaittu");
+          }
+        }
       }
     }
+
     return $return;
   }
-  
+
   /**
    * Hakee edellisen tapahtuman asiakaskuitin
    */
@@ -136,68 +142,98 @@ class LumoClient {
 
     $return = '';
 
-    $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'><GetReceiptCustomer/></EMVLumo>\0";
-    socket_write($this->_socket, $in, strlen($in));
-    while ($out = socket_read($this->_socket, 2048)) {
+    $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'>
+             <GetReceiptCustomer/>
+           </EMVLumo>\0";
 
+    fwrite($this->_socket, $in);
+
+    $this->log("Haetaan asiakkaan kuittia");
+
+    while ($patka = fgets($this->_socket)) {
+      $out .= $patka;
+    }
+
+    $stringit = explode("\0", $out);
+
+    foreach ($stringit as $stringi) {
       $xml = @simplexml_load_string($out);
+
       if (isset($xml) and isset($xml->GetReceiptCustomer->Result)) {
         $return = $xml->GetReceiptCustomer->Result;
       }
     }
+
     $msg = $return == '' ? "Asiakkaan kuittia ei haettu" : "Asiakkaan kuitti haettu";
+
     $this->log($msg);
+
     return $return;
   }
 
   /**
    * Hakee edellisen tapahtuman kauppiaskuitin
-   */  
+   */
   function getMerchantReceipt() {
 
     $return = '';
 
-    $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'><GetReceiptMerchant/></EMVLumo>\0";
-    socket_write($this->_socket, $in, strlen($in));
-    while ($out = socket_read($this->_socket, 2048)) {
+    $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'>
+             <GetReceiptMerchant/>
+           </EMVLumo>\0";
 
+    fwrite($this->_socket, $in);
+
+    $this->log("Haetaan kauppiaan kuittia");
+
+    while ($patka = fgets($this->_socket)) {
+      $out .= $patka;
+    }
+
+    $stringit = explode("\0", $out);
+
+    foreach ($stringit as $stringi) {
       $xml = @simplexml_load_string($out);
+
       if (isset($xml) and isset($xml->GetReceiptMerchant->Result)) {
         $return = $xml->GetReceiptMerchant->Result;
       }
     }
+
     $msg = $return == '' ? "Kauppiaan kuittia ei haettu" : "Kauppiaan kuitti haettu";
+
     $this->log($msg);
+
     return $return;
   }
+
   /**
    * Hakee error_countin:n
-   *
    * @return int  virheiden määrä
    */
   public function getErrorCount() {
     return $this->_error_count;
   }
-  
+
   /**
    * Virhelogi
    *
-   * @param string  $message   Virheviesti
+   * @param string    $message Virheviesti
    * @param exception $exception Exception
    */
   private function log($message, $exception = '') {
 
     if (self::LOGGING == true) {
       $timestamp = date('d.m.y H:i:s');
-      $message = utf8_encode($message);
+      $message   = utf8_encode($message);
 
-    if ($exception != '') {
-      $message .= " (" . $exception->getMessage() . ") faultcode: " . $exception->faultcode;
-    }
+      if ($exception != '') {
+        $message .= " (" . $exception->getMessage() . ") faultcode: " . $exception->faultcode;
+      }
 
-    $message .= "\n";
-    error_log("{$timestamp}: {$message}", 3, '/tmp/lumo_log.txt');
+      $message .= "\n";
 
+      error_log("{$timestamp}: {$message}", 3, '/tmp/lumo_log.txt');
     }
   }
 }

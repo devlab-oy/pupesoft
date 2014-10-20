@@ -76,8 +76,6 @@ class LumoClient
              </SetAmount>
            </EMVLumo>\0";
 
-    fwrite($this->_socket, $in);
-
     // Jos kutsussa on setattu archive_id lisätään se myös sanomaan koska kyseessä on
     // Peruutus/hyvitystapahtuma
     $tyyppi = 'maksu';
@@ -88,17 +86,17 @@ class LumoClient
                       <Value>{$archive_id}</Value>
                     </SetArchiveID>
                   </EMVLumo>\0";
-      $tyyppi  = 'hyvitys/peruutus';
-      fwrite($this->_socket, $bonusin);
+
+      $tyyppi = 'hyvitys/peruutus';
+
+      $in .= $bonusin;
     }
 
-    $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'>
+    $in .= "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'>
              <MakeTransaction>
                <TransactionType>{$transaction_type}</TransactionType>
              </MakeTransaction>
            </EMVLumo>\0";
-
-    $out = '';
 
     $viesti = "Aloitetaan {$tyyppi}tapahtuma,\t" .
       "Tyyppi: {$transaction_type}\t/" .
@@ -109,25 +107,29 @@ class LumoClient
 
     fwrite($this->_socket, $in);
 
-    while ($out = fgets($this->_socket)) {
-      $stringit = explode("\0", $out);
+    $out = '';
 
-      foreach ($stringit as $stringi) {
-        $xml = @simplexml_load_string($stringi);
+    while ($patka = fgets($this->_socket)) {
+      $out .= $patka;
+    }
 
-        if (isset($xml) and isset($xml->MakeTransaction->Result)) {
-          $return = $xml->MakeTransaction->Result == "True" ? true : false;
-          $arvo   = $return === true ? "OK" : "HYLÄTTY";
+    $stringit = explode("\0", $out);
 
-          $this->log("\t{$tyyppi}tapahtuma {$arvo}");
-        }
+    foreach ($stringit as $stringi) {
+      $xml = @simplexml_load_string($stringi);
 
-        if (isset($xml) and isset($xml->StatusUpdate->StatusInfo)) {
-          $leelo = $xml->StatusUpdate->StatusInfo;
+      if (isset($xml) and isset($xml->MakeTransaction->Result)) {
+        $return = $xml->MakeTransaction->Result == "True" ? true : false;
+        $arvo   = $return === true ? "OK" : "HYLÄTTY";
 
-          if ($leelo == "CMD MANUAL_AUTH") {
-            $this->log("Käsivarmenne havaittu");
-          }
+        $this->log("\t{$tyyppi}tapahtuma {$arvo}");
+      }
+
+      if (isset($xml) and isset($xml->StatusUpdate->StatusInfo)) {
+        $leelo = $xml->StatusUpdate->StatusInfo;
+
+        if ($leelo == "CMD MANUAL_AUTH") {
+          $this->log("Käsivarmenne havaittu");
         }
       }
     }

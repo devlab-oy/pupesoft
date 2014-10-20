@@ -69,28 +69,22 @@ class LumoClient
   function startTransaction($amount, $transaction_type = 0, $archive_id = '') {
     $return = false;
 
-    // Setataan transaction amount
-    $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'> 
+    // Jos kutsussa on setattu archive_id lisätään se myös sanomaan koska kyseessä on
+    // Peruutus/hyvitystapahtuma
+    if ($archive_id != '') {
+      $archive_node = "<SetArchiveID><Value>{$archive_id}</Value></SetArchiveID>";
+      $tyyppi       = 'hyvitys/peruutus';
+    }
+    else {
+      $tyyppi = "maksu";
+    }
+
+    $in = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'>
              <SetAmount>
                <Value>{$amount}</Value>
              </SetAmount>
+             {$archive_node}
            </EMVLumo>\0";
-
-    // Jos kutsussa on setattu archive_id lisätään se myös sanomaan koska kyseessä on
-    // Peruutus/hyvitystapahtuma
-    $tyyppi = 'maksu';
-
-    if ($archive_id != '') {
-      $bonusin = "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'>
-                    <SetArchiveID>
-                      <Value>{$archive_id}</Value>
-                    </SetArchiveID>
-                  </EMVLumo>\0";
-
-      $tyyppi = 'hyvitys/peruutus';
-
-      $in .= $bonusin;
-    }
 
     $in .= "<EMVLumo xmlns='http://www.luottokunta.fi/EMVLumo'>
              <MakeTransaction>
@@ -159,7 +153,7 @@ class LumoClient
     $stringit = explode("\0", $out);
 
     foreach ($stringit as $stringi) {
-      $xml = @simplexml_load_string($out);
+      $xml = @simplexml_load_string($stringi);
 
       if (isset($xml) and isset($xml->GetReceiptCustomer->Result)) {
         $return = $xml->GetReceiptCustomer->Result;

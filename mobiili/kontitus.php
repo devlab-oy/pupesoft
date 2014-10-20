@@ -15,7 +15,6 @@ $errors = array();
 if (isset($submit)) {
 
   switch ($submit) {
-
   case 'konttiviite':
     if (empty($konttiviite)) {
       $errors[] = t("Syötä konttiviite");
@@ -23,7 +22,63 @@ if (isset($submit)) {
     }
     else {
 
-      $kontit_rullineen = kontit_rullineen($konttiviite);
+      $query = "SELECT
+                lasku.sisviesti1 AS ohje,
+                laskun_lisatiedot.konttityyppi AS tyyppi,
+                tilausrivi.toimitettu
+                FROM laskun_lisatiedot
+                JOIN lasku
+                  ON lasku.yhtio = laskun_lisatiedot.yhtio
+                  AND lasku.tunnus = laskun_lisatiedot.otunnus
+                JOIN tilausrivi
+                  ON tilausrivi.yhtio = lasku.yhtio
+                  AND tilausrivi.otunnus = lasku.tunnus
+                WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+                AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
+                AND tilausrivi.var != 'P'
+                GROUP BY tilausrivi.toimitettu
+                ORDER BY tilausrivi.toimitettu ASC";
+      $result = pupe_query($query);
+
+      $info  = mysql_fetch_assoc($result);
+
+      if (!$info) {
+        $errors[] = t("Ei löytynyt kontitettavia rullia");
+        $view = 'konttiviite';
+      }
+      elseif ($info['toimitettu'] != '') {
+        $view = 'kontituslista';
+      }
+      else{
+
+        // kovakoodatut max-kilot...
+        switch ($info['tyyppi']) {
+        case 'C20':
+        case 'C20OP':
+          $info['maxkg'] = 22000;
+          break;
+        case 'C40':
+        case 'C40OP':
+        case 'C40HC':
+          $info['maxkg'] = 27000;
+          break;
+        default:
+          $info['maxkg'] = 22000;
+        }
+
+        $view = 'konttiviite_maxkg';
+      }
+    }
+    break;
+  case 'konttiviite_maxkg':
+
+    if (empty($maxkg)) {
+      $errors[] = t("Syötä kilomäärä");
+      $view = 'konttiviite_maxkg';
+    }
+    else {
+
+      $kontit_rullineen = kontit_rullineen($konttiviite, $maxkg);
 
       if ($kontit_rullineen === false) {
         $errors[] = t("Tilausnumerolla ei löydy tilausta.");
@@ -38,7 +93,6 @@ if (isset($submit)) {
       }
     }
     break;
-
   case 'kontitus':
     $query = "UPDATE tilausrivi SET
               keratty = '{$kukarow['kuka']}',
@@ -46,7 +100,7 @@ if (isset($submit)) {
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tunnus = '{$rivitunnus}'";
     pupe_query($query);
-    $kontit_rullineen = kontit_rullineen($konttiviite);
+    $kontit_rullineen = kontit_rullineen($konttiviite, $maxkg);
     $view = 'kontituslista';
     break;
 
@@ -96,8 +150,6 @@ if (isset($submit)) {
         $errors[] = t("Tilausta ei löytynyt!");
       }
 
-echo $sanoma;
-
       if ($sanoma) {
         $lahetys = 'X';
         if (laheta_sanoma($sanoma)) {
@@ -143,11 +195,6 @@ foreach ($errors as $error) {
 }
 echo "</div>";
 
-
-
-
-
-
 if ($view == 'konttiviite') {
   echo "
   <form method='post' action=''>
@@ -166,10 +213,38 @@ if ($view == 'konttiviite') {
   </script>";
 }
 
+if ($view == 'konttiviite_maxkg') {
 
+  if (!empty($info)) {
 
+    echo "<div style='text-align:center;padding:10px; margin:0 auto; width:500px;'>";
 
+    echo "<p>Konttiviite: {$konttiviite}</p>";
+    echo "<p>Konttityyppi {$info['tyyppi']}</p>";
+    echo "<p>Maksimikapasitetti: {$info['maxkg']} kg</p>";
+    echo "<p>{$info['ohje']}</p>";
 
+    echo "</div>";
+
+  }
+
+  echo "
+  <form method='post' action=''>
+    <div style='text-align:center;padding:10px;'>
+      <label for='konttiviite'>", t("Konttien maksimi kilomäärä"), "</label><br>
+      <input type='hidden' name='konttiviite' value='{$konttiviite}' />
+      <input type='text' id='maxkg' name='maxkg' style='margin:10px;' value='{$info['maxkg']}' />
+      <br>
+      <button name='submit' value='konttiviite_maxkg' onclick='submit();' class='button'>", t("OK"), "</button>
+    </div>
+  </form>
+
+  <script type='text/javascript'>
+    $(document).ready(function() {
+      $('#maxkg').focus();
+    });
+  </script>";
+}
 
 if ($view == 'kontituslista') {
 
@@ -192,73 +267,68 @@ if ($view == 'kontituslista') {
 
   echo "<div style='text-align:center;padding:10px;'>";
 
-
-
     foreach ($kontit_rullineen as $key => $kontti) {
 
-      echo "<a name='{$key}'><h1>{$key}</h1></a><br>";
+    echo "<a name='{$key}'><h1>{$key}</h1></a><br>";
 
-      $keraamattomat = 0;
-      $rullat_kontissa = '';
-      $kontitettu = true;
+    $keraamattomat = 0;
+    $rullat_kontissa = '';
+    $kontitettu = true;
 
-      foreach ($kontti as $rulla) {
-        if ($rulla['keratty'] == '') {
-          echo "
-          Rulla  {$rulla['sarjanumero']}
-          <form method='post' action='kontitus.php#{$key}'>
-            <input type='hidden' name='rivitunnus' value='{$rulla['tunnus']}' />
-            <input type='hidden' name='konttiviite' value='{$konttiviite}' />
-            <button name='submit' value='kontitus' onclick='submit();' class='button'>", t("Kontita"), "</button>
-          </form><br>";
-          $keraamattomat++;
-        }
-        else{
-          echo  "Rulla  {$rulla['sarjanumero']} Kerätty!<br>";
-          $rullat_kontissa .= $rulla['tunnus'] . ',';
-        }
-        if ($rulla['toimitettu'] == '') {
-          $kontitettu = false;
-        }
-      }
-
-      if ($keraamattomat == 0 and $kontitettu === false) {
+    foreach ($kontti as $rulla) {
+      if ($rulla['keratty'] == '') {
         echo "
-        <br>
-        Kaikki kontin rullat kerätty. Syötä kontin tiedot:<br>
-
-        <form method='post' action=''>
-          <div style='text-align:center;padding:10px;'>
-            <label for='konttinumero'>", t("Konttinumero"), "</label><br>
-            <input type='text' id='konttinumero' name='konttinumero' style='margin:10px;' /><br>
-            <label for='sinettinumero'>", t("Sinettinumero"), "</label><br>
-            <input type='text' id='sinettinumero' name='sinettinumero' style='margin:10px;' /><br>
-            <input type='hidden' name='konttiviite' value='{$konttiviite}' />
-            <input type='hidden' name='rullat_kontissa' value='{$rullat_kontissa}' />
-            <button name='submit' value='konttitiedot' onclick='submit();' class='button'>", t("Lähetä kontitussanoma"), "</button>
-          </div>
-        </form>";
-
+        Rulla  {$rulla['sarjanumero']}
+        <form method='post' action='kontitus.php#{$key}'>
+          <input type='hidden' name='rivitunnus' value='{$rulla['tunnus']}' />
+          <input type='hidden' name='konttiviite' value='{$konttiviite}' />
+          <input type='hidden' name='maxkg' value='{$maxkg}' />
+          <button name='submit' value='kontitus' onclick='submit();' class='button'>", t("Kontita"), "</button>
+        </form><br>";
+        $keraamattomat++;
       }
-      elseif ($keraamattomat == 0 and $kontitettu === true) {
-        echo "
-        <br>
-        Kaikki kontin rullat kerätty ja kontitettu.
-        <br>
-        Kontitussanoma lähetetty.
-        <br>
-        Kontti#: {$kontti[$key]['toimitettu']}
-        <br><br>";
+      else{
+        echo  "Rulla  {$rulla['sarjanumero']} Kerätty!<br>";
+        $rullat_kontissa .= $rulla['tunnus'] . ',';
       }
-
-      echo "<hr>";
+      if ($rulla['toimitettu'] == '') {
+        $kontitettu = false;
+      }
     }
 
+    if ($keraamattomat == 0 and $kontitettu === false) {
+      echo "
+      <br>
+      Kaikki kontin rullat kerätty. Syötä kontin tiedot:<br>
+
+      <form method='post' action=''>
+        <div style='text-align:center;padding:10px;'>
+          <label for='konttinumero'>", t("Konttinumero"), "</label><br>
+          <input type='text' id='konttinumero' name='konttinumero' style='margin:10px;' /><br>
+          <label for='sinettinumero'>", t("Sinettinumero"), "</label><br>
+          <input type='text' id='sinettinumero' name='sinettinumero' style='margin:10px;' /><br>
+          <input type='hidden' name='maxkg' value='{$maxkg}' />
+          <input type='hidden' name='konttiviite' value='{$konttiviite}' />
+          <input type='hidden' name='rullat_kontissa' value='{$rullat_kontissa}' />
+          <button name='submit' value='konttitiedot' onclick='submit();' class='button'>", t("Lähetä kontitussanoma"), "</button>
+        </div>
+      </form>";
+
+    }
+    elseif ($keraamattomat == 0 and $kontitettu === true) {
+      echo "
+      <br>
+      Kaikki kontin rullat kerätty ja kontitettu.
+      <br>
+      Kontitussanoma lähetetty.
+      <br>
+      Kontti#: {$kontti[$key]['toimitettu']}
+      <br><br>";
+    }
+    echo "<hr>";
+  }
   echo "</div>";
 }
-
-
-
 
 if ($view == 'lahetetty') {
   echo "<div style='text-align:center;'>";
@@ -266,7 +336,4 @@ if ($view == 'lahetetty') {
   echo "</div>";
 }
 
-
-
 require 'inc/footer.inc';
-

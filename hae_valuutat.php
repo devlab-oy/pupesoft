@@ -37,8 +37,7 @@ if ($xml !== FALSE) {
                 muutospvm              = now(),
                 muuttaja               = '$kukarow[kuka]'
                 WHERE yhtio            = '$kukarow[yhtio]'
-                AND nimi               = '$valkoodi'
-                AND automaattipaivitys = ''";
+                AND nimi               = '$valkoodi'";
       $result = pupe_query($query);
 
       if (mysql_affected_rows() != 0) {

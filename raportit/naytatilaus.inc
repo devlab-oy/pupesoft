@@ -685,7 +685,8 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
   $aputullimaara_yhteensa     = "";
   $rivinlisakulu_yhteensa     = "";
 
-  $lopetus = $palvelin2;
+  if ($lopetus != '') $lopetus .= "/SPLIT/";
+  $lopetus .= $palvelin2;
   $lopetus .= "raportit/asiakkaantilaukset.php";
   $lopetus .= "////tee=NAYTATILAUS";
   $lopetus .= "//toim=OSTO";
@@ -1316,7 +1317,8 @@ else {
 
     $_myyntispessut = (in_array($toim, array('LASKU','TILAUSVAHVISTUS','LAHETE','TYOMAARAYS')));
 
-    $lopetus = $palvelin2;
+    if ($lopetus != '') $lopetus .= "/SPLIT/";
+    $lopetus .= $palvelin2;
     $lopetus .= "raportit/asiakkaantilaukset.php";
     $lopetus .= "////tee=NAYTATILAUS";
     $lopetus .= "//asiakasid=$asiakasid";

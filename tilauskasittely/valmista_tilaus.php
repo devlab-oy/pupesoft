@@ -129,7 +129,7 @@ if (!function_exists("onkokaikkivalmistettu")) {
       $query = "SELECT otunnus, uusiotunnus
                 FROM tilausrivi
                 WHERE yhtio = '$kukarow[yhtio]'
-                and tunnus  = $rivitunnus
+                and tunnus  = '{$rivitunnus}'
                 and tyyppi  in ('W','M')";
       $roxresult = pupe_query($query);
       $tilrivirow = mysql_fetch_assoc($roxresult);
@@ -138,7 +138,7 @@ if (!function_exists("onkokaikkivalmistettu")) {
       $query = "SELECT tunnus
                 FROM tilausrivi
                 WHERE yhtio        = '$kukarow[yhtio]'
-                and otunnus        = $tilrivirow[otunnus]
+                and otunnus        = '{$tilrivirow['otunnus']}'
                 and tyyppi         in ('W','M')
                 and tunnus         = perheid
                 and toimitettuaika = '0000-00-00 00:00:00'";
@@ -1339,7 +1339,7 @@ if (!isset($from_kaikkikorj)) {
       echo "<td valign='top' class='$class' align='right'>".tv1dateconv($prow["toimaika"])."</td>";
       echo "<td valign='top' class='$class' align='right'>".tv1dateconv($prow["kerayspvm"])."</td>";
 
-      if ($prow["tunnus"] != $prow["perheid"] and $prow["perheid"] > 0 and $prow["tyyppi"] == "V" and $prow["toimitettuaika"] == "0000-00-00 00:00:00" and $toim != "KORJAA") {
+      if ($prow["perheid"] > 0 and $prow["tyyppi"] == "V" and $prow["toimitettuaika"] == "0000-00-00 00:00:00" and $toim != "KORJAA") {
 
         if ($valmkpllat2[$prow["perheid"]] != 0) {
           $lapsivalue = $kulukpllat[$prow["tunnus"]];
@@ -1351,11 +1351,7 @@ if (!isset($from_kaikkikorj)) {
         echo "<td valign='top' align='center'><input type='text' name='kulukpllat[$prow[tunnus]]' value='$lapsivalue' size='5'></td>";
       }
 
-      if ($prow["tyyppi"] == "V") {
-        echo "<td valign='top' class='back'>".$virhe[$prow["tunnus"]]."</td>";
-      }
-
-      if ($prow["tunnus"] == $prow["perheid"] and ($prow["tyyppi"] == "W" or $prow["tyyppi"] == "M") and $prow["toimitettuaika"] == "0000-00-00 00:00:00" and $toim != "KORJAA") {
+      if (in_array($prow["tyyppi"], array('W', 'M')) and $prow["toimitettuaika"] == "0000-00-00 00:00:00" and $toim != "KORJAA") {
         echo "<td valign='top' class='$class' align='center'><input type='text' name='valmkpllat[$prow[tunnus]]' value='".$valmkpllat2[$prow["tunnus"]]."' size='5'></td><td class='back'>".$virhe[$prow["tunnus"]];
         echo "<br><a href='$PHP_SELF?toim=$toim&tee=SYOTARIVI&valmistettavat=$valmistettavat&perheid=$prow[perheid]&otunnus=$prow[otunnus]'>".t("Lis‰‰ raaka-aine")."</a>";
         echo  "</td>";
@@ -1440,6 +1436,10 @@ if (!isset($from_kaikkikorj)) {
 
       if ($prow["tyyppi"] == "L" and $toim != "KORJAA" and $toim != 'TUTKAA') {
         echo "<td valign='top' align='center'><input type='checkbox' name='osatoimitetaan[$prow[tunnus]]' value='$prow[tunnus]'></td>";
+      }
+
+      if ($prow["tyyppi"] == "V") {
+        echo "<td valign='top' class='back'>".$virhe[$prow["tunnus"]]."</td>";
       }
 
       echo "</tr>";

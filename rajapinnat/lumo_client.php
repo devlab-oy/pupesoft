@@ -18,11 +18,6 @@ class LumoClient
   private $_socket = false;
 
   /**
-   *  Yhteyden tila
-   */
-  private $_connection = false;
-
-  /**
    * Tämän yhteyden aikana sattuneiden virheiden määrä
    */
   private $_error_count = 0;
@@ -65,6 +60,12 @@ class LumoClient
 
   /**
    * Start transaction
+   *
+   * @param int    $amount Maksettava määrä. Aina positiitiven integer
+   * @param int    $transaction_type Maksun tyyppi. 0: Maksu, 1: hyvitys / peruutus
+   * @param string $archive_id Arkistotunnus. Täytyy antaa, jos kyseessä on hyvitys tai peruutus
+   *
+   * @return bool
    */
   function startTransaction($amount, $transaction_type = 0, $archive_id = '') {
     $return = false;
@@ -110,7 +111,7 @@ class LumoClient
     $stringit = explode("\0", $out);
 
     foreach ($stringit as $stringi) {
-      $xml = @simplexml_load_string($stringi);
+      $xml = simplexml_load_string($stringi);
 
       if (isset($xml) and isset($xml->MakeTransaction->Result)) {
         $return = $xml->MakeTransaction->Result == "True" ? true : false;
@@ -153,7 +154,7 @@ class LumoClient
     $stringit = explode("\0", $out);
 
     foreach ($stringit as $stringi) {
-      $xml = @simplexml_load_string($stringi);
+      $xml = simplexml_load_string($stringi);
 
       if (isset($xml) and isset($xml->GetReceiptCustomer->Result)) {
         $return = $xml->GetReceiptCustomer->Result;
@@ -189,7 +190,7 @@ class LumoClient
     $stringit = explode("\0", $out);
 
     foreach ($stringit as $stringi) {
-      $xml = @simplexml_load_string($out);
+      $xml = simplexml_load_string($stringi);
 
       if (isset($xml) and isset($xml->GetReceiptMerchant->Result)) {
         $return = $xml->GetReceiptMerchant->Result;
@@ -214,8 +215,8 @@ class LumoClient
   /**
    * Virhelogi
    *
-   * @param string    $message Virheviesti
-   * @param exception $exception Exception
+   * @param string           $message Virheviesti
+   * @param exception|string $exception $exception Exception
    */
   private function log($message, $exception = '') {
 

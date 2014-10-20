@@ -306,6 +306,9 @@ class MagentoClient {
 
       $multi_data = array();
 
+      $tuetut_kieliversiot = array();
+      $kauppakohtaiset_hinnat = array();
+
       // Simple tuotteiden parametrit kuten koko ja v‰ri
       foreach ($tuote['tuotteen_parametrit'] as $parametri) {
         $key = $parametri['option_name'];
@@ -315,6 +318,16 @@ class MagentoClient {
       if (count($verkkokauppatuotteet_erikoisparametrit) > 0) {
         foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
           $key = $erikoisparametri['nimi'];
+          // Kieliversiot ja kauppakohtaiset_hinnat poimitaan talteen koska niit‰ k‰ytet‰‰n toisaalla
+          if ($key == 'kieliversiot') {
+            $tuetut_kieliversiot = $erikoisparametri['arvo'];
+            continue;
+          }
+          elseif ($key == 'kauppakohtaiset_hinnat') {
+            $kauppakohtaiset_hinnat = $erikoisparametri['arvo'];
+            continue;
+          }
+
           if (isset($tuote[$erikoisparametri['arvo']])) {
             $multi_data[$key] = $this->get_option_id($key, $tuote[$erikoisparametri['arvo']]);
           }
@@ -418,6 +431,75 @@ class MagentoClient {
         }
       }
 
+      // P‰ivitet‰‰n tuotteen kieliversiot kauppan‰kym‰kohtaisesti
+      // jos n‰m‰ on asetettu konffissa
+
+      if (isset($tuetut_kieliversiot) 
+        and count($tuetut_kieliversiot) > 0) {
+
+        try {
+
+          // Kieliversiot-magentoerikoisparametrin tulee sis‰lt‰‰ array jossa m‰‰ritell‰‰n mik‰ kieliversio
+          // siirret‰‰n mihinkin kauppatunnukseen
+
+          // Esim. array("en" => array('4','13'), "se" => array('9'));
+          $kieliversio_data = $this->hae_kieliversiot($tuote_clean);
+
+          foreach ($tuetut_kieliversiot as $kieli => $kauppatunnukset) {
+            $kaannokset = $kieliversio_data[$kieli];
+            if (empty($kaannokset)) continue;
+
+            // P‰ivitet‰‰n jokaiseen kauppatunnukseen haluttu k‰‰nnˆs
+            foreach ($kauppatunnukset as $kauppatunnus) {
+              $tuotteen_kauppakohtainen_data = array(
+                'description' => $kaannokset['kuvaus'],
+                'name'        => $kaannokset['nimitys']
+              );
+
+              $this->_proxy->call($this->_session, 'catalog_product.update',
+                array(
+                  $tuote['tuoteno'],
+                  $tuotteen_kauppakohtainen_data, 
+                  $kauppatunnus
+                )
+              );
+            }
+          }
+
+          $this->log("Tuotteen '{$tuote['tuoteno']}' kieliversiot p‰ivitetty (simple) " . print_r($kieliversio_data, true));
+        }
+        catch (Exception $e) {
+          $this->log("Virhe! Tuotteen '{$tuote['tuoteno']}' kieliversioiden p‰ivitys ep‰onnistui (simple) " . print_r($kieliversio_data, true), $e);
+        }
+      }
+
+      // P‰ivitet‰‰n tuotteen kauppan‰kym‰kohtaiset hinnat
+      if (isset($kauppakohtaiset_hinnat) and count($kauppakohtaiset_hinnat) > 0) {
+        try {
+          foreach ($kauppakohtaiset_hinnat as $tuotekentta => $kauppatunnukset) {
+
+            foreach ($kauppatunnukset as $kauppatunnus) {
+
+              $tuotteen_kauppakohtainen_data = array(
+                'price' => $tuote[$tuotekentta]
+              );
+
+              $this->_proxy->call($this->_session, 'catalog_product.update',
+                array(
+                  $tuote['tuoteno'],
+                  $tuotteen_kauppakohtainen_data, 
+                  $kauppatunnus
+                )
+              );
+            }
+            $this->log("Tuotteen '{$tuote['tuoteno']}' kauppakohtainen hinta p‰ivitetty (simple) " . print_r($tuotteen_kauppakohtainen_data, true));
+          }
+        }
+        catch (Exception $e) {
+          $this->log("Virhe! Tuotteen '{$tuote['tuoteno']}' kauppakohtaisen hinnan p‰ivitys ep‰onnistui (simple) " . print_r($tuotteen_kauppakohtainen_data, true), $e);
+        }
+      }
+
       // Haetaan tuotekuvat Pupesoftista
       $tuotekuvat = $this->hae_tuotekuvat($tuote['tunnus']);
 
@@ -426,7 +508,6 @@ class MagentoClient {
 
       // Lis‰t‰‰n tuote countteria
       $count++;
-
     }
 
     $this->log("$count tuotetta p‰ivitetty (simple)");
@@ -514,6 +595,7 @@ class MagentoClient {
       if (count($verkkokauppatuotteet_erikoisparametrit) > 0) {
         foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
           $key = $erikoisparametri['nimi'];
+          if ($key == 'kieliversiot' or $key == 'kauppakohtaiset_hinnat') continue;
           if (isset($tuotteet[0][$erikoisparametri['arvo']])) {
             $configurable_multi_data[$key] = $this->get_option_id($key, $tuotteet[0][$erikoisparametri['arvo']]);
           }
@@ -1290,30 +1372,27 @@ class MagentoClient {
    * @return array   $tuotekuvat   Palauttaa arrayn joka kelpaa magenton soap clientille suoraan
    */
   public function hae_tuotekuvat($tunnus) {
-    global $kukarow, $dbhost, $dbuser, $dbpass, $dbkanta;
+    global $kukarow;
 
     // Populoidaan tuotekuvat array
     $tuotekuvat = array();
 
     try {
-      // Tietokantayhteys
-      $db = new PDO("mysql:host=$dbhost;dbname=$dbkanta", $dbuser, $dbpass);
 
-      // Tuotekuva query
-      $stmt = $db->prepare("  SELECT
-                  liitetiedostot.data,
-                  liitetiedostot.filetype,
-                  liitetiedostot.filename
-                  FROM liitetiedostot
-                  WHERE liitetiedostot.yhtio = ?
-                  AND liitetiedostot.liitostunnus = ?
-                  AND liitetiedostot.liitos = 'tuote'
-                  AND liitetiedostot.kayttotarkoitus = 'TK'
-                  ORDER BY liitetiedostot.jarjestys DESC,
-                  liitetiedostot.tunnus DESC");
-      $stmt->execute(array($kukarow['yhtio'], $tunnus));
+      $query = "SELECT
+                liitetiedostot.data,
+                liitetiedostot.filetype,
+                liitetiedostot.filename
+                FROM liitetiedostot
+                WHERE liitetiedostot.yhtio = '{$kukarow['yhtio']}'
+                AND liitetiedostot.liitostunnus = '{$tunnus}'
+                AND liitetiedostot.liitos = 'tuote'
+                AND liitetiedostot.kayttotarkoitus = 'TK'
+                ORDER BY liitetiedostot.jarjestys DESC,
+                liitetiedostot.tunnus DESC";
+      $result = pupe_query($query);
 
-      while ($liite = $stmt->fetch(PDO::FETCH_ASSOC)) {
+      while ($liite = mysql_fetch_assoc($result)) {
         $file = array(
           'content'   => base64_encode($liite['data']),
           'mime'    => $liite['filetype'],
@@ -1324,10 +1403,8 @@ class MagentoClient {
     }
     catch (Exception $e) {
       $this->_error_count++;
-      $this->log("Virhe! PDO yhteys on poikki. Yritet‰‰n uudelleen.", $e);
+      $this->log("Virhe! Tietokantayhteys on poikki. Yritet‰‰n uudelleen.", $e);
     }
-
-    $db = null;
 
     // Palautetaan tuotekuvat
     return $tuotekuvat;
@@ -1453,17 +1530,23 @@ class MagentoClient {
         }
       }
 
-      // Haetaan ensin asiakkaan laskutus- ja toimitusosoitteet
-      $address_array = $this->_proxy->call(
-        $this->_session,
-        'customer_address.list',
-        $asiakas['magento_tunnus']);
-      // Ja poistetaan ne
-      if (count($address_array) > 0) {
-        foreach ($address_array as $address) {
-          $result = $this->_proxy->call(
-            $this->_session, 'customer_address.delete', $address['customer_address_id']);
+      try {
+        // Haetaan ensin asiakkaan laskutus- ja toimitusosoitteet
+        $address_array = $this->_proxy->call(
+          $this->_session,
+          'customer_address.list',
+          $asiakas['magento_tunnus']);
+        // Ja poistetaan ne
+        if (count($address_array) > 0) {
+          foreach ($address_array as $address) {
+            $result = $this->_proxy->call(
+              $this->_session, 'customer_address.delete', $address['customer_address_id']);
+          }
         }
+
+      }
+      catch (Exception $e) {
+         $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' osoitteiden haku ep‰onnistui " . print_r("Asiakkaan magento_tunnus: {$asiakas['magento_tunnus']}", true), $e);   
       }
 
       if (isset($laskutus_osoite_data['firstname']) and !empty($laskutus_osoite_data['firstname'])) {
@@ -1500,6 +1583,52 @@ class MagentoClient {
 
     // Palautetaan p‰vitettyjen asiakkaiden m‰‰r‰
     return $count;
+  }
+
+  /**
+   * Hakee tuotteen kieliversiot(tuotenimitys, tuotekuvaus) Pupesoftista
+   *
+   * @param string   $tuotenumero         Tuotteen tuotenumero (tuote.tuoteno)
+   * @return array   $kieliversiot_data   Palauttaa arrayn joka on valmiiksi utf8-enkoodattu
+   *
+   * Esim.
+   * $kieliversiot_data['en'] = array(
+   *   'nimitys' => 'ADAPTOR',
+   *   'kuvaus' => 'ADAPTOR circular IP44- 2 components'
+   * );
+   *
+   */
+  public function hae_kieliversiot($tuotenumero) {
+    global $kukarow;
+
+    $kieliversiot_data = array();
+
+    try {
+      $query = "SELECT
+                kieli, laji, selite
+                FROM
+                tuotteen_avainsanat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tuoteno = '{$tuotenumero}'
+                AND laji IN ('nimitys','kuvaus')";
+      $result = pupe_query($query);
+
+      while ($avainsana = mysql_fetch_assoc($result)) {
+        $kieli  = $avainsana['kieli'];
+        $laji   = utf8_encode($avainsana['laji']);
+        $selite = utf8_encode($avainsana['selite']);
+
+        // J‰sennell‰‰n tuotteen avainsanat kieliversioittain
+        $kieliversiot_data[$kieli][$laji] = $selite;
+      }
+    }
+    catch (Exception $e) {
+      $this->_error_count++;
+      $this->log("Virhe! Tietokantayhteys on poikki. Yritet‰‰n uudelleen.", $e);
+    }
+
+    // Palautetaan kieliversiot
+    return $kieliversiot_data;
   }
 
   /**

@@ -12,6 +12,9 @@ if ($php_cli) {
   require_once "inc/functions.inc";
   require_once "inc/connect.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__).PATH_SEPARATOR."/usr/share/pear");
   //error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
   //ini_set("display_errors", 0);
@@ -25,14 +28,14 @@ if ($php_cli) {
   $pupe_root_polku = dirname(__FILE__);
 
   $imaplaskut_skannauskansio = substr($yhtiorow['skannatut_laskut_polku'], -1) != '/' ? $pupe_root_polku."/".$yhtiorow['skannatut_laskut_polku'].'/' : $pupe_root_polku."/".$yhtiorow['skannatut_laskut_polku'];
-  $imaplaskut_username     = $imaplaskut_param[$yhtiorow['yhtio']]["username"];
-  $imaplaskut_password     = $imaplaskut_param[$yhtiorow['yhtio']]["password"];
-  $imaplaskut_imap_server     = $imaplaskut_param[$yhtiorow['yhtio']]["imap_server"];
-  $imaplaskut_imap_port     = $imaplaskut_param[$yhtiorow['yhtio']]["imap_port"];
-  $imaplaskut_in_box        = $imaplaskut_param[$yhtiorow['yhtio']]["in_box"];
-  $imaplaskut_ok_box        = $imaplaskut_param[$yhtiorow['yhtio']]["ok_box"];
-  $imaplaskut_er_box        = $imaplaskut_param[$yhtiorow['yhtio']]["er_box"];
-  $imaplaskut_domain        = $imaplaskut_param[$yhtiorow['yhtio']]["domain"];
+  $imaplaskut_username       = $imaplaskut_param[$yhtiorow['yhtio']]["username"];
+  $imaplaskut_password       = $imaplaskut_param[$yhtiorow['yhtio']]["password"];
+  $imaplaskut_imap_server    = $imaplaskut_param[$yhtiorow['yhtio']]["imap_server"];
+  $imaplaskut_imap_port      = $imaplaskut_param[$yhtiorow['yhtio']]["imap_port"];
+  $imaplaskut_in_box         = $imaplaskut_param[$yhtiorow['yhtio']]["in_box"];
+  $imaplaskut_ok_box         = $imaplaskut_param[$yhtiorow['yhtio']]["ok_box"];
+  $imaplaskut_er_box         = $imaplaskut_param[$yhtiorow['yhtio']]["er_box"];
+  $imaplaskut_domain         = $imaplaskut_param[$yhtiorow['yhtio']]["domain"];
 }
 else {
   echo "Voidaan ajaa vain komentoriviltä!!!\n";

@@ -1,5 +1,8 @@
 <?php
 
+///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+$useslave = 1;
+
 $pupe_DataTables = array("etusivun_tyomaarays");
 
 require "inc/parametrit.inc";
@@ -183,7 +186,7 @@ if (!isset($tee) or $tee == '') {
                     kuittaus    = ''
                     WHERE yhtio = '$kukarow[yhtio]'
                     AND tunnus  = '$prow[tunnus]'";
-          $muistutus_kuittaus_res = pupe_query($query);
+          $muistutus_kuittaus_res = pupe_query($query, $masterlink);
 
           continue;
         }

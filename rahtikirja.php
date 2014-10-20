@@ -296,7 +296,7 @@ if ($id > 0 and $tunnukset != "") {
                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
                AND tilausrivi.otunnus IN ({$tunnukset})
                AND tilausrivi.tyyppi  IN ('L','G')
-               AND tilausrivi.var     NOT IN ('P', 'J')";
+               AND tilausrivi.var     not in ('P','J','O','S')";
   $vakresult = pupe_query($vakquery);
   $vakrow = mysql_fetch_assoc($vakresult);
 
@@ -483,7 +483,7 @@ if ($tee == 'add') {
 
       //Voi k‰yd‰ niin, ett‰ rahtikirja on jo tulostunut. Poistetaan mahdolliset tulostusflagit
       $query = "UPDATE tilausrivi set toimitettu = '', toimitettuaika = ''
-                where otunnus IN ({$otsikkonro}) and yhtio = '$kukarow[yhtio]' and var not in ('P','J','O') and tyyppi='$tila'";
+                where otunnus IN ({$otsikkonro}) and yhtio = '$kukarow[yhtio]' and var not in ('P','J','O','S') and tyyppi='$tila'";
       $result = pupe_query($query);
 
       //  Poistetaan kaikki lavaeloitukset
@@ -1381,6 +1381,8 @@ if (($toim == 'lisaa' or $toim == 'lisaa_siirto') and $id == 0 and (string) $id 
       $haku .= " and lasku.clearing='JT-TILAUS' ";
     }
   }
+
+  $wherelasku = $joinmaksuehto = $groupmaksuehto = $selectmaksuehto = "";
 
   //jos myyntitilaus niin halutaan maksuehto mukaan
   if ($tila == 'L') {
@@ -2961,8 +2963,8 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
       $query = "SELECT pakkaamo.printteri1, pakkaamo.printteri3, varastopaikat.printteri5
                 from pakkaamo
                 join varastopaikat ON pakkaamo.yhtio = varastopaikat.yhtio and varastopaikat.tunnus = '$otsik[varasto]'
-                where pakkaamo.yhtio='$kukarow[yhtio]'
-                and pakkaamo.tunnus='$otsik[pakkaamo]'
+                where pakkaamo.yhtio = '$kukarow[yhtio]'
+                and pakkaamo.tunnus  = '$otsik[pakkaamo]'
                 order by pakkaamo.tunnus";
     }
     elseif ($otsik['tulostusalue'] != '' and $otsik['varasto'] != '') {
@@ -2977,26 +2979,41 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
     elseif ($otsik["varasto"] == '') {
       $query = "SELECT *
                 from varastopaikat
-                where yhtio='$kukarow[yhtio]' AND tyyppi != 'P'
+                where yhtio  = '$kukarow[yhtio]'
+                AND tyyppi  != 'P'
                 order by alkuhyllyalue,alkuhyllynro
                 limit 1";
     }
     else {
       $query = "SELECT *
-                from varastopaikat
-                where yhtio='$kukarow[yhtio]' and tunnus='$otsik[varasto]'
-                order by alkuhyllyalue,alkuhyllynro";
+                FROM varastopaikat
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tunnus  = '$otsik[varasto]'
+                ORDER BY alkuhyllyalue,alkuhyllynro";
     }
     $prires = pupe_query($query);
 
 
     if (mysql_num_rows($prires) > 0) {
-      $prirow= mysql_fetch_assoc($prires);
+      $prirow = mysql_fetch_assoc($prires);
 
       $lahete_printteri = "";
       //l‰hete
       if ($prirow['printteri1'] != '') {
         $lahete_printteri = $prirow['printteri1'];
+      }
+
+      // Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
+      if (!empty($otsik['yhtio_toimipaikka'])) {
+        $avainsana_where = " and avainsana.selite       = '{$otsik['varasto']}'
+                             and avainsana.selitetark   = '{$otsik['yhtio_toimipaikka']}'
+                             and avainsana.selitetark_2 = 'printteri1'";
+
+        $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
+
+        if (!empty($tp_tulostin)) {
+          $lahete_printteri = $tp_tulostin;
+        }
       }
 
       $oslappu_printteri = "";

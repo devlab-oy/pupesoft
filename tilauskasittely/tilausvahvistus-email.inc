@@ -137,7 +137,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
   $query = "SELECT tilausrivi.tunnus, tuote.eankoodi, tuote.myyntihinta, tuote.aleryhma, tilausrivi.tuoteno,
             if(tilausrivi.var not in ('P','J','O','S'), tilausrivi.varattu, 0) varattu,
-            if(tilausrivi.var in ('J','S'), tilausrivi.jt+tilausrivi.varattu , 0) jt,
+            if(tilausrivi.var = 'J', tilausrivi.jt+tilausrivi.varattu , 0) jt,
             tilausrivi.toimaika, tilausrivi.kommentti, tilausrivi.tilkpl, tilausrivi.alv,
             tilausrivi.nimitys,  tilausrivi.hinta, {$ale_query_select_lisa} tilausrivi.kommentti, tilausrivi.var
             FROM tilausrivi

@@ -43,6 +43,9 @@ if ($handle = opendir($kansio)) {
       continue;
     }
 
+    // Logitetaan ajo
+    cron_log("{$pupe_root_polku}/dataout/$lasku");
+
     $ftphost = (isset($verkkohost_lah) and trim($verkkohost_lah) != '') ? $verkkohost_lah : "ftp.verkkolasku.net";
     $ftpuser = $yhtiorow['verkkotunnus_lah'];
     $ftppass = $yhtiorow['verkkosala_lah'];
@@ -77,6 +80,9 @@ if ($handle = opendir($kansio)) {
     if (onko_lasku_liian_vanha($kansio.$lasku)) {
       continue;
     }
+
+    // Logitetaan ajo
+    cron_log("{$pupe_root_polku}/dataout/$lasku");
 
     $ftphost     = "ftp.itella.net";
     $ftpuser     = $yhtiorow['verkkotunnus_lah'];
@@ -114,6 +120,9 @@ if ($handle = opendir($kansio)) {
       continue;
     }
 
+    // Logitetaan ajo
+    cron_log("{$pupe_root_polku}/dataout/$lasku");
+
     $ftphost = $edi_ftphost;
     $ftpuser = $edi_ftpuser;
     $ftppass = $edi_ftppass;
@@ -149,6 +158,9 @@ if ($handle = opendir($kansio)) {
       continue;
     }
 
+    // Logitetaan ajo
+    cron_log("{$pupe_root_polku}/dataout/$lasku");
+
     $ftphost = $sisainenfoinvoice_ftphost;
     $ftpuser = $sisainenfoinvoice_ftpuser;
     $ftppass = $sisainenfoinvoice_ftppass;
@@ -168,6 +180,10 @@ if ($handle = opendir($kansio)) {
 $kansio = "{$pupe_root_polku}/dataout/maventa_error/";
 
 if ($handle = opendir($kansio)) {
+
+  // Laitetaan laskut yhtiˆkohtaiseen arrayseen, jotta voidaan l‰hett‰‰ yhdell‰ soap-kutsulla per yritys
+  $mave_laskut = array();
+
   while (($lasku = readdir($handle)) !== FALSE) {
 
     // Ei k‰sitell‰ kun Maventa tiedostoja
@@ -175,14 +191,13 @@ if ($handle = opendir($kansio)) {
       continue;
     }
 
-    $yhtio = $matsit[1];
-    $yhtiorow = hae_yhtion_parametrit($yhtio);
-    $kukarow = hae_kukarow('admin', $yhtio);
+    $mave_laskut[$matsit[1]][$matsit[2]] = $lasku;
+  }
 
-    // Jos lasku on liian vanha, ei k‰sitell‰, l‰hetet‰‰n maililla
-    if (onko_lasku_liian_vanha($kansio.$lasku)) {
-      continue;
-    }
+  foreach ($mave_laskut as $yhtio => $laskut) {
+
+    $yhtiorow = hae_yhtion_parametrit($yhtio);
+    $kukarow  = hae_kukarow('admin', $yhtio);
 
     // T‰ytet‰‰n api_keys, n‰ill‰ kirjaudutaan Maventaan
     $api_keys = array();
@@ -196,23 +211,62 @@ if ($handle = opendir($kansio)) {
 
     try {
       // Testaus
-      //$client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+      // $client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
 
       // Tuotanto
       $client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
-
-      // Haetaan tarvittavat tiedot filest‰
-      $files_out = unserialize(file_get_contents($kansio.$lasku));
-
-      $status = maventa_invoice_put_file($client, $api_keys, $matsit[2], "", $kukarow['kieli'], $files_out);
-
-      // Siirret‰‰n dataout kansioon jos kaikki meni ok
-      rename($kansio.$lasku, "{$pupe_root_polku}/dataout/$lasku");
-
-      echo  "Maventa-lasku $matsit[2]: $status<br>\n";
     }
     catch (Exception $exVirhe) {
       echo "VIRHE: Yhteys Maventaan ep‰onnistui: ".$exVirhe->getMessage()."\n";
+      continue;
+    }
+
+    $mavelask = 0;
+
+    foreach ($laskut as $laskunro => $lasku) {
+
+      // Jos lasku on liian vanha, ei k‰sitell‰, l‰hetet‰‰n maililla
+      if (onko_lasku_liian_vanha($kansio.$lasku)) {
+        continue;
+      }
+
+      // Logitetaan ajo
+      cron_log("{$pupe_root_polku}/dataout/$lasku");
+
+      // Haetaan tarvittavat tiedot filest‰
+      $files_out = unserialize(file_get_contents($kansio.$lasku));
+      $status = maventa_invoice_put_file($client, $api_keys, $laskunro, "", $kukarow['kieli'], $files_out);
+
+      if (!empty($status)) {
+        // Siirret‰‰n dataout kansioon jos kaikki meni ok
+        rename($kansio.$lasku, "{$pupe_root_polku}/dataout/$lasku");
+      }
+      else {
+        $status = "YHTEYSVIRHE!";
+      }
+
+      echo "Maventa-lasku $laskunro: $status<br>\n";
+      $mavelask++;
+
+      // Pidet‰‰n sadan laskun j‰lkeen pieni paussi
+      if ($mavelask == 100) {
+        unset($client);
+        sleep(10);
+
+        try {
+          // Testaus
+          // $client = new SoapClient('https://testing.maventa.com/apis/bravo/wsdl');
+
+          // Tuotanto
+          $client = new SoapClient('https://secure.maventa.com/apis/bravo/wsdl/');
+        }
+        catch (Exception $exVirhe) {
+          echo "VIRHE: Yhteys Maventaan ep‰onnistui: ".$exVirhe->getMessage()."\n";
+          break;
+        }
+
+        $mavelask = 0;
+      }
     }
   }
 
@@ -238,6 +292,9 @@ if ($handle = opendir($kansio)) {
     if (onko_lasku_liian_vanha($kansio.$lasku)) {
       continue;
     }
+
+    // Logitetaan ajo
+    cron_log("{$pupe_root_polku}/dataout/$lasku");
 
     $status = apix_invoice_put_file(TRUE, "", "", $lasku);
     echo "APIX-l‰hetys $status<br>\n";

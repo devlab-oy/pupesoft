@@ -51,6 +51,8 @@ enable_ajax();
 
 if (strpos($_SERVER['SCRIPT_NAME'], "inventoi.php") !== FALSE) {
 
+  $koko_url = $_SERVER['SCRIPT_NAME'].'?'.$_SERVER['QUERY_STRING'];
+
   echo "  <script type='text/javascript'>
         $(function() {
           $('#inven_laji').on('change', function() {
@@ -65,7 +67,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "inventoi.php") !== FALSE) {
                 no_head: 'yes',
                 ohje: 'off'
               },
-              url: '{$_SERVER['SCRIPT_NAME']}'
+              url: '{$koko_url}'
             }).done(function(data) {
               $('#lisaselite').val(data);
             });
@@ -476,7 +478,7 @@ if ($tee == 'VALMIS') {
                 $oletus = "X";
               }
 
-              lisaa_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, 'Inventoidessa', $oletus);
+              lisaa_tuotepaikka($tuoteno, $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, 'Inventoidessa', $oletus, 0, 0, 0);
 
               // haetaan perustettu resultti (sama query ku ylh‰‰ll‰)
               $query = "SELECT *

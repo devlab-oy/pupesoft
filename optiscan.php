@@ -81,7 +81,7 @@ if (!isset($matches[1]) or !isset($matches[2])) {
   die("1, Virheellinen sanomamuoto\r\n\r\n");
 }
 
-$sanoma = $matches[1];
+$sanoma  = $matches[1];
 $sisalto = $matches[2];
 
 // Sallittuja sanomia
@@ -113,6 +113,12 @@ $response = "";
 
 require 'inc/connect.inc';
 require 'inc/functions.inc';
+
+// Laitetaan mukaan logiin
+$argv[] = $lines[0];
+
+// Logitetaan ajo
+cron_log();
 
 if ($sanoma == "SignOn") {
 
@@ -212,14 +218,27 @@ elseif ($sanoma == "GetPicks") {
           $otunnukset = implode(",", $lisatyt_tilaukset);
           $kerayslistatunnus = array_shift(array_keys($lisatyt_tilaukset));
 
-          // tilaus on jo tilassa N A, p‰ivitet‰‰n nyt tilaus "ker‰yslista tulostettu" eli L A
-          $query = "UPDATE lasku SET
-                    tila        = 'L',
-                    lahetepvm   = now(),
-                    kerayslista = '{$kerayslistatunnus}'
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus  in ({$otunnukset})";
-          $upd_res = pupe_query($query);
+          $otunnukset_temp = explode(',', $otunnukset);
+          foreach ($otunnukset_temp as $o) {
+            $lasku_temp = hae_lasku($o);
+            if ($lasku_temp['tila'] == 'G') {
+              $query = "UPDATE lasku SET
+                        alatila     = 'A',
+                        lahetepvm   = now(),
+                        kerayslista = '{$kerayslistatunnus}'
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tunnus  = {$o}";
+            }
+            else {
+              $query = "UPDATE lasku SET
+                        tila        = 'L',
+                        lahetepvm   = now(),
+                        kerayslista = '{$kerayslistatunnus}'
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tunnus  = {$o}";
+            }
+            pupe_query($query);
+          }
 
           // Haetaan ker‰tt‰v‰t rivit
           $query = "SELECT min(nro) nro, min(keraysvyohyke) keraysvyohyke, GROUP_CONCAT(tilausrivi) AS tilausrivit
@@ -637,10 +656,10 @@ elseif ($sanoma == "StopAssignment") {
       $printteri_row = mysql_fetch_assoc($printteri_res);
 
       // setataan muuttujat keraa.php:ta varten
-      $tee = "P";
-      $toim = "";
-      $id = $nro;
-      $keraajanro = "";
+      $tee         = "P";
+      $toim        = "";
+      $id          = $nro;
+      $keraajanro  = "";
       $keraajalist = $kukarow['kuka'];
 
       // vakadr-tulostin on aina sama kuin l‰hete-tulostin

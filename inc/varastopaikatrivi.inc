@@ -49,6 +49,32 @@ if (mysql_field_name($result, $i) == 'tyyppi') {
   $jatko=0;
 }
 
+if (mysql_field_name($result, $i) == "isa_varasto") {
+  $query = "SELECT tunnus, nimitys
+            FROM varastopaikat
+            WHERE yhtio      = '$kukarow[yhtio]'
+            AND tyyppi      != 'P'
+            AND isa_varasto  = 0
+            AND tunnus      != '{$trow['tunnus']}'";
+  $vresult =  pupe_query($query);
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+  $ulos .= "<option value='0'>Ei isävarastoa</option>";
+
+  while ($vrow = mysql_fetch_assoc($vresult)) {
+    $sel="";
+
+    if ($trow[$i] == $vrow["tunnus"]) {
+      $sel = "selected";
+    }
+
+    $ulos .= "<option value = '$vrow[tunnus]' $sel>$vrow[nimitys]</option>";
+  }
+  $ulos .= "</select></td>";
+  $jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == "nouto") {
 
   $ulos  = "<td><select name='$nimi'>";

@@ -738,7 +738,13 @@ if ($tee != '') {
         }
         else {
           $lisa = '';
-          $selectlisa = " tilausrivi.tuoteno, TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark)) asiakasnimi, kerayserat.kpl ";
+          //Jos siirtolistojen tulostus ker‰yserin kautta on p‰‰ll‰ niin otetaan asiakkaan nimi laskulta
+          if ($yhtiorow['kerayserat'] == 'K' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+            $selectlisa = " tilausrivi.tuoteno, TRIM(CONCAT(lasku.nimi, ' ', lasku.nimitark)) asiakasnimi, kerayserat.kpl ";
+          }
+          else {
+            $selectlisa = " tilausrivi.tuoteno, TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark)) asiakasnimi, kerayserat.kpl ";
+          }
         }
 
         $query = "SELECT kerayserat.pakkaus, kerayserat.tunnus AS rivitunnus,

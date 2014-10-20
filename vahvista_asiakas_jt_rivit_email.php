@@ -9,6 +9,9 @@ if (php_sapi_name() == 'cli') {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   $yhtio = trim($argv[1]);
 
   //yhtiötä ei ole annettu

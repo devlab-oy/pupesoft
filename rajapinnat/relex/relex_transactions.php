@@ -30,8 +30,18 @@ cron_log();
 
 $ajopaiva  = date("Y-m-d");
 $paiva_ajo = FALSE;
+$vuosi_ajo = FALSE;
 
 if (isset($argv[2]) and $argv[2] != '') {
+  if (is_numeric($argv[2])) {
+    $vuosi_ajo = TRUE;
+    $vuosi = pupesoft_cleannumber($argv[2]);
+
+    if (isset($argv[3]) and is_numeric($argv[3])) {
+      $kuukausi = pupesoft_cleannumber($argv[3]);
+    }
+  }
+
   $paiva_ajo = TRUE;
 
   if ($argv[2] == "edpaiva") {
@@ -50,7 +60,12 @@ $tuoterajaus = " AND tuote.status not in ('P','E')
                  AND tuote.tuotetyyppi  = '' ";
 
 // Tallennetaan rivit tiedostoon
-$filepath = "/tmp/input_transactions_{$yhtio}_$ajopaiva.csv";
+if ($vuosi_ajo) {
+  $filepath = "/tmp/input_transactions_{$vuosi}_{$yhtio}_$ajopaiva.csv";
+}
+else {
+  $filepath = "/tmp/input_transactions_{$yhtio}_$ajopaiva.csv";
+}
 
 if (!$fp = fopen($filepath, 'w+')) {
   die("Tiedoston avaus epäonnistui: $filepath\n");
@@ -80,6 +95,14 @@ $kerivirajaus    = " AND tilausrivi.kerattyaika > 0 ";
 if ($paiva_ajo) {
   $tapahtumarajaus = " AND tapahtuma.laadittu >= date_sub(now(), interval 24 HOUR) ";
   $kerivirajaus    = " AND tilausrivi.kerattyaika >= date_sub(now(), interval 24 HOUR) ";
+}
+
+if ($vuosi_ajo) {
+  $tapahtumarajaus = " AND tapahtuma.laadittu >= '$vuosi-01-01 00:00:00'
+                       AND tapahtuma.laadittu <= '$vuosi-01-31 23:59:59' ";
+
+  $kerivirajaus    = " AND tilausrivi.kerattyaika >= '$vuosi-01-01 00:00:00'
+                       AND tilausrivi.kerattyaika <= '$vuosi-01-31 23:59:59'";
 }
 
 // Haetaan tapahtumista:

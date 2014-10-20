@@ -37,50 +37,46 @@ if (isset($submit)) {
   }
 
   if (isset($uusi_paino)) {
-
-    require 'generoi_edifact.inc';
-    $parametrit = hylky_lusaus_parametrit($sarjanumero);
-
-    if ($parametrit) {
-      $parametrit['poistettu_paino'] = $vanha_paino - $uusi_paino;
-      $parametrit['paino'] = $uusi_paino;
-      $parametrit['laji'] = 'lusaus';
-      $sanoma = laadi_edifact_sanoma($parametrit);
+    if ($uusi_paino > $vanha_paino) {
+      $errors[] = t("Uusi paino ei voi olla suurempi kuin alkuperäinen.");
     }
-    else{
-      $errors[] = t("Sarjanumerolla ei löytynyt mitään.");
-    }
+    else {
+      require 'generoi_edifact.inc';
+      $parametrit = hylky_lusaus_parametrit($sarjanumero);
 
-    if ($sanoma) {
-      if (laheta_sanoma($sanoma)) {
-
-        $lahetys = 'OK';
-        $viesti = "Sarjanumeron $sarjanumero uudeksi painoksi on päivitetty $uusi_paino kg.";
-
-        $query = "UPDATE sarjanumeroseuranta
-                  SET massa = '{$uusi_paino}'
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND sarjanumero = '{$sarjanumero}'";
-        pupe_query($query);
-
+      if ($parametrit) {
+        $parametrit['poistettu_paino'] = $vanha_paino - $uusi_paino;
+        $parametrit['paino'] = $uusi_paino;
+        $parametrit['laji'] = 'lusaus';
+        $sanoma = laadi_edifact_sanoma($parametrit);
       }
       else{
-        $errors[] = t("Lähetys ei onnistunut");
+        $errors[] = t("Sarjanumerolla ei löytynyt mitään.");
+      }
+
+      if ($sanoma) {
+        if (laheta_sanoma($sanoma)) {
+
+          $lahetys = 'OK';
+          $viesti = "Sarjanumeron $sarjanumero uudeksi painoksi on päivitetty $uusi_paino kg.";
+
+          $query = "UPDATE sarjanumeroseuranta
+                    SET massa = '{$uusi_paino}'
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND sarjanumero = '{$sarjanumero}'";
+          pupe_query($query);
+
+        }
+        else{
+          $errors[] = t("Lähetys ei onnistunut");
+        }
+      }
+      else{
+        $errors[] = t("Ei sanomaa");
       }
     }
-    else{
-      $errors[] = t("Ei sanomaa");
-    }
-
-    //$query_string = "?sarjanumero={$sarjanumero}&submit=sarjanumero";
-    //echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=tuloutus_sarjanumero.php{$query_string}'>";
-    //die;
   }
 }
-
-
-
-
 
 echo "
 <div class='header'>
@@ -94,7 +90,7 @@ foreach ($errors as $error) {
 }
 echo "</div>";
 
-if (isset($sarjanumero) and count($errors) < 1 and $lahetys != 'OK') {
+if (isset($sarjanumero) and $lahetys != 'OK') {
 
   echo "
   <form method='post' action='lusaus.php'>
@@ -147,8 +143,25 @@ else {
 echo "
 <script type='text/javascript'>
   $(document).ready(function() {
-    $('#{$input}').focus();
+
+    $(document).keypress(function(event){
+        var keycode = (event.keyCode ? event.keyCode : event.which);
+        if(keycode == '13'){
+            $('#{$input}').focus();
+        }
+    });
+
+
+    var code = e.keyCode || e.which;
+     if(code == 13) { //Enter keycode
+       alert('dfdfd');
+       $('#{$input}').focus();
+     }
+
   });
+
+
+
 </script>";
 
 require 'inc/footer.inc';

@@ -61,7 +61,7 @@ $tuoterajaus = " AND tuote.status not in ('P','E')
 
 // Tallennetaan rivit tiedostoon
 if ($kuukausi_ajo) {
-  $filepath = "/tmp/input_transactions_{$vuosi}{$kuukausi}_{$yhtio}_$ajopaiva.csv";
+  $filepath = "/tmp/history_{$vuosi}{$kuukausi}_input_transactions_{$yhtio}.csv";
 }
 else {
   $filepath = "/tmp/input_transactions_{$yhtio}_$ajopaiva.csv";

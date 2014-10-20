@@ -30,15 +30,15 @@ cron_log();
 
 $ajopaiva  = date("Y-m-d");
 $paiva_ajo = FALSE;
-$vuosi_ajo = FALSE;
+$kuukausi_ajo = FALSE;
 
 if (isset($argv[2]) and $argv[2] != '') {
   if (is_numeric($argv[2])) {
-    $vuosi_ajo = TRUE;
+    $kuukausi_ajo = TRUE;
     $vuosi = pupesoft_cleannumber($argv[2]);
 
     if (isset($argv[3]) and is_numeric($argv[3])) {
-      $kuukausi = pupesoft_cleannumber($argv[3]);
+      $kuukausi = sprintf('%02d', pupesoft_cleannumber($argv[3]));
     }
   }
 
@@ -60,8 +60,8 @@ $tuoterajaus = " AND tuote.status not in ('P','E')
                  AND tuote.tuotetyyppi  = '' ";
 
 // Tallennetaan rivit tiedostoon
-if ($vuosi_ajo) {
-  $filepath = "/tmp/input_transactions_{$vuosi}_{$yhtio}_$ajopaiva.csv";
+if ($kuukausi_ajo) {
+  $filepath = "/tmp/input_transactions_{$vuosi}{$kuukausi}_{$yhtio}_$ajopaiva.csv";
 }
 else {
   $filepath = "/tmp/input_transactions_{$yhtio}_$ajopaiva.csv";
@@ -97,12 +97,17 @@ if ($paiva_ajo) {
   $kerivirajaus    = " AND tilausrivi.kerattyaika >= date_sub(now(), interval 24 HOUR) ";
 }
 
-if ($vuosi_ajo) {
-  $tapahtumarajaus = " AND tapahtuma.laadittu >= '$vuosi-01-01 00:00:00'
-                       AND tapahtuma.laadittu <= '$vuosi-01-31 23:59:59' ";
+if ($kuukausi_ajo) {
+	
+  // Kuukauden vika päivä
+  $vikapaiva = date("t", mktime(0, 0, 0, $kuukausi, 1, $vuosi));
+	
+  $tapahtumarajaus = " AND tapahtuma.laadittu >= '$vuosi-$kuukausi-01 00:00:00'
+                       AND tapahtuma.laadittu <= '$vuosi-$kuukausi-$vikapaiva 23:59:59' ";
 
-  $kerivirajaus    = " AND tilausrivi.kerattyaika >= '$vuosi-01-01 00:00:00'
-                       AND tilausrivi.kerattyaika <= '$vuosi-01-31 23:59:59'";
+  $kerivirajaus    = " AND tilausrivi.kerattyaika >= '$vuosi-$kuukausi-01 00:00:00'
+                       AND tilausrivi.kerattyaika <= '$vuosi-$kuukausi-$vikapaiva 23:59:59'";
+
 }
 
 // Haetaan tapahtumista:

@@ -25,26 +25,6 @@ if ($task == 'hae') {
 
   ftp_chdir($yhteys, 'out-test');
 
-/*
-
-  $path = "$pupe_root_polku/dataout/rp_edifact/";
-  $filenimi = 'book';
-  $file = $path.$filenimi;
-
-
-  ftp_pasv($yhteys, true);
-  ftp_chdir($yhteys, 'out-test');
-
-  // try to upload $file
-  if (ftp_put($yhteys, $filenimi, $file, FTP_ASCII)) {
-    echo t("Onnistuneesti siirrettiin tiedosto $file<br/>");
-  }
-  else {
-    echo t("Tiedoston siirtamisessa oli ongelma: $file<br/>");
-  }
-
-*/
-
   ftp_pasv($yhteys, true);
 
   $files = ftp_nlist($yhteys, ".");
@@ -159,6 +139,11 @@ function kasittele_bookkaussanoma($edi_data) {
       $rivinro = $tilaus_info_osat[2];
     }
 
+    if (substr($rivi, 0, 7) == "FTX+TRA" and !isset($ohje)) {
+      $osat = explode("+", $rivi);
+      $ohje = $osat[4];
+    }
+
     if (substr($rivi, 0, 6) == 'EQD+CN') {
       $osat = explode("+", $rivi);
       $konttityyppi = $osat[3];
@@ -220,7 +205,8 @@ function kasittele_bookkaussanoma($edi_data) {
     $tunnus = luo_myyntitilausotsikko('RIVISYOTTO', $asiakas_id);
 
     $update_query = "UPDATE lasku SET
-                     asiakkaan_tilausnumero = '{$tilausnro}'
+                     asiakkaan_tilausnumero = '{$tilausnro}',
+                     sisviesti1 = '{$ohje}'
                      WHERE yhtio = '{$kukarow['yhtio']}'
                      AND tunnus = '{$tunnus}'";
     pupe_query($update_query);

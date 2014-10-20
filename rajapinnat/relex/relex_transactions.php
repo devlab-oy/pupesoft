@@ -91,6 +91,8 @@ fwrite($fp, $header);
 $tapahtumarajaus = "";
 $kerivirajaus    = " AND tilausrivi.kerattyaika > 0 ";
 
+pupemaster_start();
+
 $datetime_checkpoint_res = t_avainsana("RELEX_TRAN_CRON");
 
 if (mysql_num_rows($datetime_checkpoint_res) != 1) {
@@ -110,6 +112,8 @@ else {
   $datetime_checkpoint_row = mysql_fetch_assoc($datetime_checkpoint_res);
   $datetime_checkpoint = pupesoft_cleanstring($datetime_checkpoint_row['selite']);
 }
+
+pupemaster_stop();
 
 // Otetaan mukaan vain edellisen ajon j‰lkeen tehdyt tapahtumat
 if ($paiva_ajo and $datetime_checkpoint != "") {
@@ -218,13 +222,17 @@ if ($kuukausi_ajo) {
 else {
   $datetime_checkpoint_uusi = date('Y-m-d H:i:s');
 }
-  
+
+pupemaster_start();
+
 // P‰ivitet‰‰n timestamppi talteen jolloin tuotteet on haettu
 $query = "UPDATE avainsana SET
           selite      = '{$datetime_checkpoint_uusi}'
           WHERE yhtio = '{$kukarow['yhtio']}'
           AND laji    = 'RELEX_TRAN_CRON'";
 pupe_query($query);
+
+pupemaster_stop();
 
 // Kerrotaan montako rivi‰ k‰sitell‰‰n
 $rows = mysql_num_rows($res);

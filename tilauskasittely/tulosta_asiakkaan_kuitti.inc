@@ -39,7 +39,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   list($yhteensa, $pyoristys, $loppusumma) = summat($lasku);
 
   if ($kateinen) {
-    $takaisin = $kateinen - $loppusumma;
+    $takaisin = $kateinen - $loppusumma + $maksupaatesumma;
     $takaisin = hintapyoristys($takaisin);
   }
 

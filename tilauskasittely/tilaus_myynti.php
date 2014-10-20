@@ -4224,12 +4224,9 @@ if ($tee == '') {
     //Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
     if ($tila == "LISAAKERTARESEPTIIN" and $teeperhe == "OK") {
 
-      $_tyyppilisa = $valmiste_vai_raakaaine == 'raakaaine' ? 'V' : 'W';
-
       $query = "UPDATE tilausrivi
                 SET
-                perheid     = '$isatunnus',
-                tyyppi      = '{$_tyyppilisa}'
+                perheid     = '$isatunnus'
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tunnus  = '$isatunnus'";
       $presult = pupe_query($query);
@@ -4240,12 +4237,9 @@ if ($tee == '') {
     if ($tila == "LISAAISAKERTARESEPTIIN") {
       if ($teeperhe == "OK") {
 
-        $_tyyppilisa = $valmiste_vai_raakaaine == 'raakaaine' ? 'V' : 'W';
-
         $query = "UPDATE tilausrivi
                   SET
-                  perheid     = '$isatunnus',
-                  tyyppi      = '{$_tyyppilisa}'
+                  perheid     = '$isatunnus'
                   WHERE yhtio = '$kukarow[yhtio]'
                   and tunnus  = '$isatunnus'";
         $presult = pupe_query($query);

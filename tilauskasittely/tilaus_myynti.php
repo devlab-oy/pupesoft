@@ -234,6 +234,15 @@ if ($kukarow["extranet"] == "") {
         $('#laskuri').submit();
       });
 
+      $('#peruuta_viimeisin').click(function () {
+        $('#seka').val('X');
+        $('#maksupaatetapahtuma').val('X');
+        $('#peruutus').val('X');
+        $('#loader').show();
+        $('#maksustatus').text('');
+        $('#laskuri').submit();
+      });
+
       $('#hyvaksy_nappi').click(function () {
         $('#seka').val('kylla');
         $('#laskuri').submit();
@@ -1275,6 +1284,7 @@ if ($tee == "VALMIS"
     echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
     echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
     echo "<input type='hidden' name='maksupaatetapahtuma' id='maksupaatetapahtuma' value=''>";
+    echo "<input type='hidden' id='peruutus' name='peruutus' value>";
 
     echo "  <script type='text/javascript' language='JavaScript'>
       <!--
@@ -1347,7 +1357,7 @@ if ($tee == "VALMIS"
       $maksupaate_maksetut['pankkikortti'] = $maksettu_pkortilla;
       
        // Kutsutaan scriptaa jos on syötetty summa KORTILLA-ruutuun ja klikattu oikeaa namiskaa
-      if (isset($maksupaatetapahtuma) and $maksupaatetapahtuma != '' and $tilausnumero != '' and $korttimaksu != '') {
+      if (isset($maksupaatetapahtuma) and $maksupaatetapahtuma != '' and $tilausnumero != '') {
 
         $korttimaksu = str_replace(",",".", $korttimaksu);
         $korttimaksu = number_format($korttimaksu, $yhtiorow['hintapyoristys'], '.', '');
@@ -1420,10 +1430,18 @@ if ($tee == "VALMIS"
     echo "<tr><th>".t("Erotus")."</th><td name='loppusumma' id='loppusumma' align='right'><strong>$totaalisumma</strong></td><td>$laskurow[valkoodi]</td></tr>";
 
     if ($yhtiorow['maksupaate_kassamyynti'] != '') {
-      echo "<tr>";
-      echo "<td class='back'>";
-      echo "<br>";
-      echo "<input type='button' name='korttimaksunappi' id='korttimaksunappi' value='".t("Tee uusi korttimaksu")."'></td></tr>";
+      echo "<tr>
+              <td class='back'>
+                <input type='button'
+                       name='korttimaksunappi'
+                       id='korttimaksunappi'
+                       value='" . t("Tee uusi korttimaksu") . "'>
+                <input type='button'
+                       name='peruuta_viimeisin'
+                       id='peruuta_viimeisin'
+                       value='" . t("Peruuta viimeisin maksu") . "'
+              </td>
+            </tr>";
     }
 
     echo "<tr><td class='back'><input type='button' name='hyvaksy_nappi' id='hyvaksy_nappi' value='".t("Hyväksy")."' $disabloi_hyvaksy></td></tr>";
@@ -1787,7 +1805,8 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
         echo "<table><form name='laskuri' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
 
         if ($yhtiorow["maksupaate_kassamyynti"] == "K") {
-          echo "<input type='hidden' name='laskunro' value='{$laskurow["laskunro"]}'";
+          echo "<input type='hidden' name='laskunro' value='{$laskurow["laskunro"]}'/>";
+          echo "<input type='hidden' name='toim' value='PIKATILAUS'/>";
         }
 
         if (!isset($kateismaksu['kateinen']) or $kateismaksu['kateinen'] == '') {

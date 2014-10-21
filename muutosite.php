@@ -1229,9 +1229,9 @@ if ($tee == 'E' or $tee == 'F') {
         echo "<th>".t('Varastosiirtotosite')."</th>";
         echo "<td colspan='5'>";
 
-        while ($varastosiirto = mysql_fetch_assoc($varastosiirto_result)) {
+        if ($lopetus != '') $lopetus .= "/SPLIT/";
 
-          if ($lopetus != '') $lopetus .= "/SPLIT/";
+        while ($varastosiirto = mysql_fetch_assoc($varastosiirto_result)) {
           echo "<a href='{$palvelin2}muutosite.php?tee=E&tunnus={$varastosiirto['varastosiirto_tunnus']}&lopetus={$lopetus}{$palvelin2}muutosite.php////tee=E//tunnus={$trow['tunnus']}'>{$varastosiirto['varastosiirto_tunnus']}</a> ";
         }
 

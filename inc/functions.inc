@@ -28204,3 +28204,9 @@ if (!function_exists('hae_tilausrivi')) {
     return mysql_fetch_assoc($result);
   }
 }
+
+if (!function_exists('escape_single_quotes')) {
+  function escape_single_quotes(&$item, $key) {
+    $item = str_replace("'", "\'", $item);
+  }
+}

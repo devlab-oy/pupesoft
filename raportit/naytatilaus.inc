@@ -990,7 +990,16 @@ else {
   $lopetus .= "//lasku_yhtio=$row[yhtio]";
   $lopetus .= "//ytunnus=$ytunnus";
   $lopetus .= "//tunnus=$tunnus";
-  $lopetus_apu = 'X';
+
+  if (!$_asiakkaantilaus and $_myyntispessut) {
+    $lopetus .= "//toim=MYYNTI";
+  }
+  elseif ($_asiakkaantilaus) {
+    $lopetus .= "//toim=$toim";
+  }
+  else {
+    $lopetus = '';
+  }
 
   while ($row = mysql_fetch_assoc($result)) {
     $linjannimi = "";
@@ -1327,16 +1336,6 @@ else {
       else {
         echo "<td $class align='left' valign='top'></td>";
       }
-    }
-    
-    if (!$_asiakkaantilaus and $_myyntispessut) {
-      $lopetus .= "//toim=MYYNTI";
-    }
-    elseif ($_asiakkaantilaus) {
-      $lopetus .= "//toim=$toim";
-    }
-    else {
-      $lopetus = '';
     }
 
     if ($kukarow['extranet'] == '') {

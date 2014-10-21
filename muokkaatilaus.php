@@ -907,24 +907,24 @@ else {
   else {
     $tepalisa = " AND tilaustyyppi != '9' ";
   }
-echo "910 toim $toim <br><br>";
+
   // Etsit‰‰n muutettavaa tilausta
   if ($toim == 'HYPER') {
 
     $query = "  SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, ";
 
     if ($kukarow['hinnat'] == 0) {
-      $query .= " round(sum(tilausrivi.hinta 
-                    / if('$yhtiorow[alv_kasittely]'  = '' AND tilausrivi.alv < 500, 
-                      (1 + tilausrivi.alv / 100), 
-                      1) 
-                    * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl) 
-                    * {$query_ale_lisa}), 2) AS arvo, 
-                  round(sum(tilausrivi.hinta 
-                    * if('$yhtiorow[alv_kasittely]' != '' AND tilausrivi.alv < 500, 
+      $query .= " round(sum(tilausrivi.hinta
+                    / if('$yhtiorow[alv_kasittely]'  = '' AND tilausrivi.alv < 500,
                       (1 + tilausrivi.alv / 100),
-                      1) 
-                    * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl) 
+                      1)
+                    * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl)
+                    * {$query_ale_lisa}), 2) AS arvo,
+                  round(sum(tilausrivi.hinta
+                    * if('$yhtiorow[alv_kasittely]' != '' AND tilausrivi.alv < 500,
+                      (1 + tilausrivi.alv / 100),
+                      1)
+                    * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl)
                     * {$query_ale_lisa}), 2) AS summa, ";
     }
 
@@ -992,7 +992,7 @@ echo "910 toim $toim <br><br>";
                    count(distinct lasku.tunnus) kpl
                    FROM lasku use index (tila_index)
                    JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio
-                     AND tilausrivi.otunnus = lasku.tunnus 
+                     AND tilausrivi.otunnus = lasku.tunnus
                      AND tilausrivi.tyyppi != 'D')
                    WHERE lasku.yhtio = '$kukarow[yhtio]'
                      AND lasku.tila IN ('L', 'N')
@@ -1008,17 +1008,17 @@ echo "910 toim $toim <br><br>";
     $query = "  SELECT DISTINCT lasku.tunnus tilaus, $asiakasstring asiakas, lasku.luontiaika, if(kuka1.kuka is null, lasku.laatija, if (kuka1.kuka!=kuka2.kuka, concat_ws('<br>', kuka1.nimi, kuka2.nimi), kuka1.nimi)) laatija, ";
 
     if ($kukarow['hinnat'] == 0) {
-      $query .= " round(sum(tilausrivi.hinta 
-                    / if('$yhtiorow[alv_kasittely]'  = '' AND tilausrivi.alv < 500, 
-                      (1 + tilausrivi.alv / 100), 
-                      1) 
-                    * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl) 
-                    * {$query_ale_lisa}), 2) AS arvo, 
-                  round(sum(tilausrivi.hinta 
-                    * if('$yhtiorow[alv_kasittely]' != '' AND tilausrivi.alv < 500, 
-                      (1 + tilausrivi.alv / 100), 
-                      1) 
-                    * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl) 
+      $query .= " round(sum(tilausrivi.hinta
+                    / if('$yhtiorow[alv_kasittely]'  = '' AND tilausrivi.alv < 500,
+                      (1 + tilausrivi.alv / 100),
+                      1)
+                    * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl)
+                    * {$query_ale_lisa}), 2) AS arvo,
+                  round(sum(tilausrivi.hinta
+                    * if('$yhtiorow[alv_kasittely]' != '' AND tilausrivi.alv < 500,
+                      (1 + tilausrivi.alv / 100),
+                      1)
+                    * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl)
                     * {$query_ale_lisa}), 2) AS summa, ";
     }
 
@@ -1075,7 +1075,7 @@ echo "910 toim $toim <br><br>";
       $sumresult = pupe_query($sumquery);
       $sumrow = mysql_fetch_assoc($sumresult);
     }
-echo "1006 Q $query <br><br> sumQ $sumquery <br><br>";
+
     $miinus = 7;
   }
   elseif ($toim == 'ENNAKKO') {

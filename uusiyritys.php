@@ -274,11 +274,13 @@ if ($tila == 'kayttaja') {
             kuka      = '$kuka',
             profiilit = '$profile'";
   $result = pupe_query($query);
+  $kuka_id = mysql_insert_id($GLOBALS["masterlink"]);
 
   //Insertoidaan ainakin oikeudet käyttäjähallintaan
   $query = "INSERT into oikeu
             SET
             kuka       = '$kuka',
+            user_id    = '{$kuka_id}',
             sovellus   = 'Käyttäjät ja valikot',
             nimi       = 'suoja.php',
             alanimi    = '',
@@ -318,6 +320,7 @@ if ($tila == 'kayttaja') {
           $query = "INSERT into oikeu
                     SET
                     kuka       = '$kuka',
+                    user_id    = '{$kuka_id}',
                     sovellus   = '{$trow['sovellus']}',
                     nimi       = '{$trow['nimi']}',
                     alanimi    = '{$trow['alanimi']}',

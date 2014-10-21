@@ -1859,6 +1859,8 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
   if ($onko_toim_laite) {
     js_laite();
+    uusi_paikka_dialog('laitehallinta');
+    uusi_paikka_dialog_css();
   }
 
   echo "<table><tr><td class='back' valign='top' style='padding: 0px;'>";

@@ -18310,7 +18310,7 @@ if (!function_exists("tee_keraysera")) {
               if ($_til_koko_chk > $keraysvyohyketiedot['max_keraysera_pintaala']) {
 
                 if (isset($kukarow['debugstring'])) {
-                  $kukarow['debugstring'] .= "(E1002): Löydettiin lupaava nippu<br>\n";
+                  $kukarow['debugstring'] .= "(E1002): Löydettiin lupaava nippu ($_nurkka_i)<br>\n";
                 }
 
                 $_main_i = $_nurkka_i;

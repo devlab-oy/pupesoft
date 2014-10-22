@@ -905,9 +905,6 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
     mysql_data_seek($uvresult, 0);
 
-    // Valmistetaan ensimm‰inen is‰
-    valmista_isa($valmisterow, $tilrivirow, $isavarattu, $isatuoteno, $uusiarvo, $kaikenkaikkiaan, $kaikenkaikkiaan_arvot);
-
     while ($uvrow = mysql_fetch_assoc($uvresult)) {
 
       // k‰ytet‰‰n rivill‰ olevaa paikkaa

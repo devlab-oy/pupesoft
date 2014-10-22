@@ -59,21 +59,16 @@ function kontit_rullineen($konttiviite, $maxkg) {
 }
 
 function laheta_sanoma($sanoma){
-
-  return true;
   global $kukarow, $ftp_info;
 
   $host = $ftp_info['host'];
   $user = $ftp_info['user'];
   $pass = $ftp_info['pass'];
 
-  // Connect to host
   $yhteys = ftp_connect($host);
 
-  // Open a session to an external ftp site
   $login = ftp_login($yhteys, $user, $pass);
 
-  // Check open
   if ((!$yhteys) || (!$login)) {
     die('ei yhteyttä');
   }
@@ -132,7 +127,6 @@ function kuittaus_parametrit($hakunumero, $tyyppi) {
   }
 
   $query = "SELECT lasku.ovttunnus,
-            lasku.asiakkaan_tilausnumero,
             sarjanumeroseuranta.sarjanumero,
             sarjanumeroseuranta.massa AS paino,
             sarjanumeroseuranta.leveys,
@@ -142,7 +136,8 @@ function kuittaus_parametrit($hakunumero, $tyyppi) {
             tilausrivin_lisatiedot.juoksu,
             tilausrivin_lisatiedot.kuljetuksen_rekno,
             tilausrivin_lisatiedot.tilauksen_paino,
-            tilausrivin_lisatiedot.asiakkaan_rivinumero
+            tilausrivin_lisatiedot.asiakkaan_rivinumero,
+            tilausrivin_lisatiedot.asiakkaan_tilausnumero
             FROM tilausrivi
             JOIN tilausrivin_lisatiedot
               ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio

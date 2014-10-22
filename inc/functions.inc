@@ -17802,7 +17802,14 @@ if (!function_exists("tee_keraysera")) {
 
     mysql_data_seek($res, 0);
 
-    foreach ($fixed_main_array as $key => $tilaukset) {
+    #foreach ($fixed_main_array as $key => $tilaukset) {
+
+    $_fixed_main_array_count = count($fixed_main_array);
+
+    for ($_main_i = 1; $_fixed_main_array_count > $_main_i; $_main_i++) {
+
+      $key = $_main_i;
+      $tilaukset = $fixed_main_array[$key];
 
       if (isset($kaytettava_pakkaus) and $kaytettava_pakkaus != "" and $eran_koko > 0 and $pakkaukset[$kaytettava_pakkaus]['yksin_eraan'] == 'K') {
         if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "<br>(E360): Pakkaus oli yksin erään alusta! Keräyserä valmis!<br><br>\n";
@@ -18290,6 +18297,30 @@ if (!function_exists("tee_keraysera")) {
             or ($kaytettava_pakkaus == '' and $eran_koko_pintaala > 0 and ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $tuoterow['y_maara']) > $keraysvyohyketiedot['max_keraysera_pintaala']))) {
 
             if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1000): Tuleva pakkaus ylittäisi JOKA TAPAUKSESSA keräyserän sallitun pinta-alan ($eran_koko_pintaala cm2 + (pakkauksen ".($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])." cm2 tai tuotteen $tuoterow[pisin_sorttaus] * $tuoterow[lyhin_sorttaus] * $tuoterow[y_maara]) > $keraysvyohyketiedot[max_keraysera_pintaala] cm2). Keräyserä valmis!<br>\n";
+
+            # Katsotaan nurkan takaa onko parempia nippuja tarjolla mitkä mahtuisi erään
+            if (isset($kukarow['debugstring'])) {
+              $kukarow['debugstring'] .= "(E1001): Katsotaan nurkan takaa<br>\n";
+            }
+
+            for ($_nurkka_i = $_main_i; $_fixed_main_array_count > $_nurkka_i; $_nurkka_i++) {
+              $_til_koko = $kerailyniput_tiedot[$_nurkka_i]['tilauksen_koko'];
+              $_til_koko_chk = $eran_koko_pintaala + $_til_koko;
+
+              if ($_til_koko_chk > $keraysvyohyketiedot['max_keraysera_pintaala']) {
+
+                if (isset($kukarow['debugstring'])) {
+                  $kukarow['debugstring'] .= "(E1002): Löydettiin lupaava nippu<br>\n";
+                }
+
+                $_main_i = $_nurkka_i;
+                break 2;
+              }
+            }
+
+            if (isset($kukarow['debugstring'])) {
+              $kukarow['debugstring'] .= "(E1003): Ei löytynyt nurkan takaa<br>\n";
+            }
 
             $era_valmis = true;
             break 2;

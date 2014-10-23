@@ -350,7 +350,7 @@ if ($view == 'kontituslista') {
       <br>
       Kontitussanoma lähetetty.
       <br>
-      Kontti#: {$kontti[$key]['toimitettu']}
+      Kontti#: {$kontti[$key]['konttinumero']}
       <br><br>";
     }
     echo "<hr>";

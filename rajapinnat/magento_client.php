@@ -439,7 +439,7 @@ class MagentoClient {
       // Päivitetään tuotteen kieliversiot kauppanäkymäkohtaisesti
       // jos nämä on asetettu konffissa
 
-      if (isset($tuetut_kieliversiot) 
+      if (isset($tuetut_kieliversiot)
         and count($tuetut_kieliversiot) > 0) {
 
         try {
@@ -464,7 +464,7 @@ class MagentoClient {
               $this->_proxy->call($this->_session, 'catalog_product.update',
                 array(
                   $tuote['tuoteno'],
-                  $tuotteen_kauppakohtainen_data, 
+                  $tuotteen_kauppakohtainen_data,
                   $kauppatunnus
                 )
               );
@@ -492,7 +492,7 @@ class MagentoClient {
               $this->_proxy->call($this->_session, 'catalog_product.update',
                 array(
                   $tuote['tuoteno'],
-                  $tuotteen_kauppakohtainen_data, 
+                  $tuotteen_kauppakohtainen_data,
                   $kauppatunnus
                 )
               );
@@ -1436,36 +1436,36 @@ class MagentoClient {
       $asiakasryhma_id = $this->findCustomerGroup(utf8_encode($asiakas['asiakasryhma']));
 
       $asiakas_data = array(
-        'email'          => $asiakas['yhenk_email'],
-        'firstname'        => $asiakas['nimi'],
-        'lastname'        => $asiakas['nimi'],
-        'website_id'      => $asiakas['magento_website_id'],
-        'taxvat'        => $asiakas['ytunnus'],
-        'external_id'      => $asiakas['asiakasnro'],
-        'group_id'        => $asiakasryhma_id,
+        'email'       => utf8_encode($asiakas['yhenk_email']),
+        'firstname'   => utf8_encode($asiakas['nimi']),
+        'lastname'    => utf8_encode($asiakas['nimi']),
+        'website_id'  => utf8_encode($asiakas['magento_website_id']),
+        'taxvat'      => $asiakas['ytunnus'],
+        'external_id' => $asiakas['asiakasnro'],
+        'group_id'    => $asiakasryhma_id,
       );
 
       $laskutus_osoite_data = array(
-        'firstname'        => $asiakas['laskutus_nimi'],
-        'lastname'        => $asiakas['laskutus_nimi'],
-        'street'        => array($asiakas['laskutus_osoite']),
-        'postcode'        => $asiakas['laskutus_postino'],
-        'city'          => $asiakas['laskutus_postitp'],
-        'country_id'      => $asiakas['maa'],
-        'telephone'        => $asiakas['yhenk_puh'],
-        'company'        => $asiakas['nimi'],
+        'firstname'  => utf8_encode($asiakas['laskutus_nimi']),
+        'lastname'   => utf8_encode($asiakas['laskutus_nimi']),
+        'street'     => array(utf8_encode($asiakas['laskutus_osoite'])),
+        'postcode'   => utf8_encode($asiakas['laskutus_postino']),
+        'city'       => utf8_encode($asiakas['laskutus_postitp']),
+        'country_id' => utf8_encode($asiakas['maa']),
+        'telephone'  => utf8_encode($asiakas['yhenk_puh']),
+        'company'    => utf8_encode($asiakas['nimi']),
         'is_default_billing'    => true,
       );
 
       $toimitus_osoite_data = array(
-        'firstname'        => $asiakas['toimitus_nimi'],
-        'lastname'        => $asiakas['toimitus_nimi'],
-        'street'        => array($asiakas['toimitus_osoite']),
-        'postcode'        => $asiakas['toimitus_postino'],
-        'city'          => $asiakas['toimitus_postitp'],
-        'country_id'      => $asiakas['maa'],
-        'telephone'        => $asiakas['yhenk_puh'],
-        'company'        => $asiakas['nimi'],
+        'firstname'  => utf8_encode($asiakas['toimitus_nimi']),
+        'lastname'   => utf8_encode($asiakas['toimitus_nimi']),
+        'street'     => array(utf8_encode($asiakas['toimitus_osoite'])),
+        'postcode'   => utf8_encode($asiakas['toimitus_postino']),
+        'city'       => utf8_encode($asiakas['toimitus_postitp']),
+        'country_id' => utf8_encode($asiakas['maa']),
+        'telephone'  => utf8_encode($asiakas['yhenk_puh']),
+        'company'    => utf8_encode($asiakas['nimi']),
         'is_default_shipping' => true
       );
 
@@ -1475,9 +1475,9 @@ class MagentoClient {
           $value = $erikoisparametri['arvo'];
           // Jos value löytyy asiakas-arraysta, käytetään sitä
           if (isset($asiakas[$value])) {
-            $asiakas_data[$key] = $asiakas[$value];
-            $laskutus_osoite_data[$key] = $asiakas[$value];
-            $toimitus_osoite_data[$key] = $asiakas[$value];
+            $asiakas_data[$key] = utf8_encode($asiakas[$value]);
+            $laskutus_osoite_data[$key] = utf8_encode($asiakas[$value]);
+            $toimitus_osoite_data[$key] = utf8_encode($asiakas[$value]);
           }
         }
       }
@@ -1566,7 +1566,7 @@ class MagentoClient {
 
       }
       catch (Exception $e) {
-         $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' osoitteiden haku epäonnistui " . print_r("Asiakkaan magento_tunnus: {$asiakas['magento_tunnus']}", true), $e);   
+         $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' osoitteiden haku epäonnistui " . print_r("Asiakkaan magento_tunnus: {$asiakas['magento_tunnus']}", true), $e);
       }
 
       if (isset($laskutus_osoite_data['firstname']) and !empty($laskutus_osoite_data['firstname'])) {

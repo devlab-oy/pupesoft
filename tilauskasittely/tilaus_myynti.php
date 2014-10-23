@@ -183,8 +183,9 @@ if (!isset($painotettukehayhteensa)) $painotettukehayhteensa = 0;
 if (!isset($hintojen_vaihto)) $hintojen_vaihto = "JOO";
 if (!isset($avaa_rekursiiviset)) $avaa_rekursiiviset = "";
 if (!isset($valmiste_vai_raakaaine)) {
-  $_cookie_valmiste = $_COOKIE["valmiste_vai_raakaaine"];
-  $valmiste_vai_raakaaine = isset($_cookie_valmiste) ? $_cookie_valmiste : 'valmiste';
+  $_cookie_valmiste_isset = isset($_COOKIE["valmiste_vai_raakaaine"]);
+  $_cookie_valmiste = $_cookie_valmiste_isset ? $_COOKIE["valmiste_vai_raakaaine"] : false;
+  $valmiste_vai_raakaaine = $_cookie_valmiste ? $_cookie_valmiste : 'valmiste';
 }
 
 // Setataan lopetuslinkki, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla

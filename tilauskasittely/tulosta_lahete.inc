@@ -378,7 +378,7 @@ if (!function_exists('alku_lahete')) {
 
       // Jos rahtivapaa
       if ($laskurow['rahtivapaa'] == 'o' and onko_rahtituote_syotetty($laskurow) == 0) {
-        $rahtivapaa = "Rahtivapaa";
+        $rahtivapaa = t("Rahtivapaa", $kieli);
       }
 
       if ($extranet_tilausvahvistus != 1) {

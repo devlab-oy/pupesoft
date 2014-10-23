@@ -451,7 +451,13 @@ if ($monta == 1) {
   }
 
   $asiakasid = $asiakasrow['tunnus'];
-
+  if ($asiakasrow['kieli'] != '') {
+    $asiakaskieli = $asiakasrow['kieli'];
+  }
+  else {
+    $asiakaskieli = $kukarow['kieli'];
+  }
+  
   if ($kutsuja == 'otsik.inc' and $asiakasrow['osuma'] == '5') {
     $query = "SELECT avainsana
               FROM asiakkaan_avainsanat

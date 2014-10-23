@@ -32,7 +32,8 @@
 // $olpaikalta      --> pakotetaan myymään oletuspaikalta
 // $tuotenimitys    --> tuotteen nimitys jos nimityksen syötö on yhtiöllä sallittu
 // $tuotenimitys_force  --> tuotteen nimitys muutetaan systemitasolla
-
+// $asiakaskieli    --> kantaan päivitettävät tekstit asiakkaan kielellä
+echo "asiakkaan kieli: $asiakaskieli <br><br>";
 // Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi myyntihaarassa
 // Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka tää systeemi lisäsi puute-jt-osto-haarassa
 
@@ -733,7 +734,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
           if ($krow2["myytavissa"] > 0 and !in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) {
             $kaikkituotteet[] = strtoupper($krow2["tuoteno"]); // lisätään tuoteno arrayseen
             if ($krow2["tyyppi"] == "vastaava") $korlisakommi[strtoupper($krow2["tuoteno"])] = t("HUOM: Tuote %s on tilapäisesti loppu. Toimitetaan vastaava tuote.", "", $trow["tuoteno"]);
-            else $korlisakommi[strtoupper($krow2["tuoteno"])] = t("HUOM: Korvaa tuotteen")." $alkupera_trow[tuoteno]";
+            else $korlisakommi[strtoupper($krow2["tuoteno"])] = t("HUOM: Korvaa tuotteen", $asiakaskieli)." $alkupera_trow[tuoteno]";
           }
         }
         elseif ($yhtiorow["korvaavan_hinta_ylaraja"] != '' and $yhtiorow["korvaavan_hinta_ylaraja"] != 'MIN' and ($if_ale_korva_isa_chk1) != 0 and (($if_ale_korva_isa_chk2) / ($if_ale_korva_isa_chk1)) > (1+($yhtiorow["korvaavan_hinta_ylaraja"]/100))) {
@@ -750,7 +751,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
             $kaikkituotteet[]=strtoupper($krow2["tuoteno"]); // lisätään tuoteno arrayseen
 
             if ($krow2["tyyppi"] == "vastaava") $korlisakommi[strtoupper($krow2["tuoteno"])] = t("HUOM: Tuote %s on tilapäisesti loppu. Toimitetaan vastaava tuote.", "", $trow["tuoteno"]);
-            else $korlisakommi[strtoupper($krow2["tuoteno"])] = t("HUOM: Korvaa tuotteen")." $alkupera_trow[tuoteno]";
+            else $korlisakommi[strtoupper($krow2["tuoteno"])] = t("HUOM: Korvaa tuotteen", $asiakaskieli)." $alkupera_trow[tuoteno]";
           }
         }
       }
@@ -1536,8 +1537,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
               if ($yhtiorow['huomautetaanko_poistuvasta'] == 'K' and ($trow['status'] == 'X' or $trow['status'] == 'P')) {
                 // Tilausrivin systeemikommentti
-                if (stripos($kommentti, t("HUOM:", $kieli)." $alkupera_trow[tuoteno] ".t("on poistuva tuote!", $kieli)) === FALSE) {
-                  $kommentti .= " ".t("HUOM:", $kieli)." $alkupera_trow[tuoteno] ".t("on poistuva tuote!", $kieli);
+                if (stripos($kommentti, t("HUOM:", $asiakaskieli)." $alkupera_trow[tuoteno] ".t("on poistuva tuote!", $asiakaskieli)) === FALSE) {
+                  $kommentti .= " ".t("HUOM:", $asiakaskieli)." $alkupera_trow[tuoteno] ".t("on poistuva tuote!", $asiakaskieli);
                 }
               }
 
@@ -1557,8 +1558,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               $varattu = $myy_kpl[$indeksi];
 
               if ($yhtiorow['myyntiera_pyoristys'] == 'K' and $kutsuja == "EDITILAUS" and $edi_tyyppi != "magento" and $myyntierahuomatus) {
-                if (strpos($kommentti, t("HUOM: Rivin määrä on pyöristetty täyteen myyntierään! Myyntierä on")) === FALSE) {
-                  $kommentti .= " ".t("HUOM: Rivin määrä on pyöristetty täyteen myyntierään! Myyntierä on").": $trow[myynti_era]";
+                if (strpos($kommentti, t("HUOM: Rivin määrä on pyöristetty täyteen myyntierään! Myyntierä on", $asiakaskieli)) === FALSE) {
+                  $kommentti .= " ".t("HUOM: Rivin määrä on pyöristetty täyteen myyntierään! Myyntierä on", $asiakaskieli).": $trow[myynti_era]";
                 }
               }
 
@@ -2115,8 +2116,8 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
       if ($paatuote != "") {
         if (strtoupper($paatuote) != strtoupper($tuoteno)) {
-          if (stripos($kommentti, t("HUOM: Korvaa tuotteen")." $tuoteno") === FALSE) {
-            $kommentti .= " ".t("HUOM: Korvaa tuotteen")." $tuoteno";
+          if (stripos($kommentti, t("HUOM: Korvaa tuotteen", $asiakaskieli)." $tuoteno") === FALSE) {
+            $kommentti .= " ".t("HUOM: Korvaa tuotteen", $asiakaskieli)." $tuoteno";
           }
         }
 
@@ -2152,8 +2153,8 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           // Lisätään löydetyt vastaavat mahdollisten myytävien joukkoon
           foreach ($_tuotteet as $_tuote) {
             if (strtoupper($_tuote['tuoteno']) != strtoupper($tuoteno)) {
-              if (stripos($kommentti, t("HUOM: Korvaa tuotteen")." $tuoteno") === FALSE and empty($korlisakommi[$_tuote['tuoteno']])) {
-                $kommentti .= " ".t("HUOM: Korvaa tuotteen")." $tuoteno";
+              if (stripos($kommentti, t("HUOM: Korvaa tuotteen", $asiakaskieli)." $tuoteno") === FALSE and empty($korlisakommi[$_tuote['tuoteno']])) {
+                $kommentti .= " ".t("HUOM: Korvaa tuotteen", $asiakaskieli)." $tuoteno";
               }
               else {
                 $kommentti .= " ".$korlisakommi[$_tuote['tuoteno']];
@@ -2475,9 +2476,9 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
         $puurivires = t_avainsana("PUUTEKOMM");
 
         if ($kutsuja == "EDITILAUS" and $trow['status'] == 'T') {
-          if (stripos($kommentti, t("Tilaustuote.", $kieli)) === FALSE) {
+          if (stripos($kommentti, t("Tilaustuote.", $asiakaskieli)) === FALSE) {
             // Tilausrivin systeemikommentti
-            $kommentti .= " ".t("Tilaustuote.", $kieli);
+            $kommentti .= " ".t("Tilaustuote.", $asiakaskieli);
           }
         }
         elseif (mysql_num_rows($puurivires) > 0) {
@@ -2490,9 +2491,9 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           }
         }
         elseif ($kutsuja == "EDITILAUS") {
-          if (stripos($kommentti, t("Tuote Loppu.", $kieli)) === FALSE) {
+          if (stripos($kommentti, t("Tuote Loppu.", $asiakaskieli)) === FALSE) {
             // Tilausrivin systeemikommentti
-            $kommentti .= " ".t("Tuote loppu.", $kieli);
+            $kommentti .= " ".t("Tuote loppu.", $asiakaskieli);
           }
         }
       }

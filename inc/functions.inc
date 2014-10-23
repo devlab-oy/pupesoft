@@ -1032,44 +1032,36 @@ if (!function_exists("maventa_invoice_put_file")) {
     else {
       // L‰hetet‰‰n lasku
       try {
-        if ($client === FALSE) {
-          throw new Exception('VIRHE: Yhteys Maventaan ei ole auki.');
-        }
-        else {
-          $return_value = $client->invoice_put_finvoice($api_keys, $files_out);
-          return $return_value->status;
-        }
+        $return_value = $client->invoice_put_finvoice($api_keys, $files_out);
+        return $return_value->status;
       }
       catch (Exception $exVirhe) {
         // Siirret‰‰n error-kansioon, paitsi jos faili on seill‰ jo ennest‰‰n...
         if (count($files_out_resend) == 0) file_put_contents("{$pupe_root_polku}/dataout/maventa_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number-serialized.txt", serialize($files_out));
-        return $exVirhe->getMessage();
+        return FALSE;
       }
     }
   }
 }
 
 if (!function_exists("apix_invoice_put_file")) {
-  function apix_invoice_put_file($lahetettavat_apix, $kieli, $apixzipfile_resend = "") {
+  function apix_invoice_put_file($send, $lahetettavat_apix, $kieli, $apixzipfile_resend = "") {
     global $kukarow, $yhtiorow, $pupe_root_polku;
 
     // siirret‰‰n laskutiedosto operaattorille
-    //$url       = "https://test-api.apix.fi/invoices";
-    $url         = "https://api.apix.fi/invoices";
-    $transferkey = $yhtiorow['apix_avain'];
-    $transferid  = $yhtiorow['apix_tunnus'];
-    $software    = "Pupesoft";
-    $version     = "1.0";
-    $timestamp   = gmdate("YmdHis");
-    $apix_ulos   = "";
+    //$url           = "https://test-api.apix.fi/invoices";
+    $url             = "https://api.apix.fi/invoices";
+    $transferkey     = $yhtiorow['apix_avain'];
+    $transferid      = $yhtiorow['apix_tunnus'];
+    $software        = "Pupesoft";
+    $version         = "1.0";
+    $timestamp       = gmdate("YmdHis");
+    $apix_ulos       = "";
+    $apixerrorreport = "";
 
     if ($apixzipfile_resend != "") {
       // Filenimi joka uudelleenl‰hetet‰‰n
       $apixzipfile  = $apixzipfile_resend;
-
-      // Filen koko ja pointteri siihen
-      $apixfilesize = filesize("$pupe_root_polku/dataout/apix_error/$apixzipfile");
-      $apix_fh      = fopen("$pupe_root_polku/dataout/apix_error/$apixzipfile", 'r');
     }
     else {
       // Filenimi
@@ -1103,62 +1095,93 @@ if (!function_exists("apix_invoice_put_file")) {
         exec("cd $apix_tmpdirnimi; zip $apixzipfile *;");
 
         // Aineisto dataouttiin
-        exec("cp $apix_tmpdirnimi/$apixzipfile $pupe_root_polku/dataout/");
+        exec("cp $apix_tmpdirnimi/$apixzipfile {$pupe_root_polku}/dataout/apix_error/");
 
         // Poistetaan apix-tmpdir
         exec("rm -rf $apix_tmpdirnimi");
 
-        // Filen koko ja pointteri siihen
-        $apixfilesize = filesize("$pupe_root_polku/dataout/$apixzipfile");
-        $apix_fh = fopen("$pupe_root_polku/dataout/$apixzipfile", 'r');
+        if ($send !== TRUE) {
+          $apix_ulos .= "Lasku siirretty l‰hetysjonoon";
+        }
       }
       else {
-        $apix_ulos .= "APIX tmpdirrin teko feilas!<br>";
+        $apix_ulos .= "APIX tmpdirrin teko feilas!<br>\n";
         return $apix_ulos;
       }
     }
 
-    // Siirret‰‰n aineisto APIXiin
-    $digest_src = $software."+".$version."+".$transferid."+".$timestamp."+".$transferkey;
-    $dt = substr(hash('sha256', $digest_src), 0, 64);
+    if ($send === TRUE) {
+      // Filen koko ja pointteri siihen
+      $apixfilesize = filesize("{$pupe_root_polku}/dataout/apix_error/$apixzipfile");
+      $apix_fh = fopen("{$pupe_root_polku}/dataout/apix_error/$apixzipfile", 'r');
 
-    $real_url = "$url?soft=$software&ver=$version&TraID=$transferid&t=$timestamp&d=SHA-256:$dt";
+      // Siirret‰‰n aineisto APIXiin
+      $digest_src = $software."+".$version."+".$transferid."+".$timestamp."+".$transferkey;
+      $dt = substr(hash('sha256', $digest_src), 0, 64);
 
-    $ch = curl_init($real_url);
-    curl_setopt($ch, CURLOPT_PUT, true);
-    curl_setopt($ch, CURLOPT_INFILE, $apix_fh);
-    curl_setopt($ch, CURLOPT_INFILESIZE, $apixfilesize);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+      $real_url = "$url?soft=$software&ver=$version&TraID=$transferid&t=$timestamp&d=SHA-256:$dt";
 
-    $apix_ulos .= "L‰hetet‰‰n aineisto APIX:lle...<br>";
-    $response = curl_exec($ch);
+      $ch = curl_init($real_url);
+      curl_setopt($ch, CURLOPT_PUT, true);
+      curl_setopt($ch, CURLOPT_INFILE, $apix_fh);
+      curl_setopt($ch, CURLOPT_INFILESIZE, $apixfilesize);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
-    curl_close($ch);
-    fclose($apix_fh);
+      $apix_ulos .= "L‰hetet‰‰n aineisto APIX:lle...<br>\n";
+      $response = curl_exec($ch);
 
-    $xml = simplexml_load_string($response);
+      curl_close($ch);
+      fclose($apix_fh);
 
-    if ($xml->Status == "OK") {
-      $apix_ulos .= "L‰hetys onnistui!";
+      $xml = simplexml_load_string($response);
 
-      // Siirret‰‰n pois error kansiosta...
-      if ($apixzipfile_resend != "") rename("{$pupe_root_polku}/dataout/apix_error/$apixzipfile_resend", "{$pupe_root_polku}/dataout/$apixzipfile_resend");
-    }
-    else {
-      $apix_ulos .= "L‰hetys ep‰onnistui:<br>";
+      if ($xml->Status == "OK") {
+        $apix_ulos .= "L‰hetys onnistui!";
 
-      $apix_ulos .= "Tila: ".$xml->Status."<br>";
-      $apix_ulos .= "Tilakoodi: ".$xml->StatusCode."<br>";
-
-      foreach ($xml->FreeText as $teksti) {
-        $apix_ulos .= "Tilaviesti: ".$teksti."<br>";
+        // Siirret‰‰n pois error kansiosta...
+        if ($apixzipfile_resend != "") rename("{$pupe_root_polku}/dataout/apix_error/$apixzipfile_resend", "{$pupe_root_polku}/dataout/$apixzipfile_resend");
       }
+      else {
+        $apix_ulos .= "L‰hetys ep‰onnistui:<br>\n";
 
-      if ($apixzipfile_resend == "") $apix_ulos .= "Laskut: ".implode(", ", $apix_lasnot)."<br>";
+        $apix_ulos .= "Tila: ".$xml->Status."<br>\n";
+        $apix_ulos .= "Tilakoodi: ".$xml->StatusCode."<br>\n";
 
-      // Siirret‰‰n error-kansioon, paitsi jos faili on seill‰ jo ennest‰‰n...
-      if ($apixzipfile_resend == "") rename("{$pupe_root_polku}/dataout/$apixzipfile", "{$pupe_root_polku}/dataout/apix_error/$apixzipfile");
+        // Rakennetaan s‰hkˆpostiin l‰hetett‰v‰ virheviesti
+        $apixerrorreport .= "{$yhtiorow["yhtio"]} Apix laskutuksen virheviesti! \n";
+        $apixerrorreport .= " $apixzipfile ";
+        $apixerrorreport .= "\n\n";
+        $apixerrorreport .= $real_url;
+        $apixerrorreport .= "\n\n";
+        $apixerrorreport .= $ch;
+        $apixerrorreport .= "\n\n";
+        ob_start();
+        var_dump($xml);
+        $apixerrorreport .= ob_get_clean();
+
+        if (mb_detect_encoding($apixerrorreport, 'UTF-8', true) !== FALSE) {
+    			$apixerrorreport = utf8_decode($apixerrorreport);
+        }
+
+        $params = array(
+          "to" => $yhtiorow["admin_email"],
+          "subject" => "Apix virheilmoitus '{$yhtiorow["yhtio"]}'",
+          "ctype" => "text",
+          "body"=> $apixerrorreport
+        );
+
+        pupesoft_sahkoposti($params);
+
+        foreach ($xml->FreeText as $teksti) {
+          $apix_ulos .= "Tilaviesti: ".$teksti."<br>\n";
+        }
+
+        if ($apixzipfile_resend == "") $apix_ulos .= "Laskut: ".implode(", ", $apix_lasnot)."<br>\n";
+
+        // Siirret‰‰n error-kansioon, paitsi jos faili on seill‰ jo ennest‰‰n...
+        if ($apixzipfile_resend == "") rename("{$pupe_root_polku}/dataout/$apixzipfile", "{$pupe_root_polku}/dataout/apix_error/$apixzipfile");
+      }
     }
 
     return $apix_ulos;
@@ -11707,8 +11730,7 @@ if (!function_exists("lue_kurssit")) {
                 muutospvm              = now(),
                 muuttaja               = '{$kukarow['kuka']}'
                 WHERE yhtio            = '{$kukarow['yhtio']}'
-                AND nimi               = '$valuutta'
-                AND automaattipaivitys = ''";
+                AND nimi               = '$valuutta'";
       $result = pupe_query($query);
 
       // t‰m‰ valuutta on nyt p‰ivitetty!
@@ -12558,7 +12580,7 @@ if (!function_exists("luoiban")) {
 }
 
 if (!function_exists("tarkista_sepa")) {
-  function tarkista_sepa($maa) {
+  function tarkista_sepa($maa, $palauta_maat = '') {
 
     // SEPA (Single Euro Payments Area) maat ja niiden IBAN tilinumeron pituus
     $sepa_maat  = array("AL" => "28",
@@ -12613,14 +12635,18 @@ if (!function_exists("tarkista_sepa")) {
       "TR" => "26",
       "GB" => "22");
 
+    if ($palauta_maat == 'K') {
+      // Palautetaan kaikki SEPA-maat
+      return array_keys($sepa_maat);
+    }
     // Maa ei ole sepa maa, palautetaan FALSE
-    if (!isset($sepa_maat[$maa])) {
+    elseif (!isset($sepa_maat[$maa])) {
       return FALSE;
     }
-
-    // Palautetaan IBAN:in pituus, jos on SEPA maa
-    return $sepa_maat[$maa];
-
+    else {
+      // Palautetaan IBAN:in pituus, jos on SEPA maa
+      return $sepa_maat[$maa];
+    }
   }
 }
 
@@ -19224,14 +19250,18 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
 
     $order_sorttaus = '';
 
-    $asiakas_apu_query = "SELECT lahetteen_jarjestys, lahetteen_jarjestys_suunta, email, kerayserat
+    $asiakas_apu_query = "SELECT lahetteen_jarjestys,
+                          lahetteen_jarjestys_suunta,
+                          email,
+                          kerayserat,
+                          koontilahete_kollitiedot
                           FROM asiakas
-                          WHERE yhtio = '$kukarow[yhtio]'
-                          and tunnus  = '$laskurow[liitostunnus]'";
+                          WHERE yhtio = '{$kukarow['yhtio']}'
+                          and tunnus  = '{$laskurow['liitostunnus']}'";
     $asiakas_apu_res = pupe_query($asiakas_apu_query);
+    $asiakas_apu_row = mysql_fetch_assoc($asiakas_apu_res);
 
     if (mysql_num_rows($asiakas_apu_res) == 1) {
-      $asiakas_apu_row = mysql_fetch_assoc($asiakas_apu_res);
       $sorttauskentta = generoi_sorttauskentta($asiakas_apu_row["lahetteen_jarjestys"] != "" ? $asiakas_apu_row["lahetteen_jarjestys"] : $yhtiorow["lahetteen_jarjestys"]);
       $order_sorttaus = $asiakas_apu_row["lahetteen_jarjestys_suunta"] != "" ? $asiakas_apu_row["lahetteen_jarjestys_suunta"] : $yhtiorow["lahetteen_jarjestys_suunta"];
     }
@@ -19259,6 +19289,10 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
     $koontilisa    = "";
     $koontirivihinta = "";
 
+    $_yhtion_kollitiedot = ($yhtiorow['koontilahete_kollitiedot'] == '');
+    $_as_kollitiedot = $asiakas_apu_row['koontilahete_kollitiedot'];
+    $_kollitieto = ($_as_kollitiedot == 'K' or ($_as_kollitiedot == '' and $_yhtion_kollitiedot));
+
     // Koontil‰hetteen lis‰valinnat ja -ehdot
     if (isset($koontilahete) and $koontilahete != 0) {
 
@@ -19277,7 +19311,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
         $onko_kerayserat_kaytossa = true;
       }
 
-      if ($onko_kerayserat_kaytossa === true and $yhtiorow['koontilahete_kollitiedot'] == '') {
+      if ($onko_kerayserat_kaytossa === true and $_kollitieto) {
         $koontiselect  = " ifnull(kerayserat.sscc, 0) sscc, ifnull(kerayserat.sscc_ulkoinen, 99999999) sscc_ulkoinen, pakkaus.pakkaus, kerayserat.kpl_keratty AS varattu, 0 AS kpl, 0 as jt, ifnull(kerayserat.kpl, tilausrivi.tilkpl) AS tilkpl,";
         $koontirivihinta = "round(tilausrivi.hinta * ifnull(kerayserat.kpl_keratty, (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl)) * {$query_ale_lisa},'{$yhtiorow['hintapyoristys']}') rivihinta,";
         $koontijoin   = " LEFT JOIN kerayserat ON (kerayserat.tilausrivi = tilausrivi.tunnus AND kerayserat.yhtio = tilausrivi.yhtio)
@@ -19456,7 +19490,7 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
           $siirto = 20;
         }
 
-        if ($otsikoitu === false or $yhtiorow['koontilahete_kollitiedot'] == '') {
+        if ($otsikoitu === false or $_kollitieto) {
           $params_lahete['kala'] = $params_lahete['kala'] -= $siirto;
           $params_lahete = rivi_otsikot_lahete($params_lahete);
           $otsikoitu = true;
@@ -20545,11 +20579,23 @@ if (!function_exists("pupesoft_sahkoposti")) {
     // Vikassa boundissa pit‰‰ olla -- lopussa.
     $content .= "--\n";
 
-    $boob = mail($email_to, mb_encode_mimeheader($email_subject, "ISO-8859-1", "Q"), $content, $header, "-f {$yhtiorow["postittaja_email"]}");
+    // Laitetaan php-resque jonoon
+    if ($GLOBALS["pupe_resque"] === TRUE) {
+      $resque_args = array(
+              'to'      => $email_to,
+              'subject' => mb_encode_mimeheader($email_subject, "ISO-8859-1", "Q"),
+              'content' => $content,
+              'header'  => $header,
+              'from'    => "-f {$yhtiorow["postittaja_email"]}");
 
-    if ($boob === FALSE) echo t("S‰hkˆpostin l‰hetys ep‰onnistui").": $email_to<br>";
-
-    return $boob;
+      Resque::enqueue('pupe_email', 'pupesoft_email_worker', $resque_args);
+      return TRUE;
+    }
+    else {
+      $boob = mail($email_to, mb_encode_mimeheader($email_subject, "ISO-8859-1", "Q"), $content, $header, "-f {$yhtiorow["postittaja_email"]}");
+      if ($boob === FALSE) echo t("S‰hkˆpostin l‰hetys ep‰onnistui").": $email_to<br>";
+      return $boob;
+    }
   }
 }
 
@@ -24761,6 +24807,9 @@ if (!function_exists('hyllysiirto')) {
     if (!isset($params['tun'])) $error = true;
     else $tun = (int) $params['tun'];
 
+    if (!isset($params['poikkeavalaskutuspvm'])) $_poikkeavalaskutuspvm = '';
+    else $_poikkeavalaskutuspvm = $params['poikkeavalaskutuspvm'];
+
     if ($error) return false;
 
     if ($lisavaruste == "LISAVARUSTE") {
@@ -24863,6 +24912,15 @@ if (!function_exists('hyllysiirto')) {
       $selite = "";
     }
 
+    if ($_poikkeavalaskutuspvm != '') {
+      $_laadittu = $_poikkeavalaskutuspvm." 23:59:59";
+      $_tapvm = $_poikkeavalaskutuspvm;
+    }
+    else {
+      $_laadittu = date("Y-m-d H:i:s");
+      $_tapvm = date("Y-m-d");
+    }
+
     $query = "INSERT into tapahtuma set
               yhtio      = '{$kukarow['yhtio']}',
               tuoteno    = '{$tuoteno}',
@@ -24876,7 +24934,7 @@ if (!function_exists('hyllysiirto')) {
               rivitunnus = {$tun},
               selite     = '".t("Paikalta")." {$mista_texti} ".t("v‰hennettiin")." {$kappaleet}{$selite}',
               laatija    = '{$kukarow['kuka']}',
-              laadittu   = now()";
+              laadittu   = '$_laadittu'";
     $result = pupe_query($query);
     $mista_tapa_tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
@@ -24893,7 +24951,7 @@ if (!function_exists('hyllysiirto')) {
               rivitunnus = {$tun},
               selite     = '".t("Paikalle")." {$minne_texti} ".t("lis‰ttiin")." {$kappaleet}{$selite}',
               laatija    = '{$kukarow['kuka']}',
-              laadittu   = now()";
+              laadittu   = '$_laadittu'";
     $result = pupe_query($query);
     $minne_tapa_tunnus = mysql_insert_id($GLOBALS["masterlink"]);
 
@@ -25014,7 +25072,7 @@ if (!function_exists('hyllysiirto')) {
                       FROM lasku
                       WHERE tila  = 'X'
                       and alatila = 'G'
-                      and tapvm   = current_date
+                      and tapvm   = '$_tapvm'
                       and yhtio   = '$kukarow[yhtio]'";
             $result = pupe_query($query);
 
@@ -25027,11 +25085,11 @@ if (!function_exists('hyllysiirto')) {
           if ($laskuid == 0) {
             $query = "INSERT into lasku set
                       yhtio      = '$kukarow[yhtio]',
-                      tapvm      = now(),
+                      tapvm      = '$_tapvm',
                       tila       = 'X',
                       alatila    = 'G',
                       laatija    = '$kukarow[kuka]',
-                      luontiaika = current_date";
+                      luontiaika = '$_laadittu'";
             $result = pupe_query($query);
             $laskuid = mysql_insert_id($GLOBALS["masterlink"]);
           }
@@ -25044,7 +25102,7 @@ if (!function_exists('hyllysiirto')) {
                     kustp           = '{$mista_kustp}',
                     kohde           = '{$mista_kohde}',
                     projekti        = '{$mista_projekti}',
-                    tapvm           = current_date,
+                    tapvm           = '$_tapvm',
                     summa           = {$varastonmuutos_neg},
                     vero            = 0,
                     lukko           = '',
@@ -25062,7 +25120,7 @@ if (!function_exists('hyllysiirto')) {
                     kustp           = '{$mista_kustp}',
                     kohde           = '{$mista_kohde}',
                     projekti        = '{$mista_projekti}',
-                    tapvm           = current_date,
+                    tapvm           = '$_tapvm',
                     summa           = {$varastonmuutos},
                     vero            = 0,
                     lukko           = '',
@@ -25082,7 +25140,7 @@ if (!function_exists('hyllysiirto')) {
                       kustp           = '{$mista_kustp}',
                       kohde           = '{$mista_kohde}',
                       projekti        = '{$mista_projekti}',
-                      tapvm           = current_date,
+                      tapvm           = '$_tapvm',
                       summa           = {$varastonmuutos_neg},
                       vero            = 0,
                       lukko           = '',
@@ -25100,7 +25158,7 @@ if (!function_exists('hyllysiirto')) {
                       kustp           = '{$minne_kustp}',
                       kohde           = '{$minne_kohde}',
                       projekti        = '{$minne_projekti}',
-                      tapvm           = current_date,
+                      tapvm           = '$_tapvm',
                       summa           = {$varastonmuutos},
                       vero            = 0,
                       lukko           = '',
@@ -25119,7 +25177,7 @@ if (!function_exists('hyllysiirto')) {
                     kustp           = '{$minne_kustp}',
                     kohde           = '{$minne_kohde}',
                     projekti        = '{$minne_projekti}',
-                    tapvm           = current_date,
+                    tapvm           = '$_tapvm',
                     summa           = {$varastonmuutos},
                     vero            = 0,
                     lukko           = '',
@@ -25137,7 +25195,7 @@ if (!function_exists('hyllysiirto')) {
                     kustp           = '{$minne_kustp}',
                     kohde           = '{$minne_kohde}',
                     projekti        = '{$minne_projekti}',
-                    tapvm           = current_date,
+                    tapvm           = '$_tapvm',
                     summa           = {$varastonmuutos_neg},
                     vero            = 0,
                     lukko           = '',
@@ -27746,7 +27804,7 @@ if (!function_exists('array_column')) {
 }
 
 if (!function_exists('tee_kirjanpidollinen_varastosiirto')) {
-  function tee_kirjanpidollinen_varastosiirto($myyntitilaus_tunnus) {
+  function tee_kirjanpidollinen_varastosiirto($myyntitilaus_tunnus, $_poikkeavalaskutuspvm) {
     global $kukarow, $yhtiorow;
 
     if ($yhtiorow['kirjanpidollinen_varastosiirto_myyntitilaukselta'] == '') {
@@ -27762,7 +27820,7 @@ if (!function_exists('tee_kirjanpidollinen_varastosiirto')) {
       require 'tilauskasittely/tilauksesta_varastosiirto.inc';
 
       //Myyntitilaukselle valittu varasto ei ole yhtion toimipaikan varastoissa. T‰llˆin tehd‰‰n kirjanpidollinen varastosiirto
-      tilauksesta_varastosiirto($myyntitilaus_tunnus, 'K');
+      tilauksesta_varastosiirto($myyntitilaus_tunnus, 'K', $_poikkeavalaskutuspvm);
     }
   }
 }

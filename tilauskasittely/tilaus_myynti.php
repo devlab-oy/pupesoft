@@ -1,5 +1,12 @@
 <?php
 
+if (isset($_REQUEST["komento"]) and in_array("PDF_RUUDULLE", $_REQUEST["komento"])) {
+  $nayta_pdf = 1; //Generoidaan .pdf-file
+}
+else {
+  unset($nayta_pdf);
+}
+
 if (isset($_REQUEST['tulosta_maksusopimus']) and is_numeric(trim($_REQUEST['tulosta_maksusopimus']))) {
   $nayta_pdf = 1;
   $ohje = 'off';
@@ -1434,6 +1441,8 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
       require "inc/valitse_tulostin.inc";
     }
 
+    if (isset($nayta_pdf)) $tee = "NAYTATILAUS";
+
     require_once 'tulosta_tarjous.inc';
 
     tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli,  $tee, '', $verolliset_verottomat_hinnat, $naytetaanko_rivihinta, $naytetaanko_tuoteno);
@@ -1574,61 +1583,6 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
     }
     else {
-
-      $laskurow['ohjausmerkki'] = paivita_ohjausmerkki($laskurow);
-
-      // Luodaan valituista riveist‰ suoraan normaali ostotilaus
-      if (($kukarow["extranet"] == "" or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) and $yhtiorow["tee_osto_myyntitilaukselta"] != '') {
-        require "tilauksesta_ostotilaus.inc";
-
-        // Jos halutaan tehd‰ tilauksesta ostotilauksia, niin tehd‰‰n kaikista ostotilaus
-        if ($tee_osto != "") {
-          $tilauksesta_ostotilaus = tilauksesta_ostotilaus($kukarow["kesken"], 'KAIKKI');
-
-          // P‰ivitet‰‰n tilaukselle, ett‰ sit‰ ei osatoimiteta jos koko tilauksesta tehtiin ostotilaus
-          $query  = "UPDATE lasku set
-                     osatoimitus = 'o'
-                     where yhtio = '$kukarow[yhtio]'
-                     and tunnus  = '$kukarow[kesken]'";
-          $result = pupe_query($query);
-        }
-        else {
-          $tilauksesta_ostotilaus  = tilauksesta_ostotilaus($kukarow["kesken"], 'T');
-          $tilauksesta_ostotilaus .= tilauksesta_ostotilaus($kukarow["kesken"], 'U');
-        }
-
-        if ($tilauksesta_ostotilaus != '') echo "$tilauksesta_ostotilaus<br><br>";
-      }
-
-      if ($kukarow["extranet"] == "" and $yhtiorow["tee_valmistus_myyntitilaukselta"] != '') {
-        //  Voimme myˆs tehd‰ tilaukselta suoraan valmistuksia!
-        require "tilauksesta_valmistustilaus.inc";
-
-        $tilauksesta_valmistustilaus = tilauksesta_valmistustilaus($kukarow["kesken"]);
-        if ($tilauksesta_valmistustilaus != '') echo "$tilauksesta_valmistustilaus<br><br>";
-      }
-
-      //Tarkistetaan onko myyntitilaukselle tehty varastosiirto ja jos ei ole niin tehd‰‰n
-      $_tehdaan_varastosiirto = false;
-
-      if ($kukarow["extranet"] == "" and $yhtiorow["tee_siirtolista_myyntitilaukselta"] == 'K' and $laskurow['tila'] == 'N') {
-        $query = "SELECT tilausrivi.tunnus
-                  FROM tilausrivi
-                  WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                  AND tilausrivi.otunnus = {$laskurow['tunnus']}
-                  AND tilausrivi.var     = 'S'";
-        $varastosiirto_result = pupe_query($query);
-
-        if (mysql_num_rows($varastosiirto_result) > 0) {
-          $_tehdaan_varastosiirto = true;
-        }
-      }
-
-      if ($_tehdaan_varastosiirto) {
-        require 'tilauksesta_varastosiirto.inc';
-
-        tilauksesta_varastosiirto($laskurow['tunnus'], 'N');
-      }
 
       if ($kukarow["extranet"] != "") {
         //Pyydet‰‰n tilaus-valmista olla echomatta mit‰‰n
@@ -1807,15 +1761,24 @@ if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $tee == "ODOTTAA" 
   }
 }
 
-if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VASTAANOTTO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
+if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' 
+  and ($tee == 'VASTAANOTTO' or $tee == 'VALMIS')
+  and $yhtiorow['reklamaation_kasittely'] == 'U') {
   // Joka tarkoittaa ett‰ "Reklamaatio on vastaanotettu
   // t‰m‰n j‰lkeen kun seuraavassa vaiheessa tullaan niin "Tulostetaan Purkulista"
+  
+  if ($tee == 'VALMIS') {
+    $alatila_lisa = "AND alatila = ''";              // takuu
+  }
+  else {
+    $alatila_lisa = "AND alatila = 'A'";             // reklamaatio
+  }
   $query = "UPDATE lasku set
             alatila     = 'B'
             WHERE yhtio = '$kukarow[yhtio]'
             AND tunnus  = '$tilausnumero'
             AND tila    = 'C'
-            AND alatila = 'A'";
+            $alatila_lisa";
   $result = pupe_query($query);
 
   $query  = "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and kesken = '$tilausnumero'";
@@ -1843,12 +1806,20 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VASTAANOT
   }
 }
 
-if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and $tee == 'VALMIS_VAINSALDOTTOMIA' and $yhtiorow['reklamaation_kasittely'] == 'U') {
-  // Reklamaatio on valmis laskutettavaksi
+if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' 
+  and ($tee == 'VALMIS_VAINSALDOTTOMIA' or $tee == 'VALMIS')
+  and $yhtiorow['reklamaation_kasittely'] == 'U') {
+  // Reklamaatio/takuu on valmis laskutettavaksi
   // katsotaan onko tilausrivit Unikko-j‰rjestelm‰‰n
+  if ($laskurow['tilaustyyppi'] == 'U') {
+    $saldoton_lisa = "and tuote.ei_saldoa=''";
+  }
+  else {
+    $saldoton_lisa = "";
+  }
   $query = "SELECT tilausrivi.tunnus
             FROM tilausrivi
-            JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno and tuote.ei_saldoa='')
+            JOIN tuote ON (tuote.yhtio=tilausrivi.yhtio and tilausrivi.tuoteno=tuote.tuoteno $saldoton_lisa)
             WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
             AND tilausrivi.otunnus  = '{$tilausnumero}'
             AND tilausrivi.tyyppi  != 'D'";
@@ -3538,7 +3509,7 @@ if ($tee == '') {
     if ($kukarow["oletus_asiakas"] != 0) {
       $query  = "SELECT *
                  FROM asiakas
-                 WHERE yhtio = '$kukarow[yhtio]' 
+                 WHERE yhtio = '$kukarow[yhtio]'
                  and tunnus  = '$kukarow[oletus_asiakas]'";
       $result = pupe_query($query);
 
@@ -3556,7 +3527,7 @@ if ($tee == '') {
     }
 
     if ($toim == "PIKATILAUS") {
-      
+
       if ($yhtiorow['pikatilaus_focus'] == 'A' and isset($indexvas) and $indexvas == 1) {
         $kentta = 'syotetty_ytunnus';
       }

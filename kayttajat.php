@@ -434,6 +434,7 @@ if ($tee == 'UUSI') {
           if (mysql_num_rows($tarkesult) == 0) {
             $query = "INSERT into oikeu SET
                       kuka       = '{$ktunnus}',
+                      user_id    = '{$selkuka}',
                       sovellus   = '{$trow['sovellus']}',
                       nimi       = '{$trow['nimi']}',
                       alanimi    = '{$trow['alanimi']}',
@@ -663,6 +664,7 @@ if ($tee == 'MUUTA') {
           if (mysql_num_rows($tarkesult) == 0) {
             $query = "INSERT into oikeu SET
                       kuka       = '{$kuka}',
+                      user_id    = '{$selkukarow['tunnus']}',
                       sovellus   = '{$trow['sovellus']}',
                       nimi       = '{$trow['nimi']}',
                       alanimi    = '{$trow['alanimi']}',

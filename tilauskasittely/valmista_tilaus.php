@@ -1627,8 +1627,9 @@ if (!isset($from_kaikkikorj)) {
 
       if ($haku == "") {
         $lisa .= " and lasku.luontiaika >= date_sub(curdate(), INTERVAL 90 DAY) ";
-        $laskuindex = "yhtio_tila_luontiaika";
       }
+
+      $laskuindex = "tila_index";
     }
     elseif ($toim == "TUTKAA") {
       $query     = "SELECT lasku.ytunnus, lasku.tila, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
@@ -1645,8 +1646,9 @@ if (!isset($from_kaikkikorj)) {
 
       if ($haku == "") {
         $lisa .= " and lasku.luontiaika >= date_sub(curdate(), INTERVAL 90 DAY) ";
-        $laskuindex = "yhtio_tila_luontiaika";
       }
+
+      $laskuindex = "tila_index";
     }
     else {
       $query     = "SELECT lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
@@ -1663,8 +1665,9 @@ if (!isset($from_kaikkikorj)) {
 
       if ($haku == "") {
         $lisa .= " and lasku.luontiaika >= date_sub(curdate(), INTERVAL 180 DAY) ";
-        $laskuindex = "yhtio_tila_luontiaika";
       }
+
+      $laskuindex = "tila_index";
 
       // Jos valmistuksessa k‰ytet‰‰n tilakoodeja, n‰ytet‰‰n pelk‰st‰‰n tarkistettu
       // tilassa olevat valmistukset

@@ -42,26 +42,40 @@ $query = "SELECT lasku.asiakkaan_tilausnumero,
             AND laskun_lisatiedot.otunnus = lasku.tunnus
           WHERE lasku.yhtio = '{$kukarow['yhtio']}'
           AND lasku.tilaustyyppi = 'N'
-          AND laskun_lisatiedot.konttiviite != ''";
+          AND laskun_lisatiedot.konttiviite != ''
+          GROUP BY lasku.asiakkaan_tilausnumero";
 $result = pupe_query($query);
 
+$toimitukset = array();
 
+while ($rivi = mysql_fetch_assoc($result)) {
 
+  //if (!isset($toimitukset[$rivi['konttiviite']])) {
+
+    $toimitukset[$rivi['konttiviite']][] = $rivi;
+
+  //}
+
+}
 
 
 
 echo "<table>";
 echo "<tr>";
+/*
 echo "<th>".t("Tilauskoodi")."</th>";
 echo "<th>".t("Matkakoodi")."</th>";
+*/
 echo "<th>".t("Konttiviite")."</th>";
 echo "<th class='back'></th>";
 echo "</tr>";
 
-while ($tilaus = mysql_fetch_assoc($result)) {
+//while ($tilaus = mysql_fetch_assoc($result)) {
+
+foreach ($toimitukset as $key => $value) {
 
   echo "<tr>";
-
+/*
   echo "<td>";
   echo $tilaus['asiakkaan_tilausnumero'];
   echo "</td>";
@@ -69,16 +83,17 @@ while ($tilaus = mysql_fetch_assoc($result)) {
   echo "<td>";
   echo $tilaus['matkakoodi'];
   echo "</td>";
+*/
 
   echo "<td>";
-  echo $tilaus['konttiviite'];
+  echo $key;
   echo "</td>";
 
   echo "<td class='back'>";
 
   echo "
     <form method='post'>
-    <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />
+    <input type='hidden' name='konttiviite' value='{$key}' />
     <input type='hidden' name='task' value='hae_parametrit' />
     <input type='submit' value='". t("Lähetä satamavahvistus") ."' />
     </form>";

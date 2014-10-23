@@ -28205,6 +28205,33 @@ if (!function_exists('hae_tilausrivi')) {
   }
 }
 
+if (!function_exists('hae_tilausrivit')) {
+
+  function hae_tilausrivit($otunnus) {
+    global $kukarow, $yhtiorow;
+
+    if (empty($otunnus)) {
+      return array();
+    }
+
+    $query = "SELECT *
+              FROM tilausrivi
+              JOIN tilausrivin_lisatiedot
+              ON ( tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+                AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus )
+              WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+              AND tilausrivi.otunnus = {$otunnus}";
+    $result = pupe_query($query);
+
+    $tilausrivit = array();
+    while ($tilausrivi = mysql_fetch_assoc($result)) {
+      $tilausrivit[] = $tilausrivi;
+    }
+
+    return $tilausrivit;
+  }
+}
+
 if (!function_exists('escape_single_quotes')) {
   function escape_single_quotes(&$item, $key) {
     $item = str_replace("'", "\'", $item);

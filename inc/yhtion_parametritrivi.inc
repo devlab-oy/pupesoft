@@ -1237,11 +1237,11 @@ if ($fieldname == "pikatilaus_focus") {
 
   $sel = array();
   $sel[$trow[$i]]  = " selected";
-  
+
   $ulos .= "<option value = ''>" . t("Uudella pikatilauksella kursori oletuksena tuotenumero-kentässä");
   $ulos .= "<option value = 'A' $sel[A]>" . t("Uudella pikatilauksella kursori oletuksena asiakas-kentässä");
   $ulos .= "<option value = 'M' $sel[M]>" . t("Uudella pikatilauksella kursori oletuksena myyjänro-kentässä");
-  $ulos .= "<option value = 'Y' $sel[Y]>" . t("Uudella pikatilauksella kursori oletuksena myyjänro-kentässä. Myyjänumero on syötettävä");  
+  $ulos .= "<option value = 'Y' $sel[Y]>" . t("Uudella pikatilauksella kursori oletuksena myyjänro-kentässä. Myyjänumero on syötettävä");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -2214,6 +2214,18 @@ if ($fieldname == "myyntitilaus_osatoimitus") {
   $ulos .= "<option value = ''>".t("Myyntitilauksesta ei voi tehdä osatoimitusta käsin")."</option>";
   $ulos .= "<option value = 'K' $sel[K]>".t("Myyntitilauksesta voi tehdä osatoimituksia käsin")."</option>";
   $ulos .= "<option value = 'E' $sel[E]>".t("Tilauksia ei osatoimiteta")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "myyntitilaus_ytunnus_syotto") {
+
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value = ''>".t("Myyntitilauksesta ei voi syöttää ytunnusta käsin")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("Myyntitilauksesta voi syöttää ytunnuksen käsin")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

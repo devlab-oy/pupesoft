@@ -136,7 +136,7 @@ if (isset($submit)) {
     break;
 
   case 'konttitiedot':
-    if (isset($sinettinumero) and isset($konttinumero)) {
+    if (!empty($sinettinumero) and !empty($konttinumero)) {
 
       $rullat_kontissa = rtrim($rullat_kontissa,",");
 
@@ -332,9 +332,9 @@ if ($view == 'kontituslista') {
       <form method='post' action=''>
         <div style='text-align:center;padding:10px;'>
           <label for='konttinumero'>", t("Konttinumero"), "</label><br>
-          <input type='text' id='konttinumero' name='konttinumero' style='margin:10px;' /><br>
+          <input type='text' id='konttinumero' name='konttinumero' value='{$konttinumero}' style='margin:10px;' /><br>
           <label for='sinettinumero'>", t("Sinettinumero"), "</label><br>
-          <input type='text' id='sinettinumero' name='sinettinumero' style='margin:10px;' /><br>
+          <input type='text' id='sinettinumero' name='sinettinumero' value='{$sinettinumero}' style='margin:10px;' /><br>
           <input type='hidden' name='maxkg' value='{$maxkg}' />
           <input type='hidden' name='konttiviite' value='{$konttiviite}' />
           <input type='hidden' name='rullat_kontissa' value='{$rullat_kontissa}' />

@@ -977,6 +977,8 @@ if (!isset($from_kaikkikorj)) {
     }
     echo "</table><br>";
 
+    $_jarj = $yhtiorow['tilauksen_jarjestys_suunta'];
+
     //Haetaan valmistettavat valmisteet ja käytettävät raaka-aineet
     $query = "SELECT tilausrivi.nimitys,
               tilausrivi.tuoteno,
@@ -1013,7 +1015,16 @@ if (!isset($from_kaikkikorj)) {
               and tuote.tuoteno        = tilausrivi.tuoteno
               and tyyppi               in ('V','W','M','L','D','O')
               $korjataan
-              ORDER BY if(tilausrivi.perheid=0, tilausrivi.tunnus, tilausrivi.perheid) $yhtiorow[tilauksen_jarjestys_suunta], tyyppi in ('W','M','L','D','O','V'), tunnus";
+              ORDER BY IF(tilausrivi.perheid=0, tilausrivi.tunnus, tilausrivi.perheid) {$_jarj},
+              CASE tilausrivi.tyyppi
+                WHEN 'W' THEN 1
+                WHEN 'M' THEN 2
+                WHEN 'L' THEN 3
+                WHEN 'D' THEN 4
+                WHEN 'O' THEN 5
+                WHEN 'V' THEN 6
+              END,
+              tunnus";
     $presult = pupe_query($query);
     $riveja = mysql_num_rows($presult);
 

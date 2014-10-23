@@ -184,50 +184,78 @@ if (isset($submit)) {
       vie_varastoon($saapuminen, 0, $hylly, $tilausrivi['tunnus']);
       unset($kukarow['ei_echoa']);
 
-      $info = "Sarjanumero {$sarjanumero} vietiin varastopaikalle {$hylly['hyllyalue']}-{$hylly['hyllynro']}-{$hylly['hyllyvali']}-{$hylly['hyllytaso']}";
-
-      // tutkitaan rahdin ja tilauksen tulouttamisen tila
       $query = "SELECT
-                sum(CASE WHEN trlt.rahtikirja_id = '{$rahtikirja_id}'
-                  AND tr.uusiotunnus = 0
-                  THEN 1 ELSE 0 END) viemattomia_rahdin_riveja,
-                sum(CASE WHEN tr.otunnus = '{$tilausrivi['otunnus']}'
-                  AND tr.uusiotunnus = 0
-                  THEN 1 ELSE 0 END) viemattomia_tilauksen_riveja
+                ss.sarjanumero,
+                tr.uusiotunnus,
+                tr.tunnus,
+                ss.hyllyalue AS alue,
+                ss.hyllynro AS nro,
+                ss.hyllyvali AS vali,
+                ss.hyllytaso AS taso,
+                trlt.asiakkaan_tilausnumero AS tno
                 FROM tilausrivi AS tr
-                JOIN tilausrivin_lisatiedot AS trlt ON trlt.yhtio = tr.yhtio AND trlt.tilausrivitunnus = tr.tunnus
+                JOIN tilausrivin_lisatiedot AS trlt
+                  ON trlt.yhtio = tr.yhtio
+                  AND trlt.tilausrivitunnus = tr.tunnus
+                JOIN sarjanumeroseuranta AS ss
+                  ON ss.yhtio = tr.yhtio
+                  AND ss.ostorivitunnus = tr.tunnus
                 WHERE tr.yhtio = '{$kukarow['yhtio']}'
-                AND tr.tyyppi = 'O'";
+                AND tr.tyyppi = 'O'
+                AND trlt.rahtikirja_id = '{$rahtikirja_id}'";
       $result = pupe_query($query);
-      $tilanne = mysql_fetch_assoc($result);
 
-      if ($tilanne['viemattomia_tilauksen_riveja'] == 0) {
+      $viematta = 0;
 
-        $query = "SELECT ola.tunnus AS osto, mla.tunnus AS myynti
-                  FROM sarjanumeroseuranta AS ss
-                  JOIN tilausrivi AS mtr
-                    ON mtr.yhtio = ss.yhtio AND mtr.tunnus = ss.myyntirivitunnus
-                  JOIN tilausrivi AS otr
-                    ON otr.yhtio = ss.yhtio AND otr.tunnus = ss.ostorivitunnus
-                  JOIN lasku AS ola
-                    ON ola.yhtio = otr.yhtio AND ola.tunnus = otr.otunnus
-                  JOIN lasku AS mla
-                    ON mla.yhtio = mtr.yhtio AND mla.tunnus = mtr.otunnus
-                  WHERE ss.yhtio = '{$kukarow['yhtio']}'
-                  AND ss.ostorivitunnus = '{$tilausrivi['tunnus']}'";
-        $result = pupe_query($query);
-        $tunnukset = mysql_fetch_assoc($result);
+      while ($rulla = mysql_fetch_assoc($result)) {
+        $rullat[] = $rulla;
+        if ($rulla['uusiotunnus'] == 0) {
+          $viematta++;
+        }
+      }
 
-        $query = "UPDATE lasku
-                  SET tila = 'L', alatila = 'A'
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus  = '{$tunnukset['myynti']}'";
-        pupe_query($query);
+      if ($viematta == 0) {
 
         $query = "UPDATE lasku
                   SET alatila = 'X'
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus  = '{$tunnukset['osto']}'";
+                  AND tunnus  = '{$tilausrivi['otunnus']}'";
+        pupe_query($query);
+
+      }
+
+      // tarkistetaan oliko tuloutettu rulla jonkin myyntitilauksen vika rulla
+      $query = "SELECT myyntirivitunnus
+                FROM sarjanumeroseuranta
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND ostorivitunnus = '{$tilausrivi['tunnus']}'";
+      $result = pupe_query($query);
+      $myyntirivitunnus = mysql_result($result,0);
+
+      $query = "SELECT asiakkaan_tilausnumero
+                FROM tilausrivin_lisatiedot
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tilausrivitunnus = '{$myyntirivitunnus}'";
+      $result = pupe_query($query);
+      $asiakkaan_tilausnumero = mysql_result($result,0);
+
+      $query = "SELECT *
+                FROM tilausrivi
+                JOIN tilausrivin_lisatiedot
+                  ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+                  AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                AND tilausrivi.tyyppi = 'L'
+                AND tilausrivi.var = 'P'
+                AND tilausrivin_lisatiedot.asiakkaan_tilausnumero = '{$asiakkaan_tilausnumero}'";
+      $result = pupe_query($query);
+
+      if (mysql_num_rows($result) == 0) {
+
+        $query = "UPDATE lasku
+                  SET tila = 'L', alatila = 'A'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND asiakkaan_tilausnumero  = '{$asiakkaan_tilausnumero}'";
         pupe_query($query);
       }
 
@@ -269,20 +297,30 @@ if ($view == 'sarjanumero') {
     </div>
   </form>";
 
-  if (isset($info)) {
-    echo "
-    <div class='main' style='text-align:center;padding:5px;'>
-      {$info}
-    </div>";
-  }
+  foreach ($rullat as $rulla) {
 
-  if (isset($tilanne)) {
-    echo "
-    <div class='main' style='text-align:center;padding:5px;'>
-      koko tilauksesta tulouttamatta {$tilanne['viemattomia_tilauksen_riveja']} rullaa
-      <br>
-      koko rahdista tulouttamatta {$tilanne['viemattomia_rahdin_riveja']} rullaa
-    </div>";
+    echo "<div class='main' style='text-align:center;'>";
+
+    if ($rulla['uusiotunnus'] == 0) {
+      echo "<p>Rulla: {$rulla['sarjanumero']} tulouttamatta</p>";
+    }
+    else {
+
+      if ($rulla['sarjanumero'] == $sarjanumero) {
+        $huomiostyle = "style='color:green;'";
+        $verbi = "vietiin varastopaikkaan:";
+      }
+      else{
+       $huomiostyle = "";
+       $verbi = "on varastopaikassa:";
+      }
+
+      $paikka = "{$rulla['alue']}-{$rulla['nro']}-{$rulla['vali']}-{$rulla['taso']}";
+      echo "<p {$huomiostyle}>Rulla: {$rulla['sarjanumero']} {$verbi} {$paikka}</p>";
+    }
+
+    echo "</div>";
+
   }
 
 }
@@ -294,7 +332,7 @@ if ($view == 'tuotepaikka') {
     <div style='text-align:center;padding:10px;'>
     <input type='hidden' name='sarjanumero' value='{$sarjanumero}' />
       <label for='sarjanumero'>", t("Tuotepaikka"), "</label><br>
-      <input type='text' id='tuotepaikka' name='tuotepaikka' style='margin:10px;' />
+      <input type='text' id='tuotepaikka' name='tuotepaikka' style='margin:10px;' value='' />
       <br>
       <button name='submit' value='sarjanumero_tuotepaikka' onclick='submit();' class='button'>", t("OK"), "</button>
     </div>

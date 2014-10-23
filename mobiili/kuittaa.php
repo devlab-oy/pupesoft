@@ -80,10 +80,7 @@ echo "</div>";
 
 if ($lahetys == 'OK') {
   echo "<div style='text-align:center;'>";
-  echo "Sanoma lähetetty!";
-
-echo '<hr>', $sanoma, '<hr>';
-
+  echo "Rahti vastaanotettu ja sanoma lähetetty!";
   echo "</div>";
 }
 

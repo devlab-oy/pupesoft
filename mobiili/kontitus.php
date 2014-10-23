@@ -25,7 +25,8 @@ if (isset($submit)) {
       $query = "SELECT
                 lasku.sisviesti1 AS ohje,
                 laskun_lisatiedot.konttityyppi AS tyyppi,
-                tilausrivi.toimitettu
+                tilausrivi.toimitettu,
+                group_concat(tilausrivi.var) AS status
                 FROM laskun_lisatiedot
                 JOIN lasku
                   ON lasku.yhtio = laskun_lisatiedot.yhtio
@@ -35,19 +36,26 @@ if (isset($submit)) {
                   AND tilausrivi.otunnus = lasku.tunnus
                 WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
                 AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
-                AND tilausrivi.var != 'P'
                 GROUP BY tilausrivi.toimitettu
                 ORDER BY tilausrivi.toimitettu ASC";
       $result = pupe_query($query);
 
       $info  = mysql_fetch_assoc($result);
 
+      // katsotaan onko kaikki rullat varastossa
+      $status = explode(",", $info['status']);
+
       if (!$info) {
-        $errors[] = t("Ei löytynyt kontitettavia rullia");
+        $errors[] = t("Ei löytynyt kontitettavia rullia.");
+        $view = 'konttiviite';
+      }
+      elseif (in_array('P', $status)) {
+        $errors[] = t("Kaikkia rullia ei ole tuloutettu.");
         $view = 'konttiviite';
       }
       elseif ($info['toimitettu'] != '') {
-        $view = 'kontituslista';
+        $errors[] = t("Rullat on jo kontitettu.");
+        $view = 'konttiviite';
       }
       else{
 
@@ -119,7 +127,7 @@ if (isset($submit)) {
               AND tunnus = '{$rivitunnus}'";
     pupe_query($query);
 
-    $kontit_rullineen = kontit_rullineen($konttiviite);
+    $kontit_rullineen = kontit_rullineen($konttiviite, $maxkg);
     $view = 'kontituslista';
     break;
 
@@ -132,16 +140,33 @@ if (isset($submit)) {
 
       $rullat_kontissa = rtrim($rullat_kontissa,",");
 
-      $query = "UPDATE tilausrivi
-                SET toimitettu = '{$konttinumero}'
+      $query = "UPDATE tilausrivi SET
+                toimitettu = '{$kukarow['kuka']}',
+                toimitettuaika = NOW()
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tunnus IN ({$rullat_kontissa})";
       pupe_query($query);
 
+      $query = "UPDATE tilausrivin_lisatiedot SET
+                konttinumero = '{$konttinumero}',
+                sinettinumero = '{$sinettinumero}',
+                kontin_kilot = '{$kontin_kilot}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tilausrivitunnus IN ({$rullat_kontissa})";
+      pupe_query($query);
+
+      /* // todo katso onko jonkin tilauksen vika rulla
+      $query = "SELECT
+                FROM tilausrivi
+                JOIN tilausrivin_lisatiedot
+                  ON tilausrivin_lisatiedot.tila ";
+
+      */
+
+
       $parametrit = kontitus_parametrit($rullat_kontissa);
 
       if ($parametrit) {
-        $parametrit['laji'] = 'kontitus';
         $parametrit['kontitus_info']['konttinumero'] = $konttinumero;
         $parametrit['kontitus_info']['sinettinumero'] = $sinettinumero;
         $sanoma = laadi_edifact_sanoma($parametrit);
@@ -166,7 +191,7 @@ if (isset($submit)) {
     else {
       $errors[] = t("Syötä konttitiedot");
     }
-    $kontit_rullineen = kontit_rullineen($konttiviite);
+    $kontit_rullineen = kontit_rullineen($konttiviite, $maxkg);
     $view = 'kontituslista';
     break;
 
@@ -267,13 +292,14 @@ if ($view == 'kontituslista') {
 
   echo "<div style='text-align:center;padding:10px;'>";
 
-    foreach ($kontit_rullineen as $key => $kontti) {
+  foreach ($kontit_rullineen as $key => $kontti) {
 
     echo "<a name='{$key}'><h1>{$key}</h1></a><br>";
 
     $keraamattomat = 0;
     $rullat_kontissa = '';
     $kontitettu = true;
+    $kontin_kilot = 0;
 
     foreach ($kontti as $rulla) {
       if ($rulla['keratty'] == '') {
@@ -287,13 +313,14 @@ if ($view == 'kontituslista') {
         </form><br>";
         $keraamattomat++;
       }
-      else{
+      else {
         echo  "Rulla  {$rulla['sarjanumero']} Kerätty!<br>";
         $rullat_kontissa .= $rulla['tunnus'] . ',';
       }
-      if ($rulla['toimitettu'] == '') {
+      if ($rulla['konttinumero'] == '') {
         $kontitettu = false;
       }
+      $kontin_kilot = $kontin_kilot + $rulla['paino'];
     }
 
     if ($keraamattomat == 0 and $kontitettu === false) {
@@ -310,10 +337,10 @@ if ($view == 'kontituslista') {
           <input type='hidden' name='maxkg' value='{$maxkg}' />
           <input type='hidden' name='konttiviite' value='{$konttiviite}' />
           <input type='hidden' name='rullat_kontissa' value='{$rullat_kontissa}' />
+          <input type='hidden' name='kontin_kilot' value='{$kontin_kilot}' />
           <button name='submit' value='konttitiedot' onclick='submit();' class='button'>", t("Lähetä kontitussanoma"), "</button>
         </div>
       </form>";
-
     }
     elseif ($keraamattomat == 0 and $kontitettu === true) {
       echo "

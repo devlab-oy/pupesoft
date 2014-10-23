@@ -2,12 +2,56 @@
 
 require "../inc/parametrit.inc";
 
+if ($task == 'B1') {
+
+  $sanoma = "UNB+UNOC:2+003708274241:30+003706664131:30+140916:0839+KM0001++++++'UNH+1+IFTMBF:D:97B:UN:EXWL12'BGM+335+KTKANT24091+9'DTM+137:201409160839:203'RFF+VON:KV0001'RFF+CU:TILAUS-0001:1'TDT+20++1++MSCFI+++H3JN:103::MSC IRIS'LOC+5+FIKTKC::86:Kotka Mussalo'DTM+133:201411010000:203'LOC+8+BEANR::86:ANTWERPEN'DTM+132:201411080000:203'RFF+VON:KTKANT24091'TDT+30++1++MSCFI+++3FUT9:103::MSC LAURENCE'LOC+5++BEANR::86'DTM+133:201412010000:203'LOC+8+AUSYD::86'DTM+132:201412020000:203'RFF+VON:ANTAU05101'NAD+OS+003708274241:100++Kotkamills Oy:Norskankatu 6:FI-48101:FI+++++FI'NAD+CZ+003708274241:100'NAD+FX+SPOTPRESS++SPOTPRESS+24-26 Lilian Fowler Place+Marrickville++NSW 2204+AU'NAD+TR+STEVECO'GID++4:RL'LOC+20+BEANR:16'PIA+1+4810 22:HS'FTX+ZSM++LOLO'FTX+AAA+++PAPER'FTX+PRD+++Solaris (New) 1.55 57 g/m2'FTX+TRA+++max netto paino20to/ kontti (24to/kontti brutto)'FTX+TRA+++1  x 20?' kontti'MEA+AAE+CT+RO:1'MEA+AAE+WD+MMT:700'MEA+AAE+DI+MMT:1250'MEA+AAE+G+KGM:4000'RFF+CU:TILAUS-0001:1'EQD+CN++C20'EQN+1'RFF+AKC:KV0001'NAD+CW+MSCFI'NAD+ZST+FIMUSSALO'UNT+40+1'UNZ+1+KM0001'";
+
+  kasittele_bookkaussanoma($sanoma);
+
+}
+
+
+
+if ($task == 'B2') {
+
+  $sanoma = "UNB+UNOC:2+003708274241:30+003706664131:30+140916:0839+KM0002++++++'UNH+1+IFTMBF:D:97B:UN:EXWL12'BGM+335+KTKANT24091+9'DTM+137:201409160840:203'RFF+VON:KV0001'RFF+CU:TILAUS-0001:2'TDT+20++1++MSCFI+++H3JN:103::MSC IRIS'LOC+5+FIKTKC::86:Kotka Mussalo'DTM+133:201411010000:203'LOC+8+BEANR::86:ANTWERPEN'DTM+132:201411080000:203'RFF+VON:KTKANT24091'TDT+30++1++MSCFI+++3FUT9:103::MSC LAURENCE'LOC+5++BEANR::86'DTM+133:201412010000:203'LOC+8+AUSYD::86'DTM+132:201412020000:203'RFF+VON:ANTAU05101'NAD+OS+003708274241:100++Kotkamills Oy:Norskankatu 6:FI-48101:FI+++++FI'NAD+CZ+003708274241:100'NAD+FX+SPOTPRESS++SPOTPRESS+24-26 Lilian Fowler Place+Marrickville++NSW 2204+AU'NAD+TR+STEVECO'GID++3:RL'LOC+20+BEANR:16'PIA+1+4810 20:HS'FTX+ZSM++LOLO'FTX+AAA+++PAPER'FTX+PRD+++Solaris (New) 1.55 57 g/m2'FTX+TRA+++max netto paino20to/ kontti (24to/kontti brutto)'FTX+TRA+++1  x 20?' kontti'MEA+AAE+CT+RO:1'MEA+AAE+WD+MMT:800'MEA+AAE+DI+MMT:1250'MEA+AAE+G+KGM:4000'RFF+CU:TILAUS-0001:2'EQD+CN++C20'EQN+1'RFF+AKC:KV0001'NAD+CW+MSCFI'NAD+ZST+FIMUSSALO'UNT+40+1'UNZ+1+KM0001'";
+
+  kasittele_bookkaussanoma($sanoma);
+
+}
+
+
+
+
+if ($task == 'R1') {
+
+  $sanoma = "UNB+UNOC:2+003708274241:30+003706800420:30+141024:1032+KM0003++++++'UNH+1+DESADV:D:97B:UN:EXWL15'BGM+15+RK0001+9'DTM+137:201410241020:203'NAD+FX+STEVECO::86++Steveco+Steveco+Kotka++48101+FI'NAD+CZ+003708274241:100++Kotkamills Oy'TDT+10++3++RP::86:RP Logistics Oy+++WLY-834'LOC+5+FIKTKM::86:KOTKA'DTM+180:201410300000:203'DTM+143:201410300605:203'LOC+8+FIKTKC::86:KOTKA, MUSSALO'DTM+132:201410101600:203'CPS+MOL'PAC+4++RL'MEA+AAE+AAL+KGM:4000'MEA+AAE+G+KGM:4000'MEA+AAE+WD+MMT:700'MEA+AAE+DI+MMT:1250'PCI+16+MERINOPA-EMAIL 08.06.2013-'LIN+1'PIA+1+4810 22:HS'NAD+OS+003708274241:100++Kotkamills Oy'NAD+SB+SEINDIA::86++SE INDIA'NAD+FX+MERINOPA::86++MERINOPA'NAD+CZ+003708274241:100++Kotkamills Oy'TDT+20++1+++++D5DM7:::CHARLOTTA B'FTX+AAA+++PAPER'RFF+CU:TILAUS-0001:1'RFF+VON:KTKANT24091'DTM+ZEL:201407010000:203'LOC+5+FIKTKM::86:Kotka warehouse'LOC+8+FIKTKC::86:Kotka'LOC+20+MERINOPA::86:HARYANA'CPS+PKG'PAC+999++RL'MEA+AAE+G+KGM:1000'MEA+AAE+AAL+KGM:1000'MEA+AAE+DI+MMT:1250'MEA+AAE+WD+MMT:700'PCI+999'GIN+ZUN+0001'GIN+ZPI+1'CPS+PKG'PAC+999++RL'MEA+AAE+G+KGM:1000'MEA+AAE+AAL+KGM:1000'MEA+AAE+DI+MMT:1250'MEA+AAE+WD+MMT:700'PCI+999'GIN+ZUN+0002'GIN+ZPI+2'CPS+PKG'PAC+999++RL'MEA+AAE+G+KGM:1000'MEA+AAE+AAL+KGM:1000'MEA+AAE+DI+MMT:1250'MEA+AAE+WD+MMT:700'PCI+999'GIN+ZUN+0003'GIN+ZPI+3'CPS+PKG'PAC+999++RL'MEA+AAE+G+KGM:1000'MEA+AAE+AAL+KGM:1000'MEA+AAE+DI+MMT:1250'MEA+AAE+WD+MMT:700'PCI+999'GIN+ZUN+0004'GIN+ZPI+4'CPS+MOL'PAC+3++RL'MEA+AAE+AAL+KGM:3000'MEA+AAE+G+KGM:3000'MEA+AAE+WD+MMT:800'MEA+AAE+DI+MMT:1250'PCI+16+MERINOPA-EMAIL 08.06.2013-'LIN+1'PIA+1+4810 20:HS'NAD+OS+003708274241:100++Kotkamills Oy'NAD+SB+SEINDIA::86++SE INDIA'NAD+FX+MERINOPA::86++MERINOPA'NAD+CZ+003708274241:100++Kotkamills Oy'TDT+20++1+++++D5DM7:::CHARLOTTA B'FTX+AAA+++PAPER'RFF+CU:TILAUS-0001:2'RFF+VON:KTKANT24091'DTM+ZEL:201407010000:203'LOC+5+FIKTKM::86:Kotka warehouse'LOC+8+FIKTKC::86:Kotka'LOC+20+MERINOPA::86:HARYANA'CPS+PKG'PAC+999++RL'MEA+AAE+G+KGM:1000'MEA+AAE+AAL+KGM:1000'MEA+AAE+DI+MMT:1250'MEA+AAE+WD+MMT:800'PCI+999'GIN+ZUN+0005'GIN+ZPI+5'CPS+PKG'PAC+999++RL'MEA+AAE+G+KGM:1000'MEA+AAE+AAL+KGM:1000'MEA+AAE+DI+MMT:1250'MEA+AAE+WD+MMT:800'PCI+999'GIN+ZUN+0006'GIN+ZPI+6'CPS+PKG'PAC+999++RL'MEA+AAE+G+KGM:1000'MEA+AAE+AAL+KGM:1000'MEA+AAE+DI+MMT:1250'MEA+AAE+WD+MMT:800'PCI+999'GIN+ZUN+0007'GIN+ZPI+7'UNT+117+1'UNZ+1+KM0003'";
+
+  kasittele_rahtikirjasanoma($sanoma);
+
+}
+
+
+if ($task == 'nollaa') {
+  $taulut = array(
+      "tilausrivi",
+      "tilausrivin_lisatiedot",
+      "lasku",
+      "laskun_lisatiedot",
+      "sarjanumeroseuranta",
+      "liitetiedostot");
+
+  foreach ($taulut as $taulu) {
+    $query = "TRUNCATE TABLE {$taulu}";
+    pupe_query($query);
+  }
+}
+
 if ($task == 'hae') {
 
   $host = $ftp_info['host'];
   $user = $ftp_info['user'];
   $pass = $ftp_info['pass'];
-
 
   // Connect to host
   $yhteys = ftp_connect($host);
@@ -29,9 +73,14 @@ if ($task == 'hae') {
 
   $files = ftp_nlist($yhteys, ".");
 
-  foreach ($files as $file) {
+  $b1 = "13713_225860614.IFF";
+  $b2 = "18176_227697666.IFF";
+  $r1 = "18176_227708169.DAD";
+  $r2 = "18176_227708837.DAD";
 
-    if (ftp_mdtm($yhteys, $file) > 1412772935) {
+  $sanomat = array($b1,$b2,$r1,$r2);
+
+  foreach ($files as $file) {
 
       if (substr($file, -3) == 'IFF') {
         $bookkaukset[] = $file;
@@ -40,10 +89,8 @@ if ($task == 'hae') {
       if (substr($file, -3) == 'DAD') {
         $rahtikirjat[] = $file;
       }
-    }
+
   }
-
-
 
   foreach ($bookkaukset as $bookkaus) {
     $temp_file = tempnam("/tmp", "IFF-");
@@ -53,7 +100,6 @@ if ($task == 'hae') {
     unlink($temp_file);
   }
 
-
   foreach ($rahtikirjat as $rahtikirja) {
     $temp_file = tempnam("/tmp", "DAD-");
     ftp_get($yhteys, $temp_file, $rahtikirja, FTP_ASCII);
@@ -62,14 +108,12 @@ if ($task == 'hae') {
     unlink($temp_file);
   }
 
-
-
-  // suljetaan yhteys
   ftp_close($yhteys);
-
 
 }
 else{
+
+/*
 
   echo "
   <font class='head'>".t("Sanomien haku")."</font>
@@ -77,6 +121,43 @@ else{
     <input type='hidden' name='task' value='hae' />
     <input type='submit' value='".t("Hae sanomat")."'>
   </form>";
+
+*/
+
+  echo "<hr>
+  <font class='head'>".t("Testaus")."</font>
+
+  <br><br>
+
+  <form action='' method='post'>
+    <input type='hidden' name='task' value='nollaa' />
+    <input type='submit' value='".t("Nollaa tilanne")."'>
+  </form>
+
+  <br><br>
+
+  <form action='' method='post'>
+    <input type='hidden' name='task' value='B1' />
+    <input type='submit' value='".t("Hae bookkaus 1.")."'>
+  </form>
+
+  <br><br>
+
+  <form action='' method='post'>
+    <input type='hidden' name='task' value='B2' />
+    <input type='submit' value='".t("Hae bookkaus 2.")."'>
+  </form>
+
+
+  <br><br>
+
+  <form action='' method='post'>
+    <input type='hidden' name='task' value='R1' />
+    <input type='submit' value='".t("Hae rahtikirja 1.")."'>
+  </form>
+
+  ";
+
 
 }
 
@@ -90,7 +171,7 @@ function kasittele_bookkaussanoma($edi_data) {
   $edi_data = str_replace("?'", "#%#", $edi_data);
   $edi_data = explode("'", $edi_data);
 
-  $kuorma = array();
+  $rahti = array();
   $pakkaukset = array();
   $tilaukset = array();
 
@@ -170,38 +251,20 @@ function kasittele_bookkaussanoma($edi_data) {
     return false;
   }
 
-  // tarkistetaan onko vastaava sanoma jo liitetiedostona
-  $query = "SELECT tunnus
-            FROM liitetiedostot
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND selite = '{$tilausnro}:{$rivinro}'
-            AND kayttotarkoitus = 'bookkaussanoma'";
-  $vastaavuusresult = pupe_query($query);
-  $osumia = mysql_num_rows($vastaavuusresult);
-
-  // katsotaan onko tilauksesta luotu jo osto- tai myyntitilaus
-  $query = "SELECT group_concat(tila)
+  // katsotaan onko tilauksesta luotu jo myyntitilaus
+  $query = "SELECT *
             FROM lasku
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND asiakkaan_tilausnumero = '{$tilausnro}'
-            GROUP BY yhtio";
+            AND tilaustyyppi = 'N'";
   $result = pupe_query($query);
-
-  if (mysql_num_rows($result) > 0) {
-    $tilat = mysql_result($result, 0);
-  }
-  else {
-    $tilat = '';
-  }
-
-  $ostotilaus = strpos($tilat, "O") === false ? false : true;
-  $myyntitilaus = strpos($tilat, "N") === false ? false : true;
 
   $kukarow['kesken'] = 0;
 
-  if (!$myyntitilaus) {
+  if (mysql_num_rows($result) == 0) {
 
     require_once "../tilauskasittely/luo_myyntitilausotsikko.inc";
+
     $tunnus = luo_myyntitilausotsikko('RIVISYOTTO', $asiakas_id);
 
     $update_query = "UPDATE lasku SET
@@ -220,48 +283,36 @@ function kasittele_bookkaussanoma($edi_data) {
                      AND otunnus  = '{$tunnus}'";
     pupe_query($update_query);
 
-    if ($ostotilaus) {
+    // katsotaan onko tilaukseen kuuluvia rullia ostotilauksilla
+    $query = "SELECT *
+              FROM tilausrivin_lisatiedot
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND asiakkaan_tilausnumero = '{$tilausnro}'";
+    $result = pupe_query($query);
 
-      $query = "SELECT *
-                FROM lasku
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = '{$tunnus}'";
-      $result = pupe_query($query);
-      $laskurow = mysql_fetch_assoc($result, 0);
+    if (mysql_num_rows($result) > 0) {
 
-      // otetaan ostotilauksen tunnus
-      $ostoquery = "SELECT tunnus
-                    FROM lasku
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND asiakkaan_tilausnumero = '{$tilausnro}'
-                    AND tila = 'O'";
-      $ostoresult = pupe_query($ostoquery);
-      $ostotunnus = mysql_result($ostoresult, 0);
-
-      // haetaan ostotilauksen rivit
-      $query = "SELECT *
-                FROM tilausrivi
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND otunnus = '{$ostotunnus}'";
-      $result = pupe_query($query);
+      $laskuquery = "SELECT *
+                     FROM lasku
+                     WHERE yhtio = '{$kukarow['yhtio']}'
+                     AND tunnus = '{$tunnus}'";
+      $laskuresult = pupe_query($laskuquery);
+      $laskurow = mysql_fetch_assoc($laskuresult, 0);
 
       $kukarow['kesken'] = $laskurow['tunnus'];
 
       // haetaan tuotteen tiedot
-      $query = "SELECT *
-                FROM tuote
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tuoteno = '123'";
-      $tuoteres = pupe_query($query);
+      $tuotequery = "SELECT *
+                     FROM tuote
+                     WHERE yhtio = '{$kukarow['yhtio']}'
+                     AND tuoteno = '123'";
+      $tuoteresult = pupe_query($tuotequery);
+
       $trow = mysql_fetch_assoc($tuoteres);
       $kpl = 1;
       $var = 'P';
 
-      while ($tilausrivi = mysql_fetch_assoc($result)) {
-        $ostorivit[] = $tilausrivi;
-      }
-
-      foreach ($ostorivit as  $ostorivi) {
+      while ($rulla = mysql_fetch_assoc($result)) {
 
         require "lisaarivi.inc";
 
@@ -274,25 +325,17 @@ function kasittele_bookkaussanoma($edi_data) {
         $update_query = "UPDATE sarjanumeroseuranta
                          SET myyntirivitunnus = '{$lisatty_tun}'
                          WHERE yhtio = '{$kukarow['yhtio']}'
-                         AND ostorivitunnus = '{$ostorivi['tunnus']}'";
+                         AND ostorivitunnus = '{$rulla['tilausrivitunnus']}'";
         pupe_query($update_query);
 
-        // haetaan rivin lisätiedot
-        $query = "SELECT *
-                  FROM tilausrivin_lisatiedot
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tilausrivitunnus = '{$ostorivi['tunnus']}'";
-        $result = pupe_query($query);
-        $lisatiedot = mysql_fetch_assoc($result);
-
         $update_query = "UPDATE tilausrivin_lisatiedot SET
-                         juoksu = '{$lisatiedot['juoksu']}',
-                         tilauksen_paino = '{$lisatiedot['tilauksen_paino']}',
-                         asiakkaan_rivinumero = '{$lisatiedot['asiakkaan_rivinumero']}'
+                         juoksu = '{$rulla['juoksu']}',
+                         tilauksen_paino = '{$rulla['tilauksen_paino']}',
+                         asiakkaan_tilausnumero = '{$rulla['asiakkaan_tilausnumero']}'
+                         asiakkaan_rivinumero = '{$rulla['asiakkaan_rivinumero']}'
                          WHERE yhtio = '{$kukarow['yhtio']}'
                          AND tilausrivitunnus = '{$lisatty_tun}'";
         pupe_query($update_query);
-
       }
     }
   }
@@ -304,10 +347,28 @@ function kasittele_bookkaussanoma($edi_data) {
               AND tila = 'N'";
     $result = pupe_query($query);
     $tunnus = mysql_result($result, 0);
+
+    $update_query = "UPDATE laskun_lisatiedot SET
+                     konttiviite  = '{$konttiviite}',
+                     konttimaara  = '{$konttimaara}',
+                     konttityyppi = '{$konttityyppi}',
+                     matkakoodi   = '{$matkakoodi}'
+                     WHERE yhtio  = '{$kukarow['yhtio']}'
+                     AND otunnus  = '{$tunnus}'";
+    pupe_query($update_query);
   }
 
   $filesize = strlen($liitedata);
   $liitedata = mysql_real_escape_string($liitedata);
+
+  // tarkistetaan onko vastaava sanoma jo liitetiedostona
+  $query = "SELECT tunnus
+            FROM liitetiedostot
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND selite = '{$tilausnro}:{$rivinro}'
+            AND kayttotarkoitus = 'bookkaussanoma'";
+  $vastaavuusresult = pupe_query($query);
+  $osumia = mysql_num_rows($vastaavuusresult);
 
   if ($osumia == 0) {
 
@@ -339,10 +400,8 @@ function kasittele_bookkaussanoma($edi_data) {
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND  tunnus = '{$korvattava}'";
     pupe_query($query);
-
   }
 }
-
 
 function kasittele_rahtikirjasanoma($edi_data) {
   global $kukarow;
@@ -355,11 +414,9 @@ function kasittele_rahtikirjasanoma($edi_data) {
 
   $edi_data = explode("'", $edi_data);
 
-  $kuorma = array();
-  $pakkaukset = array();
-  $tilaukset = array();
   $rivimaara = count($edi_data);
 
+  // luetaan kaikki rivit
   foreach ($edi_data as $rivi => $value) {
 
     if (substr($value, 0, 3) == 'UNB') {
@@ -385,7 +442,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
 
         if (substr($edi_data[$luetaan], 0, 3) == "BGM") {
           $osat = explode("+", $edi_data[$luetaan]);
-          $kuormakirja_id = $osat[2];
+          $rahtikirja_id = $osat[2];
           $tyyppi = $osat[3];
         }
 
@@ -442,9 +499,9 @@ function kasittele_rahtikirjasanoma($edi_data) {
         }
       }
 
-      $kuorma[$kuormakirja_id]= array(
+      $rahti = array(
         'sanoma_id' => $sanoma_id,
-        'kuorma_id' => $kuormakirja_id,
+        'rahtikirja_id' => $rahtikirja_id,
         'tyyppi' => $tyyppi,
         'sender_id' => $lahettaja_id,
         'recipient_id' => $vastaanottaja_id,
@@ -467,29 +524,19 @@ function kasittele_rahtikirjasanoma($edi_data) {
 
         $luetaan++;
 
-        if (substr($edi_data[$luetaan], 0, 3) == "PAC") {
-          $osat = explode("+", $edi_data[$luetaan]);
-          $tilaukset[$rivi]['kpl'] = $osat[1];
-        }
-
         if (substr($edi_data[$luetaan], 0, 15) == "MEA+AAE+AAL+KGM") {
           $osat = explode("+", $edi_data[$luetaan]);
           $paino_info = $osat[3];
           $paino_info_osat = explode(":", $paino_info);
-          $tilaukset[$rivi]['paino'] = $paino_info_osat[1];
-        }
-
-        if (substr($edi_data[$luetaan], 0, 6) == "NAD+OS") {
-          $osat = explode("+", $edi_data[$luetaan]);
-          $tilaukset[$rivi]['lahettaja'] = $osat[4];
+          $_paino = $paino_info_osat[1];
         }
 
         if (substr($edi_data[$luetaan], 0, 6) == "RFF+CU") {
           $osat = explode("+", $edi_data[$luetaan]);
           $tilaus_info = $osat[1];
           $tilaus_info_osat = explode(":", $tilaus_info);
-          $tilaukset[$rivi]['tilausnro'] = $tilaus_info_osat[1];
-          $_rivi = $tilaukset[$rivi]['rivinro'] = $tilaus_info_osat[2];
+          $_tilausnro = $tilaus_info_osat[1];
+          $_rivi = $tilaus_info_osat[2];
           $valmis = true;
         }
 
@@ -498,13 +545,10 @@ function kasittele_rahtikirjasanoma($edi_data) {
         }
 
       }
-      $pakkaukset = array();
+
     }
 
     if (substr($value, 0, 7) == 'CPS+PKG') {
-
-      end($tilaukset);
-      $tilaus_id = key($tilaukset);
 
       $valmis = false;
       $luetaan = $rivi;
@@ -552,262 +596,181 @@ function kasittele_rahtikirjasanoma($edi_data) {
 
       $tuoteno = '123';
 
-      $pakkaukset[$rivi] = array(
+      $rullat[] = array(
         'paino' => $paino,
         'halkaisija' => $halkaisija,
         'leveys' => $leveys,
         'tuoteno' => $tuoteno,
         'juoksu' => $juoksu,
         'sarjanumero' => $sarjanumero,
-        'rivinro' => $_rivi
+        'tilausnro' => $_tilausnro,
+        'rivinro' => $_rivi,
+        'tilauksen_paino' => $_paino
         );
 
-      $tilaukset[$tilaus_id]['pakkaukset'] = $pakkaukset;
     }
+  }// rivit luettu
+
+  $rahti['rullat'] = $rullat;
+
+  $data = $rahti;
+
+  require_once "../inc/luo_ostotilausotsikko.inc";
+
+  // haetaan toimittajan tiedot
+  $query = "SELECT *
+            FROM toimi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND REPLACE(nimi, ' ', '') = REPLACE('{$data['lahettaja']}', ' ', '')";
+  $toimres = pupe_query($query);
+  $toimrow = mysql_fetch_assoc($toimres);
+
+  $params = array(
+    'liitostunnus' => $toimrow['tunnus'],
+    'nimi' => $toimrow['nimi'],
+    'myytil_toimaika' => $data['toimitusaika'],
+    'varasto' => $data['varasto_id'],
+    'osoite' => $toimrow['osoite'],
+    'postino' => $toimrow['postino'],
+    'postitp' => $toimrow['postitp'],
+    'maa' => $toimrow['maa'],
+    'edi' => 'X'
+  );
+
+  $laskurow = luo_ostotilausotsikko($params);
+
+  // tarkistetaan onko vastaava sanoma jo liitetiedostona
+  $query = "SELECT tunnus
+            FROM liitetiedostot
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND CONCAT(liitostunnus,selite) = '{$laskurow['tunnus']}{$data['rahtikirja_id']}'
+            AND kayttotarkoitus = 'rahtikirjasanoma'";
+  $vastaavuusresult = pupe_query($query);
+
+  if (mysql_num_rows($vastaavuusresult) == 0) {
+
+    $query = "INSERT INTO liitetiedostot set
+              yhtio           = '{$kukarow['yhtio']}',
+              liitos          = 'lasku',
+              selite          = '{$data['rahtikirja_id']}',
+              liitostunnus    = '{$laskurow['tunnus']}',
+              laatija         = '{$kukarow['kuka']}',
+              luontiaika      = now(),
+              data            = '$liitedata',
+              filename        = '{$data['sanoma_id']}',
+              filesize        = '{$filesize}',
+              filetype        = 'text/plain',
+              kayttotarkoitus = 'rahtikirjasanoma'";
+    pupe_query($query);
+
+  }
+  elseif ($data['tyyppi'] == 5) {
+
+    $korvattava = mysql_result($vastaavuusresult, 0);
+
+    $query = "UPDATE liitetiedostot SET
+              data        = '$liitedata',
+              muutospvm   = NOW(),
+              muuttaja    = '{$kukarow['kuka']}',
+              filename    = '{$data['sanoma_id']}',
+              filesize    = '{$filesize}'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND  tunnus = '{$korvattava}'";
+    pupe_query($query);
+
   }
 
-  $kuorma[$kuormakirja_id]['tilaukset'] = $tilaukset;
+  $ostolaskurow = $laskurow;
 
-  $data = $kuorma;
-  $data = $data[key($data)];
+  foreach ($data['rullat'] as $rulla) {
 
-  foreach ($data['tilaukset'] as $key => $tilaus) {
-
-    // katsotaan onko tilauksesta luotu jo osto- tai myyntitilaus
-    $query = "SELECT group_concat(tila)
-              FROM lasku
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND asiakkaan_tilausnumero = '{$tilaus['tilausnro']}'
-              GROUP BY yhtio";
-    $result = pupe_query($query);
-    $tilat = mysql_result($result, 0);
-
-    $ostotilaus = strpos($tilat, "O") === false ? false : true;
-    $myyntitilaus = strpos($tilat, "N") === false ? false : true;
-
-    if ($ostotilaus) {
-      // osa tilauksesta on tullut aiemmassa rahtikirjassa tai duplikaattisanoma
-
-      $query = "SELECT *
-                FROM lasku
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND asiakkaan_tilausnumero = '{$tilaus['tilausnro']}'";
-      $result = pupe_query($query);
-      $laskurow = mysql_fetch_assoc($result);
-
-    }
-    else {
-      // ei ostotilausta
-
-      require_once "../inc/luo_ostotilausotsikko.inc";
-
-      // haetaan toimittajan tiedot
-      $query = "SELECT *
-                FROM toimi
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND REPLACE(nimi, ' ', '') = REPLACE('{$data['lahettaja']}', ' ', '')";
-      $toimres = pupe_query($query);
-      $toimrow = mysql_fetch_assoc($toimres);
-
-      $params = array(
-        'liitostunnus' => $toimrow['tunnus'],
-        'nimi' => $toimrow['nimi'],
-        'myytil_toimaika' => $data['toimitusaika'],
-        'varasto' => $data['varasto_id'],
-        'osoite' => $toimrow['osoite'],
-        'postino' => $toimrow['postino'],
-        'postitp' => $toimrow['postitp'],
-        'maa' => $toimrow['maa'],
-        'edi' => 'X'
-      );
-
-      $laskurow = luo_ostotilausotsikko($params);
-
-      $update_query = "UPDATE lasku SET
-                       asiakkaan_tilausnumero = '{$tilaus['tilausnro']}'
-                       WHERE yhtio = '{$kukarow['yhtio']}'
-                       AND tunnus = '{$laskurow['tunnus']}'";
-      pupe_query($update_query);
-
-    }
-
-    // tarkistetaan onko vastaava sanoma jo liitetiedostona
     $query = "SELECT tunnus
-              FROM liitetiedostot
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND CONCAT(liitostunnus,selite) = '{$laskurow['tunnus']}{$tilaus['tilausnro']}'
-              AND kayttotarkoitus = 'rahtikirjasanoma'";
-    $vastaavuusresult = pupe_query($query);
+              FROM sarjanumeroseuranta use index (yhtio_sarjanumero)
+              WHERE yhtio     = '{$kukarow['yhtio']}'
+              AND sarjanumero = '{$rulla['sarjanumero']}'";
+    $sarjares = pupe_query($query);
 
-    if (mysql_num_rows($vastaavuusresult) == 0) {
+    if (mysql_num_rows($sarjares) == 0) {
 
-      $query = "INSERT INTO liitetiedostot set
-                yhtio           = '{$kukarow['yhtio']}',
-                liitos          = 'lasku',
-                selite          = '{$tilaus['tilausnro']}',
-                liitostunnus    = '{$laskurow['tunnus']}',
-                laatija         = '{$kukarow['kuka']}',
-                luontiaika      = now(),
-                data            = '$liitedata',
-                filename        = '{$data['sanoma_id']}',
-                filesize        = '{$filesize}',
-                filetype        = 'text/plain',
-                kayttotarkoitus = 'rahtikirjasanoma'";
-      pupe_query($query);
-
-    }
-    elseif ($data['tyyppi'] == 5) {
-
-      $korvattava = mysql_result($vastaavuusresult, 0);
-
-      $query = "UPDATE liitetiedostot SET
-                data        = '$liitedata',
-                muutospvm   = NOW(),
-                muuttaja    = '{$kukarow['kuka']}',
-                filename    = '{$data['sanoma_id']}',
-                filesize    = '{$filesize}'
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND  tunnus = '{$korvattava}'";
-      pupe_query($query);
-
-    }
-
-    $kukarow['kesken'] = $laskurow['tunnus'];
-
-
-
-    foreach ($tilaus['pakkaukset'] as $key => $pakkaus) {
-
-      $query = "SELECT tunnus
-                FROM sarjanumeroseuranta use index (yhtio_sarjanumero)
-                WHERE yhtio     = '{$kukarow['yhtio']}'
-                AND sarjanumero = '{$pakkaus['sarjanumero']}'";
-      $sarjares = pupe_query($query);
-
-      if (mysql_num_rows($sarjares) == 0) {
-
-        // haetaan tuotteen tiedot
-        $query = "SELECT *
-                  FROM tuote
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tuoteno = '{$pakkaus['tuoteno']}'";
-        $tuoteres = pupe_query($query);
-
-        $trow = mysql_fetch_assoc($tuoteres);
-        $kpl = 1;
-        $kerayspvm = $toimaika = $data['toimitusaika'];
-
-        require "lisaarivi.inc";
-
-        $update_query = "UPDATE tilausrivin_lisatiedot SET
-                         rahtikirja_id = '{$data['kuorma_id']}',
-                         juoksu = '{$pakkaus['juoksu']}',
-                         tilauksen_paino = '{$tilaus['paino']}',
-                         kuljetuksen_rekno = '{$data['rekisterinumero']}',
-                         asiakkaan_rivinumero = '{$pakkaus['rivinro']}'
-                         WHERE yhtio = '{$kukarow['yhtio']}'
-                         AND tilausrivitunnus = '{$lisatty_tun}'";
-        pupe_query($update_query);
-
-        $query = "SELECT *
-                  FROM tilausrivi
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = '{$lisatty_tun}'";
-        $rivires = pupe_query($query);
-        $rivirow = mysql_fetch_assoc($rivires);
-
-
-        $query = "INSERT INTO sarjanumeroseuranta SET
-                  yhtio           = '{$kukarow['yhtio']}',
-                  tuoteno         = '{$rivirow['tuoteno']}',
-                  sarjanumero     = '{$pakkaus['sarjanumero']}',
-                  massa           = '{$pakkaus['paino']}',
-                  leveys          = '{$pakkaus['leveys']}',
-                  halkaisija      = '{$pakkaus['halkaisija']}',
-                  ostorivitunnus  = '{$lisatty_tun}',
-                  era_kpl         = '1',
-                  laatija         = '{$kukarow['kuka']}',
-                  luontiaika      = NOW()";
-        pupe_query($query);
-
-      }
-    }
-
-    $kukarow['kesken'] = 0;
-
-    if ($myyntitilaus) {
-      // bookkaussanoma tullut ennen rahtikirjaa
-
+      // haetaan tuotteen tiedot
       $query = "SELECT *
-                FROM tilausrivi
+                FROM tuote
                 WHERE yhtio = '{$kukarow['yhtio']}'
-                AND otunnus = '{$laskurow['tunnus']}'";
-      $oresult = pupe_query($query);
+                AND tuoteno = '{$rulla['tuoteno']}'";
+      $tuoteres = pupe_query($query);
 
+      $trow = mysql_fetch_assoc($tuoteres);
+      $kpl = 1;
+      $kerayspvm = $toimaika = $data['toimitusaika'];
+
+      $laskurow = $ostolaskurow;
+      $kukarow['kesken'] = $laskurow['tunnus'];
+      unset($var);
+      require "lisaarivi.inc";
+
+      $query = "UPDATE tilausrivin_lisatiedot SET
+                rahtikirja_id = '{$data['rahtikirja_id']}',
+                juoksu = '{$rulla['juoksu']}',
+                tilauksen_paino = '{$rulla['tilauksen_paino']}',
+                kuljetuksen_rekno = '{$data['rekisterinumero']}',
+                asiakkaan_tilausnumero = '{$rulla['tilausnro']}',
+                asiakkaan_rivinumero = '{$rulla['rivinro']}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tilausrivitunnus = '{$lisatty_tun}'";
+      pupe_query($query);
+
+      $query = "INSERT INTO sarjanumeroseuranta SET
+                yhtio           = '{$kukarow['yhtio']}',
+                tuoteno         = '{$rulla['tuoteno']}',
+                sarjanumero     = '{$rulla['sarjanumero']}',
+                massa           = '{$rulla['paino']}',
+                leveys          = '{$rulla['leveys']}',
+                halkaisija      = '{$rulla['halkaisija']}',
+                ostorivitunnus  = '{$lisatty_tun}',
+                era_kpl         = '1',
+                laatija         = '{$kukarow['kuka']}',
+                luontiaika      = NOW()";
+      pupe_query($query);
+
+      // katsotaan onko tilauksesta luotu jo myyntitilaus
       $query = "SELECT *
                 FROM lasku
                 WHERE yhtio = '{$kukarow['yhtio']}'
-                AND asiakkaan_tilausnumero = '{$tilaus['tilausnro']}'
+                AND asiakkaan_tilausnumero = '{$rulla['tilausnro']}'
                 AND tilaustyyppi = 'N'";
       $result = pupe_query($query);
-      $laskurow = mysql_fetch_assoc($result);
 
-      $kukarow['kesken'] = $laskurow['tunnus'];
+      if (mysql_num_rows($result) != 0) {
 
-      while ($tilausrivi = mysql_fetch_assoc($oresult)) {
+       $laskurow = mysql_fetch_assoc($result);
+       $kukarow['kesken'] = $laskurow['tunnus'];
+       $var = 'P';
+       require "lisaarivi.inc";
 
-        $query = "SELECT tunnus
-                  FROM sarjanumeroseuranta
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND ostorivitunnus = '{$tilausrivi['tunnus']}'
-                  AND myyntirivitunnus = 0";
-        $result = pupe_query($query);
+       $update_query = "UPDATE tilausrivin_lisatiedot SET
+                        juoksu = '{$rulla['juoksu']}',
+                        tilauksen_paino = '{$rulla['tilauksen_paino']}',
+                        asiakkaan_tilausnumero = '{$rulla['tilausnro']}',
+                        asiakkaan_rivinumero = '{$rulla['rivinro']}'
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tilausrivitunnus = '{$lisatty_tun}'";
+       pupe_query($update_query);
 
-        if (mysql_num_rows($result) == 1) {
+       $update_query = "UPDATE tilausrivi
+                        SET var2 = 'OK'
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tunnus = '{$lisatty_tun}'";
+       pupe_query($update_query);
 
-          // haetaan tuotteen tiedot
-          $query = "SELECT *
-                    FROM tuote
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tuoteno = '{$tilausrivi['tuoteno']}'";
-          $tuoteres = pupe_query($query);
+       $update_query = "UPDATE sarjanumeroseuranta
+                        SET myyntirivitunnus = '{$lisatty_tun}'
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND sarjanumero = '{$rulla['sarjanumero']}'";
+       pupe_query($update_query);
 
-          $trow = mysql_fetch_assoc($tuoteres);
-          $kpl = 1;
-          $var = 'P';
-
-          require "lisaarivi.inc";
-
-          // haetaan rivin lisätiedot
-          $query = "SELECT *
-                    FROM tilausrivin_lisatiedot
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tilausrivitunnus = '{$tilausrivi['tunnus']}'";
-          $result = pupe_query($query);
-          $lisatiedot = mysql_fetch_assoc($result);
-
-          $update_query = "UPDATE tilausrivin_lisatiedot SET
-                           juoksu = '{$lisatiedot['juoksu']}',
-                           tilauksen_paino = '{$lisatiedot['tilauksen_paino']}',
-                           asiakkaan_rivinumero = '{$lisatiedot['asiakkaan_rivinumero']}'
-                           WHERE yhtio = '{$kukarow['yhtio']}'
-                           AND tilausrivitunnus = '{$lisatty_tun}'";
-          pupe_query($update_query);
-
-          $update_query = "UPDATE tilausrivi
-                           SET var2 = 'OK'
-                           WHERE yhtio = '{$kukarow['yhtio']}'
-                           AND tunnus = '{$lisatty_tun}'";
-          pupe_query($update_query);
-
-          $update_query = "UPDATE sarjanumeroseuranta
-                           SET myyntirivitunnus = '{$lisatty_tun}'
-                           WHERE yhtio = '{$kukarow['yhtio']}'
-                           AND ostorivitunnus = '{$tilausrivi['tunnus']}'";
-          pupe_query($update_query);
-
-        }
       }
+
+
     }
   }
 }

@@ -279,6 +279,7 @@ if ($view == 'kontituslista') {
       <label for='sarjanumero'>", t("Sarjanumero"), "</label><br>
       <input type='text' id='sarjanumero' name='sarjanumero' style='margin:10px;' />
       <input type='hidden' name='konttiviite' value='{$konttiviite}' />
+      <input type='hidden' name='maxkg' value='{$maxkg}' />
       <br>
       <button name='submit' value='sarjanumero' onclick='submit();' class='button'>", t("OK"), "</button>
     </div>

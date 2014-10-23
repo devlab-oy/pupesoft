@@ -232,7 +232,7 @@ if ($view == 'konttiviite') {
   </form>
 
   <script type='text/javascript'>
-    $(document).ready(function() {
+    $(document).on('touchstart', function(){
       $('#konttiviite').focus();
     });
   </script>";
@@ -266,7 +266,7 @@ if ($view == 'konttiviite_maxkg') {
 
   <script type='text/javascript'>
     $(document).on('touchstart', function(){
-      $('#konttiviite').focus();
+      $('#maxkg').focus();
     });
   </script>";
 }

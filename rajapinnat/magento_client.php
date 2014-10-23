@@ -1475,9 +1475,9 @@ class MagentoClient {
           $value = $erikoisparametri['arvo'];
           // Jos value löytyy asiakas-arraysta, käytetään sitä
           if (isset($asiakas[$value])) {
-            $asiakas_data[$key] = $value;
-            $laskutus_osoite_data[$key] = $value;
-            $toimitus_osoite_data[$key] = $value;
+            $asiakas_data[$key] = $asiakas[$value];
+            $laskutus_osoite_data[$key] = $asiakas[$value];
+            $toimitus_osoite_data[$key] = $asiakas[$value];
           }
         }
       }

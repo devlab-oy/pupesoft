@@ -142,25 +142,14 @@ else {
 
 echo "
 <script type='text/javascript'>
-  $(document).ready(function() {
 
-    $(document).keypress(function(event){
-        var keycode = (event.keyCode ? event.keyCode : event.which);
-        if(keycode == '13'){
-            $('#{$input}').focus();
-        }
+    $(document).on('touchstart', function(){
+      $('#sarjanumero').focus();
     });
 
-
-    var code = e.keyCode || e.which;
-     if(code == 13) { //Enter keycode
-       alert('dfdfd');
-       $('#{$input}').focus();
-     }
-
-  });
-
-
+    $(document).ready(function() {
+      $('#sarjanumero').focus();
+    });
 
 </script>";
 

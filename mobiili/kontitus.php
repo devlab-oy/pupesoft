@@ -285,9 +285,15 @@ if ($view == 'kontituslista') {
   </form>
 
   <script type='text/javascript'>
+
+    $(document).on('touchstart', function(){
+      $('#sarjanumero').focus();
+    });
+
     $(document).ready(function() {
       $('#sarjanumero').focus();
     });
+
   </script>";
 
   echo "<div style='text-align:center;padding:10px;'>";

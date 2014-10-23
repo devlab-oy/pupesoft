@@ -88,9 +88,15 @@ echo "
 </form>
 
 <script type='text/javascript'>
+
+  $(document).on('touchstart', function(){
+    $('#sarjanumero').focus();
+  });
+
   $(document).ready(function() {
     $('#sarjanumero').focus();
   });
+
 </script>";
 
 require 'inc/footer.inc';

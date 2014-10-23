@@ -346,6 +346,10 @@ echo "
     $('#{$view}').focus();
   });
 
+  $(document).ready(function() {
+    $('#{$view}').focus();
+  });
+
 </script>";
 
 require 'inc/footer.inc';

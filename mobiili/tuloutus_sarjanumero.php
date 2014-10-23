@@ -341,15 +341,9 @@ if ($view == 'tuotepaikka') {
 
 echo "
 <script type='text/javascript'>
-
   $(document).on('touchstart', function(){
     $('#{$view}').focus();
   });
-
-  $(document).ready(function() {
-    $('#{$view}').focus();
-  });
-
 </script>";
 
 require 'inc/footer.inc';

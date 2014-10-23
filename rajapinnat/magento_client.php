@@ -97,6 +97,11 @@ class MagentoClient {
   private $_verkkokauppatuotteet_erikoisparametrit = array ();
 
   /**
+   * Asiakkaan erikoisparametrit joilla ylikirjoitetaan arvoja asiakas- ja osoitetiedoista
+   */
+  private $_asiakkaat_erikoisparametrit = array ();
+
+  /**
    * Magentossa käsin hallitut kategoria id:t joita ei poisteta tuotteelta tuotepäivityksessä
    */
   private $_sticky_kategoriat = array ();
@@ -1422,9 +1427,11 @@ class MagentoClient {
     // Asiakas countteri
     $count = 0;
 
+    // Asiakkaiden erikoisparametrit
+    $asiakkaat_erikoisparametrit = $this->_asiakkaat_erikoisparametrit;
+
     // Lisätään asiakkaat ja osoitteet erissä
     foreach ($dnsasiakas as $asiakas) {
-
 
       $asiakasryhma_id = $this->findCustomerGroup(utf8_encode($asiakas['asiakasryhma']));
 
@@ -1461,6 +1468,19 @@ class MagentoClient {
         'company'        => $asiakas['nimi'],
         'is_default_shipping' => true
       );
+
+      if (count($asiakkaat_erikoisparametrit) > 0) {
+        foreach ($asiakkaat_erikoisparametrit as $erikoisparametri) {
+          $key = $erikoisparametri['nimi'];
+          $value = $erikoisparametri['arvo'];
+          // Jos value löytyy asiakas-arraysta, käytetään sitä
+          if (isset($asiakas[$value])) {
+            $asiakas_data[$key] = $value;
+            $laskutus_osoite_data[$key] = $value;
+            $toimitus_osoite_data[$key] = $value;
+          }
+        }
+      }
 
       // Lisätään tai päivitetään asiakas
 
@@ -1705,10 +1725,19 @@ class MagentoClient {
   /**
    * Asettaa verkkokauppatuotteiden erikoisparametrit
    *
-   * @param string  $verkkokauppatuotteet_erikoisparametrit
+   * @param array  $verkkokauppatuotteet_erikoisparametrit
    */
   public function setVerkkokauppatuotteetErikoisparametrit($verkkokauppatuotteet_erikoisparametrit) {
     $this->_verkkokauppatuotteet_erikoisparametrit = $verkkokauppatuotteet_erikoisparametrit;
+  }
+
+  /**
+   * Asettaa verkkokauppa-asiakkaiden erikoisparametrit
+   *
+   * @param array  $asiakkaat_erikoisparametrit
+   */
+  public function setAsiakkaatErikoisparametrit($asiakkaat_erikoisparametrit) {
+    $this->_asiakkaat_erikoisparametrit = $asiakkaat_erikoisparametrit;
   }
 
   /**

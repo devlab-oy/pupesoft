@@ -473,6 +473,8 @@ if (isset($magento_siirretaan_asiakkaat)) {
   $asiakasselectlisa = " avainsana.selitetark as asiakasryhma,
                          asiakkaan_avainsanat.tarkenne magento_tunnus,
                          yhteyshenkilo.nimi yhenk_nimi,
+                         yhteyshenkilo.etunimi yhenk_etunimi,
+                         yhteyshenkilo.sukunimi yhenk_sukunimi,
                          yhteyshenkilo.email yhenk_email,
                          yhteyshenkilo.puh yhenk_puh,";
 
@@ -542,10 +544,12 @@ while ($row = mysql_fetch_array($res)) {
     'laskutus_postino'   => $row["laskutus_postino"],
     'laskutus_postitp'   => $row["laskutus_postitp"],
     'yhenk_nimi'         => $row["yhenk_nimi"],
+    'yhenk_etunimi'      => $row['yhenk_etunimi'], 
+    'yhenk_sukunimi'     => $row['yhenk_sukunimi'],
     'yhenk_email'        => $row["yhenk_email"],
     'yhenk_puh'          => $row["yhenk_puh"],
     'magento_tunnus'     => $row["magento_tunnus"],
-    'asiakasryhma'       => $row['asiakasryhma'],
+    'asiakasryhma'       => $row['asiakasryhma']
   );
 }
 
@@ -849,7 +853,12 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   if (isset($verkkokauppatuotteet_erikoisparametrit) and count($verkkokauppatuotteet_erikoisparametrit) > 0) {
     $magento_client->setVerkkokauppatuotteetErikoisparametrit($verkkokauppatuotteet_erikoisparametrit);
   }
-
+  // Asetetaan custom asiakaskentät. Array joka sisältää jokaiselle erikoisparametrille
+  // array ('nimi' =>'magento_parametrin_nimi', 'arvo' = 'asiakkaan_kentän_nimi_mistä arvo_halutaan') esim. array ('nimi' => 'lastname', 'arvo' => 'yhenk_sukunimi')
+  // näillä arvoilla ylikirjoitetaan asiakkaan tiedot sekä laskutus/toimitusosoitetiedot
+  if (isset($asiakkaat_erikoisparametrit) and count($asiakkaat_erikoisparametrit) > 0) {
+    $magento_client->setAsiakkaatErikoisparametrit($asiakkaat_erikoisparametrit);
+  }
   // Magentossa käsin hallitut kategoriat jotka säilytetään aina tuotepäivityksessä
   if (isset($magento_sticky_kategoriat) and count($magento_sticky_kategoriat) > 0) {
     $magento_client->setStickyKategoriat($magento_sticky_kategoriat);

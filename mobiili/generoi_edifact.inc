@@ -22,10 +22,10 @@ function kontit_rullineen($konttiviite, $maxkg) {
   $query = "SELECT ss.sarjanumero,
             tr.tunnus,
             tr.keratty,
-            tr.toimitettu,
             ss.massa as paino,
             trlt.juoksu,
             trlt.asiakkaan_rivinumero as rivinro,
+            trlt.konttinumero,
             la.sisviesti1 as ohje
             FROM lasku AS la
             JOIN tilausrivi AS tr
@@ -59,6 +59,14 @@ function kontit_rullineen($konttiviite, $maxkg) {
 }
 
 function laheta_sanoma($sanoma){
+
+  if ($sanoma == '') {
+    return false;
+  }
+  else {
+    return true;
+  }
+
   global $kukarow, $ftp_info;
 
   $host = $ftp_info['host'];
@@ -338,6 +346,7 @@ function kontitus_parametrit($rullat_kontissa) {
   $sanomanumero = time();
 
   $parametrit = array(
+    'laji' => 'kontitus',
     'tyyppi' => 'DESADV',
     'lahettajan_ovt' => $yhtiorow['ovttunnus'],
     'vastaanottajan_ovt' => '003708274241',
@@ -351,6 +360,69 @@ function kontitus_parametrit($rullat_kontissa) {
 
   return $parametrit;
 }
+
+
+
+function satamavahvistus_parametrit($konttiviite) {
+  global $kukarow, $yhtiorow;
+
+  $query = "SELECT group_concat(otunnus),
+            matkakoodi
+            FROM laskun_lisatiedot
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND konttiviite = '{$konttiviite}'";
+  $result = pupe_query($query);
+  $tunnukset = mysql_result($result, 0);
+  $matkakoodi = mysql_result($result, 0, 1);
+
+  $kontit = array();
+
+  $query = "SELECT trlt.konttinumero,
+            trlt.sinettinumero,
+            trlt.kontin_kilot
+            FROM tilausrivi
+            JOIN tilausrivin_lisatiedot AS trlt
+              ON trlt.yhtio = tilausrivi.yhtio
+              AND trlt.tilausrivitunnus = tilausrivi.tunnus
+            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+            AND tilausrivi.otunnus IN ({$tunnukset})";
+  $result = pupe_query($query);
+
+  $kontit = array();
+
+  while ($row = mysql_fetch_assoc($result)) {
+    if ($row['kontin_kilot'] == 0) {
+      return false;
+    }
+    if (!isset($kontit[$row['konttinumero']])) {
+
+      $kontit[$row['konttinumero']] = array(
+          'sinettinumero' => $row['sinettinumero'],
+          'paino' => $row['kontin_kilot']
+        );
+    }
+  }
+
+  $sanomaid = "RP" . time();
+  $sanomanumero = time();
+
+  $parametrit = array(
+    'laji' => 'satamavahvistus',
+    'tyyppi' => 'DESADV',
+    'lahettajan_ovt' => $yhtiorow['ovttunnus'],
+    'vastaanottajan_ovt' => '003708274241',
+    'sanomaid' => $sanomaid,
+    'sanomanumero' => $sanomanumero,
+    'kontit' => $kontit,
+    'tilauskoodi' => $konttiviite,
+    'matkakoodi' => $matkakoodi
+  );
+
+  return $parametrit;
+}
+
+
+
 
 function laadi_edifact_sanoma($parametrit) {
   global $kukarow;
@@ -380,6 +452,11 @@ function laadi_edifact_sanoma($parametrit) {
       $assosiaatiokoodi = 'EXTU11';
       $merkityskoodi = '9';
       break;
+    case 'satamavahvistus':
+        $lajikoodi = '122';
+        $assosiaatiokoodi = 'EXPC13';
+        $merkityskoodi = '9';
+        break;
     default:
       return NULL;
       break;
@@ -429,6 +506,12 @@ function laadi_edifact_sanoma($parametrit) {
     $s .= "DTM+413:";
     $s .= date("YmdHi");
     $s .= ":203'";
+    $segmentit++;
+  }
+
+  if ($laji == 'satamavahvistus') {
+    // RFF+VON -segmentti
+    $s .= "RFF+VON:" . $matkakoodi . "'";
     $segmentit++;
   }
 
@@ -513,6 +596,65 @@ function laadi_edifact_sanoma($parametrit) {
     $s .= $varasto_info['koodi2'] . ":::";
     $s .= $varasto_info['koodi3'] . "'";
     $segmentit++;
+  }
+
+  if ($laji == 'satamavahvistus') {
+    // TDT -segmentti pitää vielä selvittää
+    $s .= "TDT+20++1++00370:100:ZZZ:Oy Melship Ab+++V2FN7:103::WES AMELIE:AG'";
+    $segmentit++;
+
+    // LOC -segmentti lähtöpaikka
+    $s .= "LOC+5+FIKTKC::6:KOTKA'";
+    $segmentit++;
+
+    // DTM -segmentti lähtöaika
+    $s .= "DTM+186:";
+    $s .= date("YmdHi");
+    $s .= ":203'";
+    $segmentit++;
+
+    // LOC -segmentti määränpää
+    $s .= "LOC+8+NLRTM::6:Rotterdam+DELTA/EAST:::DELTA/EAST'";
+    $segmentit++;
+
+    // TDT -segmentti jatkokuljetus
+    $s .= "TDT+30++1++::ZZZ+++:::LEVERKUSEN EXPRESS'";
+    $segmentit++;
+
+    // LOC -segmentti määränpäätarkenne
+    $s .= "LOC+8+SADMM::6:Ad Dammam'";
+    $segmentit++;
+
+    foreach ($kontit as $konttiviite => $info) {
+
+      // EQD+CN -segmentti konttinumero
+      $s .= "EQD+CN+" . $konttiviite . "+42GP::86+++5'";
+      $segmentit++;
+
+      // MEA+AAE+ACX -segmentti kontin paino
+      $s .= "MEA+AAE+ACX+KGM:" . $info['paino'] . "'";
+      $segmentit++;
+
+      // MEA+AAE+T -segmentti muu paino
+      $s .= "MEA+AAE+T+KGM:" . $info['paino'] . "'";
+      $segmentit++;
+
+      // SEL -segmentti sinettinumero
+      $s .= "SEL+" . $info['sinettinumero'] . "+TO:::STEVECO'";
+      $segmentit++;
+
+      // HAN -segmentti ??
+      $s .= "HAN+33::86'";
+      $segmentit++;
+
+      // FTX -segmentti ??
+      $s .= "FTX+ZSP++220402::ZZZ'";
+      $segmentit++;
+
+    }
+
+
+
   }
 
   if ($tyyppi == 'RECADV') {

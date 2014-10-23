@@ -124,7 +124,7 @@ else{
 
 */
 
-  echo "<hr>
+  echo "
   <font class='head'>".t("Testaus")."</font>
 
   <br><br>

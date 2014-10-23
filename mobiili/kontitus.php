@@ -265,8 +265,8 @@ if ($view == 'konttiviite_maxkg') {
   </form>
 
   <script type='text/javascript'>
-    $(document).ready(function() {
-      $('#maxkg').focus();
+    $(document).on('touchstart', function(){
+      $('#konttiviite').focus();
     });
   </script>";
 }

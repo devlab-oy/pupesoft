@@ -1563,7 +1563,7 @@ if (!isset($from_kaikkikorj)) {
     echo "<input type='Submit' value='".t("Etsi")."'></form>";
 
     $haku = "";
-    $laskuindex = "";
+    $laskuindex = "tila_index";
 
     $kerayspvm = "{$vv}-{$kk}-{$pp}";
     $where = "";
@@ -1609,8 +1609,6 @@ if (!isset($from_kaikkikorj)) {
       $rivilisat  = " and tilausrivi.tyyppi in ('W','M')
               and tilausrivi.toimitettu = ''
               and tilausrivi.varattu != 0";
-
-      $laskuindex = "tila_index";
     }
     elseif ($toim == "KORJAA") {
       $query     = "SELECT lasku.ytunnus, lasku.tila, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
@@ -1628,8 +1626,6 @@ if (!isset($from_kaikkikorj)) {
       if ($haku == "") {
         $lisa .= " and lasku.luontiaika >= date_sub(curdate(), INTERVAL 90 DAY) ";
       }
-
-      $laskuindex = "tila_index";
     }
     elseif ($toim == "TUTKAA") {
       $query     = "SELECT lasku.ytunnus, lasku.tila, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
@@ -1647,8 +1643,6 @@ if (!isset($from_kaikkikorj)) {
       if ($haku == "") {
         $lisa .= " and lasku.luontiaika >= date_sub(curdate(), INTERVAL 90 DAY) ";
       }
-
-      $laskuindex = "tila_index";
     }
     else {
       $query     = "SELECT lasku.ytunnus, lasku.nimi, lasku.nimitark, lasku.osoite, lasku.postino, lasku.postitp,
@@ -1666,8 +1660,6 @@ if (!isset($from_kaikkikorj)) {
       if ($haku == "") {
         $lisa .= " and lasku.luontiaika >= date_sub(curdate(), INTERVAL 180 DAY) ";
       }
-
-      $laskuindex = "tila_index";
 
       // Jos valmistuksessa k‰ytet‰‰n tilakoodeja, n‰ytet‰‰n pelk‰st‰‰n tarkistettu
       // tilassa olevat valmistukset

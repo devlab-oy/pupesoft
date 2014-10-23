@@ -226,7 +226,7 @@ if (!function_exists("tee_jt_tilaus")) {
         // joten joinataan laskun lisätiedot vain kun ei siirtolista
         if ($otsikkorivi["tila"] != 'G') {
           $lisatjoin = "JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = lasku.yhtio
-                              AND laskun_lisatiedot.otunnus = lasku.tunnus";
+                          AND laskun_lisatiedot.otunnus = lasku.tunnus";
 
           $lisatehdot = "AND laskun_lisatiedot.laskutus_nimi     = '$lisatiedot_row[laskutus_nimi]'
                          AND laskun_lisatiedot.laskutus_nimitark = '$lisatiedot_row[laskutus_nimitark]'

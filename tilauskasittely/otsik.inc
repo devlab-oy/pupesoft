@@ -1008,7 +1008,7 @@ if ($tila == "" and !isset($jatka)) {
 
     echo "</select></td></tr>";
 
-    if ($asiarow['laji'] != 'H') {
+    if ($yhtiorow['myyntitilaus_ytunnus_syotto'] == 'K' and $asiarow['laji'] != 'H') {
       echo "<tr>";
       echo "<td valign='top'>",t("Ytunnus"),":</td>";
       echo "<td><input type='text' name='ytunnus' value='{$srow['ytunnus']}' /></td>";
@@ -1105,7 +1105,7 @@ if ($tila == "" and !isset($jatka)) {
         <input type='hidden' name='tyojono'              value = '$tyojono'>
         <input type='hidden' name='liitostunnus'            value = '$srow[liitostunnus]'>";
 
-    if ($asiarow['laji'] == 'H') {
+    if ($yhtiorow['myyntitilaus_ytunnus_syotto'] == '' or $asiarow['laji'] == 'H') {
       echo "<input type='hidden' name='ytunnus'              value = '$srow[ytunnus]'>";
     }
 

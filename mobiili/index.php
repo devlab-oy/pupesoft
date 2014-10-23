@@ -14,7 +14,7 @@ if (empty($browkieli)) $browkieli = 'fi';
 echo "<meta name='viewport' content='width=250,height=246, user-scalable=no, maximum-scale=1'>\n";
 echo "<link rel='stylesheet' type='text/css' href='kasipaate.css' />\n";
 echo "<body>";
-echo "<div class='header'><h1>", t("PÄÄVALIKKO", $browkieli), "</h1></div>";
+echo "<div class='header'><h1>P&Auml;&Auml;VALIKKO</h1></div>";
 
 echo "<div class='main valikko'>";
 if (tarkista_oikeus("mobiili/siirto.php")) {
@@ -50,7 +50,7 @@ if (tarkista_oikeus("mobiili/lusaus.php")) {
 }
 
 if (tarkista_oikeus("mobiili/hylky.php")) {
-  echo "<p><a href='hylky.php' class='button'>", t("Hylkää rulla", $browkieli), "</a></p>";
+  echo "<p><a href='hylky.php' class='button'>Hylk&auml;&auml; rulla</a></p>";
 }
 
 if (tarkista_oikeus("mobiili/tuki.php")) {

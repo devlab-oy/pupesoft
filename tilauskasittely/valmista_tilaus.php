@@ -1625,6 +1625,7 @@ if (!isset($from_kaikkikorj)) {
 
       if ($haku == "") {
         $lisa .= " and lasku.luontiaika >= date_sub(curdate(), INTERVAL 90 DAY) ";
+        $laskuindex = "yhtio_tila_luontiaika";
       }
     }
     elseif ($toim == "TUTKAA") {
@@ -1642,6 +1643,7 @@ if (!isset($from_kaikkikorj)) {
 
       if ($haku == "") {
         $lisa .= " and lasku.luontiaika >= date_sub(curdate(), INTERVAL 90 DAY) ";
+        $laskuindex = "yhtio_tila_luontiaika";
       }
     }
     else {

@@ -33,7 +33,7 @@
 // $tuotenimitys    --> tuotteen nimitys jos nimityksen syˆtˆ on yhtiˆll‰ sallittu
 // $tuotenimitys_force  --> tuotteen nimitys muutetaan systemitasolla
 // $asiakaskieli    --> kantaan p‰ivitett‰v‰t tekstit asiakkaan kielell‰
-echo "asiakkaan kieli: $asiakaskieli <br><br>";
+
 // Palauttaa arrayn $lisatyt_rivit1 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si myyntihaarassa
 // Palauttaa arrayn $lisatyt_rivit2 jossa on kaikkien rivien tunnukset jotka t‰‰ systeemi lis‰si puute-jt-osto-haarassa
 

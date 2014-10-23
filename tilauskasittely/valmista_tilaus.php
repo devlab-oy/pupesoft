@@ -1023,7 +1023,7 @@ if (!isset($from_kaikkikorj)) {
                 WHEN 'D' THEN 4
                 WHEN 'O' THEN 5
                 WHEN 'V' THEN 6
-              END,
+              END CASE,
               tunnus";
     $presult = pupe_query($query);
     $riveja = mysql_num_rows($presult);

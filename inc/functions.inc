@@ -20279,6 +20279,23 @@ if (!function_exists("pupesoft_sahkoposti")) {
 
     // Laitetaan php-resque jonoon
     if ($GLOBALS["pupe_resque"] === TRUE) {
+
+      $resque_liitteet = array();
+
+      if (!empty($liitteet)) {
+        foreach ($liitteet as $liite) {
+
+          $attachement_filename    = isset($liite["filename"]) ? $liite["filename"] : "";
+          $attachement_newfilename = isset($liite["newfilename"]) ? $liite["newfilename"] : "";
+          $attachement_ctype       = isset($liite["ctype"]) ? strtoupper($liite["ctype"]) : "";
+
+          $resque_liitteet[] = array("filename"    => utf8_encode($attachement_filename),
+                                     "newfilename" => utf8_encode($attachement_newfilename),
+                                     "ctype"       => utf8_encode($attachement_ctype));
+        }
+      }
+
+
       $resque_args = array(
               'user'          => $kukarow["eposti"],
               'error_message' => utf8_encode(t("Sähköpostin lähetys epäonnistui").": $email_to"),
@@ -20288,7 +20305,7 @@ if (!function_exists("pupesoft_sahkoposti")) {
               'cc'            => $email_cc,
               'subject'       => utf8_encode($email_subject),
               'body'          => utf8_encode($email_body),
-              'attachements'  => $liitteet);
+              'attachements'  => $resque_liitteet);
 
       Resque::enqueue('PupeEmail', 'EmailWorker', $resque_args);
       return TRUE;

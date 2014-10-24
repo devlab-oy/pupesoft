@@ -434,7 +434,7 @@ class MagentoClient {
       // Päivitetään tuotteen kieliversiot kauppanäkymäkohtaisesti
       // jos nämä on asetettu konffissa
 
-      if (isset($tuetut_kieliversiot) 
+      if (isset($tuetut_kieliversiot)
         and count($tuetut_kieliversiot) > 0) {
 
         try {
@@ -459,7 +459,7 @@ class MagentoClient {
               $this->_proxy->call($this->_session, 'catalog_product.update',
                 array(
                   $tuote['tuoteno'],
-                  $tuotteen_kauppakohtainen_data, 
+                  $tuotteen_kauppakohtainen_data,
                   $kauppatunnus
                 )
               );
@@ -487,7 +487,7 @@ class MagentoClient {
               $this->_proxy->call($this->_session, 'catalog_product.update',
                 array(
                   $tuote['tuoteno'],
-                  $tuotteen_kauppakohtainen_data, 
+                  $tuotteen_kauppakohtainen_data,
                   $kauppatunnus
                 )
               );
@@ -1546,7 +1546,7 @@ class MagentoClient {
 
       }
       catch (Exception $e) {
-         $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' osoitteiden haku epäonnistui " . print_r("Asiakkaan magento_tunnus: {$asiakas['magento_tunnus']}", true), $e);   
+         $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' osoitteiden haku epäonnistui " . print_r("Asiakkaan magento_tunnus: {$asiakas['magento_tunnus']}", true), $e);
       }
 
       if (isset($laskutus_osoite_data['firstname']) and !empty($laskutus_osoite_data['firstname'])) {

@@ -2844,7 +2844,7 @@ if (!function_exists("tulosta_lasku")) {
 
         // l‰hetet‰‰n meili
         $kutsu = t("Lasku", $kieli)." ".$laskurow["laskunro"];
-        $liite = $pdf_laskufilenimi;          
+        $liite = $pdf_laskufilenimi;
 
         // l‰hetet‰‰n cc aina talhal/postittaja osoitteeseen
         if ($yhtiorow["sahkopostilasku_cc_email"] != "") {

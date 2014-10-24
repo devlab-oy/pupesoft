@@ -1158,7 +1158,7 @@ if (!function_exists("apix_invoice_put_file")) {
         $apixerrorreport .= ob_get_clean();
 
         if (mb_detect_encoding($apixerrorreport, 'UTF-8', true) !== FALSE) {
-    			$apixerrorreport = utf8_decode($apixerrorreport);
+          $apixerrorreport = utf8_decode($apixerrorreport);
         }
 
         $params = array(

@@ -132,7 +132,7 @@ if ($tee == "TULOSTA") {
 
       //poistetaan tmp file samantien kuleksimasta...
       unlink($filenimi.".ps");
-      
+
       $tee = "";
     }
   }

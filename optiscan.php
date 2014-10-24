@@ -228,6 +228,8 @@ elseif ($sanoma == "GetPicks") {
                     tila 	      = 'L',
                     alatila     = 'A',
                     lahetepvm   = now(),
+                    hyvak3      = '{$kukarow['kuka']}',
+                    h3time      = now(),
                     kerayslista = '{$kerayslistatunnus}'
                     WHERE yhtio = '{$kukarow['yhtio']}'
                     AND tunnus in ({$otunnukset})
@@ -240,6 +242,8 @@ elseif ($sanoma == "GetPicks") {
             $query = "UPDATE lasku SET
                       alatila     = 'A',
                       lahetepvm   = now(),
+                      hyvak3      = '{$kukarow['kuka']}',
+                      h3time      = now(),
                       kerayslista = '{$kerayslistatunnus}'
                       WHERE yhtio = '{$kukarow['yhtio']}'
                       AND tunnus in ({$otunnukset})

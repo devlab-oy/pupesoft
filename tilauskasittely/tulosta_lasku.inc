@@ -2917,7 +2917,7 @@ if (!function_exists("tulosta_lasku")) {
         $liite           = $pdf_laskufilenimi;
         $sahkoposti_cc   = "";
         $content_subject = "";
-        $content_body    = "MOIKKA MOI MÖI MÄI\n";
+        $content_body    = "";
 
         include "inc/sahkoposti.inc";
       }
@@ -2974,7 +2974,6 @@ if (!function_exists("tulosta_lasku")) {
       }
     }
 
-    // poistetaan tmp file samantien kuleksimasta...
     unset($pdf_lasku);
     unset($page_lasku);
   }

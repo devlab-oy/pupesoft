@@ -131,8 +131,8 @@ if ($tee == "TULOSTA") {
       echo "<font class='message'>".t("Tuotepaikkalistaus tulostuu")."!</font><br><br>";
 
       //poistetaan tmp file samantien kuleksimasta...
-      system("rm -f $filenimi");
-      system("rm -f ".$filenimi.".ps");
+      unlink($filenimi.".ps");
+      
       $tee = "";
     }
   }

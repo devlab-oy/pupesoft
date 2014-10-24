@@ -1504,12 +1504,7 @@ if (!function_exists('print_pdf_tarjous')) {
       echo t("Tarjous tulostuu")."...<br>";
 
       if ($kukarow["extranet"] == '') {
-        if ($mista == 'koontitarjous.php') {
-          require "inc/sahkoposti.inc";
-        }
-        else {
-          require "../inc/sahkoposti.inc";
-        }
+        require "inc/sahkoposti.inc";        
       }
       else {
         require "sahkoposti.inc";
@@ -1523,9 +1518,6 @@ if (!function_exists('print_pdf_tarjous')) {
       echo t("Tarjous tulostuu")."...<br>";
       $line = exec("$komento $pdf_tarjousfilenimi", $output, $returnvalue);
     }
-
-    //poistetaan tmp file samantien kuleksimasta...
-    system("rm -f $pdf_tarjousfilenimi");
   }
 }
 

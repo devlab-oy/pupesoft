@@ -445,7 +445,7 @@ if (!function_exists("pupesoft_flock")) {
       flock($backupflock, LOCK_UN);
     }
 
-    $flock = fopen($lockfile, "c");
+    $GLOBALS["flock_fp"] = $flock = fopen($lockfile, "c");
 
     if (! @flock($flock, LOCK_EX | LOCK_NB)) {
       if ($locktime > 0 and mktime() - filemtime($lockfile) >= $locktime) {
@@ -16985,7 +16985,7 @@ if (!function_exists('arrcmp')) {
 
 if (!function_exists("release_tee_keraysera")) {
   function release_tee_keraysera() {
-    global $flock, $kukarow, $yhtiorow;
+    global $kukarow, $yhtiorow;
 
     // Vapautetaan muutkin käsittelyyn otetut tilaukset
     $query = "UPDATE lasku
@@ -17005,7 +17005,7 @@ if (!function_exists("release_tee_keraysera")) {
     }
 
     // Vapautetaan flocki
-    flock($flock, LOCK_UN);
+    flock($GLOBALS["flock_fp"], LOCK_UN);
   }
 }
 

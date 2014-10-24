@@ -628,12 +628,12 @@ while ($tietue = fgets($fd)) {
           $query = "SELECT asiakas.*
                     FROM asiakas
                     JOIN asiakkaan_avainsanat ON asiakas.yhtio = asiakkaan_avainsanat.yhtio
-                      AND asiakas.tunnus = asiakkaan_avainsanat.liitostunnus
+                      AND asiakas.tunnus                 = asiakkaan_avainsanat.liitostunnus
                       AND asiakkaan_avainsanat.avainsana = 'magento_tunnus'
-                      AND asiakkaan_avainsanat.tarkenne = '{$ot_verkkokauppa_asiakasnro}'
-                    WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-                    AND asiakas.toim_ovttunnus not in ('','0')
-                    AND asiakas.laji not in ('R','P')";
+                      AND asiakkaan_avainsanat.tarkenne  = '{$ot_verkkokauppa_asiakasnro}'
+                    WHERE asiakas.yhtio                  = '{$kukarow['yhtio']}'
+                    AND asiakas.toim_ovttunnus           not in ('','0')
+                    AND asiakas.laji                     not in ('R','P')";
           $result = pupe_query($query);
 
           if (mysql_num_rows($result) == 1) {

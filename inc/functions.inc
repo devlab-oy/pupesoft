@@ -11635,11 +11635,11 @@ if (!function_exists("lue_kurssit")) {
       }
 
       $query = "UPDATE valuu SET
-                kurssi                 = round(1 / $kurssi, 9),
-                muutospvm              = now(),
-                muuttaja               = '{$kukarow['kuka']}'
-                WHERE yhtio            = '{$kukarow['yhtio']}'
-                AND nimi               = '$valuutta'";
+                kurssi      = round(1 / $kurssi, 9),
+                muutospvm   = now(),
+                muuttaja    = '{$kukarow['kuka']}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND nimi    = '$valuutta'";
       $result = pupe_query($query);
 
       // tämä valuutta on nyt päivitetty!

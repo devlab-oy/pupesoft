@@ -207,7 +207,7 @@ elseif ($sanoma == "GetPicks") {
 
       // Ei saatu lukkoa järkevässä ajassa
       if ($erat === FALSE) {
-        $response = "N,,,,,,,,,,,,,1,Keräyserien luonnissa ruuhkaa. Yritä pian uudelleen.";
+        $response = "N,,,,,,,,,,,,,1,Keräyserien luonnissa ruuhkaa. Yritä pian uudelleen.\r\n";
       }
 
       if (isset($erat['tilaukset']) and count($erat['tilaukset']) > 0) {

@@ -20295,7 +20295,6 @@ if (!function_exists("pupesoft_sahkoposti")) {
         }
       }
 
-
       $resque_args = array(
               'user'          => $kukarow["eposti"],
               'error_message' => utf8_encode(t("Sähköpostin lähetys epäonnistui").": $email_to"),

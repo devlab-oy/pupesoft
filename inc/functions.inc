@@ -17806,7 +17806,7 @@ if (!function_exists("tee_keraysera")) {
 
     $_fixed_main_array_count = count($fixed_main_array);
 
-    for ($_main_i = 1; $_fixed_main_array_count > $_main_i; $_main_i++) {
+    for ($_main_i = 1; $_fixed_main_array_count >= $_main_i; $_main_i++) {
 
       $key = $_main_i;
       $tilaukset = $fixed_main_array[$key];
@@ -18293,34 +18293,41 @@ if (!function_exists("tee_keraysera")) {
           $pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] = 0;
           $pakkaukset[$kaytettava_pakkaus]['kaytetty_paino'] = 0;
 
+          # Katsotaan nurkan takaa onko parempia nippuja tarjolla mitkä mahtuisi erään
+          if (isset($kukarow['debugstring'])) {
+            $kukarow['debugstring'] .= "(E1001): Katsotaan nurkan takaa<br>\n";
+          }
+
+          for ($_nurkka_i = ($_main_i + 1); $_fixed_main_array_count >= $_nurkka_i; $_nurkka_i++) {
+            $_til_koko = $kerailyniput_tiedot[$_nurkka_i]['tilauksen_koko'];
+            $_til_koko_chk = $eran_koko_pintaala + $_til_koko;
+
+            if ($_til_koko_chk <= $keraysvyohyketiedot['max_keraysera_pintaala']) {
+
+              if (isset($kukarow['debugstring'])) {
+                $kukarow['debugstring'] .= "(E1002): Löydettiin lupaava nippu ($_nurkka_i)<br>\n";
+              }
+
+              $_main_i = $_nurkka_i - 1;
+
+              $ii++;
+              $ed_asiakas = $kerailyniput_tiedot[$key]['nimi'];
+              $ed_otunnus = $tuoterow['otunnus'];
+              $ed_ohjausmerkki = $ohjausmerkki[$tuoterow['otunnus']];
+              $ed_jiivee = $jiivee[$tuoterow['otunnus']];
+
+              break 2;
+            }
+          }
+
+          if (isset($kukarow['debugstring'])) {
+            $kukarow['debugstring'] .= "(E1003): Ei löytynyt nurkan takaa<br>\n";
+          }
+
           if (($kaytettava_pakkaus != '' and ($eran_koko_pintaala + ($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])) > $keraysvyohyketiedot['max_keraysera_pintaala'])
             or ($kaytettava_pakkaus == '' and $eran_koko_pintaala > 0 and ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $tuoterow['y_maara']) > $keraysvyohyketiedot['max_keraysera_pintaala']))) {
 
             if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1000): Tuleva pakkaus ylittäisi JOKA TAPAUKSESSA keräyserän sallitun pinta-alan ($eran_koko_pintaala cm2 + (pakkauksen ".($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])." cm2 tai tuotteen $tuoterow[pisin_sorttaus] * $tuoterow[lyhin_sorttaus] * $tuoterow[y_maara]) > $keraysvyohyketiedot[max_keraysera_pintaala] cm2). Keräyserä valmis!<br>\n";
-
-            # Katsotaan nurkan takaa onko parempia nippuja tarjolla mitkä mahtuisi erään
-            if (isset($kukarow['debugstring'])) {
-              $kukarow['debugstring'] .= "(E1001): Katsotaan nurkan takaa<br>\n";
-            }
-
-            for ($_nurkka_i = $_main_i; $_fixed_main_array_count > $_nurkka_i; $_nurkka_i++) {
-              $_til_koko = $kerailyniput_tiedot[$_nurkka_i]['tilauksen_koko'];
-              $_til_koko_chk = $eran_koko_pintaala + $_til_koko;
-
-              if ($_til_koko_chk > $keraysvyohyketiedot['max_keraysera_pintaala']) {
-
-                if (isset($kukarow['debugstring'])) {
-                  $kukarow['debugstring'] .= "(E1002): Löydettiin lupaava nippu ($_nurkka_i)<br>\n";
-                }
-
-                $_main_i = $_nurkka_i;
-                break 2;
-              }
-            }
-
-            if (isset($kukarow['debugstring'])) {
-              $kukarow['debugstring'] .= "(E1003): Ei löytynyt nurkan takaa<br>\n";
-            }
 
             $era_valmis = true;
             break 2;

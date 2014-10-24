@@ -427,6 +427,7 @@ else {
 
           $asiakas .= $lassurivi['toim_nimi']."<br>";
           $asiakas .= $lassurivi['toim_postitp']."<br>";
+          $asiakas .= $lassurivi['asiakkaan_tilausnumero']."<br>";
           $asiakas .= "<br><br>";
         }
 

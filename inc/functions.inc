@@ -17116,7 +17116,7 @@ if (!function_exists("tee_keraysera")) {
 
                UNION
 
-               (SELECT
+               (SELECT SQL_NO_CACHE
                lasku.prioriteettinro as prioriteetti,
                0 as erotus,
                lasku.ohjausmerkki,
@@ -20493,8 +20493,8 @@ if (!function_exists("pupesoft_sahkoposti")) {
 
         // Tarkistetaan $liite arrayn oikeellisuus
         $attachement_filename    = isset($liite["filename"]) ? $liite["filename"] : "";
-        $attachement_newfilename  = isset($liite["newfilename"]) ? $liite["newfilename"] : "";
-        $attachement_ctype      = isset($liite["ctype"]) ? strtoupper($liite["ctype"]) : "";
+        $attachement_newfilename = isset($liite["newfilename"]) ? $liite["newfilename"] : "";
+        $attachement_ctype       = isset($liite["ctype"]) ? strtoupper($liite["ctype"]) : "";
 
         // Selvitet‰‰n ctype jos ei annettu, PHP version mukaan
         if ($attachement_ctype == "") {

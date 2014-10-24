@@ -2844,7 +2844,7 @@ if (!function_exists("tulosta_lasku")) {
 
         // lähetetään meili
         $kutsu = t("Lasku", $kieli)." ".$laskurow["laskunro"];
-        $liite = $pdf_laskufilenimi;
+        $liite = $pdf_laskufilenimi;          
 
         // lähetetään cc aina talhal/postittaja osoitteeseen
         if ($yhtiorow["sahkopostilasku_cc_email"] != "") {
@@ -2914,10 +2914,10 @@ if (!function_exists("tulosta_lasku")) {
           $kutsu .= ", ".trim($laskurow["nimi"]);
         }
 
-        $liite         = $pdf_laskufilenimi;
-        $sahkoposti_cc     = "";
-        $content_subject   = "";
-        $content_body     = "";
+        $liite           = $pdf_laskufilenimi;
+        $sahkoposti_cc   = "";
+        $content_subject = "";
+        $content_body    = "MOIKKA MOI MÖI MÄI\n";
 
         include "inc/sahkoposti.inc";
       }
@@ -2975,7 +2975,6 @@ if (!function_exists("tulosta_lasku")) {
     }
 
     // poistetaan tmp file samantien kuleksimasta...
-    unlink($pdf_laskufilenimi);
     unset($pdf_lasku);
     unset($page_lasku);
   }

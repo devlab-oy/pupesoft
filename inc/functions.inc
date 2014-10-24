@@ -1046,8 +1046,8 @@ if (!function_exists("apix_invoice_put_file")) {
     global $kukarow, $yhtiorow, $pupe_root_polku;
 
     // siirretään laskutiedosto operaattorille
-    //$url           = "https://test-api.apix.fi/invoices";
-    $url             = "https://api.apix.fi/invoices";
+    $url           = "https://test-api.apix.fi/invoices";
+    //$url             = "https://api.apix.fi/invoices";
     $transferkey     = $yhtiorow['apix_avain'];
     $transferid      = $yhtiorow['apix_tunnus'];
     $software        = "Pupesoft";
@@ -1146,16 +1146,14 @@ if (!function_exists("apix_invoice_put_file")) {
         $apix_ulos .= "Tilakoodi: ".$xml->StatusCode."<br>\n";
 
         // Rakennetaan sähköpostiin lähetettävä virheviesti
-        $apixerrorreport .= "{$yhtiorow["yhtio"]} Apix laskutuksen virheviesti! \n";
-        $apixerrorreport .= " $apixzipfile ";
+        $apixerrorreport .= t("Apix laskutuksen virheviesti");
+        $apixerrorreport .= "!\n";
+        $apixerrorreport .= t("Lähetetyn tiedoston nimi");
+        $apixerrorreport .= ": $apixzipfile \n\n";
+        $apixerrorreport .= $xml->FreeText[1];
         $apixerrorreport .= "\n\n";
-        $apixerrorreport .= $real_url;
+        $apixerrorreport .= $xml->Value[0];
         $apixerrorreport .= "\n\n";
-        $apixerrorreport .= $ch;
-        $apixerrorreport .= "\n\n";
-        ob_start();
-        var_dump($xml);
-        $apixerrorreport .= ob_get_clean();
 
         if (mb_detect_encoding($apixerrorreport, 'UTF-8', true) !== FALSE) {
     			$apixerrorreport = utf8_decode($apixerrorreport);

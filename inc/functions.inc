@@ -18366,11 +18366,11 @@ if (!function_exists("tee_keraysera")) {
               $order_chk_row = mysql_fetch_assoc($order_chk_res);
 
               // pakkauskoon valitsemisperiaate
-              if ($tuoterow['myynti_era'] > 1) {
-                $kerayspakkauskoko = $tuoterow['myynti_era'];
-              }
-              elseif ($order_chk_row['osto_era'] > 1) {
+              if ($order_chk_row['osto_era'] > 1) {
                 $kerayspakkauskoko = $order_chk_row['osto_era'];
+              }
+              elseif ($tuoterow['myynti_era'] > 1) {
+                $kerayspakkauskoko = $tuoterow['myynti_era'];
               }
               else {
                 $kerayspakkauskoko = 1;

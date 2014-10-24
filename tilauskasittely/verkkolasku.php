@@ -2995,9 +2995,6 @@ else {
               $line = exec("$vientierittelykomento $pdffilenimi");
             }
 
-            //poistetaan tmp file samantien kuleksimasta...
-            system("rm -f $pdffilenimi");
-
             if ($silent == "") $tulos_ulos .= t("Vientierittely tulostuu")."...<br>\n";
 
             unset($Xpdf);
@@ -3064,9 +3061,6 @@ else {
               $content_body       = "";
               include "inc/sahkoposti.inc"; // sanotaan include eik‰ require niin ei kuolla
             }
-
-            //poistetaan tmp file samantien kuleksimasta...
-            system("rm -f $pdffilenimi");
 
             if ($silent == "") $tulos_ulos .= t("Vientierittely l‰hetet‰‰n")."...<br>\n";
 

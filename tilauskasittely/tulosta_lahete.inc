@@ -4298,9 +4298,6 @@ if (!function_exists('print_pdf_lahete')) {
         }
       }
     }
-
-    // poistetaan tmp file samantien kuleksimasta...
-    system("rm -f $pdffilenimi");
   }
 }
 

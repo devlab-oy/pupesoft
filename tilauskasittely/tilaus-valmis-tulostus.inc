@@ -547,7 +547,6 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
                 alatila     = 'B'
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tila    = 'C'
-                AND alatila = '$tilausalatila'
                 and tunnus  in ($tilausnumeroita)";
     }
     else {

@@ -249,13 +249,13 @@ if (!function_exists("asiakasalennustarkista")) {
       $and = '';
 
       if ($chasiakas_ryhma != '') $and .= " and asiakas_ryhma = '$chasiakas_ryhma'";
-      if ($chytunnus != '')     $and .= " and ytunnus = '$chytunnus'";
-      if ($chpiiri != '')     $and .= " and piiri = '$chpiiri'";
-      if ($chsegmentti > 0)     $and .= " and asiakas_segmentti = '$chsegmentti'";
-      if ($chastunn > 0)       $and .= " and asiakas = '$chastunn'";
+      if ($chytunnus != '')       $and .= " and ytunnus = '$chytunnus'";
+      if ($chpiiri != '')         $and .= " and piiri = '$chpiiri'";
+      if ($chsegmentti > 0)       $and .= " and asiakas_segmentti = '$chsegmentti'";
+      if ($chastunn > 0)          $and .= " and asiakas = '$chastunn'";
 
-      if ($chryhma != '')     $and .= " and ryhma = '$chryhma'";
-      if ($chtuoteno != '')     $and .= " and tuoteno = '$chtuoteno'";
+      if ($chryhma != '')         $and .= " and ryhma = '$chryhma'";
+      if ($chtuoteno != '')       $and .= " and tuoteno = '$chtuoteno'";
       if ($chalennuslaji == "" or $chalennuslaji == 0) $chalennuslaji = 1;
 
       $chminkpl = (int) $chminkpl;

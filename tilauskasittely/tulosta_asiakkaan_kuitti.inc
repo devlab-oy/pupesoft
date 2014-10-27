@@ -177,13 +177,13 @@ function hae_myyntilasku($laskunro) {
             asiakas.kieli AS asiakkaan_kieli
             FROM lasku
             LEFT JOIN kuka ON (kuka.tunnus = lasku.myyja
-              AND kuka.yhtio = lasku.yhtio)
+              AND kuka.yhtio     = lasku.yhtio)
             LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
               AND asiakas.tunnus = lasku.liitostunnus)
-            WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
-            AND lasku.tila     = 'U'
-            AND lasku.alatila  = 'X'
-            AND lasku.laskunro = '{$laskunro}'";
+            WHERE lasku.yhtio    = '{$kukarow['yhtio']}'
+            AND lasku.tila       = 'U'
+            AND lasku.alatila    = 'X'
+            AND lasku.laskunro   = '{$laskunro}'";
 
   $result = pupe_query($query);
 
@@ -197,8 +197,8 @@ function hae_maksupaatetapahtumat($laskunro) {
             FROM lasku
             INNER JOIN maksupaatetapahtumat ON (maksupaatetapahtumat.yhtio = lasku.yhtio
               AND maksupaatetapahtumat.tilausnumero = lasku.tunnus)
-            WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
-            AND lasku.laskunro = '{$laskunro}'";
+            WHERE lasku.yhtio                       = '{$kukarow['yhtio']}'
+            AND lasku.laskunro                      = '{$laskunro}'";
 
   $result = pupe_query($query);
 
@@ -222,7 +222,7 @@ function hae_tilausrivit($laskunro) {
             tilausrivi.alv,
             tilausrivi.rivihinta,
             round(tilausrivi.hinta * if ('{$yhtiorow['alv_kasittely']}' != '' and
-              tilausrivi.alv < 500,(1+tilausrivi.alv/100), 1) *
+              tilausrivi.alv         < 500,(1+tilausrivi.alv/100), 1) *
               (tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa},{$yhtiorow['hintapyoristys']})
               AS rivihinta_verollinen,
             tilausrivi.tuoteno,
@@ -232,10 +232,10 @@ function hae_tilausrivit($laskunro) {
             FROM lasku
             INNER JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
               AND tilausrivi.otunnus = lasku.tunnus)
-            WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
-            AND lasku.tila     = 'L'
-            AND lasku.alatila  = 'X'
-            AND lasku.laskunro = '{$laskunro}'";
+            WHERE lasku.yhtio        = '{$kukarow['yhtio']}'
+            AND lasku.tila           = 'L'
+            AND lasku.alatila        = 'X'
+            AND lasku.laskunro       = '{$laskunro}'";
 
   $result = pupe_query($query);
 

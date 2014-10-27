@@ -83,10 +83,10 @@ function hae_tuotteet_hintalappuja_varten($otunnus, $kukarow) {
             if(tuote.tarrakerroin > 0, tuote.tarrakerroin, 1) AS tarrakerroin
             FROM tilausrivi
             INNER JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
-            AND tilausrivi.tuoteno = tuote.tuoteno)
+            AND tilausrivi.tuoteno       = tuote.tuoteno)
             WHERE tilausrivi.uusiotunnus = '{$otunnus}'
-            AND tilausrivi.yhtio  = '{$kukarow['yhtio']}'
-            AND tilausrivi.tyyppi = 'O'";
+            AND tilausrivi.yhtio         = '{$kukarow['yhtio']}'
+            AND tilausrivi.tyyppi        = 'O'";
 
   $result = pupe_query($query);
 

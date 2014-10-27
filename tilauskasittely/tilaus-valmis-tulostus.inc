@@ -99,6 +99,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
               and tila    = 'C'
               and alatila = 'B'
               and tunnus  in ({$tilausnumeroita})";
+    pupe_query($query);
   }
   else {
     $query = "UPDATE lasku SET
@@ -573,6 +574,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tila    = 'C'
                 and tunnus  in ($tilausnumeroita)";
+      pupe_query($query);
     }
     else {
       $query = "UPDATE lasku SET

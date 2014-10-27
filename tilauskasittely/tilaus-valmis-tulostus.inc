@@ -587,43 +587,15 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
       $ei_pakkaamoa_lisaviesti = ", sisviesti2 = concat(sisviesti2, ' $kukarow[kuka] ".t("halusi tilauksen pakkaamolokeroihin")." ".tv1dateconv(date("Y-m-d H:i:s"))."')";
     }
 
-    if ($toim == 'VASTAANOTA_REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
-      $query = "UPDATE lasku SET
-                lahetepvm   = now(),
-                hyvak3      = '{$kukarow['kuka']}',
-                h3time      = now(),
-                kerayslista = '$kerayslistatunnus'
-                $ei_pakkaamoa_lisaviesti
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tila    = 'C'
-                and tunnus  in ($tilausnumeroita)";
-      pupe_query($query);
-    }
-    else {
-      $query = "UPDATE lasku SET
-                lahetepvm   = now(),
-                hyvak3      = '{$kukarow['kuka']}',
-                h3time      = now(),
-                kerayslista = '$kerayslistatunnus'
-                $ei_pakkaamoa_lisaviesti
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tunnus  in ($tilausnumeroita)
-                AND tila    = 'L'";
-      pupe_query($query);
-
-      if ($yhtiorow['kerayserat'] != '' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
-        $query = "UPDATE lasku SET
-                  lahetepvm   = now(),
-                  hyvak3      = '{$kukarow['kuka']}',
-                  h3time      = now(),
-                  kerayslista = '$kerayslistatunnus'
-                  $ei_pakkaamoa_lisaviesti
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tunnus  in ($tilausnumeroita)
-                  AND tila    = 'G'";
-        pupe_query($query);
-      }
-    }
+    $query = "UPDATE lasku SET
+              lahetepvm   = now(),
+              hyvak3      = '{$kukarow['kuka']}',
+              h3time      = now(),
+              kerayslista = '$kerayslistatunnus'
+              $ei_pakkaamoa_lisaviesti
+              WHERE yhtio = '$kukarow[yhtio]'
+              and tunnus  in ($tilausnumeroita)";
+    pupe_query($query);
   }
 }
 else {

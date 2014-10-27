@@ -758,7 +758,7 @@ if ($tee == 'M' and isset($generoi)) {
               $netto         = "";
               $var        = "";
               $korvaavakielto    = 1;
-              $perhekielto    = $lapsituotteet == "" ? 1 : 0;
+              $perhekielto    = $lapsituotteet == "" ? 1 : "";
               $orvoteikiinnosta  = "EITOD";
               $varataan_saldoa = "";
               $kpl2 = "";

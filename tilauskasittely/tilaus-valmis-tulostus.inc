@@ -551,7 +551,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     }
     else {
       $query = "UPDATE lasku SET
-                tila = 'N',
+                tila        = 'N',
                 alatila     = 'A'
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tila    = 'L'

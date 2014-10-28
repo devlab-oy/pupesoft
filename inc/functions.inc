@@ -18342,23 +18342,23 @@ if (!function_exists("tee_keraysera")) {
             );
 
             list(
-              $inner_main_array,
-              $pisin_tuote,
-              $pisin_tuote_per_asiakas,
-              $eran_koko_chk,
-              $eran_koko_pintaala_chk,
-              $eran_paino_chk
+              $_inner_main_array,
+              $_pisin_tuote,
+              $_pisin_tuote_per_asiakas,
+              $_eran_koko_chk,
+              $_eran_koko_pintaala_chk,
+              $_eran_paino_chk
             ) = hae_tuotteet_ja_pisin_mitta($args);
 
             $kaytettava_pakkaus = valitse_pakkaus(
               $keraysvyohyketiedot,
               $pakkaukset,
-              $pisin_tuote,
-              $pisin_tuote_per_asiakas,
+              $_pisin_tuote,
+              $_pisin_tuote_per_asiakas,
               $eran_koko,
               $eran_paino,
-              $eran_koko_chk,
-              $eran_paino_chk,
+              $_eran_koko_chk,
+              $_eran_paino_chk,
               $eran_koko_pintaala
             );
 

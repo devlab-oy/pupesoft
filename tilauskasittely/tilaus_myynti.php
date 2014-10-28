@@ -9344,7 +9344,7 @@ function loytyyko_myyja_tunnuksella($tunnus) {
   $query  = "SELECT COUNT(*) AS maara
              FROM kuka
              WHERE yhtio = '{$kukarow['yhtio']}'
-             AND myyja = '{$tunnus}' AND myyja != ''";
+             AND myyja   = '{$tunnus}' AND myyja != ''";
   $result = pupe_query($query);
 
   $maara = mysql_fetch_assoc($result);

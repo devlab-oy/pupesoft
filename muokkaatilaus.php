@@ -992,11 +992,11 @@ else {
                    count(distinct lasku.tunnus) kpl
                    FROM lasku use index (tila_index)
                    JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio
-                     AND tilausrivi.otunnus = lasku.tunnus
-                     AND tilausrivi.tyyppi != 'D')
-                   WHERE lasku.yhtio = '$kukarow[yhtio]'
-                     AND lasku.tila IN ('L', 'N')
-                     AND lasku.alatila != 'X'";
+                     AND tilausrivi.otunnus  = lasku.tunnus
+                     AND tilausrivi.tyyppi  != 'D')
+                   WHERE lasku.yhtio         = '$kukarow[yhtio]'
+                     AND lasku.tila          IN ('L', 'N')
+                     AND lasku.alatila      != 'X'";
       $sumresult = pupe_query($sumquery);
       $sumrow = mysql_fetch_assoc($sumresult);
     }
@@ -1065,12 +1065,12 @@ else {
                    count(distinct lasku.tunnus) kpl
                    FROM lasku use index (tila_index)
                    JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio
-                     AND tilausrivi.otunnus = lasku.tunnus
-                     AND tilausrivi.tyyppi != 'D')
-                   WHERE lasku.yhtio   = '{$kukarow['yhtio']}'
-                   AND lasku.tila      IN ('L', 'N')
-                   AND lasku.alatila  != 'X'
-                   AND lasku.clearing != 'EXTENNAKKO'
+                     AND tilausrivi.otunnus  = lasku.tunnus
+                     AND tilausrivi.tyyppi  != 'D')
+                   WHERE lasku.yhtio         = '{$kukarow['yhtio']}'
+                   AND lasku.tila            IN ('L', 'N')
+                   AND lasku.alatila        != 'X'
+                   AND lasku.clearing       != 'EXTENNAKKO'
                    {$sumhaku}";
       $sumresult = pupe_query($sumquery);
       $sumrow = mysql_fetch_assoc($sumresult);

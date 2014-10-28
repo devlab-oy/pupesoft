@@ -186,7 +186,7 @@ if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
       echo file_get_contents($pdffilenimi);
 
       //poistetaan tmp file samantien kuleksimasta...
-      system("rm -f $pdffilenimi");
+      unlink($pdffilenimi);
     }
 
     $tuoteno = '';

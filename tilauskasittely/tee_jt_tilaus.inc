@@ -222,6 +222,9 @@ if (!function_exists("tee_jt_tilaus")) {
           $atlisa = "";
         }
 
+        $lisatjoin  = "";
+        $lisatehdot = "";
+
         // Laskun lisätietoja ei ole siirtolistoilla,
         // joten joinataan laskun lisätiedot vain kun ei siirtolista
         if ($otsikkorivi["tila"] != 'G') {

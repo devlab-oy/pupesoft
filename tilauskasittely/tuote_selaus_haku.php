@@ -295,8 +295,8 @@ if (!empty($variaatio)) {
     echo "<td>{$tuote["nimitys"]}</td>";
     echo "<td>{$tuote["osasto"]}<br/>{$tuote["try"]}</td>";
 
-    $tuotteen_myyntihinta = tuotteen_myyntihinta($yhtiorow, $tuote, 1);
-    echo "<td>" . hintapyoristys($tuotteen_myyntihinta) . " {$yhtiorow["valkoodi"]}</td>";
+    piirra_hinta($tuote, $oleasrow, $valuurow, $vari, $classmidl, $hinta_rajaus, $poistetut,
+                 $lisatiedot);
 
     $yhtiot = hae_yhtiot();
 
@@ -1568,86 +1568,8 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
         echo "<td valign='top' class='$vari' $classmidl>$row[osasto]<br>$row[try]</td>";
       }
 
-      if ($kukarow['hinnat'] >= 0 and ($verkkokauppa == "" or $kukarow["kuka"] != "www")) {
-
-        $myyntihinta = hintapyoristys($row["myyntihinta"]). " $yhtiorow[valkoodi]";
-
-        if ($kukarow["extranet"] != "" and $kukarow["naytetaan_asiakashinta"] != "") {
-          list($hinta, $netto, $ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($oleasrow, $row, 1, '', '', '');
-          $myyntihinta_echotus = $hinta * generoi_alekentta_php($ale_kaikki, 'M', 'kerto');
-          $myyntihinta = hintapyoristys($myyntihinta_echotus)." $alehinta_val";
-        }
-        elseif ($kukarow["extranet"] != "") {
-          // jos kyseess‰ on extranet asiakas yritet‰‰n n‰ytt‰‰ kaikki hinnat oikeassa valuutassa
-          if ($oleasrow["valkoodi"] != $yhtiorow["valkoodi"]) {
-
-            $myyntihinta = hintapyoristys($row["myyntihinta"])." $yhtiorow[valkoodi]";
-
-            $query = "SELECT *
-                      from hinnasto
-                      where yhtio  = '$kukarow[yhtio]'
-                      and tuoteno  = '$row[tuoteno]'
-                      and valkoodi = '$oleasrow[valkoodi]'
-                      and laji     = ''
-                      and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-                      order by ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
-                      limit 1";
-            $olhires = pupe_query($query);
-
-            if (mysql_num_rows($olhires) == 1) {
-              $olhirow     = mysql_fetch_assoc($olhires);
-              $myyntihinta = hintapyoristys($olhirow["hinta"]) . " $olhirow[valkoodi]";
-            }
-            elseif ($valuurow["kurssi"] != 0) {
-              $myyntihinta = hintapyoristys(laskuval($row["myyntihinta"], $valuurow["kurssi"])) .
-                " $oleasrow[valkoodi]";
-            }
-          }
-        }
-        else {
-          $query = "SELECT distinct valkoodi, maa
-                    from hinnasto
-                    where yhtio = '$kukarow[yhtio]'
-                    and tuoteno = '$row[tuoteno]'
-                    and laji    = ''
-                    order by maa, valkoodi";
-          $hintavalresult = pupe_query($query);
-
-          while ($hintavalrow = mysql_fetch_assoc($hintavalresult)) {
-
-            // katotaan onko tuotteelle valuuttahintoja
-            $query = "SELECT *
-                      from hinnasto
-                      where yhtio  = '$kukarow[yhtio]'
-                      and tuoteno  = '$row[tuoteno]'
-                      and valkoodi = '$hintavalrow[valkoodi]'
-                      and maa      = '$hintavalrow[maa]'
-                      and laji     = ''
-                      and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-                      order by ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
-                      limit 1";
-            $hintaresult = pupe_query($query);
-
-            while ($hintarow = mysql_fetch_assoc($hintaresult)) {
-              $myyntihinta .= "<br>$hintarow[maa]: ".hintapyoristys($hintarow["hinta"])." $hintarow[valkoodi]";
-            }
-          }
-        }
-
-        echo "<td valign='top' class='$vari' align='right' $classmidl nowrap>";
-
-        if ($hinta_rajaus != "") {
-          echo '<font style="text-decoration:line-through;">'.hintapyoristys($row["myymalahinta"]).' '.$yhtiorow["valkoodi"].'</font></br>';
-        }
-
-        echo ($poistetut !="" and $kukarow["extranet"] != "") ? " <font class='green'>$myyntihinta</font>" : $myyntihinta;
-
-        if ($lisatiedot != "" and $kukarow["extranet"] == "") {
-          echo "<br>".hintapyoristys($row["nettohinta"])." $yhtiorow[valkoodi]";
-        }
-
-        echo "</td>";
-      }
+      piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_rajaus, $poistetut,
+                   $lisatiedot);
 
       if ($lisatiedot != "" and $kukarow["extranet"] == "") {
         echo "<td valign='top' class='$vari' $classmidl>$row[aleryhma]<br>$row[status]</td>";
@@ -2418,5 +2340,118 @@ function piirra_nayta_variaatiot_nappula($parametri_variaatio) {
     echo "<a href='?variaatio={$parametri_variaatio["selite"]}' onclick='{$new_window}'>" .
       t("N‰yt‰ variaatiot") .
       "</a>";
+  }
+}
+
+function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_rajaus, $poistetut,
+                      $lisatiedot) {
+  global $kukarow, $yhtiorow, $verkkokauppa;
+
+  if ($kukarow['hinnat'] >= 0 and ($verkkokauppa == "" or $kukarow["kuka"] != "www")) {
+    $myyntihinta = hintapyoristys($row["myyntihinta"]) . " $yhtiorow[valkoodi]";
+
+    if ($kukarow["extranet"] != "" and $kukarow["naytetaan_asiakashinta"] != "") {
+      list($hinta,
+        $netto,
+        $ale_kaikki,
+        $alehinta_alv,
+        $alehinta_val) = alehinta($oleasrow, $row, 1, '', '', '');
+
+      $myyntihinta_echotus = $hinta * generoi_alekentta_php($ale_kaikki, 'M', 'kerto');
+      $myyntihinta         = hintapyoristys($myyntihinta_echotus) . " $alehinta_val";
+    }
+    elseif ($kukarow["extranet"] != "") {
+      // jos kyseess‰ on extranet asiakas yritet‰‰n n‰ytt‰‰ kaikki hinnat oikeassa valuutassa
+      if ($oleasrow["valkoodi"] != $yhtiorow["valkoodi"]) {
+
+        $myyntihinta = hintapyoristys($row["myyntihinta"]) . " $yhtiorow[valkoodi]";
+
+        $query = "SELECT *
+                  FROM hinnasto
+                  WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND tuoteno = '{$row["tuoteno"]}'
+                  AND valkoodi = '{$oleasrow["valkoodi"]}'
+                  AND laji = ''
+                  AND (
+                    (alkupvm <= current_date and if(loppupvm = '0000-00-00',
+                                                    '9999-12-31',
+                                                    loppupvm) >= current_date)
+                    or (alkupvm = '0000-00-00' and loppupvm = '0000-00-00'))
+                  ORDER BY ifnull(to_days(current_date) - to_days(alkupvm), 9999999999999)
+                  LIMIT 1";
+
+        $olhires = pupe_query($query);
+
+        if (mysql_num_rows($olhires) == 1) {
+          $olhirow     = mysql_fetch_assoc($olhires);
+          $myyntihinta = hintapyoristys($olhirow["hinta"]) . " $olhirow[valkoodi]";
+        }
+        elseif ($valuurow["kurssi"] != 0) {
+          $myyntihinta = hintapyoristys(laskuval($row["myyntihinta"], $valuurow["kurssi"])) .
+            " $oleasrow[valkoodi]";
+        }
+      }
+    }
+    else {
+      $query = "SELECT DISTINCT valkoodi,
+                maa
+                FROM hinnasto
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tuoteno = '$row[tuoteno]'
+                AND laji = ''
+                ORDER BY maa, valkoodi";
+
+      $hintavalresult = pupe_query($query);
+
+      while ($hintavalrow = mysql_fetch_assoc($hintavalresult)) {
+        // katotaan onko tuotteelle valuuttahintoja
+        $query = "SELECT *
+                  FROM hinnasto
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND tuoteno = '$row[tuoteno]'
+                  AND valkoodi = '$hintavalrow[valkoodi]'
+                  AND maa = '$hintavalrow[maa]'
+                  AND laji = ''
+                  AND (
+                    (alkupvm <= current_date and if(loppupvm = '0000-00-00',
+                                                    '9999-12-31',
+                                                    loppupvm) >= current_date)
+                    or (alkupvm = '0000-00-00' and loppupvm = '0000-00-00'))
+                  ORDER BY ifnull(to_days(current_date) - to_days(alkupvm), 9999999999999)
+                  LIMIT 1";
+
+        $hintaresult = pupe_query($query);
+
+        while ($hintarow = mysql_fetch_assoc($hintaresult)) {
+          $myyntihinta .= "<br>$hintarow[maa]: " .
+            hintapyoristys($hintarow["hinta"]) .
+            " $hintarow[valkoodi]";
+        }
+      }
+    }
+
+    echo "<td valign='top' class='$vari' align='right' $classmidl nowrap>";
+
+    if ($hinta_rajaus != "") {
+      echo '<font style="text-decoration:line-through;">' .
+        hintapyoristys($row["myymalahinta"]) .
+        ' '
+        .
+        $yhtiorow["valkoodi"] .
+        '</font></br>';
+    }
+
+    if (($poistetut != "" and $kukarow["extranet"] != "")) {
+      echo " <font class='green'>$myyntihinta</font>";
+    }
+    else {
+      echo $myyntihinta;
+    }
+
+    if ($lisatiedot != "" and $kukarow["extranet"] == "") {
+      echo "<br>" . hintapyoristys($row["nettohinta"]) . " $yhtiorow[valkoodi]";
+    }
+
+    echo "</td>";
   }
 }

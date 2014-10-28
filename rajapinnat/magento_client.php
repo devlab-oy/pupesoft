@@ -434,7 +434,7 @@ class MagentoClient {
       // Päivitetään tuotteen kieliversiot kauppanäkymäkohtaisesti
       // jos nämä on asetettu konffissa
 
-      if (isset($tuetut_kieliversiot) 
+      if (isset($tuetut_kieliversiot)
         and count($tuetut_kieliversiot) > 0) {
 
         try {
@@ -459,7 +459,7 @@ class MagentoClient {
               $this->_proxy->call($this->_session, 'catalog_product.update',
                 array(
                   $tuote['tuoteno'],
-                  $tuotteen_kauppakohtainen_data, 
+                  $tuotteen_kauppakohtainen_data,
                   $kauppatunnus
                 )
               );
@@ -487,7 +487,7 @@ class MagentoClient {
               $this->_proxy->call($this->_session, 'catalog_product.update',
                 array(
                   $tuote['tuoteno'],
-                  $tuotteen_kauppakohtainen_data, 
+                  $tuotteen_kauppakohtainen_data,
                   $kauppatunnus
                 )
               );
@@ -1384,9 +1384,9 @@ class MagentoClient {
                 liitetiedostot.filetype,
                 liitetiedostot.filename
                 FROM liitetiedostot
-                WHERE liitetiedostot.yhtio = '{$kukarow['yhtio']}'
-                AND liitetiedostot.liitostunnus = '{$tunnus}'
-                AND liitetiedostot.liitos = 'tuote'
+                WHERE liitetiedostot.yhtio         = '{$kukarow['yhtio']}'
+                AND liitetiedostot.liitostunnus    = '{$tunnus}'
+                AND liitetiedostot.liitos          = 'tuote'
                 AND liitetiedostot.kayttotarkoitus = 'TK'
                 ORDER BY liitetiedostot.jarjestys DESC,
                 liitetiedostot.tunnus DESC";
@@ -1546,7 +1546,7 @@ class MagentoClient {
 
       }
       catch (Exception $e) {
-         $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' osoitteiden haku epäonnistui " . print_r("Asiakkaan magento_tunnus: {$asiakas['magento_tunnus']}", true), $e);   
+         $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' osoitteiden haku epäonnistui " . print_r("Asiakkaan magento_tunnus: {$asiakas['magento_tunnus']}", true), $e);
       }
 
       if (isset($laskutus_osoite_data['firstname']) and !empty($laskutus_osoite_data['firstname'])) {
@@ -1610,7 +1610,7 @@ class MagentoClient {
                 tuotteen_avainsanat
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tuoteno = '{$tuotenumero}'
-                AND laji IN ('nimitys','kuvaus')";
+                AND laji    IN ('nimitys','kuvaus')";
       $result = pupe_query($query);
 
       while ($avainsana = mysql_fetch_assoc($result)) {

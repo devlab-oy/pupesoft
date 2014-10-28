@@ -1115,7 +1115,7 @@ if (!function_exists('tyomaarays_print_pdf')) {
       echo t("Työmääräys tulostuu")."...<br>";
 
       if ($kukarow["extranet"] == '') {
-        require "../inc/sahkoposti.inc";
+        require "inc/sahkoposti.inc";
       }
       else {
         require "sahkoposti.inc";
@@ -1129,9 +1129,6 @@ if (!function_exists('tyomaarays_print_pdf')) {
       echo t("Työmääräys tulostuu")."...<br>";
       $line = exec("$komento $pdffilenimi", $output, $returnvalue);
     }
-
-    //poistetaan tmp file samantien kuleksimasta...
-    system("rm -f $pdffilenimi");
   }
 }
 

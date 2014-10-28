@@ -589,8 +589,6 @@ if ($tee == "TULOSTA" and mysql_num_rows($saldoresult) > 0 ) {
     $ctype = "PDF";
     $kutsu = "inventointipoikkeamat-".date("Y-m-d");
     require "inc/sahkoposti.inc";
-
-    system("rm -f ".$filenimi.".pdf");
   }
   else {
     //käännetään kaunniksi
@@ -600,8 +598,8 @@ if ($tee == "TULOSTA" and mysql_num_rows($saldoresult) > 0 ) {
   echo "<br>".t("Inventointipoikkeamalista tulostuu")."!<br><br>";
 
   //poistetaan tmp file samantien kuleksimasta...
-  system("rm -f ".$filenimi.".ps");
-  system("rm -f $filenimi");
+  unlink($filenimi.".ps");
+  unlink($filenimi);
 }
 
 if ($tee == "TULOSTAEXCEL" and mysql_num_rows($saldoresult) > 0 ) {

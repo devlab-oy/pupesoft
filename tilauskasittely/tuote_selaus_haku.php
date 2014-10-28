@@ -253,7 +253,7 @@ if (!empty($variaatio)) {
               AND tuotteen_avainsanat.yhtio  = tuote.yhtio
               AND tuotteen_avainsanat.selite = '{$variaatio}')
             WHERE tuote.yhtio                = '{$kukarow['yhtio']}'
-            AND tuote.tuotetyyppi NOT IN ('A', 'B')
+            AND tuote.tuotetyyppi            NOT IN ('A', 'B')
             {$kieltolisa}
             {$extra_poislisa}
             {$poislisa}";

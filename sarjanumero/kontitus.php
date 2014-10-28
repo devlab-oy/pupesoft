@@ -42,7 +42,32 @@ if (isset($submit)) {
                   AND trlt.tilausrivitunnus = tilausrivi.tunnus
                 WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
                 AND laskun_lisatiedot.konttiviite = '{$konttiviite}'";
-      $result = pupe_query($query);
+
+
+      if ($muutos == 'muutos' ) {
+
+        $result = pupe_query($query);
+
+        while ($rulla = mysql_fetch_assoc($result)) {
+
+          if ($rulla['toimitettu'] == '') {
+
+            $uquery = "UPDATE tilausrivi SET
+                      keratty = '',
+                      kerattyaika = '0000-00-00 00:00:00'
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus = '{$rulla['tunnus']}'";
+            pupe_query($uquery);
+
+            $uquery = "UPDATE tilausrivin_lisatiedot SET
+                      konttinumero = ''
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tilausrivitunnus = '{$rulla['tunnus']}'";
+            pupe_query($uquery);
+
+          }
+        }
+      }
 
       $yliajo = false;
 
@@ -51,6 +76,8 @@ if (isset($submit)) {
       $kontissa = false;
       $ei_kontissa = false;
       $kontitettu = false;
+
+      $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {
         $rullia_loytyy = false;
@@ -366,7 +393,8 @@ if ($view == 'konttiviite') {
       <div style='display:inline-block; margin:6px;'>
       <form method='post' action=''>
         <input type='hidden' name='konttiviite' value='{$konttiviite}' />
-        <button name='submit' value='muuta' onclick='submit();' class='{$luokka}'>" . t("Muuta kontitusta") . "</button>
+        <input type='hidden' name='muutos' value='muutos' />
+        <button name='submit' value='konttiviite' onclick='submit();' class='{$luokka}'>" . t("Muuta kontitusta") . "</button>
       </form>
       </div>";
   }
@@ -507,13 +535,20 @@ if ($view == 'kontituslista') {
 
   echo "<div style='text-align:center; padding:10px; width:700px; margin:0 auto; overflow:auto;'>";
 
+
+  foreach ($kontitetut as $rulla) {
+    $kontitusinfo = explode("/", $rulla['konttinumero']);
+    $konttinumero = $kontitusinfo[0];
+    $kontit[$konttinumero] = $kontit[$konttinumero] + $rulla['paino'];
+  }
+
   foreach ($kontit as $key => $kontti) {
 
     if ($key == $aktiivinen_kontti) {
       $luokka = "button aktiivi";
     }
     else {
-     $luokka = "button";
+      $luokka = "button";
     }
 
     echo "
@@ -522,12 +557,10 @@ if ($view == 'kontituslista') {
         <input type='hidden' name='aktiivinen_kontti' value='{$key}' />
         <input type='hidden' name='konttiviite' value='{$konttiviite}' />
         <input type='hidden' name='maxkg' value='{$maxkg}' />
-        <button name='submit' value='konttivalinta' onclick='submit();' class='{$luokka}'>" . t("Kontti") ."-". $key . "</button>
+        <button name='submit' value='konttivalinta' onclick='submit();' class='{$luokka}'>" . t("Kontti") ."-". $key . " (" . $kontti . "kg)</button>
       </form>
       </div>";
-
     }
-
 
     echo "<div>";
 

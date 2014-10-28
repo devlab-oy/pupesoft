@@ -53,7 +53,7 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
       $kilot = 0;
     }
 
-    $kontit[$kontti] = 'X';
+    $kontit[$kontti] = 0;
     $kilot = $kilot + $rulla['paino'];
 
     if ($rulla['konttinumero'] != '') {

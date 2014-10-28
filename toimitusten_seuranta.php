@@ -1,7 +1,7 @@
 <?php
 
 require "inc/parametrit.inc";
-require 'mobiili/generoi_edifact.inc';
+require 'sarjanumero/generoi_edifact.inc';
 
 if (isset($task) and $task == 'hae_parametrit') {
   $parametrit = satamavahvistus_parametrit($konttiviite);

@@ -1158,7 +1158,7 @@ if (!function_exists("apix_invoice_put_file")) {
         $apixerrorreport .= ob_get_clean();
 
         if (mb_detect_encoding($apixerrorreport, 'UTF-8', true) !== FALSE) {
-    			$apixerrorreport = utf8_decode($apixerrorreport);
+          $apixerrorreport = utf8_decode($apixerrorreport);
         }
 
         $params = array(
@@ -11635,11 +11635,11 @@ if (!function_exists("lue_kurssit")) {
       }
 
       $query = "UPDATE valuu SET
-                kurssi                 = round(1 / $kurssi, 9),
-                muutospvm              = now(),
-                muuttaja               = '{$kukarow['kuka']}'
-                WHERE yhtio            = '{$kukarow['yhtio']}'
-                AND nimi               = '$valuutta'";
+                kurssi      = round(1 / $kurssi, 9),
+                muutospvm   = now(),
+                muuttaja    = '{$kukarow['kuka']}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND nimi    = '$valuutta'";
       $result = pupe_query($query);
 
       // tämä valuutta on nyt päivitetty!
@@ -20274,7 +20274,40 @@ if (!function_exists("pupesoft_sahkoposti")) {
 
     // To ja Subject pitää olla kunnossa, että voidaan jatkaa
     if ($email_to == "" or $email_subject == "") {
-      return false;
+      return FALSE;
+    }
+
+    // Laitetaan php-resque jonoon
+    if ($GLOBALS["pupe_resque"] === TRUE) {
+
+      $resque_liitteet = array();
+
+      if (!empty($liitteet)) {
+        foreach ($liitteet as $liite) {
+
+          $attachement_filename    = isset($liite["filename"]) ? $liite["filename"] : "";
+          $attachement_newfilename = isset($liite["newfilename"]) ? $liite["newfilename"] : "";
+          $attachement_ctype       = isset($liite["ctype"]) ? strtoupper($liite["ctype"]) : "";
+
+          $resque_liitteet[] = array("filename"    => utf8_encode($attachement_filename),
+                                     "newfilename" => utf8_encode($attachement_newfilename),
+                                     "ctype"       => utf8_encode($attachement_ctype));
+        }
+      }
+
+      $resque_args = array(
+              'user'          => $kukarow["eposti"],
+              'error_message' => utf8_encode(t("Sähköpostin lähetys epäonnistui").": $email_to"),
+              'from'          => $yhtiorow["postittaja_email"],
+              'from_name'     => utf8_encode($yhtiorow["nimi"]),
+              'to'            => $email_to,
+              'cc'            => $email_cc,
+              'subject'       => utf8_encode($email_subject),
+              'body'          => utf8_encode($email_body),
+              'attachements'  => $resque_liitteet);
+
+      Resque::enqueue('PupeEmail', 'EmailWorker', $resque_args);
+      return TRUE;
     }
 
     $content = "";
@@ -20402,23 +20435,9 @@ if (!function_exists("pupesoft_sahkoposti")) {
     // Vikassa boundissa pitää olla -- lopussa.
     $content .= "--\n";
 
-    // Laitetaan php-resque jonoon
-    if ($GLOBALS["pupe_resque"] === TRUE) {
-      $resque_args = array(
-              'to'      => $email_to,
-              'subject' => mb_encode_mimeheader($email_subject, "ISO-8859-1", "Q"),
-              'content' => $content,
-              'header'  => $header,
-              'from'    => "-f {$yhtiorow["postittaja_email"]}");
-
-      Resque::enqueue('pupe_email', 'pupesoft_email_worker', $resque_args);
-      return TRUE;
-    }
-    else {
-      $boob = mail($email_to, mb_encode_mimeheader($email_subject, "ISO-8859-1", "Q"), $content, $header, "-f {$yhtiorow["postittaja_email"]}");
-      if ($boob === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $email_to<br>";
-      return $boob;
-    }
+    $boob = mail($email_to, mb_encode_mimeheader($email_subject, "ISO-8859-1", "Q"), $content, $header, "-f {$yhtiorow["postittaja_email"]}");
+    if ($boob === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $email_to<br>";
+    return $boob;
   }
 }
 

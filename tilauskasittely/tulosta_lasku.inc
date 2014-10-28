@@ -2952,10 +2952,10 @@ if (!function_exists("tulosta_lasku")) {
           $kutsu .= ", ".trim($laskurow["nimi"]);
         }
 
-        $liite         = $pdf_laskufilenimi;
-        $sahkoposti_cc     = "";
-        $content_subject   = "";
-        $content_body     = "";
+        $liite           = $pdf_laskufilenimi;
+        $sahkoposti_cc   = "";
+        $content_subject = "";
+        $content_body    = "";
 
         include "inc/sahkoposti.inc";
       }
@@ -3012,8 +3012,6 @@ if (!function_exists("tulosta_lasku")) {
       }
     }
 
-    // poistetaan tmp file samantien kuleksimasta...
-    unlink($pdf_laskufilenimi);
     unset($pdf_lasku);
     unset($page_lasku);
   }

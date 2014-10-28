@@ -545,14 +545,6 @@ $fh = fopen($pdffilenimi, "w");
 if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
 fclose($fh);
 
-//testaukseen voi myös laittaa sähköpostiin
-//$liite = $pdffilenimi;
-//$aihe = "Kolliosoitelappu";
-//require("inc/sahkoposti.inc");
-
-//itse print komento...
-// itse print komento...
-
 if ($oslapp == 'email') {
   $liite = $pdffilenimi;
   $kutsu = "Osoitelappu";
@@ -576,7 +568,5 @@ elseif ($oslapp != '' and $oslapp != 'edi') {
   echo t("Osoitelappu tulostuu")."...<br>";
 }
 
-//poistetaan tmp file samantien kuleksimasta...
-system("rm -f $pdffilenimi");
 $pdffilenimi='';
 $tilausnumeroita="";

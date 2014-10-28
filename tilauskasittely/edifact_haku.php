@@ -47,6 +47,51 @@ if ($task == 'R2') {
 }
 
 
+if ($task == 'B4') {
+
+  $sanoma = "UNB+UNOC:2+003708274241:30+003706664131:30+140916:0839+KM0006++++++'UNH+1+IFTMBF:D:97B:UN:EXWL12'BGM+335+MATKA123+9'DTM+137:201409160839:203'RFF+VON:KV0002'RFF+CU:TILAUS-0003:1'TDT+20++1++MSCFI+++H3JN:103::MSC IRIS'LOC+5+FIKTKC::86:Kotka Mussalo'DTM+133:201411010000:203'LOC+8+BEANR::86:ANTWERPEN'DTM+132:201411080000:203'RFF+VON:MATKA123'TDT+30++1++MSCFI+++3FUT9:103::MSC LAURENCE'LOC+5++BEANR::86'DTM+133:201412010000:203'LOC+8+AUSYD::86'DTM+132:201412020000:203'RFF+VON:JATKO001'NAD+OS+003708274241:100++Kotkamills Oy:Norskankatu 6:FI-48101:FI+++++FI'NAD+CZ+003708274241:100'NAD+FX+SPOTPRESS++SPOTPRESS+24-26 Lilian Fowler Place+Marrickville++NSW 2204+AU'NAD+TR+STEVECO'GID++2:RL'LOC+20+BEANR:16'PIA+1+4810 22:HS'FTX+ZSM++LOLO'FTX+AAA+++PAPER'FTX+PRD+++Solaris (New) 1.55 57 g/m2'FTX+TRA+++max netto paino20to/ kontti (24to/kontti brutto)'FTX+TRA+++1  x 20?'kontti'MEA+AAE+CT+RO:1'MEA+AAE+WD+MMT:1050'MEA+AAE+DI+MMT:1250'MEA+AAE+G+KGM:30000'RFF+CU:TILAUS-0003:1'EQD+CN++C20'EQN+2'RFF+AKC:KV0002'NAD+CW+MSCFI'NAD+ZST+FIMUSSALO'UNT+40+1'UNZ+1+KM0006'";
+
+  kasittele_bookkaussanoma($sanoma);
+
+}
+
+
+
+
+
+if ($task == 'R3') {
+
+  $sanoma ="UNB+UNOC:2+003708274241:30+003706800420:30+141024:1032+KM0007++++++'UNH+1+DESADV:D:97B:UN:EXWL15'BGM+15+RK0003+9'DTM+137:201410241020:203'NAD+FX+STEVECO::86++Steveco+Steveco+Kotka++48101+FI'NAD+CZ+003708274241:100++Kotkamills Oy'TDT+10++3++RP::86:RP Logistics Oy+++XYP-555'LOC+5+FIKTKM::86:KOTKA'DTM+180:201410300000:203'DTM+143:201410300605:203'LOC+8+FIKTKC::86:KOTKA, MUSSALO'DTM+132:201410101600:203'CPS+MOL'PAC+1++RL'MEA+AAE+AAL+KGM:2000'MEA+AAE+G+KGM:2000'MEA+AAE+WD+MMT:1050'MEA+AAE+DI+MMT:1250'PCI+16+MERINOPA-EMAIL 08.06.2013-'LIN+1'PIA+1+4810 55:HS'NAD+OS+003708274241:100++Kotkamills Oy'NAD+SB+SEINDIA::86++SE INDIA'NAD+FX+MERINOPA::86++MERINOPA'NAD+CZ+003708274241:100++Kotkamills Oy'TDT+20++1+++++D5DM7:::CHARLOTTA B'FTX+AAA+++PAPER'RFF+CU:TILAUS-0003:1'RFF+VON:MATKA123'DTM+ZEL:201407010000:203'LOC+5+FIKTKM::86:Kotka warehouse'LOC+8+FIKTKC::86:Kotka'LOC+20+MERINOPA::86:HARYANA'CPS+PKG'PAC+999++RL'MEA+AAE+G+KGM:1000'MEA+AAE+AAL+KGM:1000'MEA+AAE+DI+MMT:1250'MEA+AAE+WD+MMT:1050'PCI+999'GIN+ZUN+0016'GIN+ZPI+1'UNT+117+1'UNZ+1+KM0007'";
+
+  kasittele_rahtikirjasanoma($sanoma);
+
+}
+
+if ($task == 'R4') {
+
+  $sanoma ="UNB+UNOC:2+003708274241:30+003706800420:30+141024:1032+KM0008++++++'UNH+1+DESADV:D:97B:UN:EXWL15'BGM+15+RK0004+9'DTM+137:201410241020:203'NAD+FX+STEVECO::86++Steveco+Steveco+Kotka++48101+FI'NAD+CZ+003708274241:100++Kotkamills Oy'TDT+10++3++RP::86:RP Logistics Oy+++XYP-555'LOC+5+FIKTKM::86:KOTKA'DTM+180:201410300000:203'DTM+143:201410300605:203'LOC+8+FIKTKC::86:KOTKA, MUSSALO'DTM+132:201410101600:203'CPS+MOL'PAC+1++RL'MEA+AAE+AAL+KGM:2000'MEA+AAE+G+KGM:2000'MEA+AAE+WD+MMT:1050'MEA+AAE+DI+MMT:1250'PCI+16+MERINOPA-EMAIL 08.06.2013-'LIN+1'PIA+1+4810 55:HS'NAD+OS+003708274241:100++Kotkamills Oy'NAD+SB+SEINDIA::86++SE INDIA'NAD+FX+MERINOPA::86++MERINOPA'NAD+CZ+003708274241:100++Kotkamills Oy'TDT+20++1+++++D5DM7:::CHARLOTTA B'FTX+AAA+++PAPER'RFF+CU:TILAUS-0003:1'RFF+VON:MATKA123'DTM+ZEL:201407010000:203'LOC+5+FIKTKM::86:Kotka warehouse'LOC+8+FIKTKC::86:Kotka'LOC+20+MERINOPA::86:HARYANA'CPS+PKG'PAC+999++RL'MEA+AAE+G+KGM:1000'MEA+AAE+AAL+KGM:1000'MEA+AAE+DI+MMT:1250'MEA+AAE+WD+MMT:1050'PCI+999'GIN+ZUN+0017'GIN+ZPI+1'UNT+117+1'UNZ+1+KM0008'
+";
+
+  kasittele_rahtikirjasanoma($sanoma);
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 if ($task == 'nollaa') {
@@ -187,6 +232,31 @@ else{
 
   <br><hr><br>
 
+  TILAUS-0003<br><br>
+
+  <form action='' method='post'>
+    <input type='hidden' name='task' value='B4' />
+    <input type='submit' value='".t("Hae bookkaus 4.")."'>
+  </form>
+
+  <br><br>
+
+  <form action='' method='post'>
+    <input type='hidden' name='task' value='R3' />
+    <input type='submit' value='".t("Hae rahtikirja 3.")."'>
+  </form>
+
+  <br><br>
+
+  <form action='' method='post'>
+    <input type='hidden' name='task' value='R4' />
+    <input type='submit' value='".t("Hae rahtikirja 4.")."'>
+  </form>
+
+  <br><hr><br>
+
+
+
   <form action='' method='post'>
     <input type='hidden' name='task' value='nollaa' />
     <input type='submit' value='".t("Nollaa tilanne")."'>
@@ -257,6 +327,17 @@ function kasittele_bookkaussanoma($edi_data) {
       $rivinro = $tilaus_info_osat[2];
     }
 
+    if (substr($rivi, 0, 7) == "DTM+133" and !isset($lahtopvm)) {
+      $osat = explode("+", $rivi);
+      $lahto_info = $osat[1];
+      $lahto_info_osat = explode(":", $lahto_info);
+      $lahtoaika = $lahto_info_osat[1];
+      $vuosi = substr($lahtoaika, 0, 4);
+      $kuu = substr($lahtoaika, 4, 2);
+      $paiva = substr($lahtoaika, 6, 2);
+      $lahtopvm = $vuosi."-".$kuu."-".$paiva;
+    }
+
     if (substr($rivi, 0, 7) == "FTX+TRA" and !isset($ohje)) {
       $osat = explode("+", $rivi);
       $ohje = $osat[4];
@@ -270,6 +351,13 @@ function kasittele_bookkaussanoma($edi_data) {
     if (substr($rivi, 0, 3) == 'EQN') {
       $osat = explode("+", $rivi);
       $konttimaara = $osat[1];
+    }
+
+    if (substr($rivi, 0, 3) == 'GID') {
+      $osat = explode("+", $rivi);
+      $rulla_info = $osat[2];
+      $rulla_info_osat = explode(":", $rulla_info);
+      $rullamaara = $rulla_info_osat[0];
     }
 
   }
@@ -306,7 +394,8 @@ function kasittele_bookkaussanoma($edi_data) {
 
     $update_query = "UPDATE lasku SET
                      asiakkaan_tilausnumero = '{$tilausnro}',
-                     sisviesti1 = '{$ohje}'
+                     sisviesti1 = '{$ohje}',
+                     toimaika = '{$lahtopvm}'
                      WHERE yhtio = '{$kukarow['yhtio']}'
                      AND tunnus = '{$tunnus}'";
     pupe_query($update_query);
@@ -315,7 +404,8 @@ function kasittele_bookkaussanoma($edi_data) {
                      konttiviite  = '{$konttiviite}',
                      konttimaara  = '{$konttimaara}',
                      konttityyppi = '{$konttityyppi}',
-                     matkakoodi   = '{$matkakoodi}'
+                     matkakoodi   = '{$matkakoodi}',
+                     rullamaara   = '{$rullamaara}'
                      WHERE yhtio  = '{$kukarow['yhtio']}'
                      AND otunnus  = '{$tunnus}'";
     pupe_query($update_query);
@@ -377,19 +467,28 @@ function kasittele_bookkaussanoma($edi_data) {
     }
   }
   else {
-    $query = "SELECT tunnus
+    $query = "SELECT lasku.tunnus,
+              laskun_lisatiedot.rullamaara
               FROM lasku
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND asiakkaan_tilausnumero = '{$tilausnro}'
-              AND tila = 'N'";
+              JOIN laskun_lisatiedot
+                ON laskun_lisatiedot.yhtio = lasku.yhtio
+                AND laskun_lisatiedot.otunnus = lasku.tunnus
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+              AND lasku.asiakkaan_tilausnumero = '{$tilausnro}'
+              AND lasku.tila = 'N'";
     $result = pupe_query($query);
-    $tunnus = mysql_result($result, 0);
+    $laskuinfo = mysql_fetch_assoc($result);
+
+    $tunnus = $laskuinfo['tunnus'];
+
+    $rullamaara = $rullamaara + $laskuinfo['rullamaara'];
 
     $update_query = "UPDATE laskun_lisatiedot SET
                      konttiviite  = '{$konttiviite}',
                      konttimaara  = '{$konttimaara}',
                      konttityyppi = '{$konttityyppi}',
-                     matkakoodi   = '{$matkakoodi}'
+                     matkakoodi   = '{$matkakoodi}',
+                     rullamaara   = '{$rullamaara}'
                      WHERE yhtio  = '{$kukarow['yhtio']}'
                      AND otunnus  = '{$tunnus}'";
     pupe_query($update_query);
@@ -438,6 +537,13 @@ function kasittele_bookkaussanoma($edi_data) {
               AND  tunnus = '{$korvattava}'";
     pupe_query($query);
   }
+
+  $query = "UPDATE kuka
+            SET kesken = 0
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND kuka = '{$kukarow['kuka']}'";
+  pupe_query($query);
+
 }
 
 function kasittele_rahtikirjasanoma($edi_data) {
@@ -652,6 +758,18 @@ function kasittele_rahtikirjasanoma($edi_data) {
 
   $data = $rahti;
 
+
+  // tarkistetaan onko tämä sanoma jostakin syystä jo käsitelty
+  $query = "SELECT tunnus
+            FROM liitetiedostot
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND filename = '{$data['sanoma_id']}'";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) != 0) {
+    return false;
+  }
+
   require_once "../inc/luo_ostotilausotsikko.inc";
 
   // haetaan toimittajan tiedot
@@ -810,4 +928,11 @@ function kasittele_rahtikirjasanoma($edi_data) {
 
     }
   }
+
+  $query = "UPDATE kuka
+            SET kesken = 0
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND kuka = '{$kukarow['kuka']}'";
+  pupe_query($query);
+
 }

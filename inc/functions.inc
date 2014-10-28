@@ -143,6 +143,11 @@ if (!function_exists("pupesoft_login")) {
               $palvelin2 .= "mobiili/index.php";
             }
 
+            // Jos logataan mobiilista
+            if ($params['sarjanumero']) {
+              $palvelin2 .= "sarjanumero/index.php";
+            }
+
             echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL={$palvelin2}'>";
             exit;
           }

@@ -2173,18 +2173,27 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   }
 
   if ($onko_toim_laite) {
+    echo "<tr>";
+    echo "<th>".t('K‰yt‰ kohteen suosituinta p‰iv‰‰')."</th>";
+    echo "<td><button id='suosituimmat_paivat' type='button'>".t('K‰yt‰')."</button></td>";
+    echo "</tr>";
     $query = "SELECT DISTINCT selite
               FROM tuotteen_avainsanat
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND laji    = 'tyomaarayksen_ryhmittely'";
-    $result = pupe_query($query);
+              AND laji = 'tyomaarayksen_ryhmittely'";
+    $toimenpide_result = pupe_query($query);
+    $toimenpide_tyypit = array();
+    while ($toimenpide_tyyppi = mysql_fetch_assoc($toimenpide_result)) {
+      $toimenpide_tyypit[] = $toimenpide_tyyppi['selite'];
+    }
 
     $request = array(
       'tuoteno'      => $t[1],
       'huoltosyklit' => $laite['huoltosyklit']
     );
-    while ($selite = mysql_fetch_assoc($result)) {
-      huoltosykli_rivi($selite['selite'], $request);
+    foreach ($toimenpide_tyypit as $toimenpide_tyyppi) {
+      $request['tapahtuman_suosituin_paiva'] = hae_suosituin_tapahtumapaiva($paikan_kohde, $toimenpide_tyyppi);
+      huoltosykli_rivi($toimenpide_tyyppi, $request);
     }
   }
 

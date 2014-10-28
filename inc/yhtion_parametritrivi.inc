@@ -1237,11 +1237,11 @@ if ($fieldname == "pikatilaus_focus") {
 
   $sel = array();
   $sel[$trow[$i]]  = " selected";
-  
+
   $ulos .= "<option value = ''>" . t("Uudella pikatilauksella kursori oletuksena tuotenumero-kentässä");
   $ulos .= "<option value = 'A' $sel[A]>" . t("Uudella pikatilauksella kursori oletuksena asiakas-kentässä");
   $ulos .= "<option value = 'M' $sel[M]>" . t("Uudella pikatilauksella kursori oletuksena myyjänro-kentässä");
-  $ulos .= "<option value = 'Y' $sel[Y]>" . t("Uudella pikatilauksella kursori oletuksena myyjänro-kentässä. Myyjänumero on syötettävä");  
+  $ulos .= "<option value = 'Y' $sel[Y]>" . t("Uudella pikatilauksella kursori oletuksena myyjänro-kentässä. Myyjänumero on syötettävä");
   $ulos .= "</select></td>";
 
   $jatko = 0;

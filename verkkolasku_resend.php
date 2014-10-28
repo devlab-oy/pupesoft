@@ -223,7 +223,7 @@ if ($handle = opendir($kansio)) {
       $status = maventa_invoice_put_file($client, $api_keys, $laskunro, "", $kukarow['kieli'], $files_out);
 
       if (!empty($status)) {
-        // Siirret‰‰n dataout kansioon jos kaikki meni ok
+        // Siirret‰‰n dataout kansioon jos Maventalta on saatu jokin vastaus
         rename($kansio.$lasku, "{$pupe_root_polku}/dataout/$lasku");
       }
       else {

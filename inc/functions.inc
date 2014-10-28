@@ -1134,9 +1134,6 @@ if (!function_exists("apix_invoice_put_file")) {
 
     if ($xml->Status == "OK") {
       $apix_ulos .= t("APIX-laskun %s l‰hetys onnistui", "", $apix_invoicenum)."!";
-
-      // Siirret‰‰n pois l‰hetysjonosta...
-      rename("{$pupe_root_polku}/dataout/apix_error/$apixzipfile", "{$pupe_root_polku}/dataout/$apixzipfile");
     }
     else {
       $apix_ulos .= "Laskun $apix_invoicenum l‰hetys ep‰onnistui:<br>\n";
@@ -1164,6 +1161,11 @@ if (!function_exists("apix_invoice_put_file")) {
       foreach ($xml->FreeText as $teksti) {
         $apix_ulos .= "Tilaviesti: ".$teksti."<br>\n";
       }
+    }
+
+    if (!empty($xml->Status)) {
+      // Siirret‰‰n dataout kansioon jos Apixilta on saatu jokin vastaus
+      rename("{$pupe_root_polku}/dataout/apix_error/$apixzipfile", "{$pupe_root_polku}/dataout/$apixzipfile");
     }
 
     return $apix_ulos;

@@ -473,8 +473,6 @@ if (isset($magento_siirretaan_asiakkaat)) {
   $asiakasselectlisa = " avainsana.selitetark as asiakasryhma,
                          asiakkaan_avainsanat.tarkenne magento_tunnus,
                          yhteyshenkilo.nimi yhenk_nimi,
-                         yhteyshenkilo.etunimi yhenk_etunimi,
-                         yhteyshenkilo.sukunimi yhenk_sukunimi,
                          yhteyshenkilo.email yhenk_email,
                          yhteyshenkilo.puh yhenk_puh,";
 
@@ -521,6 +519,15 @@ while ($row = mysql_fetch_array($res)) {
     $row["toim_postino"] = $row['postino'];
     $row["toim_postitp"] = $row['postitp'];
   }
+  // Yhteyshenkilön nimestä otetaan etunimi ja sukunimi
+  if (!empty($row["yhenk_nimi"])) {
+    // Viimeinen osa nimestä on sukunimi
+    $yhenk_sukunimi = end(explode(' ', $row['yhenk_nimi']));
+    // Ensimmäiset osat etunimiä
+    $yhenk_etunimi = explode(' ', $row['yhenk_nimi']);
+    array_pop($yhenk_etunimi);
+    $yhenk_etunimi = implode(' ', $yhenk_etunimi);
+  }
 
   $dnsasiakas[] = array(
     'nimi'               => $row["nimi"],
@@ -544,8 +551,8 @@ while ($row = mysql_fetch_array($res)) {
     'laskutus_postino'   => $row["laskutus_postino"],
     'laskutus_postitp'   => $row["laskutus_postitp"],
     'yhenk_nimi'         => $row["yhenk_nimi"],
-    'yhenk_etunimi'      => $row['yhenk_etunimi'], 
-    'yhenk_sukunimi'     => $row['yhenk_sukunimi'],
+    'yhenk_etunimi'      => $yhenk_etunimi, 
+    'yhenk_sukunimi'     => $yhenk_sukunimi,
     'yhenk_email'        => $row["yhenk_email"],
     'yhenk_puh'          => $row["yhenk_puh"],
     'magento_tunnus'     => $row["magento_tunnus"],

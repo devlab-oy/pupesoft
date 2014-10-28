@@ -103,7 +103,7 @@ if ($tee == 'TOIMITA' and isset($maksutapa) and $maksutapa == 'seka') {
   $asres = pupe_query($query);
   $asrow = mysql_fetch_array($asres);
   
-  if ($yhtiorow[alv_kasittely] = '') {
+  if ($yhtiorow[alv_kasittely] == '') {
     $summa = $laskurow["verollinen"];
   }
   else {

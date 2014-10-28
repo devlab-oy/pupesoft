@@ -4803,11 +4803,12 @@ if ($tee == '') {
     }
 
     if ($luottorajavirhe != '') {
-      
+
+      echo "<br/>";
+      echo "<font class='error'>", t("HUOM: Luottoraja ylittynyt"),"</font>";
+
       if ($yhtiorow['luottorajan_ylitys'] != '') {
-        echo "<br/>";
-        echo "<font class='error'>", t("HUOM: Luottoraja ylittynyt"),", ";
-        echo t("ota yhteys luotonvalvontaan tai mitätöi myyntitilaus"),"!";
+        echo ", <font class='error'>", t("ota yhteys luotonvalvontaan tai mitätöi myyntitilaus"),"!";
         echo " ", t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"), ".";
         echo "</font><br />";
       }
@@ -4834,10 +4835,11 @@ if ($tee == '') {
 
     if ($ylivito > 0) {
 
+      echo "<br/>";
+      echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s päivää sitten erääntyneitä laskuja, olkaa ystävällinen ja ottakaa yhteyttä myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."</font>!";
+
       if ($yhtiorow['erapaivan_ylityksen_toimenpide'] != '') {
-        echo "<br/>";
-        echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s päivää sitten erääntyneitä laskuja, olkaa ystävällinen ja ottakaa yhteyttä myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."!";
-        echo " ",t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"),".";
+        echo " <font class='error'>",t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"),".";
         echo "</font>";
         echo "<br/>";
       }
@@ -4892,11 +4894,11 @@ if ($tee == '') {
         if ($tilauksen_rivihinnat_row['rivihinta'] + $laskurow['luottoraja'] > $asrow['luottoraja']) {
 
           $luottorajavirhe = 'kyllä';
+          echo "<br/>";
+          echo "<font class='error'>", t("HUOM: Luottoraja ylittynyt"),"</font>";
 
           if ($yhtiorow['luottorajan_ylitys'] != '') {
-            echo "<br/>";
-            echo "<font class='error'>", t("HUOM: Luottoraja ylittynyt"),", ";
-            echo t("ota yhteys luotonvalvontaan tai mitätöi myyntitilaus"),"!";
+            echo ", <font class='error'>", t("ota yhteys luotonvalvontaan tai mitätöi myyntitilaus"),"!";
             echo " ", t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"), ".";
             echo "</font><br />";
           }
@@ -4914,11 +4916,11 @@ if ($tee == '') {
     if ($_ylivito_chk > 0) {
 
       $ylivito = $laskurow['erapaivan_ylityksen_summa'];
+      echo "<br/>";
+      echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s päivää sitten erääntyneitä laskuja, olkaa ystävällinen ja ottakaa yhteyttä myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."</font>!";
 
       if ($yhtiorow['erapaivan_ylityksen_toimenpide'] != '') {
-        echo "<br/>";
-        echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s päivää sitten erääntyneitä laskuja, olkaa ystävällinen ja ottakaa yhteyttä myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."!";
-        echo " ",t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"),".";
+        echo " <font class='error'>",t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"),".";
         echo "</font>";
         echo "<br/>";
       }

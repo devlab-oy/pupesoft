@@ -1015,28 +1015,31 @@ if (!function_exists("maventa_invoice_put_file")) {
       $files_out['files']     = array();
       $files_out['filenames'] = array();
 
-      //Finvoice
+      // Finvoice
       $files_out['files'][0]     = base64_encode($xmlstring);
       $files_out['filenames'][0] = "$invoice_number.xml";
 
-      //PDF‰
+      // PDF‰
       $files_out['files'][1]     = base64_encode(tulosta_lasku("LASKU:".$invoice_number, $kieli, "VERKKOLASKU_MAVENTA", "", "", "", ""));
       $files_out['filenames'][1] = "$invoice_number.pdf";
     }
 
-    try {
-      if ($client === FALSE) {
-        throw new Exception('VIRHE: Yhteys Maventaan ei ole auki.');
-      }
-      else {
+    if ($client === NULL and $api_keys === NULL) {
+      // Siirret‰‰n l‰hetysjonoon
+      file_put_contents("{$pupe_root_polku}/dataout/maventa_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number-serialized.txt", serialize($files_out));
+      return "Lasku siirretty l‰hetysjonoon";
+    }
+    else {
+      // L‰hetet‰‰n lasku
+      try {
         $return_value = $client->invoice_put_finvoice($api_keys, $files_out);
         return $return_value->status;
       }
-    }
-    catch (Exception $exVirhe) {
-      // Siirret‰‰n error-kansioon, paitsi jos faili on seill‰ jo ennest‰‰n...
-      if (count($files_out_resend) == 0) file_put_contents("{$pupe_root_polku}/dataout/maventa_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number-serialized.txt", serialize($files_out));
-      return $exVirhe->getMessage();
+      catch (Exception $exVirhe) {
+        // Siirret‰‰n error-kansioon, paitsi jos faili on seill‰ jo ennest‰‰n...
+        if (count($files_out_resend) == 0) file_put_contents("{$pupe_root_polku}/dataout/maventa_error/laskutus-$kukarow[yhtio]-".date("Ymd")."-$invoice_number-serialized.txt", serialize($files_out));
+        return FALSE;
+      }
     }
   }
 }
@@ -1082,9 +1085,9 @@ if (!function_exists("apix_queue")) {
       $apix_ulos .= "Lasku $apix_invoicenum siirretty l‰hetysjonoon<br>\n";
     }
     else {
-      $apix_ulos .= "APIX tmpdirrin teko feilas!<br>\n";      
+      $apix_ulos .= "APIX tmpdirrin teko feilas!<br>\n";
     }
-    
+
     return $apix_ulos;
   }
 }

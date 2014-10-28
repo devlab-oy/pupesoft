@@ -236,6 +236,8 @@ if (isset($extrapoistetut)
   $poislisa = "";
 }
 
+list($oleasrow, $valuurow) = hae_oletusasiakas($laskurow);
+
 // Katsotaan, onko paramseissa annettu variaatio ja, jos on, n‰ytet‰‰n kyseisen variaation tuotteet
 if (!empty($variaatio)) {
   tarkista_tilausrivi();
@@ -298,7 +300,7 @@ if (!empty($variaatio)) {
 
     $yhtiot = hae_yhtiot();
 
-    hae_ja_piirra_saldo($tuote, $yhtiot);
+    hae_ja_piirra_saldo($tuote, $yhtiot, $oleasrow);
 
     piirra_ostoskoriin_lisays($tuote);
 
@@ -1593,11 +1595,12 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             $olhires = pupe_query($query);
 
             if (mysql_num_rows($olhires) == 1) {
-              $olhirow = mysql_fetch_assoc($olhires);
-              $myyntihinta = hintapyoristys($olhirow["hinta"])." $olhirow[valkoodi]";
+              $olhirow     = mysql_fetch_assoc($olhires);
+              $myyntihinta = hintapyoristys($olhirow["hinta"]) . " $olhirow[valkoodi]";
             }
-            elseif ($olhirow["kurssi"] != 0) {
-              $myyntihinta = hintapyoristys(yhtioval($row["myyntihinta"], $olhirow["kurssi"])). " $oleasrow[valkoodi]";
+            elseif ($valuurow["kurssi"] != 0) {
+              $myyntihinta = hintapyoristys(laskuval($row["myyntihinta"], $valuurow["kurssi"])) .
+                " $oleasrow[valkoodi]";
             }
           }
         }
@@ -1650,7 +1653,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
         echo "<td valign='top' class='$vari' $classmidl>$row[aleryhma]<br>$row[status]</td>";
       }
 
-      hae_ja_piirra_saldo($row, $yhtiot);
+      hae_ja_piirra_saldo($row, $yhtiot, $oleasrow);
 
       piirra_ostoskoriin_lisays($row);
 
@@ -1699,29 +1702,9 @@ if ($verkkokauppa == "") {
   else exit;
 }
 
-function piirra_extranet_saldo($row) {
+function piirra_extranet_saldo($row, $oleasrow) {
   global $kukarow, $yhtiorow, $verkkokauppa, $noutovarres, $laskurow, $saldoaikalisa,
   $rivin_yksikko, $vari, $verkkokauppa_saldoluku, $hinta_rajaus;
-
-  $query = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
-  $oleasres = pupe_query($query);
-  $oleasrow = mysql_fetch_assoc($oleasres);
-  $oleasrow["liitostunnus"] = $oleasrow["tunnus"];
-
-  $query = "SELECT * from valuu where yhtio='$kukarow[yhtio]' and nimi='$oleasrow[valkoodi]'";
-  $olhires = pupe_query($query);
-  $olhirow = mysql_fetch_assoc($olhires);
-
-  // k‰ytt‰j‰n maa
-  $oleasrow["varastomaa"] = $laskurow["toim_maa"];
-
-  if ($oleasrow["varastomaa"] == "") {
-    $oleasrow["varastomaa"] = $oleasrow["toim_maa"];
-  }
-
-  if ($oleasrow["varastomaa"] == "") {
-    $oleasrow["varastomaa"] = $oleasrow["maa"];
-  }
 
   $noutolisa = "";
 
@@ -1813,6 +1796,40 @@ function piirra_extranet_saldo($row) {
   }
 
   echo "</td>";
+}
+
+function hae_oletusasiakas($laskurow) {
+  global $kukarow;
+
+  $query = "SELECT *
+            FROM asiakas
+            WHERE yhtio='$kukarow[yhtio]'
+            AND tunnus='$kukarow[oletus_asiakas]'";
+
+  $oleasres                 = pupe_query($query);
+  $oleasrow                 = mysql_fetch_assoc($oleasres);
+  $oleasrow["liitostunnus"] = $oleasrow["tunnus"];
+
+  $query = "SELECT *
+            FROM valuu
+            WHERE yhtio='$kukarow[yhtio]'
+            AND nimi='$oleasrow[valkoodi]'";
+
+  $valuures = pupe_query($query);
+  $valuurow = mysql_fetch_assoc($valuures);
+
+  // k‰ytt‰j‰n maa
+  $oleasrow["varastomaa"] = $laskurow["toim_maa"];
+
+  if ($oleasrow["varastomaa"] == "") {
+    $oleasrow["varastomaa"] = $oleasrow["toim_maa"];
+  }
+
+  if ($oleasrow["varastomaa"] == "") {
+    $oleasrow["varastomaa"] = $oleasrow["maa"];
+  }
+
+  return array($oleasrow, $valuurow);
 }
 
 function piirra_ostoskoriin_lisays($row) {
@@ -2086,7 +2103,7 @@ function tarkista_tilausrivi() {
   pupemaster_stop();
 }
 
-function hae_ja_piirra_saldo($row, $yhtiot) {
+function hae_ja_piirra_saldo($row, $yhtiot, $oleasrow) {
   global $toim_kutsu, $verkkokauppa, $kukarow, $verkkokauppa_saldotsk, $laskurow,
   $saldoaikalisa, $yhtiorow, $rivin_yksikko, $vari, $classrigh, $hinta_rajaus, $ostoskori,
   $yht_i, $lisatiedot, $hae_ja_selaa_row;
@@ -2192,7 +2209,7 @@ function hae_ja_piirra_saldo($row, $yhtiot) {
     }
     // Normaalit saldolliset tuotteet (Extranet ja Verkkokauppa)
     elseif ($kukarow["extranet"] != "" or $verkkokauppa != "") {
-      piirra_extranet_saldo($row);
+      piirra_extranet_saldo($row, $oleasrow);
     }
     // Normaalit saldolliset tuotteet (Normi)
     else {

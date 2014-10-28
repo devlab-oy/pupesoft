@@ -1133,10 +1133,10 @@ if (!function_exists("apix_invoice_put_file")) {
     $xml = simplexml_load_string($response);
 
     if ($xml->Status == "OK") {
-      $apix_ulos .= t("APIX-laskun %s l‰hetys ep‰onnistui:", "", $apix_invoicenum)."!";
+      $apix_ulos .= t("APIX-laskun %s l‰hetys onnistui", "", $apix_invoicenum)."!";
 
       // Siirret‰‰n pois l‰hetysjonosta...
-      rename("{$pupe_root_polku}/dataout/apix_error/$apixzipfile_resend", "{$pupe_root_polku}/dataout/$apixzipfile_resend");
+      rename("{$pupe_root_polku}/dataout/apix_error/$apixzipfile", "{$pupe_root_polku}/dataout/$apixzipfile");
     }
     else {
       $apix_ulos .= "Laskun $apix_invoicenum l‰hetys ep‰onnistui:<br>\n";
@@ -1144,7 +1144,7 @@ if (!function_exists("apix_invoice_put_file")) {
       $apix_ulos .= "Tilakoodi: ".$xml->StatusCode."<br>\n";
 
       // Rakennetaan s‰hkˆpostiin l‰hetett‰v‰ virheviesti
-      $apixerrorreport .= t("APIX-laskun %s l‰hetys ep‰onnistui:", "", $apix_invoicenum)."!\n";
+      $apixerrorreport .= t("APIX-laskun %s l‰hetys ep‰onnistui", "", $apix_invoicenum)."!\n";
       $apixerrorreport .= t("L‰hetetyn tiedoston nimi").": $apixzipfile \n\n";
       $apixerrorreport .= utf8_decode($xml->FreeText[1])."\n\n";
       $apixerrorreport .= utf8_decode($xml->Value[0])."\n\n";
@@ -1155,7 +1155,7 @@ if (!function_exists("apix_invoice_put_file")) {
         "ctype"   => "text",
         "body"    => $apixerrorreport,
         "attachements"  => array(0 => array(
-            "filename"    => $apixzipfile,
+            "filename"    => "{$pupe_root_polku}/dataout/apix_error/$apixzipfile",
             "newfilename" => ""))
       );
 

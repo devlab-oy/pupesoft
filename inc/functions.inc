@@ -17015,6 +17015,7 @@ if (!function_exists('hae_tuotteet_ja_pisin_mitta')) {
 
     $mittakerroin = $args['mittakerroin'];
     $tilaukset = $args['tilaukset'];
+    $keraysvyohyke = $args['keraysvyohyke'];
     $pisin_tuote = $args['pisin_tuote'];
     $pisin_tuote_per_asiakas = $args['pisin_tuote_per_asiakas'];
     $eran_koko_chk = $args['eran_koko_chk'];
@@ -17974,6 +17975,7 @@ if (!function_exists("tee_keraysera")) {
       $args = array(
         'mittakerroin' => $mittakerroin,
         'tilaukset' => $tilaukset,
+        'keraysvyohyke' => $keraysvyohyke,
         'pisin_tuote' => $pisin_tuote,
         'pisin_tuote_per_asiakas' => $pisin_tuote_per_asiakas,
         'eran_koko_chk' => $eran_koko_chk,
@@ -18334,6 +18336,7 @@ if (!function_exists("tee_keraysera")) {
             $args = array(
               'mittakerroin' => $mittakerroin,
               'tilaukset' => $_tilaukset,
+              'keraysvyohyke' => $keraysvyohyke,
               'pisin_tuote' => $pisin_tuote,
               'pisin_tuote_per_asiakas' => $pisin_tuote_per_asiakas,
               'eran_koko_chk' => $eran_koko_chk,

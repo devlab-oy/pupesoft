@@ -17009,6 +17009,107 @@ if (!function_exists("release_tee_keraysera")) {
   }
 }
 
+if (!function_exists('hae_tuotteet_ja_pisin_mitta')) {
+  function hae_tuotteet_ja_pisin_mitta($args) {
+    global $kukarow;
+
+    $mittakerroin = $args['mittakerroin'];
+    $tilaukset = $args['tilaukset'];
+    $pisin_tuote = $args['pisin_tuote'];
+    $pisin_tuote_per_asiakas = $args['pisin_tuote_per_asiakas'];
+    $eran_koko_chk = $args['eran_koko_chk'];
+    $eran_koko_pintaala_chk = $args['eran_koko_pintaala_chk'];
+    $eran_paino_chk = $args['eran_paino_chk'];
+
+    $query = "SELECT tilausrivi.tunnus, tilausrivi.otunnus,
+              round(if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}) * if(tilausrivi.varattu < 1, 1, round(tilausrivi.varattu)), 4) as tuotteen_koko,
+              tilausrivi.tuoteno,
+              round(if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}), 4) y_koko,
+              round(if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}), 2) tuotekorkeus,
+              round(if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}), 2) tuoteleveys,
+              round(if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}), 2) tuotesyvyys,
+              if(tilausrivi.varattu < 1, 1, round(tilausrivi.varattu)) y_maara,
+              tuote.yksin_kerailyalustalle,
+              IF(tuote.yksin_kerailyalustalle = 'K', 3, IF(tuote.yksin_kerailyalustalle = 'E', 1, 2)) yksin_kerailyalustalle_sort,
+              tuote.tuotemassa y_paino,
+              tilausrivi.perheid,
+              if (tuote.tuotekorkeus > tuote.tuoteleveys, if(tuote.tuotekorkeus > tuote.tuotesyvyys, tuote.tuotekorkeus, tuote.tuotesyvyys), if(tuote.tuoteleveys > tuote.tuotesyvyys, tuote.tuoteleveys, tuote.tuotesyvyys)) * {$mittakerroin} AS pisin_sorttaus,
+              if (tuote.tuotekorkeus < tuote.tuoteleveys, if(tuote.tuotekorkeus < tuote.tuotesyvyys, tuote.tuotekorkeus, tuote.tuotesyvyys), if(tuote.tuoteleveys < tuote.tuotesyvyys, tuote.tuoteleveys, tuote.tuotesyvyys)) * {$mittakerroin} AS lyhin_sorttaus,
+              tuote.myynti_era
+              FROM tilausrivi
+              JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+                AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+                AND tilausrivin_lisatiedot.ohita_kerays = '')
+              JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
+                AND tuote.tuoteno = tilausrivi.tuoteno)
+              JOIN varaston_hyllypaikat ON (varaston_hyllypaikat.yhtio = tilausrivi.yhtio
+                AND varaston_hyllypaikat.hyllyalue = tilausrivi.hyllyalue
+                AND varaston_hyllypaikat.hyllynro = tilausrivi.hyllynro
+                AND varaston_hyllypaikat.hyllyvali = tilausrivi.hyllyvali
+                AND varaston_hyllypaikat.hyllytaso = tilausrivi.hyllytaso
+                AND varaston_hyllypaikat.keraysvyohyke = '{$keraysvyohyke}')
+              WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
+              AND tilausrivi.otunnus  IN ({$tilaukset})
+              AND tilausrivi.tyyppi  != 'D'
+              AND tilausrivi.var      not in ('P','J','O','S')
+              AND tilausrivi.varattu  > 0
+              ORDER BY yksin_kerailyalustalle_sort ASC, pisin_sorttaus DESC, varaston_hyllypaikat.indeksi ASC";
+    $tuoteres = pupe_query($query);
+
+    $inner_main_array = array();
+
+    while ($tuoterow = mysql_fetch_assoc($tuoteres)) {
+
+      $inner_main_array[] = $tuoterow;
+
+      if (!isset($pisin_tuote[$tuoterow['tuoteno']]['koko'])) $pisin_tuote[$tuoterow['tuoteno']]['koko'] = 0;
+
+      if (isset($kukarow['debugstring'])) {
+        $kukarow['debugstring'] .= "<font class='head'>(E400): Tuoteno: $tuoterow[tuoteno] KPL: $tuoterow[y_maara]</font> \n";
+        $kukarow['debugstring'] .= "(E410): Otunnus: $tuoterow[otunnus] \n";
+        $kukarow['debugstring'] .= "(E420): Tuotteen tilavuus: $tuoterow[y_koko] Tuotteen paino: $tuoterow[y_paino] <font class='head'>($tuoterow[tuoteleveys] cm&nbsp;&nbsp;x&nbsp;&nbsp;$tuoterow[tuotekorkeus] cm&nbsp;&nbsp;x&nbsp;&nbsp;$tuoterow[tuotesyvyys] cm)</font> \n";
+        $kukarow['debugstring'] .= "<br>\n";
+      }
+
+      if ($tuoterow['tuoteleveys'] > $pisin_tuote[$tuoterow['tuoteno']]['koko']) {
+        $pisin_tuote[$tuoterow['tuoteno']]['koko'] = $tuoterow['tuoteleveys'];
+      }
+
+      if ($tuoterow['tuotekorkeus'] > $pisin_tuote[$tuoterow['tuoteno']]['koko']) {
+        $pisin_tuote[$tuoterow['tuoteno']]['koko'] = $tuoterow['tuotekorkeus'];
+      }
+
+      if ($tuoterow['tuotesyvyys'] > $pisin_tuote[$tuoterow['tuoteno']]['koko']) {
+        $pisin_tuote[$tuoterow['tuoteno']]['koko'] = $tuoterow['tuotesyvyys'];
+      }
+
+      $pisin_tuote[$tuoterow['tuoteno']]['paino'] = $tuoterow['y_paino'];
+      $pisin_tuote[$tuoterow['tuoteno']]['tilavuus'] = $tuoterow['y_koko'];
+      $pisin_tuote[$tuoterow['tuoteno']]['kpl'] = $tuoterow['y_maara'];
+      $pisin_tuote[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']] = $tuoterow['otunnus'];
+
+      $pisin_tuote_per_asiakas[$tuoterow['otunnus']][] = $tuoterow['tuoteno'];
+
+      if ($tuoterow['yksin_kerailyalustalle'] != 'K') {
+        // simuloidaan keräyksen muodostumista
+        $eran_koko_chk += $tuoterow['tuotteen_koko'];
+      }
+
+      $eran_koko_pintaala_chk += (($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus']) * $tuoterow['y_maara']);
+      $eran_paino_chk += ($tuoterow['y_paino'] * $tuoterow['y_maara']);
+    }
+
+    return array(
+      $inner_main_array,
+      $pisin_tuote,
+      $pisin_tuote_per_asiakas,
+      $eran_koko_chk,
+      $eran_koko_pintaala_chk,
+      $eran_paino_chk
+    );
+  }
+}
+
 if (!function_exists("tee_keraysera")) {
   function tee_keraysera($keraysvyohyke, $varasto) {
     global $kukarow, $yhtiorow, $tee_keraysera_debugdir;
@@ -17870,83 +17971,24 @@ if (!function_exists("tee_keraysera")) {
         $kukarow['debugstring'] .= "<br>(E390): ETSITÄÄN PISIN TUOTE:<br>\n";
       }
 
-      $query = "SELECT tilausrivi.tunnus, tilausrivi.otunnus,
-                round(if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}) * if(tilausrivi.varattu < 1, 1, round(tilausrivi.varattu)), 4) as tuotteen_koko,
-                tilausrivi.tuoteno,
-                round(if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}) * if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}) * if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}), 4) y_koko,
-                round(if(tuote.tuotekorkeus * {$mittakerroin} < 1, 1, tuote.tuotekorkeus * {$mittakerroin}), 2) tuotekorkeus,
-                round(if(tuote.tuoteleveys * {$mittakerroin} < 1, 1, tuote.tuoteleveys * {$mittakerroin}), 2) tuoteleveys,
-                round(if(tuote.tuotesyvyys * {$mittakerroin} < 1, 1, tuote.tuotesyvyys * {$mittakerroin}), 2) tuotesyvyys,
-                if(tilausrivi.varattu < 1, 1, round(tilausrivi.varattu)) y_maara,
-                tuote.yksin_kerailyalustalle,
-                IF(tuote.yksin_kerailyalustalle = 'K', 3, IF(tuote.yksin_kerailyalustalle = 'E', 1, 2)) yksin_kerailyalustalle_sort,
-                tuote.tuotemassa y_paino,
-                tilausrivi.perheid,
-                if (tuote.tuotekorkeus > tuote.tuoteleveys, if(tuote.tuotekorkeus > tuote.tuotesyvyys, tuote.tuotekorkeus, tuote.tuotesyvyys), if(tuote.tuoteleveys > tuote.tuotesyvyys, tuote.tuoteleveys, tuote.tuotesyvyys)) * {$mittakerroin} AS pisin_sorttaus,
-                if (tuote.tuotekorkeus < tuote.tuoteleveys, if(tuote.tuotekorkeus < tuote.tuotesyvyys, tuote.tuotekorkeus, tuote.tuotesyvyys), if(tuote.tuoteleveys < tuote.tuotesyvyys, tuote.tuoteleveys, tuote.tuotesyvyys)) * {$mittakerroin} AS lyhin_sorttaus,
-                tuote.myynti_era
-                FROM tilausrivi
-                JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-                  AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-                  AND tilausrivin_lisatiedot.ohita_kerays = '')
-                JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
-                  AND tuote.tuoteno = tilausrivi.tuoteno)
-                JOIN varaston_hyllypaikat ON (varaston_hyllypaikat.yhtio = tilausrivi.yhtio
-                  AND varaston_hyllypaikat.hyllyalue = tilausrivi.hyllyalue
-                  AND varaston_hyllypaikat.hyllynro = tilausrivi.hyllynro
-                  AND varaston_hyllypaikat.hyllyvali = tilausrivi.hyllyvali
-                  AND varaston_hyllypaikat.hyllytaso = tilausrivi.hyllytaso
-                  AND varaston_hyllypaikat.keraysvyohyke = '{$keraysvyohyke}')
-                WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
-                AND tilausrivi.otunnus  IN ({$tilaukset})
-                AND tilausrivi.tyyppi  != 'D'
-                AND tilausrivi.var      not in ('P','J','O','S')
-                AND tilausrivi.varattu  > 0
-                ORDER BY yksin_kerailyalustalle_sort ASC, pisin_sorttaus DESC, varaston_hyllypaikat.indeksi ASC";
-      $tuoteres = pupe_query($query);
+      $args = array(
+        'mittakerroin' => $mittakerroin,
+        'tilaukset' => $tilaukset,
+        'pisin_tuote' => $pisin_tuote,
+        'pisin_tuote_per_asiakas' => $pisin_tuote_per_asiakas,
+        'eran_koko_chk' => $eran_koko_chk,
+        'eran_koko_pintaala_chk' => $eran_koko_pintaala_chk,
+        'eran_paino_chk' => $eran_paino_chk,
+      );
 
-      $inner_main_array = array();
-
-      while ($tuoterow = mysql_fetch_assoc($tuoteres)) {
-
-        $inner_main_array[] = $tuoterow;
-
-        if (!isset($pisin_tuote[$tuoterow['tuoteno']]['koko'])) $pisin_tuote[$tuoterow['tuoteno']]['koko'] = 0;
-
-        if (isset($kukarow['debugstring'])) {
-          $kukarow['debugstring'] .= "<font class='head'>(E400): Tuoteno: $tuoterow[tuoteno] KPL: $tuoterow[y_maara]</font> \n";
-          $kukarow['debugstring'] .= "(E410): Otunnus: $tuoterow[otunnus] \n";
-          $kukarow['debugstring'] .= "(E420): Tuotteen tilavuus: $tuoterow[y_koko] Tuotteen paino: $tuoterow[y_paino] <font class='head'>($tuoterow[tuoteleveys] cm&nbsp;&nbsp;x&nbsp;&nbsp;$tuoterow[tuotekorkeus] cm&nbsp;&nbsp;x&nbsp;&nbsp;$tuoterow[tuotesyvyys] cm)</font> \n";
-          $kukarow['debugstring'] .= "<br>\n";
-        }
-
-        if ($tuoterow['tuoteleveys'] > $pisin_tuote[$tuoterow['tuoteno']]['koko']) {
-          $pisin_tuote[$tuoterow['tuoteno']]['koko'] = $tuoterow['tuoteleveys'];
-        }
-
-        if ($tuoterow['tuotekorkeus'] > $pisin_tuote[$tuoterow['tuoteno']]['koko']) {
-          $pisin_tuote[$tuoterow['tuoteno']]['koko'] = $tuoterow['tuotekorkeus'];
-        }
-
-        if ($tuoterow['tuotesyvyys'] > $pisin_tuote[$tuoterow['tuoteno']]['koko']) {
-          $pisin_tuote[$tuoterow['tuoteno']]['koko'] = $tuoterow['tuotesyvyys'];
-        }
-
-        $pisin_tuote[$tuoterow['tuoteno']]['paino'] = $tuoterow['y_paino'];
-        $pisin_tuote[$tuoterow['tuoteno']]['tilavuus'] = $tuoterow['y_koko'];
-        $pisin_tuote[$tuoterow['tuoteno']]['kpl'] = $tuoterow['y_maara'];
-        $pisin_tuote[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']] = $tuoterow['otunnus'];
-
-        $pisin_tuote_per_asiakas[$tuoterow['otunnus']][] = $tuoterow['tuoteno'];
-
-        if ($tuoterow['yksin_kerailyalustalle'] != 'K') {
-          // simuloidaan keräyksen muodostumista
-          $eran_koko_chk += $tuoterow['tuotteen_koko'];
-        }
-
-        $eran_koko_pintaala_chk += (($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus']) * $tuoterow['y_maara']);
-        $eran_paino_chk += ($tuoterow['y_paino'] * $tuoterow['y_maara']);
-      }
+      list(
+        $inner_main_array,
+        $pisin_tuote,
+        $pisin_tuote_per_asiakas,
+        $eran_koko_chk,
+        $eran_koko_pintaala_chk,
+        $eran_paino_chk
+      ) = hae_tuotteet_ja_pisin_mitta($args);
 
       if (isset($kukarow['debugstring'])) {
         $kukarow['debugstring'] .= "<br>(E440): <font class='head'>NIPUN TILAVUUS YHT: $eran_koko_chk</font>\n";
@@ -18286,24 +18328,62 @@ if (!function_exists("tee_keraysera")) {
           }
 
           for ($_nurkka_i = ($_main_i + 1); $_fixed_main_array_count >= $_nurkka_i; $_nurkka_i++) {
-            $_til_koko = $kerailyniput_tiedot[$_nurkka_i]['tilauksen_koko'];
-            $_til_koko_chk = $eran_koko_pintaala + $_til_koko;
 
-            if ($_til_koko_chk <= $keraysvyohyketiedot['max_keraysera_pintaala']) {
+            $_tilaukset = $fixed_main_array[$_nurkka_i];
 
-              if (isset($kukarow['debugstring'])) {
-                $kukarow['debugstring'] .= "(E1002): Löydettiin lupaava nippu ($_nurkka_i)<br>\n";
+            $args = array(
+              'mittakerroin' => $mittakerroin,
+              'tilaukset' => $_tilaukset,
+              'pisin_tuote' => $pisin_tuote,
+              'pisin_tuote_per_asiakas' => $pisin_tuote_per_asiakas,
+              'eran_koko_chk' => $eran_koko_chk,
+              'eran_koko_pintaala_chk' => $eran_koko_pintaala_chk,
+              'eran_paino_chk' => $eran_paino_chk,
+            );
+
+            list(
+              $inner_main_array,
+              $pisin_tuote,
+              $pisin_tuote_per_asiakas,
+              $eran_koko_chk,
+              $eran_koko_pintaala_chk,
+              $eran_paino_chk
+            ) = hae_tuotteet_ja_pisin_mitta($args);
+
+            $kaytettava_pakkaus = valitse_pakkaus(
+              $keraysvyohyketiedot,
+              $pakkaukset,
+              $pisin_tuote,
+              $pisin_tuote_per_asiakas,
+              $eran_koko,
+              $eran_paino,
+              $eran_koko_chk,
+              $eran_paino_chk,
+              $eran_koko_pintaala
+            );
+
+            if ($kaytettava_pakkaus != '') {
+
+              $_leveys = $pakkaukset[$kaytettava_pakkaus]['leveys'];
+              $_syvyys = $pakkaukset[$kaytettava_pakkaus]['syvyys'];
+              $_til_koko_chk = $eran_koko_pintaala + ($_leveys * $_syvyys);
+
+              if ($_til_koko_chk <= $keraysvyohyketiedot['max_keraysera_pintaala']) {
+
+                if (isset($kukarow['debugstring'])) {
+                  $kukarow['debugstring'] .= "(E1002): Löydettiin lupaava nippu ($_nurkka_i)<br>\n";
+                }
+
+                $_main_i = $_nurkka_i - 1;
+
+                $ii++;
+                $ed_asiakas = $kerailyniput_tiedot[$key]['nimi'];
+                $ed_otunnus = $tuoterow['otunnus'];
+                $ed_ohjausmerkki = $ohjausmerkki[$tuoterow['otunnus']];
+                $ed_jiivee = $jiivee[$tuoterow['otunnus']];
+
+                break 2;
               }
-
-              $_main_i = $_nurkka_i - 1;
-
-              $ii++;
-              $ed_asiakas = $kerailyniput_tiedot[$key]['nimi'];
-              $ed_otunnus = $tuoterow['otunnus'];
-              $ed_ohjausmerkki = $ohjausmerkki[$tuoterow['otunnus']];
-              $ed_jiivee = $jiivee[$tuoterow['otunnus']];
-
-              break 2;
             }
           }
 

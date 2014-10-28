@@ -2733,7 +2733,8 @@ else {
             $apix_laskut_20l[$invoice_number[1]] = "<?xml version=\"1.0\"".$apix_laskuarray[$a];
 
             if (count($apix_laskut_20l) == 20 or $a == ($apix_laskumaara-1)) {
-              $tulos_ulos .= apix_invoice_put_file($apix_laskut_20l, $kieli);
+              // Laitetaan laskut l‰hetysjonoon
+              $tulos_ulos .= apix_invoice_put_file(FALSE, $apix_laskut_20l, $kieli);
 
               // Nollataan t‰m‰
               $apix_laskut_20l = array();
@@ -2994,9 +2995,6 @@ else {
               $line = exec("$vientierittelykomento $pdffilenimi");
             }
 
-            //poistetaan tmp file samantien kuleksimasta...
-            system("rm -f $pdffilenimi");
-
             if ($silent == "") $tulos_ulos .= t("Vientierittely tulostuu")."...<br>\n";
 
             unset($Xpdf);
@@ -3063,9 +3061,6 @@ else {
               $content_body       = "";
               include "inc/sahkoposti.inc"; // sanotaan include eik‰ require niin ei kuolla
             }
-
-            //poistetaan tmp file samantien kuleksimasta...
-            system("rm -f $pdffilenimi");
 
             if ($silent == "") $tulos_ulos .= t("Vientierittely l‰hetet‰‰n")."...<br>\n";
 

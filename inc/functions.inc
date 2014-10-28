@@ -1042,26 +1042,23 @@ if (!function_exists("maventa_invoice_put_file")) {
 }
 
 if (!function_exists("apix_invoice_put_file")) {
-  function apix_invoice_put_file($lahetettavat_apix, $kieli, $apixzipfile_resend = "") {
+  function apix_invoice_put_file($send, $lahetettavat_apix, $kieli, $apixzipfile_resend = "") {
     global $kukarow, $yhtiorow, $pupe_root_polku;
 
     // siirret‰‰n laskutiedosto operaattorille
-    //$url        = "https://test-api.apix.fi/invoices";
-    $url         = "https://api.apix.fi/invoices";
-    $transferkey = $yhtiorow['apix_avain'];
-    $transferid  = $yhtiorow['apix_tunnus'];
-    $software    = "Pupesoft";
-    $version     = "1.0";
-    $timestamp   = gmdate("YmdHis");
-    $apix_ulos    = "";
+    //$url           = "https://test-api.apix.fi/invoices";
+    $url             = "https://api.apix.fi/invoices";
+    $transferkey     = $yhtiorow['apix_avain'];
+    $transferid      = $yhtiorow['apix_tunnus'];
+    $software        = "Pupesoft";
+    $version         = "1.0";
+    $timestamp       = gmdate("YmdHis");
+    $apix_ulos       = "";
+    $apixerrorreport = "";
 
     if ($apixzipfile_resend != "") {
       // Filenimi joka uudelleenl‰hetet‰‰n
       $apixzipfile  = $apixzipfile_resend;
-
-      // Filen koko ja pointteri siihen
-      $apixfilesize = filesize("$pupe_root_polku/dataout/apix_error/$apixzipfile");
-      $apix_fh      = fopen("$pupe_root_polku/dataout/apix_error/$apixzipfile", 'r');
     }
     else {
       // Filenimi
@@ -1095,62 +1092,93 @@ if (!function_exists("apix_invoice_put_file")) {
         exec("cd $apix_tmpdirnimi; zip $apixzipfile *;");
 
         // Aineisto dataouttiin
-        exec("cp $apix_tmpdirnimi/$apixzipfile $pupe_root_polku/dataout/");
+        exec("cp $apix_tmpdirnimi/$apixzipfile {$pupe_root_polku}/dataout/apix_error/");
 
         // Poistetaan apix-tmpdir
         exec("rm -rf $apix_tmpdirnimi");
 
-        // Filen koko ja pointteri siihen
-        $apixfilesize = filesize("$pupe_root_polku/dataout/$apixzipfile");
-        $apix_fh = fopen("$pupe_root_polku/dataout/$apixzipfile", 'r');
+        if ($send !== TRUE) {
+          $apix_ulos .= "Lasku siirretty l‰hetysjonoon";
+        }
       }
       else {
-        $apix_ulos .= "APIX tmpdirrin teko feilas!<br>";
+        $apix_ulos .= "APIX tmpdirrin teko feilas!<br>\n";
         return $apix_ulos;
       }
     }
 
-    // Siirret‰‰n aineisto APIXiin
-    $digest_src = $software."+".$version."+".$transferid."+".$timestamp."+".$transferkey;
-    $dt = substr(hash('sha256', $digest_src), 0, 64);
+    if ($send === TRUE) {
+      // Filen koko ja pointteri siihen
+      $apixfilesize = filesize("{$pupe_root_polku}/dataout/apix_error/$apixzipfile");
+      $apix_fh = fopen("{$pupe_root_polku}/dataout/apix_error/$apixzipfile", 'r');
 
-    $real_url = "$url?soft=$software&ver=$version&TraID=$transferid&t=$timestamp&d=SHA-256:$dt";
+      // Siirret‰‰n aineisto APIXiin
+      $digest_src = $software."+".$version."+".$transferid."+".$timestamp."+".$transferkey;
+      $dt = substr(hash('sha256', $digest_src), 0, 64);
 
-    $ch = curl_init($real_url);
-    curl_setopt($ch, CURLOPT_PUT, true);
-    curl_setopt($ch, CURLOPT_INFILE, $apix_fh);
-    curl_setopt($ch, CURLOPT_INFILESIZE, $apixfilesize);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+      $real_url = "$url?soft=$software&ver=$version&TraID=$transferid&t=$timestamp&d=SHA-256:$dt";
 
-    $apix_ulos .= "L‰hetet‰‰n aineisto APIX:lle...<br>";
-    $response = curl_exec($ch);
+      $ch = curl_init($real_url);
+      curl_setopt($ch, CURLOPT_PUT, true);
+      curl_setopt($ch, CURLOPT_INFILE, $apix_fh);
+      curl_setopt($ch, CURLOPT_INFILESIZE, $apixfilesize);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
-    curl_close($ch);
-    fclose($apix_fh);
+      $apix_ulos .= "L‰hetet‰‰n aineisto APIX:lle...<br>\n";
+      $response = curl_exec($ch);
 
-    $xml = simplexml_load_string($response);
+      curl_close($ch);
+      fclose($apix_fh);
 
-    if ($xml->Status == "OK") {
-      $apix_ulos .= "L‰hetys onnistui!";
+      $xml = simplexml_load_string($response);
 
-      // Siirret‰‰n pois error kansiosta...
-      if ($apixzipfile_resend != "") rename("{$pupe_root_polku}/dataout/apix_error/$apixzipfile_resend", "{$pupe_root_polku}/dataout/$apixzipfile_resend");
-    }
-    else {
-      $apix_ulos .= "L‰hetys ep‰onnistui:<br>";
+      if ($xml->Status == "OK") {
+        $apix_ulos .= "L‰hetys onnistui!";
 
-      $apix_ulos .= "Tila: ".$xml->Status."<br>";
-      $apix_ulos .= "Tilakoodi: ".$xml->StatusCode."<br>";
-
-      foreach ($xml->FreeText as $teksti) {
-        $apix_ulos .= "Tilaviesti: ".$teksti."<br>";
+        // Siirret‰‰n pois error kansiosta...
+        if ($apixzipfile_resend != "") rename("{$pupe_root_polku}/dataout/apix_error/$apixzipfile_resend", "{$pupe_root_polku}/dataout/$apixzipfile_resend");
       }
+      else {
+        $apix_ulos .= "L‰hetys ep‰onnistui:<br>\n";
 
-      if ($apixzipfile_resend == "") $apix_ulos .= "Laskut: ".implode(", ", $apix_lasnot)."<br>";
+        $apix_ulos .= "Tila: ".$xml->Status."<br>\n";
+        $apix_ulos .= "Tilakoodi: ".$xml->StatusCode."<br>\n";
 
-      // Siirret‰‰n error-kansioon, paitsi jos faili on seill‰ jo ennest‰‰n...
-      if ($apixzipfile_resend == "") rename("{$pupe_root_polku}/dataout/$apixzipfile", "{$pupe_root_polku}/dataout/apix_error/$apixzipfile");
+        // Rakennetaan s‰hkˆpostiin l‰hetett‰v‰ virheviesti
+        $apixerrorreport .= "{$yhtiorow["yhtio"]} Apix laskutuksen virheviesti! \n";
+        $apixerrorreport .= " $apixzipfile ";
+        $apixerrorreport .= "\n\n";
+        $apixerrorreport .= $real_url;
+        $apixerrorreport .= "\n\n";
+        $apixerrorreport .= $ch;
+        $apixerrorreport .= "\n\n";
+        ob_start();
+        var_dump($xml);
+        $apixerrorreport .= ob_get_clean();
+
+        if (mb_detect_encoding($apixerrorreport, 'UTF-8', true) !== FALSE) {
+          $apixerrorreport = utf8_decode($apixerrorreport);
+        }
+
+        $params = array(
+          "to" => $yhtiorow["admin_email"],
+          "subject" => "Apix virheilmoitus '{$yhtiorow["yhtio"]}'",
+          "ctype" => "text",
+          "body"=> $apixerrorreport
+        );
+
+        pupesoft_sahkoposti($params);
+
+        foreach ($xml->FreeText as $teksti) {
+          $apix_ulos .= "Tilaviesti: ".$teksti."<br>\n";
+        }
+
+        if ($apixzipfile_resend == "") $apix_ulos .= "Laskut: ".implode(", ", $apix_lasnot)."<br>\n";
+
+        // Siirret‰‰n error-kansioon, paitsi jos faili on seill‰ jo ennest‰‰n...
+        if ($apixzipfile_resend == "") rename("{$pupe_root_polku}/dataout/$apixzipfile", "{$pupe_root_polku}/dataout/apix_error/$apixzipfile");
+      }
     }
 
     return $apix_ulos;
@@ -11607,12 +11635,11 @@ if (!function_exists("lue_kurssit")) {
       }
 
       $query = "UPDATE valuu SET
-                kurssi                 = round(1 / $kurssi, 9),
-                muutospvm              = now(),
-                muuttaja               = '{$kukarow['kuka']}'
-                WHERE yhtio            = '{$kukarow['yhtio']}'
-                AND nimi               = '$valuutta'
-                AND automaattipaivitys = ''";
+                kurssi      = round(1 / $kurssi, 9),
+                muutospvm   = now(),
+                muuttaja    = '{$kukarow['kuka']}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND nimi    = '$valuutta'";
       $result = pupe_query($query);
 
       // t‰m‰ valuutta on nyt p‰ivitetty!
@@ -12456,7 +12483,7 @@ if (!function_exists("luoiban")) {
 }
 
 if (!function_exists("tarkista_sepa")) {
-  function tarkista_sepa($maa) {
+  function tarkista_sepa($maa, $palauta_maat = '') {
 
     // SEPA (Single Euro Payments Area) maat ja niiden IBAN tilinumeron pituus
     $sepa_maat  = array("AL" => "28",
@@ -12511,14 +12538,18 @@ if (!function_exists("tarkista_sepa")) {
       "TR" => "26",
       "GB" => "22");
 
+    if ($palauta_maat == 'K') {
+      // Palautetaan kaikki SEPA-maat
+      return array_keys($sepa_maat);
+    }
     // Maa ei ole sepa maa, palautetaan FALSE
-    if (!isset($sepa_maat[$maa])) {
+    elseif (!isset($sepa_maat[$maa])) {
       return FALSE;
     }
-
-    // Palautetaan IBAN:in pituus, jos on SEPA maa
-    return $sepa_maat[$maa];
-
+    else {
+      // Palautetaan IBAN:in pituus, jos on SEPA maa
+      return $sepa_maat[$maa];
+    }
   }
 }
 
@@ -20243,7 +20274,40 @@ if (!function_exists("pupesoft_sahkoposti")) {
 
     // To ja Subject pit‰‰ olla kunnossa, ett‰ voidaan jatkaa
     if ($email_to == "" or $email_subject == "") {
-      return false;
+      return FALSE;
+    }
+
+    // Laitetaan php-resque jonoon
+    if ($GLOBALS["pupe_resque"] === TRUE) {
+
+      $resque_liitteet = array();
+
+      if (!empty($liitteet)) {
+        foreach ($liitteet as $liite) {
+
+          $attachement_filename    = isset($liite["filename"]) ? $liite["filename"] : "";
+          $attachement_newfilename = isset($liite["newfilename"]) ? $liite["newfilename"] : "";
+          $attachement_ctype       = isset($liite["ctype"]) ? strtoupper($liite["ctype"]) : "";
+
+          $resque_liitteet[] = array("filename"    => utf8_encode($attachement_filename),
+                                     "newfilename" => utf8_encode($attachement_newfilename),
+                                     "ctype"       => utf8_encode($attachement_ctype));
+        }
+      }
+
+      $resque_args = array(
+              'user'          => $kukarow["eposti"],
+              'error_message' => utf8_encode(t("S‰hkˆpostin l‰hetys ep‰onnistui").": $email_to"),
+              'from'          => $yhtiorow["postittaja_email"],
+              'from_name'     => utf8_encode($yhtiorow["nimi"]),
+              'to'            => $email_to,
+              'cc'            => $email_cc,
+              'subject'       => utf8_encode($email_subject),
+              'body'          => utf8_encode($email_body),
+              'attachements'  => $resque_liitteet);
+
+      Resque::enqueue('PupeEmail', 'EmailWorker', $resque_args);
+      return TRUE;
     }
 
     $content = "";
@@ -20372,9 +20436,7 @@ if (!function_exists("pupesoft_sahkoposti")) {
     $content .= "--\n";
 
     $boob = mail($email_to, mb_encode_mimeheader($email_subject, "ISO-8859-1", "Q"), $content, $header, "-f {$yhtiorow["postittaja_email"]}");
-
     if ($boob === FALSE) echo t("S‰hkˆpostin l‰hetys ep‰onnistui").": $email_to<br>";
-
     return $boob;
   }
 }

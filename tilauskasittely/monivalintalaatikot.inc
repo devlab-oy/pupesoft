@@ -616,7 +616,7 @@ if (count($mul_kustp) > 0) {
       $lisa_haku_kustp = " and asiakas.kustannuspaikka in ($kustpt) ";
       $lisa .= " and asiakas.kustannuspaikka in ($kustpt) ";
     }
-    elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== FALSE) {
+    elseif (strpos($_SERVER['SCRIPT_NAME'], "myyntiseuranta") !== false) {
       if (isset($kustapvalinta) and $kustapvalinta == "tuote") {
         $lisa_haku_kustp = " and tuote.kustp in ($kustpt) ";
         $lisa .= " and tuote.kustp in ($kustpt) ";
@@ -626,7 +626,7 @@ if (count($mul_kustp) > 0) {
         $lisa .= " and asiakas.kustannuspaikka in ($kustpt) ";
       }
     }
-    elseif (strpos($_SERVER['SCRIPT_NAME'], "tulosseuranta") !== FALSE) {
+    elseif (strpos($_SERVER['SCRIPT_NAME'], "tulosseuranta") !== false) {
       $lisa_haku_kustp = " and tuote.kustp in ($kustpt) ";
       $lisa .= " and tiliointi.kustp in ($kustpt) ";
     }
@@ -2107,6 +2107,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
 
       echo "<option value=''>".t("Ei valintaa")."</option>";
+      echo "<option value='0'>" . t("Ei kustannuspaikkaa" . "</option>");
 
       lapsitasot(0, -1, "0,", $kustparray);
 
@@ -2174,8 +2175,10 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
       echo "<tr>";
 
-      echo "<td nowrap style='padding:0px'><select name='mul_kohde[]' multiple='multiple' size='7' style='width: 100%;' $tunnukset_save $autosubmit>";
-      echo "<option value=''>".t("Ei valintaa")."</option>";
+      echo "<td nowrap style='padding:0px'><select name='mul_kohde[]' multiple='multiple' " .
+        "size='7' style='width: 100%;' $tunnukset_save $autosubmit>";
+      echo "<option value=''>" . t("Ei valintaa") . "</option>";
+      echo "<option value='0'>" . t("Ei kohdetta") . "</option>";
 
       while ($sxrow = mysql_fetch_array($sresult)) {
         $sel = '';
@@ -2231,6 +2234,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
       echo "<td nowrap style='padding:0px'><select name='mul_projekti[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
       echo "<option value=''>".t("Ei valintaa")."</option>";
+      echo "<option value='0'>" . t("Ei projektia") . "</option>";
 
       while ($sxrow = mysql_fetch_array($sresult)) {
         $sel = '';

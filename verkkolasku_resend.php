@@ -226,20 +226,22 @@ if ($handle = opendir($kansio)) {
   while (($lasku = readdir($handle)) !== FALSE) {
 
     // Ei k‰sitell‰ kun Apix tiedostoja
-    if (!preg_match("/Apix_(.*?)_invoices_/", $lasku, $matsit)) {
+    if (!preg_match("/Apix_(.*?)_invoices_([0-9]*?)_/", $lasku, $matsit)) {
       continue;
     }
 
-    $yhtio = $matsit[1];
+    $yhtio    = $matsit[1];
     $yhtiorow = hae_yhtion_parametrit($yhtio);
-    $kukarow = hae_kukarow('admin', $yhtio);
+    $kukarow  = hae_kukarow('admin', $yhtio);
+    $laskunro = $matsit[2];
+
 
     // Jos lasku on liian vanha, ei k‰sitell‰, l‰hetet‰‰n maililla
     if (onko_lasku_liian_vanha($kansio.$lasku)) {
       continue;
     }
 
-    $status = apix_invoice_put_file(TRUE, "", "", $lasku);
+    $status = apix_invoice_put_file($lasku, $laskunro);
     echo "APIX-l‰hetys $status<br>\n";
   }
 

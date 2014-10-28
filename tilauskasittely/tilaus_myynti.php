@@ -182,7 +182,6 @@ if (!isset($tuotteenpainotettukehayht)) $tuotteenpainotettukehayht = array();
 if (!isset($painotettukehayhteensa)) $painotettukehayhteensa = 0;
 if (!isset($hintojen_vaihto)) $hintojen_vaihto = "JOO";
 if (!isset($avaa_rekursiiviset)) $avaa_rekursiiviset = "";
-if (!isset($asiakaskieli)) $asiakaskieli = "";
 
 // Setataan lopetuslinkki, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla
 $tilmyy_lopetus = "{$palvelin2}{$tilauskaslisa}tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
@@ -414,7 +413,6 @@ if ($kukarow["extranet"] != '') {
     $extra_asiakas = mysql_fetch_assoc($result);
     $ytunnus   = $extra_asiakas["ytunnus"];
     $asiakasid   = $extra_asiakas["tunnus"];
-    $asiakaskieli = $extra_asiakas["kieli"];
 
     if ($toim == 'EXTRANET_REKLAMAATIO') {
       $ex_tila = "C";
@@ -2353,7 +2351,6 @@ if ($tee == '') {
           <input type='hidden' name='tyojono' value='$tyojono'>
           <input type='hidden' name='orig_tila' value='$orig_tila'>
           <input type='hidden' name='orig_alatila' value='$orig_alatila'>
-          <input type='hidden' name='asiakaskieli' value='$asiakaskieli'>
           <input type='submit' ACCESSKEY='m' value='".t("Muuta Otsikkoa")."'>
           </form>";
 
@@ -2824,7 +2821,6 @@ if ($tee == '') {
         <input type='hidden' name='tilaustyyppi' value='{$laskurow['tilaustyyppi']}' />
         <input type='hidden' id='syotetty_ytunnus' name='syotetty_ytunnus' value=''>
         <input type='hidden' id='hae_asiakasta_hv_hidden' name='hintojen_vaihto' value='$hintojen_vaihto'>
-        <input type='hidden' id='asiakaskieli' value='{$asiakaskieli}'>";
     echo "</form>";
   }
 
@@ -2840,7 +2836,6 @@ if ($tee == '') {
       <input type='hidden' name='orig_tila' value='$orig_tila'>
       <input type='hidden' name='orig_alatila' value='$orig_alatila'>
       <input type='hidden' name='tilausrivi_alvillisuus' value='$tilausrivi_alvillisuus'>
-      <input type='hidden' name='asiakaskieli' value='$asiakaskieli'>";
 
   // kirjoitellaan otsikko
   echo "<table>";
@@ -3644,7 +3639,7 @@ if ($tee == '') {
 
   // Tarkastetaan onko asiakas myyntikiellossa
   if ($laskurow['liitostunnus'] > 0) {
-    $query = "SELECT myyntikielto, kieli
+    $query = "SELECT myyntikielto
               FROM asiakas
               WHERE yhtio = '$kukarow[yhtio]'
               AND tunnus  = '$laskurow[liitostunnus]'";
@@ -3662,7 +3657,6 @@ if ($tee == '') {
       $muokkauslukko = 'LUKOSSA';
       $myyntikielto = 'MYYNTIKIELTO';
     }
-    $asiakaskieli = $myyntikielto_row['kieli'];
   }
 
   if ($smsnumero != "" and strlen("smsviesti") > 0) {

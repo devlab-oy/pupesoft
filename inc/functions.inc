@@ -11022,7 +11022,7 @@ if (!function_exists('t_tunnus_avainsanat')) {
                   WHERE yhtio = '$kukarow[yhtio]'
                   and selite  = '$row'";
         $sresult = pupe_query($query);
-
+echo "$query <br><br>";
         if (mysql_num_rows($sresult) == 1) {
           $row = mysql_fetch_assoc($sresult);
         }

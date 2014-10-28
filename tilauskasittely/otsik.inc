@@ -172,7 +172,6 @@ if (($nimi != '' and !isset($jatka) and $asiakasid == 0 and !isset($vaihdatoim_a
   }
 
   $asiakasid  = "";
-  $asiakaskieli = '';
   $ahlopetus   = "tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//mista=$mista//tila=$tila//from=ASIAKASYLLAPITO";
   $lause     = "<font class='head'>".t("Valitse asiakas").":</font><hr><br>";
 
@@ -637,7 +636,6 @@ if ($tila == "" and !isset($jatka)) {
   echo "<input type='hidden' name='mista' value='$mista'>";
   echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
   echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
-  echo "<input type='hidden' name='asiakaskieli' value='$asiakaskieli'>";
 
   if ($asiakasid != "" or $kukarow["kesken"] != 0 or $kopioitava_otsikko != 0) {
 
@@ -1099,7 +1097,6 @@ if ($tila == "" and !isset($jatka)) {
         <input type='hidden' name='kauppatapahtuman_luonne'      value = '$srow[kauppatapahtuman_luonne]'>
         <input type='hidden' name='asentaja'              value = '$asentaja'>
         <input type='hidden' name='tyojono'              value = '$tyojono'>
-        <input type='hidden' name='asiakaskieli'         value='$asiakaskieli'>
         <input type='hidden' name='liitostunnus'            value = '$srow[liitostunnus]'>";
 
     echo "<td valign='top' style='padding:0px;'>";

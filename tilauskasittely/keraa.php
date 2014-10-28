@@ -2368,7 +2368,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
                 COUNT(DISTINCT tilausrivi.tunnus) AS 'riveja',
                 kuka.nimi as keraaja_nimi,
                 kuka.keraajanro as keraaja_nro,
-                lasku.ohjelma_moduli,
+                kerayserat.ohjelma_moduli,
                 min(lasku.toimaika) toimaika,
                 min(lasku.ytunnus) ytunnus,
                 min(lasku.kerayspvm) kerayspvm

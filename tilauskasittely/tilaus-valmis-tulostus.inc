@@ -78,19 +78,37 @@ $chk_row = mysql_fetch_assoc($chk_result);
 // Katsotaan, että tämä keräyslista ei ole jo tulostettu
 if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] != 0) {
 
+  // jos tilauksia on useita niin laitetaan niille yhteinen kerayslista-tunnus
+  if ($laskuja > 1) {
+    $tunnukset = explode(',', $tilausnumeroita);
+    $kerayslistatunnus = trim($tunnukset[0]);
+  }
+  else {
+    $kerayslistatunnus = 0;
+  }
+
   // Päivitetään tilaus pois jonosta ja avataan lukot
   if ($toim == 'VASTAANOTA_REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
     $query = "UPDATE lasku SET
-              alatila     = 'C'
-              WHERE yhtio = '$kukarow[yhtio]'
+              alatila     = 'C',
+              lahetepvm   = now(),
+              hyvak3      = '{$kukarow['kuka']}',
+              h3time      = now(),
+              kerayslista = '{$kerayslistatunnus}'
+              WHERE yhtio = '{$kukarow['yhtio']}'
               and tila    = 'C'
               and alatila = 'B'
-              and tunnus  in ($tilausnumeroita)";
+              and tunnus  in ({$tilausnumeroita})";
+    pupe_query($query);
   }
   else {
     $query = "UPDATE lasku SET
               tila        = 'L',
-              alatila     = 'A'
+              alatila     = 'A',
+              lahetepvm   = now(),
+              hyvak3      = '{$kukarow['kuka']}',
+              h3time      = now(),
+              kerayslista = '{$kerayslistatunnus}'
               WHERE yhtio = '$kukarow[yhtio]'
               and tunnus  in ($tilausnumeroita)
               AND tila    = 'N'
@@ -99,7 +117,11 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
 
     if ($yhtiorow['kerayserat'] != '' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
       $query = "UPDATE lasku SET
-                alatila     = 'A'
+                alatila     = 'A',
+                lahetepvm   = now(),
+                hyvak3      = '{$kukarow['kuka']}',
+                h3time      = now(),
+                kerayslista = '{$kerayslistatunnus}'
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tunnus  in ($tilausnumeroita)
                 AND tila    = 'G'
@@ -544,16 +566,24 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
 
     if ($toim == 'VASTAANOTA_REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
       $query = "UPDATE lasku SET
-                alatila     = 'B'
+                alatila     = 'B',
+                lahetepvm   = '0000-00-00 00:00:00',
+                hyvak3      = '',
+                h3time      = '0000-00-00 00:00:00',
+                kerayslista = 0
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tila    = 'C'
-                and alatila = 'C'
                 and tunnus  in ($tilausnumeroita)";
+      pupe_query($query);
     }
     else {
       $query = "UPDATE lasku SET
                 tila        = 'N',
-                alatila     = 'A'
+                alatila     = 'A',
+                lahetepvm   = '0000-00-00 00:00:00',
+                hyvak3      = '',
+                h3time      = '0000-00-00 00:00:00',
+                kerayslista = 0
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tila    = 'L'
                 and tunnus  in ($tilausnumeroita)";
@@ -561,7 +591,11 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
 
       if ($yhtiorow['kerayserat'] != '' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
         $query = "UPDATE lasku SET
-                  alatila     = 'J'
+                  alatila     = 'J',
+                  lahetepvm   = '0000-00-00 00:00:00',
+                  hyvak3      = '',
+                  h3time      = '0000-00-00 00:00:00',
+                  kerayslista = 0
                   WHERE yhtio = '$kukarow[yhtio]'
                   and tila    = 'G'
                   and tunnus  in ($tilausnumeroita)";
@@ -573,64 +607,16 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   // jos meillä ei ollut lähetteen tulostusongelmia
   if ($virheellinen != 'X') {
 
-    // jos tilauksia on useita niin laitetaan niille yhteinen kerayslista-tunnus
-    if ($laskuja > 1) {
-      $tunnukset = explode(',', $tilausnumeroita);
-      $kerayslistatunnus = trim($tunnukset[0]);
-    }
-    else {
-      $kerayslistatunnus = 0;
-    }
-
     $ei_pakkaamoa_lisaviesti = '';
 
     if (isset($ei_pakkaamoa_selected) and $ei_pakkaamoa_selected == 'checked' and $ei_pakkaamoa == '') {
-      $ei_pakkaamoa_lisaviesti = ", sisviesti2 = concat(sisviesti2, ' $kukarow[kuka] ".t("halusi tilauksen pakkaamolokeroihin")." ".tv1dateconv(date("Y-m-d H:i:s"))."')";
-    }
+      $ei_pakkaamoa_lisaviesti = "sisviesti2 = concat(sisviesti2, ' $kukarow[kuka] ".t("halusi tilauksen pakkaamolokeroihin")." ".tv1dateconv(date("Y-m-d H:i:s"))."')";
 
-    if ($toim == 'VASTAANOTA_REKLAMAATIO' and $yhtiorow['reklamaation_kasittely'] == 'U') {
       $query = "UPDATE lasku SET
-                alatila     = 'C',
-                lahetepvm   = now(),
-                hyvak3      = '{$kukarow['kuka']}',
-                h3time      = now(),
-                kerayslista = '$kerayslistatunnus'
-                $ei_pakkaamoa_lisaviesti
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tila    = 'C'
-                and alatila = 'B'
-                and tunnus  in ($tilausnumeroita)";
+                {$ei_pakkaamoa_lisaviesti}
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                and tunnus  in ({$tilausnumeroita})";
       pupe_query($query);
-    }
-    else {
-      $query = "UPDATE lasku SET
-                tila        = 'L',
-                alatila     = 'A',
-                lahetepvm   = now(),
-                hyvak3      = '{$kukarow['kuka']}',
-                h3time      = now(),
-                kerayslista = '$kerayslistatunnus'
-                $ei_pakkaamoa_lisaviesti
-                WHERE yhtio = '$kukarow[yhtio]'
-                and tunnus  in ($tilausnumeroita)
-                AND tila    = 'N'
-                AND alatila = '$tilausalatila'";
-      pupe_query($query);
-
-      if ($yhtiorow['kerayserat'] != '' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
-        $query = "UPDATE lasku SET
-                  alatila     = 'A',
-                  lahetepvm   = now(),
-                  hyvak3      = '{$kukarow['kuka']}',
-                  h3time      = now(),
-                  kerayslista = '$kerayslistatunnus'
-                  $ei_pakkaamoa_lisaviesti
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tunnus  in ($tilausnumeroita)
-                  AND tila    = 'G'
-                  AND alatila = '$siirtoalatila'";
-        pupe_query($query);
-      }
     }
   }
 }

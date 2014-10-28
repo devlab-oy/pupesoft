@@ -20,7 +20,7 @@ if ($copyready != '') {
   $query = "SELECT *
             FROM kuka
             WHERE yhtio = '{$toyhtio}'
-            AND kuka = '{$tokuka}'";
+            AND kuka    = '{$tokuka}'";
   $tokuka_res = pupe_query($query);
   $tokuka_row = mysql_fetch_assoc($tokuka_res);
 

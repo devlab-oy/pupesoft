@@ -1305,9 +1305,8 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       echo "<font class='message'>", t("Inventointilista tulostuu!"), "</font><br><br>";
 
       //poistetaan tmp file samantien kuleksimasta...
-      system("rm -f $filenimi");
-      system("rm -f ".$filenimi.".ps");
-      system("rm -f ".$filenimi.".pdf");
+      unlink($filenimi);
+      unlink($filenimi.".ps");
     }
 
     $tee = "";

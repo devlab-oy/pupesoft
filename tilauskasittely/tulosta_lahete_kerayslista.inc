@@ -1430,9 +1430,6 @@ if (!function_exists('print_pdf_kerayslista')) {
         echo t("Keräyslista tulostuu")."...<br>";
         $line = exec("$komento $pdffilenimi", $output, $returnvalue);
       }
-
-      //poistetaan tmp file samantien kuleksimasta...
-      unlink("$pdffilenimi");
     }
   }
 }

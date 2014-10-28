@@ -2368,6 +2368,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
                 COUNT(DISTINCT tilausrivi.tunnus) AS 'riveja',
                 kuka.nimi as keraaja_nimi,
                 kuka.keraajanro as keraaja_nro,
+                lasku.ohjelma_moduli,
                 min(lasku.toimaika) toimaika,
                 min(lasku.ytunnus) ytunnus,
                 min(lasku.kerayspvm) kerayspvm
@@ -2527,9 +2528,12 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
         if (isset($row['varastonimi'])) echo "<br>{$row['varastonimi']}";
 
         echo "</td>";
-
+        
+        $_moduuli = '';
         if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
-          echo "<td valign='top'>{$row['keraysera']}</td>";
+
+          if ($row['ohjelma_moduli'] != 'PUPESOFT') $_moduuli = "<br><font class='error'>{$row['ohjelma_moduli']}</font>";
+          echo "<td valign='top'>{$row['keraysera']}{$_moduuli}</td>";
         }
 
         echo "<td valign='top'>{$row['tunnus']}</td>";

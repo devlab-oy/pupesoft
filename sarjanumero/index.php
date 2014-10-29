@@ -9,7 +9,12 @@ elseif (@include_once "inc/parametrit.inc");
 echo "<meta name='viewport' content='width=device-width, maximum-scale=1.0' />\n";
 echo "<link rel='stylesheet' type='text/css' href='ipad.css' />\n";
 echo "<body>";
-echo "<div class='header'><h1>P&Auml;&Auml;VALIKKO</h1></div>";
+
+echo "<div class='header'>";
+echo "<h1>";
+echo t("PÄÄVALIKKO");
+echo "</h1>";
+echo "</div>";
 
 echo "<div class='main valikko'>";
 
@@ -33,7 +38,7 @@ if (tarkista_oikeus("sarjanumero/hylky.php")) {
   echo "<p><a href='hylky.php' class='button'>Hylk&auml;&auml; rulla</a></p>";
 }
 
-echo "<p><a href='{$palvelin2}logout.php?location={$palvelin2}sarjanumero' class='button'>", t("Lopeta"), "</a></p>";
+echo "<p><a href='{$palvelin2}logout.php?location={$palvelin2}sarjanumero' class='button'>", t("Kirjaudu ulos"), "</a></p>";
 
 echo "</div>";
 echo "</body>";

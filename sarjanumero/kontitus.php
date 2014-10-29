@@ -370,17 +370,33 @@ else {
   $view = 'konttiviite';
 }
 
+echo "<div class='header'>";
 
-echo "
-<div class='header'>
-<div style='width:20%; float:left; text-align:left;'>xx</div>
-<div style='width:60%; margin:0 auto; float:left;  text-align:center;'><h1>" . t("KONTITUS") . "</h1></div>
-<div style='width:20%; float:left;  text-align:right;'>xx</div>
-</div>";
+echo "<div class='header_left'>";
+echo "<a href='index.php' class='button header_button'>";
+echo "<span>";
+echo t("P‰‰valikko");
+echo "</span>";
+echo "</a>";
+echo "</div>";
 
+echo "<div class='header_center'>";
+echo "<h1>";
+echo t("KONTITUS");
+echo "</h1>";
+echo "</div>";
+
+echo "<div class='header_right'>";
+echo "<a href='{$palvelin2}logout.php?location={$palvelin2}sarjanumero' class='button header_button'>";
+echo "<span>";
+echo t("Kirjaudu ulos");
+echo "</span>";
+echo "</a>";
+echo "</div>";
+
+echo "</div>";
 
 echo "<div style='text-align:center;padding:10px; margin:0 auto; width:750px;'>";
-
 
 echo "<div class='error center'>";
 

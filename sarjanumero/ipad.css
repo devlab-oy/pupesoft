@@ -25,7 +25,7 @@ body {
 
 h1 {
   margin: 0;
-  padding-top: 5px;
+  padding: 5px;
   font-size: 1.2em;
   font-weight: bold;
 }
@@ -72,8 +72,27 @@ p {
 .header {
   background-color: #eeeeff;
   border-bottom: 1px solid #aaa;
-  padding:5px;
+  padding:0px;
   overflow:auto;
+  text-align: center;
+}
+
+.header_left {
+  width:20%;
+  float:left;
+  text-align:left;
+}
+
+.header_right {
+  width:20%;
+  float:left;
+  text-align:right;
+}
+
+.header_center {
+  width:60%;
+  float:left;
+  text-align:center;
 }
 
 .main {
@@ -139,7 +158,22 @@ input[type="button"] {
   padding:10px 20px;
 }
 
-.aktiivi {  color: green; border: 1px solid green;}
+.header_button {
+  -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+  padding:20px;
+}
+
+.header span {
+  position:relative;
+  top:4px;
+}
+
+.aktiivi {
+  color: green;
+  border: 1px solid green;
+}
 
 th {
   text-align: left;

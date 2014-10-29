@@ -56,11 +56,31 @@ if (isset($submit)) {
   }
 }
 
+echo "<div class='header'>";
 
-echo "
-<div class='header'>
-  <h1>", t("Rullan hylkääminen"), "</h1>
-</div>";
+echo "<div class='header_left'>";
+echo "<a href='index.php' class='button header_button'>";
+echo "<span>";
+echo t("Päävalikko");
+echo "</span>";
+echo "</a>";
+echo "</div>";
+
+echo "<div class='header_center'>";
+echo "<h1>";
+echo t("RULLAN HYLKÄÄMINEN");
+echo "</h1>";
+echo "</div>";
+
+echo "<div class='header_right'>";
+echo "<a href='{$palvelin2}logout.php?location={$palvelin2}sarjanumero' class='button header_button'>";
+echo "<span>";
+echo t("Kirjaudu ulos");
+echo "</span>";
+echo "</a>";
+echo "</div>";
+
+echo "</div>";
 
 if (count($errors) > 0) {
   echo "<div class='error' style='text-align:center'>";

@@ -264,9 +264,6 @@ if (isset($submit)) {
       $view = 'sarjanumero';
     }
     break;
-  case 'takaisin':
-    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=index.php'>";
-    die;
   default:
     $errors[] = 'error';
   }
@@ -275,10 +272,31 @@ else {
   $view = 'sarjanumero';
 }
 
-echo "
-<div class='header'>
-  <h1>", t("Tuloutus sarjanumerolla"), "</h1>
-</div>";
+echo "<div class='header'>";
+
+echo "<div class='header_left'>";
+echo "<a href='index.php' class='button header_button'>";
+echo "<span>";
+echo t("P‰‰valikko");
+echo "</span>";
+echo "</a>";
+echo "</div>";
+
+echo "<div class='header_center'>";
+echo "<h1>";
+echo t("TULOUTUS");
+echo "</h1>";
+echo "</div>";
+
+echo "<div class='header_right'>";
+echo "<a href='{$palvelin2}logout.php?location={$palvelin2}sarjanumero' class='button header_button'>";
+echo "<span>";
+echo t("Kirjaudu ulos");
+echo "</span>";
+echo "</a>";
+echo "</div>";
+
+echo "</div>";
 
 echo "<div class='error' style='text-align:center'>";
 foreach ($errors as $error) {

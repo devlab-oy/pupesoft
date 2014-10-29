@@ -2820,7 +2820,7 @@ if ($tee == '') {
         <input type='hidden' name='yhtiotoimipaikka' value='{$laskurow['yhtio_toimipaikka']}' />
         <input type='hidden' name='tilaustyyppi' value='{$laskurow['tilaustyyppi']}' />
         <input type='hidden' id='syotetty_ytunnus' name='syotetty_ytunnus' value=''>
-        <input type='hidden' id='hae_asiakasta_hv_hidden' name='hintojen_vaihto' value='$hintojen_vaihto'>
+        <input type='hidden' id='hae_asiakasta_hv_hidden' name='hintojen_vaihto' value='$hintojen_vaihto'>";
     echo "</form>";
   }
 
@@ -2835,7 +2835,7 @@ if ($tee == '') {
       <input type='hidden' name='projektilla' value='$projektilla'>
       <input type='hidden' name='orig_tila' value='$orig_tila'>
       <input type='hidden' name='orig_alatila' value='$orig_alatila'>
-      <input type='hidden' name='tilausrivi_alvillisuus' value='$tilausrivi_alvillisuus'>
+      <input type='hidden' name='tilausrivi_alvillisuus' value='$tilausrivi_alvillisuus'>";
 
   // kirjoitellaan otsikko
   echo "<table>";

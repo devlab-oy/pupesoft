@@ -181,7 +181,7 @@ if ($faarao == 'TUTKHM') {
               }
 
               ///* Testataan kolmanneks, löytyykö edes tuotenumero ja kappale mätchiä jossa kpl:ää on riittävästi *///
-              if ($rivirow['varattu'] > $apukpl) {
+              if ($rivirow['varattu'] > $apukpl and $apukpl != 0) {
 
                 $filehinta = $hinta;
 

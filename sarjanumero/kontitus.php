@@ -370,16 +370,20 @@ else {
   $view = 'konttiviite';
 }
 
+
 echo "
 <div class='header'>
-  <h1>", t("KONTITUS"), "</h1>
+<div style='width:20%; float:left; text-align:left;'>xx</div>
+<div style='width:60%; margin:0 auto; float:left;  text-align:center;'><h1>" . t("KONTITUS") . "</h1></div>
+<div style='width:20%; float:left;  text-align:right;'>xx</div>
 </div>";
+
 
 echo "<div style='text-align:center;padding:10px; margin:0 auto; width:750px;'>";
 
 
-echo "
-<div class='error center'>";
+echo "<div class='error center'>";
+
 foreach ($errors as $error) {
   echo $error."<br>";
 }
@@ -414,12 +418,10 @@ if ($view == 'konttiviite') {
 
   echo "
   <form method='post' action=''>
-    <div style='text-align:center;padding:10px;'>
       <label for='konttiviite'>", t("Konttiviite"), "</label><br>
       <input type='text' id='konttiviite' name='konttiviite' style='margin:10px;' />
       <br>
       <button name='submit' value='konttiviite' onclick='submit();' class='button'>", t("OK"), "</button>
-    </div>
   </form>
 
   <script type='text/javascript'>
@@ -456,18 +458,13 @@ if ($view == 'konttiviite_maxkg') {
 
     echo "<div class='ohjediv'>";
     echo "Bookkaussanoman kontitusohje:<br><br>";
-
     echo $info['kontitusohje'];
-
     echo "</div>";
 
     echo "</td>";
     echo "</tr>";
 
-
   }
-
-
 
   echo "<tr>";
   echo "<td colspan='2'  style='padding:8px 0'>Rullien sijainnit:</td>";
@@ -487,7 +484,6 @@ if ($view == 'konttiviite_maxkg') {
   echo "</tr>";
 
   echo "</table>";
-
   echo "</div>";
 
   echo "
@@ -512,7 +508,6 @@ if ($view == 'kontituslista') {
 
   echo "
   <form method='post' action=''>
-    <div style='text-align:center;padding:10px;'>
       <label for='sarjanumero'>", t("Sarjanumero"), "</label><br>
       <input type='text' id='sarjanumero' name='sarjanumero' style='margin:10px;' />
       <input type='hidden' name='konttiviite' value='{$konttiviite}' />
@@ -521,7 +516,6 @@ if ($view == 'kontituslista') {
       <input type='hidden' name='aktiivinen_kontti' value='{$aktiivinen_kontti}' />
       <br>
       <button name='submit' value='sarjanumero' onclick='submit();' class='button'>", t("OK"), "</button>
-    </div>
   </form>
 
   <script type='text/javascript'>
@@ -562,28 +556,23 @@ if ($view == 'kontituslista') {
       </div>";
     }
 
-    echo "<div>";
 
     foreach ($kontitetut as $rulla) {
+
       $kontitusinfo = explode("/", $rulla['konttinumero']);
       $konttinumero = $kontitusinfo[0];
-      echo "Rulla " . $rulla['sarjanumero'] . " kontissa " . $konttinumero . ".<br>";
+
+      echo "<div class='listadiv kontissa'>";
+      echo "Rulla " . $rulla['sarjanumero'] . " kontissa " . $konttinumero;
+      echo "</div>";
     }
 
     foreach ($kontittamattomat as $rulla) {
-      echo "Rulla " . $rulla['sarjanumero'] . " kontittamatta.<br>";
+      echo "<div class='listadiv'>";
+      echo "Rulla " . $rulla['sarjanumero'] . " kontittamatta";
+      echo "</div>";
     }
 
-    echo "</div>";
-
-  echo "</div>";
-
-
-}
-
-if ($view == 'lahetetty') {
-  echo "<div style='text-align:center;'>";
-  echo "Sanoma lähetetty.";
   echo "</div>";
 }
 

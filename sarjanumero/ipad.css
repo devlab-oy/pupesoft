@@ -70,12 +70,10 @@ p {
 /******************************/
 
 .header {
-  display: inline-block;
-  text-align: center;
-  width: 100%;
   background-color: #eeeeff;
   border-bottom: 1px solid #aaa;
   padding:5px;
+  overflow:auto;
 }
 
 .main {
@@ -158,4 +156,19 @@ th {
 
 #logindiv {
   text-align:center;
+}
+
+.listadiv {
+  background-color:#FFB2B2;
+  padding:4px;
+  border:1px solid #A4A4A4;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  margin:2px auto;
+  width:300px;
+}
+
+.kontissa{
+  background-color:#A3EDC8;
 }

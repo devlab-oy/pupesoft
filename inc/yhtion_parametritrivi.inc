@@ -2236,6 +2236,18 @@ if ($fieldname == "myyntitilaus_osatoimitus") {
   $jatko = 0;
 }
 
+if ($fieldname == "myyntitilaus_ytunnus_syotto") {
+
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value = ''>".t("Myyntitilauksella ei voi syöttää ytunnusta käsin")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("Myyntitilauksella voi syöttää ytunnuksen käsin")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "varaako_jt_saldoa") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

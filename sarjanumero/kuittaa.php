@@ -67,9 +67,7 @@ echo "<div class='header'>";
 
 echo "<div class='header_left'>";
 echo "<a href='index.php' class='button header_button'>";
-echo "<span>";
 echo t("P‰‰valikko");
-echo "</span>";
 echo "</a>";
 echo "</div>";
 
@@ -81,9 +79,7 @@ echo "</div>";
 
 echo "<div class='header_right'>";
 echo "<a href='{$palvelin2}logout.php?location={$palvelin2}sarjanumero' class='button header_button'>";
-echo "<span>";
-echo t("Kirjaudu ulos");
-echo "</span>";
+echo t("Kirjaudu&nbsp;ulos");
 echo "</a>";
 echo "</div>";
 

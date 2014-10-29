@@ -25,7 +25,6 @@ body {
 
 h1 {
   margin: 0;
-  padding: 5px;
   font-size: 1.2em;
   font-weight: bold;
 }
@@ -163,11 +162,7 @@ input[type="button"] {
   -webkit-border-radius: 0px;
   border-radius: 0px;
   padding:20px;
-}
-
-.header span {
-  position:relative;
-  top:4px;
+  font-size:1em;
 }
 
 .aktiivi {

@@ -374,7 +374,7 @@ if ($tee == 'laskelma') {
       if (mysql_num_rows($asiakasres) != 0) $aineistoon = $_red;
     }
 
-    if (mysql_num_rows($laskures) == 0) $aineistoon = $_red;
+    if (mysql_num_rows($laskures) == 0 or $laskurow['laskunro'] == 0) $aineistoon = $_red;
 
     $erikoiskoodi = ($laskelma == 'a' and $row['veropros'] == 0) ? '03' : '';
 

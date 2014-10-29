@@ -5573,7 +5573,6 @@ if ($tee == '') {
             <input type='hidden' name='tiedot_laskulta' value='$tiedot_laskulta'>
             <input type='hidden' name='orig_tila' value = '$orig_tila'>
             <input type='hidden' name='orig_alatila' value = '$orig_alatila'>
-            <input type='hidden' name='asiakaskieli' value = 'asiakaskieli'>
             ".t("Verolliset hinnat").": <input type='radio' onclick='submit();' name='tilausrivi_alvillisuus' value='K' $sele[K]>
             ".t("Verottomat hinnat").": <input type='radio' onclick='submit();' name='tilausrivi_alvillisuus' value='E' $sele[E]>
             </form>";

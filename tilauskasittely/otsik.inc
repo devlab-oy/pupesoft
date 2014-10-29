@@ -1010,15 +1010,17 @@ if ($tila == "" and !isset($jatka)) {
 
     echo "</select></td></tr>";
 
-    echo "<tr>
-            <td valign='top'>".t("Puh").": </td>
-            <td><input type='tel' name='tpuh' size='35' value='$srow[toim_puh]'></td>
-          </tr>";
+    if ($yhtiorow["vahvistusviesti_asiakkaalle"]) {
+      echo "<tr>
+              <td valign='top'>" . t("Puh") . ": </td>
+              <td><input type='tel' name='tpuh' size='35' value='$srow[toim_puh]'></td>
+            </tr>";
 
-    echo "<tr>
-            <td valign='top'>".t("Email").": </td>
-            <td><input type='email' name='temail' size='35' value='$srow[toim_email]'></td>
-          </tr>";
+      echo "<tr>
+              <td valign='top'>" . t("Email") . ": </td>
+              <td><input type='email' name='temail' size='35' value='$srow[toim_email]'></td>
+            </tr>";
+    }
 
     if ($yhtiorow['myyntitilaus_ytunnus_syotto'] == 'K' and $asiarow['laji'] != 'H') {
       echo "<tr>";

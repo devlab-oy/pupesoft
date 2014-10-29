@@ -100,9 +100,9 @@ if ($tee == "ALOITAKOROTUS") {
             JOIN tiliointi use index (tositerivit_index) on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]') and tiliointi.tapvm > lasku.erpcm and tiliointi.korjattu = '')
             WHERE lasku.tunnus     = laskut.tunnus
             $konslisa
-            GROUP BY asiakas.ytunnus, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp
+            GROUP BY asiakas.ytunnus, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp, asiakas.tunnus
             HAVING korkosumma > 0 $korkolisa
-            ORDER BY asiakas.ytunnus";
+            ORDER BY asiakas.ytunnus, asiakas.tunnus";
   $result = pupe_query($query);
 
   $korotettavat = array();

@@ -454,7 +454,7 @@ if (count($_POST) > 0) {
           }
 
           // Jos gruupataan enemmän kuin yksi taso niin tehdään välisumma
-          if ($gluku > 1 and $edluku != $row[mysql_field_name($result, 0)] and $edluku != 'x' and strpos($group, ',') !== FALSE and substr($group, 0, 13) != "tuote.tuoteno") {
+          if ($gluku > 1 and $edluku != $row[mysql_field_name($result, 0)] and $edluku != 'x' and strpos($group, ',') !== FALSE and $mukaan != 'tuote') {
             $excelsarake = $myyntiind = $kateind = $nettokateind = $myykplind = 0;
 
             foreach ($valisummat as $vnim => $vsum) {
@@ -479,7 +479,6 @@ if (count($_POST) > 0) {
 
           $edluku = $row[mysql_field_name($result, 0)];
 
-          // hoidetaan pisteet pilkuiksi!!
           if (is_numeric($row[$fieldname]) and (mysql_field_type($result, $i) == 'real' or mysql_field_type($result, $i) == 'int' or substr($fieldname, 0 , 4) == 'kate')) {
             if ($elements <= $rivilimitti) echo "<td valign='top' align='right'>".sprintf("%.02f", $row[$fieldname])."</td>";
 

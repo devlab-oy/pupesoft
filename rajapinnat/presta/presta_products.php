@@ -92,7 +92,7 @@ class PrestaProducts extends PrestaClient {
    */
   public function get_product($id) {
     try {
-      $response = $this->get('products', $id);
+      $response = $this->get($id);
     }
     catch (Exception $e) {
       throw $e;

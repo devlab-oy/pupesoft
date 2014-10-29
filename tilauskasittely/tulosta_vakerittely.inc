@@ -309,8 +309,7 @@ if (!function_exists('print_pdf_vakadr')) {
             $kutsu .= ", ".trim($laskurow["nimi"]);
           }
 
-          if (@include "../inc/sahkoposti.inc");
-          elseif (@include "inc/sahkoposti.inc");
+          if (@include "inc/sahkoposti.inc");
           else include "sahkoposti.inc";
         }
         elseif ($komento != '' and $komento != 'edi') {
@@ -319,8 +318,5 @@ if (!function_exists('print_pdf_vakadr')) {
         }
       }
     }
-
-    // poistetaan tmp file samantien kuleksimasta...
-    system("rm -f $pdffilenimi");
   }
 }

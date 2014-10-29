@@ -2,6 +2,15 @@
 
 $pupe_DataTables = 'keikka';
 
+if (isset($_POST["tee"])) {
+  if ($_POST["tee"] == 'lataa_tiedosto') {
+    $lataa_tiedosto = 1;
+  }
+  if (isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') {
+    $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
+  }
+}
+
 if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php")  !== FALSE) {
 
   if ($_REQUEST["toiminto"] == "kalkyyli" or $_REQUEST["toiminto"] == "kaikkiok") {
@@ -238,6 +247,25 @@ if ($toiminto == "tulosta") {
   if ($komento["Tavaraetiketti"] != '') {
     require 'tulosta_tavaraetiketti.inc';
   }
+}
+
+if ($toiminto == "tulosta_hintalaput") {
+  require "tulosta_hintalaput.inc";
+
+  $tuotteet = hae_tuotteet_hintalappuja_varten($otunnus, $kukarow);
+  list($tiedostonimi, $kaunisnimi) = tulosta_hintalaput($tuotteet);
+
+  echo "<font class='ok'>" . t("Hintalaput tulostettu") . "</font>";
+
+  echo "<form method='post' class='multisubmit'>";
+  echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+  echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
+  echo "<input type='hidden' name='kaunisnimi' value='{$kaunisnimi}'>";
+  echo "<input type='hidden' name='tmpfilenimi' value='{$tiedostonimi}'>";
+  echo "<input type='submit' value='" . t("Tallenna hintalaput") . "'>";
+  echo "</form>";
+
+  $toiminto = "";
 }
 
 // syötetään keikan lisätietoja
@@ -1446,6 +1474,11 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
     $nappikeikka .= "<input type='hidden' name='toiminto' value='tulosta'>";
     $nappikeikka .= "<input type='submit' value='".t("Tulosta paperit")."'>";
     $nappikeikka .= "$formloppu";
+
+    $nappikeikka .= $formalku;
+    $nappikeikka .= "<input type='hidden' name='toiminto' value='tulosta_hintalaput'/>";
+    $nappikeikka .= "<input type='submit' value='" . t("Tulosta hintalaput") . "'/>";
+    $nappikeikka .= $formloppu;
   }
 
   // jos on kohdistettuja rivejä ja lisätiedot on syötetty ja varastopaikat on ok ja on vielä jotain vietävää varastoon

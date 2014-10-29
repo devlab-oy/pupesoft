@@ -1103,9 +1103,6 @@ if ($asiakasid > 0) {
 
         echo "<br><br>".t("Tulostetaan alennustaulukko $kukarow[eposti]")."...<br>";
       }
-
-      //poistetaan tmp file samantien kuleksimasta...
-      system("rm -f $pdffilenimi");
     }
   }
 }

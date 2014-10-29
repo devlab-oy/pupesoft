@@ -163,7 +163,7 @@ if ($tee == 'laskelma') {
     $tilaustyyppi = "";
     $laskun_lisatiedot_lisa = "";
     $verolisa = "";
-    $laskun_nimi_lisa_select = "trim(concat(lasku.nimi, ' ', lasku.nimitark)) nimi,";
+    $laskun_nimi_lisa_select = "lasku.nimi, ";
   }
 
   $query = "SELECT

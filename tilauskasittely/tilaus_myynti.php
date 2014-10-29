@@ -1792,7 +1792,14 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
       $aika=date("d.m.y @ G:i:s", time());
       echo "<font class='message'>$otsikko $kukarow[kesken] ".t("valmis")."! ($aika) $kaikkiyhteensa $laskurow[valkoodi]</font><br><br>";
 
-      if (($kukarow["kassamyyja"] != '' or $kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "") and $kateinen != '' and $kukarow['extranet'] == '' and $kateisohitus == "") {
+      if (($kukarow["kassamyyja"] != '' or
+           $kukarow["dynaaminen_kassamyynti"] != "" or
+           $yhtiorow["dynaaminen_kassamyynti"] != "") and
+          $kateinen != '' and
+          $kukarow['extranet'] == '' and
+          $kateisohitus == "" and
+          ($yhtiorow["maksupaate_kassamyynti"] != "K" or $kateismaksu["kateinen"] != "")
+      ) {
         echo "  <script type='text/javascript' language='JavaScript'>
             <!--
               function update_summa(kaikkiyhteensa) {

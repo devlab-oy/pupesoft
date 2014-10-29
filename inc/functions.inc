@@ -17928,10 +17928,11 @@ if (!function_exists("tee_keraysera")) {
     #foreach ($fixed_main_array as $key => $tilaukset) {
 
     $_fixed_main_array_count = count($fixed_main_array);
+    $_fixed_main_array_keys = array_keys($fixed_main_array);
 
-    for ($_main_i = 1; $_fixed_main_array_count >= $_main_i; $_main_i++) {
+    for ($_main_i = 0; $_fixed_main_array_count >= $_main_i; $_main_i++) {
 
-      $key = $_main_i;
+      $key = $_fixed_main_array_keys[$_main_i];
       $tilaukset = $fixed_main_array[$key];
 
       if (isset($kaytettava_pakkaus) and $kaytettava_pakkaus != "" and $eran_koko > 0 and $pakkaukset[$kaytettava_pakkaus]['yksin_eraan'] == 'K') {
@@ -18329,9 +18330,10 @@ if (!function_exists("tee_keraysera")) {
             $kukarow['debugstring'] .= "(E1001): Katsotaan nurkan takaa<br>\n";
           }
 
-          for ($_nurkka_i = ($_main_i + 1); $_fixed_main_array_count >= $_nurkka_i; $_nurkka_i++) {
+          for ($_nurkka_i = ($_main_i + 1); $_fixed_main_array_count > $_nurkka_i; $_nurkka_i++) {
 
-            $_tilaukset = $fixed_main_array[$_nurkka_i];
+            $_key = $_fixed_main_array_keys[$_nurkka_i];
+            $_tilaukset = $fixed_main_array[$_key];
 
             $args = array(
               'mittakerroin' => $mittakerroin,

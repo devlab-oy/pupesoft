@@ -5387,6 +5387,65 @@ if (!function_exists("alehinta")) {
         }
       }
 
+      // 14B. lasku.piiri tuote.aleryhm‰ positiivinen-aleprosentti
+      if ($hinta == 0) {
+
+        $query = "SELECT alennus
+                  FROM asiakasalennus USE INDEX (yhtio_piiri_ryhma)
+                  WHERE yhtio  = '$kukarow[yhtio]'
+                  and piiri    = '{$laskurow['piiri']}'
+                  and piiri   != ''
+                  and ytunnus  = ''
+                  and asiakas  = 0
+                  and (minkpl <= $kpl or minkpl = 0)
+                  and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
+                  and alennus > 0
+                  ORDER BY minkpl desc, IFNULL(TO_DAYS(current_date)-TO_DAYS(alkupvm),9999999999999),alennus desc, tunnus desc
+                  LIMIT 1";
+        $hresult = pupe_query($query);
+
+        if (mysql_num_rows($hresult) > 0) {
+
+          $hrow = mysql_fetch_assoc($hresult);
+
+          // Kehahinta saa olla nolla vain jos tuote on kokoep‰kurantti, muuten katemyynti ei onnaa
+          if ($trow['kehahin'] <= 0) {
+            $hinta     = 0.01;
+            for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+              $ale["ale".$alepostfix] = 0;
+            }
+            $netto    = "";
+            $hperuste   .= "Asiakaspiirin Katemyyntihinta (kokoep‰kurantti). ";
+            $hintaperuste = 11;
+          }
+          elseif ($trow['kehahin'] > 0) {
+            // Lasketaan keskihankintahinnan p‰‰lle haluttu kate
+            $hinta = $trow['kehahin'] / (1 - (abs($hrow["alennus"]) / 100));
+
+            // Jos on poikkeava myyntihinta-m‰‰r‰ laitetaan se hintaan mukaan
+            if ($trow["myyntihinta_maara"] != 0) {
+              $hinta = $hinta * $trow["myyntihinta_maara"];
+            }
+
+            // Jos tuotteiden hinnat sis‰lt‰v‰t arvonlis‰veron lis‰t‰‰n vero p‰‰lle
+            if ($yhtiorow['alv_kasittely'] == '') {
+              $hinta = $hinta * (1 + ($trow['alv'] / 100));
+            }
+
+            // Pyˆristet‰‰n hinta haluttuun tarkkuuteen
+            $hinta = round($hinta, $yhtiorow['hintapyoristys']);
+
+            for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+              $ale["ale".$alepostfix] = 0;
+            }
+
+            $netto    = "";
+            $hperuste   .= "Asiakaspiirin Asiakasalennushinta. ";
+            $hintaperuste = '14B';
+          }
+        }
+      }
+
       // 15A. hinnasto.hinta tuotteen nettohinta hinnastosta laskun valuutassa
       if ($hinta == 0 and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
 

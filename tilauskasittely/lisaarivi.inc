@@ -732,7 +732,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
           if ($krow2["myytavissa"] > 0 and !in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) {
             $kaikkituotteet[] = strtoupper($krow2["tuoteno"]); // lisätään tuoteno arrayseen
-            if ($krow2["tyyppi"] == "vastaava") $korlisakommi[strtoupper($krow2["tuoteno"])] = t("HUOM: Tuote %s on tilapäisesti loppu. Toimitetaan vastaava tuote.", "", $trow["tuoteno"]);
+            if ($krow2["tyyppi"] == "vastaava") $korlisakommi[strtoupper($krow2["tuoteno"])] = t("HUOM: Tuote %s on tilapäisesti loppu. Toimitetaan vastaava tuote.", $kieli, $trow["tuoteno"]);
             else $korlisakommi[strtoupper($krow2["tuoteno"])] = t("HUOM: Korvaa tuotteen", $kieli)." $alkupera_trow[tuoteno]";
           }
         }
@@ -749,7 +749,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
           if (!in_array(strtoupper($krow2["tuoteno"]), $kaikkituotteet)) {
             $kaikkituotteet[]=strtoupper($krow2["tuoteno"]); // lisätään tuoteno arrayseen
 
-            if ($krow2["tyyppi"] == "vastaava") $korlisakommi[strtoupper($krow2["tuoteno"])] = t("HUOM: Tuote %s on tilapäisesti loppu. Toimitetaan vastaava tuote.", "", $trow["tuoteno"]);
+            if ($krow2["tyyppi"] == "vastaava") $korlisakommi[strtoupper($krow2["tuoteno"])] = t("HUOM: Tuote %s on tilapäisesti loppu. Toimitetaan vastaava tuote.", $kieli, $trow["tuoteno"]);
             else $korlisakommi[strtoupper($krow2["tuoteno"])] = t("HUOM: Korvaa tuotteen", $kieli)." $alkupera_trow[tuoteno]";
           }
         }
@@ -759,10 +759,10 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
     }
 
     if (count($korkieltokommi) == 1) {
-      $korkieltokommi = t("Voit tilata korvaavaa tuotetta").": ".$korkieltokommi[0];
+      $korkieltokommi = t("Voit tilata korvaavaa tuotetta", $kieli).": ".$korkieltokommi[0];
     }
     elseif (count($korkieltokommi) > 1) {
-      $korkieltokommi = t("Voit tilata korvaavia tuotteita").": ".implode(", ", $korkieltokommi);
+      $korkieltokommi = t("Voit tilata korvaavia tuotteita", $kieli).": ".implode(", ", $korkieltokommi);
     }
   }
 
@@ -2152,7 +2152,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           // Lisätään löydetyt vastaavat mahdollisten myytävien joukkoon
           foreach ($_tuotteet as $_tuote) {
             if (strtoupper($_tuote['tuoteno']) != strtoupper($tuoteno)) {
-              if (stripos($kommentti, t("HUOM: Korvaa tuotteen", $akieli)." $tuoteno") === FALSE and empty($korlisakommi[$_tuote['tuoteno']])) {
+              if (stripos($kommentti, t("HUOM: Korvaa tuotteen", $kieli)." $tuoteno") === FALSE and empty($korlisakommi[$_tuote['tuoteno']])) {
                 $kommentti .= " ".t("HUOM: Korvaa tuotteen", $kieli)." $tuoteno";
               }
               else {
@@ -2758,7 +2758,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     }
 
     if ($yhtiorow['myyntiera_pyoristys'] == 'K' and $kutsuja == "EDITILAUS" and $edi_tyyppi != "magento" and $myyntierahuomatus) {
-      if (strpos($kommentti, t("HUOM: Rivin määrä on pyöristetty täyteen myyntierään! Myyntierä on")) === FALSE) {
+      if (strpos($kommentti, t("HUOM: Rivin määrä on pyöristetty täyteen myyntierään! Myyntierä on", $kieli)) === FALSE) {
         $kommentti .= " ".t("HUOM: Rivin määrä on pyöristetty täyteen myyntierään! Myyntierä on", $kieli).": $trow[myynti_era]";
       }
     }

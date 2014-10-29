@@ -52,8 +52,8 @@ ini_set("max_execution_time", 0);
 if ($verkkokauppatyyppi == 'presta') {
   $tuotteet = hae_tuotteet();
   die();
-  $presta_client = new PrestaClient($presta_url, $presta_api_key);
-  $presta_client->sync_products($tuotteet);
+  $presta_products = new PrestaProducts($presta_url, $presta_api_key);
+  $presta_products->sync_products($tuotteet);
 }
 
 die();

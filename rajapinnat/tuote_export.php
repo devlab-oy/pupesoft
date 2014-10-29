@@ -29,7 +29,7 @@ $lock_params = array(
 pupesoft_flock($lock_params);
 
 require "{$pupe_root_polku}/rajapinnat/magento_client.php";
-require "{$pupe_root_polku}/rajapinnat/presta_client.php";
+require "{$pupe_root_polku}/rajapinnat/presta/presta_client.php";
 
 // Laitetaan unlimited execution time
 ini_set("max_execution_time", 0);

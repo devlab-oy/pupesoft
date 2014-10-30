@@ -1381,7 +1381,7 @@ if ($tee == 'P') {
         $rivit .= "<tr>";
         $rivit .= "<td>$poikkeama[nimitys]</td>";
         $rivit .= "<td>$poikkeama[tuoteno]</td>";
-        $rivit .= "<td>". (float) $poikkeama["tilkpl"]."</td>";
+        $rivit .= "<td>". (float) $poikkeama["tilkpl"]."   </td>";
         $rivit .= "<td>". (float) $poikkeama["maara"]."</td>";
         if ($yhtiorow["kerayspoikkeama_kasittely"] != '') $rivit .= "<td>$poikkeama[loput]</td>";
         $rivit .= "</tr>";
@@ -1446,8 +1446,18 @@ if ($tee == 'P') {
 
       // Lähetetään keräyspoikkeama asiakkaalle
       if ($laskurow["email"] != '' and $laskurow["kerayspoikkeama"] == 0) {
-        $boob = mail($laskurow["email"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f $yhtiorow[postittaja_email]");
-        if ($boob === FALSE) echo " - ".t("Email lähetys epäonnistui")."!<br>";
+        
+        // Sähköpostin lähetykseen parametrit
+        $parametri = array(
+          "to"           => $laskurow["email"],
+          "cc"           => $yhtiorow["postittaja_email"],
+          "subject"      => mb_encode_mimeheader("{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"),
+          "ctype"        => "text",
+          "body"         => $ulos,
+          "attachements" => "",
+        );
+
+        pupesoft_sahkoposti($parametri);
       }
 
       // Lähetetään keräyspoikkeama myyjälle
@@ -1469,16 +1479,34 @@ if ($tee == 'P') {
 
         $ulos = str_replace("</font><hr><br><br><table>", "</font><hr><br><br>$uloslisa<table>", $ulos);
 
-        $boob = mail($laskurow["kukamail"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f $yhtiorow[postittaja_email]");
-        if ($boob === FALSE) echo " - ".t("Email lähetys epäonnistui")."!<br>";
+        // Sähköpostin lähetykseen parametrit
+        $parametri = array(
+          "to"           => $laskurow["kukamail"],
+          "cc"           => $yhtiorow["postittaja_email"],
+          "subject"      => mb_encode_mimeheader("{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"),
+          "ctype"        => "text",
+          "body"         => $ulos0,
+          "attachements" => "",
+        );
+
+        pupesoft_sahkoposti($parametri);
       }
 
       if ($laskurow['kuka_ext_nimi'] != '' and $yhtiorow['extranet_kerayspoikkeama_email'] != '') {
         $uloslisa .= t("Tilauksen keräsi").": $keraaja[nimi]<br><br>";
         $ulos = str_replace("</font><hr><br><br><table>", "</font><hr><br><br>$uloslisa<table>", $ulos);
 
-        $boob = mail($yhtiorow['extranet_kerayspoikkeama_email'], mb_encode_mimeheader("{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f {$yhtiorow['postittaja_email']}");
-        if ($boob === FALSE) echo " - ", t("\"Extranet keräyspoikkeama\"-sähköpostin lähetys epäonnistui"), "!<br>";
+        // Sähköpostin lähetykseen parametrit
+        $parametri = array(
+          "to"           => $yhtiorow["extranet_kerayspoikkeama_email"],
+          "cc"           => $yhtiorow["postittaja_email"],
+          "subject"      => mb_encode_mimeheader("{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"),
+          "ctype"        => "text",
+          "body"         => $ulos,
+          "attachements" => "",
+        );
+
+        pupesoft_sahkoposti($parametri);    
       }
 
       unset($ulos);

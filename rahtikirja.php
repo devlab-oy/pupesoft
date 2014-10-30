@@ -2194,23 +2194,24 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
       }
 
       function verify(element) {
-        msg = '".t("HUOM: oletko varma että haluat tulostaa osoitelappuja noin paljon?")."';
-      
+        msg = '".t("HUOM: oletko varma että haluat tulostaa osoitelappuja")." ';
+        msg2 = ' ".t("kappaletta")."';
+
         if (document.getElementById('oslapcheck2')) {
           oslap = document.getElementById('oslapcheck2').value;
         }
         else {
           oslap = document.getElementById('oslapcheck').value;
         }
-        
+
         // sallitaan ilman herjoja kaksi osoitelappua per kolli
         maksimi = summaa_kollit(element, true) * 2;
-        
-        if (oslap <= maksimi) {
+
+        if (oslap <= maksimi || oslap < 10) {
           return true;
         }
         else {
-          if (confirm(msg)) {
+          if (confirm(msg + oslap + msg2 + '?')) {
             return true;
           }
           else {

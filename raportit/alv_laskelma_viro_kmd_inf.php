@@ -245,16 +245,16 @@ if ($tee == 'laskelma') {
   echo "<thead>";
 
   echo "<tr>";
-  echo "<th>CSV</th>";
+  echo "<th>",t("CSV"),"</th>";
   echo "<th>#</th>";
-  echo "<th>ytunnus</th>";
-  echo "<th>nimi</th>";
-  echo "<th>laskunro</th>";
-  echo "<th>pvm</th>";
-  echo "<th>laskun summa</th>";
-  echo "<th>alv</th>";
-  echo "<th>verot</th>";
-  echo "<th>erikoiskoodi</th>";
+  echo "<th>",t("ytunnus"),"</th>";
+  echo "<th>",t("nimi"),"</th>";
+  echo "<th>",t("laskunro"),"</th>";
+  echo "<th>",t("pvm"),"</th>";
+  echo "<th>",t("laskun summa"),"</th>";
+  echo "<th>",t("alv"),"</th>";
+  echo "<th>",t("verot"),"</th>";
+  echo "<th>",t("erikoiskoodi"),"</th>";
   echo "</tr>";
 
   if (isset($worksheet)) {

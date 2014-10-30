@@ -369,41 +369,30 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
     if (strpos($_SERVER['SCRIPT_NAME'], "tulostakopio.php") === FALSE and $yhtiorow['tilausvahvistus_tallenna'] == 'K') {
       $tilausvahvistus_tallenna = "/tmp/Tilausvahvistus-".md5(uniqid(mt_rand(), true)).".txt";
       file_put_contents($tilausvahvistus_tallenna, $ulos);
+      $_attachments = array(0 => array(
+              "filename"        => $tilausvahvistus_tallenna,
+              "newfilename"     => "tilvahv.txt",
+              "ctype"           => "text")
+          );
     }
     else {
       $tilausvahvistus_tallenna = "";
+      $_attachments = "";
     }
 
   } // end rivejä löytyi
 
   // Kompostoidaan meili
   $bound = uniqid(time()."_") ;
-
-  $content = "--$bound\n";
-
-  $content .= "Content-Type: text/plain;\n";
-  $content .= "Content-Transfer-Encoding: quoted-printable\n\n";
-  $content .= $ulos;
-  $content .= "\n" ;
-
-  $content .= "--$bound\n";
-
-  $content .= "Content-Type: text/plain;\n" ;
-  $content .= "Content-Transfer-Encoding: 7bit\n" ;
-  $content .= "Content-Disposition: attachment; filename=\"tilvahv.txt\"\n\n";
-  $content .= $liite;
-  $content .= "\n" ;
-
-  if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
     
     // Sähköpostin lähetykseen parametrit
     $parametri = array(
       "to"           => $tilvahasiakas['email'],
       "cc"           => "",
-      "subject"      => mb_encode_mimeheader($yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus", "ISO-8859-1", "Q"),
+      "subject"      => $yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus",
       "ctype"        => "text",
-      "body"         => $content,
-      "attachements" => "",
+      "body"         => $ulos,
+      "attachements" => $_attachments
     );
 
     pupesoft_sahkoposti($parametri);
@@ -415,10 +404,10 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
     $parametri = array(
       "to"           => $kukarow['eposti'],
       "cc"           => "",
-      "subject"      => mb_encode_mimeheader($yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus", "ISO-8859-1", "Q"),
+      "subject"      => $yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus",
       "ctype"        => "text",
-      "body"         => $content,
-      "attachements" => "",
+      "body"         => $ulos,
+      "attachements" => $_attachments
     );
 
     pupesoft_sahkoposti($parametri);

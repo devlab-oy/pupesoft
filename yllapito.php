@@ -2192,7 +2192,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       'huoltosyklit' => $laite['huoltosyklit']
     );
     foreach ($toimenpide_tyypit as $toimenpide_tyyppi) {
-      $request['tapahtuman_suosituin_paiva'] = hae_suosituin_tapahtumapaiva($paikan_kohde, $toimenpide_tyyppi);
+      $request['tapahtuman_suosituin_paiva'] = hae_suosituin_tapahtumapaiva($valittu_kohde, $toimenpide_tyyppi);
       huoltosykli_rivi($toimenpide_tyyppi, $request);
     }
   }

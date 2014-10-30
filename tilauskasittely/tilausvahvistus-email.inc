@@ -382,9 +382,6 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
   } // end rivejä löytyi
 
-  // Kompostoidaan meili
-  $bound = uniqid(time()."_") ;
-    
     // Sähköpostin lähetykseen parametrit
     $parametri = array(
       "to"           => $tilvahasiakas['email'],

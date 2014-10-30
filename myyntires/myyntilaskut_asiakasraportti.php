@@ -1159,7 +1159,7 @@ function hae_maksusuoritukset($maksurow, $linkki) {
       // echotaan suoritusten tiedot
       while ($row3 = mysql_fetch_assoc($res3)) {
         echo "<span style='font-weight:bold'> ".t("Suoritus")."</span> &#124; ", $row3['summa'], " ";
-        echo $yhtiorow['valkoodi'], " &#124; ", tv1dateconv($row3['maksupvm']), "<br>";
+        echo $row3['valkoodi'], " &#124; ", tv1dateconv($row3['maksupvm']), "<br>";
 
         // ja mahdollinen kommentti
         if (!empty($row3['viesti'])) {

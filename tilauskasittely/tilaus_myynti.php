@@ -4132,14 +4132,24 @@ if ($tee == '') {
           $subject = "";
           $content_body = "";
 
-          $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
           $kutsu = "Jälkitoimitus";
           $subject = t("Jälkitoimitustuote poistettu");
           $content_body = $yhtiorow['nimi']."\n\n";
 
           $content_body .= "$kpl ".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")." ".t("poistettu jälkitoimituksesta tuotetta")." $tilausrivi[tuoteno] ".t("tilauksella")." $kukarow[kesken]\n\n\n";
 
-          mail($yhtiorow['jt_email'], mb_encode_mimeheader($subject, "ISO-8859-1", "Q"), $content_body, $header, "-f $yhtiorow[postittaja_email]");
+          // Sähköpostin lähetykseen parametrit
+          $parametri = array(
+            "to"           => $yhtiorow["jt_email"],
+            "cc"           => "",
+            "subject"      => mb_encode_mimeheader($subject, "ISO-8859-1", "Q"),
+            "ctype"        => "text",
+            "body"         => $content_body,
+            "attachements" => "",
+          );
+
+          pupesoft_sahkoposti($parametri);
+          
           echo t("Lähetettiin jälkitoimitus-sähköposti")."...<br><br>";
         }
 

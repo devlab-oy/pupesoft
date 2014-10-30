@@ -6,9 +6,16 @@ if ($_REQUEST['malli'] == 'PDF24' or $_REQUEST['malli'] == 'PDF40') {
 
 require "inc/parametrit.inc";
 
-//$toim='YKS' tarkottaa yksinkertainen ja silloin ei v‰litet‰ onko tuotteella eankoodia vaan tulostetaan suoraan tuoteno viivakoodiin
+// $toim='YKS' tarkottaa yksinkertainen ja silloin ei v‰litet‰ onko tuotteella eankoodia vaan
+// tulostetaan suoraan tuoteno viivakoodiin
+//
+// $toim='HINTA' tarkoittaa, ett‰ tulostetaan hintalaput
 
-if (!isset($nayta_pdf)) echo "<font class='head'>", t("Tulosta tuotetarroja"), "</font><hr>";
+$otsikko = $toim == "HINTA" ? "Tulosta hintalappuja" : "Tulosta tuotettarroja";
+
+if (!isset($nayta_pdf)) {
+  echo "<font class='head'>", t($otsikko), "</font><hr>";
+}
 
 if (!isset($toim)) $toim = '';
 if (!isset($tuoteno)) $tuoteno = '';
@@ -189,6 +196,16 @@ if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
       unlink($pdffilenimi);
     }
 
+    if ($malli == "Hintalappu PDF") {
+      $tuotteet = array($trow);
+      $params   = array(
+        "kpl" => $tulostakappale
+      );
+
+      require "tilauskasittely/tulosta_hintalaput.inc";
+      tulosta_hintalaput($tuotteet, $params);
+    }
+
     $tuoteno = '';
     $tee = '';
   }
@@ -206,7 +223,13 @@ if (!isset($nayta_pdf)) {
   echo "<input type='hidden' name='toim' value='$toim'>";
 
   echo "<table>";
-  echo "<tr><th colspan='4'><center>".t("Tulostetaan tuotetarrat tuotenumeron mukaan")."</center></th><tr>";
+
+  $tarrat = $toim == "HINTA" ? "hintalaput" : "tuotetarrat";
+
+  echo
+    "<tr><th colspan='4'><center>" .
+    t("Tulostetaan {$tarrat} tuotenumeron mukaan") .
+    "</center></th><tr>";
   echo "<tr>";
   echo "<th>".t("Tuotenumero")."</th>";
   echo "<th>".t("KPL")."</th>";
@@ -238,7 +261,7 @@ if (!isset($nayta_pdf)) {
   echo "</select></td>";
 
   //t‰h‰n arrayhin pit‰‰ lis‰t‰ uusia malleja jos tehd‰‰n uusia inccej‰ ja ylemp‰n‰ tehd‰ iffej‰.
-  $pohjat = array();
+  $pohjat   = array();
   $pohjat[] = 'Tec';
   $pohjat[] = 'Intermec';
   $pohjat[] = 'Zebra';
@@ -246,6 +269,7 @@ if (!isset($nayta_pdf)) {
   $pohjat[] = 'Zebra_tuote';
   $pohjat[] = 'PDF24';
   $pohjat[] = 'PDF40';
+  $pohjat[] = 'Hintalappu PDF';
 
   echo "<td><select name='malli'>";
   echo "<option value=''>".t("Ei mallia")."</option>";

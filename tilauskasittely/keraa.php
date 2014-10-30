@@ -1452,7 +1452,7 @@ if ($tee == 'P') {
           "to"           => $laskurow["email"],
           "cc"           => "",
           "subject"      => mb_encode_mimeheader("{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"),
-          "ctype"        => "text",
+          "ctype"        => "html",
           "body"         => $ulos,
           "attachements" => "",
         );
@@ -1484,7 +1484,7 @@ if ($tee == 'P') {
           "to"           => $laskurow["kukamail"],
           "cc"           => "",
           "subject"      => mb_encode_mimeheader("{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"),
-          "ctype"        => "text",
+          "ctype"        => "html",
           "body"         => $ulos0,
           "attachements" => "",
         );
@@ -1501,7 +1501,7 @@ if ($tee == 'P') {
           "to"           => $yhtiorow["extranet_kerayspoikkeama_email"],
           "cc"           => "",
           "subject"      => mb_encode_mimeheader("{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"),
-          "ctype"        => "text",
+          "ctype"        => "html",
           "body"         => $ulos,
           "attachements" => "",
         );

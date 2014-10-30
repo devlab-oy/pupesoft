@@ -3933,6 +3933,8 @@ if ($tee == '') {
 
       }
 
+      $_ei_jt_meilia = "";
+
       if ($tapa == "POISTA" and $kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and !empty($tilausrivi['vanha_otunnus']) and $tilausrivi['vanha_otunnus'] != $tilausrivi['otunnus'] and $tilausrivi['positio'] == 'JT' and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $yhtiorow['jt_automatiikka_mitatoi_tilaus'] == 'E') {
 
         $jt_saldo_lisa = $yhtiorow["varaako_jt_saldoa"] == "" ? ", jt = varattu, varattu = 0 " : '';
@@ -3947,6 +3949,7 @@ if ($tee == '') {
         $jt_rivi_res = pupe_query($query);
 
         echo "<font class='message'>", t("Jälkitoimitus palautettiin tilaukselle"), " {$tilausrivi['vanha_otunnus']}</font><br /><br />";
+        $_ei_jt_meilia = 'X';
       }
       elseif ($tapa != "POISJTSTA" and $tapa != "PUUTE" and $tapa != "JT") {
         // Poistetaan muokattava tilausrivi
@@ -4127,19 +4130,29 @@ if ($tee == '') {
       }
       elseif ($tapa == "POISTA") {
 
-        if ($yhtiorow['jt_email'] != '' and $tilausrivi['positio'] == 'JT') {
+        if ($_ei_jt_meilia == '' and $yhtiorow['jt_email'] != '' and $tilausrivi['positio'] == 'JT') {
           $kutsu = "";
           $subject = "";
           $content_body = "";
 
-          $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
           $kutsu = "Jälkitoimitus";
           $subject = t("Jälkitoimitustuote poistettu");
           $content_body = $yhtiorow['nimi']."\n\n";
 
           $content_body .= "$kpl ".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")." ".t("poistettu jälkitoimituksesta tuotetta")." $tilausrivi[tuoteno] ".t("tilauksella")." $kukarow[kesken]\n\n\n";
 
-          mail($yhtiorow['jt_email'], mb_encode_mimeheader($subject, "ISO-8859-1", "Q"), $content_body, $header, "-f $yhtiorow[postittaja_email]");
+          // Sähköpostin lähetykseen parametrit
+          $parametri = array(
+            "to"           => $yhtiorow["jt_email"],
+            "cc"           => "",
+            "subject"      => $subject,
+            "ctype"        => "text",
+            "body"         => $content_body,
+            "attachements" => "",
+          );
+
+          pupesoft_sahkoposti($parametri);
+          
           echo t("Lähetettiin jälkitoimitus-sähköposti")."...<br><br>";
         }
 

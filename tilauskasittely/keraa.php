@@ -1450,7 +1450,7 @@ if ($tee == 'P') {
         // Sähköpostin lähetykseen parametrit
         $parametri = array(
           "to"           => $laskurow["email"],
-          "cc"           => $yhtiorow["postittaja_email"],
+          "cc"           => "",
           "subject"      => mb_encode_mimeheader("{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"),
           "ctype"        => "text",
           "body"         => $ulos,
@@ -1482,7 +1482,7 @@ if ($tee == 'P') {
         // Sähköpostin lähetykseen parametrit
         $parametri = array(
           "to"           => $laskurow["kukamail"],
-          "cc"           => $yhtiorow["postittaja_email"],
+          "cc"           => "",
           "subject"      => mb_encode_mimeheader("{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"),
           "ctype"        => "text",
           "body"         => $ulos0,
@@ -1499,7 +1499,7 @@ if ($tee == 'P') {
         // Sähköpostin lähetykseen parametrit
         $parametri = array(
           "to"           => $yhtiorow["extranet_kerayspoikkeama_email"],
-          "cc"           => $yhtiorow["postittaja_email"],
+          "cc"           => "",
           "subject"      => mb_encode_mimeheader("{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli), "ISO-8859-1", "Q"),
           "ctype"        => "text",
           "body"         => $ulos,

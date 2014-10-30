@@ -2055,7 +2055,6 @@ else {
 
           if ($yhtiorow['jt_email'] == '') continue;
 
-          $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
           $kutsu = "Jälkitoimitus";
           $subject = t("Tuotetta jätetty jälkitoimitukseen");
           $content_body = $yhtiorow['nimi']."\n".t("Asiakas", $kieli).": $jt_chk_row[nimi] $jt_chk_row[nimitark]\n\n";
@@ -2074,7 +2073,18 @@ else {
             $content_body .= t("Status").": $jt_chk_row[status]\n\n\n";
           }
 
-          mail($yhtiorow['jt_email'], mb_encode_mimeheader($subject, "ISO-8859-1", "Q"), $content_body, $header, "-f $yhtiorow[postittaja_email]");
+          // Sähköpostin lähetykseen parametrit
+          $parametri = array(
+            "to"           => $yhtiorow["jt_email"],
+            "cc"           => "",
+            "subject"      => mb_encode_mimeheader($subject, "ISO-8859-1", "Q"),
+            "ctype"        => "text",
+            "body"         => $content_body,
+            "attachements" => "",
+          );
+
+          pupesoft_sahkoposti($parametri);
+
           echo t("Lähetettiin jälkitoimitus-sähköposti")."...<br><br>";
         }
       }

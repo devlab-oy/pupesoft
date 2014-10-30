@@ -29,7 +29,7 @@ $lock_params = array(
 pupesoft_flock($lock_params);
 
 require "{$pupe_root_polku}/rajapinnat/magento_client.php";
-require "{$pupe_root_polku}/rajapinnat/presta/presta_client.php";
+require "{$pupe_root_polku}/rajapinnat/presta/presta_products.php";
 
 // Laitetaan unlimited execution time
 ini_set("max_execution_time", 0);
@@ -51,7 +51,6 @@ ini_set("max_execution_time", 0);
 
 if ($verkkokauppatyyppi == 'presta') {
   $tuotteet = hae_tuotteet();
-  die();
   $presta_products = new PrestaProducts($presta_url, $presta_api_key);
   $presta_products->sync_products($tuotteet);
 }

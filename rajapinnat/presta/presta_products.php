@@ -1,6 +1,6 @@
 <?php
 
-require_once './presta_client.php';
+require_once 'rajapinnat/presta/presta_client.php';
 
 class PrestaProducts extends PrestaClient {
 
@@ -43,7 +43,7 @@ class PrestaProducts extends PrestaClient {
   /**
    *
    * @param array $products
-   * @return \SimpleXMLElement
+   * @return array
    */
   public function sync_products(array $products) {
     $this->logger->log('---------Start product sync---------');
@@ -51,8 +51,7 @@ class PrestaProducts extends PrestaClient {
     try {
       $this->schema = $this->get_empty_schema($this->resource_name());
       //Fetch all products with ID's and SKU's only
-      $existing_products = $this->all_products(array('id', 'reference'));
-      $existing_products = xml_to_array($existing_products);
+      $existing_products = $this->all(array('id', 'reference'));
       $existing_products = $existing_products['products']['product'];
       $existing_products = array_column($existing_products, 'reference', 'id');
 
@@ -60,12 +59,12 @@ class PrestaProducts extends PrestaClient {
         try {
           if (in_array($product['tuoteno'], $existing_products)) {
             $id = array_search($product['tuoteno'], $existing_products);
-            $response_xml = $this->update_product($id, $product);
+            $response = $this->update($id, $product);
             $this->delete_product_images($id);
           }
           else {
-            $response_xml = $this->create_product($product);
-            $id = (string) $response_xml->product->id;
+            $response = $this->create($product);
+            $id = (string) $response['product']['id'];
           }
 
           $this->create_product_images($id, $product['images']);
@@ -81,59 +80,7 @@ class PrestaProducts extends PrestaClient {
     }
 
     $this->logger->log('---------End product sync---------');
-    return $response_xml;
-  }
-
-  /**
-   *
-   * @param int $id
-   * @return SimpleXMLElement
-   * @throws Exception
-   */
-  public function get_product($id) {
-    try {
-      $response = $this->get($id);
-    }
-    catch (Exception $e) {
-      throw $e;
-    }
-
     return $response;
-  }
-
-  /**
-   *
-   * @param array $product
-   * @return SimpleXMLElement
-   * @throws Exception
-   */
-  public function create_product($product) {
-    try {
-      $response_xml = $this->create($product);
-    }
-    catch (Exception $e) {
-      throw $e;
-    }
-
-    return $response_xml;
-  }
-
-  /**
-   *
-   * @param int $id
-   * @param array $product
-   * @return SimpleXMLElement
-   * @throws Exception
-   */
-  public function update_product($id, $product) {
-    try {
-      $response_xml = $this->update($id, $product);
-    }
-    catch (Exception $e) {
-      throw $e;
-    }
-
-    return $response_xml;
   }
 
   /**
@@ -142,7 +89,7 @@ class PrestaProducts extends PrestaClient {
    * @param array $images
    * @return int
    */
-  public function create_product_images($product_id, $images) {
+  protected function create_product_images($product_id, $images) {
     if (empty($images)) {
       return;
     }
@@ -150,7 +97,7 @@ class PrestaProducts extends PrestaClient {
     $count = 0;
     foreach ($images as $image) {
       try {
-        $response = $this->create_product_image($product_id, $image);
+        $response = $this->create_resource_image($product_id, $image);
         if ($response['status_code'] == 200) {
           $count++;
         }
@@ -168,88 +115,19 @@ class PrestaProducts extends PrestaClient {
   /**
    *
    * @param int $product_id
-   * @param array $image
-   * @return array
-   * @throws Exception
-   */
-  public function create_product_image($product_id, $image) {
-    try {
-      $response = $this->create_resource_image($product_id, $image);
-    }
-    catch (Exception $e) {
-      throw $e;
-    }
-
-    return $response;
-  }
-
-  /**
-   *
-   * @param array $display
-   * @return SimpleXMLElement
-   * @throws Exception
-   */
-  public function all_products($display = array()) {
-    try {
-      $response = $this->all($display);
-    }
-    catch (Exception $e) {
-      throw $e;
-    }
-
-    return $response;
-  }
-
-  /**
-   *
-   * @param int $id
-   * @return boolean
-   * @throws Exception
-   */
-  public function delete_product($id) {
-    try {
-      $response = $this->delete($id);
-    }
-    catch (Exception $e) {
-      throw $e;
-    }
-
-    return $response;
-  }
-
-  /**
-   *
-   * @param int $product_id
-   * @return array
-   * @throws Exception
-   */
-  public function get_product_images($product_id) {
-    try {
-      $image_ids = $this->get_resource_images($product_id);
-    }
-    catch (Exception $e) {
-      throw $e;
-    }
-
-    return $image_ids;
-  }
-
-  /**
-   *
-   * @param int $product_id
    * @param array $image_ids If empty delete all
    * @return int
    */
-  public function delete_product_images($product_id, $image_ids = array()) {
+  protected function delete_product_images($product_id, $image_ids = array()) {
     $deleted = 0;
 
     try {
       if (empty($image_ids)) {
-        $image_ids = $this->get_product_images($product_id);
+        $image_ids = $this->get_resource_images($product_id);
       }
 
       foreach ($image_ids as $image_id) {
-        $ok = $this->delete_product_image($product_id, $image_id);
+        $ok = $this->delete_resource_image($product_id, $image_id);
         if ($ok) {
           $deleted++;
         }
@@ -264,23 +142,5 @@ class PrestaProducts extends PrestaClient {
     }
 
     return $deleted;
-  }
-
-  /**
-   *
-   * @param int $product_id
-   * @param int $image_id
-   * @return boolean
-   * @throws Exception
-   */
-  public function delete_product_image($product_id, $image_id) {
-    try {
-      $response = $this->delete_resource_image($product_id, $image_id);
-    }
-    catch (Exception $e) {
-      throw $e;
-    }
-
-    return $response;
   }
 }

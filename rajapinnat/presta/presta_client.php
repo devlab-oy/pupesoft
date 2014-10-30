@@ -1,6 +1,6 @@
 <?php
 
-require_once '../logger.php';
+require_once 'rajapinnat/logger.php';
 require_once 'PSWebServiceLibrary.php';
 
 abstract class PrestaClient {
@@ -139,13 +139,14 @@ abstract class PrestaClient {
       throw $e;
     }
 
-    return $response_xml;
+    $response = xml_to_array($response_xml);
+    return $response;
   }
 
   /**
    *
    * @param array $display
-   * @return SimpleXMLElement
+   * @return array
    * @throws Exception
    */
   protected function all($display = array()) {
@@ -169,6 +170,7 @@ abstract class PrestaClient {
       throw $e;
     }
 
+    $response = xml_to_array($response);
     return $response;
   }
 
@@ -286,7 +288,7 @@ abstract class PrestaClient {
   }
 
   //Child has to implement function which returns schema=blank or repopulated xml
-  protected abstract function generate_xml();
+  protected abstract function generate_xml($resource, SimpleXMLElement $existing_resource = null);
 
   //Child needs to implement function which return resource as string: 'products'...
   protected abstract function resource_name();

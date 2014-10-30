@@ -231,19 +231,29 @@ if (!isset($nayta_pdf)) {
   echo "<input type='hidden' name='tee' value='Z'>";
   echo "<input type='hidden' name='toim' value='$toim'>";
 
+  if ($toim == 'HINTA') {
+    echo "<input type='hidden' name='malli' value='Hintalappu PDF'>";
+  }
+
   echo "<table>";
 
   $tarrat = $toim == "HINTA" ? "hintalaput" : "tuotetarrat";
 
+  $colspan = $toim == 'HINTA' ? "2" : "4";
+
   echo
-    "<tr><th colspan='4'><center>" .
+    "<tr><th colspan='{$colspan}'><center>" .
     t("Tulostetaan {$tarrat} tuotenumeron mukaan") .
     "</center></th><tr>";
   echo "<tr>";
   echo "<th>".t("Tuotenumero")."</th>";
   echo "<th>".t("KPL")."</th>";
-  echo "<th>".t("Kirjoitin")."</th>";
-  echo "<th>".t("Malli")."</th>";
+
+  if ($toim != 'HINTA') {
+    echo "<th>" . t("Kirjoitin") . "</th>";
+    echo "<th>" . t("Malli") . "</th>";
+  }
+
   if ($uusean!= '') {
     echo "<th>".t("Eankoodi")."</th>";
   }
@@ -251,45 +261,56 @@ if (!isset($nayta_pdf)) {
   echo "<tr>";
   echo "<td><input type='text' name='tuoteno' size='20' maxlength='60' value='$tuoteno'></td>";
   echo "<td><input type='text' name='tulostakappale' size='3' value='$tulostakappale'></td>";
-  echo "<td><select name='kirjoitin'>";
-  echo "<option value=''>".t("Ei kirjoitinta")."</option>";
 
-  $query = "SELECT *
-            FROM kirjoittimet
-            WHERE yhtio  = '$kukarow[yhtio]'
-            and komento != 'email'
-            order by kirjoitin";
-  $kires = pupe_query($query);
+  if ($toim != "HINTA") {
+    echo "<td><select name='kirjoitin'>";
+    echo "<option value=''>" . t("Ei kirjoitinta") . "</option>";
 
-  while ($kirow = mysql_fetch_array($kires)) {
-    if ($kirow['tunnus'] == $kirjoitin) $select = 'SELECTED';
-    else $select = '';
-    echo "<option value='$kirow[tunnus]' $select>$kirow[kirjoitin]</option>";
+    $query = "SELECT *
+              FROM kirjoittimet
+              WHERE yhtio  = '$kukarow[yhtio]'
+              and komento != 'email'
+              order by kirjoitin";
+    $kires = pupe_query($query);
+
+    while ($kirow = mysql_fetch_array($kires)) {
+      if ($kirow['tunnus'] == $kirjoitin) {
+        $select = 'SELECTED';
+      }
+      else {
+        $select = '';
+      }
+      echo "<option value='$kirow[tunnus]' $select>$kirow[kirjoitin]</option>";
+    }
+
+    echo "</select></td>";
+
+    //t‰h‰n arrayhin pit‰‰ lis‰t‰ uusia malleja jos tehd‰‰n uusia inccej‰ ja ylemp‰n‰ tehd‰ iffej‰.
+    $pohjat   = array();
+    $pohjat[] = 'Tec';
+    $pohjat[] = 'Intermec';
+    $pohjat[] = 'Zebra';
+    $pohjat[] = 'Zebra_hylly';
+    $pohjat[] = 'Zebra_tuote';
+    $pohjat[] = 'PDF24';
+    $pohjat[] = 'PDF40';
+    $pohjat[] = 'Hintalappu PDF';
+
+    echo "<td><select name='malli'>";
+    echo "<option value=''>" . t("Ei mallia") . "</option>";
+
+    foreach ($pohjat as $pohja) {
+      if ($pohja == $malli) {
+        $select = 'SELECTED';
+      }
+      else {
+        $select = '';
+      }
+      echo "<option value='$pohja' $select>$pohja</option>";
+    }
+
+    echo "</select></td>";
   }
-
-  echo "</select></td>";
-
-  //t‰h‰n arrayhin pit‰‰ lis‰t‰ uusia malleja jos tehd‰‰n uusia inccej‰ ja ylemp‰n‰ tehd‰ iffej‰.
-  $pohjat   = array();
-  $pohjat[] = 'Tec';
-  $pohjat[] = 'Intermec';
-  $pohjat[] = 'Zebra';
-  $pohjat[] = 'Zebra_hylly';
-  $pohjat[] = 'Zebra_tuote';
-  $pohjat[] = 'PDF24';
-  $pohjat[] = 'PDF40';
-  $pohjat[] = 'Hintalappu PDF';
-
-  echo "<td><select name='malli'>";
-  echo "<option value=''>".t("Ei mallia")."</option>";
-
-  foreach ($pohjat as $pohja) {
-    if ($pohja == $malli) $select = 'SELECTED';
-    else $select = '';
-    echo "<option value='$pohja' $select>$pohja</option>";
-  }
-
-  echo "</select></td>";
 
   if ($uusean != '') {
     echo "<input type='hidden' name='updateean' value='joo'>";

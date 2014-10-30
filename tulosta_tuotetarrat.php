@@ -2,7 +2,8 @@
 
 if ($_REQUEST['malli'] == 'PDF24' or
     $_REQUEST['malli'] == 'PDF40' or
-    $_REQUEST['malli'] == 'Hintalappu PDF'
+    $_REQUEST['malli'] == 'Hintalappu PDF' and
+    (!empty($_REQUEST['tuoteno']) or $_REQUEST['toim'] != 'HINTA')
 ) {
   $_REQUEST['nayta_pdf'] = 1;
   $nayta_pdf             = 1;
@@ -321,69 +322,98 @@ if (!isset($nayta_pdf)) {
   echo "</tr>";
   echo "</table>";
   echo "</form>";
-  // tästä alkaa toinen formi
-  $sel = "";
-  $lisa = "";
 
-  if ($saldo =='1') {
-    $sel = "CHECKED";
+  if ($toim != 'HINTA') {
+    // tästä alkaa toinen formi
+    $sel  = "";
+    $lisa = "";
+
+    if ($saldo == '1') {
+      $sel = "CHECKED";
+    }
+
+    echo "<form method='post' autocomplete='off'>";
+    echo "<input type='hidden' name='tee' value='H'>";
+    echo "<input type='hidden' name='toim' value='$toim'>";
+    echo "<br>";
+
+    echo "<table>";
+    echo
+      "<tr><th colspan='2'><center>" .
+      t("Tulostetaan tuotetarrat hyllyjen väliltä") .
+      "</center></th><tr>";
+    echo "<tr><th>" . t("Alkuosoite") . "</th>";
+    echo "<td>", hyllyalue("ahyllyalue", $ahyllyalue);
+    echo "-";
+    echo "<input type='text' name='ahyllynro' size='5' maxlength='5' value='$ahyllynro'>";
+    echo "-";
+    echo "<input type='text' name='ahyllyvali' size='5' maxlength='5' value='$ahyllyvali'>";
+    echo "-";
+    echo "<input type='text' name='ahyllytaso' size='5' maxlength='5' value='$ahyllytaso'>
+          </td>
+          </tr>";
+
+    echo "<tr><th>" . t("Loppuosoite") . "</th>";
+    echo "<td>", hyllyalue("lhyllyalue", $lhyllyalue);
+    echo "-";
+    echo "<input type='text' name='lhyllynro' size='5' maxlength='5' value='$lhyllynro'>";
+    echo "-";
+    echo "<input type='text' name='lhyllyvali' size='5' maxlength='5' value='$lhyllyvali'>";
+    echo "-";
+    echo "<input type='text' name='lhyllytaso' size='5' maxlength='5' value='$lhyllytaso'>
+          </td>
+          </tr>";
+    echo
+      "<tr><th>" .
+      t("Vain tuotteet joilla on saldoa hyllyillä") .
+      "</th><td><input type='checkbox' name='saldo' value='1' $sel> </td>";
+
+    echo
+      "<tr><th>" .
+      t("KPL") .
+      "</th><td><input type='text' name='tulostakappale' size='3' value='$tulostakappale'>
+        </td>
+        <tr>";
+    echo "<tr><th>" . t("Kirjoitin") . "</th><td><select name='kirjoitin'>";
+    echo "<option value=''>" . t("Ei kirjoitinta") . "</option>";
+
+    mysql_data_seek($kires, 0);
+
+    while ($kirow = mysql_fetch_array($kires)) {
+      if ($kirow['tunnus'] == $kirjoitin) {
+        $select = 'SELECTED';
+      }
+      else {
+        $select = '';
+      }
+      echo "<option value='$kirow[tunnus]' $select>$kirow[kirjoitin]</option>";
+    }
+
+    echo "</select></td>";
+
+    echo "</tr><tr><th>" . t("Mallipohja") . "</th><td><select name='malli'>";
+    echo "<option value=''>" . t("Ei mallia") . "</option>";
+
+    foreach ($pohjat as $pohja) {
+      if ($pohja == $malli) {
+        $select = 'SELECTED';
+      }
+      else {
+        $select = '';
+      }
+      echo "<option value='$pohja' $select>$pohja</option>";
+    }
+
+    echo "</select></td>";
+    echo
+      "<tr><td class='back'></td><td class='back'><input type='Submit' value='" .
+      t("Tulosta tarrat") .
+      "'></td>";
+    echo "</tr>";
+    echo "</table>";
+    echo "<br>";
+    echo "</form>";
   }
-
-  echo "<form method='post' autocomplete='off'>";
-  echo "<input type='hidden' name='tee' value='H'>";
-  echo "<input type='hidden' name='toim' value='$toim'>";
-  echo "<br>";
-
-  echo "<table>";
-  echo "<tr><th colspan='2'><center>".t("Tulostetaan tuotetarrat hyllyjen väliltä")."</center></th><tr>";
-  echo "<tr><th>".t("Alkuosoite")."</th>";
-  echo "<td>", hyllyalue("ahyllyalue", $ahyllyalue);
-  echo "-";
-  echo "<input type='text' name='ahyllynro' size='5' maxlength='5' value='$ahyllynro'>";
-  echo "-";
-  echo "<input type='text' name='ahyllyvali' size='5' maxlength='5' value='$ahyllyvali'>";
-  echo "-";
-  echo "<input type='text' name='ahyllytaso' size='5' maxlength='5' value='$ahyllytaso'></td></tr>";
-
-  echo "<tr><th>".t("Loppuosoite")."</th>";
-  echo "<td>", hyllyalue("lhyllyalue", $lhyllyalue);
-  echo "-";
-  echo "<input type='text' name='lhyllynro' size='5' maxlength='5' value='$lhyllynro'>";
-  echo "-";
-  echo "<input type='text' name='lhyllyvali' size='5' maxlength='5' value='$lhyllyvali'>";
-  echo "-";
-  echo "<input type='text' name='lhyllytaso' size='5' maxlength='5' value='$lhyllytaso'></td></tr>";
-  echo "<tr><th>".t("Vain tuotteet joilla on saldoa hyllyillä")."</th><td><input type='checkbox' name='saldo' value='1' $sel> </td>";
-
-  echo "<tr><th>".t("KPL")."</th><td><input type='text' name='tulostakappale' size='3' value='$tulostakappale'></td><tr>";
-  echo "<tr><th>".t("Kirjoitin")."</th><td><select name='kirjoitin'>";
-  echo "<option value=''>".t("Ei kirjoitinta")."</option>";
-
-  mysql_data_seek($kires, 0);
-
-  while ($kirow = mysql_fetch_array($kires)) {
-    if ($kirow['tunnus'] == $kirjoitin) $select = 'SELECTED';
-    else $select = '';
-    echo "<option value='$kirow[tunnus]' $select>$kirow[kirjoitin]</option>";
-  }
-
-  echo "</select></td>";
-
-  echo "</tr><tr><th>".t("Mallipohja")."</th><td><select name='malli'>";
-  echo "<option value=''>".t("Ei mallia")."</option>";
-
-  foreach ($pohjat as $pohja) {
-    if ($pohja == $malli) $select = 'SELECTED';
-    else $select = '';
-    echo "<option value='$pohja' $select>$pohja</option>";
-  }
-
-  echo "</select></td>";
-  echo "<tr><td class='back'></td><td class='back'><input type='Submit' value='".t("Tulosta tarrat")."'></td>";
-  echo "</tr>";
-  echo "</table>";
-  echo "<br>";
-  echo "</form>";
 }
 
 require "inc/footer.inc";

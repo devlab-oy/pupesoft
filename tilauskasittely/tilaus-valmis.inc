@@ -2077,7 +2077,7 @@ else {
           $parametri = array(
             "to"           => $yhtiorow["jt_email"],
             "cc"           => "",
-            "subject"      => mb_encode_mimeheader($subject, "ISO-8859-1", "Q"),
+            "subject"      => $subject,
             "ctype"        => "text",
             "body"         => $content_body,
             "attachements" => "",

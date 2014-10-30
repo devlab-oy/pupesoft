@@ -157,13 +157,10 @@ foreach($suoritukset as $suoritus) {
       case '3':
         $kuitti2 = $clientti->getMerchantReceipt();
         $kuitti2 = utf8_decode($kuitti2);
-        if (strpos($kuitti2, "ALLEKIRJOITUS")) {
-          require("../tilauskasittely/tulosta_asiakkaan_kuitti.inc");
 
-          /**
-           * @todo Poista hardkoodattu tulostimen tunnus
-           */
-          tulosta_kauppiaan_kuitti($kuitti2, 105);
+        if (strpos($kuitti2, "ALLEKIRJOITUS")) {
+          require("tilauskasittely/tulosta_asiakkaan_kuitti.inc");
+          tulosta_kauppiaan_kuitti($kuitti2, $kukarow["kuittitulostin"]);
         }
         break;
     }

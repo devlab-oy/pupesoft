@@ -1,10 +1,6 @@
 <?php
 
 /**
- * @todo Muuta tiedoston nimi paremmaksi
- */
-
-/**
  * Tulostaa asiakkaan kuitin lämpösiirtotulostimelle. Kuitille tulostuu logo, yhtiön tiedot, laskun
  * tilausrivit, laskun summa, verotiedot ja luottokorttitapahtumat
  *

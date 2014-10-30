@@ -1446,7 +1446,7 @@ if ($tee == 'P') {
 
       // L‰hetet‰‰n ker‰yspoikkeama asiakkaalle
       if ($laskurow["email"] != '' and $laskurow["kerayspoikkeama"] == 0) {
-        
+
         // S‰hkˆpostin l‰hetykseen parametrit
         $parametri = array(
           "to"           => $laskurow["email"],
@@ -1506,7 +1506,7 @@ if ($tee == 'P') {
           "attachements" => "",
         );
 
-        pupesoft_sahkoposti($parametri);    
+        pupesoft_sahkoposti($parametri);
       }
 
       unset($ulos);
@@ -1658,6 +1658,11 @@ if ($tee == 'P') {
           if ($_ker_chk_row['keratty'] == 0) {
             $alatilak = 'X';
           }
+        }
+
+        if ($yhtiorow['vahvistusviesti_asiakkaalle'] == "Y") {
+          require_once("inc/jt_ja_tyomaarays_valmis_viesti.inc");
+          laheta_vahvistusviesti($zoner_tunnarit["username"], $zoner_tunnarit["salasana"], $id);
         }
 
         // Lasku p‰ivitet‰‰n vasta kuin tilausrivit on p‰ivitetty...
@@ -2556,7 +2561,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
         if (isset($row['varastonimi'])) echo "<br>{$row['varastonimi']}";
 
         echo "</td>";
-        
+
         $_moduuli = '';
         if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 

@@ -22,14 +22,15 @@ function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $kerattu = 
 
   if (loytyy_jt_riveja($tilausnumero)) {
     $otsikko = t("Tilaus noudettavissa");
-    $viesti  = t("Kaikki tilauksen ") .
-      $tilausnumero .
-      t(" osat ovat noudettavissa, terveisin ") .
+
+    $viesti =
+      t("Kaikki tilauksen %s osat ovat noudettavissa, terveisin", "", $tilausnumero) .
+      " " .
       $yhtiorow["nimi"];
   }
   elseif (loytyy_tyomaarays($tilausnumero) or $kerattu) {
     $otsikko = t("Huoltotyö valmis");
-    $viesti  = t("Huoltotyösi on valmis, terveisin ") . $yhtiorow["nimi"];
+    $viesti  = t("Huoltotyösi on valmis, terveisin") . " " . $yhtiorow["nimi"];
   }
 
   if (empty($viesti)) {

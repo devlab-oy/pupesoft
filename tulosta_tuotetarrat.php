@@ -295,7 +295,6 @@ if (!isset($nayta_pdf)) {
     $pohjat[] = 'Zebra_tuote';
     $pohjat[] = 'PDF24';
     $pohjat[] = 'PDF40';
-    $pohjat[] = 'Hintalappu PDF';
 
     echo "<td><select name='malli'>";
     echo "<option value=''>" . t("Ei mallia") . "</option>";

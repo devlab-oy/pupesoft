@@ -1,7 +1,11 @@
 <?php
-if ($_REQUEST['malli'] == 'PDF24' or $_REQUEST['malli'] == 'PDF40') {
+
+if ($_REQUEST['malli'] == 'PDF24' or
+    $_REQUEST['malli'] == 'PDF40' or
+    $_REQUEST['malli'] == 'Hintalappu PDF'
+) {
   $_REQUEST['nayta_pdf'] = 1;
-  $nayta_pdf = 1;
+  $nayta_pdf             = 1;
 }
 
 require "inc/parametrit.inc";
@@ -100,7 +104,7 @@ if ($ulos != "") {
   echo "</form>";
 }
 
-if ($tee != 'H') {
+if ($tee != 'H' and $toim != "HINTA") {
 
   $query = "SELECT $koodi FROM tuote WHERE yhtio = '$kukarow[yhtio]' AND tuoteno = '$tuoteno'";
   $eankoodires = pupe_query($query);
@@ -119,6 +123,9 @@ if ($tee != 'H') {
       $uusean = 'jeppis';
     }
   }
+}
+elseif ($toim == "HINTA") {
+  $lets = "go";
 }
 
 if ($malli == '' and ($tee == 'Z' or $tee == 'H')) {
@@ -203,7 +210,9 @@ if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
       );
 
       require "tilauskasittely/tulosta_hintalaput.inc";
-      tulosta_hintalaput($tuotteet, $params);
+      list($tiedostonimi, $kaunisnimi) = tulosta_hintalaput($tuotteet, $params);
+
+      echo file_get_contents("/tmp/{$tiedostonimi}");
     }
 
     $tuoteno = '';

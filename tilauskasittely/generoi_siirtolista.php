@@ -692,19 +692,19 @@ if ($tee == 'M' and isset($generoi)) {
 
               $kukarow["kesken"] = 0;
 
-              $tilausnumero  = 0;
+              $tilausnumero = 0;
               $clearing     = $kohdevarasto;
-              $chn       = 'GEN'; // tällä erotellaan "tulosta siirtolista"-kohdassa generoidut ja käsin tehdyt siirtolistat
-              $toimpp     = $kerpp = date("j");
-              $toimkk     = $kerkk = date("n");
-              $toimvv     = $kervv = date("Y");
+              $chn          = 'GEN'; // tällä erotellaan "tulosta siirtolista"-kohdassa generoidut ja käsin tehdyt siirtolistat
+              $toimpp       = $kerpp = date("j");
+              $toimkk       = $kerkk = date("n");
+              $toimvv       = $kervv = date("Y");
               $comments     = $kukarow["nimi"]." ".t("Generoi hälytysrajojen perusteella");
-              $viesti     = $kukarow["nimi"]." ".t("Generoi hälytysrajojen perusteella");
-              $varasto     = $lahdevarasto;
-              $toim      = "SIIRTOLISTA";
-              $alatila = "";
-              $luokka = "";
-              $tunnusnippu = "";
+              $viesti       = $kukarow["nimi"]." ".t("Generoi hälytysrajojen perusteella");
+              $varasto      = $lahdevarasto;
+              $toim         = "SIIRTOLISTA";
+              $alatila      = "";
+              $luokka       = "";
+              $tunnusnippu  = "";
 
               require "otsik_siirtolista.inc";
 
@@ -758,7 +758,7 @@ if ($tee == 'M' and isset($generoi)) {
               $netto         = "";
               $var        = "";
               $korvaavakielto    = 1;
-              $perhekielto    = $lapsituotteet == "" ? 1 : 0;
+              $perhekielto    = $lapsituotteet == "" ? 1 : "";
               $orvoteikiinnosta  = "EITOD";
               $varataan_saldoa = "";
               $kpl2 = "";

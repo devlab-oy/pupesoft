@@ -352,6 +352,4 @@ elseif ($oslapp != '' and $oslapp != 'edi') {
   echo t("Osoitelappu tulostuu")."...<br>";
 }
 
-//poistetaan tmp file samantien kuleksimasta...
-system("rm -f $pdffilenimi");
 $pdffilenimi = '';

@@ -1433,10 +1433,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     $ctype = "excel";
     $kukarow["eposti"] = $email_osoite;
 
-    require "../inc/sahkoposti.inc";
-
-    //poistetaan tmp file samantien kuleksimasta...
-    system("rm -f /tmp/$excelnimi");
+    require "inc/sahkoposti.inc";
   }
 }
 

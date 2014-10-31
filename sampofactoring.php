@@ -301,9 +301,6 @@ if ($tee == 'TULOSTA') {
       system("ps2pdf -sPAPERSIZE=a4 $tempfile2.ps $liite[1]");
 
       require "inc/sahkoposti.inc";
-
-      unlink($tempfile1.".pdf");
-      unlink($tempfile2.".pdf");
     }
     else {
       $null = exec("$kirrow[komento] ".$tempfile2.".ps");

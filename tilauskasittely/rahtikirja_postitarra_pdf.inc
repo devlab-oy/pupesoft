@@ -354,7 +354,4 @@ if ($tulostakolli > 0) {
   else {
     $line = exec("$kirjoitin $pdffilenimi");
   }
-
-  //poistetaan tmp file samantien kuleksimasta...
-  system("rm -f $pdffilenimi");
 }

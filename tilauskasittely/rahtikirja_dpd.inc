@@ -407,7 +407,5 @@ if ($kollityht > 0) {
     $line = exec("$kirjoitin $pdffilenimi");
   }
 
-  //poistetaan tmp file samantien kuleksimasta...
-  system("rm -f $pdffilenimi");
   $pdffilenimi='';
 }

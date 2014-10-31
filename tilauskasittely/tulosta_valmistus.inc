@@ -789,7 +789,7 @@ if (!function_exists('print_pdf_valm')) {
       echo t("Valmistuslista tulostuu")."...<br>";
 
       if ($kukarow["extranet"] == '') {
-        require "../inc/sahkoposti.inc";
+        require "inc/sahkoposti.inc";
       }
       else {
         require "sahkoposti.inc";
@@ -803,8 +803,5 @@ if (!function_exists('print_pdf_valm')) {
       echo t("Valmistuslista tulostuu")."...<br>";
       $line = exec("$komento $pdffilenimi", $output, $returnvalue);
     }
-
-    //poistetaan tmp file samantien kuleksimasta...
-    system("rm -f $pdffilenimi");
   }
 }

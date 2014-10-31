@@ -125,10 +125,45 @@ if (!function_exists('normaali_varastosiirto')) {
       paivita_myyntitilausrivien_tuotepaikat($myyntitilausrivit, false);
 
       aseta_kukarow_kesken($varastosiirto['tunnus']);
+
+      $_tuoteperheet = array();
+
       foreach ($myyntitilausrivit as $tilausrivi) {
         $lisatyt_rivit1 = luo_varastosiirtorivi($varastosiirto, $tilausrivi, $lahde_ja_kohde_varasto_yhdistelma['lahdevarasto_tunnus'], 'N');
-
         linkkaa_myyntitilausrivi_varastosiirtoriviin($lisatyt_rivit1[0], $tilausrivi['tunnus']);
+
+        $_tunnus = $lisatyt_rivit1[0];
+
+        if ($tilausrivi['perheid'] != 0 and $tilausrivi['perheid'] == $tilausrivi['tunnus']) {
+          # MYYNNIN TUOTEPERHEEN ISÄRIVI
+          $_tuoteperheet[$tilausrivi['perheid']] = $_tunnus;
+
+          $query = "UPDATE tilausrivi SET
+                    perheid = tunnus
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus = '{$_tunnus}'";
+          $updres = pupe_query($query);
+        }
+        elseif ($tilausrivi['perheid'] != 0 and $tilausrivi['perheid'] != $tilausrivi['tunnus']) {
+
+          # MYYNNIN TUOTEPERHEEN LAPSIRIVI
+          if (array_key_exists($tilausrivi['perheid'], $_tuoteperheet)) {
+
+            $query = "UPDATE tilausrivi SET
+                      perheid = '{$_tuoteperheet[$tilausrivi['perheid']]}'
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus = '{$_tunnus}'";
+            $updres = pupe_query($query);
+
+            if ($tilausrivi['ohita_kerays'] != '') {
+              $query = "UPDATE tilausrivin_lisatiedot SET
+                        ohita_kerays = '{$tilausrivi['ohita_kerays']}'
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tilausrivitunnus = '{$_tunnus}'";
+              $updres = pupe_query($query);
+            }
+          }
+        }
 
         $kommentit[] = t('Tilauksen')." {$myyntitilaus['tunnus']} ".t('tilausrivi')." {$tilausrivi['tuoteno']} - {$tilausrivi['tilkpl']} {$tilausrivi['yksikko']} ".t('lisättiin siirtolistalle')." {$varastosiirto['tunnus']}";
       }
@@ -246,7 +281,7 @@ if (!function_exists('luo_varastosiirtorivi')) {
     $hinta            = "";
     $netto            = "";
     $korvaavakielto   = 1;
-    $perhekielto      = $lapsituotteet == "" ? 1 : 0;
+    $perhekielto      = 1;
     $orvoteikiinnosta = "EITOD";
 
     // Generoiduille listoille ei laiteta väkisin
@@ -441,7 +476,8 @@ if (!function_exists('hae_tilausrivit')) {
       $select = ' v_lahdevarasto.tunnus AS lahdevarasto_tunnus,
                   v_kohdevarasto.tunnus AS kohdevarasto_tunnus,
                   a.selitetark_2 AS toimitustapa_tunnus,
-                  varaston_hyllypaikat.keraysvyohyke AS keraysvyohyke,';
+                  varaston_hyllypaikat.keraysvyohyke AS keraysvyohyke,
+                  tl.ohita_kerays,';
     }
     else {
       //Kirjanpidollinen ja palautus tähän haaraan
@@ -487,7 +523,8 @@ if (!function_exists('hae_tilausrivit')) {
                 {$varasto_avainsana_join}
                 WHERE t.yhtio             = '{$kukarow['yhtio']}'
                 AND t.otunnus             = {$otunnus}
-                {$tilausrivi_where}";
+                {$tilausrivi_where}
+                ORDER BY t.perheid, t.tunnus";
     $result = pupe_query($query);
 
     $tilausrivit = array();

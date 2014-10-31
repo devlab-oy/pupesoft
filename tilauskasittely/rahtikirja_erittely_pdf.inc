@@ -354,6 +354,4 @@ if (mysql_num_rows($result) > 0) {
       $line = exec("$kirjoitin $pdffilenimi");
     }
   }
-
-  system("rm -f $pdffilenimi");
 }

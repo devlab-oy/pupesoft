@@ -737,10 +737,10 @@ if ($tee == 'LISTAA') {
              liitetiedostot.liitos
              FROM tuote
              INNER JOIN liitetiedostot ON (liitetiedostot.yhtio = tuote.yhtio
-              AND liitetiedostot.liitos = 'tuote'
-              AND liitetiedostot.liitostunnus = tuote.tunnus
-              AND liitetiedostot.filename != '')
-             WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+              AND liitetiedostot.liitos        = 'tuote'
+              AND liitetiedostot.liitostunnus  = tuote.tunnus
+              AND liitetiedostot.filename     != '')
+             WHERE tuote.yhtio                 = '{$kukarow["yhtio"]}'
              $lisa
              ORDER BY $orderlisa";
   $result = pupe_query($query);

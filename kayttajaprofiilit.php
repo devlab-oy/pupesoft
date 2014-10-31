@@ -160,6 +160,7 @@ if ($tee == 'PAIVITA' and $profiili != "") {
             if (mysql_num_rows($tarkesult) == 0) {
               $query = "INSERT into oikeu
                         SET kuka  = '$krow[kuka]',
+                        user_id    = '{$krow['tunnus']}',
                         sovellus   = '$trow[sovellus]',
                         nimi       = '$trow[nimi]',
                         alanimi    = '$trow[alanimi]',

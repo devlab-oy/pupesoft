@@ -235,13 +235,17 @@ if ($handle = opendir($kansio)) {
 
       // Haetaan tarvittavat tiedot filest‰
       $files_out = unserialize(file_get_contents($kansio.$lasku));
-
       $status = maventa_invoice_put_file($client, $api_keys, $laskunro, "", $kukarow['kieli'], $files_out);
 
-      // Siirret‰‰n dataout kansioon jos kaikki meni ok
-      rename($kansio.$lasku, "{$pupe_root_polku}/dataout/$lasku");
-      echo "Maventa-lasku $laskunro: $status<br>\n";
+      if (!empty($status)) {
+        // Siirret‰‰n dataout kansioon jos Maventalta on saatu jokin vastaus
+        rename($kansio.$lasku, "{$pupe_root_polku}/dataout/$lasku");
+      }
+      else {
+        $status = "YHTEYSVIRHE!";
+      }
 
+      echo "Maventa-lasku $laskunro: $status<br>\n";
       $mavelask++;
 
       // Pidet‰‰n sadan laskun j‰lkeen pieni paussi
@@ -276,13 +280,15 @@ if ($handle = opendir($kansio)) {
   while (($lasku = readdir($handle)) !== FALSE) {
 
     // Ei k‰sitell‰ kun Apix tiedostoja
-    if (!preg_match("/Apix_(.*?)_invoices_/", $lasku, $matsit)) {
+    if (!preg_match("/Apix_(.*?)_invoices_([0-9]*?)_/", $lasku, $matsit)) {
       continue;
     }
 
-    $yhtio = $matsit[1];
+    $yhtio    = $matsit[1];
     $yhtiorow = hae_yhtion_parametrit($yhtio);
-    $kukarow = hae_kukarow('admin', $yhtio);
+    $kukarow  = hae_kukarow('admin', $yhtio);
+    $laskunro = $matsit[2];
+
 
     // Jos lasku on liian vanha, ei k‰sitell‰, l‰hetet‰‰n maililla
     if (onko_lasku_liian_vanha($kansio.$lasku)) {
@@ -292,7 +298,7 @@ if ($handle = opendir($kansio)) {
     // Logitetaan ajo
     cron_log("{$pupe_root_polku}/dataout/$lasku");
 
-    $status = apix_invoice_put_file("", $kukarow['kieli'], $lasku);
+    $status = apix_invoice_put_file($lasku, $laskunro);
     echo "APIX-l‰hetys $status<br>\n";
   }
 

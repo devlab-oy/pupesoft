@@ -330,17 +330,13 @@ if (!function_exists('print_pdf_dgd')) {
 
         $kutsu = t("DGD %s", $kieli, $laskurow["tunnus"]);
 
-        if (@include "../inc/sahkoposti.inc");
-        elseif (@include "inc/sahkoposti.inc");
+        if (@include "inc/sahkoposti.inc");
         else include "sahkoposti.inc";
       }
       elseif ($komento != '' and $komento != 'edi') {
         echo t("DGD tulostuu")."...<br>";
         $line = exec("$komento $pdffilenimi", $output, $returnvalue);
       }
-
-      // poistetaan tmp file
-      unlink($pdffilenimi);
     }
   }
 }

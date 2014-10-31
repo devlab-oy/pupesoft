@@ -146,7 +146,7 @@ if (!function_exists("tulosta_tilaustuotetarrat")) {
           $kutsu = "Tilaustuotetarrat $laskurow[tunnus]";
 
           if ($kukarow["extranet"] == '') {
-            require "../inc/sahkoposti.inc";
+            require "inc/sahkoposti.inc";
           }
           else {
             require "sahkoposti.inc";
@@ -166,9 +166,6 @@ if (!function_exists("tulosta_tilaustuotetarrat")) {
             echo "<font class='error'>".t("VIRHE: Tilaustuotetarrojen tulostus epäonnistui..")."</font><br>";
           }
         }
-
-        system("rm -f $pdf_tilaustuotetarrafilenimi");
-
       }
     }
   }

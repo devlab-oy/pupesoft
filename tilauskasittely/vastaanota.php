@@ -461,7 +461,7 @@ if ($tee == 'paikat') {
   if ($virheita == 0 and $vainlistaus == '') {
     $tee = 'valmis';
   }
-  elseif ($vainlistaus == '')  {
+  elseif ($vainlistaus == '') {
     $tee = '';
   }
 
@@ -649,7 +649,7 @@ if ($tee == 'valmis') {
       }
 
       if ($tee != 'X') {
-        
+
         if ($_poikkeavalaskutuspvm != '') {
           $_laadittu = $_poikkeavalaskutuspvm." 23:59:59";
           $_tapvm = $_poikkeavalaskutuspvm;
@@ -658,7 +658,7 @@ if ($tee == 'valmis') {
           $_laadittu = date("Y-m-d H:i:s");
           $_tapvm = date("Y-m-d");
         }
-        
+
         // jos kaikki meni ok niin päivitetään rivi vastaanotetuksi, laitetaan rivihinnaks tuotteen myyntihinat (tätä käytetään sit intrastatissa jos on tarve)
         $query = "UPDATE tilausrivi, tuote
                   SET tilausrivi.toimitettu  = '$kukarow[kuka]',
@@ -1088,9 +1088,9 @@ if (empty($id) and $echotaanko) {
 
     $_suljettu_lahto = (!is_null($tilrow['lahdon_aktiivi']) and $tilrow['lahdon_aktiivi'] != 'S');
 
-     if ($_suljettu_lahto) {
-        //Ei näytetä siirtolistoja, joihin on liitetty aukioleva lähtö
-        continue;
+    if ($_suljettu_lahto) {
+      //Ei näytetä siirtolistoja, joihin on liitetty aukioleva lähtö
+      continue;
     }
 
     // etsitään sopivia tilauksia

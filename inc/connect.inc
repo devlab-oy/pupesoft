@@ -82,5 +82,5 @@ $pupe_resque = FALSE;
 
 // Otetaan php-resque käyttöön jos se on asennettu
 if (@include_once "php-resque/lib/Resque.php") {
-    $pupe_resque = TRUE;
+  $pupe_resque = TRUE;
 }

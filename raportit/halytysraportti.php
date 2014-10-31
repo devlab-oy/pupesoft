@@ -454,7 +454,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
       $toimipaikka_nimi = t("Ei toimipaikkaa");
     }
 
-    echo "<tr><th>",t("Toimipaikka"),"</th><td colspan='3'>{$toimipaikka_nimi}</td></tr>";
+    echo "<tr><th>", t("Toimipaikka"), "</th><td colspan='3'>{$toimipaikka_nimi}</td></tr>";
   }
 
   echo "  </table><br>";
@@ -861,7 +861,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
                   LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                     AND varastopaikat.tunnus = tuotepaikat.varasto)
                   WHERE tuotepaikat.$varastot_yhtiot
-                  and tuotepaikat.tuoteno = '$row[tuoteno]'
+                  and tuotepaikat.tuoteno    = '$row[tuoteno]'
                   GROUP BY varastopaikat.tunnus
                   $varastot";
         $result = pupe_query($query);
@@ -969,10 +969,10 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
                 sum(if (tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,tilausrivi.rivihinta,0)) rivihinta4,
                 max(tilausrivi.laskutettuaika) myyntipvm
                 FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-                WHERE tilausrivi.yhtio = '$row[yhtio]'
+                WHERE tilausrivi.yhtio        = '$row[yhtio]'
                 {$varastowherelisa}
-                and tilausrivi.tyyppi  = 'L'
-                and tilausrivi.tuoteno = '$row[tuoteno]'
+                and tilausrivi.tyyppi         = 'L'
+                and tilausrivi.tuoteno        = '$row[tuoteno]'
                 and tilausrivi.laskutettuaika >= '$apvm'
                 and tilausrivi.laskutettuaika <= '$lpvm'
                 $lisa";
@@ -985,10 +985,10 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
                 sum(if (tilausrivi.laadittu >= '$vva3-$kka3-$ppa3 00:00:00' and tilausrivi.laadittu <= '$vvl3-$kkl3-$ppl3 23:59:59' and tilausrivi.var='P', tilausrivi.tilkpl,0)) puutekpl3,
                 sum(if (tilausrivi.laadittu >= '$vva4-$kka4-$ppa4 00:00:00' and tilausrivi.laadittu <= '$vvl4-$kkl4-$ppl4 23:59:59' and tilausrivi.var='P', tilausrivi.tilkpl,0)) puutekpl4
                 FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laadittu)
-                WHERE tilausrivi.yhtio = '$row[yhtio]'
+                WHERE tilausrivi.yhtio  = '$row[yhtio]'
                 {$varastowherelisa}
-                and tilausrivi.tyyppi = 'L'
-                and tilausrivi.tuoteno = '$row[tuoteno]'
+                and tilausrivi.tyyppi   = 'L'
+                and tilausrivi.tuoteno  = '$row[tuoteno]'
                 and tilausrivi.laadittu >= '$apvm 00:00:00'
                 and tilausrivi.laadittu <= '$lpvm 23:59:59'
                 $lisa";
@@ -1028,7 +1028,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
                 FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laadittu)
                 WHERE tilausrivi.yhtio = '$row[yhtio]'
                 {$varastowherelisa}
-                and tilausrivi.tyyppi = 'V'
+                and tilausrivi.tyyppi  = 'V'
                 and tilausrivi.tuoteno = '$row[tuoteno]'
                 and ((tilausrivi.toimitettuaika >= '$apvm 00:00:00' and tilausrivi.toimitettuaika <= '$lpvm 23:59:59') or tilausrivi.toimitettuaika = '0000-00-00 00:00:00')
                 $lisa";
@@ -1044,10 +1044,10 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
                 sum(if(tilausrivi.tyyppi in ('L','G') and tilausrivi.var = 'J', jt $lisavarattu, 0)) jt
                 $varastolisa
                 FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-                WHERE tilausrivi.yhtio = '$row[yhtio]'
+                WHERE tilausrivi.yhtio        = '$row[yhtio]'
                 {$varastowherelisa}
-                and tilausrivi.tyyppi in ('L','V','O','G','E','W','M')
-                and tilausrivi.tuoteno = '$row[tuoteno]'
+                and tilausrivi.tyyppi         in ('L','V','O','G','E','W','M')
+                and tilausrivi.tuoteno        = '$row[tuoteno]'
                 and tilausrivi.laskutettuaika = '0000-00-00'
                 and (tilausrivi.varattu + tilausrivi.jt > 0)";
       $result = pupe_query($query);
@@ -1155,16 +1155,16 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
                    JOIN lasku l use index(PRIMARY)
                    JOIN asiakas a use index (ytunnus_index)
                    WHERE tilausrivi.yhtio        = '$row[yhtio]'
-                  {$varastowherelisa}
+                   {$varastowherelisa}
                    and tilausrivi.tyyppi         = 'L'
                    and tilausrivi.tuoteno        = '$row[tuoteno]'
                    and tilausrivi.laskutettuaika >= '$apvm'
                    and tilausrivi.laskutettuaika <= '$lpvm'
-                   and l.yhtio          = tilausrivi.yhtio
-                   and l.tunnus         = tilausrivi.uusiotunnus
-                   and a.ytunnus        = l.ytunnus
-                   and a.yhtio          = l.yhtio
-                   and a.osasto         = '$asiakasosasto'";
+                   and l.yhtio                   = tilausrivi.yhtio
+                   and l.tunnus                  = tilausrivi.uusiotunnus
+                   and a.ytunnus                 = l.ytunnus
+                   and a.yhtio                   = l.yhtio
+                   and a.osasto                  = '$asiakasosasto'";
         $asosresult = pupe_query($query);
         $asosrow = mysql_fetch_assoc($asosresult);
       }
@@ -1177,14 +1177,14 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
                    FROM tilausrivi t use index (yhtio_tyyppi_tuoteno_laskutettuaika)
                    JOIN lasku l use index(PRIMARY)
                    WHERE tilausrivi.yhtio        = '$row[yhtio]'
-                  {$varastowherelisa}
+                   {$varastowherelisa}
                    and tilausrivi.tyyppi         = 'L'
                    and tilausrivi.tuoteno        = '$row[tuoteno]'
                    and tilausrivi.laskutettuaika >= '$apvm'
                    and tilausrivi.laskutettuaika <= '$lpvm'
-                   and l.yhtio          = tilausrivi.yhtio
-                   and l.tunnus         = tilausrivi.otunnus
-                   and l.liitostunnus   = '$asiakasid'";
+                   and l.yhtio                   = tilausrivi.yhtio
+                   and l.tunnus                  = tilausrivi.otunnus
+                   and l.liitostunnus            = '$asiakasid'";
         $asresult = pupe_query($query);
         $asrow = mysql_fetch_assoc($asresult);
       }
@@ -1955,7 +1955,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
                       FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
                       WHERE tilausrivi.yhtio = '$row[yhtio]'
                       {$varastowherelisa}
-                      and tilausrivi.tyyppi in ('L','V','O','W','M')
+                      and tilausrivi.tyyppi  in ('L','V','O','W','M')
                       and tilausrivi.tuoteno = '$korvarow[tuoteno]'
                       and tilausrivi.varattu > 0";
             $presult = pupe_query($query);
@@ -2267,7 +2267,7 @@ if ($tee == "") {
     echo "<th>", t("Toimipaikka"), "</th>";
 
     echo "<td><select name='toimipaikka'>";
-    echo "<option value='kaikki'>",t("Kaikki"),"</option>";
+    echo "<option value='kaikki'>", t("Kaikki"), "</option>";
 
     $sel = "";
 
@@ -2426,7 +2426,7 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
     }
 
     echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />";
-    echo "<tr><th>",t("Toimipaikka"),"</th><td colspan='3'>{$toimipaikka_nimi}</td></tr>";
+    echo "<tr><th>", t("Toimipaikka"), "</th><td colspan='3'>{$toimipaikka_nimi}</td></tr>";
   }
 
 
@@ -2665,7 +2665,7 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
     $chk = "CHECKED";
   }
 
-  echo "<tr><th>",t("Älä näytä ehdokas-tuotteita"),"</th><td colspan='3'><input type='checkbox' name='valitut[ehdokas]' value='EHDOKAS' {$chk}></td></tr>";
+  echo "<tr><th>", t("Älä näytä ehdokas-tuotteita"), "</th><td colspan='3'><input type='checkbox' name='valitut[ehdokas]' value='EHDOKAS' {$chk}></td></tr>";
 
   //Näytetäänkö ostoehdottamattomat tuotteet
   $query = "SELECT selitetark
@@ -2808,7 +2808,7 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
   }
 
   echo "<tr>";
-  echo "<th>",t("Näytä vain tuotteet joilla on saldoa"),"</th>";
+  echo "<th>", t("Näytä vain tuotteet joilla on saldoa"), "</th>";
   echo "<td colspan='3'><input type='checkbox' name='valitut[SALDOLLISET]' {$chk}></td>";
   echo "<td colspan='5' class='back'></td>";
   echo "</tr>";
@@ -2884,7 +2884,7 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
         $_chk = "CHECKED";
       }
 
-      echo "<tr><th>",t("Varastovalinta huomioidaan kaikissa laskennoissa"),"</th>";
+      echo "<tr><th>", t("Varastovalinta huomioidaan kaikissa laskennoissa"), "</th>";
       echo "<td colspan='3'><input type='checkbox' name='valitut[VARASTOHUOMIO]' value='VARASTOHUOMIO' {$_chk} />";
 
       echo "<tr><th rowspan='".mysql_num_rows($vtresult)."'>".t("Huomioi saldot varastossa:")."</th>";
@@ -2904,7 +2904,7 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
   echo t("Omat hälytysraportit");
 
   echo "<span style='float: right;'>";
-  echo t("Ruksaa kaikki")," ";
+  echo t("Ruksaa kaikki"), " ";
   echo "<input type='checkbox' class='valitut_checkbox_kaikki' />";
   echo "</span>";
 

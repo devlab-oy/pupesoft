@@ -210,7 +210,7 @@ if ($toim == 'TYOMAARAYS') {
   if (mysql_num_rows($result) > 0) {
     $yhtiot = array();
 
-    while ($row = mysql_fetch_array($result)) {
+    while ($row = mysql_fetch_assoc($result)) {
       $yhtiot[] = $row["yhtio"];
     }
   }
@@ -499,7 +499,7 @@ if ($tee == "ETSILASKU") {
 
     echo "<th>".t("Näytä")."</th></tr>";
 
-    while ($row = mysql_fetch_array($result)) {
+    while ($row = mysql_fetch_assoc($result)) {
       echo "<tr>";
       $ero = "td";
 
@@ -551,11 +551,7 @@ if ($tee == "ETSILASKU") {
       }
 
       if ($toim == '') {
-        $sel = "";
-        if (isset($korjaaalvit[$row["tilaus"]]) and $korjaaalvit[$row["tilaus"]] != '') $sel = "CHECKED";
-
         echo "<{$ero} valign='top' nowrap>";
-        echo "<input type='checkbox' name='korjaaalvit[{$row['tilaus']}]' value='on' {$sel}> ".t("Korjaa alvit")."<br>";
 
         // Katotaan ettei yksikään tuote ole sarjanumeroseurannassa, silloin ei voida turvallisesti laittaa suoraan laskutukseen
         $query = "SELECT tuote.sarjanumeroseuranta
@@ -936,7 +932,6 @@ if ($tee == 'MONISTA') {
   // $tunnus joka on array joss on monistettavat laskut
   // $kklkm kopioiden määrä
   // Jos hyvitä on 'on', niin silloin $kklkm täytyy aina olla 1
-  // $korjaaalvit array kertoo korjataanko kopioitavat tilauksen alvit
   // $suoraanlasku array sanoo että tilausta ei kerätä vaan se menee suoraan laskutusjonoon
 
   // Otetaan uudet tunnukset talteen
@@ -949,17 +944,15 @@ if ($tee == 'MONISTA') {
 
   foreach ($monistettavat as $lasku => $kumpi) {
 
-    $alvik       = "";
-    $slask       = "";
-    $sprojekti    = "";
+    $slask      = "";
+    $sprojekti  = "";
     $koptyom    = "";
-    $korjrahdit    = "";
+    $korjrahdit = "";
 
-    if (isset($korjaaalvit[$lasku]) and $korjaaalvit[$lasku] != '')        $alvik    = "on";
-    if (isset($suoraanlasku[$lasku]) and $suoraanlasku[$lasku] != '')       $slask    = "on";
-    if (isset($sailytaprojekti[$lasku]) and $sailytaprojekti[$lasku] != '')   $sprojekti  = "on";
-    if (isset($sailytatyomaarays[$lasku]) and $sailytatyomaarays[$lasku] != '')  $koptyom   = "on";
-    if (isset($korjaarahdit[$lasku]) and $korjaarahdit[$lasku] != '')      $korjrahdit  = "on";
+    if (isset($suoraanlasku[$lasku]) and $suoraanlasku[$lasku] != '')           $slask      = "on";
+    if (isset($sailytaprojekti[$lasku]) and $sailytaprojekti[$lasku] != '')     $sprojekti  = "on";
+    if (isset($sailytatyomaarays[$lasku]) and $sailytatyomaarays[$lasku] != '') $koptyom    = "on";
+    if (isset($korjaarahdit[$lasku]) and $korjaarahdit[$lasku] != '')           $korjrahdit = "on";
     if (isset($kaytetaanhyvityshintoja[$lasku]) and $kaytetaanhyvityshintoja[$lasku] != '')  $kaythyvit = "on";
 
     if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA') {
@@ -996,24 +989,24 @@ if ($tee == 'MONISTA') {
                 WHERE tunnus = '{$lasku}'
                 AND yhtio    IN ('".implode("','", $yhtiot)."')";
       $monistares = pupe_query($query);
-      $monistarow = mysql_fetch_array($monistares);
+      $monistarow = mysql_fetch_assoc($monistares);
 
       $squery = "SELECT *
                  FROM asiakas
                  WHERE yhtio = '{$kukarow['yhtio']}'
                  AND tunnus  = '{$monistarow['liitostunnus']}'";
       $asiakres = pupe_query($squery);
-      $asiakrow = mysql_fetch_array($asiakres);
+      $asiakrow = mysql_fetch_assoc($asiakres);
 
       $fields = "yhtio";
       $values = "'$kukarow[yhtio]'";
 
       // Ei monisteta tunnusta
       for ($i = 1; $i < mysql_num_fields($monistares) - 1; $i++) {
+        $fieldname = mysql_field_name($monistares, $i);
+        $fields .= ", ".$fieldname;
+        switch ($fieldname) {
 
-        $fields .= ", ".mysql_field_name($monistares, $i);
-
-        switch (mysql_field_name($monistares, $i)) {
         case 'ytunnus':
         case 'liitostunnus':
         case 'nimi':
@@ -1045,7 +1038,7 @@ if ($tee == 'MONISTA') {
             $values .= ", ''";
           }
           else {
-            $values .= ", '".$monistarow[$i]."'";
+            $values .= ", '".$monistarow[$fieldname]."'";
           }
           break;
         case 'maksuehto':
@@ -1055,7 +1048,7 @@ if ($tee == 'MONISTA') {
                     WHERE yhtio  = '{$kukarow['yhtio']}'
                     AND kaytossa = ''
                     AND (sallitut_maat = '' OR sallitut_maat LIKE '%{$monistarow['maa']}%')
-                    AND tunnus   = '{$monistarow[$i]}'";
+                    AND tunnus   = '{$monistarow[$fieldname]}'";
           $abures = pupe_query($query);
 
           $maksuehto_ok = TRUE;
@@ -1074,7 +1067,7 @@ if ($tee == 'MONISTA') {
           }
 
           if ($maksuehto_ok) {
-            $values .= ", '".$monistarow[$i]."'";
+            $values .= ", '".$monistarow[$fieldname]."'";
           }
           else {
             // Otetaan firman eka maksuehto
@@ -1097,7 +1090,7 @@ if ($tee == 'MONISTA') {
           break;
         case 'toimaika':
           if (($kumpi == 'HYVITA' or $kumpi == 'REKLAMA' or $yhtiorow["tilausrivien_toimitettuaika"] == 'X') and $toim != 'OSTOTILAUS') {
-            $values .= ", '{$monistarow[$i]}'";
+            $values .= ", '{$monistarow[$fieldname]}'";
           }
           else {
             $values .= ", now()";
@@ -1173,7 +1166,7 @@ if ($tee == 'MONISTA') {
         case 'vahennettava_era':
         case 'ultilno':
           if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA') {
-            $values .= ", '".$monistarow[$i]."'";
+            $values .= ", '".$monistarow[$fieldname]."'";
           }
           else {
             $values .= ", ''";
@@ -1246,7 +1239,7 @@ if ($tee == 'MONISTA') {
           break;
         case 'tunnusnippu':
           if ($sprojekti == "on") {
-            $values .= ", '".$monistarow[$i]."'";
+            $values .= ", '".$monistarow[$fieldname]."'";
           }
           else {
             $values .= ", ''";
@@ -1258,7 +1251,7 @@ if ($tee == 'MONISTA') {
             $values .= ", 'o'";
           }
           else {
-            $values .= ", '".$monistarow[$i]."'";
+            $values .= ", '".$monistarow[$fieldname]."'";
           }
           break;
         case 'alv':
@@ -1327,30 +1320,24 @@ if ($tee == 'MONISTA') {
             echo t("Korjataan laskun ALVia").":  {$monistarow['alv']} --> {$uusi_alv}<br>";
           }
           else {
-            $values .= ", '".$monistarow[$i]."'";
+            $values .= ", '".$monistarow[$fieldname]."'";
           }
           break;
         case 'ketjutus':
-          if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA' or $alvik == "on") {
+          if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA') {
             echo t("Hyvitystä/ALV-korjausta ei ketjuteta")."<br>";
             $values .= ", 'x'";
           }
           else {
-            $values .= ", '".$monistarow[$i]."'";
+            $values .= ", '".$monistarow[$fieldname]."'";
           }
           break;
         case 'viesti':
-          if ($kumpi == 'HYVITA' and $alvik == "on") {
-            $values .= ", '".t("Hyvitetään ja tehdään ALV-korjaus laskuun", $asiakrow['kieli']).": ".$monistarow["laskunro"].".'";
-          }
-          elseif ($kumpi == 'HYVITA') {
+          if ($kumpi == 'HYVITA') {
             $values .= ", '".t("Hyvitys laskuun", $asiakrow['kieli']).": ".$monistarow["laskunro"].".'";
           }
           elseif ($kumpi == 'REKLAMA') {
             $values .= ", '".t("Reklamaatio laskuun", $asiakrow['kieli']).": ".$monistarow["laskunro"].".'";
-          }
-          elseif ($kumpi == 'MONISTA' and $alvik == "on") {
-            $values .= ", '".t("ALV-korjaus laskuun", $asiakrow['kieli']).": ".$monistarow["laskunro"].".'";
           }
           else {
             $values .= ", ''";
@@ -1359,14 +1346,14 @@ if ($tee == 'MONISTA') {
         case 'vienti_kurssi';
           // hyvityksissä pidetään kurssi samana, tai jos korjataan rahtikuluja
           if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA' or ($toim == '' and $kumpi == 'MONISTA' and $korjrahdit == 'on')) {
-            if ($monistarow[$i] == 0) {
+            if ($monistarow[$fieldname] == 0) {
               // Vanhoilla u-laskuilla ei ole vienti kurssia....
               $vienti_kurssi = @round($monistarow["arvo"] / $monistarow["arvo_valuutassa"], 9);
 
               $values .= ", '{$vienti_kurssi}'";
             }
             else {
-              $values .= ", '".$monistarow[$i]."'";
+              $values .= ", '".$monistarow[$fieldname]."'";
             }
           }
           else {
@@ -1375,12 +1362,12 @@ if ($tee == 'MONISTA') {
                        WHERE yhtio = '{$kukarow['yhtio']}'
                        and nimi    = '{$monistarow['valkoodi']}'";
             $vresult = pupe_query($vquery);
-            $valrow = mysql_fetch_array($vresult);
+            $valrow = mysql_fetch_assoc($vresult);
             $values .= ", '{$valrow['kurssi']}'";
           }
           break;
         default:
-          $values .= ", '".$monistarow[$i]."'";
+          $values .= ", '".$monistarow[$fieldname]."'";
         }
       }
 
@@ -1423,22 +1410,22 @@ if ($tee == 'MONISTA') {
 
         if (mysql_num_rows($sompmonres) > 0) {
 
-          while ($sopmonrow = mysql_fetch_array($sompmonres)) {
+          while ($sopmonrow = mysql_fetch_assoc($sompmonres)) {
 
             $fields = "yhtio";
             $values = "'{$kukarow['yhtio']}'";
 
             // Ei monisteta tunnusta
             for ($i = 1; $i < mysql_num_fields($sompmonres) - 1; $i++) {
+              $fieldname = mysql_field_name($sompmonres, $i);
+              $fields .= ", ".$fieldname;
 
-              $fields .= ", ".mysql_field_name($sompmonres, $i);
-
-              switch (mysql_field_name($sompmonres, $i)) {
+              switch ($fieldname) {
               case 'otunnus':
                 $values .= ", '{$utunnus}'";
                 break;
               default:
-                $values .= ", '".$monistalisrow[$i]."'";
+                $values .= ", '".$monistalisrow[$fieldname]."'";
               }
             }
 
@@ -1463,22 +1450,22 @@ if ($tee == 'MONISTA') {
       $monistalisres = pupe_query($query);
 
       if (mysql_num_rows($monistalisres) > 0) {
-        $monistalisrow = mysql_fetch_array($monistalisres);
+        $monistalisrow = mysql_fetch_assoc($monistalisres);
 
         $fields = "yhtio";
         $values = "'{$kukarow['yhtio']}'";
 
         // Ei monisteta tunnusta
         for ($i = 1; $i < mysql_num_fields($monistalisres) - 1; $i++) {
+          $fieldname = mysql_field_name($monistalisres, $i);
+          $fields .= ", ".$fieldname;
 
-          $fields .= ", ".mysql_field_name($monistalisres, $i);
-
-          switch (mysql_field_name($monistalisres, $i)) {
+          switch ($fieldname) {
           case 'otunnus':
             $values .= ", '{$utunnus}'";
             break;
           default:
-            $values .= ", '".$monistalisrow[$i]."'";
+            $values .= ", '".$monistalisrow[$fieldname]."'";
           }
         }
 
@@ -1498,7 +1485,7 @@ if ($tee == 'MONISTA') {
                     ORDER BY tunnus
                     LIMIT 1";
           $monistalisres = pupe_query($query);
-          $monistalisrow = mysql_fetch_array($monistalisres);
+          $monistalisrow = mysql_fetch_assoc($monistalisres);
 
           $tyomaarays = $monistalisrow["tyomaarays"];
         }
@@ -1512,21 +1499,21 @@ if ($tee == 'MONISTA') {
                   WHERE otunnus = '{$tyomaarays}'
                   AND yhtio     = '{$monistarow['yhtio']}'";
         $monistalisres = pupe_query($query);
-        $monistalisrow = mysql_fetch_array($monistalisres);
+        $monistalisrow = mysql_fetch_assoc($monistalisres);
 
         $fields = "yhtio";
         $values = "'{$kukarow['yhtio']}'";
 
         for ($i = 1; $i < mysql_num_fields($monistalisres); $i++) {
+          $fieldname = mysql_field_name($monistalisres, $i);
+          $fields .= ", ".$fieldname;
 
-          $fields .= ", ".mysql_field_name($monistalisres, $i);
-
-          switch (mysql_field_name($monistalisres, $i)) {
+          switch ($fieldname) {
           case 'otunnus':
             $values .= ", '{$utunnus}'";
             break;
           default:
-            $values .= ", '".$monistalisrow[$i]."'";
+            $values .= ", '".$monistalisrow[$fieldname]."'";
           }
         }
 
@@ -1560,7 +1547,7 @@ if ($tee == 'MONISTA') {
       }
       $rivires = pupe_query($query);
 
-      while ($rivirow = mysql_fetch_array($rivires)) {
+      while ($rivirow = mysql_fetch_assoc($rivires)) {
         $paikkavaihtu = 0;
         $uusikpl = 0;
 
@@ -1585,7 +1572,7 @@ if ($tee == 'MONISTA') {
           $p2result = pupe_query($p2query);
 
           if (mysql_num_rows($p2result) == 1) {
-            $paikka2row = mysql_fetch_array($p2result);
+            $paikka2row = mysql_fetch_assoc($p2result);
             $paikkavaihtu = 1;
           }
         }
@@ -1593,31 +1580,32 @@ if ($tee == 'MONISTA') {
         $palautus = array();
 
         if ($toim == '' and $kumpi == 'REKLAMA' and isset($kaytetaanhyvityshintoja[$lasku]) and $kaytetaanhyvityshintoja[$lasku] != '') {
-          $palautus = hae_hyvityshinta($laskurow["liitostunnus"], $rivirow['tuoteno'], ($rivirow["kpl"] + $rivirow["jt"] + $rivirow["varattu"]));
+          $_kpl = $rivirow["kpl"] + $rivirow["jt"] + $rivirow["varattu"];
+          $palautus = hae_hyvityshinta($laskurow["liitostunnus"], $rivirow['tuoteno'], $_kpl);
 
           if (count($palautus) > 0) {
             $rivirow['hinta'] = $palautus[0]["hinta"];
             $rivirow['kommentti'] = trim($rivirow['kommentti']) != '' ? "{$rivirow['kommentti']} {$palautus[0]['kommentti']}" : $palautus[0]['kommentti'];
             $rivirow['varattu'] = $palautus[0]["kpl"];
+            $rivirow['kpl'] = 0;
             $rivirow['ale1'] = $palautus[0]['ale'];
             for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
               $rivirow['ale'.$alepostfix] = 0;
             }
-
           }
         }
 
         $rfields = "yhtio";
         $rvalues = "'{$kukarow['yhtio']}'";
 
-        for ($i = 1; $i < mysql_num_fields($rivires) - 1; $i++) { // Ei tunnusta
+        for ($i = 1; $i < mysql_num_fields($rivires) - 1; $i++) {
+          $fieldname = mysql_field_name($rivires, $i);
+          $rfields .= ", ".$fieldname;
+          switch ($fieldname) {
 
-          $rfields .= ", ".mysql_field_name($rivires, $i);
-
-          switch (mysql_field_name($rivires, $i)) {
           case 'toimaika':
             if ($yhtiorow["tilausrivien_toimitettuaika"] == 'X' and $toim != 'OSTOTILAUS') {
-              $rvalues .= ", '".$rivirow[$i]."'";
+              $rvalues .= ", '".$rivirow[$fieldname]."'";
             }
             else {
               $rvalues .= ", now()";
@@ -1725,10 +1713,10 @@ if ($tee == 'MONISTA') {
             //Korjataanko tilausrivin alvit
             if ($alvik == "on") {
               $rvalues .= ", '{$uusi_alv}'";
-              $rivirow['orig_alv'] = $rivirow[$i];
+              $rivirow['orig_alv'] = $rivirow[$fieldname];
             }
             else {
-              $rvalues .= ", '".$rivirow[$i]."'";
+              $rvalues .= ", '".$rivirow[$fieldname]."'";
             }
             break;
           case 'tyyppi':
@@ -1737,7 +1725,7 @@ if ($tee == 'MONISTA') {
               $rvalues .= ", 'T'";
             }
             else {
-              $rvalues .= ", '".$rivirow[$i]."'";
+              $rvalues .= ", '".$rivirow[$fieldname]."'";
             }
             break;
           case 'suuntalava':
@@ -1746,11 +1734,11 @@ if ($tee == 'MONISTA') {
               $rvalues .= ", 0";
             }
             else {
-              $rvalues .= ", '".$rivirow[$i]."'";
+              $rvalues .= ", '".$rivirow[$fieldname]."'";
             }
             break;
           default:
-            $rvalues .= ", '".$rivirow[$i]."'";
+            $rvalues .= ", '".$rivirow[$fieldname]."'";
           }
         }
 
@@ -1766,7 +1754,7 @@ if ($tee == 'MONISTA') {
         $monistares2 = pupe_query($query);
 
         if (mysql_num_rows($monistares2) > 0) {
-          $monistarow2 = mysql_fetch_array($monistares2);
+          $monistarow2 = mysql_fetch_assoc($monistares2);
 
           $kysely = "INSERT INTO tilausrivin_lisatiedot
                      SET yhtio       = '{$kukarow['yhtio']}',
@@ -1774,8 +1762,10 @@ if ($tee == 'MONISTA') {
                      luontiaika       = now(),
                      tilausrivitunnus = {$insid},";
 
-          for ($i = 0; $i < mysql_num_fields($monistares2) - 1; $i++) { // Ei monisteta tunnusta
-            switch (mysql_field_name($monistares2, $i)) {
+          for ($i = 0; $i < mysql_num_fields($monistares2) - 1; $i++) {
+            $fieldname = mysql_field_name($monistares2, $i);
+
+            switch ($fieldname) {
             case 'yhtio':
             case 'laatija':
             case 'luontiaika':
@@ -1788,18 +1778,18 @@ if ($tee == 'MONISTA') {
             case 'muuttaja':
               break;
             case 'osto_vai_hyvitys':
-              if ($monistarow2[$i] == "O" and ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA')) {
-                $kysely .= mysql_field_name($monistares2, $i)."='H',";
+              if ($monistarow2[$fieldname] == "O" and ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA')) {
+                $kysely .= $fieldname."='H',";
               }
-              elseif ($monistarow2[$i] == "H" and ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA')) {
-                $kysely .= mysql_field_name($monistares2, $i)."='O',";
+              elseif ($monistarow2[$fieldname] == "H" and ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA')) {
+                $kysely .= $fieldname."='O',";
               }
               else {
-                $kysely .= mysql_field_name($monistares2, $i)."='".$monistarow2[$i]."',";
+                $kysely .= $fieldname."='".$monistarow2[$fieldname]."',";
               }
               break;
             default:
-              $kysely .= mysql_field_name($monistares2, $i)."='".$monistarow2[$i]."',";
+              $kysely .= $fieldname."='".$monistarow2[$fieldname]."',";
             }
           }
 
@@ -1826,7 +1816,7 @@ if ($tee == 'MONISTA') {
                     AND {$tunken2} = 0";
           $sarjares = pupe_query($query);
 
-          while ($sarjarow = mysql_fetch_array($sarjares)) {
+          while ($sarjarow = mysql_fetch_assoc($sarjares)) {
             if ($uusikpl > 0) {
               $uusi_tunken = "myyntirivitunnus";
             }
@@ -1836,7 +1826,7 @@ if ($tee == 'MONISTA') {
 
             $query = "SELECT sarjanumeroseuranta FROM tuote WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '{$rivirow['tuoteno']}'";
             $sarjatuoteres = pupe_query($query);
-            $sarjatuoterow = mysql_fetch_array($sarjatuoteres);
+            $sarjatuoterow = mysql_fetch_assoc($sarjatuoteres);
 
             if ($sarjatuoterow["sarjanumeroseuranta"] == "E" or $sarjatuoterow["sarjanumeroseuranta"] == "F" or $sarjatuoterow["sarjanumeroseuranta"] == "G") {
               $query = "INSERT INTO sarjanumeroseuranta
@@ -1880,7 +1870,7 @@ if ($tee == 'MONISTA') {
               $sarjares1 = pupe_query($query);
 
               if (mysql_num_rows($sarjares1) == 1) {
-                $sarjarow1 = mysql_fetch_array($sarjares1);
+                $sarjarow1 = mysql_fetch_assoc($sarjares1);
 
                 $query = "UPDATE sarjanumeroseuranta
                           SET {$uusi_tunken} = '{$insid}', ";
@@ -1944,7 +1934,7 @@ if ($tee == 'MONISTA') {
                     WHERE yhtio = '{$monistarow['yhtio']}'
                     AND tuoteno = '{$rivirow['tuoteno']}'";
           $tres = pupe_query($query);
-          $trow = mysql_fetch_array($tres);
+          $trow = mysql_fetch_assoc($tres);
 
           // Ohitetaan valuuttaproblematiikka
           $laskurow["vienti_kurssi"] = 1;
@@ -1999,7 +1989,7 @@ if ($tee == 'MONISTA') {
                 GROUP BY perheid";
       $copresult = pupe_query($query);
 
-      while ($coprivirow = mysql_fetch_array($copresult)) {
+      while ($coprivirow = mysql_fetch_assoc($copresult)) {
         $query = "UPDATE tilausrivi
                   SET perheid = '{$coprivirow['uusiperheid']}'
                   WHERE yhtio = '{$kukarow['yhtio']}'
@@ -2017,7 +2007,7 @@ if ($tee == 'MONISTA') {
                 GROUP BY perheid2";
       $copresult = pupe_query($query);
 
-      while ($coprivirow = mysql_fetch_array($copresult)) {
+      while ($coprivirow = mysql_fetch_assoc($copresult)) {
         $query = "UPDATE tilausrivi
                   SET perheid2 = '{$coprivirow['uusiperheid2']}'
                   WHERE yhtio  = '{$kukarow['yhtio']}'
@@ -2099,7 +2089,7 @@ if ($tee == 'MONISTA') {
                   WHERE yhtio = '{$kukarow['yhtio']}'
                   AND tunnus  = '{$utunnus}'";
         $result = pupe_query($query);
-        $laskurow = mysql_fetch_array($result);
+        $laskurow = mysql_fetch_assoc($result);
 
         $kukarow["kesken"] = $laskurow["tunnus"];
 

@@ -369,16 +369,12 @@ if (!function_exists('tulosta_ostotilaus')) {
       $tulosta_ostotilaus_ulos .= t("Toimituksen vahvistuspyyntö lähetetään osoitteeseen")." $kukarow[eposti]...<br>";
 
       if ($kukarow["extranet"] == '') {
-        require "../inc/sahkoposti.inc";
+        require "inc/sahkoposti.inc";
       }
       else {
         require "sahkoposti.inc";
       }
     }
-
-
-    //poistetaan tmp file samantien kuleksimasta...
-    system("rm -f $pdf_ostofilenimi");
   }
 }
 

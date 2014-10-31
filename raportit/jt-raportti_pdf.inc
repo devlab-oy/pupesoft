@@ -137,14 +137,7 @@ if (!function_exists('print_pdf')) {
     $liite = $pdffilenimi;
     $kutsu = t("Jälkitoimitusraportti", $kieli);
 
-    //    debuggaus-echo
-    //    echo t("Luettelo tulostuu")."...$asiakasrow[nimi]\n";
-
     $kukarow["eposti"] = $asiakasrow["email"];
-    //    $kukarow["eposti"] = "tomi@arwidson.fi";
-    require "../inc/sahkoposti.inc";
-
-    //poistetaan tmp file samantien kuleksimasta...
-    system("rm -f $pdffilenimi");
+    require "inc/sahkoposti.inc";
   }
 }

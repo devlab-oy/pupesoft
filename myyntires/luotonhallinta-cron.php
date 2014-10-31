@@ -159,5 +159,5 @@ $content_body .= "</body>";
 $content_body .= "</html>";
 
 if ($laskuri > 0) {
-  require "../inc/sahkoposti.inc";
+  require "inc/sahkoposti.inc";
 }

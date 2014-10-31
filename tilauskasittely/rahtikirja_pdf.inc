@@ -667,5 +667,3 @@ if (strpos($_SERVER['SCRIPT_NAME'], "rahtikirja-kopio.php") === FALSE) {
     pupesoft_sahkoposti($params);
   }
 }
-
-system("rm -f $pdffilenimi");

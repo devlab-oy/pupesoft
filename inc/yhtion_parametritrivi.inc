@@ -2219,6 +2219,18 @@ if ($fieldname == "myyntitilaus_osatoimitus") {
   $jatko = 0;
 }
 
+if ($fieldname == "myyntitilaus_ytunnus_syotto") {
+
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value = ''>".t("Myyntitilauksella ei voi syöttää ytunnusta käsin")."</option>";
+  $ulos .= "<option value = 'K' {$sel}>".t("Myyntitilauksella voi syöttää ytunnuksen käsin")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "varaako_jt_saldoa") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2501,6 +2513,21 @@ if ($fieldname == "jt_toimitusaika_email_vahvistus") {
 
   $ulos .= "<option value = ''>".t("JT-rivien toimitusajan vahvistussähköpostia ei lähetetä")."</option>";
   $ulos .= "<option value = 'K' $sel[K]>".t("Ostotilauksen toimitusajan vahvistuksesta lähetetään asiakkaalle JT-rivien toimitusajan vahvistussähköposti")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "vahvistusviesti_asiakkaalle") {
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel = $trow[$i] == 'Y' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>" .
+    t("Ei lähetetä asiakkaalle vahvistusviestiä");
+  $ulos .= "<option value = 'Y' $sel>" .
+    t("Lähetetään asiakkaalle tekstiviesti ja sähköposti, kun jälkitoimitustuotteet ovat " .
+      "valmiina noudettaviksi, tai kun työmääräys on valmis");
   $ulos .= "</select></td>";
 
   $jatko = 0;

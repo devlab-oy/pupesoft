@@ -31,10 +31,11 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
 
   // Hakuehdot
   if ($tuoteno != '')    $params['tuoteno'] = "tuote.tuoteno = '{$tuoteno}'";
-  if ($tuotepaikka != '') $params['tuotepaikka'] = "concat(tuotepaikat.hyllyalue,
-                     tuotepaikat.hyllynro,
-                     tuotepaikat.hyllyvali,
-                     tuotepaikat.hyllytaso) LIKE '$hylly%'";
+
+  if ($tuotepaikka != '') {
+    $params['tuotepaikka'] = "hyllypaikka LIKE '{$hylly}%'";
+  }
+
   // Viivakoodi case
   if ($viivakoodi != '') {
     $tuotenumerot = hae_viivakoodilla($viivakoodi);
@@ -65,8 +66,13 @@ function hae($viivakoodi='', $tuoteno='', $tuotepaikka='') {
               concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
                     tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) tuotepaikka
               FROM tuotepaikat
+              JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                AND varastopaikat.tunnus      = tuotepaikat.varasto
+                AND varastopaikat.toimipaikka = '{$kukarow['toimipaikka']}'
+                AND varastopaikat.tyyppi = ''
+              )
               JOIN tuote on (tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno)
-              WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+              WHERE tuotepaikat.yhtio         = '{$kukarow['yhtio']}'
               AND $haku_ehto
               LIMIT 200";
     $result = pupe_query($query);

@@ -24,6 +24,9 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(d
 require 'inc/connect.inc';
 require 'inc/functions.inc';
 
+// Logitetaan ajo
+cron_log();
+
 // Yhtiö
 $yhtio = mysql_real_escape_string($argv[1]);
 

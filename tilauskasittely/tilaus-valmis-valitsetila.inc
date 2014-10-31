@@ -28,7 +28,7 @@ else {
 
 $query = "SELECT count(*) riveja,
           sum(if (tilausrivi.var = 'P' and tilausrivi.tilkpl $lis_plus_kpl > 0, 1, 0)) puutteet,
-          sum(if (tilausrivi.var in ('J','S') and tilausrivi.jt $lisavarattu > 0, 1, 0)) jteet,
+          sum(if (tilausrivi.var = 'J' and tilausrivi.jt $lisavarattu > 0, 1, 0)) jteet,
           sum(if (tilausrivi.var not in ('P','J','O','S') and tilausrivi.varattu $lis_plus_kpl < 0, 1, 0)) hyvitykset,
           sum(if (tilausrivi.var not in ('P','J','O','S') and (('$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa = '') or '$yhtiorow[kerataanko_saldottomat]' = 'S') and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) normaalit_kerataan,
           sum(if (tilausrivi.var not in ('P','J','O','S') and '$yhtiorow[kerataanko_saldottomat]' = '' and tuote.ei_saldoa != '' and tilausrivi.varattu $lis_plus_kpl > 0, 1, 0)) saldottomat,
@@ -100,6 +100,28 @@ if ($yhtiorow["puute_jt_kerataanko"] != "" and $kutsuja != 'keraa.php') {
   }
 }
 
+$tilaus_toimitetuksi = false;
+//Siirtolistat ker‰t‰‰n ker‰yserien kautta ja siihen linkattu myyntitilaus halutaan laittaa toimitetuksi kun siirtolista on vastaanotettu kohdevarastossa
+if ($yhtiorow['kerayserat'] == 'K' and $yhtiorow['siirtolistan_tulostustapa'] == 'U' and $laskurow['tila'] == 'N' and $laskurow['alatila'] == '') {
+  $query = "SELECT *
+            FROM tilausrivi AS t
+            JOIN tilausrivin_lisatiedot AS tt
+            ON ( tt.yhtio = t.yhtio
+              AND tt.tilausrivilinkki = t.tunnus )
+            JOIN tilausrivi AS t2
+            ON ( t2.yhtio = tt.yhtio
+              AND t2.tunnus           = tt.tilausrivitunnus
+              AND t2.tyyppi           = 'G' )
+            WHERE t.yhtio             = '{$kukarow['yhtio']}'
+            AND t.otunnus             = {$laskurow['tunnus']}
+            AND t.tyyppi              = 'L'";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) > 0) {
+    $tilaus_toimitetuksi = true;
+  }
+}
+
 /*
 echo "puute_jt_kerataanko: $yhtiorow[puute_jt_kerataanko]<br>";
 echo "kerataanko_jos_vain_puute_jt: $yhtiorow[kerataanko_jos_vain_puute_jt]<br>";
@@ -143,7 +165,7 @@ elseif ($rivirow["jteet"] > 0 and $laskurow["osatoimitus"] != '') {
 
   $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli JT-rivej‰ ja osatoimitusta ei tehd‰, eli se j‰tettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";
 }
-elseif ($kerattavia == 0) {
+elseif ($kerattavia == 0 or $tilaus_toimitetuksi) {
   // Tilauskella on pelk‰st‰‰n puuterivej‰ joita ei ker‰t‰
   // merkataan otsikko mit‰tˆidyksi, mutta j‰tet‰‰n PUUTE rivit analyysej‰ varten...
   if ($rivirow["riveja"] == $rivirow["puutteet"]) {
@@ -205,7 +227,7 @@ elseif ($kerattavia == 0) {
 
     $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilauksella %s oli pelk‰st‰‰n JT-rivej‰ ja Puuterivej‰ ja se j‰tettiin odottamaan JT-tuotteita."), $laskurow["tunnus"])."</font><br><br>\n";
   }
-  elseif ($ei_kerattavia > 0) {
+  elseif ($tilaus_toimitetuksi or $ei_kerattavia > 0) {
     if ($kateinen == 'X' or $itsetulostus == "X" or $laskurow["vienti"] != '') {
       // jos on laskuettavia rivej‰ ja jos kyseess‰ on k‰teist‰, itsetulostus tai vienti‰
       // merkataan rivit ker‰tyiksi, mutta ei toimitetuiksi ja laskulle alatila alatila C/B
@@ -314,7 +336,7 @@ elseif ($kerattavia == 0) {
     $tilaus_valmis_message .= "<font class='message'>".sprintf(t("VIRHE: Tilausta %s ei voitu merkata valmiiksi. Aktivoi tilaus ja korjaa virheet"), $laskurow["tunnus"])."! (1)</font><br><br>\n";
   }
 }
-elseif ($kerattavia > 0 and $kutsuja != 'keraa.php') {
+elseif ($kerattavia > 0 and $kutsuja != 'keraa.php' and !$tilaus_toimitetuksi) {
   // T‰ss‰ meill‰ ON jotain ker‰tt‰v‰‰
   // laitetaan l‰hete tulostusjonoon
   $tila = 'N';
@@ -384,7 +406,7 @@ elseif ($kerattavia > 0 and $kutsuja != 'keraa.php') {
     $tilaus_valmis_message .= "<font class='message'>".sprintf(t("Tilaus %s siirretty tulostusjonoon"), $laskurow["tunnus"])."!</font><br><br>\n";
   }
 }
-elseif ($kutsuja != 'keraa.php') {
+elseif ($kutsuja != 'keraa.php' and !$tilaus_toimitetuksi) {
   $tilaus_valmis_message .= "<font class='message'>".sprintf(t("VIRHE: Tilausta %s ei voitu merkata valmiiksi. Aktivoi tilaus ja korjaa virheet"), $laskurow["tunnus"])."! (2)</font><br><br>\n";
 }
 

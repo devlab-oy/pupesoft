@@ -329,6 +329,21 @@ if ($fieldname == "koontilaskut_yhdistetaan") {
   $jatko = 0;
 }
 
+if ($fieldname == "koontilahete_kollitiedot") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $selE = $trow[$i] == 'E' ? 'selected' : '';
+
+  $ulos .= "<option value = ''>".t("Keräysvahvistus/sähköinen lähete: Tuotteiden kollitiedot (SSCC) näytetään")."</option>";
+  $ulos .= "<option value = 'E' {$selE}>".t("Keräysvahvistus/sähköinen lähete: Tuotteiden kollitietoja (SSCC) ei näytetä")."</option>";
+
+  $ulos .= "</select>";
+  $ulos .=  "</td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "tilausvahvistustyyppi") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2518,6 +2533,21 @@ if ($fieldname == "jt_toimitusaika_email_vahvistus") {
   $jatko = 0;
 }
 
+if ($fieldname == "vahvistusviesti_asiakkaalle") {
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel = $trow[$i] == 'Y' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>" .
+    t("Ei lähetetä asiakkaalle vahvistusviestiä");
+  $ulos .= "<option value = 'Y' $sel>" .
+    t("Lähetetään asiakkaalle tekstiviesti ja sähköposti, kun jälkitoimitustuotteet ovat " .
+      "valmiina noudettaviksi, tai kun työmääräys on valmis");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "jt_manual") {
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -2954,6 +2984,18 @@ if ($fieldname == "extranet_nayta_saldo") {
 
   $ulos .= "<option value = ''>" . t("Ei näytetä saldoa extranetissä");
   $ulos .= "<option value = 'Y' $sel>" . t("Näytetään saldo extranetissä");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "ext_tilauksen_hyvaksyja_myyjaksi") {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'X' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>".t("Hyväksyjää ei tallenneta tilauksen myyjäksi")."</option>";
+  $ulos .= "<option value = 'X' {$sel}>".t("Hyväksyjä tallennetaan tilauksen myyjäksi")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

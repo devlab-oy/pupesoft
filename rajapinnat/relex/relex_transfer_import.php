@@ -66,20 +66,20 @@ if (isset($tee) and trim($tee) == 'aja') {
   foreach ($filet as $filu) {
 
     /* Tiedostomuoto:
-      COLUMN	      TYPE	COMMENT
-      order_number	INT	  Row level unique order number
-      product_code	TXT	  Identifier of the product/item
-      quantity	    FLOAT	Number of products to be ordered
-      order_type	  TXT	  NORMAL, EXTRA ORDER, ALLOCATION, ORDER IN ADVANCE, INITIAL REPLENISHMENT
-      location_code	TXT	  Identifier for location/warehouse
-      supplier_code	TXT	  Supplier code for proposed item
-      delivery_date	DATE	Expected delivery date for order
-      comment_1	    TXT	  Comment or identifier set in RELEX user interface
-      comment_2	    TXT	  Comment or identifier set in RELEX user interface
-      comment_3	    TXT	  Comment or identifier set in RELEX user interface
-      comment_4	    TXT	  Comment or identifier set in RELEX user interface
-      comment_5	    TXT	  Comment or identifier set in RELEX user interface
-      order_date	  DATE	When should the item be ordered
+      COLUMN        TYPE  COMMENT
+      order_number  INT    Row level unique order number
+      product_code  TXT    Identifier of the product/item
+      quantity      FLOAT  Number of products to be ordered
+      order_type    TXT    NORMAL, EXTRA ORDER, ALLOCATION, ORDER IN ADVANCE, INITIAL REPLENISHMENT
+      location_code  TXT    Identifier for location/warehouse
+      supplier_code  TXT    Supplier code for proposed item
+      delivery_date  DATE  Expected delivery date for order
+      comment_1      TXT    Comment or identifier set in RELEX user interface
+      comment_2      TXT    Comment or identifier set in RELEX user interface
+      comment_3      TXT    Comment or identifier set in RELEX user interface
+      comment_4      TXT    Comment or identifier set in RELEX user interface
+      comment_5      TXT    Comment or identifier set in RELEX user interface
+      order_date    DATE  When should the item be ordered
     */
 
     $rivit = file($filu);

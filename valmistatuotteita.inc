@@ -24,11 +24,11 @@ if ($tee == 'UV') {
   $query = "SELECT tilausrivi.*, tuote.ei_saldoa, tuote.kehahin
             FROM tilausrivi
             JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno=tilausrivi.tuoteno
-            WHERE tilausrivi.yhtio         = '$kukarow[yhtio]'
-            and tilausrivi.otunnus         = '$tilrivirow[otunnus]'
-            and tilausrivi.perheid         = '$tilrivirow[perheid]'
-            and tilausrivi.tyyppi          in ('W','M')
-            and tilausrivi.toimitettuaika  = '0000-00-00 00:00:00'
+            WHERE tilausrivi.yhtio        = '$kukarow[yhtio]'
+            and tilausrivi.otunnus        = '$tilrivirow[otunnus]'
+            and tilausrivi.perheid        = '$tilrivirow[perheid]'
+            and tilausrivi.tyyppi         in ('W','M')
+            and tilausrivi.toimitettuaika = '0000-00-00 00:00:00'
             ORDER by tilausrivi.tuoteno";
   $uvresult = pupe_query($query);
 

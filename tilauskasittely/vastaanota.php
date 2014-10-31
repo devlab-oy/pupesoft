@@ -649,10 +649,20 @@ if ($tee == 'valmis') {
       }
 
       if ($tee != 'X') {
+        
+        if ($_poikkeavalaskutuspvm != '') {
+          $_laadittu = $_poikkeavalaskutuspvm." 23:59:59";
+          $_tapvm = $_poikkeavalaskutuspvm;
+        }
+        else {
+          $_laadittu = date("Y-m-d H:i:s");
+          $_tapvm = date("Y-m-d");
+        }
+        
         // jos kaikki meni ok niin p‰ivitet‰‰n rivi vastaanotetuksi, laitetaan rivihinnaks tuotteen myyntihinat (t‰t‰ k‰ytet‰‰n sit intrastatissa jos on tarve)
         $query = "UPDATE tilausrivi, tuote
                   SET tilausrivi.toimitettu  = '$kukarow[kuka]',
-                  toimitettuaika          = now(),
+                  toimitettuaika          = '$_laadittu',
                   kpl                     = varattu,
                   varattu                 = 0,
                   rivihinta               = round(tilausrivi.kpl * tuote.myyntihinta / if('$yhtiorow[alv_kasittely]' = '', (1+tuote.alv/100), 1), '$yhtiorow[hintapyoristys]')
@@ -795,7 +805,7 @@ if ($tee == 'valmis') {
 
       $query = "UPDATE lasku
                 SET alatila    = 'V',
-                tapvm        = now(),
+                tapvm        = '$_tapvm',
                 summa        = '$apusummarow[rivihinta]'
                 WHERE tunnus = '{$apusummarow['otunnus']}'
                 and yhtio    = '$kukarow[yhtio]'

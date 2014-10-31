@@ -51,7 +51,6 @@ if (isset($tee) and $tee == "apix_siirto") {
   // Splitataan file ja l‰hetet‰‰n laskut sopivissa osissa
   $apix_laskuarray = explode("<?xml version=\"1.0\"", file_get_contents("/tmp/".$filenimi));
   $apix_laskumaara = count($apix_laskuarray);
-  $apix_laskut_20l = array();
 
   if ($apix_laskumaara > 0) {
     require_once "tilauskasittely/tulosta_lasku.inc";
@@ -59,15 +58,10 @@ if (isset($tee) and $tee == "apix_siirto") {
     for ($a = 1; $a < $apix_laskumaara; $a++) {
       preg_match("/\<InvoiceNumber\>(.*?)\<\/InvoiceNumber\>/i", $apix_laskuarray[$a], $invoice_number);
 
-      // Laitetaan 20 laskua arrayseen ja l‰hetet‰‰n ne...
-      $apix_laskut_20l[$invoice_number[1]] = "<?xml version=\"1.0\"".$apix_laskuarray[$a];
+      $apix_finvoice = "<?xml version=\"1.0\"".$apix_laskuarray[$a];
 
-      if (count($apix_laskut_20l) == 20 or $a == ($apix_laskumaara-1)) {
-        echo apix_invoice_put_file($apix_laskut_20l, $kieli);
-
-        // Nollataan t‰m‰
-        $apix_laskut_20l = array();
-      }
+      // Laitetaan lasku l‰hetysjonoon
+      echo apix_queue($apix_finvoice, $invoice_number[1], $kieli);
     }
   }
 }

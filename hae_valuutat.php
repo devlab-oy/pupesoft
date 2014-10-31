@@ -33,12 +33,11 @@ if ($xml !== FALSE) {
 
     if ($tee == "PAIVITA") {
       $query = "UPDATE valuu SET
-                kurssi                 = round(1 / $kurssi, 9),
-                muutospvm              = now(),
-                muuttaja               = '$kukarow[kuka]'
-                WHERE yhtio            = '$kukarow[yhtio]'
-                AND nimi               = '$valkoodi'
-                AND automaattipaivitys = ''";
+                kurssi      = round(1 / $kurssi, 9),
+                muutospvm   = now(),
+                muuttaja    = '$kukarow[kuka]'
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND nimi    = '$valkoodi'";
       $result = pupe_query($query);
 
       if (mysql_affected_rows() != 0) {

@@ -80,7 +80,7 @@ if ($tee == 'TOIMITA' and isset($maksutapa) and $maksutapa == 'seka') {
 
   $query_rivi = "SELECT lasku.valkoodi, lasku.maksuehto, lasku.hinta,
                  sum(round(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != ''
-                   and tilausrivi.alv > 0 and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)
+                   and tilausrivi.alv  > 0 and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)
                    * (tilausrivi.varattu+tilausrivi.kpl)
                    * {$query_ale_lisa},$yhtiorow[hintapyoristys])) verollinen
                  FROM tilausrivi

@@ -268,13 +268,13 @@ if (!$paivaajo) {
   $query = "UPDATE lahdot
             SET vakisin_kerays  = ''
             WHERE yhtio         = '{$kukarow['yhtio']}'
-            AND vakisin_kerays  != ''";
+            AND vakisin_kerays != ''";
   $upd_res = pupe_query($query);
 
   $query = "UPDATE lasku
             SET vakisin_kerays  = ''
             WHERE yhtio         = '{$kukarow['yhtio']}'
-            AND vakisin_kerays  != ''
+            AND vakisin_kerays != ''
             AND (
               (tila             = 'N'
               AND alatila       = 'A') OR

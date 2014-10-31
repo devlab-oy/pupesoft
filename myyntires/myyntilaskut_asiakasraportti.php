@@ -46,7 +46,7 @@ if ((isset($tiliote) and $tiliote == '1') or (!empty($tee) and $tee == 'TULOSTA_
     pupesoft_sahkoposti($params);
 
     echo "<font class='info'>";
-    echo t("Tiliote lähetettiin osoitteeseen"),": {$email}<br /><br />";
+    echo t("Tiliote lähetettiin osoitteeseen"), ": {$email}<br /><br />";
     echo "</font>";
   }
 
@@ -431,14 +431,14 @@ if ($tee == "") {
 
       if ($asiakasrow['talhal_email'] != '') {
         echo "<tr>";
-        echo "<th>", t("Sähköpostiosoite")," (",t("Taloushallinto"),")</th>";
+        echo "<th>", t("Sähköpostiosoite"), " (", t("Taloushallinto"), ")</th>";
         echo "<td colspan='2'>{$asiakasrow['talhal_email']}</td>";
         echo "</tr>";
       }
 
       if ($asiakasrow['lasku_email'] != '') {
         echo "<tr>";
-        echo "<th>", t("Sähköpostiosoite")," (",t("laskutus"),")</th>";
+        echo "<th>", t("Sähköpostiosoite"), " (", t("laskutus"), ")</th>";
         echo "<td colspan='2'>{$asiakasrow['lasku_email']}</td>";
         echo "</tr>";
       }
@@ -494,7 +494,7 @@ if ($tee == "") {
       if ($_email_ok) {
 
         echo "</tr><tr>";
-        echo "<th>",t("Lähetä tiliote asiakkaan sähköpostiin"),"</th>";
+        echo "<th>", t("Lähetä tiliote asiakkaan sähköpostiin"), "</th>";
         echo "<td class='back'>";
 
         if ($asiakasrow['email'] != '') {
@@ -899,7 +899,7 @@ if ($tee == "") {
           echo "<tr><th style='width:200px;'>", t("Laskukopiot"), "</th>
               <td><input class='laskunro_checkall' type='checkbox' /> ".t("Valitse kaikki listatut laskut"), "</td>";
           echo "<td>";
-          echo t("Lähetä laskukopiot valituista laskuista asiakkaan sähköpostiin"),": ";
+          echo t("Lähetä laskukopiot valituista laskuista asiakkaan sähköpostiin"), ": ";
 
           if (!empty($asiakasrow['email'])) {
             echo "<form class='tulosta_lasku_email' name='tulosta_lasku_email' method='post'>
@@ -959,7 +959,7 @@ if ($tee == "") {
 
         if ($_email_ok) {
 
-          echo "<td>",t("Lähetä asiakkaan sähköpostiin"),": ";
+          echo "<td>", t("Lähetä asiakkaan sähköpostiin"), ": ";
 
           if ($asiakasrow['email'] != '') {
             echo "<form id='tulosta_tiliote_email' name='tulosta_tiliote_email' method='post'>

@@ -296,7 +296,7 @@ if ($id > 0 and $tunnukset != "") {
                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
                AND tilausrivi.otunnus IN ({$tunnukset})
                AND tilausrivi.tyyppi  IN ('L','G')
-               AND tilausrivi.var     NOT IN ('P', 'J')";
+               AND tilausrivi.var     not in ('P','J','O','S')";
   $vakresult = pupe_query($vakquery);
   $vakrow = mysql_fetch_assoc($vakresult);
 
@@ -483,7 +483,7 @@ if ($tee == 'add') {
 
       //Voi k‰yd‰ niin, ett‰ rahtikirja on jo tulostunut. Poistetaan mahdolliset tulostusflagit
       $query = "UPDATE tilausrivi set toimitettu = '', toimitettuaika = ''
-                where otunnus IN ({$otsikkonro}) and yhtio = '$kukarow[yhtio]' and var not in ('P','J','O') and tyyppi='$tila'";
+                where otunnus IN ({$otsikkonro}) and yhtio = '$kukarow[yhtio]' and var not in ('P','J','O','S') and tyyppi='$tila'";
       $result = pupe_query($query);
 
       //  Poistetaan kaikki lavaeloitukset
@@ -1382,6 +1382,8 @@ if (($toim == 'lisaa' or $toim == 'lisaa_siirto') and $id == 0 and (string) $id 
     }
   }
 
+  $wherelasku = $joinmaksuehto = $groupmaksuehto = $selectmaksuehto = "";
+
   //jos myyntitilaus niin halutaan maksuehto mukaan
   if ($tila == 'L') {
     $selectmaksuehto   = " if(maksuehto.jv='', 'OK', lasku.tunnus) jvgrouppi, ";
@@ -2165,7 +2167,9 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
   }
 
   echo "  <script language='javascript'>
-      function summaa_kollit(kollit_yht) {
+      function summaa_kollit(kollit_yht, palautus) {
+
+        palautus = palautus || false;
 
         var currForm = kollit_yht.form;
         var isChecked = kollit_yht.checked;
@@ -2179,10 +2183,41 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
         }
 
         if (isNaN(yht)) {
-          currForm.oslappkpl.value=0;
+          yht = 0;
+        }
+
+        if (palautus) {
+          return yht;
+        }
+
+        currForm.oslappkpl.value=yht;
+      }
+
+      function verify(element) {
+        msg = '".t("HUOM: oletko varma ett‰ haluat tulostaa osoitelappuja")." ';
+        msg2 = ' ".t("kappaletta")."';
+
+        if (document.getElementById('oslapcheck2')) {
+          oslap = document.getElementById('oslapcheck2').value;
         }
         else {
-          currForm.oslappkpl.value=yht;
+          oslap = document.getElementById('oslapcheck').value;
+        }
+
+        // sallitaan ilman herjoja kaksi osoitelappua per kolli
+        maksimi = summaa_kollit(element, true) * 2;
+
+        if (oslap <= maksimi || oslap < 10) {
+          return true;
+        }
+        else {
+          if (confirm(msg + oslap + msg2 + '?')) {
+            return true;
+          }
+          else {
+            skippaa_tama_submitti = true;
+            return false;
+          }
         }
       }
     </script> ";
@@ -2961,8 +2996,8 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
       $query = "SELECT pakkaamo.printteri1, pakkaamo.printteri3, varastopaikat.printteri5
                 from pakkaamo
                 join varastopaikat ON pakkaamo.yhtio = varastopaikat.yhtio and varastopaikat.tunnus = '$otsik[varasto]'
-                where pakkaamo.yhtio='$kukarow[yhtio]'
-                and pakkaamo.tunnus='$otsik[pakkaamo]'
+                where pakkaamo.yhtio = '$kukarow[yhtio]'
+                and pakkaamo.tunnus  = '$otsik[pakkaamo]'
                 order by pakkaamo.tunnus";
     }
     elseif ($otsik['tulostusalue'] != '' and $otsik['varasto'] != '') {
@@ -2977,26 +3012,41 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
     elseif ($otsik["varasto"] == '') {
       $query = "SELECT *
                 from varastopaikat
-                where yhtio='$kukarow[yhtio]' AND tyyppi != 'P'
+                where yhtio  = '$kukarow[yhtio]'
+                AND tyyppi  != 'P'
                 order by alkuhyllyalue,alkuhyllynro
                 limit 1";
     }
     else {
       $query = "SELECT *
-                from varastopaikat
-                where yhtio='$kukarow[yhtio]' and tunnus='$otsik[varasto]'
-                order by alkuhyllyalue,alkuhyllynro";
+                FROM varastopaikat
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tunnus  = '$otsik[varasto]'
+                ORDER BY alkuhyllyalue,alkuhyllynro";
     }
     $prires = pupe_query($query);
 
 
     if (mysql_num_rows($prires) > 0) {
-      $prirow= mysql_fetch_assoc($prires);
+      $prirow = mysql_fetch_assoc($prires);
 
       $lahete_printteri = "";
       //l‰hete
       if ($prirow['printteri1'] != '') {
         $lahete_printteri = $prirow['printteri1'];
+      }
+
+      // Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
+      if (!empty($otsik['yhtio_toimipaikka'])) {
+        $avainsana_where = " and avainsana.selite       = '{$otsik['varasto']}'
+                             and avainsana.selitetark   = '{$otsik['yhtio_toimipaikka']}'
+                             and avainsana.selitetark_2 = 'printteri1'";
+
+        $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
+
+        if (!empty($tp_tulostin)) {
+          $lahete_printteri = $tp_tulostin;
+        }
       }
 
       $oslappu_printteri = "";
@@ -3084,10 +3134,10 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
       }
     }
 
-    echo "<input type='text' size='4' name='oslappkpl' value='$oslappkpl' {$disabled} />";
+    echo "<input type='text' size='4' name='oslappkpl' id='oslapcheck' value='$oslappkpl' {$disabled} />";
 
     if ($oslappkpl_hidden != 0) {
-      echo "<input type='hidden' name='oslappkpl' value='{$oslappkpl_hidden}' />";
+      echo "<input type='hidden' name='oslappkpl' id='oslapcheck2' value='{$oslappkpl_hidden}' />";
     }
 
     echo "</td></tr>";
@@ -3160,7 +3210,7 @@ if (($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') or $id != 0) {
 
   echo "<br><input type='hidden' name='id' value='$id'>";
 
-  echo "<input name='subnappi' type='submit' value='".t("Valmis")."'>";
+  echo "<input name='subnappi' type='submit' value='".t("Valmis"), "' onClick='return verify(this);'>";
 
   if ($id == 'dummy' and $mista == 'rahtikirja-tulostus.php') {
     echo "<input type='hidden' name='rakirsyotto_dgd_tulostin' value='{$rakirsyotto_dgd_tulostin}' />";

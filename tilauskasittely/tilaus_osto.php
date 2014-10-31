@@ -425,35 +425,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
           if (!isset($nayta_pdf)) echo "<font class='error'>".t("Tehtiin uusi varastopaikka")." $ostotilausrivit[tuoteno]: $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0</font><br>";
 
-          // lis‰t‰‰n paikka
-          $query = "INSERT INTO tuotepaikat set
-                    yhtio        = '$kukarow[yhtio]',
-                    tuoteno      = '$ostotilausrivit[tuoteno]',
-                    oletus       = '$oletus',
-                       saldo     = '0',
-                       saldoaika = now(),
-                    hyllyalue    = '$hyllyrow[alkuhyllyalue]',
-                    hyllynro     = '$hyllyrow[alkuhyllynro]',
-                    hyllytaso    = '0',
-                    hyllyvali    = '0'";
-          $updres = pupe_query($query);
-
-          // tehd‰‰n tapahtuma
-          $query = "INSERT into tapahtuma set
-                    yhtio     = '$kukarow[yhtio]',
-                    tuoteno   = '$ostotilausrivit[tuoteno]',
-                    kpl       = '0',
-                    kplhinta  = '0',
-                    hinta     = '0',
-                    laji      = 'uusipaikka',
-                    hyllyalue = '$hyllyrow[alkuhyllyalue]',
-                    hyllynro  = '$hyllyrow[alkuhyllynro]',
-                    hyllytaso = '0',
-                    hyllyvali = '0',
-                    selite    = '".t("Lis‰ttiin tuotepaikka")." $hyllyrow[alkuhyllyalue] $hyllyrow[alkuhyllynro] 0 0',
-                    laatija   = '$kukarow[kuka]',
-                    laadittu  = now()";
-          $updres = pupe_query($query);
+          lisaa_tuotepaikka($ostotilausrivit["tuoteno"], $hyllyrow["alkuhyllyalue"], $hyllyrow["alkuhyllynro"], 0, 0, "Ostotilauksella", $oletus, 0, 0, 0);
 
           // p‰ivitet‰‰n tilausrivi
           $query = "UPDATE tilausrivi set

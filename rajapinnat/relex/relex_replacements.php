@@ -25,6 +25,9 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(d
 require 'inc/connect.inc';
 require 'inc/functions.inc';
 
+// Logitetaan ajo
+cron_log();
+
 $ajopaiva  = date("Y-m-d");
 $paiva_ajo = FALSE;
 
@@ -41,6 +44,10 @@ $yhtio = mysql_real_escape_string($argv[1]);
 
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
+
+$tuoterajaus = " AND tuote.status not in ('P','E')
+                 AND tuote.ei_saldoa    = ''
+                 AND tuote.tuotetyyppi  = '' ";
 
 $tecd = FALSE;
 
@@ -76,11 +83,8 @@ $query = "SELECT DISTINCT yhtio.maa, korvaavat.id
           FROM tuote
           JOIN korvaavat ON (tuote.yhtio = korvaavat.yhtio AND tuote.tuoteno = korvaavat.tuoteno {$korvaavatrajaus})
           JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
-          WHERE tuote.yhtio      = '$yhtio'
-          AND tuote.status      != 'P'
-          AND tuote.ei_saldoa    = ''
-          AND tuote.tuotetyyppi  = ''
-          AND tuote.ostoehdotus  = ''";
+          WHERE tuote.yhtio = '$yhtio'
+          {$tuoterajaus}";
 $res = pupe_query($query);
 
 // Kerrotaan montako rivi‰ k‰sitell‰‰n

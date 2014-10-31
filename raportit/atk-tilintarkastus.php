@@ -470,7 +470,7 @@ if ($tee == "raportti") {
       fwrite($fh, "{$row['tunnus']}|{$row['laskunro']}|{$row['luontiaika']}|{$row['tapvm']}|{$row['summa']}|{$row['valkoodi']}|{$row['kotisumma']}|{$row['toimittajanro']}|{$row['nimi']}|{$row['tyyppi']}|{$row['vienti']}|{$row['tila']}\n");
 
       // Haetaan saapumisen rivi vain jos on vaihto-omaisuuslasku kysesssä
-      if (in_array($row["vienti"], array('C','F','I','J','K','L'))) {
+      if (in_array($row["vienti"], array('C', 'F', 'I', 'J', 'K', 'L'))) {
         // katotaan onko lasku liitetty saapumiseen
         $query = "SELECT keikka.laskunro, keikka.tunnus, keikka.vienti_kurssi, keikka.liitostunnus
                   FROM lasku

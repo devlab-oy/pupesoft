@@ -857,7 +857,7 @@ if (
   if ($_siirtolista_myyntitilaukselta and
     $_ei_ole_takuu and
     !in_array($toim, array("VALMISTAVARASTOON", "SIIRTOLISTA", "SIIRTOTYOMAARAYS", "REKLAMAATIO")) and
-    in_array($laskurow['tila'], array('N','T'))) {
+    in_array($laskurow['tila'], array('N', 'T'))) {
 
     $sel4 = "";
 
@@ -885,8 +885,8 @@ if (
         $tuoteperhe_saldomyytavissa = tuoteperhe_myytavissa($trow['tuoteno'], '', '', $siirto_varasto['lahde_tunnus']);
         $saldo_myytavissa = $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']];
         $_isa_saldot[$row['perheid']] = array(
-            'saldo_myytavissa' => $saldo_myytavissa,
-            'var' => $row['var'],
+          'saldo_myytavissa' => $saldo_myytavissa,
+          'var' => $row['var'],
         );
       }
       elseif ($_onko_lapsituote) {
@@ -902,15 +902,15 @@ if (
       //tarkoittaa se että tilausriville on valittu kyseinen siirtovarasto
       //ja lisaarivi vaiheessa saldot on riittäneet.
       $_normirivi_onko_siirto = (
-              !isset($tuoteperhe_saldomyytavissa)
-              and $siirto_varasto['tuote']['myytavissa'] <= 0
-              and $row['toimittajan_tunnus'] != $siirto_varasto['tunnus']
-              );
+        !isset($tuoteperhe_saldomyytavissa)
+        and $siirto_varasto['tuote']['myytavissa'] <= 0
+        and $row['toimittajan_tunnus'] != $siirto_varasto['tunnus']
+      );
       $_perherivi_onko_siirto = (
-              isset($tuoteperhe_saldomyytavissa)
-              and $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']] <= 0
-              and $row['toimittajan_tunnus'] != $siirto_varasto['tunnus']
-              );
+        isset($tuoteperhe_saldomyytavissa)
+        and $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']] <= 0
+        and $row['toimittajan_tunnus'] != $siirto_varasto['tunnus']
+      );
 
       if ($_normirivi_onko_siirto or $_perherivi_onko_siirto) {
         continue;

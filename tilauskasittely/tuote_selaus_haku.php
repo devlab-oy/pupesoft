@@ -296,7 +296,7 @@ if (!empty($variaatio)) {
     echo "<td>{$tuote["osasto"]}<br/>{$tuote["try"]}</td>";
 
     piirra_hinta($tuote, $oleasrow, $valuurow, $vari, $classmidl, $hinta_rajaus, $poistetut,
-                 $lisatiedot);
+      $lisatiedot);
 
     $yhtiot = hae_yhtiot();
 
@@ -1569,7 +1569,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
       }
 
       piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_rajaus, $poistetut,
-                   $lisatiedot);
+        $lisatiedot);
 
       if ($lisatiedot != "" and $kukarow["extranet"] == "") {
         echo "<td valign='top' class='$vari' $classmidl>$row[aleryhma]<br>$row[status]</td>";
@@ -2344,7 +2344,7 @@ function piirra_nayta_variaatiot_nappula($parametri_variaatio) {
 }
 
 function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_rajaus, $poistetut,
-                      $lisatiedot) {
+  $lisatiedot) {
   global $kukarow, $yhtiorow, $verkkokauppa;
 
   if ($kukarow['hinnat'] >= 0 and ($verkkokauppa == "" or $kukarow["kuka"] != "www")) {

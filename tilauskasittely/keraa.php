@@ -1661,7 +1661,7 @@ if ($tee == 'P') {
         }
 
         if ($yhtiorow['vahvistusviesti_asiakkaalle'] == "Y") {
-          require_once("inc/jt_ja_tyomaarays_valmis_viesti.inc");
+          require_once "inc/jt_ja_tyomaarays_valmis_viesti.inc";
           laheta_vahvistusviesti($zoner_tunnarit["username"], $zoner_tunnarit["salasana"], $id);
         }
 

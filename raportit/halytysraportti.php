@@ -454,7 +454,7 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
       $toimipaikka_nimi = t("Ei toimipaikkaa");
     }
 
-    echo "<tr><th>",t("Toimipaikka"),"</th><td colspan='3'>{$toimipaikka_nimi}</td></tr>";
+    echo "<tr><th>", t("Toimipaikka"), "</th><td colspan='3'>{$toimipaikka_nimi}</td></tr>";
   }
 
   echo "  </table><br>";
@@ -2267,7 +2267,7 @@ if ($tee == "") {
     echo "<th>", t("Toimipaikka"), "</th>";
 
     echo "<td><select name='toimipaikka'>";
-    echo "<option value='kaikki'>",t("Kaikki"),"</option>";
+    echo "<option value='kaikki'>", t("Kaikki"), "</option>";
 
     $sel = "";
 
@@ -2426,7 +2426,7 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
     }
 
     echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}' />";
-    echo "<tr><th>",t("Toimipaikka"),"</th><td colspan='3'>{$toimipaikka_nimi}</td></tr>";
+    echo "<tr><th>", t("Toimipaikka"), "</th><td colspan='3'>{$toimipaikka_nimi}</td></tr>";
   }
 
 
@@ -2665,7 +2665,7 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
     $chk = "CHECKED";
   }
 
-  echo "<tr><th>",t("Älä näytä ehdokas-tuotteita"),"</th><td colspan='3'><input type='checkbox' name='valitut[ehdokas]' value='EHDOKAS' {$chk}></td></tr>";
+  echo "<tr><th>", t("Älä näytä ehdokas-tuotteita"), "</th><td colspan='3'><input type='checkbox' name='valitut[ehdokas]' value='EHDOKAS' {$chk}></td></tr>";
 
   //Näytetäänkö ostoehdottamattomat tuotteet
   $query = "SELECT selitetark
@@ -2808,7 +2808,7 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
   }
 
   echo "<tr>";
-  echo "<th>",t("Näytä vain tuotteet joilla on saldoa"),"</th>";
+  echo "<th>", t("Näytä vain tuotteet joilla on saldoa"), "</th>";
   echo "<td colspan='3'><input type='checkbox' name='valitut[SALDOLLISET]' {$chk}></td>";
   echo "<td colspan='5' class='back'></td>";
   echo "</tr>";
@@ -2884,7 +2884,7 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
         $_chk = "CHECKED";
       }
 
-      echo "<tr><th>",t("Varastovalinta huomioidaan kaikissa laskennoissa"),"</th>";
+      echo "<tr><th>", t("Varastovalinta huomioidaan kaikissa laskennoissa"), "</th>";
       echo "<td colspan='3'><input type='checkbox' name='valitut[VARASTOHUOMIO]' value='VARASTOHUOMIO' {$_chk} />";
 
       echo "<tr><th rowspan='".mysql_num_rows($vtresult)."'>".t("Huomioi saldot varastossa:")."</th>";
@@ -2904,7 +2904,7 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
   echo t("Omat hälytysraportit");
 
   echo "<span style='float: right;'>";
-  echo t("Ruksaa kaikki")," ";
+  echo t("Ruksaa kaikki"), " ";
   echo "<input type='checkbox' class='valitut_checkbox_kaikki' />";
   echo "</span>";
 

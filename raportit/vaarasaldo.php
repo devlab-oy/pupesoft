@@ -101,22 +101,22 @@ if ($tee != '') {
 
   if (mysql_num_rows($result) > 0 ) {
     echo "<table><tr>";
-    echo "<th>",t("Varastopaikka"),"</th>";
-    echo "<th>",t("Tuoteno"),"</th>";
-    echo "<th>",t("Nimitys"),"</th>";
-    echo "<th>",t("Asiakas"),"</th>";
+    echo "<th>", t("Varastopaikka"), "</th>";
+    echo "<th>", t("Tuoteno"), "</th>";
+    echo "<th>", t("Nimitys"), "</th>";
+    echo "<th>", t("Asiakas"), "</th>";
 
     if (empty($rivityyppi)) {
-      echo "<th>",t("Rivityyppi"),"</th>";
+      echo "<th>", t("Rivityyppi"), "</th>";
     }
 
-    echo "<th>",t("Tilattu"),"</th>";
-    echo "<th>",t("Toimitettu"),"</th>";
-    echo "<th>",t("Tilauksessa"),"</th>";
-    echo "<th>",t("Ensimm‰inen toimitus"),"</th>";
-    echo "<th>",t("Hyllyss‰"),"</th>";
-    echo "<th>",t("Saldo"),"</th>";
-    echo "<th>",t("Ker‰‰j‰"),"</th>";
+    echo "<th>", t("Tilattu"), "</th>";
+    echo "<th>", t("Toimitettu"), "</th>";
+    echo "<th>", t("Tilauksessa"), "</th>";
+    echo "<th>", t("Ensimm‰inen toimitus"), "</th>";
+    echo "<th>", t("Hyllyss‰"), "</th>";
+    echo "<th>", t("Saldo"), "</th>";
+    echo "<th>", t("Ker‰‰j‰"), "</th>";
     echo "</tr>";
 
     while ($row = mysql_fetch_array($result)) {
@@ -144,7 +144,7 @@ if ($tee != '') {
       echo "<tr>";
       echo "<td>{$row['tuotepaikka']}</td>";
       echo "<td>{$row['tuoteno']}</td>";
-      echo "<td>",t_tuotteen_avainsanat($row, 'nimitys'),"</td>";
+      echo "<td>", t_tuotteen_avainsanat($row, 'nimitys'), "</td>";
       echo "<td>{$row['asiakas']}</td>";
 
       if (empty($rivityyppi)) {
@@ -163,7 +163,7 @@ if ($tee != '') {
       echo "<td align='right'>{$row['tilkpl']}</td>";
       echo "<td align='right'>{$row['kpl']}</td>";
       echo "<td align='right'>{$prow['varattu']}</td>";
-      echo "<td>",tv1dateconv($prow['toimaika']),"</td>";
+      echo "<td>", tv1dateconv($prow['toimaika']), "</td>";
       echo "<td align='right'>{$hyllyssa}</td>";
       echo "<td align='right'>{$saldo}</td>";
       echo "<td>{$row['keratty']}</td>";
@@ -201,7 +201,7 @@ echo "<th>", t("Hae rivit ajan mukaan"), "</th>";
 echo "<td><select name='rivien_aika'>";
 echo "<option value=''>", t("Ker‰ttyaika"), "</option>";
 echo "<option value='toimitettuaika' {$sel['toimitettuaika']}>", t("Toimitettuaika"), "</option>";
-echo "<option value='laskutettuaika' {$sel['laskutettuaika']}>", t("Laskutettuaika"), " (",t("Vain myynnit"),")</option>";
+echo "<option value='laskutettuaika' {$sel['laskutettuaika']}>", t("Laskutettuaika"), " (", t("Vain myynnit"), ")</option>";
 echo "</select></td>";
 echo "</tr>";
 
@@ -240,12 +240,12 @@ echo "</select></td></tr>";
 $sel = array($rivityyppi => 'selected') + array('M' => '', 'S' => '');
 
 echo "<tr>";
-echo "<th>",t("Rajaa rivityypill‰"),"</th>";
+echo "<th>", t("Rajaa rivityypill‰"), "</th>";
 echo "<td>";
 echo "<select name='rivityyppi'>";
-echo "<option value=''>",t("Myynti- ja siirtorivit"),"</option>";
-echo "<option value='M' {$sel['M']}>",t("Myyntirivit"),"</option>";
-echo "<option value='S' {$sel['S']}>",t("Siirtorivit"),"</option>";
+echo "<option value=''>", t("Myynti- ja siirtorivit"), "</option>";
+echo "<option value='M' {$sel['M']}>", t("Myyntirivit"), "</option>";
+echo "<option value='S' {$sel['S']}>", t("Siirtorivit"), "</option>";
 echo "</select>";
 echo "</td>";
 echo "</tr>";

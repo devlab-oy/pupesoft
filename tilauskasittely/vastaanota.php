@@ -461,7 +461,7 @@ if ($tee == 'paikat') {
   if ($virheita == 0 and $vainlistaus == '') {
     $tee = 'valmis';
   }
-  elseif ($vainlistaus == '')  {
+  elseif ($vainlistaus == '') {
     $tee = '';
   }
 
@@ -1088,9 +1088,9 @@ if (empty($id) and $echotaanko) {
 
     $_suljettu_lahto = (!is_null($tilrow['lahdon_aktiivi']) and $tilrow['lahdon_aktiivi'] != 'S');
 
-     if ($_suljettu_lahto) {
-        //Ei näytetä siirtolistoja, joihin on liitetty aukioleva lähtö
-        continue;
+    if ($_suljettu_lahto) {
+      //Ei näytetä siirtolistoja, joihin on liitetty aukioleva lähtö
+      continue;
     }
 
     // etsitään sopivia tilauksia

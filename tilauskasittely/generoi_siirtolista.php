@@ -663,7 +663,7 @@ if ($tee == 'M' and isset($generoi)) {
                   'mita'  => $pairow["tuoteno"],
                   'tarve' => $tarve_kohdevarasto,
                   'saldo' => $saldo_myytavissa_lahde
-                  );
+                );
               }
             }
             elseif ($saldo_myytavissa_lahde == 1) {

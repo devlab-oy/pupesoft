@@ -135,7 +135,7 @@ if (!function_exists('normaali_varastosiirto')) {
         $_tunnus = $lisatyt_rivit1[0];
 
         if ($tilausrivi['perheid'] != 0 and $tilausrivi['perheid'] == $tilausrivi['tunnus']) {
-          # MYYNNIN TUOTEPERHEEN ISÄRIVI
+          // MYYNNIN TUOTEPERHEEN ISÄRIVI
           $_tuoteperheet[$tilausrivi['perheid']] = $_tunnus;
 
           $query = "UPDATE tilausrivi SET
@@ -146,7 +146,7 @@ if (!function_exists('normaali_varastosiirto')) {
         }
         elseif ($tilausrivi['perheid'] != 0 and $tilausrivi['perheid'] != $tilausrivi['tunnus']) {
 
-          # MYYNNIN TUOTEPERHEEN LAPSIRIVI
+          // MYYNNIN TUOTEPERHEEN LAPSIRIVI
           if (array_key_exists($tilausrivi['perheid'], $_tuoteperheet)) {
 
             $query = "UPDATE tilausrivi SET

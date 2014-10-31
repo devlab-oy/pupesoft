@@ -25,6 +25,9 @@ $lock_params = array(
   "locktime" => 5400
 );
 
+// Logitetaan ajo
+cron_log();
+
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock($lock_params);
 

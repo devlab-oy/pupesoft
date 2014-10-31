@@ -260,7 +260,7 @@ if ($tee == 'close_with_printer') {
                 SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
                 WHERE otunnus   = '$row[tunnus]'
                 AND yhtio       = '$kukarow[yhtio]'
-                AND var         not in ('P','J','O')
+                AND var         not in ('P','J','O','S')
                 AND keratty    != ''
                 AND toimitettu  = ''
                 AND tyyppi      = 'L'";
@@ -307,6 +307,11 @@ if ($tee == 'close_with_printer') {
                 AND chn      = '999'";
       $ures  = pupe_query($query);
 
+      // Jos laaja toimipaikkak‰sittely on p‰‰ll‰, niin p‰ivitet‰‰n siirtolistan toimipaikka
+      // kohdevaraston toimipaikaksi
+      if ($yhtiorow['toimipaikkakasittely'] == "L") {
+        paivita_siirtolistan_toimipaikka($row['tunnus']);
+      }
     }
   }
 
@@ -666,7 +671,7 @@ if ($tee == 'tulosta') {
                   SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
                   WHERE otunnus   in ($otunnukset)
                   AND yhtio       = '$kukarow[yhtio]'
-                  AND var         not in ('P','J','O')
+                  AND var         not in ('P','J','O','S')
                   AND keratty    != ''
                   AND toimitettu  = ''
                   AND tyyppi      = 'L'";
@@ -732,6 +737,17 @@ if ($tee == 'tulosta') {
                   AND yhtio      = '$kukarow[yhtio]'
                   AND tulostettu = '0000-00-00 00:00:00'";
         $ures  = pupe_query($query);
+
+        // Jos laaja toimipaikkak‰sittely on p‰‰ll‰, niin p‰ivitet‰‰n siirtolistan toimipaikka
+        // kohdevaraston toimipaikaksi
+        if ($yhtiorow['toimipaikkakasittely'] == "L") {
+
+          foreach (explode(",", $otunnukset) as $siirtolistan_tunnus) {
+
+            $siirtolistan_tunnus = str_replace("'", "", $siirtolistan_tunnus);
+            paivita_siirtolistan_toimipaikka($siirtolistan_tunnus);
+          }
+        }
       }
 
       // n‰it‰ tarvitaan vain JV-keiseissa, mutta pit‰‰ nollata tietty joka luupilla

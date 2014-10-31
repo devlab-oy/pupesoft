@@ -13,6 +13,9 @@ if (isset($argv[1]) and trim($argv[1]) != '') {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   // hmm.. j‰nn‰‰
   $kukarow['yhtio'] = $argv[1];
 

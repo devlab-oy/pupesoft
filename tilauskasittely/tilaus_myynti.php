@@ -4152,7 +4152,7 @@ if ($tee == '') {
           );
 
           pupesoft_sahkoposti($parametri);
-          
+
           echo t("Lähetettiin jälkitoimitus-sähköposti")."...<br><br>";
         }
 
@@ -4811,12 +4811,12 @@ if ($tee == '') {
     $query_ale_lisa = generoi_alekentta('M');
 
     $query = "SELECT sum(round(
-                hinta * (varattu+jt+kpl) * {$query_ale_lisa},
-                {$yhtiorow['hintapyoristys']}
+              hinta * (varattu+jt+kpl) * {$query_ale_lisa},
+              {$yhtiorow['hintapyoristys']}
               )) rivihinta
               FROM tilausrivi
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tyyppi = 'L'
+              AND tyyppi  = 'L'
               AND otunnus = '{$laskurow['tunnus']}'";
     $_tilauksen_rivihinnat_res = pupe_query($query);
     $_tilauksen_rivihinnat_row = mysql_fetch_assoc($_tilauksen_rivihinnat_res);
@@ -4826,9 +4826,9 @@ if ($tee == '') {
       $_tilauksen_rivihinnat_row['rivihinta'] = (float) $_tilauksen_rivihinnat_row['rivihinta'];
 
       $query = "UPDATE lasku SET
-                luottoraja = {$_avoimia_yhteensa} - {$_tilauksen_rivihinnat_row['rivihinta']}
+                luottoraja  = {$_avoimia_yhteensa} - {$_tilauksen_rivihinnat_row['rivihinta']}
                 WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = '{$laskurow['tunnus']}'";
+                AND tunnus  = '{$laskurow['tunnus']}'";
       $upd_res = pupe_query($query);
 
       $laskurow['luottoraja'] = $_avoimia_yhteensa - $_tilauksen_rivihinnat_row['rivihinta'];
@@ -4841,10 +4841,10 @@ if ($tee == '') {
     if ($luottorajavirhe != '') {
 
       echo "<br/>";
-      echo "<font class='error'>", t("HUOM: Luottoraja ylittynyt"),"</font>";
+      echo "<font class='error'>", t("HUOM: Luottoraja ylittynyt"), "</font>";
 
       if ($yhtiorow['luottorajan_ylitys'] != '') {
-        echo ", <font class='error'>", t("ota yhteys luotonvalvontaan tai mitätöi myyntitilaus"),"!";
+        echo ", <font class='error'>", t("ota yhteys luotonvalvontaan tai mitätöi myyntitilaus"), "!";
         echo " ", t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"), ".";
         echo "</font><br />";
       }
@@ -4863,8 +4863,8 @@ if ($tee == '') {
 
     $query = "UPDATE lasku SET
               erapaivan_ylityksen_summa = '{$ylivito}'
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus = '{$laskurow['tunnus']}'";
+              WHERE yhtio               = '{$kukarow['yhtio']}'
+              AND tunnus                = '{$laskurow['tunnus']}'";
     $upd_res = pupe_query($query);
 
     $laskurow['erapaivan_ylityksen_summa'] = $ylivito;
@@ -4875,7 +4875,7 @@ if ($tee == '') {
       echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s päivää sitten erääntyneitä laskuja, olkaa ystävällinen ja ottakaa yhteyttä myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."</font>!";
 
       if ($yhtiorow['erapaivan_ylityksen_toimenpide'] != '') {
-        echo " <font class='error'>",t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"),".";
+        echo " <font class='error'>", t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"), ".";
         echo "</font>";
         echo "<br/>";
       }
@@ -4905,8 +4905,8 @@ if ($tee == '') {
 
       $query = "SELECT luottoraja
                 FROM asiakas
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                and tunnus = '{$laskurow['liitostunnus']}'
+                WHERE yhtio     = '{$kukarow['yhtio']}'
+                and tunnus      = '{$laskurow['liitostunnus']}'
                 AND luottoraja != 0";
       $asresult = pupe_query($query);
       $asrow = mysql_fetch_assoc($asresult);
@@ -4916,14 +4916,14 @@ if ($tee == '') {
         $query_ale_lisa = generoi_alekentta('M');
 
         $query = "SELECT sum(round(
-                hinta * (varattu+jt+kpl) * {$query_ale_lisa},
-                {$yhtiorow['hintapyoristys']}
-              )) rivihinta
-              FROM tilausrivi
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tyyppi = 'L'
-              AND var != 'P'
-              AND otunnus = '{$laskurow['tunnus']}'";
+                  hinta * (varattu+jt+kpl) * {$query_ale_lisa},
+                  {$yhtiorow['hintapyoristys']}
+                  )) rivihinta
+                  FROM tilausrivi
+                  WHERE yhtio  = '{$kukarow['yhtio']}'
+                  AND tyyppi   = 'L'
+                  AND var     != 'P'
+                  AND otunnus  = '{$laskurow['tunnus']}'";
         $tilauksen_rivihinnat_res = pupe_query($query);
         $tilauksen_rivihinnat_row = mysql_fetch_assoc($tilauksen_rivihinnat_res);
 
@@ -4931,10 +4931,10 @@ if ($tee == '') {
 
           $luottorajavirhe = 'kyllä';
           echo "<br/>";
-          echo "<font class='error'>", t("HUOM: Luottoraja ylittynyt"),"</font>";
+          echo "<font class='error'>", t("HUOM: Luottoraja ylittynyt"), "</font>";
 
           if ($yhtiorow['luottorajan_ylitys'] != '') {
-            echo ", <font class='error'>", t("ota yhteys luotonvalvontaan tai mitätöi myyntitilaus"),"!";
+            echo ", <font class='error'>", t("ota yhteys luotonvalvontaan tai mitätöi myyntitilaus"), "!";
             echo " ", t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"), ".";
             echo "</font><br />";
           }
@@ -4956,7 +4956,7 @@ if ($tee == '') {
       echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s päivää sitten erääntyneitä laskuja, olkaa ystävällinen ja ottakaa yhteyttä myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."</font>!";
 
       if ($yhtiorow['erapaivan_ylityksen_toimenpide'] != '') {
-        echo " <font class='error'>",t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"),".";
+        echo " <font class='error'>", t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"), ".";
         echo "</font>";
         echo "<br/>";
       }
@@ -4981,8 +4981,8 @@ if ($tee == '') {
 
       $_chk = array($valmiste_vai_raakaaine => 'checked') + array('raakaaine' => '', 'valmiste' => '');
 
-      echo t("Raaka-aine")," <input type='radio' name='valmiste_vai_raakaaine' value='raakaaine' {$_chk['raakaaine']} /> ";
-      echo t("Valmiste")," <input type='radio' name='valmiste_vai_raakaaine' value='valmiste' {$_chk['valmiste']} />";
+      echo t("Raaka-aine"), " <input type='radio' name='valmiste_vai_raakaaine' value='raakaaine' {$_chk['raakaaine']} /> ";
+      echo t("Valmiste"), " <input type='radio' name='valmiste_vai_raakaaine' value='valmiste' {$_chk['valmiste']} />";
     }
 
     require "syotarivi.inc";
@@ -7629,7 +7629,7 @@ if ($tee == '') {
             and $row["status"] != 'P'
             and $row["status"] != 'X'
             and !$_luottoraja_ylivito
-            ) {
+          ) {
 
             echo "<br />";
 
@@ -9528,7 +9528,7 @@ if ($tee == '') {
         echo "</form>";
       }
 
-      if ($yhtiorow['myyntitilaus_tarjoukseksi'] == 'K' and in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) and $laskurow['tila'] == 'N' and in_array($laskurow['alatila'], array('','F')) and tarkista_oikeus("tilaus_myynti.php", "TARJOUS")) {
+      if ($yhtiorow['myyntitilaus_tarjoukseksi'] == 'K' and in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) and $laskurow['tila'] == 'N' and in_array($laskurow['alatila'], array('', 'F')) and tarkista_oikeus("tilaus_myynti.php", "TARJOUS")) {
         echo "  <br><br><form action='' method='post'>
             <input type='hidden' name='toim' value='{$toim}'>
             <input type='hidden' name='tilausnumero' value='{$tilausnumero}'>

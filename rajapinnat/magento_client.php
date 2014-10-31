@@ -1566,7 +1566,7 @@ class MagentoClient {
 
       }
       catch (Exception $e) {
-         $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' osoitteiden haku epäonnistui " . print_r("Asiakkaan magento_tunnus: {$asiakas['magento_tunnus']}", true), $e);
+        $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' osoitteiden haku epäonnistui " . print_r("Asiakkaan magento_tunnus: {$asiakas['magento_tunnus']}", true), $e);
       }
 
       if (isset($laskutus_osoite_data['firstname']) and !empty($laskutus_osoite_data['firstname'])) {
@@ -1608,7 +1608,7 @@ class MagentoClient {
   /**
    * Hakee tuotteen kieliversiot(tuotenimitys, tuotekuvaus) Pupesoftista
    *
-   * @param string   $tuotenumero         Tuotteen tuotenumero (tuote.tuoteno)
+   * @param string  $tuotenumero Tuotteen tuotenumero (tuote.tuoteno)
    * @return array   $kieliversiot_data   Palauttaa arrayn joka on valmiiksi utf8-enkoodattu
    *
    * Esim.

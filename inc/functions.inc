@@ -17038,8 +17038,8 @@ if (!function_exists("tee_keraysera")) {
       "return"   => TRUE
     );
 
-		$yrityskerta   = 0;
-		$max_yritykset = 5;
+    $yrityskerta   = 0;
+    $max_yritykset = 5;
 
     // yritet‰‰n ottaa flock lukko
     do {

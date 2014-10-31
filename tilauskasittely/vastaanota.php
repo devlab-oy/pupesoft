@@ -649,7 +649,7 @@ if ($tee == 'valmis') {
       }
 
       if ($tee != 'X') {
-        
+
         if ($_poikkeavalaskutuspvm != '') {
           $_laadittu = $_poikkeavalaskutuspvm." 23:59:59";
           $_tapvm = $_poikkeavalaskutuspvm;
@@ -658,7 +658,7 @@ if ($tee == 'valmis') {
           $_laadittu = date("Y-m-d H:i:s");
           $_tapvm = date("Y-m-d");
         }
-        
+
         // jos kaikki meni ok niin p‰ivitet‰‰n rivi vastaanotetuksi, laitetaan rivihinnaks tuotteen myyntihinat (t‰t‰ k‰ytet‰‰n sit intrastatissa jos on tarve)
         $query = "UPDATE tilausrivi, tuote
                   SET tilausrivi.toimitettu  = '$kukarow[kuka]',

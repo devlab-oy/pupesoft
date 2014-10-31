@@ -1,159 +1,159 @@
 <?php
 
-  /*
-   * Paging
-   */
-  $sLimit = "";
+/*
+ * Paging
+ */
+$sLimit = "";
 
-  if (isset($_GET['iDisplayStart']) and $_GET['iDisplayLength'] != '-1') {
-    $sLimit = "LIMIT ".intval($_GET['iDisplayStart']).", ".intval($_GET['iDisplayLength']);
-  }
+if (isset($_GET['iDisplayStart']) and $_GET['iDisplayLength'] != '-1') {
+  $sLimit = "LIMIT ".intval($_GET['iDisplayStart']).", ".intval($_GET['iDisplayLength']);
+}
 
-  /*
-   * Ordering
-   */
-  $sOrder = "";
+/*
+ * Ordering
+ */
+$sOrder = "";
 
-  if (isset($_GET['iSortCol_0'])) {
-    $sOrder = "ORDER BY  ";
+if (isset($_GET['iSortCol_0'])) {
+  $sOrder = "ORDER BY  ";
 
-    for ($i = 0; $i < intval($_GET['iSortingCols']); $i++) {
-      if ($_GET['bSortable_'.intval($_GET['iSortCol_'.$i])] == "true") {
-        $sOrder .= $aColumns[ intval($_GET['iSortCol_'.$i]) ]." ".($_GET['sSortDir_'.$i]==='asc' ? 'asc' : 'desc') .", ";
-      }
-    }
-
-    $sOrder = substr_replace($sOrder, "", -2);
-
-    if ($sOrder == "ORDER BY") {
-      $sOrder = "";
+  for ($i = 0; $i < intval($_GET['iSortingCols']); $i++) {
+    if ($_GET['bSortable_'.intval($_GET['iSortCol_'.$i])] == "true") {
+      $sOrder .= $aColumns[ intval($_GET['iSortCol_'.$i]) ]." ".($_GET['sSortDir_'.$i]==='asc' ? 'asc' : 'desc') .", ";
     }
   }
 
-  /*
-   * Filtering
-   * NOTE this does not match the built-in DataTables filtering which does it
-   * word by word on any field. It's possible to do here, but concerned about efficiency
-   * on very large tables, and MySQL's regex functionality is very limited
-   */
-  $sWhere = "";
+  $sOrder = substr_replace($sOrder, "", -2);
 
-  if (isset($_GET['sSearch']) and $_GET['sSearch'] != "") {
-    $sWhere = " AND (";
-
-    for ($i=0; $i<count($aColumns); $i++) {
-      $sWhere .= "{$aColumns[$i]} LIKE '%".mysql_real_escape_string($_GET['sSearch'])."%' OR ";
-    }
-
-    $sWhere = substr_replace($sWhere, "", -3);
-    $sWhere .= ')';
+  if ($sOrder == "ORDER BY") {
+    $sOrder = "";
   }
+}
 
-  /*
-   * Individual column filtering
-   */
+/*
+ * Filtering
+ * NOTE this does not match the built-in DataTables filtering which does it
+ * word by word on any field. It's possible to do here, but concerned about efficiency
+ * on very large tables, and MySQL's regex functionality is very limited
+ */
+$sWhere = "";
+
+if (isset($_GET['sSearch']) and $_GET['sSearch'] != "") {
+  $sWhere = " AND (";
+
   for ($i=0; $i<count($aColumns); $i++) {
-    if (isset($_GET['bSearchable_'.$i]) and $_GET['bSearchable_'.$i] == "true" and $_GET['sSearch_'.$i] != '') {
-      $sWhere .= " AND {$aColumns[$i]} LIKE '%".mysql_real_escape_string($_GET['sSearch_'.$i])."%' ";
-    }
+    $sWhere .= "{$aColumns[$i]} LIKE '%".mysql_real_escape_string($_GET['sSearch'])."%' OR ";
   }
 
-  /*
-   * Use specific index
-   */
-  $sIndex = "";
+  $sWhere = substr_replace($sWhere, "", -3);
+  $sWhere .= ')';
+}
 
-  if (isset($sUseIndex) and $sUseIndex != "") {
-    $sIndex = ($sUseIndex);
+/*
+ * Individual column filtering
+ */
+for ($i=0; $i<count($aColumns); $i++) {
+  if (isset($_GET['bSearchable_'.$i]) and $_GET['bSearchable_'.$i] == "true" and $_GET['sSearch_'.$i] != '') {
+    $sWhere .= " AND {$aColumns[$i]} LIKE '%".mysql_real_escape_string($_GET['sSearch_'.$i])."%' ";
   }
+}
 
-  /*
-  * Static where
-  */
-  if (isset($sInitialWhere) and $sInitialWhere != "") {
-    $sWhere .= " AND ".($sInitialWhere);
-  }
+/*
+ * Use specific index
+ */
+$sIndex = "";
 
-  /*
-  * Initial sorting
-  */
-  if ($sOrder == "" and isset($sInitialOrder) and $sInitialOrder != "") {
-    $sOrder = "ORDER BY ".($sInitialOrder);
-  }
+if (isset($sUseIndex) and $sUseIndex != "") {
+  $sIndex = ($sUseIndex);
+}
 
-  $selectColumns = $aColumns;
+/*
+* Static where
+*/
+if (isset($sInitialWhere) and $sInitialWhere != "") {
+  $sWhere .= " AND ".($sInitialWhere);
+}
 
-  if (isset($aExtraColumns) and count($aExtraColumns) > 0) {
-    $selectColumns = array_merge($aColumns, $aExtraColumns);
-  }
+/*
+* Initial sorting
+*/
+if ($sOrder == "" and isset($sInitialOrder) and $sInitialOrder != "") {
+  $sOrder = "ORDER BY ".($sInitialOrder);
+}
 
-  /*
-   * SQL queries
-   * Get data to display
-   */
-  $sQuery = "  SELECT SQL_CALC_FOUND_ROWS ".str_replace(" , ", " ", implode(", ", $selectColumns))."
-        FROM $sTable {$sIndex}
-        WHERE yhtio = '{$kukarow['yhtio']}'
-        $sWhere
-        $sOrder
-        $sLimit";
-  $rResult = pupe_query($sQuery);
+$selectColumns = $aColumns;
 
-  /* Data set length after filtering */
-  $iFilteredTotal = mysql_num_rows($rResult);
+if (isset($aExtraColumns) and count($aExtraColumns) > 0) {
+  $selectColumns = array_merge($aColumns, $aExtraColumns);
+}
 
-  /* Total data set length */
-  $sQuery = " SELECT COUNT('".$sIndexColumn."')
-        FROM $sTable";
-  $rResultTotal = pupe_query($sQuery);
-  $aResultTotal = mysql_fetch_array($rResultTotal);
+/*
+ * SQL queries
+ * Get data to display
+ */
+$sQuery = "  SELECT SQL_CALC_FOUND_ROWS ".str_replace(" , ", " ", implode(", ", $selectColumns))."
+      FROM $sTable {$sIndex}
+      WHERE yhtio = '{$kukarow['yhtio']}'
+      $sWhere
+      $sOrder
+      $sLimit";
+$rResult = pupe_query($sQuery);
 
-  $iTotal = $aResultTotal[0];
+/* Data set length after filtering */
+$iFilteredTotal = mysql_num_rows($rResult);
 
-  /*
-   * Output
-   */
-  $output = array(
-    "sEcho" => intval($_GET['sEcho']),
-    "iTotalRecords" => $iTotal,
-    "iTotalDisplayRecords" => $iFilteredTotal,
-    "aaData" => array()
-  );
+/* Total data set length */
+$sQuery = " SELECT COUNT('".$sIndexColumn."')
+      FROM $sTable";
+$rResultTotal = pupe_query($sQuery);
+$aResultTotal = mysql_fetch_array($rResultTotal);
 
-  while ($aRow = mysql_fetch_array($rResult)) {
-    $row = array();
+$iTotal = $aResultTotal[0];
 
-    for ($i=0; $i<count($aColumns); $i++) {
-      if (isset($aExceptionColumns[$i]) and $aExceptionColumns[$i] != "") {
+/*
+ * Output
+ */
+$output = array(
+  "sEcho" => intval($_GET['sEcho']),
+  "iTotalRecords" => $iTotal,
+  "iTotalDisplayRecords" => $iFilteredTotal,
+  "aaData" => array()
+);
 
-        $aMatchException = $aExceptionColumns[$i];
+while ($aRow = mysql_fetch_array($rResult)) {
+  $row = array();
 
-        $aMatches = array();
-        preg_match_all("/#ROW_([a-zA-Z_]*?)#/", $aMatchException, $aMatches);
+  for ($i=0; $i<count($aColumns); $i++) {
+    if (isset($aExceptionColumns[$i]) and $aExceptionColumns[$i] != "") {
 
-        for ($aii=0; $aii<count($aMatches[0]); $aii++) {
+      $aMatchException = $aExceptionColumns[$i];
 
-          if ($aMatches[1][$aii] == "ebidFUNCTION") {
-            $aMatchException = str_replace($aMatches[0][$aii], ebid($aRow['tunnus']), $aMatchException);
-          }
-          elseif ($aMatches[1][$aii] == "mlh_maksutekstiFUNCTION") {
-            $aMatchException = str_replace($aMatches[0][$aii], mlh_maksuteksti($aRow), $aMatchException);
-          }
-          elseif ($aMatches[1][$aii] == "mlh_nimiFUNCTION") {
-            $aMatchException = str_replace($aMatches[0][$aii], mlh_nimi($aRow['laatija']), $aMatchException);
-          }
-          else {
-            $aMatchException = str_replace($aMatches[0][$aii], $aRow[$aMatches[1][$aii]], $aMatchException);
-          }
+      $aMatches = array();
+      preg_match_all("/#ROW_([a-zA-Z_]*?)#/", $aMatchException, $aMatches);
+
+      for ($aii=0; $aii<count($aMatches[0]); $aii++) {
+
+        if ($aMatches[1][$aii] == "ebidFUNCTION") {
+          $aMatchException = str_replace($aMatches[0][$aii], ebid($aRow['tunnus']), $aMatchException);
         }
-
-        $aRow[$aColumns[$i]] = $aMatchException;
+        elseif ($aMatches[1][$aii] == "mlh_maksutekstiFUNCTION") {
+          $aMatchException = str_replace($aMatches[0][$aii], mlh_maksuteksti($aRow), $aMatchException);
+        }
+        elseif ($aMatches[1][$aii] == "mlh_nimiFUNCTION") {
+          $aMatchException = str_replace($aMatches[0][$aii], mlh_nimi($aRow['laatija']), $aMatchException);
+        }
+        else {
+          $aMatchException = str_replace($aMatches[0][$aii], $aRow[$aMatches[1][$aii]], $aMatchException);
+        }
       }
 
-      $row[] = utf8_encode($aRow[$aColumns[$i]]);
+      $aRow[$aColumns[$i]] = $aMatchException;
     }
 
-    $output['aaData'][] = $row;
+    $row[] = utf8_encode($aRow[$aColumns[$i]]);
   }
 
-  echo json_encode($output);
+  $output['aaData'][] = $row;
+}
+
+echo json_encode($output);

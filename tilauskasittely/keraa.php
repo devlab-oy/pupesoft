@@ -1381,7 +1381,7 @@ if ($tee == 'P') {
         $rivit .= "<tr>";
         $rivit .= "<td>$poikkeama[nimitys]</td>";
         $rivit .= "<td>$poikkeama[tuoteno]</td>";
-        $rivit .= "<td>". (float) $poikkeama["tilkpl"]."</td>";
+        $rivit .= "<td>". (float) $poikkeama["tilkpl"]."   </td>";
         $rivit .= "<td>". (float) $poikkeama["maara"]."</td>";
         if ($yhtiorow["kerayspoikkeama_kasittely"] != '') $rivit .= "<td>$poikkeama[loput]</td>";
         $rivit .= "</tr>";
@@ -1446,8 +1446,18 @@ if ($tee == 'P') {
 
       // L‰hetet‰‰n ker‰yspoikkeama asiakkaalle
       if ($laskurow["email"] != '' and $laskurow["kerayspoikkeama"] == 0) {
-        $boob = mail($laskurow["email"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Ker‰yspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f $yhtiorow[postittaja_email]");
-        if ($boob === FALSE) echo " - ".t("Email l‰hetys ep‰onnistui")."!<br>";
+
+        // S‰hkˆpostin l‰hetykseen parametrit
+        $parametri = array(
+          "to"           => $laskurow["email"],
+          "cc"           => "",
+          "subject"      => "{$yhtiorow['nimi']} - ".t("Ker‰yspoikkeamat", $kieli),
+          "ctype"        => "html",
+          "body"         => $ulos,
+          "attachements" => "",
+        );
+
+        pupesoft_sahkoposti($parametri);
       }
 
       // L‰hetet‰‰n ker‰yspoikkeama myyj‰lle
@@ -1469,16 +1479,34 @@ if ($tee == 'P') {
 
         $ulos = str_replace("</font><hr><br><br><table>", "</font><hr><br><br>$uloslisa<table>", $ulos);
 
-        $boob = mail($laskurow["kukamail"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Ker‰yspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f $yhtiorow[postittaja_email]");
-        if ($boob === FALSE) echo " - ".t("Email l‰hetys ep‰onnistui")."!<br>";
+        // S‰hkˆpostin l‰hetykseen parametrit
+        $parametri = array(
+          "to"           => $laskurow["kukamail"],
+          "cc"           => "",
+          "subject"      => "{$yhtiorow['nimi']} - ".t("Ker‰yspoikkeamat", $kieli),
+          "ctype"        => "html",
+          "body"         => $ulos,
+          "attachements" => "",
+        );
+
+        pupesoft_sahkoposti($parametri);
       }
 
       if ($laskurow['kuka_ext_nimi'] != '' and $yhtiorow['extranet_kerayspoikkeama_email'] != '') {
         $uloslisa .= t("Tilauksen ker‰si").": $keraaja[nimi]<br><br>";
         $ulos = str_replace("</font><hr><br><br><table>", "</font><hr><br><br>$uloslisa<table>", $ulos);
 
-        $boob = mail($yhtiorow['extranet_kerayspoikkeama_email'], mb_encode_mimeheader("{$yhtiorow['nimi']} - ".t("Ker‰yspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f {$yhtiorow['postittaja_email']}");
-        if ($boob === FALSE) echo " - ", t("\"Extranet ker‰yspoikkeama\"-s‰hkˆpostin l‰hetys ep‰onnistui"), "!<br>";
+        // S‰hkˆpostin l‰hetykseen parametrit
+        $parametri = array(
+          "to"           => $yhtiorow["extranet_kerayspoikkeama_email"],
+          "cc"           => "",
+          "subject"      => "{$yhtiorow['nimi']} - ".t("Ker‰yspoikkeamat", $kieli),
+          "ctype"        => "html",
+          "body"         => $ulos,
+          "attachements" => "",
+        );
+
+        pupesoft_sahkoposti($parametri);
       }
 
       unset($ulos);
@@ -1630,6 +1658,11 @@ if ($tee == 'P') {
           if ($_ker_chk_row['keratty'] == 0) {
             $alatilak = 'X';
           }
+        }
+
+        if ($yhtiorow['vahvistusviesti_asiakkaalle'] == "Y") {
+          require_once("inc/jt_ja_tyomaarays_valmis_viesti.inc");
+          laheta_vahvistusviesti($zoner_tunnarit["username"], $zoner_tunnarit["salasana"], $id);
         }
 
         // Lasku p‰ivitet‰‰n vasta kuin tilausrivit on p‰ivitetty...
@@ -2368,7 +2401,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
                 COUNT(DISTINCT tilausrivi.tunnus) AS 'riveja',
                 kuka.nimi as keraaja_nimi,
                 kuka.keraajanro as keraaja_nro,
-                lasku.ohjelma_moduli,
+                kerayserat.ohjelma_moduli,
                 min(lasku.toimaika) toimaika,
                 min(lasku.ytunnus) ytunnus,
                 min(lasku.kerayspvm) kerayspvm
@@ -2528,7 +2561,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
         if (isset($row['varastonimi'])) echo "<br>{$row['varastonimi']}";
 
         echo "</td>";
-        
+
         $_moduuli = '';
         if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 

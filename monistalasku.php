@@ -47,6 +47,16 @@ if ($tee == 'MONISTA' and count($monistettavat) == 0) {
   $tee = "";
 }
 
+$kommenttikentta = $yhtiorow["laskun_monistus_kommenttikentta"];
+
+if ($tee == 'MONISTA' and strlen($kommentti) < 20 and $kommenttikentta == "P") {
+  echo "<font class='error'>",
+  t("Sinun on annettava kommentti laskun monistuksesta. Kommentin vähimmäispituus on 20 merkkiä."),
+  "</font><br>";
+
+  $tee = "";
+}
+
 if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 
   foreach ($monistettavat as $lasku_x => $kumpi_x) {
@@ -474,7 +484,8 @@ if ($tee == "ETSILASKU") {
     echo "  <form method='post' autocomplete='off'>
     <input type='hidden' name='kklkm' value='1'>
     <input type='hidden' name='toim' value='{$toim}'>
-    <input type='hidden' name='tee' value='MONISTA'>";
+    <input type='hidden' name='tee' value='MONISTA'>
+    <input type='hidden' name='laskunro' value='{$laskunro}'>";
 
     echo "<table>";
     echo "<tr>";
@@ -909,16 +920,15 @@ if ($tee == "ETSILASKU") {
 
     echo "</table><br>";
 
-    $kommenttikentta = $yhtiorow["laskun_monistus_kommenttikentta"];
-
     if ($kommenttikentta) {
       $required = $kommenttikentta == "P" ? "required" : "";
 
       echo "<textarea rows='3'
                       cols='40'
+                      name='kommentti'
                       minlength='20'
                       placeholder='Nimi, puh ja email'
-                      {$required}></textarea>
+                      {$required}>{$kommentti}</textarea>
             <br>";
     }
 

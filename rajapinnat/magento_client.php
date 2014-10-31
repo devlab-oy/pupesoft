@@ -1389,9 +1389,9 @@ class MagentoClient {
                 liitetiedostot.filetype,
                 liitetiedostot.filename
                 FROM liitetiedostot
-                WHERE liitetiedostot.yhtio = '{$kukarow['yhtio']}'
-                AND liitetiedostot.liitostunnus = '{$tunnus}'
-                AND liitetiedostot.liitos = 'tuote'
+                WHERE liitetiedostot.yhtio         = '{$kukarow['yhtio']}'
+                AND liitetiedostot.liitostunnus    = '{$tunnus}'
+                AND liitetiedostot.liitos          = 'tuote'
                 AND liitetiedostot.kayttotarkoitus = 'TK'
                 ORDER BY liitetiedostot.jarjestys DESC,
                 liitetiedostot.tunnus DESC";
@@ -1630,7 +1630,7 @@ class MagentoClient {
                 tuotteen_avainsanat
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tuoteno = '{$tuotenumero}'
-                AND laji IN ('nimitys','kuvaus')";
+                AND laji    IN ('nimitys','kuvaus')";
       $result = pupe_query($query);
 
       while ($avainsana = mysql_fetch_assoc($result)) {

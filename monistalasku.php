@@ -551,11 +551,7 @@ if ($tee == "ETSILASKU") {
       }
 
       if ($toim == '') {
-        $sel = "";
-        if (isset($korjaaalvit[$row["tilaus"]]) and $korjaaalvit[$row["tilaus"]] != '') $sel = "CHECKED";
-
         echo "<{$ero} valign='top' nowrap>";
-        echo "<input type='checkbox' name='korjaaalvit[{$row['tilaus']}]' value='on' {$sel}> ".t("Korjaa alvit")."<br>";
 
         // Katotaan ettei yksik‰‰n tuote ole sarjanumeroseurannassa, silloin ei voida turvallisesti laittaa suoraan laskutukseen
         $query = "SELECT tuote.sarjanumeroseuranta
@@ -936,7 +932,6 @@ if ($tee == 'MONISTA') {
   // $tunnus joka on array joss on monistettavat laskut
   // $kklkm kopioiden m‰‰r‰
   // Jos hyvit‰ on 'on', niin silloin $kklkm t‰ytyy aina olla 1
-  // $korjaaalvit array kertoo korjataanko kopioitavat tilauksen alvit
   // $suoraanlasku array sanoo ett‰ tilausta ei ker‰t‰ vaan se menee suoraan laskutusjonoon
 
   // Otetaan uudet tunnukset talteen
@@ -949,13 +944,11 @@ if ($tee == 'MONISTA') {
 
   foreach ($monistettavat as $lasku => $kumpi) {
 
-    $alvik       = "";
-    $slask       = "";
-    $sprojekti    = "";
+    $slask      = "";
+    $sprojekti  = "";
     $koptyom    = "";
-    $korjrahdit    = "";
+    $korjrahdit = "";
 
-    if (isset($korjaaalvit[$lasku]) and $korjaaalvit[$lasku] != '')             $alvik      = "on";
     if (isset($suoraanlasku[$lasku]) and $suoraanlasku[$lasku] != '')           $slask      = "on";
     if (isset($sailytaprojekti[$lasku]) and $sailytaprojekti[$lasku] != '')     $sprojekti  = "on";
     if (isset($sailytatyomaarays[$lasku]) and $sailytatyomaarays[$lasku] != '') $koptyom    = "on";
@@ -1012,8 +1005,8 @@ if ($tee == 'MONISTA') {
       for ($i = 1; $i < mysql_num_fields($monistares) - 1; $i++) {
         $fieldname = mysql_field_name($monistares, $i);
         $fields .= ", ".$fieldname;
-
         switch ($fieldname) {
+
         case 'ytunnus':
         case 'liitostunnus':
         case 'nimi':
@@ -1331,7 +1324,7 @@ if ($tee == 'MONISTA') {
           }
           break;
         case 'ketjutus':
-          if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA' or $alvik == "on") {
+          if ($kumpi == 'HYVITA' or $kumpi == 'REKLAMA') {
             echo t("Hyvityst‰/ALV-korjausta ei ketjuteta")."<br>";
             $values .= ", 'x'";
           }
@@ -1340,17 +1333,11 @@ if ($tee == 'MONISTA') {
           }
           break;
         case 'viesti':
-          if ($kumpi == 'HYVITA' and $alvik == "on") {
-            $values .= ", '".t("Hyvitet‰‰n ja tehd‰‰n ALV-korjaus laskuun", $asiakrow['kieli']).": ".$monistarow["laskunro"].".'";
-          }
-          elseif ($kumpi == 'HYVITA') {
+          if ($kumpi == 'HYVITA') {
             $values .= ", '".t("Hyvitys laskuun", $asiakrow['kieli']).": ".$monistarow["laskunro"].".'";
           }
           elseif ($kumpi == 'REKLAMA') {
             $values .= ", '".t("Reklamaatio laskuun", $asiakrow['kieli']).": ".$monistarow["laskunro"].".'";
-          }
-          elseif ($kumpi == 'MONISTA' and $alvik == "on") {
-            $values .= ", '".t("ALV-korjaus laskuun", $asiakrow['kieli']).": ".$monistarow["laskunro"].".'";
           }
           else {
             $values .= ", ''";
@@ -1614,8 +1601,8 @@ if ($tee == 'MONISTA') {
         for ($i = 1; $i < mysql_num_fields($rivires) - 1; $i++) {
           $fieldname = mysql_field_name($rivires, $i);
           $rfields .= ", ".$fieldname;
-
           switch ($fieldname) {
+
           case 'toimaika':
             if ($yhtiorow["tilausrivien_toimitettuaika"] == 'X' and $toim != 'OSTOTILAUS') {
               $rvalues .= ", '".$rivirow[$fieldname]."'";

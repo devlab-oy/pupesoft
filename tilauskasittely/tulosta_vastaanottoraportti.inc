@@ -100,8 +100,7 @@ if (!function_exists('print_pdf_vastaanotto')) {
 
       $kutsu = "Vastaanottoraportti";
 
-      if (@include "../inc/sahkoposti.inc");
-      elseif (@include "inc/sahkoposti.inc");
+      if (@include "inc/sahkoposti.inc");
       else include "sahkoposti.inc";
 
       echo t("Vastaanottoraportti tulostuu"), "...<br>";
@@ -115,9 +114,6 @@ if (!function_exists('print_pdf_vastaanotto')) {
 
       echo t("Vastaanottoraportti tulostuu"), "...<br>";
     }
-
-    //poistetaan tmp file samantien kuleksimasta...
-    system("rm -f $pdffilenimi");
   }
 }
 

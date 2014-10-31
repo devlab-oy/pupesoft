@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists("luo_myyntitilausotsikko")) {
-  function luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '', $kantaasiakastunnus = '', $ohjelmamoduli = '', $tilaustyyppi = '', $yhtiotoimipaikka = '', $ei_ketjutus = '') {
+  function luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '', $kantaasiakastunnus = '', $ohjelmamoduli = '', $tilaustyyppi = '', $yhtiotoimipaikka = '', $ei_ketjutus = '', $eilahe_osatoim = '') {
     global $kukarow, $yhtiorow, $session;
 
     $query  = "SELECT *
@@ -56,6 +56,13 @@ if (!function_exists("luo_myyntitilausotsikko")) {
       $piiri          = $asiakasrow["piiri"];
       $laskutyyppi     = $asiakasrow["laskutyyppi"];
       $lahetetyyppi      = pupesoft_lahetetyyppi(0, $asiakasrow['tunnus']);
+
+      if ((int) $kukarow["kesken"] == 0 and $asiakasrow['toimipaikka'] != 0) {
+        if ($kukarow['toimipaikka'] != $asiakasrow['toimipaikka'] and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+          $kukarow['toimipaikka'] = $asiakasrow['toimipaikka'];
+          $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+        }
+      }
 
       $kohde  = "";
       $eilahe = "";
@@ -158,22 +165,6 @@ if (!function_exists("luo_myyntitilausotsikko")) {
 
       $erikoisale  = $asiakasrow["erikoisale"];
 
-      // Jos on varasto setattuna, pässätään eteenpäin
-      $varasto = 0;
-
-      if ($toim == "REKLAMAATIO" and $tilaustyyppi == 'U' and $yhtiorow['takuuvarasto'] != 0) {
-        $varasto = $yhtiorow['takuuvarasto'];
-      }
-      elseif (strpos($kukarow["varasto"], ',') === FALSE and (int) $kukarow["varasto"] > 0) {
-        // Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan $kukarow['varasto']
-        $varasto = $kukarow['varasto'];
-      }
-      // valitaan käyttäjän oletus varasto
-      elseif ($yhtiorow['oletusvarasto_tilaukselle'] == 'O' and (int) $kukarow["oletus_varasto"] > 0) {
-        // jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan käyttäjän oletus varasto
-        $varasto = $kukarow['oletus_varasto'];
-      }
-
       if ($yhtiorow["splittauskielto"] != '') {
         $splittauskielto = "E";
       }
@@ -246,30 +237,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
         $myynnista_osto_avainsanat = t_avainsana("MYYNNISTA_OSTO");
 
         if (mysql_num_rows($myynnista_osto_avainsanat) > 0) {
-
-          // Yhtiön toimipaikka yliajaa tämän parametrin
-          $query_x = "SELECT ostotilauksen_kasittely
-                      FROM yhtion_parametrit
-                      WHERE yhtio = '{$kukarow['yhtio']}'";
-          $param_fetch_res = pupe_query($query_x);
-          $param_fetch_row = mysql_fetch_assoc($param_fetch_res);
-
-          $ostotilauksen_kasittely = $param_fetch_row['ostotilauksen_kasittely'];
-
-          if ($kukarow['toimipaikka'] != 0) {
-
-            $query_x = "SELECT ostotilauksen_kasittely
-                        FROM yhtion_toimipaikat
-                        WHERE yhtio                  = '{$kukarow['yhtio']}'
-                        AND tunnus                   = '{$kukarow['toimipaikka']}'
-                        AND ostotilauksen_kasittely != ''";
-            $toimpaikka_chk_res = pupe_query($query_x);
-
-            if (mysql_num_rows($toimpaikka_chk_res) > 0) {
-              $toimpaikka_chk_row = mysql_fetch_assoc($toimpaikka_chk_res);
-              $ostotilauksen_kasittely = $toimpaikka_chk_row['ostotilauksen_kasittely'];
-            }
-          }
+          $ostotilauksen_kasittely = $yhtiorow['ostotilauksen_kasittely'];
         }
       }
     }
@@ -286,13 +254,15 @@ if (!function_exists("luo_myyntitilausotsikko")) {
       // Jos on varasto setattuna, pässätään eteenpäin
       $varasto = 0;
 
-      if (strpos($kukarow["varasto"], ',') === FALSE and (int) $kukarow["varasto"] > 0) {
+      if ($toim == "REKLAMAATIO" and $tilaustyyppi == 'U' and $yhtiorow['takuuvarasto'] != 0) {
+        $varasto = $yhtiorow['takuuvarasto'];
+      }
+      elseif (strpos($kukarow["varasto"], ',') === FALSE and (int) $kukarow["varasto"] > 0) {
         // Jos kukarow varasto on vain YKSI varasto, niin silloin valitaan $kukarow['varasto']
         $varasto = $kukarow['varasto'];
       }
-      // valitaan käyttäjän oletus varasto
       elseif ($yhtiorow['oletusvarasto_tilaukselle'] == 'O' and (int) $kukarow["oletus_varasto"] > 0) {
-        // jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan käyttäjän oletus varasto
+        // jos kukarow['oletus_varasto'] valittu ja myyntitilauksella ei ole varastoa valittuna, valitaan käyttäjän oletusvarasto
         $varasto = $kukarow['oletus_varasto'];
       }
     }

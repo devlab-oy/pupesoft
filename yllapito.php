@@ -32,7 +32,7 @@ if (array_key_exists($toim, $psx_ohjelmat)) {
 
   $psx_url = $psx_ohjelmat[$toim];
 
-  echo "<font class='head'>",t("Virhe"),"</font><hr>";
+  echo "<font class='head'>", t("Virhe"), "</font><hr>";
 
   echo "<br />";
 
@@ -430,7 +430,7 @@ if ($upd == 1) {
     unset($virhe);
     $errori = "";
   }
-  elseif ($errori != '') {
+  elseif ($errori != '' and isset($yllapitonappi)) {
     echo "<font class='error'>".t("Jossain oli jokin virhe! Ei voitu paivitt‰‰!")."</font>";
   }
 
@@ -1226,6 +1226,10 @@ for ($i=0; $i<=$count; $i++) {
       $tarkkahaku = TRUE;
       $hakuehto = " = '{$haku[$i]}' ";
     }
+    elseif ($toim == 'asiakas' and $array[$i] == "toimipaikka") {
+      $tarkkahaku = FALSE;
+      $hakuehto = " = '{$haku[$i]}' ";
+    }
     else {
       $tarkkahaku = FALSE;
       $hakuehto = " like '%{$haku[$i]}%' ";
@@ -1250,6 +1254,9 @@ for ($i=0; $i<=$count; $i++) {
       else {
         $lisa .= " and {$array[$i]} = '{$haku[$i]}' ";
       }
+    }
+    elseif ($toim == 'asiakas' and $yhtiorow['toimipaikkakasittely'] == 'L' and trim($array[$i]) == "toimipaikka") {
+      if (strpos($hakuehto, 'kaikki') === false) $lisa .= " AND asiakas.toimipaikka {$hakuehto} ";
     }
     elseif ($from == "" and $toim == 'toimi' and $alias_set == "KAYTTAJA") {
       $ashak = "SELECT group_concat(concat('\'',kuka,'\'')) kukat
@@ -1381,6 +1388,13 @@ for ($i=0; $i<=$count; $i++) {
 
     $ulisa .= "&haku[$i]=".urlencode($haku[$i]);
   }
+  elseif (!isset($haku[$i])) {
+    if ($toim == 'asiakas' and $yhtiorow['toimipaikkakasittely'] == 'L' and trim($array[$i]) == "toimipaikka") {
+      if ($kukarow['toimipaikka'] != 0) {
+        $lisa .= " AND asiakas.toimipaikka = '{$kukarow['toimipaikka']}' ";
+      }
+    }
+  }
 }
 
 //  S‰ilytet‰‰n ohjeen tila
@@ -1500,7 +1514,18 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
         <input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
         <input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
         <input type = 'hidden' name = 'laji' value = '$laji'>
-        <input type = 'submit' value = '".t("N‰yt‰ kaikki")."'></form>";
+        <input type = 'submit' value = '".t("N‰yt‰ kaikki")."'>";
+
+    if ($toim == "asiakas" and $yhtiorow['toimipaikkakasittely'] == 'L') {
+      for ($i = 1; $i < mysql_num_fields($result); $i++) {
+        if (mysql_field_name($result, $i) == "toimipaikka" and $haku[$i] != 'kaikki') {
+          echo "<input type = 'hidden' name = 'haku[$i]' value = '@{$haku[$i]}'>";
+          break;
+        }
+      }
+    }
+
+    echo "</form>";
   }
 
   if ($toim == "asiakas" or $toim == "maksuehto" or $toim == "toimi" or $toim == "tuote" or $toim == "yriti" or $toim == "kustannuspaikka" or $toim == "lahdot" or $toim == "toimitustavan_lahdot") {
@@ -1632,6 +1657,36 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
             echo "<option value=''></option>";
             echo "<option value='@E'{$sel['@E']}>", t("Ei"), "</option>";
             echo "<option value='@K'{$sel['@K']}>", t("Kyll‰"), "</option>";
+          }
+
+          echo "</select>";
+        }
+        elseif ($toim == "asiakas" and $yhtiorow['toimipaikkakasittely'] == 'L' and mysql_field_name($result, $i) == "toimipaikka") {
+
+          echo "<br />";
+          echo "<select name='haku[{$i}]'>";
+
+          echo "<option value='0'>", t("Ei toimipaikkaa"), "</option>";
+
+          $sel = strtolower($haku[$i]) == "kaikki" ? "selected" : "";
+
+          echo "<option value='kaikki' {$sel}>", t("Kaikki toimipaikat"), "</option>";
+
+          $sel = '';
+
+          $query = "SELECT DISTINCT nimi, tunnus
+                    FROM yhtion_toimipaikat
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    ORDER BY nimi";
+          $toimipaikka_chk_res = pupe_query($query);
+
+          while ($toimipaikka_chk_row = mysql_fetch_assoc($toimipaikka_chk_res)) {
+
+            $sel = (isset($haku[$i]) and $haku[$i] == "@".$toimipaikka_chk_row['tunnus']) ? ' selected' : '';
+
+            if (!isset($haku[$i]) and $kukarow['toimipaikka'] != 0 and $kukarow['toimipaikka'] == $toimipaikka_chk_row['tunnus']) $sel = 'selected';
+
+            echo "<option value='@{$toimipaikka_chk_row['tunnus']}'{$sel}>{$toimipaikka_chk_row['nimi']}</option>";
           }
 
           echo "</select>";
@@ -2038,6 +2093,9 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       case "printteri10":
         $otsikko = t("L‰mpˆsiirto");
         break;
+      case "isa_varasto":
+        $otsikko = t("Is‰varasto");
+        break;
       default:
         if (isset($mysqlaliasarraysetti) and isset($mysqlaliasarray[$mysqlaliasarraysetti][mysql_field_name($result, $i)])) {
           $otsikko = t($mysqlaliasarray[$mysqlaliasarraysetti][mysql_field_name($result, $i)]);
@@ -2421,6 +2479,13 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     }
   }
 
+  if ($trow["tunnus"] > 0 and $errori == '' and $toim == 'toimitustapa') {
+    if (($toikrow = tarkista_oikeus("yllapito.php", "toimitustavat_toimipaikat%", "", "OK")) !== FALSE) {
+      echo "<br>";
+      echo "<iframe id='toimitustavat_iframe' name='toimitustavat_iframe' src='yllapito.php?toim=toimitustavat_toimipaikat&from=yllapito&ohje=off&haku[1]=@{$tunnus}&lukitse_avaimeen={$tunnus}' style='width: 600px; height: 300px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+    }
+  }
+
   if ($trow["tunnus"] > 0 and $errori == "" and $from != "yllapito" and $toim == "tuote" and $laji != "V") {
 
     $lukitse_avaimeen = urlencode($tuoteno);
@@ -2512,6 +2577,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $toim == "yhteensopivuus_tuote" or
     $toim == "yhteensopivuus_tuote_lisatiedot" or
     ($toim == "toimitustapa" and $poistolukko == "") or
+    $toim == "toimitustavat_toimipaikat" or
     $toim == "kirjoittimet" or
     $toim == "hinnasto" or
     $toim == "rahtimaksut" or
@@ -2538,6 +2604,8 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $toim == "tuotteen_orginaalit" or
     $toim == "huoltosykli" or
     $toim == "huoltosyklit_laitteet" or
+    $toim == "yhtion_toimipaikat_parametrit" or
+    $toim == "kohde" or
     ($toim == "liitetiedostot" and $poistolukko == "") or
     ($toim == "tuote" and $poistolukko == "") or
     ($toim == "toimi" and $kukarow["taso"] == "3")) {

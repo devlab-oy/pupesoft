@@ -97,6 +97,14 @@ if (mysql_field_name($result, $i) == "yhdistelysaanto") {
   $jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == "keraysnippujen_priorisointi") {
+
+  $chk = !empty($trow[$i]) ? "checked" : "";
+
+  $ulos = "<td><input type='checkbox' name='{$nimi}' {$chk} /></td>";
+  $jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == "varasto") {
   $ulos = "<td><select name='{$nimi}'>";
 

@@ -19,6 +19,9 @@ $pupe_root_polku = dirname(dirname(__FILE__));
 require "{$pupe_root_polku}/inc/connect.inc";
 require "{$pupe_root_polku}/inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
+
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock();
 
@@ -44,7 +47,7 @@ $magento = new MagentoClient($magento_api_ht_url, $magento_api_ht_usr, $magento_
 // 'processing_pupesoft'-tilassa niin tilausta ei lueta sisään jos sisäänluvun esto on päällä
 // Default on: YES
 if (isset($magento_sisaanluvun_esto) and !empty($magento_sisaanluvun_esto)) {
-   $magento->setSisaanluvunEsto($magento_sisaanluvun_esto);
+  $magento->setSisaanluvunEsto($magento_sisaanluvun_esto);
 }
 
 if ($magento->getErrorCount() > 0) {

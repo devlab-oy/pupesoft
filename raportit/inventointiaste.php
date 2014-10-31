@@ -51,7 +51,7 @@ if ($ajax_request) {
       //jos dropdownista valitaan tyhj‰ pit‰‰ t‰ss‰ kohtaan yhtioon laittaa joku ep‰validi yhtio, koska hae_varastot funkkarissa on empty(), jolloin k‰ytet‰‰n kukarow:ta
       $yhtio = "EPAVALIDI";
     }
-    $varastot = hae_varastot(array(), $yhtio);
+    $varastot = inventointiaste_hae_varastot(array(), $yhtio);
     array_walk_recursive($varastot, 'array_utf8_encode');
 
     echo json_encode($varastot);
@@ -774,7 +774,7 @@ function init(&$request) {
     );
   }
 
-  $request['varastot'] = hae_varastot($request);
+  $request['varastot'] = inventointiaste_hae_varastot($request);
 
   if (empty($request['valitut_varastot'])) {
     //ensimm‰inen sivulataus, requestista ei ole tullut valittuja varastoja, rajataan k‰yttˆliittym‰‰n esivalittujen varastojen perusteella
@@ -1466,11 +1466,6 @@ function hae_inventoinnit(&$request) {
               AND avainsana.selite     = tuote.try
               AND avainsana.laji       = 'TRY'
               AND avainsana.kieli      = '{$yhtiorow['kieli']}')
-            JOIN varastopaikat
-            ON ( varastopaikat.yhtio = tapahtuma.yhtio
-              AND concat(rpad(upper(varastopaikat.alkuhyllyalue), 5, '0'),lpad(upper(varastopaikat.alkuhyllynro), 5, '0')) <= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
-              AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tapahtuma.hyllyalue), 5, '0'),lpad(upper(tapahtuma.hyllynro), 5, '0'))
-              AND varastopaikat.tunnus IN (".implode(', ', $request['valitut_varastot']).") )
             LEFT JOIN kuka
             ON ( kuka.yhtio = tapahtuma.yhtio
               AND kuka.kuka            = tapahtuma.laatija )
@@ -1487,6 +1482,7 @@ function hae_inventoinnit(&$request) {
             WHERE tapahtuma.yhtio      = '{$yhtio}'
               AND tapahtuma.laadittu BETWEEN '{$request['alku_aika']}' AND '{$request['loppu_aika']}'
               AND tapahtuma.laji       = 'Inventointi'
+              AND tapahtuma.varasto    IN (".implode(', ', $request['valitut_varastot']).")
             {$tapahtuma_where}
             {$inventointilaji_rajaus}
             {$ei_huomioida_lisa}
@@ -1604,7 +1600,7 @@ function hae_tilikaudet($request = array(), $yhtio = '') {
 }
 
 //tarvitaan uusi yhtio parametri ajax_requestia varten
-function hae_varastot($request = array(), $yhtio = '') {
+function inventointiaste_hae_varastot($request = array(), $yhtio = '') {
   global $kukarow;
 
   //ajax_requestia varten

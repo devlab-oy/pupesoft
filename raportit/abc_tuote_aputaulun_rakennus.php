@@ -25,6 +25,9 @@ if ($php_cli) {
   require "../inc/connect.inc";
   require "../inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   $kukarow['yhtio'] = trim($argv[1]);
 
   $abclaji      = "";
@@ -416,6 +419,7 @@ if ($tee == 'YHTEENVETO') {
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND tuoteno = '$row[tuoteno]'
                 AND laji    = 'tulo'
+                AND selite  not like '%alkusaldo%'
                 ORDER BY laadittu
                 LIMIT 1";
       $insres = pupe_query($query);

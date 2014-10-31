@@ -323,7 +323,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
               ORDER BY asn_sanomat.tuoteno ASC";
     $kollires = pupe_query($query);
 
-    $i = $x = 0;
+    $i = $x = $y = 0;
     $keikoilla  = array();
     $ostoilla  = array();
     $tullaan_virhetarkistuksesta = $tee == 'vahvistavakisinkolli' ? false : true;
@@ -546,20 +546,23 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
           $tilausrivires = pupe_query($query);
 
           while ($tilausrivirow = mysql_fetch_assoc($tilausrivires)) {
+
             if ($tilausrivirow['uusiotunnus'] == 0) {
               // löytyi, ei ole keikalla
-              $ostoilla[$x]["tunnus"] = $tilausrivirow['tunnus']; // tilausrivi tunnus
-              $ostoilla[$x]["hinta"] = $rtuoteno[$i]["hinta"];
-              $ostoilla[$x]["kpl"] = $rtuoteno[$i]["kpl"];
-              $ostoilla[$x]["laskuntunnus"] = $rtuoteno[$i]["ostotilausnro"]; // laskun tunnus
-              $ostoilla[$x]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
-              $ostoilla[$x]["insert_id"] = $rtuoteno[$i]["insert_id"];
-              $ostoilla[$x]["lisakulu"] = $rtuoteno[$i]["lisakulu"];
-              $ostoilla[$x]["kulu"] = $rtuoteno[$i]["kulu"];
-              $ostoilla[$x]["ale1"] = $rtuoteno[$i]["ale1"];
-              $ostoilla[$x]["ale2"] = $rtuoteno[$i]["ale2"];
-              $ostoilla[$x]["ale3"] = $rtuoteno[$i]["ale3"];
-              $ostoilla[$x]['tuoteno'] = $tilausrivirow['tuoteno'];
+              $ostoilla[$y]["tunnus"] = $tilausrivirow['tunnus']; // tilausrivi tunnus
+              $ostoilla[$y]["hinta"] = $rtuoteno[$i]["hinta"];
+              $ostoilla[$y]["kpl"] = $rtuoteno[$i]["kpl"];
+              $ostoilla[$y]["laskuntunnus"] = $rtuoteno[$i]["ostotilausnro"]; // laskun tunnus
+              $ostoilla[$y]["tilaajanrivinro"] = $rtuoteno[$i]["tilaajanrivinro"];
+              $ostoilla[$y]["insert_id"] = $rtuoteno[$i]["insert_id"];
+              $ostoilla[$y]["lisakulu"] = $rtuoteno[$i]["lisakulu"];
+              $ostoilla[$y]["kulu"] = $rtuoteno[$i]["kulu"];
+              $ostoilla[$y]["ale1"] = $rtuoteno[$i]["ale1"];
+              $ostoilla[$y]["ale2"] = $rtuoteno[$i]["ale2"];
+              $ostoilla[$y]["ale3"] = $rtuoteno[$i]["ale3"];
+              $ostoilla[$y]['tuoteno'] = $tilausrivirow['tuoteno'];
+
+              $y++;
             }
             else {
               // löytyi, on jo keikalla
@@ -595,9 +598,9 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
                           AND tunnus  = '{$kollirow['tunnus']}'";
                 $upd_res = pupe_query($query);
               }
-            }
 
-            $x++;
+              $x++;
+            }
           }
         }
 
@@ -1710,7 +1713,7 @@ if ($tee == 'nayta') {
               JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero and toimi.tyyppi !='P')
               WHERE asn_sanomat.yhtio          = '{$kukarow['yhtio']}'
               AND asn_sanomat.paketintunniste  = '{$kolli}'
-              AND asn_sanomat.tilausrivi is NULL
+              AND (asn_sanomat.tilausrivi is NULL or asn_sanomat.tilausrivi = '')
               AND asn_sanomat.laji             = 'asn'
               AND asn_sanomat.asn_numero       = '{$asn_numero}'
               AND asn_sanomat.toimittajanumero = '{$toimittajanumero}'
@@ -1964,7 +1967,7 @@ if ($tee == 'nayta') {
       if ($row['status'] == 'E') {
         echo "<font class='message'>", t("Erolistalla"), "</font>";
       }
-      elseif (!is_null($row['tilausrivi'])) {
+      elseif (!is_null($row['tilausrivi']) and !empty($row['tilausrivi'])) {
         echo "<font class='ok'>Ok</font>";
         $ok++;
 
@@ -1980,7 +1983,7 @@ if ($tee == 'nayta') {
 
       echo "<td class='back'>";
 
-      if (is_null($row['tilausrivi']) and $row['status'] != 'E') {
+      if ((is_null($row['tilausrivi']) or empty($row['tilausrivi']) ) and $row['status'] != 'E') {
         echo "<input type='button' class='etsibutton_osto' id='{$lasku}##{$row['tuoteno']}##{$row['tilausrivinpositio']}##{$row['toimittajanumero']}##{$row['kappalemaara']}##{$row['tunnus']}##{$row['tilausnumero']}##{$row['toim_tuoteno']}##{$toimipaikka}' value='", t("Etsi"), "' />";
 
         if ($row['hinta'] == 0) {
@@ -2078,14 +2081,14 @@ if ($tee == '') {
               asn_sanomat.toimittajanumero,
               asn_sanomat.status,
               count(asn_sanomat.tunnus) AS rivit,
-              sum(if(asn_sanomat.tilausrivi is NULL, 0, 1)) AS ok
+              sum(if((asn_sanomat.tilausrivi is NULL or asn_sanomat.tilausrivi = ''), 0, 1)) AS ok
               FROM asn_sanomat
               JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero and toimi.tyyppi !='P')
               WHERE asn_sanomat.yhtio = '{$kukarow['yhtio']}'
               AND asn_sanomat.laji    = 'asn'
               AND asn_sanomat.status  NOT IN ('X', 'E', 'D')
               GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14
-              HAVING count(asn_sanomat.tunnus) != sum(if(asn_sanomat.tilausrivi is NULL, 0, 1))
+              HAVING count(asn_sanomat.tunnus) != sum(if((asn_sanomat.tilausrivi is NULL or asn_sanomat.tilausrivi = ''), 0, 1))
               ORDER BY asn_sanomat.asn_numero, asn_sanomat.paketintunniste";
     $result = pupe_query($query);
 
@@ -2209,7 +2212,7 @@ if ($tee == '') {
               asn_sanomat.paketintunniste,
               asn_sanomat.toimittajanumero,
               count(asn_sanomat.tunnus) AS rivit,
-              sum(if(asn_sanomat.tilausrivi is NULL, 0, 1)) AS ok
+              sum(if((asn_sanomat.tilausrivi is NULL or asn_sanomat.tilausrivi = ''), 0, 1)) AS ok
               FROM asn_sanomat
               JOIN toimi ON (toimi.yhtio = asn_sanomat.yhtio AND toimi.toimittajanro = asn_sanomat.toimittajanumero AND toimi.tyyppi != 'P')
               JOIN lasku ON (lasku.yhtio = asn_sanomat.yhtio AND lasku.laskunro = asn_sanomat.asn_numero AND vienti in ('B', 'C', 'E', 'F', 'H', 'I') AND lasku.liitostunnus = toimi.tunnus {$toimipaikkalisa})

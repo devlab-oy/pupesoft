@@ -26,9 +26,12 @@ if ($php_cli) {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   // Haetaan yhtiörow ja kukarow
   $yhtiorow = hae_yhtion_parametrit($argv[1]);
-  $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
+  $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
   $aja = 'run';
 }
@@ -720,7 +723,7 @@ if ($yhtiorow['kerayserat'] == 'K') {
 }
 
 // Poistetaan tuotepaikat jotka ovat varaston ensimmäisellä paikalla (esim. A-0-0-0) ja joilla
-// ei ole saldoa. Koska nämä ovat yleensä generoituja paikkoja. (ei poisteta oletuspaikkaa)
+// ei ole saldoa eikä hälytysrajaa. Koska nämä ovat yleensä generoituja paikkoja. (ei poisteta oletuspaikkaa)
 if ($yhtiorow['kerayserat'] == 'K') {
   $poistettu = 0;
 
@@ -734,6 +737,7 @@ if ($yhtiorow['kerayserat'] == 'K') {
             AND tuotepaikat.hyllytaso        = 0
             AND tuotepaikat.hyllyvali        = 0
             AND tuotepaikat.oletus           = ''
+            AND tuotepaikat.halytysraja      = 0
             AND tuotepaikat.poistettava     != 'D'
             GROUP BY 1";
   $result = pupe_query($query);
@@ -780,12 +784,26 @@ $avoimet_rivit = array();
 
 // Jos on poistettavia, haetaan avoimet
 if (mysql_num_rows($poistettavat_tuotepaikat) > 0) {
+
   // Haetaan avoimet tilausrivit arrayseen (myynti, osto, siirtolistat, valmistukset)
   $query = "SELECT CONCAT(tuoteno, hyllyalue, hyllynro, hyllytaso, hyllyvali) AS id
             FROM tilausrivi
             WHERE yhtio        = '{$kukarow['yhtio']}'
             AND laskutettuaika = '0000-00-00'
             AND tyyppi         IN ('L','O','G','V','W','M')";
+  $avoinrivi_result = pupe_query($query);
+
+  while ($avoinrivi = mysql_fetch_assoc($avoinrivi_result)) {
+    $avoimet_rivit[] = $avoinrivi['id'];
+  }
+
+  // Haetaan avoimet tilausrivit arrayseen (siirtolistojen kohdepaikka)
+  $query = "SELECT CONCAT(tilausrivi.tuoteno, tilausrivin_lisatiedot.kohde_hyllyalue, tilausrivin_lisatiedot.kohde_hyllynro, tilausrivin_lisatiedot.kohde_hyllytaso, tilausrivin_lisatiedot.kohde_hyllyvali) AS id
+            FROM tilausrivi
+            JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.kohde_hyllyalue != '')
+            WHERE tilausrivi.yhtio        = '{$kukarow['yhtio']}'
+            AND tilausrivi.laskutettuaika = '0000-00-00'
+            AND tilausrivi.tyyppi         = 'G'";
   $avoinrivi_result = pupe_query($query);
 
   while ($avoinrivi = mysql_fetch_assoc($avoinrivi_result)) {

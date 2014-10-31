@@ -1,5 +1,8 @@
 <?php
 
+///* Tämä skripti käyttää slave-tietokantapalvelinta *///
+$useslave = 1;
+
 // DataTables päälle
 $pupe_DataTables = "asiakkaantilaukset";
 

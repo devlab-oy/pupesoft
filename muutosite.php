@@ -1212,22 +1212,29 @@ if ($tee == 'E' or $tee == 'F') {
     }
 
     $_kirjanpidollinen_varastosiirto = ($yhtiorow['kirjanpidollinen_varastosiirto_myyntitilaukselta'] == 'K');
-    if ($_kirjanpidollinen_varastosiirto) {
-      $query = "SELECT tila,
-                alatila
-                FROM lasku
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus  = '{$trow['vanhatunnus']}'";
-      $varastosiirto_result = pupe_query($query);
-      $varastosiirto = mysql_fetch_assoc($varastosiirto_result);
 
-      $_onko_varastosiirto = ($varastosiirto['tila'] == 'G' and in_array($varastosiirto['alatila'], array('X', 'V')));
-      //Tarkistetaan onko myyntilaskun vanhatunnus linkissä vastaanotettu varastosiirto
-      if ($_onko_varastosiirto) {
+    if ($_kirjanpidollinen_varastosiirto AND $trow['tila'] == "U") {
+
+      $query = "SELECT varastosiirto_tunnus
+                FROM lasku
+                WHERE yhtio  = '{$kukarow['yhtio']}'
+                AND tila     = 'L'
+                AND alatila  = 'X'
+                AND laskunro = '{$trow['laskunro']}'
+                AND varastosiirto_tunnus > 0";
+      $varastosiirto_result = pupe_query($query);
+
+      if (mysql_num_rows($varastosiirto_result) > 0) {
         echo "<tr>";
         echo "<th>".t('Varastosiirtotosite')."</th>";
         echo "<td colspan='5'>";
-        echo "<a href='{$palvelin2}muutosite.php?tee=E&tunnus={$trow['vanhatunnus']}&lopetus={$palvelin2}myyntires/myyntilaskuhaku.php////tee=N'>".t('Varastosiirto').": {$trow['vanhatunnus']}</a>";
+
+        if ($lopetus != '') $lopetus .= "/SPLIT/";
+
+        while ($varastosiirto = mysql_fetch_assoc($varastosiirto_result)) {
+          echo "<a href='{$palvelin2}muutosite.php?tee=E&tunnus={$varastosiirto['varastosiirto_tunnus']}&lopetus={$lopetus}{$palvelin2}muutosite.php////tee=E//tunnus={$trow['tunnus']}'>{$varastosiirto['varastosiirto_tunnus']}</a> ";
+        }
+
         echo "</td>";
         echo "</tr>";
       }

@@ -98,6 +98,7 @@ if ($copyready != '') {
               $query = "INSERT into oikeu
                         SET
                         kuka       = '$krow[kuka]',
+                        user_id    = '{$krow['tunnus']}',
                         sovellus   = '$trow[sovellus]',
                         nimi       = '$trow[nimi]',
                         alanimi    = '$trow[alanimi]',
@@ -105,7 +106,7 @@ if ($copyready != '') {
                         nimitys    = '$trow[nimitys]',
                         jarjestys  = '$trow[jarjestys]',
                         jarjestys2 = '$trow[jarjestys2]',
-                        yhtio      = '$tokuka'
+                        yhtio      = '$tokuka',
                         laatija    = '{$kukarow['kuka']}',
                         luontiaika = now(),
                         muutospvm  = now(),

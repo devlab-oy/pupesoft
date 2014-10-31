@@ -642,9 +642,34 @@ while ($tietue = fgets($fd)) {
       and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
       and count($verkkokauppa_erikoiskasittely) > 0) {
 
-      $result = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
-      if (count($result) > 0) {
+      $e_parametrit = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+      if (count($e_parametrit) > 0) {
         $tieto = $ot_verkkokauppa_asiakasnro;
+
+        $verkkokauppamyyjanro = $e_parametrit[3];
+        // Haetaan asiakasta magento_id:llä avainsanoista
+        if (!is_array($arow)) {
+          $edi_ulos .= t("Tilaava asiakas (magento_id)")." $tieto -> ";
+
+          $query = "SELECT asiakas.*
+                    FROM asiakas
+                    JOIN asiakkaan_avainsanat ON asiakas.yhtio = asiakkaan_avainsanat.yhtio
+                      AND asiakas.tunnus                 = asiakkaan_avainsanat.liitostunnus
+                      AND asiakkaan_avainsanat.avainsana = 'magento_tunnus'
+                      AND asiakkaan_avainsanat.tarkenne  = '{$ot_verkkokauppa_asiakasnro}'
+                    WHERE asiakas.yhtio                  = '{$kukarow['yhtio']}'
+                    AND asiakas.toim_ovttunnus           not in ('','0')
+                    AND asiakas.laji                     not in ('R','P')";
+          $result = pupe_query($query);
+
+          if (mysql_num_rows($result) == 1) {
+            $arow = mysql_fetch_assoc($result);
+            // Jos myyjänumero on spesifioitu $verkkokauppa_erikoiskasittelyyn, käytetään sitä
+            if (!empty($verkkokauppamyyjanro)) $arow['myyjanro'] = $verkkokauppamyyjanro;
+            $vastaustapa .= $arow['tilausvahvistus'];
+            $edi_ulos .= "$arow[nimi] $arow[nimitark] $arow[toim_nimi] $arow[toim_nimitark] $arow[toim_postitp]\n";
+          }
+        }
       }
     }
 
@@ -906,6 +931,18 @@ while ($tietue = fgets($fd)) {
     break;
 
   case 'OSTOTIL.OT_MAKSETTU' :
+    // Jos Magenton tilaus ja osutaan erikoiskauppakäsittelyyn
+    if ($edi_tyyppi == 'magento' and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
+       and count($verkkokauppa_erikoiskasittely) > 0) {
+
+       $result = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+       if (count($result) > 0) {
+         // Tyhjätään tämä ja haetaan maksuehto myöhemmin asiakkaan takaa
+         $tieto = '';
+         break;
+       }
+    }
+
     // jos Magenton tilaus on jo maksettu luottokortilla niin päivitetään maksuehto
     if ($edi_tyyppi == "magento" and ($tieto == 'processing' or $tieto == 'complete')) {
       $kukarow["kassamyyja"] = "";
@@ -1213,12 +1250,13 @@ while ($tietue = fgets($fd)) {
       if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
         and count($verkkokauppa_erikoiskasittely) > 0) {
 
-        list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa) = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+        list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa, $editilaus_myyja) = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
         // Jos löytyy erikoiskäsittely niin näytetään se myös käyttöliittymässä
         if (isset($nimi) and !empty($nimi)) {
           $edi_ulos .= t("Tilauksen erikoiskäsittely")."-> {$nimi},
               ".t("tilaustyyppi").": {$editilaus_tilaustyyppi},
-              ".t("tilaustyyppilisä").": {$tilaustyyppilisa} \n\n";
+              ".t("tilaustyyppilisä").": {$tilaustyyppilisa},
+              ".t("myyjänumero").": {$editilaus_myyja} \n\n";
         }
       }
 

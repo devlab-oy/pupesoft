@@ -92,7 +92,7 @@ if ($tee != '') {
             {$rivityyppilisa}
             and tilausrivi.var     not in ('P','J','O','S')
             and tilausrivi.tilkpl  <> IF(
-              tilausrivi.tyyppi = 'G',
+              tilausrivi.tyyppi    = 'G',
               tilausrivi.kpl + tilausrivi.varattu,
               tilausrivi.kpl
             )

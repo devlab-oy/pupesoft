@@ -86,8 +86,8 @@ function hae_asiakas_vahvistusta_varten($tunnus) {
   $query  = "SELECT gsm,
              email
              FROM  asiakas
-             WHERE yhtio   = '{$kukarow['yhtio']}'
-             AND   tunnus  = '{$tunnus}'";
+             WHERE yhtio  = '{$kukarow['yhtio']}'
+             AND   tunnus = '{$tunnus}'";
   $result = pupe_query($query);
 
   $asiakas = mysql_fetch_assoc($result);
@@ -130,8 +130,8 @@ function loytyy_jt_riveja($tilausnumero) {
             FROM tilausrivi
             INNER JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
               AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
-            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-            AND tilausrivi.otunnus = '{$tilausnumero}'";
+            WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
+            AND tilausrivi.otunnus  = '{$tilausnumero}'";
 
   $result = pupe_query($query);
 

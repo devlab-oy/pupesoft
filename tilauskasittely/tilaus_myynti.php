@@ -4811,12 +4811,12 @@ if ($tee == '') {
     $query_ale_lisa = generoi_alekentta('M');
 
     $query = "SELECT sum(round(
-                hinta * (varattu+jt+kpl) * {$query_ale_lisa},
-                {$yhtiorow['hintapyoristys']}
+              hinta * (varattu+jt+kpl) * {$query_ale_lisa},
+              {$yhtiorow['hintapyoristys']}
               )) rivihinta
               FROM tilausrivi
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tyyppi = 'L'
+              AND tyyppi  = 'L'
               AND otunnus = '{$laskurow['tunnus']}'";
     $_tilauksen_rivihinnat_res = pupe_query($query);
     $_tilauksen_rivihinnat_row = mysql_fetch_assoc($_tilauksen_rivihinnat_res);
@@ -4826,9 +4826,9 @@ if ($tee == '') {
       $_tilauksen_rivihinnat_row['rivihinta'] = (float) $_tilauksen_rivihinnat_row['rivihinta'];
 
       $query = "UPDATE lasku SET
-                luottoraja = {$_avoimia_yhteensa} - {$_tilauksen_rivihinnat_row['rivihinta']}
+                luottoraja  = {$_avoimia_yhteensa} - {$_tilauksen_rivihinnat_row['rivihinta']}
                 WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus = '{$laskurow['tunnus']}'";
+                AND tunnus  = '{$laskurow['tunnus']}'";
       $upd_res = pupe_query($query);
 
       $laskurow['luottoraja'] = $_avoimia_yhteensa - $_tilauksen_rivihinnat_row['rivihinta'];
@@ -4863,8 +4863,8 @@ if ($tee == '') {
 
     $query = "UPDATE lasku SET
               erapaivan_ylityksen_summa = '{$ylivito}'
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus = '{$laskurow['tunnus']}'";
+              WHERE yhtio               = '{$kukarow['yhtio']}'
+              AND tunnus                = '{$laskurow['tunnus']}'";
     $upd_res = pupe_query($query);
 
     $laskurow['erapaivan_ylityksen_summa'] = $ylivito;
@@ -4905,8 +4905,8 @@ if ($tee == '') {
 
       $query = "SELECT luottoraja
                 FROM asiakas
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                and tunnus = '{$laskurow['liitostunnus']}'
+                WHERE yhtio     = '{$kukarow['yhtio']}'
+                and tunnus      = '{$laskurow['liitostunnus']}'
                 AND luottoraja != 0";
       $asresult = pupe_query($query);
       $asrow = mysql_fetch_assoc($asresult);
@@ -4916,14 +4916,14 @@ if ($tee == '') {
         $query_ale_lisa = generoi_alekentta('M');
 
         $query = "SELECT sum(round(
-                hinta * (varattu+jt+kpl) * {$query_ale_lisa},
-                {$yhtiorow['hintapyoristys']}
-              )) rivihinta
-              FROM tilausrivi
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tyyppi = 'L'
-              AND var != 'P'
-              AND otunnus = '{$laskurow['tunnus']}'";
+                  hinta * (varattu+jt+kpl) * {$query_ale_lisa},
+                  {$yhtiorow['hintapyoristys']}
+                  )) rivihinta
+                  FROM tilausrivi
+                  WHERE yhtio  = '{$kukarow['yhtio']}'
+                  AND tyyppi   = 'L'
+                  AND var     != 'P'
+                  AND otunnus  = '{$laskurow['tunnus']}'";
         $tilauksen_rivihinnat_res = pupe_query($query);
         $tilauksen_rivihinnat_row = mysql_fetch_assoc($tilauksen_rivihinnat_res);
 

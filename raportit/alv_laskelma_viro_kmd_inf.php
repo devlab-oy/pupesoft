@@ -179,30 +179,30 @@ if ($tee == 'laskelma') {
   if ($_rajaa_chk) {
 
     $query = "SELECT lasku.ytunnus
-          FROM lasku
-          JOIN tiliointi ON (
-            tiliointi.yhtio = lasku.yhtio AND
-            tiliointi.ltunnus = lasku.tunnus AND
-            tiliointi.korjattu = '' AND
-            tiliointi.tapvm    >= '{$alkupvm}' AND
-            tiliointi.tapvm    <= '{$loppupvm}' AND
-            tiliointi.tilino in ({$tilirow['tilitMUU']})
-            {$verolisa}
-          )
-          WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-          {$tilat}
-          {$tilaustyyppi}
-          GROUP BY 1
-          HAVING abs(sum(if(
-            (tiliointi.summa + (tiliointi.summa * vero / 100)) > 0,
-            (tiliointi.summa + (tiliointi.summa * vero / 100)),
-            0
-          ))) < {$rajaa}
-          AND abs(sum(if(
-            (tiliointi.summa + (tiliointi.summa * vero / 100)) < 0,
-            (tiliointi.summa + (tiliointi.summa * vero / 100)),
-            0
-          ))) < {$rajaa}";
+              FROM lasku
+              JOIN tiliointi ON (
+                tiliointi.yhtio    = lasku.yhtio AND
+                tiliointi.ltunnus  = lasku.tunnus AND
+                tiliointi.korjattu = '' AND
+                tiliointi.tapvm    >= '{$alkupvm}' AND
+                tiliointi.tapvm    <= '{$loppupvm}' AND
+                tiliointi.tilino   in ({$tilirow['tilitMUU']})
+                {$verolisa}
+              )
+              WHERE lasku.yhtio    = '{$kukarow['yhtio']}'
+              {$tilat}
+              {$tilaustyyppi}
+              GROUP BY 1
+              HAVING abs(sum(if(
+                (tiliointi.summa + (tiliointi.summa * vero / 100)) > 0,
+                (tiliointi.summa + (tiliointi.summa * vero / 100)),
+                0
+              ))) < {$rajaa}
+              AND abs(sum(if(
+                (tiliointi.summa + (tiliointi.summa * vero / 100)) < 0,
+                (tiliointi.summa + (tiliointi.summa * vero / 100)),
+                0
+              ))) < {$rajaa}";
     $result = pupe_query($query);
 
     $_exclude_asiakkaat = array();
@@ -221,11 +221,11 @@ if ($tee == 'laskelma') {
             sum(round(tiliointi.summa * vero / 100, 2)) veronmaara,
             sum(tiliointi.summa) summa
             FROM tiliointi
-            WHERE tiliointi.yhtio = '{$kukarow['yhtio']}'
+            WHERE tiliointi.yhtio  = '{$kukarow['yhtio']}'
             AND tiliointi.korjattu = ''
             AND tiliointi.tapvm    >= '{$alkupvm}'
             AND tiliointi.tapvm    <= '{$loppupvm}'
-            AND tiliointi.tilino in ({$tilirow['tilitMUU']})
+            AND tiliointi.tilino   in ({$tilirow['tilitMUU']})
             {$verolisa}
             GROUP BY 1";
   $result = pupe_query($query);
@@ -338,7 +338,7 @@ if ($tee == 'laskelma') {
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               {$tilat}
               {$tilaustyyppi}
-              AND lasku.tunnus = '{$row['ltunnus']}'
+              AND lasku.tunnus  = '{$row['ltunnus']}'
               {$rajaalisa}";
     $laskures = pupe_query($query);
     $laskurow = mysql_fetch_assoc($laskures);
@@ -346,10 +346,10 @@ if ($tee == 'laskelma') {
     if (!empty($laskurow['tunnus']) and $laskelma == 'a') {
       $query = "SELECT round(sum(rivihinta), {$yhtiorow['hintapyoristys']}) rivihinta_summa
                 FROM tilausrivi
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND uusiotunnus = '{$laskurow['tunnus']}'
-                AND var NOT IN ('P','J','O','S')
-                AND tyyppi != 'D'";
+                WHERE yhtio      = '{$kukarow['yhtio']}'
+                AND uusiotunnus  = '{$laskurow['tunnus']}'
+                AND var          NOT IN ('P','J','O','S')
+                AND tyyppi      != 'D'";
       $_tilsum_res = pupe_query($query);
       $_tilsum_row = mysql_fetch_assoc($_tilsum_res);
 
@@ -372,11 +372,11 @@ if ($tee == 'laskelma') {
 
     if ($laskelma == 'a') {
 
-      $query = "  SELECT tunnus
-                  FROM asiakas
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = '{$laskurow['liitostunnus']}'
-                  AND laji = 'H'";
+      $query = "SELECT tunnus
+                FROM asiakas
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$laskurow['liitostunnus']}'
+                AND laji    = 'H'";
       $asiakasres = pupe_query($query);
 
       if (mysql_num_rows($asiakasres) != 0) $aineistoon = $_red;

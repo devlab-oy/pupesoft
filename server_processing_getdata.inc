@@ -91,20 +91,20 @@ if (isset($aExtraColumns) and count($aExtraColumns) > 0) {
  * SQL queries
  * Get data to display
  */
-$sQuery = "  SELECT SQL_CALC_FOUND_ROWS ".str_replace(" , ", " ", implode(", ", $selectColumns))."
-      FROM $sTable {$sIndex}
-      WHERE yhtio = '{$kukarow['yhtio']}'
-      $sWhere
-      $sOrder
-      $sLimit";
+$sQuery = "SELECT SQL_CALC_FOUND_ROWS ".str_replace(" , ", " ", implode(", ", $selectColumns))."
+           FROM $sTable {$sIndex}
+           WHERE yhtio = '{$kukarow['yhtio']}'
+           $sWhere
+           $sOrder
+           $sLimit";
 $rResult = pupe_query($sQuery);
 
 /* Data set length after filtering */
 $iFilteredTotal = mysql_num_rows($rResult);
 
 /* Total data set length */
-$sQuery = " SELECT COUNT('".$sIndexColumn."')
-      FROM $sTable";
+$sQuery = "SELECT COUNT('".$sIndexColumn."')
+           FROM $sTable";
 $rResultTotal = pupe_query($sQuery);
 $aResultTotal = mysql_fetch_array($rResultTotal);
 

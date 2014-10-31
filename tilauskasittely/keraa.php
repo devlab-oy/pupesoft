@@ -2066,9 +2066,9 @@ if ($tee == 'P') {
         if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
           $query = "UPDATE lasku
                     SET alatila = 'B'
-                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    WHERE yhtio  = '{$kukarow['yhtio']}'
                     AND alatila != 'X'
-                    AND tunnus  IN ({$tilausnumeroita_backup})";
+                    AND tunnus   IN ({$tilausnumeroita_backup})";
           $alatila_upd_res = pupe_query($query);
         }
 

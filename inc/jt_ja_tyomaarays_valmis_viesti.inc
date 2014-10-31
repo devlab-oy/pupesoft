@@ -5,13 +5,15 @@
  * jos sellainen löytyy. Toistaiseksi ainut tuettu palvelu on Zoner. Lähettää myös sähköpostin, jos
  * asiakkaalta sellainen löytyy
  *
- * @param string $username Zonerin käyttäjätunnus
- * @param string $salasana Zonerin salasana
- * @param int    $tilausnumero
- * @param bool   $kerattu Onko kaikki tilauksen rivit jo kerätty
+ * @param string  $username     Zonerin käyttäjätunnus
+ * @param string  $salasana     Zonerin salasana
+ * @param int     $tilausnumero
+ * @param bool    $kerattu      Onko kaikki tilauksen rivit jo kerätty
  *
  * @return bool Jos tekstiviestin tai sähköpostin lähetys onnistui, palauttaa true
  */
+
+
 function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $kerattu = false) {
   global $yhtiorow;
 

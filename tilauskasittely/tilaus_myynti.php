@@ -4841,10 +4841,10 @@ if ($tee == '') {
     if ($luottorajavirhe != '') {
 
       echo "<br/>";
-      echo "<font class='error'>", t("HUOM: Luottoraja ylittynyt"),"</font>";
+      echo "<font class='error'>", t("HUOM: Luottoraja ylittynyt"), "</font>";
 
       if ($yhtiorow['luottorajan_ylitys'] != '') {
-        echo ", <font class='error'>", t("ota yhteys luotonvalvontaan tai mitätöi myyntitilaus"),"!";
+        echo ", <font class='error'>", t("ota yhteys luotonvalvontaan tai mitätöi myyntitilaus"), "!";
         echo " ", t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"), ".";
         echo "</font><br />";
       }
@@ -4875,7 +4875,7 @@ if ($tee == '') {
       echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s päivää sitten erääntyneitä laskuja, olkaa ystävällinen ja ottakaa yhteyttä myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."</font>!";
 
       if ($yhtiorow['erapaivan_ylityksen_toimenpide'] != '') {
-        echo " <font class='error'>",t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"),".";
+        echo " <font class='error'>", t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"), ".";
         echo "</font>";
         echo "<br/>";
       }
@@ -4931,10 +4931,10 @@ if ($tee == '') {
 
           $luottorajavirhe = 'kyllä';
           echo "<br/>";
-          echo "<font class='error'>", t("HUOM: Luottoraja ylittynyt"),"</font>";
+          echo "<font class='error'>", t("HUOM: Luottoraja ylittynyt"), "</font>";
 
           if ($yhtiorow['luottorajan_ylitys'] != '') {
-            echo ", <font class='error'>", t("ota yhteys luotonvalvontaan tai mitätöi myyntitilaus"),"!";
+            echo ", <font class='error'>", t("ota yhteys luotonvalvontaan tai mitätöi myyntitilaus"), "!";
             echo " ", t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"), ".";
             echo "</font><br />";
           }
@@ -4956,7 +4956,7 @@ if ($tee == '') {
       echo "<font class='error'>".t("HUOM: Asiakkaalla on yli %s päivää sitten erääntyneitä laskuja, olkaa ystävällinen ja ottakaa yhteyttä myyntireskontran hoitajaan", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja'])."</font>!";
 
       if ($yhtiorow['erapaivan_ylityksen_toimenpide'] != '') {
-        echo " <font class='error'>",t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"),".";
+        echo " <font class='error'>", t("Asiakkaalle voi kuitenkin myydä käteismaksuehdolla"), ".";
         echo "</font>";
         echo "<br/>";
       }
@@ -4981,8 +4981,8 @@ if ($tee == '') {
 
       $_chk = array($valmiste_vai_raakaaine => 'checked') + array('raakaaine' => '', 'valmiste' => '');
 
-      echo t("Raaka-aine")," <input type='radio' name='valmiste_vai_raakaaine' value='raakaaine' {$_chk['raakaaine']} /> ";
-      echo t("Valmiste")," <input type='radio' name='valmiste_vai_raakaaine' value='valmiste' {$_chk['valmiste']} />";
+      echo t("Raaka-aine"), " <input type='radio' name='valmiste_vai_raakaaine' value='raakaaine' {$_chk['raakaaine']} /> ";
+      echo t("Valmiste"), " <input type='radio' name='valmiste_vai_raakaaine' value='valmiste' {$_chk['valmiste']} />";
     }
 
     require "syotarivi.inc";
@@ -7629,7 +7629,7 @@ if ($tee == '') {
             and $row["status"] != 'P'
             and $row["status"] != 'X'
             and !$_luottoraja_ylivito
-            ) {
+          ) {
 
             echo "<br />";
 
@@ -9528,7 +9528,7 @@ if ($tee == '') {
         echo "</form>";
       }
 
-      if ($yhtiorow['myyntitilaus_tarjoukseksi'] == 'K' and in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) and $laskurow['tila'] == 'N' and in_array($laskurow['alatila'], array('','F')) and tarkista_oikeus("tilaus_myynti.php", "TARJOUS")) {
+      if ($yhtiorow['myyntitilaus_tarjoukseksi'] == 'K' and in_array($toim, array('RIVISYOTTO', 'PIKATILAUS')) and $laskurow['tila'] == 'N' and in_array($laskurow['alatila'], array('', 'F')) and tarkista_oikeus("tilaus_myynti.php", "TARJOUS")) {
         echo "  <br><br><form action='' method='post'>
             <input type='hidden' name='toim' value='{$toim}'>
             <input type='hidden' name='tilausnumero' value='{$tilausnumero}'>

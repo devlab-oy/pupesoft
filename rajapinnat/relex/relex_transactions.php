@@ -220,7 +220,7 @@ if ($kuukausi_ajo) {
   $datetime_checkpoint_uusi = "$vuosi-$kuukausi-$vikapaiva 23:59:59";
 
   if (strtotime($datetime_checkpoint_uusi) > strtotime(date('Y-m-d H:i:s'))) {
-   $datetime_checkpoint_uusi = date('Y-m-d H:i:s');
+    $datetime_checkpoint_uusi = date('Y-m-d H:i:s');
   }
 }
 else {
@@ -246,7 +246,7 @@ echo "Tapahtumarivejä {$rows} kappaletta.\n";
 $relex_transactions = array();
 
 while ($row = mysql_fetch_assoc($res)) {
-    $relex_transactions[] = $row;
+  $relex_transactions[] = $row;
 }
 
 $k_rivi = 0;

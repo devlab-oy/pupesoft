@@ -11,8 +11,8 @@ if (php_sapi_name() != 'cli') {
 error_reporting(E_ALL);
 ini_set("display_errors", 1);
 
-require ("inc/connect.inc");
-require ("inc/functions.inc");
+require "inc/connect.inc";
+require "inc/functions.inc";
 
 // Logitetaan ajo
 cron_log();
@@ -30,9 +30,9 @@ $haku = date("d.m");
 
 // Ajopäivämääräluokat
 $arvot = array(1 => array('pvm1'=>'01.01', 'pvm2'=>'',      'pvm3'=>'',      'pvm4'=>''),
-               2 => array('pvm1'=>'01.01', 'pvm2'=>'01.07', 'pvm3'=>'',      'pvm4'=>''),
-               3 => array('pvm1'=>'01.01', 'pvm2'=>'01.05', 'pvm3'=>'01.09', 'pvm4'=>''),
-               4 => array('pvm1'=>'01.01', 'pvm2'=>'01.04', 'pvm3'=>'01.07', 'pvm4'=>'01.10'));
+  2 => array('pvm1'=>'01.01', 'pvm2'=>'01.07', 'pvm3'=>'',      'pvm4'=>''),
+  3 => array('pvm1'=>'01.01', 'pvm2'=>'01.05', 'pvm3'=>'01.09', 'pvm4'=>''),
+  4 => array('pvm1'=>'01.01', 'pvm2'=>'01.04', 'pvm3'=>'01.07', 'pvm4'=>'01.10'));
 $syklit = "";
 
 foreach ($arvot as $nro => $arr) {
@@ -109,7 +109,7 @@ if (trim($syklit) != "") {
 
           $meili = t("Toimittajien hinnantarkistuspyyntö")."\n";
           $meili .= "\nTervehdys {$posti["nimi"]} \n\n";
-          $meili .= t("Pyyntö").":\n".str_replace("\r\n","\n","Tarkista seuraavilta toimittajilta hinnat Pupesoftiin\n");
+          $meili .= t("Pyyntö").":\n".str_replace("\r\n", "\n", "Tarkista seuraavilta toimittajilta hinnat Pupesoftiin\n");
           $meili .= $lista;
 
           if ($posti['eposti'] == "") {

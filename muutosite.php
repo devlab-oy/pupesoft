@@ -1213,7 +1213,7 @@ if ($tee == 'E' or $tee == 'F') {
 
     $_kirjanpidollinen_varastosiirto = ($yhtiorow['kirjanpidollinen_varastosiirto_myyntitilaukselta'] == 'K');
 
-    if ($_kirjanpidollinen_varastosiirto AND $trow['tila'] == "U") {
+    if ($_kirjanpidollinen_varastosiirto and $trow['tila'] == "U") {
 
       $query = "SELECT varastosiirto_tunnus
                 FROM lasku

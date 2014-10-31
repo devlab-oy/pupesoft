@@ -3251,8 +3251,8 @@ function hae_suljetut_lahdot($toimitustavan_tunnukset, $ajax_request) {
             JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio
               AND toimitustapa.selite       = lasku.toimitustapa
               AND toimitustapa.tunnus       IN (".($ajax_request == 1 ?
-            $toimitustavan_tunnukset :
-            implode(',', $toimitustavan_tunnukset))."))
+    $toimitustavan_tunnukset :
+    implode(',', $toimitustavan_tunnukset))."))
             WHERE lahdot.yhtio              = '{$kukarow['yhtio']}'
             AND lahdot.aktiivi              = 'S'
             AND lahdot.pvm                  > date_sub(now(), INTERVAL 14 day)

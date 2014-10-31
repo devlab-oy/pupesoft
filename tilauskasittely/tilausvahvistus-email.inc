@@ -396,7 +396,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
   }
 
   if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
-   
+
     // Sähköpostin lähetykseen parametrit
     $parametri = array(
       "to"           => $kukarow['eposti'],

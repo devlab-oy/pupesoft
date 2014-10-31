@@ -1211,7 +1211,7 @@ else {
           $gluku++;
 
           if ($rajaus[$i] != "") {
-            $lisa .= " and lasku.clearing='{$rajaus[$i]}' ";
+            $lisa .= " and lasku.tilaustyyppi='{$rajaus[$i]}' ";
           }
           $laskugroups++;
         }

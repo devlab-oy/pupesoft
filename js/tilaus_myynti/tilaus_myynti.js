@@ -131,6 +131,12 @@ function Hinta_laskuri(perheid, raakaaineiden_kehahinta_summa, valmisteiden_pain
 
       $input.val(_val);
 
+      if ($input.val() < 0) {
+        $input.val(vanha_arvo);
+        alert('Hinta ei saa olla negatiivinen');
+        return;
+      }
+
       // Jos hinnat menevät yli tai ali, palauta vanha arvo ja infoa käyttäjää.
       if (me.tarkista_hinnat()===false) {
         $input.val(vanha_arvo);

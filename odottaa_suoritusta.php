@@ -11,6 +11,9 @@ ini_set("display_errors", 0);
 require_once 'inc/connect.inc';
 require_once 'inc/functions.inc';
 
+// Logitetaan ajo
+cron_log();
+
 /*
  * HOW TO:
  *

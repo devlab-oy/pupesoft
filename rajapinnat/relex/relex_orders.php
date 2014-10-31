@@ -25,6 +25,9 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(d
 require 'inc/connect.inc';
 require 'inc/functions.inc';
 
+// Logitetaan ajo
+cron_log();
+
 $ajopaiva  = date("Y-m-d");
 $paiva_ajo = FALSE;
 
@@ -41,6 +44,10 @@ $yhtio = mysql_real_escape_string($argv[1]);
 
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
+
+$tuoterajaus = " AND tuote.status not in ('P','E')
+                 AND tuote.ei_saldoa    = ''
+                 AND tuote.tuotetyyppi  = '' ";
 
 // Tallennetaan rivit tiedostoon
 $filepath = "/tmp/input_orders_{$yhtio}_$ajopaiva.csv";
@@ -78,89 +85,80 @@ function add_open_orders_line($fp, $row) {
 
 // Haetaan avoimet ostot : myynnit ja kulutukset : varastosiirrot ja valmistukset
 $query = "(SELECT
-           tilausrivi.laadittu,
-           yhtio.maa,
-           tilausrivi.varasto,
-           tilausrivi.tuoteno,
-           tilausrivi.tyyppi,
-           tilausrivi.varattu maara,
-           tilausrivi.toimaika toimituspaiva,
-           tilausrivi.keratty,
-           lasku.liitostunnus partner,
-           '' vastaanottovarasto,
-           '' sisainen_siirto
-           FROM tilausrivi USE INDEX (yhtio_tyyppi_laskutettuaika)
-           JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-           JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
-             AND tuote.tuoteno            = tilausrivi.tuoteno
-             AND tuote.status            != 'P'
-             AND tuote.ei_saldoa          = ''
-             AND tuote.tuotetyyppi        = ''
-             AND tuote.ostoehdotus        = '')
-           JOIN yhtio ON (tilausrivi.yhtio = yhtio.yhtio)
-           WHERE tilausrivi.yhtio         = '$yhtio'
-           AND tilausrivi.varattu        != 0
-           AND tilausrivi.tyyppi          = 'O'
-           AND tilausrivi.laskutettuaika  = 0)
+          tilausrivi.laadittu,
+          yhtio.maa,
+          tilausrivi.varasto,
+          tilausrivi.tuoteno,
+          tilausrivi.tyyppi,
+          tilausrivi.varattu maara,
+          tilausrivi.toimaika toimituspaiva,
+          tilausrivi.keratty,
+          lasku.liitostunnus partner,
+          '' vastaanottovarasto,
+          '' sisainen_siirto
+          FROM tilausrivi USE INDEX (yhtio_tyyppi_laskutettuaika)
+          JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+          JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
+            AND tuote.tuoteno = tilausrivi.tuoteno
+            {$tuoterajaus})
+          JOIN yhtio ON (tilausrivi.yhtio = yhtio.yhtio)
+          WHERE tilausrivi.yhtio         = '$yhtio'
+          AND tilausrivi.varattu        != 0
+          AND tilausrivi.tyyppi          = 'O'
+          AND tilausrivi.laskutettuaika  = 0)
 
-           UNION
+          UNION
 
-           (SELECT
-           tilausrivi.laadittu,
-           yhtio.maa,
-           tilausrivi.varasto,
-           tilausrivi.tuoteno,
-           tilausrivi.tyyppi,
-           tilausrivi.varattu+tilausrivi.jt maara,
-           tilausrivi.toimaika toimituspaiva,
-           tilausrivi.keratty,
-           lasku.liitostunnus partner,
-           '' vastaanottovarasto,
-           '' sisainen_siirto
-           FROM tilausrivi USE INDEX (yhtio_tyyppi_kerattyaika)
-           JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-           JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
-             AND tuote.tuoteno            = tilausrivi.tuoteno
-             AND tuote.status            != 'P'
-             AND tuote.ei_saldoa          = ''
-             AND tuote.tuotetyyppi        = ''
-             AND tuote.ostoehdotus        = '')
-           JOIN yhtio ON (tilausrivi.yhtio = yhtio.yhtio)
-           WHERE tilausrivi.yhtio         = '$yhtio'
-           AND tilausrivi.varattu        != 0
-           AND tilausrivi.tyyppi          in ('L','V')
-           AND tilausrivi.kerattyaika     = 0)
+          (SELECT
+          tilausrivi.laadittu,
+          yhtio.maa,
+          tilausrivi.varasto,
+          tilausrivi.tuoteno,
+          tilausrivi.tyyppi,
+          tilausrivi.varattu+tilausrivi.jt maara,
+          tilausrivi.toimaika toimituspaiva,
+          tilausrivi.keratty,
+          lasku.liitostunnus partner,
+          '' vastaanottovarasto,
+          '' sisainen_siirto
+          FROM tilausrivi USE INDEX (yhtio_tyyppi_kerattyaika)
+          JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+          JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
+            AND tuote.tuoteno = tilausrivi.tuoteno
+            {$tuoterajaus})
+          JOIN yhtio ON (tilausrivi.yhtio = yhtio.yhtio)
+          WHERE tilausrivi.yhtio         = '$yhtio'
+          AND tilausrivi.varattu        != 0
+          AND tilausrivi.tyyppi          in ('L','V')
+          AND tilausrivi.kerattyaika     = 0)
 
-           UNION
+          UNION
 
-           (SELECT
-           tilausrivi.laadittu,
-           yhtio.maa,
-           tilausrivi.varasto,
-           tilausrivi.tuoteno,
-           tilausrivi.tyyppi,
-           tilausrivi.varattu+tilausrivi.jt maara,
-           tilausrivi.toimaika toimituspaiva,
-           tilausrivi.keratty,
-           lasku.liitostunnus partner,
-           lasku.clearing vastaanottovarasto,
-           if (tilausrivi.tyyppi = 'G' and tilausrivi.varasto = lasku.clearing, 1, 0) sisainen_siirto
-           FROM tilausrivi USE INDEX (yhtio_tyyppi_toimitettuaika)
-           JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-           JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
-             AND tuote.tuoteno            = tilausrivi.tuoteno
-             AND tuote.status            != 'P'
-             AND tuote.ei_saldoa          = ''
-             AND tuote.tuotetyyppi        = ''
-             AND tuote.ostoehdotus        = '')
-           JOIN yhtio ON (tilausrivi.yhtio = yhtio.yhtio)
-           WHERE tilausrivi.yhtio         = '$yhtio'
-           AND tilausrivi.varattu        != 0
-           AND tilausrivi.tyyppi          in ('G','W','M')
-           AND tilausrivi.toimitettuaika  = 0
-           HAVING sisainen_siirto = 0)
+          (SELECT
+          tilausrivi.laadittu,
+          yhtio.maa,
+          tilausrivi.varasto,
+          tilausrivi.tuoteno,
+          tilausrivi.tyyppi,
+          tilausrivi.varattu+tilausrivi.jt maara,
+          tilausrivi.toimaika toimituspaiva,
+          tilausrivi.keratty,
+          lasku.liitostunnus partner,
+          lasku.clearing vastaanottovarasto,
+          if (tilausrivi.tyyppi = 'G' and tilausrivi.varasto = lasku.clearing, 1, 0) sisainen_siirto
+          FROM tilausrivi USE INDEX (yhtio_tyyppi_toimitettuaika)
+          JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+          JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
+            AND tuote.tuoteno = tilausrivi.tuoteno
+            {$tuoterajaus})
+          JOIN yhtio ON (tilausrivi.yhtio = yhtio.yhtio)
+          WHERE tilausrivi.yhtio         = '$yhtio'
+          AND tilausrivi.varattu        != 0
+          AND tilausrivi.tyyppi          in ('G','W','M')
+          AND tilausrivi.toimitettuaika  = 0
+          HAVING sisainen_siirto = 0)
 
-           ORDER BY laadittu";
+          ORDER BY laadittu";
 $res = pupe_query($query);
 
 // Kerrotaan montako rivi‰ k‰sitell‰‰n

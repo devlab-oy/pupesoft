@@ -19,6 +19,9 @@ ini_set("display_errors", 0);
 require "inc/connect.inc";
 require "inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
+
 $yhtio = $argv[1];
 $varastot = array_slice($argv, 2);
 
@@ -30,6 +33,7 @@ if (empty($yhtio) or empty($varastot)) {
 $oikeurow = array(
   'paivitys' => 1
 );
+
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow = hae_kukarow('admin', $yhtio);
 

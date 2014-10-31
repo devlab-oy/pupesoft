@@ -161,6 +161,9 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
       }
 
       rename($ftpget_dest[$operaattori]."/".$file, $ftpget_dest[$operaattori]."/ok/".$file);
+
+      // Logitetaan ajo
+      cron_log($ftpget_dest[$operaattori]."/ok/".$file);
     }
   }
 }

@@ -24,6 +24,28 @@ if (isset($ajax_request) and file_exists("inc/{$toim}_ajax.inc")) {
   require "inc/{$toim}_ajax.inc";
 }
 
+$psx_ohjelmat = array(
+  "valuu" => "{$palvelin2}pupenext/currencies",
+);
+
+if (array_key_exists($toim, $psx_ohjelmat)) {
+
+  $psx_url = $psx_ohjelmat[$toim];
+
+  echo "<font class='head'>",t("Virhe"),"</font><hr>";
+
+  echo "<br />";
+
+  echo "<a href='{$psx_url}'>";
+  echo t("%s ylläpito on siirtynyt uuteen ympäristöön", '', $toim);
+  echo " &raquo;</a>";
+
+  echo "<br />";
+
+  require "inc/footer.inc";
+  exit;
+}
+
 if (function_exists("js_popup") and !isset($ajax_request)) {
   echo js_popup(-100);
 }
@@ -2469,7 +2491,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     }
   }
 
-  // M‰‰ritell‰‰n mit‰ tietueita saa poistaa
+  // Määritellään mitä tietueita saa poistaa
   if ($saako_poistaa or
     $toim == "auto_vari" or
     $toim == "auto_vari_tuote" or

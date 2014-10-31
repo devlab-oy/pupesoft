@@ -242,9 +242,6 @@ if ($tila == 'tulostakuitti') {
       $line = exec("$tulostakuitti $pdffilenimi");
       echo "<font class='message'>".t("Kuittikopio (2 kpl) tulostettu").".</font><br>";
     }
-
-    //poistetaan tmp file samantien kuleksimasta...
-    $line = exec("rm -f $pdffilenimi");
   }
 
   // nollataan muuttujat niin ei mene mik‰‰n sekasin

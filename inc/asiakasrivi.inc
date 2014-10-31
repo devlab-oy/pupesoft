@@ -1033,6 +1033,26 @@ if (mysql_field_name($result, $i) == "lahetteen_jarjestys_suunta" or
   $jatko = 0;
 }
 
+if (mysql_field_name($result, $i) == "koontilahete_kollitiedot") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $selE = $trow[$i] == 'E' ? 'selected' : '';
+  $sel = array($trow[$i] => 'selected') + array('' => '', 'K' => '', 'P' => '');
+
+  $_msg_1 = "Keräysvahvistus/sähköinen lähete: Tuotteiden kollitiedot (SSCC)";
+  $_msg_2 = "Keräysvahvistus/sähköinen lähete: Tuotteiden kollitietoja (SSCC)";
+
+  $ulos .= "<option value = ''>".t("Yhtiön oletus")."</option>";
+  $ulos .= "<option value = 'K' {$sel['K']}>".t("%s näytetään", '', $_msg_1)."</option>";
+  $ulos .= "<option value = 'E' {$sel['E']}>".t("%s ei näytetä", '', $_msg_2)."</option>";
+
+  $ulos .= "</select>";
+  $ulos .=  "</td>";
+
+  $jatko = 0;
+}
+
 if (mysql_field_name($result, $i) == "extranet_tilaus_varaa_saldoa") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";

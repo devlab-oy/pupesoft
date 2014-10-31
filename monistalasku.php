@@ -923,12 +923,17 @@ if ($tee == "ETSILASKU") {
     if ($kommenttikentta) {
       $required = $kommenttikentta == "P" ? "required" : "";
 
-      echo "<textarea rows='3'
-                      cols='40'
-                      name='kommentti'
-                      minlength='20'
-                      placeholder='Nimi, puh ja email'
-                      {$required}>{$kommentti}</textarea>
+      $label_text = t("Asiakkaan yhteystiedot (Nimi, puh, email)");
+
+      echo "<label>{$label_text}
+              <br>
+              <textarea rows='3'
+                        cols='40'
+                        name='kommentti'
+                        minlength='20'
+                        placeholder='{$label_text}'
+                        {$required}>{$kommentti}</textarea>
+            </label>
             <br>";
     }
 

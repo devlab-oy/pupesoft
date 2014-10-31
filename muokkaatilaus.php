@@ -1010,7 +1010,7 @@ if ($toim == 'HYPER') {
                   * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl)
                   * {$query_ale_lisa}), 2) AS summa, ";
   }
-      
+
   $query .= "  $toimaikalisa alatila, tila, lasku.tunnus, lasku.mapvm, lasku.tilaustyyppi, lasku.varasto
         FROM lasku use index (tila_index)
         LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)
@@ -1104,7 +1104,7 @@ elseif ($toim == 'SUPER' or $toim == 'SUPERTEHDASPALAUTUKSET') {
                   * (tilausrivi.varattu + tilausrivi.jt + tilausrivi.kpl)
                   * {$query_ale_lisa}), 2) AS summa, ";
   }
-  
+
   $query .= "  $toimaikalisa alatila, tila, lasku.tunnus, lasku.mapvm, lasku.tilaustyyppi, lasku.label, lasku.varasto
         FROM lasku use index (tila_index)
         LEFT JOIN kuka as kuka1 ON (kuka1.yhtio = lasku.yhtio and kuka1.kuka = lasku.laatija)

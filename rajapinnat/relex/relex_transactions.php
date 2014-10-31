@@ -100,12 +100,12 @@ if (mysql_num_rows($datetime_checkpoint_res) != 1) {
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND laji    = 'RELEX_TRAN_CRON'";
   pupe_query($query);
-  
+
   $query = "INSERT INTO avainsana SET
             yhtio = '{$kukarow['yhtio']}',
             laji  = 'RELEX_TRAN_CRON'";
   pupe_query($query);
-  
+
   $datetime_checkpoint = "";
 }
 else {
@@ -126,10 +126,10 @@ elseif ($paiva_ajo) {
 }
 
 if ($kuukausi_ajo) {
-	
+
   // Kuukauden vika päivä
   $vikapaiva = date("t", mktime(0, 0, 0, $kuukausi, 1, $vuosi));
-	
+
   $tapahtumarajaus = " AND tapahtuma.laadittu >= '$vuosi-$kuukausi-01 00:00:00'
                        AND tapahtuma.laadittu <= '$vuosi-$kuukausi-$vikapaiva 23:59:59' ";
 
@@ -218,7 +218,7 @@ $res = pupe_query($query);
 
 if ($kuukausi_ajo) {
   $datetime_checkpoint_uusi = "$vuosi-$kuukausi-$vikapaiva 23:59:59";
-  
+
   if (strtotime($datetime_checkpoint_uusi) > strtotime(date('Y-m-d H:i:s'))) {
    $datetime_checkpoint_uusi = date('Y-m-d H:i:s');
   }

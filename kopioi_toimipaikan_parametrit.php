@@ -27,13 +27,13 @@ if ($tee == 'kopioi') {
     $kohdetoimipaikka = (int) $kohdetoimipaikka;
 
     $query = "DELETE FROM yhtion_toimipaikat_parametrit
-              WHERE yhtio = '{$kukarow['yhtio']}'
+              WHERE yhtio     = '{$kukarow['yhtio']}'
               AND toimipaikka = '{$kohdetoimipaikka}'";
     $res = pupe_query($query);
 
     $query = "SELECT *
               FROM yhtion_toimipaikat_parametrit
-              WHERE yhtio = '{$kukarow['yhtio']}'
+              WHERE yhtio     = '{$kukarow['yhtio']}'
               AND toimipaikka = '{$lahdetoimipaikka}'";
     $res = pupe_query($query);
 
@@ -92,7 +92,7 @@ echo "<table>";
 $query = "SELECT DISTINCT ytp.nimi, ytp.tunnus
           FROM yhtion_toimipaikat AS ytp
           JOIN yhtion_toimipaikat_parametrit AS ytpp ON (
-            ytpp.yhtio = ytp.yhtio AND ytpp.toimipaikka = ytp.tunnus
+            ytpp.yhtio    = ytp.yhtio AND ytpp.toimipaikka = ytp.tunnus
           )
           WHERE ytp.yhtio = '{$kukarow['yhtio']}'
           ORDER BY 1";

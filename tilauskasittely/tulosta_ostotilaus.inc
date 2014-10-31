@@ -657,8 +657,6 @@ else {
         }
 
         $tee = "";
-        //poistetaan tmp file samantien kuleksimasta...
-        system("rm -f $pdffilenimi");
       }
     }
   }

@@ -1,5 +1,12 @@
 <?php
 
+if (isset($_REQUEST["komento"]) and in_array("PDF_RUUDULLE", $_REQUEST["komento"])) {
+  $nayta_pdf = 1; //Generoidaan .pdf-file
+}
+else {
+  unset($nayta_pdf);
+}
+
 session_start();
 
 if (isset($_REQUEST['tulosta_maksusopimus']) and is_numeric(trim($_REQUEST['tulosta_maksusopimus']))) {
@@ -177,6 +184,11 @@ if (!isset($tuotteenpainotettukehayht)) $tuotteenpainotettukehayht = array();
 if (!isset($painotettukehayhteensa)) $painotettukehayhteensa = 0;
 if (!isset($hintojen_vaihto)) $hintojen_vaihto = "JOO";
 if (!isset($avaa_rekursiiviset)) $avaa_rekursiiviset = "";
+
+if (!isset($valmiste_vai_raakaaine)) {
+  $_cookie_isset = isset($_COOKIE["valmiste_vai_raakaaine"]);
+  $valmiste_vai_raakaaine = $_cookie_isset ? $_COOKIE["valmiste_vai_raakaaine"] : 'valmiste';
+}
 
 $rivitunnus_temp = $rivitunnus;
 
@@ -1420,6 +1432,8 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
       $tulostimet[0] = "Tarjous";
       require "inc/valitse_tulostin.inc";
     }
+
+    if (isset($nayta_pdf)) $tee = "NAYTATILAUS";
 
     require_once 'tulosta_tarjous.inc';
 
@@ -4181,64 +4195,82 @@ if ($tee == '') {
     }
   }
 
-  if ($kukarow["extranet"] == "" and $tila == 'MUUTAKAIKKI') {
-    if (!empty($tilausnumero)) {
+  $_ei_extranet = ($kukarow["extranet"] == "");
 
-      // Riippuen yhtiˆn parametrist‰, k‰sitell‰‰n jt eri tavalla
-      if ($yhtiorow["varaako_jt_saldoa"] == "") {
-        $updatelisa = "jt = if(var='P',tilkpl,if(var='J',jt,varattu)), varattu = 0,";
+  if ($_ei_extranet) {
+
+    $_varastoon_asiakkaalle = (in_array($toim, array('VALMISTAVARASTOON', 'VALMISTAASIAKKAALLE')));
+    $_tila_check = (!in_array($tila, array('LISAAKERTARESEPTIIN', 'LISAAISAKERTARESEPTIIN')));
+
+    if ($_varastoon_asiakkaalle and $_tila_check) {
+
+      if ($valmiste_vai_raakaaine == 'valmiste') {
+        $perheid2 = -100;
       }
       else {
-        $updatelisa = "varattu = if(var='P',tilkpl,varattu),";
+        $perheid2 = 0;
       }
-
-      $query = "UPDATE tilausrivi
-                SET $updatelisa
-                var         = 'J',
-                kerayspvm   = '".date('Y-m-d', strtotime('now + 3 month'))."'
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND otunnus = '{$tilausnumero}'";
-      pupe_query($query);
     }
-  }
 
-  //Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
-  if ($kukarow["extranet"] == "" and $tila == "LISAARESEPTIIN" and $teeperhe == "OK") {
-    $query = "UPDATE tilausrivi
-              SET perheid2 = '$isatunnus'
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tunnus  = '$isatunnus'";
-    $presult = pupe_query($query);
-    $perheid2 = $isatunnus;
-  }
+    if ($tila == 'MUUTAKAIKKI') {
+      if (!empty($tilausnumero)) {
 
-  //Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
-  if ($kukarow["extranet"] == "" and $tila == "LISAAKERTARESEPTIIN" and $teeperhe == "OK") {
-    $query = "UPDATE tilausrivi
-              SET
-              perheid     = '$isatunnus',
-              tyyppi      = 'W'
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tunnus  = '$isatunnus'";
-    $presult = pupe_query($query);
-    $perheid = $isatunnus;
-  }
+        // Riippuen yhtiˆn parametrist‰, k‰sitell‰‰n jt eri tavalla
+        if ($yhtiorow["varaako_jt_saldoa"] == "") {
+          $updatelisa = "jt = if(var='P',tilkpl,if(var='J',jt,varattu)), varattu = 0,";
+        }
+        else {
+          $updatelisa = "varattu = if(var='P',tilkpl,varattu),";
+        }
 
-  //Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
-  if ($kukarow["extranet"] == "" and $tila == "LISAAISAKERTARESEPTIIN") {
-    if ($teeperhe == "OK") {
+        $query = "UPDATE tilausrivi
+                  SET $updatelisa
+                  var         = 'J',
+                  kerayspvm   = '".date('Y-m-d', strtotime('now + 3 month'))."'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND otunnus = '{$tilausnumero}'";
+        pupe_query($query);
+      }
+    }
+
+    //Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
+    if ($tila == "LISAARESEPTIIN" and $teeperhe == "OK") {
+      $query = "UPDATE tilausrivi
+                SET perheid2 = '$isatunnus'
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '$isatunnus'";
+      $presult = pupe_query($query);
+      $perheid2 = $isatunnus;
+    }
+
+    //Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
+    if ($tila == "LISAAKERTARESEPTIIN" and $teeperhe == "OK") {
+
       $query = "UPDATE tilausrivi
                 SET
-                perheid     = '$isatunnus',
-                tyyppi      = 'W'
+                perheid     = '$isatunnus'
                 WHERE yhtio = '$kukarow[yhtio]'
                 and tunnus  = '$isatunnus'";
       $presult = pupe_query($query);
       $perheid = $isatunnus;
     }
 
-    // useamman valmisteen reseptit...
-    $perheid2 = -100;
+    //Lis‰t‰‰n tuote tiettyyn tuoteperheeseen/reseptiin
+    if ($tila == "LISAAISAKERTARESEPTIIN") {
+      if ($teeperhe == "OK") {
+
+        $query = "UPDATE tilausrivi
+                  SET
+                  perheid     = '$isatunnus'
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and tunnus  = '$isatunnus'";
+        $presult = pupe_query($query);
+        $perheid = $isatunnus;
+      }
+
+      // useamman valmisteen reseptit...
+      $perheid2 = -100;
+    }
   }
 
   if ($tuoteno != '') {
@@ -4773,6 +4805,15 @@ if ($tee == '') {
   //Syˆttˆrivi
   if ($muokkauslukko == "" and ($toim != "PROJEKTI" or $rivitunnus != 0) or $toim == "YLLAPITO") {
     echo "<table><tr>$jarjlisa<td class='back'><font class='head'>".t("Lis‰‰ rivi").": </font></td></tr></table>";
+
+    if (in_array($toim, array('VALMISTAVARASTOON', 'VALMISTAASIAKKAALLE')) and $tila != 'LISAAKERTARESEPTIIN' and $tila != 'LISAAISAKERTARESEPTIIN') {
+
+      $_chk = array($valmiste_vai_raakaaine => 'checked') + array('raakaaine' => '', 'valmiste' => '');
+
+      echo t("Raaka-aine")," <input type='radio' name='valmiste_vai_raakaaine' value='raakaaine' {$_chk['raakaaine']} /> ";
+      echo t("Valmiste")," <input type='radio' name='valmiste_vai_raakaaine' value='valmiste' {$_chk['valmiste']} />";
+    }
+
     require "syotarivi.inc";
   }
   else {
@@ -7218,6 +7259,7 @@ if ($tee == '') {
                 <input type='hidden' name='perheid'       value = '$row[perheid]'>
                 <input type='hidden' name='orig_tila'     value = '$orig_tila'>
                 <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
+                <input type='hidden' name='valmiste_vai_raakaaine' value='raakaaine' />
                 <input type='Submit' value='".t("Lis‰‰ raaka-aine")."'>
                 </form>";
 
@@ -7235,10 +7277,12 @@ if ($tee == '') {
                 <input type='hidden' name='perheid'       value = '$row[perheid]'>
                 <input type='hidden' name='orig_tila'     value = '$orig_tila'>
                 <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
+                <input type='hidden' name='valmiste_vai_raakaaine' value='valmiste' />
                 <input type='Submit' value='".t("Lis‰‰ valmiste")."'>
                 </form>";
           }
           elseif ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0 and ($toim != "VALMISTAASIAKKAALLE" or $yhtiorow["raaka_aineet_valmistusmyynti"] != "N")) or ($row["tunnus"] == $row["perheid2"] and $row["perheid2"] != 0) or (($toim == 'SIIRTOLISTA' or $toim == "SIIRTOTYOMAARAYS" or $toim == "TARJOUS" or $toim == "EXTTARJOUS" or $laskurow["tilaustyyppi"] == "T") and $row["perheid2"] == 0 and $row["perheid"] == 0)) and $kukarow['extranet'] == '') {
+
             if ($row["perheid2"] == 0 and $row["perheid"] == 0) {
               $lisax = "<input type='hidden' name='teeperhe'  value = 'OK'>";
             }
@@ -9412,7 +9456,7 @@ function loytyyko_myyja_tunnuksella($tunnus) {
   $query  = "SELECT COUNT(*) AS maara
              FROM kuka
              WHERE yhtio = '{$kukarow['yhtio']}'
-             AND myyja = '{$tunnus}' AND myyja != ''";
+             AND myyja   = '{$tunnus}' AND myyja != ''";
   $result = pupe_query($query);
 
   $maara = mysql_fetch_assoc($result);

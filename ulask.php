@@ -172,41 +172,38 @@ if ($tee == 'poista_lasku') {
 
   // Lähetetään lasku sähköpostilla
   $skannatut_laskut_polku = rtrim($yhtiorow['skannatut_laskut_polku'], '/').'/';
-  $poistettava_lasku = realpath($skannatut_laskut_polku.$poistettava_lasku);
-  $path_parts = pathinfo($poistettava_lasku);
+
+  $poistettava_lasku_tmpname = "/tmp/".md5(uniqid(mt_rand(), true))."_".$poistettava_lasku;
+
+  // Siirretään lasku temppiin
+  rename(realpath($skannatut_laskut_polku.$poistettava_lasku), $poistettava_lasku_tmpname);
 
   // Sähköpostin lähetykseen parametrit
-  $parametri = array( "to"       => $kukarow["eposti"],
-    "cc"       => $yhtiorow["talhal_email"],
-    "subject"    => t("Poistettu lasku"),
-    "ctype"      => "text",
-    "body"      => t("Liitteenä Pupesoftista poistettu skannattu lasku."),
-    "attachements"  => array(0   => array(
-        "filename"    => $poistettava_lasku,
-        "newfilename"  => "",
-        "ctype"      => $path_parts['extension']),
+  $parametri = array(
+    "to"           => $kukarow["eposti"],
+    "cc"           => $yhtiorow["talhal_email"],
+    "subject"      => t("Poistettu lasku"),
+    "ctype"        => "text",
+    "body"         => t("Liitteenä Pupesoftista poistettu skannattu lasku.")."\n\n",
+    "attachements" => array(0   => array(
+        "filename"    => $poistettava_lasku_tmpname,
+        "newfilename" => $poistettava_lasku,
+        "ctype"       => ""),
     )
   );
-  $boob = pupesoft_sahkoposti($parametri);
 
-  if ($boob === FALSE) {
-    echo t("VIRHE: Sähköpostin lähetys epäonnistui. Ei poisteta skannattua laskua");
+  pupesoft_sahkoposti($parametri);
+
+  // Haetaan seuraava lasku
+  $silent = 'ei näytetä käyttöliittymää';
+  $seuraava_lasku = hae_skannattu_lasku("kasittele_seuraava");
+
+  if ($seuraava_lasku === FALSE) {
+    echo "<br/>", t("Skannatut laskut loppuivat"), ".<br/><br/>";
+    $nayta_skannattu_lasku = "";
   }
   else {
-    // Poistetaan tiedosto
-    unlink($poistettava_lasku);
-
-    // Haetaan seuraava lasku
-    $silent = 'ei näytetä käyttöliittymää';
-    $seuraava_lasku = hae_skannattu_lasku("kasittele_seuraava");
-
-    if ($seuraava_lasku === FALSE) {
-      echo "<br/>", t("Skannatut laskut loppuivat"), ".<br/><br/>";
-      $nayta_skannattu_lasku = "";
-    }
-    else {
-      $nayta_skannattu_lasku = $seuraava_lasku["seuraava"];
-    }
+    $nayta_skannattu_lasku = $seuraava_lasku["seuraava"];
   }
 
   $tee = "";

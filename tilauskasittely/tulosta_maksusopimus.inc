@@ -207,6 +207,6 @@ if (!function_exists('tulosta_maksusopimus')) {
     echo file_get_contents($pdf_filenimi);
 
     //poistetaan tmp file samantien kuleksimasta...
-    system("rm -f $pdf_filenimi");
+    unlink($pdf_filenimi);
   }
 }

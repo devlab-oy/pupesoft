@@ -1213,14 +1213,14 @@ if ($tee == 'E' or $tee == 'F') {
 
     $_kirjanpidollinen_varastosiirto = ($yhtiorow['kirjanpidollinen_varastosiirto_myyntitilaukselta'] == 'K');
 
-    if ($_kirjanpidollinen_varastosiirto AND $trow['tila'] == "U") {
+    if ($_kirjanpidollinen_varastosiirto and $trow['tila'] == "U") {
 
       $query = "SELECT varastosiirto_tunnus
                 FROM lasku
-                WHERE yhtio  = '{$kukarow['yhtio']}'
-                AND tila     = 'L'
-                AND alatila  = 'X'
-                AND laskunro = '{$trow['laskunro']}'
+                WHERE yhtio              = '{$kukarow['yhtio']}'
+                AND tila                 = 'L'
+                AND alatila              = 'X'
+                AND laskunro             = '{$trow['laskunro']}'
                 AND varastosiirto_tunnus > 0";
       $varastosiirto_result = pupe_query($query);
 

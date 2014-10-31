@@ -858,7 +858,7 @@ if ($kasitellaan_tiedosto) {
           //ei haluta tätä tänne
         }
         elseif (in_array($table_mysql, array('yhteensopivuus_tuote_lisatiedot', 'yhteensopivuus_tuote_sensori_lisatiedot'))
-          and in_array($taulunotsikot[$taulu][$j], array("YHTEENSOPIVUUS_TUOTE_TUNNUS","YHTEENSOPIVUUS_TUOTE_SENSORI_TUNNUS"))
+          and in_array($taulunotsikot[$taulu][$j], array("YHTEENSOPIVUUS_TUOTE_TUNNUS", "YHTEENSOPIVUUS_TUOTE_SENSORI_TUNNUS"))
           and $taulunrivit[$taulu][$eriviindex][$j] == "") {
 
           if (in_array("yhteensopivuus_tuote_sensori", $taulut)) {

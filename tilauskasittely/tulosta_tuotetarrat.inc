@@ -90,5 +90,3 @@ else {
   }
   system("rm -f ".$filenimi.".ps");
 }
-
-system("rm -f $filenimi");

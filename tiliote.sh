@@ -22,9 +22,9 @@ else
 fi
 
 # Parametrit
-local_dir=${1%/}          # Mistä hakemistosta haetaan viitteet/tiliotteet (vika slash pois)
-local_dir_ok=${2%/}       # Mihin hakemistoon siirretään käsittelyn jälkeen (vika slash pois)
-pupesoft_dir=`dirname $0` # Pupesoft root hakemisto
+local_dir=${1%/}           # Mistä hakemistosta haetaan viitteet/tiliotteet (vika slash pois)
+local_dir_ok=${2%/}        # Mihin hakemistoon siirretään käsittelyn jälkeen (vika slash pois)
+pupesoft_dir=$(dirname $0) # Pupesoft root hakemisto
 
 # Katsotaan, että parametrit on annettu
 if [ -z ${local_dir} ] || [ -z ${local_dir_ok} ]; then
@@ -52,16 +52,20 @@ if [ ! -d ${local_dir_ok} ]; then
   exit 1
 fi
 
-for file in `find "${local_dir}" -maxdepth 1 -type f`
+for file in $(find "${local_dir}" -maxdepth 1 -type f)
 do
+
+  # Poistetaan polku filenamesta
+  basefile=$(basename ${file})
+
   # Tehdään timestamp
-  timestamp=$( date +%Y%d%m-%H%M%S )
+  timestamp=$(date +%Y%d%m-%H%M%S)
 
   # Ajetaan tiliote sitään (huom eka parametri pitää olla "perl")
   /usr/bin/php "${pupesoft_dir}/tiliote.php" "perl" "${file}"
 
   # Siirretään tiedosto done hakemistoon
-  mv -f "${local_dir}/${file}" "${local_dir_ok}/${timestamp}_${file}"
+  mv -f "${file}" "${local_dir_ok}/${timestamp}_${basefile}"
 done
 
 # Vapautetaan lukko

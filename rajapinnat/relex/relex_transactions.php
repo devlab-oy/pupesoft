@@ -89,71 +89,71 @@ if ($paiva_ajo) {
 $query_ale_lisa = generoi_alekentta('M');
 
 $query = "(SELECT
-          yhtio.maa,
-          tapahtuma.laadittu laadittu,
-          date_format(tapahtuma.laadittu, '%Y-%m-%d') pvm,
-          tapahtuma.varasto,
-          tapahtuma.tuoteno,
-          tapahtuma.laji,
-          tapahtuma.kpl,
-          if (tapahtuma.laji = 'tulo', tapahtuma.kplhinta, tapahtuma.hinta) kplhinta,
-          lasku.tilaustyyppi,
-          lasku.varasto lahdevarasto,
-          lasku.clearing vastaanottovarasto,
-          lasku.liitostunnus,
-          if (lasku.tila is not null and lasku.tila = 'G' and tapahtuma.kpl < 0, 1, 0) keratty_siirto,
-          if (tapahtuma.laji = 'laskutus' and (tapahtuma.kpl < 0 or tapahtuma.kpl > 0 and lasku.tilaustyyppi = 'R'), 1, 0) keratty_myynti,
-          if (tapahtuma.laji = 'siirto' and tilausrivi.varasto = lasku.clearing, 1, 0) sisainen_siirto
-          FROM tapahtuma
-          JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio
-            AND tuote.tuoteno      = tapahtuma.tuoteno
-            AND tuote.status      != 'P'
-            AND tuote.ei_saldoa    = ''
-            AND tuote.tuotetyyppi  = ''
-            AND tuote.ostoehdotus  = '')
-          JOIN yhtio ON (tapahtuma.yhtio = yhtio.yhtio)
-          LEFT JOIN tilausrivi USE INDEX (PRIMARY) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
-          LEFT JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-          WHERE tapahtuma.yhtio = '$yhtio'
-          AND tapahtuma.laji in ('laskutus', 'tulo', 'siirto', 'valmistus','inventointi')
-          AND tapahtuma.kpl != 0
-          {$tapahtumarajaus}
-          HAVING keratty_siirto = 0 AND keratty_myynti = 0 AND sisainen_siirto = 0)
+           yhtio.maa,
+           tapahtuma.laadittu laadittu,
+           date_format(tapahtuma.laadittu, '%Y-%m-%d') pvm,
+           tapahtuma.varasto,
+           tapahtuma.tuoteno,
+           tapahtuma.laji,
+           tapahtuma.kpl,
+           if (tapahtuma.laji = 'tulo', tapahtuma.kplhinta, tapahtuma.hinta) kplhinta,
+           lasku.tilaustyyppi,
+           lasku.varasto lahdevarasto,
+           lasku.clearing vastaanottovarasto,
+           lasku.liitostunnus,
+           if (lasku.tila is not null and lasku.tila = 'G' and tapahtuma.kpl < 0, 1, 0) keratty_siirto,
+           if (tapahtuma.laji = 'laskutus' and (tapahtuma.kpl < 0 or tapahtuma.kpl > 0 and lasku.tilaustyyppi = 'R'), 1, 0) keratty_myynti,
+           if (tapahtuma.laji = 'siirto' and tilausrivi.varasto = lasku.clearing, 1, 0) sisainen_siirto
+           FROM tapahtuma
+           JOIN tuote ON (tuote.yhtio = tapahtuma.yhtio
+             AND tuote.tuoteno      = tapahtuma.tuoteno
+             AND tuote.status      != 'P'
+             AND tuote.ei_saldoa    = ''
+             AND tuote.tuotetyyppi  = ''
+             AND tuote.ostoehdotus  = '')
+           JOIN yhtio ON (tapahtuma.yhtio = yhtio.yhtio)
+           LEFT JOIN tilausrivi USE INDEX (PRIMARY) ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
+           LEFT JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+           WHERE tapahtuma.yhtio    = '$yhtio'
+           AND tapahtuma.laji       in ('laskutus', 'tulo', 'siirto', 'valmistus','inventointi')
+           AND tapahtuma.kpl       != 0
+           {$tapahtumarajaus}
+           HAVING keratty_siirto = 0 AND keratty_myynti = 0 AND sisainen_siirto = 0)
 
-          UNION
+           UNION
 
-          (SELECT
-          yhtio.maa,
-          tilausrivi.kerattyaika laadittu,
-          date_format(tilausrivi.kerattyaika, '%Y-%m-%d') pvm,
-          tilausrivi.varasto,
-          tilausrivi.tuoteno,
-          if (tilausrivi.tyyppi='G', 'siirtolista', 'myynti') laji,
-          (tilausrivi.kpl+tilausrivi.varattu) * -1 kpl,
-          if (tilausrivi.tyyppi='G', tuote.kehahin, round(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * {$query_ale_lisa}, 2)) kplhinta,
-          lasku.tilaustyyppi,
-          lasku.varasto lahdevarasto,
-          lasku.clearing vastaanottovarasto,
-          lasku.liitostunnus,
-          '' keratty_siirto,
-          '' keratty_myynti,
-          if (tilausrivi.tyyppi = 'G' and tilausrivi.varasto = lasku.clearing, 1, 0) sisainen_siirto
-          FROM tilausrivi
-          JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
-            AND tuote.tuoteno      = tilausrivi.tuoteno
-            AND tuote.status      != 'P'
-            AND tuote.ei_saldoa    = ''
-            AND tuote.tuotetyyppi  = ''
-            AND tuote.ostoehdotus  = '')
-          JOIN yhtio ON (tilausrivi.yhtio = yhtio.yhtio)
-          JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
-          WHERE tilausrivi.yhtio = '$yhtio'
-          AND tilausrivi.tyyppi IN ('L','G','V')
-          AND (tilausrivi.varattu+tilausrivi.kpl > 0 OR (tilausrivi.varattu+tilausrivi.kpl < 0 and lasku.tilaustyyppi = 'R'))
-          {$kerivirajaus}
-          HAVING sisainen_siirto = 0)
+           (SELECT
+           yhtio.maa,
+           tilausrivi.kerattyaika laadittu,
+           date_format(tilausrivi.kerattyaika, '%Y-%m-%d') pvm,
+           tilausrivi.varasto,
+           tilausrivi.tuoteno,
+           if (tilausrivi.tyyppi='G', 'siirtolista', 'myynti') laji,
+           (tilausrivi.kpl+tilausrivi.varattu) * -1 kpl,
+           if (tilausrivi.tyyppi='G', tuote.kehahin, round(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]' = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * {$query_ale_lisa}, 2)) kplhinta,
+           lasku.tilaustyyppi,
+           lasku.varasto lahdevarasto,
+           lasku.clearing vastaanottovarasto,
+           lasku.liitostunnus,
+           '' keratty_siirto,
+           '' keratty_myynti,
+           if (tilausrivi.tyyppi = 'G' and tilausrivi.varasto = lasku.clearing, 1, 0) sisainen_siirto
+           FROM tilausrivi
+           JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
+             AND tuote.tuoteno      = tilausrivi.tuoteno
+             AND tuote.status      != 'P'
+             AND tuote.ei_saldoa    = ''
+             AND tuote.tuotetyyppi  = ''
+             AND tuote.ostoehdotus  = '')
+           JOIN yhtio ON (tilausrivi.yhtio = yhtio.yhtio)
+           JOIN lasku USE INDEX (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
+           WHERE tilausrivi.yhtio   = '$yhtio'
+           AND tilausrivi.tyyppi    IN ('L','G','V')
+           AND (tilausrivi.varattu+tilausrivi.kpl > 0 OR (tilausrivi.varattu+tilausrivi.kpl < 0 and lasku.tilaustyyppi = 'R'))
+           {$kerivirajaus}
+           HAVING sisainen_siirto = 0)
 
-          ORDER BY laadittu, tuoteno";
+           ORDER BY laadittu, tuoteno";
 $res = pupe_query($query);
 
 // Kerrotaan montako riviä käsitellään

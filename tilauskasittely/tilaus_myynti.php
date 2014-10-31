@@ -4549,8 +4549,15 @@ if ($tee == '') {
           $sisaltyvat_tyot = hae_riviin_sisaltyvat_tyot($_laite_tunnus, $tuoteno);
           $_vaihdettava_rivi = hae_tilausrivi($vaihdettava_rivi);
           foreach ($sisaltyvat_tyot as $sisaltyva_tyo) {
-            paivita_viimenen_tapahtuma_laitteen_huoltosyklille($_laite_tunnus, $sisaltyva_tyo['huoltosykli_tunnus'], $_vaihdettava_rivi['toimaika']);
+            //import = false koska viimeinen_paivamaara tsekkiä ei haluta tehdä. Huoltosyklin päivä
+            //pitää muuttua huolimatta mikä päivä sinne syötetään.
+            $import = false;
+            paivita_viimenen_tapahtuma_laitteen_huoltosyklille($_laite_tunnus, $sisaltyva_tyo['huoltosykli_tunnus'], $_vaihdettava_rivi['toimaika'], $import);
           }
+
+          $uusi_tilausrivi = hae_tilausrivi($lisatty_tun);
+          $uuden_rivin_huoltosykli = hae_rivin_huoltosykli($_laite_tunnus, $uusi_tilausrivi['tuoteno']);
+          paivita_viimenen_tapahtuma_laitteen_huoltosyklille($_laite_tunnus, $uuden_rivin_huoltosykli['huoltosykli_tunnus'], $_vaihdettava_rivi['toimaika'], $import);
         }
         else {
           $_laite_tunnus = $_SESSION['laite_tunnus'];

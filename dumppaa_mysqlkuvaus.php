@@ -17,6 +17,9 @@ if ($php_cli) {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   // dummy yhtio (menee ainoastaan filenimeen)
   $kukarow["yhtio"] = "crond";
 }

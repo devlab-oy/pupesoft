@@ -31,7 +31,7 @@ $lopeta_body = TRUE;
 $piirra_sanakirja = TRUE;
 
 // Piilotetaan koko body
-if (isset($nayta_pdf) and $nayta_pdf == "1") {
+if ((isset($nayta_pdf) and $nayta_pdf == 1) or (isset($lataa_tiedosto) and $lataa_tiedosto == 1)) {
   $lopeta_body = FALSE;
   $piirra_sanakirja = FALSE;
 }

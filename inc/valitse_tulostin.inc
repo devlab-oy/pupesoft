@@ -348,6 +348,10 @@ foreach ($tulostimet as $tulostin) {
   echo "<option value=''>".t("Ei kirjoitinta")."</option>";
   echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
 
+  if ($tulostimet[0] == "Inventointi") {
+    echo "<option value='excel'>".t('Excel-tiedosto')."</option>";
+  }
+
   if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS' or $toim == 'LAHETE' or $toim == 'TILAUSVAHVISTUS' or $toim == 'LASKU') and $asrow['email'] != '') {
     echo "<option value='asiakasemail$asrow[email]'>".t("Asiakkaan sähköpostiin").": $asrow[email]</option>";
   }

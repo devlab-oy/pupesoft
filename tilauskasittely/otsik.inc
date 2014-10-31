@@ -813,16 +813,18 @@ if ($tila == "" and !isset($jatka)) {
     if ($otsikolta == "YES" and $from != "vaihdaasiakas") {
       foreach ($_POST as $key => $val) {
 
-        if ($key == "toimpp")       $srow["toimaika"] = $_POST["toimvv"]."-".$_POST["toimkk"]."-".$_POST["toimpp"];
-        elseif ($key == "kerpp")     $srow["kerayspvm"] = $_POST["kervv"]."-".$_POST["kerkk"]."-".$_POST["kerpp"];
+        if ($key == "toimpp")         $srow["toimaika"] = $_POST["toimvv"]."-".$_POST["toimkk"]."-".$_POST["toimpp"];
+        elseif ($key == "kerpp")      $srow["kerayspvm"] = $_POST["kervv"]."-".$_POST["kerkk"]."-".$_POST["kerpp"];
         elseif ($key == "tkohde")     $srow["asiakkaan_kohde"] = $val;
-        elseif ($key == "tnimi")     $srow["toim_nimi"] = $val;
-        elseif ($key == "tnimitark")   $srow["toim_nimitark"] = $val;
-        elseif ($key == "tosoite")     $srow["toim_osoite"] = $val;
+        elseif ($key == "tnimi")      $srow["toim_nimi"] = $val;
+        elseif ($key == "tnimitark")  $srow["toim_nimitark"] = $val;
+        elseif ($key == "tosoite")    $srow["toim_osoite"] = $val;
         elseif ($key == "tpostino")   $srow["toim_postino"] = $val;
         elseif ($key == "tpostitp")   $srow["toim_postitp"] = $val;
+        elseif ($key == "tpuh")       $srow["toim_puh"] = $val;
+        elseif ($key == "temail")     $srow["toim_email"] = $val;
         elseif ($key == "eilahe")     $srow["eilahetetta"] = $val;
-        elseif ($key == "maksaja")     $srow["kohdistettu"] = $val;
+        elseif ($key == "maksaja")    $srow["kohdistettu"] = $val;
         elseif ($key == "valkoodi")   $srow["valkoodi"] = substr($val, 0, strpos($val, "##"));
         elseif (!in_array($key, array("tila", "alatila"))) {
           $srow[$key] = $val;
@@ -1007,6 +1009,18 @@ if ($tila == "" and !isset($jatka)) {
     }
 
     echo "</select></td></tr>";
+
+    if ($yhtiorow["vahvistusviesti_asiakkaalle"]) {
+      echo "<tr>
+              <td valign='top'>" . t("Puh") . ": </td>
+              <td><input type='tel' name='tpuh' size='35' value='$srow[toim_puh]'></td>
+            </tr>";
+
+      echo "<tr>
+              <td valign='top'>" . t("Email") . ": </td>
+              <td><input type='email' name='temail' size='35' value='$srow[toim_email]'></td>
+            </tr>";
+    }
 
     if ($yhtiorow['myyntitilaus_ytunnus_syotto'] == 'K' and $asiarow['laji'] != 'H') {
       echo "<tr>";
@@ -3883,6 +3897,8 @@ if (isset($jatka)) {
         toim_osoite             = '$tosoite',
         toim_ovttunnus          = '$toim_ovttunnus',
         toim_postino            = '$tpostino',
+        toim_puh                = '$tpuh',
+        toim_email              = '$temail',
         toim_postitp            = '$tpostitp',
         tunnusnippu             = '$tunnusnippu',
         valkoodi                = '$valkoodi',

@@ -334,9 +334,9 @@ if (count($tuotetiedot) > 0) {
 
           // ei oteta alennuksia huomioon Klokkerholm-keississä
           // eikä ZF-keississä (123007), eikä Valeolla ( 123342), eikä Schaefflerillä (123456)
-          if (strtolower($attribute) == "allow" 
-            and $laskuttajan_toimittajanumero != "123418" 
-            and $laskuttajan_toimittajanumero != "123007" 
+          if (strtolower($attribute) == "allow"
+            and $laskuttajan_toimittajanumero != "123418"
+            and $laskuttajan_toimittajanumero != "123007"
             and $laskuttajan_toimittajanumero != "123342"
             and $laskuttajan_toimittajanumero != "123456") {
 

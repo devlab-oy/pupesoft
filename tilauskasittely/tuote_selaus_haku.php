@@ -296,7 +296,7 @@ if (!empty($variaatio)) {
     echo "<td>{$tuote["osasto"]}<br/>{$tuote["try"]}</td>";
 
     piirra_hinta($tuote, $oleasrow, $valuurow, $vari, $classmidl, $hinta_rajaus, $poistetut,
-                 $lisatiedot);
+      $lisatiedot);
 
     $yhtiot = hae_yhtiot();
 
@@ -1569,7 +1569,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
       }
 
       piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_rajaus, $poistetut,
-                   $lisatiedot);
+        $lisatiedot);
 
       if ($lisatiedot != "" and $kukarow["extranet"] == "") {
         echo "<td valign='top' class='$vari' $classmidl>$row[aleryhma]<br>$row[status]</td>";
@@ -2344,7 +2344,7 @@ function piirra_nayta_variaatiot_nappula($parametri_variaatio) {
 }
 
 function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_rajaus, $poistetut,
-                      $lisatiedot) {
+  $lisatiedot) {
   global $kukarow, $yhtiorow, $verkkokauppa;
 
   if ($kukarow['hinnat'] >= 0 and ($verkkokauppa == "" or $kukarow["kuka"] != "www")) {
@@ -2368,10 +2368,10 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
 
         $query = "SELECT *
                   FROM hinnasto
-                  WHERE yhtio = '{$kukarow["yhtio"]}'
-                  AND tuoteno = '{$row["tuoteno"]}'
+                  WHERE yhtio  = '{$kukarow["yhtio"]}'
+                  AND tuoteno  = '{$row["tuoteno"]}'
                   AND valkoodi = '{$oleasrow["valkoodi"]}'
-                  AND laji = ''
+                  AND laji     = ''
                   AND (
                     (alkupvm <= current_date and if(loppupvm = '0000-00-00',
                                                     '9999-12-31',
@@ -2398,7 +2398,7 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
                 FROM hinnasto
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND tuoteno = '$row[tuoteno]'
-                AND laji = ''
+                AND laji    = ''
                 ORDER BY maa, valkoodi";
 
       $hintavalresult = pupe_query($query);
@@ -2407,11 +2407,11 @@ function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_raja
         // katotaan onko tuotteelle valuuttahintoja
         $query = "SELECT *
                   FROM hinnasto
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND tuoteno = '$row[tuoteno]'
+                  WHERE yhtio  = '$kukarow[yhtio]'
+                  AND tuoteno  = '$row[tuoteno]'
                   AND valkoodi = '$hintavalrow[valkoodi]'
-                  AND maa = '$hintavalrow[maa]'
-                  AND laji = ''
+                  AND maa      = '$hintavalrow[maa]'
+                  AND laji     = ''
                   AND (
                     (alkupvm <= current_date and if(loppupvm = '0000-00-00',
                                                     '9999-12-31',

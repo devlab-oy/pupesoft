@@ -352,7 +352,7 @@ foreach ($tulostimet as $tulostin) {
     echo "<option value='excel'>".t('Excel-tiedosto')."</option>";
   }
 
-  if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS' or $toim == 'LAHETE' or $toim == 'TILAUSVAHVISTUS' or $toim == 'LASKU' or $toim == 'KERAYSLISTA') and $asrow['email'] != '') {
+  if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS' or $toim == 'LAHETE' or $toim == 'TILAUSVAHVISTUS' or $toim == 'LASKU') and $asrow['email'] != '') {
     echo "<option value='asiakasemail$asrow[email]'>".t("Asiakkaan sähköpostiin").": $asrow[email]</option>";
   }
 

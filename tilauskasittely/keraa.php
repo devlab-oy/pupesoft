@@ -1621,6 +1621,11 @@ if ($tee == 'P') {
           $alatilak = "C";
         }
 
+        if ($yhtiorow['vahvistusviesti_asiakkaalle'] == "Y") {
+          require_once("inc/jt_ja_tyomaarays_valmis_viesti.inc");
+          laheta_vahvistusviesti($zoner_tunnarit["username"], $zoner_tunnarit["salasana"], $id);
+        }
+
         // Lasku p‰ivitet‰‰n vasta kuin tilausrivit on p‰ivitetty...
         $query  = "UPDATE lasku SET
                    alatila     = '$alatilak'

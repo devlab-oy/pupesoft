@@ -380,7 +380,7 @@ if (!function_exists('print_pdf')) {
         $liite = $pdffilenimi;
         $kutsu = "Ostotilaus";
 
-        require "../inc/sahkoposti.inc";
+        require "inc/sahkoposti.inc";
         echo t("Vahvistamattomat rivit lähetetty sähköpostiin")."...<br><br>";
       }
 

@@ -105,8 +105,7 @@ if ($kirjoitinrow["komento"] == 'email') {
     $kutsu .= ", ".trim($saaja);
   }
 
-  if (@include "../inc/sahkoposti.inc");
-  elseif (@include "inc/sahkoposti.inc");
+  if (@include "inc/sahkoposti.inc");
   else include "sahkoposti.inc";
 }
 else {

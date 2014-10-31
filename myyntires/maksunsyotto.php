@@ -272,7 +272,7 @@ if ($tee == "SYOTTO") {
     $line = exec("$tulostakuitti $pdffilenimi");
 
     //poistetaan tmp file samantien kuleksimasta...
-    $line = exec("rm -f $pdffilenimi");
+    unlink($pdffilenimi);
 
     echo "<font class='message'>".t("Kuitti (2 kpl) tulostettu").".</font><br>";
   }

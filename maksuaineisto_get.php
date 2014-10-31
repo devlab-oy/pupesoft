@@ -21,6 +21,9 @@ ini_set("display_errors", 0);
 require "inc/salasanat.php";
 require "inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
+
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock();
 

@@ -20,6 +20,9 @@ if ($php_cli) {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   if (trim($argv[1]) == '') {
     die ("Et antanut lähettävää yhtiötä!\n");
   }
@@ -124,7 +127,7 @@ if (!isset($keraysvyohyke)) $keraysvyohyke = array();
 if (!isset($lahdekeraysvyohyke)) $lahdekeraysvyohyke = array();
 if (!isset($lapsituotteet)) $lapsituotteet = isset($_COOKIE["lapsituotteet"]) ? $_COOKIE["lapsituotteet"] : "";
 if (!isset($myyntiera)) $myyntiera = isset($_COOKIE["myyntiera"]) ? $_COOKIE["myyntiera"] : "";
-if (!isset($kesken)) $kesken = "";
+if (!isset($kesken)) $kesken = isset($_COOKIE["kesken"]) ? $_COOKIE["kesken"] : "";
 if (!isset($tee)) $tee = "";
 if (!isset($kohdevarasto)) $kohdevarasto = "";
 if (!isset($toimittaja)) $toimittaja = "";
@@ -347,8 +350,6 @@ if (!$php_cli) {
     echo "<option value='{$row['selite']}' {$sel}>", t_tunnus_avainsanat($row, "selite", "TOIMTAPAKV"), "</option>";
   }
   echo "</select>";
-
-
   echo "</td></tr>";
 
   if ($kesken == "X") {
@@ -475,8 +476,7 @@ if ($tee == 'M' and isset($generoi)) {
               {$abcjoin}
               {$keraysvyohykelisa}
               WHERE tuotepaikat.yhtio     = '{$kukarow['yhtio']}'
-              AND CONCAT(RPAD(UPPER('{$varow['alkuhyllyalue']}'),  5, '0'),LPAD(UPPER('{$varow['alkuhyllynro']}'),  5, '0')) <= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
-              AND CONCAT(RPAD(UPPER('{$varow['loppuhyllyalue']}'), 5, '0'),LPAD(UPPER('{$varow['loppuhyllynro']}'), 5, '0')) >= CONCAT(RPAD(UPPER(tuotepaikat.hyllyalue), 5, '0'),LPAD(UPPER(tuotepaikat.hyllynro), 5, '0'))
+              AND tuotepaikat.varasto     = {$kohdevarasto}
               AND tuotepaikat.halytysraja > 0
               {$kohdepaikkalisa}
               ORDER BY tuotepaikat.tuoteno";
@@ -502,6 +502,34 @@ if ($tee == 'M' and isset($generoi)) {
                 AND tunnus  = '{$lahdevarasto}'";
       $varres = pupe_query($query);
       $varrow = mysql_fetch_assoc($varres);
+
+      $tt_vaihdettu = false;
+      if ($valittu_toimitustapa == 'Ei toimitustapaa') {
+        $ttqry = "SELECT tpa.selite AS toimitustapa
+                  FROM avainsana AS ana
+                  JOIN toimitustapa AS tpa
+                  ON ( ana.yhtio = tpa.yhtio AND ana.selitetark_2 = tpa.tunnus )
+                  WHERE ana.yhtio = '$kukarow[yhtio]'
+                  AND ana.laji = 'SIIRTOVARASTOT'
+                  AND ana.selite = '$lahdevarasto'
+                  AND ana.selitetark = '$kohdevarasto'";
+        $ttresult = pupe_query($ttqry);
+
+        if (mysql_num_rows($ttresult) > 0) {
+          $ttrow = mysql_fetch_assoc($ttresult);
+          $toimitustapa = $ttrow['toimitustapa'];
+        }
+        else {
+          $toimitustapa = $valittu_toimitustapa;
+        }
+
+        if ($toimitustapa != $valittu_toimitustapa) {
+          $tt_vaihdettu = true;
+        }
+      }
+      else {
+        $toimitustapa = $valittu_toimitustapa;
+      }
 
       $lahdevyohyke = 0;
 
@@ -664,17 +692,19 @@ if ($tee == 'M' and isset($generoi)) {
 
               $kukarow["kesken"] = 0;
 
-              $tilausnumero  = 0;
+              $tilausnumero = 0;
               $clearing     = $kohdevarasto;
-              $chn       = 'GEN'; // tällä erotellaan "tulosta siirtolista"-kohdassa generoidut ja käsin tehdyt siirtolistat
-              $toimpp     = $kerpp = date("j");
-              $toimkk     = $kerkk = date("n");
-              $toimvv     = $kervv = date("Y");
+              $chn          = 'GEN'; // tällä erotellaan "tulosta siirtolista"-kohdassa generoidut ja käsin tehdyt siirtolistat
+              $toimpp       = $kerpp = date("j");
+              $toimkk       = $kerkk = date("n");
+              $toimvv       = $kervv = date("Y");
               $comments     = $kukarow["nimi"]." ".t("Generoi hälytysrajojen perusteella");
-              $viesti     = $kukarow["nimi"]." ".t("Generoi hälytysrajojen perusteella");
-              $varasto     = $lahdevarasto;
-              $toimitustapa   = $valittu_toimitustapa;
-              $toim      = "SIIRTOLISTA";
+              $viesti       = $kukarow["nimi"]." ".t("Generoi hälytysrajojen perusteella");
+              $varasto      = $lahdevarasto;
+              $toim         = "SIIRTOLISTA";
+              $alatila      = "";
+              $luokka       = "";
+              $tunnusnippu  = "";
 
               require "otsik_siirtolista.inc";
 
@@ -688,7 +718,17 @@ if ($tee == 'M' and isset($generoi)) {
                 exit;
               }
 
-              if (!$php_cli) echo "<br /><font class='message'>", t("Tehtiin siirtolistalle otsikko %s lähdevarasto on %s", $kieli, $kukarow["kesken"], $varrow["nimitys"]), "</font><br />";
+              if (!$php_cli) {
+                echo "<br /><font class='message'>";
+                echo t("Tehtiin siirtolistalle otsikko %s lähdevarasto on %s", $kieli, $kukarow["kesken"], $varrow["nimitys"]);
+                echo "</font><br />";
+              }
+
+              if (!$php_cli and $tt_vaihdettu) {
+                echo "<font class='message'>";
+                echo t("Siirtolistan toimitustapa yliajettiin automaattisesti oletustoimitustavalla");
+                echo ": " . $toimitustapa . "</font><br />";
+              }
 
               //  Otetaan luotu otsikko talteen
               $otsikot[] = $kukarow["kesken"];
@@ -718,8 +758,12 @@ if ($tee == 'M' and isset($generoi)) {
               $netto         = "";
               $var        = "";
               $korvaavakielto    = 1;
-              $perhekielto    = $lapsituotteet == "" ? 1 : 0;
+              $perhekielto    = $lapsituotteet == "" ? 1 : "";
               $orvoteikiinnosta  = "EITOD";
+              $varataan_saldoa = "";
+              $kpl2 = "";
+              $toimittajan_tunnus = "";
+              $osatoimkielto = "";
 
               // Tallennetaan riville minne se on menossa
               $kohde_alue   = $pairow["hyllyalue"];

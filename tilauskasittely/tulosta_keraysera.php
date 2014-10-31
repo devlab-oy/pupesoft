@@ -68,7 +68,8 @@ if ($tee == '') {
             WHERE yhtio        = '{$kukarow['yhtio']}'
             AND extranet       = ''
             AND keraajanro     > 0
-            AND keraysvyohyke != ''";
+            AND keraysvyohyke != ''
+            ORDER BY nimi";
   $kuresult = pupe_query($query);
 
   echo "<tr><th>", t("Kerääjä"), "</th><td><input type='text' size='5' name='keraajanro'> ", t("tai"), " ";
@@ -536,15 +537,19 @@ if ($tee != '') {
       $loop_counter = TRUE;
 
       if ($tulosta_kaikki == "JOO" and $naytetaan_tulosta_kaikki == 0) {
-        //jos yritetään tulostaa kaikki niin tsekataan vielä käyttöoikeudet
+        // jos yritetään tulostaa kaikki niin tsekataan vielä käyttöoikeudet
         $tulosta_kaikki = "";
         echo "<font class='message'>", t("Yritit tulostaa kaikki keräyserät mutta käyttöoikeus puuttuu"), ".</font><br />";
       }
 
       while ($loop_counter) {
-
-        // HUOM!!! FUNKTIOSSA TEHDÄÄN LOCK TABLESIT, LUKKOJA EI AVATA TÄSSÄ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KÄYTÖN JÄLKEEN!!!!!!!!!!
         $erat = tee_keraysera($keraajarow['keraysvyohyke'], $select_varasto);
+
+        // Ei saatu lukkoa järkevässä ajassa
+        if ($erat === FALSE) {
+          echo "<font class='error'>".t("VIRHE: Keräyserien luonnissa ruuhkaa. Yritä pian uudelleen")."!</font><br>";
+          break;
+        }
 
         if (isset($erat['tilaukset']) and count($erat['tilaukset']) > 0) {
 
@@ -555,7 +560,8 @@ if ($tee != '') {
           if (isset($lisatyt_tilaukset) and count($lisatyt_tilaukset) > 0) {
 
             $otunnukset = implode(",", $lisatyt_tilaukset);
-            $kerayslistatunnus = array_shift(array_keys($lisatyt_tilaukset));
+            $lisatyt_tilaukset_keys = array_keys($lisatyt_tilaukset);
+            $kerayslistatunnus = array_shift($lisatyt_tilaukset_keys);
 
             $query = "SELECT *
                       FROM lasku
@@ -564,11 +570,10 @@ if ($tee != '') {
             $res = pupe_query($query);
             $laskurow = mysql_fetch_assoc($res);
 
-            $tilausnumeroita      = $otunnukset;
-            $valittu_tulostin     = $kerayslistatulostin;
-            $keraysvyohyke      = $erat['keraysvyohyketiedot']['keraysvyohyke'];
-            $laskuja         = count($erat['tilaukset']);
-            $lukotetaan       = FALSE;
+            $tilausnumeroita  = $otunnukset;
+            $valittu_tulostin = $kerayslistatulostin;
+            $keraysvyohyke    = $erat['keraysvyohyketiedot']['keraysvyohyke'];
+            $laskuja          = count($erat['tilaukset']);
 
             require "tilauskasittely/tilaus-valmis-tulostus.inc";
 
@@ -591,9 +596,8 @@ if ($tee != '') {
           $loop_counter = FALSE;
         }
 
-        // lukitaan tableja
-        $query = "UNLOCK TABLES";
-        $result = pupe_query($query);
+        // Vapautetaan keräsyerän nappaamat tilaukset
+        release_tee_keraysera();
 
         if (isset($lisatyt_tilaukset) and count($lisatyt_tilaukset) > 0) {
 
@@ -738,7 +742,13 @@ if ($tee != '') {
         }
         else {
           $lisa = '';
-          $selectlisa = " tilausrivi.tuoteno, TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark)) asiakasnimi, kerayserat.kpl ";
+          //Jos siirtolistojen tulostus keräyserin kautta on päällä niin otetaan asiakkaan nimi laskulta
+          if ($yhtiorow['kerayserat'] == 'K' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+            $selectlisa = " tilausrivi.tuoteno, TRIM(CONCAT(lasku.nimi, ' ', lasku.nimitark)) asiakasnimi, kerayserat.kpl ";
+          }
+          else {
+            $selectlisa = " tilausrivi.tuoteno, TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark)) asiakasnimi, kerayserat.kpl ";
+          }
         }
 
         $query = "SELECT kerayserat.pakkaus, kerayserat.tunnus AS rivitunnus,
@@ -847,7 +857,7 @@ if ($tee != '') {
                       lasku.liitostunnus,
                       CONCAT(tilausrivi.hyllyalue, ' ', tilausrivi.hyllynro, ' ', tilausrivi.hyllyvali, ' ', tilausrivi.hyllytaso) hyllypaikka,
                       tilausrivi.tunnus AS tilausrivin_tunnus
-                       FROM kerayserat
+                      FROM kerayserat
                       JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
                       JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
                       JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)

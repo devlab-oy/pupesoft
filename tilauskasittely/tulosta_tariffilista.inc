@@ -84,7 +84,7 @@ if (!function_exists('print_pdf_tariffi')) {
       $liite = $pdffilenimi;
       $kutsu = "Tariffilista";
 
-      require "../inc/sahkoposti.inc";
+      require "inc/sahkoposti.inc";
 
       echo t("Tariffilista tulostuu")."...<br>";
     }
@@ -97,9 +97,6 @@ if (!function_exists('print_pdf_tariffi')) {
 
       echo t("Tariffilista tulostuu")."...<br>";
     }
-
-    //poistetaan tmp file samantien kuleksimasta...
-    system("rm -f $pdffilenimi");
   }
 }
 

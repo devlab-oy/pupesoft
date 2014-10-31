@@ -27,7 +27,6 @@ if ($tee == 'UV') {
             WHERE tilausrivi.yhtio         = '$kukarow[yhtio]'
             and tilausrivi.otunnus         = '$tilrivirow[otunnus]'
             and tilausrivi.perheid         = '$tilrivirow[perheid]'
-            and tilausrivi.tunnus         != '$tilrivirow[perheid]'
             and tilausrivi.tyyppi          in ('W','M')
             and tilausrivi.toimitettuaika  = '0000-00-00 00:00:00'
             ORDER by tilausrivi.tuoteno";
@@ -904,9 +903,6 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
     }
 
     mysql_data_seek($uvresult, 0);
-
-    // Valmistetaan ensimm‰inen is‰
-    valmista_isa($valmisterow, $tilrivirow, $isavarattu, $isatuoteno, $uusiarvo, $kaikenkaikkiaan, $kaikenkaikkiaan_arvot);
 
     while ($uvrow = mysql_fetch_assoc($uvresult)) {
 

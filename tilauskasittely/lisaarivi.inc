@@ -627,10 +627,10 @@ if (substr($paikka, 0, 3) == "¡¡S") {
 
       $query = "UPDATE tilausrivin_lisatiedot
                 SET toimittajan_tunnus = '{$toimittajan_tunnus}',
-                kohde_hyllyalue        = '{$kohdevarasto_tuotepaikka['hyllyalue']}',
-                kohde_hyllynro         = '{$kohdevarasto_tuotepaikka['hyllynro']}',
-                kohde_hyllyvali        = '{$kohdevarasto_tuotepaikka['hyllyvali']}',
-                kohde_hyllytaso        = '{$kohdevarasto_tuotepaikka['hyllytaso']}'
+                kohde_hyllyalue      = '{$kohdevarasto_tuotepaikka['hyllyalue']}',
+                kohde_hyllynro       = '{$kohdevarasto_tuotepaikka['hyllynro']}',
+                kohde_hyllyvali      = '{$kohdevarasto_tuotepaikka['hyllyvali']}',
+                kohde_hyllytaso      = '{$kohdevarasto_tuotepaikka['hyllytaso']}'
                 WHERE yhtio          = '{$kukarow['yhtio']}'
                 AND tilausrivitunnus = {$lapsirivi['tunnus']}";
       pupe_query($query);
@@ -1075,7 +1075,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   FROM tuote
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                   JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
-                    AND varastopaikat.tunnus = tuotepaikat.varasto)
+                    AND varastopaikat.tunnus                = tuotepaikat.varasto)
                   JOIN sarjanumeroseuranta ON sarjanumeroseuranta.yhtio = tuote.yhtio
                   and sarjanumeroseuranta.tuoteno           = tuote.tuoteno
                   and sarjanumeroseuranta.hyllyalue         = tuotepaikat.hyllyalue
@@ -1106,8 +1106,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   JOIN tuotepaikat ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno
                   JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
                     AND varastopaikat.tunnus = tuotepaikat.varasto)
-                  WHERE tuote.yhtio = '$kukarow[yhtio]'
-                  and tuote.tuoteno = '$tuoteno'
+                  WHERE tuote.yhtio          = '$kukarow[yhtio]'
+                  and tuote.tuoteno          = '$tuoteno'
                   $notfromvarasto
                   ORDER BY tuotepaikat.oletus DESC, varastopaikat.nimitys, sorttauskentta
                   $limit";
@@ -3064,7 +3064,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
         while ($edirow = mysql_fetch_assoc($edi2result)) {
 
-          list(, , $vmyytavissa) = saldo_myytavissa($edirow["tuoteno"],'' , $varasto);
+          list(, , $vmyytavissa) = saldo_myytavissa($edirow["tuoteno"], '' , $varasto);
 
           if ($vmyytavissa > 0) {
             $tvsql = "SELECT *

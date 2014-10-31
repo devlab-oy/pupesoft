@@ -9,6 +9,7 @@
  * - korvaavuusketjun p‰‰tuottella on hinnastoon ei
  */
 
+
 // Kutsutaanko CLI:st‰
 if (php_sapi_name() != 'cli') {
   die("T‰t‰ scripti‰ voi ajaa vain komentorivilt‰!\n");

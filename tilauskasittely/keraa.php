@@ -1661,7 +1661,7 @@ if ($tee == 'P') {
         }
 
         if ($yhtiorow['vahvistusviesti_asiakkaalle'] == "Y") {
-          require_once("inc/jt_ja_tyomaarays_valmis_viesti.inc");
+          require_once "inc/jt_ja_tyomaarays_valmis_viesti.inc";
           laheta_vahvistusviesti($zoner_tunnarit["username"], $zoner_tunnarit["salasana"], $id);
         }
 
@@ -2066,9 +2066,9 @@ if ($tee == 'P') {
         if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
           $query = "UPDATE lasku
                     SET alatila = 'B'
-                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    WHERE yhtio  = '{$kukarow['yhtio']}'
                     AND alatila != 'X'
-                    AND tunnus  IN ({$tilausnumeroita_backup})";
+                    AND tunnus   IN ({$tilausnumeroita_backup})";
           $alatila_upd_res = pupe_query($query);
         }
 

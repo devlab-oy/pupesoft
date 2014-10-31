@@ -1123,7 +1123,7 @@ if ($tila == "" and !isset($jatka)) {
 
     if ($yhtiorow['myyntitilaus_ytunnus_syotto'] == 'K' and $asiarow['laji'] != 'H') {
       echo "<tr>";
-      echo "<td valign='top'>",t("Ytunnus"),":</td>";
+      echo "<td valign='top'>", t("Ytunnus"), ":</td>";
       echo "<td><input type='text' name='ytunnus' value='{$srow['ytunnus']}' /></td>";
       echo "</tr>";
     }

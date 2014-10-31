@@ -135,30 +135,30 @@ if (!function_exists('normaali_varastosiirto')) {
         $_tunnus = $lisatyt_rivit1[0];
 
         if ($tilausrivi['perheid'] != 0 and $tilausrivi['perheid'] == $tilausrivi['tunnus']) {
-          # MYYNNIN TUOTEPERHEEN ISÄRIVI
+          // MYYNNIN TUOTEPERHEEN ISÄRIVI
           $_tuoteperheet[$tilausrivi['perheid']] = $_tunnus;
           $query = "UPDATE tilausrivi SET
 
-                    perheid = tunnus
+                    perheid     = tunnus
                     WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus = '{$_tunnus}'";
+                    AND tunnus  = '{$_tunnus}'";
           $updres = pupe_query($query);
         }
         elseif ($tilausrivi['perheid'] != 0 and $tilausrivi['perheid'] != $tilausrivi['tunnus']) {
 
-          # MYYNNIN TUOTEPERHEEN LAPSIRIVI
+          // MYYNNIN TUOTEPERHEEN LAPSIRIVI
           if (array_key_exists($tilausrivi['perheid'], $_tuoteperheet)) {
 
             $query = "UPDATE tilausrivi SET
-                      perheid = '{$_tuoteperheet[$tilausrivi['perheid']]}'
+                      perheid     = '{$_tuoteperheet[$tilausrivi['perheid']]}'
                       WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tunnus = '{$_tunnus}'";
+                      AND tunnus  = '{$_tunnus}'";
             $updres = pupe_query($query);
 
             if ($tilausrivi['ohita_kerays'] != '') {
               $query = "UPDATE tilausrivin_lisatiedot SET
-                        ohita_kerays = '{$tilausrivi['ohita_kerays']}'
-                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        ohita_kerays         = '{$tilausrivi['ohita_kerays']}'
+                        WHERE yhtio          = '{$kukarow['yhtio']}'
                         AND tilausrivitunnus = '{$_tunnus}'";
               $updres = pupe_query($query);
             }
@@ -600,8 +600,8 @@ if (!function_exists('linkkaa_varastosiirto_myyntitilaukseen')) {
     // Tällä merkataan jos ollaan tehty KIRJANPIDOLLINEN varastosiirto.
     $query = "UPDATE lasku SET
               varastosiirto_tunnus = {$varastosiirto['tunnus']}
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus  = {$myyntitilaus['tunnus']}";
+              WHERE yhtio          = '{$kukarow['yhtio']}'
+              AND tunnus           = {$myyntitilaus['tunnus']}";
     pupe_query($query);
 
     return true;

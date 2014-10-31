@@ -327,13 +327,13 @@ if ($tee == "TULOSTA") {
     }
 
     //poistetaan tmp file samantien kuleksimasta...
-    system("rm -f $filenimi");
-    system("rm -f ".$filenimi.".ps");
+    unlink($filenimi);
+    unlink($filenimi.".ps");
 
     echo "<br>".t("Tarrat tulostuu")."!<br><br>";
   }
 
-  $tee='';
+  $tee = '';
 }
 
 // Nyt selataan

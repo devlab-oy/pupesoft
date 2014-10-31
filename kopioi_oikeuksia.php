@@ -17,10 +17,18 @@ if ($copyready != '') {
             AND yhtio  = '$toyhtio'";
   $delre = pupe_query($query);
 
+  $query = "SELECT *
+            FROM kuka
+            WHERE yhtio = '{$toyhtio}'
+            AND kuka    = '{$tokuka}'";
+  $tokuka_res = pupe_query($query);
+  $tokuka_row = mysql_fetch_assoc($tokuka_res);
+
   while ($row = mysql_fetch_array($kukar)) {
 
     $query = "INSERT into oikeu SET
               kuka       = '{$tokuka}',
+              user_id    = '{$tokuka_row['tunnus']}',
               sovellus   = '{$row['sovellus']}',
               nimi       = '{$row['nimi']}',
               alanimi    = '{$row['alanimi']}',

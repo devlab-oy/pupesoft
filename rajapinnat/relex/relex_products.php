@@ -75,10 +75,10 @@ if ($paiva_ajo) {
 
   $query = "SELECT tuote.tuoteno
             FROM tuote
-            WHERE tuote.yhtio = '{$yhtio}'
+            WHERE tuote.yhtio     = '{$yhtio}'
             {$tuoterajaus}
             AND (tuote.muutospvm  >= date_sub(now(), interval 24 HOUR)
-              OR tuote.luontiaika  >= date_sub(now(), interval 24 HOUR))";
+              OR tuote.luontiaika >= date_sub(now(), interval 24 HOUR))";
   $res = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($res)) {

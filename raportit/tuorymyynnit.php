@@ -14,23 +14,23 @@ else $ytunnus = trim($ytunnus);
 if (!isset($osasto)) $osasto = '';
 else $osasto = trim($osasto);
 
-echo "<font class='head'>",t("Asiakkaan ostot tuoteryhmästä"),"</font><hr>";
+echo "<font class='head'>", t("Asiakkaan ostot tuoteryhmästä"), "</font><hr>";
 
 if (empty($try) or empty($ytunnus)) {
 
   echo "<form name=asiakas method='post' autocomplete='off'>";
   echo "<table><tr>";
-  echo "<th>",t("Anna asiakasnumero tai osa nimestä"),"</th>";
+  echo "<th>", t("Anna asiakasnumero tai osa nimestä"), "</th>";
   echo "<td><input type='text' name='ytunnus' value='{$ytunnus}'></td>";
   echo "<td class='back'></td>";
   echo "</tr><tr>";
-  echo "<th>",t("Anna osasto"),"</th>";
+  echo "<th>", t("Anna osasto"), "</th>";
   echo "<td><input type='text' name='osasto' value='{$osasto}'></td>";
   echo "<td class='back'></td>";
   echo "</tr><tr>";
-  echo "<th>",t("Anna tuoteryhmä"),"</th>";
+  echo "<th>", t("Anna tuoteryhmä"), "</th>";
   echo "<td><input type='text' name='try' value='{$try}'></td>";
-  echo "<td class='back'><input type='submit' value='",t("Hae"),"'></td>";
+  echo "<td class='back'><input type='submit' value='", t("Hae"), "'></td>";
   echo "</tr></table>";
   echo "</form>";
 }
@@ -44,10 +44,10 @@ if (!empty($ytunnus) or !empty($try) or !empty($osasto)) {
 
   echo "<br />";
   echo "<table><tr>";
-  echo "<th>",t("ytunnus"),"</th>";
-  echo "<th>",t("asnro"),"</th>";
-  echo "<th>",t("nimi"),"</th>";
-  echo "<th colspan='3'>",t("osoite"),"</th>";
+  echo "<th>", t("ytunnus"), "</th>";
+  echo "<th>", t("asnro"), "</th>";
+  echo "<th>", t("nimi"), "</th>";
+  echo "<th colspan='3'>", t("osoite"), "</th>";
   echo "</tr><tr>";
   echo "<td>{$asiakasrow['ytunnus']}</td>";
   echo "<td>{$asiakasrow['asiakasnro']}</td>";
@@ -63,24 +63,24 @@ if (!empty($ytunnus) or !empty($try) or !empty($osasto)) {
   $ckatepr = "#00dd00";
   $maxcol  = 12; // montako columnia näyttö on
 
-  $katteet_naytetaan = (in_array($kukarow["naytetaan_katteet_tilauksella"], array('Y','')));
+  $katteet_naytetaan = (in_array($kukarow["naytetaan_katteet_tilauksella"], array('Y', '')));
 
   // tehdään asiakkaan ostot tuoteryhmästä
   echo "<br />";
   echo "<font class='message'>";
 
   if (!empty($osasto)) {
-    echo t("Osasto")," {$osasto} ";
+    echo t("Osasto"), " {$osasto} ";
   }
 
   if (!empty($try)) {
-    echo t("tuoteryhmä")," {$try} ";
+    echo t("tuoteryhmä"), " {$try} ";
   }
 
-  echo t("myynti kausittain viimeiset 24 kk")," (<font color='{$cmyynti}'>",t("myynti"),"</font>";
+  echo t("myynti kausittain viimeiset 24 kk"), " (<font color='{$cmyynti}'>", t("myynti"), "</font>";
 
-  if ($katteet_naytetaan) echo "/<font color='{$ckate}'>",t("kate"),"</font>";
-  if ($katteet_naytetaan) echo "/<font color='{$ckatepr}'>",t("kateprosentti"),"</font>";
+  if ($katteet_naytetaan) echo "/<font color='{$ckate}'>", t("kate"), "</font>";
+  if ($katteet_naytetaan) echo "/<font color='{$ckatepr}'>", t("kateprosentti"), "</font>";
 
   echo ")</font><hr>";
 
@@ -226,7 +226,7 @@ if (!empty($ytunnus) or !empty($try) or !empty($osasto)) {
     echo "</tr>";
 
     echo "<tr>";
-    echo "<td nowrap align='right'><font class='info'>{$sumrow['kpl']} ",t("kpl"),"</font></td>";
+    echo "<td nowrap align='right'><font class='info'>{$sumrow['kpl']} ", t("kpl"), "</font></td>";
     echo "</tr>";
 
     if ($katteet_naytetaan) {
@@ -273,7 +273,7 @@ if (!empty($ytunnus) or !empty($try) or !empty($osasto)) {
   echo "<form action='asiakasinfo.php?lopetus={$lopetus}' method='post'>";
   echo "<input type='hidden' name='ytunnus' value='{$ytunnus}'>";
   echo "<input type='hidden' name='asiakasid' value='{$asiakasid}'>";
-  echo "<input type='submit' value='",t("Asiakkaan perustiedot"),"'>";
+  echo "<input type='submit' value='", t("Asiakkaan perustiedot"), "'>";
 }
 
 // kursorinohjausta

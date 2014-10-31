@@ -10,8 +10,8 @@ echo "TARIC Veroperusteet\n\n";
 require "/var/www/html/pupesoft/inc/connect.inc";
 require "/var/www/html/pupesoft/inc/functions.inc";
 
-//require("/Users/juppe/Sites/Devlab/pupesoft/inc/connect.inc");
-//require("/Users/juppe/Sites/Devlab/pupesoft/inc/functions.inc");
+// Logitetaan ajo
+cron_log();
 
 for ($a = 1; $a < count($argv); $a++) {
 

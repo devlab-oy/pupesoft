@@ -18,6 +18,9 @@ date_default_timezone_set('Europe/Helsinki');
 require "inc/connect.inc";
 require "inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
+
 // Yhtiö komentoriviltä
 $yhtio = mysql_real_escape_string($argv[1]);
 $yhtiorow = hae_yhtion_parametrit($yhtio);

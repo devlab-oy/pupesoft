@@ -44,7 +44,7 @@ else {
   $gen_ker_res_result = pupe_query($query);
 
   while ($gen_ker_row = mysql_fetch_assoc($gen_ker_res_result)) {
-    
+
     $erat = tee_keraysera($gen_ker_row["tunnus"], $gen_ker_row["varasto"]);
 
     // Ei saatu lukkoa j‰rkev‰ss‰ ajassa
@@ -52,7 +52,7 @@ else {
       // echo t("VIRHE: Ker‰yserien luonnissa ruuhkaa. Yrit‰ pian uudelleen!<br>";
       continue;
     }
-    
+
     if (isset($erat['tilaukset']) and count($erat['tilaukset']) > 0) {
       // Tallennetaan miss‰ t‰‰ er‰ on tehty
       $ohjelma_moduli = "KARDEX";
@@ -69,12 +69,12 @@ else {
 
         // tilaus on jo tilassa N A, p‰ivitet‰‰n nyt tilaus "ker‰yslista tulostettu" eli L A
         $query = "UPDATE lasku SET
-                  tila 	      = 'L',
+                  tila        = 'L',
                   alatila     = 'A',
                   lahetepvm   = now(),
                   kerayslista = '{$kerayslistatunnus}'
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus in ({$otunnukset})
+                  AND tunnus  in ({$otunnukset})
                   AND tila    = 'N'
                   AND alatila = 'KA'";
         pupe_query($query);
@@ -86,7 +86,7 @@ else {
                     lahetepvm   = now(),
                     kerayslista = '{$kerayslistatunnus}'
                     WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus in ({$otunnukset})
+                    AND tunnus  in ({$otunnukset})
                     AND tila    = 'G'
                     AND alatila = 'KJ'";
           pupe_query($query);

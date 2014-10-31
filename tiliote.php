@@ -37,7 +37,7 @@ if ($php_cli) {
   $filenimi = $userfile;
   $ok = 1;
   $palvelin2 = "";
-  
+
   ob_start();
 }
 else {

@@ -4,9 +4,9 @@
  * Tulostaa asiakkaan kuitin lämpösiirtotulostimelle. Kuitille tulostuu logo, yhtiön tiedot, laskun
  * tilausrivit, laskun summa, verotiedot ja luottokorttitapahtumat
  *
- * @param  int  $laskunro
- * @param  int  $tulostimen_tunnus
- * @param array $params
+ * @param int     $laskunro
+ * @param int     $tulostimen_tunnus
+ * @param array   $params
  *  Esimerkki config parametreistä arvoina defaultit:
  *    array(
  *      "header_teksti"     => false,
@@ -14,6 +14,8 @@
  *      "avaa_lipas_lopuksi => false
  *    );
  */
+
+
 function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array()) {
   global $yhtiorow;
 

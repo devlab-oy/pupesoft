@@ -5,13 +5,15 @@
  * jos sellainen löytyy. Toistaiseksi ainut tuettu palvelu on Zoner. Lähettää myös sähköpostin, jos
  * asiakkaalta sellainen löytyy
  *
- * @param string $username Zonerin käyttäjätunnus
- * @param string $salasana Zonerin salasana
- * @param int    $tilausnumero
- * @param bool   $kerattu Onko kaikki tilauksen rivit jo kerätty
+ * @param string  $username     Zonerin käyttäjätunnus
+ * @param string  $salasana     Zonerin salasana
+ * @param int     $tilausnumero
+ * @param bool    $kerattu      Onko kaikki tilauksen rivit jo kerätty
  *
  * @return bool Jos tekstiviestin tai sähköpostin lähetys onnistui, palauttaa true
  */
+
+
 function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $kerattu = false) {
   global $yhtiorow;
 
@@ -86,8 +88,8 @@ function hae_asiakas_vahvistusta_varten($tunnus) {
   $query  = "SELECT gsm,
              email
              FROM  asiakas
-             WHERE yhtio   = '{$kukarow['yhtio']}'
-             AND   tunnus  = '{$tunnus}'";
+             WHERE yhtio  = '{$kukarow['yhtio']}'
+             AND   tunnus = '{$tunnus}'";
   $result = pupe_query($query);
 
   $asiakas = mysql_fetch_assoc($result);
@@ -130,8 +132,8 @@ function loytyy_jt_riveja($tilausnumero) {
             FROM tilausrivi
             INNER JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
               AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus)
-            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-            AND tilausrivi.otunnus = '{$tilausnumero}'";
+            WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
+            AND tilausrivi.otunnus  = '{$tilausnumero}'";
 
   $result = pupe_query($query);
 

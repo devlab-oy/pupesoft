@@ -908,6 +908,20 @@ if ($tee == "ETSILASKU") {
     }
 
     echo "</table><br>";
+
+    $kommenttikentta = $yhtiorow["laskun_monistus_kommenttikentta"];
+
+    if ($kommenttikentta) {
+      $required = $kommenttikentta == "P" ? "required" : "";
+
+      echo "<textarea rows='3'
+                      cols='40'
+                      minlength='20'
+                      placeholder='Nimi, puh ja email'
+                      {$required}></textarea>
+            <br>";
+    }
+
     echo "<input type='submit' value='".t("Monista")."'></form>";
 
     echo "<br>";

@@ -1298,9 +1298,8 @@ else {
             $lisa .= " and varastopaikat.nimitys = '{$rajaus[$i]}' ";
           }
 
-          $varasto_join = "LEFT JOIN varastopaikat ON varastopaikat.yhtio = tilausrivi.yhtio
-                  and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-                  and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))";
+          $varasto_join = "LEFT JOIN varastopaikat ON (varastopaikat.yhtio = tilausrivi.yhtio
+                  AND varastopaikat.tunnus = tilausrivi.varasto)";
           $muutgroups++;
         }
         //**  Varastogrouppaukset loppu **//

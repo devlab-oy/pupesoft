@@ -45,6 +45,10 @@ $yhtio = mysql_real_escape_string($argv[1]);
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
+$tuoterajaus = " AND tuote.status not in ('P','E')
+                 AND tuote.ei_saldoa    = ''
+                 AND tuote.tuotetyyppi  = '' ";
+
 // Tallennetaan rivit tiedostoon
 $filepath = "/tmp/input_balances_{$yhtio}_$ajopaiva.csv";
 
@@ -66,11 +70,8 @@ $query = "SELECT
           JOIN tuotepaikat ON (tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio)
           JOIN varastopaikat ON (varastopaikat.tunnus = tuotepaikat.varasto and varastopaikat.yhtio = tuotepaikat.yhtio)
           JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
-          WHERE tuote.yhtio      = '$yhtio'
-          AND tuote.status      != 'P'
-          AND tuote.ei_saldoa    = ''
-          AND tuote.tuotetyyppi  = ''
-          AND tuote.ostoehdotus  = ''
+          WHERE tuote.yhtio = '$yhtio'
+          {$tuoterajaus}
           GROUP BY 1,2,3
           ORDER BY tuotepaikat.varasto, tuotepaikat.tuoteno";
 $res = pupe_query($query);
@@ -88,12 +89,12 @@ while ($row = mysql_fetch_assoc($res)) {
             ifnull(sum(if(tilausrivi.keratty!='', tilausrivi.varattu, 0)), 0) keratty
             FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
-            WHERE tilausrivi.yhtio   = '$yhtio'
-            and tilausrivi.tyyppi    in ('L','G','V')
+            WHERE tilausrivi.yhtio = '$yhtio'
+            and tilausrivi.tyyppi  in ('L','G','V')
             and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
-            and tilausrivi.tuoteno   = '$row[tuoteno]'
+            and tilausrivi.tuoteno = '$row[tuoteno]'
             and (tilausrivi.varattu > 0 or (tilausrivi.varattu < 0 and lasku.tilaustyyppi = 'R'))
-            and tilausrivi.varasto  = '$row[varasto]'";
+            and tilausrivi.varasto = '$row[varasto]'";
   $kerres = pupe_query($query);
   $kerrow = mysql_fetch_assoc($kerres);
 

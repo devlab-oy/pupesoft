@@ -1480,7 +1480,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
             $kutsu .= ", ".trim($laskurow["nimi"]);
           }
 
-          require "../inc/sahkoposti.inc";
+          require "inc/sahkoposti.inc";
         }
         elseif ($tee == 'NAYTATILAUS') {
           //Työnnetään tuo pdf vaan putkeen!
@@ -1489,9 +1489,6 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         elseif ($komento["SAD-lomake"] != '' and $komento["SAD-lomake"] != 'edi') {
           $line = exec($komento["SAD-lomake"]." ".$pdffilenimi);
         }
-
-        //poistetaan tmp file samantien kuleksimasta...
-        system("rm -f $pdffilenimi");
 
         if ($tee != 'NAYTATILAUS') {
           echo t("SAD-lomake tulostuu")."...<br>";
@@ -1527,7 +1524,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
           $kutsu .= ", ".trim($laskurow["nimi"]);
         }
 
-        require "../inc/sahkoposti.inc";
+        require "inc/sahkoposti.inc";
       }
       elseif ($tee == 'NAYTATILAUS') {
         //Työnnetään tuo pdf vaan putkeen!
@@ -1536,8 +1533,6 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       elseif ($komento["Vientierittely"] != '' and $komento["Vientierittely"] != 'edi') {
         $line = exec($komento["Vientierittely"]." ".$pdffilenimi);
       }
-      //poistetaan tmp file samantien kuleksimasta...
-      system("rm -f $pdffilenimi");
 
       if ($tee != 'NAYTATILAUS') {
         echo t("Vientierittely tulostuu")."...<br>";

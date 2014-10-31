@@ -477,7 +477,7 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
   $keraysvyohyke_select = "";
   $keraysvyohyke_join = "";
   $varaston_hyllypaikat_join = "";
-  $group = "";
+  $group = ",";
 
   if ($yhtiorow['kerayserat'] == "K") {
     $keraysvyohyke_select = "keraysvyohyke.nimitys as keraysvyohykkeen_nimitys,";
@@ -574,7 +574,8 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
               WHERE tuotepaikat.yhtio    = '{$kukarow['yhtio']}'
               {$kerayksettomat_tuotepaikka_where}
               {$varasto_lisa1}
-              GROUP BY 1, {$kerayksettomat_tuotepaikat_group}
+              GROUP BY 1
+              {$kerayksettomat_tuotepaikat_group}
               ORDER BY kpl_valittu_aika DESC
               $lisa";
   }
@@ -607,7 +608,8 @@ function hae_rivit($tyyppi, $kukarow, $vva, $kka, $ppa, $vvl, $kkl, $ppl, $apaik
               {$tuotepaikka_where}
               {$_date}
               {$varasto_lisa2}
-              GROUP BY 1, {$group}
+              GROUP BY 1
+              {$group}
               ORDER BY kpl_valittu_aika DESC
               $lisa";
   }

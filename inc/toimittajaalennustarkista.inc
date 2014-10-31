@@ -198,11 +198,14 @@ if (!function_exists("toimittajaalennustarkista")) {
 
       $and = '';
 
-      if ($chytunnus != '')     $and .= " and ytunnus = '$chytunnus'";
-      if ($chastunn > 0)       $and .= " and toimittaja = '$chastunn'";
+      if ($chytunnus != '')   $and .= " and ytunnus = '$chytunnus'";
+      if ($chastunn > 0)      $and .= " and toimittaja = '$chastunn'";
 
       if ($chryhma != '')     $and .= " and ryhma = '$chryhma'";
-      if ($chtuoteno != '')     $and .= " and tuoteno = '$chtuoteno'";
+      if ($chtuoteno != '')   $and .= " and tuoteno = '$chtuoteno'";
+      if ($chalennuslaji == "" or $chalennuslaji == 0) $chalennuslaji = 1;
+
+      $chminkpl = (int) $chminkpl;
 
       $aquery = "SELECT ytunnus
                  FROM toimittajaalennus

@@ -553,7 +553,7 @@ $haku_query = "SELECT lasku.*,
                if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
                if((lasku.ultilno_maa != ''
                  AND lasku.ultilno_maa in ($sepamaat))
-                 OR lasku.maa in ($sepamaat), 'SEPA', '') sepa,
+                 OR lasku.maa          in ($sepamaat), 'SEPA', '') sepa,
                yriti.iban yriti_iban,
                yriti.bic yriti_bic,
                yriti.asiakastunnus yriti_asiakastunnus,
@@ -561,11 +561,11 @@ $haku_query = "SELECT lasku.*,
                date_format(lasku.popvm, '%d.%m.%y.%H.%i.%s') popvm_dmy
                FROM lasku
                INNER JOIN valuu ON (valuu.yhtio = lasku.yhtio
-                AND valuu.nimi     = lasku.valkoodi)
+                AND valuu.nimi         = lasku.valkoodi)
                INNER JOIN yriti ON (yriti.yhtio = lasku.yhtio
-                AND yriti.tunnus   = lasku.maksu_tili
-                AND yriti.kaytossa = '')
-               WHERE lasku.yhtio   = '{$kukarow["yhtio"]}'
+                AND yriti.tunnus       = lasku.maksu_tili
+                AND yriti.kaytossa     = '')
+               WHERE lasku.yhtio       = '{$kukarow["yhtio"]}'
                {$lisa}
                ORDER BY maksu_tili, olmapvm, sepa, ultilno";
 $result = pupe_query($haku_query);
@@ -780,14 +780,14 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
     $query = "SELECT lasku.*, if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
               if((lasku.ultilno_maa != ''
                 AND lasku.ultilno_maa in ($sepamaat))
-                OR lasku.maa in ($sepamaat), 'SEPA', '') sepa,
+                OR lasku.maa          in ($sepamaat), 'SEPA', '') sepa,
               yriti.iban yriti_iban, yriti.bic yriti_bic, yriti.asiakastunnus yriti_asiakastunnus
               FROM lasku
               JOIN yriti ON (yriti.yhtio = lasku.yhtio
-                AND yriti.tunnus = lasku.maksu_tili
-                AND yriti.kaytossa = '')
-              WHERE lasku.yhtio = '$kukarow[yhtio]'
-              AND lasku.tunnus  in ($tunnukset)
+                AND yriti.tunnus      = lasku.maksu_tili
+                AND yriti.kaytossa    = '')
+              WHERE lasku.yhtio       = '$kukarow[yhtio]'
+              AND lasku.tunnus        in ($tunnukset)
               LIMIT 1";
     $result = pupe_query($query);
     $nettorow = mysql_fetch_assoc($result);
@@ -808,7 +808,7 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
       // p‰ivitet‰‰n laskut "odottaa suoritusta" tilaan
       $query = "UPDATE lasku
                 SET tila = 'Q',
-                popvm    = '$popvm_nyt'
+                popvm       = '$popvm_nyt'
                 WHERE yhtio = '$kukarow[yhtio]'
                 AND tunnus  in ($tunnukset)";
       $uresult = pupe_query($query);
@@ -827,18 +827,18 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
                  if(lasku.ultilno_maa != '', lasku.ultilno_maa, lasku.maa) iban_maa,
                  if((lasku.ultilno_maa != ''
                    AND lasku.ultilno_maa in ($sepamaat))
-                   OR lasku.maa in ($sepamaat), 'SEPA', '') sepa,
+                   OR lasku.maa          in ($sepamaat), 'SEPA', '') sepa,
                  yriti.iban yriti_iban,
                  yriti.bic yriti_bic,
                  yriti.asiakastunnus yriti_asiakastunnus,
                  date_format(lasku.popvm, '%d.%m.%y.%H.%i.%s') popvm_dmy
                  FROM lasku
                  INNER JOIN valuu ON (valuu.yhtio = lasku.yhtio
-                  AND valuu.nimi     = lasku.valkoodi)
+                  AND valuu.nimi         = lasku.valkoodi)
                  INNER JOIN yriti ON (yriti.yhtio = lasku.yhtio
-                  AND yriti.tunnus   = lasku.maksu_tili
-                  AND yriti.kaytossa = '')
-                 WHERE lasku.yhtio   = '{$kukarow["yhtio"]}'
+                  AND yriti.tunnus       = lasku.maksu_tili
+                  AND yriti.kaytossa     = '')
+                 WHERE lasku.yhtio       = '{$kukarow["yhtio"]}'
                  {$lisa}
                  ORDER BY maksu_tili, olmapvm, sepa, ultilno";
   $result = pupe_query($haku_query);

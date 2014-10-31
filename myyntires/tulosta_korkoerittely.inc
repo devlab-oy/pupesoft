@@ -346,18 +346,16 @@ if (basename($_SERVER["SCRIPT_FILENAME"]) != 'muutosite.php') {
       $liite = $pdffilenimi;
       $kutsu = "korkoerittely-$asiakastiedot[ytunnus]";
       $ctype = "pdf";
-      require "../inc/sahkoposti.inc";
+      require "inc/sahkoposti.inc";
     }
     else {
       $line  = exec("$kirow[komento] $pdffilenimi");
     }
-
-    //system("rm -f $pdffilenimi");
-    unset($pdffilenimi);
   }
 }
 else {
   echo $pdf->generate();
 }
+
 unset($pdf);
 unset($firstpage);

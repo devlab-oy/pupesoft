@@ -1,9 +1,154 @@
 <?php
 
-require "inc/parametrit.inc";
+// Kutsutaanko CLI:stä
+$php_cli = (php_sapi_name() == 'cli') ? true : false;
 
-echo "<font class='head'>".t("Tuotenumeroiden vaihto")."</font><hr>";
-flush();
+if ($php_cli) {
+  // Pupesoft root include_pathiin
+  ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(__FILE__));
+
+  // Otetaan tietokanta connect
+  require "inc/connect.inc";
+  require "inc/functions.inc";
+
+  // Logitetaan ajo
+  cron_log();
+
+  if (!isset($argv[1])) {
+    echo "Anna yhtio!\n";
+    die;
+  }
+
+  if (!isset($argv[2])) {
+    echo "Anna tiedostonimi\n";
+    die;
+  }
+
+  // Tehdään parametrit
+  $tee = "file";
+
+  // Haetaan yhtiörow ja kukarow
+  $yhtio    = pupesoft_cleanstring($argv[1]);
+  $yhtiorow = hae_yhtion_parametrit($yhtio);
+  $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
+}
+else {
+  require "inc/parametrit.inc";
+}
+
+// Tämä vaatii paljon muistia
+error_reporting(E_ALL);
+ini_set("memory_limit", "5G");
+ini_set("display_errors", 1);
+unset($pupe_query_debug);
+
+function is_log($str) {
+  global $php_cli;
+
+  if ($php_cli) {
+    echo date("d.m.Y @ G:i:s") . ": {$str}\n";
+  }
+  else {
+    echo "<font class='message'>{$str}</font><br>";
+  }
+}
+
+function kasittele_tuote_tiedosto($file_name, $real_name = '') {
+  global $kukarow, $yhtiorow, $suuraakkosiin;
+
+  $path_parts = ($real_name == '') ? pathinfo($file_name) : pathinfo($real_name);
+  $name = strtoupper($path_parts['filename']);
+  $ext  = strtoupper($path_parts['extension']);
+
+  if ($ext != "TXT" and $ext != "CSV") {
+    die ("<font class='error'><br>".t("Ainoastaan .txt ja .csv tiedostot sallittuja")."!</font>");
+  }
+
+  $file  = fopen($file_name , "r") or die (t("Tiedoston avaus epäonnistui")."!");
+  $error = 0;
+  $count = 0;
+
+  while ($rivi = fgets($file)) {
+
+    // luetaan rivi tiedostosta..
+    $rivi = explode("\t", pupesoft_cleanstring($rivi));
+    $count++;
+
+    $vantuoteno = trim($rivi[0]);
+    $uustuoteno = strtoupper(trim($rivi[1]));
+
+    if ($vantuoteno != '' and $uustuoteno != '') {
+      // Etsitään vanha
+      $query = "SELECT tunnus
+                FROM tuote
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tuoteno = '$vantuoteno'";
+      $tuoteresult = pupe_query($query);
+
+      if (mysql_num_rows($tuoteresult) == 0) {
+        $error++;
+        echo "<font class='message'>".t("VANHAA TUOTENUMEROA EI LÖYDY").": $vantuoteno</font><br>";
+      }
+
+      // Etsitään uusi
+      $query  = "SELECT tunnus
+                 FROM tuote
+                 WHERE yhtio = '$kukarow[yhtio]'
+                 AND tuoteno = '$uustuoteno'";
+      $tuoteuresult = pupe_query($query);
+
+      if (mysql_num_rows($tuoteuresult) == 1) {
+
+        // uusi tuoteno löytyy jo. tarkistetaan onko sama kuin vanha...
+        if (strtoupper($vantuoteno) == $uustuoteno) {
+          // uusi ja vanha tuoteno ovat samat. katsotaan onko vanha jo kokonaan uppercase...
+          if (ctype_upper($vantuoteno)) {
+            $error++;
+            echo "<font class='message'>";
+            echo t("Vanha ja uusi tuotenumero ovat identtiset");
+            echo ": $uustuoteno = $vantuoteno</font><br>";
+          }
+          else {
+            // sallitaan muutos suuraakkosiin
+            $suuraakkosiin[] = strtoupper($vantuoteno."!¡!".$uustuoteno);
+            echo "<font class='message'>";
+            echo t("Tuotenumeron aakkoslaji vaihdetaan suuraakkosiin");
+            echo ": $vantuoteno --> $uustuoteno</font><br>";
+          }
+        }
+        else {
+          $error++;
+          echo "<font class='message'>".t("UUSI TUOTENUMERO LÖYTYY JO").": $uustuoteno</font><br>";
+        }
+      }
+    }
+    elseif ($vantuoteno == '' and $uustuoteno != '') {
+      $error++;
+      echo "<font class='message'>".t("Vanha tuotenumero puuttuu tiedostosta").": (tyhjä) --> $uustuoteno</font><br>";
+    }
+    elseif ($uustuoteno == '' and $vantuoteno != '') {
+      $error++;
+      echo "<font class='message'>".t("Uusi tuotenumero puuttuu tiedostosta").": $vantuoteno --> (tyhjä)</font><br>";
+    }
+  }
+
+  fclose($file);
+
+  if ($count == 0) {
+    die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
+  }
+
+  return $error;
+}
+
+if ($php_cli) {
+  echo "\n";
+  is_log("Tuotenumeroiden vaihto");
+}
+else {
+  echo "<font class='head'>".t("Tuotenumeroiden vaihto")."</font><hr>";
+  flush();
+}
 
 $vikaa          = 0;
 $tarkea         = 0;
@@ -21,68 +166,27 @@ $vankehahin     = "";
 $vanvihahin     = "";
 $vanvihapvm     = "";
 $vanyksikko     = "";
+$tee            = (isset($tee)) ? $tee : "";
+$jatavanha      = (isset($jatavanha)) ? $jatavanha : "";
+$postit         = (isset($postit)) ? $postit : array();
+$suuraakkosiin  = array();
 
-if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $tee == "file") {
-  //Tuotenumerot tulevat tiedostosta
-  $path_parts = pathinfo($_FILES['userfile']['name']);
-  $name  = strtoupper($path_parts['filename']);
-  $ext  = strtoupper($path_parts['extension']);
+if (!isset($muistutus)) $muistutus = "";
 
-  if ($ext != "TXT" and $ext != "CSV") {
-    die ("<font class='error'><br>".t("Ainoastaan .txt ja .cvs tiedostot sallittuja")."!</font>");
-  }
-
-  if ($_FILES['userfile']['size']==0) {
-    die ("<font class='error'><br>".t("Tiedosto on tyhjä")."!</font>");
-  }
-
-  $file = fopen($_FILES['userfile']['tmp_name'], "r") or die (t("Tiedoston avaus epäonnistui")."!");
-
+if ($php_cli) {
+  $uploaded_filename = $argv[2];
+  $error = kasittele_tuote_tiedosto($uploaded_filename);
+  $failista = "JOO";
+}
+elseif (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE and $tee == "file") {
   echo "<font class='message'>".t("Tutkaillaan mitä olet lähettänyt").".<br></font>";
   flush();
 
-  while ($rivi = fgets($file)) {
-    // luetaan rivi tiedostosta..
-    $rivi = explode("\t", pupesoft_cleanstring($rivi));
-
-    if (trim($rivi[0]) != '' and trim($rivi[1]) != '') {
-
-      $vantuoteno = strtoupper(trim($rivi[0]));
-      $uustuoteno = strtoupper(trim($rivi[1]));
-
-      $query  = "SELECT tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$vantuoteno'";
-      $tuoteresult = pupe_query($query);
-
-      if (mysql_num_rows($tuoteresult) != '0') {
-        $query  = "SELECT tunnus from tuote where yhtio = '$kukarow[yhtio]' and tuoteno = '$uustuoteno'";
-        $tuoteuresult = pupe_query($query);
-
-        if (mysql_num_rows($tuoteuresult) != '0') {
-          $error++;
-          echo "<font class='message'>".t("UUSI TUOTENUMERO LÖYTYY JO").": $uustuoteno</font><br>";
-        }
-      }
-      else {
-        $error++;
-        echo "<font class='message'>".t("VANHAA TUOTENUMEROA EI LÖYDY").": $vantuoteno</font><br>";
-      }
-    }
-    else {
-      if (trim($rivi[0]) == '' and trim($rivi[1]) != '') {
-        $error++;
-        echo "<font class='message'>".t("Vanha tuotenumero puuttuu tiedostosta").": (tyhjä) --> $rivi[1]</font><br>";
-      }
-      elseif (trim($rivi[1]) == '' and trim($rivi[0]) != '') {
-        $error++;
-        echo "<font class='message'>".t("Uusi tuotenumero puuttuu tiedostosta").": $rivi[0] --> (tyhjä)</font><br>";
-      }
-    }
-  }
-
+  $uploaded_filename = $_FILES['userfile']['tmp_name'];
+  $error = kasittele_tuote_tiedosto($uploaded_filename, $_FILES['userfile']['name']);
   $failista = "JOO";
-  fclose($file);
 }
-elseif (is_uploaded_file($_FILES['userfile']['tmp_name']) !== TRUE and $tee == "file") {
+elseif (isset($_FILES['userfile']) and is_uploaded_file($_FILES['userfile']['tmp_name']) !== TRUE and $tee == "file") {
 
   $vantuoteno = strtoupper(trim($vantuoteno));
   $uustuoteno = strtoupper(trim($uustuoteno));
@@ -122,15 +226,15 @@ elseif (is_uploaded_file($_FILES['userfile']['tmp_name']) !== TRUE and $tee == "
     echo "<font class='message'>".t("VANHAA TUOTENUMEROA EI LÖYDY").": $vantuoteno</font><br>";
   }
 
-  $failista   = "EI";
+  $failista = "EI";
 }
 
 if ($error == 0 and $tee == "file") {
 
-  echo "<font class='message'>".t("Syötetyt tiedot ovat ok")."</font><br><br>";
+  is_log(t("Syötetyt tiedot ovat ok"));
   flush();
 
-  echo "<font class='message'>".t("Aloitellaan päivitys, tämä voi kestää hetken").".  <br></font>";
+  is_log(t("Aloitellaan päivitys, tämä voi kestää hetken"));
   flush();
 
   $tulos = array();
@@ -170,7 +274,7 @@ if ($error == 0 and $tee == "file") {
   $montako = count($tulos);
 
   if ($montako > 0) {
-    echo "<font class='message'>".t("Löydettiin paikat joita pitää muuttaa").": $montako kappaletta.</font><br>";
+    is_log(t("Löydettiin paikat joita pitää muuttaa").": $montako kappaletta.");
     flush();
   }
   else {
@@ -208,11 +312,11 @@ if ($error == 0 and $tee == "file") {
   if ($perhetyyppi == "") $perhetyyppi = "''";
   if ($kielet == "") $kielet = "''";
 
-  echo "<font class='message'>".t("Nyt ollan kerätty tietokannasta kaikki tarpeellinen")."<br>".t("Aloitellaan muutos")."...</font><br>";
+  is_log(t("Nyt ollan kerätty tietokannasta kaikki tarpeellinen")."<br>".t("Aloitellaan muutos")."...");
   flush();
 
   if ($failista == "JOO") {
-    $file = fopen($_FILES['userfile']['tmp_name'], "r") or die (t("Tiedoston avaus epäonnistui")."!");
+    $file = fopen($uploaded_filename, "r") or die (t("Tiedoston avaus epäonnistui")."!");
   }
   else {
     $tmpfname = tempnam("/tmp", "Vaihdatuoteno");
@@ -259,6 +363,10 @@ if ($error == 0 and $tee == "file") {
                    AND tuoteno = '$uustuoteno'";
         $tuoteuresult = pupe_query($query);
 
+        if (in_array(strtoupper($vantuoteno."!¡!".$uustuoteno), $suuraakkosiin)) {
+          $uusi_on_jo = "SAMA";
+        }
+
         if (mysql_num_rows($tuoteuresult) == 0 or $uusi_on_jo == "OK" or $uusi_on_jo == "SAMA") {
 
           $query = "INSERT INTO tuote_muutokset
@@ -270,7 +378,7 @@ if ($error == 0 and $tee == "file") {
                     kuka          = '$kukarow[kuka]'";
           $result2 = pupe_query($query);
 
-          echo "<font class='message'>".t("Vaihdetaan tuotenumero ja siirretään historiatiedot").": $vantuoteno --> $uustuoteno.</font><br>";
+          is_log(t("Vaihdetaan tuotenumero ja siirretään historiatiedot").": $vantuoteno --> $uustuoteno.");
           flush();
 
           foreach ($tulos as $saraketaulu) {
@@ -547,13 +655,16 @@ if ($error == 0 and $tee == "file") {
           $lask++;
         }
         else {
-          echo t("UUSI TUOTENUMERO LÖYTYY JO")." $uustuoteno<br>";
+          is_log(t("UUSI TUOTENUMERO LÖYTYY JO")." $uustuoteno");
         }
       }
       else {
-        echo t("VANHAA TUOTENUMEROA EI LÖYDY")." $vantuoteno<br>";
+        is_log(t("VANHAA TUOTENUMEROA EI LÖYDY")." $vantuoteno");
       }
     }
+
+    // Nollataan tämä, koska sitä muutetaan loopissa
+    $uusi_on_jo = "";
 
     $unlokki = "UNLOCK TABLES";
     $res     = pupe_query($unlokki);
@@ -604,7 +715,7 @@ if ($error == 0 and $tee == "file") {
 
   fclose($file);
 
-  echo "<br><font class='message'>".t("Valmis, muutettiin")." $lask ".t("tuotetta")."!<br><br><br></font>";
+  is_log(t("Valmis, muutettiin")." $lask ".t("tuotetta")."!");
   $tee = "";
 }
 elseif ($tee == "file") {
@@ -613,7 +724,7 @@ elseif ($tee == "file") {
 }
 
 
-if ($tee == "") {
+if ($tee == "" and $php_cli === false) {
 
   echo "<form method='post' name='sendfile' enctype='multipart/form-data'>
 

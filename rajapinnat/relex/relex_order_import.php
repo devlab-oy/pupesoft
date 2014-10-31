@@ -23,6 +23,9 @@ if ($php_cli) {
   require "inc/functions.inc";
   require "inc/luo_ostotilausotsikko.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   $lock_params = array(
     "locktime" => 900,
   );
@@ -40,7 +43,6 @@ if ($php_cli) {
   if ($yhtiorow["yhtio"] == "") {
     die ("Yhtiö $kukarow[yhtio] ei löydy!");
   }
-
 }
 else {
   require "../../inc/parametrit.inc";
@@ -218,6 +220,7 @@ if (isset($tee) and trim($tee) == 'aja') {
           'varasto'                 => $varasto['tunnus'],
           'myytil_toimaika'         => $ehdotus_pvm,
           'tilaustyyppi'            => $tilaustyyppi,
+          'myytil_viesti'           => t("Relex-ostotilaus"),
           'ostotilauksen_kasittely' => "GEN", // tällä erotellaan generoidut ja käsin tehdyt ostotilaukset
         );
 

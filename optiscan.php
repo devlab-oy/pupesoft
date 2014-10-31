@@ -225,14 +225,14 @@ elseif ($sanoma == "GetPicks") {
 
           // tilaus on jo tilassa N A, p‰ivitet‰‰n nyt tilaus "ker‰yslista tulostettu" eli L A
           $query = "UPDATE lasku SET
-                    tila         = 'L',
+                    tila        = 'L',
                     alatila     = 'A',
                     lahetepvm   = now(),
                     hyvak3      = '{$kukarow['kuka']}',
                     h3time      = now(),
                     kerayslista = '{$kerayslistatunnus}'
                     WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus in ({$otunnukset})
+                    AND tunnus  in ({$otunnukset})
                     AND tila    = 'N'
                     AND alatila = 'KA'";
           pupe_query($query);
@@ -246,7 +246,7 @@ elseif ($sanoma == "GetPicks") {
                       h3time      = now(),
                       kerayslista = '{$kerayslistatunnus}'
                       WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tunnus in ({$otunnukset})
+                      AND tunnus  in ({$otunnukset})
                       AND tila    = 'G'
                       AND alatila = 'KJ'";
             pupe_query($query);

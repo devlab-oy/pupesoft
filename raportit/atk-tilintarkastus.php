@@ -447,9 +447,9 @@ if ($tee == "raportti") {
               FROM lasku
               LEFT JOIN toimi ON (toimi.yhtio = lasku.yhtio and toimi.tunnus = lasku.liitostunnus)
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-              AND lasku.tila   in ('H','Y','M','P','Q')
-              AND lasku.tapvm  >= '$alku'
-              AND lasku.tapvm  <= '$loppu'
+              AND lasku.tila    in ('H','Y','M','P','Q')
+              AND lasku.tapvm   >= '$alku'
+              AND lasku.tapvm   <= '$loppu'
               ORDER BY lasku.tapvm, lasku.luontiaika";
     $result = pupe_query($query);
 

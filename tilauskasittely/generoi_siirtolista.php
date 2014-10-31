@@ -509,9 +509,9 @@ if ($tee == 'M' and isset($generoi)) {
                   FROM avainsana AS ana
                   JOIN toimitustapa AS tpa
                   ON ( ana.yhtio = tpa.yhtio AND ana.selitetark_2 = tpa.tunnus )
-                  WHERE ana.yhtio = '$kukarow[yhtio]'
-                  AND ana.laji = 'SIIRTOVARASTOT'
-                  AND ana.selite = '$lahdevarasto'
+                  WHERE ana.yhtio    = '$kukarow[yhtio]'
+                  AND ana.laji       = 'SIIRTOVARASTOT'
+                  AND ana.selite     = '$lahdevarasto'
                   AND ana.selitetark = '$kohdevarasto'";
         $ttresult = pupe_query($ttqry);
 

@@ -294,16 +294,16 @@ if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
 
             if ($toitarow_old['tulostustapa'] == 'E' and $toitarow_new['tulostustapa'] == 'H') {
               $query = "UPDATE rahtikirjat SET
-                        tulostettu = now()
-                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        tulostettu     = now()
+                        WHERE yhtio    = '{$kukarow['yhtio']}'
                         AND otsikkonro = '{$row['tunnus']}'";
               $updres = pupe_query($query);
             }
 
             if ($toitarow_old['tulostustapa'] == 'H' and $toitarow_new['tulostustapa'] == 'E') {
               $query = "UPDATE rahtikirjat SET
-                        tulostettu = '0000-00-00 00:00:00'
-                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        tulostettu     = '0000-00-00 00:00:00'
+                        WHERE yhtio    = '{$kukarow['yhtio']}'
                         AND otsikkonro = '{$row['tunnus']}'";
               $updres = pupe_query($query);
             }
@@ -2180,13 +2180,13 @@ if ($select_varasto > 0) {
   $query = "SELECT group_concat(lasku.tunnus) tunnukset
             FROM lasku
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tila = 'N'
+            AND lasku.tila    = 'N'
             AND lasku.alatila = 'A'
             UNION
             SELECT group_concat(lasku.tunnus) tunnukset
             FROM lasku
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tila = 'L'
+            AND lasku.tila    = 'L'
             AND lasku.alatila IN ('A', 'B', 'C')";
   $result = pupe_query($query);
 
@@ -2200,7 +2200,7 @@ if ($select_varasto > 0) {
     $query = "SELECT group_concat(lasku.tunnus) tunnukset
               FROM lasku
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-              AND lasku.tila = 'G'
+              AND lasku.tila    = 'G'
               AND lasku.alatila IN ('J', 'A', 'B', 'C')";
     $result = pupe_query($query);
     $row = mysql_fetch_assoc($result);
@@ -3251,8 +3251,8 @@ function hae_suljetut_lahdot($toimitustavan_tunnukset, $ajax_request) {
             JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio
               AND toimitustapa.selite       = lasku.toimitustapa
               AND toimitustapa.tunnus       IN (".($ajax_request == 1 ?
-    $toimitustavan_tunnukset :
-    implode(',', $toimitustavan_tunnukset))."))
+            $toimitustavan_tunnukset :
+            implode(',', $toimitustavan_tunnukset))."))
             WHERE lahdot.yhtio              = '{$kukarow['yhtio']}'
             AND lahdot.aktiivi              = 'S'
             AND lahdot.pvm                  > date_sub(now(), INTERVAL 14 day)

@@ -1217,10 +1217,10 @@ if ($tee == 'E' or $tee == 'F') {
 
       $query = "SELECT varastosiirto_tunnus
                 FROM lasku
-                WHERE yhtio  = '{$kukarow['yhtio']}'
-                AND tila     = 'L'
-                AND alatila  = 'X'
-                AND laskunro = '{$trow['laskunro']}'
+                WHERE yhtio              = '{$kukarow['yhtio']}'
+                AND tila                 = 'L'
+                AND alatila              = 'X'
+                AND laskunro             = '{$trow['laskunro']}'
                 AND varastosiirto_tunnus > 0";
       $varastosiirto_result = pupe_query($query);
 

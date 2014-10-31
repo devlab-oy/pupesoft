@@ -48,14 +48,14 @@ $syklit = substr($syklit, 0, -1);
 if (trim($syklit) != "") {
 
   // 1. nämä toimittajat ovat toimittaneet meille tavaraa ja jotka ovat AKTIIVISIA, ei poistettuja tai poistuvia
-  $sql = "  SELECT tuotteen_toimittajat.liitostunnus, toimi.hintojenpaivityssykli, toimi.nimi
-            FROM tuotteen_toimittajat
-            JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio
-              AND toimi.tunnus = tuotteen_toimittajat.liitostunnus
-              AND toimi.tyyppi not in ('P', 'PP')
-              AND toimi.hintojenpaivityssykli in ($syklit))
-            WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
-            GROUP BY tuotteen_toimittajat.liitostunnus";
+  $sql = "SELECT tuotteen_toimittajat.liitostunnus, toimi.hintojenpaivityssykli, toimi.nimi
+          FROM tuotteen_toimittajat
+          JOIN toimi ON (toimi.yhtio = tuotteen_toimittajat.yhtio
+            AND toimi.tunnus                = tuotteen_toimittajat.liitostunnus
+            AND toimi.tyyppi                not in ('P', 'PP')
+            AND toimi.hintojenpaivityssykli in ($syklit))
+          WHERE tuotteen_toimittajat.yhtio  = '$kukarow[yhtio]'
+          GROUP BY tuotteen_toimittajat.liitostunnus";
   $result = pupe_query($sql);
 
   $laheta_meilit = array();
@@ -65,22 +65,22 @@ if (trim($syklit) != "") {
     while ($ttrow = mysql_fetch_assoc($result)) {
 
       // 2. tämä hakee toimittajan tuotteet, jotka ovat aktiivisia tuotteita
-      $tuotteet=" SELECT group_concat(distinct tuote.tunnus) lista_tunnuksista
-                  FROM tuotteen_toimittajat
-                  JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio
-                      AND tuote.tuoteno = tuotteen_toimittajat.tuoteno
-                      AND tuote.status not in ('P','X'))
-                  WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
-                  AND tuotteen_toimittajat.liitostunnus = '$ttrow[liitostunnus]'";
+      $tuotteet="SELECT group_concat(distinct tuote.tunnus) lista_tunnuksista
+                 FROM tuotteen_toimittajat
+                 JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio
+                     AND tuote.tuoteno                 = tuotteen_toimittajat.tuoteno
+                     AND tuote.status                  not in ('P','X'))
+                 WHERE tuotteen_toimittajat.yhtio      = '$kukarow[yhtio]'
+                 AND tuotteen_toimittajat.liitostunnus = '$ttrow[liitostunnus]'";
       $result2 = pupe_query($tuotteet);
       $tuoterow = mysql_fetch_assoc($result2);
 
       // 3. haetaan kyseisien tuotteiden tuotepäällikkönro
-      $tuotesql=" SELECT DISTINCT tuotepaallikko
-                  FROM tuote
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND tunnus in ($tuoterow[lista_tunnuksista])
-                  AND tuotepaallikko != 0";
+      $tuotesql="SELECT DISTINCT tuotepaallikko
+                 FROM tuote
+                 WHERE yhtio         = '$kukarow[yhtio]'
+                 AND tunnus          in ($tuoterow[lista_tunnuksista])
+                 AND tuotepaallikko != 0";
       $result3 = pupe_query($tuotesql);
 
       while ($henkilot = mysql_fetch_assoc($result3)) {
@@ -99,10 +99,10 @@ if (trim($syklit) != "") {
         }
 
         // 4. Haetaan ostajan ja tuotepyällikön sähköpostiosoitteet esille.
-        $postisql = " SELECT nimi, eposti
-                      FROM kuka
-                      WHERE yhtio = '$kukarow[yhtio]'
-                      AND myyja = '$key'";
+        $postisql = "SELECT nimi, eposti
+                     FROM kuka
+                     WHERE yhtio = '$kukarow[yhtio]'
+                     AND myyja   = '$key'";
         $resuposti = pupe_query($postisql);
 
         while ($posti = mysql_fetch_assoc($resuposti)) {

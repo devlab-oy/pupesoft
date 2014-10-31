@@ -933,14 +933,14 @@ while ($tietue = fgets($fd)) {
   case 'OSTOTIL.OT_MAKSETTU' :
     // Jos Magenton tilaus ja osutaan erikoiskauppakäsittelyyn
     if ($edi_tyyppi == 'magento' and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
-       and count($verkkokauppa_erikoiskasittely) > 0) {
+      and count($verkkokauppa_erikoiskasittely) > 0) {
 
-       $result = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
-       if (count($result) > 0) {
-         // Tyhjätään tämä ja haetaan maksuehto myöhemmin asiakkaan takaa
-         $tieto = '';
-         break;
-       }
+      $result = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+      if (count($result) > 0) {
+        // Tyhjätään tämä ja haetaan maksuehto myöhemmin asiakkaan takaa
+        $tieto = '';
+        break;
+      }
     }
 
     // jos Magenton tilaus on jo maksettu luottokortilla niin päivitetään maksuehto

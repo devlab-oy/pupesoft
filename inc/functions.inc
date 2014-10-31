@@ -17348,7 +17348,7 @@ if (!function_exists("tee_keraysera")) {
     $_mittaraja   = !empty($keraysvyohyketiedot['mittaraja']);
     $_painoraja   = !empty($keraysvyohyketiedot['painoraja']);
     $_kappaleraja = !empty($keraysvyohyketiedot['kappaleraja']);
-    $_mitta_vai_paino_kappale = ($_mittaraja OR $_painoraja OR $_kappaleraja);
+    $_mitta_vai_paino_kappale = ($_mittaraja or $_painoraja or $_kappaleraja);
 
     if ($_priorisointi_kaytossa and $_aikaraja_kaytossa and $_mitta_vai_paino_kappale) {
 
@@ -17502,6 +17502,7 @@ if (!function_exists("tee_keraysera")) {
      * Mediaanirypp‰‰st‰ otetaan keskihajontaluku eri askelv‰leill‰.
      * Askelv‰li riippuu montako ker‰ilynippuja saadaan.
      */
+
 
     $kerailyniput        = array();
     $kerailyniput_key    = array();
@@ -17913,7 +17914,7 @@ if (!function_exists("tee_keraysera")) {
 
     mysql_data_seek($res, 0);
 
-    #foreach ($fixed_main_array as $key => $tilaukset) {
+    //foreach ($fixed_main_array as $key => $tilaukset) {
 
     $_fixed_main_array_count = count($fixed_main_array);
     $_fixed_main_array_keys = array_keys($fixed_main_array);
@@ -18313,7 +18314,7 @@ if (!function_exists("tee_keraysera")) {
           $pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] = 0;
           $pakkaukset[$kaytettava_pakkaus]['kaytetty_paino'] = 0;
 
-          # Katsotaan nurkan takaa onko parempia nippuja tarjolla mitk‰ mahtuisi er‰‰n
+          // Katsotaan nurkan takaa onko parempia nippuja tarjolla mitk‰ mahtuisi er‰‰n
           if (isset($kukarow['debugstring'])) {
             $kukarow['debugstring'] .= "(E1001): Katsotaan nurkan takaa<br>\n";
           }
@@ -20578,21 +20579,21 @@ if (!function_exists("pupesoft_sahkoposti")) {
           $attachement_ctype       = isset($liite["ctype"]) ? strtoupper($liite["ctype"]) : "";
 
           $resque_liitteet[] = array("filename"    => utf8_encode($attachement_filename),
-                                     "newfilename" => utf8_encode($attachement_newfilename),
-                                     "ctype"       => utf8_encode($attachement_ctype));
+            "newfilename" => utf8_encode($attachement_newfilename),
+            "ctype"       => utf8_encode($attachement_ctype));
         }
       }
 
       $resque_args = array(
-              'user'          => $kukarow["eposti"],
-              'error_message' => utf8_encode(t("S‰hkˆpostin l‰hetys ep‰onnistui").": $email_to"),
-              'from'          => $yhtiorow["postittaja_email"],
-              'from_name'     => utf8_encode($yhtiorow["nimi"]),
-              'to'            => $email_to,
-              'cc'            => $email_cc,
-              'subject'       => utf8_encode($email_subject),
-              'body'          => utf8_encode($email_body),
-              'attachements'  => $resque_liitteet);
+        'user'          => $kukarow["eposti"],
+        'error_message' => utf8_encode(t("S‰hkˆpostin l‰hetys ep‰onnistui").": $email_to"),
+        'from'          => $yhtiorow["postittaja_email"],
+        'from_name'     => utf8_encode($yhtiorow["nimi"]),
+        'to'            => $email_to,
+        'cc'            => $email_cc,
+        'subject'       => utf8_encode($email_subject),
+        'body'          => utf8_encode($email_body),
+        'attachements'  => $resque_liitteet);
 
       Resque::enqueue('PupeEmail', 'EmailWorker', $resque_args);
       return TRUE;
@@ -29772,7 +29773,7 @@ if (!function_exists("kasittele_tiliote_viite")) {
 
 if (!function_exists("cron_log")) {
   function cron_log($file = "") {
-    GLOBAL $argv, $pupesoft_commandlinelog;
+    global $argv, $pupesoft_commandlinelog;
 
     if (isset($pupesoft_commandlinelog) and substr($pupesoft_commandlinelog, -23) == "pupesoft-commanline.log") {
       $_msg  = microtime(TRUE)."|$file|".serialize($argv)."\n";

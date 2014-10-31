@@ -1406,6 +1406,20 @@ if ($tee == 'MONISTA') {
       $laskures = pupe_query($query);
       $laskurow = mysql_fetch_assoc($laskures);
 
+      if ($kommenttikentta and !empty($kommentti)) {
+        $tallennettava_kommentti =
+          trim($laskurow["sisviesti3"] .
+               "\nMonistettaessa annetut asiakkaan yhteystedot:\n" .
+               $kommentti);
+
+        $kommentti_query = "UPDATE lasku SET
+                            sisviesti3 = '{$tallennettava_kommentti}'
+                            WHERE yhtio = '{$kukarow['yhtio']}'
+                            AND tunnus = '{$utunnus}'";
+
+        pupe_query($kommentti_query);
+      }
+
       $tulos_ulos[] = $utunnus;
 
       if ($toim == 'SOPIMUS') {

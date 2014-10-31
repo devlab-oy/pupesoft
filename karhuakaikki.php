@@ -14,6 +14,9 @@ if ($argv[1] == '') {
 require "inc/connect.inc";
 require "inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
+
 if ($argv[2] != "") {
   $lpvm_aikaa = $argv[2];
 }

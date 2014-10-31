@@ -274,6 +274,9 @@ if (isset($tee) and trim($tee) == 'aja') {
 
       // Siirret‰‰n valmis tilaustiedosto VALMIS-kansioon talteen.
       rename($e3_ehdotuskansio."/".$hfile, $e3_ehdotuskansio."/done/".$hfile);
+
+      // Logitetaan ajo
+      cron_log($e3_ehdotuskansio."/done/".$hfile);
     }
     else {
       echo "<br>";

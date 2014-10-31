@@ -59,8 +59,8 @@ if ($kollityht > 0) {
     }
 
     //$apu_kollityht = $kollityht;
-    if ($kollityht > 10) {
-      die("Liikaa kolleja! (max 10 kpl)"); // kolleja ei saa olla yli 10 per toimitusrivi...
+    if ($kollityht > 20) {
+      die("Liikaa kolleja! (max 20 kpl)"); // kolleja ei saa olla yli 20 per toimitusrivi...
     }
 
     //  Luodaan meidän tiedostorakenne parcelOrder arrayhin ja pukataan se tonne aineistoon sitten laakista

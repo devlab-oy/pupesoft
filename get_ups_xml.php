@@ -10,6 +10,9 @@ date_default_timezone_set('Europe/Helsinki');
 require 'inc/connect.inc';
 require 'inc/functions.inc';
 
+// Logitetaan ajo
+cron_log();
+
 foreach ($ups_path as $ups_key => $ups_val) {
 
   $ups_host_temp = $ups_host[$ups_key];

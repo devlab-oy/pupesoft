@@ -25,6 +25,9 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(d
 require 'inc/connect.inc';
 require 'inc/functions.inc';
 
+// Logitetaan ajo
+cron_log();
+
 $ajopaiva  = date("Y-m-d");
 $paiva_ajo = FALSE;
 
@@ -42,6 +45,10 @@ $yhtio = mysql_real_escape_string($argv[1]);
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
+$tuoterajaus = " AND tuote.status not in ('P','E')
+                 AND tuote.ei_saldoa    = ''
+                 AND tuote.tuotetyyppi  = '' ";
+
 $tecd = FALSE;
 
 if (@include "inc/tecdoc.inc") {
@@ -58,7 +65,7 @@ if (!$fp = fopen($filepath, 'w+')) {
   die("Tiedoston avaus epäonnistui: $filepath\n");
 }
 
-$tuoterajaus = "";
+$tuotteet = "";
 
 // Päiväajoon otetaan mukaan vain viimeisen vuorokauden aikana muuttuneet
 if ($paiva_ajo) {
@@ -68,11 +75,8 @@ if ($paiva_ajo) {
 
   $query = "SELECT tuote.tuoteno
             FROM tuote
-            WHERE tuote.yhtio      = '{$yhtio}'
-            AND tuote.status      != 'P'
-            AND tuote.ei_saldoa    = ''
-            AND tuote.tuotetyyppi  = ''
-            AND tuote.ostoehdotus  = ''
+            WHERE tuote.yhtio = '{$yhtio}'
+            {$tuoterajaus}
             AND (tuote.muutospvm  >= date_sub(now(), interval 24 HOUR)
               OR tuote.luontiaika  >= date_sub(now(), interval 24 HOUR))";
   $res = pupe_query($query);
@@ -93,7 +97,7 @@ if ($paiva_ajo) {
     $tuotelista .= ",'".pupesoft_cleanstring($row["tuoteno"])."'";
   }
 
-  $tuoterajaus = " AND tuote.tuoteno IN ({$tuotelista}) ";
+  $tuotteet = " AND tuote.tuoteno IN ({$tuotelista}) ";
 }
 
 // Otsikkotieto
@@ -203,7 +207,7 @@ $query = "SELECT
           if(tuote.halytysraja = 0, '', tuote.halytysraja) halytysraja,
           if(tuote.varmuus_varasto = 0, '', tuote.varmuus_varasto) varmuus_varasto,
           if(tuote.tilausmaara = 0, 1, tuote.tilausmaara) tilausmaara,
-          tuote.ostoehdotus,
+          if(tuote.ostoehdotus != 'E', 'K', 'E') ostoehdotus,
           tuote.tahtituote,
           if(tuote.myynti_era = 0, 1, tuote.myynti_era) myynti_era,
           if(tuote.minimi_era = 0, '', tuote.minimi_era) minimi_era,
@@ -216,12 +220,9 @@ $query = "SELECT
           tuote.tunnus
           FROM tuote
           JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
-          WHERE tuote.yhtio      = '$yhtio'
-          AND tuote.status      != 'P'
-          AND tuote.ei_saldoa    = ''
-          AND tuote.tuotetyyppi  = ''
-          AND tuote.ostoehdotus  = ''
+          WHERE tuote.yhtio = '$yhtio'
           {$tuoterajaus}
+          {$tuotteet}
           ORDER BY tuote.tuoteno";
 $res = pupe_query($query);
 
@@ -353,18 +354,41 @@ while ($row = mysql_fetch_assoc($res)) {
                AND tilausrivi.tyyppi         = 'O'
                AND tilausrivi.tuoteno        = '{$row['tuoteno']}'
                AND tilausrivi.laskutettuaika > date_sub(current_date, interval 1 year)
+               HAVING toimitusaika > 0
                ORDER BY laskutettuaika desc
                LIMIT 5";
       $emares = pupe_query($emaq);
 
-      $ema = 0;
+      $ema_tulot    = array();
+      $ema          = 0;
+      $alfa         = 0.35;
+      $korjattu_ema = 0;
 
       if (mysql_num_rows($emares)) {
         while ($emarow = mysql_fetch_assoc($emares)) {
-          $ema += $emarow["toimitusaika"];
+          $ema_tulot[] = $emarow["toimitusaika"];
         }
 
-        $ema = round($ema / mysql_num_rows($emares));
+        $ema_tulot = array_reverse($ema_tulot);
+        $ema_maara = count($ema_tulot);
+
+        // Ema ekan tulos perusteella on sama kuin ekan tulon toimitusaika
+        $ema = $ema_tulot[0];
+
+        if ($ema_maara > 1) {
+
+          $poikpros = array();
+
+          for ($i = 1; $i < $ema_maara; $i++) {
+            $ema = $alfa * $ema_tulot[$i] + (1 - $alfa) * $ema;
+            $poikpros[] = abs($ema - $ema_tulot[$i]) / $ema;
+          }
+
+          // EMA:n ja toimitusajan poikkeamaprossat keskimäärin
+          $avg_poikpros = array_sum($poikpros) / count($poikpros);
+
+          $korjattu_ema = round($ema * (1 + $avg_poikpros / 2), 2);
+        }
       }
 
       // Hetaan kaikki ostohinnat yhtiön oletusvaluutassa
@@ -418,7 +442,7 @@ while ($row = mysql_fetch_assoc($res)) {
       $trivi .= "{$ttrow['toim_yksikko']};";
       $trivi .= "{$ttrow['tuotekerroin']};";
       $trivi .= "{$ttrow['jarjestys']};";
-      $trivi .= "$ema";
+      $trivi .= "$korjattu_ema";
       $trivi .= "\n";
 
       fwrite($tfp, $trivi);

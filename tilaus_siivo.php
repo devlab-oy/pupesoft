@@ -254,7 +254,7 @@ else {
 $query = "SELECT lasku.tunnus, lasku.tila, lasku.alatila, lasku.nimi, lasku.vienti, lasku.valkoodi, concat(if(kuka.kassamyyja!='', 'Kassa',''), ' ', if(extranet!='', 'Extranet','')) kassamyyja, lasku.luontiaika,
           count(tilausrivi.tunnus) tilausrivi1,
           sum(if(tilausrivi.var != 'P', 1, 0)) tilausrivi2,
-          sum(if($kpl != 0 and tilausrivi.var in ('J','S'), 1, 0)) tilausrivi3
+          sum(if($kpl != 0 and tilausrivi.var = 'J', 1, 0)) tilausrivi3
           FROM lasku use index (yhtio_tila_luontiaika)
           LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and lasku.laatija = kuka.kuka
           LEFT JOIN tilausrivi ON lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus and tilausrivi.tyyppi != 'D'

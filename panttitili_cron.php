@@ -19,6 +19,9 @@ require "inc/connect.inc";
 require "inc/functions.inc";
 require "tilauskasittely/luo_myyntitilausotsikko.inc";
 
+// Logitetaan ajo
+cron_log();
+
 $kukarow['yhtio'] = (string) $argv[1];
 $kukarow['kuka'] = 'admin';
 $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);

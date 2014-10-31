@@ -17,6 +17,9 @@ if (!isset($argv[1]) or $argv[1] == '') {
 require "inc/connect.inc";
 require "inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
+
 if (isset($argv[2]) and $argv[2] != "") {
   $ajalta = $argv[2];
 }

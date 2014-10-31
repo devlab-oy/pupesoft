@@ -352,12 +352,16 @@ foreach ($tulostimet as $tulostin) {
     echo "<option value='excel'>".t('Excel-tiedosto')."</option>";
   }
 
-  if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS' or $toim == 'LAHETE' or $toim == 'TILAUSVAHVISTUS' or $toim == 'LASKU' or $toim == 'KERAYSLISTA') and $asrow['email'] != '') {
+  if (($toim == 'TARJOUS' or $toim == 'MYYNTISOPIMUS' or $toim == 'LAHETE' or $toim == 'TILAUSVAHVISTUS' or $toim == 'LASKU') and $asrow['email'] != '') {
     echo "<option value='asiakasemail$asrow[email]'>".t("Asiakkaan sähköpostiin").": $asrow[email]</option>";
   }
 
   if ($toim == 'LASKU' and trim($asrow['lasku_email']) != '') {
     echo "<option value='asiakasemail$asrow[lasku_email]'>".t("Asiakkaan laskutussähköpostiin").": $asrow[lasku_email]</option>";
+  }
+
+  if ($toim == 'TILAUSVAHVISTUS') {
+    echo "<option value='excel_lahete_geodis_wilson'>".t("Excel-tilausvahvistus")."</option>";
   }
 
   if (isset($editoimrow) and $editoimrow["edi_kuvaus"] != '' and

@@ -2187,12 +2187,12 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 }
               }
 
-              $rivitunnus      = 0;
-              $kommentti       = "";
-              $tuotenimitys     = "";
+              $rivitunnus         = 0;
+              $kommentti          = "";
+              $tuotenimitys       = "";
               $tuotenimitys_force = "";
               $omalle_tilaukselle = "";
-              $ale_peruste    = "";
+              $ale_peruste        = "";
 
             } // Tällä rundilla myydyt
           } // Jos tuoteperhettä löytyi riittävästi tai myytiin pelkää isää
@@ -2705,7 +2705,14 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
         $alemaara = $kpl;
       }
 
-      list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $alemaara, $netto, $hinta, $ale_kaikki_array, '', '', ($myy_tyyppi[$indeksi] == 'LAPSITUOTE' ? 'X' : ''));
+      if (!empty($myy_tyyppi[$indeksi]) and $myy_tyyppi[$indeksi] == 'LAPSITUOTE') {
+        $_onko_lapsituote = 'X';
+      }
+      else {
+        $_onko_lapsituote = '';
+      }
+
+      list($lis_hinta, $lis_netto, $lis_ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($laskurow, $trow, $alemaara, $netto, $hinta, $ale_kaikki_array, '', '', $_onko_lapsituote);
       list($lis_hinta, $lis_alv) = alv($laskurow, $trow, $lis_hinta, $alv, $alehinta_alv);
     }
 
@@ -3477,7 +3484,7 @@ if ($_yhteen_varastoon and $_sopivatilaustoimi and !in_array($var, array('S', 'U
 
   $_normi_tyhja       = (empty($myy_hyllyalue) and empty($myy_hyllynro));
   $_puute_ei_tyhja    = ($p_hyllyalue != "" and $p_hyllynro != "");
-  $_puutteesta_hyllyt = ($_normi_tyhja and $_puute_ei_tyhja);
+  $_puutteesta_hyllyt = ( $_normi_tyhja and $_puute_ei_tyhja);
 
   if ($_puutteesta_hyllyt) {
     $myy_hyllyalue_temp = $p_hyllyalue;

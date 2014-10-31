@@ -137,8 +137,8 @@ if (!function_exists('normaali_varastosiirto')) {
         if ($tilausrivi['perheid'] != 0 and $tilausrivi['perheid'] == $tilausrivi['tunnus']) {
           # MYYNNIN TUOTEPERHEEN ISÄRIVI
           $_tuoteperheet[$tilausrivi['perheid']] = $_tunnus;
-
           $query = "UPDATE tilausrivi SET
+
                     perheid = tunnus
                     WHERE yhtio = '{$kukarow['yhtio']}'
                     AND tunnus = '{$_tunnus}'";
@@ -282,6 +282,7 @@ if (!function_exists('luo_varastosiirtorivi')) {
     $netto            = "";
     $korvaavakielto   = 1;
     $perhekielto      = 1;
+    $perheid          = $tilausrivi['perheid'];
     $orvoteikiinnosta = "EITOD";
 
     // Generoiduille listoille ei laiteta väkisin
@@ -455,15 +456,27 @@ if (!function_exists('hae_tilausrivit')) {
     $select                 = '';
     $lasku_join             = "";
 
-    if ($varastosiirtotyyppi == 'N') {
-      $tilausrivi_where = "AND t.var = 'S'";
+    $varasto_avainsana_join = '
+        JOIN avainsana AS a
+        ON ( a.yhtio = tl.yhtio
+          AND a.tunnus = tl.toimittajan_tunnus )
+        JOIN varastopaikat AS v_lahdevarasto
+        ON ( v_lahdevarasto.tunnus = a.selite )
+        JOIN varastopaikat AS v_kohdevarasto
+        ON ( v_kohdevarasto.tunnus = a.selitetark )
+        LEFT JOIN varaston_hyllypaikat
+        ON ( varaston_hyllypaikat.yhtio = t.yhtio
+          AND varaston_hyllypaikat.hyllyalue = t.hyllyalue
+          AND varaston_hyllypaikat.hyllynro = t.hyllynro
+          AND varaston_hyllypaikat.hyllyvali = t.hyllyvali
+          AND varaston_hyllypaikat.hyllytaso = t.hyllytaso)';
 
-      $varasto_avainsana_join = '
+    $select = ' v_lahdevarasto.tunnus AS lahdevarasto_tunnus,
           JOIN avainsana AS a
           ON ( a.yhtio = tl.yhtio
             AND a.tunnus = tl.toimittajan_tunnus )
-          JOIN varastopaikat AS v_lahdevarasto
-          ON ( v_lahdevarasto.tunnus = a.selite )
+                v_kohdevarasto.tunnus AS kohdevarasto_tunnus,
+                a.selitetark_2 AS toimitustapa_tunnus,
           JOIN varastopaikat AS v_kohdevarasto
           ON ( v_kohdevarasto.tunnus = a.selitetark )
           LEFT JOIN varaston_hyllypaikat
@@ -471,7 +484,7 @@ if (!function_exists('hae_tilausrivit')) {
             AND varaston_hyllypaikat.hyllyalue = t.hyllyalue
             AND varaston_hyllypaikat.hyllynro = t.hyllynro
             AND varaston_hyllypaikat.hyllyvali = t.hyllyvali
-            AND varaston_hyllypaikat.hyllytaso = t.hyllytaso)';
+                varaston_hyllypaikat.keraysvyohyke AS keraysvyohyke,';
 
       $select = ' v_lahdevarasto.tunnus AS lahdevarasto_tunnus,
                   v_kohdevarasto.tunnus AS kohdevarasto_tunnus,
@@ -484,11 +497,21 @@ if (!function_exists('hae_tilausrivit')) {
       $tilausrivi_where = " AND t.var not in ('P','J','O','S')";
 
       if ($varastosiirtotyyppi == 'P') {
-        $lasku_join   = " JOIN lasku AS l
-                          ON ( l.yhtio = t.yhtio
-                            AND l.tunnus = t.otunnus )";
-        $select     = "l.varasto AS varasto, ";
+        $lasku_join = " JOIN lasku AS l ON ( l.yhtio = t.yhtio AND l.tunnus = t.otunnus )";
+        $select .= "l.varasto AS varasto, ";
         $tilausrivi_where .= " AND tl.palautus_varasto != 0 ";
+      }
+      else {
+
+        # Kirjanpidollisessa varastosiirrossa ei ole keräysvyöhykkeitä
+        # Ei lähde- eikä kohdevarastoa
+        # Eikä avainsanoja
+        $varasto_avainsana_join = '';
+
+        $select = ' 0 AS lahdevarasto_tunnus,
+                    0 AS kohdevarasto_tunnus,
+                    0 AS toimitustapa_tunnus,
+                    0 AS keraysvyohyke,';
       }
     }
 

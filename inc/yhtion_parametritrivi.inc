@@ -2542,7 +2542,7 @@ if ($fieldname == "vahvistusviesti_asiakkaalle") {
     t("Ei lähetetä asiakkaalle vahvistusviestiä");
   $ulos .= "<option value = 'Y' $sel>" .
     t("Lähetetään asiakkaalle tekstiviesti ja sähköposti, kun jälkitoimitustuotteet ovat " .
-      "valmiina noudettaviksi, tai kun työmääräys on valmis");
+    "valmiina noudettaviksi, tai kun työmääräys on valmis");
   $ulos .= "</select></td>";
 
   $jatko = 0;

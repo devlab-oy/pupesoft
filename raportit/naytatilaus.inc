@@ -978,7 +978,7 @@ else {
   $ennaa_yht    = 0;
   $rihin_yht    = 0;
 
-  $_myyntispessut = (in_array($toim, array('LASKU','TILAUSVAHVISTUS','LAHETE','TYOMAARAYS')));
+  $_myyntispessut = (in_array($toim, array('LASKU', 'TILAUSVAHVISTUS', 'LAHETE', 'TYOMAARAYS')));
 
   if ($lopetus != '') $lopetus .= "/SPLIT/";
   $lopetus .= $palvelin2;

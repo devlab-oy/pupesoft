@@ -1600,11 +1600,14 @@ for ($i = 0; $i < count($rtuoteno); $i++) {
 
         foreach ($lisa_array as $tilriv) {
 
-          $query = "SELECT uusiotunnus FROM tilausrivi WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tilriv}'";
+          $query = "SELECT uusiotunnus, tuoteno
+                    FROM tilausrivi
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '{$tilriv}'";
           $uusiotunnus_res = pupe_query($query);
           $uusiotunnus_row = mysql_fetch_assoc($uusiotunnus_res);
 
-          list($ostoilla, $keikoilla) = ostoilla_vai_keikoilla($ostoilla, $keikoilla, $tilriv, $tilausrivirow, $rtuoteno[$i], $debug);
+          list($ostoilla, $keikoilla) = ostoilla_vai_keikoilla($ostoilla, $keikoilla, $tilriv, $uusiotunnus_row, $rtuoteno[$i], $debug);
         }
       }
     }
@@ -2043,11 +2046,10 @@ if ($osrow["ebid"] == "TECCOM-INVOICE" or ($osrow['ebid'] == 'MAVENTAXML' and $t
               FROM lasku
               JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus AND tilausrivi.tyyppi != 'D')
               JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio
-                AND varastopaikat.maa != ''
-                AND concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'))
-                AND concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0')))
-              WHERE lasku.yhtio        = '{$kukarow['yhtio']}'
-              AND lasku.tunnus         = '{$_uusiotunnus}'
+                AND varastopaikat.maa    != ''
+                AND varastopaikat.tunnus  = tilausrivi.varasto)
+              WHERE lasku.yhtio           = '{$kukarow['yhtio']}'
+              AND lasku.tunnus            = '{$_uusiotunnus}'
               GROUP BY varastopaikat.maa
               ORDER BY kpl DESC
               LIMIT 1";
@@ -2078,10 +2080,10 @@ if ($osrow["ebid"] == "TECCOM-INVOICE" or ($osrow['ebid'] == 'MAVENTAXML' and $t
     $upd_res = pupe_query($query);
 
     $tee_kululaskut = "liita";
-    $silent = "SILENT";
+    $silent        = "SILENT";
     $keikanalatila = "";
-    $laskutunnus = $tunnus;
-    $otunnus = $keikantunnus =  $_uusiotunnus;
+    $laskutunnus   = $tunnus;
+    $otunnus       = $keikantunnus =  $_uusiotunnus;
 
     require "tilauskasittely/kululaskut.inc";
   }

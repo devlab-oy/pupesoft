@@ -12,6 +12,9 @@ if (php_sapi_name() != 'cli') {
 require "../inc/connect.inc";
 require "../inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
+
 $query = "SELECT DISTINCT yhtio FROM yhtio";
 $yhtio_result = pupe_query($query);
 

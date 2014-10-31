@@ -562,6 +562,10 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
         echo "<td valign='top' align='right'>$luottoraja</td>";
         echo "</tr>";
 
+        if (isset($_avoimia_yhteensa)) {
+          $_avoimia_yhteensa = $row["avoimia"] + $avoimettilaukset - $kaatotilisumma;
+        }
+
         if ($eiliittymaa != 'ON') {
           $excelsarake = 0;
 

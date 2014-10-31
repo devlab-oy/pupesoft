@@ -81,7 +81,7 @@ if (!isset($matches[1]) or !isset($matches[2])) {
   die("1, Virheellinen sanomamuoto\r\n\r\n");
 }
 
-$sanoma = $matches[1];
+$sanoma  = $matches[1];
 $sisalto = $matches[2];
 
 // Sallittuja sanomia
@@ -113,6 +113,12 @@ $response = "";
 
 require 'inc/connect.inc';
 require 'inc/functions.inc';
+
+// Laitetaan mukaan logiin
+$argv[] = $lines[0];
+
+// Logitetaan ajo
+cron_log();
 
 if ($sanoma == "SignOn") {
 
@@ -197,8 +203,12 @@ elseif ($sanoma == "GetPicks") {
     else {
       $row = mysql_fetch_assoc($result);
 
-      // HUOM!!! FUNKTIOSSA TEHDƒƒN LOCK TABLESIT, LUKKOJA EI AVATA TƒSSƒ FUNKTIOSSA! MUISTA AVATA LUKOT FUNKTION KƒYT÷N JƒLKEEN!!!!!!!!!!
       $erat = tee_keraysera($row['keraysvyohyke'], $row['oletus_varasto']);
+
+      // Ei saatu lukkoa j‰rkev‰ss‰ ajassa
+      if ($erat === FALSE) {
+        $response = "N,,,,,,,,,,,,,1,Ker‰yserien luonnissa ruuhkaa. Yrit‰ pian uudelleen.\r\n";
+      }
 
       if (isset($erat['tilaukset']) and count($erat['tilaukset']) > 0) {
         // Tallennetaan miss‰ t‰‰ er‰ on tehty
@@ -210,16 +220,37 @@ elseif ($sanoma == "GetPicks") {
         if (isset($lisatyt_tilaukset) and count($lisatyt_tilaukset) > 0) {
 
           $otunnukset = implode(",", $lisatyt_tilaukset);
-          $kerayslistatunnus = array_shift(array_keys($lisatyt_tilaukset));
+          $lisatyt_tilaukset_keys = array_keys($lisatyt_tilaukset);
+          $kerayslistatunnus = array_shift($lisatyt_tilaukset_keys);
 
           // tilaus on jo tilassa N A, p‰ivitet‰‰n nyt tilaus "ker‰yslista tulostettu" eli L A
           $query = "UPDATE lasku SET
-                    tila        = 'L',
+                    tila 	      = 'L',
+                    alatila     = 'A',
                     lahetepvm   = now(),
+                    hyvak3      = '{$kukarow['kuka']}',
+                    h3time      = now(),
                     kerayslista = '{$kerayslistatunnus}'
                     WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus  in ({$otunnukset})";
-          $upd_res = pupe_query($query);
+                    AND tunnus in ({$otunnukset})
+                    AND tila    = 'N'
+                    AND alatila = 'KA'";
+          pupe_query($query);
+
+          if ($yhtiorow['kerayserat'] != '' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+            // siirtolista on jo tilassa G J, p‰ivitet‰‰n nyt tilaus "siirtolista tulostettu" eli G A
+            $query = "UPDATE lasku SET
+                      alatila     = 'A',
+                      lahetepvm   = now(),
+                      hyvak3      = '{$kukarow['kuka']}',
+                      h3time      = now(),
+                      kerayslista = '{$kerayslistatunnus}'
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus in ({$otunnukset})
+                      AND tila    = 'G'
+                      AND alatila = 'KJ'";
+            pupe_query($query);
+          }
 
           // Haetaan ker‰tt‰v‰t rivit
           $query = "SELECT min(nro) nro, min(keraysvyohyke) keraysvyohyke, GROUP_CONCAT(tilausrivi) AS tilausrivit
@@ -235,9 +266,8 @@ elseif ($sanoma == "GetPicks") {
         }
       }
 
-      // poistetaan lukko
-      $query = "UNLOCK TABLES";
-      $res   = pupe_query($query);
+      // Vapautetaan ker‰syer‰n nappaamat tilaukset
+      release_tee_keraysera();
     }
   }
 
@@ -637,10 +667,10 @@ elseif ($sanoma == "StopAssignment") {
       $printteri_row = mysql_fetch_assoc($printteri_res);
 
       // setataan muuttujat keraa.php:ta varten
-      $tee = "P";
-      $toim = "";
-      $id = $nro;
-      $keraajanro = "";
+      $tee         = "P";
+      $toim        = "";
+      $id          = $nro;
+      $keraajanro  = "";
       $keraajalist = $kukarow['kuka'];
 
       // vakadr-tulostin on aina sama kuin l‰hete-tulostin

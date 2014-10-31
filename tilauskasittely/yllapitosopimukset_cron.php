@@ -18,11 +18,14 @@ ini_set("display_errors", 0);
 require "../inc/connect.inc";
 require "../inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
+
 // hmm.. j‰nn‰‰
 $kukarow['yhtio']     = $argv[1];
-$kieli           = $argv[2];
+$kieli                = $argv[2];
 $kukarow['kuka']      = "admin";
-$kukarow["kirjoitin"]   = "";
+$kukarow["kirjoitin"] = "";
 
 // Haetaan yhtion tiedot (virhetsekki funktiossa....)
 $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);

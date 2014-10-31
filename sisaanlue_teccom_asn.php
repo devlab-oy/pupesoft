@@ -32,14 +32,78 @@ if (!isset($teccomkansio_error)) {
 }
 
 // setataan käytetyt muuttujat:
-$asn_numero          = "";
-$kukarow["kuka"]       = "admin";
-$poikkeukset         = array("123001", "123067", "123310", "123312", "123342", "123108", "123036", "123049", "123317", "123441", "123080", "123007", "123453", "123506", "123110");
-$tavarantoimittajanumero   = "";
-$tiedosto_sisalto      = "";
-$toimituspvm        = "";
-$vastaanottaja        = "";
-$_yhtion_toimipaikka    = 0;
+$asn_numero               = "";
+$kukarow["kuka"]          = "admin";
+$poikkeukset              = array("123001", "123067", "123310", "123312", "123342", "123108", "123036", "123049", "123317", "123441", "123080", "123007", "123453", "123506", "123110");
+$tavarantoimittajanumero  = "";
+$tiedosto_sisalto         = "";
+$toimituspvm              = "";
+$vastaanottaja            = "";
+$_yhtion_toimipaikka      = 0;
+
+if (!function_exists('teccom_asn_paketti')) {
+  function teccom_asn_paketti($element, $tavarantoimittajanumero, $asn_numero) {
+
+    $_sscc = "";
+    $_laatikkoind = "";
+
+    if (isset($element->PkgId->PkgIdentNumber) and $tavarantoimittajanumero != "123007") {
+      $laatikko = (string) $element->PkgId->PkgIdentNumber;
+      $laatikko = utf8_decode($laatikko);
+      $koodi = $laatikko;
+
+      $_toimittajat_1 = array("123001", "123049", "123108", "123506", "123110");
+      $_onko_toimittaja_1 = in_array($tavarantoimittajanumero, $_toimittajat_1);
+
+      $_toimittajat_2 = array("123001", "123108", "123506", "123110");
+      $_onko_toimittaja_2 = in_array($tavarantoimittajanumero, $_toimittajat_2);
+
+      if ($_onko_toimittaja_1 and strlen($laatikko) >10) {
+        $_sscc = $laatikko;
+        $_laatikkoind = substr($laatikko, 10);
+      }
+      elseif ($_onko_toimittaja_2 and strlen($laatikko) < 10) {
+        $_sscc = $laatikko;
+        $_laatikkoind = '0'.$laatikko;
+      }
+      elseif ($tavarantoimittajanumero == "123342") {
+        $_sscc = $laatikko;
+        $_laatikkoind = substr($laatikko, 8);
+      }
+      else {
+        $_sscc = $koodi;
+        $_laatikkoind  = $laatikko;
+      }
+    }
+    elseif ($tavarantoimittajanumero == "123441" and !isset($element->PkgId->PkgIdentNumber)) {
+      $_laatikkoind = $asn_numero;
+      $_sscc = $asn_numero;
+    }
+    elseif ($tavarantoimittajanumero == "123007") {
+      $laatikko = $asn_numero;
+
+      foreach ($element->PkgId as $pkg) {
+        if (isset($pkg->PkgIdentSystem) and (int) $pkg->PkgIdentSystem == 17) {
+          $laatikko = (string) $pkg->PkgIdentNumber;
+          break;
+        }
+      }
+
+      $_laatikkoind = $laatikko;
+      $_sscc = $laatikko;
+    }
+    elseif ($tavarantoimittajanumero == "123220" or $tavarantoimittajanumero == "123080") {
+      $_laatikkoind = $asn_numero;
+      $_sscc = $asn_numero;
+    }
+    else {
+      $_laatikkoind = $asn_numero;
+      $_sscc = $asn_numero;
+    }
+
+    return array($_sscc, $_laatikkoind);
+  }
+}
 
 function loop_packet($xml_element, $parameters) {
   global $kukarow;
@@ -51,9 +115,8 @@ function loop_packet($xml_element, $parameters) {
   $toimituspvm             = $parameters["toimituspvm"];
   $vastaanottaja           = $parameters["vastaanottaja"];
   $pakkauslista            = $parameters["pakkauslista"];
-  $pakettinumero        = $parameters["pakettinumero"];
-  $sscc           = $parameters["sscc"];
-  $laatikkoind       = $parameters["laatikkoind"];
+  $sscc                    = $parameters["sscc"];
+  $laatikkoind             = $parameters["laatikkoind"];
 
   foreach ($xml_element as $key => $element) {
 
@@ -157,61 +220,16 @@ function loop_packet($xml_element, $parameters) {
 
       $parameters = array(
         "tavarantoimittajanumero"   => $tavarantoimittajanumero,
-        "asn_numero"        => $asn_numero,
-        "toimituspvm"        => $toimituspvm,
-        "vastaanottaja"        => $vastaanottaja,
-        "pakkauslista"        => $pakkauslista,
-        "pakettinumero"        => $pakettinumero,
+        "asn_numero"                => $asn_numero,
+        "toimituspvm"               => $toimituspvm,
+        "vastaanottaja"             => $vastaanottaja,
+        "pakkauslista"              => $pakkauslista,
       );
 
-      if (isset($element->PkgId->PkgIdentNumber) and $tavarantoimittajanumero != "123007") {
-        $laatikko = (string) $element->PkgId->PkgIdentNumber;
-        $laatikko = utf8_decode($laatikko);
-        $koodi = $laatikko;
+      list($_sscc, $_laatikkoind) = teccom_asn_paketti($element, $tavarantoimittajanumero, $asn_numero);
 
-        if (($tavarantoimittajanumero == "123001" or $tavarantoimittajanumero == "123049" or $tavarantoimittajanumero == "123108" or $tavarantoimittajanumero == "123506" or $tavarantoimittajanumero == "123110") and strlen($laatikko) >10) {
-          $parameters["sscc"] = $laatikko;
-          $parameters["laatikkoind"] = substr($laatikko, 10);
-        }
-        elseif (($tavarantoimittajanumero == "123001" or $tavarantoimittajanumero == "123108" or $tavarantoimittajanumero == "123506" or $tavarantoimittajanumero == "123110") and strlen($laatikko) < 10) {
-          $parameters["sscc"] = $laatikko;
-          $parameters["laatikkoind"] = '0'.$laatikko;
-        }
-        elseif ($tavarantoimittajanumero == "123342") {
-          $parameters["sscc"] = $laatikko;
-          $parameters["laatikkoind"] = substr($laatikko, 8);
-        }
-        else {
-          $parameters["sscc"]      = $koodi;
-          $parameters["laatikkoind"]  = $laatikko;
-        }
-      }
-      elseif ($tavarantoimittajanumero == "123441" and !isset($element->PkgId->PkgIdentNumber)) {
-        $parameters["laatikkoind"]  = $asn_numero;
-        $parameters["sscc"]      = $asn_numero;
-
-      }
-      elseif ($tavarantoimittajanumero == "123007") {
-        $laatikko = $asn_numero;
-
-        foreach ($element->PkgId as $pkg) {
-          if (isset($pkg->PkgIdentSystem) and (int) $pkg->PkgIdentSystem == 17) {
-            $laatikko = (string) $pkg->PkgIdentNumber;
-            break;
-          }
-        }
-
-        $parameters["laatikkoind"]  = $laatikko;
-        $parameters["sscc"]      = $laatikko;
-      }
-      elseif ($tavarantoimittajanumero == "123220" or $tavarantoimittajanumero == "123080") {
-        $parameters["laatikkoind"]  = $asn_numero;
-        $parameters["sscc"]      = $asn_numero;
-      }
-      else {
-        $parameters["laatikkoind"]  = $asn_numero;
-        $parameters["sscc"]      = $asn_numero;
-      }
+      $parameters['sscc'] = $_sscc;
+      $parameters['laatikkoind'] = $_laatikkoind;
 
       loop_packet($element, $parameters);
     }
@@ -221,9 +239,7 @@ function loop_packet($xml_element, $parameters) {
 }
 
 if ($handle = opendir($teccomkansio)) {
-
   while (($file = readdir($handle)) !== FALSE) {
-
     if (is_file($teccomkansio."/".$file)) {
 
       $tiedosto = $teccomkansio."/".$file;
@@ -299,11 +315,11 @@ if ($handle = opendir($teccomkansio)) {
         }
 
         $parameters = array(
-          "tavarantoimittajanumero"   => $tavarantoimittajanumero,
-          "asn_numero"        => $asn_numero,
-          "toimituspvm"        => $toimituspvm,
-          "vastaanottaja"        => $vastaanottaja,
-          "pakkauslista"        => $pakkauslista,
+          "tavarantoimittajanumero" => $tavarantoimittajanumero,
+          "asn_numero"              => $asn_numero,
+          "toimituspvm"             => $toimituspvm,
+          "vastaanottaja"           => $vastaanottaja,
+          "pakkauslista"            => $pakkauslista,
         );
 
         // tässä kohdassa tarkistetaan että löytyykö ASN-sanoma jo kannasta, jos ei niin kutsutaan rekursiivista funkkaria.
@@ -322,6 +338,19 @@ if ($handle = opendir($teccomkansio)) {
             rename($teccomkansio."/".$file, $teccomkansio_error."/".$file);
           }
           else {
+
+            if (isset($xml->Package->Package)) {
+              $element = $xml->Package->Package;
+            }
+            else {
+              $element = $xml->Package;
+            }
+
+            list($_sscc, $_laatikkoind) = teccom_asn_paketti($element, $tavarantoimittajanumero, $asn_numero);
+
+            $parameters['sscc'] = $_sscc;
+            $parameters['laatikkoind'] = $_laatikkoind;
+
             // loop_packet funktio tekee kaikki lisäykset asn-sanomatauluun ja palauttaa viimeisen lisätyn rivin mysql_id() joka laitetaan liitetiedostoon.
             $tunnus_liitetiedostoon = loop_packet($xml, $parameters);
 
@@ -344,6 +373,9 @@ if ($handle = opendir($teccomkansio)) {
                          luontiaika      = now()";
             $Xresult = pupe_query($tecquery);
             rename($teccomkansio."/".$file, $teccomkansio_valmis."/".$file);
+
+            // Logitetaan ajo
+            cron_log($teccomkansio_valmis."/".$file);
           }
         }
         else {
@@ -357,9 +389,9 @@ if ($handle = opendir($teccomkansio)) {
       }
     }
   }
+
   require "inc/asn_kohdistus.inc";
   asn_kohdistus($tavarantoimittajanumero);
-
 }
 else {
   echo "Hakemistoa $teccomkansio ei löydy\n";

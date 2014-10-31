@@ -232,7 +232,8 @@ if ($tee == 'I') {
        */
 
 
-      require_once "PHPExcel/PHPExcel/IOFactory.php";
+      if (@include "PHPExcel/Classes/PHPExcel/IOFactory.php");
+      elseif (@include "PHPExcel/PHPExcel/IOFactory.php");
 
       /**
        * Tunnistetaan tiedostomuoto *

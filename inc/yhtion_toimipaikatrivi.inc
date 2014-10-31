@@ -129,6 +129,9 @@ if (mysql_field_name($result, $i) == "ostotilauksen_kasittely") {
 
     $ulos .= "</select></td>";
   }
+  else {
+    $ulos .= "<td></td>";
+  }
 
   $jatko = 0;
 }
@@ -137,7 +140,7 @@ if (mysql_field_name($result, $i) == "sahkoinen_automaattituloutus") {
 
   $sel = array($trow[$i] => 'selected') + array('K' => '', 'J' => '');
 
-  $ulos  = "<td><select name='{$nimi}'>";
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
   $ulos .= "<option value=''>".t("Sähköisen laskun sisäänluvun yhteydessä ei oletuksena tulouteta tuotteita varastoon")."</option>";
   $ulos .= "<option value='K'{$sel["K"]}>".t("Tuotteet tuloutetaan varastoon automaattisesti sähköisen laskun sisäänluvun yhteydessä")."</option>";
   $ulos .= "<option value='J'{$sel["J"]}>".t("Tuotteet tuloutetaan varastoon ja jälkilasketaan automaattisesti sähköisen laskun sisäänluvun yhteydessä")."</option>";

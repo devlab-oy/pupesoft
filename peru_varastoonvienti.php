@@ -222,9 +222,14 @@ if ($id != 0) {
             echo "<br><font class='error'>".t("Tuotteella")." $rivirow[tuoteno] ".t("ei ole oletuspaikkaakaaaaan")."!!!</font><br><br>";
 
             // haetaan firman eka varasto, tökätään kama sinne ja tehdään siitä oletuspaikka
-            $query = "SELECT alkuhyllyalue, alkuhyllynro from varastopaikat where yhtio='$kukarow[yhtio]' AND tyyppi != 'P' order by alkuhyllyalue, alkuhyllynro limit 1";
+            $query = "SELECT alkuhyllyalue, alkuhyllynro
+                      from varastopaikat
+                      where yhtio  = '$kukarow[yhtio]'
+                      AND tyyppi  != 'P'
+                      order by alkuhyllyalue, alkuhyllynro
+                      limit 1";
             $korjres = pupe_query($query);
-            $hyllyrow =  mysql_fetch_array($korjres);
+            $hyllyrow = mysql_fetch_array($korjres);
 
             echo "<br><font class='error'>".t("Tehtiin oletuspaikka")." $rivirow[tuoteno]: $rivirow[alkuhyllyalue] $rivirow[alkuhyllynro] 0 0</font><br><br>";
 

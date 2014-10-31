@@ -838,6 +838,10 @@ if (!function_exists("verkkolasku_in")) {
         }
       }
 
+      if ($_yhtion_toimipaikka != 0) {
+        $yhtiorow = hae_yhtion_parametrit($yhtio, $_yhtion_toimipaikka);
+      }
+
       // Laitetaan tämä päivä laskun kirjauspäiväksi jos yhtiön parametri on tässä asennossa.
       if ($yhtiorow['ostolaskujen_paivays'] == "1") {
 

@@ -31,9 +31,9 @@ if (!function_exists("pupe_register_globals")) {
   }
 }
 
-$_GET    = pupe_register_globals($_GET);
+$_GET     = pupe_register_globals($_GET);
 $_POST    = pupe_register_globals($_POST);
-$_REQUEST  = pupe_register_globals($_REQUEST);
+$_REQUEST = pupe_register_globals($_REQUEST);
 
 // Hoidetaan pakkaus
 if ((isset($compression) and !$compression) or (isset($nayta_pdf) and $nayta_pdf == 1) or (isset($lataa_tiedosto) and $lataa_tiedosto == 1)) {
@@ -226,6 +226,8 @@ unset($magento_api_ht_url);
 unset($magento_api_ht_usr);
 unset($magento_api_ht_pas);
 unset($magento_api_ht_edi);
+
+unset($pupesoft_commandlinelog);
 
 $pupe_query_debug = 0;
 $aika_debug_array = array();
@@ -487,12 +489,9 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     }
 
     if ($phpnimi == 'generoi_siirtolista.php') {
-      if (isset($lapsituotteet)) {
-        setcookie('lapsituotteet', $lapsituotteet, time()+60*60*24*90, "/");
-      }
-      if (isset($myyntiera)) {
-        setcookie('myyntiera', $myyntiera, time()+60*60*24*90, "/");
-      }
+      setcookie('lapsituotteet', $lapsituotteet, time()+60*60*24*90, "/");
+      setcookie('myyntiera', $myyntiera, time()+60*60*24*90, "/");
+      setcookie('kesken', $kesken, time()+60*60*24*90, "/");
     }
 
     // Unohdetaan tallennettu state jos tullaan suoraan indexsvassista
@@ -837,11 +836,11 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
           enable_ajax();
 
           while ($message_row = mysql_fetch_assoc($message_result)) {
-            echo "<div id='$message_row[tunnus]'>";
+            echo "<div id='{$message_row['tunnus']}'>";
             echo t("Viesti käyttäjältä").": ";
-            echo "$message_row[nimi] @ ".tv1dateconv($message_row['luontiaika'], 'yes').": ";
-            echo "$message_row[viesti] ";
-            echo "<input type='button' onClick=\"javascript:sndReq('$message_row[tunnus]','?tee=message_luettu&amp;message_tunnus=$message_row[tunnus]&amp;ohje=off&amp;no_css=yes', false, false)\" value='".t("Kuittaa")."'><br>";
+            echo "{$message_row['nimi']} @ ".tv1dateconv($message_row['luontiaika'], 'yes').": ";
+            echo "{$message_row['viesti']} ";
+            echo "<input type='button' onClick=\"javascript:sndReq('{$message_row['tunnus']}','?tee=message_luettu&amp;toim={$toim}&amp;message_tunnus={$message_row['tunnus']}&amp;ohje=off&amp;no_css=yes', false, false)\" value='".t("Kuittaa")."'><br>";
             echo "</div>";
           }
 

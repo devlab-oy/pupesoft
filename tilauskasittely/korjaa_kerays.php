@@ -29,7 +29,7 @@ if ($tee == 'KORJAA') {
               WHERE tilausrivi.otunnus  = '$tunnus'
               and tilausrivi.yhtio      = '{$kukarow['yhtio']}'
               AND tilausrivi.tyyppi    != 'D'
-              AND tilausrivi.var        not in ('P','J','O')";
+              AND tilausrivi.var        not in ('P','J','O','S')";
     $result = pupe_query($query);
 
     $query  = "UPDATE lasku

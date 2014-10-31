@@ -202,6 +202,7 @@ if (!isset($variaatio_tuoteno)) $variaatio_tuoteno = "";
 if (!isset($var_array)) $var_array = "";
 if (!isset($yksi_suoratoimittaja)) $yksi_suoratoimittaja = "";
 if (!isset($ylatila)) $ylatila = "";
+if (!isset($siirto_varastot_paikka)) $siirto_varastot_paikka = "";
 
 if (!isset($valmiste_vai_raakaaine)) {
   $_cookie_isset = isset($_COOKIE["valmiste_vai_raakaaine"]);
@@ -4152,7 +4153,7 @@ if ($tee == '') {
           );
 
           pupesoft_sahkoposti($parametri);
-          
+
           echo t("Lähetettiin jälkitoimitus-sähköposti")."...<br><br>";
         }
 
@@ -7494,6 +7495,7 @@ if ($tee == '') {
                   <input type='hidden' name='orig_alatila'  value = '$orig_alatila'>
                   <input type='hidden' name='tila'       value = 'MUUTA'>
                   <input type='hidden' name='tapa'       value = 'MUOKKAA'>
+                  <input type='hidden' name='siirto_varastot_paikka' value = '{$siirto_varastot_paikka}'>
                   <input type='Submit' value='".t("Muokkaa")."'>
                   </form> ";
             }

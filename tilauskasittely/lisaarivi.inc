@@ -562,6 +562,10 @@ if ($lisaarivi_debug == 1) echo "Tilattu m‰‰r‰: $toimittamatta<br>";
 $kohde_varasto_update = "";
 $paivita_hyllyt_varastosiirto = false;
 
+if (!empty($siirto_varastot_paikka)) {
+  $paikka = $siirto_varastot_paikka;
+}
+
 if (substr($paikka, 0, 3) == "°°S") {
   $paivita_hyllyt_varastosiirto = true;
   $var = "S";

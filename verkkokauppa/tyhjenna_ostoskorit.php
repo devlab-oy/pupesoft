@@ -13,6 +13,9 @@ if (!isset($argv[1]) or $argv[1] == '') {
 require "../inc/connect.inc";
 require "../inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
+
 $yhtio = mysql_real_escape_string($argv[1]);
 
 //  Poistetaan rivi

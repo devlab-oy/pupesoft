@@ -168,7 +168,7 @@ if (mysql_num_rows($pakkaamore) != 0) {
               WHERE tilausrivi.$logistiikka_yhtiolisa
               and tilausrivi.otunnus      = '$row[tunnus]'
               and tilausrivi.kerattyaika != '0000-00-00 00:00:00'
-              and tilausrivi.var          not in ('P','J','O')";
+              and tilausrivi.var          not in ('P','J','O','S')";
     $kerayspvmres = pupe_query($query);
     $kerayspvmrow = mysql_fetch_array($kerayspvmres);
 

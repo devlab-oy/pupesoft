@@ -729,11 +729,10 @@ if ($varaston_muutos != 0 and (in_array($tee, array("paalle", "25paalle", "puoli
   if ($yhtiorow["tarkenteiden_prioriteetti"] == "T") {
     $query = "SELECT varastopaikat.tunnus, varastopaikat.toimipaikka, sum(tuotepaikat.saldo) saldo
               FROM tuotepaikat
-              JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-              and concat(rpad(upper(alkuhyllyalue),  5, '0'),lpad(upper(alkuhyllynro),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-              and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
-              WHERE tuotepaikat.yhtio = '{$kukarow["yhtio"]}'
-              AND tuotepaikat.tuoteno = '{$tuoterow["tuoteno"]}'
+              JOIN varastopaikat ON (varastopaikat.yhtio = tuotepaikat.yhtio
+                AND varastopaikat.tunnus = tuotepaikat.varasto)
+              WHERE tuotepaikat.yhtio    = '{$kukarow["yhtio"]}'
+              AND tuotepaikat.tuoteno    = '{$tuoterow["tuoteno"]}'
               GROUP BY 1,2
               HAVING saldo != 0";
     $vpresult = pupe_query($query);

@@ -26,7 +26,7 @@ if ($php_cli) {
   require "inc/functions.inc";
 
   // Logitetaan ajo
-  cron_log();  
+  cron_log();
 
   $kukarow['yhtio'] = (string) $argv[1];
   $kukarow['kuka']  = 'admin';

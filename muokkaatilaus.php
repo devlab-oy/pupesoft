@@ -41,6 +41,12 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
       echo t("Tilaus on aktiivisena käyttäjällä"), " {$row['nimi']} ({$row['kuka']}). ", t("Tilausta ei voi tällä hetkellä muokata");
     }
     else {
+      $query = "UPDATE kuka
+                SET kesken = '{$otunnus}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND kuka = '{$kukarow['kuka']}'";
+      $result = pupe_query($query);
+
       echo false;
     }
 

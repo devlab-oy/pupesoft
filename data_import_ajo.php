@@ -24,6 +24,9 @@ $pupe_root_polku = dirname(__FILE__);
 require "{$pupe_root_polku}/inc/connect.inc";
 require "{$pupe_root_polku}/inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
+
 $lock_params = array(
   "locktime" => 900,
 );

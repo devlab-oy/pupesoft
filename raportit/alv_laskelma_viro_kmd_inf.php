@@ -163,7 +163,7 @@ if ($tee == 'laskelma') {
     $tilaustyyppi = "";
     $laskun_lisatiedot_lisa = "";
     $verolisa = "";
-    $laskun_nimi_lisa_select = "trim(concat(lasku.nimi, ' ', lasku.nimitark)) nimi,";
+    $laskun_nimi_lisa_select = "lasku.nimi, ";
   }
 
   $query = "SELECT
@@ -193,8 +193,16 @@ if ($tee == 'laskelma') {
           {$tilat}
           {$tilaustyyppi}
           GROUP BY 1
-          HAVING abs(sum(if(tiliointi.summa > 0, tiliointi.summa, 0))) < {$rajaa}
-          AND abs(sum(if(tiliointi.summa < 0, tiliointi.summa, 0))) < {$rajaa}";
+          HAVING abs(sum(if(
+            (tiliointi.summa + (tiliointi.summa * vero / 100)) > 0,
+            (tiliointi.summa + (tiliointi.summa * vero / 100)),
+            0
+          ))) < {$rajaa}
+          AND abs(sum(if(
+            (tiliointi.summa + (tiliointi.summa * vero / 100)) < 0,
+            (tiliointi.summa + (tiliointi.summa * vero / 100)),
+            0
+          ))) < {$rajaa}";
     $result = pupe_query($query);
 
     $_exclude_asiakkaat = array();
@@ -237,16 +245,16 @@ if ($tee == 'laskelma') {
   echo "<thead>";
 
   echo "<tr>";
-  echo "<th>CSV</th>";
+  echo "<th>",t("CSV"),"</th>";
   echo "<th>#</th>";
-  echo "<th>ytunnus</th>";
-  echo "<th>nimi</th>";
-  echo "<th>laskunro</th>";
-  echo "<th>pvm</th>";
-  echo "<th>laskun summa</th>";
-  echo "<th>alv</th>";
-  echo "<th>verot</th>";
-  echo "<th>erikoiskoodi</th>";
+  echo "<th>",t("ytunnus"),"</th>";
+  echo "<th>",t("nimi"),"</th>";
+  echo "<th>",t("laskunro"),"</th>";
+  echo "<th>",t("pvm"),"</th>";
+  echo "<th>",t("laskun summa"),"</th>";
+  echo "<th>",t("alv"),"</th>";
+  echo "<th>",t("verot"),"</th>";
+  echo "<th>",t("erikoiskoodi"),"</th>";
   echo "</tr>";
 
   if (isset($worksheet)) {
@@ -374,7 +382,7 @@ if ($tee == 'laskelma') {
       if (mysql_num_rows($asiakasres) != 0) $aineistoon = $_red;
     }
 
-    if (mysql_num_rows($laskures) == 0) $aineistoon = $_red;
+    if (mysql_num_rows($laskures) == 0 or $laskurow['laskunro'] == 0) $aineistoon = $_red;
 
     $erikoiskoodi = ($laskelma == 'a' and $row['veropros'] == 0) ? '03' : '';
 

@@ -24,26 +24,26 @@ if (!isset($tee)) $tee = "";
 
 $_rajaa_chk = ("{$rajaa}" == "1000");
 
-echo "<font class='head'>",t("ALV-laskelma KMD INF"),"</font><hr />";
+echo "<font class='head'>", t("ALV-laskelma KMD INF"), "</font><hr />";
 
 echo "<form method='post'>";
 echo "<input type='hidden' name='tee' value='laskelma' />";
 echo "<table>";
 echo "<tr>";
-echo "<th>",t("Valitse"),"</th>";
+echo "<th>", t("Valitse"), "</th>";
 
 $sel = $laskelma == "b" ? "selected" : "";
 
 echo "<td>";
 echo "<select name='laskelma'>";
-echo "<option value='a'>",t("Laskelma A")," (",t("myynti"),")</option>";
-echo "<option value='b' {$sel}>",t("Laskelma B")," (",t("osto"),")</option>";
+echo "<option value='a'>", t("Laskelma A"), " (", t("myynti"), ")</option>";
+echo "<option value='b' {$sel}>", t("Laskelma B"), " (", t("osto"), ")</option>";
 echo "</select>";
 echo "</td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<th>",t("Valitse kausi"),"</th>";
+echo "<th>", t("Valitse kausi"), "</th>";
 echo "<td>";
 
 $vv_select = date("Y");
@@ -58,7 +58,7 @@ echo "</select>";
 echo "<select name='kk'>";
 for ($i = 1; $i <= 12; $i++) {
   $sel = $i == $kk ? "selected" : "";
-  echo "<option value='{$i}' {$sel}>",str_pad($i, 2, floor($i / 10), STR_PAD_LEFT),"</option>";
+  echo "<option value='{$i}' {$sel}>", str_pad($i, 2, floor($i / 10), STR_PAD_LEFT), "</option>";
 }
 echo "</select>";
 
@@ -68,11 +68,11 @@ echo "</tr>";
 $sel = $_rajaa_chk ? "selected" : "";
 
 echo "<tr>";
-echo "<th>",t("Rajaa"),"</th>";
+echo "<th>", t("Rajaa"), "</th>";
 echo "<td>";
 echo "<select name='rajaa'>";
-echo "<option value=''>",t("Näytä kaikki"),"</option>";
-echo "<option value='1000' {$sel}>",t("Vain 1000 EUR"),"</option>";
+echo "<option value=''>", t("Näytä kaikki"), "</option>";
+echo "<option value='1000' {$sel}>", t("Vain 1000 EUR"), "</option>";
 echo "</select>";
 echo "</td>";
 echo "</tr>";
@@ -80,19 +80,19 @@ echo "</tr>";
 $chk = !empty($per_paiva) ? "checked" : "";
 
 echo "<tr>";
-echo "<th>",t("Aja laskelma per päivä"),"</th>";
+echo "<th>", t("Aja laskelma per päivä"), "</th>";
 echo "<td><input type='checkbox' name='per_paiva' value='1' {$chk} /></td>";
 echo "</tr>";
 
 $chk = !empty($tee_excel) ? "checked" : "";
 
 echo "<tr>";
-echo "<th>",t("Tee Excel"),"<br /></th>";
+echo "<th>", t("Tee Excel"), "<br /></th>";
 echo "<td><input type='checkbox' name='tee_excel' {$chk} /></td>";
 echo "</tr>";
 
 echo "<tr>";
-echo "<td colspan='2' class='back'><input type='submit' value='",t("Näytä"),"' /></td>";
+echo "<td colspan='2' class='back'><input type='submit' value='", t("Näytä"), "' /></td>";
 echo "</tr>";
 
 echo "</table>";
@@ -127,9 +127,9 @@ if ($tee == 'laskelma') {
     $_url = "{$palvelin2}raportit/alv_laskelma_viro_kmd_inf.php";
     $_url .= "?tee=laskelma&laskelma={$laskelma}&rajaa={$rajaa}&kk={$kk}&vv={$vv}";
 
-    echo "<a href='{$_url}&per_paiva=",($per_paiva-1),"'>",t("Edellinen päivä"),"</a> ";
-    echo t("ALV-laskelma KMD INF")," ",t("päivältä")," {$per_paiva}.{$kk}.{$vv} ";
-    echo "<a href='{$_url}&per_paiva=",($per_paiva+1),"'>",t("Seuraava päivä"),"</a>";
+    echo "<a href='{$_url}&per_paiva=", ($per_paiva-1), "'>", t("Edellinen päivä"), "</a> ";
+    echo t("ALV-laskelma KMD INF"), " ", t("päivältä"), " {$per_paiva}.{$kk}.{$vv} ";
+    echo "<a href='{$_url}&per_paiva=", ($per_paiva+1), "'>", t("Seuraava päivä"), "</a>";
 
     $alkupvm     = date("Y-m-d", mktime(0, 0, 0, $kk, $per_paiva, $vv));
     $loppupvm    = date("Y-m-d", mktime(0, 0, 0, $kk, $per_paiva, $vv));
@@ -139,10 +139,10 @@ if ($tee == 'laskelma') {
     $loppupvm = date("Y-m-d", mktime(0, 0, 0, $kk+1, 0, $vv));
   }
 
-  # ee100 = myynti
-  # ee500 = osto
-  # myyntilasku tila U
-  # ostolasku tilat HYMPQ
+  // ee100 = myynti
+  // ee500 = osto
+  // myyntilasku tila U
+  // ostolasku tilat HYMPQ
   if ($laskelma == 'a') {
     $taso = 'ee100';
     $eetasolisa = "or alv_taso like '%ee110%'";
@@ -179,30 +179,30 @@ if ($tee == 'laskelma') {
   if ($_rajaa_chk) {
 
     $query = "SELECT lasku.ytunnus
-          FROM lasku
-          JOIN tiliointi ON (
-            tiliointi.yhtio = lasku.yhtio AND
-            tiliointi.ltunnus = lasku.tunnus AND
-            tiliointi.korjattu = '' AND
-            tiliointi.tapvm    >= '{$alkupvm}' AND
-            tiliointi.tapvm    <= '{$loppupvm}' AND
-            tiliointi.tilino in ({$tilirow['tilitMUU']})
-            {$verolisa}
-          )
-          WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-          {$tilat}
-          {$tilaustyyppi}
-          GROUP BY 1
-          HAVING abs(sum(if(
-            (tiliointi.summa + (tiliointi.summa * vero / 100)) > 0,
-            (tiliointi.summa + (tiliointi.summa * vero / 100)),
-            0
-          ))) < {$rajaa}
-          AND abs(sum(if(
-            (tiliointi.summa + (tiliointi.summa * vero / 100)) < 0,
-            (tiliointi.summa + (tiliointi.summa * vero / 100)),
-            0
-          ))) < {$rajaa}";
+              FROM lasku
+              JOIN tiliointi ON (
+                tiliointi.yhtio    = lasku.yhtio AND
+                tiliointi.ltunnus  = lasku.tunnus AND
+                tiliointi.korjattu = '' AND
+                tiliointi.tapvm    >= '{$alkupvm}' AND
+                tiliointi.tapvm    <= '{$loppupvm}' AND
+                tiliointi.tilino   in ({$tilirow['tilitMUU']})
+                {$verolisa}
+              )
+              WHERE lasku.yhtio    = '{$kukarow['yhtio']}'
+              {$tilat}
+              {$tilaustyyppi}
+              GROUP BY 1
+              HAVING abs(sum(if(
+                (tiliointi.summa + (tiliointi.summa * vero / 100)) > 0,
+                (tiliointi.summa + (tiliointi.summa * vero / 100)),
+                0
+              ))) < {$rajaa}
+              AND abs(sum(if(
+                (tiliointi.summa + (tiliointi.summa * vero / 100)) < 0,
+                (tiliointi.summa + (tiliointi.summa * vero / 100)),
+                0
+              ))) < {$rajaa}";
     $result = pupe_query($query);
 
     $_exclude_asiakkaat = array();
@@ -221,11 +221,11 @@ if ($tee == 'laskelma') {
             sum(round(tiliointi.summa * vero / 100, 2)) veronmaara,
             sum(tiliointi.summa) summa
             FROM tiliointi
-            WHERE tiliointi.yhtio = '{$kukarow['yhtio']}'
+            WHERE tiliointi.yhtio  = '{$kukarow['yhtio']}'
             AND tiliointi.korjattu = ''
             AND tiliointi.tapvm    >= '{$alkupvm}'
             AND tiliointi.tapvm    <= '{$loppupvm}'
-            AND tiliointi.tilino in ({$tilirow['tilitMUU']})
+            AND tiliointi.tilino   in ({$tilirow['tilitMUU']})
             {$verolisa}
             GROUP BY 1";
   $result = pupe_query($query);
@@ -245,16 +245,16 @@ if ($tee == 'laskelma') {
   echo "<thead>";
 
   echo "<tr>";
-  echo "<th>",t("CSV"),"</th>";
+  echo "<th>", t("CSV"), "</th>";
   echo "<th>#</th>";
-  echo "<th>",t("ytunnus"),"</th>";
-  echo "<th>",t("nimi"),"</th>";
-  echo "<th>",t("laskunro"),"</th>";
-  echo "<th>",t("pvm"),"</th>";
-  echo "<th>",t("laskun summa"),"</th>";
-  echo "<th>",t("alv"),"</th>";
-  echo "<th>",t("verot"),"</th>";
-  echo "<th>",t("erikoiskoodi"),"</th>";
+  echo "<th>", t("ytunnus"), "</th>";
+  echo "<th>", t("nimi"), "</th>";
+  echo "<th>", t("laskunro"), "</th>";
+  echo "<th>", t("pvm"), "</th>";
+  echo "<th>", t("laskun summa"), "</th>";
+  echo "<th>", t("alv"), "</th>";
+  echo "<th>", t("verot"), "</th>";
+  echo "<th>", t("erikoiskoodi"), "</th>";
   echo "</tr>";
 
   if (isset($worksheet)) {
@@ -338,7 +338,7 @@ if ($tee == 'laskelma') {
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               {$tilat}
               {$tilaustyyppi}
-              AND lasku.tunnus = '{$row['ltunnus']}'
+              AND lasku.tunnus  = '{$row['ltunnus']}'
               {$rajaalisa}";
     $laskures = pupe_query($query);
     $laskurow = mysql_fetch_assoc($laskures);
@@ -346,10 +346,10 @@ if ($tee == 'laskelma') {
     if (!empty($laskurow['tunnus']) and $laskelma == 'a') {
       $query = "SELECT round(sum(rivihinta), {$yhtiorow['hintapyoristys']}) rivihinta_summa
                 FROM tilausrivi
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND uusiotunnus = '{$laskurow['tunnus']}'
-                AND var NOT IN ('P','J','O','S')
-                AND tyyppi != 'D'";
+                WHERE yhtio      = '{$kukarow['yhtio']}'
+                AND uusiotunnus  = '{$laskurow['tunnus']}'
+                AND var          NOT IN ('P','J','O','S')
+                AND tyyppi      != 'D'";
       $_tilsum_res = pupe_query($query);
       $_tilsum_row = mysql_fetch_assoc($_tilsum_res);
 
@@ -372,11 +372,11 @@ if ($tee == 'laskelma') {
 
     if ($laskelma == 'a') {
 
-      $query = "  SELECT tunnus
-                  FROM asiakas
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = '{$laskurow['liitostunnus']}'
-                  AND laji = 'H'";
+      $query = "SELECT tunnus
+                FROM asiakas
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$laskurow['liitostunnus']}'
+                AND laji    = 'H'";
       $asiakasres = pupe_query($query);
 
       if (mysql_num_rows($asiakasres) != 0) $aineistoon = $_red;
@@ -410,7 +410,7 @@ if ($tee == 'laskelma') {
     echo "<td>$laskurow[ytunnus]</td>";
     echo "<td>$laskurow[nimi]</td>";
     echo "<td>$laskurow[laskunro]</td>";
-    echo "<td>",pupe_DataTablesEchoSort($laskurow['tapvm']).tv1dateconv($laskurow['tapvm']),"</td>";
+    echo "<td>", pupe_DataTablesEchoSort($laskurow['tapvm']).tv1dateconv($laskurow['tapvm']), "</td>";
     echo "<td>$laskurow[laskun_summa]</td>";
     echo "<td>$row[veropros]</td>";
     echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[ltunnus]&lopetus={$lopetus}'>";
@@ -524,14 +524,14 @@ if ($tee == 'laskelma') {
   echo "<tfoot>";
 
   echo "<tr><th colspan='10'>";
-  echo t("Yhteensä")," (",t("ilman ALV"),")";
-  echo "<span style='float: right;'>",round(abs($verot_yht), 2),"</span>";
+  echo t("Yhteensä"), " (", t("ilman ALV"), ")";
+  echo "<span style='float: right;'>", round(abs($verot_yht), 2), "</span>";
   echo "</th></tr>";
 
   if ($_rajaa_chk) {
     echo "<tr><th colspan='10'>";
-    echo t("Yhteensä")," CSV (",t("ilman ALV"),")";
-    echo "<span style='float: right;'>",round(abs($verot_csv_yht), 2),"</span>";
+    echo t("Yhteensä"), " CSV (", t("ilman ALV"), ")";
+    echo "<span style='float: right;'>", round(abs($verot_csv_yht), 2), "</span>";
     echo "</th></tr>";
   }
 

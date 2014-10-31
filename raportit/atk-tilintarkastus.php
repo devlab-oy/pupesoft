@@ -447,9 +447,9 @@ if ($tee == "raportti") {
               FROM lasku
               LEFT JOIN toimi ON (toimi.yhtio = lasku.yhtio and toimi.tunnus = lasku.liitostunnus)
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-              AND lasku.tila   in ('H','Y','M','P','Q')
-              AND lasku.tapvm  >= '$alku'
-              AND lasku.tapvm  <= '$loppu'
+              AND lasku.tila    in ('H','Y','M','P','Q')
+              AND lasku.tapvm   >= '$alku'
+              AND lasku.tapvm   <= '$loppu'
               ORDER BY lasku.tapvm, lasku.luontiaika";
     $result = pupe_query($query);
 
@@ -470,7 +470,7 @@ if ($tee == "raportti") {
       fwrite($fh, "{$row['tunnus']}|{$row['laskunro']}|{$row['luontiaika']}|{$row['tapvm']}|{$row['summa']}|{$row['valkoodi']}|{$row['kotisumma']}|{$row['toimittajanro']}|{$row['nimi']}|{$row['tyyppi']}|{$row['vienti']}|{$row['tila']}\n");
 
       // Haetaan saapumisen rivi vain jos on vaihto-omaisuuslasku kysesssä
-      if (in_array($row["vienti"], array('C','F','I','J','K','L'))) {
+      if (in_array($row["vienti"], array('C', 'F', 'I', 'J', 'K', 'L'))) {
         // katotaan onko lasku liitetty saapumiseen
         $query = "SELECT keikka.laskunro, keikka.tunnus, keikka.vienti_kurssi, keikka.liitostunnus
                   FROM lasku

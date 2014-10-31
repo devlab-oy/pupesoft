@@ -435,12 +435,12 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   //ylärivi
   $pdf->draw_text(62,  529, t("Merkki / nro"),                  $firstpage, $norm);
   $pdf->draw_text(62,  523, t("Märke / nr"),                    $firstpage, $norm);
-  $pdf->draw_rectangle(535, 181, 520, 181,                      $firstpage, $rectparam);
-  $pdf->draw_text(183,  529, t("Kolliluku ja -laji"),                $firstpage, $norm);
-  $pdf->draw_text(183,  523, t("Kolliantal och -slag"),              $firstpage, $norm);
-  $pdf->draw_rectangle(535, 242, 520, 242,                      $firstpage, $rectparam);
-  $pdf->draw_text(246,  529, t("Sisältö, ulkomitat ja VAK-merkinnät"),      $firstpage, $norm);
-  $pdf->draw_text(246,  523, t("Innehåll, yttermått och ADR-anmärkningar"),    $firstpage, $norm);
+  $pdf->draw_rectangle(535, 141, 520, 141,                      $firstpage, $rectparam);
+  $pdf->draw_text(143,  529, t("Kolliluku ja -laji"),                $firstpage, $norm);
+  $pdf->draw_text(143,  523, t("Kolliantal och -slag"),              $firstpage, $norm);
+  $pdf->draw_rectangle(535, 202, 520, 202,                      $firstpage, $rectparam);
+  $pdf->draw_text(206,  529, t("Sisältö, ulkomitat ja VAK-merkinnät"),      $firstpage, $norm);
+  $pdf->draw_text(206,  523, t("Innehåll, yttermått och ADR-anmärkningar"),    $firstpage, $norm);
   $pdf->draw_rectangle(535, 420, 520, 420,                      $firstpage, $rectparam);
   $pdf->draw_text(422,  529, t("Brutto kg"),                    $firstpage, $norm);
   $pdf->draw_rectangle(535, 484, 520, 484,                      $firstpage, $rectparam);
@@ -462,43 +462,42 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   //kollit
   $pdf->draw_text(62, 510, $lotsikot[0],                      $firstpage, $kirj);
   if ($astilnrot[0] != '') $pdf->draw_text(62, 502, t("Astilnro").": ".$astilnrot[0],  $firstpage, $kirj);
-
-  $pdf->draw_text(183, 510, $kollit[0]."  ". $pakkaus[0],              $firstpage, $kirj);
-  $pdf->draw_text(246, 510, trim($pakkauskuvaus[0]." ".$pakkauskuvaustark[0]),  $firstpage, $kirj);
-  $pdf->draw_text(246, 500, $vakit[0]." ".$lisatiedot[0],              $firstpage, $kirj);
+  $pdf->draw_text(143, 510, $kollit[0]."  ". $pakkaus[0],              $firstpage, $kirj);
+  $pdf->draw_text(206, 510, trim($pakkauskuvaus[0]." ".$pakkauskuvaustark[0]),  $firstpage, $kirj);
+  $pdf->draw_text(206, 500, $vakit[0]." ".$lisatiedot[0],              $firstpage, $kirj);
   $pdf->draw_text(422, 510, $kilot[0],                      $firstpage, $kirj);
   $pdf->draw_text(486, 510, $kuutiot[0],                      $firstpage, $kirj);
 
   $pdf->draw_text(62, 490, $lotsikot[1],                      $firstpage, $kirj);
   if ($astilnrot[1] != '') $pdf->draw_text(62, 482, t("Astilnro").": ".$astilnrot[1],  $firstpage, $kirj);
-  $pdf->draw_text(183, 490, $kollit[1]."  ". $pakkaus[1],              $firstpage, $kirj);
-  $pdf->draw_text(246, 490, trim($pakkauskuvaus[1]." ".$pakkauskuvaustark[1]),  $firstpage, $kirj);
-  $pdf->draw_text(246, 480, $vakit[1]." ".$lisatiedot[1],              $firstpage, $kirj);
+  $pdf->draw_text(143, 490, $kollit[1]."  ". $pakkaus[1],              $firstpage, $kirj);
+  $pdf->draw_text(206, 490, trim($pakkauskuvaus[1]." ".$pakkauskuvaustark[1]),  $firstpage, $kirj);
+  $pdf->draw_text(206, 480, $vakit[1]." ".$lisatiedot[1],              $firstpage, $kirj);
   $pdf->draw_text(422, 490, $kilot[1],                      $firstpage, $kirj);
   $pdf->draw_text(486, 490 , $kuutiot[1],                      $firstpage, $kirj);
 
 
   $pdf->draw_text(62, 470, $lotsikot[2],                      $firstpage, $kirj);
   if ($astilnrot[2] != '') $pdf->draw_text(62, 462, t("Astilnro").": ".$astilnrot[2],  $firstpage, $kirj);
-  $pdf->draw_text(183, 470, $kollit[2]."  ". $pakkaus[2],              $firstpage, $kirj);
-  $pdf->draw_text(246, 470, trim($pakkauskuvaus[2]." ".$pakkauskuvaustark[2]),  $firstpage, $kirj);
-  $pdf->draw_text(246, 460, $vakit[2]." ".$lisatiedot[2],              $firstpage, $kirj);
+  $pdf->draw_text(143, 470, $kollit[2]."  ". $pakkaus[2],              $firstpage, $kirj);
+  $pdf->draw_text(206, 470, trim($pakkauskuvaus[2]." ".$pakkauskuvaustark[2]),  $firstpage, $kirj);
+  $pdf->draw_text(206, 460, $vakit[2]." ".$lisatiedot[2],              $firstpage, $kirj);
   $pdf->draw_text(422, 470, $kilot[2],                      $firstpage, $kirj);
   $pdf->draw_text(486, 470, $kuutiot[2],                      $firstpage, $kirj);
 
   $pdf->draw_text(62, 450, $lotsikot[3],                      $firstpage, $kirj);
   if ($astilnrot[3] != '') $pdf->draw_text(62, 442, t("Astilnro").": ".$astilnrot[3],  $firstpage, $kirj);
-  $pdf->draw_text(183, 450, $kollit[3]."  ". $pakkaus[3],              $firstpage, $kirj);
-  $pdf->draw_text(246, 450, trim($pakkauskuvaus[3]." ".$pakkauskuvaustark[3]),  $firstpage, $kirj);
-  $pdf->draw_text(246, 440, $vakit[3]." ".$lisatiedot[3],              $firstpage, $kirj);
+  $pdf->draw_text(143, 450, $kollit[3]."  ". $pakkaus[3],              $firstpage, $kirj);
+  $pdf->draw_text(206, 450, trim($pakkauskuvaus[3]." ".$pakkauskuvaustark[3]),  $firstpage, $kirj);
+  $pdf->draw_text(206, 440, $vakit[3]." ".$lisatiedot[3],              $firstpage, $kirj);
   $pdf->draw_text(422, 450, $kilot[3],                      $firstpage, $kirj);
   $pdf->draw_text(486, 450, $kuutiot[3],                      $firstpage, $kirj);
 
   $pdf->draw_text(62, 430, $lotsikot[4],                      $firstpage, $kirj);
   if ($astilnrot[4] != '') $pdf->draw_text(62, 422, t("Astilnro").": ".$astilnrot[4],  $firstpage, $kirj);
-  $pdf->draw_text(183, 430, $kollit[4]."  ". $pakkaus[4],              $firstpage, $kirj);
-  $pdf->draw_text(246, 430, trim($pakkauskuvaus[4]." ".$pakkauskuvaustark[4]),  $firstpage, $kirj);
-  $pdf->draw_text(246, 420, $vakit[4]." ".$lisatiedot[4],              $firstpage, $kirj);
+  $pdf->draw_text(143, 430, $kollit[4]."  ". $pakkaus[4],              $firstpage, $kirj);
+  $pdf->draw_text(206, 430, trim($pakkauskuvaus[4]." ".$pakkauskuvaustark[4]),  $firstpage, $kirj);
+  $pdf->draw_text(206, 420, $vakit[4]." ".$lisatiedot[4],              $firstpage, $kirj);
   $pdf->draw_text(422, 430, $kilot[4],                      $firstpage, $kirj);
   $pdf->draw_text(486, 430, $kuutiot[4],                      $firstpage, $kirj);
 

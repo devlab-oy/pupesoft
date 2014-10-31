@@ -19,6 +19,9 @@ $pupe_root_polku = dirname(dirname(__FILE__));
 require "{$pupe_root_polku}/inc/connect.inc";
 require "{$pupe_root_polku}/inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
+
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock();
 

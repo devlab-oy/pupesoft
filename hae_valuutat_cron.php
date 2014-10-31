@@ -8,6 +8,9 @@ if (php_sapi_name() != 'cli') {
 require "inc/connect.inc";
 require "inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
+
 $xml = @simplexml_load_file("http://www.ecb.europa.eu/stats/eurofxref/eurofxref-daily.xml");
 
 if ($xml !== FALSE) {

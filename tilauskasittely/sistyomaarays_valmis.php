@@ -315,15 +315,8 @@ if ($tee == "VALMIS") {
 
               if (mysql_num_rows($sarjares) == 0) {
                 // Lisätään tuotepaikkoja
-                $query = "INSERT INTO tuotepaikat
-                          SET tuoteno = '$lisarow[tuoteno]',
-                          yhtio     = '$kukarow[yhtio]',
-                          hyllyalue = '$srow[hyllyalue]',
-                          hyllynro  = '$srow[hyllynro]',
-                          hyllyvali = '$srow[hyllyvali]',
-                          hyllytaso = '$srow[hyllytaso]'";
-                $sarjares = pupe_query($query);
-                $minne  = mysql_insert_id($GLOBALS["masterlink"]);
+                $lisatty_paikka = lisaa_tuotepaikka($lisarow["tuoteno"], $srow["hyllyalue"], $srow["hyllynro"], $srow["hyllyvali"], $srow["hyllytaso"], "Sisäisellä työmääräyksellä", "", 0, 0, 0);
+                $minne  = $lisatty_paikka["tuotepaikan_tunnus"];
 
                 $query = "SELECT *
                           FROM tuotepaikat
@@ -332,22 +325,6 @@ if ($tee == "VALMIS") {
                           and tunnus    = '$minne'";
                 $sarjares = pupe_query($query);
                 $minnerow  = mysql_fetch_assoc($sarjares);
-
-                $query = "INSERT into tapahtuma set
-                          yhtio     = '$kukarow[yhtio]',
-                          tuoteno   = '$lisarow[tuoteno]',
-                          kpl       = '0',
-                          kplhinta  = '0',
-                          hinta     = '0',
-                          hyllyalue = '$srow[hyllyalue]',
-                          hyllynro  = '$srow[hyllynro]',
-                          hyllyvali = '$srow[hyllyvali]',
-                          hyllytaso = '$srow[hyllytaso]',
-                          laji      = 'uusipaikka',
-                          selite    = '".t("Lisättiin tuotepaikka")." $srow[hyllyalue] $srow[hyllynro] $srow[hyllyvali] $srow[hyllytaso]. ".t("Sisäinen työmääräys")."',
-                          laatija   = '$kukarow[kuka]',
-                          laadittu  = now()";
-                $sarjares = pupe_query($query);
               }
               else {
                 $minnerow  = mysql_fetch_assoc($sarjares);

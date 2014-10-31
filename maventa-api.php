@@ -12,6 +12,9 @@ $pupesoft_polku = dirname(__FILE__);
 require $pupesoft_polku."/inc/connect.inc";
 require $pupesoft_polku."/inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
+
 // Otetaan defaultit, jos ei olla yliajettu salasanat.php:ssä
 $verkkolaskut_in     = empty($verkkolaskut_in)     ? "/home/verkkolaskut"        : rtrim($verkkolaskut_in, "/");
 $verkkolaskut_ok     = empty($verkkolaskut_ok)     ? "/home/verkkolaskut/ok"     : rtrim($verkkolaskut_ok, "/");

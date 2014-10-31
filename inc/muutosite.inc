@@ -1,6 +1,10 @@
 <?php
 
-echo "  <SCRIPT LANGUAGE=JAVASCRIPT>
+if (!isset($tila)) $tila = "";
+if (!isset($komm)) $komm = "";
+
+if ($tila != 'ostolasku_kulut') {
+  echo "  <SCRIPT LANGUAGE=JAVASCRIPT>
       function verify(msg){
         if (confirm(msg)) {
           return true;
@@ -11,9 +15,8 @@ echo "  <SCRIPT LANGUAGE=JAVASCRIPT>
         }
       }
     </SCRIPT>";
+}
 
-if (!isset($tila)) $tila = "";
-if (!isset($komm)) $komm = "";
 
 if (!function_exists("erottele")) {
   function erottele($pvm) {

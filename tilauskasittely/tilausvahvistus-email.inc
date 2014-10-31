@@ -137,7 +137,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
   $query = "SELECT tilausrivi.tunnus, tuote.eankoodi, tuote.myyntihinta, tuote.aleryhma, tilausrivi.tuoteno,
             if(tilausrivi.var not in ('P','J','O','S'), tilausrivi.varattu, 0) varattu,
-            if(tilausrivi.var in ('J','S'), tilausrivi.jt+tilausrivi.varattu , 0) jt,
+            if(tilausrivi.var = 'J', tilausrivi.jt+tilausrivi.varattu , 0) jt,
             tilausrivi.toimaika, tilausrivi.kommentti, tilausrivi.tilkpl, tilausrivi.alv,
             tilausrivi.nimitys,  tilausrivi.hinta, {$ale_query_select_lisa} tilausrivi.kommentti, tilausrivi.var
             FROM tilausrivi
@@ -369,45 +369,45 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
     if (strpos($_SERVER['SCRIPT_NAME'], "tulostakopio.php") === FALSE and $yhtiorow['tilausvahvistus_tallenna'] == 'K') {
       $tilausvahvistus_tallenna = "/tmp/Tilausvahvistus-".md5(uniqid(mt_rand(), true)).".txt";
       file_put_contents($tilausvahvistus_tallenna, $ulos);
+      $_attachments = array(0 => array(
+              "filename"        => $tilausvahvistus_tallenna,
+              "newfilename"     => "tilvahv.txt",
+              "ctype"           => "text")
+          );
     }
     else {
       $tilausvahvistus_tallenna = "";
+      $_attachments = "";
     }
 
   } // end rivejä löytyi
 
-  // Kompostoidaan meili
-  $bound = uniqid(time()."_") ;
+    // Sähköpostin lähetykseen parametrit
+    $parametri = array(
+      "to"           => $tilvahasiakas['email'],
+      "cc"           => "",
+      "subject"      => $yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus",
+      "ctype"        => "text",
+      "body"         => $ulos,
+      "attachements" => $_attachments
+    );
 
-  $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
-  $header .= "MIME-Version: 1.0\n";
-  $header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n";
-
-  $content = "--$bound\n";
-
-  $content .= "Content-Type: text/plain;\n";
-  $content .= "Content-Transfer-Encoding: quoted-printable\n\n";
-  $content .= $ulos;
-  $content .= "\n" ;
-
-  $content .= "--$bound\n";
-
-  $content .= "Content-Type: text/plain;\n" ;
-  $content .= "Content-Transfer-Encoding: 7bit\n" ;
-  $content .= "Content-Disposition: attachment; filename=\"tilvahv.txt\"\n\n";
-  $content .= $liite;
-  $content .= "\n" ;
-
-  if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
-    unset($boob);
-    $boob = mail($tilvahasiakas['email'], mb_encode_mimeheader($yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
-    if ($boob===FALSE) echo t("Sähköpostin lähetys epäonnistui")."!<br>";
+    pupesoft_sahkoposti($parametri);
   }
 
   if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
-    unset($boob);
-    $boob = mail($kukarow['eposti'], mb_encode_mimeheader($yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
-    if ($boob===FALSE) echo t("Sähköpostin lähetys epäonnistui")."!<br>";
+   
+    // Sähköpostin lähetykseen parametrit
+    $parametri = array(
+      "to"           => $kukarow['eposti'],
+      "cc"           => "",
+      "subject"      => $yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus",
+      "ctype"        => "text",
+      "body"         => $ulos,
+      "attachements" => $_attachments
+    );
+
+    pupesoft_sahkoposti($parametri);
   }
 }
 

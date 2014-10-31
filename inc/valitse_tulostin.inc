@@ -390,7 +390,7 @@ foreach ($tulostimet as $tulostin) {
 
     echo "<option value='$kirow[komento]'$sel>$kirow[kirjoitin]</option>";
   }
-
+  echo "<option value='excel_lahete_geodis_wilson'>Geodis Wilson Excel</option>";
   echo "</select></td>";
   echo "</tr>";
 

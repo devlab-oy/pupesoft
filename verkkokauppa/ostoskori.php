@@ -84,8 +84,7 @@ if ($tee == 'tarjous') {
     echo file_get_contents($pdffilenimi);
 
     //poistetaan tmp file samantien kuleksimasta...
-    system("rm -f $pdffilenimi");
-
+    unlink($pdffilenimi);
     unset($pdf);
     unset($firstpage);
   }

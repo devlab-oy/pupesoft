@@ -56,6 +56,7 @@ if ($update == 'totta' and $selkukarow["kuka"] != "") {
       $query = "INSERT into oikeu
                 SET
                 kuka       = '$selkukarow[kuka]',
+                user_id    = '{$selkukarow['tunnus']}',
                 sovellus   = '$trow[sovellus]',
                 nimi       = '$trow[nimi]',
                 alanimi    = '$trow[alanimi]',

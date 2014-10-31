@@ -201,8 +201,8 @@ height: 22px;
 line-height: 22px;
 }
 
-.paging_full_numbers span.paginate_button,
-   .paging_full_numbers span.paginate_active {
+.paging_full_numbers a.paginate_button,
+   .paging_full_numbers a.paginate_active {
 -webkit-border-radius: 5px;
 -moz-border-radius: 5px;
 padding: 2px 5px;

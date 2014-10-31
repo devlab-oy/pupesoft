@@ -85,12 +85,12 @@ while ($row = mysql_fetch_assoc($res)) {
             ifnull(sum(if(tilausrivi.keratty!='', tilausrivi.varattu, 0)), 0) keratty
             FROM tilausrivi use index (yhtio_tyyppi_tuoteno_varattu)
             JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus)
-            WHERE tilausrivi.yhtio   = '$yhtio'
-            and tilausrivi.tyyppi    in ('L','G','V')
+            WHERE tilausrivi.yhtio = '$yhtio'
+            and tilausrivi.tyyppi  in ('L','G','V')
             and (tilausrivi.perheid2 = 0 or tilausrivi.perheid2=tilausrivi.tunnus)
-            and tilausrivi.tuoteno   = '$row[tuoteno]'
+            and tilausrivi.tuoteno = '$row[tuoteno]'
             and (tilausrivi.varattu > 0 or (tilausrivi.varattu < 0 and lasku.tilaustyyppi = 'R'))
-            and tilausrivi.varasto  = '$row[varasto]'";
+            and tilausrivi.varasto = '$row[varasto]'";
   $kerres = pupe_query($query);
   $kerrow = mysql_fetch_assoc($kerres);
 

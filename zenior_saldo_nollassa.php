@@ -20,6 +20,9 @@ ini_set("display_errors", 0);
 require "inc/connect.inc";
 require "inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
+
 // Tehd‰‰n oletukset
 $kukarow['yhtio'] = $argv[1];
 $kukarow['kuka'] = "admin";

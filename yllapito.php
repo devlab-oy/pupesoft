@@ -27,7 +27,7 @@ if (array_key_exists($toim, $psx_ohjelmat)) {
 
   $psx_url = $psx_ohjelmat[$toim];
 
-  echo "<font class='head'>",t("Virhe"),"</font><hr>";
+  echo "<font class='head'>", t("Virhe"), "</font><hr>";
 
   echo "<br />";
 

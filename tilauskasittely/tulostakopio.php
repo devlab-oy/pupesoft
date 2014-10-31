@@ -1371,7 +1371,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
   $rrrresult = pupe_query($query);
 
   while ($laskurow = mysql_fetch_assoc($rrrresult)) {
-    
+
     if ($toim == "TARJOUS") {
       if ($kukarow['toimipaikka'] != $laskurow['yhtio_toimipaikka'] and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
         $kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];

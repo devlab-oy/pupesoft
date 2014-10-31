@@ -1091,7 +1091,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   // 'processing_pupesoft'-tilassa niin tilausta ei lueta sisään jos sisäänluvun esto on päällä
   // Default on: YES
   if (isset($magento_sisaanluvun_esto) and !empty($magento_sisaanluvun_esto)) {
-     $magento_client->setSisaanluvunEsto($magento_sisaanluvun_esto);
+    $magento_client->setSisaanluvunEsto($magento_sisaanluvun_esto);
   }
 
   // lisaa_kategoriat

@@ -488,7 +488,14 @@ if ($tee == "ETSILASKU") {
     <input type='hidden' name='laskunro' value='{$laskunro}'>
     <input type='hidden' name='otunnus' value='{$otunnus}'>
     <input type='hidden' name='ytunnus' value='{$ytunnus}'>
-    <input type='hidden' name='asiakasid' value='{$asiakasid}'>";
+    <input type='hidden' name='asiakasid' value='{$asiakasid}'>
+    <input type='hidden' name='toimittajaid' value='{$toimittajaid}'>
+    <input type='hidden' name='kka' value='{$kka}'>
+    <input type='hidden' name='vva' value='{$vva}'>
+    <input type='hidden' name='ppa' value='{$ppa}'>
+    <input type='hidden' name='kkl' value='{$kkl}'>
+    <input type='hidden' name='vvl' value='{$vvl}'>
+    <input type='hidden' name='ppl' value='{$ppl}'>";
 
     echo "<table>";
     echo "<tr>";

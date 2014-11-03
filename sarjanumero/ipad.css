@@ -195,9 +195,13 @@ th {
   -webkit-border-radius: 5px;
   border-radius: 5px;
   margin:2px auto;
-  width:300px;
+  width:400px;
 }
 
-.kontissa{
+.viety{
   background-color:#A3EDC8;
+}
+
+.vietava{
+  background-color:#FFD633;
 }

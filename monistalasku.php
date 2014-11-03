@@ -933,7 +933,7 @@ if ($tee == "ETSILASKU") {
     if ($kommenttikentta) {
       $required = $kommenttikentta == "P" ? "required" : "";
 
-      $label_text = t("Asiakkaan yhteystiedot (Nimi, puh, email)");
+      $label_text = t("Monistuskommentti");
 
       echo "<label>{$label_text}
               <br>
@@ -941,7 +941,7 @@ if ($tee == "ETSILASKU") {
                         cols='40'
                         name='kommentti'
                         minlength='20'
-                        placeholder='{$label_text}'
+                        placeholder='" . t("Kommentti monistuksesta") . "'
                         {$required}>{$kommentti}</textarea>
             </label>
             <br>";
@@ -1424,7 +1424,7 @@ if ($tee == 'MONISTA') {
       if ($kommenttikentta and !empty($kommentti)) {
         $tallennettava_kommentti =
           trim($laskurow["sisviesti3"] .
-               "\nMonistettaessa annetut asiakkaan yhteystedot:\n" .
+               "\nMonistuskommentti:\n" .
                $kommentti);
 
         $kommentti_query = "UPDATE lasku SET

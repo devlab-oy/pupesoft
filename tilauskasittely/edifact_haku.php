@@ -135,22 +135,19 @@ if ($task == 'hae') {
 
   $files = ftp_nlist($yhteys, ".");
 
-  $b1 = "13713_225860614.IFF";
-  $b2 = "18176_227697666.IFF";
-  $r1 = "18176_227708169.DAD";
-  $r2 = "18176_227708837.DAD";
-
-  $sanomat = array($b1,$b2,$r1,$r2);
-
   foreach ($files as $file) {
 
-      if (substr($file, -3) == 'IFF') {
-        $bookkaukset[] = $file;
-      }
+    if (substr($file, -3) == 'IFF') {
+      $bookkaukset[] = $file;
+    }
 
-      if (substr($file, -3) == 'DAD') {
-        $rahtikirjat[] = $file;
-      }
+    if (substr($file, -3) == 'DAD') {
+      $rahtikirjat[] = $file;
+    }
+
+    if (substr($file, -3) == 'IFT') {
+      $iftstat[] = $file;
+    }
 
   }
 
@@ -170,21 +167,29 @@ if ($task == 'hae') {
     unlink($temp_file);
   }
 
+  foreach ($iftstat as $iftsta) {
+    $temp_file = tempnam("/tmp", "IFT-");
+    ftp_get($yhteys, $temp_file, $iftsta, FTP_ASCII);
+    $edi_data = file_get_contents($temp_file);
+    kasittele_iftsta($edi_data);
+    unlink($temp_file);
+  }
+
   ftp_close($yhteys);
 
 }
 else{
 
-/*
+
 
   echo "
-  <font class='head'>".t("Sanomien haku")."</font>
+  <font class='head'>".t("Sanomien haku")."</font>  <br><hr>
   <form action='' method='post'>
     <input type='hidden' name='task' value='hae' />
-    <input type='submit' value='".t("Hae sanomat")."'>
-  </form>";
+    <input type='submit' value='".t("Hae sanomat (ftp)")."'>
+  </form>  <br><hr><br>";
 
-*/
+
 
   echo "
   <font class='head'>".t("Testaus")."</font>
@@ -270,6 +275,70 @@ else{
 
 require "inc/footer.inc";
 
+
+function kasittele_iftsta($edi_data) {
+  global $kukarow;
+
+  $edi_data = str_replace("\n", "", $edi_data);
+  $liitedata = $edi_data;
+  $edi_data = str_replace("?'", "#%#", $edi_data);
+  $edi_data = explode("'", $edi_data);
+
+  $rivimaara = count($edi_data);
+
+
+  foreach ($edi_data as $key => $rivi) {
+
+    trim($rivi);
+
+    $rivi = str_replace("#%#", "'", $rivi);
+
+    // katsotaan onko viesti alkuperäinen vai korvaava (9 vai 5)
+    // tulee ehkä olemaan oleellinen tieto
+    if (substr($rivi, 0, 3) == 'BGM') {
+      $osat = explode("+", $rivi);
+      $matkakoodi = $osat[2];
+      $tyyppi = $osat[3];
+    }
+
+    if (substr($rivi, 0, 6) == 'EQD+CN') {
+      $osat = explode("+", $rivi);
+      $konttinumero = $osat[2];
+    }
+
+    if (substr($rivi, 0, 7) == 'RFF+ZMR' and !isset($konttiviite)) {
+      $osat = explode("+", $rivi);
+      $mrn_info = $osat[1];
+      $mrn_info_osat = explode(":", $mrn_info);
+      $mrn = $mrn_info_osat[1];
+    }
+  }
+
+  $query = "SELECT group_concat(otunnus)
+            FROM laskun_lisatiedot
+            WHERE matkakoodi = '{$matkakoodi}'";
+  $result = pupe_query($query);
+  $laskutunnukset = mysql_result($result, 0);
+
+  $query = "SELECT group_concat(trlt.tunnus)
+            FROM tilausrivi
+            JOIN tilausrivin_lisatiedot AS trlt
+              ON trlt.yhtio = tilausrivi.yhtio
+              AND trlt.tilausrivitunnus = tilausrivi.tunnus
+            WHERE tilausrivi.otunnus IN ({$laskutunnukset})
+            AND trlt.konttinumero = '{$konttinumero}'";
+  $result = pupe_query($query);
+  $tunnukset = mysql_result($result, 0);
+
+  $update_query = "UPDATE tilausrivin_lisatiedot SET
+                   kontin_mrn  = '{$mrn}'
+                   WHERE yhtio = '{$kukarow['yhtio']}'
+                   AND tunnus IN ({$tunnukset})";
+  pupe_query($update_query);
+
+}
+
+
 function kasittele_bookkaussanoma($edi_data) {
   global $kukarow;
 
@@ -278,11 +347,13 @@ function kasittele_bookkaussanoma($edi_data) {
   $edi_data = str_replace("?'", "#%#", $edi_data);
   $edi_data = explode("'", $edi_data);
 
+  $rivimaara = count($edi_data);
+
   $rahti = array();
   $pakkaukset = array();
   $tilaukset = array();
 
-  foreach ($edi_data as $rivi) {
+  foreach ($edi_data as $key => $rivi) {
 
     trim($rivi);
 
@@ -327,6 +398,78 @@ function kasittele_bookkaussanoma($edi_data) {
       $rivinro = $tilaus_info_osat[2];
     }
 
+    if (substr($rivi, 0, 6) == 'TDT+20') {
+
+      $osat = explode("+", $rivi);
+
+      $carrier_id = $osat[5];
+
+      $transport_info = $osat[8];
+      $transport_info_osat = explode(":", $transport_info);
+      $transport_id = $transport_info_osat[0];
+      $transport_name = $transport_info_osat[3];
+
+      $valmis = false;
+      $luetaan = $key;
+
+      while ($valmis == false) {
+
+        $luetaan++;
+
+        if (substr($edi_data[$luetaan], 0, 5) == "LOC+5") {
+          $osat = explode("+", $edi_data[$luetaan]);
+          $lahtopaikka_info = $osat[2];
+          $lahtopaikka_info_osat = explode(":", $lahtopaikka_info);
+          $lahtopaikka_id = $lahtopaikka_info_osat[0];
+          $lahtopaikka_nimi = $lahtopaikka_info_osat[3];
+        }
+
+        if (substr($edi_data[$luetaan], 0, 5) == "LOC+8") {
+          $osat = explode("+", $edi_data[$luetaan]);
+          $valisatama_info = $osat[2];
+          $valisatama_info_osat = explode(":", $valisatama_info);
+          $valisatama_id = $valisatama_info_osat[0];
+          $valmis = true;
+        }
+
+        if (substr($edi_data[$luetaan], 0, 6) == "TDT+30" or $luetaan >= $rivimaara) {
+          $valmis = true;
+        }
+      }
+    }
+
+
+    if (substr($rivi, 0, 6) == 'TDT+30') {
+
+      $osat = explode("+", $rivi);
+
+      $jatko_transport_info = $osat[8];
+      $jatko_transport_info_osat = explode(":", $jatko_transport_info);
+      $jatko_transport_id = $jatko_transport_info_osat[0];
+      $jatko_transport_name = $jatko_transport_info_osat[3];
+
+      $valmis = false;
+      $luetaan = $key;
+
+      while ($valmis == false) {
+
+        $luetaan++;
+
+        if (substr($edi_data[$luetaan], 0, 5) == "LOC+8") {
+
+          $osat = explode("+", $edi_data[$luetaan]);
+          $maaranpaa_info = $osat[2];
+          $maaranpaa_info_osat = explode(":", $maaranpaa_info);
+          $maaranpaa_id = $maaranpaa_info_osat[0];
+          $valmis = true;
+        }
+
+        if (substr($edi_data[$luetaan], 0, 7) == "TDT+30" or $luetaan >= $rivimaara) {
+          $valmis = true;
+        }
+      }
+    }
+
     if (substr($rivi, 0, 7) == "DTM+133" and !isset($lahtopvm)) {
       $osat = explode("+", $rivi);
       $lahto_info = $osat[1];
@@ -359,8 +502,22 @@ function kasittele_bookkaussanoma($edi_data) {
       $rulla_info_osat = explode(":", $rulla_info);
       $rullamaara = $rulla_info_osat[0];
     }
-
   }
+
+  $matkatiedot = array(
+    'carrier_id' => $carrier_id,
+    'transport_id' => $transport_id,
+    'transport_name' => $transport_name,
+    'lahtopaikka_id' => $lahtopaikka_id,
+    'lahtopaikka_nimi' => $lahtopaikka_nimi,
+    'valisatama_id' => $valisatama_id,
+    'jatko_transport_id' => $jatko_transport_id,
+    'jatko_transport_name' => $jatko_transport_name,
+    'maaranpaa_id' => $maaranpaa_id
+    );
+
+  $matkatiedot = serialize($matkatiedot);
+  $matkatiedot = mysql_real_escape_string($matkatiedot);
 
   // tässä vaiheessa vastaanottaja on aina steveco
   $asiakas_id = 106;
@@ -405,7 +562,8 @@ function kasittele_bookkaussanoma($edi_data) {
                      konttimaara  = '{$konttimaara}',
                      konttityyppi = '{$konttityyppi}',
                      matkakoodi   = '{$matkakoodi}',
-                     rullamaara   = '{$rullamaara}'
+                     rullamaara   = '{$rullamaara}',
+                     matkatiedot  = '{$matkatiedot}'
                      WHERE yhtio  = '{$kukarow['yhtio']}'
                      AND otunnus  = '{$tunnus}'";
     pupe_query($update_query);

@@ -23,6 +23,9 @@ $lock_params = array(
   "locktime" => 5400
 );
 
+// Logitetaan ajo
+cron_log();
+
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
 pupesoft_flock($lock_params);
 
@@ -858,7 +861,7 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   // 'processing_pupesoft'-tilassa niin tilausta ei lueta sisään jos sisäänluvun esto on päällä
   // Default on: YES
   if (isset($magento_sisaanluvun_esto) and !empty($magento_sisaanluvun_esto)) {
-     $magento_client->setSisaanluvunEsto($magento_sisaanluvun_esto);
+    $magento_client->setSisaanluvunEsto($magento_sisaanluvun_esto);
   }
 
   // lisaa_kategoriat

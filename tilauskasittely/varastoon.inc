@@ -246,8 +246,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
                 AND hyllyalue = '{$chk_row['hyllyalue']}'
                 AND hyllynro  = '{$chk_row['hyllynro']}'
                 AND hyllytaso = '{$chk_row['hyllytaso']}'
-                AND hyllyvali = '{$chk_row['hyllyvali']}'
-                LIMIT 1";
+                AND hyllyvali = '{$chk_row['hyllyvali']}'";
       $paikka_chk_res = pupe_query($query);
 
       if (mysql_num_rows($paikka_chk_res) == 0) {
@@ -316,8 +315,7 @@ elseif ($toiminto == "kalkyyli" and $tee == "varastoon") {
                 AND hyllynro   = '{$chk_row['hyllynro']}'
                 AND hyllytaso  = '{$chk_row['hyllytaso']}'
                 AND hyllyvali  = '{$chk_row['hyllyvali']}'
-                AND oletus    != ''
-                LIMIT 1";
+                AND oletus    != ''";
       $paikka_chk_res = pupe_query($query);
 
       if (mysql_num_rows($paikka_chk_res) == 1) {
@@ -542,6 +540,24 @@ if ($tee != "" and $mobiili_keikka != "yes" and $kauttalaskutus == '' and !$tull
 }
 
 while ($tilrivirow = mysql_fetch_assoc($presult)) {
+
+  // Jos ollaan tultu mobiilista ja rivin paikka onkin eri kuin oletuspaikka
+  // niin setataan se paika johon ollaan tulouttamassa oletuspaikaksi
+  if ($mobiili_keikka == "yes"
+    and $hyllyalue != ""
+    and $hyllynro != ""
+    and $hyllyvali != ""
+    and $hyllytaso != ""
+    and ($tilrivirow["hyllyalue"] != $hyllyalue
+      or $tilrivirow["hyllynro"] != $hyllynro
+      or $tilrivirow["hyllyvali"] != $hyllyvali
+      or $tilrivirow["hyllytaso"] != $hyllytaso)) {
+
+    $tilrivirow["hyllyalue"] = $hyllyalue;
+    $tilrivirow["hyllynro"] = $hyllynro;
+    $tilrivirow["hyllyvali"] = $hyllyvali;
+    $tilrivirow["hyllytaso"] = $hyllytaso;
+  }
 
   $hankintakulut = "";
 
@@ -829,8 +845,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
                 AND hyllyalue = '{$tilrivirow['hyllyalue']}'
                 AND hyllynro  = '{$tilrivirow['hyllynro']}'
                 AND hyllytaso = '{$tilrivirow['hyllytaso']}'
-                AND hyllyvali = '{$tilrivirow['hyllyvali']}'
-                LIMIT 1";
+                AND hyllyvali = '{$tilrivirow['hyllyvali']}'";
       $paikka_chk_res = pupe_query($query);
 
       if (mysql_num_rows($paikka_chk_res) == 0) {
@@ -880,24 +895,22 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
                   AND hyllyalue = '{$tilrivirow['hyllyalue']}'
                   AND hyllynro  = '{$tilrivirow['hyllynro']}'
                   AND hyllytaso = '{$tilrivirow['hyllytaso']}'
-                  AND hyllyvali = '{$tilrivirow['hyllyvali']}'
-                  LIMIT 1";
+                  AND hyllyvali = '{$tilrivirow['hyllyvali']}'";
         $result = pupe_query($query);
       }
     }
     else {
       // päivitetään saldo tuoterivillä olevalle paikalle
-      $query = "UPDATE tuotepaikat set
+      $query = "UPDATE tuotepaikat SET
                 saldo         = saldo+$tilrivirow[varattu],
                 saldo_varattu = saldo_varattu + if($tilrivirow[tunnus] != $tilrivirow[perheid2] and $tilrivirow[perheid2]>0, $tilrivirow[varattu], 0),
                 saldoaika     = now()
-                where yhtio   = '$kukarow[yhtio]' and
-                tuoteno       = '$tilrivirow[tuoteno]' and
-                hyllyalue     = '$tilrivirow[hyllyalue]' and
-                hyllynro      = '$tilrivirow[hyllynro]' and
-                hyllytaso     = '$tilrivirow[hyllytaso]' and
-                hyllyvali     = '$tilrivirow[hyllyvali]'
-                limit 1";
+                WHERE yhtio   = '$kukarow[yhtio]'
+                AND tuoteno   = '$tilrivirow[tuoteno]'
+                AND hyllyalue = '$tilrivirow[hyllyalue]'
+                AND hyllynro  = '$tilrivirow[hyllynro]'
+                AND hyllytaso = '$tilrivirow[hyllytaso]'
+                AND hyllyvali = '$tilrivirow[hyllyvali]'";
       $result = pupe_query($query);
     }
 
@@ -914,6 +927,7 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
                 WHERE yhtio    = '$kukarow[yhtio]' and
                 tuoteno        = '$tilrivirow[tuoteno]' and
                 oletus        != ''
+                ORDER BY tunnus
                 LIMIT 1";
       $result = pupe_query($query);
 
@@ -946,7 +960,8 @@ while ($tilrivirow = mysql_fetch_assoc($presult)) {
           // haetaan firman eka varasto, tökätään kama sinne ja tehdään siitä oletuspaikka
           $query = "SELECT alkuhyllyalue, alkuhyllynro
                     FROM varastopaikat
-                    WHERE yhtio = '$kukarow[yhtio]' AND tyyppi != 'P'
+                    WHERE yhtio  = '$kukarow[yhtio]'
+                    AND tyyppi  != 'P'
                     ORDER BY alkuhyllyalue, alkuhyllynro
                     LIMIT 1";
           $result = pupe_query($query);

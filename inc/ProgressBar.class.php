@@ -153,7 +153,7 @@ class ProgressBar {
 
     echo '<div id="'.$this->domID.'">'.
       $this->message.'<br/>'.
-      '<div style="position:absolute;color:'.$this->backgroundColor.';background-color:'.$this->backgroundColor.'">'.$this->backgroundBar.'</div>' .
+      '<div style="margin-bottom:20px;position:absolute;color:'.$this->backgroundColor.';background-color:'.$this->backgroundColor.'">'.$this->backgroundBar.'</div>' .
       '<div style="position:absolute;color:'.$this->foregroundColor.';background-color:'.$this->foregroundColor.'">';
 
     ob_flush();
@@ -191,7 +191,7 @@ class ProgressBar {
     if (!$this->finished && $this->StepCount == $this->numSteps) {
 
       // close the bar
-      echo '</div></div><br/>';
+      echo '</div></div><br />';
       ob_flush();
       flush();
 

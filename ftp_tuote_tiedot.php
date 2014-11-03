@@ -20,6 +20,10 @@ else {
 
   require "/var/www/html/pupesoft/inc/connect.inc";
   require "/var/www/html/pupesoft/inc/functions.inc";
+
+  // Logitetaan ajo
+  cron_log();
+
   $tee = "aja";
 }
 

@@ -57,6 +57,9 @@ else {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   // Tehd‰‰n oletukset
   $kukarow['yhtio'] = $argv[1];
   $kukarow['kuka'] = "admin";
@@ -212,12 +215,13 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
         }
       }
 
-      // Haetaan tuotteen viimeisin laskutus
+      // Haetaan tuotteen viimeisin laskutus (ei huomioida hyvityksi‰)
       $query  = "SELECT laadittu
                  FROM tapahtuma
                  WHERE yhtio = '$kukarow[yhtio]'
                  AND laji    in ('laskutus', 'kulutus')
                  AND tuoteno = '$epakurantti_row[tuoteno]'
+                 AND kpl     < 0
                  ORDER BY laadittu DESC
                  LIMIT 1;";
       $tapres = pupe_query($query);

@@ -120,12 +120,9 @@ if ($maara > 0) {
   if ($varasto > 0) {
     $query = "SELECT tuotepaikat.*
               FROM tuotepaikat
-              JOIN varastopaikat ON varastopaikat.yhtio = tuotepaikat.yhtio
-              and concat(rpad(upper(varastopaikat.alkuhyllyalue),  5, '0'),lpad(upper(varastopaikat.alkuhyllynro),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-              and concat(rpad(upper(varastopaikat.loppuhyllyalue), 5, '0'),lpad(upper(varastopaikat.loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-              and varastopaikat.tunnus = $varasto
-              WHERE tuotepaikat.yhtio  = '$kukarow[yhtio]'
-              and tuotepaikat.tuoteno  = '$tuoteno'";
+              WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
+              and tuotepaikat.varasto = $varasto
+              and tuotepaikat.tuoteno = '$tuoteno'";
     $jtsre = pupe_query($query);
     $jtstu = mysql_fetch_array($jtsre);
   }

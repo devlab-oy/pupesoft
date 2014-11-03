@@ -23,14 +23,14 @@ if (!isset($oletus_profiili))  $oletus_profiili = '';
 if (!isset($oletus_asiakastiedot)) $oletus_asiakastiedot = '';
 if (!isset($myyja))        $myyja = "";
 
-if (isset($toim) and $toim == 'extranet') {
+if ($toim == 'extranet') {
   echo "Extranet-";
 }
 
 echo t("K‰ytt‰j‰hallinta"), ":</font><hr>";
 
 // t‰‰ on t‰ll‰n‰n kikka.. ‰lk‰‰ seotko.. en jaksa pyˆritt‰‰ toimia joka formista vaikka pit‰s..
-if (isset($toim)) $PHP_SELF = $PHP_SELF."?toim={$toim}";
+$PHP_SELF = $PHP_SELF."?toim={$toim}";
 
 if (isset($generatepass) and $generatepass != "") {
   $generoitupass = trim(shell_exec("openssl rand -base64 12"));
@@ -39,7 +39,7 @@ if (isset($generatepass) and $generatepass != "") {
 }
 
 if (isset($muutparametrit)) {
-  list ($tee, $selkuka, $kumpi, $yoaid) = explode("#", $muutparametrit);
+  list ($tee, $selkuka, $kumpi, $yoaid) = explode("!°!", $muutparametrit);
 
   if ($kumpi == 1) {
     $ytunnus_oa_id = $asiakasid;
@@ -52,10 +52,14 @@ if (isset($muutparametrit)) {
 
   $ytunnus_oa = "";
   $ytunnus_oat = "";
+
+  if ($tee == "MUUTA" and !empty($ytunnus) and isset($toimipaikka_rajaus) and $toimipaikka_rajaus != "") {
+    $kumpi == 1 ? $ytunnus_oa = $ytunnus : $ytunnus_oat = $ytunnus;
+  }
 }
 
 if ($tee == "MUUTA" and $ytunnus_oa != "" and $ytunnus_oa != '0') {
-  $muutparametrit = "MUUTA#{$selkuka}#1#{$oletus_asiakastiedot}";
+  $muutparametrit = "MUUTA!°!{$selkuka}!°!1!°!{$oletus_asiakastiedot}";
   $ytunnus     = $ytunnus_oa;
   $asiakasid     = "";
   $ytunnus_oat    = "";
@@ -86,7 +90,7 @@ elseif (isset($ytunnus_oa) and $ytunnus_oa == '0') {
 }
 
 if ($tee == "MUUTA" and $ytunnus_oat != "" and $ytunnus_oat != '0') {
-  $muutparametrit = "MUUTA#{$selkuka}#2#{$oletus_asiakas}";
+  $muutparametrit = "MUUTA!°!{$selkuka}!°!2!°!{$oletus_asiakas}";
   $ytunnus     = $ytunnus_oat;
   $asiakasid     = "";
   $ytunnus_oa    = "";
@@ -430,6 +434,7 @@ if ($tee == 'UUSI') {
           if (mysql_num_rows($tarkesult) == 0) {
             $query = "INSERT into oikeu SET
                       kuka       = '{$ktunnus}',
+                      user_id    = '{$selkuka}',
                       sovellus   = '{$trow['sovellus']}',
                       nimi       = '{$trow['nimi']}',
                       alanimi    = '{$trow['alanimi']}',
@@ -497,6 +502,11 @@ if (isset($selkuka) and ($selkuka == "UUSI" or $selkuka == "KOPSAAUUSI")) {
 }
 elseif (strtoupper($toim) == 'EXTRANET' and isset($selkuka)) {
   $query = "SELECT * FROM kuka WHERE tunnus = '{$selkuka}' and extranet != ''";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) == 0) {
+    $query = "SELECT * FROM kuka WHERE kuka = '{$selkuka}' and extranet != ''";
+  }
 }
 elseif (isset($selkuka)) {
   $query = "SELECT * FROM kuka WHERE tunnus = '{$selkuka}' and extranet = ''";
@@ -555,7 +565,6 @@ if ($tee == 'MUUTA') {
       }
     }
 
-
     $max_keraysera_alustat = isset($max_keraysera_alustat) ? (int) $max_keraysera_alustat : 0;
 
     $query = "UPDATE kuka
@@ -567,6 +576,7 @@ if ($tee == 'MUUTA') {
               taso                          = '{$taso}',
               tilaus_valmis                 = '{$tilaus_valmis}',
               hinnat                        = '{$hinnat}',
+              kulujen_laskeminen_hintoihin  = '{$kulujen_laskeminen_hintoihin}',
               saatavat                      = '{$saatavat}',
               keraajanro                    = '{$keraajanro}',
               myyja                         = '{$myyja}',
@@ -654,6 +664,7 @@ if ($tee == 'MUUTA') {
           if (mysql_num_rows($tarkesult) == 0) {
             $query = "INSERT into oikeu SET
                       kuka       = '{$kuka}',
+                      user_id    = '{$selkukarow['tunnus']}',
                       sovellus   = '{$trow['sovellus']}',
                       nimi       = '{$trow['nimi']}',
                       alanimi    = '{$trow['alanimi']}',
@@ -918,6 +929,14 @@ if ($tee == 'MUUTA') {
       echo "<option value='0'  {$sel0}>", t("Normaali"), "</option>";
       echo "<option value='1'  {$sel1}>", t("N‰ytet‰‰n vain tuotteen myyntihinta"), "</option>";
       echo "<option value='-1' {$sel2}>", t("Hintoja ei n‰ytet‰"), "</option>";
+      echo "</select></td></tr>";
+
+      $sel = $krow['kulujen_laskeminen_hintoihin'] == 'K' ? "selected" : "";
+
+      echo "<tr><th align='left'>", t("kuluprosentin esitt‰minen"), ":</th>";
+      echo "<td><select name='kulujen_laskeminen_hintoihin'>";
+      echo "<option value=''>", t("Hintoihin ei lasketa kuluprosenttia"), "</option>";
+      echo "<option value='K' {$sel}>", t("Hintoihin lasketaan kuluprosentti"), "</option>";
       echo "</select></td></tr>";
 
       if ($toim == 'extranet') {
@@ -1559,18 +1578,16 @@ if ($tee == "") {
   if ($toim == "extranet") $extrsel = "X";
   else $extrsel = "";
 
-  $query = "SELECT kuka.nimi, kuka.kuka, kuka.tunnus, if (count(oikeu.tunnus) > 0, 0, 1) aktiivinen
+  $query = "SELECT kuka.nimi, kuka.kuka, kuka.tunnus, kuka.aktiivinen
             FROM kuka
-            LEFT JOIN oikeu ON (oikeu.yhtio = kuka.yhtio AND oikeu.kuka = kuka.kuka)
             WHERE kuka.yhtio  = '{$kukarow['yhtio']}'
             AND kuka.extranet = '{$extrsel}'
-            GROUP BY 1,2,3
-            ORDER BY aktiivinen, kuka.nimi";
+            ORDER BY kuka.aktiivinen DESC, kuka.nimi";
   $kukares = pupe_query($query);
 
   echo "<optgroup label='", t("Aktiiviset k‰ytt‰j‰t"), "'>";
 
-  $edakt = 0;
+  $edakt = 1;
   $poislisa = "";
 
   while ($kurow = mysql_fetch_assoc($kukares)) {

@@ -337,7 +337,7 @@ if ($tee == 'Y') {
   }
 
   if (!empty($varastot)) {
-    $varastopaikat_lisa .= "and varastopaikat.tunnus IN (" . implode(', ', $varastot) . ") ";
+    $varastopaikat_lisa .= "and tapahtuma.varasto IN (" . implode(', ', $varastot) . ") ";
   }
 
   if ($vararvomuu != "") {
@@ -358,7 +358,8 @@ if ($tee == 'Y') {
                       and tapahtuma.laadittu     >= '$vva-$kka-$ppa 00:00:00'
                       and tapahtuma.laadittu     <= '$vvl-$kkl-$ppl 23:59:59'
                       and tapahtuma.kpl         != 0
-                      $tapahtuma_lisa)
+                      $tapahtuma_lisa
+                      $varastopaikat_lisa)
             JOIN tuotepaikat ON  (tuotepaikat.yhtio = tapahtuma.yhtio
                       and tuotepaikat.tuoteno    = tapahtuma.tuoteno
                       and tuotepaikat.hyllyalue  = tapahtuma.hyllyalue
@@ -366,10 +367,6 @@ if ($tee == 'Y') {
                       and tuotepaikat.hyllyvali  = tapahtuma.hyllyvali
                       and tuotepaikat.hyllytaso  = tapahtuma.hyllytaso
                       $tuotepaikat_lisa)
-            JOIN varastopaikat ON  (varastopaikat.yhtio = tuotepaikat.yhtio
-                        and concat(rpad(upper(alkuhyllyalue), 5, '0'),lpad(upper(alkuhyllynro), 5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-                        and concat(rpad(upper(loppuhyllyalue), 5, '0'),lpad(upper(loppuhyllynro), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
-                        $varastopaikat_lisa)
             WHERE tuote.yhtio                    = '$kukarow[yhtio]'
             and tuote.ei_saldoa                  = ''
             $lisa
@@ -589,8 +586,6 @@ if ($tee == "TULOSTA" and mysql_num_rows($saldoresult) > 0 ) {
     $ctype = "PDF";
     $kutsu = "inventointipoikkeamat-".date("Y-m-d");
     require "inc/sahkoposti.inc";
-
-    system("rm -f ".$filenimi.".pdf");
   }
   else {
     //käännetään kaunniksi
@@ -600,8 +595,8 @@ if ($tee == "TULOSTA" and mysql_num_rows($saldoresult) > 0 ) {
   echo "<br>".t("Inventointipoikkeamalista tulostuu")."!<br><br>";
 
   //poistetaan tmp file samantien kuleksimasta...
-  system("rm -f ".$filenimi.".ps");
-  system("rm -f $filenimi");
+  unlink($filenimi.".ps");
+  unlink($filenimi);
 }
 
 if ($tee == "TULOSTAEXCEL" and mysql_num_rows($saldoresult) > 0 ) {

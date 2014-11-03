@@ -7595,7 +7595,7 @@ if ($tee == '') {
                   <input type='hidden' name='tapa'       value = 'VAIHDAJAPOISTA'>
                   <input type='hidden' name='vaihda_rivi'       value = '1'>
                   <input type='hidden' name='var'       value = 'P'>
-                  <input type='Submit' value='".t("Vaihda rivi")."'>
+                  <input type='Submit' value='".t("Vaihda toimenpide")."'>
                   </form> ";
             }
           }

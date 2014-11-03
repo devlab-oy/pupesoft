@@ -293,75 +293,7 @@ if (isset($submit)) {
     $kontit = $rullat_ja_kontit['kontit'];
     $view = 'kontituslista';
     break;
-
   case 'vahvista':
-    $view = 'vahvistus';
-    break;
-
-  case 'konttitiedot':
-    if (!empty($sinettinumero) and !empty($konttinumero)) {
-
-      $rullat_kontissa = rtrim($rullat_kontissa,",");
-
-      $query = "UPDATE tilausrivi SET
-                toimitettu = '{$kukarow['kuka']}',
-                toimitettuaika = NOW()
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus IN ({$rullat_kontissa})";
-      pupe_query($query);
-
-      $query = "UPDATE tilausrivin_lisatiedot SET
-                konttinumero = '{$konttinumero}',
-                sinettinumero = '{$sinettinumero}',
-                kontin_kilot = '{$kontin_kilot}'
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tilausrivitunnus IN ({$rullat_kontissa})";
-      pupe_query($query);
-
-      /* // todo katso onko jonkin tilauksen vika rulla
-      $query = "SELECT
-                FROM tilausrivi
-                JOIN tilausrivin_lisatiedot
-                  ON tilausrivin_lisatiedot.tila ";
-
-      */
-
-
-      $parametrit = kontitus_parametrit($rullat_kontissa);
-
-      if ($parametrit) {
-        $parametrit['kontitus_info']['konttinumero'] = $konttinumero;
-        $parametrit['kontitus_info']['sinettinumero'] = $sinettinumero;
-        $sanoma = laadi_edifact_sanoma($parametrit);
-      }
-      else {
-        $errors[] = t("Tilausta ei löytynyt!");
-      }
-
-      if ($sanoma) {
-        $lahetys = 'X';
-        if (laheta_sanoma($sanoma)) {
-          $lahetys = 'OK';
-        }
-        else {
-          $errors[] = t("Lähetys ei onnistunut");
-        }
-      }
-      else {
-        $errors[] = t("Ei sanomaa");
-      }
-    }
-    else {
-      $errors[] = t("Syötä konttitiedot");
-    }
-    $rullat_ja_kontit = rullat_ja_kontit($konttiviite, $maxkg);
-    $view = 'kontituslista';
-    break;
-
-  case 'takaisin':
-    echo "<META HTTP-EQUIV='Refresh'CONTENT='0;URL=index.php'>";
-    die;
-
   default:
     $errors[] = 'error';
   }
@@ -531,6 +463,11 @@ if ($view == 'kontituslista') {
   </form>
 
   <script type='text/javascript'>
+
+  $( document ).ready(function() {
+    $('#sarjanumero').focus();
+  });
+
     $(document).on('touchstart', function(){
       $('#sarjanumero').focus();
     });
@@ -568,20 +505,19 @@ if ($view == 'kontituslista') {
       </div>";
     }
 
+    foreach ($kontittamattomat as $rulla) {
+      echo "<div class='listadiv'>";
+      echo "Rulla " . $rulla['sarjanumero'] . " kontittamatta";
+      echo "</div>";
+    }
 
     foreach ($kontitetut as $rulla) {
 
       $kontitusinfo = explode("/", $rulla['konttinumero']);
       $konttinumero = $kontitusinfo[0];
 
-      echo "<div class='listadiv kontissa'>";
+      echo "<div class='listadiv viety'>";
       echo "Rulla " . $rulla['sarjanumero'] . " kontissa " . $konttinumero;
-      echo "</div>";
-    }
-
-    foreach ($kontittamattomat as $rulla) {
-      echo "<div class='listadiv'>";
-      echo "Rulla " . $rulla['sarjanumero'] . " kontittamatta";
       echo "</div>";
     }
 

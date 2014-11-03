@@ -1,10 +1,21 @@
 <?php
 
-require_once "../pdflib/phppdflib.class.php";
-require_once "../barcode/barcode.php";
-require_once "../barcode/c128cobject.php";
+require_once "pdflib/phppdflib.class.php";
+require_once "barcode/barcode.php";
+require_once "barcode/c128cobject.php";
 
-function tulosta_hintalaput($tuotteet) {
+/**
+ * @param array $tuotteet Array tuotteista, joiden hintalaput tulostetaan
+ * @param array $params Configuraation array. Esimerkki:
+ *   array(
+ *     "kpl" => 1
+ *   );
+ *
+ * @return array Tiedostonimi ja kaunisnimi
+ */
+function tulosta_hintalaput($tuotteet, $params = array()) {
+  $kpl = isset($params["kpl"]) ? $params["kpl"] : false;
+
   $pdf = new pdffile();
 
   $pdf->set_default('margin-top', 0);
@@ -39,7 +50,7 @@ function tulosta_hintalaput($tuotteet) {
     );
     $kuva                  = $pdf->jfif_embed($viivakoodi);
 
-    $montako_tulostetaan = $tuote['tarrakpl'] * $tuote['tarrakerroin'];
+    $montako_tulostetaan = $kpl ? $kpl : ($tuote['tarrakpl'] * $tuote['tarrakerroin']);
 
     for ($i = 0; $i < $montako_tulostetaan; $i++) {
       $page = $pdf->new_page('4.9x3cm');

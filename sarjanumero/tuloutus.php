@@ -339,7 +339,7 @@ if ($view == 'tuotepaikka') {
     <input type='hidden' name='sarjanumero' value='{$sarjanumero}' />
     <input type='hidden' name='rahtikirja_id' value='{$rahtikirja_id}' />
       <label for='sarjanumero'>", t("Tuotepaikka"), "</label><br>
-      <input type='text' id='tuotepaikka' name='tuotepaikka' style='margin:10px;' value='A 5 5 5' />
+      <input type='text' id='tuotepaikka' name='tuotepaikka' style='margin:10px;' />
       <br>
       <button name='submit' value='sarjanumero_tuotepaikka' onclick='submit();' class='button'>", t("OK"), "</button>
     </div>

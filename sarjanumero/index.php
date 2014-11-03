@@ -12,7 +12,7 @@ echo "<body>";
 
 echo "<div class='header'>";
 echo "<h1>";
-echo t("PÄÄVALIKKO");
+echo t("P&Auml;&Auml;VALIKKO");
 echo "</h1>";
 echo "</div>";
 

@@ -485,7 +485,10 @@ if ($tee == "ETSILASKU") {
     <input type='hidden' name='kklkm' value='1'>
     <input type='hidden' name='toim' value='{$toim}'>
     <input type='hidden' name='tee' value='MONISTA'>
-    <input type='hidden' name='laskunro' value='{$laskunro}'>";
+    <input type='hidden' name='laskunro' value='{$laskunro}'>
+    <input type='hidden' name='otunnus' value='{$otunnus}'>
+    <input type='hidden' name='ytunnus' value='{$ytunnus}'>
+    <input type='hidden' name='asiakasid' value='{$asiakasid}'>";
 
     echo "<table>";
     echo "<tr>";

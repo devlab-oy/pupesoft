@@ -115,245 +115,257 @@ if (!isset($task)) {
 
   $viitteet = array();
 
-  while ($rivi = mysql_fetch_assoc($result)) {
-    $viitteet[] = $rivi['konttiviite'];
-    $tilaukset[$rivi['asiakkaan_tilausnumero']] = $rivi;
-  }
+  if (mysql_num_rows($result) > 0) {
 
-  echo "<table>";
-  echo "<tr>";
-  echo "<th>".t("Tilauskoodi")."</th>";
-  echo "<th>".t("Matkakoodi")."</th>";
-  echo "<th>".t("Lähtöpäivä")."</th>";
-  echo "<th>".t("Konttiviite")."</th>";
-  echo "<th>".t("Rullien määrä")."</th>";
-  echo "<th>".t("Tapahtumat")."</th>";
-  echo "<th>".t("Kontit")."</th>";
-  echo "<th class='back'></th>";
-  echo "</tr>";
-
-
-  foreach ($tilaukset as $key => $tilaus) {
-
-    $viitelasku = array_count_values($viitteet);
-    $tilauksia_viitteella = $viitelasku[$tilaus['konttiviite']];
-
-    if (in_array($tilaus['konttiviite'], $kasitellyt_konttivitteet)) {
-      $konttiviite_kasitelty = true;
-    }
-    else{
-     $konttiviite_kasitelty = false;
+    while ($rivi = mysql_fetch_assoc($result)) {
+      $viitteet[] = $rivi['konttiviite'];
+      $tilaukset[$rivi['asiakkaan_tilausnumero']] = $rivi;
     }
 
-    $kontit_sinetointivalmiit = false;
-
-    $query = "SELECT tunnus
-              FROM liitetiedostot
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND liitos = 'lasku'
-              AND liitostunnus = '{$tilaus['tunnus']}'";
-    $result = pupe_query($query);
-
-    $bookkaukset = mysql_num_rows($result);
-
-    $tapahtumat = "&bull; " . $bookkaukset ." kpl bookkaussanomia haettu<br>";
-
+    echo "<table>";
     echo "<tr>";
-
-    echo "<td valign='top'>";
-    echo $tilaus['asiakkaan_tilausnumero'];
-    echo "</td>";
-
-    echo "<td valign='top'>";
-    echo $tilaus['matkakoodi'];
-    echo "</td>";
-
-    echo "<td valign='top'>";
-    echo $tilaus['toimaika'];
-    echo "</td>";
+    echo "<th>".t("Tilauskoodi")."</th>";
+    echo "<th>".t("Matkakoodi")."</th>";
+    echo "<th>".t("Lähtöpäivä")."</th>";
+    echo "<th>".t("Konttiviite")."</th>";
+    echo "<th>".t("Rullien määrä")."</th>";
+    echo "<th>".t("Tapahtumat")."</th>";
+    echo "<th>".t("Kontit")."</th>";
+    echo "<th class='back'></th>";
+    echo "</tr>";
 
 
-    echo "<td valign='top'>";
-    echo $tilaus['konttiviite'];
-    echo "</td>";
+    foreach ($tilaukset as $key => $tilaus) {
 
-    if ($tilaus['rullat'] == 0) {
-      $rullamaara = $tilaus['rullamaara'] . " (" . t("Ennakkoarvio") . ")";
-    }
-    else {
+      $viitelasku = array_count_values($viitteet);
+      $tilauksia_viitteella = $viitelasku[$tilaus['konttiviite']];
 
-      $rullamaara = $tilaus['rullat'];
+      if (in_array($tilaus['konttiviite'], $kasitellyt_konttivitteet)) {
+        $konttiviite_kasitelty = true;
+      }
+      else{
+       $konttiviite_kasitelty = false;
+      }
 
-      $query = "SELECT tilausrivi.toimitettu, trlt.rahtikirja_id
-                FROM tilausrivi
-                JOIN tilausrivin_lisatiedot AS trlt
-                  ON trlt.yhtio = tilausrivi.yhtio
-                  AND trlt.tilausrivitunnus = tilausrivi.tunnus
-                WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                AND tilausrivi.tyyppi = 'O'
-                AND trlt.asiakkaan_tilausnumero = '{$tilaus['asiakkaan_tilausnumero']}'";
+      $kontit_sinetointivalmiit = false;
+
+      $query = "SELECT tunnus
+                FROM liitetiedostot
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND liitos = 'lasku'
+                AND liitostunnus = '{$tilaus['tunnus']}'";
       $result = pupe_query($query);
 
-      $kuitattu = $kuittaamatta = 0;
-      $rahtikirjat = array();
+      $bookkaukset = mysql_num_rows($result);
 
-      // katsotaan onko rahtikirja(t) kuitattu ja kuinka monta rahtikirjaa
-      while ($rulla = mysql_fetch_assoc($result)) {
-        if ($rulla['toimitettu'] == '' ) {
-          $kuittaamatta++;
+      $tapahtumat = "&bull; " . $bookkaukset ." kpl bookkaussanomia haettu<br>";
+
+      echo "<tr>";
+
+      echo "<td valign='top'>";
+      echo $tilaus['asiakkaan_tilausnumero'];
+      echo "</td>";
+
+      echo "<td valign='top'>";
+      echo $tilaus['matkakoodi'];
+      echo "</td>";
+
+      echo "<td valign='top'>";
+      echo $tilaus['toimaika'];
+      echo "</td>";
+
+
+      echo "<td valign='top'>";
+      echo $tilaus['konttiviite'];
+      echo "</td>";
+
+      if ($tilaus['rullat'] == 0) {
+        $rullamaara = $tilaus['rullamaara'] . " (" . t("Ennakkoarvio") . ")";
+      }
+      else {
+
+        $rullamaara = $tilaus['rullat'];
+
+        $query = "SELECT tilausrivi.toimitettu, trlt.rahtikirja_id
+                  FROM tilausrivi
+                  JOIN tilausrivin_lisatiedot AS trlt
+                    ON trlt.yhtio = tilausrivi.yhtio
+                    AND trlt.tilausrivitunnus = tilausrivi.tunnus
+                  WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                  AND tilausrivi.tyyppi = 'O'
+                  AND trlt.asiakkaan_tilausnumero = '{$tilaus['asiakkaan_tilausnumero']}'";
+        $result = pupe_query($query);
+
+        $kuitattu = $kuittaamatta = 0;
+        $rahtikirjat = array();
+
+        // katsotaan onko rahtikirja(t) kuitattu ja kuinka monta rahtikirjaa
+        while ($rulla = mysql_fetch_assoc($result)) {
+          if ($rulla['toimitettu'] == '' ) {
+            $kuittaamatta++;
+          }
+          else {
+            $kuitattu++;
+          }
+          $rahtikirjat[] = $rulla['rahtikirja_id'];
         }
-        else {
-          $kuitattu++;
+
+        $rahtikirjat = array_count_values($rahtikirjat);
+        $rahtikirjat = count($rahtikirjat);
+        $tapahtumat .= "&bull; " . $rahtikirjat ." kpl rahtikirjasanomia haettu<br>";
+
+        if ($kuittaamatta == 0) {
+          $tapahtumat .= "&bull; " .  t("Rahti kuitattu saapuneeksi") . "<br>";
         }
-        $rahtikirjat[] = $rulla['rahtikirja_id'];
-      }
+        elseif ($kuitattu > 0) {
+          $tapahtumat .= "&bull; " .  t("Osa rahdista kuitattu saapuneeksi") . "<br>";
+        }
 
-      $rahtikirjat = array_count_values($rahtikirjat);
-      $rahtikirjat = count($rahtikirjat);
-      $tapahtumat .= "&bull; " . $rahtikirjat ." kpl rahtikirjasanomia haettu<br>";
+        if ($tilaus['tulouttamatta'] == 0) {
 
-      if ($kuittaamatta == 0) {
-        $tapahtumat .= "&bull; " .  t("Rahti kuitattu saapuneeksi") . "<br>";
-      }
-      elseif ($kuitattu > 0) {
-        $tapahtumat .= "&bull; " .  t("Osa rahdista kuitattu saapuneeksi") . "<br>";
-      }
+          $tapahtumat .= "&bull; " .  t("Rullat viety varastoon") . "<br>";
 
-      if ($tilaus['tulouttamatta'] == 0) {
+          if ($tilaus['kontittamatta'] == 0) {
+            $tapahtumat .= "&bull; " .  t("Rullat kontitettu") . "<br>";
 
-        $tapahtumat .= "&bull; " .  t("Rullat viety varastoon") . "<br>";
+            $query = "SELECT group_concat(otunnus)
+                      FROM laskun_lisatiedot
+                      WHERE yhtio = '{$yhtiorow['yhtio']}'
+                      AND konttiviite = '{$tilaus['konttiviite']}'";
+            $result = pupe_query($query);
+            $konttiviitteen_alaiset_tilaukset = mysql_result($result, 0);
 
-        if ($tilaus['kontittamatta'] == 0) {
-          $tapahtumat .= "&bull; " .  t("Rullat kontitettu") . "<br>";
+            $query = "SELECT count(tunnus) AS riveja
+                      FROM tilausrivi
+                      WHERE yhtio = '{$yhtiorow['yhtio']}'
+                      AND otunnus IN ({$konttiviitteen_alaiset_tilaukset})
+                      AND keratty = ''";
+            $result = pupe_query($query);
+            $konttiviitteesta_kontittamatta = mysql_result($result, 0);
 
-          $query = "SELECT group_concat(otunnus)
-                    FROM laskun_lisatiedot
-                    WHERE yhtio = '{$yhtiorow['yhtio']}'
-                    AND konttiviite = '{$tilaus['konttiviite']}'";
-          $result = pupe_query($query);
-          $konttiviitteen_alaiset_tilaukset = mysql_result($result, 0);
+            if ($konttiviitteesta_kontittamatta == 0) {
+              $kontit_sinetointivalmiit = true;
+            }
 
-          $query = "SELECT count(tunnus) AS riveja
-                    FROM tilausrivi
-                    WHERE yhtio = '{$yhtiorow['yhtio']}'
-                    AND otunnus IN ({$konttiviitteen_alaiset_tilaukset})
-                    AND keratty = ''";
-          $result = pupe_query($query);
-          $konttiviitteesta_kontittamatta = mysql_result($result, 0);
+          }
+          elseif ($tilaus['kontittamatta'] < $tilaus['rullamaara']) {
+            $tapahtumat .= "&bull; " .  t("Osa rullista kontitettu") . "<br>";
+          }
 
-          if ($konttiviitteesta_kontittamatta == 0) {
-            $kontit_sinetointivalmiit = true;
+          if ($tilaus['toimittamatta'] == 0) {
+            $tapahtumat .= "&bull; " .  t("Kontit sinetöity") . "<br>";
+          }
+          elseif ($tilaus['toimittamatta'] < $tilaus['rullamaara']) {
+            $tapahtumat .= "&bull; " .  t("Osa konteista sinetöity") . "<br>";
+          }
+
+          $mrn_tullut = false;
+
+          if ($tilaus['mrn_vastaanottamatta'] == 0) {
+            $tapahtumat .= "&bull; " .  t("MRN-numerot vastaanotettu") . "<br>";
+            $mrn_tullut = true;
+          }
+          elseif ($tilaus['mrn_vastaanottamatta']  < $tilaus['rullamaara']) {
+           $tapahtumat .= "&bull; " .  t("Osa MRN-numeroista vastaanotettu") . "<br>";
           }
 
         }
-        elseif ($tilaus['kontittamatta'] < $tilaus['rullamaara']) {
-          $tapahtumat .= "&bull; " .  t("Osa rullista kontitettu") . "<br>";
+        elseif ($tilaus['tulouttamatta'] < $tilaus['rullamaara']) {
+          $tapahtumat .= "&bull; " .  t("Osa rullista viety varastoon") . "<br>";
         }
-
-        if ($tilaus['toimittamatta'] == 0) {
-          $tapahtumat .= "&bull; " .  t("Kontit sinetöity") . "<br>";
-        }
-        elseif ($tilaus['toimittamatta'] < $tilaus['rullamaara']) {
-          $tapahtumat .= "&bull; " .  t("Osa konteista sinetöity") . "<br>";
-        }
-
-        $mrn_tullut = false;
-
-        if ($tilaus['mrn_vastaanottamatta'] == 0) {
-          $tapahtumat .= "&bull; " .  t("MRN-numerot vastaanotettu") . "<br>";
-          $mrn_tullut = true;
-        }
-        elseif ($tilaus['mrn_vastaanottamatta']  < $tilaus['rullamaara']) {
-         $tapahtumat .= "&bull; " .  t("Osa MRN-numeroista vastaanotettu") . "<br>";
-        }
-
       }
-      elseif ($tilaus['tulouttamatta'] < $tilaus['rullamaara']) {
-        $tapahtumat .= "&bull; " .  t("Osa rullista viety varastoon") . "<br>";
-      }
-    }
 
-    echo "<td valign='top' align='center'>";
-    echo $rullamaara;
-    echo "</td>";
-
-    echo "<td valign='top'>";
-    echo $tapahtumat;
-    echo "</td>";
-
-    if ($konttiviite_kasitelty) {
-      //echo "<td valign='top' align='center'>";
-      //echo t("Sama konttiviite kuin yllä.");
-      //echo "</td>";
-    }
-    elseif (!$kontit_sinetointivalmiit) {
-      echo "<td valign='top' rowspan='{$tilauksia_viitteella}' align='center'>";
-      echo t("Ei vielä tietoa.");
+      echo "<td valign='top' align='center'>";
+      echo $rullamaara;
       echo "</td>";
-      $kasitellyt_konttivitteet[] = $tilaus['konttiviite'];
-    }
-    else {
-      echo "<td valign='top' rowspan='{$tilauksia_viitteella}' align='right'>";
 
-      $kontit = kontitustiedot($tilaus['konttiviite']);
+      echo "<td valign='top'>";
+      echo $tapahtumat;
+      echo "</td>";
 
-      $kesken = 0;
-      foreach ($kontit as $konttinumero => $kontti) {
+      if ($konttiviite_kasitelty) {
+        //echo "<td valign='top' align='center'>";
+        //echo t("Sama konttiviite kuin yllä.");
+        //echo "</td>";
+      }
+      elseif (!$kontit_sinetointivalmiit) {
+        echo "<td valign='top' rowspan='{$tilauksia_viitteella}' align='center'>";
+        echo t("Ei vielä tietoa.");
+        echo "</td>";
+        $kasitellyt_konttivitteet[] = $tilaus['konttiviite'];
+      }
+      else {
+        echo "<td valign='top' rowspan='{$tilauksia_viitteella}' align='right'>";
 
-        $temp_array = explode("/", $konttinumero);
-        $_konttinumero = $temp_array[0];
+        $kontit = kontitustiedot($tilaus['konttiviite']);
 
-        echo "<div style='margin:0 5px 8px 5px; padding:5px; border-bottom:1px solid grey;'>";
-        echo "{$_konttinumero}. ({$kontti['kpl']} kpl, {$kontti['paino']} kg)&nbsp;&nbsp;";
+        $kesken = 0;
+        foreach ($kontit as $konttinumero => $kontti) {
 
-        if ($kontti['sinettinumero'] == '') {
-          echo "<form method='post'>";
-          echo "<input type='hidden' name='task' value='anna_konttitiedot' />";
-          echo "<input type='hidden' name='temp_konttinumero' value='{$konttinumero}' />";
-          echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
-          echo "<input type='hidden' name='rullia' value='{$kontti['kpl']}' />";
-          echo "<input type='hidden' name='sinetoitava_konttiviite' value='{$tilaus['konttiviite']}' />";
-          echo "<input type='submit' value='". t("Sinetöi") ."' />";
-          echo "</form>";
-          $kesken++;
-        }
-        else {
-          echo "<button type='button' disabled>" . t("Sinetöity") . "</button>";
-        }
+          $temp_array = explode("/", $konttinumero);
+          $_konttinumero = $temp_array[0];
 
-        if ($kontti['mrn'] != '') {
-          echo "<div style='text-align:center; margin:4px 0'>MRN: ";
-          echo "<input type='text'  value='{$kontti['mrn']}' readonly>";
+          echo "<div style='margin:0 5px 8px 5px; padding:5px; border-bottom:1px solid grey;'>";
+          echo "{$_konttinumero}. ({$kontti['kpl']} kpl, {$kontti['paino']} kg)&nbsp;&nbsp;";
+
+          if ($kontti['sinettinumero'] == '') {
+            echo "<form method='post'>";
+            echo "<input type='hidden' name='task' value='anna_konttitiedot' />";
+            echo "<input type='hidden' name='temp_konttinumero' value='{$konttinumero}' />";
+            echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
+            echo "<input type='hidden' name='rullia' value='{$kontti['kpl']}' />";
+            echo "<input type='hidden' name='sinetoitava_konttiviite' value='{$tilaus['konttiviite']}' />";
+            echo "<input type='submit' value='". t("Sinetöi") ."' />";
+            echo "</form>";
+            $kesken++;
+          }
+          else {
+            echo "<button type='button' disabled>" . t("Sinetöity") . "</button>";
+          }
+
+          if ($kontti['mrn'] != '') {
+            echo "<div style='text-align:center; margin:4px 0'>MRN: ";
+            echo "<input type='text'  value='{$kontti['mrn']}' readonly>";
+            echo "</div>";
+
+          }
+
           echo "</div>";
-
         }
 
-        echo "</div>";
+        if ($kesken == 0 and $mrn_tullut) {
+
+          echo "
+            <div style='text-align:center;margin:10px 0;'>
+            <form method='post'>
+            <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />
+            <input type='hidden' name='matkakoodi' value='{$tilaus['matkakoodi']}' />
+            <input type='hidden' name='lahtopvm_arvio' value='{$tilaus['toimaika']}' />
+            <input type='hidden' name='task' value='tee_satamavahvistus' />
+            <input type='submit' value='". t("Tee satamavahvistus") ."' />
+            </form>
+            </div>";
+        }
+
+
+        echo "</td>";
+        $kasitellyt_konttivitteet[] = $tilaus['konttiviite'];
       }
 
-      if ($kesken == 0 and $mrn_tullut) {
-
-        echo "
-          <div style='text-align:center;margin:10px 0;'>
-          <form method='post'>
-          <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />
-          <input type='hidden' name='matkakoodi' value='{$tilaus['matkakoodi']}' />
-          <input type='hidden' name='lahtopvm_arvio' value='{$tilaus['toimaika']}' />
-          <input type='hidden' name='task' value='tee_satamavahvistus' />
-          <input type='submit' value='". t("Tee satamavahvistus") ."' />
-          </form>
-          </div>";
-      }
-
-
-      echo "</td>";
-      $kasitellyt_konttivitteet[] = $tilaus['konttiviite'];
+      echo "</tr>";
     }
+    echo "</table>";
 
-    echo "</tr>";
+  }
+  else {
+    echo "Ei tilauksia...";
   }
 
-  echo "</table>";
+
+
+
+
+
 }
 
 

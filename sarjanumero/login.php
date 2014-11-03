@@ -34,8 +34,7 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
     'yhtio' => $yhtio,
     'browkieli' => $browkieli,
     'palvelin' => $palvelin,
-    'palvelin2' => $palvelin2,
-    'sarjanumero' => true
+    'palvelin2' => $palvelin2 . "sarjanumero/index.php"
   );
 
   $return = pupesoft_login($params);

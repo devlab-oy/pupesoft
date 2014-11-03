@@ -11,7 +11,6 @@ if ($task == 'B1') {
 }
 
 
-
 if ($task == 'B2') {
 
   $sanoma = "UNB+UNOC:2+003708274241:30+003706664131:30+140916:0839+KM0002++++++'UNH+1+IFTMBF:D:97B:UN:EXWL12'BGM+335+KTKANT24091+9'DTM+137:201409160840:203'RFF+VON:KV0001'RFF+CU:TILAUS-0001:2'TDT+20++1++MSCFI+++H3JN:103::MSC IRIS'LOC+5+FIKTKC::86:Kotka Mussalo'DTM+133:201411010000:203'LOC+8+BEANR::86:ANTWERPEN'DTM+132:201411080000:203'RFF+VON:KTKANT24091'TDT+30++1++MSCFI+++3FUT9:103::MSC LAURENCE'LOC+5++BEANR::86'DTM+133:201412010000:203'LOC+8+AUSYD::86'DTM+132:201412020000:203'RFF+VON:ANTAU05101'NAD+OS+003708274241:100++Kotkamills Oy:Norskankatu 6:FI-48101:FI+++++FI'NAD+CZ+003708274241:100'NAD+FX+SPOTPRESS++SPOTPRESS+24-26 Lilian Fowler Place+Marrickville++NSW 2204+AU'NAD+TR+STEVECO'GID++3:RL'LOC+20+BEANR:16'PIA+1+4810 20:HS'FTX+ZSM++LOLO'FTX+AAA+++PAPER'FTX+PRD+++Solaris (New) 1.55 57 g/m2'FTX+TRA+++max netto paino20to/ kontti (24to/kontti brutto)'FTX+TRA+++1  x 20?' kontti'MEA+AAE+CT+RO:1'MEA+AAE+WD+MMT:800'MEA+AAE+DI+MMT:1250'MEA+AAE+G+KGM:4000'RFF+CU:TILAUS-0001:2'EQD+CN++C20'EQN+1'RFF+AKC:KV0001'NAD+CW+MSCFI'NAD+ZST+FIMUSSALO'UNT+40+1'UNZ+1+KM0001'";
@@ -27,7 +26,6 @@ if ($task == 'B3') {
   kasittele_bookkaussanoma($sanoma);
 
 }
-
 
 
 if ($task == 'R1') {
@@ -46,7 +44,6 @@ if ($task == 'R2') {
 
 }
 
-
 if ($task == 'B4') {
 
   $sanoma = "UNB+UNOC:2+003708274241:30+003706664131:30+140916:0839+KM0006++++++'UNH+1+IFTMBF:D:97B:UN:EXWL12'BGM+335+MATKA123+9'DTM+137:201409160839:203'RFF+VON:KV0002'RFF+CU:TILAUS-0003:1'TDT+20++1++MSCFI+++H3JN:103::MSC IRIS'LOC+5+FIKTKC::86:Kotka Mussalo'DTM+133:201411010000:203'LOC+8+BEANR::86:ANTWERPEN'DTM+132:201411080000:203'RFF+VON:MATKA123'TDT+30++1++MSCFI+++3FUT9:103::MSC LAURENCE'LOC+5++BEANR::86'DTM+133:201412010000:203'LOC+8+AUSYD::86'DTM+132:201412020000:203'RFF+VON:JATKO001'NAD+OS+003708274241:100++Kotkamills Oy:Norskankatu 6:FI-48101:FI+++++FI'NAD+CZ+003708274241:100'NAD+FX+SPOTPRESS++SPOTPRESS+24-26 Lilian Fowler Place+Marrickville++NSW 2204+AU'NAD+TR+STEVECO'GID++2:RL'LOC+20+BEANR:16'PIA+1+4810 22:HS'FTX+ZSM++LOLO'FTX+AAA+++PAPER'FTX+PRD+++Solaris (New) 1.55 57 g/m2'FTX+TRA+++max netto paino20to/ kontti (24to/kontti brutto)'FTX+TRA+++1  x 20?'kontti'MEA+AAE+CT+RO:1'MEA+AAE+WD+MMT:1050'MEA+AAE+DI+MMT:1250'MEA+AAE+G+KGM:30000'RFF+CU:TILAUS-0003:1'EQD+CN++C20'EQN+2'RFF+AKC:KV0002'NAD+CW+MSCFI'NAD+ZST+FIMUSSALO'UNT+40+1'UNZ+1+KM0006'";
@@ -54,10 +51,6 @@ if ($task == 'B4') {
   kasittele_bookkaussanoma($sanoma);
 
 }
-
-
-
-
 
 if ($task == 'R3') {
 
@@ -75,24 +68,6 @@ if ($task == 'R4') {
   kasittele_rahtikirjasanoma($sanoma);
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 if ($task == 'nollaa') {
   $taulut = array(
@@ -203,7 +178,6 @@ else{
     <input type='submit' value='".t("Hae bookkaus 1.")."'>
   </form>
 
-  <br><br>
 
   <form action='' method='post'>
     <input type='hidden' name='task' value='B2' />
@@ -211,7 +185,6 @@ else{
   </form>
 
 
-  <br><br>
 
   <form action='' method='post'>
     <input type='hidden' name='task' value='R1' />
@@ -228,7 +201,7 @@ else{
     <input type='submit' value='".t("Hae bookkaus 3.")."'>
   </form>
 
-  <br><br>
+
 
   <form action='' method='post'>
     <input type='hidden' name='task' value='R2' />
@@ -244,14 +217,14 @@ else{
     <input type='submit' value='".t("Hae bookkaus 4.")."'>
   </form>
 
-  <br><br>
+
 
   <form action='' method='post'>
     <input type='hidden' name='task' value='R3' />
     <input type='submit' value='".t("Hae rahtikirja 3.")."'>
   </form>
 
-  <br><br>
+
 
   <form action='' method='post'>
     <input type='hidden' name='task' value='R4' />

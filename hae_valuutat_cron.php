@@ -5,6 +5,11 @@ if (php_sapi_name() != 'cli') {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
+// otetaan includepath aina rootista
+$pupe_root_polku = dirname(__FILE__);
+
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.$pupe_root_polku.PATH_SEPARATOR."/usr/share/pear");
+
 require "inc/connect.inc";
 require "inc/functions.inc";
 

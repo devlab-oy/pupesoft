@@ -10,7 +10,10 @@ if (!isset($argv[1]) or $argv[1] == '') {
   die;
 }
 
-ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
+// otetaan includepath aina rootista
+$pupe_root_polku = dirname(__FILE__);
+
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.$pupe_root_polku.PATH_SEPARATOR."/usr/share/pear");
 error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
 ini_set("display_errors", 0);
 

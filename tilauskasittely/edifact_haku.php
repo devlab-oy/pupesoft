@@ -69,6 +69,65 @@ if ($task == 'R4') {
 
 }
 
+if ($task == 'I1') {
+
+  $sanoma ="UNB+UNOC:2+003708274241:30+003706800420:30+140919:0146+92477++++++'
+UNH+2057831+IFTSTA:D:99B:UN:SE0015'
+BGM+132+KTKANT24091+5'
+DTM+137:201409190146:203'
+LOC+5+FIKTKC'
+CNI+1'
+STS+1'
+EQD+CN+KONTTI1'
+RFF+CU:KTKANT24091'
+RFF+ZMR:MRN001'
+UNT+9+2057831'
+UNZ+1+92477'";
+
+  kasittele_iftsta($sanoma);
+
+}
+
+
+if ($task == 'I2') {
+
+  $sanoma ="UNB+UNOC:2+003708274241:30+003706800420:30+140919:0146+92477++++++'
+UNH+2057831+IFTSTA:D:99B:UN:SE0015'
+BGM+132+MATKA123+5'
+DTM+137:201409190146:203'
+LOC+5+FIKTKC'
+CNI+1'
+STS+1'
+EQD+CN+KONTTI2'
+RFF+CU:MATKA123'
+RFF+ZMR:MRN001'
+UNT+9+2057831'
+UNZ+1+92477'";
+
+  kasittele_iftsta($sanoma);
+
+}
+
+if ($task == 'I3') {
+
+  $sanoma ="UNB+UNOC:2+003708274241:30+003706800420:30+140919:0146+92477++++++'
+UNH+2057831+IFTSTA:D:99B:UN:SE0015'
+BGM+132+MATKA123+5'
+DTM+137:201409190146:203'
+LOC+5+FIKTKC'
+CNI+1'
+STS+1'
+EQD+CN+KONTTI1'
+RFF+CU:MATKA123'
+RFF+ZMR:MRN002'
+UNT+9+2057831'
+UNZ+1+92477'";
+
+  kasittele_iftsta($sanoma);
+
+}
+
+
 if ($task == 'nollaa') {
   $taulut = array(
       "tilausrivi",
@@ -229,6 +288,29 @@ else{
   <form action='' method='post'>
     <input type='hidden' name='task' value='R4' />
     <input type='submit' value='".t("Hae rahtikirja 4.")."'>
+  </form>
+
+  <br><hr><br>
+
+  TILAUS-0003<br><br>
+
+  <form action='' method='post'>
+    <input type='hidden' name='task' value='I1' />
+    <input type='submit' value='".t("Hae IFTSTA 1.")."'>
+  </form>
+
+
+
+  <form action='' method='post'>
+    <input type='hidden' name='task' value='I2' />
+    <input type='submit' value='".t("Hae IFTSTA 2.")."'>
+  </form>
+
+
+
+  <form action='' method='post'>
+    <input type='hidden' name='task' value='I3' />
+    <input type='submit' value='".t("Hae IFTSTA 3.")."'>
   </form>
 
   <br><hr><br>

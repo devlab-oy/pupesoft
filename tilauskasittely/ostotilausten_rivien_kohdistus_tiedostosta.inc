@@ -180,8 +180,10 @@ if ($faarao == 'TUTKHM') {
                 $apukpl = $kpl;
               }
 
-              ///* Testataan kolmanneks, lˆytyykˆ edes tuotenumero ja kappale m‰tchi‰ jossa kpl:‰‰ on riitt‰v‰sti *///
-              if ($rivirow['varattu'] > $apukpl) {
+              // Testataan kolmanneks, lˆytyykˆ edes tuotenumero ja kappale m‰tchi‰ jossa kpl:‰‰ on riitt‰v‰sti
+              // T‰nne ei menn‰ ollenkaan, jos loput j‰tet‰‰n JT:seen ja kohdistettavan m‰‰r‰ on nolla,
+              // koska turha tehd‰ mit‰‰n kun koko rivi j‰‰ kuitenkin JT:seen
+              if ($rivirow['varattu'] > $apukpl and ($hyvaksy == "LOP" or ($apukpl > 0 and $hyvaksy == "LOJ"))) {
 
                 $filehinta = $hinta;
 
@@ -192,6 +194,12 @@ if ($faarao == 'TUTKHM') {
                           and tyyppi   = 'O'
                           and otunnus  = '$rivirow[otunnus]'";
                 $poistoresult = pupe_query($query);
+
+                // Jos ollaan poistamassa loput & kohdistettava m‰‰r‰ on 0,
+                // niin ei menn‰ tekem‰‰n uusia rivej‰ koska niist‰ tulisi 0-rivej‰
+                if ($hyvaksy == "LOP" and $apukpl <= 0) {
+                  break;
+                }
 
                 // Lis‰t‰‰n rivi ja splitataan se k‰ytt‰j‰n toiveita mukaillen
                 $kpl         = $apukpl;

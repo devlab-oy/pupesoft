@@ -182,7 +182,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
             $tilaustyyppi = 2;
           }
 
-          if ($yhtiorow['suoratoimitusvarasto'] != 0) {
+          if ($tyyppi == "U" and $yhtiorow['suoratoimitusvarasto'] != 0) {
             $oletusostovarasto = $yhtiorow['suoratoimitusvarasto'];
           }
           elseif ($myytilrow['varasto'] != 0) {

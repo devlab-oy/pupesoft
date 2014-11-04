@@ -459,6 +459,13 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       }
     }
 
+    if ($phpnimi == "inventoi.php") {
+      if (isset($selitenakyvyys)) {
+        setcookie("selitenakyvyys", $selitenakyvyys, time()+60*60*24*90, "/");
+        $_COOKIE["selitenakyvyys"] = $selitenakyvyys;
+      }
+    }
+
     // Tuoteperhe
     if ($phpnimi == "tuoteperhe.php") {
       // Muistetaan keräyksen ohituksen valinta

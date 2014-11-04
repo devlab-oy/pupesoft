@@ -30123,6 +30123,25 @@ if (!function_exists('hae_tilausrivit')) {
   }
 }
 
+if (!function_exists('hae_lasku')) {
+  function hae_lasku($lasku_tunnus) {
+    global $kukarow, $yhtiorow;
+
+    if (empty($lasku_tunnus)) {
+      return false;
+    }
+
+    $query = "SELECT *
+              FROM lasku
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+              AND lasku.tunnus = {$lasku_tunnus}";
+
+    $result = pupe_query($query);
+
+    return mysql_fetch_assoc($result);
+  }
+}
+
 if (!function_exists('escape_single_quotes')) {
   function escape_single_quotes(&$item, $key) {
     $item = str_replace("'", "\'", $item);

@@ -364,7 +364,14 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
     $chkvv = substr($epakurpvm, 0, 4);
 
     if (!checkdate($chkkk, $chkpp, $chkvv)) {
-      echo "<font class='error'>$tuoterow[tuoteno] ".t("VIRHE: Syötetty päivämäärä on virheellinen")."!</font><br>";
+      if ($from == "lue_data") {
+        lue_data_echo("<font class='error'>$tuoterow[tuoteno] ");
+        lue_data_echo(t("VIRHE: Syötetty päivämäärä on virheellinen")."!</font><br>");
+      }
+      else {
+        echo "<font class='error'>$tuoterow[tuoteno] ";
+        echo t("VIRHE: Syötetty päivämäärä on virheellinen")."!</font><br>";
+      }
       $tee = "";
     }
     else {

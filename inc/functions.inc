@@ -17339,7 +17339,7 @@ if (!function_exists("tee_keraysera")) {
                 AND lasku.varasto                              = '{$varasto}'
                 AND kuka.tunnus is null
                 {$_group_by_lisa}
-                ORDER BY prioriteetti,erotus,h1time,liitostunnus,ohjausmerkki,lahdon_tiedot";
+                ORDER BY prioriteetti,erotus,lahdon_tiedot,h1time,liitostunnus,ohjausmerkki";
     }
     else {
 
@@ -17388,7 +17388,7 @@ if (!function_exists("tee_keraysera")) {
                 AND lasku.varasto                              = '{$varasto}'
                 AND kuka.tunnus is null
                 {$_group_by_lisa}
-                ORDER BY prioriteetti,erotus,h1time,liitostunnus,ohjausmerkki,lahdon_tiedot";
+                ORDER BY prioriteetti,erotus,lahdon_tiedot,h1time,liitostunnus,ohjausmerkki";
     }
     $res = pupe_query($query);
 
@@ -17421,7 +17421,7 @@ if (!function_exists("tee_keraysera")) {
         break;
       }
 
-      if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'K') === false and trim($ed_asiakas) != '' and $ed_asiakas == $row['asiakas_nimi'] and trim($ed_lahto) != '' and $ed_lahto != $row['lahto']) {
+      if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'K') === false and trim($ed_lahto) != '' and $ed_lahto != $row['lahto']) {
         if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E60): EI SAA OLLA USEITA LÄHTÖJÄ! BREAK<br>\n";
         break;
       }

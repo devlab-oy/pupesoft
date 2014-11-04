@@ -5438,7 +5438,7 @@ if (!function_exists("alehinta")) {
           }
           elseif ($trow['kehahin'] > 0) {
             // Lasketaan keskihankintahinnan p‰‰lle haluttu kate
-            $hinta = $trow['kehahin'] / (1 - (abs($hrow["alennus"]) / 100));
+            $hinta = $trow['myyntihinta'];
 
             // Jos on poikkeava myyntihinta-m‰‰r‰ laitetaan se hintaan mukaan
             if ($trow["myyntihinta_maara"] != 0) {
@@ -5457,6 +5457,7 @@ if (!function_exists("alehinta")) {
               $ale["ale".$alepostfix] = 0;
             }
 
+            $ale['ale1'] = $hrow['alennus'];
             $netto    = "";
             $hperuste   .= "Asiakaspiirin Asiakasalennushinta. ";
             $hintaperuste = '14B';

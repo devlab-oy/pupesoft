@@ -3937,11 +3937,12 @@ if (isset($jatka)) {
     $tilausrivi_result = pupe_query($tilausrivi_query);
 
     while ($tilausrivi = mysql_fetch_assoc($tilausrivi_result)) {
-      $ale_hinta = alehinta($laskurow, $tilausrivi, $tilausrivi['kpl'], $netto, $hinta, $ale, 'hinta,hperuste,hintaperuste');
+      $ale_hinta = alehinta($laskurow, $tilausrivi, $tilausrivi['kpl'], $netto, $hinta, $ale, 'hinta,hperuste,hintaperuste,ale1');
 
       $ale_peruste = $ale_hinta['hperuste'] . '('.t('Aletaso').'): ' . $ale_hinta['hintaperuste'];
       $tilausrivi_query = " UPDATE tilausrivi
                             SET hinta = '{$ale_hinta['hinta']}',
+                            ale1 = '{$ale_hinta['ale1']}',
                             ale_peruste = '{$ale_peruste}'
                             WHERE yhtio = '{$kukarow['yhtio']}'
                             AND tunnus = {$tilausrivi['tilausrivi_tunnus']}";

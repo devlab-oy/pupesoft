@@ -4190,11 +4190,20 @@ if ($tee == '') {
 
     if ($_varastoon_asiakkaalle and $_tila_check) {
 
-      if ($valmiste_vai_raakaaine == 'valmiste') {
-        $perheid2 = -100;
-      }
-      else {
-        $perheid2 = 0;
+      $perheid2 = 0;
+
+      if ($valmiste_vai_raakaaine == 'valmiste' and !empty($tuoteno)) {
+
+        $query = "SELECT *
+                  FROM tuoteperhe
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tyyppi = 'R'
+                  AND isatuoteno = '{$tuoteno}'";
+        $tuoteperhe_chk_res = pupe_query($query);
+
+        if (mysql_num_rows($tuoteperhe_chk_res) == 0) {
+          $perheid2 = -100;
+        }
       }
     }
 

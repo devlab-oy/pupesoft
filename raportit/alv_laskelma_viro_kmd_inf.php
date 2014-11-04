@@ -393,6 +393,10 @@ if ($tee == 'laskelma') {
       $erikoiskoodi = '03';
     }
 
+    if ($_rajaa_chk and $aineistoon == $_red) {
+      continue;
+    }
+
     $_class = $aineistoon == $_red ? 'spec' : '';
 
     echo "<tr class='$_class aktiivi'>";

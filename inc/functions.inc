@@ -28880,13 +28880,16 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
 
     $sorttaajat = $parametrit['order_by'];
 
-    usort($ryhmitetty_array, function($a, $b) use ($sorttaajat) {
-        foreach ($sorttaajat as $sorttaaja) {
-          if ($a[$sorttaaja] > $b[$sorttaaja]) return 1;
-          if ($a[$sorttaaja] < $b[$sorttaaja]) return -1;
-        }
-        return 0;
-      });
+    function sorttaajat ($a, $b) {
+      foreach ($sorttaajat as $sorttaaja) {
+        if ($a[$sorttaaja] > $b[$sorttaaja]) return 1;
+        if ($a[$sorttaaja] < $b[$sorttaaja]) return -1;
+      }
+      return 0;
+    }
+
+    usort($ryhmitetty_array, "sorttaajat");
+
     return $ryhmitetty_array;
   }
 }

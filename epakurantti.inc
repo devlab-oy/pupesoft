@@ -54,7 +54,12 @@ if ($tuoteno != "") {
   $tuoterow = mysql_fetch_assoc($result);
 
   if (mysql_num_rows($result) != 1) {
-    echo "<font class='error'>".t("Tuote %s ei lˆydy!", "", $tuoteno)."</font><br>";
+    if ($from == "lue_data") {
+      lue_data_echo("<font class='error'>".t("Tuote %s ei lˆydy!", "", $tuoteno)."</font><br>");
+    }
+    else {
+      echo "<font class='error'>".t("Tuote %s ei lˆydy!", "", $tuoteno)."</font><br>";
+    }
     $tee = "";
   }
   elseif (in_array($tuoterow["sarjanumeroseuranta"], array('S', 'U', 'G'))) {
@@ -222,7 +227,16 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
   $tilro = mysql_fetch_assoc($tilre);
 
   if ($tilro["varattu"] != 0 and $tee != "pois" and $tee != "peru") {
-    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuotetta on tilauksessa!")." ".t("Ei voida laittaa ep‰kurantiksi!")."</font><br>";
+    if ($from == "lue_data") {
+      lue_data_echo("<font class='error'>$tuoterow[tuoteno] ");
+      lue_data_echo(t("Tuotetta on tilauksessa!")." ");
+      lue_data_echo(t("Ei voida laittaa ep‰kurantiksi!")."</font><br>");
+    }
+    else {
+      echo "<font class='error'>$tuoterow[tuoteno] ";
+      echo t("Tuotetta on tilauksessa!")." ";
+      echo t("Ei voida laittaa ep‰kurantiksi!")."</font><br>";
+    }
     $tee = "";
   }
 
@@ -241,42 +255,105 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 
   if (mysql_num_rows($tilre) != 0 and $tee != "pois" and $tee != "peru") {
     $tilro = mysql_fetch_assoc($tilre);
-    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuotetta on viem‰tt‰ varastoon saapumisella")." $tilro[laskunro]. ".t("Ei voida laittaa ep‰kurantiksi!")."</font><br>";
+    if ($from == "lue_data") {
+      lue_data_echo("<font class='error'>$tuoterow[tuoteno] ");
+      lue_data_echo(t("Tuotetta on viem‰tt‰ varastoon saapumisella")." $tilro[laskunro]. ");
+      lue_data_echo(t("Ei voida laittaa ep‰kurantiksi!")."</font><br>");
+    }
+    else {
+      echo "<font class='error'>$tuoterow[tuoteno] ";
+      echo t("Tuotetta on viem‰tt‰ varastoon saapumisella")." $tilro[laskunro]. ";
+      echo t("Ei voida laittaa ep‰kurantiksi!")."</font><br>";
+    }
     $tee = "";
   }
 
   if ($tuoterow["saldo"] < 0) {
-    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuotteen saldo on negatiivinen!")." ".t("Ei voida vaihtaa tilaa!")."</font><br>";
+    if ($from == "lue_data") {
+      lue_data_echo("<font class='error'>$tuoterow[tuoteno] ");
+      lue_data_echo(t("Tuotteen saldo on negatiivinen!")." ");
+      lue_data_echo(t("Ei voida vaihtaa tilaa!")."</font><br>");
+    }
+    else {
+      echo "<font class='error'>$tuoterow[tuoteno] ";
+      echo t("Tuotteen saldo on negatiivinen!")." ";
+      echo t("Ei voida vaihtaa tilaa!")."</font><br>";
+    }
     $tee = "";
   }
 
   // ei voida aktivoida tuotetta kurantiksi jos se on jo kurantti
   if (($tee == 'pois' or $tee == "peru") and ($tuoterow['epakurantti25pvm'] == '0000-00-00') and ($tuoterow['epakurantti50pvm'] == '0000-00-00') and ($tuoterow['epakurantti75pvm'] == '0000-00-00') and ($tuoterow['epakurantti100pvm'] == '0000-00-00')) {
-    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuote v‰‰r‰ss‰ tilassa!")." ".t("Ei voida laittaa kurantiksi!")."</font><br>";
+    if ($from == "lue_data") {
+      lue_data_echo("<font class='error'>$tuoterow[tuoteno] ");
+      lue_data_echo(t("Tuote v‰‰r‰ss‰ tilassa!")." ");
+      lue_data_echo(t("Ei voida laittaa kurantiksi!")."</font><br>");
+    }
+    else {
+      echo "<font class='error'>$tuoterow[tuoteno] ";
+      echo t("Tuote v‰‰r‰ss‰ tilassa!")." ";
+      echo t("Ei voida laittaa kurantiksi!")."</font><br>";
+    }
     $tee = "";
   }
 
   // ei voida laittaa puoliep‰kurantiksi jos tuote on puoliep‰kurantti tai t‰ysep‰kurantti
   if (($tee == '25paalle') and (($tuoterow['epakurantti25pvm'] != '0000-00-00') or ($tuoterow['epakurantti50pvm'] != '0000-00-00') or ($tuoterow['epakurantti75pvm'] != '0000-00-00') or ($tuoterow['epakurantti100pvm'] != '0000-00-00'))) {
-    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuote v‰‰r‰ss‰ tilassa!")." ".t("Ei voida laittaa 25% ep‰kurantiksi!")."</font><br>";
+    if ($from == "lue_data") {
+      lue_data_echo("<font class='error'>$tuoterow[tuoteno] ");
+      lue_data_echo(t("Tuote v‰‰r‰ss‰ tilassa!")." ");
+      lue_data_echo(t("Ei voida laittaa 25% ep‰kurantiksi!")."</font><br>");
+    }
+    else {
+      echo "<font class='error'>$tuoterow[tuoteno] ";
+      echo t("Tuote v‰‰r‰ss‰ tilassa!")." ";
+      echo t("Ei voida laittaa 25% ep‰kurantiksi!")."</font><br>";
+    }
     $tee = "";
   }
 
   // ei voida laittaa puoliep‰kurantiksi jos tuote on puoliep‰kurantti tai t‰ysep‰kurantti
   if (($tee == 'puolipaalle') and (($tuoterow['epakurantti50pvm'] != '0000-00-00') or ($tuoterow['epakurantti75pvm'] != '0000-00-00') or ($tuoterow['epakurantti100pvm'] != '0000-00-00'))) {
-    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuote v‰‰r‰ss‰ tilassa!")." ".t("Ei voida laittaa puoliep‰kurantiksi!")."</font><br>";
+    if ($from == "lue_data") {
+      lue_data_echo("<font class='error'>$tuoterow[tuoteno] ");
+      lue_data_echo(t("Tuote v‰‰r‰ss‰ tilassa!")." ");
+      lue_data_echo(t("Ei voida laittaa puoliep‰kurantiksi!")."</font><br>");
+    }
+    else {
+      echo "<font class='error'>$tuoterow[tuoteno] ";
+      echo t("Tuote v‰‰r‰ss‰ tilassa!")." ";
+      echo t("Ei voida laittaa puoliep‰kurantiksi!")."</font><br>";
+    }
     $tee = "";
   }
 
   // ei voida laittaa puoliep‰kurantiksi jos tuote on puoliep‰kurantti tai t‰ysep‰kurantti
   if (($tee == '75paalle') and (($tuoterow['epakurantti75pvm'] != '0000-00-00') or ($tuoterow['epakurantti100pvm'] != '0000-00-00'))) {
-    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuote v‰‰r‰ss‰ tilassa!")." ".t("Ei voida laittaa 75% ep‰kurantiksi!")."</font><br>";
+    if ($from == "lue_data") {
+      lue_data_echo("<font class='error'>$tuoterow[tuoteno] ");
+      lue_data_echo(t("Tuote v‰‰r‰ss‰ tilassa!")." ");
+      lue_data_echo(t("Ei voida laittaa 75% ep‰kurantiksi!")."</font><br>");
+    }
+    else {
+      echo "<font class='error'>$tuoterow[tuoteno] ";
+      echo t("Tuote v‰‰r‰ss‰ tilassa!")." ";
+      echo t("Ei voida laittaa 75% ep‰kurantiksi!")."</font><br>";
+    }
     $tee = "";
   }
 
   // ei voida laittaa t‰ysep‰kurantiksi jos tuote on jo t‰ysep‰kurantti
   if (($tee == 'paalle') and ($tuoterow['epakurantti100pvm'] != '0000-00-00')) {
-    echo "<font class='error'>$tuoterow[tuoteno] ".t("Tuote v‰‰r‰ss‰ tilassa!")." ".t("Ei voida laittaa t‰ysiep‰kurantiksi!")."</font><br>";
+    if ($from == "lue_data") {
+      lue_data_echo("<font class='error'>$tuoterow[tuoteno] ");
+      lue_data_echo(t("Tuote v‰‰r‰ss‰ tilassa!")." ");
+      lue_data_echo(t("Ei voida laittaa t‰ysiep‰kurantiksi!")."</font><br>");
+    }
+    else {
+      echo "<font class='error'>$tuoterow[tuoteno] ";
+      echo t("Tuote v‰‰r‰ss‰ tilassa!")." ";
+      echo t("Ei voida laittaa t‰ysiep‰kurantiksi!")."</font><br>";
+    }
     $tee = "";
   }
 
@@ -295,7 +372,14 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
     }
   }
   elseif (isset($epakurpvm) and $epakurpvm != "") {
-    echo "<font class='error'>$tuoterow[tuoteno] ".t("VIRHE: Syˆtetty p‰iv‰m‰‰r‰ ei sis‰lly kuluvaan tilikauteen")."!</font><br>";
+    if ($from == "lue_data") {
+      lue_data_echo("<font class='error'>$tuoterow[tuoteno] ");
+      lue_data_echo(t("VIRHE: Syˆtetty p‰iv‰m‰‰r‰ ei sis‰lly kuluvaan tilikauteen")."!</font><br>");
+    }
+    else {
+      echo "<font class='error'>$tuoterow[tuoteno] ";
+      echo t("VIRHE: Syˆtetty p‰iv‰m‰‰r‰ ei sis‰lly kuluvaan tilikauteen")."!</font><br>";
+    }
     $tee = "";
   }
 }
@@ -468,13 +552,28 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 
   if (!isset($php_cli) or !$php_cli) {
     echo "<font class='message'>";
-    echo t("Tuote")." $tuoteno ok! <br>";
+    if ($from == "lue_data") {
+      lue_data_echo(t("Tuote")." $tuoteno ok! <br>");
+    }
+    else {
+      echo t("Tuote")." $tuoteno ok! <br>";
+    }
   }
 
-  echo t("Varastonarvoa muutettiin")." $varaston_muutos $yhtiorow[valkoodi].";
+  if ($from == "lue_data") {
+    lue_data_echo(t("Varastonarvoa muutettiin")." $varaston_muutos $yhtiorow[valkoodi].");
+  }
+  else {
+    echo t("Varastonarvoa muutettiin")." $varaston_muutos $yhtiorow[valkoodi].";
+  }
 
   if (!isset($php_cli) or !$php_cli) {
-    echo "</font><br><br>";
+    if ($from == "lue_data") {
+      lue_data_echo("</font><br><br>");
+    }
+    else {
+      echo "</font><br><br>";
+    }
   }
 }
 

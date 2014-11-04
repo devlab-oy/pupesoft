@@ -5437,7 +5437,7 @@ if (!function_exists("alehinta")) {
             $hintaperuste = 11;
           }
           elseif ($trow['kehahin'] > 0) {
-            // Lasketaan keskihankintahinnan päälle haluttu kate
+            //Tuotteen myyntihinta
             $hinta = $trow['myyntihinta'];
 
             // Jos on poikkeava myyntihinta-määrä laitetaan se hintaan mukaan

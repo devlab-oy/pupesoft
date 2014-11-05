@@ -7170,7 +7170,11 @@ if ($tee == '') {
               $kpl_ruudulle = ($row['jt']+$row['varattu']) * 1;
             }
           }
-          elseif ($row["var"] == 'P' or ($kukarow['extranet'] != '' and $row['positio'] == 'Ei varaa saldoa')) {
+          elseif ($row["var"] == 'P' or
+                  ($kukarow['extranet'] != '' and $row['positio'] == 'Ei varaa saldoa') or
+                  $yhtiorow["extranet_tilaus_varaa_saldoa"] == "E" and
+                  ($laskurow["tilaustyyppi"] == "H")
+          ) {
             $kpl_ruudulle = $row['tilkpl'] * 1;
           }
           else {

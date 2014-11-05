@@ -499,6 +499,7 @@ if ($kukarow["extranet"] != '') {
     exit;
   }
 }
+
 if ((int) $valitsetoimitus_vaihdarivi > 0 and $tilausnumero == $kukarow["kesken"] and $kukarow["kesken"] > 0 and ($toim != "TARJOUS" and $toim != "EXTTARJOUS")) {
 
   $query = "  (  SELECT tunnus
@@ -2882,7 +2883,7 @@ if ($tee == '') {
   // jos asiakasnumero on annettu
   if ($laskurow["liitostunnus"] != 0 or ($laskurow["liitostunnus"] == 0 and $kukarow["kesken"] > 0 and $toim != "PIKATILAUS")) {
 
-    $query = "SELECT fakta, luokka, asiakasnro, osasto, laji, ryhma, verkkotunnus, chn, rahtivapaa_alarajasumma
+    $query = "SELECT fakta, luokka, asiakasnro, osasto, laji, ryhma, verkkotunnus, chn, rahtivapaa_alarajasumma, toimitustapa
               FROM asiakas
               WHERE yhtio = '{$kukarow['yhtio']}'
               and tunnus  = '{$laskurow['liitostunnus']}'";
@@ -3008,6 +3009,7 @@ if ($tee == '') {
                   ORDER BY jarjestys,selite";
       }
       $tresult = pupe_query($query);
+      $tm_toimitustaparow = mysql_fetch_assoc($tresult);
 
       if ($kukarow["extranet"] != "" and mysql_num_rows($tresult) == 0) {
         echo t("VIRHE: K‰ytt‰j‰tiedoissasi on virhe! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n."), "<br><br>";
@@ -3030,16 +3032,17 @@ if ($tee == '') {
       }
 
       echo "<td><select name='toimitustapa' onchange='submit()' {$state_chk} ".js_alasvetoMaxWidth("toimitustapa", 200).">";
-      $tm_toimitustaparow = mysql_fetch_assoc($tresult);
 
       $_varasto = hae_varasto($laskurow['varasto']);
+
       $params = array(
-        'asiakas_tunnus' => $laskurow['liitostunnus'],
-        'lasku_toimipaikka' => $laskurow['yhtio_toimipaikka'],
+        'asiakas_tunnus'      => $laskurow['liitostunnus'],
+        'lasku_toimipaikka'   => $laskurow['yhtio_toimipaikka'],
         'varasto_toimipaikka' => $_varasto['toimipaikka'],
-        'kohdevarasto' => $laskurow['clearing'],
-        'lahdevarasto' => $laskurow['varasto']
+        'kohdevarasto'        => $laskurow['clearing'],
+        'lahdevarasto'        => $laskurow['varasto']
       );
+
       $toimitustavat = hae_toimitustavat($params);
 
       foreach ($toimitustavat as $toimitustapa) {
@@ -3048,11 +3051,15 @@ if ($tee == '') {
           continue;
         }
 
-        if (in_array($toimitustapa['extranet'], array('', 'M')) or $toimitustapa['selite'] != $laskurow['toimitustapa']) {
+        if (($kukarow['extranet'] == "" and in_array($toimitustapa['extranet'], array('', 'M')))
+         or ($kukarow['extranet'] != "" and in_array($toimitustapa['extranet'], array('K', 'M')))
+         or $toimitustapa['selite'] == $laskurow['toimitustapa']
+         or $toimitustapa['selite'] == $faktarow['toimitustapa']) {
+
           $sel = "";
           if ($toimitustapa["selite"] == $laskurow["toimitustapa"]) {
             $sel = 'selected';
-            $tm_toimitustaparow = $toimitustapa;
+            $tm_toimitustaparow   = $toimitustapa;
             $toimitustavan_tunnus = $toimitustapa['tunnus'];
           }
 

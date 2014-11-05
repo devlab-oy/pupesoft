@@ -566,8 +566,8 @@ if ($tee == 'V') {
 if ($tee == 'L') {
   $query = "SELECT *
             FROM lasku
-            WHERE tunnus = '$tunnus'
-            AND yhtio = '$kukarow[yhtio]'
+            WHERE tunnus      = '$tunnus'
+            AND yhtio         = '$kukarow[yhtio]'
             AND hyvaksyja_nyt = '$kukarow[kuka]'";
   $result = pupe_query($query);
 
@@ -599,13 +599,13 @@ if ($tee == 'L') {
   }
 
   $query = "UPDATE lasku SET
-            hyvak2                = '$hyvak[2]',
-            hyvak3                = '$hyvak[3]',
-            hyvak4                = '$hyvak[4]',
-            hyvak5                = '$hyvak[5]',
-            hyvaksyja_nyt         = '$_hyvaksyja_nyt'
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND tunnus            = '$tunnus'";
+            hyvak2        = '$hyvak[2]',
+            hyvak3        = '$hyvak[3]',
+            hyvak4        = '$hyvak[4]',
+            hyvak5        = '$hyvak[5]',
+            hyvaksyja_nyt = '$_hyvaksyja_nyt'
+            WHERE yhtio   = '$kukarow[yhtio]'
+            AND tunnus    = '$tunnus'";
   $result = pupe_query($query);
 
   $tee = '';

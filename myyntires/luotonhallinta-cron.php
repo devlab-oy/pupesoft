@@ -11,6 +11,9 @@ if (php_sapi_name() != 'cli') {
 require "../inc/connect.inc";
 require "../inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
+
 // Tarvitaan 3 parametria
 // 1 = Yhtio
 // 2 = Luottorajaprosentti
@@ -159,5 +162,5 @@ $content_body .= "</body>";
 $content_body .= "</html>";
 
 if ($laskuri > 0) {
-  require "../inc/sahkoposti.inc";
+  require "inc/sahkoposti.inc";
 }

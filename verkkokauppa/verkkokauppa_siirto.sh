@@ -108,11 +108,7 @@ tilauskasittely/tulosta_ostotilaus.inc
 tilauskasittely/tulosta_tilausvahvistus_pdf.inc
 tilauskasittely/tulostakopio.php
 tilauskasittely/tuote_selaus_haku.php
-vastaavat.class.php
-verkkokauppa/ostoskori-kysely.php
-verkkokauppa/ostoskori.inc
-verkkokauppa/ostoskori.php
-verkkokauppa/tyhjenna_ostoskorit.php"
+vastaavat.class.php"
 
 # Yhdistä muuttujat ja vaihda rivinvaihdot spaceiksi
 ALL_FILES=`echo ${DIRECTORIES} ${CONTENT} ${FILES} ${EXTRA_FILES} | tr '\n' ' '`

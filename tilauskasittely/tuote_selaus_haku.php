@@ -121,6 +121,123 @@ $query    = "SELECT *
 $result   = pupe_query($query);
 $laskurow = mysql_fetch_assoc($result);
 
+// vientikieltok‰sittely:
+// +maa tarkoittaa ett‰ myynti on kielletty t‰h‰n maahan ja sallittu kaikkiin muihin
+// -maa tarkoittaa ett‰ ainoastaan t‰h‰n maahan saa myyd‰
+// eli n‰ytet‰‰n vaan tuotteet jossa vienti kent‰ss‰ on tyhj‰‰ tai -maa.. ja se ei saa olla +maa
+$kieltolisa = "";
+unset($vierow);
+
+if ($kukarow["kesken"] > 0) {
+  $query  = "SELECT if (toim_maa != '', toim_maa, maa) maa
+             FROM lasku
+             WHERE yhtio = '$kukarow[yhtio]'
+             and tunnus  = '$kukarow[kesken]'";
+  $vieres = pupe_query($query);
+  $vierow = mysql_fetch_assoc($vieres);
+}
+elseif ($verkkokauppa != "") {
+  $vierow = array();
+
+  if ($maa != "") {
+    $vierow["maa"] = $maa;
+  }
+  else {
+    $vierow["maa"] = $yhtiorow["maa"];
+  }
+}
+elseif ($kukarow["extranet"] != "") {
+  $query  = "SELECT if (toim_maa != '', toim_maa, maa) maa
+             FROM asiakas
+             WHERE yhtio = '$kukarow[yhtio]'
+             and tunnus  = '$kukarow[oletus_asiakas]'";
+  $vieres = pupe_query($query);
+  $vierow = mysql_fetch_assoc($vieres);
+}
+
+if (isset($vierow) and $vierow["maa"] != "") {
+  $kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' " .
+    "or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
+}
+
+if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
+  if ($verkkokauppa != "") {
+
+    if ($kukarow["kuka"] == "www") {
+      $extra_poislisa = " and tuote.hinnastoon = 'W' ";
+    }
+    else {
+      $extra_poislisa = " and tuote.hinnastoon in ('W','V') ";
+    }
+
+    $avainlisa = " and avainsana.nakyvyys = '' ";
+  }
+  else {
+    $extra_poislisa = " and tuote.hinnastoon != 'E' ";
+    $avainlisa      = " and avainsana.jarjestys < 10000 ";
+  }
+}
+else {
+  $extra_poislisa = "";
+  $avainlisa      = "";
+}
+
+if (!isset($poistetut)) {
+  $poistetut = '';
+}
+
+if ($poistetut != "") {
+
+  $poischeck = "CHECKED";
+  $ulisa .= "&poistetut=checked";
+
+  if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
+    // N‰ytet‰‰n vain poistettuja tuotteita
+    $poislisa        = " AND tuote.status in ('P','X')
+                  AND (SELECT sum(saldo)
+                  FROM tuotepaikat
+                  JOIN varastopaikat ON (varastopaikat.yhtio=tuotepaikat.yhtio
+                  AND varastopaikat.tunnus = tuotepaikat.varasto
+                  AND varastopaikat.tyyppi = '')
+                  WHERE tuotepaikat.yhtio=tuote.yhtio
+                  AND tuotepaikat.tuoteno=tuote.tuoteno
+                  AND tuotepaikat.saldo > 0) > 0 ";
+    if (($yhtiorow["yhtio"] == 'allr')) {
+      $hinta_rajaus = " AND tuote.myymalahinta > tuote.myyntihinta ";
+    }
+    else {
+      $hinta_rajaus = " ";
+    }
+    $poislisa_mulsel = " and tuote.status in ('P','X') ";
+  }
+  else {
+    $poislisa = "";
+    //$poislisa_mulsel  = "";
+  }
+}
+else {
+  $poislisa = " and (tuote.status not in ('P','X')
+          or (SELECT sum(saldo)
+              FROM tuotepaikat
+              WHERE tuotepaikat.yhtio=tuote.yhtio
+              AND tuotepaikat.tuoteno=tuote.tuoteno
+              AND tuotepaikat.saldo > 0) > 0) ";
+  //$poislisa_mulsel  = " and tuote.status not in ('P','X') ";
+  $poischeck = "";
+}
+
+if (isset($extrapoistetut)
+  and $extrapoistetut != ""
+  and $kukarow["extranet"] != ""
+  and $kukarow['asema'] == "NE"
+) {
+  $extrapoischeck = "CHECKED";
+  $ulisa .= "&extrapoistetut=checked";
+  $poislisa = "";
+}
+
+list($oleasrow, $valuurow) = hae_oletusasiakas($laskurow);
+
 // Katsotaan, onko paramseissa annettu variaatio ja, jos on, n‰ytet‰‰n kyseisen variaation tuotteet
 if (!empty($variaatio)) {
   tarkista_tilausrivi();
@@ -137,7 +254,12 @@ if (!empty($variaatio)) {
               AND tuotteen_avainsanat.laji   = 'parametri_variaatio'
               AND tuotteen_avainsanat.yhtio  = tuote.yhtio
               AND tuotteen_avainsanat.selite = '{$variaatio}')
-            WHERE tuote.yhtio                = '{$kukarow['yhtio']}'";
+            WHERE tuote.yhtio                = '{$kukarow['yhtio']}'
+            AND tuote.tuotetyyppi            NOT IN ('A', 'B')
+            {$kieltolisa}
+            {$extra_poislisa}
+            {$poislisa}";
+
   $result = pupe_query($query);
 
   $tuotteet = array();
@@ -173,12 +295,12 @@ if (!empty($variaatio)) {
     echo "<td>{$tuote["nimitys"]}</td>";
     echo "<td>{$tuote["osasto"]}<br/>{$tuote["try"]}</td>";
 
-    $tuotteen_myyntihinta = tuotteen_myyntihinta($yhtiorow, $tuote, 1);
-    echo "<td>" . hintapyoristys($tuotteen_myyntihinta) . " {$yhtiorow["valkoodi"]}</td>";
+    piirra_hinta($tuote, $oleasrow, $valuurow, $vari, $classmidl, $hinta_rajaus, $poistetut,
+      $lisatiedot);
 
     $yhtiot = hae_yhtiot();
 
-    hae_ja_piirra_saldo($tuote, $yhtiot);
+    hae_ja_piirra_saldo($tuote, $yhtiot, $oleasrow);
 
     piirra_ostoskoriin_lisays($tuote);
 
@@ -335,45 +457,6 @@ else {
   $saldotoncheck = "";
 }
 
-if (!isset($poistetut)) {
-  $poistetut = '';
-}
-
-if ($poistetut != "") {
-
-  $poischeck = "CHECKED";
-  $ulisa .= "&poistetut=checked";
-
-  if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
-    // N‰ytet‰‰n vain poistettuja tuotteita
-    $poislisa = " AND tuote.status in ('P','X')
-                  AND (SELECT sum(saldo)
-                  FROM tuotepaikat
-                  JOIN varastopaikat ON (varastopaikat.yhtio=tuotepaikat.yhtio
-                  AND varastopaikat.tunnus = tuotepaikat.varasto
-                  AND varastopaikat.tyyppi = '')
-                  WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0 ";
-    $hinta_rajaus      = ($yhtiorow["yhtio"] == 'allr') ? " AND tuote.myymalahinta > tuote.myyntihinta " : " ";
-    $poislisa_mulsel  = " and tuote.status in ('P','X') ";
-  }
-  else {
-    $poislisa         = "";
-    //$poislisa_mulsel  = "";
-  }
-}
-else {
-  $poislisa  = " and (tuote.status not in ('P','X')
-          or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0) ";
-  //$poislisa_mulsel  = " and tuote.status not in ('P','X') ";
-  $poischeck = "";
-}
-
-if (isset($extrapoistetut) and $extrapoistetut != "" and $kukarow["extranet"] != "" and $kukarow['asema'] == "NE") {
-  $extrapoischeck = "CHECKED";
-  $ulisa .= "&extrapoistetut=checked";
-  $poislisa         = "";
-}
-
 if (!isset($lisatiedot)) {
   $lisatiedot = '';
 }
@@ -384,28 +467,6 @@ if ($lisatiedot != "") {
 }
 else {
   $lisacheck = "";
-}
-
-if ($kukarow["extranet"] != "" or $verkkokauppa != "") {
-  if ($verkkokauppa != "") {
-
-    if ($kukarow["kuka"] == "www") {
-      $extra_poislisa = " and tuote.hinnastoon = 'W' ";
-    }
-    else {
-      $extra_poislisa = " and tuote.hinnastoon in ('W','V') ";
-    }
-
-    $avainlisa = " and avainsana.nakyvyys = '' ";
-  }
-  else {
-    $extra_poislisa = " and tuote.hinnastoon != 'E' ";
-    $avainlisa = " and avainsana.jarjestys < 10000 ";
-  }
-}
-else {
-  $extra_poislisa = "";
-  $avainlisa = "";
 }
 
 if (!isset($nimitys)) {
@@ -498,44 +559,6 @@ if (trim($alkuperaisnumero) != '') {
   }
 
   $ulisa .= "&alkuperaisnumero=$alkuperaisnumero";
-}
-
-// vientikieltok‰sittely:
-// +maa tarkoittaa ett‰ myynti on kielletty t‰h‰n maahan ja sallittu kaikkiin muihin
-// -maa tarkoittaa ett‰ ainoastaan t‰h‰n maahan saa myyd‰
-// eli n‰ytet‰‰n vaan tuotteet jossa vienti kent‰ss‰ on tyhj‰‰ tai -maa.. ja se ei saa olla +maa
-$kieltolisa = "";
-unset($vierow);
-
-if ($kukarow["kesken"] > 0) {
-  $query  = "SELECT if (toim_maa != '', toim_maa, maa) maa
-             FROM lasku
-             WHERE yhtio = '$kukarow[yhtio]'
-             and tunnus  = '$kukarow[kesken]'";
-  $vieres = pupe_query($query);
-  $vierow = mysql_fetch_assoc($vieres);
-}
-elseif ($verkkokauppa != "") {
-  $vierow = array();
-
-  if ($maa != "") {
-    $vierow["maa"] = $maa;
-  }
-  else {
-    $vierow["maa"] = $yhtiorow["maa"];
-  }
-}
-elseif ($kukarow["extranet"] != "") {
-  $query  = "SELECT if (toim_maa != '', toim_maa, maa) maa
-             FROM asiakas
-             WHERE yhtio = '$kukarow[yhtio]'
-             and tunnus  = '$kukarow[oletus_asiakas]'";
-  $vieres = pupe_query($query);
-  $vierow = mysql_fetch_assoc($vieres);
-}
-
-if (isset($vierow) and $vierow["maa"] != "") {
-  $kieltolisa = " and (tuote.vienti = '' or tuote.vienti like '%-$vierow[maa]%' or tuote.vienti like '%+%') and tuote.vienti not like '%+$vierow[maa]%' ";
 }
 
 if (file_exists('sarjanumeron_lisatiedot_popup.inc')) {
@@ -1545,91 +1568,14 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
         echo "<td valign='top' class='$vari' $classmidl>$row[osasto]<br>$row[try]</td>";
       }
 
-      if ($kukarow['hinnat'] >= 0 and ($verkkokauppa == "" or $kukarow["kuka"] != "www")) {
-
-        $myyntihinta = hintapyoristys($row["myyntihinta"]). " $yhtiorow[valkoodi]";
-
-        if ($kukarow["extranet"] != "" and $kukarow["naytetaan_asiakashinta"] != "") {
-          list($hinta, $netto, $ale_kaikki, $alehinta_alv, $alehinta_val) = alehinta($oleasrow, $row, 1, '', '', '');
-          $myyntihinta_echotus = $hinta * generoi_alekentta_php($ale_kaikki, 'M', 'kerto');
-          $myyntihinta = hintapyoristys($myyntihinta_echotus)." $alehinta_val";
-        }
-        elseif ($kukarow["extranet"] != "") {
-          // jos kyseess‰ on extranet asiakas yritet‰‰n n‰ytt‰‰ kaikki hinnat oikeassa valuutassa
-          if ($oleasrow["valkoodi"] != $yhtiorow["valkoodi"]) {
-
-            $myyntihinta = hintapyoristys($row["myyntihinta"])." $yhtiorow[valkoodi]";
-
-            $query = "SELECT *
-                      from hinnasto
-                      where yhtio  = '$kukarow[yhtio]'
-                      and tuoteno  = '$row[tuoteno]'
-                      and valkoodi = '$oleasrow[valkoodi]'
-                      and laji     = ''
-                      and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-                      order by ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
-                      limit 1";
-            $olhires = pupe_query($query);
-
-            if (mysql_num_rows($olhires) == 1) {
-              $olhirow = mysql_fetch_assoc($olhires);
-              $myyntihinta = hintapyoristys($olhirow["hinta"])." $olhirow[valkoodi]";
-            }
-            elseif ($olhirow["kurssi"] != 0) {
-              $myyntihinta = hintapyoristys(yhtioval($row["myyntihinta"], $olhirow["kurssi"])). " $oleasrow[valkoodi]";
-            }
-          }
-        }
-        else {
-          $query = "SELECT distinct valkoodi, maa
-                    from hinnasto
-                    where yhtio = '$kukarow[yhtio]'
-                    and tuoteno = '$row[tuoteno]'
-                    and laji    = ''
-                    order by maa, valkoodi";
-          $hintavalresult = pupe_query($query);
-
-          while ($hintavalrow = mysql_fetch_assoc($hintavalresult)) {
-
-            // katotaan onko tuotteelle valuuttahintoja
-            $query = "SELECT *
-                      from hinnasto
-                      where yhtio  = '$kukarow[yhtio]'
-                      and tuoteno  = '$row[tuoteno]'
-                      and valkoodi = '$hintavalrow[valkoodi]'
-                      and maa      = '$hintavalrow[maa]'
-                      and laji     = ''
-                      and ((alkupvm <= current_date and if (loppupvm = '0000-00-00','9999-12-31',loppupvm) >= current_date) or (alkupvm='0000-00-00' and loppupvm='0000-00-00'))
-                      order by ifnull(to_days(current_date)-to_days(alkupvm),9999999999999)
-                      limit 1";
-            $hintaresult = pupe_query($query);
-
-            while ($hintarow = mysql_fetch_assoc($hintaresult)) {
-              $myyntihinta .= "<br>$hintarow[maa]: ".hintapyoristys($hintarow["hinta"])." $hintarow[valkoodi]";
-            }
-          }
-        }
-
-        echo "<td valign='top' class='$vari' align='right' $classmidl nowrap>";
-
-        if ($hinta_rajaus != "") {
-          echo '<font style="text-decoration:line-through;">'.hintapyoristys($row["myymalahinta"]).' '.$yhtiorow["valkoodi"].'</font></br>';
-        }
-
-        echo ($poistetut !="" and $kukarow["extranet"] != "") ? " <font class='green'>$myyntihinta</font>" : $myyntihinta;
-
-        if ($lisatiedot != "" and $kukarow["extranet"] == "") {
-          echo "<br>".hintapyoristys($row["nettohinta"])." $yhtiorow[valkoodi]";
-        }
-
-        echo "</td>";
-      }
+      piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_rajaus, $poistetut,
+        $lisatiedot);
 
       if ($lisatiedot != "" and $kukarow["extranet"] == "") {
         echo "<td valign='top' class='$vari' $classmidl>$row[aleryhma]<br>$row[status]</td>";
       }
 
-      hae_ja_piirra_saldo($row, $yhtiot);
+      hae_ja_piirra_saldo($row, $yhtiot, $oleasrow);
 
       piirra_ostoskoriin_lisays($row);
 
@@ -1678,29 +1624,9 @@ if ($verkkokauppa == "") {
   else exit;
 }
 
-function piirra_extranet_saldo($row) {
+function piirra_extranet_saldo($row, $oleasrow) {
   global $kukarow, $yhtiorow, $verkkokauppa, $noutovarres, $laskurow, $saldoaikalisa,
   $rivin_yksikko, $vari, $verkkokauppa_saldoluku, $hinta_rajaus;
-
-  $query = "SELECT * from asiakas where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[oletus_asiakas]'";
-  $oleasres = pupe_query($query);
-  $oleasrow = mysql_fetch_assoc($oleasres);
-  $oleasrow["liitostunnus"] = $oleasrow["tunnus"];
-
-  $query = "SELECT * from valuu where yhtio='$kukarow[yhtio]' and nimi='$oleasrow[valkoodi]'";
-  $olhires = pupe_query($query);
-  $olhirow = mysql_fetch_assoc($olhires);
-
-  // k‰ytt‰j‰n maa
-  $oleasrow["varastomaa"] = $laskurow["toim_maa"];
-
-  if ($oleasrow["varastomaa"] == "") {
-    $oleasrow["varastomaa"] = $oleasrow["toim_maa"];
-  }
-
-  if ($oleasrow["varastomaa"] == "") {
-    $oleasrow["varastomaa"] = $oleasrow["maa"];
-  }
 
   $noutolisa = "";
 
@@ -1792,6 +1718,40 @@ function piirra_extranet_saldo($row) {
   }
 
   echo "</td>";
+}
+
+function hae_oletusasiakas($laskurow) {
+  global $kukarow;
+
+  $query = "SELECT *
+            FROM asiakas
+            WHERE yhtio='$kukarow[yhtio]'
+            AND tunnus='$kukarow[oletus_asiakas]'";
+
+  $oleasres                 = pupe_query($query);
+  $oleasrow                 = mysql_fetch_assoc($oleasres);
+  $oleasrow["liitostunnus"] = $oleasrow["tunnus"];
+
+  $query = "SELECT *
+            FROM valuu
+            WHERE yhtio='$kukarow[yhtio]'
+            AND nimi='$oleasrow[valkoodi]'";
+
+  $valuures = pupe_query($query);
+  $valuurow = mysql_fetch_assoc($valuures);
+
+  // k‰ytt‰j‰n maa
+  $oleasrow["varastomaa"] = $laskurow["toim_maa"];
+
+  if ($oleasrow["varastomaa"] == "") {
+    $oleasrow["varastomaa"] = $oleasrow["toim_maa"];
+  }
+
+  if ($oleasrow["varastomaa"] == "") {
+    $oleasrow["varastomaa"] = $oleasrow["maa"];
+  }
+
+  return array($oleasrow, $valuurow);
 }
 
 function piirra_ostoskoriin_lisays($row) {
@@ -2065,7 +2025,7 @@ function tarkista_tilausrivi() {
   pupemaster_stop();
 }
 
-function hae_ja_piirra_saldo($row, $yhtiot) {
+function hae_ja_piirra_saldo($row, $yhtiot, $oleasrow) {
   global $toim_kutsu, $verkkokauppa, $kukarow, $verkkokauppa_saldotsk, $laskurow,
   $saldoaikalisa, $yhtiorow, $rivin_yksikko, $vari, $classrigh, $hinta_rajaus, $ostoskori,
   $yht_i, $lisatiedot, $hae_ja_selaa_row;
@@ -2171,7 +2131,7 @@ function hae_ja_piirra_saldo($row, $yhtiot) {
     }
     // Normaalit saldolliset tuotteet (Extranet ja Verkkokauppa)
     elseif ($kukarow["extranet"] != "" or $verkkokauppa != "") {
-      piirra_extranet_saldo($row);
+      piirra_extranet_saldo($row, $oleasrow);
     }
     // Normaalit saldolliset tuotteet (Normi)
     else {
@@ -2380,5 +2340,118 @@ function piirra_nayta_variaatiot_nappula($parametri_variaatio) {
     echo "<a href='?variaatio={$parametri_variaatio["selite"]}' onclick='{$new_window}'>" .
       t("N‰yt‰ variaatiot") .
       "</a>";
+  }
+}
+
+function piirra_hinta($row, $oleasrow, $valuurow, $vari, $classmidl, $hinta_rajaus, $poistetut,
+  $lisatiedot) {
+  global $kukarow, $yhtiorow, $verkkokauppa;
+
+  if ($kukarow['hinnat'] >= 0 and ($verkkokauppa == "" or $kukarow["kuka"] != "www")) {
+    $myyntihinta = hintapyoristys($row["myyntihinta"]) . " $yhtiorow[valkoodi]";
+
+    if ($kukarow["extranet"] != "" and $kukarow["naytetaan_asiakashinta"] != "") {
+      list($hinta,
+        $netto,
+        $ale_kaikki,
+        $alehinta_alv,
+        $alehinta_val) = alehinta($oleasrow, $row, 1, '', '', '');
+
+      $myyntihinta_echotus = $hinta * generoi_alekentta_php($ale_kaikki, 'M', 'kerto');
+      $myyntihinta         = hintapyoristys($myyntihinta_echotus) . " $alehinta_val";
+    }
+    elseif ($kukarow["extranet"] != "") {
+      // jos kyseess‰ on extranet asiakas yritet‰‰n n‰ytt‰‰ kaikki hinnat oikeassa valuutassa
+      if ($oleasrow["valkoodi"] != $yhtiorow["valkoodi"]) {
+
+        $myyntihinta = hintapyoristys($row["myyntihinta"]) . " $yhtiorow[valkoodi]";
+
+        $query = "SELECT *
+                  FROM hinnasto
+                  WHERE yhtio  = '{$kukarow["yhtio"]}'
+                  AND tuoteno  = '{$row["tuoteno"]}'
+                  AND valkoodi = '{$oleasrow["valkoodi"]}'
+                  AND laji     = ''
+                  AND (
+                    (alkupvm <= current_date and if(loppupvm = '0000-00-00',
+                                                    '9999-12-31',
+                                                    loppupvm) >= current_date)
+                    or (alkupvm = '0000-00-00' and loppupvm = '0000-00-00'))
+                  ORDER BY ifnull(to_days(current_date) - to_days(alkupvm), 9999999999999)
+                  LIMIT 1";
+
+        $olhires = pupe_query($query);
+
+        if (mysql_num_rows($olhires) == 1) {
+          $olhirow     = mysql_fetch_assoc($olhires);
+          $myyntihinta = hintapyoristys($olhirow["hinta"]) . " $olhirow[valkoodi]";
+        }
+        elseif ($valuurow["kurssi"] != 0) {
+          $myyntihinta = hintapyoristys(laskuval($row["myyntihinta"], $valuurow["kurssi"])) .
+            " $oleasrow[valkoodi]";
+        }
+      }
+    }
+    else {
+      $query = "SELECT DISTINCT valkoodi,
+                maa
+                FROM hinnasto
+                WHERE yhtio = '$kukarow[yhtio]'
+                AND tuoteno = '$row[tuoteno]'
+                AND laji    = ''
+                ORDER BY maa, valkoodi";
+
+      $hintavalresult = pupe_query($query);
+
+      while ($hintavalrow = mysql_fetch_assoc($hintavalresult)) {
+        // katotaan onko tuotteelle valuuttahintoja
+        $query = "SELECT *
+                  FROM hinnasto
+                  WHERE yhtio  = '$kukarow[yhtio]'
+                  AND tuoteno  = '$row[tuoteno]'
+                  AND valkoodi = '$hintavalrow[valkoodi]'
+                  AND maa      = '$hintavalrow[maa]'
+                  AND laji     = ''
+                  AND (
+                    (alkupvm <= current_date and if(loppupvm = '0000-00-00',
+                                                    '9999-12-31',
+                                                    loppupvm) >= current_date)
+                    or (alkupvm = '0000-00-00' and loppupvm = '0000-00-00'))
+                  ORDER BY ifnull(to_days(current_date) - to_days(alkupvm), 9999999999999)
+                  LIMIT 1";
+
+        $hintaresult = pupe_query($query);
+
+        while ($hintarow = mysql_fetch_assoc($hintaresult)) {
+          $myyntihinta .= "<br>$hintarow[maa]: " .
+            hintapyoristys($hintarow["hinta"]) .
+            " $hintarow[valkoodi]";
+        }
+      }
+    }
+
+    echo "<td valign='top' class='$vari' align='right' $classmidl nowrap>";
+
+    if ($hinta_rajaus != "") {
+      echo '<font style="text-decoration:line-through;">' .
+        hintapyoristys($row["myymalahinta"]) .
+        ' '
+        .
+        $yhtiorow["valkoodi"] .
+        '</font></br>';
+    }
+
+    if (($poistetut != "" and $kukarow["extranet"] != "")) {
+      echo " <font class='green'>$myyntihinta</font>";
+    }
+    else {
+      echo $myyntihinta;
+    }
+
+    if ($lisatiedot != "" and $kukarow["extranet"] == "") {
+      echo "<br>" . hintapyoristys($row["nettohinta"]) . " $yhtiorow[valkoodi]";
+    }
+
+    echo "</td>";
   }
 }

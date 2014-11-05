@@ -499,10 +499,10 @@ function tosite_print($vv, $kk, $pp, $ltunnukset, $tulosta = null) {
 
       $kutsu = t("Käteismyynnit", $kieli);
 
-      $liite         = "$filenimi.ps";
-      $sahkoposti_cc     = "";
-      $content_subject   = "";
-      $content_body     = "";
+      $liite           = "$filenimi.ps";
+      $sahkoposti_cc   = "";
+      $content_subject = "";
+      $content_body    = "";
 
       include "inc/sahkoposti.inc";
     }
@@ -512,8 +512,7 @@ function tosite_print($vv, $kk, $pp, $ltunnukset, $tulosta = null) {
     }
 
     //poistetaan tmp file samantien kuleksimasta...
-    system("rm -f $filenimi");
-    system("rm -f $filenimi.ps");
+    unlink($filenimi);
   }
 }
 
@@ -2252,10 +2251,10 @@ elseif ($tee != '') {
 
       system("ps2pdf -sPAPERSIZE=a4 ".$filenimi.".ps ".$filenimi.".pdf");
 
-      $liite         = "$filenimi.pdf";
-      $sahkoposti_cc     = "";
-      $content_subject   = "";
-      $content_body     = "";
+      $liite           = "$filenimi.pdf";
+      $sahkoposti_cc   = "";
+      $content_subject = "";
+      $content_body    = "";
 
       include "inc/sahkoposti.inc";
     }
@@ -2265,8 +2264,8 @@ elseif ($tee != '') {
     }
 
     //poistetaan tmp file samantien kuleksimasta...
-    system("rm -f $filenimi");
-    system("rm -f $filenimi.ps");
+    unlink($filenimi);
+    unlink($filenimi.".ps");
   }
 
   echo "</table>";

@@ -18,6 +18,9 @@ ini_set("display_errors", 0);
 require "inc/connect.inc";
 require "inc/functions.inc";
 
+// Logitetaan ajo
+cron_log();
+
 $kukarow['yhtio'] = (string) $argv[1];
 $kukarow['kuka']  = 'admin';
 $kukarow['kieli'] = 'fi';
@@ -54,7 +57,7 @@ while ($chk_row = mysql_fetch_assoc($chk_res)) {
   $query = "SELECT tunnus
             FROM lasku
             WHERE yhtio             = '{$kukarow['yhtio']}'
-            AND tila                IN ('N','L')
+            AND tila                IN ('N','L','G')
             AND alatila             not in ('D','X')
             AND toimitustavan_lahto = $chk_row[tunnus]";
   $chk_res2 = pupe_query($query);
@@ -121,6 +124,7 @@ while ($chk_row = mysql_fetch_assoc($chk_res)) {
              AND liitostunnus          = '{$chk_row['liitostunnus']}'
              AND varasto               = '{$chk_row['varasto']}'
              AND aktiivi              != 'E'
+             AND ohjausmerkki          = '{$chk_row['ohjausmerkki']}'
              AND (alkupvm = '0000-00-00' OR (alkupvm != '0000-00-00' AND alkupvm <= '{$chk_row['pvm']}'))";
   $chk_res2 = pupe_query($query1);
 
@@ -138,6 +142,7 @@ while ($chk_row = mysql_fetch_assoc($chk_res)) {
                AND liitostunnus          = '{$chk_row['liitostunnus']}'
                AND varasto               = '{$chk_row['varasto']}'
                AND aktiivi               = 'E'
+               AND ohjausmerkki          = '{$chk_row['ohjausmerkki']}'
                AND alkupvm              != '0000-00-00'
                AND alkupvm               > '{$chk_row['pvm']}'";
     $chk_res2 = pupe_query($query2);
@@ -147,7 +152,7 @@ while ($chk_row = mysql_fetch_assoc($chk_res)) {
   $query = "SELECT tunnus
             FROM lasku
             WHERE yhtio             = '{$kukarow['yhtio']}'
-            AND tila                IN ('N','L')
+            AND tila                IN ('N','L','G')
             AND alatila             not in ('D','X')
             AND toimitustavan_lahto = {$chk_row['tunnus']}";
   $chk_res3 = pupe_query($query);
@@ -230,7 +235,8 @@ for ($i = 0; $i <= $paivia_eteenpain; $i++) {
                 AND terminaalialue       = '{$t_row['terminaalialue']}'
                 AND asiakasluokka        = '{$asiakasluokka}'
                 AND liitostunnus         = '{$t_row['liitostunnus']}'
-                AND varasto              = '{$t_row['varasto']}'";
+                AND varasto              = '{$t_row['varasto']}'
+                AND ohjausmerkki         = '{$t_row['ohjausmerkki']}'";
       $chk_res = pupe_query($query);
 
       if (mysql_num_rows($chk_res) == 0) {
@@ -244,6 +250,7 @@ for ($i = 0; $i <= $paivia_eteenpain; $i++) {
                   terminaalialue       = '{$t_row['terminaalialue']}',
                   asiakasluokka        = '{$asiakasluokka}',
                   aktiivi              = '',
+                  ohjausmerkki         = '{$t_row['ohjausmerkki']}',
                   liitostunnus         = '{$t_row['liitostunnus']}',
                   varasto              = '{$t_row['varasto']}',
                   laatija              = '{$kukarow['kuka']}',
@@ -259,16 +266,19 @@ for ($i = 0; $i <= $paivia_eteenpain; $i++) {
 if (!$paivaajo) {
   // Nollataan väkisinkeräystäpät aina päivän päätteeksi
   $query = "UPDATE lahdot
-            SET vakisin_kerays = ''
+            SET vakisin_kerays  = ''
             WHERE yhtio         = '{$kukarow['yhtio']}'
             AND vakisin_kerays != ''";
   $upd_res = pupe_query($query);
 
   $query = "UPDATE lasku
-            SET vakisin_kerays = ''
+            SET vakisin_kerays  = ''
             WHERE yhtio         = '{$kukarow['yhtio']}'
             AND vakisin_kerays != ''
-            AND tila            = 'N'
-            AND alatila         = 'A'";
+            AND (
+              (tila             = 'N'
+              AND alatila       = 'A') OR
+              (tila             = 'G'
+              AND alatila       = 'J'))";
   $upd_res = pupe_query($query);
 }

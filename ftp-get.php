@@ -18,6 +18,9 @@ if ($php_cli) {
   require "inc/salasanat.php";
   require "inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   if (!isset($ftpget_email)) $ftpget_email = "development@devlab.fi";       // kenelle meilataan jos on ongelma
   if (!isset($ftpget_emailfrom)) $ftpget_emailfrom = "development@devlab.fi";   // mill‰ osoitteella meili l‰hetet‰‰n
 

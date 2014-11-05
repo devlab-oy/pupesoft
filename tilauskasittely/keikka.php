@@ -2,6 +2,15 @@
 
 $pupe_DataTables = 'keikka';
 
+if (isset($_POST["tee"])) {
+  if ($_POST["tee"] == 'lataa_tiedosto') {
+    $lataa_tiedosto = 1;
+  }
+  if (isset($_POST["kaunisnimi"]) and $_POST["kaunisnimi"] != '') {
+    $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
+  }
+}
+
 if (strpos($_SERVER['SCRIPT_NAME'], "keikka.php")  !== FALSE) {
 
   if ($_REQUEST["toiminto"] == "kalkyyli" or $_REQUEST["toiminto"] == "kaikkiok") {
@@ -39,8 +48,29 @@ if (!isset($ostotil))       $ostotil = "";
 if (!isset($toimittajaid))     $toimittajaid = "";
 if (!isset($kauttalaskutus))   $kauttalaskutus = "";
 if (!isset($mobiili_keikka))   $mobiili_keikka = "";
+if (!isset($toimipaikka))    $toimipaikka = $kukarow['toimipaikka'];
 
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
+
+if ($onkolaajattoimipaikat and isset($otunnus)) {
+
+  $otunnus = (int) $otunnus;
+
+  // Saapuminen
+  $query = "SELECT *
+            from lasku
+            where tunnus = '{$otunnus}'
+            and tila     = 'K'
+            and yhtio    = '{$kukarow['yhtio']}'";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) > 0) {
+    $laskurow = mysql_fetch_assoc($result);
+
+    $kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];
+    $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+  }
+}
 
 echo "<font class='head'>".t("Saapumiset")."</font><hr>";
 
@@ -238,6 +268,25 @@ if ($toiminto == "tulosta") {
   if ($komento["Tavaraetiketti"] != '') {
     require 'tulosta_tavaraetiketti.inc';
   }
+}
+
+if ($toiminto == "tulosta_hintalaput") {
+  require "tulosta_hintalaput.inc";
+
+  $tuotteet = hae_tuotteet_hintalappuja_varten($otunnus, $kukarow);
+  list($tiedostonimi, $kaunisnimi) = tulosta_hintalaput($tuotteet);
+
+  echo "<font class='ok'>" . t("Hintalaput tulostettu") . "</font>";
+
+  echo "<form method='post' class='multisubmit'>";
+  echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+  echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
+  echo "<input type='hidden' name='kaunisnimi' value='{$kaunisnimi}'>";
+  echo "<input type='hidden' name='tmpfilenimi' value='{$tiedostonimi}'>";
+  echo "<input type='submit' value='" . t("Tallenna hintalaput") . "'>";
+  echo "</form>";
+
+  $toiminto = "";
 }
 
 // syˆtet‰‰n keikan lis‰tietoja
@@ -1013,8 +1062,8 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
   }
 
   if ($onkolaajattoimipaikat and isset($toimipaikka) and $toimipaikka == 'kaikki') {
-    $joinlisa .= " JOIN yhtion_toimipaikat ON (yhtion_toimipaikat.yhtio = lasku.yhtio AND yhtion_toimipaikat.tunnus = lasku.yhtio_toimipaikka)";
-    $selectlisa .= ", yhtion_toimipaikat.nimi as toimipaikka_nimi";
+    $joinlisa .= " LEFT JOIN yhtion_toimipaikat ON (yhtion_toimipaikat.yhtio = lasku.yhtio AND yhtion_toimipaikat.tunnus = lasku.yhtio_toimipaikka)";
+    $selectlisa .= ", IF(yhtion_toimipaikat.tunnus IS NULL, '".t('Ei toimipaikkaa')."', yhtion_toimipaikat.nimi) as toimipaikka_nimi";
   }
   // etsit‰‰n vanhoja keikkoja, vanhatunnus pit‰‰ olla tyhj‰‰ niin ei listata liitettyj‰ laskuja
   $query = "SELECT lasku.tunnus,
@@ -1025,7 +1074,8 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
             lasku.luontiaika,
             lasku.laatija,
             lasku.rahti_etu,
-            lasku.kohdistettu
+            lasku.kohdistettu,
+            lasku.yhtio_toimipaikka
             {$selectlisa}
             FROM lasku USE INDEX (tila_index)
             {$joinlisa}
@@ -1229,7 +1279,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
         echo "<td align='right'>";
         echo "<form method='post'>";
         echo "<input type='hidden' name='toimittajaid'   value='$toimittajaid'>";
-        echo "<input type='hidden' name='toimipaikka'   value='$toimipaikka'>";
+        echo "<input type='hidden' name='toimipaikka'   value='$row[yhtio_toimipaikka]'>";
         echo "<input type='hidden' name='otunnus'     value='$row[tunnus]'>";
         echo "<input type='hidden' name='ytunnus'     value='$ytunnus'>";
         echo "<input type='hidden' name='keikkaid'     value='$row[laskunro]'>";
@@ -1446,6 +1496,11 @@ if ($toiminto == "kohdista" or $toiminto == "yhdista" or $toiminto == "poista" o
     $nappikeikka .= "<input type='hidden' name='toiminto' value='tulosta'>";
     $nappikeikka .= "<input type='submit' value='".t("Tulosta paperit")."'>";
     $nappikeikka .= "$formloppu";
+
+    $nappikeikka .= $formalku;
+    $nappikeikka .= "<input type='hidden' name='toiminto' value='tulosta_hintalaput'/>";
+    $nappikeikka .= "<input type='submit' value='" . t("Tulosta hintalaput") . "'/>";
+    $nappikeikka .= $formloppu;
   }
 
   // jos on kohdistettuja rivej‰ ja lis‰tiedot on syˆtetty ja varastopaikat on ok ja on viel‰ jotain viet‰v‰‰ varastoon

@@ -18,6 +18,9 @@ $kukarow['kuka'] = 'admin';
 require 'inc/connect.inc';
 require 'inc/functions.inc';
 
+// Logitetaan ajo
+cron_log();
+
 echo date("d.m.Y @ G:i:s")." - Varastoryhmien päivitys\n";
 
 // poistetaan kaikki varastoryhma-tuotteen_avainsanat

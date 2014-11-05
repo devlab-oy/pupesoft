@@ -222,46 +222,58 @@ if (!function_exists("tee_jt_tilaus")) {
           $atlisa = "";
         }
 
+        $lisatjoin  = "";
+        $lisatehdot = "";
+
+        // Laskun lisätietoja ei ole siirtolistoilla,
+        // joten joinataan laskun lisätiedot vain kun ei siirtolista
+        if ($otsikkorivi["tila"] != 'G') {
+          $lisatjoin = "JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = lasku.yhtio
+                          AND laskun_lisatiedot.otunnus = lasku.tunnus";
+
+          $lisatehdot = "AND laskun_lisatiedot.laskutus_nimi     = '$lisatiedot_row[laskutus_nimi]'
+                         AND laskun_lisatiedot.laskutus_nimitark = '$lisatiedot_row[laskutus_nimitark]'
+                         AND laskun_lisatiedot.laskutus_osoite   = '$lisatiedot_row[laskutus_osoite]'
+                         AND laskun_lisatiedot.laskutus_postino  = '$lisatiedot_row[laskutus_postino]'
+                         AND laskun_lisatiedot.laskutus_postitp  = '$lisatiedot_row[laskutus_postitp]'
+                         AND laskun_lisatiedot.laskutus_maa      = '$lisatiedot_row[laskutus_maa]'";
+        }
+
         // Tarvitsemmeko uuden otsikon?
         $query = "SELECT lasku.*
                   FROM lasku
-                  JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio=lasku.yhtio and laskun_lisatiedot.otunnus=lasku.tunnus
-                  WHERE lasku.yhtio                       = '$kukarow[yhtio]'
-                  and lasku.laatija                       = '$kukarow[kuka]'
-                  and lasku.alatila                       = '$alatila'
-                  and lasku.tila                          = '$tila'
-                  and lasku.myyja                         = '$otsikkorivi[myyja]'
-                  and lasku.ytunnus                       = '$otsikkorivi[ytunnus]'
-                  and lasku.nimi                          = '$otsikkorivi[nimi]'
-                  and lasku.nimitark                      = '$otsikkorivi[nimitark]'
-                  and lasku.osoite                        = '$otsikkorivi[osoite]'
-                  and lasku.postino                       = '$otsikkorivi[postino]'
-                  and lasku.postitp                       = '$otsikkorivi[postitp]'
-                  and lasku.toim_nimi                     = '$otsikkorivi[toim_nimi]'
-                  and lasku.toim_nimitark                 = '$otsikkorivi[toim_nimitark]'
-                  and lasku.toim_osoite                   = '$otsikkorivi[toim_osoite]'
-                  and lasku.toim_postino                  = '$otsikkorivi[toim_postino]'
-                  and lasku.toim_postitp                  = '$otsikkorivi[toim_postitp]'
-                  and lasku.toimitustapa                  = '$otsikkorivi[toimitustapa]'
-                  and lasku.maksuehto                     = '$otsikkorivi[maksuehto]'
-                  and lasku.vienti                        = '$otsikkorivi[vienti]'
-                  and lasku.alv                           = '$otsikkorivi[alv]'
-                  and lasku.ketjutus                      = '$otsikkorivi[ketjutus]'
-                  and lasku.jaksotettu                    = '$otsikkorivi[jaksotettu]'
-                  and lasku.toimitusehto                  = '$otsikkorivi[toimitusehto]'
-                  and lasku.valkoodi                      = '$otsikkorivi[valkoodi]'
-                  and lasku.vienti_kurssi                 = '$otsikkorivi[vienti_kurssi]'
-                  and lasku.erikoisale                    = '$otsikkorivi[erikoisale]'
-                  and lasku.eilahetetta                   = '$isarivirow[suoraan_laskutukseen]'
-                  and lasku.tunnusnippu                   = '$otsikkorivi[tunnusnippu]'
-                  and lasku.piiri                         = '$otsikkorivi[piiri]'
-                  and lasku.kolmikantakauppa              = '{$otsikkorivi['kolmikantakauppa']}'
-                  and laskun_lisatiedot.laskutus_nimi     = '$lisatiedot_row[laskutus_nimi]'
-                  and laskun_lisatiedot.laskutus_nimitark = '$lisatiedot_row[laskutus_nimitark]'
-                  and laskun_lisatiedot.laskutus_osoite   = '$lisatiedot_row[laskutus_osoite]'
-                  and laskun_lisatiedot.laskutus_postino  = '$lisatiedot_row[laskutus_postino]'
-                  and laskun_lisatiedot.laskutus_postitp  = '$lisatiedot_row[laskutus_postitp]'
-                  and laskun_lisatiedot.laskutus_maa      = '$lisatiedot_row[laskutus_maa]'
+                  $lisatjoin
+                  WHERE lasku.yhtio          = '$kukarow[yhtio]'
+                  AND lasku.laatija          = '$kukarow[kuka]'
+                  AND lasku.alatila          = '$alatila'
+                  AND lasku.tila             = '$tila'
+                  AND lasku.myyja            = '$otsikkorivi[myyja]'
+                  AND lasku.ytunnus          = '$otsikkorivi[ytunnus]'
+                  AND lasku.nimi             = '$otsikkorivi[nimi]'
+                  AND lasku.nimitark         = '$otsikkorivi[nimitark]'
+                  AND lasku.osoite           = '$otsikkorivi[osoite]'
+                  AND lasku.postino          = '$otsikkorivi[postino]'
+                  AND lasku.postitp          = '$otsikkorivi[postitp]'
+                  AND lasku.toim_nimi        = '$otsikkorivi[toim_nimi]'
+                  AND lasku.toim_nimitark    = '$otsikkorivi[toim_nimitark]'
+                  AND lasku.toim_osoite      = '$otsikkorivi[toim_osoite]'
+                  AND lasku.toim_postino     = '$otsikkorivi[toim_postino]'
+                  AND lasku.toim_postitp     = '$otsikkorivi[toim_postitp]'
+                  AND lasku.toimitustapa     = '$otsikkorivi[toimitustapa]'
+                  AND lasku.maksuehto        = '$otsikkorivi[maksuehto]'
+                  AND lasku.vienti           = '$otsikkorivi[vienti]'
+                  AND lasku.alv              = '$otsikkorivi[alv]'
+                  AND lasku.ketjutus         = '$otsikkorivi[ketjutus]'
+                  AND lasku.jaksotettu       = '$otsikkorivi[jaksotettu]'
+                  AND lasku.toimitusehto     = '$otsikkorivi[toimitusehto]'
+                  AND lasku.valkoodi         = '$otsikkorivi[valkoodi]'
+                  AND lasku.vienti_kurssi    = '$otsikkorivi[vienti_kurssi]'
+                  AND lasku.erikoisale       = '$otsikkorivi[erikoisale]'
+                  AND lasku.eilahetetta      = '$isarivirow[suoraan_laskutukseen]'
+                  AND lasku.tunnusnippu      = '$otsikkorivi[tunnusnippu]'
+                  AND lasku.piiri            = '$otsikkorivi[piiri]'
+                  AND lasku.kolmikantakauppa = '{$otsikkorivi['kolmikantakauppa']}'
+                  $lisatehdot
                   {$kohdistettulisa}
                   $erpcmlisa1
                   {$atlisa}

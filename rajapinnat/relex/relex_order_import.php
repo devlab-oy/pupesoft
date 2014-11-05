@@ -23,6 +23,9 @@ if ($php_cli) {
   require "inc/functions.inc";
   require "inc/luo_ostotilausotsikko.inc";
 
+  // Logitetaan ajo
+  cron_log();
+
   $lock_params = array(
     "locktime" => 900,
   );
@@ -40,7 +43,6 @@ if ($php_cli) {
   if ($yhtiorow["yhtio"] == "") {
     die ("Yhtiö $kukarow[yhtio] ei löydy!");
   }
-
 }
 else {
   require "../../inc/parametrit.inc";
@@ -64,20 +66,20 @@ if (isset($tee) and trim($tee) == 'aja') {
   foreach ($filet as $filu) {
 
     /* Tiedostomuoto:
-      COLUMN	      TYPE	COMMENT
-      order_number	INT	  Row level unique order number
-      product_code	TXT	  Identifier of the product/item
-      quantity	    FLOAT	Number of products to be ordered
-      order_type	  TXT	  NORMAL, EXTRA ORDER, ALLOCATION, ORDER IN ADVANCE, INITIAL REPLENISHMENT
-      location_code	TXT	  Identifier for location/warehouse
-      supplier_code	TXT	  Supplier code for proposed item
-      delivery_date	DATE	Expected delivery date for order
-      comment_1	    TXT	  Comment or identifier set in RELEX user interface
-      comment_2	    TXT	  Comment or identifier set in RELEX user interface
-      comment_3	    TXT	  Comment or identifier set in RELEX user interface
-      comment_4	    TXT	  Comment or identifier set in RELEX user interface
-      comment_5	    TXT	  Comment or identifier set in RELEX user interface
-      order_date	  DATE	When should the item be ordered
+      COLUMN        TYPE  COMMENT
+      order_number  INT    Row level unique order number
+      product_code  TXT    Identifier of the product/item
+      quantity      FLOAT  Number of products to be ordered
+      order_type    TXT    NORMAL, EXTRA ORDER, ALLOCATION, ORDER IN ADVANCE, INITIAL REPLENISHMENT
+      location_code  TXT    Identifier for location/warehouse
+      supplier_code  TXT    Supplier code for proposed item
+      delivery_date  DATE  Expected delivery date for order
+      comment_1      TXT    Comment or identifier set in RELEX user interface
+      comment_2      TXT    Comment or identifier set in RELEX user interface
+      comment_3      TXT    Comment or identifier set in RELEX user interface
+      comment_4      TXT    Comment or identifier set in RELEX user interface
+      comment_5      TXT    Comment or identifier set in RELEX user interface
+      order_date    DATE  When should the item be ordered
     */
 
     $rivit = file($filu);
@@ -218,6 +220,7 @@ if (isset($tee) and trim($tee) == 'aja') {
           'varasto'                 => $varasto['tunnus'],
           'myytil_toimaika'         => $ehdotus_pvm,
           'tilaustyyppi'            => $tilaustyyppi,
+          'myytil_viesti'           => t("Relex-ostotilaus"),
           'ostotilauksen_kasittely' => "GEN", // tällä erotellaan generoidut ja käsin tehdyt ostotilaukset
         );
 

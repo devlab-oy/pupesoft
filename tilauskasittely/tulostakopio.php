@@ -695,8 +695,13 @@ if ($tee == "ETSILASKU") {
 
   if ($toim == "KERAYSLISTA") {
 
-    //myyntitilaus. Tulostetaan lähete.
-    $where1 .= " lasku.tila in ('L','N','V') ";
+    if ($yhtiorow['kerayserat'] == 'K' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
+      $where1 .= " lasku.tila in ('L','N','V','G') ";
+    }
+    else {
+      //myyntitilaus. Tulostetaan lähete.
+      $where1 .= " lasku.tila in ('L','N','V') ";
+    }
 
     if (strlen($ytunnus) > 0 and substr($ytunnus, 0, 1) == '£') {
       $where2 .= $wherenimi;
@@ -1367,6 +1372,12 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
   while ($laskurow = mysql_fetch_assoc($rrrresult)) {
 
+    if ($toim == "TARJOUS") {
+      if ($kukarow['toimipaikka'] != $laskurow['yhtio_toimipaikka'] and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+        $kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];
+        $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
+      }
+    }
     if ($toim == "VAKADR") {
       tulosta_vakadr_erittely($laskurow["tunnus"], $komento["VAK_ADR"], $tee);
       $tee = '';
@@ -1469,7 +1480,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
             $kutsu .= ", ".trim($laskurow["nimi"]);
           }
 
-          require "../inc/sahkoposti.inc";
+          require "inc/sahkoposti.inc";
         }
         elseif ($tee == 'NAYTATILAUS') {
           //Työnnetään tuo pdf vaan putkeen!
@@ -1478,9 +1489,6 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
         elseif ($komento["SAD-lomake"] != '' and $komento["SAD-lomake"] != 'edi') {
           $line = exec($komento["SAD-lomake"]." ".$pdffilenimi);
         }
-
-        //poistetaan tmp file samantien kuleksimasta...
-        system("rm -f $pdffilenimi");
 
         if ($tee != 'NAYTATILAUS') {
           echo t("SAD-lomake tulostuu")."...<br>";
@@ -1516,7 +1524,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
           $kutsu .= ", ".trim($laskurow["nimi"]);
         }
 
-        require "../inc/sahkoposti.inc";
+        require "inc/sahkoposti.inc";
       }
       elseif ($tee == 'NAYTATILAUS') {
         //Työnnetään tuo pdf vaan putkeen!
@@ -1525,8 +1533,6 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
       elseif ($komento["Vientierittely"] != '' and $komento["Vientierittely"] != 'edi') {
         $line = exec($komento["Vientierittely"]." ".$pdffilenimi);
       }
-      //poistetaan tmp file samantien kuleksimasta...
-      system("rm -f $pdffilenimi");
 
       if ($tee != 'NAYTATILAUS') {
         echo t("Vientierittely tulostuu")."...<br>";

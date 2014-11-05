@@ -30,6 +30,9 @@ if ($php_cli) {
   require "inc/connect.inc";
   require "inc/functions.inc";
 
+  // Logitetaan ajo
+  cron_log($argv[2]);
+
   $userfile = trim($argv[2]);
   $filenimi = $userfile;
   $ok = 1;

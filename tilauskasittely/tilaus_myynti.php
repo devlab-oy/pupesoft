@@ -4026,8 +4026,10 @@ if ($tee == '') {
           $kpl = $tilausrivi['jt']+$tilausrivi['varattu'];
         }
       }
-      elseif ($tilausrivi["var"] == "P") {
-        $kpl  = $tilausrivi['tilkpl'];
+      elseif ($tilausrivi["var"] == "P" or
+              ($yhtiorow["extranet_nayta_saldo"] and $laskurow["tilaustyyppi"] == "H")
+      ) {
+        $kpl = $tilausrivi['tilkpl'];
       }
       else {
         $kpl  = $tilausrivi['varattu'];

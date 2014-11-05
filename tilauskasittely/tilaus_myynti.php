@@ -499,6 +499,7 @@ if ($kukarow["extranet"] != '') {
     exit;
   }
 }
+
 if ((int) $valitsetoimitus_vaihdarivi > 0 and $tilausnumero == $kukarow["kesken"] and $kukarow["kesken"] > 0 and ($toim != "TARJOUS" and $toim != "EXTTARJOUS")) {
 
   $query = "  (  SELECT tunnus

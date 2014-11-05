@@ -6279,8 +6279,19 @@ if ($tee == '') {
           $row["hinta"] = hintapyoristys(laskuval($row["hinta"], $laskurow["vienti_kurssi"]));
         }
 
+        if ($yhtiorow["extranet_tilaus_varaa_saldoa"] == "E" and $laskurow["tilaustyyppi"] == "H") {
+          $kplmaara = $row["tilkpl"];
+        }
+        else {
+          $kplmaara = $row["varattu"] + $row["jt"];
+        }
+
         // Tän rivin rivihinta
-        $summa     = $row["hinta"] * ($row["varattu"]+$row["jt"]) * generoi_alekentta_php($row, 'M', 'kerto', 'ei_erikoisale');
+        $summa =
+          $row["hinta"] *
+          $kplmaara *
+          generoi_alekentta_php($row, 'M', 'kerto', 'ei_erikoisale');
+
         $kotisumma  = $row["kotihinta"] * ($row["varattu"] + $row["jt"]) * generoi_alekentta_php($row, 'M', 'kerto', 'ei_erikoisale');
 
         // Tän rivin alviton rivihinta

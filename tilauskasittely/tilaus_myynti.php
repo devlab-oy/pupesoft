@@ -3048,7 +3048,10 @@ if ($tee == '') {
           continue;
         }
 
-        if (in_array($toimitustapa['extranet'], array('', 'M')) or $toimitustapa['selite'] != $laskurow['toimitustapa']) {
+        if (($kukarow['extranet'] == "" and in_array($toimitustapa['extranet'], array('', 'M')))
+         or ($kukarow['extranet'] != "" and in_array($toimitustapa['extranet'], array('K', 'M')))
+         or $toimitustapa['selite'] == $laskurow['toimitustapa']) {
+           
           $sel = "";
           if ($toimitustapa["selite"] == $laskurow["toimitustapa"]) {
             $sel = 'selected';

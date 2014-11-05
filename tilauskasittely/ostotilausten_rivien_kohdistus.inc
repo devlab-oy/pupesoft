@@ -2181,7 +2181,13 @@ if ($tila == '') {
              var kateContainer = $('#kate_{$rivirow['rivitunnus']}');
              var myyntihinta = myyntihintaInput.val();
              var hinta = hintaInput.val();
-             var kate = (myyntihinta - hinta).toFixed(2);
+
+             if (myyntihinta > 0 && hinta > 0) {
+               var kate = ((myyntihinta - hinta) / myyntihinta * 100).toFixed() + ' %';
+             }
+             else {
+               kate = '0 %'
+             }
 
              kateContainer.text(kate);
            };

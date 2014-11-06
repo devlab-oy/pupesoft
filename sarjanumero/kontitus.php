@@ -343,7 +343,7 @@ echo "</div>";
 
 echo "</div>";
 
-echo "<div style='text-align:center;padding:10px; margin:0 auto;'>";
+echo "<div style='text-align:center;padding:0; margin:0 auto;'>";
 
 echo "<div class='error center'>";
 
@@ -647,7 +647,7 @@ if ($view == 'kontituslista') {
 
     $group_class = $rulla['group_class'];
 
-    if ($group_class == $aktiivi_group or count($otsikoidut) < 1 or $oletus_aktiivi == $group_class) {
+    if ($group_class == $aktiivi_group or (count($otsikoidut) < 1 and !$aktiivi_group) or ($oletus_aktiivi == $group_class and !$aktiivi_group)) {
       $display = 'block';
       $otsikko_tila ='avoin_otsikko';
       $nuoli = '';
@@ -755,7 +755,7 @@ if ($isiPad) {
   $trigger = 'touchstart';
 }
 else {
-  $trigger = 'mousedown';
+  $trigger = 'click';
 }
 
 echo "

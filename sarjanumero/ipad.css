@@ -318,4 +318,6 @@ th {
   -webkit-border-radius: 50%;
   border-radius: 50%;
   background-color:#FFEBC1;
+  box-shadow: 0 0 1em hsla(0, 0%, 0%, 1.0);
+  margin:15px;
 }

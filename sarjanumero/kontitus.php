@@ -751,7 +751,7 @@ foreach ($otsikoidut as $luokka) {
 
 echo "
 
-  $('.{$luokka}-otsikko')..bind('touchstart',function(){
+  $('.{$luokka}-otsikko').bind('touchstart',function(){
 
     if ( !$(this).hasClass('avoin_otsikko')) {
 

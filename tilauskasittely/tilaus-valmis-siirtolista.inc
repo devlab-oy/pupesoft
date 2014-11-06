@@ -196,10 +196,14 @@ else {
       else {
         $toimitustavan_lahto_arvo = 0;
       }
-
-      $varasto_row = hae_varasto($varasto);
-      $varasto_toimipaikka = $varasto_row['toimipaikka'];
-
+      if ($yhtiorow['toimipaikkakasittely'] == 'L') {
+        $varasto_row = hae_varasto($varasto);
+        $varasto_toimipaikka = $varasto_row['toimipaikka'];
+      }
+      else {
+        $varasto_toimipaikka = $kukarow['toimipaikka'];
+      }
+      
       // Mikä tulostusalue
       $tulostusalue = onkotulostusalueita($row["hyllyalue"], $row["hyllynro"], $varasto);
 

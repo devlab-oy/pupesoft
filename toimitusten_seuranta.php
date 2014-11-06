@@ -52,6 +52,16 @@ if (isset($task) and $task == 'laheta_satamavahvistus') {
 
   $parametrit = satamavahvistus_parametrit($konttiviite);
 
+  $lahtoajat = explode(".", $lahtopvm);
+
+  $lahtopaiva = $lahtoajat[0];
+  $lahtokuu = $lahtoajat[1];
+  $lahtovuosi = $lahtoajat[2];
+
+  $koko_lahtoaika = $lahtovuosi.$lahtokuu.$lahtopaiva.$lahtotunti.$lahtominuutti;
+
+  $parametrit['matka_info']['lahtoaika'] = $koko_lahtoaika;
+
   if ($parametrit) {
     $sanoma = laadi_edifact_sanoma($parametrit);
   }

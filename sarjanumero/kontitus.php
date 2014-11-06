@@ -492,7 +492,7 @@ if ($view == 'kontituslista') {
   echo "<div class='subheader'>";
 
   echo "<div class='subheader_left'>";
-  echo "<div class='tapfocus' style='width:100px; height:100px; border:1px solid red;'></div>";
+  echo "<div class='tapfocus'></div>";
   echo "</div>";
 
   echo "<div class='subheader_center'>";
@@ -514,7 +514,7 @@ if ($view == 'kontituslista') {
   echo "</div>";
 
   echo "<div class='subheader_right'>";
-  echo "<div class='tapfocus' style='width:100px; height:100px; border:1px solid red; float:right;'></div>";
+  echo "<div class='tapfocus' style='float:right;'></div>";
   echo "</div>";
 
   echo "</div>";

@@ -777,6 +777,7 @@ echo "
 
 $('.tapfocus').on('ontouchstart click', function(){
   $('input').focus().select();
+  $('input').setSelectionRange(0, 9999);
 });
 
 </script>";

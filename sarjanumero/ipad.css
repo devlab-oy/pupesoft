@@ -197,7 +197,7 @@ th {
   -webkit-border-radius: 5px;
   border-radius: 5px;
   margin:2px auto;
-  width:400px;
+  width:500px;
 }
 
 .viety{
@@ -206,4 +206,69 @@ th {
 
 .vietava{
   background-color:#FFD633;
+}
+
+.otsikkodiv{
+  background-color: #DEDECE;
+}
+
+.avoin_otsikko{
+  background-color: #FF4D4D;
+}
+
+.peruslista_left {
+
+  display:inline-block;
+  width:110px;
+  text-align: center;
+  border-right:1px solid #A4A4A4;
+
+}
+
+.peruslista_center {
+
+  text-align: center;
+  display:inline-block;
+  width:260px;
+
+}
+
+.peruslista_right {
+
+  display:inline-block;
+  width:110px;
+  text-align: center;
+  border-left:1px solid #A4A4A4;
+
+}
+
+.otsikko_left {
+
+  display:inline-block;
+  width:60px;
+  text-align: left;
+
+}
+
+.otsikko_center {
+
+  text-align: center;
+  display:inline-block;
+  width:360px;
+
+}
+
+.otsikko_right {
+
+  display:inline-block;
+  width:60px;
+  text-align: right;
+
+}
+
+.nuoli {
+
+  opacity: 0.5;
+  filter: alpha(opacity=50); /* For IE8 and earlier */
+
 }

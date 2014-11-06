@@ -1979,6 +1979,34 @@ while ($tietue = fgets($fd)) {
               array_push($varasto, $varrow['tunnus']);
             }
           }
+          elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+
+            $args = array(
+              'asiakas_tunnus' => $laskurow['liitostunnus'],
+              'toimipaikka_tunnus' => $laskurow['yhtio_toimipaikka'],
+              'toim' => "EXTRANET",
+              'tilaustyyppi' => $editilaus_tilaustyyppi,
+              'varasto' => $laskurow['varasto'],
+              'toimitus_maa' => $laskurow['maa'],
+            );
+
+            list($varasto, $varastot) = palauta_varasto($args);
+            $_onko_varasto_setattu = (isset($varasto) and $varasto != '0' and is_numeric($varasto));
+
+            if ($_onko_varasto_setattu) {
+
+              $v_toimipaikka = hae_varaston_toimipaikka($varasto);
+              if ($v_toimipaikka['tunnus'] == 0) {
+                $_toimipaikka = $kukarow['toimipaikka'];
+                $kukarow['toimipaikka'] = 0;
+              }
+              if ($v_toimipaikka['tunnus'] != $laskurow['yhtio_toimipaikka']) {
+                $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $v_toimipaikka['tunnus']);
+                $kukarow['toimipaikka'] = (isset($_toimipaikka) ? $_toimipaikka : $kukarow['toimipaikka']);
+              }
+              unset($_toimipaikka);
+            }
+          }
 
           // jos terminaalitoimitus niin ohitetaan kaikki saldozekit, sekä laitetaan kommenttiriville asiakkaan tuotenumero ja nimitys
           if ($editilaus_tila == "Z") {
@@ -2200,9 +2228,32 @@ while ($tietue = fgets($fd)) {
       // tarvitaan $kukarow[yhtio], $kukarow[kesken], $laskurow ja $yhtiorow
       $kukarow["kesken"] = $laskurow["tunnus"];
       $editilaus_lasku_tunnus = $laskurow["tunnus"];
+      $_hyvaksyttavaksi = '';
+
+      // Jos yhtiön parametreissä halutaaan, että tulostetaan lähete ja keräyslista aina, laitetaan tilaus hyväksyttäväksi
+      if ($yhtiorow['lahetteen_tulostustapa'] == "I" and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+
+        if (is_array($varasto) and count($varasto) == 1) {
+          $varasto = $varasto[0];
+        }
+        elseif (is_array($varasto)) {
+          $varasto = 0;
+        }
+
+        $query = "UPDATE lasku
+                  SET tila  = 'N',
+                  alatila   = 'F',
+                  eilahetetta = 'o',
+                  osatoimitus = 'o',
+                  varasto   = '$varasto'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  = '{$laskurow['tunnus']}'";
+        pupe_query($query);
+        $_hyvaksyttavaksi = 'X';
+      }
 
       // jos terminaalitoimitus niin EI tehdä tilaus-valmista...
-      if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3 and $editilaus_tilaustyyppi != 'K') {
+      if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3 and $editilaus_tilaustyyppi != 'K' and $_hyvaksyttavaksi == '') {
 
         if (in_array($yhtiorow['jt_automatiikka'], array('Y', 'W', 'K'))) {
 
@@ -2300,7 +2351,7 @@ while ($tietue = fgets($fd)) {
         $edi_ulos .= "$tilaus_valmis_message\n";
         $edi_ulos .= "\n".t("Merkittiin tilaus valmiiksi").": $editilaus_lasku_tunnus.\n\n";
       }
-      elseif ($editilaus_tila == "Z") {
+      elseif ($editilaus_tila == "Z" and $_hyvaksyttavaksi == '') {
         $query = "UPDATE lasku SET
                   alatila     = 'A'
                   WHERE yhtio = '$kukarow[yhtio]'
@@ -2308,7 +2359,7 @@ while ($tietue = fgets($fd)) {
         $terminaali_tilaus_res = pupe_query($query);
         $edi_ulos .= "\n".t("Terminaalitoimitus vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
       }
-      elseif ($editilaus_tilaustyyppi == 3) {
+      elseif ($editilaus_tilaustyyppi == 3 and $_hyvaksyttavaksi == '') {
         $edi_ulos .= "\n".t("Reklamaatio vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
       }
     }

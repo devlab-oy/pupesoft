@@ -12,6 +12,10 @@ echo "<body>";
 
 require 'generoi_edifact.inc';
 
+if (!isset($aktiivi_group)) {
+  $aktiivi_group = false;
+}
+
 $errors = array();
 
 if (isset($submit)) {
@@ -290,25 +294,43 @@ if (isset($submit)) {
     $result = pupe_query($query);
     $rivitunnus = mysql_result($result, 0);
 
-    $query = "UPDATE tilausrivi SET
-              keratty = '{$kukarow['kuka']}',
-              kerattyaika = NOW()
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus = '{$rivitunnus}'";
-    pupe_query($query);
+    if ($rivitunnus) {
 
-    $temp_konttinumero = $aktiivinen_kontti . "/" . $konttimaara . "/" . $maxkg;
+      $query = "UPDATE tilausrivi SET
+                keratty = '{$kukarow['kuka']}',
+                kerattyaika = NOW()
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = '{$rivitunnus}'";
+      pupe_query($query);
 
-    $query = "UPDATE tilausrivin_lisatiedot SET
-              konttinumero = '{$temp_konttinumero}'
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tilausrivitunnus = '{$rivitunnus}'";
-    pupe_query($query);
+      $temp_konttinumero = $aktiivinen_kontti . "/" . $konttimaara . "/" . $maxkg;
+
+      $query = "UPDATE tilausrivin_lisatiedot SET
+                konttinumero = '{$temp_konttinumero}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tilausrivitunnus = '{$rivitunnus}'";
+      pupe_query($query);
+
+
+    }
+    else {
+
+      $errors[] = t("Tuntematon sarjanumero.");
+
+    }
 
     $rullat_ja_kontit = rullat_ja_kontit($konttiviite, $maxkg);
 
     $kontittamattomat = $rullat_ja_kontit['kontittamattomat'];
     $kontitetut = $rullat_ja_kontit['kontitetut'];
+
+    foreach ($kontitetut as $kontitettu) {
+      if ($kontitettu['sarjanumero'] == $sarjanumero) {
+        $aktiivi_group = $kontitettu['group_class'];
+      }
+    }
+
+
     $kontit = $rullat_ja_kontit['kontit'];
     $view = 'kontituslista';
     break;
@@ -622,7 +644,7 @@ if ($view == 'kontituslista') {
     echo "</div>";
 
     echo "<div class='peruslista_center'>";
-    echo "Tilaus";
+    echo "Tilaus #";
     echo "</div>";
 
     echo "<div class='peruslista_right'>";
@@ -637,9 +659,6 @@ if ($view == 'kontituslista') {
     echo "</div>";
 
   }
-
-
-
 
   echo "</div>";
 

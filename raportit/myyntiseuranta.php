@@ -409,7 +409,7 @@ echo "<td><select name='rajaus[60]'>
       <td class='back'>", t("(Toimii vain jos ajat raporttia tilauksista)"), "</td>
       </tr>
       <tr>
-      <th>", t("Listaa clearing"), "</th>
+      <th>", t("Listaa tilauksen muodostustavoittain"), "</th>
       <td><input type='text' name='jarjestys[70]' size='2' value='{$jarjestys[70]}'></td>
       <td><input type='checkbox' name='ruksit[70]' value='clearing' {$ruk70chk}></td>";
 

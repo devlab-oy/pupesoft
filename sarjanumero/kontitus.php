@@ -733,14 +733,18 @@ foreach ($otsikoidut as $luokka) {
 echo "
 
   $('.{$luokka}-otsikko').on('touchstart click', function(){
-    $('.otsikkodiv').removeClass('avoin_otsikko');
-    $(this).addClass('avoin_otsikko');
-    $('.perus').slideUp(200);
-    $('.{$luokka}').slideDown(200);
-    $('.aktiivi_group').val('{$luokka}');
 
-    $('.nuoli').html('&#x25BC;');
-    $('.{$luokka}-nuoli').html('');
+    if ( !$(this).hasClass('avoin_otsikko')) {
+
+      $('.otsikkodiv').removeClass('avoin_otsikko');
+      $(this).addClass('avoin_otsikko');
+      $('.perus').slideUp(200);
+      $('.{$luokka}').slideDown(200);
+      $('.aktiivi_group').val('{$luokka}');
+      $('.nuoli').html('&#x25BC;');
+      $('.{$luokka}-nuoli').html('');
+
+    }
 
   });
 
@@ -749,18 +753,10 @@ echo "
 
 }
 
-$isiPad = (bool) strpos($_SERVER['HTTP_USER_AGENT'],'iPad');
-
-if ($isiPad) {
-  $trigger = 'touchstart';
-}
-else {
-  $trigger = 'click';
-}
 
 echo "
 
-$('.tapfocus').on('{$trigger}', function(){
+$('.tapfocus').on('ontouchstart click', function(){
   $('input').focus().select();
 });
 

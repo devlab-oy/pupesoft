@@ -354,6 +354,38 @@ echo "</div>";
 
 if ($view == 'konttiviite') {
 
+  if (!$yliajo) {
+
+
+
+    echo "<div class='subheader'>";
+
+    echo "<div class='subheader_left'>";
+    echo "<div class='tapfocus'></div>";
+    echo "</div>";
+
+    echo "<div class='subheader_center'>";
+
+    echo "
+    <form method='post' action=''>
+        <label for='konttiviite'>", t("Konttiviite"), "</label><br>
+        <input type='text' id='konttiviite' name='konttiviite' style='margin:10px;' />
+        <br>
+        <button name='submit' value='konttiviite' onclick='submit();' class='button'>", t("OK"), "</button>
+    </form>";
+
+    echo "</div>";
+
+    echo "<div class='subheader_right'>";
+    echo "<div class='tapfocus' style='float:right;'></div>";
+    echo "</div>";
+
+    echo "</div>";
+
+
+
+  }
+
   if ($yliajo) {
 
     echo "
@@ -378,23 +410,25 @@ if ($view == 'konttiviite') {
   }
 
 
-
-  echo "
-  <form method='post' action=''>
-      <label for='konttiviite'>", t("Konttiviite"), "</label><br>
-      <input type='text' id='konttiviite' name='konttiviite' style='margin:10px;' />
-      <br>
-      <button name='submit' value='konttiviite' onclick='submit();' class='button'>", t("OK"), "</button>
-  </form>
-
-  <script type='text/javascript'>
-    $(document).on('touchstart', function(){
-      $('#konttiviite').focus();
-    });
-  </script>";
 }
 
+
+
+
+
 if ($view == 'konttiviite_maxkg') {
+
+
+
+
+  echo "<div class='subheader'>";
+
+  echo "<div class='subheader_left'>";
+  echo "<div class='tapfocus'></div>";
+  echo "</div>";
+
+  echo "<div class='subheader_center'>";
+
 
   echo "<div style='text-align:center;padding:10px; margin:0 auto; width:500px;'>";
   echo "<table border='0'>";
@@ -472,13 +506,19 @@ if ($view == 'konttiviite_maxkg') {
       <br>
       <button name='submit' value='konttiviite_maxkg' onclick='submit();' class='button'>", t("Jatka"), "</button>
     </div>
-  </form>
+  </form>";
 
-  <script type='text/javascript'>
-    $(document).on('touchstart', function(){
-      $('#maxkg').focus();
-    });
-  </script>";
+
+  echo "</div>";
+
+  echo "<div class='subheader_right'>";
+  echo "<div class='tapfocus' style='float:right;'></div>";
+  echo "</div>";
+
+  echo "</div>";
+
+
+
 }
 
 if ($view == 'kontituslista') {
@@ -607,10 +647,11 @@ if ($view == 'kontituslista') {
 
     $group_class = $rulla['group_class'];
 
-    if ($group_class == $aktiivi_group) {
+    if ($group_class == $aktiivi_group or count($otsikoidut) < 1 or $oletus_aktiivi == $group_class) {
       $display = 'block';
       $otsikko_tila ='avoin_otsikko';
       $nuoli = '';
+      $oletus_aktiivi = $group_class;
     }
     else{
      $display = 'none';
@@ -708,11 +749,19 @@ echo "
 
 }
 
+$isiPad = (bool) strpos($_SERVER['HTTP_USER_AGENT'],'iPad');
+
+if ($isiPad) {
+  $trigger = 'touchstart';
+}
+else {
+  $trigger = 'mousedown';
+}
+
 echo "
 
-
-$('.tapfocus').on('touchstart', function(){
-  $('#sarjanumero').focus();
+$('.tapfocus').on('{$trigger}', function(){
+  $('input').focus().select();
 });
 
 </script>";

@@ -673,7 +673,7 @@ foreach ($otsikoidut as $luokka) {
 
 echo "
 
-  $('.{$luokka}-otsikko').on('click', function(){
+  $('.{$luokka}-otsikko').on('touchstart', function(){
     $('.otsikkodiv').removeClass('avoin_otsikko');
     $(this).addClass('avoin_otsikko');
     $('.perus').slideUp(200);

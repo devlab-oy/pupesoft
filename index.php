@@ -17,12 +17,6 @@ if ($go == '') {
   $goso = '';
 }
 
-$colwidth = '175';
-
-if (isset($kukarow['resoluutio']) and $kukarow['resoluutio'] == 'P') {
-  $colwidth = '45';
-}
-
 if (!headers_sent()) {
   header("Content-Type: text/html; charset=iso-8859-1");
   header("Pragma: public");
@@ -43,26 +37,27 @@ echo "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Frameset//EN\"\n\"http://www
     <meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">\n";
 
 if (file_exists("pics/pupeicon.gif")) {
-  echo "  <link rel='shortcut icon' href='pics/pupeicon.gif'>\n";
+  echo "<link rel='shortcut icon' href='pics/pupeicon.gif'>\n";
 }
 else {
-  echo "  <link rel='shortcut icon' href='".$palvelin2."devlab-shortcut.png'>\n";
+  echo "<link rel='shortcut icon' href='".$palvelin2."devlab-shortcut.png'>\n";
 }
 
 
 echo "</head>
-  <frameset cols='$colwidth,*' border='0'>
-    <frameset rows='*,0' border='0'>
-      <frame noresize src='indexvas.php?goso=$goso' name='menu' frameborder='0' marginwidth='0' marginheight='0'>
-      <frame noresize src='' name='alamenu' id='alamenuFrame' frameborder='0' marginwidth='0' marginheight='0'>
-    </frameset>
-    <frame noresize src='$go' name='main' frameborder='0' marginwidth='0' marginheight='0'>
-    <noframes>
+    <frameset rows='115,*' border='0'>
+      <frame noresize src='ylaframe.php' name='ylaframe' frameborder='0' marginwidth='0' marginheight='0' scrolling='no'>
+    
+      <frameset cols='345,*' border='0'>    
+        <frame noresize src='indexvas.php?goso=$goso' name='menu' frameborder='0' marginwidth='0' marginheight='0'>
+        <frame noresize src='$go' name='main' frameborder='0' marginwidth='0' marginheight='0'>
+      </frameset>
+      <noframes>
       <body>
               <p>
                   This page uses frames, but your browser does not support them.
               </p>
           </body>
-    </noframes>
-  </frameset>
+      </noframes>
+    </frameset>
 </html>";

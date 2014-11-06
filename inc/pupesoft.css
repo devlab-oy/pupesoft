@@ -1,0 +1,281 @@
+
+* {
+	font-size: 10pt;
+	font-weight: normal;
+	font-family: "Helvetica",Arial,Verdana,Lucida;
+}
+
+body {
+	color: #242424; /*BODY_COLOR*/
+	background-color: #b3afaa; /*BODY_BACKGROUND*/
+	margin: 2px 2px 0px 8px;
+	padding: 0px 0px 0px 15px;
+}
+
+form {
+	margin: 0px 0px 0px 0px;
+	display: inline;
+}
+
+a {
+	color: #ffda08; /*LINK_COLOR*/
+}
+
+a:hover {
+	border-bottom: 1px;
+	color: #1f4457; /*TRAKTIIVI_COLOR*/
+	background-color: #a8d9f2; /*TRAKTIIVI_BACKGROUND*/
+}
+
+a.td {
+	color: #242424; /*TDLINKKI_COLOR*/
+	text-decoration: none;
+	display: block;
+	width: 100%;
+}
+
+a.td:hover {
+	color: #1f4457; /*TRAKTIIVI_COLOR*/
+	background-color: #a8d9f2; /*TRAKTIIVI_BACKGROUND*/
+}
+
+table {
+	border-spacing: 1px 1px;
+	display: table;
+	empty-cells: show;
+}
+
+tr {
+	color: #242424; /*TR_COLOR*/
+	background-color: #fafdfe; /*TR_BACKGROUND*/
+}
+
+tr.aktiivi:hover {
+	color: #1f4457; /*TRAKTIIVI_COLOR*/
+	background-color: #a8d9f2; /*TRAKTIIVI_BACKGROUND*/
+}
+
+th {
+	font-size: 11pt;
+  text-transform: capitalize;
+  font-weight: bold;
+	vertical-align: middle;
+	text-align: left;
+	padding: 10px 15px 10px 15px;
+  /* border-bottom: solid 2px #b3afaa; */
+	background-color: #ffffff; /*TH_BACKGROUND*/
+	color: #828282; /*TH_COLOR*/
+}
+
+th a {
+	font-size: 11pt;
+  text-transform: capitalize;
+  font-weight: bold;
+	vertical-align: top;
+	text-align: left;
+  color: #828282; /*TH_COLOR*/
+}
+
+td {
+  color: #828282;
+	padding: 5px;
+	vertical-align: top;
+}
+
+td a {
+  color: #828282; /*TH_COLOR*/
+}
+
+hr {
+	border: 0px;
+	height: 1px;
+	background-color: #b3afaa; /*HR_BACKGROUND*/
+	width: 100%;
+}
+
+pre {
+	font-family: courier;
+}
+
+.tumma {
+	color: #ffffff; /*TUMMA_COLOR*/
+	background-color: #828282; /*TUMMA_BACKGROUND*/
+}
+
+.spec {
+	color: #1f4457; /*SPEC_COLOR*/
+	background: #828282; /*SPEC_BACKGROUND*/
+}
+
+.back {
+	background-color: #b3afaa; /*BODY_BACKGROUND*/
+}
+
+.info {
+	font-size: 9pt;
+	color: #1f4458; /*INFO_COLOR*/
+	font-weight: normal;
+}
+
+.head {
+	font-size: 22pt;
+	color: #ffffff; /*HEAD_COLOR*/
+	font-weight: bold;
+	letter-spacing: 3px;
+}
+
+.message {
+	color: #333333; /*MESSAGE_COLOR*/
+	font-weight:bold;
+}
+
+.ok, .green {
+	color : #229822; /*OK_COLOR*/
+	font-weight: bold;
+}
+
+.error, .red {
+	color: #FF3333; /*ERROR_COLOR*/
+	font-weight: bold;
+}
+
+.kaleinfo {
+	color : #1f4458; /*INFO_COLOR*/
+}
+
+div.popup {
+	position: absolute;
+	z-index: 100;
+	display: none;
+	background-color: #828282; /*POPUP_BACKGROUND*/
+	color: #ffffff; /*POPUP_COLOR*/
+	border: 1px solid;
+	border-color: #b3afaa; /*POPUP_COLOR*/
+	padding: 5px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-border-radius: 5px;
+}
+
+input, textarea {
+	color: #444444; /*INPUT_COLOR*/
+	padding: 2px 0px 0px 2px;
+}
+
+button {
+	padding: 2px 4px 2px 4px;
+}
+
+select {
+	padding-top: 4px;
+	padding-right: 4px;
+	padding-left: 0px;
+	padding-bottom: 0px;
+	margin: 0px;
+  color: #828282;
+}
+
+option, optgroup {
+	padding-top: 2px;
+	padding-right: 4px;
+	padding-left: 2px;
+	padding-bottom: 0px;
+	margin: 0px;
+}
+
+img {
+	border: 0px;
+}
+
+div.liveSearch {
+	position:absolute;
+	z-index:100;
+	visibility: hidden;
+	border: 1px solid;
+	background-color: #FFFFFF;
+	color: #444444; /*INPUT_COLOR*/
+}
+
+div.liveSearchSelectedItem {
+	background-color: #88b9d2; /*LIVESEARCH_BACKGROUND*/
+}
+
+select.indexvas {
+  width: 305px;
+	margin: 10px 0px 0px 0px;
+  -webkit-appearance: none;
+  -webkit-border-radius: 0px;
+	padding: 12px 20px 12px 20px;
+  border : solid 0px;
+	font-size: 18pt;
+	font-weight: bold;
+  color: #828282;
+  letter-spacing: 2px;
+}
+
+select.indexvas option {
+  color: #820000;
+}
+
+table.indexvas {
+  width: 305px;
+	margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+	border-spacing: 0;
+}
+
+table.indexvas tr {
+  background-color: #828282;
+}
+
+table.indexvas td {
+  padding: 8px 20px 8px 20px;
+}
+
+table.indexvas a {
+  font-size: 13pt;
+  color: #edeae4;
+	text-decoration: none;
+	display: block;
+	width: 100%;
+	padding: 2px 6px 2px 6px;
+}
+
+table.indexvas a:hover {
+  
+}
+
+button, input[type=submit], input[type=button] {
+ 	border : solid 0px #ffffff;
+ 	font-size: 12pt;
+ 	color : #ffffff;
+ 	padding: 10px 5px 10px 5px;
+  background-color: #828282;
+  min-width: 100px;
+}
+
+table.ylaframe {
+  width: 100%;
+	margin: 0px 15px 0px 0px;
+  padding: 0px 15px 0px 0px;
+	border-spacing: 0;
+}
+
+table.ylaframe td {
+  vertical-align: middle;
+}
+
+div.showhide_yla {
+  position:fixed;
+  bottom:5px;
+  left:5px;
+}
+
+div.showhide_vasen {
+  position:fixed;
+  top:5px;
+  left:5px;
+}
+
+
+

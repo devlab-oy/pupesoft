@@ -548,7 +548,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     }
 
     // T‰nne p‰‰see aina!
-    if ($phpnimi != 'indexvas.php' and $phpnimi != 'index.php' and $phpnimi != 'tervetuloa.php' and $phpnimi != 'logout.php') {
+    if ($phpnimi != 'indexvas.php' and $phpnimi != 'index.php' and $phpnimi != 'tervetuloa.php' and $phpnimi != 'logout.php' and $phpnimi != 'ylaframe.php') {
 
       if (!isset($toim)) $toim = "";
 
@@ -682,9 +682,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       }
 
       if (!isset($_GET["no_css"]) or $_GET["no_css"] != "yes") {
-        echo "<style type='text/css'>\n";
-        echo $css;
-        echo "</style>\n";
+        echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft.css' />\n";
 
         if (isset($pupe_DataTables)) {
           echo "<style type=\"text/css\" title=\"currentStyle\">\n";

@@ -3848,7 +3848,7 @@ if ($tee == '') {
                and tilausrivi.otunnus = '$kukarow[kesken]'
                and tilausrivi.tunnus  = '$rivitunnus'";
     $result = pupe_query($query);
-echo "3851 $paikka <br><br>";
+
     if (mysql_num_rows($result) == 1) {
 
       $tilausrivi = mysql_fetch_assoc($result);
@@ -4307,7 +4307,7 @@ echo "3851 $paikka <br><br>";
     for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
       ${'kayttajan_ale'.$alepostfix} = ${'ale'.$alepostfix};
     }
-echo "4297TM paikka $paikka <br><br>";
+
     $kayttajan_hinta  = $hinta;
     $kayttajan_netto   = strtoupper(trim($netto));
     $kayttajan_var    = $var;
@@ -4459,7 +4459,7 @@ echo "4297TM paikka $paikka <br><br>";
       else {
         $alv = $kayttajan_alv;
       }
-echo "4449TM "; var_dump($paikka_array); echo "<br> $kayttajan_paikka <br><br>";
+
       if (is_array($paikka_array)) {
         $paikka = $paikka_array[$tuoteno];
       }
@@ -4571,7 +4571,7 @@ echo "4449TM "; var_dump($paikka_array); echo "<br> $kayttajan_paikka <br><br>";
         //Tuotetta ei löydy, aravataan muutamia muuttujia
         $trow["alv"] = $laskurow["alv"];
       }
-echo "4561 tama? paikka $paikka <br><br>";
+
       if ($tuoteno != '' and $kpl != 0) {
         require 'lisaarivi.inc';
       }
@@ -5274,7 +5274,7 @@ echo "4561 tama? paikka $paikka <br><br>";
           }
 
           $varresult = pupe_query($query);
-echo "5264 $query <br><br>";
+
           $myytavissa_sum = 0;
 
           if (mysql_num_rows($varresult) > 0) {

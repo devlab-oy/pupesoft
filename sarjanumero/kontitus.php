@@ -26,10 +26,14 @@ if (isset($submit)) {
 
       $query = "SELECT lasku.sisviesti1 AS ohje,
                 laskun_lisatiedot.konttityyppi,
+                laskun_lisatiedot.konttimaara,
                 tilausrivi.toimitettu,
                 tilausrivi.tunnus,
                 tilausrivi.var,
-                trlt.konttinumero
+                trlt.konttinumero,
+                ss.hyllyalue,
+                ss.hyllynro,
+                lasku.asiakkaan_tilausnumero
                 FROM laskun_lisatiedot
                 JOIN lasku
                   ON lasku.yhtio = laskun_lisatiedot.yhtio
@@ -40,9 +44,11 @@ if (isset($submit)) {
                 JOIN tilausrivin_lisatiedot AS trlt
                   ON trlt.yhtio = tilausrivi.yhtio
                   AND trlt.tilausrivitunnus = tilausrivi.tunnus
+                JOIN sarjanumeroseuranta AS ss
+                  ON ss.yhtio = lasku.yhtio
+                  AND ss.myyntirivitunnus = tilausrivi.tunnus
                 WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
                 AND laskun_lisatiedot.konttiviite = '{$konttiviite}'";
-
 
       if ($muutos == 'muutos' ) {
 
@@ -84,6 +90,8 @@ if (isset($submit)) {
       }
       else{
 
+        $rullia = mysql_num_rows($result);
+
         $rivitunnukset = '';
 
         while ($rulla = mysql_fetch_assoc($result)) {
@@ -103,12 +111,17 @@ if (isset($submit)) {
             $ei_kontissa = true;
           }
 
+          $tilaukset[$rulla['asiakkaan_tilausnumero']][] = $rulla;
+
           $kontitusohje = $rulla['ohje'];
           $tyyppi = $rulla['konttityyppi'];
+          $konttimaara = $rulla['konttimaara'];
 
           $rivitunnukset .= $rulla['tunnus'] . ',';
         }
       }
+
+
 
       $rivitunnukset = rtrim($rivitunnukset, ',');
 
@@ -138,7 +151,8 @@ if (isset($submit)) {
 
         $info = array(
           'kontitusohje' => $kontitusohje,
-          'tyyppi' => $tyyppi
+          'tyyppi' => $tyyppi,
+          'konttimaara' => $konttimaara
           );
 
         // kovakoodatut max-kilot...
@@ -156,22 +170,36 @@ if (isset($submit)) {
           $info['maxkg'] = 22000;
         }
 
-        $query = "SELECT concat(hyllyalue, '-', hyllynro) AS hylly
-                  FROM sarjanumeroseuranta
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND myyntirivitunnus IN ({$rivitunnukset})";
-        $result = pupe_query($query);
-
         $rullat_varastossa = array();
 
-        while ($rulla = mysql_fetch_assoc($result)) {
-          if (!isset($rullat_varastossa[$rulla['hylly']])) {
-            $rullat_varastossa[$rulla['hylly']] = 1;
+        foreach ($tilaukset as $tilaus => $rullat) {
+
+          $_tilaus = array();
+
+          foreach ($rullat as $key => $rulla) {
+
+            $varasto = $rulla['hyllyalue'] . "-" . $rulla['hyllynro'];
+
+            if (!isset($_tilaus[$varasto])) {
+              $_tilaus[$varasto] = 1;
+            }
+            else {
+              $_tilaus[$varasto]++;
+            }
+
+
+
           }
-          else {
-            $rullat_varastossa[$rulla['hylly']]++;
-          }
+
+
+          $rullat_varastossa[$tilaus] = $_tilaus;
+
+
         }
+
+print_r($rullat_varastossa);
+
+
 
         $view = 'konttiviite_maxkg';
       }
@@ -191,6 +219,12 @@ if (isset($submit)) {
       $kontitetut = $rullat_ja_kontit['kontitetut'];
       $kontit = $rullat_ja_kontit['kontit'];
       $konttimaara = count($kontit);
+
+      if ($konttimaara > $bookattu_konttimaara) {
+        $erotus = $konttimaara - $bookattu_konttimaara;
+        $huomio  = t("Huom. N‰ytt‰‰ silt‰, ett‰ bookattu konttim‰‰r‰ ei riit‰ kaikille rullille:");
+        $huomio .= " " . $erotus . " " . t("konttia lis‰tty.");
+      }
 
       $aktiivinen_kontti = 1;
 
@@ -381,17 +415,22 @@ if ($view == 'konttiviite_maxkg') {
   echo "<table border='0'>";
 
   echo "<tr>";
-  echo "<td style='text-align:right; width:50%'>Konttiviite: </td>";
+  echo "<td style='text-align:right; width:50%'>" . t("Konttiviite") . ": </td>";
   echo "<td style='text-align:left; width:50%'>{$konttiviite}</td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<td style='text-align:right;'>Konttityyppi: </td>";
+  echo "<td style='text-align:right;'>" . t("Konttityyppi") . ": </td>";
   echo "<td style='text-align:left;'>{$info['tyyppi']}</td>";
   echo "</tr>";
 
   echo "<tr>";
-  echo "<td style='text-align:right;'>Max-kapasiteetti: </td>";
+  echo "<td style='text-align:right;'>" . t("Bookattu m‰‰r‰") . ": </td>";
+  echo "<td style='text-align:left;'>{$info['konttimaara']}</td>";
+  echo "</tr>";
+
+  echo "<tr>";
+  echo "<td style='text-align:right;'>" . t("Max-kapasiteetti") . ": </td>";
   echo "<td style='text-align:left;'>{$info['maxkg']}</td>";
   echo "</tr>";
 
@@ -414,17 +453,25 @@ if ($view == 'konttiviite_maxkg') {
   echo "<td colspan='2'  style='padding:8px 0'>Rullien sijainnit:</td>";
   echo "</tr>";
 
+  foreach ($rullat_varastossa as $tilaus => $varastot) {
 
-  foreach ($rullat_varastossa as $hylly => $maara) {
     echo "<tr>";
-    echo "<td style='text-align:right; width:50%'>{$hylly}: </td>";
-    echo "<td style='text-align:left; width:50%'> {$maara} kpl.</td>";
+    echo "<td style='text-align:center; width:100%; padding:10px  0 0 0' colspan='2'><b>{$tilaus}</b></td>";
     echo "</tr>";
+
+    foreach ($varastot as $hylly => $maara) {
+      echo "<tr>";
+      echo "<td style='text-align:right; width:50%'>{$hylly}: </td>";
+      echo "<td style='text-align:left; width:50%'> {$maara} kpl.</td>";
+      echo "</tr>";
+    }
   }
 
+
+
   echo "<tr>";
-  echo "<td align='right'>Yhteens‰: </td>";
-  echo "<td align='left'> " . array_sum($rullat_varastossa) . " kpl.</td>";
+  echo "<td align='right' style='padding-top:10px'>Yhteens‰: </td>";
+  echo "<td align='left'  style='padding-top:10px'> " . $rullia . " kpl.</td>";
   echo "</tr>";
 
   echo "</table>";
@@ -433,8 +480,9 @@ if ($view == 'konttiviite_maxkg') {
   echo "
   <form method='post' action=''>
     <div style='text-align:center;padding:10px;'>
-      <label for='konttiviite'>", t("Konttien maksimi kilom‰‰r‰"), "</label><br>
+      <label for='maxkg'>", t("Konttien maksimi kilom‰‰r‰"), "</label><br>
       <input type='hidden' name='konttiviite' value='{$konttiviite}' />
+      <input type='hidden' name='bookattu_konttimaara' value='{$info['konttimaara']}' />
       <input type='text' id='maxkg' name='maxkg' style='margin:10px;' value='{$info['maxkg']}' />
       <br>
       <button name='submit' value='konttiviite_maxkg' onclick='submit();' class='button'>", t("Jatka"), "</button>
@@ -450,6 +498,10 @@ if ($view == 'konttiviite_maxkg') {
 
 if ($view == 'kontituslista') {
 
+  if (isset($huomio)) {
+    echo $huomio;
+  }
+
   echo "
   <form method='post' action=''>
       <label for='sarjanumero'>", t("Sarjanumero"), "</label><br>
@@ -458,6 +510,7 @@ if ($view == 'kontituslista') {
       <input type='hidden' name='maxkg' value='{$maxkg}' />
       <input type='hidden' name='konttimaara' value='{$konttimaara}' />
       <input type='hidden' name='aktiivinen_kontti' value='{$aktiivinen_kontti}' />
+      <input type='hidden' name='aktiivi_group' class='aktiivi_group' value='{$aktiivi_group}' />
       <br>
       <button name='submit' value='sarjanumero' onclick='submit();' class='button'>", t("OK"), "</button>
   </form>
@@ -478,11 +531,17 @@ if ($view == 'kontituslista') {
 
   echo "<div style='text-align:center; padding:10px; width:700px; margin:0 auto; overflow:auto;'>";
 
+  $konttien_painot = array();
+  $konttien_kpl = array();
 
   foreach ($kontitetut as $rulla) {
+
     $kontitusinfo = explode("/", $rulla['konttinumero']);
     $konttinumero = $kontitusinfo[0];
-    $kontit[$konttinumero] = $kontit[$konttinumero] + $rulla['paino'];
+
+    $konttien_painot[$konttinumero] = $konttien_painot[$konttinumero] + $rulla['paino'];
+    $konttien_kpl[$konttinumero] = $konttien_kpl[$konttinumero] + 1;
+
   }
 
   foreach ($kontit as $key => $kontti) {
@@ -494,36 +553,148 @@ if ($view == 'kontituslista') {
       $luokka = "button";
     }
 
-    echo "
-      <div style='display:inline-block; margin:6px;'>
-      <form method='post' action=''>
-        <input type='hidden' name='aktiivinen_kontti' value='{$key}' />
-        <input type='hidden' name='konttiviite' value='{$konttiviite}' />
-        <input type='hidden' name='maxkg' value='{$maxkg}' />
-        <button name='submit' value='konttivalinta' onclick='submit();' class='{$luokka}'>" . t("Kontti") ."-". $key . " (" . $kontti . "kg)</button>
-      </form>
-      </div>";
+    echo "<div style='display:inline-block; margin:6px;'>";
+    echo "<form method='post' action=''>";
+    echo "<input type='hidden' name='aktiivinen_kontti' value='{$key}' />";
+    echo "<input type='hidden' name='konttiviite' value='{$konttiviite}' />";
+    echo "<input type='hidden' name='aktiivi_group' class='aktiivi_group' value='{$aktiivi_group}' />";
+    echo "<input type='hidden' name='maxkg' value='{$maxkg}' />";
+    echo "<button name='submit' value='konttivalinta' onclick='submit();' class='{$luokka}'>";
+    echo t("Kontti") ."-". $key ;
+
+    if ($konttien_painot[$key] > 0 and $konttien_kpl[$key] > 0) {
+      echo " (" . $konttien_painot[$key] . " kg, " . $konttien_kpl[$key] . " kpl)";
     }
 
-    foreach ($kontittamattomat as $rulla) {
-      echo "<div class='listadiv'>";
-      echo "Rulla " . $rulla['sarjanumero'] . " kontittamatta";
+    echo "</button></form></div>";
+
+  }
+
+  echo "<div class='listadiv otsikkodiv'>";
+
+  echo "<div class='peruslista_left'>";
+  echo "Sijainti";
+  echo "</div>";
+
+  echo "<div class='peruslista_center'>";
+  echo "Tilaus";
+  echo "</div>";
+
+  echo "<div class='peruslista_right'>";
+  echo "Paino (kg)";
+  echo "</div>";
+
+
+  echo "</div>";
+
+  foreach ($kontittamattomat as $rulla) {
+
+    $group_class = $rulla['group_class'];
+
+    if ($group_class == $aktiivi_group) {
+      $display = 'block';
+      $otsikko_tila ='avoin_otsikko';
+    }
+    else{
+     $display = 'none';
+     $otsikko_tila ='';
+    }
+
+    if (!in_array($group_class, $otsikoidut)) {
+
+      echo "<div class='listadiv otsikkodiv {$group_class}-otsikko {$otsikko_tila}'>";
+
+
+      echo "<div class='otsikko_left'>";
+      echo "<span class='nuoli {$group_class}-nuoli'>&#x25BC;</span>";
       echo "</div>";
-    }
 
-    foreach ($kontitetut as $rulla) {
-
-      $kontitusinfo = explode("/", $rulla['konttinumero']);
-      $konttinumero = $kontitusinfo[0];
-
-      echo "<div class='listadiv viety'>";
-      echo "Rulla " . $rulla['sarjanumero'] . " kontissa " . $konttinumero;
+      echo "<div class='otsikko_center'>";
+      echo $rulla['asiakkaan_tilausnumero'];
+      echo " - " . $rulla['paikka'];
+      echo " - " . $rullat_ja_kontit['ryhma_laskuri'][$group_class] . " kpl";
       echo "</div>";
+
+      echo "<div class='otsikko_right'>";
+      echo "<span class='nuoli {$group_class}-nuoli'>&#x25BC;</span>";
+      echo "</div>";
+
+
+      echo "</div>";
+
+      $otsikoidut[] = $group_class;
+
     }
+
+    echo "<div class='listadiv perus {$group_class}' style='display:{$display};'>";
+
+    echo "<div class='peruslista_left'>";
+    echo $rulla['paikka'];
+    echo "</div>";
+
+    echo "<div class='peruslista_center'>";
+    echo $rulla['asiakkaan_tilausnumero'];
+    echo "</div>";
+
+    echo "<div class='peruslista_right'>";
+    echo (INT) $rulla['paino'];
+    echo "</div>";
+
+
+    echo "</div>";
+  }
+
+/*
+
+  foreach ($kontitetut as $rulla) {
+
+    $kontitusinfo = explode("/", $rulla['konttinumero']);
+    $konttinumero = $kontitusinfo[0];
+
+    echo "<div class='listadiv viety'>";
+    echo "Tilaus: " . $rulla['asiakkaan_tilausnumero'];
+    echo ", Paino: " . (INT) $rulla['paino'];
+    echo ", Kontti: " . $konttinumero;
+    echo "</div>";
+  }
+
+*/
 
   echo "</div>";
 }
 
 echo "</div>";
 
+
+
+echo "<script type='text/javascript'>";
+
+foreach ($otsikoidut as $luokka) {
+
+echo "
+
+  $('.{$luokka}-otsikko').on('click', function(){
+    $('.otsikkodiv').removeClass('avoin_otsikko');
+    $(this).addClass('avoin_otsikko');
+    $('.perus').slideUp(200);
+    $('.{$luokka}').slideDown(200);
+    $('.aktiivi_group').val('{$luokka}');
+
+    $('.nuoli').html('&#x25BC;');
+    $('.{$luokka}-nuoli').html('');
+
+  });
+
+";
+
+
+}
+
+
+ echo "</script>";
+
+
 require 'inc/footer.inc';
+
+
+

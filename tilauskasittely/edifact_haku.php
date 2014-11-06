@@ -171,6 +171,22 @@ if ($task == 'hae') {
 
   foreach ($files as $file) {
 
+  if (ftp_mdtm($yhteys, $file) > 1414590822) {
+
+    if (substr($file, -3) == 'IFF') {
+      $bookkaukset[] = $file;
+    }
+
+    if (substr($file, -3) == 'DAD') {
+      $rahtikirjat[] = $file;
+    }
+
+
+  }
+
+
+/*
+
     if (substr($file, -3) == 'IFF') {
       $bookkaukset[] = $file;
     }
@@ -183,7 +199,10 @@ if ($task == 'hae') {
       $iftstat[] = $file;
     }
 
+    */
+
   }
+
 
   foreach ($bookkaukset as $bookkaus) {
     $temp_file = tempnam("/tmp", "IFF-");

@@ -4,7 +4,7 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
   global $kukarow;
 
   // haetaan kaikki konttiviitteen alaiset rullat
-  $query = "SELECT GROUP_CONCAT(lasku.tunnus)
+  $query = "SELECT GROUP_CONCAT(lasku.tunnus), laskun_lisatiedot.konttimaara
             FROM laskun_lisatiedot
             JOIN lasku
               ON lasku.yhtio = laskun_lisatiedot.yhtio
@@ -13,7 +13,8 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
             AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
             GROUP BY lasku.yhtio";
   $result = pupe_query($query);
-  $laskujen_tunnukset = mysql_result($result, 0);
+  $laskujen_tunnukset = mysql_result($result, 0, 0);
+  $bookattu_konttimaara = mysql_result($result, 0, 1);
 
   if (mysql_num_rows($result) == 0) {
     return false;
@@ -26,7 +27,12 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
             trlt.juoksu,
             trlt.asiakkaan_rivinumero as rivinro,
             trlt.konttinumero,
-            la.sisviesti1 as ohje
+            la.sisviesti1 as ohje,
+            ss.hyllyalue,
+            ss.hyllynro,
+            concat(ss.hyllyalue, '-', ss.hyllynro) AS paikka,
+            concat(la.asiakkaan_tilausnumero, ss.hyllyalue, '-', ss.hyllynro) AS group_class,
+            la.asiakkaan_tilausnumero
             FROM lasku AS la
             JOIN tilausrivi AS tr
               ON tr.yhtio = la.yhtio AND tr.otunnus = la.tunnus
@@ -36,12 +42,15 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
               ON ss.yhtio = tr.yhtio AND ss.myyntirivitunnus = tr.tunnus
             WHERE la.yhtio = '{$kukarow['yhtio']}'
             AND la.tunnus IN ({$laskujen_tunnukset})
-            AND ss.lisatieto IS NULL";
+            AND ss.lisatieto IS NULL
+            ORDER BY asiakkaan_tilausnumero, paikka";
   $result = pupe_query($query);
 
   $kontit = array();
   $kontitetut = array();
   $kontittamattomat = array();
+
+  $ryhma_laskuri = array();
 
   $kontti = 1;
   $kilot = 0;
@@ -61,14 +70,27 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
     }
     else{
       $kontittamattomat[] = $rulla;
+      $ryhmalaskuri[$rulla['group_class']]++;
     }
+  }
 
+
+  $konttimaara = count($kontit);
+
+  if ($konttimaara < $bookattu_konttimaara) {
+    while ($konttimaara < $bookattu_konttimaara) {
+      end($kontit);
+      $vika_kontti = key($kontit);
+      $kontit[$vika_kontti + 1] = 0;
+      $konttimaara = count($kontit);
+    }
   }
 
   $rullat_ja_kontit = array(
     'kontittamattomat' => $kontittamattomat,
     'kontitetut' => $kontitetut,
-    'kontit' => $kontit
+    'kontit' => $kontit,
+    'ryhma_laskuri' => $ryhmalaskuri
   );
 
   return $rullat_ja_kontit;
@@ -625,7 +647,7 @@ function laadi_edifact_sanoma($parametrit) {
     $segmentit++;
 
     // LOC -segmentti lähtöpaikka
-    $s .= "LOC+5+" . $matka_info['lahtopaikka_id'] ."::6:" . $matka_info['carrier_nimi'] ."'";
+    $s .= "LOC+5+" . $matka_info['lahtopaikka_id'] ."::6:" . $matka_info['lahtopaikka_nimi'] ."'";
     $segmentit++;
 
     // DTM -segmentti lähtöaika

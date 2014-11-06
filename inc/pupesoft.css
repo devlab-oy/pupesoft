@@ -63,7 +63,7 @@ th {
 	text-align: left;
 	padding: 10px 15px 10px 15px;
   /* border-bottom: solid 2px #b3afaa; */
-	background-color: #ffffff; /*TH_BACKGROUND*/
+	background-color: #f0f0f0; /*TH_BACKGROUND*/
 	color: #828282; /*TH_COLOR*/
 }
 
@@ -234,7 +234,7 @@ table.indexvas tr {
 }
 
 table.indexvas td {
-  padding: 8px 20px 8px 20px;
+  padding: 5px 20px 5px 20px;
 }
 
 table.indexvas a {

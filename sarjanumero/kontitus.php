@@ -775,9 +775,9 @@ echo "
 
 echo "
 
-$('.tapfocus').on('click', function(){
-  $('input').focus().select();
-});
+  $('.tapfocus').bind('touchstart',function(event){
+    $('input').focus().select();
+  });
 
 </script>";
 

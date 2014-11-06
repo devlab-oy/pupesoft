@@ -173,33 +173,18 @@ if (isset($submit)) {
         $rullat_varastossa = array();
 
         foreach ($tilaukset as $tilaus => $rullat) {
-
           $_tilaus = array();
-
           foreach ($rullat as $key => $rulla) {
-
             $varasto = $rulla['hyllyalue'] . "-" . $rulla['hyllynro'];
-
             if (!isset($_tilaus[$varasto])) {
               $_tilaus[$varasto] = 1;
             }
             else {
               $_tilaus[$varasto]++;
             }
-
-
-
           }
-
-
           $rullat_varastossa[$tilaus] = $_tilaus;
-
-
         }
-
-print_r($rullat_varastossa);
-
-
 
         $view = 'konttiviite_maxkg';
       }
@@ -570,19 +555,34 @@ if ($view == 'kontituslista') {
 
   }
 
-  echo "<div class='listadiv otsikkodiv'>";
+  if (count($kontittamattomat) > 0) {
 
-  echo "<div class='peruslista_left'>";
-  echo "Sijainti";
-  echo "</div>";
+    echo "<div style='padding:20px;'>" . t("Kontittamattomat rullat") . ":</div>";
 
-  echo "<div class='peruslista_center'>";
-  echo "Tilaus";
-  echo "</div>";
 
-  echo "<div class='peruslista_right'>";
-  echo "Paino (kg)";
-  echo "</div>";
+    echo "<div class='listadiv otsikkodiv lista_header'>";
+    echo "<div class='peruslista_left'>";
+    echo "Sijainti";
+    echo "</div>";
+
+    echo "<div class='peruslista_center'>";
+    echo "Tilaus";
+    echo "</div>";
+
+    echo "<div class='peruslista_right'>";
+    echo "Paino (kg)";
+    echo "</div>";
+
+  }
+  else{
+
+    echo "<div>";
+    echo t("Kaikki rullat kontitettu!");
+    echo "</div>";
+
+  }
+
+
 
 
   echo "</div>";
@@ -594,10 +594,12 @@ if ($view == 'kontituslista') {
     if ($group_class == $aktiivi_group) {
       $display = 'block';
       $otsikko_tila ='avoin_otsikko';
+      $nuoli = '';
     }
     else{
      $display = 'none';
      $otsikko_tila ='';
+     $nuoli = '&#x25BC;';
     }
 
     if (!in_array($group_class, $otsikoidut)) {
@@ -606,7 +608,7 @@ if ($view == 'kontituslista') {
 
 
       echo "<div class='otsikko_left'>";
-      echo "<span class='nuoli {$group_class}-nuoli'>&#x25BC;</span>";
+      echo "<span class='nuoli {$group_class}-nuoli'>{$nuoli}</span>";
       echo "</div>";
 
       echo "<div class='otsikko_center'>";
@@ -616,7 +618,7 @@ if ($view == 'kontituslista') {
       echo "</div>";
 
       echo "<div class='otsikko_right'>";
-      echo "<span class='nuoli {$group_class}-nuoli'>&#x25BC;</span>";
+      echo "<span class='nuoli {$group_class}-nuoli'>{$nuoli}</span>";
       echo "</div>";
 
 
@@ -673,7 +675,7 @@ foreach ($otsikoidut as $luokka) {
 
 echo "
 
-  $('.{$luokka}-otsikko').on('touchstart', function(){
+  $('.{$luokka}-otsikko').on('touchstart click', function(){
     $('.otsikkodiv').removeClass('avoin_otsikko');
     $(this).addClass('avoin_otsikko');
     $('.perus').slideUp(200);

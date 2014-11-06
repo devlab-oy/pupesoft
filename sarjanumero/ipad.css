@@ -210,10 +210,14 @@ th {
 
 .otsikkodiv{
   background-color: #DEDECE;
+  padding-top:20px;
+  padding-bottom:20px;
 }
 
 .avoin_otsikko{
   background-color: #FF4D4D;
+  padding-top:10px;
+  padding-bottom:10px;
 }
 
 .peruslista_left {
@@ -271,4 +275,10 @@ th {
   opacity: 0.5;
   filter: alpha(opacity=50); /* For IE8 and earlier */
 
+}
+
+.lista_header{
+  background-color:#99EBFF;
+  padding-top:10px;
+  padding-bottom:10px;
 }

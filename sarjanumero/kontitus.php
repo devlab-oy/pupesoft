@@ -751,7 +751,7 @@ foreach ($otsikoidut as $luokka) {
 
 echo "
 
-  $('.{$luokka}-otsikko').on('touchstart click', function(){
+  $('.{$luokka}-otsikko')..bind('touchstart',function(){
 
     if ( !$(this).hasClass('avoin_otsikko')) {
 
@@ -775,7 +775,7 @@ echo "
 
 echo "
 
-  $('.tapfocus').bind('touchstart',function(event){
+  $('.tapfocus').bind('touchstart',function(){
     $('input').focus();
     $('input').setSelectionRange(0, 9999);
   });

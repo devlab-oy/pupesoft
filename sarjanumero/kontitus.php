@@ -452,7 +452,7 @@ if ($view == 'konttiviite_maxkg') {
   echo "<div class='subheader_center'>";
 
 
-  echo "<div style='text-align:center;padding:10px; margin:0 auto; width:500px;'>";
+  echo "<div style='text-align:center;padding:10px; margin:0 auto;'>";
   echo "<table border='0'>";
 
   echo "<tr>";
@@ -777,6 +777,7 @@ echo "
 
 $('.tapfocus').on('ontouchstart click', function(){
   $('input').focus().select();
+  $('input').setSelectionRange(0, 9999);
 });
 
 </script>";

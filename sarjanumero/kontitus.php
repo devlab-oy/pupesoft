@@ -343,7 +343,7 @@ echo "</div>";
 
 echo "</div>";
 
-echo "<div style='text-align:center;padding:10px; margin:0 auto; width:750px;'>";
+echo "<div style='text-align:center;padding:10px; margin:0 auto;'>";
 
 echo "<div class='error center'>";
 
@@ -487,6 +487,17 @@ if ($view == 'kontituslista') {
     echo $huomio;
   }
 
+
+
+  echo "<div class='subheader'>";
+
+  echo "<div class='subheader_left'>";
+  echo "<div class='tapfocus' style='width:100px; height:100px; border:1px solid red;'></div>";
+  echo "</div>";
+
+  echo "<div class='subheader_center'>";
+
+
   echo "
   <form method='post' action=''>
       <label for='sarjanumero'>", t("Sarjanumero"), "</label><br>
@@ -498,18 +509,23 @@ if ($view == 'kontituslista') {
       <input type='hidden' name='aktiivi_group' class='aktiivi_group' value='{$aktiivi_group}' />
       <br>
       <button name='submit' value='sarjanumero' onclick='submit();' class='button'>", t("OK"), "</button>
-  </form>
+  </form>";
 
-  <script type='text/javascript'>
+  echo "</div>";
 
-  $( document ).ready(function() {
-    $('#sarjanumero').focus();
-  });
+  echo "<div class='subheader_right'>";
+  echo "<div class='tapfocus' style='width:100px; height:100px; border:1px solid red; float:right;'></div>";
+  echo "</div>";
 
-    $(document).on('touchstart', function(){
-      $('#sarjanumero').focus();
-    });
-  </script>";
+  echo "</div>";
+
+
+
+
+
+
+
+
 
 
   $tarvittava_maara = count($kontit);
@@ -692,8 +708,14 @@ echo "
 
 }
 
+echo "
 
- echo "</script>";
+
+$('.tapfocus').on('touchstart', function(){
+  $('#sarjanumero').focus();
+});
+
+</script>";
 
 
 require 'inc/footer.inc';

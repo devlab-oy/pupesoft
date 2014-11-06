@@ -282,3 +282,30 @@ th {
   padding-top:10px;
   padding-bottom:10px;
 }
+
+
+
+
+.subheader {
+  padding:0px;
+  overflow:auto;
+  text-align: center;
+}
+
+.subheader_left {
+  width:20%;
+  float:left;
+  text-align:left;
+}
+
+.subheader_right {
+  width:20%;
+  float:left;
+  text-align:right;
+}
+
+.subheader_center {
+  width:60%;
+  float:left;
+  text-align:center;
+}

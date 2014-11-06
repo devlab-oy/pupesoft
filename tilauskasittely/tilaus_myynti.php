@@ -3212,7 +3212,7 @@ if ($tee == '') {
     }
 
     echo "<th>".t("Tilausviite").":</th><td>";
-    echo "<input type='text' size='30' name='viesti' value='$laskurow[viesti]' $state><input type='submit' value='".t("Tallenna")."' $state></td></tr>\n";
+    echo "<input type='text' size='30' name='viesti' value='$laskurow[viesti]' $state><input type='submit' class='tallenna_btn' value='".t("Tallenna")."' $state></td></tr>\n";
 
     echo "<tr>$jarjlisa";
 
@@ -7536,7 +7536,7 @@ if ($tee == '') {
                 <input type='hidden' name='orig_alatila'  value = '$orig_alatila'>
                 <input type='hidden' name='tila'       value = 'MUUTA'>
                 <input type='hidden' name='tapa'       value = 'POISTA'>
-                <input type='Submit' value='".t("Poista")."' $poista_onclick>
+                <input type='Submit' class='poista_btn' value='".t("Poista")."' $poista_onclick>
                 </form> ";
           }
 
@@ -7904,7 +7904,7 @@ if ($tee == '') {
               $lislask++;
 
               if ($lislask == mysql_num_rows($lisaresult)) {
-                echo "<td class='back' valign='top'><input type='submit' value='".t("Lisää")."'></td>";
+                echo "<td class='back' valign='top'><input type='submit' class='lisaa_btn' value='".t("Lisää")."'></td>";
                 echo "</form>";
               }
 
@@ -9651,7 +9651,7 @@ if ($tee == '') {
           <input type='hidden' name='orig_tila' value = '$orig_tila'>
           <input type='hidden' name='orig_alatila' value = '$orig_alatila'>
           <input type='hidden' name='tilaustyyppi' value = '$laskurow[tilaustyyppi]'>
-          <input type='submit' value='* ".t("Mitätöi koko")." $otsikko *'>
+          <input type='submit' class='poista_btn' value='* ".t("Mitätöi koko")." $otsikko *'>
           </form></td>";
     }
 

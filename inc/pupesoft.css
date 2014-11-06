@@ -71,7 +71,7 @@ th a {
 	font-size: 11pt;
   text-transform: capitalize;
   font-weight: bold;
-	vertical-align: top;
+	vertical-align: middle;
 	text-align: left;
   color: #828282; /*TH_COLOR*/
 }
@@ -79,7 +79,7 @@ th a {
 td {
   color: #828282;
 	padding: 5px;
-	vertical-align: top;
+	vertical-align: middle;
 }
 
 td a {
@@ -103,8 +103,12 @@ pre {
 }
 
 .spec {
-	color: #1f4457; /*SPEC_COLOR*/
-	background: #828282; /*SPEC_BACKGROUND*/
+	color: #ffffff; /*SPEC_COLOR*/
+	background-color: #828282; /*SPEC_BACKGROUND*/
+}
+
+.spec a {
+	color: #ffffff; /*SPEC_COLOR*/
 }
 
 .back {
@@ -121,7 +125,7 @@ pre {
 	font-size: 22pt;
 	color: #ffffff; /*HEAD_COLOR*/
 	font-weight: bold;
-	letter-spacing: 3px;
+	letter-spacing: 1px;
 }
 
 .message {
@@ -159,7 +163,7 @@ div.popup {
 
 input, textarea {
 	color: #444444; /*INPUT_COLOR*/
-	padding: 2px 0px 0px 2px;
+	padding: 7px 0px 7px 2px;
 }
 
 button {
@@ -167,12 +171,14 @@ button {
 }
 
 select {
-	padding-top: 4px;
-	padding-right: 4px;
-	padding-left: 0px;
-	padding-bottom: 0px;
-	margin: 0px;
+  -webkit-appearance: none;
+  -webkit-border-radius: 0px;
+	padding: 8px 35px 8px 4px;
+  border : solid 1px #b3afaa;
   color: #828282;
+  background-image: url('../pics/dropdown_arrow.png');
+  background-repeat: no-repeat;
+  background-position: right;
 }
 
 option, optgroup {
@@ -210,11 +216,10 @@ select.indexvas {
 	font-size: 18pt;
 	font-weight: bold;
   color: #828282;
-  letter-spacing: 2px;
-}
-
-select.indexvas option {
-  color: #820000;
+  letter-spacing: 1px;
+  background-image: url('../pics/dropdown_arrow_big.png');
+  background-repeat: no-repeat;
+  background-position: right;
 }
 
 table.indexvas {
@@ -249,7 +254,7 @@ button, input[type=submit], input[type=button] {
  	border : solid 0px #ffffff;
  	font-size: 12pt;
  	color : #ffffff;
- 	padding: 10px 5px 10px 5px;
+ 	padding: 7px 5px 7px 5px;
   background-color: #828282;
   min-width: 100px;
 }
@@ -267,7 +272,7 @@ table.ylaframe td {
 
 div.showhide_yla {
   position:fixed;
-  bottom:5px;
+  top:5px;
   left:5px;
 }
 
@@ -277,5 +282,26 @@ div.showhide_vasen {
   left:5px;
 }
 
+input[type=submit].lisaa_btn {
+  background-color: #01ebd3;
+  background-image: url('../pics/submit_add.png');
+  background-repeat: no-repeat;
+  background-position: right;
+  padding-right: 40px;
+}
 
+input[type=submit].tallenna_btn {
+  background-color: #01a1eb;
+  background-image: url('../pics/submit_rightarrow.png');
+  background-repeat: no-repeat;
+  background-position: right;
+  padding-right: 40px;
+}
 
+input[type=submit].poista_btn {
+  background-color: #999999;
+  background-image: url('../pics/submit_leftarrow.png');
+  background-repeat: no-repeat;
+  background-position: right;
+  padding-right: 40px;
+}

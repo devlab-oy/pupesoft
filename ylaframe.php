@@ -19,7 +19,7 @@ echo "<td><a class='puhdas' target='main' href='{$palvelin2}tuote.php'><img bord
 echo "</tr>";
 echo "</table>";
 
-echo "<div class='showhide_yla' id='maaginen_yla'><img src='{$palvelin2}pics/alas.gif'></div>";
+echo "<div class='showhide_yla' id='maaginen_yla'><img src='{$palvelin2}pics/lullacons/switch.png'></div>";
 
 echo "
   <script>

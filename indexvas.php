@@ -209,7 +209,7 @@ echo "<tr><td><br></td></tr>";
 echo "<tr><td><a href='logout.php' target='main'>".t("Kirjaudu ulos")."</a></td></tr>";
 echo "</table><br>";
 
-echo "<div class='showhide_vasen' id='maaginen_vasen'><img src='{$palvelin2}pics/alas.gif'></div>";
+echo "<div class='showhide_vasen' id='maaginen_vasen'><img src='{$palvelin2}pics/lullacons/switch.png'></div>";
 
 echo "
   <script>

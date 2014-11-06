@@ -52,6 +52,9 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:$pupesoft_tilaustyyppi\n";
     $edi_order .= "OSTOTIL.VERKKOKAUPPA:".str_replace("\n", " ", $order['store_name'])."\n";
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO:".$order['customer_id']."\n";
+    $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_ORDER_NUMBER:".str_replace("\n", " ", $order['order_number'])."\n";
+    $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_REFERENCE:".str_replace("\n", " ", $order['reference_number'])."\n";
+    $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TARGET:".str_replace("\n", " ", $order['target'])."\n";
     $edi_order .= "OSTOTIL.OT_TILAUSAIKA:\n";
     $edi_order .= "OSTOTIL.OT_KASITTELIJA:\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUSAIKA:\n";

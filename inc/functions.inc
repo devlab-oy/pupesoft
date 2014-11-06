@@ -28316,7 +28316,7 @@ if (!function_exists('sallitut_varastot')) {
     if (trim($kukarow['varasto']) != "" and strpos($kukarow['varasto'], ',') !== false) {
       return explode(",", $kukarow["varasto"]);
     }
-    elseif (trim($kukarow['varasto']) != "") {
+    elseif (trim($kukarow['varasto']) != "" and $kukarow['varasto'] > 0) {
       return array($kukarow['varasto']);
     }
 

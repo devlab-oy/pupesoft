@@ -3848,7 +3848,7 @@ if ($tee == '') {
                and tilausrivi.otunnus = '$kukarow[kesken]'
                and tilausrivi.tunnus  = '$rivitunnus'";
     $result = pupe_query($query);
-
+echo "3851 $paikka <br><br>";
     if (mysql_num_rows($result) == 1) {
 
       $tilausrivi = mysql_fetch_assoc($result);
@@ -3882,6 +3882,15 @@ if ($tee == '') {
         //Pidetään sarjatunnus muistissa
         if ($tapa != "POISTA") {
           $myy_sarjatunnus = $sarjarow["tunnukset"];
+        }
+
+        // Otetaan sarjanumero talteen, jotta osataan muokkauksen jälkeen palauttaa oikea erä jos se vielä riittää
+        if (isset($myy_sarjatunnus)) {
+          $query = "SELECT sarjanumero
+                    FROM sarjanumeroseuranta
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus = $myy_sarjatunnus";
+          $sarjanro = mysql_fetch_assoc(pupe_query($query));
         }
 
         if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
@@ -4072,6 +4081,10 @@ if ($tee == '') {
       // Muistetaan myös valittu paikka
       if ($tapa != "VAIHDA" and $hyllyalue != '') {
         $paikka = $hyllyalue."#!¡!#".$hyllynro."#!¡!#".$hyllyvali."#!¡!#".$hyllytaso;
+      }
+
+      if (isset($myy_sarjatunnus) and ($tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F" or $tuoterow["sarjanumeroseuranta"] == "G")) {
+        $paikka .= "#!¡!#".$sarjanro["sarjanumero"];
       }
 
       if ($tapa == "MUOKKAA") {
@@ -4294,7 +4307,7 @@ if ($tee == '') {
     for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
       ${'kayttajan_ale'.$alepostfix} = ${'ale'.$alepostfix};
     }
-
+echo "4297TM paikka $paikka <br><br>";
     $kayttajan_hinta  = $hinta;
     $kayttajan_netto   = strtoupper(trim($netto));
     $kayttajan_var    = $var;
@@ -4446,7 +4459,7 @@ if ($tee == '') {
       else {
         $alv = $kayttajan_alv;
       }
-
+echo "4449TM "; var_dump($paikka_array); echo "<br> $kayttajan_paikka <br><br>";
       if (is_array($paikka_array)) {
         $paikka = $paikka_array[$tuoteno];
       }
@@ -4558,7 +4571,7 @@ if ($tee == '') {
         //Tuotetta ei löydy, aravataan muutamia muuttujia
         $trow["alv"] = $laskurow["alv"];
       }
-
+echo "4561 tama? paikka $paikka <br><br>";
       if ($tuoteno != '' and $kpl != 0) {
         require 'lisaarivi.inc';
       }
@@ -5261,7 +5274,7 @@ if ($tee == '') {
           }
 
           $varresult = pupe_query($query);
-
+echo "5264 $query <br><br>";
           $myytavissa_sum = 0;
 
           if (mysql_num_rows($varresult) > 0) {

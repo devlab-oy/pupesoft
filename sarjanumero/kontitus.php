@@ -776,7 +776,8 @@ echo "
 echo "
 
   $('.tapfocus').bind('touchstart',function(event){
-    $('input').focus().select();
+    $('input').focus();
+    $('input').setSelectionRange(0, 9999);
   });
 
 </script>";

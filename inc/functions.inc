@@ -28265,7 +28265,7 @@ if (!function_exists('sallitut_varastot')) {
       }
     }
 
-    if ($toimipaikka_tunnus != 0) {
+    if ($toimipaikka_tunnus != 0 and $yhtiorow["toimipaikkakasittely"] == "L") {
       // Haetaan varastot joita toimipaikka saa k‰ytt‰‰
       $query   = "SELECT varastopaikat.tunnus
                   FROM avainsana

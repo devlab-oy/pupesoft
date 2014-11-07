@@ -1361,6 +1361,24 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
     echo "</form>";
   }
 
+  if ($toim == "tuotteen_toimittajat") {
+    $checked = $nayta_nimitys == "on" ? "checked" : "";
+
+    echo
+      "<form action='yllapito.php?ojarj={$ojarj}{$ulisa}' method='post'>
+         <input type = 'hidden' name = 'toim' value = '$aputoim'>
+         <input type = 'hidden' name = 'lopetus' value = '$lopetus'>
+         <input type = 'hidden' name = 'js_open_yp' value = '$js_open_yp'>
+         <input type = 'hidden' name = 'limit' value = '{$limit}'>
+         <input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
+         <input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
+         <input type = 'hidden' name = 'laji' value = '$laji'>
+         <label>" .
+      t("Näytä tuotteen nimitys") .
+      "<input type='checkbox' name='nayta_nimitys' onclick='submit()' {$checked}></label>
+       </form>";
+  }
+
   if ($toim == "asiakas" or $toim == "maksuehto" or $toim == "toimi" or $toim == "tuote" or $toim == "yriti" or $toim == "kustannuspaikka" or $toim == "lahdot" or $toim == "toimitustavan_lahdot") {
     echo "  <form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
         <input type = 'hidden' name = 'toim' value = '$aputoim'>

@@ -3,13 +3,18 @@
 $otsikko       = "Tuotteen toimittajat";
 $otsikko_nappi = "tuotteen toimittaja";
 
-$nimitys_lisa =
-  "(SELECT nimitys
+if ($nayta_nimitys == "on") {
+  $nimitys_kentta = "nimitys,";
+  $nimitys_lisa   =
+    "(SELECT nimitys
     FROM tuote
     WHERE tuote.yhtio = tuotteen_toimittajat.yhtio
     AND tuote.tuoteno = tuotteen_toimittajat.tuoteno ) AS nimitys,";
-
-$nimitys_kentta = "nimitys,";
+}
+else {
+  $nimitys_kentta = "";
+  $nimitys_lisa   = "";
+}
 
 // HUOM HUOM: ethän muuta näitä ilman, että korjaat myös yllapito.php:ssä iframen
 // lukitse_avaimeen muuttujat

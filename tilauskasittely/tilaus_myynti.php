@@ -3890,7 +3890,7 @@ if ($tee == '') {
                     FROM sarjanumeroseuranta
                     WHERE yhtio = '{$kukarow['yhtio']}'
                     AND tunnus = $myy_sarjatunnus";
-          $sarjanro = mysql_fetch_assoc(pupe_query($query));
+          $m_eranro = mysql_fetch_assoc(pupe_query($query));
         }
 
         if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
@@ -4083,8 +4083,8 @@ if ($tee == '') {
         $paikka = $hyllyalue."#!¡!#".$hyllynro."#!¡!#".$hyllyvali."#!¡!#".$hyllytaso;
       }
 
-      if (isset($myy_sarjatunnus) and ($tuoterow["sarjanumeroseuranta"] == "E" or $tuoterow["sarjanumeroseuranta"] == "F" or $tuoterow["sarjanumeroseuranta"] == "G")) {
-        $paikka .= "#!¡!#".$sarjanro["sarjanumero"];
+      if (!empty($paikka) and !empty($m_eranro)) {
+        $paikka .= "#!¡!#".$m_eranro["sarjanumero"];
       }
 
       if ($tapa == "MUOKKAA") {

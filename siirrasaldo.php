@@ -328,7 +328,7 @@ if ($tee == '') {
 
   echo  "<font class='message'>".t("Tiedostomuoto").":</font><br>
 
-      <table border='0' cellpadding='3' cellspacing='2'>
+      <table cellpadding='3' cellspacing='2'>
       <tr><th colspan='2'>".t("Tabulaattorilla eroteltu tekstitiedosto").".</th></tr>
       <tr><td>".t("Tuoteno")."</td><td>".t("M‰‰r‰")."</td></tr>
       </table>

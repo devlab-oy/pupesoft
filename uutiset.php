@@ -435,7 +435,7 @@ if ($tee == "PRINTTAA") {
         </FONT>
         <HR COLOR='GRAY'>
 
-        <TABLE BORDER='0' CELLSPACING='5' CELLPADDING='4'><TR>
+        <TABLE CELLSPACING='5' CELLPADDING='4'><TR>
             <TD VALIGN='TOP'>
                 $kuvaurl
             </TD><TD VALIGN='TOP'>
@@ -454,8 +454,8 @@ if ($tee == "PRINTTAA") {
         </FONT>
     <!--
       </TD><TD ALIGN=right bgcolor='#000000'>
-      <IMG SRC='print.gif' WIDTH='21' HEIGHT='21' BORDER='0' ALT='".t("tulosta uutinen")."'>&nbsp;
-      <IMG SRC='koti.gif' WIDTH='21' HEIGHT='21' BORDER='0' ALT='".t("koti")."'>&nbsp;
+      <IMG SRC='print.gif' WIDTH='21' HEIGHT='21' ALT='".t("tulosta uutinen")."'>&nbsp;
+      <IMG SRC='koti.gif' WIDTH='21' HEIGHT='21' ALT='".t("koti")."'>&nbsp;
     -->
     </TD></TR></TABLE>
 

@@ -2954,7 +2954,7 @@ if ($tee == '') {
 
       if ($kukarow["extranet"] == "") {
         echo "<a href='{$palvelin2}crm/asiakasmemo.php?ytunnus={$laskurow['ytunnus']}&asiakasid={$laskurow['liitostunnus']}&from={$toim}&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS'>{$laskurow['nimi']}</a>";
-        echo " <a id='hae_asiakasta_linkki'><img src='".$palvelin2."pics/lullacons/user-multiple.png'></a>";
+        echo " <a id='hae_asiakasta_linkki'><img src='".$palvelin2."pics/facelift/ukot.png'></a>";
       }
       else {
         echo "{$laskurow['nimi']}";
@@ -4991,7 +4991,7 @@ if ($tee == '') {
 
   //Syöttörivi
   if ($muokkauslukko == "" and ($toim != "PROJEKTI" or $rivitunnus != 0) or $toim == "YLLAPITO") {
-    echo "<table><tr>$jarjlisa<td class='back'><font class='head'>".t("Lisää rivi").": </font></td></tr></table>";
+    echo "<table><tr>$jarjlisa<td class='back'><font class='head'>".t("Lisää rivi")."</font></td></tr></table>";
 
     if (in_array($toim, array('VALMISTAVARASTOON', 'VALMISTAASIAKKAALLE')) and $tila != 'LISAAKERTARESEPTIIN' and $tila != 'LISAAISAKERTARESEPTIIN') {
 
@@ -5805,13 +5805,13 @@ if ($tee == '') {
 
     if ($toim == "VALMISTAVARASTOON") {
       echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet' nowrap>";
-      echo "<font class='head'>".t("Valmistusrivit").":</font>";
+      echo "<font class='head'>".t("Valmistusrivit")."</font>";
     }
     else {
       // jos meillä on yhtiön myyntihinnoissa alvit mukana ja meillä on alvillinen tilaus, annetaan mahdollisuus switchata listaus alvittomaksi
       if ($laskurow["alv"] != 0 and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON" and $kukarow['extranet'] == '') {
         echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet' nowrap>";
-        echo "<font class='head'>".t("Tilausrivit").":</font>";
+        echo "<font class='head'>".t("Tilausrivit")."</font>";
 
         $sele = array("K" => "", "E" => "");
 
@@ -5866,7 +5866,7 @@ if ($tee == '') {
       }
       else {
         echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet' nowrap>";
-        echo "<font class='head'>".t("Tilausrivit").":</font>";
+        echo "<font class='head'>".t("Tilausrivit")."</font>";
         $tilausrivi_alvillisuus = "";
       }
     }
@@ -5884,7 +5884,7 @@ if ($tee == '') {
             <input type='hidden' name='tiedot_laskulta' value='$tiedot_laskulta'>
             <input type='hidden' name='orig_tila' value='$orig_tila'>
             <input type='hidden' name='orig_alatila' value='$orig_alatila'>
-             ".t("Näytä rivit").": <select name='ruutulimit' onchange='submit();'>
+             ".t("Näytä rivit")." <select name='ruutulimit' onchange='submit();'>
             <option value=''>".t("Kaikki")."</option>";
 
         $ruuarray = array();
@@ -6335,11 +6335,11 @@ if ($tee == '') {
                   <input type='hidden' id='rivi_$rivino' name='jarjesta' value='$rivino'>";
 
           if (($rivino > 1 and $yhtiorow["tilauksen_jarjestys_suunta"] == "ASC") or ($rivino < $rivilaskuri and $yhtiorow["tilauksen_jarjestys_suunta"] == "DESC")) {
-            $buttonit .= "  <a href='#' onClick=\"getElementById('rivi_$rivino').value='moveUp'; document.forms['siirra_$rivino'].submit();\"><img src='".$palvelin2."pics/lullacons/arrow-single-up-green.png' border='0' height = '10' width = '10'></a><br>";
+            $buttonit .= "  <a href='#' onClick=\"getElementById('rivi_$rivino').value='moveUp'; document.forms['siirra_$rivino'].submit();\"><img src='".$palvelin2."pics/lullacons/arrow-single-up-green.png' height = '10' width = '10'></a><br>";
           }
 
           if (($rivilaskuri > $rivino and $yhtiorow["tilauksen_jarjestys_suunta"] == "ASC") or ($rivino > 1 and $yhtiorow["tilauksen_jarjestys_suunta"] == "DESC")) {
-            $buttonit .= "  <a href='#' onClick=\"getElementById('rivi_$rivino').value='moveDown'; document.forms['siirra_$rivino'].submit();\"><img src='".$palvelin2."pics/lullacons/arrow-single-down-red.png' border='0' height = '10' width = '10'></a>";
+            $buttonit .= "  <a href='#' onClick=\"getElementById('rivi_$rivino').value='moveDown'; document.forms['siirra_$rivino'].submit();\"><img src='".$palvelin2."pics/lullacons/arrow-single-down-red.png' height = '10' width = '10'></a>";
           }
 
           $buttonit .= "</form></div>";
@@ -7071,7 +7071,7 @@ if ($tee == '') {
             $sarjarow = mysql_fetch_assoc($sarjares);
 
             if ($muokkauslukko_rivi == "" and $sarjarow["kpl"] == abs($row["varattu"]+$row["jt"])) {
-              echo " (<a href='{$palvelin2}{$tilauskaslisa}sarjanumeroseuranta.php?tuoteno=".urlencode($row["tuoteno"])."&$tunken2=$row[tunnus]&from=$toim&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS#".urlencode($sarjarow["sarjanumero"])."' style='color:#00FF00;'>$snro_ok</font></a>)";
+              echo " (<a href='{$palvelin2}{$tilauskaslisa}sarjanumeroseuranta.php?tuoteno=".urlencode($row["tuoteno"])."&$tunken2=$row[tunnus]&from=$toim&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS#".urlencode($sarjarow["sarjanumero"])."' class='green'>$snro_ok</font></a>)";
             }
             elseif ($muokkauslukko_rivi == "") {
               echo " (<a href='{$palvelin2}{$tilauskaslisa}sarjanumeroseuranta.php?tuoteno=".urlencode($row["tuoteno"])."&$tunken2=$row[tunnus]&from=$toim&lopetus=$tilmyy_lopetus//from=LASKUTATILAUS'>$snro</a>)";

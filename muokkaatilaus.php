@@ -2547,7 +2547,7 @@ if (mysql_num_rows($result) != 0) {
 
       if ($row["tila"] == "N" and $row["alatila"] == "U") {
         if ($jtok == 0) {
-          echo "<td class='$class' valign='top'><font style='color:#00FF00;'>".t("Voidaan toimittaa")."</font></td>";
+          echo "<td class='$class' valign='top'><font class='green'>".t("Voidaan toimittaa")."</font></td>";
 
           if (isset($worksheet)) {
             $worksheet->writeString($excelrivi, $ii, "Voidaan toimittaa");
@@ -2555,7 +2555,7 @@ if (mysql_num_rows($result) != 0) {
           }
         }
         else {
-          echo "<td class='$class' valign='top'><font style='color:#FF0000;'>".t("Ei voida toimittaa")."</font></td>";
+          echo "<td class='$class' valign='top'><font class='green'>".t("Ei voida toimittaa")."</font></td>";
 
           if (isset($worksheet)) {
             $worksheet->writeString($excelrivi, $ii, t("Ei voida toimittaa"));

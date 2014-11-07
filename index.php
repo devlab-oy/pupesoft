@@ -40,24 +40,23 @@ if (file_exists("pics/pupeicon.gif")) {
   echo "<link rel='shortcut icon' href='pics/pupeicon.gif'>\n";
 }
 else {
-  echo "<link rel='shortcut icon' href='".$palvelin2."devlab-shortcut.png'>\n";
+  echo "<link rel='shortcut icon' href='{$palvelin2}devlab-shortcut.png'>\n";
 }
 
-
 echo "</head>
-    <frameset rows='115,*' border='0'>
-      <frame noresize src='ylaframe.php' name='ylaframe' frameborder='0' marginwidth='0' marginheight='0' scrolling='no'>
+    <frameset rows='80,*' border='0'>
+      <frame noresize src='ylaframe.php' name='ylaframe' id='ylaframe' frameborder='0' marginwidth='0' marginheight='0' scrolling='no'>
     
       <frameset cols='345,*' border='0'>    
-        <frame noresize src='indexvas.php?goso=$goso' name='menu' frameborder='0' marginwidth='0' marginheight='0'>
-        <frame noresize src='$go' name='main' frameborder='0' marginwidth='0' marginheight='0'>
+        <frame noresize src='indexvas.php?goso=$goso' name='menuframe' id='menuframe' frameborder='0' marginwidth='0' marginheight='0'>
+        <frame noresize src='$go' name='mainframe' id='mainframe' frameborder='0' marginwidth='0' marginheight='0'>
       </frameset>
       <noframes>
-      <body>
-              <p>
-                  This page uses frames, but your browser does not support them.
-              </p>
-          </body>
+        <body>
+          <p>
+          This page uses frames, but your browser does not support them.
+          </p>
+        </body>
       </noframes>
     </frameset>
 </html>";

@@ -4,12 +4,12 @@ if (isset($_COOKIE['laiteluettelo_keksi'])) $valitut_sarakkeet = unserialize(url
 
 if (isset($_POST['piirtele_laiteluettelo'])) {
 
-  // Piirrell√§√§n laiteluettelo-valikko
+  // Piirrell‰‰n laiteluettelo-valikko
   echo "<br><br>";
 
-  // M√§√§ritell√§√§n jostain halutut kent√§t
+  // M‰‰ritell‰‰n jostain halutut kent‰t
   $kiissit = array(
-    // Sopimuskohtaiset -pit√§isik√∂ erotella valikossa jotenkin?
+    // Sopimuskohtaiset -pit‰isikˆ erotella valikossa jotenkin?
     "asiakastiedot",
     "sopimus_lisatietoja",
     "sopimus_lisatietoja2",
@@ -30,7 +30,7 @@ if (isset($_POST['piirtele_laiteluettelo'])) {
   );
 
   echo "<form name='aja_ja_tallenna' method='post'>";
-  echo "<table border='0' cellpadding='5' cellspacing='0' width='600'>";
+  echo "<table cellpadding='5' cellspacing='0' width='600'>";
   echo "<tr><th>".t("Valitse sarakkeet")."</th></tr>";
 
   $secretcounter = 0;
@@ -76,7 +76,7 @@ if (isset($_POST['piirtele_laiteluettelo'])) {
   echo "</form>";
 }
 elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
-  // t√§√§ll√§ ajellaan rapsa ja tallennetaan henkseliin
+  // t‰‰ll‰ ajellaan rapsa ja tallennetaan henkseliin
 
   include 'inc/pupeExcel.inc';
 
@@ -90,7 +90,7 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
     "sopimus_lisatietoja",
     "sopimus_lisatietoja2"
   );
-  // Haetaan sopimuskent√§t, tilausrivien(palveluiden) ja valittavat laitetiedot
+  // Haetaan sopimuskent‰t, tilausrivien(palveluiden) ja valittavat laitetiedot
   $query = "SELECT
             lasku.tunnus,
             concat(lasku.toim_nimi,'\n',
@@ -139,9 +139,9 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
   // Rustaillaan henkseliin kaikki valitut sarakkeet
   while ($row = mysql_fetch_assoc($result)) {
 
-    // Sopimuskohtaiset kent√§t
+    // Sopimuskohtaiset kent‰t
     if ($eka_ajo) {
-      // Defaultkent√§t:
+      // Defaultkent‰t:
       $worksheet->write($excelrivi, $excelsarake, t("Sopimusnumero"),       $format_bold);
       $worksheet->write($excelrivi+1, $excelsarake++, $row['tunnus']);
       $worksheet->write($excelrivi, $excelsarake, t("Sopimus alkaa"),       $format_bold);
@@ -149,7 +149,7 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
       $worksheet->write($excelrivi, $excelsarake, t("Sopimus loppuu"),     $format_bold);
       $worksheet->write($excelrivi+1, $excelsarake++, $row['sopimus_loppupvm']);
 
-      // Valinnaiset sopimuskohtaiset kent√§t:
+      // Valinnaiset sopimuskohtaiset kent‰t:
       // Sopimuslisatietoja 1/2
       // Asiakastiedot
       foreach ($row as $key => $value) {
@@ -163,7 +163,7 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
       $eka_ajo = false;
     }
 
-    // Laite-/palvelukohtaiset valinnaiset kent√§t
+    // Laite-/palvelukohtaiset valinnaiset kent‰t
 
     // Laitetunnus
     // Sarjanumero
@@ -182,7 +182,7 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
 
         if (is_numeric($value) and $key == "hinta") {
           $value = str_replace(".", ",", hintapyoristys($value))." ".t("e / kk");
-          // Jos laitteiden kappalem√§√§r√§ ei vaikuta palvelun hintaan
+          // Jos laitteiden kappalem‰‰r‰ ei vaikuta palvelun hintaan
           if ($row['netto'] != '') {
             $value .= " **";
             $lisainffot = "".t("** Palvelukohtainen hinta");
@@ -218,6 +218,6 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
     echo "</table><br>";
   }
   else {
-    echo t("Tallennus ep√§onnistui")."!<br>";
+    echo t("Tallennus ep‰onnistui")."!<br>";
   }
 }

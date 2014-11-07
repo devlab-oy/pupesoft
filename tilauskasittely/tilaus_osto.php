@@ -1489,7 +1489,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             $sarjarow = mysql_fetch_assoc($sarjares);
 
             if ($sarjarow["kpl"] == abs($prow["varattukpl"])) {
-              echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&from=riviosto&lopetus=$tilost_lopetus//from=LASKUTATILAUS' style='color:#00FF00;'>".t("S:nro ok")."</font></a>)";
+              echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&from=riviosto&lopetus=$tilost_lopetus//from=LASKUTATILAUS' class='green'>".t("S:nro ok")."</font></a>)";
             }
             else {
               echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&ostorivitunnus=$prow[tunnus]&from=riviosto&lopetus=$tilost_lopetus//from=LASKUTATILAUS'>".t("S:nro")."</a>)";

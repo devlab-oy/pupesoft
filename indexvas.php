@@ -5,11 +5,6 @@ if (@include_once "inc/parametrit.inc");
 elseif (@include_once "parametrit.inc");
 else exit;
 
-// haetaan jotain tarpeellisia funktioita mukaan..
-if (@include_once "inc/functions.inc");
-elseif (@include_once "functions.inc");
-else exit;
-
 // estet‰‰n errorit tyhj‰st‰ arrayst‰
 if (!isset($menu)) $menu = array();
 if (!isset($tultiin)) $tultiin = "";
@@ -153,7 +148,7 @@ while ($orow = mysql_fetch_array($result)) {
           echo "indexvas=1";
         }
 
-        echo "' target='main'>  &bull; ".t("$mrow[nimitys]")."</a></td></tr>";
+        echo "' target='mainframe'>  &bull; ".t("$mrow[nimitys]")."</a></td></tr>";
       }
     }
     else {
@@ -176,7 +171,7 @@ while ($orow = mysql_fetch_array($result)) {
       $mrow["alanimi"] = "";
     }
 
-    echo "<tr><td><a $target href='$mrow[nimi]";
+    echo "<tr><td><a $target class='indexvaslink' href='$mrow[nimi]";
 
     if (strpos($mrow['nimi'], '?') === FALSE) {
       echo "?";
@@ -199,20 +194,26 @@ while ($orow = mysql_fetch_array($result)) {
       echo "indexvas=1";
     }
 
-    echo "' target='main'>".t("$mrow[nimitys]")."{$nimitys_lukumaara}</a></td></tr>";
+    echo "' target='mainframe'>".t("$mrow[nimitys]")."{$nimitys_lukumaara}</a></td></tr>";
   }
 
 }
 
 //N‰ytet‰‰n aina exit-nappi
 echo "<tr><td><br></td></tr>";
-echo "<tr><td><a href='logout.php' target='main'>".t("Kirjaudu ulos")."</a></td></tr>";
+echo "<tr><td><a href='logout.php' target='mainframe'>".t("Kirjaudu ulos")."</a></td></tr>";
 echo "</table><br>";
 
-echo "<div class='showhide_vasen' id='maaginen_vasen'><img src='{$palvelin2}pics/lullacons/switch.png'></div>";
+echo "<div class='showhide_vasen' id='maaginen_vasen'><img src='{$palvelin2}pics/lullacons/switch_gray.png'></div>";
 
 echo "
   <script>
+      
+      $('.indexvaslink').click(function(){
+        $('.indexvaslink').removeClass('indexvaslink_aktivoitu');
+        $(this).addClass('indexvaslink_aktivoitu');
+      });
+
       $(document).ready(function(){
         $(\"#maaginen_vasen\").click(function(){
            if (parent.document.getElementsByTagName('frameset')[1].cols==\"345,*\") {

@@ -248,11 +248,11 @@ while ($row = mysql_fetch_array($result)) {
       $takafontti = "";
 
       if ($krow["kuittaus"] == "" and ($krow["selitetark"] == "Palkaton vapaa" or $krow["selitetark"] == "Sairasloma" or $krow["selitetark"] == "Kesäloma" or $krow["selitetark"] == "Talviloma" or $krow["selitetark"] == "Ylityövapaa")) {
-        $etufontti = "<font style='color:#FF0000;'>";
+        $etufontti = "<font class='green'>";
         $takafontti = "</font>";
       }
       elseif ($krow["kuittaus"] != "" and ($krow["selitetark"] == "Palkaton vapaa" or $krow["selitetark"] == "Sairasloma" or $krow["selitetark"] == "Kesäloma" or $krow["selitetark"] == "Talviloma" or $krow["selitetark"] == "Ylityövapaa")) {
-        $etufontti = "<font style='color:#00FF00;'>";
+        $etufontti = "<font class='green'>";
         $takafontti = "</font>";
       }
 

@@ -416,7 +416,7 @@ if (isset($laskurow)) {
 
   $rivienmaara = mysql_num_rows($presult);
 
-  echo "<table border='0' cellspacing='1' cellpadding='2'><tr>";
+  echo "<table cellspacing='1' cellpadding='2'><tr>";
 
   $miinus = 2;
 

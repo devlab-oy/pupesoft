@@ -802,7 +802,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
         if (isset($ohjewiki_url)) {
           $hreffi = $ohjewiki_url."/Ohjeet:".basename($phpnimi).$urltoim;
-          echo "<div style='text-align:right; vertical-align:top; margin-right: 10px;'><a target='_blank' href='$hreffi'>".t("OHJE")."</a></div>";
+          echo "<div class='ohje'><a target='_blank' href='$hreffi'>".t("OHJE")."</a></div>";
         }
 
         if ($kukarow['toimipaikka'] > 0 and tarkista_oikeus('infobar.php')) {
@@ -864,8 +864,10 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     }
 
     if ((!isset($no_head) or (isset($no_head) and $no_head != "yes")) and isset($lopetus) and $lopetus != '') {
+      
+      echo "<div class='lopetus'>";      
       lopetus($lopetus);
-      echo "<br>";
+      echo "</div>";
     }
   }
 

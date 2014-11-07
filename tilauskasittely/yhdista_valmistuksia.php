@@ -277,7 +277,7 @@ if ($tee == "VALITSE") {
   $presult = pupe_query($query);
   $riveja = mysql_num_rows($presult);
 
-  echo "<table border='0' cellspacing='1' cellpadding='2'><tr>";
+  echo "<table cellspacing='1' cellpadding='2'><tr>";
   echo "<th>".t("Valmistus")."</a></th>";
   echo "<th>".t("Nimitys")."/".t("Kommentti")."</a></th>";
   echo "<th>".t("Valmiste")."</a></th>";

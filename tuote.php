@@ -315,26 +315,26 @@ if ($tee == 'Z') {
 
     // Hinnastoon
     if (strtoupper($tuoterow['hinnastoon']) == 'E') {
-      $tuoterow['hinnastoon'] = "<font style='color:#FF0000;'>".t("Ei")."</font>";
+      $tuoterow['hinnastoon'] = "<font class='red'>".t("Ei")."</font>";
     }
     else {
-      $tuoterow['hinnastoon'] = "<font style='color:#00FF00;'>".t("Kyllä")."</font>";
+      $tuoterow['hinnastoon'] = "<font class='green'>".t("Kyllä")."</font>";
     }
 
     // Varastoon
     if ($tuoterow['status'] == 'T' or $tuoterow['status'] == 'P') {
-      $tuoterow['ei_varastoida'] = "<font style='color:#FF0000;'>".t("Ei")."</font>";
+      $tuoterow['ei_varastoida'] = "<font class='red'>".t("Ei")."</font>";
     }
     else {
-      $tuoterow['ei_varastoida'] = "<font style='color:#00FF00;'>".t("Kyllä")."</font>";
+      $tuoterow['ei_varastoida'] = "<font class='green'>".t("Kyllä")."</font>";
     }
 
     // Ostoehdotukselle
     if ($tuoterow['ostoehdotus'] == 'E') {
-      $tuoterow['ostoehdotus'] = "<font style='color:#FF0000;'>".t("Ei")."</font>";
+      $tuoterow['ostoehdotus'] = "<font class='red'>".t("Ei")."</font>";
     }
     else {
-      $tuoterow['ostoehdotus'] = "<font style='color:#00FF00;'>".t("Kyllä")."</font>";
+      $tuoterow['ostoehdotus'] = "<font class='green'>".t("Kyllä")."</font>";
     }
 
     //tullinimike

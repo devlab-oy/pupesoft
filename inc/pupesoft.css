@@ -8,8 +8,8 @@
 body {
 	color: #242424; /*BODY_COLOR*/
 	background-color: #b3afaa; /*BODY_BACKGROUND*/
-	margin: 2px 2px 0px 8px;
-	padding: 0px 0px 0px 15px;
+	margin: 2px 2px 0px 0px;
+	padding: 0px 0px 0px 0px;
 }
 
 form {
@@ -37,6 +37,15 @@ a.td {
 a.td:hover {
 	color: #1f4457; /*TRAKTIIVI_COLOR*/
 	background-color: #a8d9f2; /*TRAKTIIVI_BACKGROUND*/
+}
+
+span {
+	vertical-align: middle;
+}
+
+img {
+	border: 0px;
+  vertical-align: middle;
 }
 
 table {
@@ -134,7 +143,7 @@ pre {
 }
 
 .ok, .green {
-	color : #229822; /*OK_COLOR*/
+	color : #01ebd3; /*OK_COLOR*/
 	font-weight: bold;
 }
 
@@ -163,7 +172,9 @@ div.popup {
 
 input, textarea {
 	color: #444444; /*INPUT_COLOR*/
+  background-color: #f2f2f2;
 	padding: 7px 0px 7px 2px;
+  border : solid 1px #f0f0f0;
 }
 
 button {
@@ -174,9 +185,9 @@ select {
   -webkit-appearance: none;
   -webkit-border-radius: 0px;
 	padding: 8px 35px 8px 4px;
-  border : solid 1px #b3afaa;
+  border : solid 1px #f0f0f0;
   color: #828282;
-  background-image: url('../pics/dropdown_arrow.png');
+  background-image: url('../pics/facelift/dropdown_arrow.png');
   background-repeat: no-repeat;
   background-position: right;
 }
@@ -187,10 +198,6 @@ option, optgroup {
 	padding-left: 2px;
 	padding-bottom: 0px;
 	margin: 0px;
-}
-
-img {
-	border: 0px;
 }
 
 div.liveSearch {
@@ -208,7 +215,7 @@ div.liveSearchSelectedItem {
 
 select.indexvas {
   width: 305px;
-	margin: 10px 0px 0px 0px;
+	margin: 10px 0px 0px 20px;
   -webkit-appearance: none;
   -webkit-border-radius: 0px;
 	padding: 12px 20px 12px 20px;
@@ -217,14 +224,14 @@ select.indexvas {
 	font-weight: bold;
   color: #828282;
   letter-spacing: 1px;
-  background-image: url('../pics/dropdown_arrow_big.png');
+  background-image: url('../pics/facelift/dropdown_arrow_big.png');
   background-repeat: no-repeat;
   background-position: right;
 }
 
 table.indexvas {
   width: 305px;
-	margin: 0px 0px 0px 0px;
+	margin: 0px 0px 0px 20px;
   padding: 0px 0px 0px 0px;
 	border-spacing: 0;
 }
@@ -244,10 +251,15 @@ table.indexvas a {
 	display: block;
 	width: 100%;
 	padding: 2px 6px 2px 6px;
+  background-color: #828282;
 }
 
 table.indexvas a:hover {
-  
+  color: #ffda08;
+}
+
+table.indexvas a.indexvaslink_aktivoitu {
+  color: #ffda08;
 }
 
 button, input[type=submit], input[type=button] {
@@ -261,7 +273,7 @@ button, input[type=submit], input[type=button] {
 
 table.ylaframe {
   width: 100%;
-	margin: 0px 15px 0px 0px;
+	margin: 10px 15px 0px 20px;
   padding: 0px 15px 0px 0px;
 	border-spacing: 0;
 }
@@ -270,21 +282,38 @@ table.ylaframe td {
   vertical-align: middle;
 }
 
+table.ylaframe td.ylapalkki {
+  width: 50px;
+  text-align: center;
+}
+
 div.showhide_yla {
   position:fixed;
   top:5px;
-  left:5px;
+  left:3px;
 }
 
 div.showhide_vasen {
   position:fixed;
+  top:12px;
+  left:3px;
+}
+
+div.lopetus {
+  position:absolute;
   top:5px;
-  left:5px;
+  right:60px;  
+}
+
+div.ohje {
+  position:absolute;
+  top:5px;
+  right:20px; 
 }
 
 input[type=submit].lisaa_btn {
   background-color: #01ebd3;
-  background-image: url('../pics/submit_add.png');
+  background-image: url('../pics/facelift/submit_add.png');
   background-repeat: no-repeat;
   background-position: right;
   padding-right: 40px;
@@ -292,7 +321,7 @@ input[type=submit].lisaa_btn {
 
 input[type=submit].tallenna_btn {
   background-color: #01a1eb;
-  background-image: url('../pics/submit_rightarrow.png');
+  background-image: url('../pics/facelift/submit_rightarrow.png');
   background-repeat: no-repeat;
   background-position: right;
   padding-right: 40px;
@@ -300,7 +329,7 @@ input[type=submit].tallenna_btn {
 
 input[type=submit].poista_btn {
   background-color: #999999;
-  background-image: url('../pics/submit_leftarrow.png');
+  background-image: url('../pics/facelift/submit_leftarrow.png');
   background-repeat: no-repeat;
   background-position: right;
   padding-right: 40px;

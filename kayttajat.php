@@ -1511,7 +1511,7 @@ if ($tee == 'MUUTA') {
       if (mysql_num_rows($res) > 0) {
         require "inc/extranet_kayttajan_lisatiedot.inc";
         echo "<td class='back'>";
-        echo "<iframe id='extranet_lisatiedot_iframe' name='extranet_lisatiedot_iframe' src='yllapito.php?toim=extranet_kayttajan_lisatiedot&from=yllapito&ohje=off&haku[4]=@{$selkuka}&lukitse_avaimeen={$selkuka}' style='height: 700px; width: 700px; border: 0px; display: inline;' scrolling='yes' border='0' frameborder='0'></iFrame>";
+        echo "<iframe id='extranet_lisatiedot_iframe' name='extranet_lisatiedot_iframe' src='yllapito.php?toim=extranet_kayttajan_lisatiedot&from=yllapito&ohje=off&haku[4]=@{$selkuka}&lukitse_avaimeen={$selkuka}' style='height: 700px; width: 700px; border: 0px; display: inline;' scrolling='yes' frameborder='0'></iFrame>";
         echo "</td>";
       }
       echo "</tr>";

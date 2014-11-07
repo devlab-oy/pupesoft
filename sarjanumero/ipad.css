@@ -16,7 +16,12 @@ body {
 
 .error {
   color: #ff6666;
-  margin:4px;
+  margin:8px;
+}
+
+.viesti {
+  color: #00A300;
+  margin:8px;
 }
 
 .center {
@@ -317,7 +322,7 @@ th {
   -moz-border-radius: 50%;
   -webkit-border-radius: 50%;
   border-radius: 50%;
-  background-color:#FFEBC1;
+  background-color:white;
   box-shadow: 0 0 1em hsla(0, 0%, 0%, 1.0);
   margin:15px;
 }

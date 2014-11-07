@@ -19,40 +19,41 @@ if (isset($submit)) {
   }
   else{
 
-    require 'generoi_edifact.inc';
-    $parametrit = hylky_lusaus_parametrit($sarjanumero);
+    $query = "SELECT trlt.sinettinumero,
+              ss.lisatieto
+              FROM sarjanumeroseuranta AS ss
+              JOIN tilausrivi AS tr
+                ON tr.yhtio = ss.yhtio
+                AND tr.tunnus = ss.myyntirivitunnus
+              JOIN tilausrivin_lisatiedot AS trlt
+                ON trlt.yhtio = ss.yhtio
+                AND trlt.tilausrivitunnus = tr.tunnus
+              WHERE ss.yhtio = '{$kukarow['yhtio']}'
+              AND ss.sarjanumero = '{$sarjanumero}'";
+    $result = pupe_query($query);
 
-    if ($parametrit) {
-      $parametrit['laji'] = 'hylky';
-      $sanoma = laadi_edifact_sanoma($parametrit);
-    }
-    else{
+    $tiedot = mysql_fetch_assoc($result);
+
+    if (!$tiedot) {
       $errors[] = t("Sarjanumerolla ei löytynyt mitään.");
     }
-
-    if ($sanoma) {
-      if (laheta_sanoma($sanoma)) {
-
-        $lahetys = 'OK';
-        $viesti = "Sarjanumero $sarjanumero on hylätty.";
-
-        $query = "UPDATE sarjanumeroseuranta
-                  SET lisatieto = 'Hylätty'
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND sarjanumero = '{$sarjanumero}'";
-        pupe_query($query);
-
-      }
-      else{
-        $errors[] = t("Lähetys ei onnistunut");
-      }
+    elseif ($tiedot['sinettinumero'] != '') {
+      $errors[] = t("Rulla on jo kontitettu ja kontti sinetöity.");
+    }
+    elseif ($tiedot['lisatieto'] == 'Hylätty') {
+      $errors[] = t("Rulla on jo merkitty hylätyksi.");
     }
     else{
-      $errors[] = t("Ei sanomaa");
+
+      $query = "UPDATE sarjanumeroseuranta
+                SET lisatieto = 'Hylättävä'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND sarjanumero = '{$sarjanumero}'";
+      $result = pupe_query($query);
+
+      $viestit[] = t("Sarjanumero merkitty hylättäväksi.");
+
     }
-
-
-
   }
 }
 
@@ -66,7 +67,7 @@ echo "</div>";
 
 echo "<div class='header_center'>";
 echo "<h1>";
-echo t("RULLAN HYLKÄÄMINEN");
+echo t("RULLAN HYLKÄYS");
 echo "</h1>";
 echo "</div>";
 
@@ -77,22 +78,6 @@ echo "</a>";
 echo "</div>";
 
 echo "</div>";
-
-if (count($errors) > 0) {
-  echo "<div class='error' style='text-align:center'>";
-  foreach ($errors as $error) {
-    echo $error."<br>";
-  }
-  echo "</div>";
-}
-
-
-if ($lahetys == 'OK') {
-  echo "<div style='text-align:center;'>";
-  echo $viesti;
-  echo "</div>";
-}
-
 
 echo "
 <form method='post' action='hylky.php'>
@@ -110,5 +95,21 @@ echo "
   });
 
 </script>";
+
+if (count($viestit) > 0) {
+  echo "<div class='viesti' style='text-align:center'>";
+  foreach ($viestit as $viesti) {
+    echo $viesti."<br>";
+  }
+  echo "</div>";
+}
+
+if (count($errors) > 0) {
+  echo "<div class='error' style='text-align:center'>";
+  foreach ($errors as $error) {
+    echo $error."<br>";
+  }
+  echo "</div>";
+}
 
 require 'inc/footer.inc';

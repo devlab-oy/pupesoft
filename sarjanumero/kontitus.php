@@ -52,8 +52,8 @@ if (isset($submit)) {
                   ON ss.yhtio = lasku.yhtio
                   AND ss.myyntirivitunnus = tilausrivi.tunnus
                 WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+                AND ss.lisatieto IS NULL
                 AND laskun_lisatiedot.konttiviite = '{$konttiviite}'";
-
       if ($muutos == 'muutos' ) {
 
         $result = pupe_query($query);

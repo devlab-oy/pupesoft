@@ -13,11 +13,7 @@ echo "<body>";
 require 'generoi_edifact.inc';
 
 if (!isset($errors)) $errors = array();
-
-// Jos haulla ei löytyny mitään, ollaan palattu tälle sivulle virheparametrilla.
-if (isset($virhe)) {
-  $errors[] = t("Ei löytynyt. Hae uudestaan.");
-}
+if (!isset($viestit)) $viestit = array();
 
 if (isset($submit)) {
   switch ($submit) {
@@ -45,16 +41,15 @@ if (isset($submit)) {
       $errors[] = t("Rahtikirjaa ei löytynyt!");
     }
     if ($sanoma) {
-      $lahetys = 'X';
       if (laheta_sanoma($sanoma)) {
-        $lahetys = 'OK';
+      $viestit[] = t("Rahti vastaanotettu ja sanoma lähetetty!");
       }
       else{
         $errors[] = t("Lähetys ei onnistunut");
       }
     }
     else{
-      $errors[] = t("Ei sanomaa");
+      $errors[] = t("Ei lähetetty sanomaa.");
     }
     break;
   default:
@@ -85,19 +80,9 @@ echo "</div>";
 
 echo "</div>";
 
-echo "<div class='error' style='text-align:center'>";
-foreach ($errors as $error) {
-  echo $error."<br>";
-}
-echo "</div>";
 
-if ($lahetys == 'OK') {
-  echo "<div style='text-align:center;'>";
-  echo "Rahti vastaanotettu ja sanoma lähetetty!";
-  echo "</div>";
-}
 
-echo "
+/*
 <form method='post' action=''>
   <div style='text-align:center;padding:10px;'>
     <label for='rahtikirjanumero'>", t("Syötä rahtikirjanumero"), "</label><br>
@@ -107,9 +92,13 @@ echo "
   </div>
 </form>
 
+*/
+
+echo "
+
 <form method='post' action=''>
   <div style='text-align:center;padding:10px;'>
-    <label for='sarjanumero'>", t("Tai lue jokin rahdin sarjanumero"), "</label><br>
+    <label for='sarjanumero'>", t("Lue mikä tahansa rahdin viivakoodi."), "</label><br>
     <input type='text' id='sarjanumero' name='sarjanumero' style='margin:10px;' />
     <br>
     <button name='submit' value='sarjanumero' onclick='submit();' class='button'>", t("OK"), "</button>
@@ -121,5 +110,21 @@ echo "
     $('#sarjanumero').focus();
   });
 </script>";
+
+if (count($viestit) > 0) {
+  echo "<div class='viesti' style='text-align:center'>";
+  foreach ($viestit as $viesti) {
+    echo $viesti."<br>";
+  }
+  echo "</div>";
+}
+
+if (count($errors) > 0) {
+  echo "<div class='error' style='text-align:center'>";
+  foreach ($errors as $error) {
+    echo $error."<br>";
+  }
+  echo "</div>";
+}
 
 require 'inc/footer.inc';

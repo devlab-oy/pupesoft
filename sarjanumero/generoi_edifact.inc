@@ -294,7 +294,9 @@ function hylky_lusaus_parametrit($sarjanumero) {
             JOIN varastopaikat ON varastopaikat.yhtio = tilausrivi.yhtio
               AND varastopaikat.tunnus = tilausrivi.varasto
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-            AND sarjanumeroseuranta.sarjanumero = '{$sarjanumero}'";
+            AND sarjanumeroseuranta.sarjanumero = '{$sarjanumero}'
+            AND sarjanumeroseuranta.lisatieto = 'Lusattava'
+            AND tilausrivin_lisatiedot.sinettinumero = ''";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {

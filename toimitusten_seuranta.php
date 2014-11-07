@@ -1,7 +1,69 @@
 <?php
 
+if (isset($_POST['task']) and $_POST['task'] == 'hae_pakkalista') {
+
+header("Content-type: text/plain");
+
+echo "PAKKALISTA\n";
+
+echo "Konttinumero: " . $_POST['konttinumero'] . "\n\n";
+
+echo $_POST['data'];
+
+
+die;
+
+}
+
+
 require "inc/parametrit.inc";
 require 'sarjanumero/generoi_edifact.inc';
+
+if (!isset($errors)) $errors = array();
+
+if (isset($task) and $task == 'suorita_lusaus') {
+
+  if (empty($uusi_paino)) {
+    $errors[$sarjanumero] = t("Syötä uusi paino!");
+    $task = 'lusaus';
+  }
+  elseif (!is_numeric($uusi_paino)) {
+    $errors[$sarjanumero] = t("Syötetty arvo ei ole kelvollinen!");
+    $task = 'lusaus';
+  }
+  elseif ($uusi_paino > $vanha_paino) {
+    $errors[$sarjanumero] = t("Uusi paino ei voi olla suurempi kun vanha!");
+    $task = 'lusaus';
+  }
+  else {
+
+    $parametrit = hylky_lusaus_parametrit($sarjanumero);
+
+    $parametrit['poistettu_paino'] = $vanha_paino - $uusi_paino;
+    $parametrit['paino'] = $uusi_paino;
+    $parametrit['laji'] = 'lusaus';
+
+    $sanoma = laadi_edifact_sanoma($parametrit);
+
+    $query = "UPDATE sarjanumeroseuranta SET
+              massa = '{$uusi_paino}',
+              lisatieto = 'Lusattu'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND sarjanumero = '{$sarjanumero}'";
+    pupe_query($query);
+
+    if (laheta_sanoma($sanoma)) {
+      $viesti = "UIB: {$sarjanumero} uudeksi painoksi on päivitetty $uusi_paino kg.";
+    }
+
+    if ($lusattavat_kpl > 1) {
+      $task = 'lusaus';
+    }
+    else {
+      unset($task);
+    }
+  }
+}
 
 if (isset($task) and $task == 'sinetoi') {
   if (!empty($sinettinumero) and !empty($konttinumero)) {
@@ -46,7 +108,6 @@ if (isset($task) and $task == 'sinetoi') {
   }
   unset($task);
 }
-
 
 if (isset($task) and $task == 'laheta_satamavahvistus') {
 
@@ -102,7 +163,11 @@ if (!isset($task)) {
             SUM(IF(tilausrivi.var = 'P', 1, 0)) AS tulouttamatta,
             SUM(IF(tilausrivi.keratty = '', 1, 0)) AS kontittamatta,
             SUM(IF(tilausrivi.toimitettu = '', 1, 0)) AS toimittamatta,
-            SUM(IF(trlt.kontin_mrn = '', 1, 0)) AS mrn_vastaanottamatta
+            SUM(IF(trlt.kontin_mrn = '', 1, 0)) AS mrn_vastaanottamatta,
+            SUM(IF(ss.lisatieto = 'Hylättävä', 1, 0)) AS hylattavat,
+            SUM(IF(ss.lisatieto = 'Hylätty', 1, 0)) AS hylatyt,
+            SUM(IF(ss.lisatieto = 'Lusattava', 1, 0)) AS lusattavat,
+            SUM(IF(ss.lisatieto = 'Lusattu', 1, 0)) AS lusatut
             FROM lasku
             JOIN laskun_lisatiedot
               ON laskun_lisatiedot.yhtio = lasku.yhtio
@@ -114,6 +179,9 @@ if (!isset($task)) {
             LEFT JOIN tilausrivin_lisatiedot AS trlt
               ON trlt.yhtio = lasku.yhtio
               AND trlt.tilausrivitunnus = tilausrivi.tunnus
+            LEFT JOIN sarjanumeroseuranta AS ss
+              ON ss.yhtio = lasku.yhtio
+              AND ss.myyntirivitunnus = tilausrivi.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tilaustyyppi = 'N'
             AND laskun_lisatiedot.konttiviite != ''
@@ -196,6 +264,13 @@ if (!isset($task)) {
 
         $rullamaara = $tilaus['rullat'];
 
+        $poikkeukset = array(
+          'odottaa hylkäystä' => $tilaus['hylattavat'],
+          'hylatty' => $tilaus['hylatyt'],
+          'odottaa lusausta' => $tilaus['lusattavat'],
+          'lusattu' => $tilaus['lusatut']
+          );
+
         $query = "SELECT tilausrivi.toimitettu, trlt.rahtikirja_id
                   FROM tilausrivi
                   JOIN tilausrivin_lisatiedot AS trlt
@@ -245,11 +320,15 @@ if (!isset($task)) {
             $result = pupe_query($query);
             $konttiviitteen_alaiset_tilaukset = mysql_result($result, 0);
 
-            $query = "SELECT count(tunnus) AS riveja
+            $query = "SELECT count(tilausrivi.tunnus) AS riveja
                       FROM tilausrivi
-                      WHERE yhtio = '{$yhtiorow['yhtio']}'
-                      AND otunnus IN ({$konttiviitteen_alaiset_tilaukset})
-                      AND keratty = ''";
+                      JOIN sarjanumeroseuranta AS ss
+                        ON ss.yhtio = tilausrivi.yhtio
+                        AND ss.myyntirivitunnus = tilausrivi.tunnus
+                      WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
+                      AND tilausrivi.otunnus IN ({$konttiviitteen_alaiset_tilaukset})
+                      AND tilausrivi.keratty = ''
+                      AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusaus')";
             $result = pupe_query($query);
             $konttiviitteesta_kontittamatta = mysql_result($result, 0);
 
@@ -258,14 +337,14 @@ if (!isset($task)) {
             }
 
           }
-          elseif ($tilaus['kontittamatta'] < $tilaus['rullamaara']) {
+          elseif ($tilaus['kontittamatta'] < $tilaus['rullat']) {
             $tapahtumat .= "&bull; " .  t("Osa rullista kontitettu") . "<br>";
           }
 
           if ($tilaus['toimittamatta'] == 0) {
             $tapahtumat .= "&bull; " .  t("Kontit sinetöity") . "<br>";
           }
-          elseif ($tilaus['toimittamatta'] < $tilaus['rullamaara']) {
+          elseif ($tilaus['toimittamatta'] < $tilaus['rullat']) {
             $tapahtumat .= "&bull; " .  t("Osa konteista sinetöity") . "<br>";
           }
 
@@ -275,18 +354,65 @@ if (!isset($task)) {
             $tapahtumat .= "&bull; " .  t("MRN-numerot vastaanotettu") . "<br>";
             $mrn_tullut = true;
           }
-          elseif ($tilaus['mrn_vastaanottamatta']  < $tilaus['rullamaara']) {
+          elseif ($tilaus['mrn_vastaanottamatta']  < $tilaus['rullat']) {
            $tapahtumat .= "&bull; " .  t("Osa MRN-numeroista vastaanotettu") . "<br>";
           }
 
         }
-        elseif ($tilaus['tulouttamatta'] < $tilaus['rullamaara']) {
+        elseif ($tilaus['tulouttamatta'] < $tilaus['rullat']) {
           $tapahtumat .= "&bull; " .  t("Osa rullista viety varastoon") . "<br>";
         }
       }
 
       echo "<td valign='top' align='center'>";
-      echo $rullamaara;
+      echo $rullamaara . " kpl.";
+
+      if (array_sum($poikkeukset) > 0) {
+        echo "<br>Joista:";
+        echo "<div style='text-align:left'>";
+
+        foreach ($poikkeukset as $poikkeus => $kpl) {
+          if ($kpl > 0) {
+
+            switch ($poikkeus) {
+              case 'odottaa hylkäystä':
+
+                echo "<form method='post' name='hylkyform'>";
+                echo "<input type='hidden' name='task' value='hylky' />";
+                echo "<input type='hidden' name='tilausnumero' ";
+                echo "value='{$tilaus['asiakkaan_tilausnumero']}' />";
+                echo "</form>";
+
+                echo "&bull; <a style='cursor:pointer; text-decoration:underline;' ";
+                echo "onclick='document.forms[\"hylkyform\"].submit();'>";
+                echo $kpl . " " . $poikkeus . "</a><br>";
+
+                break;
+
+              case 'odottaa lusausta':
+
+                echo "<form method='post' name='lusausform'>";
+                echo "<input type='hidden' name='task' value='lusaus' />";
+                echo "<input type='hidden' name='tilausnumero' ";
+                echo "value='{$tilaus['asiakkaan_tilausnumero']}' />";
+                echo "</form>";
+
+                echo "&bull; <a style='cursor:pointer; text-decoration:underline;' ";
+                echo "onclick='document.forms[\"lusausform\"].submit();'>";
+                echo $kpl . " " . $poikkeus . "</a><br>";
+
+                break;
+
+              default:
+                echo "&bull; " . $kpl . " " . $poikkeus . "<br>";
+                break;
+            }
+
+          }
+        }
+        echo "</div>";
+      }
+
       echo "</td>";
 
       echo "<td valign='top'>";
@@ -332,6 +458,21 @@ if (!isset($task)) {
           else {
             echo "<button type='button' disabled>" . t("Sinetöity") . "</button>";
           }
+
+
+          js_openFormInNewWindow();
+
+          echo "&nbsp;<form method='post' id='hae_pakkalista'>";
+          echo "<input type='hidden' name='task' value='hae_pakkalista' />";
+          echo "<input type='hidden' name='data' value='{$kontti['pakkalista']}' />";
+          echo "<input type='hidden' name='tee' value='XXX' />";
+          echo "<input type='hidden' name='konttinumero' value='{$konttinumero}' />";
+          echo "<input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />";
+          echo "</form>";
+          echo "<button onClick=\"js_openFormInNewWindow('hae_pakkalista', 'Pakkalista'); return false;\" />";
+          echo t("Pakkalista");
+          echo "</button>";
+
 
           if ($kontti['mrn'] != '') {
             echo "<div style='text-align:center; margin:4px 0'>MRN: ";
@@ -478,6 +619,109 @@ if (isset($task) and $task == 'tee_satamavahvistus') {
 
 }
 
+if (isset($task) and $task == 'hylky') {
+
+  $query = "SELECT ss.tunnus,
+            ss.massa,
+            ss.sarjanumero,
+            lasku.asiakkaan_tilausnumero
+            FROM lasku
+            JOIN tilausrivi
+              ON tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+            JOIN sarjanumeroseuranta AS ss
+              ON ss.yhtio = tilausrivi.yhtio
+              AND ss.myyntirivitunnus = tilausrivi.tunnus
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.asiakkaan_tilausnumero = '{$tilausnumero}'
+            AND ss.lisatieto = 'Hylättävä'";
+  $result = pupe_query($query);
+
+  echo "<a href='toimitusten_seuranta.php'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
+  echo "<font class='head'>".t("Rullien hylkääminen")."</font></a><hr><br>";
+
+  $hylattavat_kpl = mysql_num_rows($result);
+
+  while ($hylattava = mysql_fetch_assoc($result)) {
+
+    if (isset($errors[$hylattava['sarjanumero']])) {
+      $hylky_error = $errors[$hylattava['sarjanumero']];
+    }
+    else{
+      $hylky_error = '';
+    }
+
+    echo "
+    <form method='post'>
+    <input type='hidden' name='task' value='suorita_hylky' />
+    <input type='hidden' name='hylattavat_kpl' value='{$hylattavat_kpl}' />
+    <input type='hidden' name='tilausnumero' value='{$hylattava['asiakkaan_tilausnumero']}' />
+    <input type='hidden' name='sarjanumero' value='{$hylattava['sarjanumero']}' />
+    <table>
+    <tr><th>" . t("Tilausnumero") ."</th><td>{$hylattava['asiakkaan_tilausnumero']}</td><td class='back'></td></tr>
+    <tr><th>" . t("UIB") ."</th><td>{$hylattava['sarjanumero']}</td><td class='back'></td></tr>
+    <tr><th></th><td align='right'><input type='submit' value='". t("Vahvista hylkäys") ."' /></td><td class='back'></td></tr>
+    </table>
+    </form><br>";
+
+  }
+}
+
+if (isset($task) and $task == 'lusaus') {
+
+  $query = "SELECT ss.tunnus,
+            ss.massa,
+            ss.sarjanumero,
+            lasku.asiakkaan_tilausnumero
+            FROM lasku
+            JOIN tilausrivi
+              ON tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+            JOIN sarjanumeroseuranta AS ss
+              ON ss.yhtio = tilausrivi.yhtio
+              AND ss.myyntirivitunnus = tilausrivi.tunnus
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.asiakkaan_tilausnumero = '{$tilausnumero}'
+            AND ss.lisatieto = 'Lusattava'";
+  $result = pupe_query($query);
+
+  echo "<a href='toimitusten_seuranta.php'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
+  echo "<font class='head'>".t("Rullien lusaus")."</font></a><hr><br>";
+
+  if (isset($viesti)) {
+    echo $viesti;
+  }
+
+  $lusattavat_kpl = mysql_num_rows($result);
+
+  while ($lusattava = mysql_fetch_assoc($result)) {
+
+    if (isset($errors[$lusattava['sarjanumero']])) {
+      $lusaus_error = $errors[$lusattava['sarjanumero']];
+    }
+    else{
+      $lusaus_error = '';
+    }
+
+    echo "
+    <form method='post'>
+    <input type='hidden' name='task' value='suorita_lusaus' />
+    <input type='hidden' name='lusattavat_kpl' value='{$lusattavat_kpl}' />
+    <input type='hidden' name='tilausnumero' value='{$lusattava['asiakkaan_tilausnumero']}' />
+    <input type='hidden' name='sarjanumero' value='{$lusattava['sarjanumero']}' />
+    <input type='hidden' name='vanha_paino' value='{$lusattava['massa']}' />
+    <table>
+    <tr><th>" . t("Tilausnumero") ."</th><td>{$lusattava['asiakkaan_tilausnumero']}</td><td class='back'></td></tr>
+    <tr><th>" . t("UIB") ."</th><td>{$lusattava['sarjanumero']}</td><td class='back'></td></tr>
+    <tr><th>" . t("Vanha paino") ."</th><td>{$lusattava['massa']} kg</td><td class='back'></td></tr>
+    <tr><th>" . t("Uusi paino") ."</th><td><input type='text' name='uusi_paino' /></td><td class='back error'>{$lusaus_error}</td></tr>
+    <tr><th></th><td align='right'><input type='submit' value='". t("Suorita lusaus") ."' /></td><td class='back'></td></tr>
+    </table>
+    </form><br>";
+
+  }
+}
+
 require "inc/footer.inc";
 
 function kontitustiedot($konttiviite, $konttinumero = false) {
@@ -494,7 +738,9 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
             ss.massa,
             trlt.konttinumero,
             trlt.sinettinumero,
-            trlt.kontin_mrn
+            trlt.kontin_mrn,
+            ss.sarjanumero,
+            lasku.asiakkaan_tilausnumero
             FROM laskun_lisatiedot
             JOIN lasku
               ON lasku.yhtio = laskun_lisatiedot.yhtio
@@ -509,6 +755,7 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
               ON ss.yhtio = tilausrivi.yhtio
               AND ss.myyntirivitunnus = tilausrivi.tunnus
             WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+            AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusaus')
             {$rajaus}
             AND laskun_lisatiedot.konttiviite = '{$konttiviite}'";
   $result = pupe_query($query);
@@ -526,11 +773,15 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
     $konttipaino = 0;
     $konttilista = '';
 
+    $pakkalista = '';
+
     foreach ($kontti as $rulla) {
       $konttipaino = $konttipaino + $rulla['massa'];
       $konttilista .= $rulla['tunnus'] . ',';
       $sinettinumero = $rulla['sinettinumero'];
       $mrn = $rulla['kontin_mrn'];
+
+      $pakkalista .= "UIB: " . $rulla['sarjanumero'] . " - " . (INT) $rulla['massa'] . " kg - " .$rulla['asiakkaan_tilausnumero'] . "\n";
     }
 
     $konttilista = rtrim($konttilista, ',');
@@ -540,8 +791,7 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
     $kontit[$konttinumero]['kpl'] = count($kontti);
     $kontit[$konttinumero]['sinettinumero'] = $sinettinumero;
     $kontit[$konttinumero]['mrn'] = $mrn;
-
-
+    $kontit[$konttinumero]['pakkalista'] = $pakkalista;
   }
 
   return $kontit;

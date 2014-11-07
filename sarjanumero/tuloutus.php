@@ -59,7 +59,7 @@ if (isset($submit)) {
           }
           else{
 
-            $error  = t("Pakkaus on jo varastopaikalla");
+            $error  = t("Rulla on jo varastopaikalla");
             $error .= " {$rulla['hyllyalue']}-{$rulla['hyllynro']}-";
             $error .= "{$rulla['hyllyvali']}-{$rulla['hyllytaso']}";
             $errors[] = $error;
@@ -304,12 +304,6 @@ echo "</div>";
 
 echo "</div>";
 
-echo "<div class='error' style='text-align:center'>";
-foreach ($errors as $error) {
-  echo $error."<br>";
-}
-echo "</div>";
-
 if ($view == 'sarjanumero') {
 
   $vaihtoinput = "";
@@ -346,6 +340,13 @@ if ($view == 'tuotepaikka') {
   </form>";
 }
 
+if (count($errors) > 0) {
+  echo "<div class='error' style='text-align:center'>";
+  foreach ($errors as $error) {
+    echo $error."<br>";
+  }
+  echo "</div>";
+}
 
 foreach ($rullat as $rulla) {
 
@@ -373,18 +374,17 @@ foreach ($rullat as $rulla) {
   echo "</div>";
 }
 
-
 echo "
 <script type='text/javascript'>
 
-$( document ).ready(function() {
-  $('#{$view}').focus();
-});
-
+  $( document ).ready(function() {
+    $('#{$view}').focus();
+  });
 
   $(document).on('touchstart', function(){
     $('#{$view}').focus();
   });
+
 </script>";
 
 require 'inc/footer.inc';

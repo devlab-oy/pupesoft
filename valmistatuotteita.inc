@@ -878,7 +878,7 @@ if ($tee == 'UV') { //Tehdään tuotteet!
   if ($useavalmiste == "ON") {
 
     // Katsotaan eka kuinka monta eri valmistetta syntyy
-    $kaikenkaikkiaan = 1;
+    $kaikenkaikkiaan = 0;
 
     // Katsotaan eka kanssa valmisteiden nykyinen varastonarvo
     if ($valmisterow["kehahin"]  > 0) {

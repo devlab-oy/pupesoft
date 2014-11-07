@@ -17339,7 +17339,7 @@ if (!function_exists("tee_keraysera")) {
                 AND lasku.varasto                              = '{$varasto}'
                 AND kuka.tunnus is null
                 {$_group_by_lisa}
-                ORDER BY prioriteetti,erotus,h1time,liitostunnus,ohjausmerkki,lahdon_tiedot";
+                ORDER BY prioriteetti,erotus,lahdon_tiedot,h1time,liitostunnus,ohjausmerkki";
     }
     else {
 
@@ -17388,7 +17388,7 @@ if (!function_exists("tee_keraysera")) {
                 AND lasku.varasto                              = '{$varasto}'
                 AND kuka.tunnus is null
                 {$_group_by_lisa}
-                ORDER BY prioriteetti,erotus,h1time,liitostunnus,ohjausmerkki,lahdon_tiedot";
+                ORDER BY prioriteetti,erotus,lahdon_tiedot,h1time,liitostunnus,ohjausmerkki";
     }
     $res = pupe_query($query);
 
@@ -17421,7 +17421,7 @@ if (!function_exists("tee_keraysera")) {
         break;
       }
 
-      if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'K') === false and trim($ed_asiakas) != '' and $ed_asiakas == $row['asiakas_nimi'] and trim($ed_lahto) != '' and $ed_lahto != $row['lahto']) {
+      if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'K') === false and trim($ed_lahto) != '' and $ed_lahto != $row['lahto']) {
         if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E60): EI SAA OLLA USEITA LÄHTÖJÄ! BREAK<br>\n";
         break;
       }
@@ -28880,13 +28880,16 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
 
     $sorttaajat = $parametrit['order_by'];
 
-    usort($ryhmitetty_array, function($a, $b) use ($sorttaajat) {
-        foreach ($sorttaajat as $sorttaaja) {
-          if ($a[$sorttaaja] > $b[$sorttaaja]) return 1;
-          if ($a[$sorttaaja] < $b[$sorttaaja]) return -1;
-        }
-        return 0;
-      });
+    function sorttaajat ($a, $b) {
+      foreach ($sorttaajat as $sorttaaja) {
+        if ($a[$sorttaaja] > $b[$sorttaaja]) return 1;
+        if ($a[$sorttaaja] < $b[$sorttaaja]) return -1;
+      }
+      return 0;
+    }
+
+    usort($ryhmitetty_array, "sorttaajat");
+
     return $ryhmitetty_array;
   }
 }

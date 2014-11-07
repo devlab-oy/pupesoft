@@ -194,13 +194,13 @@ if ($tee == 'laskelma') {
               {$tilaustyyppi}
               GROUP BY 1
               HAVING abs(sum(if(
-                (tiliointi.summa + (tiliointi.summa * vero / 100)) > 0,
-                (tiliointi.summa + (tiliointi.summa * vero / 100)),
+                tiliointi.summa > 0,
+                tiliointi.summa,
                 0
               ))) < {$rajaa}
               AND abs(sum(if(
-                (tiliointi.summa + (tiliointi.summa * vero / 100)) < 0,
-                (tiliointi.summa + (tiliointi.summa * vero / 100)),
+                tiliointi.summa < 0,
+                tiliointi.summa,
                 0
               ))) < {$rajaa}";
     $result = pupe_query($query);
@@ -391,6 +391,10 @@ if ($tee == 'laskelma') {
 
     if ($laskelma == 'a' and !empty($laskurow['laskun_summa']) and $_sum_a != $_sum_b) {
       $erikoiskoodi = '03';
+    }
+
+    if ($_rajaa_chk and $aineistoon == $_red) {
+      continue;
     }
 
     $_class = $aineistoon == $_red ? 'spec' : '';

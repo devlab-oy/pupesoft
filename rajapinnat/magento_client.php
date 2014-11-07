@@ -97,6 +97,11 @@ class MagentoClient {
   private $_verkkokauppatuotteet_erikoisparametrit = array ();
 
   /**
+   * Asiakkaan erikoisparametrit joilla ylikirjoitetaan arvoja asiakas- ja osoitetiedoista
+   */
+  private $_asiakkaat_erikoisparametrit = array ();
+
+  /**
    * Magentossa käsin hallitut kategoria id:t joita ei poisteta tuotteelta tuotepäivityksessä
    */
   private $_sticky_kategoriat = array ();
@@ -1422,45 +1427,60 @@ class MagentoClient {
     // Asiakas countteri
     $count = 0;
 
+    // Asiakkaiden erikoisparametrit
+    $asiakkaat_erikoisparametrit = $this->_asiakkaat_erikoisparametrit;
+
     // Lisätään asiakkaat ja osoitteet erissä
     foreach ($dnsasiakas as $asiakas) {
-
 
       $asiakasryhma_id = $this->findCustomerGroup(utf8_encode($asiakas['asiakasryhma']));
 
       $asiakas_data = array(
-        'email'          => $asiakas['yhenk_email'],
-        'firstname'        => $asiakas['nimi'],
-        'lastname'        => $asiakas['nimi'],
-        'website_id'      => $asiakas['magento_website_id'],
-        'taxvat'        => $asiakas['ytunnus'],
-        'external_id'      => $asiakas['asiakasnro'],
-        'group_id'        => $asiakasryhma_id,
+        'email'       => utf8_encode($asiakas['yhenk_email']),
+        'firstname'   => utf8_encode($asiakas['nimi']),
+        'lastname'    => utf8_encode($asiakas['nimi']),
+        'website_id'  => utf8_encode($asiakas['magento_website_id']),
+        'taxvat'      => $asiakas['ytunnus'],
+        'external_id' => $asiakas['asiakasnro'],
+        'group_id'    => $asiakasryhma_id,
       );
 
       $laskutus_osoite_data = array(
-        'firstname'        => $asiakas['laskutus_nimi'],
-        'lastname'        => $asiakas['laskutus_nimi'],
-        'street'        => array($asiakas['laskutus_osoite']),
-        'postcode'        => $asiakas['laskutus_postino'],
-        'city'          => $asiakas['laskutus_postitp'],
-        'country_id'      => $asiakas['maa'],
-        'telephone'        => $asiakas['yhenk_puh'],
-        'company'        => $asiakas['nimi'],
+        'firstname'  => utf8_encode($asiakas['laskutus_nimi']),
+        'lastname'   => utf8_encode($asiakas['laskutus_nimi']),
+        'street'     => array(utf8_encode($asiakas['laskutus_osoite'])),
+        'postcode'   => utf8_encode($asiakas['laskutus_postino']),
+        'city'       => utf8_encode($asiakas['laskutus_postitp']),
+        'country_id' => utf8_encode($asiakas['maa']),
+        'telephone'  => utf8_encode($asiakas['yhenk_puh']),
+        'company'    => utf8_encode($asiakas['nimi']),
         'is_default_billing'    => true,
       );
 
       $toimitus_osoite_data = array(
-        'firstname'        => $asiakas['toimitus_nimi'],
-        'lastname'        => $asiakas['toimitus_nimi'],
-        'street'        => array($asiakas['toimitus_osoite']),
-        'postcode'        => $asiakas['toimitus_postino'],
-        'city'          => $asiakas['toimitus_postitp'],
-        'country_id'      => $asiakas['maa'],
-        'telephone'        => $asiakas['yhenk_puh'],
-        'company'        => $asiakas['nimi'],
+        'firstname'  => utf8_encode($asiakas['toimitus_nimi']),
+        'lastname'   => utf8_encode($asiakas['toimitus_nimi']),
+        'street'     => array(utf8_encode($asiakas['toimitus_osoite'])),
+        'postcode'   => utf8_encode($asiakas['toimitus_postino']),
+        'city'       => utf8_encode($asiakas['toimitus_postitp']),
+        'country_id' => utf8_encode($asiakas['maa']),
+        'telephone'  => utf8_encode($asiakas['yhenk_puh']),
+        'company'    => utf8_encode($asiakas['nimi']),
         'is_default_shipping' => true
       );
+
+      if (count($asiakkaat_erikoisparametrit) > 0) {
+        foreach ($asiakkaat_erikoisparametrit as $erikoisparametri) {
+          $key = $erikoisparametri['nimi'];
+          $value = $erikoisparametri['arvo'];
+          // Jos value löytyy asiakas-arraysta, käytetään sitä
+          if (isset($asiakas[$value])) {
+            $asiakas_data[$key] = utf8_encode($asiakas[$value]);
+            $laskutus_osoite_data[$key] = utf8_encode($asiakas[$value]);
+            $toimitus_osoite_data[$key] = utf8_encode($asiakas[$value]);
+          }
+        }
+      }
 
       // Lisätään tai päivitetään asiakas
 
@@ -1705,10 +1725,19 @@ class MagentoClient {
   /**
    * Asettaa verkkokauppatuotteiden erikoisparametrit
    *
-   * @param string  $verkkokauppatuotteet_erikoisparametrit
+   * @param array  $verkkokauppatuotteet_erikoisparametrit
    */
   public function setVerkkokauppatuotteetErikoisparametrit($verkkokauppatuotteet_erikoisparametrit) {
     $this->_verkkokauppatuotteet_erikoisparametrit = $verkkokauppatuotteet_erikoisparametrit;
+  }
+
+  /**
+   * Asettaa verkkokauppa-asiakkaiden erikoisparametrit
+   *
+   * @param array  $asiakkaat_erikoisparametrit
+   */
+  public function setAsiakkaatErikoisparametrit($asiakkaat_erikoisparametrit) {
+    $this->_asiakkaat_erikoisparametrit = $asiakkaat_erikoisparametrit;
   }
 
   /**

@@ -171,9 +171,13 @@ if ($tee_kululaskut == "liita") {
   //lis‰t‰‰n lasku
   if ($verotonsumma != 0 and $verosumma != 0 or ($apurow["laskunrot"] == "" and $verotonsumma == 0)) {
 
-    $osto_kulu = (!isset($osto_kulu) or trim($osto_kulu) == '') ? 0 : (float) $osto_kulu;
-    $osto_rahti = (!isset($osto_rahti) or trim($osto_rahti) == '') ? 0 : (float) $osto_rahti;
-    $osto_rivi_kulu = (!isset($osto_rivi_kulu) or trim($osto_rivi_kulu) == '') ? 0 : (float) $osto_rivi_kulu;
+    $osto_rahti    = str_replace(",", ".", trim($osto_rahti));
+    $osto_kulu    = str_replace(",", ".", trim($osto_kulu));
+    $osto_rivi_kulu    = str_replace(",", ".", trim($osto_rivi_kulu));
+    
+    $osto_kulu = (!isset($osto_kulu) or trim($osto_kulu) == '') ? 0 : round($osto_kulu,2);
+    $osto_rahti = (!isset($osto_rahti) or trim($osto_rahti) == '') ? 0 : round($osto_rahti,2);
+    $osto_rivi_kulu = (!isset($osto_rivi_kulu) or trim($osto_rivi_kulu) == '') ? 0 : round($osto_rivi_kulu,2);
 
     $osto_kulu_alv = (!isset($osto_kulu_alv) or trim($osto_kulu_alv) == '') ? 0 : (float) $osto_kulu_alv;
     $osto_rahti_alv = (!isset($osto_rahti_alv) or trim($osto_rahti_alv) == '') ? 0 : (float) $osto_rahti_alv;

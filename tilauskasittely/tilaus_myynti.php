@@ -3884,6 +3884,15 @@ if ($tee == '') {
           $myy_sarjatunnus = $sarjarow["tunnukset"];
         }
 
+        // Otetaan sarjanumero talteen, jotta osataan muokkauksen jälkeen palauttaa oikea erä jos se vielä riittää
+        if (isset($myy_sarjatunnus)) {
+          $query = "SELECT sarjanumero
+                    FROM sarjanumeroseuranta
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus = $myy_sarjatunnus";
+          $m_eranro = mysql_fetch_assoc(pupe_query($query));
+        }
+
         if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
           // Nollataan myyntirivitunnus laite-taulusta
           $spessukveri = "SELECT *
@@ -4072,6 +4081,10 @@ if ($tee == '') {
       // Muistetaan myös valittu paikka
       if ($tapa != "VAIHDA" and $hyllyalue != '') {
         $paikka = $hyllyalue."#!¡!#".$hyllynro."#!¡!#".$hyllyvali."#!¡!#".$hyllytaso;
+      }
+
+      if (!empty($paikka) and !empty($m_eranro)) {
+        $paikka .= "#!¡!#".$m_eranro["sarjanumero"];
       }
 
       if ($tapa == "MUOKKAA") {

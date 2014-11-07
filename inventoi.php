@@ -1580,6 +1580,41 @@ if ($tee == 'INVENTOI') {
     }
     elseif ($tuoterow["inventointilista_aika"] == '0000-00-00 00:00:00' and $tuoterow["inventointilista"] == $lista) {
 
+      $query = "SELECT *
+                FROM tapahtuma
+                WHERE yhtio   = '$kukarow[yhtio]'
+                and tuoteno   = '$tuoterow[tuoteno]'
+                and laji      = 'Inventointi'
+                and laadittu  >= '$lista_aika'
+                and hyllyalue = '$tuoterow[hyllyalue]'
+                and hyllynro  = '$tuoterow[hyllynro] '
+                and hyllyvali = '$tuoterow[hyllyvali]'
+                and hyllytaso = '$tuoterow[hyllytaso]'
+                ORDER BY tunnus desc
+                LIMIT 1";
+      $tapresult = pupe_query($query);
+      $taptrow = mysql_fetch_assoc($tapresult);
+
+      //Jos invauserohälytys on triggeröity
+      $query = "SELECT abs(kpl) kpl
+                FROM tapahtuma
+                  WHERE yhtio = '$kukarow[yhtio]'
+                and tuoteno   = '$tuoterow[tuoteno]'
+                and laji      = 'Inventointi'
+                and laadittu  >= '$lista_aika'
+                and kpl       <> 0
+                ORDER BY tunnus desc
+                LIMIT 1";
+      $tapresult = pupe_query($query);
+      $taptrow2 = mysql_fetch_assoc($tapresult);
+
+      $_strpos = strpos($taptrow['selite'],"täsmäsi") !== false;
+      $_taptrow_chk = (mysql_num_rows($tapresult) == 0 or $taptrow2["kpl"] <= 10);
+
+      if ($selitenakyvyys == 'muuttuneet' and $_strpos and $_taptrow_chk) {
+        continue;
+      }
+
       echo "<tr>";
       echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');
 
@@ -1597,35 +1632,8 @@ if ($tee == 'INVENTOI') {
 
       echo "</td><td valign='top'>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>$tdlisa";
 
-      $query = "SELECT *
-                FROM tapahtuma
-                WHERE yhtio   = '$kukarow[yhtio]'
-                and tuoteno   = '$tuoterow[tuoteno]'
-                and laji      = 'Inventointi'
-                and laadittu  >= '$lista_aika'
-                and hyllyalue = '$tuoterow[hyllyalue]'
-                and hyllynro  = '$tuoterow[hyllynro] '
-                and hyllyvali = '$tuoterow[hyllyvali]'
-                and hyllytaso = '$tuoterow[hyllytaso]'
-                ORDER BY tunnus desc
-                LIMIT 1";
-      $tapresult = pupe_query($query);
-      $taptrow = mysql_fetch_assoc($tapresult);
-
       $taptrow["selite"] = preg_replace("/".t("paikalla")." .*?\-.*?\-.*?\-.*? /", "", $taptrow["selite"]);
 
-      //Jos invauserohälytys on triggeröity
-      $query = "SELECT abs(kpl) kpl
-                FROM tapahtuma
-                  WHERE yhtio = '$kukarow[yhtio]'
-                and tuoteno   = '$tuoterow[tuoteno]'
-                and laji      = 'Inventointi'
-                and laadittu  >= '$lista_aika'
-                and kpl       <> 0
-                ORDER BY tunnus desc
-                LIMIT 1";
-      $tapresult = pupe_query($query);
-      $taptrow2 = mysql_fetch_assoc($tapresult);
       $_yli_10 = "";
 
       if ($taptrow2["kpl"] > 10) {

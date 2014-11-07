@@ -458,7 +458,8 @@ class MagentoClient {
             foreach ($kauppatunnukset as $kauppatunnus) {
               $tuotteen_kauppakohtainen_data = array(
                 'description' => $kaannokset['kuvaus'],
-                'name'        => $kaannokset['nimitys']
+                'name'        => $kaannokset['nimitys'],
+                'unit'        => $kaannokset['yksikko']
               );
 
               $this->_proxy->call($this->_session, 'catalog_product.update',
@@ -1630,7 +1631,7 @@ class MagentoClient {
                 tuotteen_avainsanat
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tuoteno = '{$tuotenumero}'
-                AND laji    IN ('nimitys','kuvaus')";
+                AND laji    IN ('nimitys','kuvaus', 'yksikko')";
       $result = pupe_query($query);
 
       while ($avainsana = mysql_fetch_assoc($result)) {

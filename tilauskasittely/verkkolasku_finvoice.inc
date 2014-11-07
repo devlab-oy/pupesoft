@@ -337,9 +337,13 @@ if (!function_exists('finvoice_otsik')) {
         fputs($tootfinvoice, "<InvoiceRecipientPartyDetails>\r\n");
         xml_add("InvoiceRecipientPartyIdentifier", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa']),  $tootfinvoice, 35);
 
-        xml_add("InvoiceRecipientOrganisationName", $laskutusosoitetiedot['laskutus_nimi'], $tootfinvoice, 35, 2);
-        if ($laskutusosoitetiedot["laskutus_nimitark"] != '') {
-          xml_add("InvoiceRecipientOrganisationName", $laskutusosoitetiedot['laskutus_nimitark'], $tootfinvoice, 35, 2);
+        $laskutus_nimitieto = trim($laskutusosoitetiedot["laskutus_nimi"]." ".$laskutusosoitetiedot["laskutus_nimitark"]);
+        $laskutus_nimitieto_array = str_split($laskutus_nimitieto, 35);
+
+        foreach ($laskutus_nimitieto_array as $laskutus_nimi_osa) {
+          if (strlen($laskutus_nimi_osa) > 1) {
+            xml_add("InvoiceRecipientOrganisationName", $laskutus_nimi_osa, $tootfinvoice, 35, 2);
+          }
         }
 
         if ($yhtiorow["verkkolasku_lah"] != "maventa") {
@@ -367,9 +371,13 @@ if (!function_exists('finvoice_otsik')) {
       fputs($tootfinvoice, "<BuyerPartyDetails>\r\n");
       xml_add("BuyerPartyIdentifier",  tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa']),         $tootfinvoice, 35);
 
-      xml_add("BuyerOrganisationName", $lasrow['nimi'], $tootfinvoice, 35, 2);
-      if ($lasrow['nimitark'] != '') {
-        xml_add("BuyerOrganisationName", $lasrow['nimitark'], $tootfinvoice, 35, 2);
+      $laskutus_nimitieto = trim($lasrow["nimi"]." ".$lasrow["nimitark"]);
+      $laskutus_nimitieto_array = str_split($laskutus_nimitieto, 35);
+          
+      foreach ($laskutus_nimitieto_array as $laskutus_nimi_osa) {
+        if (strlen($laskutus_nimi_osa) > 1) { 
+          xml_add("BuyerOrganisationName", $laskutus_nimi_osa, $tootfinvoice, 35, 2);
+        }
       }
 
       xml_add("BuyerOrganisationTaxCode", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], "VATNUMERO"), $tootfinvoice, 35);

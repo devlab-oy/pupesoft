@@ -171,7 +171,14 @@ while ($orow = mysql_fetch_array($result)) {
       $mrow["alanimi"] = "";
     }
 
-    echo "<tr><td><a $target class='indexvaslink' href='$mrow[nimi]";
+    $goclass = "";
+
+    if (isset($go) and $go == $mrow["nimi"] or $go == "$mrow[nimi]?toim=$mrow[alanimi]") {
+      $goclass = " indexvaslink_aktivoitu";
+      unset($go);
+    }
+
+    echo "<tr><td><a $target class='indexvaslink$goclass' href='$mrow[nimi]";
 
     if (strpos($mrow['nimi'], '?') === FALSE) {
       echo "?";
@@ -196,19 +203,14 @@ while ($orow = mysql_fetch_array($result)) {
 
     echo "' target='mainframe'>".t("$mrow[nimitys]")."{$nimitys_lukumaara}</a></td></tr>";
   }
-
 }
-
-//N‰ytet‰‰n aina exit-nappi
-echo "<tr><td><br></td></tr>";
-echo "<tr><td><a href='logout.php' target='mainframe'>".t("Kirjaudu ulos")."</a></td></tr>";
 echo "</table><br>";
 
 echo "<div class='showhide_vasen' id='maaginen_vasen'><img src='{$palvelin2}pics/lullacons/switch_gray.png'></div>";
 
 echo "
   <script>
-      
+
       $('.indexvaslink').click(function(){
         $('.indexvaslink').removeClass('indexvaslink_aktivoitu');
         $(this).addClass('indexvaslink_aktivoitu');

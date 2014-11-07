@@ -72,7 +72,7 @@ th {
 	text-align: left;
 	padding: 10px 15px 10px 15px;
   /* border-bottom: solid 2px #b3afaa; */
-	background-color: #f0f0f0; /*TH_BACKGROUND*/
+	background-color: #fafdfe; /*TH_BACKGROUND*/
 	color: #828282; /*TH_COLOR*/
 }
 
@@ -104,6 +104,10 @@ hr {
 
 pre {
 	font-family: courier;
+}
+
+.top {
+	vertical-align: top;
 }
 
 .tumma {
@@ -187,6 +191,7 @@ select {
 	padding: 8px 35px 8px 4px;
   border : solid 1px #f0f0f0;
   color: #828282;
+  background-color: #f2f2f2;
   background-image: url('../pics/facelift/dropdown_arrow.png');
   background-repeat: no-repeat;
   background-position: right;
@@ -284,6 +289,7 @@ table.ylaframe td {
 
 table.ylaframe td.ylapalkki {
   width: 50px;
+  white-space: nowrap;
   text-align: center;
 }
 

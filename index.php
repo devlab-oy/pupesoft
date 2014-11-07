@@ -48,7 +48,7 @@ echo "</head>
       <frame noresize src='ylaframe.php' name='ylaframe' id='ylaframe' frameborder='0' marginwidth='0' marginheight='0' scrolling='no'>
     
       <frameset cols='345,*' border='0'>    
-        <frame noresize src='indexvas.php?goso=$goso' name='menuframe' id='menuframe' frameborder='0' marginwidth='0' marginheight='0'>
+        <frame noresize src='indexvas.php?goso=$goso&go=$go' name='menuframe' id='menuframe' frameborder='0' marginwidth='0' marginheight='0'>
         <frame noresize src='$go' name='mainframe' id='mainframe' frameborder='0' marginwidth='0' marginheight='0'>
       </frameset>
       <noframes>

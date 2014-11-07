@@ -1450,7 +1450,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
   if ($from != "" and mysql_num_rows($result) > 0) {
     for ($i = 1; $i < mysql_num_fields($result); $i++) {
       if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
-        echo "<th valign='top'>".t(mysql_field_name($result, $i))."</th>";
+        echo "<th>".t(mysql_field_name($result, $i))."</th>";
       }
     }
   }
@@ -1458,7 +1458,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
     for ($i = 1; $i < mysql_num_fields($result); $i++) {
       if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
 
-        echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&lopetus=$lopetus&ojarj=".($i+1)."_".$edosuu."$ulisa&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji'{$tuote_status_lisa}>" . t(mysql_field_name($result, $i)) . "</a>";
+        echo "<th><a href='yllapito.php?toim=$aputoim&lopetus=$lopetus&ojarj=".($i+1)."_".$edosuu."$ulisa&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji'{$tuote_status_lisa}>" . t(mysql_field_name($result, $i)) . "</a>";
 
         if (mysql_num_fields($result) <= 6 and mysql_field_len($result, $i) > 10) $size='15';
         elseif (mysql_field_len($result, $i) < 5)  $size='5';
@@ -1535,7 +1535,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
     }
 
     if (($toim == "asiakasalennus" or $toim == "asiakashinta" or $toim == "hinnasto" or $toim == "puun_alkio") and $oikeurow['paivitys'] == 1) {
-      echo "<th valign='top'>".t("Poista")."</th>";
+      echo "<th>".t("Poista")."</th>";
     }
 
     echo "<td class='back' valign='bottom'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi")."'></td></form>";
@@ -1586,7 +1586,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
         if ($i == 1) {
           if (trim($trow[1]) == '' or (is_float($trow[1]) and $trow[1] == 0)) $trow[1] = t("*tyhjä*");
 
-          echo "<td valign='top'><a name='$trow[0]' href='yllapito.php?mista=$mista&ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji{$tuote_status_lisa}";
+          echo "<td><a name='$trow[0]' href='yllapito.php?mista=$mista&ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji{$tuote_status_lisa}";
 
           if ($from == "" and $lopetus == "") {
             echo "&lopetus=".$palvelin2."yllapito.php////mista=$mista//ojarj=$ojarj".str_replace("&", "//", $ulisa)."//toim=$aputoim//limit=$limit//nayta_poistetut=$nayta_poistetut//nayta_eraantyneet=$nayta_eraantyneet//laji=$laji///$trow[0]";
@@ -1637,10 +1637,10 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
         }
         else {
           if (mysql_field_type($result, $i) == 'real' or mysql_field_type($result, $i) == 'int') {
-            echo "<td valign='top' style='text-align:right'>$fontlisa1 $trow[$i] $fontlisa2</td>";
+            echo "<td style='text-align:right'>$fontlisa1 $trow[$i] $fontlisa2</td>";
           }
           elseif (mysql_field_name($result, $i) == 'koko') {
-            echo "<td valign='top'>$fontlisa1 ".size_readable($trow[$i])." $fontlisa2</td>";
+            echo "<td>$fontlisa1 ".size_readable($trow[$i])." $fontlisa2</td>";
           }
           else {
 
@@ -1652,7 +1652,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
 
             $trow[$i] = preg_replace_callback("/[0-9]{4}\-[0-9]{2}\-[0-9]{2}/", "ps_callback", $trow[$i]);
 
-            echo "<td valign='top'>$fontlisa1 $trow[$i] $fontlisa2</td>";
+            echo "<td>$fontlisa1 $trow[$i] $fontlisa2</td>";
           }
         }
       }
@@ -1736,7 +1736,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   $result = pupe_query($query);
   $trow = mysql_fetch_array($result);
 
-  echo "<table><tr><td class='back' valign='top' style='padding: 0px;'>";
+  echo "<table><tr><td class='back top' style='padding: 0px;'>";
 
   echo "<table>";
 
@@ -2015,7 +2015,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   }
 
   echo "</td>";
-  echo "<td class='back' valign='top'>";
+  echo "<td class='back top'>";
 
   if ($errori == '' and $toim == "sarjanumeron_lisatiedot") {
     @include "inc/arviokortti.inc";

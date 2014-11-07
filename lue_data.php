@@ -2190,6 +2190,7 @@ if ($kasitellaan_tiedosto) {
 
             // tehd‰‰n ep‰kunrattijutut
             if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "75paalle" or $tee == "pois" or $tee == "peru") {
+              $from = "lue_data";
               require "epakurantti.inc";
             }
 

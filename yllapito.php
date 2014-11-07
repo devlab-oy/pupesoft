@@ -19,6 +19,24 @@ if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
   require "inc/parametrit.inc";
 }
 
+if ($toim == "tuotteen_toimittajat") {
+  ob_start();
+
+  if ($nayta_nimitys == "on") {
+    setcookie("tuotteen_toimittajat_nayta_nimitys", $nayta_nimitys);
+    $_COOKIE["tuotteen_toimittajat_nayta_nimitys"] = $nayta_nimitys;
+  }
+  elseif ($nayta_nimitys_clicked and $nayta_nimitys != "on") {
+    unset($_COOKIE["tuotteen_toimittajat_nayta_nimitys"]);
+    setcookie("tuotteen_toimittajat_nayta_nimitys", "", time() - 3600);
+  }
+
+  ob_end_flush();
+
+  $nayta_nimitys = isset($_COOKIE["tuotteen_toimittajat_nayta_nimitys"]) ? "on" : "off";
+}
+
+
 $psx_ohjelmat = array(
   "valuu" => "{$palvelin2}pupenext/currencies",
 );
@@ -1373,9 +1391,10 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
          <input type = 'hidden' name = 'nayta_poistetut' value = '$nayta_poistetut'>
          <input type = 'hidden' name = 'nayta_eraantyneet' value = '$nayta_eraantyneet'>
          <input type = 'hidden' name = 'laji' value = '$laji'>
+         <input type='hidden' name='nayta_nimitys_clicked' value='yes'>
          <label>" .
       t("Näytä tuotteen nimitys") .
-      "<input type='checkbox' name='nayta_nimitys' onclick='submit()' {$checked}></label>
+      "<input type='checkbox' name='nayta_nimitys' onclick='this.form.submit()' {$checked}></label>
        </form>";
   }
 

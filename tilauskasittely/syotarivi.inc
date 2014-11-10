@@ -662,11 +662,9 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
   echo "<tr>$jarjlisa";
 
   if ($tila == "LISAAKERTARESEPTIIN") {
-    echo "<input type='hidden' name='valmiste_vai_raakaaine' value='raakaaine' />";
     echo "<td valign='top' style='color: #00FF00;'>".t("Raaka-Aine")."</td>";
   }
   if ($tila == "LISAAISAKERTARESEPTIIN") {
-    echo "<input type='hidden' name='valmiste_vai_raakaaine' value='valmiste' />";
     echo "<td valign='top' style='color: #00FF00;'>".t("Valmiste")."</td>";
   }
   if ($tila == "LISAARESEPTIIN") {
@@ -792,6 +790,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
 
   if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
     echo "<th></th>";
+    if ($tila != "LISAARESEPTIIN") echo "<input type='hidden' name='tila' value='$tila'>";
   }
 
   if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {

@@ -964,7 +964,7 @@ if ($tila == "" and !isset($jatka)) {
 
   $yhtiotoimipaikka = tilauksen_toimipaikka($args);
 
-  if ($yhtiorow["toimipaikkakasittely"] == "L") {
+  if ($yhtiorow["myyntitilauksen_toimipaikka"] == "A") {
     $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $yhtiotoimipaikka);
   }
   

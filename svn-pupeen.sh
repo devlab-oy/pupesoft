@@ -150,7 +150,7 @@ if [[ "${jatketaanko}" = "k" ]]; then
   if [[ -f "${branchfile}" && -s "${branchfile}" ]]; then
     pupebranch=$(cat ${branchfile} | tr -d '\n')
   else
-    pupebranch="juppe/naruloki"
+    pupebranch="master"
   fi
 
   cd ${pupedir} &&

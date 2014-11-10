@@ -150,7 +150,7 @@ if [[ "${jatketaanko}" = "k" ]]; then
   if [[ -f "${branchfile}" && -s "${branchfile}" ]]; then
     pupebranch=$(cat ${branchfile} | tr -d '\n')
   else
-    pupebranch="master"
+    pupebranch="juppe/naruloki"
   fi
 
   cd ${pupedir} &&
@@ -170,7 +170,7 @@ if [[ "${jatketaanko}" = "k" ]]; then
   # Get new head
   NEW_HEAD=$(git rev-parse HEAD)
   
-  if [[ ${STATUS} -eq 0 && ${OLD_HEAD} = ${NEW_HEAD} ]]; then
+  if [[ ${STATUS} -eq 0 ]]; then
     WHO_AM_I=$(who -m am i)
     USER_IP=$(echo ${WHO_AM_I}|awk '{ print $NF}'|sed -e 's/[\(\)]//g')
     

@@ -32,9 +32,12 @@ $ajopaiva  = date("Y-m-d");
 $paiva_ajo = FALSE;
 
 if (isset($argv[2]) and $argv[2] != '') {
-  list($y, $m, $d) = explode("-", $argv[2]);
-  if (checkdate($d, $m, $y)) {
-    $ajopaiva = $argv[2];
+
+  if (strpos($argv[2], "-") !== FALSE) {
+    list($y, $m, $d) = explode("-", $argv[2]);
+    if (is_numeric($y) and is_numeric($m) and is_numeric($d) and checkdate($d, $m, $y)) {
+      $ajopaiva = $argv[2];
+    }
   }
   $paiva_ajo = TRUE;
 }

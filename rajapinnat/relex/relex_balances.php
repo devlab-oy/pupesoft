@@ -74,7 +74,6 @@ $query = "SELECT
           JOIN varastopaikat ON (varastopaikat.tunnus = tuotepaikat.varasto and varastopaikat.yhtio = tuotepaikat.yhtio)
           JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
           WHERE tuote.yhtio = '$yhtio'
-          and tuote.tuoteno = '+1'
           {$tuoterajaus}
           GROUP BY 1,2,3
           ORDER BY tuotepaikat.varasto, tuotepaikat.tuoteno";

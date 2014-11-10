@@ -3885,7 +3885,7 @@ if ($tee == '') {
         }
 
         // Otetaan sarjanumero talteen, jotta osataan muokkauksen j‰lkeen palauttaa oikea er‰ jos se viel‰ riitt‰‰
-        if (isset($myy_sarjatunnus)) {
+        if (isset($myy_sarjatunnus) and $myy_sarjatunnus != "") {
           $query = "SELECT sarjanumero
                     FROM sarjanumeroseuranta
                     WHERE yhtio = '{$kukarow['yhtio']}'

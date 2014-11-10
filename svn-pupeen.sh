@@ -175,7 +175,7 @@ if [[ "${jatketaanko}" = "k" ]]; then
       USER_IP=localhost
     fi
 
-    ${mysql_komento} -e "INSERT INTO git_paivitykset SET hash='${NEW_HEAD}', ip='${USER_IP}', whoami='${WHO_AM_I}', date=now()" 2> /dev/null
+    ${mysql_komento} -e "INSERT INTO git_paivitykset SET hash='${NEW_HEAD}', ip='${USER_IP}', whoami='${WHO_AM_I}', date=now()" &> /dev/null
   fi
 
   if [[ $? -eq 0 ]]; then

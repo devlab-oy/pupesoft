@@ -670,10 +670,10 @@ while ($tietue = fgets($fd)) {
 
           $query = "SELECT asiakas.*
                     FROM asiakas
-                    JOIN asiakkaan_avainsanat ON asiakas.yhtio = asiakkaan_avainsanat.yhtio
-                      AND asiakas.tunnus                 = asiakkaan_avainsanat.liitostunnus
-                      AND asiakkaan_avainsanat.avainsana = 'magento_tunnus'
-                      AND asiakkaan_avainsanat.tarkenne  = '{$ot_verkkokauppa_asiakasnro}'
+                    JOIN yhteyshenkilo ON asiakas.yhtio = yhteyshenkilo.yhtio
+                      AND asiakas.tunnus = yhteyshenkilo.liitostunnus
+                      AND yhteyshenkilo.rooli = 'Magento'
+                      AND yhteyshenkilo.ulkoinen_asiakasnumero = '{$ot_verkkokauppa_asiakasnro}'
                     WHERE asiakas.yhtio                  = '{$kukarow['yhtio']}'
                     AND asiakas.toim_ovttunnus           not in ('','0')
                     AND asiakas.laji                     not in ('R','P')";

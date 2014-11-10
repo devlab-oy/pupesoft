@@ -154,27 +154,28 @@ if [[ "${jatketaanko}" = "k" ]]; then
   fi
 
   cd ${pupedir} &&
-  
-  # Get old head
-  OLD_HEAD=$(git rev-parse HEAD)
-  
   git fetch origin &&               # paivitetaan lokaali repo remoten tasolle
   git checkout . &&                 # revertataan kaikki local muutokset
   git checkout ${pupebranch} &&     # varmistetaan, etta on master branchi kaytossa
   git pull origin ${pupebranch} &&  # paivitetaan master branchi
   git remote prune origin           # poistetaan ylimääriset branchit
-  
+
   # Save git exit status
   STATUS=$?
-  
+
   # Get new head
   NEW_HEAD=$(git rev-parse HEAD)
-  
+
   if [[ ${STATUS} -eq 0 ]]; then
     WHO_AM_I=$(who -m am i)
-    USER_IP=$(echo ${WHO_AM_I}|awk '{ print $NF}'|sed -e 's/[\(\)]//g')
-    
-    ${mysql_komento} -e "INSERT INTO git_paivitykset SET hash='${NEW_HEAD}', ip='${USER_IP}', laatija='${WHO_AM_I}', luontiaika=now()"
+
+    if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+      USER_IP=$(echo ${WHO_AM_I}|awk '{ print $NF}'|sed -e 's/[\(\)]//g')
+    else
+      USER_IP=localhost
+    fi
+
+    ${mysql_komento} -e "INSERT INTO git_paivitykset SET hash='${NEW_HEAD}', ip='${USER_IP}', whoami='${WHO_AM_I}', date=now()" 2> /dev/null
   fi
 
   if [[ $? -eq 0 ]]; then

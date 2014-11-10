@@ -360,6 +360,10 @@ foreach ($tulostimet as $tulostin) {
     echo "<option value='asiakasemail$asrow[lasku_email]'>".t("Asiakkaan laskutussähköpostiin").": $asrow[lasku_email]</option>";
   }
 
+  if ($toim == 'TILAUSVAHVISTUS') {
+    echo "<option value='excel_lahete_geodis_wilson'>".t("Excel-tilausvahvistus")."</option>";
+  }
+
   if (isset($editoimrow) and $editoimrow["edi_kuvaus"] != '' and
     (preg_match("/(excel|wabco|xml|sendorder)/", $editoimrow['edi_kuvaus']) or
       ($editoimrow["edi_palvelin"] != '' and $editoimrow["edi_kayttaja"] != '' and $editoimrow["edi_salasana"] != '' and $editoimrow["edi_polku"] != '') or

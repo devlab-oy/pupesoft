@@ -300,6 +300,22 @@ if ($fieldname == "laskutyyppi") {
   $jatko = 0;
 }
 
+if ($fieldname == "laskun_monistus_kommenttikentta") {
+  $ulos = "<td><select name='{$nimi}' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel = array();
+  $apu = $trow[$i];
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = ''>" . t("Ei n‰ytet‰ kommenttikentt‰‰");
+  $ulos .= "<option value = 'V' {$sel["V"]}>" . t("Laskua monistettaessa n‰ytet‰‰n kommenttikentt‰");
+  $ulos .= "<option value = 'P' {$sel["P"]}>" . t("Laskua monistettaessa pakollinen kommenttikentt‰");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+
 if ($fieldname == "viivakoodi_laskulle") {
   $apu = $trow[$i];
   $sel = array();

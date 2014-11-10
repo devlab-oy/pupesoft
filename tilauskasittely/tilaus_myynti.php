@@ -272,6 +272,21 @@ if ($kukarow["extranet"] == "") {
         $('#seka').val('kylla');
         $('#laskuri').submit();
       });
+
+      var asetaNapinTila = function() {
+        var summa = $('#korttimaksu').val().replace(',', '.');
+
+        if (!isNaN(summa) && summa != 0 ) {
+          $('#korttimaksunappi').removeAttr('disabled');
+        }
+        else {
+          $('#korttimaksunappi').attr('disabled', 'disabled')
+        }
+      };
+
+      asetaNapinTila();
+
+      $('#korttimaksu').on('keyup', asetaNapinTila);
     });
   </script>";
 

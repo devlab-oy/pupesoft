@@ -81,7 +81,7 @@ foreach($suoritukset as $suoritus) {
           $korttimaksu_f = $korttimaksu_f * -1;
           $onnistuuko = $clientti->startTransaction($korttimaksu_f,1,$arkistointitunnus);
         }
-        elseif ($korttimaksu_f == 0) {
+        elseif ($korttimaksu_f == 0 and $peruutus == "X") {
           $query = "SELECT *
                     FROM maksupaatetapahtumat
                     WHERE yhtio = '{$kukarow['yhtio']}'

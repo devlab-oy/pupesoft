@@ -41,11 +41,12 @@ if (isset($argv[2]) and $argv[2] != '') {
       $kuukausi = sprintf('%02d', pupesoft_cleannumber($argv[3]));
     }
   }
-
-  $paiva_ajo = TRUE;
-
-  if ($argv[2] == "edpaiva") {
-    $ajopaiva = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+  else {
+    list($y, $m, $d) = explode("-", $argv[2]);
+    if (checkdate($d, $m, $y)) {
+      $ajopaiva = $argv[2];
+    }
+    $paiva_ajo = TRUE;
   }
 }
 

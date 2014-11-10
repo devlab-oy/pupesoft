@@ -32,11 +32,11 @@ $ajopaiva  = date("Y-m-d");
 $paiva_ajo = FALSE;
 
 if (isset($argv[2]) and $argv[2] != '') {
-  $paiva_ajo = TRUE;
-
-  if ($argv[2] == "edpaiva") {
-    $ajopaiva = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+  list($y, $m, $d) = explode("-", $argv[2]);
+  if (checkdate($d, $m, $y)) {
+    $ajopaiva = $argv[2];
   }
+  $paiva_ajo = TRUE;
 }
 
 // Yhtiö

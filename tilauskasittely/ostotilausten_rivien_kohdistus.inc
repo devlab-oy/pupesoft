@@ -2176,10 +2176,12 @@ if ($tila == '') {
         "$(function () {
            var myyntihintaInput = $('input[name=\"{$myyntihinta_name}\"]');
            var hintaInput = $('input[name=\"{$hinta_name}\"]');
+           var alv = {$rivirow["alv"]};
 
            var paivitaKate = function() {
              var kateContainer = $('#kate_{$rivirow['rivitunnus']}');
              var myyntihinta = myyntihintaInput.val();
+             myyntihinta = alv > 0 ? (myyntihinta / (1 + alv / 100)) : myyntihinta;
              var hinta = hintaInput.val();
 
              if (myyntihinta > 0 && hinta > 0) {

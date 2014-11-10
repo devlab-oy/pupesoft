@@ -409,6 +409,5 @@ if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
 
   pupesoft_sahkoposti($parametri);
 }
-}
 
 $ulos = "";

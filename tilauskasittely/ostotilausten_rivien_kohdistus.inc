@@ -2125,7 +2125,13 @@ if ($tila == '') {
     }
     else {
       echo "<$td $class valign='top' align='right'>";
-      echo "<input size='7' type='text' name='rivi_hinta[$rivirow[rivitunnus]]' value='".hintapyoristys($rivirow["hinta"], 6)."' style='text-align:right'>";
+
+      $hinta_name = "rivi_hinta[$rivirow[rivitunnus]]";
+
+      echo
+        "<input size='7' type='text' name='{$hinta_name}' value='" .
+        hintapyoristys($rivirow["hinta"], 6) .
+        "' style='text-align:right'>";
       echo "<br>$kulurow[valkoodi]</$td>";
 
       for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
@@ -2155,11 +2161,47 @@ if ($tila == '') {
       echo "<{$td} {$class} valign='top' align='right'>";
 
       if (tarkista_oikeus('yllapito.php', 'tuote', 1)) {
-        echo "<input type='text' size='7' name='rivi_myyntihinta[{$rivirow['rivitunnus']}]' value='", hintapyoristys($rivirow['myyntihinta'], 6), "' style='text-align: right;' />";
+        $myyntihinta_name = "rivi_myyntihinta[{$rivirow['rivitunnus']}]";
+
+        echo
+          "<input type='text' size='7' name='{$myyntihinta_name}' value='" .
+          hintapyoristys($rivirow['myyntihinta'], 6) .
+          "' style='text-align: right;' />";
       }
       else {
         echo hintapyoristys($rivirow['myyntihinta'], 6);
       }
+
+      $javascript =
+        "$(function () {
+           var myyntihintaInput = $('input[name=\"{$myyntihinta_name}\"]');
+           var hintaInput = $('input[name=\"{$hinta_name}\"]');
+
+           var paivitaKate = function() {
+             var kateContainer = $('#kate_{$rivirow['rivitunnus']}');
+             var myyntihinta = myyntihintaInput.val();
+             var hinta = hintaInput.val();
+
+             if (myyntihinta > 0 && hinta > 0) {
+               var kate = ((myyntihinta - hinta) / myyntihinta * 100).toFixed() + ' %';
+             }
+             else {
+               kate = '0 %'
+             }
+
+             kateContainer.text(kate);
+           };
+
+           myyntihintaInput.on('keyup', paivitaKate);
+           hintaInput.on('keyup', paivitaKate);
+
+           paivitaKate();
+         });";
+
+      echo "<script>{$javascript}</script>";
+
+      echo "<br>
+            " . t("Kate") . ": <span id='kate_{$rivirow['rivitunnus']}'></span>";
 
       echo "</{$td}>";
     }

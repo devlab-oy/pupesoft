@@ -17339,7 +17339,7 @@ if (!function_exists("tee_keraysera")) {
                 AND lasku.varasto                              = '{$varasto}'
                 AND kuka.tunnus is null
                 {$_group_by_lisa}
-                ORDER BY prioriteetti,erotus,h1time,liitostunnus,ohjausmerkki,lahdon_tiedot";
+                ORDER BY prioriteetti,erotus,lahdon_tiedot,h1time,liitostunnus,ohjausmerkki";
     }
     else {
 
@@ -17388,7 +17388,7 @@ if (!function_exists("tee_keraysera")) {
                 AND lasku.varasto                              = '{$varasto}'
                 AND kuka.tunnus is null
                 {$_group_by_lisa}
-                ORDER BY prioriteetti,erotus,h1time,liitostunnus,ohjausmerkki,lahdon_tiedot";
+                ORDER BY prioriteetti,erotus,lahdon_tiedot,h1time,liitostunnus,ohjausmerkki";
     }
     $res = pupe_query($query);
 
@@ -17421,7 +17421,7 @@ if (!function_exists("tee_keraysera")) {
         break;
       }
 
-      if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'K') === false and trim($ed_asiakas) != '' and $ed_asiakas == $row['asiakas_nimi'] and trim($ed_lahto) != '' and $ed_lahto != $row['lahto']) {
+      if (strpos($keraysvyohyketiedot['yhdistelysaanto'], 'K') === false and trim($ed_lahto) != '' and $ed_lahto != $row['lahto']) {
         if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E60): EI SAA OLLA USEITA LÄHTÖJÄ! BREAK<br>\n";
         break;
       }
@@ -26114,7 +26114,7 @@ if (!function_exists('hae_asiakashinnat')) {
               JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.hinnastoon != 'E'
               WHERE asiakashinta.yhtio = '$asiakas_yhtio'
               and asiakashinta.ytunnus = '$asiakasrow[ytunnus]'
-              and asiakashinta.ytunnus > 0
+              and asiakashinta.ytunnus != ''
               and asiakashinta.tuoteno != ''
               and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
               and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
@@ -28880,13 +28880,16 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
 
     $sorttaajat = $parametrit['order_by'];
 
-    usort($ryhmitetty_array, function($a, $b) use ($sorttaajat) {
-        foreach ($sorttaajat as $sorttaaja) {
-          if ($a[$sorttaaja] > $b[$sorttaaja]) return 1;
-          if ($a[$sorttaaja] < $b[$sorttaaja]) return -1;
-        }
-        return 0;
-      });
+    function sorttaajat ($a, $b) {
+      foreach ($sorttaajat as $sorttaaja) {
+        if ($a[$sorttaaja] > $b[$sorttaaja]) return 1;
+        if ($a[$sorttaaja] < $b[$sorttaaja]) return -1;
+      }
+      return 0;
+    }
+
+    usort($ryhmitetty_array, "sorttaajat");
+
     return $ryhmitetty_array;
   }
 }

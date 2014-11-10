@@ -2172,11 +2172,13 @@ if ($tila == '') {
         echo hintapyoristys($rivirow['myyntihinta'], 6);
       }
 
+      $alvi = ($rivirow["alv"] > 0 and $yhtiorow["alv_kasittely"] == "") ? $rivirow["alv"] : 0;
+
       $javascript =
         "$(function () {
            var myyntihintaInput = $('input[name=\"{$myyntihinta_name}\"]');
            var hintaInput = $('input[name=\"{$hinta_name}\"]');
-           var alv = {$rivirow["alv"]};
+           var alv = {$alvi};
 
            var paivitaKate = function() {
              var kateContainer = $('#kate_{$rivirow['rivitunnus']}');

@@ -3015,8 +3015,8 @@ if ($tee == '') {
         echo t("VIRHE: K‰ytt‰j‰tiedoissasi on virhe! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n."), "<br><br>";
         exit;
       }
-      
-      // Asiakkaan toimitustava array
+
+      // Otetaan asiakkaan avainsanoista haetut toimitustavat huomioon
       $asiakas_toimitustaparow = array();
       while ($row = mysql_fetch_assoc($tresult)) {
         $asiakas_toimitustaparow[$row["tunnus"]] = $row;

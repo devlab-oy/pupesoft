@@ -390,7 +390,7 @@ if ($upd == 1) {
       for ($i=1; $i < mysql_num_fields($result); $i++) {
 
         // Tuleeko tämä columni käyttöliittymästä
-        if (isset($t[$i]) and $t[$i] != NULL) {
+        if (isset($t[$i])) {
 
           if ($toim == 'tuotteen_toimittajat' and mysql_field_name($result, $i) == 'tehdas_saldo_paivitetty') continue;
 

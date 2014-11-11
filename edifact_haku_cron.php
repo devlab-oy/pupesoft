@@ -5,6 +5,8 @@ if (php_sapi_name() != 'cli') {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
+
 require "inc/connect.inc";
 require "inc/functions.inc";
 require "inc/edifact_functions.inc";

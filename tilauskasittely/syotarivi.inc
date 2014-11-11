@@ -792,7 +792,6 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
 
   if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
     echo "<th></th>";
-    if ($tila != "LISAARESEPTIIN") echo "<input type='hidden' name='tila' value='$tila'>";
   }
 
   if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {

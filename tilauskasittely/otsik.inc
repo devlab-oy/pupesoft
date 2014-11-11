@@ -964,8 +964,10 @@ if ($tila == "" and !isset($jatka)) {
 
   $yhtiotoimipaikka = tilauksen_toimipaikka($args);
 
-  $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $yhtiotoimipaikka);
-
+  if ($yhtiorow["myyntitilauksen_toimipaikka"] == "A") {
+    $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $yhtiotoimipaikka);
+  }
+  
   if ($varasto == "" and isset($srow['varasto'])) {
     $varasto = $srow['varasto'];
   }

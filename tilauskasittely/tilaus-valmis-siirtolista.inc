@@ -201,7 +201,7 @@ else {
         $varasto_toimipaikka = $varasto_row['toimipaikka'];
       }
       else {
-        $varasto_toimipaikka = $kukarow['toimipaikka'];
+        $varasto_toimipaikka = $laskurow['toimipaikka'];
       }
       
       // Mikä tulostusalue

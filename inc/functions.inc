@@ -28038,7 +28038,7 @@ if (!function_exists('hae_asiakkaan_toimitustavat')) {
 
     $toimitustavat = array();
 
-    $query = "SELECT toimitustapa.*
+    $query = "SELECT toimitustapa.*, 'M' AS extranet
               FROM asiakkaan_avainsanat
               JOIN toimitustapa ON (toimitustapa.yhtio = asiakkaan_avainsanat.yhtio
                 AND toimitustapa.selite             = asiakkaan_avainsanat.avainsana )

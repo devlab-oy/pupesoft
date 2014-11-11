@@ -32,11 +32,11 @@ if ($tee == 'UV') {
             ORDER by tilausrivi.tuoteno";
   $uvresult = pupe_query($query);
 
-  if (mysql_num_rows($uvresult) > 0) {
+  if (mysql_num_rows($uvresult) > 1) {
     $useavalmiste = "ON";
   }
 }
-
+echo "39: $tee, $useavalmiste <br><br>";
 if ($tee == 'UV') {
 
   unset($tuoteresult);
@@ -501,7 +501,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
   if (!function_exists("valmista_isa")) {
     function valmista_isa($valmisterow, $tilrivirow, $isavarattu, $isatuoteno, $uusiarvo, $kaikenkaikkiaan, $kaikenkaikkiaan_arvot) {
       global $yhtiorow, $kukarow, $laskurow, $valmistettavat, $jaljella_tot;
-
+      echo "504: $isavarattu, $isatuoteno, $uusiarvo, $kaikenkaikkiaan, $kaikenkaikkiaan_arvot, $yhtiorow[varastonarvon_jako_usealle_valmisteelle], $tilrivirow[valmistus_painoarvo] <br><br>";
       // Jos on useampi valmiste
       if ((float) $kaikenkaikkiaan > 1) {
 
@@ -522,7 +522,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
 
         $uusiarvo = round($uusiarvo, 6);
       }
-
+      echo "525: $uusiarvo, $kaikenkaikkiaan <br><br>";
       if ($valmisterow["sarjanumeroseuranta"] == "S" or $valmisterow["sarjanumeroseuranta"] == "U" or $valmisterow["sarjanumeroseuranta"] == "G") {
         $kehahin = 0;
         $selite = t("Valmistettiin tuotetta tyˆm‰‰r‰yksell‰")." $tilrivirow[otunnus] ($uusiarvo)";
@@ -878,7 +878,7 @@ if ($tee == 'UV') { //Tehd‰‰n tuotteet!
   if ($useavalmiste == "ON") {
 
     // Katsotaan eka kuinka monta eri valmistetta syntyy
-    $kaikenkaikkiaan = 0;
+    $kaikenkaikkiaan = 1;
 
     // Katsotaan eka kanssa valmisteiden nykyinen varastonarvo
     if ($valmisterow["kehahin"]  > 0) {

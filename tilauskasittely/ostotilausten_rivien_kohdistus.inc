@@ -2191,9 +2191,10 @@ if ($tila == '') {
 
            var paivitaKate = function() {
              var kateContainer = $('#kate_{$rivirow['rivitunnus']}');
-             var myyntihinta = myyntihintaInput.val();
+             var myyntihinta = myyntihintaInput.val().replace(',','.');
+             
              myyntihinta = alv > 0 ? (myyntihinta / (1 + alv / 100)) : myyntihinta;
-             var hinta = hintaInput.val();
+             var hinta = hintaInput.val().replace(',','.');
 
              if (myyntihinta > 0 && hinta > 0) {
                var kate = ((myyntihinta - hinta) / myyntihinta * 100).toFixed() + ' %';

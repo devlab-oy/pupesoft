@@ -100,9 +100,6 @@ function laheta_sanoma($sanoma){
   if ($sanoma == '') {
     return false;
   }
-  else {
-    return true;
-  }
 
   global $kukarow, $ftp_info;
 

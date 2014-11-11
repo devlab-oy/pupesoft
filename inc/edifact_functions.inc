@@ -118,7 +118,7 @@ function laheta_sanoma($sanoma){
     die('ei yhteyttä');
   }
 
-  ftp_chdir($yhteys, 'in-test');
+  ftp_chdir($yhteys, 'in-prod');
   ftp_pasv($yhteys, true);
 
   $file = fopen('php://temp', 'r+');

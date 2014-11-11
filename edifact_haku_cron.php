@@ -31,8 +31,8 @@ ftp_pasv($yhteys, true);
 $files = ftp_nlist($yhteys, ".");
 
 $bookkaukset = array();
-$rahtikirjat array();
-$iftstat array();
+$rahtikirjat = array();
+$iftstat = array();
 
 foreach ($files as $file) {
 

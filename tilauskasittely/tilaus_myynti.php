@@ -3015,6 +3015,12 @@ if ($tee == '') {
         echo t("VIRHE: Käyttäjätiedoissasi on virhe! Ota yhteys järjestelmän ylläpitäjään."), "<br><br>";
         exit;
       }
+      
+      // Asiakkaan toimitustava array
+      $asiakas_toimitustaparow = array();
+      while ($row = mysql_fetch_assoc($tresult)) {
+        $asiakas_toimitustaparow[$row["tunnus"]] = $row;
+      }
 
       // Lukitaan rahtikirjaan vaikuttavat tiedot jos/kun rahtikirja on tulostettu
       $query = "SELECT *
@@ -3054,7 +3060,8 @@ if ($tee == '') {
         if (($kukarow['extranet'] == "" and in_array($toimitustapa['extranet'], array('', 'M')))
          or ($kukarow['extranet'] != "" and in_array($toimitustapa['extranet'], array('K', 'M')))
          or $toimitustapa['selite'] == $laskurow['toimitustapa']
-         or $toimitustapa['selite'] == $faktarow['toimitustapa']) {
+         or $toimitustapa['selite'] == $faktarow['toimitustapa']
+         or in_array($toimitustapa['selite'], $asiakas_toimitustaparow[$toimitustapa["tunnus"]])) {
 
           $sel = "";
           if ($toimitustapa["selite"] == $laskurow["toimitustapa"]) {

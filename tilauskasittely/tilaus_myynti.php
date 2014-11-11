@@ -5013,6 +5013,9 @@ if ($tee == '') {
       echo t("Raaka-aine"), " <input type='radio' name='valmiste_vai_raakaaine' value='raakaaine' {$_chk['raakaaine']} /> ";
       echo t("Valmiste"), " <input type='radio' name='valmiste_vai_raakaaine' value='valmiste' {$_chk['valmiste']} />";
     }
+    else {
+      $valmiste_vai_raakaaine = "";
+    }
 
     require "syotarivi.inc";
   }

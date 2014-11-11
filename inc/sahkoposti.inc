@@ -30,10 +30,14 @@ if (substr($komento, 0, 12) == 'asiakasemail') {
 // Käydään läpi liitteet
 if (!is_array($liite)) {
   $liite = array(0 => $liite);
+  $avaimeksi = 0;
+}
+else {
+  list($avaimeksi) = array_keys($liite);
 }
 
 if (!is_array($kutsu)) {
-  $kutsu = array(0 => $kutsu);
+  $kutsu = array($avaimeksi => $kutsu);
 }
 
 $mail_liitteet = array();

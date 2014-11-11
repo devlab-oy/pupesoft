@@ -26114,7 +26114,7 @@ if (!function_exists('hae_asiakashinnat')) {
               JOIN tuote ON tuote.yhtio=asiakashinta.yhtio and tuote.tuoteno=asiakashinta.tuoteno and tuote.hinnastoon != 'E'
               WHERE asiakashinta.yhtio = '$asiakas_yhtio'
               and asiakashinta.ytunnus = '$asiakasrow[ytunnus]'
-              and asiakashinta.ytunnus > 0
+              and asiakashinta.ytunnus != ''
               and asiakashinta.tuoteno != ''
               and asiakashinta.valkoodi in ('$yhtiorow[valkoodi]','')
               and (asiakashinta.minkpl <= '1' or asiakashinta.minkpl = 0)
@@ -28265,7 +28265,7 @@ if (!function_exists('sallitut_varastot')) {
       }
     }
 
-    if ($toimipaikka_tunnus != 0) {
+    if ($yhtiorow["myyntitilauksen_toimipaikka"] == "A" and $toimipaikka_tunnus != 0) {
       // Haetaan varastot joita toimipaikka saa käyttää
       $query   = "SELECT varastopaikat.tunnus
                   FROM avainsana

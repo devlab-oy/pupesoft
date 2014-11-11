@@ -458,7 +458,8 @@ class MagentoClient {
             foreach ($kauppatunnukset as $kauppatunnus) {
               $tuotteen_kauppakohtainen_data = array(
                 'description' => $kaannokset['kuvaus'],
-                'name'        => $kaannokset['nimitys']
+                'name'        => $kaannokset['nimitys'],
+                'unit'        => $kaannokset['yksikko']
               );
 
               $this->_proxy->call($this->_session, 'catalog_product.update',
@@ -1494,41 +1495,21 @@ class MagentoClient {
               $asiakas_data
             ));
 
-          $this->log("Asiakas '{$asiakas['tunnus']}' / {$result} lisätty " . print_r($asiakas_data, true));
+          $this->log("Asiakas '{$asiakas['tunnus']}' / '{$asiakas['yhenk_tunnus']}' / {$result} lisätty " . print_r($asiakas_data, true));
           $asiakas['magento_tunnus'] = $result;
 
           // Päivitetään magento_tunnus pupeen
-          $tarksql = "SELECT *
-                      FROM asiakkaan_avainsanat
-                      WHERE yhtio      = '{$asiakas['yhtio']}'
-                      AND liitostunnus = '{$asiakas['tunnus']}'
-                      AND avainsana    = 'magento_tunnus'";
-          $tarkesult = pupe_query($tarksql);
-          $ahy = mysql_num_rows($tarkesult);
-
-          if ($ahy == 0) {
-            $ahinsert = "INSERT INTO asiakkaan_avainsanat SET
-                         yhtio        = '{$asiakas['yhtio']}',
-                         liitostunnus = '{$asiakas['tunnus']}',
-                         tarkenne     = '{$asiakas['magento_tunnus']}',
-                         avainsana    = 'magento_tunnus',
-                         laatija      = 'Magento',
-                         luontiaika   = now(),
-                         muutospvm    = now()";
-            pupe_query($ahinsert);
-          }
-          else {
-            $query = "UPDATE asiakkaan_avainsanat
-                      SET tarkenne = '{$asiakas['magento_tunnus']}'
-                      WHERE yhtio      = '{$asiakas['yhtio']}'
-                      AND liitostunnus = '{$asiakas['tunnus']}'
-                      AND avainsana    = 'magento_tunnus'";
-            pupe_query($query);
-          }
+         $query = "UPDATE yhteyshenkilo
+                   SET ulkoinen_asiakasnumero = '{$asiakas['magento_tunnus']}'
+                   WHERE yhtio      = '{$asiakas['yhtio']}'
+                   AND liitostunnus = '{$asiakas['tunnus']}'
+                   AND rooli        = 'Magento'
+                   AND tunnus       = '{$asiakas['yhenk_tunnus']}'";
+          pupe_query($query);
         }
         catch (Exception $e) {
           $this->_error_count++;
-          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' lisäys epäonnistui " . print_r($asiakas_data, true), $e);
+          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' / '{$asiakas['yhenk_tunnus']}' lisäys epäonnistui " . print_r($asiakas_data, true), $e);
         }
       }
       // Asiakas on jo olemassa, päivitetään
@@ -1542,11 +1523,11 @@ class MagentoClient {
               $asiakas_data
             ));
 
-          $this->log("Asiakas '{$asiakas['tunnus']}' / {$asiakas['magento_tunnus']} päivitetty " . print_r($asiakas_data, true));
+          $this->log("Asiakas '{$asiakas['tunnus']}' / '{$asiakas['yhenk_tunnus']}' / {$asiakas['magento_tunnus']} päivitetty " . print_r($asiakas_data, true));
         }
         catch (Exception $e) {
           $this->_error_count++;
-          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' päivitys epäonnistui " . print_r($asiakas_data, true), $e);
+          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' / '{$asiakas['yhenk_tunnus']}' päivitys epäonnistui " . print_r($asiakas_data, true), $e);
         }
       }
 
@@ -1630,7 +1611,7 @@ class MagentoClient {
                 tuotteen_avainsanat
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tuoteno = '{$tuotenumero}'
-                AND laji    IN ('nimitys','kuvaus')";
+                AND laji    IN ('nimitys','kuvaus', 'yksikko')";
       $result = pupe_query($query);
 
       while ($avainsana = mysql_fetch_assoc($result)) {

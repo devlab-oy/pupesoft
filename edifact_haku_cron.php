@@ -11,6 +11,16 @@ require "inc/connect.inc";
 require "inc/functions.inc";
 require "inc/edifact_functions.inc";
 
+if (!isset($argv[1])) {
+  echo "Anna yhtio!\n";
+  die;
+}
+
+// Haetaan yhtiörow ja kukarow
+$yhtio = pupesoft_cleanstring($argv[1]);
+$yhtiorow = hae_yhtion_parametrit($yhtio);
+$kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
+
 $host = $ftp_info['host'];
 $user = $ftp_info['user'];
 $pass = $ftp_info['pass'];

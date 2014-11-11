@@ -1087,7 +1087,7 @@ function kasittele_bookkaussanoma($edi_data) {
 
   if (mysql_num_rows($result) == 0) {
 
-    require_once "../tilauskasittely/luo_myyntitilausotsikko.inc";
+    require_once "tilauskasittely/luo_myyntitilausotsikko.inc";
 
     $tunnus = luo_myyntitilausotsikko('RIVISYOTTO', $asiakas_id);
 

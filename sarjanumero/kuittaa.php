@@ -10,7 +10,7 @@ echo "<meta name='viewport' content='width=device-width, maximum-scale=1.0' />\n
 echo "<link rel='stylesheet' type='text/css' href='ipad.css' />\n";
 echo "<body>";
 
-require 'generoi_edifact.inc';
+require '../inc/edifact_functions.inc';
 
 if (!isset($errors)) $errors = array();
 if (!isset($viestit)) $viestit = array();

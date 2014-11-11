@@ -10,7 +10,7 @@ echo "<meta name='viewport' content='width=device-width, maximum-scale=1.0' />\n
 echo "<link rel='stylesheet' type='text/css' href='ipad.css' />\n";
 echo "<body>";
 
-require 'generoi_edifact.inc';
+require '../inc/edifact_functions.inc';
 
 if (!isset($aktiivi_group)) {
   $aktiivi_group = false;
@@ -37,6 +37,7 @@ if (isset($submit)) {
                 trlt.konttinumero,
                 ss.hyllyalue,
                 ss.hyllynro,
+                ss.lisatieto,
                 lasku.asiakkaan_tilausnumero
                 FROM laskun_lisatiedot
                 JOIN lasku
@@ -52,7 +53,6 @@ if (isset($submit)) {
                   ON ss.yhtio = lasku.yhtio
                   AND ss.myyntirivitunnus = tilausrivi.tunnus
                 WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
-                AND ss.lisatieto IS NULL
                 AND laskun_lisatiedot.konttiviite = '{$konttiviite}'";
       if ($muutos == 'muutos' ) {
 
@@ -87,14 +87,17 @@ if (isset($submit)) {
       $ei_kontissa = false;
       $kontitettu = false;
 
+      $hylatyt = array();
+      $hylattavat = array();
+      $lusattavat = array();
+      $rullia = 0;
+
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {
         $rullia_loytyy = false;
       }
       else{
-
-        $rullia = mysql_num_rows($result);
 
         $rivitunnukset = '';
 
@@ -111,21 +114,32 @@ if (isset($submit)) {
           if ($rulla['konttinumero'] != '') {
             $kontissa = true;
           }
-          else{
+          else {
             $ei_kontissa = true;
           }
 
-          $tilaukset[$rulla['asiakkaan_tilausnumero']][] = $rulla;
+          if ($rulla['lisatieto'] == "Hyl‰tty") {
+            $hylatyt[] = $rulla;
+          }
+          elseif ($rulla['lisatieto'] == "Hyl‰tt‰v‰") {
+            $hylattavat[] = $rulla;
+          }
+          elseif ($rulla['lisatieto'] == "Lusattava") {
+            $lusattavat[] = $rulla;
+          }
+          else {
 
-          $kontitusohje = $rulla['ohje'];
-          $tyyppi = $rulla['konttityyppi'];
-          $konttimaara = $rulla['konttimaara'];
+            $tilaukset[$rulla['asiakkaan_tilausnumero']][] = $rulla;
+            $rivitunnukset .= $rulla['tunnus'] . ',';
 
-          $rivitunnukset .= $rulla['tunnus'] . ',';
+            $kontitusohje = $rulla['ohje'];
+            $tyyppi = $rulla['konttityyppi'];
+            $konttimaara = $rulla['konttimaara'];
+            $rullia++;
+
+          }
         }
       }
-
-
 
       $rivitunnukset = rtrim($rivitunnukset, ',');
 
@@ -516,20 +530,53 @@ if ($view == 'konttiviite_maxkg') {
   echo "</tr>";
 
   echo "</table>";
+
+  $rullat_ok = true;
+
+  if (count($lusattavat) > 0) {
+    echo "<div class='error'>";
+    echo count($lusattavat) . " " . t("odottaa lusausta!");
+    echo "</div>";
+    $rullat_ok = false;
+  }
+
+  if (count($hylatyt) > 0) {
+    echo "<div>";
+    echo count($hylatyt) . " " . t("hyl‰tty!");
+    echo "</div>";
+  }
+
+  if (count($hylattavat) > 0) {
+    echo "<div class='error'>";
+    echo count($hylattavat) . " " . t("odottaa hylk‰yksen vahvistusta!");
+    echo "</div>";
+    $rullat_ok = false;
+  }
+
   echo "</div>";
 
-  echo "
-  <form method='post' action=''>
-    <div style='text-align:center;padding:10px;'>
-      <label for='maxkg'>", t("Konttien maksimi kilom‰‰r‰"), "</label><br>
-      <input type='hidden' name='konttiviite' value='{$konttiviite}' />
-      <input type='hidden' name='bookattu_konttimaara' value='{$info['konttimaara']}' />
-      <input type='text' id='maxkg' name='maxkg' style='margin:10px;' value='{$info['maxkg']}' />
-      <br>
-      <button name='submit' value='konttiviite_maxkg' onclick='submit();' class='button'>", t("Jatka"), "</button>
-    </div>
-  </form>";
+  if ($rullat_ok) {
 
+    echo "
+    <form method='post' action=''>
+      <div style='text-align:center;padding:10px;'>
+        <label for='maxkg'>", t("Konttien maksimi kilom‰‰r‰"), "</label><br>
+        <input type='hidden' name='konttiviite' value='{$konttiviite}' />
+        <input type='hidden' name='bookattu_konttimaara' value='{$info['konttimaara']}' />
+        <input type='text' id='maxkg' name='maxkg' style='margin:10px;' value='{$info['maxkg']}' />
+        <br>
+        <button name='submit' value='konttiviite_maxkg' onclick='submit();' class='button'>", t("Jatka"), "</button>
+      </div>
+    </form>";
+
+  }
+  else {
+
+    echo "<div class='error'>";
+    echo t("Rullien hylk‰ykset ja lusaukset on vahvistettava ennen kontitusta!");
+    echo "</div>";
+
+  }
 
   echo "</div>";
 
@@ -580,15 +627,6 @@ if ($view == 'kontituslista') {
   echo "</div>";
 
   echo "</div>";
-
-
-
-
-
-
-
-
-
 
   $tarvittava_maara = count($kontit);
 
@@ -751,7 +789,7 @@ foreach ($otsikoidut as $luokka) {
 
 echo "
 
-  $('.{$luokka}-otsikko').bind('touchstart',function(){
+  $('.{$luokka}-otsikko').bind('touchstart click',function(){
 
     if ( !$(this).hasClass('avoin_otsikko')) {
 

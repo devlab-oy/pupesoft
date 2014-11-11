@@ -3,23 +3,42 @@
 if (isset($_POST['task']) and $_POST['task'] == 'hae_pakkalista') {
 
 header("Content-type: text/plain");
-
 echo "PAKKALISTA\n";
-
 echo "Konttinumero: " . $_POST['konttinumero'] . "\n\n";
-
 echo $_POST['data'];
-
-
 die;
 
 }
 
-
 require "inc/parametrit.inc";
-require 'sarjanumero/generoi_edifact.inc';
+require 'inc/edifact_functions.inc';
 
 if (!isset($errors)) $errors = array();
+
+if (isset($task) and $task == 'suorita_hylky') {
+
+  $parametrit = hylky_lusaus_parametrit($sarjanumero);
+  $parametrit['laji'] = 'hylky';
+
+  $sanoma = laadi_edifact_sanoma($parametrit);
+
+  $query = "UPDATE sarjanumeroseuranta SET
+            lisatieto = 'Hylätty'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND sarjanumero = '{$sarjanumero}'";
+  pupe_query($query);
+
+  if (laheta_sanoma($sanoma)) {
+    $viesti = "UIB: {$sarjanumero} merkitty hylätyksi.";
+  }
+
+  if ($hylattavat_kpl > 1) {
+    $task = 'hylky';
+  }
+  else {
+    unset($task);
+  }
+}
 
 if (isset($task) and $task == 'suorita_lusaus') {
 
@@ -66,7 +85,36 @@ if (isset($task) and $task == 'suorita_lusaus') {
 }
 
 if (isset($task) and $task == 'sinetoi') {
-  if (!empty($sinettinumero) and !empty($konttinumero)) {
+
+  if (empty($konttinumero)) {
+    $errors['konttinumero'] = t("Syötä konttinumero!");
+  }
+
+  if (empty($sinettinumero)) {
+    $errors['sinettinumero'] = t("Syötä sinettinumero!");
+  }
+
+  if (empty($taara)) {
+    $errors['taara'] = t("Syötä taarapaino!");
+  }
+
+  if (!is_numeric($taara)) {
+    $errors['taara'] = t("Epäkelpo taarapaino!");
+  }
+
+  if (empty($isokoodi)) {
+    $errors['isokoodi'] = t("Syötä ISO-koodi!");
+  }
+
+  if (strlen($konttinumero) > 17) {
+    $errors['konttinumero'] = t("Konttinumero saa olla korkeintaan 17 merkkiä pitkä.");
+  }
+
+  if (strlen($sinettinumero) > 10) {
+    $errors['sinettinumero'] = t("Sinettinumero saa olla korkeintaan 10 merkkiä pitkä.");
+  }
+
+  if (count($errors) == 0) {
 
     $kontit = kontitustiedot($konttiviite, $temp_konttinumero);
 
@@ -80,6 +128,11 @@ if (isset($task) and $task == 'sinetoi') {
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tunnus IN ({$lista})";
     pupe_query($query);
+
+    $konttinumero = mysql_real_escape_string($konttinumero);
+    $sinettinumero = mysql_real_escape_string($sinettinumero);
+    $taara = mysql_real_escape_string($taara);
+    $isokoodi = mysql_real_escape_string($isokoodi);
 
     $query = "UPDATE tilausrivin_lisatiedot SET
               konttinumero      = '{$konttinumero}',
@@ -105,8 +158,13 @@ if (isset($task) and $task == 'sinetoi') {
     else {
       $lahetys = 'EI';
     }
+
+    unset($task);
   }
-  unset($task);
+  else {
+    $task = 'anna_konttitiedot';
+  }
+
 }
 
 if (isset($task) and $task == 'laheta_satamavahvistus') {
@@ -131,10 +189,13 @@ if (isset($task) and $task == 'laheta_satamavahvistus') {
   }
 
   if (laheta_sanoma($sanoma)) {
-    echo "Sanoma lähetetty";
-    echo "<hr>";
-    echo $sanoma;
-    echo "<hr>";
+
+    $query = "UPDATE laskun_lisatiedot SET
+              satamavahvistus_pvm = NOW()
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND konttiviite = '{$konttiviite}'";
+    pupe_query($query);
+
   }
   else{
     echo "Lähetys epäonnistui!";
@@ -154,6 +215,7 @@ if (!isset($task)) {
             laskun_lisatiedot.konttiviite,
             laskun_lisatiedot.konttimaara,
             laskun_lisatiedot.konttityyppi,
+            laskun_lisatiedot.satamavahvistus_pvm,
             laskun_lisatiedot.rullamaara,
             lasku.toimaika,
             lasku.tila,
@@ -436,6 +498,7 @@ if (!isset($task)) {
         $kontit = kontitustiedot($tilaus['konttiviite']);
 
         $kesken = 0;
+
         foreach ($kontit as $konttinumero => $kontti) {
 
           $temp_array = explode("/", $konttinumero);
@@ -459,17 +522,16 @@ if (!isset($task)) {
             echo "<button type='button' disabled>" . t("Sinetöity") . "</button>";
           }
 
-
           js_openFormInNewWindow();
 
-          echo "&nbsp;<form method='post' id='hae_pakkalista'>";
+          echo "&nbsp;<form method='post' id='hae_pakkalista{$_konttinumero}'>";
           echo "<input type='hidden' name='task' value='hae_pakkalista' />";
           echo "<input type='hidden' name='data' value='{$kontti['pakkalista']}' />";
           echo "<input type='hidden' name='tee' value='XXX' />";
           echo "<input type='hidden' name='konttinumero' value='{$konttinumero}' />";
           echo "<input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />";
           echo "</form>";
-          echo "<button onClick=\"js_openFormInNewWindow('hae_pakkalista', 'Pakkalista'); return false;\" />";
+          echo "<button onClick=\"js_openFormInNewWindow('hae_pakkalista{$_konttinumero}', 'Pakkalista'); return false;\" />";
           echo t("Pakkalista");
           echo "</button>";
 
@@ -484,7 +546,26 @@ if (!isset($task)) {
           echo "</div>";
         }
 
-        if ($kesken == 0 and $mrn_tullut) {
+        if ($kesken == 0 and $mrn_tullut and $tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
+
+          $id = md5($tilaus['konttiviite']);
+
+          echo "
+          <div style='text-align:center;margin:10px 0;'>
+            <button type='button' disabled>" . t("Satamavahvistus lähetetty") . "</button>
+
+            <form method='post' id='nayta_satamavahvistus{$id}'>
+            <input type='hidden' name='task' value='hae_pakkalista' />
+            <input type='hidden' name='tee' value='XXX' />
+            </form>";
+
+            echo "<button onClick=\"js_openFormInNewWindow('nayta_satamavahvistus{$id}', 'Satamavahvistus'); return false;\" />";
+            echo t("Tulosta");
+            echo "</button>";
+            echo "</div>";
+
+        }
+        elseif ($kesken == 0 and $mrn_tullut) {
 
           echo "
             <div style='text-align:center;margin:10px 0;'>
@@ -498,7 +579,6 @@ if (!isset($task)) {
             </div>";
         }
 
-
         echo "</td>";
         $kasitellyt_konttivitteet[] = $tilaus['konttiviite'];
       }
@@ -511,14 +591,7 @@ if (!isset($task)) {
   else {
     echo "Ei tilauksia...";
   }
-
-
-
-
-
-
 }
-
 
 if (isset($task) and $task == 'anna_konttitiedot') {
 
@@ -528,16 +601,46 @@ if (isset($task) and $task == 'anna_konttitiedot') {
   echo "
   <form method='post'>
   <input type='hidden' name='task' value='sinetoi' />
+  <input type='hidden' name='rullia' value='{$rullia}' />
+  <input type='hidden' name='paino' value='{$paino}' />
   <input type='hidden' name='konttiviite' value='{$sinetoitava_konttiviite}' />
   <input type='hidden' name='temp_konttinumero' value='{$temp_konttinumero}' />
   <table>
-  <tr><th>" . t("Konttinumero") ."</th><td><input type='text' name='konttinumero' /></td></tr>
-  <tr><th>" . t("Sinettinumero") ."</th><td><input type='text' name='sinettinumero' /></td></tr>
-  <tr><th>" . t("Taarapaino") ." (kg)</th><td><input type='text' name='taara' /></td></tr>
-  <tr><th>" . t("ISO-koodi") ."</th><td><input type='text' name='isokoodi' /></td></tr>
-  <tr><th>" . t("Rullien määrä") ."</th><td>{$rullia} kpl</td></tr>
-  <tr><th>" . t("Paino") ."</th><td>{$paino}</td></tr>
-  <tr><th></th><td align='right'><input type='submit' value='". t("Sinetöi") ."' /></td></tr>
+  <tr>
+    <th>" . t("Konttinumero") ."</th>
+    <td><input type='text' name='konttinumero' value='{$konttinumero}' /></td>
+    <td class='back error'>{$errors['konttinumero']}</td>
+  </tr>
+  <tr>
+    <th>" . t("Sinettinumero") ."</th>
+    <td><input type='text' name='sinettinumero' value='{$sinettinumero}' /></td>
+    <td class='back error'>{$errors['sinettinumero']}</td>
+  </tr>
+  <tr>
+    <th>" . t("Taarapaino") ." (kg)</th>
+    <td><input type='text' name='taara' value='{$taara}' /></td>
+    <td class='back error'>{$errors['taara']}</td>
+  </tr>
+  <tr>
+    <th>" . t("ISO-koodi") ."</th>
+    <td><input type='text' name='isokoodi' value='{$isokoodi}' /></td>
+    <td class='back error'>{$errors['isokoodi']}</td>
+  </tr>
+  <tr>
+    <th>" . t("Rullien määrä") ."</th>
+    <td>{$rullia} kpl</td>
+    <td class='back'></td>
+  </tr>
+  <tr>
+    <th>" . t("Paino") ."</th>
+    <td>{$paino}</td>
+    <td class='back'></td>
+  </tr>
+  <tr>
+    <th></th>
+    <td align='right'><input type='submit' value='". t("Sinetöi") ."' /></td>
+    <td class='back'></td>
+  </tr>
   </table>
   </form>";
 
@@ -616,7 +719,6 @@ if (isset($task) and $task == 'tee_satamavahvistus') {
   </table>
   <input type='hidden' name='task' value='laheta_satamavahvistus' />
   </form>";
-
 }
 
 if (isset($task) and $task == 'hylky') {
@@ -663,7 +765,6 @@ if (isset($task) and $task == 'hylky') {
     <tr><th></th><td align='right'><input type='submit' value='". t("Vahvista hylkäys") ."' /></td><td class='back'></td></tr>
     </table>
     </form><br>";
-
   }
 }
 
@@ -703,6 +804,8 @@ if (isset($task) and $task == 'lusaus') {
       $lusaus_error = '';
     }
 
+    $vanha_paino = (int) $lusattava['massa'];
+
     echo "
     <form method='post'>
     <input type='hidden' name='task' value='suorita_lusaus' />
@@ -713,7 +816,7 @@ if (isset($task) and $task == 'lusaus') {
     <table>
     <tr><th>" . t("Tilausnumero") ."</th><td>{$lusattava['asiakkaan_tilausnumero']}</td><td class='back'></td></tr>
     <tr><th>" . t("UIB") ."</th><td>{$lusattava['sarjanumero']}</td><td class='back'></td></tr>
-    <tr><th>" . t("Vanha paino") ."</th><td>{$lusattava['massa']} kg</td><td class='back'></td></tr>
+    <tr><th>" . t("Vanha paino") ."</th><td>{$vanha_paino} kg</td><td class='back'></td></tr>
     <tr><th>" . t("Uusi paino") ."</th><td><input type='text' name='uusi_paino' /></td><td class='back error'>{$lusaus_error}</td></tr>
     <tr><th></th><td align='right'><input type='submit' value='". t("Suorita lusaus") ."' /></td><td class='back'></td></tr>
     </table>
@@ -755,7 +858,7 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
               ON ss.yhtio = tilausrivi.yhtio
               AND ss.myyntirivitunnus = tilausrivi.tunnus
             WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
-            AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusaus')
+            AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu')
             {$rajaus}
             AND laskun_lisatiedot.konttiviite = '{$konttiviite}'";
   $result = pupe_query($query);
@@ -795,4 +898,5 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
   }
 
   return $kontit;
+
 }

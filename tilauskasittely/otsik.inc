@@ -1643,18 +1643,6 @@ if ($tila == "" and !isset($jatka)) {
       $vasen++;
     }
 
-    $query = "SELECT tunnus, selite, merahti
-              FROM toimitustapa
-              WHERE yhtio = '$kukarow[yhtio]'
-              and (sallitut_maat = '' or sallitut_maat like '%$srow[toim_maa]%')
-              and (extranet in ('','M') or selite = '$srow[toimitustapa]')
-              ORDER BY jarjestys,selite";
-    $tresult = pupe_query($query);
-
-    while ($row = mysql_fetch_assoc($tresult)) {
-      echo "<div style='display: none; visibility: hidden;' id='merahti_toimitustapa_$row[tunnus]'>$row[merahti]</div>";
-    }
-
     //Tehd‰‰n dummy toimitustapa td, jotta alempana voidaan luoda oikea toimitustapa selecti valikoidun varaston perusteella.
     $vasen++;
 

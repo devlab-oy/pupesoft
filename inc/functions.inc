@@ -29739,6 +29739,71 @@ if (!function_exists("paivita_sopimusrivit")) {
   }
 }
 
+if (!function_exists("rakenna_relex_tuote_parametrit")) {
+  function rakenna_relex_tuote_parametrit() {
+    global $yhtiorow, $kukarow;
+    
+    // haetaan avainsanoissa määritellyt RELEX_TUOTEPAR avainsanat 
+    // ja rakennetaan niistä valmis sql-lause tuote-taulun
+    // rajauksiksi
+    
+    $sql_where_lisa = '';
+    $oper_array = array('on'              => '=',
+                        'not'             => '!=',
+                        'in'              => 'in',
+                        'not in'          => 'not in',
+                        'like_pre'        => '%like',
+                        'like_post'       => 'like%',
+                        'like_both'       => '%like%',
+                        'gt'              => '>',
+                        'lt'              => '<',
+                        'gte'             => '>=',
+                        'lte'             => '<=',
+    );
+    
+    $query = "SELECT *
+              FROM avainsana
+              WHERE yhtio = '{$yhtiorow['yhtio']}'
+              AND laji = 'RELEX_TUOTEPAR'";
+    $res = pupe_query($query);
+    
+    while ($row = mysql_fetch_assoc($res)) {
+      
+      $kentta = "tuote.".$row['selite'];
+      $operaattori = $oper_array[$row['selitetark']];
+      $arvo = $row['selitetark_2'];
+      
+      if (in_array($operaattori, array('in','not in'))) {
+        $arvo = "('".str_replace(",", "','", $arvo)."')";
+      }
+      elseif (in_array($operaattori, array('like_pre','like_post','like_both'))) {
+        switch ($operaattori) {
+        case "like_pre":
+          $arvo = str_replace("%", "", $arvo);
+          $arvo = "%$arvo";
+          break;
+        case "like_post":
+          $arvo = str_replace("%", "", $arvo);
+          $arvo = "$arvo%";
+          break;
+        case "like_both":
+          $arvo = str_replace("%", "", $arvo);
+          $arvo = "%$arvo%";
+          break;
+        }
+        $operaattori = 'like';
+      }
+      else {
+        $arvo = "'$arvo'";
+      }
+
+      $sql_where_lisa .= " AND {$kentta} {$operaattori} {$arvo}";
+    }
+
+    return $sql_where_lisa;
+  }
+}
+
 if (!function_exists("hae_saldo")) {
   function hae_saldo($tuote, $tyyppi = '') {
     global $kukarow, $yhtiorow, $maa;

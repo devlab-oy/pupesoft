@@ -597,11 +597,16 @@ class MagentoClient {
         $configurable_multi_data[$key] = $this->get_option_id($key, $parametri['arvo']);
       }
 
+      $kauppakohtaiset_hinnat = array();
       // Configurable-tuotteelle myös ensimmäisen lapsen erikoisparametrit
       if (count($verkkokauppatuotteet_erikoisparametrit) > 0) {
         foreach ($verkkokauppatuotteet_erikoisparametrit as $erikoisparametri) {
           $key = $erikoisparametri['nimi'];
-          if ($key == 'kieliversiot' or $key == 'kauppakohtaiset_hinnat') continue;
+          if ($key == 'kieliversiot') continue;
+          if ($key == 'kauppakohtaiset_hinnat') {
+            $kauppakohtaiset_hinnat = $erikoisparametri['arvo'];
+            continue;
+          }
           if (isset($tuotteet[0][$erikoisparametri['arvo']])) {
             $configurable_multi_data[$key] = $this->get_option_id($key, $tuotteet[0][$erikoisparametri['arvo']]);
           }
@@ -715,6 +720,33 @@ class MagentoClient {
           'product_stock.update',
           array(  $nimitys, // sku
             $stock_data));
+
+        // Päivitetään configurable-tuotteen kauppanäkymäkohtaiset hinnat
+        if (isset($kauppakohtaiset_hinnat) and count($kauppakohtaiset_hinnat) > 0) {
+          try {
+            foreach ($kauppakohtaiset_hinnat as $tuotekentta => $kauppatunnukset) {
+
+              foreach ($kauppatunnukset as $kauppatunnus) {
+
+                $tuotteen_kauppakohtainen_data = array(
+                  'price' => $tuotteet[0][$tuotekentta]
+                );
+
+                $this->_proxy->call($this->_session, 'catalog_product.update',
+                  array(
+                    $nimitys,
+                    $tuotteen_kauppakohtainen_data,
+                    $kauppatunnus
+                  )
+                );
+              }
+              $this->log("Tuotteen '{$nimitys}' kauppakohtainen hinta päivitetty (configurable) " . print_r($tuotteen_kauppakohtainen_data, true));
+            }
+          }
+          catch (Exception $e) {
+            $this->log("Virhe! Tuotteen '{$nimitys}' kauppakohtaisen hinnan päivitys epäonnistui (configurable) " . print_r($tuotteen_kauppakohtainen_data, true), $e);
+          }
+        }
 
         // Haetaan tuotekuvat Pupesoftista
         $tuotekuvat = $this->hae_tuotekuvat($tuotteet[0]['tunnus']);

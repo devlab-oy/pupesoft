@@ -36,6 +36,25 @@ if (isset($submit)) {
     }
     elseif ($parametrit) {
       $sanoma = laadi_edifact_sanoma($parametrit);
+
+      $filesize = strlen($sanoma);
+      $liitedata = mysql_real_escape_string($sanoma);
+      $tunnus = $parametrit['laskutunnus'];
+
+      $query = "INSERT INTO liitetiedostot SET
+                yhtio           = '{$kukarow['yhtio']}',
+                liitos          = 'lasku',
+                liitostunnus    = '$tunnus',
+                selite          = '{$parametrit['sanomanumero']}',
+                laatija         = '{$kukarow['kuka']}',
+                luontiaika      = NOW(),
+                data            = '{$liitedata}',
+                filename        = '{$parametrit['sanoma_id']}',
+                filesize        = '$filesize',
+                filetype        = 'text/plain',
+                kayttotarkoitus = 'kuittaussanoma'";
+      pupe_query($query);
+
     }
     else{
       $errors[] = t("Rahtikirjaa ei löytynyt!");

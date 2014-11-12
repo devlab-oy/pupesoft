@@ -169,6 +169,7 @@ function kuittaus_parametrit($hakunumero, $tyyppi) {
   }
 
   $query = "SELECT lasku.ovttunnus,
+            lasku.tunnus AS laskutunnus,
             sarjanumeroseuranta.sarjanumero,
             sarjanumeroseuranta.massa AS paino,
             sarjanumeroseuranta.leveys,
@@ -210,6 +211,8 @@ function kuittaus_parametrit($hakunumero, $tyyppi) {
     $pakkaukset[] = $row;
 
     $vastaanottajan_ovt = $row['ovttunnus'];
+
+    $laskutunnus = $row['laskutunnus'];
 
     $tilaus_ja_rivi = $row['asiakkaan_tilausnumero'] .':'. $row['asiakkaan_rivinumero'];
 
@@ -254,6 +257,7 @@ function kuittaus_parametrit($hakunumero, $tyyppi) {
   );
 
   $parametrit = array(
+    'laskutunnus' => $laskutunnus,
     'laji' => 'kuittaus',
     'tyyppi' => 'RECADV',
     'rekisterinumero' => $rekno,
@@ -1597,6 +1601,13 @@ function kasittele_rahtikirjasanoma($edi_data) {
        $kukarow['kesken'] = $laskurow['tunnus'];
        $var = 'P';
        require "lisaarivi.inc";
+
+       $update_query = "UPDATE lasku SET
+                        tila = 'N',
+                        alatila = ''
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tunnus = '{$laskurow['tunnus']}'";
+       pupe_query($update_query);
 
        $update_query = "UPDATE tilausrivin_lisatiedot SET
                         juoksu = '{$rulla['juoksu']}',

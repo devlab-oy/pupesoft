@@ -32,6 +32,10 @@ $query = "SELECT
           AND tila = 'O'
           GROUP BY lasku.tunnus
           ORDER BY trlt.rahtikirja_id";
+
+echo $query;
+echo '<hr>';
+
 $result = pupe_query($query);
 
 echo "<font class='head'>".t("Saapuva rahti")."</font><hr><br>";

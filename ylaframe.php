@@ -11,7 +11,7 @@ echo "<div id='ylaframe_big'>";
 echo "<table class='ylaframe'>";
 echo "<tr>";
 echo "<td width='305'><a class='puhdas' target='mainframe' href='{$palvelin2}logout.php?toim=change'><img style='padding-left: 15px;' src='{$palvelin2}pics/facelift/logo.png'></a></td>";
-echo "<td>$kukarow[nimi]</td>";
+echo "<td>$yhtiorow[nimi]<br>$kukarow[nimi]</td>";
 
 echo "<td class='ylapalkki'><a class='puhdas' target='top' href='{$palvelin2}'><img src='{$palvelin2}pics/facelift/koti.png'><br>".t("Etusivu")."</a></td>";
 

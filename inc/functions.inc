@@ -29770,30 +29770,42 @@ if (!function_exists("rakenna_relex_tuote_parametrit")) {
     while ($row = mysql_fetch_assoc($res)) {
       
       $kentta = "tuote.".$row['selite'];
-      $operaattori = $oper_array[$row['selitetark']];
       $arvo = $row['selitetark_2'];
       
-      if (in_array($operaattori, array('in','not in'))) {
-        $arvo = "('".str_replace(",", "','", $arvo)."')";
+      if (in_array($row['selitetark'], array('in','not in'))) {
+        
+        $arvo_array = explode(",", $arvo);
+        
+        // jos ei oo mit‰‰ arvoa, ni hyp‰t‰‰ t‰n yli
+        if (count($arvo_array) == 0) continue;
+
+        $operaattori = $oper_array[$row['selitetark']];
+
+        $arvo = "(";
+        foreach ($arvo_array as $_arvo) {
+          $arvo .= "'".trim($_arvo)."',";
+        }
+        $arvo = substr($arvo, 0, -1).")";
       }
-      elseif (in_array($operaattori, array('like_pre','like_post','like_both'))) {
-        switch ($operaattori) {
+      elseif (in_array($row['selitetark'], array('like_pre','like_post','like_both'))) {
+        switch ($row['selitetark']) {
         case "like_pre":
           $arvo = str_replace("%", "", $arvo);
-          $arvo = "%$arvo";
+          $arvo = "'%$arvo'";
           break;
         case "like_post":
           $arvo = str_replace("%", "", $arvo);
-          $arvo = "$arvo%";
+          $arvo = "'$arvo%'";
           break;
         case "like_both":
           $arvo = str_replace("%", "", $arvo);
-          $arvo = "%$arvo%";
+          $arvo = "'%$arvo%'";
           break;
         }
         $operaattori = 'like';
       }
       else {
+        $operaattori = $oper_array[$row['selitetark']];
         $arvo = "'$arvo'";
       }
 

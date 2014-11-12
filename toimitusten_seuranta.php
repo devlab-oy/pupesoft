@@ -296,9 +296,15 @@ if (!isset($task)) {
                 AND liitostunnus = '{$tilaus['tunnus']}'";
       $result = pupe_query($query);
 
-      $bookkaukset = mysql_num_rows($result);
+      $sanoma_numero = 1;
 
-      $tapahtumat = "&bull; " . $bookkaukset ." kpl bookkaussanomia haettu<br>";
+      $tapahtumat = "";
+
+      while ($sanoma = mysql_fetch_assoc($result)) {
+
+        $tapahtumat .= "&bull; <a href='view.php?id={$sanoma['tunnus']}' target='_blank'>{$sanoma_numero}. bookkaussanoma</a> haettu<br>";
+
+      }
 
       echo "<tr>";
 
@@ -488,7 +494,7 @@ if (!isset($task)) {
       }
       elseif (!$kontit_sinetointivalmiit) {
         echo "<td valign='top' rowspan='{$tilauksia_viitteella}' align='center'>";
-        echo t("Ei vielä tietoa.");
+        echo $tilaus['konttimaara'] . " kpl (ennakkoarvio)";
         echo "</td>";
         $kasitellyt_konttivitteet[] = $tilaus['konttiviite'];
       }
@@ -843,7 +849,8 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
             trlt.sinettinumero,
             trlt.kontin_mrn,
             ss.sarjanumero,
-            lasku.asiakkaan_tilausnumero
+            lasku.asiakkaan_tilausnumero,
+            laskun_lisatiedot.konttimaara
             FROM laskun_lisatiedot
             JOIN lasku
               ON lasku.yhtio = laskun_lisatiedot.yhtio

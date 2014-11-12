@@ -113,9 +113,9 @@ if ($tee == "ALOITAKOROTUS") {
                 AND tiliointi.tapvm > lasku.erpcm AND tiliointi.korjattu = '')
             WHERE lasku.tunnus     = laskut.tunnus
             $konslisa
-            GROUP BY asiakas.ytunnus, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp, asiakas.tunnus
+            GROUP BY asiakas.ytunnus, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp
             HAVING korkosumma > 0 $korkolisa
-            ORDER BY asiakas.ytunnus, asiakas.tunnus";
+            ORDER BY asiakas.ytunnus";
   $result = pupe_query($query);
 
   $korotettavat = array();

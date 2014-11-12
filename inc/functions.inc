@@ -28038,12 +28038,12 @@ if (!function_exists('hae_asiakkaan_toimitustavat')) {
 
     $toimitustavat = array();
 
-    $query = "SELECT toimitustapa.*
+    $query = "SELECT toimitustapa.*, 'M' AS extranet
               FROM asiakkaan_avainsanat
               JOIN toimitustapa ON (toimitustapa.yhtio = asiakkaan_avainsanat.yhtio
                 AND toimitustapa.selite             = asiakkaan_avainsanat.avainsana )
               WHERE asiakkaan_avainsanat.yhtio      = '{$kukarow['yhtio']}'
-              AND asiakkaan_avainsanat.laji         = 'editilaus_toimitustapa'
+              AND asiakkaan_avainsanat.laji         IN ('editilaus_toimitustapa', 'toimitustapa')
               AND asiakkaan_avainsanat.liitostunnus = '{$asiakas_tunnus}'";
     $result = pupe_query($query);
 

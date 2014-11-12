@@ -32,7 +32,7 @@ if ($tee == 'UV') {
             ORDER by tilausrivi.tuoteno";
   $uvresult = pupe_query($query);
 
-  if (mysql_num_rows($uvresult) > 0) {
+  if (mysql_num_rows($uvresult) > 1) {
     $useavalmiste = "ON";
   }
 }

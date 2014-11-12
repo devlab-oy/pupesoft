@@ -45,9 +45,7 @@ $yhtio = mysql_real_escape_string($argv[1]);
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
-$tuoterajaus = " AND tuote.status not in ('P','E')
-                 AND tuote.ei_saldoa    = ''
-                 AND tuote.tuotetyyppi  = '' ";
+$tuoterajaus = rakenna_relex_tuote_parametrit();
 
 // Tallennetaan rivit tiedostoon
 $filepath = "/tmp/input_orders_{$yhtio}_$ajopaiva.csv";

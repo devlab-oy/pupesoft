@@ -548,7 +548,12 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     }
 
     // T‰nne p‰‰see aina!
-    if ($phpnimi != 'indexvas.php' and $phpnimi != 'index.php' and $phpnimi != 'tervetuloa.php' and $phpnimi != 'logout.php' and $phpnimi != 'ylaframe.php') {
+    if ($phpnimi != 'indexvas.php' 
+      and $phpnimi != 'index.php' 
+      and $phpnimi != 'tervetuloa.php' 
+      and $phpnimi != 'logout.php' 
+      and $phpnimi != 'ylaframe.php' 
+      and $phpnimi != 'pikavalinnat.php') {
 
       if (!isset($toim)) $toim = "";
 

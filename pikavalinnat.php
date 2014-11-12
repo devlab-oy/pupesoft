@@ -13,7 +13,7 @@ $kuvakkeet_img = array ("Käppyrä"   => "graafi.png",
 if ($tee == "tallenna") {
   foreach($skriptit as $i => $skripti) {
     // Tsekataan, että kaikki tiedot on syötetty
-    if (empty($skriptit[$i]) or empty($kuvakkeet) or empty($tekstit)) {
+    if (empty($skriptit[$i]) or empty($kuvakkeet[$i]) or empty($tekstit[$i])) {
         unset($skriptit[$i]);
         unset($kuvakkeet[$i]);
         unset($tekstit[$i]);

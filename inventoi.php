@@ -1119,6 +1119,45 @@ if ($tee == 'VALMIS') {
     $tee = "INVENTOI";
   }
 
+  $_param_paalla = ($yhtiorow['inventointi_yhteenveto'] == "K");
+
+  if ($_param_paalla and empty($tee) and empty($virhe) and count($tuote) > 0 and $lista != '') {
+
+    $lista = (int) $lista;
+
+    $query = "SELECT *
+              FROM tuotepaikat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND inventointilista = '{$lista}'";
+    $listares = pupe_query($query);
+
+    while ($listarow = mysql_fetch_assoc($listares)) {
+
+      $query = "SELECT *
+                FROM tapahtuma
+                WHERE yhtio   = '{$kukarow['yhtio']}'
+                and tuoteno   = '{$listarow['tuoteno']}'
+                and laji      = 'Inventointi'
+                and hyllyalue = '{$listarow['hyllyalue']}'
+                and hyllynro  = '{$listarow['hyllynro']}'
+                and hyllyvali = '{$listarow['hyllyvali']}'
+                and hyllytaso = '{$listarow['hyllytaso']}'
+                ORDER BY tunnus desc
+                LIMIT 1";
+      $tapresult = pupe_query($query);
+      $taptrow = mysql_fetch_assoc($tapresult);
+
+      if (!empty($taptrow['selite']) and strpos($taptrow['selite'], "täsmäsi") === false) {
+
+        $taptrow["selite"] = preg_replace("/".t("paikalla")." .*?\-.*?\-.*?\-.*? /", "", $taptrow["selite"]);
+
+        echo "{$listarow['tuoteno']} &raquo; {$taptrow['selite']}<br /><br />";
+      }
+    }
+
+    echo "<br />";
+  }
+
   if ($tee == "" and $lopetus != '') {
     lopetus($lopetus, "META");
   }

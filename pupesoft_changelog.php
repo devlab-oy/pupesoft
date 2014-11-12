@@ -27,27 +27,35 @@ function github_api ($url) {
   }
 }
 
+// Katostaan milloin ollaan viimeksi kutsuttu githubin apia
+$query  = "SELECT max(date) haettu
+           FROM git_paivitykset
+           WHERE hash = 'github_api_request' ";
+$apires = pupe_query($query);
+$apirow = mysql_fetch_assoc($apires);
+
 $haetaanpulkkarit = TRUE;
 
-// Haetaan muuttuneet/uudet pulkkarit kantaan
-$query  = "SELECT max(updated) updated
-           FROM git_pulkkarit";
-$prres = pupe_query($query);
-$prrow = mysql_fetch_assoc($prres);
-
-if (!empty($prrow['updated'])) {
-  $updatedtime = strtotime($prrow['updated']);
-
-  if ($updatedtime > strtotime("6 hour ago")) {
-    $haetaanpulkkarit = FALSE;
-  }
-}
-else {
-  // Ekalla ajolla haetaan vaikka parin kuukauden takaa
-  $updatedtime = strtotime("2 month ago");
+// Kutsutaan apia korkeintaan keran tunnissa
+if (!empty($apirow['haettu']) and strtotime($apirow['haettu']) > strtotime("1 hour ago")) {
+  $haetaanpulkkarit = FALSE;
 }
 
 if ($haetaanpulkkarit) {
+
+  // Haetaan muuttuneet/uudet pulkkarit kantaan
+  $query  = "SELECT max(updated) updated
+             FROM git_pulkkarit";
+  $prres = pupe_query($query);
+  $prrow = mysql_fetch_assoc($prres);
+
+  if (!empty($prrow['updated'])) {
+    $updatedtime = strtotime($prrow['updated']);
+  }
+  else {
+    // Ekalla ajolla haetaan vaikka parin kuukauden takaa
+    $updatedtime = strtotime("2 month ago");
+  }
 
   $page = 1;
 
@@ -55,6 +63,12 @@ if ($haetaanpulkkarit) {
     $page++;
 
     if ($pulkkarit === FALSE) break;
+
+    // Tägätään apikutsun aikaleima
+    $query  = "INSERT INTO git_paivitykset
+               SET hash = 'github_api_request',
+               date = now()";
+    pupe_query($query);
 
     foreach ($pulkkarit as $pulkkari) {
       $updated = $pulkkari->updated_at;
@@ -128,6 +142,7 @@ if ($haetaanpulkkarit) {
 // Haetaan kymmenen uiusnta narustavetoa kannasta
 $query  = "SELECT *
            FROM git_paivitykset
+           WHERE hash != 'github_api_request'
            ORDER BY id DESC
            LIMIT 10";
 $vetores = pupe_query($query);

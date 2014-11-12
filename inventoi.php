@@ -18,6 +18,9 @@ if (!isset($livesearch_tee)) $livesearch_tee = "";
 if (!isset($mobiili))        $mobiili = "";
 if (!isset($laadittuaika))   $laadittuaika = "";
 if (!isset($enarifocus))     $enarifocus = "";
+if (!isset($selitenakyvyys)) {
+  $selitenakyvyys = isset($_COOKIE['selitenakyvyys']) ? $_COOKIE['selitenakyvyys'] : "kaikki";
+}
 
 $validi_kasinsyotetty_inventointipaivamaara = 0;
 
@@ -1324,6 +1327,23 @@ if ($tee == 'INVENTOI') {
     echo "<option value='nimityssorttaus' $seljarj4>".t("Nimitysjärjestykseen")."</option>";
     echo "<option value='osastotrytuoteno' $seljarj3>".t("Osasto/Tuoteryhmä/Tuotenumerojärjestykseen")."</option>";
     echo "</select>";
+
+    echo "<br />";
+
+    $sel = array($selitenakyvyys => 'checked') + array('kaikki' => '', 'muuttuneet' => '');
+
+    echo t("Näytä kaikki inventoidut");
+    echo "&nbsp;";
+    echo "<input type='radio' name='selitenakyvyys' value='kaikki' {$sel['kaikki']} ";
+    echo "onchange='submit()' />";
+    echo "&nbsp;&nbsp;";
+
+    echo t("Näytä inventoidut vain jos kappale muuttunut");
+    echo "&nbsp;";
+    echo "<input type='radio' name='selitenakyvyys' value='muuttuneet' {$sel['muuttuneet']} ";
+    echo "onchange='submit()' />";
+    echo "<br /><br />";
+
     echo "<input type='hidden' name='tee' value='INVENTOI'>";
     echo "<input type='hidden' name='lista' value='$lista'>";
     echo "<input type='hidden' name='lista_aika' value='$lista_aika'>";
@@ -1560,6 +1580,41 @@ if ($tee == 'INVENTOI') {
     }
     elseif ($tuoterow["inventointilista_aika"] == '0000-00-00 00:00:00' and $tuoterow["inventointilista"] == $lista) {
 
+      $query = "SELECT *
+                FROM tapahtuma
+                WHERE yhtio   = '$kukarow[yhtio]'
+                and tuoteno   = '$tuoterow[tuoteno]'
+                and laji      = 'Inventointi'
+                and laadittu  >= '$lista_aika'
+                and hyllyalue = '$tuoterow[hyllyalue]'
+                and hyllynro  = '$tuoterow[hyllynro] '
+                and hyllyvali = '$tuoterow[hyllyvali]'
+                and hyllytaso = '$tuoterow[hyllytaso]'
+                ORDER BY tunnus desc
+                LIMIT 1";
+      $tapresult = pupe_query($query);
+      $taptrow = mysql_fetch_assoc($tapresult);
+
+      //Jos invauserohälytys on triggeröity
+      $query = "SELECT abs(kpl) kpl
+                FROM tapahtuma
+                  WHERE yhtio = '$kukarow[yhtio]'
+                and tuoteno   = '$tuoterow[tuoteno]'
+                and laji      = 'Inventointi'
+                and laadittu  >= '$lista_aika'
+                and kpl       <> 0
+                ORDER BY tunnus desc
+                LIMIT 1";
+      $tapresult = pupe_query($query);
+      $taptrow2 = mysql_fetch_assoc($tapresult);
+
+      $_strpos = strpos($taptrow['selite'],"täsmäsi") !== false;
+      $_taptrow_chk = (mysql_num_rows($tapresult) == 0 or $taptrow2["kpl"] <= 10);
+
+      if ($selitenakyvyys == 'muuttuneet' and $_strpos and $_taptrow_chk) {
+        continue;
+      }
+
       echo "<tr>";
       echo "<td valign='top'>$tuoterow[tuoteno]</td><td valign='top' nowrap>".t_tuotteen_avainsanat($tuoterow, 'nimitys');
 
@@ -1577,49 +1632,36 @@ if ($tee == 'INVENTOI') {
 
       echo "</td><td valign='top'>$tuoterow[hyllyalue] $tuoterow[hyllynro] $tuoterow[hyllyvali] $tuoterow[hyllytaso]</td>$tdlisa";
 
-      $query = "SELECT *
-                FROM tapahtuma
-                WHERE yhtio   = '$kukarow[yhtio]'
-                and tuoteno   = '$tuoterow[tuoteno]'
-                and laji      = 'Inventointi'
-                and laadittu  >= '$lista_aika'
-                and hyllyalue = '$tuoterow[hyllyalue]'
-                and hyllynro  = '$tuoterow[hyllynro] '
-                and hyllyvali = '$tuoterow[hyllyvali]'
-                and hyllytaso = '$tuoterow[hyllytaso]'
-                ORDER BY tunnus desc
-                LIMIT 1";
-      $tapresult = pupe_query($query);
-      $taptrow = mysql_fetch_assoc($tapresult);
-
       $taptrow["selite"] = preg_replace("/".t("paikalla")." .*?\-.*?\-.*?\-.*? /", "", $taptrow["selite"]);
 
-      echo "<td valign='top' class='green' colspan='4'>".t("Tuote on inventoitu!")." $taptrow[selite]";
+      $_yli_10 = "";
 
-      //Jos invauserohälytys on triggeröity
-      $query = "SELECT abs(kpl) kpl
-                FROM tapahtuma
-                  WHERE yhtio = '$kukarow[yhtio]'
-                and tuoteno   = '$tuoterow[tuoteno]'
-                and laji      = 'Inventointi'
-                and laadittu  >= '$lista_aika'
-                and kpl       <> 0
-                ORDER BY tunnus desc
-                LIMIT 1";
-      $tapresult = pupe_query($query);
-      $taptrow = mysql_fetch_assoc($tapresult);
-
-      if ($taptrow["kpl"] > 10) {
-        echo "<br><font class='error'>".t("HUOM: Tuotteen saldo muuttui yli 10 kappaletta! Tarkista inventointi!")."</font>";
+      if ($taptrow2["kpl"] > 10) {
+        $_yli_10  = "<br />";
+        $_yli_10 .= "<font class='error'>";
+        $_yli_10 .= t("HUOM: Tuotteen saldo muuttui yli 10 kappaletta! Tarkista inventointi!");
+        $_yli_10 .= "</font>";
       }
 
-      echo "</td>";
+      if ($selitenakyvyys == 'muuttuneet' and strpos($taptrow['selite'],"täsmäsi") !== false) {
+        echo "<td colspan='4'>{$_yli_10}</td>";
+      }
+      else {
+        echo "<td valign='top' class='green' colspan='4'>";
+        echo t("Tuote on inventoitu!");
+        echo " {$taptrow['selite']}";
+        echo $_yli_10;
+        echo "</td>";
+      }
 
       if (in_array($tuoterow["sarjanumeroseuranta"], array("S", "T", "U", "V"))) {
         echo "<td valign='top' class='back'>".t("Tuote on sarjanumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
       }
       elseif (in_array($tuoterow["sarjanumeroseuranta"], array("E", "F", "G"))) {
         echo "<td valign='top' class='back'>".t("Tuote on eränumeroseurannassa").". ".t("Inventoidaan varastosaldoa")."!</td>";
+      }
+      else {
+        echo "<td>&nbsp;</td>";
       }
 
       echo "</tr>";

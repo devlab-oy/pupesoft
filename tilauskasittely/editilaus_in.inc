@@ -2228,32 +2228,46 @@ while ($tietue = fgets($fd)) {
       // tarvitaan $kukarow[yhtio], $kukarow[kesken], $laskurow ja $yhtiorow
       $kukarow["kesken"] = $laskurow["tunnus"];
       $editilaus_lasku_tunnus = $laskurow["tunnus"];
-      $_hyvaksyttavaksi = '';
 
       // Jos yhtiön parametreissä halutaaan, että tulostetaan lähete ja keräyslista aina, laitetaan tilaus hyväksyttäväksi
-      if ($yhtiorow['lahetteen_tulostustapa'] == "I" and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+      if ($yhtiorow['lahetteen_tulostustapa'] == "I") {
 
+        /*
+          
+         Otin tän pois, ei kai nää kaks asiaa liity toisiinsa?
+          
+         and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A'
+        
+        */
+
+
+        /*
+        
+        Nää piätisi triggeröidä valmiiksi enne ku tehdään lasku insertti:
+        
+        // Pitääks varastovalinta-jutun olla jonkun paramin takana? and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A'?
         if (is_array($varasto) and count($varasto) == 1) {
           $varasto = $varasto[0];
         }
         elseif (is_array($varasto)) {
           $varasto = 0;
         }
+        
+        eilahetetta = 'o',
+        osatoimitus = 'o',
+        varasto   = '$varasto'
+        */
 
         $query = "UPDATE lasku
                   SET tila  = 'N',
-                  alatila   = 'F',
-                  eilahetetta = 'o',
-                  osatoimitus = 'o',
-                  varasto   = '$varasto'
+                  alatila   = 'F'                  
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus  = '{$laskurow['tunnus']}'";
+                  AND tunnus  = '{$laskurow['tunnus']}'
+                  and tila    = 'N'
+                  and alatila = ''";
         pupe_query($query);
-        $_hyvaksyttavaksi = 'X';
       }
-
-      // jos terminaalitoimitus niin EI tehdä tilaus-valmista...
-      if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3 and $editilaus_tilaustyyppi != 'K' and $_hyvaksyttavaksi == '') {
+      elseif ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3 and $editilaus_tilaustyyppi != 'K') {
 
         if (in_array($yhtiorow['jt_automatiikka'], array('Y', 'W', 'K'))) {
 
@@ -2351,7 +2365,7 @@ while ($tietue = fgets($fd)) {
         $edi_ulos .= "$tilaus_valmis_message\n";
         $edi_ulos .= "\n".t("Merkittiin tilaus valmiiksi").": $editilaus_lasku_tunnus.\n\n";
       }
-      elseif ($editilaus_tila == "Z" and $_hyvaksyttavaksi == '') {
+      elseif ($editilaus_tila == "Z") {
         $query = "UPDATE lasku SET
                   alatila     = 'A'
                   WHERE yhtio = '$kukarow[yhtio]'
@@ -2359,7 +2373,7 @@ while ($tietue = fgets($fd)) {
         $terminaali_tilaus_res = pupe_query($query);
         $edi_ulos .= "\n".t("Terminaalitoimitus vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
       }
-      elseif ($editilaus_tilaustyyppi == 3 and $_hyvaksyttavaksi == '') {
+      elseif ($editilaus_tilaustyyppi == 3) {
         $edi_ulos .= "\n".t("Reklamaatio vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
       }
     }

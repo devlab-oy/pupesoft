@@ -961,7 +961,7 @@ if ($tila == "" and !isset($jatka)) {
     'maa' => $srow['maa'],
     'toimipaikka' => $yhtiotoimipaikka,
   );
-  
+
   $yhtiotoimipaikka = tilauksen_toimipaikka($args);
 
   if (!isset($srow['yhtio_toimipaikka']) and !empty($srow['maa']) and $srow['maa'] != $yhtiorow['maa']) {
@@ -976,7 +976,7 @@ if ($tila == "" and !isset($jatka)) {
       $alhiro  = mysql_fetch_assoc($alhire);
       $kukarow['toimipaikka'] = $alhiro['tunnus'];
     }
-  }  
+  }
 
   if ($yhtiorow["myyntitilauksen_toimipaikka"] == "A") {
     $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $yhtiotoimipaikka);
@@ -984,7 +984,7 @@ if ($tila == "" and !isset($jatka)) {
   else {
     $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
   }
-  
+
   if ($varasto == "" and isset($srow['varasto'])) {
     $varasto = $srow['varasto'];
   }

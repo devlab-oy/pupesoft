@@ -262,7 +262,7 @@ if (!isset($task)) {
       $tilaukset[$rivi['asiakkaan_tilausnumero']] = $rivi;
     }
 
-    print_r($tilaukset);
+    print_r($query);
     echo '<hr>';
 
     echo "<table>";

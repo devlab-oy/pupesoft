@@ -75,12 +75,12 @@ if (!function_exists("tuotetarkista")) {
       or $fieldname == "malli"
       or $fieldname == "mallitarkenne") {
 
-      $t[$i] = trim($t[$i]);
-
       // Ei tehdä tarkistuksia jos tietoa ei oo syötetty
       if (empty($t[$i])) {
         return;
       }
+
+      $t[$i] = trim($t[$i]);
 
       $tpque = "SELECT tunnus
                 FROM avainsana

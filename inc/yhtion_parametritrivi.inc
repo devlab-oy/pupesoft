@@ -4273,11 +4273,11 @@ if ($fieldname == "jtselaus_varastot") {
   $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
   $ulos .= "<option value = ''>";
-  $ulos .= t("JT-selauksessa ei rajata varastoja käyttäjän myyntivarastojen perusteella");
+  $ulos .= t("JT-selauksessa rajataan varastoja käyttäjän myyntivarastojen perusteella");
   $ulos .= "</option>";
 
   $ulos .= "<option value = 'K' {$sel}>";
-  $ulos .= t("JT-selauksessa rajataan varastoja käyttäjän myyntivarastojen perusteella");
+  $ulos .= t("JT-selauksessa ei rajata varastoja käyttäjän myyntivarastojen perusteella");
   $ulos .= "</option>";
 
   $ulos .= "</select></td>";

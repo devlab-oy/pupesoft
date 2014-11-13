@@ -4185,7 +4185,7 @@ if ($tee == '') {
     $_varastoon_asiakkaalle = (in_array($toim, array('VALMISTAVARASTOON', 'VALMISTAASIAKKAALLE')));
     $_tila_check = (!in_array($tila, array('LISAAKERTARESEPTIIN', 'LISAAISAKERTARESEPTIIN')));
 
-    if ($_varastoon_asiakkaalle and $_tila_check) {
+    if ($_varastoon_asiakkaalle and $_tila_check and empty($perheid)) {
 
       $perheid2 = 0;
 
@@ -4662,6 +4662,7 @@ if ($tee == '') {
     $omalle_tilaukselle = "";
     $valmistuslinja     = "";
     $avaa_rekursiiviset = "";
+    $tila = "";
   }
   elseif ($tila == "VARMUUTOS" and ($tapa == "POISJTSTA" or $tapa == "PUUTE" or $tapa == "JT")) {
     //otetaan varattukpl ja jtkpl muuttuja käyttöön
@@ -7549,7 +7550,7 @@ if ($tee == '') {
                 <input type='hidden' name='perheid'       value = '$row[perheid]'>
                 <input type='hidden' name='orig_tila'     value = '$orig_tila'>
                 <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
-                <input type='hidden' name='valmiste_vai_raakaaine' value='raakaaine' />
+                <input type='hidden' name='valmiste_vai_raakaaine' value='{$valmiste_vai_raakaaine}' />
                 <input type='Submit' value='".t("Lisää raaka-aine")."'>
                 </form>";
 
@@ -7566,7 +7567,7 @@ if ($tee == '') {
                 <input type='hidden' name='perheid'       value = '$row[perheid]'>
                 <input type='hidden' name='orig_tila'     value = '$orig_tila'>
                 <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
-                <input type='hidden' name='valmiste_vai_raakaaine' value='valmiste' />
+                <input type='hidden' name='valmiste_vai_raakaaine' value='{$valmiste_vai_raakaaine}' />
                 <input type='Submit' value='".t("Lisää valmiste")."'>
                 </form>";
           }

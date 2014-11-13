@@ -10943,7 +10943,7 @@ if (!function_exists("t_avainsana")) {
     // Onko sana jo käännetty
     $paramshasharray = md5($laji.$kieli.$where.$yhtio.$eivielakaytossa.$return);
 
-    if (isset($kaannetyt[$paramshasharray])) {
+    if (isset($kaannetyt[$paramshasharray]) and mysql_num_rows($kaannetyt[$paramshasharray]) != 0) {
 
       if (is_resource($kaannetyt[$paramshasharray])) {
         mysql_data_seek($kaannetyt[$paramshasharray], 0);

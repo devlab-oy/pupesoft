@@ -75,7 +75,7 @@ if ($_loytyy_ostoehdotus !== false and $paiva_ajo) {
 
   if ($ostoehdotus_ei_raportti) {
 
-    $tuoterajaus = str_replace($_rajaukset[0], "tuote.ostoehdotus = 'E'", $tuoterajaus);
+    $_tuoterajaus = str_replace($_rajaukset[0], "tuote.ostoehdotus = 'E'", $tuoterajaus);
 
     // Tallennetaan rivit tiedostoon
     $ofilepath = "/tmp/product_ostoehdotus_update_{$yhtio}_$ajopaiva.csv";
@@ -95,7 +95,7 @@ if ($_loytyy_ostoehdotus !== false and $paiva_ajo) {
               FROM tuote
               JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
               WHERE tuote.yhtio     = '{$yhtio}'
-              $tuoterajaus
+              $_tuoterajaus
               AND (tuote.muutospvm  >= date_sub(now(), interval 24 HOUR)
                 OR tuote.luontiaika >= date_sub(now(), interval 24 HOUR))";
     $res = pupe_query($query);

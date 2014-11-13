@@ -5,6 +5,13 @@ require 'inc/edifact_functions.inc';
 
 if (!isset($errors)) $errors = array();
 
+if (isset($tnum)) {
+  $lisa = " AND trlt.asiakkaan_tilausnumero = '{$tnum}' ";
+}
+else {
+  $lisa = '';
+}
+
 $query = "SELECT
           trlt.rahtikirja_id AS rahtikirja,
           group_concat(DISTINCT trlt.asiakkaan_tilausnumero) AS tilaukset,
@@ -12,7 +19,7 @@ $query = "SELECT
           count(tr.tunnus) AS rullia,
           sum(ss.massa) AS paino,
           lasku.luontiaika,
-          group_concat(DISTINCT tr.toimitettuaika) AS ajat,
+          tr.toimitettuaika,
           group_concat(DISTINCT ss.varasto) AS varastot,
           sum(if(ss.varasto IS NULL, 0, 1)) AS varastossa,
           sum(if(ss.lisatieto = 'Hyl‰tty', 1, 0)) AS hylatyt,
@@ -30,77 +37,102 @@ $query = "SELECT
             AND ss.ostorivitunnus = tr.tunnus
           WHERE lasku.yhtio = '{$kukarow['yhtio']}'
           AND tila = 'O'
+          {$lisa}
           GROUP BY lasku.tunnus
           ORDER BY trlt.rahtikirja_id";
 $result = pupe_query($query);
 
 echo "<font class='head'>".t("Saapuva rahti")."</font><hr><br>";
 
-echo "<table>";
-echo "<tr>";
-echo "<th>".t("Rahtikirja#")."</th>";
-echo "<th>".t("Tilausnumerot")."</th>";
-echo "<th>".t("Tilausrivit")."</th>";
-echo "<th>".t("Rullien m‰‰r‰")."</th>";
-echo "<th>".t("Rahdin paino")."</th>";
-echo "<th>".t("Sanoma vastaanotettu")."</th>";
-echo "<th>".t("Rahti vastaanotettu")."</th>";
-echo "<th>".t("Varastoon viety")."</th>";
-echo "<th class='back'></th>";
-echo "</tr>";
+if (mysql_num_rows($result) == 0) {
+  echo "Ei rahteja...";
+}
+else {
 
-while ($rahti = mysql_fetch_assoc($result)) {
-
+  echo "<table>";
   echo "<tr>";
+  echo "<th>".t("Rahtikirja#")."</th>";
+  echo "<th>".t("Tilausnumerot")."</th>";
+  echo "<th>".t("Tilausrivit")."</th>";
+  echo "<th>".t("Rullien m‰‰r‰")."</th>";
+  echo "<th>".t("Rahdin paino")."</th>";
+  echo "<th>".t("Sanoma vastaanotettu")."</th>";
+  echo "<th>".t("Rahti vastaanotettu")."</th>";
+  echo "<th>".t("Varastoon viety")."</th>";
+  echo "<th class='back'></th>";
+  echo "</tr>";
 
-  echo "<td valign='top'>";
-  echo $rahti['rahtikirja'];
-  echo "</td>";
+  while ($rahti = mysql_fetch_assoc($result)) {
 
-  echo "<td valign='top'>";
-  echo $rahti['tilaukset'];
-  echo "</td>";
+    echo "<tr>";
 
-  echo "<td valign='top' align='center'>";
-  echo $rahti['rivit'];
-  echo "</td>";
+    $liite_query = "SELECT tunnus
+                    FROM liitetiedostot
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND kayttotarkoitus = 'rahtikirjasanoma'
+                    AND selite = '{$rahti['rahtikirja']}'";
+    $liite_result = pupe_query($liite_query);
+    $liite = mysql_result($liite_result, 0);
 
-  echo "<td valign='top' align='center'>";
-  echo $rahti['rullia'] . " kpl";
+    echo "<td valign='top' align='center'>";
+    echo "<a href='view.php?id={$liite}' target='_blank'>" . $rahti['rahtikirja'] . "</a>";
+    echo "</td>";
 
-  $poikkeukset = array(
-    'odottaa hylk‰yst‰' => $rahti['hylattavat'],
-    'hylatty' => $rahti['hylatyt'],
-    'odottaa lusausta' => $rahti['lusattavat']
-    );
+    echo "<td valign='top' align='center'>";
+    echo $rahti['tilaukset'];
+    echo "</td>";
 
-  foreach ($poikkeukset as $poikkeus => $kpl) {
-    if ($kpl > 0) {
-      echo "<br>&bull; " . $kpl . " " . $poikkeus;
+    echo "<td valign='top' align='center'>";
+    echo $rahti['rivit'];
+    echo "</td>";
+
+    echo "<td valign='top' align='center'>";
+    echo $rahti['rullia'] . " kpl";
+
+    $poikkeukset = array(
+      'odottaa hylk‰yst‰' => $rahti['hylattavat'],
+      'hylatty' => $rahti['hylatyt'],
+      'odottaa lusausta' => $rahti['lusattavat']
+      );
+
+    foreach ($poikkeukset as $poikkeus => $kpl) {
+      if ($kpl > 0) {
+        echo "<br>&bull; " . $kpl . " " . $poikkeus;
+      }
+
     }
 
+    echo "</td>";
+
+    echo "<td valign='top' align='center'>";
+    echo (int) $rahti['paino'];
+    echo " kg </td>";
+
+    echo "<td valign='top' align='center'>";
+    echo $rahti['luontiaika'];
+    echo "</td>";
+
+    if ($rahti['toimitettuaika'] == '0000-00-00 00:00:00') {
+      $vastaanotettu = t("Ei viel‰");
+    }
+    else {
+      $vastaanotettu = $rahti['toimitettuaika'];
+    }
+
+    echo "<td valign='top' align='center'>";
+    echo $vastaanotettu;
+    echo "</td>";
+
+    echo "<td valign='top' align='center'>";
+    echo $rahti['varastossa'];
+    echo " kpl</td>";
+
+    echo "</tr>";
   }
+  echo "</table>";
 
-  echo "</td>";
-
-  echo "<td valign='top'>";
-  echo $rahti['paino'];
-  echo "</td>";
-
-  echo "<td valign='top'>";
-  echo $rahti['luontiaika'];
-  echo "</td>";
-
-  echo "<td valign='top'>";
-  echo $rahti['ajat'];
-  echo "</td>";
-
-  echo "<td valign='top' align='center'>";
-  echo $rahti['varastossa'];
-  echo " kpl</td>";
-
-  echo "</tr>";
 }
-echo "</table>";
+
+
 
 require "inc/footer.inc";

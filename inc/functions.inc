@@ -29781,15 +29781,18 @@ if (!function_exists("rakenna_relex_tuote_parametrit")) {
         if (count($arvo_array) == 0) continue;
 
         $operaattori = $oper_array[$oper];
-
         $arvo = "(";
+
         foreach ($arvo_array as $_arvo) {
           $arvo .= "'".trim($_arvo)."',";
         }
+
         $arvo = substr($arvo, 0, -1).")";
       }
       elseif (in_array($oper, array('like_pre','like_post','like_both'))) {
+
         $arvo = str_replace("%", "", $arvo);
+
         switch ($oper) {
         case "like_pre":
           $arvo = "'%$arvo'";
@@ -29801,6 +29804,7 @@ if (!function_exists("rakenna_relex_tuote_parametrit")) {
           $arvo = "'%$arvo%'";
           break;
         }
+
         $operaattori = 'like';
       }
       else {

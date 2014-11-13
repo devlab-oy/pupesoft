@@ -1,7 +1,5 @@
 <?php
 
-exit;
-
 // Kutsutaanko CLI:stä
 if (php_sapi_name() != 'cli') {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
@@ -22,6 +20,11 @@ if (!isset($argv[1])) {
 $yhtio = pupesoft_cleanstring($argv[1]);
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
+
+$session = "";
+for ($i = 0; $i < 25; $i++) {
+  $session .= chr(rand(65, 90));
+}
 
 $host = $ftp_info['host'];
 $user = $ftp_info['user'];

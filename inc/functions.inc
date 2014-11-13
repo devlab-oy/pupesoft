@@ -29771,15 +29771,16 @@ if (!function_exists("rakenna_relex_tuote_parametrit")) {
       
       $kentta = "tuote.".$row['selite'];
       $arvo = $row['selitetark_2'];
+      $oper = $row['selitetark'];
       
-      if (in_array($row['selitetark'], array('in','not in'))) {
+      if (in_array($oper, array('in','not in'))) {
         
         $arvo_array = explode(",", $arvo);
         
         // jos ei oo mit‰‰ arvoa, ni hyp‰t‰‰ t‰n yli
         if (count($arvo_array) == 0) continue;
 
-        $operaattori = $oper_array[$row['selitetark']];
+        $operaattori = $oper_array[$oper];
 
         $arvo = "(";
         foreach ($arvo_array as $_arvo) {
@@ -29787,8 +29788,8 @@ if (!function_exists("rakenna_relex_tuote_parametrit")) {
         }
         $arvo = substr($arvo, 0, -1).")";
       }
-      elseif (in_array($row['selitetark'], array('like_pre','like_post','like_both'))) {
-        switch ($row['selitetark']) {
+      elseif (in_array($oper, array('like_pre','like_post','like_both'))) {
+        switch ($oper) {
         case "like_pre":
           $arvo = str_replace("%", "", $arvo);
           $arvo = "'%$arvo'";
@@ -29805,7 +29806,7 @@ if (!function_exists("rakenna_relex_tuote_parametrit")) {
         $operaattori = 'like';
       }
       else {
-        $operaattori = $oper_array[$row['selitetark']];
+        $operaattori = $oper_array[$oper];
         $arvo = "'$arvo'";
       }
 

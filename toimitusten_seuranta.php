@@ -365,7 +365,7 @@ if (!isset($task)) {
 
         $rahtikirjat = array_count_values($rahtikirjat);
         $rahtikirjat = count($rahtikirjat);
-        $tapahtumat .= "&bull; " . $rahtikirjat ." kpl rahtikirjasanomia haettu<br>";
+        $tapahtumat .= "&bull; <a href='saapuva_rahti.php?tnum={$tilaus['asiakkaan_tilausnumero']}'>" . $rahtikirjat ." kpl rahtikirjasanomia</a> haettu<br>";
 
         if ($kuittaamatta == 0) {
           $tapahtumat .= "&bull; " .  t("Rahti kuitattu saapuneeksi") . "<br>";

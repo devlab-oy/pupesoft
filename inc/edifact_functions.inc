@@ -1640,8 +1640,6 @@ function kasittele_rahtikirjasanoma($edi_data) {
        pupe_query($update_query);
 
       }
-
-
     }
   }
 
@@ -1662,7 +1660,6 @@ function kasittele_iftsta($edi_data) {
   $edi_data = explode("'", $edi_data);
 
   $rivimaara = count($edi_data);
-
 
   foreach ($edi_data as $key => $rivi) {
 

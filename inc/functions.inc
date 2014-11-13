@@ -29742,11 +29742,11 @@ if (!function_exists("paivita_sopimusrivit")) {
 if (!function_exists("rakenna_relex_tuote_parametrit")) {
   function rakenna_relex_tuote_parametrit() {
     global $yhtiorow, $kukarow;
-    
-    // haetaan avainsanoissa määritellyt RELEX_TUOTEPAR avainsanat 
+
+    // haetaan avainsanoissa määritellyt RELEX_TUOTEPAR avainsanat
     // ja rakennetaan niistä valmis sql-lause tuote-taulun
     // rajauksiksi
-    
+
     $sql_where_lisa = '';
     $oper_array = array('on'              => '=',
                         'not'             => '!=',
@@ -29760,23 +29760,23 @@ if (!function_exists("rakenna_relex_tuote_parametrit")) {
                         'gte'             => '>=',
                         'lte'             => '<=',
     );
-    
+
     $query = "SELECT *
               FROM avainsana
               WHERE yhtio = '{$yhtiorow['yhtio']}'
               AND laji = 'RELEX_TUOTEPAR'";
     $res = pupe_query($query);
-    
+
     while ($row = mysql_fetch_assoc($res)) {
-      
+
       $kentta = "tuote.".$row['selite'];
       $arvo = $row['selitetark_2'];
       $oper = $row['selitetark'];
-      
+
       if (in_array($oper, array('in','not in'))) {
-        
+
         $arvo_array = explode(",", $arvo);
-        
+
         // jos ei oo mitää arvoa, ni hypätää tän yli
         if (count($arvo_array) == 0) continue;
 

@@ -23,18 +23,7 @@ if (isset($submit)) {
       $errors[] = t("Syötä sarjanumero");
     }
     else {
-      // Katsotaan löytyykö sarjanumero
-      $query = "SELECT sarjanumeroseuranta.*,
-                tilausrivi.toimitettuaika
-                FROM sarjanumeroseuranta
-                JOIN tilausrivi
-                 ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio
-                 AND tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
-                WHERE sarjanumeroseuranta.yhtio = '{$kukarow['yhtio']}'
-                AND sarjanumeroseuranta.sarjanumero = '{$sarjanumero}'";
-      $result = pupe_query($query);
-
-      if (mysql_num_rows($result) == 0) {
+      if (!$result = tarkista_sarjanumero($sarjanumero)) {
         $errors[] = t("Syötettyä sarjanumeroa ei löydy");
       }
       else{
@@ -84,9 +73,7 @@ if (isset($submit)) {
         $rahtikirja_id = $tilausrivi['rahtikirja_id'];
 
         $rullat = hae_rullat($rahtikirja_id);
-
       }
-
     }
     if (count($errors) == 0) {
       $view = 'tuotepaikka';
@@ -97,8 +84,16 @@ if (isset($submit)) {
     break;
   case 'tuotepaikka':
     $rullat = hae_rullat($rahtikirja_id);
-    $aktiivinen_paikka = $tuotepaikka;
-    $view = 'sarjanumero';
+
+    if ($hylly = hae_hylly($tuotepaikka)) {
+      $tuotepaikka = $hylly['hyllyalue'] . "-" . $hylly['hyllynro'];
+      $aktiivinen_paikka = $tuotepaikka;
+      $view = 'sarjanumero';
+    }
+    else {
+      $errors[] = t("Epäkelpo tuotepaikka!");
+      $view = "tuotepaikka";
+    }
     break;
   case 'aktiivipaikan_vaihto':
     $rullat = hae_rullat($rahtikirja_id);
@@ -110,7 +105,12 @@ if (isset($submit)) {
       $tuotepaikka = $aktiivinen_paikka;
     }
 
-    if (empty($tuotepaikka)) {
+    if (tarkista_sarjanumero($sarjanumero) == false) {
+      $errors[] = t("Syötettyä sarjanumeroa ei löydy");
+      $view = 'sarjanumero';
+      $rullat = hae_rullat($rahtikirja_id);
+    }
+    elseif (empty($tuotepaikka)) {
       $errors[] = t("Syötä tuotepaikka");
       $view = 'tuotepaikka';
       $rullat = hae_rullat($rahtikirja_id);
@@ -154,55 +154,9 @@ if (isset($submit)) {
         $updated = pupe_query($update_kuka);
       }
 
-      // Parsitaan uusi tuotepaikka
-      // Jos tuotepaikka on luettu viivakoodina, muotoa (C21 045) tai (21C 03V)
-      if (preg_match('/^([a-zåäö#0-9]{2,4} [a-zåäö#0-9]{2,4})/i', $tuotepaikka)) {
+      if ($hylly = hae_hylly($tuotepaikka)) {
 
-        // Pilkotaan viivakoodilla luettu tuotepaikka välilyönnistä
-        list($alku, $loppu) = explode(' ', $tuotepaikka);
-
-        // Mätsätään numerot ja kirjaimet erilleen
-        preg_match_all('/([0-9]+)|([a-z]+)/i', $alku, $alku);
-        preg_match_all('/([0-9]+)|([a-z]+)/i', $loppu, $loppu);
-
-        // Hyllyn tiedot oikeisiin muuttujiin
-        $hyllyalue = $alku[0][0];
-        $hyllynro  = $alku[0][1];
-        $hyllyvali = $loppu[0][0];
-        $hyllytaso = $loppu[0][1];
-
-        // Kaikkia tuotepaikkoja ei pystytä parsimaan
-        if ($hyllyalue == '' or $hyllynro == '' or $hyllyvali == '' or $hyllytaso == '') {
-          $errors[] = t("Tuotepaikan haussa virhe, yritä syöttää tuotepaikka käsin") . " ($tuotepaikka)";
-        }
-      }
-      // Tuotepaikka syötetty manuaalisesti (C-21-04-5) tai (C 21 04 5)
-      elseif (strstr($tuotepaikka, '-') or strstr($tuotepaikka, ' ')) {
-        // Parsitaan tuotepaikka omiin muuttujiin (eroteltu välilyönnillä)
-        if (preg_match('/\w+\s\w+\s\w+\s\w+/i', $tuotepaikka)) {
-          list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode(' ', $tuotepaikka);
-        }
-        // (eroteltu väliviivalla)
-        elseif (preg_match('/\w+-\w+-\w+-\w+/i', $tuotepaikka)) {
-          list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = explode('-', $tuotepaikka);
-        }
-        // Ei saa olla tyhjiä kenttiä
-        if ($hyllyalue == '' or $hyllynro == '' or $hyllyvali == '' or $hyllytaso == '') {
-          $errors[] = t("Virheellinen tuotepaikka") . ". ($tuotepaikka)";
-        }
-      }
-      else {
-        $errors[] = t("Virheellinen tuotepaikka, yritä syöttää tuotepaikka käsin") . " ($tuotepaikka)";
-      }
-
-      if (count($errors) == 0) {
-
-        $hylly = array(
-          "hyllyalue" => $hyllyalue,
-          "hyllynro"   => $hyllynro,
-          "hyllyvali" => $hyllyvali,
-          "hyllytaso" => $hyllytaso
-        );
+        $tuotepaikka = $hylly['hyllyalue'] . "-" . $hylly['hyllynro'];
 
         // Tarkistetaan onko syötetty hyllypaikka jo tälle tuotteelle
         $tuotteen_oma_hyllypaikka = "SELECT * FROM tuotepaikat
@@ -285,6 +239,10 @@ if (isset($submit)) {
 
         $view = 'sarjanumero';
         $aktiivinen_paikka = $tuotepaikka;
+      }
+      else {
+        $errors[] = t("Epäkelpo tuotepaikka!");
+        $view = "tuotepaikka";
       }
     }
     break;
@@ -385,7 +343,7 @@ if (isset($aktiivinen_paikka) and $aktiivinen_paikka != '') {
 
   echo "<div style='display:inline-block; margin:6px;'>";
   echo "<button name='submit' value='aktiivipaikan_vaihto'  class='aktiivi'>";
-  echo $aktiivinen_paikka;
+  echo t("Viedään paikalle: ") . $aktiivinen_paikka;
   echo "</button></div>";
 
   echo "<div style='display:inline-block; margin:6px;'>";
@@ -418,7 +376,7 @@ foreach ($rullat as $rulla) {
     else{
      $luokka = "viety";
     }
-    $paikka = "{$rulla['alue']}-{$rulla['nro']}-{$rulla['vali']}-{$rulla['taso']}";
+    $paikka = "{$rulla['alue']}-{$rulla['nro']}";
     echo "<div class='listadiv {$luokka}' >UIB: {$rulla['sarjanumero']} on paikalla {$paikka}</div>";
   }
 
@@ -439,6 +397,83 @@ echo "
 </script>";
 
 require 'inc/footer.inc';
+
+function tarkista_sarjanumero($sarjanumero) {
+  global $kukarow;
+
+  $query = "SELECT sarjanumeroseuranta.*,
+            tilausrivi.toimitettuaika
+            FROM sarjanumeroseuranta
+            JOIN tilausrivi
+             ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio
+             AND tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
+            WHERE sarjanumeroseuranta.yhtio = '{$kukarow['yhtio']}'
+            AND sarjanumeroseuranta.sarjanumero = '{$sarjanumero}'";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) == 0) {
+    return false;
+  }
+  else {
+    return $result;
+  }
+
+}
+
+function hae_hylly($tuotepaikka) {
+
+  $paikkamerkit = str_split($tuotepaikka);
+  $x = 0;
+  $valitut = array();
+
+  if (!ctype_alpha($paikkamerkit[0])) {
+    return false;
+  }
+  else {
+    $eka = array_shift($paikkamerkit);
+    $valitut[$x] = $eka;
+
+    foreach ($paikkamerkit as $merkki) {
+
+      if (ctype_alpha($merkki)) {
+        if (ctype_alpha($valitut[$x])) {
+          $valitut[$x] .= $merkki;
+        }
+        else {
+          $x++;
+          $valitut[$x] = $merkki;
+        }
+      }
+      elseif (ctype_digit($merkki)) {
+        if (ctype_digit($valitut[$x])) {
+          $valitut[$x] .= $merkki;
+        }
+        else {
+          $x++;
+          $valitut[$x] = $merkki;
+        }
+      }
+      else {
+        $x++;
+      }
+    }
+
+    $valitut = array_values($valitut);
+
+    if (!ctype_digit($valitut[1])) {
+      return false;
+    }
+
+    $hylly = array(
+      "hyllyalue" => strtoupper($valitut[0]),
+      "hyllynro"   => $valitut[1],
+      "hyllyvali" => '0',
+      "hyllytaso" => '0'
+    );
+
+    return $hylly;
+  }
+}
 
 function paivita_tilausrivit_ja_sarjanumeroseuranta($ostorivitunnus, $hylly, $vaihto = false) {
   global $kukarow;

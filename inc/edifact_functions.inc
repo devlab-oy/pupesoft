@@ -1,7 +1,7 @@
 <?php
 
 function rullat_ja_kontit($konttiviite, $maxkg) {
-  global $kukarow;
+  global $kukarow, $yhtiorow;
 
   // haetaan kaikki konttiviitteen alaiset rullat
   $query = "SELECT GROUP_CONCAT(lasku.tunnus), laskun_lisatiedot.konttimaara
@@ -99,6 +99,9 @@ function laheta_sanoma($sanoma){
 
   if ($sanoma == '') {
     return false;
+  }
+  else {
+    return true;
   }
 
   global $kukarow, $ftp_info;
@@ -469,7 +472,7 @@ function satamavahvistus_parametrit($konttiviite) {
 }
 
 function laadi_edifact_sanoma($parametrit) {
-  global $kukarow;
+  global $kukarow, $yhtiorow;
 
   //validoidaan parametrit ja setataan muita muuttujia
   //
@@ -883,7 +886,7 @@ function laadi_edifact_sanoma($parametrit) {
 
 
 function kasittele_bookkaussanoma($edi_data) {
-  global $kukarow;
+  global $kukarow, $yhtiorow;
 
   $edi_data = str_replace("\n", "", $edi_data);
   $liitedata = $edi_data;
@@ -1248,7 +1251,7 @@ function kasittele_bookkaussanoma($edi_data) {
 }
 
 function kasittele_rahtikirjasanoma($edi_data) {
-  global $kukarow;
+  global $kukarow, $yhtiorow;
 
   $edi_data = str_replace("\n", "", $edi_data);
 
@@ -1316,6 +1319,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
           $paamaara_info_osat = explode(":", $paamaara_info);
           $paamaara = $paamaara_info_osat[3];
 
+          /*
           // haetaan varaston tiedot
           $query = "SELECT tunnus
                     FROM varastopaikat
@@ -1324,6 +1328,8 @@ function kasittele_rahtikirjasanoma($edi_data) {
                     LIMIT 1";
           $varastores = pupe_query($query);
           $varasto_id = mysql_result($varastores,0);
+          */
+          $varasto_id = 101;
         }
 
         if (substr($edi_data[$luetaan], 0, 7) == "DTM+132") {
@@ -1470,7 +1476,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
     return false;
   }
 
-  require_once "../inc/luo_ostotilausotsikko.inc";
+  require_once "inc/luo_ostotilausotsikko.inc";
 
   // haetaan toimittajan tiedot
   $query = "SELECT *
@@ -1557,11 +1563,17 @@ function kasittele_rahtikirjasanoma($edi_data) {
       $trow = mysql_fetch_assoc($tuoteres);
       $kpl = 1;
       $kerayspvm = $toimaika = $data['toimitusaika'];
+      $toim = '';
+      $hinta = 0;
+      $var = '';
+      $kutsuja = '';
+      $kpl2 = 0;
+      $toimittajan_tunnus = '';
 
       $laskurow = $ostolaskurow;
       $kukarow['kesken'] = $laskurow['tunnus'];
-      unset($var);
-      require "lisaarivi.inc";
+
+      require "tilauskasittely/lisaarivi.inc";
 
       $query = "UPDATE tilausrivin_lisatiedot SET
                 rahtikirja_id = '{$data['rahtikirja_id']}',
@@ -1600,7 +1612,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
        $laskurow = mysql_fetch_assoc($result);
        $kukarow['kesken'] = $laskurow['tunnus'];
        $var = 'P';
-       require "lisaarivi.inc";
+       require "tilauskasittely/lisaarivi.inc";
 
        $update_query = "UPDATE lasku SET
                         tila = 'N',
@@ -1645,7 +1657,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
 }
 
 function kasittele_iftsta($edi_data) {
-  global $kukarow;
+  global $kukarow, $yhtiorow;
 
   $edi_data = str_replace("\n", "", $edi_data);
   $liitedata = $edi_data;

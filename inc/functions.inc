@@ -29789,17 +29789,15 @@ if (!function_exists("rakenna_relex_tuote_parametrit")) {
         $arvo = substr($arvo, 0, -1).")";
       }
       elseif (in_array($oper, array('like_pre','like_post','like_both'))) {
+        $arvo = str_replace("%", "", $arvo);
         switch ($oper) {
         case "like_pre":
-          $arvo = str_replace("%", "", $arvo);
           $arvo = "'%$arvo'";
           break;
         case "like_post":
-          $arvo = str_replace("%", "", $arvo);
           $arvo = "'$arvo%'";
           break;
         case "like_both":
-          $arvo = str_replace("%", "", $arvo);
           $arvo = "'%$arvo%'";
           break;
         }

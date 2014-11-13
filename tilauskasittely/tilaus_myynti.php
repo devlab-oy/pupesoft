@@ -1817,7 +1817,7 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
   and $yhtiorow['reklamaation_kasittely'] == 'U') {
   // Reklamaatio/takuu on valmis laskutettavaksi
   // katsotaan onko tilausrivit Unikko-j‰rjestelm‰‰n
-  if ($laskurow['tilaustyyppi'] == 'U') {
+  if ($laskurow['tilaustyyppi'] == 'U' or $laskurow['tilaustyyppi'] == 'R') {
     $saldoton_lisa = "and tuote.ei_saldoa=''";
   }
   else {

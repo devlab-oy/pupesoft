@@ -95,7 +95,20 @@ if (isset($submit)) {
       $view = 'sarjanumero';
     }
     break;
+  case 'tuotepaikka':
+    $rullat = hae_rullat($rahtikirja_id);
+    $aktiivinen_paikka = $tuotepaikka;
+    $view = 'sarjanumero';
+    break;
+  case 'aktiivipaikan_vaihto':
+    $rullat = hae_rullat($rahtikirja_id);
+    $view = 'tuotepaikka';
+    break;
   case 'sarjanumero_tuotepaikka':
+
+    if (isset($aktiivinen_paikka) and $aktiivinen_paikka != '') {
+      $tuotepaikka = $aktiivinen_paikka;
+    }
 
     if (empty($tuotepaikka)) {
       $errors[] = t("Syötä tuotepaikka");
@@ -271,6 +284,7 @@ if (isset($submit)) {
         }
 
         $view = 'sarjanumero';
+        $aktiivinen_paikka = $tuotepaikka;
       }
     }
     break;
@@ -312,20 +326,35 @@ if ($view == 'sarjanumero') {
     $vaihtoinput = "<input type='hidden' name='vaihdettava_sarjanumero' value='{$sarjanumero}' />";
   }
 
+  if (isset($aktiivinen_paikka) and $aktiivinen_paikka != '') {
+    $submit = "sarjanumero_tuotepaikka";
+  }
+  else {
+    $submit = "sarjanumero";
+  }
+
   echo "
   <form method='post' action='tuloutus.php'>
     <div style='text-align:center;padding:10px;'>
       <label for='sarjanumero'>", t("Sarjanumero"), "</label><br>
       <input type='hidden' name='rahtikirja_id' value='{$rahtikirja_id}' />
+      <input type='hidden' name='aktiivinen_paikka' value='{$aktiivinen_paikka}' />
       {$vaihtoinput}
       <input type='text' id='sarjanumero' name='sarjanumero' style='margin:10px;' />
       <br>
-      <button name='submit' value='sarjanumero' onclick='submit();' class='button'>", t("OK"), "</button>
+      <button name='submit' value='{$submit}' onclick='submit();' class='button'>", t("OK"), "</button>
     </div>
   </form>";
 }
 
 if ($view == 'tuotepaikka') {
+
+  if (isset($sarjanumero) and $sarjanumero != '') {
+    $submit = "sarjanumero_tuotepaikka";
+  }
+  else {
+    $submit = "tuotepaikka";
+  }
 
   echo "
   <form method='post' action='tuloutus.php'>
@@ -335,10 +364,12 @@ if ($view == 'tuotepaikka') {
       <label for='sarjanumero'>", t("Tuotepaikka"), "</label><br>
       <input type='text' id='tuotepaikka' name='tuotepaikka' style='margin:10px;' />
       <br>
-      <button name='submit' value='sarjanumero_tuotepaikka' onclick='submit();' class='button'>", t("OK"), "</button>
+      <button name='submit' value='{$submit}' onclick='submit();' class='button'>", t("OK"), "</button>
     </div>
   </form>";
 }
+
+
 
 if (count($errors) > 0) {
   echo "<div class='error' style='text-align:center'>";
@@ -346,6 +377,26 @@ if (count($errors) > 0) {
     echo $error."<br>";
   }
   echo "</div>";
+}
+
+if (isset($aktiivinen_paikka) and $aktiivinen_paikka != '') {
+
+  echo "<div style='text-align:center; padding:10px; width:700px; margin:0 auto; overflow:auto;'>";
+
+  echo "<div style='display:inline-block; margin:6px;'>";
+  echo "<button name='submit' value='aktiivipaikan_vaihto'  class='aktiivi'>";
+  echo $aktiivinen_paikka;
+  echo "</button></div>";
+
+  echo "<div style='display:inline-block; margin:6px;'>";
+  echo "<form method='post' action=''>";
+  echo "<input type='hidden' name='rahtikirja_id' value='{$rahtikirja_id}' />";
+  echo "<button name='submit' value='aktiivipaikan_vaihto' onclick='submit();'>";
+  echo t("Vaihda");
+  echo "</button></form></div>";
+
+  echo "</div>";
+
 }
 
 foreach ($rullat as $rulla) {

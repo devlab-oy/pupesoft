@@ -4185,7 +4185,7 @@ if ($tee == '') {
     $_varastoon_asiakkaalle = (in_array($toim, array('VALMISTAVARASTOON', 'VALMISTAASIAKKAALLE')));
     $_tila_check = (!in_array($tila, array('LISAAKERTARESEPTIIN', 'LISAAISAKERTARESEPTIIN')));
 
-    if ($_varastoon_asiakkaalle and isset($tila) and $_tila_check) {
+    if ($_varastoon_asiakkaalle and $_tila_check and empty($perheid)) {
 
       $perheid2 = 0;
 

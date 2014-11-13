@@ -644,7 +644,6 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
 
   if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
     echo "<th align='left'>".t("Reseptiin")."</th>";
-    echo "<input type='hidden' name='tila' value='{$tila}' />";
   }
 
   echo "<th align='left'>".t("Tuoteno")."</th>";

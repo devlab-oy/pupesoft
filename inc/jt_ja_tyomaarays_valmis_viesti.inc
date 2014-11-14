@@ -24,7 +24,7 @@ function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $kerattu = 
   if (loytyy_jt_riveja($tilausnumero)) {
     $otsikko = t("Tilaus noudettavissa");
 
-    $avainsanaviesti = hae_viesti_avainsanoista("jalkitoimitus");
+    $avainsanaviesti = t_avainsana("JTVALMISVIESTI", "", "", "", "", "selite");
 
     if (empty($avainsanaviesti)) {
       $viesti =
@@ -41,7 +41,7 @@ function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $kerattu = 
   elseif (loytyy_tyomaarays($tilausnumero) or $kerattu) {
     $otsikko = t("Huoltotyö valmis");
 
-    $avainsanaviesti = hae_viesti_avainsanoista("tyomaarays");
+    $avainsanaviesti = t_avainsana("TYOMVALMVIEST", "", "", "", "", "selite");
 
     if (empty($avainsanaviesti)) {
       $viesti =
@@ -174,24 +174,4 @@ function loytyy_jt_riveja($tilausnumero) {
   }
 
   return false;
-}
-
-function hae_viesti_avainsanoista($tyyppi) {
-  global $kukarow;
-
-  $laji = $tyyppi == "tyomaarays" ? "TYOMVALMVIEST" : "JTVALMISVIESTI";
-
-  $query =
-    "SELECT laji,
-     selite
-     FROM avainsana
-     WHERE yhtio = '{$kukarow['yhtio']}'
-     AND laji = '{$laji}';";
-
-  $result = pupe_query($query);
-
-  $viesti = mysql_fetch_assoc($result);
-  $viesti = $viesti["selite"];
-
-  return $viesti;
 }

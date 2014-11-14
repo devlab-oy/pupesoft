@@ -166,6 +166,7 @@ $editilaus_toimitustapa     = "";
 $editilaus_rahtivapaa       = "";
 $editilaus_tilaustyyppi     = "";
 $editilaus_eilahetetta      = "";
+$editilaus_osatoimitus      = "";
 $editilaus_sisainen         = "";
 $editilaus_kassalipas       = "";
 $til_vienti                 = "";
@@ -1390,6 +1391,75 @@ while ($tietue = fgets($fd)) {
 
       $toimitetaan_tanne = (isset($toimovttunnus) and !empty($toimovttunnus)) ? $toimovttunnus : $arow['toim_ovttunnus'];
 
+      $varasto = array(0);
+
+      if ($edi_tyyppi == "magento") {
+        // Nämä ovat ainoat varastot joista verkkokauppa saa myydä
+        if ($verkkokauppavarasto == "") {
+          $query  = "SELECT GROUP_CONCAT(tunnus) tunnukset
+                     FROM varastopaikat
+                     WHERE yhtio      = '$kukarow[yhtio]'
+                     AND prioriteetti > 0 AND tyyppi != 'P'";
+          $pres = pupe_query($query);
+          $prow = mysql_fetch_assoc($pres);
+
+          if ($prow["tunnukset"] != "") {
+            $verkkokauppavarasto   = explode(",", $prow["tunnukset"]);
+            $verkkokauppavarasto_li = " and varastopaikat.tunnus in ($prow[tunnukset]) ";
+          }
+          
+        }
+        $varasto = $verkkokauppavarasto;
+      }
+      elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and $kukarow['toimipaikka'] == 0) {
+        $query = "SELECT *
+                  FROM varastopaikat
+                  WHERE yhtio     = '{$kukarow['yhtio']}'
+                  AND tyyppi      = ''
+                  AND toimipaikka = 0";
+        $varresult = pupe_query($query);
+
+        while ($varrow = mysql_fetch_assoc($varresult)) {
+          array_push($varasto, $varrow['tunnus']);
+        }
+      }
+      elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
+
+        $args = array(
+          'asiakas_tunnus' => $arow['tunnus'],
+          'toimipaikka_tunnus' => $kukarow['toimipaikka'],
+          'toim' => "",
+          'tilaustyyppi' => $editilaus_tilaustyyppi,
+          'varasto' => "",
+          'toimitus_maa' => $arow['maa'],
+        );
+
+        list($oletus_varasto, $varasto) = palauta_varasto($args);
+        $_onko_varasto_setattu = (isset($oletus_varasto) and $oletus_varasto != '0' and is_numeric($oletus_varasto));
+
+        array_unshift($varasto, $oletus_varasto);
+
+        if ($_onko_varasto_setattu) {
+          
+          $varasto = array($oletus_varasto);
+          
+          $v_toimipaikka = hae_varaston_toimipaikka($oletus_varasto);
+
+          if ($v_toimipaikka['tunnus'] != $kukarow['toimipaikka']) {
+            $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $v_toimipaikka['tunnus']);
+          }
+        }
+      }
+
+      if ($yhtiorow['myyntitilaus_osatoimitus'] == 'E') {
+        $editilaus_osatoimitus = 'o';
+      }
+
+      if ($edi_tyyppi != "magento" and $yhtiorow['lahetteen_tulostustapa'] == "I") {
+        $editilaus_eilahetetta = "o";
+        $editilaus_alatila = 'F';
+      }
+
       // Lisätään otsikko
       $query = "INSERT into lasku SET
                 aktiivinen_kuljetus     = '$suunnistus',
@@ -1431,7 +1501,7 @@ while ($tietue = fgets($fd)) {
                 nimitark                = '$arow[nimitark]',
                 ohjausmerkki            = '{$ohjausmerkki}',
                 olmapvm                 = '',
-                osatoimitus             = '',
+                osatoimitus             = '{$editilaus_osatoimitus}',
                 osoite                  = '$arow[osoite]',
                 ovttunnus               = '$arow[ovttunnus]',
                 piiri                   = '$arow[piiri]',
@@ -1463,7 +1533,7 @@ while ($tietue = fgets($fd)) {
                 toim_email              = '$arow[toim_email]',
                 tunnusnippu             = '',
                 valkoodi                = '$yhtiorow[valkoodi]',
-                varasto                 = '',
+                varasto                 = '{$varasto[0]}',
                 verkkotunnus            = '$arow[verkkotunnus]',
                 vienti                  = '$til_vienti',
                 vienti_kurssi           = '1',
@@ -1735,9 +1805,9 @@ while ($tietue = fgets($fd)) {
 
   case 'OLINSA_PI' :
     // tämän rivin asiakkaan oma tuotenumero
-    $type = explode("@", $tieto);
-    $olinsapi    = trim($type[0]);
-    $olinvarasto = trim($type[2]); // kolmannessa segmentissä tulee meidän varastopaikka jos lähettäjä tietää sen
+    $type     = explode("@", $tieto);
+    $olinsapi = trim($type[0]);
+    $varasto  = trim($type[2]); // kolmannessa segmentissä tulee meidän varastopaikka jos lähettäjä tietää sen
     break;
 
   case 'OLINEN_NU' :
@@ -1941,72 +2011,7 @@ while ($tietue = fgets($fd)) {
           $paikka              = "";
           $kukarow["kesken"]   = $laskurow["tunnus"];
           $jtkielto            = $laskurow['jtkielto'];
-          $varasto             = array();
           $kommentti           = $rivikommentti;
-          $laskurow["varasto"] = "";
-
-          if ($edi_tyyppi == "magento") {
-            // Nämä ovat ainoat varastot joista verkkokauppa saa myydä
-            if ($verkkokauppavarasto == "") {
-              $query  = "SELECT GROUP_CONCAT(tunnus) tunnukset
-                         FROM varastopaikat
-                         WHERE yhtio      = '$kukarow[yhtio]'
-                         AND prioriteetti > 0 AND tyyppi != 'P'";
-              $pres = pupe_query($query);
-              $prow = mysql_fetch_assoc($pres);
-
-              if ($prow["tunnukset"] != "") {
-                $verkkokauppavarasto   = explode(",", $prow["tunnukset"]);
-                $verkkokauppavarasto_li = " and varastopaikat.tunnus in ($prow[tunnukset]) ";
-                $laskurow["varasto"]   = $verkkokauppavarasto[0];
-              }
-            }
-
-            $varasto = $verkkokauppavarasto;
-          }
-          elseif ($olinvarasto != "") {
-            $varasto = $olinvarasto;
-          }
-          elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A' and $laskurow['yhtio_toimipaikka'] == 0) {
-            $query = "SELECT *
-                      FROM varastopaikat
-                      WHERE yhtio     = '{$kukarow['yhtio']}'
-                      AND tyyppi      = ''
-                      AND toimipaikka = 0";
-            $varresult = pupe_query($query);
-
-            while ($varrow = mysql_fetch_assoc($varresult)) {
-              array_push($varasto, $varrow['tunnus']);
-            }
-          }
-          elseif ($yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
-
-            $args = array(
-              'asiakas_tunnus' => $laskurow['liitostunnus'],
-              'toimipaikka_tunnus' => $laskurow['yhtio_toimipaikka'],
-              'toim' => "EXTRANET",
-              'tilaustyyppi' => $editilaus_tilaustyyppi,
-              'varasto' => $laskurow['varasto'],
-              'toimitus_maa' => $laskurow['maa'],
-            );
-
-            list($varasto, $varastot) = palauta_varasto($args);
-            $_onko_varasto_setattu = (isset($varasto) and $varasto != '0' and is_numeric($varasto));
-
-            if ($_onko_varasto_setattu) {
-
-              $v_toimipaikka = hae_varaston_toimipaikka($varasto);
-              if ($v_toimipaikka['tunnus'] == 0) {
-                $_toimipaikka = $kukarow['toimipaikka'];
-                $kukarow['toimipaikka'] = 0;
-              }
-              if ($v_toimipaikka['tunnus'] != $laskurow['yhtio_toimipaikka']) {
-                $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $v_toimipaikka['tunnus']);
-                $kukarow['toimipaikka'] = (isset($_toimipaikka) ? $_toimipaikka : $kukarow['toimipaikka']);
-              }
-              unset($_toimipaikka);
-            }
-          }
 
           // jos terminaalitoimitus niin ohitetaan kaikki saldozekit, sekä laitetaan kommenttiriville asiakkaan tuotenumero ja nimitys
           if ($editilaus_tila == "Z") {
@@ -2186,7 +2191,11 @@ while ($tietue = fgets($fd)) {
   case 'OMSG__END' :
   case '*IE' :
   case 'UNT':
-
+  
+    if ($editilaus_otsikko_ok == "KYLLA" and $edi_tyyppi != "magento" and $yhtiorow['lahetteen_tulostustapa'] == "I") {
+      $editilaus_otsikko_ok = "HYVAKSYTTAVAKSI";
+    }
+    
     // jos meilla on otsikko voidaan laittaa sen valmiiksi
     if ($editilaus_otsikko_ok == "KYLLA") {
       //tarkistetaan toimitustapa vakin takia
@@ -2229,45 +2238,7 @@ while ($tietue = fgets($fd)) {
       $kukarow["kesken"] = $laskurow["tunnus"];
       $editilaus_lasku_tunnus = $laskurow["tunnus"];
 
-      // Jos yhtiön parametreissä halutaaan, että tulostetaan lähete ja keräyslista aina, laitetaan tilaus hyväksyttäväksi
-      if ($yhtiorow['lahetteen_tulostustapa'] == "I") {
-
-        /*
-          
-         Otin tän pois, ei kai nää kaks asiaa liity toisiinsa?
-          
-         and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A'
-        
-        */
-
-
-        /*
-        
-        Nää piätisi triggeröidä valmiiksi enne ku tehdään lasku insertti:
-        
-        // Pitääks varastovalinta-jutun olla jonkun paramin takana? and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A'?
-        if (is_array($varasto) and count($varasto) == 1) {
-          $varasto = $varasto[0];
-        }
-        elseif (is_array($varasto)) {
-          $varasto = 0;
-        }
-        
-        eilahetetta = 'o',
-        osatoimitus = 'o',
-        varasto   = '$varasto'
-        */
-
-        $query = "UPDATE lasku
-                  SET tila  = 'N',
-                  alatila   = 'F'                  
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus  = '{$laskurow['tunnus']}'
-                  and tila    = 'N'
-                  and alatila = ''";
-        pupe_query($query);
-      }
-      elseif ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3 and $editilaus_tilaustyyppi != 'K') {
+      if ($editilaus_tila != "Z" and $editilaus_tilaustyyppi != 3 and $editilaus_tilaustyyppi != 'K') {
 
         if (in_array($yhtiorow['jt_automatiikka'], array('Y', 'W', 'K'))) {
 
@@ -2377,6 +2348,9 @@ while ($tietue = fgets($fd)) {
         $edi_ulos .= "\n".t("Reklamaatio vastaanotettu").": $editilaus_lasku_tunnus.\n\n";
       }
     }
+    elseif ($editilaus_otsikko_ok == "HYVAKSYTTAVAKSI") {
+      $edi_ulos .= "\n".t("Merkittiin tilaus hyväksyttäväksi").": {$laskurow['tunnus']}.\n\n";
+    }
     else {
       $edi_ulos .= "\n".t("Otsikko oli virheellinen tilausta/rivejä ei lisätty")."!\n\n";
     }
@@ -2431,6 +2405,7 @@ while ($tietue = fgets($fd)) {
     $editilaus_rahtivapaa   = "";
     $editilaus_tilaustyyppi = "";
     $editilaus_eilahetetta  = "";
+    $editilaus_osatoimitus  = "";
     $editilaus_sisainen     = "";
     $editilaus_kassalipas   = "";
     $til_vienti             = "";

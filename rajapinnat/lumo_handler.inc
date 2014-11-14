@@ -4,13 +4,21 @@
  * Lumo-handler ajaa taustalla maksup‰‰tetapahtumia ja tallentaa liikkuvat tiedot kantaan.
  * Tarvitaan $tilausnumero, $korttimaksu (summa)
  * Maksutapahtuman tila tarkastetaan ensin aina tietokannasta ja ajetaan vasta sitten maksup‰‰tteelle
- * Settaa lopuksi muuttujat k‰yttˆliittym‰‰ varten 
+ * Settaa lopuksi muuttujat k‰yttˆliittym‰‰ varten
  **/
 
 require_once("rajapinnat/lumo_client.php");
 
-$korttimaksu = str_replace(",",".", $korttimaksu);
+$korttimaksu   = str_replace(",", ".", $korttimaksu);
 $korttimaksu_f = $korttimaksu * 100;
+
+$summa   = str_replace(",", '.', $kaikkiyhteensa);
+$summa_f = $summa * 100;
+
+$jaljella_oleva_summa = $summa_f - maksettu_kortilla_yhteensa($laskurow["tunnus"]);
+
+$voi_maksaa_viela = $jaljella_oleva_summa >= $korttimaksu_f;
+
 
 // 1 = tee maksutapahtuma, 2 = hae asiakkaan kuitti, 3 = hae kauppiaan kuitti
 $suoritukset = array (1,2,3);
@@ -32,7 +40,7 @@ foreach($suoritukset as $suoritus) {
   }
 
   // Jos summa on v‰hint‰‰n 0.01 EUR voidaan tehd‰ maksutapahtuma
-  if(is_numeric($korttimaksu_f)) {
+  if(is_numeric($korttimaksu_f) and $voi_maksaa_viela) {
     // Jos maksutapahtuma ep‰onnistui niin ei tehd‰ mit‰‰n
     if ($suoritus > 1 and $onnistuuko != "VELOITETTU") break;
 
@@ -42,7 +50,7 @@ foreach($suoritukset as $suoritus) {
       $onnistuuko = "Ei yhteytt‰ maksup‰‰tteeseen";
       break;
     }
-    
+
     switch ($suoritus) {
       case '1':
         // Jos summa on v‰hint‰‰n 0.01 EUR voidaan tehd‰ maksutapahtuma
@@ -138,7 +146,7 @@ foreach($suoritukset as $suoritus) {
           $pankkivailuotto = 'PANKKIKORTTI';
           $maksupaate_maksetut['pankkikortti'] += $korttimaksu;
         }
-       
+
         if(strpos($kuitti1, "PERUUTUS") !== false) {
           $maksutyyppi = "PERUUTUS";
         }
@@ -228,3 +236,21 @@ unset($onnistuuko);
 unset($status);
 unset($pankkivailuotto);
 unset($maksutyyppi);
+
+function maksettu_kortilla_yhteensa($tilausnumero) {
+  global $kukarow;
+
+  $query =
+    "SELECT SUM(summa_valuutassa) AS maksettu_yhteensa
+     FROM maksupaatetapahtumat
+     WHERE yhtio = '{$kukarow['yhtio']}'
+     AND tilausnumero = {$tilausnumero}";
+
+  $result = pupe_query($query);
+
+  $maksettu_yhteensa = mysql_fetch_assoc($result);
+  $maksettu_yhteensa = $maksettu_yhteensa["maksettu_yhteensa"];
+  $maksettu_yhteensa = $maksettu_yhteensa * 100;
+
+  return $maksettu_yhteensa;
+}

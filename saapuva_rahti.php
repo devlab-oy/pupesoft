@@ -99,7 +99,6 @@ else {
       if ($kpl > 0) {
         echo "<br>&bull; " . $kpl . " " . $poikkeus;
       }
-
     }
 
     echo "</td>";
@@ -132,7 +131,5 @@ else {
   echo "</table>";
 
 }
-
-
 
 require "inc/footer.inc";

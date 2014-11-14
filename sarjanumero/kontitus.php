@@ -6,11 +6,11 @@ $_GET["no_css"] = 'yes';
 if (@include_once "../inc/parametrit.inc");
 elseif (@include_once "inc/parametrit.inc");
 
+require '../inc/edifact_functions.inc';
+
 echo "<meta name='viewport' content='width=device-width, maximum-scale=1.0' />\n";
 echo "<link rel='stylesheet' type='text/css' href='ipad.css' />\n";
 echo "<body>";
-
-require '../inc/edifact_functions.inc';
 
 if (!isset($aktiivi_group)) {
   $aktiivi_group = false;
@@ -440,6 +440,7 @@ if ($view == 'konttiviite') {
       <div style='display:inline-block; margin:6px;'>
       <form method='post' action=''>
         <input type='hidden' name='konttiviite' value='{$konttiviite}' />
+        <input type='hidden' name='maxkg' value='{$maxkg}' />
         <button name='submit' value='jatka' onclick='submit();' class='{$luokka}'>" . t("Jatka kontitusta") . "</button>
       </form>
       </div>";

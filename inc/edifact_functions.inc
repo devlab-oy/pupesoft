@@ -1712,4 +1712,260 @@ function kasittele_iftsta($edi_data) {
 
 }
 
+function kontitustiedot($konttiviite, $konttinumero = false) {
+  global $kukarow;
+
+  if ($konttinumero) {
+    $rajaus = "AND trlt.konttinumero = '{$konttinumero}'";
+  }
+  else{
+    $rajaus = '';
+  }
+
+  $query = "SELECT tilausrivi.tunnus,
+            ss.massa,
+            trlt.konttinumero,
+            trlt.sinettinumero,
+            trlt.kontin_mrn,
+            ss.sarjanumero,
+            lasku.asiakkaan_tilausnumero,
+            laskun_lisatiedot.konttimaara
+            FROM laskun_lisatiedot
+            JOIN lasku
+              ON lasku.yhtio = laskun_lisatiedot.yhtio
+              AND lasku.tunnus = laskun_lisatiedot.otunnus
+            JOIN tilausrivi
+              ON tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+            JOIN tilausrivin_lisatiedot AS trlt
+              ON trlt.yhtio = tilausrivi.yhtio
+              AND trlt.tilausrivitunnus = tilausrivi.tunnus
+            JOIN sarjanumeroseuranta AS ss
+              ON ss.yhtio = tilausrivi.yhtio
+              AND ss.myyntirivitunnus = tilausrivi.tunnus
+            WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+            AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu')
+            {$rajaus}
+            AND laskun_lisatiedot.konttiviite = '{$konttiviite}'";
+  $result = pupe_query($query);
+
+  $kontit = array();
+
+  while ($rulla = mysql_fetch_assoc($result)) {
+    $kontit[$rulla['konttinumero']][] = $rulla;
+  }
+
+  foreach ($kontit as $konttinumero => $kontti) {
+
+    $konttipaino = 0;
+    $konttilista = '';
+    $pakkalista = '';
+
+    foreach ($kontti as $rulla) {
+      $konttipaino = $konttipaino + $rulla['massa'];
+      $konttilista .= $rulla['tunnus'] . ',';
+      $sinettinumero = $rulla['sinettinumero'];
+      $mrn = $rulla['kontin_mrn'];
+
+      $pakkalista .= "UIB: " . $rulla['sarjanumero'] . " - " . (INT) $rulla['massa'] . " kg - " .$rulla['asiakkaan_tilausnumero'] . "\n";
+    }
+
+    $konttilista = rtrim($konttilista, ',');
+
+    $kontit[$konttinumero]['lista'] = $konttilista;
+    $kontit[$konttinumero]['paino'] = $konttipaino;
+    $kontit[$konttinumero]['kpl'] = count($kontti);
+    $kontit[$konttinumero]['sinettinumero'] = $sinettinumero;
+    $kontit[$konttinumero]['mrn'] = $mrn;
+    $kontit[$konttinumero]['pakkalista'] = $pakkalista;
+  }
+
+  return $kontit;
+}
+
+function hae_hylly($tuotepaikka) {
+
+  $paikkamerkit = str_split($tuotepaikka);
+  $x = 0;
+  $valitut = array();
+
+  if (!ctype_alpha($paikkamerkit[0])) {
+    return false;
+  }
+  else {
+    $eka = array_shift($paikkamerkit);
+    $valitut[$x] = $eka;
+
+    foreach ($paikkamerkit as $merkki) {
+
+      if (ctype_alpha($merkki)) {
+        if (ctype_alpha($valitut[$x])) {
+          $valitut[$x] .= $merkki;
+        }
+        else {
+          $x++;
+          $valitut[$x] = $merkki;
+        }
+      }
+      elseif (ctype_digit($merkki)) {
+        if (ctype_digit($valitut[$x])) {
+          $valitut[$x] .= $merkki;
+        }
+        else {
+          $x++;
+          $valitut[$x] = $merkki;
+        }
+      }
+      else {
+        $x++;
+      }
+    }
+
+    $valitut = array_values($valitut);
+
+    if (!ctype_digit($valitut[1])) {
+      return false;
+    }
+
+    $hylly = array(
+      "hyllyalue" => strtoupper($valitut[0]),
+      "hyllynro"   => $valitut[1],
+      "hyllyvali" => '0',
+      "hyllytaso" => '0'
+    );
+
+    return $hylly;
+  }
+}
+
+function paivita_tilausrivit_ja_sarjanumeroseuranta($ostorivitunnus, $hylly, $vaihto = false) {
+  global $kukarow;
+
+  $query = "SELECT myyntirivitunnus
+            FROM sarjanumeroseuranta
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND ostorivitunnus = '{$ostorivitunnus}'";
+  $result = pupe_query($query);
+  $myyntirivitunnus = mysql_result($result,0);
+
+  $query = "SELECT varasto
+            FROM tilausrivi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$ostorivitunnus}'";
+  $result = pupe_query($query);
+  $varasto = mysql_result($result,0);
+
+  $hyllyalue = strtoupper($hylly['hyllyalue']);
+  $hyllynro  = strtoupper($hylly['hyllynro']);
+  $hyllyvali = strtoupper($hylly['hyllyvali']);
+  $hyllytaso = strtoupper($hylly['hyllytaso']);
+
+  $query = "UPDATE tilausrivi SET
+            hyllyalue = '{$hyllyalue}',
+            hyllynro = '{$hyllynro}',
+            hyllyvali = '{$hyllyvali}',
+            hyllytaso = '{$hyllytaso}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$ostorivitunnus}'";
+  $result = pupe_query($query);
+
+  $query = "UPDATE tilausrivi SET
+            var = '',
+            varattu = 1,
+            hyllyalue = '{$hyllyalue}',
+            hyllynro = '{$hyllynro}',
+            hyllyvali = '{$hyllyvali}',
+            hyllytaso = '{$hyllytaso}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$myyntirivitunnus}'";
+  $result = pupe_query($query);
+
+  $query = "UPDATE sarjanumeroseuranta SET
+            hyllyalue = '{$hyllyalue}',
+            hyllynro = '{$hyllynro}',
+            hyllyvali = '{$hyllyvali}',
+            hyllytaso = '{$hyllytaso}',
+            varasto = '{$varasto}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND ostorivitunnus = '{$ostorivitunnus}'";
+  $result = pupe_query($query);
+
+  if ($vaihto == true) {
+    $query = "UPDATE tilausrivi SET
+              uusiotunnus = 0
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$ostorivitunnus}'";
+    $result = pupe_query($query);
+  }
+
+}
+
+function hae_rullat($rahtikirja_id) {
+  global $kukarow;
+
+  $query = "SELECT
+            ss.sarjanumero,
+            tr.uusiotunnus,
+            tr.tunnus,
+            tr.otunnus,
+            ss.hyllyalue AS alue,
+            ss.hyllynro AS nro,
+            ss.hyllyvali AS vali,
+            ss.hyllytaso AS taso,
+            trlt.asiakkaan_tilausnumero AS tno
+            FROM tilausrivi AS tr
+            JOIN tilausrivin_lisatiedot AS trlt
+              ON trlt.yhtio = tr.yhtio
+              AND trlt.tilausrivitunnus = tr.tunnus
+            JOIN sarjanumeroseuranta AS ss
+              ON ss.yhtio = tr.yhtio
+              AND ss.ostorivitunnus = tr.tunnus
+            WHERE tr.yhtio = '{$kukarow['yhtio']}'
+            AND tr.tyyppi = 'O'
+            AND trlt.rahtikirja_id = '{$rahtikirja_id}'";
+  $result = pupe_query($query);
+
+  $viematta = 0;
+
+  while ($rulla = mysql_fetch_assoc($result)) {
+    $rullat[] = $rulla;
+    if ($rulla['uusiotunnus'] == 0) {
+      $viematta++;
+    }
+    $laskutunnus = $rulla['otunnus'];
+  }
+
+  if ($viematta == 0) {
+    $query = "UPDATE lasku
+              SET alatila = 'X'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$laskutunnus}'";
+    pupe_query($query);
+  }
+
+return $rullat;
+}
+
+function tarkista_sarjanumero($sarjanumero) {
+  global $kukarow;
+
+  $query = "SELECT sarjanumeroseuranta.*,
+            tilausrivi.toimitettuaika
+            FROM sarjanumeroseuranta
+            JOIN tilausrivi
+             ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio
+             AND tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
+            WHERE sarjanumeroseuranta.yhtio = '{$kukarow['yhtio']}'
+            AND sarjanumeroseuranta.sarjanumero = '{$sarjanumero}'";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) == 0) {
+    return false;
+  }
+  else {
+    return $result;
+  }
+
+}
+
 ?>

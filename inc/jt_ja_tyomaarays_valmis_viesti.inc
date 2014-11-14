@@ -5,14 +5,13 @@
  * jos sellainen löytyy. Toistaiseksi ainut tuettu palvelu on Zoner. Lähettää myös sähköpostin, jos
  * asiakkaalta sellainen löytyy
  *
- * @param string  $username     Zonerin käyttäjätunnus
- * @param string  $salasana     Zonerin salasana
- * @param int     $tilausnumero
- * @param bool    $kerattu      Onko kaikki tilauksen rivit jo kerätty
+ * @param string $username Zonerin käyttäjätunnus
+ * @param string $salasana Zonerin salasana
+ * @param int    $tilausnumero
+ * @param bool   $kerattu Onko kaikki tilauksen rivit jo kerätty
  *
  * @return bool Jos tekstiviestin tai sähköpostin lähetys onnistui, palauttaa true
  */
-
 
 function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $kerattu = false) {
   global $yhtiorow;
@@ -25,14 +24,36 @@ function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $kerattu = 
   if (loytyy_jt_riveja($tilausnumero)) {
     $otsikko = t("Tilaus noudettavissa");
 
-    $viesti =
-      t("Kaikki tilauksen %s osat ovat noudettavissa, terveisin", "", $tilausnumero) .
-      " " .
-      $yhtiorow["nimi"];
+    $avainsanaviesti = hae_viesti_avainsanoista("jalkitoimitus");
+
+    if (empty($avainsanaviesti)) {
+      $viesti =
+        t("Hei. Kaikki tilauksen %s tuotteet ovat noudettavissa. Terveisin %s, %s.",
+          "",
+          $tilausnumero,
+          $yhtiorow["nimi"],
+          $yhtiorow["puhelin"]);
+    }
+    else {
+      $viesti = "{$avainsanaviesti}\n" . t("Tilausnumero") . ": {$tilausnumero}";
+    }
   }
   elseif (loytyy_tyomaarays($tilausnumero) or $kerattu) {
     $otsikko = t("Huoltotyö valmis");
-    $viesti  = t("Huoltotyösi on valmis, terveisin") . " " . $yhtiorow["nimi"];
+
+    $avainsanaviesti = hae_viesti_avainsanoista("tyomaarays");
+
+    if (empty($avainsanaviesti)) {
+      $viesti =
+        t("Hei. Huolto- ja asennustyönne %s on valmistunut. Terveisin, %s, %s.",
+          "",
+          $tilausnumero,
+          $yhtiorow["nimi"],
+          $yhtiorow["puhelin"]);
+    }
+    else {
+      $viesti = "{$avainsanaviesti}\n" . t("Tilausnumero") . ": {$tilausnumero}";
+    }
   }
 
   if (empty($viesti)) {
@@ -153,4 +174,24 @@ function loytyy_jt_riveja($tilausnumero) {
   }
 
   return false;
+}
+
+function hae_viesti_avainsanoista($tyyppi) {
+  global $kukarow;
+
+  $laji = $tyyppi == "tyomaarays" ? "TYOMVALMVIEST" : "JTVALMISVIESTI";
+
+  $query =
+    "SELECT laji,
+     selite
+     FROM avainsana
+     WHERE yhtio = '{$kukarow['yhtio']}'
+     AND laji = '{$laji}';";
+
+  $result = pupe_query($query);
+
+  $viesti = mysql_fetch_assoc($result);
+  $viesti = $viesti["selite"];
+
+  return $viesti;
 }

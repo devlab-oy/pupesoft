@@ -282,6 +282,8 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "SALDOVAHVISTUS")  $ulos .= "<option value='SALDOVAHVISTUS' {$avain_sel['SALDOVAHVISTUS']}>  ".t("Saldovahvistuksen viesti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "DPAVAINSANALAJI") $ulos .= "<option value='DPAVAINSANALAJI' {$avain_sel['DPAVAINSANALAJI']}>        ".t("Dynaamisen puun avainsanojen laji")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "LITETY_TKIRJAST") $ulos .= "<option value='LITETY_TKIRJAST' {$avain_sel['LITETY_TKIRJAST']}>".t("Tiedostokirjastossa selailtava tiedostotyyppi")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "JTVALMISVIESTI")  $ulos .= "<option value='JTVALMISVIESTI' {$avain_sel['JTVALMISVIESTI']}>".t("SMS-viesti, joka l‰hetet‰‰n asiakkalle, kun j‰lkitoimitustuotteet on ker‰tty")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "TYOMVALMVIEST")   $ulos .= "<option value='TYOMVALMVIEST' {$avain_sel['TYOMVALMVIEST']}>".t("SMS-viesti, joka l‰hetet‰‰n asiakkalle, kun tyˆm‰‰r‰ys on valmis")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";

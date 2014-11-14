@@ -111,7 +111,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
       $wherelliset  = array("RYHMA");
       break;
     case "yhteyshenkilo" :
-      if (in_array("YTUNNUS", $otsikot) and !in_array("LIITOSTUNNUS", $otsikot)) {
+      if (is_array($otsikot) and in_array("YTUNNUS", $otsikot) and !in_array("LIITOSTUNNUS", $otsikot)) {
         $pakolliset = array("TYYPPI", "NIMI");
       }
       else {
@@ -308,7 +308,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
       $kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM", "DATA", "IMAGE_BITS", "IMAGE_CHANNELS", "IMAGE_HEIGHT", "IMAGE_WIDTH", "FILETYPE", "FILESIZE");
       break;
     case "asiakkaan_avainsanat" :
-      if (in_array("YTUNNUS", $otsikot) and !in_array("LIITOSTUNNUS", $otsikot)) {
+      if (is_array($otsikot) and in_array("YTUNNUS", $otsikot) and !in_array("LIITOSTUNNUS", $otsikot)) {
         $pakolliset  = array("LAJI", "AVAINSANA");
         $wherelliset = array("LAJI", "AVAINSANA");
       }

@@ -2396,6 +2396,8 @@ if (!$cli and !isset($api_kentat)) {
   echo "<td>";
   echo "<select name='table' onchange='submit();'>";
 
+  $_taulu = '';
+
   // Jos tullaan linkist‰ jossa halutaan muokata vain tietty‰ taulua
   if (isset($taulurajaus)) {
     $validi = $taulut[$taulurajaus];
@@ -2411,6 +2413,9 @@ if (!$cli and !isset($api_kentat)) {
   else {
     foreach ($taulut as $taulu => $nimitys) {
       echo "<option value='$taulu' {$sel[$taulu]}>".t($nimitys)."</option>";
+      if (trim($sel[$taulu]) == 'selected') {
+        $_taulu = $taulu;
+      }
     }
   }
 
@@ -2420,6 +2425,29 @@ if (!$cli and !isset($api_kentat)) {
 
   // Tiettyjen taulujen spessuvalinnat
   require "inc/luedata_ja_dataimport_spessuvalinnat.inc";
+
+  // Taulujen pakolliset sarakkeet ym kuvauksia.
+  require "inc/pakolliset_sarakkeet.inc";
+  
+  if (empty($_taulu)) {
+    $taulut = array_flip($taulut);
+    $_taulu = array_shift($taulut);
+  }
+
+  list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($_taulu);
+
+  echo "  <tr><td class='tumma'>".t("Tietokantataulun pakolliset tiedot").":</td>";
+  echo "  <td>".strtolower(implode(", ", $pakolliset))."</td></tr>";
+
+  if (!empty($wherelliset)) {
+    echo "  <tr><td class='tumma'>".t("Sarakkeet jotka pit‰‰ aineistossa kertoa").":</td>";
+    echo "  <td>".strtolower(implode(", ", $wherelliset))."</td></tr>";
+  }
+  
+  if (!empty($kielletyt)) {
+    echo "  <tr><td class='tumma'>".t("Sarakkeet joita ei saa aineistossa kertoa").":</td>";
+    echo "  <td>".strtolower(implode(", ", $kielletyt))."</td></tr>";
+  }
 
   echo "  <tr><th>".t("Valitse tiedosto").":</th>
         <td><input name='userfile' type='file'></td>

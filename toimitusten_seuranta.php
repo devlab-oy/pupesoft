@@ -301,9 +301,8 @@ if (!isset($task)) {
       $tapahtumat = "";
 
       while ($sanoma = mysql_fetch_assoc($result)) {
-
         $tapahtumat .= "&bull; <a href='view.php?id={$sanoma['tunnus']}' target='_blank'>{$sanoma_numero}. bookkaussanoma</a> haettu<br>";
-
+        $sanoma_numero++;
       }
 
       echo "<tr>";
@@ -347,6 +346,7 @@ if (!isset($task)) {
                   WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
                   AND tilausrivi.tyyppi = 'O'
                   AND trlt.asiakkaan_tilausnumero = '{$tilaus['asiakkaan_tilausnumero']}'";
+
         $result = pupe_query($query);
 
         $kuitattu = $kuittaamatta = 0;
@@ -376,17 +376,17 @@ if (!isset($task)) {
 
         if ($tilaus['tulouttamatta'] == 0) {
 
+          $query = "SELECT group_concat(otunnus)
+                    FROM laskun_lisatiedot
+                    WHERE yhtio = '{$yhtiorow['yhtio']}'
+                    AND konttiviite = '{$tilaus['konttiviite']}'";
+          $result = pupe_query($query);
+          $konttiviitteen_alaiset_tilaukset = mysql_result($result, 0);
+
           $tapahtumat .= "&bull; " .  t("Rullat viety varastoon") . "<br>";
 
           if ($tilaus['kontittamatta'] == 0) {
             $tapahtumat .= "&bull; " .  t("Rullat kontitettu") . "<br>";
-
-            $query = "SELECT group_concat(otunnus)
-                      FROM laskun_lisatiedot
-                      WHERE yhtio = '{$yhtiorow['yhtio']}'
-                      AND konttiviite = '{$tilaus['konttiviite']}'";
-            $result = pupe_query($query);
-            $konttiviitteen_alaiset_tilaukset = mysql_result($result, 0);
 
             $query = "SELECT count(tilausrivi.tunnus) AS riveja
                       FROM tilausrivi
@@ -407,6 +407,28 @@ if (!isset($task)) {
           }
           elseif ($tilaus['kontittamatta'] < $tilaus['rullat']) {
             $tapahtumat .= "&bull; " .  t("Osa rullista kontitettu") . "<br>";
+
+            $query = "SELECT group_concat(tilausrivi.tunnus) AS riveja
+                      FROM tilausrivi
+                      JOIN tilausrivin_lisatiedot AS trlt
+                        ON trlt.yhtio = tilausrivi.yhtio
+                        AND trlt.tilausrivitunnus = tilausrivi.tunnus
+                      JOIN sarjanumeroseuranta AS ss
+                        ON ss.yhtio = tilausrivi.yhtio
+                        AND ss.myyntirivitunnus = tilausrivi.tunnus
+                      WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
+                      AND tilausrivi.otunnus IN ({$konttiviitteen_alaiset_tilaukset})
+                      AND trlt.sinettinumero = 'X'
+                      AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusaus')";
+            $result = pupe_query($query);
+
+            if (mysql_num_rows($result) > 0) {
+              $konttiviitteesta_vahvistettu = mysql_result($result, 0);
+            }
+            else{
+              $konttiviitteesta_vahvistettu = false;
+            }
+
           }
 
           if ($tilaus['toimittamatta'] == 0) {
@@ -492,7 +514,7 @@ if (!isset($task)) {
         //echo t("Sama konttiviite kuin yllä.");
         //echo "</td>";
       }
-      elseif (!$kontit_sinetointivalmiit) {
+      elseif (!$kontit_sinetointivalmiit and !$konttiviitteesta_vahvistettu) {
         echo "<td valign='top' rowspan='{$tilauksia_viitteella}' align='center'>";
         echo $tilaus['konttimaara'] . " kpl (ennakkoarvio)";
         echo "</td>";
@@ -507,13 +529,17 @@ if (!isset($task)) {
 
         foreach ($kontit as $konttinumero => $kontti) {
 
+          if ($kontti['sinettinumero'] == '') {
+            continue;
+          }
+
           $temp_array = explode("/", $konttinumero);
           $_konttinumero = $temp_array[0];
 
           echo "<div style='margin:0 5px 8px 5px; padding:5px; border-bottom:1px solid grey;'>";
           echo "{$_konttinumero}. ({$kontti['kpl']} kpl, {$kontti['paino']} kg)&nbsp;&nbsp;";
 
-          if ($kontti['sinettinumero'] == '') {
+          if ($kontti['sinettinumero'] == 'X') {
             echo "<form method='post'>";
             echo "<input type='hidden' name='task' value='anna_konttitiedot' />";
             echo "<input type='hidden' name='temp_konttinumero' value='{$konttinumero}' />";

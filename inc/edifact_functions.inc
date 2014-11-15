@@ -27,6 +27,7 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
             trlt.juoksu,
             trlt.asiakkaan_rivinumero as rivinro,
             trlt.konttinumero,
+            trlt.sinettinumero,
             la.sisviesti1 as ohje,
             ss.hyllyalue,
             ss.hyllynro,

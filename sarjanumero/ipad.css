@@ -177,6 +177,11 @@ input[type="button"] {
   border: 1px solid green;
 }
 
+.suljettu {
+  color: red;
+  border: 1px solid red;
+}
+
 th {
   text-align: left;
 }

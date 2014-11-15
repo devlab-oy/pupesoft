@@ -17,6 +17,7 @@ if (!isset($aktiivi_group)) {
 }
 
 $errors = array();
+$sulku = false;
 
 if (isset($submit)) {
 
@@ -70,7 +71,8 @@ if (isset($submit)) {
             pupe_query($uquery);
 
             $uquery = "UPDATE tilausrivin_lisatiedot SET
-                      konttinumero = ''
+                      konttinumero = '',
+                      sinettinumero = ''
                       WHERE yhtio = '{$kukarow['yhtio']}'
                       AND tilausrivitunnus = '{$rulla['tunnus']}'";
             pupe_query($uquery);
@@ -229,8 +231,6 @@ if (isset($submit)) {
         $huomio .= " " . $erotus . " " . t("konttia lisätty.");
       }
 
-      $aktiivinen_kontti = 1;
-
       if ($rullat_ja_kontit === false) {
         $errors[] = t("Tilausnumerolla ei löydy tilausta.");
         $view = 'tilausnumero';
@@ -273,8 +273,6 @@ if (isset($submit)) {
     $kontit = $rullat_ja_kontit['kontit'];
     $konttimaara = count($kontit);
 
-    $aktiivinen_kontti = 1;
-
     if ($rullat_ja_kontit === false) {
       $errors[] = t("Tilausnumerolla ei löydy tilausta.");
       $view = 'tilausnumero';
@@ -286,12 +284,42 @@ if (isset($submit)) {
     else{
       $view = 'kontituslista';
     }
-
     break;
-
   case 'konttivalinta':
-    if (!isset($aktiivinen_kontti)) {
-      $aktiivinen_kontti = 1;
+    $rullat_ja_kontit = rullat_ja_kontit($konttiviite, $maxkg);
+    $kontittamattomat = $rullat_ja_kontit['kontittamattomat'];
+    $kontitetut = $rullat_ja_kontit['kontitetut'];
+    $kontit = $rullat_ja_kontit['kontit'];
+    $konttimaara = count($kontit);
+    $view = 'kontituslista';
+    break;
+  case 'konttivahvistus':
+    $sulku = true;
+
+    $query = "SELECT group_concat(trlt.tunnus)
+              FROM laskun_lisatiedot
+              JOIN lasku
+                ON lasku.yhtio = laskun_lisatiedot.yhtio
+                AND lasku.tunnus = laskun_lisatiedot.otunnus
+              JOIN tilausrivi
+                ON tilausrivi.yhtio = lasku.yhtio
+                AND tilausrivi.otunnus = lasku.tunnus
+              JOIN tilausrivin_lisatiedot AS trlt
+                ON trlt.yhtio = tilausrivi.yhtio
+                AND trlt.tilausrivitunnus = tilausrivi.tunnus
+              WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+              AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
+              AND trlt.konttinumero LIKE '{$aktiivinen_kontti}%'
+              AND trlt.sinettinumero = ''";
+    $result = pupe_query($query);
+    $rivitunnukset = mysql_result($result, 0);
+
+    if (!empty($rivitunnukset)) {
+      $query = "UPDATE tilausrivin_lisatiedot SET
+                sinettinumero = 'X'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus IN ({$rivitunnukset})";
+      pupe_query($query);
     }
 
     $rullat_ja_kontit = rullat_ja_kontit($konttiviite, $maxkg);
@@ -326,12 +354,9 @@ if (isset($submit)) {
                 AND tilausrivitunnus = '{$rivitunnus}'";
       pupe_query($query);
 
-
     }
     else {
-
       $errors[] = t("Tuntematon sarjanumero.");
-
     }
 
     $rullat_ja_kontit = rullat_ja_kontit($konttiviite, $maxkg);
@@ -344,8 +369,6 @@ if (isset($submit)) {
         $aktiivi_group = $kontitettu['group_class'];
       }
     }
-
-
     $kontit = $rullat_ja_kontit['kontit'];
     $view = 'kontituslista';
     break;
@@ -393,8 +416,6 @@ if ($view == 'konttiviite') {
 
   if (!$yliajo) {
 
-
-
     echo "<div class='subheader'>";
 
     echo "<div class='subheader_left'>";
@@ -418,8 +439,6 @@ if ($view == 'konttiviite') {
     echo "</div>";
 
     echo "</div>";
-
-
 
   }
 
@@ -450,14 +469,7 @@ if ($view == 'konttiviite') {
 
 }
 
-
-
-
-
 if ($view == 'konttiviite_maxkg') {
-
-
-
 
   echo "<div class='subheader'>";
 
@@ -524,8 +536,6 @@ if ($view == 'konttiviite_maxkg') {
     }
   }
 
-
-
   echo "<tr>";
   echo "<td align='right' style='padding-top:10px'>Yhteensä: </td>";
   echo "<td align='left'  style='padding-top:10px'> " . $rullia . " kpl.</td>";
@@ -588,17 +598,43 @@ if ($view == 'konttiviite_maxkg') {
 
   echo "</div>";
 
-
-
 }
 
 if ($view == 'kontituslista') {
 
+  $konttien_painot = array();
+  $konttien_kpl = array();
+  $konttien_valmius =array();
+
+  foreach ($kontitetut as $rulla) {
+
+    $kontitusinfo = explode("/", $rulla['konttinumero']);
+    $konttinumero = $kontitusinfo[0];
+
+    $konttien_painot[$konttinumero] = $konttien_painot[$konttinumero] + $rulla['paino'];
+    $konttien_kpl[$konttinumero] = $konttien_kpl[$konttinumero] + 1;
+
+    $konttien_valmius[$konttinumero][] = $rulla['sinettinumero'];
+  }
+
+  if ($sulku) {
+    unset($aktiivinen_kontti);
+
+    foreach ($kontit as $key => $kontti) {
+      if (!in_array('X', $konttien_valmius[$key])) {
+        $aktiivinen_kontti = $key;
+        break;
+      }
+    }
+  }
+
+  if (!isset($aktiivinen_kontti)) {
+    $aktiivinen_kontti = 1;
+  }
+
   if (isset($huomio)) {
     echo $huomio;
   }
-
-
 
   echo "<div class='subheader'>";
 
@@ -630,22 +666,7 @@ if ($view == 'kontituslista') {
 
   echo "</div>";
 
-  $tarvittava_maara = count($kontit);
-
   echo "<div style='text-align:center; padding:10px; width:700px; margin:0 auto; overflow:auto;'>";
-
-  $konttien_painot = array();
-  $konttien_kpl = array();
-
-  foreach ($kontitetut as $rulla) {
-
-    $kontitusinfo = explode("/", $rulla['konttinumero']);
-    $konttinumero = $kontitusinfo[0];
-
-    $konttien_painot[$konttinumero] = $konttien_painot[$konttinumero] + $rulla['paino'];
-    $konttien_kpl[$konttinumero] = $konttien_kpl[$konttinumero] + 1;
-
-  }
 
   foreach ($kontit as $key => $kontti) {
 
@@ -656,13 +677,26 @@ if ($view == 'kontituslista') {
       $luokka = "button";
     }
 
+    if (in_array('X', $konttien_valmius[$key])) {
+      $luokka = "suljettu";
+      $disablointi = 'disabled';
+    }
+    else {
+      $disablointi = '';
+    }
+
     echo "<div style='display:inline-block; margin:6px;'>";
     echo "<form method='post' action=''>";
+
+    if ($key == $aktiivinen_kontti and $konttien_kpl[$key] > 0 and !$sulku) {
+      echo "<button name='submit' value='konttivahvistus' style='padding:10px' class='button aktiivi'>&#9658;</button>";
+    }
+
     echo "<input type='hidden' name='aktiivinen_kontti' value='{$key}' />";
     echo "<input type='hidden' name='konttiviite' value='{$konttiviite}' />";
     echo "<input type='hidden' name='aktiivi_group' class='aktiivi_group' value='{$aktiivi_group}' />";
     echo "<input type='hidden' name='maxkg' value='{$maxkg}' />";
-    echo "<button name='submit' value='konttivalinta' onclick='submit();' class='{$luokka}'>";
+    echo "<button name='submit' value='konttivalinta' onclick='submit();' {$disablointi} class='{$luokka}'>";
     echo t("Kontti") ."-". $key ;
 
     if ($konttien_painot[$key] > 0 and $konttien_kpl[$key] > 0) {
@@ -783,8 +817,6 @@ if ($view == 'kontituslista') {
 
 echo "</div>";
 
-
-
 echo "<script type='text/javascript'>";
 
 foreach ($otsikoidut as $luokka) {
@@ -812,7 +844,6 @@ echo "
 
 }
 
-
 echo "
 
   $('.tapfocus').bind('touchstart',function(){
@@ -822,8 +853,4 @@ echo "
 
 </script>";
 
-
 require 'inc/footer.inc';
-
-
-

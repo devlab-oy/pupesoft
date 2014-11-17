@@ -197,6 +197,7 @@ $editilaus_hinta   = "";
 $editilaus_alennus = "";
 $rivikommentti     = "";
 
+
 // fiilataan parametrejä joita tarvitaan require fileissä
 $tulos_ulos = "edi"; // tää on ftp-send.incissä
 
@@ -720,7 +721,7 @@ while ($tietue = fgets($fd)) {
 
       $edi_ulos .= "VASTAANOTTTAVAN YHTION TIETO PUUTTUU! -> $yhtiorow[nimi] ($kukarow[yhtio])\n";
     }
-    
+
     if (!is_array($arow)) {
       $edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
 

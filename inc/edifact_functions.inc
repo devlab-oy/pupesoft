@@ -98,6 +98,8 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
 
 function laheta_sanoma($sanoma){
 
+  return true;
+
   if ($sanoma == '') {
     return false;
   }
@@ -785,25 +787,29 @@ function laadi_edifact_sanoma($parametrit) {
       $s .= "RFF+TN:1'";
       $segmentit++;
 
+      foreach ($rullarivi as $key => $rulla) {
 
-      foreach ($rullarivi as $rulla) {
-        $s .= "CPS+PKG++3'";
-        $segmentit++;
+        if ($key != 'rivi_paino') {
 
-        $s .= "PAC+999'";
-        $segmentit++;
+          $s .= "CPS+PKG++3'";
+          $segmentit++;
 
-        $s .= "MEA+AAE+G+KGM:" . (int) $rulla['paino'] . "'";
-        $segmentit++;
+          $s .= "PAC+999'";
+          $segmentit++;
 
-        $s .= "PCI+999'";
-        $segmentit++;
+          $s .= "MEA+AAE+G+KGM:" . (int) $rulla['paino'] . "'";
+          $segmentit++;
 
-        $s .= "GIN+ZPI+" . $rulla['juoksu'] ."'";
-        $segmentit++;
+          $s .= "PCI+999'";
+          $segmentit++;
 
-        $s .= "GIN+ZUN+" . $rulla['sarjanumero'] . "'";
-        $segmentit++;
+          $s .= "GIN+ZPI+" . $rulla['juoksu'] ."'";
+          $segmentit++;
+
+          $s .= "GIN+ZUN+" . $rulla['sarjanumero'] . "'";
+          $segmentit++;
+
+        }
       }
     }
   }

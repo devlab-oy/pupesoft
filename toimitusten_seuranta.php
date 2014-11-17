@@ -280,6 +280,7 @@ if (!isset($task)) {
     echo "<th class='back'></th>";
     echo "</tr>";
 
+    print_r($tilaukset);
 
     foreach ($tilaukset as $key => $tilaus) {
 

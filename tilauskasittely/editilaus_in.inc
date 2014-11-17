@@ -721,14 +721,18 @@ while ($tietue = fgets($fd)) {
 
     if (!is_array($arow)) {
       $edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
-echo "724 $ovt_tunnus <br><br>";
+
+      if (isset($ovt_tunnus) and $ovt_tunnus != "") {
+        $ovt_tunnuswhere = "and ovttunnus      = $ovt_tunnus ";
+      }
+
       $query = "SELECT *
                 FROM asiakas
                 WHERE yhtio        = '$kukarow[yhtio]'
-                and ovttunnus      = $ovt_tunnus
                 and toim_ovttunnus = '$tieto'
                 and toim_ovttunnus not in ('','0')
-                and laji           not in ('R','P')";
+                and laji           not in ('R','P')
+                $ovt_tunnuswhere";
       $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 1) {

@@ -1727,6 +1727,8 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
             ss.massa,
             trlt.konttinumero,
             trlt.sinettinumero,
+            trlt.kontin_taarapaino,
+            trlt.kontin_isokoodi,
             trlt.kontin_mrn,
             ss.sarjanumero,
             lasku.asiakkaan_tilausnumero,

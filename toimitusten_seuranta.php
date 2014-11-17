@@ -3,8 +3,11 @@
 if (isset($_POST['task']) and $_POST['task'] == 'hae_pakkalista') {
 
 header("Content-type: text/plain");
-echo "PAKKALISTA\n";
-echo "Konttinumero: " . $_POST['konttinumero'] . "\n\n";
+echo "PAKKALISTA\n\n";
+echo "Konttinumero: " . $_POST['konttinumero'] . "\n";
+echo "Sinettinumero: " . $_POST['sinettinumero'] . "\n";
+echo "Mrn: " . $_POST['mrn'] . "\n";
+echo "Kpl: " . $_POST['kpl'] . "\n\n";
 echo $_POST['data'];
 die;
 
@@ -153,6 +156,9 @@ if (isset($task) and $task == 'sinetoi') {
     }
 
     if (laheta_sanoma($sanoma)) {
+
+      echo $sanoma;
+
       $lahetys = 'OK';
     }
     else {
@@ -374,7 +380,7 @@ if (!isset($task)) {
           $tapahtumat .= "&bull; " .  t("Osa rahdista kuitattu saapuneeksi") . "<br>";
         }
 
-        if ($tilaus['tulouttamatta'] == 0) {
+        if ($tilaus['tulouttamatta'] == 0 or $tilaus['kontittamatta'] < $tilaus['rullat']) {
 
           $query = "SELECT group_concat(otunnus)
                     FROM laskun_lisatiedot
@@ -561,6 +567,9 @@ if (!isset($task)) {
           echo "<input type='hidden' name='data' value='{$kontti['pakkalista']}' />";
           echo "<input type='hidden' name='tee' value='XXX' />";
           echo "<input type='hidden' name='konttinumero' value='{$konttinumero}' />";
+          echo "<input type='hidden' name='sinettinumero' value='{$kontti['sinettinumero']}' />";
+          echo "<input type='hidden' name='mrn' value='{$kontti['mrn']}' />";
+          echo "<input type='hidden' name='kpl' value='{$kontti['kpl']}' />";
           echo "<input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />";
           echo "</form>";
           echo "<button onClick=\"js_openFormInNewWindow('hae_pakkalista{$_konttinumero}', 'Pakkalista'); return false;\" />";

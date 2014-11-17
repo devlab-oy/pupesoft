@@ -58,14 +58,6 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
 
   while ($rulla = mysql_fetch_assoc($result)) {
 
-    if ($kilot + $rulla['paino'] >= $maxkg) {
-      $kontti++;
-      $kilot = 0;
-    }
-
-    $kontit[$kontti] = 0;
-    $kilot = $kilot + $rulla['paino'];
-
     if ($rulla['konttinumero'] != '') {
       $kontitetut[] = $rulla;
     }
@@ -73,6 +65,12 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
       $kontittamattomat[] = $rulla;
       $ryhmalaskuri[$rulla['group_class']]++;
     }
+  }
+
+  foreach ($kontitetut as $key => $rulla) {
+
+    $kontit[$rulla['konttinumero']] = 0;
+
   }
 
   $konttimaara = count($kontit);
@@ -89,6 +87,7 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
   $rullat_ja_kontit = array(
     'kontittamattomat' => $kontittamattomat,
     'kontitetut' => $kontitetut,
+    'sinetoidyt' => $sinetoidyt,
     'kontit' => $kontit,
     'ryhma_laskuri' => $ryhmalaskuri
   );

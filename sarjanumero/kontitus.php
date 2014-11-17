@@ -55,29 +55,33 @@ if (isset($submit)) {
                   AND ss.myyntirivitunnus = tilausrivi.tunnus
                 WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
                 AND laskun_lisatiedot.konttiviite = '{$konttiviite}'";
+
       if ($muutos == 'muutos' ) {
 
         $result = pupe_query($query);
 
         while ($rulla = mysql_fetch_assoc($result)) {
 
-          if ($rulla['toimitettu'] == '') {
+          $uquery = "UPDATE tilausrivi SET
+                     keratty = '',
+                     kerattyaika = '0000-00-00 00:00:00',
+                     toimitettu = '',
+                     toimitettuaika = '0000-00-00 00:00:00'
+                     WHERE yhtio = '{$kukarow['yhtio']}'
+                     AND tunnus = '{$rulla['tunnus']}'";
+          pupe_query($uquery);
 
-            $uquery = "UPDATE tilausrivi SET
-                      keratty = '',
-                      kerattyaika = '0000-00-00 00:00:00'
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tunnus = '{$rulla['tunnus']}'";
-            pupe_query($uquery);
+          $uquery = "UPDATE tilausrivin_lisatiedot SET
+                     konttinumero = '',
+                     kontin_maxkg = 0,
+                     konttien_maara = 0,
+                     sinettinumero = '',
+                     kontin_kilot = 0,
+                     kontin_taarapaino = 0
+                     WHERE yhtio = '{$kukarow['yhtio']}'
+                     AND tilausrivitunnus = '{$rulla['tunnus']}'";
+          pupe_query($uquery);
 
-            $uquery = "UPDATE tilausrivin_lisatiedot SET
-                      konttinumero = '',
-                      sinettinumero = ''
-                      WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tilausrivitunnus = '{$rulla['tunnus']}'";
-            pupe_query($uquery);
-
-          }
         }
       }
 
@@ -245,7 +249,8 @@ if (isset($submit)) {
     }
     break;
   case 'jatka':
-    $query = "SELECT trlt.konttinumero
+    $query = "SELECT trlt.konttinumero,
+              trlt.kontin_maxkg
               FROM laskun_lisatiedot
               JOIN lasku
                 ON lasku.yhtio = laskun_lisatiedot.yhtio
@@ -258,14 +263,11 @@ if (isset($submit)) {
                 AND trlt.tilausrivitunnus = tilausrivi.tunnus
               WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
               AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
-              AND trlt.kontin_kilot = 0
               ORDER BY trlt.konttinumero DESC";
     $result = pupe_query($query);
     $konttiinfo = mysql_fetch_assoc($result);
-    $konttiinfo = $konttiinfo['konttinumero'];
-    $konttiinfo = explode("/", $konttiinfo);
 
-    $maxkg = $konttiinfo[2];
+    $maxkg = $konttiinfo['kontin_maxkg'];
 
     $rullat_ja_kontit = rullat_ja_kontit($konttiviite, $maxkg);
 
@@ -347,10 +349,12 @@ if (isset($submit)) {
                 AND tunnus = '{$rivitunnus}'";
       pupe_query($query);
 
-      $temp_konttinumero = $aktiivinen_kontti . "/" . $konttimaara . "/" . $maxkg;
+      $temp_konttinumero = $aktiivinen_kontti;
 
       $query = "UPDATE tilausrivin_lisatiedot SET
-                konttinumero = '{$temp_konttinumero}'
+                konttinumero = '{$temp_konttinumero}',
+                kontin_maxkg = '{$maxkg}',
+                konttien_maara = '{$konttimaara}'
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tilausrivitunnus = '{$rivitunnus}'";
       pupe_query($query);
@@ -607,12 +611,9 @@ if ($view == 'kontituslista') {
   $konttien_kpl = array();
   $konttien_valmius =array();
 
-  print_r($kontitetut);
-  echo '<hr>';
-
   foreach ($kontitetut as $rulla) {
 
-    if (strpos($rulla['konttinumero'], "/") !== false) {
+    if ($rulla['sinettinumero'] == 'X' or $rulla['sinettinumero'] == '') {
       $kontitusinfo = explode("/", $rulla['konttinumero']);
       $konttinumero = $kontitusinfo[0];
     }
@@ -620,13 +621,31 @@ if ($view == 'kontituslista') {
       $konttinumero = $rulla['konttinumero'];
     }
 
-    $konttien_painot[$konttinumero] = $konttien_painot[$konttinumero] + $rulla['paino'];
-    $konttien_kpl[$konttinumero] = $konttien_kpl[$konttinumero] + 1;
+    $konttien_painot[$konttinumero][] = $rulla['paino'];
+    $konttien_kpl[$konttinumero][] = 1;
 
     $konttien_valmius[$konttinumero][] = $rulla['sinettinumero'];
   }
 
-print_r($konttien_painot);
+  foreach ($rullat_ja_kontit['sinetoidyt'] as $key => $value) {
+
+    $konttien_painot[$key][] = $value['paino'];
+    $konttien_kpl[$key][] = $value['kpl'];
+    array_pop($kontit);
+    $kontit[$key] = 0;
+
+  }
+
+  if (!isset($aktiivinen_kontti)) {
+
+    foreach ($kontit as $key => $kontti) {
+      if (!in_array('X', $konttien_valmius[$key])) {
+        $aktiivinen_kontti = $key;
+        break;
+      }
+    }
+
+  }
 
   if ($sulku) {
     unset($aktiivinen_kontti);
@@ -637,10 +656,6 @@ print_r($konttien_painot);
         break;
       }
     }
-  }
-
-  if (!isset($aktiivinen_kontti)) {
-    $aktiivinen_kontti = 1;
   }
 
   if (isset($huomio)) {
@@ -688,7 +703,9 @@ print_r($konttien_painot);
       $luokka = "button";
     }
 
-    if (in_array('X', $konttien_valmius[$key])) {
+    $valmius_str = implode("", $konttien_valmius[$key]);
+
+    if (!empty($valmius_str)) {
       $luokka = "suljettu";
       $disablointi = 'disabled';
     }
@@ -711,7 +728,7 @@ print_r($konttien_painot);
     echo t("Kontti") ."-". $key ;
 
     if ($konttien_painot[$key] > 0 and $konttien_kpl[$key] > 0) {
-      echo " (" . $konttien_painot[$key] . " kg, " . $konttien_kpl[$key] . " kpl)";
+      echo " (" . array_sum($konttien_painot[$key]) . " kg, " . array_sum($konttien_kpl[$key]) . " kpl)";
     }
 
     echo "</button></form></div>";

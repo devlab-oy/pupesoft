@@ -636,14 +636,17 @@ if ($view == 'kontituslista') {
 
   }
 
+
+
   if (!isset($aktiivinen_kontti)) {
+
     foreach ($kontit as $key => $kontti) {
-      $valmius_str = implode("", $konttien_valmius[$key]);
-      if (empty($valmius_str)) {
+      if (!in_array('X', $konttien_valmius[$key])) {
         $aktiivinen_kontti = $key;
         break;
       }
     }
+
   }
 
   if ($sulku) {

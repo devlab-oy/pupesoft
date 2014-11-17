@@ -35,6 +35,10 @@ if ($tee == "laheta_viesti" and $yhtiorow["vahvistusviesti_asiakkaalle"] == "Y")
                            $tilausnumero,
                            true);
 
+  if ($viestin_lahetys_onnistui) {
+    paivita_vahvistusviesti_lahetetty($tilausnumero);
+  }
+
   $tee = "";
 }
 
@@ -2182,11 +2186,13 @@ if ($tee == '') {
 
   echo "<font class='head'>$otsikko</font><hr>";
 
-  if ($viestin_lahetys_onnistui) {
-    echo "<font class='ok'>" . t("Vahvistusviesti lähetetty") . "</font><br>";
-  }
-  else {
-    echo "<font class='error'>" . t("Vahvistusviestin lähetys epäonnistui") . "</font><br>";
+  if (isset($viestin_lahetys_onnistui)) {
+    if ($viestin_lahetys_onnistui) {
+      echo "<font class='ok'>" . t("Vahvistusviesti lähetetty") . "</font><br>";
+    }
+    else {
+      echo "<font class='error'>" . t("Vahvistusviestin lähetys epäonnistui") . "</font><br>";
+    }
   }
 
   if ($kukarow['kesken'] != '0') {
@@ -9100,6 +9106,12 @@ if ($tee == '') {
           </form></td>";
 
       if ($yhtiorow["vahvistusviesti_asiakkaalle"] == "Y") {
+        $aika = hae_vahvistusviesti_lahetetty($tilausnumero);
+
+        $vahvistus_teksti = $aika ? t("Vahvistusviesti on jo lähetetty asiakkaalle") .
+                                    " " .
+                                    $aika : "";
+
         echo
           "<td class='back' valign='top'>
                 <form method='post'>
@@ -9117,6 +9129,8 @@ if ($tee == '') {
           "' onclick='return confirm(\"" .
           t("Oletko varma, että haluat lähettää asiakkaalle viestin työmääräyksen valmistumisesta?") .
           "\");'>
+          <br>
+          {$vahvistus_teksti}
                 </form>
               </td>";
       }
@@ -9812,4 +9826,38 @@ function loytyyko_myyja_tunnuksella($tunnus) {
   $maara = mysql_fetch_assoc($result);
 
   return $maara['maara'] > 0;
+}
+
+function paivita_vahvistusviesti_lahetetty($tilausnumero) {
+  global $kukarow;
+
+  $query =
+    "UPDATE tyomaarays
+     SET vahvistusviesti_lahetetty = now()
+     WHERE yhtio = '{$kukarow['yhtio']}'
+     AND otunnus = {$tilausnumero}";
+
+  return pupe_query($query);
+}
+
+function hae_vahvistusviesti_lahetetty($tilausnumero) {
+  global $kukarow;
+
+  $query =
+    "SELECT vahvistusviesti_lahetetty
+     FROM tyomaarays
+     WHERE yhtio = '{$kukarow['yhtio']}'
+     AND otunnus = {$tilausnumero}";
+
+  $result = pupe_query($query);
+
+  $aika = mysql_fetch_assoc($result);
+  $aika = $aika["vahvistusviesti_lahetetty"];
+
+  if (empty($aika)) {
+    return false;
+  }
+  else {
+    return $aika;
+  }
 }

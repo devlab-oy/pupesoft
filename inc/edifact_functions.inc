@@ -77,9 +77,7 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
 
   if ($konttimaara < $bookattu_konttimaara) {
     while ($konttimaara < $bookattu_konttimaara) {
-      end($kontit);
-      $vika_kontti = key($kontit);
-      $kontit[$vika_kontti + 1] = 0;
+      $kontit[$konttimaara + 1] = 0;
       $konttimaara = count($kontit);
     }
   }

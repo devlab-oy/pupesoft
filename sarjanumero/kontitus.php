@@ -268,11 +268,6 @@ if (isset($submit)) {
 
     $maxkg = $konttiinfo['kontin_maxkg'];
 
-    echo $konttiviite;
-    echo '<br>';
-    echo $maxkg;
-    die;
-
     $rullat_ja_kontit = rullat_ja_kontit($konttiviite, $maxkg);
 
     $kontittamattomat = $rullat_ja_kontit['kontittamattomat'];

@@ -38,7 +38,7 @@ function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $kerattu = 
       $viesti = "{$avainsanaviesti}\n" . t("Tilausnumero") . ": {$tilausnumero}";
     }
   }
-  elseif (loytyy_tyomaarays($tilausnumero) or $kerattu) {
+  elseif ($kerattu) {
     $otsikko = t("Huoltotyö valmis");
 
     $avainsanaviesti = t_avainsana("TYOMVALMVIEST", "", "", "", "", "selite");
@@ -84,6 +84,8 @@ function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $kerattu = 
     $vastaus = $vastaus[0];
 
     if ($vastaus == "OK") {
+      paivita_vahvistusviesti_lahetetty($tilausnumero);
+
       $lahetetty = true;
     }
   }
@@ -133,19 +135,6 @@ function hae_tilaus($tilausnumero) {
   return mysql_fetch_assoc($result);
 }
 
-function loytyy_tyomaarays($tilausnumero) {
-  global $kukarow;
-
-  $query  = "SELECT COUNT(*) AS maara
-             FROM  tyomaarays
-             WHERE yhtio   = '{$kukarow['yhtio']}'
-             AND   otunnus = '{$tilausnumero}'";
-  $result = pupe_query($query);
-  $result = mysql_fetch_assoc($result);
-
-  return (int) $result["maara"] > 0;
-}
-
 function loytyy_jt_riveja($tilausnumero) {
   global $kukarow;
 
@@ -174,4 +163,38 @@ function loytyy_jt_riveja($tilausnumero) {
   }
 
   return false;
+}
+
+function paivita_vahvistusviesti_lahetetty($tilausnumero) {
+  global $kukarow;
+
+  $query =
+    "UPDATE laskun_lisatiedot
+     SET vahvistusviesti_lahetetty = now()
+     WHERE yhtio = '{$kukarow['yhtio']}'
+     AND otunnus = {$tilausnumero}";
+
+  return pupe_query($query);
+}
+
+function hae_vahvistusviesti_lahetetty($tilausnumero) {
+  global $kukarow;
+
+  $query =
+    "SELECT vahvistusviesti_lahetetty
+     FROM laskun_lisatiedot
+     WHERE yhtio = '{$kukarow['yhtio']}'
+     AND otunnus = {$tilausnumero}";
+
+  $result = pupe_query($query);
+
+  $aika = mysql_fetch_assoc($result);
+  $aika = $aika["vahvistusviesti_lahetetty"];
+
+  if (empty($aika)) {
+    return false;
+  }
+  else {
+    return $aika;
+  }
 }

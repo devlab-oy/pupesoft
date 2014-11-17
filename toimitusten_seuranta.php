@@ -418,7 +418,7 @@ if (!isset($task)) {
                         AND ss.myyntirivitunnus = tilausrivi.tunnus
                       WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
                       AND tilausrivi.otunnus IN ({$konttiviitteen_alaiset_tilaukset})
-                      AND trlt.sinettinumero = 'X'
+                      AND trlt.sinettinumero != ''
                       AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusaus')";
             $result = pupe_query($query);
 

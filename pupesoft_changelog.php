@@ -4,6 +4,25 @@ require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Uudet ominaisuudet")."</font><hr><br>";
 
+echo "  <script type='text/javascript'>
+
+    $(function() {
+
+      $('.nayta_rivit').on('click', function() {
+        var id = $(this).attr('id');
+        var table = $('#table_'+id);
+
+        if (table.is(':visible')) {
+          table.hide();
+        }
+        else {
+          table.show();
+        }
+      });
+    });
+
+    </script>";
+
 // Haetaan pulkkareita githubista
 function github_api ($url) {
   $ch  = curl_init();
@@ -144,7 +163,7 @@ $query  = "SELECT *
            FROM git_paivitykset
            WHERE hash != 'github_api_request'
            ORDER BY id DESC
-           LIMIT 10";
+           LIMIT 50";
 $vetores = pupe_query($query);
 
 if (mysql_num_rows($vetores)) {
@@ -161,7 +180,6 @@ if (mysql_num_rows($vetores)) {
   echo "<table style='width: 90%;'>";
 
   foreach ($vedot as $i => $veto) {
-
     $taveto_hash = $veto["hash"];
 
     if (isset($vedot[$i+1])) {
@@ -183,11 +201,15 @@ if (mysql_num_rows($vetores)) {
         continue;
       }
 
-      echo "<tr><th colspan='3'>".t("Tulossa olevat ominaisuudet").":</th></tr>";
+      echo "<tr><th><img style='float:left;' class='nayta_rivit' id='HEAD' src='{$palvelin2}pics/lullacons/switch.png' />".t("Tulossa olevat ominaisuudet").":</th></tr>";
+      echo "<tr><td class='back' style='padding:0px;'><table id='table_HEAD'>";
+
       $pull_ids = $pulrow['idt'];
     }
     else {
-      echo "<tr><th colspan='3'>Pupesoft ".t("päivitys").": $veto[date]</th></tr>";
+
+      echo "<tr><th><img style='float:left;' class='nayta_rivit' id='{$taveto_hash}' src='{$palvelin2}pics/lullacons/switch.png' />Pupesoft ".t("päivitys").": ".tv1dateconv($veto["date"], "P")."</th></tr>";
+      echo "<tr><td class='back' style='padding:0px;'><table id='table_{$taveto_hash}' style='display:none;'>";
 
       $pulkkarit = array();
       exec("git log --merges $edveto_hash..$taveto_hash |grep \"pull request\"", $pulkkarit);
@@ -254,9 +276,11 @@ if (mysql_num_rows($vetores)) {
         echo "<tr><td class='back'><br></td></tr>";
 
       }
-
-      echo "<tr><td class='back'><br></td></tr>";
     }
+
+    echo "</table>";
+    echo "</td></tr>";
+
   }
 
   echo "</table>";

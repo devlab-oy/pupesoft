@@ -474,26 +474,25 @@ $asiakasselectlisa = $asiakasjoinilisa = $asiakaswherelisa = "";
 
 if (isset($magento_siirretaan_asiakkaat)) {
   $asiakasselectlisa = " avainsana.selitetark as asiakasryhma,
-                         asiakkaan_avainsanat.tarkenne magento_tunnus,
+                         yhteyshenkilo.ulkoinen_asiakasnumero magento_tunnus,
+                         yhteyshenkilo.tunnus yhenk_tunnus,
                          yhteyshenkilo.nimi yhenk_nimi,
                          yhteyshenkilo.email yhenk_email,
                          yhteyshenkilo.puh yhenk_puh,";
 
-  $asiakasjoinilisa = " LEFT JOIN asiakkaan_avainsanat ON (asiakkaan_avainsanat.yhtio = asiakas.yhtio AND asiakkaan_avainsanat.liitostunnus = asiakas.tunnus AND asiakkaan_avainsanat.avainsana = 'magento_tunnus')
-                        JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakas.yhtio AND yhteyshenkilo.liitostunnus = asiakas.tunnus AND yhteyshenkilo.rooli = 'magento')
+  $asiakasjoinilisa = " JOIN yhteyshenkilo ON (yhteyshenkilo.yhtio = asiakas.yhtio AND yhteyshenkilo.liitostunnus = asiakas.tunnus AND yhteyshenkilo.rooli = 'magento')
                         LEFT JOIN avainsana ON (avainsana.yhtio = asiakas.yhtio AND avainsana.selite = asiakas.ryhma AND avainsana.laji = 'asiakasryhma')";
 
   $asiakaswherelisa = " AND yhteyshenkilo.rooli  = 'magento'
                         AND yhteyshenkilo.email != ''";
 
   if (!empty($muutoslisa)) {
-    $muutoslisa .= " OR asiakkaan_avainsanat.muutospvm >= '{$datetime_checkpoint}'
-                     OR yhteyshenkilo.muutospvm >= '{$datetime_checkpoint}'";
+    $muutoslisa .= " OR yhteyshenkilo.muutospvm >= '{$datetime_checkpoint}'";
   }
 }
 
 // Haetaan kaikki asiakkaat
-// Asiakassiirtoa varten poimitaan myös lisäkenttiä asiakkaan_avainsanat ja yhteyshenkilo-tauluista
+// Asiakassiirtoa varten poimitaan myös lisäkenttiä yhteyshenkilo-tauluista
 $query = "SELECT
           asiakas.*,
           $asiakasselectlisa
@@ -522,6 +521,15 @@ while ($row = mysql_fetch_array($res)) {
     $row["toim_postino"] = $row['postino'];
     $row["toim_postitp"] = $row['postitp'];
   }
+  // Yhteyshenkilön nimestä otetaan etunimi ja sukunimi
+  if (!empty($row["yhenk_nimi"])) {
+    // Viimeinen osa nimestä on sukunimi
+    $yhenk_sukunimi = end(explode(' ', $row['yhenk_nimi']));
+    // Ensimmäiset osat etunimiä
+    $yhenk_etunimi = explode(' ', $row['yhenk_nimi']);
+    array_pop($yhenk_etunimi);
+    $yhenk_etunimi = implode(' ', $yhenk_etunimi);
+  }
 
   $dnsasiakas[] = array(
     'nimi'               => $row["nimi"],
@@ -545,10 +553,13 @@ while ($row = mysql_fetch_array($res)) {
     'laskutus_postino'   => $row["laskutus_postino"],
     'laskutus_postitp'   => $row["laskutus_postitp"],
     'yhenk_nimi'         => $row["yhenk_nimi"],
+    'yhenk_etunimi'      => $yhenk_etunimi, 
+    'yhenk_sukunimi'     => $yhenk_sukunimi,
     'yhenk_email'        => $row["yhenk_email"],
     'yhenk_puh'          => $row["yhenk_puh"],
+    'yhenk_tunnus'       => $row["yhenk_tunnus"],
     'magento_tunnus'     => $row["magento_tunnus"],
-    'asiakasryhma'       => $row['asiakasryhma'],
+    'asiakasryhma'       => $row['asiakasryhma']
   );
 }
 
@@ -852,7 +863,12 @@ if (isset($verkkokauppatyyppi) and $verkkokauppatyyppi == "magento") {
   if (isset($verkkokauppatuotteet_erikoisparametrit) and count($verkkokauppatuotteet_erikoisparametrit) > 0) {
     $magento_client->setVerkkokauppatuotteetErikoisparametrit($verkkokauppatuotteet_erikoisparametrit);
   }
-
+  // Asetetaan custom asiakaskentät. Array joka sisältää jokaiselle erikoisparametrille
+  // array ('nimi' =>'magento_parametrin_nimi', 'arvo' = 'asiakkaan_kentän_nimi_mistä arvo_halutaan') esim. array ('nimi' => 'lastname', 'arvo' => 'yhenk_sukunimi')
+  // näillä arvoilla ylikirjoitetaan asiakkaan tiedot sekä laskutus/toimitusosoitetiedot
+  if (isset($asiakkaat_erikoisparametrit) and count($asiakkaat_erikoisparametrit) > 0) {
+    $magento_client->setAsiakkaatErikoisparametrit($asiakkaat_erikoisparametrit);
+  }
   // Magentossa käsin hallitut kategoriat jotka säilytetään aina tuotepäivityksessä
   if (isset($magento_sticky_kategoriat) and count($magento_sticky_kategoriat) > 0) {
     $magento_client->setStickyKategoriat($magento_sticky_kategoriat);

@@ -97,6 +97,11 @@ class MagentoClient {
   private $_verkkokauppatuotteet_erikoisparametrit = array ();
 
   /**
+   * Asiakkaan erikoisparametrit joilla ylikirjoitetaan arvoja asiakas- ja osoitetiedoista
+   */
+  private $_asiakkaat_erikoisparametrit = array ();
+
+  /**
    * Magentossa käsin hallitut kategoria id:t joita ei poisteta tuotteelta tuotepäivityksessä
    */
   private $_sticky_kategoriat = array ();
@@ -453,7 +458,8 @@ class MagentoClient {
             foreach ($kauppatunnukset as $kauppatunnus) {
               $tuotteen_kauppakohtainen_data = array(
                 'description' => $kaannokset['kuvaus'],
-                'name'        => $kaannokset['nimitys']
+                'name'        => $kaannokset['nimitys'],
+                'unit'        => $kaannokset['yksikko']
               );
 
               $this->_proxy->call($this->_session, 'catalog_product.update',
@@ -1422,45 +1428,60 @@ class MagentoClient {
     // Asiakas countteri
     $count = 0;
 
+    // Asiakkaiden erikoisparametrit
+    $asiakkaat_erikoisparametrit = $this->_asiakkaat_erikoisparametrit;
+
     // Lisätään asiakkaat ja osoitteet erissä
     foreach ($dnsasiakas as $asiakas) {
-
 
       $asiakasryhma_id = $this->findCustomerGroup(utf8_encode($asiakas['asiakasryhma']));
 
       $asiakas_data = array(
-        'email'          => $asiakas['yhenk_email'],
-        'firstname'        => $asiakas['nimi'],
-        'lastname'        => $asiakas['nimi'],
-        'website_id'      => $asiakas['magento_website_id'],
-        'taxvat'        => $asiakas['ytunnus'],
-        'external_id'      => $asiakas['asiakasnro'],
-        'group_id'        => $asiakasryhma_id,
+        'email'       => utf8_encode($asiakas['yhenk_email']),
+        'firstname'   => utf8_encode($asiakas['nimi']),
+        'lastname'    => utf8_encode($asiakas['nimi']),
+        'website_id'  => utf8_encode($asiakas['magento_website_id']),
+        'taxvat'      => $asiakas['ytunnus'],
+        'external_id' => $asiakas['asiakasnro'],
+        'group_id'    => $asiakasryhma_id,
       );
 
       $laskutus_osoite_data = array(
-        'firstname'        => $asiakas['laskutus_nimi'],
-        'lastname'        => $asiakas['laskutus_nimi'],
-        'street'        => array($asiakas['laskutus_osoite']),
-        'postcode'        => $asiakas['laskutus_postino'],
-        'city'          => $asiakas['laskutus_postitp'],
-        'country_id'      => $asiakas['maa'],
-        'telephone'        => $asiakas['yhenk_puh'],
-        'company'        => $asiakas['nimi'],
+        'firstname'  => utf8_encode($asiakas['laskutus_nimi']),
+        'lastname'   => utf8_encode($asiakas['laskutus_nimi']),
+        'street'     => array(utf8_encode($asiakas['laskutus_osoite'])),
+        'postcode'   => utf8_encode($asiakas['laskutus_postino']),
+        'city'       => utf8_encode($asiakas['laskutus_postitp']),
+        'country_id' => utf8_encode($asiakas['maa']),
+        'telephone'  => utf8_encode($asiakas['yhenk_puh']),
+        'company'    => utf8_encode($asiakas['nimi']),
         'is_default_billing'    => true,
       );
 
       $toimitus_osoite_data = array(
-        'firstname'        => $asiakas['toimitus_nimi'],
-        'lastname'        => $asiakas['toimitus_nimi'],
-        'street'        => array($asiakas['toimitus_osoite']),
-        'postcode'        => $asiakas['toimitus_postino'],
-        'city'          => $asiakas['toimitus_postitp'],
-        'country_id'      => $asiakas['maa'],
-        'telephone'        => $asiakas['yhenk_puh'],
-        'company'        => $asiakas['nimi'],
+        'firstname'  => utf8_encode($asiakas['toimitus_nimi']),
+        'lastname'   => utf8_encode($asiakas['toimitus_nimi']),
+        'street'     => array(utf8_encode($asiakas['toimitus_osoite'])),
+        'postcode'   => utf8_encode($asiakas['toimitus_postino']),
+        'city'       => utf8_encode($asiakas['toimitus_postitp']),
+        'country_id' => utf8_encode($asiakas['maa']),
+        'telephone'  => utf8_encode($asiakas['yhenk_puh']),
+        'company'    => utf8_encode($asiakas['nimi']),
         'is_default_shipping' => true
       );
+
+      if (count($asiakkaat_erikoisparametrit) > 0) {
+        foreach ($asiakkaat_erikoisparametrit as $erikoisparametri) {
+          $key = $erikoisparametri['nimi'];
+          $value = $erikoisparametri['arvo'];
+          // Jos value löytyy asiakas-arraysta, käytetään sitä
+          if (isset($asiakas[$value])) {
+            $asiakas_data[$key] = utf8_encode($asiakas[$value]);
+            $laskutus_osoite_data[$key] = utf8_encode($asiakas[$value]);
+            $toimitus_osoite_data[$key] = utf8_encode($asiakas[$value]);
+          }
+        }
+      }
 
       // Lisätään tai päivitetään asiakas
 
@@ -1474,41 +1495,21 @@ class MagentoClient {
               $asiakas_data
             ));
 
-          $this->log("Asiakas '{$asiakas['tunnus']}' / {$result} lisätty " . print_r($asiakas_data, true));
+          $this->log("Asiakas '{$asiakas['tunnus']}' / '{$asiakas['yhenk_tunnus']}' / {$result} lisätty " . print_r($asiakas_data, true));
           $asiakas['magento_tunnus'] = $result;
 
           // Päivitetään magento_tunnus pupeen
-          $tarksql = "SELECT *
-                      FROM asiakkaan_avainsanat
-                      WHERE yhtio      = '{$asiakas['yhtio']}'
-                      AND liitostunnus = '{$asiakas['tunnus']}'
-                      AND avainsana    = 'magento_tunnus'";
-          $tarkesult = pupe_query($tarksql);
-          $ahy = mysql_num_rows($tarkesult);
-
-          if ($ahy == 0) {
-            $ahinsert = "INSERT INTO asiakkaan_avainsanat SET
-                         yhtio        = '{$asiakas['yhtio']}',
-                         liitostunnus = '{$asiakas['tunnus']}',
-                         tarkenne     = '{$asiakas['magento_tunnus']}',
-                         avainsana    = 'magento_tunnus',
-                         laatija      = 'Magento',
-                         luontiaika   = now(),
-                         muutospvm    = now()";
-            pupe_query($ahinsert);
-          }
-          else {
-            $query = "UPDATE asiakkaan_avainsanat
-                      SET tarkenne = '{$asiakas['magento_tunnus']}'
-                      WHERE yhtio      = '{$asiakas['yhtio']}'
-                      AND liitostunnus = '{$asiakas['tunnus']}'
-                      AND avainsana    = 'magento_tunnus'";
-            pupe_query($query);
-          }
+         $query = "UPDATE yhteyshenkilo
+                   SET ulkoinen_asiakasnumero = '{$asiakas['magento_tunnus']}'
+                   WHERE yhtio      = '{$asiakas['yhtio']}'
+                   AND liitostunnus = '{$asiakas['tunnus']}'
+                   AND rooli        = 'Magento'
+                   AND tunnus       = '{$asiakas['yhenk_tunnus']}'";
+          pupe_query($query);
         }
         catch (Exception $e) {
           $this->_error_count++;
-          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' lisäys epäonnistui " . print_r($asiakas_data, true), $e);
+          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' / '{$asiakas['yhenk_tunnus']}' lisäys epäonnistui " . print_r($asiakas_data, true), $e);
         }
       }
       // Asiakas on jo olemassa, päivitetään
@@ -1522,11 +1523,11 @@ class MagentoClient {
               $asiakas_data
             ));
 
-          $this->log("Asiakas '{$asiakas['tunnus']}' / {$asiakas['magento_tunnus']} päivitetty " . print_r($asiakas_data, true));
+          $this->log("Asiakas '{$asiakas['tunnus']}' / '{$asiakas['yhenk_tunnus']}' / {$asiakas['magento_tunnus']} päivitetty " . print_r($asiakas_data, true));
         }
         catch (Exception $e) {
           $this->_error_count++;
-          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' päivitys epäonnistui " . print_r($asiakas_data, true), $e);
+          $this->log("Virhe! Asiakkaan '{$asiakas['tunnus']}' / '{$asiakas['yhenk_tunnus']}' päivitys epäonnistui " . print_r($asiakas_data, true), $e);
         }
       }
 
@@ -1610,7 +1611,7 @@ class MagentoClient {
                 tuotteen_avainsanat
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tuoteno = '{$tuotenumero}'
-                AND laji    IN ('nimitys','kuvaus')";
+                AND laji    IN ('nimitys','kuvaus', 'yksikko')";
       $result = pupe_query($query);
 
       while ($avainsana = mysql_fetch_assoc($result)) {
@@ -1705,10 +1706,19 @@ class MagentoClient {
   /**
    * Asettaa verkkokauppatuotteiden erikoisparametrit
    *
-   * @param string  $verkkokauppatuotteet_erikoisparametrit
+   * @param array  $verkkokauppatuotteet_erikoisparametrit
    */
   public function setVerkkokauppatuotteetErikoisparametrit($verkkokauppatuotteet_erikoisparametrit) {
     $this->_verkkokauppatuotteet_erikoisparametrit = $verkkokauppatuotteet_erikoisparametrit;
+  }
+
+  /**
+   * Asettaa verkkokauppa-asiakkaiden erikoisparametrit
+   *
+   * @param array  $asiakkaat_erikoisparametrit
+   */
+  public function setAsiakkaatErikoisparametrit($asiakkaat_erikoisparametrit) {
+    $this->_asiakkaat_erikoisparametrit = $asiakkaat_erikoisparametrit;
   }
 
   /**

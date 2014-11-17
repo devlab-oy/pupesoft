@@ -91,6 +91,31 @@ else {
     if (!isset($kumulatiivinen_vv)) $kumulatiivinen_vv = date('Y');
     if (isset($kumulatiivinen_valittu)) $kumulatiivinen_chk = "CHECKED";
 
+    $tilaustyypit_array = array(
+      '0' => t("Ylläpitosopimus"),
+      '2' => t("Varastotäydennys"),
+      '7' => t("Tehdastilaus"),
+      '8' => t("Muiden mukana"),
+      '9' => t("Tehdaspalautus"),
+      'A' => t("Työmääräys"),
+      'E' => t("Ennakkotilaus"),
+      'M' => t("Myyntitili"),
+      'N' => t("Normaalitilaus"),
+      'P' => t("Projekti"),
+      'R' => t("Reklamaatio"),
+      'S' => t("Sarjatilaus"),
+      'T' => t("Tarjous"),
+      'U' => t("Takuu"),
+      'V' => t("Valmistus")
+    );
+
+    $_clearingit = array(
+      'ENNAKKOTILAUS' => '',
+      'JT-TILAUS' => '',
+      'TARJOUSTILAUS' => '',
+      'HYVITYS' => '',
+    );
+
     echo "<br>\n\n\n";
     echo "<form method='post' action='myyntiseuranta.php'>";
     echo "<input type='hidden' name='tee' value='go'>";
@@ -238,13 +263,14 @@ else {
     if ($ruksit[40]  != '')     $ruk40chk          = "CHECKED";
     if ($ruksit[50]  != '')     $ruk50chk          = "CHECKED";
     if ($ruksit[60]  != '')     $ruk60chk          = "CHECKED";
+    if ($ruksit[70]  != '')     $ruk70chk          = "CHECKED";
     if ($ruksit[80]  != '')     $ruk80chk          = "CHECKED";
     if ($ruksit[90]  != '')     $ruk90chk          = "CHECKED";
-    if ($ruksit[100]  != '')     $ruk100chk         = "CHECKED";
-    if ($ruksit[110]  != '')     $ruk110chk         = "CHECKED";
-    if ($ruksit[120] != '')      $ruk120chk         = "CHECKED";
-    if ($ruksit[130] != '')      $ruk130chk         = "CHECKED";
-    if ($ruksit[140] != '')      $ruk140chk         = "CHECKED";
+    if ($ruksit[100]  != '')    $ruk100chk         = "CHECKED";
+    if ($ruksit[110]  != '')    $ruk110chk         = "CHECKED";
+    if ($ruksit[120] != '')     $ruk120chk         = "CHECKED";
+    if ($ruksit[130] != '')     $ruk130chk         = "CHECKED";
+    if ($ruksit[140] != '')     $ruk140chk         = "CHECKED";
 
     if ($nimitykset != '')       $nimchk           = "CHECKED";
     if ($mitat != '')        $mitatchk        = "CHECKED";
@@ -339,8 +365,72 @@ else {
       <tr>
       <th>", t("Listaa tilaustyypeittäin"), "</th>
       <td><input type='text' name='jarjestys[60]' size='2' value='{$jarjestys[60]}'></td>
-      <td><input type='checkbox' name='ruksit[60]' value='tilaustyyppi' {$ruk60chk}></td>
-      <td><input type='text' name='rajaus[60]' value='{$rajaus[60]}'></td>
+      <td><input type='checkbox' name='ruksit[60]' value='tilaustyyppi' {$ruk60chk}></td>";
+
+      $_tilaustyypit = array(
+        '0' => '',
+        '2' => '',
+        '7' => '',
+        '8' => '',
+        '9' => '',
+        'A' => '',
+        'E' => '',
+        'M' => '',
+        'N' => '',
+        'P' => '',
+        'R' => '',
+        'S' => '',
+        'T' => '',
+        'U' => '',
+        'U' => '',
+        'V' => '',
+      );
+
+      $tilaustyyppi_chk = array($rajaus[60] => 'selected') + $_tilaustyypit;
+
+echo "<td><select name='rajaus[60]'>
+      <option value=''>",t("Ei rajausta"),"</option>
+      <option value='N' {$tilaustyyppi_chk['N']}>",t("Normaalitilaus"),"</option>
+      <option value='0' {$tilaustyyppi_chk['0']}>",t("Ylläpitosopimus"),"</option>
+      <option value='2' {$tilaustyyppi_chk['2']}>",t("Varastotäydennys"),"</option>
+      <option value='7' {$tilaustyyppi_chk['7']}>",t("Tehdastilaus"),"</option>
+      <option value='8' {$tilaustyyppi_chk['8']}>",t("Muiden mukana"),"</option>
+      <option value='9' {$tilaustyyppi_chk['9']}>",t("Tehdaspalautus"),"</option>
+      <option value='A' {$tilaustyyppi_chk['A']}>",t("Työmääräys"),"</option>
+      <option value='E' {$tilaustyyppi_chk['E']}>",t("Ennakkotilaus"),"</option>
+      <option value='M' {$tilaustyyppi_chk['M']}>",t("Myyntitili"),"</option>
+      <option value='P' {$tilaustyyppi_chk['P']}>",t("Projekti"),"</option>
+      <option value='R' {$tilaustyyppi_chk['R']}>",t("Reklamaatio"),"</option>
+      <option value='S' {$tilaustyyppi_chk['S']}>",t("Sarjatilaus"),"</option>
+      <option value='T' {$tilaustyyppi_chk['T']}>",t("Tarjous"),"</option>
+      <option value='U' {$tilaustyyppi_chk['U']}>",t("Takuu"),"</option>
+      <option value='V' {$tilaustyyppi_chk['V']}>",t("Valmistus"),"</option>
+      </select></td>
+
+      <td class='back'>", t("(Toimii vain jos ajat raporttia tilauksista)"), "</td>
+      </tr>
+      <tr>
+      <th>", t("Listaa tilauksen muodostustavoittain"), "</th>
+      <td><input type='text' name='jarjestys[70]' size='2' value='{$jarjestys[70]}'></td>
+      <td><input type='checkbox' name='ruksit[70]' value='clearing' {$ruk70chk}></td>";
+
+      $_clearing = array($rajaus[70] => 'selected') + $_clearingit;
+
+echo "<td><select name='rajaus[70]'>
+      <option value=''>",t("Ei rajausta"),"</option>
+      <option value='ENNAKKOTILAUS' {$_clearing['ENNAKKOTILAUS']}>",
+      t("Ennakkomyynnistä tehty myyntitilaus"),
+      "</option>
+      <option value='JT-TILAUS' {$_clearing['JT-TILAUS']}>",
+      t("JT-selauksessa tehty myyntitilaus"),
+      "</option>
+      <option value='TARJOUSTILAUS' {$_clearing['TARJOUSTILAUS']}>",
+      t("Hyväksytystä tarjouksesta tehty myyntitilaus"),
+      "</option>
+      <option value='HYVITYS' {$_clearing['HYVITYS']}>",
+      t("Monistamalla tehty hyvitys"),
+      "</option>
+      </select></td>
       <td class='back'>", t("(Toimii vain jos ajat raporttia tilauksista)"), "</td>
       </tr>
       <tr>
@@ -1207,13 +1297,32 @@ else {
 
         if ($mukaan == "tilaustyyppi") {
           $group .= ",tilauksentyyppi";
-          $select .= "concat(if(lasku.tilaustyyppi='','N',lasku.tilaustyyppi),'##',lasku.clearing) tilauksentyyppi, ";
+          $select .= "if(lasku.tilaustyyppi='','N',lasku.tilaustyyppi) tilauksentyyppi, ";
           $order  .= "tilauksentyyppi,";
+          $gluku++;
+
+          if ($rajaus[$i] != "") {
+            if ($rajaus[$i] == "N") {
+              $lisa .= " and lasku.tilaustyyppi IN ('', '{$rajaus[$i]}') ";
+            }
+            else {
+              $lisa .= " and lasku.tilaustyyppi = '{$rajaus[$i]}' ";
+            }
+          }
+
+          $laskugroups++;
+        }
+
+        if ($mukaan == "clearing") {
+          $group .= ",lasku.clearing";
+          $select .= "lasku.clearing AS tilaustyypin_tarkenne, ";
+          $order  .= "lasku.clearing,";
           $gluku++;
 
           if ($rajaus[$i] != "") {
             $lisa .= " and lasku.clearing='{$rajaus[$i]}' ";
           }
+
           $laskugroups++;
         }
 
@@ -2631,25 +2740,6 @@ else {
             $bar->initialize($elements); // print the empty bar
           }
 
-          $tilaustyypit_array = array(
-            '0' => t("Ylläpitosopimus"),
-            '2' => t("Varastotäydennys"),
-            '7' => t("Tehdastilaus"),
-            '8' => t("Muiden mukana"),
-            '9' => t("Tehdaspalautus"),
-            'A' => t("Työmääräys"),
-            'E' => t("Ennakkotilaus"),
-            'M' => t("Myyntitili"),
-            'N' => t("Normaalitilaus"),
-            'P' => t("Projekti"),
-            'R' => t("Reklamaatio"),
-            'S' => t("Sarjatilaus"),
-            'T' => t("Tarjous"),
-            'T' => t("Tarjoustilaus"),
-            'U' => t("Takuu"),
-            'U' => t("Takuutilaus"),
-            'V' => t("Valmistus-Tilaus"));
-
           // Indeksien nimet
           $row_keys = array_keys($rows[0]);
 
@@ -2755,9 +2845,7 @@ else {
                 }
 
                 if ($ken_nimi == "tilauksentyyppi") {
-                  list($tils_tyyppi1, $tils_tyyppi2) = explode("##", $row[$ken_nimi]);
-
-                  $row[$ken_nimi] = $tilaustyypit_array[$tils_tyyppi1]." ".$tils_tyyppi2;
+                  $row[$ken_nimi] = $tilaustyypit_array[$row[$ken_nimi]];
                 }
 
                 if ($ken_nimi == "laskutuspvm") {

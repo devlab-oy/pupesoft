@@ -1082,9 +1082,7 @@ if ($avain_sel['RELEX_TUOTEPAR'] == "SELECTED" and $_selite) {
   
   $query = "DESC tuote";
   $varresult = pupe_query($query);
-//  $kukkarow = mysql_fetch_assoc($varresult);
-//  echo "<pre>",var_dump($kukkarow),"</pre>";
-//  die;
+
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
   while ($kukkarow = mysql_fetch_assoc($varresult)) {

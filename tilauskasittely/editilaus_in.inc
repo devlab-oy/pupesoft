@@ -124,60 +124,61 @@ unset($arow_terminaali);
 unset($yhtiorow);
 unset($crossdock911);
 
-$toimpvm                    = date("Y-m-d");
-$vastaustapa                = "";
-$editilaus_tila             = "N"; // laskun tila
-$editilaus_alatila          = "";
-$editilaus_tyyppi           = "L"; // tilausrivi tyyppi
-$id                         = "";
-$edi_kommentti              = "";
-$vastaustapa                = "";
-$maksaja                    = "";
-$viite                      = "";
-$asiakkaan_tilausnumero     = "";
-$editilaus_otsikko_ok       = "";
-$suunnistus                 = "";
-$tnimi                      = "";
-$tnimitark                  = "";
-$tpostitp                   = "";
-$tpostino                   = "";
-$tosoite                    = "";
-$lnimi                      = "";
-$lnimitark                  = "";
-$lpostitp                   = "";
-$lpostino                   = "";
-$losoite                    = "";
-$lopnumero                  = "";
-$lopnimi                    = "";
-$loppostitp                 = "";
-$loppostino                 = "";
-$loposoite                  = "";
-$ltoim_maa                  = "";
-$ltoim_puh                  = "";
-$yhteyshenkilon_puhelin     = "";
-$tilausyhteyshenkilo        = "";
-$lopviesti                  = "";
-$veromaara                  = "";
-$ohjausmerkki               = "";
-$ketjutus                   = "";
-$editilaus_maksuehto        = "";
-$editilaus_maksuteksti      = "";
-$editilaus_toimitustapa     = "";
-$editilaus_rahtivapaa       = "";
-$editilaus_tilaustyyppi     = "";
-$editilaus_eilahetetta      = "";
-$editilaus_osatoimitus      = "";
-$editilaus_sisainen         = "";
-$editilaus_kassalipas       = "";
-$til_vienti                 = "";
-$verkkokauppavarasto        = "";
-$verkkokauppavarasto_li     = "";
-$editilaus_loppuhinta       = "";
-$kieltolisa                 = "";
-$verkkokauppa               = "";
-$ot_verkkokauppa_asiakasnro = "";
-$OT_ASIAKASNRO              = "";
-$merkkitieto                = "";
+$asiakkaan_tilausnumero       = "";
+$editilaus_alatila            = "";
+$editilaus_eilahetetta        = "";
+$editilaus_kassalipas         = "";
+$editilaus_loppuhinta         = "";
+$editilaus_maksuehto          = "";
+$editilaus_maksuteksti        = "";
+$editilaus_osatoimitus        = "";
+$editilaus_otsikko_ok         = "";
+$editilaus_rahtivapaa         = "";
+$editilaus_sisainen           = "";
+$editilaus_tila               = "N"; // laskun tila
+$editilaus_tilaustyyppi       = "";
+$editilaus_toimitustapa       = "";
+$editilaus_tyyppi             = "L"; // tilausrivi tyyppi
+$edi_kommentti                = "";
+$id                           = "";
+$ketjutus                     = "";
+$kieltolisa                   = "";
+$lnimi                        = "";
+$lnimitark                    = "";
+$lopnimi                      = "";
+$lopnumero                    = "";
+$loposoite                    = "";
+$loppostino                   = "";
+$loppostitp                   = "";
+$lopviesti                    = "";
+$losoite                      = "";
+$lpostino                     = "";
+$lpostitp                     = "";
+$ltoim_maa                    = "";
+$ltoim_puh                    = "";
+$maksaja                      = "";
+$merkkitieto                  = "";
+$ohjausmerkki                 = "";
+$OT_ASIAKASNRO                = "";
+$ot_verkkokauppa_asiakasnro   = "";
+$ot_verkkokauppa_kohde        = "";
+$ot_verkkokauppa_tilausviesti = "";
+$suunnistus                   = "";
+$tilausyhteyshenkilo          = "";
+$til_vienti                   = "";
+$tnimi                        = "";
+$tnimitark                    = "";
+$toimpvm                      = date("Y-m-d");
+$tosoite                      = "";
+$tpostino                     = "";
+$tpostitp                     = "";
+$vastaustapa                  = "";
+$verkkokauppa                 = "";
+$verkkokauppavarasto          = "";
+$verkkokauppavarasto_li       = "";
+$veromaara                    = "";
+$viite                        = "";
+$yhteyshenkilon_puhelin       = "";
 
 // nollataan kaikki rivin muuttujat (nämä samat pitää tehdä tuote insertin jälkeen)
 $tuoteerror        = 1; // oletetaan aina ettei  tuotetta löydy
@@ -189,10 +190,10 @@ $tuoteno           = "";
 $olinsapi          = "";
 $olinvarasto       = "";
 $edi_nimitys       = "";
-$sallitaanjt     = "";
-$editilaus_hinta  = "";
-$editilaus_alennus  = "";
-$rivikommentti    = "";
+$sallitaanjt       = "";
+$editilaus_hinta   = "";
+$editilaus_alennus = "";
+$rivikommentti     = "";
 
 // fiilataan parametrejä joita tarvitaan require fileissä
 $tulos_ulos = "edi"; // tää on ftp-send.incissä
@@ -436,6 +437,21 @@ while ($tietue = fgets($fd)) {
     $ot_verkkokauppa_asiakasnro = $tieto;
     break;
 
+  case 'OSTOTIL.OT_VERKKOKAUPPA_TILAUSVIITE' :
+    // Verkkokauppassa asiakkaan antama tilausviite
+    $ot_verkkokauppa_tilausviesti = $tieto;
+    break;
+
+  case 'OSTOTIL.OT_VERKKOKAUPPA_TILAUSNUMERO' :
+    // Verkkokauppassa asiakkaan antama tilausnumero
+    $ot_verkkokauppa_tilausviesti .= " / ".t("Tilausnro").": ".$tieto;
+    break;
+
+  case 'OSTOTIL.OT_VERKKOKAUPPA_KOHDE' :
+    // Verkkokaupassa asiakkaan antama kohde
+    $ot_verkkokauppa_kohde = $tieto;
+    break;
+
   case 'OBGMIACKR' :
     //Edivastaus
     if ($tieto == "AB") {
@@ -654,10 +670,10 @@ while ($tietue = fgets($fd)) {
 
           $query = "SELECT asiakas.*
                     FROM asiakas
-                    JOIN asiakkaan_avainsanat ON asiakas.yhtio = asiakkaan_avainsanat.yhtio
-                      AND asiakas.tunnus                 = asiakkaan_avainsanat.liitostunnus
-                      AND asiakkaan_avainsanat.avainsana = 'magento_tunnus'
-                      AND asiakkaan_avainsanat.tarkenne  = '{$ot_verkkokauppa_asiakasnro}'
+                    JOIN yhteyshenkilo ON asiakas.yhtio = yhteyshenkilo.yhtio
+                      AND asiakas.tunnus = yhteyshenkilo.liitostunnus
+                      AND yhteyshenkilo.rooli = 'Magento'
+                      AND yhteyshenkilo.ulkoinen_asiakasnumero = '{$ot_verkkokauppa_asiakasnro}'
                     WHERE asiakas.yhtio                  = '{$kukarow['yhtio']}'
                     AND asiakas.toim_ovttunnus           not in ('','0')
                     AND asiakas.laji                     not in ('R','P')";
@@ -1407,7 +1423,7 @@ while ($tietue = fgets($fd)) {
             $verkkokauppavarasto   = explode(",", $prow["tunnukset"]);
             $verkkokauppavarasto_li = " and varastopaikat.tunnus in ($prow[tunnukset]) ";
           }
-          
+
         }
         $varasto = $verkkokauppavarasto;
       }
@@ -1440,9 +1456,9 @@ while ($tietue = fgets($fd)) {
         array_unshift($varasto, $oletus_varasto);
 
         if ($_onko_varasto_setattu) {
-          
+
           $varasto = array($oletus_varasto);
-          
+
           $v_toimipaikka = hae_varaston_toimipaikka($oletus_varasto);
 
           if ($v_toimipaikka['tunnus'] != $kukarow['toimipaikka']) {
@@ -1458,6 +1474,12 @@ while ($tietue = fgets($fd)) {
       if ($edi_tyyppi != "magento" and $yhtiorow['lahetteen_tulostustapa'] == "I") {
         $editilaus_eilahetetta = "o";
         $editilaus_alatila = 'F';
+      }
+
+
+      // Jos asiakas on syöttänyt verkkokaupassa oman tilausnumeron tai viitteen yliajetaan viesti
+      if (trim($ot_verkkokauppa_tilausviesti) != "") {
+        $viite = $ot_verkkokauppa_tilausviesti;
       }
 
       // Lisätään otsikko
@@ -1484,7 +1506,7 @@ while ($tietue = fgets($fd)) {
                 kerayspvm               = '$toimpvm',
                 keraysvko               = '',
                 ketjutus                = '$arow[ketjutus]',
-                kohde                   = '',
+                kohde                   = '$ot_verkkokauppa_kohde',
                 kohdistettu             = '$maksaja',
                 kuljetus                = '',
                 kuljetusmuoto           = '$arow[kuljetusmuoto]',
@@ -2191,11 +2213,11 @@ while ($tietue = fgets($fd)) {
   case 'OMSG__END' :
   case '*IE' :
   case 'UNT':
-  
+
     if ($editilaus_otsikko_ok == "KYLLA" and $edi_tyyppi != "magento" and $yhtiorow['lahetteen_tulostustapa'] == "I") {
       $editilaus_otsikko_ok = "HYVAKSYTTAVAKSI";
     }
-    
+
     // jos meilla on otsikko voidaan laittaa sen valmiiksi
     if ($editilaus_otsikko_ok == "KYLLA") {
       //tarkistetaan toimitustapa vakin takia
@@ -2363,58 +2385,61 @@ while ($tietue = fgets($fd)) {
     unset($arow_terminaali);
     unset($crossdock911);
 
-    $toimpvm                = date("Y-m-d");
-    $vastaustapa            = "";
-    $editilaus_tila         = "N"; // laskun tila
-    $editilaus_alatila      = "";
-    $editilaus_tyyppi       = "L"; // tilausrivi tyyppi
-    $id                     = "";
-    $edi_kommentti          = "";
-    $vastaustapa            = "";
-    $maksaja                = "";
-    $viite                  = "";
-    $asiakkaan_tilausnumero = "";
-    $editilaus_otsikko_ok   = "";
-    $suunnistus             = "";
-    $tnimi                  = "";
-    $tnimitark              = "";
-    $tpostitp               = "";
-    $tpostino               = "";
-    $tosoite                = "";
-    $lnimi                  = "";
-    $lnimitark              = "";
-    $lpostitp               = "";
-    $lpostino               = "";
-    $losoite                = "";
-    $lopnumero              = "";
-    $lopnimi                = "";
-    $loppostitp             = "";
-    $loppostino             = "";
-    $loposoite              = "";
-    $ltoim_maa              = "";
-    $ltoim_puh              = "";
-    $yhteyshenkilon_puhelin = "";
-    $tilausyhteyshenkilo    = "";
-    $lopviesti              = "";
-    $veromaara              = "";
-    $ohjausmerkki           = "";
-    $ketjutus               = "";
-    $editilaus_maksuehto    = "";
-    $editilaus_maksuteksti  = "";
-    $editilaus_toimitustapa = "";
-    $editilaus_rahtivapaa   = "";
-    $editilaus_tilaustyyppi = "";
-    $editilaus_eilahetetta  = "";
-    $editilaus_osatoimitus  = "";
-    $editilaus_sisainen     = "";
-    $editilaus_kassalipas   = "";
-    $til_vienti             = "";
-    $verkkokauppavarasto    = "";
-    $verkkokauppavarasto_li = "";
-    $editilaus_loppuhinta   = "";
-    $kieltolisa             = "";
-    $OT_ASIAKASNRO          = "";
-    $merkkitieto            = "";
+    $asiakkaan_tilausnumero       = "";
+    $editilaus_alatila            = "";
+    $editilaus_eilahetetta        = "";
+    $editilaus_kassalipas         = "";
+    $editilaus_loppuhinta         = "";
+    $editilaus_maksuehto          = "";
+    $editilaus_maksuteksti        = "";
+    $editilaus_osatoimitus        = "";
+    $editilaus_otsikko_ok         = "";
+    $editilaus_rahtivapaa         = "";
+    $editilaus_sisainen           = "";
+    $editilaus_tila               = "N"; // laskun tila
+    $editilaus_tilaustyyppi       = "";
+    $editilaus_toimitustapa       = "";
+    $editilaus_tyyppi             = "L"; // tilausrivi tyyppi
+    $edi_kommentti                = "";
+    $id                           = "";
+    $ketjutus                     = "";
+    $kieltolisa                   = "";
+    $lnimi                        = "";
+    $lnimitark                    = "";
+    $lopnimi                      = "";
+    $lopnumero                    = "";
+    $loposoite                    = "";
+    $loppostino                   = "";
+    $loppostitp                   = "";
+    $lopviesti                    = "";
+    $losoite                      = "";
+    $lpostino                     = "";
+    $lpostitp                     = "";
+    $ltoim_maa                    = "";
+    $ltoim_puh                    = "";
+    $maksaja                      = "";
+    $merkkitieto                  = "";
+    $ohjausmerkki                 = "";
+    $OT_ASIAKASNRO                = "";
+    $ot_verkkokauppa_asiakasnro   = "";
+    $ot_verkkokauppa_kohde        = "";
+    $ot_verkkokauppa_tilausviesti = "";
+    $suunnistus                   = "";
+    $tilausyhteyshenkilo          = "";
+    $til_vienti                   = "";
+    $tnimi                        = "";
+    $tnimitark                    = "";
+    $toimpvm                      = date("Y-m-d");
+    $tosoite                      = "";
+    $tpostino                     = "";
+    $tpostitp                     = "";
+    $vastaustapa                  = "";
+    $verkkokauppa                 = "";
+    $verkkokauppavarasto          = "";
+    $verkkokauppavarasto_li       = "";
+    $veromaara                    = "";
+    $viite                        = "";
+    $yhteyshenkilon_puhelin       = "";
     break;
   }
 }

@@ -55,7 +55,6 @@ if (isset($submit)) {
                   AND ss.myyntirivitunnus = tilausrivi.tunnus
                 WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
                 AND laskun_lisatiedot.konttiviite = '{$konttiviite}'";
-
       if ($muutos == 'muutos' ) {
 
         $result = pupe_query($query);
@@ -266,6 +265,8 @@ if (isset($submit)) {
               ORDER BY trlt.konttinumero DESC";
     $result = pupe_query($query);
     $konttiinfo = mysql_fetch_assoc($result);
+
+    var_dump($konttiinfo);die;
 
     $maxkg = $konttiinfo['kontin_maxkg'];
 

@@ -614,7 +614,7 @@ if ($view == 'kontituslista') {
       $konttinumero = $kontitusinfo[0];
     }
     else {
-      $konttinumero = $rulla['konttinumero']
+      $konttinumero = $rulla['konttinumero'];
     }
 
     $konttien_painot[$konttinumero] = $konttien_painot[$konttinumero] + $rulla['paino'];

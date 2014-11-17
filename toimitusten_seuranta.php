@@ -380,7 +380,7 @@ if (!isset($task)) {
           $tapahtumat .= "&bull; " .  t("Osa rahdista kuitattu saapuneeksi") . "<br>";
         }
 
-        if ($tilaus['tulouttamatta'] == 0 or $tilaus['kontittamatta'] < $tilaus['rullat']) {
+        if ($tilaus['tulouttamatta'] == 0) {
 
           $query = "SELECT group_concat(otunnus)
                     FROM laskun_lisatiedot

@@ -378,40 +378,73 @@ if ($kasitellaan_tiedosto) {
 
   if (in_array("tuotteen_toimittajat_tuotenumerot", $taulut)) {
 
-    $chk_toim_tuoteno = $chk_ytunnus = "x";
+    $chk_tuoteno = $chk_toim_tuoteno = "x";
 
     foreach ($taulunotsikot["tuotteen_toimittajat_tuotenumerot"] as $key => $column) {
-      if ($column == "TOIM_TUOTENO") $chk_toim_tuoteno = $key;
-      if ($column == "YTUNNUS") $chk_ytunnus = $key;
+
+      if (isset($toimitunnusvalinta) and $toimitunnusvalinta != 1) {
+
+        if ($column == "TOIM_TUOTENO_TUNNUS") $chk_tunnus = $key;
+        
+        switch ($toimitunnusvalinta) {
+        case "2":
+          if ($column == "TUOTENUMERO") $chk_tuoteno = $key;
+          $toimikentta = "ytunnus";
+          $tuotenokentta = "tuoteno";
+          break;
+        case "3":
+          if ($column == "TOIM_TUOTENO") $chk_toim_tuoteno = $key;
+          $toimikentta = "ytunnus";
+          $tuotenokentta = "toim_tuoteno";
+          break;
+        case "4":
+          if ($column == "TUOTENUMERO") $chk_tuoteno = $key;
+          $toimikentta = "toimittajanro";
+          $tuotenokentta = "tuoteno";
+          break;
+        case "5":
+          if ($column == "TOIM_TUOTENO") $chk_toim_tuoteno = $key;
+          $toimikentta = "toimittajanro";
+          $tuotenokentta = "toim_tuoteno";
+          break;
+        }
+      }
     }
 
-    if (is_int($chk_toim_tuoteno) and is_int($chk_ytunnus)) {
+    if (is_int($chk_toim_tuoteno) or is_int($chk_tuoteno)) {
 
       // Vaihdetaan otsikko
-      $taulunotsikot["tuotteen_toimittajat_tuotenumerot"][$chk_ytunnus] = "TOIM_TUOTENO_TUNNUS";
+      unset($taulunotsikot["tuotteen_toimittajat_tuotenumerot"][$chk_tuoteno]);
       unset($taulunotsikot["tuotteen_toimittajat_tuotenumerot"][$chk_toim_tuoteno]);
 
       // Muutetaan arvot
       foreach ($taulunrivit["tuotteen_toimittajat_tuotenumerot"] as $ind => $rivit) {
-        $chk_ytunnus_val = $taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_ytunnus];
-        $chk_toim_tuoteno_val = $taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_toim_tuoteno];
+        $chk_tunnus_val = $taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_tunnus];
+        
+        if (is_int($chk_tuoteno)) {
+          $chk_tuoteno_val = $taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_tuoteno];
+        }
+        else {
+          $chk_tuoteno_val = $taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_toim_tuoteno];
+        }
 
         $query = "SELECT tt.tunnus
                   FROM tuotteen_toimittajat AS tt
-                  JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.ytunnus = '{$chk_ytunnus_val}')
+                  JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.{$toimikentta} = '{$chk_tunnus_val}')
                   WHERE tt.yhtio      = '{$kukarow['yhtio']}'
-                  AND tt.toim_tuoteno = '{$chk_toim_tuoteno_val}'";
+                  AND tt.{$tuotenokentta} = '{$chk_tuoteno_val}'";
         $chk_tunnus_res = pupe_query($query);
 
         if (mysql_num_rows($chk_tunnus_res) == 1) {
           $chk_tunnus_row = mysql_fetch_assoc($chk_tunnus_res);
 
-          $taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_ytunnus] = $chk_tunnus_row['tunnus'];
+          $taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_tunnus] = $chk_tunnus_row['tunnus'];
         }
         else {
-          $taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_ytunnus] = "";
+          $taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_tunnus] = "";
         }
 
+        unset($taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_tuoteno]);
         unset($taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_toim_tuoteno]);
       }
     }
@@ -2428,7 +2461,7 @@ if (!$cli and !isset($api_kentat)) {
 
   // Taulujen pakolliset sarakkeet ym kuvauksia.
   require "inc/pakolliset_sarakkeet.inc";
-  
+
   if (empty($_taulu)) {
     $taulut = array_flip($taulut);
     $_taulu = array_shift($taulut);
@@ -2443,7 +2476,7 @@ if (!$cli and !isset($api_kentat)) {
     echo "  <tr><td class='tumma'>".t("Sarakkeet jotka pit‰‰ aineistossa kertoa").":</td>";
     echo "  <td>".strtolower(implode(", ", $wherelliset))."</td></tr>";
   }
-  
+
   if (!empty($kielletyt)) {
     echo "  <tr><td class='tumma'>".t("Sarakkeet joita ei saa aineistossa kertoa").":</td>";
     echo "  <td>".strtolower(implode(", ", $kielletyt))."</td></tr>";

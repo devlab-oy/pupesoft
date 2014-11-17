@@ -208,9 +208,6 @@ if (mysql_num_rows($vetores)) {
     }
     else {
 
-      echo "<tr><th><img style='float:left;' class='nayta_rivit' id='{$taveto_hash}' src='{$palvelin2}pics/lullacons/switch.png' />Pupesoft ".t("p‰ivitys").": ".tv1dateconv($veto["date"], "P")."</th></tr>";
-      echo "<tr><td class='back' style='padding:0px;'><table id='table_{$taveto_hash}' style='display:none;'>";
-
       $pulkkarit = array();
       exec("git log --merges $edveto_hash..$taveto_hash |grep \"pull request\"", $pulkkarit);
 
@@ -223,6 +220,12 @@ if (mysql_num_rows($vetores)) {
       }
 
       $pull_ids = implode(",", $pull_ids);
+
+      // jos ei ollut yht‰‰n pulkkaria, niin skipataan koko rivi
+      if ($pull_ids == "") continue;
+
+      echo "<tr><th><img style='float:left;' class='nayta_rivit' id='{$taveto_hash}' src='{$palvelin2}pics/lullacons/switch.png' />Pupesoft ".t("p‰ivitys").": ".tv1dateconv($veto["date"], "P")."</th></tr>";
+      echo "<tr><td class='back' style='padding:0px;'><table id='table_{$taveto_hash}' style='display:none;'>";
     }
 
     if ($pull_ids != "") {

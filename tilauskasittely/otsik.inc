@@ -1660,27 +1660,7 @@ if ($tila == "" and !isset($jatka)) {
       $vasen++;
     }
 
-    $query = "SELECT tunnus, selite, merahti
-              FROM toimitustapa
-              WHERE yhtio = '$kukarow[yhtio]'
-              and (sallitut_maat = '' or sallitut_maat like '%$srow[toim_maa]%')
-              and (extranet in ('','M') or selite = '$srow[toimitustapa]')
-              ORDER BY jarjestys,selite";
-    $tresult = pupe_query($query);
-
-    while ($row = mysql_fetch_assoc($tresult)) {
-      echo "<div style='display: none; visibility: hidden;' id='merahti_toimitustapa_$row[tunnus]'>$row[merahti]</div>";
-    }
-
-    $vasen_sarake[$vasen] = "<td>".t("Toimitustapa").":</td>";
-    $vasen_sarake[$vasen] .= "<td><select id='toimitustapa' name='toimitustapa' onchange='merahti_oletus(\"toimitustapa\");' {$state_chk}>";
-
-    mysql_data_seek($tresult, 0);
-
     //Tehdään dummy toimitustapa td, jotta alempana voidaan luoda oikea toimitustapa selecti valikoidun varaston perusteella.
-    $vasen_sarake[$vasen] = "<td>".t("Toimitustapa").":</td><td>";
-    $vasen_sarake[$vasen] .= "";
-    $vasen_sarake[$vasen] .= "</td>";
     $vasen++;
 
     //yhtiön oletusalvi!
@@ -2668,7 +2648,7 @@ if ($tila == "" and !isset($jatka)) {
 
     $string .= "</td>";
 
-    $vasen_sarake[2] = $string;
+    $vasen_sarake[3] = $string;
 
     // Ekotetan sarakkeet!
     $rivicount = count($vasen_sarake) > count($oikea_sarake) ? count($vasen_sarake) : count($oikea_sarake);

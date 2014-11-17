@@ -607,6 +607,9 @@ if ($view == 'kontituslista') {
   $konttien_kpl = array();
   $konttien_valmius =array();
 
+  print_r($kontitetut);
+  echo '<hr>';
+
   foreach ($kontitetut as $rulla) {
 
     if (strpos($rulla['konttinumero'], "/") !== false) {
@@ -622,6 +625,8 @@ if ($view == 'kontituslista') {
 
     $konttien_valmius[$konttinumero][] = $rulla['sinettinumero'];
   }
+
+print_r($konttien_painot);
 
   if ($sulku) {
     unset($aktiivinen_kontti);

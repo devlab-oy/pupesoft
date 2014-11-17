@@ -6358,7 +6358,7 @@ if ($tee == '') {
           $query = "SELECT
                     sum(if(kommentti != '' {$aleperustelisa} {$laskentalisa_riveille} or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]'), 1, 0)),
                     count(*),
-                    sum(if('{$yhtiorow['vastaavat_tuotteet_esitysmuoto']}' = 'A' and {$vastaavattuotteet} = 1 and tilausrivi.perheid != 0, 1, 0))
+                    sum(if({$vastaavattuotteet} = 1 and tilausrivi.perheid != 0, 1, 0))
                     FROM tilausrivi use index (yhtio_otunnus)
                     LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
                     WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'

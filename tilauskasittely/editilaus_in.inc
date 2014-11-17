@@ -741,8 +741,6 @@ while ($tietue = fgets($fd)) {
     }
 
     if (!is_array($arow)) {
-      $edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
-
       if (isset($ovt_tunnus) and $ovt_tunnus != "") {
         $ovt_tunnuswhere = "and ovttunnus      = $ovt_tunnus ";
       }

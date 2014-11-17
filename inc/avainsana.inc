@@ -42,3 +42,7 @@ $mysqlaliasarray['INVEN_LAJI']['selitetark_4']     = "Oletusselite";
 
 $mysqlaliasarray['KERAYSERA_TK']['selite']         = "Ker‰‰j‰";
 $mysqlaliasarray['KERAYSERA_TK']['selitetark']     = "Varasto";
+
+$mysqlaliasarray['RELEX_TUOTEPAR']['selite']         = "Tuote-kentt‰";
+$mysqlaliasarray['RELEX_TUOTEPAR']['selitetark']     = "Operaattori";
+$mysqlaliasarray['RELEX_TUOTEPAR']['selitetark_2']   = "Arvo";

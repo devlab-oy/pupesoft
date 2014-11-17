@@ -26,6 +26,18 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
+if ($tee == "laheta_viesti" and $yhtiorow["vahvistusviesti_asiakkaalle"] == "Y") {
+  require_once("inc/jt_ja_tyomaarays_valmis_viesti.inc");
+
+  $viestin_lahetys_onnistui =
+    laheta_vahvistusviesti($zoner_tunnarit["username"],
+                           $zoner_tunnarit["salasana"],
+                           $tilausnumero,
+                           true);
+
+  $tee = "";
+}
+
 if ($yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K" and isset($ajax_toiminto) and trim($ajax_toiminto) == 'tallenna_painoarvot') {
 
   foreach ($painoarvot as $tunnus => $painoarvo) {
@@ -2169,6 +2181,13 @@ if ($tee == '') {
   $formi = "tilaus";
 
   echo "<font class='head'>$otsikko</font><hr>";
+
+  if ($viestin_lahetys_onnistui) {
+    echo "<font class='ok'>" . t("Vahvistusviesti lähetetty") . "</font><br>";
+  }
+  else {
+    echo "<font class='error'>" . t("Vahvistusviestin lähetys epäonnistui") . "</font><br>";
+  }
 
   if ($kukarow['kesken'] != '0') {
     $tilausnumero = $kukarow['kesken'];
@@ -9079,6 +9098,28 @@ if ($tee == '') {
           <input type='hidden' name='orig_alatila' value='$orig_alatila'>
           <input type='submit' value='* ".t("Työmääräys lepäämään")." *'>
           </form></td>";
+
+      if ($yhtiorow["vahvistusviesti_asiakkaalle"] == "Y") {
+        echo
+          "<td class='back' valign='top'>
+                <form method='post'>
+                  <input type='hidden' name='toim' value='{$toim}'>
+                  <input type='hidden' name='lopetus' value='{$lopetus}'>
+                  <input type='hidden' name='ruutulimit' value='{$ruutulimit}'>
+                  <input type='hidden' name='projektilla' value='{$projektilla}'>
+                  <input type='hidden' name='tee' value='laheta_viesti'>
+                  <input type='hidden' name='tilausnumero' value='{$tilausnumero}'>
+                  <input type='hidden' name='mista' value = '{$mista}'>
+                  <input type='hidden' name='orig_tila' value='{$orig_tila}'>
+                  <input type='hidden' name='orig_alatila' value='{$orig_alatila}'>
+                  <input type='submit' value='" .
+          t("Lähetä viesti valmistumisesta asiakkaalle") .
+          "' onclick='return confirm(\"" .
+          t("Oletko varma, että haluat lähettää asiakkaalle viestin työmääräyksen valmistumisesta?") .
+          "\");'>
+                </form>
+              </td>";
+      }
     }
 
     if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $toim == "REKLAMAATIO") {

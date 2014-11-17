@@ -592,6 +592,15 @@ while ($tietue = fgets($fd)) {
     $viite .= $tieto. ' ';
     break;
 
+  case 'ICHG_SNDR' :
+    // Otetaan asiakkaan ovttunnus talteen
+    if (isset($tieto) and $tieto != "") {
+      $pos = strpos($tieto, "@");
+      $ovt_tunnus = substr($tieto, 0, $pos);
+      $ovt_tunnus = trim($ovt_tunnus);
+    }
+  break;
+
   case 'ONADBY_RF' :
     if (substr($tieto, 0, 4) == 'IT @') {
       $tieto = substr($tieto, 4, 10) * 1;
@@ -634,6 +643,7 @@ while ($tietue = fgets($fd)) {
         $query = "SELECT *
                   FROM asiakas
                   WHERE yhtio        = '$kukarow[yhtio]'
+                  and ovttunnus      = $ovt_tunnus
                   and toim_ovttunnus = '$tieto'
                   and toim_ovttunnus not in ('','0')
                   and laji           not in ('R','P')";

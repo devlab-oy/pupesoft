@@ -266,8 +266,6 @@ if (isset($submit)) {
     $result = pupe_query($query);
     $konttiinfo = mysql_fetch_assoc($result);
 
-    var_dump($konttiinfo);die;
-
     $maxkg = $konttiinfo['kontin_maxkg'];
 
     $rullat_ja_kontit = rullat_ja_kontit($konttiviite, $maxkg);

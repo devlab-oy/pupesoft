@@ -3098,8 +3098,21 @@ if ($tila == "" and !isset($jatka)) {
         }
       }
 
+      $kuukausi_checked = $sopapurow["yllapito_kuukausihinnoittelu"] == "Y" ? "checked" : "";
+
       echo "<table>";
       echo "<tr><th colspan='2'>".t("Valitse ylläpitosopimuksen laskutusaikataulu").":</th></tr>";
+      echo "<tr>
+              <td colspan='2'>
+                <label>" . t("Kuukausihinnoittelu") . "
+                  <input type='checkbox'
+                         id='kuukausihinnoittelu'
+                         name='kuukausihinnoittelu'
+                         value='Y'
+                         {$kuukausi_checked}>
+                </label>
+              </td>
+            </tr>";
       echo "<tr>";
       echo "<td style='padding:0px;'>";
       echo "<table><tr>";
@@ -4390,6 +4403,7 @@ if (isset($jatka)) {
             yhtio            = '$kukarow[yhtio]',
             sopimus_kk          = '$sopimus_kk',
             sopimus_pp          = '$sopimus_pp',
+            yllapito_kuukausihinnoittelu = '{$kuukausihinnoittelu}',
             sopimus_alkupvm        = '$yllapito_alkuvv-$yllapito_alkukk-$yllapito_alkupp',
             sopimus_loppupvm      = '$yllapito_loppuvv-$yllapito_loppukk-$yllapito_loppupp',
             {$sopimus_info}

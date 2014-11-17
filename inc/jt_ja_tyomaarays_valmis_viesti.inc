@@ -8,12 +8,13 @@
  * @param string $username Zonerin käyttäjätunnus
  * @param string $salasana Zonerin salasana
  * @param int    $tilausnumero
- * @param bool   $kerattu Onko kaikki tilauksen rivit jo kerätty
+ * @param bool   $tyomaarays Onko kyseessä työmääräys. Jos arvoksi annetaan true, viesti
+ *   työmääräyksen valmistumisesta lähtee heti.
  *
  * @return bool Jos tekstiviestin tai sähköpostin lähetys onnistui, palauttaa true
  */
 
-function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $kerattu = false) {
+function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $tyomaarays = false) {
   global $yhtiorow;
 
   $lahetetty = false;
@@ -38,7 +39,7 @@ function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $kerattu = 
       $viesti = "{$avainsanaviesti}\n" . t("Tilausnumero") . ": {$tilausnumero}";
     }
   }
-  elseif ($kerattu) {
+  elseif ($tyomaarays) {
     $otsikko = t("Huoltotyö valmis");
 
     $avainsanaviesti = t_avainsana("TYOMVALMVIEST", "", "", "", "", "selite");

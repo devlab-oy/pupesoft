@@ -275,6 +275,8 @@ if (isset($submit)) {
     $kontit = $rullat_ja_kontit['kontit'];
     $konttimaara = count($kontit);
 
+    print_r($rullat_ja_kontit);die;
+
     if ($rullat_ja_kontit === false) {
       $errors[] = t("Tilausnumerolla ei löydy tilausta.");
       $view = 'tilausnumero';

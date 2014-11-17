@@ -2938,7 +2938,7 @@ echo "<td><select name='rajaus[70]'>
                   $serialisoitavat_muuttujat = $kaikki_muuttujat_array;
 
                   // jos tuoteosostoittain ja tuoteryhmitt‰in ruksin on chekattu, osastoa klikkaamalla palataan taaksep‰in
-                  if ($ruksit["osasto"] != '' and $ruksit["try"] != '') {
+                  if ($ruksit["osasto"] != '' and ($ruksit["try"] != '' or $ruksit[30] != "")) {
                     // Nollataan asiakasosasto sek‰ asiakaryhm‰valinnat
                     unset($serialisoitavat_muuttujat["mul_osasto"]);
                     unset($serialisoitavat_muuttujat["mul_try"]);
@@ -2950,7 +2950,8 @@ echo "<td><select name='rajaus[70]'>
                   else {
                     // jos tuoteosostoittain ja tuoteryhmitt‰in ei ole chekattu, osastoa klikkaamalla menn‰‰n eteenp‰in
                     $serialisoitavat_muuttujat["mul_osasto"][$ken_nimi] = $row[$ken_nimi];
-                    $serialisoitavat_muuttujat["ruksit"]["try"] = "tuoteryhma";
+                    $serialisoitavat_muuttujat["ruksit"]["try"] = "try";
+                    unset($serialisoitavat_muuttujat["mul_try"]);
                   }
 
                   $tuoteosasto_temp = $row[$ken_nimi];
@@ -2978,7 +2979,7 @@ echo "<td><select name='rajaus[70]'>
                     // jos vain tuoteosastot, tuoteryhm‰t ja tuottetain on valittu, menn‰‰n eteenp‰in
                     $serialisoitavat_muuttujat["mul_try"][$ken_nimi] = $row[$ken_nimi];
                     $serialisoitavat_muuttujat["ruksit"]["osasto"] = "osasto";
-                    $serialisoitavat_muuttujat["ruksit"]["try"] = "tuoteryhma";
+                    $serialisoitavat_muuttujat["ruksit"]["try"] = "try";
                     $serialisoitavat_muuttujat["ruksit"][30] = "tuote";
                   }
 
@@ -3304,9 +3305,11 @@ echo "<td><select name='rajaus[70]'>
                         echo "<a href='myyntiseuranta.php?kaikki_parametrit_serialisoituna=".urlencode(serialize($serialisoitavat_muuttujat))."'>" . t('N‰yt‰') . "</a>";
                         echo "</td>";
                       }
-                      else if ($ken_nimi == 'tuoteosasto') {
+                      elseif ($ken_nimi == 'tuoteosasto') {
+
                         unset($serialisoitavat_muuttujat["ruksit"]["try"]);
                         unset($serialisoitavat_muuttujat["mul_try"]);
+
                         if ($ruksit['osasto'] != '' and $ruksit[30] != '') {
                           $serialisoitavat_muuttujat["mul_osasto"][$ken_nimi] = '';
                           $serialisoitavat_muuttujat['ruksit'][30] = '';

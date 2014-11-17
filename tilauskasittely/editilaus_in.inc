@@ -179,6 +179,8 @@ $verkkokauppavarasto_li       = "";
 $veromaara                    = "";
 $viite                        = "";
 $yhteyshenkilon_puhelin       = "";
+$ovt_tunnus                   = "";
+$ovt_tunnuswhere              = "";
 
 // nollataan kaikki rivin muuttujat (nämä samat pitää tehdä tuote insertin jälkeen)
 $tuoteerror        = 1; // oletetaan aina ettei  tuotetta löydy
@@ -717,6 +719,24 @@ while ($tietue = fgets($fd)) {
       $editil_cli = TRUE;
 
       $edi_ulos .= "VASTAANOTTTAVAN YHTION TIETO PUUTTUU! -> $yhtiorow[nimi] ($kukarow[yhtio])\n";
+    }
+    
+    if (!is_array($arow)) {
+      $edi_ulos .= t("Tilaava asiakas")." $tieto -> ";
+
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio        = '$kukarow[yhtio]'
+                and toim_ovttunnus = '$tieto'
+                and toim_ovttunnus not in ('','0')
+                and laji           not in ('R','P')";
+      $result = pupe_query($query);
+
+      if (mysql_num_rows($result) == 1) {
+        $arow = mysql_fetch_assoc($result);
+        $vastaustapa .= $arow['tilausvahvistus'];
+        $edi_ulos .= "$arow[nimi] $arow[nimitark] $arow[toim_nimi] $arow[toim_nimitark] $arow[toim_postitp]\n";
+      }
     }
 
     if (!is_array($arow)) {
@@ -2454,6 +2474,8 @@ while ($tietue = fgets($fd)) {
     $veromaara                    = "";
     $viite                        = "";
     $yhteyshenkilon_puhelin       = "";
+    $ovt_tunnus                   = "";
+    $ovt_tunnuswhere              = "";
     break;
   }
 }

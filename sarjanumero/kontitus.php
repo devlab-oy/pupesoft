@@ -153,10 +153,10 @@ if (isset($submit)) {
         $errors[] = t("Kaikkia rullia ei ole tuloutettu.");
         $view = 'konttiviite';
       }
-      elseif ($kontitettu == true) {
+      /*elseif ($kontitettu == true) {
         $errors[] = t("Rullat on jo kontitettu ja kontti sinetöity.");
         $view = 'konttiviite';
-      }
+      }*/
       elseif ($kontissa == true and $ei_kontissa == false) {
         $errors[] = t("Kaikki viitteen alaiset rullat on jo kontitettu.");
         $yliajo = true;

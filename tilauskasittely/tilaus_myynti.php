@@ -6356,8 +6356,9 @@ if ($tee == '') {
           }
 
           $query = "SELECT
-                    sum(if(kommentti != '' {$aleperustelisa} {$laskentalisa_riveille} or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]') or (tilausrivi.tunnus = $row[tunnus] and $vastaavattuotteet = 1), 1, 0)),
-                    count(*)
+                    sum(if(kommentti != '' {$aleperustelisa} {$laskentalisa_riveille} or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]'), 1, 0)),
+                    count(*),
+                    sum(if('{$yhtiorow['vastaavat_tuotteet_esitysmuoto']}' = 'A' and ('$row[var2]' IN ('OK', 'PK') or {$vastaavattuotteet} = 1) and tilausrivi.perheid != 0, 1, 0))
                     FROM tilausrivi use index (yhtio_otunnus)
                     LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
                     WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
@@ -6384,6 +6385,25 @@ if ($tee == '') {
 
           $pknum = $pkrow[0] + $pkrow[1];
           $borderlask = $pkrow[1];
+
+          if ($vastaavattuotteet) {
+
+            $pknum = $pkrow[2];
+
+            $query  = "SELECT tuoteperhe.tuoteno
+                       FROM tuoteperhe
+                       WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
+                       and tuoteperhe.isatuoteno = '$row[tuoteno]'
+                       and tuoteperhe.tyyppi     = 'P'";
+            $lisaresult_x = pupe_query($query);
+
+            while ($lisays_x = mysql_fetch_assoc($lisaresult_x)) {
+              $vastaavat = new Vastaavat($lisays_x["tuoteno"]);
+              $ketjut = explode(",", $vastaavat->getIDt());
+
+              $pknum += count($ketjut);
+            }
+          }
 
           echo "<tr>";
 

@@ -609,8 +609,13 @@ if ($view == 'kontituslista') {
 
   foreach ($kontitetut as $rulla) {
 
-    $kontitusinfo = explode("/", $rulla['konttinumero']);
-    $konttinumero = $kontitusinfo[0];
+    if (strpos($rulla['konttinumero'], "/") !== false) {
+      $kontitusinfo = explode("/", $rulla['konttinumero']);
+      $konttinumero = $kontitusinfo[0];
+    }
+    else {
+      $konttinumero = $rulla['konttinumero']
+    }
 
     $konttien_painot[$konttinumero] = $konttien_painot[$konttinumero] + $rulla['paino'];
     $konttien_kpl[$konttinumero] = $konttien_kpl[$konttinumero] + 1;

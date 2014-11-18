@@ -156,9 +156,6 @@ if (isset($task) and $task == 'sinetoi') {
     }
 
     if (laheta_sanoma($sanoma)) {
-
-      echo $sanoma;
-
       $lahetys = 'OK';
     }
     else {
@@ -343,7 +340,8 @@ if (!isset($task)) {
           'odottaa hylkäystä' => $tilaus['hylattavat'],
           'hylatty' => $tilaus['hylatyt'],
           'odottaa lusausta' => $tilaus['lusattavat'],
-          'lusattu' => $tilaus['lusatut']
+          'lusattu' => $tilaus['lusatut'],
+          'ylijäämä' => $tilaus['ylijaama']
           );
 
         $query = "SELECT tilausrivi.toimitettu, trlt.rahtikirja_id
@@ -413,7 +411,7 @@ if (!isset($task)) {
             }
 
           }
-          elseif ($tilaus['kontittamatta'] < $tilaus['rullat']) {
+          elseif ($tilaus['kontittamatta'] < ($tilaus['rullat'] - $tilaus['ylijaama'] - $tilaus['hylatyt'])) {
             $tapahtumat .= "&bull; " .  t("Osa rullista kontitettu") . "<br>";
 
             $query = "SELECT group_concat(tilausrivi.tunnus) AS riveja

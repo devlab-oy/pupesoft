@@ -1900,6 +1900,7 @@ else {
             $valitu_lahto = array_shift($lahdot);
 
             # Haetaan lähdön takaa ohjausmerkki
+            $lahtorow['ohjausmerkki'] = $valitu_lahto['tunnus'];
             $_ohjausmerkki = paivita_ohjausmerkki($lahtorow, false);
 
             $query = "UPDATE lasku

@@ -408,12 +408,20 @@ if (!function_exists("tuotetarkista")) {
     //tehdään nää jutut tässä koska tämä on aina viimeinen sarake
     if ($fieldname == "tunnus") {
 
-      if ($tem_kehahin != "" and $tem_kehahin != $trow["kehahin"] and $tem_eisaldoa == "" and isset($tem_eisaldoa)) {
+      if ($tem_kehahin != ""
+        and $tem_kehahin != $trow["kehahin"]
+        and $tem_eisaldoa == ""
+        and isset($tem_eisaldoa)) {
         // Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
         $virhe[$i] = $virhe[$tem_kehahin_ind] = t("Saldollisen tuotteen hankintahintaa ei voi muuttaa")."!";
       }
 
-      if ($tem_kehahin != "" and $tem_kehahin != $trow["kehahin"] and $tem_eisaldoa == "" and isset($tem_eisaldoa) and count($virhe) == 0 and $yhtiorow["palvelutuotteiden_kehahinnat"] == "K") {
+      if ($tem_kehahin != ""
+        and $tem_kehahin != $trow["kehahin"]
+        and $tem_eisaldoa == ""
+        and isset($tem_eisaldoa)
+        and count($virhe) == 0
+        and $yhtiorow["palvelutuotteiden_kehahinnat"] == "K") {
 
         $tem_kehahin = sprintf("%.6f", $tem_kehahin);
 
@@ -434,14 +442,17 @@ if (!function_exists("tuotetarkista")) {
         $chkressires = pupe_query($query);
       }
 
-      if (count($virhe) == 0 and $tem_eisaldoa == "" and isset($tem_eisaldoa) and $yhtiorow["tuotteen_oletuspaikka"] != "") { //(($tem_eisaldoa == "" and $trow["ei_saldoa"] == "") or ($tem_eisaldoa != $trow["ei_saldoa"]))
+      if (count($virhe) == 0
+        and $tem_eisaldoa == ""
+        and isset($tem_eisaldoa)
+        and $yhtiorow["tuotteen_oletuspaikka"] != "") {
 
         $query = "SELECT *
                   FROM tuotepaikat
                   WHERE tuoteno = '$tem_tuoteno'
                   and yhtio     = '$kukarow[yhtio]'";
         $sresult = pupe_query($query);
-echo "444 <br><br>";
+
         if (mysql_num_rows($sresult) == 0) {
           $kaikki_oletuspaikat = hae_kaikki_oletuspaikat_try_tai_status($tem_try, $tem_status);
           $_counter = 0;

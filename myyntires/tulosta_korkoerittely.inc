@@ -219,7 +219,7 @@ if (basename($_SERVER["SCRIPT_FILENAME"]) == 'muutosite.php') {
   $result = pupe_query($query);
   $yrow = mysql_fetch_assoc($result);
   $yhteyshenkilo = $yrow['tunnus'];
-  
+
   $query = "SELECT l.tunnus, l.liitostunnus, t.summa*-1 summa, l.erpcm, l.yhtio_toimipaikka,
             l.laskunro, t.tapvm mapvm, l.tapvm tapvm, l.tunnus, l.viikorkopros, to_days(t.tapvm) - to_days(l.erpcm) as ika,
             round(l.viikorkopros * t.summa * -1 * (to_days(t.tapvm)-to_days(l.erpcm)) / 36500,2) as korkosumma, l.maksuehto

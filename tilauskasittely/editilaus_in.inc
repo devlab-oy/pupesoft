@@ -601,7 +601,7 @@ while ($tietue = fgets($fd)) {
       $ovt_tunnus = substr($tieto, 0, $pos);
       $ovt_tunnus = trim($ovt_tunnus);
     }
-  break;
+    break;
 
   case 'ONADBY_RF' :
     if (substr($tieto, 0, 4) == 'IT @') {
@@ -682,12 +682,12 @@ while ($tietue = fgets($fd)) {
           $query = "SELECT asiakas.*
                     FROM asiakas
                     JOIN yhteyshenkilo ON asiakas.yhtio = yhteyshenkilo.yhtio
-                      AND asiakas.tunnus = yhteyshenkilo.liitostunnus
-                      AND yhteyshenkilo.rooli = 'Magento'
+                      AND asiakas.tunnus                       = yhteyshenkilo.liitostunnus
+                      AND yhteyshenkilo.rooli                  = 'Magento'
                       AND yhteyshenkilo.ulkoinen_asiakasnumero = '{$ot_verkkokauppa_asiakasnro}'
-                    WHERE asiakas.yhtio                  = '{$kukarow['yhtio']}'
-                    AND asiakas.toim_ovttunnus           not in ('','0')
-                    AND asiakas.laji                     not in ('R','P')";
+                    WHERE asiakas.yhtio                        = '{$kukarow['yhtio']}'
+                    AND asiakas.toim_ovttunnus                 not in ('','0')
+                    AND asiakas.laji                           not in ('R','P')";
           $result = pupe_query($query);
 
           if (mysql_num_rows($result) == 1) {

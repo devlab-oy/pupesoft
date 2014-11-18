@@ -7532,7 +7532,12 @@ if ($tee == '') {
           if (($yhtiorow['lapsituotteen_poiston_esto'] == 0 or (($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0) or $row["perheid"] == 0)) and
             ($kukarow['extranet'] == '' or ($kukarow['extranet'] != '' and $row['positio'] != 'JT'))) {
 
+            $_laite_huolto_ja_muokkaus_lukko = ($yhtiorow['laite_huolto'] == 'X' and $row['positio'] == 'X');
             if (empty($muokkauslukko_rivi) and !$_luottoraja_ylivito) {
+              $onclick = "";
+              if ($_laite_huolto_ja_muokkaus_lukko) {
+                $onclick = "onclick=\"return confirm('".t("Toimenpiteen muokkaaminen ei vaikuta automaattiseen työmääräyksen generointiin")."')\"";
+              }
               echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='muokkaa'>
                   <input type='hidden' name='toim'       value = '$toim'>
                   <input type='hidden' name='lopetus'     value = '$lopetus'>
@@ -7549,7 +7554,7 @@ if ($tee == '') {
                   <input type='hidden' name='orig_alatila'  value = '$orig_alatila'>
                   <input type='hidden' name='tila'       value = 'MUUTA'>
                   <input type='hidden' name='tapa'       value = 'MUOKKAA'>
-                  <input type='Submit' value='".t("Muokkaa")."'>
+                  <input type='Submit' value='".t("Muokkaa")."' {$onclick}>
                   </form> ";
             }
 
@@ -7560,25 +7565,27 @@ if ($tee == '') {
               $poista_onclick = "onclick='return nappi_onclick_confirm(\"".t('Olet poistamassa automaattisesti lisätyn jälkitoimitusrivin oletko varma')."?\");'";
             }
 
-            echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='poista'>
-                <input type='hidden' name='toim'       value = '$toim'>
-                <input type='hidden' name='lopetus'     value = '$lopetus'>
-                <input type='hidden' name='ruutulimit'     value = '$ruutulimit'>
-                <input type='hidden' name='projektilla'   value = '$projektilla'>
-                <input type='hidden' name='tilausnumero'   value = '$tilausnumero'>
-                <input type='hidden' name='mista'       value = '$mista'>
-                <input type='hidden' name='rivitunnus'     value = '$row[tunnus]'>
-                <input type='hidden' name='ale_peruste'   value = '$row[ale_peruste]'>
-                <input type='hidden' name='rivilaadittu'  value = '$row[laadittu]'>
-                <input type='hidden' name='menutila'     value = '$menutila'>
-                <input type='hidden' name='orig_tila'    value = '$orig_tila'>
-                <input type='hidden' name='orig_alatila'  value = '$orig_alatila'>
-                <input type='hidden' name='tila'       value = 'MUUTA'>
-                <input type='hidden' name='tapa'       value = 'POISTA'>
-                <input type='Submit' value='".t("Poista")."' $poista_onclick>
-                </form> ";
+            if (!$_laite_huolto_ja_muokkaus_lukko) {
+              echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='poista'>
+                  <input type='hidden' name='toim'       value = '$toim'>
+                  <input type='hidden' name='lopetus'     value = '$lopetus'>
+                  <input type='hidden' name='ruutulimit'     value = '$ruutulimit'>
+                  <input type='hidden' name='projektilla'   value = '$projektilla'>
+                  <input type='hidden' name='tilausnumero'   value = '$tilausnumero'>
+                  <input type='hidden' name='mista'       value = '$mista'>
+                  <input type='hidden' name='rivitunnus'     value = '$row[tunnus]'>
+                  <input type='hidden' name='ale_peruste'   value = '$row[ale_peruste]'>
+                  <input type='hidden' name='rivilaadittu'  value = '$row[laadittu]'>
+                  <input type='hidden' name='menutila'     value = '$menutila'>
+                  <input type='hidden' name='orig_tila'    value = '$orig_tila'>
+                  <input type='hidden' name='orig_alatila'  value = '$orig_alatila'>
+                  <input type='hidden' name='tila'       value = 'MUUTA'>
+                  <input type='hidden' name='tapa'       value = 'POISTA'>
+                  <input type='Submit' value='".t("Poista")."' $poista_onclick>
+                  </form> ";
+            }
 
-            if ($yhtiorow['laite_huolto'] == 'X') {
+            if ($_laite_huolto_ja_muokkaus_lukko) {
               echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='vaihda_rivi'>
                   <input type='hidden' name='toim'       value = '$toim'>
                   <input type='hidden' name='lopetus'     value = '$lopetus'>

@@ -789,12 +789,7 @@ function laadi_edifact_sanoma($parametrit) {
       $s .= "RFF+TN:1'";
       $segmentit++;
 
-
       foreach ($rullarivi as $key => $rulla) {
-
-        echo $rulla['sarjanumero'];
-        echo '<br>';
-
 
           $s .= "CPS+PKG++3'";
           $segmentit++;

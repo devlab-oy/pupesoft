@@ -95,8 +95,6 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
 
 function laheta_sanoma($sanoma){
 
-  return true;
-
   if ($sanoma == '') {
     return false;
   }
@@ -388,9 +386,6 @@ function kontitus_parametrit($rullat_kontissa) {
   $sanomaid = "RP" . time();
   $sanomanumero = time();
 
-var_dump($rullarivit);
-echo '<hr>';
-
   $parametrit = array(
     'laji' => 'kontitus',
     'tyyppi' => 'DESADV',
@@ -559,7 +554,7 @@ function laadi_edifact_sanoma($parametrit) {
   }
 
   if ($laji == 'satamavahvistus') {
-    // RFF+VON -segmentti
+    // RFF+VON -segmenttilaheta
     $s .= "RFF+VON:" . $matkakoodi . "'";
     $segmentit++;
   }

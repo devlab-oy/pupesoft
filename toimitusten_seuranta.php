@@ -157,9 +157,6 @@ if (isset($task) and $task == 'sinetoi') {
     }
 
     if (laheta_sanoma($sanoma)) {
-
-      echo $sanoma,'<hr>';
-
       $lahetys = 'OK';
     }
     else {

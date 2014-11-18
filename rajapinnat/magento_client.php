@@ -1499,7 +1499,7 @@ class MagentoClient {
           $asiakas['magento_tunnus'] = $result;
 
           // Päivitetään magento_tunnus pupeen
-         $query = "UPDATE yhteyshenkilo
+          $query = "UPDATE yhteyshenkilo
                    SET ulkoinen_asiakasnumero = '{$asiakas['magento_tunnus']}'
                    WHERE yhtio      = '{$asiakas['yhtio']}'
                    AND liitostunnus = '{$asiakas['tunnus']}'
@@ -1706,7 +1706,7 @@ class MagentoClient {
   /**
    * Asettaa verkkokauppatuotteiden erikoisparametrit
    *
-   * @param array  $verkkokauppatuotteet_erikoisparametrit
+   * @param array   $verkkokauppatuotteet_erikoisparametrit
    */
   public function setVerkkokauppatuotteetErikoisparametrit($verkkokauppatuotteet_erikoisparametrit) {
     $this->_verkkokauppatuotteet_erikoisparametrit = $verkkokauppatuotteet_erikoisparametrit;
@@ -1715,7 +1715,7 @@ class MagentoClient {
   /**
    * Asettaa verkkokauppa-asiakkaiden erikoisparametrit
    *
-   * @param array  $asiakkaat_erikoisparametrit
+   * @param array   $asiakkaat_erikoisparametrit
    */
   public function setAsiakkaatErikoisparametrit($asiakkaat_erikoisparametrit) {
     $this->_asiakkaat_erikoisparametrit = $asiakkaat_erikoisparametrit;

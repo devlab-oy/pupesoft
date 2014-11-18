@@ -5,14 +5,17 @@ require_once "barcode/barcode.php";
 require_once "barcode/c128cobject.php";
 
 /**
- * @param array $tuotteet Array tuotteista, joiden hintalaput tulostetaan
- * @param array $params Configuraation array. Esimerkki:
+ *
+ * @param array   $tuotteet Array tuotteista, joiden hintalaput tulostetaan
+ * @param array   $params   Configuraation array. Esimerkki:
  *   array(
  *     "kpl" => 1
  *   );
  *
  * @return array Tiedostonimi ja kaunisnimi
  */
+
+
 function tulosta_hintalaput($tuotteet, $params = array()) {
   $kpl = isset($params["kpl"]) ? $params["kpl"] : false;
 

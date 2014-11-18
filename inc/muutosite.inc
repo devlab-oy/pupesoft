@@ -1443,7 +1443,7 @@ if ($tila == 'ostolasku_kulut') {
     $tila = '';
   }
   else {
-     $osto_rahti = (float) round($osto_rahti,2);
+    $osto_rahti = (float) round($osto_rahti, 2);
   }
 
   if (isset($osto_kulu) and ((trim($osto_kulu) != '' and !is_numeric($osto_kulu)) or trim($osto_kulu) == '')) {
@@ -1452,7 +1452,7 @@ if ($tila == 'ostolasku_kulut') {
     $tila = '';
   }
   else {
-     $osto_kulu = (float) round($osto_kulu,2);
+    $osto_kulu = (float) round($osto_kulu, 2);
   }
 
   if (isset($osto_rivi_kulu) and ((trim($osto_rivi_kulu) != '' and !is_numeric($osto_rivi_kulu)) or trim($osto_rivi_kulu) == '')) {
@@ -1461,7 +1461,7 @@ if ($tila == 'ostolasku_kulut') {
     $tila = '';
   }
   else {
-     $osto_rivi_kulu = (float) round($osto_rivi_kulu,2);
+    $osto_rivi_kulu = (float) round($osto_rivi_kulu, 2);
   }
 }
 

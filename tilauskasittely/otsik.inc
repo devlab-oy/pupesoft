@@ -967,22 +967,22 @@ if ($tila == "" and !isset($jatka)) {
   if (!isset($srow['yhtio_toimipaikka'])
     and !empty($srow['maa'])
     and $srow['maa'] != $yhtiorow['maa']) {
-      $alhqur = "SELECT tunnus
+    $alhqur = "SELECT tunnus
                  FROM yhtion_toimipaikat
                  WHERE yhtio     = '$kukarow[yhtio]'
                  AND maa         = '$srow[maa]'
                  AND vat_numero != ''";
-      $alhire = pupe_query($alhqur);
+    $alhire = pupe_query($alhqur);
 
-      if (mysql_num_rows($alhire) > 0) {
-        $alhiro  = mysql_fetch_assoc($alhire);
-        $kukarow['toimipaikka'] = $alhiro['tunnus'];
-      }
+    if (mysql_num_rows($alhire) > 0) {
+      $alhiro  = mysql_fetch_assoc($alhire);
+      $kukarow['toimipaikka'] = $alhiro['tunnus'];
+    }
   }
   elseif (!empty($srow['yhtio_toimipaikka'])
     and !empty($srow['maa'])
     and $srow['maa'] != $yhtiorow['maa']) {
-      $kukarow['toimipaikka'] = $srow['yhtio_toimipaikka'];
+    $kukarow['toimipaikka'] = $srow['yhtio_toimipaikka'];
   }
 
   if ($yhtiorow["myyntitilauksen_toimipaikka"] == "A") {

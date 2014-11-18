@@ -601,7 +601,7 @@ while ($tietue = fgets($fd)) {
       $ovt_tunnus = substr($tieto, 0, $pos);
       $ovt_tunnus = trim($ovt_tunnus);
     }
-  break;
+    break;
 
   case 'ONADBY_RF' :
     if (substr($tieto, 0, 4) == 'IT @') {

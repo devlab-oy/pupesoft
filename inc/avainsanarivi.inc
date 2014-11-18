@@ -283,7 +283,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "SALDOVAHVISTUS")  $ulos .= "<option value='SALDOVAHVISTUS' {$avain_sel['SALDOVAHVISTUS']}>  ".t("Saldovahvistuksen viesti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "DPAVAINSANALAJI") $ulos .= "<option value='DPAVAINSANALAJI' {$avain_sel['DPAVAINSANALAJI']}>        ".t("Dynaamisen puun avainsanojen laji")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "LITETY_TKIRJAST") $ulos .= "<option value='LITETY_TKIRJAST' {$avain_sel['LITETY_TKIRJAST']}>".t("Tiedostokirjastossa selailtava tiedostotyyppi")."</option>";
-    if ($lukitse_laji== "" or $lukitse_laji == "RELEX_TUOTEPAR") $ulos .= "<option value='RELEX_TUOTEPAR' {$avain_sel['RELEX_TUOTEPAR']}>".t("Relex tuoteparametrit")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "RELEX_TUOTEPAR") $ulos .= "<option value='RELEX_TUOTEPAR' {$avain_sel['RELEX_TUOTEPAR']}>".t("Relex tuoteparametrit")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -1097,16 +1097,16 @@ if ($avain_sel['RELEX_TUOTEPAR'] == "SELECTED" and $_selite) {
 if ($avain_sel['RELEX_TUOTEPAR'] == "SELECTED" and $_selitetark) {
 
   $oper_array = array('on'              => '=',
-                      'not'             => '!=',
-                      'in'              => 'in',
-                      'not in'          => 'not in',
-                      'like_pre'        => '%like',
-                      'like_post'       => 'like%',
-                      'like_both'       => '%like%',
-                      'gt'              => '>',
-                      'lt'              => '<',
-                      'gte'             => '>=',
-                      'lte'             => '<=',
+    'not'             => '!=',
+    'in'              => 'in',
+    'not in'          => 'not in',
+    'like_pre'        => '%like',
+    'like_post'       => 'like%',
+    'like_both'       => '%like%',
+    'gt'              => '>',
+    'lt'              => '<',
+    'gte'             => '>=',
+    'lte'             => '<=',
   );
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";

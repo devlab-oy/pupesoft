@@ -24,7 +24,7 @@ echo "  <script type='text/javascript'>
     </script>";
 
 // Haetaan pulkkareita githubista
-function github_api ($url) {
+function github_api($url) {
   $ch  = curl_init();
   curl_setopt($ch, CURLOPT_URL, $url);
   curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -42,7 +42,7 @@ function github_api ($url) {
   }
   else {
     $pulkkarit = json_decode($pulkkarit);
-    return($pulkkarit);
+    return $pulkkarit;
   }
 }
 
@@ -289,4 +289,4 @@ if (mysql_num_rows($vetores)) {
   echo "</table>";
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

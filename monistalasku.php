@@ -1424,8 +1424,8 @@ if ($tee == 'MONISTA') {
       if ($kommenttikentta and !empty($kommentti)) {
         $tallennettava_kommentti =
           trim($laskurow["sisviesti3"] .
-               "\nMonistuskommentti:\n" .
-               $kommentti);
+          "\nMonistuskommentti:\n" .
+          $kommentti);
 
         $kommentti_query = "UPDATE lasku SET
                             sisviesti3 = '{$tallennettava_kommentti}'

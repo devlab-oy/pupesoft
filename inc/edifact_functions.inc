@@ -326,7 +326,7 @@ function hylky_lusaus_parametrit($sarjanumero) {
   return $parametrit;
 }
 
-function kontitus_parametrit($rullat_kontissa) {
+function kontitus_parametrit($rullat_kontissa, $korjaus = false) {
   global $kukarow, $yhtiorow;
 
   $query = "SELECT ss.sarjanumero,
@@ -338,7 +338,8 @@ function kontitus_parametrit($rullat_kontissa) {
             trlt.asiakkaan_rivinumero as rivinro,
             lasku.asiakkaan_tilausnumero as tilauskoodi,
             laskun_lisatiedot.matkakoodi,
-            laskun_lisatiedot.konttiviite
+            laskun_lisatiedot.konttiviite,
+            lasku.tunnus AS laskutunnus
             FROM tilausrivi AS tr
             JOIN tilausrivin_lisatiedot AS trlt
               ON trlt.yhtio = tr.yhtio
@@ -357,6 +358,7 @@ function kontitus_parametrit($rullat_kontissa) {
             AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu')";
   $result = pupe_query($query);
 
+  $tilaukset = array();
   $rullarivit = array();
   $rivipainot = array();
   $total_paino = 0;
@@ -365,7 +367,11 @@ function kontitus_parametrit($rullat_kontissa) {
 
     $index = $row['tilauskoodi'] . ":" .$row['rivinro'];
 
+    $laskutunnus = $row['laskutunnus'];
+
     $rullarivit[$index][] = $row;
+
+    $tilaukset[$laskutunnus]['laskutunnus'] = $laskutunnus;
 
     $rivipainot[$index] = $rivipainot[$index] + $row['paino'];
 
@@ -397,7 +403,8 @@ function kontitus_parametrit($rullat_kontissa) {
     'rivipainot' => $rivipainot,
     'tilauskoodi' => $konttiviite,
     'kontitus_info' => $kontitus_info,
-    'total_paino' => $total_paino
+    'total_paino' => $total_paino,
+    'tilaukset' => $tilaukset
   );
 
   return $parametrit;
@@ -468,38 +475,40 @@ function satamavahvistus_parametrit($konttiviite) {
   return $parametrit;
 }
 
-function laadi_edifact_sanoma($parametrit) {
+function laadi_edifact_sanoma($parametrit, $korjaus = false) {
   global $kukarow, $yhtiorow;
 
   //validoidaan parametrit ja setataan muita muuttujia
   //
   extract($parametrit);
 
+  if ($korjaus) {
+    $merkityskoodi = '5';
+  }
+  else {
+    $merkityskoodi = '9';
+  }
+
   switch ($laji) {
     case 'kuittaus':
       $lajikoodi = '632';
       $assosiaatiokoodi = 'EXGR13';
-      $merkityskoodi = '9';
       break;
     case 'lusaus':
       $lajikoodi = '6';
       $assosiaatiokoodi = 'EXSC13';
-      $merkityskoodi = '5';
       break;
     case 'hylky':
       $lajikoodi = '34';
       $assosiaatiokoodi = 'EXSC13';
-      $merkityskoodi = '5';
       break;
     case 'kontitus':
       $lajikoodi = '833';
       $assosiaatiokoodi = 'EXTU11';
-      $merkityskoodi = '9';
       break;
     case 'satamavahvistus':
         $lajikoodi = '122';
         $assosiaatiokoodi = 'EXPC13';
-        $merkityskoodi = '9';
         break;
     default:
       return NULL;
@@ -1768,6 +1777,8 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
       $konttipaino = $konttipaino + $rulla['massa'];
       $konttilista .= $rulla['tunnus'] . ',';
       $sinettinumero = $rulla['sinettinumero'];
+      $konttinumero = $rulla['konttinumero'];
+      $isokoodi = $rulla['kontin_isokoodi'];
       $taara = $rulla['kontin_taarapaino'];
 
       $pakkalista .= "UIB: " . $rulla['sarjanumero'] . " - " . (INT) $rulla['massa'] . " kg - " .$rulla['asiakkaan_tilausnumero'] . "\n";
@@ -1779,7 +1790,9 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
     $kontit[$konttinumero]['paino'] = $konttipaino;
     $kontit[$konttinumero]['kpl'] = count($kontti);
     $kontit[$konttinumero]['sinettinumero'] = $sinettinumero;
+    $kontit[$konttinumero]['konttinumero'] = $konttinumero;
     $kontit[$konttinumero]['taara'] = $taara;
+    $kontit[$konttinumero]['isokoodi'] = $isokoodi;
     $kontit[$konttinumero]['pakkalista'] = $pakkalista;
   }
 

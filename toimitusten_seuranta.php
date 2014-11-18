@@ -88,7 +88,7 @@ if (isset($task) and $task == 'suorita_lusaus') {
   }
 }
 
-if (isset($task) and $task == 'sinetoi') {
+if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
 
   if (empty($konttinumero)) {
     $errors['konttinumero'] = t("Syötä konttinumero!");
@@ -120,6 +120,13 @@ if (isset($task) and $task == 'sinetoi') {
 
   if (count($errors) == 0) {
 
+    if ($task == 'sinetoi') {
+      $korjaus = false;
+    }
+    else {
+      $korjaus = true;
+    }
+
     $kontit = kontitustiedot($konttiviite, $temp_konttinumero);
 
     $kontin_kilot = $kontit[$temp_konttinumero]['paino'];
@@ -148,12 +155,32 @@ if (isset($task) and $task == 'sinetoi') {
               AND tilausrivitunnus IN ({$lista})";
     pupe_query($query);
 
-    $parametrit = kontitus_parametrit($lista);
+    $parametrit = kontitus_parametrit($lista, $korjaus);
 
     if ($parametrit) {
       $parametrit['kontitus_info']['konttinumero'] = $konttinumero;
       $parametrit['kontitus_info']['sinettinumero'] = $sinettinumero;
-      $sanoma = laadi_edifact_sanoma($parametrit);
+
+      if ($korjaus) {
+
+        $tilaukset = array_keys($parametrit['tilaukset']);
+        $tilaukset = implode(",", $tilaukset);
+
+        $query = "SELECT filename
+                  FROM liitetiedostot
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND kayttotarkoitus = 'kontitussanoma'
+                  AND selite = '{$temp_konttinumero}'
+                  AND liitostunnus IN ({$tilaukset})";
+        $result = pupe_query($query);
+
+        $liite_info = mysql_fetch_array($result);
+
+        $parametrit['sanomanumero'] = $liite_info['filename'];
+
+      }
+
+      $sanoma = laadi_edifact_sanoma($parametrit, $korjaus);
     }
 
     if (laheta_sanoma($sanoma)) {
@@ -206,13 +233,14 @@ if (isset($task) and $task == 'sinetoi') {
           pupe_query($query);
 
         }
-        elseif ($tyyppi == 5){
+        elseif ($korjaus){
 
           $korvattava = mysql_result($vastaavuusresult, 0);
 
           $query = "UPDATE liitetiedostot SET
                     data        = '$liitedata',
                     muutospvm   = NOW(),
+                    selite      = '{$konttinumero}',
                     muuttaja    = '{$kukarow['kuka']}',
                     filename    = '{$parametrit['sanomanumero']}',
                     filesize    = '$filesize'
@@ -624,6 +652,18 @@ if (!isset($task)) {
           }
           else {
             echo "<button type='button' disabled>" . t("Sinetöity") . "</button>";
+            echo "<form method='post'>";
+            echo "<input type='hidden' name='task' value='korjaa_konttitiedot' />";
+            echo "<input type='hidden' name='temp_konttinumero' value='{$konttinumero}' />";
+            echo "<input type='hidden' name='konttinumero' value='{$kontti['konttinumero']}' />";
+            echo "<input type='hidden' name='sinettinumero' value='{$kontti['sinettinumero']}' />";
+            echo "<input type='hidden' name='taara' value='{$kontti['taara']}' />";
+            echo "<input type='hidden' name='isokoodi' value='{$kontti['isokoodi']}' />";
+            echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
+            echo "<input type='hidden' name='rullia' value='{$kontti['kpl']}' />";
+            echo "<input type='hidden' name='sinetoitava_konttiviite' value='{$tilaus['konttiviite']}' />";
+            echo "<input type='submit' value='". t("Korjaa") ."' />";
+            echo "</form>";
           }
 
           js_openFormInNewWindow();
@@ -701,14 +741,21 @@ if (!isset($task)) {
   }
 }
 
-if (isset($task) and $task == 'anna_konttitiedot') {
+if (isset($task) and ($task == 'anna_konttitiedot' or $task == 'korjaa_konttitiedot')) {
+
+  if ($task == 'anna_konttitiedot') {
+    $uusi_task = 'sinetoi';
+  }
+  else {
+    $uusi_task = 'korjaa';
+  }
 
   echo "<a href='toimitusten_seuranta.php'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
   echo "<font class='head'>".t("Kontin sinetöinti")."</font></a><hr><br>";
 
   echo "
   <form method='post'>
-  <input type='hidden' name='task' value='sinetoi' />
+  <input type='hidden' name='task' value='{$uusi_task}' />
   <input type='hidden' name='rullia' value='{$rullia}' />
   <input type='hidden' name='paino' value='{$paino}' />
   <input type='hidden' name='konttiviite' value='{$sinetoitava_konttiviite}' />

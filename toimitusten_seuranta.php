@@ -157,6 +157,71 @@ if (isset($task) and $task == 'sinetoi') {
     }
 
     if (laheta_sanoma($sanoma)) {
+
+      $query = "SELECT group_concat(DISTINCT lasku.tunnus) AS tunnukset
+                FROM tilausrivin_lisatiedot AS trlt
+                JOIN tilausrivi AS tr
+                  ON tr.yhtio = trlt.yhtio
+                  AND tr.tunnus = trlt.tilausrivitunnus
+                JOIN lasku
+                  ON lasku.yhtio = tr.yhtio
+                  AND lasku.tunnus = tr.otunnus
+                WHERE trlt.yhtio = '{$kukarow['yhtio']}'
+                AND trlt.konttinumero = '{$konttinumero}'
+                AND trlt.sinettinumero = '{$sinettinumero}'";
+      $result = pupe_query($query);
+
+      $tunnukset = mysql_result($result, 0);
+      $tunnukset = explode(',', $tunnukset);
+
+      $filesize = strlen($sanoma);
+      $liitedata = mysql_real_escape_string($sanoma);
+
+      foreach ($tunnukset as $tunnus) {
+
+        // tarkistetaan onko vastaava sanoma jo liitetiedostona
+        $query = "SELECT tunnus
+                  FROM liitetiedostot
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND filename = '{$parametrit['sanomanumero']}'
+                  AND kayttotarkoitus = 'kontitussanoma'
+                  AND liitostunnus = '{$tunnus}'";
+        $vastaavuusresult = pupe_query($query);
+        $osumia = mysql_num_rows($vastaavuusresult);
+
+        if ($osumia == 0) {
+
+          $query = "INSERT INTO liitetiedostot SET
+                    yhtio           = '{$kukarow['yhtio']}',
+                    liitos          = 'lasku',
+                    liitostunnus    = '$tunnus',
+                    selite          = '{$konttinumero}',
+                    laatija         = '{$kukarow['kuka']}',
+                    luontiaika      = NOW(),
+                    data            = '{$liitedata}',
+                    filename        = '{$parametrit['sanomanumero']}',
+                    filesize        = '$filesize',
+                    filetype        = 'text/plain',
+                    kayttotarkoitus = 'kontitussanoma'";
+          pupe_query($query);
+
+        }
+        elseif ($tyyppi == 5){
+
+          $korvattava = mysql_result($vastaavuusresult, 0);
+
+          $query = "UPDATE liitetiedostot SET
+                    data        = '$liitedata',
+                    muutospvm   = NOW(),
+                    muuttaja    = '{$kukarow['kuka']}',
+                    filename    = '{$parametrit['sanomanumero']}',
+                    filesize    = '$filesize'
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND  tunnus = '{$korvattava}'";
+          pupe_query($query);
+        }
+      }
+
       $lahetys = 'OK';
     }
     else {

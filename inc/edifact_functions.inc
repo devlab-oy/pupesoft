@@ -388,6 +388,9 @@ function kontitus_parametrit($rullat_kontissa) {
   $sanomaid = "RP" . time();
   $sanomanumero = time();
 
+print_r($rullarivit);
+echo '<hr>';
+
   $parametrit = array(
     'laji' => 'kontitus',
     'tyyppi' => 'DESADV',

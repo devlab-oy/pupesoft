@@ -1773,7 +1773,7 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
       $konttipaino = $konttipaino + $rulla['massa'];
       $konttilista .= $rulla['tunnus'] . ',';
       $sinettinumero = $rulla['sinettinumero'];
-      $mrn = $rulla['kontin_mrn'];
+      $taara = $rulla['kontin_taarapaino'];
 
       $pakkalista .= "UIB: " . $rulla['sarjanumero'] . " - " . (INT) $rulla['massa'] . " kg - " .$rulla['asiakkaan_tilausnumero'] . "\n";
     }
@@ -1784,7 +1784,7 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
     $kontit[$konttinumero]['paino'] = $konttipaino;
     $kontit[$konttinumero]['kpl'] = count($kontti);
     $kontit[$konttinumero]['sinettinumero'] = $sinettinumero;
-    $kontit[$konttinumero]['mrn'] = $mrn;
+    $kontit[$konttinumero]['taara'] = $taara;
     $kontit[$konttinumero]['pakkalista'] = $pakkalista;
   }
 

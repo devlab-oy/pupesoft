@@ -150,6 +150,9 @@ if (isset($task) and $task == 'sinetoi') {
   */
     $parametrit = kontitus_parametrit($lista);
 
+    print_r($parametrit);
+    echo '<hr>';
+
     if ($parametrit) {
       $parametrit['kontitus_info']['konttinumero'] = $konttinumero;
       $parametrit['kontitus_info']['sinettinumero'] = $sinettinumero;

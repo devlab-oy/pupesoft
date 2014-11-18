@@ -391,7 +391,7 @@ if (!isset($task)) {
 
           $tapahtumat .= "&bull; " .  t("Rullat viety varastoon") . "<br>";
 
-          if ($tilaus['kontittamatta'] == 0) {
+          if (($tilaus['kontittamatta'] - $tilaus['ylijaama'] - $tilaus['hylatyt']) == 0) {
             $tapahtumat .= "&bull; " .  t("Rullat kontitettu") . "<br>";
 
             $query = "SELECT count(tilausrivi.tunnus) AS riveja

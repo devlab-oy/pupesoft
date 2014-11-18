@@ -789,9 +789,12 @@ function laadi_edifact_sanoma($parametrit) {
       $s .= "RFF+TN:1'";
       $segmentit++;
 
+
       foreach ($rullarivi as $key => $rulla) {
 
-        if ($key != 'rivi_paino') {
+        echo $rulla['sarjanumero'];
+        echo '<br>';
+
 
           $s .= "CPS+PKG++3'";
           $segmentit++;
@@ -811,7 +814,6 @@ function laadi_edifact_sanoma($parametrit) {
           $s .= "GIN+ZUN+" . $rulla['sarjanumero'] . "'";
           $segmentit++;
 
-        }
       }
     }
   }

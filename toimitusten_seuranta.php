@@ -124,7 +124,7 @@ if (isset($task) and $task == 'sinetoi') {
     $kontin_kilot = $kontit[$temp_konttinumero]['paino'];
 
     $lista = $kontit[$temp_konttinumero]['lista'];
-
+    /*
     $query = "UPDATE tilausrivi SET
               toimitettu = '{$kukarow['kuka']}',
               toimitettuaika = NOW()
@@ -146,7 +146,7 @@ if (isset($task) and $task == 'sinetoi') {
               WHERE yhtio       = '{$kukarow['yhtio']}'
               AND tilausrivitunnus IN ({$lista})";
     pupe_query($query);
-
+  */
     $parametrit = kontitus_parametrit($lista);
 
     if ($parametrit) {
@@ -156,6 +156,9 @@ if (isset($task) and $task == 'sinetoi') {
     }
 
     if (laheta_sanoma($sanoma)) {
+
+      echo $sanoma,'<hr>';
+
       $lahetys = 'OK';
     }
     else {

@@ -29764,7 +29764,7 @@ if (!function_exists("rakenna_relex_tuote_parametrit")) {
     $query = "SELECT *
               FROM avainsana
               WHERE yhtio = '{$yhtiorow['yhtio']}'
-              AND laji = 'RELEX_TUOTEPAR'";
+              AND laji    = 'RELEX_TUOTEPAR'";
     $res = pupe_query($query);
 
     while ($row = mysql_fetch_assoc($res)) {

@@ -120,7 +120,7 @@ if ($haetaanpulkkarit) {
                          WHERE yhtio   = '{$kukarow['yhtio']}'
                          and kuka      = ''
                          and sovellus != ''
-                         and nimi like '%$filename'
+                         and nimi      like '%$filename'
                          ORDER BY sovellus, nimi";
               $menures = pupe_query($query);
 

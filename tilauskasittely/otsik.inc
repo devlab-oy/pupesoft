@@ -968,10 +968,10 @@ if ($tila == "" and !isset($jatka)) {
     and !empty($srow['maa'])
     and $srow['maa'] != $yhtiorow['maa']) {
     $alhqur = "SELECT tunnus
-                 FROM yhtion_toimipaikat
-                 WHERE yhtio     = '$kukarow[yhtio]'
-                 AND maa         = '$srow[maa]'
-                 AND vat_numero != ''";
+               FROM yhtion_toimipaikat
+               WHERE yhtio     = '$kukarow[yhtio]'
+               AND maa         = '$srow[maa]'
+               AND vat_numero != ''";
     $alhire = pupe_query($alhqur);
 
     if (mysql_num_rows($alhire) > 0) {

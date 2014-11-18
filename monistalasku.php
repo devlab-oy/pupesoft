@@ -1428,9 +1428,9 @@ if ($tee == 'MONISTA') {
           $kommentti);
 
         $kommentti_query = "UPDATE lasku SET
-                            sisviesti3 = '{$tallennettava_kommentti}'
+                            sisviesti3  = '{$tallennettava_kommentti}'
                             WHERE yhtio = '{$kukarow['yhtio']}'
-                            AND tunnus = '{$utunnus}'";
+                            AND tunnus  = '{$utunnus}'";
 
         pupe_query($kommentti_query);
       }

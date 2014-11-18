@@ -86,32 +86,32 @@ if ($tee == "ALOITAKOROTUS") {
                 FROM lasku use index (yhtio_tila_mapvm)
                 JOIN asiakas
                   ON (lasku.yhtio = asiakas.yhtio
-                    AND lasku.liitostunnus = asiakas.tunnus $asiakaslisa)
+                    AND lasku.liitostunnus  = asiakas.tunnus $asiakaslisa)
                 JOIN tiliointi use index (tositerivit_index)
                   ON (tiliointi.yhtio = lasku.yhtio
-                    AND tiliointi.ltunnus = lasku.tunnus
-                    AND tiliointi.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]')
-                    AND tiliointi.tapvm > lasku.erpcm and tiliointi.korjattu = '')
+                    AND tiliointi.ltunnus   = lasku.tunnus
+                    AND tiliointi.tilino    in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]')
+                    AND tiliointi.tapvm     > lasku.erpcm and tiliointi.korjattu = '')
                 LEFT JOIN maksuehto
                   ON (maksuehto.yhtio = lasku.yhtio
-                    AND maksuehto.tunnus = lasku.maksuehto)
-                WHERE lasku.yhtio  = '$kukarow[yhtio]'
-                AND lasku.tila     = 'U'
+                    AND maksuehto.tunnus    = lasku.maksuehto)
+                WHERE lasku.yhtio           = '$kukarow[yhtio]'
+                AND lasku.tila              = 'U'
                 AND lasku.mapvm   >='$vva-$kka-$ppa'
                 AND lasku.mapvm   <='$vvl-$kkl-$ppl'
-                AND lasku.summa   != 0
-                AND lasku.olmapvm  = '0000-00-00'
+                AND lasku.summa            != 0
+                AND lasku.olmapvm           = '0000-00-00'
                 $konslisa
                 HAVING ika > $min_myoh AND abs(korkosumma2) > abs($minimisumma) AND (maksuehto.jv is null or maksuehto.jv = '')
                 ORDER BY asiakas.ytunnus) AS laskut
             JOIN asiakas ON (lasku.yhtio = asiakas.yhtio
-              AND lasku.liitostunnus = asiakas.tunnus $asiakaslisa)
+              AND lasku.liitostunnus        = asiakas.tunnus $asiakaslisa)
             JOIN tiliointi use index (tositerivit_index)
               ON (tiliointi.yhtio = lasku.yhtio
-                AND tiliointi.ltunnus = lasku.tunnus
-                AND tiliointi.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]')
-                AND tiliointi.tapvm > lasku.erpcm AND tiliointi.korjattu = '')
-            WHERE lasku.tunnus     = laskut.tunnus
+                AND tiliointi.ltunnus       = lasku.tunnus
+                AND tiliointi.tilino        in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]')
+                AND tiliointi.tapvm         > lasku.erpcm AND tiliointi.korjattu = '')
+            WHERE lasku.tunnus              = laskut.tunnus
             $konslisa
             GROUP BY asiakas.ytunnus, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp
             HAVING korkosumma > 0 $korkolisa
@@ -147,12 +147,12 @@ if ($tee == "KOROTA") {
             JOIN tiliointi use index (tositerivit_index)
               ON (tiliointi.yhtio = lasku.yhtio
                 AND tiliointi.ltunnus = lasku.tunnus
-                AND tiliointi.tilino IN ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]')
-                AND tiliointi.tapvm > lasku.erpcm AND tiliointi.korjattu = '')
+                AND tiliointi.tilino  IN ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]')
+                AND tiliointi.tapvm   > lasku.erpcm AND tiliointi.korjattu = '')
             LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio
-              AND maksuehto.tunnus = lasku.maksuehto)
-            WHERE lasku.yhtio = '$kukarow[yhtio]'
-            AND lasku.tunnus  IN ($korotettavat[0])
+              AND maksuehto.tunnus    = lasku.maksuehto)
+            WHERE lasku.yhtio         = '$kukarow[yhtio]'
+            AND lasku.tunnus          IN ($korotettavat[0])
             GROUP BY lasku.tunnus
             ORDER BY lasku.erpcm";
   $result = pupe_query($query);

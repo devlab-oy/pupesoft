@@ -1500,11 +1500,11 @@ class MagentoClient {
 
           // P‰ivitet‰‰n magento_tunnus pupeen
           $query = "UPDATE yhteyshenkilo
-                   SET ulkoinen_asiakasnumero = '{$asiakas['magento_tunnus']}'
-                   WHERE yhtio      = '{$asiakas['yhtio']}'
-                   AND liitostunnus = '{$asiakas['tunnus']}'
-                   AND rooli        = 'Magento'
-                   AND tunnus       = '{$asiakas['yhenk_tunnus']}'";
+                    SET ulkoinen_asiakasnumero = '{$asiakas['magento_tunnus']}'
+                    WHERE yhtio      = '{$asiakas['yhtio']}'
+                    AND liitostunnus = '{$asiakas['tunnus']}'
+                    AND rooli        = 'Magento'
+                    AND tunnus       = '{$asiakas['yhenk_tunnus']}'";
           pupe_query($query);
         }
         catch (Exception $e) {

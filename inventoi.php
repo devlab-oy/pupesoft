@@ -1127,7 +1127,7 @@ if ($tee == 'VALMIS') {
 
     $query = "SELECT *
               FROM tuotepaikat
-              WHERE yhtio = '{$kukarow['yhtio']}'
+              WHERE yhtio          = '{$kukarow['yhtio']}'
               AND inventointilista = '{$lista}'";
     $listares = pupe_query($query);
 

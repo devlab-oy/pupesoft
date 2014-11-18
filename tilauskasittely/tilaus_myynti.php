@@ -3866,7 +3866,7 @@ if ($tee == '') {
           $query = "SELECT sarjanumero
                     FROM sarjanumeroseuranta
                     WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus = $myy_sarjatunnus";
+                    AND tunnus  = $myy_sarjatunnus";
           $m_eranro = mysql_fetch_assoc(pupe_query($query));
         }
 
@@ -4193,8 +4193,8 @@ if ($tee == '') {
 
         $query = "SELECT *
                   FROM tuoteperhe
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tyyppi = 'R'
+                  WHERE yhtio    = '{$kukarow['yhtio']}'
+                  AND tyyppi     = 'R'
                   AND isatuoteno = '{$tuoteno}'";
         $tuoteperhe_chk_res = pupe_query($query);
 

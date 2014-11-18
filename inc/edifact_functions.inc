@@ -360,6 +360,7 @@ function kontitus_parametrit($rullat_kontissa) {
   $result = pupe_query($query);
 
   $rullarivit = array();
+  $rivipainot = array();
   $total_paino = 0;
 
   while ($row = mysql_fetch_assoc($result)) {
@@ -368,7 +369,7 @@ function kontitus_parametrit($rullat_kontissa) {
 
     $rullarivit[$index][] = $row;
 
-    $rullarivit[$index]['rivi_paino'] = $rullarivit[$index]['rivi_paino'] + $row['paino'];
+    $rivipainot[$index] = $rivipainot[$index] + $row['paino'];
 
     $total_paino = $total_paino + $row['paino'];
 
@@ -395,6 +396,7 @@ function kontitus_parametrit($rullat_kontissa) {
     'sanomaid' => $sanomaid,
     'sanomanumero' => $sanomanumero,
     'rullarivit' => $rullarivit,
+    'rivipainot' => $rivipainot,
     'tilauskoodi' => $konttiviite,
     'kontitus_info' => $kontitus_info,
     'total_paino' => $total_paino
@@ -766,7 +768,7 @@ function laadi_edifact_sanoma($parametrit) {
       $segmentit++;
 
       // kokonaispaino
-      $s .= "MEA+AAE+G+KGM:" . $rullarivi['rivi_paino'] ."'";
+      $s .= "MEA+AAE+G+KGM:" . $rivipainot[$key] ."'";
       $segmentit++;
 
       $s .= "LIN+999'";

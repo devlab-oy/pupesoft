@@ -243,6 +243,12 @@ if (!function_exists("pakolliset_sarakkeet")) {
       $joinattavat  = array("TUOTENO" => "tuote");
       $saakopoistaa = TRUE;
       break;
+    case "tuotteen_toimittajat_pakkauskoot" :
+      $pakolliset   = array("TOIM_TUOTENO_TUNNUS");
+      $kielletyt    = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+      $wherelliset  = array("PAKKAUSKOKO", "YKSIKKO");
+      $saakopoistaa = TRUE;
+      break;
     case "tuotteen_toimittajat_tuotenumerot" :
       $pakolliset   = array("TOIM_TUOTENO_TUNNUS");
       $kielletyt    = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");

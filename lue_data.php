@@ -376,6 +376,80 @@ if ($kasitellaan_tiedosto) {
     }
   }
 
+  if (in_array("tuotteen_toimittajat_pakkauskoot", $taulut)) {
+
+    $chk_tuoteno = $chk_toim_tuoteno = "x";
+
+    foreach ($taulunotsikot["tuotteen_toimittajat_pakkauskoot"] as $key => $column) {
+
+      if (isset($toimitunnusvalinta) and $toimitunnusvalinta != 1) {
+
+        if ($column == "TOIM_TUOTENO_TUNNUS") $chk_tunnus = $key;
+        
+        switch ($toimitunnusvalinta) {
+        case "2":
+          if ($column == "TUOTENUMERO") $chk_tuoteno = $key;
+          $toimikentta = "ytunnus";
+          $tuotenokentta = "tuoteno";
+          break;
+        case "3":
+          if ($column == "TOIM_TUOTENO") $chk_toim_tuoteno = $key;
+          $toimikentta = "ytunnus";
+          $tuotenokentta = "toim_tuoteno";
+          break;
+        case "4":
+          if ($column == "TUOTENUMERO") $chk_tuoteno = $key;
+          $toimikentta = "toimittajanro";
+          $tuotenokentta = "tuoteno";
+          break;
+        case "5":
+          if ($column == "TOIM_TUOTENO") $chk_toim_tuoteno = $key;
+          $toimikentta = "toimittajanro";
+          $tuotenokentta = "toim_tuoteno";
+          break;
+        }
+      }
+    }
+
+    if (is_int($chk_toim_tuoteno) or is_int($chk_tuoteno)) {
+
+      // Vaihdetaan otsikko
+      unset($taulunotsikot["tuotteen_toimittajat_pakkauskoot"][$chk_tuoteno]);
+      unset($taulunotsikot["tuotteen_toimittajat_pakkauskoot"][$chk_toim_tuoteno]);
+
+      // Muutetaan arvot
+      foreach ($taulunrivit["tuotteen_toimittajat_pakkauskoot"] as $ind => $rivit) {
+        $chk_tunnus_val = $taulunrivit["tuotteen_toimittajat_pakkauskoot"][$ind][$chk_tunnus];
+        
+        if (is_int($chk_tuoteno)) {
+          $chk_tuoteno_val = $taulunrivit["tuotteen_toimittajat_pakkauskoot"][$ind][$chk_tuoteno];
+        }
+        else {
+          $chk_tuoteno_val = $taulunrivit["tuotteen_toimittajat_pakkauskoot"][$ind][$chk_toim_tuoteno];
+        }
+
+        $query = "SELECT tt.tunnus
+                  FROM tuotteen_toimittajat AS tt
+                  JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.{$toimikentta} = '{$chk_tunnus_val}')
+                  WHERE tt.yhtio      = '{$kukarow['yhtio']}'
+                  AND tt.{$tuotenokentta} = '{$chk_tuoteno_val}'";
+        $chk_tunnus_res = pupe_query($query);
+
+        if (mysql_num_rows($chk_tunnus_res) == 1) {
+          $chk_tunnus_row = mysql_fetch_assoc($chk_tunnus_res);
+
+          $taulunrivit["tuotteen_toimittajat_pakkauskoot"][$ind][$chk_tunnus] = $chk_tunnus_row['tunnus'];
+        }
+        else {
+          $taulunrivit["tuotteen_toimittajat_pakkauskoot"][$ind][$chk_tunnus] = "";
+        }
+
+        unset($taulunrivit["tuotteen_toimittajat_pakkauskoot"][$ind][$chk_tuoteno]);
+        unset($taulunrivit["tuotteen_toimittajat_pakkauskoot"][$ind][$chk_toim_tuoteno]);
+      }
+    }
+  }
+
   if (in_array("tuotteen_toimittajat_tuotenumerot", $taulut)) {
 
     $chk_tuoteno = $chk_toim_tuoteno = "x";
@@ -2381,6 +2455,7 @@ if (!$cli and !isset($api_kentat)) {
     'tuotteen_avainsanat'             => 'Tuotteen avainsanat',
     'tuotteen_orginaalit'             => 'Tuotteiden originaalit',
     'tuotteen_toimittajat'            => 'Tuotteen toimittajat',
+    'tuotteen_toimittajat_pakkauskoot' => 'Tuotteen toimittajan pakkauskoot',
     'tuotteen_toimittajat_tuotenumerot' => 'Tuotteen toimittajan vaihtoehtoiset tuotenumerot',
     'vak'                             => 'VAK/ADR-tietoja',
     'vak_imdg'                        => 'VAK/IMDG-tietoja',

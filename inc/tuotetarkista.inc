@@ -410,18 +410,22 @@ if (!function_exists("tuotetarkista")) {
 
       if ($tem_kehahin != ""
         and $tem_kehahin != $trow["kehahin"]
-        and $tem_eisaldoa == ""
-        and isset($tem_eisaldoa)) {
+        and ((isset($tem_eisaldoa)
+            and $tem_eisaldoa == "")
+          or (!isset($tem_eisaldoa)
+            and $trow["ei_saldoa"] == ""))) {
         // Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
         $virhe[$i] = $virhe[$tem_kehahin_ind] = t("Saldollisen tuotteen hankintahintaa ei voi muuttaa")."!";
       }
 
       if ($tem_kehahin != ""
         and $tem_kehahin != $trow["kehahin"]
-        and $tem_eisaldoa == ""
-        and isset($tem_eisaldoa)
         and count($virhe) == 0
-        and $yhtiorow["palvelutuotteiden_kehahinnat"] == "K") {
+        and $yhtiorow["palvelutuotteiden_kehahinnat"] == "K"
+        and ((isset($tem_eisaldoa)
+            and $tem_eisaldoa == "")
+          or (!isset($tem_eisaldoa)
+            and $trow["ei_saldoa"] == ""))) {
 
         $tem_kehahin = sprintf("%.6f", $tem_kehahin);
 
@@ -443,9 +447,11 @@ if (!function_exists("tuotetarkista")) {
       }
 
       if (count($virhe) == 0
-        and $tem_eisaldoa == ""
-        and isset($tem_eisaldoa)
-        and $yhtiorow["tuotteen_oletuspaikka"] != "") {
+        and $yhtiorow["tuotteen_oletuspaikka"] != ""
+        and ((isset($tem_eisaldoa)
+            and $tem_eisaldoa == "")
+          or (!isset($tem_eisaldoa)
+            and $trow["ei_saldoa"] == ""))) {
 
         $query = "SELECT *
                   FROM tuotepaikat

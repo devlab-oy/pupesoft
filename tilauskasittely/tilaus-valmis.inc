@@ -1899,6 +1899,9 @@ else {
             // Otetaan eka lähtö
             $valitu_lahto = array_shift($lahdot);
 
+            # Haetaan lähdön takaa ohjausmerkki
+            $_ohjausmerkki = paivita_ohjausmerkki($lahtorow, false);
+
             $query = "UPDATE lasku
                       SET toimitustavan_lahto = '$valitu_lahto[tunnus]'
                       WHERE yhtio = '$kukarow[yhtio]'

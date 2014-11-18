@@ -397,7 +397,6 @@ elseif ($tee != "") {
       echo "</select>";
 
       echo "</td>";
-      echo "<td class='back'>".t("Pakollinen kenttä")."</td>";
       echo "</tr>";
 
       echo "<tr>";
@@ -788,7 +787,6 @@ elseif ($tee == '') {
         and $tilrow['maa_maara'] != ''
         and $tilrow['kuljetusmuoto'] > 0
         and $tilrow['kauppatapahtuman_luonne'] > 0
-        and $tilrow['sisamaan_kuljetus'] != ''
         and $tilrow['sisamaan_kuljetusmuoto'] > 0
         and $tilrow['poistumistoimipaikka'] != ''
         and $tilrow['poistumistoimipaikka_koodi'] != '') {

@@ -235,7 +235,8 @@ if (!isset($task)) {
             SUM(IF(ss.lisatieto = 'Hylättävä', 1, 0)) AS hylattavat,
             SUM(IF(ss.lisatieto = 'Hylätty', 1, 0)) AS hylatyt,
             SUM(IF(ss.lisatieto = 'Lusattava', 1, 0)) AS lusattavat,
-            SUM(IF(ss.lisatieto = 'Lusattu', 1, 0)) AS lusatut
+            SUM(IF(ss.lisatieto = 'Lusattu', 1, 0)) AS lusatut,
+            SUM(IF(ss.lisatieto = 'Ylijaama', 1, 0)) AS ylijaama
             FROM lasku
             JOIN laskun_lisatiedot
               ON laskun_lisatiedot.yhtio = lasku.yhtio
@@ -438,7 +439,7 @@ if (!isset($task)) {
 
           }
 
-          if ($tilaus['toimittamatta'] == 0) {
+          if (($tilaus['toimittamatta'] - $tilaus['ylijaama'] - $tilaus['hylatyt']) == 0) {
             $tapahtumat .= "&bull; " .  t("Kontit sinetöity") . "<br>";
           }
           elseif ($tilaus['toimittamatta'] < $tilaus['rullat']) {

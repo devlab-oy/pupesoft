@@ -29819,6 +29819,43 @@ if (!function_exists("rakenna_relex_tuote_parametrit")) {
   }
 }
 
+if (!function_exists('tuotteen_toimittajat_pakkauskoot')) {
+  function tuotteen_toimittajat_pakkauskoot($tu_to_tunnus, $suurin = '') {
+    global $yhtiorow, $kukarow;
+
+    $pakkaukset = array();
+
+    if ($suurin != '') {
+      $orderby_limit = 'ORDER BY tuotteen_toimittajat_pakkauskoot.pakkauskoko desc LIMIT 1';
+    }
+    else {
+      $orderby_limit = 'ORDER BY tuotteen_toimittajat_pakkauskoot.pakkauskoko';
+    }
+
+    if (isset($tu_to_tunnus)) {
+
+      $query = "SELECT tuotteen_toimittajat_pakkauskoot.*
+                FROM tuotteen_toimittajat
+                JOIN tuotteen_toimittajat_pakkauskoot ON (
+                  tuotteen_toimittajat_pakkauskoot.yhtio = tuotteen_toimittajat.yhtio
+                  AND tuotteen_toimittajat_pakkauskoot.toim_tuoteno_tunnus = tuotteen_toimittajat.tunnus)
+                WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
+                AND tuotteen_toimittajat.tunnus= '$tu_to_tunnus'
+                $orderby_limit";
+      $result = pupe_query($query);
+
+      while ($trow = mysql_fetch_assoc($result)) {
+        $pakkaukset[] = array($trow['pakkauskoko'], $trow['yksikko']);
+      }
+
+      return $pakkaukset;
+    }
+    else {
+      return array();
+    }
+  }
+}
+
 if (!function_exists("hae_saldo")) {
   function hae_saldo($tuote, $tyyppi = '') {
     global $kukarow, $yhtiorow, $maa;

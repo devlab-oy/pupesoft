@@ -149,7 +149,7 @@ if ($tee == "KOROTA") {
                 AND tiliointi.ltunnus = lasku.tunnus
                 AND tiliointi.tilino IN ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]')
                 AND tiliointi.tapvm > lasku.erpcm AND tiliointi.korjattu = '')
-            LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio 
+            LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio
               AND maksuehto.tunnus = lasku.maksuehto)
             WHERE lasku.yhtio = '$kukarow[yhtio]'
             AND lasku.tunnus  IN ($korotettavat[0])

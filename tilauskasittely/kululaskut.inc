@@ -174,7 +174,7 @@ if ($tee_kululaskut == "liita") {
     $osto_rahti    = str_replace(",", ".", trim($osto_rahti));
     $osto_kulu    = str_replace(",", ".", trim($osto_kulu));
     $osto_rivi_kulu    = str_replace(",", ".", trim($osto_rivi_kulu));
-    
+
     $osto_kulu = (!isset($osto_kulu) or trim($osto_kulu) == '') ? 0 : round($osto_kulu,2);
     $osto_rahti = (!isset($osto_rahti) or trim($osto_rahti) == '') ? 0 : round($osto_rahti,2);
     $osto_rivi_kulu = (!isset($osto_rivi_kulu) or trim($osto_rivi_kulu) == '') ? 0 : round($osto_rivi_kulu,2);

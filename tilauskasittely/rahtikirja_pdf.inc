@@ -462,28 +462,28 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
   //kollit
   for ($rakir_i = 0; $rakir_i < 100; $rakir_i++) {
-  
+
     $pdf->draw_text(62, $rakir_i_kala, $lotsikot[$rakir_i], $firstpage, $kirj);
     if ($astilnrot[$rakir_i] != '') $pdf->draw_text(62, 502, t("Astilnro").": ".$astilnrot[$rakir_i], $firstpage, $kirj);
     $pdf->draw_text(143, $rakir_i_kala, $kollit[$rakir_i]."  ". $pakkaus[$rakir_i], $firstpage, $kirj);
     $pdf->draw_text(206, $rakir_i_kala, trim($pakkauskuvaus[$rakir_i]." ".$pakkauskuvaustark[$rakir_i]), $firstpage, $kirj);
-  
+
     $pdf->draw_text(422, $rakir_i_kala, $kilot[$rakir_i], $firstpage, $kirj);
     $pdf->draw_text(486, $rakir_i_kala, $kuutiot[$rakir_i], $firstpage, $kirj);
-    
+
     $alempiteksti = trim($vakit[$rakir_i]." ".$lisatiedot[$rakir_i]);
-    
+
     if ($alempiteksti != "") {
       $rakir_i_kala-= 10;
       list($ff_string, $ff_font) = pdf_fontfit($alempiteksti, 360, $pdf, $kirj);
-      $pdf->draw_text(206, $rakir_i_kala, $ff_string, $firstpage, $ff_font);  
+      $pdf->draw_text(206, $rakir_i_kala, $ff_string, $firstpage, $ff_font);
     }
-    
+
     $rakir_i_kala-= 10;
-    
+
     if ($rakir_i_kala < 410) {
       break;
-    }    
+    }
   }
 
   //alarivi

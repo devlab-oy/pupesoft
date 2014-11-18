@@ -203,7 +203,7 @@ else {
       else {
         $varasto_toimipaikka = $laskurow['yhtio_toimipaikka'];
       }
-      
+
       // Mikä tulostusalue
       $tulostusalue = onkotulostusalueita($row["hyllyalue"], $row["hyllynro"], $varasto);
 

@@ -1079,7 +1079,7 @@ if ($avain_sel['KERAYSERA_TK'] == "SELECTED" and $_selitetark) {
 }
 
 if ($avain_sel['RELEX_TUOTEPAR'] == "SELECTED" and $_selite) {
-  
+
   $query = "DESC tuote";
   $varresult = pupe_query($query);
 

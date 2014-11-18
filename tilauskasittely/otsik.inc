@@ -964,8 +964,8 @@ if ($tila == "" and !isset($jatka)) {
 
   $yhtiotoimipaikka = tilauksen_toimipaikka($args);
 
-  if (!isset($srow['yhtio_toimipaikka']) 
-    and !empty($srow['maa']) 
+  if (!isset($srow['yhtio_toimipaikka'])
+    and !empty($srow['maa'])
     and $srow['maa'] != $yhtiorow['maa']) {
       $alhqur = "SELECT tunnus
                  FROM yhtion_toimipaikat
@@ -979,8 +979,8 @@ if ($tila == "" and !isset($jatka)) {
         $kukarow['toimipaikka'] = $alhiro['tunnus'];
       }
   }
-  elseif (!empty($srow['yhtio_toimipaikka']) 
-    and !empty($srow['maa']) 
+  elseif (!empty($srow['yhtio_toimipaikka'])
+    and !empty($srow['maa'])
     and $srow['maa'] != $yhtiorow['maa']) {
       $kukarow['toimipaikka'] = $srow['yhtio_toimipaikka'];
   }

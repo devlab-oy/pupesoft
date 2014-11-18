@@ -154,7 +154,9 @@ if ($tee == 'laskelma') {
         ll.otunnus = lasku.tunnus
       )";
     $verolisa = "AND tiliointi.vero > 0";
-    $laskun_nimi_lisa_select = "trim(concat(ll.laskutus_nimi, ' ', ll.laskutus_nimitark)) nimi, lasku.nimi AS nimicsv,";
+    $laskun_nimi_lisa_select = "
+    trim(concat(lasku.toim_nimi, ' ', lasku.toim_nimitark)) nimi,
+    lasku.toim_nimi AS nimicsv,";
   }
   else {
     $taso = 'ee500';

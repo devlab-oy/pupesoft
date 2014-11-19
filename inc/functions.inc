@@ -28307,11 +28307,7 @@ if (!function_exists('sallitut_varastot')) {
         return $kukarow_varasto;
       }
     }
-
-    if ($yhtiorow['oletusvarasto_tilaukselle'] == 'O' and (int)$kukarow["oletus_varasto"] > 0) {
-      return array($kukarow['oletus_varasto']);
-    }
-
+    
     // Ei löytynyt vielä yhtään varastoa, otetaan varastot käyttäjän tiedoista
     if (trim($kukarow['varasto']) != "" and strpos($kukarow['varasto'], ',') !== false) {
       return explode(",", $kukarow["varasto"]);

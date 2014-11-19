@@ -360,44 +360,47 @@ if (($kukarow["extranet"] != '' and $toim != 'EXTRANET' and $toim != 'EXTRANET_R
 }
 
 if ($tee == 'TARKISTA') {
-
   $uquery = "UPDATE lasku
              SET tilaustyyppi = 'L'
              WHERE yhtio = '{$kukarow['yhtio']}'
              AND tunnus = $tilausnumero";
+
   $uresult = pupe_query($uquery);
 
   $lquery = "SELECT *
-            FROM lasku
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = $tilausnumero";
-  $lresult = pupe_query($lquery);
+             FROM lasku
+             WHERE yhtio = '{$kukarow['yhtio']}'
+             AND tunnus = $tilausnumero";
+
+  $lresult  = pupe_query($lquery);
   $laskurow = mysql_fetch_assoc($lresult);
 
   $xquery = "SELECT *
              FROM tilausrivi
              WHERE yhtio = '{$kukarow['yhtio']}'
-             AND otunnus = $tilausnumero";
+             AND otunnus = $tilausnumero
+             AND tyyppi != 'D'";
+
   $xresult = pupe_query($xquery);
 
   while ($xrow = mysql_fetch_assoc($xresult)) {
-
-    $tuoteno_array[] = $xrow['tuoteno'];
-    $kpl_array[$xrow['tuoteno']] = $xrow['tilkpl'];
+    $tuoteno_array[]                   = $xrow['tuoteno'];
+    $kpl_array[$xrow['tuoteno']]       = $xrow['tilkpl'];
     $kommentti_array[$xrow['tuoteno']] = $xrow['kommentti'];
 
     $query = "UPDATE tilausrivi SET
               tyyppi      = 'D'
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tunnus  = '{$xrow['tunnus']}'";
-    $palauta_res = pupe_query($query);
 
+    $palauta_res = pupe_query($query);
   }
-  $tee = '';
+
+  $tee         = '';
   $tarkistettu = true;
 }
 else {
- $tarkistettu = false;
+  $tarkistettu = false;
 }
 
 if ($tee == 'PAIVITA_SARJANUMERO' and $rivitunnus > 0) {

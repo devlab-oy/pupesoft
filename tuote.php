@@ -476,14 +476,12 @@ if ($tee == 'Z') {
     echo "<br>".t_avainsana("TUOTEMERKKI", "", " and avainsana.selite='$tuoterow[tuotemerkki]'", "", "", "selite")."</td>";
     echo "<td>".t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite");
 
-    $palautus = t_tuotteen_avainsanat($tuoterow, "pakkauskoko2");
-    if ($palautus != '' and $palautus != 'pakkauskoko2') {
-      echo "<br>$palautus";
-    }
+    foreach ($ttrow as $tt_rivi) {
 
-    $palautus = t_tuotteen_avainsanat($tuoterow, "pakkauskoko3");
-    if ($palautus != '' and $palautus != 'pakkauskoko3') {
-      echo "<br>$palautus";
+      $_pakkaukset = tuotteen_toimittajat_pakkauskoot($tt_rivi['tunnus']);
+      foreach ($_pakkaukset as $_pak) {
+        echo "<br>$_pak[0] $_pak[1]";
+      }
     }
 
     echo "</td>";

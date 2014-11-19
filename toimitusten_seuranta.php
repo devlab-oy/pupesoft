@@ -13,7 +13,7 @@ if (isset($_POST['task']) and $_POST['task'] == 'hae_pakkalista') {
     'logodata' => $logodata,
     'taara' => $_POST['taara'],
     'kpl' => $_POST['kpl'],
-    'paino' => $_POST['taara'],
+    'paino' => $_POST['paino'],
     'konttinumero' => $_POST['konttinumero'],
     'sinettinumero' => $_POST['sinettinumero']
     );

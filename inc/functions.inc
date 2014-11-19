@@ -29768,7 +29768,7 @@ if (!function_exists("mb_str_pad")) {
 }
 
 if (!function_exists("mb_str_split")) {
-  function mb_str_split($string, $string_length = 1) {
+  function mb_str_split($string, $string_length = 1, $string_min_length = 1) {
     $parts = array();
 
     if (mb_strlen($string) > $string_length or !$string_length) {
@@ -29778,6 +29778,21 @@ if (!function_exists("mb_str_split")) {
         $string  = mb_substr($string, $string_length, $c-$string_length);
 
       } while(!empty($string));
+
+      // Tsekataan, että vika stringi ei ole liian lyhyt jos meillä on minimipituus annettu
+      if ($string_min_length > 1 and mb_strlen(end($parts)) < $string_min_length and count($parts) > 1) {
+        $vika = array_pop($parts);
+        $tokavika = array_pop($parts);
+
+        // montako merkkiä tarvitaan tokavikasta vikaan, jotta se ei olisi liian lyhyt
+        $vikapituus = mb_strlen($vika);
+
+        $ero = ($string_min_length - $vikapituus);
+        $siiretaan_vikaan = mb_substr($tokavika, -$ero);
+
+        $parts[] = mb_substr($tokavika, 0, -$ero);
+        $parts[] = $vika.$siiretaan_vikaan;
+      }
     }
     else {
       $parts[] = $string;
@@ -29786,4 +29801,3 @@ if (!function_exists("mb_str_split")) {
     return $parts;
   }
 }
-

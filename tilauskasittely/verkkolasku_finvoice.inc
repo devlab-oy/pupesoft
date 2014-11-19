@@ -341,18 +341,20 @@ if (!function_exists('finvoice_otsik')) {
         $laskutus_nimitieto_array = str_split($laskutus_nimitieto, 35);
 
         foreach ($laskutus_nimitieto_array as $laskutus_nimi_osa) {
-          xml_add("InvoiceRecipientOrganisationName", $laskutus_nimi_osa, $tootfinvoice, 35, 2);
+          if (strlen($laskutus_nimi_osa) > 1) {
+            xml_add("InvoiceRecipientOrganisationName", $laskutus_nimi_osa, $tootfinvoice, 35, 2);
+          }
         }
 
         if ($yhtiorow["verkkolasku_lah"] != "maventa") {
           xml_add("InvoiceRecipientOrganisationTaxCode", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], "VATNUMERO"),  $tootfinvoice, 35); // Maventa ei salli tyhjänä, optionaalinen
         }
         fputs($tootfinvoice, "<InvoiceRecipientPostalAddressDetails>\r\n");
-        xml_add("InvoiceRecipientStreetName",               $laskutusosoitetiedot["laskutus_osoite"],   $tootfinvoice, 35, 2);
-        xml_add("InvoiceRecipientTownName",               $laskutusosoitetiedot["laskutus_postitp"],   $tootfinvoice, 35, 2);
-        xml_add("InvoiceRecipientPostCodeIdentifier",           $laskutusosoitetiedot["laskutus_postino"],  $tootfinvoice, 35, 1);
-        xml_add("CountryCode",                       $laskutusosoitetiedot["laskutus_maa"],     $tootfinvoice, 2);
-        xml_add("CountryName",                       $laskutusosoitetiedot["laskutus_maa"],     $tootfinvoice, 35);
+        xml_add("InvoiceRecipientStreetName", $laskutusosoitetiedot["laskutus_osoite"],   $tootfinvoice, 35, 2);
+        xml_add("InvoiceRecipientTownName", $laskutusosoitetiedot["laskutus_postitp"],   $tootfinvoice, 35, 2);
+        xml_add("InvoiceRecipientPostCodeIdentifier", $laskutusosoitetiedot["laskutus_postino"],  $tootfinvoice, 35, 1);
+        xml_add("CountryCode", $laskutusosoitetiedot["laskutus_maa"],     $tootfinvoice, 2);
+        xml_add("CountryName", $laskutusosoitetiedot["laskutus_maa"],     $tootfinvoice, 35);
         xml_add("InvoiceRecipientPostOfficeBoxIdentifier",        "",                     $tootfinvoice, 35);
         fputs($tootfinvoice, "</InvoiceRecipientPostalAddressDetails>\r\n");
         fputs($tootfinvoice, "</InvoiceRecipientPartyDetails>\r\n");
@@ -369,11 +371,13 @@ if (!function_exists('finvoice_otsik')) {
       fputs($tootfinvoice, "<BuyerPartyDetails>\r\n");
       xml_add("BuyerPartyIdentifier",  tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa']),         $tootfinvoice, 35);
 
-      $asiakas_nimitieto = trim($lasrow['nimi']." ".$lasrow['nimitark']);
-      $asiakas_nimitieto_array = str_split($asiakas_nimitieto, 35);
-
-      foreach ($asiakas_nimitieto_array as $asiakas_nimi_osa) {
-        xml_add("BuyerOrganisationName", $asiakas_nimi_osa, $tootfinvoice, 35, 2);
+      $laskutus_nimitieto = trim($lasrow["nimi"]." ".$lasrow["nimitark"]);
+      $laskutus_nimitieto_array = str_split($laskutus_nimitieto, 35);
+          
+      foreach ($laskutus_nimitieto_array as $laskutus_nimi_osa) {
+        if (strlen($laskutus_nimi_osa) > 1) { 
+          xml_add("BuyerOrganisationName", $laskutus_nimi_osa, $tootfinvoice, 35, 2);
+        }
       }
 
       xml_add("BuyerOrganisationTaxCode", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], "VATNUMERO"), $tootfinvoice, 35);
@@ -429,7 +433,10 @@ if (!function_exists('finvoice_otsik')) {
 
       fputs($tootfinvoice, "<DeliveryPartyDetails>\r\n");
       xml_add("DeliveryPartyIdentifier",    tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa']),         $tootfinvoice, 35);
-      xml_add("DeliveryOrganisationName",                              trim($lasrow['toim_nimi']." ".$lasrow['toim_nimitark']), $tootfinvoice, 35, 2);
+      xml_add("DeliveryOrganisationName", trim($lasrow['toim_nimi']), $tootfinvoice, 35, 2);
+      if ($lasrow['toim_nimitark'] != '') {
+        xml_add("DeliveryOrganisationName", $lasrow['toim_nimitark'], $tootfinvoice, 35, 2);
+      }
       xml_add("DeliveryOrganisationTaxCode",  tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa'], "VATNUMERO"), $tootfinvoice, 35);
       fputs($tootfinvoice, "<DeliveryPostalAddressDetails>\r\n");
       xml_add("DeliveryStreetName",                                 $lasrow['toim_osoite'],           $tootfinvoice, 35, 2);

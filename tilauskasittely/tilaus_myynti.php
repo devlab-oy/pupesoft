@@ -363,7 +363,9 @@ if ($tee == 'TARKISTA') {
   $uquery = "UPDATE lasku
              SET tilaustyyppi = 'L'
              WHERE yhtio = '{$kukarow['yhtio']}'
-             AND tunnus = $tilausnumero";
+             AND tunnus = $tilausnumero
+             AND tilaustyyppi = 'H'
+             AND tila = 'N'";
 
   $uresult = pupe_query($uquery);
 

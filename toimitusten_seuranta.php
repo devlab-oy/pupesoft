@@ -640,8 +640,6 @@ if (!isset($task)) {
 
         $kesken = 0;
 
-        print_r($kontit);
-
         foreach ($kontit as $konttinumero => $kontti) {
 
           if ($kontti['sinettinumero'] == '') {
@@ -707,6 +705,7 @@ if (!isset($task)) {
           echo t("Pakkalista");
           echo "</button>";
 
+          echo $kontti['kontin_mrn'];
 
           if ($kontti['kontin_mrn'] != '') {
             echo "<div style='text-align:center; margin:4px 0'>MRN: ";

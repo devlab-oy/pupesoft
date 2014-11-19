@@ -135,24 +135,23 @@ if (
   }
 }
 
-if ($row["varattu"] == 0 and
-    in_array($row["var"], array('', 'H')) and
-    $row["tyyppi"] != "E" and
-    $row["tyyppi"] != "G" and
-    ($yhtiorow['extranet_tilaus_varaa_saldoa'] != "E")
-) {
-  if ($kukarow['extranet'] != '' and $row['positio'] == 'Ei varaa saldoa') {
-    //    $varaosavirhe .=
-    //      t("HUOM: Rivi on liian vanha ja tuote ei varaa saldoa") .
-    //      "! ($row[tilkpl] " .
-    //      t("kpl") .
-    //      ")<br/>";
+if (in_array($row["var"], array('', 'H')) and $row["tyyppi"] != "E" and $row["tyyppi"] != "G") {
+  if (($yhtiorow['extranet_tilaus_varaa_saldoa'] != "E" and $row["varattu"] == 0) or
+      ($yhtiorow['extranet_tilaus_varaa_saldoa'] == "E" and $row["tilkpl"] == 0)
+  ) {
+    if ($kukarow['extranet'] != '' and $row['positio'] == 'Ei varaa saldoa') {
+      //    $varaosavirhe .=
+      //      t("HUOM: Rivi on liian vanha ja tuote ei varaa saldoa") .
+      //      "! ($row[tilkpl] " .
+      //      t("kpl") .
+      //      ")<br/>";
+    }
+    else {
+      $varaosavirhe .= t("VIRHE: M‰‰r‰ puuttuu!") . "<br>";
+    }
+    $riviok++;
+    $tilausok++;
   }
-  else {
-    $varaosavirhe .= t("VIRHE: M‰‰r‰ puuttuu!") . "<br>";
-  }
-  $riviok++;
-  $tilausok++;
 }
 
 if (in_array($row["var"], array('S', 'U', 'T', 'R', 'J')) and $row["tyyppi"] != "E") {

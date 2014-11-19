@@ -1130,6 +1130,9 @@ for ($i=0; $i<=$count; $i++) {
     elseif ($from == "yllapito" and $toim == "tuotteen_toimittajat_tuotenumerot" and trim($array[$i]) == "tuoteno") {
       $lisa .= " and toim_tuoteno_tunnus {$hakuehto} ";
     }
+    elseif ($from == "yllapito" and $toim == "tuotteen_toimittajat_pakkauskoot" and trim($array[$i]) == "tuoteno") {
+      $lisa .= " and toim_tuoteno_tunnus {$hakuehto} ";
+    }
     elseif ($from == "yllapito" and ($toim == 'rahtisopimukset' or $toim == 'asiakasalennus' or $toim == 'kohde' or $toim == 'asiakashinta') and trim($array[$i]) == 'asiakas') {
 
       list($a, $b) = explode("/", $haku[$i]);
@@ -2248,6 +2251,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $toim == "autodata_tuote" or
     $toim == "korvaavat_kiellot" or
     $toim == "tuotteen_toimittajat" or
+    $toim == "tuotteen_toimittajat_pakkauskoot" or
     $toim == "tuotteen_toimittajat_tuotenumerot" or
     $toim == "extranet_kayttajan_lisatiedot" or
     $toim == "asiakkaan_avainsanat" or
@@ -2303,6 +2307,16 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   }
 
   if ($trow["tunnus"] > 0 and $errori == '' and $toim == 'tuotteen_toimittajat') {
+    
+    if (($toikrow = tarkista_oikeus("yllapito.php", "tuotteen_toimittajat_pakkauskoot%", "", "OK")) !== FALSE) {
+      $lukitse_avaimeen = urlencode($toim_tuoteno_tunnus);
+
+      echo "<tr><td class='back'></td></tr>";
+      echo "<tr><td class='back'>";
+      echo "<iframe id='tuotteen_toimittajat_pakkauskoot_iframe' name='tuotteen_toimittajat_pakkauskoot_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&from=yllapito&ohje=off&haku[1]=@{$lukitse_avaimeen}&lukitse_avaimeen={$lukitse_avaimeen}' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "</td></tr>";
+    }
+    
     if (($toikrow = tarkista_oikeus("yllapito.php", "tuotteen_toimittajat_tuotenumerot%", "", "OK")) !== FALSE) {
       $lukitse_avaimeen = urlencode($toim_tuoteno_tunnus);
 

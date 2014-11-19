@@ -29820,19 +29820,22 @@ if (!function_exists("rakenna_relex_tuote_parametrit")) {
 }
 
 if (!function_exists('tuotteen_toimittajat_pakkauskoot')) {
-  function tuotteen_toimittajat_pakkauskoot($tu_to_tunnus, $suurin = '') {
+  function tuotteen_toimittajat_pakkauskoot($tt_tunnus, $ehto = '') {
     global $yhtiorow, $kukarow;
 
     $pakkaukset = array();
 
-    if ($suurin != '') {
-      $orderby_limit = 'ORDER BY tuotteen_toimittajat_pakkauskoot.pakkauskoko desc LIMIT 1';
+    if ($ehto == 'suurin') {
+      $orderby_limit = 'ORDER BY abs(tuotteen_toimittajat_pakkauskoot.pakkauskoko) desc LIMIT 1';
+    }
+    elseif ($ehto == 'desc') {
+      $orderby_limit = 'ORDER BY abs(tuotteen_toimittajat_pakkauskoot.pakkauskoko) desc';
     }
     else {
-      $orderby_limit = 'ORDER BY tuotteen_toimittajat_pakkauskoot.pakkauskoko';
+      $orderby_limit = 'ORDER BY abs(tuotteen_toimittajat_pakkauskoot.pakkauskoko) asc';
     }
 
-    if (isset($tu_to_tunnus)) {
+    if (isset($tt_tunnus)) {
 
       $query = "SELECT tuotteen_toimittajat_pakkauskoot.*
                 FROM tuotteen_toimittajat
@@ -29840,7 +29843,7 @@ if (!function_exists('tuotteen_toimittajat_pakkauskoot')) {
                   tuotteen_toimittajat_pakkauskoot.yhtio = tuotteen_toimittajat.yhtio
                   AND tuotteen_toimittajat_pakkauskoot.toim_tuoteno_tunnus = tuotteen_toimittajat.tunnus)
                 WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
-                AND tuotteen_toimittajat.tunnus= '$tu_to_tunnus'
+                AND tuotteen_toimittajat.tunnus= '$tt_tunnus'
                 $orderby_limit";
       $result = pupe_query($query);
 

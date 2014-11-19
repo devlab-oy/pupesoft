@@ -1865,7 +1865,7 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
   and $yhtiorow['reklamaation_kasittely'] == 'U') {
   // Reklamaatio/takuu on valmis laskutettavaksi
   // katsotaan onko tilausrivit Unikko-j‰rjestelm‰‰n
-  if ($laskurow['tilaustyyppi'] == 'U') {
+  if ($laskurow['tilaustyyppi'] == 'U' or $laskurow['tilaustyyppi'] == 'R') {
     $saldoton_lisa = "and tuote.ei_saldoa=''";
   }
   else {
@@ -3036,34 +3036,6 @@ if ($tee == '') {
 
       echo "<th align='left'>".t("Toimitustapa").":</th>";
 
-      if ($kukarow["extranet"] != "") {
-        $query = "(SELECT toimitustapa.*
-                   FROM toimitustapa
-                   WHERE toimitustapa.yhtio = '{$kukarow['yhtio']}' and (toimitustapa.extranet in ('K','M') or toimitustapa.selite = '{$extra_asiakas['toimitustapa']}')
-                   and (toimitustapa.sallitut_maat = '' or toimitustapa.sallitut_maat like '%{$laskurow['toim_maa']}%'))
-                   UNION
-                   (SELECT toimitustapa.*
-                   FROM toimitustapa
-                   JOIN asiakkaan_avainsanat ON toimitustapa.yhtio = asiakkaan_avainsanat.yhtio and toimitustapa.selite = asiakkaan_avainsanat.avainsana and asiakkaan_avainsanat.laji = 'toimitustapa' and asiakkaan_avainsanat.liitostunnus = '{$laskurow['liitostunnus']}'
-                   WHERE toimitustapa.yhtio = '{$kukarow['yhtio']}'
-                   and (toimitustapa.sallitut_maat = '' or toimitustapa.sallitut_maat like '%{$laskurow['toim_maa']}%'))
-                   ORDER BY jarjestys,selite";
-      }
-      else {
-        $query = "SELECT toimitustapa.*
-                  FROM toimitustapa
-                  WHERE yhtio = '{$kukarow['yhtio']}' and (extranet in ('','M') or selite = '{$laskurow['toimitustapa']}')
-                  and (sallitut_maat = '' or sallitut_maat like '%{$laskurow['toim_maa']}%')
-                  ORDER BY jarjestys,selite";
-      }
-      $tresult = pupe_query($query);
-      $tm_toimitustaparow = mysql_fetch_assoc($tresult);
-
-      if ($kukarow["extranet"] != "" and mysql_num_rows($tresult) == 0) {
-        echo t("VIRHE: K‰ytt‰j‰tiedoissasi on virhe! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n."), "<br><br>";
-        exit;
-      }
-
       // Lukitaan rahtikirjaan vaikuttavat tiedot jos/kun rahtikirja on tulostettu
       $query = "SELECT *
                 FROM rahtikirjat
@@ -3079,8 +3051,6 @@ if ($tee == '') {
         $state_chk = 'disabled';
       }
 
-      echo "<td><select name='toimitustapa' onchange='submit()' {$state_chk} ".js_alasvetoMaxWidth("toimitustapa", 200).">";
-
       $_varasto = hae_varasto($laskurow['varasto']);
 
       $params = array(
@@ -3088,10 +3058,17 @@ if ($tee == '') {
         'lasku_toimipaikka'   => $laskurow['yhtio_toimipaikka'],
         'varasto_toimipaikka' => $_varasto['toimipaikka'],
         'kohdevarasto'        => $laskurow['clearing'],
-        'lahdevarasto'        => $laskurow['varasto']
+        'lahdevarasto'        => $laskurow['varasto'],
       );
 
       $toimitustavat = hae_toimitustavat($params);
+
+      if (count($toimitustavat) == 0) {
+        echo t("VIRHE: K‰ytt‰j‰tiedoissasi on virhe! Ota yhteys j‰rjestelm‰n yll‰pit‰j‰‰n."), "<br><br>";
+        exit;
+      }
+
+      echo "<td><select name='toimitustapa' onchange='submit()' {$state_chk} ".js_alasvetoMaxWidth("toimitustapa", 200).">";
 
       foreach ($toimitustavat as $toimitustapa) {
 
@@ -3100,9 +3077,9 @@ if ($tee == '') {
         }
 
         if (($kukarow['extranet'] == "" and in_array($toimitustapa['extranet'], array('', 'M')))
-         or ($kukarow['extranet'] != "" and in_array($toimitustapa['extranet'], array('K', 'M')))
-         or $toimitustapa['selite'] == $laskurow['toimitustapa']
-         or $toimitustapa['selite'] == $faktarow['toimitustapa']) {
+          or ($kukarow['extranet'] != "" and in_array($toimitustapa['extranet'], array('K', 'M')))
+          or $toimitustapa['selite'] == $laskurow['toimitustapa']
+          or $toimitustapa['selite'] == $faktarow['toimitustapa']) {
 
           $sel = "";
           if ($toimitustapa["selite"] == $laskurow["toimitustapa"]) {
@@ -3933,11 +3910,11 @@ if ($tee == '') {
         }
 
         // Otetaan sarjanumero talteen, jotta osataan muokkauksen j‰lkeen palauttaa oikea er‰ jos se viel‰ riitt‰‰
-        if (isset($myy_sarjatunnus)) {
+        if (isset($myy_sarjatunnus) and $myy_sarjatunnus != "") {
           $query = "SELECT sarjanumero
                     FROM sarjanumeroseuranta
                     WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus = $myy_sarjatunnus";
+                    AND tunnus  = $myy_sarjatunnus";
           $m_eranro = mysql_fetch_assoc(pupe_query($query));
         }
 
@@ -4258,7 +4235,7 @@ if ($tee == '') {
     $_varastoon_asiakkaalle = (in_array($toim, array('VALMISTAVARASTOON', 'VALMISTAASIAKKAALLE')));
     $_tila_check = (!in_array($tila, array('LISAAKERTARESEPTIIN', 'LISAAISAKERTARESEPTIIN')));
 
-    if ($_varastoon_asiakkaalle and $_tila_check) {
+    if ($_varastoon_asiakkaalle and $_tila_check and empty($perheid)) {
 
       $perheid2 = 0;
 
@@ -4266,8 +4243,8 @@ if ($tee == '') {
 
         $query = "SELECT *
                   FROM tuoteperhe
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tyyppi = 'R'
+                  WHERE yhtio    = '{$kukarow['yhtio']}'
+                  AND tyyppi     = 'R'
                   AND isatuoteno = '{$tuoteno}'";
         $tuoteperhe_chk_res = pupe_query($query);
 
@@ -4744,6 +4721,7 @@ if ($tee == '') {
     $omalle_tilaukselle = "";
     $valmistuslinja     = "";
     $avaa_rekursiiviset = "";
+    $tila = "";
   }
   elseif ($tila == "VARMUUTOS" and ($tapa == "POISJTSTA" or $tapa == "PUUTE" or $tapa == "JT")) {
     //otetaan varattukpl ja jtkpl muuttuja k‰yttˆˆn
@@ -7645,7 +7623,7 @@ if ($tee == '') {
                 <input type='hidden' name='perheid'       value = '$row[perheid]'>
                 <input type='hidden' name='orig_tila'     value = '$orig_tila'>
                 <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
-                <input type='hidden' name='valmiste_vai_raakaaine' value='raakaaine' />
+                <input type='hidden' name='valmiste_vai_raakaaine' value='{$valmiste_vai_raakaaine}' />
                 <input type='Submit' value='".t("Lis‰‰ raaka-aine")."'>
                 </form>";
 
@@ -7662,7 +7640,7 @@ if ($tee == '') {
                 <input type='hidden' name='perheid'       value = '$row[perheid]'>
                 <input type='hidden' name='orig_tila'     value = '$orig_tila'>
                 <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
-                <input type='hidden' name='valmiste_vai_raakaaine' value='valmiste' />
+                <input type='hidden' name='valmiste_vai_raakaaine' value='{$valmiste_vai_raakaaine}' />
                 <input type='Submit' value='".t("Lis‰‰ valmiste")."'>
                 </form>";
           }

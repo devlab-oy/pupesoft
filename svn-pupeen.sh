@@ -160,6 +160,22 @@ if [[ "${jatketaanko}" = "k" ]]; then
   git pull origin ${pupebranch} &&  # paivitetaan master branchi
   git remote prune origin           # poistetaan ylimääriset branchit
 
+  # Save git exit status
+  STATUS=$?
+
+  # Get new head
+  NEW_HEAD=$(git rev-parse HEAD)
+
+  if [[ ${STATUS} -eq 0 ]]; then
+    if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+      USER_IP=$(who -m am i|awk '{ print $NF}'|sed -e 's/[\(\)]//g')
+    else
+      USER_IP=localhost
+    fi
+
+    ${mysql_komento} -e "INSERT INTO git_paivitykset SET hash='${NEW_HEAD}', ip='${USER_IP}', date=now()" &> /dev/null
+  fi
+
   if [[ $? -eq 0 ]]; then
     echo
     echo "${green}Pupesoft päivitetty!${normal}"

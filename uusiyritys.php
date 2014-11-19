@@ -199,8 +199,8 @@ if ($tila == 'perusta') {
 
 if ($tila == 'menut') {
   if ($fromyhtio != '') {
-    $query = "INSERT into oikeu (sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,yhtio,laatija,luontiaika,muutospvm,muuttaja)
-              SELECT sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,'$yhtio','{$kukarow['kuka']}',now(),now(),'{$kukarow['kuka']}'
+    $query = "INSERT into oikeu (sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,yhtio,hidden,laatija,luontiaika,muutospvm,muuttaja)
+              SELECT sovellus,nimi,alanimi,paivitys,lukittu,nimitys,jarjestys,jarjestys2,'$yhtio',hidden,'{$kukarow['kuka']}',now(),now(),'{$kukarow['kuka']}'
               FROM oikeu
               WHERE yhtio  = '$fromyhtio'
               and profiili = ''

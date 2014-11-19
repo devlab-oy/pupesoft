@@ -29765,3 +29765,21 @@ function mb_str_pad($input, $pad_length, $pad_string = ' ', $pad_type = STR_PAD_
     return str_pad($input, $diff, $pad_string, $pad_type); //NO_MB_OVERLOAD
 }
 
+function mb_str_split($string, $string_length = 1) {
+  $parts = array();
+
+  if (mb_strlen($string) > $string_length or !$string_length) {
+    do {
+      $c = mb_strlen($string);
+      $parts[] = mb_substr($string, 0, $string_length);
+      $string  = mb_substr($string, $string_length, $c-$string_length);
+
+    } while(!empty($string));
+  }
+  else {
+    $parts[] = $string;
+  }
+
+  return $parts;
+}
+

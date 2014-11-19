@@ -29791,7 +29791,7 @@ if (!function_exists("mb_str_split")) {
         $siiretaan_vikaan = mb_substr($tokavika, -$ero);
 
         $parts[] = mb_substr($tokavika, 0, -$ero);
-        $parts[] = $vika.$siiretaan_vikaan;
+        $parts[] = $siiretaan_vikaan.$vika;
       }
     }
     else {

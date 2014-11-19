@@ -8,8 +8,6 @@ if (isset($_POST['task']) and $_POST['task'] == 'hae_pakkalista') {
 
   $logodata = base64_decode($_POST['logodata']);
 
-  echo $logodata;die;
-
   $pdf_data = array(
     'pakkalista' => $pakkalista,
     'logodata' => $logodata,

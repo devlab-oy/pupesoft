@@ -29757,29 +29757,33 @@ if (!function_exists("hae_saldo")) {
   }
 }
 
-function mb_str_pad($input, $pad_length, $pad_string = ' ', $pad_type = STR_PAD_RIGHT) {
-    // Tässä on "//NO_MB_OVERLOAD"-kommentti
-    // jotta UTF8-konversio ei osu tähän riviin
-    $pad_string_length =  mb_strlen($pad_string);
-    $diff = ($pad_length - strlen($input)) * $pad_string_length; //NO_MB_OVERLOAD
-    return str_pad($input, $diff, $pad_string, $pad_type); //NO_MB_OVERLOAD
+if (!function_exists("mb_str_pad")) {
+  function mb_str_pad($input, $pad_length, $pad_string = ' ', $pad_type = STR_PAD_RIGHT) {
+      // Tässä on "//NO_MB_OVERLOAD"-kommentti
+      // jotta UTF8-konversio ei osu tähän riviin
+      $pad_string_length =  mb_strlen($pad_string);
+      $diff = ($pad_length - strlen($input)) * $pad_string_length; //NO_MB_OVERLOAD
+      return str_pad($input, $diff, $pad_string, $pad_type); //NO_MB_OVERLOAD
+  }
 }
 
-function mb_str_split($string, $string_length = 1) {
-  $parts = array();
+if (!function_exists("mb_str_split")) {
+  function mb_str_split($string, $string_length = 1) {
+    $parts = array();
 
-  if (mb_strlen($string) > $string_length or !$string_length) {
-    do {
-      $c = mb_strlen($string);
-      $parts[] = mb_substr($string, 0, $string_length);
-      $string  = mb_substr($string, $string_length, $c-$string_length);
+    if (mb_strlen($string) > $string_length or !$string_length) {
+      do {
+        $c = mb_strlen($string);
+        $parts[] = mb_substr($string, 0, $string_length);
+        $string  = mb_substr($string, $string_length, $c-$string_length);
 
-    } while(!empty($string));
+      } while(!empty($string));
+    }
+    else {
+      $parts[] = $string;
+    }
+
+    return $parts;
   }
-  else {
-    $parts[] = $string;
-  }
-
-  return $parts;
 }
 

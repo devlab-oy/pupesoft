@@ -1,21 +1,34 @@
 <?php
 
+require 'inc/edifact_functions.inc';
+
 if (isset($_POST['task']) and $_POST['task'] == 'hae_pakkalista') {
 
-header("Content-type: text/plain");
-echo "PAKKALISTA\n\n";
-echo "Konttinumero: " . $_POST['konttinumero'] . "\n";
-echo "Sinettinumero: " . $_POST['sinettinumero'] . "\n";
-echo "Paino: " . $_POST['paino'] . "\n";
-echo "Taara: " . $_POST['taara'] . "\n";
-echo "Kpl: " . $_POST['kpl'] . "\n\n";
-echo $_POST['data'];
-die;
+  $pakkalista = unserialize(base64_decode($_POST['pakkalista']));
+
+  $logodata = base64_decode($_POST['logodata']);
+
+  $pdf_data = array(
+    'pakkalista' => $pakkalista,
+    'logodata' => $logodata,
+    'taara' => $_POST['taara'],
+    'kpl' => $_POST['kpl'],
+    'paino' => $_POST['taara'],
+    'konttinumero' => $_POST['konttinumero'],
+    'sinettinumero' => $_POST['sinettinumero']
+    );
+
+  $pdf_tiedosto = pakkalista_pdf($pdf_data);
+
+  header("Content-type: application/pdf");
+
+  echo file_get_contents($pdf_tiedosto);
+
+  die;
 
 }
 
 require "inc/parametrit.inc";
-require 'inc/edifact_functions.inc';
 
 if (!isset($errors)) $errors = array();
 
@@ -668,13 +681,22 @@ if (!isset($task)) {
 
           js_openFormInNewWindow();
 
+          $query = "SELECT data
+                    FROM liitetiedostot
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus = '{$yhtiorow['logo']}'";
+          $result = pupe_query($query);
+          $logodata =  mysql_result($result, 0);
+          $logodata = base64_encode($logodata);
+
           echo "&nbsp;<form method='post' id='hae_pakkalista{$_konttinumero}'>";
           echo "<input type='hidden' name='task' value='hae_pakkalista' />";
-          echo "<input type='hidden' name='data' value='{$kontti['pakkalista']}' />";
+          echo "<input type='hidden' name='pakkalista' value='{$kontti['pakkalista']}' />";
           echo "<input type='hidden' name='tee' value='XXX' />";
           echo "<input type='hidden' name='konttinumero' value='{$konttinumero}' />";
           echo "<input type='hidden' name='sinettinumero' value='{$kontti['sinettinumero']}' />";
           echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
+          echo "<input type='hidden' name='logodata' value='{$logodata}' />";
           echo "<input type='hidden' name='taara' value='{$kontti['taara']}' />";
           echo "<input type='hidden' name='kpl' value='{$kontti['kpl']}' />";
           echo "<input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />";

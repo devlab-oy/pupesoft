@@ -95,6 +95,8 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
 
 function laheta_sanoma($sanoma){
 
+  return true;
+
   if ($sanoma == '') {
     return false;
   }
@@ -1771,7 +1773,7 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
 
     $konttipaino = 0;
     $konttilista = '';
-    $pakkalista = '';
+    $pakkalista = array();
 
     foreach ($kontti as $rulla) {
       $konttipaino = $konttipaino + $rulla['massa'];
@@ -1781,8 +1783,13 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
       $isokoodi = $rulla['kontin_isokoodi'];
       $taara = $rulla['kontin_taarapaino'];
 
-      $pakkalista .= "UIB: " . $rulla['sarjanumero'] . " - " . (INT) $rulla['massa'] . " kg - " .$rulla['asiakkaan_tilausnumero'] . "\n";
+      $pakkalista[] = "UIB: " . $rulla['sarjanumero'] . " - " . (INT) $rulla['massa'] . " kg - " .$rulla['asiakkaan_tilausnumero'] . "\n";
+
+      //$pakkalista .= "UIB: " . $rulla['sarjanumero'] . " - " . (INT) $rulla['massa'] . " kg - " .$rulla['asiakkaan_tilausnumero'] . "\n";
     }
+
+    $pakkalista = serialize($pakkalista);
+    $pakkalista = base64_encode($pakkalista);
 
     $konttilista = rtrim($konttilista, ',');
 
@@ -1983,5 +1990,96 @@ function tarkista_sarjanumero($sarjanumero) {
   }
 
 }
+
+function pakkalista_pdf($pdf_data) {
+
+  extract($pdf_data);
+
+  //PDF:n luonti ja defaultit
+  require_once("pdflib/phppdflib.class.php");
+
+  //PDF parametrit
+  $pdf = new pdffile;
+  $pdf->set_default('margin-top',   0);
+  $pdf->set_default('margin-bottom',   0);
+  $pdf->set_default('margin-left',   0);
+  $pdf->set_default('margin-right',   0);
+
+  //fontit
+  $pieni["height"] = 11;
+  $pieni["font"] = "Times-Roman";
+
+  $bold["height"] = 11;
+  $bold["font"] = "Times-Bold";
+
+  // sitten aletaan piirtämään itse PDF sisältöä
+  $sivu = $pdf->new_page("a4");
+
+  $image = $pdf->jfif_embed($logodata);
+  $logoparam['scale'] = 0.5;
+  $pdf->image_place($image, 720, 440, $sivu, $logoparam);
+
+  $x = 40;
+  $y = 800;
+
+  $xx = array(20,580);
+
+  $pdf->draw_text($x, $y, 'PAKKALISTA', $sivu, $bold);
+
+  $y -= 20;
+
+  $pdf->draw_text($x, $y, 'Konttinumero', $sivu, $bold);
+  $pdf->draw_text($x+100, $y, $konttinumero, $sivu, $bold);
+
+  $y -= 15;
+
+  $pdf->draw_text($x, $y, 'Sinettinumero', $sivu, $bold);
+  $pdf->draw_text($x+100, $y, $sinettinumero, $sivu, $bold);
+
+  $y -= 15;
+
+  $pdf->draw_text($x, $y, 'Paino', $sivu, $bold);
+  $pdf->draw_text($x+100, $y, $paino, $sivu, $bold);
+
+  $y -= 15;
+
+  $pdf->draw_text($x, $y, 'Taara', $sivu, $bold);
+  $pdf->draw_text($x+100, $y, $taara, $sivu, $bold);
+
+  $y -= 15;
+
+  $pdf->draw_text($x, $y, 'Kpl', $sivu, $bold);
+  $pdf->draw_text($x+100, $y, $kpl, $sivu, $bold);
+
+  $y -= 15;
+  $yy[0] = $yy[1] = $y;
+  $pdf->draw_line($xx, $yy, $sivu);
+  $y -= 20;
+
+  foreach ($pakkalista as $rulla) {
+
+    if ($y < 20) {
+      $sivu = $pdf->new_page("a4");
+      $y = 800;
+    }
+
+    $pdf->draw_text($x, $y, $rulla, $sivu, $bold);
+    $y -= 15;
+
+  }
+
+
+  //keksitään uudelle failille joku varmasti uniikki nimi:
+  $pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(),true)).".pdf";
+
+  //kirjoitetaan pdf faili levylle..
+  $fh = fopen($pdffilenimi, "w");
+  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
+  fclose($fh);
+
+  return $pdffilenimi;
+
+}
+
 
 ?>

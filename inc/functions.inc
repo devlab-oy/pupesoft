@@ -28880,7 +28880,7 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
 
     $sorttaajat = $parametrit['order_by'];
 
-    function sorttaajat ($a, $b) {
+    function sorttaajat($a, $b) {
       foreach ($sorttaajat as $sorttaaja) {
         if ($a[$sorttaaja] > $b[$sorttaaja]) return 1;
         if ($a[$sorttaaja] < $b[$sorttaaja]) return -1;
@@ -29749,22 +29749,22 @@ if (!function_exists("rakenna_relex_tuote_parametrit")) {
 
     $sql_where_lisa = '';
     $oper_array = array('on'              => '=',
-                        'not'             => '!=',
-                        'in'              => 'in',
-                        'not in'          => 'not in',
-                        'like_pre'        => '%like',
-                        'like_post'       => 'like%',
-                        'like_both'       => '%like%',
-                        'gt'              => '>',
-                        'lt'              => '<',
-                        'gte'             => '>=',
-                        'lte'             => '<=',
+      'not'             => '!=',
+      'in'              => 'in',
+      'not in'          => 'not in',
+      'like_pre'        => '%like',
+      'like_post'       => 'like%',
+      'like_both'       => '%like%',
+      'gt'              => '>',
+      'lt'              => '<',
+      'gte'             => '>=',
+      'lte'             => '<=',
     );
 
     $query = "SELECT *
               FROM avainsana
               WHERE yhtio = '{$yhtiorow['yhtio']}'
-              AND laji = 'RELEX_TUOTEPAR'";
+              AND laji    = 'RELEX_TUOTEPAR'";
     $res = pupe_query($query);
 
     while ($row = mysql_fetch_assoc($res)) {
@@ -29773,7 +29773,7 @@ if (!function_exists("rakenna_relex_tuote_parametrit")) {
       $arvo = $row['selitetark_2'];
       $oper = $row['selitetark'];
 
-      if (in_array($oper, array('in','not in'))) {
+      if (in_array($oper, array('in', 'not in'))) {
 
         $arvo_array = explode(",", $arvo);
 
@@ -29789,7 +29789,7 @@ if (!function_exists("rakenna_relex_tuote_parametrit")) {
 
         $arvo = substr($arvo, 0, -1).")";
       }
-      elseif (in_array($oper, array('like_pre','like_post','like_both'))) {
+      elseif (in_array($oper, array('like_pre', 'like_post', 'like_both'))) {
 
         $arvo = str_replace("%", "", $arvo);
 

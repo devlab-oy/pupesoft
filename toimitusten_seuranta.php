@@ -708,7 +708,7 @@ if (!isset($task)) {
           echo $kontti['kontin_mrn'];
 
           if ($kontti['mrn'] != '') {
-            echo "<div style='text-align:center; margin:4px 0'>MRN: ";
+            echo "<div style='text-align:center; margin:6px 0'>MRN: ";
             echo "<input type='text'  value='{$kontti['mrn']}' readonly>";
             echo "</div>";
 

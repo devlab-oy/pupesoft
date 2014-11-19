@@ -2014,7 +2014,7 @@ function pakkalista_pdf($pdf_data) {
   $sivu = $pdf->new_page("a4");
 
   $image = $pdf->jfif_embed($logodata);
-  $logoparam['scale'] = 0.1;
+  $logoparam['scale'] = 0.5;
   $pdf->image_place($image, 720, 440, $sivu, $logoparam);
 
   $x = 40;

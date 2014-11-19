@@ -553,7 +553,7 @@ if (!isset($task)) {
 
           $mrn_tullut = false;
 
-          if ($tilaus['mrn_vastaanottamatta'] == 0) {
+         if (($tilaus['mrn_vastaanottamatta'] - $tilaus['ylijaama'] - $tilaus['hylatyt']) == 0) {
             $tapahtumat .= "&bull; " .  t("MRN-numerot vastaanotettu") . "<br>";
             $mrn_tullut = true;
           }

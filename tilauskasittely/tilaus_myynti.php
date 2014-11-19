@@ -4023,7 +4023,10 @@ if ($tee == '') {
         }
       }
       elseif ($tilausrivi["var"] == "P" or
-              ($yhtiorow["extranet_nayta_saldo"] and $laskurow["tilaustyyppi"] == "H")
+              ($yhtiorow["extranet_nayta_saldo"] and
+               ($yhtiorow["extranet_tilaus_varaa_saldoa"] or
+                $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and
+               $laskurow["tilaustyyppi"] == "H")
       ) {
         $kpl = $tilausrivi['tilkpl'];
       }
@@ -6291,7 +6294,10 @@ if ($tee == '') {
           $row["hinta"] = hintapyoristys(laskuval($row["hinta"], $laskurow["vienti_kurssi"]));
         }
 
-        if ($yhtiorow["extranet_tilaus_varaa_saldoa"] == "E" and $laskurow["tilaustyyppi"] == "H") {
+        if (($yhtiorow["extranet_tilaus_varaa_saldoa"] == "E" or
+             $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and
+            $laskurow["tilaustyyppi"] == "H"
+        ) {
           $kplmaara = $row["tilkpl"];
         }
         else {
@@ -7195,8 +7201,9 @@ if ($tee == '') {
           }
           elseif ($row["var"] == 'P' or
                   ($kukarow['extranet'] != '' and $row['positio'] == 'Ei varaa saldoa') or
-                  $yhtiorow["extranet_tilaus_varaa_saldoa"] == "E" and
-                  ($laskurow["tilaustyyppi"] == "H")
+                  (($yhtiorow["extranet_tilaus_varaa_saldoa"] == "E" or
+                    $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and
+                   ($laskurow["tilaustyyppi"] == "H"))
           ) {
             $kpl_ruudulle = $row['tilkpl'] * 1;
           }
@@ -8206,7 +8213,8 @@ if ($tee == '') {
           $query_ale_lisa = generoi_alekentta('M');
           $query_ale_lisa_ei_erik = generoi_alekentta('M', '', 'ei_erikoisale');
 
-          if ($yhtiorow["extranet_tilaus_varaa_saldoa"] == "E" and
+          if (($yhtiorow["extranet_tilaus_varaa_saldoa"] == "E" or
+               $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and
               $laskurow["tilaustyyppi"] == "H"
           ) {
             $kplkentta = "tilkpl";

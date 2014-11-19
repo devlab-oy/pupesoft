@@ -296,19 +296,20 @@ if ($tee == 'laske' or $tee == 'inventoi') {
     $sscc = $suuntalava_sscc['sscc'];
   }
 
-  // Näytetäänkö apulaskuri
-  $query = "SELECT
-            count(tunnus) as monta
-            FROM tuotteen_avainsanat
-            WHERE tuoteno='{$tuote['tuoteno']}'
-            AND yhtio='{$kukarow['yhtio']}'
-            AND (laji='pakkauskoko2' OR laji='pakkauskoko3')";
-  $pakkaukset = pupe_query($query);
-  $pakkaukset = mysql_fetch_assoc($pakkaukset);
+  $query = "SELECT tunnus
+            FROM tuotteen_toimittajat
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tuoteno = '{$tuote['tuoteno']}'
+            ORDER BY if(jarjestys = 0, 9999, jarjestys), tunnus
+            LIMIT 1";
+  $paatoimittaja_result = pupe_query($query);
+  $paatoimittaja_tunnus = mysql_fetch_assoc($paatoimittaja_result);
 
+  $pakkaukset = tuotteen_toimittajat_pakkauskoot($paatoimittaja_tunnus['tunnus']);
+  
   $apulaskuri_url = '';
   // Jos pakkauksia ei löytynyt, ei näytetä apulaskuria
-  if ($pakkaukset['monta'] > 0) {
+  if (count($pakkaukset) > 0) {
     $apulaskuri_url = http_build_query(array('tee' => 'apulaskuri',
         'tuotepaikka' => $tuotepaikka,
         'tuoteno' => $tuote['tuoteno'],
@@ -369,34 +370,35 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 if ($tee == 'apulaskuri') {
   // Pakkaus1
   $query = "SELECT
-            if(myynti_era > 0, myynti_era, 1) as myynti_era,
+            round(if(myynti_era > 0, myynti_era, 1), 0) as myynti_era,
             yksikko
             FROM tuote
             WHERE tuoteno='{$tuoteno}' AND yhtio='{$kukarow['yhtio']}'";
   $result = pupe_query($query);
   $p1 = mysql_fetch_assoc($result);
 
-  // Pakkaus2
-  $query = "SELECT
-            selite as myynti_era,
-            selitetark as yksikko
-            FROM tuotteen_avainsanat
-            WHERE tuoteno='{$tuoteno}'
-            AND yhtio='{$kukarow['yhtio']}'
-            AND laji='pakkauskoko2'";
-  $result = pupe_query($query);
-  $p2 = mysql_fetch_assoc($result);
+  $query = "SELECT tunnus
+            FROM tuotteen_toimittajat
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tuoteno = '{$tuoteno}'
+            ORDER BY if(jarjestys = 0, 9999, jarjestys), tunnus
+            LIMIT 1";
+  $paatoimittaja_result = pupe_query($query);
+  $paatoimittaja_tunnus = mysql_fetch_assoc($paatoimittaja_result);
 
-  // Pakkaus3
-  $query = "SELECT
-            selite as myynti_era,
-            selitetark as yksikko
-            FROM tuotteen_avainsanat
-            WHERE tuoteno='{$tuoteno}'
-            AND yhtio='{$kukarow['yhtio']}'
-            AND laji='pakkauskoko3'";
-  $result = pupe_query($query);
-  $p3 = mysql_fetch_assoc($result);
+  $pakkaukset = tuotteen_toimittajat_pakkauskoot($paatoimittaja_tunnus['tunnus']);
+
+  // laitetaan vain kaksi ensimmäistä pakkauskokoa apulaskuriin
+  $p2['myynti_era']   = $pakkaukset[0][0];
+  $p2['yksikko']      = $pakkaukset[0][1];
+  
+  if (is_array($pakkaukset[1])) {
+    $p3['myynti_era']   = $pakkaukset[1][0];
+    $p3['yksikko']      = $pakkaukset[1][1];
+  }
+  else {
+    $p3 = array();
+  }
 
   $back = http_build_query(array('tee' => 'laske',
       'tuotepaikka' => $tuotepaikka,

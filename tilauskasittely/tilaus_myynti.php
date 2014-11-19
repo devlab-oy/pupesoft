@@ -3225,9 +3225,9 @@ if ($tee == '') {
         }
 
         if (($kukarow['extranet'] == "" and in_array($toimitustapa['extranet'], array('', 'M')))
-         or ($kukarow['extranet'] != "" and in_array($toimitustapa['extranet'], array('K', 'M')))
-         or $toimitustapa['selite'] == $laskurow['toimitustapa']
-         or $toimitustapa['selite'] == $faktarow['toimitustapa']) {
+          or ($kukarow['extranet'] != "" and in_array($toimitustapa['extranet'], array('K', 'M')))
+          or $toimitustapa['selite'] == $laskurow['toimitustapa']
+          or $toimitustapa['selite'] == $faktarow['toimitustapa']) {
 
           $sel = "";
           if ($toimitustapa["selite"] == $laskurow["toimitustapa"]) {
@@ -4062,7 +4062,7 @@ if ($tee == '') {
           $query = "SELECT sarjanumero
                     FROM sarjanumeroseuranta
                     WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus = $myy_sarjatunnus";
+                    AND tunnus  = $myy_sarjatunnus";
           $m_eranro = mysql_fetch_assoc(pupe_query($query));
         }
 
@@ -4389,8 +4389,8 @@ if ($tee == '') {
 
         $query = "SELECT *
                   FROM tuoteperhe
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tyyppi = 'R'
+                  WHERE yhtio    = '{$kukarow['yhtio']}'
+                  AND tyyppi     = 'R'
                   AND isatuoteno = '{$tuoteno}'";
         $tuoteperhe_chk_res = pupe_query($query);
 

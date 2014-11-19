@@ -1221,6 +1221,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               tuotteen_toimittajat.ostohinta,
               if(tuotteen_toimittajat.osto_era = 0, 1, tuotteen_toimittajat.osto_era) AS osto_era,
               tuotteen_toimittajat.valuutta,
+              tuotteen_toimittajat.tunnus as tt_tunnus,
               tilausrivi.erikoisale,
               tilausrivi.ale1,
               tilausrivi.ale2,
@@ -1498,18 +1499,23 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
           echo "</td>";
           echo "<td valign='top' class='tooltip' id='$divnolla'>$prow[toim_tuoteno]";
-
-          if ($yhtiorow["ostoera_pyoristys"] == "K" and ($prow["p2"] !="" or $prow["p3"] !="")) {
+          
+          $_pakkaukset = tuotteen_toimittajat_pakkauskoot($prow['tt_tunnus']);
+  
+          if ($yhtiorow["ostoera_pyoristys"] == "K" and count($_pakkaukset)) {
             echo "<br><img src='$palvelin2/pics/lullacons/info.png'>";
             echo "<div id='div_$divnolla' class='popup' style='width: 600px;'>";
+            
+            // pientä kaunistelua, ei turhia desimaaleja
+            $prow["osto_era"] = fmod($prow["osto_era"], 1) ? $prow["osto_era"] : round($prow["osto_era"]); 
+            
             // tähän pakkauskoot..
             echo "<ul><li>".t("Oletuskoko").": {$prow["osto_era"]}</li>";
-            if ($prow["p2"] !="") {
-              echo "<li>".t("pakkaus2").": {$prow["p2"]} {$prow["p2s"]}</li>";
+            
+            foreach ($_pakkaukset as $_pak) {
+              echo "<li>{$_pak[0]} {$_pak[1]}</li>";
             }
-            if ($prow["p3"] !="") {
-              echo "<li>".t("pakkaus3").": {$prow["p3"]} {$prow["p3s"]}</li>";
-            }
+            
             echo "</ul></div>";
           }
           echo "</td>";

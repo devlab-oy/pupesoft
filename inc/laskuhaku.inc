@@ -316,6 +316,7 @@ if ($tee == 'M') {
 
 echo "</select></td></tr>";
 echo "<tr><th>".t("Haku")."</th><td><input type = 'text' name = 'summa1' value = '$summa1' size='13'> - <input type = 'text' name = 'summa2' value = '$summa2' size='13'></td>";
+echo "<tr><th>".t("Rajaus")."</th><td><input type = 'text' name = 'rajaus' value = '$rajaus' size='13'></td>";
 echo "<td class='back'><input type = 'submit' value = '".t("Etsi")."'></td>";
 echo "</tr>";
 
@@ -350,6 +351,13 @@ if ($tee != '') {
   else {
     $tiliointilisa = '';
   }
+ 
+  if ($rajaus == "" or !is_numeric($rajaus)) {
+    $rajaus = 50;
+  }
+  else {
+    $rajaus = round($rajaus);
+  }
 
   $query = "SELECT DISTINCT lasku.tapvm, lasku.erpcm, concat_ws('<br>', lasku.nimi, lasku.nimitark) nimi,
             lasku.summa, lasku.valkoodi, lasku.vienti, concat_ws(' ', lasku.viite, lasku.viesti) 'viite/viesti',
@@ -360,7 +368,7 @@ if ($tee != '') {
             and lasku.yhtio = '$kukarow[yhtio]'
             $lisa
               ORDER BY $jarj
-              LIMIT $alku, 50";
+              LIMIT $alku, $rajaus";
   $result = pupe_query($query);
   $seraavako = mysql_num_rows($result);
 

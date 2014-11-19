@@ -306,10 +306,10 @@ if ($tee == 'laske' or $tee == 'inventoi') {
   $paatoimittaja_tunnus = mysql_fetch_assoc($paatoimittaja_result);
 
   $pakkaukset = tuotteen_toimittajat_pakkauskoot($paatoimittaja_tunnus['tunnus']);
-  
+
   $apulaskuri_url = '';
   // Jos pakkauksia ei löytynyt, ei näytetä apulaskuria
-  if (count($pakkaukset) > 0) {
+  if (count($pakkaukset)) {
     $apulaskuri_url = http_build_query(array('tee' => 'apulaskuri',
         'tuotepaikka' => $tuotepaikka,
         'tuoteno' => $tuote['tuoteno'],
@@ -370,7 +370,7 @@ if ($tee == 'laske' or $tee == 'inventoi') {
 if ($tee == 'apulaskuri') {
   // Pakkaus1
   $query = "SELECT
-            round(if(myynti_era > 0, myynti_era, 1), 0) as myynti_era,
+            if(myynti_era > 0, myynti_era, 1) as myynti_era,
             yksikko
             FROM tuote
             WHERE tuoteno='{$tuoteno}' AND yhtio='{$kukarow['yhtio']}'";
@@ -388,10 +388,13 @@ if ($tee == 'apulaskuri') {
 
   $pakkaukset = tuotteen_toimittajat_pakkauskoot($paatoimittaja_tunnus['tunnus']);
 
+  // pientä kaunistelua, ei turhia desimaaleja
+  $p1['myynti_era'] = fmod($p1['myynti_era'], 1) ? $p1['myynti_era'] : round($p1['myynti_era']);
+
   // laitetaan vain kaksi ensimmäistä pakkauskokoa apulaskuriin
   $p2['myynti_era']   = $pakkaukset[0][0];
   $p2['yksikko']      = $pakkaukset[0][1];
-  
+
   if (is_array($pakkaukset[1])) {
     $p3['myynti_era']   = $pakkaukset[1][0];
     $p3['yksikko']      = $pakkaukset[1][1];

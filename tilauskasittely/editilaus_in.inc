@@ -1436,7 +1436,7 @@ while ($tietue = fgets($fd)) {
 
       $toimitetaan_tanne = (isset($toimovttunnus) and !empty($toimovttunnus)) ? $toimovttunnus : $arow['toim_ovttunnus'];
 
-      $varasto = array(0);
+      $varasto = array();
 
       if ($edi_tyyppi == "magento") {
         // Nämä ovat ainoat varastot joista verkkokauppa saa myydä

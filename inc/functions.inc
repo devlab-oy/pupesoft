@@ -10945,7 +10945,7 @@ if (!function_exists("t_avainsana")) {
 
     if (isset($kaannetyt[$paramshasharray])) {
 
-      if (is_resource($kaannetyt[$paramshasharray])) {
+      if (is_resource($kaannetyt[$paramshasharray]) and mysql_num_rows($kaannetyt[$paramshasharray]) > 0) {
         mysql_data_seek($kaannetyt[$paramshasharray], 0);
       }
 

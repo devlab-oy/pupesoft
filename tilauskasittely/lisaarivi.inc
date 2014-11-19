@@ -499,24 +499,17 @@ if ($kpl > 0 and $rivityyppi == 'O' and $yhtiorow['ostoera_pyoristys'] == 'K') {
   // Otetaan $trow laajemmin, tuotteen_toimittaja tiedot ja 2 avainsanaa
   $query = "SELECT
             tuote.*,
+            tt.tunnus tt_tunnus,
             tt.toim_tuoteno,
             if(tt.osto_era = 0, 1, tt.osto_era) AS osto_era,
             tt.pakkauskoko,
             tt.ostohinta,
             tt.valuutta,
-            tt.osto_alv,
-            ta1.selite pakkaus2,
-            ta2.selite pakkaus3
+            tt.osto_alv
             FROM tuote
             JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = tuote.yhtio
               AND tuote.tuoteno   = tt.tuoteno
               AND tt.liitostunnus = '$laskurow[liitostunnus]')
-            LEFT JOIN tuotteen_avainsanat AS ta1 ON (ta1.yhtio = tuote.yhtio
-              AND ta1.tuoteno     = tuote.tuoteno
-              AND ta1.laji        = 'pakkauskoko2')
-            LEFT JOIN tuotteen_avainsanat AS ta2 ON (ta2.yhtio = tuote.yhtio
-              AND ta2.tuoteno     = tuote.tuoteno
-              AND ta2.laji        = 'pakkauskoko3')
             WHERE tuote.yhtio     = '{$kukarow["yhtio"]}'
             AND tuote.tuoteno     = '{$trow["tuoteno"]}'";
   $ttresult = pupe_query($query);
@@ -530,8 +523,12 @@ if ($kpl > 0 and $rivityyppi == 'O' and $yhtiorow['ostoera_pyoristys'] == 'K') {
     $jaannos = 0;
     $pakkauskoko = 0;
 
-    $ttrow["pakkaus3"] !="" ? $pakkausarray[] = $ttrow["pakkaus3"] : "";
-    $ttrow["pakkaus2"] !="" ? $pakkausarray[] = $ttrow["pakkaus2"] : "";
+    $_pakkaukset = tuotteen_toimittajat_pakkauskoot($ttrow['tt_tunnus'], 'desc');
+
+    foreach ($_pakkaukset as $_pak) {
+      $pakkausarray[] = $_pak[0];
+    }
+
     $pakkausarray[] = $ttrow["osto_era"]; // Oletus jos ei muuta löydy.
 
     foreach ($pakkausarray as $pak) {

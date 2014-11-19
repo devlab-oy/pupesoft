@@ -535,7 +535,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     }
 
     // T‰nne p‰‰see aina!
-    if ($phpnimi != 'indexvas.php' and $phpnimi != 'index.php' and $phpnimi != 'tervetuloa.php' and $phpnimi != 'logout.php') {
+    if ($phpnimi != 'indexvas.php' and $phpnimi != 'index.php' and $phpnimi != 'tervetuloa.php' and $phpnimi != 'logout.php' and $phpnimi != 'pupesoft_changelog.php') {
 
       if (!isset($toim)) $toim = "";
 

@@ -1556,7 +1556,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
     }
 
     $tilausvahvistus_onkin_kerayslista = '';
-    $pos = strpos($komento, "excel_lahete_geodis_wilson"); 
+    $pos = strpos($komento['Tilausvahvistus'], "excel_lahete_geodis_wilson");
     if ($pos !== FALSE and $toim == "TILAUSVAHVISTUS") {
       $toim = "KERAYSLISTA";
       $tilausvahvistus_onkin_kerayslista = "JOO";

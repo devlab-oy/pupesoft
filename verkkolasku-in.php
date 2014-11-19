@@ -77,6 +77,14 @@ if ($handle = opendir($laskut)) {
     }
 
     $nimi = $laskut."/".$file;
+
+    // Muutetaan UTF-8:ksi jos lasku on jossain toisessa merkistössä
+    $encoding = exec("file -b --mime-encoding $nimi");
+
+    if ($encoding != "" and mb_strtoupper($encoding) != 'UTF-8') {
+      exec("recode $encoding..UTF8 $nimi");
+    }
+
     $luotiinlaskuja = erittele_laskut($nimi);
 
     // Jos tiedostosta luotiin laskuja siirretään se tieltä pois

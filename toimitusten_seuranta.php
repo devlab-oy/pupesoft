@@ -640,6 +640,8 @@ if (!isset($task)) {
 
         $kesken = 0;
 
+        print_r($kontit);
+
         foreach ($kontit as $konttinumero => $kontti) {
 
           if ($kontti['sinettinumero'] == '') {

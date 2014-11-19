@@ -1081,7 +1081,7 @@ if ($tee == 'MUUTA') {
 
         echo "</select></td></tr>";
 
-        echo "<tr><th align='left'>", t("Kuittitulostin:"), "</th>";
+        echo "<tr><th align='left'>", t("Kuittitulostin"), ":</th>";
         echo "<td>" .
           "<select name='kuittitulostin'>" .
           "<option value=''>" . t("Ei kuittitulostinta") .

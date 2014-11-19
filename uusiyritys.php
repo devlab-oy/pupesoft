@@ -398,6 +398,9 @@ if ($tila == 'avainsana') {
                   selitetark   = '$trow[selitetark]',
                   selitetark_2 = '$trow[selitetark_2]',
                   selitetark_3 = '$trow[selitetark_3]',
+                  selitetark_4 = '$trow[selitetark_4]',
+                  selitetark_5 = '$trow[selitetark_5]',
+                  nakyvyys     = '$trow[nakyvyys]',
                   kieli        = '$trow[kieli]',
                   yhtio        = '$yhtio'";
         $rresult = pupe_query($query);

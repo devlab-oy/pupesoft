@@ -2206,7 +2206,7 @@ function lahtoilmoitus_pdf($pdf_data) {
     $pdf->draw_text($x, $y, $tilausnro, $sivu, $bold);
     $pdf->draw_text($x+100, $y, $tilaus['transport_name'], $sivu, $bold);
     $pdf->draw_text($x+260, $y, $tilaus['rullia'], $sivu, $bold);
-    $pdf->draw_text($x+360, $y, $tilaus['paino'], $sivu, $bold);
+    $pdf->draw_text($x+360, $y, $tilaus['paino'] / 1000, $sivu, $bold);
     $pdf->draw_text($x+460, $y, $tilaus['kontteja'], $sivu, $bold);
 
     $y -= 15;

@@ -67,14 +67,14 @@ th {
   font-weight: bold;
 	vertical-align: middle;
 	text-align: left;
-	padding: 10px 15px 10px 15px;
+	padding: 10px 10px 10px 10px;
 	background-color: #ffffff; /*TH_BACKGROUND*/
 	color: #828282; /*TH_COLOR*/
 }
 
 td {
   color: #828282;
-	padding: 5px;
+	padding: 5px 5px 5px 5px;
 	vertical-align: middle;
 }
 
@@ -172,12 +172,9 @@ div.popup {
 input, textarea {
 	color: #444444; /*INPUT_COLOR*/
   background-color: #ffffff;
-	padding: 7px 0px 7px 2px;
+	margin: 0px 4px 0px 0px;
+  padding: 10px 0px 8px 2px;
   border : solid 1px #e1e1e1;
-}
-
-button {
-	padding: 2px 4px 2px 4px;
 }
 
 select {
@@ -273,7 +270,8 @@ button, input[type=submit], input[type=button] {
  	border : solid 0px #ffffff;
  	font-size: 12pt;
  	color : #ffffff;
- 	padding: 10px 10px 10px 10px;
+ 	margin: 2px 4px 2px 0px;
+ 	padding: 8px 10px 8px 10px;
   background-color: #6c70eb;
   min-width: 100px;
 }
@@ -305,20 +303,20 @@ div.showhide_yla {
 
 div.showhide_vasen {
   position:fixed;
-  top:85px;
+  top:80px;
   left:2px;
 }
 
 div.lopetus {
   position:absolute;
   top:5px;
-  right:60px;  
+  right:60px;
 }
 
 div.ohje {
   position:absolute;
   top:5px;
-  right:20px; 
+  right:20px;
 }
 
 input[type=submit].lisaa_btn {

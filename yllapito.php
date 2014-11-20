@@ -45,10 +45,6 @@ if (function_exists("js_popup")) {
   echo js_popup(-100);
 }
 
-if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote" or $toim == "avainsana") {
-  enable_ajax();
-}
-
 if (isset($livesearch_tee) and $livesearch_tee == "TILIHAKU") {
   livesearch_tilihaku();
   exit;
@@ -67,6 +63,10 @@ $a_lisa = "";
 $toim = $toimi_array[0];
 if (isset($toimi_array[1])) $alias_set = $toimi_array[1];
 if (isset($toimi_array[2])) $rajattu_nakyma = $toimi_array[2];
+
+if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote" or $toim == "avainsana") {
+  enable_ajax();
+}
 
 // Tuotteita voidaan rajata status -kentällä
 $tuote_status_rajaus_lisa = "";
@@ -388,6 +388,7 @@ if ($upd == 1) {
       if ($toim == 'tuotteen_toimittajat' and isset($paivita_tehdas_saldo_paivitetty) and is_array($paivita_tehdas_saldo_paivitetty) and count($paivita_tehdas_saldo_paivitetty) == 2) $query .= ", tehdas_saldo_paivitetty = now() ";
 
       for ($i=1; $i < mysql_num_fields($result); $i++) {
+
         // Tuleeko tämä columni käyttöliittymästä
         if (isset($t[$i])) {
 
@@ -428,7 +429,6 @@ if ($upd == 1) {
           }
         }
       }
-
     }
     // Päivitetään
     else {

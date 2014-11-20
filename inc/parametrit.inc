@@ -548,12 +548,13 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     }
 
     // T‰nne p‰‰see aina!
-    if ($phpnimi != 'indexvas.php' 
-      and $phpnimi != 'index.php' 
-      and $phpnimi != 'tervetuloa.php' 
-      and $phpnimi != 'logout.php' 
-      and $phpnimi != 'ylaframe.php' 
-      and $phpnimi != 'pikavalinnat.php') {
+    if ($phpnimi != 'indexvas.php'
+      and $phpnimi != 'index.php'
+      and $phpnimi != 'tervetuloa.php'
+      and $phpnimi != 'logout.php'
+      and $phpnimi != 'ylaframe.php'
+      and $phpnimi != 'pikavalinnat.php'
+      and $phpnimi != 'pupesoft_changelog.php') {
 
       if (!isset($toim)) $toim = "";
 
@@ -869,8 +870,8 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     }
 
     if ((!isset($no_head) or (isset($no_head) and $no_head != "yes")) and isset($lopetus) and $lopetus != '') {
-      
-      echo "<div class='lopetus'>";      
+
+      echo "<div class='lopetus'>";
       lopetus($lopetus);
       echo "</div>";
     }

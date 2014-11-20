@@ -10943,7 +10943,7 @@ if (!function_exists("t_avainsana")) {
     // Onko sana jo käännetty
     $paramshasharray = md5($laji.$kieli.$where.$yhtio.$eivielakaytossa.$return);
 
-    if (isset($kaannetyt[$paramshasharray]) and mysql_num_rows($kaannetyt[$paramshasharray]) != 0) {
+    if (isset($kaannetyt[$paramshasharray])) {
 
       if (is_resource($kaannetyt[$paramshasharray]) and mysql_num_rows($kaannetyt[$paramshasharray]) > 0) {
         mysql_data_seek($kaannetyt[$paramshasharray], 0);
@@ -28307,7 +28307,7 @@ if (!function_exists('sallitut_varastot')) {
         return $kukarow_varasto;
       }
     }
-    
+
     // Ei löytynyt vielä yhtään varastoa, otetaan varastot käyttäjän tiedoista
     if (trim($kukarow['varasto']) != "" and strpos($kukarow['varasto'], ',') !== false) {
       return explode(",", $kukarow["varasto"]);

@@ -2228,35 +2228,19 @@ function pdf_logo($logo_url, $sessio) {
 
   $opts = array(
     'http'=>array(
-      'method'=>"GET",
+      'method'=>"POST",
       'header'=>"Accept-language: en\r\n" .
                 "Cookie: pupesoft_session={$sessio}\r\n"
     )
   );
 
-  var_dump($sessio);
-  echo '<hr>';
-  var_dump($logo_url);
-
-die;
-
   $context = stream_context_create($opts);
   $string = file_get_contents($logo_url, false, $context);
 
-
-  var_dump($string);
-
-  echo '<hr>';
-
   $image = imagecreatefromstring($string);
-
-
-  var_dump($image);die;
-
   $file = "/tmp/".md5(uniqid(rand(),true)).".png";
 
   $tt = imagepng($image, $file);
-
 
   $file_info = getimagesize($file);
 

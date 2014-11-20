@@ -1,5 +1,7 @@
 <?php
 
+phpinfo();die;
+
 require 'inc/edifact_functions.inc';
 
 if (isset($_POST['task']) and $_POST['task'] == 'nayta_lahtoilmoitus') {

@@ -2234,6 +2234,12 @@ function pdf_logo($logo_url, $sessio) {
     )
   );
 
+  var_dump($sessio);
+  echo '<hr>';
+  var_dump($logo_url);
+
+die;
+
   $context = stream_context_create($opts);
   $string = file_get_contents($logo_url, false, $context);
 

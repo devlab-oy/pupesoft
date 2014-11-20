@@ -236,12 +236,12 @@ if (isset($tee) and trim($tee) == 'aja') {
       );
 
       $laskurow = luo_ostotilausotsikko($params);
-      $kukarow['kesken'] = $laskurow['tunnus'];
     }
     else {
       $laskurow = mysql_fetch_assoc($result);
-      $kukarow['kesken'] = $laskurow['tunnus'];
     }
+
+    aseta_kukarow_kesken($laskurow['tunnus']);
 
     $params = array(
       "trow"      => $tuote,
@@ -260,6 +260,9 @@ if (isset($tee) and trim($tee) == 'aja') {
 
     echo "Lis‰t‰‰n tuote {$tuote["tuoteno"]} $quantity {$tuote["yksikko"]} tilaukselle {$laskurow["tunnus"]}.<br>";
   }
+
+  aseta_kukarow_kesken(0);
+
 }
 
 if (!$php_cli) {

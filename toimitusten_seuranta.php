@@ -770,7 +770,7 @@ if (!isset($task)) {
           <button onClick=\"js_openFormInNewWindow('nayta_lahtoilmoitus{$id}',
            'Satamavahvistus'); return false;\" />";
 
-          echo t("Tulosta");
+          echo t("Näytä lähtöilmoitus");
           echo "</button></div>";
 
         }

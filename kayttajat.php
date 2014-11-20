@@ -587,6 +587,7 @@ if ($tee == 'MUUTA') {
               oletus_ostovarasto            = '{$oletus_ostovarasto}',
               oletus_pakkaamo               = '{$oletus_pakkaamo}',
               kirjoitin                     = '{$kirjoitin}',
+              kuittitulostin                = '{$kuittitulostin}',
               oletus_asiakas                = '{$oletus_asiakas}',
               oletus_asiakastiedot          = '{$oletus_asiakastiedot}',
               oletus_profiili               = '{$oletus_profiili}',
@@ -1076,6 +1077,34 @@ if ($tee == 'MUUTA') {
           $sel = '';
           if ($varow['tunnus'] == $krow["kirjoitin"]) $sel = 'selected';
           echo "<option value='{$varow['tunnus']}' {$sel}>{$varow['kirjoitin']}</option>";
+        }
+
+        echo "</select></td></tr>";
+
+        echo "<tr><th align='left'>", t("Kuittitulostin"), ":</th>";
+        echo "<td>" .
+          "<select name='kuittitulostin'>" .
+          "<option value=''>" . t("Ei kuittitulostinta") .
+          "</option>";
+
+        $kuittitulostin_query =
+          "SELECT tunnus, kirjoitin
+           FROM kirjoittimet
+           WHERE yhtio     = '{$kukarow['yhtio']}'
+           AND mediatyyppi = 'kuittitulostin'";
+
+        $kuittitulostin_result = pupe_query($kuittitulostin_query);
+
+        while ($kuittitulostin_rivi = mysql_fetch_assoc($kuittitulostin_result)) {
+          $sel = '';
+
+          if ($kuittitulostin_rivi['tunnus'] == $krow["kuittitulostin"]) {
+            $sel = 'selected';
+          }
+
+          echo "<option " .
+            "value='{$kuittitulostin_rivi['tunnus']}' {$sel}>{$kuittitulostin_rivi['kirjoitin']}" .
+            "</option>";
         }
 
         echo "</select></td></tr>";

@@ -405,7 +405,8 @@ if (!isset($task)) {
                 FROM liitetiedostot
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND liitos = 'lasku'
-                AND liitostunnus = '{$tilaus['tunnus']}'";
+                AND liitostunnus = '{$tilaus['tunnus']}'
+                AND kayttotarkoitus = 'bookkaussanoma'";
       $result = pupe_query($query);
 
       $sanoma_numero = 1;

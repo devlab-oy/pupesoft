@@ -2236,12 +2236,21 @@ function pdf_logo($logo_url, $sessio) {
 
   $context = stream_context_create($opts);
   $string = file_get_contents($logo_url, false, $context);
+
+
+  var_dump($string);
+
+  echo '<hr>';
+
   $image = imagecreatefromstring($string);
+
+
+  var_dump($image);die;
+
   $file = "/tmp/".md5(uniqid(rand(),true)).".png";
 
   $tt = imagepng($image, $file);
 
-var_dump($tt);die;
 
   $file_info = getimagesize($file);
 

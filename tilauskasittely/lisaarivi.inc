@@ -1594,15 +1594,9 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
       if (!$paikkakelpasi) $paikka = "";
 
     }
-    
-    $_is_varasto_array = isset($varasto);
-    $_is_varasto_array = ($_is_varasto_array and is_array($varasto));
-    $_is_varasto_array = ($_is_varasto_array and count($varasto) > 0);
-    $_is_varasto_array = ($_is_varasto_array and $varasto[0] != 0);
-    $_is_varasto_array = ($_is_varasto_array and empty($paikka));
 
     // Myydään tietystä varastosta
-    if ($_is_varasto_array) {
+    if (isset($varasto) and is_array($varasto) and $paikka == '') {
 
       if ($lisaarivi_debug == 1) echo "Halutaan myydä varastoista ", var_dump($varasto).".<br>";
 

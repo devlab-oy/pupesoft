@@ -6390,6 +6390,9 @@ if ($tee == '') {
 
             $pknum = $pkrow[2];
 
+            # isän rowspanlisäys
+            $pknum += 1;
+
             $query  = "SELECT tuoteperhe.tuoteno
                        FROM tuoteperhe
                        WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
@@ -6401,7 +6404,7 @@ if ($tee == '') {
               $vastaavat = new Vastaavat($lisays_x["tuoteno"]);
               $ketjut = explode(",", $vastaavat->getIDt());
 
-              $pknum += count($ketjut);
+              $pknum += 1;
             }
           }
 

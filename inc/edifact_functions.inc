@@ -2238,10 +2238,12 @@ function pdf_logo($logo_url, $sessio) {
   $string = file_get_contents($logo_url, false, $context);
   $image = imagecreatefromstring($string);
   $file = "/tmp/".md5(uniqid(rand(),true)).".png";
-  imagepng($image, $file);
-  $file_info = getimagesize($file);
 
-  var_dump($file_info);die;
+  $tt = imagepng($image, $file);
+
+var_dump($tt);die;
+
+  $file_info = getimagesize($file);
 
   $scale = 150 / $file_info[0];
   $logodata = file_get_contents($file);

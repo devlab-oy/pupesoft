@@ -28773,7 +28773,7 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
     global $kukarow, $yhtiorow;
 
     $ryhmitetty_array = array();
-    $tuote_temp = NULL;
+    $tuote_temp = FALSE;
 
     if ($yhtiorow['kulujen_laskeminen_hintoihin'] == 'K' and $kukarow['kulujen_laskeminen_hintoihin'] == 'K') {
       $tuote_temp = TRUE;
@@ -28799,7 +28799,7 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
           }
 
           if (    isset($row[$k])
-            and isset($tuote_temp)) {
+            and $tuote_temp) {
 
             if (in_array($k, $parametrit['laske_kate'])) {
 
@@ -28822,7 +28822,7 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
         foreach ($parametrit['sum'] as $k) {
 
           if (    isset($row[$k])
-            and isset($tuote_temp)) {
+            and $tuote_temp) {
 
             if (in_array($k, $parametrit['laske_kate'])) {
 

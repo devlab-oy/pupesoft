@@ -10945,7 +10945,7 @@ if (!function_exists("t_avainsana")) {
 
     if (isset($kaannetyt[$paramshasharray])) {
 
-      if (is_resource($kaannetyt[$paramshasharray])) {
+      if (is_resource($kaannetyt[$paramshasharray]) and mysql_num_rows($kaannetyt[$paramshasharray]) > 0) {
         mysql_data_seek($kaannetyt[$paramshasharray], 0);
       }
 
@@ -25374,51 +25374,54 @@ if (!function_exists('hae_tilauksen_rekisterinumerot')) {
 }
 
 if (!function_exists('paivita_ohjausmerkki')) {
-  function paivita_ohjausmerkki($laskurow) {
+  function paivita_ohjausmerkki($laskurow, $asiakkaan_ohjausmerkki = true) {
     global $kukarow;
 
-    $query = "SELECT tarkenne
-              FROM asiakkaan_avainsanat
-              WHERE yhtio      = '{$kukarow['yhtio']}'
-              AND laji         = 'OHJAUSMERKKI'
-              AND liitostunnus = '{$laskurow['liitostunnus']}'
-              AND avainsana    = '{$laskurow['toimitustapa']}'
-              LIMIT 1";
-    $ohjausmerkki_check_res = pupe_query($query);
+    if ($asiakkaan_ohjausmerkki) {
 
-    if (mysql_num_rows($ohjausmerkki_check_res) == 0) {
       $query = "SELECT tarkenne
                 FROM asiakkaan_avainsanat
                 WHERE yhtio      = '{$kukarow['yhtio']}'
                 AND laji         = 'OHJAUSMERKKI'
                 AND liitostunnus = '{$laskurow['liitostunnus']}'
-                AND avainsana    = 'OLETUS'
+                AND avainsana    = '{$laskurow['toimitustapa']}'
                 LIMIT 1";
       $ohjausmerkki_check_res = pupe_query($query);
-    }
 
-    $ohjausmerkki_check_row = mysql_fetch_assoc($ohjausmerkki_check_res);
+      if (mysql_num_rows($ohjausmerkki_check_res) == 0) {
+        $query = "SELECT tarkenne
+                  FROM asiakkaan_avainsanat
+                  WHERE yhtio      = '{$kukarow['yhtio']}'
+                  AND laji         = 'OHJAUSMERKKI'
+                  AND liitostunnus = '{$laskurow['liitostunnus']}'
+                  AND avainsana    = 'OLETUS'
+                  LIMIT 1";
+        $ohjausmerkki_check_res = pupe_query($query);
+      }
 
-    if ($ohjausmerkki_check_row['tarkenne'] != "") {
+      $ohjausmerkki_check_row = mysql_fetch_assoc($ohjausmerkki_check_res);
 
-      // Tarkistetaan löytyykö kyseinen ohjausmerkkiteksti otsikolta
-      // Ei haluta lisätä tekstiä kahteen kertaan
-      if (stripos($laskurow['ohjausmerkki'], $ohjausmerkki_check_row['tarkenne']) === FALSE) {
+      if ($ohjausmerkki_check_row['tarkenne'] != "") {
 
-        if ($laskurow['ohjausmerkki'] != "") {
-          $updlisa = " ohjausmerkki = CONCAT('{$ohjausmerkki_check_row['tarkenne']}', ' / ', ohjausmerkki)";
-          $laskurow['ohjausmerkki'] = "{$ohjausmerkki_check_row['tarkenne']} / {$laskurow['ohjausmerkki']}";
+        // Tarkistetaan löytyykö kyseinen ohjausmerkkiteksti otsikolta
+        // Ei haluta lisätä tekstiä kahteen kertaan
+        if (stripos($laskurow['ohjausmerkki'], $ohjausmerkki_check_row['tarkenne']) === FALSE) {
+
+          if ($laskurow['ohjausmerkki'] != "") {
+            $updlisa = " ohjausmerkki = CONCAT('{$ohjausmerkki_check_row['tarkenne']}', ' / ', ohjausmerkki)";
+            $laskurow['ohjausmerkki'] = "{$ohjausmerkki_check_row['tarkenne']} / {$laskurow['ohjausmerkki']}";
+          }
+          else {
+            $updlisa = " ohjausmerkki = '{$ohjausmerkki_check_row['tarkenne']}'";
+            $laskurow['ohjausmerkki'] = $ohjausmerkki_check_row['tarkenne'];
+          }
+
+          $query = "UPDATE lasku SET
+                    {$updlisa}
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '{$laskurow['tunnus']}'";
+          $updres = pupe_query($query);
         }
-        else {
-          $updlisa = " ohjausmerkki = '{$ohjausmerkki_check_row['tarkenne']}'";
-          $laskurow['ohjausmerkki'] = $ohjausmerkki_check_row['tarkenne'];
-        }
-
-        $query = "UPDATE lasku SET
-                  {$updlisa}
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus  = '{$laskurow['tunnus']}'";
-        $updres = pupe_query($query);
       }
     }
 
@@ -28307,11 +28310,7 @@ if (!function_exists('sallitut_varastot')) {
         return $kukarow_varasto;
       }
     }
-
-    if ($yhtiorow['oletusvarasto_tilaukselle'] == 'O' and (int)$kukarow["oletus_varasto"] > 0) {
-      return array($kukarow['oletus_varasto']);
-    }
-
+    
     // Ei löytynyt vielä yhtään varastoa, otetaan varastot käyttäjän tiedoista
     if (trim($kukarow['varasto']) != "" and strpos($kukarow['varasto'], ',') !== false) {
       return explode(",", $kukarow["varasto"]);
@@ -28880,7 +28879,7 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
 
     $sorttaajat = $parametrit['order_by'];
 
-    function sorttaajat ($a, $b) {
+    function sorttaajat($a, $b) {
       foreach ($sorttaajat as $sorttaaja) {
         if ($a[$sorttaaja] > $b[$sorttaaja]) return 1;
         if ($a[$sorttaaja] < $b[$sorttaaja]) return -1;
@@ -29749,22 +29748,22 @@ if (!function_exists("rakenna_relex_tuote_parametrit")) {
 
     $sql_where_lisa = '';
     $oper_array = array('on'              => '=',
-                        'not'             => '!=',
-                        'in'              => 'in',
-                        'not in'          => 'not in',
-                        'like_pre'        => '%like',
-                        'like_post'       => 'like%',
-                        'like_both'       => '%like%',
-                        'gt'              => '>',
-                        'lt'              => '<',
-                        'gte'             => '>=',
-                        'lte'             => '<=',
+      'not'             => '!=',
+      'in'              => 'in',
+      'not in'          => 'not in',
+      'like_pre'        => '%like',
+      'like_post'       => 'like%',
+      'like_both'       => '%like%',
+      'gt'              => '>',
+      'lt'              => '<',
+      'gte'             => '>=',
+      'lte'             => '<=',
     );
 
     $query = "SELECT *
               FROM avainsana
               WHERE yhtio = '{$yhtiorow['yhtio']}'
-              AND laji = 'RELEX_TUOTEPAR'";
+              AND laji    = 'RELEX_TUOTEPAR'";
     $res = pupe_query($query);
 
     while ($row = mysql_fetch_assoc($res)) {
@@ -29773,7 +29772,7 @@ if (!function_exists("rakenna_relex_tuote_parametrit")) {
       $arvo = $row['selitetark_2'];
       $oper = $row['selitetark'];
 
-      if (in_array($oper, array('in','not in'))) {
+      if (in_array($oper, array('in', 'not in'))) {
 
         $arvo_array = explode(",", $arvo);
 
@@ -29789,7 +29788,7 @@ if (!function_exists("rakenna_relex_tuote_parametrit")) {
 
         $arvo = substr($arvo, 0, -1).")";
       }
-      elseif (in_array($oper, array('like_pre','like_post','like_both'))) {
+      elseif (in_array($oper, array('like_pre', 'like_post', 'like_both'))) {
 
         $arvo = str_replace("%", "", $arvo);
 

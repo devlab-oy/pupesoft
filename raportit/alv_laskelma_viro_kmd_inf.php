@@ -196,12 +196,12 @@ if ($tee == 'laskelma') {
               {$tilaustyyppi}
               GROUP BY 1
               HAVING abs(sum(if(
-                tiliointi.summa > 0,
+                tiliointi.summa    > 0,
                 tiliointi.summa,
                 0
               ))) < {$rajaa}
               AND abs(sum(if(
-                tiliointi.summa < 0,
+                tiliointi.summa    < 0,
                 tiliointi.summa,
                 0
               ))) < {$rajaa}";

@@ -2138,7 +2138,7 @@ if ($tila == '') {
       $hinta_name = "rivi_hinta[$rivirow[rivitunnus]]";
 
       echo
-        "<input size='7' type='text' name='{$hinta_name}' value='" .
+      "<input size='7' type='text' name='{$hinta_name}' value='" .
         hintapyoristys($rivirow["hinta"], 6) .
         "' style='text-align:right'>";
       echo "<br>$kulurow[valkoodi]</$td>";
@@ -2173,7 +2173,7 @@ if ($tila == '') {
         $myyntihinta_name = "rivi_myyntihinta[{$rivirow['rivitunnus']}]";
 
         echo
-          "<input type='text' size='7' name='{$myyntihinta_name}' value='" .
+        "<input type='text' size='7' name='{$myyntihinta_name}' value='" .
           hintapyoristys($rivirow['myyntihinta'], 6) .
           "' style='text-align: right;' />";
       }
@@ -2192,7 +2192,7 @@ if ($tila == '') {
            var paivitaKate = function() {
              var kateContainer = $('#kate_{$rivirow['rivitunnus']}');
              var myyntihinta = myyntihintaInput.val().replace(',','.');
-             
+
              myyntihinta = alv > 0 ? (myyntihinta / (1 + alv / 100)) : myyntihinta;
              var hinta = hintaInput.val().replace(',','.');
 

@@ -451,19 +451,19 @@ if ($tee == 'I') {
       $osto_rahti = 0;
     }
     else {
-       $osto_rahti = round($osto_rahti,2);
+      $osto_rahti = round($osto_rahti, 2);
     }
     if (!isset($osto_kulu)) {
       $osto_kulu = 0;
     }
     else {
-       $osto_kulu = round($osto_kulu,2);
+      $osto_kulu = round($osto_kulu, 2);
     }
     if (!isset($osto_rivi_kulu)) {
       $osto_rivi_kulu = 0;
     }
     else {
-       $osto_rivi_kulu = round($osto_rivi_kulu,2);
+      $osto_rivi_kulu = round($osto_rivi_kulu, 2);
     }
     if (abs($summa) - abs($osto_rahti) - abs($osto_kulu) - abs($osto_rivi_kulu) < 0) {
       $errormsg .= "<font class='error'>".t("Kulut ylittävät laskun summan")."!</font><br>";

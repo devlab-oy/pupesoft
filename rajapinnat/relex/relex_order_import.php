@@ -209,6 +209,16 @@ if (isset($tee) and trim($tee) == 'aja') {
     // Ei löydy, tehdään uus tilaus
     if (mysql_num_rows($result) == 0) {
 
+      $query = "SELECT tunnus
+                FROM kuka
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND myyja   = '{$tuote['ostajanro']}'
+                AND myyja   > 0
+                ORDER BY tunnus
+                LIMIT 1";
+      $ostajaresult = pupe_query($query);
+      $ostajarow = mysql_fetch_assoc($ostajaresult);
+
       $params = array(
         'liitostunnus'            => $toimittaja["tunnus"],
         'nimi'                    => $varasto['nimi'],
@@ -219,6 +229,7 @@ if (isset($tee) and trim($tee) == 'aja') {
         'maa'                     => $varasto['maa'],
         'varasto'                 => $varasto['tunnus'],
         'myytil_toimaika'         => $ehdotus_pvm,
+        'myytil_myyja'            => $ostajarow['tunnus'],
         'tilaustyyppi'            => $tilaustyyppi,
         'myytil_viesti'           => t("Relex-ostotilaus"),
         'ostotilauksen_kasittely' => "GEN", // tällä erotellaan generoidut ja käsin tehdyt ostotilaukset

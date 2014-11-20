@@ -2071,9 +2071,9 @@ function pakkalista_pdf($pdf_data) {
   // sitten aletaan piirtämään itse PDF sisältöä
   $sivu = $pdf->new_page("a4");
 
-  $image = $pdf->jfif_embed($logodata);
-  $logoparam['scale'] = 0.5;
-  $pdf->image_place($image, 720, 440, $sivu, $logoparam);
+  $image = $pdf->png_embed($logodata);
+  $logoparam['scale'] = $pdf_data['scale'];
+  $pdf->image_place($image, 780, 420, $sivu, $logoparam);
 
   $x = 40;
   $y = 800;
@@ -2161,9 +2161,9 @@ function lahtoilmoitus_pdf($pdf_data) {
   // sitten aletaan piirtämään itse PDF sisältöä
   $sivu = $pdf->new_page("a4");
 
-  $image = $pdf->jfif_embed($logodata);
-  $logoparam['scale'] = 0.5;
-  $pdf->image_place($image, 720, 440, $sivu, $logoparam);
+  $image = $pdf->png_embed($logodata);
+  $logoparam['scale'] = $pdf_data['scale'];
+  $pdf->image_place($image, 780, 420, $sivu, $logoparam);
 
   $x = 40;
   $y = 800;
@@ -2172,7 +2172,7 @@ function lahtoilmoitus_pdf($pdf_data) {
 
   $pdf->draw_text($x, $y, 'PORTCONF', $sivu, $bold);
 
-  $y -= 15;
+  $y -= 25;
   $yy[0] = $yy[1] = $y;
   $pdf->draw_line($xx, $yy, $sivu);
   $y -= 20;
@@ -2222,6 +2222,30 @@ function lahtoilmoitus_pdf($pdf_data) {
   fclose($fh);
 
   return $pdffilenimi;
+}
+
+function pdf_logo($logo_url, $sessio) {
+
+  $opts = array(
+    'http'=>array(
+      'method'=>"GET",
+      'header'=>"Accept-language: en\r\n" .
+                "Cookie: pupesoft_session={$sessio}\r\n"
+    )
+  );
+
+  $context = stream_context_create($opts);
+  $string = file_get_contents($logo_url, false, $context);
+  $image = imagecreatefromstring($string);
+  $file = "/tmp/".md5(uniqid(rand(),true)).".png";
+  imagepng($image, $file);
+  $file_info = getimagesize($file);
+  $scale = 150 / $file_info[0];
+  $logodata = file_get_contents($file);
+
+  $return = array('logodata' => $logodata, 'scale' => $scale);
+
+  return $return;
 }
 
 ?>

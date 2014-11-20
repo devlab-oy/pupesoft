@@ -6,25 +6,26 @@ if (isset($_POST['task']) and $_POST['task'] == 'nayta_lahtoilmoitus') {
 
   $pdf_data = unserialize(base64_decode($_POST['parametrit']));
 
+  $sessio = $_POST['session'];
+  $logo_url = $_POST['logo_url'];
+  $logo_info = pdf_logo($logo_url, $sessio);
+
+  $pdf_data['logodata'] = $logo_info['logodata'];
+  $pdf_data['scale'] = $logo_info['scale'];
+
   $pdf_tiedosto = lahtoilmoitus_pdf($pdf_data);
 
   header("Content-type: application/pdf");
-
   echo file_get_contents($pdf_tiedosto);
-
   die;
-
 }
 
 if (isset($_POST['task']) and $_POST['task'] == 'hae_pakkalista') {
 
   $pakkalista = unserialize(base64_decode($_POST['pakkalista']));
 
-  $logodata = base64_decode($_POST['logodata']);
-
   $pdf_data = array(
     'pakkalista' => $pakkalista,
-    'logodata' => $logodata,
     'taara' => $_POST['taara'],
     'kpl' => $_POST['kpl'],
     'paino' => $_POST['paino'],
@@ -32,14 +33,18 @@ if (isset($_POST['task']) and $_POST['task'] == 'hae_pakkalista') {
     'sinettinumero' => $_POST['sinettinumero']
     );
 
+  $sessio = $_POST['session'];
+  $logo_url = $_POST['logo_url'];
+  $logo_info = pdf_logo($logo_url, $sessio);
+
+  $pdf_data['logodata'] = $logo_info['logodata'];
+  $pdf_data['scale'] = $logo_info['scale'];
+
   $pdf_tiedosto = pakkalista_pdf($pdf_data);
 
   header("Content-type: application/pdf");
-
   echo file_get_contents($pdf_tiedosto);
-
   die;
-
 }
 
 require "inc/parametrit.inc";
@@ -696,13 +701,8 @@ if (!isset($task)) {
 
           js_openFormInNewWindow();
 
-          $query = "SELECT data
-                    FROM liitetiedostot
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus = '{$yhtiorow['logo']}'";
-          $result = pupe_query($query);
-          $logodata =  mysql_result($result, 0);
-          $logodata = base64_encode($logodata);
+          $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
+          $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
 
           echo "&nbsp;<form method='post' id='hae_pakkalista{$_konttinumero}'>";
           echo "<input type='hidden' name='task' value='hae_pakkalista' />";
@@ -711,7 +711,8 @@ if (!isset($task)) {
           echo "<input type='hidden' name='konttinumero' value='{$konttinumero}' />";
           echo "<input type='hidden' name='sinettinumero' value='{$kontti['sinettinumero']}' />";
           echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
-          echo "<input type='hidden' name='logodata' value='{$logodata}' />";
+          echo "<input type='hidden' name='session' value='{$session}' />";
+          echo "<input type='hidden' name='logo_url' value='{$logo_url}' />";
           echo "<input type='hidden' name='taara' value='{$kontti['taara']}' />";
           echo "<input type='hidden' name='kpl' value='{$kontti['kpl']}' />";
           echo "<input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />";
@@ -761,10 +762,15 @@ if (!isset($task)) {
           $parametrit = serialize($parametrit);
           $parametrit = base64_encode($parametrit);
 
+          $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
+          $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
+
           echo "
           <form method='post' id='nayta_lahtoilmoitus{$id}'>
           <input type='hidden' name='parametrit' value='{$parametrit}' />
           <input type='hidden' name='task' value='nayta_lahtoilmoitus' />
+          <input type='hidden' name='session' value='{$session}' />
+          <input type='hidden' name='logo_url' value='{$logo_url}' />
           <input type='hidden' name='tee' value='XXX' />
           </form>
           <button onClick=\"js_openFormInNewWindow('nayta_lahtoilmoitus{$id}',

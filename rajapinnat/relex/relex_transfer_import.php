@@ -41,6 +41,8 @@ if ($php_cli) {
   if ($yhtiorow["yhtio"] == "") {
     die ("Yhtiö $kukarow[yhtio] ei löydy!");
   }
+  
+  $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
 
   $tee = 'aja';
 }

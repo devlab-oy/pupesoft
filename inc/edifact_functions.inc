@@ -410,6 +410,59 @@ function kontitus_parametrit($rullat_kontissa, $korjaus = false) {
   return $parametrit;
 }
 
+function lahtoilmoitus_parametrit($konttiviite) {
+  global $kukarow, $yhtiorow;
+
+  $query = "SELECT lasku.asiakkaan_tilausnumero AS tilausnro,
+            matkakoodi,
+            matkatiedot
+            FROM laskun_lisatiedot
+            JOIN lasku
+              ON lasku.yhtio = laskun_lisatiedot.yhtio
+              AND lasku.tunnus = laskun_lisatiedot.otunnus
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND konttiviite = '{$konttiviite}'";
+  $result = pupe_query($query);
+
+  $kaikki_matkatiedot = array();
+
+  while ($tilaus = mysql_fetch_assoc($result)) {
+
+    $matkakoodi = $tilaus['matkakoodi'];
+
+    $mt = unserialize($tilaus['matkatiedot']);
+    $kaikki_matkatiedot[$tilaus['tilausnro']] = $mt;
+  }
+
+  foreach ($kaikki_matkatiedot as $tilausnro => $tiedot) {
+
+    $query = "SELECT count(trlt.tunnus) AS rullia,
+              sum(ss.massa) AS paino,
+              COUNT(DISTINCT trlt.kontin_mrn) AS kontteja
+              FROM tilausrivin_lisatiedot AS trlt
+              JOIN sarjanumeroseuranta AS ss
+                ON ss.yhtio = trlt.yhtio
+                AND ss.myyntirivitunnus = trlt.tilausrivitunnus
+              WHERE trlt.yhtio = '{$kukarow['yhtio']}'
+              AND trlt.asiakkaan_tilausnumero = '{$tilausnro}'
+              AND trlt.kontin_mrn != ''
+              AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu')";
+    $result = pupe_query($query);
+    $info = mysql_fetch_assoc($result);
+
+    $kaikki_matkatiedot[$tilausnro]['rullia'] = $info['rullia'];
+    $kaikki_matkatiedot[$tilausnro]['paino'] = (int) $info['paino'];
+    $kaikki_matkatiedot[$tilausnro]['kontteja'] = $info['kontteja'];
+
+  }
+
+  $parametrit['matkatiedot'] = $kaikki_matkatiedot;
+  $parametrit['matkakoodi'] = $matkakoodi;
+
+  return $parametrit;
+
+}
+
 function satamavahvistus_parametrit($konttiviite) {
   global $kukarow, $yhtiorow;
 
@@ -436,10 +489,13 @@ function satamavahvistus_parametrit($konttiviite) {
             JOIN tilausrivin_lisatiedot AS trlt
               ON trlt.yhtio = tilausrivi.yhtio
               AND trlt.tilausrivitunnus = tilausrivi.tunnus
+            JOIN sarjanumeroseuranta AS ss
+              ON ss.yhtio = tilausrivi.yhtio
+              AND ss.myyntirivitunnus = tilausrivi.tunnus
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-            AND tilausrivi.otunnus IN ({$tunnukset})";
+            AND tilausrivi.otunnus IN ({$tunnukset})
+            AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu')";
   $result = pupe_query($query);
-
   $kontit = array();
 
   while ($row = mysql_fetch_assoc($result)) {
@@ -2081,5 +2137,91 @@ function pakkalista_pdf($pdf_data) {
 
 }
 
+function lahtoilmoitus_pdf($pdf_data) {
+
+  extract($pdf_data);
+
+  //PDF:n luonti ja defaultit
+  require_once("pdflib/phppdflib.class.php");
+
+  //PDF parametrit
+  $pdf = new pdffile;
+  $pdf->set_default('margin-top',   0);
+  $pdf->set_default('margin-bottom',   0);
+  $pdf->set_default('margin-left',   0);
+  $pdf->set_default('margin-right',   0);
+
+  //fontit
+  $pieni["height"] = 11;
+  $pieni["font"] = "Times-Roman";
+
+  $bold["height"] = 11;
+  $bold["font"] = "Times-Bold";
+
+  // sitten aletaan piirtämään itse PDF sisältöä
+  $sivu = $pdf->new_page("a4");
+
+  $image = $pdf->jfif_embed($logodata);
+  $logoparam['scale'] = 0.5;
+  $pdf->image_place($image, 720, 440, $sivu, $logoparam);
+
+  $x = 40;
+  $y = 800;
+
+  $xx = array(20,580);
+
+  $pdf->draw_text($x, $y, 'PORTCONF', $sivu, $bold);
+
+  $y -= 15;
+  $yy[0] = $yy[1] = $y;
+  $pdf->draw_line($xx, $yy, $sivu);
+  $y -= 20;
+
+  $pdf->draw_text($x, $y, 'Voyage id:', $sivu, $bold);
+  $pdf->draw_text($x+100, $y, $matkakoodi, $sivu, $bold);
+
+  $y -= 15;
+  $yy[0] = $yy[1] = $y;
+  $pdf->draw_line($xx, $yy, $sivu);
+  $y -= 20;
+
+  $pdf->draw_text($x, $y, 'Order number:', $sivu, $bold);
+  $pdf->draw_text($x+100, $y, 'Ocean vessel', $sivu, $bold);
+  $pdf->draw_text($x+260, $y, 'RLS', $sivu, $bold);
+  $pdf->draw_text($x+360, $y, 'TON', $sivu, $bold);
+  $pdf->draw_text($x+460, $y, 'Containers', $sivu, $bold);
+
+  $y -= 10;
+  $yy[0] = $yy[1] = $y;
+  $pdf->draw_line($xx, $yy, $sivu);
+  $y -= 20;
+
+  foreach ($matkatiedot as $tilausnro => $tilaus) {
+
+    if ($y < 20) {
+      $sivu = $pdf->new_page("a4");
+      $y = 800;
+    }
+
+    $pdf->draw_text($x, $y, $tilausnro, $sivu, $bold);
+    $pdf->draw_text($x+100, $y, $tilaus['transport_name'], $sivu, $bold);
+    $pdf->draw_text($x+260, $y, $tilaus['rullia'], $sivu, $bold);
+    $pdf->draw_text($x+360, $y, $tilaus['paino'], $sivu, $bold);
+    $pdf->draw_text($x+460, $y, $tilaus['kontteja'], $sivu, $bold);
+
+    $y -= 15;
+
+  }
+
+  //keksitään uudelle failille joku varmasti uniikki nimi:
+  $pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(),true)).".pdf";
+
+  //kirjoitetaan pdf faili levylle..
+  $fh = fopen($pdffilenimi, "w");
+  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
+  fclose($fh);
+
+  return $pdffilenimi;
+}
 
 ?>

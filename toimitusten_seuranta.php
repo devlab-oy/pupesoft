@@ -2,6 +2,20 @@
 
 require 'inc/edifact_functions.inc';
 
+if (isset($_POST['task']) and $_POST['task'] == 'nayta_lahtoilmoitus') {
+
+  $pdf_data = unserialize(base64_decode($_POST['parametrit']));
+
+  $pdf_tiedosto = lahtoilmoitus_pdf($pdf_data);
+
+  header("Content-type: application/pdf");
+
+  echo file_get_contents($pdf_tiedosto);
+
+  die;
+
+}
+
 if (isset($_POST['task']) and $_POST['task'] == 'hae_pakkalista') {
 
   $pakkalista = unserialize(base64_decode($_POST['pakkalista']));
@@ -724,17 +738,7 @@ if (!isset($task)) {
 
           echo "
           <div style='text-align:center;margin:10px 0;'>
-            <button type='button' disabled>" . t("Satamavahvistus lähetetty") . "</button>
-
-            <form method='post' id='nayta_satamavahvistus{$id}'>
-            <input type='hidden' name='task' value='hae_pakkalista' />
-            <input type='hidden' name='tee' value='XXX' />
-            </form>";
-
-            echo "<button onClick=\"js_openFormInNewWindow('nayta_satamavahvistus{$id}', 'Satamavahvistus'); return false;\" />";
-            echo t("Tulosta");
-            echo "</button>";
-            echo "</div>";
+            <button type='button' disabled>" . t("Satamavahvistus lähetetty") . "</button>";
 
         }
         elseif ($kesken == 0 and $mrn_tullut) {
@@ -747,8 +751,28 @@ if (!isset($task)) {
             <input type='hidden' name='lahtopvm_arvio' value='{$tilaus['toimaika']}' />
             <input type='hidden' name='task' value='tee_satamavahvistus' />
             <input type='submit' value='". t("Tee satamavahvistus") ."' />
-            </form>
-            </div>";
+            </form>";
+        }
+
+        if ($kesken == 0 and $mrn_tullut) {
+
+          $parametrit = lahtoilmoitus_parametrit($tilaus['konttiviite']);
+
+          $parametrit = serialize($parametrit);
+          $parametrit = base64_encode($parametrit);
+
+          echo "
+          <form method='post' id='nayta_lahtoilmoitus{$id}'>
+          <input type='hidden' name='parametrit' value='{$parametrit}' />
+          <input type='hidden' name='task' value='nayta_lahtoilmoitus' />
+          <input type='hidden' name='tee' value='XXX' />
+          </form>
+          <button onClick=\"js_openFormInNewWindow('nayta_lahtoilmoitus{$id}',
+           'Satamavahvistus'); return false;\" />";
+
+          echo t("Tulosta");
+          echo "</button></div>";
+
         }
 
         echo "</td>";

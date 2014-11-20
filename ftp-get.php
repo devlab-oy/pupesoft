@@ -69,12 +69,19 @@ if ($ftpget_host[$operaattori] != '' and $ftpget_user[$operaattori] != '' and $f
 
     if ($files) {
       foreach ($files as $file) {
+        if (isset($ftpget_filt[$operaattori]) and $ftpget_filt[$operaattori] != "") {
+          // Skipataan ne tiedostot joissa ei ole m‰‰ritelty‰ stringi‰ nimess‰
+          if (stripos($file, $ftpget_filt[$operaattori]) === FALSE) {
+            continue;
+          }
+        }
+
         $temp_filename = tempnam("/tmp", "ftp");
 
         $fileget = ftp_get($conn_id, $temp_filename, $file, FTP_ASCII);
 
         if (filesize($temp_filename) == 0) {
-          //echo "VIRHE: Ladattava tiedotsto on tyhj‰!\n";
+          // echo "VIRHE: Ladattava tiedosto on tyhj‰!\n";
           unlink($temp_filename);
         }
         elseif ($fileget) {

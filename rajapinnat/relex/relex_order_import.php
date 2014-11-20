@@ -209,7 +209,7 @@ if (isset($tee) and trim($tee) == 'aja') {
     // Ei löydy, tehdään uus tilaus
     if (mysql_num_rows($result) == 0) {
 
-      $query = "SELECT tunnus
+      $query = "SELECT tunnus, nimi
                 FROM kuka
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND myyja   = '{$tuote['ostajanro']}'
@@ -218,6 +218,8 @@ if (isset($tee) and trim($tee) == 'aja') {
                 LIMIT 1";
       $ostajaresult = pupe_query($query);
       $ostajarow = mysql_fetch_assoc($ostajaresult);
+
+      $kukarow['nimi'] = $ostajarow['nimi'];
 
       $params = array(
         'liitostunnus'            => $toimittaja["tunnus"],

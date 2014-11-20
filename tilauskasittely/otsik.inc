@@ -119,7 +119,7 @@ if ($tila == "vaihdaasiakas") {
             toim_postino        = '',
             toim_postitp        = '',
             toim_maa            = '',
-            toim_puh            = ''
+            toim_puh            = '',
             laskutusvkopv       = '',
             chn                 = '',
             verkkotunnus        = '',

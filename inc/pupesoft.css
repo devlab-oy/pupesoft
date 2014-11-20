@@ -4,11 +4,6 @@
 	font-family: "Lato","Helvetica",Arial,Verdana,Lucida;
 }
 
-@font-face {
-	font-family: "Lato";
-	src: url("https://fonts.googleapis.com/css?family=Lato");
-}
-
 body {
 	color: #808080; /*BODY_COLOR*/
 	background-color: #e6e6e6; /*BODY_BACKGROUND*/

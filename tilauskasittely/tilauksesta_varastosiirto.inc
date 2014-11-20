@@ -51,7 +51,7 @@ if (!function_exists('kirjanpidollinen_varastosiirto')) {
       'kohdevarasto_tunnus'   => $toimipaikan_varastot[0]['tunnus'],
     );
 
-    $myyntitilausrivit = array_find($myyntitilaus['tilausrivit'], $lahde_ja_kohde_varasto_yhdistelma);
+    $myyntitilausrivit = $myyntitilaus['tilausrivit'];
 
     // Ei tehä mitää jos ei ole yhtään riviä
     if (empty($myyntitilausrivit)) {
@@ -471,48 +471,67 @@ if (!function_exists('hae_tilausrivit')) {
           AND varaston_hyllypaikat.hyllyvali = t.hyllyvali
           AND varaston_hyllypaikat.hyllytaso = t.hyllytaso)';
 
-    $select = ' v_lahdevarasto.tunnus AS lahdevarasto_tunnus,
-          JOIN avainsana AS a
-          ON ( a.yhtio = tl.yhtio
-            AND a.tunnus = tl.toimittajan_tunnus )
-                v_kohdevarasto.tunnus AS kohdevarasto_tunnus,
-                a.selitetark_2 AS toimitustapa_tunnus,
-          JOIN varastopaikat AS v_kohdevarasto
-          ON ( v_kohdevarasto.tunnus = a.selitetark )
-          LEFT JOIN varaston_hyllypaikat
-          ON ( varaston_hyllypaikat.yhtio = t.yhtio
-            AND varaston_hyllypaikat.hyllyalue = t.hyllyalue
-            AND varaston_hyllypaikat.hyllynro = t.hyllynro
-            AND varaston_hyllypaikat.hyllyvali = t.hyllyvali
-                varaston_hyllypaikat.keraysvyohyke AS keraysvyohyke,';
+    if ($varastosiirtotyyppi == 'N') {
+      // normaali varastosiirto tähän haaraan
+      $tilausrivi_where = "AND t.var = 'S'";
 
       $select = ' v_lahdevarasto.tunnus AS lahdevarasto_tunnus,
                   v_kohdevarasto.tunnus AS kohdevarasto_tunnus,
                   a.selitetark_2 AS toimitustapa_tunnus,
                   varaston_hyllypaikat.keraysvyohyke AS keraysvyohyke,
-                  tl.ohita_kerays,';
+                  tl.ohita_kerays,
+                  tl.palautus_varasto AS palautus_varasto,
+                  tl.toimittajan_tunnus,
+                  tl.tilausrivitunnus AS tilausrivitunnus,
+                  tl.tilausrivilinkki AS tilausrivilinkki,
+                  tl.kohde_hyllyalue AS kohde_hyllyalue,
+                  tl.kohde_hyllynro AS kohde_hyllynro,
+                  tl.kohde_hyllytaso AS kohde_hyllytaso,
+                  tl.kohde_hyllyvali AS kohde_hyllyvali,';
+      $_left = "";
     }
-    else {
-      //Kirjanpidollinen ja palautus tähän haaraan
+    elseif ($varastosiirtotyyppi == 'P') {
+      //palautus tähän haaraan
       $tilausrivi_where = " AND t.var not in ('P','J','O','S')";
 
-      if ($varastosiirtotyyppi == 'P') {
-        $lasku_join = " JOIN lasku AS l ON ( l.yhtio = t.yhtio AND l.tunnus = t.otunnus )";
-        $select .= "l.varasto AS varasto, ";
-        $tilausrivi_where .= " AND tl.palautus_varasto != 0 ";
-      }
-      else {
+      $select .= "l.varasto AS varasto,
+                  tl.palautus_varasto AS palautus_varasto,
+                  tl.toimittajan_tunnus,
+                  tl.tilausrivitunnus AS tilausrivitunnus,
+                  tl.tilausrivilinkki AS tilausrivilinkki,
+                  tl.kohde_hyllyalue AS kohde_hyllyalue,
+                  tl.kohde_hyllynro AS kohde_hyllynro,
+                  tl.kohde_hyllytaso AS kohde_hyllytaso,
+                  tl.kohde_hyllyvali AS kohde_hyllyvali,";
 
-        # Kirjanpidollisessa varastosiirrossa ei ole keräysvyöhykkeitä
-        # Ei lähde- eikä kohdevarastoa
-        # Eikä avainsanoja
-        $varasto_avainsana_join = '';
+      $lasku_join = " JOIN lasku AS l ON ( l.yhtio = t.yhtio AND l.tunnus = t.otunnus )";
+      $tilausrivi_where .= " AND tl.palautus_varasto != 0 ";
 
-        $select = ' 0 AS lahdevarasto_tunnus,
-                    0 AS kohdevarasto_tunnus,
-                    0 AS toimitustapa_tunnus,
-                    0 AS keraysvyohyke,';
-      }
+      $_left = "";
+    }
+    else {
+      //Kirjanpidollinen tähän haaraan
+      $tilausrivi_where = " AND t.var not in ('P','J','O','S')";
+
+      $select = " 0 AS lahdevarasto_tunnus,
+                  0 AS kohdevarasto_tunnus,
+                  0 AS toimitustapa_tunnus,
+                  0 AS keraysvyohyke,
+                  0 AS palautus_varasto,
+                  0 AS toimittajan_tunnus,
+                  t.tunnus AS tilausrivitunnus,
+                  0 AS tilausrivilinkki,
+                  '' AS kohde_hyllyalue,
+                  '' AS kohde_hyllynro,
+                  '' AS kohde_hyllytaso,
+                  '' AS kohde_hyllyvali,";
+
+      # Kirjanpidollisessa varastosiirrossa ei ole keräysvyöhykkeitä
+      # Ei lähde- eikä kohdevarastoa
+      # Eikä avainsanoja
+      $varasto_avainsana_join = '';
+
+      $_left = "LEFT";
     }
 
     if ($onko_myyntitilaus) {
@@ -525,22 +544,14 @@ if (!function_exists('hae_tilausrivit')) {
     $query   = "SELECT t.*,
                 {$select}
                 t.hyllyalue AS lahde_hyllyalue,
-                t.hyllynro AS lahde_hyllynro,
-                tl.palautus_varasto AS palautus_varasto,
-                tl.toimittajan_tunnus,
-                tl.tilausrivitunnus AS tilausrivitunnus,
-                tl.tilausrivilinkki AS tilausrivilinkki,
-                tl.kohde_hyllyalue AS kohde_hyllyalue,
-                tl.kohde_hyllynro AS kohde_hyllynro,
-                tl.kohde_hyllytaso AS kohde_hyllytaso,
-                tl.kohde_hyllyvali AS kohde_hyllyvali
+                t.hyllynro AS lahde_hyllynro
                 FROM tilausrivi AS t
                 {$lasku_join}
                 JOIN tuote
                 ON ( tuote.yhtio = t.yhtio
                   AND tuote.tuoteno       = t.tuoteno
                   AND tuote.ei_saldoa     = '')
-                JOIN tilausrivin_lisatiedot AS tl
+                {$_left} JOIN tilausrivin_lisatiedot AS tl
                 ON (tl.yhtio = t.yhtio
                   AND tl.tilausrivitunnus = t.tunnus )
                 {$varasto_avainsana_join}
@@ -570,8 +581,20 @@ if (!function_exists('paivita_myyntitilausrivien_tuotepaikat')) {
 
     foreach ($tilausrivit as $tilausrivi) {
 
-      $update = "AND tunnus = {$tilausrivi['tunnus']}";
+      $update = "AND tunnus = {$tilausrivi['tilausrivitunnus']}";
+
       if ($onko_varastosiirtorivi) {
+
+        if ($tilausrivi['tilausrivilinkki'] == 0) {
+          $query = "SELECT tilausrivilinkki
+                    FROM tilausrivin_lisatiedot
+                    WHERE yhtio          = '{$kukarow['yhtio']}'
+                    AND tilausrivitunnus = {$tilausrivi['tilausrivitunnus']}";
+          $linkres = pupe_query($query);
+          $linkrow = mysql_fetch_assoc($linkres);
+          $tilausrivi['tilausrivilinkki'] = $linkrow['tilausrivilinkki'];
+        }
+
         $update = "AND tunnus = {$tilausrivi['tilausrivilinkki']}";
       }
 

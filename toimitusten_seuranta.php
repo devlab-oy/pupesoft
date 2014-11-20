@@ -1,7 +1,5 @@
 <?php
 
-phpinfo();die;
-
 require 'inc/edifact_functions.inc';
 
 if (isset($_POST['task']) and $_POST['task'] == 'nayta_lahtoilmoitus') {
@@ -14,8 +12,6 @@ if (isset($_POST['task']) and $_POST['task'] == 'nayta_lahtoilmoitus') {
 
   $pdf_data['logodata'] = $logo_info['logodata'];
   $pdf_data['scale'] = $logo_info['scale'];
-
-  print_r($pdf_data);die;
 
   $pdf_tiedosto = lahtoilmoitus_pdf($pdf_data);
 

@@ -7,7 +7,7 @@ if (@include_once "inc/parametrit.inc");
 elseif (@include_once "parametrit.inc");
 else exit;
 
-echo "<div id='ylaframe_big'>";
+echo "<div id='ylaframe_container'>";
 echo "<table class='ylaframe'>";
 echo "<tr>";
 echo "<td width='305'><a class='puhdas' target='mainframe' href='{$palvelin2}logout.php?toim=change'><img style='padding-left: 15px;' src='{$palvelin2}pics/facelift/logo.png'></a></td>";
@@ -33,11 +33,11 @@ foreach ($tallennetut["skriptit"] as $i => $skripti) {
   list($goso, $go, $golisa) = explode("###", $skripti);
 
   $skriptilisa = "?goso=$goso&go=$go";
-  
+
   if (!empty($golisa)) {
     $skriptilisa .= "?toim=".$golisa;
   }
-  
+
   echo "<td class='ylapalkki'><a class='puhdas' target='top' href='{$palvelin2}$skriptilisa'><img src='{$palvelin2}pics/facelift/$kuvake'><br>$teksti</a></td>";
 }
 
@@ -47,19 +47,21 @@ echo "</tr>";
 echo "</table>";
 echo "</div>";
 
-echo "<div class='showhide_yla' id='maaginen_yla'><img src='{$palvelin2}pics/lullacons/switch_gray.png'></div>";
+echo "<div class='showhide_yla' id='maaginen_yla'><img id='showhide_upper' src='{$palvelin2}pics/facelift/hide_upper.png'></div>";
 
 echo "
   <script>
       $(document).ready(function(){
-        $(\"#maaginen_yla\").click(function(){
-           if (parent.document.getElementsByTagName('frameset')[0].rows==\"80,*\") {
-             parent.document.getElementsByTagName('frameset')[0].rows=\"20,*\";
-             $('#ylaframe_big').hide();
+        $('#maaginen_yla').click(function(){
+           if (parent.document.getElementsByTagName('frameset')[0].rows=='90,*') {
+             parent.document.getElementsByTagName('frameset')[0].rows='20,*';
+             $('#showhide_upper').attr('src', '{$palvelin2}pics/facelift/show_upper.png');
+             $('#ylaframe_container').hide();
            }
            else {
-             parent.document.getElementsByTagName('frameset')[0].rows=\"80,*\";
-             $('#ylaframe_big').show();             
+             parent.document.getElementsByTagName('frameset')[0].rows='90,*';
+             $('#showhide_upper').attr('src', '{$palvelin2}pics/facelift/hide_upper.png');
+             $('#ylaframe_container').show();
            }
         });
       });

@@ -97,10 +97,10 @@ if (empty($verkkokauppa)) {
     $otsikko = t("Variaatiot tuotteelle");
   }
   elseif ($hae_ja_selaa_row['selite'] == 'B') {
-    $otsikko = t("TUOTEHAKU");
+    $otsikko = t("Tuotehaku");
   }
   else {
-    $otsikko = t("ETSI JA SELAA TUOTTEITA");
+    $otsikko = t("Hae ja selaa");
   }
 
   echo "<font class='head'>{$otsikko}:</font><br/><br/>";

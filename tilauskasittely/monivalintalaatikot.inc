@@ -756,7 +756,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
     if (mysql_num_rows($sresult) > 1) {
 
-      $multiple_lisa = " multiple='multiple' size='7' style='width: 100%;' ";
+      $multiple_lisa = " multiple='multiple' class='multipleselect' size='7' ";
 
       if (in_array("osasto", $monivalintalaatikot_normaali)) {
         $multiple_lisa = "";
@@ -874,7 +874,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
     if (mysql_num_rows($sresult) > 1) {
 
-      $multiple_lisa = " multiple='multiple' size='7' style='width: 100%;' ";
+      $multiple_lisa = " multiple='multiple' class='multipleselect' size='7' ";
 
       if (in_array("try", $monivalintalaatikot_normaali)) {
         $multiple_lisa = "";
@@ -1021,7 +1021,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
       echo "<tr><td nowrap style='padding:0px'>";
 
-      $multiple_lisa = " multiple='multiple' size='7' style='width: 100%;' ";
+      $multiple_lisa = " multiple='multiple' class='multipleselect' size='7' ";
 
       if (in_array("tuotemerkki", $monivalintalaatikot_normaali)) {
         $multiple_lisa = "";
@@ -1148,7 +1148,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
           echo "<tr><td nowrap style='padding:0px'>";
 
-          $multiple_lisa = " multiple='multiple' size='7' style='width: 100%;' ";
+          $multiple_lisa = " multiple='multiple' class='multipleselect' size='7' ";
 
           if (in_array("malli", $monivalintalaatikot_normaali)) {
             $multiple_lisa = "";
@@ -1274,7 +1274,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
           echo "<tr><td nowrap style='padding:0px'>";
 
-          $multiple_lisa = " multiple='multiple' size='7' style='width: 100%;' ";
+          $multiple_lisa = " multiple='multiple' class='multipleselect' size='7' ";
 
           if (in_array("mallitarkenne", $monivalintalaatikot_normaali)) {
             $multiple_lisa = "";
@@ -1408,7 +1408,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
           echo "<select name='mul_{$tree}{$looppirow['syvyys']}[]' ";
 
           if (is_array($monivalintalaatikot_normaali) and !in_array("dynaaminen_".$tree, $monivalintalaatikot_normaali)) {
-            echo " multiple='multiple' size='7' style='width: 100%;' ";
+            echo " multiple='multiple' class='multipleselect' size='7' ";
           }
 
           echo "{$autosubmit}>";
@@ -1566,7 +1566,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
         echo "<select name='mul_{$parametri}[]' ";
 
         if (!in_array("parametri_$parametri", $monivalintalaatikot_normaali)) {
-          echo " multiple='multiple' size='7' style='width: 100%;' ";
+          echo " multiple='multiple' class='multipleselect' size='7' ";
         }
 
         if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
@@ -1621,7 +1621,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
               ORDER BY myyja";
     $sresult = pupe_query($query);
 
-    echo "<td nowrap style='padding:0px'><select name='mul_laskumyyja[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+    echo "<td nowrap style='padding:0px'><select name='mul_laskumyyja[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
     while ($sxrow = mysql_fetch_array($sresult)) {
@@ -1663,7 +1663,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
     $sresult = t_avainsana("ASIAKASTILA");
 
-    echo "<td nowrap style='padding:0px'><select name='mul_asiakastila[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+    echo "<td nowrap style='padding:0px'><select name='mul_asiakastila[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
     while ($sxrow = mysql_fetch_array($sresult)) {
@@ -1713,7 +1713,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
               ORDER BY myyja";
     $sresult = pupe_query($query);
 
-    echo "<td nowrap style='padding:0px'><select name='mul_tuotemyyja[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+    echo "<td nowrap style='padding:0px'><select name='mul_tuotemyyja[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
     while ($sxrow = mysql_fetch_array($sresult)) {
@@ -1761,7 +1761,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
               ORDER BY myyja";
     $sresult = pupe_query($query);
 
-    echo "<td nowrap style='padding:0px'><select name='mul_asiakasmyyja[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+    echo "<td nowrap style='padding:0px'><select name='mul_asiakasmyyja[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
     while ($sxrow = mysql_fetch_array($sresult)) {
@@ -1808,7 +1808,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
               ORDER BY myyja";
     $sresult = pupe_query($query);
 
-    echo "<td nowrap style='padding:0px'><select name='mul_tuoteostaja[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+    echo "<td nowrap style='padding:0px'><select name='mul_tuoteostaja[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
     while ($sxrow = mysql_fetch_array($sresult)) {
@@ -1850,7 +1850,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
     $sresult = t_avainsana("ASIAKASOSASTO");
 
-    echo "<td nowrap style='padding:0px'><select name='mul_asiakasosasto[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+    echo "<td nowrap style='padding:0px'><select name='mul_asiakasosasto[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
     while ($sxrow = mysql_fetch_array($sresult)) {
@@ -1894,7 +1894,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
     $sresult = t_avainsana("ASIAKASRYHMA");
 
-    echo "<td nowrap style='padding:0px'><select name='mul_asiakasryhma[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+    echo "<td nowrap style='padding:0px'><select name='mul_asiakasryhma[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
     while ($sxrow = mysql_fetch_array($sresult)) {
@@ -1938,7 +1938,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
     $sresult = t_avainsana("PIIRI");
 
-    echo "<td nowrap style='padding:0px'><select name='mul_asiakaspiiri[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+    echo "<td nowrap style='padding:0px'><select name='mul_asiakaspiiri[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
     echo "<option value=''>".t("Ei valintaa")."</option>";
 
     while ($sxrow = mysql_fetch_array($sresult)) {
@@ -1987,7 +1987,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
         echo "<tr><th>", t("Toimipaikka"), "</th></tr>";
       }
       echo "<tr>";
-      echo "<td nowrap style='padding:0px'><select name='mul_toimipaikka[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+      echo "<td nowrap style='padding:0px'><select name='mul_toimipaikka[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
       echo "<option value=''>".t("Ei valintaa")."</option>";
 
       while ($toimipaikka = mysql_fetch_assoc($toimipaikka_result)) {
@@ -2097,7 +2097,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
       echo "<td nowrap style='padding:0px'>";
 
-      $multiple_lisa = " multiple='multiple' size='7' style='width: 100%;' ";
+      $multiple_lisa = " multiple='multiple' class='multipleselect' size='7' ";
 
       if (in_array("kustp", $monivalintalaatikot_normaali)) {
         $multiple_lisa = "";
@@ -2175,7 +2175,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
       echo "<tr>";
 
-      echo "<td nowrap style='padding:0px'><select name='mul_kohde[]' multiple='multiple' " .
+      echo "<td nowrap style='padding:0px'><select name='mul_kohde[]' multiple='multiple' class='multipleselect' " .
         "size='7' style='width: 100%;' $tunnukset_save $autosubmit>";
       echo "<option value=''>" . t("Ei valintaa") . "</option>";
       echo "<option value='0'>" . t("Ei kohdetta") . "</option>";
@@ -2232,7 +2232,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
       echo "<tr>";
 
-      echo "<td nowrap style='padding:0px'><select name='mul_projekti[]' multiple='multiple' size='7' style='width: 100%;' $autosubmit>";
+      echo "<td nowrap style='padding:0px'><select name='mul_projekti[]' multiple='multiple' class='multipleselect' size='7' $autosubmit>";
       echo "<option value=''>".t("Ei valintaa")."</option>";
       echo "<option value='0'>" . t("Ei projektia") . "</option>";
 

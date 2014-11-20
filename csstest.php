@@ -72,7 +72,7 @@ ksort($varit);
 
 echo "
 Tässä näkee miten formit käyttäytyy:<hr>
-<form action='#'>
+<form action='#' class='multisubmit'>
 <select>
 <option>1 - ensimmäinen</option>
 <option>2 - toinen</option>

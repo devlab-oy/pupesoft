@@ -10,8 +10,8 @@
 }
 
 body {
-	color: #242424; /*BODY_COLOR*/
-	background-color: #b3afaa; /*BODY_BACKGROUND*/
+	color: #808080; /*BODY_COLOR*/
+	background-color: #e6e6e6; /*BODY_BACKGROUND*/
 	margin: 2px 2px 0px 0px;
 	padding: 0px 0px 0px 0px;
 }
@@ -22,17 +22,16 @@ form {
 }
 
 a {
-	color: #ffda08; /*LINK_COLOR*/
+	color: #6c70eb; /*LINK_COLOR*/
 }
 
 a:hover {
 	border-bottom: 1px;
-	color: #1f4457; /*TRAKTIIVI_COLOR*/
-	background-color: #a8d9f2; /*TRAKTIIVI_BACKGROUND*/
+	color: #6c70eb; /*TRAKTIIVI_COLOR*/
 }
 
 a.td {
-	color: #242424; /*TDLINKKI_COLOR*/
+	color: #6c70eb; /*TDLINKKI_COLOR*/
 	text-decoration: none;
 	display: block;
 	width: 100%;
@@ -60,12 +59,11 @@ table {
 
 tr {
 	color: #242424; /*TR_COLOR*/
-	background-color: #fafdfe; /*TR_BACKGROUND*/
+	background-color: #ffffff; /*TR_BACKGROUND*/
 }
 
 tr.aktiivi:hover {
-	color: #1f4457; /*TRAKTIIVI_COLOR*/
-	background-color: #a8d9f2; /*TRAKTIIVI_BACKGROUND*/
+	background-color: #f6f6f6; /*TRAKTIIVI_BACKGROUND*/
 }
 
 th {
@@ -75,18 +73,8 @@ th {
 	vertical-align: middle;
 	text-align: left;
 	padding: 10px 15px 10px 15px;
-  /* border-bottom: solid 2px #b3afaa; */
-	background-color: #fafdfe; /*TH_BACKGROUND*/
+	background-color: #ffffff; /*TH_BACKGROUND*/
 	color: #828282; /*TH_COLOR*/
-}
-
-th a {
-	font-size: 11pt;
-  text-transform: capitalize;
-  font-weight: bold;
-	vertical-align: middle;
-	text-align: left;
-  color: #828282; /*TH_COLOR*/
 }
 
 td {
@@ -95,14 +83,23 @@ td {
 	vertical-align: middle;
 }
 
+th a {
+	font-size: 11pt;
+  text-transform: capitalize;
+  font-weight: bold;
+	vertical-align: middle;
+	text-align: left;
+  color: #6c70eb; /*TH_COLOR*/
+}
+
 td a {
-  color: #828282; /*TH_COLOR*/
+  color: #6c70eb; /*TH_COLOR*/
 }
 
 hr {
 	border: 0px;
 	height: 1px;
-	background-color: #b3afaa; /*HR_BACKGROUND*/
+	background-color: #e6e6e6; /*HR_BACKGROUND*/
 	width: 100%;
 }
 
@@ -129,24 +126,23 @@ pre {
 }
 
 .back {
-	background-color: #b3afaa; /*BODY_BACKGROUND*/
+	background-color: #e6e6e6; /*BODY_BACKGROUND*/
 }
 
 .info {
 	font-size: 9pt;
-	color: #1f4458; /*INFO_COLOR*/
+	color: #808080; /*INFO_COLOR*/
 	font-weight: normal;
 }
 
 .head {
 	font-size: 22pt;
-	color: #ffffff; /*HEAD_COLOR*/
-	font-weight: bold;
+	color: #b3b3b3; /*HEAD_COLOR*/
 	letter-spacing: 1px;
 }
 
 .message {
-	color: #333333; /*MESSAGE_COLOR*/
+	color: #808080; /*MESSAGE_COLOR*/
 	font-weight:bold;
 }
 
@@ -171,7 +167,7 @@ div.popup {
 	background-color: #828282; /*POPUP_BACKGROUND*/
 	color: #ffffff; /*POPUP_COLOR*/
 	border: 1px solid;
-	border-color: #b3afaa; /*POPUP_COLOR*/
+	border-color: #e6e6e6; /*POPUP_COLOR*/
 	padding: 5px;
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;
@@ -180,9 +176,9 @@ div.popup {
 
 input, textarea {
 	color: #444444; /*INPUT_COLOR*/
-  background-color: #f2f2f2;
+  background-color: #ffffff;
 	padding: 7px 0px 7px 2px;
-  border : solid 1px #f0f0f0;
+  border : solid 1px #e1e1e1;
 }
 
 button {
@@ -195,7 +191,7 @@ select {
 	padding: 8px 35px 8px 4px;
   border : solid 1px #f0f0f0;
   color: #828282;
-  background-color: #f2f2f2;
+  background-color: #ffffff;
   background-image: url('../pics/facelift/dropdown_arrow.png');
   background-repeat: no-repeat;
   background-position: right;
@@ -223,52 +219,59 @@ div.liveSearchSelectedItem {
 }
 
 select.indexvas {
-  width: 305px;
-	margin: 10px 0px 0px 20px;
+  width: 255px;
+	margin: 3px 0px 0px 15px;
   -webkit-appearance: none;
   -webkit-border-radius: 0px;
-	padding: 12px 20px 12px 20px;
+	padding: 18px 20px 14px 20px;
   border : solid 0px;
-	font-size: 18pt;
-	font-weight: bold;
+	font-size: 14pt;
   color: #828282;
+  background-color: #ffffff;
   letter-spacing: 1px;
-  background-image: url('../pics/facelift/dropdown_arrow_big.png');
+  background-image: url('../pics/facelift/dropdown_arrow.png');
   background-repeat: no-repeat;
   background-position: right;
 }
 
+select.multipleselect {
+  padding: 2px 2px 2px 2px;
+  background-image: url('');
+  width: 100%;
+  overflow-y:scroll;
+}
+
 table.indexvas {
-  width: 305px;
-	margin: 0px 0px 0px 20px;
+  width: 255px;
+	margin: 0px 0px 0px 15px;
   padding: 0px 0px 0px 0px;
 	border-spacing: 0;
 }
 
 table.indexvas tr {
-  background-color: #828282;
+  background-color: #ffffff;
 }
 
 table.indexvas td {
-  padding: 5px 20px 5px 20px;
+  padding: 3px 15px 3px 15px;
 }
 
 table.indexvas a {
   font-size: 13pt;
-  color: #edeae4;
+  color: #6c70eb;
 	text-decoration: none;
 	display: block;
 	width: 100%;
 	padding: 2px 6px 2px 6px;
-  background-color: #828282;
+  background-color: #ffffff;
 }
 
 table.indexvas a:hover {
-  color: #ffda08;
+  color: #808080;
 }
 
 table.indexvas a.indexvaslink_aktivoitu {
-  color: #ffda08;
+  color: #808080;
 }
 
 button, input[type=submit], input[type=button] {
@@ -276,18 +279,20 @@ button, input[type=submit], input[type=button] {
  	font-size: 12pt;
  	color : #ffffff;
  	padding: 10px 10px 10px 10px;
-  background-color: #828282;
+  background-color: #6c70eb;
   min-width: 100px;
 }
 
 table.ylaframe {
   width: 100%;
-	margin: 10px 15px 0px 20px;
+  background-color: #6c70eb;
+	margin: 15px 15px 0px 15px;
   padding: 0px 15px 0px 0px;
 	border-spacing: 0;
 }
 
 table.ylaframe td {
+  background-color: #ffffff;
   vertical-align: middle;
 }
 
@@ -299,14 +304,14 @@ table.ylaframe td.ylapalkki {
 
 div.showhide_yla {
   position:fixed;
-  top:5px;
-  left:3px;
+  top:2px;
+  left:40%;
 }
 
 div.showhide_vasen {
   position:fixed;
-  top:12px;
-  left:3px;
+  top:85px;
+  left:2px;
 }
 
 div.lopetus {

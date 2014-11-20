@@ -603,7 +603,7 @@ function echo_matkalaskuraportti_form($request_params) {
   echo "</tr>";
   echo "<tr>";
   echo "<td>";
-  echo "<select id='tuotetyypit' multiple='multiple' name='tuotetyypit[]'>";
+  echo "<select id='tuotetyypit' multiple='multiple' class='multipleselect' name='tuotetyypit[]'>";
   $sel = "";
   foreach ($tuotetyypit as $tuotetyyppi_key => $tuotetyyppi_value) {
     if (is_array($request_params['tuotetyypit']) and in_array($tuotetyyppi_key, $request_params['tuotetyypit'])) {

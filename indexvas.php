@@ -5,6 +5,9 @@ if (@include_once "inc/parametrit.inc");
 elseif (@include_once "parametrit.inc");
 else exit;
 
+
+echo "<div id = 'indexvas_container'>";
+
 // estet‰‰n errorit tyhj‰st‰ arrayst‰
 if (!isset($menu)) $menu = array();
 if (!isset($tultiin)) $tultiin = "";
@@ -205,8 +208,9 @@ while ($orow = mysql_fetch_array($result)) {
   }
 }
 echo "</table><br>";
+echo "</div>";
 
-echo "<div class='showhide_vasen' id='maaginen_vasen'><img src='{$palvelin2}pics/lullacons/switch_gray.png'></div>";
+echo "<div class='showhide_vasen' id='maaginen_vasen'><img id='showhide_left' src='{$palvelin2}pics/facelift/hide_left.png'></div>";
 
 echo "
   <script>
@@ -217,12 +221,16 @@ echo "
       });
 
       $(document).ready(function(){
-        $(\"#maaginen_vasen\").click(function(){
-           if (parent.document.getElementsByTagName('frameset')[1].cols==\"345,*\") {
-             parent.document.getElementsByTagName('frameset')[1].cols=\"20,*\";
+        $('#maaginen_vasen').click(function(){
+           if (parent.document.getElementsByTagName('frameset')[1].cols=='285,*') {
+             parent.document.getElementsByTagName('frameset')[1].cols='20,*';
+             $('#indexvas_container').hide();
+             $('#showhide_left').attr('src', '{$palvelin2}pics/facelift/show_left.png');
            }
            else {
-             parent.document.getElementsByTagName('frameset')[1].cols=\"345,*\";
+             parent.document.getElementsByTagName('frameset')[1].cols='285,*';
+              $('#indexvas_container').show();
+             $('#showhide_left').attr('src', '{$palvelin2}pics/facelift/hide_left.png');
            }
         });
       });

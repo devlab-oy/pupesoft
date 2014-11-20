@@ -29815,6 +29815,30 @@ if (!function_exists("rakenna_relex_tuote_parametrit")) {
   }
 }
 
+if (!function_exists('aseta_kukarow_kesken')) {
+  function aseta_kukarow_kesken($kesken) {
+    global $kukarow, $yhtiorow;
+
+    if ($kesken === '' or $kesken === null) {
+      return false;
+    }
+
+    $query = "UPDATE kuka
+              SET kesken = {$kesken}
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND kuka    = '{$kukarow['kuka']}'";
+    pupe_query($query);
+
+    $kukarow["kesken"] = $kesken;
+
+    if (mysql_affected_rows() == 1) {
+      return true;
+    }
+
+    return false;
+  }
+}
+
 if (!function_exists("hae_saldo")) {
   function hae_saldo($tuote, $tyyppi = '') {
     global $kukarow, $yhtiorow, $maa;

@@ -1501,6 +1501,20 @@ if ($fieldname == "salli_jyvitys_tarjouksella") {
   $jatko = 0;
 }
 
+if ($fieldname == "naytetaan_tilausvahvistusnappi") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array();
+  $sel[$trow[$i]] = "selected";
+
+  $ulos .= "<option value = ''>".t("Ei n‰ytet‰ 'N‰yt‰ tilausvahvistus' -painiketta myyntitilauksella");
+  $ulos .= "<option value = 'K' $sel[K]>".t("N‰ytet‰‰n 'N‰yt‰ tilausvahvistus' -painike myyntitilauksella");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "rivinumero_syotto") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

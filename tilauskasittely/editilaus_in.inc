@@ -356,7 +356,7 @@ while ($tietue = fgets($fd)) {
   fseek($fd, $positio);
 
   // Tuoterivi vaihtuu ilman selke‰t‰ rivinloppumismerkki‰....
-  if ($edi_tyyppi == "edifact911" and $tunnus == "QTY" and $next_tunnus == "LIN") {
+  if ($edi_tyyppi == "edifact911" and $tunnus == "QTY") { //and $next_tunnus == "LIN"
     $tunnus = "QTYLIN";
   }
 
@@ -1891,7 +1891,7 @@ while ($tietue = fgets($fd)) {
       }
       else {
         $trow = mysql_fetch_assoc($result);
-        $edi_ulos .= t("Rivi")." $rivinumero ".t("Tuote")." $trow[tuoteno] / EAN: $tieto ";
+        $edi_ulos .= t("1894 Rivi")." $rivinumero ".t("Tuote")." $trow[tuoteno] / EAN: $tieto ";
         $tuoteno = $trow['tuoteno'];
         $tuoteerror = 0; // tuote ok
       }
@@ -1956,7 +1956,7 @@ while ($tietue = fgets($fd)) {
   case 'OSTOTILRIV.OTR_TILATTUMAARA' :
   case 'QTY':
   case 'QTYLIN':
-
+echo "1959 $tunnus <br><br>";
     if ($edi_tyyppi != "edifact911") {
       //Tilattava m‰‰r‰
       $tieto = str_replace(",", ".", $tieto);
@@ -2183,7 +2183,7 @@ while ($tietue = fgets($fd)) {
           else {
             $hyvityssaannon_palautuskielto = "";
           }
-
+echo "2186 lisaarivi <br><br><br><br>";
           require "lisaarivi.inc";
 
           $edi_ulos .= "\n";

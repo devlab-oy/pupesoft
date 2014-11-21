@@ -354,9 +354,17 @@ while ($tietue = fgets($fd)) {
   $next_tietue = fgets($fd);
   $next_tunnus = trim(substr($next_tietue, 0, 3));
   fseek($fd, $positio);
+echo "357 $crossdock911 <br><br>";
+
+  $rivinvaihto = $edi_tyyppi == "edifact911";
+  $rivinvaihto = ($rivinvaihto and $tunnus == "QTY");
+
+  if ($crossdock911 == "JOO") {
+    $rivinvaihto = ($rivinvaihto and $next_tunnus == "LIN");
+  }
 
   // Tuoterivi vaihtuu ilman selkeätä rivinloppumismerkkiä....
-  if ($edi_tyyppi == "edifact911" and $tunnus == "QTY") {
+  if ($rivinvaihto) {
     $tunnus = "QTYLIN";
   }
 

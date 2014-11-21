@@ -135,7 +135,10 @@ if ($tee == 'T') {
             ORDER BY erpcm";
   $result = pupe_query($query);
 
-  echo "<table><tr>";
+  pupe_DataTables(array(array($pupe_DataTables[0], 11, 11, false, false, false)));
+
+  echo "<table class='display dataTable' id='$pupe_DataTables[0]'>";
+  echo "<tr>";
   echo "<th>".t("Tapvm")."</th>";
   echo "<th>".t("Kapvm")."</th>";
   echo "<th>".t("Eräpvm")."</th>";

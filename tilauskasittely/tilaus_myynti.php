@@ -6368,17 +6368,21 @@ if ($tee == '') {
           $pkres = pupe_query($query);
           $pkrow = mysql_fetch_row($pkres);
 
+          $lisays = 0;
+
           if ($row["perheid2"] == -1) {
-            $query  = "SELECT tuoteperhe.tunnus
-                       FROM tuoteperhe
-                       WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
-                       and tuoteperhe.isatuoteno = '$row[tuoteno]'
-                       and tuoteperhe.tyyppi     = 'L'";
-            $lisaresult = pupe_query($query);
-            $lisays = mysql_num_rows($lisaresult);
-          }
-          else {
-            $lisays = 0;
+
+            foreach ($rows as $chkrow) {
+
+              $_onko_perhe = ($row['perheid'] == $chkrow['perheid']);
+              $_onko_lapsi = ($chkrow['perheid'] != $chkrow['tunnus']);
+
+              if ($_onko_perhe and $_onko_lapsi) {
+                $lisays++;
+              }
+            }
+
+            unset($chkrow);
           }
 
           $pkrow[1] += $lisays;
@@ -6393,19 +6397,20 @@ if ($tee == '') {
             # isän rowspanlisäys
             $pknum += 1;
 
-            $query  = "SELECT tuoteperhe.tuoteno
-                       FROM tuoteperhe
-                       WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
-                       and tuoteperhe.isatuoteno = '$row[tuoteno]'
-                       and tuoteperhe.tyyppi     = 'P'";
-            $lisaresult_x = pupe_query($query);
+            foreach ($rows as $chkrow) {
 
-            while ($lisays_x = mysql_fetch_assoc($lisaresult_x)) {
-              $vastaavat = new Vastaavat($lisays_x["tuoteno"]);
-              $ketjut = explode(",", $vastaavat->getIDt());
+              $_onko_perhe = ($row['perheid'] == $chkrow['perheid']);
+              $_onko_lapsi = ($chkrow['perheid'] != $chkrow['tunnus']);
 
-              $pknum += 1;
+              if ($_onko_perhe and $_onko_lapsi) {
+                $vastaavat = new Vastaavat($chkrow["tuoteno"]);
+                $ketjut = explode(",", $vastaavat->getIDt());
+
+                $pknum += count($ketjut);
+              }
             }
+
+            unset($chkrow);
           }
 
           echo "<tr>";

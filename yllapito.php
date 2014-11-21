@@ -2257,10 +2257,13 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     echo "<th>".t('K‰yt‰ kohteen suosituinta p‰iv‰‰')."</th>";
     echo "<td><button id='suosituimmat_paivat' type='button'>".t('K‰yt‰')."</button></td>";
     echo "</tr>";
-    $query = "SELECT DISTINCT selite
+    $query = "SELECT selite,
+              selitetark
               FROM tuotteen_avainsanat
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND laji = 'tyomaarayksen_ryhmittely'";
+              AND laji = 'tyomaarayksen_ryhmittely'
+              GROUP BY 1,2
+              ORDER BY selitetark DESC";
     $toimenpide_result = pupe_query($query);
     $toimenpide_tyypit = array();
     while ($toimenpide_tyyppi = mysql_fetch_assoc($toimenpide_result)) {

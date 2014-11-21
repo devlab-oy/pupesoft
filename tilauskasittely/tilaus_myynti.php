@@ -9106,7 +9106,7 @@ if ($tee == '') {
 
         $aika = hae_vahvistusviesti_lahetetty($tilausnumero);
 
-        $vahvistus_teksti = $aika ? t("Vahvistusviesti on lähetetty asiakkaalle") .
+        $vahvistus_teksti = $aika ? t("Vahvistusviesti on lähetetty asiakkaalle viimeksi") .
                                     " " .
                                     "<time datetime='{$aika}'>{$aika}</time>" : "";
 

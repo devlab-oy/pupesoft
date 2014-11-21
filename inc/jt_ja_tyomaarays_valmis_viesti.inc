@@ -85,7 +85,7 @@ function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $tyomaarays
     $vastaus = $vastaus[0];
 
     if ($vastaus == "OK") {
-      paivita_vahvistusviesti_lahetetty($tilausnumero);
+      paivita_vahvistusviesti_lahetetty($tilausnumero, $tilaus, $otsikko, $viesti, $asiakas);
 
       $lahetetty = true;
     }
@@ -110,7 +110,8 @@ function hae_asiakas_vahvistusta_varten($tunnus) {
   global $kukarow;
 
   $query  = "SELECT gsm,
-             email
+             email,
+             ytunnus
              FROM  asiakas
              WHERE yhtio  = '{$kukarow['yhtio']}'
              AND   tunnus = '{$tunnus}'";
@@ -166,14 +167,24 @@ function loytyy_jt_riveja($tilausnumero) {
   return false;
 }
 
-function paivita_vahvistusviesti_lahetetty($tilausnumero) {
+function paivita_vahvistusviesti_lahetetty($tilausnumero, $tilaus, $otsikko, $viesti, $asiakas) {
   global $kukarow;
 
+  $viesti = "{$otsikko}\n{$viesti}";
+
   $query =
-    "UPDATE laskun_lisatiedot
-     SET vahvistusviesti_lahetetty = now()
-     WHERE yhtio = '{$kukarow['yhtio']}'
-     AND otunnus = {$tilausnumero}";
+    "INSERT INTO kalenteri
+     SET tapa     = 'Vahvistusviesti',
+     asiakas      = '{$asiakas["ytunnus"]}',
+     liitostunnus = {$tilaus["liitostunnus"]},
+     otunnus      = {$tilausnumero},
+     kuka         = '{$kukarow["kuka"]}',
+     yhtio        = '{$kukarow["yhtio"]}',
+     tyyppi       = 'Memo',
+     pvmalku      = now(),
+     kentta01     = '{$viesti}',
+     laatija      = '{$kukarow["kuka"]}',
+     luontiaika   = now()";
 
   return pupe_query($query);
 }
@@ -182,15 +193,19 @@ function hae_vahvistusviesti_lahetetty($tilausnumero) {
   global $kukarow;
 
   $query =
-    "SELECT vahvistusviesti_lahetetty
-     FROM laskun_lisatiedot
-     WHERE yhtio = '{$kukarow['yhtio']}'
-     AND otunnus = {$tilausnumero}";
+    "SELECT luontiaika
+     FROM kalenteri
+     WHERE yhtio = '{$kukarow["yhtio"]}'
+     AND    tapa = 'Vahvistusviesti'
+     AND  tyyppi = 'Memo'
+     AND otunnus = {$tilausnumero}
+     ORDER BY luontiaika DESC
+     LIMIT 1";
 
   $result = pupe_query($query);
 
   $aika = mysql_fetch_assoc($result);
-  $aika = $aika["vahvistusviesti_lahetetty"];
+  $aika = $aika["luontiaika"];
 
   if (empty($aika)) {
     return false;

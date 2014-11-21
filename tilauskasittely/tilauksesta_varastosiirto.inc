@@ -358,30 +358,6 @@ if (!function_exists('luo_varastosiirto')) {
   }
 }
 
-if (!function_exists('aseta_kukarow_kesken')) {
-  function aseta_kukarow_kesken($kesken) {
-    global $kukarow, $yhtiorow;
-
-    if ($kesken === '' or $kesken === null) {
-      return false;
-    }
-
-    $query = "UPDATE kuka
-              SET kesken = {$kesken}
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND kuka    = '{$kukarow['kuka']}'";
-    pupe_query($query);
-
-    $kukarow["kesken"] = $kesken;
-
-    if (mysql_affected_rows() == 1) {
-      return true;
-    }
-
-    return false;
-  }
-}
-
 if (!function_exists('aseta_varastosiirto_vastaanotetuksi')) {
   function aseta_varastosiirto_vastaanotetuksi($varastosiirto, $varastosiirtorivit, $_poikkeavalaskutuspvm) {
     global $kukarow, $yhtiorow;

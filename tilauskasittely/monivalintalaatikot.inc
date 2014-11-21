@@ -74,6 +74,7 @@ else {
 }
 
 // Setataan muuttujat
+$lisa_haku_toimi         = "";
 $lisa_haku_osasto        = "";
 $lisa_haku_try           = "";
 $lisa_haku_tme           = "";
@@ -128,6 +129,7 @@ else {
 }
 
 // Setataan muuttujat
+if (!isset($mul_toimi))         $mul_toimi = array();
 if (!isset($mul_osasto))        $mul_osasto = array();
 if (!isset($mul_try))           $mul_try = array();
 if (!isset($mul_tme))           $mul_tme = array();
@@ -192,8 +194,37 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   }
 }
 
+$mul_toimi = array_filter($mul_toimi);
+
 // jos on valittu jotakin dropdowneista (muu kuin osasto) niin tehdään niillä rajaukset muihin dropdowneihin
-if (count($mul_osasto) > 0 or count($mul_try) > 0 or count($mul_tme) > 0 or trim($dynaaminen_check) != '') {
+if (count($mul_toimi) > 0 or count($mul_osasto) > 0 or count($mul_try) > 0 or count($mul_tme) > 0 or trim($dynaaminen_check) != '') {
+
+  if (count($mul_toimi) > 0) {
+    $toimittajat = '';
+
+    foreach ($mul_toimi as $toimittaja) {
+        $toimittajat .= "$toimittaja,";
+        $ulisa .= "&mul_toimi[]=".rawurlencode($toimittaja);
+    }
+
+    $toimittajat = trim(substr($toimittajat, 0, -1), ',');
+
+    $query = "SELECT group_concat(quote(tuoteno))
+              FROM tuotteen_toimittajat
+              WHERE yhtio = '{$yhtiorow['yhtio']}'
+              AND liitostunnus IN ({$toimittajat})";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) > 0) {
+      $tuotenumerot = mysql_result($result, 0);
+      if (trim($tuotenumerot) != '') {
+        $tuotenumerot = mysql_result($result, 0);
+        $lisa_haku_toimi = " and tuote.tuoteno in ($tuotenumerot) ";
+        $lisa .= " and tuote.tuoteno in ($tuotenumerot) ";
+      }
+    }
+  }
+
   if (count($mul_osasto) > 0) {
     $osastot = '';
 
@@ -714,7 +745,8 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     echo "<div style='clear: both;'><br></div>";
   }
 
-  if ($monivalintalaatikko == "osasto") {
+  if ($monivalintalaatikko == "toimi") {
+
     if (isset($monivalinta_tuotteet)) {
       $query = "SELECT DISTINCT avainsana.selite,
                 $kieli_selitetark,
@@ -731,6 +763,96 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                 ORDER BY avainsana.selitetark";
     }
     else {
+      $query = "SELECT toimi.nimi, toimi.tunnus
+                FROM toimi
+                RIGHT JOIN tuotteen_toimittajat AS tt
+                ON tt.yhtio = toimi.yhtio
+                AND tt.liitostunnus = toimi.tunnus
+                WHERE toimi.yhtio = '$kukarow[yhtio]'
+                GROUP BY toimi.nimi";
+    }
+    $sresult = pupe_query($query);
+
+    if (mysql_num_rows($sresult) == 0) {
+      $query = "SELECT DISTINCT tuote.osasto selite, tuote.osasto selitetark
+                FROM tuote
+                WHERE tuote.yhtio  = '$kukarow[yhtio]'
+                and tuote.osasto  != ''
+                $kieltolisa
+                $extra_poislisa
+                $poislisa_mulsel
+                ORDER BY 1, 2";
+      $sresult = pupe_query($query);
+    }
+
+    if (mysql_num_rows($sresult) > 1) {
+
+      $multiple_lisa = " multiple='multiple' size='7' style='width: 100%;' ";
+
+      if (in_array("toimi", $monivalintalaatikot_normaali)) {
+        $multiple_lisa = "";
+      }
+
+      echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+
+      if ($piirra_otsikot) {
+        echo "<tr><th>";
+
+        if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
+          echo "<label>";
+        }
+
+        echo t("Toimittaja");
+
+        if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
+          echo "</label>";
+        }
+
+        echo "</th></tr>";
+      }
+
+      echo "<tr><td nowrap style='padding:0px'><select name='mul_toimi[]' $multiple_lisa $autosubmit>";
+      echo "<option value=''>".t("Ei valintaa")."</option>";
+
+      while ($sxrow = mysql_fetch_assoc($sresult)) {
+        $sel = '';
+
+        if (count($mul_toimi) > 0) {
+          if (in_array(strtolower(trim($sxrow['tunnus'])), $mul_toimi)) {
+            $sel = 'SELECTED';
+          }
+        }
+
+        echo "<option value='".strtolower($sxrow['tunnus'])."' $sel>";
+
+        echo "$sxrow[nimi]</option>";
+      }
+
+      echo "</select></td>";
+      echo "</tr>";
+
+      echo "</table></div>";
+    }
+  }
+
+  if ($monivalintalaatikko == "osasto") {
+    if (isset($monivalinta_tuotteet)) {
+      $query = "SELECT DISTINCT avainsana.selite,
+                $kieli_selitetark,
+                sum(if(tuote.status not in ('P','X'), 1, (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0))) naytetaanko
+                FROM tuote
+                JOIN avainsana ON (avainsana.yhtio = tuote.yhtio AND avainsana.selite = tuote.osasto AND avainsana.laji = 'OSASTO' AND avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
+                WHERE tuote.yhtio = '$kukarow[yhtio]'
+                $lisa_haku_toimi
+                $kieltolisa
+                $extra_poislisa
+                $poislisa_mulsel
+                AND tuote.tuoteno in ($monivalinta_tuotteet)
+                GROUP BY 1,2
+                HAVING naytetaanko > 0
+                ORDER BY avainsana.selitetark";
+    }
+    elseif ($lisa_haku_toimi == "") {
       $query = "SELECT DISTINCT avainsana.selite,
                 $kieli_selitetark
                 FROM avainsana
@@ -740,6 +862,18 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                 $avainlisa
                 $orderlisa";
     }
+    else {
+      $query = "SELECT distinct avainsana.selite,
+                $kieli_selitetark
+                FROM tuote
+                JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'OSASTO' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
+                WHERE tuote.yhtio = '$kukarow[yhtio]'
+                $lisa_haku_toimi
+                $kieltolisa
+                $extra_poislisa
+                $poislisa_mulsel
+                $orderlisa";
+    }
     $sresult = pupe_query($query);
 
     if (mysql_num_rows($sresult) == 0) {
@@ -747,6 +881,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                 FROM tuote
                 WHERE tuote.yhtio  = '$kukarow[yhtio]'
                 and tuote.osasto  != ''
+                $lisa_haku_toimi
                 $kieltolisa
                 $extra_poislisa
                 $poislisa_mulsel
@@ -826,6 +961,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                 FROM tuote
                 JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
                 WHERE tuote.yhtio = '$kukarow[yhtio]'
+                $lisa_haku_toimi
                 $lisa_haku_osasto
                 $kieltolisa
                 $extra_poislisa
@@ -835,7 +971,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                 HAVING naytetaanko > 0
                 ORDER BY avainsana.selitetark";
     }
-    elseif ($lisa_haku_osasto == "") {
+    elseif ($lisa_haku_toimi == "" and $lisa_haku_osasto == "") {
       $query = "SELECT DISTINCT avainsana.selite,
                 $kieli_selitetark
                 FROM avainsana
@@ -845,12 +981,13 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                 $avainlisa
                 $orderlisa";
     }
-    else {
+    elseif ($lisa_haku_toimi != "" or $lisa_haku_osasto != "") {
       $query = "SELECT distinct avainsana.selite,
                 $kieli_selitetark
                 FROM tuote
                 JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'TRY' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
                 WHERE tuote.yhtio = '$kukarow[yhtio]'
+                $lisa_haku_toimi
                 $lisa_haku_osasto
                 $kieltolisa
                 $extra_poislisa
@@ -864,6 +1001,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                 FROM tuote
                 WHERE tuote.yhtio  = '$kukarow[yhtio]'
                 and tuote.try     != ''
+                $lisa_haku_toimi
                 $lisa_haku_osasto
                 $kieltolisa
                 $extra_poislisa
@@ -944,6 +1082,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                 FROM tuote
                 JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.tuotemerkki = avainsana.selite and avainsana.laji = 'TUOTEMERKKI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
                 WHERE tuote.yhtio = '$kukarow[yhtio]'
+                $lisa_haku_toimi
                 $lisa_haku_osasto
                 $lisa_haku_try
                 $kieltolisa
@@ -955,7 +1094,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                 ORDER BY avainsana.selite";
       $tmsresult = pupe_query($query);
     }
-    elseif ($lisa_haku_osasto == "" and $lisa_haku_try == "" and $lisa_dynaaminen["tuote"] == "") {
+    elseif ($lisa_haku_toimi == "" and $lisa_haku_osasto == "" and $lisa_haku_try == "" and $lisa_dynaaminen["tuote"] == "") {
       $query = "SELECT avainsana.selite as tme,
                 $kieli_selite
                       FROM avainsana
@@ -966,13 +1105,14 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                       ORDER BY avainsana.jarjestys, avainsana.selite";
       $tmsresult = pupe_query($query);
     }
-    elseif ($lisa_haku_osasto != "" or $lisa_haku_try != "" or $lisa_dynaaminen["tuote"] != "") {
+    elseif ($lisa_haku_toimi != "" or $lisa_haku_osasto != "" or $lisa_haku_try != "" or $lisa_dynaaminen["tuote"] != "") {
       $query = "SELECT distinct avainsana.selite as tme,
                 $kieli_selite
                 FROM tuote
                 {$lisa_dynaaminen["tuote"]}
                 JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.tuotemerkki = avainsana.selite and avainsana.laji = 'TUOTEMERKKI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
                 WHERE tuote.yhtio = '$kukarow[yhtio]'
+                $lisa_haku_toimi
                 $lisa_haku_osasto
                 $lisa_haku_try
                 $lisa_haku_malli
@@ -990,6 +1130,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                 $lisa_parametri
                 WHERE tuote.yhtio      = '$kukarow[yhtio]'
                 and tuote.tuotemerkki != ''
+                $lisa_haku_toimi
                 $lisa_haku_osasto
                 $lisa_haku_try
                 $kieltolisa
@@ -1060,7 +1201,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   if ($monivalintalaatikko == "malli/mallitark" or $monivalintalaatikko == "malli") {
     unset($sxresult);
 
-    if (($lisa_haku_osasto != "" or $lisa_haku_try != "")) {
+    if (($lisa_haku_toimi != "" or $lisa_haku_osasto != "" or $lisa_haku_try != "")) {
 
       if (($lisa_haku_tme != '' or $lisa_haku_try != '') and ($monivalintalaatikko == "malli" or (!in_array("malli", $monivalintalaatikot) and $monivalintalaatikko == 'malli/mallitark'))) {
         // malli dropdown
@@ -1071,6 +1212,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                     FROM tuote
                     JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.malli = avainsana.selite and avainsana.laji = 'MALLI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
                     WHERE tuote.yhtio = '$kukarow[yhtio]'
+                    $lisa_haku_toimi
                     $lisa_haku_osasto
                     $lisa_haku_try
                     $lisa_haku_tme
@@ -1101,6 +1243,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                     $lisa_parametri
                     JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.malli = avainsana.selite and avainsana.laji = 'MALLI' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
                     WHERE tuote.yhtio = '$kukarow[yhtio]'
+                    $lisa_haku_toimi
                     $lisa_haku_osasto
                     $lisa_haku_try
                     $lisa_haku_tme
@@ -1116,6 +1259,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                     FROM tuote
                     WHERE tuote.yhtio  = '$kukarow[yhtio]'
                     and tuote.malli   != ''
+                    $lisa_haku_toimi
                     $lisa_haku_osasto
                     $lisa_haku_try
                     $lisa_haku_tme
@@ -1195,6 +1339,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                     FROM tuote
                     JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.mallitarkenne = avainsana.selite and avainsana.laji = 'MALLITARKENNE' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
                     WHERE tuote.yhtio = '$kukarow[yhtio]'
+                    $lisa_haku_toimi
                     $lisa_haku_osasto
                     $lisa_haku_try
                     $lisa_haku_tme
@@ -1226,6 +1371,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                     $lisa_parametri
                     JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.mallitarkenne = avainsana.selite and avainsana.laji = 'MALLITARKENNE' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
                     WHERE tuote.yhtio = '$kukarow[yhtio]'
+                    $lisa_haku_toimi
                     $lisa_haku_osasto
                     $lisa_haku_try
                     $lisa_haku_tme
@@ -1242,6 +1388,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                     FROM tuote
                     WHERE tuote.yhtio        = '$kukarow[yhtio]'
                     and tuote.mallitarkenne != ''
+                    $lisa_haku_toimi
                     $lisa_haku_osasto
                     $lisa_haku_try
                     $lisa_haku_tme

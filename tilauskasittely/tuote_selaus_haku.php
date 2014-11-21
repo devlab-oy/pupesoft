@@ -693,7 +693,7 @@ if ($verkkokauppa == "") {
   }
   else {
     // Oletus
-    $monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI", "MALLI", "MALLI/MALLITARK", "<br>DYNAAMINEN_TUOTE");
+    $monivalintalaatikot = array("TOIMI", "OSASTO", "TRY", "TUOTEMERKKI", "MALLI", "MALLI/MALLITARK", "<br>DYNAAMINEN_TUOTE");
     $monivalintalaatikot_normaali = array();
   }
 

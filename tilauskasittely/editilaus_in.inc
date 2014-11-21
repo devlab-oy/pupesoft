@@ -354,7 +354,6 @@ while ($tietue = fgets($fd)) {
   $next_tietue = fgets($fd);
   $next_tunnus = trim(substr($next_tietue, 0, 3));
   fseek($fd, $positio);
-echo "357 $crossdock911 <br><br>";
 
   $rivinvaihto = $edi_tyyppi == "edifact911";
   $rivinvaihto = ($rivinvaihto and $tunnus == "QTY");

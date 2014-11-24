@@ -203,7 +203,7 @@ if ($_SERVER['REMOTE_ADDR'] == '82.181.128.118') {
     // PUPESOFT-FINVOICE
     tsekkaa_verkkolaskufile("{$pupe_root_polku}/dataout/sisainenfinvoice_error/");
 
-    echo "Verkkolaskujen FTP-lahetys OK $STATE_OK";
+    echo "OK - Verkkolaskujen FTP-lahetys OK $STATE_OK";
     exit;
   }
 

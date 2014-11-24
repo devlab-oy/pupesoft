@@ -68,7 +68,7 @@ class Logger {
    * @return string
    */
   private function exception_message($exception, $message = '') {
-    return "{$message} (" . $exception->getMessage() . ") faultcode: " . $exception->faultcode;
+    return "{$message} (" . $exception->getMessage() . ")";
   }
 
   /**

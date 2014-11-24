@@ -2657,7 +2657,7 @@ if ($tila == "" and !isset($jatka)) {
 
     $string .= "</td>";
 
-    $vasen_sarake[3] = $string;
+    $vasen_sarake[2] = $string;
 
     // Ekotetan sarakkeet!
     $rivicount = count($vasen_sarake) > count($oikea_sarake) ? count($vasen_sarake) : count($oikea_sarake);

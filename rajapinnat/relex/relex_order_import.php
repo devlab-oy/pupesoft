@@ -42,6 +42,8 @@ if ($php_cli) {
     die ("Yhtiˆ $kukarow[yhtio] ei lˆydy!");
   }
 
+  $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
+
   $tee = 'aja';
 }
 else {
@@ -207,6 +209,18 @@ if (isset($tee) and trim($tee) == 'aja') {
     // Ei lˆydy, tehd‰‰n uus tilaus
     if (mysql_num_rows($result) == 0) {
 
+      $query = "SELECT tunnus, nimi
+                FROM kuka
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND myyja   = '{$tuote['ostajanro']}'
+                AND myyja   > 0
+                ORDER BY tunnus
+                LIMIT 1";
+      $ostajaresult = pupe_query($query);
+      $ostajarow = mysql_fetch_assoc($ostajaresult);
+
+      $kukarow['nimi'] = $ostajarow['nimi'];
+
       $params = array(
         'liitostunnus'            => $toimittaja["tunnus"],
         'nimi'                    => $varasto['nimi'],
@@ -217,18 +231,19 @@ if (isset($tee) and trim($tee) == 'aja') {
         'maa'                     => $varasto['maa'],
         'varasto'                 => $varasto['tunnus'],
         'myytil_toimaika'         => $ehdotus_pvm,
+        'myytil_myyja'            => $ostajarow['tunnus'],
         'tilaustyyppi'            => $tilaustyyppi,
         'myytil_viesti'           => t("Relex-ostotilaus"),
         'ostotilauksen_kasittely' => "GEN", // t‰ll‰ erotellaan generoidut ja k‰sin tehdyt ostotilaukset
       );
 
       $laskurow = luo_ostotilausotsikko($params);
-      $kukarow['kesken'] = $laskurow['tunnus'];
     }
     else {
       $laskurow = mysql_fetch_assoc($result);
-      $kukarow['kesken'] = $laskurow['tunnus'];
     }
+
+    aseta_kukarow_kesken($laskurow['tunnus']);
 
     $params = array(
       "trow"      => $tuote,
@@ -247,6 +262,9 @@ if (isset($tee) and trim($tee) == 'aja') {
 
     echo "Lis‰t‰‰n tuote {$tuote["tuoteno"]} $quantity {$tuote["yksikko"]} tilaukselle {$laskurow["tunnus"]}.<br>";
   }
+
+  aseta_kukarow_kesken(0);
+
 }
 
 if (!$php_cli) {

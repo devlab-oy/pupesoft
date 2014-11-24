@@ -1435,7 +1435,7 @@ while ($tietue = fgets($fd)) {
 
       $toimitetaan_tanne = (isset($toimovttunnus) and !empty($toimovttunnus)) ? $toimovttunnus : $arow['toim_ovttunnus'];
 
-      $varasto = array(0);
+      $varasto = array();
 
       if ($edi_tyyppi == "magento") {
         // Nämä ovat ainoat varastot joista verkkokauppa saa myydä
@@ -1508,6 +1508,12 @@ while ($tietue = fgets($fd)) {
       // Jos asiakas on syöttänyt verkkokaupassa oman tilausnumeron tai viitteen yliajetaan viesti
       if (trim($ot_verkkokauppa_tilausviesti) != "") {
         $viite = $ot_verkkokauppa_tilausviesti;
+      }
+
+      // Tässä hallitaan se tapaus jos varasto muuttuja onkin tyhjä
+      $insertvarasto = array(0);
+      if (!empty($varasto)) {
+        $insertvarasto = $varasto;
       }
 
       // Lisätään otsikko
@@ -1583,7 +1589,7 @@ while ($tietue = fgets($fd)) {
                 toim_email              = '$arow[toim_email]',
                 tunnusnippu             = '',
                 valkoodi                = '$yhtiorow[valkoodi]',
-                varasto                 = '{$varasto[0]}',
+                varasto                 = '{$insertvarasto[0]}',
                 verkkotunnus            = '$arow[verkkotunnus]',
                 vienti                  = '$til_vienti',
                 vienti_kurssi           = '1',

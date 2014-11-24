@@ -762,7 +762,7 @@ if ($tee == 'VALMIS') {
               $selite = t("Saldoa")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("v‰hennettiin")." ".abs($erotus)." ".t("kappaleella. Saldo nyt")." $cursaldo. <br>$lisaselite<br>$inven_laji";
             }
             else {
-              $selite = t("Saldo")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("t‰sm‰si.")." <br>$lisaselite<br>$inven_laji";
+              $selite = t("Saldo")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("t‰sm‰si").".<br>$lisaselite<br>$inven_laji";
             }
 
             ///* Tehd‰‰n tapahtuma *///
@@ -1150,7 +1150,7 @@ if ($tee == 'VALMIS') {
       $tapresult = pupe_query($query);
       $taptrow = mysql_fetch_assoc($tapresult);
 
-      if (!empty($taptrow['selite']) and strpos($taptrow['selite'], "t‰sm‰si") === false) {
+      if (!empty($taptrow['selite']) and strpos($taptrow['selite'], t("t‰sm‰si")) === false) {
 
         $_loytyyko = true;
 

@@ -42,6 +42,8 @@ if ($php_cli) {
     die ("Yhtiö $kukarow[yhtio] ei löydy!");
   }
 
+  $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
+
   $tee = 'aja';
 }
 else {
@@ -164,8 +166,28 @@ if (isset($tee) and trim($tee) == 'aja') {
 
     // Ei löydy, tehdään uus siirto
     if (empty($varastosiirto)) {
+
       aseta_kukarow_kesken(0);
-      $varastosiirto = luo_varastosiirto($lahde["tunnus"], $kohde["tunnus"], "", "", "G");
+
+      $ttqry = "SELECT tpa.tunnus
+                FROM avainsana AS ana
+                JOIN toimitustapa AS tpa
+                ON ( ana.yhtio = tpa.yhtio AND ana.selitetark_2 = tpa.tunnus )
+                WHERE ana.yhtio    = '$kukarow[yhtio]'
+                AND ana.laji       = 'SIIRTOVARASTOT'
+                AND ana.selite     = '{$lahde["tunnus"]}'
+                AND ana.selitetark = '{$kohde["tunnus"]}'";
+      $ttresult = pupe_query($ttqry);
+
+      if (mysql_num_rows($ttresult) > 0) {
+        $ttrow = mysql_fetch_assoc($ttresult);
+        $def_toimitustapa = $ttrow['tunnus'];
+      }
+      else {
+        $def_toimitustapa = '';
+      }
+
+      $varastosiirto = luo_varastosiirto($lahde["tunnus"], $kohde["tunnus"], $def_toimitustapa, "", "G");
     }
 
     aseta_kukarow_kesken($varastosiirto['tunnus']);
@@ -180,6 +202,9 @@ if (isset($tee) and trim($tee) == 'aja') {
 
     echo "Lisätään tuote {$tuote["tuoteno"]} $quantity {$tuote["yksikko"]} siirtolistalle {$varastosiirto["tunnus"]}.<br>";
   }
+
+  aseta_kukarow_kesken(0);
+
 }
 
 if (!$php_cli) {

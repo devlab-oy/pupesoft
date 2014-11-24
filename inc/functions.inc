@@ -18594,7 +18594,7 @@ if (!function_exists("tee_keraysera")) {
 
           $xxx = 1;
 
-          for ($i = 1; $i <= $tuoterow['y_maara']; $i++) {
+          for ($i = 1; $i < $tuoterow['y_maara']; $i++) {
             if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1240): $i. tuote <br>\n";
 
             if ($tuoterow['myynti_era'] > 1 and ($pakkaukset[$kaytettava_pakkaus]['tilavuus'] < ($pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] + $tuoterow['y_koko']) or $pakkaukset[$kaytettava_pakkaus]['paino'] < ($pakkaukset[$kaytettava_pakkaus]['kaytetty_paino'] + $tuoterow['y_paino']))) {
@@ -28310,7 +28310,7 @@ if (!function_exists('sallitut_varastot')) {
         return $kukarow_varasto;
       }
     }
-    
+
     // Ei löytynyt vielä yhtään varastoa, otetaan varastot käyttäjän tiedoista
     if (trim($kukarow['varasto']) != "" and strpos($kukarow['varasto'], ',') !== false) {
       return explode(",", $kukarow["varasto"]);

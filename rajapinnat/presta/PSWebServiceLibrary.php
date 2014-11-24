@@ -456,6 +456,13 @@ class PrestaShopWebservice
     curl_setopt($ch, CURLOPT_USERPWD, $this->key . ':');
     curl_setopt($ch, CURLOPT_POSTFIELDS, $imagedata);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    
+    //@TODO HUOM TÄTÄ KOHTAA ON KANS MUOKATTU. ALKU
+    if (stristr($this->url, 'https')) {
+      curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    }
+    //@TODO HUOM TÄTÄ KOHTAA ON KANS MUOKATTU. LOPPU
+        
     $response = curl_exec($ch);
 
     $index = strpos($response, "\r\n\r\n");

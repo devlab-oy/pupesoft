@@ -4565,7 +4565,7 @@ if ($tee == '') {
         require 'lisaarivi.inc';
       }
 
-      if (!empty($vaihdettava_rivi) or $_SESSION['laite_tunnus']) {
+      if ((!empty($vaihdettava_rivi) or $_SESSION['laite_tunnus']) and !isset($vaihda_rivi)) {
         if (!empty($vaihdettava_rivi)) {
           $query = "SELECT asiakkaan_positio
                     FROM tilausrivin_lisatiedot

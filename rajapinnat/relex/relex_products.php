@@ -535,7 +535,13 @@ while ($row = mysql_fetch_assoc($res)) {
     }
 
     // Valitaan edullisin toimittaja
-    array_multisort($toimittajat_a_hinta, SORT_ASC, $toimittajat_a);
+    /*
+    TODO, toistaiseksi päätoimittajaksi Pupen päätoimittaja (order by järjestys)
+    Myöhemmin lisätään tuki, että voidaan kertoa missä tapauksissa
+    otetaan halvimman hinnan mukaan ja missä Pupen päätoimittaja
+    Relexin päätoimittajaksi.
+    */
+    // array_multisort($toimittajat_a_hinta, SORT_ASC, $toimittajat_a);
   }
 
   $parastoimittaja = $toimittajat_a[0];

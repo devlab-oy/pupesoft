@@ -437,7 +437,7 @@ class PrestaShopWebservice
       throw new PrestaShopWebserviceException('Only POST and PUT are accepted');
     }
 
-    $url = "{$this->url}api/images/{$options['resource']}/{$options['id']}";
+    $url = "{$this->url}/api/images/{$options['resource']}/{$options['id']}";
     $filepath = luo_temp_tiedosto($options['attachment']);
     $imagedata = array(
         'image' => curl_file_create($filepath, $options['attachment']['filetype'], $options['attachment']['filename'])

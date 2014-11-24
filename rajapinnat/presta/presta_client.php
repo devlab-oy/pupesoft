@@ -30,6 +30,9 @@ abstract class PrestaClient {
     $this->logger = new Logger('/tmp/presta_log.txt');
     $this->logger->set_date_format('Y-m-d H:i:s');
 
+    if (substr($url, -1) == '/') {
+      $url = substr($url, 0, -1);
+    }
     $this->url = $url;
     $this->api_key = $api_key;
     $this->ws = new PrestaShopWebservice($this->url, $this->api_key);
@@ -63,7 +66,7 @@ abstract class PrestaClient {
    * Use $this-> instead of parent:: if you are going to override this class get()
    *
    * @param int $id
-   * @return SimpleXMLElement
+   * @return array
    * @throws Exception
    */
   protected function get($id) {
@@ -82,14 +85,14 @@ abstract class PrestaClient {
       throw $e;
     }
 
-    return $response_xml;
+    return xml_to_array($response_xml);
   }
 
   /**
    * Creates the given resource
    *
    * @param array $resource
-   * @return SimpleXMLElement
+   * @return array
    * @throws Exception
    */
   protected function create(array $resource) {
@@ -109,7 +112,7 @@ abstract class PrestaClient {
       throw $e;
     }
 
-    return $response_xml;
+    return xml_to_array($response_xml);
   }
 
   /**
@@ -117,7 +120,7 @@ abstract class PrestaClient {
    *
    * @param int $id
    * @param array $resource
-   * @return SimpleXMLElement
+   * @return array
    * @throws Exception
    */
   protected function update($id, array $resource) {
@@ -139,8 +142,7 @@ abstract class PrestaClient {
       throw $e;
     }
 
-    $response = xml_to_array($response_xml);
-    return $response;
+    return xml_to_array($response_xml);
   }
 
   /**
@@ -162,7 +164,7 @@ abstract class PrestaClient {
     );
 
     try {
-      $response = $this->ws->get($opt);
+      $response_xml = $this->ws->get($opt);
     }
     catch (Exception $e) {
       $msg = "Kaikkien resurssin " . $this->resource_name() . " rivien haku epäonnistui";
@@ -170,8 +172,7 @@ abstract class PrestaClient {
       throw $e;
     }
 
-    $response = xml_to_array($response);
-    return $response;
+    return xml_to_array($response_xml);
   }
 
   /**
@@ -187,7 +188,7 @@ abstract class PrestaClient {
     );
 
     try {
-      $response = $this->ws->delete($opt);
+      $response_bool = $this->ws->delete($opt);
     }
     catch (Exception $e) {
       $msg = "Resurssin: " . $this->resource_name() . " {$id} poistaminen epäonnistui";
@@ -195,7 +196,7 @@ abstract class PrestaClient {
       throw $e;
     }
 
-    return $response;
+    return $response_bool;
   }
 
   /**
@@ -279,7 +280,7 @@ abstract class PrestaClient {
     }
     catch (Exception $e) {
       $msg = "Resurssin: " . $this->resource_name() . " {$resouce_id}"
-              . " kuvan {$image_id} poistaminen epäonnistui";
+        . " kuvan {$image_id} poistaminen epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
     }

@@ -17,6 +17,10 @@ if (isset($supertee)) {
   }
 }
 
+if (function_exists("js_popup")) {
+  echo js_popup(-100);
+}
+
 echo "<font class='head'>".t("Myöhässä olevat myyntitilaukset")."</font><hr>";
 
 if (!isset($tee) or $tee != "NAYTATILAUS") {
@@ -282,12 +286,15 @@ if ($tee == "HAE") {
   }
 
   $query = "SELECT lasku.toimaika,
-            tilausrivi.tuoteno
+            tilausrivi.tuoteno,
+            trlt.korvamerkinta,
+            tilausrivi.tunnus AS tilausrivitunnus
             $selectlisa
             FROM tilausrivi use index (yhtio_tyyppi_laskutettuaika)
             JOIN lasku ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and lasku.tila IN ('L','N') and lasku.toimaika <= '$myovv-$myokk-$myopp')
             JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
             JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus)
+            JOIN tilausrivin_lisatiedot AS trlt ON (trlt.yhtio = lasku.yhtio AND trlt.tilausrivitunnus = tilausrivi.tunnus)
             $toimjoin
             WHERE tilausrivi.yhtio         = '$kukarow[yhtio]'
             and tilausrivi.tyyppi         != 'D'
@@ -475,8 +482,25 @@ if ($tee == "HAE") {
         echo "<td><font class='OK'>".t($laskutyyppi)."<br>".t($alatila)."</font></td>";
       }
       else {
-        echo "<td>".t($laskutyyppi)."<br>".t($alatila)."</td>";
+        echo "<td>".t($laskutyyppi)."<br>".t($alatila);
       }
+
+      if ($tulrow['korvamerkinta'] !== NULL) {
+
+        if (empty($tulrow['korvamerkinta'])) {
+          $luokka = '';
+        }
+        else {
+          $luokka = 'tooltip';
+        }
+
+        echo "<br><img src='{$palvelin2}pics/lullacons/info.png' class='{$luokka}' id='{$tulrow['tilausrivitunnus']}_info'>";
+        echo "<div id='div_{$tulrow['tilausrivitunnus']}_info' class='popup'>";
+        echo $tulrow['korvamerkinta'];
+        echo "</div>";
+      }
+
+      echo "</td>";
 
       echo "</tr>";
 

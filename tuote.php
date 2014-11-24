@@ -2293,6 +2293,7 @@ if ($tee == 'Z') {
                 tilausrivi.tunnus trivitunn,
                 tilausrivi.perheid,
                 tilausrivin_lisatiedot.osto_vai_hyvitys,
+                tilausrivin_lisatiedot.korvamerkinta,
                 lasku2.tunnus lasku2tunnus,
                 lasku2.laskunro lasku2laskunro,
                 concat_ws(' / ', round(tilausrivi.hinta, $yhtiorow[hintapyoristys]), $ale_query_concat_lisa round(tilausrivi.rivihinta, $yhtiorow[hintapyoristys])) tilalehinta,
@@ -2438,6 +2439,21 @@ if ($tee == 'Z') {
           }
           else {
             echo t("$prow[laji]");
+          }
+
+          if ($prow['korvamerkinta'] !== NULL) {
+
+            if (empty($prow['korvamerkinta'])) {
+              $luokka = '';
+            }
+            else {
+              $luokka = 'tooltip';
+            }
+
+            echo "&nbsp;<img src='{$palvelin2}pics/lullacons/info.png' class='{$luokka}' id='{$prow['trivitunn']}_info'>";
+            echo "<div id='div_{$prow['trivitunn']}_info' class='popup'>";
+            echo $prow['korvamerkinta'];
+            echo "</div>";
           }
 
           echo "</td>";

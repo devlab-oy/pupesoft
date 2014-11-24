@@ -317,7 +317,7 @@ if (!function_exists("pupe_error")) {
 
       echo "<font class = 'error'>";
 
-      $puperror = htmlentities($puperror, ENT_SUBSTITUTE);
+      $puperror = htmlentities($puperror);
     }
 
     if ($_display == '1' or $_pupedebug !== false) {

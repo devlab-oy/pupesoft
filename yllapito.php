@@ -2207,6 +2207,9 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
         $vuosi_vaihteluvali['min'] = 1970;
         $vuosi_vaihteluvali['max'] = date('Y', strtotime('now + 4 years'));
       }
+      if ($vva === false) {
+        $vva = date('Y');
+      }
       foreach (range($vuosi_vaihteluvali['min'], $vuosi_vaihteluvali['max']) as $vuosi) {
         if ($vva == $vuosi) {
           $sel = "SELECTED";

@@ -392,7 +392,7 @@ else {
   $_x++;
 
   //  Haetaan kaikki varastot ja luodaan kysely paljonko ko. varastoon on tilattu tavaraa..
-  $varastolisa = "";
+  $varastolisa = $varastosiirtolisa = "";
 
   if ($valitut["OSTOTVARASTOITTAIN"] != "") {
 
@@ -409,6 +409,11 @@ else {
                 concat(rpad(upper('$vrow[alkuhyllyalue]'),  5, '0'),lpad(upper('$vrow[alkuhyllynro]'),  5, '0')) <= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0')) and
                 concat(rpad(upper('$vrow[loppuhyllyalue]'), 5, '0'),lpad(upper('$vrow[loppuhyllynro]'), 5, '0')) >= concat(rpad(upper(hyllyalue), 5, '0'),lpad(upper(hyllynro), 5, '0'))
               , varattu, 0)) tilattu_$vrow[tunnus] ";
+
+      $varastosiirtolisa .= ", sum(if (tyyppi='G' and
+                concat(rpad(upper('{$vrow['alkuhyllyalue']}'),  5, '0'),lpad(upper('{$vrow['alkuhyllynro']}'),  5, '0')) <= concat(rpad(upper(tl.kohde_hyllyalue), 5, '0'),lpad(upper(tl.kohde_hyllynro), 5, '0')) and
+                concat(rpad(upper('{$vrow['loppuhyllyalue']}'), 5, '0'),lpad(upper('{$vrow['loppuhyllynro']}'), 5, '0')) >= concat(rpad(upper(tl.kohde_hyllyalue), 5, '0'),lpad(upper(tl.kohde_hyllynro), 5, '0'))
+              , varattu, 0)) tilattu_siirto_{$vrow['tunnus']}, ";
 
       $sarakkeet["SARAKE{$_x}#".$vrow["tunnus"]] = t("tilattu kpl - $vrow[nimitys]")."\t";
       $abuArray["SARAKE{$_x}#".$vrow["tunnus"]] = "SARAKE{$_x}#".$vrow["tunnus"];
@@ -1065,7 +1070,7 @@ else {
       $result   = pupe_query($query);
       $kulutrow = mysql_fetch_assoc($result);
 
-      $ennp_myynti = kappaleet_tila_myynti($row['tuoteno'], $row['yhtio'], $lisavarattu, $varastolisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa);
+      $ennp_myynti = kappaleet_tila_myynti($row['tuoteno'], $row['yhtio'], $lisavarattu, $varastosiirtolisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa);
       $ennp_osto = kappaleet_tila_osto($row['tuoteno'], $row['yhtio'], $lisavarattu, $varastolisa);
 
       $ennp = $ennp_myynti + $ennp_osto;
@@ -1264,9 +1269,12 @@ else {
         }
 
         if ($valitut["SARAKE7"] != '') {
-          $rivi .= str_replace(".", ",", $ennp['tilattu'])."\t";
 
-          $worksheet->writeNumber($excelrivi, $excelsarake, $ennp["tilattu"]);
+          $_tilattu = $ennp['tilattu'] + $ennp['siirrot'];
+
+          $rivi .= str_replace(".", ",", $_tilattu)."\t";
+
+          $worksheet->writeNumber($excelrivi, $excelsarake, $_tilattu);
           $excelsarake++;
         }
 
@@ -1300,7 +1308,7 @@ else {
 
         if ($valitut["SARAKE9A"] != '') {
 
-          $vapaa_saldo = $saldo['saldo'] + $ennp['tilattu'] - $ennp['ennpois'];
+          $vapaa_saldo = $saldo['saldo'] + $ennp['tilattu'] - $ennp['ennpois'] - $ennp['siirrot'];
 
           if ($yhtiorow['varaako_jt_saldoa'] == 'K') $vapaa_saldo -= $ennp['jt'];
 
@@ -1312,7 +1320,7 @@ else {
 
         if ($valitut["SARAKE9B"] != '') {
 
-          $myytavissa = $saldo['saldo'] - $ennp['ennpois'];
+          $myytavissa = $saldo['saldo'] - $ennp['ennpois'] - $ennp['siirrot'];
 
           if ($yhtiorow['varaako_jt_saldoa'] == 'K') $myytavissa -= $ennp['jt'];
 
@@ -1710,9 +1718,13 @@ else {
           mysql_data_seek($osvres, 0);
 
           while ($vrow = mysql_fetch_assoc($osvres)) {
-            $rivi .= str_replace(".", ",", $ennp["tilattu_".$vrow["tunnus"]])."\t";
 
-            $worksheet->write($excelrivi, $excelsarake, $ennp["tilattu_".$vrow["tunnus"]]);
+            $_tilattu_varastoittain = $ennp["tilattu_".$vrow["tunnus"]];
+            $_tilattu_varastoittain += $ennp["tilattu_siirto_".$vrow["tunnus"]];
+
+            $rivi .= str_replace(".", ",", $_tilattu_varastoittain)."\t";
+
+            $worksheet->write($excelrivi, $excelsarake, $_tilattu_varastoittain);
             $excelsarake++;
           }
 
@@ -1891,7 +1903,7 @@ else {
                 $ostohinta = substr($ostohinta, 0, -3);
                 $tuotteen_toimittajat_string = substr($tuotteen_toimittajat_string, 0, -3);
 
-                $vastaava_ennp_myynti = kappaleet_tila_myynti($_tuoteno_arr['tuoteno'], $row['yhtio'], $lisavarattu, $varastolisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa);
+                $vastaava_ennp_myynti = kappaleet_tila_myynti($_tuoteno_arr['tuoteno'], $row['yhtio'], $lisavarattu, $varastosiirtolisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa);
                 $vastaava_ennp_osto = kappaleet_tila_osto($_tuoteno_arr['tuoteno'], $row['yhtio'], $lisavarattu, $varastolisa);
 
                 $vastaava_ennp = $vastaava_ennp_myynti + $vastaava_ennp_osto;
@@ -1915,10 +1927,13 @@ else {
                 $_x++;
 
                 if ($valitut["SARAKE{$_x}"] != '') {
-                  //tilatut
-                  $rivi .= "\"{$vastaava_ennp['tilattu']}\"\t";
 
-                  $worksheet->write($excelrivi, $excelsarake, $vastaava_ennp['tilattu']);
+                  $_vast_tilattu = $vastaava_ennp['tilattu'] + $vastaava_ennp['siirrot'];
+
+                  //tilatut
+                  $rivi .= "\"{$_vast_tilattu}\"\t";
+
+                  $worksheet->write($excelrivi, $excelsarake, $_vast_tilattu);
                   $excelsarake++;
                 }
                 $_x++;
@@ -1934,7 +1949,9 @@ else {
 
                 if ($valitut["SARAKE{$_x}"] != '') {
                   //vapaa saldo
-                  $vapaa_saldo = $vastaava_saldo['saldo'] + $vastaava_ennp['tilattu'] - $vastaava_ennp['ennpois'];
+                  $vapaa_saldo = $vastaava_saldo['saldo'] + $vastaava_ennp['tilattu'];
+                  $vapaa_saldo -= $vastaava_ennp['ennpois'];
+                  $vapaa_saldo -= $vastaava_ennp['siirrot'];
 
                   $rivi .= "\"{$vapaa_saldo}\"\t";
 
@@ -1947,6 +1964,7 @@ else {
                   //myytävissä
 
                   $myytavissa = $vastaava_saldo['saldo'] - $vastaava_ennp['ennpois'];
+                  $myytavissa -= $vastaava_ennp['siirrot'];
 
                   if ($yhtiorow['varaako_jt_saldoa'] == 'K') $myytavissa -= $vastaava_ennp['jt'];
 
@@ -2905,18 +2923,32 @@ function hae_tuotteen_toimittajat($tuoteno) {
   return $tuotteen_toimittajat;
 }
 
-function kappaleet_tila_myynti($tuoteno, $row_yhtio, $lisavarattu, $varastolisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa) {
+function kappaleet_tila_myynti($tuoteno, $row_yhtio, $lisavarattu, $varastosiirtolisa, $ei_vienteja_lisa, $ei_asiakkaan_myynteja_lisa) {
   global $kukarow, $yhtiorow;
+
+  if ($varastosiirtolisa != "") {
+    $tilausrivinlisatiedotjoin = "
+      JOIN tilausrivin_lisatiedot AS tl ON (
+        tl.yhtio = tilausrivi.yhtio AND
+        tl.tilausrivitunnus = tilausrivi.tunnus
+      )
+    ";
+  }
+  else {
+    $tilausrivinlisatiedotjoin = "";
+  }
 
   $query = "SELECT
             sum(if(tyyppi IN ('W','M'), varattu, 0)) valmistuksessa,
             sum(if(tyyppi = 'E' and var != 'O', varattu, 0)) ennakot, # toimittamattomat ennakot
             sum(if(tyyppi IN ('L','V') AND var NOT IN ('P','J','O','S'), varattu, 0)) ennpois,
-            sum(if(tyyppi IN ('L','G') AND var = 'J', jt $lisavarattu, 0)) jt
-            $varastolisa
+            sum(if(tyyppi IN ('L','G') AND var = 'J', jt $lisavarattu, 0)) jt,
+            {$varastosiirtolisa}
+            sum(if(tyyppi = 'G' AND var IN ('','H'), varattu, 0)) siirrot
             FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
             {$ei_vienteja_lisa}
             {$ei_asiakkaan_myynteja_lisa}
+            {$tilausrivinlisatiedotjoin}
             WHERE tilausrivi.yhtio        = '{$row_yhtio}'
             AND tilausrivi.tyyppi         IN ('L','V','G','E','W','M')
             AND tilausrivi.tuoteno        = '{$tuoteno}'

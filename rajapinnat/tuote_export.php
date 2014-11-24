@@ -21,15 +21,15 @@ $pupe_root_polku = dirname(dirname(__FILE__));
 
 require "../inc/parametrit.inc";
 
-$lock_params = array(
-  "locktime" => 5400
-);
+//$lock_params = array(
+//  "locktime" => 5400
+//);
 
 // Logitetaan ajo
-cron_log();
+//cron_log();
 
 // Sallitaan vain yksi instanssi tästä skriptistä kerrallaan
-pupesoft_flock($lock_params);
+//pupesoft_flock($lock_params);
 
 require "{$pupe_root_polku}/rajapinnat/magento_client.php";
 require "{$pupe_root_polku}/rajapinnat/presta/presta_products.php";
@@ -61,7 +61,7 @@ if ($verkkokauppatyyppi == 'presta') {
 die();
 
 function hae_tuotteet() {
-  global $kukarow, $yhtiorow;
+  global $kukarow, $yhtiorow, $verkkokauppatyyppi;
   // Haetaan pupesta tuotteen tiedot
   $query = "SELECT
           tuote.*,
@@ -89,7 +89,7 @@ function hae_tuotteet() {
             AND tuote.tuotetyyppi    NOT in ('A','B')
             AND tuote.tuoteno       != ''
             AND tuote.nakyvyys      != ''
-            AND tuote.tuoteno IN ('+10','+11','+12')
+            AND tuote.tuoteno IN ('1024','1025','1026')
           ORDER BY tuote.tuoteno";
   $res = pupe_query($query);
 $dnstuote = array();

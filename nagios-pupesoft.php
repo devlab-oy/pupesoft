@@ -273,6 +273,10 @@ if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' o
     }
     exit;
   }
+
+  if (!isset($_GET["tee"]) or $_GET["tee"] == "") {
+    echo "OK - Pupesoft OK $STATE_OK";
+  }
 }
 else {
   echo "CRITICAL - Permission denied $STATE_CRITICAL";

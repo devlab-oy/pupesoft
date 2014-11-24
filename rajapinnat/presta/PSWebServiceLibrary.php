@@ -128,6 +128,13 @@ class PrestaShopWebservice
 				$curl_options[$defkey] = $curl_params[$defkey];
 
 		curl_setopt_array($session, $curl_options);
+        
+        //@TODO HUOM TÄTÄ KOHTAA ON KANS MUOKATTU. ALKU
+        if (stristr($this->url, 'https')) {
+          curl_setopt($session, CURLOPT_SSL_VERIFYPEER, false);
+        }
+        //@TODO HUOM TÄTÄ KOHTAA ON KANS MUOKATTU. LOPPU
+        
 		$response = curl_exec($session);
 
 		$index = strpos($response, "\r\n\r\n");

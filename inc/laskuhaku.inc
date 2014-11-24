@@ -333,7 +333,7 @@ echo "<option {$sel['250']} value = '250'>".t("250")."</option>";
 echo "<option {$sel['500']} value = '500'>".t("500")."</option>";
 echo "<option {$sel['750']} value = '750'>".t("750")."</option>";
 echo "<option {$sel['1000']} value = '1000'>".t("1000")."</option>";
-echo "</select></td>";
+echo "</select> ".t("laskua")."</td>";
 
 
 echo "<td class='back'><input type = 'submit' value = '".t("Etsi")."'></td>";
@@ -398,7 +398,7 @@ if ($tee != '') {
     exit;
   }
 
-  pupe_DataTables(array(array($pupe_DataTables, 8, 8)));
+  pupe_DataTables(array(array($pupe_DataTables, 8, 8, false)));
 
   echo "<table class='display dataTable' id='$pupe_DataTables'>";
 
@@ -481,7 +481,7 @@ if ($tee != '') {
         <td class='tumma' colspan='4'></td></tr>";
   }
   echo "</tfoot>";
-  echo "</table><br>";
+  echo "</table><br><br>";
 
   $serikustpt = urlencode(urlencode(serialize($mul_kustp)));
   $serikohdet = urlencode(urlencode(serialize($mul_kohde)));

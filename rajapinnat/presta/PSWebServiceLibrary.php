@@ -249,7 +249,9 @@ class PrestaShopWebservice
     $message = '';
     if (!empty($request['response'])) {
       $response_xml = self::parseXML($request['response']);
-      $message = (string) $response_xml->errors->error->message;
+      if (isset($response_xml->errors->error->message)) {
+        $message = (string) $response_xml->errors->error->message;
+      }
     }
     //TÄMÄ BLOKKI ON ITSE MUOKATTU
 		self::checkStatusCode($request['status_code'], $message);

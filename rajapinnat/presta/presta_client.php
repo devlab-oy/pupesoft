@@ -15,7 +15,8 @@ abstract class PrestaClient {
   protected $ws = null;
 
   /**
-   * Schema is used to create / update a resource. It contains given resource blank xml schema
+   * Schema is used to create / update a resource.
+   * It contains given resource blank xml schema
    * @var SimpleXML
    */
   protected $schema = null;
@@ -70,6 +71,23 @@ abstract class PrestaClient {
    * @throws Exception
    */
   protected function get($id) {
+    try {
+      $response_xml = $this->get_as_xml($id);
+    }
+    catch (Exception $e) {
+      throw $e;
+    }
+
+    return xml_to_array($response_xml);
+  }
+
+  /**
+   * 
+   * @param int $id
+   * @return SimpleXMLElement
+   * @throws Exception
+   */
+  protected function get_as_xml($id) {
     $resource = $this->resource_name();
     $opt = array(
         'resource' => $resource,
@@ -85,7 +103,7 @@ abstract class PrestaClient {
       throw $e;
     }
 
-    return xml_to_array($response_xml);
+    return $response_xml;
   }
 
   /**
@@ -130,14 +148,16 @@ abstract class PrestaClient {
     );
 
     try {
-      $existing_resource = $this->get($id);
+      $existing_resource = $this->get_as_xml($id);
       $opt['putXml'] = $this->generate_xml($resource, $existing_resource)->asXML();
       $response_xml = $this->ws->edit($opt);
       //@TODO Resource IDENTIFIER to log message
       $this->logger->log("Päivitettiin resurssi: " . $this->resource_name());
     }
     catch (Exception $e) {
-      $msg = "Resurssin: " . $this->resource_name() . " {$id} päivittäminen epäonnistui";
+      $msg = "Resurssin: "
+        . $this->resource_name()
+        . " {$id} päivittäminen epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -167,7 +187,9 @@ abstract class PrestaClient {
       $response_xml = $this->ws->get($opt);
     }
     catch (Exception $e) {
-      $msg = "Kaikkien resurssin " . $this->resource_name() . " rivien haku epäonnistui";
+      $msg = "Kaikkien resurssin "
+        . $this->resource_name()
+        . " rivien haku epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -191,7 +213,9 @@ abstract class PrestaClient {
       $response_bool = $this->ws->delete($opt);
     }
     catch (Exception $e) {
-      $msg = "Resurssin: " . $this->resource_name() . " {$id} poistaminen epäonnistui";
+      $msg = "Resurssin: "
+        . $this->resource_name()
+        . " {$id} poistaminen epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -220,7 +244,9 @@ abstract class PrestaClient {
       $this->logger->log($msg);
     }
     catch (Exception $e) {
-      $msg = "Resurssin:" . $this->resource_name() . " {$id} kuvan luonti epäonnistui";
+      $msg = "Resurssin:"
+        . $this->resource_name()
+        . " {$id} kuvan luonti epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -255,7 +281,11 @@ abstract class PrestaClient {
       $image_ids = array_unique($image_ids);
     }
     catch (Exception $e) {
-      $msg = "Resurssin: " . $this->resource_name() . " {$id} kuvien haku epäonnistui";
+      $msg = "Resurssin: "
+        . $this->resource_name()
+        . " {$id} kuvien haku epäonnistui."
+        . " Jos kyseessä HTTP code 500 tarkoittaa se"
+        . ", että resurssille ei löytynyt kuvia.";
       $this->logger->log($msg, $e);
       throw $e;
     }
@@ -272,7 +302,7 @@ abstract class PrestaClient {
    */
   protected function delete_resource_image($resouce_id, $image_id) {
     $opt = array(
-        'url' => "{$this->url}api/images/" . $this->resource_name() . "/{$resouce_id}/{$image_id}",
+        'url' => "{$this->url}/api/images/" . $this->resource_name() . "/{$resouce_id}/{$image_id}",
     );
 
     try {
@@ -280,7 +310,8 @@ abstract class PrestaClient {
     }
     catch (Exception $e) {
       $msg = "Resurssin: " . $this->resource_name() . " {$resouce_id}"
-        . " kuvan {$image_id} poistaminen epäonnistui";
+        . " kuvan {$image_id} poistaminen epäonnistui"
+        . "url: {$opt['url']}";
       $this->logger->log($msg, $e);
       throw $e;
     }

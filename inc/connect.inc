@@ -70,7 +70,7 @@ mysql_query("set group_concat_max_len=1000000", $link);
 
 // jos debugataan pienillä arvoilla, ni pakotetaan myös queryt kuntoon!
 if (isset($GLOBALS["pupe_query_debug"]) and $GLOBALS["pupe_query_debug"] > 0 and $GLOBALS["pupe_query_debug"] < 1) {
-  mysql_query("set session sql_mode = 'STRICT_ALL_TABLES,ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE'", $link); // NO_ZERO_DATE ois myös kova!
+//  mysql_query("set session sql_mode = 'STRICT_ALL_TABLES,ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE'", $link); // NO_ZERO_DATE ois myös kova!
 }
 
 if (!isset($temporarylink)) $temporarylink = $masterlink;

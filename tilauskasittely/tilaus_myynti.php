@@ -668,26 +668,28 @@ if ((int) $kukarow["kesken"] > 0) {
 
   $laskurow = mysql_fetch_assoc($result);
 
-  if (isset($poikkeava_toimitusosoite) and $poikkeava_toimitusosoite == "N") {
-    $tnimi     = $laskurow["nimi"];
-    $tnimitark = $laskurow["nimitark"];
-    $tosoite   = $laskurow["osoite"];
-    $tpostino  = $laskurow["postino"];
-    $tpostitp  = $laskurow["postitp"];
-    $toim_maa  = $laskurow["maa"];
-  }
+  if ($yhtiorow["extranet_poikkeava_toimitusosoite"] == "Y") {
+    if (isset($poikkeava_toimitusosoite) and $poikkeava_toimitusosoite == "N") {
+      $tnimi     = $laskurow["nimi"];
+      $tnimitark = $laskurow["nimitark"];
+      $tosoite   = $laskurow["osoite"];
+      $tpostino  = $laskurow["postino"];
+      $tpostitp  = $laskurow["postitp"];
+      $toim_maa  = $laskurow["maa"];
+    }
 
-  if ($tnimi) {
-    $toimitusosoite = array(
-      "nimi"     => $tnimi,
-      "nimitark" => $tnimitark,
-      "osoite"   => $tosoite,
-      "postino"  => $tpostino,
-      "postitp"  => $tpostitp,
-      "maa"      => $toim_maa
-    );
+    if ($tnimi) {
+      $toimitusosoite = array(
+        "nimi"     => $tnimi,
+        "nimitark" => $tnimitark,
+        "osoite"   => $tosoite,
+        "postino"  => $tpostino,
+        "postitp"  => $tpostitp,
+        "maa"      => $toim_maa
+      );
 
-    $laskurow = tallenna_toimitusosoite($toimitusosoite, $laskurow);
+      $laskurow = tallenna_toimitusosoite($toimitusosoite, $laskurow);
+    }
   }
 
   if ($kukarow['toimipaikka'] != $laskurow['yhtio_toimipaikka'] and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
@@ -3514,46 +3516,48 @@ if ($tee == '') {
       echo "<input type='hidden' size='30' name='myyja' value='$laskurow[myyja]'>";
       echo "</tr>";
 
-      $toim_eroaa = ($laskurow["nimi"] != $laskurow["toim_nimi"] or
-                     $laskurow["nimitark"] != $laskurow["toim_nimitark"] or
-                     $laskurow["osoite"] != $laskurow["toim_osoite"] or
-                     $laskurow["postitp"] != $laskurow["toim_postitp"] or
-                     $laskurow["postino"] != $laskurow["toim_postino"] or
-                     $laskurow["maa"] != $laskurow["toim_maa"]);
+      if ($yhtiorow["extranet_poikkeava_toimitusosoite"] == "Y") {
+        $toim_eroaa = ($laskurow["nimi"] != $laskurow["toim_nimi"] or
+                       $laskurow["nimitark"] != $laskurow["toim_nimitark"] or
+                       $laskurow["osoite"] != $laskurow["toim_osoite"] or
+                       $laskurow["postitp"] != $laskurow["toim_postitp"] or
+                       $laskurow["postino"] != $laskurow["toim_postino"] or
+                       $laskurow["maa"] != $laskurow["toim_maa"]);
 
-      if ($toim_eroaa) {
-        $poikkeava_toimitusosoite = "Y";
-      }
+        if ($toim_eroaa) {
+          $poikkeava_toimitusosoite = "Y";
+        }
 
-      $checked =
-        (isset($poikkeava_toimitusosoite) and $poikkeava_toimitusosoite == "Y") ? "checked" : "";
+        $checked =
+          (isset($poikkeava_toimitusosoite) and $poikkeava_toimitusosoite == "Y") ? "checked" : "";
 
-      echo "<script>
-              var handleCheckbox = function() {
-                checkBoxi = document.getElementById(\"toimCheck\");
-                if (checkBoxi.checked) {
-                  document.getElementById(\"toimHidden\").disabled = true;
-                  tilaus.submit();
-                } else {
-                  if (confirm('" . t("Toimitusosoitteen tiedot poistetaan, oletko varma?") . "')) {
+        echo "<script>
+                var handleCheckbox = function() {
+                  checkBoxi = document.getElementById(\"toimCheck\");
+                  if (checkBoxi.checked) {
+                    document.getElementById(\"toimHidden\").disabled = true;
                     tilaus.submit();
                   } else {
-                    checkBoxi.checked = true;
+                    if (confirm('" . t("Toimitusosoitteen tiedot poistetaan, oletko varma?") . "')) {
+                      tilaus.submit();
+                    } else {
+                      checkBoxi.checked = true;
+                    }
                   }
-                }
-              };
-            </script>";
+                };
+              </script>";
 
-      echo "<tr>
-              <th>" . t("Poikkeava toimitusosoite") . "</th>
-              <td>
-                <input id='toimHidden' type='hidden' name='poikkeava_toimitusosoite' value='N'>
-                <input id='toimCheck' type='checkbox'
-                       name='poikkeava_toimitusosoite'
-                       value='Y'
-                       onclick='handleCheckbox();' {$checked}>
-              </td>
-            </tr>";
+        echo "<tr>
+                <th>" . t("Poikkeava toimitusosoite") . "</th>
+                <td>
+                  <input id='toimHidden' type='hidden' name='poikkeava_toimitusosoite' value='N'>
+                  <input id='toimCheck' type='checkbox'
+                         name='poikkeava_toimitusosoite'
+                         value='Y'
+                         onclick='handleCheckbox();' {$checked}>
+                </td>
+              </tr>";
+      }
     }
   }
   elseif ($kukarow["extranet"] == "") {
@@ -3644,8 +3648,10 @@ if ($tee == '') {
 
   <script>{$javascript}</script>";
 
-  if (isset($poikkeava_toimitusosoite) and $poikkeava_toimitusosoite == "Y") {
-    piirra_toimitusosoite($laskurow);
+  if ($yhtiorow["extranet_poikkeava_toimitusosoite"] == "Y") {
+    if (isset($poikkeava_toimitusosoite) and $poikkeava_toimitusosoite == "Y") {
+      piirra_toimitusosoite($laskurow);
+    }
   }
 
   if ($laskurow['tila'] == 'N' and $laskurow['alatila'] == 'F' and $laskurow['sisviesti3'] != '') {

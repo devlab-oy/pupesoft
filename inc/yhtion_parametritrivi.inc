@@ -3005,6 +3005,20 @@ if ($fieldname == "extranet_nayta_saldo") {
   $jatko = 0;
 }
 
+if ($fieldname == "extranet_poikkeava_toimitusosoite") {
+  $ulos = "<td><select name='{$nimi}' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel = $trow[$i] == 'Y' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>" . t("Ei poikkeavaa toimitusosoitetta extranet-tilauksissa");
+  $ulos .=
+    "<option value = 'Y' {$sel}>" .
+    t("Extranet-tilauksissa mahdollisuus syöttää poikkeava toimitusosoite");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "ext_tilauksen_hyvaksyja_myyjaksi") {
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 

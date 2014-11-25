@@ -51,7 +51,7 @@ if ($tee == "") {
       <font class='message'>".t("Etsi laite").":<hr></font>
       ".t("Syötä sarjanumero").":
       <input type='text' name='etsi' value='$etsi'>
-      <input type='Submit' value = '".t("Etsi")."'>
+      <input type='Submit' class='hae_btn' value='".t("Etsi")."'>
       </form>";
 
 

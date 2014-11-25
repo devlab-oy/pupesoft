@@ -585,7 +585,7 @@ if ($tee == "") {
       <font class='head'>".t("Etsi sisäinen työmääräys").":<hr></font>
       ".t("Syötä tilausnumero, nimen tai laatijan osa").":
       <input type='text' name='etsi'>
-      <input type='Submit' value = '".t("Etsi")."'>
+      <input type='Submit' class='hae_btn' value='".t("Etsi")."'>
       </form>";
 
   // pvm 30 pv taaksepäin

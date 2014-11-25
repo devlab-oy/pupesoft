@@ -150,7 +150,7 @@ if ($tee == '') {
     echo "<br><input type='text' name = 'haku[" . $i . "]' value = '$haku[$i]'>";
     echo "</th>";
   }
-  echo "<td valign='bottom' class='back'><input type='Submit' value = '".t("Etsi")."'></td></form></tr>";
+  echo "<td valign='bottom' class='back'><input type='Submit' class='hae_btn' value='".t("Etsi")."'></td></form></tr>";
 
   while ($trow=mysql_fetch_array($result)) {
     echo "<tr>";

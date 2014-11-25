@@ -496,7 +496,7 @@ if ($tee == '') {
     echo "<br><input type='text' size='3' name = 'haku[11]' value = '$haku[11]'></th>";
   }
 
-  echo "<td class='back' valign='bottom'><input type='submit' value = '".t("Etsi")."'></td></tr>";
+  echo "<td class='back' valign='bottom'><input type='Submit' class='hae_btn' value='".t("Etsi")."'></td></tr>";
 
   while ($trow = mysql_fetch_assoc($result)) {
 

@@ -425,7 +425,7 @@ if ($tila == 'tarkenna') {
   echo "<th>".t("postitp")."  <br><input type='text' name = 'haku[postitp]' value = '$haku[postitp]' size='12'></th>";
   echo "<th valign='top'>".t("avoimia")."<br>".t("laskuja")."</th>";
   echo "<th valign='top'>".t("saamisettili")."</th>";
-  echo "<td class='back'><input type='submit' value = '".t("Etsi")."'>";
+  echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Etsi")."'>";
   echo "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type='checkbox' name='poisetsi' $petsichk> ".t("Etsi myös poistettuja asiakkaita");
   echo "</td>";
   echo "</tr>";

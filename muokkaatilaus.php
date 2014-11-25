@@ -797,7 +797,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     echo "</select></td><td class='back'>&nbsp;</td>";
   }
 
-  echo "<td class='back'><input type='Submit' value = '".t("Etsi")."'></td></tr>";
+  echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Etsi")."'></td></tr>";
   echo "</table>";
   echo "</form>";
   echo "<br>";

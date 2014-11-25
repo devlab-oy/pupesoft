@@ -415,7 +415,7 @@ if ($tee == "PRINTTAA") {
   }
 
   if ($kuvaurl == '') {
-    $kuvaurl = "<img src='{$pupesoft_scheme}api.devlab.fi/pupesoft.gif' width='130'>";
+    $kuvaurl = "<img src='{$palvelin2}pics/facelift/pupe.gif' width='130'>";
   }
 
   $otsikko        = $row["kentta01"];
@@ -586,7 +586,7 @@ if ($tee == '') {
       }
 
       if ($kuva == '') {
-        $kuva = "<img src='{$pupesoft_scheme}api.devlab.fi/pupesoft.gif' width='130'>";
+        $kuva = "<img src='{$palvelin2}pics/facelift/pupe.gif' width='130'>";
       }
 
       if ($uutinen['nimi'] == "") {

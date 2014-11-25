@@ -193,8 +193,7 @@ abstract class PrestaClient {
 
     try {
       $response_xml = $this->ws->get($opt);
-      $response = xml_to_array($response_xml);
-      $msg = "Resurssin " . $this->resource_name() . " kaikki (".count($response).") rivit haettu";
+      $msg = "Resurssin " . $this->resource_name() . "kaikki rivit haettu";
       $this->logger->log($msg);
     }
     catch (Exception $e) {
@@ -205,7 +204,7 @@ abstract class PrestaClient {
       throw $e;
     }
 
-    return $response;
+    return xml_to_array($response_xml);
   }
 
   /**

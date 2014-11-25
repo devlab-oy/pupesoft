@@ -43,7 +43,7 @@ class PrestaProducts extends PrestaClient {
   /**
    *
    * @param array $products
-   * @return array
+   * @return boolean
    */
   public function sync_products(array $products) {
     $this->logger->log('---------Start product sync---------');
@@ -76,11 +76,13 @@ class PrestaProducts extends PrestaClient {
       }
     }
     catch (Exception $e) {
-      //Exception logging happens in create / update. No need to do anything here
+      //Exception logging happens in create / update.
+      
+      return false;
     }
 
     $this->logger->log('---------End product sync---------');
-    return $response;
+    return true;
   }
 
   /**

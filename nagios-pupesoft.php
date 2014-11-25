@@ -275,6 +275,14 @@ if ($_SERVER['REMOTE_ADDR'] == '82.181.128.118') {
   }
 
   if (!isset($_GET["tee"]) or $_GET["tee"] == "") {
+
+    $errorlog = exec("tail -n 1 /home/nagios/nagios-pupesoft.log");
+
+    if (trim($errorlog) != "") {
+      echo "CRITICAL - PUPESOFT VIRHE! $errorlog $STATE_CRITICAL";
+      exit;
+    }
+
     echo "OK - Pupesoft OK $STATE_OK";
   }
 }

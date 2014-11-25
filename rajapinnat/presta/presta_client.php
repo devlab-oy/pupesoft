@@ -179,21 +179,31 @@ abstract class PrestaClient {
 
   /**
    *
-   * @param array $display
+   * @param array $display Defines SELECT columns
+   * @param array $filters adds WHERE statements. Needs to be key/value pair
+   * @param string $resource Other resources resource_name
    * @return array
    * @throws Exception
    */
-  protected function all($display = array()) {
+  protected function all($display = array(), $filters = array(), $resource = '') {
+    $opt = array();
+
+    if (empty($resource)) {
+      $opt['resource'] = $resource;
+    }
+
     if (!empty($display)) {
       $display = '[' . implode(',', $display) . ']';
     }
     else {
       $display = 'full';
     }
-    $opt = array(
-        'resource' => $this->resource_name(),
-        'display'  => $display,
-    );
+    $opt['display'] = $display;
+
+    foreach ($filters as $column_key => $value) {
+      $key = "filter[{$column_key}]";
+      $opt[$key] = "[{$value}]";
+    }
 
     try {
       $response_xml = $this->ws->get($opt);
@@ -333,6 +343,14 @@ abstract class PrestaClient {
     }
 
     return $response;
+  }
+  
+  protected function get_url() {
+    return $this->url;
+  }
+  
+  protected function get_api_key() {
+    return $this->api_key;
   }
 
   //Child has to implement function which returns schema=blank or repopulated xml

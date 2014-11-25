@@ -14,7 +14,7 @@ else {
 
 $query = "SELECT
           trlt.rahtikirja_id AS rahtikirja,
-          group_concat(DISTINCT trlt.asiakkaan_tilausnumero) AS tilaukset,
+          group_concat(DISTINCT trlt.asiakkaan_tilausnumero SEPARATOR '<br>') AS tilaukset,
           group_concat(DISTINCT trlt.asiakkaan_rivinumero) AS rivit,
           count(tr.tunnus) AS rullia,
           sum(ss.massa) AS paino,
@@ -24,7 +24,8 @@ $query = "SELECT
           sum(if(ss.varasto IS NULL, 0, 1)) AS varastossa,
           sum(if(ss.lisatieto = 'Hyl‰tty', 1, 0)) AS hylatyt,
           sum(if(ss.lisatieto = 'Hyl‰t‰‰n', 1, 0)) AS hylattavat,
-          sum(if(ss.lisatieto = 'Lusattava', 1, 0)) AS lusattavat
+          sum(if(ss.lisatieto = 'Lusattava', 1, 0)) AS lusattavat,
+          sum(if(ss.lisatieto = 'Toimitettu', 1, 0)) AS toimitettu
           FROM lasku
           JOIN tilausrivi AS tr
             ON tr.yhtio = lasku.yhtio
@@ -59,6 +60,7 @@ else {
   echo "<th>".t("Sanoma vastaanotettu")."</th>";
   echo "<th>".t("Rahti vastaanotettu")."</th>";
   echo "<th>".t("Varastoon viety")."</th>";
+  echo "<th>".t("Toimitettu")."</th>";
   echo "<th class='back'></th>";
   echo "</tr>";
 
@@ -124,6 +126,10 @@ else {
 
     echo "<td valign='top' align='center'>";
     echo $rahti['varastossa'];
+    echo " kpl</td>";
+
+    echo "<td valign='top' align='center'>";
+    echo $rahti['toimitettu'];
     echo " kpl</td>";
 
     echo "</tr>";

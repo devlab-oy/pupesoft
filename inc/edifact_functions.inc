@@ -416,7 +416,7 @@ function lahtoilmoitus_parametrit($konttiviite) {
   $query = "SELECT lasku.asiakkaan_tilausnumero AS tilausnro,
             matkakoodi,
             matkatiedot,
-            lasku.toimaika
+            laskun_lisatiedot.satamavahvistus_pvm AS lahtoaika
             FROM laskun_lisatiedot
             JOIN lasku
               ON lasku.yhtio = laskun_lisatiedot.yhtio
@@ -430,7 +430,7 @@ function lahtoilmoitus_parametrit($konttiviite) {
   while ($tilaus = mysql_fetch_assoc($result)) {
 
     $matkakoodi = $tilaus['matkakoodi'];
-    $lahtopaiva = $tilaus['toimaika'];
+    $lahtopaiva = $tilaus['lahtoaika'];
     $mt = unserialize($tilaus['matkatiedot']);
     $kaikki_matkatiedot[$tilaus['tilausnro']] = $mt;
   }
@@ -456,6 +456,8 @@ function lahtoilmoitus_parametrit($konttiviite) {
     $kaikki_matkatiedot[$tilausnro]['kontteja'] = $info['kontteja'];
 
   }
+
+  $lahtopaiva = date("d.m.Y H:i", strtotime($lahtopaiva));
 
   $parametrit['matkatiedot'] = $kaikki_matkatiedot;
   $parametrit['matkakoodi'] = $matkakoodi;
@@ -2181,8 +2183,6 @@ function lahtoilmoitus_pdf($pdf_data) {
 
   $pdf->draw_text($x, $y, 'Voyage id:', $sivu, $bold);
   $pdf->draw_text($x+60, $y, $matkakoodi, $sivu, $bold);
-
-  $lahtopaiva = date("d.m.Y", strtotime($lahtopaiva));
 
   $pdf->draw_text($x+200, $y, 'Date of departure:', $sivu, $bold);
   $pdf->draw_text($x+300, $y, $lahtopaiva, $sivu, $bold);

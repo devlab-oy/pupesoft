@@ -135,9 +135,10 @@ if ($tee == 'T') {
             ORDER BY erpcm";
   $result = pupe_query($query);
 
-  pupe_DataTables(array(array($pupe_DataTables[0], 11, 11, false, false, false)));
+  pupe_DataTables(array(array($pupe_DataTables[0], 11, 11)));
 
   echo "<table class='display dataTable' id='$pupe_DataTables[0]'>";
+  echo "<thead>";
   echo "<tr>";
   echo "<th>".t("Tapvm")."</th>";
   echo "<th>".t("Kapvm")."</th>";
@@ -151,6 +152,20 @@ if ($tee == 'T') {
   echo "<th>".t("EBID")."</th>";
   echo "<th>".t("Siirrä")."</th>";
   echo "</tr>";
+  echo "<tr>";
+  echo "<td><input type='text' class='search_field' name='search_tapvm'></td>";
+  echo "<td><input type='text' class='search_field' name='search_kapvm'></td>";
+  echo "<td><input type='text' class='search_field' name='search_erpcm'></td>";
+  echo "<td><input type='text' class='search_field' name='search_nimi'></td>";
+  echo "<td><input type='text' class='search_field' name='search_postitp'></td>";
+  echo "<td><input type='text' class='search_field' name='search_laskunro'></td>";
+  echo "<td><input type='text' class='search_field' name='search_kotisumma'></td>";
+  echo "<td><input type='text' class='search_field' name='search_summa'></td>";
+  echo "<td><input type='text' class='search_field' name='search_kustp'></td>";
+  echo "<td><input type='text' class='search_field' name='search_ebid'></td>";
+  echo "<td><input type='text' class='search_field' name='search_siirra'></td>";
+  echo "</tr>";
+  echo "</thead>";
 
   while ($trow = mysql_fetch_array($result)) {
 

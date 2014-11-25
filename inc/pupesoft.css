@@ -212,7 +212,7 @@ div.liveSearch {
 }
 
 div.liveSearchSelectedItem {
-	background-color: #88b9d2; /*LIVESEARCH_BACKGROUND*/
+	background-color: #cccccc; /*LIVESEARCH_BACKGROUND*/
 }
 
 select.indexvas {

@@ -75,7 +75,7 @@ class PrestaCategories extends PrestaClient {
       $first_level_nodes = array_find($this->categories, $first_level_node_depth);
       foreach ($first_level_nodes as $first_level_node) {
         $first_level_node['parent_id'] = $this->root;
-        $this->recursive_category_save($first_level_node);
+        $this->recursive_save($first_level_node);
       }
     }
     catch (Exception $e) {
@@ -94,14 +94,14 @@ class PrestaCategories extends PrestaClient {
    * 
    * @param array $node
    */
-  private function recursive_category_save($node) {
+  private function recursive_save($node) {
     $response = $this->create($node);
     $parent_id = (string) $response['category']['id'];
     $nodes = $this->next_level_nodes($node['syvyys'], $node['rgt'], $node['lft']);
 
     foreach ($nodes as $node) {
       $node['parent_id'] = $parent_id;
-      $this->recursive_category_save($node);
+      $this->recursive_save($node);
     }
   }
 

@@ -1670,6 +1670,7 @@ if ($tila == "" and !isset($jatka)) {
     }
 
     //Tehdään dummy toimitustapa td, jotta alempana voidaan luoda oikea toimitustapa selecti valikoidun varaston perusteella.
+    $toimitustapa_vasen = $vasen;
     $vasen++;
 
     //yhtiön oletusalvi!
@@ -2657,7 +2658,7 @@ if ($tila == "" and !isset($jatka)) {
 
     $string .= "</td>";
 
-    $vasen_sarake[2] = $string;
+    $vasen_sarake[$toimitustapa_vasen] = $string;
 
     // Ekotetan sarakkeet!
     $rivicount = count($vasen_sarake) > count($oikea_sarake) ? count($vasen_sarake) : count($oikea_sarake);

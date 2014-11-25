@@ -3783,8 +3783,10 @@ if (!function_exists("alehinta")) {
     // oletetaan tuotteen alvi ja valuutta
     $alehinta_val = $yhtiorow["valkoodi"];
 
-    // jos meillä on lasku menossa ulkomaille
-    if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
+    // Jos meillä on lasku menossa ulkomaille
+    // Tietyissä tapauksissa yhtiorow maa voi olla sama kuin laskun maa, mutta vat_numerosta tiedetään,
+    // että ollaan verovelsollisia tähä maahan
+    if ($yhtiorow["vat_numero"] != "" or ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"])) {
 
       // tutkitaan ollaanko siellä alv-rekisteröity
       $query = "SELECT * from yhtion_toimipaikat where yhtio='$kukarow[yhtio]' and maa='$laskurow[maa]' and vat_numero != ''";

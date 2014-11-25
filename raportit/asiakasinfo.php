@@ -182,7 +182,7 @@ if ($kukarow["extranet"] == "" and $lopetus == "") {
   echo "<table><tr>";
   echo "<th>".t("Anna asiakasnumero tai osa nimestä")."</th>";
   echo "<td><input type='text' name='ytunnus'></td>";
-  echo "<td class='back'><input type='submit' value='".t("Hae")."'>";
+  echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Hae")."'>";
   echo "</tr></table>";
   echo "</form><br><br>";
 }

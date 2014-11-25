@@ -326,6 +326,14 @@ input[type=submit].lisaa_btn {
   padding-right: 40px;
 }
 
+input[type=submit].hae_btn {
+  background-color: #6c70eb;
+  background-image: url('../pics/facelift/submit_mglass.png');
+  background-repeat: no-repeat;
+  background-position: right;
+  padding-right: 40px;
+}
+
 input[type=submit].tallenna_btn {
   background-color: #01a1eb;
   background-image: url('../pics/facelift/submit_rightarrow.png');

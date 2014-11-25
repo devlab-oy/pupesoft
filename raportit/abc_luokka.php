@@ -301,7 +301,7 @@ if ($luokka != "") {
     echo "<th><input type='text' name='haku[total]' value='$haku[total]' size='5'></th>";
   }
 
-  echo "<td class='back'><input type='Submit' value='".t("Etsi")."'></td></form></tr>";
+  echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Etsi")."'></td></form></tr>";
 
   //jos rivejä ei löydy
   if (mysql_num_rows($res) == 0) {

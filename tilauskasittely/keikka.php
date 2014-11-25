@@ -666,7 +666,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
   echo "<option value='liitetty_lasku_rivitok_kohdistus_ok'{$sel['liitetty_lasku_rivitok_kohdistus_ok']}>", t("Saapumiset joihin on liitetty lasku ja kaikki rivit on viety varastoon ja kohdistus on ok"), "</option>";
   echo "</select></td>";
 
-  echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
+  echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Hae")."'></td>";
   echo "</tr>";
 
   echo "</table>";

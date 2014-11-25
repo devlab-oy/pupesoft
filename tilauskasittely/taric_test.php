@@ -13,7 +13,7 @@ echo "<form method='post'>
   <table>
   <tr><th>".t("Syötä tuotenumero").":</th>
     <td><input type='text' name='tuoteno' value = '$tuoteno'></td>
-    <td class='back'><input type='submit' value='".t("Hae")."'></td>
+    <td class='back'><input type='Submit' class='hae_btn' value='".t("Hae")."'></td>
   </tr>
   </table>
   </form><br><br><br><br>";

@@ -201,7 +201,7 @@ echo "<td><input type='text' name='tullinimike1' value='$tullinimike1'></td>";
 echo "</tr><tr>";
 echo "<th>".t("Syötä tullinimikkeen lisäosa").":</th>";
 echo "<td><input type='text' name='tullinimike2' value='$tullinimike2'> (ei pakollinen) </td>";
-echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
+echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Hae")."'></td>";
 echo "</tr></table>";
 echo "</form><br><br>";
 

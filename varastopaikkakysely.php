@@ -47,7 +47,7 @@ if ($yhtiorow['suuntalavat'] == 'S') {
 }
 
 echo "<td class='back'>";
-echo "<input type='Submit' value='".t("Hae")."'></form></td>";
+echo "<input type='Submit' class='hae_btn' value='".t("Hae")."'></form></td>";
 echo "</tr>";
 echo "</table>";
 echo "<br>";

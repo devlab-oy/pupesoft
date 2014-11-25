@@ -26,7 +26,7 @@ if ($tee == '') {
         <option value='N' $selectn>".t("Toimittajan nimi")."
         <option value='Y' $selecty>".t("Y-tunnus")."
         </select></td>
-        <td><input type='submit' value='".t("Hae")."'></td>
+        <td><input type='Submit' class='hae_btn' value='".t("Hae")."'></td>
         </tr></table></form>";
     $formi = 'valinta';
     $kentta = 'nimi';

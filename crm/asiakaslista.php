@@ -281,7 +281,7 @@ for ($i = 1; $i < mysql_num_fields($result)-1; $i++) {
   echo "</th>";
 }
 
-echo "<td class='back'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi")."'></td></tr>\n\n";
+echo "<td class='back'>&nbsp;&nbsp;<input type='Submit' class='hae_btn' value='".t("Etsi")."'></td></tr>\n\n";
 
 $kalalask = 1;
 

@@ -944,7 +944,7 @@ if (empty($id) and $echotaanko) {
     echo "<option value='{$maarow['koodi']}' $sel>{$maarow['nimi']}</option>";
   }
 
-  echo "</select></td><td class='back'><input type='Submit' value='".t("Etsi")."'></td></tr></table></form><br>";
+  echo "</select></td><td class='back'><input type='Submit' class='hae_btn' value='".t("Etsi")."'></td></tr></table></form><br>";
 
   $haku = '';
   if (is_string($etsi) and $etsi != "")  $haku = " and lasku.nimi LIKE '%$etsi%' ";

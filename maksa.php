@@ -1700,7 +1700,7 @@ if ($tee == 'V') {
 
   echo "<tr>";
   echo "<th>".t("Nimi")."</th><td><input type='text' name='nimihaku' size='15' value='$nimihaku'></td><td></td>";
-  echo "<td class='back'><input type='Submit' value='".t("Etsi")."'></td></tr>";
+  echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Etsi")."'></td></tr>";
   echo "</table>";
   echo "</form>";
 

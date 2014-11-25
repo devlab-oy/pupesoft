@@ -118,7 +118,7 @@ echo "<input type='hidden' name='tee' value='Z'>";
 echo "<th style='vertical-align:middle;'>".t("Tuotehaku")."</th>";
 echo "<td>".livesearch_kentta("formi", "TUOTEHAKU", "tuoteno", 300)."</td>";
 echo "<td class='back'>";
-echo "<input type='Submit' value='".t("Hae")."'></form></td>";
+echo "<input type='Submit' class='hae_btn' value='".t("Hae")."'></form></td>";
 echo "</tr>";
 
 echo "<tr>";
@@ -137,7 +137,7 @@ echo "<input type='text' name='tuoteno' value='' style='width:300px;'>";
 echo "</td>";
 
 echo "<td class='back'>";
-echo "<input type='Submit' value='".t("Hae")."'>";
+echo "<input type='Submit' class='hae_btn' value='".t("Hae")."'>";
 echo "</form>";
 echo "</td>";
 

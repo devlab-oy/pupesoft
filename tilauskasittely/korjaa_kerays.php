@@ -65,7 +65,7 @@ if ($tee == '') {
   $kentta = "etsi";
 
   // tehdään etsi valinta
-  echo "<form name='find' method='post'>".t("Etsi tilausta").": <input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form><br><br>";
+  echo "<form name='find' method='post'>".t("Etsi tilausta").": <input type='text' name='etsi'><input type='Submit' class='hae_btn' value='".t("Etsi")."'></form><br><br>";
 
   $kka = date("m", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
   $vva = date("Y", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));

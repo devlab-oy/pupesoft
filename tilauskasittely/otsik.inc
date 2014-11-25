@@ -1218,7 +1218,7 @@ if ($tila == "" and !isset($jatka)) {
       }
     }
 
-    echo "<input type='submit' value='".t("Hae")."'>";
+    echo "<input type='Submit' class='hae_btn' value='".t("Hae")."'>";
     echo "</form>";
 
     $formi  = "paaformi";

@@ -359,7 +359,7 @@ if ($tee == '') {
         <option value='3' $chk[3]>".t("Viitesiirrot")."
       </select>
       </td>
-      <td class='back'><input type='submit' value='".t("Hae")."'></td>
+      <td class='back'><input type='Submit' class='hae_btn' value='".t("Hae")."'></td>
       </tr>
       </table><br>
       </form>";

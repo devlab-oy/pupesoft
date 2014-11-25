@@ -939,7 +939,7 @@ if ($tee2 == '') {
 
   echo "</td>";
   echo "<th>".t("Etsi tilausta").":</th><td><input type='text' name='etsi'>";
-  echo "<input type='Submit' value='".t("Etsi")."'></td></tr>";
+  echo "<input type='Submit' class='hae_btn' value='".t("Etsi")."'></td></tr>";
 
   echo "</table>";
 

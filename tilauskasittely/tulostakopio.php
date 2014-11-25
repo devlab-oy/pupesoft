@@ -432,7 +432,7 @@ if ($tee != 'NAYTATILAUS') {
       <td><input type='text' name='ppl' value='$ppl' size='3'></td>
       <td><input type='text' name='kkl' value='$kkl' size='3'></td>
       <td><input type='text' name='vvl' value='$vvl' size='5'></td>
-      <td class='back'><input type='submit' value='".t("Etsi")."'></td>";
+      <td class='back'><input type='Submit' class='hae_btn' value='".t("Etsi")."'></td>";
   echo "</table>";
   echo "</form><br>";
 }

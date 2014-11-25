@@ -779,7 +779,7 @@ if ((int) $asiakasid == 0 and (int) $toimittajaid == 0) {
 
   echo "</table>";
 
-  echo "<br><input type='submit' value='".t("Etsi")."'>";
+  echo "<br><input type='Submit' class='hae_btn' value='".t("Etsi")."'>";
   echo "</form>";
 }
 else {

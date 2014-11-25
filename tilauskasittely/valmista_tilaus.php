@@ -1567,7 +1567,7 @@ if (!isset($from_kaikkikorj)) {
       echo "<input type='text' name='etsi'>";
     }
 
-    echo "<input type='Submit' value='".t("Etsi")."'></form>";
+    echo "<input type='Submit' class='hae_btn' value='".t("Etsi")."'></form>";
 
     $haku = "";
     $laskuindex = "tila_index";

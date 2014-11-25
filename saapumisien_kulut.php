@@ -42,7 +42,7 @@ echo "<table>
     </td>
   </tr>
 </table>";
-echo "<br/><input type='submit' value='".t("Hae")."'>";
+echo "<br/><input type='Submit' class='hae_btn' value='".t("Hae")."'>";
 echo "</form><br/>";
 
 // Toimittajan haku

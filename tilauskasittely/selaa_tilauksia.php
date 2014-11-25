@@ -352,7 +352,7 @@ if ($tee == "paiva" or $tee == "kk") {
     echo "<th>".t("Hae tilausnumerolla").":</th>";
     echo "<td><input type='text' name='tilhaku' value='$tilhaku'></td>";
   }
-  echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
+  echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Hae")."'></td>";
   echo "</tr>";
   echo "</table>";
 

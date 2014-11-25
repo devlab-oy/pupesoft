@@ -621,7 +621,7 @@ if ($tila == '') {
   echo "<td valign='top'><input type='text' size='5'  name='haku[suoritus.tilino]' value='".$haku["suoritus.tilino"]."'></td>";
   echo "<td valign='top'><input type='text' size='15' name='haku[suoritus.viite]' value='".$haku["suoritus.viite"]."'><br><input type='text' size='15' name='haku[suoritus.viesti]' value='".$haku["suoritus.viesti"]."'></td>";
   echo "<td valign='top'><input type='text' size='5'  name='haku[tiliointi.tilino]' value='".$haku["tiliointi.tilino"]."'></td>";
-  echo "<td valign='top' class='back'><input type='submit' value='".t("Etsi")."'></td></tr>";
+  echo "<td valign='top' class='back'><input type='Submit' class='hae_btn' value='".t("Etsi")."'></td></tr>";
   echo "</form>";
 
   $row = 0;

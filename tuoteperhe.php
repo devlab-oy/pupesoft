@@ -1448,7 +1448,7 @@ elseif ($tee == "") {
     echo "<tr>";
     echo "<td><input type='text' size='20' name='isatuoteno_haku' value='$isatuoteno_haku'></td>";
     echo "<td><input type='text' size='20' name='tuoteno_haku' value='$tuoteno_haku'></td>";
-    echo "<td class='back'><input type='submit' value='".t("Hae")."'></td>";
+    echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Hae")."'></td>";
     echo "</tr>";
 
     while ($prow = mysql_fetch_array($result)) {

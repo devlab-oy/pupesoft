@@ -263,7 +263,7 @@ if ($id == '0') {
   $boob   = "";
 
   // tehd‰‰n etsi valinta
-  echo "<form name='find' method='post'>".t("Etsi tilausta").": <input type='text' name='etsi'><input type='Submit' value='".t("Etsi")."'></form><br><br>";
+  echo "<form name='find' method='post'>".t("Etsi tilausta").": <input type='text' name='etsi'><input type='Submit' class='hae_btn' value='".t("Etsi")."'></form><br><br>";
 
   $haku = '';
   if (is_string($etsi))  $haku="and lasku.nimi LIKE '%$etsi%'";

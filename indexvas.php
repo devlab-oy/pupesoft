@@ -85,7 +85,6 @@ echo "<table class='indexvas'>";
 
 // Mitä käyttäjä saa tehdä?
 // Valitaan ensin vain ylätaso jarjestys2='0'
-
 $query = "SELECT nimi, jarjestys
           FROM oikeu use index (sovellus_index)
           WHERE yhtio    = '$kukarow[yhtio]'
@@ -95,6 +94,11 @@ $query = "SELECT nimi, jarjestys
           and hidden     = ''
           ORDER BY jarjestys";
 $result = pupe_query($query);
+
+$firstrow = "first";
+$lastrow  = "";
+$rowcount = 0;
+$rowtot   = mysql_num_rows($result);
 
 while ($orow = mysql_fetch_array($result)) {
 
@@ -126,6 +130,12 @@ while ($orow = mysql_fetch_array($result)) {
     }
   }
 
+  $rowcount++;
+  
+  if ($rowcount == $rowtot) {
+    $lastrow = "last";
+  }
+	
   // alamenuja löytyy, eli tämä on menu
   if (mysql_num_rows($xresult) > 1) {
 
@@ -181,7 +191,7 @@ while ($orow = mysql_fetch_array($result)) {
       unset($go);
     }
 
-    echo "<tr><td><a $target class='indexvaslink$goclass' href='$mrow[nimi]";
+    echo "<tr><td class='$firstrow$lastrow'><a $target class='indexvaslink$goclass' href='$mrow[nimi]";
 
     if (strpos($mrow['nimi'], '?') === FALSE) {
       echo "?";
@@ -205,6 +215,8 @@ while ($orow = mysql_fetch_array($result)) {
     }
 
     echo "' target='mainframe'>".t("$mrow[nimitys]")."{$nimitys_lukumaara}</a></td></tr>";
+
+	$firstrow = "";
   }
 }
 echo "</table><br>";

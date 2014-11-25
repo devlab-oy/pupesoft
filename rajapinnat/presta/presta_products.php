@@ -49,7 +49,7 @@ class PrestaProducts extends PrestaClient {
     $this->logger->log('---------Start product sync---------');
 
     try {
-      $this->schema = $this->get_empty_schema($this->resource_name());
+      $this->schema = $this->get_empty_schema();
       //Fetch all products with ID's and SKU's only
       $existing_products = $this->all(array('id', 'reference'));
       $existing_products = $existing_products['products']['product'];

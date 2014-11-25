@@ -40,13 +40,17 @@ abstract class PrestaClient {
   }
 
   /**
-   * Fetch empty xml schema for given resource
+   * Fetch empty xml schema for given resource. If no resource is given use
+   * childs resource_name();
    *
    * @param string $resource
    * @return SimpleXMLElement
    * @throws Exception
    */
-  protected function get_empty_schema($resource) {
+  protected function get_empty_schema($resource = '') {
+    if (empty($resource)) {
+      $resource = $this->resource_name();
+    }
     $opt = array(
         'resource' => "$resource?schema=blank"
     );

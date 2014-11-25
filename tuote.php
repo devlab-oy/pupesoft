@@ -1324,6 +1324,7 @@ if ($tee == 'Z') {
               lasku2.laskunro as keikkanro,
               tilausrivi.jaksotettu,
               tilausrivin_lisatiedot.osto_vai_hyvitys,
+              tilausrivin_lisatiedot.korvamerkinta,
               lasku2.comments,
               lasku2.laatija,
               lasku2.luontiaika
@@ -1496,7 +1497,27 @@ if ($tee == 'Z') {
         }
 
         echo "</td>";
-        echo "  <td>$tyyppi</td>
+        echo "<td>";
+        echo $tyyppi;
+
+        if ($jtrow['korvamerkinta'] !== NULL) {
+
+          if (empty($jtrow['korvamerkinta'])) {
+            $luokka = '';
+          }
+          else {
+            $luokka = 'tooltip';
+          }
+
+          echo "&nbsp;<img src='{$palvelin2}pics/lullacons/info.png' class='{$luokka}' id='{$jtrow['trivitunn']}_info'>";
+          echo "<div id='div_{$jtrow['trivitunn']}_info' class='popup'>";
+          echo $jtrow['korvamerkinta'];
+          echo "</div>";
+        }
+
+        echo "</td>";
+
+        echo "
             <td>".tv1dateconv($jtrow["laadittu"])."</td>
             <td>".tv1dateconv($jtrow["pvm"])."$vahvistettu</td>
             <td align='right'>$merkki".abs($jtrow["kpl"])."</td>

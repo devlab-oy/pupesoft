@@ -319,8 +319,10 @@ if (isset($task) and $task == 'laheta_satamavahvistus') {
 
   if (laheta_sanoma($sanoma)) {
 
+    $sv_pvm = $lahtovuosi.'-'.$lahtokuu.'-'.$lahtopaiva.' '.$lahtotunti.':'.$lahtominuutti.':00';
+
     $query = "UPDATE laskun_lisatiedot SET
-              satamavahvistus_pvm = NOW()
+              satamavahvistus_pvm = '{$sv_pvm}'
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND konttiviite = '{$konttiviite}'";
     pupe_query($query);

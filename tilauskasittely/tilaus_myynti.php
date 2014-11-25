@@ -668,6 +668,28 @@ if ((int) $kukarow["kesken"] > 0) {
 
   $laskurow = mysql_fetch_assoc($result);
 
+  if (isset($poikkeava_toimitusosoite) and $poikkeava_toimitusosoite == "N") {
+    $tnimi     = $laskurow["nimi"];
+    $tnimitark = $laskurow["nimitark"];
+    $tosoite   = $laskurow["osoite"];
+    $tpostino  = $laskurow["postino"];
+    $tpostitp  = $laskurow["postitp"];
+    $toim_maa  = $laskurow["maa"];
+  }
+
+  if ($tnimi) {
+    $toimitusosoite = array(
+      "nimi"     => $tnimi,
+      "nimitark" => $tnimitark,
+      "osoite"   => $tosoite,
+      "postino"  => $tpostino,
+      "postitp"  => $tpostitp,
+      "maa"      => $toim_maa
+    );
+
+    $laskurow = tallenna_toimitusosoite($toimitusosoite, $laskurow);
+  }
+
   if ($kukarow['toimipaikka'] != $laskurow['yhtio_toimipaikka'] and $yhtiorow['myyntitilauksen_toimipaikka'] == 'A') {
     $kukarow['toimipaikka'] = $laskurow['yhtio_toimipaikka'];
     $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
@@ -3491,6 +3513,47 @@ if ($tee == '') {
     else {
       echo "<input type='hidden' size='30' name='myyja' value='$laskurow[myyja]'>";
       echo "</tr>";
+
+      $toim_eroaa = ($laskurow["nimi"] != $laskurow["toim_nimi"] or
+                     $laskurow["nimitark"] != $laskurow["toim_nimitark"] or
+                     $laskurow["osoite"] != $laskurow["toim_osoite"] or
+                     $laskurow["postitp"] != $laskurow["toim_postitp"] or
+                     $laskurow["postino"] != $laskurow["toim_postino"] or
+                     $laskurow["maa"] != $laskurow["toim_maa"]);
+
+      if ($toim_eroaa) {
+        $poikkeava_toimitusosoite = "Y";
+      }
+
+      $checked =
+        (isset($poikkeava_toimitusosoite) and $poikkeava_toimitusosoite == "Y") ? "checked" : "";
+
+      echo "<script>
+              var handleCheckbox = function() {
+                checkBoxi = document.getElementById(\"toimCheck\");
+                if (checkBoxi.checked) {
+                  document.getElementById(\"toimHidden\").disabled = true;
+                  tilaus.submit();
+                } else {
+                  if (confirm('" . t("Toimitusosoitteen tiedot poistetaan, oletko varma?") . "')) {
+                    tilaus.submit();
+                  } else {
+                    checkBoxi.checked = true;
+                  }
+                }
+              };
+            </script>";
+
+      echo "<tr>
+              <th>" . t("Poikkeava toimitusosoite") . "</th>
+              <td>
+                <input id='toimHidden' type='hidden' name='poikkeava_toimitusosoite' value='N'>
+                <input id='toimCheck' type='checkbox'
+                       name='poikkeava_toimitusosoite'
+                       value='Y'
+                       onclick='handleCheckbox();' {$checked}>
+              </td>
+            </tr>";
     }
   }
   elseif ($kukarow["extranet"] == "") {
@@ -3580,6 +3643,10 @@ if ($tee == '') {
   <span id='myyjanumero_error'>{$myyjanumero_virhe}</span>
 
   <script>{$javascript}</script>";
+
+  if (isset($poikkeava_toimitusosoite) and $poikkeava_toimitusosoite == "Y") {
+    piirra_toimitusosoite($laskurow);
+  }
 
   if ($laskurow['tila'] == 'N' and $laskurow['alatila'] == 'F' and $laskurow['sisviesti3'] != '') {
 
@@ -9771,4 +9838,99 @@ function loytyyko_myyja_tunnuksella($tunnus) {
   $maara = mysql_fetch_assoc($result);
 
   return $maara['maara'] > 0;
+}
+
+function piirra_toimitusosoite($laskurow) {
+  global $kukarow, $yhtiorow;
+
+  $maa_query = "SELECT DISTINCT koodi, nimi
+                FROM maat
+                WHERE nimi != ''
+                ORDER BY koodi";
+
+  $maa_result = pupe_query($maa_query);
+
+  echo "<br>
+        <table>
+          <tr>
+            <th colspan='2' align='left' valign='top'>" . t("Toimitusosoite") . ":</th>
+          </tr>
+          <tr>
+            <td valign='top'>" . t("Nimi") . ":</td>
+            <td><input type='text' name='tnimi' value='{$laskurow["toim_nimi"]}'/></td>
+          </tr>
+          <tr>
+            <td valign='top'></td>
+            <td><input type='text' name='tnimitark' value='{$laskurow["toim_nimitark"]}'/></td>
+          </tr>
+          <tr>
+            <td valign='top'>" . t("Osoite") . ":</td>
+            <td><input type='text' name='tosoite' value='{$laskurow["toim_osoite"]}'/></td>
+          </tr>
+          <tr>
+            <td valign='top'>" . t("Postitp") . ":</td>
+            <td>
+              <input type='text' name='tpostino' value='{$laskurow["toim_postino"]}'/>
+              <input type='text' name='tpostitp' value='{$laskurow["toim_postitp"]}'/>
+            </td>
+          </tr>
+          <tr>
+            <td valign='top'>" . t("Maa") . "</td>
+            <td>
+              <select name='toim_maa'
+                      onchange='submit()' " . js_alasvetoMaxWidth("toim_maa", 200) . ">";
+
+  while ($maa = mysql_fetch_assoc($maa_result)) {
+    $sel = "";
+
+    if (strtoupper($laskurow["toim_maa"]) == strtoupper($maa["koodi"])) {
+      $sel = "selected";
+    }
+    elseif ($laskurow["toim_maa"] == "" and
+            strtoupper($maa["koodi"]) == strtoupper($yhtiorow["maa"])
+    ) {
+      $sel = "selected";
+    }
+
+    echo
+      "<option value='" . strtoupper($maa["koodi"]) . "' {$sel}>" . t($maa["nimi"]) . "</option>";
+  }
+
+  echo "      </select>
+            </td>
+          </tr>
+          <tr>
+            <td class='back'>
+              <input type='submit'
+                     value='" . t("Tallenna toimitusosoite") . "'
+                     name='tallenna_toimitusosoite'>
+            </td>
+          </tr>
+        </table>";
+}
+
+function tallenna_toimitusosoite($toimitusosoite, $laskurow) {
+  global $kukarow;
+
+  $query =
+    "UPDATE lasku
+     SET toim_nimi = '{$toimitusosoite["nimi"]}',
+     toim_nimitark = '{$toimitusosoite["nimitark"]}',
+     toim_osoite   = '{$toimitusosoite["osoite"]}',
+     toim_postino  = '{$toimitusosoite["postino"]}',
+     toim_postitp  = '{$toimitusosoite["postitp"]}',
+     toim_maa      = '{$toimitusosoite["maa"]}'
+     WHERE yhtio = '{$kukarow["yhtio"]}'
+     AND  tunnus = {$laskurow["tunnus"]}";
+
+  pupe_query($query);
+
+  $laskurow["toim_nimi"]     = $toimitusosoite["nimi"];
+  $laskurow["toim_nimitark"] = $toimitusosoite["nimitark"];
+  $laskurow["toim_osoite"]   = $toimitusosoite["osoite"];
+  $laskurow["toim_postino"]  = $toimitusosoite["postino"];
+  $laskurow["toim_postitp"]  = $toimitusosoite["postitp"];
+  $laskurow["toim_maa"]      = $toimitusosoite["maa"];
+
+  return $laskurow;
 }

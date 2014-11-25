@@ -95,11 +95,6 @@ $query = "SELECT nimi, jarjestys
           ORDER BY jarjestys";
 $result = pupe_query($query);
 
-$firstrow = "first";
-$lastrow  = "";
-$rowcount = 0;
-$rowtot   = mysql_num_rows($result);
-
 while ($orow = mysql_fetch_array($result)) {
 
   // tutkitaan onko meillä alamenuja
@@ -130,12 +125,6 @@ while ($orow = mysql_fetch_array($result)) {
     }
   }
 
-  $rowcount++;
-  
-  if ($rowcount == $rowtot) {
-    $lastrow = "last";
-  }
-	
   // alamenuja löytyy, eli tämä on menu
   if (mysql_num_rows($xresult) > 1) {
 
@@ -191,7 +180,7 @@ while ($orow = mysql_fetch_array($result)) {
       unset($go);
     }
 
-    echo "<tr><td class='$firstrow$lastrow'><a $target class='indexvaslink$goclass' href='$mrow[nimi]";
+    echo "<tr><td><a $target class='indexvaslink$goclass' href='$mrow[nimi]";
 
     if (strpos($mrow['nimi'], '?') === FALSE) {
       echo "?";
@@ -215,8 +204,6 @@ while ($orow = mysql_fetch_array($result)) {
     }
 
     echo "' target='mainframe'>".t("$mrow[nimitys]")."{$nimitys_lukumaara}</a></td></tr>";
-
-	$firstrow = "";
   }
 }
 echo "</table><br>";

@@ -43,7 +43,7 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
               ON ss.yhtio = tr.yhtio AND ss.myyntirivitunnus = tr.tunnus
             WHERE la.yhtio = '{$kukarow['yhtio']}'
             AND la.tunnus IN ({$laskujen_tunnukset})
-            AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu')
+            AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu' OR ss.lisatieto = 'Toimitettu')
             ORDER BY asiakkaan_tilausnumero, paikka";
   $result = pupe_query($query);
 
@@ -482,13 +482,14 @@ function satamavahvistus_parametrit($konttiviite) {
   $matkatiedot = mysql_result($result, 0, 2);
 
   $matka_info = unserialize($matkatiedot);
-
+  $rullat = array();
   $kontit = array();
 
   $query = "SELECT trlt.konttinumero,
             trlt.sinettinumero,
             trlt.kontin_kilot,
-            trlt.kontin_taarapaino
+            trlt.kontin_taarapaino,
+            ss.sarjanumero
             FROM tilausrivi
             JOIN tilausrivin_lisatiedot AS trlt
               ON trlt.yhtio = tilausrivi.yhtio
@@ -500,7 +501,7 @@ function satamavahvistus_parametrit($konttiviite) {
             AND tilausrivi.otunnus IN ({$tunnukset})
             AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu')";
   $result = pupe_query($query);
-  $kontit = array();
+
 
   while ($row = mysql_fetch_assoc($result)) {
     if ($row['kontin_kilot'] == 0) {
@@ -514,6 +515,7 @@ function satamavahvistus_parametrit($konttiviite) {
           'taara' => $row['kontin_taarapaino']
         );
     }
+    $rullat[$row['sarjanumero']] = $row;
   }
 
   $sanomaid = "RP" . time();
@@ -527,6 +529,7 @@ function satamavahvistus_parametrit($konttiviite) {
     'sanomaid' => $sanomaid,
     'sanomanumero' => $sanomanumero,
     'kontit' => $kontit,
+    'rullat' => $rullat,
     'tilauskoodi' => $konttiviite,
     'matkakoodi' => $matkakoodi,
     'matka_info' => $matka_info
@@ -1816,7 +1819,7 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
               ON ss.yhtio = tilausrivi.yhtio
               AND ss.myyntirivitunnus = tilausrivi.tunnus
             WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
-            AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu')
+            AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu' OR ss.lisatieto = 'Toimitettu')
             {$rajaus}
             AND laskun_lisatiedot.konttiviite = '{$konttiviite}'";
   $result = pupe_query($query);

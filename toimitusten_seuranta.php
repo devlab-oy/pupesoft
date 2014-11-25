@@ -300,6 +300,9 @@ if (isset($task) and $task == 'laheta_satamavahvistus') {
 
   $parametrit = satamavahvistus_parametrit($konttiviite);
 
+  $sarjanumerot = array_keys($parametrit['rullat']);
+  $sarjanumero_string = implode(",", $sarjanumerot);
+
   $lahtoajat = explode(".", $lahtopvm);
 
   $lahtopaiva = $lahtoajat[0];
@@ -327,10 +330,17 @@ if (isset($task) and $task == 'laheta_satamavahvistus') {
               AND konttiviite = '{$konttiviite}'";
     pupe_query($query);
 
+    $query = "UPDATE sarjanumeroseuranta SET
+              lisatieto = 'Toimitettu'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND sarjanumero IN  ({$sarjanumero_string})";
+    pupe_query($query);
+
   }
   else{
     echo "Lähetys epäonnistui!";
   }
+
 
   unset($task);
 }

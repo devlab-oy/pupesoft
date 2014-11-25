@@ -975,7 +975,7 @@ if ($tee == '') {
   echo "<th nowrap>".t("Valitse toimittaja")."</th>";
   echo "<td>";
 
-  echo "<input type = 'text' name = 'toimittaja_y' size='20'></td><td class='back'><input type = 'submit' value = '".t("Etsi")."'>";
+  echo "<input type = 'text' name = 'toimittaja_y' size='20'></td><td class='back'><input type = 'submit' class='hae_btn' value = '".t("Etsi")."'>";
 
   echo "</td>\n";
   echo "</tr>\n";
@@ -993,7 +993,7 @@ if ($tee == '') {
   echo "<th nowrap>".t("tai")." ".t("valitse asiakas")."</th>";
   echo "<td>";
 
-  echo "<input type = 'text' name = 'asiakas_y' size='20'></td><td class='back'><input type = 'submit' value = '".t("Etsi")."'>";
+  echo "<input type = 'text' name = 'asiakas_y' size='20'></td><td class='back'><input type = 'submit' class='hae_btn' value = '".t("Etsi")."'>";
 
   echo "</td>\n";
   echo "</tr>\n";

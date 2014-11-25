@@ -336,7 +336,7 @@ echo "<option {$sel['1000']} value = '1000'>".t("1000")."</option>";
 echo "</select> ".t("laskua")."</td>";
 
 
-echo "<td class='back'><input type = 'submit' value = '".t("Etsi")."'></td>";
+echo "<td class='back'><input type = 'submit' class='hae_btn' value = '".t("Etsi")."'></td>";
 echo "</tr>";
 
 echo "</table>";

@@ -73,12 +73,13 @@ abstract class PrestaClient {
    * Use $this-> instead of parent:: if you are going to override this class get()
    *
    * @param int $id
+   * @param string $resource
    * @return array
    * @throws Exception
    */
-  protected function get($id) {
+  protected function get($id, $resource = '') {
     try {
-      $response_xml = $this->get_as_xml($id);
+      $response_xml = $this->get_as_xml($id, $resource);
     }
     catch (Exception $e) {
       throw $e;
@@ -90,11 +91,14 @@ abstract class PrestaClient {
   /**
    * 
    * @param int $id
+   * @param string $resource
    * @return SimpleXMLElement
    * @throws Exception
    */
-  protected function get_as_xml($id) {
-    $resource = $this->resource_name();
+  protected function get_as_xml($id, $resource = '') {
+    if (empty($resource)) {
+      $resource = $this->resource_name();
+    }
     $opt = array(
         'resource' => $resource,
         'id'       => $id,

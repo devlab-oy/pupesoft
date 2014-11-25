@@ -42,7 +42,7 @@ foreach ($tallennetut["skriptit"] as $i => $skripti) {
 }
 
 echo "<td class='ylapalkki'><a class='puhdas' target='mainframe' href='{$palvelin2}pikavalinnat.php'><img src='{$palvelin2}pics/facelift/plussa.png'><br>".t("Lis‰‰")."</a></td>";
-echo "<td class='ylapalkki' style='padding-left: 15px;'><a class='puhdas' target='mainframe' href='{$palvelin2}logout.php'><img src='{$palvelin2}pics/facelift/ratas.png'><br>Exit</a></td>";
+echo "<td class='ylapalkki'><a class='puhdas' target='mainframe' href='{$palvelin2}logout.php'><img src='{$palvelin2}pics/facelift/icon-exit.gif'><br>Exit</a></td>";
 echo "</tr>";
 echo "</table>";
 echo "</div>";

@@ -8,7 +8,7 @@ $STATE_CRITICAL  = 2;
 $STATE_UNKNOWN   = 3;
 $STATE_DEPENDENT = 4;
 
-if ($_SERVER['REMOTE_ADDR'] == '82.181.128.118') {
+if ($_SERVER['REMOTE_ADDR'] == '127.0.0.1' or $_SERVER['REMOTE_ADDR'] == '::1' or $_SERVER['SERVER_ADDR'] == $_SERVER['REMOTE_ADDR'] or $_SERVER['REMOTE_ADDR'] == '82.181.128.118') {
 
   if ($_GET["tee"] == "MYSQL") {
     $link = mysql_connect($dbhost, $dbuser, $dbpass) or die ("CRITICAL - mysql_connect() failed $STATE_CRITICAL");
@@ -275,6 +275,14 @@ if ($_SERVER['REMOTE_ADDR'] == '82.181.128.118') {
   }
 
   if (!isset($_GET["tee"]) or $_GET["tee"] == "") {
+
+    $errorlog = exec("tail -n 1 /home/nagios/nagios-pupesoft.log");
+
+    if (trim($errorlog) != "") {
+      echo "CRITICAL - PUPESOFT VIRHE! $errorlog $STATE_CRITICAL";
+      exit;
+    }
+
     echo "OK - Pupesoft OK $STATE_OK";
   }
 }

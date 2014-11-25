@@ -1090,11 +1090,11 @@ if ($tila == "" and !isset($jatka)) {
   }
 
   echo "<table>";
-  echo "<tr><td style='padding:0px;'>";
+  echo "<tr><td class='nopad_top'>";
 
   echo "<table>";
   echo "<tr>
-      <th colspan='2' align='left' valign='top'>".t("Ostaja").":</td>
+      <th colspan='2'>".t("Ostaja").":</td>
     </tr>";
   echo "<tr>
       <td valign='top'>".t("Nimi").": </td>
@@ -1249,10 +1249,10 @@ if ($tila == "" and !isset($jatka)) {
       echo "<input type='hidden' name='ytunnus'              value = '$srow[ytunnus]'>";
     }
 
-    echo "<td valign='top' style='padding:0px;'>";
+    echo "<td class='nopad_top'>";
     echo "<table>";
     echo "<tr>
-        <th colspan='2' align='left' valign='top'>".t("Toimitusosoite").":</td></tr>";
+        <th colspan='2'>".t("Toimitusosoite").":</td></tr>";
 
     /* jos asiakkaalle ei ole tallennettu kohteita, ei piirret‰ kentt‰‰ */
     $kohde_ui = "";
@@ -1325,10 +1325,10 @@ if ($tila == "" and !isset($jatka)) {
     echo "</table>";
     echo "</td>";
 
-    echo "<td valign='top' style='padding:0px;'>";
+    echo "<td class='nopad_top'>";
     echo "<table>";
     echo "<tr>
-        <th colspan='2' align='left' valign='top'>&nbsp; ".t("Laskun postitusosoite").":</td></tr>";
+        <th colspan='2'>&nbsp; ".t("Laskun postitusosoite").":</td></tr>";
     echo "<tr>
         <td valign='top'> ".t("Nimi").": </td>
         <td><input type='text' name='laskutus_nimi' size='35' value='$srow[laskutus_nimi]'></td></tr>";
@@ -1378,10 +1378,10 @@ if ($tila == "" and !isset($jatka)) {
       echo "<table>";
 
       if (($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $tilaustyyppi == "T") {
-        echo "<tr><th colspan='2' align='left' valign='top'>&nbsp; ".t("Rinnakkaisostaja").":</th></tr>";
+        echo "<tr><th colspan='2'>&nbsp; ".t("Rinnakkaisostaja").":</th></tr>";
       }
       else {
-        echo "<tr><th colspan='2' align='left' valign='top'>&nbsp; ".t("Asiamies").":</th></tr>";
+        echo "<tr><th colspan='2'>&nbsp; ".t("Asiamies").":</th></tr>";
       }
 
       echo "<tr>

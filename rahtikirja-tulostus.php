@@ -1258,7 +1258,7 @@ if ($tee == '') {
 
     echo "<table><tr><th valign='top'>", t("Etsi numerolla"), ":</th>";
     echo "<form method='post'>"; // document.getElementById('sel_rahtikirjat').style.display='inline';document.getElementById('sel_td').className='';
-    echo "<td valign='top'><input type='text' value='$etsi_nro2' name='etsi_nro2' id='etsi_nro2'>&nbsp;<input type='submit' id='etsi_button2' name='etsi_button2' value='", t("Etsi"), "'>&nbsp;<input type='submit' id='resetti' name='resetti' value='", t("Tyhjennä"), "'></td>";
+    echo "<td valign='top'><input type='text' value='$etsi_nro2' name='etsi_nro2' id='etsi_nro2'>&nbsp;<input type='submit' id='etsi_button2' name='etsi_button2' class='hae_btn' value = '".t("Etsi")."'>&nbsp;<input type='submit' id='resetti' name='resetti' value='", t("Tyhjennä"), "'></td>";
     echo "</form>";
     echo "</tr>";
 
@@ -1408,7 +1408,7 @@ if ($tee == '') {
 
     echo "</tr><tr>";
     echo "<td valign='top' class='$class' id='sel_td'><div id='sel_rahtikirjat' $nayta_div>";
-    echo "<table id='toim_table' name='toim_table'><tr><td valign='top'>", t("Etsi numerolla"), ": <input type='input' name='etsi_nro' id='etsi_nro' onkeypress=\"return disableEnterKey(event);\"> <input type='button' name='etsi_button' id='etsi_button' value='", t("Etsi"), "' onclick='untoggleAll(this);document.getElementById(\"nayta_rahtikirjat\").checked=true;showNumber(this);'> <input type='button' name='etsi_kaikki' id='etsi_kaikki' value='", t("Näytä kaikki"), "' onclick='untoggleAll(this);document.getElementById(\"nayta_rahtikirjat\").checked=true;showNumbers(this);'></td></tr>";
+    echo "<table id='toim_table' name='toim_table'><tr><td valign='top'>", t("Etsi numerolla"), ": <input type='input' name='etsi_nro' id='etsi_nro' onkeypress=\"return disableEnterKey(event);\"> <input type='button' name='etsi_button' id='etsi_button' class='hae_btn' value = '".t("Etsi")."' onclick='untoggleAll(this);document.getElementById(\"nayta_rahtikirjat\").checked=true;showNumber(this);'> <input type='button' name='etsi_kaikki' id='etsi_kaikki' value='", t("Näytä kaikki"), "' onclick='untoggleAll(this);document.getElementById(\"nayta_rahtikirjat\").checked=true;showNumbers(this);'></td></tr>";
 
     mysql_data_seek($result, 0);
 

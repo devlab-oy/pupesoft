@@ -8,7 +8,7 @@ if (!isset($laskunro)) $laskunro = '';
 
 echo "<table>";
 echo "<form method='post'>";
-echo "<tr><th>", t("Laskunumero"), "</th><td><input type='text' name='laskunro' value='{$laskunro}' /></td><td><input type='submit' value='", t("Etsi"), "' /></td></tr>";
+echo "<tr><th>", t("Laskunumero"), "</th><td><input type='text' name='laskunro' value='{$laskunro}' /></td><td><input type='submit' class='hae_btn' value = '".t("Etsi")."' /></td></tr>";
 echo "</form>";
 echo "</table>";
 

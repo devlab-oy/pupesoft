@@ -25,7 +25,7 @@ echo "<tr><th>", t("Valitse toimittaja"), ":</th><td style='text-align: top;'><i
 echo "<select name='nayta_rivit'>";
 echo "<option value=''>", t("Kaikki avoimet rivit"), "</option>";
 echo "<option value='vahvistamattomat' {$select}>", t("Vain vahvistamattomia rivejä"), "</option> ";
-echo "<input type='submit' value='", t("Etsi"), "'></td>";
+echo "<input type='submit' class='hae_btn' value = '".t("Etsi")."'></td>";
 echo "</tr>";
 
 echo "<tr><th>", t("Näytä kaikki"), ":</th>";

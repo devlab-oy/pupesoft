@@ -4,11 +4,23 @@ require "inc/parametrit.inc";
 
 echo "<font class='head'>".t("Muokkaa pikavalintoja").":</font><hr>";
 
-$kuvakkeet_img = array ("Käppyrä"   => "graafi.png",
-                        "Kalenteri" => "kalenteri.png",
-                        "Koti"      => "koti.png",
-                        "Pylväät"   => "palkit.png",
-                        "Ratas"     => "ratas.png");
+$kuvakkeet_img = array ("Kalenteri"    => "calendar.png",
+                        "Crm"          => "crm-2.png",
+                        "Crm-sydän"    => "crm.png",
+                        "Lisää_useita" => "icon-add-multiple.png",
+                        "Lisää"        => "icon-add.png",
+                        "Palkit"       => "icon-adjust.png",
+                        "Tiedosto"     => "icon-document.png",
+                        "Alas"         => "icon-download.png",
+                        "Koti"         => "icon-home.png",
+                        "Säätimet"     => "icon-setting.png",
+                        "Struktuuri"   => "icon-structure.png",
+                        "Lamppu"       => "icon-tip.png",
+                        "Ylös"         => "icon-upload.png",
+                        "Vähennä"      => "icon-vahenna.png",
+                        "Myynti"       => "myynti.png",
+                        "Neula"        => "pin.png",
+                        "Ratas"        => "ratas.png");
 
 if ($tee == "tallenna") {
   foreach($skriptit as $i => $skripti) {
@@ -136,7 +148,7 @@ echo "</form>";
 echo "<br><br><br>Käytettävissä olevat kuvakkeet:<br><br>";
 
 foreach ($kuvakkeet_img as $kuvanimi => $kuva) {
-  echo "<img src='{$palvelin2}pics/facelift/$kuva'> $kuvanimi<br>";
+  echo "<img src='{$palvelin2}pics/facelift/icons/$kuva'> $kuvanimi<br>";
 }
 
 require "inc/footer.inc";

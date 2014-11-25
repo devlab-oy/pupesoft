@@ -13,7 +13,7 @@ echo "<tr>";
 echo "<td width='305'><a class='puhdas' target='mainframe' href='{$palvelin2}logout.php?toim=change'><img style='padding-left: 15px;' src='{$palvelin2}pics/facelift/logo.png'></a></td>";
 echo "<td>$yhtiorow[nimi]<br>$kukarow[nimi]</td>";
 
-echo "<td class='ylapalkki'><a class='puhdas' target='top' href='{$palvelin2}'><img src='{$palvelin2}pics/facelift/koti.png'><br>".t("Etusivu")."</a></td>";
+echo "<td class='ylapalkki'><a class='puhdas' target='top' href='{$palvelin2}'><img src='{$palvelin2}pics/facelift/icons/icon-home.png'><br>".t("Etusivu")."</a></td>";
 
 $query = "SELECT *
           FROM extranet_kayttajan_lisatiedot
@@ -38,7 +38,7 @@ foreach ($tallennetut["skriptit"] as $i => $skripti) {
     $skriptilisa .= "?toim=".$golisa;
   }
 
-  echo "<td class='ylapalkki'><a class='puhdas' target='top' href='{$palvelin2}$skriptilisa'><img src='{$palvelin2}pics/facelift/$kuvake'><br>$teksti</a></td>";
+  echo "<td class='ylapalkki'><a class='puhdas' target='top' href='{$palvelin2}$skriptilisa'><img src='{$palvelin2}pics/facelift/icons/$kuvake'><br>$teksti</a></td>";
 }
 
 echo "<td style='padding: 0px; text-align: center;'><img src='{$palvelin2}pics/facelift/divider.png'></td>";

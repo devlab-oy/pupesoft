@@ -78,6 +78,11 @@ td {
 	vertical-align: middle;
 }
 
+td.nopad_top {
+	padding: 0px;
+	vertical-align: top;
+}
+
 th a {
 	font-size: 11pt;
   text-transform: capitalize;
@@ -108,12 +113,12 @@ pre {
 
 .tumma {
 	color: #ffffff; /*TUMMA_COLOR*/
-	background-color: #828282; /*TUMMA_BACKGROUND*/
+	background-color: #a2a2a2; /*TUMMA_BACKGROUND*/
 }
 
 .spec {
 	color: #ffffff; /*SPEC_COLOR*/
-	background-color: #828282; /*SPEC_BACKGROUND*/
+	background-color: #a2a2a2; /*SPEC_BACKGROUND*/
 }
 
 .spec a {
@@ -331,7 +336,7 @@ input[type=submit].lisaa_btn {
   background-image: url('../pics/facelift/submit_add.png');
   background-repeat: no-repeat;
   background-position: right;
-  padding-right: 40px;
+  padding-right: 35px;
 }
 
 input[type=submit].hae_btn {
@@ -339,7 +344,7 @@ input[type=submit].hae_btn {
   background-image: url('../pics/facelift/submit_mglass.png');
   background-repeat: no-repeat;
   background-position: right;
-  padding-right: 40px;
+  padding-right: 35px;
 }
 
 input[type=submit].tallenna_btn {
@@ -347,7 +352,7 @@ input[type=submit].tallenna_btn {
   background-image: url('../pics/facelift/submit_rightarrow.png');
   background-repeat: no-repeat;
   background-position: right;
-  padding-right: 40px;
+  padding-right: 35px;
 }
 
 input[type=submit].poista_btn {
@@ -355,5 +360,5 @@ input[type=submit].poista_btn {
   background-image: url('../pics/facelift/submit_leftarrow.png');
   background-repeat: no-repeat;
   background-position: right;
-  padding-right: 40px;
+  padding-right: 35px;
 }

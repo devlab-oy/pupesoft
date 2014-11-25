@@ -324,7 +324,7 @@ if (!$asiakasid and !$rahtikirja_ilman_asiakasta) {
 
   echo "<table><form method='POST' action='rahtikirja_custom.php' name='haku'>
         <tr><th>".t('Hae asiakas')."</th><td><input type='text' name='ytunnus' value=''><input type='hidden' name='rahtikirja_ilman_asiakasta' value='0' /></td>
-          <td class='back'><input type='submit' value=".t('Etsi')."></td>
+          <td class='back'><input type='submit' class='hae_btn' value = '".t("Etsi")."'></td>
         </tr></form></table>";
 
   echo "<br/>";

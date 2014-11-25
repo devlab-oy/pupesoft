@@ -2285,7 +2285,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
     echo "</select></td>";
 
     echo "<th>", t("Etsi tilausta"), ":</th><td><input type='text' name='etsi'>";
-    echo "<input type='submit' value='", t("Etsi"), "'></td></tr>";
+    echo "<input type='submit' class='hae_btn' value = '".t("Etsi")."'></td></tr>";
     echo "</table>";
     echo "</form>";
     echo "</span>";

@@ -52,7 +52,7 @@ if (in_array($tee, array('', 'etsi_sscc', 'etsi_saapuminen'))) {
   echo "<tr>";
   echo "<th>", t("SSCC"), "</th>";
   echo "<td><input type='text' name='sscc' value='{$sscc}' /></td>";
-  echo "<td class='back' nowrap><input type='submit' value='", t("Etsi"), "' />&nbsp;&nbsp;<font class='error'>{$error_sscc}</font></td></tr>";
+  echo "<td class='back' nowrap><input type='submit' class='hae_btn' value = '".t("Etsi")."' />&nbsp;&nbsp;<font class='error'>{$error_sscc}</font></td></tr>";
   echo "<input type='hidden' name='tee' value='etsi_sscc' />";
   echo "</table>";
   echo "</form>";
@@ -64,7 +64,7 @@ if (in_array($tee, array('', 'etsi_sscc', 'etsi_saapuminen'))) {
   echo "<tr>";
   echo "<th>", t("Saapumisen nro"), "</th>";
   echo "<td><input type='text' name='saapuminen' value='{$saapuminen}' /></td>";
-  echo "<td class='back' nowrap><input type='submit' value='", t("Etsi"), "' />&nbsp;&nbsp;<font class='error'>{$error_saapuminen}</font></td></tr>";
+  echo "<td class='back' nowrap><input type='submit' class='hae_btn' value = '".t("Etsi")."' />&nbsp;&nbsp;<font class='error'>{$error_saapuminen}</font></td></tr>";
   echo "<input type='hidden' name='tee' value='etsi_saapuminen' />";
   echo "</table>";
   echo "</form>";

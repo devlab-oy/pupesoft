@@ -33,6 +33,7 @@ require "../inc/parametrit.inc";
 
 require "{$pupe_root_polku}/rajapinnat/magento_client.php";
 require "{$pupe_root_polku}/rajapinnat/presta/presta_products.php";
+require "{$pupe_root_polku}/rajapinnat/presta/presta_categories.php";
 
 // Laitetaan unlimited execution time
 ini_set("max_execution_time", 0);
@@ -52,13 +53,48 @@ ini_set("max_execution_time", 0);
 //
 //$verkkokauppatyyppi = isset($argv[2]) ? trim($argv[2]) : "";
 
-if ($verkkokauppatyyppi == 'presta') {
+$tuotteet = hae_tuotteet();
+
+$tuotexxxx = false;
+if ($verkkokauppatyyppi == 'presta' and $tuotexxxx) {
+  $kategoriat = hae_kategoriat();
+  $presta_categories = new PrestaCategories($presta_url, $presta_api_key);
+  $presta_categories->sync_categories($kategoriat);
+  
   $tuotteet = hae_tuotteet();
   $presta_products = new PrestaProducts($presta_url, $presta_api_key);
   $presta_products->sync_products($tuotteet);
 }
 
 die();
+
+function hae_kategoriat() {
+  global $kukarow, $yhtiorow, $verkkokauppatyyppi;
+  
+  $query = "SELECT
+            node.lft AS lft,
+            node.rgt AS rgt,
+            node.nimi AS node_nimi,
+            node.koodi AS node_koodi,
+            node.tunnus AS node_tunnus,
+            node.syvyys as node_syvyys,
+            (COUNT(node.tunnus) - 1) AS syvyys
+            FROM dynaaminen_puu AS node
+            JOIN dynaaminen_puu AS parent ON node.yhtio=parent.yhtio and node.laji=parent.laji AND node.lft BETWEEN parent.lft AND parent.rgt
+            WHERE node.yhtio = '{$kukarow['yhtio']}'
+            AND node.laji    = 'tuote'
+            GROUP BY node.lft
+            ORDER BY node.lft";
+            
+  $result = pupe_query($query);
+  
+  $kategoriat = array();
+  while($kategoria = mysql_fetch_assoc($result)) {
+    $kategoriat[] = $kategoria;
+  }
+  
+  return $kategoriat;
+}
 
 function hae_tuotteet() {
   global $kukarow, $yhtiorow, $verkkokauppatyyppi;

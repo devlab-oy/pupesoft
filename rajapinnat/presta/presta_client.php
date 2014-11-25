@@ -57,6 +57,8 @@ abstract class PrestaClient {
 
     try {
       $schema = $this->ws->get($opt);
+      $msg = "Resurssin {$resource} empty schema haettu";
+      $this->logger->log($msg);
     }
     catch (Exception $e) {
       $msg = "Resurssin {$resource} empty schema GET epäonnistui";
@@ -100,6 +102,8 @@ abstract class PrestaClient {
 
     try {
       $response_xml = $this->ws->get($opt);
+      $msg = "Resurssin {$resource} {$id} haettu";
+      $this->logger->log($msg);
     }
     catch (Exception $e) {
       $msg = "Resurssin: {$resource} {$id} haku epäonnistui";
@@ -189,6 +193,9 @@ abstract class PrestaClient {
 
     try {
       $response_xml = $this->ws->get($opt);
+      $response = xml_to_array($response_xml);
+      $msg = "Resurssin " . $this->resource_name() . " kaikki (".count($response).") rivit haettu";
+      $this->logger->log($msg);
     }
     catch (Exception $e) {
       $msg = "Kaikkien resurssin "
@@ -198,7 +205,7 @@ abstract class PrestaClient {
       throw $e;
     }
 
-    return xml_to_array($response_xml);
+    return $response;
   }
 
   /**
@@ -215,6 +222,8 @@ abstract class PrestaClient {
 
     try {
       $response_bool = $this->ws->delete($opt);
+      $msg = "Resurssin " . $this->resource_name() . " {$id} poistettu";
+      $this->logger->log($msg);
     }
     catch (Exception $e) {
       $msg = "Resurssin: "

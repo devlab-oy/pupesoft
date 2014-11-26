@@ -334,12 +334,30 @@ abstract class PrestaClient {
     return $response;
   }
   
+  /**
+   * 
+   * @return string
+   */
   protected function get_url() {
     return $this->url;
   }
   
+  /**
+   * 
+   * @return string
+   */
   protected function get_api_key() {
     return $this->api_key;
+  }
+  
+  /**
+   * Sanitezes string for presta link_rewrite column
+   * 
+   * @param string $string
+   * @return string
+   */
+  protected function saniteze_link_rewrite($string) {
+    return preg_replace('/[^a-zA-Z0-9]/', '', $string);
   }
 
   //Child has to implement function which returns schema=blank or repopulated xml

@@ -101,8 +101,9 @@ class PrestaCategories extends PrestaClient {
     $xml->category->id_parent = $category['parent_id'];
     $xml->category->active = 1;
 
-    $xml->category->link_rewrite->language[0] = preg_replace('/[^a-zA-Z0-9]/', '', $category['node_nimi']);
-    $xml->category->link_rewrite->language[1] = preg_replace('/[^a-zA-Z0-9]/', '', $category['node_nimi']);
+    $link_rewrite = $this->saniteze_link_rewrite($category['node_nimi']);
+    $xml->category->link_rewrite->language[0] = $link_rewrite;
+    $xml->category->link_rewrite->language[1] = $link_rewrite;
     $xml->category->name->language[0] = $category['node_nimi'];
     $xml->category->name->language[1] = $category['node_nimi'];
 
@@ -116,7 +117,7 @@ class PrestaCategories extends PrestaClient {
    */
   public function sync_categories($categories) {
     $this->logger->log('---------Start category sync---------');
-    $this->set_category_root(483);
+    $this->set_category_root(1);
     $this->categories = $categories;
 
     if (empty($this->root)) {

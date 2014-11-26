@@ -34,8 +34,9 @@ class PrestaProducts extends PrestaClient {
     $xml->product->supplier_reference = $product['tuoteno'];
     $xml->product->price = $product['myyntihinta'];
 
-    $xml->product->link_rewrite->language[0] = preg_replace('/[^a-zA-Z0-9]/', '', $product['nimi']);
-    $xml->product->link_rewrite->language[1] = preg_replace('/[^a-zA-Z0-9]/', '', $product['nimi']);
+    $link_rewrite = $this->saniteze_link_rewrite($product['nimi']);
+    $xml->product->link_rewrite->language[0] = $link_rewrite;
+    $xml->product->link_rewrite->language[1] = $link_rewrite;
     $xml->product->name->language[0] = $product['nimi'];
     $xml->product->name->language[1] = $product['nimi'];
 

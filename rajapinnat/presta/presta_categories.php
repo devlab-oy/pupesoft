@@ -127,7 +127,7 @@ class PrestaCategories extends PrestaClient {
     }
 
     try {
-      $this->schema = $this->get_empty_schema($this->resource_name());
+      $this->schema = $this->get_empty_schema();
 
       //We start with first level. This means that the root element is skipped.
       $first_level_node_depth = array(

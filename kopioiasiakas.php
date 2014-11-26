@@ -183,8 +183,17 @@ if ($tee == '') {
 
   foreach ($haku as $ind => $val) {
     if (strlen($val) > 0) {
-      $lisa .= " and $ind like '%$val%'";
       $ulisa .= "&haku[$ind]=" . $val;
+
+      // Tutkitaan myös löytyykö hakukentän arvoa toimitusosoiteen vastaavasta kentästä
+      // Ytunnuksella ja asiakasnumerolal ei kuitenkaan ole omaa kenttää
+      // toimitusosoitteessa, joten katsoteen ne vain varsinaisesta kentästä.
+      if ($ind == "ytunnus" or $ind == "asiakasnro") {
+        $lisa .= " and $ind like '%$val%'";
+      }
+      else {
+        $lisa .= " and ($ind like '%$val%' or toim_$ind like '%$val%')";
+      }
     }
   }
 

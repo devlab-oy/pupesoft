@@ -40,19 +40,14 @@ abstract class PrestaClient {
   }
 
   /**
-   * Fetch empty xml schema for given resource. If no resource is given use
-   * childs resource_name();
-   *
-   * @param string $resource
+   * 
    * @return SimpleXMLElement
    * @throws Exception
    */
-  protected function get_empty_schema($resource = '') {
-    if (empty($resource)) {
-      $resource = $this->resource_name();
-    }
+  protected function get_empty_schema() {
+    $resource = $this->resource_name();
     $opt = array(
-        'resource' => "$resource?schema=blank"
+        'resource' => "{$resource}?schema=blank"
     );
 
     try {
@@ -73,13 +68,12 @@ abstract class PrestaClient {
    * Use $this-> instead of parent:: if you are going to override this class get()
    *
    * @param int $id
-   * @param string $resource
    * @return array
    * @throws Exception
    */
-  protected function get($id, $resource = '') {
+  protected function get($id) {
     try {
-      $response_xml = $this->get_as_xml($id, $resource);
+      $response_xml = $this->get_as_xml($id);
     }
     catch (Exception $e) {
       throw $e;
@@ -91,14 +85,11 @@ abstract class PrestaClient {
   /**
    * 
    * @param int $id
-   * @param string $resource
    * @return SimpleXMLElement
    * @throws Exception
    */
-  protected function get_as_xml($id, $resource = '') {
-    if (empty($resource)) {
-      $resource = $this->resource_name();
-    }
+  protected function get_as_xml($id) {
+    $resource = $this->resource_name();
     $opt = array(
         'resource' => $resource,
         'id'       => $id,
@@ -185,12 +176,10 @@ abstract class PrestaClient {
    * @return array
    * @throws Exception
    */
-  protected function all($display = array(), $filters = array(), $resource = '') {
-    $opt = array();
-
-    if (empty($resource)) {
-      $opt['resource'] = $resource;
-    }
+  protected function all($display = array(), $filters = array()) {
+    $opt = array(
+        'resource' => $this->resource_name(),
+    );
 
     if (!empty($display)) {
       $display = '[' . implode(',', $display) . ']';

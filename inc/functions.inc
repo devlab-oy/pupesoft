@@ -1150,8 +1150,19 @@ if (!function_exists("apix_invoice_put_file")) {
       $apixerrorreport .= utf8_decode($xml->FreeText[1])."\n\n";
       $apixerrorreport .= utf8_decode($xml->Value[0])."\n\n";
 
+      // Laitetaan sähköposti admin osoitteeseen siinä tapauksessa,
+      // jos talhal tai alert email osoitteita ei ole kumpaakaan setattu
+      $error_email = $yhtiorow["admin_email"];
+
+      if (isset($yhtiorow["talhal_email"]) and $yhtiorow["talhal_email"] != "") {
+        $error_email = $yhtiorow["talhal_email"];
+      }
+      elseif (isset($yhtiorow["alert_email"]) and $yhtiorow["alert_email"] != "") {
+        $error_email = $yhtiorow["alert_email"];
+      }
+
       $params = array(
-        "to"      => $yhtiorow["admin_email"],
+        "to"      => $error_email,
         "subject" => t("APIX-laskun %s lähetys epäonnistui", "", $apix_invoicenum),
         "ctype"   => "text",
         "body"    => $apixerrorreport,
@@ -28310,7 +28321,7 @@ if (!function_exists('sallitut_varastot')) {
         return $kukarow_varasto;
       }
     }
-    
+
     // Ei löytynyt vielä yhtään varastoa, otetaan varastot käyttäjän tiedoista
     if (trim($kukarow['varasto']) != "" and strpos($kukarow['varasto'], ',') !== false) {
       return explode(",", $kukarow["varasto"]);

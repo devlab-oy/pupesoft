@@ -207,7 +207,7 @@ abstract class PrestaClient {
 
     try {
       $response_xml = $this->ws->get($opt);
-      $msg = "Resurssin " . $this->resource_name() . "kaikki rivit haettu";
+      $msg = "Resurssin " . $this->resource_name() . " kaikki rivit haettu";
       $this->logger->log($msg);
     }
     catch (Exception $e) {

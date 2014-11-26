@@ -61,9 +61,9 @@ if ($verkkokauppatyyppi == 'presta' and $tuotexxxx) {
   $presta_categories = new PrestaCategories($presta_url, $presta_api_key);
   $presta_categories->sync_categories($kategoriat);
   
-//  $tuotteet = hae_tuotteet();
-//  $presta_products = new PrestaProducts($presta_url, $presta_api_key);
-//  $presta_products->sync_products($tuotteet);
+  $tuotteet = hae_tuotteet();
+  $presta_products = new PrestaProducts($presta_url, $presta_api_key);
+  $presta_products->sync_products($tuotteet);
 }
 
 die();

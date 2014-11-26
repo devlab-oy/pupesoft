@@ -44,11 +44,10 @@ class PrestaProducts extends PrestaClient {
       foreach ($product['tuotepuun_nodet'] as $category_ancestors) {
         $presta_categories = new PrestaCategories($this->get_url(), $this->get_api_key());
         $category_id = $presta_categories->find_category($category_ancestors);
-        if ($category_id !== null) {
+        if (!is_null($category_id)) {
           $category = $xml->product->associations->categories->addChild('category');
           $category->addChild('id');
           $category->id = $category_id;
-          $debug = $xml->asXML();
         }
       }
     }

@@ -34,6 +34,7 @@ require "../inc/parametrit.inc";
 require "{$pupe_root_polku}/rajapinnat/magento_client.php";
 require "{$pupe_root_polku}/rajapinnat/presta/presta_products.php";
 require "{$pupe_root_polku}/rajapinnat/presta/presta_categories.php";
+require "{$pupe_root_polku}/rajapinnat/presta/presta_customers.php";
 
 // Laitetaan unlimited execution time
 ini_set("max_execution_time", 0);
@@ -57,6 +58,11 @@ ini_set("max_execution_time", 0);
 
 $tuotexxxx = true;
 if ($verkkokauppatyyppi == 'presta' and $tuotexxxx) {
+  $asiakkaat = hae_asiakkaat1();
+  $presta_customer = new PrestaCustomers($presta_url, $presta_api_key);
+  $presta_customer->sync_customers($asiakkaat);
+
+  die();
   $kategoriat = hae_kategoriat();
   $presta_categories = new PrestaCategories($presta_url, $presta_api_key);
   $presta_categories->sync_categories($kategoriat);
@@ -67,6 +73,23 @@ if ($verkkokauppatyyppi == 'presta' and $tuotexxxx) {
 }
 
 die();
+
+
+function hae_asiakkaat1() {
+  global $kukarow, $yhtiorow, $verkkokauppatyyppi;
+
+  $query = "SELECT *
+            FROM asiakas
+            WHERE yhtio = '{$kukarow['yhtio']}'";
+  $result = pupe_query($query);
+
+  $asiakkaat = array();
+  while ($asiakas = mysql_fetch_assoc($result)) {
+    $asiakkaat[] = $asiakas;
+  }
+
+  return $asiakkaat;
+}
 
 function hae_kategoriat() {
   global $kukarow, $yhtiorow, $verkkokauppatyyppi;

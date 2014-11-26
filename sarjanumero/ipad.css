@@ -79,6 +79,7 @@ p {
   padding:0px;
   overflow:auto;
   text-align: center;
+  height:61px;
 }
 
 .header_left {
@@ -97,6 +98,11 @@ p {
   width:60%;
   float:left;
   text-align:center;
+}
+
+.header h1 {
+  position:relative;
+  top:14px;
 }
 
 .main {
@@ -166,7 +172,7 @@ input[type="button"] {
   -moz-border-radius: 0px;
   -webkit-border-radius: 0px;
   position:relative;
-  top:6px;
+  top:21px;
   border-radius: 0px;
   padding:20px;
   font-size:1em;

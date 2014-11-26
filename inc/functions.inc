@@ -28786,10 +28786,10 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
     global $kukarow, $yhtiorow;
 
     $ryhmitetty_array = array();
-    $tuote_temp = array();
+    $tuote_temp = FALSE;
 
     if ($yhtiorow['kulujen_laskeminen_hintoihin'] == 'K' and $kukarow['kulujen_laskeminen_hintoihin'] == 'K') {
-      $tuote_temp = tuotteiden_kulutarkistus();
+      $tuote_temp = TRUE;
     }
 
     mysql_data_seek($parametrit['result'], 0);
@@ -28812,7 +28812,7 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
           }
 
           if (    isset($row[$k])
-            and isset($tuote_temp)) {
+            and $tuote_temp) {
 
             if (in_array($k, $parametrit['laske_kate'])) {
 
@@ -28835,7 +28835,7 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
         foreach ($parametrit['sum'] as $k) {
 
           if (    isset($row[$k])
-            and isset($tuote_temp)) {
+            and $tuote_temp) {
 
             if (in_array($k, $parametrit['laske_kate'])) {
 
@@ -28903,36 +28903,6 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
     usort($ryhmitetty_array, "sorttaajat");
 
     return $ryhmitetty_array;
-  }
-}
-
-if (!function_exists("tuotteiden_kulutarkistus")) {
-  function tuotteiden_kulutarkistus() {
-    global $kukarow, $yhtiorow;
-
-    $kulujen_laskeminen_hintoihin = false;
-
-    if ($yhtiorow['kulujen_laskeminen_hintoihin'] == 'K') {
-      $kulujen_laskeminen_hintoihin = true;
-    }
-
-    $query = "SELECT toimi.kulujen_laskeminen_hintoihin, tuotteen_toimittajat.tuoteno
-              FROM tuotteen_toimittajat
-              JOIN toimi ON ( toimi.yhtio = tuotteen_toimittajat.yhtio
-              AND toimi.tunnus                       = tuotteen_toimittajat.liitostunnus )
-              WHERE tuotteen_toimittajat.yhtio       =  '{$kukarow['yhtio']}'
-              AND toimi.kulujen_laskeminen_hintoihin = 'K'
-              ORDER BY
-              if(tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) ASC,
-              tuotteen_toimittajat.tunnus ASC";
-    $result = pupe_query($query);
-
-    $tuotteet = array();
-
-    while ($tuote = mysql_fetch_assoc($result)) {
-      $tuotteet[] = $tuote['tuoteno'];
-    }
-    return $tuotteet;
   }
 }
 

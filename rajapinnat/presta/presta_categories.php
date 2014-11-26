@@ -116,6 +116,8 @@ class PrestaCategories extends PrestaClient {
    * @return boolean
    */
   public function sync_categories($categories) {
+    $this->delete_all();
+    
     $this->logger->log('---------Start category sync---------');
     $this->set_category_root(1);
     $this->categories = $categories;

@@ -489,7 +489,11 @@ function satamavahvistus_parametrit($konttiviite) {
             trlt.sinettinumero,
             trlt.kontin_kilot,
             trlt.kontin_taarapaino,
-            ss.sarjanumero
+            ss.sarjanumero,
+            ss.tuoteno,
+            ss.hyllyalue,
+            ss.hyllynro,
+            tilausrivi.tunnus AS tilausrivitunnus
             FROM tilausrivi
             JOIN tilausrivin_lisatiedot AS trlt
               ON trlt.yhtio = tilausrivi.yhtio
@@ -501,7 +505,6 @@ function satamavahvistus_parametrit($konttiviite) {
             AND tilausrivi.otunnus IN ({$tunnukset})
             AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu')";
   $result = pupe_query($query);
-
 
   while ($row = mysql_fetch_assoc($result)) {
     if ($row['kontin_kilot'] == 0) {
@@ -521,6 +524,8 @@ function satamavahvistus_parametrit($konttiviite) {
   $sanomaid = "RP" . time();
   $sanomanumero = time();
 
+  $laskutunnukset = explode(',', $tunnukset);
+
   $parametrit = array(
     'laji' => 'satamavahvistus',
     'tyyppi' => 'DESADV',
@@ -532,7 +537,8 @@ function satamavahvistus_parametrit($konttiviite) {
     'rullat' => $rullat,
     'tilauskoodi' => $konttiviite,
     'matkakoodi' => $matkakoodi,
-    'matka_info' => $matka_info
+    'matka_info' => $matka_info,
+    'laskutunnukset' => $laskutunnukset
   );
 
   return $parametrit;

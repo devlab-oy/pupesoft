@@ -4,12 +4,14 @@ require_once 'rajapinnat/presta/presta_client.php';
 
 class PrestaProducts extends PrestaClient {
 
+  const RESOURCE = 'products';
+  
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
   }
 
   protected function resource_name() {
-    return 'products';
+    return self::RESOURCE;
   }
 
   /**
@@ -36,6 +38,11 @@ class PrestaProducts extends PrestaClient {
     $xml->product->link_rewrite->language[1] = preg_replace('/[^a-zA-Z0-9]/', '', $product['nimi']);
     $xml->product->name->language[0] = $product['nimi'];
     $xml->product->name->language[1] = $product['nimi'];
+    
+    if (!empty($product['tuotepuun_nodet'])) {
+      $presta_categories = new PrestaCategories($this->get_url(), $this->get_api_key());
+      $category_id = $presta_categories->find_category($product['tuotepuun_nodet']);
+    }
 
     return $xml;
   }

@@ -53,17 +53,17 @@ ini_set("max_execution_time", 0);
 //
 //$verkkokauppatyyppi = isset($argv[2]) ? trim($argv[2]) : "";
 
-$tuotteet = hae_tuotteet();
+//$tuotteet = hae_tuotteet();
 
-$tuotexxxx = false;
+$tuotexxxx = true;
 if ($verkkokauppatyyppi == 'presta' and $tuotexxxx) {
   $kategoriat = hae_kategoriat();
   $presta_categories = new PrestaCategories($presta_url, $presta_api_key);
   $presta_categories->sync_categories($kategoriat);
   
-  $tuotteet = hae_tuotteet();
-  $presta_products = new PrestaProducts($presta_url, $presta_api_key);
-  $presta_products->sync_products($tuotteet);
+//  $tuotteet = hae_tuotteet();
+//  $presta_products = new PrestaProducts($presta_url, $presta_api_key);
+//  $presta_products->sync_products($tuotteet);
 }
 
 die();

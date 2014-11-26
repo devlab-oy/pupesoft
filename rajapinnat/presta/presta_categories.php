@@ -4,6 +4,8 @@ require_once 'rajapinnat/presta/presta_client.php';
 
 class PrestaCategories extends PrestaClient {
 
+  const RESOURCE = 'categories';
+
   /**
    * Presta root element id
    * 
@@ -21,7 +23,33 @@ class PrestaCategories extends PrestaClient {
    * @return string
    */
   protected function resource_name() {
-    return 'categories';
+    return self::RESOURCE;
+  }
+
+  /**
+   * This function is used in PrestaProducts. It finds the deepest level node
+   * according to ancestors and returns the presta id if its found
+   * 
+   * @param array $ancestors
+   * @return string
+   */
+  public function find_category($ancestors) {
+    //Display is allways supposed to be an empty array when its given to all
+    $display = $filter = array();
+    //Nodes are in parent -> deepest level children order
+    foreach ($ancestors as $node_nimi) {
+      $filter['name'] = $node_nimi;
+      $categories = $this->all($display, $filter);
+      $categories = $categories['categories'];
+
+      if (empty($categories)) {
+        break;
+      }
+
+      foreach ($categories['associations']['categories'] as $cat) {
+        
+      }
+    }
   }
 
   /**

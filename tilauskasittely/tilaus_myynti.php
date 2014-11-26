@@ -6121,6 +6121,13 @@ if ($tee == '') {
         echo '<input type="hidden" id="desimaalia" value="'.$yhtiorow['hintapyoristys'].'" />';
       }
 
+      if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A' and $toim != "VALMISTAVARASTOON") {
+        $kommenttirivi_nakyviin = true;
+      }
+      else {
+        $kommenttirivi_nakyviin = false;
+      }
+
       foreach ($rows as $row) {
         if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K"
           and $row["tyyppi"] != "V" and isset($tuotteenpainotettukehayht["keha"])) {
@@ -6170,13 +6177,6 @@ if ($tee == '') {
         }
 
         $vastaavattuotteet = 0;
-
-        if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A' and $toim != "VALMISTAVARASTOON") {
-          $kommenttirivi_nakyviin = true;
-        }
-        else {
-          $kommenttirivi_nakyviin = false;
-        }
 
         if (strpos($row['sorttauskentta'], '种种种种种种种种种种种') !== FALSE) {
           $erikoistuote_tuoteperhe[$row['perheid']] = $row['sorttauskentta'];

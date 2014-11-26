@@ -6338,6 +6338,13 @@ if ($tee == '') {
         echo '<input type="hidden" id="desimaalia" value="'.$yhtiorow['hintapyoristys'].'" />';
       }
 
+      if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A' and $toim != "VALMISTAVARASTOON") {
+        $kommenttirivi_nakyviin = true;
+      }
+      else {
+        $kommenttirivi_nakyviin = false;
+      }
+
       foreach ($rows as $row) {
         if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K"
           and $row["tyyppi"] != "V" and isset($tuotteenpainotettukehayht["keha"])) {
@@ -6573,7 +6580,7 @@ if ($tee == '') {
           }
 
           $query = "SELECT
-                    sum(if(kommentti != '' {$aleperustelisa} {$laskentalisa_riveille} or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]') or (tilausrivi.tunnus = $row[tunnus] and $vastaavattuotteet = 1), 1, 0)),
+                    sum(if(kommentti != '' {$aleperustelisa} {$laskentalisa_riveille} or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]'), 1, 0)),
                     count(*)
                     FROM tilausrivi use index (yhtio_otunnus)
                     LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
@@ -6584,23 +6591,31 @@ if ($tee == '') {
           $pkres = pupe_query($query);
           $pkrow = mysql_fetch_row($pkres);
 
+          $lisays = 0;
+
           if ($row["perheid2"] == -1) {
-            $query  = "SELECT tuoteperhe.tunnus
-                       FROM tuoteperhe
-                       WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
-                       and tuoteperhe.isatuoteno = '$row[tuoteno]'
-                       and tuoteperhe.tyyppi     = 'L'";
-            $lisaresult = pupe_query($query);
-            $lisays = mysql_num_rows($lisaresult);
-          }
-          else {
-            $lisays = 0;
+
+            foreach ($rows as $chkrow) {
+
+              $_onko_perhe = ($row['perheid'] == $chkrow['perheid']);
+              $_onko_lapsi = ($chkrow['perheid'] != $chkrow['tunnus']);
+
+              if ($_onko_perhe and $_onko_lapsi) {
+                $lisays++;
+              }
+            }
+
+            unset($chkrow);
           }
 
           $pkrow[1] += $lisays;
 
           $pknum = $pkrow[0] + $pkrow[1];
           $borderlask = $pkrow[1];
+
+          if ($kommenttirivi_nakyviin) {
+            $pknum = $pkrow[1] * 2;
+          }
 
           echo "<tr>";
 
@@ -6721,7 +6736,7 @@ if ($tee == '') {
 
           echo "<tr>";
 
-          if ($row["kommentti"] != "" or ($row["ale_peruste"] != '' and $yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '') or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio']) or $vastaavattuotteet == 1) {
+          if ($kommenttirivi_nakyviin or $row["kommentti"] != "" or ($row["ale_peruste"] != '' and $yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '') or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio'])) {
             if ($jarjlisa != "") {
               echo "<td rowspan = '2' class='back' style='width:10px; padding:0px; margin:0px;'>$buttonit</td>";
             }
@@ -6812,7 +6827,7 @@ if ($tee == '') {
           $borderlask--;
         }
         elseif ($borderlask == 1) {
-          if ($row['kommentti'] != '' or ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '') or $vastaavattuotteet == 1) {
+          if ($kommenttirivi_nakyviin or $row['kommentti'] != '' or ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '')) {
             $classlisa = $class." style='font-style:italic; border-right: 1px solid;' ";
             $class    .= " style='font-style:italic; ' ";
           }
@@ -8175,7 +8190,7 @@ if ($tee == '') {
           $row['kommentti'] .= ", ".t("Rivihinta").": ".hintapyoristys($hintapyoristys_echo * $kpl_ruudulle);
         }
 
-        if ($row['kommentti'] != '' or ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '') or $vastaavattuotteet == 1) {
+        if ($kommenttirivi_nakyviin or $row['kommentti'] != '' or ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '')) {
 
           echo "<tr>";
 

@@ -336,11 +336,69 @@ if (isset($task) and $task == 'laheta_satamavahvistus') {
               AND sarjanumero IN  ({$sarjanumero_string})";
     pupe_query($query);
 
+    $filesize = strlen($sanoma);
+    $liitedata = mysql_real_escape_string($sanoma);
+
+    foreach ($parametrit['laskutunnukset'] as $tunnus) {
+
+      $query = "SELECT tunnus
+                FROM liitetiedostot
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND liitos = 'lasku'
+                AND liitostunnus = '$tunnus',
+                AND kayttotarkoitus = 'satamavahvistus'
+                AND selite = '{$konttiviite}'";
+      $result = pupe_query($result);
+
+      if (mysql_num_rows($result) == 0) {
+
+        $query = "INSERT INTO liitetiedostot SET
+                  yhtio           = '{$kukarow['yhtio']}',
+                  liitos          = 'lasku',
+                  liitostunnus    = '$tunnus',
+                  selite          = '{$konttiviite}',
+                  laatija         = '{$kukarow['kuka']}',
+                  luontiaika      = NOW(),
+                  data            = '{$liitedata}',
+                  filename        = '{$parametrit['sanomanumero']}',
+                  filesize        = '$filesize',
+                  filetype        = 'text/plain',
+                  kayttotarkoitus = 'satamavahvistus'";
+        pupe_query($query);
+
+      }
+
+      $query = "UPDATE lasku SET
+                alatila = 'D'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = '{$tunnus}'";
+      pupe_query($query);
+
+    }
+
+    foreach ($parametrit['rullat'] as $rulla) {
+
+      $query = "UPDATE tuotepaikat SET
+                saldo = saldo - 1
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tuoteno = '{$rulla['tuoteno']}'
+                AND hyllyalue = '{$rulla['hyllyalue']}'
+                AND hyllynro = '{$rulla['hyllynro']}'";
+      pupe_query($query);
+
+      $query = "UPDATE tilausrivi SET
+                varattu = 0,
+                laskutettu = '{$kukarow['kuka']}',
+                laskutettuaika = NOW()
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = '{$rulla['tilausrivitunnus']}'";
+      pupe_query($query);
+
+    }
   }
   else{
     echo "Lähetys epäonnistui!";
   }
-
 
   unset($task);
 }
@@ -350,6 +408,50 @@ if (!isset($task)) {
   $konttiviite_kasitelty = array();
 
   echo "<font class='head'>".t("Toimitusten seuranta")."</font><hr><br>";
+
+  if (!isset($rajaus)) {
+    $rajaus = 'aktiiviset';
+  }
+
+  $disable1 = $disable2 = $disable3 = '';
+
+  switch ($rajaus) {
+  case 'kaikki':
+    $rajauslisa = '';
+    $disable1 = 'disabled';
+    break;
+
+  case 'aktiiviset':
+    $rajauslisa = " AND lasku.alatila != 'D' ";
+    $disable2 = 'disabled';
+    break;
+
+  case 'toimitetut':
+    $rajauslisa = " AND lasku.alatila = 'D' ";
+    $disable3 = 'disabled';
+    break;
+
+  default:
+    $rajauslisa = '';
+    break;
+  }
+
+  echo t("Näytä");
+  echo "&nbsp;";
+  echo "<form method='post'>";
+  echo "<input type='hidden' name='rajaus' value='aktiiviset' />";
+  echo "<input type='submit' {$disable2} value='" .t("Aktiiviset") ."'>";
+  echo "</form>";
+  echo "&nbsp;";
+  echo "<form method='post'>";
+  echo "<input type='hidden' name='rajaus' value='toimitetut' />";
+  echo "<input type='submit' {$disable3} value='" .t("Toimitetut") ."'>";
+  echo "</form>";
+  echo "&nbsp;";
+  echo "<form method='post'>";
+  echo "<input type='hidden' name='rajaus' value='kaikki' />";
+  echo "<input type='submit' {$disable1} value='" .t("Kaikki") ."'>";
+  echo "</form><br><br>";
 
   $query = "SELECT lasku.asiakkaan_tilausnumero,
             laskun_lisatiedot.matkakoodi,
@@ -388,6 +490,7 @@ if (!isset($task)) {
               AND ss.myyntirivitunnus = tilausrivi.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tilaustyyppi = 'N'
+            {$rajauslisa}
             AND laskun_lisatiedot.konttiviite != ''
             GROUP BY lasku.asiakkaan_tilausnumero
             ORDER BY konttiviite";

@@ -131,7 +131,7 @@ echo "</head>
 -->
 </style>
 
-<table width='550' border='0'>
+<table width='550' >
 <tr>
 <td valign='top'><br>";
 

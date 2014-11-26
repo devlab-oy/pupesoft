@@ -231,7 +231,7 @@ if ($tee == "TULOSTAPDF") {
 }
 
 if (isset($laskurow)) {
-  echo "<table width='720' cellpadding='2' cellspacing='1' border='0'>";
+  echo "<table width='720'   >";
 
   echo "<tr><th>", t("Ytunnus"), "</th><th colspan='2'>", t("Toimittaja"), "</th></tr>";
   echo "<tr><td>{$laskurow['ytunnus']}</td>
@@ -416,7 +416,7 @@ if (isset($laskurow)) {
 
   $rivienmaara = mysql_num_rows($presult);
 
-  echo "<table cellspacing='1' cellpadding='2'><tr>";
+  echo "<table><tr>";
 
   $miinus = 2;
 

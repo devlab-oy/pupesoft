@@ -131,7 +131,7 @@ if ($tee == '') {
   $exttarjousten_lukumaara = hae_kayttajaan_liitetyn_asiakkaan_extranet_tarjoukset($kukarow['oletus_asiakas']);
 
   if ($exttarjousten_lukumaara > 0) {
-    echo "<table border='1'>";
+    echo "<table>";
     echo "<tr>";
     echo "<td style='padding:10px;'><font class='message'>".t("Sinulla on %s kappaletta hyväksymättömiä tarjouksia.", '', $exttarjousten_lukumaara)."</font></td>";
     echo "</tr>";
@@ -142,7 +142,7 @@ if ($tee == '') {
   $extennakoiden_lukumaara = hae_kayttajaan_liitetyn_asiakkaan_extranet_ennakot($kukarow['oletus_asiakas']);
 
   if ($extennakoiden_lukumaara > 0) {
-    echo "<table border='1'>";
+    echo "<table>";
     echo "<tr>";
     echo "<td style='padding:10px;'><font class='message'>".t("Sinulla on %s kappaletta hyväksymättömiä ennakkotilauksia.", '', $extennakoiden_lukumaara)."</font></td>";
     echo "</tr>";
@@ -328,9 +328,7 @@ if ($tee == '') {
       <td colspan='2' class='back'><font class='head'>$uutinen[kentta01]</font><hr></td>
       </tr><tr>
       <td valign='top' align='center' width='180'><br>$kuva<br><br></td>
-      <td valign='top'>$uutinen[kentta02]<br>
-      <a href='$PHP_SELF?tee=PRINTTAA&tun=$uutinen[tun]'>".t("Tulosta")."</a>
-      </font></td>
+      <td valign='top'>$uutinen[kentta02]</td>
       </tr><tr>
       <th colspan='2'>".t("Toimittaja").": $uutinen[nimi]<br>".t("Päivämäärä").": $uutinen[pvmalku]</th>
       </tr>
@@ -353,98 +351,6 @@ if ($tee == '') {
 
   echo "</tr>";
   echo "</table>";
-}
-
-if ($tee == "PRINTTAA") {
-
-  echo "
-    <script language=\"JavaScript\">
-    <!--
-          function printtaa() {
-        window.print();
-        window.location = \"$PHP_SELF\";
-          }
-    //-->
-    </script>";
-
-  $query = "SELECT *, kalenteri.tunnus tun, kalenteri.kuka toimittaja
-            from kalenteri
-            left join kuka on kuka.yhtio=kalenteri.yhtio and kuka.kuka=kalenteri.kuka
-            where tyyppi='uutinen'
-            and kalenteri.yhtio='$kukarow[yhtio]'
-            and kalenteri.tunnus='$tun'";
-  $result = pupe_query($query);
-  $row = mysql_fetch_array($result);
-
-  /*
-  toimittaja = kuka
-  paivays    = pvmalku
-  otsikko    = kentta01
-  uutinen    = kentta02
-  kuvaurl    = kentta03
-  */
-
-  $kuvaurl = "";
-
-  if ($row["kentta03"] != "") {
-    $kuvaurl = "<img src='view.php?id=$row[kentta03]' width='130'>";
-  }
-
-  if ($yhtiorow["logo"] != '' and $kuvaurl == '') {
-    $kuvaurl = "<img src='$yhtiorow[logo]' width='130'>";
-  }
-
-  if ($kuvaurl == '') {
-    $kuvaurl = "<img src='{$palvelin2}pics/facelift/pupe.gif' width='130'>";
-  }
-
-  $otsikko        = $row["kentta01"];
-  $uutinen        = $row["kentta02"];
-  $paivays        = $row["pvmalku"];
-  $toimittaja     = $row["kuka"];
-
-  print "
-
-    <TITLE>$otsikko - $paivays</TITLE>
-    <BODY BGCOLOR='#FFFFFF' TEXT='#000000' LINK='#336699' VLINK='#336699' ALINK='#336699' onLoad='printtaa();'>
-
-    <CENTER>
-    <BR><BR>
-
-    <TABLE CELLSPACING='0' CELLPADDING='5' WIDTH='400' BORDER='1' BORDERCOLOR='#000000' BGCOLOR='#FFFFFF'><TR><TD colspan=2>
-        <FONT FACE='Lucida,Verdana,Helvetica,Arial' SIZE='+2'>
-            <B>$otsikko</B><BR>
-        </FONT>
-        <HR COLOR='GRAY'>
-
-        <TABLE CELLSPACING='5' CELLPADDING='4'><TR>
-            <TD VALIGN='TOP'>
-                $kuvaurl
-            </TD><TD VALIGN='TOP'>
-                <FONT FACE='Lucida,Verdana,Helvetica,Arial' SIZE='-1'>
-                $uutinen
-                </FONT>
-            </TD>
-        </TR></TABLE>
-
-    </TD></TR>
-
-    <TR><TD VALIGN=middle bgcolor='#000000'>
-        <FONT FACE='Lucida,Verdana,Helvetica,Arial' COLOR='#FFFFFF'>
-        <B><SMALL>&nbsp;".t("Toimittaja").": $toimittaja</SMALL></B><BR>
-        <B><SMALL>&nbsp;".t("Päivämäärä").": $paivays</SMALL></B>
-        </FONT>
-    <!--
-      </TD><TD ALIGN=right bgcolor='#000000'>
-      <IMG SRC='print.gif' WIDTH='21' HEIGHT='21' ALT='tulosta uutinen'>&nbsp;
-      <IMG SRC='koti.gif' WIDTH='21' HEIGHT='21' ALT='koti'>&nbsp;
-    -->
-    </TD></TR></TABLE>
-
-    </CENTER>
-    </BODY>
-
-    ";
 }
 
 require "footer.inc";

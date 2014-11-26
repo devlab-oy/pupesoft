@@ -30,7 +30,7 @@ if (isset($_POST['piirtele_laiteluettelo'])) {
   );
 
   echo "<form name='aja_ja_tallenna' method='post'>";
-  echo "<table cellpadding='5' cellspacing='0' width='600'>";
+  echo "<table   width='600'>";
   echo "<tr><th>".t("Valitse sarakkeet")."</th></tr>";
 
   $secretcounter = 0;

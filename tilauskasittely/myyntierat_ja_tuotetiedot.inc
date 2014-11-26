@@ -31,7 +31,7 @@ if (isset($_POST['piirtele_valikko'])) {
   $result = pupe_query($query);
 
   echo "<form>";
-  echo "<table cellpadding='5' cellspacing='0' width='600'>";
+  echo "<table   width='600'>";
   echo "<tr><th>".t("Valitse avainsanat sekä lisäkielet")."<br><br><input type='checkbox' class='check_all' value='lajiboksit'>".t("Valitse Kaikki")."</th><td>";
 
   $query = "SELECT DISTINCT kieli

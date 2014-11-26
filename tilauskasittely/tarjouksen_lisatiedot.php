@@ -216,7 +216,7 @@ if ($tee == "ETSILASKU") {
 
   if (mysql_num_rows($result) > 0) {
 
-    echo "<table cellpadding='2' cellspacing='1'>";
+    echo "<table>";
     echo "<tr>";
 
     for ($i=0; $i < mysql_num_fields($result)-2; $i++) {

@@ -588,7 +588,7 @@ if ($kasitellaan_tiedosto) {
 }
 else {
   echo "<form method='post' name='sendfile' enctype='multipart/form-data'>
-      <table border='0'>
+      <table>
       <tr>
         <th>", t("Valitse tietokannan taulu"), ":</th>
         <td><select name='table'>

@@ -29,7 +29,7 @@ if (!isset($tee) or $tee == '') {
 
   ///* Hyv‰ksytt‰v‰t laskut*///
   echo "<td class='back' width='10'></td>";
-  echo "<td class='back top' width='450'>";
+  echo "<td class='back nopad_top' width='450'>";
 
   // haetaan kaikki yritykset, jonne t‰m‰ k‰ytt‰j‰ p‰‰see
   $query  = "SELECT distinct yhtio.yhtio, yhtio.nimi

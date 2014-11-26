@@ -655,7 +655,7 @@ if ($tee == "") {
     echo "</table>";
 
     if (is_array($sumrow)) {
-      echo "<br><table cellpadding='5'><tr>";
+      echo "<br><table><tr>";
       echo "<th>".t("Tilausten arvo yhteensä")." ($sumrow[kpl] ".t("kpl")."): </th>";
       echo "<td>$sumrow[arvo] $yhtiorow[valkoodi]</td>";
       echo "</tr></table>";

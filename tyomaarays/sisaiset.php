@@ -49,7 +49,7 @@ foreach ($MonthNames as $val) {
 }
 echo "</select>&nbsp;<input type='text' size='5' name='year' value='$YearToShow'></form><br><br>";
 
-echo"<table bgcolor='$tablecolor' cellspacing='1' cellpadding='2'>";
+echo"<table bgcolor='$tablecolor'  >";
 
 $query = "SELECT id, maksuaika, maksutapa, maksutapa
           FROM asiakastiedot

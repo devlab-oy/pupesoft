@@ -785,7 +785,7 @@ if ($tee == 'LISTAA') {
     }
 
     echo "<form method='post' {$onsubmit}>";
-    echo "<table cellpadding='2' cellspacing='2'>";
+    echo "<table>";
 
     echo "<tr>";
     echo "<td valign='top' align='left' colspan='10' class='back'>";

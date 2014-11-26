@@ -79,7 +79,7 @@ echo "
 -->
 </style>
 
-<table border='0'>
+<table>
 <tr>
 <td valign='top'><br>";
 

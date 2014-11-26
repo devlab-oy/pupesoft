@@ -5,7 +5,7 @@ $useslave = 1;
 
 require "inc/parametrit.inc";
 
-echo "<table cellpadding='5'><tr><td valign='top' class='back'>";
+echo "<table><tr><td valign='top' class='back'>";
 
 $query  = "show tables from $dbkanta";
 $result =  pupe_query($query);

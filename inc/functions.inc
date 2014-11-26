@@ -15985,7 +15985,7 @@ if (!function_exists("kopioi_tilausrivi")) {
       $query = "SELECT tunnus
                 FROM asn_sanomat
                 WHERE yhtio    = '{$kukarow['yhtio']}'
-                AND tilausrivi LIKE '%{$tunnus}%'";
+                AND MATCH (tilausrivi) AGAINST ('{$tunnus}' IN BOOLEAN MODE)";
       $chk_asn_res = pupe_query($query);
 
       while ($chk_asn_row = mysql_fetch_assoc($chk_asn_res)) {
@@ -21067,7 +21067,7 @@ if (!function_exists('splittaa_tilausrivi')) {
     $query = "SELECT tunnus
               FROM asn_sanomat
               WHERE yhtio    = '{$kukarow['yhtio']}'
-              AND tilausrivi LIKE '%{$tunnus}%'";
+              AND MATCH (tilausrivi) AGAINST ('{$tunnus}' IN BOOLEAN MODE)";
     $chk_asn_res = pupe_query($query);
 
     while ($chk_asn_row = mysql_fetch_assoc($chk_asn_res)) {

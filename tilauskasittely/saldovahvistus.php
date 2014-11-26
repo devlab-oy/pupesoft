@@ -67,6 +67,10 @@ if ($nayta_pdf != 1) {
   echo "<font class='head'>".t("Saldovahvistus")."</font><hr>";
 }
 
+if (!isset($avoin_saldo_rajaus)) {
+  $avoin_saldo_rajaus = "";
+}
+
 if (!isset($pp)) {
   $pp = date('d');
 }
@@ -95,6 +99,7 @@ $request = array(
   'saldovahvistus_viesti'   => $saldovahvistus_viesti,
   'lasku_tunnukset'     => $lasku_tunnukset,
   'tallenna_exceliin'     => $tallenna_exceliin,
+  'avoin_saldo_rajaus' => $avoin_saldo_rajaus,
 );
 
 $request['laskut'] = array();
@@ -287,11 +292,6 @@ elseif ($request['tee'] == 'poista_valinnat') {
         saldovahvistus_rivit: saldovahvistus_rivit
       },
       url: 'saldovahvistus.php'
-    }).done(function(data) {
-      if (console && console.log) {
-        console.log('AJAX success');
-        console.log(data);
-      }
     });
   }
 
@@ -360,6 +360,17 @@ function echo_saldovahvistukset($request) {
     if ($i == $kpl) {
       $viimeinen = true;
     }
+
+    if (!empty($request['avoin_saldo_rajaus'])) {
+
+      $_rajaus = $request['avoin_saldo_rajaus'];
+      $_avoin_summa = $lasku['avoin_saldo_summa'];
+
+      if ($_avoin_summa == 0 or ($_avoin_summa < $_rajaus and $_avoin_summa > 0))  {
+        continue;
+      }
+    }
+
     echo_saldovahvistus_rivi($lasku, $request, false, $viimeinen);
     $i++;
   }
@@ -535,6 +546,18 @@ function echo_kayttoliittyma($request) {
     echo "<option value='{$saldovahvistus_viesti['selite']}' {$sel}>{$saldovahvistus_viesti['selite']}</option>";
     $sel = "";
   }
+  echo "</select>";
+  echo "</td>";
+  echo "</tr>";
+
+  $sel = $request['avoin_saldo_rajaus'] != "" ? "selected" : "";
+
+  echo "<tr>";
+  echo "<th>".t('Avoin saldo rajaus').":</th>";
+  echo "<td>";
+  echo "<select name='avoin_saldo_rajaus'>";
+  echo "<option value=''>",t("Ei rajausta"),"</option>";
+  echo "<option value='100' {$sel}>",t("Näytä vain yli 100 EUR"),"</option>";
   echo "</select>";
   echo "</td>";
   echo "</tr>";

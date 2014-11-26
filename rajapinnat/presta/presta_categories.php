@@ -206,11 +206,12 @@ class PrestaCategories extends PrestaClient {
   }
 
   public function delete_all() {
-    $existing_categories = $this->all(array('id', 'reference'));
+    $this->logger->log('---------Start category delete all---------');
+    $existing_categories = $this->all(array('id'));
     $existing_categories = $existing_categories['categories']['category'];
-    $existing_categories = array_column($existing_categories, 'reference', 'id');
+    $existing_categories = array_column($existing_categories, 'id');
 
-    foreach ($existing_categories as $id => $sku) {
+    foreach ($existing_categories as $id) {
       try {
         $this->delete($id);
       }
@@ -218,5 +219,7 @@ class PrestaCategories extends PrestaClient {
         
       }
     }
+    
+    $this->logger->log('---------End category delete all---------');
   }
 }

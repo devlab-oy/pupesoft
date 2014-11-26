@@ -172,13 +172,13 @@ abstract class PrestaClient {
    *
    * @param array $display Defines SELECT columns
    * @param array $filters adds WHERE statements. Needs to be key/value pair
-   * @param string $resource Other resources resource_name
    * @return array
    * @throws Exception
    */
   protected function all($display = array(), $filters = array()) {
+    $resource = $this->resource_name();
     $opt = array(
-        'resource' => $this->resource_name(),
+        'resource' => $resource,
     );
 
     if (!empty($display)) {
@@ -196,12 +196,12 @@ abstract class PrestaClient {
 
     try {
       $response_xml = $this->ws->get($opt);
-      $msg = "Resurssin " . $this->resource_name() . " kaikki rivit haettu";
+      $msg = "Resurssin {$resource} kaikki rivit haettu";
       $this->logger->log($msg);
     }
     catch (Exception $e) {
       $msg = "Kaikkien resurssin "
-        . $this->resource_name()
+        . $resource
         . " rivien haku epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;

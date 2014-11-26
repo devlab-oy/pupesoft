@@ -159,8 +159,16 @@ elseif ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldovah
     $laskut['saldovahvistus_viesti'] = $laskut['saldovahvistus_viesti'][0];
     $laskut['laskun_avoin_paiva'] = $request['paiva'];
   }
+
+  if ($request['ryhmittely_tyyppi'] == 'ytunnus' and $request['ryhmittely_arvo'] != '') {
+    $boss = true;
+  }
+  else {
+    $boss = false;
+  }
+
   //Valittu saldovahvistusviesti
-  $pdf_filepath = hae_saldovahvistus_pdf($laskut);
+  $pdf_filepath = hae_saldovahvistus_pdf($laskut, $boss);
 
   if ($request['tee'] == 'NAYTATILAUS') {
     echo file_get_contents($pdf_filepath);
@@ -173,8 +181,6 @@ elseif ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldovah
 
   //unset, jotta käyttöliittymään tulisi rajausten mukaiset laskut.
   unset($request['lasku_tunnukset']);
-
-  echo_kayttoliittyma($request);
 
   $request['laskut'] = hae_myyntilaskuja_joilla_avoin_saldo($request);
   echo_saldovahvistukset($request);

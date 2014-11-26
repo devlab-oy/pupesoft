@@ -26972,6 +26972,8 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
 
 if (!function_exists('keraa_saldovahvistusrivit_ytunnus')) {
   function keraa_saldovahvistusrivit_ytunnus(&$laskut, $lasku, $ryhmittely) {
+    global $kukarow;
+
     if (!isset($laskut[$ryhmittely]['avoin_saldo_summa'])) {
       $laskut[$ryhmittely]['avoin_saldo_summa'] = 0;
     }
@@ -26979,6 +26981,33 @@ if (!function_exists('keraa_saldovahvistusrivit_ytunnus')) {
       //asiakkaan nimeen tulee ensimmäisen laskun asiakkaan nimi, eli pääasiakkaan nimi
       $laskut[$ryhmittely]['asiakas_nimi'] = $lasku['nimi'];
       $laskut[$ryhmittely]['asiakas'] = hae_asiakas($lasku['liitostunnus']);
+
+      if (!empty($laskut[$ryhmittely]['asiakas']['ytunnus'])) {
+
+        $query = "SELECT *
+                  FROM asiakas
+                  JOIN asiakkaan_avainsanat AS aa ON (
+                    aa.yhtio = asiakas.yhtio AND
+                    aa.laji = 'PÄÄASIAKAS' AND
+                    aa.avainsana != '' AND
+                    aa.liitostunnus = asiakas.tunnus
+                  )
+                  WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+                  AND asiakas.ytunnus = '{$laskut[$ryhmittely]['asiakas']['ytunnus']}'
+                  AND asiakas.talhal_email != ''
+                  LIMIT 1";
+        $chkres = pupe_query($query);
+
+        while ($chkrow = mysql_fetch_assoc($chkres)) {
+          if ($lasku['ryhmittely_tyyppi'] == 'ytunnus') {
+            $laskut[$ryhmittely]['asiakas'] = hae_asiakas($chkrow['liitostunnus']);
+          }
+          else {
+            $laskut[$ryhmittely]['paaasiakas'] = hae_asiakas($chkrow['liitostunnus']);
+            $laskut[$ryhmittely]['asiakas']['talhal_email'] = $laskut[$ryhmittely]['paaasiakas']['talhal_email'];
+          }
+        }
+      }
     }
 
     $asiakasnumerot = search_array_key_for_value_recursive($laskut[$ryhmittely]['asiakasnumerot'], 'asiakasnumero', $lasku['asiakasnumero']);
@@ -27000,6 +27029,8 @@ if (!function_exists('keraa_saldovahvistusrivit_ytunnus')) {
 
 if (!function_exists('keraa_saldovahvistusrivit_ktunnus_ytunnus')) {
   function keraa_saldovahvistusrivit_ktunnus_ytunnus(&$laskut, $lasku, $ryhmittely) {
+    global $kukarow;
+
     if (!isset($laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['avoin_saldo_summa'])) {
       $laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['avoin_saldo_summa'] = 0;
     }
@@ -27007,6 +27038,39 @@ if (!function_exists('keraa_saldovahvistusrivit_ktunnus_ytunnus')) {
       //asiakkaan nimeen tulee ensimmäisen laskun asiakkaan nimi, eli pääasiakkaan nimi
       $laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['asiakas_nimi'] = $lasku['nimi'];
       $laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['asiakas'] = hae_asiakas($lasku['liitostunnus']);
+
+      $_ytunnus_chk = $laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['asiakas']['ytunnus'];
+      $_ryhmittely_tyyppi = $lasku['ryhmittely_tyyppi'];
+
+      if (!empty($_ytunnus_chk)) {
+
+        $query = "SELECT *
+                  FROM asiakas
+                  JOIN asiakkaan_avainsanat AS aa ON (
+                    aa.yhtio = asiakas.yhtio AND
+                    aa.laji = 'PÄÄASIAKAS' AND
+                    aa.avainsana != '' AND
+                    aa.liitostunnus = asiakas.tunnus
+                  )
+                  WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+                  AND asiakas.ytunnus = '{$_ytunnus_chk}'
+                  AND asiakas.talhal_email != ''
+                  LIMIT 1";
+        $chkres = pupe_query($query);
+
+        while ($chkrow = mysql_fetch_assoc($chkres)) {
+
+          $_arr = $laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely];
+
+          if ($_ryhmittely_tyyppi == 'ytunnus') {
+            $_arr['asiakas'] = hae_asiakas($chkrow['liitostunnus']);
+          }
+          else {
+            $_arr['paaasiakas'] = hae_asiakas($chkrow['liitostunnus']);
+            $_arr['asiakas']['talhal_email'] = $_arr['paaasiakas']['talhal_email'];
+          }
+        }
+      }
     }
 
     $asiakasnumerot = search_array_key_for_value_recursive($laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['asiakasnumerot'], 'asiakasnumero', $lasku['asiakasnumero']);
@@ -28310,7 +28374,7 @@ if (!function_exists('sallitut_varastot')) {
         return $kukarow_varasto;
       }
     }
-    
+
     // Ei löytynyt vielä yhtään varastoa, otetaan varastot käyttäjän tiedoista
     if (trim($kukarow['varasto']) != "" and strpos($kukarow['varasto'], ',') !== false) {
       return explode(",", $kukarow["varasto"]);

@@ -104,7 +104,7 @@ class PrestaCustomers extends PrestaClient {
    */
   public function sanitize_tunnus($string) {
     $tunnus_array = explode(self::TUNNUS_SEPARATOR, $string);
-    if (isset($tunnus_array[1]) and is_int($tunnus_array[1])) {
+    if (isset($tunnus_array[1]) and is_numeric($tunnus_array[1])) {
       return (int) $tunnus_array[1];
     }
 

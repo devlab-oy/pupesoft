@@ -79,7 +79,26 @@ abstract class PrestaClient {
       throw $e;
     }
 
-    return xml_to_array($response_xml);
+    /**
+     * Hackhack...presta web service returns the fetched record wrapped in
+     * its resource name:
+     * $c = array(
+     *  'customer' => array(
+     *      'id' =>1,
+     *       ...
+     * )
+     * );
+     * 
+     * Basically this means all the fetched records are one level too deep.
+     * Remove the unnecessary level
+     */
+    $response = xml_to_array($response_xml);
+    $keys = array_keys($response);
+    if (isset($keys[0])) {
+      $response = $response[$keys[0]];
+    }
+
+    return $response;
   }
 
   /**
@@ -148,7 +167,7 @@ abstract class PrestaClient {
     //@TODO pitääkö tää blokki olla myös try catchin sisällä??
     $existing_resource = $this->get_as_xml($id);
     $xml = $this->generate_xml($resource, $existing_resource)->asXML();
-    
+
     return $this->update_xml($id, $xml);
   }
 

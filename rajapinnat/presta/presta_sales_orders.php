@@ -99,6 +99,12 @@ class PrestaSalesOrders extends PrestaClient {
     return $sales_orders;
   }
 
+  /**
+   * Converts presta array to pupesoft 
+   * 
+   * @param array $presta_order
+   * @return array
+   */
   private function convert_for_pupesoft($presta_order) {
     $presta_customer = new PrestaCustomers($this->get_url(), $this->get_api_key());
     $presta_customer = $presta_customer->get($presta_order['id_customer']);
@@ -163,6 +169,8 @@ class PrestaSalesOrders extends PrestaClient {
 
       $pupesoft_order['items'][] = $pupesoft_row;
     }
+    
+    return $pupesoft_order;
   }
 
   /**

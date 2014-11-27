@@ -75,12 +75,12 @@ if (!function_exists("tuotetarkista")) {
       or $fieldname == "malli"
       or $fieldname == "mallitarkenne") {
 
-      $t[$i] = trim($t[$i]);
-
       // Ei tehdä tarkistuksia jos tietoa ei oo syötetty
       if (empty($t[$i])) {
         return;
       }
+
+      $t[$i] = trim($t[$i]);
 
       $tpque = "SELECT tunnus
                 FROM avainsana
@@ -408,12 +408,24 @@ if (!function_exists("tuotetarkista")) {
     //tehdään nää jutut tässä koska tämä on aina viimeinen sarake
     if ($fieldname == "tunnus") {
 
-      if ($tem_kehahin != "" and $tem_kehahin != $trow["kehahin"] and $tem_eisaldoa == "") {
+      if ($tem_kehahin != ""
+        and $tem_kehahin != $trow["kehahin"]
+        and ((isset($tem_eisaldoa)
+            and $tem_eisaldoa == "")
+          or (!isset($tem_eisaldoa)
+            and $trow["ei_saldoa"] == ""))) {
         // Pitää aina setata myös "tämän" kentän virhe, muuten luedata ei toimi
         $virhe[$i] = $virhe[$tem_kehahin_ind] = t("Saldollisen tuotteen hankintahintaa ei voi muuttaa")."!";
       }
 
-      if ($tem_kehahin != "" and $tem_kehahin != $trow["kehahin"] and $tem_eisaldoa == "" and count($virhe) == 0 and $yhtiorow["palvelutuotteiden_kehahinnat"] == "K") {
+      if ($tem_kehahin != ""
+        and $tem_kehahin != $trow["kehahin"]
+        and count($virhe) == 0
+        and $yhtiorow["palvelutuotteiden_kehahinnat"] == "K"
+        and ((isset($tem_eisaldoa)
+            and $tem_eisaldoa == "")
+          or (!isset($tem_eisaldoa)
+            and $trow["ei_saldoa"] == ""))) {
 
         $tem_kehahin = sprintf("%.6f", $tem_kehahin);
 
@@ -434,7 +446,12 @@ if (!function_exists("tuotetarkista")) {
         $chkressires = pupe_query($query);
       }
 
-      if (count($virhe) == 0 and $tem_eisaldoa == "" and $yhtiorow["tuotteen_oletuspaikka"] != "") {
+      if (count($virhe) == 0
+        and $yhtiorow["tuotteen_oletuspaikka"] != ""
+        and ((isset($tem_eisaldoa)
+            and $tem_eisaldoa == "")
+          or (!isset($tem_eisaldoa)
+            and $trow["ei_saldoa"] == ""))) {
 
         $query = "SELECT *
                   FROM tuotepaikat

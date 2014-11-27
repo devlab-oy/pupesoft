@@ -55,83 +55,120 @@ $tuoterajaus = rakenna_relex_tuote_parametrit();
 // Relexiin ei mene ostoehdotus "EI" tuotteita. T‰m‰ siksi, ett‰ ostoehdotus "KYLLƒ"
 // on voinut muuttua "EI":ksi ja saadaan se p‰ivitetty‰ Relexiin.
 
-$_loytyy_ostoehdotus = strpos($tuoterajaus, "tuote.ostoehdotus");
+if (!function_exists("relex_product_ostoehdotus_update")) {
+  function relex_product_ostoehdotus_update($kentta, $tuoterajaus, $paiva_ajo) {
+    global $kukarow, $yhtiorow;
 
-if ($_loytyy_ostoehdotus !== false and $paiva_ajo) {
+    $_loytyy_kentta = strpos($tuoterajaus, "tuote.$kentta");
 
-  $_rajaus_alkaa_ostoehdotuksella = substr($tuoterajaus, $_loytyy_ostoehdotus);
-  $_rajaukset = explode(" AND", $_rajaus_alkaa_ostoehdotuksella);
+    if ($_loytyy_kentta !== false and $paiva_ajo) {
 
-  list($kentta, $oper, $arvo) = explode(" ", $_rajaukset[0]);
+      $_rajaus_alkaa_kentalla = substr($tuoterajaus, $_loytyy_kentta);
+      $_rajaukset = explode(" AND", $_rajaus_alkaa_kentalla);
 
-  $arvo = str_replace("'", "", $arvo);
+      list($kentta, $oper, $arvo) = explode(" ", $_rajaukset[0]);
 
-  if ($oper == "=" and $arvo == '') {
-    $ostoehdotus_ei_raportti = TRUE;
-  }
-  elseif ($oper == "!=" and $arvo == 'E') {
-    $ostoehdotus_ei_raportti = TRUE;
-  }
-  else {
-    $ostoehdotus_ei_raportti = FALSE;
-  }
+      $arvo = str_replace("'", "", $arvo);
 
-  if ($ostoehdotus_ei_raportti) {
+      if ($oper == "=") {
+        $oper = '!=';
+        $kentta_update = TRUE;
+      }
+      elseif ($oper == "!=") {
+        $oper = '=';
+        $kentta_update = TRUE;
+      }
+      elseif ($oper == "in") {
+        $oper = 'not in';
+        $kentta_update = TRUE;
+      }
+      elseif ($oper == "not in") {
+        $oper = 'in';
+        $kentta_update = TRUE;
+      }
+      else {
+        $kentta_update = FALSE;
+      }
 
-    $_tuoterajaus = str_replace($_rajaukset[0], "tuote.ostoehdotus = 'E'", $tuoterajaus);
+      if ($kentta_update) {
 
-    // Tallennetaan rivit tiedostoon
-    $ofilepath = "/tmp/product_ostoehdotus_update_{$yhtio}_$ajopaiva.csv";
-
-    if (!$ofp = fopen($ofilepath, 'w+')) {
-      die("Tiedoston avaus ep‰onnistui: $ofilepath\n");
-    }
-
-    // Otsikkotieto
-    $header  = "code;";
-    $header .= "ostoehdotus";
-    $header .= "\n";
-
-    fwrite($ofp, $header);
-
-    $query = "SELECT tuote.tuoteno, yhtio.maa
-              FROM tuote
-              JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
-              WHERE tuote.yhtio     = '{$yhtio}'
-              $_tuoterajaus
-              AND (tuote.muutospvm  >= date_sub(now(), interval 24 HOUR)
-                OR tuote.luontiaika >= date_sub(now(), interval 24 HOUR))";
-    $res = pupe_query($query);
-
-    $k_rivi = 0;
-
-    while ($row = mysql_fetch_assoc($res)) {
-
-      $rivi  = $row['maa']."-".pupesoft_csvstring($row['tuoteno']).";";
-      $rivi .= "E";
-      $rivi .= "\n";
-
-      fwrite($ofp, $rivi);
-
-      $k_rivi++;
-
-      if ($k_rivi % 1000 == 0) {
-        echo "K‰sitell‰‰n rivi‰ {$k_rivi}\n";
+        $_tuoterajaus = str_replace($_rajaukset[0], "tuote.$kentta $oper '$arvo'", $tuoterajaus);
+        return array($kentta, $_tuoterajaus);
+      }
+      else {
+        return array(FALSE, $tuoterajaus);
       }
     }
+    return array(FALSE, $tuoterajaus);
+  }
+}
 
-    fclose($ofp);
+list($ostoehdotus_update, $_tuoterajaus) = relex_product_ostoehdotus_update("ostoehdotus", $tuoterajaus, $paiva_ajo);
+list($status_update, $_tuoterajaus)      = relex_product_ostoehdotus_update("status", $_tuoterajaus, $paiva_ajo);
 
-    // Tehd‰‰n FTP-siirto
-    if ($paiva_ajo and !empty($relex_ftphost)) {
-      // Tuotetiedot
-      $ftphost = $relex_ftphost;
-      $ftpuser = $relex_ftpuser;
-      $ftppass = $relex_ftppass;
-      $ftppath = "/data/input";
-      $ftpfile = $ofilepath;
-      require "inc/ftp-send.inc";
+if ($ostoehdotus_update or $status_update) {
+
+  // Tallennetaan rivit tiedostoon
+  $ofilepath = "/tmp/product_ostoehdotus_update_{$yhtio}_$ajopaiva.csv";
+
+  if (!$ofp = fopen($ofilepath, 'w+')) {
+    die("Tiedoston avaus ep‰onnistui: $ofilepath\n");
+  }
+
+  $select_lisa = "";
+
+  // Otsikkotieto
+  $header  = "code";
+  if ($ostoehdotus_update) {
+    $header .= ";$ostoehdotus_update";
+    $select_lisa = ", tuote.$ostoehdotus_update";
+  }
+  if ($status_update) {
+    $header .= ";$status_update";
+    $select_lisa .= ", tuote.$status_update";
+  }
+  $header .= "\n";
+
+  fwrite($ofp, $header);
+
+  $query = "SELECT tuote.tuoteno, yhtio.maa $select_lisa
+            FROM tuote
+            JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
+            WHERE tuote.yhtio     = '{$yhtio}'
+            $_tuoterajaus
+            AND (tuote.muutospvm  >= date_sub(now(), interval 24 HOUR)
+              OR tuote.luontiaika >= date_sub(now(), interval 24 HOUR))";
+  $res = pupe_query($query);
+
+  $k_rivi = 0;
+
+  while ($row = mysql_fetch_assoc($res)) {
+
+    $rivi  = $row['maa']."-".pupesoft_csvstring($row['tuoteno']);
+    if ($ostoehdotus_update) $rivi .= ";{$row[$ostoehdotus_update]}";
+    if ($status_update)      $rivi .= ";{$row[$status_update]}";
+    $rivi .= "\n";
+
+    fwrite($ofp, $rivi);
+
+    $k_rivi++;
+
+    if ($k_rivi % 1000 == 0) {
+      echo "K‰sitell‰‰n rivi‰ {$k_rivi}\n";
     }
+  }
+
+  fclose($ofp);
+
+  // Tehd‰‰n FTP-siirto
+  if ($paiva_ajo and !empty($relex_ftphost)) {
+    // Tuotetiedot
+    $ftphost = $relex_ftphost;
+    $ftpuser = $relex_ftpuser;
+    $ftppass = $relex_ftppass;
+    $ftppath = "/data/input";
+    $ftpfile = $ofilepath;
+    require "inc/ftp-send.inc";
   }
 }
 

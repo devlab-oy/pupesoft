@@ -68,6 +68,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
     case "tullinimike" :
       $pakolliset  = array("CN", "KIELI");
       $kielletyt   = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
+      $saakopoistaa = TRUE;
       break;
     case "tili" :
       $pakolliset  = array("TILINO");

@@ -145,14 +145,31 @@ abstract class PrestaClient {
    * @throws Exception
    */
   protected function update($id, array $resource) {
+    //@TODO pitääkö tää blokki olla myös try catchin sisällä??
+    $existing_resource = $this->get_as_xml($id);
+    $xml = $this->generate_xml($resource, $existing_resource)->asXML();
+    
+    return $this->update_xml($id, $xml);
+  }
+
+  /**
+   * Updates given resource straight from the given xml
+   * Xml needs to be in Presta format.
+   * This is used for example in PrestaSalesOrders
+   * 
+   * @param int $id
+   * @param SimpleXMLElement $xml
+   * @return array
+   * @throws Exception
+   */
+  protected function update_xml($id, SimpleXMLElement $xml) {
     $opt = array(
         'id'       => $id,
         'resource' => $this->resource_name()
     );
 
     try {
-      $existing_resource = $this->get_as_xml($id);
-      $opt['putXml'] = $this->generate_xml($resource, $existing_resource)->asXML();
+      $opt['putXml'] = $xml;
       $response_xml = $this->ws->edit($opt);
       //@TODO Resource IDENTIFIER to log message
       $this->logger->log("Päivitettiin resurssi: " . $this->resource_name());
@@ -333,7 +350,7 @@ abstract class PrestaClient {
 
     return $response;
   }
-  
+
   /**
    * 
    * @return string
@@ -341,7 +358,7 @@ abstract class PrestaClient {
   protected function get_url() {
     return $this->url;
   }
-  
+
   /**
    * 
    * @return string
@@ -349,7 +366,7 @@ abstract class PrestaClient {
   protected function get_api_key() {
     return $this->api_key;
   }
-  
+
   /**
    * Sanitezes string for presta link_rewrite column
    * 

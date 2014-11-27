@@ -25701,6 +25701,10 @@ if (!function_exists('hae_asiakas')) {
   function hae_asiakas($liitostunnus) {
     global $yhtiorow;
 
+    if (empty($liitostunnus)) {
+      return false;
+    }
+
     $query = "SELECT *
               FROM asiakas
               WHERE yhtio = '{$yhtiorow['yhtio']}'

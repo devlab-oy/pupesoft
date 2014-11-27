@@ -224,6 +224,12 @@ for ($i = 1; $i < 32; $i++) {
 
 echo "</select></td><td class='back'>&nbsp;</td></tr>";
 
+if (!empty($serikustpt) or !empty($serikohdet) or !empty($seriprojektit)) {
+  $mul_kustp = unserialize(urldecode($serikustpt));
+  $mul_kohde = unserialize(urldecode($serikohdet));
+  $mul_projekti = unserialize(urldecode($seriprojektit));
+}
+
 $monivalintalaatikot = array();
 
 $query = "SELECT tunnus
@@ -316,6 +322,20 @@ if ($tee == 'M') {
 
 echo "</select></td></tr>";
 echo "<tr><th>".t("Haku")."</th><td><input type = 'text' name = 'summa1' value = '$summa1' size='13'> - <input type = 'text' name = 'summa2' value = '$summa2' size='13'></td>";
+
+$sel = array_fill_keys(array($rajaus), " selected") + array_fill_keys(array('50', '100', '250', '500', '750', '1000'), '');
+
+echo "<tr><th>".t("N‰ytet‰‰n")."</th>";
+echo "<td><select name = 'rajaus'>";
+echo "<option {$sel['50']} value = '50'>".t("50")."</option>";
+echo "<option {$sel['100']} value = '100'>".t("100")."</option>";
+echo "<option {$sel['250']} value = '250'>".t("250")."</option>";
+echo "<option {$sel['500']} value = '500'>".t("500")."</option>";
+echo "<option {$sel['750']} value = '750'>".t("750")."</option>";
+echo "<option {$sel['1000']} value = '1000'>".t("1000")."</option>";
+echo "</select> ".t("laskua")."</td>";
+
+
 echo "<td class='back'><input type = 'submit' value = '".t("Etsi")."'></td>";
 echo "</tr>";
 
@@ -351,6 +371,13 @@ if ($tee != '') {
     $tiliointilisa = '';
   }
 
+  if ($rajaus == "" or !is_numeric($rajaus)) {
+    $rajaus = 50;
+  }
+  else {
+    $rajaus = round($rajaus);
+  }
+
   $query = "SELECT DISTINCT lasku.tapvm, lasku.erpcm, concat_ws('<br>', lasku.nimi, lasku.nimitark) nimi,
             lasku.summa, lasku.valkoodi, lasku.vienti, concat_ws(' ', lasku.viite, lasku.viesti) 'viite/viesti',
             lasku.ebid, lasku.tila, lasku.alatila, lasku.tunnus, if(lasku.laskunro = 0, '', lasku.laskunro) laskunro
@@ -360,7 +387,7 @@ if ($tee != '') {
             and lasku.yhtio = '$kukarow[yhtio]'
             $lisa
               ORDER BY $jarj
-              LIMIT $alku, 50";
+              LIMIT $alku, $rajaus";
   $result = pupe_query($query);
   $seraavako = mysql_num_rows($result);
 
@@ -371,7 +398,7 @@ if ($tee != '') {
     exit;
   }
 
-  pupe_DataTables(array(array($pupe_DataTables, 8, 8)));
+  pupe_DataTables(array(array($pupe_DataTables, 8, 8, false)));
 
   echo "<table class='display dataTable' id='$pupe_DataTables'>";
 
@@ -454,11 +481,26 @@ if ($tee != '') {
         <td class='tumma' colspan='4'></td></tr>";
   }
   echo "</tfoot>";
-  echo "</table><br>";
+  echo "</table><br><br>";
+
+  $serikustpt = urlencode(urlencode(serialize($mul_kustp)));
+  $serikohdet = urlencode(urlencode(serialize($mul_kohde)));
+  $seriprojektit = urlencode(urlencode(serialize($mul_projekti)));
 
   if ($alku > 0) {
     $siirry = $alku - 50;
-    echo "<a href = '$PHP_SELF?toim=laskuhaku&tee=$tee&pvm=$pvm&summa1=$summa1&summa2=$summa2&alku=$siirry&alkuvv=$alkuvv&alkukk=$alkukk&alkupp=$alkupp&loppuvv=$loppuvv&loppukk=$loppukk&loppupp=$loppupp'>".t("Edelliset")."</a> ";
+    echo "<a href = '$PHP_SELF?toim=laskuhaku";
+    echo "&tee=$tee";
+    echo "&pvm=$pvm";
+    echo "&summa1=$summa1&summa2=$summa2";
+    echo "&alku=$siirry";
+    echo "&alkuvv=$alkuvv&alkukk=$alkukk&alkupp=$alkupp";
+    echo "&loppuvv=$loppuvv&loppukk=$loppukk&loppupp=$loppupp";
+    echo "&rajaus=$rajaus";
+    echo "&serikustpt=$serikustpt";
+    echo "&serikohdet=$serikohdet";
+    echo "&seriprojektit=$seriprojektit'>";
+    echo t("Edelliset")."</a> ";
   }
   else {
     echo t("Edelliset")." ";
@@ -466,7 +508,18 @@ if ($tee != '') {
 
   if ($seraavako >= 50) {
     $siirry = $alku + 50;
-    echo "<a href = '$PHP_SELF?toim=laskuhaku&tee=$tee&pvm=$pvm&summa1=$summa1&summa2=$summa2&alku=$siirry&alkuvv=$alkuvv&alkukk=$alkukk&alkupp=$alkupp&loppuvv=$loppuvv&loppukk=$loppukk&loppupp=$loppupp'>".t("Seuraavat")."</a> ";
+    echo "<a href = '$PHP_SELF?toim=laskuhaku";
+    echo "&tee=$tee";
+    echo "&pvm=$pvm";
+    echo "&summa1=$summa1&summa2=$summa2";
+    echo "&alku=$siirry";
+    echo "&alkuvv=$alkuvv&alkukk=$alkukk&alkupp=$alkupp";
+    echo "&loppuvv=$loppuvv&loppukk=$loppukk&loppupp=$loppupp";
+    echo "&rajaus=$rajaus";
+    echo "&serikustpt=$serikustpt";
+    echo "&serikohdet=$serikohdet";
+    echo "&seriprojektit=$seriprojektit'>";
+    echo t("Seuraavat")."</a>";
   }
 
   echo "<br><br>";

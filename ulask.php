@@ -412,6 +412,9 @@ if ($tee == 'I') {
   // Hoidetaan pilkut pisteiksi....
   $kassaale = str_replace(",", ".", trim($kassaale));
   $summa    = str_replace(",", ".", trim($summa));
+  $osto_rahti    = str_replace(",", ".", trim($osto_rahti));
+  $osto_kulu    = str_replace(",", ".", trim($osto_kulu));
+  $osto_rivi_kulu    = str_replace(",", ".", trim($osto_rivi_kulu));
 
   for ($i=1; $i<$maara; $i++) {
     $isumma[$i] = str_replace(",", ".", trim($isumma[$i]));
@@ -444,10 +447,24 @@ if ($tee == 'I') {
 
   if ($errormsg == '' and isset($summa) and (isset($osto_rahti) or isset($osto_kulu) or isset($osto_rivi_kulu))) {
 
-    if (!isset($osto_rahti))    $osto_rahti = 0;
-    if (!isset($osto_kulu))    $osto_kulu = 0;
-    if (!isset($osto_rivi_kulu)) $osto_rivi_kulu = 0;
-
+    if (!isset($osto_rahti)) {
+      $osto_rahti = 0;
+    }
+    else {
+      $osto_rahti = round($osto_rahti, 2);
+    }
+    if (!isset($osto_kulu)) {
+      $osto_kulu = 0;
+    }
+    else {
+      $osto_kulu = round($osto_kulu, 2);
+    }
+    if (!isset($osto_rivi_kulu)) {
+      $osto_rivi_kulu = 0;
+    }
+    else {
+      $osto_rivi_kulu = round($osto_rivi_kulu, 2);
+    }
     if (abs($summa) - abs($osto_rahti) - abs($osto_kulu) - abs($osto_rivi_kulu) < 0) {
       $errormsg .= "<font class='error'>".t("Kulut ylittävät laskun summan")."!</font><br>";
       $tee = 'E';

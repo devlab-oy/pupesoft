@@ -78,6 +78,9 @@ case "L":
   case "B":
     $alatila = "Rahtikirjatiedot syötetty";
     break;
+  case "BD":
+    $alatila = "Rahtikirjojen tulostus kesken";
+    break;
   case "C":
     $alatila = "Kerätty";
     break;
@@ -106,6 +109,9 @@ case "N":
   switch ($alatila) {
   case "A":
     $alatila = "Tulostusjonossa";
+    break;
+  case "KA":
+    $alatila = "Tulostuksessa";
     break;
   case "B":
     $alatila = "Odottaa ennakkolaskun maksua";
@@ -225,6 +231,9 @@ case "G":
     break;
   case "J":
     $alatila = "tulostusjonossa";
+    break;
+  case "KJ":
+    $alatila = "tulostuksessa";
     break;
   case "A":
     $alatila = "tulostettu";

@@ -39,7 +39,7 @@ class Edi {
 
     // Miten storen nimi?
     //$storenimi = (isset($_COOKIE["store_name"])) ? $_COOKIE["store_name"] : "";
-    $storenimi = 'default';
+    $storenimi = '';
 
     //tilauksen otsikko
     //return $order->getUpdatedAt();
@@ -52,6 +52,9 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:$pupesoft_tilaustyyppi\n";
     $edi_order .= "OSTOTIL.VERKKOKAUPPA:".str_replace("\n", " ", $order['store_name'])."\n";
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO:".$order['customer_id']."\n";
+    $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSVIITE:".str_replace("\n", " ", $order['reference_number'])."\n";
+    $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSNUMERO:".str_replace("\n", " ", $order['order_number'])."\n";
+    $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_KOHDE:".str_replace("\n", " ", $order['target'])."\n";
     $edi_order .= "OSTOTIL.OT_TILAUSAIKA:\n";
     $edi_order .= "OSTOTIL.OT_KASITTELIJA:\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUSAIKA:\n";
@@ -77,11 +80,19 @@ class Edi {
 
     //Asiakkaan ovt_tunnus MUISTA MUUTTAA
     $edi_order .= "OSTOTIL.OT_ASIAKASNRO:".$verkkokauppa_asiakasnro."\n";
-    $edi_order .= "OSTOTIL.OT_YRITYS:".$order['billing_address']['company']."\n";
+
+    // Yritystilauksissa vaihdetaan yrityksen ja tilaajan nimi toisin päin
+    if (!empty($order['billing_address']['company'])) {
+      $edi_order .= "OSTOTIL.OT_YRITYS:".$order['billing_address']['lastname']." ".$order['billing_address']['firstname']."\n";
+      $edi_order .= "OSTOTIL.OT_YHTEYSHENKILO:".$order['billing_address']['company']."\n";
+    }
+    else {
+      $edi_order .= "OSTOTIL.OT_YRITYS:".$order['billing_address']['company']."\n";
+      $edi_order .= "OSTOTIL.OT_YHTEYSHENKILO:".$order['billing_address']['lastname']." ".$order['billing_address']['firstname']."\n";
+    }
     $edi_order .= "OSTOTIL.OT_KATUOSOITE:".$billingadress."\n";
     $edi_order .= "OSTOTIL.OT_POSTITOIMIPAIKKA:".$order['billing_address']['city']."\n";
     $edi_order .= "OSTOTIL.OT_POSTINRO:".$order['billing_address']['postcode']."\n";
-    $edi_order .= "OSTOTIL.OT_YHTEYSHENKILO:".$order['billing_address']['lastname']." ".$order['billing_address']['firstname']."\n";
     $edi_order .= "OSTOTIL.OT_YHTEYSHENKILONPUH:".$order['billing_address']['telephone']."\n";
     $edi_order .= "OSTOTIL.OT_YHTEYSHENKILONFAX:".$order['billing_address']['fax']."\n";
     $edi_order .= "OSTOTIL.OT_MYYNTI_YRITYS:\n";
@@ -92,8 +103,17 @@ class Edi {
     $edi_order .= "OSTOTIL.OT_MYYNTI_YHTEYSHENKILO:\n";
     $edi_order .= "OSTOTIL.OT_MYYNTI_YHTEYSHENKILONPUH:\n";
     $edi_order .= "OSTOTIL.OT_MYYNTI_YHTEYSHENKILONFAX:\n";
-    $edi_order .= "OSTOTIL.OT_TOIMITUS_YRITYS:".$order['shipping_address']['company']."\n";
-    $edi_order .= "OSTOTIL.OT_TOIMITUS_NIMI:".$order['shipping_address']['lastname']." ".$order['shipping_address']['firstname']."\n";
+
+    // Yritystilauksissa vaihdetaan yrityksen ja tilaajan nimi toisin päin
+    if (!empty($order['shipping_address']['company'])) {
+      $edi_order .= "OSTOTIL.OT_TOIMITUS_YRITYS:".$order['shipping_address']['lastname']." ".$order['shipping_address']['firstname']."\n";
+      $edi_order .= "OSTOTIL.OT_TOIMITUS_NIMI:".$order['shipping_address']['company']."\n";
+    }
+    else {
+      $edi_order .= "OSTOTIL.OT_TOIMITUS_YRITYS:".$order['shipping_address']['company']."\n";
+      $edi_order .= "OSTOTIL.OT_TOIMITUS_NIMI:".$order['shipping_address']['lastname']." ".$order['shipping_address']['firstname']."\n";
+    }
+
     $edi_order .= "OSTOTIL.OT_TOIMITUS_KATUOSOITE:".$shippingadress."\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUS_POSTITOIMIPAIKKA:".$order['shipping_address']['city']."\n";
     $edi_order .= "OSTOTIL.OT_TOIMITUS_POSTINRO:".$order['shipping_address']['postcode']."\n";

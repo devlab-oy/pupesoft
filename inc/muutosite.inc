@@ -1436,14 +1436,14 @@ if ($tila == 'ostolasku_kulut') {
   $osto_rahti    = str_replace(",", ".", trim($osto_rahti));
   $osto_kulu    = str_replace(",", ".", trim($osto_kulu));
   $osto_rivi_kulu    = str_replace(",", ".", trim($osto_rivi_kulu));
-  
+
   if (isset($osto_rahti) and ((trim($osto_rahti) != '' and !is_numeric($osto_rahti)) or trim($osto_rahti) == '')) {
     echo "<font class='error'>", t("Vaihto-omaisuuslaskun rahtikulu ei ole numeerinen"), " {$osto_rahti}</font><br>";
     $tee = 'M';
     $tila = '';
   }
   else {
-     $osto_rahti = (float) round($osto_rahti,2);
+    $osto_rahti = (float) round($osto_rahti, 2);
   }
 
   if (isset($osto_kulu) and ((trim($osto_kulu) != '' and !is_numeric($osto_kulu)) or trim($osto_kulu) == '')) {
@@ -1452,7 +1452,7 @@ if ($tila == 'ostolasku_kulut') {
     $tila = '';
   }
   else {
-     $osto_kulu = (float) round($osto_kulu,2);
+    $osto_kulu = (float) round($osto_kulu, 2);
   }
 
   if (isset($osto_rivi_kulu) and ((trim($osto_rivi_kulu) != '' and !is_numeric($osto_rivi_kulu)) or trim($osto_rivi_kulu) == '')) {
@@ -1461,7 +1461,7 @@ if ($tila == 'ostolasku_kulut') {
     $tila = '';
   }
   else {
-     $osto_rivi_kulu = (float) round($osto_rivi_kulu,2);
+    $osto_rivi_kulu = (float) round($osto_rivi_kulu, 2);
   }
 }
 

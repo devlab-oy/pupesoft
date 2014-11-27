@@ -43,14 +43,15 @@ EXTRA_FILES=${args_array[@]}
 extranet_directory=`dirname $0`
 cd ${extranet_directory}/..
 
-# Kopioidaan nämä hakemistot rakenteineen
-DIRECTORIES="barcode/
-excel_reader/
-js/
-pdflib/
-pics/
-validation/
-viivakoodi/"
+# Kopioidaan nämä hakemistot rakenteineen, ei saa olla perässä /-merkkiä tai ainoastaan kansion
+# sisältö kopioidaan
+DIRECTORIES="barcode
+excel_reader
+js
+pdflib
+pics
+validation
+viivakoodi"
 
 # Kopioidaan näiden hakemistojen sisältö extranet roottiin
 CONTENT="extranet/*"

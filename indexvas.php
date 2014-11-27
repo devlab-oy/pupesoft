@@ -5,6 +5,57 @@ if (@include_once "inc/parametrit.inc");
 elseif (@include_once "parametrit.inc");
 else exit;
 
+if (!empty($legacy_ui)) {
+
+  unset($isizelogo);
+
+  if ((int) $yhtiorow["logo"] > 0) {
+    $liite = hae_liite($yhtiorow["logo"], "Yllapito", "array");
+
+    if ($liite !== false) {
+      $isizelogo[0] = $liite["image_width"];
+      $isizelogo[1] = $liite["image_height"];
+    }
+    unset($liite);
+  }
+  elseif (@file($yhtiorow["logo"])) {
+    $isizelogo = getimagesize($yhtiorow["logo"]);
+  }
+
+  if (isset($isizelogo) and is_array($isizelogo)) {
+    if ((int) $yhtiorow["logo"] > 0) {
+      $logo   = "view.php?id=".$yhtiorow["logo"];
+    }
+    else {
+      $image = getimagesize($yhtiorow["logo"]);
+      $logo = $yhtiorow["logo"];
+    }
+
+    $ix    = $isizelogo[0];      // kuvan x
+    $iy    = $isizelogo[1];      // kuvan y
+
+    if ($ix > $iy) {
+      $koko = "width='150'";
+    }
+    else {
+      $koko = "height='70'";
+    }
+    $yhtio_nimi = "";
+  }
+  else {
+    $logo = "{$pupesoft_scheme}api.devlab.fi/pupesoft.png";
+    $koko = "width='150'";
+    $yhtio_nimi = "<font class='info'>$yhtiorow[nimi]</font><br>";
+  }
+
+  echo "<div style='margin: 5px 0px 10px 8px;'>";
+  echo "<a class='puhdas' target='main' href='".$palvelin2."logout.php?toim=change'><img border='0' src='$logo' alt='logo' $koko ></a>"; // top right bottom left
+  echo "</div>";
+  echo "<div style='margin:0px 0px 10px 8px'>";  // top right bottom left
+  echo $yhtio_nimi;
+  echo "<font class='info'>$kukarow[nimi]</font>";
+  echo "</div>";
+}
 
 echo "<div id = 'indexvas_container'>";
 
@@ -209,30 +260,33 @@ while ($orow = mysql_fetch_array($result)) {
 echo "</table><br>";
 echo "</div>";
 
-echo "<div class='showhide_vasen' id='maaginen_vasen'><img id='showhide_left' src='{$palvelin2}pics/facelift/hide_left.png'></div>";
+if (empty($legacy_ui)) {
 
-echo "
-  <script>
+  echo "<div class='showhide_vasen' id='maaginen_vasen'><img id='showhide_left' src='{$palvelin2}pics/facelift/hide_left.png'></div>";
 
-      $('.menu').click(function(){
-        $('.menu').removeClass('menu_aktivoitu');
-        $(this).addClass('menu_aktivoitu');
-      });
+  echo "
+    <script>
 
-      $(document).ready(function(){
-        $('#maaginen_vasen').click(function(){
-           if (parent.document.getElementsByTagName('frameset')[1].cols=='285,*') {
-             parent.document.getElementsByTagName('frameset')[1].cols='20,*';
-             $('#indexvas_container').hide();
-             $('#showhide_left').attr('src', '{$palvelin2}pics/facelift/show_left.png');
-           }
-           else {
-             parent.document.getElementsByTagName('frameset')[1].cols='285,*';
-              $('#indexvas_container').show();
-             $('#showhide_left').attr('src', '{$palvelin2}pics/facelift/hide_left.png');
-           }
+        $('.menu').click(function(){
+          $('.menu').removeClass('menu_aktivoitu');
+          $(this).addClass('menu_aktivoitu');
         });
-      });
-      </script>";
+
+        $(document).ready(function(){
+          $('#maaginen_vasen').click(function(){
+             if (parent.document.getElementsByTagName('frameset')[1].cols=='285,*') {
+               parent.document.getElementsByTagName('frameset')[1].cols='20,*';
+               $('#indexvas_container').hide();
+               $('#showhide_left').attr('src', '{$palvelin2}pics/facelift/show_left.png');
+             }
+             else {
+               parent.document.getElementsByTagName('frameset')[1].cols='285,*';
+                $('#indexvas_container').show();
+               $('#showhide_left').attr('src', '{$palvelin2}pics/facelift/hide_left.png');
+             }
+          });
+        });
+        </script>";
+}
 
 echo "</body></html>";

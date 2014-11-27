@@ -45,18 +45,38 @@ else {
 
 echo "</head>";
 
-if (isset($legacy_ui) and $legacy_ui) {
-  
+if (!empty($legacy_ui)) {
+
+  $colwidth = '175';
+
+  if (isset($kukarow['resoluutio']) and $kukarow['resoluutio'] == 'P') {
+    $colwidth = '45';
+  }
+
+  echo "<frameset cols='$colwidth,*' border='0'>
+          <frameset rows='*,0' border='0'>
+            <frame noresize src='indexvas.php?goso=$goso' name='menuframe' frameborder='0' marginwidth='0' marginheight='0'>
+            <frame noresize src='' name='alamenu' id='alamenuFrame' frameborder='0' marginwidth='0' marginheight='0'>
+          </frameset>
+          <frame noresize src='$go' name='mainframe' frameborder='0' marginwidth='0' marginheight='0'>
+          <noframes>
+            <body>
+                    <p>
+                        This page uses frames, but your browser does not support them.
+                    </p>
+                </body>
+          </noframes>
+        </frameset>";
 }
 else {
   echo "<frameset rows='90,*' border='0'>
           <frame noresize src='ylaframe.php' name='ylaframe' id='ylaframe' frameborder='0' marginwidth='0' marginheight='0' scrolling='no'>
-    
-          <frameset cols='285,*' border='0'>    
+
+          <frameset cols='285,*' border='0'>
             <frame noresize src='indexvas.php?goso=$goso&go=$go' name='menuframe' id='menuframe' frameborder='0' marginwidth='0' marginheight='0'>
             <frame noresize src='$go' name='mainframe' id='mainframe' frameborder='0' marginwidth='0' marginheight='0'>
           </frameset>
-          
+
           <noframes>
             <body>
               <p>

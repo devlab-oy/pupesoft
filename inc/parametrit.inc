@@ -688,15 +688,20 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       }
 
       if (!isset($_GET["no_css"]) or $_GET["no_css"] != "yes") {
-        echo "<link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Lato:400,700' >";        
-        
+        echo "<link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Lato:400,700' >";
+
         echo "<style type='text/css'>\n";
         echo $css;
         echo "</style>\n";
 
-        #echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft.css' />\n";
-        #echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft_left.css' />\n";       
-        #echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft_top.css' />\n";               
+        if (empty($legacy_ui)) {
+          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft.css' />\n";
+          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft_left.css' />\n";
+          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft_top.css' />\n";
+        }
+        else {
+          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft_legacy.css' />\n";
+        }
 
         if (isset($pupe_DataTables)) {
           echo "<style type=\"text/css\" title=\"currentStyle\">\n";

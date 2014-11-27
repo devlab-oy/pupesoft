@@ -56,6 +56,18 @@ td {
 	letter-spacing: 1px;
 }
 
+div.lopetus {
+  position:absolute;
+  top:5px;
+  right:60px;
+}
+
+div.ohje {
+  position:absolute;
+  top:5px;
+  right:20px;
+}
+
 input, textarea {
 	margin: 0px 4px 0px 4px;
   padding: 7px 2px 8px 2px;

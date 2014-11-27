@@ -1,0 +1,16 @@
+div.lopetus {
+  position:absolute;
+  top:5px;
+  right:60px;
+}
+
+div.ohje {
+  position:absolute;
+  top:5px;
+  right:20px;
+}
+
+a.puhdas:hover {
+  text-decoration: none;
+  background-color: transparent;
+}

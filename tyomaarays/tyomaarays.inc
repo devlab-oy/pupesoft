@@ -330,7 +330,7 @@ if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == 'VALMI
   }
 
   // Lähetetään tekstiviesti asiakkaalle työmääräyksen valmistumisesta jo tässä vaiheessa,
-  // jos kerättäviä tuotteita ei ole, muuten lähetys tapahtuu keräys.php:ssä
+  // jos kerättäviä tuotteita ei ole, muutoin viestin lähetys tapahtuu manuaalisesti
   $ei_kerattavia_riveja = (isset($kerattavia) and $kerattavia == 0);
 
   if ($yhtiorow['vahvistusviesti_asiakkaalle'] == "Y" and $ei_kerattavia_riveja) {

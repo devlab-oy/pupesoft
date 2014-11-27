@@ -1367,6 +1367,10 @@ if (!function_exists('print_pdf_kerayslista')) {
         $kutsu = t("Myyntitili", $kieli);
         echo t("Myyntitili tulostuu")."...<br>";
       }
+      elseif (isset($uusiotsikko)) {
+        $kutsu = t($uusiotsikko, $kieli).": $laskurow[tunnus]";
+        echo t("{$uusiotsikko} toimitetaan sähköpostiosoitteeseen")."...{$kukarow['eposti']}<br>";
+      }
       else {
         $kutsu = t("Keräyslista", $kieli).": $laskurow[tunnus]";
         echo t("Keräyslista tulostuu")."...<br>";

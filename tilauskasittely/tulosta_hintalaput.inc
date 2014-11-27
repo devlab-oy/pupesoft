@@ -53,7 +53,15 @@ function tulosta_hintalaput($tuotteet, $params = array()) {
     );
     $kuva                  = $pdf->jfif_embed($viivakoodi);
 
-    $montako_tulostetaan = $kpl ? $kpl : ($tuote['tarrakpl'] * $tuote['tarrakerroin']);
+    if ($kpl) {
+      $montako_tulostetaan = $kpl;
+    }
+    elseif ($tuote["kpl"]) {
+      $montako_tulostetaan = ($tuote['kpl'] * $tuote['tarrakerroin']);
+    }
+    else {
+      $montako_tulostetaan = ($tuote['tarrakpl'] * $tuote['tarrakerroin']);
+    }
 
     for ($i = 0; $i < $montako_tulostetaan; $i++) {
       $page = $pdf->new_page('4.9x3cm');
@@ -94,7 +102,8 @@ function hae_tuotteet_hintalappuja_varten($otunnus, $kukarow) {
             tuote.yksikko,
             tuote.nimitys,
             if(tuote.tarrakpl > 0, tuote.tarrakpl, 1) AS tarrakpl,
-            if(tuote.tarrakerroin > 0, tuote.tarrakerroin, 1) AS tarrakerroin
+            if(tuote.tarrakerroin > 0, tuote.tarrakerroin, 1) AS tarrakerroin,
+            tilausrivi.kpl
             FROM tilausrivi
             INNER JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
             AND tilausrivi.tuoteno       = tuote.tuoteno)

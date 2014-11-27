@@ -19,6 +19,11 @@ if ($_REQUEST["toim"] == 'avoimet') {
   $pupe_DataTables = array("avoimet0", "avoimet1");
 }
 
+if ($_REQUEST["toim"] == 'hyvaksynta') {
+  // DataTables p‰‰lle
+  $pupe_DataTables = array("hyvaksynta");
+}
+
 if ($_REQUEST["toim"] == 'toimittajahaku' or $_REQUEST["toim"] == 'laskuhaku' or $_REQUEST["toim"] == 'myyrespaakirja') {
   // DataTables p‰‰lle
   $pupe_DataTables = $_REQUEST["toim"];

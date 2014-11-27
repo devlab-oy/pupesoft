@@ -59,17 +59,17 @@ if (!function_exists("relex_product_ostoehdotus_update")) {
   function relex_product_ostoehdotus_update($hakukentta, $tuoterajaus, $paiva_ajo) {
     global $kukarow, $yhtiorow;
 
-    $_loytyy_kentta = strpos($tuoterajaus, "tuote.$hakukentta");
+    $_hakukentta_loytyi = strpos($tuoterajaus, "tuote.$hakukentta");
 
-    if ($_loytyy_kentta !== false and $paiva_ajo) {
+    if ($_hakukentta_loytyi !== false and $paiva_ajo) {
 
-      $_rajaus_alkaa_kentalla = substr($tuoterajaus, $_loytyy_kentta);
-      $_rajaukset = explode(" AND", $_rajaus_alkaa_kentalla);
+      $_rajaus_alkaa_hakukentalla = substr($tuoterajaus, $_hakukentta_loytyi);
+      $_rajaukset = explode(" AND", $_rajaus_alkaa_hakukentalla);
 
-      $_rajaukset_alkper = $_rajaukset[0];
-      $_rajaukset_siivottu = str_replace(" not in ", " notin ", $_rajaukset[0]);
+      $_rajaus_alkper = $_rajaukset[0];
+      $_rajaus_siivottu = str_replace(" not in ", " notin ", $_rajaus_alkper);
 
-      list($kentta, $oper, $arvo) = explode(" ", $_rajaukset_siivottu, 3);
+      list($kentta, $oper, $arvo) = explode(" ", $_rajaus_siivottu, 3);
 
       if ($oper == "=") {
         $oper = '!=';
@@ -93,7 +93,7 @@ if (!function_exists("relex_product_ostoehdotus_update")) {
 
       if ($kentta_update) {
 
-        $_tuoterajaus = str_replace($_rajaukset_alkper, "$kentta $oper $arvo", $tuoterajaus);
+        $_tuoterajaus = str_replace($_rajaus_alkper, "$kentta $oper $arvo", $tuoterajaus);
         return array($hakukentta, $_tuoterajaus);
       }
       else {

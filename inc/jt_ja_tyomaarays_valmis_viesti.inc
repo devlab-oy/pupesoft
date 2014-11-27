@@ -5,16 +5,16 @@
  * jos sellainen löytyy. Toistaiseksi ainut tuettu palvelu on Zoner. Lähettää myös sähköpostin, jos
  * asiakkaalta sellainen löytyy
  *
- * @param string  $username     Zonerin käyttäjätunnus
- * @param string  $salasana     Zonerin salasana
- * @param int     $tilausnumero
- * @param bool    $kerattu      Onko kaikki tilauksen rivit jo kerätty
+ * @param string $username Zonerin käyttäjätunnus
+ * @param string $salasana Zonerin salasana
+ * @param int    $tilausnumero
+ * @param bool   $tyomaarays Onko kyseessä työmääräys. Jos arvoksi annetaan true, viesti
+ *   työmääräyksen valmistumisesta lähtee heti.
  *
  * @return bool Jos tekstiviestin tai sähköpostin lähetys onnistui, palauttaa true
  */
 
-
-function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $kerattu = false) {
+function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $tyomaarays = false) {
   global $yhtiorow;
 
   $lahetetty = false;
@@ -25,14 +25,36 @@ function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $kerattu = 
   if (loytyy_jt_riveja($tilausnumero)) {
     $otsikko = t("Tilaus noudettavissa");
 
-    $viesti =
-      t("Kaikki tilauksen %s osat ovat noudettavissa, terveisin", "", $tilausnumero) .
-      " " .
-      $yhtiorow["nimi"];
+    $avainsanaviesti = t_avainsana("JTVALMISVIESTI", "", "", "", "", "selite");
+
+    if (empty($avainsanaviesti)) {
+      $viesti =
+        t("Hei. Kaikki tilauksen %s tuotteet ovat noudettavissa. Terveisin %s, %s.",
+          "",
+          $tilausnumero,
+          $yhtiorow["nimi"],
+          $yhtiorow["puhelin"]);
+    }
+    else {
+      $viesti = "{$avainsanaviesti}\n" . t("Tilausnumero") . ": {$tilausnumero}";
+    }
   }
-  elseif (loytyy_tyomaarays($tilausnumero) or $kerattu) {
+  elseif ($tyomaarays) {
     $otsikko = t("Huoltotyö valmis");
-    $viesti  = t("Huoltotyösi on valmis, terveisin") . " " . $yhtiorow["nimi"];
+
+    $avainsanaviesti = t_avainsana("TYOMVALMVIEST", "", "", "", "", "selite");
+
+    if (empty($avainsanaviesti)) {
+      $viesti =
+        t("Hei. Huolto- ja asennustyönne %s on valmistunut. Terveisin, %s, %s.",
+          "",
+          $tilausnumero,
+          $yhtiorow["nimi"],
+          $yhtiorow["puhelin"]);
+    }
+    else {
+      $viesti = "{$avainsanaviesti}\n" . t("Tilausnumero") . ": {$tilausnumero}";
+    }
   }
 
   if (empty($viesti)) {
@@ -63,6 +85,8 @@ function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $kerattu = 
     $vastaus = $vastaus[0];
 
     if ($vastaus == "OK") {
+      paivita_vahvistusviesti_lahetetty($tilausnumero, $tilaus, $otsikko, $viesti, $asiakas);
+
       $lahetetty = true;
     }
   }
@@ -86,7 +110,8 @@ function hae_asiakas_vahvistusta_varten($tunnus) {
   global $kukarow;
 
   $query  = "SELECT gsm,
-             email
+             email,
+             ytunnus
              FROM  asiakas
              WHERE yhtio  = '{$kukarow['yhtio']}'
              AND   tunnus = '{$tunnus}'";
@@ -110,19 +135,6 @@ function hae_tilaus($tilausnumero) {
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);
-}
-
-function loytyy_tyomaarays($tilausnumero) {
-  global $kukarow;
-
-  $query  = "SELECT COUNT(*) AS maara
-             FROM  tyomaarays
-             WHERE yhtio   = '{$kukarow['yhtio']}'
-             AND   otunnus = '{$tilausnumero}'";
-  $result = pupe_query($query);
-  $result = mysql_fetch_assoc($result);
-
-  return (int) $result["maara"] > 0;
 }
 
 function loytyy_jt_riveja($tilausnumero) {
@@ -153,4 +165,52 @@ function loytyy_jt_riveja($tilausnumero) {
   }
 
   return false;
+}
+
+function paivita_vahvistusviesti_lahetetty($tilausnumero, $tilaus, $otsikko, $viesti, $asiakas) {
+  global $kukarow;
+
+  $viesti = "{$otsikko}\n{$viesti}";
+
+  $query =
+    "INSERT INTO kalenteri
+     SET tapa     = 'Vahvistusviesti',
+     asiakas      = '{$asiakas["ytunnus"]}',
+     liitostunnus = {$tilaus["liitostunnus"]},
+     otunnus      = {$tilausnumero},
+     kuka         = '{$kukarow["kuka"]}',
+     yhtio        = '{$kukarow["yhtio"]}',
+     tyyppi       = 'Memo',
+     pvmalku      = now(),
+     kentta01     = '{$viesti}',
+     laatija      = '{$kukarow["kuka"]}',
+     luontiaika   = now()";
+
+  return pupe_query($query);
+}
+
+function hae_vahvistusviesti_lahetetty($tilausnumero) {
+  global $kukarow;
+
+  $query =
+    "SELECT luontiaika
+     FROM kalenteri
+     WHERE yhtio = '{$kukarow["yhtio"]}'
+     AND    tapa = 'Vahvistusviesti'
+     AND  tyyppi = 'Memo'
+     AND otunnus = {$tilausnumero}
+     ORDER BY luontiaika DESC
+     LIMIT 1";
+
+  $result = pupe_query($query);
+
+  $aika = mysql_fetch_assoc($result);
+  $aika = $aika["luontiaika"];
+
+  if (empty($aika)) {
+    return false;
+  }
+  else {
+    return $aika;
+  }
 }

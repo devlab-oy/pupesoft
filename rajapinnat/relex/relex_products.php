@@ -116,23 +116,15 @@ if ($ostoehdotus_update or $status_update) {
     die("Tiedoston avaus epäonnistui: $ofilepath\n");
   }
 
-  $select_lisa = "";
-
   // Otsikkotieto
   $header  = "code";
-  if ($ostoehdotus_update) {
-    $header .= ";$ostoehdotus_update";
-    $select_lisa = ", tuote.$ostoehdotus_update";
-  }
-  if ($status_update) {
-    $header .= ";$status_update";
-    $select_lisa .= ", tuote.$status_update";
-  }
+  $header .= ";ostoehdotus";
+  $header .= ";status";
   $header .= "\n";
 
   fwrite($ofp, $header);
 
-  $query = "SELECT tuote.tuoteno, yhtio.maa $select_lisa
+  $query = "SELECT tuote.tuoteno, yhtio.maa, tuote.status, if(tuote.ostoehdotus != 'E', 'K', 'E') ostoehdotus
             FROM tuote
             JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
             WHERE tuote.yhtio     = '{$yhtio}'
@@ -146,8 +138,8 @@ if ($ostoehdotus_update or $status_update) {
   while ($row = mysql_fetch_assoc($res)) {
 
     $rivi  = $row['maa']."-".pupesoft_csvstring($row['tuoteno']);
-    if ($ostoehdotus_update) $rivi .= ";{$row[$ostoehdotus_update]}";
-    if ($status_update)      $rivi .= ";{$row[$status_update]}";
+    $rivi .= ";{$row['ostoehdotus']}";
+    $rivi .= ";{$row['status']}";
     $rivi .= "\n";
 
     fwrite($ofp, $rivi);

@@ -47,6 +47,16 @@ if ($tee == 'MONISTA' and count($monistettavat) == 0) {
   $tee = "";
 }
 
+$kommenttikentta = $yhtiorow["laskun_monistus_kommenttikentta"];
+
+if ($tee == 'MONISTA' and strlen($kommentti) < 20 and $kommenttikentta == "P") {
+  echo "<font class='error'>",
+  t("Sinun on annettava kommentti laskun monistuksesta. Kommentin vähimmäispituus on 20 merkkiä."),
+  "</font><br>";
+
+  $tee = "";
+}
+
 if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 
   foreach ($monistettavat as $lasku_x => $kumpi_x) {
@@ -474,7 +484,18 @@ if ($tee == "ETSILASKU") {
     echo "  <form method='post' autocomplete='off'>
     <input type='hidden' name='kklkm' value='1'>
     <input type='hidden' name='toim' value='{$toim}'>
-    <input type='hidden' name='tee' value='MONISTA'>";
+    <input type='hidden' name='tee' value='MONISTA'>
+    <input type='hidden' name='laskunro' value='{$laskunro}'>
+    <input type='hidden' name='otunnus' value='{$otunnus}'>
+    <input type='hidden' name='ytunnus' value='{$ytunnus}'>
+    <input type='hidden' name='asiakasid' value='{$asiakasid}'>
+    <input type='hidden' name='toimittajaid' value='{$toimittajaid}'>
+    <input type='hidden' name='kka' value='{$kka}'>
+    <input type='hidden' name='vva' value='{$vva}'>
+    <input type='hidden' name='ppa' value='{$ppa}'>
+    <input type='hidden' name='kkl' value='{$kkl}'>
+    <input type='hidden' name='vvl' value='{$vvl}'>
+    <input type='hidden' name='ppl' value='{$ppl}'>";
 
     echo "<table>";
     echo "<tr>";
@@ -908,6 +929,24 @@ if ($tee == "ETSILASKU") {
     }
 
     echo "</table><br>";
+
+    if ($kommenttikentta) {
+      $required = $kommenttikentta == "P" ? "required" : "";
+
+      $label_text = t("Monistuskommentti");
+
+      echo "<label>{$label_text}
+              <br>
+              <textarea rows='3'
+                        cols='40'
+                        name='kommentti'
+                        minlength='20'
+                        placeholder='" . t("Kommentti monistuksesta") . "'
+                        {$required}>{$kommentti}</textarea>
+            </label>
+            <br>";
+    }
+
     echo "<input type='submit' value='".t("Monista")."'></form>";
 
     echo "<br>";
@@ -1382,6 +1421,20 @@ if ($tee == 'MONISTA') {
       $laskures = pupe_query($query);
       $laskurow = mysql_fetch_assoc($laskures);
 
+      if ($kommenttikentta and !empty($kommentti)) {
+        $tallennettava_kommentti =
+          trim($laskurow["sisviesti3"] .
+          "\nMonistuskommentti:\n" .
+          $kommentti);
+
+        $kommentti_query = "UPDATE lasku SET
+                            sisviesti3  = '{$tallennettava_kommentti}'
+                            WHERE yhtio = '{$kukarow['yhtio']}'
+                            AND tunnus  = '{$utunnus}'";
+
+        pupe_query($kommentti_query);
+      }
+
       $tulos_ulos[] = $utunnus;
 
       if ($toim == 'SOPIMUS') {
@@ -1547,7 +1600,60 @@ if ($tee == 'MONISTA') {
       }
       $rivires = pupe_query($query);
 
+      $_rivit = array();
+
       while ($rivirow = mysql_fetch_assoc($rivires)) {
+
+        $palautus = array();
+
+        if ($toim == '' and $kumpi == 'REKLAMA' and isset($kaytetaanhyvityshintoja[$lasku]) and $kaytetaanhyvityshintoja[$lasku] != '') {
+          $_kpl = $rivirow["kpl"] + $rivirow["jt"] + $rivirow["varattu"];
+          $palautus = hae_hyvityshinta($laskurow["liitostunnus"], $rivirow['tuoteno'], $_kpl);
+
+          $_orig_kommentti = $rivirow['kommentti'];
+
+          if (count($palautus) > 0) {
+            $rivirow['hinta'] = $palautus[0]["hinta"];
+            $rivirow['kommentti'] = trim($rivirow['kommentti']) != '' ? "{$rivirow['kommentti']} {$palautus[0]['kommentti']}" : $palautus[0]['kommentti'];
+            $rivirow['varattu'] = $palautus[0]["kpl"];
+            $rivirow['kpl'] = 0;
+            $rivirow['ale1'] = $palautus[0]['ale'];
+            for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+              $rivirow['ale'.$alepostfix] = 0;
+            }
+
+            array_push($_rivit, $rivirow);
+
+            if (count($palautus) > 1) {
+              # eka pois
+              array_shift($palautus);
+
+              foreach ($palautus as $_palautusrow) {
+                $_arr = array(
+                  'hinta' => $_palautusrow['hinta'],
+                  'kommentti' => trim($_orig_kommentti) != '' ? "{$_orig_kommentti} {$_palautusrow['kommentti']}" : $_palautusrow['kommentti'],
+                  'varattu' => $_palautusrow['kpl'],
+                  'kpl' => 0,
+                  'ale1' => $_palautusrow['ale'],
+                );
+
+                for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+                  $_arr['ale'.$alepostfix] = 0;
+                }
+
+                $rivirow = $_arr + $rivirow;
+                echo "<pre>",var_dump($rivirow, $_arr),"</pre>";
+                array_push($_rivit, $rivirow);
+              }
+            }
+          }
+        }
+        else {
+          array_push($_rivit, $rivirow);
+        }
+      }
+
+      foreach ($_rivit as $rivirow) {
         $paikkavaihtu = 0;
         $uusikpl = 0;
 
@@ -1574,24 +1680,6 @@ if ($tee == 'MONISTA') {
           if (mysql_num_rows($p2result) == 1) {
             $paikka2row = mysql_fetch_assoc($p2result);
             $paikkavaihtu = 1;
-          }
-        }
-
-        $palautus = array();
-
-        if ($toim == '' and $kumpi == 'REKLAMA' and isset($kaytetaanhyvityshintoja[$lasku]) and $kaytetaanhyvityshintoja[$lasku] != '') {
-          $_kpl = $rivirow["kpl"] + $rivirow["jt"] + $rivirow["varattu"];
-          $palautus = hae_hyvityshinta($laskurow["liitostunnus"], $rivirow['tuoteno'], $_kpl);
-
-          if (count($palautus) > 0) {
-            $rivirow['hinta'] = $palautus[0]["hinta"];
-            $rivirow['kommentti'] = trim($rivirow['kommentti']) != '' ? "{$rivirow['kommentti']} {$palautus[0]['kommentti']}" : $palautus[0]['kommentti'];
-            $rivirow['varattu'] = $palautus[0]["kpl"];
-            $rivirow['kpl'] = 0;
-            $rivirow['ale1'] = $palautus[0]['ale'];
-            for ($alepostfix = 2; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-              $rivirow['ale'.$alepostfix] = 0;
-            }
           }
         }
 

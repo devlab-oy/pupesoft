@@ -393,21 +393,21 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
   );
 
   pupesoft_sahkoposti($parametri);
+
+
+  if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
+
+    // Sähköpostin lähetykseen parametrit
+    $parametri = array(
+      "to"           => $kukarow['eposti'],
+      "cc"           => "",
+      "subject"      => $yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus",
+      "ctype"        => "text",
+      "body"         => $ulos,
+      "attachements" => $_attachments
+    );
+
+    pupesoft_sahkoposti($parametri);
+  }
 }
-
-if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
-
-  // Sähköpostin lähetykseen parametrit
-  $parametri = array(
-    "to"           => $kukarow['eposti'],
-    "cc"           => "",
-    "subject"      => $yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus",
-    "ctype"        => "text",
-    "body"         => $ulos,
-    "attachements" => $_attachments
-  );
-
-  pupesoft_sahkoposti($parametri);
-}
-
 $ulos = "";

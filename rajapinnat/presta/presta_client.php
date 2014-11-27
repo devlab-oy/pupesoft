@@ -267,7 +267,16 @@ abstract class PrestaClient {
     if (isset($keys[0])) {
       $response = $response[$keys[0]];
     }
-    
+
+    /**
+     * Each Presta record contains id field. Check for it and if its found return
+     * the record inside an array. All should allways return many. Not one.
+     * This has to be done due to the nature of XML
+     */
+    if (isset($response['id'])) {
+      $response = array($response);
+    }
+
     return $response;
   }
 

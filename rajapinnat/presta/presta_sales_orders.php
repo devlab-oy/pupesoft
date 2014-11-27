@@ -86,8 +86,9 @@ class PrestaSalesOrders extends PrestaClient {
       $states_str = implode('|', $this->order_states);
       $display = array();
       $filters = array(
-          'current_state' => "[{$states_str}]"
+          'current_state' => "[{$states_str}]",
       );
+
       $sales_orders = $this->all($display, $filters);
     }
     catch (Exception $e) {
@@ -157,9 +158,10 @@ class PrestaSalesOrders extends PrestaClient {
 
     foreach ($rows as $row) {
       $pupesoft_row = array();
-      $pupesoft_row['product_id'] = $row['product_id'];
+      $pupesoft_row['sku'] = $row['product_reference'];
+
+      //product_type should be empty. edi.php ~131 if ($item['product_type'] != "configurable") {
       $pupesoft_row['product_type'] = '';
-      $pupesoft_row['sku'] = '';
       $pupesoft_row['name'] = $row['product_name'];
       $pupesoft_row['qty_ordered'] = $row['product_quantity'];
       $pupesoft_row['original_price'] = $row['unit_price_tax_incl'];
@@ -169,7 +171,7 @@ class PrestaSalesOrders extends PrestaClient {
 
       $pupesoft_order['items'][] = $pupesoft_row;
     }
-    
+
     return $pupesoft_order;
   }
 

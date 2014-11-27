@@ -866,7 +866,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
       $query = "SELECT distinct avainsana.selite,
                 $kieli_selitetark
                 FROM tuote
-                JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.try = avainsana.selite and avainsana.laji = 'OSASTO' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
+                JOIN avainsana ON (avainsana.yhtio = tuote.yhtio and tuote.osasto = avainsana.selite and avainsana.laji = 'OSASTO' and avainsana.kieli in ('$yhtiorow[kieli]', '') $avainlisa)
                 WHERE tuote.yhtio = '$kukarow[yhtio]'
                 $lisa_haku_toimi
                 $kieltolisa

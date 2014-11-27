@@ -43,20 +43,28 @@ else {
   echo "<link rel='shortcut icon' href='{$palvelin2}devlab-shortcut.png'>\n";
 }
 
-echo "</head>
-    <frameset rows='90,*' border='0'>
-      <frame noresize src='ylaframe.php' name='ylaframe' id='ylaframe' frameborder='0' marginwidth='0' marginheight='0' scrolling='no'>
+echo "</head>";
+
+if (isset($legacy_ui) and $legacy_ui) {
+  
+}
+else {
+  echo "<frameset rows='90,*' border='0'>
+          <frame noresize src='ylaframe.php' name='ylaframe' id='ylaframe' frameborder='0' marginwidth='0' marginheight='0' scrolling='no'>
     
-      <frameset cols='285,*' border='0'>    
-        <frame noresize src='indexvas.php?goso=$goso&go=$go' name='menuframe' id='menuframe' frameborder='0' marginwidth='0' marginheight='0'>
-        <frame noresize src='$go' name='mainframe' id='mainframe' frameborder='0' marginwidth='0' marginheight='0'>
-      </frameset>
-      <noframes>
-        <body>
-          <p>
-          This page uses frames, but your browser does not support them.
-          </p>
-        </body>
-      </noframes>
-    </frameset>
-</html>";
+          <frameset cols='285,*' border='0'>    
+            <frame noresize src='indexvas.php?goso=$goso&go=$go' name='menuframe' id='menuframe' frameborder='0' marginwidth='0' marginheight='0'>
+            <frame noresize src='$go' name='mainframe' id='mainframe' frameborder='0' marginwidth='0' marginheight='0'>
+          </frameset>
+          
+          <noframes>
+            <body>
+              <p>
+              This page uses frames, but your browser does not support them.
+              </p>
+            </body>
+          </noframes>
+        </frameset>";
+}
+
+echo "</html>";

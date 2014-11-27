@@ -67,7 +67,7 @@ if (mysql_num_rows($result) > 1) {
     $sel = '';
     if (isset($sovellus) and $sovellus == $key) $sel = "SELECTED";
 
-    echo "<option class='menu' value='$key' $sel>$val</option>";
+    echo "<option value='$key' $sel>$val</option>";
 
     // sovellus on tyhj‰ kun kirjaudutaan sis‰‰n, ni otetaan eka..
     if (!isset($sovellus) or $sovellus == '') $sovellus = $key;
@@ -130,11 +130,11 @@ while ($orow = mysql_fetch_array($result)) {
 
     // jos ykkˆnen niin n‰ytet‰‰n avattu menu itemi
     if (isset($mrow['nimitys']) and isset($menu[$mrow['nimitys']]) and $menu[$mrow['nimitys']] == 1) {
-      echo "<tr><td><a href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=0'>- ".t("$mrow[nimitys]")."</a></td></tr>";
+      echo "<tr><td><a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=0'>- ".t("$mrow[nimitys]")."</a></td></tr>";
 
       // tehd‰‰n submenu itemit
       while ($mrow = mysql_fetch_array($xresult)) {
-        echo "<tr><td><a href='$mrow[nimi]";
+        echo "<tr><td><a class='menu' href='$mrow[nimi]";
 
         if (strpos($mrow['nimi'], '?') === FALSE) {
           echo "?";
@@ -155,7 +155,7 @@ while ($orow = mysql_fetch_array($result)) {
     }
     else {
       // muuten n‰ytet‰‰n suljettu menuotsikko
-      echo "<tr><td><a href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=1'>+ ".t("$mrow[nimitys]")."</a></td></tr>";
+      echo "<tr><td><a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=1'>+ ".t("$mrow[nimitys]")."</a></td></tr>";
     }
   }
   else {
@@ -176,11 +176,11 @@ while ($orow = mysql_fetch_array($result)) {
     $goclass = "";
 
     if (isset($go) and $go == $mrow["nimi"] or $go == "$mrow[nimi]?toim=$mrow[alanimi]") {
-      $goclass = " indexvaslink_aktivoitu";
+      $goclass = " menu_aktivoitu";
       unset($go);
     }
 
-    echo "<tr><td><a $target class='indexvaslink$goclass' href='$mrow[nimi]";
+    echo "<tr><td><a $target class='menu$goclass' href='$mrow[nimi]";
 
     if (strpos($mrow['nimi'], '?') === FALSE) {
       echo "?";
@@ -214,9 +214,9 @@ echo "<div class='showhide_vasen' id='maaginen_vasen'><img id='showhide_left' sr
 echo "
   <script>
 
-      $('.indexvaslink').click(function(){
-        $('.indexvaslink').removeClass('indexvaslink_aktivoitu');
-        $(this).addClass('indexvaslink_aktivoitu');
+      $('.menu').click(function(){
+        $('.menu').removeClass('menu_aktivoitu');
+        $(this).addClass('menu_aktivoitu');
       });
 
       $(document).ready(function(){

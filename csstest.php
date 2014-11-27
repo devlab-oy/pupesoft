@@ -72,7 +72,7 @@ ksort($varit);
 
 echo "
 Tässä näkee miten formit käyttäytyy:<hr>
-<form action='#' class='multisubmit'>
+<form action='csstest.php' class='multisubmit'>
 <select>
 <option>1 - ensimmäinen</option>
 <option>2 - toinen</option>
@@ -137,7 +137,7 @@ BODY_COLOR: Sivun perusteksti.<br>
 
 echo "  <script language='javascript'>
       function variupdate (vari_index) {
-        document.getElementById(\"2_\"+vari_index).style.backgroundColor = document.getElementById(\"1_\"+vari_index).value.substring(1);
+        document.getElementById(\"2_\"+vari_index).style.backgroundColor = document.getElementById(\"1_\"+vari_index).value;
       }
     </script> ";
 

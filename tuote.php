@@ -869,7 +869,7 @@ if ($tee == 'Z') {
     }
 
     // Saldot, korvaavat ja vastaavat
-    echo "<table><tr><td class='back nopad_top'>";
+    echo "<table><tr><td class='back nopad top'>";
 
     if ($tuoterow["ei_saldoa"] == '') {
 
@@ -1078,7 +1078,7 @@ if ($tee == 'Z') {
       echo "</table>";
     }
 
-    echo "</td><td class='back nopad_top'>";
+    echo "</td><td class='back nopad top'>";
 
     // Korvaavat tuotteet
     require "korvaavat.class.php";
@@ -1148,7 +1148,7 @@ if ($tee == 'Z') {
       echo "</table>";
     }
 
-    echo "</td><td class='back nopad_top'>";
+    echo "</td><td class='back nopad top'>";
 
     // Vastaavat tuotteet
     require "vastaavat.class.php";
@@ -1240,7 +1240,7 @@ if ($tee == 'Z') {
       }
     }
 
-    echo "</td><td class='back nopad_top'>";
+    echo "</td><td class='back nopad top'>";
 
     //Tuotemuutoksia halutaan n‰ytt‰‰, mik‰li niit‰ on.
     $lista = hae_tuotemuutokset($tuoteno);

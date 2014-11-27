@@ -1,40 +1,15 @@
+
 * {
-	font-size: 10pt;
-	font-weight: normal;
 	font-family: "Lato","Helvetica",Arial,Verdana,Lucida;
 }
 
 body {
-	color: #808080; /*BODY_COLOR*/
-	background-color: #e6e6e6; /*BODY_BACKGROUND*/
 	margin: 2px 2px 0px 0px;
 	padding: 0px 0px 0px 0px;
 }
 
-form {
-	margin: 0px 0px 0px 0px;
-	display: inline;
-}
-
-a {
-	color: #6c70eb; /*LINK_COLOR*/
-}
-
 a:hover {
-	border-bottom: 1px;
-	color: #6c70eb; /*TRAKTIIVI_COLOR*/
-}
-
-a.td {
-	color: #6c70eb; /*TDLINKKI_COLOR*/
-	text-decoration: none;
-	display: block;
-	width: 100%;
-}
-
-a.td:hover {
-	color: #1f4457; /*TRAKTIIVI_COLOR*/
-	background-color: #a8d9f2; /*TRAKTIIVI_BACKGROUND*/
+	background-color: inherit;
 }
 
 span {
@@ -42,45 +17,14 @@ span {
 }
 
 img {
-	border: 0px;
   vertical-align: middle;
-}
-
-table {
-	border-spacing: 1px 1px;
-	display: table;
-	empty-cells: show;
-}
-
-tr {
-	color: #242424; /*TR_COLOR*/
-	background-color: #ffffff; /*TR_BACKGROUND*/
-}
-
-tr.aktiivi:hover {
-	background-color: #f6f6f6; /*TRAKTIIVI_BACKGROUND*/
 }
 
 th {
 	font-size: 11pt;
-  text-transform: capitalize;
   font-weight: bold;
 	vertical-align: middle;
-	text-align: left;
 	padding: 10px 10px 10px 10px;
-	background-color: #ffffff; /*TH_BACKGROUND*/
-	color: #828282; /*TH_COLOR*/
-}
-
-td {
-  color: #828282;
-	padding: 5px 5px 5px 5px;
-	vertical-align: middle;
-}
-
-td.nopad_top {
-	padding: 0px;
-	vertical-align: top;
 }
 
 th a {
@@ -89,144 +33,41 @@ th a {
   font-weight: bold;
 	vertical-align: middle;
 	text-align: left;
-  color: #6c70eb; /*TH_COLOR*/
 }
 
-td a {
-  color: #6c70eb; /*TH_COLOR*/
+td {
+	padding: 5px 5px 5px 5px;
+	vertical-align: middle;
 }
 
-hr {
-	border: 0px;
-	height: 1px;
-	background-color: #e6e6e6; /*HR_BACKGROUND*/
-	width: 100%;
-}
-
-pre {
-	font-family: courier;
+.nopad {
+	padding: 0px;
+	vertical-align: top;
 }
 
 .top {
 	vertical-align: top;
 }
 
-.tumma {
-	color: #ffffff; /*TUMMA_COLOR*/
-	background-color: #a2a2a2; /*TUMMA_BACKGROUND*/
-}
-
-.spec {
-	color: #ffffff; /*SPEC_COLOR*/
-	background-color: #a2a2a2; /*SPEC_BACKGROUND*/
-}
-
-.spec a {
-	color: #ffffff; /*SPEC_COLOR*/
-}
-
-.back {
-	background-color: #e6e6e6; /*BODY_BACKGROUND*/
-}
-
-.info {
-	font-size: 9pt;
-	color: #808080; /*INFO_COLOR*/
-	font-weight: normal;
-}
-
 .head {
 	font-size: 22pt;
-	color: #939393; /*HEAD_COLOR*/
+	text-transform: none;
+	font-weight: normal;
 	letter-spacing: 1px;
 }
 
-.message {
-	color: #808080; /*MESSAGE_COLOR*/
-	font-weight:bold;
-}
-
-.ok, .green {
-	color : #01ebd3; /*OK_COLOR*/
-	font-weight: bold;
-}
-
-.error, .red {
-	color: #FF3333; /*ERROR_COLOR*/
-	font-weight: bold;
-}
-
-.kaleinfo {
-	color : #1f4458; /*INFO_COLOR*/
-}
-
-div.popup {
-	position: absolute;
-	z-index: 100;
-	display: none;
-	background-color: #828282; /*POPUP_BACKGROUND*/
-	color: #ffffff; /*POPUP_COLOR*/
-	border: 1px solid;
-	border-color: #e6e6e6; /*POPUP_COLOR*/
-	padding: 5px;
-	-moz-border-radius: 5px;
-	-webkit-border-radius: 5px;
-	-border-radius: 5px;
-}
-
 input, textarea {
-	color: #444444; /*INPUT_COLOR*/
-  background-color: #ffffff;
-	margin: 0px 4px 0px 0px;
-  padding: 10px 0px 8px 2px;
+	margin: 0px 4px 0px 4px;
+  padding: 7px 2px 8px 2px;
   border : solid 1px #e1e1e1;
 }
 
 select {
   -webkit-appearance: none;
-  -webkit-border-radius: 0px;
+  -webkit-border-radius: 0px;  
 	padding: 8px 35px 8px 4px;
   border : solid 1px #f0f0f0;
-  color: #828282;
-  background-color: #ffffff;
   background-image: url('../pics/facelift/dropdown_arrow.png');
-  background-repeat: no-repeat;
-  background-position: right;
-}
-
-option, optgroup {
-	padding-top: 2px;
-	padding-right: 4px;
-	padding-left: 2px;
-	padding-bottom: 0px;
-	margin: 0px;
-}
-
-div.liveSearch {
-	position:absolute;
-	z-index:100;
-	visibility: hidden;
-	border: 1px solid;
-	background-color: #FFFFFF;
-	color: #444444; /*INPUT_COLOR*/
-}
-
-div.liveSearchSelectedItem {
-	background-color: #cccccc; /*LIVESEARCH_BACKGROUND*/
-}
-
-select.indexvas {
-  width: 255px;
-	margin: 3px 0px 0px 15px;
-  -webkit-appearance: none;
-  -webkit-border-radius: 0px;
-	padding: 18px 20px 14px 20px;
-  border : solid 0px;
-	font-size: 14pt;
-  color: #828282;
-  background-color: #ffffff;
-  letter-spacing: 1px;
-  background-image: url('../pics/facelift/dropdown_arrow_big.png');
   background-repeat: no-repeat;
   background-position: right;
 }
@@ -238,47 +79,6 @@ select.multipleselect {
   overflow-y:scroll;
 }
 
-table.indexvas {
-  width: 255px;
-	margin: 0px 0px 0px 15px;
-  padding: 0px 0px 0px 0px;
-	border-spacing: 0;
-}
-
-table.indexvas tr {
-  background-color: #ffffff;
-}
-
-table.indexvas td {
-  padding: 3px 15px 3px 15px;
-}
-
-table.indexvas tr:first-child td {
-  padding: 12px 15px 3px 15px;
-}
-
-table.indexvas tr:last-child td {
-  padding: 3px 15px 12px 15px;
-}
-
-table.indexvas a {
-  font-size: 13pt;
-  color: #6c70eb;
-	text-decoration: none;
-	display: block;
-	width: 100%;
-	padding: 2px 6px 2px 6px;
-  background-color: #ffffff;
-}
-
-table.indexvas a:hover {
-  color: #808080;
-}
-
-table.indexvas a.indexvaslink_aktivoitu {
-  color: #808080;
-}
-
 button, input[type=submit], input[type=button] {
  	border : solid 0px #ffffff;
  	font-size: 12pt;
@@ -287,48 +87,6 @@ button, input[type=submit], input[type=button] {
  	padding: 8px 10px 8px 10px;
   background-color: #6c70eb;
   min-width: 100px;
-}
-
-table.ylaframe {
-  width: 100%;
-	margin: 15px 15px 0px 15px;
-  padding: 0px 15px 0px 0px;
-	border-spacing: 0;
-}
-
-table.ylaframe td {
-  background-color: #ffffff;
-  vertical-align: middle;
-}
-
-table.ylaframe td.ylapalkki {
-  width: 50px;
-  white-space: nowrap;
-  text-align: center;
-}
-
-div.showhide_yla {
-  position:fixed;
-  top:2px;
-  left:40%;
-}
-
-div.showhide_vasen {
-  position:fixed;
-  top:80px;
-  left:2px;
-}
-
-div.lopetus {
-  position:absolute;
-  top:5px;
-  right:60px;
-}
-
-div.ohje {
-  position:absolute;
-  top:5px;
-  right:20px;
 }
 
 input[type=submit].lisaa_btn {

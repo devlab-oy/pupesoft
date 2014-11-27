@@ -1090,7 +1090,7 @@ if ($tila == "" and !isset($jatka)) {
   }
 
   echo "<table>";
-  echo "<tr><td class='nopad_top'>";
+  echo "<tr><td class='nopad top'>";
 
   echo "<table>";
   echo "<tr>
@@ -1249,7 +1249,7 @@ if ($tila == "" and !isset($jatka)) {
       echo "<input type='hidden' name='ytunnus'              value = '$srow[ytunnus]'>";
     }
 
-    echo "<td class='nopad_top'>";
+    echo "<td class='nopad top'>";
     echo "<table>";
     echo "<tr>
         <th colspan='2'>".t("Toimitusosoite").":</td></tr>";
@@ -1325,7 +1325,7 @@ if ($tila == "" and !isset($jatka)) {
     echo "</table>";
     echo "</td>";
 
-    echo "<td class='nopad_top'>";
+    echo "<td class='nopad top'>";
     echo "<table>";
     echo "<tr>
         <th colspan='2'>&nbsp; ".t("Laskun postitusosoite").":</td></tr>";

@@ -1,0 +1,35 @@
+table.ylaframe {
+  width: 100%;
+	margin: 15px 15px 0px 15px;
+  padding: 0px 15px 0px 0px;
+	border-spacing: 0;
+}
+
+table.ylaframe td {
+  background-color: #ffffff;
+  vertical-align: middle;
+}
+
+table.ylaframe td.ylapalkki {
+  width: 50px;
+  white-space: nowrap;
+  text-align: center;
+}
+
+div.showhide_yla {
+  position:fixed;
+  top:2px;
+  left:40%;
+}
+
+div.lopetus {
+  position:absolute;
+  top:5px;
+  right:60px;
+}
+
+div.ohje {
+  position:absolute;
+  top:5px;
+  right:20px;
+}

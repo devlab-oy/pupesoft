@@ -8594,7 +8594,7 @@ if ($tee == '') {
               <input type='hidden' name='orig_tila' value='$orig_tila'>
               <input type='hidden' name='orig_alatila' value='$orig_alatila'>";
 
-          echo "<th colspan='2' nowrap>", t("Lähdöt"), "</th>";
+          echo "<td colspan='2' class='back'>", t("Lähdöt"), ":</td>";
           echo "<td colspan='2' nowrap class='back'>&nbsp;</td>";
 
           echo "</tr><tr>";
@@ -8617,8 +8617,8 @@ if ($tee == '') {
             $varasto_chk_res = pupe_query($query);
             $varasto_chk_row = mysql_fetch_assoc($varasto_chk_res);
 
-            echo "<th colspan='2' nowrap>{$varasto_chk_row['nimitys']}</th>";
-            echo "<td colspan='2' nowrap class='back'>";
+            echo "<td colspan='2' nowrap>{$varasto_chk_row['nimitys']}</td>";
+            echo "<td colspan='2' nowrap>";
 
             echo "<select name='toimitustavan_lahto[{$lahdot_row['varasto']}]' onchange='submit()' {$state}>";
             echo "<option value=''>", t("Valitse"), "</option>";
@@ -8659,8 +8659,8 @@ if ($tee == '') {
               // Haetaan seuraavat lähdöt
               $lahdot = seuraavat_lahtoajat($laskurow["toimitustapa"], $laskurow["prioriteettinro"], $vrst, 0, $eteenpain);
 
-              echo "<th colspan='2' nowrap>{$varasto_chk_row['nimitys']}</th>";
-              echo "<td colspan='2' nowrap class='back'><select name='toimitustavan_lahto[{$vrst}]' onchange='submit();' {$state}>";
+              echo "<td colspan='2' nowrap>{$varasto_chk_row['nimitys']}</td>";
+              echo "<td colspan='2' nowrap><select name='toimitustavan_lahto[{$vrst}]' onchange='submit();' {$state}>";
               echo "<option value=''>", t("Valitse"), "</option>";
 
               $selectoitunut = FALSE;

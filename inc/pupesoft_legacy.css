@@ -32,3 +32,11 @@ table.indexvas td {
 	margin: 0px 0px 0px 0px;
   padding: 0px 0px 0px 0px;
 }
+
+.nopad {
+	padding: 0px;
+}
+
+.top {
+	vertical-align: top;
+}

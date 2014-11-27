@@ -231,7 +231,7 @@ if ($tee == "TULOSTAPDF") {
 }
 
 if (isset($laskurow)) {
-  echo "<table width='720'   >";
+  echo "<table width='720'>";
 
   echo "<tr><th>", t("Ytunnus"), "</th><th colspan='2'>", t("Toimittaja"), "</th></tr>";
   echo "<tr><td>{$laskurow['ytunnus']}</td>

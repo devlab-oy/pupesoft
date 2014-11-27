@@ -26,6 +26,18 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
+if ($tee == "laheta_viesti" and $yhtiorow["vahvistusviesti_asiakkaalle"] == "Y") {
+  require_once("inc/jt_ja_tyomaarays_valmis_viesti.inc");
+
+  $viestin_lahetys_onnistui =
+    laheta_vahvistusviesti($zoner_tunnarit["username"],
+                           $zoner_tunnarit["salasana"],
+                           $tilausnumero,
+                           true);
+
+  $tee = "";
+}
+
 if ($yhtiorow["varastonarvon_jako_usealle_valmisteelle"] == "K" and isset($ajax_toiminto) and trim($ajax_toiminto) == 'tallenna_painoarvot') {
 
   foreach ($painoarvot as $tunnus => $painoarvo) {
@@ -2193,6 +2205,15 @@ if ($tee == '') {
   $formi = "tilaus";
 
   echo "<font class='head'>$otsikko</font><hr>";
+
+  if (isset($viestin_lahetys_onnistui)) {
+    if ($viestin_lahetys_onnistui) {
+      echo "<font class='ok'>" . t("Vahvistusviesti lähetetty") . "</font><br>";
+    }
+    else {
+      echo "<font class='error'>" . t("Vahvistusviestin lähetys epäonnistui") . "</font><br>";
+    }
+  }
 
   if ($kukarow['kesken'] != '0') {
     $tilausnumero = $kukarow['kesken'];
@@ -6194,6 +6215,13 @@ if ($tee == '') {
         echo '<input type="hidden" id="desimaalia" value="'.$yhtiorow['hintapyoristys'].'" />';
       }
 
+      if ($yhtiorow['vastaavat_tuotteet_esitysmuoto'] == 'A' and $toim != "VALMISTAVARASTOON") {
+        $kommenttirivi_nakyviin = true;
+      }
+      else {
+        $kommenttirivi_nakyviin = false;
+      }
+
       foreach ($rows as $row) {
         if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K"
           and $row["tyyppi"] != "V" and isset($tuotteenpainotettukehayht["keha"])) {
@@ -6429,7 +6457,7 @@ if ($tee == '') {
           }
 
           $query = "SELECT
-                    sum(if(kommentti != '' {$aleperustelisa} {$laskentalisa_riveille} or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]') or (tilausrivi.tunnus = $row[tunnus] and $vastaavattuotteet = 1), 1, 0)),
+                    sum(if(kommentti != '' {$aleperustelisa} {$laskentalisa_riveille} or ('$GLOBALS[eta_yhtio]' != '' and '$koti_yhtio' = '$kukarow[yhtio]'), 1, 0)),
                     count(*)
                     FROM tilausrivi use index (yhtio_otunnus)
                     LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
@@ -6440,23 +6468,31 @@ if ($tee == '') {
           $pkres = pupe_query($query);
           $pkrow = mysql_fetch_row($pkres);
 
+          $lisays = 0;
+
           if ($row["perheid2"] == -1) {
-            $query  = "SELECT tuoteperhe.tunnus
-                       FROM tuoteperhe
-                       WHERE tuoteperhe.yhtio    = '$kukarow[yhtio]'
-                       and tuoteperhe.isatuoteno = '$row[tuoteno]'
-                       and tuoteperhe.tyyppi     = 'L'";
-            $lisaresult = pupe_query($query);
-            $lisays = mysql_num_rows($lisaresult);
-          }
-          else {
-            $lisays = 0;
+
+            foreach ($rows as $chkrow) {
+
+              $_onko_perhe = ($row['perheid'] == $chkrow['perheid']);
+              $_onko_lapsi = ($chkrow['perheid'] != $chkrow['tunnus']);
+
+              if ($_onko_perhe and $_onko_lapsi) {
+                $lisays++;
+              }
+            }
+
+            unset($chkrow);
           }
 
           $pkrow[1] += $lisays;
 
           $pknum = $pkrow[0] + $pkrow[1];
           $borderlask = $pkrow[1];
+
+          if ($kommenttirivi_nakyviin) {
+            $pknum = $pkrow[1] * 2;
+          }
 
           echo "<tr>";
 
@@ -6577,7 +6613,7 @@ if ($tee == '') {
 
           echo "<tr>";
 
-          if ($row["kommentti"] != "" or ($row["ale_peruste"] != '' and $yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '') or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio']) or $vastaavattuotteet == 1) {
+          if ($kommenttirivi_nakyviin or $row["kommentti"] != "" or ($row["ale_peruste"] != '' and $yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '') or (isset($GLOBALS['eta_yhtio']) and $GLOBALS['eta_yhtio'] != '' and $koti_yhtio == $kukarow['yhtio'])) {
             if ($jarjlisa != "") {
               echo "<td rowspan = '2' class='back' style='width:10px; padding:0px; margin:0px;'>$buttonit</td>";
             }
@@ -6668,7 +6704,7 @@ if ($tee == '') {
           $borderlask--;
         }
         elseif ($borderlask == 1) {
-          if ($row['kommentti'] != '' or ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '') or $vastaavattuotteet == 1) {
+          if ($kommenttirivi_nakyviin or $row['kommentti'] != '' or ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '')) {
             $classlisa = $class." style='font-style:italic; border-right: 1px solid;' ";
             $class    .= " style='font-style:italic; ' ";
           }
@@ -8031,7 +8067,7 @@ if ($tee == '') {
           $row['kommentti'] .= ", ".t("Rivihinta").": ".hintapyoristys($hintapyoristys_echo * $kpl_ruudulle);
         }
 
-        if ($row['kommentti'] != '' or ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '') or $vastaavattuotteet == 1) {
+        if ($kommenttirivi_nakyviin or $row['kommentti'] != '' or ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '')) {
 
           echo "<tr>";
 
@@ -9152,6 +9188,38 @@ if ($tee == '') {
           <input type='hidden' name='orig_alatila' value='$orig_alatila'>
           <input type='submit' value='* ".t("Työmääräys lepäämään")." *'>
           </form></td>";
+
+      if ($yhtiorow["vahvistusviesti_asiakkaalle"] == "Y") {
+        require_once("inc/jt_ja_tyomaarays_valmis_viesti.inc");
+
+        $aika = hae_vahvistusviesti_lahetetty($tilausnumero);
+
+        $vahvistus_teksti = $aika ? t("Vahvistusviesti on lähetetty asiakkaalle viimeksi") .
+                                    " " .
+                                    "<time datetime='{$aika}'>{$aika}</time>" : "";
+
+        echo
+          "<td class='back' valign='top'>
+                <form method='post'>
+                  <input type='hidden' name='toim' value='{$toim}'>
+                  <input type='hidden' name='lopetus' value='{$lopetus}'>
+                  <input type='hidden' name='ruutulimit' value='{$ruutulimit}'>
+                  <input type='hidden' name='projektilla' value='{$projektilla}'>
+                  <input type='hidden' name='tee' value='laheta_viesti'>
+                  <input type='hidden' name='tilausnumero' value='{$tilausnumero}'>
+                  <input type='hidden' name='mista' value = '{$mista}'>
+                  <input type='hidden' name='orig_tila' value='{$orig_tila}'>
+                  <input type='hidden' name='orig_alatila' value='{$orig_alatila}'>
+                  <input type='submit' value='" .
+          t("Lähetä viesti valmistumisesta asiakkaalle") .
+          "' onclick='return confirm(\"" .
+          t("Oletko varma, että haluat lähettää asiakkaalle viestin työmääräyksen valmistumisesta?") .
+          "\");'>
+          <br>
+          {$vahvistus_teksti}
+                </form>
+              </td>";
+      }
     }
 
     if ($kukarow["extranet"] == "" and $muokkauslukko == "" and $toim == "REKLAMAATIO") {

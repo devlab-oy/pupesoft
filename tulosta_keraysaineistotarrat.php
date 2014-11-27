@@ -63,7 +63,7 @@ if ($tee == '') {
       echo "<option value='$kirow[komento]' $select>$kirow[kirjoitin]</option>";
     }
 
-    echo "</select><input type='Submit' value='".t("Tulosta nämä")."'>";
+    echo "</select><input type='submit' value='".t("Tulosta nämä")."'>";
     echo "</form><br>";
   }
   else {

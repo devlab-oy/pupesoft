@@ -29,7 +29,7 @@ echo "<table>
     <tr>
       <th>".t("Asiakas")."</th>
       <td><input type='text' name='ytunnus'></td>
-      <td><input type='Submit' class='hae_btn' value='".t("Hae")."'></td>
+      <td><input type='submit' class='hae_btn' value='".t("Hae")."'></td>
     </tr>
 </table><br>";
 echo "</form>";

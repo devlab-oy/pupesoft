@@ -133,7 +133,7 @@ foreach ($pohjat as $pohja) {
 
 echo "</select></td>";
 
-echo "<td class='back'><input type='Submit' value='".t("Tulosta")."'></td>";
+echo "<td class='back'><input type='submit' value='".t("Tulosta")."'></td>";
 echo "</tr></table></form><br><br><br>";
 
 // Annetaan mahollisuus tulostaa yksittäinen tarra
@@ -177,7 +177,7 @@ foreach ($pohjat as $pohja) {
 
 echo "</select></td>";
 
-echo "<td class='back'><input type='Submit' value='".t("Tulosta")."'></td>";
+echo "<td class='back'><input type='submit' value='".t("Tulosta")."'></td>";
 echo "</form></tr></table>";
 
 require "inc/footer.inc";

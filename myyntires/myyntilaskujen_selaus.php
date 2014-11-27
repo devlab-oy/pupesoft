@@ -52,7 +52,7 @@ echo "<tr>";
 for ($i = 0; $i < mysql_num_fields($result)-2; $i++) {
   echo "<td><input type='text' size='$kentankoko[$i]' name='haku[$i]' value = '$haku[$i]'></td>";
 }
-echo "<td><input type='Submit' class='hae_btn' value='".t("Etsi")."'></td></tr>";
+echo "<td><input type='submit' class='hae_btn' value='".t("Etsi")."'></td></tr>";
 
 $row = 0;
 while ($maksurow=mysql_fetch_array($result)) {

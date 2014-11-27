@@ -1126,7 +1126,7 @@ function echo_kayttoliittyma($request) {
 
   echo "</table>";
 
-  echo "<input type='Submit' class='hae_btn' value='".t("Hae")."' onclick='return tarkista();' />";
+  echo "<input type='submit' class='hae_btn' value='".t("Hae")."' onclick='return tarkista();' />";
 
   echo "</form>";
 }

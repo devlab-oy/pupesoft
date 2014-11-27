@@ -272,7 +272,7 @@ if ($tee != "KOPIOI") {
   echo "<option value='U' $sel5>".t("Tuoreimmasta vanhimpaan näyttäen koko lista")."</option>";
   echo "</select>";
   echo "</td>";
-  echo "<td class='back'><input type='Submit' value='".t("Jatka")."'></td>";
+  echo "<td class='back'><input type='submit' value='".t("Jatka")."'></td>";
   echo "</table></form>";
 }
 
@@ -1448,7 +1448,7 @@ elseif ($tee == "") {
     echo "<tr>";
     echo "<td><input type='text' size='20' name='isatuoteno_haku' value='$isatuoteno_haku'></td>";
     echo "<td><input type='text' size='20' name='tuoteno_haku' value='$tuoteno_haku'></td>";
-    echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Hae")."'></td>";
+    echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Hae")."'></td>";
     echo "</tr>";
 
     while ($prow = mysql_fetch_array($result)) {

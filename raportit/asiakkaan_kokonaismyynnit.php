@@ -124,7 +124,7 @@ echo "<br><br><form name=asiakas method='post' autocomplete='off'>";
 echo "<table><tr>";
 echo "<th>".t("Anna asiakasnumero tai osa nimestä")."</th>";
 echo "<td><input type='text' name='ytunnus' value='$ytunnus'></td>";
-echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Hae")."'></td>";
+echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Hae")."'></td>";
 echo "</tr></table>";
 echo "</form>";
 

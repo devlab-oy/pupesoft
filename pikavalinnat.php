@@ -119,7 +119,7 @@ foreach ($tallennetut["skriptit"] as $i => $skripti) {
 
   echo "</select></td>";
   echo "<td><input type='text' name='tekstit[]' value='$teksti' size='30'></td>";
-  echo "<td class='back'><input type='Submit' class='tallenna_btn' value='".t("Tallenna")."'></td>";
+  echo "<td class='back'><input type='submit' class='tallenna_btn' value='".t("Tallenna")."'></td>";
   echo "</tr>";
 }
 
@@ -139,7 +139,7 @@ foreach ($kuvakkeet_img as $kuvanimi => $kuva) {
 
 echo "</select></td>";
 echo "<td><input type='text' name='tekstit[]' value='' size='30'></td>";
-echo "<td class='back'><input type='Submit' class='lisaa_btn' value='".t("Lisää")."'></td>";
+echo "<td class='back'><input type='submit' class='lisaa_btn' value='".t("Lisää")."'></td>";
 echo "</tr>";
 
 echo "</table>";

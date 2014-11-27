@@ -1053,7 +1053,7 @@ if ($tee == "") {
   echo "<tr>";
   echo "<th>".t("Etsi asiakasta")."</th>";
   echo "<td><input type='text' name='etsi'></td>";
-  echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Etsi")."'></td>";
+  echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Etsi")."'></td>";
   echo "</tr></table>";
   echo "</form><br>";
 

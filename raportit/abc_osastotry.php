@@ -330,7 +330,7 @@ if (count($mul_osasto) > 0 or count($mul_try) > 0 or count($mul_asiakasosasto) >
     echo "<th><input type='text' name='haku[total]' value='$haku[total]' size='5'></th>";
   }
 
-  echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Etsi")."'></td></form></tr>";
+  echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Etsi")."'></td></form></tr>";
 
   if (mysql_num_rows($res) == 0) {
     echo "</table>";

@@ -178,7 +178,7 @@ function echo_asiakas_rajaus($request) {
 
   echo t("Anna y-tunnus, nimi tai asiakasnumero");
   echo "<input type='text' name='hakuehto' value='{$request['hakuehto']}'>";
-  echo "<input type='Submit' class='hae_btn' value='".t("Hae")."'>";
+  echo "<input type='submit' class='hae_btn' value='".t("Hae")."'>";
   echo "<br>";
   echo t("Haetut asiakkaat");
   echo "</div>";

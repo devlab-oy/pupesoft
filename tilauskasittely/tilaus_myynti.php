@@ -2462,7 +2462,7 @@ if ($tee == '') {
             <input type='hidden' name='projektilla' value='$projektilla'>
             <input type='hidden' name='orig_tila' value='$orig_tila'>
             <input type='hidden' name='orig_alatila' value='$orig_alatila'>
-            <input type='Submit' value='".t("Maksusuunnitelma")."'>
+            <input type='submit' value='".t("Maksusuunnitelma")."'>
             </form>";
       }
     }
@@ -2479,7 +2479,7 @@ if ($tee == '') {
           <input type='hidden' name='projektilla' value='$projektilla'>
           <input type='hidden' name='orig_tila' value='$orig_tila'>
           <input type='hidden' name='orig_alatila' value='$orig_alatila'>
-          <input type='Submit' value='".t("Lisaa kulut")."'>
+          <input type='submit' value='".t("Lisaa kulut")."'>
           </form>";
     }
 
@@ -2514,7 +2514,7 @@ if ($tee == '') {
           <input type='hidden' name='tyojono' value='$tyojono'>
           <input type='hidden' name='orig_tila' value='$orig_tila'>
           <input type='hidden' name='orig_alatila' value='$orig_alatila'>
-          <input type='Submit' value='".t("Lähetä tekstiviesti")."'>
+          <input type='submit' value='".t("Lähetä tekstiviesti")."'>
           </form>";
     }
 
@@ -2531,10 +2531,10 @@ if ($tee == '') {
         <input type='hidden' name='orig_alatila' value='$orig_alatila'>";
 
     if ($toim != "VALMISTAVARASTOON") {
-      echo "<input type='Submit' value='".t("Lue tilausrivit tiedostosta")."'>";
+      echo "<input type='submit' value='".t("Lue tilausrivit tiedostosta")."'>";
     }
     else {
-      echo "<input type='Submit' value='".t("Lue valmistusrivit tiedostosta")."'>";
+      echo "<input type='submit' value='".t("Lue valmistusrivit tiedostosta")."'>";
     }
 
     echo "</form>";
@@ -2551,7 +2551,7 @@ if ($tee == '') {
             <input type='hidden' name='orig_tila'     value = '$orig_tila'>
             <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
             <input type='hidden' name='tila'       value = 'MUUTAKAIKKI'>
-            <input type='Submit' value='" . t("Muuta kaikki tilauksen rivit JT-muiden mukana") . "' onclick='return nappi_onclick_confirm(\"".t('Haluatko muuttaa kaikki tilausrivit jt-muiden mukana')."?\");' >
+            <input type='submit' value='" . t("Muuta kaikki tilauksen rivit JT-muiden mukana") . "' onclick='return nappi_onclick_confirm(\"".t('Haluatko muuttaa kaikki tilausrivit jt-muiden mukana')."?\");' >
           </form> ";
     }
 
@@ -2571,7 +2571,7 @@ if ($tee == '') {
           <input type='hidden' name='mista' value='$mista'>
           <input type='hidden' name='rakirno' value='$tilausnumero'>
           <input type='hidden' name='tunnukset' value='$tilausnumero'>
-          <input type='Submit' value='".t("Rahtikirjan esisyöttö")."'>
+          <input type='submit' value='".t("Rahtikirjan esisyöttö")."'>
           </form>";
     }
 
@@ -2646,7 +2646,7 @@ if ($tee == '') {
           <input type='hidden' name='projektilla' value='$projektilla'>
           <input type='hidden' name='orig_tila' value='$orig_tila'>
           <input type='hidden' name='orig_alatila' value='$orig_alatila'>
-          <input type='Submit' value='".t("Siirrä tuotteet asiakashinnoiksi")."'>
+          <input type='submit' value='".t("Siirrä tuotteet asiakashinnoiksi")."'>
           </form>";
     }
 
@@ -2661,7 +2661,7 @@ if ($tee == '') {
           <input type='hidden' name='projektilla' value='$projektilla'>
           <input type='hidden' name='orig_tila' value='$orig_tila'>
           <input type='hidden' name='orig_alatila' value='$orig_alatila'>
-          <input type='Submit' value='".t("Rahoituslaskelma")."'>
+          <input type='submit' value='".t("Rahoituslaskelma")."'>
           </form>";
     }
 
@@ -2676,7 +2676,7 @@ if ($tee == '') {
           <input type='hidden' name='projektilla' value='$projektilla'>
           <input type='hidden' name='orig_tila' value='$orig_tila'>
           <input type='hidden' name='orig_alatila' value='$orig_alatila'>
-          <input type='Submit' value='".t("Vakuutushakemus/Rekisteri-ilmoitus")."'>
+          <input type='submit' value='".t("Vakuutushakemus/Rekisteri-ilmoitus")."'>
           </form>";
     }
 
@@ -2779,7 +2779,7 @@ if ($tee == '') {
           <input type='hidden' name='projektilla' value='$projektilla'>
           <input type='hidden' name='orig_tila' value='$orig_tila'>
           <input type='hidden' name='orig_alatila' value='$orig_alatila'>";
-      echo "<input type='Submit' value='".t("Lue tuotematriisi")."'>";
+      echo "<input type='submit' value='".t("Lue tuotematriisi")."'>";
       echo "</form>";
     }
 
@@ -7546,7 +7546,7 @@ if ($tee == '') {
                   <input type='hidden' name='orig_alatila'  value = '$orig_alatila'>
                   <input type='hidden' name='tila'       value = 'MUUTA'>
                   <input type='hidden' name='tapa'       value = 'MUOKKAA'>
-                  <input type='Submit' value='".t("Muokkaa")."'>
+                  <input type='submit' value='".t("Muokkaa")."'>
                   </form> ";
             }
 
@@ -7572,7 +7572,7 @@ if ($tee == '') {
                 <input type='hidden' name='orig_alatila'  value = '$orig_alatila'>
                 <input type='hidden' name='tila'       value = 'MUUTA'>
                 <input type='hidden' name='tapa'       value = 'POISTA'>
-                <input type='Submit' class='poista_btn' value='".t("Poista")."' $poista_onclick>
+                <input type='submit' class='poista_btn' value='".t("Poista")."' $poista_onclick>
                 </form> ";
           }
 
@@ -7596,7 +7596,7 @@ if ($tee == '') {
                 <input type='hidden' name='orig_tila'     value = '$orig_tila'>
                 <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
                 <input type='hidden' name='valmiste_vai_raakaaine' value='{$valmiste_vai_raakaaine}' />
-                <input type='Submit' value='".t("Lisää raaka-aine")."'>
+                <input type='submit' value='".t("Lisää raaka-aine")."'>
                 </form>";
 
             echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='lisaaisakertareseptiin'>
@@ -7613,7 +7613,7 @@ if ($tee == '') {
                 <input type='hidden' name='orig_tila'     value = '$orig_tila'>
                 <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
                 <input type='hidden' name='valmiste_vai_raakaaine' value='{$valmiste_vai_raakaaine}' />
-                <input type='Submit' value='".t("Lisää valmiste")."'>
+                <input type='submit' value='".t("Lisää valmiste")."'>
                 </form>";
           }
           elseif ((($row["tunnus"] == $row["perheid"] and $row["perheid"] != 0 and ($toim != "VALMISTAASIAKKAALLE" or $yhtiorow["raaka_aineet_valmistusmyynti"] != "N")) or ($row["tunnus"] == $row["perheid2"] and $row["perheid2"] != 0) or (($toim == 'SIIRTOLISTA' or $toim == "SIIRTOTYOMAARAYS" or $toim == "TARJOUS" or $toim == "EXTTARJOUS" or $laskurow["tilaustyyppi"] == "T") and $row["perheid2"] == 0 and $row["perheid"] == 0)) and $kukarow['extranet'] == '') {
@@ -7643,7 +7643,7 @@ if ($tee == '') {
                 <input type='hidden' name='perheid2'     value = '$row[perheid2]'>
                 <input type='hidden' name='orig_tila'     value = '$orig_tila'>
                 <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
-                <input type='Submit' value='$nappulanteksti'>
+                <input type='submit' value='$nappulanteksti'>
                 </form>";
           }
 
@@ -7663,7 +7663,7 @@ if ($tee == '') {
                 <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
                 <input type='hidden' name='tila'       value = 'MUUTA'>
                 <input type='hidden' name='tapa'       value = 'POISJTSTA'>
-                <input type='Submit' value='".t("Toimita")."'>
+                <input type='submit' value='".t("Toimita")."'>
                 </form> ";
           }
 
@@ -7702,7 +7702,7 @@ if ($tee == '') {
                   <input type='hidden' name='jt_muidenmukana' value = 'EI'>
                   <input type='hidden' name='orig_tila'     value = '$orig_tila'>
                   <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
-                  <input type='Submit' value='{$napinnimi}'>
+                  <input type='submit' value='{$napinnimi}'>
                   </form> ";
 
             if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
@@ -7723,7 +7723,7 @@ if ($tee == '') {
                   <input type='hidden' name='tapa'       value = 'VAIHDAJAPOISTA'>
                   <input type='hidden' name='var'       value = 'J'>
                   <input type='hidden' name='jt_muidenmukana' value = 'KYLLA'>
-                  <input type='Submit' value='" . t("Jälkitoim, muiden mukana") . "'>
+                  <input type='submit' value='" . t("Jälkitoim, muiden mukana") . "'>
                   </form> ";
             }
 
@@ -7744,7 +7744,7 @@ if ($tee == '') {
                   <input type='hidden' name='tapa'       value = 'VAIHDAJAPOISTA'>
                   <input type='hidden' name='var'       value = 'J'>
                   <input type='hidden' name='jt_manual' value = 'KYLLA'>
-                  <input type='Submit' value='" . t("Jälkitoim, manuaalinen") . "'>
+                  <input type='submit' value='" . t("Jälkitoim, manuaalinen") . "'>
                   </form> ";
             }
           }
@@ -7766,7 +7766,7 @@ if ($tee == '') {
                 <input type='hidden' name='tila'       value = 'MUUTA'>
                 <input type='hidden' name='tapa'       value = 'PUUTE'>
                 <input type='hidden' name='var'       value = 'P'>
-                <input type='Submit' value='" . t("Puute") . "'>
+                <input type='submit' value='" . t("Puute") . "'>
                 </form> ";
           }
 
@@ -7785,7 +7785,7 @@ if ($tee == '') {
                 <input type='hidden' name='orig_tila'     value = '$orig_tila'>
                 <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
                 <input type='hidden' name='tila'       value = 'OOKOOAA'>
-                <input type='Submit' value='".t("Hyväksy")."'>
+                <input type='submit' value='".t("Hyväksy")."'>
                 </form> ";
           }
 
@@ -7822,7 +7822,7 @@ if ($tee == '') {
                   <input type='hidden' name='tapa'       value = 'VAIHDAJAPOISTA'>
                   <input type='hidden' name='var'       value = 'J'>
                   <input type='hidden' name='jt_muidenmukana' value = 'EI'>
-                  <input type='Submit' value='{$napinnimi}'>
+                  <input type='submit' value='{$napinnimi}'>
                   </form> ";
           }
 
@@ -7844,7 +7844,7 @@ if ($tee == '') {
                   <input type='hidden' name='tapa'       value = 'VAIHDAJAPOISTA'>
                   <input type='hidden' name='var'       value = 'J'>
                   <input type='hidden' name='jt_muidenmukana' value = 'KYLLA'>
-                  <input type='Submit' value='" . t("Jälkitoim, muiden mukana"). "'>
+                  <input type='submit' value='" . t("Jälkitoim, muiden mukana"). "'>
                   </form> ";
           }
 
@@ -7865,7 +7865,7 @@ if ($tee == '') {
                 <input type='hidden' name='tapa'       value = 'VAIHDAJAPOISTA'>
                 <input type='hidden' name='var'       value = 'J'>
                 <input type='hidden' name='jt_manual' value = 'KYLLA'>
-                <input type='Submit' value='" . t("Jälkitoim, manuaalinen") . "'>
+                <input type='submit' value='" . t("Jälkitoim, manuaalinen") . "'>
                 </form> ";
           }
         }
@@ -9688,7 +9688,7 @@ if ($tee == '') {
           <input type='hidden' name='orig_tila'     value = '{$orig_tila}'>
           <input type='hidden' name='orig_alatila'   value = '{$orig_alatila}'>
           <input type='hidden' name='tila'       value = 'OOKOOAAKAIKKI'>
-          <input type='Submit' value='", t("Hyväksy kaikki rivit"), "'>
+          <input type='submit' value='", t("Hyväksy kaikki rivit"), "'>
           </form> ";
     }
 

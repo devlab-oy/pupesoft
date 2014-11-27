@@ -598,7 +598,7 @@ if ($silent == "") {
     echo "<option value='V' $sel3>".t("viitteellä")."</option>";
     echo "</SELECT></th>";
     echo "<td><input type='text' name='haku' value='$haku'></td>";
-    echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Hae")."'></td>";
+    echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Hae")."'></td>";
     echo "</tr>";
 
     if ($listaustapa == "liittamattomat") {
@@ -626,7 +626,7 @@ if ($silent == "") {
     echo "<option value='liitetyt' $sel2>".t("Näytä vain liitetyt")."</option>";
     echo "</select></th>";
     echo "<td>&nbsp;</td>";
-    echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Hae")."'></td>";
+    echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Hae")."'></td>";
     echo "</tr>";
 
     if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) {

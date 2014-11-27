@@ -797,7 +797,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     echo "</select></td><td class='back'>&nbsp;</td>";
   }
 
-  echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Etsi")."'></td></tr>";
+  echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Etsi")."'></td></tr>";
   echo "</table>";
   echo "</form>";
   echo "<br>";
@@ -2937,7 +2937,7 @@ if (mysql_num_rows($result) != 0) {
           <input type='hidden' name='kaytiin_otsikolla' value='NOJOO!'>
           <table>
           <tr><th>".t("Listauksessa näkyy 50 ensimmäistä")." $otsikko.</th>
-          <td class='back'><input type='Submit' value = '".t("Näytä kaikki")."'></td></tr>
+          <td class='back'><input type='submit' value = '".t("Näytä kaikki")."'></td></tr>
           </table>
           </form>";
     }

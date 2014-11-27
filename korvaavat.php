@@ -7,7 +7,7 @@ echo "<font class='head'>".t("Korvaavien ylläpito")."</font><hr>";
 echo "<form action='korvaavat.php' method='post' name='etsituote' autocomplete='off'>
     <input type='hidden' value='$lopetus' name='lopetus'>
     ".t("Etsi tuotetta")." <input type='text' name='tuoteno'>
-    <input type='Submit' class='hae_btn' value='".t("Hae")."'>
+    <input type='submit' class='hae_btn' value='".t("Hae")."'>
     </form><br><br>";
 
 if ($tee == 'del') {

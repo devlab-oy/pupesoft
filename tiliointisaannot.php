@@ -554,7 +554,7 @@ if (isset($tunnus) and $tunnus > 0) {
         <input type='hidden' name='tila' value='$tila'>
         <input type='hidden' name='liitetiedosto' value='$liitetiedosto'>
         <input type='hidden' name='kayttotyyppi' value='$kayttotyyppi'>
-        <input type='Submit' value = '".t("Muuta tiliöintisääntöä")."'>
+        <input type='submit' value = '".t("Muuta tiliöintisääntöä")."'>
       </td></tr></form>";
   }
 
@@ -773,7 +773,7 @@ if (isset($tunnus) and $tunnus > 0) {
         </td>";
   }
 
-  echo "<td class='back'><input type='Submit' value = '".t("Lisää tiliöintisääntö")."'>$virhe</td>";
+  echo "<td class='back'><input type='submit' value = '".t("Lisää tiliöintisääntö")."'>$virhe</td>";
   echo "</tr></form></table>";
 }
 else {

@@ -79,7 +79,7 @@ while ($maksurow=mysql_fetch_array($result)) {
       <form action = 'maksu.php' method='post'>
       <input type='hidden' name='tunnus' value = '$maksurow[3]'>
       <input type='hidden' name='tee' value = 'M'>
-      <input type='Submit' value = '".t("Maksa")."'></td></form>";
+      <input type='submit' value = '".t("Maksa")."'></td></form>";
 
   for ($i=0; $i<mysql_num_fields($result)-1; $i++) {
     echo "<td>$maksurow[$i]</td>";
@@ -89,7 +89,7 @@ while ($maksurow=mysql_fetch_array($result)) {
       <form action = 'maksu.php' method='post'>
       <input type='hidden' name='tunnus' value = '$maksurow[3]'>
       <input type='hidden' name='tee' value = 'P'>
-      <input type='Submit' value = '".t("Muuta")."'>
+      <input type='submit' value = '".t("Muuta")."'>
       </td></tr></form>";
 }
 
@@ -108,7 +108,7 @@ echo "<tr><td></td>
   <input type='text' name='tapvm' value = '$tapvm'></td>
   <td><input type='text' name='summa' value = '$summa'></td>
   <td><input type='text' name='selite' value = '$selite'></td>
-  <td><input type='Submit' value = '".t("Lisää")."'></td>
+  <td><input type='submit' value = '".t("Lisää")."'></td>
   </tr></form>";
 echo "</table>";
 

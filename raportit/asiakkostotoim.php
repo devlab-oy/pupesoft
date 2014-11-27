@@ -168,6 +168,6 @@ else {
           <input type='hidden' name='ytunnus' value='$toimi'>";
 }
 
-echo "<tr><td class='back'><input type='Submit' class='hae_btn' value='".t("Hae")."'></td></tr></table>";
+echo "<tr><td class='back'><input type='submit' class='hae_btn' value='".t("Hae")."'></td></tr></table>";
 
 require "../inc/footer.inc";

@@ -206,7 +206,7 @@ echo "<th>".t("Anna ytunnus tai osa nimestä")."</th>";
 echo "<td><input type='text' name='ytunnus' value='$ytunnus'></td></tr>";
 echo "<tr><th>".t("Raportti Exceliin")."</th>";
 echo "<td><input type='checkbox' name='vain_excel' $vain_excelchk></td><tr>";
-echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Hae")."'></td>";
+echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Hae")."'></td>";
 echo "</tr>";
 echo "</form>";
 echo "<tr><td class='back'><br><br></td></tr>";

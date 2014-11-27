@@ -1538,7 +1538,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
       echo "<th>".t("Poista")."</th>";
     }
 
-    echo "<td class='back' valign='bottom'>&nbsp;&nbsp;<input type='Submit' class='hae_btn' value='".t("Etsi")."'></td></form>";
+    echo "<td class='back' valign='bottom'>&nbsp;&nbsp;<input type='submit' class='hae_btn' value='".t("Etsi")."'></td></form>";
     echo "</tr>";
 
   }

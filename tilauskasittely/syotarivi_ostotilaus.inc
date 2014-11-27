@@ -124,7 +124,7 @@ if ($variaaritorivi === FALSE) {
   }
 
   echo "$varaosavirhe</td>";
-  echo "<td class='back'><input type='Submit' name= 'kumpi' value = '".t("Lis‰‰")."'></td>";
+  echo "<td class='back'><input type='submit' name= 'kumpi' value = '".t("Lis‰‰")."'></td>";
 
   //n‰ytet‰‰n poista nappi vain kun ollaan navigoitu ostotilaus riville saapumisen kohdista rivin kautta ja kun tilausrivi on esit‰ytetty
   if ($saapuminen_ostorivin_muokkaus == 1 and !empty($rivitunnus)) {
@@ -167,7 +167,7 @@ if ($variaaritorivi === FALSE) {
       <td colspan='$backspan'><textarea name='kommentti' cols='50'>$kommentti</textarea></td>";
 
   //Tyhjennet‰‰n kent‰t
-  echo "<td class='back'><input type='Submit' name= 'tyhjenna' value = '".t("Tyhjenn‰")."'></td></tr>";
+  echo "<td class='back'><input type='submit' name= 'tyhjenna' value = '".t("Tyhjenn‰")."'></td></tr>";
   echo "</form></table><br>";
 }
 

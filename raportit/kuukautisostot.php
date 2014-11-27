@@ -2281,7 +2281,7 @@ else {
     echo "<tr><th>".t("Näytä kaikki JT rivit")."</th><td><input type='checkbox' name='KAIKKIJT' value='KAIKKIJT'></td></tr>";
 
     echo "  </table><br>
-        <input type='Submit' name='jatka' value = '".t("Jatka")."'>
+        <input type='submit' name='jatka' value = '".t("Jatka")."'>
         </form>";
 
   }
@@ -2796,7 +2796,7 @@ else {
     echo "</tr>";
     echo "</table>";
     echo "<br>
-      <input type='Submit' name='RAPORTOI' value = '".t("Aja kuukautisraportti")."'>
+      <input type='submit' name='RAPORTOI' value = '".t("Aja kuukautisraportti")."'>
       </form>";
   }
 

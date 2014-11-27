@@ -316,7 +316,7 @@ if ($tee == '') {
       echo "<option value='$yrow[0]' $sel>$yrow[1]</option>";
     }
     echo "</select>";
-    echo " <input type='Submit' value = '" . t("Valitse") ."'></form>";
+    echo " <input type='submit' value = '" . t("Valitse") ."'></form>";
   }
   else {
     if ($omaara == 0 or $vmaara == 0) {
@@ -513,7 +513,7 @@ if ($tee == '') {
 
     echo "</table>";
     echo "<br>";
-    echo "<input type='Submit' value = '".t("Tee tosite")."'></form>";
+    echo "<input type='submit' value = '".t("Tee tosite")."'></form>";
   }
 }
 

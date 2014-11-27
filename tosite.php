@@ -711,7 +711,7 @@ if ($tee == 'I' and isset($teetosite)) {
         <input type='hidden' name='tee' value='E'>
         <input type='hidden' name='lopetus' value='{$lopetus}'>
         <input type='hidden' name='tunnus' value='{$tunnus}'>
-        <input type='Submit' value='".t("Näytä tosite")."'>
+        <input type='submit' value='".t("Näytä tosite")."'>
         </form><br><hr><br>";
   }
 

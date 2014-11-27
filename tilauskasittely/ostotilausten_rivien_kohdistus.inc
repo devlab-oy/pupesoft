@@ -1812,7 +1812,7 @@ if ($tila == '') {
   $toimipaikka = isset($toimipaikka) ? $toimipaikka : "kaikki";
 
   echo "<td><input type='hidden' name='toimipaikka' value='{$toimipaikka}' /></td>";
-  echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Etsi")."'></td>";
+  echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Etsi")."'></td>";
   echo "</tr></form>";
 
   // Katsotaan löytyikö yhtään tilausriviä

@@ -622,7 +622,7 @@ if ($tee == "" and $ytunnus == "") {
   echo "<input type='hidden' name='lopetus' value='$lopetus'>";
   echo "<input type='hidden' name='muutparametrit' value='$summa#$ppa#$kka#$vva#$mtili#$selite'>";
   echo "<br>";
-  echo "<input type='Submit' class='hae_btn' value='".t("Etsi")."'>";
+  echo "<input type='submit' class='hae_btn' value='".t("Etsi")."'>";
   echo "</form>";
 
   $formi = "maksaja";

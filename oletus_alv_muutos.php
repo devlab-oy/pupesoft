@@ -11,7 +11,7 @@ if ($tee == "") {
   if ($yhtiorow["alv_kasittely"] == "o") echo "<option value='LISAA'>".t("Vaihda verottomat hinnat verollisiksi")."</option>";
   if ($yhtiorow["alv_kasittely"] == "")  echo "<option value='POIST'>".t("Vaihda verolliset hinnat verottomiksi")."</option>";
   echo "</select> ";
-  echo " <input type='Submit' value='".t("Tee")."'></form>";
+  echo " <input type='submit' value='".t("Tee")."'></form>";
 }
 else {
 

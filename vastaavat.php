@@ -192,7 +192,7 @@ echo "<font class='head'>".t("Vastaavien ylläpito")."</font><hr>";
 echo "<form method='get' name='etsituote' autocomplete='off'>
     <input type='hidden' value='$lopetus' name='lopetus'>
       ".t("Etsi tuotetta")." <input type='text' name='tuoteno'>
-      <input type='Submit' class='hae_btn' value='".t("Hae")."'>
+      <input type='submit' class='hae_btn' value='".t("Hae")."'>
       </form><br><br>";
 
 if (!isset($tee)) $tee = '';

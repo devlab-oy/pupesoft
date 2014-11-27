@@ -1283,7 +1283,7 @@ if (($toim == 'lisaa' or $toim == 'lisaa_siirto') and $id == 0 and (string) $id 
   }
 
   echo "<td>".t("Etsi tilausta").":</td><td><input type='text' name='etsi'>";
-  echo "<input type='Submit' class='hae_btn' value='".t("Etsi")."'></form></td></tr>";
+  echo "<input type='submit' class='hae_btn' value='".t("Etsi")."'></form></td></tr>";
 
   echo "</table>";
 
@@ -1948,7 +1948,7 @@ if (($toim == 'muokkaa' or $toim == 'muokkaa_siirto') and $id == 0 and (string) 
   echo "</select></td>";
 
   echo "<td>".t("Etsi tilausta").":</td><td><input type='text' name='etsi'>";
-  echo "<input type='Submit' class='hae_btn' value='".t("Etsi")."'></form></td></tr>";
+  echo "<input type='submit' class='hae_btn' value='".t("Etsi")."'></form></td></tr>";
 
   echo "</table>";
 

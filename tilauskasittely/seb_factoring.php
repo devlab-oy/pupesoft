@@ -77,5 +77,5 @@ if ($tee == 'LAHETA' and $factoring_sisalto != '') {
 elseif ($factlask > 1) {
   echo "  <form name='find' method='post'>
       <input type='hidden' name='tee' value='LAHETA'>
-      <input type='Submit' value='".t("Lähetä aineisto")."'></form>";
+      <input type='submit' value='".t("Lähetä aineisto")."'></form>";
 }

@@ -83,7 +83,7 @@ if ($tee=="KORJAA" or $tee=="LIITA") {
               <input type='hidden' name='tee' value='LIITA'>
               <input type='hidden' name='tunnusnippu' value='$tunnusnippu'>
               <input type='hidden' name='tunnus' value='$tunnus'>
-              <td class='back' align='right'><input type='Submit' value='".t("liitä")."'></td>
+              <td class='back' align='right'><input type='submit' value='".t("liitä")."'></td>
               </form>
             </tr>
           </table>";
@@ -130,7 +130,7 @@ if ($tee == "HAE") {
             <input type='hidden' name='tee' value='KORJAA'>
             <input type='hidden' name='tunnusnippu' value='$tunnusnippu'>
             <td><input type='text' name='tunnus' size='15' maxlength='14' value='$tunnus'></td>
-            <td class='back'><input type='Submit' value='".t("Jatka")."'></td>
+            <td class='back'><input type='submit' value='".t("Jatka")."'></td>
             <td class='back'><font class='error'>".t($tunnusvirhe)."</font></td>
             </form>
           </tr>
@@ -158,7 +158,7 @@ if ($tee == "") {
         <form method='post' name='projekti' autocomplete='off'>
         <input type='hidden' name='tee' value='HAE'>
         <td><input type='text' name='tunnusnippu' size='15' maxlength='14' value='$tunnusnippu'></td>
-        <td class='back'><input type='Submit' value='".t("Jatka")."'></td>
+        <td class='back'><input type='submit' value='".t("Jatka")."'></td>
         <td class='back'><font class='error'>".t($tunnusnippuvirhe)."</font></td>
         </form>
       </tr>

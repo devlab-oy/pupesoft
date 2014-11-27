@@ -47,7 +47,7 @@ if ($yhtiorow['suuntalavat'] == 'S') {
 }
 
 echo "<td class='back'>";
-echo "<input type='Submit' class='hae_btn' value='".t("Hae")."'></form></td>";
+echo "<input type='submit' class='hae_btn' value='".t("Hae")."'></form></td>";
 echo "</tr>";
 echo "</table>";
 echo "<br>";
@@ -232,7 +232,7 @@ if ($tee == "V") {
 
   echo "<td colspan='3' class='back'></td>";
   echo "<td class='back' >";
-  echo "<input type='Submit' value='".t("Siirrä")."'>";
+  echo "<input type='submit' value='".t("Siirrä")."'>";
   echo "</td></tr>";
   echo "</table>";
   echo "</form>";

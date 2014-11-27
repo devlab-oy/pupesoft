@@ -118,7 +118,7 @@ echo "<input type='hidden' name='tee' value='Z'>";
 echo "<th style='vertical-align:middle;'>".t("Tuotehaku")."</th>";
 echo "<td>".livesearch_kentta("formi", "TUOTEHAKU", "tuoteno", 300)."</td>";
 echo "<td class='back'>";
-echo "<input type='Submit' class='hae_btn' value='".t("Hae")."'></form></td>";
+echo "<input type='submit' class='hae_btn' value='".t("Hae")."'></form></td>";
 echo "</tr>";
 
 echo "<tr>";
@@ -137,7 +137,7 @@ echo "<input type='text' name='tuoteno' value='' style='width:300px;'>";
 echo "</td>";
 
 echo "<td class='back'>";
-echo "<input type='Submit' class='hae_btn' value='".t("Hae")."'>";
+echo "<input type='submit' class='hae_btn' value='".t("Hae")."'>";
 echo "</form>";
 echo "</td>";
 
@@ -150,7 +150,7 @@ if ($ulos == '' and $tee == 'Z') {
   echo "<input type='hidden' name='tyyppi' value=''>";
   echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
   echo "<td class='back'>";
-  echo "<input type='Submit' value='".t("Edellinen")."'>";
+  echo "<input type='submit' value='".t("Edellinen")."'>";
   echo "</td>";
   echo "</form>";
 
@@ -161,7 +161,7 @@ if ($ulos == '' and $tee == 'Z') {
   echo "<input type='hidden' name='tee' value='N'>";
   echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
   echo "<td class='back'>";
-  echo "<input type='Submit' value='".t("Seuraava")."'>";
+  echo "<input type='submit' value='".t("Seuraava")."'>";
   echo "</td>";
   echo "</form>";
 }
@@ -690,7 +690,7 @@ if ($tee == "Y") {
   echo "<table><tr>";
   echo "<th>".t("Valitse tuotenumero").":</th>";
   echo "<td>$ulos</td>";
-  echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></td>";
+  echo "<td class='back'><input type='submit' value='".t("Valitse")."'></td>";
   echo "</tr></table>";
   echo "</form>";
 }

@@ -987,7 +987,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
         <input type='hidden' name='naytetaankolukitut'   value = '$naytetaankolukitut'>
         <input type='hidden' name='tee'         value = 'MUUOTAOSTIKKOA'>
         <input type='hidden' name='tila'         value = 'Muuta'>
-        <input type='Submit' value='".t("Muuta otsikkoa")."'>
+        <input type='submit' value='".t("Muuta otsikkoa")."'>
         </form>
         </td>";
 
@@ -1008,7 +1008,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
         <input type='hidden' name='toim_tuoteno'    value = '$toim_tuoteno'>
         <input type='hidden' name='naytetaankolukitut'   value = '$naytetaankolukitut'>
         <input type='hidden' name='tee'         value = 'mikrotila'>
-        <input type='Submit' value='".t("Lue tilausrivit tiedostosta")."'>
+        <input type='submit' value='".t("Lue tilausrivit tiedostosta")."'>
         </form>
         </td>";
 
@@ -1564,7 +1564,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
               echo "<input type='hidden' name='hinta_alkuperainen' value = '{$prow['hinta_alkuperainen']}'>";
             }
 
-            echo "  <input type='Submit' value='".t("Muuta")."'>
+            echo "  <input type='submit' value='".t("Muuta")."'>
                 </form>
                 </td>";
 
@@ -1578,7 +1578,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                 <input type='hidden' name='naytetaankolukitut'   value = '$naytetaankolukitut'>
                 <input type='hidden' name='rivitunnus'       value = '$prow[tunnus]'>
                 <input type='hidden' name='tee'         value = 'POISTA_RIVI'>
-                <input type='Submit' value='".t("Poista")."'>
+                <input type='submit' value='".t("Poista")."'>
                 </form>
                 </td>";
 
@@ -1593,7 +1593,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
                   <input type='hidden' name='naytetaankolukitut'   value = '$naytetaankolukitut'>
                   <input type='hidden' name='rivitunnus'       value = '$prow[tunnus]'>
                   <input type='hidden' name='tee'         value = 'OOKOOAA'>
-                  <input type='Submit' value='".t("Hyväksy")."'>
+                  <input type='submit' value='".t("Hyväksy")."'>
                   </form></td> ";
             }
 
@@ -1866,7 +1866,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           <input type='hidden' name='naytetaankolukitut' value = '$naytetaankolukitut'>
           <input type='hidden' name='toimittajaid'      value = '$laskurow[liitostunnus]'>
           <input type='hidden' name='tee'          value = 'valmis'>
-          <input type='Submit' value='".t("Tilaus valmis")."' {$saldo_tarkistus_onclick}>
+          <input type='submit' value='".t("Tilaus valmis")."' {$saldo_tarkistus_onclick}>
           </form>
           </td>";
 
@@ -1888,7 +1888,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
             <input type='hidden' name='toim_tuoteno'     value = '$toim_tuoteno'>
             <input type='hidden' name='naytetaankolukitut' value = '$naytetaankolukitut'>
             <input type='hidden' name='tee'          value = 'vahvista'>
-            <input type='Submit' value='".t("Vahvista toimitus")."'>
+            <input type='submit' value='".t("Vahvista toimitus")."'>
             </form>
             </td>";
       }
@@ -1918,7 +1918,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           <input type='hidden' name='toim_tuoteno'    value = '$toim_tuoteno'>
           <input type='hidden' name='naytetaankolukitut'   value = '$naytetaankolukitut'>
           <input type='hidden' name='tee'         value = 'poista'>
-          <input type='Submit' value='*".t("Mitätöi koko tilaus")."*'>
+          <input type='submit' value='*".t("Mitätöi koko tilaus")."*'>
           </form>
           </td>";
 
@@ -1933,7 +1933,7 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
           <input type='hidden' name='toim_tuoteno'    value = '$toim_tuoteno'>
           <input type='hidden' name='naytetaankolukitut'   value = '$naytetaankolukitut'>
           <input type='hidden' name='tee'         value = 'poista_kohdistamattomat'>
-          <input type='Submit' value='*".t("Mitätöi kohdistamattomat rivit")."*'>
+          <input type='submit' value='*".t("Mitätöi kohdistamattomat rivit")."*'>
           </form>
           </td>";
 

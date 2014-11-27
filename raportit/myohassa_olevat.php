@@ -118,7 +118,7 @@ if (!isset($tee) or $tee != "NAYTATILAUS") {
   echo "</select></td></tr>";
   echo "<tr><th>".t("Raportti Exceliin")."</th>";
   echo "<td><input type='checkbox' name='vain_excel' $vain_excelchk></td><tr>";
-  echo "<tr><td class='back'><input type='Submit' class='hae_btn' value='".t("Hae")."'></td>";
+  echo "<tr><td class='back'><input type='submit' class='hae_btn' value='".t("Hae")."'></td>";
   echo "</tr>";
   echo "</form></table><br>";
 

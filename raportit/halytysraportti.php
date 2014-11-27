@@ -2331,7 +2331,7 @@ if ($tee == "") {
   echo "<tr><th>".t("Näytä kaikki JT rivit")."</th><td><input type='checkbox' name='KAIKKIJT' value='KAIKKIJT'></td></tr>";
 
   echo "  </table><br>
-      <input type='Submit' name='jatka' value = '".t("Jatka")."'>
+      <input type='submit' name='jatka' value = '".t("Jatka")."'>
       </form>";
 
 }
@@ -2948,7 +2948,7 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
 
   echo "</select>";
 
-  echo "<input type='Submit' name='POISTA' value = '".t("Poista valittu raporttipohja")."'>";
+  echo "<input type='submit' name='POISTA' value = '".t("Poista valittu raporttipohja")."'>";
 
   echo "</td></tr>";
 
@@ -2995,7 +2995,7 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
   echo "</table>";
   echo "<br>";
 
-  echo "<input type='Submit' name='RAPORTOI' value = '".t("Aja hälytysraportti")."'>
+  echo "<input type='submit' name='RAPORTOI' value = '".t("Aja hälytysraportti")."'>
   </form>";
 }
 

@@ -421,7 +421,7 @@ if ($tee == "") {
   echo "<tr>
     <th>".t("Etsi valmistetta/raaka-ainetta").":</th>";
   echo "<td colspan='3'><input type='text' name='etsi' value='$etsi'></td>";
-  echo "<td><input type='Submit' class='hae_btn' value='".t("Etsi")."'></td></form>";
+  echo "<td><input type='submit' class='hae_btn' value='".t("Etsi")."'></td></form>";
   echo "</table><br><br>";
 
   $haku='';

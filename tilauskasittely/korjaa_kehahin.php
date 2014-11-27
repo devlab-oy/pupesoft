@@ -116,7 +116,7 @@ if ($tee == "VALITSE") {
     }
 
     echo "</table>";
-    echo "<br><input type='Submit' value='".t("Korjaa tulo")."'>";
+    echo "<br><input type='submit' value='".t("Korjaa tulo")."'>";
     echo "</form>";
   }
 }
@@ -131,7 +131,7 @@ if ($tee == "") {
   echo t("Etsi tuotenumero").": ";
   echo "<input type='hidden' name='tee' value='VALITSE'>";
   echo "<input type='text' name='tuoteno'>";
-  echo "<input type='Submit' class='hae_btn' value='".t("Etsi")."'>";
+  echo "<input type='submit' class='hae_btn' value='".t("Etsi")."'>";
   echo "</form>";
 }
 

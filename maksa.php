@@ -988,7 +988,7 @@ else {
   echo "<td valign='top'>";
   echo "<form action = 'maksa.php' method='post'>";
   echo "<input type='hidden' name = 'tee' value='X'>";
-  echo "<input type='Submit' value='".t("Vaihda maksutiliä")."'>";
+  echo "<input type='submit' value='".t("Vaihda maksutiliä")."'>";
   echo "</form>";
   echo "</td>";
 
@@ -1012,7 +1012,7 @@ else {
     echo "<form action = 'maksa.php' method='post'>
       <input type='hidden' name = 'tee' value='NK'>
       <input type='hidden' name = 'tili' value='$oltilrow[oletustili]'>
-      <input type='Submit' value='".t('Poimi kaikki erääntyneet')."'>
+      <input type='submit' value='".t('Poimi kaikki erääntyneet')."'>
       </form>";
   }
 
@@ -1023,7 +1023,7 @@ else {
     echo "<form action = 'maksa.php' method='post'>
       <input type='hidden' name = 'tee' value='NT'>
       <input type='hidden' name = 'tili' value='$oltilrow[oletustili]'>
-      <input type='Submit' value='".t('Poimi kaikki tänään erääntyvät')."'>
+      <input type='submit' value='".t('Poimi kaikki tänään erääntyvät')."'>
       </form>";
   }
   echo "</td>";
@@ -1226,7 +1226,7 @@ if ($tee == 'DM') {
           <form action = 'maksa.php' method='post'>
           <input type='hidden' name = 'tee' value='DP'>
           <input type='hidden' name = 'lasku' value='$trow[peru]'>
-          <input type='Submit' value='".t('Poista aineistosta')."'>
+          <input type='submit' value='".t('Poista aineistosta')."'>
           </form></td>";
 
       echo "</tr>";
@@ -1493,7 +1493,7 @@ if ($tee == 'S') {
               <input type='hidden' name = 'kaikki' value='$kaikki'>
               <input type='hidden' name = 'nimihaku' value='$nimihaku'>
               <input type='hidden' name = 'tapa' value='$tapa'>
-              <input type='Submit' value='".t("Poimi lasku")."'>";
+              <input type='submit' value='".t("Poimi lasku")."'>";
         }
 
         echo "</td>";
@@ -1546,7 +1546,7 @@ if ($tee == 'S') {
               <input type='hidden' name = 'kaikki' value='$kaikki'>
               <input type='hidden' name = 'nimihaku' value='$nimihaku'>
               <input type='hidden' name = 'tapa' value='$tapa'>
-              <input type='Submit' value='".t("Poista lasku")."'>
+              <input type='submit' value='".t("Poista lasku")."'>
               </form>
               </td>";
         }
@@ -1589,7 +1589,7 @@ if ($tee == 'S') {
         <input type='hidden' name = 'valuu' value='$valuu'>
         <input type='hidden' name = 'erapvm' value='$erapvm'>
         <input type='hidden' name = 'nimihaku' value='$nimihaku'>
-        <input type='Submit' value='".t('Poimi kaikki haetut veloituslaskut')."'>
+        <input type='submit' value='".t('Poimi kaikki haetut veloituslaskut')."'>
         </form><br>";
     }
 
@@ -1700,7 +1700,7 @@ if ($tee == 'V') {
 
   echo "<tr>";
   echo "<th>".t("Nimi")."</th><td><input type='text' name='nimihaku' size='15' value='$nimihaku'></td><td></td>";
-  echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Etsi")."'></td></tr>";
+  echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Etsi")."'></td></tr>";
   echo "</table>";
   echo "</form>";
 
@@ -1724,7 +1724,7 @@ if ($tee == 'V') {
       <td>
       <form action = 'maksa.php' method='post'>
       <input type='hidden' name = 'tee' value='DM'>
-      <input type='Submit' value='".t('Näytä jo poimitut laskut')."'>
+      <input type='submit' value='".t('Näytä jo poimitut laskut')."'>
       </form>
       </td></tr>";
   echo "</table>";

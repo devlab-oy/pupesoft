@@ -1742,7 +1742,7 @@ if ($tila == 'kohdistaminen' and (int) $suoritus_tunnus > 0) {
       echo "<td><input type='text' size='$kentankoko[$i]' name='haku[$i]' value='$haku[$i]'></td>";
     }
 
-    echo "<td><input type='Submit' class='hae_btn' value='".t("Etsi")."'></td></tr>";
+    echo "<td><input type='submit' class='hae_btn' value='".t("Etsi")."'></td></tr>";
     echo"</form>";
 
     echo "<form action='manuaalinen_suoritusten_kohdistus.php?tila=tee_kohdistus' method = 'post' onSubmit='return validate(this)' class='multisubmit'>";

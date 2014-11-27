@@ -608,7 +608,7 @@ if ($tee == '' and $toim == "MUOKKAA") {
   echo "</td>";
   echo "</tr>";
   echo "</table>";
-  echo "<br><input type='Submit' class='hae_btn' value='".t("Etsi")."'>";
+  echo "<br><input type='submit' class='hae_btn' value='".t("Etsi")."'>";
   echo "</form><br><br>";
 
   if (trim($etsi) != "") {
@@ -687,7 +687,7 @@ elseif ($tee == '') {
   // tehd‰‰n etsi valinta
   echo "<form name='find' method='post'>";
   echo "<input type='hidden' name='toim' value='$toim'>";
-  echo t("Etsi tilausta (asiakkaan nimell‰ / tilausnumerolla)").": <input type='text' name='etsi'><input type='Submit' class='hae_btn' value='".t("Etsi")."'></form>";
+  echo t("Etsi tilausta (asiakkaan nimell‰ / tilausnumerolla)").": <input type='text' name='etsi'><input type='submit' class='hae_btn' value='".t("Etsi")."'></form>";
 
   $haku='';
   if (is_string($etsi))  $haku="and nimi LIKE '%$etsi%'";

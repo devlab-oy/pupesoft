@@ -194,7 +194,7 @@ if ($tila == "Muuta" or $tila == "vaihdaasiakas") {
 
   if ($toimittajaid == 0 or $tila == "vaihdaasiakas") {
     echo "  </tr><tr>
-        <td class='back' colspan = '2' align = 'right'><input type = 'hidden' name = 'tila' value = 'vaihdaasiakas'><input type='Submit' class='hae_btn' value='".t("Hae")."'></td>
+        <td class='back' colspan = '2' align = 'right'><input type = 'hidden' name = 'tila' value = 'vaihdaasiakas'><input type='submit' class='hae_btn' value='".t("Hae")."'></td>
         </tr></table></form>";
 
     $formi  = "paaformi";

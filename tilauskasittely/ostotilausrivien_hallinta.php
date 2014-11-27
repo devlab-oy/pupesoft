@@ -346,7 +346,7 @@ if (isset($laskurow)) {
       <input type='text' name='toimpp' value='{$toimpp}' size='3'>
       <input type='text' name='toimkk' value='{$toimkk}' size='3'>
       <input type='text' name='toimvv' value='{$toimvv}' size='6'></td>
-      <td><input type='Submit' value='", t("Päivitä"), "'></form></td></tr></table><br>";
+      <td><input type='submit' value='", t("Päivitä"), "'></form></td></tr></table><br>";
 
   echo "  <table>
       <form method='post'>
@@ -367,7 +367,7 @@ if (isset($laskurow)) {
   echo "</select></td>";
 
   echo "<tr><th>", t("Lähetä vahvistamattomat rivit sähköpostiin"), ": </th>
-      <td><input type='Submit' value='", t("Lähetä"), "'></form></td></tr></table><br>";
+      <td><input type='submit' value='", t("Lähetä"), "'></form></td></tr></table><br>";
 
 
   //Haetaan kaikki tilausrivit

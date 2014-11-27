@@ -229,7 +229,7 @@ if (strlen($pankkitili) != 0) {
         <input type='hidden' name='pankkitili' value = '$pankkitili'>
         <input type='hidden' name='tunnus' value = '$tiliointirow[0]'>
         <input type='hidden' name='tee' value = 'P'>
-        <input type='Submit' value = '".t("Muuta")."'>
+        <input type='submit' value = '".t("Muuta")."'>
       </td></tr></form>";
   }
 
@@ -298,7 +298,7 @@ if (strlen($pankkitili) != 0) {
         <td>$ulos</td>
         <td><input type='text' name='tilino2' size='6' value = '$tilino2'></td>
         <td>$ulos2</td>
-        <td class='back'>$virhe <input type='Submit' value = '".t("Lisää")."'>
+        <td class='back'>$virhe <input type='submit' value = '".t("Lisää")."'>
         </form>
         </td>
       </tr></table>";
@@ -311,7 +311,7 @@ if (strlen($pankkitili) != 0) {
           <input type='hidden' name='pankkitili' value = '$pankkitili'>
           <input type='text' name='selite' size='15' value = '$selite'></td>
         <td><input type='text' name='tilino' size='6' value = '$tilino'></td>
-        <td>$virhe <input type='Submit' value = '".t("Lisää")."'>
+        <td>$virhe <input type='submit' value = '".t("Lisää")."'>
         </form>
         </td>
       </tr></table>";

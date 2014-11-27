@@ -38,7 +38,7 @@ echo "<form action = 'tuotehaku.php' method = 'post'>";
 echo "<table style='display:inline-table; padding-right:4px; padding-top:4px;' valign='top'>";
 echo "<tr><th>Tuotenumero</th><td><input type='text' size='25' name='tuotenumero' id='tuotenumero' value = '$tuotenumero'></td>";
 echo "<tr><th>Nimitys</th><td><input type='text' size='25' name='nimitys' id='nimitys' value = '$nimitys'></td>";
-echo "<td><input type='Submit' name='submit_button' id='submit_button' value = 'Etsi'></td>";
+echo "<td><input type='submit' name='submit_button' id='submit_button' value = 'Etsi'></td>";
 echo "</tr>";
 echo "</table><br/>";
 echo "</form>";

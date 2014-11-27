@@ -1532,7 +1532,7 @@ if ($tee == "") {
   }
 
   echo "</td>";
-  echo "<td class='back'><input type='Submit' name='EI_ASIAKASTA_X' value='".t("Perusta")."'></td>";
+  echo "<td class='back'><input type='submit' name='EI_ASIAKASTA_X' value='".t("Perusta")."'></td>";
   echo "</tr>";
   echo "</table>";
   echo "</form>";
@@ -1584,7 +1584,7 @@ if ($tee == "") {
   echo "<tr>";
   echo "<th>".t("Asiakas")."</th>";
   echo "<td><input type='text' size='20' name='ytunnus'></td>";
-  echo "<td class='back'><input type='Submit' value='".t("Perusta")."'></td>";
+  echo "<td class='back'><input type='submit' value='".t("Perusta")."'></td>";
   echo "</tr>";
 
   echo "</table>";
@@ -1627,10 +1627,10 @@ if ($tee == "") {
       echo "<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
 
       if ($kukarow["taso"] == 2) {
-        echo "<td class='back'><input type='Submit' value='".t("Muokkaa")."'></td>";
+        echo "<td class='back'><input type='submit' value='".t("Muokkaa")."'></td>";
       }
       else {
-        echo "<td class='back'><input type='Submit' value='".t("Tarkastele")."'></td>";
+        echo "<td class='back'><input type='submit' value='".t("Tarkastele")."'></td>";
       }
 
       echo "</form>";
@@ -1669,14 +1669,14 @@ if ($tee == "") {
       echo "<input type='hidden' name='lopetus' value='$lopetus'>";
       echo "<input type='hidden' name='toim' value='$toim'>";
       echo "<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
-      echo "<input type='Submit' value='".t("Muokkaa")."'>";
+      echo "<input type='submit' value='".t("Muokkaa")."'>";
       echo "</form></td>";
       echo "<td class='back'><form action='matkalasku.php' method='post' autocomplete='off'>";
       echo "<input type='hidden' name='tee' value='POISTA'>";
       echo "<input type='hidden' name='lopetus' value='$lopetus'>";
       echo "<input type='hidden' name='toim' value='$toim'>";
       echo "<input type='hidden' name='tilausnumero' value='$row[tunnus]'>";
-      echo "<input type='Submit' value='".t("Poista")."'>";
+      echo "<input type='submit' value='".t("Poista")."'>";
       echo "</form></td>";
       echo "</tr>";
     }
@@ -1768,7 +1768,7 @@ if ($tee == "") {
       echo "<td>$row[viite]</td>";
       echo "<td>$row[summa]</td>";
       echo "<td>".t($laskutyyppi)."</td>";
-      echo "<td class='back'><input type='Submit' value='".t("Tarkastele")."'></td>";
+      echo "<td class='back'><input type='submit' value='".t("Tarkastele")."'></td>";
       echo "</tr>";
       echo "</form>";
     }

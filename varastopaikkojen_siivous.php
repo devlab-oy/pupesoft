@@ -859,7 +859,7 @@ if ($tee == "") {
     }
     echo "<option value='$srow[selite]' $sel>$srow[selite] $srow[selitetark]</option>";
   }
-  echo "</select></td><td class='back'><input type='Submit' class='hae_btn' value='".t("Hae")."'></td></tr>";
+  echo "</select></td><td class='back'><input type='submit' class='hae_btn' value='".t("Hae")."'></td></tr>";
   echo "</form>";
 
   echo "<form method='post'>";
@@ -867,7 +867,7 @@ if ($tee == "") {
   echo "<input type='hidden' name='tee' value='LISTAAOLETUKSET'>";
   echo "<tr><th>".t("Listaa tuotteet, joilla on virheellisiä oletuspaikkoja")."</th>";
   echo "<td></td>";
-  echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Hae")."'></td></tr>";
+  echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Hae")."'></td></tr>";
   echo "</form>";
 
   echo "<form method='post'>";
@@ -875,7 +875,7 @@ if ($tee == "") {
   echo "<input type='hidden' name='tee' value='LISTAATUNTEMATTOMAT'>";
   echo "<tr><th>".t("Listaa tuotepaikat, joiden varastopaikka ei kuulu mihinkään varastoon")."</th>";
   echo "<td></td>";
-  echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Hae")."'></td></tr>";
+  echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Hae")."'></td></tr>";
   echo "</form>";
 
   echo "<form method='post'>";
@@ -883,7 +883,7 @@ if ($tee == "") {
   echo "<input type='hidden' name='tee' value='LISTAATUOTTEETTOMAT'>";
   echo "<tr><th>".t("Listaa tuotepaikat, joiden tuotetta ei löydy")."</th>";
   echo "<td></td>";
-  echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Hae")."'></td></tr>";
+  echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Hae")."'></td></tr>";
   echo "</form>";
 
   echo "<form method='post'>";
@@ -891,7 +891,7 @@ if ($tee == "") {
   echo "<input type='hidden' name='tee' value='LISTAAVIRHEELLISETRIVIT'>";
   echo "<tr><th>".t("Listaa tilausrivit, joiden tuotepaikkoja ei löydy")."</th>";
   echo "<td><input type='checkbox' name='ei_nayteta_riveja'> ", t("Älä näytä tilausrivejä ruudulla"), "</td>";
-  echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Hae")."'></td></tr>";
+  echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Hae")."'></td></tr>";
   echo "</form>";
 
   echo "<form method'post'>";
@@ -899,7 +899,7 @@ if ($tee == "") {
   echo "<input type='hidden' name='tee' value='LISTAATAPAHTUMATILMANPAIKKAA'>";
   echo "<tr><th>".t("Listaa tapahtumat, joiden tuotepaikkoja ei löydy")."</th>";
   echo "<td><input type='checkbox' name='ei_nayteta_riveja'> ", t("Älä näytä tapahtumia ruudulla"), "</td>";
-  echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Hae")."'></td></tr>";
+  echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Hae")."'></td></tr>";
   echo "</form>";
 
   echo "</table>";

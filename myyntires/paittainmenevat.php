@@ -290,7 +290,7 @@ if ($tee == '') {
     echo "  <form method='post'>
         <input type='hidden' name = 'toim' value='$toim'>
         <input type='hidden' name = 'tee' value='T'>
-        <input type='Submit' value='".t('Kohdista nämä tapahtumat päittäin')."'>
+        <input type='submit' value='".t('Kohdista nämä tapahtumat päittäin')."'>
         </form><br>";
   }
   else {
@@ -329,7 +329,7 @@ if ($tee == '') {
     echo "  <form method='post'>
         <input type='hidden' name = 'toim' value='$toim'>
         <input type='hidden' name = 'tee' value='N'>
-        <input type='Submit' value='".t('Poista nämä nollatapahtumat')."'>
+        <input type='submit' value='".t('Poista nämä nollatapahtumat')."'>
         </form>";
   }
 

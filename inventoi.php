@@ -1836,7 +1836,7 @@ if ($tee == '') {
 
   echo "<tr><th>".t("EAN-koodi:")."</th><td><input type='text' size='15' id='ean_koodi' name='ean_koodi'></td></tr>";
 
-  echo "<tr><th>".t("Inventointilistan numero:")."</th><td><input type='text' size='6' name='lista'></td><td class='back'><input type='Submit' value='".t("Inventoi")."'></td></tr>";
+  echo "<tr><th>".t("Inventointilistan numero:")."</th><td><input type='text' size='6' name='lista'></td><td class='back'><input type='submit' value='".t("Inventoi")."'></td></tr>";
 
   echo "</form>";
   echo "</table>";

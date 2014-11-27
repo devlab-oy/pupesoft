@@ -144,7 +144,7 @@ if ($tee == "ETSILASKU") {
       <td><input type='text' name='ppl' value='$ppl' size='3'></td>
       <td><input type='text' name='kkl' value='$kkl' size='3'></td>
       <td><input type='text' name='vvl' value='$vvl' size='5'></td>";
-  echo "<td class='back'><input type='Submit' class='hae_btn' value='".t("Hae")."'></td></tr></form></table><br>";
+  echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Hae")."'></td></tr></form></table><br>";
 
   $where1 = "";
   $where2 = "";
@@ -267,16 +267,16 @@ if ($tee == "ETSILASKU") {
           <form method='post'>
           <input type='hidden' name='tee' value='osamaksusoppari'>
           <input type='hidden' name='tilausnumero' value='$row[Tilaus]'>
-          <input type='Submit' value='".t("Rahoituslaskelma")."'>
+          <input type='submit' value='".t("Rahoituslaskelma")."'>
           </form>
           <form method='post'>
           <input type='hidden' name='tee' value='vakuutushakemus'>
           <input type='hidden' name='tilausnumero' value='$row[Tilaus]'>
-          <input type='Submit' value='".t("Vakuutushakemus/Rekisteri-ilmoitus")."'></form>
+          <input type='submit' value='".t("Vakuutushakemus/Rekisteri-ilmoitus")."'></form>
           <form method='post'>
           <input type='hidden' name='tee' value='TULOSTA'>
           <input type='hidden' name='otunnus' value='$row[Tilaus]'>
-          <input type='Submit' value='".t("Tulosta Lomakkeita")."'></form>
+          <input type='submit' value='".t("Tulosta Lomakkeita")."'></form>
           </td>";
 
       echo "</tr>";

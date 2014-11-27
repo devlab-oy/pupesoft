@@ -8592,6 +8592,7 @@ if ($tee == '') {
         if ($yhtiorow['kerayserat'] == 'K' and $toimitustavan_tunnus > 0 and $kukarow['extranet'] == "" and $_lahdot_toim_check) {
 
           echo "<tr>{$jarjlisa}";
+          echo "<td colspan='3' class='back'>";
 
           echo "<form action='' method='post' autocomplete='off'>
               <input type='hidden' name='tilausnumero' value='{$tilausnumero}'>
@@ -8603,10 +8604,9 @@ if ($tee == '') {
               <input type='hidden' name='orig_tila' value='$orig_tila'>
               <input type='hidden' name='orig_alatila' value='$orig_alatila'>";
 
-          echo "<td colspan='2' class='back'>", t("Lähdöt"), ":</td>";
-          echo "<td colspan='2' nowrap class='back'>&nbsp;</td>";
-
-          echo "</tr><tr>";
+          echo "<table>";
+          echo "<tr><th colspan='2'>", t("Lähdöt"), ":</th></tr>";
+          echo "<tr>";
 
           if (!isset($toimitustavan_lahto)) $toimitustavan_lahto = array();
 
@@ -8626,8 +8626,7 @@ if ($tee == '') {
             $varasto_chk_res = pupe_query($query);
             $varasto_chk_row = mysql_fetch_assoc($varasto_chk_res);
 
-            echo "<td colspan='2' nowrap>{$varasto_chk_row['nimitys']}</td>";
-            echo "<td colspan='2' nowrap>";
+            echo "<td nowrap>{$varasto_chk_row['nimitys']}</td><td>";
 
             echo "<select name='toimitustavan_lahto[{$lahdot_row['varasto']}]' onchange='submit()' {$state}>";
             echo "<option value=''>", t("Valitse"), "</option>";
@@ -8640,7 +8639,6 @@ if ($tee == '') {
             $toimitustavan_lahto[$lahdot_row['varasto']] = $lahdot_row['tunnus'];
 
             echo "</select>";
-            echo "</form>";
             echo "</td>";
           }
           else {
@@ -8668,8 +8666,8 @@ if ($tee == '') {
               // Haetaan seuraavat lähdöt
               $lahdot = seuraavat_lahtoajat($laskurow["toimitustapa"], $laskurow["prioriteettinro"], $vrst, 0, $eteenpain);
 
-              echo "<td colspan='2' nowrap>{$varasto_chk_row['nimitys']}</td>";
-              echo "<td colspan='2' nowrap><select name='toimitustavan_lahto[{$vrst}]' onchange='submit();' {$state}>";
+              echo "<td nowrap>{$varasto_chk_row['nimitys']}</td><td>";
+              echo "<select name='toimitustavan_lahto[{$vrst}]' onchange='submit();' {$state}>";
               echo "<option value=''>", t("Valitse"), "</option>";
 
               $selectoitunut = FALSE;
@@ -8704,7 +8702,9 @@ if ($tee == '') {
             }
           }
 
+          echo "</tr></table>";
           echo "</form>";
+          echo "</td>";
           echo "</tr>";
         }
 

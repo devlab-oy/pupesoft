@@ -221,7 +221,12 @@ if ($tee == '') {
       }
 
       if ($kuva == '') {
-        $kuva = "<img src='{$palvelin2}pics/facelift/pupe.gif' width='180'>";
+        if (empty($legacy_ui)) {
+          $kuva = "<img src='{$palvelin2}pics/facelift/pupe.gif' width='180'>";
+        }
+        else {
+          $kuva = "<img src='{$pupesoft_scheme}api.devlab.fi/pupesoft.gif' width='180'>";
+        }
       }
 
       if ($uutinen['nimi'] == "") {

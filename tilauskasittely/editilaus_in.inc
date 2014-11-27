@@ -355,8 +355,15 @@ while ($tietue = fgets($fd)) {
   $next_tunnus = trim(substr($next_tietue, 0, 3));
   fseek($fd, $positio);
 
+  $rivinvaihto = $edi_tyyppi == "edifact911";
+  $rivinvaihto = ($rivinvaihto and $tunnus == "QTY");
+
+  if ($crossdock911 == "JOO") {
+    $rivinvaihto = ($rivinvaihto and $next_tunnus == "LIN");
+  }
+
   // Tuoterivi vaihtuu ilman selkeätä rivinloppumismerkkiä....
-  if ($edi_tyyppi == "edifact911" and $tunnus == "QTY" and $next_tunnus == "LIN") {
+  if ($rivinvaihto) {
     $tunnus = "QTYLIN";
   }
 
@@ -1436,7 +1443,7 @@ while ($tietue = fgets($fd)) {
 
       $toimitetaan_tanne = (isset($toimovttunnus) and !empty($toimovttunnus)) ? $toimovttunnus : $arow['toim_ovttunnus'];
 
-      $varasto = array(0);
+      $varasto = array();
 
       if ($edi_tyyppi == "magento") {
         // Nämä ovat ainoat varastot joista verkkokauppa saa myydä
@@ -1509,6 +1516,12 @@ while ($tietue = fgets($fd)) {
       // Jos asiakas on syöttänyt verkkokaupassa oman tilausnumeron tai viitteen yliajetaan viesti
       if (trim($ot_verkkokauppa_tilausviesti) != "") {
         $viite = $ot_verkkokauppa_tilausviesti;
+      }
+
+      // Tässä hallitaan se tapaus jos varasto muuttuja onkin tyhjä
+      $insertvarasto = array(0);
+      if (!empty($varasto)) {
+        $insertvarasto = $varasto;
       }
 
       // Lisätään otsikko
@@ -1584,7 +1597,7 @@ while ($tietue = fgets($fd)) {
                 toim_email              = '$arow[toim_email]',
                 tunnusnippu             = '',
                 valkoodi                = '$yhtiorow[valkoodi]',
-                varasto                 = '{$varasto[0]}',
+                varasto                 = '{$insertvarasto[0]}',
                 verkkotunnus            = '$arow[verkkotunnus]',
                 vienti                  = '$til_vienti',
                 vienti_kurssi           = '1',

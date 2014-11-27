@@ -762,7 +762,7 @@ if ($tee == 'VALMIS') {
               $selite = t("Saldoa")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("v‰hennettiin")." ".abs($erotus)." ".t("kappaleella. Saldo nyt")." $cursaldo. <br>$lisaselite<br>$inven_laji";
             }
             else {
-              $selite = t("Saldo")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("t‰sm‰si.")." <br>$lisaselite<br>$inven_laji";
+              $selite = t("Saldo")." ($nykyinensaldo) ".t("paikalla")." $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso ".t("t‰sm‰si").".<br>$lisaselite<br>$inven_laji";
             }
 
             ///* Tehd‰‰n tapahtuma *///
@@ -1139,6 +1139,71 @@ if ($tee == 'VALMIS') {
   }
   else {
     $tee = "INVENTOI";
+  }
+
+  $_param_paalla = ($yhtiorow['inventointi_yhteenveto'] == "K");
+
+  if ($_param_paalla and empty($tee) and empty($virhe) and $lista != '') {
+
+    $lista = (int) $lista;
+
+    $query = "SELECT *
+              FROM tuotepaikat
+              WHERE yhtio          = '{$kukarow['yhtio']}'
+              AND inventointilista = '{$lista}'";
+    $listares = pupe_query($query);
+
+    $_loytyyko = false;
+
+    while ($listarow = mysql_fetch_assoc($listares)) {
+
+      $query = "SELECT *
+                FROM tapahtuma
+                WHERE yhtio   = '{$kukarow['yhtio']}'
+                and tuoteno   = '{$listarow['tuoteno']}'
+                and laji      = 'Inventointi'
+                and hyllyalue = '{$listarow['hyllyalue']}'
+                and hyllynro  = '{$listarow['hyllynro']}'
+                and hyllyvali = '{$listarow['hyllyvali']}'
+                and hyllytaso = '{$listarow['hyllytaso']}'
+                and laadittu  = '{$listarow['inventointiaika']}'
+                ORDER BY tunnus desc
+                LIMIT 1";
+      $tapresult = pupe_query($query);
+      $taptrow = mysql_fetch_assoc($tapresult);
+
+      if (!empty($taptrow['selite']) and strpos($taptrow['selite'], t("t‰sm‰si")) === false) {
+
+        $_loytyyko = true;
+
+        $taptrow["selite"] = preg_replace("/".t("paikalla")." .*?\-.*?\-.*?\-.*? /", "", $taptrow["selite"]);
+
+        $_taulukko .= "<tr>
+          <td valign='top'>$listarow[tuoteno]</td>
+          <td>$listarow[hyllyalue] $listarow[hyllynro] $listarow[hyllyvali] $listarow[hyllytaso]</td>
+          <td>".tv1dateconv($taptrow['laadittu'], "PITKA")."</td>
+          <td>{$taptrow['selite']}</td>
+          </tr>";
+      }
+    }
+
+    if ($_loytyyko) {
+      echo "<font class='message'>".t("Inventointi yhteenveto")."</font>";
+      echo "<table>";
+      echo "<tr>";
+      echo "<th>".t("Tuoteno")."</th>";
+      echo "<th>".t("Varastopaikka")."</th>";
+      echo "<th>".t("Inventointiaika")."</th>";
+      echo "<th>".t("Selite")."</th>";
+      echo "</tr>";
+      echo $_taulukko;
+      echo "</table>";
+    }
+    else {
+      echo t("Inventoinnissa kaikki t‰sm‰si");
+    }
+
+    echo "<br />";
   }
 
   if ($tee == "" and $lopetus != '') {

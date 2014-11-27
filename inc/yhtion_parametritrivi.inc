@@ -300,6 +300,22 @@ if ($fieldname == "laskutyyppi") {
   $jatko = 0;
 }
 
+if ($fieldname == "laskun_monistus_kommenttikentta") {
+  $ulos = "<td><select name='{$nimi}' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel = array();
+  $apu = $trow[$i];
+  $sel[$apu] = "selected";
+
+  $ulos .= "<option value = ''>" . t("Ei näytetä kommenttikenttää");
+  $ulos .= "<option value = 'V' {$sel["V"]}>" . t("Laskua monistettaessa näytetään kommenttikenttä");
+  $ulos .= "<option value = 'P' {$sel["P"]}>" . t("Laskua monistettaessa pakollinen kommenttikenttä");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+
 if ($fieldname == "viivakoodi_laskulle") {
   $apu = $trow[$i];
   $sel = array();
@@ -4296,6 +4312,24 @@ if ($fieldname == "laiterekisteri_kaytossa") {
   $ulos  = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
   $ulos .= "<option value = ''>".t("Laiterekisteri ei ole käytössä");
   $ulos .= "<option value = 'K' $sel[K]>".t("Laiterekisteri on käytössä");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "inventointi_yhteenveto") {
+  $sel = $trow[$i] == "K" ? "selected" : "";
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $ulos .= "<option value = ''>";
+  $ulos .= t("Inventointilistaa inventoidessa ei näytetä yhteenvetoa");
+  $ulos .= "</option>";
+
+  $ulos .= "<option value = 'K' {$sel}>";
+  $ulos .= t("Inventointilistaa inventoidessa näytetään yhteenveto");
+  $ulos .= "</option>";
+
   $ulos .= "</select></td>";
 
   $jatko = 0;

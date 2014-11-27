@@ -29,7 +29,7 @@ class PrestaCustomers extends PrestaClient {
     }
 
     $xml->customer->firstname = '-';
-    
+
     $name = preg_replace('/[^a-zA-Z]/', '', $customer['nimi']);
     $xml->customer->lastname = $name;
     $email = 'test@example.com';
@@ -94,17 +94,21 @@ class PrestaCustomers extends PrestaClient {
   public function sanitize_tunnus_array(&$tunnus, $key) {
     $tunnus = $this->sanitize_tunnus($tunnus);
   }
-  
+
   /**
    * Sanitize singular records pupesoft id from string
    * For now pupesoft id is saved in customer.note field.
    * 
    * @param string $string
-   * @return string
+   * @return int
    */
   public function sanitize_tunnus($string) {
     $tunnus_array = explode(self::TUNNUS_SEPARATOR, $string);
-    return $tunnus_array[1];
+    if (isset($tunnus_array[1]) and is_int($tunnus_array[1])) {
+      return (int) $tunnus_array[1];
+    }
+
+    return 0;
   }
 
   /**
@@ -120,7 +124,7 @@ class PrestaCustomers extends PrestaClient {
 
     return true;
   }
-  
+
   /**
    * Overrides parents get
    * 
@@ -129,7 +133,7 @@ class PrestaCustomers extends PrestaClient {
   public function get($id) {
     $customer = parent::get($id);
     $customer['pupesoft_id'] = $this->sanitize_tunnus($customer['note']);
-    
+
     return $customer;
   }
 }

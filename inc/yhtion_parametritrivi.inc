@@ -4267,6 +4267,24 @@ if ($fieldname == 'varastonarvon_jako_usealle_valmisteelle') {
   $jatko = 0;
 }
 
+if ($fieldname == "jtselaus_varastot") {
+  $sel = $trow[$i] == "K" ? "selected" : "";
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $ulos .= "<option value = ''>";
+  $ulos .= t("JT-selauksessa rajataan varastoja käyttäjän myyntivarastojen perusteella");
+  $ulos .= "</option>";
+
+  $ulos .= "<option value = 'K' {$sel}>";
+  $ulos .= t("JT-selauksessa ei rajata varastoja käyttäjän myyntivarastojen perusteella");
+  $ulos .= "</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == 'pura_osaluettelot') {
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 

@@ -2392,7 +2392,7 @@ if ($tilaus_on_jo == "" and $from_varastoon_inc == "" and $tee == '') {
 
   echo "<br><font class='message'>".t("Valinnat")."</font><br><br>";
 
-  if (!empty($kukarow['varasto'])) {
+  if ($yhtiorow['jtselaus_varastot'] != "K" and !empty($kukarow['varasto'])) {
     $_kukarow_varasto = mysql_real_escape_string($kukarow['varasto']);
     $_varastolisa = "AND tunnus in ({$_kukarow_varasto})";
   }

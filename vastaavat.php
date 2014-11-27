@@ -237,14 +237,14 @@ if ($tee == 'muutaprio') {
 
   // Siirretään ketjun muita eteenpäin, jarjestys + 1
   if ($prio != 0 and $prio != $row['jarjestys'] and is_numeric($prio)) {
-    $query = "UPDATE vastaavat 
-              SET jarjestys=jarjestys+1, 
-                  muuttaja='{$kukarow['kuka']}', 
+    $query = "UPDATE vastaavat
+              SET jarjestys=jarjestys+1,
+                  muuttaja='{$kukarow['kuka']}',
                   muutospvm=now()
-              WHERE jarjestys!=0 
-                AND id='$id' 
-                AND yhtio='{$kukarow['yhtio']}' 
-                AND tunnus!=$tunnus 
+              WHERE jarjestys!=0
+                AND id='$id'
+                AND yhtio='{$kukarow['yhtio']}'
+                AND tunnus!=$tunnus
                 AND jarjestys >= $prio";
     $result = pupe_query($query);
   }

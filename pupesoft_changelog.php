@@ -24,13 +24,13 @@ echo "  <script type='text/javascript'>
     </script>";
 
 // Haetaan pulkkareita githubista
-function github_api ($url) {
+function github_api($url) {
   $ch  = curl_init();
-	curl_setopt($ch, CURLOPT_URL, $url);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($ch, CURLOPT_HEADER, FALSE);
+  curl_setopt($ch, CURLOPT_URL, $url);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+  curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+  curl_setopt($ch, CURLOPT_HEADER, FALSE);
   curl_setopt($ch, CURLOPT_USERAGENT, "Pupesoft");
 
   $pulkkarit = curl_exec($ch);
@@ -42,7 +42,7 @@ function github_api ($url) {
   }
   else {
     $pulkkarit = json_decode($pulkkarit);
-    return($pulkkarit);
+    return $pulkkarit;
   }
 }
 
@@ -120,7 +120,7 @@ if ($haetaanpulkkarit) {
                          WHERE yhtio   = '{$kukarow['yhtio']}'
                          and kuka      = ''
                          and sovellus != ''
-                         and nimi like '%$filename'
+                         and nimi      like '%$filename'
                          ORDER BY sovellus, nimi";
               $menures = pupe_query($query);
 
@@ -289,4 +289,4 @@ if (mysql_num_rows($vetores)) {
   echo "</table>";
 }
 
-require("inc/footer.inc");
+require "inc/footer.inc";

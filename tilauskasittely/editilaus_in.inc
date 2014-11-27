@@ -179,6 +179,8 @@ $verkkokauppavarasto_li       = "";
 $veromaara                    = "";
 $viite                        = "";
 $yhteyshenkilon_puhelin       = "";
+$ovt_tunnus                   = "";
+$ovt_tunnuswhere              = "";
 
 // nollataan kaikki rivin muuttujat (nämä samat pitää tehdä tuote insertin jälkeen)
 $tuoteerror        = 1; // oletetaan aina ettei  tuotetta löydy
@@ -353,8 +355,15 @@ while ($tietue = fgets($fd)) {
   $next_tunnus = trim(substr($next_tietue, 0, 3));
   fseek($fd, $positio);
 
+  $rivinvaihto = $edi_tyyppi == "edifact911";
+  $rivinvaihto = ($rivinvaihto and $tunnus == "QTY");
+
+  if ($crossdock911 == "JOO") {
+    $rivinvaihto = ($rivinvaihto and $next_tunnus == "LIN");
+  }
+
   // Tuoterivi vaihtuu ilman selkeätä rivinloppumismerkkiä....
-  if ($edi_tyyppi == "edifact911" and $tunnus == "QTY" and $next_tunnus == "LIN") {
+  if ($rivinvaihto) {
     $tunnus = "QTYLIN";
   }
 
@@ -592,6 +601,15 @@ while ($tietue = fgets($fd)) {
     $viite .= $tieto. ' ';
     break;
 
+  case 'ICHG_SNDR' :
+    // Otetaan asiakkaan ovttunnus talteen
+    if (isset($tieto) and $tieto != "") {
+      $pos = strpos($tieto, "@");
+      $ovt_tunnus = substr($tieto, 0, $pos);
+      $ovt_tunnus = trim($ovt_tunnus);
+    }
+    break;
+
   case 'ONADBY_RF' :
     if (substr($tieto, 0, 4) == 'IT @') {
       $tieto = substr($tieto, 4, 10) * 1;
@@ -671,12 +689,12 @@ while ($tietue = fgets($fd)) {
           $query = "SELECT asiakas.*
                     FROM asiakas
                     JOIN yhteyshenkilo ON asiakas.yhtio = yhteyshenkilo.yhtio
-                      AND asiakas.tunnus = yhteyshenkilo.liitostunnus
-                      AND yhteyshenkilo.rooli = 'Magento'
+                      AND asiakas.tunnus                       = yhteyshenkilo.liitostunnus
+                      AND yhteyshenkilo.rooli                  = 'Magento'
                       AND yhteyshenkilo.ulkoinen_asiakasnumero = '{$ot_verkkokauppa_asiakasnro}'
-                    WHERE asiakas.yhtio                  = '{$kukarow['yhtio']}'
-                    AND asiakas.toim_ovttunnus           not in ('','0')
-                    AND asiakas.laji                     not in ('R','P')";
+                    WHERE asiakas.yhtio                        = '{$kukarow['yhtio']}'
+                    AND asiakas.toim_ovttunnus                 not in ('','0')
+                    AND asiakas.laji                           not in ('R','P')";
           $result = pupe_query($query);
 
           if (mysql_num_rows($result) == 1) {
@@ -718,6 +736,24 @@ while ($tietue = fgets($fd)) {
                 WHERE yhtio        = '$kukarow[yhtio]'
                 and toim_ovttunnus = '$tieto'
                 and toim_ovttunnus not in ('','0')
+                and laji           not in ('R','P')";
+      $result = pupe_query($query);
+
+      if (mysql_num_rows($result) == 1) {
+        $arow = mysql_fetch_assoc($result);
+        $vastaustapa .= $arow['tilausvahvistus'];
+        $edi_ulos .= "$arow[nimi] $arow[nimitark] $arow[toim_nimi] $arow[toim_nimitark] $arow[toim_postitp]\n";
+      }
+    }
+
+    if (!is_array($arow) and !empty($ovt_tunnus)) {
+
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio        = '$kukarow[yhtio]'
+                and toim_ovttunnus = '$tieto'
+                and toim_ovttunnus not in ('','0')
+                and ovttunnus      = '$ovt_tunnus'
                 and laji           not in ('R','P')";
       $result = pupe_query($query);
 
@@ -1407,7 +1443,7 @@ while ($tietue = fgets($fd)) {
 
       $toimitetaan_tanne = (isset($toimovttunnus) and !empty($toimovttunnus)) ? $toimovttunnus : $arow['toim_ovttunnus'];
 
-      $varasto = array(0);
+      $varasto = array();
 
       if ($edi_tyyppi == "magento") {
         // Nämä ovat ainoat varastot joista verkkokauppa saa myydä
@@ -1480,6 +1516,12 @@ while ($tietue = fgets($fd)) {
       // Jos asiakas on syöttänyt verkkokaupassa oman tilausnumeron tai viitteen yliajetaan viesti
       if (trim($ot_verkkokauppa_tilausviesti) != "") {
         $viite = $ot_verkkokauppa_tilausviesti;
+      }
+
+      // Tässä hallitaan se tapaus jos varasto muuttuja onkin tyhjä
+      $insertvarasto = array(0);
+      if (!empty($varasto)) {
+        $insertvarasto = $varasto;
       }
 
       // Lisätään otsikko
@@ -1555,7 +1597,7 @@ while ($tietue = fgets($fd)) {
                 toim_email              = '$arow[toim_email]',
                 tunnusnippu             = '',
                 valkoodi                = '$yhtiorow[valkoodi]',
-                varasto                 = '{$varasto[0]}',
+                varasto                 = '{$insertvarasto[0]}',
                 verkkotunnus            = '$arow[verkkotunnus]',
                 vienti                  = '$til_vienti',
                 vienti_kurssi           = '1',
@@ -2440,6 +2482,8 @@ while ($tietue = fgets($fd)) {
     $veromaara                    = "";
     $viite                        = "";
     $yhteyshenkilon_puhelin       = "";
+    $ovt_tunnus                   = "";
+    $ovt_tunnuswhere              = "";
     break;
   }
 }

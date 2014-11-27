@@ -283,7 +283,9 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "SALDOVAHVISTUS")  $ulos .= "<option value='SALDOVAHVISTUS' {$avain_sel['SALDOVAHVISTUS']}>  ".t("Saldovahvistuksen viesti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "DPAVAINSANALAJI") $ulos .= "<option value='DPAVAINSANALAJI' {$avain_sel['DPAVAINSANALAJI']}>        ".t("Dynaamisen puun avainsanojen laji")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "LITETY_TKIRJAST") $ulos .= "<option value='LITETY_TKIRJAST' {$avain_sel['LITETY_TKIRJAST']}>".t("Tiedostokirjastossa selailtava tiedostotyyppi")."</option>";
-    if ($lukitse_laji== "" or $lukitse_laji == "RELEX_TUOTEPAR") $ulos .= "<option value='RELEX_TUOTEPAR' {$avain_sel['RELEX_TUOTEPAR']}>".t("Relex tuoteparametrit")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "RELEX_TUOTEPAR") $ulos .= "<option value='RELEX_TUOTEPAR' {$avain_sel['RELEX_TUOTEPAR']}>".t("Relex tuoteparametrit")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "JTVALMISVIESTI")  $ulos .= "<option value='JTVALMISVIESTI' {$avain_sel['JTVALMISVIESTI']}>".t("SMS-viesti, joka l‰hetet‰‰n asiakkalle, kun j‰lkitoimitustuotteet on ker‰tty")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "TYOMVALMVIEST")   $ulos .= "<option value='TYOMVALMVIEST' {$avain_sel['TYOMVALMVIEST']}>".t("SMS-viesti, joka l‰hetet‰‰n asiakkalle, kun tyˆm‰‰r‰ys on valmis")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Verkkokaupan avainsanat")."'>";
@@ -1079,7 +1081,7 @@ if ($avain_sel['KERAYSERA_TK'] == "SELECTED" and $_selitetark) {
 }
 
 if ($avain_sel['RELEX_TUOTEPAR'] == "SELECTED" and $_selite) {
-  
+
   $query = "DESC tuote";
   $varresult = pupe_query($query);
 
@@ -1097,16 +1099,16 @@ if ($avain_sel['RELEX_TUOTEPAR'] == "SELECTED" and $_selite) {
 if ($avain_sel['RELEX_TUOTEPAR'] == "SELECTED" and $_selitetark) {
 
   $oper_array = array('on'              => '=',
-                      'not'             => '!=',
-                      'in'              => 'in',
-                      'not in'          => 'not in',
-                      'like_pre'        => '%like',
-                      'like_post'       => 'like%',
-                      'like_both'       => '%like%',
-                      'gt'              => '>',
-                      'lt'              => '<',
-                      'gte'             => '>=',
-                      'lte'             => '<=',
+    'not'             => '!=',
+    'in'              => 'in',
+    'not in'          => 'not in',
+    'like_pre'        => '%like',
+    'like_post'       => 'like%',
+    'like_both'       => '%like%',
+    'gt'              => '>',
+    'lt'              => '<',
+    'gte'             => '>=',
+    'lte'             => '<=',
   );
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";

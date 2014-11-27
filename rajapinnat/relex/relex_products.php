@@ -390,6 +390,7 @@ while ($row = mysql_fetch_assoc($res)) {
           tuotteen_toimittajat.tunnus tutotunnus,
           toimi.tunnus toimittaja,
           toimi.ytunnus ytunnus,
+          if(tuotteen_toimittajat.toimitusaika = 0, toimi.oletus_toimaika, tuotteen_toimittajat.toimitusaika) toimitusaika,
           tuotteen_toimittajat.toim_tuoteno,
           tuotteen_toimittajat.toim_nimitys,
           if(tuotteen_toimittajat.osto_era = 0, 1, tuotteen_toimittajat.osto_era) osto_era,
@@ -479,6 +480,14 @@ while ($row = mysql_fetch_assoc($res)) {
 
           $korjattu_ema = round($ema * (1 + $avg_poikpros / 2), 2);
         }
+        else {
+          $korjattu_ema = round($ema, 2);
+        }
+      }
+      else {
+        // laitetaan tuotteen toimittajan takana oleva toimitusaika, tai toimittajan oletus,
+        // mik‰li tuotteella ei ole yht‰‰n tuloa
+        $korjattu_ema = round($ttrow['toimitusaika'], 2);
       }
 
       // Hetaan kaikki ostohinnat yhtiˆn oletusvaluutassa
@@ -543,7 +552,13 @@ while ($row = mysql_fetch_assoc($res)) {
     }
 
     // Valitaan edullisin toimittaja
-    array_multisort($toimittajat_a_hinta, SORT_ASC, $toimittajat_a);
+    /*
+    TODO, toistaiseksi p‰‰toimittajaksi Pupen p‰‰toimittaja (order by j‰rjestys)
+    Myˆhemmin lis‰t‰‰n tuki, ett‰ voidaan kertoa miss‰ tapauksissa
+    otetaan halvimman hinnan mukaan ja miss‰ Pupen p‰‰toimittaja
+    Relexin p‰‰toimittajaksi.
+    */
+    // array_multisort($toimittajat_a_hinta, SORT_ASC, $toimittajat_a);
   }
 
   $parastoimittaja = $toimittajat_a[0];

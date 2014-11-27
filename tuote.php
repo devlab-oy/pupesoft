@@ -417,7 +417,7 @@ if ($tee == 'Z') {
     }
 
     //eka laitetaan tuotteen yleiset (aika staattiset) tiedot
-    echo "<table>";
+    echo "<table class='tuotekysely'>";
 
     echo "<tr>";
     echo "<th>".t("Tuotenumero")."<br>".t("Tuotemerkki")."</th>";

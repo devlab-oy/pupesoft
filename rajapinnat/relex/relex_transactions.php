@@ -41,11 +41,14 @@ if (isset($argv[2]) and $argv[2] != '') {
       $kuukausi = sprintf('%02d', pupesoft_cleannumber($argv[3]));
     }
   }
-
-  $paiva_ajo = TRUE;
-
-  if ($argv[2] == "edpaiva") {
-    $ajopaiva = date("Y-m-d", mktime(0, 0, 0, date("m"), date("d")-1, date("Y")));
+  else {
+    if (strpos($argv[2], "-") !== FALSE) {
+      list($y, $m, $d) = explode("-", $argv[2]);
+      if (is_numeric($y) and is_numeric($m) and is_numeric($d) and checkdate($m, $d, $y)) {
+        $ajopaiva = $argv[2];
+      }
+    }
+    $paiva_ajo = TRUE;
   }
 }
 
@@ -55,9 +58,7 @@ $yhtio = mysql_real_escape_string($argv[1]);
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
-$tuoterajaus = " AND tuote.status not in ('P','E')
-                 AND tuote.ei_saldoa    = ''
-                 AND tuote.tuotetyyppi  = '' ";
+$tuoterajaus = rakenna_relex_tuote_parametrit();
 
 // Tallennetaan rivit tiedostoon
 if ($kuukausi_ajo) {

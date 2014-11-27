@@ -84,21 +84,34 @@ if ($tee == "ALOITAKOROTUS") {
                 round(lasku.viikorkopros * tiliointi.summa * -1 * (to_days(tiliointi.tapvm)-to_days(lasku.erpcm)) / 36500,2) korkosumma2,
                 maksuehto.jv
                 FROM lasku use index (yhtio_tila_mapvm)
-                JOIN asiakas ON (lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus $asiakaslisa)
-                JOIN tiliointi use index (tositerivit_index) on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]') and tiliointi.tapvm > lasku.erpcm and tiliointi.korjattu = '')
-                LEFT JOIN maksuehto on (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto)
-                WHERE lasku.yhtio  = '$kukarow[yhtio]'
-                and lasku.tila     = 'U'
-                and lasku.mapvm   >='$vva-$kka-$ppa'
-                and lasku.mapvm   <='$vvl-$kkl-$ppl'
-                and lasku.summa   != 0
-                and lasku.olmapvm  = '0000-00-00'
+                JOIN asiakas
+                  ON (lasku.yhtio = asiakas.yhtio
+                    AND lasku.liitostunnus  = asiakas.tunnus $asiakaslisa)
+                JOIN tiliointi use index (tositerivit_index)
+                  ON (tiliointi.yhtio = lasku.yhtio
+                    AND tiliointi.ltunnus   = lasku.tunnus
+                    AND tiliointi.tilino    in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]')
+                    AND tiliointi.tapvm     > lasku.erpcm and tiliointi.korjattu = '')
+                LEFT JOIN maksuehto
+                  ON (maksuehto.yhtio = lasku.yhtio
+                    AND maksuehto.tunnus    = lasku.maksuehto)
+                WHERE lasku.yhtio           = '$kukarow[yhtio]'
+                AND lasku.tila              = 'U'
+                AND lasku.mapvm   >='$vva-$kka-$ppa'
+                AND lasku.mapvm   <='$vvl-$kkl-$ppl'
+                AND lasku.summa            != 0
+                AND lasku.olmapvm           = '0000-00-00'
                 $konslisa
-                HAVING ika > $min_myoh and abs(korkosumma2) > abs($minimisumma) and (maksuehto.jv is null or maksuehto.jv = '')
-                ORDER BY asiakas.ytunnus) as laskut
-            JOIN asiakas ON (lasku.yhtio = asiakas.yhtio and lasku.liitostunnus = asiakas.tunnus $asiakaslisa)
-            JOIN tiliointi use index (tositerivit_index) on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]') and tiliointi.tapvm > lasku.erpcm and tiliointi.korjattu = '')
-            WHERE lasku.tunnus     = laskut.tunnus
+                HAVING ika > $min_myoh AND abs(korkosumma2) > abs($minimisumma) AND (maksuehto.jv is null or maksuehto.jv = '')
+                ORDER BY asiakas.ytunnus) AS laskut
+            JOIN asiakas ON (lasku.yhtio = asiakas.yhtio
+              AND lasku.liitostunnus        = asiakas.tunnus $asiakaslisa)
+            JOIN tiliointi use index (tositerivit_index)
+              ON (tiliointi.yhtio = lasku.yhtio
+                AND tiliointi.ltunnus       = lasku.tunnus
+                AND tiliointi.tilino        in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]')
+                AND tiliointi.tapvm         > lasku.erpcm AND tiliointi.korjattu = '')
+            WHERE lasku.tunnus              = laskut.tunnus
             $konslisa
             GROUP BY asiakas.ytunnus, asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.postitp
             HAVING korkosumma > 0 $korkolisa
@@ -128,13 +141,18 @@ if ($tee == "KOROTA") {
 
   $query = "SELECT lasku.liitostunnus, tiliointi.summa*-1 summa, lasku.tunnus,
             lasku.erpcm, lasku.laskunro, tiliointi.tapvm, lasku.tapvm latapvm, if(count(*) > 1, 'useita', lasku.mapvm) mapvm, lasku.viikorkopros,
-            if (count(*) > 1, 'useita', to_days(tiliointi.tapvm) - to_days(lasku.erpcm)) as ika,
-            sum(round(lasku.viikorkopros * tiliointi.summa * -1 * (to_days(tiliointi.tapvm)-to_days(lasku.erpcm)) / 36500,2)) as korkosumma
+            if (count(*) > 1, 'useita', to_days(tiliointi.tapvm) - to_days(lasku.erpcm)) AS ika,
+            sum(round(lasku.viikorkopros * tiliointi.summa * -1 * (to_days(tiliointi.tapvm)-to_days(lasku.erpcm)) / 36500,2)) AS korkosumma
             FROM lasku
-            JOIN tiliointi use index (tositerivit_index) on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.tilino in ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]') and tiliointi.tapvm > lasku.erpcm and tiliointi.korjattu = '')
-            LEFT JOIN maksuehto on (maksuehto.yhtio = lasku.yhtio and maksuehto.tunnus = lasku.maksuehto)
-            WHERE lasku.yhtio = '$kukarow[yhtio]'
-            and lasku.tunnus  in ($korotettavat[0])
+            JOIN tiliointi use index (tositerivit_index)
+              ON (tiliointi.yhtio = lasku.yhtio
+                AND tiliointi.ltunnus = lasku.tunnus
+                AND tiliointi.tilino  IN ('$yhtiorow[myyntisaamiset]', '$yhtiorow[factoringsaamiset]')
+                AND tiliointi.tapvm   > lasku.erpcm AND tiliointi.korjattu = '')
+            LEFT JOIN maksuehto ON (maksuehto.yhtio = lasku.yhtio
+              AND maksuehto.tunnus    = lasku.maksuehto)
+            WHERE lasku.yhtio         = '$kukarow[yhtio]'
+            AND lasku.tunnus          IN ($korotettavat[0])
             GROUP BY lasku.tunnus
             ORDER BY lasku.erpcm";
   $result = pupe_query($query);

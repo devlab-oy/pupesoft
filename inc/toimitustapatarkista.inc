@@ -47,83 +47,83 @@ if (!function_exists("toimitustapatarkista")) {
         $updre = pupe_query($query);
 
         echo ", ".mysql_affected_rows()." ".t("asiakkaan avainsanaa");
-        
-        $query = "UPDATE lasku set 
-                  toimitustapa='$toita' 
-                  where toimitustapa='$trow[$i]' 
-                  and yhtio='$kukarow[yhtio]' 
+
+        $query = "UPDATE lasku set
+                  toimitustapa='$toita'
+                  where toimitustapa='$trow[$i]'
+                  and yhtio='$kukarow[yhtio]'
                   and tila = 'L' and alatila in ('A','C')";
         $updre = pupe_query($query);
 
         echo ", ".mysql_affected_rows()." ".t("myyntitilaus otsikkoa");
-        
-        $query = "UPDATE lasku set 
-                  toimitustapa='$toita' 
-                  where toimitustapa='$trow[$i]' 
-                  and yhtio='$kukarow[yhtio]' 
+
+        $query = "UPDATE lasku set
+                  toimitustapa='$toita'
+                  where toimitustapa='$trow[$i]'
+                  and yhtio='$kukarow[yhtio]'
                   and tila = 'N'";
         $updre = pupe_query($query);
 
         echo ", ".mysql_affected_rows()." ".t("myyntitilaus kesken otsikkoa");
-        
-        $query = "UPDATE lasku set 
-                  toimitustapa='$toita' 
-                  where toimitustapa='$trow[$i]' 
-                  and yhtio='$kukarow[yhtio]' 
+
+        $query = "UPDATE lasku set
+                  toimitustapa='$toita'
+                  where toimitustapa='$trow[$i]'
+                  and yhtio='$kukarow[yhtio]'
                   and tila = 'G' and alatila in ('','J','KJ','A','C','T','P')";
         $updre = pupe_query($query);
 
         echo ", ".mysql_affected_rows()." ".t("siirtolista otsikkoa");
-        
-        $query = "UPDATE lasku set 
-                  toimitustapa='$toita' 
-                  where toimitustapa='$trow[$i]' 
-                  and yhtio='$kukarow[yhtio]' 
+
+        $query = "UPDATE lasku set
+                  toimitustapa='$toita'
+                  where toimitustapa='$trow[$i]'
+                  and yhtio='$kukarow[yhtio]'
                   and tila = 'E'";
         $updre = pupe_query($query);
 
         echo ", ".mysql_affected_rows()." ".t("ennakkotilaus otsikkoa");
-        
-        $query = "UPDATE lasku set 
-                  toimitustapa='$toita' 
-                  where toimitustapa='$trow[$i]' 
-                  and yhtio='$kukarow[yhtio]' 
+
+        $query = "UPDATE lasku set
+                  toimitustapa='$toita'
+                  where toimitustapa='$trow[$i]'
+                  and yhtio='$kukarow[yhtio]'
                   and tila = 'T' and alatila in ('','A','B')";
         $updre = pupe_query($query);
 
         echo ", ".mysql_affected_rows()." ".t("tarjous otsikkoa");
 
-        $query = "UPDATE lasku set 
-                  toimitustapa='$toita' 
-                  where toimitustapa='$trow[$i]' 
-                  and yhtio='$kukarow[yhtio]' 
+        $query = "UPDATE lasku set
+                  toimitustapa='$toita'
+                  where toimitustapa='$trow[$i]'
+                  and yhtio='$kukarow[yhtio]'
                   and tila = 'V' and alatila in ('','K','J','A','C')";
         $updre = pupe_query($query);
 
         echo ", ".mysql_affected_rows()." ".t("valmistus otsikkoa");
 
-        $query = "UPDATE lasku set 
-                  toimitustapa='$toita' 
-                  where toimitustapa='$trow[$i]' 
-                  and yhtio='$kukarow[yhtio]' 
+        $query = "UPDATE lasku set
+                  toimitustapa='$toita'
+                  where toimitustapa='$trow[$i]'
+                  and yhtio='$kukarow[yhtio]'
                   and tila = 'A'";
         $updre = pupe_query($query);
 
         echo ", ".mysql_affected_rows()." ".t("työmääräys otsikkoa");
 
-        $query = "UPDATE lasku set 
-                  toimitustapa='$toita' 
-                  where toimitustapa='$trow[$i]' 
-                  and yhtio='$kukarow[yhtio]' 
+        $query = "UPDATE lasku set
+                  toimitustapa='$toita'
+                  where toimitustapa='$trow[$i]'
+                  and yhtio='$kukarow[yhtio]'
                   and tila = 'R' and alatila in ('','A')";
         $updre = pupe_query($query);
 
         echo ", ".mysql_affected_rows()." ".t("projekti otsikkoa");
 
-        $query = "UPDATE lasku set 
-                  toimitustapa='$toita' 
-                  where toimitustapa='$trow[$i]' 
-                  and yhtio='$kukarow[yhtio]' 
+        $query = "UPDATE lasku set
+                  toimitustapa='$toita'
+                  where toimitustapa='$trow[$i]'
+                  and yhtio='$kukarow[yhtio]'
                   and tila = 'C'";
         $updre = pupe_query($query);
 

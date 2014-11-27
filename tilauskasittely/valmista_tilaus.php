@@ -54,6 +54,14 @@ if (!isset($from_kaikkikorj)) {
       $kukarow["kesken"]  = $otunnus;
       $perheid       = $perheid;
 
+      // Kun ollaan korjaamassa valmistusta niin pakkohyv‰ksyt‰‰n rivi,
+      // koska raaka-aine voidaan olla jo kulutettu.
+      // Joten vaikka tuotetta ei myyt‰viss‰ olisikaa tulee raaka-aine voida
+      // valmistuksen korjauksella valmistukselle lis‰t‰.
+      if ($toim == "KORJAA") {
+        $var = 'H';
+      }
+
       require 'lisaarivi.inc';
 
       $lisatyt_rivit = array_merge($lisatyt_rivit1, $lisatyt_rivit2);

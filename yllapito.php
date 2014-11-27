@@ -88,6 +88,10 @@ $toim = $toimi_array[0];
 if (isset($toimi_array[1])) $alias_set = $toimi_array[1];
 if (isset($toimi_array[2])) $rajattu_nakyma = $toimi_array[2];
 
+if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote" or $toim == "avainsana") {
+  enable_ajax();
+}
+
 // Tuotteita voidaan rajata status -kentällä
 $tuote_status_rajaus_lisa = "";
 $tuote_status_lisa = "";

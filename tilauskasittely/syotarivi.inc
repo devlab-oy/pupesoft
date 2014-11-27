@@ -671,11 +671,11 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
   echo "<tr>$jarjlisa";
 
   if ($tila == "LISAAKERTARESEPTIIN") {
-    echo "<input type='hidden' name='valmiste_vai_raakaaine' value='raakaaine' />";
+    echo "<input type='hidden' name='valmiste_vai_raakaaine' value='{$valmiste_vai_raakaaine}' />";
     echo "<td valign='top' style='color: #00FF00;'>".t("Raaka-Aine")."</td>";
   }
   if ($tila == "LISAAISAKERTARESEPTIIN") {
-    echo "<input type='hidden' name='valmiste_vai_raakaaine' value='valmiste' />";
+    echo "<input type='hidden' name='valmiste_vai_raakaaine' value='{$valmiste_vai_raakaaine}' />";
     echo "<td valign='top' style='color: #00FF00;'>".t("Valmiste")."</td>";
   }
   if ($tila == "LISAARESEPTIIN") {

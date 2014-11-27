@@ -1500,9 +1500,9 @@ if ($tee == 'Z') {
         echo "<td>";
         echo $tyyppi;
 
-        if ($jtrow['korvamerkinta'] !== NULL) {
+        if (!empty($jtrow['korvamerkinta'])) {
 
-          if (empty($jtrow['korvamerkinta'])) {
+          if ($jtrow['korvamerkinta'] == '.') {
             $luokka = '';
           }
           else {
@@ -2462,9 +2462,9 @@ if ($tee == 'Z') {
             echo t("$prow[laji]");
           }
 
-          if ($prow['korvamerkinta'] !== NULL) {
+          if (!empty($prow['korvamerkinta'])) {
 
-            if (empty($prow['korvamerkinta'])) {
+            if ($prow['korvamerkinta'] == '.') {
               $luokka = '';
             }
             else {

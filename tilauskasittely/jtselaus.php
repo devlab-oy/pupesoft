@@ -1696,9 +1696,9 @@ if ($tee == "JATKA") {
                 }
               }
 
-              if ($jtrow['korvamerkinta'] !== NULL) {
+              if (!empty($jtrow['korvamerkinta'])) {
 
-                if (empty($jtrow['korvamerkinta'])) {
+                if ($jtrow['korvamerkinta'] == '.') {
                   $luokka = '';
                 }
                 else {

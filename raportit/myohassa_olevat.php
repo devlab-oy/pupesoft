@@ -485,9 +485,9 @@ if ($tee == "HAE") {
         echo "<td>".t($laskutyyppi)."<br>".t($alatila);
       }
 
-      if ($tulrow['korvamerkinta'] !== NULL) {
+      if (!empty($tulrow['korvamerkinta'])) {
 
-        if (empty($tulrow['korvamerkinta'])) {
+        if ($tulrow['korvamerkinta'] == '.') {
           $luokka = '';
         }
         else {

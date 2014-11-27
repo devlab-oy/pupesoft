@@ -8733,13 +8733,10 @@ if ($tee == '') {
             $sallijyvitys = TRUE;
           }
 
-          if ($naytetaan_tilausvahvistusnappi) {
-            $sallijyvitys = TRUE;
-          }
         }
 
         //annetaan mahdollisuus antaa loppusumma joka jyvitetään riveille arvoosuuden mukaan
-        if ($sallijyvitys) {
+        if ($sallijyvitys or $naytetaan_tilausvahvistusnappi) {
 
           echo "<tr>$jarjlisa";
 
@@ -8825,7 +8822,7 @@ if ($tee == '') {
             $koko = '7';
           }
 
-          if ($toim != "PROJEKTI" and !$naytetaan_tilausvahvistusnappi) {
+          if ($toim != "PROJEKTI" and $sallijyvitys) {
             if ($toim == 'TARJOUS' and !empty($yhtiorow['salli_jyvitys_tarjouksella'])) {
               echo "  <th colspan='5'>".t("Pyöristä katetta").":</th>
                   <td class='spec'>

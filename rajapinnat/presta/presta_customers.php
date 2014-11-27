@@ -56,7 +56,7 @@ class PrestaCustomers extends PrestaClient {
       //Pupesoft tunnus is put in note column to make update easier
       //and it is separated with self::TUNNUS_SEPARATOR
       $existing_customers = array_filter($existing_customers, array($this, 'filter_tunnus'));
-      array_walk($existing_customers, array($this, 'sanitize_tunnus'));
+      array_walk($existing_customers, array($this, 'sanitize_tunnus_array'));
 
       foreach ($customers as $customer) {
         try {
@@ -85,16 +85,51 @@ class PrestaCustomers extends PrestaClient {
     return true;
   }
 
-  public function sanitize_tunnus(&$tunnus, $key) {
-    $tunnus_array = explode(self::TUNNUS_SEPARATOR, $tunnus);
-    $tunnus = $tunnus_array[1];
+  /**
+   * Used with array_walk
+   * 
+   * @param string $tunnus
+   * @param string $key
+   */
+  public function sanitize_tunnus_array(&$tunnus, $key) {
+    $tunnus = $this->sanitize_tunnus($tunnus);
+  }
+  
+  /**
+   * Sanitize singular records pupesoft id from string
+   * For now pupesoft id is saved in customer.note field.
+   * 
+   * @param string $string
+   * @return string
+   */
+  public function sanitize_tunnus($string) {
+    $tunnus_array = explode(self::TUNNUS_SEPARATOR, $string);
+    return $tunnus_array[1];
   }
 
+  /**
+   * Filters out empty values. Used with array_filter
+   * 
+   * @param int $value
+   * @return boolean
+   */
   public function filter_tunnus($value) {
     if (empty($value)) {
       return false;
     }
 
     return true;
+  }
+  
+  /**
+   * Overrides parents get
+   * 
+   * @param int $id
+   */
+  public function get($id) {
+    $customer = parent::get($id);
+    $customer['pupesoft_id'] = $this->sanitize_tunnus($customer['note']);
+    
+    return $customer;
   }
 }

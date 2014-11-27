@@ -28054,7 +28054,9 @@ if (!function_exists('hae_asiakkaan_toimitustavat')) {
 
     $toimitustavat = array();
 
-    $query = "SELECT toimitustapa.*, 'M' AS extranet
+    $query = "SELECT toimitustapa.*, 
+              'M' AS extranet,
+              if (toimitustapa.jarjestys = 0, 9999, toimitustapa.jarjestys) AS jarjestys
               FROM asiakkaan_avainsanat
               JOIN toimitustapa ON (toimitustapa.yhtio = asiakkaan_avainsanat.yhtio
                 AND toimitustapa.selite             = asiakkaan_avainsanat.avainsana )
@@ -28067,7 +28069,8 @@ if (!function_exists('hae_asiakkaan_toimitustavat')) {
       $toimitustavat["t{$toimitustapa['tunnus']}"] = $toimitustapa;
     }
 
-    $query = "SELECT toimitustapa.*
+    $query = "SELECT toimitustapa.*,
+              if (toimitustapa.jarjestys = 0, 9999, toimitustapa.jarjestys) AS jarjestys
               FROM asiakas
               JOIN toimitustapa
               ON (toimitustapa.yhtio = asiakas.yhtio
@@ -28126,7 +28129,8 @@ if (!function_exists('hae_toimipaikan_toimitustavat')) {
     $toimitustavat = array();
 
     //Ensin haetaan kaikki toimitustavat, jotka ei kuulu mihinkään toimipaikkaan taakse yhteensopivuuden takia
-    $query   = "SELECT t.*
+    $query   = "SELECT t.*,
+                if (t.jarjestys = 0, 9999, t.jarjestys) AS jarjestys
                 FROM toimitustapa AS t
                 LEFT JOIN toimitustavat_toimipaikat AS tt
                 ON ( tt.yhtio = t.yhtio
@@ -28141,7 +28145,8 @@ if (!function_exists('hae_toimipaikan_toimitustavat')) {
 
     $query = "SELECT t.*,
               tt.toimitustapa_tunnus AS toimitustapa_tunnus,
-              tt.toimipaikka_tunnus AS toimipaikka_tunnus
+              tt.toimipaikka_tunnus AS toimipaikka_tunnus,
+              if (t.jarjestys = 0, 9999, t.jarjestys) AS jarjestys
               FROM toimitustapa AS t
               JOIN toimitustavat_toimipaikat AS tt
               ON ( tt.yhtio = t.yhtio
@@ -28184,7 +28189,8 @@ if (!function_exists('hae_toimitustavat')) {
       $lv = (int) $params['lahdevarasto'];
       $kv = (int) $params['kohdevarasto'];
 
-      $ott_qry = "SELECT tpa.*
+      $ott_qry = "SELECT tpa.*,
+                  if (tpa.jarjestys = 0, 9999, tpa.jarjestys) AS jarjestys
                   FROM avainsana AS ana
                   JOIN toimitustapa AS tpa
                   ON ( ana.yhtio = tpa.yhtio AND ana.selitetark_2 = tpa.tunnus )
@@ -28206,9 +28212,9 @@ if (!function_exists('hae_toimitustavat')) {
 
     $sort = array();
     foreach ($toimipaikan_toimitustavat as $index => $toimipaikan_toimitustapa) {
-      $sort[$index] = $toimipaikan_toimitustapa['selite'];
+      $sort[$index] = $toimipaikan_toimitustapa['jarjestys'];
     }
-    array_multisort($sort, SORT_ASC, $toimipaikan_toimitustavat);
+    array_multisort($sort, SORT_NUMERIC, $toimipaikan_toimitustavat);
 
     return $toimipaikan_toimitustavat;
   }

@@ -28054,7 +28054,7 @@ if (!function_exists('hae_asiakkaan_toimitustavat')) {
 
     $toimitustavat = array();
 
-    $query = "SELECT toimitustapa.*, 
+    $query = "SELECT toimitustapa.*,
               'M' AS extranet,
               if (toimitustapa.jarjestys = 0, 9999, toimitustapa.jarjestys) AS jarjestys
               FROM asiakkaan_avainsanat

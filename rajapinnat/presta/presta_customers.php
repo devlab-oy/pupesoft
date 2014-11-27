@@ -51,7 +51,6 @@ class PrestaCustomers extends PrestaClient {
       $this->schema = $this->get_empty_schema();
       //Fetch all products with ID's and SKU's only
       $existing_customers = $this->all(array('id', 'note'));
-      $existing_customers = $existing_customers['customers']['customer'];
       $existing_customers = array_column($existing_customers, 'note', 'id');
       //Pupesoft tunnus is put in note column to make update easier
       //and it is separated with self::TUNNUS_SEPARATOR

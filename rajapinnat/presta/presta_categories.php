@@ -55,7 +55,6 @@ class PrestaCategories extends PrestaClient {
     foreach ($ancestors as $node_nimi) {
       $filter['name'] = $node_nimi;
       $categories = $this->all($display, $filter);
-      $category = $categories['categories']['category'];
 
       //@TODO if many categories with the name is found, we have a problem...
       //We simply take the first one
@@ -211,7 +210,6 @@ class PrestaCategories extends PrestaClient {
   public function delete_all() {
     $this->logger->log('---------Start category delete all---------');
     $existing_categories = $this->all(array('id'));
-    $existing_categories = $existing_categories['categories']['category'];
     $existing_categories = array_column($existing_categories, 'id');
 
     foreach ($existing_categories as $id) {

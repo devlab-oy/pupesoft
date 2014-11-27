@@ -243,7 +243,32 @@ abstract class PrestaClient {
       throw $e;
     }
 
-    return xml_to_array($response_xml);
+    /**
+     * Hackhack...presta web service returns the fetched records wrapped in
+     * its resource name:
+     * $c = array(
+     *  'customers' => array(
+     *    'customer' => array(
+     *      array('id'=>1,'name'=>'A'),
+     *      array('id'=>2,'name'=>'B'),
+     *    )
+     *  )
+     * );
+     * 
+     * Basically this means all the fetched records are two level too deep.
+     * Remove the unnecessary levels
+     */
+    $response = xml_to_array($response_xml);
+    $keys = array_keys($response);
+    if (isset($keys[0])) {
+      $response = $response[$keys[0]];
+    }
+    $keys = array_keys($response);
+    if (isset($keys[0])) {
+      $response = $response[$keys[0]];
+    }
+    
+    return $response;
   }
 
   /**

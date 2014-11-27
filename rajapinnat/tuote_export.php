@@ -35,6 +35,7 @@ require "{$pupe_root_polku}/rajapinnat/magento_client.php";
 require "{$pupe_root_polku}/rajapinnat/presta/presta_products.php";
 require "{$pupe_root_polku}/rajapinnat/presta/presta_categories.php";
 require "{$pupe_root_polku}/rajapinnat/presta/presta_customers.php";
+require "{$pupe_root_polku}/rajapinnat/presta/presta_sales_orders.php";
 
 // Laitetaan unlimited execution time
 ini_set("max_execution_time", 0);
@@ -58,11 +59,15 @@ ini_set("max_execution_time", 0);
 
 $tuotexxxx = true;
 if ($verkkokauppatyyppi == 'presta' and $tuotexxxx) {
+  $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key);
+  $presta_orders->transfer_orders_to_pupesoft();
+  
+  die();
+  
   $asiakkaat = hae_asiakkaat1();
   $presta_customer = new PrestaCustomers($presta_url, $presta_api_key);
   $presta_customer->sync_customers($asiakkaat);
 
-  die();
   $kategoriat = hae_kategoriat();
   $presta_categories = new PrestaCategories($presta_url, $presta_api_key);
   $presta_categories->sync_categories($kategoriat);

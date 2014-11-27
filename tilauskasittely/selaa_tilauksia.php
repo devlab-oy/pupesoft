@@ -82,7 +82,7 @@ if ($toim == "MYYNTI") {
              ORDER BY pvm";
 
   // päivänäkymä
-  $query2 = "SELECT lasku.tunnus, if(lasku.nimi!=lasku.toim_nimi, concat_ws(' / ', lasku.nimi, lasku.toim_nimi),lasku.nimi) nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
+  $query2 = "SELECT lasku.tunnus, if(lasku.nimi!=lasku.toim_nimi, concat_ws(' / ', lasku.nimi, lasku.toim_nimi),concat_ws(' / ', lasku.nimi, lasku.nimitark)) nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
              round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) summa,
              round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) arvo
              FROM lasku use index (yhtio_tila_luontiaika)

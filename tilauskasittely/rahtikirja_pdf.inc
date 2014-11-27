@@ -31,7 +31,7 @@ if (!isset($GLOBALS['tyhja'])) {
   // jos varastolle on annettu joku osoite, k‰ytet‰‰n sit‰
   if ($postirow_varasto["nimi"] != "") {
     $postirow["yhtio_nimi"]     = $postirow_varasto["nimi"];
-    $postirow['yhtio_nimitark']  = $postirow_varasto["nimitark"];
+    $postirow['yhtio_nimitark'] = $postirow_varasto["nimitark"];
     $postirow["yhtio_osoite"]   = $postirow_varasto["osoite"];
     $postirow["yhtio_postino"]  = $postirow_varasto["postino"];
     $postirow["yhtio_postitp"]  = $postirow_varasto["postitp"];
@@ -151,7 +151,6 @@ $norm["height"] = 6;
 $norm["font"] = "Times-Roman";
 
 $kirj["height"] = 8;
-//$kirj["font"] = "Times-Roman";
 $kirj["font"] = "Times-Bold";
 
 $iso["height"] = 12;
@@ -435,12 +434,12 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   //yl‰rivi
   $pdf->draw_text(62,  529, t("Merkki / nro"),                  $firstpage, $norm);
   $pdf->draw_text(62,  523, t("M‰rke / nr"),                    $firstpage, $norm);
-  $pdf->draw_rectangle(535, 181, 520, 181,                      $firstpage, $rectparam);
-  $pdf->draw_text(183,  529, t("Kolliluku ja -laji"),                $firstpage, $norm);
-  $pdf->draw_text(183,  523, t("Kolliantal och -slag"),              $firstpage, $norm);
-  $pdf->draw_rectangle(535, 242, 520, 242,                      $firstpage, $rectparam);
-  $pdf->draw_text(246,  529, t("Sis‰ltˆ, ulkomitat ja VAK-merkinn‰t"),      $firstpage, $norm);
-  $pdf->draw_text(246,  523, t("InnehÂll, yttermÂtt och ADR-anm‰rkningar"),    $firstpage, $norm);
+  $pdf->draw_rectangle(535, 141, 520, 141,                      $firstpage, $rectparam);
+  $pdf->draw_text(143,  529, t("Kolliluku ja -laji"),                $firstpage, $norm);
+  $pdf->draw_text(143,  523, t("Kolliantal och -slag"),              $firstpage, $norm);
+  $pdf->draw_rectangle(535, 202, 520, 202,                      $firstpage, $rectparam);
+  $pdf->draw_text(206,  529, t("Sis‰ltˆ, ulkomitat ja VAK-merkinn‰t"),      $firstpage, $norm);
+  $pdf->draw_text(206,  523, t("InnehÂll, yttermÂtt och ADR-anm‰rkningar"),    $firstpage, $norm);
   $pdf->draw_rectangle(535, 420, 520, 420,                      $firstpage, $rectparam);
   $pdf->draw_text(422,  529, t("Brutto kg"),                    $firstpage, $norm);
   $pdf->draw_rectangle(535, 484, 520, 484,                      $firstpage, $rectparam);
@@ -459,49 +458,33 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
     $arvoround = round($arvoround, 4);
   }
 
+  $rakir_i_kala = 510;
+
   //kollit
-  $pdf->draw_text(62, 510, $lotsikot[0],                      $firstpage, $kirj);
-  if ($astilnrot[0] != '') $pdf->draw_text(62, 502, t("Astilnro").": ".$astilnrot[0],  $firstpage, $kirj);
+  for ($rakir_i = 0; $rakir_i < 100; $rakir_i++) {
 
-  $pdf->draw_text(183, 510, $kollit[0]."  ". $pakkaus[0],              $firstpage, $kirj);
-  $pdf->draw_text(246, 510, trim($pakkauskuvaus[0]." ".$pakkauskuvaustark[0]),  $firstpage, $kirj);
-  $pdf->draw_text(246, 500, $vakit[0]." ".$lisatiedot[0],              $firstpage, $kirj);
-  $pdf->draw_text(422, 510, $kilot[0],                      $firstpage, $kirj);
-  $pdf->draw_text(486, 510, $kuutiot[0],                      $firstpage, $kirj);
+    $pdf->draw_text(62, $rakir_i_kala, $lotsikot[$rakir_i], $firstpage, $kirj);
+    if ($astilnrot[$rakir_i] != '') $pdf->draw_text(62, 502, t("Astilnro").": ".$astilnrot[$rakir_i], $firstpage, $kirj);
+    $pdf->draw_text(143, $rakir_i_kala, $kollit[$rakir_i]."  ". $pakkaus[$rakir_i], $firstpage, $kirj);
+    $pdf->draw_text(206, $rakir_i_kala, trim($pakkauskuvaus[$rakir_i]." ".$pakkauskuvaustark[$rakir_i]), $firstpage, $kirj);
 
-  $pdf->draw_text(62, 490, $lotsikot[1],                      $firstpage, $kirj);
-  if ($astilnrot[1] != '') $pdf->draw_text(62, 482, t("Astilnro").": ".$astilnrot[1],  $firstpage, $kirj);
-  $pdf->draw_text(183, 490, $kollit[1]."  ". $pakkaus[1],              $firstpage, $kirj);
-  $pdf->draw_text(246, 490, trim($pakkauskuvaus[1]." ".$pakkauskuvaustark[1]),  $firstpage, $kirj);
-  $pdf->draw_text(246, 480, $vakit[1]." ".$lisatiedot[1],              $firstpage, $kirj);
-  $pdf->draw_text(422, 490, $kilot[1],                      $firstpage, $kirj);
-  $pdf->draw_text(486, 490 , $kuutiot[1],                      $firstpage, $kirj);
+    $pdf->draw_text(422, $rakir_i_kala, $kilot[$rakir_i], $firstpage, $kirj);
+    $pdf->draw_text(486, $rakir_i_kala, $kuutiot[$rakir_i], $firstpage, $kirj);
 
+    $alempiteksti = trim($vakit[$rakir_i]." ".$lisatiedot[$rakir_i]);
 
-  $pdf->draw_text(62, 470, $lotsikot[2],                      $firstpage, $kirj);
-  if ($astilnrot[2] != '') $pdf->draw_text(62, 462, t("Astilnro").": ".$astilnrot[2],  $firstpage, $kirj);
-  $pdf->draw_text(183, 470, $kollit[2]."  ". $pakkaus[2],              $firstpage, $kirj);
-  $pdf->draw_text(246, 470, trim($pakkauskuvaus[2]." ".$pakkauskuvaustark[2]),  $firstpage, $kirj);
-  $pdf->draw_text(246, 460, $vakit[2]." ".$lisatiedot[2],              $firstpage, $kirj);
-  $pdf->draw_text(422, 470, $kilot[2],                      $firstpage, $kirj);
-  $pdf->draw_text(486, 470, $kuutiot[2],                      $firstpage, $kirj);
+    if ($alempiteksti != "") {
+      $rakir_i_kala-= 10;
+      list($ff_string, $ff_font) = pdf_fontfit($alempiteksti, 360, $pdf, $kirj);
+      $pdf->draw_text(206, $rakir_i_kala, $ff_string, $firstpage, $ff_font);
+    }
 
-  $pdf->draw_text(62, 450, $lotsikot[3],                      $firstpage, $kirj);
-  if ($astilnrot[3] != '') $pdf->draw_text(62, 442, t("Astilnro").": ".$astilnrot[3],  $firstpage, $kirj);
-  $pdf->draw_text(183, 450, $kollit[3]."  ". $pakkaus[3],              $firstpage, $kirj);
-  $pdf->draw_text(246, 450, trim($pakkauskuvaus[3]." ".$pakkauskuvaustark[3]),  $firstpage, $kirj);
-  $pdf->draw_text(246, 440, $vakit[3]." ".$lisatiedot[3],              $firstpage, $kirj);
-  $pdf->draw_text(422, 450, $kilot[3],                      $firstpage, $kirj);
-  $pdf->draw_text(486, 450, $kuutiot[3],                      $firstpage, $kirj);
+    $rakir_i_kala-= 10;
 
-  $pdf->draw_text(62, 430, $lotsikot[4],                      $firstpage, $kirj);
-  if ($astilnrot[4] != '') $pdf->draw_text(62, 422, t("Astilnro").": ".$astilnrot[4],  $firstpage, $kirj);
-  $pdf->draw_text(183, 430, $kollit[4]."  ". $pakkaus[4],              $firstpage, $kirj);
-  $pdf->draw_text(246, 430, trim($pakkauskuvaus[4]." ".$pakkauskuvaustark[4]),  $firstpage, $kirj);
-  $pdf->draw_text(246, 420, $vakit[4]." ".$lisatiedot[4],              $firstpage, $kirj);
-  $pdf->draw_text(422, 430, $kilot[4],                      $firstpage, $kirj);
-  $pdf->draw_text(486, 430, $kuutiot[4],                      $firstpage, $kirj);
-
+    if ($rakir_i_kala < 410) {
+      break;
+    }
+  }
 
   //alarivi
   $pdf->draw_text(183, 404 , t("Kollit yht. Kolliantal tot."),          $firstpage, $norm);

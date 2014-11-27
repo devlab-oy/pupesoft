@@ -1,9 +1,9 @@
 <?php
 
 if ($_REQUEST['malli'] == 'PDF24' or
-    $_REQUEST['malli'] == 'PDF40' or
-    $_REQUEST['malli'] == 'Hintalappu PDF' and
-    (!empty($_REQUEST['tuoteno']) or $_REQUEST['toim'] != 'HINTA')
+  $_REQUEST['malli'] == 'PDF40' or
+  $_REQUEST['malli'] == 'Hintalappu PDF' and
+  (!empty($_REQUEST['tuoteno']) or $_REQUEST['toim'] != 'HINTA')
 ) {
   $_REQUEST['nayta_pdf'] = 1;
   $nayta_pdf             = 1;
@@ -243,7 +243,7 @@ if (!isset($nayta_pdf)) {
   $colspan = $toim == 'HINTA' ? "2" : "4";
 
   echo
-    "<tr><th colspan='{$colspan}'><center>" .
+  "<tr><th colspan='{$colspan}'><center>" .
     t("Tulostetaan {$tarrat} tuotenumeron mukaan") .
     "</center></th><tr>";
   echo "<tr>";
@@ -338,7 +338,7 @@ if (!isset($nayta_pdf)) {
 
     echo "<table>";
     echo
-      "<tr><th colspan='2'><center>" .
+    "<tr><th colspan='2'><center>" .
       t("Tulostetaan tuotetarrat hyllyjen väliltä") .
       "</center></th><tr>";
     echo "<tr><th>" . t("Alkuosoite") . "</th>";
@@ -363,12 +363,12 @@ if (!isset($nayta_pdf)) {
           </td>
           </tr>";
     echo
-      "<tr><th>" .
+    "<tr><th>" .
       t("Vain tuotteet joilla on saldoa hyllyillä") .
       "</th><td><input type='checkbox' name='saldo' value='1' $sel> </td>";
 
     echo
-      "<tr><th>" .
+    "<tr><th>" .
       t("KPL") .
       "</th><td><input type='text' name='tulostakappale' size='3' value='$tulostakappale'>
         </td>
@@ -405,7 +405,7 @@ if (!isset($nayta_pdf)) {
 
     echo "</select></td>";
     echo
-      "<tr><td class='back'></td><td class='back'><input type='Submit' value='" .
+    "<tr><td class='back'></td><td class='back'><input type='Submit' value='" .
       t("Tulosta tarrat") .
       "'></td>";
     echo "</tr>";

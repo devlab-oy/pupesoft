@@ -370,10 +370,10 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
       $tilausvahvistus_tallenna = "/tmp/Tilausvahvistus-".md5(uniqid(mt_rand(), true)).".txt";
       file_put_contents($tilausvahvistus_tallenna, $ulos);
       $_attachments = array(0 => array(
-              "filename"        => $tilausvahvistus_tallenna,
-              "newfilename"     => "tilvahv.txt",
-              "ctype"           => "text")
-          );
+          "filename"        => $tilausvahvistus_tallenna,
+          "newfilename"     => "tilvahv.txt",
+          "ctype"           => "text")
+      );
     }
     else {
       $tilausvahvistus_tallenna = "";
@@ -382,18 +382,18 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
   } // end rivejä löytyi
 
-    // Sähköpostin lähetykseen parametrit
-    $parametri = array(
-      "to"           => $tilvahasiakas['email'],
-      "cc"           => "",
-      "subject"      => $yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus",
-      "ctype"        => "text",
-      "body"         => $ulos,
-      "attachements" => $_attachments
-    );
+  // Sähköpostin lähetykseen parametrit
+  $parametri = array(
+    "to"           => $tilvahasiakas['email'],
+    "cc"           => "",
+    "subject"      => $yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $tulostettava_tunnus",
+    "ctype"        => "text",
+    "body"         => $ulos,
+    "attachements" => $_attachments
+  );
 
-    pupesoft_sahkoposti($parametri);
-  }
+  pupesoft_sahkoposti($parametri);
+
 
   if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
 
@@ -410,5 +410,4 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
     pupesoft_sahkoposti($parametri);
   }
 }
-
 $ulos = "";

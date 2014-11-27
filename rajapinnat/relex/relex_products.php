@@ -50,18 +50,21 @@ $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
 $tuoterajaus = rakenna_relex_tuote_parametrit();
 
-// Jos relex tuoterajauksia tehd‰‰n ostoehdotus-kent‰ll‰ (operaattoreina = ja !=),
-// niin katsotaan tarviiko tehd‰ erillinen "ostoehdotus EI" raportti, mik‰li
-// Relexiin ei mene ostoehdotus "EI" tuotteita. T‰m‰ siksi, ett‰ ostoehdotus "KYLLƒ"
-// on voinut muuttua "EI":ksi ja saadaan se p‰ivitetty‰ Relexiin.
+// Jos relex tuoterajauksia tehd‰‰n "update-kentill‰",
+// niin katsotaan tarviiko tehd‰ erillinen raportti, mik‰li
+// Relexiin ei mene kenttien rajauksiin osumattomia tuotteita. T‰m‰ siksi,
+// ett‰ tuotteella kent‰n arvot on voinut muuttua, ja saadaan muutoksesta update.
+
+$update_kentat = array("ostoehdotus", "status");
 
 if (!function_exists("relex_product_ostoehdotus_update")) {
   function relex_product_ostoehdotus_update($hakukentta, $tuoterajaus, $paiva_ajo) {
     global $kukarow, $yhtiorow;
 
+    // tehd‰‰n spessukent‰st‰ k‰‰ntˆ
     $_hakukentta_loytyi = strpos($tuoterajaus, "tuote.$hakukentta");
 
-    if ($_hakukentta_loytyi !== false and $paiva_ajo) {
+    if ($_hakukentta_loytyi !== FALSE and $paiva_ajo) {
 
       $_rajaus_alkaa_hakukentalla = substr($tuoterajaus, $_hakukentta_loytyi);
       $_rajaukset = explode(" AND", $_rajaus_alkaa_hakukentalla);
@@ -93,21 +96,46 @@ if (!function_exists("relex_product_ostoehdotus_update")) {
 
       if ($kentta_update) {
 
-        $_tuoterajaus = str_replace($_rajaus_alkper, "$kentta $oper $arvo", $tuoterajaus);
-        return array($hakukentta, $_tuoterajaus);
+        $_tuoterajaus_kentta = "$kentta $oper $arvo";
+        return $_tuoterajaus_kentta;
       }
       else {
-        return array(FALSE, $tuoterajaus);
+        return "";
       }
     }
-    return array(FALSE, $tuoterajaus);
+    return "";
   }
 }
 
-list($ostoehdotus_update, $_tuoterajaus) = relex_product_ostoehdotus_update("ostoehdotus", $tuoterajaus, $paiva_ajo);
-list($status_update, $_tuoterajaus)      = relex_product_ostoehdotus_update("status", $_tuoterajaus, $paiva_ajo);
+$_tuoterajaus_ilman_hakukenttia = $tuoterajaus;
+$_tuoterajaus = "";
+$tehdaan_updatefile = FALSE;
 
-if ($ostoehdotus_update or $status_update) {
+foreach ($update_kentat as $_kentta) {
+
+  // siivotaan eka tuoterajaukset ilman spessukentti‰
+  $_hakukentta_loytyi = strpos($_tuoterajaus_ilman_hakukenttia, "tuote.$_kentta");
+
+  if ($_hakukentta_loytyi !== FALSE and $paiva_ajo) {
+
+    $_rajaus_alkaa_hakukentalla = substr($_tuoterajaus_ilman_hakukenttia, $_hakukentta_loytyi);
+    $_rajaukset = explode(" AND", $_rajaus_alkaa_hakukentalla);
+    $kentan_siivous = " AND ".$_rajaukset[0];
+    $_tuoterajaus_ilman_hakukenttia = str_replace($kentan_siivous, "", $_tuoterajaus_ilman_hakukenttia);
+  }
+  
+  // spessukent‰t l‰pi
+  $tuoterajaus_kentta = relex_product_ostoehdotus_update($_kentta, $tuoterajaus, $paiva_ajo);
+
+  if ($tuoterajaus_kentta) {
+    $_tuoterajaus .= "({$tuoterajaus_kentta}) OR ";
+  }
+}
+
+if ($_tuoterajaus) {
+
+  // yhdistet‰‰n rajaukset
+  $_tuoterajaus = $_tuoterajaus_ilman_hakukenttia ." AND (". substr($_tuoterajaus, 0, -4).")";
 
   // Tallennetaan rivit tiedostoon
   $ofilepath = "/tmp/product_ostoehdotus_update_{$yhtio}_$ajopaiva.csv";
@@ -116,15 +144,27 @@ if ($ostoehdotus_update or $status_update) {
     die("Tiedoston avaus ep‰onnistui: $ofilepath\n");
   }
 
+  $select_lisa = "";
+
   // Otsikkotieto
   $header  = "code";
-  $header .= ";ostoehdotus";
-  $header .= ";status";
+
+  foreach ($update_kentat as $kentta) {
+
+    $header .= ";$kentta";
+    if ($kentta == "ostoehdotus") {
+      $select_lisa .= "if(tuote.ostoehdotus != 'E', 'K', 'E') ostoehdotus, ";
+    }
+    else {
+      $select_lisa .= "tuote.$kentta, ";
+    }
+  }
+
   $header .= "\n";
 
   fwrite($ofp, $header);
 
-  $query = "SELECT tuote.tuoteno, yhtio.maa, tuote.status, if(tuote.ostoehdotus != 'E', 'K', 'E') ostoehdotus
+  $query = "SELECT $select_lisa tuote.tuoteno, yhtio.maa
             FROM tuote
             JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
             WHERE tuote.yhtio     = '{$yhtio}'
@@ -138,8 +178,9 @@ if ($ostoehdotus_update or $status_update) {
   while ($row = mysql_fetch_assoc($res)) {
 
     $rivi  = $row['maa']."-".pupesoft_csvstring($row['tuoteno']);
-    $rivi .= ";{$row['ostoehdotus']}";
-    $rivi .= ";{$row['status']}";
+    foreach ($update_kentat as $kentta) {
+      $rivi .= ";{$row[$kentta]}";
+    }
     $rivi .= "\n";
 
     fwrite($ofp, $rivi);

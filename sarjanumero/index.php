@@ -38,6 +38,10 @@ if (tarkista_oikeus("sarjanumero/hylky.php")) {
   echo "<p><a href='hylky.php' class='button'>Hylk&auml;&auml; rulla</a></p>";
 }
 
+if (tarkista_oikeus("sarjanumero/hae_tiedot.php")) {
+  echo "<p><a href='hae_tiedot.php' class='button'>", t("Hae tiedot"), "</a></p>";
+}
+
 echo "<p><a href='{$palvelin2}logout.php?location={$palvelin2}sarjanumero' class='button'>", t("Kirjaudu ulos"), "</a></p>";
 
 echo "</div>";

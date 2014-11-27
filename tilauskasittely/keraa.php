@@ -1374,68 +1374,130 @@ if ($tee == 'P') {
 
       $rivit = '';
 
+      $_plain_text_mail = ($yhtiorow['kerayspoikkeama_email'] == 'P');
+
       foreach ($poikkeamatilausrivit as $poikkeama) {
 
         $poikkeama['nimitys'] = t_tuotteen_avainsanat($poikkeama, 'nimitys', $kieli);
 
-        $rivit .= "<tr>";
-        $rivit .= "<td>$poikkeama[nimitys]</td>";
-        $rivit .= "<td>$poikkeama[tuoteno]</td>";
-        $rivit .= "<td>". (float) $poikkeama["tilkpl"]."   </td>";
-        $rivit .= "<td>". (float) $poikkeama["maara"]."</td>";
-        if ($yhtiorow["kerayspoikkeama_kasittely"] != '') $rivit .= "<td>$poikkeama[loput]</td>";
-        $rivit .= "</tr>";
+        if ($_plain_text_mail) {
+          $rivit .= t("Nimitys", $kieli).": {$poikkeama['nimitys']}\n";
+          $rivit .= t("Tuotenumero", $kieli).": {$poikkeama['tuoteno']}\n";
+          $rivit .= t("Tilattu", $kieli).": ".(float) $poikkeama["tilkpl"]."\n";
+          $rivit .= t("Toimitetaan", $kieli).": ".(float) $poikkeama["maara"]."\n";
+
+          if ($yhtiorow["kerayspoikkeama_kasittely"] != '') {
+            $rivit .= t("Poikkeaman käsittely", $kieli).": {$poikkeama['loput']}\n";
+          }
+
+          $rivit .= "\n";
+        }
+        else {
+          $rivit .= "<tr>";
+          $rivit .= "<td>$poikkeama[nimitys]</td>";
+          $rivit .= "<td>$poikkeama[tuoteno]</td>";
+          $rivit .= "<td>". (float) $poikkeama["tilkpl"]."   </td>";
+          $rivit .= "<td>". (float) $poikkeama["maara"]."</td>";
+          if ($yhtiorow["kerayspoikkeama_kasittely"] != '') $rivit .= "<td>$poikkeama[loput]</td>";
+          $rivit .= "</tr>";
+        }
       }
 
       $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
-      $header .= "Content-type: text/html; charset=\"iso-8859-1\"\n";
 
-      $ulos  = "<html>\n<head>\n";
-      $ulos .= "<style type='text/css'>$css</style>\n";
-      $ulos .= "<title>$yhtiorow[nimi]</title>\n";
-      $ulos .= "</head>\n";
+      if ($_plain_text_mail) {
+        $header .= "Content-type: text/plain; charset=\"iso-8859-1\"\n";
 
-      $ulos .= "<body>\n";
+        $ulos = t("Keräyspoikkeamat", $kieli)."\n\n";
 
-      $ulos .= "<font class='head'>".t("Keräyspoikkeamat", $kieli)."</font><hr><br><br><table>";
+        $ulos .= t("Yhtiö", $kieli)."\n";
+        $ulos .= "{$yhtiorow['nimi']}\n";
+        $ulos .= "{$yhtiorow['osoite']}\n";
+        $ulos .= "{$yhtiorow['postino']} {$yhtiorow['postitp']}";
+        $ulos .= "\n\n";
 
-      $ulos .= "<tr><th>".t("Yhtiö", $kieli)."</th></tr>";
-      $ulos .= "<tr><td>$yhtiorow[nimi]</td></tr>";
-      $ulos .= "<tr><td>$yhtiorow[osoite]</td></tr>";
-      $ulos .= "<tr><td>$yhtiorow[postino] $yhtiorow[postitp]</td></tr>";
-      $ulos .= "</table><br><br>";
+        $ulos .= t("Ostaja", $kieli).":\n";
+        $ulos .= "{$laskurow['nimi']}\n";
+        $ulos .= "{$laskurow['nimitark']}\n";
+        $ulos .= "{$laskurow['osoite']}\n";
+        $ulos .= "{$laskurow['postino']} {$laskurow['postitp']}";
+        $ulos .= "\n\n";
 
-      $ulos .= "<table>";
-      $ulos .= "<tr><th>".t("Ostaja", $kieli).":</th><th>".t("Toimitusosoite", $kieli).":</th></tr>";
+        $ulos .= t("Toimitusosoite", $kieli).":\n";
+        $ulos .= "{$laskurow['toim_nimi']}\n";
+        $ulos .= "{$laskurow['toim_nimitark']}\n";
+        $ulos .= "{$laskurow['toim_osoite']}\n";
+        $ulos .= "{$laskurow['toim_postino']} {$laskurow['toim_postitp']}";
+        $ulos .= "\n\n";
 
-      $ulos .= "<tr><td>$laskurow[nimi]</td><td>$laskurow[toim_nimi]</td></tr>";
-      $ulos .= "<tr><td>$laskurow[nimitark]</td><td>$laskurow[toim_nimitark]</td></tr>";
-      $ulos .= "<tr><td>$laskurow[osoite]</td><td>$laskurow[toim_osoite]</td></tr>";
-      $ulos .= "<tr><td>$laskurow[postino] $laskurow[postitp]</td><td>$laskurow[toim_postino] $laskurow[toim_postitp]</td></tr>";
-      $ulos .= "</table><br><br>";
+        $ulos .= t("Laadittu", $kieli).": ".tv1dateconv($laskurow['luontiaika'])."\n";
+        $ulos .= t("Tilausnumero", $kieli).": {$laskurow['tunnus']}\n";
+        $ulos .= t("Tilausviite", $kieli).": {$laskurow['viesti']}\n";
+        $ulos .= t("Toimitustapa", $kieli).": ";
+        $ulos .= t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli);
+        $ulos .= "\n";
+        $ulos .= t("Myyjä", $kieli).": {$laskurow['kukanimi']}\n";
 
-      $ulos .= "<table>";
-      $ulos .= "<tr><th>".t("Laadittu", $kieli).":</th><td>".tv1dateconv($laskurow['luontiaika'])."</td></tr>";
-      $ulos .= "<tr><th>".t("Tilausnumero", $kieli).":</th><td>$laskurow[tunnus]</td></tr>";
-      $ulos .= "<tr><th>".t("Tilausviite", $kieli).":</th><td>$laskurow[viesti]</td></tr>";
-      $ulos .= "<tr><th>".t("Toimitustapa", $kieli).":</th><td>".t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)."</td></tr>";
-      $ulos .= "<tr><th>".t("Myyjä", $kieli).":</th><td>$laskurow[kukanimi]</td></tr>";
+        if ($laskurow['comments'] != '') {
+          $ulos .= t("Kommentti", $kieli).": {$laskurow['comments']}\n";
+        }
 
-      if ($laskurow['comments'] != '') {
-        $ulos .= "<tr><th>".t("Kommentti", $kieli).":</th><td>".$laskurow['comments']."</td></tr>";
+        $ulos .= $rivit;
+
+        $ulos .= "\n";
+        $ulos .= t("Tämä on automaattinen viesti. Tähän sähköpostiin ei tarvitse vastata.", $kieli)."\n\n";
       }
+      else {
+        $header .= "Content-type: text/html; charset=\"iso-8859-1\"\n";
 
-      $ulos .= "</table><br><br>";
+        $ulos  = "<html>\n<head>\n";
+        $ulos .= "<style type='text/css'>$css</style>\n";
 
-      $ulos .= "<table>";
-      $ulos .= "<tr><th>".t("Nimitys", $kieli)."</th><th>".t("Tuotenumero", $kieli)."</th><th>".t("Tilattu", $kieli)."</th><th>".t("Toimitetaan", $kieli)."</th>";
-      if ($yhtiorow["kerayspoikkeama_kasittely"] != '') $ulos .= "<th>".t("Poikkeaman käsittely", $kieli)."</th>";
-      $ulos .= "</tr>";
-      $ulos .= $rivit;
-      $ulos .= "</table><br><br>";
+        $ulos .= "<title>$yhtiorow[nimi]</title>\n";
+        $ulos .= "</head>\n";
 
-      $ulos .= t("Tämä on automaattinen viesti. Tähän sähköpostiin ei tarvitse vastata.", $kieli)."<br><br>";
-      $ulos .= "</body></html>";
+        $ulos .= "<body>\n";
+
+        $ulos .= "<font class='head'>".t("Keräyspoikkeamat", $kieli)."</font><hr><br><br><table>";
+
+        $ulos .= "<tr><th>".t("Yhtiö", $kieli)."</th></tr>";
+        $ulos .= "<tr><td>$yhtiorow[nimi]</td></tr>";
+        $ulos .= "<tr><td>$yhtiorow[osoite]</td></tr>";
+        $ulos .= "<tr><td>$yhtiorow[postino] $yhtiorow[postitp]</td></tr>";
+        $ulos .= "</table><br><br>";
+
+        $ulos .= "<table>";
+        $ulos .= "<tr><th>".t("Ostaja", $kieli).":</th><th>".t("Toimitusosoite", $kieli).":</th></tr>";
+
+        $ulos .= "<tr><td>$laskurow[nimi]</td><td>$laskurow[toim_nimi]</td></tr>";
+        $ulos .= "<tr><td>$laskurow[nimitark]</td><td>$laskurow[toim_nimitark]</td></tr>";
+        $ulos .= "<tr><td>$laskurow[osoite]</td><td>$laskurow[toim_osoite]</td></tr>";
+        $ulos .= "<tr><td>$laskurow[postino] $laskurow[postitp]</td><td>$laskurow[toim_postino] $laskurow[toim_postitp]</td></tr>";
+        $ulos .= "</table><br><br>";
+
+        $ulos .= "<table>";
+        $ulos .= "<tr><th>".t("Laadittu", $kieli).":</th><td>".tv1dateconv($laskurow['luontiaika'])."</td></tr>";
+        $ulos .= "<tr><th>".t("Tilausnumero", $kieli).":</th><td>$laskurow[tunnus]</td></tr>";
+        $ulos .= "<tr><th>".t("Tilausviite", $kieli).":</th><td>$laskurow[viesti]</td></tr>";
+        $ulos .= "<tr><th>".t("Toimitustapa", $kieli).":</th><td>".t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV", $kieli)."</td></tr>";
+        $ulos .= "<tr><th>".t("Myyjä", $kieli).":</th><td>$laskurow[kukanimi]</td></tr>";
+
+        if ($laskurow['comments'] != '') {
+          $ulos .= "<tr><th>".t("Kommentti", $kieli).":</th><td>".$laskurow['comments']."</td></tr>";
+        }
+
+        $ulos .= "</table><br><br>";
+
+        $ulos .= "<table>";
+        $ulos .= "<tr><th>".t("Nimitys", $kieli)."</th><th>".t("Tuotenumero", $kieli)."</th><th>".t("Tilattu", $kieli)."</th><th>".t("Toimitetaan", $kieli)."</th>";
+        if ($yhtiorow["kerayspoikkeama_kasittely"] != '') $ulos .= "<th>".t("Poikkeaman käsittely", $kieli)."</th>";
+        $ulos .= "</tr>";
+        $ulos .= $rivit;
+        $ulos .= "</table><br><br>";
+
+        $ulos .= t("Tämä on automaattinen viesti. Tähän sähköpostiin ei tarvitse vastata.", $kieli)."<br><br>";
+        $ulos .= "</body></html>";
+      }
 
       // korvataan poikkeama-meili keräysvahvistuksella JOs lähetetään keräysvahvistus per toimitus
       if (($laskurow["keraysvahvistus_lahetys"] == 'o' or ($yhtiorow["keraysvahvistus_lahetys"] == 'o' and $laskurow["keraysvahvistus_lahetys"] == '')) and $laskurow["kerayspoikkeama"] == 0) {

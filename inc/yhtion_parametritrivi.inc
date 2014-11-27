@@ -1278,6 +1278,19 @@ if ($fieldname == "pikatilaus_focus") {
   $jatko = 0;
 }
 
+if ($fieldname == "kerayspoikkeama_email") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == "P" ? " selected" : "";
+
+  $ulos .= "<option value=''>".t("Keräyspoikkeama-sähköpostit ovat HTML-pohjaisia")."</option>";
+  $ulos .= "<option value='P' {$sel}>".t("Keräyspoikkeama-sähköpostit ovat tekstipohjaisia")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "kerayspoikkeama_kasittely") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

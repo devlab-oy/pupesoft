@@ -215,9 +215,12 @@ if (!isset($var_array)) $var_array = "";
 if (!isset($yksi_suoratoimittaja)) $yksi_suoratoimittaja = "";
 if (!isset($ylatila)) $ylatila = "";
 
-if (!isset($valmiste_vai_raakaaine)) {
+if (!isset($valmiste_vai_raakaaine) and $toim == "VALMISTAVARASTOON") {
   $_cookie_isset = isset($_COOKIE["valmiste_vai_raakaaine"]);
   $valmiste_vai_raakaaine = $_cookie_isset ? $_COOKIE["valmiste_vai_raakaaine"] : 'valmiste';
+}
+elseif (!isset($valmiste_vai_raakaaine)) {
+  $valmiste_vai_raakaaine = 'valmiste';
 }
 
 // Setataan lopetuslinkki, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla
@@ -5005,7 +5008,7 @@ if ($tee == '') {
   if ($muokkauslukko == "" and ($toim != "PROJEKTI" or $rivitunnus != 0) or $toim == "YLLAPITO") {
     echo "<table><tr>$jarjlisa<td class='back'><font class='head'>".t("Lis‰‰ rivi").": </font></td></tr></table>";
 
-    if (in_array($toim, array('VALMISTAVARASTOON', 'VALMISTAASIAKKAALLE')) and $tila != 'LISAAKERTARESEPTIIN' and $tila != 'LISAAISAKERTARESEPTIIN') {
+    if ($toim == 'VALMISTAVARASTOON' and $tila != 'LISAAKERTARESEPTIIN' and $tila != 'LISAAISAKERTARESEPTIIN') {
 
       $_chk = array($valmiste_vai_raakaaine => 'checked') + array('raakaaine' => '', 'valmiste' => '');
 

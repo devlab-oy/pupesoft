@@ -215,6 +215,10 @@ class PrestaCategories extends PrestaClient {
     $existing_categories = array_column($existing_categories, 'id');
 
     foreach ($existing_categories as $id) {
+      if ($id == 1) {
+        //Root category can not be deleted
+        continue;
+      }
       try {
         $this->delete($id);
       }

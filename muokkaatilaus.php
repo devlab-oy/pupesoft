@@ -2555,7 +2555,7 @@ if (mysql_num_rows($result) != 0) {
           }
         }
         else {
-          echo "<td class='$class' valign='top'><font class='green'>".t("Ei voida toimittaa")."</font></td>";
+          echo "<td class='$class' valign='top'><font class='red'>".t("Ei voida toimittaa")."</font></td>";
 
           if (isset($worksheet)) {
             $worksheet->writeString($excelrivi, $ii, t("Ei voida toimittaa"));

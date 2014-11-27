@@ -358,7 +358,7 @@ if ($tee == "") {
 
 
       if (date("YmdHis") > $prow["voimassa"]) {
-        echo "<font class='green'>".tv1dateconv($prow["pvmalku"], "P")."</font>";
+        echo "<font class='red'>".tv1dateconv($prow["pvmalku"], "P")."</font>";
       }
       else {
         echo "<font class='green'>".tv1dateconv($prow["pvmalku"], "P")."</font>";

@@ -6,6 +6,13 @@ elseif (@include_once "parametrit.inc");
 else exit;
 
 if (!empty($legacy_ui)) {
+  
+  echo "<style type='text/css'>
+          body {
+            margin: 0px;
+            padding: 0px 0px 0px 2px;
+          }
+        </style>";
 
   unset($isizelogo);
 
@@ -101,7 +108,7 @@ if (mysql_num_rows($result) > 1) {
     $sovellus = $gorow["sovellus"];
   }
 
-  echo "<form name='vaihdaSovellus' method='POST' action='indexvas.php'>
+  echo "<form name='vaihdaSovellus' method='POST' class='indexvas' action='indexvas.php'>
       <select name='sovellus' class='indexvas' onchange='submit()'>"; // top right bottom left
 
   $sovellukset = array();
@@ -257,6 +264,13 @@ while ($orow = mysql_fetch_array($result)) {
     echo "' target='mainframe'>".t("$mrow[nimitys]")."{$nimitys_lukumaara}</a></td></tr>";
   }
 }
+
+if (!empty($legacy_ui)) {
+  //N‰ytet‰‰n aina exit-nappi
+  echo "<tr><td class='back' style='padding:0px; margin:0px;'><br></td></tr>";
+  echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' href='logout.php' target='main'>".t("Kirjaudu ulos")."</a></td></tr>";
+}
+
 echo "</table><br>";
 echo "</div>";
 

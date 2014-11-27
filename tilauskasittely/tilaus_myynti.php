@@ -2975,7 +2975,16 @@ if ($tee == '') {
 
       if ($kukarow["extranet"] == "") {
         echo "<a href='{$palvelin2}crm/asiakasmemo.php?ytunnus={$laskurow['ytunnus']}&asiakasid={$laskurow['liitostunnus']}&from={$toim}&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS'>{$laskurow['nimi']}</a>";
-        echo " <a id='hae_asiakasta_linkki'><img src='".$palvelin2."pics/facelift/ukot.png'></a>";
+        echo " <a id='hae_asiakasta_linkki'>";
+
+        if (empty($legacy_ui)) {
+          echo "<img src='".$palvelin2."pics/facelift/ukot.png'>";
+        }
+        else {
+          echo "<img src='".$palvelin2."pics/lullacons/user-multiple.png'>";
+        }
+
+        echo "</a>";
       }
       else {
         echo "{$laskurow['nimi']}";

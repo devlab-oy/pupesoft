@@ -1,7 +1,5 @@
 div.lopetus {
-  position:absolute;
   top:5px;
-  right:60px;
 }
 
 div.ohje {
@@ -13,4 +11,24 @@ div.ohje {
 a.puhdas:hover {
   text-decoration: none;
   background-color: transparent;
+}
+
+form.indexvas {
+  margin:0px 0px 10px 8px;
+}
+
+table.indexvas {
+  width: 135px;
+	margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+	border-spacing: 0;
+}
+
+table.indexvas tr {
+  background-color: transparent;
+}
+
+table.indexvas td {
+	margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
 }

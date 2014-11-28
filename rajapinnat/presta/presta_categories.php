@@ -58,7 +58,14 @@ class PrestaCategories extends PrestaClient {
 
       //@TODO if many categories with the name is found, we have a problem...
       //We simply take the first one
-      $category = $categories[0];
+      $category = array();
+      if (isset($categories[0])) {
+        $category = $categories[0];
+      }
+      
+      if (empty($category)) {
+        return null;
+      }
 
       if (empty($parents)) {
         $parents[] = $category['id'];

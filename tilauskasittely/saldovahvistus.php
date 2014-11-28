@@ -366,10 +366,10 @@ function echo_saldovahvistukset($request) {
       $_rajaus = (float) $request['avoin_saldo_rajaus'];
       $_avoin_summa = $lasku['avoin_saldo_summa'];
 
-      $_pos = ($_avoin_summa > 0 and $_avoin_summa < $_rajaus);
-      $_neg = ($_avoin_summa < 0 and $_avoin_summa > $_rajaus);
+      $_pos = ($_rajaus > 0 and $_avoin_summa < $_rajaus);
+      $_neg = ($_rajaus < 0 and $_avoin_summa > $_rajaus);
 
-      if ($_avoin_summa == 0 or $_pos or $_neg)  {
+      if ($_pos or $_neg)  {
         continue;
       }
     }
@@ -556,7 +556,7 @@ function echo_kayttoliittyma($request) {
   echo "<tr>";
   echo "<th>".t('Avoin saldo rajaus').":</th>";
   echo "<td>";
-  echo "<input type='text' name='avoin_saldo_rajaus' value='{$avoin_saldo_rajaus}' />";
+  echo "<input type='text' name='avoin_saldo_rajaus' value='{$request['avoin_saldo_rajaus']}' />";
   echo "</td>";
   echo "</tr>";
 

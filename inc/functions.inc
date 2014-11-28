@@ -16367,6 +16367,7 @@ if (!function_exists("valitse_pakkaus")) {
     $kaytettava_pakkaus = "";
 
     if ($eran_koko != '') {
+
       $pisin_tuote_array = pisin_tuote($pisin_tuote_array, $pisin_tuote_per_asiakas);
       $pisin_tuote = array_shift($pisin_tuote_array);
 

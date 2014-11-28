@@ -165,7 +165,7 @@ elseif ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldovah
     $laskut['laskun_avoin_paiva'] = $request['paiva'];
   }
 
-  if ($request['ryhmittely_tyyppi'] == 'ytunnus' and $request['ryhmittely_arvo'] != '') {
+  if ($request['ryhmittely_tyyppi'] == 'ytunnus') {
     $boss = true;
   }
   else {

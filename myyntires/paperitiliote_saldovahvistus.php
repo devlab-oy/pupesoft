@@ -83,7 +83,7 @@ function alku($saldovahvistus) {
 
   if (!empty($saldovahvistus['paaasiakas'])) {
 
-    $_chk = ($saldovahvistus['asiakas']['liitostunnus'] != $saldovahvistus['paaasiakas']['liitostunnus']);
+    $_chk = ($saldovahvistus['asiakas']['tunnus'] != $saldovahvistus['paaasiakas']['tunnus']);
 
     if ($_chk) {
       $kala -= 10;

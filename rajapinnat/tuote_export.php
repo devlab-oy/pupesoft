@@ -19,7 +19,6 @@ $pupe_root_polku = dirname(dirname(__FILE__));
 require "{$pupe_root_polku}/inc/connect.inc";
 require "{$pupe_root_polku}/inc/functions.inc";
 
-
 $lock_params = array(
   "locktime" => 5400
 );
@@ -78,9 +77,9 @@ if (!is_array($verkkokauppa_saldo_varasto)) {
 // Haetaan timestamp
 $datetime_checkpoint_res = t_avainsana("TUOTE_EXP_CRON");
 
-//if (mysql_num_rows($datetime_checkpoint_res) != 1) {
-//  exit("VIRHE: Timestamp ei löydy avainsanoista!\n");
-//}
+if (mysql_num_rows($datetime_checkpoint_res) != 1) {
+  exit("VIRHE: Timestamp ei löydy avainsanoista!\n");
+}
 
 $datetime_checkpoint_row = mysql_fetch_assoc($datetime_checkpoint_res);
 $datetime_checkpoint = $datetime_checkpoint_row['selite']; // Mikä tilanne on jo käsitelty

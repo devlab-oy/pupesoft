@@ -17116,7 +17116,7 @@ if (!function_exists("tee_keraysera")) {
 
                UNION
 
-               (SELECT
+               (SELECT SQL_NO_CACHE
                lasku.prioriteettinro as prioriteetti,
                0 as erotus,
                lasku.ohjausmerkki,
@@ -18701,7 +18701,7 @@ if (!function_exists("tee_keraysera")) {
                 $kukarow['debugstring'] .= "(E1350): Tuotteiden tilavuus pakkauksessa: {$pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus']}<br>\n";
                 $kukarow['debugstring'] .= "(E1360): Tuotteiden paino pakkauksessa: {$pakkaukset[$kaytettava_pakkaus]['kaytetty_paino']}<br>\n";
               }
-echo "18705F pakkauksen_iterointi("; var_dump($pisin_tuote); echo ") <br><br>";
+
               if ($looppi_koko > 0) {
                 $kaytettava_pakkaus_backup = $kaytettava_pakkaus;
                 list($pakkaukset, $kaytettava_pakkaus, $kaytettavat_pakkaukset, $eran_koko, $eran_koko_pintaala) = pakkauksen_iterointi($keraysvyohyketiedot, $pakkaukset, $kaytettava_pakkaus, $pisin_tuote, $kaytettavat_pakkaukset, $eka_kierros, $eran_koko, $eran_koko_pintaala, $juokseva_nro, $kerailyniput_tiedot, $kerailyniput_key, $key, $pisin_tuote_per_asiakas);
@@ -18812,7 +18812,7 @@ echo "18705F pakkauksen_iterointi("; var_dump($pisin_tuote); echo ") <br><br>";
         $ed_ohjausmerkki = $ohjausmerkki[$tuoterow['otunnus']];
         $ed_jiivee = $jiivee[$tuoterow['otunnus']];
       }
-echo "18816F pakkauksen_iterointi("; var_dump($pisin_tuote); echo ") <br><br>";
+
       if (mysql_num_rows($tuoteres) > 0 and $pakkaukset[$kaytettava_pakkaus]['yksin_eraan'] != 'K') {
         // tilaus loppuu, tehdään vielä tässä vaiheessa pakkaustsekki
         list($pakkaukset, $kaytettava_pakkaus, $kaytettavat_pakkaukset, $eran_koko, $eran_koko_pintaala) = pakkauksen_iterointi($keraysvyohyketiedot, $pakkaukset, $kaytettava_pakkaus, $pisin_tuote, $kaytettavat_pakkaukset, $eka_kierros, $eran_koko, $eran_koko_pintaala, $juokseva_nro, $kerailyniput_tiedot, $kerailyniput_key, $key, $pisin_tuote_per_asiakas);

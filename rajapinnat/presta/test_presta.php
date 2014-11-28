@@ -19,7 +19,7 @@ $request = array(
 );
 
 
-$request['konversio_tyypit'] = array(
+$request['synkronointi_tyypit'] = array(
     'kaikki'     => t('Kaikki'),
     'kategoriat' => t('Kategoriat'),
     'tuotteet'   => t('Tuotteet ja tuotekuvat'),
@@ -32,20 +32,24 @@ if ($request['action'] == 'sync') {
   echo "<br/>";
 
   switch ($request['synkronointi_tyyppi']) {
-    case 'kaikki':
-
-      break;
     case 'kategoriat':
-
+      $kategoriat = hae_kategoriat();
+      $presta_categories = new PrestaCategories($presta_url, $presta_api_key);
+      $presta_categories->sync_categories($kategoriat);
       break;
     case 'tuotteet':
-
+      $tuotteet = hae_tuotteet();
+      $presta_products = new PrestaProducts($presta_url, $presta_api_key);
+      $presta_products->sync_products($tuotteet);
       break;
     case 'asiakkaat':
-
+      $asiakkaat = hae_asiakkaat1();
+      $presta_customer = new PrestaCustomers($presta_url, $presta_api_key);
+      $presta_customer->sync_customers($asiakkaat);
       break;
     case 'tilaukset':
-
+      $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key);
+      $presta_orders->transfer_orders_to_pupesoft();
       break;
 
     case 'kaikki':
@@ -66,6 +70,11 @@ if ($request['action'] == 'sync') {
       break;
   }
 }
+else {
+  echo_kayttoliittyma($request);
+}
+
+require('inc/footer.inc');
 
 function echo_kayttoliittyma($request) {
   global $kukarow, $yhtiorow;

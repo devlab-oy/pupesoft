@@ -363,7 +363,7 @@ function echo_saldovahvistukset($request) {
 
     if (!empty($request['avoin_saldo_rajaus'])) {
 
-      $_rajaus = $request['avoin_saldo_rajaus'];
+      $_rajaus = (float) $request['avoin_saldo_rajaus'];
       $_avoin_summa = $lasku['avoin_saldo_summa'];
 
       if ($_avoin_summa == 0 or ($_avoin_summa < $_rajaus and $_avoin_summa > 0))  {
@@ -550,15 +550,10 @@ function echo_kayttoliittyma($request) {
   echo "</td>";
   echo "</tr>";
 
-  $sel = $request['avoin_saldo_rajaus'] != "" ? "selected" : "";
-
   echo "<tr>";
   echo "<th>".t('Avoin saldo rajaus').":</th>";
   echo "<td>";
-  echo "<select name='avoin_saldo_rajaus'>";
-  echo "<option value=''>",t("Ei rajausta"),"</option>";
-  echo "<option value='100' {$sel}>",t("Näytä vain yli 100 EUR"),"</option>";
-  echo "</select>";
+  echo "<input type='text' name='avoin_saldo_rajaus' value='{$avoin_saldo_rajaus}' />";
   echo "</td>";
   echo "</tr>";
 

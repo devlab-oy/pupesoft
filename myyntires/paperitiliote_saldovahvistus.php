@@ -314,7 +314,7 @@ function loppu($firstpage, $saldovahvistus) {
 
   $pdf->draw_text(30, $kala - 20, t('Saldovahvistus', $kieli), $firstpage, $bold);
 
-  $pdf->draw_text(30, $kala - 40, t('Todistamme että', $kieli)." {$saldovahvistus['asiakas']['nimi']} ".t('velka', $kieli).'/'.t('ennakkomaksu', $kieli)." {$yhtiorow['nimi']} ".date('d.m.Y', strtotime($saldovahvistus['laskun_avoin_paiva'])).' '.t('on', $kieli), $firstpage, $bold);
+  $pdf->draw_text(30, $kala - 40, t("Todistamme että %s velka / ennakkomaksu %s %s on", $kieli, $saldovahvistus['asiakas']['nimi'], $yhtiorow['nimi'], date('d.m.Y', strtotime($saldovahvistus['laskun_avoin_paiva']))), $firstpage, $bold);
 
   $x[0] = 30;
   $x[1] = 230;

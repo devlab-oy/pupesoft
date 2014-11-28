@@ -27014,6 +27014,7 @@ if (!function_exists('keraa_saldovahvistusrivit_ytunnus')) {
         while ($chkrow = mysql_fetch_assoc($chkres)) {
           if ($lasku['ryhmittely_tyyppi'] == 'ytunnus') {
             $laskut[$ryhmittely]['asiakas'] = hae_asiakas($chkrow['liitostunnus']);
+            $laskut[$ryhmittely]['asiakas_nimi'] = $laskut[$ryhmittely]['asiakas']['nimi'];
           }
           else {
             $laskut[$ryhmittely]['paaasiakas'] = hae_asiakas($chkrow['liitostunnus']);
@@ -27077,6 +27078,7 @@ if (!function_exists('keraa_saldovahvistusrivit_ktunnus_ytunnus')) {
 
           if ($_ryhmittely_tyyppi == 'ytunnus') {
             $_arr['asiakas'] = hae_asiakas($chkrow['liitostunnus']);
+            $_arr['asiakas_nimi'] = $_arr['asiakas']['nimi'];
           }
           else {
             $_arr['paaasiakas'] = hae_asiakas($chkrow['liitostunnus']);

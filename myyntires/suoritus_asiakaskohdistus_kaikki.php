@@ -63,9 +63,10 @@ while ($suoritus = mysql_fetch_assoc($result)) {
   // Kokeillaan kohdistaa nimellä
   if ($ok == 0) {
 
+    $unimi = poista_osakeyhtio_lyhenne($suoritus['nimi_maksaja']);
+
     $old   = array("[", "{", "\\", "|", "]", "}");
     $new   = array("Ä", "ä", "Ö", "ö", "Å", "å");
-    $unimi = trim(preg_replace('/\b(oy|ab)\b/i', '', strtolower($suoritus['nimi_maksaja'])));
     $unimi = str_replace($old, $new, $unimi);
 
     $asiakasokmaksaja = FALSE;

@@ -29721,6 +29721,20 @@ if (!function_exists("paivita_sopimusrivit")) {
   }
 }
 
+if (!function_exists("poista_osakeyhtio_lyhenne")) {
+  function poista_osakeyhtio_lyhenne($nimi) {
+
+    # strtolower ei osaa pienentää tämmöisiä erikoismerkkejä
+    $old = array("Ü");
+    $new = array("ü");
+    $nimi = str_replace($old, $new, $nimi);
+
+    $replace = "oy|ab|as|oü|ou|mtü|tü|ttü";
+
+    return trim(preg_replace("/\b({$replace})\b/i", '', strtolower($nimi)));
+  }
+}
+
 if (!function_exists("rakenna_relex_tuote_parametrit")) {
   function rakenna_relex_tuote_parametrit() {
     global $yhtiorow, $kukarow;

@@ -56,9 +56,15 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
               laskun_lisatiedot.sopimus_alkupvm,
               laskun_lisatiedot.sopimus_loppupvm
                FROM lasku
-              LEFT JOIN laskun_lisatiedot ON lasku.yhtio = laskun_lisatiedot.yhtio AND lasku.tunnus = laskun_lisatiedot.otunnus
-              LEFT JOIN lasku kesken ON kesken.yhtio = lasku.yhtio AND kesken.tila='N' AND kesken.alatila = ''
-                AND kesken.clearing = 'sopimus' AND kesken.swift = lasku.tunnus
+              LEFT JOIN laskun_lisatiedot 
+                ON lasku.yhtio = laskun_lisatiedot.yhtio 
+                AND lasku.tunnus = laskun_lisatiedot.otunnus
+              LEFT JOIN lasku kesken 
+                ON kesken.yhtio = lasku.yhtio 
+                AND kesken.tila='N' 
+                AND kesken.alatila = ''
+                AND kesken.clearing = 'sopimus' 
+                AND kesken.swift = lasku.tunnus
               WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
               AND lasku.tunnus  = '$tilausnumero'
               AND kesken.tunnus is null";
@@ -270,9 +276,17 @@ $query = "SELECT lasku.*, laskun_lisatiedot.*, tilausrivi.*,
                       laskun_lisatiedot.otunnus         = lasku.tunnus and
                       laskun_lisatiedot.sopimus_alkupvm <= date_add(now(), interval 1 month) and
                       (laskun_lisatiedot.sopimus_loppupvm >= date_sub(now(), interval 1 month) or laskun_lisatiedot.sopimus_loppupvm = '0000-00-00'))
-          JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = '0')
-          LEFT JOIN lasku kesken ON kesken.yhtio = lasku.yhtio AND kesken.tila='N' AND kesken.alatila = ''
-            AND kesken.clearing = 'sopimus' AND kesken.swift = lasku.tunnus AND kesken.summa = lasku.summa
+          JOIN tilausrivi 
+            ON (tilausrivi.yhtio = lasku.yhtio 
+              and tilausrivi.otunnus = lasku.tunnus 
+              and tilausrivi.tyyppi = '0')
+          LEFT JOIN lasku kesken 
+            ON kesken.yhtio = lasku.yhtio 
+            AND kesken.tila='N' 
+            AND kesken.alatila = ''
+            AND kesken.clearing = 'sopimus' 
+            AND kesken.swift = lasku.tunnus 
+            AND kesken.summa = lasku.summa
           WHERE lasku.yhtio                             = '$kukarow[yhtio]' AND
           lasku.tila                                    = '0' AND
           lasku.alatila                                 in ('V','X')
@@ -464,7 +478,7 @@ if (mysql_num_rows($result) > 0) {
     }
     
     if ($row["keskentunnus"] > 0) {
-      $laskuttamatta = $row[keskentunnus]." kesken";
+      $laskuttamatta = $row["keskentunnus"]." kesken";
     }
 
     echo "<td nowrap class='$classname' id='$row[laskutunnus]'>$laskutettu_vika ";

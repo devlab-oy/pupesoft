@@ -28213,8 +28213,10 @@ if (!function_exists('hae_toimitustavat')) {
     $sort = array();
     foreach ($toimipaikan_toimitustavat as $index => $toimipaikan_toimitustapa) {
       $sort[$index] = $toimipaikan_toimitustapa['jarjestys'];
+      $lower[$index] = strtolower($toimipaikan_toimitustapa['selite']);
     }
-    array_multisort($sort, SORT_NUMERIC, $toimipaikan_toimitustavat);
+
+    array_multisort($sort, SORT_NUMERIC, $lower, SORT_STRING, SORT_ASC, $toimipaikan_toimitustavat);
 
     return $toimipaikan_toimitustavat;
   }

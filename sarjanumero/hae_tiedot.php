@@ -207,7 +207,12 @@ if ($view == 'tiedot') {
       foreach ($tiedot['rullat'] as $rulla) {
         if ($rulla['asiakkaan_tilausnumero'] == $tilausnumero) {
 
+          if ($rulla['konttinumero'] != '') {
+            $vp = 'Toimitettu';
+          }
+          else {
           $vp = $rulla['hyllyalue'].'-'.$rulla['hyllynro'];
+          }
 
           $statukset[$rulla['lisatieto']]++;
           $varastopaikat[$vp]++;

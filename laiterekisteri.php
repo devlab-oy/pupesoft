@@ -6,7 +6,7 @@ $pupe_DataTables = "selaalaitteita";
 if (strpos($_SERVER['SCRIPT_NAME'], "laiterekisteri.php") !== FALSE) {
   require "inc/parametrit.inc";
 }
-var_dump($_REQUEST);
+
 if ($yhtiorow['laiterekisteri_kaytossa'] == '') die(t("Yhtiön parametrit - Laiterekisteri ei ole käytössä"));
 
 if (isset($livesearch_tee) and $livesearch_tee == "SARJANUMEROHAKU") {
@@ -68,7 +68,11 @@ if (isset($tallennetaan_muutokset) and isset($muokattava_laite) and $muokattava_
 }
 elseif (isset($tallenna_uusi_laite) and isset($valitse_sarjanumero) and !empty($valitse_sarjanumero)
   and !isset($muokattava_laite)) {
-  // Tarkistetaan ettei laite/sarjanumeropari ole jo taulussa
+
+  // Jos syötetään sarjanumeroita mitkä eivät ole sarjanumeroseurannassa
+  $uusilaite_sarjanumero = $uusilaite_sarjanumero == '' ? $valitse_sarjanumero : $uusilaite_sarjanumero;
+
+  // Tarkistetaan ettei tuote/sarjanumeropari ole jo taulussa
   $query = "SELECT *
             FROM laite
             WHERE tuoteno = '{$uusilaite_tuotenumero}'
@@ -92,7 +96,6 @@ elseif (isset($tallenna_uusi_laite) and isset($valitse_sarjanumero) and !empty($
               luontiaika                         = now(),
               laatija                            = '{$kukarow['kuka']}'";
     pupe_query($kveri);
-    query_dump($query);
     unset($toiminto);
   }
   else {
@@ -181,7 +184,7 @@ if ($toiminto == "LINKKAA") {
             FROM laite
             LEFT JOIN tuote on tuote.yhtio = laite.yhtio
               AND tuote.tuoteno                           = laite.tuoteno
-            JOIN avainsana on avainsana.yhtio = tuote.yhtio
+            LEFT JOIN avainsana on avainsana.yhtio = tuote.yhtio
               AND avainsana.laji                          = 'TRY'
               AND avainsana.selite                        = tuote.try
             JOIN laitteen_sopimukset on laitteen_sopimukset.laitteen_tunnus = laite.tunnus
@@ -270,7 +273,7 @@ $query = "SELECT
           GROUP BY laite.sarjanro,laite.tuoteno";
 
 $res = pupe_query($query);
-query_dump($query);
+
 if ($toiminto == 'MUOKKAA') {
 
   // Halutaan muuttaa laitteen tietoja
@@ -337,10 +340,8 @@ elseif ($toiminto == 'UUSILAITE') {
     $esiv_malli = $rivikka['malli'];
     $esiv_sopimus = "Ei";
     if (empty($rivikka['sarjanumero'])) $rivikka['sarjanumero'] = $valitse_sarjanumero;
-    //if (empty($rivikka['tuoteno'])) $rivikka['tuoteno'] = $valitse_tuotenumero;
     echo "<input type='hidden' name='uusilaite_myyntirivitunnus' value ='{$rivikka['myyntirivitunnus']}'/>";
     echo "<input type='hidden' name='uusilaite_sarjanumero' value ='{$rivikka['sarjanumero']}'/>";
-    //echo "<input type='hidden' name='uusilaite_tuotenumero' value ='{$rivikka['tuoteno']}'/>";
   }
   echo "<td></td>";
   echo "<td>{$esiv_sopimus}</td>";

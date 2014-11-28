@@ -16353,7 +16353,7 @@ if (!function_exists("pisin_tuote")) {
         }
       }
     }
-echo "16356F pisin_tuotefunkkarissa("; var_dump($pisin_tuote); echo ") <br><br>";
+
     $pisin_tuote_array = array_intersect_key($pisin_tuote_array, $tmp_arr);
 
     return $pisin_tuote_array;
@@ -16367,10 +16367,9 @@ if (!function_exists("valitse_pakkaus")) {
     $kaytettava_pakkaus = "";
 
     if ($eran_koko != '') {
-echo "16370F pisintuotearray("; var_dump($pisin_tuote_array); echo ") <br><br>";
       $pisin_tuote_array = pisin_tuote($pisin_tuote_array, $pisin_tuote_per_asiakas);
       $pisin_tuote = array_shift($pisin_tuote_array);
-echo "16373F valitse_pakkaus funkkarissa("; var_dump($pisin_tuote); echo ") <br><br>";
+
       if ($pisin_tuote['koko'] == '') {
         return "";
       }
@@ -16546,7 +16545,7 @@ if (!function_exists("pakkauksen_iterointi")) {
     $param_paino = $pakkaukset[$kaytettava_pakkaus]['kaytetty_paino'];
 
     if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "kaytetty paino: $param_paino<br>";
-echo "16549F valitse_pakkaus("; var_dump($pisin_tuote); echo ") <br><br>";
+
     $kaytettava_pakkaus = valitse_pakkaus($keraysvyohyketiedot, $pakkaukset, $pisin_tuote, $valitse_pakkaus_array_per_asiakas, $param, $param_paino, $param, $param_paino);
 
     if ($kaytettava_pakkaus != $kaytettava_pakkaus_backup and $kaytettava_pakkaus != '') {
@@ -18162,7 +18161,7 @@ if (!function_exists("tee_keraysera")) {
             $kukarow['debugstring'] .= "(E800): Asiakas ei vaihtunut, mutta merkki tai jv vaihtui!<br>\n";
             $kukarow['debugstring'] .= "<br>\n";
           }
-echo "18165F pakkauksen_iterointi("; var_dump($pisin_tuote); echo ") <br><br>";
+
           list($pakkaukset, $kaytettava_pakkaus, $kaytettavat_pakkaukset, $eran_koko, $eran_koko_pintaala) = pakkauksen_iterointi($keraysvyohyketiedot, $pakkaukset, $kaytettava_pakkaus, $pisin_tuote, $kaytettavat_pakkaukset, $eka_kierros, $eran_koko, $eran_koko_pintaala, $juokseva_nro, $kerailyniput_tiedot, $kerailyniput_key, $key, $pisin_tuote_per_asiakas);
 
           if (isset($kukarow['debugstring'])) {
@@ -18212,7 +18211,7 @@ echo "18165F pakkauksen_iterointi("; var_dump($pisin_tuote); echo ") <br><br>";
           }
 
           $era_valmis = true;
-echo "18215F pakkauksen_iterointi("; var_dump($pisin_tuote); echo ") <br><br>";
+
           // tilaus loppuu, tehdään vielä tässä vaiheessa pakkaustsekki
           list($pakkaukset, $kaytettava_pakkaus, $kaytettavat_pakkaukset, $eran_koko, $eran_koko_pintaala) = pakkauksen_iterointi($keraysvyohyketiedot, $pakkaukset, $kaytettava_pakkaus, $pisin_tuote, $kaytettavat_pakkaukset, $eka_kierros, $eran_koko, $eran_koko_pintaala, $juokseva_nro, $kerailyniput_tiedot, $kerailyniput_key, $key, $pisin_tuote_per_asiakas);
 

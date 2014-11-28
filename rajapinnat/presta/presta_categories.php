@@ -228,6 +228,7 @@ class PrestaCategories extends PrestaClient {
       }
     }
     
+    $this->logger->log('Kaikki kategoriat poistettu');
     $this->logger->log('---------End category delete all---------');
   }
 }

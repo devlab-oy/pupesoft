@@ -38,43 +38,40 @@ if ($request['action'] == 'sync') {
   echo_kayttoliittyma($request);
   echo "<br/>";
 
-  switch ($request['synkronointi_tyyppi']) {
-    case 'kategoriat':
-      $kategoriat = hae_kategoriat();
-      $presta_categories = new PrestaCategories($presta_url, $presta_api_key);
-      $presta_categories->sync_categories($kategoriat);
-      break;
-    case 'tuotteet':
-      $tuotteet = hae_tuotteet();
-      $presta_products = new PrestaProducts($presta_url, $presta_api_key);
-      $presta_products->sync_products($tuotteet);
-      break;
-    case 'asiakkaat':
-      $asiakkaat = hae_asiakkaat1();
-      $presta_customer = new PrestaCustomers($presta_url, $presta_api_key);
-      $presta_customer->sync_customers($asiakkaat);
-      break;
-    case 'tilaukset':
-      $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key);
-      $presta_orders->transfer_orders_to_pupesoft();
-      break;
+  $synkronoi = array();
 
-    case 'kaikki':
-      $asiakkaat = hae_asiakkaat1();
-      $presta_customer = new PrestaCustomers($presta_url, $presta_api_key);
-      $presta_customer->sync_customers($asiakkaat);
+  if ($request['synkronointi_tyyppi'] == 'kaikki') {
+    foreach ($request['synkronointi_tyypit'] as $k => $s) {
+      if ($k != 'kaikki') {
+        $synkronoi[] = $k;
+      }
+    }
+  }
+  else {
+    $synkronoi[] = $request['synkronointi_tyyppi'];
+  }
 
-      $kategoriat = hae_kategoriat();
-      $presta_categories = new PrestaCategories($presta_url, $presta_api_key);
-      $presta_categories->sync_categories($kategoriat);
+  if (in_array('kategoriat', $synkronoi)) {
+    $kategoriat = hae_kategoriat();
+    $presta_categories = new PrestaCategories($presta_url, $presta_api_key);
+    $presta_categories->sync_categories($kategoriat);
+  }
 
-      $tuotteet = hae_tuotteet();
-      $presta_products = new PrestaProducts($presta_url, $presta_api_key);
-      $presta_products->sync_products($tuotteet);
+  if (in_array('tuotteet', $synkronoi)) {
+    $tuotteet = hae_tuotteet();
+    $presta_products = new PrestaProducts($presta_url, $presta_api_key);
+    $presta_products->sync_products($tuotteet);
+  }
 
-      $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key);
-      $presta_orders->transfer_orders_to_pupesoft();
-      break;
+  if (in_array('asiakkaat', $synkronoi)) {
+    $asiakkaat = hae_asiakkaat1();
+    $presta_customer = new PrestaCustomers($presta_url, $presta_api_key);
+    $presta_customer->sync_customers($asiakkaat);
+  }
+
+  if (in_array('tilaukset', $synkronoi)) {
+    $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key);
+    $presta_orders->transfer_orders_to_pupesoft();
   }
 }
 else {

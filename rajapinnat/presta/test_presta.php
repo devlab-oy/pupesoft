@@ -13,6 +13,13 @@ require "rajapinnat/presta/presta_categories.php";
 require "rajapinnat/presta/presta_customers.php";
 require "rajapinnat/presta/presta_sales_orders.php";
 
+if (!isset($action)) {
+  $action = '';
+}
+if (!isset($synkronointi_tyyppi)) {
+  $synkronointi_tyyppi = '';
+}
+
 $request = array(
     'action'              => $action,
     'synkronointi_tyyppi' => $synkronointi_tyyppi,
@@ -152,33 +159,32 @@ function hae_tuotteet() {
   global $kukarow, $yhtiorow, $verkkokauppatyyppi;
   // Haetaan pupesta tuotteen tiedot
   $query = "SELECT
-          tuote.*,
-          tuote.mallitarkenne campaign_code,
-          tuote.malli target,
-          tuote.leimahduspiste onsale,
-          ta_nimitys_se.selite nimi_swe,
-          ta_nimitys_en.selite nimi_eng,
-          try_fi.selitetark try_nimi
-          FROM tuote
-          LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio
-            and try_fi.selite        = tuote.try
-            and try_fi.laji          = 'try'
-            and try_fi.kieli         = 'fi')
-          LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on tuote.yhtio = ta_nimitys_se.yhtio
-            and tuote.tuoteno        = ta_nimitys_se.tuoteno
-            and ta_nimitys_se.laji   = 'nimitys'
-            and ta_nimitys_se.kieli  = 'se'
-          LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on tuote.yhtio = ta_nimitys_en.yhtio
-            and tuote.tuoteno        = ta_nimitys_en.tuoteno
-            and ta_nimitys_en.laji   = 'nimitys'
-            and ta_nimitys_en.kieli  = 'en'
-          WHERE tuote.yhtio          = '{$kukarow["yhtio"]}'
-            AND tuote.status        != 'P'
-            AND tuote.tuotetyyppi    NOT in ('A','B')
-            AND tuote.tuoteno       != ''
-            AND tuote.nakyvyys      != ''
-            AND tuote.tuoteno IN ('1024','1025','1026')
-          ORDER BY tuote.tuoteno";
+            tuote.*,
+            tuote.mallitarkenne campaign_code,
+            tuote.malli target,
+            tuote.leimahduspiste onsale,
+            ta_nimitys_se.selite nimi_swe,
+            ta_nimitys_en.selite nimi_eng,
+            try_fi.selitetark try_nimi
+            FROM tuote
+            LEFT JOIN avainsana as try_fi ON (try_fi.yhtio = tuote.yhtio
+              and try_fi.selite        = tuote.try
+              and try_fi.laji          = 'try'
+              and try_fi.kieli         = 'fi')
+            LEFT JOIN tuotteen_avainsanat as ta_nimitys_se on tuote.yhtio = ta_nimitys_se.yhtio
+              and tuote.tuoteno        = ta_nimitys_se.tuoteno
+              and ta_nimitys_se.laji   = 'nimitys'
+              and ta_nimitys_se.kieli  = 'se'
+            LEFT JOIN tuotteen_avainsanat as ta_nimitys_en on tuote.yhtio = ta_nimitys_en.yhtio
+              and tuote.tuoteno        = ta_nimitys_en.tuoteno
+              and ta_nimitys_en.laji   = 'nimitys'
+              and ta_nimitys_en.kieli  = 'en'
+            WHERE tuote.yhtio          = '{$kukarow["yhtio"]}'
+              AND tuote.status        != 'P'
+              AND tuote.tuotetyyppi    NOT in ('A','B')
+              AND tuote.tuoteno       != ''
+              AND tuote.nakyvyys      != ''
+            ORDER BY tuote.tuoteno";
   $res = pupe_query($query);
   $dnstuote = array();
 // Pyöräytetään muuttuneet tuotteet läpi

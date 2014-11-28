@@ -29725,8 +29725,8 @@ if (!function_exists("poista_osakeyhtio_lyhenne")) {
   function poista_osakeyhtio_lyhenne($nimi) {
 
     # strtolower ei osaa pienentää tämmöisiä erikoismerkkejä
-    $old = array("Ü");
-    $new = array("ü");
+    $old = array("Ü", "Ž");
+    $new = array("ü", "ž");
     $nimi = str_replace($old, $new, $nimi);
 
     $replace = "oy|ab|as|oü|ou|mtü|tü|ttü";

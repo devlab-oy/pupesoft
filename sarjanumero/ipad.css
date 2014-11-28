@@ -326,7 +326,6 @@ th {
   text-align:center;
 }
 
-
 .tapfocus {
   width:100px; height:100px;
   border:1px solid #AEAEAE;
@@ -337,3 +336,28 @@ th {
   box-shadow: 0 0 1em hsla(0, 0%, 0%, 1.0);
   margin:15px;
 }
+
+.alue {
+  text-align:left;
+  padding:15px;
+  margin:5px auto;
+  border:1px solid #A4A4A4;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  border-radius: 3px;
+}
+
+.alue_0 {
+  text_align:center;
+  padding:15px;
+}
+
+.alue_1 {
+  background-color:silver;
+  width:700px;
+}
+
+.alue_2 {
+  background-color:pink;
+}
+

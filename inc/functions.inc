@@ -27074,7 +27074,7 @@ if (!function_exists('keraa_saldovahvistusrivit_ktunnus_ytunnus')) {
 
         while ($chkrow = mysql_fetch_assoc($chkres)) {
 
-          $_arr = $laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely];
+          $_arr = &$laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely];
 
           if ($_ryhmittely_tyyppi == 'ytunnus') {
             $_arr['asiakas'] = hae_asiakas($chkrow['liitostunnus']);

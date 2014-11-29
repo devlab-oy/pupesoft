@@ -313,6 +313,10 @@ function hae_tuotteet() {
     if (!isset($hinnastoresult['hinta']))
       $hinnastoresult['hinta'] = '';
 
+    //@TODO UNCOMMENT
+//    list(,, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', $verkkokauppa_saldo_varasto);
+    $myytavissa = 100;
+
     $dnstuote[] = array(
         'tuoteno'              => $row["tuoteno"],
         'nimi'                 => $row["nimitys"],
@@ -342,6 +346,7 @@ function hae_tuotteet() {
         'asiakashinnat'        => $asiakashinnat,
         'tuotepuun_nodet'      => $tuotepuun_nodet,
         'tuotteen_parametrit'  => $tuotteen_parametrit,
+        'saldo'                => $myytavissa,
         'images'               => hae_tuotekuvat($row['tunnus']),
     );
   }

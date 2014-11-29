@@ -42,17 +42,37 @@ class PrestaProducts extends PrestaClient {
 
     if (!empty($product['tuotepuun_nodet'])) {
       foreach ($product['tuotepuun_nodet'] as $category_ancestors) {
-        $presta_categories = new PrestaCategories($this->get_url(), $this->get_api_key());
-        $category_id = $presta_categories->find_category($category_ancestors);
-        if (!is_null($category_id)) {
-          $category = $xml->product->associations->categories->addChild('category');
-          $category->addChild('id');
-          $category->id = $category_id;
-        }
+        $this->add_category($xml, $category_ancestors);
       }
+    }
+    
+    if (!empty($product['saldo'])) {
+      $this->add_stock_availability($xml, $product['saldo']);
     }
 
     return $xml;
+  }
+
+  /**
+   * 
+   * @param SimpleXMLElement $xml
+   * @param array $ancestors
+   */
+  private function add_category(SimpleXMLElement &$xml, $ancestors) {
+    $presta_categories = new PrestaCategories($this->get_url(), $this->get_api_key());
+    $category_id = $presta_categories->find_category($ancestors);
+    if (!is_null($category_id)) {
+      $category = $xml->product->associations->categories->addChild('category');
+      $category->addChild('id');
+      $category->id = $category_id;
+    }
+  }
+  
+  private function add_stock_availability(SimpleXMLElement &$xml, $stock) {
+    $category = $xml->product->associations->categories->addChild('stock_available');
+    $category->addChild('id');
+    $category->addChild('id_product_attribute');
+    $category->id_product_attribute = $stock;
   }
 
   /**

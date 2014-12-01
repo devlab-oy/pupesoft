@@ -4344,3 +4344,22 @@ if ($fieldname == 'takuuvarasto') {
 
   $jatko = 0;
 }
+
+if ($fieldname == "tilausrivin_korvamerkinta") {
+  $sel = $trow[$i] == "K" ? "selected" : "";
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $ulos .= "<option value = ''>";
+  $ulos .= t("Ei sallita tilausrivien korvamerkint‰‰");
+  $ulos .= "</option>";
+
+  $ulos .= "<option value = 'K' {$sel}>";
+  $ulos .= t("Sallitaan tilausrivien korvamerkint‰");
+  $ulos .= "</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+

@@ -8,11 +8,11 @@ set_time_limit(86400);
 $compression = FALSE;
 
 require "../../inc/parametrit.inc";
-require "rajapinnat/presta/presta_products.php";
-require "rajapinnat/presta/presta_categories.php";
-require "rajapinnat/presta/presta_customers.php";
-require "rajapinnat/presta/presta_sales_orders.php";
-require 'rajapinnat/presta/presta_product_stocks.php';
+require_once "rajapinnat/presta/presta_products.php";
+require_once "rajapinnat/presta/presta_categories.php";
+require_once "rajapinnat/presta/presta_customers.php";
+require_once "rajapinnat/presta/presta_sales_orders.php";
+require_once 'rajapinnat/presta/presta_product_stocks.php';
 
 if (!isset($action)) {
   $action = '';

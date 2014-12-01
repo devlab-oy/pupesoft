@@ -1,6 +1,7 @@
 <?php
 
 require_once 'rajapinnat/presta/presta_client.php';
+require_once 'rajapinnat/presta/presta_product_stocks.php';
 
 class PrestaProducts extends PrestaClient {
 
@@ -45,16 +46,12 @@ class PrestaProducts extends PrestaClient {
         $this->add_category($xml, $category_ancestors);
       }
     }
-    
-    if (!empty($product['saldo'])) {
-      $this->add_stock_availability($xml, $product['saldo']);
-    }
 
     return $xml;
   }
 
   /**
-   * 
+   *
    * @param SimpleXMLElement $xml
    * @param array $ancestors
    */
@@ -66,13 +63,6 @@ class PrestaProducts extends PrestaClient {
       $category->addChild('id');
       $category->id = $category_id;
     }
-  }
-  
-  private function add_stock_availability(SimpleXMLElement &$xml, $stock) {
-    $category = $xml->product->associations->categories->addChild('stock_available');
-    $category->addChild('id');
-    $category->addChild('id_product_attribute');
-    $category->id_product_attribute = $stock;
   }
 
   /**
@@ -99,6 +89,11 @@ class PrestaProducts extends PrestaClient {
           else {
             $response = $this->create($product);
             $id = (string) $response['product']['id'];
+          }
+
+          if (!empty($product['saldo'])) {
+            $presta_stock = new PrestaProductStocks($this->get_url(), $this->get_api_key());
+            $presta_stock->create_or_update($id, $product['saldo']);
           }
 
           $this->create_product_images($id, $product['images']);

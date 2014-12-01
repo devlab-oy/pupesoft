@@ -19,22 +19,51 @@ if ($tee == '') {
 }
 
 function hae_toimittajat() {
-  global $kukarow;
+  global $kukarow, $yhtiorow;
 
-  $query  = "SELECT DISTINCT toimi.tunnus, toimi.nimi
+  if ($yhtiorow["tiedostokirjaston_toimittajat_avainsanoista"] == "Y") {
+    $result = t_avainsana('TOIMIT_TKIRJAST');
+
+    $tunnukset = array();
+
+    while ($toimittaja = mysql_fetch_assoc($result)) {
+      array_push($tunnukset, $toimittaja["selite"]);
+    }
+
+    $tunnukset = implode(",", $tunnukset);
+
+    $query = "SELECT tunnus, nimi
+              FROM toimi
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND tunnus IN ({$tunnukset})
+              ORDER BY toimi.nimi";
+
+    $result = pupe_query($query);
+
+    $toimittajat = array();
+
+    while ($toimittaja = mysql_fetch_assoc($result)) {
+      array_push($toimittajat, $toimittaja);
+    }
+
+    return $toimittajat;
+  }
+  else {
+    $query  = "SELECT DISTINCT toimi.tunnus, toimi.nimi
              FROM tuotteen_toimittajat
              INNER JOIN toimi ON (toimi.tunnus = tuotteen_toimittajat.liitostunnus)
              WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
              ORDER BY toimi.nimi";
-  $result = pupe_query($query);
+    $result = pupe_query($query);
 
-  $toimittajat = array();
+    $toimittajat = array();
 
-  while ($rivi = mysql_fetch_assoc($result)) {
-    array_push($toimittajat, $rivi);
+    while ($rivi = mysql_fetch_assoc($result)) {
+      array_push($toimittajat, $rivi);
+    }
+
+    return $toimittajat;
   }
-
-  return $toimittajat;
 }
 
 function tiedostotyypit() {

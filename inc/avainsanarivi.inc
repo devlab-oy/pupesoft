@@ -283,6 +283,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "SALDOVAHVISTUS")  $ulos .= "<option value='SALDOVAHVISTUS' {$avain_sel['SALDOVAHVISTUS']}>  ".t("Saldovahvistuksen viesti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "DPAVAINSANALAJI") $ulos .= "<option value='DPAVAINSANALAJI' {$avain_sel['DPAVAINSANALAJI']}>        ".t("Dynaamisen puun avainsanojen laji")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "LITETY_TKIRJAST") $ulos .= "<option value='LITETY_TKIRJAST' {$avain_sel['LITETY_TKIRJAST']}>".t("Tiedostokirjastossa selailtava tiedostotyyppi")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "TOIMIT_TKIRJAST") $ulos .= "<option value='TOIMIT_TKIRJAST' {$avain_sel['TOIMIT_TKIRJAST']}>".t("Tiedostokirjastossa n‰kyv‰ toimittaja")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "RELEX_TUOTEPAR") $ulos .= "<option value='RELEX_TUOTEPAR' {$avain_sel['RELEX_TUOTEPAR']}>".t("Relex tuoteparametrit")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "JTVALMISVIESTI")  $ulos .= "<option value='JTVALMISVIESTI' {$avain_sel['JTVALMISVIESTI']}>".t("SMS-viesti, joka l‰hetet‰‰n asiakkalle, kun j‰lkitoimitustuotteet on ker‰tty")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TYOMVALMVIEST")   $ulos .= "<option value='TYOMVALMVIEST' {$avain_sel['TYOMVALMVIEST']}>".t("SMS-viesti, joka l‰hetet‰‰n asiakkalle, kun tyˆm‰‰r‰ys on valmis")."</option>";
@@ -857,6 +858,33 @@ if ($avain_sel["LITETY_TKIRJAST"] == "SELECTED" and mysql_field_name($result, $i
     $sel = ($row["selite"] == $trow[$i]) ? ' selected' : '';
     $ulos .= "<option value = '{$row["selite"]}'$sel>{$row["selite"]} - {$row["selitetark"]}</option>";
   }
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($avain_sel["TOIMIT_TKIRJAST"] == "SELECTED" and $_selite) {
+  $query = "SELECT DISTINCT toimi.tunnus, toimi.nimi
+            FROM tuotteen_toimittajat
+            INNER JOIN toimi ON (toimi.tunnus = tuotteen_toimittajat.liitostunnus)
+            WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+            ORDER BY toimi.nimi";
+
+  $toimittaja_result = pupe_query($query);
+
+  $toimittajat = array();
+
+  while ($rivi = mysql_fetch_assoc($toimittaja_result)) {
+    array_push($toimittajat, $rivi);
+  }
+
+  $ulos = "<td><select name='{$nimi}' onclick='submit();'>";
+
+  foreach ($toimittajat as $toimittaja) {
+    $sel = ($toimittaja["tunnus"] == $trow[$i]) ? ' selected' : '';
+    $ulos .= "<option value='{$toimittaja["tunnus"]}' $sel>{$toimittaja["nimi"]}</option>";
+  }
+
   $ulos .= "</select></td>";
 
   $jatko = 0;

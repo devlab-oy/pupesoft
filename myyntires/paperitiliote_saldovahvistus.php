@@ -100,7 +100,7 @@ function alku($saldovahvistus) {
 
   $kala -= 60;
 
-  $pdf->draw_text(380, 780, t("Päivämäärä", $kieli).': '.$saldovahvistus['laskun_avoin_paiva'], $firstpage, $norm);
+  $pdf->draw_text(380, 780, t("Päivämäärä", $kieli).': '.$saldovahvistus['tiliotepvm'], $firstpage, $norm);
 
   //Oikea sarake
   $pdf->draw_text(380, 760, t("Laatija", $kieli).':', $firstpage, $norm);
@@ -116,7 +116,7 @@ function alku($saldovahvistus) {
   $pdf->draw_text(440, 730, $kukarow["eposti"], $firstpage, $norm);
 
   if ($pdf->currentPage['number'] == 0) {
-    $string = t('Ilmoitamme että avoin saldo ', $kieli)." ".date('d.m.Y', strtotime($saldovahvistus['laskun_avoin_paiva']))." ".t('on', $kieli).' '.$saldovahvistus['avoin_saldo_summa'].' '.$saldovahvistus['valkoodi'];
+    $string = t('Ilmoitamme että avoin saldo ', $kieli)." ".date('d.m.Y', strtotime($saldovahvistus['tiliotepvm']))." ".t('on', $kieli).' '.$saldovahvistus['avoin_saldo_summa'].' '.$saldovahvistus['valkoodi'];
     $pdf->draw_text(30, $kala, $string, $firstpage, $norm);
 
     // tehdään riveistä max 90 merkkiä
@@ -314,7 +314,7 @@ function loppu($firstpage, $saldovahvistus) {
 
   $pdf->draw_text(30, $kala - 20, t('Saldovahvistus', $kieli), $firstpage, $bold);
 
-  $pdf->draw_text(30, $kala - 40, t("Todistamme että %s velka / ennakkomaksu %s %s on", $kieli, $saldovahvistus['asiakas']['nimi'], $yhtiorow['nimi'], date('d.m.Y', strtotime($saldovahvistus['laskun_avoin_paiva']))), $firstpage, $bold);
+  $pdf->draw_text(30, $kala - 40, t("Todistamme että %s velka / ennakkomaksu %s %s on", $kieli, $saldovahvistus['asiakas']['nimi'], $yhtiorow['nimi'], date('d.m.Y', strtotime($saldovahvistus['tiliotepvm']))), $firstpage, $bold);
 
   $x[0] = 30;
   $x[1] = 230;

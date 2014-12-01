@@ -172,6 +172,8 @@ elseif ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldovah
     $boss = false;
   }
 
+  $laskut['tiliotepvm'] = "{$request['pp']}.{$request['kk']}.{$request['vv']}";
+
   //Valittu saldovahvistusviesti
   $pdf_filepath = hae_saldovahvistus_pdf($laskut, $boss);
 

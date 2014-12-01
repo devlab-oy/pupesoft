@@ -265,6 +265,40 @@ if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and (int) 
   $valitsetoimitus = $toim;
 }
 
+if ($tila == "KORVAMERKITSE") {
+
+  $query = "SELECT otunnus
+            FROM tilausrivi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$rivitunnus}'";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) > 0 and mysql_result($result, 0) == $tilausnumero) {
+
+    $korvamerkinta = mysql_real_escape_string($korvamerkinta);
+
+    if (empty($korvamerkinta)) {
+      $korvamerkinta = '.';
+    }
+
+    $query = "UPDATE tilausrivin_lisatiedot
+              JOIN tilausrivi
+                ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
+                AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+              JOIN lasku
+                ON lasku.yhtio = tilausrivin_lisatiedot.yhtio
+                AND lasku.tunnus = tilausrivi.otunnus
+              SET tilausrivin_lisatiedot.korvamerkinta = '{$korvamerkinta}'
+              WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+              AND tilausrivin_lisatiedot.tilausrivitunnus = '{$rivitunnus}'
+              AND lasku.tunnus = '{$kukarow['kesken']}'";
+    pupe_query($query);
+
+  }
+
+  $tila = '';
+}
+
 if ($kukarow["extranet"] == "" and in_array($toim, array("PIKATILAUS", "RIVISYOTTO", "TARJOUS")) and file_exists($pupe_root_polku . '/tilauskasittely/ostoskorin_haku.inc')) {
   require_once 'tilauskasittely/ostoskorin_haku.inc';
 }
@@ -7288,7 +7322,24 @@ if ($tee == '') {
           }
         }
 
-        echo "<td $classvar align='center' valign='top'>$var_temp&nbsp;</td>";
+        echo "<td $classvar align='center' valign='top'>$var_temp&nbsp;";
+
+        if (!empty($row['korvamerkinta'])) {
+
+          if ($row['korvamerkinta'] == '.') {
+            $luokka = '';
+          }
+          else {
+            $luokka = 'tooltip';
+          }
+
+          echo "<img src='{$palvelin2}pics/lullacons/info.png' class='{$luokka}' id='{$row['tunnus']}_info'>";
+          echo "<div id='div_{$row['tunnus']}_info' class='popup'>";
+          echo $row['korvamerkinta'];
+          echo "</div>";
+        }
+
+        echo "</td>";
 
         if ($toim == "VALMISTAVARASTOON" and $yhtiorow['kehahinta_valmistuksella'] == "K") {
           echo "<td {$class} align='right' valign='top' nowrap>";
@@ -7659,6 +7710,52 @@ if ($tee == '') {
                 <input type='hidden' name='tapa'       value = 'POISJTSTA'>
                 <input type='Submit' value='".t("Toimita")."'>
                 </form> ";
+          }
+
+          if ($yhtiorow['tilausrivin_korvamerkinta'] == 'K') {
+
+            echo "<br>
+                  <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='korvamerkitse'>
+                  <input type='hidden' name='toim'       value = '$toim'>
+                  <input type='hidden' name='lopetus'     value = '$lopetus'>
+                  <input type='hidden' name='ruutulimit'     value = '$ruutulimit'>
+                  <input type='hidden' name='projektilla'   value = '$projektilla'>
+                  <input type='hidden' name='tilausnumero'   value = '$tilausnumero'>
+                  <input type='hidden' name='mista'       value = '$mista'>
+                  <input type='hidden' name='rivitunnus'     value = '$row[tunnus]'>
+                  <input type='hidden' name='ale_peruste'   value = '$row[ale_peruste]'>
+                  <input type='hidden' name='rivilaadittu'   value = '$row[laadittu]'>
+                  <input type='hidden' name='menutila'     value = '$menutila'>
+                  <input type='hidden' name='tila'       value = 'KORVAMERKITSE'>
+                  <input type='hidden' name='orig_tila'     value = '$orig_tila'>
+                  <input type='hidden' name='orig_alatila'   value = '$orig_alatila'>
+                  <span class='korvaspan' id='korvaspan_{$row['tunnus']}' style='display:none'>
+                  <input type='Submit' style='margin:5px 0' value='".t("Korvamerkitse")."'>
+                  <input type='text' class='korvamerkinta' style='padding:0; margin:0; position:relative; top:1px;' name='korvamerkinta' value = ''>
+                  <img src='{$palvelin2}pics/lullacons/stop.png' alt='Peru' title='Peru' class='korvaperu' style='position:relative; top:4px;'>
+                  </span>
+                  </form>
+                  <input type='Submit' class='korvabutton' style='margin:5px 0' id='korvabutton_{$row['tunnus']}' value='".t("Korvamerkitse")."'>
+
+                  <script type='text/javascript' language='javascript'>
+
+                  $('.korvaperu').click(function() {
+                    $('.korvabutton').show();
+                    $('.korvaspan').hide();
+                    $('.korvamerkinta').val('');
+                  });
+
+                  $('#korvabutton_{$row['tunnus']}').click(function() {
+                    $('.korvabutton').show();
+                    $(this).hide();
+                    $('.korvaspan').hide();
+                    $('.korvamerkinta').val('');
+                    $('#korvaspan_{$row['tunnus']}').show();
+                  });
+
+                  </script>
+                  ";
+
           }
 
           if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {

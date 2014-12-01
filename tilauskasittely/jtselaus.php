@@ -52,6 +52,10 @@ if (!isset($automaattinen_poiminta))$automaattinen_poiminta = "";
 if (!isset($mista_tullaan))      $mista_tullaan = "";
 if (!isset($jt_tyyppi))       $jt_tyyppi = "";
 
+if (function_exists("js_popup")) {
+  echo js_popup(-100);
+}
+
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 
 $DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
@@ -1059,6 +1063,7 @@ if ($tee == "JATKA") {
                 lasku.vienti_kurssi,
                 lasku.liitostunnus,
                 tilausrivin_lisatiedot.tilausrivilinkki,
+                tilausrivin_lisatiedot.korvamerkinta,
                 tilausrivi.hinta
                   * (tilausrivi.varattu + tilausrivi.jt)
                   * {$query_ale_lisa} jt_rivihinta,
@@ -1690,6 +1695,22 @@ if ($tee == "JATKA") {
                   echo ($jtrow["ale{$alepostfix}"]*1), "%<br>";
                 }
               }
+
+              if (!empty($jtrow['korvamerkinta'])) {
+
+                if ($jtrow['korvamerkinta'] == '.') {
+                  $luokka = '';
+                }
+                else {
+                  $luokka = 'tooltip';
+                }
+
+                echo "<img src='{$palvelin2}pics/lullacons/info.png' class='{$luokka}' id='{$jtrow['tunnus']}_info'>";
+                echo "<div id='div_{$jtrow['tunnus']}_info' class='popup'>";
+                echo $jtrow['korvamerkinta'];
+                echo "</div>";
+              }
+
               echo "</td>";
             }
 

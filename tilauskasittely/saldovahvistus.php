@@ -124,6 +124,7 @@ if (!empty($_SESSION['valitut_laskut'])) {
   foreach ($_SESSION['valitut_laskut'] as $valittu_lasku) {
     $request['lasku_tunnukset'] = $valittu_lasku['lasku_tunnukset'];
     $request['ryhmittely_tyyppi_temp'] = $valittu_lasku['ryhmittely_tyyppi'];
+    $request['paiva'] = $valittu_lasku['laskun_avoin_paiva'];
     $lasku_temp = hae_myyntilaskuja_joilla_avoin_saldo($request, true);
     $lasku_temp['saldovahvistus_viesti'] = $valittu_lasku['saldovahvistus_viesti'];
     $lasku_temp['laskun_avoin_paiva'] = $valittu_lasku['laskun_avoin_paiva'];

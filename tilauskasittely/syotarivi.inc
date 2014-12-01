@@ -719,75 +719,81 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
 
   echo "<td valign='top' class='back'><input type='submit' value='".t("Lisää")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
-  echo "<tr>$jarjlisa";
+  if (($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') or $yhtiorow["splittauskielto"] == "K") {
 
-  if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
-    echo "<th></th>";
-  }
+    echo "<tr>$jarjlisa";
 
-  if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
-    echo "<th align='left'>".t("Toivottu keräysajankohta")."</th>";
-    echo "<th align='left' colspan='2'>".t("Toivottu valmistusajankohta")."</th>";
-  }
-  // Jos "Tilaukset jaetaan osiin keräyspäivän mukaan" niin näytetään päivien syöttökentät per tilaus
-  elseif ($yhtiorow["splittauskielto"] == "K") {
-    echo "  <th align='left'>".t("Keräysaika")."</th>
-        <th align='left'>".t("Toimitusaika")."</th>";
-  }
+    if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
+      echo "<th></th>";
+    }
 
-  echo "</tr>";
-  echo "<tr>$jarjlisa";
+    if ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') {
+      echo "<th align='left'>".t("Toivottu keräysajankohta")."</th>";
+      echo "<th align='left' colspan='2'>".t("Toivottu valmistusajankohta")."</th>";
+    }
+    // Jos "Tilaukset jaetaan osiin keräyspäivän mukaan" niin näytetään päivien syöttökentät per tilaus
+    elseif ($yhtiorow["splittauskielto"] == "K") {
+      echo "  <th align='left'>".t("Keräysaika")."</th>
+          <th align='left'>".t("Toimitusaika")."</th>";
+    }
 
-  if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
-    echo "<td valign='top'></td>";
-  }
+    echo "</tr>";
+  
+    echo "<tr>$jarjlisa";
 
-  if ($toimaika == "" or $toimaika == "0000-00-00") {
-    $toimaika = $laskurow["toimaika"];
-  }
+    if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
+      echo "<td valign='top'></td>";
+    }
 
-  if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
-    $kerayspvm = $laskurow["kerayspvm"];
-  }
+    if ($toimaika == "" or $toimaika == "0000-00-00") {
+      $toimaika = $laskurow["toimaika"];
+    }
 
-  if ($toimaika == "") {
-    $toimkka = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-    $toimvva = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-    $toimppa = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-  }
-  else {
-    $toimkka = substr($toimaika, 5, 2);
-    $toimvva = substr($toimaika, 0, 4);
-    $toimppa = substr($toimaika, 8, 2);
-  }
+    if ($kerayspvm == "" or $kerayspvm == "0000-00-00") {
+      $kerayspvm = $laskurow["kerayspvm"];
+    }
 
-  if ($kerayspvm == "") {
-    $kerayskka = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-    $keraysvva = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-    $keraysppa = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
-  }
-  else {
-    $kerayskka = substr($kerayspvm, 5, 2);
-    $keraysvva = substr($kerayspvm, 0, 4);
-    $keraysppa = substr($kerayspvm, 8, 2);
-  }
+    if ($toimaika == "") {
+      $toimkka = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $toimvva = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $toimppa = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+    }
+    else {
+      $toimkka = substr($toimaika, 5, 2);
+      $toimvva = substr($toimaika, 0, 4);
+      $toimppa = substr($toimaika, 8, 2);
+    }
 
-  // Jos "Tilaukset jaetaan osiin keräyspäivän mukaan" niin näytetään päivien syöttökentät per tilaus
-  if ($yhtiorow["splittauskielto"] == "K" or ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
-    $colspan = $yhtiorow["splittauskielto"] == "K" ? 1 : 2;
-    echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";
-    echo "<td valign='top' colspan='{$colspan}'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";
-  }
-  else {
-    echo "<input type='hidden' name='keraysppa' value='$keraysppa'>";
-    echo "<input type='hidden' name='kerayskka' value='$kerayskka'>";
-    echo "<input type='hidden' name='keraysvva' value='$keraysvva'>";
-    echo "<input type='hidden' name='toimppa' value='$toimppa'>";
-    echo "<input type='hidden' name='toimkka' value='$toimkka'>";
-    echo "<input type='hidden' name='toimvva' value='$toimvva'>";
-  }
+    if ($kerayspvm == "") {
+      $kerayskka = date("m", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $keraysvva = date("Y", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+      $keraysppa = date("d", mktime(0, 0, 0, date("m"), date("d"), date("Y")));
+    }
+    else {
+      $kerayskka = substr($kerayspvm, 5, 2);
+      $keraysvva = substr($kerayspvm, 0, 4);
+      $keraysppa = substr($kerayspvm, 8, 2);
+    }
 
-  echo "</tr>";
+    // Jos "Tilaukset jaetaan osiin keräyspäivän mukaan" niin näytetään päivien syöttökentät per tilaus
+    if ($yhtiorow["splittauskielto"] == "K" or ($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y')) {
+      $colspan = $yhtiorow["splittauskielto"] == "K" ? 1 : 2;
+      echo "<td valign='top'><input type='text' size='3' name='keraysppa' value='$keraysppa'><input type='text' size='3' name='kerayskka' value='$kerayskka'><input type='text' size='5' name='keraysvva' value='$keraysvva'></td>";
+      echo "<td valign='top' colspan='{$colspan}'><input type='text' size='3' name='toimppa' value='$toimppa'><input type='text' size='3' name='toimkka' value='$toimkka'><input type='text' size='5' name='toimvva' value='$toimvva'></td>";
+    }
+    else {
+      echo "<input type='hidden' name='keraysppa' value='$keraysppa'>";
+      echo "<input type='hidden' name='kerayskka' value='$kerayskka'>";
+      echo "<input type='hidden' name='keraysvva' value='$keraysvva'>";
+      echo "<input type='hidden' name='toimppa' value='$toimppa'>";
+      echo "<input type='hidden' name='toimkka' value='$toimkka'>";
+      echo "<input type='hidden' name='toimvva' value='$toimvva'>";
+    }
+
+    echo "</tr>";
+  }
+  
+  
   echo "<tr>$jarjlisa";
 
   if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {

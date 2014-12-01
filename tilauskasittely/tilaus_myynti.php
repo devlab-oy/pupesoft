@@ -731,7 +731,18 @@ if ((int) $kukarow["kesken"] > 0) {
   $toimtapa_kv = t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV");
 }
 
-if (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or (isset($laskurow["tilaustyyppi"]) and $laskurow["tilaustyyppi"] == "T") or $toim == "PROJEKTI") {
+if (($toim == 'RIVISYOTTO' or $toim == 'PIKATILAUS') and $yhtiorow['naytetaan_tilausvahvistusnappi'] != '') {
+  $naytetaan_tilausvahvistusnappi = true;
+}
+else {
+  $naytetaan_tilausvahvistusnappi = false;
+}
+
+if (($naytetaan_tilausvahvistusnappi or
+     $toim == "TARJOUS" or $toim == "EXTTARJOUS") or
+     (isset($laskurow["tilaustyyppi"]) and $laskurow["tilaustyyppi"] == "T") or
+     $toim == "PROJEKTI") {
+
   // ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
   js_openFormInNewWindow();
 }
@@ -8821,10 +8832,11 @@ if ($tee == '') {
           if ($toim == 'TARJOUS' and $yhtiorow['salli_jyvitys_tarjouksella'] != '') {
             $sallijyvitys = TRUE;
           }
+
         }
 
         //annetaan mahdollisuus antaa loppusumma joka jyvitetään riveille arvoosuuden mukaan
-        if ($sallijyvitys) {
+        if ($sallijyvitys or $naytetaan_tilausvahvistusnappi) {
 
           echo "<tr>$jarjlisa";
 
@@ -8832,7 +8844,7 @@ if ($tee == '') {
             $jyvsumma = '0.00';
           }
 
-          if ($toim == "TARJOUS" or $toim == "EXTTARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI") {
+          if ($naytetaan_tilausvahvistusnappi or $toim == "TARJOUS" or $toim == "EXTTARJOUS" or $laskurow["tilaustyyppi"] == "T" or $toim == "PROJEKTI") {
             echo "  <th colspan='2' nowrap>".t("Näytä").":</th>
                 <td colspan='2' nowrap>
                 <form action='tulostakopio.php' method='post' name='tulostaform_tmyynti' id='tulostaform_tmyynti' class='multisubmit'>
@@ -8910,7 +8922,7 @@ if ($tee == '') {
             $koko = '7';
           }
 
-          if ($toim != "PROJEKTI") {
+          if ($toim != "PROJEKTI" and $sallijyvitys) {
             if ($toim == 'TARJOUS' and !empty($yhtiorow['salli_jyvitys_tarjouksella'])) {
               echo "  <th colspan='5'>".t("Pyöristä katetta").":</th>
                   <td class='spec'>

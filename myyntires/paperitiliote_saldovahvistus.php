@@ -100,7 +100,7 @@ function alku($saldovahvistus) {
 
   $kala -= 60;
 
-  $pdf->draw_text(380, 780, t("Päivämäärä", $kieli).': '.date('d.m.Y'), $firstpage, $norm);
+  $pdf->draw_text(380, 780, t("Päivämäärä", $kieli).': '.$saldovahvistus['laskun_avoin_paiva'], $firstpage, $norm);
 
   //Oikea sarake
   $pdf->draw_text(380, 760, t("Laatija", $kieli).':', $firstpage, $norm);

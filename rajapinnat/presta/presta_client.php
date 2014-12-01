@@ -310,6 +310,28 @@ abstract class PrestaClient {
     return $response_bool;
   }
 
+  protected function delete_all() {
+    $this->logger->log('---------Start '.$this->resource_name().' delete all---------');
+    $existing_resources = $this->all(array('id'));
+    $existing_resources = array_column($existing_resources, 'id');
+
+    foreach ($existing_resources as $id) {
+      if ($id == 1) {
+        //Root category can not be deleted
+        continue;
+      }
+      try {
+        $this->delete($id);
+      }
+      catch (Exception $e) {
+
+      }
+    }
+
+    $this->logger->log('Kaikki '.$this->resource_name().' poistettu');
+    $this->logger->log('---------End '.$this->resource_name().' delete all---------');
+  }
+
   /**
    *
    * @param int $id

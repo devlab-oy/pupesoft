@@ -206,7 +206,7 @@ function kohdista_rivi($laskurow, $valittutunnus, $valittuotunnus, $otunnus, $su
               FROM asn_sanomat
               WHERE yhtio    = '{$kukarow['yhtio']}'
               AND laji       in ('tec','mav')
-              AND tilausrivi LIKE '%{$valittutunnus}%'";
+              AND MATCH (tilausrivi) AGAINST ('{$valittutunnus}' IN BOOLEAN MODE)";
     $chk_exist_res = pupe_query($query);
 
     if (mysql_num_rows($chk_exist_res) > 0) {

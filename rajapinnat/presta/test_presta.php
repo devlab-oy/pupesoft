@@ -360,7 +360,8 @@ function hae_tuotekuvat($tuote_tunnus) {
             FROM liitetiedostot
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND liitos = 'tuote'
-            AND liitostunnus = '{$tuote_tunnus}'";
+            AND liitostunnus = '{$tuote_tunnus}'
+            ORDER BY jarjestys ASC";
   $result = pupe_query($query);
   $tuotekuvat = array();
   while ($tuotekuva = mysql_fetch_assoc($result)) {

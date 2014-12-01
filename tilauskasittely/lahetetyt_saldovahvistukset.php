@@ -102,6 +102,8 @@ elseif ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldovah
     $boss = false;
   }
 
+  $laskut['tiliotepvm'] = $saldovahvistus['laskun_avoin_paiva'];
+
   $pdf_filepath = hae_saldovahvistus_pdf($saldovahvistus, $boss);
 
   if ($request['tee'] == 'NAYTATILAUS') {

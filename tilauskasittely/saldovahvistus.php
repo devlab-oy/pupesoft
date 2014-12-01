@@ -391,11 +391,17 @@ function echo_saldovahvistukset($request) {
   echo "<form method='POST' action = ''>";
   echo "<input type='hidden' name='tee' value='laheta_sahkopostit' />";
   echo "<input type='hidden' name='ryhmittely_tyyppi' value='{$request['ryhmittely_tyyppi']}' />";
+  echo "<input type='hidden' name='pp' value='{$request['pp']}' />";
+  echo "<input type='hidden' name='kk' value='{$request['kk']}' />";
+  echo "<input type='hidden' name='vv' value='{$request['vv']}' />";
   echo "<input type='submit' value='".t('Lähetä saldovahvistukset asiakkaille')."' />";
   echo "</form><br><br>";
 
   echo "<form method='POST' action=''>";
   echo "<input type='hidden' name='tee' value='poista_valinnat' />";
+  echo "<input type='hidden' name='pp' value='{$request['pp']}' />";
+  echo "<input type='hidden' name='kk' value='{$request['kk']}' />";
+  echo "<input type='hidden' name='vv' value='{$request['vv']}' />";
   echo "<input type='submit' value='".t('Poista kaikki kerätyt saldovahvistusrivit')."' onclick='return tarkista(\"".t('Oletko varma että haluat poistaa kaikki valitut')."\");' />";
   echo "</form>";
 }
@@ -473,6 +479,9 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
   echo "<input type='submit' value='".t("Näytä pdf")."' onClick=\"js_openFormInNewWindow('".implode('', $saldovahvistusrivi['lasku_tunnukset'])."', '".implode('', $saldovahvistusrivi['lasku_tunnukset'])."'); return false;\">";
   echo "<input type='hidden' name='tee' value='NAYTATILAUS' />";
   echo "<input type='hidden' name='nayta_pdf' value='1' />";
+  echo "<input type='hidden' name='pp' value='{$request['pp']}' />";
+  echo "<input type='hidden' name='kk' value='{$request['kk']}' />";
+  echo "<input type='hidden' name='vv' value='{$request['vv']}' />";
   echo "<input type='hidden' name='saldovahvistus_viesti' value='{$saldovahvistusrivi['saldovahvistus_viesti']}' />";
   echo "<input type='hidden' name='ryhmittely_tyyppi' value='{$request['ryhmittely_tyyppi']}' />";
   echo "<input type='hidden' name='ryhmittely_arvo' value='{$request['ryhmittely_arvo']}' />";
@@ -486,6 +495,9 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
   echo "<form method='POST' action=''>";
   echo "<input type='submit' value='".t('Tulosta pdf')."' />";
   echo "<input type='hidden' name='tee' value='tulosta_saldovahvistus_pdf' />";
+  echo "<input type='hidden' name='pp' value='{$request['pp']}' />";
+  echo "<input type='hidden' name='kk' value='{$request['kk']}' />";
+  echo "<input type='hidden' name='vv' value='{$request['vv']}' />";
   echo "<input type='hidden' name='saldovahvistus_viesti' value='{$saldovahvistusrivi['saldovahvistus_viesti']}' />";
   echo "<input type='hidden' name='ryhmittely_tyyppi' value='{$request['ryhmittely_tyyppi']}' />";
   echo "<input type='hidden' name='ryhmittely_arvo' value='{$request['ryhmittely_arvo']}' />";

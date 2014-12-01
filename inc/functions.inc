@@ -26820,7 +26820,8 @@ if (!function_exists('hae_lahetetyt_saldovahvistukset')) {
                 saldovahvistukset.tunnus AS saldovahvistus_tunnus,
                 saldovahvistukset.lahetys_pvm AS lahetys_paiva,
                 saldovahvistusrivit.tyyppi AS saldovahvistusrivi_tyyppi,
-                saldovahvistusrivit.summa AS avoin_saldo
+                saldovahvistusrivit.summa AS avoin_saldo,
+                saldovahvistukset.liitostunnus AS saldovahvistus_liitostunnus
                 FROM saldovahvistukset
                 JOIN saldovahvistusrivit
                 ON ( saldovahvistusrivit.yhtio = saldovahvistukset.yhtio
@@ -27007,7 +27008,6 @@ if (!function_exists('keraa_saldovahvistusrivit_ytunnus')) {
                   )
                   WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
                   AND asiakas.ytunnus = '{$laskut[$ryhmittely]['asiakas']['ytunnus']}'
-                  AND asiakas.talhal_email != ''
                   LIMIT 1";
         $chkres = pupe_query($query);
 
@@ -27056,20 +27056,28 @@ if (!function_exists('keraa_saldovahvistusrivit_ktunnus_ytunnus')) {
       $_ytunnus_chk = $laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['asiakas']['ytunnus'];
       $_ryhmittely_tyyppi = $lasku['ryhmittely_tyyppi'];
 
-      if (!empty($_ytunnus_chk)) {
+      if (!empty($lasku['saldovahvistus_liitostunnus']) or !empty($_ytunnus_chk)) {
 
-        $query = "SELECT *
-                  FROM asiakas
-                  JOIN asiakkaan_avainsanat AS aa ON (
-                    aa.yhtio = asiakas.yhtio AND
-                    aa.laji = 'PÄÄASIAKAS' AND
-                    aa.avainsana != '' AND
-                    aa.liitostunnus = asiakas.tunnus
-                  )
-                  WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-                  AND asiakas.ytunnus = '{$_ytunnus_chk}'
-                  AND asiakas.talhal_email != ''
-                  LIMIT 1";
+        if (!empty($lasku['saldovahvistus_liitostunnus'])) {
+          $query = "SELECT *
+                    FROM asiakas
+                    WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+                    AND asiakas.tunnus = '{$lasku['saldovahvistus_liitostunnus']}'";
+        }
+        else {
+          $query = "SELECT asiakas.*
+                    FROM asiakas
+                    JOIN asiakkaan_avainsanat AS aa ON (
+                      aa.yhtio = asiakas.yhtio AND
+                      aa.laji = 'PÄÄASIAKAS' AND
+                      aa.avainsana != '' AND
+                      aa.liitostunnus = asiakas.tunnus
+                    )
+                    WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+                    AND asiakas.ytunnus = '{$_ytunnus_chk}'
+                    LIMIT 1";
+        }
+
         $chkres = pupe_query($query);
 
         while ($chkrow = mysql_fetch_assoc($chkres)) {

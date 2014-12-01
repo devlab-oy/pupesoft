@@ -666,6 +666,10 @@ if (!function_exists("lopetus")) {
             }
           }
         }
+        
+        if (strpos($edlopetus, $lopetus_clean) !== FALSE) {
+          break;
+        }
 
         if ($edlopetus != "") {
           if (strpos($lopetus, "?") === FALSE) {

@@ -2277,7 +2277,7 @@ function varastoraportti_pdf($pdf_data) {
   $xx = array(20,580);
 
   $pdf->draw_text($x, $y, 'VARASTORAPORTTI', $sivu, $iso);
-  $pvm = date("j.m.Y H:");
+  $pvm = date("j.m.Y H:i");
   $y -= 20;
   $pdf->draw_text($x, $y, $pvm, $sivu, $bold);
 

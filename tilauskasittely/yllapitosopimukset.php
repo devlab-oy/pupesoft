@@ -56,9 +56,18 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
               laskun_lisatiedot.sopimus_alkupvm,
               laskun_lisatiedot.sopimus_loppupvm
                FROM lasku
-              LEFT JOIN laskun_lisatiedot ON lasku.yhtio = laskun_lisatiedot.yhtio and lasku.tunnus = laskun_lisatiedot.otunnus
+              LEFT JOIN laskun_lisatiedot 
+                ON lasku.yhtio = laskun_lisatiedot.yhtio 
+                AND lasku.tunnus = laskun_lisatiedot.otunnus
+              LEFT JOIN lasku kesken 
+                ON kesken.yhtio = lasku.yhtio 
+                AND kesken.tila='N' 
+                AND kesken.alatila = ''
+                AND kesken.clearing = 'sopimus' 
+                AND kesken.swift = lasku.tunnus
               WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-              and lasku.tunnus  = '$tilausnumero'";
+              AND lasku.tunnus  = '$tilausnumero'
+              AND kesken.tunnus is null";
     $result = pupe_query($query);
     $soprow = mysql_fetch_assoc($result);
 
@@ -257,9 +266,9 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
 $query_ale_lisa = generoi_alekentta('M');
 
 // n‰ytet‰‰n sopparit
-$query = "SELECT *,
+$query = "SELECT lasku.*, laskun_lisatiedot.*, tilausrivi.*,
           concat_ws('<br>', lasku.ytunnus, concat_ws(' ',lasku.nimi,lasku.nimitark), if (lasku.nimi!=lasku.toim_nimi, concat_ws(' ',lasku.toim_nimi,lasku.toim_nimitark), NULL), if (lasku.postitp!=lasku.toim_postitp, lasku.toim_postitp, NULL)) nimi,
-          lasku.tunnus laskutunnus,
+          lasku.tunnus laskutunnus, kesken.tunnus keskentunnus,
           round(sum(tilausrivi.hinta / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) arvo,
           round(sum(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa
           FROM lasku
@@ -267,12 +276,22 @@ $query = "SELECT *,
                       laskun_lisatiedot.otunnus         = lasku.tunnus and
                       laskun_lisatiedot.sopimus_alkupvm <= date_add(now(), interval 1 month) and
                       (laskun_lisatiedot.sopimus_loppupvm >= date_sub(now(), interval 1 month) or laskun_lisatiedot.sopimus_loppupvm = '0000-00-00'))
-          JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.tyyppi = '0')
-          WHERE lasku.yhtio                             = '$kukarow[yhtio]' and
-          lasku.tila                                    = '0' and
+          JOIN tilausrivi 
+            ON (tilausrivi.yhtio = lasku.yhtio 
+              and tilausrivi.otunnus = lasku.tunnus 
+              and tilausrivi.tyyppi = '0')
+          LEFT JOIN lasku kesken 
+            ON kesken.yhtio = lasku.yhtio 
+            AND kesken.tila='N' 
+            AND kesken.alatila = ''
+            AND kesken.clearing = 'sopimus' 
+            AND kesken.swift = lasku.tunnus 
+            AND kesken.summa = lasku.summa
+          WHERE lasku.yhtio                             = '$kukarow[yhtio]' AND
+          lasku.tila                                    = '0' AND
           lasku.alatila                                 in ('V','X')
           GROUP BY laskutunnus
-          ORDER BY liitostunnus, sopimus_loppupvm, sopimus_alkupvm";
+          ORDER BY lasku.liitostunnus, sopimus_loppupvm, sopimus_alkupvm";
 $result = pupe_query($query);
 
 if (mysql_num_rows($result) > 0) {
@@ -419,18 +438,31 @@ if (mysql_num_rows($result) > 0) {
         $chkres = pupe_query($query);
 
         if (mysql_num_rows($chkres) == 0) {
-          $laskuttamatta .= "  <input type='checkbox' name='laskutapvm[$pointteri]' value='$pvmloop_vv-$pvmloop_kk-$pvmloop_pp'>
+
+          $query = "SELECT *
+                    FROM lasku
+                    WHERE yhtio      = '$kukarow[yhtio]'
+                    and liitostunnus = '$row[liitostunnus]'
+                    and tila         = 'N'
+                    and alatila      = ''
+                    and clearing     = 'sopimus'
+                    and swift        = '$row[laskutunnus]'";
+          $chkres2 = pupe_query($query);
+ 
+          if (mysql_num_rows($chkres2) == 0) {
+            $laskuttamatta .= "  <input type='checkbox' name='laskutapvm[$pointteri]' value='$pvmloop_vv-$pvmloop_kk-$pvmloop_pp'>
                     <input type='hidden' name='laskutatun[$pointteri]' value='$row[laskutunnus]'>
                     $pvmloop_pp.$pvmloop_kk.$pvmloop_vv<br>";
 
-          // tehd‰‰n arrayt‰ cronijobia varten
-          $cron_pvm[$pointteri] = "$pvmloop_vv-$pvmloop_kk-$pvmloop_pp";
-          $cron_tun[$pointteri] = "$row[laskutunnus]";
+            // tehd‰‰n arrayt‰ cronijobia varten
+            $cron_pvm[$pointteri] = "$pvmloop_vv-$pvmloop_kk-$pvmloop_pp";
+            $cron_tun[$pointteri] = "$row[laskutunnus]";
 
-          $pointteri++;
+            $pointteri++;
 
-          $arvoyhteensa   += $row["arvo"];
-          $summayhteensa   += $row["summa"];
+            $arvoyhteensa   += $row["arvo"];
+            $summayhteensa   += $row["summa"];
+          }  
         }
         else {
           $chkrow = mysql_fetch_assoc($chkres);
@@ -443,6 +475,10 @@ if (mysql_num_rows($result) > 0) {
     $classname = '';
     if ($laskutettu != '') {
       $classname = 'tooltip';
+    }
+    
+    if ($row["keskentunnus"] > 0) {
+      $laskuttamatta = $row["keskentunnus"]." kesken";
     }
 
     echo "<td nowrap class='$classname' id='$row[laskutunnus]'>$laskutettu_vika ";

@@ -27371,11 +27371,24 @@ if (!function_exists('merkkaa_saldovahvistus_lahetetyksi')) {
   function merkkaa_saldovahvistus_lahetetyksi($saldovahvistus) {
     global $kukarow, $yhtiorow;
 
+    if ($saldovahvistus['ryhmittely_tyyppi'] == 'ytunnus') {
+      $_liitostunnus = $saldovahvistus['asiakas']['tunnus'];
+    }
+    elseif (!empty($saldovahvistus['paaasiakas'])) {
+      $_liitostunnus = $saldovahvistus['paaasiakas']['tunnus'];
+    }
+    else {
+      $_liitostunnus = 0;
+    }
+
+    $_date = date('Y-m-d', strtotime($saldovahvistus['laskun_avoin_paiva']));
+
     $query = "INSERT INTO saldovahvistukset
               SET lahetys_pvm = CURRENT_DATE,
               saldovahvistus_viesti = '{$saldovahvistus['saldovahvistus_viesti']['selite']}',
-              avoin_saldo_pvm       = '".date('Y-m-d', strtotime($saldovahvistus['laskun_avoin_paiva']))."',
+              avoin_saldo_pvm       = '{$_date}',
               ryhmittely_tyyppi     = '{$saldovahvistus['ryhmittely_tyyppi']}',
+              liitostunnus          = '{$_liitostunnus}',
               yhtio                 = '{$kukarow['yhtio']}'";
     pupe_query($query, $GLOBALS["masterlink"]);
     $saldovahvistus_tunnus = mysql_insert_id($GLOBALS["masterlink"]);

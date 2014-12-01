@@ -94,7 +94,15 @@ elseif ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldovah
   $saldovahvistus['saldovahvistus_viesti'] = search_array_key_for_value_recursive($request['saldovahvistus_viestit'], 'selite', $saldovahvistus['saldovahvistus_viesti']);
   $saldovahvistus['saldovahvistus_viesti'] = $saldovahvistus['saldovahvistus_viesti'][0];
   $saldovahvistus['laskun_avoin_paiva'] = $saldovahvistus['avoin_saldo_pvm'];
-  $pdf_filepath = hae_saldovahvistus_pdf($saldovahvistus);
+
+  if ($saldovahvistus['ryhmittely_tyyppi'] == 'ytunnus') {
+    $boss = true;
+  }
+  else {
+    $boss = false;
+  }
+
+  $pdf_filepath = hae_saldovahvistus_pdf($saldovahvistus, $boss);
 
   if ($request['tee'] == 'NAYTATILAUS') {
     echo file_get_contents($pdf_filepath);

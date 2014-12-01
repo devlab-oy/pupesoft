@@ -2240,6 +2240,136 @@ function lahtoilmoitus_pdf($pdf_data) {
   return $pdffilenimi;
 }
 
+function varastoraportti_pdf($pdf_data) {
+
+  extract($pdf_data);
+
+  //PDF:n luonti ja defaultit
+  require_once("pdflib/phppdflib.class.php");
+
+  //PDF parametrit
+  $pdf = new pdffile;
+  $pdf->set_default('margin-top',   0);
+  $pdf->set_default('margin-bottom',   0);
+  $pdf->set_default('margin-left',   0);
+  $pdf->set_default('margin-right',   0);
+
+  //fontit
+  $pieni["height"] = 10;
+  $pieni["font"] = "Times-Roman";
+
+  $bold["height"] = 11;
+  $bold["font"] = "Times-Bold";
+
+  $iso["height"] = 20;
+  $iso["font"] = "Times-Bold";
+
+  // sitten aletaan piirtämään itse PDF sisältöä
+  $sivu = $pdf->new_page("a4");
+
+  $image = $pdf->png_embed($logodata);
+  $logoparam['scale'] = $pdf_data['scale'];
+  $pdf->image_place($image, 780, 420, $sivu, $logoparam);
+
+  $x = 30;
+  $y = 800;
+
+  $xx = array(20,580);
+
+  $pdf->draw_text($x, $y, 'VARASTORAPORTTI', $sivu, $iso);
+  $pvm = date("j.m.Y H:");
+  $y -= 20;
+  $pdf->draw_text($x, $y, $pvm, $sivu, $bold);
+
+  $y -= 50;
+
+  $pdf->draw_text($x, $y, 'Paikka', $sivu, $bold);
+  $pdf->draw_text($x+70, $y, 'UIB', $sivu, $bold);
+  $pdf->draw_text($x+160, $y, 'Paino', $sivu, $bold);
+  $pdf->draw_text($x+220, $y, 'Tilaus:rivi', $sivu, $bold);
+  $pdf->draw_text($x+320, $y, 'Status', $sivu, $bold);
+  $pdf->draw_text($x+400, $y, 'Rek.#', $sivu, $bold);
+
+  $y -= 5;
+  $yy[0] = $yy[1] = $y;
+  $pdf->draw_line($xx, $yy, $sivu);
+  $y -= 20;
+
+  foreach ($varastot as $vp => $rullat) {
+
+    if ($y < 20) {
+      $sivu = $pdf->new_page("a4");
+      $y = 800;
+    }
+
+    $pdf->draw_text($x, $y-5, $vp, $sivu, $iso);
+
+    $total_kg = 0;
+
+    end($rullat);
+    $vika = key($rullat);
+    reset($rullat);
+
+    foreach ($rullat as $key => $rulla) {
+
+      if ($y < 20) {
+        $sivu = $pdf->new_page("a4");
+        $y = 800;
+
+        $pdf->draw_text($x, $y, 'Paikka', $sivu, $bold);
+        $pdf->draw_text($x+70, $y, 'UIB', $sivu, $bold);
+        $pdf->draw_text($x+160, $y, 'Paino', $sivu, $bold);
+        $pdf->draw_text($x+220, $y, 'Tilaus:rivi', $sivu, $bold);
+        $pdf->draw_text($x+320, $y, 'Status', $sivu, $bold);
+        $pdf->draw_text($x+400, $y, 'Rek.#', $sivu, $bold);
+
+        $y -= 5;
+        $yy[0] = $yy[1] = $y;
+        $pdf->draw_line($xx, $yy, $sivu);
+        $y -= 20;
+
+        $pdf->draw_text($x, $y-5, $vp, $sivu, $iso);
+
+      }
+
+      $total_kg += $rulla['massa'];
+
+      $pdf->draw_text($x+70, $y, $rulla['sarjanumero'], $sivu, $pieni);
+
+      $pdf->draw_text($x+160, $y, (int) $rulla['massa'] . ' kg', $sivu, $pieni);
+
+      $kombo = $rulla['asiakkaan_tilausnumero'] . ":" . $rulla['asiakkaan_rivinumero'];
+      $pdf->draw_text($x+220, $y, $kombo, $sivu, $pieni);
+
+      $pdf->draw_text($x+320, $y, $rulla['status'], $sivu, $pieni);
+
+      $pdf->draw_text($x+400, $y, $rulla['kuljetuksen_rekno'], $sivu, $pieni);
+
+      $y -= 15;
+
+      if ($key == $vika) {
+        $y -= 5;
+        $pdf->draw_text($x, $y, $total_kg . ' kg', $sivu, $bold);
+        $y -= 5;
+        $yy[0] = $yy[1] = $y;
+        $pdf->draw_line($xx, $yy, $sivu);
+        $y -= 20;
+      }
+
+    }
+  }
+
+  //keksitään uudelle failille joku varmasti uniikki nimi:
+  $pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(),true)).".pdf";
+
+  //kirjoitetaan pdf faili levylle..
+  $fh = fopen($pdffilenimi, "w");
+  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
+  fclose($fh);
+
+  return $pdffilenimi;
+}
+
 function pdf_logo($logo_url, $sessio) {
 
   $opts = array(

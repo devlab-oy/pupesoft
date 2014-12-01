@@ -27085,11 +27085,11 @@ if (!function_exists('keraa_saldovahvistusrivit_ktunnus_ytunnus')) {
           $_arr = &$laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely];
 
           if ($_ryhmittely_tyyppi == 'ytunnus') {
-            $_arr['asiakas'] = hae_asiakas($chkrow['liitostunnus']);
+            $_arr['asiakas'] = hae_asiakas($chkrow['tunnus']);
             $_arr['asiakas_nimi'] = $_arr['asiakas']['nimi'];
           }
           else {
-            $_arr['paaasiakas'] = hae_asiakas($chkrow['liitostunnus']);
+            $_arr['paaasiakas'] = hae_asiakas($chkrow['tunnus']);
             $_arr['asiakas']['talhal_email'] = $_arr['paaasiakas']['talhal_email'];
           }
         }

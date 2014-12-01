@@ -2181,7 +2181,13 @@ if ($tila == '') {
         echo hintapyoristys($rivirow['myyntihinta'], 6);
       }
 
-      $alvi = ($rivirow["myyntialv"] > 0 and $yhtiorow["alv_kasittely"] == "") ? $rivirow["alv"] : 0;
+      if (($rivirow["myyntialv"] > 0 and $yhtiorow["alv_kasittely"] == "")) {
+        $alvi = $rivirow["myyntialv"];
+      }
+      else {
+        $alvi = 0;
+      }
+
       $ulkkpl = isset($rivirow["ulkkpl"]) ? $rivirow["ulkkpl"] : 0;
       $siskpl = isset($rivirow["siskpl"]) ? $rivirow["siskpl"] : 0;
 

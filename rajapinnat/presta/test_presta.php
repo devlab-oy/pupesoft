@@ -314,9 +314,7 @@ function hae_tuotteet() {
     if (!isset($hinnastoresult['hinta']))
       $hinnastoresult['hinta'] = '';
 
-    //@TODO UNCOMMENT
-//    list(,, $myytavissa) = saldo_myytavissa($row["tuoteno"], '', $verkkokauppa_saldo_varasto);
-    $myytavissa = 100;
+    list(,, $myytavissa) = saldo_myytavissa($row["tuoteno"]);
 
     $dnstuote[] = array(
         'tuoteno'              => $row["tuoteno"],

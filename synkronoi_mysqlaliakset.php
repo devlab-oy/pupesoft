@@ -61,8 +61,7 @@ if ($tee == "TEE" or strpos($_SERVER['SCRIPT_NAME'], "iltasiivo.php") !== FALSE)
 
     if (mysql_num_rows($sanakirjaresult) > 0) {
       $sanakirjaquery  = "UPDATE avainsana SET
-                          selitetark       = '$selitetark',
-                          nakyvyys         = '$nakyvyys'
+                          selitetark       = '$selitetark'
                           WHERE yhtio      = '$kukarow[yhtio]'
                           AND laji         = 'MYSQLALIAS'
                           AND selite       = '$selite'

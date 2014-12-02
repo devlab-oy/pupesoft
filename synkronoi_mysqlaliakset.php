@@ -37,7 +37,7 @@ if ($tee == "TEE" or strpos($_SERVER['SCRIPT_NAME'], "iltasiivo.php") !== FALSE)
 
   foreach ($aliakset as $rivi) {
     list($perhe, $kieli, $selite, $selitetark, $selitetark_2, $selitetark_3, $jarjestys, $nakyvyys) = explode("\t", trim($rivi));
-
+echo "40 nakyvyys $nakyvyys <br><br>";
     list($taulu, $sarake) = explode(".", $selite);
 
     $taulut[] = $taulu."###".$selitetark_2;
@@ -50,7 +50,7 @@ if ($tee == "TEE" or strpos($_SERVER['SCRIPT_NAME'], "iltasiivo.php") !== FALSE)
 
   foreach ($rivit as $rivi) {
     list($perhe, $kieli, $selite, $selitetark, $selitetark_2, $selitetark_3, $selitetark_4, $jarjestys, $nakyvyys) = explode("\t", trim($rivi));
-
+echo "53 nakyvyys $nakyvyys <br><br>";
     $sanakirjaquery = "SELECT *
                        FROM avainsana
                        WHERE yhtio      = '$kukarow[yhtio]'
@@ -61,11 +61,12 @@ if ($tee == "TEE" or strpos($_SERVER['SCRIPT_NAME'], "iltasiivo.php") !== FALSE)
 
     if (mysql_num_rows($sanakirjaresult) > 0) {
       $sanakirjaquery  = "UPDATE avainsana SET
-                          selitetark       = '$selitetark'
+                          selitetark       = '$selitetark',
+                          nakyvyys         = '$nakyvyys'
                           WHERE yhtio      = '$kukarow[yhtio]'
-                          and laji         = 'MYSQLALIAS'
-                          and selite       = '$selite'
-                          and selitetark_2 = '$selitetark_2'";
+                          AND laji         = 'MYSQLALIAS'
+                          AND selite       = '$selite'
+                          AND selitetark_2 = '$selitetark_2'";
       pupe_query($sanakirjaquery);
 
       if ($tee == "TEE") echo "<tr><th>".t("P‰ivitet‰‰n mysqlalias")."</th><td>$selite</td><td>$selitetark</td><td>$selitetark_2</td></tr>";

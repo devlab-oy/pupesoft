@@ -11,6 +11,7 @@ require "../../inc/parametrit.inc";
 require_once "rajapinnat/presta/presta_products.php";
 require_once "rajapinnat/presta/presta_categories.php";
 require_once "rajapinnat/presta/presta_customers.php";
+require_once "rajapinnat/presta/presta_customer_groups.php";
 require_once "rajapinnat/presta/presta_sales_orders.php";
 require_once 'rajapinnat/presta/presta_product_stocks.php';
 
@@ -28,11 +29,12 @@ $request = array(
 
 
 $request['synkronointi_tyypit'] = array(
-    'kaikki'     => t('Kaikki'),
-    'kategoriat' => t('Kategoriat'),
-    'tuotteet'   => t('Tuotteet ja tuotekuvat'),
-    'asiakkaat'  => t('Asiakkaat'),
-    'tilaukset'  => t('Tilauksien haku'),
+    'kaikki'        => t('Kaikki'),
+    'kategoriat'    => t('Kategoriat'),
+    'tuotteet'      => t('Tuotteet ja tuotekuvat'),
+    'asiakkaat'     => t('Asiakkaat'),
+    'asiakasryhmat' => t('Asiakasryhmät'),
+    'tilaukset'     => t('Tilauksien haku'),
 );
 
 if ($request['action'] == 'sync') {
@@ -68,6 +70,12 @@ if ($request['action'] == 'sync') {
     $asiakkaat = hae_asiakkaat1();
     $presta_customer = new PrestaCustomers($presta_url, $presta_api_key);
     $presta_customer->sync_customers($asiakkaat);
+  }
+
+  if (in_array('asiakasryhmat', $synkronoi)) {
+    $groups = hae_asiakasryhmat();
+    $presta_customer_groups = new PrestaCustomerGroups($presta_url, $presta_api_key);
+    $presta_customer_groups->sync_groups($groups);
   }
 
   if (in_array('tilaukset', $synkronoi)) {
@@ -123,6 +131,22 @@ function hae_asiakkaat1() {
   }
 
   return $asiakkaat;
+}
+
+function hae_asiakasryhmat() {
+  global $kukarow, $yhtiorow;
+
+  $query = "SELECT *
+            FROM perusalennus
+            WHERE yhtio = '{$kukarow['yhtio']}'";
+  $result = pupe_query($query);
+
+  $ryhmat = array();
+  while ($ryhma = mysql_fetch_assoc($result)) {
+    $ryhmat[] = $ryhma;
+  }
+
+  return $ryhmat;
 }
 
 function hae_kategoriat() {

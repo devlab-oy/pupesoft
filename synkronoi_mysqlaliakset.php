@@ -37,7 +37,7 @@ if ($tee == "TEE" or strpos($_SERVER['SCRIPT_NAME'], "iltasiivo.php") !== FALSE)
 
   foreach ($aliakset as $rivi) {
     list($perhe, $kieli, $selite, $selitetark, $selitetark_2, $selitetark_3, $jarjestys, $nakyvyys) = explode("\t", trim($rivi));
-echo "40 nakyvyys $nakyvyys <br><br>";
+
     list($taulu, $sarake) = explode(".", $selite);
 
     $taulut[] = $taulu."###".$selitetark_2;
@@ -50,7 +50,7 @@ echo "40 nakyvyys $nakyvyys <br><br>";
 
   foreach ($rivit as $rivi) {
     list($perhe, $kieli, $selite, $selitetark, $selitetark_2, $selitetark_3, $selitetark_4, $jarjestys, $nakyvyys) = explode("\t", trim($rivi));
-echo "53 nakyvyys $nakyvyys <br><br>";
+
     $sanakirjaquery = "SELECT *
                        FROM avainsana
                        WHERE yhtio      = '$kukarow[yhtio]'

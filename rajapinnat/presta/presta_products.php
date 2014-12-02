@@ -80,6 +80,7 @@ class PrestaProducts extends PrestaClient {
       $existing_products = array_column($existing_products, 'reference', 'id');
 
       foreach ($products as $product) {
+        //@TODO tee while looppi ja catchissa tsekkaa $counter >= 10 niin break;
         try {
           if (in_array($product['tuoteno'], $existing_products)) {
             $id = array_search($product['tuoteno'], $existing_products);

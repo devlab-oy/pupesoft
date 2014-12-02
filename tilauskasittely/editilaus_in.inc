@@ -1298,6 +1298,11 @@ while ($tietue = fgets($fd)) {
         }
       }
 
+      if ($edi_tyyppi == 'presta') {
+        $editilaus_tila   = 'N';
+        $editilaus_alatila   = 'F';
+      }
+
       $tilaustyyppilisa = '';
 
       if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)

@@ -2,7 +2,7 @@
 
 require_once 'rajapinnat/presta/presta_client.php';
 require_once 'rajapinnat/presta/presta_customers.php';
-require_once 'rajapinnat/edi.php';
+require_once 'rajapinnat/edi_presta.php';
 
 class PrestaSalesOrders extends PrestaClient {
 
@@ -19,6 +19,13 @@ class PrestaSalesOrders extends PrestaClient {
    * @var array
    */
   protected $order_states = array();
+
+  /**
+   * Filepath base where edi files are saved
+   *
+   * @var string
+   */
+  private $edi_filepath_base = '';
 
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
@@ -48,17 +55,25 @@ class PrestaSalesOrders extends PrestaClient {
     return $xml;
   }
 
+  public function set_edi_filepath($filepath) {
+    $this->edi_filepath_base = $filepath;
+  }
+
   /**
    * Gets all PrestaShop sales orders and saves them in EDI-format for pupesoft.
    * Marks saved sales orders as fetched and updates them to presta.
    */
   public function transfer_orders_to_pupesoft() {
+    if ($this->edi_filepath_base != '') {
+      throw new Exception('Edi tiedosto polku pitää olla määritelty');
+    }
+
     $sales_orders = $this->fetch_sales_orders();
 
     foreach ($sales_orders as $sales_order) {
       try {
         $pupesoft_order = $this->convert_for_pupesoft($sales_order);
-        Edi::create($pupesoft_order);
+        EdiPresta::create($pupesoft_order, $this->edi_filepath_base);
 
         $this->mark_as_fetched($sales_order);
       }
@@ -119,36 +134,39 @@ class PrestaSalesOrders extends PrestaClient {
     }
 
     $pupesoft_order = array();
-    $pupesoft_order['customer_id'] = $presta_order['id_customer'];
-    $pupesoft_order['reference_number'] = $presta_order['invoice_number'];
-    $pupesoft_order['order_number'] = $presta_order['id'];
-    $pupesoft_order['shipping_description'] = '';
-    $pupesoft_order['status'] = '';
-    $pupesoft_order['payment']['method'] = $presta_order['payment'];
-    $pupesoft_order['tax_amount'] = ($presta_order['total_paid_tax_incl'] - $presta_order['total_paid_tax_excl']);
-    $pupesoft_order['grand_total'] = $presta_order['total_paid_tax_incl'];
-    $pupesoft_order['order_currency_code'] = $presta_order['id_currency'];
+    $pupesoft_order['liitostunnus'] = $presta_order['id_customer'];
+    $pupesoft_order['viite'] = $presta_order['invoice_number'];
+    $pupesoft_order['external_system_id'] = $presta_order['id'];
+    $pupesoft_order['toimitustapa'] = '';
+    $pupesoft_order['maksettu'] = '';
+    $pupesoft_order['maksuehto'] = $presta_order['payment'];
+    $pupesoft_order['alv_maara'] = ($presta_order['total_paid_tax_incl'] - $presta_order['total_paid_tax_excl']);
+    $pupesoft_order['summa'] = $presta_order['total_paid_tax_incl'];
+    $pupesoft_order['valkoodi'] = $presta_order['id_currency'];
 
-    $pupesoft_order['billing_address']['street'] = $pupesoft_customer['laskutus_osoite'];
-    $pupesoft_order['billing_address']['city'] = $pupesoft_customer['laskutus_postitp'];
-    $pupesoft_order['billing_address']['postcode'] = $pupesoft_customer['laskutus_postino'];
-    $pupesoft_order['billing_address']['telephone'] = $pupesoft_customer['puhelin'];
-    $pupesoft_order['billing_address']['fax'] = $pupesoft_customer['fax'];
+    $pupesoft_order['laskutus_nimi'] = $pupesoft_customer['laskutus_nimi'];
+    $pupesoft_order['laskutus_osoite'] = $pupesoft_customer['laskutus_osoite'];
+    $pupesoft_order['laskutus_postitp'] = $pupesoft_customer['laskutus_postitp'];
+    $pupesoft_order['laskutus_postino'] = $pupesoft_customer['laskutus_postino'];
+    $pupesoft_order['laskutus_maa'] = $pupesoft_customer['laskutus_maa'];
 
-    $pupesoft_order['shipping_address']['street'] = $pupesoft_customer['toim_osoite'];
-    $pupesoft_order['shipping_address']['lastname'] = $pupesoft_customer['nimi'];
-    $pupesoft_order['shipping_address']['city'] = $pupesoft_customer['toim_postitp'];
-    $pupesoft_order['shipping_address']['postcode'] = $pupesoft_customer['toim_postino'];
-    $pupesoft_order['shipping_address']['country_id'] = $pupesoft_customer['toim_maa'];
-    $pupesoft_order['shipping_address']['telephone'] = $pupesoft_customer['puhelin'];
+    $pupesoft_order['puhelin'] = $pupesoft_customer['puhelin'];
+    $pupesoft_order['fax'] = $pupesoft_customer['fax'];
 
-    $pupesoft_order['customer_email'] = '';
-    $pupesoft_order['shipping_amount'] = $presta_order['total_shipping_tax_excl'];
+    $pupesoft_order['toim_nimi'] = $pupesoft_customer['nimi'];
+    $pupesoft_order['toim_osoite'] = $pupesoft_customer['toim_osoite'];
+    $pupesoft_order['toim_postitp'] = $pupesoft_customer['toim_postitp'];
+    $pupesoft_order['toim_postino'] = $pupesoft_customer['toim_postino'];
+    $pupesoft_order['toim_maa'] = $pupesoft_customer['toim_maa'];
+    $pupesoft_order['toim_puhelin'] = $pupesoft_customer['puhelin'];
+
+    $pupesoft_order['email'] = $pupesoft_customer['email'];
+    $pupesoft_order['rahti_veroton'] = $presta_order['total_shipping_tax_excl'];
     $shipping_tax = ($presta_order['total_shipping_tax_incl'] - $presta_order['total_shipping_tax_excl']);
-    $pupesoft_order['shipping_tax_amount'] = $shipping_tax;
+    $pupesoft_order['rahti_vero_maara'] = $shipping_tax;
 
 
-    $pupesoft_order['items'] = array();
+    $pupesoft_order['tilausrivit'] = array();
 
     $rows = $presta_order['associations']['order_rows']['order_row'];
     //One row fix
@@ -158,18 +176,15 @@ class PrestaSalesOrders extends PrestaClient {
 
     foreach ($rows as $row) {
       $pupesoft_row = array();
-      $pupesoft_row['sku'] = $row['product_reference'];
+      $pupesoft_row['tuoteno'] = $row['product_reference'];
+      $pupesoft_row['nimitys'] = $row['product_name'];
+      $pupesoft_row['tilkpl'] = $row['product_quantity'];
+      $pupesoft_row['verollinen_yksikkohinta'] = $row['unit_price_tax_incl'];
+      $pupesoft_row['veroton_yksikkohinta'] = $row['product_price'];
+      $pupesoft_row['alennusprosentti'] = 0;
+      $pupesoft_row['alv_prosentti'] = $presta_order['carrier_tax_rate'];
 
-      //product_type should be empty. edi.php ~131 if ($item['product_type'] != "configurable") {
-      $pupesoft_row['product_type'] = '';
-      $pupesoft_row['name'] = $row['product_name'];
-      $pupesoft_row['qty_ordered'] = $row['product_quantity'];
-      $pupesoft_row['original_price'] = $row['unit_price_tax_incl'];
-      $pupesoft_row['price'] = $row['product_price'];
-      $pupesoft_row['discount_percent'] = 0;
-      $pupesoft_row['tax_percent'] = $presta_order['carrier_tax_rate'];
-
-      $pupesoft_order['items'][] = $pupesoft_row;
+      $pupesoft_order['tilausrivit'][] = $pupesoft_row;
     }
 
     return $pupesoft_order;

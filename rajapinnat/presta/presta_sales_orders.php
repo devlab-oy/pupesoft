@@ -15,7 +15,7 @@ class PrestaSalesOrders extends PrestaClient {
 
   /**
    * Presta order states which are fetched in fetch_sales_orders()
-   * 
+   *
    * @var array
    */
   protected $order_states = array();
@@ -66,7 +66,7 @@ class PrestaSalesOrders extends PrestaClient {
         //Do nothing because we still want to try to create the other
         //order eventhough this failed
         $msg = "Myyntitilauksen {$sales_order['id']} luominen"
-          . "pupesoftiin epäonnistui";
+                . "pupesoftiin epäonnistui";
         $this->logger->log($msg, $e);
       }
     }
@@ -74,7 +74,7 @@ class PrestaSalesOrders extends PrestaClient {
 
   /**
    * Fetches PrestaShop order which are in $this->order_states state
-   * 
+   *
    * @return array
    */
   public function fetch_sales_orders() {
@@ -101,8 +101,8 @@ class PrestaSalesOrders extends PrestaClient {
   }
 
   /**
-   * Converts presta array to pupesoft 
-   * 
+   * Converts presta array to pupesoft
+   *
    * @param array $presta_order
    * @return array
    */
@@ -176,7 +176,7 @@ class PrestaSalesOrders extends PrestaClient {
   }
 
   /**
-   * 
+   *
    * @param array $sales_order
    * @throws Exception
    */
@@ -195,7 +195,7 @@ class PrestaSalesOrders extends PrestaClient {
     }
     catch (Exception $e) {
       $msg = "Tilauksen {$sales_order['id']} haetuksi merkkaaminen"
-        . "epäonnistui";
+              . "epäonnistui";
       $this->logger->log($msg, $e);
       throw $e;
     }

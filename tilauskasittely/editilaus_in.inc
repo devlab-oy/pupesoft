@@ -693,7 +693,6 @@ while ($tietue = fgets($fd)) {
                       AND yhteyshenkilo.rooli                  = 'Magento'
                       AND yhteyshenkilo.ulkoinen_asiakasnumero = '{$ot_verkkokauppa_asiakasnro}'
                     WHERE asiakas.yhtio                        = '{$kukarow['yhtio']}'
-                    AND asiakas.toim_ovttunnus                 not in ('','0')
                     AND asiakas.laji                           not in ('R','P')";
           $result = pupe_query($query);
 

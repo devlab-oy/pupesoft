@@ -11808,7 +11808,7 @@ if (!function_exists("pupesoft_csvstring")) {
     // Muutetaan X -merkiksi kaikki non-printable characterit
     // Sallitaan merkit ja numerot: a-z A-Z 0-9
     // Sallitaan välilyönti sekä merkit: äöåÄÖÅ#%&,:<>@=!-^$.,|?*+()[]{}/
-    return preg_replace("/([^a-zA-Z0-9 äöåÄÖÅ#%&,:<>@=!\-\^\$\.\,\|\?\*\+\(\)\[\]\{\}\/])/", "X", $string);
+    return preg_replace("/([^a-zA-Z0-9 äöåÄÖÅ#%&,:<>@=!\-\^\$\.\,\|\?\*\+\(\)\[\]\{\}\/])/", " ", $string);
   }
 }
 

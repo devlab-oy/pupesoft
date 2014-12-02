@@ -1144,10 +1144,14 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
       if ($ostettavahaly > 0)  $ostettavahaly = ceil($ostettavahaly) * $row['osto_era'];
       else           $ostettavahaly = 0;
 
-      $vva1ehto = "tilausrivi.laskutettuaika >= '$vva1-$kka1-$ppa1' AND tilausrivi.laskutettuaika <= '$vvl1-$kkl1-$ppl1'";
-      $vva2ehto = "tilausrivi.laskutettuaika >= '$vva2-$kka2-$ppa2' AND tilausrivi.laskutettuaika <= '$vvl2-$kkl2-$ppl2'";
-      $vva3ehto = "tilausrivi.laskutettuaika >= '$vva3-$kka3-$ppa3' AND tilausrivi.laskutettuaika <= '$vvl3-$kkl3-$ppl3'";
-      $vva4ehto = "tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' AND tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4'";
+      $vva1ehto = "tilausrivi.laskutettuaika >= '$vva1-$kka1-$ppa1'
+                    AND tilausrivi.laskutettuaika <= '$vvl1-$kkl1-$ppl1'";
+      $vva2ehto = "tilausrivi.laskutettuaika >= '$vva2-$kka2-$ppa2'
+                    AND tilausrivi.laskutettuaika <= '$vvl2-$kkl2-$ppl2'";
+      $vva3ehto = "tilausrivi.laskutettuaika >= '$vva3-$kka3-$ppa3'
+                    AND tilausrivi.laskutettuaika <= '$vvl3-$kkl3-$ppl3'";
+      $vva4ehto = "tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4'
+                    AND tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4'";
 
       //asiakkaan ostot
       if ($asiakasosasto != '') {

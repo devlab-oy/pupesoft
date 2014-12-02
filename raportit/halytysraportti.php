@@ -1144,47 +1144,57 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
       if ($ostettavahaly > 0)  $ostettavahaly = ceil($ostettavahaly) * $row['osto_era'];
       else           $ostettavahaly = 0;
 
+      $vva1ehto = "tilausrivi.laskutettuaika >= '$vva1-$kka1-$ppa1'
+                    AND tilausrivi.laskutettuaika <= '$vvl1-$kkl1-$ppl1'";
+      $vva2ehto = "tilausrivi.laskutettuaika >= '$vva2-$kka2-$ppa2'
+                    AND tilausrivi.laskutettuaika <= '$vvl2-$kkl2-$ppl2'";
+      $vva3ehto = "tilausrivi.laskutettuaika >= '$vva3-$kka3-$ppa3'
+                    AND tilausrivi.laskutettuaika <= '$vvl3-$kkl3-$ppl3'";
+      $vva4ehto = "tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4'
+                    AND tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4'";
+
       //asiakkaan ostot
       if ($asiakasosasto != '') {
         $query  = "SELECT
-                   sum(if (tilausrivi.laskutettuaika >= '$vva1-$kka1-$ppa1' and tilausrivi.laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,tilausrivi.kpl,0)) kpl1,
-                   sum(if (tilausrivi.laskutettuaika >= '$vva2-$kka2-$ppa2' and tilausrivi.laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,tilausrivi.kpl,0)) kpl2,
-                   sum(if (tilausrivi.laskutettuaika >= '$vva3-$kka3-$ppa3' and tilausrivi.laskutettuaika <= '$vvl3-$kkl3-$ppl3' ,tilausrivi.kpl,0)) kpl3,
-                   sum(if (tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,tilausrivi.kpl,0)) kpl4
+                   sum(if ({$vva1ehto}, tilausrivi.kpl, 0)) kpl1,
+                   sum(if ({$vva2ehto}, tilausrivi.kpl, 0)) kpl2,
+                   sum(if ({$vva3ehto}, tilausrivi.kpl, 0)) kpl3,
+                   sum(if ({$vva4ehto}, tilausrivi.kpl, 0)) kpl4
                    FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-                   JOIN lasku l use index(PRIMARY)
-                   JOIN asiakas a use index (ytunnus_index)
-                   WHERE tilausrivi.yhtio        = '$row[yhtio]'
+                   JOIN lasku use index(PRIMARY)
+                   JOIN asiakas use index (ytunnus_index)
+                   WHERE tilausrivi.yhtio         = '$row[yhtio]'
                    {$varastowherelisa}
-                   and tilausrivi.tyyppi         = 'L'
-                   and tilausrivi.tuoteno        = '$row[tuoteno]'
-                   and tilausrivi.laskutettuaika >= '$apvm'
-                   and tilausrivi.laskutettuaika <= '$lpvm'
-                   and l.yhtio                   = tilausrivi.yhtio
-                   and l.tunnus                  = tilausrivi.uusiotunnus
-                   and a.ytunnus                 = l.ytunnus
-                   and a.yhtio                   = l.yhtio
-                   and a.osasto                  = '$asiakasosasto'";
+                   AND tilausrivi.tyyppi          = 'L'
+                   AND tilausrivi.tuoteno         = '$row[tuoteno]'
+                   AND tilausrivi.laskutettuaika  >= '$apvm'
+                   AND tilausrivi.laskutettuaika  <= '$lpvm'
+                   AND lasku.yhtio                = tilausrivi.yhtio
+                   AND lasku.tunnus               = tilausrivi.uusiotunnus
+                   AND asiakas.ytunnus            = lasku.ytunnus
+                   AND asiakas.yhtio              = lasku.yhtio
+                   AND asiakas.osasto             = '$asiakasosasto'";
         $asosresult = pupe_query($query);
         $asosrow = mysql_fetch_assoc($asosresult);
       }
 
       if ($asiakasid != '') {
-        $query  = "SELECT sum(if (tilausrivi.laskutettuaika >= '$vva1-$kka1-$ppa1' and tilausrivi.laskutettuaika <= '$vvl1-$kkl1-$ppl1' ,tilausrivi.kpl,0)) kpl1,
-                   sum(if (tilausrivi.laskutettuaika >= '$vva2-$kka2-$ppa2' and tilausrivi.laskutettuaika <= '$vvl2-$kkl2-$ppl2' ,tilausrivi.kpl,0)) kpl2,
-                   sum(if (tilausrivi.laskutettuaika >= '$vva3-$kka3-$ppa3' and tilausrivi.laskutettuaika <= '$vvl3-$kkl3-$ppl3' ,tilausrivi.kpl,0)) kpl3,
-                   sum(if (tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4' ,tilausrivi.kpl,0)) kpl4
-                   FROM tilausrivi t use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-                   JOIN lasku l use index(PRIMARY)
+        $query  = "SELECT
+                   sum(if ({$vva1ehto}, tilausrivi.kpl, 0)) kpl1,
+                   sum(if ({$vva2ehto}, tilausrivi.kpl, 0)) kpl2,
+                   sum(if ({$vva3ehto}, tilausrivi.kpl, 0)) kpl3,
+                   sum(if ({$vva4ehto}, tilausrivi.kpl, 0)) kpl4
+                   FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
+                   JOIN lasku use index(PRIMARY)
                    WHERE tilausrivi.yhtio        = '$row[yhtio]'
                    {$varastowherelisa}
-                   and tilausrivi.tyyppi         = 'L'
-                   and tilausrivi.tuoteno        = '$row[tuoteno]'
-                   and tilausrivi.laskutettuaika >= '$apvm'
-                   and tilausrivi.laskutettuaika <= '$lpvm'
-                   and l.yhtio                   = tilausrivi.yhtio
-                   and l.tunnus                  = tilausrivi.otunnus
-                   and l.liitostunnus            = '$asiakasid'";
+                   AND tilausrivi.tyyppi         = 'L'
+                   AND tilausrivi.tuoteno        = '$row[tuoteno]'
+                   AND tilausrivi.laskutettuaika >= '$apvm'
+                   AND tilausrivi.laskutettuaika <= '$lpvm'
+                   AND lasku.yhtio                   = tilausrivi.yhtio
+                   AND lasku.tunnus                  = tilausrivi.otunnus
+                   AND lasku.liitostunnus            = '$asiakasid'";
         $asresult = pupe_query($query);
         $asrow = mysql_fetch_assoc($asresult);
       }

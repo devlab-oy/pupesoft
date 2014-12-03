@@ -110,14 +110,14 @@ else {
     echo " kg </td>";
 
     echo "<td valign='top' align='center'>";
-    echo $rahti['luontiaika'];
+    echo date("j.m.Y H:i", strtotime($rahti['luontiaika']));
     echo "</td>";
 
     if ($rahti['toimitettuaika'] == '0000-00-00 00:00:00') {
       $vastaanotettu = t("Ei vielä");
     }
     else {
-      $vastaanotettu = $rahti['toimitettuaika'];
+      $vastaanotettu = date("j.m.Y H:i", strtotime($rahti['toimitettuaika']));
     }
 
     echo "<td valign='top' align='center'>";

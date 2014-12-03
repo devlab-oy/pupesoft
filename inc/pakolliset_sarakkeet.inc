@@ -187,7 +187,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
     case "yhteensopivuus_tuote_sensori" :
       $pakolliset   = array("TYYPPI", "ATUNNUS", "TUOTENO", "SENSORITUOTENO");
       $kielletyt    = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
-      $wherelliset  = array("TYYPPI", "ATUNNUS", "TUOTENO", "SENSORITUOTENO");
+      $wherelliset  = array("TYYPPI", "ATUNNUS", "TUOTENO", "SENSORITUOTENO", "SENSORIRYHMA");
       $saakopoistaa = TRUE;
       break;
     case "yhteensopivuus_tuote_sensori_lisatiedot" :

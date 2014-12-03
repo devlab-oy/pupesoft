@@ -5,73 +5,72 @@ if (@include_once "inc/parametrit.inc");
 elseif (@include_once "parametrit.inc");
 else exit;
 
-// haetaan jotain tarpeellisia funktioita mukaan..
-if (@include_once "inc/functions.inc");
-elseif (@include_once "functions.inc");
-else exit;
+if ($yhtiorow["kayttoliittyma"] == "") {
 
-echo "<style type='text/css'>
-body {
-  margin: 0px;
-  padding: 0px 0px 0px 2px;
-}
-a.puhdas:hover {
-  text-decoration: none;
-  background-color: transparent;
-}
-form {
-  margin:0px 0px 10px 8px;
-}
-</style>";
+  echo "<style type='text/css'>
+          body {
+            margin: 0px;
+            padding: 0px 0px 0px 2px;
+          }
+        </style>";
 
-unset($isizelogo);
+  unset($isizelogo);
 
-if ((int) $yhtiorow["logo"] > 0) {
-  $liite = hae_liite($yhtiorow["logo"], "Yllapito", "array");
-  if ($liite !== false) {
-    $isizelogo[0] = $liite["image_width"];
-    $isizelogo[1] = $liite["image_height"];
-  }
-  unset($liite);
-}
-elseif (@file($yhtiorow["logo"])) {
-  $isizelogo = getimagesize($yhtiorow["logo"]);
-}
-
-if (isset($isizelogo) and is_array($isizelogo)) {
   if ((int) $yhtiorow["logo"] > 0) {
-    $logo   = "view.php?id=".$yhtiorow["logo"];
+    $liite = hae_liite($yhtiorow["logo"], "Yllapito", "array");
+
+    if ($liite !== false) {
+      $isizelogo[0] = $liite["image_width"];
+      $isizelogo[1] = $liite["image_height"];
+    }
+    unset($liite);
+  }
+  elseif (@file($yhtiorow["logo"])) {
+    $isizelogo = getimagesize($yhtiorow["logo"]);
+  }
+
+  if (isset($isizelogo) and is_array($isizelogo)) {
+    if ((int) $yhtiorow["logo"] > 0) {
+      $logo   = "view.php?id=".$yhtiorow["logo"];
+    }
+    else {
+      $image = getimagesize($yhtiorow["logo"]);
+      $logo = $yhtiorow["logo"];
+    }
+
+    $ix    = $isizelogo[0];      // kuvan x
+    $iy    = $isizelogo[1];      // kuvan y
+
+    if ($ix > $iy) {
+      $koko = "width='150'";
+    }
+    else {
+      $koko = "height='70'";
+    }
+    $yhtio_nimi = "";
   }
   else {
-    $image = getimagesize($yhtiorow["logo"]);
-    $logo = $yhtiorow["logo"];
-  }
-
-  $ix    = $isizelogo[0];      // kuvan x
-  $iy    = $isizelogo[1];      // kuvan y
-
-  if ($ix > $iy) {
+    $logo = "{$pupesoft_scheme}api.devlab.fi/pupesoft.png";
     $koko = "width='150'";
+    $yhtio_nimi = "<font class='info'>$yhtiorow[nimi]</font><br>";
   }
-  else {
-    $koko = "height='70'";
-  }
-  $yhtio_nimi = "";
-}
-else {
-  $logo = "{$pupesoft_scheme}api.devlab.fi/pupesoft.png";
-  $koko = "width='150'";
-  $yhtio_nimi = "<font class='info'>$yhtiorow[nimi]</font><br>";
+
+  echo "<div style='margin: 5px 0px 10px 8px;'>";
+  echo "<a class='puhdas' target='mainframe' href='".$palvelin2."logout.php?toim=change'><img border='0' src='$logo' alt='logo' $koko ></a>"; // top right bottom left
+  echo "</div>";
+  echo "<div style='margin:0px 0px 10px 8px'>";  // top right bottom left
+  echo $yhtio_nimi;
+  echo "<font class='info'>$kukarow[nimi]</font>";
+  echo "</div>";
 }
 
-echo "<div style='margin: 5px 0px 10px 8px;'>";
-echo "<a class='puhdas' target='main' href='".$palvelin2."logout.php?toim=change'><img border='0' src='$logo' alt='logo' $koko ></a>"; // top right bottom left
-echo "</div>";
+$hiddenlisa = "";
 
-echo "<div style='margin:0px 0px 10px 8px'>";  // top right bottom left
-echo $yhtio_nimi;
-echo "<font class='info'>$kukarow[nimi]</font>";
-echo "</div>";
+if (isset($_COOKIE["vas_frame_showhide"]) and $_COOKIE["vas_frame_showhide"] == "hidden") {
+  $hiddenlisa = " style='display: none;'";
+}
+
+echo "<div id = 'indexvas_container'{$hiddenlisa}>";
 
 // estet‰‰n errorit tyhj‰st‰ arrayst‰
 if (!isset($menu)) $menu = array();
@@ -115,8 +114,8 @@ if (mysql_num_rows($result) > 1) {
     $sovellus = $gorow["sovellus"];
   }
 
-  echo "  <form name='vaihdaSovellus' method='POST' action='indexvas.php'>
-      <select name='sovellus' onchange='submit()' ".js_alasvetoMaxWidth("sovellus", 140)." >"; // top right bottom left
+  echo "<form name='vaihdaSovellus' method='POST' class='indexvas' action='indexvas.php'>
+      <select name='sovellus' class='indexvas' onchange='submit()'>"; // top right bottom left
 
   $sovellukset = array();
 
@@ -146,11 +145,10 @@ else {
   $sovellus = $orow['sovellus'];
 }
 
-echo "<table style='padding:0; margin:0; width:135px;'>";
+echo "<table class='indexvas'>";
 
 // Mit‰ k‰ytt‰j‰ saa tehd‰?
 // Valitaan ensin vain yl‰taso jarjestys2='0'
-
 $query = "SELECT nimi, jarjestys
           FROM oikeu use index (sovellus_index)
           WHERE yhtio    = '$kukarow[yhtio]'
@@ -196,11 +194,11 @@ while ($orow = mysql_fetch_array($result)) {
 
     // jos ykkˆnen niin n‰ytet‰‰n avattu menu itemi
     if (isset($mrow['nimitys']) and isset($menu[$mrow['nimitys']]) and $menu[$mrow['nimitys']] == 1) {
-      echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=0'>- ".t("$mrow[nimitys]")."</a></td></tr>";
+      echo "<tr><td><a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=0'>- ".t("$mrow[nimitys]")."</a></td></tr>";
 
       // tehd‰‰n submenu itemit
       while ($mrow = mysql_fetch_array($xresult)) {
-        echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' href='$mrow[nimi]";
+        echo "<tr><td><a class='menu' href='$mrow[nimi]";
 
         if (strpos($mrow['nimi'], '?') === FALSE) {
           echo "?";
@@ -216,12 +214,12 @@ while ($orow = mysql_fetch_array($result)) {
           echo "indexvas=1";
         }
 
-        echo "' target='main'>  &bull; ".t("$mrow[nimitys]")."</a></td></tr>";
+        echo "' target='mainframe'>  &bull; ".t("$mrow[nimitys]")."</a></td></tr>";
       }
     }
     else {
       // muuten n‰ytet‰‰n suljettu menuotsikko
-      echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=1'>+ ".t("$mrow[nimitys]")."</a></td></tr>";
+      echo "<tr><td><a class='menu' href='$PHP_SELF?sovellus=$sovellus&menu[$mrow[nimitys]]=1'>+ ".t("$mrow[nimitys]")."</a></td></tr>";
     }
   }
   else {
@@ -239,7 +237,14 @@ while ($orow = mysql_fetch_array($result)) {
       $mrow["alanimi"] = "";
     }
 
-    echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' $target href='$mrow[nimi]";
+    $goclass = "";
+
+    if (isset($go) and $go == $mrow["nimi"] or $go == "$mrow[nimi]?toim=$mrow[alanimi]") {
+      $goclass = " menu_aktivoitu";
+      unset($go);
+    }
+
+    echo "<tr><td><a $target class='menu$goclass' href='$mrow[nimi]";
 
     if (strpos($mrow['nimi'], '?') === FALSE) {
       echo "?";
@@ -262,14 +267,53 @@ while ($orow = mysql_fetch_array($result)) {
       echo "indexvas=1";
     }
 
-    echo "' target='main'>".t("$mrow[nimitys]")."{$nimitys_lukumaara}</a></td></tr>";
+    echo "' target='mainframe'>".t("$mrow[nimitys]")."{$nimitys_lukumaara}</a></td></tr>";
   }
-
 }
 
-//N‰ytet‰‰n aina exit-nappi
-echo "<tr><td class='back' style='padding:0px; margin:0px;'><br></td></tr>";
-echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' href='logout.php' target='main'>".t("Kirjaudu ulos")."</a></td></tr>";
+if ($yhtiorow["kayttoliittyma"] == "") {
+  //N‰ytet‰‰n aina exit-nappi
+  echo "<tr><td class='back' style='padding:0px; margin:0px;'><br></td></tr>";
+  echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' href='logout.php' target='mainframe'>".t("Kirjaudu ulos")."</a></td></tr>";
+}
 
-echo "</table>";
+echo "</table><br>";
+echo "</div>";
+
+if ($yhtiorow["kayttoliittyma"] == "U") {
+
+  if (isset($_COOKIE["vas_frame_showhide"]) and $_COOKIE["vas_frame_showhide"] == "hidden") {
+    echo "<div class='showhide_vasen' id='maaginen_vasen'><img id='showhide_left' src='{$palvelin2}pics/facelift/show_left.png'></div>";
+  }
+  else {
+    echo "<div class='showhide_vasen' id='maaginen_vasen'><img id='showhide_left' src='{$palvelin2}pics/facelift/hide_left.png'></div>";
+  }
+
+  echo "
+    <script>
+
+        $('.menu').click(function(){
+          $('.menu').removeClass('menu_aktivoitu');
+          $(this).addClass('menu_aktivoitu');
+        });
+
+        $(document).ready(function(){
+          $('#maaginen_vasen').click(function(){
+             if (parent.document.getElementsByTagName('frameset')[1].cols=='285,*') {
+               parent.document.getElementsByTagName('frameset')[1].cols='20,*';
+               $('#indexvas_container').hide();
+               $('#showhide_left').attr('src', '{$palvelin2}pics/facelift/show_left.png');
+               document.cookie = \"vas_frame_showhide=hidden;7\";
+             }
+             else {
+               parent.document.getElementsByTagName('frameset')[1].cols='285,*';
+               $('#indexvas_container').show();
+               $('#showhide_left').attr('src', '{$palvelin2}pics/facelift/hide_left.png');
+               document.cookie = \"vas_frame_showhide=;7\";
+             }
+          });
+        });
+        </script>";
+}
+
 echo "</body></html>";

@@ -797,7 +797,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     echo "</select></td><td class='back'>&nbsp;</td>";
   }
 
-  echo "<td class='back'><input type='Submit' value = '".t("Etsi")."'></td></tr>";
+  echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Etsi")."'></td></tr>";
   echo "</table>";
   echo "</form>";
   echo "<br>";
@@ -2547,7 +2547,7 @@ if (mysql_num_rows($result) != 0) {
 
       if ($row["tila"] == "N" and $row["alatila"] == "U") {
         if ($jtok == 0) {
-          echo "<td class='$class' valign='top'><font style='color:#00FF00;'>".t("Voidaan toimittaa")."</font></td>";
+          echo "<td class='$class' valign='top'><font class='green'>".t("Voidaan toimittaa")."</font></td>";
 
           if (isset($worksheet)) {
             $worksheet->writeString($excelrivi, $ii, "Voidaan toimittaa");
@@ -2555,7 +2555,7 @@ if (mysql_num_rows($result) != 0) {
           }
         }
         else {
-          echo "<td class='$class' valign='top'><font style='color:#FF0000;'>".t("Ei voida toimittaa")."</font></td>";
+          echo "<td class='$class' valign='top'><font class='red'>".t("Ei voida toimittaa")."</font></td>";
 
           if (isset($worksheet)) {
             $worksheet->writeString($excelrivi, $ii, t("Ei voida toimittaa"));
@@ -2937,7 +2937,7 @@ if (mysql_num_rows($result) != 0) {
           <input type='hidden' name='kaytiin_otsikolla' value='NOJOO!'>
           <table>
           <tr><th>".t("Listauksessa näkyy 50 ensimmäistä")." $otsikko.</th>
-          <td class='back'><input type='Submit' value = '".t("Näytä kaikki")."'></td></tr>
+          <td class='back'><input type='submit' value = '".t("Näytä kaikki")."'></td></tr>
           </table>
           </form>";
     }

@@ -465,7 +465,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
                           FROM asn_sanomat
                           WHERE yhtio    = '{$kukarow['yhtio']}'
                           AND laji       = 'asn'
-                          AND tilausrivi LIKE '%{$isa_chk_row['tunnus']}%'";
+                          AND MATCH (tilausrivi) AGAINST ('{$isa_chk_row['tunnus']}' IN BOOLEAN MODE)";
                 $info_res = pupe_query($query);
                 $info_row = mysql_fetch_assoc($info_res);
 
@@ -1558,7 +1558,7 @@ if ($tee == 'etsi') {
                 FROM asn_sanomat
                 WHERE yhtio          = '{$kukarow['yhtio']}'
                 AND toimittajanumero = '{$toimittaja}'
-                AND tilausrivi       LIKE '%{$row['tunnus']}%'
+                AND MATCH (tilausrivi) AGAINST ('{$row['tunnus']}' IN BOOLEAN MODE)
                 AND laji             = '{$lajilisa}'";
       $chkres = pupe_query($query);
 
@@ -1570,7 +1570,7 @@ if ($tee == 'etsi') {
                   FROM asn_sanomat
                   WHERE yhtio          = '{$kukarow['yhtio']}'
                   AND toimittajanumero = '{$toimittaja}'
-                  AND tilausrivi       LIKE '%{$row['tunnus']}%'
+                  AND MATCH (tilausrivi) AGAINST ('{$row['tunnus']}' IN BOOLEAN MODE)
                   AND laji             = 'asn'";
         $chkres = pupe_query($query);
 

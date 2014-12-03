@@ -1442,6 +1442,7 @@ if ($tee == 'P') {
           $ulos .= t("Kommentti", $kieli).": {$laskurow['comments']}\r\n";
         }
 
+        $ulos .= "\r\n";
         $ulos .= $rivit;
 
         $ulos .= "\r\n";

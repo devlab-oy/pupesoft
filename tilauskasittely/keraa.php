@@ -1506,6 +1506,8 @@ if ($tee == 'P') {
 
       $boob = "";
 
+      $_ctype = $_plain_text_mail ? "text" : "html";
+
       // Lähetetään keräyspoikkeama asiakkaalle
       if ($laskurow["email"] != '' and $laskurow["kerayspoikkeama"] == 0) {
 
@@ -1514,7 +1516,7 @@ if ($tee == 'P') {
           "to"           => $laskurow["email"],
           "cc"           => "",
           "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli),
-          "ctype"        => "html",
+          "ctype"        => $_ctype,
           "body"         => $ulos,
           "attachements" => "",
         );
@@ -1546,7 +1548,7 @@ if ($tee == 'P') {
           "to"           => $laskurow["kukamail"],
           "cc"           => "",
           "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli),
-          "ctype"        => "html",
+          "ctype"        => $_ctype,
           "body"         => $ulos,
           "attachements" => "",
         );
@@ -1563,7 +1565,7 @@ if ($tee == 'P') {
           "to"           => $yhtiorow["extranet_kerayspoikkeama_email"],
           "cc"           => "",
           "subject"      => "{$yhtiorow['nimi']} - ".t("Keräyspoikkeamat", $kieli),
-          "ctype"        => "html",
+          "ctype"        => $_ctype,
           "body"         => $ulos,
           "attachements" => "",
         );

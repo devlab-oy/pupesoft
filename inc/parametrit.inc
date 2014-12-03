@@ -883,3 +883,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
   define('SEPA_PANKKIYHTEYS', $_sepa_pankkiyhteys == 1 ? true : false);
 }
+
+if ($yhtiorow['laite_huolto'] == 'X' and $kukarow['kuka'] == 'admin') {
+  $pupe_query_debug = 0.0001;
+}

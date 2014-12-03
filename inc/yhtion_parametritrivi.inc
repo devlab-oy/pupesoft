@@ -269,6 +269,27 @@ if ($fieldname == "tiliotteen_selvittelyt") {
   $jatko = 0;
 }
 
+if ($fieldname == "kayttoliittyma") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel1 = "";
+  $sel2 = "";
+
+  if ($trow[$i] == '') {
+    $sel1 = "selected";
+  }
+  if ($trow[$i] == 'U') {
+    $sel2 = "selected";
+  }
+
+  $ulos .= "<option value = '' $sel1>".t("Pupesoft Classic");
+  $ulos .= "<option value = 'U' $sel2>".t("Pupesoft Next");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "laskutyyppi") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

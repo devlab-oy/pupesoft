@@ -97,10 +97,10 @@ if (empty($verkkokauppa)) {
     $otsikko = t("Variaatiot tuotteelle");
   }
   elseif ($hae_ja_selaa_row['selite'] == 'B') {
-    $otsikko = t("TUOTEHAKU");
+    $otsikko = t("Tuotehaku");
   }
   else {
-    $otsikko = t("ETSI JA SELAA TUOTTEITA");
+    $otsikko = t("Hae ja selaa");
   }
 
   echo "<font class='head'>{$otsikko}:</font><br/><br/>";
@@ -703,7 +703,7 @@ if ($verkkokauppa == "") {
     echo "</fieldset>";
   }
 
-  echo "<input type='Submit' name='submit_button' id='submit_button' value = '".t("Etsi")."'></form>";
+  echo "<input type='submit' name='submit_button' id='submit_button' class='hae_btn' value = '".t("Etsi")."'></form>";
   echo "&nbsp;<form action = '?toim_kutsu=$toim_kutsu' method = 'post'>
       <input type='hidden' name='tilausnumero' value='$kukarow[kesken]'>
       <input type='hidden' name='valittu_tarjous_tunnus' value='$valittu_tarjous_tunnus'>

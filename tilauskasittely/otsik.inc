@@ -229,17 +229,11 @@ if ($kukarow['kesken'] > 0 and isset($laskurow) and (($laskurow['tila'] == 'N' a
   $tarkistus_meapu = pupe_query($tarkistus_apuqu);
   $tarkistus_meapu_row = mysql_fetch_assoc($tarkistus_meapu);
 
-  $tarkistus_apuqu = "SELECT * from maksuehto where yhtio='{$kukarow['yhtio']}' and tunnus='{$edellinen_maksuehto}'";
-  $tarkistus_meapu2 = pupe_query($tarkistus_apuqu);
-  $tarkistus_meapu_row2 = mysql_fetch_assoc($tarkistus_meapu2);
+  $_kateis = $tarkistus_meapu_row['kateinen'];
+  $_jv = $tarkistus_meapu_row['jv'];
 
-  $a = $tarkistus_meapu_row['kateinen'];
-  $b = $tarkistus_meapu_row2['kateinen'];
-
-  $c = $tarkistus_meapu_row['jv'];
-  $d = $tarkistus_meapu_row2['jv'];
-
-  if (((empty($a) and !empty($b)) or empty($a)) or ((empty($c) and !empty($d)) or empty($c))) {
+  // Jos uusi maksuehto ei ole käteinen eikä jv, niin katsotaan luottoraja
+  if (empty($_kateis) and empty($_jv)) {
 
     // Parametrejä saatanat.php:lle
     $sytunnus       = $laskurow['ytunnus'];

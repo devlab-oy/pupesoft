@@ -160,12 +160,12 @@ if (isset($submit)) {
         $errors[] = t("Rullat on jo kontitettu ja kontti sinetöity.");
         $view = 'konttiviite';
       }*/
-      elseif ($kontissa == true and $ei_kontissa == false) {
+      elseif ($kontissa == true and $ei_kontissa == false and !$jatka) {
         $errors[] = t("Kaikki viitteen alaiset rullat on jo kontitettu.");
         $yliajo = true;
         $view = 'konttiviite';
       }
-      elseif ($kontissa == true and $ei_kontissa == true) {
+      elseif ($kontissa == true and $ei_kontissa == true and !$jatka) {
         $errors[] = t("Osa viitteen alaisista rullista on jo kontitettu.");
         $yliajo = 'X';
         $view = 'konttiviite';
@@ -178,19 +178,45 @@ if (isset($submit)) {
           'konttimaara' => $konttimaara
           );
 
-        // kovakoodatut max-kilot...
-        switch ($info['tyyppi']) {
-        case 'C20':
-        case 'C20OP':
-          $info['maxkg'] = 22000;
-          break;
-        case 'C40':
-        case 'C40OP':
-        case 'C40HC':
-          $info['maxkg'] = 27000;
-          break;
-        default:
-          $info['maxkg'] = 22000;
+        if ($jatka) {
+
+          $query = "SELECT trlt.konttinumero,
+                    trlt.kontin_maxkg
+                    FROM laskun_lisatiedot
+                    JOIN lasku
+                      ON lasku.yhtio = laskun_lisatiedot.yhtio
+                      AND lasku.tunnus = laskun_lisatiedot.otunnus
+                    JOIN tilausrivi
+                      ON tilausrivi.yhtio = lasku.yhtio
+                      AND tilausrivi.otunnus = lasku.tunnus
+                    JOIN tilausrivin_lisatiedot AS trlt
+                      ON trlt.yhtio = tilausrivi.yhtio
+                      AND trlt.tilausrivitunnus = tilausrivi.tunnus
+                    WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+                    AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
+                    ORDER BY trlt.konttinumero DESC";
+          $result = pupe_query($query);
+          $konttiinfo = mysql_fetch_assoc($result);
+
+         $info['maxkg'] = $konttiinfo['kontin_maxkg'];
+        }
+        else {
+
+          // kovakoodatut max-kilot...
+          switch ($info['tyyppi']) {
+          case 'C20':
+          case 'C20OP':
+            $info['maxkg'] = 22000;
+            break;
+          case 'C40':
+          case 'C40OP':
+          case 'C40HC':
+            $info['maxkg'] = 27000;
+            break;
+          default:
+            $info['maxkg'] = 22000;
+          }
+
         }
 
         $rullat_varastossa = array();
@@ -245,46 +271,6 @@ if (isset($submit)) {
       else{
         $view = 'kontituslista';
       }
-    }
-    break;
-  case 'jatka':
-    $query = "SELECT trlt.konttinumero,
-              trlt.kontin_maxkg
-              FROM laskun_lisatiedot
-              JOIN lasku
-                ON lasku.yhtio = laskun_lisatiedot.yhtio
-                AND lasku.tunnus = laskun_lisatiedot.otunnus
-              JOIN tilausrivi
-                ON tilausrivi.yhtio = lasku.yhtio
-                AND tilausrivi.otunnus = lasku.tunnus
-              JOIN tilausrivin_lisatiedot AS trlt
-                ON trlt.yhtio = tilausrivi.yhtio
-                AND trlt.tilausrivitunnus = tilausrivi.tunnus
-              WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
-              AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
-              ORDER BY trlt.konttinumero DESC";
-    $result = pupe_query($query);
-    $konttiinfo = mysql_fetch_assoc($result);
-
-    $maxkg = $konttiinfo['kontin_maxkg'];
-
-    $rullat_ja_kontit = rullat_ja_kontit($konttiviite, $maxkg);
-
-    $kontittamattomat = $rullat_ja_kontit['kontittamattomat'];
-    $kontitetut = $rullat_ja_kontit['kontitetut'];
-    $kontit = $rullat_ja_kontit['kontit'];
-    $konttimaara = count($kontit);
-
-    if ($rullat_ja_kontit === false) {
-      $errors[] = t("Tilausnumerolla ei löydy tilausta.");
-      $view = 'tilausnumero';
-    }
-    elseif(count($kontittamattomat) == 0 and count($kontitetut) == 0) {
-      $errors[] = t("Tilauksella ei ole kontitettavia rullia.");
-      $view = 'tilausnumero';
-    }
-    else{
-      $view = 'kontituslista';
     }
     break;
   case 'konttivalinta':
@@ -465,7 +451,8 @@ if ($view == 'konttiviite') {
       <form method='post' action=''>
         <input type='hidden' name='konttiviite' value='{$konttiviite}' />
         <input type='hidden' name='maxkg' value='{$maxkg}' />
-        <button name='submit' value='jatka' onclick='submit();' class='{$luokka}'>" . t("Jatka kontitusta") . "</button>
+        <input type='hidden' name='jatka' value='jatka' />
+        <button name='submit' value='konttiviite' onclick='submit();' class='{$luokka}'>" . t("Jatka kontitusta") . "</button>
       </form>
       </div>";
   }
@@ -767,7 +754,7 @@ if ($view == 'kontituslista') {
 
     $group_class = $rulla['group_class'];
 
-    if ($group_class == $aktiivi_group or (count($otsikoidut) < 1 and !$aktiivi_group) or ($oletus_aktiivi == $group_class and !$aktiivi_group)) {
+    if ($group_class == $aktiivi_group) {
       $display = 'block';
       $otsikko_tila ='avoin_otsikko';
       $nuoli = '';
@@ -812,7 +799,7 @@ if ($view == 'kontituslista') {
     echo "</div>";
 
     echo "<div class='peruslista_center'>";
-    echo $rulla['asiakkaan_tilausnumero'];
+    echo $rulla['asiakkaan_tilausnumero'] . ":" . $rulla['rivinro'];
     echo "</div>";
 
     echo "<div class='peruslista_right'>";

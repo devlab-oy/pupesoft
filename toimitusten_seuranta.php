@@ -473,7 +473,8 @@ if (!isset($task)) {
             SUM(IF(ss.lisatieto = 'Hylätty', 1, 0)) AS hylatyt,
             SUM(IF(ss.lisatieto = 'Lusattava', 1, 0)) AS lusattavat,
             SUM(IF(ss.lisatieto = 'Lusattu', 1, 0)) AS lusatut,
-            SUM(IF(ss.lisatieto = 'Ylijaama', 1, 0)) AS ylijaama
+            SUM(IF(ss.lisatieto = 'Ylijaama', 1, 0)) AS ylijaama,
+            SUM(IF(ss.lisatieto = 'Siirretty', 1, 0)) AS siirretty
             FROM lasku
             JOIN laskun_lisatiedot
               ON laskun_lisatiedot.yhtio = lasku.yhtio
@@ -522,6 +523,8 @@ if (!isset($task)) {
     sort($tilaukset);
 
     foreach ($tilaukset as $key => $tilaus) {
+
+      $poikkeukset = array();
 
       $viitelasku = array_count_values($viitteet);
       $tilauksia_viitteella = $viitelasku[$tilaus['konttiviite']];
@@ -583,7 +586,8 @@ if (!isset($task)) {
           'hylatty' => $tilaus['hylatyt'],
           'odottaa lusausta' => $tilaus['lusattavat'],
           'lusattu' => $tilaus['lusatut'],
-          'ylijäämä' => $tilaus['ylijaama']
+          'ylijäämä' => $tilaus['ylijaama'],
+          'siirretty' => $tilaus['siirretty'],
           );
 
         $query = "SELECT tilausrivi.toimitettu, trlt.rahtikirja_id
@@ -613,7 +617,10 @@ if (!isset($task)) {
 
         $rahtikirjat = array_count_values($rahtikirjat);
         $rahtikirjat = count($rahtikirjat);
-        $tapahtumat .= "&bull; <a href='saapuva_rahti.php?tnum={$tilaus['asiakkaan_tilausnumero']}'>" . $rahtikirjat ." kpl rahtikirjasanomia</a> haettu<br>";
+
+        if ($rahtikirjat > 0) {
+          $tapahtumat .= "&bull; <a href='saapuva_rahti.php?tnum={$tilaus['asiakkaan_tilausnumero']}'>" . $rahtikirjat ." kpl rahtikirjasanomia</a> haettu<br>";
+        }
 
         if ($kuittaamatta == 0) {
           $tapahtumat .= "&bull; " .  t("Rahti kuitattu saapuneeksi") . "<br>";

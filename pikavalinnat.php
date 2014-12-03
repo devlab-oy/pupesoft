@@ -69,8 +69,8 @@ echo "<tr>
 $query = "SELECT sovellus, nimi, alanimi, min(nimitys) nimitys, min(jarjestys) jarjestys, min(jarjestys2) jarjestys2, max(hidden) hidden
           FROM oikeu
           WHERE yhtio  = '$kukarow[yhtio]'
-          and kuka     = ''
-          and profiili = ''
+          and kuka     = '$kukarow[kuka]'
+          and sovellus not like 'Extranet%'
           GROUP BY sovellus, nimi, alanimi
           ORDER BY sovellus, jarjestys, jarjestys2";
 $oikeures = pupe_query($query);

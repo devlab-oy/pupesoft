@@ -43,7 +43,7 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
               ON ss.yhtio = tr.yhtio AND ss.myyntirivitunnus = tr.tunnus
             WHERE la.yhtio = '{$kukarow['yhtio']}'
             AND la.tunnus IN ({$laskujen_tunnukset})
-            AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu' OR ss.lisatieto = 'Toimitettu')
+            AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu' OR ss.lisatieto = 'Toimitettu' OR ss.lisatieto = 'Siirretty')
             ORDER BY asiakkaan_tilausnumero, paikka";
   $result = pupe_query($query);
 
@@ -447,7 +447,7 @@ function lahtoilmoitus_parametrit($konttiviite) {
               WHERE trlt.yhtio = '{$kukarow['yhtio']}'
               AND trlt.asiakkaan_tilausnumero = '{$tilausnro}'
               AND trlt.kontin_mrn != ''
-              AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu')";
+              AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu' OR ss.lisatieto = 'Toimitettu')";
     $result = pupe_query($query);
     $info = mysql_fetch_assoc($result);
 
@@ -1926,6 +1926,14 @@ function hae_hylly($tuotepaikka) {
       "hyllytaso" => '0'
     );
 
+    if (!in_array($hylly['hyllyalue'], array("A","B")) ) {
+      return false;
+    }
+
+    if ($hylly['hyllynro'] < 1 or $hylly['hyllynro'] > 21) {
+      return false;
+    }
+
     return $hylly;
   }
 }
@@ -2004,6 +2012,7 @@ function hae_rullat($rahtikirja_id) {
             ss.hyllynro AS nro,
             ss.hyllyvali AS vali,
             ss.hyllytaso AS taso,
+            ss.massa AS paino,
             trlt.asiakkaan_tilausnumero AS tno
             FROM tilausrivi AS tr
             JOIN tilausrivin_lisatiedot AS trlt
@@ -2042,6 +2051,7 @@ function tarkista_sarjanumero($sarjanumero) {
   global $kukarow;
 
   $query = "SELECT sarjanumeroseuranta.*,
+            sarjanumeroseuranta.massa as paino,
             tilausrivi.toimitettuaika
             FROM sarjanumeroseuranta
             JOIN tilausrivi
@@ -2057,7 +2067,6 @@ function tarkista_sarjanumero($sarjanumero) {
   else {
     return $result;
   }
-
 }
 
 function pakkalista_pdf($pdf_data) {
@@ -2084,6 +2093,11 @@ function pakkalista_pdf($pdf_data) {
   // sitten aletaan piirtämään itse PDF sisältöä
   $sivu = $pdf->new_page("a4");
 
+  $sivunro = 1;
+  // lasketaan sivumäärä
+  $riveja = count($pakkalista) + 4;
+  $sivuja = ceil($riveja / 49);
+
   $image = $pdf->png_embed($logodata);
   $logoparam['scale'] = $pdf_data['scale'];
   $pdf->image_place($image, 780, 420, $sivu, $logoparam);
@@ -2093,32 +2107,27 @@ function pakkalista_pdf($pdf_data) {
 
   $xx = array(20,580);
 
-  $pdf->draw_text($x, $y, 'PAKKALISTA', $sivu, $bold);
-
+  $pdf->draw_text($x, $y, "PAKKALISTA", $sivu, $bold);
   $y -= 20;
-
   $pdf->draw_text($x, $y, 'Konttinumero', $sivu, $bold);
   $pdf->draw_text($x+100, $y, $konttinumero, $sivu, $bold);
-
   $y -= 15;
-
   $pdf->draw_text($x, $y, 'Sinettinumero', $sivu, $bold);
   $pdf->draw_text($x+100, $y, $sinettinumero, $sivu, $bold);
-
   $y -= 15;
-
   $pdf->draw_text($x, $y, 'Paino', $sivu, $bold);
   $pdf->draw_text($x+100, $y, $paino, $sivu, $bold);
-
   $y -= 15;
-
   $pdf->draw_text($x, $y, 'Taara', $sivu, $bold);
   $pdf->draw_text($x+100, $y, $taara, $sivu, $bold);
-
   $y -= 15;
-
   $pdf->draw_text($x, $y, 'Kpl', $sivu, $bold);
   $pdf->draw_text($x+100, $y, $kpl, $sivu, $bold);
+  $pdf->draw_text($x+500, $y, "sivu {$sivunro}/{$sivuja}", $sivu, $bold);
+
+
+
+
 
   $y -= 15;
   $yy[0] = $yy[1] = $y;
@@ -2130,13 +2139,25 @@ function pakkalista_pdf($pdf_data) {
     if ($y < 20) {
       $sivu = $pdf->new_page("a4");
       $y = 800;
+
+      $sivunro++;
+
+      $pdf->draw_text($x, $y, "PAKKALISTA", $sivu, $bold);
+      $y -= 20;
+      $pdf->draw_text($x, $y, 'Konttinumero', $sivu, $bold);
+      $pdf->draw_text($x+100, $y, $konttinumero, $sivu, $bold);
+      $pdf->draw_text($x+500, $y, "sivu {$sivunro}/{$sivuja}", $sivu, $bold);
+      $y -= 15;
+      $yy[0] = $yy[1] = $y;
+      $pdf->draw_line($xx, $yy, $sivu);
+      $y -= 20;
+
     }
 
     $pdf->draw_text($x, $y, $rulla, $sivu, $bold);
     $y -= 15;
 
   }
-
 
   //keksitään uudelle failille joku varmasti uniikki nimi:
   $pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(),true)).".pdf";

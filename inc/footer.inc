@@ -115,6 +115,14 @@ if ($lopeta_body) {
       array_multisort($aika_debug_array, SORT_DESC, $quer_debug_array);
     }
 
+    if (empty($aika_debug_array) and !empty($GLOBALS['aika_debug_array'])) {
+      $aika_debug_array = $GLOBALS['aika_debug_array'];
+    }
+
+    if (empty($quer_debug_array) and !empty($GLOBALS['quer_debug_array'])) {
+      $quer_debug_array = $GLOBALS['quer_debug_array'];
+    }
+
     for ($i=0; $i<count($aika_debug_array); $i++) {
       if ($aika_debug_array[$i] > $GLOBALS["pupe_query_debug"]) {
         echo sprintf("%.04f", $aika_debug_array[$i]).": ", query_dump($quer_debug_array[$i]);

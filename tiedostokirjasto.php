@@ -30,23 +30,27 @@ function hae_toimittajat() {
       array_push($tunnukset, $toimittaja["selite"]);
     }
 
-    $tunnukset = implode(",", $tunnukset);
+    if (!empty($tunnukset)) {
+      $tunnukset = implode(",", $tunnukset);
 
-    $query = "SELECT tunnus, nimi
-              FROM toimi
-              WHERE yhtio = '{$kukarow["yhtio"]}'
-              AND tunnus IN ({$tunnukset})
-              ORDER BY toimi.nimi";
+      $query = "SELECT tunnus, nimi
+                FROM toimi
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND tunnus IN ({$tunnukset})
+                ORDER BY toimi.nimi";
 
-    $result = pupe_query($query);
+      $result = pupe_query($query);
 
-    $toimittajat = array();
+      $toimittajat = array();
 
-    while ($toimittaja = mysql_fetch_assoc($result)) {
-      array_push($toimittajat, $toimittaja);
+      while ($toimittaja = mysql_fetch_assoc($result)) {
+        array_push($toimittajat, $toimittaja);
+      }
+
+      return $toimittajat;
     }
 
-    return $toimittajat;
+    return false;
   }
   else {
     $query  = "SELECT DISTINCT toimi.tunnus, toimi.nimi
@@ -109,8 +113,9 @@ function piirra_formi($valittu_toimittaja, $valittu_tiedostotyyppi) {
   echo "<td>";
   echo "<select id='tiedostotyyppi_id' name='tiedostotyyppi'>";
   foreach (tiedostotyypit() as $tiedostotyyppi) {
-    $tiedostotyyppinimi = t_avainsana("LITETY", '', "and selite = '{$tiedostotyyppi}'", '', '', "selitetark");
-    $valittu = $valittu_tiedostotyyppi == $tiedostotyyppi ? "selected" : "";
+    $tiedostotyyppinimi =
+      t_avainsana("LITETY", '', "and selite = '{$tiedostotyyppi}'", '', '', "selitetark");
+    $valittu            = $valittu_tiedostotyyppi == $tiedostotyyppi ? "selected" : "";
     echo "<option value='{$tiedostotyyppi}' {$valittu}>{$tiedostotyyppinimi}</option>";
   }
   echo "</select>";
@@ -145,6 +150,7 @@ function hae_tiedostot($toimittajan_tunnus, $tiedoston_tyyppi) {
                AND liitetiedostot.kayttotarkoitus  = '{$tiedoston_tyyppi}')
              WHERE tuotteen_toimittajat.yhtio      = '{$kukarow['yhtio']}'
              AND tuotteen_toimittajat.liitostunnus = '{$toimittajan_tunnus}'
+             GROUP BY liitetiedostot.selite
              ORDER BY liitetiedostot.selite";
   $result = pupe_query($query);
 

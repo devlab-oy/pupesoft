@@ -411,7 +411,8 @@ if ($upd == 1) {
     }
 
     if (mysql_num_rows($al_res) != 0 and strtoupper($pakollisuuden_tarkistus_rivi['selitetark_3']) == "PAKOLLINEN") {
-      if (((mysql_field_type($result, $i) == 'real' or  mysql_field_type($result, $i) == 'int') and (float) str_replace(",", ".", $t[$i]) == 0) or
+      $_alv = (mysql_field_name($result, $i) == 'alv');
+      if (!$_alv and ((mysql_field_type($result, $i) == 'real' or  mysql_field_type($result, $i) == 'int') and (float) str_replace(",", ".", $t[$i]) == 0) or
         (mysql_field_type($result, $i) != 'real' and mysql_field_type($result, $i) != 'int' and trim($t[$i]) == "")) {
         $virhe[$i] .= t("Tieto on pakollinen")."!";
         $errori = 1;

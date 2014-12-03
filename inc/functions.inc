@@ -27343,7 +27343,14 @@ if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
 
         $saldovahvistus['tiliotepvm'] = "{$request['vv']}-{$request['kk']}-{$request['pp']}";
 
-        $pdf_filepath = hae_saldovahvistus_pdf($saldovahvistus);
+        if ($request['ryhmittely_tyyppi'] == 'ytunnus') {
+          $boss = true;
+        }
+        else {
+          $boss = false;
+        }
+
+        $pdf_filepath = hae_saldovahvistus_pdf($saldovahvistus, $boss);
 
         $params = array(
           "to"       => $saldovahvistus['asiakas']['talhal_email'],

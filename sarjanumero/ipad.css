@@ -139,9 +139,7 @@ p {
 }
 
 
-.valikko p {
-  margin:40px;
-}
+
 
 .button,
 button,
@@ -166,6 +164,12 @@ input[type="button"] {
   text-decoration: none;
   text-shadow: 0 1px rgba(255, 255, 255, .75);
   padding:10px 20px;
+}
+
+.index_button {
+  display: inline-block;
+  min-width: 170px;
+  margin:0 10px;
 }
 
 .header_button {

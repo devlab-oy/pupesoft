@@ -138,9 +138,6 @@ p {
   text-align: center;
 }
 
-
-
-
 .button,
 button,
 input[type="submit"],
@@ -187,7 +184,7 @@ input[type="button"] {
   border: 1px solid green;
 }
 
-.suljettu {
+.suljettu, .logout {
   color: red;
   border: 1px solid red;
 }

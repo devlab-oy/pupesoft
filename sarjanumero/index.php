@@ -62,7 +62,7 @@ if (tarkista_oikeus("sarjanumero/hae_tiedot.php")) {
   echo "<p><a href='hae_tiedot.php' class='button index_button'>", t("Hae tiedot"), "</a></p>";
 }
 
-echo "<p><a href='{$palvelin2}logout.php?location={$palvelin2}sarjanumero' class='button index_button'>", t("Kirjaudu ulos"), "</a></p>";
+echo "<p><a href='{$palvelin2}logout.php?location={$palvelin2}sarjanumero' class='button index_button logout'>", t("Kirjaudu ulos"), "</a></p>";
 
 echo "</div>";
 echo "</body>";

@@ -7,7 +7,13 @@ if (@include_once "inc/parametrit.inc");
 elseif (@include_once "parametrit.inc");
 else exit;
 
-echo "<div id='ylaframe_container'>";
+$hiddenlisa = "";
+
+if (isset($_COOKIE["yla_frame_showhide"]) and $_COOKIE["yla_frame_showhide"] == "hidden") {
+  $hiddenlisa = " style='display: none;'";
+}
+
+echo "<div id='ylaframe_container'{$hiddenlisa}>";
 echo "<table class='ylaframe'>";
 echo "<tr>";
 echo "<td width='305'><a class='puhdas' target='mainframe' href='{$palvelin2}logout.php?toim=change'><img style='padding-left: 15px;' src='{$palvelin2}pics/facelift/logo.png'></a></td>";
@@ -49,7 +55,12 @@ echo "</tr>";
 echo "</table>";
 echo "</div>";
 
-echo "<div class='showhide_yla' id='maaginen_yla'><img id='showhide_upper' src='{$palvelin2}pics/facelift/hide_upper.png'></div>";
+if (isset($_COOKIE["yla_frame_showhide"]) and $_COOKIE["yla_frame_showhide"] == "hidden") {
+  echo "<div class='showhide_yla' id='maaginen_yla'><img id='showhide_upper' src='{$palvelin2}pics/facelift/show_upper.png'></div>";
+}
+else {
+  echo "<div class='showhide_yla' id='maaginen_yla'><img id='showhide_upper' src='{$palvelin2}pics/facelift/hide_upper.png'></div>";
+}
 
 echo "
   <script>
@@ -59,11 +70,13 @@ echo "
              parent.document.getElementsByTagName('frameset')[0].rows='20,*';
              $('#showhide_upper').attr('src', '{$palvelin2}pics/facelift/show_upper.png');
              $('#ylaframe_container').hide();
+             document.cookie = \"yla_frame_showhide=hidden;7\";
            }
            else {
              parent.document.getElementsByTagName('frameset')[0].rows='90,*';
              $('#showhide_upper').attr('src', '{$palvelin2}pics/facelift/hide_upper.png');
              $('#ylaframe_container').show();
+             document.cookie = \"yla_frame_showhide=;7\";
            }
         });
       });

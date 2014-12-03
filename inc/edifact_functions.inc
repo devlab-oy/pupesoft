@@ -416,7 +416,8 @@ function lahtoilmoitus_parametrit($konttiviite) {
   $query = "SELECT lasku.asiakkaan_tilausnumero AS tilausnro,
             matkakoodi,
             matkatiedot,
-            laskun_lisatiedot.satamavahvistus_pvm AS lahtoaika
+            laskun_lisatiedot.satamavahvistus_pvm AS lahtoaika,
+            laskun_lisatiedot.konttityyppi
             FROM laskun_lisatiedot
             JOIN lasku
               ON lasku.yhtio = laskun_lisatiedot.yhtio
@@ -429,17 +430,19 @@ function lahtoilmoitus_parametrit($konttiviite) {
 
   while ($tilaus = mysql_fetch_assoc($result)) {
 
+    $konttityyppi = $tilaus['konttityyppi'];
     $matkakoodi = $tilaus['matkakoodi'];
     $lahtopaiva = $tilaus['lahtoaika'];
     $mt = unserialize($tilaus['matkatiedot']);
     $kaikki_matkatiedot[$tilaus['tilausnro']] = $mt;
   }
 
-  foreach ($kaikki_matkatiedot as $tilausnro => $tiedot) {
+  $kaikki_kontit = array();
 
+  foreach ($kaikki_matkatiedot as $tilausnro => $tiedot) {
     $query = "SELECT count(trlt.tunnus) AS rullia,
               sum(ss.massa) AS paino,
-              COUNT(DISTINCT trlt.kontin_mrn) AS kontteja
+              group_concat(DISTINCT trlt.kontin_mrn) AS kontit
               FROM tilausrivin_lisatiedot AS trlt
               JOIN sarjanumeroseuranta AS ss
                 ON ss.yhtio = trlt.yhtio
@@ -451,14 +454,19 @@ function lahtoilmoitus_parametrit($konttiviite) {
     $result = pupe_query($query);
     $info = mysql_fetch_assoc($result);
 
+    $kontti_array = explode(",", $info['kontit']);
+    $kaikki_kontit = array_unique(array_merge($kontti_array, $kaikki_kontit));
+
     $kaikki_matkatiedot[$tilausnro]['rullia'] = $info['rullia'];
     $kaikki_matkatiedot[$tilausnro]['paino'] = (int) $info['paino'];
-    $kaikki_matkatiedot[$tilausnro]['kontteja'] = $info['kontteja'];
+    $kaikki_matkatiedot[$tilausnro]['kontit'] = $info['kontit'];
 
   }
 
   $lahtopaiva = date("d.m.Y H:i", strtotime($lahtopaiva));
 
+  $parametrit['konttimaara'] = count($kaikki_kontit);
+  $parametrit['konttityyppi'] = $konttityyppi;
   $parametrit['matkatiedot'] = $kaikki_matkatiedot;
   $parametrit['matkakoodi'] = $matkakoodi;
   $parametrit['lahtopaiva'] = $lahtopaiva;
@@ -2225,8 +2233,8 @@ function lahtoilmoitus_pdf($pdf_data) {
   $pdf->draw_text($x, $y, 'Order number:', $sivu, $bold);
   $pdf->draw_text($x+100, $y, 'Ocean vessel', $sivu, $bold);
   $pdf->draw_text($x+260, $y, 'RLS', $sivu, $bold);
-  $pdf->draw_text($x+360, $y, 'TON', $sivu, $bold);
-  $pdf->draw_text($x+460, $y, 'Containers', $sivu, $bold);
+  $pdf->draw_text($x+350, $y, 'TON', $sivu, $bold);
+  $pdf->draw_text($x+440, $y, 'Containers', $sivu, $bold);
 
   $y -= 10;
   $yy[0] = $yy[1] = $y;
@@ -2243,12 +2251,15 @@ function lahtoilmoitus_pdf($pdf_data) {
     $pdf->draw_text($x, $y, $tilausnro, $sivu, $bold);
     $pdf->draw_text($x+100, $y, $tilaus['transport_name'], $sivu, $bold);
     $pdf->draw_text($x+260, $y, $tilaus['rullia'], $sivu, $bold);
-    $pdf->draw_text($x+360, $y, $tilaus['paino'] / 1000, $sivu, $bold);
-    $pdf->draw_text($x+460, $y, $tilaus['kontteja'], $sivu, $bold);
+    $pdf->draw_text($x+350, $y, $tilaus['paino'] / 1000, $sivu, $bold);
 
     $y -= 15;
 
   }
+
+  $y += 15;
+  $pdf->draw_text($x+440, $y, "{$konttimaara} x {$konttityyppi}", $sivu, $bold);
+  $y -= 30;
 
   //keksitään uudelle failille joku varmasti uniikki nimi:
   $pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(),true)).".pdf";

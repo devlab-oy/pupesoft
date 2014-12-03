@@ -2347,7 +2347,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
     echo "</select></td>";
 
     echo "<th>", t("Etsi tilausta"), ":</th><td><input type='text' name='etsi'>";
-    echo "<input type='submit' value='", t("Etsi"), "'></td></tr>";
+    echo "<input type='submit' class='hae_btn' value = '".t("Etsi")."'></td></tr>";
     echo "</table>";
     echo "</form>";
     echo "</span>";
@@ -3220,7 +3220,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
             $sarjarow = mysql_fetch_assoc($sarjares);
 
             if ($sarjarow["kpl"] == abs($row["varattu"])) {
-              echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($row["puhdas_tuoteno"])."&$tunken2=$row[tunnus]&from=KERAA&aputoim=$toim&otunnus=$id#".urlencode($sarjarow["sarjanumero"])."' style='color:#00FF00;'>".t("S:nro OK")."</font></a>)";
+              echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($row["puhdas_tuoteno"])."&$tunken2=$row[tunnus]&from=KERAA&aputoim=$toim&otunnus=$id#".urlencode($sarjarow["sarjanumero"])."' class='green'>".t("S:nro OK")."</font></a>)";
             }
             else {
               echo " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($row["puhdas_tuoteno"])."&$tunken2=$row[tunnus]&from=KERAA&aputoim=$toim&otunnus=$id#".urlencode($sarjarow["sarjanumero"])."'>".t("S:nro")."</a>)";

@@ -291,7 +291,7 @@ if ($tee == 'AVALITTU' and $tuoteno != '') {
   echo "<input type='hidden' name='tee' value='PERUSTA'>";
   echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
   echo "<td><input type='text' name='uustuoteno' size='22' maxlength='30' value=''></td>";
-  echo "<td class='back'><input type='Submit' value='".t("Kopioi")."'></td>";
+  echo "<td class='back'><input type='submit' value='".t("Kopioi")."'></td>";
   echo "<td class='back'><font class='error'>$varaosavirhe</font></td>";
   echo "</form></tr></table>";
 
@@ -308,7 +308,7 @@ if (($tee == 'HAKU' or $tee == "Y") and $ulos != '') {
   echo "<table><tr>";
   echo "<th>".t("Valitse listasta").":</th></tr>";
   echo "<tr><td>$ulos</td>";
-  echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></td>";
+  echo "<td class='back'><input type='submit' value='".t("Valitse")."'></td>";
   echo "<td class='back'><font class='error'>$varaosavirhe</font></td>";
   echo "</tr></table>";
   echo "</form>";
@@ -326,7 +326,7 @@ if ($tee == '' or $tee == "Y") {
   echo "<tr><form method='post' name='$formi' autocomplete='off'>";
   echo "<input type='hidden' name='tee' value='HAKU'>";
   echo "<td>".livesearch_kentta("formi", "TUOTEHAKU", "tuoteno", 210)."</td>";
-  echo "<td class='back'><input type='Submit' value='".t("Jatka")."'></td>";
+  echo "<td class='back'><input type='submit' value='".t("Jatka")."'></td>";
   echo "<td class='back'><font class='error'>$varaosavirhe</font></td>";
   echo "</form></tr></table>";
 }

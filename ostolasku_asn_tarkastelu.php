@@ -246,7 +246,7 @@ if ($tee == 'vaihdatoimittaja') {
 
     echo "<form method='post' action='?tee={$tee}{$action}'>";
     echo "<table>";
-    echo "<tr><th>", t("Etsi toimittajaa"), " (", t("nimi"), " / ", t("ytunnus"), ")</th><td><input type='text' name='nimi' value='' />&nbsp;<input type='submit' value='", t("Etsi"), "' /></td></tr>";
+    echo "<tr><th>", t("Etsi toimittajaa"), " (", t("nimi"), " / ", t("ytunnus"), ")</th><td><input type='text' name='nimi' value='' />&nbsp;<input type='submit' class='hae_btn' value = '".t("Etsi")."' /></td></tr>";
     echo "</table>";
     echo "</form>";
   }
@@ -465,7 +465,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
                           FROM asn_sanomat
                           WHERE yhtio    = '{$kukarow['yhtio']}'
                           AND laji       = 'asn'
-                          AND tilausrivi LIKE '%{$isa_chk_row['tunnus']}%'";
+                          AND MATCH (tilausrivi) AGAINST ('{$isa_chk_row['tunnus']}' IN BOOLEAN MODE)";
                 $info_res = pupe_query($query);
                 $info_row = mysql_fetch_assoc($info_res);
 
@@ -1389,7 +1389,7 @@ if ($tee == 'etsi') {
   echo "<td><input type='text' name='tuoteno' value='{$tuoteno}' /></td>";
   echo "<td><input type='text' name='tilaajanrivinro' value='{$tilaajanrivinro}' /></td>";
   echo "<td><input type='text' name='kpl' value='{$kpl}' /></td>";
-  echo "<td><input type='submit' value='", t("Etsi"), "' /></td>";
+  echo "<td><input type='submit' class='hae_btn' value = '".t("Etsi")."' /></td>";
   echo "</tr>";
 
   if ($toimirow['asn_sanomat'] == 'K') {
@@ -1558,7 +1558,7 @@ if ($tee == 'etsi') {
                 FROM asn_sanomat
                 WHERE yhtio          = '{$kukarow['yhtio']}'
                 AND toimittajanumero = '{$toimittaja}'
-                AND tilausrivi       LIKE '%{$row['tunnus']}%'
+                AND MATCH (tilausrivi) AGAINST ('{$row['tunnus']}' IN BOOLEAN MODE)
                 AND laji             = '{$lajilisa}'";
       $chkres = pupe_query($query);
 
@@ -1570,7 +1570,7 @@ if ($tee == 'etsi') {
                   FROM asn_sanomat
                   WHERE yhtio          = '{$kukarow['yhtio']}'
                   AND toimittajanumero = '{$toimittaja}'
-                  AND tilausrivi       LIKE '%{$row['tunnus']}%'
+                  AND MATCH (tilausrivi) AGAINST ('{$row['tunnus']}' IN BOOLEAN MODE)
                   AND laji             = 'asn'";
         $chkres = pupe_query($query);
 

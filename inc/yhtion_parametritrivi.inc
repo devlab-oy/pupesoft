@@ -269,6 +269,27 @@ if ($fieldname == "tiliotteen_selvittelyt") {
   $jatko = 0;
 }
 
+if ($fieldname == "kayttoliittyma") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel1 = "";
+  $sel2 = "";
+
+  if ($trow[$i] == '') {
+    $sel1 = "selected";
+  }
+  if ($trow[$i] == 'U') {
+    $sel2 = "selected";
+  }
+
+  $ulos .= "<option value = '' $sel1>".t("Pupesoft Classic");
+  $ulos .= "<option value = 'U' $sel2>".t("Pupesoft Next");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "laskutyyppi") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -1509,6 +1530,20 @@ if ($fieldname == "salli_jyvitys_tarjouksella") {
   $ulos .= "<option value = ''>".t("Tarjouksella ei sallita katteen jyvityst‰");
   $ulos .= "<option value = 'K' $sel[K]>".t("Kaikki saa jyvitt‰‰ katteen perusteella tarjouksella");
   $ulos .= "<option value = 'S' $sel[S]>".t("Kaikki saa jyvitt‰‰ sek‰ osajyvitt‰‰ katteen perusteella tarjouksella");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "naytetaan_tilausvahvistusnappi") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array();
+  $sel[$trow[$i]] = "selected";
+
+  $ulos .= "<option value = ''>".t("Ei n‰ytet‰ 'N‰yt‰ tilausvahvistus' -painiketta myyntitilauksella");
+  $ulos .= "<option value = 'K' $sel[K]>".t("N‰ytet‰‰n 'N‰yt‰ tilausvahvistus' -painike myyntitilauksella");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -2997,6 +3032,7 @@ if ($fieldname == "extranet_tilaus_varaa_saldoa") {
   $sel[$apu] = "selected";
 
   $ulos .= "<option value = ''>".t("Extranet-tilaus varaa saldoa")."</option>";
+  $ulos .= "<option value = 'E' $sel[E]>".t("Extranet-tilaus ei varaa saldoa")."</option>";
   $ulos .= "<option value = '1' $sel[1]>".t("Extranet-tilaus varaa saldoa 1 tunnin")."</option>";
   $ulos .= "<option value = '8' $sel[8]>".t("Extranet-tilaus varaa saldoa 8 tuntia")."</option>";
   $ulos .= "<option value = '24' $sel[24]>".t("Extranet-tilaus varaa saldoa 24 tuntia")."</option>";
@@ -4343,3 +4379,22 @@ if ($fieldname == 'takuuvarasto') {
 
   $jatko = 0;
 }
+
+if ($fieldname == "tilausrivin_korvamerkinta") {
+  $sel = $trow[$i] == "K" ? "selected" : "";
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $ulos .= "<option value = ''>";
+  $ulos .= t("Ei sallita tilausrivien korvamerkint‰‰");
+  $ulos .= "</option>";
+
+  $ulos .= "<option value = 'K' {$sel}>";
+  $ulos .= t("Sallitaan tilausrivien korvamerkint‰");
+  $ulos .= "</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+

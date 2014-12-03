@@ -484,7 +484,7 @@ if ($kasitellaan_tiedosto) {
   }
 
   // Otetaan pupen talut haltuun
-  $query  = "SHOW TABLES FROM $dbkanta";
+  $query  = "SHOW TABLES FROM `$dbkanta`";
   $tableresult = pupe_query($query);
 
   $taulunrivit_keys = array_keys($taulunrivit);
@@ -863,9 +863,15 @@ if ($kasitellaan_tiedosto) {
 
           if (in_array("yhteensopivuus_tuote_sensori", $taulut)) {
             $yhteensopivuus_taulun_nimi = "yhteensopivuus_tuote_sensori";
+
             $_sensori = array_search("SENSORITUOTENO", $taulunotsikot["yhteensopivuus_tuote_sensori"]);
             $_sensori = $taulunrivit["yhteensopivuus_tuote_sensori"][$eriviindex][$_sensori];
-            $_wherelisa = "and sensorituoteno = '{$_sensori}'";
+
+            $_sensoriryhma = array_search("SENSORIRYHMA", $taulunotsikot["yhteensopivuus_tuote_sensori"]);
+            $_sensoriryhma = $taulunrivit["yhteensopivuus_tuote_sensori"][$eriviindex][$_sensoriryhma];
+
+            $_wherelisa  = "and sensorituoteno = '{$_sensori}' ";
+            $_wherelisa .= "and sensoriryhma = '{$_sensoriryhma}'";
           }
           else {
             $yhteensopivuus_taulun_nimi = "yhteensopivuus_tuote";

@@ -11808,7 +11808,7 @@ if (!function_exists("pupesoft_csvstring")) {
     // Muutetaan X -merkiksi kaikki non-printable characterit
     // Sallitaan merkit ja numerot: a-z A-Z 0-9
     // Sallitaan välilyönti sekä merkit: äöåÄÖÅ#%&,:<>@=!-^$.,|?*+()[]{}/
-    return preg_replace("/([^a-zA-Z0-9 äöåÄÖÅ#%&,:<>@=!\-\^\$\.\,\|\?\*\+\(\)\[\]\{\}\/])/", "X", $string);
+    return preg_replace("/([^a-zA-Z0-9 äöåÄÖÅ#%&,:<>@=!\-\^\$\.\,\|\?\*\+\(\)\[\]\{\}\/])/", " ", $string);
   }
 }
 
@@ -15985,7 +15985,7 @@ if (!function_exists("kopioi_tilausrivi")) {
       $query = "SELECT tunnus
                 FROM asn_sanomat
                 WHERE yhtio    = '{$kukarow['yhtio']}'
-                AND tilausrivi LIKE '%{$tunnus}%'";
+                AND MATCH (tilausrivi) AGAINST ('{$tunnus}' IN BOOLEAN MODE)";
       $chk_asn_res = pupe_query($query);
 
       while ($chk_asn_row = mysql_fetch_assoc($chk_asn_res)) {
@@ -21067,7 +21067,7 @@ if (!function_exists('splittaa_tilausrivi')) {
     $query = "SELECT tunnus
               FROM asn_sanomat
               WHERE yhtio    = '{$kukarow['yhtio']}'
-              AND tilausrivi LIKE '%{$tunnus}%'";
+              AND MATCH (tilausrivi) AGAINST ('{$tunnus}' IN BOOLEAN MODE)";
     $chk_asn_res = pupe_query($query);
 
     while ($chk_asn_row = mysql_fetch_assoc($chk_asn_res)) {
@@ -28141,7 +28141,9 @@ if (!function_exists('hae_asiakkaan_toimitustavat')) {
 
     $toimitustavat = array();
 
-    $query = "SELECT toimitustapa.*, 'M' AS extranet
+    $query = "SELECT toimitustapa.*,
+              'M' AS extranet,
+              if (toimitustapa.jarjestys = 0, 9999, toimitustapa.jarjestys) AS jarjestys
               FROM asiakkaan_avainsanat
               JOIN toimitustapa ON (toimitustapa.yhtio = asiakkaan_avainsanat.yhtio
                 AND toimitustapa.selite             = asiakkaan_avainsanat.avainsana )
@@ -28154,7 +28156,8 @@ if (!function_exists('hae_asiakkaan_toimitustavat')) {
       $toimitustavat["t{$toimitustapa['tunnus']}"] = $toimitustapa;
     }
 
-    $query = "SELECT toimitustapa.*
+    $query = "SELECT toimitustapa.*,
+              if (toimitustapa.jarjestys = 0, 9999, toimitustapa.jarjestys) AS jarjestys
               FROM asiakas
               JOIN toimitustapa
               ON (toimitustapa.yhtio = asiakas.yhtio
@@ -28213,7 +28216,8 @@ if (!function_exists('hae_toimipaikan_toimitustavat')) {
     $toimitustavat = array();
 
     //Ensin haetaan kaikki toimitustavat, jotka ei kuulu mihinkään toimipaikkaan taakse yhteensopivuuden takia
-    $query   = "SELECT t.*
+    $query   = "SELECT t.*,
+                if (t.jarjestys = 0, 9999, t.jarjestys) AS jarjestys
                 FROM toimitustapa AS t
                 LEFT JOIN toimitustavat_toimipaikat AS tt
                 ON ( tt.yhtio = t.yhtio
@@ -28228,7 +28232,8 @@ if (!function_exists('hae_toimipaikan_toimitustavat')) {
 
     $query = "SELECT t.*,
               tt.toimitustapa_tunnus AS toimitustapa_tunnus,
-              tt.toimipaikka_tunnus AS toimipaikka_tunnus
+              tt.toimipaikka_tunnus AS toimipaikka_tunnus,
+              if (t.jarjestys = 0, 9999, t.jarjestys) AS jarjestys
               FROM toimitustapa AS t
               JOIN toimitustavat_toimipaikat AS tt
               ON ( tt.yhtio = t.yhtio
@@ -28271,7 +28276,8 @@ if (!function_exists('hae_toimitustavat')) {
       $lv = (int) $params['lahdevarasto'];
       $kv = (int) $params['kohdevarasto'];
 
-      $ott_qry = "SELECT tpa.*
+      $ott_qry = "SELECT tpa.*,
+                  if (tpa.jarjestys = 0, 9999, tpa.jarjestys) AS jarjestys
                   FROM avainsana AS ana
                   JOIN toimitustapa AS tpa
                   ON ( ana.yhtio = tpa.yhtio AND ana.selitetark_2 = tpa.tunnus )
@@ -28293,9 +28299,11 @@ if (!function_exists('hae_toimitustavat')) {
 
     $sort = array();
     foreach ($toimipaikan_toimitustavat as $index => $toimipaikan_toimitustapa) {
-      $sort[$index] = $toimipaikan_toimitustapa['selite'];
+      $sort[$index] = $toimipaikan_toimitustapa['jarjestys'];
+      $lower[$index] = strtolower($toimipaikan_toimitustapa['selite']);
     }
-    array_multisort($sort, SORT_ASC, $toimipaikan_toimitustavat);
+
+    array_multisort($sort, SORT_NUMERIC, $lower, SORT_STRING, SORT_ASC, $toimipaikan_toimitustavat);
 
     return $toimipaikan_toimitustavat;
   }
@@ -28415,7 +28423,7 @@ if (!function_exists('sallitut_varastot')) {
     if (trim($kukarow['varasto']) != "" and strpos($kukarow['varasto'], ',') !== false) {
       return explode(",", $kukarow["varasto"]);
     }
-    elseif (trim($kukarow['varasto']) != "") {
+    elseif (!empty($kukarow['varasto'])) {
       return array($kukarow['varasto']);
     }
 

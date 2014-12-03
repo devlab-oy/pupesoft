@@ -1641,7 +1641,7 @@ if ($tee == "") {
         <td>".t("Näytä yliviivatut rivit")."</td>
         <td><input type = 'checkbox' name = 'viivatut'></td>
       <input type = 'hidden' name = 'lisaselite' class='lisaselite' value='' />
-        <td><input type = 'submit' class='hae_lisaselite' value = '".t("Etsi")."'></td></tr>";
+        <td><input type = 'submit' class='hae_lisaselite hae_btn' value = '".t("Etsi")."'></td></tr>";
 
   echo "</table>";
   echo "</form>";

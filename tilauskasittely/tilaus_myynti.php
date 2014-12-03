@@ -4319,10 +4319,10 @@ if ($tee == '') {
 
   if ($_ei_extranet) {
 
-    $_varastoon_asiakkaalle = (in_array($toim, array('VALMISTAVARASTOON', 'VALMISTAASIAKKAALLE')));
+    $_varastoon = ($toim == "VALMISTAVARASTOON");
     $_tila_check = (!in_array($tila, array('LISAAKERTARESEPTIIN', 'LISAAISAKERTARESEPTIIN')));
 
-    if ($_varastoon_asiakkaalle and $_tila_check and empty($perheid)) {
+    if ($_varastoon and $_tila_check and empty($perheid)) {
 
       $perheid2 = 0;
 

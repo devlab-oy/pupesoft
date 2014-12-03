@@ -36,6 +36,7 @@ if (isset($submit)) {
                 tilausrivi.tunnus,
                 tilausrivi.var,
                 trlt.konttinumero,
+                trlt.kontin_mrn,
                 ss.hyllyalue,
                 ss.hyllynro,
                 ss.lisatieto,
@@ -91,6 +92,7 @@ if (isset($submit)) {
       $kontissa = false;
       $ei_kontissa = false;
       $kontitettu = false;
+      $mrn = false;
 
       $hylatyt = array();
       $hylattavat = array();
@@ -107,6 +109,10 @@ if (isset($submit)) {
         $rivitunnukset = '';
 
         while ($rulla = mysql_fetch_assoc($result)) {
+
+          if ($rulla['kontin_mrn'] != '') {
+            $mrn = true;
+          }
 
           if ($rulla['var'] == 'P') {
             $tuloutettu = false;
@@ -148,7 +154,11 @@ if (isset($submit)) {
 
       $rivitunnukset = rtrim($rivitunnukset, ',');
 
-      if ($rullia_loytyy == false) {
+      if ($mrn == true) {
+        $errors[] = t("Kontit on jo toimitettu.");
+        $view = 'konttiviite';
+      }
+      elseif ($rullia_loytyy == false) {
         $errors[] = t("Ei löytynyt kontitettavia rullia.");
         $view = 'konttiviite';
       }
@@ -395,13 +405,6 @@ echo "</div>";
 
 echo "<div style='text-align:center;padding:0; margin:0 auto;'>";
 
-echo "<div class='error center'>";
-
-foreach ($errors as $error) {
-  echo $error."<br>";
-}
-echo "</div>";
-
 if ($view == 'konttiviite') {
 
   if (!$yliajo) {
@@ -457,6 +460,21 @@ if ($view == 'konttiviite') {
       </div>";
   }
 
+  if (count($viestit) > 0) {
+    echo "<div class='viesti' style='text-align:center'>";
+    foreach ($viestit as $viesti) {
+      echo $viesti."<br>";
+    }
+    echo "</div>";
+  }
+
+  if (count($errors) > 0) {
+    echo "<div class='error' style='text-align:center'>";
+    foreach ($errors as $error) {
+      echo $error."<br>";
+    }
+    echo "</div>";
+  }
 
 }
 
@@ -589,6 +607,22 @@ if ($view == 'konttiviite_maxkg') {
 
   echo "</div>";
 
+  if (count($viestit) > 0) {
+    echo "<div class='viesti' style='text-align:center'>";
+    foreach ($viestit as $viesti) {
+      echo $viesti."<br>";
+    }
+    echo "</div>";
+  }
+
+  if (count($errors) > 0) {
+    echo "<div class='error' style='text-align:center'>";
+    foreach ($errors as $error) {
+      echo $error."<br>";
+    }
+    echo "</div>";
+  }
+
 }
 
 if ($view == 'kontituslista') {
@@ -677,6 +711,22 @@ if ($view == 'kontituslista') {
   echo "</div>";
 
   echo "</div>";
+
+  if (count($viestit) > 0) {
+    echo "<div class='viesti' style='text-align:center'>";
+    foreach ($viestit as $viesti) {
+      echo $viesti."<br>";
+    }
+    echo "</div>";
+  }
+
+  if (count($errors) > 0) {
+    echo "<div class='error' style='text-align:center'>";
+    foreach ($errors as $error) {
+      echo $error."<br>";
+    }
+    echo "</div>";
+  }
 
   echo "<div style='text-align:center; padding:10px; width:700px; margin:0 auto; overflow:auto;'>";
 

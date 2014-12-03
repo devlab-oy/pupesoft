@@ -210,8 +210,11 @@ if ($view == 'tiedot') {
           if ($rulla['konttinumero'] != '') {
             $vp = 'Toimitettu';
           }
+          elseif ($rulla['hyllyalue'] == '') {
+            $vp = t("Ei paikkaa");
+          }
           else {
-          $vp = $rulla['hyllyalue'].'-'.$rulla['hyllynro'];
+            $vp = $rulla['hyllyalue'].'-'.$rulla['hyllynro'];
           }
 
           $statukset[$rulla['lisatieto']]++;
@@ -243,6 +246,7 @@ if ($view == 'tiedot') {
       }
 
       $_varastopaikat = "";
+
       foreach ($varastopaikat as $vp => $kpl) {
         if (in_array('X', $haetun_vp[$vp])) {
           $luokka = 'haettu';
@@ -334,7 +338,7 @@ function hae_tiedot($hakukoodi, $tyyppi) {
             tilausrivin_lisatiedot.kontin_isokoodi,
             tilausrivin_lisatiedot.asiakkaan_rivinumero,
             sarjanumeroseuranta.sarjanumero,
-            sarjanumeroseuranta.lisatieto,
+            IF(sarjanumeroseuranta.lisatieto IS NULL, 'Normaali', sarjanumeroseuranta.lisatieto) AS lisatieto,
             sarjanumeroseuranta.massa,
             sarjanumeroseuranta.hyllyalue,
             sarjanumeroseuranta.hyllynro,

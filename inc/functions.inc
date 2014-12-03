@@ -27340,6 +27340,9 @@ if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
       $saldovahvistus['laskun_avoin_paiva'] = $valittu_saldovahvistus['laskun_avoin_paiva'];
 
       if ($saldovahvistus['asiakas']['talhal_email'] != '') {
+
+        $saldovahvistus['tiliotepvm'] = "{$request['vv']}-{$request['kk']}-{$request['pp']}";
+
         $pdf_filepath = hae_saldovahvistus_pdf($saldovahvistus);
 
         $params = array(

@@ -304,7 +304,7 @@ th {
 
 
 .subheader {
-  padding:0px;
+  padding:10px 0 0 0;
   overflow:auto;
   text-align: center;
 }

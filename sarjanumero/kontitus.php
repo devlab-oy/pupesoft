@@ -403,7 +403,7 @@ echo "</div>";
 
 echo "</div>";
 
-echo "<div style='text-align:center;padding:0; margin:0 auto;'>";
+echo "<div style='text-align:center;padding:10px 0 0 0; margin:0 auto;'>";
 
 if ($view == 'konttiviite') {
 

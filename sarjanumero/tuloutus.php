@@ -20,6 +20,8 @@ if (isset($submit)) {
   case 'sarjanumero':
 
     $vaihto = false;
+    $ylijaamasiirto = false;
+    $kuittaus = true;
 
     if (empty($sarjanumero)) {
       $errors[] = t("Syötä sarjanumero");
@@ -31,8 +33,14 @@ if (isset($submit)) {
       else{
         $rulla = mysql_fetch_assoc($result);
 
+        if ($rulla['lisatieto'] == 'Ylijaama') {
+          $viestit[] = t("Rulla on merkitty ylijäämäksi");
+          $ylijaamasiirto = true;
+        }
+
         if ($rulla['toimitettuaika'] == "0000-00-00 00:00:00") {
           $errors[] = t("Rahtia ei ole vielä kuitattu vastaanotetuksi.");
+          $kuittaus = false;
         }
         elseif ($rulla['varasto'] != null) {
 
@@ -48,11 +56,10 @@ if (isset($submit)) {
             paivita_tilausrivit_ja_sarjanumeroseuranta($rulla['ostorivitunnus'], $hylly, true);
 
           }
-          else{
+          else {
 
             $error  = t("Rulla on jo varastopaikalla");
-            $error .= " {$rulla['hyllyalue']}-{$rulla['hyllynro']}-";
-            $error .= "{$rulla['hyllyvali']}-{$rulla['hyllytaso']}";
+            $error .= " {$rulla['hyllyalue']}-{$rulla['hyllynro']}";
             $errors[] = $error;
             $errors[] = t("Jos haluat vaihtaa varastopaikkaa, lue sarjanumero uudestaan.");
             $vaihto = true;
@@ -60,21 +67,32 @@ if (isset($submit)) {
           }
         }
 
-        $query = "SELECT trlt.rahtikirja_id, tr.tunnus
-                  FROM sarjanumeroseuranta AS ss
-                  JOIN tilausrivi AS tr
-                    ON tr.yhtio = ss.yhtio
-                    AND tr.tunnus = ss.ostorivitunnus
-                  JOIN tilausrivin_lisatiedot AS trlt
-                    ON trlt.yhtio = tr.yhtio
-                    AND trlt.tilausrivitunnus = tr.tunnus
-                  WHERE ss.yhtio = '{$kukarow['yhtio']}'
-                  AND ss.sarjanumero = '{$sarjanumero}'";
-        $result = pupe_query($query);
-        $tilausrivi = mysql_fetch_assoc($result);
-        $rahtikirja_id = $tilausrivi['rahtikirja_id'];
+        if ($kuittaus) {
+          if ($ylijaamasiirto) {
+            $rullat = array($rulla);
+          }
+          else {
 
-        $rullat = hae_rullat($rahtikirja_id);
+            $query = "SELECT trlt.rahtikirja_id, tr.tunnus
+                      FROM sarjanumeroseuranta AS ss
+                      JOIN tilausrivi AS tr
+                        ON tr.yhtio = ss.yhtio
+                        AND tr.tunnus = ss.ostorivitunnus
+                      JOIN tilausrivin_lisatiedot AS trlt
+                        ON trlt.yhtio = tr.yhtio
+                        AND trlt.tilausrivitunnus = tr.tunnus
+                      WHERE ss.yhtio = '{$kukarow['yhtio']}'
+                      AND ss.sarjanumero = '{$sarjanumero}'";
+            $result = pupe_query($query);
+            $tilausrivi = mysql_fetch_assoc($result);
+            $rahtikirja_id = $tilausrivi['rahtikirja_id'];
+
+            $rullat = hae_rullat($rahtikirja_id);
+          }
+        }
+        else {
+          $rullat = null;
+        }
       }
     }
     if (count($errors) == 0) {
@@ -160,6 +178,11 @@ if (isset($submit)) {
 
         $tuotepaikka = $hylly['hyllyalue'] . "-" . $hylly['hyllynro'];
 
+        $hyllyalue = $hylly['hyllyalue'];
+        $hyllynro  = $hylly['hyllynro'];
+        $hyllyvali = $hylly['hyllyvali'];
+        $hyllytaso = $hylly['hyllytaso'];
+
         // Tarkistetaan onko syötetty hyllypaikka jo tälle tuotteelle
         $tuotteen_oma_hyllypaikka = "SELECT * FROM tuotepaikat
                                      WHERE tuoteno = '{$tilausrivi['tuoteno']}'
@@ -172,10 +195,8 @@ if (isset($submit)) {
 
         // Jos syötettyä paikkaa ei ole tämän tuotteen, lisätään uusi tuotepaikka
         if (mysql_num_rows($oma_paikka) == 0) {
-
           $_viesti = 'Saapumisessa';
-
-          lisaa_tuotepaikka($tilausrivi['tuoteno'], $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $_viesti, '', $halytysraja, $tilausmaara);
+          lisaa_tuotepaikka($tilausrivi['tuoteno'], $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $_viesti);
         }
         else {
           // Nollataan poistettava kenttä varmuuden vuoksi
@@ -245,6 +266,7 @@ if (isset($submit)) {
       else {
         $errors[] = t("Epäkelpo tuotepaikka!");
         $view = "tuotepaikka";
+        $rullat = hae_rullat($rahtikirja_id);
       }
     }
     break;
@@ -266,7 +288,7 @@ echo "</div>";
 
 echo "<div class='header_center'>";
 echo "<h1>";
-echo t("TULOUTUS");
+echo t("VARASTOON VIENTI");
 echo "</h1>";
 echo "</div>";
 
@@ -329,7 +351,13 @@ if ($view == 'tuotepaikka') {
   </form>";
 }
 
-
+if (count($viestit) > 0) {
+  echo "<div class='viesti' style='text-align:center'>";
+  foreach ($viestit as $viesti) {
+    echo $viesti."<br>";
+  }
+  echo "</div>";
+}
 
 if (count($errors) > 0) {
   echo "<div class='error' style='text-align:center'>";
@@ -361,14 +389,15 @@ if (isset($aktiivinen_paikka) and $aktiivinen_paikka != '') {
 
 foreach ($rullat as $rulla) {
 
+  $paino = (int) $rulla['paino'];
   echo "<div class='main' style='text-align:center;'>";
 
   if ($rulla['uusiotunnus'] == 0) {
     if ($rulla['sarjanumero'] == $sarjanumero) {
-      echo "<div class='listadiv vietava'>UIB: {$rulla['sarjanumero']}</div>";
+      echo "<div class='listadiv vietava'>UIB: {$rulla['sarjanumero']} ({$paino} kg)</div>";
     }
     else{
-      echo "<div class='listadiv'>UIB: {$rulla['sarjanumero']} tulouttamatta</div>";
+      echo "<div class='listadiv'>UIB: {$rulla['sarjanumero']} ({$paino} kg) tulouttamatta</div>";
     }
   }
   else {
@@ -379,7 +408,7 @@ foreach ($rullat as $rulla) {
      $luokka = "viety";
     }
     $paikka = "{$rulla['alue']}-{$rulla['nro']}";
-    echo "<div class='listadiv {$luokka}' >UIB: {$rulla['sarjanumero']} on paikalla {$paikka}</div>";
+    echo "<div class='listadiv {$luokka}' >UIB: {$rulla['sarjanumero']} ({$paino} kg) on paikalla {$paikka}</div>";
   }
 
   echo "</div>";

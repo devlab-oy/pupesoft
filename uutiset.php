@@ -496,7 +496,7 @@ if ($tee == '') {
       }
 
       if ($kuva == '') {
-        if (empty($legacy_ui)) {
+        if ($yhtiorow["kayttoliittyma"] == "U") {
           $kuva = "<img src='{$palvelin2}pics/facelift/pupe.gif' width='130'>";
         }
         else {

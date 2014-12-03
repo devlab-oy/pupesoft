@@ -3078,7 +3078,7 @@ if ($tee == '') {
         echo "<a href='{$palvelin2}crm/asiakasmemo.php?ytunnus={$laskurow['ytunnus']}&asiakasid={$laskurow['liitostunnus']}&from={$toim}&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS'>{$laskurow['nimi']}</a>";
         echo " <a id='hae_asiakasta_linkki'>";
 
-        if (empty($legacy_ui)) {
+        if ($yhtiorow["kayttoliittyma"] == "U") {
           echo "<img src='".$palvelin2."pics/facelift/ukot.png'>";
         }
         else {

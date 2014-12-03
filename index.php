@@ -45,7 +45,7 @@ else {
 
 echo "</head>";
 
-if (!empty($legacy_ui)) {
+if ($yhtiorow["kayttoliittyma"] == "") {
 
   $colwidth = '175';
 

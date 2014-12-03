@@ -694,7 +694,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
         echo $css;
         echo "</style>\n";
 
-        if (empty($legacy_ui)) {
+        if ($yhtiorow["kayttoliittyma"] == "U") {
           echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft.css' />\n";
           echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft_left.css' />\n";
           echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft_top.css' />\n";

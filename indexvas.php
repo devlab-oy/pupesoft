@@ -5,7 +5,7 @@ if (@include_once "inc/parametrit.inc");
 elseif (@include_once "parametrit.inc");
 else exit;
 
-if (!empty($legacy_ui)) {
+if ($yhtiorow["kayttoliittyma"] == "") {
   
   echo "<style type='text/css'>
           body {
@@ -265,7 +265,7 @@ while ($orow = mysql_fetch_array($result)) {
   }
 }
 
-if (!empty($legacy_ui)) {
+if ($yhtiorow["kayttoliittyma"] == "") {
   //N‰ytet‰‰n aina exit-nappi
   echo "<tr><td class='back' style='padding:0px; margin:0px;'><br></td></tr>";
   echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' href='logout.php' target='main'>".t("Kirjaudu ulos")."</a></td></tr>";
@@ -274,7 +274,7 @@ if (!empty($legacy_ui)) {
 echo "</table><br>";
 echo "</div>";
 
-if (empty($legacy_ui)) {
+if ($yhtiorow["kayttoliittyma"] == "U") {
 
   echo "<div class='showhide_vasen' id='maaginen_vasen'><img id='showhide_left' src='{$palvelin2}pics/facelift/hide_left.png'></div>";
 

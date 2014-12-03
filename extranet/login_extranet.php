@@ -142,7 +142,7 @@ elseif (file_exists("pics/pupesoft_logo.gif")) {
   echo "<a target='_top' href='/'><img src='pics/pupesoft_logo.gif' border='0'>";
 }
 else {
-  if (empty($legacy_ui)) {
+  if ($yhtiorow["kayttoliittyma"] == "U") {
     echo "<a target='_top' href='/'><img src='{$palvelin2}pics/facelift/pupe.gif' border='0'>";
   }
   else {

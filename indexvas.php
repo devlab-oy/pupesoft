@@ -6,7 +6,7 @@ elseif (@include_once "parametrit.inc");
 else exit;
 
 if ($yhtiorow["kayttoliittyma"] == "") {
-  
+
   echo "<style type='text/css'>
           body {
             margin: 0px;
@@ -56,7 +56,7 @@ if ($yhtiorow["kayttoliittyma"] == "") {
   }
 
   echo "<div style='margin: 5px 0px 10px 8px;'>";
-  echo "<a class='puhdas' target='main' href='".$palvelin2."logout.php?toim=change'><img border='0' src='$logo' alt='logo' $koko ></a>"; // top right bottom left
+  echo "<a class='puhdas' target='mainframe' href='".$palvelin2."logout.php?toim=change'><img border='0' src='$logo' alt='logo' $koko ></a>"; // top right bottom left
   echo "</div>";
   echo "<div style='margin:0px 0px 10px 8px'>";  // top right bottom left
   echo $yhtio_nimi;
@@ -268,7 +268,7 @@ while ($orow = mysql_fetch_array($result)) {
 if ($yhtiorow["kayttoliittyma"] == "") {
   //N‰ytet‰‰n aina exit-nappi
   echo "<tr><td class='back' style='padding:0px; margin:0px;'><br></td></tr>";
-  echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' href='logout.php' target='main'>".t("Kirjaudu ulos")."</a></td></tr>";
+  echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' href='logout.php' target='mainframe'>".t("Kirjaudu ulos")."</a></td></tr>";
 }
 
 echo "</table><br>";

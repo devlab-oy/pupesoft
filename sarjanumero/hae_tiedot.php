@@ -208,7 +208,14 @@ if ($view == 'tiedot') {
         if ($rulla['asiakkaan_tilausnumero'] == $tilausnumero) {
 
           if ($rulla['konttinumero'] != '') {
-            $vp = 'Toimitettu';
+
+            if ($rulla['sinettinumero'] == 'X') {
+              $vp = 'Kontitettu';
+            }
+            else {
+              $vp = 'Toimitettu';
+            }
+
           }
           elseif ($rulla['hyllyalue'] == '') {
             $vp = t("Ei paikkaa");

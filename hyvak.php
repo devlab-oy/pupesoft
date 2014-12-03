@@ -500,7 +500,7 @@ if ($tee == 'Z') {
       <input type='hidden' name = 'nayta' value='$nayta'>
       <input type='hidden' name='tunnus' value='$trow[tunnus]'>";
 
-  echo "  <td><input type='text' name='komm' size='25'><input type='Submit' value='".t("Pysäytä laskun kierto")."'></td>
+  echo "  <td><input type='text' name='komm' size='25'><input type='submit' value='".t("Pysäytä laskun kierto")."'></td>
       </form>
       </tr>
       </table>";
@@ -1074,7 +1074,7 @@ if (strlen($tunnus) != 0) {
         <input type='hidden' name='tee' value='D'>
         <input type='hidden' name = 'nayta' value='$nayta'>
         <input type='hidden' name='tunnus' value = '$tunnus'>
-        <input type='Submit' value='".t("Poista lasku")."'>
+        <input type='submit' value='".t("Poista lasku")."'>
         </form></td>";
 
     echo "  <SCRIPT LANGUAGE=JAVASCRIPT>
@@ -1146,7 +1146,7 @@ if (strlen($tunnus) != 0) {
 
   echo "  <tr>
       <td><input type='text' name='komm' value='' size='50'></td>
-      <td><input type='Submit' value='".t("Lisää kommentti")."'></td>
+      <td><input type='submit' value='".t("Lisää kommentti")."'></td>
       </tr>";
 
   echo "</form>";
@@ -1240,7 +1240,7 @@ if (strlen($tunnus) != 0) {
     }
 
     echo "  </td>
-        <td valign='top'><input type='Submit' value='".t("Muuta lista")."'></td>
+        <td valign='top'><input type='submit' value='".t("Muuta lista")."'></td>
         </tr></form>";
 
     echo "</table></td><td width='30px' class='back'></td>";
@@ -1411,7 +1411,7 @@ if (strlen($tunnus) != 0) {
         echo "<form method='post'>
             <input type='hidden' name = 'tunnus' value='$tunnus'>
             <input type='hidden' name = 'tee' value='H'>
-            <input type='Submit' value='".t("Hyväksy tiliöinti ja lasku")."'>
+            <input type='submit' value='".t("Hyväksy tiliöinti ja lasku")."'>
             </form><br>";
       }
       else {
@@ -1423,7 +1423,7 @@ if (strlen($tunnus) != 0) {
       echo "<form method='post'>
           <input type='hidden' name='tee' value='palauta'>
           <input type='hidden' name='tunnus' value='$tunnus'>
-          <input type='Submit' value='".t("Palauta lasku edelliselle hyväksyjälle")."'>
+          <input type='submit' value='".t("Palauta lasku edelliselle hyväksyjälle")."'>
           </form><br>";
     }
   }
@@ -1437,7 +1437,7 @@ if (strlen($tunnus) != 0) {
       echo "<form method='post'>
           <input type='hidden' name = 'tunnus' value='$tunnus'>
           <input type='hidden' name = 'tee' value='H'>
-          <td class='back'><input type='Submit' value='".t("Hyväksy lasku")."'></td>
+          <td class='back'><input type='submit' value='".t("Hyväksy lasku")."'></td>
           </form>";
     }
     else {
@@ -1447,7 +1447,7 @@ if (strlen($tunnus) != 0) {
     echo "<form method='post'>
         <input type='hidden' name='tee' value='Z'>
         <input type='hidden' name='tunnus' value='$tunnus'>
-        <td class='back'><input type='Submit' value='".t("Pysäytä laskun käsittely")."'></td>
+        <td class='back'><input type='submit' value='".t("Pysäytä laskun käsittely")."'></td>
         </form>";
 
     echo "</tr></table><br>";
@@ -1471,7 +1471,7 @@ if (strlen($tunnus) != 0) {
 
     if (is_array($liitteet) and count($liitteet) == 1) {
       echo "<input type='hidden' name = 'iframe_id' value='$liitteet[0]'>
-          <input type='Submit' value='".t("Avaa")."'>";
+          <input type='submit' value='".t("Avaa")."'>";
     }
     else {
       echo "<select name='iframe_id' onchange='submit();'>
@@ -1498,7 +1498,7 @@ if (strlen($tunnus) != 0) {
           <input type='hidden' name = 'tunnus' value='$tunnus'>
         <input type='hidden' name='lopetus' value='$lopetus'>
           <input type='hidden' name = 'nayta' value='$nayta'>
-          <input type='Submit' value='".t("Sulje lasku")."'>
+          <input type='submit' value='".t("Sulje lasku")."'>
         </form></td>";
   }
 
@@ -1721,7 +1721,7 @@ elseif ($kutsuja == "") {
             <input type='hidden' name='tee' value='Z'>
             <input type='hidden' name='lopetus' value='$lopetus'>
             <input type='hidden' name='tunnus' value='$trow[tunnus]'>
-            <input type='Submit' value='".t("Lisää kommentti")."'>
+            <input type='submit' value='".t("Lisää kommentti")."'>
             </form>
           </td>";
       }
@@ -1732,7 +1732,7 @@ elseif ($kutsuja == "") {
             <input type='hidden' name='tee' value='D'>
             <input type='hidden' name='nayta' value='$nayta'>
             <input type='hidden' name='tunnus' value = '$trow[tunnus]'>
-            <input type='Submit' value='".t("Poista")."'>
+            <input type='submit' value='".t("Poista")."'>
             </form>
           </td>";
       }

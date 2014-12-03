@@ -535,7 +535,13 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     }
 
     // T‰nne p‰‰see aina!
-    if ($phpnimi != 'indexvas.php' and $phpnimi != 'index.php' and $phpnimi != 'tervetuloa.php' and $phpnimi != 'logout.php' and $phpnimi != 'pupesoft_changelog.php') {
+    if ($phpnimi != 'indexvas.php'
+      and $phpnimi != 'index.php'
+      and $phpnimi != 'tervetuloa.php'
+      and $phpnimi != 'logout.php'
+      and $phpnimi != 'ylaframe.php'
+      and $phpnimi != 'pikavalinnat.php'
+      and $phpnimi != 'pupesoft_changelog.php') {
 
       if (!isset($toim)) $toim = "";
 
@@ -545,7 +551,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
         echo "<table width='100%' height='70%'>";
         echo "<tr>";
         echo "<td style='text-align:center;font-size:9pt;font-family:Lucida,Verdana,Helvetica,Arial; color: #666;'>";
-        echo "<img src='{$pupesoft_scheme}api.devlab.fi/pupesoft.gif'><br><br>";
+        echo "<img src='{$palvelin2}pics/facelift/pupe.gif'><br><br>";
         echo "K‰ytt‰j‰ {$kukarow["kuka"]} pyysi toimintoa $phpnimi $toim, joka on kielletty!";
         echo "</td>";
         echo "</tr>";
@@ -666,9 +672,20 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       }
 
       if (!isset($_GET["no_css"]) or $_GET["no_css"] != "yes") {
+        echo "<link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Lato:400,700' >";
+
         echo "<style type='text/css'>\n";
         echo $css;
         echo "</style>\n";
+
+        if ($yhtiorow["kayttoliittyma"] == "U") {
+          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft.css' />\n";
+          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft_left.css' />\n";
+          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft_top.css' />\n";
+        }
+        else {
+          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft_legacy.css' />\n";
+        }
 
         if (isset($pupe_DataTables)) {
           echo "<style type=\"text/css\" title=\"currentStyle\">\n";
@@ -788,7 +805,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
         if (isset($ohjewiki_url)) {
           $hreffi = $ohjewiki_url."/Ohjeet:".basename($phpnimi).$urltoim;
-          echo "<div style='text-align:right; vertical-align:top; margin-right: 10px;'><a target='_blank' href='$hreffi'>".t("OHJE")."</a></div>";
+          echo "<div class='ohje'><a target='_blank' href='$hreffi'>".t("OHJE")."</a></div>";
         }
 
         if ($kukarow['toimipaikka'] > 0 and tarkista_oikeus('infobar.php')) {
@@ -850,8 +867,10 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     }
 
     if ((!isset($no_head) or (isset($no_head) and $no_head != "yes")) and isset($lopetus) and $lopetus != '') {
+
+      echo "<div class='lopetus'>";
       lopetus($lopetus);
-      echo "<br>";
+      echo "</div>";
     }
   }
 

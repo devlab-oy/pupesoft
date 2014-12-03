@@ -1,0 +1,44 @@
+div.lopetus {
+  top:5px;
+  margin-top: 5px;
+  margin-bottom: 5px;  
+}
+
+div.ohje {
+  position:absolute;
+  top:5px;
+  right:20px;
+}
+
+a.puhdas:hover {
+  text-decoration: none;
+  background-color: transparent;
+}
+
+form.indexvas {
+  margin:0px 0px 10px 8px;
+}
+
+table.indexvas {
+  width: 135px;
+	margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+	border-spacing: 0;
+}
+
+table.indexvas tr {
+  background-color: transparent;
+}
+
+table.indexvas td {
+	margin: 0px 0px 0px 0px;
+  padding: 0px 0px 0px 0px;
+}
+
+.nopad {
+	padding: 0px;
+}
+
+.top {
+	vertical-align: top;
+}

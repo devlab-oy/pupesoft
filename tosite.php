@@ -710,7 +710,7 @@ if ($tee == 'I' and isset($teetosite)) {
         <input type='hidden' name='tee' value='E'>
         <input type='hidden' name='lopetus' value='{$lopetus}'>
         <input type='hidden' name='tunnus' value='{$tunnus}'>
-        <input type='Submit' value='".t("Näytä tosite")."'>
+        <input type='submit' value='".t("Näytä tosite")."'>
         </form><br><hr><br>";
   }
 
@@ -974,7 +974,7 @@ if ($tee == '') {
   echo "<th nowrap>".t("Valitse toimittaja")."</th>";
   echo "<td>";
 
-  echo "<input type = 'text' name = 'toimittaja_y' size='20'></td><td class='back'><input type = 'submit' value = '".t("Etsi")."'>";
+  echo "<input type = 'text' name = 'toimittaja_y' size='20'></td><td class='back'><input type = 'submit' class='hae_btn' value = '".t("Etsi")."'>";
 
   echo "</td>\n";
   echo "</tr>\n";
@@ -992,7 +992,7 @@ if ($tee == '') {
   echo "<th nowrap>".t("tai")." ".t("valitse asiakas")."</th>";
   echo "<td>";
 
-  echo "<input type = 'text' name = 'asiakas_y' size='20'></td><td class='back'><input type = 'submit' value = '".t("Etsi")."'>";
+  echo "<input type = 'text' name = 'asiakas_y' size='20'></td><td class='back'><input type = 'submit' class='hae_btn' value = '".t("Etsi")."'>";
 
   echo "</td>\n";
   echo "</tr>\n";

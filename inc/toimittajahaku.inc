@@ -56,7 +56,7 @@ if ($tee == 'A') {
         <option $sel[Y] value = 'Y'>".t("Maksettu")."
         <option $sel[O] value = 'O'>".t("Ostoraportti")."
         </select></td>
-        <td class='back'><input type='Submit' value='".t("Näytä")."'></td>
+        <td class='back'><input type='submit' value='".t("Näytä")."'></td>
         </tr></form>";
     echo "</table>";
 
@@ -270,7 +270,7 @@ if ($tee == 'A') {
 
       echo "<tr>";
       echo "<td class='back' style='vertical-align:bottom;'>";
-      echo "<input type='Submit' value='".t("Näytä")."'>";
+      echo "<input type='submit' value='".t("Näytä")."'>";
       echo "</td>";
       echo "</tr>";
 
@@ -563,7 +563,7 @@ if ($th_lisat != '') {
           <option value = 'Y'>".t("Maksettu")."
           <option value = 'O'>".t("Ostoraportti")."
           </select></td>
-          <td><input type='Submit' value='".t("Näytä")."'></td>
+          <td><input type='submit' value='".t("Näytä")."'></td>
           </tr></form>";
     }
     echo "</table>";

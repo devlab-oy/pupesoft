@@ -1,0 +1,46 @@
+select.indexvas {
+  width: 255px;
+	margin: 3px 0px 0px 15px;
+  -webkit-appearance: none;
+  -webkit-border-radius: 0px;
+	padding: 18px 20px 14px 20px;
+  border : solid 0px;
+	font-size: 14pt;
+  letter-spacing: 1px;
+  background-image: url('../pics/facelift/dropdown_arrow_big.png');
+  background-repeat: no-repeat;
+  background-position: right;
+}
+
+table.indexvas {
+  width: 255px;
+	margin: 0px 0px 0px 15px;
+  padding: 0px 0px 0px 0px;
+	border-spacing: 0;
+}
+
+table.indexvas td {
+  padding: 3px 15px 3px 15px;
+}
+
+table.indexvas tr:first-child td {
+  padding: 12px 15px 3px 15px;
+}
+
+table.indexvas tr:last-child td {
+  padding: 3px 15px 12px 15px;
+}
+
+table.indexvas a {
+  font-size: 13pt;
+}
+
+a.menu_aktivoitu {
+  color: #808080;
+}
+
+div.showhide_vasen {
+  position:fixed;
+  top:80px;
+  left:2px;
+}

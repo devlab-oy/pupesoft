@@ -2041,8 +2041,11 @@ if ($tila == '') {
     echo "<br>$rivirow[toim_tuoteno]";
 
     echo "&nbsp;";
+
     $_src = "{$palvelin2}pics/lullacons/info.png";
-    echo "<img src='{$_src}' class='hae_saldo' id='{$rivirow['tuoteno']}' />";
+    $_title = t("Näytä saldo");
+
+    echo "<img title='{$_title}' src='{$_src}' class='hae_saldo' id='{$rivirow['tuoteno']}' />";
     echo "<input type='hidden' id='{$rivirow['tuoteno']}_varasto' value='{$rivirow['varasto']}' />";
     echo "<span class='saldo_{$rivirow['tuoteno']}' style='display:none;'></span>";
 

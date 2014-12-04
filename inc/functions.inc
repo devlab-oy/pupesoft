@@ -27346,7 +27346,7 @@ if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
 
         $saldovahvistus['tiliotepvm'] = "{$request['vv']}-{$request['kk']}-{$request['pp']}";
 
-        if ($request['ryhmittely_tyyppi'] == 'ytunnus') {
+        if ($valittu_saldovahvistus['ryhmittely_tyyppi'] == 'ytunnus') {
           $boss = true;
         }
         else {

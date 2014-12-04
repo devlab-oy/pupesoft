@@ -695,16 +695,29 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
         echo "</style>\n";
 
         if ($yhtiorow["kayttoliittyma"] == "U") {
-          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft.css' />\n";
-          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft_left.css' />\n";
-          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft_top.css' />\n";
+          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft.css' />\n";
+          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_left.css' />\n";
+          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_top.css' />\n";
 
-          if (isset($_SERVER['HTTP_USER_AGENT']) and mb_stripos($_SERVER['HTTP_USER_AGENT'], "MOZILLA") !== FALSE) {
-             echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft_mozilla.css' />\n";
+          if (isset($_SERVER['HTTP_USER_AGENT']) and mb_stripos($_SERVER['HTTP_USER_AGENT'], "FIREFOX") !== FALSE) {
+             echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_mozilla.css' />\n";
+          }
+          
+          if (isset($_SERVER['HTTP_USER_AGENT']) and mb_stripos($_SERVER['HTTP_USER_AGENT'], "WINDOWS") !== FALSE) {
+            
+            if (isset($_SERVER['HTTP_USER_AGENT']) and mb_stripos($_SERVER['HTTP_USER_AGENT'], "TRIDENT") !== FALSE) {
+              echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_ms_ie.css' />\n";
+            }
+            elseif (isset($_SERVER['HTTP_USER_AGENT']) and mb_stripos($_SERVER['HTTP_USER_AGENT'], "FIREFOX") !== FALSE) {
+              echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_ms_mozilla.css' />\n";
+            }
+            else {
+              echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_ms_chrome.css' />\n";
+            }                          
           }
         }
         else {
-          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft_legacy.css' />\n";
+          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_legacy.css' />\n";
         }
 
         if (isset($pupe_DataTables)) {
@@ -716,12 +729,12 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
       if (substr(dirname(__FILE__), -3) == "inc") {
         echo "<script language='javascript' src='{$palvelin2}inc/jquery.min.js'></script>";
-        echo "<link rel='stylesheet' href='{$palvelin2}inc/jquery-ui.css' />";
+        echo "<link rel='stylesheet' href='{$palvelin2}css/jquery-ui.css' />";
         echo "<script src='{$palvelin2}inc/jquery-ui.js'></script>";
       }
       else {
         echo "<script language='javascript' src='{$palvelin2}jquery.min.js'></script>";
-        echo "<link rel='stylesheet' href='{$palvelin2}jquery-ui-extranet.css' />";
+        echo "<link rel='stylesheet' href='{$palvelin2}css/jquery-ui-extranet.css' />";
         echo "<script src='{$palvelin2}jquery-ui.js'></script>";
       }
 

@@ -77,7 +77,7 @@ input, textarea {
 select {
   font-size: 10pt;
   -webkit-appearance: none;
-  -webkit-border-radius: 0px;  
+  -webkit-border-radius: 0px;
 	padding: 8px 35px 8px 4px;
   border : solid 1px #f0f0f0;
   background-image: url('../pics/facelift/dropdown_arrow.png');

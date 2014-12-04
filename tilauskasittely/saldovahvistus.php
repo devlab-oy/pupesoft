@@ -197,15 +197,25 @@ elseif ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldovah
   echo_saldovahvistukset($request);
 }
 elseif ($request['tee'] == 'laheta_sahkopostit') {
-  list($lahetetyt_count, $ei_lahetetty_count) = generoi_saldovahvistus_sahkopostit($request);
+  list($lahetetyt_count, $ei_lahetetty_count, $ei_lahetetyt) = generoi_saldovahvistus_sahkopostit($request);
   unset($_SESSION['valitut_laskut']);
 
   echo "<br/>";
   echo "<br/>";
   echo '<font class="message">'.$lahetetyt_count.' '.t('sähköpostia lähetetty').'</font>';
   if ($ei_lahetetty_count > 0) {
-    echo "<br/>";
+    echo "<br />";
     echo '<font class="message">'.$ei_lahetetty_count.' '.t('sähköpostin lähettäminen epäonnistui').'</font>';
+
+    if (count($ei_lahetetyt) > 0) {
+      echo "<br /><br />";
+
+      foreach ($ei_lahetetyt as $ei_lahetetty_nimi) {
+        echo "<font class='message'>";
+        echo t("Asiakkaan %s sähköpostin lähettäminen epäonnistui", "", $ei_lahetetty_nimi);
+        echo "</font><br />";
+      }
+    }
   }
 }
 elseif ($request['tee'] == 'poista_valinnat') {

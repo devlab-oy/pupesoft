@@ -27322,6 +27322,9 @@ if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
 
     $lahetetyt_count = 0;
     $ei_lahetetty_count = 0;
+
+    $ei_lahetetyt = array();
+
     foreach ($valitut_saldovahvistukset as $valittu_saldovahvistus) {
       $request['ryhmittely_tyyppi_temp'] = $valittu_saldovahvistus['ryhmittely_tyyppi'];
 
@@ -27374,14 +27377,16 @@ if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
         }
         else {
           $ei_lahetetty_count++;
+          $ei_lahetetyt[$saldovahvistus['asiakas']['nimi']] = $saldovahvistus['asiakas']['nimi'];
         }
       }
       else {
         $ei_lahetetty_count++;
+        $ei_lahetetyt[$saldovahvistus['asiakas']['nimi']] = $saldovahvistus['asiakas']['nimi'];
       }
     }
 
-    return array($lahetetyt_count, $ei_lahetetty_count);
+    return array($lahetetyt_count, $ei_lahetetty_count, $ei_lahetetyt);
   }
 }
 

@@ -3220,7 +3220,7 @@ else {
 
                     if (mysql_num_rows($osre) > 0) {
                       while ($osrow = mysql_fetch_assoc($osre)) {
-                        $row[$ken_nimi] .= "<a href='../tilauskasittely/sarjanumeroseuranta.php?sarjanumero_haku=".urlencode($osrow["sarjanumero"])."' target='_top'>{$osrow['sarjanumero']}</a><br>";
+                        $row[$ken_nimi] .= "<a href='../tilauskasittely/sarjanumeroseuranta.php?sarjanumero_haku=".urlencode($osrow["sarjanumero"])."' target='Sarjanumero'>{$osrow['sarjanumero']}</a><br>";
                       }
                     }
                   }
@@ -3231,7 +3231,7 @@ else {
                 if ($ken_nimi == "laskunumero") {
                   list($laskalk, $lasklop) = explode(":", $row[$ken_nimi]);
 
-                  $row[$ken_nimi] = $laskalk.":<a href='{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=&laskunro={$lasklop}' target='_top'>{$lasklop}</a>";
+                  $row[$ken_nimi] = $laskalk.":<a href='{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=&laskunro={$lasklop}' target='Asiakkaantilaukset'>{$lasklop}</a>";
                 }
 
                 // jos kyseessa on varastonarvo

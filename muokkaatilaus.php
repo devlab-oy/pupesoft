@@ -611,6 +611,14 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
         $aputoim2 = "";
         $lisa2 = "";
       }
+      elseif ($toim == "VASTAANOTA_REKLAMAATIO") {
+        $aputoim1 = "REKLAMAATIO";
+        $lisa1 = t("Muokkaa");
+
+        $aputoim2 = "";
+        $lisa2 = "";
+      }
+      
       elseif ($toim == "HAAMU") {
         $aputoim1 = "HAAMU";
         $lisa1 = t("Muokkaa");
@@ -2721,16 +2729,16 @@ if (mysql_num_rows($result) != 0) {
 
         $lisa1 = t("Rivisyöttöön");
       }
-      elseif ($whiletoim == "REKLAMAATIO" or $whiletoim == "REKLAMAATIOSUPER" or $whiletoim == "TAKUU" or $whiletoim == "TAKUUSUPER") {
-        $aputoim1 = "REKLAMAATIO";
-        $lisa1 = t("Muokkaa");
+      elseif ($toim == "VASTAANOTA_REKLAMAATIO") {
+        $aputoim1 = $whiletoim;
+        $lisa1 = t("Vastaanota");
 
         $aputoim2 = "";
         $lisa2 = "";
       }
-      elseif ($toim == "VASTAANOTA_REKLAMAATIO") {
-        $aputoim1 = $whiletoim;
-        $lisa1 = t("Vastaanota");
+      elseif ($whiletoim == "REKLAMAATIO" or $whiletoim == "REKLAMAATIOSUPER" or $whiletoim == "TAKUU" or $whiletoim == "TAKUUSUPER") {
+        $aputoim1 = "REKLAMAATIO";
+        $lisa1 = t("Muokkaa");
 
         $aputoim2 = "";
         $lisa2 = "";

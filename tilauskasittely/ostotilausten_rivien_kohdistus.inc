@@ -2029,18 +2029,22 @@ if ($tila == '') {
     echo "<$td $class valign='top' nowrap>";
 
     // tehd‰‰n pop-up divi jos keikalla on kommentti...
-    list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($rivirow["tuoteno"]);
     $pop_yks = t_avainsana("Y", "", "and avainsana.selite='$rivirow[tilyksikko]'", "", "", "selite");
 
     echo "<div id='div_$rivirow[rivitunnus]' class='popup' style='width: 400px;'>";
     echo "<ul>";
-    echo "<li>".t("Saldo").": $saldo $pop_yks</li><li>".t("Hyllyss‰").": $hyllyssa $pop_yks</li><li>".t("Myyt‰viss‰").": $myytavissa $pop_yks</li>";
     echo "<li>".t("Tilattu").": $rivirow[tilattu] $pop_yks</li><li>".t("Varattu").": $rivirow[varattu] $pop_yks</li>";
     echo "<li>".t("Keskihinta").": $rivirow[keskihinta] $rivirow[valuutta]</li><li>".t("Ostohinta").": $rivirow[ostohinta] $rivirow[valuutta]</li>";
     echo "</ul>";
     echo "</div>";
     echo "<a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($rivirow["tuoteno"])."&lopetus=$PHP_SELF////toiminto=kohdista//toimittajaid=$toimittajaid//tee=K//otunnus=$otunnus//alku=$alku//nayta_kohdistetut=$nayta_kohdistetut//nayta_kaikki=$nayta_kaikki//tila=$tila//ojarj=$ojarj$ulisa//riviid=$rivirow[rivitunnus]///$rivirow[rivitunnus]' class='tooltip' id='$rivirow[rivitunnus]'>$rivirow[tuoteno]</a>";
     echo "<br>$rivirow[toim_tuoteno]";
+
+    echo "<br />";
+    $_src = "{$palvelin2}pics/lullacons/info.png";
+    echo "<img src='{$_src}' class='hae_saldo' id='{$rivirow['tuoteno']}' />";
+    echo "<input type='hidden' id='{$rivirow['tuoteno']}_varasto' value='{$rivirow['varasto']}' />";
+    echo "<span class='saldo_{$rivirow['tuoteno']}' style='display:none;'></span>";
 
     if ($rivirow["sarjanumeroseuranta"] != "") {
       if ($rivirow["siskpl"] < 0) {

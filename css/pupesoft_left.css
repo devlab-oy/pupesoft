@@ -1,6 +1,6 @@
 select.indexvas {
   width: 255px;
-	margin: 3px 0px 0px 15px;
+	margin: 3px 0px 0px 5px;
   -webkit-appearance: none;
   -webkit-border-radius: 0px;
 	padding: 18px 20px 14px 20px;
@@ -14,9 +14,15 @@ select.indexvas {
 
 table.indexvas {
   width: 255px;
-	margin: 0px 0px 0px 15px;
-  padding: 0px 0px 0px 0px;
+	margin: 0px 0px 0px 5px;
+  padding: 0;
 	border-spacing: 0;
+}
+
+#indexvas_container {
+	margin: 0;
+  padding: 0;
+  width: 255px;
 }
 
 table.indexvas td {

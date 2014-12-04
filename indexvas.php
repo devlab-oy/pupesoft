@@ -299,14 +299,14 @@ if ($yhtiorow["kayttoliittyma"] == "U") {
 
         $(document).ready(function(){
           $('#maaginen_vasen').click(function(){
-             if (parent.document.getElementsByTagName('frameset')[1].cols=='285,*') {
-               parent.document.getElementsByTagName('frameset')[1].cols='20,*';
+             if (parent.document.getElementsByTagName('frameset')[1].cols=='270,*') {
+               parent.document.getElementsByTagName('frameset')[1].cols='15,*';
                $('#indexvas_container').hide();
                $('#showhide_left').attr('src', '{$palvelin2}pics/facelift/show_left.png');
                document.cookie = \"vas_frame_showhide=hidden;7\";
              }
              else {
-               parent.document.getElementsByTagName('frameset')[1].cols='285,*';
+               parent.document.getElementsByTagName('frameset')[1].cols='270,*';
                $('#indexvas_container').show();
                $('#showhide_left').attr('src', '{$palvelin2}pics/facelift/hide_left.png');
                document.cookie = \"vas_frame_showhide=;7\";

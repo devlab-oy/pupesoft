@@ -81,10 +81,10 @@ else {
           <frame noresize src='ylaframe.php' name='ylaframe' id='ylaframe' frameborder='0' marginwidth='0' marginheight='0' scrolling='no'>";
   
   if (isset($_COOKIE["vas_frame_showhide"]) and $_COOKIE["vas_frame_showhide"] == "hidden") {
-    $vas_cols = "20,*";
+    $vas_cols = "15,*";
   }
   else {
-    $vas_cols = "285,*";
+    $vas_cols = "270,*";
   }
   
   echo "  <frameset cols='$vas_cols' border='0'>

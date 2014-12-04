@@ -38,7 +38,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
 
   $tilikausi = tarkista_saako_laskua_muuttaa($tapahtumapaiva);
   $tilikausi_lasku = tarkista_saako_laskua_muuttaa($laskurow['tapvm']);
-
+echo "41: $kassalipas, $_kassalipas <br><br>"; die;
   if (empty($tilikausi) and (empty($tilikausi_lasku) or $toim == 'KATEINEN') and !$laskupvmerror and !$laskumaksettuerror) {
     $mehtorow     = hae_maksuehto($maksuehto);
     $konsrow      = hae_asiakas($laskurow);
@@ -54,7 +54,7 @@ if ((int) $maksuehto != 0 and (int) $tunnus != 0) {
       'tapahtumapaiva' => $tapahtumapaiva,
       'kassalipas'   => $kassalipas
     );
-
+    echo "$params[kassalipas] <br><br>"; die;
     if ($toim == 'KATEINEN' and $kateinen != '') {
       // Lasku oli ennest‰‰n k‰teinen ja nyt p‰ivitet‰‰n sille joku toinen k‰teismaksuehto
       list($myysaatili, $_tmp) = hae_kassalippaan_tiedot($laskurow['kassalipas'], hae_maksuehto($laskurow['maksuehto']), $laskurow);
@@ -152,6 +152,7 @@ function hae_lasku($tunnus) {
             FROM lasku
             WHERE yhtio = '$kukarow[yhtio]'
             and tunnus  = '$tunnus'";
+echo "155: $query <br><br>";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -254,7 +255,7 @@ function hae_kassalipas($kassalipas_tunnus) {
             FROM kassalipas
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tunnus  = '{$kassalipas_tunnus}'";
-
+            echo "$query <br><br>"; die;
   $result = pupe_query($query);
 
   return mysql_fetch_assoc($result);
@@ -527,7 +528,8 @@ function echo_lasku_table($laskurow, $toim) {
     // haetaan kaikki k‰teisen maksuehdot
     $query = "SELECT *
               FROM kassalipas
-              WHERE yhtio = '{$kukarow['yhtio']}'";
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$kukarow['kassamyyja']}'";
     $result = pupe_query($query);
 
     echo '<tr>';

@@ -2040,7 +2040,7 @@ if ($tila == '') {
     echo "<a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($rivirow["tuoteno"])."&lopetus=$PHP_SELF////toiminto=kohdista//toimittajaid=$toimittajaid//tee=K//otunnus=$otunnus//alku=$alku//nayta_kohdistetut=$nayta_kohdistetut//nayta_kaikki=$nayta_kaikki//tila=$tila//ojarj=$ojarj$ulisa//riviid=$rivirow[rivitunnus]///$rivirow[rivitunnus]' class='tooltip' id='$rivirow[rivitunnus]'>$rivirow[tuoteno]</a>";
     echo "<br>$rivirow[toim_tuoteno]";
 
-    echo "<br />";
+    echo "&nbsp;";
     $_src = "{$palvelin2}pics/lullacons/info.png";
     echo "<img src='{$_src}' class='hae_saldo' id='{$rivirow['tuoteno']}' />";
     echo "<input type='hidden' id='{$rivirow['tuoteno']}_varasto' value='{$rivirow['varasto']}' />";

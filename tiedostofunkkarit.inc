@@ -23,7 +23,7 @@ function tiedostotyypit($aihealue) {
   global $kukarow;
 
   if ($aihealue) {
-    $avainsanat = t_avainsana("LITETY_TIEDTALL", "", "AND selite = '{$aihealue}'");
+    $avainsanat = t_avainsana("LITETY_LAATUAS", "", "AND selite = '{$aihealue}'");
 
     $tiedostotyypit = array();
 
@@ -102,7 +102,7 @@ function hae_tiedostot($params) {
 }
 
 function hae_aihealueet() {
-  $avainsanat = t_avainsana("AIHEAL_TIEDTALL");
+  $avainsanat = t_avainsana("AIHEAL_LAATUAS");
 
   $aihealueet = array();
 

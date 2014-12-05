@@ -21,3 +21,7 @@ select.indexvas {
 table.indexvas {
   width: 245px;
 }
+
+select.multipleselect {
+  width: 97%;
+}

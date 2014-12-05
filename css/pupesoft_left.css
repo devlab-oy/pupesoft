@@ -19,12 +19,6 @@ table.indexvas {
 	border-spacing: 0;
 }
 
-#indexvas_container {
-	margin: 0;
-  padding: 0;
-  width: 255px;
-}
-
 table.indexvas td {
   padding: 3px 15px 3px 15px;
 }

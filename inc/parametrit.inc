@@ -702,9 +702,9 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
           if (isset($_SERVER['HTTP_USER_AGENT']) and mb_stripos($_SERVER['HTTP_USER_AGENT'], "FIREFOX") !== FALSE) {
              echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_mozilla.css' />\n";
           }
-          
+
           if (isset($_SERVER['HTTP_USER_AGENT']) and mb_stripos($_SERVER['HTTP_USER_AGENT'], "WINDOWS") !== FALSE) {
-            
+
             if (isset($_SERVER['HTTP_USER_AGENT']) and mb_stripos($_SERVER['HTTP_USER_AGENT'], "TRIDENT") !== FALSE) {
               echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_ms_ie.css' />\n";
             }
@@ -713,7 +713,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
             }
             else {
               echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_ms_chrome.css' />\n";
-            }                          
+            }
           }
         }
         else {

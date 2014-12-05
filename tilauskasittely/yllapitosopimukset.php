@@ -56,14 +56,14 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
               laskun_lisatiedot.sopimus_alkupvm,
               laskun_lisatiedot.sopimus_loppupvm
                FROM lasku
-              LEFT JOIN laskun_lisatiedot 
-                ON lasku.yhtio = laskun_lisatiedot.yhtio 
+              LEFT JOIN laskun_lisatiedot
+                ON lasku.yhtio = laskun_lisatiedot.yhtio
                 AND lasku.tunnus = laskun_lisatiedot.otunnus
-              LEFT JOIN lasku kesken 
-                ON kesken.yhtio = lasku.yhtio 
-                AND kesken.tila='N' 
+              LEFT JOIN lasku kesken
+                ON kesken.yhtio = lasku.yhtio
+                AND kesken.tila='N'
                 AND kesken.alatila = ''
-                AND kesken.clearing = 'sopimus' 
+                AND kesken.clearing = 'sopimus'
                 AND kesken.swift = lasku.tunnus
               WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
               AND lasku.tunnus  = '$tilausnumero'
@@ -276,16 +276,16 @@ $query = "SELECT lasku.*, laskun_lisatiedot.*, tilausrivi.*,
                       laskun_lisatiedot.otunnus         = lasku.tunnus and
                       laskun_lisatiedot.sopimus_alkupvm <= date_add(now(), interval 1 month) and
                       (laskun_lisatiedot.sopimus_loppupvm >= date_sub(now(), interval 1 month) or laskun_lisatiedot.sopimus_loppupvm = '0000-00-00'))
-          JOIN tilausrivi 
-            ON (tilausrivi.yhtio = lasku.yhtio 
-              and tilausrivi.otunnus = lasku.tunnus 
+          JOIN tilausrivi
+            ON (tilausrivi.yhtio = lasku.yhtio
+              and tilausrivi.otunnus = lasku.tunnus
               and tilausrivi.tyyppi = '0')
-          LEFT JOIN lasku kesken 
-            ON kesken.yhtio = lasku.yhtio 
-            AND kesken.tila='N' 
+          LEFT JOIN lasku kesken
+            ON kesken.yhtio = lasku.yhtio
+            AND kesken.tila='N'
             AND kesken.alatila = ''
-            AND kesken.clearing = 'sopimus' 
-            AND kesken.swift = lasku.tunnus 
+            AND kesken.clearing = 'sopimus'
+            AND kesken.swift = lasku.tunnus
             AND kesken.summa = lasku.summa
           WHERE lasku.yhtio                             = '$kukarow[yhtio]' AND
           lasku.tila                                    = '0' AND
@@ -448,7 +448,7 @@ if (mysql_num_rows($result) > 0) {
                     and clearing     = 'sopimus'
                     and swift        = '$row[laskutunnus]'";
           $chkres2 = pupe_query($query);
- 
+
           if (mysql_num_rows($chkres2) == 0) {
             $laskuttamatta .= "  <input type='checkbox' name='laskutapvm[$pointteri]' value='$pvmloop_vv-$pvmloop_kk-$pvmloop_pp'>
                     <input type='hidden' name='laskutatun[$pointteri]' value='$row[laskutunnus]'>
@@ -462,7 +462,7 @@ if (mysql_num_rows($result) > 0) {
 
             $arvoyhteensa   += $row["arvo"];
             $summayhteensa   += $row["summa"];
-          }  
+          }
         }
         else {
           $chkrow = mysql_fetch_assoc($chkres);
@@ -476,7 +476,7 @@ if (mysql_num_rows($result) > 0) {
     if ($laskutettu != '') {
       $classname = 'tooltip';
     }
-    
+
     if ($row["keskentunnus"] > 0) {
       $laskuttamatta = $row["keskentunnus"]." kesken";
     }

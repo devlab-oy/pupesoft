@@ -1163,17 +1163,17 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
                    FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
                    JOIN lasku use index(PRIMARY)
                    JOIN asiakas use index (ytunnus_index)
-                   WHERE tilausrivi.yhtio         = '$row[yhtio]'
+                   WHERE tilausrivi.yhtio        = '$row[yhtio]'
                    {$varastowherelisa}
-                   AND tilausrivi.tyyppi          = 'L'
-                   AND tilausrivi.tuoteno         = '$row[tuoteno]'
-                   AND tilausrivi.laskutettuaika  >= '$apvm'
-                   AND tilausrivi.laskutettuaika  <= '$lpvm'
-                   AND lasku.yhtio                = tilausrivi.yhtio
-                   AND lasku.tunnus               = tilausrivi.uusiotunnus
-                   AND asiakas.ytunnus            = lasku.ytunnus
-                   AND asiakas.yhtio              = lasku.yhtio
-                   AND asiakas.osasto             = '$asiakasosasto'";
+                   AND tilausrivi.tyyppi         = 'L'
+                   AND tilausrivi.tuoteno        = '$row[tuoteno]'
+                   AND tilausrivi.laskutettuaika >= '$apvm'
+                   AND tilausrivi.laskutettuaika <= '$lpvm'
+                   AND lasku.yhtio               = tilausrivi.yhtio
+                   AND lasku.tunnus              = tilausrivi.uusiotunnus
+                   AND asiakas.ytunnus           = lasku.ytunnus
+                   AND asiakas.yhtio             = lasku.yhtio
+                   AND asiakas.osasto            = '$asiakasosasto'";
         $asosresult = pupe_query($query);
         $asosrow = mysql_fetch_assoc($asosresult);
       }
@@ -1192,9 +1192,9 @@ if ($tee == "RAPORTOI" and isset($RAPORTOI)) {
                    AND tilausrivi.tuoteno        = '$row[tuoteno]'
                    AND tilausrivi.laskutettuaika >= '$apvm'
                    AND tilausrivi.laskutettuaika <= '$lpvm'
-                   AND lasku.yhtio                   = tilausrivi.yhtio
-                   AND lasku.tunnus                  = tilausrivi.otunnus
-                   AND lasku.liitostunnus            = '$asiakasid'";
+                   AND lasku.yhtio               = tilausrivi.yhtio
+                   AND lasku.tunnus              = tilausrivi.otunnus
+                   AND lasku.liitostunnus        = '$asiakasid'";
         $asresult = pupe_query($query);
         $asrow = mysql_fetch_assoc($asresult);
       }

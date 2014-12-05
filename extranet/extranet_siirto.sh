@@ -51,7 +51,8 @@ js
 pdflib
 pics
 validation
-viivakoodi"
+viivakoodi
+css"
 
 # Kopioidaan näiden hakemistojen sisältö extranet roottiin
 CONTENT="extranet/*"

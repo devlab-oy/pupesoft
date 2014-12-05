@@ -15984,7 +15984,7 @@ if (!function_exists("kopioi_tilausrivi")) {
       // jos on, lis‰t‰‰n uusi splitattu rivi kanssa sinne
       $query = "SELECT tunnus
                 FROM asn_sanomat
-                WHERE yhtio    = '{$kukarow['yhtio']}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
                 AND MATCH (tilausrivi) AGAINST ('{$tunnus}' IN BOOLEAN MODE)";
       $chk_asn_res = pupe_query($query);
 
@@ -21066,7 +21066,7 @@ if (!function_exists('splittaa_tilausrivi')) {
     // jos on, lis‰t‰‰n uusi splitattu rivi kanssa sinne
     $query = "SELECT tunnus
               FROM asn_sanomat
-              WHERE yhtio    = '{$kukarow['yhtio']}'
+              WHERE yhtio = '{$kukarow['yhtio']}'
               AND MATCH (tilausrivi) AGAINST ('{$tunnus}' IN BOOLEAN MODE)";
     $chk_asn_res = pupe_query($query);
 

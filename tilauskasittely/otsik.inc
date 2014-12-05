@@ -3930,7 +3930,7 @@ if (isset($jatka)) {
   // onko yhtiön tai asiakkaan takaa säädetty extranet-tilaukset saldoa varaamattomiksi
   if ((($asiakasrow['extranet_tilaus_varaa_saldoa'] == "" and
         $yhtiorow["extranet_tilaus_varaa_saldoa"] == "E") or
-       $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and $toim == "EXTRANET"
+      $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and $toim == "EXTRANET"
   ) {
     $tilaustyyppi = 'H';
   }

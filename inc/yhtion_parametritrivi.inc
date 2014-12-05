@@ -4384,4 +4384,3 @@ if ($fieldname == "tilausrivin_korvamerkinta") {
 
   $jatko = 0;
 }
-

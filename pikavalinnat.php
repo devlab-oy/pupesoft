@@ -5,36 +5,36 @@ require "inc/parametrit.inc";
 echo "<font class='head'>".t("Muokkaa pikavalintoja").":</font><hr>";
 
 $kuvakkeet_img = array ("Kalenteri"    => "calendar.png",
-                        "Crm"          => "crm-2.png",
-                        "Crm-sydän"    => "crm.png",
-                        "Lisää_useita" => "icon-add-multiple.png",
-                        "Lisää"        => "icon-add.png",
-                        "Palkit"       => "icon-adjust.png",
-                        "Tiedosto"     => "icon-document.png",
-                        "Alas"         => "icon-download.png",
-                        "Koti"         => "icon-home.png",
-                        "Säätimet"     => "icon-setting.png",
-                        "Struktuuri"   => "icon-structure.png",
-                        "Lamppu"       => "icon-tip.png",
-                        "Ylös"         => "icon-upload.png",
-                        "Vähennä"      => "icon-vahenna.png",
-                        "Myynti"       => "myynti.png",
-                        "Neula"        => "pin.png",
-                        "Ratas"        => "ratas.png");
+  "Crm"          => "crm-2.png",
+  "Crm-sydän"    => "crm.png",
+  "Lisää_useita" => "icon-add-multiple.png",
+  "Lisää"        => "icon-add.png",
+  "Palkit"       => "icon-adjust.png",
+  "Tiedosto"     => "icon-document.png",
+  "Alas"         => "icon-download.png",
+  "Koti"         => "icon-home.png",
+  "Säätimet"     => "icon-setting.png",
+  "Struktuuri"   => "icon-structure.png",
+  "Lamppu"       => "icon-tip.png",
+  "Ylös"         => "icon-upload.png",
+  "Vähennä"      => "icon-vahenna.png",
+  "Myynti"       => "myynti.png",
+  "Neula"        => "pin.png",
+  "Ratas"        => "ratas.png");
 
 if ($tee == "tallenna") {
-  foreach($skriptit as $i => $skripti) {
+  foreach ($skriptit as $i => $skripti) {
     // Tsekataan, että kaikki tiedot on syötetty
     if (empty($skriptit[$i]) or empty($kuvakkeet[$i]) or empty($tekstit[$i])) {
-        unset($skriptit[$i]);
-        unset($kuvakkeet[$i]);
-        unset($tekstit[$i]);
+      unset($skriptit[$i]);
+      unset($kuvakkeet[$i]);
+      unset($tekstit[$i]);
     }
   }
 
   $tallennettavat = serialize(array("skriptit"     => $skriptit,
-                                    "kuvakkeet"    => $kuvakkeet,
-                                    "tekstit"      => $tekstit));
+      "kuvakkeet"    => $kuvakkeet,
+      "tekstit"      => $tekstit));
 
 }
 

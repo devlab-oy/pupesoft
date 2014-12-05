@@ -36,15 +36,15 @@ $laskuri_norm = 0;
 $query = "SELECT lasku.tunnus laskutunnus, asiakas.extranet_tilaus_varaa_saldoa
           FROM lasku
           JOIN kuka ON (kuka.yhtio = lasku.yhtio
-            AND kuka.kuka          = lasku.laatija
-            AND kuka.extranet     != '')
+            AND kuka.kuka         = lasku.laatija
+            AND kuka.extranet    != '')
           JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
-            AND asiakas.tunnus     = lasku.liitostunnus)
-          WHERE lasku.yhtio        = '{$kukarow['yhtio']}'
-          AND lasku.tila           = 'N'
-          AND lasku.tilaustyyppi  != 'H'
-          AND lasku.alatila        = ''
-          AND lasku.clearing    NOT IN ('EXTENNAKKO','EXTTARJOUS')";
+            AND asiakas.tunnus    = lasku.liitostunnus)
+          WHERE lasku.yhtio       = '{$kukarow['yhtio']}'
+          AND lasku.tila          = 'N'
+          AND lasku.tilaustyyppi != 'H'
+          AND lasku.alatila       = ''
+          AND lasku.clearing      NOT IN ('EXTENNAKKO','EXTTARJOUS')";
 $result = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($result)) {
@@ -70,7 +70,7 @@ while ($row = mysql_fetch_assoc($result)) {
       }
       else {
         $aikaraja = (int) $yhtion_asetus;
-       }
+      }
     }
     else {
       $aikaraja = (int) $asiakkaan_asetus;

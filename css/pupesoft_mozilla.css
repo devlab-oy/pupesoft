@@ -12,7 +12,16 @@ select:-moz-focusring {
 
 select.indexvas {
   height: 25px;
-  width: 215px;
+  width: 205px;
+  background-image: none;
   box-sizing: content-box;
   -moz-box-sizing:content-box;
+}
+
+table.indexvas {
+  width: 245px;
+}
+
+select.multipleselect {
+  width: 97%;
 }

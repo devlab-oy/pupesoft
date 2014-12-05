@@ -65,7 +65,7 @@ function piirra_formi($valittu_aihealue, $valittu_tiedostotyyppi, $aihealueet) {
   echo "</td>";
   echo "</tr>";
 
-  if (!empty($valittu_aihealue)) {
+  if (!empty($valittu_aihealue) and $tiedostotyypit = tiedostotyypit($valittu_aihealue)) {
     echo "<tr>";
     echo "<td><label for='tyyppi_id'>" . t("Tiedoston tyyppi") . "</label></td>";
     echo "<td>";
@@ -90,11 +90,21 @@ function piirra_formi($valittu_aihealue, $valittu_tiedostotyyppi, $aihealueet) {
           <td><input type='text' name='selite' id='selite'></td>
           </tr>";
   }
+  elseif (!empty($valittu_aihealue)) {
+    echo
+      "<tr>
+         <td colspan='2'>
+           <font class='error'>" .
+      t("Tälle aihealueelle ei ole vielä lisätty tiedostotyyppejä") .
+      "</font>
+         </td>
+       </tr>";
+  }
 
   echo "<tr>";
   echo "<td class='back'>";
 
-  $buttonin_teksti = empty($valittu_aihealue) ? "Jatka" : "Tallenna";
+  $buttonin_teksti = (empty($valittu_aihealue) or empty($tiedostotyypit)) ? "Jatka" : "Tallenna";
 
   echo "<input type='submit' value='" . t($buttonin_teksti) . "'/>";
   echo "</td>";

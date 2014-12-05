@@ -50,7 +50,7 @@ else {
 
 if ($tee == "") {
   if ($toim == "LAATU" and empty($aihealueet)) {
-    echo "<font class='error'>" . t("Et ole vielä lisännyt aihealueita avainsanoihin") . "</font>";
+    echo "<font class='error'>" . t("Aihealueita ei ole vielä lisätty") . "</font>";
   }
   else {
     piirra_formi($params);
@@ -117,9 +117,13 @@ function piirra_formi($params) {
   }
   elseif ($valittu_aihealue) {
     echo
-      "<font class='error'>" .
-      t("Et ole vielä lisännyt tälle aihealueelle tiedostotyyppejä avainsanoihin") .
-      "</font>";
+      "<tr>
+         <td colspan='2'>
+           <font class='error'>" .
+      t("Tälle aihealueelle ei ole vielä lisätty tiedostotyyppejä") .
+      "</font>
+         </td>
+       </tr>";
   }
 
   echo "<tr>";

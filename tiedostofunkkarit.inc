@@ -112,28 +112,3 @@ function hae_aihealueet() {
 
   return $aihealueet;
 }
-
-function piirra_tiedostolista($tiedostot) {
-  if (empty($tiedostot)) {
-    echo "<font class='error'>";
-    echo t("Valitulle toimittajalle ei löytynyt valitun tyyppisiä liitetiedostoja");
-    echo "</font>";
-
-    return;
-  }
-
-  echo "<table>";
-  echo "<tbody>";
-
-  foreach ($tiedostot as $tiedosto) {
-    echo "<tr>";
-    echo "<td>";
-    echo "<a href='view.php?id={$tiedosto['tunnus']}'
-             target='Attachment'>{$tiedosto['selite']}</a>";
-    echo "</td>";
-    echo "</tr>";
-  }
-
-  echo "</tbody>";
-  echo "</table>";
-}

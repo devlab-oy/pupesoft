@@ -119,6 +119,8 @@ if ($nayta_pdf != 1) {
   echo "<br/>";
 }
 
+# Tämä blocki on sitä varten, että muistetaan käyttäjän aiemmat haut,
+# jos käyttäjä vierailee toisissa softissa ja palaa tähän softaan myöhemmin
 if (!empty($_SESSION['valitut_laskut'])) {
   $lasku_tunnukset_temp = $request['lasku_tunnukset'];
   foreach ($_SESSION['valitut_laskut'] as $valittu_lasku) {

@@ -115,7 +115,7 @@ function piirra_formi($params) {
     echo "</td>";
     echo "</tr>";
   }
-  elseif ($valittu_toimittaja and $tiedostotyypit = tiedostotyypit()) {
+  elseif ($tiedostotyypit = tiedostotyypit()) {
     echo "<tr>";
     echo "<td><label for='tiedostotyyppi'>" . t("Tiedoston tyyppi") . "</label></td>";
     echo "<td>";

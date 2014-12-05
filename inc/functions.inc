@@ -10912,7 +10912,7 @@ if (!function_exists("t")) {
       }
       elseif ($verkkokauppa == "") {
         $sanakirjaquery  = "INSERT INTO sanakirja SET fi = '$stringi_sql', aikaleima=now(), kysytty=1, laatija='$kukarow[kuka]', luontiaika=now()";
-        $sanakirjaresult = pupe_query($sanakirjaquery, $GLOBALS["masterlink"]);
+//        $sanakirjaresult = pupe_query($sanakirjaquery, $GLOBALS["masterlink"]);
       }
     }
     elseif (isset($kaannetyt_sanat) and !in_array($stringi, $kaannetyt_sanat)) {

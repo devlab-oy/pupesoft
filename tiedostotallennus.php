@@ -7,18 +7,20 @@ require_once("tiedostofunkkarit.inc");
 echo "<font class='head'>" . t('Tiedostojen tallennus') . "</font>";
 echo "<hr>";
 
-$tee                  = empty($tee) ? "" : $tee;
-$tiedosto             = $_FILES["tiedosto"];
+$tee                  = isset($tee) ? $tee : "";
 $selite               = isset($selite) ? $selite : "";
 $aihealue             = isset($aihealue) ? $aihealue : "";
 $tiedostotyyppi       = isset($tiedostotyyppi) ? $tiedostotyyppi : "";
 $listaa_tiedostot     = isset($listaa_tiedostot) ? $listaa_tiedostot : "";
 $poistettava_tiedosto = isset($poistettava_tiedosto) ? $poistettava_tiedosto : "";
+$tallennus_nappi      = isset($tallennus_nappi) ? $tallennus_nappi : "";
+$tiedosto             = isset($_FILES["tiedosto"]) ? $_FILES["tiedosto"] : "";
 
 if ($tee == "poista") {
   poista_liitetiedosto($poistettava_tiedosto);
   $listaa_tiedostot = true;
 }
+
 if ($tee == "tallenna_tiedosto" and
     !empty($tiedosto["tmp_name"]) and
     !empty($selite) and
@@ -28,23 +30,32 @@ if ($tee == "tallenna_tiedosto" and
     echo "<font class='ok'>" . t("Tiedosto tallennettu onnistuneesti") . "</font>";
   }
 
-  $tee = "";
+  $listaa_tiedostot = true;
 }
-elseif (!empty($tiedostotyyppi) and
-        empty($tiedosto["tmp_name"]) and
-        !$listaa_tiedostot and
-        $tee != ""
+
+if (!empty($tiedostotyyppi) and
+    empty($tiedosto["tmp_name"]) and
+    !$listaa_tiedostot and
+    $tee != "" and
+    $tallennus_nappi
 ) {
   echo "<font class='error'>" . t("Sinun täytyy valita tiedosto") . "</font>";
 
   $tee = "";
 }
-elseif (!empty($tiedostotyyppi) and empty($selite) and !$listaa_tiedostot and $tee != "") {
+
+if (!empty($tiedostotyyppi) and
+    empty($selite) and
+    !$listaa_tiedostot and
+    $tee != "" and
+    $tallennus_nappi
+) {
   echo "<font class='error'>" . t("Sinun täytyy valita tiedostolle selite") . "</font>";
 
   $tee = "";
 }
-elseif ($listaa_tiedostot) {
+
+if ($listaa_tiedostot) {
   $params     = array("tiedoston_tyyppi" => $tiedostotyyppi, "aihealue" => $aihealue);
   $tiedostot  = hae_tiedostot($params);
   $aihealueet = hae_aihealueet();
@@ -64,9 +75,14 @@ else {
 
 if ($tee == "") {
   $aihealueet = hae_aihealueet();
+  $params     = array("tiedoston_tyyppi" => $tiedostotyyppi, "aihealue" => $aihealue);
+  $tiedostot  = hae_tiedostot($params);
 
   if (!empty($aihealueet)) {
     piirra_formi($aihealue, $tiedostotyyppi, $aihealueet);
+    if ($tiedostot) {
+      piirra_tiedostolista($tiedostot, $aihealue, $tiedostotyyppi);
+    }
   }
   else {
     echo "<font class='error'>" . t("Et ole vielä lisännyt aihealueita avainsanoihin") . "</font>";
@@ -97,11 +113,12 @@ function piirra_formi($valittu_aihealue, $valittu_tiedostotyyppi, $aihealueet) {
     echo "<tr>";
     echo "<td><label for='tyyppi_id'>" . t("Tiedoston tyyppi") . "</label></td>";
     echo "<td>";
-    echo "<select id='tiedostotyyppi_id' name='tiedostotyyppi'>";
+    echo "<select id='tiedostotyyppi_id' name='tiedostotyyppi' onclick='submit();'>";
 
     foreach ($tiedostotyypit as $tiedostotyyppi) {
       $valittu = $valittu_tiedostotyyppi == $tiedostotyyppi["selitetark"] ? "selected" : "";
-      echo "<option value='{$tiedostotyyppi["selitetark"]}' {$valittu}>{$tiedostotyyppi["selitetark"]}</option>";
+      echo "<option value='{$tiedostotyyppi["selitetark"]}'
+                    {$valittu}>{$tiedostotyyppi["selitetark"]}</option>";
     }
 
     echo "</select>";
@@ -134,10 +151,10 @@ function piirra_formi($valittu_aihealue, $valittu_tiedostotyyppi, $aihealueet) {
 
   $buttonin_teksti = (empty($valittu_aihealue) or empty($tiedostotyypit)) ? "Jatka" : "Tallenna";
 
-  echo "<input type='submit' value='" . t($buttonin_teksti) . "'/>";
+  echo "<input name='tallenna_nappi' type='submit' value='" . t($buttonin_teksti) . "'/>";
 
   if (!empty($valittu_aihealue) and $tiedostotyypit = tiedostotyypit($valittu_aihealue)) {
-    echo "<input name='listaa_tiedostot' type='submit' value='Listaa aihealueen tiedostot'>";
+    echo "<input name='listaa_tiedostot' type='submit' value='Listaa aihealueen valitun tyyppiset tiedostot'>";
   }
 
   echo "</td>";
@@ -149,14 +166,6 @@ function piirra_formi($valittu_aihealue, $valittu_tiedostotyyppi, $aihealueet) {
 }
 
 function piirra_tiedostolista($tiedostot, $aihealue, $tiedostotyyppi) {
-  if (empty($tiedostot)) {
-    echo "<font class='error'>";
-    echo t("Tiedostoja ei löytynyt");
-    echo "</font>";
-
-    return;
-  }
-
   echo "<table>";
   echo "<tbody>";
 
@@ -172,7 +181,10 @@ function piirra_tiedostolista($tiedostot, $aihealue, $tiedostotyyppi) {
     echo "<input type='hidden' name='aihealue' value='{$aihealue}'>";
     echo "<input type='hidden' name='tiedostotyyppi' value='{$tiedostotyyppi}'>";
     echo "<input type='hidden' name='poistettava_tiedosto' value='{$tiedosto["tunnus"]}'>";
-    echo "<input type='submit' value='Poista'></td>";
+    echo "<input type='submit'
+                 value='Poista'
+                 onclick='return confirm(\"Oletko varma, että haluat poistaa tämän tiedoston\");'>
+          </td>";
     echo "</form>";
     echo "</tr>";
   }

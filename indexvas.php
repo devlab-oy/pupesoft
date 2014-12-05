@@ -64,7 +64,13 @@ if ($yhtiorow["kayttoliittyma"] == "") {
   echo "</div>";
 }
 
-echo "<div id = 'indexvas_container'>";
+$hiddenlisa = "";
+
+if (isset($_COOKIE["vas_frame_showhide"]) and $_COOKIE["vas_frame_showhide"] == "hidden") {
+  $hiddenlisa = " style='display: none;'";
+}
+
+echo "<div id = 'indexvas_container'{$hiddenlisa}>";
 
 // estet‰‰n errorit tyhj‰st‰ arrayst‰
 if (!isset($menu)) $menu = array();
@@ -276,7 +282,12 @@ echo "</div>";
 
 if ($yhtiorow["kayttoliittyma"] == "U") {
 
-  echo "<div class='showhide_vasen' id='maaginen_vasen'><img id='showhide_left' src='{$palvelin2}pics/facelift/hide_left.png'></div>";
+  if (isset($_COOKIE["vas_frame_showhide"]) and $_COOKIE["vas_frame_showhide"] == "hidden") {
+    echo "<div class='showhide_vasen' id='maaginen_vasen'><img id='showhide_left' src='{$palvelin2}pics/facelift/show_left.png'></div>";
+  }
+  else {
+    echo "<div class='showhide_vasen' id='maaginen_vasen'><img id='showhide_left' src='{$palvelin2}pics/facelift/hide_left.png'></div>";
+  }
 
   echo "
     <script>
@@ -292,11 +303,13 @@ if ($yhtiorow["kayttoliittyma"] == "U") {
                parent.document.getElementsByTagName('frameset')[1].cols='20,*';
                $('#indexvas_container').hide();
                $('#showhide_left').attr('src', '{$palvelin2}pics/facelift/show_left.png');
+               document.cookie = \"vas_frame_showhide=hidden;7\";
              }
              else {
                parent.document.getElementsByTagName('frameset')[1].cols='285,*';
-                $('#indexvas_container').show();
+               $('#indexvas_container').show();
                $('#showhide_left').attr('src', '{$palvelin2}pics/facelift/hide_left.png');
+               document.cookie = \"vas_frame_showhide=;7\";
              }
           });
         });

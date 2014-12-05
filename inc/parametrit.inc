@@ -698,6 +698,10 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
           echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft.css' />\n";
           echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft_left.css' />\n";
           echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft_top.css' />\n";
+
+          if (isset($_SERVER['HTTP_USER_AGENT']) and mb_stripos($_SERVER['HTTP_USER_AGENT'], "MOZILLA") !== FALSE) {
+             echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft_mozilla.css' />\n";
+          }
         }
         else {
           echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft_legacy.css' />\n";

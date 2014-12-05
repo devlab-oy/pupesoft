@@ -69,10 +69,25 @@ if ($yhtiorow["kayttoliittyma"] == "") {
         </frameset>";
 }
 else {
-  echo "<frameset rows='90,*' border='0'>
-          <frame noresize src='ylaframe.php' name='ylaframe' id='ylaframe' frameborder='0' marginwidth='0' marginheight='0' scrolling='no'>
-
-          <frameset cols='285,*' border='0'>
+  
+  if (isset($_COOKIE["yla_frame_showhide"]) and $_COOKIE["yla_frame_showhide"] == "hidden") {
+    $yla_cols = "20,*";
+  }
+  else {
+    $yla_cols = "90,*";
+  }
+  
+  echo "<frameset rows='$yla_cols' border='0'>
+          <frame noresize src='ylaframe.php' name='ylaframe' id='ylaframe' frameborder='0' marginwidth='0' marginheight='0' scrolling='no'>";
+  
+  if (isset($_COOKIE["vas_frame_showhide"]) and $_COOKIE["vas_frame_showhide"] == "hidden") {
+    $vas_cols = "20,*";
+  }
+  else {
+    $vas_cols = "285,*";
+  }
+  
+  echo "  <frameset cols='$vas_cols' border='0'>
             <frame noresize src='indexvas.php?goso=$goso&go=$go' name='menuframe' id='menuframe' frameborder='0' marginwidth='0' marginheight='0'>
             <frame noresize src='$go' name='mainframe' id='mainframe' frameborder='0' marginwidth='0' marginheight='0'>
           </frameset>

@@ -3370,7 +3370,7 @@ else {
                       $valisummat['asiakkaittain'] = "";
                       $totsummat['asiakkaittain']  = "";
                     }
-                    else if ($ken_nimi == 'tuoteosasto') {
+                    elseif ($ken_nimi == 'tuoteosasto') {
                       $valisummat['tuotteittain'] = "";
                       $totsummat['tuotteittain']  = "";
                     }

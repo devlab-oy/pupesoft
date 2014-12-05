@@ -517,6 +517,7 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
   echo "<input type='hidden' name='kk' value='{$request['kk']}' />";
   echo "<input type='hidden' name='vv' value='{$request['vv']}' />";
   echo "<input type='hidden' name='saldovahvistus_viesti' value='{$saldovahvistusrivi['saldovahvistus_viesti']}' />";
+  echo "<input type='hidden' name='saldovahvistus_rivi_ryhmittely_tyyppi' value='{$saldovahvistusrivi['ryhmittely_tyyppi']}' />";
   echo "<input type='hidden' name='ryhmittely_tyyppi' value='{$request['ryhmittely_tyyppi']}' />";
   echo "<input type='hidden' name='ryhmittely_arvo' value='{$request['ryhmittely_arvo']}' />";
   foreach ($saldovahvistusrivi['lasku_tunnukset'] as $lasku_tunnus) {

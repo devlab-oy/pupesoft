@@ -81,6 +81,43 @@ if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
 // scripti balloonien tekemiseen
 js_popup();
 
+echo "<script type=\"text/javascript\" charset=\"utf-8\">
+        $(document).ready(function() {
+          // HAETAAN SALDO MYYTÄVISSÄ
+          $('img.hae_saldo').live('mouseover', function() {
+            $(this).css('cursor', 'pointer');
+          });
+
+          $('img.hae_saldo').live('click', function() {
+            var id = $(this).attr('id'),
+                varasto = $('#'+id+'_varasto').val();
+
+            if ($('.saldo_'+id).is(':visible')) {
+              $('.saldo_'+id).hide();
+            }
+            else {
+              $.post('{$_SERVER['SCRIPT_NAME']}',
+                {   ajax_toiminto: 'hae_saldo_myytavissa',
+                    id: id,
+                    varasto: varasto,
+                    no_head: 'yes',
+                    ohje: 'off' },
+                function(return_value) {
+                  var data = jQuery.parseJSON(return_value);
+
+                  $('.saldo_'+id).html(
+                    '<br />' +
+                    '<table>' +
+                    '<tr><th class=\"tumma\">".t("Saldo")."</th><td>' + data.saldo + '</td></tr>' +
+                    '<tr><th class=\"tumma\">".t("Hyllyssä")."</th><td>' + data.hyllyssa + '</td></tr>' +
+                    '<tr><th class=\"tumma\">".t("Myytävissä")."</th><td>' + data.myytavissa + '</td></tr>'
+                  ).show();
+                });
+            }
+          });
+        });
+      </script>";
+
 echo "<div id='toimnapit'></div>";
 
 if (isset($nappikeikalle) and $nappikeikalle == 'menossa') {

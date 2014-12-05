@@ -204,8 +204,8 @@ function kohdista_rivi($laskurow, $valittutunnus, $valittuotunnus, $otunnus, $su
     // Jos löytyy, poistetaan kohdistus
     $query = "SELECT *
               FROM asn_sanomat
-              WHERE yhtio    = '{$kukarow['yhtio']}'
-              AND laji       in ('tec','mav')
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji    in ('tec','mav')
               AND MATCH (tilausrivi) AGAINST ('{$valittutunnus}' IN BOOLEAN MODE)";
     $chk_exist_res = pupe_query($query);
 

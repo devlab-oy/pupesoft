@@ -211,7 +211,7 @@ if (count($mul_toimi) > 0 or count($mul_osasto) > 0 or count($mul_try) > 0 or co
 
     $query = "SELECT group_concat(quote(tuoteno))
               FROM tuotteen_toimittajat
-              WHERE yhtio = '{$yhtiorow['yhtio']}'
+              WHERE yhtio      = '{$yhtiorow['yhtio']}'
               AND liitostunnus IN ({$toimittajat})";
     $result = pupe_query($query);
 
@@ -768,7 +768,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
                 RIGHT JOIN tuotteen_toimittajat AS tt
                 ON tt.yhtio = toimi.yhtio
                 AND tt.liitostunnus = toimi.tunnus
-                WHERE toimi.yhtio = '$kukarow[yhtio]'
+                WHERE toimi.yhtio   = '$kukarow[yhtio]'
                 GROUP BY toimi.nimi";
     }
     $sresult = pupe_query($query);

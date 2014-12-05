@@ -270,7 +270,7 @@ if ($tila == "KORVAMERKITSE") {
   $query = "SELECT otunnus
             FROM tilausrivi
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$rivitunnus}'";
+            AND tunnus  = '{$rivitunnus}'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0 and mysql_result($result, 0) == $tilausnumero) {
@@ -284,14 +284,14 @@ if ($tila == "KORVAMERKITSE") {
     $query = "UPDATE tilausrivin_lisatiedot
               JOIN tilausrivi
                 ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
-                AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+                AND tilausrivi.tunnus                     = tilausrivin_lisatiedot.tilausrivitunnus
               JOIN lasku
                 ON lasku.yhtio = tilausrivin_lisatiedot.yhtio
-                AND lasku.tunnus = tilausrivi.otunnus
+                AND lasku.tunnus                          = tilausrivi.otunnus
               SET tilausrivin_lisatiedot.korvamerkinta = '{$korvamerkinta}'
-              WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+              WHERE tilausrivin_lisatiedot.yhtio          = '{$kukarow['yhtio']}'
               AND tilausrivin_lisatiedot.tilausrivitunnus = '{$rivitunnus}'
-              AND lasku.tunnus = '{$kukarow['kesken']}'";
+              AND lasku.tunnus                            = '{$kukarow['kesken']}'";
     pupe_query($query);
 
   }
@@ -411,26 +411,26 @@ if (($kukarow["extranet"] != '' and $toim != 'EXTRANET' and $toim != 'EXTRANET_R
 if ($tee == 'TARKISTA') {
   $uquery = "UPDATE lasku
              SET tilaustyyppi = 'L'
-             WHERE yhtio = '{$kukarow['yhtio']}'
-             AND tunnus = $tilausnumero
+             WHERE yhtio      = '{$kukarow['yhtio']}'
+             AND tunnus       = $tilausnumero
              AND tilaustyyppi = 'H'
-             AND tila = 'N'";
+             AND tila         = 'N'";
 
   $uresult = pupe_query($uquery);
 
   $lquery = "SELECT *
              FROM lasku
              WHERE yhtio = '{$kukarow['yhtio']}'
-             AND tunnus = $tilausnumero";
+             AND tunnus  = $tilausnumero";
 
   $lresult  = pupe_query($lquery);
   $laskurow = mysql_fetch_assoc($lresult);
 
   $xquery = "SELECT *
              FROM tilausrivi
-             WHERE yhtio = '{$kukarow['yhtio']}'
-             AND otunnus = $tilausnumero
-             AND tyyppi != 'D'";
+             WHERE yhtio  = '{$kukarow['yhtio']}'
+             AND otunnus  = $tilausnumero
+             AND tyyppi  != 'D'";
 
   $xresult = pupe_query($xquery);
 
@@ -578,8 +578,8 @@ if ($kukarow["extranet"] != '') {
 
         $query = "UPDATE kuka
                   SET kesken   = '$tilausnumero'
-                  WHERE yhtio  = '{$kukarow['yhtio']}'
-                  AND kuka     = '{$kukarow['kuka']}'
+                  WHERE yhtio   = '{$kukarow['yhtio']}'
+                  AND kuka      = '{$kukarow['kuka']}'
                   AND extranet != ''";
         $result = pupe_query($query);
       }

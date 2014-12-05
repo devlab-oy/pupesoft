@@ -30,7 +30,7 @@ $tee = empty($tee) ? '' : $tee;
 $params = array(
   "aihealue"               => $aihealue,
   "tiedoston_tyyppi"       => $tiedostotyyppi,
-  "toimittajan_tunnus"     => $toimittaja,
+  "valittu_toimittaja"     => $toimittaja,
   "ylaotsikko"             => $ylaotsikko,
   "toimittajat"            => $toimittajat,
   "aihealueet"             => $aihealueet,
@@ -104,10 +104,29 @@ function piirra_formi($params) {
     echo "<td>";
     echo "<select id='tiedostotyyppi_id' name='tiedostotyyppi' onchange='submit()'>";
 
-    foreach (tiedostotyypit($valittu_aihealue) as $tiedostotyyppi) {
+    foreach ($tiedostotyypit as $tiedostotyyppi) {
       $valittu = $valittu_tiedostotyyppi == $tiedostotyyppi['selitetark'] ? "selected" : "";
       echo "<option value='{$tiedostotyyppi["selitetark"]}'
                     {$valittu}>{$tiedostotyyppi["selitetark"]}
+            </option>";
+    }
+
+    echo "</select>";
+    echo "</td>";
+    echo "</tr>";
+  }
+  elseif ($valittu_toimittaja and $tiedostotyypit = tiedostotyypit()) {
+    echo "<tr>";
+    echo "<td><label for='tiedostotyyppi'>" . t("Tiedoston tyyppi") . "</label></td>";
+    echo "<td>";
+    echo "<select id='tiedostotyyppi' name='tiedostotyyppi' onchange='submit()'>";
+
+    foreach ($tiedostotyypit as $tiedostotyyppi) {
+      $tiedostotyyppinimi =
+        t_avainsana("LITETY", '', "and selite = '{$tiedostotyyppi}'", '', '', "selitetark");
+      $valittu            = $valittu_tiedostotyyppi == $tiedostotyyppi ? "selected" : "";
+      echo "<option value='{$tiedostotyyppi}'
+                    {$valittu}>{$tiedostotyyppinimi}
             </option>";
     }
 

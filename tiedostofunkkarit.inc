@@ -19,7 +19,7 @@ function hae_toimittajat_selectiin() {
   return $toimittajat;
 }
 
-function tiedostotyypit($aihealue) {
+function tiedostotyypit($aihealue = "") {
   global $kukarow;
 
   if ($aihealue) {
@@ -52,14 +52,14 @@ function tiedostotyypit($aihealue) {
 
 function hae_tiedostot($params) {
   $tiedoston_tyyppi   = isset($params["tiedoston_tyyppi"]) ? $params["tiedoston_tyyppi"] : "";
-  $toimittajan_tunnus = isset($params["toimittajan_tunnus"]) ? $params["toimittajan_tunnus"] : "";
+  $valittu_toimittaja = isset($params["valittu_toimittaja"]) ? $params["valittu_toimittaja"] : "";
   $aihealue           = isset($params["aihealue"]) ? $params["aihealue"] : "";
 
   global $kukarow;
 
   $tiedoston_tyyppi = strtolower($tiedoston_tyyppi);
 
-  if ($toimittajan_tunnus) {
+  if ($valittu_toimittaja) {
     $query = "SELECT liitetiedostot.tunnus,
                liitetiedostot.kayttotarkoitus,
                liitetiedostot.selite
@@ -71,7 +71,7 @@ function hae_tiedostot($params) {
                  AND liitetiedostot.liitostunnus     = tuote.tunnus
                  AND liitetiedostot.kayttotarkoitus  = '{$tiedoston_tyyppi}')
                WHERE tuotteen_toimittajat.yhtio      = '{$kukarow['yhtio']}'
-               AND tuotteen_toimittajat.liitostunnus = '{$toimittajan_tunnus}'
+               AND tuotteen_toimittajat.liitostunnus = '{$valittu_toimittaja}'
                ORDER BY liitetiedostot.selite";
   }
   elseif ($aihealue and $tiedoston_tyyppi) {

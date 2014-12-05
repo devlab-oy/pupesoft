@@ -1642,7 +1642,6 @@ if ($tee == 'MONISTA') {
                 }
 
                 $rivirow = $_arr + $rivirow;
-                echo "<pre>", var_dump($rivirow, $_arr), "</pre>";
                 array_push($_rivit, $rivirow);
               }
             }

@@ -18,58 +18,24 @@ $tiedosto             = isset($_FILES["tiedosto"]) ? $_FILES["tiedosto"] : "";
 
 if ($tee == "poista") {
   poista_liitetiedosto($poistettava_tiedosto);
-  $listaa_tiedostot = true;
 }
 
-if ($tee == "tallenna_tiedosto" and
-    !empty($tiedosto["tmp_name"]) and
-    !empty($selite) and
-    !$listaa_tiedostot
-) {
+if ($tee == "tallenna_tiedosto" and !empty($tiedosto["tmp_name"]) and !empty($selite)) {
   if (tallenna_liite("tiedosto", "muut_tiedostot", 0, $selite, "{$aihealue} | {$tiedostotyyppi}")) {
     echo "<font class='ok'>" . t("Tiedosto tallennettu onnistuneesti") . "</font>";
   }
-
-  $listaa_tiedostot = true;
 }
 
-if (!empty($tiedostotyyppi) and
-    empty($tiedosto["tmp_name"]) and
-    !$listaa_tiedostot and
-    $tee != "" and
-    $tallenna_nappi
-) {
+if (!empty($tiedostotyyppi) and empty($tiedosto["tmp_name"]) and $tallenna_nappi) {
   echo "<font class='error'>" . t("Sinun täytyy valita tiedosto") . "</font>";
 
   $tee = "";
 }
 
-if (!empty($tiedostotyyppi) and
-    empty($selite) and
-    !$listaa_tiedostot and
-    $tee != "" and
-    $tallenna_nappi
+if (!empty($tiedostotyyppi) and empty($selite) and $tallenna_nappi
 ) {
   echo "<font class='error'>" . t("Sinun täytyy valita tiedostolle selite") . "</font>";
 
-  $tee = "";
-}
-
-if ($listaa_tiedostot) {
-  $params     = array("tiedoston_tyyppi" => $tiedostotyyppi, "aihealue" => $aihealue);
-  $tiedostot  = hae_tiedostot($params);
-  $aihealueet = hae_aihealueet();
-
-  if (!empty($aihealueet)) {
-    piirra_formi($aihealue, $tiedostotyyppi, $aihealueet);
-  }
-  else {
-    echo "<font class='error'>" . t("Et ole vielä lisännyt aihealueita avainsanoihin") . "</font>";
-  }
-
-  piirra_tiedostolista($tiedostot, $aihealue, $tiedostotyyppi);
-}
-else {
   $tee = "";
 }
 

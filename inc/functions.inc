@@ -26960,8 +26960,14 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
         }
       }
       else {
-        $lasku['ryhmittely_tyyppi'] = $request['ryhmittely_tyyppi_temp'];
-        if ($request['ryhmittely_tyyppi_temp'] == 'ytunnus') {
+        if (!isset($request['ryhmittely_tyyppi_temp']) and isset($request['saldovahvistus_rivi_ryhmittely_tyyppi'])) {
+          $lasku['ryhmittely_tyyppi'] = $request['saldovahvistus_rivi_ryhmittely_tyyppi'];
+        }
+        else {
+          $lasku['ryhmittely_tyyppi'] = $request['ryhmittely_tyyppi_temp'];
+        }
+
+        if ($lasku['ryhmittely_tyyppi'] == 'ytunnus') {
           $ryhmittely = $lasku['ytunnus'];
         }
         else {

@@ -6273,6 +6273,18 @@ if ($tee == '') {
         $kommenttirivi_nakyviin = false;
       }
 
+      $bordercolor = "";
+
+      if ($yhtiorow["kayttoliittyma"] == "U") {
+        // Otetaan yhtiön css:stä SPEC_COLOR
+        preg_match("/.*?\/\*(.*?(SPEC_COLOR))\*\//", $yhtiorow['css'], $varitmatch);
+        preg_match("/(#[a-f0-9]{3,6});/i", $varitmatch[0], $varirgb);
+
+        if (!empty($varirgb[1])) {
+          $bordercolor = " $varirgb[1]";
+        }
+      }
+
       foreach ($rows as $row) {
         if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K"
           and $row["tyyppi"] != "V" and isset($tuotteenpainotettukehayht["keha"])) {
@@ -6646,7 +6658,7 @@ if ($tee == '') {
             if ($row['perheid'] != 0 and ($tilauksen_jarjestys == '1' or $tilauksen_jarjestys == '0' or $tilauksen_jarjestys == '4' or $tilauksen_jarjestys == '5')) {
               $tuoteperhe_kayty = $row['perheid'];
             }
-            echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;'>$echorivino";
+            echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid{$bordercolor}; border-left: 1px solid{$bordercolor}; border-bottom: 1px solid{$bordercolor};'>$echorivino";
 
             if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
               echo "<br/>";
@@ -6758,31 +6770,31 @@ if ($tee == '') {
         $classlisa = "";
 
         if (isset($pkrow[1]) and $borderlask == 1 and $pkrow[1] == 1 and $pknum == 1) {
-          $classlisa = $class." style='border-top: 1px solid; border-bottom: 1px solid; border-right: 1px solid;' ";
-          $class    .= " style=' border-top: 1px solid; border-bottom: 1px solid;' ";
+          $classlisa = $class." style='border-top: 1px solid{$bordercolor}; border-bottom: 1px solid{$bordercolor}; border-right: 1px solid{$bordercolor};' ";
+          $class    .= " style=' border-top: 1px solid{$bordercolor}; border-bottom: 1px solid{$bordercolor};' ";
 
           $borderlask--;
         }
         elseif (isset($pkrow[1]) and $borderlask == $pkrow[1] and $pkrow[1] > 0) {
-          $classlisa = $class." style='border-top: 1px solid; border-right: 1px solid;' ";
-          $class    .= " style='border-top: 1px solid;' ";
+          $classlisa = $class." style='border-top: 1px solid{$bordercolor}; border-right: 1px solid{$bordercolor};' ";
+          $class    .= " style='border-top: 1px solid{$bordercolor};' ";
 
           $borderlask--;
         }
         elseif ($borderlask == 1) {
           if ($kommenttirivi_nakyviin or $row['kommentti'] != '' or ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '')) {
-            $classlisa = $class." style='font-style:italic; border-right: 1px solid;' ";
+            $classlisa = $class." style='font-style:italic; border-right: 1px solid{$bordercolor};' ";
             $class    .= " style='font-style:italic; ' ";
           }
           else {
-            $classlisa = $class." style='font-style:italic; border-bottom: 1px solid; border-right: 1px solid;' ";
-            $class    .= " style='font-style:italic; border-bottom: 1px solid;' ";
+            $classlisa = $class." style='font-style:italic; border-bottom: 1px solid{$bordercolor}; border-right: 1px solid{$bordercolor};' ";
+            $class    .= " style='font-style:italic; border-bottom: 1px solid{$bordercolor};' ";
           }
 
           $borderlask--;
         }
         elseif ($borderlask > 0 and $borderlask <= $pknum) {
-          $classlisa = $class." style='font-style:italic; border-right: 1px solid;' ";
+          $classlisa = $class." style='font-style:italic; border-right: 1px solid{$bordercolor};' ";
           $class    .= " style='font-style:italic;' ";
           $borderlask--;
         }
@@ -8207,11 +8219,11 @@ if ($tee == '') {
           echo "<tr>";
 
           if ($borderlask == 0 and $pknum > 1) {
-            $kommclass1 = " style='border-bottom: 1px solid; border-right: 1px solid;'";
-            $kommclass2 = " style='border-bottom: 1px solid;'";
+            $kommclass1 = " style='border-bottom: 1px solid{$bordercolor}; border-right: 1px solid{$bordercolor};'";
+            $kommclass2 = " style='border-bottom: 1px solid{$bordercolor};'";
           }
           elseif ($pknum > 0) {
-            $kommclass1 = " style='border-right: 1px solid;'";
+            $kommclass1 = " style='border-right: 1px solid{$bordercolor};'";
             $kommclass2 = " ";
           }
           else {

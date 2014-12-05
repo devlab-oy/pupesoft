@@ -13,7 +13,7 @@ $aihealue             = isset($aihealue) ? $aihealue : "";
 $tiedostotyyppi       = isset($tiedostotyyppi) ? $tiedostotyyppi : "";
 $listaa_tiedostot     = isset($listaa_tiedostot) ? $listaa_tiedostot : "";
 $poistettava_tiedosto = isset($poistettava_tiedosto) ? $poistettava_tiedosto : "";
-$tallennus_nappi      = isset($tallennus_nappi) ? $tallennus_nappi : "";
+$tallenna_nappi       = isset($tallenna_nappi) ? $tallenna_nappi : "";
 $tiedosto             = isset($_FILES["tiedosto"]) ? $_FILES["tiedosto"] : "";
 
 if ($tee == "poista") {
@@ -37,7 +37,7 @@ if (!empty($tiedostotyyppi) and
     empty($tiedosto["tmp_name"]) and
     !$listaa_tiedostot and
     $tee != "" and
-    $tallennus_nappi
+    $tallenna_nappi
 ) {
   echo "<font class='error'>" . t("Sinun täytyy valita tiedosto") . "</font>";
 
@@ -48,7 +48,7 @@ if (!empty($tiedostotyyppi) and
     empty($selite) and
     !$listaa_tiedostot and
     $tee != "" and
-    $tallennus_nappi
+    $tallenna_nappi
 ) {
   echo "<font class='error'>" . t("Sinun täytyy valita tiedostolle selite") . "</font>";
 

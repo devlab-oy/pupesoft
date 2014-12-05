@@ -1,8 +1,8 @@
 table.ylaframe {
   width: 100%;
-	margin: 15px 15px 0px 15px;
+  margin: 15px 15px 0px 5px;
   padding: 0px 15px 0px 0px;
-	border-spacing: 0;
+  border-spacing: 0;
 }
 
 table.ylaframe td {

@@ -93,17 +93,15 @@ select.multipleselect {
 }
 
 button, input[type=submit], input[type=button] {
-   border : solid 0px #ffffff;
-   font-size: 12pt;
-   color : #ffffff;
-   margin: 2px 4px 2px 0px;
-   padding: 8px 10px 8px 10px;
-  background-color: #6c70eb;
+  border : solid 0px #ffffff;
+  font-size: 12pt;
+  color : #ffffff;
+  margin: 2px 4px 2px 0px;
+  padding: 8px 10px 8px 10px;
   min-width: 100px;
 }
 
 input[type=submit].lisaa_btn {
-  background-color: #01ebd3;
   background-image: url('../pics/facelift/submit_add.png');
   background-repeat: no-repeat;
   background-position: right;
@@ -111,7 +109,6 @@ input[type=submit].lisaa_btn {
 }
 
 input[type=submit].hae_btn {
-  background-color: #6c70eb;
   background-image: url('../pics/facelift/submit_mglass.png');
   background-repeat: no-repeat;
   background-position: right;
@@ -119,7 +116,6 @@ input[type=submit].hae_btn {
 }
 
 input[type=submit].tallenna_btn {
-  background-color: #01a1eb;
   background-image: url('../pics/facelift/submit_rightarrow.png');
   background-repeat: no-repeat;
   background-position: right;
@@ -127,7 +123,6 @@ input[type=submit].tallenna_btn {
 }
 
 input[type=submit].poista_btn {
-  background-color: #999999;
   background-image: url('../pics/facelift/submit_leftarrow.png');
   background-repeat: no-repeat;
   background-position: right;

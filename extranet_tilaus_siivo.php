@@ -70,7 +70,7 @@ while ($row = mysql_fetch_assoc($result)) {
       }
       else {
         $aikaraja = (int) $yhtion_asetus;
-       }
+      }
     }
     else {
       $aikaraja = (int) $asiakkaan_asetus;

@@ -700,7 +700,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
           echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_top.css' />\n";
 
           if (isset($_SERVER['HTTP_USER_AGENT']) and mb_stripos($_SERVER['HTTP_USER_AGENT'], "FIREFOX") !== FALSE) {
-             echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_mozilla.css' />\n";
+            echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_mozilla.css' />\n";
           }
 
           if (isset($_SERVER['HTTP_USER_AGENT']) and mb_stripos($_SERVER['HTTP_USER_AGENT'], "WINDOWS") !== FALSE) {

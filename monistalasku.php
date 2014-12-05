@@ -1625,7 +1625,7 @@ if ($tee == 'MONISTA') {
             array_push($_rivit, $rivirow);
 
             if (count($palautus) > 1) {
-              # eka pois
+              // eka pois
               array_shift($palautus);
 
               foreach ($palautus as $_palautusrow) {
@@ -1642,7 +1642,7 @@ if ($tee == 'MONISTA') {
                 }
 
                 $rivirow = $_arr + $rivirow;
-                echo "<pre>",var_dump($rivirow, $_arr),"</pre>";
+                echo "<pre>", var_dump($rivirow, $_arr), "</pre>";
                 array_push($_rivit, $rivirow);
               }
             }

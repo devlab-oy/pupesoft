@@ -203,8 +203,8 @@ if (count($mul_toimi) > 0 or count($mul_osasto) > 0 or count($mul_try) > 0 or co
     $toimittajat = '';
 
     foreach ($mul_toimi as $toimittaja) {
-        $toimittajat .= "$toimittaja,";
-        $ulisa .= "&mul_toimi[]=".rawurlencode($toimittaja);
+      $toimittajat .= "$toimittaja,";
+      $ulisa .= "&mul_toimi[]=".rawurlencode($toimittaja);
     }
 
     $toimittajat = trim(substr($toimittajat, 0, -1), ',');

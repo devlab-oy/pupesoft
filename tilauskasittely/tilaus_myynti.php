@@ -27,13 +27,13 @@ elseif (@include "parametrit.inc");
 else exit;
 
 if ($tee == "laheta_viesti" and $yhtiorow["vahvistusviesti_asiakkaalle"] == "Y") {
-  require_once("inc/jt_ja_tyomaarays_valmis_viesti.inc");
+  require_once "inc/jt_ja_tyomaarays_valmis_viesti.inc";
 
   $viestin_lahetys_onnistui =
     laheta_vahvistusviesti($zoner_tunnarit["username"],
-                           $zoner_tunnarit["salasana"],
-                           $tilausnumero,
-                           true);
+    $zoner_tunnarit["salasana"],
+    $tilausnumero,
+    true);
 
   $tee = "";
 }
@@ -792,9 +792,9 @@ else {
 }
 
 if (($naytetaan_tilausvahvistusnappi or
-     $toim == "TARJOUS" or $toim == "EXTTARJOUS") or
-     (isset($laskurow["tilaustyyppi"]) and $laskurow["tilaustyyppi"] == "T") or
-     $toim == "PROJEKTI") {
+    $toim == "TARJOUS" or $toim == "EXTTARJOUS") or
+  (isset($laskurow["tilaustyyppi"]) and $laskurow["tilaustyyppi"] == "T") or
+  $toim == "PROJEKTI") {
 
   // ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
   js_openFormInNewWindow();
@@ -4103,11 +4103,11 @@ if ($tee == '') {
         }
       }
       elseif ($tilausrivi["var"] == "P" or
-              ($yhtiorow["extranet_nayta_saldo"] and
-               (($asiakasrow['extranet_tilaus_varaa_saldoa'] == "" and
-                 $yhtiorow["extranet_tilaus_varaa_saldoa"] == "E") or
-                $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and
-               $laskurow["tilaustyyppi"] == "H")
+        ($yhtiorow["extranet_nayta_saldo"] and
+          (($asiakasrow['extranet_tilaus_varaa_saldoa'] == "" and
+              $yhtiorow["extranet_tilaus_varaa_saldoa"] == "E") or
+            $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and
+          $laskurow["tilaustyyppi"] == "H")
       ) {
         $kpl = $tilausrivi['tilkpl'];
       }
@@ -6384,8 +6384,8 @@ if ($tee == '') {
 
         if ((($asiakasrow['extranet_tilaus_varaa_saldoa'] == "" and
               $yhtiorow["extranet_tilaus_varaa_saldoa"] == "E") or
-             $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and
-            $laskurow["tilaustyyppi"] == "H"
+            $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and
+          $laskurow["tilaustyyppi"] == "H"
         ) {
           $kplmaara = $row["tilkpl"];
         }
@@ -7297,11 +7297,11 @@ if ($tee == '') {
             }
           }
           elseif ($row["var"] == 'P' or
-                  ($kukarow['extranet'] != '' and $row['positio'] == 'Ei varaa saldoa') or
-                  ((($asiakasrow['extranet_tilaus_varaa_saldoa'] == "" and
-                     $yhtiorow["extranet_tilaus_varaa_saldoa"] == "E") or
-                    $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and
-                   ($laskurow["tilaustyyppi"] == "H"))
+            ($kukarow['extranet'] != '' and $row['positio'] == 'Ei varaa saldoa') or
+            ((($asiakasrow['extranet_tilaus_varaa_saldoa'] == "" and
+                  $yhtiorow["extranet_tilaus_varaa_saldoa"] == "E") or
+                $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and
+              ($laskurow["tilaustyyppi"] == "H"))
           ) {
             $kpl_ruudulle = $row['tilkpl'] * 1;
           }
@@ -8376,8 +8376,8 @@ if ($tee == '') {
 
           if ((($asiakasrow['extranet_tilaus_varaa_saldoa'] == "" and
                 $yhtiorow["extranet_tilaus_varaa_saldoa"] == "E") or
-               $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and
-              $laskurow["tilaustyyppi"] == "H"
+              $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and
+            $laskurow["tilaustyyppi"] == "H"
           ) {
             $kplkentta = "tilkpl";
           }
@@ -9345,16 +9345,16 @@ if ($tee == '') {
           </form></td>";
 
       if ($yhtiorow["vahvistusviesti_asiakkaalle"] == "Y") {
-        require_once("inc/jt_ja_tyomaarays_valmis_viesti.inc");
+        require_once "inc/jt_ja_tyomaarays_valmis_viesti.inc";
 
         $aika = hae_vahvistusviesti_lahetetty($tilausnumero);
 
         $vahvistus_teksti = $aika ? t("Vahvistusviesti on lähetetty asiakkaalle viimeksi") .
-                                    " " .
-                                    "<time datetime='{$aika}'>{$aika}</time>" : "";
+          " " .
+          "<time datetime='{$aika}'>{$aika}</time>" : "";
 
         echo
-          "<td class='back' valign='top'>
+        "<td class='back' valign='top'>
                 <form method='post'>
                   <input type='hidden' name='toim' value='{$toim}'>
                   <input type='hidden' name='lopetus' value='{$lopetus}'>
@@ -9641,7 +9641,7 @@ if ($tee == '') {
           $tee_value = 'TARKISTA';
           $painike_txt = t("Tarkista tuotteiden saatavuus");
         }
-        else{
+        else {
           $tee_value = 'VALMIS';
           $painike_txt = $otsikko.' '.t("valmis").' '.$laskelisa;
         }

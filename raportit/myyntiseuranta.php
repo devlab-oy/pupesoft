@@ -3286,16 +3286,16 @@ else {
                         echo "<td>";
 
                         if ($serialisoitavat_muuttujat["ruksit"][$ken_nimi] != '' and
-                            $asiakasosasto_temp != "" and
-                            $ruksit["asiakasryhma"] != "") {
-                            $serialisoitavat_muuttujat["mul_asiakasryhma"]["asiakasryhmä"] = $row["asiakasryhmä"];
+                          $asiakasosasto_temp != "" and
+                          $ruksit["asiakasryhma"] != "") {
+                          $serialisoitavat_muuttujat["mul_asiakasryhma"]["asiakasryhmä"] = $row["asiakasryhmä"];
 
-                            if ($mul_asiakasryhma["asiakasryhmä"] != "") {
-                              unset($serialisoitavat_muuttujat["mul_asiakasryhma"]);
-                            }
-                            else {
-                              $serialisoitavat_muuttujat["ruksit"]["asiakasryhma"] = 1;
-                            }
+                          if ($mul_asiakasryhma["asiakasryhmä"] != "") {
+                            unset($serialisoitavat_muuttujat["mul_asiakasryhma"]);
+                          }
+                          else {
+                            $serialisoitavat_muuttujat["ruksit"]["asiakasryhma"] = 1;
+                          }
                         }
                         elseif ($serialisoitavat_muuttujat["ruksit"]["asiakasryhma"] != '') {
                           unset($serialisoitavat_muuttujat["ruksit"]["asiakasryhma"]);

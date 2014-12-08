@@ -207,8 +207,8 @@ if (!$php_cli) {
   echo "<td>
       <select name='varatturajaus'>
       <option value=''>".t("Ei rajausta")."</option>
-      <option value='O' $sel1>".t("N‰ytet‰‰n tuotteet joilla on varauksia")."</option>
-      <option value='E' $sel2>".t("N‰ytet‰‰n tuotteet joilla ei ole varauksia")."</option>
+      <option value='O' $sel1>".t("N‰ytet‰‰n vain tuotteet joilla on varauksia")."</option>
+      <option value='E' $sel2>".t("N‰ytet‰‰n vain tuotteet joilla ei ole varauksia")."</option>
       </select>
       </td>";
   echo "</tr>";

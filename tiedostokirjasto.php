@@ -19,55 +19,37 @@ if ($tee == '') {
 }
 
 function hae_toimittajat() {
-  global $kukarow, $yhtiorow;
+  global $kukarow;
 
-  if ($yhtiorow["tiedostokirjaston_toimittajat_avainsanoista"] == "Y") {
-    $result = t_avainsana('TOIMIT_TKIRJAST');
+  $result = t_avainsana('TOIMIT_TKIRJAST');
 
-    $tunnukset = array();
+  $tunnukset = array();
 
-    while ($toimittaja = mysql_fetch_assoc($result)) {
-      array_push($tunnukset, $toimittaja["selite"]);
-    }
-
-    if (!empty($tunnukset)) {
-      $tunnukset = implode(",", $tunnukset);
-
-      $query = "SELECT tunnus, nimi
-                FROM toimi
-                WHERE yhtio = '{$kukarow["yhtio"]}'
-                AND tunnus IN ({$tunnukset})
-                ORDER BY toimi.nimi";
-
-      $result = pupe_query($query);
-
-      $toimittajat = array();
-
-      while ($toimittaja = mysql_fetch_assoc($result)) {
-        array_push($toimittajat, $toimittaja);
-      }
-
-      return $toimittajat;
-    }
-
-    return false;
+  while ($toimittaja = mysql_fetch_assoc($result)) {
+    array_push($tunnukset, $toimittaja["selite"]);
   }
-  else {
-    $query  = "SELECT DISTINCT toimi.tunnus, toimi.nimi
-             FROM tuotteen_toimittajat
-             INNER JOIN toimi ON (toimi.tunnus = tuotteen_toimittajat.liitostunnus)
-             WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-             ORDER BY toimi.nimi";
+
+  if (!empty($tunnukset)) {
+    $tunnukset = implode(",", $tunnukset);
+
+    $query = "SELECT tunnus, nimi
+              FROM toimi
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND tunnus IN ({$tunnukset})
+              ORDER BY toimi.nimi";
+
     $result = pupe_query($query);
 
     $toimittajat = array();
 
-    while ($rivi = mysql_fetch_assoc($result)) {
-      array_push($toimittajat, $rivi);
+    while ($toimittaja = mysql_fetch_assoc($result)) {
+      array_push($toimittajat, $toimittaja);
     }
 
     return $toimittajat;
   }
+
+  return false;
 }
 
 function tiedostotyypit() {

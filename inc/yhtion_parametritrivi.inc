@@ -3055,20 +3055,6 @@ if ($fieldname == "extranet_poikkeava_toimitusosoite") {
   $jatko = 0;
 }
 
-if ($fieldname == "tiedostokirjaston_toimittajat_avainsanoista") {
-  $ulos = "<td><select name='{$nimi}' " . js_alasvetoMaxWidth($nimi, 400) . ">";
-
-  $sel = $trow[$i] == 'Y' ? ' selected' : '';
-
-  $ulos .= "<option value = ''>" . t("Kaikki toimittajat n‰ytet‰‰n tiedostokirjastossa");
-  $ulos .=
-    "<option value = 'Y' {$sel}>" .
-    t("Tiedostokirjastossa n‰ytet‰‰n vain avainsanoihin lis‰tyt toimittajat");
-  $ulos .= "</select></td>";
-
-  $jatko = 0;
-}
-
 if ($fieldname == "ext_tilauksen_hyvaksyja_myyjaksi") {
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 

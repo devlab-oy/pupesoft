@@ -479,9 +479,9 @@ if ($kasitellaan_tiedosto) {
   */
 
   // REST-api ei salli etenemispalkkia
-  // if ((!$cli or $lue_data_output_file != "") and !isset($api_kentat)) {
-  //   require 'inc/ProgressBar.class.php';
-  // }
+  if ((!$cli or $lue_data_output_file != "") and !isset($api_kentat)) {
+    require 'inc/ProgressBar.class.php';
+  }
 
   // Otetaan pupen talut haltuun
   $query  = "SHOW TABLES FROM `$dbkanta`";
@@ -703,10 +703,10 @@ if ($kasitellaan_tiedosto) {
     $puun_alkio_index_plus   = 0;
 
     // REST-api ei salli etenemispalkkia
-    // if ((!$cli or $lue_data_output_file != "") and !isset($api_kentat)) {
-    //   $bar = new ProgressBar();
-    //   $bar->initialize($rivimaara);
-    // }
+    if ((!$cli or $lue_data_output_file != "") and !isset($api_kentat)) {
+      $bar = new ProgressBar();
+      $bar->initialize($rivimaara);
+    }
 
     $lisatyt_indeksit = array();
 
@@ -714,14 +714,14 @@ if ($kasitellaan_tiedosto) {
 
       // Komentorivillä piirretään progressbar, ellei ole output loggaus päällä
       // REST-api skippaa
-      // if (!isset($api_kentat)) {
-      //   if ($cli and $lue_data_output_file == "") {
-      //     progress_bar($eriviindex, $max_rivit);
-      //   }
-      //   elseif (!$cli or $lue_data_output_file != "") {
-      //     $bar->increase();
-      //   }
-      // }
+      if (!isset($api_kentat)) {
+        if ($cli and $lue_data_output_file == "") {
+          progress_bar($eriviindex, $max_rivit);
+        }
+        elseif (!$cli or $lue_data_output_file != "") {
+          $bar->increase();
+        }
+      }
 
       $hylkaa    = 0;
       $tila      = "";
@@ -1964,10 +1964,9 @@ if ($kasitellaan_tiedosto) {
 
             $query .= ", toimitustapa = '{$select_row["selite"]}' ";
           }
-echo "1967 $query <br><br>";
+
           if (stripos($query, ", valkoodi = ") === FALSE) {
             $query .= ", valkoodi = '{$yhtiorow["valkoodi"]}' ";
-echo "1970 $query <br><br>";
           }
 
           if (stripos($query, ", kerayspoikkeama = ") === FALSE) {
@@ -2043,7 +2042,7 @@ echo "1970 $query <br><br>";
           }
 
         }
-        
+
         // Laitetaan oletuksena asiakashinnalle yhtiön valuutta
         if ($table_mysql == "asiakashinta") {
           if (stripos($query, ", valkoodi = ") === FALSE) {
@@ -2090,7 +2089,7 @@ echo "1970 $query <br><br>";
 
         //  Otetaan talteen query..
         $lue_data_query = $query;
-echo "2085 $query <br><br>";
+
         $tarq = "SELECT *
                  FROM $table_mysql";
         if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajaalennus') {
@@ -2161,7 +2160,7 @@ echo "2085 $query <br><br>";
               }
 
               unset($virhe);
-echo "2157 "; var_dump($t); echo "<br><br>"; var_dump($i); echo "<br><br>";
+
               if (function_exists($funktio)) {
                 $funktio($t, $i, $result, $tunnus, $virhe, $tarkrow);
               }

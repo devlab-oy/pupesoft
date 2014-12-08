@@ -10164,7 +10164,7 @@ function loytyyko_myyja_tunnuksella($tunnus) {
 }
 
 function piirra_toimitusosoite($laskurow) {
-  global $kukarow, $yhtiorow;
+  global $kukarow, $yhtiorow, $kentta;
 
   $maa_query = "SELECT DISTINCT koodi, nimi
                 FROM maat
@@ -10173,28 +10173,58 @@ function piirra_toimitusosoite($laskurow) {
 
   $maa_result = pupe_query($maa_query);
 
-  echo "<br>
+  echo "<input type='hidden' id='focusKentta' name='kentta'><br>
         <table>
           <tr>
             <th colspan='2' align='left' valign='top'>" . t("Toimitusosoite") . ":</th>
           </tr>
           <tr>
             <td valign='top'>" . t("Nimi") . ":</td>
-            <td><input type='text' name='tnimi' value='{$laskurow["toim_nimi"]}'/></td>
+            <td>
+              <input type='text'
+                     name='tnimi'
+                     value='{$laskurow["toim_nimi"]}'
+                     placeholder='" . t("Nimi") . "'
+                     onfocus='document.getElementById(\"focusKentta\").value = \"tnimitark\";'
+                     onchange='submit();'>
+            </td>
           </tr>
           <tr>
             <td valign='top'></td>
-            <td><input type='text' name='tnimitark' value='{$laskurow["toim_nimitark"]}'/></td>
+            <td>
+              <input type='text'
+                     name='tnimitark'
+                     value='{$laskurow["toim_nimitark"]}'
+                     placeholder=" . t("'Nimi") . "'
+                     onfocus='document.getElementById(\"focusKentta\").value = \"tosoite\";'
+                     onchange='submit();'>
+            </td>
           </tr>
           <tr>
             <td valign='top'>" . t("Osoite") . ":</td>
-            <td><input type='text' name='tosoite' value='{$laskurow["toim_osoite"]}'/></td>
+            <td>
+              <input type='text'
+                     name='tosoite'
+                     value='{$laskurow["toim_osoite"]}'
+                     placeholder='" . t("Osoite") . "'
+                     onfocus='document.getElementById(\"focusKentta\").value = \"tpostino\";'
+                     onchange='submit();'>
+            </td>
           </tr>
           <tr>
-            <td valign='top'>" . t("Postitp") . ":</td>
+            <td valign='top'>" . t("Postino") . " - " . t("Postitp") . ":</td>
             <td>
-              <input type='text' name='tpostino' value='{$laskurow["toim_postino"]}'/>
-              <input type='text' name='tpostitp' value='{$laskurow["toim_postitp"]}'/>
+              <input type='text'
+                     name='tpostino'
+                     value='{$laskurow["toim_postino"]}'
+                     placeholder='" . t("Postino") . "'
+                     onfocus='document.getElementById(\"focusKentta\").value = \"tpostitp\";'
+                     onblur='submit();'>
+              <input type='text'
+                     name='tpostitp'
+                     value='{$laskurow["toim_postitp"]}'
+                     placeholder='" . t("Postitp") . "'
+                     onchange='submit();'>
             </td>
           </tr>
           <tr>
@@ -10220,13 +10250,6 @@ function piirra_toimitusosoite($laskurow) {
   }
 
   echo "      </select>
-            </td>
-          </tr>
-          <tr>
-            <td class='back'>
-              <input type='submit'
-                     value='" . t("Tallenna toimitusosoite") . "'
-                     name='tallenna_toimitusosoite'>
             </td>
           </tr>
         </table>";

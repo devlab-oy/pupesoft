@@ -1812,7 +1812,7 @@ if ($tila == '') {
   $toimipaikka = isset($toimipaikka) ? $toimipaikka : "kaikki";
 
   echo "<td><input type='hidden' name='toimipaikka' value='{$toimipaikka}' /></td>";
-  echo "<td class='back'><input type='submit' value='".t("Etsi")."'></td>";
+  echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Etsi")."'></td>";
   echo "</tr></form>";
 
   // Katsotaan löytyikö yhtään tilausriviä
@@ -2029,18 +2029,25 @@ if ($tila == '') {
     echo "<$td $class valign='top' nowrap>";
 
     // tehdään pop-up divi jos keikalla on kommentti...
-    list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($rivirow["tuoteno"]);
     $pop_yks = t_avainsana("Y", "", "and avainsana.selite='$rivirow[tilyksikko]'", "", "", "selite");
 
     echo "<div id='div_$rivirow[rivitunnus]' class='popup' style='width: 400px;'>";
     echo "<ul>";
-    echo "<li>".t("Saldo").": $saldo $pop_yks</li><li>".t("Hyllyssä").": $hyllyssa $pop_yks</li><li>".t("Myytävissä").": $myytavissa $pop_yks</li>";
     echo "<li>".t("Tilattu").": $rivirow[tilattu] $pop_yks</li><li>".t("Varattu").": $rivirow[varattu] $pop_yks</li>";
     echo "<li>".t("Keskihinta").": $rivirow[keskihinta] $rivirow[valuutta]</li><li>".t("Ostohinta").": $rivirow[ostohinta] $rivirow[valuutta]</li>";
     echo "</ul>";
     echo "</div>";
     echo "<a href='{$palvelin2}tuote.php?tee=Z&tuoteno=".urlencode($rivirow["tuoteno"])."&lopetus=$PHP_SELF////toiminto=kohdista//toimittajaid=$toimittajaid//tee=K//otunnus=$otunnus//alku=$alku//nayta_kohdistetut=$nayta_kohdistetut//nayta_kaikki=$nayta_kaikki//tila=$tila//ojarj=$ojarj$ulisa//riviid=$rivirow[rivitunnus]///$rivirow[rivitunnus]' class='tooltip' id='$rivirow[rivitunnus]'>$rivirow[tuoteno]</a>";
     echo "<br>$rivirow[toim_tuoteno]";
+
+    echo "&nbsp;";
+
+    $_src = "{$palvelin2}pics/lullacons/info.png";
+    $_title = t("Näytä saldo");
+
+    echo "<img title='{$_title}' src='{$_src}' class='hae_saldo' id='{$rivirow['tuoteno']}' />";
+    echo "<input type='hidden' id='{$rivirow['tuoteno']}_varasto' value='{$rivirow['varasto']}' />";
+    echo "<span class='saldo_{$rivirow['tuoteno']}' style='display:none;'></span>";
 
     if ($rivirow["sarjanumeroseuranta"] != "") {
       if ($rivirow["siskpl"] < 0) {
@@ -2078,7 +2085,7 @@ if ($tila == '') {
       $sarjarow2 = mysql_fetch_assoc($sarjares);
 
       if ($sarjarow2["kpl"] == abs($rivirow["siskpl"])) {
-        echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=".urlencode($rivirow["tuoteno"])."&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&ojarj=$ojarj$ulisa#$sarjarow2[sarjanumero]' style='color:#00FF00;'>$snro_ok</font></a>)";
+        echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=".urlencode($rivirow["tuoteno"])."&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&ojarj=$ojarj$ulisa#$sarjarow2[sarjanumero]' class='green'>$snro_ok</font></a>)";
       }
       else {
         echo "<br>(<a href='$PHP_SELF?tila=sarjanumerot&toiminto=kohdista&toimittajaid=$toimittajaid&tuoteno=".urlencode($rivirow["tuoteno"])."&ostorivitunnus=$rivirow[rivitunnus]&from=kohdista&tee=K&otunnus=$otunnus&alku=$alku&nayta_kohdistetut=$nayta_kohdistetut&nayta_kaikki=$nayta_kaikki&ojarj=$ojarj$ulisa#$sarjarow2[sarjanumero]' style='color:#DD0000;'>$snro</a>)";

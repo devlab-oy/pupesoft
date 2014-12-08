@@ -246,7 +246,7 @@ if ($tee == 'vaihdatoimittaja') {
 
     echo "<form method='post' action='?tee={$tee}{$action}'>";
     echo "<table>";
-    echo "<tr><th>", t("Etsi toimittajaa"), " (", t("nimi"), " / ", t("ytunnus"), ")</th><td><input type='text' name='nimi' value='' />&nbsp;<input type='submit' value='", t("Etsi"), "' /></td></tr>";
+    echo "<tr><th>", t("Etsi toimittajaa"), " (", t("nimi"), " / ", t("ytunnus"), ")</th><td><input type='text' name='nimi' value='' />&nbsp;<input type='submit' class='hae_btn' value = '".t("Etsi")."' /></td></tr>";
     echo "</table>";
     echo "</form>";
   }
@@ -463,8 +463,8 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
 
                 $query = "SELECT *
                           FROM asn_sanomat
-                          WHERE yhtio    = '{$kukarow['yhtio']}'
-                          AND laji       = 'asn'
+                          WHERE yhtio = '{$kukarow['yhtio']}'
+                          AND laji    = 'asn'
                           AND MATCH (tilausrivi) AGAINST ('{$isa_chk_row['tunnus']}' IN BOOLEAN MODE)";
                 $info_res = pupe_query($query);
                 $info_row = mysql_fetch_assoc($info_res);
@@ -1389,7 +1389,7 @@ if ($tee == 'etsi') {
   echo "<td><input type='text' name='tuoteno' value='{$tuoteno}' /></td>";
   echo "<td><input type='text' name='tilaajanrivinro' value='{$tilaajanrivinro}' /></td>";
   echo "<td><input type='text' name='kpl' value='{$kpl}' /></td>";
-  echo "<td><input type='submit' value='", t("Etsi"), "' /></td>";
+  echo "<td><input type='submit' class='hae_btn' value = '".t("Etsi")."' /></td>";
   echo "</tr>";
 
   if ($toimirow['asn_sanomat'] == 'K') {

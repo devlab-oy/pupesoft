@@ -204,8 +204,8 @@ function kohdista_rivi($laskurow, $valittutunnus, $valittuotunnus, $otunnus, $su
     // Jos löytyy, poistetaan kohdistus
     $query = "SELECT *
               FROM asn_sanomat
-              WHERE yhtio    = '{$kukarow['yhtio']}'
-              AND laji       in ('tec','mav')
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji    in ('tec','mav')
               AND MATCH (tilausrivi) AGAINST ('{$valittutunnus}' IN BOOLEAN MODE)";
     $chk_exist_res = pupe_query($query);
 
@@ -497,6 +497,18 @@ elseif ($_POST['ajax_toiminto'] == 'rivi_kpl_splittaus') {
   $rivi['yksikko'] = t_avainsana("Y", "", "and avainsana.selite='$rivi[yksikko]'", "", "", "selite");
 
   echo json_encode($rivi);
+}
+elseif ($_POST['ajax_toiminto'] == 'hae_saldo_myytavissa') {
+  $_tuoteno = $_POST['id'];
+  $_varasto = (int) $_POST['varasto'];
+
+  list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($_tuoteno, "", $_varasto);
+
+  echo json_encode(array(
+    'saldo' => $saldo,
+    'hyllyssa' => $hyllyssa,
+    'myytavissa' => $myytavissa,
+  ));
 }
 elseif ($_POST['ajax_toiminto'] == 'lisaa_suuntalava') {
   $otunnus      = $_POST['otunnus'];

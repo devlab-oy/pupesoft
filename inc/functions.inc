@@ -15984,7 +15984,7 @@ if (!function_exists("kopioi_tilausrivi")) {
       // jos on, lisätään uusi splitattu rivi kanssa sinne
       $query = "SELECT tunnus
                 FROM asn_sanomat
-                WHERE yhtio    = '{$kukarow['yhtio']}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
                 AND MATCH (tilausrivi) AGAINST ('{$tunnus}' IN BOOLEAN MODE)";
       $chk_asn_res = pupe_query($query);
 
@@ -21066,7 +21066,7 @@ if (!function_exists('splittaa_tilausrivi')) {
     // jos on, lisätään uusi splitattu rivi kanssa sinne
     $query = "SELECT tunnus
               FROM asn_sanomat
-              WHERE yhtio    = '{$kukarow['yhtio']}'
+              WHERE yhtio = '{$kukarow['yhtio']}'
               AND MATCH (tilausrivi) AGAINST ('{$tunnus}' IN BOOLEAN MODE)";
     $chk_asn_res = pupe_query($query);
 
@@ -29726,6 +29726,20 @@ if (!function_exists("paivita_sopimusrivit")) {
     }
 
     return "";
+  }
+}
+
+if (!function_exists("poista_osakeyhtio_lyhenne")) {
+  function poista_osakeyhtio_lyhenne($nimi) {
+
+    # strtolower ei osaa pienentää tämmöisiä erikoismerkkejä
+    $old = array("Ü", "Ž");
+    $new = array("ü", "ž");
+    $nimi = str_replace($old, $new, $nimi);
+
+    $replace = "oy|ab|as|oü|ou|mtü|tü|ttü";
+
+    return trim(preg_replace("/\b({$replace})\b/i", '', strtolower($nimi)));
   }
 }
 

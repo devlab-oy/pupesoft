@@ -123,7 +123,7 @@ foreach ($update_kentat as $_kentta) {
     $kentan_siivous = " AND ".$_rajaukset[0];
     $_tuoterajaus_ilman_hakukenttia = str_replace($kentan_siivous, "", $_tuoterajaus_ilman_hakukenttia);
   }
-  
+
   // spessukentät läpi
   $tuoterajaus_kentta = relex_product_ostoehdotus_update($_kentta, $tuoterajaus, $paiva_ajo);
 

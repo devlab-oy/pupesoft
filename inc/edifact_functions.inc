@@ -463,7 +463,12 @@ function lahtoilmoitus_parametrit($konttiviite) {
 
   }
 
-  $lahtopaiva = date("d.m.Y H:i", strtotime($lahtopaiva));
+  if ($lahtopaiva != '0000-00-00 00:00:00') {
+    $lahtopaiva = date("d.m.Y H:i", strtotime($lahtopaiva));
+  }
+  else {
+    $lahtopaiva = 'X';
+  }
 
   $parametrit['konttimaara'] = count($kaikki_kontit);
   $parametrit['konttityyppi'] = $konttityyppi;
@@ -2289,8 +2294,10 @@ function lahtoilmoitus_pdf($pdf_data) {
   $pdf->draw_text($x, $y, 'Voyage id:', $sivu, $bold);
   $pdf->draw_text($x+60, $y, $matkakoodi, $sivu, $bold);
 
-  $pdf->draw_text($x+200, $y, 'Date of departure:', $sivu, $bold);
-  $pdf->draw_text($x+300, $y, $lahtopaiva, $sivu, $bold);
+  if ($lahtopaiva != 'X') {
+    $pdf->draw_text($x+200, $y, 'Date of departure:', $sivu, $bold);
+    $pdf->draw_text($x+300, $y, $lahtopaiva, $sivu, $bold);
+  }
 
   $y -= 15;
   $yy[0] = $yy[1] = $y;

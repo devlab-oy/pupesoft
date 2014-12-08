@@ -6343,6 +6343,9 @@ if ($tee == '') {
         if ($row["uusiotunnus"] > 0 or $laskurow["tunnus"] != $row["otunnus"] or ($laskurow["tila"] == "V" and $row["kpl"] != 0)) {
           $muokkauslukko_rivi = "LUKOSSA";
         }
+        else {
+          $muokkauslukko_rivi = "";
+        }
 
         // Rivin tarkistukset
         if ($muokkauslukko == "" and $muokkauslukko_rivi == "") {

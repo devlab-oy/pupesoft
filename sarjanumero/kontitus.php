@@ -62,15 +62,6 @@ if (isset($submit)) {
 
         while ($rulla = mysql_fetch_assoc($result)) {
 
-          $uquery = "UPDATE tilausrivi SET
-                     keratty = '',
-                     kerattyaika = '0000-00-00 00:00:00',
-                     toimitettu = '',
-                     toimitettuaika = '0000-00-00 00:00:00'
-                     WHERE yhtio = '{$kukarow['yhtio']}'
-                     AND tunnus = '{$rulla['tunnus']}'";
-          pupe_query($uquery);
-
           $uquery = "UPDATE tilausrivin_lisatiedot SET
                      konttinumero = '',
                      kontin_maxkg = 0,
@@ -79,9 +70,21 @@ if (isset($submit)) {
                      kontin_kilot = 0,
                      kontin_taarapaino = 0
                      WHERE yhtio = '{$kukarow['yhtio']}'
-                     AND tilausrivitunnus = '{$rulla['tunnus']}'";
+                     AND tilausrivitunnus = '{$rulla['tunnus']}'
+                     AND kontin_mrn = ''";
           pupe_query($uquery);
 
+          if (mysql_affected_rows() > 0) {
+            $uquery = "UPDATE tilausrivi SET
+                       keratty = '',
+                       kerattyaika = '0000-00-00 00:00:00',
+                       toimitettu = '',
+                       toimitettuaika = '0000-00-00 00:00:00'
+                       WHERE yhtio = '{$kukarow['yhtio']}'
+                       AND tunnus IN '{$rulla['tunnus']}'";
+            pupe_query($uquery);
+
+          }
         }
       }
 

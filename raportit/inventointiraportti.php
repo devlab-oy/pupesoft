@@ -218,9 +218,8 @@ if (count($_POST) > 0) {
     if ($kaikkirivit != "") {
       if ($group!="") $group .= ",tapahtuma.tunnus,tapahtuma.laadittu";
       else $group  .= "tapahtuma.tunnus,tapahtuma.laadittu";
-      $select .= "tapahtuma.selite 'selite', tapahtuma.laadittu,";
+      $select .= "tapahtuma.selite 'selite', tapahtuma.laadittu, ";
       $order  = "tapahtuma.laadittu,".$order;
-      $gluku++;
     }
 
     if ($order != "") {

@@ -8,14 +8,14 @@ class PrestaCategories extends PrestaClient {
 
   /**
    * Presta root element id
-   * 
-   * @var int 
+   *
+   * @var int
    */
   private $root = null;
 
   /**
    * Synced categories
-   * 
+   *
    * @var array
    */
   private $categories = array();
@@ -25,7 +25,7 @@ class PrestaCategories extends PrestaClient {
   }
 
   /**
-   * 
+   *
    * @return string
    */
   protected function resource_name() {
@@ -35,15 +35,15 @@ class PrestaCategories extends PrestaClient {
   /**
    * This function is used in PrestaProducts. It finds the deepest level node
    * according to ancestors and returns the presta id if its found
-   * 
+   *
    * Ancestor is given in following format:
    * $ancestors = array(
    *    'Taso 1',
    *    'Taso 1 1',
    *    'Taso 1 1 1', (returns this id)
    * );
-   * 
-   * 
+   *
+   *
    * @param array $ancestors
    * @return string
    */
@@ -62,7 +62,7 @@ class PrestaCategories extends PrestaClient {
       if (isset($categories[0])) {
         $category = $categories[0];
       }
-      
+
       if (empty($category)) {
         return null;
       }
@@ -113,15 +113,15 @@ class PrestaCategories extends PrestaClient {
   }
 
   /**
-   * 
+   *
    * @param array $categories 2D array (array of hashes) of categories
    * @return boolean
    */
   public function sync_categories($categories) {
     $this->delete_all();
-    
+
     $this->logger->log('---------Start category sync---------');
-    $this->set_category_root(1);
+    $this->set_category_root(2);
     $this->categories = $categories;
 
     if (empty($this->root)) {
@@ -154,7 +154,7 @@ class PrestaCategories extends PrestaClient {
 
   /**
    * Contains the logic to save a node and recursively all its children
-   * 
+   *
    * @param array $node
    */
   private function recursive_save($node) {
@@ -170,7 +170,7 @@ class PrestaCategories extends PrestaClient {
 
   /**
    * Returns specific nodes first level chidlren
-   * 
+   *
    * @param int $parent_depth (syvyys)
    * @param int $parent_right (rgt)
    * @param int $parent_left (lft)
@@ -192,9 +192,9 @@ class PrestaCategories extends PrestaClient {
 
   /**
    * Presta has Root node which is common for all. Since Presta is multi company
-   * webstore under root are the company specific nodes. These nodes are the 
+   * webstore under root are the company specific nodes. These nodes are the
    * root nodes for each companys dynamic tree
-   * 
+   *
    * Root
    *  Store1_root
    *    Computers
@@ -202,7 +202,7 @@ class PrestaCategories extends PrestaClient {
    *  Store2_root
    *    Cars
    *    Mopeds
-   * 
+   *
    * @param int $presta_category_id
    */
   public function set_category_root($presta_category_id) {
@@ -224,10 +224,10 @@ class PrestaCategories extends PrestaClient {
         $this->delete($id);
       }
       catch (Exception $e) {
-        
+
       }
     }
-    
+
     $this->logger->log('Kaikki kategoriat poistettu');
     $this->logger->log('---------End category delete all---------');
   }

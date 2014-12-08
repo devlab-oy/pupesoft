@@ -616,7 +616,7 @@ if (!isset($task)) {
         echo "</a>";
 
         echo "<div style='display:none;' class='uusilaivaformi' id='uusilaivaformi{$id}'>";
-        echo "<form method='post'>";
+        echo "<form method='post' action='toimitusten_seuranta.php?rajaus={$rajaus}'>";
         echo "<input type='hidden' name='task' value='laivamuutos' />";
         echo "<input type='hidden' name='vanhat_tiedot' value='{$vanhat_tiedot}' />";
         echo "<input type='hidden' name='konttiviite' ";

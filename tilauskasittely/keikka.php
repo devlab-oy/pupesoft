@@ -1114,7 +1114,7 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
             lasku.kohdistettu,
             lasku.yhtio_toimipaikka
             {$selectlisa}
-            FROM lasku USE INDEX (tila_index)
+            FROM lasku
             {$joinlisa}
             where lasku.yhtio      = '$kukarow[yhtio]'
             and lasku.liitostunnus = '$toimittajaid'
@@ -1692,6 +1692,15 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0, $pp = nul
   $query_ale_lisa = generoi_alekentta("O");
 
   if ($comp) {
+
+    $_groupby = "GROUP BY lasku.liitostunnus";
+    $_where1 = "AND lasku.alatila = ''
+                AND lasku.mapvm = '0000-00-00'
+                AND lasku.kohdistettu IN ('','K')";
+    $_where2 = "AND lasku.alatila = 'X'
+                AND lasku.mapvm >= '{$vv}-{$kk}-{$pp}'
+                AND lasku.kohdistettu = 'X'";
+
     // n‰ytet‰‰n mill‰ toimittajilla on keskener‰isi‰ keikkoja
     $query = "SELECT
               group_concat(distinct lasku.laskunro SEPARATOR ', ') keikat,
@@ -1705,11 +1714,15 @@ function hae_yhteenveto_tiedot($toimittajaid = null, $toimipaikka = 0, $pp = nul
               and lasku.vanhatunnus = 0
               AND lasku.luontiaika  <= '{$vv}-{$kk}-{$pp}'
               {$toimipaikkalisa}
-              {$toimittaja_where}
-              AND ((lasku.alatila = '' AND lasku.mapvm = '0000-00-00' AND lasku.kohdistettu IN ('','K'))
-                OR
-                (lasku.alatila = 'X' AND lasku.mapvm >= '{$vv}-{$kk}-{$pp}' AND lasku.kohdistettu = 'X'))
-              GROUP BY lasku.liitostunnus";
+              {$toimittaja_where}";
+
+    $query = "( {$query}
+                {$_where1}
+                {$_groupby})
+                UNION
+              ( {$query}
+                {$_where2}
+                {$_groupby})";
     $result_x = pupe_query($query);
 
     $kaikkiliitettyyhteensa = 0;

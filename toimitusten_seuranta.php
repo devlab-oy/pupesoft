@@ -51,9 +51,9 @@ if (isset($_POST['task']) and $_POST['task'] == 'hae_pakkalista') {
     'sinettinumero' => $_POST['sinettinumero']
     );
 
-  $logodata = base64_decode($_POST['logodata']);
-
-  $logo_info = pdf_logo($logodata);
+  $sessio = $_POST['session'];
+  $logo_url = $_POST['logo_url'];
+  $logo_info = pdf_logo($logo_url, $sessio);
 
   $pdf_data['logodata'] = $logo_info['logodata'];
   $pdf_data['scale'] = $logo_info['scale'];
@@ -890,16 +890,6 @@ if (!isset($task)) {
           $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
           $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
 
-          $opts = array(
-            'http'=>array(
-              'method'=>"POST",
-              'header'=>"Cookie: pupesoft_session={$session}"
-            )
-          );
-
-          $context = stream_context_create($opts);
-          $string =  base64_encode(file_get_contents($logo_url, false, $context));
-
           echo "&nbsp;<form method='post' id='hae_pakkalista{$_konttinumero}'>";
           echo "<input type='hidden' name='task' value='hae_pakkalista' />";
           echo "<input type='hidden' name='pakkalista' value='{$kontti['pakkalista']}' />";
@@ -907,7 +897,8 @@ if (!isset($task)) {
           echo "<input type='hidden' name='konttinumero' value='{$konttinumero}' />";
           echo "<input type='hidden' name='sinettinumero' value='{$kontti['sinettinumero']}' />";
           echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
-          echo "<input type='hidden' name='logodata' value='{$string}' />";
+          echo "<input type='hidden' name='session' value='{$session}' />";
+          echo "<input type='hidden' name='logo_url' value='{$logo_url}' />";
           echo "<input type='hidden' name='taara' value='{$kontti['taara']}' />";
           echo "<input type='hidden' name='kpl' value='{$kontti['kpl']}' />";
           echo "<input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />";

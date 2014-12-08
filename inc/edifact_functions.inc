@@ -552,6 +552,73 @@ function satamavahvistus_parametrit($konttiviite) {
   return $parametrit;
 }
 
+function laskutusraportti_parametrit($konttiviite) {
+  global $kukarow;
+
+  $query = "SELECT lasku.asiakkaan_tilausnumero,
+            SUM(sarjanumeroseuranta.massa) AS total_paino,
+            laskun_lisatiedot.konttityyppi,
+            laskun_lisatiedot.konttiviite,
+            group_concat(DISTINCT kontin_mrn) AS kontit,
+            group_concat(DISTINCT DATE(tilausrivi.toimitettuaika)) AS sisaan,
+            group_concat(DISTINCT tilausrivi.laskutettuaika) AS ulos
+            FROM laskun_lisatiedot
+            JOIN lasku
+              ON lasku.yhtio = laskun_lisatiedot.yhtio
+              AND lasku.tunnus = laskun_lisatiedot.otunnus
+            JOIN tilausrivi
+              ON tilausrivi.yhtio = laskun_lisatiedot.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+            JOIN tilausrivin_lisatiedot
+              ON tilausrivin_lisatiedot.yhtio = laskun_lisatiedot.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+            JOIN sarjanumeroseuranta
+              ON sarjanumeroseuranta.yhtio = laskun_lisatiedot.yhtio
+              AND sarjanumeroseuranta.myyntirivitunnus = tilausrivi.tunnus
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND sarjanumeroseuranta.lisatieto != 'Hylätty'
+            AND sarjanumeroseuranta.lisatieto != 'Ylijaama'
+            AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
+            GROUP BY concat(lasku.asiakkaan_tilausnumero, DATE(tilausrivi.toimitettuaika))";
+  $result = pupe_query($query);
+
+  $tilaukset = array();
+  $kaikki_kontit = array();
+
+  $hinta = 200;
+
+  while ($tilaus = mysql_fetch_assoc($result)) {
+
+    $konttiviite = $tilaus['konttiviite'];
+
+    $kontti_array = explode(",", $tilaus['kontit']);
+    $kaikki_kontit = array_unique(array_merge($kontti_array, $kaikki_kontit));
+
+    $sisaan = new DateTime($tilaus['sisaan']);
+    $ulos = new DateTime($tilaus['ulos']);
+    $ero = $ulos->diff($sisaan)->format("%a") + 1;
+
+    $tilaus['varastointipaivat'] = $ero;
+
+    $tilaus['total_paino'] = (int) $tilaus['total_paino'] / 1000;
+
+    $tilaus['hinta'] = $ero * $hinta * $tilaus['total_paino'];
+
+    $tilaukset[] = $tilaus;
+  }
+
+  $kpl = count($kaikki_kontit);
+
+  $parametrit = array(
+    'tilaukset' => $tilaukset,
+    'kpl' => $kpl,
+    'konttiviite' => $konttiviite
+  );
+
+  return $parametrit;
+
+}
+
 function laadi_edifact_sanoma($parametrit, $korjaus = false) {
   global $kukarow, $yhtiorow;
 
@@ -967,7 +1034,6 @@ function laadi_edifact_sanoma($parametrit, $korjaus = false) {
   return $s;
 
 }
-
 
 function kasittele_bookkaussanoma($edi_data) {
   global $kukarow, $yhtiorow;
@@ -2231,7 +2297,7 @@ function lahtoilmoitus_pdf($pdf_data) {
   $y -= 20;
 
   $pdf->draw_text($x, $y, 'Order number:', $sivu, $bold);
-  $pdf->draw_text($x+100, $y, 'Ocean vessel', $sivu, $bold);
+  $pdf->draw_text($x+100, $y, 'Feeder vessel', $sivu, $bold);
   $pdf->draw_text($x+260, $y, 'RLS', $sivu, $bold);
   $pdf->draw_text($x+350, $y, 'TON', $sivu, $bold);
   $pdf->draw_text($x+440, $y, 'Containers', $sivu, $bold);
@@ -2390,6 +2456,103 @@ function varastoraportti_pdf($pdf_data) {
 
     }
   }
+
+  //keksitään uudelle failille joku varmasti uniikki nimi:
+  $pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(),true)).".pdf";
+
+  //kirjoitetaan pdf faili levylle..
+  $fh = fopen($pdffilenimi, "w");
+  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
+  fclose($fh);
+
+  return $pdffilenimi;
+}
+
+function laskutusraportti_pdf($pdf_data) {
+
+  extract($pdf_data);
+
+  //PDF:n luonti ja defaultit
+  require_once("pdflib/phppdflib.class.php");
+
+  //PDF parametrit
+  $pdf = new pdffile;
+  $pdf->set_default('margin-top',   0);
+  $pdf->set_default('margin-bottom',   0);
+  $pdf->set_default('margin-left',   0);
+  $pdf->set_default('margin-right',   0);
+
+  //fontit
+  $pieni["height"] = 10;
+  $pieni["font"] = "Times-Roman";
+
+  $bold["height"] = 11;
+  $bold["font"] = "Times-Bold";
+
+  $iso["height"] = 20;
+  $iso["font"] = "Times-Bold";
+
+  // sitten aletaan piirtämään itse PDF sisältöä
+  $sivu = $pdf->new_page("a4");
+
+  $image = $pdf->png_embed($logodata);
+  $logoparam['scale'] = $pdf_data['scale'];
+  $pdf->image_place($image, 780, 420, $sivu, $logoparam);
+
+  $x = 30;
+  $y = 800;
+
+  $xx = array(20,580);
+
+  $pdf->draw_text($x, $y, 'LASKUTUSRAPORTTI', $sivu, $iso);
+  $pvm = date("j.m.Y H:i");
+  $y -= 20;
+  $pdf->draw_text($x, $y, $pvm, $sivu, $bold);
+
+  $y -= 20;
+  $pdf->draw_text($x, $y, "Konttiviite: {$konttiviite}", $sivu, $bold);
+
+  $y -= 20;
+  $pdf->draw_text($x, $y, "Kontteja: {$kpl} kpl", $sivu, $bold);
+
+  $y -= 5;
+  $yy[0] = $yy[1] = $y;
+  $pdf->draw_line($xx, $yy, $sivu);
+  $y -= 20;
+
+  $total_hinta = 0;
+
+  foreach ($tilaukset as $tilaus) {
+
+    $pdf->draw_text($x, $y, "Tilaus:", $sivu, $pieni);
+    $pdf->draw_text($x+50, $y, $tilaus['asiakkaan_tilausnumero'], $sivu, $pieni);
+    $y -= 15;
+    $pdf->draw_text($x, $y, 'Tonnit:', $sivu, $pieni);
+    $pdf->draw_text($x+50, $y, $tilaus['total_paino'], $sivu, $pieni);
+    $y -= 15;
+    $pdf->draw_text($x, $y, utf8_decode("Sisään:"), $sivu, $pieni);
+    $pdf->draw_text($x+50, $y, $tilaus['sisaan'], $sivu, $pieni);
+    $y -= 15;
+    $pdf->draw_text($x, $y, 'Ulos:', $sivu, $pieni);
+    $pdf->draw_text($x+50, $y, $tilaus['ulos'], $sivu, $pieni);
+    $y -= 15;
+    $pdf->draw_text($x, $y, utf8_decode("Päivät:"), $sivu, $pieni);
+    $pdf->draw_text($x+50, $y, $tilaus['varastointipaivat'], $sivu, $pieni);
+    $y -= 15;
+    $pdf->draw_text($x, $y, "Hinta:", $sivu, $pieni);
+    $pdf->draw_text($x+50, $y, chr(128).$tilaus['hinta'], $sivu, $pieni);
+    $y -= 15;
+
+    $yy[0] = $yy[1] = $y;
+    $pdf->draw_line($xx, $yy, $sivu);
+    $y -= 20;
+
+    $total_hinta +=  $tilaus['hinta'];
+  }
+
+  $pdf->draw_text($x, $y, utf8_decode("Hinta yhteensä:"), $sivu, $pieni);
+  $pdf->draw_text($x+80, $y, chr(128).$total_hinta, $sivu, $pieni);
+  $y -= 15;
 
   //keksitään uudelle failille joku varmasti uniikki nimi:
   $pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(),true)).".pdf";

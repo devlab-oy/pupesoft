@@ -110,7 +110,7 @@ else {
     echo " kg </td>";
 
     echo "<td valign='top' align='center'>";
-    echo date("j.m.Y H:i", strtotime($rahti['luontiaika']));
+    echo date("j.n.Y H:i", strtotime($rahti['luontiaika']));
     echo "</td>";
 
     if ($rahti['toimitettuaika'] == '0000-00-00 00:00:00') {

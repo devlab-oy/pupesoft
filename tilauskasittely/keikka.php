@@ -798,7 +798,7 @@ if ($toiminto == "" and $ytunnus == "" and $keikka == "") {
             SUM(tilausrivi.kpl) var_kpl,
             SUM(tilausrivi.varattu) var_varattu,
             GROUP_CONCAT(DISTINCT lasku.tunnus) tilauksien_tunnukset
-            FROM lasku USE INDEX (yhtio_tila_mapvm)
+            FROM lasku
             {$left_join}JOIN tilausrivi USE INDEX (uusiotunnus_index) on (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus and tilausrivi.tyyppi = 'O' {$tilriv_joinlisa})
             {$joinlisa}
             {$suuntalavajoin}

@@ -8,6 +8,7 @@ $toim           = isset($toim) ? strtoupper($toim) : "";
 $aihealue       = isset($aihealue) ? $aihealue : "";
 $tiedostotyyppi = isset($tiedostotyyppi) ? $tiedostotyyppi : "";
 $toimittaja     = isset($toimittaja) ? $toimittaja : "";
+$tee            = isset($tee) ? $tee : "";
 
 if ($toim == "LAATU") {
   $otsikko     = "Laatu-asiakirjat";
@@ -24,8 +25,6 @@ else {
 
 echo "<font class='head'>" . t($otsikko) . "</font>";
 echo "<hr>";
-
-$tee = empty($tee) ? '' : $tee;
 
 $params = array(
   "aihealue"               => $aihealue,
@@ -68,26 +67,28 @@ function piirra_formi($params) {
     isset($params["valittu_tiedostotyyppi"]) ? $params["valittu_tiedostotyyppi"] : "";
   $valittu_toimittaja     =
     isset($params["valittu_toimittaja"]) ? $params["valittu_toimittaja"] : "";
+  $tiedostotyypit         = tiedostotyypit($valittu_aihealue);
 
-  echo "<form action='tiedostokirjasto.php' method='post'>";
-  echo "<input type='hidden' name='tee' value='hae_tiedostot'/>";
+  echo "<form method='post'>";
+  echo "<input type='hidden' name='tee' value='hae_tiedostot'>";
   echo "<input type='hidden' name='toim' value='{$toim}'>";
   echo "<table>";
   echo "<tbody>";
 
   echo "<tr>";
-  echo "<td><label for='toimittaja_id'>" . t($ylaotsikko) . "</label></td>";
+  echo "<td><label for='ylaotsikko'>" . t($ylaotsikko) . "</label></td>";
   echo "<td>";
 
   if (!empty($toimittajat)) {
-    echo '<select id="toimittaja" name="toimittaja" onchange="submit()">';
+    echo '<select id="ylaotsikko" name="toimittaja" onchange="submit();">';
+
     foreach ($toimittajat as $toimittaja) {
       $valittu = $valittu_toimittaja == $toimittaja['tunnus'] ? "selected" : "";
       echo "<option {$valittu} value='{$toimittaja['tunnus']}'>{$toimittaja['nimi']}</option>";
     }
   }
   elseif ($aihealueet) {
-    echo '<select id="aihealue" name="aihealue" onchange="submit()">';
+    echo '<select id="ylaotsikko" name="aihealue" onchange="submit();">';
     foreach ($aihealueet as $aihealue) {
       $valittu = $valittu_aihealue == $aihealue['selite'] ? "selected" : "";
       echo "<option {$valittu} value='{$aihealue['selite']}'>{$aihealue['selite']}</option>";
@@ -98,11 +99,11 @@ function piirra_formi($params) {
   echo "</td>";
   echo "</tr>";
 
-  if ($valittu_aihealue and $tiedostotyypit = tiedostotyypit($valittu_aihealue)) {
+  if ($valittu_aihealue and $tiedostotyypit) {
     echo "<tr>";
-    echo "<td><label for='tyyppi_id'>" . t("Tiedoston tyyppi") . "</label></td>";
+    echo "<td><label for='tiedostotyyppi'>" . t("Tiedoston tyyppi") . "</label></td>";
     echo "<td>";
-    echo "<select id='tiedostotyyppi_id' name='tiedostotyyppi' onchange='submit()'>";
+    echo "<select id='tiedostotyyppi' name='tiedostotyyppi' onchange='submit()'>";
 
     foreach ($tiedostotyypit as $tiedostotyyppi) {
       $valittu = $valittu_tiedostotyyppi == $tiedostotyyppi['selitetark'] ? "selected" : "";
@@ -115,11 +116,11 @@ function piirra_formi($params) {
     echo "</td>";
     echo "</tr>";
   }
-  elseif ($tiedostotyypit = tiedostotyypit()) {
+  elseif ($tiedostotyypit) {
     echo "<tr>";
     echo "<td><label for='tiedostotyyppi'>" . t("Tiedoston tyyppi") . "</label></td>";
     echo "<td>";
-    echo "<select id='tiedostotyyppi' name='tiedostotyyppi' onchange='submit()'>";
+    echo "<select id='tiedostotyyppi' name='tiedostotyyppi' onchange='submit();'>";
 
     foreach ($tiedostotyypit as $tiedostotyyppi) {
       $tiedostotyyppinimi =

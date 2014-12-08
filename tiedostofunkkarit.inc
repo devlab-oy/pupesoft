@@ -112,4 +112,3 @@ function hae_aihealueet() {
 
   return $aihealueet;
 }
-

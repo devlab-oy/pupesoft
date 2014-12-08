@@ -18,12 +18,20 @@ $tiedosto             = isset($_FILES["tiedosto"]) ? $_FILES["tiedosto"] : "";
 
 if ($tee == "poista") {
   poista_liitetiedosto($poistettava_tiedosto);
+  $tee = "";
 }
 
-if ($tee == "tallenna_tiedosto" and !empty($tiedosto["tmp_name"]) and !empty($selite)) {
+if ($tee == "tallenna_tiedosto" and
+    !empty($tiedosto["tmp_name"]) and
+    !empty($selite) and
+    !empty($aihealue) and
+    !empty($tiedostotyyppi)
+) {
   if (tallenna_liite("tiedosto", "muut_tiedostot", 0, $selite, "{$aihealue} | {$tiedostotyyppi}")) {
     echo "<font class='ok'>" . t("Tiedosto tallennettu onnistuneesti") . "</font>";
   }
+
+  $tee = "";
 }
 
 if (!empty($tiedostotyyppi) and empty($tiedosto["tmp_name"]) and $tallenna_nappi) {
@@ -31,21 +39,27 @@ if (!empty($tiedostotyyppi) and empty($tiedosto["tmp_name"]) and $tallenna_nappi
 
   $tee = "";
 }
-
-if (!empty($tiedostotyyppi) and empty($selite) and $tallenna_nappi
-) {
+elseif (!empty($tiedostotyyppi) and empty($selite) and $tallenna_nappi) {
   echo "<font class='error'>" . t("Sinun täytyy valita tiedostolle selite") . "</font>";
 
   $tee = "";
 }
 
+if ($tee == "tallenna_tiedosto" and !empty($aihealue)) {
+  $tee = "";
+}
+
 if ($tee == "") {
   $aihealueet = hae_aihealueet();
-  $params     = array("tiedoston_tyyppi" => $tiedostotyyppi, "aihealue" => $aihealue);
+  $params     = array(
+    "tiedoston_tyyppi" => $tiedostotyyppi,
+    "aihealue"         => $aihealue
+  );
   $tiedostot  = hae_tiedostot($params);
 
   if (!empty($aihealueet)) {
     piirra_formi($aihealue, $tiedostotyyppi, $aihealueet);
+
     if ($tiedostot) {
       piirra_tiedostolista($tiedostot, $aihealue, $tiedostotyyppi);
     }
@@ -56,15 +70,17 @@ if ($tee == "") {
 }
 
 function piirra_formi($valittu_aihealue, $valittu_tiedostotyyppi, $aihealueet) {
+  $tiedostotyypit = tiedostotyypit($valittu_aihealue);
+
   echo "<form method='post' enctype='multipart/form-data'>";
-  echo "<input type='hidden' name='tee' value='tallenna_tiedosto'/>";
+  echo "<input type='hidden' name='tee' value='tallenna_tiedosto'>";
   echo "<table>";
   echo "<tbody>";
 
   echo "<tr>";
   echo "<td><label for='aihealue'>" . t("Aihealue") . "</label></td>";
   echo "<td>";
-  echo '<select id="aihealue" name="aihealue" onchange="submit()">';
+  echo '<select id="aihealue" name="aihealue" onchange="submit();">';
 
   foreach ($aihealueet as $aihealue) {
     $valittu = $valittu_aihealue == $aihealue['selite'] ? "selected" : "";
@@ -75,11 +91,11 @@ function piirra_formi($valittu_aihealue, $valittu_tiedostotyyppi, $aihealueet) {
   echo "</td>";
   echo "</tr>";
 
-  if (!empty($valittu_aihealue) and $tiedostotyypit = tiedostotyypit($valittu_aihealue)) {
+  if (!empty($valittu_aihealue) and !empty($tiedostotyypit)) {
     echo "<tr>";
-    echo "<td><label for='tyyppi_id'>" . t("Tiedoston tyyppi") . "</label></td>";
+    echo "<td><label for='tiedostotyyppi'>" . t("Tiedoston tyyppi") . "</label></td>";
     echo "<td>";
-    echo "<select id='tiedostotyyppi_id' name='tiedostotyyppi' onclick='submit();'>";
+    echo "<select id='tiedostotyyppi' name='tiedostotyyppi' onclick='submit();'>";
 
     foreach ($tiedostotyypit as $tiedostotyyppi) {
       $valittu = $valittu_tiedostotyyppi == $tiedostotyyppi["selitetark"] ? "selected" : "";
@@ -117,10 +133,12 @@ function piirra_formi($valittu_aihealue, $valittu_tiedostotyyppi, $aihealueet) {
 
   $buttonin_teksti = (empty($valittu_aihealue) or empty($tiedostotyypit)) ? "Jatka" : "Tallenna";
 
-  echo "<input name='tallenna_nappi' type='submit' value='" . t($buttonin_teksti) . "'/>";
+  echo "<input name='tallenna_nappi' type='submit' value='" . t($buttonin_teksti) . "'>";
 
-  if (!empty($valittu_aihealue) and $tiedostotyypit = tiedostotyypit($valittu_aihealue)) {
-    echo "<input name='listaa_tiedostot' type='submit' value='Listaa aihealueen valitun tyyppiset tiedostot'>";
+  if (!empty($valittu_aihealue) and !empty($tiedostotyypit)) {
+    echo "<input name='listaa_tiedostot'
+                 type='submit'
+                 value='Listaa aihealueen valitun tyyppiset tiedostot'>";
   }
 
   echo "</td>";
@@ -147,9 +165,12 @@ function piirra_tiedostolista($tiedostot, $aihealue, $tiedostotyyppi) {
     echo "<input type='hidden' name='aihealue' value='{$aihealue}'>";
     echo "<input type='hidden' name='tiedostotyyppi' value='{$tiedostotyyppi}'>";
     echo "<input type='hidden' name='poistettava_tiedosto' value='{$tiedosto["tunnus"]}'>";
-    echo "<input type='submit'
+    echo
+      "<input type='submit'
                  value='Poista'
-                 onclick='return confirm(\"Oletko varma, että haluat poistaa tämän tiedoston\");'>
+                 onclick='return confirm(\"" .
+      t("Oletko varma, että haluat poistaa tämän tiedoston") .
+      "\");'>
           </td>";
     echo "</form>";
     echo "</tr>";

@@ -2,6 +2,24 @@
 
 require 'inc/edifact_functions.inc';
 
+if (isset($_POST['task']) and $_POST['task'] == 'nayta_laskutusraportti') {
+
+  $pdf_data = unserialize(base64_decode($_POST['parametrit']));
+
+  $sessio = $_POST['session'];
+  $logo_url = $_POST['logo_url'];
+  $logo_info = pdf_logo($logo_url, $sessio);
+
+  $pdf_data['logodata'] = $logo_info['logodata'];
+  $pdf_data['scale'] = $logo_info['scale'];
+
+  $pdf_tiedosto = laskutusraportti_pdf($pdf_data);
+
+  header("Content-type: application/pdf");
+  echo file_get_contents($pdf_tiedosto);
+  die;
+}
+
 if (isset($_POST['task']) and $_POST['task'] == 'nayta_lahtoilmoitus') {
 
   $pdf_data = unserialize(base64_decode($_POST['parametrit']));
@@ -50,6 +68,25 @@ if (isset($_POST['task']) and $_POST['task'] == 'hae_pakkalista') {
 require "inc/parametrit.inc";
 
 if (!isset($errors)) $errors = array();
+
+if (isset($task) and $task == 'laivamuutos') {
+
+  if (!empty($uusilaiva)) {
+
+    $vanhat_tiedot = unserialize(base64_decode($vanhat_tiedot));
+    $uusilaiva = mysql_real_escape_string($uusilaiva);
+    $vanhat_tiedot['transport_name'] = $uusilaiva;
+    $uudet_tiedot = serialize($vanhat_tiedot);
+
+    $query = "UPDATE laskun_lisatiedot SET
+              matkatiedot = '{$uudet_tiedot}'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND konttiviite = '{$konttiviite}'";
+    pupe_query($query);
+
+  }
+  unset($task);
+}
 
 if (isset($task) and $task == 'suorita_hylky') {
 
@@ -457,6 +494,7 @@ if (!isset($task)) {
             laskun_lisatiedot.matkakoodi,
             laskun_lisatiedot.konttiviite,
             laskun_lisatiedot.konttimaara,
+            laskun_lisatiedot.matkatiedot,
             laskun_lisatiedot.konttityyppi,
             laskun_lisatiedot.satamavahvistus_pvm,
             laskun_lisatiedot.rullamaara,
@@ -494,7 +532,7 @@ if (!isset($task)) {
             {$rajauslisa}
             AND laskun_lisatiedot.konttiviite != ''
             GROUP BY lasku.asiakkaan_tilausnumero
-            ORDER BY konttiviite";
+            ORDER BY toimaika, konttiviite";
   $result = pupe_query($query);
 
   $tilaukset = array();
@@ -512,6 +550,7 @@ if (!isset($task)) {
     echo "<tr>";
     echo "<th>".t("Tilauskoodi")."</th>";
     echo "<th>".t("Matkakoodi")."</th>";
+    echo "<th>".t("Laiva")."</th>";
     echo "<th>".t("Lähtöpäivä")."</th>";
     echo "<th>".t("Konttiviite")."</th>";
     echo "<th>".t("Rullien määrä")."</th>";
@@ -520,14 +559,14 @@ if (!isset($task)) {
     echo "<th class='back'></th>";
     echo "</tr>";
 
-    sort($tilaukset);
-
     foreach ($tilaukset as $key => $tilaus) {
 
       $poikkeukset = array();
 
       $viitelasku = array_count_values($viitteet);
       $tilauksia_viitteella = $viitelasku[$tilaus['konttiviite']];
+
+      $id = md5($tilaus['konttiviite']);
 
       if (in_array($tilaus['konttiviite'], $kasitellyt_konttivitteet)) {
         $konttiviite_kasitelty = true;
@@ -565,8 +604,34 @@ if (!isset($task)) {
       echo $tilaus['matkakoodi'];
       echo "</td>";
 
+      if (!$konttiviite_kasitelty) {
+
+        echo "<td valign='top' rowspan='{$tilauksia_viitteella}'>";
+
+        $matkatiedot = unserialize($tilaus['matkatiedot']);
+        $vanhat_tiedot = base64_encode($tilaus['matkatiedot']);
+
+        echo "<a style='cursor:pointer;' id='uusilaivanappi{$id}' class='uusilaivanappi'>";
+        echo $matkatiedot['transport_name'];
+        echo "</a>";
+
+        echo "<div style='display:none;' class='uusilaivaformi' id='uusilaivaformi{$id}'>";
+        echo "<form method='post'>";
+        echo "<input type='hidden' name='task' value='laivamuutos' />";
+        echo "<input type='hidden' name='vanhat_tiedot' value='{$vanhat_tiedot}' />";
+        echo "<input type='hidden' name='konttiviite' ";
+        echo "value='{$tilaus['konttiviite']}' />";
+        echo "<input type='text' class='uusilaivainput' name='uusilaiva' style='width:100px' /><br>";
+        echo "<input type='submit' value='". t("Muuta") ."' />&nbsp;";
+        echo "<img src='{$palvelin2}pics/lullacons/stop.png' alt='Peru' title='Peru' class='uusilaivaperu' style='position:relative; top:4px;'>";
+        echo "</form></div>";
+        echo "</td>";
+
+        $kasitellyt_konttivitteet[] = $tilaus['konttiviite'];
+      }
+
       echo "<td valign='top'>";
-      echo $tilaus['toimaika'];
+      echo date("j.n.Y", strtotime($tilaus['toimaika']));
       echo "</td>";
 
 
@@ -773,7 +838,6 @@ if (!isset($task)) {
         echo "<td valign='top' rowspan='{$tilauksia_viitteella}' align='center'>";
         echo $tilaus['konttimaara'] . " kpl (ennakkoarvio)";
         echo "</td>";
-        $kasitellyt_konttivitteet[] = $tilaus['konttiviite'];
       }
       else {
         echo "<td valign='top' rowspan='{$tilauksia_viitteella}' align='right'>";
@@ -857,8 +921,6 @@ if (!isset($task)) {
 
         if ($kesken == 0 and $mrn_tullut and $tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
 
-          $id = md5($tilaus['konttiviite']);
-
           echo "
           <div style='text-align:center;margin:10px 0;'>
             <button type='button' disabled>" . t("Satamavahvistus lähetetty") . "</button>";
@@ -880,7 +942,6 @@ if (!isset($task)) {
         if ($kesken == 0 and $mrn_tullut) {
 
           $parametrit = lahtoilmoitus_parametrit($tilaus['konttiviite']);
-
           $parametrit = serialize($parametrit);
           $parametrit = base64_encode($parametrit);
 
@@ -901,6 +962,29 @@ if (!isset($task)) {
           echo t("Näytä lähtöilmoitus");
           echo "</button></div>";
 
+          if ($tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
+
+            $parametrit = laskutusraportti_parametrit($tilaus['konttiviite']);
+            $parametrit = serialize($parametrit);
+            $parametrit = base64_encode($parametrit);
+
+            echo "
+            <div style='text-align:center'>
+            <form method='post' id='nayta_laskutusraportti{$id}'>
+            <input type='hidden' name='parametrit' value='{$parametrit}' />
+            <input type='hidden' name='task' value='nayta_laskutusraportti' />
+            <input type='hidden' name='session' value='{$session}' />
+            <input type='hidden' name='logo_url' value='{$logo_url}' />
+            <input type='hidden' name='tee' value='XXX' />
+            </form>
+            <button onClick=\"js_openFormInNewWindow('nayta_laskutusraportti{$id}',
+             'Satamavahvistus'); return false;\" />";
+
+            echo t("Laskutusraportti");
+            echo "</button></div>";
+          }
+
+          echo "</div>";
         }
 
         echo "</td>";
@@ -916,6 +1000,22 @@ if (!isset($task)) {
     echo "Ei tilauksia...";
   }
 }
+
+
+echo "<script type='text/javascript'>
+
+  $('.uusilaivaperu').click(function() {
+    $('.uusilaivaformi').hide();
+    $('.uusilaivainput').val('');
+  });
+
+  $('.uusilaivanappi').bind('click',function(){
+    var id = $(this).attr('id').replace('nappi', 'formi');
+    $('.uusilaivaformi').hide();
+    $('#'+id).show();
+  });
+
+</script>";
 
 if (isset($task) and ($task == 'anna_konttitiedot' or $task == 'korjaa_konttitiedot')) {
 

@@ -27,13 +27,13 @@ elseif (@include "parametrit.inc");
 else exit;
 
 if ($tee == "laheta_viesti" and $yhtiorow["vahvistusviesti_asiakkaalle"] == "Y") {
-  require_once("inc/jt_ja_tyomaarays_valmis_viesti.inc");
+  require_once "inc/jt_ja_tyomaarays_valmis_viesti.inc";
 
   $viestin_lahetys_onnistui =
     laheta_vahvistusviesti($zoner_tunnarit["username"],
-                           $zoner_tunnarit["salasana"],
-                           $tilausnumero,
-                           true);
+    $zoner_tunnarit["salasana"],
+    $tilausnumero,
+    true);
 
   $tee = "";
 }
@@ -270,7 +270,7 @@ if ($tila == "KORVAMERKITSE") {
   $query = "SELECT otunnus
             FROM tilausrivi
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$rivitunnus}'";
+            AND tunnus  = '{$rivitunnus}'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0 and mysql_result($result, 0) == $tilausnumero) {
@@ -284,14 +284,14 @@ if ($tila == "KORVAMERKITSE") {
     $query = "UPDATE tilausrivin_lisatiedot
               JOIN tilausrivi
                 ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio
-                AND tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+                AND tilausrivi.tunnus                     = tilausrivin_lisatiedot.tilausrivitunnus
               JOIN lasku
                 ON lasku.yhtio = tilausrivin_lisatiedot.yhtio
-                AND lasku.tunnus = tilausrivi.otunnus
+                AND lasku.tunnus                          = tilausrivi.otunnus
               SET tilausrivin_lisatiedot.korvamerkinta = '{$korvamerkinta}'
-              WHERE tilausrivin_lisatiedot.yhtio = '{$kukarow['yhtio']}'
+              WHERE tilausrivin_lisatiedot.yhtio          = '{$kukarow['yhtio']}'
               AND tilausrivin_lisatiedot.tilausrivitunnus = '{$rivitunnus}'
-              AND lasku.tunnus = '{$kukarow['kesken']}'";
+              AND lasku.tunnus                            = '{$kukarow['kesken']}'";
     pupe_query($query);
 
   }
@@ -411,26 +411,26 @@ if (($kukarow["extranet"] != '' and $toim != 'EXTRANET' and $toim != 'EXTRANET_R
 if ($tee == 'TARKISTA') {
   $uquery = "UPDATE lasku
              SET tilaustyyppi = 'L'
-             WHERE yhtio = '{$kukarow['yhtio']}'
-             AND tunnus = $tilausnumero
+             WHERE yhtio      = '{$kukarow['yhtio']}'
+             AND tunnus       = $tilausnumero
              AND tilaustyyppi = 'H'
-             AND tila = 'N'";
+             AND tila         = 'N'";
 
   $uresult = pupe_query($uquery);
 
   $lquery = "SELECT *
              FROM lasku
              WHERE yhtio = '{$kukarow['yhtio']}'
-             AND tunnus = $tilausnumero";
+             AND tunnus  = $tilausnumero";
 
   $lresult  = pupe_query($lquery);
   $laskurow = mysql_fetch_assoc($lresult);
 
   $xquery = "SELECT *
              FROM tilausrivi
-             WHERE yhtio = '{$kukarow['yhtio']}'
-             AND otunnus = $tilausnumero
-             AND tyyppi != 'D'";
+             WHERE yhtio  = '{$kukarow['yhtio']}'
+             AND otunnus  = $tilausnumero
+             AND tyyppi  != 'D'";
 
   $xresult = pupe_query($xquery);
 
@@ -578,8 +578,8 @@ if ($kukarow["extranet"] != '') {
 
         $query = "UPDATE kuka
                   SET kesken   = '$tilausnumero'
-                  WHERE yhtio  = '{$kukarow['yhtio']}'
-                  AND kuka     = '{$kukarow['kuka']}'
+                  WHERE yhtio   = '{$kukarow['yhtio']}'
+                  AND kuka      = '{$kukarow['kuka']}'
                   AND extranet != ''";
         $result = pupe_query($query);
       }
@@ -792,9 +792,9 @@ else {
 }
 
 if (($naytetaan_tilausvahvistusnappi or
-     $toim == "TARJOUS" or $toim == "EXTTARJOUS") or
-     (isset($laskurow["tilaustyyppi"]) and $laskurow["tilaustyyppi"] == "T") or
-     $toim == "PROJEKTI") {
+    $toim == "TARJOUS" or $toim == "EXTTARJOUS") or
+  (isset($laskurow["tilaustyyppi"]) and $laskurow["tilaustyyppi"] == "T") or
+  $toim == "PROJEKTI") {
 
   // ekotetaan javascriptiä jotta saadaan pdf:ät uuteen ikkunaan
   js_openFormInNewWindow();
@@ -4103,11 +4103,11 @@ if ($tee == '') {
         }
       }
       elseif ($tilausrivi["var"] == "P" or
-              ($yhtiorow["extranet_nayta_saldo"] and
-               (($asiakasrow['extranet_tilaus_varaa_saldoa'] == "" and
-                 $yhtiorow["extranet_tilaus_varaa_saldoa"] == "E") or
-                $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and
-               $laskurow["tilaustyyppi"] == "H")
+        ($yhtiorow["extranet_nayta_saldo"] and
+          (($asiakasrow['extranet_tilaus_varaa_saldoa'] == "" and
+              $yhtiorow["extranet_tilaus_varaa_saldoa"] == "E") or
+            $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and
+          $laskurow["tilaustyyppi"] == "H")
       ) {
         $kpl = $tilausrivi['tilkpl'];
       }
@@ -6273,6 +6273,18 @@ if ($tee == '') {
         $kommenttirivi_nakyviin = false;
       }
 
+      $bordercolor = "";
+
+      if ($yhtiorow["kayttoliittyma"] == "U") {
+        // Otetaan yhtiön css:stä SPEC_COLOR
+        preg_match("/.*?\/\*(.*?(SPEC_COLOR))\*\//", $yhtiorow['css'], $varitmatch);
+        preg_match("/(#[a-f0-9]{3,6});/i", $varitmatch[0], $varirgb);
+
+        if (!empty($varirgb[1])) {
+          $bordercolor = " $varirgb[1]";
+        }
+      }
+
       foreach ($rows as $row) {
         if ($toim == "VALMISTAVARASTOON" and $yhtiorow["kehahinta_valmistuksella"] == "K"
           and $row["tyyppi"] != "V" and isset($tuotteenpainotettukehayht["keha"])) {
@@ -6384,8 +6396,8 @@ if ($tee == '') {
 
         if ((($asiakasrow['extranet_tilaus_varaa_saldoa'] == "" and
               $yhtiorow["extranet_tilaus_varaa_saldoa"] == "E") or
-             $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and
-            $laskurow["tilaustyyppi"] == "H"
+            $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and
+          $laskurow["tilaustyyppi"] == "H"
         ) {
           $kplmaara = $row["tilkpl"];
         }
@@ -6646,7 +6658,7 @@ if ($tee == '') {
             if ($row['perheid'] != 0 and ($tilauksen_jarjestys == '1' or $tilauksen_jarjestys == '0' or $tilauksen_jarjestys == '4' or $tilauksen_jarjestys == '5')) {
               $tuoteperhe_kayty = $row['perheid'];
             }
-            echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid; border-left: 1px solid; border-bottom: 1px solid;'>$echorivino";
+            echo "<td valign='top' rowspan='$pknum' $class style='border-top: 1px solid{$bordercolor}; border-left: 1px solid{$bordercolor}; border-bottom: 1px solid{$bordercolor};'>$echorivino";
 
             if (($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] == 'S') or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
               echo "<br/>";
@@ -6758,31 +6770,31 @@ if ($tee == '') {
         $classlisa = "";
 
         if (isset($pkrow[1]) and $borderlask == 1 and $pkrow[1] == 1 and $pknum == 1) {
-          $classlisa = $class." style='border-top: 1px solid; border-bottom: 1px solid; border-right: 1px solid;' ";
-          $class    .= " style=' border-top: 1px solid; border-bottom: 1px solid;' ";
+          $classlisa = $class." style='border-top: 1px solid{$bordercolor}; border-bottom: 1px solid{$bordercolor}; border-right: 1px solid{$bordercolor};' ";
+          $class    .= " style=' border-top: 1px solid{$bordercolor}; border-bottom: 1px solid{$bordercolor};' ";
 
           $borderlask--;
         }
         elseif (isset($pkrow[1]) and $borderlask == $pkrow[1] and $pkrow[1] > 0) {
-          $classlisa = $class." style='border-top: 1px solid; border-right: 1px solid;' ";
-          $class    .= " style='border-top: 1px solid;' ";
+          $classlisa = $class." style='border-top: 1px solid{$bordercolor}; border-right: 1px solid{$bordercolor};' ";
+          $class    .= " style='border-top: 1px solid{$bordercolor};' ";
 
           $borderlask--;
         }
         elseif ($borderlask == 1) {
           if ($kommenttirivi_nakyviin or $row['kommentti'] != '' or ($yhtiorow['naytetaanko_ale_peruste_tilausrivilla'] != '' and $row['ale_peruste'] != '')) {
-            $classlisa = $class." style='font-style:italic; border-right: 1px solid;' ";
+            $classlisa = $class." style='font-style:italic; border-right: 1px solid{$bordercolor};' ";
             $class    .= " style='font-style:italic; ' ";
           }
           else {
-            $classlisa = $class." style='font-style:italic; border-bottom: 1px solid; border-right: 1px solid;' ";
-            $class    .= " style='font-style:italic; border-bottom: 1px solid;' ";
+            $classlisa = $class." style='font-style:italic; border-bottom: 1px solid{$bordercolor}; border-right: 1px solid{$bordercolor};' ";
+            $class    .= " style='font-style:italic; border-bottom: 1px solid{$bordercolor};' ";
           }
 
           $borderlask--;
         }
         elseif ($borderlask > 0 and $borderlask <= $pknum) {
-          $classlisa = $class." style='font-style:italic; border-right: 1px solid;' ";
+          $classlisa = $class." style='font-style:italic; border-right: 1px solid{$bordercolor};' ";
           $class    .= " style='font-style:italic;' ";
           $borderlask--;
         }
@@ -7297,11 +7309,11 @@ if ($tee == '') {
             }
           }
           elseif ($row["var"] == 'P' or
-                  ($kukarow['extranet'] != '' and $row['positio'] == 'Ei varaa saldoa') or
-                  ((($asiakasrow['extranet_tilaus_varaa_saldoa'] == "" and
-                     $yhtiorow["extranet_tilaus_varaa_saldoa"] == "E") or
-                    $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and
-                   ($laskurow["tilaustyyppi"] == "H"))
+            ($kukarow['extranet'] != '' and $row['positio'] == 'Ei varaa saldoa') or
+            ((($asiakasrow['extranet_tilaus_varaa_saldoa'] == "" and
+                  $yhtiorow["extranet_tilaus_varaa_saldoa"] == "E") or
+                $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and
+              ($laskurow["tilaustyyppi"] == "H"))
           ) {
             $kpl_ruudulle = $row['tilkpl'] * 1;
           }
@@ -8207,11 +8219,11 @@ if ($tee == '') {
           echo "<tr>";
 
           if ($borderlask == 0 and $pknum > 1) {
-            $kommclass1 = " style='border-bottom: 1px solid; border-right: 1px solid;'";
-            $kommclass2 = " style='border-bottom: 1px solid;'";
+            $kommclass1 = " style='border-bottom: 1px solid{$bordercolor}; border-right: 1px solid{$bordercolor};'";
+            $kommclass2 = " style='border-bottom: 1px solid{$bordercolor};'";
           }
           elseif ($pknum > 0) {
-            $kommclass1 = " style='border-right: 1px solid;'";
+            $kommclass1 = " style='border-right: 1px solid{$bordercolor};'";
             $kommclass2 = " ";
           }
           else {
@@ -8376,8 +8388,8 @@ if ($tee == '') {
 
           if ((($asiakasrow['extranet_tilaus_varaa_saldoa'] == "" and
                 $yhtiorow["extranet_tilaus_varaa_saldoa"] == "E") or
-               $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and
-              $laskurow["tilaustyyppi"] == "H"
+              $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and
+            $laskurow["tilaustyyppi"] == "H"
           ) {
             $kplkentta = "tilkpl";
           }
@@ -9345,16 +9357,16 @@ if ($tee == '') {
           </form></td>";
 
       if ($yhtiorow["vahvistusviesti_asiakkaalle"] == "Y") {
-        require_once("inc/jt_ja_tyomaarays_valmis_viesti.inc");
+        require_once "inc/jt_ja_tyomaarays_valmis_viesti.inc";
 
         $aika = hae_vahvistusviesti_lahetetty($tilausnumero);
 
         $vahvistus_teksti = $aika ? t("Vahvistusviesti on lähetetty asiakkaalle viimeksi") .
-                                    " " .
-                                    "<time datetime='{$aika}'>{$aika}</time>" : "";
+          " " .
+          "<time datetime='{$aika}'>{$aika}</time>" : "";
 
         echo
-          "<td class='back' valign='top'>
+        "<td class='back' valign='top'>
                 <form method='post'>
                   <input type='hidden' name='toim' value='{$toim}'>
                   <input type='hidden' name='lopetus' value='{$lopetus}'>
@@ -9641,7 +9653,7 @@ if ($tee == '') {
           $tee_value = 'TARKISTA';
           $painike_txt = t("Tarkista tuotteiden saatavuus");
         }
-        else{
+        else {
           $tee_value = 'VALMIS';
           $painike_txt = $otsikko.' '.t("valmis").' '.$laskelisa;
         }

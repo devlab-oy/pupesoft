@@ -730,10 +730,22 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
   $worksheet->writeString($excelrivi, $excelsarake, t("Saldo"),         $format_bold);
   $excelsarake++;
+
+  if ($varatturajaus == "O") {
+    $worksheet->writeString($excelrivi, $excelsarake, t("Varattu saldo"), $format_bold);
+    $excelsarake++;
+  }
+
   $worksheet->writeString($excelrivi, $excelsarake, t("Kehahin"),       $format_bold);
   $excelsarake++;
   $worksheet->writeString($excelrivi, $excelsarake, t("Varastonarvo"),     $format_bold);
   $excelsarake++;
+
+  if ($varatturajaus == "O") {
+    $worksheet->writeString($excelrivi, $excelsarake, t("Varattu varastonarvo"), $format_bold);
+    $excelsarake++;
+  }
+
   if ("$vv-$kk-$pp" != date("Y-m-d")) {
     $worksheet->writeString($excelrivi, $excelsarake, t("Bruttovarastonarvo")." ".t("Arvio"), $format_bold);
   }
@@ -879,7 +891,9 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
       $query = "SELECT tuotepaikat.tuoteno,
                 sum(tuotepaikat.saldo) saldo,
+                sum(tuotepaikat.saldo_varattu) AS varattu_saldo,
                 sum(tuotepaikat.saldo*if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0)) varasto,
+                sum(tuotepaikat.saldo_varattu * if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0)) AS varattu_varastonarvo,
                 sum(tuotepaikat.saldo*tuote.kehahin) bruttovarasto
                 FROM tuotepaikat
                 JOIN tuote ON (tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio and tuote.ei_saldoa = '')
@@ -891,8 +905,12 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $vararvorow = mysql_fetch_assoc($vararvores);
 
       $kpl = (float) $vararvorow["saldo"];
+      $varattu_saldo = $vararvorow["varattu_saldo"];
       $varaston_arvo = hinta_kuluineen( $vararvorow["tuoteno"], (float) $vararvorow["varasto"] );
-      $bruttovaraston_arvo = hinta_kuluineen( $vararvorow["tuoteno"], (float) $vararvorow["bruttovarasto"] );
+      $varattu_varastonarvo =
+        hinta_kuluineen($vararvorow["tuoteno"], (float) $vararvorow["varattu_varastonarvo"]);
+      $bruttovaraston_arvo =
+        hinta_kuluineen($vararvorow["tuoteno"], (float) $vararvorow["bruttovarasto"]);
     }
 
     // jos summaustaso on per paikka, otetaan varastonmuutos vain siltä paikalta
@@ -1224,10 +1242,22 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
       $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $muutoskpl));
       $excelsarake++;
+
+      if ($varatturajaus == "O") {
+        $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $varattu_saldo));
+        $excelsarake++;
+      }
+
       $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $kehasilloin));
       $excelsarake++;
       $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $muutoshinta));
       $excelsarake++;
+
+      if ($varatturajaus == "O") {
+        $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $varattu_varastonarvo));
+        $excelsarake++;
+      }
+
       $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $bmuutoshinta));
       $excelsarake++;
 

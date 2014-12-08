@@ -1127,11 +1127,11 @@ echo "<script type='text/javascript'>
           $('#tapahtumat').on('click', function() {
 
             var _src = '{$palvelin2}pics/loading_blue_small.gif',
-                historia = $('#historia').val(),
+                historia = $('#historia option:selected').val(),
                 sarjanumeroseuranta = $('#sarjanumeroseuranta').val(),
                 ei_saldoa = $('#ei_saldoa').val(),
                 kehahin = $('#kehahin').val(),
-                tapahtumalaji = $('#tapahtumalaji').val(),
+                tapahtumalaji = $('#tapahtumalaji option:selected').val(),
                 tilalehinta = $('#tilalehinta:checked').val();
 
             $('#tapahtumat_container').html('<img src=\"'+_src+'\" /><br />');
@@ -2627,7 +2627,7 @@ if ($tee == 'Z') {
 
       echo "<tr>";
       echo "<th colspan='5'>".t("Näytä tapahtumat").": ";
-      echo "<select id='historia' name='historia' onchange='submit();'>'";
+      echo "<select id='historia' name='historia'>'";
       echo "<option value='1' $chk[1]> ".t("20 viimeisintä")."</option>";
 
       $query = "SELECT * FROM tilikaudet WHERE yhtio = '$kukarow[yhtio]' ORDER BY tilikausi_loppu DESC";
@@ -2671,7 +2671,7 @@ if ($tee == 'Z') {
       }
 
       echo "'>".t("Tapahtumalaji").": ";
-      echo "<select id='tapahtumalaji' name='tapahtumalaji' onchange='submit();'>'";
+      echo "<select id='tapahtumalaji' name='tapahtumalaji'>'";
       echo "<option value=''>".t("Näytä kaikki")."</option>";
       echo "<option value='laskutus' $sel1>".t("Laskutukset")."</option>";
       echo "<option value='tulo' $sel2>".t("Tulot")."</option>";
@@ -2686,7 +2686,7 @@ if ($tee == 'Z') {
       echo "</th>";
 
       echo "<th>";
-      echo t("Näytä tilausrivin hinta ja ale").": <input type='checkbox' name='tilalehinta' id='tilalehinta' $check onClick='javascript:submit();'>";
+      echo t("Näytä tilausrivin hinta ja ale").": <input type='checkbox' name='tilalehinta' id='tilalehinta' $check />";
       echo "</th>";
 
       echo "</tr>";

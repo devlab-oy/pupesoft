@@ -5220,7 +5220,7 @@ if ($tee == '') {
 
         echo "<br>";
         echo "<table>";
-        echo "<tr>$jarjlisa<td class='back' style='padding:0px; margin:0px;'>";
+        echo "<tr>$jarjlisa<td class='back nopad top'>";
 
         echo "<table>
           <tr><th colspan='2'>".t_tuotteen_avainsanat($tuote, 'nimitys')."</th></tr>
@@ -5496,7 +5496,7 @@ if ($tee == '') {
 
             $oikeus_chk = tarkista_oikeus("tuote.php");
 
-            echo "<td class='back' style='padding:0px; margin:0px;'>$jarjlisa";
+            echo "<td class='back nopad top'>$jarjlisa";
 
             echo "<table>";
             echo "<tr>";

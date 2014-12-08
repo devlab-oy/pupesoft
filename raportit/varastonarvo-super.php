@@ -891,10 +891,9 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
       $query = "SELECT tuotepaikat.tuoteno,
                 sum(tuotepaikat.saldo) saldo,
-                sum(tuotepaikat.saldo_varattu) AS varattu_saldo,
                 sum(tuotepaikat.saldo*if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0)) varasto,
-                sum(tuotepaikat.saldo_varattu * if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0)) AS varattu_varastonarvo,
-                sum(tuotepaikat.saldo*tuote.kehahin) bruttovarasto
+                sum(tuotepaikat.saldo*tuote.kehahin) bruttovarasto,
+                tuote.kehahin
                 FROM tuotepaikat
                 JOIN tuote ON (tuote.tuoteno = tuotepaikat.tuoteno and tuote.yhtio = tuotepaikat.yhtio and tuote.ei_saldoa = '')
                 WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
@@ -904,11 +903,21 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $vararvores = pupe_query($query);
       $vararvorow = mysql_fetch_assoc($vararvores);
 
+      $varattu_query = "SELECT sum(varattu) AS varattu_saldo
+                        FROM tilausrivi
+                        WHERE tuoteno = '{$vararvorow["tuoteno"]}'
+                        AND yhtio = '{$kukarow["yhtio"]}'
+                        AND tyyppi IN ('B', 'F', 'L', 'V', 'W')";
+
+      $varattu_result = pupe_query($varattu_query);
+      $varattu_result = mysql_fetch_assoc($varattu_result);
+
       $kpl = (float) $vararvorow["saldo"];
-      $varattu_saldo = $vararvorow["varattu_saldo"];
+      $varattu_saldo = $varattu_result["varattu_saldo"];
       $varaston_arvo = hinta_kuluineen( $vararvorow["tuoteno"], (float) $vararvorow["varasto"] );
+      $varattu_varastonarvo = $varattu_saldo * $vararvorow["kehahin"];
       $varattu_varastonarvo =
-        hinta_kuluineen($vararvorow["tuoteno"], (float) $vararvorow["varattu_varastonarvo"]);
+        hinta_kuluineen($vararvorow["tuoteno"], (float) $varattu_varastonarvo);
       $bruttovaraston_arvo =
         hinta_kuluineen($vararvorow["tuoteno"], (float) $vararvorow["bruttovarasto"]);
     }

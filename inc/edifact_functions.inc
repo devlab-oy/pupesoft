@@ -516,7 +516,7 @@ function satamavahvistus_parametrit($konttiviite) {
               AND ss.myyntirivitunnus = tilausrivi.tunnus
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             AND tilausrivi.otunnus IN ({$tunnukset})
-            AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu')";
+            AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu' OR ss.lisatieto = 'Toimitettu')";
   $result = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($result)) {

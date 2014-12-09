@@ -382,10 +382,10 @@ if (isset($task) and $task == 'laheta_satamavahvistus') {
                 FROM liitetiedostot
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND liitos = 'lasku'
-                AND liitostunnus = '$tunnus',
+                AND liitostunnus = '{$tunnus}'
                 AND kayttotarkoitus = 'satamavahvistus'
                 AND selite = '{$konttiviite}'";
-      $result = pupe_query($result);
+      $result = pupe_query($query);
 
       if (mysql_num_rows($result) == 0) {
 

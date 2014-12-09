@@ -1153,8 +1153,7 @@ echo "<script type='text/javascript'>
                 tilalehinta: tilalehinta
               },
               success: function(data) {
-                $('#tapahtumat_container').empty();
-                $('#tapahtumat_header').after(data);
+                $('#tapahtumat_container').html(data);
               }
             });
           });
@@ -2619,7 +2618,8 @@ if ($tee == 'Z') {
       echo "<input type='hidden' name='raportti' value='$raportti'>";
 
       echo "&nbsp;&nbsp;<a href='#' name='Tapahtumat'><img src='pics/lullacons/arrow-double-up-green.png' /></a>";
-      echo "<hr>";
+      echo "&nbsp;&nbsp;<input type='button' id='tapahtumat' value='",t("Näytä"),"' />";
+      echo "<hr />";
       echo "<table>";
 
       if ($historia == "") $historia=1;
@@ -2711,10 +2711,7 @@ if ($tee == 'Z') {
       echo "</tr>";
 
       //tapahtumat
-      $_cols = $tilalehinta != '' ? 12 : 11;
-      echo "<tr id='tapahtumat_container'><td colspan='{$_cols}' class='back'>";
-      echo "<input type='button' id='tapahtumat' value='",t("Näytä"),"' />";
-      echo "</td></tr>";
+      echo "<tbody id='tapahtumat_container'></tbody>";
 
       echo "</table>";
     }

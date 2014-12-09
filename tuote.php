@@ -38,6 +38,13 @@ if (isset($ajax)) {
 
   if ($ajax == "vastaavat") {
 
+    if (isset($toimipaikan_varastot)) {
+      $toimipaikan_varastot = unserialize(urldecode($toimipaikan_varastot));
+    }
+    else {
+      $toimipaikan_varastot = array();
+    }
+
     $_return = "";
 
     $vastaavat = new Vastaavat($tuoteno);

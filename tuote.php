@@ -1079,7 +1079,9 @@ echo "<script type='text/javascript'>
           $('#tuotteen_tilaukset').on('click', function() {
 
             var _src = '{$palvelin2}pics/loading_blue_small.gif',
-                toimipaikka = $('#toimipaikka').val();
+                toimipaikka = $('#toimipaikka option:selected').val();
+
+            $(this).val('".t("Päivitä")."');
 
             $('#tuotteen_tilaukset_container').html('<img src=\"'+_src+'\" /><br />');
 
@@ -1105,7 +1107,9 @@ echo "<script type='text/javascript'>
             var _src = '{$palvelin2}pics/loading_blue_small.gif',
                 raportointi_tyyppi = $('.raportti_tyyppi:checked').val(),
                 yksikko = $('#yksikko').val(),
-                toimipaikka = $('#toimipaikka').val();
+                toimipaikka = $('#toimipaikka option:selected').val();
+
+            $(this).val('".t("Päivitä")."');
 
             $('#raportointi_container').html('<img src=\"'+_src+'\" /><br />');
 
@@ -1137,7 +1141,9 @@ echo "<script type='text/javascript'>
                 kehahin = $('#kehahin').val(),
                 tapahtumalaji = $('#tapahtumalaji option:selected').val(),
                 tilalehinta = $('#tilalehinta:checked').val(),
-                toimipaikka = $('#toimipaikka').val();
+                toimipaikka = $('#toimipaikka option:selected').val();
+
+            $(this).val('".t("Päivitä")."');
 
             if (tilalehinta) {
               $('#tapahtumalaji_header').attr('colspan', 6);
@@ -2412,7 +2418,7 @@ if ($tee == 'Z') {
       <input type='hidden' name='raportti' value='{$raportti}' />
       <input type='hidden' name='toim_kutsu' value='{$toim_kutsu}'>";
 
-      echo "<select name='toimipaikka' onchange='submit();'>";
+      echo "<select id='toimipaikka' name='toimipaikka'>";
       echo "<option value='kaikki'>", t("Kaikki toimipaikat"), "</option>";
       echo "<option value='0' {$sel}>", t("Ei toimipaikkaa"), "</option>";
 
@@ -2429,6 +2435,7 @@ if ($tee == 'Z') {
 
     // Varastosaldot ja paikat
     echo "<font class='message'>".t("Tuotteen tilaukset")."</font>";
+    echo "&nbsp;&nbsp;<input type='button' id='tuotteen_tilaukset' value='",t("Näytä"),"' />";
     echo "<input type='hidden' id='tuoteno' value='{$tuoteno}' />";
     echo "<input type='hidden' id='yksikko' value='{$tuoterow['yksikko']}' />";
     echo "<input type='hidden' id='sarjanumeroseuranta' value='{$tuoterow['sarjanumeroseuranta']}' />";
@@ -2437,7 +2444,6 @@ if ($tee == 'Z') {
 
     echo "<hr />";
     echo "<div id='tuotteen_tilaukset_container'>";
-    echo "<input type='button' id='tuotteen_tilaukset' value='",t("Näytä"),"' />";
     echo "</div>";
     echo "<br />";
 
@@ -2463,12 +2469,12 @@ if ($tee == 'Z') {
         <input type='hidden' name='toim_kutsu' value='$toim_kutsu'>
         <input type='hidden' name='toimipaikka' value='{$toimipaikka}' />
         <font class='message'>".t("Raportointi")."</font><a href='#' name='Raportit'></a>
-        (<input type='radio' class='raportti_tyyppi' onclick='submit()' name='raportti' value='MYYNTI' $sele[M]> ".t("Myynnistä")." /
-        <input type='radio' class='raportti_tyyppi' onclick='submit()' name='raportti' value='KULUTUS' $sele[K]> ".t("Kulutuksesta").")
+        (<input type='radio' class='raportti_tyyppi' name='raportti' value='MYYNTI' $sele[M]> ".t("Myynnistä")." /
+        <input type='radio' class='raportti_tyyppi' name='raportti' value='KULUTUS' $sele[K]> ".t("Kulutuksesta").")
+        &nbsp;&nbsp;<input type='button' id='raportointi' value='",t("Näytä"),"' />
         </form><hr>";
 
       echo "<div id='raportointi_container'>";
-      echo "<input type='button' id='raportointi' value='",t("Näytä"),"' />";
       echo "</div>";
       echo "<br />";
     }
@@ -2629,7 +2635,7 @@ if ($tee == 'Z') {
       echo "<input type='hidden' name='lopetus' value='$lopetus'>";
       echo "<input type='hidden' name='tee' value='Z'>";
       echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
-      echo "<input type='hidden' id='toimipaikka' name='toimipaikka' value='{$toimipaikka}'>";
+      echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
       echo "<input type='hidden' name='raportti' value='$raportti'>";
 
       echo "&nbsp;&nbsp;<a href='#' name='Tapahtumat'><img src='pics/lullacons/arrow-double-up-green.png' /></a>";

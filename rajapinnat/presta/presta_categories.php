@@ -149,7 +149,7 @@ class PrestaCategories extends PrestaClient {
     try {
       $this->schema = $this->get_empty_schema();
 
-      //We start with first level. This means that the root element is skipped.
+      //We start with root level. This means that the pupesoft root is inserted under Presta root.
       $first_level_node_depth = array(
           'node_syvyys' => 0
       );
@@ -161,6 +161,7 @@ class PrestaCategories extends PrestaClient {
 
         $root_category_id = $this->recursive_save($first_level_node);
 
+        //Shop has id_category_default which needs to be updated. Otherwise presta will fail.
         if (!$shop_category_updated) {
           $presta_shop = new PrestaShops($this->get_url(), $this->get_api_key());
           $presta_shop->update_shops_category($root_category_id);
@@ -168,8 +169,6 @@ class PrestaCategories extends PrestaClient {
       }
     }
     catch (Exception $e) {
-      //Exception logging happens in create / update.
-
       return false;
     }
 

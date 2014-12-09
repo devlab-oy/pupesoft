@@ -1097,7 +1097,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             }
           }
           else {
-            list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row_value["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
+            list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row_value["tuoteno"], "KAIKKI", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
           }
 
           if ($myytavissa <= 0) {

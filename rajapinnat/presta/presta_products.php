@@ -45,8 +45,11 @@ class PrestaProducts extends PrestaClient {
 
     if (!empty($product['tuotepuun_nodet'])) {
       foreach ($product['tuotepuun_nodet'] as $category_ancestors) {
-        $this->add_category($xml, $category_ancestors);
+        //Default category id is set inside for. This means that the last category is set default
+        $default_category_id = $this->add_category($xml, $category_ancestors);
       }
+
+      $xml->product->id_category_default = $default_category_id;
     }
 
     return $xml;
@@ -56,6 +59,7 @@ class PrestaProducts extends PrestaClient {
    *
    * @param SimpleXMLElement $xml
    * @param array $ancestors
+   * @return int
    */
   private function add_category(SimpleXMLElement &$xml, $ancestors) {
     $presta_categories = new PrestaCategories($this->get_url(), $this->get_api_key());
@@ -65,6 +69,8 @@ class PrestaProducts extends PrestaClient {
       $category->addChild('id');
       $category->id = $category_id;
     }
+
+    return $category_id;
   }
 
   /**

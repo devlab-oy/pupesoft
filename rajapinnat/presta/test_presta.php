@@ -56,9 +56,6 @@ if ($request['action'] == 'sync') {
   }
 
   $ok = true;
-  $sho = new PrestaShops($presta_url, $presta_api_key);
-  $sho->update_shops_category(71);
-  die();
   if ($ok and in_array('kategoriat', $synkronoi)) {
     $kategoriat = hae_kategoriat();
     $presta_categories = new PrestaCategories($presta_url, $presta_api_key);

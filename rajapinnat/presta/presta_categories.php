@@ -146,7 +146,6 @@ class PrestaCategories extends PrestaClient {
       return false;
     }
 
-
     try {
       $this->schema = $this->get_empty_schema();
 

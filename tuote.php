@@ -357,16 +357,16 @@ if (isset($ajax)) {
         $_return .= "<td nowrap valign='top'>";
 
         if ($prow["laji"] == "laskutus" and $prow["laskutunnus"] != "") {
-          $_return .= "<a name='$ankkuri' href='raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus=$tkysy_lopetus///$ankkuri'>".t("$prow[laji]")."</a>";
+          $_return .= "<a href=\"javascript:lataaiframe('{$prow['laskutunnus']}', '{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=NAYTATILAUS&tunnus={$prow['laskutunnus']}&ohje=off');\">".t("$prow[laji]")."</a>";
         }
         elseif ($prow["laji"] == "tulo" and $prow["laskutunnus"] != "") {
-          $_return .= "<a name='$ankkuri' href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus=$tkysy_lopetus///$ankkuri'>".t("$prow[laji]")."</a>";
+          $_return .= "<a href=\"javascript:lataaiframe('{$prow['laskutunnus']}', '{$palvelin2}raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus={$prow['laskutunnus']}&ohje=off');\">".t("$prow[laji]")."</a>";
         }
         elseif ($prow["laji"] == "siirto" and $prow["laskutunnus"] != "") {
-          $_return .= "<a name='$ankkuri' href='$PHP_SELF?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus=$tkysy_lopetus///$ankkuri'>".t("$prow[laji]")."</a>";
+          $_return .= "<a href=\"javascript:lataaiframe('{$prow['laskutunnus']}', '{$palvelin2}raportit/asiakkaantilaukset.php?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus={$prow['laskutunnus']}&ohje=off');\">".t("$prow[laji]")."</a>";
         }
         elseif ($prow["laji"] == "valmistus" and $prow["laskutunnus"] != "") {
-          $_return .= "<a name='$ankkuri' href='$PHP_SELF?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&lopetus=$tkysy_lopetus///$ankkuri'>".t("$prow[laji]")."</a>";
+          $_return .= "<a href=\"javascript:lataaiframe('{$prow['laskutunnus']}', '{$palvelin2}raportit/asiakkaantilaukset.php?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus={$prow['laskutunnus']}&ohje=off');\">".t("$prow[laji]")."</a>";
 
           // N‰ytet‰‰n t‰m‰ vain jos k‰ytt‰j‰ll‰ on oikeus tehd‰ valmistuksia tai reseptej‰
           if ($oikeu_t1 or $oikeu_t2 or $oikeu_t3 or $oikeu_t4) {
@@ -496,7 +496,7 @@ if (isset($ajax)) {
             $_return .= "<br />";
           }
 
-          $_return .= "<a name='$ankkuri' href='raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus=$prow[lasku2tunnus]&lopetus=$tkysy_lopetus///$ankkuri'>".t("N‰yt‰ saapuminen")." $prow[lasku2laskunro]</a>";
+          $_return .= "<a href=\"javascript:lataaiframe('{$prow['lasku2tunnus']}', '{$palvelin2}raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus={$prow['lasku2tunnus']}&ohje=off');\">".t("N‰yt‰ saapuminen")." {$prow['lasku2laskunro']}</a>";
         }
 
         if (trim($prow["tapapaikka"]) != "" and $prow["tapahtuma_hyllyalue"] != "!!M") $_return .= "<br>".t("Varastopaikka").": $prow[tapapaikka]";
@@ -548,6 +548,12 @@ if (isset($ajax)) {
 
         $_return .= "</td>";
         $_return .= "</tr>";
+
+        $_colspanni = $tilalehinta != '' ? 12 : 11;
+
+        $_return .= "<tr><td colspan='{$_colspanni}' class='back' style='width:100%; padding:0; margin:0;'><div id = 'ifd_{$prow['laskutunnus']}' style='width:100%; border:1px solid; display:none'></div></td></tr>";
+        $_return .= "<tr><td colspan='{$_colspanni}' class='back' style='width:100%; padding:0; margin:0;'><div id = 'ifd_{$prow['lasku2tunnus']}' style='width:100%; border:1px solid; display:none'></div></td></tr>";
+
       }
     }
   }
@@ -1231,6 +1237,32 @@ if (function_exists("js_popup")) {
 enable_ajax();
 
 echo "<script type='text/javascript'>
+
+        function suljedivi(tunnus) {
+          $('#ifd_'+tunnus).hide();
+        }
+
+        function lataaiframe(tunnus, url) {
+
+          var ifd = $('#ifd_'+tunnus);
+          var ifr = $('#ifr_'+tunnus);
+
+          if (ifr.length) {
+
+            if (ifr.attr('src') == url) {
+              ifd.toggle();
+            }
+            else {
+              ifd.show();
+              ifr.attr('src', url);
+            }
+          }
+          else {
+            ifd.show();
+            ifd.html(\"<div style='float:right;'><a href=\\\"javascript:suljedivi('\"+tunnus+\"');\\\">".t("Piilota")." <img src='{$palvelin2}pics/lullacons/stop.png'></a></div><iframe id='ifr_\"+tunnus+\"' src='\"+url+\"' style='width:100%; height: 800px; border: 1px; display: block;'></iFrame>\");
+          }
+        }
+
         $(function() {
 
           $('#vastaavat').on('click', function() {

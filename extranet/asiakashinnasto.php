@@ -128,9 +128,9 @@ else {
     $tarkistus = mysql_result($tarkistus,0);
 
     if ($tarkistus > 0) {
-      echo "<tr><th>".t("Ryhmittely").":</th><td><select name='ryhmittely'>";
-      echo "<option value='1' $sel1>".t("Perinteinen")."</option>";
-      echo "<option value='2' $sel2>".t("Tuotehinnastoryhmä")."</option>";
+      echo "<tr><th>".t("Esitystapa").":</th><td><select name='ryhmittely'>";
+      echo "<option value='1' $sel1>".t("Normaali")."</option>";
+      echo "<option value='2' $sel2>".t("Tuotehinnastoryhmittäin")."</option>";
       echo "</select></td></tr>";
     }
   }

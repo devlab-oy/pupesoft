@@ -28267,7 +28267,7 @@ if (!function_exists('sallitut_varastot')) {
       $varastotyyppi_lisa = "";
     }
     else {
-      $varastotyyppi_lisa = "AND varastopaikat.tyyppi=''";
+      $varastotyyppi_lisa = "AND varastopaikat.tyyppi IN ('', 'V')";
     }
 
     // Katsotaan saako tälle asiakkaalle myydä vain jostain varastoista

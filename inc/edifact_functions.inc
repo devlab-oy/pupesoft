@@ -1058,7 +1058,7 @@ function kasittele_bookkaussanoma($edi_data) {
 
     trim($rivi);
 
-    $rivi = str_replace("#%#", "'", $rivi);
+    $rivi = str_replace("#%#", " ", $rivi);
 
     if (substr($rivi, 0, 3) == 'UNB') {
       $osat = explode("+", $rivi);

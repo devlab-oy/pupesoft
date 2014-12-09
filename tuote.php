@@ -1158,7 +1158,7 @@ if (isset($ajax)) {
           $kuka_chk_res = pupe_query($query);
           $kuka_chk_row = mysql_fetch_assoc($kuka_chk_res);
 
-          $_return .= "&nbsp;<img src='{$palvelin2}/pics/lullacons/info.png'>";
+          $_return .= "&nbsp;<img src='{$palvelin2}/pics/lullacons/info.png' class='tooltip' id='{$jtrow['tunnus']}{$jtrow['keikkanro']}'>";
           $_return .= "<div id='div_{$jtrow['tunnus']}{$jtrow['keikkanro']}' class='popup' style='width: 500px;'>";
           $_return .= t("Saapuminen"). ": {$jtrow['keikkanro']} / {$jtrow['nimi']}<br /><br />";
           $_return .= t("Laatija"). ": {$kuka_chk_row['nimi']}<br />";
@@ -1347,6 +1347,7 @@ echo "<script type='text/javascript'>
               },
               success: function(data) {
                 $('#tuotteen_tilaukset_container').html(data);
+                $('.tooltip').tooltip('yes', 'popup');
               }
             });
           });
@@ -1424,6 +1425,7 @@ echo "<script type='text/javascript'>
               },
               success: function(data) {
                 $('#tapahtumat_container').html(data);
+                $('.tooltip').tooltip('yes', 'popup');
               }
             });
           });

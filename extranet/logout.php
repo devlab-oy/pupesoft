@@ -2,6 +2,8 @@
 
 ob_start();
 
+$no_head = "yes";
+
 require "parametrit.inc";
 
 $query = "UPDATE kuka SET

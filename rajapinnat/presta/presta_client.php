@@ -184,7 +184,7 @@ abstract class PrestaClient {
   protected function update_xml($id, SimpleXMLElement $xml) {
     $opt = array(
         'id'       => $id,
-        'resource' => $this->resource_name()
+        'resource' => $this->resource_name(),
     );
 
     try {
@@ -311,7 +311,7 @@ abstract class PrestaClient {
   }
 
   protected function delete_all() {
-    $this->logger->log('---------Start '.$this->resource_name().' delete all---------');
+    $this->logger->log('---------Start ' . $this->resource_name() . ' delete all---------');
     $existing_resources = $this->all(array('id'));
     $existing_resources = array_column($existing_resources, 'id');
 
@@ -328,8 +328,8 @@ abstract class PrestaClient {
       }
     }
 
-    $this->logger->log('Kaikki '.$this->resource_name().' poistettu');
-    $this->logger->log('---------End '.$this->resource_name().' delete all---------');
+    $this->logger->log('Kaikki ' . $this->resource_name() . ' poistettu');
+    $this->logger->log('---------End ' . $this->resource_name() . ' delete all---------');
   }
 
   /**

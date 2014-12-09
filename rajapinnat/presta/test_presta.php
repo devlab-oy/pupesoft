@@ -14,6 +14,7 @@ require_once "rajapinnat/presta/presta_customers.php";
 require_once "rajapinnat/presta/presta_customer_groups.php";
 require_once "rajapinnat/presta/presta_sales_orders.php";
 require_once 'rajapinnat/presta/presta_product_stocks.php';
+require_once 'rajapinnat/presta/presta_shops.php';
 
 if (!isset($action)) {
   $action = '';
@@ -54,28 +55,32 @@ if ($request['action'] == 'sync') {
     $synkronoi[] = $request['synkronointi_tyyppi'];
   }
 
-  if (in_array('kategoriat', $synkronoi)) {
+  $ok = true;
+  $sho = new PrestaShops($presta_url, $presta_api_key);
+  $sho->update_shops_category(71);
+  die();
+  if ($ok and in_array('kategoriat', $synkronoi)) {
     $kategoriat = hae_kategoriat();
     $presta_categories = new PrestaCategories($presta_url, $presta_api_key);
-    $presta_categories->sync_categories($kategoriat);
+    $ok = $presta_categories->sync_categories($kategoriat);
   }
 
-  if (in_array('tuotteet', $synkronoi)) {
+  if ($ok and in_array('tuotteet', $synkronoi)) {
     $tuotteet = hae_tuotteet();
     $presta_products = new PrestaProducts($presta_url, $presta_api_key);
-    $presta_products->sync_products($tuotteet);
+    $ok = $presta_products->sync_products($tuotteet);
   }
-
-  if (in_array('asiakkaat', $synkronoi)) {
+  die();
+  if ($ok and in_array('asiakkaat', $synkronoi)) {
     $asiakkaat = hae_asiakkaat1();
     $presta_customer = new PrestaCustomers($presta_url, $presta_api_key);
-    $presta_customer->sync_customers($asiakkaat);
+    $ok = $presta_customer->sync_customers($asiakkaat);
   }
 
-  if (in_array('asiakasryhmat', $synkronoi)) {
+  if ($ok and in_array('asiakasryhmat', $synkronoi)) {
     $groups = hae_asiakasryhmat();
     $presta_customer_groups = new PrestaCustomerGroups($presta_url, $presta_api_key);
-    $presta_customer_groups->sync_groups($groups);
+    $ok = $presta_customer_groups->sync_groups($groups);
   }
 
   if (in_array('tilaukset', $synkronoi)) {

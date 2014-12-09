@@ -1,6 +1,7 @@
 <?php
 
 require_once 'rajapinnat/presta/presta_client.php';
+require_once 'rajapinnat/presta/presta_shops.php';
 
 class PrestaCategories extends PrestaClient {
 
@@ -103,6 +104,13 @@ class PrestaCategories extends PrestaClient {
     $xml->category->id_parent = $category['parent_id'];
     $xml->category->active = 1;
 
+    if ($category['is_root_category']) {
+      $xml->category->is_root_category = 1;
+    }
+    else {
+      $xml->category->is_root_category = 0;
+    }
+
     $link_rewrite = $this->saniteze_link_rewrite($category['node_nimi']);
     $xml->category->link_rewrite->language[0] = $link_rewrite;
     $xml->category->link_rewrite->language[1] = $link_rewrite;
@@ -121,7 +129,7 @@ class PrestaCategories extends PrestaClient {
     $this->delete_all();
 
     $this->logger->log('---------Start category sync---------');
-    $this->set_category_root(2);
+    $this->set_category_root(1);
     $this->categories = $categories;
 
     if (empty($this->root)) {
@@ -129,16 +137,35 @@ class PrestaCategories extends PrestaClient {
     }
 
     try {
+      $this->get($this->root);
+    }
+    catch (Exception $e) {
+      $msg = "Root categoryä {$this->root} ei ole olemassa";
+      $this->logger->log($msg);
+
+      return false;
+    }
+
+
+    try {
       $this->schema = $this->get_empty_schema();
 
       //We start with first level. This means that the root element is skipped.
       $first_level_node_depth = array(
-          'node_syvyys' => 1
+          'node_syvyys' => 0
       );
       $first_level_nodes = array_find($this->categories, $first_level_node_depth);
+      $shop_category_updated = false;
       foreach ($first_level_nodes as $first_level_node) {
         $first_level_node['parent_id'] = $this->root;
-        $this->recursive_save($first_level_node);
+        $first_level_node['is_root_category'] = true;
+
+        $root_category_id = $this->recursive_save($first_level_node);
+
+        if (!$shop_category_updated) {
+          $presta_shop = new PrestaShops($this->get_url(), $this->get_api_key());
+          $presta_shop->update_shops_category($root_category_id);
+        }
       }
     }
     catch (Exception $e) {
@@ -156,6 +183,7 @@ class PrestaCategories extends PrestaClient {
    * Contains the logic to save a node and recursively all its children
    *
    * @param array $node
+   * @return string
    */
   private function recursive_save($node) {
     $response = $this->create($node);
@@ -164,8 +192,11 @@ class PrestaCategories extends PrestaClient {
 
     foreach ($nodes as $node) {
       $node['parent_id'] = $parent_id;
+      $node['is_root_category'] = false;
       $this->recursive_save($node);
     }
+
+    return $parent_id;
   }
 
   /**
@@ -210,6 +241,9 @@ class PrestaCategories extends PrestaClient {
     $this->root = $presta_category_id;
   }
 
+  /**
+   * Delete all does not delete all. It leaves the Root node (id=1) (which is not even deletable)
+   */
   public function delete_all() {
     $this->logger->log('---------Start category delete all---------');
     $existing_categories = $this->all(array('id'));

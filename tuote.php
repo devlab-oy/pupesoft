@@ -1078,7 +1078,8 @@ echo "<script type='text/javascript'>
         $(function() {
           $('#tuotteen_tilaukset').on('click', function() {
 
-            var _src = '{$palvelin2}pics/loading_blue_small.gif';
+            var _src = '{$palvelin2}pics/loading_blue_small.gif',
+                toimipaikka = $('#toimipaikka').val();
 
             $('#tuotteen_tilaukset_container').html('<img src=\"'+_src+'\" /><br />');
 
@@ -1090,7 +1091,8 @@ echo "<script type='text/javascript'>
                 ajax: 'tuotteen_tilaukset',
                 no_head: 'yes',
                 ohje: 'off',
-                tuoteno: $('#tuoteno').val()
+                tuoteno: $('#tuoteno').val(),
+                toimipaikka: toimipaikka
               },
               success: function(data) {
                 $('#tuotteen_tilaukset_container').html(data);
@@ -1102,7 +1104,8 @@ echo "<script type='text/javascript'>
 
             var _src = '{$palvelin2}pics/loading_blue_small.gif',
                 raportointi_tyyppi = $('.raportti_tyyppi:checked').val(),
-                yksikko = $('#yksikko').val();
+                yksikko = $('#yksikko').val(),
+                toimipaikka = $('#toimipaikka').val();
 
             $('#raportointi_container').html('<img src=\"'+_src+'\" /><br />');
 
@@ -1116,7 +1119,8 @@ echo "<script type='text/javascript'>
                 ohje: 'off',
                 tuoteno: $('#tuoteno').val(),
                 raportti: raportointi_tyyppi,
-                yksikko: yksikko
+                yksikko: yksikko,
+                toimipaikka: toimipaikka
               },
               success: function(data) {
                 $('#raportointi_container').html(data);
@@ -1132,7 +1136,8 @@ echo "<script type='text/javascript'>
                 ei_saldoa = $('#ei_saldoa').val(),
                 kehahin = $('#kehahin').val(),
                 tapahtumalaji = $('#tapahtumalaji option:selected').val(),
-                tilalehinta = $('#tilalehinta:checked').val();
+                tilalehinta = $('#tilalehinta:checked').val(),
+                toimipaikka = $('#toimipaikka').val();
 
             if (tilalehinta) {
               $('#tapahtumalaji_header').attr('colspan', 6);
@@ -1159,7 +1164,8 @@ echo "<script type='text/javascript'>
                 ei_saldoa: ei_saldoa,
                 kehahin: kehahin,
                 tapahtumalaji: tapahtumalaji,
-                tilalehinta: tilalehinta
+                tilalehinta: tilalehinta,
+                toimipaikka: toimipaikka
               },
               success: function(data) {
                 $('#tapahtumat_container').html(data);
@@ -2623,7 +2629,7 @@ if ($tee == 'Z') {
       echo "<input type='hidden' name='lopetus' value='$lopetus'>";
       echo "<input type='hidden' name='tee' value='Z'>";
       echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
-      echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
+      echo "<input type='hidden' id='toimipaikka' name='toimipaikka' value='{$toimipaikka}'>";
       echo "<input type='hidden' name='raportti' value='$raportti'>";
 
       echo "&nbsp;&nbsp;<a href='#' name='Tapahtumat'><img src='pics/lullacons/arrow-double-up-green.png' /></a>";

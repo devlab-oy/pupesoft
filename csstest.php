@@ -25,6 +25,7 @@ $css_kuvaus = array(
   ,  'INFO_COLOR'             =>  'Infoteksti (fonttikooltaan normaalia pienempää)'
   ,  'INPUT_COLOR'            =>  'Painikkeiden teksti ja syötekenttien teksti'
   ,  'INPUT_BACKGROUND'       =>  'Painikkeiden ja syötekenttien tausta'
+  ,  'INPUT_BORDER_COLOR'     =>  'Syöttökenttien ja alasvetovalikoiden reunuksen väri'
   ,  'LINK_COLOR'             =>  'Linkit'
   ,  'LIVESEARCH_BACKGROUND'  =>  'Live-hakukenttien tausta'
   ,  'MENUHOVER_BACKGROUND'   =>  'Aktiivisen navigaatioelementin tausta'

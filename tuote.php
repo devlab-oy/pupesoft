@@ -31,7 +31,73 @@ if ($lopetus != "") {
   $tkysy_lopetus = $lopetus."/SPLIT/".$tkysy_lopetus;
 }
 
+require "korvaavat.class.php";
+
 if (isset($ajax)) {
+
+  if ($ajax == "korvaavat") {
+
+    if (isset($toimipaikan_varastot)) {
+      $toimipaikan_varastot = unserialize(urldecode($toimipaikan_varastot));
+    }
+    else {
+      $toimipaikan_varastot = array();
+    }
+
+    $_return = "<table>";
+    $_return .= "<tr>";
+    $_return .= "<th>".t("Tuotenumero")."</th>";
+    $_return .= "<th>".t("Myytävissä")."</th>";
+
+    if ($_tp_kasittely) {
+      $_return .= "<th>".t("Oma myytävissä")."</th>";
+    }
+
+    $_return .= "</tr>";
+
+    $kokonaismyytavissa = 0;
+    $oma_myytavissa_yhteensa = 0;
+
+    $korvaavat = new Korvaavat($tuoteno);
+
+    // Listataan korvaavat ketju
+    foreach (array_reverse($korvaavat->tuotteet()) as $tuote) {
+      if ($tuoteno != $tuote["tuoteno"]) {
+
+        list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuote["tuoteno"], 'KAIKKI', '', '', '', '', '', '', '', $saldoaikalisa);
+        $kokonaismyytavissa += $myytavissa;
+
+        if ($_tp_kasittely and !empty($toimipaikan_varastot)) {
+          list($_saldo, $_hyllyssa, $_myytavissa) = saldo_myytavissa($tuote["tuoteno"], 'KAIKKI', $toimipaikan_varastot, '', '', '', '', '', '', $saldoaikalisa);
+          $oma_myytavissa_yhteensa += $_myytavissa;
+          $oma_myytavissa = $_myytavissa;
+        }
+        else {
+          $oma_myytavissa = 0;
+        }
+
+        $_return .= "<tr>";
+        $_return .= "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($tuote["tuoteno"])."&lopetus=$lopetus'>$tuote[tuoteno]</a></td>";
+        $_return .= "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
+        if ($_tp_kasittely) {
+          $_return .= "<td align='right'>".sprintf("%.2f", $oma_myytavissa)."</td>";
+        }
+        $_return .= "</tr>";
+      }
+    }
+
+    $_return .= "<tr>";
+    $_return .= "<th>".t("Yhteensä")."</th>";
+    $_return .= "<th style='text-align:right;'>".sprintf("%.2f", $kokonaismyytavissa)."</th>";
+
+    if ($_tp_kasittely) {
+      $_return .= "<th style='text-align:right;'>".sprintf("%.2f", $oma_myytavissa_yhteensa)."</th>";
+    }
+
+    $_return .= "</tr>";
+
+    $_return .= "</table>";
+  }
 
   if ($ajax == "tapahtumat") {
 
@@ -1076,6 +1142,39 @@ enable_ajax();
 
 echo "<script type='text/javascript'>
         $(function() {
+
+          $('#korvaavat').on('click', function() {
+
+            var _src = '{$palvelin2}pics/loading_blue_small.gif',
+                toimipaikka = $('#toimipaikka option:selected').val(),
+                _tp_kasittely = $('#_tp_kasittely').val(),
+                saldoaikalisa = $('#saldoaikalisa').val(),
+                toimipaikan_varastot = $('#toimipaikan_varastot').val();
+
+            $(this).val('".t("Päivitä")."');
+
+            $('#korvaavat_container').html('<img src=\"'+_src+'\" /><br />');
+
+            $.ajax({
+              async: false,
+              type: 'POST',
+              dataType: 'JSON',
+              data: {
+                ajax: 'korvaavat',
+                no_head: 'yes',
+                ohje: 'off',
+                tuoteno: $('#tuoteno').val(),
+                toimipaikka: toimipaikka,
+                _tp_kasittely: _tp_kasittely,
+                saldoaikalisa: saldoaikalisa,
+                toimipaikan_varastot: toimipaikan_varastot
+              },
+              success: function(data) {
+                $('#korvaavat_container').html(data);
+              }
+            });
+          });
+
           $('#tuotteen_tilaukset').on('click', function() {
 
             var _src = '{$palvelin2}pics/loading_blue_small.gif',
@@ -1396,6 +1495,8 @@ if ($tee == 'Z') {
     else {
       $saldoaikalisa = "";
     }
+
+    echo "<input type='hidden' id='saldoaikalisa' value='{$saldoaikalisa}' />";
 
     $sarjanumero_kpl = 0;
 
@@ -1997,6 +2098,14 @@ if ($tee == 'Z') {
 
       $toimipaikan_varastot = explode(",", $toimipaikka_varasto_row['tunnukset']);
     }
+    else {
+      $toimipaikan_varastot = array();
+    }
+
+    $_tpvar_url = urlencode(serialize($toimipaikan_varastot));
+
+    echo "<input type='hidden' id='_tp_kasittely' value='{$_tp_kasittely}' />";
+    echo "<input type='hidden' id='toimipaikan_varastot' value='{$_tpvar_url}' />";
 
     // Saldot, korvaavat ja vastaavat
     echo "<table><tr><td class='back nopad top'>";
@@ -2211,7 +2320,6 @@ if ($tee == 'Z') {
     echo "</td><td class='back nopad top'>";
 
     // Korvaavat tuotteet
-    require "korvaavat.class.php";
     $korvaavat = new Korvaavat($tuoteno);
 
     if (count($korvaavat->tuotteet()) > 0) {
@@ -2225,57 +2333,9 @@ if ($tee == 'Z') {
 
       echo "<hr>";
 
-      echo "<table>";
-      echo "<tr>";
-      echo "<th>".t("Tuotenumero")."</th>";
-      echo "<th>".t("Myytävissä")."</th>";
-
-      if ($_tp_kasittely) {
-        echo "<th>", t("Oma myytävissä"), "</th>";
-      }
-
-      echo "</tr>";
-
-      $kokonaismyytavissa = 0;
-      $oma_myytavissa_yhteensa = 0;
-
-      // Listataan korvaavat ketju
-      foreach (array_reverse($korvaavat->tuotteet()) as $tuote) {
-        if ($tuoterow["tuoteno"] != $tuote["tuoteno"]) {
-
-          list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($tuote["tuoteno"], 'KAIKKI', '', '', '', '', '', '', '', $saldoaikalisa);
-          $kokonaismyytavissa += $myytavissa;
-
-          if ($_tp_kasittely and !empty($toimipaikan_varastot)) {
-            list($_saldo, $_hyllyssa, $_myytavissa) = saldo_myytavissa($tuote["tuoteno"], 'KAIKKI', $toimipaikan_varastot, '', '', '', '', '', '', $saldoaikalisa);
-            $oma_myytavissa_yhteensa += $_myytavissa;
-            $oma_myytavissa = $_myytavissa;
-          }
-          else {
-            $oma_myytavissa = 0;
-          }
-
-          echo "<tr>";
-          echo "<td><a href='$PHP_SELF?toim=$toim&tee=Z&tuoteno=".urlencode($tuote["tuoteno"])."&lopetus=$lopetus'>$tuote[tuoteno]</a></td>";
-          echo "<td align='right'>".sprintf("%.2f", $myytavissa)."</td>";
-          if ($_tp_kasittely) {
-            echo "<td align='right'>".sprintf("%.2f", $oma_myytavissa)."</td>";
-          }
-          echo "</tr>";
-        }
-      }
-
-      echo "<tr>";
-      echo "<th>", t("Yhteensä"), "</th>";
-      echo "<th style='text-align:right;'>".sprintf("%.2f", $kokonaismyytavissa)."</th>";
-
-      if ($_tp_kasittely) {
-        echo "<th style='text-align:right;'>".sprintf("%.2f", $oma_myytavissa_yhteensa)."</th>";
-      }
-
-      echo "</tr>";
-
-      echo "</table>";
+      echo "<div id='korvaavat_container'>";
+      echo "<input type='button' id='korvaavat' value='",t("Näytä"),"' />";
+      echo "</div>";
     }
 
     echo "</td><td class='back nopad top'>";

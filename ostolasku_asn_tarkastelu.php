@@ -352,6 +352,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
         $query = "SELECT GROUP_CONCAT(tuoteperhe.tuoteno) lapset
                   FROM tuoteperhe
                   WHERE yhtio       = '{$kukarow['yhtio']}'
+                  AND tyyppi        = 'P'
                   AND isatuoteno    = '{$kollirow['tuoteno']}'
                   AND ohita_kerays != ''";
         $result = pupe_query($query);

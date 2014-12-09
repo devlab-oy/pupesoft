@@ -274,7 +274,9 @@ else {
       $excelrivi++;
     }
 
-    $tro = '';
+    if ($tuoteryhmaosasto) {
+      $tro = '';
+    }
 
     while ($rrow = mysql_fetch_assoc($rresult)) {
 
@@ -383,7 +385,7 @@ else {
 
         $excelsarake = 0;
 
-        if ($tro != $rrow['tro']) {
+        if (isset($tro) and $tro != $rrow['tro']) {
           $excelrivi++;
           $worksheet->writeString($excelrivi, 0, $rrow["tro"], $format_bold);
           $excelrivi++;
@@ -441,7 +443,9 @@ else {
         $excelrivi++;
       }
 
-      $tro = $rrow['tro'];
+      if ($tuoteryhmaosasto) {
+        $tro = $rrow['tro'];
+      }
     }
 
     if (isset($worksheet)) {

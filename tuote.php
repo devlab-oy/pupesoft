@@ -1134,6 +1134,15 @@ echo "<script type='text/javascript'>
                 tapahtumalaji = $('#tapahtumalaji option:selected').val(),
                 tilalehinta = $('#tilalehinta:checked').val();
 
+            if (tilalehinta) {
+              $('#tapahtumalaji_header').attr('colspan', 6);
+              $('#tilalehinta_hearder').show();
+            }
+            else {
+              $('#tapahtumalaji_header').attr('colspan', 5);
+              $('#tilalehinta_hearder').hide();
+            }
+
             $('#tapahtumat_container').html('<img src=\"'+_src+'\" /><br />');
 
             $.ajax({
@@ -2661,7 +2670,7 @@ if ($tee == 'Z') {
         $check = "";
       }
 
-      echo "</th><th colspan='";
+      echo "</th><th id='tapahtumalaji_header' colspan='";
 
       if ($tilalehinta != '') {
         echo 6;
@@ -2702,9 +2711,9 @@ if ($tee == 'Z') {
       echo "<th>".t("Arvo")."</th>";
       echo "<th>".t("Var.Arvo")."</th>";
       echo "<th>".t("Var.Saldo")."</th>";
-      if ($tilalehinta != '') {
-        echo "<th>".t("Hinta / Ale / Rivihinta")."</th>";
-      }
+      echo "<th id='tilalehinta_hearder' style='display: none;'>";
+      echo t("Hinta / Ale / Rivihinta");
+      echo "</th>";
       echo "<th>".t("Selite");
 
       echo "</th></form>";

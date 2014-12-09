@@ -2440,6 +2440,7 @@ if ($tee == 'Z') {
 
       if (tarkista_oikeus('korvaavat.php', '', 1)) {
         echo "&nbsp;&nbsp;<a href='{$palvelin2}korvaavat.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&lopetus=$tkysy_lopetus'><img style='height:10px;' src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t("Muokkaa"), "' title='", t("Muuta korvaavuusketjuja"), "' /></a>";
+        echo "&nbsp;&nbsp;";
       }
 
       echo "<hr>";

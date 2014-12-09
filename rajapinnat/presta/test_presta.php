@@ -67,7 +67,7 @@ if ($request['action'] == 'sync') {
     $presta_products = new PrestaProducts($presta_url, $presta_api_key);
     $ok = $presta_products->sync_products($tuotteet);
   }
-  die();
+
   if ($ok and in_array('asiakkaat', $synkronoi)) {
     $asiakkaat = hae_asiakkaat1();
     $presta_customer = new PrestaCustomers($presta_url, $presta_api_key);
@@ -123,7 +123,7 @@ function hae_asiakkaat1() {
   global $kukarow, $yhtiorow, $verkkokauppatyyppi;
 
   $query = "SELECT *
-            FROM asiakas
+            FROM yhteyshenkilo
             WHERE yhtio = '{$kukarow['yhtio']}'";
   $result = pupe_query($query);
 

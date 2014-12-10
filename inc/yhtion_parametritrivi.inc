@@ -16,28 +16,12 @@ else {
   $fieldname = mysql_field_name($result, $i);
 }
 
-if ($fieldname == "css") {
-  $ulos = "<td><textarea cols='45' rows='7' name='css'>$trow[$i]</textarea><input type='hidden' name='cssi' value='$i'></td>";
-  $jatko = 0;
-}
-
-if ($fieldname == "css_pieni") {
-  $ulos = "<td><textarea cols='45' rows='7' name='css_pieni'>$trow[$i]</textarea><input type='hidden' name='csspienii' value='$i'></td>";
-  $jatko = 0;
-}
-
-if ($fieldname == "css_extranet") {
-  $ulos = "<td><textarea cols='45' rows='7' name='css_extranet'>$trow[$i]</textarea><input type='hidden' name='cssextraneti' value='$i'></td>";
-  $jatko = 0;
-}
-
-if ($fieldname == "css_verkkokauppa") {
-  $ulos = "<td><textarea cols='45' rows='7' name='css_verkkokauppa'>$trow[$i]</textarea><input type='hidden' name='cssverkkokauppa' value='$i'></td>";
-  $jatko = 0;
-}
-
-if ($fieldname == "web_seuranta") {
-  $ulos = "<td><textarea cols='45' rows='7' name='web_seuranta'>$trow[$i]</textarea><input type='hidden' name='webseuranta' value='$i'></td>";
+if ($fieldname == "css"
+  or $fieldname == "css_classic"
+  or $fieldname == "css_extranet"
+  or $fieldname == "css_verkkokauppa"
+  or $fieldname == "web_seuranta") {
+  $ulos = "<td><textarea cols='45' rows='7' name='$fieldname'>$trow[$i]</textarea><input type='hidden' name='{$fieldname}i' value='$i'></td>";
   $jatko = 0;
 }
 
@@ -4397,4 +4381,3 @@ if ($fieldname == "tilausrivin_korvamerkinta") {
 
   $jatko = 0;
 }
-

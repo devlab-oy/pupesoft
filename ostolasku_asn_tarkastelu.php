@@ -352,6 +352,7 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
         $query = "SELECT GROUP_CONCAT(tuoteperhe.tuoteno) lapset
                   FROM tuoteperhe
                   WHERE yhtio       = '{$kukarow['yhtio']}'
+                  AND tyyppi        = 'P'
                   AND isatuoteno    = '{$kollirow['tuoteno']}'
                   AND ohita_kerays != ''";
         $result = pupe_query($query);
@@ -463,8 +464,8 @@ if ($tee == 'vahvistakolli' or $tee == 'vahvistavakisinkolli') {
 
                 $query = "SELECT *
                           FROM asn_sanomat
-                          WHERE yhtio    = '{$kukarow['yhtio']}'
-                          AND laji       = 'asn'
+                          WHERE yhtio = '{$kukarow['yhtio']}'
+                          AND laji    = 'asn'
                           AND MATCH (tilausrivi) AGAINST ('{$isa_chk_row['tunnus']}' IN BOOLEAN MODE)";
                 $info_res = pupe_query($query);
                 $info_row = mysql_fetch_assoc($info_res);

@@ -51,7 +51,8 @@ js
 pdflib
 pics
 validation
-viivakoodi"
+viivakoodi
+css"
 
 # Kopioidaan näiden hakemistojen sisältö extranet roottiin
 CONTENT="extranet/*"
@@ -69,7 +70,6 @@ inc/hinnastoriviautomaster.inc
 inc/hinnastorivifutur.inc
 inc/hinnastorivitab.inc
 inc/hinnastorivivienti.inc
-inc/jquery-ui-extranet.css
 inc/jquery-ui.js
 inc/jquery.min.js
 inc/laskutyyppi.inc

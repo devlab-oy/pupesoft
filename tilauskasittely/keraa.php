@@ -1451,6 +1451,13 @@ if ($tee == 'P') {
       else {
         $header .= "Content-type: text/html; charset=\"iso-8859-1\"\n";
 
+        if ($yhtiorow["kayttoliittyma"] == "U") {
+          $css = $yhtiorow['css'];
+        }
+        else {
+          $css = $yhtiorow['css_classic'];
+        }
+
         $ulos  = "<html>\n<head>\n";
         $ulos .= "<style type='text/css'>$css</style>\n";
 

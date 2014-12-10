@@ -21,9 +21,9 @@ form.indexvas {
 
 table.indexvas {
   width: 135px;
-	margin: 0px 0px 0px 0px;
+  margin: 0px 0px 0px 0px;
   padding: 0px 0px 0px 0px;
-	border-spacing: 0;
+  border-spacing: 0;
 }
 
 table.indexvas tr {
@@ -31,14 +31,14 @@ table.indexvas tr {
 }
 
 table.indexvas td {
-	margin: 0px 0px 0px 0px;
+  margin: 0px 0px 0px 0px;
   padding: 0px 0px 0px 0px;
 }
 
 .nopad {
-	padding: 0px;
+  padding: 0px;
 }
 
 .top {
-	vertical-align: top;
+  vertical-align: top;
 }

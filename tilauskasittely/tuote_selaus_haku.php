@@ -1097,7 +1097,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             }
           }
           else {
-            list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row_value["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
+            list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row_value["tuoteno"], "KAIKKI", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
           }
 
           if ($myytavissa <= 0) {
@@ -1337,8 +1337,19 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
     }
 
     $isan_kuva = '';
+    $bordercolor = " #555555";
 
-    foreach ($rows as $row_key => $row) {
+    if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+      // Otetaan yhtiön css:stä SPEC_COLOR
+      preg_match("/.*?\/\*(.*?(SPEC_COLOR))\*\//", $yhtiorow['active_css'], $varitmatch);
+      preg_match("/(#[a-f0-9]{3,6});/i", $varitmatch[0], $varirgb);
+
+      if (!empty($varirgb[1])) {
+        $bordercolor = " $varirgb[1]";
+      }
+    }
+
+    foreach ($rows as $row_key => &$row) {
 
       if ($kukarow['extranet'] != '' or $verkkokauppa != "") {
         $hae_ja_selaa_asiakas = (int) $kukarow['oletus_asiakas'];
@@ -1374,7 +1385,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
       echo "<tr class='aktiivi'>";
 
       if ($verkkokauppa == "" and isset($row["vastaavamaara"]) and $row["vastaavamaara"] > 0 and $row['vastaavat'] != '') {
-        echo "<td style='border-top: 1px solid #555555; border-left: 1px solid #555555; border-bottom: 1px solid #555555; border-right: 1px solid #555555;' rowspan='{$row["vastaavamaara"]}' align='center'>V<br>a<br>s<br>t<br>a<br>a<br>v<br>a<br>t</td>";
+        echo "<td style='border-top: 1px solid{$bordercolor}; border-left: 1px solid{$bordercolor}; border-bottom: 1px solid{$bordercolor}; border-right: 1px solid{$bordercolor};' rowspan='{$row["vastaavamaara"]}' align='center'>V<br>a<br>s<br>t<br>a<br>a<br>v<br>a<br>t</td>";
       }
       elseif ($verkkokauppa == "" and !isset($row["mikavastaava"])) {
         echo "<td class='back'></td>";
@@ -1409,11 +1420,10 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
       // Peek ahead
       $row_seuraava = current($rows);
 
-
       if ($piilota_tuoteperheen_lapset != '' and $row["tuoteperhe"] == $row["tuoteno"]) {
-        $classleft = "style='border-bottom: 1px solid #555555; border-left: 1px solid #555555; border-top: 1px solid #555555;' ";
-        $classmidl = "style='border-bottom: 1px solid #555555; border-top: 1px solid #555555;' ";
-        $classrigh = "style='border-bottom: 1px solid #555555; border-right: 1px solid #555555; border-top: 1px solid #555555;' ";
+        $classleft = "style='border-bottom: 1px solid{$bordercolor}; border-left: 1px solid{$bordercolor}; border-top: 1px solid{$bordercolor};' ";
+        $classmidl = "style='border-bottom: 1px solid{$bordercolor}; border-top: 1px solid{$bordercolor};' ";
+        $classrigh = "style='border-bottom: 1px solid{$bordercolor}; border-right: 1px solid{$bordercolor}; border-top: 1px solid{$bordercolor};' ";
       }
       elseif (($row["tuoteperhe"] == $row["tuoteno"] and $row["tuoteperhe"] != $row_seuraava["tuoteperhe"] and $row_seuraava["tuoteperhe"] != "") or
         ($row["osaluettelo"] == $row["tuoteno"] and $row["osaluettelo"] != $row_seuraava["osaluettelo"] and $row_seuraava["osaluettelo"] != "")) {
@@ -1422,20 +1432,20 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
         $classrigh = "";
       }
       elseif ($row["tuoteperhe"] == $row["tuoteno"] or $row["osaluettelo"] == $row["tuoteno"]) {
-        $classleft = "style='border-top: 1px solid #555555; border-left: 1px solid #555555;' ";
-        $classmidl = "style='border-top: 1px solid #555555;' ";
-        $classrigh = "style='border-top: 1px solid #555555; border-right: 1px solid #555555;' ";
+        $classleft = "style='border-top: 1px solid{$bordercolor}; border-left: 1px solid{$bordercolor};' ";
+        $classmidl = "style='border-top: 1px solid{$bordercolor};' ";
+        $classrigh = "style='border-top: 1px solid{$bordercolor}; border-right: 1px solid{$bordercolor};' ";
       }
       elseif (($row["tuoteperhe"] != "" and $row["tuoteperhe"] != $row_seuraava["tuoteperhe"]) or
         ($row["osaluettelo"] != "" and $row["osaluettelo"] != $row_seuraava["osaluettelo"])) {
-        $classleft = "style='border-bottom: 1px solid #555555; border-left: 1px solid #555555;' ";
-        $classmidl = "style='border-bottom: 1px solid #555555;' ";
-        $classrigh = "style='border-bottom: 1px solid #555555; border-right: 1px solid #555555;' ";
+        $classleft = "style='border-bottom: 1px solid{$bordercolor}; border-left: 1px solid{$bordercolor};' ";
+        $classmidl = "style='border-bottom: 1px solid{$bordercolor};' ";
+        $classrigh = "style='border-bottom: 1px solid{$bordercolor}; border-right: 1px solid{$bordercolor};' ";
       }
       elseif ($row["tuoteperhe"] != '' or $row["osaluettelo"] != '') {
-        $classleft = "style='border-left: 1px solid #555555;' ";
+        $classleft = "style='border-left: 1px solid{$bordercolor};' ";
         $classmidl = "";
-        $classrigh = "style='border-right: 1px solid #555555;' ";
+        $classrigh = "style='border-right: 1px solid{$bordercolor};' ";
       }
       else {
         $classleft = "";

@@ -496,7 +496,7 @@ if ($tee == '') {
       }
 
       if ($kuva == '') {
-        if ($yhtiorow["kayttoliittyma"] == "U") {
+        if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
           $kuva = "<img src='{$palvelin2}pics/facelift/pupe.gif' width='130'>";
         }
         else {

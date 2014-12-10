@@ -1097,7 +1097,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             }
           }
           else {
-            list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row_value["tuoteno"], "", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
+            list($saldo, $hyllyssa, $myytavissa) = saldo_myytavissa($row_value["tuoteno"], "KAIKKI", 0, "", "", "", "", "", $laskurow["toim_maa"], $saldoaikalisa);
           }
 
           if ($myytavissa <= 0) {
@@ -1339,9 +1339,9 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
     $isan_kuva = '';
     $bordercolor = " #555555";
 
-    if ($yhtiorow["kayttoliittyma"] == "U") {
+    if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
       // Otetaan yhtiön css:stä SPEC_COLOR
-      preg_match("/.*?\/\*(.*?(SPEC_COLOR))\*\//", $yhtiorow['css'], $varitmatch);
+      preg_match("/.*?\/\*(.*?(SPEC_COLOR))\*\//", $yhtiorow['active_css'], $varitmatch);
       preg_match("/(#[a-f0-9]{3,6});/i", $varitmatch[0], $varirgb);
 
       if (!empty($varirgb[1])) {

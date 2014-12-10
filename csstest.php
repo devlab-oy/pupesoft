@@ -25,6 +25,7 @@ $css_kuvaus = array(
   ,  'INFO_COLOR'             =>  'Infoteksti (fonttikooltaan normaalia pienempää)'
   ,  'INPUT_COLOR'            =>  'Painikkeiden teksti ja syötekenttien teksti'
   ,  'INPUT_BACKGROUND'       =>  'Painikkeiden ja syötekenttien tausta'
+  ,  'INPUT_BORDER_COLOR'     =>  'Syöttökenttien ja alasvetovalikoiden reunuksen väri'
   ,  'LINK_COLOR'             =>  'Linkit'
   ,  'LIVESEARCH_BACKGROUND'  =>  'Live-hakukenttien tausta'
   ,  'MENUHOVER_BACKGROUND'   =>  'Aktiivisen navigaatioelementin tausta'
@@ -45,13 +46,13 @@ $css_kuvaus = array(
   ,  'TR_COLOR'               =>  'Taulukon solun teksti'
   ,  'TUMMA_BACKGROUND'       =>  'Tumman elementin tausta'
   ,  'TUMMA_COLOR'            =>  'Tumman elementin teksti'
-  ,  'ASIAKASFAKTA_COLOR'     =>  'Asiakasfakta otsikolla ja myyntitilauksella'    
+  ,  'ASIAKASFAKTA_COLOR'     =>  'Asiakasfakta otsikolla ja myyntitilauksella'
   ,  'SUBMITBUTTON_BACKGROUND'          =>  'Normaalin Submit-nappulan tausta'
   ,  'SUBMITBUTTON_LISAA_BACKGROUND'    =>  'Lisää Submit-nappulan tausta'
   ,  'SUBMITBUTTON_HAE_BACKGROUND'      =>  'Hae Submit-nappulan tausta'
-  ,  'SUBMITBUTTON_TALLENNA_BACKGROUND' =>  'Tallenna Submit-nappulan tausta'  
-  ,  'SUBMITBUTTON_POISTA_BACKGROUND'   =>  'Poista Submit-nappulan tausta'   
- 
+  ,  'SUBMITBUTTON_TALLENNA_BACKGROUND' =>  'Tallenna Submit-nappulan tausta'
+  ,  'SUBMITBUTTON_POISTA_BACKGROUND'   =>  'Poista Submit-nappulan tausta'
+
 );
 
 function getCSSDescription($css_name) {

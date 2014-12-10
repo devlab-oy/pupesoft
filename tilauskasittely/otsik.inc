@@ -1805,7 +1805,7 @@ if ($tila == "" and !isset($jatka)) {
         <option value=''  $sel1>".t("Kotimaa")."</option>
         <option value='E' $sel2>".t("Vienti EU")."</option>
         <option value='K' $sel3>".t("Vienti ei-EU")."</option>
-        </select>";
+        </select> ";
 
       $sel = $srow['kolmikantakauppa'] != "" ? " selected" : "";
 
@@ -3246,7 +3246,7 @@ if ($tila == "" and !isset($jatka)) {
 
     echo "<td><input type='text' size='30' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'><br>";
 
-    echo "<select id='yhteyshenkilo_tilaus' name='yhteyshenkilo_tilaus'>";
+    echo "&nbsp;<select id='yhteyshenkilo_tilaus' name='yhteyshenkilo_tilaus'>";
     echo "<option value = ''>".t("Ei valintaa")."</option>";
 
     while ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {

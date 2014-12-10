@@ -70,7 +70,6 @@ inc/hinnastoriviautomaster.inc
 inc/hinnastorivifutur.inc
 inc/hinnastorivitab.inc
 inc/hinnastorivivienti.inc
-inc/jquery-ui-extranet.css
 inc/jquery-ui.js
 inc/jquery.min.js
 inc/laskutyyppi.inc

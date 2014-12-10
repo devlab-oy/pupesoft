@@ -28,7 +28,6 @@ $request = array(
     'synkronointi_tyyppi' => $synkronointi_tyyppi,
 );
 
-
 $request['synkronointi_tyypit'] = array(
     'kaikki'        => t('Kaikki'),
     'kategoriat'    => t('Kategoriat'),

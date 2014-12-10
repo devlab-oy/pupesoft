@@ -24,18 +24,35 @@ $kuvakkeet_img = array ("Kalenteri"    => "calendar.png",
 
 if ($tee == "tallenna") {
   foreach ($skriptit as $i => $skripti) {
+    
+    if ($jarjestykset[$i] == "") {
+      $jarjestykset[$i] = 99;
+    }
+    
     // Tsekataan, että kaikki tiedot on syötetty
     if (empty($skriptit[$i]) or empty($kuvakkeet[$i]) or empty($tekstit[$i])) {
       unset($skriptit[$i]);
       unset($kuvakkeet[$i]);
       unset($tekstit[$i]);
+      unset($jarjestykset[$i]);
     }
   }
+  
+  asort($jarjestykset);
 
-  $tallennettavat = serialize(array("skriptit"     => $skriptit,
-      "kuvakkeet"    => $kuvakkeet,
-      "tekstit"      => $tekstit));
-
+  $jarj = 1;
+  $tallennettavat = array();
+  
+  // laitetaan järjestykset kuntoon
+  foreach ($jarjestykset as $i => $j) {    
+    $tallennettavat["skriptit"][]     = $skriptit[$i];
+    $tallennettavat["kuvakkeet"][]    = $kuvakkeet[$i];
+    $tallennettavat["tekstit"][]      = $tekstit[$i];
+    $tallennettavat["jarjestykset"][] = $jarj;
+    $jarj++;
+  }
+  
+  $tallennettavat = serialize($tallennettavat);
 }
 
 if ($tee == "tallenna") {
@@ -54,6 +71,12 @@ if ($tee == "tallenna") {
             muutospvm    = now(),
             selitetark   = '$tallennettavat' ";
   pupe_query($query);
+  
+  
+  echo "<script>";
+  echo "parent.ylaframe.location.href = 'ylaframe.php';";
+  echo "</script>";
+  
 }
 
 echo "<form method='post' action='pikavalinnat.php'>";
@@ -64,6 +87,7 @@ echo "<tr>
       <th>".t("Ohjelma")."</th>
       <th>".t("Kuvake")."</th>
       <th>".t("Teksti")."</th>
+      <th>".t("Järjestys")."</th>
       </tr>";
 
 $query = "SELECT sovellus, nimi, alanimi, min(nimitys) nimitys, min(jarjestys) jarjestys, min(jarjestys2) jarjestys2, max(hidden) hidden
@@ -90,6 +114,7 @@ foreach ($tallennetut["skriptit"] as $i => $skripti) {
 
   $kuvake    = $tallennetut["kuvakkeet"][$i];
   $teksti    = $tallennetut["tekstit"][$i];
+  $jarjestys = $tallennetut["jarjestykset"][$i];
 
   echo "<tr>";
   echo "<td><select name='skriptit[]'><option value=''>".t("Valitse ohjelma")."</option>";
@@ -119,6 +144,7 @@ foreach ($tallennetut["skriptit"] as $i => $skripti) {
 
   echo "</select></td>";
   echo "<td><input type='text' name='tekstit[]' value='$teksti' size='30'></td>";
+  echo "<td><input type='text' name='jarjestykset[]' value='$jarjestys' size='4'></td>";
   echo "<td class='back'><input type='submit' class='tallenna_btn' value='".t("Tallenna")."'></td>";
   echo "</tr>";
 }
@@ -139,6 +165,7 @@ foreach ($kuvakkeet_img as $kuvanimi => $kuva) {
 
 echo "</select></td>";
 echo "<td><input type='text' name='tekstit[]' value='' size='30'></td>";
+echo "<td><input type='text' name='jarjestykset[]' value='' size='4'></td>";
 echo "<td class='back'><input type='submit' class='lisaa_btn' value='".t("Lisää")."'></td>";
 echo "</tr>";
 
@@ -147,8 +174,20 @@ echo "</form>";
 
 echo "<br><br><br>Käytettävissä olevat kuvakkeet:<br><br>";
 
+
+echo "<table><tr>";
+$kala = 0;
+
 foreach ($kuvakkeet_img as $kuvanimi => $kuva) {
-  echo "<img src='{$palvelin2}pics/facelift/icons/$kuva'> $kuvanimi<br>";
+  echo "<td><img src='{$palvelin2}pics/facelift/icons/$kuva'> $kuvanimi</td>";
+  
+  $kala++;
+  
+  if ($kala % 4 == 0) {
+    echo "</tr><tr>";
+  }
 }
+
+echo "</tr></table>";
 
 require "inc/footer.inc";

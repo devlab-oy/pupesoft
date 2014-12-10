@@ -125,16 +125,16 @@ if (isset($_POST["toim"]) and $_POST["toim"] == "yhtion_parametrit") {
     $t[$cssi] = mysql_real_escape_string($apucss);
   }
   if (isset($apucssclassic)) {
-    $t[$cssclassici] = mysql_real_escape_string($apucssclassic);
+    $t[$css_classici] = mysql_real_escape_string($apucssclassic);
   }
   if (isset($apucssextranet)) {
-    $t[$cssextraneti] = mysql_real_escape_string($apucssextranet);
+    $t[$css_extraneti] = mysql_real_escape_string($apucssextranet);
   }
   if (isset($apucssverkkokauppa)) {
-    $t[$cssverkkokauppa] = mysql_real_escape_string($apucssverkkokauppa);
+    $t[$css_verkkokauppai] = mysql_real_escape_string($apucssverkkokauppa);
   }
   if (isset($apuwebseuranta)) {
-    $t[$webseuranta] = mysql_real_escape_string($apuwebseuranta);
+    $t[$web_seurantai] = mysql_real_escape_string($apuwebseuranta);
   }
 }
 
@@ -965,16 +965,16 @@ if ($errori != '' and $_POST["toim"] == "yhtion_parametrit") {
     $t[$cssi] = $apucss;
   }
   if (isset($apucssclassic)) {
-    $t[$cssclassici] = $apucssclassic;
+    $t[$css_classici] = $apucssclassic;
   }
   if (isset($apucssextranet)) {
-    $t[$cssextraneti] = $apucssextranet;
+    $t[$css_extraneti] = $apucssextranet;
   }
   if (isset($apucssverkkokauppa)) {
-    $t[$cssverkkokauppa] = $apucssverkkokauppa;
+    $t[$css_verkkokauppai] = $apucssverkkokauppa;
   }
   if (isset($apuwebseuranta)) {
-    $t[$webseuranta] = $apuwebseuranta;
+    $t[$web_seurantai] = $apuwebseuranta;
   }
 }
 

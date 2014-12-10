@@ -46,14 +46,7 @@ else {
 echo "</head>";
 
 if ($yhtiorow["kayttoliittyma"] == "") {
-
-  $colwidth = '175';
-
-  if (isset($kukarow['resoluutio']) and $kukarow['resoluutio'] == 'P') {
-    $colwidth = '45';
-  }
-
-  echo "<frameset cols='$colwidth,*' border='0'>
+  echo "<frameset cols='175,*' border='0'>
           <frameset rows='*,0' border='0'>
             <frame noresize src='indexvas.php?goso=$goso' name='menuframe' frameborder='0' marginwidth='0' marginheight='0'>
             <frame noresize src='' name='alamenu' id='alamenuFrame' frameborder='0' marginwidth='0' marginheight='0'>

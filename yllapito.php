@@ -2,7 +2,6 @@
 
 if (isset($_POST["toim"]) and $_POST["toim"] == "yhtion_parametrit") {
   $apucss = $_POST["css"];
-  $apucsspieni = $_POST["css_pieni"];
   $apucssextranet = $_POST["css_extranet"];
   $apucssverkkokauppa = $_POST["css_verkkokauppa"];
   $apuwebseuranta = $_POST["web_seuranta"];

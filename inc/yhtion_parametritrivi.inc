@@ -21,11 +21,6 @@ if ($fieldname == "css") {
   $jatko = 0;
 }
 
-if ($fieldname == "css_pieni") {
-  $ulos = "<td><textarea cols='45' rows='7' name='css_pieni'>$trow[$i]</textarea><input type='hidden' name='csspienii' value='$i'></td>";
-  $jatko = 0;
-}
-
 if ($fieldname == "css_extranet") {
   $ulos = "<td><textarea cols='45' rows='7' name='css_extranet'>$trow[$i]</textarea><input type='hidden' name='cssextraneti' value='$i'></td>";
   $jatko = 0;

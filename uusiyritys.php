@@ -146,8 +146,7 @@ if ($tila == 'ulkonako') {
         "muuttaja",
         "css",
         "css_extranet",
-        "css_verkkokauppa",
-        "css_pieni");
+        "css_verkkokauppa");
 
       foreach ($row as $ind => $val) {
         if (!in_array($ind, $alakopsaa)) {
@@ -166,7 +165,7 @@ if ($tila == 'ulkonako') {
 
 if ($tila == 'perusta') {
   if ($fromyhtio != '') {
-    $query = "SELECT css, css_extranet, css_verkkokauppa, css_pieni
+    $query = "SELECT css, css_extranet, css_verkkokauppa
               from yhtion_parametrit
               where yhtio = '$fromyhtio'";
     $result = pupe_query($query);
@@ -188,8 +187,7 @@ if ($tila == 'perusta') {
       $query = "UPDATE yhtion_parametrit SET
                 css              = '$uusiyhtiorow[css]',
                 css_extranet     = '$uusiyhtiorow[css_extranet]',
-                css_verkkokauppa = '$uusiyhtiorow[css_verkkokauppa]',
-                css_pieni        = '$uusiyhtiorow[css_pieni]'
+                css_verkkokauppa = '$uusiyhtiorow[css_verkkokauppa]'
                 WHERE tunnus     = '$yht_row[tunnus]'
                 AND yhtio        = '$yhtio'";
       $result = pupe_query($query);

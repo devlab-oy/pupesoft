@@ -5871,10 +5871,8 @@ if ($tee == '') {
       $sarakkeet++;
     }
 
-    if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
-      $headerit .= "<th>".t("Nimitys")."</th>";
-      $sarakkeet++;
-    }
+    $headerit .= "<th>".t("Nimitys")."</th>";
+    $sarakkeet++;
 
     if ((($toim != "TARJOUS" and $toim != "EXTTARJOUS") or $yhtiorow['tarjouksen_tuotepaikat'] == "") and (($kukarow['extranet'] == '' or ($kukarow['extranet'] != '' and $yhtiorow['tuoteperhe_suoratoimitus'] == 'E')) or $yhtiorow['varastopaikan_lippu'] != '')) {
       $headerit .= "<th>".t("Paikka")."</th>";
@@ -6987,20 +6985,16 @@ if ($tee == '') {
           echo "</td>";
         }
 
-        // Tuotteen nimitys n‰ytet‰‰n vain jos k‰ytt‰j‰n resoluution on iso
-        if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
-          // Onko liitetiedostoja
-
-          if ($kukarow['extranet'] != '') {
-            $liitekuvat = liite_popup("TH", $row['tuote_tunnus']);
-            $liitekuvat = "<div style='float: left;'>{$liitekuvat}</div>";
-          }
-          else {
-            $liitekuvat = '';
-          }
-
-          echo "<td $class align='left' valign='top'>{$liitekuvat}".t_tuotteen_avainsanat($row, "nimitys")."$extranet_tarkistus_teksti</td>";
+        // Onko liitetiedostoja
+        if ($kukarow['extranet'] != '') {
+          $liitekuvat = liite_popup("TH", $row['tuote_tunnus']);
+          $liitekuvat = "<div style='float: left;'>{$liitekuvat}</div>";
         }
+        else {
+          $liitekuvat = '';
+        }
+
+        echo "<td $class align='left' valign='top'>{$liitekuvat}".t_tuotteen_avainsanat($row, "nimitys")."$extranet_tarkistus_teksti</td>";
 
         if ($kukarow['extranet'] == '' and $toim == "MYYNTITILI" and $laskurow["alatila"] == "V") {
 
@@ -8126,10 +8120,7 @@ if ($tee == '') {
                 echo "<td valign='top'>&nbsp;</td>";
               }
 
-              if ($kukarow["resoluutio"] == 'I') {
-                echo "<td valign='top'>".t_tuotteen_avainsanat($prow, 'nimitys')."</td>";
-              }
-
+              echo "<td valign='top'>".t_tuotteen_avainsanat($prow, 'nimitys')."</td>";
               echo "<input type='hidden' name='tuoteno_array[$prow[tuoteno]]' value='$prow[tuoteno]'>";
 
               if ($row["var"] == "T") {

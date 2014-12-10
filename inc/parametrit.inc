@@ -641,9 +641,6 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     elseif ($kukarow["extranet"] != "" and $yhtiorow["css_extranet"] != "") {
       $css = $yhtiorow["css_extranet"];
     }
-    elseif ($kukarow['resoluutio'] == 'P' and $yhtiorow['css_pieni'] != "") {
-      $css = $yhtiorow['css_pieni'];
-    }
     else {
       $css = $yhtiorow['css'];
     }

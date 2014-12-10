@@ -36,14 +36,15 @@ $laskuri_norm = 0;
 $query = "SELECT lasku.tunnus laskutunnus, asiakas.extranet_tilaus_varaa_saldoa
           FROM lasku
           JOIN kuka ON (kuka.yhtio = lasku.yhtio
-            AND kuka.kuka       = lasku.laatija
-            AND kuka.extranet  != '')
+            AND kuka.kuka         = lasku.laatija
+            AND kuka.extranet    != '')
           JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
-            AND asiakas.tunnus  = lasku.liitostunnus)
-          WHERE lasku.yhtio     = '{$kukarow['yhtio']}'
-          AND lasku.tila        = 'N'
-          AND lasku.alatila     = ''
-          AND lasku.clearing    NOT IN ('EXTENNAKKO','EXTTARJOUS')";
+            AND asiakas.tunnus    = lasku.liitostunnus)
+          WHERE lasku.yhtio       = '{$kukarow['yhtio']}'
+          AND lasku.tila          = 'N'
+          AND lasku.tilaustyyppi != 'H'
+          AND lasku.alatila       = ''
+          AND lasku.clearing      NOT IN ('EXTENNAKKO','EXTTARJOUS')";
 $result = pupe_query($query);
 
 while ($row = mysql_fetch_assoc($result)) {
@@ -54,21 +55,25 @@ while ($row = mysql_fetch_assoc($result)) {
   // X = Extranet-tilaus varaa saldoa
   // numero = Extranet-tilaus varaa saldoa x tuntia
   // E = Extranet-tilaus ei varaa saldoa
-  if ($row['extranet_tilaus_varaa_saldoa'] != 'X') {
+  // E-asetuksella  annetaan kuitenkin tunti varausaikaa siivouksen yhteydessä
 
-    // tyhjä on yhtiön oletus
-    if ($row['extranet_tilaus_varaa_saldoa'] == '') {
+  $asiakkaan_asetus = $row['extranet_tilaus_varaa_saldoa'];
+  $yhtion_asetus = $yhtiorow['extranet_tilaus_varaa_saldoa'];
 
-      // jos yhtiön oletus ei ole tyhjää, otetaan aikaraja tunteina
-      if ($yhtiorow['extranet_tilaus_varaa_saldoa'] != '') {
-        $aikaraja = (int) $yhtiorow['extranet_tilaus_varaa_saldoa'];
+  if ($asiakkaan_asetus != 'X') {
+    if ($asiakkaan_asetus == 'E') {
+      $aikaraja = 1;
+    }
+    elseif ($asiakkaan_asetus == '') {
+      if ($yhtion_asetus == 'E') {
+        $aikaraja = 1;
       }
       else {
-        continue;
+        $aikaraja = (int) $yhtion_asetus;
       }
     }
     else {
-      $aikaraja = (int) $row['extranet_tilaus_varaa_saldoa'];
+      $aikaraja = (int) $asiakkaan_asetus;
     }
   }
   else {

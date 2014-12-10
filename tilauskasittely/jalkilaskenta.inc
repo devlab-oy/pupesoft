@@ -1043,11 +1043,10 @@ if ($tuoteno != '') {
 
                 // etsitään tuotteen tiliöinti
                 $query = "SELECT *
-                          FROM lasku use index (yhtio_tila_tapvm)
-                          WHERE yhtio = '$kukarow[yhtio]'
+                          FROM lasku use index (tila_viite)
+                          WHERE yhtio = '{$kukarow['yhtio']}'
                           AND tila    = 'X'
-                          AND tapvm   >= '".substr($trow["laadittu"], 0, 10)."'
-                          AND viite   = '$trow[tunnus]'";
+                          AND viite   = '{$trow['tunnus']}'";
                 $invresult = pupe_query($query);
 
                 if (mysql_num_rows($invresult) == 1) {

@@ -108,10 +108,16 @@ if (mysql_field_name($result, $i) == "valkoodi") {
              ORDER BY jarjestys";
   $vresult = pupe_query($query);
 
+  // Jos trow valkoodi on tyhjä niin näytetään oletuksena
+  // yhtiön valkoodi ekana
+  if ($trow[$i] == "") {
+    $trow[$i] = $yhtiorow["valkoodi"];
+  }
+
   $ulos = "<td><select name='$nimi'>";
 
-  while ($vrow=mysql_fetch_array($vresult)) {
-    $sel="";
+  while ($vrow = mysql_fetch_array($vresult)) {
+    $sel = "";
     if ($trow[$i] == $vrow['nimi']) {
       $sel = "selected";
     }

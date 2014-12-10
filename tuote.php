@@ -152,7 +152,7 @@ echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
 echo "<th style='vertical-align:middle;'>".t("Tuotehaku")."</th>";
 echo "<td>".livesearch_kentta("formi", "TUOTEHAKU", "tuoteno", 300)."</td>";
 echo "<td class='back'>";
-echo "<input type='Submit' value='".t("Hae")."'></form></td>";
+echo "<input type='submit' class='hae_btn' value='".t("Hae")."'></form></td>";
 echo "</tr>";
 
 echo "<tr>";
@@ -172,7 +172,7 @@ echo "<input type='text' name='tuoteno' value='' style='width:300px;'>";
 echo "</td>";
 
 echo "<td class='back'>";
-echo "<input type='Submit' value='".t("Hae")."'>";
+echo "<input type='submit' class='hae_btn' value='".t("Hae")."'>";
 echo "</form>";
 echo "</td>";
 
@@ -186,7 +186,7 @@ if ($ulos == '' and $tee == 'Z') {
   echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
   echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
   echo "<td class='back'>";
-  echo "<input type='Submit' value='".t("Edellinen")."'>";
+  echo "<input type='submit' value='".t("Edellinen")."'>";
   echo "</td>";
   echo "</form>";
 
@@ -198,7 +198,7 @@ if ($ulos == '' and $tee == 'Z') {
   echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
   echo "<input type='hidden' name='toim_kutsu' value='$toim_kutsu'>";
   echo "<td class='back'>";
-  echo "<input type='Submit' value='".t("Seuraava")."'>";
+  echo "<input type='submit' value='".t("Seuraava")."'>";
   echo "</td>";
   echo "</form>";
 }
@@ -315,26 +315,26 @@ if ($tee == 'Z') {
 
     // Hinnastoon
     if (strtoupper($tuoterow['hinnastoon']) == 'E') {
-      $tuoterow['hinnastoon'] = "<font style='color:#FF0000;'>".t("Ei")."</font>";
+      $tuoterow['hinnastoon'] = "<font class='red'>".t("Ei")."</font>";
     }
     else {
-      $tuoterow['hinnastoon'] = "<font style='color:#00FF00;'>".t("Kyll‰")."</font>";
+      $tuoterow['hinnastoon'] = "<font class='green'>".t("Kyll‰")."</font>";
     }
 
     // Varastoon
     if ($tuoterow['status'] == 'T' or $tuoterow['status'] == 'P') {
-      $tuoterow['ei_varastoida'] = "<font style='color:#FF0000;'>".t("Ei")."</font>";
+      $tuoterow['ei_varastoida'] = "<font class='red'>".t("Ei")."</font>";
     }
     else {
-      $tuoterow['ei_varastoida'] = "<font style='color:#00FF00;'>".t("Kyll‰")."</font>";
+      $tuoterow['ei_varastoida'] = "<font class='green'>".t("Kyll‰")."</font>";
     }
 
     // Ostoehdotukselle
     if ($tuoterow['ostoehdotus'] == 'E') {
-      $tuoterow['ostoehdotus'] = "<font style='color:#FF0000;'>".t("Ei")."</font>";
+      $tuoterow['ostoehdotus'] = "<font class='red'>".t("Ei")."</font>";
     }
     else {
-      $tuoterow['ostoehdotus'] = "<font style='color:#00FF00;'>".t("Kyll‰")."</font>";
+      $tuoterow['ostoehdotus'] = "<font class='green'>".t("Kyll‰")."</font>";
     }
 
     //tullinimike
@@ -417,7 +417,7 @@ if ($tee == 'Z') {
     }
 
     //eka laitetaan tuotteen yleiset (aika staattiset) tiedot
-    echo "<table>";
+    echo "<table class='tuotekysely'>";
 
     echo "<tr>";
     echo "<th>".t("Tuotenumero")."<br>".t("Tuotemerkki")."</th>";
@@ -869,7 +869,7 @@ if ($tee == 'Z') {
     }
 
     // Saldot, korvaavat ja vastaavat
-    echo "<table><tr><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
+    echo "<table><tr><td class='back nopad top'>";
 
     if ($tuoterow["ei_saldoa"] == '') {
 
@@ -1078,7 +1078,7 @@ if ($tee == 'Z') {
       echo "</table>";
     }
 
-    echo "</td><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
+    echo "</td><td class='back nopad top'>";
 
     // Korvaavat tuotteet
     require "korvaavat.class.php";
@@ -1148,7 +1148,7 @@ if ($tee == 'Z') {
       echo "</table>";
     }
 
-    echo "</td><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
+    echo "</td><td class='back nopad top'>";
 
     // Vastaavat tuotteet
     require "vastaavat.class.php";
@@ -1240,7 +1240,7 @@ if ($tee == 'Z') {
       }
     }
 
-    echo "</td><td class='back' valign='top' style='padding:0px; margin:0px;height:0px;'>";
+    echo "</td><td class='back nopad top'>";
 
     //Tuotemuutoksia halutaan n‰ytt‰‰, mik‰li niit‰ on.
     $lista = hae_tuotemuutokset($tuoteno);
@@ -1324,6 +1324,7 @@ if ($tee == 'Z') {
               lasku2.laskunro as keikkanro,
               tilausrivi.jaksotettu,
               tilausrivin_lisatiedot.osto_vai_hyvitys,
+              tilausrivin_lisatiedot.korvamerkinta,
               lasku2.comments,
               lasku2.laatija,
               lasku2.luontiaika
@@ -1496,7 +1497,27 @@ if ($tee == 'Z') {
         }
 
         echo "</td>";
-        echo "  <td>$tyyppi</td>
+        echo "<td>";
+        echo $tyyppi;
+
+        if (!empty($jtrow['korvamerkinta'])) {
+
+          if ($jtrow['korvamerkinta'] == '.') {
+            $luokka = '';
+          }
+          else {
+            $luokka = 'tooltip';
+          }
+
+          echo "&nbsp;<img src='{$palvelin2}pics/lullacons/info.png' class='{$luokka}' id='{$jtrow['trivitunn']}_info'>";
+          echo "<div id='div_{$jtrow['trivitunn']}_info' class='popup'>";
+          echo $jtrow['korvamerkinta'];
+          echo "</div>";
+        }
+
+        echo "</td>";
+
+        echo "
             <td>".tv1dateconv($jtrow["laadittu"])."</td>
             <td>".tv1dateconv($jtrow["pvm"])."$vahvistettu</td>
             <td align='right'>$merkki".abs($jtrow["kpl"])."</td>
@@ -2293,6 +2314,7 @@ if ($tee == 'Z') {
                 tilausrivi.tunnus trivitunn,
                 tilausrivi.perheid,
                 tilausrivin_lisatiedot.osto_vai_hyvitys,
+                tilausrivin_lisatiedot.korvamerkinta,
                 lasku2.tunnus lasku2tunnus,
                 lasku2.laskunro lasku2laskunro,
                 concat_ws(' / ', round(tilausrivi.hinta, $yhtiorow[hintapyoristys]), $ale_query_concat_lisa round(tilausrivi.rivihinta, $yhtiorow[hintapyoristys])) tilalehinta,
@@ -2440,6 +2462,21 @@ if ($tee == 'Z') {
             echo t("$prow[laji]");
           }
 
+          if (!empty($prow['korvamerkinta'])) {
+
+            if ($prow['korvamerkinta'] == '.') {
+              $luokka = '';
+            }
+            else {
+              $luokka = 'tooltip';
+            }
+
+            echo "&nbsp;<img src='{$palvelin2}pics/lullacons/info.png' class='{$luokka}' id='{$prow['trivitunn']}_info'>";
+            echo "<div id='div_{$prow['trivitunn']}_info' class='popup'>";
+            echo $prow['korvamerkinta'];
+            echo "</div>";
+          }
+
           echo "</td>";
 
           echo "<td nowrap align='right' valign='top'>" . $prow['kpl'] . "</td>";
@@ -2569,7 +2606,7 @@ if ($ulos != "") {
   echo "<table><tr>";
   echo "<th>".t("Valitse listasta").":</th>";
   echo "<td>$ulos</td>";
-  echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></td>";
+  echo "<td class='back'><input type='submit' value='".t("Valitse")."'></td>";
   echo "</tr></table>";
   echo "</form>";
 }

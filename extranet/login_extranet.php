@@ -131,7 +131,7 @@ echo "</head>
 -->
 </style>
 
-<table width='550' border='0'>
+<table width='550' >
 <tr>
 <td valign='top'><br>";
 
@@ -142,7 +142,12 @@ elseif (file_exists("pics/pupesoft_logo.gif")) {
   echo "<a target='_top' href='/'><img src='pics/pupesoft_logo.gif' border='0'>";
 }
 else {
-  echo "<a target='_top' href='/'><img src='{$pupesoft_scheme}api.devlab.fi/pupesoft.gif' border='0'>";
+  if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+    echo "<a target='_top' href='/'><img src='{$palvelin2}pics/facelift/pupe.gif' border='0'>";
+  }
+  else {
+    echo "<a target='_top' href='/'><img src='{$pupesoft_scheme}api.devlab.fi/pupesoft.gif' border='0'>";
+  }
 }
 
 echo "</a></td>

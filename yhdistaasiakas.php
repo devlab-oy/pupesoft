@@ -187,7 +187,7 @@ if ( ( !isset($jataminut) and !isset($yhdista) ) and (!isset($_FILES['userfile']
   }
 
   echo "<th>".t("Yhdistä")."</th><th>".t("jätä tämä")."</th>";
-  echo "<td class='back'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi / yhdistä")."'></td></tr>\n\n";
+  echo "<td class='back'>&nbsp;&nbsp;<input type='submit' value='".t("Etsi / yhdistä")."'></td></tr>\n\n";
 
   $kalalask = 1;
 

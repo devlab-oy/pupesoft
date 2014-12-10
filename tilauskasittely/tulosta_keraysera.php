@@ -500,7 +500,7 @@ if ($tee != '') {
       while ($kirow = mysql_fetch_assoc($kires)) {
 
         $sel = "";
-        $_printterit = explode(",", $kirow['printteri8']);
+        $_printterit = explode(",", $kirow['printteri0']);
 
         if (in_array($kirow['kir_tunnus'], $_printterit)) {
           $sel = " selected";

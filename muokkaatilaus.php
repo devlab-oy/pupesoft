@@ -229,6 +229,8 @@ if (isset($tee) and $tee == 'TOIMITA_ENNAKKO' and $yhtiorow["ennakkotilausten_to
 if (!isset($asiakastiedot)) $asiakastiedot = '';
 if (!isset($limit)) $limit = '';
 if (!isset($etsi)) $etsi = '';
+if (!isset($pv_rajaus)) $pv_rajaus = '2';
+if (!isset($tee_excel)) $tee_excel = '';
 
 // scripti balloonien tekemiseen
 js_popup();
@@ -804,6 +806,53 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     echo "</select></td><td class='back'>&nbsp;</td>";
   }
 
+  echo "</tr>";
+  echo "<tr>";
+
+  $_alkiot = array(
+    '1' => '',
+    '2' => '',
+    '3' => '',
+    '5' => '',
+    '7' => '',
+    '14' => '',
+    '30' => '',
+    '60' => '',
+    '90' => '',
+    'ei_rajausta' => '',
+  );
+
+  $_sel = array($pv_rajaus => 'selected') + $_alkiot;
+
+  echo "<th>";
+  echo t("Listan tulokset"),"<br />";
+  echo "(",t("Oletuksena vain 50 ensimm‰ist‰"),")";
+  echo "</th>";
+  echo "<td>";
+  echo "<select name='pv_rajaus'>";
+  echo "<option value='1' {$_sel['1']}>",t("%d p‰iv‰‰", "", 1),"</option>";
+  echo "<option value='2' {$_sel['2']}>",t("%d p‰iv‰‰", "", 2),"</option>";
+  echo "<option value='3' {$_sel['3']}>",t("%d p‰iv‰‰", "", 3),"</option>";
+  echo "<option value='5' {$_sel['5']}>",t("%d p‰iv‰‰", "", 5),"</option>";
+  echo "<option value='7' {$_sel['7']}>",t("%d p‰iv‰‰", "", 7),"</option>";
+  echo "<option value='14' {$_sel['14']}>",t("%d p‰iv‰‰", "", 14),"</option>";
+  echo "<option value='30' {$_sel['30']}>",t("%d p‰iv‰‰", "", 30),"</option>";
+  echo "<option value='60' {$_sel['60']}>",t("%d p‰iv‰‰", "", 60),"</option>";
+  echo "<option value='90' {$_sel['90']}>",t("%d p‰iv‰‰", "", 90),"</option>";
+  echo "<option value='ei_rajausta' {$_sel['ei_rajausta']}>",t("Ei rajausta"),"</option>";
+  echo "</select>";
+  echo "</td>";
+
+  echo "</tr>";
+  echo "<tr>";
+
+  $_chk = $tee_excel ? "checked" : "";
+
+  echo "<th>",t("Tee Excel"),"</th>";
+  echo "<td>";
+  echo "<input type='checkbox' name='tee_excel' {$_chk} />";
+  echo "</td>";
+
   echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Etsi")."'></td></tr>";
   echo "</table>";
   echo "</form>";
@@ -826,7 +875,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     $myyntitili_haku = " or tilausrivi.tuoteno like '%{$etsi}%' ";
   }
 
-  if (is_string($etsi)) {
+  if (!empty($etsi) and is_string($etsi)) {
     $haku = " and (lasku.nimi like '%{$etsi}%' or lasku.nimitark like '%{$etsi}%' or lasku.viesti like '%{$etsi}%' or lasku.toim_nimi like '%{$etsi}%' or lasku.toim_nimitark like '%{$etsi}%' or lasku.laatija like '%{$etsi}%' or kuka1.nimi like '%{$etsi}%' or kuka2.nimi like '%{$etsi}%' {$myyntitili_haku}) ";
   }
 
@@ -883,6 +932,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
       $haku .= " and lasku.yhtio_toimipaikka = '{$toimipaikka}' ";
       $sumhaku = " and lasku.yhtio_toimipaikka = '{$toimipaikka}' ";
     }
+  }
+
+  if (!empty($pv_rajaus) and $pv_rajaus != 'ei_rajausta') {
+    $haku .= " and DATE(lasku.luontiaika) >= DATE_SUB(CURRENT_DATE, INTERVAL {$pv_rajaus} DAY) ";
   }
 
   if (!empty($mt_order)) {
@@ -2077,7 +2130,7 @@ $result = pupe_query($query);
 
 if (mysql_num_rows($result) != 0) {
 
-  if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
+  if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE and $tee_excel) {
     include 'inc/pupeExcel.inc';
 
     $worksheet    = new pupeExcel();
@@ -2942,6 +2995,8 @@ if (mysql_num_rows($result) != 0) {
           <input type='hidden' name='asiakastiedot' value='$asiakastiedot'>
           <input type='hidden' name='limit' value='NO'>
           <input type='hidden' name='kaytiin_otsikolla' value='NOJOO!'>
+          <input type='hidden' name='pv_rajaus' value='{$pv_rajaus}'>
+          <input type='hidden' name='toimipaikka' value='{$toimipaikka}'>
           <table>
           <tr><th>".t("Listauksessa n‰kyy 50 ensimm‰ist‰")." $otsikko.</th>
           <td class='back'><input type='submit' value = '".t("N‰yt‰ kaikki")."'></td></tr>

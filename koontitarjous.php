@@ -71,7 +71,7 @@ else {
       <td><input type='text' name='ppa' value='{$ppa}' size='3' />&nbsp;<input type='text' name='kka' value='{$kka}' size='3' />&nbsp;<input type='text' name='vva' value='{$vva}' size='5' /></td>
       </tr><tr><th>", t("loppup‰iv‰m‰‰r‰ (pp-kk-vvvv)"), "</th>
       <td><input type='text' name='ppl' value='{$ppl}' size='3' />&nbsp;<input type='text' name='kkl' value='{$kkl}' size='3' />&nbsp;<input type='text' name='vvl' value='{$vvl}' size='5' /></td>
-      <td class='back'><input type='submit' name='submit' value='", t("Etsi"), "'></td>";
+      <td class='back'><input type='submit' name='submit' class='hae_btn' value = '".t("Etsi")."'></td>";
   echo "</table>";
   echo "</form>";
 }

@@ -68,7 +68,11 @@ if (isset($tallennetaan_muutokset) and isset($muokattava_laite) and $muokattava_
 }
 elseif (isset($tallenna_uusi_laite) and isset($valitse_sarjanumero) and !empty($valitse_sarjanumero)
   and !isset($muokattava_laite)) {
-  // Tarkistetaan ettei laite/sarjanumeropari ole jo taulussa
+
+  // Jos syötetään sarjanumeroita mitkä eivät ole sarjanumeroseurannassa
+  $uusilaite_sarjanumero = $uusilaite_sarjanumero == '' ? $valitse_sarjanumero : $uusilaite_sarjanumero;
+
+  // Tarkistetaan ettei tuote/sarjanumeropari ole jo taulussa
   $query = "SELECT *
             FROM laite
             WHERE tuoteno = '{$uusilaite_tuotenumero}'
@@ -178,9 +182,9 @@ if ($toiminto == "LINKKAA") {
             avainsana.selitetark valmistaja,
             tuote.tuotemerkki malli
             FROM laite
-            JOIN tuote on tuote.yhtio = laite.yhtio
+            LEFT JOIN tuote on tuote.yhtio = laite.yhtio
               AND tuote.tuoteno                           = laite.tuoteno
-            JOIN avainsana on avainsana.yhtio = tuote.yhtio
+            LEFT JOIN avainsana on avainsana.yhtio = tuote.yhtio
               AND avainsana.laji                          = 'TRY'
               AND avainsana.selite                        = tuote.try
             JOIN laitteen_sopimukset on laitteen_sopimukset.laitteen_tunnus = laite.tunnus
@@ -258,9 +262,9 @@ $query = "SELECT
           if(ifnull(laitteen_sopimukset.sopimusrivin_tunnus, 0),'Kyllä','Ei') sopimusrivi,
           group_concat(laitteen_sopimukset.sopimusrivin_tunnus) sopimusrivin_tunnukset
           FROM laite
-          JOIN tuote on tuote.yhtio = laite.yhtio
+          LEFT JOIN tuote on tuote.yhtio = laite.yhtio
             AND tuote.tuoteno    = laite.tuoteno
-          JOIN avainsana on avainsana.yhtio = tuote.yhtio
+          LEFT JOIN avainsana on avainsana.yhtio = tuote.yhtio
             AND avainsana.laji   = 'TRY'
             AND avainsana.selite = tuote.try
           LEFT JOIN laitteen_sopimukset on laitteen_sopimukset.laitteen_tunnus = laite.tunnus
@@ -335,9 +339,9 @@ elseif ($toiminto == 'UUSILAITE') {
     $esiv_valmistaja = $rivikka['valmistaja'];
     $esiv_malli = $rivikka['malli'];
     $esiv_sopimus = "Ei";
+    if (empty($rivikka['sarjanumero'])) $rivikka['sarjanumero'] = $valitse_sarjanumero;
     echo "<input type='hidden' name='uusilaite_myyntirivitunnus' value ='{$rivikka['myyntirivitunnus']}'/>";
     echo "<input type='hidden' name='uusilaite_sarjanumero' value ='{$rivikka['sarjanumero']}'/>";
-    echo "<input type='hidden' name='uusilaite_tuotenumero' value ='{$rivikka['tuoteno']}'/>";
   }
   echo "<td></td>";
   echo "<td>{$esiv_sopimus}</td>";
@@ -348,7 +352,7 @@ elseif ($toiminto == 'UUSILAITE') {
   echo livesearch_kentta("laiterekisteriformi", "SARJANUMEROHAKU", "valitse_sarjanumero", 140, $valitse_sarjanumero, '', '', '', 'ei_break_all');
   echo "</td>";
 
-  echo "<td>{$esiv_tuotenumero}</td>";
+  echo "<td><input type='text' name='uusilaite_tuotenumero' value='{$esiv_tuotenumero}'/></td>";
   echo "<td></td><td></td>";
   echo "<td><input type='text' name='sla'/></td>";
   echo "<td><input type='text' name='sd_sla'/></td>";
@@ -427,6 +431,7 @@ else {
 
           $asiakas .= $lassurivi['toim_nimi']."<br>";
           $asiakas .= $lassurivi['toim_postitp']."<br>";
+          $asiakas .= $lassurivi['asiakkaan_tilausnumero']."<br>";
           $asiakas .= "<br><br>";
         }
 

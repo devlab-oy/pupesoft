@@ -1,15 +1,15 @@
 <?php
 
 if (isset($_POST["toim"]) and $_POST["toim"] == "yhtion_parametrit") {
-  $apucss = $_POST["css"];
-  $apucsspieni = $_POST["css_pieni"];
-  $apucssextranet = $_POST["css_extranet"];
+  $apucss             = $_POST["css"];
+  $apucssclassic      = $_POST["css_classic"];
+  $apucssextranet     = $_POST["css_extranet"];
   $apucssverkkokauppa = $_POST["css_verkkokauppa"];
-  $apuwebseuranta = $_POST["web_seuranta"];
+  $apuwebseuranta     = $_POST["web_seuranta"];
 }
 else {
   unset($apucss);
-  unset($apucsspieni);
+  unset($apucssclassic);
   unset($apucssextranet);
   unset($apucssverkkokauppa);
   unset($apuwebseuranta);
@@ -148,17 +148,17 @@ if (isset($_POST["toim"]) and $_POST["toim"] == "yhtion_parametrit") {
   if (isset($apucss)) {
     $t[$cssi] = mysql_real_escape_string($apucss);
   }
-  if (isset($apucsspieni)) {
-    $t[$csspienii] = mysql_real_escape_string($apucsspieni);
+  if (isset($apucssclassic)) {
+    $t[$css_classici] = mysql_real_escape_string($apucssclassic);
   }
   if (isset($apucssextranet)) {
-    $t[$cssextraneti] = mysql_real_escape_string($apucssextranet);
+    $t[$css_extraneti] = mysql_real_escape_string($apucssextranet);
   }
   if (isset($apucssverkkokauppa)) {
-    $t[$cssverkkokauppa] = mysql_real_escape_string($apucssverkkokauppa);
+    $t[$css_verkkokauppai] = mysql_real_escape_string($apucssverkkokauppa);
   }
   if (isset($apuwebseuranta)) {
-    $t[$webseuranta] = mysql_real_escape_string($apuwebseuranta);
+    $t[$web_seurantai] = mysql_real_escape_string($apuwebseuranta);
   }
 }
 
@@ -1118,17 +1118,17 @@ if ($errori != '' and $_POST["toim"] == "yhtion_parametrit") {
   if (isset($apucss)) {
     $t[$cssi] = $apucss;
   }
-  if (isset($apucsspieni)) {
-    $t[$csspienii] = $apucsspieni;
+  if (isset($apucssclassic)) {
+    $t[$css_classici] = $apucssclassic;
   }
   if (isset($apucssextranet)) {
-    $t[$cssextraneti] = $apucssextranet;
+    $t[$css_extraneti] = $apucssextranet;
   }
   if (isset($apucssverkkokauppa)) {
-    $t[$cssverkkokauppa] = $apucssverkkokauppa;
+    $t[$css_verkkokauppai] = $apucssverkkokauppa;
   }
   if (isset($apuwebseuranta)) {
-    $t[$webseuranta] = $apuwebseuranta;
+    $t[$web_seurantai] = $apuwebseuranta;
   }
 }
 
@@ -1622,7 +1622,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
   if ($from != "" and mysql_num_rows($result) > 0) {
     for ($i = 1; $i < mysql_num_fields($result); $i++) {
       if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
-        echo "<th valign='top'>".t(mysql_field_name($result, $i))."</th>";
+        echo "<th>".t(mysql_field_name($result, $i))."</th>";
       }
     }
   }
@@ -1630,7 +1630,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
     for ($i = 1; $i < mysql_num_fields($result); $i++) {
       if (strpos(strtoupper(mysql_field_name($result, $i)), "HIDDEN") === FALSE) {
 
-        echo "<th valign='top'><a href='yllapito.php?toim=$aputoim&lopetus=$lopetus&ojarj=".($i+1)."_".$edosuu."$ulisa&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji'{$tuote_status_lisa}>" . t(mysql_field_name($result, $i)) . "</a>";
+        echo "<th><a href='yllapito.php?toim=$aputoim&lopetus=$lopetus&ojarj=".($i+1)."_".$edosuu."$ulisa&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji'{$tuote_status_lisa}>" . t(mysql_field_name($result, $i)) . "</a>";
 
         if (mysql_num_fields($result) <= 6 and mysql_field_len($result, $i) > 10) $size='15';
         elseif (mysql_field_len($result, $i) < 5)  $size='5';
@@ -1707,10 +1707,10 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
     }
 
     if (($toim == "asiakasalennus" or $toim == "asiakashinta" or $toim == "hinnasto" or $toim == "puun_alkio") and $oikeurow['paivitys'] == 1) {
-      echo "<th valign='top'>".t("Poista")."</th>";
+      echo "<th>".t("Poista")."</th>";
     }
 
-    echo "<td class='back' valign='bottom'>&nbsp;&nbsp;<input type='Submit' value='".t("Etsi")."'></td></form>";
+    echo "<td class='back' valign='bottom'>&nbsp;&nbsp;<input type='submit' class='hae_btn' value='".t("Etsi")."'></td></form>";
     echo "</tr>";
 
   }
@@ -1758,7 +1758,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
         if ($i == 1) {
           if (trim($trow[1]) == '' or (is_float($trow[1]) and $trow[1] == 0)) $trow[1] = t("*tyhjä*");
 
-          echo "<td valign='top'><a name='$trow[0]' href='yllapito.php?mista=$mista&ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji{$tuote_status_lisa}";
+          echo "<td><a name='$trow[0]' href='yllapito.php?mista=$mista&ojarj=$ojarj$ulisa&toim=$aputoim&tunnus=$trow[0]&limit=$limit&nayta_poistetut=$nayta_poistetut&nayta_eraantyneet=$nayta_eraantyneet&laji=$laji{$tuote_status_lisa}";
 
           if ($from == "" and $lopetus == "") {
             echo "&lopetus=".$palvelin2."yllapito.php////mista=$mista//ojarj=$ojarj".str_replace("&", "//", $ulisa)."//toim=$aputoim//limit=$limit//nayta_poistetut=$nayta_poistetut//nayta_eraantyneet=$nayta_eraantyneet//laji=$laji///$trow[0]";
@@ -1812,7 +1812,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
             echo "<td valign='top' style='text-align:right'>$fontlisa1 $trow[$i] $fontlisa2</td>";
           }
           elseif (mysql_field_name($result, $i) == 'koko') {
-            echo "<td valign='top'>$fontlisa1 ".size_readable($trow[$i])." $fontlisa2</td>";
+            echo "<td>$fontlisa1 ".size_readable($trow[$i])." $fontlisa2</td>";
           }
           elseif ($yhtiorow['laite_huolto'] == 'X' and $toim == 'huoltosykli' and mysql_field_name($result, $i) == 'huoltovali') {
             $huoltovalit = huoltovali_options();
@@ -1854,7 +1854,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
 
             $trow[$i] = preg_replace_callback("/[0-9]{4}\-[0-9]{2}\-[0-9]{2}/", "ps_callback", $trow[$i]);
 
-            echo "<td valign='top'>$fontlisa1 $trow[$i] $fontlisa2</td>";
+            echo "<td>$fontlisa1 $trow[$i] $fontlisa2</td>";
           }
         }
       }
@@ -2361,7 +2361,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   }
 
   echo "</td>";
-  echo "<td class='back' valign='top'>";
+  echo "<td class='back top'>";
 
   if ($errori == '' and $toim == "sarjanumeron_lisatiedot") {
     @include "inc/arviokortti.inc";
@@ -2371,45 +2371,45 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   echo "</form>";
 
   if ($trow["tunnus"] > 0 and $errori == '' and $toim == "yhtio") {
-    echo "<iframe id='yhtion_toimipaikat_iframe' name='yhtion_toimipaikat_iframe' src='yllapito.php?toim=yhtion_toimipaikat&from=yllapito&ohje=off&haku[4]=@$trow[yhtio]&lukitse_avaimeen=$trow[yhtio]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+    echo "<iframe id='yhtion_toimipaikat_iframe' name='yhtion_toimipaikat_iframe' src='yllapito.php?toim=yhtion_toimipaikat&from=yllapito&ohje=off&haku[4]=@$trow[yhtio]&lukitse_avaimeen=$trow[yhtio]' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
   }
 
   if ($trow["tunnus"] > 0 and $errori == '' and $toim == "lasku") {
-    echo "<iframe id='laskun_lisatiedot_iframe' name='laskun_lisatiedot_iframe' src='yllapito.php?toim=laskun_lisatiedot&from=yllapito&ohje=off&haku[1]=@$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+    echo "<iframe id='laskun_lisatiedot_iframe' name='laskun_lisatiedot_iframe' src='yllapito.php?toim=laskun_lisatiedot&from=yllapito&ohje=off&haku[1]=@$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
   }
 
   if ($trow["tunnus"] > 0 and $errori == '' and $toim == "asiakas") {
 
     if (($toikrow = tarkista_oikeus("yllapito.php", "asiakasalennus%", "", "OK")) !== FALSE) {
-      echo "<iframe id='asiakasalennus_iframe' name='asiakasalennus_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[1]=$trow[tunnus]/$trow[ytunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='asiakasalennus_iframe' name='asiakasalennus_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[1]=$trow[tunnus]/$trow[ytunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
 
     if (($toikrow = tarkista_oikeus("yllapito.php", "asiakashinta%", "", "OK")) !== FALSE) {
-      echo "<iframe id='asiakashinta_iframe' name='asiakashinta_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[1]=$trow[tunnus]/$trow[ytunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='asiakashinta_iframe' name='asiakashinta_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[1]=$trow[tunnus]/$trow[ytunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
 
     if (($toikrow = tarkista_oikeus("yllapito.php", "asiakaskommentti%", "", "OK")) !== FALSE) {
-      echo "<iframe id='asiakaskommentti_iframe' name='asiakaskommentti_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[1]=@$trow[ytunnus]&lukitse_avaimeen=$trow[ytunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='asiakaskommentti_iframe' name='asiakaskommentti_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[1]=@$trow[ytunnus]&lukitse_avaimeen=$trow[ytunnus]' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
 
     if (($toikrow = tarkista_oikeus("yllapito.php", "asiakkaan_avainsanat%", "", "OK")) !== FALSE) {
-      echo "<iframe id='asiakkaan_avainsanat_iframe' name='asiakkaan_avainsanat_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[5]=@$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='asiakkaan_avainsanat_iframe' name='asiakkaan_avainsanat_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[5]=@$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
 
     if (($toikrow = tarkista_oikeus("yllapito.php", "puun_alkio&laji=asiakas%", "", "OK")) !== FALSE) {
-      echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=$toikrow[alanimi]&lukitse_laji=asiakas&from=yllapito&ohje=off&haku[1]=@$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=$toikrow[alanimi]&lukitse_laji=asiakas&from=yllapito&ohje=off&haku[1]=@$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
 
     if (($toikrow = tarkista_oikeus("yllapito.php", "puun_alkio&laji=tuote&mista=asiakas%", "", "OK")) !== FALSE) {
-      echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&mista=asiakas&lukitse_laji=tuote&from=yllapito&ohje=off&haku[1]=@{$trow['tunnus']}&lukitse_avaimeen={$trow['tunnus']}' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&mista=asiakas&lukitse_laji=tuote&from=yllapito&ohje=off&haku[1]=@{$trow['tunnus']}&lukitse_avaimeen={$trow['tunnus']}' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
       echo "<br />";
     }
 
     if (($toikrow = tarkista_oikeus("yllapito.php", "rahtisopimukset%", "", "OK")) !== FALSE) {
-      echo "<iframe id='rahtisopimukset_iframe' name='rahtisopimukset_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[1]=$trow[tunnus]/$trow[ytunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='rahtisopimukset_iframe' name='rahtisopimukset_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[1]=$trow[tunnus]/$trow[ytunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
     if (($toikrow = tarkista_oikeus("yllapito.php", "kohde%", "", "OK")) !== FALSE) {
-      echo "<iframe id='kohde_iframe' name='kohde_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[2]=$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='kohde_iframe' name='kohde_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[2]=$trow[tunnus]&lukitse_avaimeen=$trow[tunnus]' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
   }
 
@@ -2424,14 +2424,14 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
         $laji = "T";
       }
 
-      echo "<iframe id='yhteyshenkilo_iframe' name='yhteyshenkilo_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&laji=$laji&ohje=off&haku[6]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='yhteyshenkilo_iframe' name='yhteyshenkilo_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&laji=$laji&ohje=off&haku[6]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
   }
 
   if ($trow["tunnus"] > 0 and $errori == '' and $toim == "toimi") {
 
     if (($toikrow = tarkista_oikeus("yllapito.php", "vaihtoehtoiset_verkkolaskutunnukset%", "", "OK")) !== FALSE) {
-      echo "<iframe id='vaihtoehtoiset_verkkolaskutunnukset_iframe' name='vaihtoehtoiset_verkkolaskutunnukset_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&laji=$laji&ohje=off&haku[3]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='vaihtoehtoiset_verkkolaskutunnukset_iframe' name='vaihtoehtoiset_verkkolaskutunnukset_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&laji=$laji&ohje=off&haku[3]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
   }
 
@@ -2462,38 +2462,38 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     }
 
     if (($toikrow = tarkista_oikeus("yllapito.php", "avainsana%", "", "OK")) !== FALSE) {
-      echo "<iframe id='avainsana_iframe' name='avainsana_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&lukitse_laji=$laji&ohje=off&haku[2]=@$laji$urilisa&lukitse_avaimeen=$la_tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='avainsana_iframe' name='avainsana_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&lukitse_laji=$laji&ohje=off&haku[2]=@$laji$urilisa&lukitse_avaimeen=$la_tunnus' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
   }
 
   if ($trow["tunnus"] > 0 and $errori == '' and $toim == "yhteensopivuus_tuote") {
     if (($toikrow = tarkista_oikeus("yllapito.php", "yhteensopivuus_tuote_lisatiedot%", "", "OK")) !== FALSE) {
-      echo "<iframe id='yhteensopivuus_tuote_lisatiedot_iframe' name='yhteensopivuus_tuote_lisatiedot_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&haku[5]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='yhteensopivuus_tuote_lisatiedot_iframe' name='yhteensopivuus_tuote_lisatiedot_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&haku[5]=@$tunnus&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
   }
 
   if ($trow["tunnus"] > 0 and $errori == '' and $toim == "toimitustapa") {
     if (($toikrow = tarkista_oikeus("yllapito.php", "toimitustavan_lahdot%", "", "OK")) !== FALSE) {
-      echo "<iframe id='toimitustavan_lahdot_iframe' name='toimitustavan_lahdot_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&haku[1]=@$tunnus&ohje=off&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='toimitustavan_lahdot_iframe' name='toimitustavan_lahdot_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&haku[1]=@$tunnus&ohje=off&lukitse_avaimeen=$tunnus' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
   }
 
   if ($trow["tunnus"] > 0 and $errori == '' and $from != "yllapito" and ($toim == 'lasku' or $toim == 'asiakas' or $toim == "sarjanumeron_lisatiedot" or $toim == "tuote" or $toim == "avainsana" or $toim == "toimi")) {
     if (($toikrow = tarkista_oikeus("yllapito.php", "liitetiedostot%", "", "OK")) !== FALSE) {
-      echo "<iframe id='liitetiedostot_iframe' name='liitetiedostot_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[7]=@$toim&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus&lukitse_laji=$toim' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='liitetiedostot_iframe' name='liitetiedostot_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[7]=@$toim&haku[8]=@$tunnus&lukitse_avaimeen=$tunnus&lukitse_laji=$toim' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
   }
 
   if ($trow["tunnus"] > 0 and $errori == '' and $toim == 'pakkaus') {
     if (($toikrow = tarkista_oikeus("yllapito.php", "pakkauskoodit%", "", "OK")) !== FALSE) {
-      echo "<iframe id='pakkauskoodit_iframe' name='pakkauskoodit_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&from=yllapito&ohje=off&haku[1]=@{$tunnus}&lukitse_avaimeen={$tunnus}' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='pakkauskoodit_iframe' name='pakkauskoodit_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&from=yllapito&ohje=off&haku[1]=@{$tunnus}&lukitse_avaimeen={$tunnus}' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
   }
 
   if ($trow["tunnus"] > 0 and $errori == '' and $toim == 'toimitustapa') {
     if (($toikrow = tarkista_oikeus("yllapito.php", "toimitustavat_toimipaikat%", "", "OK")) !== FALSE) {
       echo "<br>";
-      echo "<iframe id='toimitustavat_iframe' name='toimitustavat_iframe' src='yllapito.php?toim=toimitustavat_toimipaikat&from=yllapito&ohje=off&haku[1]=@{$tunnus}&lukitse_avaimeen={$tunnus}' style='width: 600px; height: 300px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='toimitustavat_iframe' name='toimitustavat_iframe' src='yllapito.php?toim=toimitustavat_toimipaikat&from=yllapito&ohje=off&haku[1]=@{$tunnus}&lukitse_avaimeen={$tunnus}' style='width: 600px; height: 300px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
   }
 
@@ -2502,32 +2502,32 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $lukitse_avaimeen = urlencode($tuoteno);
 
     if (($toikrow = tarkista_oikeus("yllapito.php", "tuotteen_toimittajat%", "", "OK")) !== FALSE) {
-      echo "<iframe id='tuotteen_toimittajat_iframe' name='tuotteen_toimittajat_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame><br />";
+      echo "<iframe id='tuotteen_toimittajat_iframe' name='tuotteen_toimittajat_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame><br />";
     }
 
     if (($toikrow = tarkista_oikeus("yllapito.php", "toimittajaalennus%", "", "OK")) !== FALSE) {
-      echo "<iframe id='toimittajaalennus_iframe' name='toimittajaalennus_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[3]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='toimittajaalennus_iframe' name='toimittajaalennus_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[3]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
 
     if (($toikrow = tarkista_oikeus("yllapito.php", "toimittajahinta%", "", "OK")) !== FALSE) {
-      echo "<iframe id='toimittajahinta_iframe' name='toimittajahinta_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[3]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='toimittajahinta_iframe' name='toimittajahinta_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[3]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
 
     if (($toikrow = tarkista_oikeus("yllapito.php", "tuotteen_avainsanat%", "", "OK")) !== FALSE) {
-      echo "<iframe id='tuotteen_avainsanat_iframe' name='tuotteen_avainsanat_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='tuotteen_avainsanat_iframe' name='tuotteen_avainsanat_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
 
     if (($toikrow = tarkista_oikeus("yllapito.php", "puun_alkio&laji=tuote%", "", "OK")) !== FALSE) {
-      echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=$toikrow[alanimi]&lukitse_laji=tuote&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='puun_alkio_iframe' name='puun_alkio_iframe' src='yllapito.php?toim=$toikrow[alanimi]&lukitse_laji=tuote&from=yllapito&ohje=off&haku[1]=@$lukitse_avaimeen&lukitse_avaimeen=$lukitse_avaimeen' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
   }
 
   if ($trow["tunnus"] > 0 and $errori == '' and $toim == "auto_vari") {
     if (($toikrow = tarkista_oikeus("yllapito.php", "auto_vari_tuote%", "", "OK")) !== FALSE) {
-      echo "<iframe id='auto_vari_tuote_iframe' name='auto_vari_tuote_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&haku[1]=@$trow[varikoodi]&ohje=off&lukitse_avaimeen=$trow[varikoodi]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='auto_vari_tuote_iframe' name='auto_vari_tuote_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&haku[1]=@$trow[varikoodi]&ohje=off&lukitse_avaimeen=$trow[varikoodi]' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
     if (($toikrow = tarkista_oikeus("yllapito.php", "auto_vari_korvaavat%", "", "OK")) !== FALSE) {
-      echo "<iframe id='auto_vari_korvaavat_iframe' name='auto_vari_korvaavat_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&haku[1]=@$trow[varikoodi]&ohje=off&lukitse_avaimeen=$trow[varikoodi]' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='auto_vari_korvaavat_iframe' name='auto_vari_korvaavat_iframe' src='yllapito.php?toim=$toikrow[alanimi]&from=yllapito&haku[1]=@$trow[varikoodi]&ohje=off&lukitse_avaimeen=$trow[varikoodi]' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
     }
   }
 
@@ -2667,7 +2667,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
       echo "<tr><td class='back'></td></tr>";
       echo "<tr><td class='back'>";
-      echo "<iframe id='tuotteen_toimittajat_tuotenumerot_iframe' name='tuotteen_toimittajat_tuotenumerot_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&from=yllapito&ohje=off&haku[1]=@{$lukitse_avaimeen}&lukitse_avaimeen={$lukitse_avaimeen}' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
+      echo "<iframe id='tuotteen_toimittajat_tuotenumerot_iframe' name='tuotteen_toimittajat_tuotenumerot_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&from=yllapito&ohje=off&haku[1]=@{$lukitse_avaimeen}&lukitse_avaimeen={$lukitse_avaimeen}' style='width: 600px; border: 0px; display: block;' frameborder='0'></iFrame>";
       echo "</td></tr>";
     }
   }

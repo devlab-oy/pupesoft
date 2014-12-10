@@ -3263,7 +3263,7 @@ else {
 
                     if (mysql_num_rows($osre) > 0) {
                       while ($osrow = mysql_fetch_assoc($osre)) {
-                        $row[$ken_nimi] .= "<a href='../tilauskasittely/sarjanumeroseuranta.php?sarjanumero_haku=".urlencode($osrow["sarjanumero"])."' target='_top'>{$osrow['sarjanumero']}</a><br>";
+                        $row[$ken_nimi] .= "<a href='../tilauskasittely/sarjanumeroseuranta.php?sarjanumero_haku=".urlencode($osrow["sarjanumero"])."' target='Sarjanumero'>{$osrow['sarjanumero']}</a><br>";
                       }
                     }
                   }
@@ -3274,7 +3274,7 @@ else {
                 if ($ken_nimi == "laskunumero") {
                   list($laskalk, $lasklop) = explode(":", $row[$ken_nimi]);
 
-                  $row[$ken_nimi] = $laskalk.":<a href='{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=&laskunro={$lasklop}' target='_top'>{$lasklop}</a>";
+                  $row[$ken_nimi] = $laskalk.":<a href='{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&tee=&laskunro={$lasklop}' target='Asiakkaantilaukset'>{$lasklop}</a>";
                 }
 
                 // jos kyseessa on varastonarvo
@@ -3329,16 +3329,16 @@ else {
                         echo "<td>";
 
                         if ($serialisoitavat_muuttujat["ruksit"][$ken_nimi] != '' and
-                            $asiakasosasto_temp != "" and
-                            $ruksit["asiakasryhma"] != "") {
-                            $serialisoitavat_muuttujat["mul_asiakasryhma"]["asiakasryhmä"] = $row["asiakasryhmä"];
+                          $asiakasosasto_temp != "" and
+                          $ruksit["asiakasryhma"] != "") {
+                          $serialisoitavat_muuttujat["mul_asiakasryhma"]["asiakasryhmä"] = $row["asiakasryhmä"];
 
-                            if ($mul_asiakasryhma["asiakasryhmä"] != "") {
-                              unset($serialisoitavat_muuttujat["mul_asiakasryhma"]);
-                            }
-                            else {
-                              $serialisoitavat_muuttujat["ruksit"]["asiakasryhma"] = 1;
-                            }
+                          if ($mul_asiakasryhma["asiakasryhmä"] != "") {
+                            unset($serialisoitavat_muuttujat["mul_asiakasryhma"]);
+                          }
+                          else {
+                            $serialisoitavat_muuttujat["ruksit"]["asiakasryhma"] = 1;
+                          }
                         }
                         elseif ($serialisoitavat_muuttujat["ruksit"]["asiakasryhma"] != '') {
                           unset($serialisoitavat_muuttujat["ruksit"]["asiakasryhma"]);
@@ -3413,7 +3413,7 @@ else {
                       $valisummat['asiakkaittain'] = "";
                       $totsummat['asiakkaittain']  = "";
                     }
-                    else if ($ken_nimi == 'tuoteosasto') {
+                    elseif ($ken_nimi == 'tuoteosasto') {
                       $valisummat['tuotteittain'] = "";
                       $totsummat['tuotteittain']  = "";
                     }

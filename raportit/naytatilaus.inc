@@ -900,9 +900,7 @@ else {
     }
   }
 
-  if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
-    echo "<th>".t("Nimitys")."</th>";
-  }
+  echo "<th>".t("Nimitys")."</th>";
 
   if (($laskurow["tila"] != "T" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and ($kukarow['extranet'] == '' or $yhtiorow['varastopaikan_lippu'] != '')) {
     echo "  <th>".t("Paikka")."</th>";
@@ -1275,10 +1273,7 @@ else {
       echo "</td>";
     }
 
-    // Tuotteen nimitys n‰ytet‰‰n vain jos k‰ytt‰j‰n resoluution on iso
-    if ($kukarow["resoluutio"] == 'I' or $kukarow['extranet'] != '') {
-      echo "<td $class align='left' valign='top'>".t_tuotteen_avainsanat($row, 'nimitys')."</td>";
-    }
+    echo "<td $class align='left' valign='top'>".t_tuotteen_avainsanat($row, 'nimitys')."</td>";
 
     if (($laskurow["tila"] != "T" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and $kukarow['extranet'] == '') {
 
@@ -1634,7 +1629,7 @@ else {
     echo "</tr>";
 
     if ($row['kommentti'] != '') {
-      $cspan = 10;
+      $cspan = 11;
 
       if ($kukarow['hinnat'] == 1) {
         $cspan-=2;
@@ -1642,9 +1637,7 @@ else {
       if ($kukarow['hinnat'] == -1) {
         $cspan-=4;
       }
-      if ($kukarow["resoluutio"] == "I") {
-        $cspan++;
-      }
+
       if (($laskurow["tila"] != "T" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and ($kukarow['extranet'] == '' or $yhtiorow['varastopaikan_lippu'] != '')) {
         $cspan++;
       }
@@ -1689,13 +1682,10 @@ else {
   }
 
   if ($kukarow['hinnat'] >= 0) {
-    $colspan = 6;
+    $colspan = 7;
 
     if ($kukarow['hinnat'] == 1) {
       $colspan = $colspan - 2;
-    }
-    if ($kukarow["resoluutio"] == "I") {
-      $colspan++;
     }
     if (($laskurow["tila"] != "T" or $yhtiorow['tarjouksen_tuotepaikat'] == "") and ($kukarow['extranet'] == '' or $yhtiorow['varastopaikan_lippu'] != '')) {
       $colspan++;

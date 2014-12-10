@@ -44,6 +44,14 @@ if ($kukarow['toimipaikka'] != $laskurow['yhtio_toimipaikka'] and $yhtiorow['myy
 // debuggia varten, laita 1 jos haluut messuja
 $lisaarivi_debug = 0;
 
+// haluttaessa ei varata saldoa extranet-tilauksissa
+if ($laskurow['tilaustyyppi'] == 'H') {
+  $varataan_saldoa = "EI";
+}
+
+if (!isset($rivitunnus)) $rivitunnus = 0;
+else $rivitunnus = (int) $rivitunnus;
+
 if ($laskurow["tila"] == 'G' and !isset($kohde_alue) and isset($tuoteno)) {
   //Laitetaan tuote oletusvaraston tuotepaikalle
   $tuotteen_oletuspaikka = hae_tuotteen_tuotepaikat($tuoteno, $laskurow['clearing']);
@@ -1828,7 +1836,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               }
 
               // Jos ei varata saldoa niin ei varata saldoa
-              if ($varataan_saldoa == "EI" and $rivityyppi == 'G') {
+              if ($varataan_saldoa == "EI" and ($rivityyppi == 'G' or $laskurow['tilaustyyppi'] == 'H')) {
                 $varattu = 0;
               }
 

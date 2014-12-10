@@ -470,8 +470,8 @@ if ($yhtiorow['iltasiivo_mitatoi_ext_tilauksia'] != '') {
             AND lasku.tila          = 'N'
             AND lasku.alatila       = ''
             AND lasku.tilaustyyppi != 'H'
-            AND lasku.clearing     NOT IN ('EXTENNAKKO','EXTTARJOUS')
-            AND lasku.luontiaika   < DATE_SUB(now(), INTERVAL $aikaraja HOUR)";
+            AND lasku.clearing      NOT IN ('EXTENNAKKO','EXTTARJOUS')
+            AND lasku.luontiaika    < DATE_SUB(now(), INTERVAL $aikaraja HOUR)";
   $result = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($result)) {

@@ -311,8 +311,16 @@ if (!function_exists("pupe_error")) {
     }
 
     if (!$_cli and isset($yhtiorow['css'])) {
+
+      if ($yhtiorow["kayttoliittyma"] == "U") {
+        $css = $yhtiorow['css'];
+      }
+      else {
+        $css = $yhtiorow['css_classic'];
+      }
+
       echo "<style type = 'text/css'>";
-      echo $yhtiorow['css'];
+      echo $css;
       echo "</style>";
 
       echo "<font class = 'error'>";
@@ -13479,7 +13487,7 @@ if (!function_exists("pupe_DataTables")) {
   function pupe_DataTables($parametrit) {
     global $yhtiorow;
 
-    preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['css'], $varitmatch);
+    preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['active_css'], $varitmatch);
     preg_match("/(#[a-f0-9]{3,6});/i", $varitmatch[0], $varirgb);
 
     $json_pass = array();
@@ -13499,7 +13507,7 @@ if (!function_exists("pupe_DataTables")) {
       $json_pass[$taulu] = array($sarakkeetVis, $sarakkeetTot, $paginate, $paginationtype, $info, $sorting);
     }
 
-    preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['css'], $varitmatch);
+    preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['active_css'], $varitmatch);
     preg_match("/(#[a-f0-9]{3,6});/i", $varitmatch[0], $varirgb);
 
     echo "<script type=\"text/javascript\" charset=\"utf-8\">
@@ -15983,7 +15991,7 @@ if (!function_exists("kopioi_tilausrivi")) {
       // jos on, lisätään uusi splitattu rivi kanssa sinne
       $query = "SELECT tunnus
                 FROM asn_sanomat
-                WHERE yhtio    = '{$kukarow['yhtio']}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
                 AND MATCH (tilausrivi) AGAINST ('{$tunnus}' IN BOOLEAN MODE)";
       $chk_asn_res = pupe_query($query);
 
@@ -17048,9 +17056,17 @@ if (!function_exists("tee_keraysera")) {
     $mittakerroin = 100;
 
     if ($tee_keraysera_debugdir != "" and is_dir($tee_keraysera_debugdir)) {
+
+      if ($yhtiorow["kayttoliittyma"] == "U") {
+        $css = $yhtiorow['css'];
+      }
+      else {
+        $css = $yhtiorow['css_classic'];
+      }
+
       // Käytetään globaalia muutujaa ja tehdään elämä helpoksi
       $kukarow['debugstring']  = "<html>\n<head>";
-      $kukarow['debugstring'] .= "<style type='text/css'>{$yhtiorow['css']}</style>\n";
+      $kukarow['debugstring'] .= "<style type='text/css'>{$css}</style>\n";
       $kukarow['debugstring'] .= "<title>$yhtiorow[nimi]</title>\n";
       $kukarow['debugstring'] .= "</head>\n";
       $kukarow['debugstring'] .= "<body>\n";
@@ -18606,7 +18622,7 @@ if (!function_exists("tee_keraysera")) {
 
           $xxx = 1;
 
-          for ($i = 1; $i <= $tuoterow['y_maara']; $i++) {
+          for ($i = 1; $i < $tuoterow['y_maara']; $i++) {
             if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1240): $i. tuote <br>\n";
 
             if ($tuoterow['myynti_era'] > 1 and ($pakkaukset[$kaytettava_pakkaus]['tilavuus'] < ($pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] + $tuoterow['y_koko']) or $pakkaukset[$kaytettava_pakkaus]['paino'] < ($pakkaukset[$kaytettava_pakkaus]['kaytetty_paino'] + $tuoterow['y_paino']))) {
@@ -20506,8 +20522,16 @@ if (!function_exists("pupesoft_sahkoposti")) {
       $content .= "Content-Transfer-Encoding: quoted-printable\n\n";
 
       if ($email_ctype == "HTML") {
+
+        if ($yhtiorow["kayttoliittyma"] == "U") {
+          $css = $yhtiorow['css'];
+        }
+        else {
+          $css = $yhtiorow['css_classic'];
+        }
+
         $content .= "\n<head>\n";
-        $content .= "<style type='text/css'>{$yhtiorow['css']}</style>\n";
+        $content .= "<style type='text/css'>{$css}</style>\n";
         $content .= "</head>\n";
       }
 
@@ -21059,7 +21083,7 @@ if (!function_exists('splittaa_tilausrivi')) {
     // jos on, lisätään uusi splitattu rivi kanssa sinne
     $query = "SELECT tunnus
               FROM asn_sanomat
-              WHERE yhtio    = '{$kukarow['yhtio']}'
+              WHERE yhtio = '{$kukarow['yhtio']}'
               AND MATCH (tilausrivi) AGAINST ('{$tunnus}' IN BOOLEAN MODE)";
     $chk_asn_res = pupe_query($query);
 
@@ -28260,7 +28284,7 @@ if (!function_exists('sallitut_varastot')) {
       $varastotyyppi_lisa = "";
     }
     else {
-      $varastotyyppi_lisa = "AND varastopaikat.tyyppi=''";
+      $varastotyyppi_lisa = "AND varastopaikat.tyyppi IN ('', 'V')";
     }
 
     // Katsotaan saako tälle asiakkaalle myydä vain jostain varastoista
@@ -29715,6 +29739,20 @@ if (!function_exists("paivita_sopimusrivit")) {
     }
 
     return "";
+  }
+}
+
+if (!function_exists("poista_osakeyhtio_lyhenne")) {
+  function poista_osakeyhtio_lyhenne($nimi) {
+
+    # strtolower ei osaa pienentää tämmöisiä erikoismerkkejä
+    $old = array("Ü", "Ž");
+    $new = array("ü", "ž");
+    $nimi = str_replace($old, $new, $nimi);
+
+    $replace = "oy|ab|as|oü|ou|mtü|tü|ttü";
+
+    return trim(preg_replace("/\b({$replace})\b/i", '', strtolower($nimi)));
   }
 }
 

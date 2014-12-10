@@ -627,16 +627,16 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
   elseif (($phpnimi != 'index.php' and $phpnimi != 'futursoft.php') or (isset($futuvanha) and $futuvanha == '1')) {
 
     if ((isset($verkkokauppa) and $verkkokauppa != "") and $yhtiorow['css_verkkokauppa'] != "") {
-      $css = $yhtiorow['css_verkkokauppa'];
+      $yhtiorow['active_css'] = $yhtiorow['css_verkkokauppa'];
     }
     elseif ($kukarow["extranet"] != "" and $yhtiorow["css_extranet"] != "") {
-      $css = $yhtiorow["css_extranet"];
+       $yhtiorow['active_css'] = $yhtiorow["css_extranet"];
     }
-    elseif ($kukarow['resoluutio'] == 'P' and $yhtiorow['css_pieni'] != "") {
-      $css = $yhtiorow['css_pieni'];
+    elseif (($yhtiorow["kayttoliittyma"] == "" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "C") {
+       $yhtiorow['active_css'] = $yhtiorow['css_classic'];
     }
     else {
-      $css = $yhtiorow['css'];
+       $yhtiorow['active_css'] = $yhtiorow['css'];
     }
 
     if (!headers_sent()) {
@@ -675,16 +675,33 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
         echo "<link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Lato:400,700' >";
 
         echo "<style type='text/css'>\n";
-        echo $css;
+        echo $yhtiorow['active_css'];
         echo "</style>\n";
 
-        if ($yhtiorow["kayttoliittyma"] == "U") {
-          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft.css' />\n";
-          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft_left.css' />\n";
-          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft_top.css' />\n";
+        if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft.css' />\n";
+          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_left.css' />\n";
+          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_top.css' />\n";
+
+          if (isset($_SERVER['HTTP_USER_AGENT']) and mb_stripos($_SERVER['HTTP_USER_AGENT'], "FIREFOX") !== FALSE) {
+            echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_mozilla.css' />\n";
+          }
+
+          if (isset($_SERVER['HTTP_USER_AGENT']) and mb_stripos($_SERVER['HTTP_USER_AGENT'], "WINDOWS") !== FALSE) {
+
+            if (isset($_SERVER['HTTP_USER_AGENT']) and mb_stripos($_SERVER['HTTP_USER_AGENT'], "TRIDENT") !== FALSE) {
+              echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_ms_ie.css' />\n";
+            }
+            elseif (isset($_SERVER['HTTP_USER_AGENT']) and mb_stripos($_SERVER['HTTP_USER_AGENT'], "FIREFOX") !== FALSE) {
+              echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_ms_mozilla.css' />\n";
+            }
+            else {
+              echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_ms_chrome.css' />\n";
+            }
+          }
         }
         else {
-          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}inc/pupesoft_legacy.css' />\n";
+          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_legacy.css' />\n";
         }
 
         if (isset($pupe_DataTables)) {
@@ -696,12 +713,12 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
       if (substr(dirname(__FILE__), -3) == "inc") {
         echo "<script language='javascript' src='{$palvelin2}inc/jquery.min.js'></script>";
-        echo "<link rel='stylesheet' href='{$palvelin2}inc/jquery-ui.css' />";
+        echo "<link rel='stylesheet' href='{$palvelin2}css/jquery-ui.css' />";
         echo "<script src='{$palvelin2}inc/jquery-ui.js'></script>";
       }
       else {
         echo "<script language='javascript' src='{$palvelin2}jquery.min.js'></script>";
-        echo "<link rel='stylesheet' href='{$palvelin2}jquery-ui-extranet.css' />";
+        echo "<link rel='stylesheet' href='{$palvelin2}css/jquery-ui-extranet.css' />";
         echo "<script src='{$palvelin2}jquery-ui.js'></script>";
       }
 

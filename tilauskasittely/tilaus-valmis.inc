@@ -1908,7 +1908,7 @@ else {
             // Otetaan eka lähtö
             $valitu_lahto = array_shift($lahdot);
 
-            # Haetaan lähdön takaa ohjausmerkki
+            // Haetaan lähdön takaa ohjausmerkki
             $lahtorow['toimitustavan_lahto'] = $valitu_lahto['tunnus'];
             $_ohjausmerkki = paivita_ohjausmerkki($lahtorow, false);
 

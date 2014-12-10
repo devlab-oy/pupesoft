@@ -5,7 +5,7 @@ if (@include_once "inc/parametrit.inc");
 elseif (@include_once "parametrit.inc");
 else exit;
 
-if ($yhtiorow["kayttoliittyma"] == "") {
+if (($yhtiorow["kayttoliittyma"] == "" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "C") {
 
   echo "<style type='text/css'>
           body {
@@ -64,7 +64,13 @@ if ($yhtiorow["kayttoliittyma"] == "") {
   echo "</div>";
 }
 
-echo "<div id = 'indexvas_container'>";
+$hiddenlisa = "";
+
+if (isset($_COOKIE["vas_frame_showhide"]) and $_COOKIE["vas_frame_showhide"] == "hidden") {
+  $hiddenlisa = " style='display: none;'";
+}
+
+echo "<div id = 'indexvas_container'{$hiddenlisa}>";
 
 // estet‰‰n errorit tyhj‰st‰ arrayst‰
 if (!isset($menu)) $menu = array();
@@ -265,18 +271,23 @@ while ($orow = mysql_fetch_array($result)) {
   }
 }
 
-if ($yhtiorow["kayttoliittyma"] == "") {
+if (($yhtiorow["kayttoliittyma"] == "" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "C") {
   //N‰ytet‰‰n aina exit-nappi
   echo "<tr><td class='back' style='padding:0px; margin:0px;'><br></td></tr>";
-  echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' href='logout.php' target='mainframe'>".t("Kirjaudu ulos")."</a></td></tr>";
+  echo "<tr><td class='back' style='padding:0px; margin:0px;'><a class='menu' href='logout.php' target='_top'>".t("Kirjaudu ulos")."</a></td></tr>";
 }
 
 echo "</table><br>";
 echo "</div>";
 
-if ($yhtiorow["kayttoliittyma"] == "U") {
+if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
 
-  echo "<div class='showhide_vasen' id='maaginen_vasen'><img id='showhide_left' src='{$palvelin2}pics/facelift/hide_left.png'></div>";
+  if (isset($_COOKIE["vas_frame_showhide"]) and $_COOKIE["vas_frame_showhide"] == "hidden") {
+    echo "<div class='showhide_vasen' id='maaginen_vasen'><img id='showhide_left' src='{$palvelin2}pics/facelift/show_left.png'></div>";
+  }
+  else {
+    echo "<div class='showhide_vasen' id='maaginen_vasen'><img id='showhide_left' src='{$palvelin2}pics/facelift/hide_left.png'></div>";
+  }
 
   echo "
     <script>
@@ -288,15 +299,17 @@ if ($yhtiorow["kayttoliittyma"] == "U") {
 
         $(document).ready(function(){
           $('#maaginen_vasen').click(function(){
-             if (parent.document.getElementsByTagName('frameset')[1].cols=='285,*') {
-               parent.document.getElementsByTagName('frameset')[1].cols='20,*';
+             if (parent.document.getElementsByTagName('frameset')[1].cols=='270,*') {
+               parent.document.getElementsByTagName('frameset')[1].cols='15,*';
                $('#indexvas_container').hide();
                $('#showhide_left').attr('src', '{$palvelin2}pics/facelift/show_left.png');
+               document.cookie = \"vas_frame_showhide=hidden;7\";
              }
              else {
-               parent.document.getElementsByTagName('frameset')[1].cols='285,*';
-                $('#indexvas_container').show();
+               parent.document.getElementsByTagName('frameset')[1].cols='270,*';
+               $('#indexvas_container').show();
                $('#showhide_left').attr('src', '{$palvelin2}pics/facelift/hide_left.png');
+               document.cookie = \"vas_frame_showhide=;7\";
              }
           });
         });

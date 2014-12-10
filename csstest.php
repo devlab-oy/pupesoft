@@ -17,34 +17,42 @@ if ($tee == "update") {
 }
 
 $css_kuvaus = array(
-  'BODY_BACKGROUND'    =>  'Sivun tausta'
-  ,  'BODY_COLOR'      =>  'Sivun perusteksti'
-  ,  'ERROR_COLOR'      =>  'Virheteksti'
-  ,  'HEAD_COLOR'      =>  'Otsikkoteksti'
-  ,  'HR_BACKGROUND'      =>  'Osioiden erotinviiva (esim. otsikon alla)'
-  ,  'INFO_COLOR'      =>  'Infoteksti (fonttikooltaan normaalia pienempää)'
-  ,  'INPUT_COLOR'      =>  'Painikkeiden teksti ja syötekenttien teksti'
-  ,  'LINK_COLOR'      =>  'Linkit'
+  'BODY_BACKGROUND'           =>  'Sivun tausta'
+  ,  'BODY_COLOR'             =>  'Sivun perusteksti'
+  ,  'ERROR_COLOR'            =>  'Virheteksti'
+  ,  'HEAD_COLOR'             =>  'Otsikkoteksti'
+  ,  'HR_BACKGROUND'          =>  'Osioiden erotinviiva (esim. otsikon alla)'
+  ,  'INFO_COLOR'             =>  'Infoteksti (fonttikooltaan normaalia pienempää)'
+  ,  'INPUT_COLOR'            =>  'Painikkeiden teksti ja syötekenttien teksti'
+  ,  'INPUT_BACKGROUND'       =>  'Painikkeiden ja syötekenttien tausta'
+  ,  'INPUT_BORDER_COLOR'     =>  'Syöttökenttien ja alasvetovalikoiden reunuksen väri'
+  ,  'LINK_COLOR'             =>  'Linkit'
   ,  'LIVESEARCH_BACKGROUND'  =>  'Live-hakukenttien tausta'
-  ,  'MENUHOVER_BACKGROUND'  =>  'Aktiivisen navigaatioelementin tausta'
-  ,  'MENUHOVER_COLOR'    =>  'Aktiivisen navigaatioelementin teksti'
-  ,  'MENULINK_COLOR'    =>  'Navigaatioelementin'
-  ,  'MESSAGE_COLOR'      =>  'Lihavoitu infoteksti'
-  ,  'OK_COLOR'        =>  'Onnistuneen tai hyväksytyn toiminnan palaute'
-  ,  'POPUP_BACKGROUND'    =>  'Ponnahdusikkunoiden tausta'
-  ,  'POPUP_COLOR'      =>  'Ponnahdusikkunoiden teksti'
-  ,  'SPEC_BACKGROUND'    =>  'Erikoiselementin tausta'
-  ,  'SPEC_COLOR'      =>  'Erikoiselementin teksti'
-  ,  'TDLINKKI_COLOR'    =>  'Taulukon solussa oleva linkki'
-  ,  'TH_BACKGROUND'      =>  'Taulukon otsikkosolu'
-  ,  'TH_COLOR'        =>  'Taulukon otsikkosolun tausta'
-  ,  'TRAKTIIVI_BACKGROUND'  =>  'Aktiivisen solun tausta'
-  ,  'TRAKTIIVI_COLOR'    =>  'Aktiivisen solun teksti'
-  ,  'TR_BACKGROUND'      =>  'Taulukon solun tausta'
-  ,  'TR_COLOR'        =>  'Taulukon solun teksti'
-  ,  'TUMMA_BACKGROUND'    =>  'Tumman elementin tausta'
-  ,  'TUMMA_COLOR'      =>  'Tumman elementin teksti'
-  ,  'ASIAKASFAKTA_COLOR'  =>  'Asiakasfakta otsikolla ja myyntitilauksella'
+  ,  'MENUHOVER_BACKGROUND'   =>  'Aktiivisen navigaatioelementin tausta'
+  ,  'MENUHOVER_COLOR'        =>  'Aktiivisen navigaatioelementin teksti'
+  ,  'MENULINK_COLOR'         =>  'Navigaatioelementin'
+  ,  'MESSAGE_COLOR'          =>  'Lihavoitu infoteksti'
+  ,  'OK_COLOR'               =>  'Onnistuneen tai hyväksytyn toiminnan palaute'
+  ,  'POPUP_BACKGROUND'       =>  'Ponnahdusikkunoiden tausta'
+  ,  'POPUP_COLOR'            =>  'Ponnahdusikkunoiden teksti'
+  ,  'SPEC_BACKGROUND'        =>  'Erikoiselementin tausta'
+  ,  'SPEC_COLOR'             =>  'Erikoiselementin teksti'
+  ,  'TDLINKKI_COLOR'         =>  'Taulukon solussa oleva linkki'
+  ,  'TH_BACKGROUND'          =>  'Taulukon otsikkosolu'
+  ,  'TH_COLOR'               =>  'Taulukon otsikkosolun tausta'
+  ,  'TRAKTIIVI_BACKGROUND'   =>  'Aktiivisen solun tausta'
+  ,  'TRAKTIIVI_COLOR'        =>  'Aktiivisen solun teksti'
+  ,  'TR_BACKGROUND'          =>  'Taulukon solun tausta'
+  ,  'TR_COLOR'               =>  'Taulukon solun teksti'
+  ,  'TUMMA_BACKGROUND'       =>  'Tumman elementin tausta'
+  ,  'TUMMA_COLOR'            =>  'Tumman elementin teksti'
+  ,  'ASIAKASFAKTA_COLOR'     =>  'Asiakasfakta otsikolla ja myyntitilauksella'
+  ,  'SUBMITBUTTON_BACKGROUND'          =>  'Normaalin Submit-nappulan tausta'
+  ,  'SUBMITBUTTON_LISAA_BACKGROUND'    =>  'Lisää Submit-nappulan tausta'
+  ,  'SUBMITBUTTON_HAE_BACKGROUND'      =>  'Hae Submit-nappulan tausta'
+  ,  'SUBMITBUTTON_TALLENNA_BACKGROUND' =>  'Tallenna Submit-nappulan tausta'
+  ,  'SUBMITBUTTON_POISTA_BACKGROUND'   =>  'Poista Submit-nappulan tausta'
+
 );
 
 function getCSSDescription($css_name) {
@@ -83,7 +91,15 @@ Tässä näkee miten formit käyttäytyy:<hr>
 <input type='radio'   name='2'>
 <input type='radio'   name='2'>
 <input type='submit' value='Normaali submit-nappula'>
-</form> pitäisi pysyä nipussa ilman suurempia aukkoja ja rivinvaihtoja.
+ pitäisi pysyä nipussa ilman suurempia aukkoja ja rivinvaihtoja.
+
+<br><br>
+
+<input type='submit' class='lisaa_btn' value='Lisää submit-nappula'>
+<input type='submit' class='hae_btn' value='Hae submit-nappula'>
+<input type='submit' class='tallenna_btn' value='Tallenna submit-nappula'>
+<input type='submit' class='poista_btn' value='Poista submit-nappula'>
+</form>
 
 <br>
 <br>

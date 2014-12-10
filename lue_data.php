@@ -2031,6 +2031,13 @@ if ($kasitellaan_tiedosto) {
 
         }
 
+        // Laitetaan oletuksena asiakashinnalle yhtiön valuutta
+        if ($table_mysql == "asiakashinta") {
+          if (stripos($query, ", valkoodi = ") === FALSE) {
+            $query .= ", valkoodi = '{$yhtiorow["valkoodi"]}' ";
+          }
+        }
+
         if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'MUUTA') {
           if (($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajaalennus') and $and != "") {
             $query .= " WHERE yhtio = '$kukarow[yhtio]'";

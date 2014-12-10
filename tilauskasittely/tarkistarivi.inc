@@ -137,7 +137,7 @@ if (
 
 if (in_array($row["var"], array('', 'H')) and $row["tyyppi"] != "E" and $row["tyyppi"] != "G") {
   if (($laskurow["tilaustyyppi"] != "H" and $row["varattu"] == 0) or
-      ($laskurow["tilaustyyppi"] == "H" and $row["tilkpl"] == 0)
+    ($laskurow["tilaustyyppi"] == "H" and $row["tilkpl"] == 0)
   ) {
     if ($kukarow['extranet'] != '' and $row['positio'] == 'Ei varaa saldoa') {
       //    $varaosavirhe .=

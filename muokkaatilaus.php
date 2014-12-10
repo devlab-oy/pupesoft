@@ -611,6 +611,13 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
         $aputoim2 = "";
         $lisa2 = "";
       }
+      elseif ($toim == "VASTAANOTA_REKLAMAATIO") {
+        $aputoim1 = "REKLAMAATIO";
+        $lisa1 = t("Muokkaa");
+
+        $aputoim2 = "";
+        $lisa2 = "";
+      }
       elseif ($toim == "HAAMU") {
         $aputoim1 = "HAAMU";
         $lisa1 = t("Muokkaa");
@@ -913,7 +920,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 
   $toimaikalisa = "";
 
-  if ($kukarow['resoluutio'] == 'I' and $toim != "SIIRTOLISTA" and $toim != "SIIRTOLISTASUPER" and $toim != "MYYNTITILI" and $toim != "MYYNTITILISUPER" and $toim != "EXTRANET" and ($toim != 'TARJOUS' and $toim != 'EXTTARJOUS')) {
+  if ($toim != "SIIRTOLISTA" and $toim != "SIIRTOLISTASUPER" and $toim != "MYYNTITILI" and $toim != "MYYNTITILISUPER" and $toim != "EXTRANET" and ($toim != 'TARJOUS' and $toim != 'EXTTARJOUS')) {
     $toimaikalisa = ' lasku.toimaika, ';
   }
 

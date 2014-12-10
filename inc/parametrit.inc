@@ -636,16 +636,16 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
   elseif (($phpnimi != 'index.php' and $phpnimi != 'futursoft.php') or (isset($futuvanha) and $futuvanha == '1')) {
 
     if ((isset($verkkokauppa) and $verkkokauppa != "") and $yhtiorow['css_verkkokauppa'] != "") {
-      $css = $yhtiorow['css_verkkokauppa'];
+      $yhtiorow['active_css'] = $yhtiorow['css_verkkokauppa'];
     }
     elseif ($kukarow["extranet"] != "" and $yhtiorow["css_extranet"] != "") {
-      $css = $yhtiorow["css_extranet"];
+       $yhtiorow['active_css'] = $yhtiorow["css_extranet"];
     }
-    elseif ($kukarow['resoluutio'] == 'P' and $yhtiorow['css_pieni'] != "") {
-      $css = $yhtiorow['css_pieni'];
+    elseif (($yhtiorow["kayttoliittyma"] == "" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "C") {
+       $yhtiorow['active_css'] = $yhtiorow['css_classic'];
     }
     else {
-      $css = $yhtiorow['css'];
+       $yhtiorow['active_css'] = $yhtiorow['css'];
     }
 
     if ($kukarow["kieli"] == "ru" and $yhtiorow['yhtio'] == 'allr') {
@@ -691,10 +691,10 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
         echo "<link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Lato:400,700' >";
 
         echo "<style type='text/css'>\n";
-        echo $css;
+        echo $yhtiorow['active_css'];
         echo "</style>\n";
 
-        if ($yhtiorow["kayttoliittyma"] == "U") {
+        if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
           echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft.css' />\n";
           echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_left.css' />\n";
           echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_top.css' />\n";

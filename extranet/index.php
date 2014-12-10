@@ -26,8 +26,8 @@ echo "</head>
   </noscript>
 
   <frameset cols='180,*' frameborder='no'>
-    <frame noresize src='indexvas.php' name='menu'>
-    <frame src='$go' name='main'>
+    <frame noresize src='indexvas.php' name='menuframe' id='menuframe'>
+    <frame src='$go' name='mainframe' id='mainframe'>
     <noframes>Your browser does not support frames!</noframes>
   </frameset>
   </html>";

@@ -1,0 +1,27 @@
+select {
+  background-image: none;
+  padding: 8px 4px 8px 4px;
+  box-sizing: content-box;
+  -moz-box-sizing:content-box;
+}
+
+select:-moz-focusring {
+  color: transparent;
+  text-shadow: 0 0 0 #808080;
+}
+
+select.indexvas {
+  height: 25px;
+  width: 205px;
+  background-image: none;
+  box-sizing: content-box;
+  -moz-box-sizing:content-box;
+}
+
+table.indexvas {
+  width: 245px;
+}
+
+select.multipleselect {
+  width: 97%;
+}

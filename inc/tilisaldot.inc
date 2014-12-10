@@ -227,6 +227,7 @@ if ($tee == '1') {
         $worksheet->write($excelrivi, $iiiiii, $trow["tilino"]);
         $iiiiii++;
         $worksheet->write($excelrivi, $iiiiii, $trow["nimi"]);
+        $iiiiii++;
 
         if ($kustannuspaikoittain != "") {
           $worksheet->write($excelrivi, $iiiiii, $trow["kustp"]);
@@ -237,7 +238,6 @@ if ($tee == '1') {
           $iiiiii++;
         }
 
-        $iiiiii++;
         $worksheet->write($excelrivi, $iiiiii, $trow["Vientejä"]);
         $iiiiii++;
         $worksheet->write($excelrivi, $iiiiii, $trow["Saldo"]);

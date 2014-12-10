@@ -74,7 +74,7 @@ $res = pupe_query($query);
 // Kerrotaan montako rivi‰ k‰sitell‰‰n
 $rows = mysql_num_rows($res);
 
-echo "Tuoteryhmi‰ {$rows} kappaletta.\n";
+echo date("d.m.Y @ G:i:s") . ": Relex tuoteryhmi‰ {$rows} kappaletta.\n";
 
 $k_rivi = 0;
 
@@ -86,10 +86,6 @@ while ($row = mysql_fetch_assoc($res)) {
   fwrite($fp, $rivi);
 
   $k_rivi++;
-
-  if ($k_rivi % 1000 == 0) {
-    echo "K‰sitell‰‰n rivi‰ {$k_rivi}\n";
-  }
 }
 
 fclose($fp);
@@ -105,4 +101,4 @@ if ($paiva_ajo and !empty($relex_ftphost)) {
   require "inc/ftp-send.inc";
 }
 
-echo "Valmis.\n";
+echo date("d.m.Y @ G:i:s") . ": Relex tuoteryhm‰t valmis.\n\n";

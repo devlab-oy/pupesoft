@@ -11,17 +11,17 @@ enable_ajax();
 
 echo "<font class='head'>";
 
-if (!isset($toim))         $toim = "";
-if (!isset($tee))         $tee = "";
-if (!isset($ytunnus_oa))     $ytunnus_oa = "";
-if (!isset($ytunnus_oat))     $ytunnus_oat = "";
-if (!isset($firname))       $firname = "";
-if (!isset($generoitupass))   $generoitupass = "";
-if (!isset($kumpi))       $kumpi = "";
-if (!isset($oletus_asiakas))   $oletus_asiakas = "";
-if (!isset($oletus_profiili))  $oletus_profiili = '';
-if (!isset($oletus_asiakastiedot)) $oletus_asiakastiedot = '';
-if (!isset($myyja))        $myyja = "";
+if (!isset($toim))                  $toim = "";
+if (!isset($tee))                   $tee = "";
+if (!isset($ytunnus_oa))            $ytunnus_oa = "";
+if (!isset($ytunnus_oat))           $ytunnus_oat = "";
+if (!isset($firname))               $firname = "";
+if (!isset($generoitupass))         $generoitupass = "";
+if (!isset($kumpi))                 $kumpi = "";
+if (!isset($oletus_asiakas))        $oletus_asiakas = "";
+if (!isset($oletus_profiili))       $oletus_profiili = '';
+if (!isset($oletus_asiakastiedot))  $oletus_asiakastiedot = '';
+if (!isset($myyja))                 $myyja = "";
 
 if ($toim == 'extranet') {
   echo "Extranet-";
@@ -264,30 +264,30 @@ if ($tee == 'UUSI') {
   if (mysql_num_rows($reskuka) > 0 and $jatka != 1 and $kopsaakuka == "JOO") {
     $monta = mysql_fetch_assoc($reskuka);
 
-    $firname             = $monta['nimi'];
-    $ktunnus             = $monta['kuka'];
-    $phonenum             = $monta['puhno'];
-    $email               = $monta['eposti'];
-    $lang               = $monta['kieli'];
-    $ip                = $monta['ip'];
-    $taso               = $monta['taso'];
+    $firname                = $monta['nimi'];
+    $ktunnus                = $monta['kuka'];
+    $phonenum               = $monta['puhno'];
+    $email                  = $monta['eposti'];
+    $lang                   = $monta['kieli'];
+    $ip                     = $monta['ip'];
+    $taso                   = $monta['taso'];
     $tilaus_valmis          = $monta['tilaus_valmis'];
-    $hinta               = $monta['hinnat'];
-    $saatavat             = $monta['saatavat'];
-    $salasana             = $monta['salasana'];
-    $kassamyyja           = $monta['kassamyyja'];
-    $dynaaminen_kassamyynti      = $monta['dynaaminen_kassamyynti'];
-    $jyvitys             = $monta['jyvitys'];
+    $hinta                  = $monta['hinnat'];
+    $saatavat               = $monta['saatavat'];
+    $salasana               = $monta['salasana'];
+    $kassamyyja             = $monta['kassamyyja'];
+    $dynaaminen_kassamyynti = $monta['dynaaminen_kassamyynti'];
+    $jyvitys                = $monta['jyvitys'];
     $oletus_ohjelma         = $monta['oletus_ohjelma'];
-    $resoluutio           = $monta['resoluutio'];
-    $extranet             = $monta['extranet'];
-    $hyvaksyja             = $monta['hyvaksyja'];
+    $kayttoliittyma         = $monta['kayttoliittyma'];
+    $extranet               = $monta['extranet'];
+    $hyvaksyja              = $monta['hyvaksyja'];
     $naytetaan_katteet_tilauksella  = $monta['naytetaan_katteet_tilauksella'];
-    $naytetaan_asiakashinta      = $monta['naytetaan_asiakashinta'];
-    $naytetaan_tuotteet        = $monta['naytetaan_tuotteet'];
-    $naytetaan_tilaukset      = $monta['naytetaan_tilaukset'];
-    $profile             = $monta['profiilit'];
-    $piirit               = $monta['piirit'];
+    $naytetaan_asiakashinta = $monta['naytetaan_asiakashinta'];
+    $naytetaan_tuotteet     = $monta['naytetaan_tuotteet'];
+    $naytetaan_tilaukset    = $monta['naytetaan_tilaukset'];
+    $profile                = $monta['profiilit'];
+    $piirit                 = $monta['piirit'];
     $oletus_profiili        = $monta['oletus_profiili'];
 
     echo "<font class='message'>", t("Käyttäjä"), " {$monta['kuka']} ({$monta['nimi']}) ", t("löytyi muista yrityksistä."), "<br>";
@@ -364,7 +364,7 @@ if ($tee == 'UUSI') {
               oletus_asiakastiedot          = '{$oletus_asiakastiedot}',
               oletus_profiili               = '{$oletus_profiili}',
               oletus_ohjelma                = '{$oletus_ohjelma}',
-              resoluutio                    = '{$resoluutio}',
+              kayttoliittyma                = '{$kayttoliittyma}',
               extranet                      = '{$extranet}',
               hyvaksyja                     = '{$hyvaksyja}',
               hyvaksyja_maksimisumma        = '{$hyvaksyja_maksimisumma}',
@@ -590,7 +590,7 @@ if ($tee == 'MUUTA') {
               oletus_asiakas                = '{$oletus_asiakas}',
               oletus_asiakastiedot          = '{$oletus_asiakastiedot}',
               oletus_profiili               = '{$oletus_profiili}',
-              resoluutio                    = '{$resoluutio}',
+              kayttoliittyma                = '{$kayttoliittyma}',
               extranet                      = '{$extranet}',
               hyvaksyja                     = '{$hyvaksyja}',
               hyvaksyja_maksimisumma        = '{$hyvaksyja_maksimisumma}',
@@ -1297,24 +1297,23 @@ if ($tee == 'MUUTA') {
         }
         echo "</select></td></tr>";
 
-
         $sel1 = $sel2 = $sel3 = "";
 
-        if ($krow['resoluutio'] == "N") {
+        if ($krow['kayttoliittyma'] == "") {
           $sel1 = "SELECTED";
         }
-        if (!isset($krow["resoluutio"]) or $krow['resoluutio'] == "I") {
+        if ($krow['kayttoliittyma'] == "C") {
           $sel2 = "SELECTED";
         }
-        if ($krow['resoluutio'] == "P") {
+        if ($krow['kayttoliittyma'] == "U") {
           $sel3 = "SELECTED";
         }
 
-        echo "<tr><th align='left'>", t("Näytön koko"), ":</th>
-            <td><select name='resoluutio'>
-            <option value='I' {$sel2}>", t("Iso"), "</option>
-            <option value='N' {$sel1}>", t("Normaali"), "</option>
-            <option value='P' {$sel3}>", t("Pieni"), "</option>
+        echo "<tr><th align='left'>", t("Käyttöliittymä"), ":</th>
+            <td><select name='kayttoliittyma'>
+            <option value='' {$sel1}>", t("Yhtiön oletus"), "</option>
+            <option value='C' {$sel2}>", t("Pupesoft Classic"), "</option>
+            <option value='U' {$sel3}>", t("Pupesoft Next"), "</option>
             </select></td></tr>";
 
         if ($krow['naytetaan_katteet_tilauksella'] == "") {

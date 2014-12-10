@@ -397,11 +397,7 @@ if ($tee2 == 'VALITSE') {
       echo "<th>".t("Nimi")."</th>";
       echo "<th>".t("Viite")."</th>";
       echo "<th>".t("Keräyspvm")."</th>";
-
-      if ($kukarow['resoluutio'] == 'I') {
-        echo "<th>".t("Toimaika")."</th>";
-      }
-
+      echo "<th>".t("Toimaika")."</th>";
       echo "<th>".t("Riv")."</th>";
       echo "<th>".t("Tulosta")."</th>";
       echo "<th>".t("Näytä")."</th>";
@@ -474,21 +470,17 @@ if ($tee2 == 'VALITSE') {
           echo "<$ero valign='top'>".tv1dateconv($tilrow["kerayspvm"])."</$ero>";
         }
 
+        if ($tilrow["toimvko"] != '') {
+          echo "<$ero valign='top' nowrap>".t("Vko")." ".date("W", strtotime($tilrow["toimaika"]));
 
-        if ($kukarow['resoluutio'] == 'I') {
-          if ($tilrow["toimvko"] != '') {
-            echo "<$ero valign='top' nowrap>".t("Vko")." ".date("W", strtotime($tilrow["toimaika"]));
-
-            if ($tilrow['toimvko'] != '7') {
-              echo "/".$DAY_ARRAY[$tilrow["toimvko"]];
-            }
-
-            echo "</$ero>";
-          }
-          else {
-            echo "<$ero valign='top'>".tv1dateconv($tilrow["toimaika"])."</$ero>";
+          if ($tilrow['toimvko'] != '7') {
+            echo "/".$DAY_ARRAY[$tilrow["toimvko"]];
           }
 
+          echo "</$ero>";
+        }
+        else {
+          echo "<$ero valign='top'>".tv1dateconv($tilrow["toimaika"])."</$ero>";
         }
 
         echo "<$ero valign='top'>$tilrow[riveja]</$ero>";
@@ -1144,21 +1136,17 @@ if ($tee2 == '') {
         echo "<$ero valign='top' align='right'>".tv1dateconv($tilrow["kerayspvm"], "", "LYHYT");
       }
 
+      if ($tilrow["toimvko"] != '') {
+        echo "<br>".t("Vko")." ".date("W", strtotime($tilrow["toimaika"]));
 
-      if ($kukarow['resoluutio'] == 'I') {
-        if ($tilrow["toimvko"] != '') {
-          echo "<br>".t("Vko")." ".date("W", strtotime($tilrow["toimaika"]));
-
-          if ($tilrow['toimvko'] != '7') {
-            echo "/".$DAY_ARRAY[$tilrow["toimvko"]];
-          }
-
-          echo "</$ero>";
-        }
-        else {
-          echo "<br>".tv1dateconv($tilrow["toimaika"], "", "LYHYT")."</$ero>";
+        if ($tilrow['toimvko'] != '7') {
+          echo "/".$DAY_ARRAY[$tilrow["toimvko"]];
         }
 
+        echo "</$ero>";
+      }
+      else {
+        echo "<br>".tv1dateconv($tilrow["toimaika"], "", "LYHYT")."</$ero>";
       }
 
       echo "<$ero valign='top'>$tilrow[toimitustapa]</$ero>";

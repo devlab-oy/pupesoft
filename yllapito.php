@@ -1,15 +1,15 @@
 <?php
 
 if (isset($_POST["toim"]) and $_POST["toim"] == "yhtion_parametrit") {
-  $apucss = $_POST["css"];
-  $apucsspieni = $_POST["css_pieni"];
-  $apucssextranet = $_POST["css_extranet"];
+  $apucss             = $_POST["css"];
+  $apucssclassic      = $_POST["css_classic"];
+  $apucssextranet     = $_POST["css_extranet"];
   $apucssverkkokauppa = $_POST["css_verkkokauppa"];
-  $apuwebseuranta = $_POST["web_seuranta"];
+  $apuwebseuranta     = $_POST["web_seuranta"];
 }
 else {
   unset($apucss);
-  unset($apucsspieni);
+  unset($apucssclassic);
   unset($apucssextranet);
   unset($apucssverkkokauppa);
   unset($apuwebseuranta);
@@ -124,17 +124,17 @@ if (isset($_POST["toim"]) and $_POST["toim"] == "yhtion_parametrit") {
   if (isset($apucss)) {
     $t[$cssi] = mysql_real_escape_string($apucss);
   }
-  if (isset($apucsspieni)) {
-    $t[$csspienii] = mysql_real_escape_string($apucsspieni);
+  if (isset($apucssclassic)) {
+    $t[$css_classici] = mysql_real_escape_string($apucssclassic);
   }
   if (isset($apucssextranet)) {
-    $t[$cssextraneti] = mysql_real_escape_string($apucssextranet);
+    $t[$css_extraneti] = mysql_real_escape_string($apucssextranet);
   }
   if (isset($apucssverkkokauppa)) {
-    $t[$cssverkkokauppa] = mysql_real_escape_string($apucssverkkokauppa);
+    $t[$css_verkkokauppai] = mysql_real_escape_string($apucssverkkokauppa);
   }
   if (isset($apuwebseuranta)) {
-    $t[$webseuranta] = mysql_real_escape_string($apuwebseuranta);
+    $t[$web_seurantai] = mysql_real_escape_string($apuwebseuranta);
   }
 }
 
@@ -964,17 +964,17 @@ if ($errori != '' and $_POST["toim"] == "yhtion_parametrit") {
   if (isset($apucss)) {
     $t[$cssi] = $apucss;
   }
-  if (isset($apucsspieni)) {
-    $t[$csspienii] = $apucsspieni;
+  if (isset($apucssclassic)) {
+    $t[$css_classici] = $apucssclassic;
   }
   if (isset($apucssextranet)) {
-    $t[$cssextraneti] = $apucssextranet;
+    $t[$css_extraneti] = $apucssextranet;
   }
   if (isset($apucssverkkokauppa)) {
-    $t[$cssverkkokauppa] = $apucssverkkokauppa;
+    $t[$css_verkkokauppai] = $apucssverkkokauppa;
   }
   if (isset($apuwebseuranta)) {
-    $t[$webseuranta] = $apuwebseuranta;
+    $t[$web_seurantai] = $apuwebseuranta;
   }
 }
 

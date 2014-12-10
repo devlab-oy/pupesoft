@@ -311,8 +311,16 @@ if (!function_exists("pupe_error")) {
     }
 
     if (!$_cli and isset($yhtiorow['css'])) {
+
+      if ($yhtiorow["kayttoliittyma"] == "U") {
+        $css = $yhtiorow['css'];
+      }
+      else {
+        $css = $yhtiorow['css_classic'];
+      }
+
       echo "<style type = 'text/css'>";
-      echo $yhtiorow['css'];
+      echo $css;
       echo "</style>";
 
       echo "<font class = 'error'>";
@@ -13480,7 +13488,7 @@ if (!function_exists("pupe_DataTables")) {
   function pupe_DataTables($parametrit) {
     global $yhtiorow;
 
-    preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['css'], $varitmatch);
+    preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['active_css'], $varitmatch);
     preg_match("/(#[a-f0-9]{3,6});/i", $varitmatch[0], $varirgb);
 
     $json_pass = array();
@@ -13500,7 +13508,7 @@ if (!function_exists("pupe_DataTables")) {
       $json_pass[$taulu] = array($sarakkeetVis, $sarakkeetTot, $paginate, $paginationtype, $info, $sorting);
     }
 
-    preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['css'], $varitmatch);
+    preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['active_css'], $varitmatch);
     preg_match("/(#[a-f0-9]{3,6});/i", $varitmatch[0], $varirgb);
 
     echo "<script type=\"text/javascript\" charset=\"utf-8\">
@@ -17049,9 +17057,17 @@ if (!function_exists("tee_keraysera")) {
     $mittakerroin = 100;
 
     if ($tee_keraysera_debugdir != "" and is_dir($tee_keraysera_debugdir)) {
+
+      if ($yhtiorow["kayttoliittyma"] == "U") {
+        $css = $yhtiorow['css'];
+      }
+      else {
+        $css = $yhtiorow['css_classic'];
+      }
+
       // K‰ytet‰‰n globaalia muutujaa ja tehd‰‰n el‰m‰ helpoksi
       $kukarow['debugstring']  = "<html>\n<head>";
-      $kukarow['debugstring'] .= "<style type='text/css'>{$yhtiorow['css']}</style>\n";
+      $kukarow['debugstring'] .= "<style type='text/css'>{$css}</style>\n";
       $kukarow['debugstring'] .= "<title>$yhtiorow[nimi]</title>\n";
       $kukarow['debugstring'] .= "</head>\n";
       $kukarow['debugstring'] .= "<body>\n";
@@ -20513,8 +20529,16 @@ if (!function_exists("pupesoft_sahkoposti")) {
       $content .= "Content-Transfer-Encoding: quoted-printable\n\n";
 
       if ($email_ctype == "HTML") {
+
+        if ($yhtiorow["kayttoliittyma"] == "U") {
+          $css = $yhtiorow['css'];
+        }
+        else {
+          $css = $yhtiorow['css_classic'];
+        }
+
         $content .= "\n<head>\n";
-        $content .= "<style type='text/css'>{$yhtiorow['css']}</style>\n";
+        $content .= "<style type='text/css'>{$css}</style>\n";
         $content .= "</head>\n";
       }
 

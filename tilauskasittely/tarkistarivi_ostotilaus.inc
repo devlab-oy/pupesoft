@@ -329,7 +329,7 @@ if (!isset($rivienmaara) or $rivienmaara < 100) {
               <input type='hidden' name='toimi_tunnus'  value = '{$tuotteen_toimittaja_row['toimi_tunnus']}'>
               <input type='hidden' name='tee'       value = 'PV'>
               <input type='hidden' name='tapa'       value = 'VAIHDARIVI'>
-              <input type='Submit' value='".t("Tilaa tuote")."' onclick='return confirm(\"".t('Oletko varma että haluat vaihtaa tuotteen')."\")'>
+              <input type='submit' value='".t("Tilaa tuote")."' onclick='return confirm(\"".t('Oletko varma että haluat vaihtaa tuotteen')."\")'>
               </form>";
       }
 
@@ -413,7 +413,7 @@ if (!isset($rivienmaara) or $rivienmaara < 100) {
                   <input type='hidden' name='toimi_tunnus'  value = '{$tuotteen_toimittaja_row['toimi_tunnus']}'>
                   <input type='hidden' name='tee'       value = 'PV'>
                   <input type='hidden' name='tapa'       value = 'VAIHDARIVI'>
-                  <input type='Submit' value='".t("Tilaa tuote")."' onclick='return confirm(\"".t('Oletko varma että haluat vaihtaa tuotteen')."\")'>
+                  <input type='submit' value='".t("Tilaa tuote")."' onclick='return confirm(\"".t('Oletko varma että haluat vaihtaa tuotteen')."\")'>
                   </form> "
         ."</td></tr>";
     }

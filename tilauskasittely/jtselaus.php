@@ -52,6 +52,10 @@ if (!isset($automaattinen_poiminta))$automaattinen_poiminta = "";
 if (!isset($mista_tullaan))      $mista_tullaan = "";
 if (!isset($jt_tyyppi))       $jt_tyyppi = "";
 
+if (function_exists("js_popup")) {
+  echo js_popup(-100);
+}
+
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 
 $DAY_ARRAY = array(1 => t("Ma"), t("Ti"), t("Ke"), t("To"), t("Pe"), t("La"), t("Su"));
@@ -1059,6 +1063,7 @@ if ($tee == "JATKA") {
                 lasku.vienti_kurssi,
                 lasku.liitostunnus,
                 tilausrivin_lisatiedot.tilausrivilinkki,
+                tilausrivin_lisatiedot.korvamerkinta,
                 tilausrivi.hinta
                   * (tilausrivi.varattu + tilausrivi.jt)
                   * {$query_ale_lisa} jt_rivihinta,
@@ -1354,23 +1359,15 @@ if ($tee == "JATKA") {
               echo "<table>";
               echo "<tr>";
               echo "<th>#</th>";
-
               echo "<th valign='top'>".t("Tuoteno");
-
-              if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {
-                echo "<br>".t("Nimitys");
-              }
-
+              echo "<br>".t("Nimitys");
               echo "</th>";
 
               if ($tilaus_on_jo == "") {
                 echo "<th valign='top'>".t("Ytunnus")."<br>".t("Nimi")."<br>".t("Toim_Nimi")."</th>";
               }
 
-              if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {
-                echo "<th valign='top'>".t("Tilausnro")."<br>".t("Viesti.")."</th>";
-              }
-
+              echo "<th valign='top'>".t("Tilausnro")."<br>".t("Viesti.")."</th>";
               echo "<th valign='top'>".t("JT")."<br>".t("Hinta")."<br>";
 
               for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -1597,9 +1594,7 @@ if ($tee == "JATKA") {
                 echo "<td valign='top' $class>$ins $jtrow[tuoteno]";
               }
 
-              if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {
-                echo "<br>$jtrow[nimitys]";
-              }
+              echo "<br>$jtrow[nimitys]";
               echo "</td>";
 
               if ($tilaus_on_jo == "") {
@@ -1664,9 +1659,7 @@ if ($tee == "JATKA") {
                 echo "</td>";
               }
 
-              if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {
-                echo "<td valign='top' $class>$jtrow[otunnus]<br>$jtrow[viesti]</td>";
-              }
+              echo "<td valign='top' $class>$jtrow[otunnus]<br>$jtrow[viesti]</td>";
 
               if ($jtselaus_paivitys_oikeus and $kukarow["extranet"] == "") {
                 echo "<td valign='top' $class><a href='$PHP_SELF?toim=$toim&tee=MUOKKAARIVI&jt_rivitunnus=$jtrow[tunnus]&toimittajaid=$toimittajaid&asiakasid=$asiakasid&asiakasno=$asiakasno&toimittaja=$toimittaja&toimi=$toimi&ei_limiittia=$ei_limiittia&suoratoimit=$suoratoimit&tuotenumero=$tuotenumero&tilaus=$tilaus&jarj=$jarj&tilausnumero=$tilausnumero'>".($jtrow["jt"]*1)."</a><br>";
@@ -1690,6 +1683,22 @@ if ($tee == "JATKA") {
                   echo ($jtrow["ale{$alepostfix}"]*1), "%<br>";
                 }
               }
+
+              if (!empty($jtrow['korvamerkinta'])) {
+
+                if ($jtrow['korvamerkinta'] == '.') {
+                  $luokka = '';
+                }
+                else {
+                  $luokka = 'tooltip';
+                }
+
+                echo "<img src='{$palvelin2}pics/lullacons/info.png' class='{$luokka}' id='{$jtrow['tunnus']}_info'>";
+                echo "<div id='div_{$jtrow['tunnus']}_info' class='popup'>";
+                echo $jtrow['korvamerkinta'];
+                echo "</div>";
+              }
+
               echo "</td>";
             }
 
@@ -2142,9 +2151,7 @@ if ($tee == "JATKA") {
                   echo "<td valign='top' $class>$perherow[tuoteno]";
                 }
 
-                if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {
-                  echo "<br>$perherow[nimitys]</td>";
-                }
+                echo "<br>$perherow[nimitys]</td>";
                 echo "</td>";
 
                 if ($tilaus_on_jo == "") {
@@ -2160,9 +2167,7 @@ if ($tee == "JATKA") {
                   echo "$perherow[toim_nimi]</td>";
                 }
 
-                if ($kukarow["resoluutio"] == 'I' or $kukarow["extranet"] != "") {
-                  echo "<td valign='top' $class>$perherow[otunnus]<br>$perherow[viesti]</td>";
-                }
+                echo "<td valign='top' $class>$perherow[otunnus]<br>$perherow[viesti]</td>";
 
                 if ($kukarow["extranet"] == "") {
                   echo "<td valign='top' $class><a href='$PHP_SELF?toim=$toim&tee=MUOKKAARIVI&jt_rivitunnus=$perherow[tunnus]&toimittajaid=$toimittajaid&asiakasid=$asiakasid&asiakasno=$asiakasno&toimittaja=$toimittaja&toimi=$toimi&ei_limiittia=$ei_limiittia&suoratoimit=$suoratoimit&tuotenumero=$tuotenumero&tilaus=$tilaus&jarj=$jarj&tilausnumero=$tilausnumero'>$perherow[jt]</a><br>";
@@ -2335,9 +2340,7 @@ if ($tee == "JATKA") {
               $colspan++;
             }
 
-            if ($kukarow["resoluutio"] == 'I') {
-              $colspan++;
-            }
+            $colspan++;
 
             if ($jtselaus_paivitys_oikeus) {
               $colspan++;

@@ -123,7 +123,7 @@ foreach ($update_kentat as $_kentta) {
     $kentan_siivous = " AND ".$_rajaukset[0];
     $_tuoterajaus_ilman_hakukenttia = str_replace($kentan_siivous, "", $_tuoterajaus_ilman_hakukenttia);
   }
-  
+
   // spessukent‰t l‰pi
   $tuoterajaus_kentta = relex_product_ostoehdotus_update($_kentta, $tuoterajaus, $paiva_ajo);
 
@@ -186,10 +186,6 @@ if ($_tuoterajaus) {
     fwrite($ofp, $rivi);
 
     $k_rivi++;
-
-    if ($k_rivi % 1000 == 0) {
-      echo "K‰sitell‰‰n rivi‰ {$k_rivi}\n";
-    }
   }
 
   fclose($ofp);
@@ -386,7 +382,7 @@ $res = pupe_query($query);
 // Kerrotaan montako rivi‰ k‰sitell‰‰n
 $rows = mysql_num_rows($res);
 
-echo "Tuoterivej‰ {$rows} kappaletta.\n";
+echo date("d.m.Y @ G:i:s") . ": Relex tuoterivej‰ {$rows} kappaletta.\n";
 
 $k_rivi = 0;
 
@@ -672,10 +668,6 @@ while ($row = mysql_fetch_assoc($res)) {
   fwrite($fp, $rivi);
 
   $k_rivi++;
-
-  if ($k_rivi % 1000 == 0) {
-    echo "K‰sitell‰‰n rivi‰ {$k_rivi}\n";
-  }
 }
 
 fclose($fp);
@@ -700,4 +692,4 @@ if ($paiva_ajo and !empty($relex_ftphost)) {
   require "inc/ftp-send.inc";
 }
 
-echo "Valmis.\n";
+echo date("d.m.Y @ G:i:s") . ": Relex tuotteet valmis.\n\n";

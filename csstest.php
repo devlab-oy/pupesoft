@@ -24,7 +24,8 @@ $css_kuvaus = array(
   ,  'HR_BACKGROUND'          =>  'Osioiden erotinviiva (esim. otsikon alla)'
   ,  'INFO_COLOR'             =>  'Infoteksti (fonttikooltaan normaalia pienempää)'
   ,  'INPUT_COLOR'            =>  'Painikkeiden teksti ja syötekenttien teksti'
-  ,  'INPUT_BACKGROUND'       =>  'Painikkeiden ja syötekenttien tausta'  
+  ,  'INPUT_BACKGROUND'       =>  'Painikkeiden ja syötekenttien tausta'
+  ,  'INPUT_BORDER_COLOR'     =>  'Syöttökenttien ja alasvetovalikoiden reunuksen väri'
   ,  'LINK_COLOR'             =>  'Linkit'
   ,  'LIVESEARCH_BACKGROUND'  =>  'Live-hakukenttien tausta'
   ,  'MENUHOVER_BACKGROUND'   =>  'Aktiivisen navigaatioelementin tausta'
@@ -46,6 +47,12 @@ $css_kuvaus = array(
   ,  'TUMMA_BACKGROUND'       =>  'Tumman elementin tausta'
   ,  'TUMMA_COLOR'            =>  'Tumman elementin teksti'
   ,  'ASIAKASFAKTA_COLOR'     =>  'Asiakasfakta otsikolla ja myyntitilauksella'
+  ,  'SUBMITBUTTON_BACKGROUND'          =>  'Normaalin Submit-nappulan tausta'
+  ,  'SUBMITBUTTON_LISAA_BACKGROUND'    =>  'Lisää Submit-nappulan tausta'
+  ,  'SUBMITBUTTON_HAE_BACKGROUND'      =>  'Hae Submit-nappulan tausta'
+  ,  'SUBMITBUTTON_TALLENNA_BACKGROUND' =>  'Tallenna Submit-nappulan tausta'
+  ,  'SUBMITBUTTON_POISTA_BACKGROUND'   =>  'Poista Submit-nappulan tausta'
+
 );
 
 function getCSSDescription($css_name) {
@@ -84,7 +91,15 @@ Tässä näkee miten formit käyttäytyy:<hr>
 <input type='radio'   name='2'>
 <input type='radio'   name='2'>
 <input type='submit' value='Normaali submit-nappula'>
-</form> pitäisi pysyä nipussa ilman suurempia aukkoja ja rivinvaihtoja.
+ pitäisi pysyä nipussa ilman suurempia aukkoja ja rivinvaihtoja.
+
+<br><br>
+
+<input type='submit' class='lisaa_btn' value='Lisää submit-nappula'>
+<input type='submit' class='hae_btn' value='Hae submit-nappula'>
+<input type='submit' class='tallenna_btn' value='Tallenna submit-nappula'>
+<input type='submit' class='poista_btn' value='Poista submit-nappula'>
+</form>
 
 <br>
 <br>

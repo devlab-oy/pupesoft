@@ -1390,6 +1390,13 @@ if ($tee == 'P') {
       $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
       $header .= "Content-type: text/html; charset=\"iso-8859-1\"\n";
 
+      if ($yhtiorow["kayttoliittyma"] == "U") {
+        $css = $yhtiorow['css'];
+      }
+      else {
+        $css = $yhtiorow['css_classic'];
+      }
+
       $ulos  = "<html>\n<head>\n";
       $ulos .= "<style type='text/css'>$css</style>\n";
       $ulos .= "<title>$yhtiorow[nimi]</title>\n";

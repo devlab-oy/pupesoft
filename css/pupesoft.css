@@ -1,20 +1,19 @@
-
 * {
   font-size: 10pt;
-	font-family: "Lato","Helvetica",Arial,Verdana,Lucida;
+  font-family: "Lato","Helvetica",Arial,Verdana,Lucida;
 }
 
 body {
-	margin: 2px 2px 0px 0px;
-	padding: 0px 0px 0px 0px;
+  margin: 2px 2px 0px 0px;
+  padding: 0px 0px 0px 10px;
 }
 
 a:hover {
-	background-color: inherit;
+  background-color: inherit;
 }
 
 span {
-	vertical-align: middle;
+  vertical-align: middle;
 }
 
 img {
@@ -22,38 +21,38 @@ img {
 }
 
 th {
-	font-size: 11pt;
+  font-size: 11pt;
   font-weight: bold;
-	vertical-align: middle;
-	padding: 10px 10px 10px 10px;
+  vertical-align: middle;
+  padding: 10px 10px 10px 10px;
 }
 
 th a {
-	font-size: 11pt;
+  font-size: 11pt;
   text-transform: capitalize;
   font-weight: bold;
-	vertical-align: middle;
-	text-align: left;
+  vertical-align: middle;
+  text-align: left;
 }
 
 td {
-	padding: 5px 5px 5px 5px;
-	vertical-align: middle;
+  padding: 5px 5px 5px 5px;
+  vertical-align: middle;
 }
 
 .nopad {
-	padding: 0px;
+  padding: 0px;
 }
 
 .top {
-	vertical-align: top;
+  vertical-align: top;
 }
 
 .head {
-	font-size: 22pt;
-	text-transform: none;
-	font-weight: normal;
-	letter-spacing: 1px;
+  font-size: 22pt;
+  text-transform: none;
+  font-weight: normal;
+  letter-spacing: 1px;
 }
 
 div.lopetus {
@@ -69,17 +68,19 @@ div.ohje {
 }
 
 input, textarea {
-	margin: 0px 4px 0px 4px;
+  margin: 0px 4px 0px 4px;
   padding: 7px 2px 8px 2px;
-  border : solid 1px #e1e1e1;
+  border-style: solid;
+  border-width: 1px;
 }
 
 select {
   font-size: 10pt;
   -webkit-appearance: none;
   -webkit-border-radius: 0px;
-	padding: 8px 35px 8px 4px;
-  border : solid 1px #f0f0f0;
+  padding: 8px 35px 8px 4px;
+  border-style: solid;
+  border-width: 1px;
   background-image: url('../pics/facelift/dropdown_arrow.png');
   background-repeat: no-repeat;
   background-position: right;
@@ -88,23 +89,21 @@ select {
 select.multipleselect {
   font-size: 10pt;
   padding: 2px 2px 2px 2px;
-  background-image: url('');
+  background-image: none;
   width: 100%;
   overflow-y:scroll;
 }
 
 button, input[type=submit], input[type=button] {
- 	border : solid 0px #ffffff;
- 	font-size: 12pt;
- 	color : #ffffff;
- 	margin: 2px 4px 2px 0px;
- 	padding: 8px 10px 8px 10px;
-  background-color: #6c70eb;
+  border : solid 0px #ffffff;
+  font-size: 12pt;
+  color : #ffffff;
+  margin: 2px 4px 2px 0px;
+  padding: 8px 10px 8px 10px;
   min-width: 100px;
 }
 
 input[type=submit].lisaa_btn {
-  background-color: #01ebd3;
   background-image: url('../pics/facelift/submit_add.png');
   background-repeat: no-repeat;
   background-position: right;
@@ -112,7 +111,6 @@ input[type=submit].lisaa_btn {
 }
 
 input[type=submit].hae_btn {
-  background-color: #6c70eb;
   background-image: url('../pics/facelift/submit_mglass.png');
   background-repeat: no-repeat;
   background-position: right;
@@ -120,7 +118,6 @@ input[type=submit].hae_btn {
 }
 
 input[type=submit].tallenna_btn {
-  background-color: #01a1eb;
   background-image: url('../pics/facelift/submit_rightarrow.png');
   background-repeat: no-repeat;
   background-position: right;
@@ -128,7 +125,6 @@ input[type=submit].tallenna_btn {
 }
 
 input[type=submit].poista_btn {
-  background-color: #999999;
   background-image: url('../pics/facelift/submit_leftarrow.png');
   background-repeat: no-repeat;
   background-position: right;

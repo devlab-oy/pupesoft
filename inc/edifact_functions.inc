@@ -1325,7 +1325,7 @@ function kasittele_bookkaussanoma($edi_data) {
       }
     }
   }
-  else {
+  elseif ($tyyppi != 5) {
     $query = "SELECT lasku.tunnus,
               laskun_lisatiedot.rullamaara
               FROM lasku

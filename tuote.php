@@ -1045,6 +1045,7 @@ if (isset($ajax)) {
         $vahvistettu = "";
         $merkki    = "";
         $keikka    = "";
+        $tyyppi_url = "MYYNTI";
 
         if ($jtrow["tyyppi"] == "O") {
 
@@ -1059,12 +1060,15 @@ if (isset($ajax)) {
               $keikka = " / ".$jtrow["keikkanro"];
             }
           }
+
           if ($jtrow["kpl"] >= 0) {
             $merkki = "+";
           }
           else {
             $merkki = "-";
           }
+
+          $tyyppi_url = "OSTO";
         }
         elseif ($jtrow["tyyppi"] == "E") {
           $tyyppi = t("Ennakkotilaus");
@@ -1081,6 +1085,7 @@ if (isset($ajax)) {
         elseif ($jtrow["tyyppi"] == "V") {
           $tyyppi = t("Kulutus");
           $merkki = "-";
+          $tyyppi_url = "VALMISTUSMYYNTI";
         }
         elseif ($jtrow["tyyppi"] == "L" and $jtrow["var"] == "J") {
           $tyyppi = t("Jälkitoimitus");
@@ -1109,10 +1114,12 @@ if (isset($ajax)) {
         elseif (($jtrow["tyyppi"] == "W" or $jtrow["tyyppi"] == "M") and $jtrow["tilaustyyppi"] == "W") {
           $tyyppi = t("Valmistus");
           $merkki = "+";
+          $tyyppi_url = "VALMISTUSMYYNTI";
         }
         elseif (($jtrow["tyyppi"] == "W" or $jtrow["tyyppi"] == "M") and $jtrow["tilaustyyppi"] == "V") {
           $tyyppi = t("Asiakkaallevalmistus");
           $merkki = "+";
+          $tyyppi_url = "VALMISTUSMYYNTI";
         }
 
         if ($jtrow["jaksotettu"] == 1) {
@@ -1147,7 +1154,7 @@ if (isset($ajax)) {
           $_return .= "<td>";
         }
 
-        $_return .= "<a href='$PHP_SELF?toim=$toim&tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$jtrow[tunnus]&lopetus=$lopetus'>$jtrow[tunnus]</a>$keikka";
+        $_return .= "<a href=\"javascript:lataaiframe('{$jtrow['tunnus']}', '{$palvelin2}raportit/asiakkaantilaukset.php?toim={$tyyppi_url}&tee=NAYTATILAUS&tunnus={$jtrow['tunnus']}&ohje=off');\">{$jtrow['tunnus']}</a>$keikka";
 
         if ($jtrow["tyyppi"] == "O" and $jtrow["laskutila"] != "K" and $jtrow["keikkanro"] > 0 and $jtrow['comments'] != '') {
 
@@ -1194,6 +1201,8 @@ if (isset($ajax)) {
             <td align='right'>$merkki".abs($jtrow["kpl"])."</td>
             <td align='right'>".sprintf('%.2f', $myyta)."</td>
             </tr>";
+
+        $_return .= "<tr><td colspan='7' class='back' style='width:100%; padding:0; margin:0;'><div id = 'ifd_{$jtrow['tunnus']}' style='width:100%; border:1px solid; display:none'></div></td></tr>";
       }
 
       foreach ($yhteensa as $type => $kappale) {

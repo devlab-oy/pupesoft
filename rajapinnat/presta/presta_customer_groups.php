@@ -35,7 +35,6 @@ class PrestaCustomerGroups extends PrestaClient {
 
     try {
       $this->schema = $this->get_empty_schema();
-      //Fetch all products with ID's and SKU's only
       $existing_groups = $this->all(array('id', 'note'));
       $existing_groups = array_column($existing_groups, 'note', 'id');
 

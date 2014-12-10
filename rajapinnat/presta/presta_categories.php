@@ -15,7 +15,7 @@ class PrestaCategories extends PrestaClient {
   private $root = null;
 
   /**
-   * Synced categories
+   * Categories to be synced
    *
    * @var array
    */
@@ -235,7 +235,6 @@ class PrestaCategories extends PrestaClient {
    * @param int $presta_category_id
    */
   public function set_category_root($presta_category_id) {
-    //Manually set Devlab testi root node
     $this->root = $presta_category_id;
   }
 

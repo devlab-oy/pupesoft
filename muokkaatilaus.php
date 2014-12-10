@@ -934,7 +934,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     }
   }
 
-  if (!empty($pv_rajaus) and $pv_rajaus != 'ei_rajausta') {
+  if (!empty($pv_rajaus) and $pv_rajaus != 'ei_rajausta' and empty($etsi)) {
     $haku .= " and DATE(lasku.luontiaika) > DATE_SUB(CURRENT_DATE, INTERVAL {$pv_rajaus} DAY) ";
   }
 

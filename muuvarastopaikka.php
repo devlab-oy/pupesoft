@@ -828,7 +828,7 @@ if ($tee == 'M' or $tee == 'Q') {
     echo "<table><tr>";
     echo "<td>".t("Valitse listasta").":</td>";
     echo "<td>$ulos</td>";
-    echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></td>";
+    echo "<td class='back'><input type='submit' value='".t("Valitse")."'></td>";
     echo "</tr></table>";
     echo "</form>";
 
@@ -857,7 +857,7 @@ if ($tee == 'M') {
 
   echo "<th>$tuoteno - ".t_tuotteen_avainsanat($trow, 'nimitys')."</th>";
   echo "<td>";
-  echo "<input type='Submit' value='".t("Edellinen tuote")."'>";
+  echo "<input type='submit' value='".t("Edellinen tuote")."'>";
   echo "</td>";
   echo "</form>";
 
@@ -867,7 +867,7 @@ if ($tee == 'M') {
   echo "<input type = 'hidden' name = 'toim' value = '{$toim}' />";
   echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
   echo "<td>";
-  echo "<input type='Submit' value='".t("Seuraava tuote")."'>";
+  echo "<input type='submit' value='".t("Seuraava tuote")."'>";
   echo "</td>";
   echo "</form>";
   echo "</tr>";

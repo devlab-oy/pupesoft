@@ -192,7 +192,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
       break;
     case "yhteensopivuus_tuote_sensori_lisatiedot" :
       $pakolliset   = array("YHTEENSOPIVUUS_TUOTE_SENSORI_TUNNUS");
-      $wherelliset  = array("YHTEENSOPIVUUS_TUOTE_SENSORI_TUNNUS", "OTSIKKO");
+      $wherelliset  = array("YHTEENSOPIVUUS_TUOTE_SENSORI_TUNNUS", "OTSIKKO", "ARVO");
       $kielletyt    = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
       // HUOM: tässä hieman fuulataan joinattavia. Tsekkaa koodi lue_datassa, tämä on spessukeissi....
       $joinattavat  = array("TUOTENO" => "yhteensopivuus_tuote_sensori");

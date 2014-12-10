@@ -1039,7 +1039,7 @@ if ($tee == "") {
       <option value='Y'>", t("Ytunnuksella"), "</option>
       <option value='T' {$sel}>", t("Asiakkaalla"), "</option>
       </select></td>";
-    echo "<td class='back'><input type='submit' value='", t("Etsi"), "'></td></tr>";
+    echo "<td class='back'><input type='submit' class='hae_btn' value = '".t("Etsi")."'></td></tr>";
 
     echo "</table>";
     echo "</form>";

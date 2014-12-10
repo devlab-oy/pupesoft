@@ -44,12 +44,13 @@ verkkokauppa_directory=`dirname $0`
 cd ${verkkokauppa_directory}/..
 
 # Kopioidaan nämä hakemistot rakenteineen
-DIRECTORIES="barcode/
-excel_reader/
-pdflib/
-pics/
-validation/
-viivakoodi/"
+DIRECTORIES="barcode
+excel_reader
+pdflib
+pics
+validation
+viivakoodi
+css"
 
 # Kopioidaan näiden hakemistojen sisältö verkkokauppa roottiin
 CONTENT="verkkokauppa/*"
@@ -67,7 +68,6 @@ inc/hinnastoriviautomaster.inc
 inc/hinnastorivifutur.inc
 inc/hinnastorivitab.inc
 inc/hinnastorivivienti.inc
-inc/jquery-ui-extranet.css
 inc/jquery-ui.js
 inc/jquery.min.js
 inc/laskutyyppi.inc

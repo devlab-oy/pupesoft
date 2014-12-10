@@ -279,7 +279,7 @@ if ($oikeurow['paivitys'] == 1 and ($kukarow['taso'] == 2 or $kukarow['taso'] ==
 
   if ($virhe != "") $virhe .= "<br>";
   echo "<input type = 'hidden' name = 'lisaselite' class='lisaselite' value='' />";
-  echo "<td valign='top'><input type='Submit' class='hae_lisaselite' value = '".t("Lisää")."'></td>";
+  echo "<td valign='top'><input type='submit' class='hae_lisaselite' value = '".t("Lisää")."'></td>";
 
   if (strpos($_SERVER['SCRIPT_NAME'], "hyvak.php") === FALSE and strpos($_SERVER['SCRIPT_NAME'], "selaajamuuta.php") === FALSE) {
     echo "<td valign='top' class='back' nowrap><font class='error'>$virhe</font><input type='checkbox' name = 'jaksota'> ".t("Jaksota")."</td>";
@@ -461,7 +461,7 @@ while ($trow = mysql_fetch_assoc($result)) {
         <input type='hidden' name = 'iframe_id' value = '$iframe_id'>
         <input type='hidden' name = 'jarj' value = '$jarj'>
         <input type = 'hidden' name = 'lisaselite' class='lisaselite' value='' />
-        <input type='Submit' class='hae_lisaselite' value = '".t("Muuta")."'>
+        <input type='submit' class='hae_lisaselite' value = '".t("Muuta")."'>
         </td></tr></form>";
   }
   else {
@@ -595,7 +595,7 @@ if (mysql_num_rows($toimires)==1) {
     echo "<input type='hidden' name = 'lopetus' value='$lopetus/SPLIT/".$palvelin2."muutosite.php////tee=E//tunnus=$tunnus'>";
   }
 
-  echo "<input type='Submit' value='".t("Kululaskun erittely")."'></form></td>";
+  echo "<input type='submit' value='".t("Kululaskun erittely")."'></form></td>";
 }
 
 if ($mtklasrow["tilaustyyppi"] == "M") {
@@ -612,7 +612,7 @@ if ($mtklasrow["tilaustyyppi"] == "M") {
     echo "<input type='hidden' name = 'lopetus' value='$lopetus/SPLIT/".$palvelin2."muutosite.php////tee=E//tunnus=$tunnus'>";
   }
 
-  echo "<input type='Submit' value='".t("Tarkastele matkalaskua")."'>
+  echo "<input type='submit' value='".t("Tarkastele matkalaskua")."'>
         </form></td>";
 }
 

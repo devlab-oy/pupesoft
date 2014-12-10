@@ -1410,7 +1410,7 @@ if (!isset($tee) or $tee == "") {
   echo "<tr>";
   echo "<th>".t('Valmistuslinja')."</th>";
   echo "<td>";
-  echo "<select multiple='multiple' name='multi_valmistuslinja[]' onchange='submit();'>";
+  echo "<select multiple='multiple' class='multipleselect' name='multi_valmistuslinja[]' onchange='submit();'>";
   echo "<option value=''>".t('Ei valintaa')."</option>";
   foreach ($valmistuslinjat as $_valmistuslinja) {
     $sel = in_array($_valmistuslinja['selite'], $multi_valmistuslinja) ? " SELECTED" : "";
@@ -1423,7 +1423,7 @@ if (!isset($tee) or $tee == "") {
   echo "<tr>";
   echo "<th>".t("Tuotteen status")."</th>";
   echo "<td>";
-  echo "<select multiple='multiple' name='multi_status[]' onchange='submit();'>";
+  echo "<select multiple='multiple' class='multipleselect' name='multi_status[]' onchange='submit();'>";
   echo "<option value=''>".t("Ei valintaa")."</option>";
 
   $result = t_avainsana("S");

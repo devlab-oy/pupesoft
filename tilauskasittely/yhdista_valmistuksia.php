@@ -277,7 +277,7 @@ if ($tee == "VALITSE") {
   $presult = pupe_query($query);
   $riveja = mysql_num_rows($presult);
 
-  echo "<table border='0' cellspacing='1' cellpadding='2'><tr>";
+  echo "<table><tr>";
   echo "<th>".t("Valmistus")."</a></th>";
   echo "<th>".t("Nimitys")."/".t("Kommentti")."</a></th>";
   echo "<th>".t("Valmiste")."</a></th>";
@@ -421,7 +421,7 @@ if ($tee == "") {
   echo "<tr>
     <th>".t("Etsi valmistetta/raaka-ainetta").":</th>";
   echo "<td colspan='3'><input type='text' name='etsi' value='$etsi'></td>";
-  echo "<td><input type='Submit' value='".t("Etsi")."'></td></form>";
+  echo "<td><input type='submit' class='hae_btn' value='".t("Etsi")."'></td></form>";
   echo "</table><br><br>";
 
   $haku='';

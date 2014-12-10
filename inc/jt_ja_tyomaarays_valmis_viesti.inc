@@ -5,14 +5,15 @@
  * jos sellainen löytyy. Toistaiseksi ainut tuettu palvelu on Zoner. Lähettää myös sähköpostin, jos
  * asiakkaalta sellainen löytyy
  *
- * @param string $username Zonerin käyttäjätunnus
- * @param string $salasana Zonerin salasana
- * @param int    $tilausnumero
- * @param bool   $tyomaarays Onko kyseessä työmääräys. Jos arvoksi annetaan true, viesti
+ * @param string  $username     Zonerin käyttäjätunnus
+ * @param string  $salasana     Zonerin salasana
+ * @param int     $tilausnumero
+ * @param bool    $tyomaarays   Onko kyseessä työmääräys. Jos arvoksi annetaan true, viesti
  *   työmääräyksen valmistumisesta lähtee heti.
  *
  * @return bool Jos tekstiviestin tai sähköpostin lähetys onnistui, palauttaa true
  */
+
 
 function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $tyomaarays = false) {
   global $yhtiorow;
@@ -30,10 +31,10 @@ function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $tyomaarays
     if (empty($avainsanaviesti)) {
       $viesti =
         t("Hei. Kaikki tilauksen %s tuotteet ovat noudettavissa. Terveisin %s, %s.",
-          "",
-          $tilausnumero,
-          $yhtiorow["nimi"],
-          $yhtiorow["puhelin"]);
+        "",
+        $tilausnumero,
+        $yhtiorow["nimi"],
+        $yhtiorow["puhelin"]);
     }
     else {
       $viesti = "{$avainsanaviesti}\n" . t("Tilausnumero") . ": {$tilausnumero}";
@@ -47,10 +48,10 @@ function laheta_vahvistusviesti($username, $salasana, $tilausnumero, $tyomaarays
     if (empty($avainsanaviesti)) {
       $viesti =
         t("Hei. Huolto- ja asennustyönne %s on valmistunut. Terveisin, %s, %s.",
-          "",
-          $tilausnumero,
-          $yhtiorow["nimi"],
-          $yhtiorow["puhelin"]);
+        "",
+        $tilausnumero,
+        $yhtiorow["nimi"],
+        $yhtiorow["puhelin"]);
     }
     else {
       $viesti = "{$avainsanaviesti}\n" . t("Tilausnumero") . ": {$tilausnumero}";

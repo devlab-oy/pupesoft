@@ -611,6 +611,13 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
         $aputoim2 = "";
         $lisa2 = "";
       }
+      elseif ($toim == "VASTAANOTA_REKLAMAATIO") {
+        $aputoim1 = "REKLAMAATIO";
+        $lisa1 = t("Muokkaa");
+
+        $aputoim2 = "";
+        $lisa2 = "";
+      }
       elseif ($toim == "HAAMU") {
         $aputoim1 = "HAAMU";
         $lisa1 = t("Muokkaa");
@@ -797,7 +804,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     echo "</select></td><td class='back'>&nbsp;</td>";
   }
 
-  echo "<td class='back'><input type='Submit' value = '".t("Etsi")."'></td></tr>";
+  echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Etsi")."'></td></tr>";
   echo "</table>";
   echo "</form>";
   echo "<br>";
@@ -913,7 +920,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 
   $toimaikalisa = "";
 
-  if ($kukarow['resoluutio'] == 'I' and $toim != "SIIRTOLISTA" and $toim != "SIIRTOLISTASUPER" and $toim != "MYYNTITILI" and $toim != "MYYNTITILISUPER" and $toim != "EXTRANET" and ($toim != 'TARJOUS' and $toim != 'EXTTARJOUS')) {
+  if ($toim != "SIIRTOLISTA" and $toim != "SIIRTOLISTASUPER" and $toim != "MYYNTITILI" and $toim != "MYYNTITILISUPER" and $toim != "EXTRANET" and ($toim != 'TARJOUS' and $toim != 'EXTTARJOUS')) {
     $toimaikalisa = ' lasku.toimaika, ';
   }
 
@@ -2547,7 +2554,7 @@ if (mysql_num_rows($result) != 0) {
 
       if ($row["tila"] == "N" and $row["alatila"] == "U") {
         if ($jtok == 0) {
-          echo "<td class='$class' valign='top'><font style='color:#00FF00;'>".t("Voidaan toimittaa")."</font></td>";
+          echo "<td class='$class' valign='top'><font class='green'>".t("Voidaan toimittaa")."</font></td>";
 
           if (isset($worksheet)) {
             $worksheet->writeString($excelrivi, $ii, "Voidaan toimittaa");
@@ -2555,7 +2562,7 @@ if (mysql_num_rows($result) != 0) {
           }
         }
         else {
-          echo "<td class='$class' valign='top'><font style='color:#FF0000;'>".t("Ei voida toimittaa")."</font></td>";
+          echo "<td class='$class' valign='top'><font class='red'>".t("Ei voida toimittaa")."</font></td>";
 
           if (isset($worksheet)) {
             $worksheet->writeString($excelrivi, $ii, t("Ei voida toimittaa"));
@@ -2937,7 +2944,7 @@ if (mysql_num_rows($result) != 0) {
           <input type='hidden' name='kaytiin_otsikolla' value='NOJOO!'>
           <table>
           <tr><th>".t("Listauksessa näkyy 50 ensimmäistä")." $otsikko.</th>
-          <td class='back'><input type='Submit' value = '".t("Näytä kaikki")."'></td></tr>
+          <td class='back'><input type='submit' value = '".t("Näytä kaikki")."'></td></tr>
           </table>
           </form>";
     }

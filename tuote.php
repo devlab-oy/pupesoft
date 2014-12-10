@@ -1829,9 +1829,9 @@ if ($tee == 'Z') {
 
         $i = 0;
 
-        $trimtuoteno = str_replace(" ", "_", $tuoterow["tuoteno"]);
+        $trimtuoteno = str_replace(array(" ", "+"), "_", $tuoterow["tuoteno"]);
 
-        $divit = "<div id='div_$trimtuoteno' class='popup'>";
+        $divit = "<div id='div_{$trimtuoteno}' class='popup'>";
         $divit .= "<table><tr><td valign='top'><table>";
         $divit .= "<tr><td class='back' valign='top' align='center'>".t("Alkuperäisnumero")."</td><td class='back' valign='top' align='center'>".t("Hinta")."</td><td class='back' valign='top' align='center'>".t("Merkki")."</td></tr>";
 
@@ -1850,8 +1850,7 @@ if ($tee == 'Z') {
         $divit .= "</table>";
         $divit .= "</div>";
 
-        echo "&nbsp;&nbsp;<a src='#' class='tooltip' id='$trimtuoteno'><img src='pics/lullacons/info.png' height='13'></a>";
-
+        echo "&nbsp;&nbsp;<a src='#' class='tooltip' id='{$trimtuoteno}'><img src='pics/lullacons/info.png' height='13'></a>";
       }
     }
 

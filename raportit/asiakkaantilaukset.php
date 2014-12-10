@@ -410,13 +410,8 @@ if ($ytunnus != '') {
     $summaselli = " lasku.summa, ";
   }
 
-  if ($kukarow['resoluutio'] == 'I') {
-    $summaselli .= " lasku.viesti tilausviite, ";
-  }
-
-  if ($kukarow['resoluutio'] == 'I') {
-    $summaselli .= " lasku.asiakkaan_tilausnumero astilno, ";
-  }
+  $summaselli .= " lasku.viesti tilausviite, ";
+  $summaselli .= " lasku.asiakkaan_tilausnumero astilno, ";
 
   if ($otunnus > 0 or $laskunro > 0 or $sopimus > 0) {
     if ($laskunro > 0) {
@@ -539,25 +534,14 @@ if ($ytunnus != '') {
 
   if (mysql_num_rows($result) > 0) {
 
-    if ($kukarow['resoluutio'] == 'I') {
-      if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
-        pupe_DataTables(array(array($pupe_DataTables, 11, 12)));
-      }
-      else {
-        pupe_DataTables(array(array($pupe_DataTables, 10, 11)));
-      }
+    if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
+      pupe_DataTables(array(array($pupe_DataTables, 11, 12)));
     }
     else {
-      if (substr($toim, 0, 8) == "KONSERNI" and $yhtiorow['konsernivarasto'] != '' and $konsernivarasto_yhtiot != '') {
-        pupe_DataTables(array(array($pupe_DataTables, 9, 10)));
-      }
-      else {
-        pupe_DataTables(array(array($pupe_DataTables, 8, 9)));
-      }
+      pupe_DataTables(array(array($pupe_DataTables, 10, 11)));
     }
 
     echo "<br>";
-
     echo "<table class='display dataTable' id='$pupe_DataTables'>";
     echo "<thead>";
     echo "<tr>";

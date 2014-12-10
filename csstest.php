@@ -46,13 +46,13 @@ $css_kuvaus = array(
   ,  'TR_COLOR'               =>  'Taulukon solun teksti'
   ,  'TUMMA_BACKGROUND'       =>  'Tumman elementin tausta'
   ,  'TUMMA_COLOR'            =>  'Tumman elementin teksti'
-  ,  'ASIAKASFAKTA_COLOR'     =>  'Asiakasfakta otsikolla ja myyntitilauksella'    
+  ,  'ASIAKASFAKTA_COLOR'     =>  'Asiakasfakta otsikolla ja myyntitilauksella'
   ,  'SUBMITBUTTON_BACKGROUND'          =>  'Normaalin Submit-nappulan tausta'
   ,  'SUBMITBUTTON_LISAA_BACKGROUND'    =>  'Lisää Submit-nappulan tausta'
   ,  'SUBMITBUTTON_HAE_BACKGROUND'      =>  'Hae Submit-nappulan tausta'
-  ,  'SUBMITBUTTON_TALLENNA_BACKGROUND' =>  'Tallenna Submit-nappulan tausta'  
-  ,  'SUBMITBUTTON_POISTA_BACKGROUND'   =>  'Poista Submit-nappulan tausta'   
- 
+  ,  'SUBMITBUTTON_TALLENNA_BACKGROUND' =>  'Tallenna Submit-nappulan tausta'
+  ,  'SUBMITBUTTON_POISTA_BACKGROUND'   =>  'Poista Submit-nappulan tausta'
+
 );
 
 function getCSSDescription($css_name) {

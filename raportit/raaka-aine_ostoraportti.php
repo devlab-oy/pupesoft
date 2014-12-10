@@ -687,7 +687,7 @@ if (!isset($tee) or $tee == "") {
   echo "<tr>";
   echo "<th>".t("Valmisteen status")."</th>";
   echo "<td>";
-  echo "<select multiple='multiple' name='multi_status[]' onchange='submit();'>";
+  echo "<select multiple='multiple' class='multipleselect' name='multi_status[]' onchange='submit();'>";
   echo "<option value=''>".t("Ei valintaa")."</option>";
 
   $result = t_avainsana("S");

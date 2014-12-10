@@ -472,7 +472,7 @@ if ($tee == 'V') {
       <input type='hidden' name='map' value = '$map'>
       <input type='hidden' name='mtili' value = '$mtili'>
       <input type='hidden' name='tunnus' value = '$tunnus'>
-      <input type='Submit' value='".t("Suorita lisää")."'>
+      <input type='submit' value='".t("Suorita lisää")."'>
       </form></td>";
 
   echo "<td class='back'>
@@ -480,7 +480,7 @@ if ($tee == 'V') {
       <input type='hidden' name='tee' value='E'>
       <input type='hidden' name='tunnus' value='$tunnus'>
       <input type='hidden' name='lopetus' value='$lopetus'>
-      <input type='Submit' value='".t("Korjaa tiliöinti")."'>
+      <input type='submit' value='".t("Korjaa tiliöinti")."'>
       </form></td></tr></table>";
 }
 
@@ -632,7 +632,7 @@ if ($tee == "W") {
           <input type='hidden' name='map' value = '$map'>
           <input type='hidden' name='mtili' value = $mtili>
           <input type='hidden' name='tunnus' value = $trow[tunnus]>
-          <input type='Submit' value='".t("Suorita")."'></td></tr></form>";
+          <input type='submit' value='".t("Suorita")."'></td></tr></form>";
     }
     else {
       echo "</td><td></td><td>";
@@ -682,7 +682,7 @@ if ($tee == '') {
 
       echo "<td>
           <input type='hidden' name='mtili' value = $trow[maksu_tili]>
-          <input type='Submit' value='".t("Valitse")."'></td></tr></form>";
+          <input type='submit' value='".t("Valitse")."'></td></tr></form>";
     }
 
     echo "</table>";

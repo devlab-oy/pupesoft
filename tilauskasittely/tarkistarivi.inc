@@ -135,15 +135,23 @@ if (
   }
 }
 
-if ($row["varattu"] == 0 and in_array($row["var"], array('', 'H')) and $row["tyyppi"] != "E" and $row["tyyppi"] != "G") {
-  if ($kukarow['extranet'] != '' and $row['positio'] == 'Ei varaa saldoa') {
-    // $varaosavirhe .= t("HUOM: Rivi on liian vanha ja tuote ei varaa saldoa")."! ($row[tilkpl] ".t("kpl").")<br/>";
+if (in_array($row["var"], array('', 'H')) and $row["tyyppi"] != "E" and $row["tyyppi"] != "G") {
+  if (($laskurow["tilaustyyppi"] != "H" and $row["varattu"] == 0) or
+    ($laskurow["tilaustyyppi"] == "H" and $row["tilkpl"] == 0)
+  ) {
+    if ($kukarow['extranet'] != '' and $row['positio'] == 'Ei varaa saldoa') {
+      //    $varaosavirhe .=
+      //      t("HUOM: Rivi on liian vanha ja tuote ei varaa saldoa") .
+      //      "! ($row[tilkpl] " .
+      //      t("kpl") .
+      //      ")<br/>";
+    }
+    else {
+      $varaosavirhe .= t("VIRHE: M‰‰r‰ puuttuu!") . "<br>";
+    }
+    $riviok++;
+    $tilausok++;
   }
-  else {
-    $varaosavirhe .= t("VIRHE: M‰‰r‰ puuttuu!")."<br>";
-  }
-  $riviok++;
-  $tilausok++;
 }
 
 if (in_array($row["var"], array('S', 'U', 'T', 'R', 'J')) and $row["tyyppi"] != "E") {
@@ -1219,7 +1227,7 @@ if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vasta
                 <input type='hidden' name='tila'         value = 'OOKOOAA'>
                 <input type='hidden' name='vastaavienkasittely' value = 'kylla'>
                 <input type='hidden' name='naytetaan_vastaavat' value = 'true' />
-                <input style='float:right;' type='Submit' value='".t("N‰yt‰ vastaavat tuotteet")."'>
+                <input style='float:right;' type='submit' value='".t("N‰yt‰ vastaavat tuotteet")."'>
                 $lisa_huomautus
                 </form></th>";
       $vastaavat_html .= "</tr></table>";
@@ -1378,7 +1386,7 @@ if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vasta
                           <input type='hidden' name='menutila'     value = '$menutila'>
                           <input type='hidden' name='tila'       value = 'MUUTA'>
                           <input type='hidden' name='tapa'       value = 'MYYVASTAAVA'>
-                          <input type='Submit' value='".t("Tilaa tuote")."'>
+                          <input type='submit' value='".t("Tilaa tuote")."'>
                           </form>";
             }
 
@@ -1413,7 +1421,7 @@ if ($toim != "VALMISTAVARASTOON" and $row['tuoteno'] != '' and ($yhtiorow['vasta
                       <input type='hidden' name='menutila'     value = '$menutila'>
                       <input type='hidden' name='tila'       value = 'OOKOOAA'>
                       <input type='hidden' name='vastaavienkasittely' value = 'kylla'>
-                      <input type='Submit' value='".t("Piilota vastaavat tuotteet")."'>
+                      <input type='submit' value='".t("Piilota vastaavat tuotteet")."'>
                       </form>";
           }
 

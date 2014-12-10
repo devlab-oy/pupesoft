@@ -229,7 +229,7 @@ if (isset($tee) and $tee == 'TOIMITA_ENNAKKO' and $yhtiorow["ennakkotilausten_to
 if (!isset($asiakastiedot)) $asiakastiedot = '';
 if (!isset($limit)) $limit = '';
 if (!isset($etsi)) $etsi = '';
-if (!isset($pv_rajaus)) $pv_rajaus = '2';
+if (!isset($pv_rajaus)) $pv_rajaus = $yhtiorow['muokkaatilaus_pv_rajaus'];
 if (!isset($tee_excel)) $tee_excel = '';
 
 // scripti balloonien tekemiseen
@@ -935,7 +935,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
   }
 
   if (!empty($pv_rajaus) and $pv_rajaus != 'ei_rajausta') {
-    $haku .= " and DATE(lasku.luontiaika) >= DATE_SUB(CURRENT_DATE, INTERVAL {$pv_rajaus} DAY) ";
+    $haku .= " and DATE(lasku.luontiaika) > DATE_SUB(CURRENT_DATE, INTERVAL {$pv_rajaus} DAY) ";
   }
 
   if (!empty($mt_order)) {

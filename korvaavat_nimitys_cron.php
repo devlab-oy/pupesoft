@@ -1,20 +1,20 @@
 <?php
 
 /*
-- Loopataan kaikki ketjut lÃ¤pi
-- Jos ketjun tuotteella saldo 0, tuote ei ole ketjun ykkÃ¶stuote = laitetaan jÃ¤rjestykseltÃ¤ pienempi nimitykseen, esim "KORVAAVA A2".
-- Jos jÃ¤rjestys on kuitenkin 0, niin laitetaan "Korvaava "ykkÃ¶stuote"". Eli pÃ¤Ã¤tuote ketjusta menee silloin nimitykseen.
-- TehdÃ¤Ã¤n tsekki, ettÃ¤ jos tuotteella on nimitys jo muutettu, niin ei tehÃ¤ mitÃ¤Ã¤n.
+- Loopataan kaikki ketjut läpi
+- Jos ketjun tuotteella saldo 0, tuote ei ole ketjun ykköstuote = laitetaan järjestykseltä pienempi nimitykseen, esim "KORVAAVA A2".
+- Jos järjestys on kuitenkin 0, niin laitetaan "Korvaava "ykköstuote"". Eli päätuote ketjusta menee silloin nimitykseen.
+- Tehdään tsekki, että jos tuotteella on nimitys jo muutettu, niin ei tehä mitään.
 */
 
-// Kutsutaanko CLI:stÃ¤
+// Kutsutaanko CLI:stä
 if (php_sapi_name() != 'cli') {
-  die("TÃ¤tÃ¤ scriptiÃ¤ voi ajaa vain komentoriviltÃ¤\n");
+  die("Tätä scriptiä voi ajaa vain komentoriviltä\n");
 }
 
-// YhtiÃ¶ annettava parametriksi
+// Yhtiö annettava parametriksi
 if (!isset($argv[1])) {
-  echo "KÃ¤yttÃ¶: {$_SERVER['SCRIPT_NAME']} [yhtion_nimi]\n";
+  echo "Käyttö: {$_SERVER['SCRIPT_NAME']} [yhtion_nimi]\n";
   exit;
 }
 
@@ -34,7 +34,7 @@ $yhteensa = 0;
 $muutettu = 0;
 $poistettu = 0;
 
-echo "PÃ¤ivitetÃ¤Ã¤n korvaavuusketjun nimitykset ...\n\n";
+echo date("d.m.Y @ G:i:s") . ": Päivitetään korvaavuusketjun nimitykset ...\n";
 
 // Haetaan tuoteketjut
 $select = "SELECT distinct id
@@ -42,7 +42,7 @@ $select = "SELECT distinct id
            WHERE yhtio='{$kukarow['yhtio']}'";
 $result = pupe_query($select);
 
-// Loopataan ketjut lÃ¤pi
+// Loopataan ketjut läpi
 while ($ketju = mysql_fetch_assoc($result)) {
 
   // Haetaan ketjun tuotteet
@@ -54,15 +54,15 @@ while ($ketju = mysql_fetch_assoc($result)) {
                      ORDER BY if(korvaavat.jarjestys=0, 9999, korvaavat.jarjestys), korvaavat.tuoteno";
   $tuotteet_result = pupe_query($tuotteet_query);
 
-  // Poislukien pÃ¤Ã¤tuote
+  // Poislukien päätuote
   $paa_tuote = mysql_fetch_assoc($tuotteet_result);
   $edellinen_tuote = $paa_tuote;
 
-  // Loopataan ketjun muut tuotteet lÃ¤pi
+  // Loopataan ketjun muut tuotteet läpi
   while ($tuote = mysql_fetch_assoc($tuotteet_result)) {
 
     // Muutetaan tuotteen nimitys
-    // Jos tuotteen jÃ¤rjestys on 0, laitetaan pÃ¤Ã¤tuote, muuten edellinen
+    // Jos tuotteen järjestys on 0, laitetaan päätuote, muuten edellinen
     if ($tuote['jarjestys'] == 0) $tuoteno = $paa_tuote['tuoteno'];
     else $tuoteno = $edellinen_tuote['tuoteno'];
 
@@ -81,7 +81,7 @@ while ($ketju = mysql_fetch_assoc($result)) {
                          WHERE yhtio='{$kukarow['yhtio']}'
                          AND tuoteno='{$tuote['tuoteno']}'";
 
-        // Ajetaan pÃ¤ivitysquery ja poistetaan tuote vastaavuusketjuista
+        // Ajetaan päivitysquery ja poistetaan tuote vastaavuusketjuista
         if (pupe_query($muutos_query)) {
           $muutettu++;
 
@@ -103,5 +103,5 @@ while ($ketju = mysql_fetch_assoc($result)) {
   $yhteensa++;
 }
 
-echo "\nYhteensÃ¤ $yhteensa sopivaa tuotetta, joista muutettiin $muutettu nimitystÃ¤\n";
-echo "Vastaavat ketjuista poistettiin $poistettu tuotetta\n";
+echo date("d.m.Y @ G:i:s") . ": Yhteensä $yhteensa sopivaa tuotetta, joista muutettiin $muutettu nimitystä\n";
+echo date("d.m.Y @ G:i:s") . ": Vastaavat ketjuista poistettiin $poistettu tuotetta\n\n";

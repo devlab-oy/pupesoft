@@ -1394,11 +1394,9 @@ if ($tee == 'Z') {
             // onko saapuminen jolle rivi on lisätty vielä auki.
             // Jos saapuminen on auki niin tulostetaan kyseisen saapumisen numero,
             // muuten tulostetaan sen saapumisen numero mihin rivi on mahdollisesti liitetty
-            if ($jtrow["alatila"] == "X") {
-             if ($jtrow["keikkanro"] > 0) {
-               $keikka = " / ".$jtrow["keikkanro"];
-               $laskutunnus = $jtrow["keikkatunnus"];
-             }
+            if ($jtrow["alatila"] == "X" and $jtrow["keikkanro"] > 0) {
+              $keikka = " / ".$jtrow["keikkanro"];
+              $laskutunnus = $jtrow["keikkatunnus"];
             }
             else {
               $keikka = " / ".$jtrow["laskunro"];

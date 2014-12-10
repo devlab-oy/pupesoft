@@ -42,7 +42,7 @@ echo "</td></tr>";
 
 echo "<tr>";
 echo "<th>", t("Etsi rahtikirjoja lähdön tunnuksella"), "</th>";
-echo "<td><input type='text' name='checkbox_parent[]' value='{$lahto}' /> <input type='submit' value='", t("Etsi"), "' /></td>";
+echo "<td><input type='text' name='checkbox_parent[]' value='{$lahto}' /> <input type='submit' class='hae_btn' value = '".t("Etsi")."' /></td>";
 echo "</tr>";
 echo "</table>";
 echo "</form>";

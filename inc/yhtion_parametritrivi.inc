@@ -16,28 +16,12 @@ else {
   $fieldname = mysql_field_name($result, $i);
 }
 
-if ($fieldname == "css") {
-  $ulos = "<td><textarea cols='45' rows='7' name='css'>$trow[$i]</textarea><input type='hidden' name='cssi' value='$i'></td>";
-  $jatko = 0;
-}
-
-if ($fieldname == "css_pieni") {
-  $ulos = "<td><textarea cols='45' rows='7' name='css_pieni'>$trow[$i]</textarea><input type='hidden' name='csspienii' value='$i'></td>";
-  $jatko = 0;
-}
-
-if ($fieldname == "css_extranet") {
-  $ulos = "<td><textarea cols='45' rows='7' name='css_extranet'>$trow[$i]</textarea><input type='hidden' name='cssextraneti' value='$i'></td>";
-  $jatko = 0;
-}
-
-if ($fieldname == "css_verkkokauppa") {
-  $ulos = "<td><textarea cols='45' rows='7' name='css_verkkokauppa'>$trow[$i]</textarea><input type='hidden' name='cssverkkokauppa' value='$i'></td>";
-  $jatko = 0;
-}
-
-if ($fieldname == "web_seuranta") {
-  $ulos = "<td><textarea cols='45' rows='7' name='web_seuranta'>$trow[$i]</textarea><input type='hidden' name='webseuranta' value='$i'></td>";
+if ($fieldname == "css"
+  or $fieldname == "css_classic"
+  or $fieldname == "css_extranet"
+  or $fieldname == "css_verkkokauppa"
+  or $fieldname == "web_seuranta") {
+  $ulos = "<td><textarea cols='45' rows='7' name='$fieldname'>$trow[$i]</textarea><input type='hidden' name='{$fieldname}i' value='$i'></td>";
   $jatko = 0;
 }
 
@@ -264,6 +248,27 @@ if ($fieldname == "tiliotteen_selvittelyt") {
 
   $ulos .= "<option value = '' $sel1>".t("Tiliotteen kaikki selvittelytiliöinnit tehdään yhdelle tositteelle");
   $ulos .= "<option value = 'E' $sel2>".t("Tiliotteen kaikki selvittelytiliöinnit tehdään omille tositteilleen");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "kayttoliittyma") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel1 = "";
+  $sel2 = "";
+
+  if ($trow[$i] == '') {
+    $sel1 = "selected";
+  }
+  if ($trow[$i] == 'U') {
+    $sel2 = "selected";
+  }
+
+  $ulos .= "<option value = '' $sel1>".t("Pupesoft Classic");
+  $ulos .= "<option value = 'U' $sel2>".t("Pupesoft Next");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -1278,6 +1283,19 @@ if ($fieldname == "pikatilaus_focus") {
   $jatko = 0;
 }
 
+if ($fieldname == "kerayspoikkeama_email") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == "P" ? " selected" : "";
+
+  $ulos .= "<option value=''>".t("Keräyspoikkeama-sähköpostit ovat HTML-pohjaisia")."</option>";
+  $ulos .= "<option value='P' {$sel}>".t("Keräyspoikkeama-sähköpostit ovat tekstipohjaisia")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "kerayspoikkeama_kasittely") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -1496,6 +1514,20 @@ if ($fieldname == "salli_jyvitys_tarjouksella") {
   $ulos .= "<option value = ''>".t("Tarjouksella ei sallita katteen jyvitystä");
   $ulos .= "<option value = 'K' $sel[K]>".t("Kaikki saa jyvittää katteen perusteella tarjouksella");
   $ulos .= "<option value = 'S' $sel[S]>".t("Kaikki saa jyvittää sekä osajyvittää katteen perusteella tarjouksella");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "naytetaan_tilausvahvistusnappi") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = array();
+  $sel[$trow[$i]] = "selected";
+
+  $ulos .= "<option value = ''>".t("Ei näytetä 'Näytä tilausvahvistus' -painiketta myyntitilauksella");
+  $ulos .= "<option value = 'K' $sel[K]>".t("Näytetään 'Näytä tilausvahvistus' -painike myyntitilauksella");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -2984,6 +3016,7 @@ if ($fieldname == "extranet_tilaus_varaa_saldoa") {
   $sel[$apu] = "selected";
 
   $ulos .= "<option value = ''>".t("Extranet-tilaus varaa saldoa")."</option>";
+  $ulos .= "<option value = 'E' $sel[E]>".t("Extranet-tilaus ei varaa saldoa")."</option>";
   $ulos .= "<option value = '1' $sel[1]>".t("Extranet-tilaus varaa saldoa 1 tunnin")."</option>";
   $ulos .= "<option value = '8' $sel[8]>".t("Extranet-tilaus varaa saldoa 8 tuntia")."</option>";
   $ulos .= "<option value = '24' $sel[24]>".t("Extranet-tilaus varaa saldoa 24 tuntia")."</option>";
@@ -4325,6 +4358,24 @@ if ($fieldname == 'takuuvarasto') {
     $sel = $trow[$i] == $varow['tunnus'] ? "selected" : "";
     $ulos .= "<option value = '{$varow['tunnus']}' {$sel}>{$varow['nimitys']}</option>";
   }
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "tilausrivin_korvamerkinta") {
+  $sel = $trow[$i] == "K" ? "selected" : "";
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $ulos .= "<option value = ''>";
+  $ulos .= t("Ei sallita tilausrivien korvamerkintää");
+  $ulos .= "</option>";
+
+  $ulos .= "<option value = 'K' {$sel}>";
+  $ulos .= t("Sallitaan tilausrivien korvamerkintä");
+  $ulos .= "</option>";
 
   $ulos .= "</select></td>";
 

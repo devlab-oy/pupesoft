@@ -100,7 +100,7 @@ if ($ulos != "") {
   echo "<table><tr>";
   echo "<td>".t("Valitse listasta").":</td>";
   echo "<td>$ulos</td>";
-  echo "<td class='back'><input type='Submit' value='".t("Valitse")."'></td>";
+  echo "<td class='back'><input type='submit' value='".t("Valitse")."'></td>";
   echo "</tr></table>";
   echo "</form>";
 }
@@ -317,7 +317,7 @@ if (!isset($nayta_pdf)) {
     echo "<td><input type='text' name='uuseankoodi' size='13' maxlength='13' value='$uuseankoodi'></td>";
   }
 
-  echo "<td class='back'><input type='Submit' value='".t("Tulosta")."'></td>";
+  echo "<td class='back'><input type='submit' value='".t("Tulosta")."'></td>";
   echo "</tr>";
   echo "</table>";
   echo "</form>";
@@ -405,7 +405,7 @@ if (!isset($nayta_pdf)) {
 
     echo "</select></td>";
     echo
-    "<tr><td class='back'></td><td class='back'><input type='Submit' value='" .
+    "<tr><td class='back'></td><td class='back'><input type='submit' value='" .
       t("Tulosta tarrat") .
       "'></td>";
     echo "</tr>";

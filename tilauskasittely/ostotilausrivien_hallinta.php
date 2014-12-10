@@ -25,7 +25,7 @@ echo "<tr><th>", t("Valitse toimittaja"), ":</th><td style='text-align: top;'><i
 echo "<select name='nayta_rivit'>";
 echo "<option value=''>", t("Kaikki avoimet rivit"), "</option>";
 echo "<option value='vahvistamattomat' {$select}>", t("Vain vahvistamattomia rivejä"), "</option> ";
-echo "<input type='submit' value='", t("Etsi"), "'></td>";
+echo "<input type='submit' class='hae_btn' value = '".t("Etsi")."'></td>";
 echo "</tr>";
 
 echo "<tr><th>", t("Näytä kaikki"), ":</th>";
@@ -231,7 +231,7 @@ if ($tee == "TULOSTAPDF") {
 }
 
 if (isset($laskurow)) {
-  echo "<table width='720' cellpadding='2' cellspacing='1' border='0'>";
+  echo "<table width='720'>";
 
   echo "<tr><th>", t("Ytunnus"), "</th><th colspan='2'>", t("Toimittaja"), "</th></tr>";
   echo "<tr><td>{$laskurow['ytunnus']}</td>
@@ -346,7 +346,7 @@ if (isset($laskurow)) {
       <input type='text' name='toimpp' value='{$toimpp}' size='3'>
       <input type='text' name='toimkk' value='{$toimkk}' size='3'>
       <input type='text' name='toimvv' value='{$toimvv}' size='6'></td>
-      <td><input type='Submit' value='", t("Päivitä"), "'></form></td></tr></table><br>";
+      <td><input type='submit' value='", t("Päivitä"), "'></form></td></tr></table><br>";
 
   echo "  <table>
       <form method='post'>
@@ -367,7 +367,7 @@ if (isset($laskurow)) {
   echo "</select></td>";
 
   echo "<tr><th>", t("Lähetä vahvistamattomat rivit sähköpostiin"), ": </th>
-      <td><input type='Submit' value='", t("Lähetä"), "'></form></td></tr></table><br>";
+      <td><input type='submit' value='", t("Lähetä"), "'></form></td></tr></table><br>";
 
 
   //Haetaan kaikki tilausrivit
@@ -416,7 +416,7 @@ if (isset($laskurow)) {
 
   $rivienmaara = mysql_num_rows($presult);
 
-  echo "<table border='0' cellspacing='1' cellpadding='2'><tr>";
+  echo "<table><tr>";
 
   $miinus = 2;
 

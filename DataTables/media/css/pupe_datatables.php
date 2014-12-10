@@ -1,7 +1,6 @@
 <?php
 
-// Otetaan yhtiön css:stä TH_BACKGROUND
-preg_match("/.*?\/\*(.*?(TH_BACKGROUND))\*\//", $yhtiorow['css'], $varitmatch);
+preg_match("/.*?\/\*(.*?(TH_BACKGROUND))\*\//", $yhtiorow['active_css'], $varitmatch);
 preg_match("/(#[a-f0-9]{3,6});/i", $varitmatch[0], $varirgb);
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

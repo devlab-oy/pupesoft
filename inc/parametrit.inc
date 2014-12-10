@@ -495,7 +495,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
         setcookie("laiteluettelo_keksi", urlencode(serialize($valitut_sarakkeet)), strtotime('+90 days'), "/");
         $_COOKIE["laiteluettelo_keksi"] = urlencode(serialize($valitut_sarakkeet));
       }
-      if (isset($valmiste_vai_raakaaine)) {
+      if (isset($valmiste_vai_raakaaine) and $toim == "VALMISTAVARASTOON") {
         setcookie('valmiste_vai_raakaaine', $valmiste_vai_raakaaine, time()+60*60*24*90, "/");
         $_COOKIE["valmiste_vai_raakaaine"] = urlencode(serialize($valmiste_vai_raakaaine));
       }
@@ -548,7 +548,13 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     }
 
     // T‰nne p‰‰see aina!
-    if ($phpnimi != 'indexvas.php' and $phpnimi != 'index.php' and $phpnimi != 'tervetuloa.php' and $phpnimi != 'logout.php' and $phpnimi != 'pupesoft_changelog.php') {
+    if ($phpnimi != 'indexvas.php'
+      and $phpnimi != 'index.php'
+      and $phpnimi != 'tervetuloa.php'
+      and $phpnimi != 'logout.php'
+      and $phpnimi != 'ylaframe.php'
+      and $phpnimi != 'pikavalinnat.php'
+      and $phpnimi != 'pupesoft_changelog.php') {
 
       if (!isset($toim)) $toim = "";
 
@@ -558,7 +564,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
         echo "<table width='100%' height='70%'>";
         echo "<tr>";
         echo "<td style='text-align:center;font-size:9pt;font-family:Lucida,Verdana,Helvetica,Arial; color: #666;'>";
-        echo "<img src='{$pupesoft_scheme}api.devlab.fi/pupesoft.gif'><br><br>";
+        echo "<img src='{$palvelin2}pics/facelift/pupe.gif'><br><br>";
         echo "K‰ytt‰j‰ {$kukarow["kuka"]} pyysi toimintoa $phpnimi $toim, joka on kielletty!";
         echo "</td>";
         echo "</tr>";
@@ -630,16 +636,16 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
   elseif (($phpnimi != 'index.php' and $phpnimi != 'futursoft.php') or (isset($futuvanha) and $futuvanha == '1')) {
 
     if ((isset($verkkokauppa) and $verkkokauppa != "") and $yhtiorow['css_verkkokauppa'] != "") {
-      $css = $yhtiorow['css_verkkokauppa'];
+      $yhtiorow['active_css'] = $yhtiorow['css_verkkokauppa'];
     }
     elseif ($kukarow["extranet"] != "" and $yhtiorow["css_extranet"] != "") {
-      $css = $yhtiorow["css_extranet"];
+       $yhtiorow['active_css'] = $yhtiorow["css_extranet"];
     }
-    elseif ($kukarow['resoluutio'] == 'P' and $yhtiorow['css_pieni'] != "") {
-      $css = $yhtiorow['css_pieni'];
+    elseif (($yhtiorow["kayttoliittyma"] == "" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "C") {
+       $yhtiorow['active_css'] = $yhtiorow['css_classic'];
     }
     else {
-      $css = $yhtiorow['css'];
+       $yhtiorow['active_css'] = $yhtiorow['css'];
     }
 
     if ($kukarow["kieli"] == "ru" and $yhtiorow['yhtio'] == 'allr') {
@@ -682,9 +688,37 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       }
 
       if (!isset($_GET["no_css"]) or $_GET["no_css"] != "yes") {
+        echo "<link rel='stylesheet' type='text/css' href='http://fonts.googleapis.com/css?family=Lato:400,700' >";
+
         echo "<style type='text/css'>\n";
-        echo $css;
+        echo $yhtiorow['active_css'];
         echo "</style>\n";
+
+        if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft.css' />\n";
+          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_left.css' />\n";
+          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_top.css' />\n";
+
+          if (isset($_SERVER['HTTP_USER_AGENT']) and mb_stripos($_SERVER['HTTP_USER_AGENT'], "FIREFOX") !== FALSE) {
+            echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_mozilla.css' />\n";
+          }
+
+          if (isset($_SERVER['HTTP_USER_AGENT']) and mb_stripos($_SERVER['HTTP_USER_AGENT'], "WINDOWS") !== FALSE) {
+
+            if (isset($_SERVER['HTTP_USER_AGENT']) and mb_stripos($_SERVER['HTTP_USER_AGENT'], "TRIDENT") !== FALSE) {
+              echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_ms_ie.css' />\n";
+            }
+            elseif (isset($_SERVER['HTTP_USER_AGENT']) and mb_stripos($_SERVER['HTTP_USER_AGENT'], "FIREFOX") !== FALSE) {
+              echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_ms_mozilla.css' />\n";
+            }
+            else {
+              echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_ms_chrome.css' />\n";
+            }
+          }
+        }
+        else {
+          echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_legacy.css' />\n";
+        }
 
         if (isset($pupe_DataTables)) {
           echo "<style type=\"text/css\" title=\"currentStyle\">\n";
@@ -695,12 +729,12 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
       if (substr(dirname(__FILE__), -3) == "inc") {
         echo "<script language='javascript' src='{$palvelin2}inc/jquery.min.js'></script>";
-        echo "<link rel='stylesheet' href='{$palvelin2}inc/jquery-ui.css' />";
+        echo "<link rel='stylesheet' href='{$palvelin2}css/jquery-ui.css' />";
         echo "<script src='{$palvelin2}inc/jquery-ui.js'></script>";
       }
       else {
         echo "<script language='javascript' src='{$palvelin2}jquery.min.js'></script>";
-        echo "<link rel='stylesheet' href='{$palvelin2}jquery-ui-extranet.css' />";
+        echo "<link rel='stylesheet' href='{$palvelin2}css/jquery-ui-extranet.css' />";
         echo "<script src='{$palvelin2}jquery-ui.js'></script>";
       }
 
@@ -806,7 +840,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
         if (isset($ohjewiki_url)) {
           $hreffi = $ohjewiki_url."/Ohjeet:".basename($phpnimi).$urltoim;
-          echo "<div style='text-align:right; vertical-align:top; margin-right: 10px;'><a target='_blank' href='$hreffi'>".t("OHJE")."</a></div>";
+          echo "<div class='ohje'><a target='_blank' href='$hreffi'>".t("OHJE")."</a></div>";
         }
 
         if ($kukarow['toimipaikka'] > 0 and tarkista_oikeus('infobar.php')) {
@@ -868,8 +902,10 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     }
 
     if ((!isset($no_head) or (isset($no_head) and $no_head != "yes")) and isset($lopetus) and $lopetus != '') {
+
+      echo "<div class='lopetus'>";
       lopetus($lopetus);
-      echo "<br>";
+      echo "</div>";
     }
   }
 

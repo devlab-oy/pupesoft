@@ -229,17 +229,11 @@ if ($kukarow['kesken'] > 0 and isset($laskurow) and (($laskurow['tila'] == 'N' a
   $tarkistus_meapu = pupe_query($tarkistus_apuqu);
   $tarkistus_meapu_row = mysql_fetch_assoc($tarkistus_meapu);
 
-  $tarkistus_apuqu = "SELECT * from maksuehto where yhtio='{$kukarow['yhtio']}' and tunnus='{$edellinen_maksuehto}'";
-  $tarkistus_meapu2 = pupe_query($tarkistus_apuqu);
-  $tarkistus_meapu_row2 = mysql_fetch_assoc($tarkistus_meapu2);
+  $_kateis = $tarkistus_meapu_row['kateinen'];
+  $_jv = $tarkistus_meapu_row['jv'];
 
-  $a = $tarkistus_meapu_row['kateinen'];
-  $b = $tarkistus_meapu_row2['kateinen'];
-
-  $c = $tarkistus_meapu_row['jv'];
-  $d = $tarkistus_meapu_row2['jv'];
-
-  if (((empty($a) and !empty($b)) or empty($a)) or ((empty($c) and !empty($d)) or empty($c))) {
+  // Jos uusi maksuehto ei ole käteinen eikä jv, niin katsotaan luottoraja
+  if (empty($_kateis) and empty($_jv)) {
 
     // Parametrejä saatanat.php:lle
     $sytunnus       = $laskurow['ytunnus'];
@@ -1090,11 +1084,11 @@ if ($tila == "" and !isset($jatka)) {
   }
 
   echo "<table>";
-  echo "<tr><td style='padding:0px;'>";
+  echo "<tr><td class='nopad top'>";
 
   echo "<table>";
   echo "<tr>
-      <th colspan='2' align='left' valign='top'>".t("Ostaja").":</td>
+      <th colspan='2'>".t("Ostaja").":</td>
     </tr>";
   echo "<tr>
       <td valign='top'>".t("Nimi").": </td>
@@ -1218,7 +1212,7 @@ if ($tila == "" and !isset($jatka)) {
       }
     }
 
-    echo "<input type='submit' value='".t("Hae")."'>";
+    echo "<input type='submit' class='hae_btn' value='".t("Hae")."'>";
     echo "</form>";
 
     $formi  = "paaformi";
@@ -1249,10 +1243,10 @@ if ($tila == "" and !isset($jatka)) {
       echo "<input type='hidden' name='ytunnus'              value = '$srow[ytunnus]'>";
     }
 
-    echo "<td valign='top' style='padding:0px;'>";
+    echo "<td class='nopad top'>";
     echo "<table>";
     echo "<tr>
-        <th colspan='2' align='left' valign='top'>".t("Toimitusosoite").":</td></tr>";
+        <th colspan='2'>".t("Toimitusosoite").":</td></tr>";
 
     /* jos asiakkaalle ei ole tallennettu kohteita, ei piirretä kenttää */
     $kohde_ui = "";
@@ -1325,10 +1319,10 @@ if ($tila == "" and !isset($jatka)) {
     echo "</table>";
     echo "</td>";
 
-    echo "<td valign='top' style='padding:0px;'>";
+    echo "<td class='nopad top'>";
     echo "<table>";
     echo "<tr>
-        <th colspan='2' align='left' valign='top'>&nbsp; ".t("Laskun postitusosoite").":</td></tr>";
+        <th colspan='2'>&nbsp; ".t("Laskun postitusosoite").":</td></tr>";
     echo "<tr>
         <td valign='top'> ".t("Nimi").": </td>
         <td><input type='text' name='laskutus_nimi' size='35' value='$srow[laskutus_nimi]'></td></tr>";
@@ -1378,10 +1372,10 @@ if ($tila == "" and !isset($jatka)) {
       echo "<table>";
 
       if (($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $tilaustyyppi == "T") {
-        echo "<tr><th colspan='2' align='left' valign='top'>&nbsp; ".t("Rinnakkaisostaja").":</th></tr>";
+        echo "<tr><th colspan='2'>&nbsp; ".t("Rinnakkaisostaja").":</th></tr>";
       }
       else {
-        echo "<tr><th colspan='2' align='left' valign='top'>&nbsp; ".t("Asiamies").":</th></tr>";
+        echo "<tr><th colspan='2'>&nbsp; ".t("Asiamies").":</th></tr>";
       }
 
       echo "<tr>
@@ -1811,7 +1805,7 @@ if ($tila == "" and !isset($jatka)) {
         <option value=''  $sel1>".t("Kotimaa")."</option>
         <option value='E' $sel2>".t("Vienti EU")."</option>
         <option value='K' $sel3>".t("Vienti ei-EU")."</option>
-        </select>";
+        </select> ";
 
       $sel = $srow['kolmikantakauppa'] != "" ? " selected" : "";
 
@@ -2635,7 +2629,7 @@ if ($tila == "" and !isset($jatka)) {
         continue;
       }
 
-      if (in_array($toimitustapa['extranet'], array('', 'M')) or $toimitustapa['selite'] != $srow['toimitustapa']) {
+      if (in_array($toimitustapa['extranet'], array('', 'M')) or $toimitustapa['selite'] == $srow['toimitustapa']) {
         $sel = "";
         if (empty($asiakas) and $toimitustapa["selite"] == $srow["toimitustapa"]) {
           $sel = 'selected';
@@ -3252,7 +3246,7 @@ if ($tila == "" and !isset($jatka)) {
 
     echo "<td><input type='text' size='30' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'><br>";
 
-    echo "<select id='yhteyshenkilo_tilaus' name='yhteyshenkilo_tilaus'>";
+    echo "&nbsp;<select id='yhteyshenkilo_tilaus' name='yhteyshenkilo_tilaus'>";
     echo "<option value = ''>".t("Ei valintaa")."</option>";
 
     while ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
@@ -3283,7 +3277,7 @@ if ($tila == "" and !isset($jatka)) {
     echo "<tr><td>".t("Tilausviite").":</td><td><input type='text' size='43' name='viesti' value='$srow[viesti]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("lasku")." + ".t("tarjous")."</td></tr>";
 
     echo "<tr><td>".t("Ohjausmerkki").":</td><td><input type='text' size='43' name='ohjausmerkki' value='$srow[ohjausmerkki]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("lähete")."</td></tr>";
-    
+
     echo "<tr><td>".t("Puhelin toimitukseen").":</td><td><input type='text' size='43' name='tpuh' value='$srow[toim_puh]'</td><td></td></tr>";
 
     echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("tarjous")."</td></tr>";
@@ -3931,6 +3925,14 @@ if (isset($jatka)) {
   // verollisuus oletuksena nollaksi jos on vientipoka ja asiakas ei oo yksityishenkilö
   if ($vienti != "" and $liitostunnus > 0 and $asiarow["laji"] != "H") {
     $alv = 0;
+  }
+
+  // onko yhtiön tai asiakkaan takaa säädetty extranet-tilaukset saldoa varaamattomiksi
+  if ((($asiakasrow['extranet_tilaus_varaa_saldoa'] == "" and
+        $yhtiorow["extranet_tilaus_varaa_saldoa"] == "E") or
+      $asiakasrow["extranet_tilaus_varaa_saldoa"] == "E") and $toim == "EXTRANET"
+  ) {
+    $tilaustyyppi = 'H';
   }
 
   $query .= "  lasku SET

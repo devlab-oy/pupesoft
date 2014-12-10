@@ -2347,7 +2347,7 @@ if ($tee == "JATKA" or $tee == "RAPORTOI") {
   echo "</tr>";
   echo "</table>";
   echo "<br>
-    <input type='Submit' name='RAPORTOI' value = '".t("Aja ostoraportti")."'>
+    <input type='submit' name='RAPORTOI' value = '".t("Aja ostoraportti")."'>
     </form>";
 }
 
@@ -2484,7 +2484,7 @@ if ($tee == "") {
       <tr><th>".t("Asiakas")."</th><td><input type='text' size='20' name='asiakasno' value='$asiakasno'></td></tr>
 
       </table><br>
-      <input type='Submit' name='jatkanappi' value = '".t("Jatka")."'>
+      <input type='submit' name='jatkanappi' value = '".t("Jatka")."'>
       </form>";
 
 }

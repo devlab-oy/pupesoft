@@ -8937,15 +8937,15 @@ if ($tee == '') {
         $sallijyvitys = FALSE;
 
         if ($kukarow["extranet"] == "") {
-          if ($yhtiorow["salli_jyvitys_myynnissa"] == "" and ($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '')) {
+          if ($yhtiorow["salli_jyvitys_myynnissa"] == "" and ($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '') and $toim != 'SIIRTOLISTA') {
             $sallijyvitys = TRUE;
           }
 
-          if ($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] != '') {
+          if ($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] != '' and $toim != 'SIIRTOLISTA') {
             $sallijyvitys = TRUE;
           }
 
-          if ($yhtiorow["salli_jyvitys_myynnissa"] == "K" or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
+          if (($yhtiorow["salli_jyvitys_myynnissa"] == "K" or $yhtiorow["salli_jyvitys_myynnissa"] == "S") and $toim != 'SIIRTOLISTA') {
             $sallijyvitys = TRUE;
           }
 
@@ -9046,7 +9046,7 @@ if ($tee == '') {
             $koko = '7';
           }
 
-          if ($toim != "PROJEKTI" and $toim != "SIIRTOLISTA" and $sallijyvitys) {
+          if ($toim != "PROJEKTI" and $sallijyvitys) {
             if ($toim == 'TARJOUS' and !empty($yhtiorow['salli_jyvitys_tarjouksella'])) {
               echo "  <th colspan='5'>".t("Pyöristä katetta").":</th>
                   <td class='spec'>

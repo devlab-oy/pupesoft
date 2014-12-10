@@ -1132,7 +1132,7 @@ if (!isset($from_kaikkikorj)) {
         $sarjarow = mysql_fetch_assoc($sarjares);
 
         if ($sarjarow["kpl"] == abs($prow["valmistetaan"]+$prow["valmistettu"]+$prow["valmistettu_valmiiksi"])) {
-          $sarjavalinta = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&$tunken=$prow[tunnus]&otunnus=$row[Tilaus]&muut_siirrettavat=$valmistettavat&from=valmistus&aputoim=$toim' style='color:#00FF00;'>".t("S:nro ok")."</font></a>)";
+          $sarjavalinta = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&$tunken=$prow[tunnus]&otunnus=$row[Tilaus]&muut_siirrettavat=$valmistettavat&from=valmistus&aputoim=$toim' class='green'>".t("S:nro ok")."</font></a>)";
         }
         else {
           $sarjavalinta = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&$tunken=$prow[tunnus]&otunnus=$row[Tilaus]&muut_siirrettavat=$valmistettavat&from=valmistus&aputoim=$toim'>".t("S:nro")."</a>)";
@@ -1301,7 +1301,7 @@ if (!isset($from_kaikkikorj)) {
         }
 
         if ($sarjarow["kpl"] == abs($era_maara)) {
-          $sarjavalinta = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&$tunken=$prow[tunnus]&otunnus=$row[Tilaus]&muut_siirrettavat=$valmistettavat&from=valmistus&aputoim=$toim' style='color:#00FF00;'>".t("E:nro ok")."</font></a>)";
+          $sarjavalinta = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&$tunken=$prow[tunnus]&otunnus=$row[Tilaus]&muut_siirrettavat=$valmistettavat&from=valmistus&aputoim=$toim' class='green'>".t("E:nro ok")."</font></a>)";
         }
         else {
           $sarjavalinta = " (<a href='sarjanumeroseuranta.php?tuoteno=".urlencode($prow["tuoteno"])."&$tunken=$prow[tunnus]&otunnus=$row[Tilaus]&muut_siirrettavat=$valmistettavat&from=valmistus&aputoim=$toim'>".t("E:nro")."</a>)";
@@ -1567,7 +1567,7 @@ if (!isset($from_kaikkikorj)) {
       echo "<input type='text' name='etsi'>";
     }
 
-    echo "<input type='Submit' value='".t("Etsi")."'></form>";
+    echo "<input type='submit' class='hae_btn' value='".t("Etsi")."'></form>";
 
     $haku = "";
     $laskuindex = "tila_index";

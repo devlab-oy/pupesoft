@@ -693,7 +693,6 @@ while ($tietue = fgets($fd)) {
                       AND yhteyshenkilo.rooli                  = 'Magento'
                       AND yhteyshenkilo.ulkoinen_asiakasnumero = '{$ot_verkkokauppa_asiakasnro}'
                     WHERE asiakas.yhtio                        = '{$kukarow['yhtio']}'
-                    AND asiakas.toim_ovttunnus                 not in ('','0')
                     AND asiakas.laji                           not in ('R','P')";
           $result = pupe_query($query);
 
@@ -1931,12 +1930,13 @@ while ($tietue = fgets($fd)) {
     }
 
     // Jos tilaus tulee ennalta määritellyistä kaupoista
-    // jotka on setattu $verkkokauppa_erikoiskasittely:n, nollataan hinta
+    // jotka on setattu $verkkokauppa_erikoiskasittely:n ja
+    // ei olla setattu $verkkokauppa_hinnatedifailista, nollataan hinta
     if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
       and count($verkkokauppa_erikoiskasittely) > 0) {
 
       $result = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
-      if (count($result) > 0) {
+      if (count($result) > 0  and !isset($verkkokauppa_hinnatedifailista)) {
         $editilaus_hinta = 0;
       }
     }

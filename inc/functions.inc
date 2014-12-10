@@ -24685,7 +24685,7 @@ if (!function_exists('aja_ruby')) {
 
 if (!function_exists('pupesoft_require')) {
   function pupesoft_require($filename) {
-    global $kukarow, $yhtiorow, $starttime;
+    global $kukarow, $yhtiorow, $starttime, $aika_debug_array, $pupe_query_debug, $quer_debug_array, $alkumem;
 
     if (file_exists($filename)) {
       require_once $filename;

@@ -112,16 +112,23 @@ $path_xf04  = $path.'XF04';
 $path_xf01  = $path.'XF01';
 $path_xf02  = $path.'XF02';
 
-echo "E3rajapinta siirto: $yhtiorow[yhtio]\n";
+echo date("d.m.Y @ G:i:s") . ": E3rajapinta siirto: $yhtiorow[yhtio]\n";
 
 // Ajetaan kaikki operaatiot
 xauxi($tanaan);
+echo date("d.m.Y @ G:i:s") . ": E3rajapinta xauxi valmis\n";
 xlto($tanaan);
+echo date("d.m.Y @ G:i:s") . ": E3rajapinta xlto valmis\n";
 xswp($tanaan, "");
+echo date("d.m.Y @ G:i:s") . ": E3rajapinta xswp valmis\n";
 xvni($tanaan);
+echo date("d.m.Y @ G:i:s") . ": E3rajapinta xvni valmis\n";
 xf04($tanaan);
+echo date("d.m.Y @ G:i:s") . ": E3rajapinta xf04 valmis\n";
 xf01($tanaan);
+echo date("d.m.Y @ G:i:s") . ": E3rajapinta xf01 valmis\n";
 xf02($tanaan, xswp($edellinen_arki, "yes"));
+echo date("d.m.Y @ G:i:s") . ": E3rajapinta xf02 valmis\n";
 
 //Siirret‰‰n failit e3 palvelimelle
 siirto($path_xf01,  "E3XF01NP");
@@ -132,6 +139,8 @@ siirto($path_xauxi, "E3XAUXINP");
 siirto($path_xlto,  "E3XLT0NP");
 siirto($path_wswp,  "E3XSWPMWNP");
 siirto("", "", "RCMD E3nattsbm");
+
+echo date("d.m.Y @ G:i:s") . ": E3rajapinta siirto valmis\n\n";
 
 function siirto($ftpfile, $renameftpfile, $komento = "") {
   global $e3_params, $yhtiorow;

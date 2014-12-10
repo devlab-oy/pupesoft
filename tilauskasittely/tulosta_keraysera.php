@@ -458,19 +458,24 @@ if ($tee != '') {
 
     $select_varasto = (int) $select_varasto;
 
-    $querykieli = "SELECT kirjoittimet.kirjoitin, keraysvyohyke.tunnus, keraysvyohyke.printteri8, keraysvyohyke.printteri0, kirjoittimet.tunnus as kir_tunnus
-                   FROM kirjoittimet
+    $querykieli = "SELECT DISTINCT kirjoittimet.tunnus as kir_tunnus,
+                  kirjoittimet.kirjoitin,
+                  group_concat(keraysvyohyke.printteri8) printteri8,
+                  group_concat(keraysvyohyke.printteri0) printteri0
+                  FROM kirjoittimet
                    JOIN keraysvyohyke ON (keraysvyohyke.yhtio = kirjoittimet.yhtio AND keraysvyohyke.tunnus IN ({$keraajarow['keraysvyohyke']}) AND keraysvyohyke.varasto = '{$select_varasto}')
                    WHERE kirjoittimet.yhtio  = '{$kukarow['yhtio']}'
                    AND kirjoittimet.komento != 'EDI'
-                   GROUP BY 1,2,3,4,5
+                   GROUP BY 1,2
                    ORDER BY kirjoittimet.kirjoitin";
     $kires = pupe_query($querykieli);
 
     while ($kirow = mysql_fetch_assoc($kires)) {
 
       $sel = "";
-      if (strpos($keraajarow["keraysvyohyke"], $kirow["tunnus"]) !== FALSE and $kirow['kir_tunnus'] == $kirow['printteri8']) {
+      $_printterit = explode(",", $kirow['printteri8']);
+
+      if (in_array($kirow['kir_tunnus'], $_printterit)) {
         $sel = " selected";
       }
 
@@ -495,7 +500,9 @@ if ($tee != '') {
       while ($kirow = mysql_fetch_assoc($kires)) {
 
         $sel = "";
-        if (strpos($keraajarow["keraysvyohyke"], $kirow["tunnus"]) !== FALSE and $kirow['kir_tunnus'] == $kirow['printteri0']) {
+        $_printterit = explode(",", $kirow['printteri8']);
+
+        if (in_array($kirow['kir_tunnus'], $_printterit)) {
           $sel = " selected";
         }
 

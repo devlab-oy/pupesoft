@@ -1,15 +1,15 @@
 <?php
 
 if (isset($_POST["toim"]) and $_POST["toim"] == "yhtion_parametrit") {
-  $apucss = $_POST["css"];
-  $apucssextranet = $_POST["
-"];
+  $apucss             = $_POST["css"];
+  $apucssclassic      = $_POST["css_classic"];
+  $apucssextranet     = $_POST["css_extranet"];
   $apucssverkkokauppa = $_POST["css_verkkokauppa"];
-  $apuwebseuranta = $_POST["web_seuranta"];
+  $apuwebseuranta     = $_POST["web_seuranta"];
 }
 else {
   unset($apucss);
-  unset($apucsspieni);
+  unset($apucssclassic);
   unset($apucssextranet);
   unset($apucssverkkokauppa);
   unset($apuwebseuranta);
@@ -124,8 +124,8 @@ if (isset($_POST["toim"]) and $_POST["toim"] == "yhtion_parametrit") {
   if (isset($apucss)) {
     $t[$cssi] = mysql_real_escape_string($apucss);
   }
-  if (isset($apucsspieni)) {
-    $t[$csspienii] = mysql_real_escape_string($apucsspieni);
+  if (isset($apucssclassic)) {
+    $t[$cssclassici] = mysql_real_escape_string($apucssclassic);
   }
   if (isset($apucssextranet)) {
     $t[$cssextraneti] = mysql_real_escape_string($apucssextranet);
@@ -964,8 +964,8 @@ if ($errori != '' and $_POST["toim"] == "yhtion_parametrit") {
   if (isset($apucss)) {
     $t[$cssi] = $apucss;
   }
-  if (isset($apucsspieni)) {
-    $t[$csspienii] = $apucsspieni;
+  if (isset($apucssclassic)) {
+    $t[$cssclassici] = $apucssclassic;
   }
   if (isset($apucssextranet)) {
     $t[$cssextraneti] = $apucssextranet;

@@ -127,7 +127,7 @@ if ($tila == 'ulkonako') {
       $row = mysql_fetch_assoc($result);
       $query = "  UPDATE yhtion_parametrit SET ";
 
-      $alakopsaa = array(  "tunnus",
+      $alakopsaa = array("tunnus",
         "yhtio",
         "finvoice_senderpartyid",
         "finvoice_senderintermediator",
@@ -145,8 +145,8 @@ if ($tila == 'ulkonako') {
         "muutospvm",
         "muuttaja",
         "css",
-        "
-",
+        "css_classic",
+        "css_extranet",
         "css_verkkokauppa");
 
       foreach ($row as $ind => $val) {
@@ -157,8 +157,8 @@ if ($tila == 'ulkonako') {
 
       $query = substr($query, 0, -1);
 
-      $query .= "  WHERE tunnus = '$yht_row[tunnus]'
-            AND yhtio = '$yhtio'";
+      $query .= " WHERE tunnus = '$yht_row[tunnus]'
+                  AND yhtio = '$yhtio'";
       $result = pupe_query($query);
     }
   }
@@ -166,8 +166,10 @@ if ($tila == 'ulkonako') {
 
 if ($tila == 'perusta') {
   if ($fromyhtio != '') {
-    $query = "SELECT css, 
-, css_verkkokauppa
+    $query = "SELECT css,
+              css_classic,
+              css_extranet,
+              css_verkkokauppa
               from yhtion_parametrit
               where yhtio = '$fromyhtio'";
     $result = pupe_query($query);
@@ -188,9 +190,8 @@ if ($tila == 'perusta') {
 
       $query = "UPDATE yhtion_parametrit SET
                 css              = '$uusiyhtiorow[css]',
-                
-     = '$uusiyhtiorow[
-]',
+                css_classic      = '$uusiyhtiorow[css_classic]',
+                css_extranet     = '$uusiyhtiorow[css_extranet]',
                 css_verkkokauppa = '$uusiyhtiorow[css_verkkokauppa]'
                 WHERE tunnus     = '$yht_row[tunnus]'
                 AND yhtio        = '$yhtio'";

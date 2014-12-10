@@ -1130,18 +1130,6 @@ if ($tila == "" and !isset($jatka)) {
 
     echo "</select></td></tr>";
 
-    if ($yhtiorow["vahvistusviesti_asiakkaalle"]) {
-      echo "<tr>
-              <td valign='top'>" . t("Puh") . ": </td>
-              <td>$srow[toim_puh]</td>
-            </tr>";
-
-      echo "<tr>
-              <td valign='top'>" . t("Email") . ": </td>
-              <td>$srow[toim_email]</td>
-            </tr>";
-    }
-
     if ($yhtiorow['myyntitilaus_ytunnus_syotto'] == 'K' and $asiarow['laji'] != 'H') {
       echo "<tr>";
       echo "<td valign='top'>", t("Ytunnus"), ":</td>";
@@ -3280,7 +3268,9 @@ if ($tila == "" and !isset($jatka)) {
 
     echo "<tr><td>".t("Puhelin toimitukseen").":</td><td><input type='text' size='43' name='tpuh' value='$srow[toim_puh]'</td><td></td></tr>";
     
-    echo "<tr><td>".t("Email toimitukseen").":</td><td><input type='text' size='43' name='temail' value='$srow[toim_email]'</td><td></td></tr>";
+    if ($yhtiorow["vahvistusviesti_asiakkaalle"]) {
+      echo "<tr><td>".t("Email toimitukseen").":</td><td><input type='text' size='43' name='temail' value='$srow[toim_email]'</td><td></td></tr>";
+    }
 
     echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("tarjous")."</td></tr>";
 

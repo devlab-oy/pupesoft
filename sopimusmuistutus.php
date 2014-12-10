@@ -66,6 +66,13 @@ if (mysql_num_rows($result) == 0) {
   exit;
 }
 
+if ($yhtiorow["kayttoliittyma"] == "U") {
+  $css = $yhtiorow['css'];
+}
+else {
+  $css = $yhtiorow['css_classic'];
+}
+
 // Tehdään email
 $header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <{$yhtiorow["postittaja_email"]}>\n";
 $header .= "Content-type: text/html; charset=\"iso-8859-1\"\n";
@@ -74,7 +81,7 @@ $out  = "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">";
 $out .= "<html>";
 $out .= "<head>";
 $out .= "<meta http-equiv='Content-Type' content='text/html; charset=ISO-8859-15'>";
-$out .= "<style type='text/css'>{$yhtiorow["css"]}</style>";
+$out .= "<style type='text/css'>{$css}</style>";
 $out .= "<title></title>";
 $out .= "</head>";
 

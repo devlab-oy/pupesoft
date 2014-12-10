@@ -252,7 +252,7 @@ else {
     }
   }
 
-  echo "<table cellpadding='5'><tr><td valign='top' class='back'>";
+  echo "<table><tr><td valign='top' class='back'>";
 
   $query  = "SHOW tables FROM $dbkanta";
   $result =  pupe_query($query);

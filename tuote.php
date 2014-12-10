@@ -1319,9 +1319,11 @@ if ($tee == 'Z') {
               tilausrivi.tyyppi,
               lasku.laskunro,
               lasku.tila laskutila,
+              lasku.alatila,
               lasku.tilaustyyppi,
               tilausrivi.var,
               lasku2.laskunro as keikkanro,
+              lasku2.tunnus AS keikkatunnus,
               tilausrivi.jaksotettu,
               tilausrivin_lisatiedot.osto_vai_hyvitys,
               tilausrivin_lisatiedot.korvamerkinta,
@@ -1336,7 +1338,7 @@ if ($tee == 'Z') {
               LEFT JOIN lasku as lasku2 ON lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.uusiotunnus
               LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus
               WHERE tilausrivi.yhtio         = '$kukarow[yhtio]'
-              and ((tilausrivi.tyyppi in ('L','E','G','V','W','M') and tilausrivi.varattu + tilausrivi.jt != 0) OR (tilausrivi.tyyppi = 'O' and lasku.alatila != 'X'))
+              and ((tilausrivi.tyyppi in ('L','E','G','V','W','M') and tilausrivi.varattu + tilausrivi.jt != 0) OR (tilausrivi.tyyppi = 'O' and lasku.alatila != 'X') OR (tilausrivi.tyyppi = 'O' AND lasku.tila = 'K'))
               and tilausrivi.tuoteno         = '$tuoteno'
               and tilausrivi.laskutettuaika  = '0000-00-00'
               and tilausrivi.var            != 'P'
@@ -1374,12 +1376,24 @@ if ($tee == 'Z') {
         $vahvistettu = "";
         $merkki    = "";
         $keikka    = "";
+        $laskutunnus = $jtrow["tunnus"];
 
         if ($jtrow["tyyppi"] == "O") {
 
           if ($jtrow["laskutila"] == "K") {
             $tyyppi = t("Lisätty suoraan saapumiselle");
-            $keikka = " / ".$jtrow["laskunro"];
+
+            // Jos rivi on lisätty suoraan saapumiselle katsotaan,
+            // onko saapuminen jolle rivi on lisätty vielä auki.
+            // Jos saapuminen on auki niin tulostetaan kyseisen saapumisen numero,
+            // muuten tulostetaan sen saapumisen numero mihin rivi on mahdollisesti liitetty
+            if ($jtrow["alatila"] == "X" and $jtrow["keikkanro"] > 0) {
+              $keikka = " / ".$jtrow["keikkanro"];
+              $laskutunnus = $jtrow["keikkatunnus"];
+            }
+            else {
+              $keikka = " / ".$jtrow["laskunro"];
+            }
           }
           else {
             $tyyppi = t("Ostotilaus");
@@ -1476,7 +1490,7 @@ if ($tee == 'Z') {
           echo "<td>";
         }
 
-        echo "<a href='$PHP_SELF?toim=$toim&tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$jtrow[tunnus]&lopetus=$lopetus'>$jtrow[tunnus]</a>$keikka";
+        echo "<a href='$PHP_SELF?toim=$toim&tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$laskutunnus&lopetus=$lopetus'>$laskutunnus</a>$keikka";
 
         if ($jtrow["tyyppi"] == "O" and $jtrow["laskutila"] != "K" and $jtrow["keikkanro"] > 0 and $jtrow['comments'] != '') {
 

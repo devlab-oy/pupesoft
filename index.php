@@ -45,7 +45,7 @@ else {
 
 echo "</head>";
 
-if ($yhtiorow["kayttoliittyma"] == "") {
+if (($yhtiorow["kayttoliittyma"] == "" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "C") {
   echo "<frameset cols='175,*' border='0'>
           <frameset rows='*,0' border='0'>
             <frame noresize src='indexvas.php?goso=$goso' name='menuframe' frameborder='0' marginwidth='0' marginheight='0'>

@@ -3078,7 +3078,7 @@ if ($tee == '') {
         echo "<a href='{$palvelin2}crm/asiakasmemo.php?ytunnus={$laskurow['ytunnus']}&asiakasid={$laskurow['liitostunnus']}&from={$toim}&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS'>{$laskurow['nimi']}</a>";
         echo " <a id='hae_asiakasta_linkki'>";
 
-        if ($yhtiorow["kayttoliittyma"] == "U") {
+        if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
           echo "<img src='".$palvelin2."pics/facelift/ukot.png'>";
         }
         else {
@@ -6273,7 +6273,7 @@ if ($tee == '') {
 
       $bordercolor = "";
 
-      if ($yhtiorow["kayttoliittyma"] == "U") {
+      if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
         // Otetaan yhtiön css:stä SPEC_COLOR
         preg_match("/.*?\/\*(.*?(SPEC_COLOR))\*\//", $yhtiorow['css'], $varitmatch);
         preg_match("/(#[a-f0-9]{3,6});/i", $varitmatch[0], $varirgb);

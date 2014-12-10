@@ -1302,18 +1302,18 @@ if ($tee == 'MUUTA') {
         if ($krow['kayttoliittyma'] == "") {
           $sel1 = "SELECTED";
         }
-        if (!isset($krow["kayttoliittyma"]) or $krow['kayttoliittyma'] == "I") {
+        if ($krow['kayttoliittyma'] == "C") {
           $sel2 = "SELECTED";
         }
-        if ($krow['kayttoliittyma'] == "P") {
+        if ($krow['kayttoliittyma'] == "U") {
           $sel3 = "SELECTED";
         }
 
         echo "<tr><th align='left'>", t("Käyttöliittymä"), ":</th>
             <td><select name='kayttoliittyma'>
-            <option value='' {$sel2}>", t("Yhtiön oletus"), "</option>
-            <option value='' {$sel1}>", t("Pupesoft Classic"), "</option>
-            <option value='' {$sel3}>", t("Pupesoft Next"), "</option>
+            <option value='' {$sel1}>", t("Yhtiön oletus"), "</option>
+            <option value='C' {$sel2}>", t("Pupesoft Classic"), "</option>
+            <option value='U' {$sel3}>", t("Pupesoft Next"), "</option>
             </select></td></tr>";
 
         if ($krow['naytetaan_katteet_tilauksella'] == "") {

@@ -641,6 +641,9 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     elseif ($kukarow["extranet"] != "" and $yhtiorow["css_extranet"] != "") {
       $css = $yhtiorow["css_extranet"];
     }
+    elseif (($yhtiorow["kayttoliittyma"] == "" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "C") {
+      $css = $yhtiorow['css_classic'];
+    }
     else {
       $css = $yhtiorow['css'];
     }
@@ -691,7 +694,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
         echo $css;
         echo "</style>\n";
 
-        if ($yhtiorow["kayttoliittyma"] == "U") {
+        if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
           echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft.css' />\n";
           echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_left.css' />\n";
           echo "<link rel='stylesheet' type='text/css' href='{$palvelin2}css/pupesoft_top.css' />\n";

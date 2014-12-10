@@ -161,7 +161,7 @@ function nimike($limit = '') {
             tuote.tuotemassa    paino,
             tuote.status      status
             FROM tuote
-            LEFT JOIN avainsana ON (avainsana.selite = tuote.try AND avainsana.yhtio = tuote.yhtio)
+            LEFT JOIN avainsana ON (avainsana.selite = tuote.try AND avainsana.yhtio = tuote.yhtio AND tuote.try not in ('','0'))
             LEFT JOIN kuka ON (kuka.myyja = tuote.ostajanro AND kuka.yhtio = tuote.yhtio AND kuka.myyja > 0)
             WHERE tuote.yhtio     = '$yhtio'
             AND tuote.tuotetyyppi NOT IN ('A','B')
@@ -179,20 +179,20 @@ function nimike($limit = '') {
   $row = 0;
 
   $headers = array(
-    'nimiketunnus'           => null,
-    'nimitys'                => null,
-    'yksikko'                => null,
-    'tuoteryhma'             => null,
-    'kustannuspaikka'        => null,
-    'toimittajatunnus'       => null,
-    'varastotunnus'          => null,
-    'toimittajannimiketunnus'   => null,
-    'hintayksikko'           => null,
-    'varastoimiskoodi'       => null,
-    'nimikelaji'             => null,
-    'ostaja'                 => null,
-    'paino'                  => null,
-    'status'                 => null
+    'nimiketunnus'            => null,
+    'nimitys'                 => null,
+    'yksikko'                 => null,
+    'tuoteryhma'              => null,
+    'kustannuspaikka'         => null,
+    'toimittajatunnus'        => null,
+    'varastotunnus'           => null,
+    'toimittajannimiketunnus' => null,
+    'hintayksikko'            => null,
+    'varastoimiskoodi'        => null,
+    'nimikelaji'              => null,
+    'ostaja'                  => null,
+    'paino'                   => null,
+    'status'                  => null
   );
 
   create_headers($fp, array_keys($headers));
@@ -222,9 +222,14 @@ function nimike($limit = '') {
     $paikka = mysql_fetch_assoc($res);
 
     // mikä varasto
-    $tuote['varastotunnus']       = kuuluukovarastoon($paikka['hyllyalue'], $paikka['hyllynro']);
-    $tuote['toimittajatunnus']       = $tuot_toim_row['toimittajatunnus'];
-    $tuote['toimittajannimiketunnus']   = $tuot_toim_row['toimittajannimiketunnus'];
+    $tuote['varastotunnus']           = kuuluukovarastoon($paikka['hyllyalue'], $paikka['hyllynro']);
+    $tuote['toimittajatunnus']        = $tuot_toim_row['toimittajatunnus'];
+    $tuote['toimittajannimiketunnus'] = $tuot_toim_row['toimittajannimiketunnus'];
+
+    // Siivotaan kentät:
+    foreach ($tuote as &$tk) {
+      $tk = pupesoft_csvstring($tk);
+    }
 
     $data = array_merge($headers, $tuote);
     $data = implode("\t", $data);
@@ -279,6 +284,11 @@ function asiakas($limit = '') {
   while ($asiakas = mysql_fetch_assoc($rest)) {
     $row++;
 
+    // Siivotaan kentät:
+    foreach ($asiakas as &$tk) {
+      $tk = pupesoft_csvstring($tk);
+    }
+
     $data = array_merge($headers, $asiakas);
     $data = implode("\t", $data);
 
@@ -325,6 +335,11 @@ function toimittaja($limit = '') {
 
   while ($toimittaja = mysql_fetch_assoc($rest)) {
     $row++;
+
+    // Siivotaan kentät:
+    foreach ($toimittaja as &$tk) {
+      $tk = pupesoft_csvstring($tk);
+    }
 
     $data = array_merge($headers, $toimittaja);
     $data = implode("\t", $data);
@@ -404,6 +419,11 @@ function varasto($limit = '') {
 
     $trow['tilattu'] = $ennp['tilattu'];
     $trow['varattu'] = $ennp['varattu'];
+
+    // Siivotaan kentät:
+    foreach ($trow as &$tk) {
+      $tk = pupesoft_csvstring($tk);
+    }
 
     $data = array_merge($headers, $trow);
     $data = implode("\t", $trow);
@@ -562,6 +582,11 @@ function varastotapahtumat($limit = '') {
 
     unset($trow['kate']);
 
+    // Siivotaan kentät:
+    foreach ($trow as &$tk) {
+      $tk = pupesoft_csvstring($tk);
+    }
+
     $data = array_merge($headers, $trow);
     $data = implode("\t", $data);
 
@@ -664,6 +689,11 @@ function myynti($limit = '') {
       // ei haluta toimitettu-saraketta mukaan
       unset($trow['toimitettu']);
 
+      // Siivotaan kentät:
+      foreach ($trow as &$tk) {
+        $tk = pupesoft_csvstring($tk);
+      }
+
       $data = array_merge($headers, $trow);
       $data = implode("\t", $data);
 
@@ -692,6 +722,11 @@ function myynti($limit = '') {
       // ei haluta toimitettu-saraketta mukaan
       unset($trow['toimitettu']);
       break;
+    }
+
+    // Siivotaan kentät:
+    foreach ($trow as &$tk) {
+      $tk = pupesoft_csvstring($tk);
     }
 
     $data = array_merge($headers, $trow);

@@ -133,12 +133,12 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
     echo "</select></td>";
   }
 
-  echo "  <td valign='top' class='back'><input type='submit' value='".t("Lis‰‰")."'></td>
+  echo "  <td valign='top' class='back'><input type='submit' class='lisaa_btn' value='".t("Lis‰‰")."'></td>
       <td valign='top' class='back'>
       <input type='hidden' name='perheid' value = '$perheid'>
       <input type='hidden' name='perheid2' value = '$perheid2'>
       <input type='hidden' name='takaisin' value = '$takaisin'>
-      <input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'> <font class='error'>$varaosavirhe</font></td>
+      <input type='submit' class='poista_btn' name='tyhjenna' value='".t("Tyhjenn‰")."'> <font class='error'>$varaosavirhe</font></td>
     </tr>";
 
   // jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
@@ -453,7 +453,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
 
   echo "<td valign='top' class='back'>";
   echo "<input type='hidden' name='aputapa' value='$tapa'>";
-  echo "<input type='submit' value='".t("Lis‰‰")."'> <font class='error'>$varaosavirhe</font></td></tr>";
+  echo "<input type='submit' class='lisaa_btn' value='".t("Lis‰‰")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
   echo "<tr>$jarjlisa";
 
@@ -599,7 +599,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
         <td valign='top' colspan='{$nrospanni}'><input type='text' maxlength='100' size='75' name='tuotenimitys' value = '$tuotenimitys'></td>";
   }
 
-  echo "<td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'>";
+  echo "<td valign='top' class='back'><input type='submit' class='poista_btn' name='tyhjenna' value='".t("Tyhjenn‰")."'>";
 
   if ($toim == "YLLAPITO") {
 
@@ -717,7 +717,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
     echo "</td>";
   }
 
-  echo "<td valign='top' class='back'><input type='submit' value='".t("Lis‰‰")."'> <font class='error'>$varaosavirhe</font></td></tr>";
+  echo "<td valign='top' class='back'><input type='submit' class='lisaa_btn' value='".t("Lis‰‰")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 
   if (($toim == "VALMISTAVARASTOON" and $yhtiorow['valmistuksien_kasittely'] == 'Y') or $yhtiorow["splittauskielto"] == "K") {
 
@@ -738,7 +738,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
     }
 
     echo "</tr>";
-  
+
     echo "<tr>$jarjlisa";
 
     if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
@@ -792,8 +792,8 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
 
     echo "</tr>";
   }
-  
-  
+
+
   echo "<tr>$jarjlisa";
 
   if ($tila == "LISAAKERTARESEPTIIN" or $tila == "LISAAISAKERTARESEPTIIN" or $tila == "LISAARESEPTIIN") {
@@ -820,7 +820,7 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "SIIRTOLIS
   }
 
   echo "<td valign='top' colspan='{$colspan}'><textarea name='kommentti' cols='40' rows='2' wrap='soft'>$kommentti</textarea></td>
-      <td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'>";
+      <td valign='top' class='back'><input type='submit' class='poista_btn' name='tyhjenna' value='".t("Tyhjenn‰")."'>";
 
   // jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
   if ($rivitunnus!='') {
@@ -865,7 +865,7 @@ elseif (!$variaaritorivi and $miniliittyma == "JOO") {
 
   echo "  <td valign='top'> $varaosavirhe </td> ";
 
-  echo "<td valign='top'><input type='submit' value='".t("Lis‰‰")."'>";
+  echo "<td valign='top'><input type='submit' class='lisaa_btn' value='".t("Lis‰‰")."'>";
 
   echo "</td></tr></table></form>";
 
@@ -904,8 +904,8 @@ elseif (!$variaaritorivi and $kukarow["extranet"] != '') {
   }
 
   echo "  <td valign='top'><input type='text' name='kpl' size='5' maxlength='13' value='$kpl'></td>
-      <td valign='top' class='back'><input type='submit' value='".t("Lis‰‰")."'></td>
-      <td valign='top' class='back'><input type='submit' name='tyhjenna' value='".t("Tyhjenn‰")."'> <font class='error'>$varaosavirhe</font></td>
+      <td valign='top' class='back'><input type='submit' class='lisaa_btn' value='".t("Lis‰‰")."'></td>
+      <td valign='top' class='back'><input type='submit' class='poista_btn' name='tyhjenna' value='".t("Tyhjenn‰")."'> <font class='error'>$varaosavirhe</font></td>
     </tr>";
 
   echo "<tr colspan='4'><th colspan='2'>".t("Toimitusaika")."</th></tr>";

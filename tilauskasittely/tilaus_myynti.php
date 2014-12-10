@@ -3997,7 +3997,7 @@ if ($tee == '') {
           $query = "SELECT sarjanumero
                     FROM sarjanumeroseuranta
                     WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus  = $myy_sarjatunnus";
+                    AND tunnus  IN ($myy_sarjatunnus)";
           $m_eranro = mysql_fetch_assoc(pupe_query($query));
         }
 

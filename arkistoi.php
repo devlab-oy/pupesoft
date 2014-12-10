@@ -192,7 +192,17 @@ if (isset($teearkistointi) and $teearkistointi != "") {
     pupe_query($query);
     $del = mysql_affected_rows();
 
-    is_log("Poistettiin $del laskutettua myntitilausta.");
+    is_log("Poistettiin $del laskutettua myyntitilausta.");
+
+    // Poistetut myyntitilaukset
+    $query = "DELETE lasku FROM lasku
+              WHERE yhtio = '$kukarow[yhtio]'
+              AND tila    = 'D'
+              AND luontiaika <= '$vv-$kk-$pp'";
+    pupe_query($query);
+    $del = mysql_affected_rows();
+
+    is_log("Poistettiin $del poistettua myyntitilausta.");
 
     // Laskun lisätiedot
     $query = "DELETE laskun_lisatiedot
@@ -229,6 +239,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
                 LEFT JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio and tilausrivi.tunnus = tapahtuma.rivitunnus)
                 WHERE tapahtuma.yhtio     = '{$kukarow["yhtio"]}'
                  AND tapahtuma.rivitunnus > 0
+                 AND tapahtuma.laadittu <= '$vv-$kk-$pp 23:59:59'
                 AND tilausrivi.tunnus is null";
       pupe_query($query);
       $del = mysql_affected_rows();
@@ -241,6 +252,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
               FROM tilausrivi
               LEFT JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus)
               WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+              AND tilausrivi.laadittu <= '$vv-$kk-$pp 23:59:59'
               AND lasku.tunnus is null";
     pupe_query($query);
     $del = mysql_affected_rows();

@@ -5,15 +5,18 @@ if (php_sapi_name() != 'cli') {
   die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
+// otetaan includepath aina rootista
+$pupe_root_polku = dirname(__FILE__);
+
+ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.$pupe_root_polku.PATH_SEPARATOR."/usr/share/pear");
+error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
+ini_set("display_errors", 0);
+
 require_once "../inc/functions.inc";
 require_once "../inc/connect.inc";
 
 // Logitetaan ajo
 cron_log();
-
-ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
-error_reporting(E_ALL ^E_WARNING ^E_NOTICE);
-ini_set("display_errors", 0);
 
 if ($argv[1] == '') {
   die ("Yhtiö on pakollinen tieto!\n");

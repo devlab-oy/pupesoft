@@ -973,7 +973,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 
   $toimaikalisa = "";
 
-  if ($kukarow['resoluutio'] == 'I' and $toim != "SIIRTOLISTA" and $toim != "SIIRTOLISTASUPER" and $toim != "MYYNTITILI" and $toim != "MYYNTITILISUPER" and $toim != "EXTRANET" and ($toim != 'TARJOUS' and $toim != 'EXTTARJOUS')) {
+  if ($toim != "SIIRTOLISTA" and $toim != "SIIRTOLISTASUPER" and $toim != "MYYNTITILI" and $toim != "MYYNTITILISUPER" and $toim != "EXTRANET" and ($toim != 'TARJOUS' and $toim != 'EXTTARJOUS')) {
     $toimaikalisa = ' lasku.toimaika, ';
   }
 

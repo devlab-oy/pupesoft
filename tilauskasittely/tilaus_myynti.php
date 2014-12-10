@@ -6275,7 +6275,7 @@ if ($tee == '') {
 
       if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
         // Otetaan yhtiön css:stä SPEC_COLOR
-        preg_match("/.*?\/\*(.*?(SPEC_COLOR))\*\//", $yhtiorow['css'], $varitmatch);
+        preg_match("/.*?\/\*(.*?(SPEC_COLOR))\*\//", $yhtiorow['active_css'], $varitmatch);
         preg_match("/(#[a-f0-9]{3,6});/i", $varitmatch[0], $varirgb);
 
         if (!empty($varirgb[1])) {

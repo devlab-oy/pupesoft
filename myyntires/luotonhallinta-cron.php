@@ -45,13 +45,12 @@ $luottorajaprosentti = (float) $argv[2];
 $email = trim($argv[3]);
 
 // Meilinlähetyksen oletustiedot
-$content_subject  = "Luotonhallintaraportti ".date("d.m.y");
-$content_body    = "";
-$ctype        = "html";
+$content_subject    = "Luotonhallintaraportti ".date("d.m.y");
+$content_body       = "";
+$ctype              = "html";
 $kukarow["eposti"]  = $email;
-$liite        = array();
-$laskuri      = 0;
-
+$liite              = array();
+$laskuri            = 0;
 
 if ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
   // käsitellään luottorajoja per ytunnus
@@ -76,11 +75,18 @@ $query  = "SELECT $kasittely_periaate ytunnus,
            HAVING luottoraja > 0";
 $asiakasres = pupe_query($query);
 
+if ($yhtiorow["kayttoliittyma"] == "U") {
+  $css = $yhtiorow['css'];
+}
+else {
+  $css = $yhtiorow['css_classic'];
+}
+
 $content_body .= "<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01//EN\">";
 $content_body .= "<html>";
 $content_body .= "<head>";
 $content_body .= "<meta http-equiv='Content-Type' content='text/html; charset=ISO-8859-15'>";
-$content_body .= "<style type='text/css'>{$yhtiorow["css"]}</style>";
+$content_body .= "<style type='text/css'>{$css}</style>";
 $content_body .= "<title>".htmlentities($content_subject)."</title>";
 $content_body .= "</head>";
 $content_body .= "<body>";

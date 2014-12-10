@@ -242,7 +242,7 @@ pupemaster_stop();
 // Kerrotaan montako rivi‰ k‰sitell‰‰n
 $rows = mysql_num_rows($res);
 
-echo "Tapahtumarivej‰ {$rows} kappaletta.\n";
+echo date("d.m.Y @ G:i:s") . ": Relex Tapahtumarivej‰ {$rows} kappaletta.\n";
 
 $relex_transactions = array();
 
@@ -357,10 +357,6 @@ foreach ($relex_transactions as $row) {
   fwrite($fp, $rivi);
 
   $k_rivi++;
-
-  if ($k_rivi % 1000 == 0) {
-    echo "K‰sitell‰‰n rivi‰ {$k_rivi}\n";
-  }
 }
 
 fclose($fp);
@@ -375,4 +371,4 @@ if ($paiva_ajo and !empty($relex_ftphost)) {
   require "inc/ftp-send.inc";
 }
 
-echo "Valmis.\n";
+echo date("d.m.Y @ G:i:s") . ": Relext tapahtumat valmis.\n";

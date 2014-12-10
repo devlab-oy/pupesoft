@@ -170,7 +170,10 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     }
 
     echo "<td><select name='clearing' onchange='submit()' >";
-    echo "<option value=''>".t("Valitse")."</option>";
+
+    if ($toim != "VALMISTAVARASTOON") {
+      echo "<option value=''>".t("Valitse")."</option>";
+    }
 
     $query  = "SELECT *
                FROM varastopaikat

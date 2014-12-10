@@ -94,7 +94,17 @@ elseif ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldovah
   $saldovahvistus['saldovahvistus_viesti'] = search_array_key_for_value_recursive($request['saldovahvistus_viestit'], 'selite', $saldovahvistus['saldovahvistus_viesti']);
   $saldovahvistus['saldovahvistus_viesti'] = $saldovahvistus['saldovahvistus_viesti'][0];
   $saldovahvistus['laskun_avoin_paiva'] = $saldovahvistus['avoin_saldo_pvm'];
-  $pdf_filepath = hae_saldovahvistus_pdf($saldovahvistus);
+
+  if ($saldovahvistus['ryhmittely_tyyppi'] == 'ytunnus') {
+    $boss = true;
+  }
+  else {
+    $boss = false;
+  }
+
+  $saldovahvistus['tiliotepvm'] = $saldovahvistus['laskun_avoin_paiva'];
+
+  $pdf_filepath = hae_saldovahvistus_pdf($saldovahvistus, $boss);
 
   if ($request['tee'] == 'NAYTATILAUS') {
     echo file_get_contents($pdf_filepath);
@@ -112,7 +122,7 @@ elseif ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldovah
   echo_lahetetyt_saldovahvistukset($request);
 }
 elseif ($request['tee'] == 'laheta_sahkoposti') {
-  list($lahetetyt_count, $ei_lahetetty_count) = generoi_saldovahvistus_sahkopostit($request, true);
+  list($lahetetyt_count, $ei_lahetetty_count, $ei_lahetetyt) = generoi_saldovahvistus_sahkopostit($request, true);
 }
 
 echo "<br/>";
@@ -136,6 +146,17 @@ if (isset($lahetetyt_count) and isset($ei_lahetetty_count)) {
   if ($ei_lahetetty_count > 0) {
     echo "<br/>";
     echo '<font class="message">'.$ei_lahetetty_count.' '.t('sähköpostin lähettäminen epäonnistui').'</font>';
+
+    if (count($ei_lahetetyt) > 0) {
+
+      echo "<br /><br />";
+
+      foreach ($ei_lahetetyt as $ei_lahetetty_nimi) {
+        echo "<font class='message'>";
+        echo t("Asiakkaan %s sähköpostin lähettäminen epäonnistui", "", $ei_lahetetty_nimi);
+        echo "</font><br />";
+      }
+    }
   }
 }
 ?>

@@ -1310,18 +1310,20 @@ if ($tee == 'Z') {
     }
 
     // Tilausrivit tälle tuotteelle
-    $query = "SELECT if (asiakas.ryhma != '', concat(lasku.nimi,' (',asiakas.ryhma,')'), lasku.nimi) nimi,
+    $query = "SELECT if (asiakas.ryhma != '', concat(lasku.nimi,' (',asiakas.ryhma,')'), lasku.nimi) AS nimi,
               lasku.tunnus,
-              (tilausrivi.varattu+tilausrivi.jt) kpl,
-              tilausrivi.toimaika pvm,
+              (tilausrivi.varattu + tilausrivi.jt) AS kpl,
+              tilausrivi.toimaika AS pvm,
               tilausrivi.laadittu,
-              varastopaikat.nimitys varasto,
+              varastopaikat.nimitys AS varasto,
               tilausrivi.tyyppi,
               lasku.laskunro,
-              lasku.tila laskutila,
+              lasku.tila AS laskutila,
+              lasku.alatila,
               lasku.tilaustyyppi,
               tilausrivi.var,
-              lasku2.laskunro as keikkanro,
+              lasku2.laskunro AS keikkanro,
+              lasku2.tunnus AS keikkatunnus,
               tilausrivi.jaksotettu,
               tilausrivin_lisatiedot.osto_vai_hyvitys,
               tilausrivin_lisatiedot.korvamerkinta,
@@ -1329,17 +1331,24 @@ if ($tee == 'Z') {
               lasku2.laatija,
               lasku2.luontiaika
               FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-              LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-              JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus {$toimipaikkarajaus}
+              LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+                AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+              JOIN lasku use index (PRIMARY) ON lasku.yhtio = tilausrivi.yhtio
+                AND lasku.tunnus = tilausrivi.otunnus
+                {$toimipaikkarajaus}
               LEFT JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio
-                AND varastopaikat.tunnus     = lasku.varasto)
-              LEFT JOIN lasku as lasku2 ON lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.uusiotunnus
-              LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus
-              WHERE tilausrivi.yhtio         = '$kukarow[yhtio]'
-              and ((tilausrivi.tyyppi in ('L','E','G','V','W','M') and tilausrivi.varattu + tilausrivi.jt != 0) OR (tilausrivi.tyyppi = 'O' and lasku.alatila != 'X'))
-              and tilausrivi.tuoteno         = '$tuoteno'
-              and tilausrivi.laskutettuaika  = '0000-00-00'
-              and tilausrivi.var            != 'P'
+                AND varastopaikat.tunnus = lasku.varasto)
+              LEFT JOIN lasku AS lasku2 ON lasku2.yhtio = tilausrivi.yhtio
+                AND lasku2.tunnus = tilausrivi.uusiotunnus
+              LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio
+                AND asiakas.tunnus = lasku.liitostunnus
+              WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+              AND ((tilausrivi.tyyppi IN ('L','E','G','V','W','M') AND tilausrivi.varattu + tilausrivi.jt != 0)
+                OR (tilausrivi.tyyppi = 'O' AND lasku.alatila != 'X')
+                OR (tilausrivi.tyyppi = 'O' AND lasku.tila = 'K'))
+              AND tilausrivi.tuoteno = '$tuoteno'
+              AND tilausrivi.laskutettuaika  = '0000-00-00'
+              AND tilausrivi.var != 'P'
               ORDER BY pvm, tunnus";
     $jtresult = pupe_query($query);
 
@@ -1374,12 +1383,26 @@ if ($tee == 'Z') {
         $vahvistettu = "";
         $merkki    = "";
         $keikka    = "";
+        $laskutunnus = $jtrow["tunnus"];
 
         if ($jtrow["tyyppi"] == "O") {
 
           if ($jtrow["laskutila"] == "K") {
             $tyyppi = t("Lisätty suoraan saapumiselle");
-            $keikka = " / ".$jtrow["laskunro"];
+
+            // Jos rivi on lisätty suoraan saapumiselle katsotaan,
+            // onko saapuminen jolle rivi on lisätty vielä auki.
+            // Jos saapuminen on auki niin tulostetaan kyseisen saapumisen numero,
+            // muuten tulostetaan sen saapumisen numero mihin rivi on mahdollisesti liitetty
+            if ($jtrow["alatila"] == "X") {
+             if ($jtrow["keikkanro"] > 0) {
+               $keikka = " / ".$jtrow["keikkanro"];
+               $laskutunnus = $jtrow["keikkatunnus"];
+             }
+            }
+            else {
+              $keikka = " / ".$jtrow["laskunro"];
+            }
           }
           else {
             $tyyppi = t("Ostotilaus");
@@ -1476,7 +1499,7 @@ if ($tee == 'Z') {
           echo "<td>";
         }
 
-        echo "<a href='$PHP_SELF?toim=$toim&tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$jtrow[tunnus]&lopetus=$lopetus'>$jtrow[tunnus]</a>$keikka";
+        echo "<a href='$PHP_SELF?toim=$toim&tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$laskutunnus&lopetus=$lopetus'>$laskutunnus</a>$keikka";
 
         if ($jtrow["tyyppi"] == "O" and $jtrow["laskutila"] != "K" and $jtrow["keikkanro"] > 0 and $jtrow['comments'] != '') {
 

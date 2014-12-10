@@ -22158,22 +22158,22 @@ if (!function_exists('luottotilanne')) {
 
     // Avoimet tilaukset
     $query = "(SELECT
-              round(sum($avtilisa * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) tilausavoinsaldo
+              round(sum({$avtilisa} * if('{$yhtiorow['alv_kasittely']}' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) tilausavoinsaldo
               FROM lasku
               JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
-              WHERE lasku.yhtio      = '$kukarow[yhtio]'
+              WHERE lasku.yhtio      = '{$kukarow['yhtio']}'
               AND lasku.tila in ('L', 'N')
               AND lasku.alatila != 'X')      # Kaikki myyntitilaukset, paitsi laskutetut
-              AND lasku.liitostunnus in ($liitostunnus))
+              AND lasku.liitostunnus in ({$liitostunnus}))
               UNION
               (SELECT
-              round(sum($avtilisa * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) tilausavoinsaldo
+              round(sum({$avtilisa} * if('{$yhtiorow['alv_kasittely']}' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) tilausavoinsaldo
               FROM lasku
               JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
-              WHERE lasku.yhtio      = '$kukarow[yhtio]'
+              WHERE lasku.yhtio      = '{$kukarow['yhtio']}'
               AND lasku.tila = 'V'
               AND lasku.alatila in ('','A','C','J','V')  # Valmistukset
-              AND lasku.liitostunnus in ($liitostunnus))";
+              AND lasku.liitostunnus in ({$liitostunnus}))";
     $avoimettilauksetres = pupe_query($query);
     $avoimettilauksetrow = mysql_fetch_assoc($avoimettilauksetres);
 

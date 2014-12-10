@@ -417,7 +417,7 @@ else {
           $excelsarake++;
           $worksheet->writeNumber($excelrivi, $excelsarake, $veroton);
           $excelsarake++;
-          $worksheet->writeNumber($excelrivi, $excelsarake0, $verollinen);
+          $worksheet->writeNumber($excelrivi, $excelsarake, $verollinen);
           $excelsarake++;
         }
         else {

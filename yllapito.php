@@ -2269,7 +2269,6 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
     $request = array(
       'tuoteno'      => $t[1],
-      'huoltosyklit' => $laite['huoltosyklit']
     );
     foreach ($toimenpide_tyypit as $toimenpide_tyyppi) {
       $request['tapahtuman_suosituin_paiva'] = hae_suosituin_tapahtumapaiva($valittu_kohde, $toimenpide_tyyppi);

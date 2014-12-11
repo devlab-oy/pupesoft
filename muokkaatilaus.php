@@ -825,8 +825,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
   $_sel = array($pv_rajaus => 'selected') + $_alkiot;
 
   echo "<th>";
-  echo t("Listan tulokset"),"<br />";
-  echo "(",t("Oletuksena vain 50 ensimmäistä"),")";
+  echo t("Aikarajaus");
   echo "</th>";
   echo "<td>";
   echo "<select name='pv_rajaus'>";

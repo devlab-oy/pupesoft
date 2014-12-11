@@ -845,13 +845,6 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
   echo "</tr>";
   echo "<tr>";
 
-  $_chk = $tee_excel ? "checked" : "";
-
-  echo "<th>",t("Tee Excel"),"</th>";
-  echo "<td>";
-  echo "<input type='checkbox' name='tee_excel' {$_chk} />";
-  echo "</td>";
-
   echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Etsi")."'></td></tr>";
   echo "</table>";
   echo "</form>";
@@ -3016,6 +3009,24 @@ if (mysql_num_rows($result) != 0) {
       echo "<tr><th>".t("Tallenna lista").":</th>";
       echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr>";
       echo "</table></form><br>";
+    }
+    else {
+      echo "<br />";
+      echo "<form method='post'>";
+      echo "<input type='hidden' name='toim' value='{$toim}'>";
+      echo "<input type='hidden' name='etsi' value='{$etsi}'>";
+      echo "<input type='hidden' name='asiakastiedot' value='{$asiakastiedot}'>";
+      echo "<input type='hidden' name='kaytiin_otsikolla' value='NOJOO!'>";
+      echo "<input type='hidden' name='pv_rajaus' value='{$pv_rajaus}'>";
+      echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
+      echo "<table>";
+      echo "<tr>";
+      echo "<td>";
+      echo "<input type='submit' name='tee_excel' value='",t("Tee Excel"),"' />";
+      echo "</td>";
+      echo "</tr>";
+      echo "</table>";
+      echo "</form>";
     }
 
     if ($toim == 'TARJOUS' and tarkista_oikeus('tilaus_myynti.php', 'TARJOUS', 1)) {

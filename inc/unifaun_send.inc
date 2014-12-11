@@ -453,7 +453,7 @@ class Unifaun {
     $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->postirow["tilausyhteyshenkilo"])); // Contact person
     $uni_rcv_val->addAttribute('n', "contact");
 
-    $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["puhelin"])); // Phone number
+    $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->postirow["toim_puh"])); // Phone number
     $uni_rcv_val->addAttribute('n', "phone");
 
     $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->asiakasrow["fax"])); // Fax number

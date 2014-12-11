@@ -1076,7 +1076,7 @@ function kasittele_bookkaussanoma($edi_data) {
       $sanoma_id = $osat[5];
     }
 
-    // katsotaan onko viesti alkuperäinen vai korvaava (9 vai 5)
+    // katsotaan onko viesti alkuperäinen vai korvaava vai peruutus (9 vai 5 vai 1)
     // tulee ehkä olemaan oleellinen tieto
     if (substr($rivi, 0, 3) == 'BGM') {
       $osat = explode("+", $rivi);
@@ -1217,6 +1217,11 @@ function kasittele_bookkaussanoma($edi_data) {
     'maaranpaa_id' => $maaranpaa_id
     );
 
+  if ($tyyppi == 1) {
+    peruuta_bookkaus($rullamaara, $tilausnro, $rivinro);
+    return false;
+  }
+
   $matkatiedot = serialize($matkatiedot);
   $matkatiedot = mysql_real_escape_string($matkatiedot);
 
@@ -1230,7 +1235,7 @@ function kasittele_bookkaussanoma($edi_data) {
             AND filename = '{$sanoma_id}'";
   $result = pupe_query($query);
 
-  if (mysql_num_rows($result) != 0) {
+  if (mysql_num_rows($result) != 0 AND $tyyppi != 5) {
     return false;
   }
 
@@ -1351,6 +1356,54 @@ function kasittele_bookkaussanoma($edi_data) {
                      WHERE yhtio  = '{$kukarow['yhtio']}'
                      AND otunnus  = '{$tunnus}'";
     pupe_query($update_query);
+  }
+  elseif ($tyyppi == 5) {
+
+    $lasku = mysqL_fetch_assoc($result);
+
+    $update_query = "UPDATE lasku SET
+                     sisviesti1 = '{$ohje}',
+                     toimaika = '{$lahtopvm}'
+                     WHERE yhtio = '{$kukarow['yhtio']}'
+                     AND tunnus = '{$lasku['tunnus']}'";
+    pupe_query($update_query);
+
+    $query = "SELECT data
+              FROM liitetiedostot
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND selite LIKE '{$tilausnro}%'";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) > 1) {
+      while ($bookkaus = mysql_fetch_assoc($result)) {
+        preg_match('~RFF\+CU:(.*?)\'~', $bookkaus['data'], $_tilausnumero);
+
+        if ($_tilausnumero[1] == $tilausnro.":".$rivinro) {
+          preg_match('~GID\+\+(.*?):RL~', $bookkaus['data'], $maara);
+          $alkuperainen_maara = $maara[1];
+        }
+      }
+    }
+
+    if (isset($alkuperainen_maara) and $alkuperainen_maara != $konttimaara) {
+      $alkuperainen_maara = $alkuperainen_maara = -1 * abs($alkuperainen_maara);
+      $uusi_maara = (int) $alkuperainen_maara + $rullamaara;
+    }
+    else {
+      $uusi_maara = (int) $rullamaara;
+    }
+
+    $update_query = "UPDATE laskun_lisatiedot SET
+                     konttiviite  = '{$konttiviite}',
+                     konttimaara  = '{$konttimaara}',
+                     konttityyppi = '{$konttityyppi}',
+                     matkakoodi   = '{$matkakoodi}',
+                     rullamaara   = rullamaara + $uusi_maara,
+                     matkatiedot  = '{$matkatiedot}'
+                     WHERE yhtio  = '{$kukarow['yhtio']}'
+                     AND otunnus  = '{$lasku['tunnus']}'";
+    pupe_query($update_query);
+
   }
 
   $filesize = strlen($liitedata);
@@ -1825,7 +1878,7 @@ function kasittele_iftsta($edi_data) {
 
     $rivi = str_replace("#%#", "'", $rivi);
 
-    // katsotaan onko viesti alkuperäinen vai korvaava (9 vai 5)
+    // katsotaan onko viesti alkuperäinen vai korvaava vai peruutus (9 vai 5 vai 1)
     // tulee ehkä olemaan oleellinen tieto
     if (substr($rivi, 0, 3) == 'BGM') {
       $osat = explode("+", $rivi);
@@ -2147,6 +2200,57 @@ function tarkista_sarjanumero($sarjanumero) {
   else {
     return $result;
   }
+}
+
+function peruuta_bookkaus($rullamaara, $tilausnro, $rivinro) {
+  global $kukarow;
+
+  $query = "SELECT
+            lasku.asiakkaan_tilausnumero,
+            laskun_lisatiedot.rullamaara,
+            laskun_lisatiedot.konttiviite,
+            laskun_lisatiedot.tunnus AS lisatieto_tunnus
+            FROM lasku
+            JOIN laskun_lisatiedot
+              ON laskun_lisatiedot.yhtio = lasku.yhtio
+              AND laskun_lisatiedot.otunnus = lasku.tunnus
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.asiakkaan_tilausnumero = '{$tilausnro}'";
+  $result = pupe_query($query);
+  $lasku = mysql_fetch_assoc($result);
+
+  if ($lasku['rullamaara'] > $rullamaara) {
+
+    $uusi_rullamaara = $lasku['rullamaara'] - $rullamaara;
+
+    $query = "UPDATE laskun_lisatiedot
+              SET rullamaara = '{$uusi_rullamaara}'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$lasku['lisatieto_tunnus']}'";
+    pupe_query($query);
+
+    $tilaus_ja_rivi = $tilausnro.":".$rivinro;
+
+  }
+  else {
+
+    $query = "DELETE FROM lasku
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND asiakkaan_tilausnumero = '{$tilausnro}'";
+    pupe_query($query);
+
+    $query = "DELETE FROM laskun_lisatiedot
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$lasku['lisatieto_tunnus']}'";
+    pupe_query($query);
+
+  }
+
+  $query = "DELETE FROM liitetiedostot
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND selite = '{$tilaus_ja_rivi}'";
+  pupe_query($query);
+
 }
 
 function pakkalista_pdf($pdf_data) {
@@ -2603,8 +2707,7 @@ function pdf_logo($logo_url, $sessio) {
   return $return;
 }
 
-function curl_get_contents($url, $sessio)
-{
+function curl_get_contents($url, $sessio) {
     $ch = curl_init();
 
     curl_setopt($ch, CURLOPT_COOKIE, "pupesoft_session=$sessio");

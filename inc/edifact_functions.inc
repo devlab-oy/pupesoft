@@ -1388,21 +1388,36 @@ function kasittele_bookkaussanoma($edi_data) {
     if (isset($alkuperainen_maara) and $alkuperainen_maara != $konttimaara) {
       $alkuperainen_maara = $alkuperainen_maara = -1 * abs($alkuperainen_maara);
       $uusi_maara = (int) $alkuperainen_maara + $rullamaara;
+
+      $update_query = "UPDATE laskun_lisatiedot SET
+                       konttiviite  = '{$konttiviite}',
+                       konttimaara  = '{$konttimaara}',
+                       konttityyppi = '{$konttityyppi}',
+                       matkakoodi   = '{$matkakoodi}',
+                       rullamaara   = rullamaara + $uusi_maara,
+                       matkatiedot  = '{$matkatiedot}'
+                       WHERE yhtio  = '{$kukarow['yhtio']}'
+                       AND otunnus  = '{$lasku['tunnus']}'";
+      pupe_query($update_query);
+
     }
     else {
       $uusi_maara = (int) $rullamaara;
+
+      $update_query = "UPDATE laskun_lisatiedot SET
+                       konttiviite  = '{$konttiviite}',
+                       konttimaara  = '{$konttimaara}',
+                       konttityyppi = '{$konttityyppi}',
+                       matkakoodi   = '{$matkakoodi}',
+                       rullamaara   = $uusi_maara,
+                       matkatiedot  = '{$matkatiedot}'
+                       WHERE yhtio  = '{$kukarow['yhtio']}'
+                       AND otunnus  = '{$lasku['tunnus']}'";
+      pupe_query($update_query);
+
     }
 
-    $update_query = "UPDATE laskun_lisatiedot SET
-                     konttiviite  = '{$konttiviite}',
-                     konttimaara  = '{$konttimaara}',
-                     konttityyppi = '{$konttityyppi}',
-                     matkakoodi   = '{$matkakoodi}',
-                     rullamaara   = rullamaara + $uusi_maara,
-                     matkatiedot  = '{$matkatiedot}'
-                     WHERE yhtio  = '{$kukarow['yhtio']}'
-                     AND otunnus  = '{$lasku['tunnus']}'";
-    pupe_query($update_query);
+
 
   }
 

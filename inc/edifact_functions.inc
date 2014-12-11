@@ -1416,9 +1416,6 @@ function kasittele_bookkaussanoma($edi_data) {
       pupe_query($update_query);
 
     }
-
-
-
   }
 
   $filesize = strlen($liitedata);

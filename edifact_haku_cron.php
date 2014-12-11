@@ -51,20 +51,24 @@ $bookkaukset = array();
 $rahtikirjat = array();
 $iftstat = array();
 
+$nyt_miinus_tunti = time() - 3600;
+
 foreach ($files as $file) {
 
-  if (substr($file, -3) == 'IFF') {
-    $bookkaukset[] = $file;
-  }
+  if (ftp_mdtm($yhteys, $file) > $nyt_miinus_tunti) {
 
-  if (substr($file, -3) == 'DAD') {
-    $rahtikirjat[] = $file;
-  }
+    if (substr($file, -3) == 'IFF') {
+      $bookkaukset[] = $file;
+    }
 
-  if (substr($file, -3) == 'IFS') {
-    $iftstat[] = $file;
-  }
+    if (substr($file, -3) == 'DAD') {
+      $rahtikirjat[] = $file;
+    }
 
+    if (substr($file, -3) == 'IFS') {
+      $iftstat[] = $file;
+    }
+  }
 }
 
 foreach ($bookkaukset as $bookkaus) {

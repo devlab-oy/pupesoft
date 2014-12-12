@@ -4367,6 +4367,7 @@ if ($fieldname == 'takuuvarasto') {
 if ($fieldname == "muokkaatilaus_pv_rajaus") {
 
   $_alkiot = array(
+    '0' => '',
     '1' => '',
     '2' => '',
     '3' => '',
@@ -4376,13 +4377,13 @@ if ($fieldname == "muokkaatilaus_pv_rajaus") {
     '30' => '',
     '60' => '',
     '90' => '',
-    'ei_rajausta' => '',
   );
 
   $_sel = array($trow[$i] => 'selected') + $_alkiot;
 
   $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
+  $ulos .= "<option value='0' {$_sel['0']}>".t("Ei rajausta")."</option>";
   $ulos .= "<option value='1' {$_sel['1']}>".t("%d p‰iv‰‰", "", 1)."</option>";
   $ulos .= "<option value='2' {$_sel['2']}>".t("%d p‰iv‰‰", "", 2)."</option>";
   $ulos .= "<option value='3' {$_sel['3']}>".t("%d p‰iv‰‰", "", 3)."</option>";
@@ -4392,7 +4393,6 @@ if ($fieldname == "muokkaatilaus_pv_rajaus") {
   $ulos .= "<option value='30' {$_sel['30']}>".t("%d p‰iv‰‰", "", 30)."</option>";
   $ulos .= "<option value='60' {$_sel['60']}>".t("%d p‰iv‰‰", "", 60)."</option>";
   $ulos .= "<option value='90' {$_sel['90']}>".t("%d p‰iv‰‰", "", 90)."</option>";
-  $ulos .= "<option value='ei_rajausta' {$_sel['ei_rajausta']}>".t("Ei rajausta")."</option>";
 
   $ulos .= "</select></td>";
 

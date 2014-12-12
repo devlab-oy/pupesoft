@@ -810,6 +810,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
   echo "<tr>";
 
   $_alkiot = array(
+    '0' => '',
     '1' => '',
     '2' => '',
     '3' => '',
@@ -819,7 +820,6 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     '30' => '',
     '60' => '',
     '90' => '',
-    'ei_rajausta' => '',
   );
 
   $_sel = array($pv_rajaus => 'selected') + $_alkiot;
@@ -829,6 +829,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
   echo "</th>";
   echo "<td>";
   echo "<select name='pv_rajaus'>";
+  echo "<option value='0' {$_sel['0']}>",t("Ei rajausta"),"</option>";
   echo "<option value='1' {$_sel['1']}>",t("%d p‰iv‰‰", "", 1),"</option>";
   echo "<option value='2' {$_sel['2']}>",t("%d p‰iv‰‰", "", 2),"</option>";
   echo "<option value='3' {$_sel['3']}>",t("%d p‰iv‰‰", "", 3),"</option>";
@@ -838,7 +839,6 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
   echo "<option value='30' {$_sel['30']}>",t("%d p‰iv‰‰", "", 30),"</option>";
   echo "<option value='60' {$_sel['60']}>",t("%d p‰iv‰‰", "", 60),"</option>";
   echo "<option value='90' {$_sel['90']}>",t("%d p‰iv‰‰", "", 90),"</option>";
-  echo "<option value='ei_rajausta' {$_sel['ei_rajausta']}>",t("Ei rajausta"),"</option>";
   echo "</select>";
   echo "</td>";
 
@@ -926,7 +926,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     }
   }
 
-  if (!empty($pv_rajaus) and $pv_rajaus != 'ei_rajausta' and empty($etsi)) {
+  if (!empty($pv_rajaus) and empty($etsi)) {
     $haku .= " and DATE(lasku.luontiaika) > DATE_SUB(CURRENT_DATE, INTERVAL {$pv_rajaus} DAY) ";
   }
 

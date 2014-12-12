@@ -1,6 +1,12 @@
 <?php
 
-(@include "inc/parametrit.inc") || (@include "parametrit.inc") || exit;
+if (@include "inc/parametrit.inc") {
+}
+elseif (@include "parametrit.inc") {
+}
+else {
+  exit;
+}
 
 require_once("tiedostofunkkarit.inc");
 

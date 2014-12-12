@@ -58,7 +58,7 @@ $e2 = (isset($yhtiorow['laiterekisteri_kaytossa']) and $yhtiorow['laiterekisteri
 $e3 = (isset($tappi) and $tappi == "lataa_tiedosto");
 $e4 = isset($tmpfilenimi);
 
-if ($e1 and $e2 and $e3 and $e4) {
+if (($e1 or $e2) and $e3 and $e4) {
   readfile("/tmp/".$tmpfilenimi);
   exit;
 }

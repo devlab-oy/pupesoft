@@ -1,6 +1,12 @@
 <?php
 
-(@include "inc/parametrit.inc") || (@include "parametrit.inc") || exit;
+if (@include "inc/parametrit.inc") {
+}
+elseif (@include "parametrit.inc") {
+}
+else {
+  exit;
+}
 
 require_once("tiedostofunkkarit.inc");
 
@@ -17,7 +23,7 @@ $tallenna_nappi       = isset($tallenna_nappi) ? $tallenna_nappi : "";
 $tiedosto             = isset($_FILES["tiedosto"]) ? $_FILES["tiedosto"] : "";
 
 if ($tee == "poista") {
-  poista_liitetiedosto($poistettava_tiedosto);
+  poista_liitetiedosto($poistettava_tiedosto, $aihealue, $tiedostotyyppi);
   $tee = "";
 }
 
@@ -180,12 +186,18 @@ function piirra_tiedostolista($tiedostot, $aihealue, $tiedostotyyppi) {
   echo "</table>";
 }
 
-function poista_liitetiedosto($tunnus) {
-  if ($tunnus) {
+function poista_liitetiedosto($tunnus, $aihealue, $tiedostotyyppi) {
+  global $kukarow;
+
+  if ($tunnus and $aihealue and $tiedostotyyppi) {
     $query =
       "DELETE
        FROM liitetiedostot
-       WHERE tunnus = {$tunnus}";
+       WHERE tunnus = {$tunnus}
+       AND yhtio = '{$kukarow["yhtio"]}'
+       AND liitos = 'muut_tiedostot'
+       AND liitostunnus = 0
+       AND kayttotarkoitus = '{$aihealue} | {$tiedostotyyppi}'";
 
     return pupe_query($query);
   }

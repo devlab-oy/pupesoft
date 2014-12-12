@@ -3,11 +3,14 @@
 function hae_toimittajat_selectiin() {
   global $kukarow;
 
-  $query  = "SELECT DISTINCT toimi.tunnus, toimi.nimi
-             FROM tuotteen_toimittajat
-             INNER JOIN toimi ON (toimi.tunnus = tuotteen_toimittajat.liitostunnus)
-             WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-             ORDER BY toimi.nimi";
+  $query = "SELECT toimi.tunnus,
+            toimi.nimi
+            FROM toimi
+            WHERE toimi.yhtio = '{$kukarow["yhtio"]}'
+            AND toimi.oletus_vienti IN ('C', 'J', 'F', 'K', 'I', 'L')
+            AND toimi.tyyppi NOT IN ('P', 'PP')
+            ORDER BY toimi.nimi";
+
   $result = pupe_query($query);
 
   $toimittajat = array();
@@ -34,10 +37,11 @@ function tiedostotyypit($aihealue = "") {
     return $tiedostotyypit;
   }
   else {
-    $query  = "SELECT selite
-             FROM avainsana
-             WHERE yhtio = '{$kukarow['yhtio']}'
-             AND laji    = 'LITETY_TKIRJAST'";
+    $query = "SELECT selite
+              FROM avainsana
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji    = 'LITETY_TKIRJAST'";
+
     $result = pupe_query($query);
 
     $tiedostotyypit = array();
@@ -64,9 +68,9 @@ function hae_tiedostot($params) {
                liitetiedostot.kayttotarkoitus,
                liitetiedostot.selite
                FROM tuotteen_toimittajat
-               INNER JOIN tuote ON (tuote.yhtio = '{$kukarow['yhtio']}'
-                 AND tuotteen_toimittajat.tuoteno    = tuote.tuoteno)
-               INNER JOIN liitetiedostot ON (liitetiedostot.yhtio = '{$kukarow['yhtio']}'
+               INNER JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio
+                 AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)
+               INNER JOIN liitetiedostot ON (liitetiedostot.yhtio = tuotteen_toimittajat.yhtio
                  AND liitetiedostot.liitos           = 'tuote'
                  AND liitetiedostot.liitostunnus     = tuote.tunnus
                  AND liitetiedostot.kayttotarkoitus  = '{$tiedoston_tyyppi}')

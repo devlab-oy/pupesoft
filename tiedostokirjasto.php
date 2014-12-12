@@ -132,7 +132,6 @@ function hae_tiedostot($toimittajan_tunnus, $tiedoston_tyyppi) {
                AND liitetiedostot.kayttotarkoitus  = '{$tiedoston_tyyppi}')
              WHERE tuotteen_toimittajat.yhtio      = '{$kukarow['yhtio']}'
              AND tuotteen_toimittajat.liitostunnus = '{$toimittajan_tunnus}'
-             GROUP BY liitetiedostot.selite
              ORDER BY liitetiedostot.selite";
   $result = pupe_query($query);
 

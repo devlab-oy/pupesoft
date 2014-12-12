@@ -669,6 +669,7 @@ if ($tila == "" and !isset($jatka)) {
                 toim_postino        = '$assrow[toim_postino]',
                 toim_postitp        = '$assrow[toim_postitp]',
                 toim_maa            = '$assrow[toim_maa]',
+                toim_puh            = '$tpuh',
                 laskutusvkopv       = '$assrow[laskutusvkopv]',
                 chn                 = '$assrow[chn]',
                 verkkotunnus        = '$assrow[verkkotunnus]',
@@ -732,7 +733,7 @@ if ($tila == "" and !isset($jatka)) {
         $puhlisa = "";
       }
 
-      $squery = "SELECT asiakas.*, tilaus_viesti as viesti, myynti_kommentti1 as comments, $puhlisa asiakas.tunnus liitostunnus, 'O' kohdistettu, '' kohde, '' kauppatapahtuman_luonne
+      $squery = "SELECT asiakas.*, tilaus_viesti as viesti, myynti_kommentti1 as comments, $puhlisa asiakas.tunnus liitostunnus, 'O' kohdistettu, '' kohde, '' kauppatapahtuman_luonne, asiakas.puhelin as toim_puh
                  FROM asiakas
                  WHERE tunnus = '$asiakasid'";
 
@@ -810,6 +811,7 @@ if ($tila == "" and !isset($jatka)) {
       }
 
       $srow["toimitustapa"] = $toimasiakas_row["toimitustapa"];
+      $srow["toim_puh"]     = $toimasiakas_row["puhelin"];
 
       if ($tilausnumero == 0) {
         echo "<font class='message'>".t("HUOM: Tilauksen oletustiedot haettu laskutusasiakkaan asiakasrekisteristä.")."</font><br>";
@@ -3278,7 +3280,7 @@ if ($tila == "" and !isset($jatka)) {
 
     echo "<tr><td>".t("Ohjausmerkki").":</td><td><input type='text' size='43' name='ohjausmerkki' value='$srow[ohjausmerkki]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("lähete")."</td></tr>";
 
-    echo "<tr><td>".t("Puhelin toimitukseen").":</td><td><input type='text' size='43' name='tpuh' value='$srow[toim_puh]'</td><td></td></tr>";
+    echo "<tr><td>".t("Puhelin toimitukseen").":</td><td><input type='text' size='43' name='tpuh' value='$srow[toim_puh]'</td><td>".t("rahtikirja")." + ".t("osoitelappu")."</td></tr>";
 
     echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("tarjous")."</td></tr>";
 

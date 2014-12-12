@@ -124,9 +124,9 @@ function hae_tiedostot($toimittajan_tunnus, $tiedoston_tyyppi) {
              liitetiedostot.kayttotarkoitus,
              liitetiedostot.selite
              FROM tuotteen_toimittajat
-             INNER JOIN tuote ON (tuote.yhtio = '{$kukarow['yhtio']}'
+             INNER JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio
                AND tuotteen_toimittajat.tuoteno    = tuote.tuoteno)
-             INNER JOIN liitetiedostot ON (liitetiedostot.yhtio = '{$kukarow['yhtio']}'
+             INNER JOIN liitetiedostot ON (liitetiedostot.yhtio = tuotteen_toimittajat.yhtio
                AND liitetiedostot.liitos           = 'tuote'
                AND liitetiedostot.liitostunnus     = tuote.tunnus
                AND liitetiedostot.kayttotarkoitus  = '{$tiedoston_tyyppi}')

@@ -864,23 +864,19 @@ if ($avain_sel["LITETY_TKIRJAST"] == "SELECTED" and mysql_field_name($result, $i
 }
 
 if ($avain_sel["TOIMIT_TKIRJAST"] == "SELECTED" and $_selite) {
-  $query = "SELECT DISTINCT toimi.tunnus, toimi.nimi
-            FROM tuotteen_toimittajat
-            INNER JOIN toimi ON (toimi.tunnus = tuotteen_toimittajat.liitostunnus)
-            WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
+  $query = "SELECT toimi.tunnus,
+            toimi.nimi
+            FROM toimi
+            WHERE toimi.yhtio = '{$kukarow["yhtio"]}'
+            AND toimi.oletus_vienti IN ('C', 'J', 'F', 'K', 'I', 'L')
+            AND toimi.tyyppi NOT IN ('P', 'PP')
             ORDER BY toimi.nimi";
 
   $toimittaja_result = pupe_query($query);
 
-  $toimittajat = array();
-
-  while ($rivi = mysql_fetch_assoc($toimittaja_result)) {
-    array_push($toimittajat, $rivi);
-  }
-
   $ulos = "<td><select name='{$nimi}' onclick='submit();'>";
 
-  foreach ($toimittajat as $toimittaja) {
+  while ($toimittaja = mysql_fetch_assoc($toimittaja_result)) {
     $sel = ($toimittaja["tunnus"] == $trow[$i]) ? ' selected' : '';
     $ulos .= "<option value='{$toimittaja["tunnus"]}' $sel>{$toimittaja["nimi"]}</option>";
   }

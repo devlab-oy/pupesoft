@@ -3002,17 +3002,19 @@ if (mysql_num_rows($result) != 0) {
 
       echo "<form method='post' class='multisubmit'>";
       echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+      echo "<input type='hidden' name='toim' value='{$toim}'>";
       echo "<input type='hidden' name='kaunisnimi' value='Tilauslista.xlsx'>";
       echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
       echo "<input type='hidden' name='kaytiin_otsikolla' value='NOJOO!'>";
+      echo "<a name='tallennaexcel' />";
       echo "<br><table>";
-      echo "<tr><th>".t("Tallenna lista").":</th>";
-      echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr>";
+      echo "<tr><th>".t("Tallenna").":</th>";
+      echo "<td class='back'><input type='submit' value='".t("Tallenna Excel")."'></td></tr>";
       echo "</table></form><br>";
     }
     else {
       echo "<br />";
-      echo "<form method='post'>";
+      echo "<form method='post' action='muokkaatilaus.php#tallennaexcel'>";
       echo "<input type='hidden' name='toim' value='{$toim}'>";
       echo "<input type='hidden' name='etsi' value='{$etsi}'>";
       echo "<input type='hidden' name='asiakastiedot' value='{$asiakastiedot}'>";
@@ -3021,7 +3023,8 @@ if (mysql_num_rows($result) != 0) {
       echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
       echo "<table>";
       echo "<tr>";
-      echo "<td>";
+      echo "<tr><th>".t("Excel").":</th>";
+      echo "<td class='back'>";
       echo "<input type='submit' name='tee_excel' value='",t("Tee Excel"),"' />";
       echo "</td>";
       echo "</tr>";

@@ -283,7 +283,9 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "SALDOVAHVISTUS")  $ulos .= "<option value='SALDOVAHVISTUS' {$avain_sel['SALDOVAHVISTUS']}>  ".t("Saldovahvistuksen viesti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "DPAVAINSANALAJI") $ulos .= "<option value='DPAVAINSANALAJI' {$avain_sel['DPAVAINSANALAJI']}>        ".t("Dynaamisen puun avainsanojen laji")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "LITETY_TKIRJAST") $ulos .= "<option value='LITETY_TKIRJAST' {$avain_sel['LITETY_TKIRJAST']}>".t("Tiedostokirjastossa selailtava tiedostotyyppi")."</option>";
-  if ($lukitse_laji== "" or $lukitse_laji == "RELEX_TUOTEPAR") $ulos .= "<option value='RELEX_TUOTEPAR' {$avain_sel['RELEX_TUOTEPAR']}>".t("Relex tuoteparametrit")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "AIHEAL_LAATUAS")  $ulos .= "<option value='AIHEAL_LAATUAS' {$avain_sel['AIHEAL_LAATUAS']}>" . t("Laatuasiakirjaselaimessa n‰ytett‰v‰ aihealue") . "</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "LITETY_LAATUAS")  $ulos .= "<option value='LITETY_LAATUAS' {$avain_sel['LITETY_LAATUAS']}>" . t("Laatuasiakirjaselaimessa n‰ytett‰v‰ tiedostotyyppi") . "</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "RELEX_TUOTEPAR")  $ulos .= "<option value='RELEX_TUOTEPAR' {$avain_sel['RELEX_TUOTEPAR']}>".t("Relex tuoteparametrit")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "JTVALMISVIESTI")  $ulos .= "<option value='JTVALMISVIESTI' {$avain_sel['JTVALMISVIESTI']}>".t("SMS-viesti, joka l‰hetet‰‰n asiakkalle, kun j‰lkitoimitustuotteet on ker‰tty")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TYOMVALMVIEST")   $ulos .= "<option value='TYOMVALMVIEST' {$avain_sel['TYOMVALMVIEST']}>".t("SMS-viesti, joka l‰hetet‰‰n asiakkalle, kun tyˆm‰‰r‰ys on valmis")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
@@ -856,6 +858,20 @@ if ($avain_sel["LITETY_TKIRJAST"] == "SELECTED" and mysql_field_name($result, $i
   while ($row = mysql_fetch_assoc($vresult)) {
     $sel = ($row["selite"] == $trow[$i]) ? ' selected' : '';
     $ulos .= "<option value = '{$row["selite"]}'$sel>{$row["selite"]} - {$row["selitetark"]}</option>";
+  }
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($avain_sel["LITETY_LAATUAS"] == "SELECTED" and $_selite) {
+  $vresult = t_avainsana("AIHEAL_LAATUAS");
+
+  $ulos = "<td><select name = '{$nimi}'>";
+
+  while ($row = mysql_fetch_assoc($vresult)) {
+    $sel = ($row["selite"] == $trow[$i]) ? ' selected' : '';
+    $ulos .= "<option value = '{$row["selite"]}'$sel>{$row["selite"]}</option>";
   }
   $ulos .= "</select></td>";
 

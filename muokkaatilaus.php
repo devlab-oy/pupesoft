@@ -229,6 +229,8 @@ if (isset($tee) and $tee == 'TOIMITA_ENNAKKO' and $yhtiorow["ennakkotilausten_to
 if (!isset($asiakastiedot)) $asiakastiedot = '';
 if (!isset($limit)) $limit = '';
 if (!isset($etsi)) $etsi = '';
+if (!isset($pv_rajaus)) $pv_rajaus = $yhtiorow['muokkaatilaus_pv_rajaus'];
+if (!isset($tee_excel)) $tee_excel = '';
 
 // scripti balloonien tekemiseen
 js_popup();
@@ -804,6 +806,45 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     echo "</select></td><td class='back'>&nbsp;</td>";
   }
 
+  echo "</tr>";
+  echo "<tr>";
+
+  $_alkiot = array(
+    '0' => '',
+    '1' => '',
+    '2' => '',
+    '3' => '',
+    '5' => '',
+    '7' => '',
+    '14' => '',
+    '30' => '',
+    '60' => '',
+    '90' => '',
+  );
+
+  $_sel = array($pv_rajaus => 'selected') + $_alkiot;
+
+  echo "<th>";
+  echo t("Aikarajaus");
+  echo "</th>";
+  echo "<td>";
+  echo "<select name='pv_rajaus'>";
+  echo "<option value='0' {$_sel['0']}>",t("Ei rajausta"),"</option>";
+  echo "<option value='1' {$_sel['1']}>",t("%d p‰iv‰‰", "", 1),"</option>";
+  echo "<option value='2' {$_sel['2']}>",t("%d p‰iv‰‰", "", 2),"</option>";
+  echo "<option value='3' {$_sel['3']}>",t("%d p‰iv‰‰", "", 3),"</option>";
+  echo "<option value='5' {$_sel['5']}>",t("%d p‰iv‰‰", "", 5),"</option>";
+  echo "<option value='7' {$_sel['7']}>",t("%d p‰iv‰‰", "", 7),"</option>";
+  echo "<option value='14' {$_sel['14']}>",t("%d p‰iv‰‰", "", 14),"</option>";
+  echo "<option value='30' {$_sel['30']}>",t("%d p‰iv‰‰", "", 30),"</option>";
+  echo "<option value='60' {$_sel['60']}>",t("%d p‰iv‰‰", "", 60),"</option>";
+  echo "<option value='90' {$_sel['90']}>",t("%d p‰iv‰‰", "", 90),"</option>";
+  echo "</select>";
+  echo "</td>";
+
+  echo "</tr>";
+  echo "<tr>";
+
   echo "<td class='back'><input type='submit' class='hae_btn' value='".t("Etsi")."'></td></tr>";
   echo "</table>";
   echo "</form>";
@@ -826,7 +867,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     $myyntitili_haku = " or tilausrivi.tuoteno like '%{$etsi}%' ";
   }
 
-  if (is_string($etsi)) {
+  if (!empty($etsi) and is_string($etsi)) {
     $haku = " and (lasku.nimi like '%{$etsi}%' or lasku.nimitark like '%{$etsi}%' or lasku.viesti like '%{$etsi}%' or lasku.toim_nimi like '%{$etsi}%' or lasku.toim_nimitark like '%{$etsi}%' or lasku.laatija like '%{$etsi}%' or kuka1.nimi like '%{$etsi}%' or kuka2.nimi like '%{$etsi}%' {$myyntitili_haku}) ";
   }
 
@@ -885,6 +926,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
     }
   }
 
+  if (!empty($pv_rajaus) and empty($etsi)) {
+    $haku .= " and DATE(lasku.luontiaika) > DATE_SUB(CURRENT_DATE, INTERVAL {$pv_rajaus} DAY) ";
+  }
+
   if (!empty($mt_order)) {
     $hakusarake = mysql_real_escape_string(key($mt_order));
     $hakusuunta = mysql_real_escape_string($mt_order[$hakusarake]);
@@ -920,7 +965,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
 
   $toimaikalisa = "";
 
-  if ($kukarow['resoluutio'] == 'I' and $toim != "SIIRTOLISTA" and $toim != "SIIRTOLISTASUPER" and $toim != "MYYNTITILI" and $toim != "MYYNTITILISUPER" and $toim != "EXTRANET" and ($toim != 'TARJOUS' and $toim != 'EXTTARJOUS')) {
+  if ($toim != "SIIRTOLISTA" and $toim != "SIIRTOLISTASUPER" and $toim != "MYYNTITILI" and $toim != "MYYNTITILISUPER" and $toim != "EXTRANET" and ($toim != 'TARJOUS' and $toim != 'EXTTARJOUS')) {
     $toimaikalisa = ' lasku.toimaika, ';
   }
 
@@ -2077,7 +2122,7 @@ $result = pupe_query($query);
 
 if (mysql_num_rows($result) != 0) {
 
-  if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
+  if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE and $tee_excel) {
     include 'inc/pupeExcel.inc';
 
     $worksheet    = new pupeExcel();
@@ -2942,6 +2987,8 @@ if (mysql_num_rows($result) != 0) {
           <input type='hidden' name='asiakastiedot' value='$asiakastiedot'>
           <input type='hidden' name='limit' value='NO'>
           <input type='hidden' name='kaytiin_otsikolla' value='NOJOO!'>
+          <input type='hidden' name='pv_rajaus' value='{$pv_rajaus}'>
+          <input type='hidden' name='toimipaikka' value='{$toimipaikka}'>
           <table>
           <tr><th>".t("Listauksessa n‰kyy 50 ensimm‰ist‰")." $otsikko.</th>
           <td class='back'><input type='submit' value = '".t("N‰yt‰ kaikki")."'></td></tr>
@@ -2955,13 +3002,34 @@ if (mysql_num_rows($result) != 0) {
 
       echo "<form method='post' class='multisubmit'>";
       echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
+      echo "<input type='hidden' name='toim' value='{$toim}'>";
       echo "<input type='hidden' name='kaunisnimi' value='Tilauslista.xlsx'>";
       echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
       echo "<input type='hidden' name='kaytiin_otsikolla' value='NOJOO!'>";
+      echo "<a name='tallennaexcel' />";
       echo "<br><table>";
-      echo "<tr><th>".t("Tallenna lista").":</th>";
-      echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr>";
+      echo "<tr><th>".t("Tallenna").":</th>";
+      echo "<td class='back'><input type='submit' value='".t("Tallenna Excel")."'></td></tr>";
       echo "</table></form><br>";
+    }
+    else {
+      echo "<br />";
+      echo "<form method='post' action='muokkaatilaus.php#tallennaexcel'>";
+      echo "<input type='hidden' name='toim' value='{$toim}'>";
+      echo "<input type='hidden' name='etsi' value='{$etsi}'>";
+      echo "<input type='hidden' name='asiakastiedot' value='{$asiakastiedot}'>";
+      echo "<input type='hidden' name='kaytiin_otsikolla' value='NOJOO!'>";
+      echo "<input type='hidden' name='pv_rajaus' value='{$pv_rajaus}'>";
+      echo "<input type='hidden' name='toimipaikka' value='{$toimipaikka}'>";
+      echo "<table>";
+      echo "<tr>";
+      echo "<tr><th>".t("Excel").":</th>";
+      echo "<td class='back'>";
+      echo "<input type='submit' name='tee_excel' value='",t("Tee Excel"),"' />";
+      echo "</td>";
+      echo "</tr>";
+      echo "</table>";
+      echo "</form>";
     }
 
     if ($toim == 'TARJOUS' and tarkista_oikeus('tilaus_myynti.php', 'TARJOUS', 1)) {

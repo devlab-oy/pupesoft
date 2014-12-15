@@ -1130,18 +1130,6 @@ if ($tila == "" and !isset($jatka)) {
 
     echo "</select></td></tr>";
 
-    if ($yhtiorow["vahvistusviesti_asiakkaalle"]) {
-      echo "<tr>
-              <td valign='top'>" . t("Puh") . ": </td>
-              <td><input type='tel' name='tpuh' size='35' value='$srow[toim_puh]'></td>
-            </tr>";
-
-      echo "<tr>
-              <td valign='top'>" . t("Email") . ": </td>
-              <td><input type='email' name='temail' size='35' value='$srow[toim_email]'></td>
-            </tr>";
-    }
-
     if ($yhtiorow['myyntitilaus_ytunnus_syotto'] == 'K' and $asiarow['laji'] != 'H') {
       echo "<tr>";
       echo "<td valign='top'>", t("Ytunnus"), ":</td>";
@@ -1805,7 +1793,7 @@ if ($tila == "" and !isset($jatka)) {
         <option value=''  $sel1>".t("Kotimaa")."</option>
         <option value='E' $sel2>".t("Vienti EU")."</option>
         <option value='K' $sel3>".t("Vienti ei-EU")."</option>
-        </select>";
+        </select> ";
 
       $sel = $srow['kolmikantakauppa'] != "" ? " selected" : "";
 
@@ -3246,7 +3234,7 @@ if ($tila == "" and !isset($jatka)) {
 
     echo "<td><input type='text' size='30' name='tilausyhteyshenkilo' value='$srow[tilausyhteyshenkilo]'><br>";
 
-    echo "<select id='yhteyshenkilo_tilaus' name='yhteyshenkilo_tilaus'>";
+    echo "&nbsp;<select id='yhteyshenkilo_tilaus' name='yhteyshenkilo_tilaus'>";
     echo "<option value = ''>".t("Ei valintaa")."</option>";
 
     while ($yhteysrow = mysql_fetch_assoc($yhteysresult)) {
@@ -3279,6 +3267,10 @@ if ($tila == "" and !isset($jatka)) {
     echo "<tr><td>".t("Ohjausmerkki").":</td><td><input type='text' size='43' name='ohjausmerkki' value='$srow[ohjausmerkki]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("lähete")."</td></tr>";
 
     echo "<tr><td>".t("Puhelin toimitukseen").":</td><td><input type='text' size='43' name='tpuh' value='$srow[toim_puh]'</td><td></td></tr>";
+    
+    if ($yhtiorow["vahvistusviesti_asiakkaalle"]) {
+      echo "<tr><td>".t("Email toimitukseen").":</td><td><input type='text' size='43' name='temail' value='$srow[toim_email]'</td><td></td></tr>";
+    }
 
     echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("tarjous")."</td></tr>";
 

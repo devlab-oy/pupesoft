@@ -494,29 +494,38 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
   //################# varattu-rajaukset ##################
   if (isset($varatturajaus) and $varatturajaus != "") {
-    $query = "SELECT group_concat(distinct concat('\'',tuoteno,'\'')) varatut_tuotteet
-              FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_varattu)
-              WHERE yhtio  = '$kukarow[yhtio]'
-              and tyyppi   in ('B','F','L','V','W')
-              and tuoteno != ''
-              and varattu != 0";
+    $query = "SELECT tuoteno,
+              sum(varattu) AS varattu_saldo
+              FROM tilausrivi
+              USE INDEX (yhtio_tyyppi_tuoteno_varattu)
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND tyyppi IN ('B', 'F', 'L', 'V', 'W')
+              AND tuoteno != ''
+              AND varattu != 0
+              GROUP BY tuoteno;";
+
     $varares = pupe_query($query);
-    $vararow = mysql_fetch_assoc($varares);
+
+    $tuotevaraukset          = array();
+
+    while ($vararivi = mysql_fetch_assoc($varares)) {
+      $tuotevaraukset[$vararivi["tuoteno"]] = $vararivi["varattu_saldo"];
+    }
 
     $varatut_tuotteet = "''";
 
-    if ($vararow["varatut_tuotteet"] != "") {
-      $varatut_tuotteet = $vararow["varatut_tuotteet"];
+    if (!empty($tuotevaraukset)) {
+      $varatut_tuotteet = implode("','", array_keys($tuotevaraukset));
     }
 
     // N‰ytet‰‰n vain varatut tuotteet
     if ($varatturajaus == "O") {
-      $tuote_lisa .= " and tuote.tuoteno in ($varatut_tuotteet) ";
+      $tuote_lisa .= " and tuote.tuoteno in ('$varatut_tuotteet') ";
     }
 
     // N‰ytet‰‰n vain EI varatut tuotteet
     if ($varatturajaus == "E") {
-      $tuote_lisa .= " and tuote.tuoteno not in ($varatut_tuotteet) ";
+      $tuote_lisa .= " and tuote.tuoteno not in ('$varatut_tuotteet') ";
     }
   }
 
@@ -902,17 +911,8 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $vararvores = pupe_query($query);
       $vararvorow = mysql_fetch_assoc($vararvores);
 
-      $varattu_query = "SELECT sum(varattu) AS varattu_saldo
-                        FROM tilausrivi
-                        WHERE tuoteno = '{$vararvorow["tuoteno"]}'
-                        AND yhtio = '{$kukarow["yhtio"]}'
-                        AND tyyppi IN ('B', 'F', 'L', 'V', 'W')";
-
-      $varattu_result = pupe_query($varattu_query);
-      $varattu_result = mysql_fetch_assoc($varattu_result);
-
       $kpl = (float) $vararvorow["saldo"];
-      $varattu_saldo = $varattu_result["varattu_saldo"];
+      $varattu_saldo = $tuotevaraukset[$row["tuoteno"]];
       $varaston_arvo = hinta_kuluineen( $vararvorow["tuoteno"], (float) $vararvorow["varasto"] );
       $varattu_varastonarvo = $varattu_saldo * $row["kehahin_nyt"];
       $varattu_varastonarvo =

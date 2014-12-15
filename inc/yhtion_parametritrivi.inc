@@ -2192,6 +2192,18 @@ if ($fieldname == "automaattinen_tuotehaku") {
   $jatko = 0;
 }
 
+if ($fieldname == "tuotekysely") {
+
+  $sel = $trow[$i] == "K" ? "selected" : "";
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value=''>".t("Tuotekyselyssä haetaan kaikki tiedot oletuksena")."</option>";
+  $ulos .= "<option value='K' {$sel}>".t("Tuotekyselyssä käyttäjä hakee tiedot moduulikohtaisesti")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "oslapp_rakir_logo") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

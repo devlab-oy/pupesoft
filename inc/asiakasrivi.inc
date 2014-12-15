@@ -633,8 +633,12 @@ if (mysql_field_name($result, $i) == "ketjutus") {
   $jatko = 0;
 }
 
-if ((mysql_field_name($result, $i) == "fakta") or (mysql_field_name($result, $i) == "sisviesti1") or (mysql_field_name($result, $i) == "myynti_kommentti1")) {
-  $ulos = "<td><textarea cols='45' rows='5' name='$nimi'>$trow[$i]</textarea></td>";
+if ((mysql_field_name($result, $i) == "fakta") or
+    (mysql_field_name($result, $i) == "sisviesti1") or
+    (mysql_field_name($result, $i) == "myynti_kommentti1") or
+    (mysql_field_name($result, $i) == "sisviesti2")
+) {
+  $ulos  = "<td><textarea cols='45' rows='5' name='$nimi'>$trow[$i]</textarea></td>";
   $jatko = 0;
 }
 

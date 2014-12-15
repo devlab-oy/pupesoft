@@ -5478,56 +5478,85 @@ if ($tee == '') {
         echo "</td>";
 
         if (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS', 'REKLAMAATIO'))) {
-          $query = "SELECT tapahtuma.*,
-                    if (kuka.nimi is not null and kuka.nimi != '', kuka.nimi, tapahtuma.laatija) laatija,
-                    tilausrivi.alv
-                    FROM tapahtuma
-                    JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
-                    JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.liitostunnus='{$laskurow['liitostunnus']}' and lasku.tila = 'L' and lasku.alatila = 'X')
-                    LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja)
-                    WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
-                    AND tapahtuma.tuoteno = '{$tuote['tuoteno']}'
-                    AND tapahtuma.laji    = 'laskutus'
-                    ORDER BY tapahtuma.laadittu desc, tapahtuma.tunnus desc
-                    LIMIT 5";
-          $tapahtuma_chk_res = pupe_query($query);
 
-          if (mysql_num_rows($tapahtuma_chk_res) > 0) {
+          $oikeus_chk = tarkista_oikeus("tuote.php");
 
-            $oikeus_chk = tarkista_oikeus("tuote.php");
+          $_html_rows = "";
+          $_html = "<td class='back nopad top'>{$jarjlisa}";
 
-            echo "<td class='back nopad top'>$jarjlisa";
+          $_html .= "<table>";
+          $_html .= "<tr>";
+          $_html .= "<th>".t("Laatija")."</th>";
+          $_html .= "<th>".t("Pvm")."</th>";
+          $_html .= "<th>".t("M‰‰r‰")."</th>";
 
-            echo "<table>";
-            echo "<tr>";
-            echo "<th>", t("Laatija"), "</th>";
-            echo "<th>", t("Pvm"), "</th>";
-            echo "<th>", t("M‰‰r‰"), "</th>";
-            if ($oikeus_chk) {
-              echo "<th>", t("Kplhinta"), "</th>";
-              echo "<th>", t("Rivihinta"), "</th>";
-            }
-            echo "</tr>";
+          if ($oikeus_chk) {
+            $_html .= "<th>".t("Kplhinta")."</th>";
+            $_html .= "<th>".t("Rivihinta")."</th>";
+          }
 
-            while ($tapahtuma_chk_row = mysql_fetch_assoc($tapahtuma_chk_res)) {
-              echo "<tr>";
-              echo "<td>{$tapahtuma_chk_row['laatija']}</td>";
-              echo "<td>", tv1dateconv($tapahtuma_chk_row['laadittu']), "</td>";
-              echo "<td align='right'>".($tapahtuma_chk_row['kpl'] * -1)." {$tapahtuma_chk_row['yksikko']}</td>";
+          $_html .= "</tr>";
 
-              if ($oikeus_chk) {
+          $_rows_added = 0;
 
-                // Onko verolliset hinnat?
-                if ($yhtiorow["alv_kasittely"] == "") {
-                  $tapahtuma_chk_row['kplhinta'] = $tapahtuma_chk_row['kplhinta'] * (1 + $tapahtuma_chk_row["alv"] / 100);
+          $cur_date = new DateTime();
+          $date_2yo = new DateTime();
+          $date_2yo->sub(new DateInterval('P2Y'));
+
+          // Jos kahden vuoden aikarajaus ylittyy, breikataan looppi
+          while ($cur_date >= $date_2yo) {
+
+            $cur_date->sub(new DateInterval('P1M'));
+            $pre_date = new DateTime($cur_date->format('Y-m-d'));
+            $pre_date->add(new DateInterval('P1M'));
+
+            $query = "SELECT tapahtuma.*,
+                      if (kuka.nimi is not null and kuka.nimi != '', kuka.nimi, tapahtuma.laatija) laatija,
+                      tilausrivi.alv
+                      FROM tapahtuma USE INDEX (laji_tuote_laadittu)
+                      JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
+                      JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.liitostunnus='{$laskurow['liitostunnus']}' and lasku.tila = 'L' and lasku.alatila = 'X')
+                      LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja)
+                      WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
+                      AND tapahtuma.tuoteno = '{$tuote['tuoteno']}'
+                      AND tapahtuma.laji    = 'laskutus'
+                      AND tapahtuma.laadittu <= '".$pre_date->format('Y-m-d')."'
+                      and tapahtuma.laadittu >= '".$cur_date->format('Y-m-d')."'
+                      ORDER BY tapahtuma.laadittu desc, tapahtuma.tunnus desc";
+            $tapahtuma_chk_res = pupe_query($query);
+
+            if (mysql_num_rows($tapahtuma_chk_res) > 0) {
+
+              while ($tapahtuma_chk_row = mysql_fetch_assoc($tapahtuma_chk_res)) {
+
+                $_html_rows .= "<tr>";
+                $_html_rows .= "<td>{$tapahtuma_chk_row['laatija']}</td>";
+                $_html_rows .= "<td>".tv1dateconv($tapahtuma_chk_row['laadittu'])."</td>";
+                $_html_rows .= "<td align='right'>".($tapahtuma_chk_row['kpl'] * -1)." {$tapahtuma_chk_row['yksikko']}</td>";
+
+                if ($oikeus_chk) {
+                  // Onko verolliset hinnat?
+                  if ($yhtiorow["alv_kasittely"] == "") {
+                    $tapahtuma_chk_row['kplhinta'] = $tapahtuma_chk_row['kplhinta'] * (1 + $tapahtuma_chk_row["alv"] / 100);
+                  }
+
+                  $_html_rows .= "<td align='right'>".hintapyoristys($tapahtuma_chk_row['kplhinta'])."</td>";
+                  $_html_rows .= "<td align='right'>".hintapyoristys($tapahtuma_chk_row['kplhinta']*($tapahtuma_chk_row['kpl'] * -1))."</td>";
                 }
 
-                echo "<td align='right'>", hintapyoristys($tapahtuma_chk_row['kplhinta']), "</td>";
-                echo "<td align='right'>", hintapyoristys($tapahtuma_chk_row['kplhinta']*($tapahtuma_chk_row['kpl'] * -1)), "</td>";
-              }
-              echo "</tr>";
-            }
+                $_html_rows .= "</tr>";
+                $_rows_added++;
 
+                if ($_rows_added == 5) {
+                  break 2;
+                }
+              }
+            }
+          }
+
+          if (!empty($_html_rows)) {
+            echo $_html;
+            echo $_html_rows;
             echo "</table>";
           }
         }

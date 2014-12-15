@@ -95,6 +95,8 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
 
 function laheta_sanoma($sanoma){
 
+return true;
+
   if ($sanoma == '') {
     return false;
   }
@@ -140,30 +142,25 @@ function laheta_sanoma($sanoma){
   return false;
 }
 
-function kuittaus_parametrit($hakunumero, $tyyppi) {
-  global $kukarow, $yhtiorow;
+function kuittaus_parametrit($hakunumero) {
+  global $kukarow;
 
-  if ($tyyppi == 'R') {
-    $rahtikirjanumero = $hakunumero;
+  $query = "SELECT tilausrivin_lisatiedot.rahtikirja_id
+            FROM sarjanumeroseuranta
+            JOIN tilausrivi
+              ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio
+              AND tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
+            JOIN tilausrivin_lisatiedot
+              ON tilausrivin_lisatiedot.yhtio = sarjanumeroseuranta.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+            WHERE sarjanumeroseuranta.sarjanumero = '{$hakunumero}'";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) > 0) {
+    $rahtikirjanumero = mysql_result($result, 0);
   }
   else {
-    $query = "SELECT tilausrivin_lisatiedot.rahtikirja_id
-              FROM sarjanumeroseuranta
-              JOIN tilausrivi
-                ON tilausrivi.yhtio = sarjanumeroseuranta.yhtio
-                AND tilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
-              JOIN tilausrivin_lisatiedot
-                ON tilausrivin_lisatiedot.yhtio = sarjanumeroseuranta.yhtio
-                AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-              WHERE sarjanumeroseuranta.sarjanumero = '{$hakunumero}'";
-    $result = pupe_query($query);
-
-    if (mysql_num_rows($result) == 0) {
-      return false;
-    }
-    else {
-      $rahtikirjanumero = mysql_result($result, 0);
-    }
+    $rahtikirjanumero = $hakunumero;
   }
 
   $query = "SELECT lasku.ovttunnus,
@@ -2265,6 +2262,24 @@ function peruuta_bookkaus($rullamaara, $tilausnro, $rivinro) {
 
 }
 
+function hae_saapumistiedot($saapumiskoodi) {
+  global $kukarow;
+
+  $query = "SELECT *
+            FROM lasku
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND asiakkaan_tilausnumero = '{$saapumiskoodi}'";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) == 0) {
+    return false;
+  }
+  else {
+    $lasku = mysql_fetch_assoc($result);
+    return $lasku;
+  }
+}
+
 function pakkalista_pdf($pdf_data) {
 
   extract($pdf_data);
@@ -2320,10 +2335,6 @@ function pakkalista_pdf($pdf_data) {
   $pdf->draw_text($x, $y, 'Kpl', $sivu, $bold);
   $pdf->draw_text($x+100, $y, $kpl, $sivu, $bold);
   $pdf->draw_text($x+500, $y, "sivu {$sivunro}/{$sivuja}", $sivu, $bold);
-
-
-
-
 
   $y -= 15;
   $yy[0] = $yy[1] = $y;

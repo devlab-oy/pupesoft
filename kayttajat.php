@@ -1175,6 +1175,9 @@ if ($tee == 'MUUTA') {
                 <td>
                   <select name='maksupaate_kassamyynti'>
                     <option value=''
+                            {$maksupaate_sel_1}>" . t("Yhtiön oletus") . "
+                    </option>
+                    <option value='E'
                             {$maksupaate_sel_1}>" . t("Ei käytetä maksupäätettä kassamyynnissä") . "
                     </option>
                     <option value='K'

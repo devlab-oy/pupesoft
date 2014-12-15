@@ -2534,7 +2534,7 @@ if ($tee == 'Z') {
       echo "<div id='korvaavat_container'>";
       echo "<input type='button' id='korvaavat' value='",t("Näytä"),"' />";
       echo "</div>";
-    }
+      }
 
     echo "</td><td class='back nopad top'>";
 
@@ -2554,7 +2554,7 @@ if ($tee == 'Z') {
       echo "<div id='vastaavat_container'>";
       echo "<input type='button' id='vastaavat' value='",t("Näytä"),"' />";
       echo "</div>";
-    }
+        }
 
     echo "</td><td class='back nopad top'>";
 
@@ -2630,7 +2630,7 @@ if ($tee == 'Z') {
 
     echo "<hr />";
     echo "<div id='tuotteen_tilaukset_container'>";
-    echo "</div>";
+          echo "</div>";
     echo "<br />";
 
     if ($toim != "TYOMAARAYS_ASENTAJA") {
@@ -2663,7 +2663,7 @@ if ($tee == 'Z') {
       echo "<div id='raportointi_container'>";
       echo "</div>";
       echo "<br />";
-    }
+        }
 
     if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U" or $tuoterow["sarjanumeroseuranta"] == "V" or $tuoterow['sarjanumeroseuranta'] == 'T') {
 
@@ -2920,8 +2920,8 @@ if ($tee == 'Z') {
       //tapahtumat
       echo "<tbody id='tapahtumat_container'></tbody>";
 
-      echo "</table>";
-    }
+              echo "</table>";
+            }
 
     echo "<br /><br />";
     echo $divit;

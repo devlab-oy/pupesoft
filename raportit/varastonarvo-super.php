@@ -898,8 +898,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         $summaus_lisa = "";
       }
 
-      $query = "SELECT tuotepaikat.tuoteno,
-                sum(tuotepaikat.saldo) saldo,
+      $query = "SELECT sum(tuotepaikat.saldo) saldo,
                 sum(tuotepaikat.saldo*if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0)) varasto,
                 sum(tuotepaikat.saldo*tuote.kehahin) bruttovarasto
                 FROM tuotepaikat
@@ -913,12 +912,12 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
       $kpl = (float) $vararvorow["saldo"];
       $varattu_saldo = $tuotevaraukset[$row["tuoteno"]];
-      $varaston_arvo = hinta_kuluineen( $vararvorow["tuoteno"], (float) $vararvorow["varasto"] );
+      $varaston_arvo = hinta_kuluineen( $row["tuoteno"], (float) $vararvorow["varasto"] );
       $varattu_varastonarvo = $varattu_saldo * $row["kehahin_nyt"];
       $varattu_varastonarvo =
-        hinta_kuluineen($vararvorow["tuoteno"], (float) $varattu_varastonarvo);
+        hinta_kuluineen($row["tuoteno"], (float) $varattu_varastonarvo);
       $bruttovaraston_arvo =
-        hinta_kuluineen($vararvorow["tuoteno"], (float) $vararvorow["bruttovarasto"]);
+        hinta_kuluineen($row["tuoteno"], (float) $vararvorow["bruttovarasto"]);
     }
 
     // jos summaustaso on per paikka, otetaan varastonmuutos vain siltä paikalta

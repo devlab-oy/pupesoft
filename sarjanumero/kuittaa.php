@@ -16,64 +16,53 @@ if (!isset($errors)) $errors = array();
 if (!isset($viestit)) $viestit = array();
 
 if (isset($submit)) {
-  switch ($submit) {
-  case 'rahtikirjanumero':
-  case 'sarjanumero':
 
-    if (empty($rahtikirjanumero) and empty($sarjanumero)) {
-      $errors[] = t("Syötä rahtikirjanumero tai sarjanumero");
-      break;
-    }
-    elseif (empty($rahtikirjanumero)) {
-      $parametrit = kuittaus_parametrit($sarjanumero, 'S');
-    }
-    else {
-      $parametrit = kuittaus_parametrit($rahtikirjanumero, 'R');
-    }
+  if (empty($hakunumero)) {
+    $errors[] = t("Syötä rahtikirjanumero tai sarjanumero");
+  }
+  else {
+    $parametrit = kuittaus_parametrit($hakunumero);
+  }
 
-    if (is_string($parametrit)) {
-      $errors[] = t("Rahtikirja: {$parametrit} on jo kuitattu.");
-    }
-    elseif ($parametrit) {
-      $sanoma = laadi_edifact_sanoma($parametrit);
+  if (is_string($parametrit)) {
+    $errors[] = t("Rahtikirja: {$parametrit} on jo kuitattu.");
+  }
+  elseif ($parametrit) {
+    $sanoma = laadi_edifact_sanoma($parametrit);
 
-      $filesize = strlen($sanoma);
-      $liitedata = mysql_real_escape_string($sanoma);
-      $tunnus = $parametrit['laskutunnus'];
+    $filesize = strlen($sanoma);
+    $liitedata = mysql_real_escape_string($sanoma);
+    $tunnus = $parametrit['laskutunnus'];
 
-      $query = "INSERT INTO liitetiedostot SET
-                yhtio           = '{$kukarow['yhtio']}',
-                liitos          = 'lasku',
-                liitostunnus    = '$tunnus',
-                selite          = '{$parametrit['sanomanumero']}',
-                laatija         = '{$kukarow['kuka']}',
-                luontiaika      = NOW(),
-                data            = '{$liitedata}',
-                filename        = '{$parametrit['sanoma_id']}',
-                filesize        = '$filesize',
-                filetype        = 'text/plain',
-                kayttotarkoitus = 'kuittaussanoma'";
-      pupe_query($query);
+    $query = "INSERT INTO liitetiedostot SET
+              yhtio           = '{$kukarow['yhtio']}',
+              liitos          = 'lasku',
+              liitostunnus    = '$tunnus',
+              selite          = '{$parametrit['sanomanumero']}',
+              laatija         = '{$kukarow['kuka']}',
+              luontiaika      = NOW(),
+              data            = '{$liitedata}',
+              filename        = '{$parametrit['sanoma_id']}',
+              filesize        = '$filesize',
+              filetype        = 'text/plain',
+              kayttotarkoitus = 'kuittaussanoma'";
+    pupe_query($query);
 
+  }
+  else{
+    $errors[] = t("Rahtikirjaa ei löytynyt!");
+  }
+
+  if ($sanoma) {
+    if (laheta_sanoma($sanoma)) {
+    $viestit[] = t("Rahti vastaanotettu ja sanoma lähetetty!");
     }
     else{
-      $errors[] = t("Rahtikirjaa ei löytynyt!");
+      $errors[] = t("Lähetys ei onnistunut");
     }
-    if ($sanoma) {
-      if (laheta_sanoma($sanoma)) {
-      $viestit[] = t("Rahti vastaanotettu ja sanoma lähetetty!");
-      }
-      else{
-        $errors[] = t("Lähetys ei onnistunut");
-      }
-    }
-    else{
-      $errors[] = t("Ei lähetetty sanomaa.");
-    }
-    break;
-  default:
-    $errors[] = t("Yllättävä virhe");
-    break;
+  }
+  else{
+    $errors[] = t("Ei lähetetty sanomaa.");
   }
 }
 
@@ -99,31 +88,19 @@ echo "</div>";
 
 echo "</div>";
 
-/*
-<form method='post' action=''>
-  <div style='text-align:center;padding:10px;'>
-    <label for='rahtikirjanumero'>", t("Syötä rahtikirjanumero"), "</label><br>
-    <input type='text' id='rahtikirjanumero' name='rahtikirjanumero' style='margin:10px;' />
-    <br>
-    <button name='submit' value='rahtikirjanumero' onclick='submit();' class='button'>", t("OK"), "</button>
-  </div>
-</form>
-
-*/
-
 echo "
 <form method='post' action=''>
   <div style='text-align:center;padding:10px;'>
-    <label for='sarjanumero'>", t("Lue mikä tahansa rahdin viivakoodi."), "</label><br>
-    <input type='text' id='sarjanumero' name='sarjanumero' style='margin:10px;' />
+    <label for='hakunumero'>", t("Lue mikä tahansa rahdin viivakoodi tai rahtikirjanumero."), "</label><br>
+    <input type='text' id='hakunumero' name='hakunumero' style='margin:10px;' />
     <br>
-    <button name='submit' value='sarjanumero' onclick='submit();' class='button'>", t("OK"), "</button>
+    <button name='submit' value='hakunumero' onclick='submit();' class='button'>", t("OK"), "</button>
   </div>
 </form>
 
 <script type='text/javascript'>
   $(document).on('touchstart', function(){
-    $('#sarjanumero').focus();
+    $('#hakunumero').focus();
   });
 </script>";
 

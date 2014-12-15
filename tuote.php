@@ -1438,6 +1438,28 @@ echo "<script type='text/javascript'>
               }
             });
           });
+
+          $('.raportti_tyyppi').on('change', function() {
+            $('#raportointi').trigger('click');
+          });
+
+          $('#toimipaikka').on('change', function() {
+            $('#tuotteen_tilaukset').trigger('click');
+            $('#raportointi').trigger('click');
+            $('#tapahtumat').trigger('click');
+          });
+
+          $('#historia, #tapahtumalaji, #tilalehinta').on('change', function() {
+            $('#tapahtumat').trigger('click');
+          });
+
+          if ('{$yhtiorow['tuotekysely']}' == '') {
+            $('#vastaavat').trigger('click');
+            $('#korvaavat').trigger('click');
+            $('#tuotteen_tilaukset').trigger('click');
+            $('#raportointi').trigger('click');
+            $('#tapahtumat').trigger('click');
+          }
         });
       </script>";
 

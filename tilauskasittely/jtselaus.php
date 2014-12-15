@@ -1309,7 +1309,7 @@ if ($tee == "JATKA") {
                                          lasku.ytunnus,
                                          lasku.nimi,
                                          lasku.toim_nimi
-                                         FROM tilausrivi USE INDEX (yhtio_tyyppi_var_keratty_kerattyaika_uusiotunnus)
+                                         FROM tilausrivi USE INDEX (tyyppi_tuoteno_var_keratty_uusiotunnus)
                                          JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
                                            AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
                                          JOIN lasku USE INDEX (primary) ON (lasku.yhtio = tilausrivi.yhtio

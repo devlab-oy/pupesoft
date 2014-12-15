@@ -22184,7 +22184,7 @@ if (!function_exists('luottotilanne')) {
     $query = "(SELECT
               round(sum({$avtilisa} * if('{$yhtiorow['alv_kasittely']}' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) tilausavoinsaldo
               FROM lasku
-              JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
+              JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi = 'L')
               WHERE lasku.yhtio      = '{$kukarow['yhtio']}'
               AND lasku.tila in ('L', 'N')
               AND lasku.alatila != 'X'      # Kaikki myyntitilaukset, paitsi laskutetut
@@ -22193,7 +22193,7 @@ if (!function_exists('luottotilanne')) {
               (SELECT
               round(sum({$avtilisa} * if('{$yhtiorow['alv_kasittely']}' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) tilausavoinsaldo
               FROM lasku
-              JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
+              JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi = 'W')
               WHERE lasku.yhtio      = '{$kukarow['yhtio']}'
               AND lasku.tila = 'V'
               AND lasku.alatila in ('','A','C','J','V')  # Valmistukset

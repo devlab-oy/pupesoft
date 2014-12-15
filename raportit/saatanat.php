@@ -299,23 +299,21 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
   }
 
   $query = "(SELECT
-              {$selecti},
-              {$summalisa}
-              min(lasku.liitostunnus) litu,
-              min(lasku.tunnus) latunnari
-              FROM lasku use index ({$indeksi})
-              JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl' {$tiliointilisa})
-              {$luottolisa}
-              WHERE lasku.yhtio = '{$saatavat_yhtio}'
-              and lasku.mapvm > '{$savvl}-{$sakkl}-{$sappl}'
-              and lasku.tapvm   <= '{$savvl}-{$sakkl}-{$sappl}'
-              and lasku.tapvm   > '0000-00-00'
-              and lasku.tila    = 'U'
-              and lasku.alatila = 'X'
-              {$generoitumuuttuja}
-              {$salisa1}
-              GROUP BY {$grouppauslisa}
-              {$having})
+            {$selecti},
+            {$summalisa}
+            min(lasku.liitostunnus) litu,
+            min(lasku.tunnus) latunnari
+            FROM lasku use index ({$indeksi})
+            JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl' {$tiliointilisa})
+            {$luottolisa}
+            WHERE lasku.yhtio = '{$saatavat_yhtio}'
+            and lasku.mapvm > '{$savvl}-{$sakkl}-{$sappl}'
+            and lasku.tapvm   <= '{$savvl}-{$sakkl}-{$sappl}'
+            and lasku.tapvm   > '0000-00-00'
+            and lasku.tila    = 'U'
+            and lasku.alatila = 'X'
+            {$generoitumuuttuja}
+            {$salisa1})
             UNION
             (SELECT
             {$selecti},
@@ -332,9 +330,9 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
             and lasku.tila    = 'U'
             and lasku.alatila = 'X'
             {$generoitumuuttuja}
-            {$salisa1}
+            {$salisa1})
             GROUP BY {$grouppauslisa}
-            {$having})
+            {$having}
             ORDER BY 1,2,3";
 
   $result = pupe_query($query);

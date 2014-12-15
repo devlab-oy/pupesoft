@@ -1166,8 +1166,11 @@ if ($tee == 'MUUTA') {
         if ($krow["maksupaate_kassamyynti"] == "") {
           $maksupaate_sel_1 = "selected";
         }
-        else {
+        elseif ($krow["maksupaate_kassamyynti"] == "E") {
           $maksupaate_sel_2 = "selected";
+        }
+        else {
+          $maksupaate_sel_3 = "selected";
         }
 
         echo "<tr>
@@ -1178,10 +1181,10 @@ if ($tee == 'MUUTA') {
                             {$maksupaate_sel_1}>" . t("Yhtiˆn oletus") . "
                     </option>
                     <option value='E'
-                            {$maksupaate_sel_1}>" . t("Ei k‰ytet‰ maksup‰‰tett‰ kassamyynniss‰") . "
+                            {$maksupaate_sel_2}>" . t("Ei k‰ytet‰ maksup‰‰tett‰ kassamyynniss‰") . "
                     </option>
                     <option value='K'
-                            {$maksupaate_sel_2}>" . t("K‰ytet‰‰n maksup‰‰tett‰ kassamyynniss‰") . "
+                            {$maksupaate_sel_3}>" . t("K‰ytet‰‰n maksup‰‰tett‰ kassamyynniss‰") . "
                     </option>
                   </select>
                 </td>

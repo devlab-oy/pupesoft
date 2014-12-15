@@ -1889,8 +1889,7 @@ if ($tee == "JATKA") {
 
                     echo "<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA' $mita_check></td>";
                     echo "<td valign='top' align='center' $classlisa>".t("H")."<input type='radio' name='loput[$tunnukset]' value='VAKISIN' $mita_check></td>";
-                    echo "<td class='back'><button name='poistaValintaNappi'>Poista valinta</button></td>";
-
+                    echo "<td class='back'><button name='poistaValintaNappi'>" . t("Poista valinta") . "</button></td>";
                   }
                   elseif ($kukarow["extranet"] != "") {
                     echo "<td valign='top' $class><font style='color:green;'>".t("Voidaan toimittaa")."!</font></td>";
@@ -1985,7 +1984,7 @@ if ($tee == "JATKA") {
 
                   echo "<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA' $mita_check></td>";
                   echo "<td valign='top' align='center' $classlisa>".t("H")."<input type='radio' name='loput[$tunnukset]' value='VAKISIN' $mita_check></td>";
-                  echo "<td class='back'><button name='poistaValintaNappi'>Poista valinta</button></td>";
+                  echo "<td class='back'><button name='poistaValintaNappi'>" . t("Poista valinta") . "</button></td>";
 
                   $jt_rivilaskuri++;
                 }
@@ -2042,8 +2041,7 @@ if ($tee == "JATKA") {
 
                   echo "<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA' $mita_check></td>";
                   echo "<td valign='top' align='center' $classlisa>".t("H")."<input type='radio' name='loput[$tunnukset]' value='VAKISIN' $mita_check></td>";
-                  echo "<td class='back'><button name='poistaValintaNappi'>Poista valinta</button></td>";
-
+                  echo "<td class='back'><button name='poistaValintaNappi'>" . t("Poista valinta") . "</button></td>";
 
                   $jt_rivilaskuri++;
                 }
@@ -2095,7 +2093,7 @@ if ($tee == "JATKA") {
                         <td valign='top' align='center' $class>&nbsp;</td>
                         <td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA' $mita_check></td>";
                     echo "<td valign='top' align='center' $classlisa>".t("H")."<input type='radio' name='loput[$tunnukset]' value='VAKISIN' $mita_check></td>";
-                    echo "<td class='back'><button name='poistaValintaNappi'>Poista valinta</button></td>";
+                    echo "<td class='back'><button name='poistaValintaNappi'>" . t("Poista valinta") . "</button></td>";
 
                   }
                   else {

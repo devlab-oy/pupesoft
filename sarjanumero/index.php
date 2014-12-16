@@ -8,7 +8,7 @@ elseif (@include_once "inc/parametrit.inc");
 
 
 if (!isset($view)) {
-  $view = 'top';
+  $view = 'rulla';
 }
 
 echo "<meta name='viewport' content='width=device-width, maximum-scale=1.0' />\n";

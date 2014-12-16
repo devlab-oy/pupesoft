@@ -40,11 +40,11 @@ td {
   vertical-align: middle;
 }
 
-.nopad {
-  padding: 0px;
+.pnopad {
+  padding: 0;
 }
 
-.top {
+.ptop {
   vertical-align: top;
 }
 

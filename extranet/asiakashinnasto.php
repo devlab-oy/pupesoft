@@ -114,7 +114,8 @@ else {
       $ryhmittelylisa = " JOIN tuotteen_avainsanat
                           ON tuotteen_avainsanat.yhtio = tuote.yhtio
                           AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
-                          AND tuotteen_avainsanat.laji = 'tuoteryhmaosasto' ";
+                          AND tuotteen_avainsanat.laji = 'tuoteryhmaosasto'
+                          AND tuotteen_avainsanat.kieli = '{$yhtiorow['kieli']}' ";
       $selectlisa = ", tuotteen_avainsanat.selite AS tro, tuotteen_avainsanat.jarjestys AS jar ";
       $jarjestyslisa = " tro, jar, ";
     }
@@ -184,6 +185,9 @@ else {
               {$kieltolisa}
               {$lisa}
               ORDER BY {$jarjestyslisa} tuote.osasto, tuote.try, tuote.tuoteno";
+
+echo $query;die;
+
     $rresult = pupe_query($query);
 
     // KAUTTALASKUTUSKIKKARE

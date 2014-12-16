@@ -1281,7 +1281,7 @@ if ($kasitellaan_tiedosto) {
           $taulunrivit[$taulu][$eriviindex][$postoiminto] = "LISAA";
         }
         elseif ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA' and mysql_num_rows($fresult) != 0) {
-          if ($table_mysql != 'asiakasalennus' and $table_mysql != 'asiakashinta' and $table_mysql != 'toimittajaalennus' and $table_mysql != 'toimittajahinta') {
+          if ($table_mysql != 'asiakasalennus' and $table_mysql != 'asiakashinta' and $table_mysql != 'toimittajaalennus' and $table_mysql != 'toimittajahinta' and $table_mysql != 'tuotteen_avainsanat') {
             lue_data_echo(t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("VIRHE:")." ".t("Rivi on jo olemassa, ei voida perustaa uutta!")."</font> $valinta<br>");
             $tila = 'ohita';
           }

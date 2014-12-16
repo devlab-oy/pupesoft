@@ -15,6 +15,7 @@ require_once "rajapinnat/presta/presta_customer_groups.php";
 require_once "rajapinnat/presta/presta_sales_orders.php";
 require_once 'rajapinnat/presta/presta_product_stocks.php';
 require_once 'rajapinnat/presta/presta_shops.php';
+require_once 'rajapinnat/presta/presta_specific_prices.php';
 
 if (!isset($action)) {
   $action = '';
@@ -29,12 +30,13 @@ $request = array(
 );
 
 $request['synkronointi_tyypit'] = array(
-    'kaikki'        => t('Kaikki'),
-    'kategoriat'    => t('Kategoriat'),
-    'tuotteet'      => t('Tuotteet ja tuotekuvat'),
-    'asiakkaat'     => t('Asiakkaat'),
-    'asiakasryhmat' => t('Asiakasryhmät'),
-    'tilaukset'     => t('Tilauksien haku'),
+    'kaikki'         => t('Kaikki'),
+    'kategoriat'     => t('Kategoriat'),
+    'tuotteet'       => t('Tuotteet ja tuotekuvat'),
+    'asiakkaat'      => t('Asiakkaat'),
+    'asiakasryhmat'  => t('Asiakasryhmät'),
+    'asiakas_hinnat' => t('Asiakashinnat'),
+    'tilaukset'      => t('Tilauksien haku'),
 );
 
 if ($request['action'] == 'sync') {
@@ -77,6 +79,10 @@ if ($request['action'] == 'sync') {
     $groups = hae_asiakasryhmat();
     $presta_customer_groups = new PrestaCustomerGroups($presta_url, $presta_api_key);
     $ok = $presta_customer_groups->sync_groups($groups);
+  }
+
+  if ($ok and in_array('asiakashinnat', $synkronoi)) {
+    $groups = hae_asiakashinnat();
   }
 
   if (in_array('tilaukset', $synkronoi)) {

@@ -37,6 +37,7 @@ require "{$pupe_root_polku}/rajapinnat/presta/presta_customer_groups.php";
 require "{$pupe_root_polku}/rajapinnat/presta/presta_sales_orders.php";
 require "{$pupe_root_polku}/rajapinnat/presta/presta_product_stocks.php";
 require "{$pupe_root_polku}/rajapinnat/presta/presta_shops.php";
+require "{$pupe_root_polku}/rajapinnat/presta/presta_specific_prices.php";
 
 // Laitetaan unlimited execution time
 ini_set("max_execution_time", 0);

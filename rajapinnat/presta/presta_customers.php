@@ -98,8 +98,6 @@ class PrestaCustomers extends PrestaClient {
    * @param int $id
    */
   public function get($id) {
-    $customer = parent::get($id);
-
-    return $customer;
+    return parent::get($id);
   }
 }

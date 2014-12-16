@@ -1449,13 +1449,14 @@ function kasittele_bookkaussanoma($edi_data) {
     $korvattava = mysql_result($vastaavuusresult, 0);
 
     $query = "UPDATE liitetiedostot SET
-              data        = '$liitedata',
-              muutospvm   = NOW(),
-              muuttaja    = '{$kukarow['kuka']}',
-              filename    = '{$sanoma_id}',
-              filesize    = '$filesize'
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND  tunnus = '{$korvattava}'";
+              data         = '$liitedata',
+              muutospvm    = NOW(),
+              liitostunnus = '{$lasku['tunnus']}'
+              muuttaja     = '{$kukarow['kuka']}',
+              filename     = '{$sanoma_id}',
+              filesize     = '$filesize'
+              WHERE yhtio  = '{$kukarow['yhtio']}'
+              AND  tunnus  = '{$korvattava}'";
     pupe_query($query);
   }
 
@@ -2214,6 +2215,8 @@ function tarkista_sarjanumero($sarjanumero) {
 function peruuta_bookkaus($rullamaara, $tilausnro, $rivinro) {
   global $kukarow;
 
+  $tilaus_ja_rivi = $tilausnro.":".$rivinro;
+
   $query = "SELECT
             lasku.asiakkaan_tilausnumero,
             laskun_lisatiedot.rullamaara,
@@ -2237,8 +2240,6 @@ function peruuta_bookkaus($rullamaara, $tilausnro, $rivinro) {
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tunnus = '{$lasku['lisatieto_tunnus']}'";
     pupe_query($query);
-
-    $tilaus_ja_rivi = $tilausnro.":".$rivinro;
 
   }
   else {

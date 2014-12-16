@@ -5510,19 +5510,23 @@ if ($tee == '') {
             $pre_date = new DateTime($cur_date->format('Y-m-d'));
             $pre_date->add(new DateInterval('P1M'));
 
-            $query = "SELECT tapahtuma.*,
-                      if (kuka.nimi is not null and kuka.nimi != '', kuka.nimi, tapahtuma.laatija) laatija,
-                      tilausrivi.alv
-                      FROM tapahtuma USE INDEX (laji_tuote_laadittu)
-                      JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
-                      JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.liitostunnus='{$laskurow['liitostunnus']}' and lasku.tila = 'L' and lasku.alatila = 'X')
+            $query = "SELECT tilausrivi.*,
+                      if (kuka.nimi IS NOT NULL AND kuka.nimi != '', kuka.nimi, tilausrivi.laatija) laatija
+                      FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
+                      JOIN lasku USE INDEX (PRIMARY) ON (
+                        lasku.yhtio = tilausrivi.yhtio AND
+                        lasku.tunnus = tilausrivi.otunnus AND
+                        lasku.liitostunnus = '{$laskurow['liitostunnus']}' AND
+                        lasku.tila = 'L' AND
+                        lasku.alatila = 'X'
+                      )
                       LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja)
-                      WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
-                      AND tapahtuma.tuoteno = '{$tuote['tuoteno']}'
-                      AND tapahtuma.laji    = 'laskutus'
-                      AND tapahtuma.laadittu <= '".$pre_date->format('Y-m-d')."'
-                      and tapahtuma.laadittu >= '".$cur_date->format('Y-m-d')."'
-                      ORDER BY tapahtuma.laadittu desc, tapahtuma.tunnus desc";
+                      WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                      AND tilausrivi.tyyppi = 'L'
+                      AND tilausrivi.tuoteno = '{$tuote['tuoteno']}'
+                      AND tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."'
+                      AND tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."'
+                      ORDER BY tilausrivi.laskutettuaika DESC, tilausrivi.tunnus DESC";
             $tapahtuma_chk_res = pupe_query($query);
 
             if (mysql_num_rows($tapahtuma_chk_res) > 0) {
@@ -5532,16 +5536,22 @@ if ($tee == '') {
                 $_html_rows .= "<tr>";
                 $_html_rows .= "<td>{$tapahtuma_chk_row['laatija']}</td>";
                 $_html_rows .= "<td>".tv1dateconv($tapahtuma_chk_row['laadittu'])."</td>";
-                $_html_rows .= "<td align='right'>".($tapahtuma_chk_row['kpl'] * -1)." {$tapahtuma_chk_row['yksikko']}</td>";
+                $_html_rows .= "<td align='right'>";
+                $_html_rows .= ($tapahtuma_chk_row['kpl'] * -1)." {$tapahtuma_chk_row['yksikko']}";
+                $_html_rows .= "</td>";
 
                 if ($oikeus_chk) {
                   // Onko verolliset hinnat?
                   if ($yhtiorow["alv_kasittely"] == "") {
-                    $tapahtuma_chk_row['kplhinta'] = $tapahtuma_chk_row['kplhinta'] * (1 + $tapahtuma_chk_row["alv"] / 100);
+                    $tapahtuma_chk_row['hinta'] *= (1 + $tapahtuma_chk_row["alv"] / 100);
                   }
 
-                  $_html_rows .= "<td align='right'>".hintapyoristys($tapahtuma_chk_row['kplhinta'])."</td>";
-                  $_html_rows .= "<td align='right'>".hintapyoristys($tapahtuma_chk_row['kplhinta']*($tapahtuma_chk_row['kpl'] * -1))."</td>";
+                  $_html_rows .= "<td align='right'>";
+                  $_html_rows .= hintapyoristys($tapahtuma_chk_row['hinta']);
+                  $_html_rows .= "</td>";
+
+                  $_kplhinta = $tapahtuma_chk_row['hinta'] * ($tapahtuma_chk_row['kpl'] * -1);
+                  $_html_rows .= "<td align='right'>".hintapyoristys($_kplhinta)."</td>";
                 }
 
                 $_html_rows .= "</tr>";

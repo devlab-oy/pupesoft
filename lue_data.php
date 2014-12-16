@@ -806,6 +806,9 @@ if ($kasitellaan_tiedosto) {
 
           $valinta .= " and TUOTENO='$tuoteno'";
         }
+        elseif ($taulunotsikot[$taulu][$j] == 'SELITE') {
+          $valinta .= " and SELITE = '{$taulunrivit[$taulu][$eriviindex][$j]}' ";
+        }
         elseif ($table_mysql == 'autoid_lisatieto' and $lue_data_autoid and ($taulunrivit[$taulu][$eriviindex][$postoiminto] == "POISTA" or $taulunrivit[$taulu][$eriviindex][$postoiminto] == "MUUTA") and !in_array($eriviindex, $lisatyt_indeksit)) {
           $tee = "pre_rivi_loop";
           require "lue_data_autoid.php";
@@ -2114,7 +2117,7 @@ if ($kasitellaan_tiedosto) {
         if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'MUUTA' and mysql_num_rows($result) != 1) {
           lue_data_echo(t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Päivitettävää riviä ei löytynyt")."!</font><br>");
         }
-        elseif ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA' and mysql_num_rows($result) != 0) {
+        elseif ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA' and mysql_num_rows($result) != 0 and $table_mysql != 'tuotteen_avainsanat') {
 
           if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajaalennus') {
             lue_data_echo(t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Riviä ei lisätty, koska se löytyi jo järjestelmästä")."!</font><br>");

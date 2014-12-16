@@ -182,6 +182,7 @@ function piirra_tiedostolista($tiedostot, $aihealue, $tiedostotyyppi) {
     echo "</tr>";
   }
 
+  echo "</br>";
   echo "</tbody>";
   echo "</table>";
 }

@@ -83,8 +83,7 @@ class PrestaProducts extends PrestaClient {
 
     try {
       $this->schema = $this->get_empty_schema();
-      $existing_products = $this->all(array('id', 'reference'));
-      $existing_products = array_column($existing_products, 'reference', 'id');
+      $existing_products = $this->all_skus();
 
       foreach ($products as $product) {
         //@TODO tee while looppi ja catchissa tsekkaa $counter >= 10 niin break;
@@ -120,6 +119,13 @@ class PrestaProducts extends PrestaClient {
 
     $this->logger->log('---------End product sync---------');
     return true;
+  }
+
+  public function all_skus() {
+    $existing_products = $this->all(array('id', 'reference'));
+    $existing_products = array_column($existing_products, 'reference', 'id');
+
+    return $existing_products;
   }
 
   /**

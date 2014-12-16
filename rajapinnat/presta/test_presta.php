@@ -81,11 +81,14 @@ if ($request['action'] == 'sync') {
     $ok = $presta_customer_groups->sync_groups($groups);
   }
 
+  die();
   if ($ok and in_array('asiakashinnat', $synkronoi)) {
-    $groups = hae_asiakashinnat();
+    $hinnat = hae_asiakashinnat();
+    $presta_prices = new PrestaSpecificPrices($presta_url, $presta_api_key);
+    $presta_prices->sync_prices($hinnat);
   }
 
-  if (in_array('tilaukset', $synkronoi)) {
+  if ($ok and in_array('tilaukset', $synkronoi)) {
     $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key);
     $presta_orders->transfer_orders_to_pupesoft();
   }
@@ -154,6 +157,22 @@ function hae_asiakasryhmat() {
   }
 
   return $ryhmat;
+}
+
+function hae_asiakashinnat() {
+  global $kukarow, $yhtiorow;
+
+  $query = "SELECT *
+            FROM asiakashinta
+            WHERE asiakashinta.yhtio = '{$kukarow['yhtio']}'";
+  $result = pupe_query($query);
+
+  $asiakashinnat = array();
+  while ($asiakashinta = mysql_fetch_assoc($result)) {
+    $asiakashinnat[] = $asiakashinta;
+  }
+
+  return $asiakashinnat;
 }
 
 function hae_kategoriat() {

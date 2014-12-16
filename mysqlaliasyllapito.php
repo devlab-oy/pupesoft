@@ -2,6 +2,10 @@
 
 require "inc/parametrit.inc";
 
+if ($yhtiorow['laite_huolto'] == 'X') {
+  require "inc/laite_huolto_functions.inc";
+}
+
 echo "<font class='head'>".t("Mysqlalias-avainsanojen ylläpito")."</font><hr>";
 
 if ($upd == 1) {

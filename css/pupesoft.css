@@ -130,3 +130,7 @@ input[type=submit].poista_btn {
   background-position: right;
   padding-right: 35px;
 }
+
+.monivalintadiv {
+  display: inline-block;
+}

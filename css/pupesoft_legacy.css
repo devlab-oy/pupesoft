@@ -1,7 +1,7 @@
 div.lopetus {
   top:5px;
   margin-top: 5px;
-  margin-bottom: 5px;  
+  margin-bottom: 5px;
 }
 
 div.ohje {
@@ -41,4 +41,8 @@ table.indexvas td {
 
 .top {
   vertical-align: top;
+}
+
+.monivalintadiv {
+  display: inline-block;
 }

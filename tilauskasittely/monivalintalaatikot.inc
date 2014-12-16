@@ -793,20 +793,12 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
         $multiple_lisa = "";
       }
 
-      echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+      echo "<div class='monivalintadiv'><table valign='top'>";
 
       if ($piirra_otsikot) {
         echo "<tr><th>";
 
-        if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-          echo "<label>";
-        }
-
         echo t("Toimittaja");
-
-        if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-          echo "</label>";
-        }
 
         echo "</th></tr>";
       }
@@ -897,20 +889,12 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
         $multiple_lisa = "";
       }
 
-      echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+      echo "<div class='monivalintadiv'><table valign='top'>";
 
       if ($piirra_otsikot) {
         echo "<tr><th>";
 
-        if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-          echo "<label>";
-        }
-
         echo t("Osasto");
-
-        if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-          echo "</label>";
-        }
 
         echo "</th></tr>";
       }
@@ -1018,20 +1002,12 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
         $multiple_lisa = "";
       }
 
-      echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+      echo "<div class='monivalintadiv'><table valign='top'>";
 
       if ($piirra_otsikot) {
         echo "<tr><th>";
 
-        if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-          echo "<label>";
-        }
-
         echo t("Tuoteryhmä");
-
-        if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-          echo "</label>";
-        }
 
         echo "</th></tr>";
       }
@@ -1142,20 +1118,12 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
     if (is_resource($tmsresult) and mysql_num_rows($tmsresult) > 0) {
 
-      echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+      echo "<div class='monivalintadiv'><table valign='top'>";
 
       if ($piirra_otsikot) {
         echo "<tr><th>";
 
-        if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-          echo "<label>";
-        }
-
         echo t("Tuotemerkki");
-
-        if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-          echo "</label>";
-        }
 
         echo "</th></tr>";
       }
@@ -1272,21 +1240,11 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
         if (is_resource($sxresult) and mysql_num_rows($sxresult) > 0) {
 
-          echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+          echo "<div class='monivalintadiv'><table valign='top'>";
 
           if ($piirra_otsikot) {
             echo "<tr><th>";
-
-            if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-              echo "<label>";
-            }
-
             echo t("Malli");
-
-            if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-              echo "</label>";
-            }
-
             echo "</th></tr>";
           }
 
@@ -1401,21 +1359,11 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
         }
 
         if (is_resource($sxresult) and mysql_num_rows($sxresult) > 0) {
-          echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+          echo "<div class='monivalintadiv'><table valign='top'>";
 
           if ($piirra_otsikot) {
             echo "<tr><th>";
-
-            if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-              echo "<label>";
-            }
-
             echo t("Mallitarkenne");
-
-            if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-              echo "</label>";
-            }
-
             echo "</th></tr>";
           }
 
@@ -1545,7 +1493,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
             echo "</table></div>";
           }
 
-          echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+          echo "<div class='monivalintadiv'><table valign='top'>";
 
           if ($piirra_otsikot) {
             echo "<tr><th>$mul_otsik {$looppirow['syvyys']}</th></tr>";
@@ -1691,21 +1639,11 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
       if (is_resource($sxresult) and mysql_num_rows($sxresult) > 0) {
 
-        echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+        echo "<div class='monivalintadiv'><table valign='top'>";
 
         if ($piirra_otsikot) {
           echo "<tr><th>";
-
-          if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-            echo "<label>";
-          }
-
           echo t_avainsana("PARAMETRI", "", " and avainsana.selite='$parametri'", "", "", "selitetark");
-
-          if (isset($hae_ja_selaa_row['selite']) and $hae_ja_selaa_row['selite'] == 'B') {
-            echo "</label>";
-          }
-
           echo "</th></tr>";
         }
 
@@ -1752,7 +1690,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   }
 
   if ($monivalintalaatikko == "laskumyyja") {
-    echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+    echo "<div class='monivalintadiv'><table valign='top'>";
 
     if ($piirra_otsikot) {
       echo "<tr><th>", t("Myyjä"), "</th></tr>";
@@ -1800,7 +1738,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   }
 
   if ($monivalintalaatikko == "asiakastila") {
-    echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+    echo "<div class='monivalintadiv'><table valign='top'>";
 
     if ($piirra_otsikot) {
       echo "<tr><th>", t("Asiakastila"), "</th></tr>";
@@ -1844,7 +1782,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   }
 
   if ($monivalintalaatikko == "tuotemyyja") {
-    echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+    echo "<div class='monivalintadiv'><table valign='top'>";
 
     if ($piirra_otsikot) {
       echo "<tr><th>", t("Tuotemyyjä"), "</th></tr>";
@@ -1892,7 +1830,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   }
 
   if ($monivalintalaatikko == "asiakasmyyja") {
-    echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+    echo "<div class='monivalintadiv'><table valign='top'>";
 
     if ($piirra_otsikot) {
       echo "<tr><th>", t("Asiakasmyyjä"), "</th></tr>";
@@ -1940,7 +1878,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   }
 
   if ($monivalintalaatikko == "tuoteostaja") {
-    echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+    echo "<div class='monivalintadiv'><table valign='top'>";
 
     if ($piirra_otsikot) {
       echo "<tr><th>", t("Tuoteostaja"), "</th></tr>";
@@ -1987,7 +1925,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   }
 
   if ($monivalintalaatikko == "asiakasosasto") {
-    echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+    echo "<div class='monivalintadiv'><table valign='top'>";
 
     if ($piirra_otsikot) {
       echo "<tr><th>", t("Asiakasosasto"), "</th></tr>";
@@ -2031,7 +1969,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   }
 
   if ($monivalintalaatikko == "asiakasryhma") {
-    echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+    echo "<div class='monivalintadiv'><table valign='top'>";
 
     if ($piirra_otsikot) {
       echo "<tr><th>", t("Asiakasryhmä"), "</th></tr>";
@@ -2075,7 +2013,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
   }
 
   if ($monivalintalaatikko == "asiakaspiiri") {
-    echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+    echo "<div class='monivalintadiv'><table valign='top'>";
 
     if ($piirra_otsikot) {
       echo "<tr><th>", t("Asiakaspiiri"), "</th></tr>";
@@ -2128,7 +2066,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
     if (mysql_num_rows($toimipaikka_result) > 0) {
 
-      echo "<div style='float: left; padding-right:4px; padding-top:4px;'>";
+      echo "<div class='monivalintadiv'>";
       echo "<table valign='top'>";
       if ($piirra_otsikot) {
         echo "<tr><th>", t("Toimipaikka"), "</th></tr>";
@@ -2234,7 +2172,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     }
 
     if (mysql_num_rows($sresult) > 0) {
-      echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+      echo "<div class='monivalintadiv'><table valign='top'>";
 
       if ($piirra_otsikot) {
         echo "<tr><th>", t("Kustannuspaikka"), "</th></tr>";
@@ -2314,7 +2252,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     $sresult = pupe_query($query);
 
     if (mysql_num_rows($sresult) > 0) {
-      echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+      echo "<div class='monivalintadiv'><table valign='top'>";
 
       if ($piirra_otsikot) {
         echo "<tr><th>", t("Kohde"), "</th></tr>";
@@ -2371,7 +2309,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
     $sresult = pupe_query($query);
 
     if (mysql_num_rows($sresult) > 0) {
-      echo "<div style='float: left; padding-right:4px; padding-top:4px;'><table valign='top'>";
+      echo "<div class='monivalintadiv'><table valign='top'>";
 
       if ($piirra_otsikot) {
         echo "<tr><th>", t("Projekti"), "</th></tr>";

@@ -1415,6 +1415,7 @@ echo "<script type='text/javascript'>
                 kehahin = $('#kehahin').val(),
                 tapahtumalaji = $('#tapahtumalaji option:selected').val(),
                 tilalehinta = $('#tilalehinta:checked').val(),
+                kokonaissaldo_tapahtumalle = $('#kokonaissaldo_tapahtumalle').val(),
                 toimipaikka = $('#toimipaikka option:selected').val();
 
             $(this).val('".t("Päivitä")."');
@@ -1445,6 +1446,7 @@ echo "<script type='text/javascript'>
                 kehahin: kehahin,
                 tapahtumalaji: tapahtumalaji,
                 tilalehinta: tilalehinta,
+                kokonaissaldo_tapahtumalle: kokonaissaldo_tapahtumalle,
                 toimipaikka: toimipaikka
               },
               success: function(data) {
@@ -2815,6 +2817,8 @@ if ($tee == 'Z') {
     if ($toim != "TYOMAARAYS_ASENTAJA") {
       // Varastotapahtumat
       echo "<font class='message'>".t("Tuotteen tapahtumat")."</font>";
+
+      echo "<input type='hidden' id='kokonaissaldo_tapahtumalle' value='{$kokonaissaldo_tapahtumalle}' />";
 
       echo "<form action='$PHP_SELF#Tapahtumat' method='post'>";
       echo "<input type='hidden' name='toim' value='$toim'>";

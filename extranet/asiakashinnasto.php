@@ -186,8 +186,6 @@ else {
               {$lisa}
               ORDER BY {$jarjestyslisa} tuote.osasto, tuote.try, tuote.tuoteno";
 
-echo $query;die;
-
     $rresult = pupe_query($query);
 
     // KAUTTALASKUTUSKIKKARE

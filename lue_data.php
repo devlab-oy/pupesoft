@@ -2117,11 +2117,16 @@ if ($kasitellaan_tiedosto) {
         if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'MUUTA' and mysql_num_rows($result) != 1) {
           lue_data_echo(t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Päivitettävää riviä ei löytynyt")."!</font><br>");
         }
-        elseif ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA' and mysql_num_rows($result) != 0 and $table_mysql != 'tuotteen_avainsanat') {
+        elseif ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA' and mysql_num_rows($result) != 0) {
 
-          if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajaalennus') {
+          if (   $table_mysql == 'asiakasalennus'
+              or $table_mysql == 'asiakashinta'
+              or $table_mysql == 'toimittajahinta'
+              or $table_mysql == 'toimittajaalennus'
+              or $table_mysql == 'tuotteen_avainsanat') {
             lue_data_echo(t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Riviä ei lisätty, koska se löytyi jo järjestelmästä")."!</font><br>");
           }
+
         }
         else {
           $tarkrow = mysql_fetch_array($result);

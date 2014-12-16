@@ -458,7 +458,7 @@ if (mysql_field_name($result, $i) == "tilausvahvistus") {
 
 if (mysql_field_name($result, $i) == "tilausvahvistus_jttoimituksista") {
 
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
   $sel = array();
   $apu = $trow[$i];
@@ -474,7 +474,7 @@ if (mysql_field_name($result, $i) == "tilausvahvistus_jttoimituksista") {
 
 if (mysql_field_name($result, $i) == "jt_toimitusaika_email_vahvistus") {
 
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
   $sel = array();
   $apu = $trow[$i];
@@ -941,7 +941,7 @@ if (mysql_field_name($result, $i) == "rahtivapaa_alarajasumma") {
 
 if (mysql_field_name($result, $i) == "kuljetusvakuutus_tyyppi") {
 
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
   $sel = array();
   $apu = $trow[$i];
@@ -1035,7 +1035,7 @@ if (mysql_field_name($result, $i) == "lahetteen_jarjestys_suunta" or
 
 if (mysql_field_name($result, $i) == "koontilahete_kollitiedot") {
 
-  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 300).">";
 
   $selE = $trow[$i] == 'E' ? 'selected' : '';
   $sel = array($trow[$i] => 'selected') + array('' => '', 'K' => '', 'P' => '');
@@ -1063,6 +1063,7 @@ if (mysql_field_name($result, $i) == "extranet_tilaus_varaa_saldoa") {
 
   $ulos .= "<option value = ''>".t("Yhtiön oletus")."</option>";
   $ulos .= "<option value = 'X'>".t("Extranet-tilaus varaa saldoa")."</option>";
+  $ulos .= "<option value = 'E' $sel[E]>".t("Extranet-tilaus ei varaa saldoa")."</option>";
   $ulos .= "<option value = '1' $sel[1]>".t("Extranet-tilaus varaa saldoa 1 tunnin")."</option>";
   $ulos .= "<option value = '8' $sel[8]>".t("Extranet-tilaus varaa saldoa 8 tuntia")."</option>";
   $ulos .= "<option value = '24' $sel[24]>".t("Extranet-tilaus varaa saldoa 24 tuntia")."</option>";
@@ -1233,7 +1234,7 @@ if (mysql_field_name($result, $i) == 'maksukehotuksen_osoitetiedot') {
 }
 if (mysql_field_name($result, $i) == "koontilaskut_yhdistetaan") {
 
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
 
   $sel = array_fill_keys(explode(",", $trow[$i]), " selected") + array('A' => '', 'U' => '');
 

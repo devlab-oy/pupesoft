@@ -134,3 +134,9 @@ input[type=submit].poista_btn {
 .monivalintadiv {
   display: inline-block;
 }
+
+table.ostorivien_kohdistus input[type=text], table.ostorivien_kohdistus input[type=button], table.ostorivien_kohdistus select {
+  margin: 0;
+  padding: 1px;
+}
+

@@ -1175,19 +1175,6 @@ while ($tietue = fgets($fd)) {
           else {
             $arow["vienti"] = "E";
           }
-
-          // Jos yksityishenkilkölle menee verollisena
-          if ($veromaara != 0) {
-            $wquery = "SELECT selite
-                       FROM avainsana
-                       WHERE yhtio     = '$kukarow[yhtio]'
-                       AND laji        = 'alv'
-                       AND selitetark != ''";
-            $wtres  = pupe_query($wquery);
-            $wtrow  = mysql_fetch_assoc($wtres);
-
-            $arow["alv"] = $wtrow["selite"];
-          }
         }
       }
 
@@ -1522,7 +1509,7 @@ while ($tietue = fgets($fd)) {
       if (!empty($varasto)) {
         $insertvarasto = $varasto;
       }
-
+echo "1526 {$arow["alv"]} <br><br>";
       // Lisätään otsikko
       $query = "INSERT into lasku SET
                 aktiivinen_kuljetus     = '$suunnistus',

@@ -3425,7 +3425,7 @@ if (!function_exists("alv")) {
       if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 600;              // Otsikolla on valittu veroton myynti, esim Ahvenanmaan myntiä
       if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0) $alv = $trow["alv"]+600; // Otsikolla on valittu verollinen kotimaan myynti
       if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") $alv = 600;              // EU-vienti yritykselle --> alviton
-      if ($laskurow["vienti"] == "K" and $asrow["laji"] != "H") $alv = 600;              // Vienti eu:n ulkopuolelle yritykselle --> alviton
+      if ($laskurow["vienti"] == "K") $alv = 600;              // Vienti EU:n ulkopuolelle on aina alviton
 
       $alv = (float) $alv;
     }
@@ -3434,7 +3434,7 @@ if (!function_exists("alv")) {
       if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 500;              // Otsikolla on valittu veroton myynti, esim Ahvenanmaan myntiä
       if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0) $alv = $trow["alv"]+500; // Otsikolla on valittu verollinen kotimaan myynti
       if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") $alv = 500;              // EU-vienti yritykselle --> alviton
-      if ($laskurow["vienti"] == "K" and $asrow["laji"] != "H") $alv = 500;              // Vienti eu:n ulkopuolelle yritykselle --> alviton
+      if ($laskurow["vienti"] == "K") $alv = 500;              // Vienti EU:n ulkopuolelle on aina alviton
 
       $alv = (float) $alv;
     }
@@ -3443,7 +3443,7 @@ if (!function_exists("alv")) {
       if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 0;                           // Otsikolla on valittu veroton myynti, esim Ahvenanmaan myntiä
       if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0 and $alv == "") $alv = $trow["alv"]; // Otsikolla on valittu verollinen kotimaan myynti
       if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") $alv = 0;                           // EU-vienti yritykselle --> alviton
-      if ($laskurow["vienti"] == "K" and $asrow["laji"] != "H") $alv = 0;                           // Vienti eu:n ulkopuolelle yritykselle --> alviton
+      if ($laskurow["vienti"] == "K") $alv = 0;                           // Vienti EU:n ulkopuolelle on aina alviton
 
       $alv = (float) $alv;
     }
@@ -3452,7 +3452,7 @@ if (!function_exists("alv")) {
       if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 0;                           // Otsikolla on valittu veroton myynti, esim Ahvenanmaan myntiä
       if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0 and $alv == "") $alv = $trow["alv"]; // Otsikolla on valittu verollinen kotimaan myynti
       if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") $alv = 0;                           // EU-vienti yritykselle --> alviton
-      if ($laskurow["vienti"] == "K" and $asrow["laji"] != "H") $alv = 0;                           // Vienti eu:n ulkopuolelle yritykselle --> alviton
+      if ($laskurow["vienti"] == "K") $alv = 0;                           // Vienti EU:n ulkopuolelle on aina alviton
 
       $alv = (float) $alv;
       $trow['alv'] = (float) $trow['alv'];

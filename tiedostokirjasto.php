@@ -172,7 +172,7 @@ function piirra_tiedostolista($tiedostot) {
     return;
   }
 
-  echo "</br>";
+  echo "<br>";
   echo "<table>";
   echo "<tbody>";
 

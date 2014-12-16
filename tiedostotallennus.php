@@ -181,10 +181,9 @@ function piirra_tiedostolista($tiedostot, $aihealue, $tiedostotyyppi) {
     echo "</form>";
     echo "</tr>";
   }
-
-  echo "</br>";
   echo "</tbody>";
   echo "</table>";
+  echo "<br>";
 }
 
 function poista_liitetiedosto($tunnus, $aihealue, $tiedostotyyppi) {

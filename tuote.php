@@ -2305,7 +2305,7 @@ if ($tee == 'Z') {
     echo "<input type='hidden' id='toimipaikan_varastot' value='{$_tpvar_url}' />";
 
     // Saldot, korvaavat ja vastaavat
-    echo "<table><tr><td class='back nopad top'>";
+    echo "<table><tr><td class='back pnopad ptop'>";
 
     if ($tuoterow["ei_saldoa"] == '') {
 
@@ -2514,7 +2514,7 @@ if ($tee == 'Z') {
       echo "</table>";
     }
 
-    echo "</td><td class='back nopad top'>";
+    echo "</td><td class='back pnopad ptop'>";
 
     // Korvaavat tuotteet
     $korvaavat = new Korvaavat($tuoteno);
@@ -2536,7 +2536,7 @@ if ($tee == 'Z') {
       echo "</div>";
       }
 
-    echo "</td><td class='back nopad top'>";
+    echo "</td><td class='back pnopad ptop'>";
 
     // Vastaavat tuotteet
     $vastaavat = new Vastaavat($tuoteno);
@@ -2556,7 +2556,7 @@ if ($tee == 'Z') {
       echo "</div>";
         }
 
-    echo "</td><td class='back nopad top'>";
+    echo "</td><td class='back pnopad ptop'>";
 
     //Tuotemuutoksia halutaan n‰ytt‰‰, mik‰li niit‰ on.
     $lista = hae_tuotemuutokset($tuoteno);

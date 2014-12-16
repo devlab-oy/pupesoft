@@ -787,7 +787,7 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
 
     if (mysql_num_rows($sresult) > 1) {
 
-      $multiple_lisa = " multiple='multiple' size='7' style='width: 100%;' ";
+      $multiple_lisa = " multiple='multiple' class='multipleselect' size='7' ";
 
       if (in_array("toimi", $monivalintalaatikot_normaali)) {
         $multiple_lisa = "";

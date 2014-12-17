@@ -217,6 +217,7 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
         $kh_query = "SELECT tunnus, tilkpl, varattu
                      FROM tilausrivi
                      WHERE yhtio = '{$kukarow["yhtio"]}'
+                     AND tyyppi  = '0'
                      AND otunnus = {$ok}";
 
         $kh_result = pupe_query($kh_query);

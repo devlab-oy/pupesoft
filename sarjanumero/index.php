@@ -8,7 +8,10 @@ elseif (@include_once "inc/parametrit.inc");
 
 
 if (!isset($view)) {
-  $view = 'rulla';
+  $view = 'top';
+  if ($kukarow['kuka'] != 'admin') {
+    $view = 'rulla';
+  }
 }
 
 echo "<meta name='viewport' content='width=device-width, maximum-scale=1.0' />\n";
@@ -34,7 +37,7 @@ if ($view == 'top') {
 elseif ($view == 'tulli') {
 
   if (tarkista_oikeus("sarjanumero/kuittaa.php")) {
-    echo "<p><a href='tullivarastointi.php' class='button index_button'>", t("Tullivarasto juttu"), "</a></p>";
+    echo "<p><a href='tullivarastointi.php' class='button index_button'>", t("Vie varastoon"), "</a></p>";
   }
 
 }

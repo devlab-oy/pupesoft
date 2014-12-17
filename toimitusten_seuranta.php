@@ -600,9 +600,13 @@ if (!isset($task)) {
       echo $tilaus['asiakkaan_tilausnumero'];
       echo "</td>";
 
-      echo "<td valign='top'>";
-      echo $tilaus['matkakoodi'];
-      echo "</td>";
+      if (!$konttiviite_kasitelty) {
+
+        echo "<td valign='top' rowspan='{$tilauksia_viitteella}'>";
+        echo $tilaus['matkakoodi'];
+        echo "</td>";
+
+      }
 
       if (!$konttiviite_kasitelty) {
 
@@ -630,14 +634,21 @@ if (!isset($task)) {
         $kasitellyt_konttivitteet[] = $tilaus['konttiviite'];
       }
 
-      echo "<td valign='top'>";
-      echo date("j.n.Y", strtotime($tilaus['toimaika']));
-      echo "</td>";
+      if (!$konttiviite_kasitelty) {
 
+        echo "<td valign='top' rowspan='{$tilauksia_viitteella}'>";
+        echo date("j.n.Y", strtotime($tilaus['toimaika']));
+        echo "</td>";
 
-      echo "<td valign='top'>";
-      echo $tilaus['konttiviite'];
-      echo "</td>";
+      }
+
+      if (!$konttiviite_kasitelty) {
+
+        echo "<td valign='top' rowspan='{$tilauksia_viitteella}'>";
+        echo $tilaus['konttiviite'];
+        echo "</td>";
+
+      }
 
       if ($tilaus['rullat'] == 0) {
         $rullamaara = $tilaus['rullamaara'] . " (" . t("Ennakkoarvio") . ")";

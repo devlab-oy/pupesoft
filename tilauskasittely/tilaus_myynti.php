@@ -5544,7 +5544,7 @@ if ($tee == '') {
 
                 $_html_rows .= "<tr>";
                 $_html_rows .= "<td>{$tapahtuma_chk_row['laatija']}</td>";
-                $_html_rows .= "<td>".tv1dateconv($tapahtuma_chk_row['laadittu'])."</td>";
+                $_html_rows .= "<td>".tv1dateconv($tapahtuma_chk_row['laskutettuaika'])."</td>";
                 $_html_rows .= "<td align='right'>";
                 $_html_rows .= "{$tapahtuma_chk_row['kpl']} {$tapahtuma_chk_row['yksikko']}";
                 $_html_rows .= "</td>";

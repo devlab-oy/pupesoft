@@ -332,7 +332,7 @@ if ($tee == 'laskelma') {
               lasku.ytunnus,
               lasku.tapvm,
               lasku.alv,
-              lasku.mapvm,
+              lasku.lapvm,
               lasku.liitostunnus,
               lasku.tunnus,
               round(lasku.summa / (1+lasku.alv/100), {$yhtiorow['hintapyoristys']}) laskun_summa
@@ -413,7 +413,7 @@ if ($tee == 'laskelma') {
 
     echo "</td>";
 
-    $_pvm = $laskelma == 'b' ? $laskurow['mapvm'] : $laskurow['tapvm'];
+    $_pvm = $laskelma == 'b' ? $laskurow['lapvm'] : $laskurow['tapvm'];
 
     echo "<td>$_i</td>";
     echo "<td>$laskurow[ytunnus]</td>";
@@ -509,7 +509,7 @@ if ($tee == 'laskelma') {
           'sellerRegCode' => $laskurow['ytunnus'],
           'sellerName' => $laskurow['nimi'],
           'invoiceNumber' => $laskurow['laskunro'],
-          'invoiceDate' => date('j.m.Y', strtotime($laskurow['mapvm'])),
+          'invoiceDate' => date('j.m.Y', strtotime($laskurow['lapvm'])),
           'invoiceSumVat' => $laskurow['laskun_summa'],
           'vatSum' => $_vero,
           'vatInPeriod' => '',

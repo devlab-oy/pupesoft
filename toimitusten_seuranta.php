@@ -531,7 +531,7 @@ if (!isset($task)) {
             AND lasku.tilaustyyppi = 'N'
             {$rajauslisa}
             AND laskun_lisatiedot.konttiviite != ''
-            GROUP BY lasku.asiakkaan_tilausnumero
+            GROUP BY lasku.asiakkaan_tilausnumero, laskun_lisatiedot.konttiviite
             ORDER BY toimaika, konttiviite";
   $result = pupe_query($query);
 
@@ -543,7 +543,7 @@ if (!isset($task)) {
 
     while ($rivi = mysql_fetch_assoc($result)) {
       $viitteet[] = $rivi['konttiviite'];
-      $tilaukset[$rivi['asiakkaan_tilausnumero']] = $rivi;
+      $tilaukset[$rivi['asiakkaan_tilausnumero'].$rivi['konttiviite']] = $rivi;
     }
 
     echo "<table>";

@@ -511,8 +511,8 @@ if ($tee == 'laskelma') {
           'invoiceNumber' => $laskurow['laskunro'],
           'invoiceDate' => date('j.m.Y', strtotime($laskurow['lapvm'])),
           'invoiceSumVat' => $laskurow['laskun_summa'],
-          'vatSum' => $_vero,
-          'vatInPeriod' => '',
+          'vatSum' => '',
+          'vatInPeriod' => $_vero,
           'comments' => $erikoiskoodi,
         );
       }

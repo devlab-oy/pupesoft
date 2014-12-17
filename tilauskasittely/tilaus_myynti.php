@@ -5555,12 +5555,15 @@ if ($tee == '') {
                     $tapahtuma_chk_row['rivihinta'] *= (1 + $tapahtuma_chk_row["alv"] / 100);
                   }
 
+                  $_kplhinta = $tapahtuma_chk_row['rivihinta'] / $tapahtuma_chk_row['kpl'];
+
+                  $_html_rows .= "<td align='right'>";
+                  $_html_rows .= hintapyoristys($_kplhinta);
+                  $_html_rows .= "</td>";
+
                   $_html_rows .= "<td align='right'>";
                   $_html_rows .= hintapyoristys($tapahtuma_chk_row['rivihinta']);
                   $_html_rows .= "</td>";
-
-                  $_kplhinta = $tapahtuma_chk_row['rivihinta'] / $tapahtuma_chk_row['kpl'];
-                  $_html_rows .= "<td align='right'>".hintapyoristys($_kplhinta)."</td>";
                 }
 
                 $_html_rows .= "</tr>";

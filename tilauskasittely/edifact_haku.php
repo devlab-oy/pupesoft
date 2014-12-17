@@ -1,5 +1,5 @@
 <?php
-die;
+
 require '../inc/edifact_functions.inc';
 
 require "../inc/parametrit.inc";

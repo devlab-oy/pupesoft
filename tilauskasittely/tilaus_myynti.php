@@ -5431,10 +5431,19 @@ if ($tee == '') {
 
                 if ($myytavissa != 0) {
 
+                  $id2  = $saldorow['hyllyalue'].$saldorow['hyllynro'];
+                  $id2 .= $saldorow['hyllyvali'].$saldorow['hyllytaso'];
+
+                  $id2 = sanitoi_javascript_id($id2);
+
                   echo "<tr>";
                   echo "<th nowrap>";
-                  echo "<a class='tooltip' id='$id2'>$saldorow[nimitys]</a> $saldorow[tyyppi]";
-                  echo "<div id='div_$id2' class='popup' style='width: 300px'>($saldorow[hyllyalue]-$saldorow[hyllynro]-$saldorow[hyllyvali]-$saldorow[hyllytaso])</div>";
+                  echo "<a class='tooltip' id='{$id2}'>{$saldorow['nimitys']}</a>";
+                  echo " {$saldorow['tyyppi']}";
+                  echo "<div id='div_{$id2}' class='popup' style='width: 300px'>(";
+                  echo "{$saldorow['hyllyalue']}-{$saldorow['hyllynro']}-";
+                  echo "{$saldorow['hyllyvali']}-{$saldorow['hyllytaso']}";
+                  echo ")</div>";
                   echo "</th>";
 
                   echo "<td align='right' nowrap>";

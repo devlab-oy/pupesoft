@@ -2315,7 +2315,7 @@ function peruuta_bookkaus($rullamaara, $tilausnro, $rivinro, $konttiviite) {
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
               AND lasku.asiakkaan_tilausnumero = '{$tilausnumero}'";
-    $result = pupe_query($result);
+    $result = pupe_query($query);
     $poistettava_tunnus = mysql_result($result, 0);
 
     $query = "DELETE FROM lasku

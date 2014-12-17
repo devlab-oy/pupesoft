@@ -1,5 +1,4 @@
 <?php
-die;
 
 require '../inc/edifact_functions.inc';
 
@@ -377,7 +376,7 @@ if ($task == 'hae') {
     echo t("Ftp-yhteys muodostettu.")."<br/>";
   }
 
-  ftp_chdir($yhteys, 'out-test');
+  ftp_chdir($yhteys, 'out-prod');
 
   ftp_pasv($yhteys, true);
 
@@ -385,35 +384,11 @@ if ($task == 'hae') {
 
   foreach ($files as $file) {
 
-  if (ftp_mdtm($yhteys, $file) > 1414590822) {
 
     if (substr($file, -3) == 'IFF') {
       $bookkaukset[] = $file;
     }
 
-    if (substr($file, -3) == 'DAD') {
-      $rahtikirjat[] = $file;
-    }
-
-
-  }
-
-
-/*
-
-    if (substr($file, -3) == 'IFF') {
-      $bookkaukset[] = $file;
-    }
-
-    if (substr($file, -3) == 'DAD') {
-      $rahtikirjat[] = $file;
-    }
-
-    if (substr($file, -3) == 'IFT') {
-      $iftstat[] = $file;
-    }
-
-    */
 
   }
 

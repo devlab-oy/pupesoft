@@ -95,6 +95,8 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
 
 function laheta_sanoma($sanoma){
 
+  return true;
+
   if ($sanoma == '') {
     return false;
   }
@@ -1213,7 +1215,7 @@ function kasittele_bookkaussanoma($edi_data) {
     );
 
   if ($tyyppi == 1) {
-    peruuta_bookkaus($rullamaara, $tilausnro, $rivinro);
+    peruuta_bookkaus($rullamaara, $tilausnro, $rivinro, $konttiviite);
     return false;
   }
 
@@ -1244,7 +1246,47 @@ function kasittele_bookkaussanoma($edi_data) {
 
   $kukarow['kesken'] = 0;
 
-  if (mysql_num_rows($result) == 0) {
+  $tarvitaan_uusi_tilaus = false;
+  $tunnus_johon_liitetaan = 0;
+
+  if (mysql_num_rows($result) != 0) {
+
+    // tutkitaan jakautuuko tilaus moneen konttiviitteeseen
+    $kv_query = "SELECT laskun_lisatiedot.konttiviite,
+                 lasku.tunnus
+                 FROM lasku
+                 JOIN laskun_lisatiedot
+                  ON laskun_lisatiedot.yhtio = lasku.yhtio
+                  AND laskun_lisatiedot.otunnus = lasku.tunnus
+                 WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                 AND lasku.asiakkaan_tilausnumero = '{$tilausnro}'
+                 AND lasku.tilaustyyppi = 'N'";
+    $kv_result = pupe_query($kv_query);
+
+    $kviitteet = array();
+
+    while ($laskuinfo = mysql_fetch_assoc($kv_result)) {
+      $kviitteet[] = $laskuinfo;
+    }
+
+  }
+
+  if (count($kviitteet) == 1 and $kviitteet[0]['konttiviite'] != $konttiviite) {
+    $tarvitaan_uusi_tilaus = true;
+  }
+
+  if (count($kviitteet) > 1) {
+    $tarvitaan_uusi_tilaus = true;
+    foreach ($kviitteet as $kviite) {
+      if ($kviite['konttiviite'] == $konttiviite) {
+        $tunnus_johon_liitetaan = $kviite['tunnus'];
+        $tarvitaan_uusi_tilaus = false;
+        break;
+      }
+    }
+  }
+
+  if (mysql_num_rows($result) == 0 or $tarvitaan_uusi_tilaus) {
 
     require_once "tilauskasittely/luo_myyntitilausotsikko.inc";
 
@@ -1273,7 +1315,8 @@ function kasittele_bookkaussanoma($edi_data) {
     $query = "SELECT *
               FROM tilausrivin_lisatiedot
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND asiakkaan_tilausnumero = '{$tilausnro}'";
+              AND asiakkaan_tilausnumero = '{$tilausnro}'
+              AND asiakkaan_rivinumero = '{$rivinro}'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) > 0) {
@@ -1326,33 +1369,56 @@ function kasittele_bookkaussanoma($edi_data) {
     }
   }
   elseif ($tyyppi != 5) {
-    $query = "SELECT lasku.tunnus,
-              laskun_lisatiedot.rullamaara
-              FROM lasku
-              JOIN laskun_lisatiedot
-                ON laskun_lisatiedot.yhtio = lasku.yhtio
-                AND laskun_lisatiedot.otunnus = lasku.tunnus
-              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-              AND lasku.asiakkaan_tilausnumero = '{$tilausnro}'
-              AND lasku.tila = 'N'";
-    $result = pupe_query($query);
+
+    if ($tunnus_johon_liitetaan > 0) {
+
+      $query = "SELECT lasku.tunnus,
+                laskun_lisatiedot.rullamaara
+                FROM lasku
+                JOIN laskun_lisatiedot
+                  ON laskun_lisatiedot.yhtio = lasku.yhtio
+                  AND laskun_lisatiedot.otunnus = lasku.tunnus
+                WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                AND lasku.tunnus = '{$tunnus_johon_liitetaan}'";
+      $result = pupe_query($query);
+
+    }
+    else {
+
+      $query = "SELECT lasku.tunnus,
+                laskun_lisatiedot.rullamaara
+                FROM lasku
+                JOIN laskun_lisatiedot
+                  ON laskun_lisatiedot.yhtio = lasku.yhtio
+                  AND laskun_lisatiedot.otunnus = lasku.tunnus
+                WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                AND lasku.asiakkaan_tilausnumero = '{$tilausnro}'
+                AND lasku.tila = 'N'";
+      $result = pupe_query($query);
+
+    }
+
     $laskuinfo = mysql_fetch_assoc($result);
-
     $tunnus = $laskuinfo['tunnus'];
-
     $rullamaara = $rullamaara + $laskuinfo['rullamaara'];
 
     $update_query = "UPDATE laskun_lisatiedot SET
-                     konttiviite  = '{$konttiviite}',
-                     konttimaara  = '{$konttimaara}',
-                     konttityyppi = '{$konttityyppi}',
-                     matkakoodi   = '{$matkakoodi}',
-                     rullamaara   = '{$rullamaara}'
-                     WHERE yhtio  = '{$kukarow['yhtio']}'
-                     AND otunnus  = '{$tunnus}'";
+                      konttiviite  = '{$konttiviite}',
+                      konttimaara  = '{$konttimaara}',
+                      konttityyppi = '{$konttityyppi}',
+                      matkakoodi   = '{$matkakoodi}',
+                      rullamaara   = '{$rullamaara}'
+                      WHERE yhtio  = '{$kukarow['yhtio']}'
+                      AND otunnus  = '{$tunnus}'";
     pupe_query($update_query);
+
   }
   elseif ($tyyppi == 5) {
+
+    if ($tunnus_johon_liitetaan == 0) {
+      $lasku = mysqL_fetch_assoc($result);
+      $tunnus_johon_liitetaan = $lasku['tunnus'];
+    }
 
     $lasku = mysqL_fetch_assoc($result);
 
@@ -1360,7 +1426,7 @@ function kasittele_bookkaussanoma($edi_data) {
                      sisviesti1 = '{$ohje}',
                      toimaika = '{$lahtopvm}'
                      WHERE yhtio = '{$kukarow['yhtio']}'
-                     AND tunnus = '{$lasku['tunnus']}'";
+                     AND tunnus = '{$tunnus_johon_liitetaan}'";
     pupe_query($update_query);
 
     $query = "SELECT data
@@ -2210,7 +2276,7 @@ function tarkista_sarjanumero($sarjanumero) {
   }
 }
 
-function peruuta_bookkaus($rullamaara, $tilausnro, $rivinro) {
+function peruuta_bookkaus($rullamaara, $tilausnro, $rivinro, $konttiviite) {
   global $kukarow;
 
   $tilaus_ja_rivi = $tilausnro.":".$rivinro;
@@ -2225,6 +2291,7 @@ function peruuta_bookkaus($rullamaara, $tilausnro, $rivinro) {
               ON laskun_lisatiedot.yhtio = lasku.yhtio
               AND laskun_lisatiedot.otunnus = lasku.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
             AND lasku.asiakkaan_tilausnumero = '{$tilausnro}'";
   $result = pupe_query($query);
   $lasku = mysql_fetch_assoc($result);
@@ -2242,14 +2309,25 @@ function peruuta_bookkaus($rullamaara, $tilausnro, $rivinro) {
   }
   else {
 
+    $query = "SELECT lasku.tunnus
+              FROM laskun_lisatiedot
+              JOIN lasku
+                ON lasku.yhtio = laskun_lisatiedot.yhtio
+                AND lasku.tunnus = laskun_lisatiedot.otunnus
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+              AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
+              AND lasku.asiakkaan_tilausnumero = '{$tilausnumero}'";
+    $result = pupe_query($result);
+    $poistettava_tunnus = mysql_result($result, 0);
+
     $query = "DELETE FROM lasku
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND asiakkaan_tilausnumero = '{$tilausnro}'";
+              AND tunnus = '{$poistettava_tunnus}'";
     pupe_query($query);
 
     $query = "DELETE FROM laskun_lisatiedot
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus = '{$lasku['lisatieto_tunnus']}'";
+              AND otunnus = '{$poistettava_tunnus}'";
     pupe_query($query);
 
   }

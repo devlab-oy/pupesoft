@@ -332,6 +332,7 @@ if ($tee == 'laskelma') {
               lasku.ytunnus,
               lasku.tapvm,
               lasku.alv,
+              lasku.mapvm,
               lasku.liitostunnus,
               lasku.tunnus,
               round(lasku.summa / (1+lasku.alv/100), {$yhtiorow['hintapyoristys']}) laskun_summa
@@ -412,11 +413,13 @@ if ($tee == 'laskelma') {
 
     echo "</td>";
 
+    $_pvm = $laskelma == 'b' ? $laskurow['mapvm'] : $laskurow['tapvm'];
+
     echo "<td>$_i</td>";
     echo "<td>$laskurow[ytunnus]</td>";
     echo "<td>$laskurow[nimi]</td>";
     echo "<td>$laskurow[laskunro]</td>";
-    echo "<td>", pupe_DataTablesEchoSort($laskurow['tapvm']).tv1dateconv($laskurow['tapvm']), "</td>";
+    echo "<td>", pupe_DataTablesEchoSort($_pvm).tv1dateconv($_pvm), "</td>";
     echo "<td>$laskurow[laskun_summa]</td>";
     echo "<td>$row[veropros]</td>";
     echo "<td><a href='{$palvelin2}muutosite.php?tee=E&tunnus=$row[ltunnus]&lopetus={$lopetus}'>";
@@ -467,7 +470,7 @@ if ($tee == 'laskelma') {
         $worksheet->write($excelrivi, $excelsarake, $laskurow['laskunro']);
         $excelsarake++;
 
-        $worksheet->write($excelrivi, $excelsarake, date('j.m.Y', strtotime($laskurow['tapvm'])));
+        $worksheet->write($excelrivi, $excelsarake, date('j.m.Y', strtotime($_pvm)));
         $excelsarake++;
 
         $worksheet->write($excelrivi, $excelsarake, $laskurow['laskun_summa']);
@@ -506,7 +509,7 @@ if ($tee == 'laskelma') {
           'sellerRegCode' => $laskurow['ytunnus'],
           'sellerName' => $laskurow['nimi'],
           'invoiceNumber' => $laskurow['laskunro'],
-          'invoiceDate' => date('j.m.Y', strtotime($laskurow['tapvm'])),
+          'invoiceDate' => date('j.m.Y', strtotime($laskurow['mapvm'])),
           'invoiceSumVat' => $laskurow['laskun_summa'],
           'vatSum' => $_vero,
           'vatInPeriod' => $_vero,

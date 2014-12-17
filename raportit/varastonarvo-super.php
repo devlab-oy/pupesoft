@@ -506,13 +506,13 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
     $varares = pupe_query($query);
 
-    $tuotevaraukset          = array();
+    $tuotevaraukset = array();
 
     while ($vararivi = mysql_fetch_assoc($varares)) {
       $tuotevaraukset[$vararivi["tuoteno"]] = $vararivi["varattu_saldo"];
     }
 
-    $varatut_tuotteet = "''";
+    $varatut_tuotteet = "";
 
     if (!empty($tuotevaraukset)) {
       $varatut_tuotteet = implode("','", array_keys($tuotevaraukset));

@@ -512,7 +512,7 @@ if ($tee == 'laskelma') {
           'invoiceDate' => date('j.m.Y', strtotime($laskurow['mapvm'])),
           'invoiceSumVat' => $laskurow['laskun_summa'],
           'vatSum' => $_vero,
-          'vatInPeriod' => $_vero,
+          'vatInPeriod' => '',
           'comments' => $erikoiskoodi,
         );
       }

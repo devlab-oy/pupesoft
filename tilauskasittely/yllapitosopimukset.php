@@ -199,7 +199,18 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
       // Jos kuukausihinnoittelu on päällä, kerrotaan tilausrivien määrät, jotta saadaan oikea summa
       // laskuun
       if ($soprow["yllapito_kuukausihinnoittelu"] == "Y") {
+        $ed_alku_date = new DateTime($ed_alku);
+        $ed_lopp_date = new DateTime($ed_lopp);
+        $kuukaudet    = $ed_lopp_date->diff($ed_alku_date);
+
         $kk_kerroin = 12 / count($laskutus_kk);
+
+        if ($kuukaudet->m < $kk_kerroin and $kuukaudet->d > 0) {
+          $kk_kerroin = $kuukaudet->m + 1;
+        }
+        elseif ($kuukaudet->m < $kk_kerroin) {
+          $kk_kerroin = $kuukaudet->m;
+        }
 
         $kh_query = "SELECT tunnus, tilkpl, varattu
                      FROM tilausrivi

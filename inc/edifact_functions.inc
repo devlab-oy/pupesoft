@@ -1449,9 +1449,9 @@ function kasittele_bookkaussanoma($edi_data) {
     $korvattava = mysql_result($vastaavuusresult, 0);
 
     $query = "UPDATE liitetiedostot SET
-              data         = '$liitedata',
+              data         = '{$liitedata}',
               muutospvm    = NOW(),
-              liitostunnus = '{$lasku['tunnus']}'
+              liitostunnus = '{$lasku['tunnus']}',
               muuttaja     = '{$kukarow['kuka']}',
               filename     = '{$sanoma_id}',
               filesize     = '$filesize'

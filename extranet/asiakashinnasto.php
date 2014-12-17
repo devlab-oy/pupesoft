@@ -95,6 +95,44 @@ else {
     }
 
     echo "</select></td></tr>";
+
+    if (!isset($ryhmittely)) {
+      $ryhmittely = 1;
+    }
+
+    if ($ryhmittely == 1) {
+      $sel1 = "SELECTED";
+      $sel2 = "";
+      $tuoteryhmaosasto = false;
+      $ryhmittelylisa = $selectlisa = $jarjestyslisa = "";
+    }
+
+    if ($ryhmittely == 2) {
+      $sel2 = "SELECTED";
+      $sel1 = "";
+      $tuoteryhmaosasto = true;
+      $ryhmittelylisa = " JOIN tuotteen_avainsanat
+                          ON tuotteen_avainsanat.yhtio = tuote.yhtio
+                          AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
+                          AND tuotteen_avainsanat.laji = 'tuoteryhmaosasto' ";
+      $selectlisa = ", tuotteen_avainsanat.selite AS tro, tuotteen_avainsanat.jarjestys AS jar ";
+      $jarjestyslisa = " tro, jar, ";
+    }
+
+    // näytettään ryhmittelyvalinta vain jos tuoteryhmäosastoja on perustettu
+    $tarkistus = "SELECT count(tunnus)
+                  FROM tuotteen_avainsanat
+                  WHERE yhtio = '{$yhtiorow['yhtio']}'
+                  AND laji = 'tuoteryhmaosasto'";
+    $tarkistus = pupe_query($tarkistus);
+    $tarkistus = mysql_result($tarkistus,0);
+
+    if ($tarkistus > 0) {
+      echo "<tr><th>".t("Esitystapa").":</th><td><select name='ryhmittely'>";
+      echo "<option value='1' $sel1>".t("Normaali")."</option>";
+      echo "<option value='2' $sel2>".t("Tuotehinnastoryhmittäin")."</option>";
+      echo "</select></td></tr>";
+    }
   }
   else {
     $hinkieli = $kukarow["kieli"];
@@ -136,15 +174,16 @@ else {
     $asres = pupe_query($query);
     $kurssi = mysql_fetch_assoc($asres);
 
-    $query = "SELECT *
+    $query = "SELECT tuote.*{$selectlisa}
               FROM tuote
-              WHERE tuote.yhtio      = '$kukarow[yhtio]'
+              {$ryhmittelylisa}
+              WHERE tuote.yhtio      = '{$kukarow['yhtio']}'
               and tuote.status       NOT IN ('P','X')
               and tuote.tuotetyyppi  NOT IN ('A', 'B')
               and tuote.hinnastoon  != 'E'
-              $kieltolisa
-              $lisa
-              ORDER BY tuote.osasto, tuote.try, tuote.tuoteno";
+              {$kieltolisa}
+              {$lisa}
+              ORDER BY {$jarjestyslisa} tuote.osasto, tuote.try, tuote.tuoteno";
     $rresult = pupe_query($query);
 
     // KAUTTALASKUTUSKIKKARE
@@ -169,7 +208,7 @@ else {
     $worksheet    = new pupeExcel();
     $format_bold = array("bold" => TRUE);
     $excelrivi    = 0;
-
+    $excelsarake = 0;
 
     if (isset($worksheet)) {
       $worksheet->writeString($excelrivi,  0, t("Ytunnus", $hinkieli).": $ytunnus", $format_bold);
@@ -178,25 +217,65 @@ else {
       $worksheet->writeString($excelrivi,  0, t("Asiakas", $hinkieli).": $asiakasrow[nimi] $asiakasrow[nimitark]", $format_bold);
       $excelrivi++;
 
-      $worksheet->writeString($excelrivi,  0, t("Tuotenumero", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi,  1, t("EAN-koodi", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi,  2, t("Osasto", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi,  3, t("Tuoteryhmä", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi,  4, t("Nimitys", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi,  5, t("Myyntierä", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi,  6, t("Yksikkö", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi,  7, t("Status", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi,  8, t("Aleryhmä", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi,  9, t("Veroton Myyntihinta", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi, 10, t("Verollinen Myyntihinta", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi, $excelsarake, t("Tuotenumero", $hinkieli), $format_bold);
+      $excelsarake++;
 
-      for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
-        $worksheet->writeString($excelrivi, 11, t("Alennus{$alepostfix}", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi, $excelsarake, t("EAN-koodi", $hinkieli), $format_bold);
+      $excelsarake++;
+
+      if (!$tuoteryhmaosasto) {
+        $worksheet->writeString($excelrivi, $excelsarake, t("Osasto", $hinkieli), $format_bold);
+        $excelsarake++;
+        $worksheet->writeString($excelrivi, $excelsarake, t("Tuoteryhmä", $hinkieli), $format_bold);
+        $excelsarake++;
       }
 
-      $worksheet->writeString($excelrivi, 12, t("Sinun veroton hinta", $hinkieli), $format_bold);
-      $worksheet->writeString($excelrivi, 13, t("Sinun verollinen hinta", $hinkieli), $format_bold);
+      $worksheet->writeString($excelrivi, $excelsarake, t("Nimitys", $hinkieli), $format_bold);
+      $excelsarake++;
+
+      $worksheet->writeString($excelrivi, $excelsarake, t("Myyntierä", $hinkieli), $format_bold);
+      $excelsarake++;
+
+      $worksheet->writeString($excelrivi, $excelsarake, t("Yksikkö", $hinkieli), $format_bold);
+      $excelsarake++;
+
+      if (!$tuoteryhmaosasto) {
+        $worksheet->writeString($excelrivi, $excelsarake, t("Status", $hinkieli), $format_bold);
+        $excelsarake++;
+        $worksheet->writeString($excelrivi, $excelsarake, t("Aleryhmä", $hinkieli), $format_bold);
+        $excelsarake++;
+        $worksheet->writeString($excelrivi, $excelsarake, t("Veroton Myyntihinta", $hinkieli), $format_bold);
+        $excelsarake++;
+        $worksheet->writeString($excelrivi, $excelsarake, t("Verollinen Myyntihinta", $hinkieli), $format_bold);
+        $excelsarake++;
+      }
+      else {
+        $worksheet->writeString($excelrivi, $excelsarake, t("Veroton Myyntihinta", $hinkieli), $format_bold);
+        $excelsarake++;
+      }
+
+      for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
+        $worksheet->writeString($excelrivi, $excelsarake, t("Alennus{$alepostfix}", $hinkieli), $format_bold);
+        $excelsarake++;
+      }
+
+      if (!$tuoteryhmaosasto) {
+        $worksheet->writeString($excelrivi, $excelsarake, t("Sinun verollinen hinta", $hinkieli), $format_bold);
+        $excelsarake++;
+        $worksheet->writeString($excelrivi, $excelsarake, t("Sinun veroton hinta", $hinkieli), $format_bold);
+        $excelsarake++;
+      }
+      else {
+        $worksheet->writeString($excelrivi, $excelsarake, t("Verollinen asiakashinta", $hinkieli), $format_bold);
+        $excelsarake++;
+        $worksheet->writeString($excelrivi, $excelsarake, t("Veroton asiakashinta ", $hinkieli), $format_bold);
+        $excelsarake++;
+      }
       $excelrivi++;
+    }
+
+    if ($tuoteryhmaosasto) {
+      $tro = '';
     }
 
     while ($rrow = mysql_fetch_assoc($rresult)) {
@@ -303,35 +382,73 @@ else {
       }
 
       if (isset($worksheet)) {
-        $worksheet->writeString($excelrivi, 0, $rrow["tuoteno"]);
-        $worksheet->writeString($excelrivi, 1, $rrow["eankoodi"]);
-        $worksheet->writeString($excelrivi, 2, $rrow["osasto"]);
-        $worksheet->writeString($excelrivi, 3, $rrow["try"]);
-        $worksheet->writeString($excelrivi, 4, t_tuotteen_avainsanat($rrow, 'nimitys', $hinkieli));
-        $worksheet->writeString($excelrivi, 5, $rrow["myynti_era"]);
-        $worksheet->writeString($excelrivi, 6, t_avainsana("Y", $hinkieli, "and avainsana.selite='$rrow[yksikko]'", "", "", "selite"));
-        $worksheet->writeString($excelrivi, 7, $rrow["status"]);
-        $worksheet->writeString($excelrivi, 8, $rrow["aleryhma"]);
-        $worksheet->writeNumber($excelrivi, 9, $veroton);
-        $worksheet->writeNumber($excelrivi, 10, $verollinen);
+
+        $excelsarake = 0;
+
+        if (isset($tro) and $tro != $rrow['tro']) {
+          $excelrivi++;
+          $worksheet->writeString($excelrivi, 0, $rrow["tro"], $format_bold);
+          $excelrivi++;
+        }
+
+        $worksheet->writeString($excelrivi, $excelsarake, $rrow["tuoteno"]);
+        $excelsarake++;
+        $worksheet->writeString($excelrivi, $excelsarake, $rrow["eankoodi"]);
+        $excelsarake++;
+
+        if (!$tuoteryhmaosasto) {
+          $worksheet->writeString($excelrivi, $excelsarake, $rrow["osasto"]);
+          $excelsarake++;
+          $worksheet->writeString($excelrivi, $excelsarake, $rrow["try"]);
+          $excelsarake++;
+        }
+
+        $worksheet->writeString($excelrivi, $excelsarake, t_tuotteen_avainsanat($rrow, 'nimitys', $hinkieli));
+        $excelsarake++;
+        $worksheet->writeString($excelrivi, $excelsarake, $rrow["myynti_era"]);
+        $excelsarake++;
+        $worksheet->writeString($excelrivi, $excelsarake, t_avainsana("Y", $hinkieli, "and avainsana.selite='$rrow[yksikko]'", "", "", "selite"));
+        $excelsarake++;
+
+        if (!$tuoteryhmaosasto) {
+          $worksheet->writeString($excelrivi, $excelsarake, $rrow["status"]);
+          $excelsarake++;
+          $worksheet->writeString($excelrivi, $excelsarake, $rrow["aleryhma"]);
+          $excelsarake++;
+          $worksheet->writeNumber($excelrivi, $excelsarake, $veroton);
+          $excelsarake++;
+          $worksheet->writeNumber($excelrivi, $excelsarake, $verollinen);
+          $excelsarake++;
+        }
+        else {
+          $worksheet->writeNumber($excelrivi, $excelsarake, $veroton);
+          $excelsarake++;
+        }
 
         for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
           if ($netto != "") {
-            $worksheet->writeString($excelrivi, 11, t("Netto", $hinkieli));
+            $worksheet->writeString($excelrivi, $excelsarake, t("Netto", $hinkieli));
+            $excelsarake++;
           }
           else {
-            $worksheet->writeNumber($excelrivi, 11, sprintf('%.2f', ${'ale'.$alepostfix}));
+            $worksheet->writeNumber($excelrivi, $excelsarake, sprintf('%.2f', ${'ale'.$alepostfix}));
+            $excelsarake++;
           }
         }
 
-        $worksheet->writeNumber($excelrivi, 12, hintapyoristys($asiakashinta_veroton));
-        $worksheet->writeNumber($excelrivi, 13, hintapyoristys($asiakashinta_verollinen));
+        $worksheet->writeNumber($excelrivi, $excelsarake, hintapyoristys($asiakashinta_verollinen));
+        $excelsarake++;
+        $worksheet->writeNumber($excelrivi, $excelsarake, hintapyoristys($asiakashinta_veroton));
+        $excelsarake++;
         $excelrivi++;
+      }
+
+      if ($tuoteryhmaosasto) {
+        $tro = $rrow['tro'];
       }
     }
 
     if (isset($worksheet)) {
-
 
       $excelnimi = $worksheet->close();
 

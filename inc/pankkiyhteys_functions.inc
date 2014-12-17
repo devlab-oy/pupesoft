@@ -829,6 +829,42 @@ function hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana) {
   return $pankki;
 }
 
+function pankkiyhteyden_paivamaarat($pankkiyhteys) {
+  // Loopataan certifikaattien expire datet
+  $certit = array(
+    "signing_certificate_valid_to" => "Allekirjoitus-sertifikaatti",
+    "encryption_certificate_valid_to" => "Salaus-sertifikaatti",
+    "bank_encryption_certificate_valid_to" => "Pankin salaus-sertifikaatti",
+    "bank_root_certificate_valid_to" => "Pankin juuri-sertifikaatti",
+    "ca_certificate_valid_to" => "Pankin CA-sertifikaatti",
+  );
+
+  $_today = date("Y-m-d h:i:s");
+  $_certit_ok = true;
+
+  foreach ($certit as $valid => $nimi) {
+    $_time = $pankkiyhteys[$valid];
+
+    // Nollaa jos meillä ei ole tätä serttiä
+    if ($_time == '0000-00-00 00:00:00') {
+      continue;
+    }
+
+    // Jos expire date tulevaisuudessa, niin hyvä
+    if ($_time > $_today) {
+      continue;
+    }
+
+    $_nimi = t($nimi);
+    $_time = tv1dateconv($_time);
+
+    echo "<font class='error'>{$_nimi} on vanhentunut!</font><br><br>";
+
+    $_certit_ok = false;
+  }
+
+  return $_certit_ok;
+}
 
 /**
  * Laitaa kaikki tietyntyyppiset tiedostot pankista ja

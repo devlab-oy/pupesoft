@@ -95,6 +95,7 @@ $request = array(
     'saldovahvistus_viesti'                 => $saldovahvistus_viesti,
     'lasku_tunnukset'                       => $lasku_tunnukset,
     'tallenna_exceliin'                     => $tallenna_exceliin,
+    'avoin_saldo_rajaus'                    => $avoin_saldo_rajaus,
 );
 
 $request['laskut'] = array();

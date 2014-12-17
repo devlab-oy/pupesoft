@@ -1,7 +1,7 @@
 div.lopetus {
   top:5px;
   margin-top: 5px;
-  margin-bottom: 5px;  
+  margin-bottom: 5px;
 }
 
 div.ohje {
@@ -35,10 +35,14 @@ table.indexvas td {
   padding: 0px 0px 0px 0px;
 }
 
-.nopad {
+.pnopad {
   padding: 0px;
 }
 
-.top {
+.ptop {
   vertical-align: top;
+}
+
+.monivalintadiv {
+  display: inline-block;
 }

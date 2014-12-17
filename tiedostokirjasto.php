@@ -57,50 +57,12 @@ if ($tee == "") {
   if ($toim == "LAATU" and empty($aihealueet)) {
     echo "<font class='error'>" . t("Aihealueita ei ole vielä lisätty") . "</font>";
   }
+  elseif ($toim == "" and empty($toimittajat)) {
+    echo "<font class='error'>" . t("Toimittajia ei ole vielä lisätty") . "</font>";
+  }
   else {
     piirra_formi($params);
   }
-}
-
-if ($tee == '') {
-  piirra_formi($toimittaja, $tiedostotyyppi);
-}
-
-function hae_toimittajat() {
-  global $kukarow;
-
-  $query  = "SELECT DISTINCT toimi.tunnus, toimi.nimi
-             FROM tuotteen_toimittajat
-             INNER JOIN toimi ON (toimi.tunnus = tuotteen_toimittajat.liitostunnus)
-             WHERE tuotteen_toimittajat.yhtio = '{$kukarow['yhtio']}'
-             ORDER BY toimi.nimi";
-  $result = pupe_query($query);
-
-  $toimittajat = array();
-
-  while ($rivi = mysql_fetch_assoc($result)) {
-    array_push($toimittajat, $rivi);
-  }
-
-  return $toimittajat;
-}
-
-function tiedostotyypit() {
-  global $kukarow;
-
-  $query  = "SELECT selite
-             FROM avainsana
-             WHERE yhtio = '{$kukarow['yhtio']}'
-             AND laji    = 'LITETY_TKIRJAST'";
-  $result = pupe_query($query);
-
-  $tiedostotyypit = array();
-
-  while ($tiedostotyyppi = mysql_fetch_assoc($result)) {
-    array_push($tiedostotyypit, strtolower($tiedostotyyppi['selite']));
-  }
-
-  return $tiedostotyypit;
 }
 
 function piirra_formi($params) {
@@ -202,35 +164,6 @@ function piirra_formi($params) {
   echo "</tbody>";
   echo "</table>";
   echo "</form>";
-}
-
-function hae_tiedostot($toimittajan_tunnus, $tiedoston_tyyppi) {
-  global $kukarow;
-
-  $tiedoston_tyyppi = strtolower($tiedoston_tyyppi);
-
-  $query  = "SELECT liitetiedostot.tunnus,
-             liitetiedostot.kayttotarkoitus,
-             liitetiedostot.selite
-             FROM tuotteen_toimittajat
-             INNER JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio
-               AND tuotteen_toimittajat.tuoteno    = tuote.tuoteno)
-             INNER JOIN liitetiedostot ON (liitetiedostot.yhtio = tuotteen_toimittajat.yhtio
-               AND liitetiedostot.liitos           = 'tuote'
-               AND liitetiedostot.liitostunnus     = tuote.tunnus
-               AND liitetiedostot.kayttotarkoitus  = '{$tiedoston_tyyppi}')
-             WHERE tuotteen_toimittajat.yhtio      = '{$kukarow['yhtio']}'
-             AND tuotteen_toimittajat.liitostunnus = '{$toimittajan_tunnus}'
-             ORDER BY liitetiedostot.selite";
-  $result = pupe_query($query);
-
-  $tiedostot = array();
-
-  while ($tiedosto = mysql_fetch_assoc($result)) {
-    array_push($tiedostot, $tiedosto);
-  }
-
-  return $tiedostot;
 }
 
 function piirra_tiedostolista($tiedostot) {

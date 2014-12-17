@@ -1726,9 +1726,18 @@ echo "<script type='text/javascript'>
 
           $('#toimipaikka').on('change', function() {
             $('#varastopaikat').trigger('click');
-            $('#tuotteen_tilaukset').trigger('click');
-            $('#raportointi').trigger('click');
-            $('#tapahtumat').trigger('click');
+
+            if ($('#tuotteen_tilaukset_container:not(:empty)').length) {
+              $('#tuotteen_tilaukset').trigger('click');
+            }
+
+            if ($('#raportointi_container:not(:empty)').length) {
+              $('#raportointi').trigger('click');
+            }
+
+            if ($('#tapahtumat_container:not(:empty)').length) {
+              $('#tapahtumat').trigger('click');
+            }
           });
 
           $('#historia, #tapahtumalaji, #tilalehinta').on('change', function() {
@@ -2683,7 +2692,7 @@ if ($tee == 'Z') {
 
     echo "<hr />";
     echo "<div id='tuotteen_tilaukset_container'>";
-          echo "</div>";
+    echo "</div>";
     echo "<br />";
 
     if ($toim != "TYOMAARAYS_ASENTAJA") {
@@ -2974,9 +2983,8 @@ if ($tee == 'Z') {
 
       //tapahtumat
       echo "<tbody id='tapahtumat_container'></tbody>";
-
-              echo "</table>";
-            }
+      echo "</table>";
+    }
 
     echo "<br /><br />";
     echo $divit;

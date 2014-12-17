@@ -54,7 +54,8 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
               laskun_lisatiedot.sopimus_kk,
               laskun_lisatiedot.sopimus_pp,
               laskun_lisatiedot.sopimus_alkupvm,
-              laskun_lisatiedot.sopimus_loppupvm
+              laskun_lisatiedot.sopimus_loppupvm,
+              laskun_lisatiedot.yllapito_kuukausihinnoittelu
                FROM lasku
               LEFT JOIN laskun_lisatiedot
                 ON lasku.yhtio = laskun_lisatiedot.yhtio
@@ -194,6 +195,32 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
                  and tunnus   = '$ok'
                  and tila     = '0'";
       $result = pupe_query($query);
+
+      // Jos kuukausihinnoittelu on p‰‰ll‰, kerrotaan tilausrivien m‰‰r‰t, jotta saadaan oikea summa
+      // laskuun
+      if ($soprow["yllapito_kuukausihinnoittelu"] == "Y") {
+        $kk_kerroin = 12 / count($laskutus_kk);
+
+        $kh_query = "SELECT tunnus, tilkpl, varattu
+                     FROM tilausrivi
+                     WHERE yhtio = '{$kukarow["yhtio"]}'
+                     AND otunnus = {$ok}";
+
+        $kh_result = pupe_query($kh_query);
+
+        while ($kh_row = mysql_fetch_assoc($kh_result)) {
+          $uusi_tilkpl  = $kh_row["tilkpl"] * $kk_kerroin;
+          $uusi_varattu = $kh_row["varattu"] * $kk_kerroin;
+          $tr_tunnus    = $kh_row["tunnus"];
+
+          $kh2_query = "UPDATE tilausrivi
+                        SET tilkpl = {$uusi_tilkpl},
+                        varattu = {$uusi_varattu}
+                        WHERE tunnus = {$tr_tunnus}";
+
+          $kh2_result = pupe_query($kh2_query);
+        }
+      }
 
       // tyyppi takasin L, merkataan rivit ker‰tyks ja toimitetuks
       $query = "UPDATE tilausrivi

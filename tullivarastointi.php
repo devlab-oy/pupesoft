@@ -5,8 +5,6 @@ $errors = array();
 
 if (isset($task) and $task == 'perusta_saapuminen') {
 
-  print_r($tuote);
-
   foreach ($tuote as $key => $tiedot) {
 
     if (empty($tiedot['nimitys'])) {

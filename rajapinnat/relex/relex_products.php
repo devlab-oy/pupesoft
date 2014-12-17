@@ -25,6 +25,8 @@ ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(d
 require 'inc/connect.inc';
 require 'inc/functions.inc';
 
+$relex_ftphost = '';
+
 // Logitetaan ajo
 cron_log();
 
@@ -369,7 +371,7 @@ $query = "SELECT
           tuote.tuoteleveys,
           tuote.tuotesyvyys,
           tuote.tuotemassa,
-          round(tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys, 3) tilavuus,
+          round(tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys, 5) tilavuus,
           tuote.ostajanro,
           tuote.tuotepaallikko,
           tuote.tunnus

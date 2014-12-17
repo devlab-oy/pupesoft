@@ -3,23 +3,32 @@
 function hae_toimittajat_selectiin() {
   global $kukarow;
 
-  $query = "SELECT toimi.tunnus,
-            toimi.nimi
-            FROM toimi
-            WHERE toimi.yhtio = '{$kukarow["yhtio"]}'
-            AND toimi.oletus_vienti IN ('C', 'J', 'F', 'K', 'I', 'L')
-            AND toimi.tyyppi NOT IN ('P', 'PP')
-            ORDER BY toimi.nimi";
+  $result    = t_avainsana('TOIMIT_TKIRJAST');
+  $tunnukset = array();
 
-  $result = pupe_query($query);
-
-  $toimittajat = array();
-
-  while ($rivi = mysql_fetch_assoc($result)) {
-    array_push($toimittajat, $rivi);
+  while ($toimittaja = mysql_fetch_assoc($result)) {
+    array_push($tunnukset, $toimittaja["selite"]);
   }
 
-  return $toimittajat;
+  if (!empty($tunnukset)) {
+    $tunnukset = implode(",", $tunnukset);
+    $query     = "SELECT tunnus, nimi
+                  FROM toimi
+                  WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND tunnus IN ({$tunnukset})
+                  ORDER BY toimi.nimi";
+
+    $result      = pupe_query($query);
+    $toimittajat = array();
+
+    while ($toimittaja = mysql_fetch_assoc($result)) {
+      array_push($toimittajat, $toimittaja);
+    }
+
+    return $toimittajat;
+  }
+
+  return false;
 }
 
 function tiedostotyypit($aihealue = "") {

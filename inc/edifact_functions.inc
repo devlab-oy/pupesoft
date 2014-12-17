@@ -1418,6 +1418,8 @@ function kasittele_bookkaussanoma($edi_data) {
       $tunnus_johon_liitetaan = $lasku['tunnus'];
     }
 
+    $tunnus = $tunnus_johon_liitetaan;
+
     $lasku = mysqL_fetch_assoc($result);
 
     $update_query = "UPDATE lasku SET
@@ -1494,13 +1496,13 @@ function kasittele_bookkaussanoma($edi_data) {
     $query = "INSERT INTO liitetiedostot SET
               yhtio           = '{$kukarow['yhtio']}',
               liitos          = 'lasku',
-              liitostunnus    = '$tunnus',
+              liitostunnus    = '{$tunnus}',
               selite          = '{$tilausnro}:{$rivinro}',
               laatija         = '{$kukarow['kuka']}',
               luontiaika      = NOW(),
               data            = '{$liitedata}',
               filename        = '{$sanoma_id}',
-              filesize        = '$filesize',
+              filesize        = '{$filesize}',
               filetype        = 'text/plain',
               kayttotarkoitus = 'bookkaussanoma'";
     pupe_query($query);
@@ -1513,7 +1515,7 @@ function kasittele_bookkaussanoma($edi_data) {
     $query = "UPDATE liitetiedostot SET
               data         = '{$liitedata}',
               muutospvm    = NOW(),
-              liitostunnus = '{$lasku['tunnus']}',
+              liitostunnus = '{$tunnus}',
               muuttaja     = '{$kukarow['kuka']}',
               filename     = '{$sanoma_id}',
               filesize     = '$filesize'

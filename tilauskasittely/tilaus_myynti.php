@@ -5351,6 +5351,8 @@ if ($tee == '') {
 
         if ($trow["ei_saldoa"] == "") {
 
+          pupeslave_start();
+
           $sallitut_maat_lisa = "";
 
           if ($laskurow["toim_maa"] != '') {
@@ -5461,9 +5463,14 @@ if ($tee == '') {
           if ($myytavissa_sum == 0) {
             echo "<tr><th>".t("Myytävissä")."</th><td><font class='error'>".t("Tuote loppu")."</font></td></tr>";
           }
+
+          pupeslave_stop();
         }
 
         if ($toim == "REKLAMAATIO" and $toimpalautusasiakkat != "") {
+
+          pupeslave_start();
+
           // Saako tuotteen palauttaa toimittajalle
           $query = "SELECT asiakas.tunnus, asiakas.nimi, if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) sorttaus
                     FROM tuotteen_toimittajat
@@ -5481,12 +5488,16 @@ if ($tee == '') {
               echo "<tr><th>".t("Voidaan palauttaa toimittajalle")."</th><td>{$trrow['nimi']}</td></tr>";
             }
           }
+
+          pupeslave_stop();
         }
 
         echo "</table>";
         echo "</td>";
 
         if (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS', 'REKLAMAATIO'))) {
+
+          pupeslave_start();
 
           $oikeus_chk = tarkista_oikeus("tuote.php");
 
@@ -5581,6 +5592,8 @@ if ($tee == '') {
             echo $_html_rows;
             echo "</table>";
           }
+
+          pupeslave_stop();
         }
 
         echo "</td>";

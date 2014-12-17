@@ -110,7 +110,7 @@ function alku($saldovahvistus) {
   $pdf->draw_text(440, 750, $kukarow["puhno"], $firstpage, $norm);
 
   $pdf->draw_text(380, 740, t("Fax", $kieli).':', $firstpage, $norm);
-  $pdf->draw_text(440, 740, $saldovahvistus['asiakas']['fax'], $firstpage, $norm);
+  $pdf->draw_text(440, 740, $yhtiorow['fax'], $firstpage, $norm);
 
   $pdf->draw_text(380, 730, t("Sähköposti", $kieli).':', $firstpage, $norm);
   $pdf->draw_text(440, 730, $kukarow["eposti"], $firstpage, $norm);

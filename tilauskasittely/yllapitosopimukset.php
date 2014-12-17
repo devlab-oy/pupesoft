@@ -184,13 +184,15 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
       $result = pupe_query($query);
 
       // p‰ivitet‰‰n tila myyntitilaus valmis, suoraan laskutukseen (clearing on sopimus ja swift kent‰ss‰ on mik‰ soppari on kopsattu)
+      // Samalla p‰vitet‰‰n laskulle viesti, joista k‰y ilmi laskutuskausi
       $query  = "UPDATE lasku
                  SET tila     = 'N',
                  alatila      = '',
                  eilahetetta  = 'o',
                  clearing     = 'sopimus',
                  swift        = '$tilausnumero',
-                 tilaustyyppi = ''
+                 tilaustyyppi = '',
+                 viesti       = concat_ws(', ', viesti, 'Laskutuskausi {$to[0]}')
                  WHERE yhtio  = '$kukarow[yhtio]'
                  and tunnus   = '$ok'
                  and tila     = '0'";

@@ -5537,20 +5537,20 @@ if ($tee == '') {
                 $_html_rows .= "<td>{$tapahtuma_chk_row['laatija']}</td>";
                 $_html_rows .= "<td>".tv1dateconv($tapahtuma_chk_row['laadittu'])."</td>";
                 $_html_rows .= "<td align='right'>";
-                $_html_rows .= ($tapahtuma_chk_row['kpl'] * -1)." {$tapahtuma_chk_row['yksikko']}";
+                $_html_rows .= "{$tapahtuma_chk_row['kpl']} {$tapahtuma_chk_row['yksikko']}";
                 $_html_rows .= "</td>";
 
                 if ($oikeus_chk) {
                   // Onko verolliset hinnat?
                   if ($yhtiorow["alv_kasittely"] == "") {
-                    $tapahtuma_chk_row['hinta'] *= (1 + $tapahtuma_chk_row["alv"] / 100);
+                    $tapahtuma_chk_row['rivihinta'] *= (1 + $tapahtuma_chk_row["alv"] / 100);
                   }
 
                   $_html_rows .= "<td align='right'>";
-                  $_html_rows .= hintapyoristys($tapahtuma_chk_row['hinta']);
+                  $_html_rows .= hintapyoristys($tapahtuma_chk_row['rivihinta']);
                   $_html_rows .= "</td>";
 
-                  $_kplhinta = $tapahtuma_chk_row['hinta'] * ($tapahtuma_chk_row['kpl'] * -1);
+                  $_kplhinta = $tapahtuma_chk_row['rivihinta'] / $tapahtuma_chk_row['kpl'];
                   $_html_rows .= "<td align='right'>".hintapyoristys($_kplhinta)."</td>";
                 }
 

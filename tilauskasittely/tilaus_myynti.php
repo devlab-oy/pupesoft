@@ -58,7 +58,7 @@ $e2 = (isset($yhtiorow['laiterekisteri_kaytossa']) and $yhtiorow['laiterekisteri
 $e3 = (isset($tappi) and $tappi == "lataa_tiedosto");
 $e4 = isset($tmpfilenimi);
 
-if ($e1 and $e2 and $e3 and $e4) {
+if (($e1 or $e2) and $e3 and $e4) {
   readfile("/tmp/".$tmpfilenimi);
   exit;
 }
@@ -5293,7 +5293,7 @@ if ($tee == '') {
 
         echo "<br>";
         echo "<table>";
-        echo "<tr>$jarjlisa<td class='back nopad top'>";
+        echo "<tr>$jarjlisa<td class='back pnopad ptop'>";
 
         echo "<table>
           <tr><th colspan='2'>".t_tuotteen_avainsanat($tuote, 'nimitys')."</th></tr>
@@ -5569,7 +5569,7 @@ if ($tee == '') {
 
             $oikeus_chk = tarkista_oikeus("tuote.php");
 
-            echo "<td class='back nopad top'>$jarjlisa";
+            echo "<td class='back pnopad ptop'>$jarjlisa";
 
             echo "<table>";
             echo "<tr>";
@@ -9001,15 +9001,15 @@ if ($tee == '') {
         $sallijyvitys = FALSE;
 
         if ($kukarow["extranet"] == "") {
-          if ($yhtiorow["salli_jyvitys_myynnissa"] == "" and ($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '')) {
+          if ($yhtiorow["salli_jyvitys_myynnissa"] == "" and ($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '') and $toim != 'SIIRTOLISTA') {
             $sallijyvitys = TRUE;
           }
 
-          if ($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] != '') {
+          if ($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] != '' and $toim != 'SIIRTOLISTA') {
             $sallijyvitys = TRUE;
           }
 
-          if ($yhtiorow["salli_jyvitys_myynnissa"] == "K" or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
+          if (($yhtiorow["salli_jyvitys_myynnissa"] == "K" or $yhtiorow["salli_jyvitys_myynnissa"] == "S") and $toim != 'SIIRTOLISTA') {
             $sallijyvitys = TRUE;
           }
 

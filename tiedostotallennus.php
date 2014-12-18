@@ -8,7 +8,7 @@ else {
   exit;
 }
 
-require_once("tiedostofunkkarit.inc");
+require_once "tiedostofunkkarit.inc";
 
 echo "<font class='head'>" . t('Tiedostojen tallennus') . "</font>";
 echo "<hr>";
@@ -28,10 +28,10 @@ if ($tee == "poista") {
 }
 
 if ($tee == "tallenna_tiedosto" and
-    !empty($tiedosto["tmp_name"]) and
-    !empty($selite) and
-    !empty($aihealue) and
-    !empty($tiedostotyyppi)
+  !empty($tiedosto["tmp_name"]) and
+  !empty($selite) and
+  !empty($aihealue) and
+  !empty($tiedostotyyppi)
 ) {
   if (tallenna_liite("tiedosto", "muut_tiedostot", 0, $selite, "{$aihealue} | {$tiedostotyyppi}")) {
     echo "<font class='ok'>" . t("Tiedosto tallennettu onnistuneesti") . "</font>";
@@ -125,7 +125,7 @@ function piirra_formi($valittu_aihealue, $valittu_tiedostotyyppi, $aihealueet) {
   }
   elseif (!empty($valittu_aihealue)) {
     echo
-      "<tr>
+    "<tr>
          <td colspan='2'>
            <font class='error'>" .
       t("Tälle aihealueelle ei ole vielä lisätty tiedostotyyppejä") .
@@ -172,7 +172,7 @@ function piirra_tiedostolista($tiedostot, $aihealue, $tiedostotyyppi) {
     echo "<input type='hidden' name='tiedostotyyppi' value='{$tiedostotyyppi}'>";
     echo "<input type='hidden' name='poistettava_tiedosto' value='{$tiedosto["tunnus"]}'>";
     echo
-      "<input type='submit'
+    "<input type='submit'
                  value='Poista'
                  onclick='return confirm(\"" .
       t("Oletko varma, että haluat poistaa tämän tiedoston") .

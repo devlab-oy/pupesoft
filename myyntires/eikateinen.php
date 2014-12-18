@@ -539,7 +539,7 @@ function echo_lasku_table($laskurow, $toim) {
 
       $sel = $laskurow['kassalipas'] == $row['tunnus'] ? " selected" : "";
       if ($sel == '') {
-         $sel = $kukarow['kassamyyja'] == $row['tunnus'] ? " selected" : "";
+        $sel = $kukarow['kassamyyja'] == $row['tunnus'] ? " selected" : "";
       }
       echo "<option value='{$row['tunnus']}'{$sel}>".t($row['nimi'])."</option>";
     }

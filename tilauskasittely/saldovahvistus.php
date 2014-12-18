@@ -36,10 +36,10 @@ if ($ajax_request) {
       $lasku_tunnukset_key = implode('', $saldovahvistus_rivi['lasku_tunnukset']);
 
       $saldovahvistusrivi = array(
-          'laskun_avoin_paiva'    => $saldovahvistus_rivi['laskun_avoin_paiva'],
-          'saldovahvistus_viesti' => $saldovahvistus_rivi['saldovahvistus_viesti'],
-          'lasku_tunnukset'       => $saldovahvistus_rivi['lasku_tunnukset'],
-          'ryhmittely_tyyppi'     => $saldovahvistus_rivi['ryhmittely_tyyppi'],
+        'laskun_avoin_paiva'    => $saldovahvistus_rivi['laskun_avoin_paiva'],
+        'saldovahvistus_viesti' => $saldovahvistus_rivi['saldovahvistus_viesti'],
+        'lasku_tunnukset'       => $saldovahvistus_rivi['lasku_tunnukset'],
+        'ryhmittely_tyyppi'     => $saldovahvistus_rivi['ryhmittely_tyyppi'],
       );
 
       lisaa_sessioon_saldovahvistus_rivi($lasku_tunnukset_key, $saldovahvistusrivi);
@@ -84,26 +84,26 @@ else {
 }
 
 $request = array(
-    'tee'                                   => $tee,
-    'ryhmittely_tyyppi'                     => $ryhmittely_tyyppi,
-    'saldovahvistus_rivi_ryhmittely_tyyppi' => $saldovahvistus_rivi_ryhmittely_tyyppi,
-    'ryhmittely_arvo'                       => $ryhmittely_arvo,
-    'pp'                                    => $pp,
-    'kk'                                    => $kk,
-    'vv'                                    => $vv,
-    'paiva'                                 => $paiva,
-    'saldovahvistus_viesti'                 => $saldovahvistus_viesti,
-    'lasku_tunnukset'                       => $lasku_tunnukset,
-    'tallenna_exceliin'                     => $tallenna_exceliin,
-    'avoin_saldo_rajaus'                    => $avoin_saldo_rajaus,
+  'tee'                                   => $tee,
+  'ryhmittely_tyyppi'                     => $ryhmittely_tyyppi,
+  'saldovahvistus_rivi_ryhmittely_tyyppi' => $saldovahvistus_rivi_ryhmittely_tyyppi,
+  'ryhmittely_arvo'                       => $ryhmittely_arvo,
+  'pp'                                    => $pp,
+  'kk'                                    => $kk,
+  'vv'                                    => $vv,
+  'paiva'                                 => $paiva,
+  'saldovahvistus_viesti'                 => $saldovahvistus_viesti,
+  'lasku_tunnukset'                       => $lasku_tunnukset,
+  'tallenna_exceliin'                     => $tallenna_exceliin,
+  'avoin_saldo_rajaus'                    => $avoin_saldo_rajaus,
 );
 
 $request['laskut'] = array();
 $request['valitut_laskut'] = array();
 
 $request['ryhmittely_tyypit'] = array(
-    'ytunnus'    => t('Ytunnus'),
-    'asiakasnro' => t('Asiakasnumero'),
+  'ytunnus'    => t('Ytunnus'),
+  'asiakasnro' => t('Asiakasnumero'),
 );
 
 $request['saldovahvistus_viestit'] = hae_saldovahvistus_viestit();
@@ -115,8 +115,8 @@ if ($nayta_pdf != 1) {
   echo "<br/>";
 }
 
-# Tämä blocki on sitä varten, että muistetaan käyttäjän aiemmat haut,
-# jos käyttäjä vierailee toisissa softissa ja palaa tähän softaan myöhemmin
+// Tämä blocki on sitä varten, että muistetaan käyttäjän aiemmat haut,
+// jos käyttäjä vierailee toisissa softissa ja palaa tähän softaan myöhemmin
 if (!empty($_SESSION['valitut_laskut'])) {
   $lasku_tunnukset_temp = $request['lasku_tunnukset'];
   foreach ($_SESSION['valitut_laskut'] as $valittu_lasku) {
@@ -373,7 +373,7 @@ function echo_saldovahvistukset($request) {
       $_pos = ($_rajaus > 0 and $_avoin_summa < $_rajaus);
       $_neg = ($_rajaus < 0 and $_avoin_summa > $_rajaus);
 
-      if ($_pos or $_neg)  {
+      if ($_pos or $_neg) {
         continue;
       }
     }

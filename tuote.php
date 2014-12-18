@@ -1242,7 +1242,7 @@ if (isset($ajax)) {
               LEFT JOIN lasku as lasku2 ON lasku2.yhtio = tilausrivi.yhtio and lasku2.tunnus = tilausrivi.uusiotunnus
               LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio and asiakas.tunnus = lasku.liitostunnus
               WHERE tilausrivi.yhtio         = '$kukarow[yhtio]'
-              and tilausrivi.tyyppi in ('L','E','G','V','W','M','O')
+              and tilausrivi.tyyppi          in ('L','E','G','V','W','M','O')
               and tilausrivi.varattu + tilausrivi.jt != 0
               and tilausrivi.tuoteno         = '$tuoteno'
               and tilausrivi.laskutettuaika  = '0000-00-00'
@@ -2568,7 +2568,7 @@ if ($tee == 'Z') {
         echo "&nbsp;&nbsp;<a href='{$palvelin2}muuvarastopaikka.php?toim=OLETUSVARASTO&tee=M&tuoteno=".urlencode($tuoterow["tuoteno"])."&lopetus=$tkysy_lopetus'><img style='height:10px;' src='{$palvelin2}pics/lullacons/document-properties.png' alt='", t("Muokkaa"), "' title='", t("Muuta tuotepaikkoja"), "' /></a>";
       }
 
-      echo "&nbsp;&nbsp;<input type='button' id='varastopaikat' value='",t("Näytä"),"' />";
+      echo "&nbsp;&nbsp;<input type='button' id='varastopaikat' value='", t("Näytä"), "' />";
 
       echo "<hr>";
 
@@ -2594,9 +2594,9 @@ if ($tee == 'Z') {
       echo "<hr>";
 
       echo "<div id='korvaavat_container'>";
-      echo "<input type='button' id='korvaavat' value='",t("Näytä"),"' />";
+      echo "<input type='button' id='korvaavat' value='", t("Näytä"), "' />";
       echo "</div>";
-      }
+    }
 
     echo "</td><td class='back pnopad ptop'>";
 
@@ -2614,7 +2614,7 @@ if ($tee == 'Z') {
       echo "<hr>";
 
       echo "<div id='vastaavat_container'>";
-      echo "<input type='button' id='vastaavat' value='",t("Näytä"),"' />";
+      echo "<input type='button' id='vastaavat' value='", t("Näytä"), "' />";
       echo "</div>";
     }
 
@@ -2683,7 +2683,7 @@ if ($tee == 'Z') {
 
     // Varastosaldot ja paikat
     echo "<font class='message'>".t("Tuotteen tilaukset")."</font>";
-    echo "&nbsp;&nbsp;<input type='button' id='tuotteen_tilaukset' value='",t("Näytä"),"' />";
+    echo "&nbsp;&nbsp;<input type='button' id='tuotteen_tilaukset' value='", t("Näytä"), "' />";
     echo "<input type='hidden' id='tuoteno' value='{$tuoteno}' />";
     echo "<input type='hidden' id='yksikko' value='{$tuoterow['yksikko']}' />";
     echo "<input type='hidden' id='sarjanumeroseuranta' value='{$tuoterow['sarjanumeroseuranta']}' />";
@@ -2719,13 +2719,13 @@ if ($tee == 'Z') {
         <font class='message'>".t("Raportointi")."</font><a href='#' name='Raportit'></a>
         (<input type='radio' class='raportti_tyyppi' name='raportti' value='MYYNTI' $sele[M]> ".t("Myynnistä")." /
         <input type='radio' class='raportti_tyyppi' name='raportti' value='KULUTUS' $sele[K]> ".t("Kulutuksesta").")
-        &nbsp;&nbsp;<input type='button' id='raportointi' value='",t("Näytä"),"' />
+        &nbsp;&nbsp;<input type='button' id='raportointi' value='", t("Näytä"), "' />
         </form><hr>";
 
       echo "<div id='raportointi_container'>";
       echo "</div>";
       echo "<br />";
-        }
+    }
 
     if ($tuoterow["sarjanumeroseuranta"] == "S" or $tuoterow["sarjanumeroseuranta"] == "U" or $tuoterow["sarjanumeroseuranta"] == "V" or $tuoterow['sarjanumeroseuranta'] == 'T') {
 
@@ -2889,7 +2889,7 @@ if ($tee == 'Z') {
       echo "<input type='hidden' name='raportti' value='$raportti'>";
 
       echo "&nbsp;&nbsp;<a href='#' name='Tapahtumat'><img src='pics/lullacons/arrow-double-up-green.png' /></a>";
-      echo "&nbsp;&nbsp;<input type='button' id='tapahtumat' value='",t("Näytä"),"' />";
+      echo "&nbsp;&nbsp;<input type='button' id='tapahtumat' value='", t("Näytä"), "' />";
       echo "<hr />";
       echo "<table>";
 

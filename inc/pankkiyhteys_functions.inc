@@ -903,6 +903,7 @@ function pankkiyhteyden_paivamaarat($pankkiyhteys) {
   return $_certit_ok;
 }
 
+
 /**
  * Laitaa kaikki tietyntyyppiset tiedostot pankista ja
  * palauttaa arrayn tiedostojen viitteista ja

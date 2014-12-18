@@ -201,8 +201,8 @@ if ($tee == "pankin_sertifikaatti_hae") {
               bank_root_certificate                = '{$brc}',
               bank_encryption_certificate_valid_to = '{$bec_time}',
               bank_root_certificate_valid_to       = '{$brc_time}'
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus = {$pankkiyhteys_tunnus}";
+              WHERE yhtio                          = '{$kukarow['yhtio']}'
+              AND tunnus                           = {$pankkiyhteys_tunnus}";
     $result = pupe_query($query);
 
     ok("Pankin sertifikaatit päivitetty!");

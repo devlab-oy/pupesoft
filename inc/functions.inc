@@ -29993,9 +29993,9 @@ if (!function_exists('tuotteen_toimittajat_pakkauskoot')) {
       $query = "SELECT tuotteen_toimittajat_pakkauskoot.*
                 FROM tuotteen_toimittajat
                 JOIN tuotteen_toimittajat_pakkauskoot ON (
-                  tuotteen_toimittajat_pakkauskoot.yhtio = tuotteen_toimittajat.yhtio
+                  tuotteen_toimittajat_pakkauskoot.yhtio                   = tuotteen_toimittajat.yhtio
                   AND tuotteen_toimittajat_pakkauskoot.toim_tuoteno_tunnus = tuotteen_toimittajat.tunnus)
-                WHERE tuotteen_toimittajat.yhtio = '$kukarow[yhtio]'
+                WHERE tuotteen_toimittajat.yhtio                           = '$kukarow[yhtio]'
                 AND tuotteen_toimittajat.tunnus= '$tt_tunnus'
                 $orderby_limit";
       $result = pupe_query($query);

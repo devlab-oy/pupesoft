@@ -385,7 +385,7 @@ if ($kasitellaan_tiedosto) {
       if (isset($toimitunnusvalinta) and $toimitunnusvalinta != 1) {
 
         if ($column == "TOIM_TUOTENO_TUNNUS") $chk_tunnus = $key;
-        
+
         switch ($toimitunnusvalinta) {
         case "2":
           if ($column == "TUOTENUMERO") $chk_tuoteno = $key;
@@ -430,7 +430,7 @@ if ($kasitellaan_tiedosto) {
       // Muutetaan arvot
       foreach ($taulunrivit["tuotteen_toimittajat_pakkauskoot"] as $ind => $rivit) {
         $chk_tunnus_val = $taulunrivit["tuotteen_toimittajat_pakkauskoot"][$ind][$chk_tunnus];
-        
+
         if (is_int($chk_tuoteno)) {
           $chk_tuoteno_val = $taulunrivit["tuotteen_toimittajat_pakkauskoot"][$ind][$chk_tuoteno];
         }
@@ -469,7 +469,7 @@ if ($kasitellaan_tiedosto) {
       if (isset($toimitunnusvalinta) and $toimitunnusvalinta != 1) {
 
         if ($column == "TOIM_TUOTENO_TUNNUS") $chk_tunnus = $key;
-        
+
         switch ($toimitunnusvalinta) {
         case "2":
           if ($column == "TUOTENUMERO") $chk_tuoteno = $key;
@@ -514,7 +514,7 @@ if ($kasitellaan_tiedosto) {
       // Muutetaan arvot
       foreach ($taulunrivit["tuotteen_toimittajat_tuotenumerot"] as $ind => $rivit) {
         $chk_tunnus_val = $taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_tunnus];
-        
+
         if (is_int($chk_tuoteno)) {
           $chk_tuoteno_val = $taulunrivit["tuotteen_toimittajat_tuotenumerot"][$ind][$chk_tuoteno];
         }

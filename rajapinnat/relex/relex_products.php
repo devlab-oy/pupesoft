@@ -593,7 +593,7 @@ while ($row = mysql_fetch_assoc($res)) {
       $ttrow['ostohinta_oletusvaluutta']        = $ostohinta;
       $ttrow['ostohinta_oletusvaluutta_netto']  = $ostohinta_netto;
       $ttrow['alennukset_oletusvaluutta_netto'] = $alennukset;
-      
+
       $pakkaukset = tuotteen_toimittajat_pakkauskoot($ttrow['tutotunnus'], 'suurin');
       $ttrow['lavakoko'] = !empty($pakkaukset) ? $pakkaukset[0][0] : '0';
 

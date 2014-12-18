@@ -2307,7 +2307,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   }
 
   if ($trow["tunnus"] > 0 and $errori == '' and $toim == 'tuotteen_toimittajat') {
-    
+
     if (($toikrow = tarkista_oikeus("yllapito.php", "tuotteen_toimittajat_pakkauskoot%", "", "OK")) !== FALSE) {
       $lukitse_avaimeen = urlencode($toim_tuoteno_tunnus);
 
@@ -2316,7 +2316,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
       echo "<iframe id='tuotteen_toimittajat_pakkauskoot_iframe' name='tuotteen_toimittajat_pakkauskoot_iframe' src='yllapito.php?toim={$toikrow['alanimi']}&from=yllapito&ohje=off&haku[1]=@{$lukitse_avaimeen}&lukitse_avaimeen={$lukitse_avaimeen}' style='width: 600px; border: 0px; display: block;' border='0' frameborder='0'></iFrame>";
       echo "</td></tr>";
     }
-    
+
     if (($toikrow = tarkista_oikeus("yllapito.php", "tuotteen_toimittajat_tuotenumerot%", "", "OK")) !== FALSE) {
       $lukitse_avaimeen = urlencode($toim_tuoteno_tunnus);
 

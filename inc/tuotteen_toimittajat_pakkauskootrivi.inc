@@ -24,16 +24,16 @@ if ($_kentta == "yksikko") {
 
   $ulos = "<td>";
   $ulos .= "<select name='$nimi'>";
-  
+
   while ($_yksikko = mysql_fetch_assoc($res)) {
-    
+
     $sel="";
     if (strtoupper($trow[$i]) == strtoupper($_yksikko["selite"]) and $_yksikko["selite"] != "") {
       $sel = "selected";
     }
     $ulos .= "<option value = '{$_yksikko['selite']}' $sel>{$_yksikko['selitetark']}</option>";
   }
-  
+
   $ulos .= "</select>";
   $ulos .= "</td>";
   $jatko = 0;

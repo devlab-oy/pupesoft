@@ -81,11 +81,11 @@ if ($tee == "file" and $laheta != "") {
   if ($table == "extranet_kayttajan_lisatiedot") {
     $tablelisa .= "..liitostunnusvalinta.$liitostunnusvalinta";
   }
-  
+
   if ($table == "tuotteen_toimittajat_tuotenumerot") {
     $tablelisa .= "..toimitunnusvalinta.$toimitunnusvalinta";
   }
-  
+
   if ($table == "tuotteen_toimittajat_pakkauskoot") {
     $tablelisa .= "..toimitunnusvalinta.$toimitunnusvalinta";
   }

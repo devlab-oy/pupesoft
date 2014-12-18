@@ -1499,23 +1499,23 @@ if ($tee != "" and $tee != "MUUOTAOSTIKKOA") {
 
           echo "</td>";
           echo "<td valign='top' class='tooltip' id='$divnolla'>$prow[toim_tuoteno]";
-          
+
           $_pakkaukset = tuotteen_toimittajat_pakkauskoot($prow['tt_tunnus']);
-  
+
           if ($yhtiorow["ostoera_pyoristys"] == "K" and count($_pakkaukset)) {
             echo "<br><img src='$palvelin2/pics/lullacons/info.png'>";
             echo "<div id='div_$divnolla' class='popup' style='width: 600px;'>";
-            
+
             // pientä kaunistelua, ei turhia desimaaleja
-            $prow["osto_era"] = fmod($prow["osto_era"], 1) ? $prow["osto_era"] : round($prow["osto_era"]); 
-            
+            $prow["osto_era"] = fmod($prow["osto_era"], 1) ? $prow["osto_era"] : round($prow["osto_era"]);
+
             // tähän pakkauskoot..
             echo "<ul><li>".t("Oletuskoko").": {$prow["osto_era"]}</li>";
-            
+
             foreach ($_pakkaukset as $_pak) {
               echo "<li>{$_pak[0]} {$_pak[1]}</li>";
             }
-            
+
             echo "</ul></div>";
           }
           echo "</td>";

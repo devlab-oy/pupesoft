@@ -2187,7 +2187,7 @@ if ($tee == 'Z') {
       $_pakkaukset = tuotteen_toimittajat_pakkauskoot($tt_rivi['tunnus']);
       foreach ($_pakkaukset as $_pak) {
         echo "<br>$_pak[0] $_pak[1]";
-    }
+      }
     }
 
     echo "</td>";

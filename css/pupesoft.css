@@ -40,11 +40,11 @@ td {
   vertical-align: middle;
 }
 
-.nopad {
-  padding: 0px;
+.pnopad {
+  padding: 0;
 }
 
-.top {
+.ptop {
   vertical-align: top;
 }
 
@@ -129,4 +129,13 @@ input[type=submit].poista_btn {
   background-repeat: no-repeat;
   background-position: right;
   padding-right: 35px;
+}
+
+.monivalintadiv {
+  display: inline-block;
+}
+
+table.ostorivien_kohdistus input[type=text], table.ostorivien_kohdistus input[type=button], table.ostorivien_kohdistus select {
+  margin: 0;
+  padding: 1px;
 }

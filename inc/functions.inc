@@ -22181,15 +22181,23 @@ if (!function_exists('luottotilanne')) {
     $query_alennuksia = generoi_alekentta('M');
 
     // Avoimet tilaukset
-    $query = "SELECT
-              round(sum($avtilisa * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) tilausavoinsaldo
-              FROM lasku
-              JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
-              WHERE lasku.yhtio      = '$kukarow[yhtio]'
-              AND ((lasku.tila in ('L', 'N') and lasku.alatila != 'X')      # Kaikki myyntitilaukset, paitsi laskutetut
-                OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))  # Valmistukset
-              )
-              AND lasku.liitostunnus in ($liitostunnus)";
+    $query = "(SELECT
+               round(sum({$avtilisa} * if('{$yhtiorow['alv_kasittely']}' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) tilausavoinsaldo
+               FROM lasku
+               JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi = 'L')
+               WHERE lasku.yhtio       = '{$kukarow['yhtio']}'
+               AND lasku.tila          in ('L', 'N')
+               AND lasku.alatila      != 'X'      # Kaikki myyntitilaukset, paitsi laskutetut
+               AND lasku.liitostunnus  in ({$liitostunnus}))
+               UNION
+               (SELECT
+               round(sum({$avtilisa} * if('{$yhtiorow['alv_kasittely']}' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) tilausavoinsaldo
+               FROM lasku
+               JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi = 'W')
+               WHERE lasku.yhtio       = '{$kukarow['yhtio']}'
+               AND lasku.tila          = 'V'
+               AND lasku.alatila       in ('','A','C','J','V')  # Valmistukset
+               AND lasku.liitostunnus  in ({$liitostunnus}))";
     $avoimettilauksetres = pupe_query($query);
     $avoimettilauksetrow = mysql_fetch_assoc($avoimettilauksetres);
 
@@ -27031,13 +27039,13 @@ if (!function_exists('keraa_saldovahvistusrivit_ytunnus')) {
         $query = "SELECT *
                   FROM asiakas
                   JOIN asiakkaan_avainsanat AS aa ON (
-                    aa.yhtio = asiakas.yhtio AND
-                    aa.laji = 'PÄÄASIAKAS' AND
-                    aa.avainsana != '' AND
-                    aa.liitostunnus = asiakas.tunnus
+                    aa.yhtio           = asiakas.yhtio AND
+                    aa.laji            = 'PÄÄASIAKAS' AND
+                    aa.avainsana      != '' AND
+                    aa.liitostunnus    = asiakas.tunnus
                   )
-                  WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-                  AND asiakas.ytunnus = '{$laskut[$ryhmittely]['asiakas']['ytunnus']}'
+                  WHERE asiakas.yhtio  = '{$kukarow['yhtio']}'
+                  AND asiakas.ytunnus  = '{$laskut[$ryhmittely]['asiakas']['ytunnus']}'
                   LIMIT 1";
         $chkres = pupe_query($query);
 
@@ -27092,19 +27100,19 @@ if (!function_exists('keraa_saldovahvistusrivit_ktunnus_ytunnus')) {
           $query = "SELECT *
                     FROM asiakas
                     WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-                    AND asiakas.tunnus = '{$lasku['saldovahvistus_liitostunnus']}'";
+                    AND asiakas.tunnus  = '{$lasku['saldovahvistus_liitostunnus']}'";
         }
         else {
           $query = "SELECT asiakas.*
                     FROM asiakas
                     JOIN asiakkaan_avainsanat AS aa ON (
-                      aa.yhtio = asiakas.yhtio AND
-                      aa.laji = 'PÄÄASIAKAS' AND
-                      aa.avainsana != '' AND
-                      aa.liitostunnus = asiakas.tunnus
+                      aa.yhtio           = asiakas.yhtio AND
+                      aa.laji            = 'PÄÄASIAKAS' AND
+                      aa.avainsana      != '' AND
+                      aa.liitostunnus    = asiakas.tunnus
                     )
-                    WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
-                    AND asiakas.ytunnus = '{$_ytunnus_chk}'
+                    WHERE asiakas.yhtio  = '{$kukarow['yhtio']}'
+                    AND asiakas.ytunnus  = '{$_ytunnus_chk}'
                     LIMIT 1";
         }
 
@@ -29861,10 +29869,19 @@ if (!function_exists("paivita_sopimusrivit")) {
   }
 }
 
+if (!function_exists("sanitoi_javascript_id")) {
+  function sanitoi_javascript_id($value) {
+    // ID and NAME tokens must begin with a letter ([A-Za-z])
+    // and may be followed by any number of letters, digits ([0-9]),
+    // hyphens ("-"), underscores ("_"), colons (":"), and periods (".").
+    return preg_replace("/[^a-zöäåA-ZÖÄÅ0-9\-\:\_\.]/i", "", $value);
+  }
+}
+
 if (!function_exists("poista_osakeyhtio_lyhenne")) {
   function poista_osakeyhtio_lyhenne($nimi) {
 
-    # strtolower ei osaa pienentää tämmöisiä erikoismerkkejä
+    // strtolower ei osaa pienentää tämmöisiä erikoismerkkejä
     $old = array("Ü", "Ž");
     $new = array("ü", "ž");
     $nimi = str_replace($old, $new, $nimi);

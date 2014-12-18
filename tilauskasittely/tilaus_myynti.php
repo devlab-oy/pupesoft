@@ -58,7 +58,7 @@ $e2 = (isset($yhtiorow['laiterekisteri_kaytossa']) and $yhtiorow['laiterekisteri
 $e3 = (isset($tappi) and $tappi == "lataa_tiedosto");
 $e4 = isset($tmpfilenimi);
 
-if ($e1 and $e2 and $e3 and $e4) {
+if (($e1 or $e2) and $e3 and $e4) {
   readfile("/tmp/".$tmpfilenimi);
   exit;
 }
@@ -5220,7 +5220,7 @@ if ($tee == '') {
 
         echo "<br>";
         echo "<table>";
-        echo "<tr>$jarjlisa<td class='back nopad top'>";
+        echo "<tr>$jarjlisa<td class='back pnopad ptop'>";
 
         echo "<table>
           <tr><th colspan='2'>".t_tuotteen_avainsanat($tuote, 'nimitys')."</th></tr>
@@ -5431,10 +5431,19 @@ if ($tee == '') {
 
                 if ($myytavissa != 0) {
 
+                  $id2  = $saldorow['hyllyalue'].$saldorow['hyllynro'];
+                  $id2 .= $saldorow['hyllyvali'].$saldorow['hyllytaso'];
+
+                  $id2 = sanitoi_javascript_id($id2);
+
                   echo "<tr>";
                   echo "<th nowrap>";
-                  echo "<a class='tooltip' id='$id2'>$saldorow[nimitys]</a> $saldorow[tyyppi]";
-                  echo "<div id='div_$id2' class='popup' style='width: 300px'>($saldorow[hyllyalue]-$saldorow[hyllynro]-$saldorow[hyllyvali]-$saldorow[hyllytaso])</div>";
+                  echo "<a class='tooltip' id='{$id2}'>{$saldorow['nimitys']}</a>";
+                  echo " {$saldorow['tyyppi']}";
+                  echo "<div id='div_{$id2}' class='popup' style='width: 300px'>(";
+                  echo "{$saldorow['hyllyalue']}-{$saldorow['hyllynro']}-";
+                  echo "{$saldorow['hyllyvali']}-{$saldorow['hyllytaso']}";
+                  echo ")</div>";
                   echo "</th>";
 
                   echo "<td align='right' nowrap>";
@@ -5455,6 +5464,7 @@ if ($tee == '') {
         }
 
         if ($toim == "REKLAMAATIO" and $toimpalautusasiakkat != "") {
+
           // Saako tuotteen palauttaa toimittajalle
           $query = "SELECT asiakas.tunnus, asiakas.nimi, if (tuotteen_toimittajat.jarjestys = 0, 9999, tuotteen_toimittajat.jarjestys) sorttaus
                     FROM tuotteen_toimittajat
@@ -5478,56 +5488,98 @@ if ($tee == '') {
         echo "</td>";
 
         if (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS', 'REKLAMAATIO'))) {
-          $query = "SELECT tapahtuma.*,
-                    if (kuka.nimi is not null and kuka.nimi != '', kuka.nimi, tapahtuma.laatija) laatija,
-                    tilausrivi.alv
-                    FROM tapahtuma
-                    JOIN tilausrivi ON (tilausrivi.yhtio = tapahtuma.yhtio AND tilausrivi.tunnus = tapahtuma.rivitunnus)
-                    JOIN lasku use index (PRIMARY) ON (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus and lasku.liitostunnus='{$laskurow['liitostunnus']}' and lasku.tila = 'L' and lasku.alatila = 'X')
-                    LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja)
-                    WHERE tapahtuma.yhtio = '{$kukarow['yhtio']}'
-                    AND tapahtuma.tuoteno = '{$tuote['tuoteno']}'
-                    AND tapahtuma.laji    = 'laskutus'
-                    ORDER BY tapahtuma.laadittu desc, tapahtuma.tunnus desc
-                    LIMIT 5";
-          $tapahtuma_chk_res = pupe_query($query);
 
-          if (mysql_num_rows($tapahtuma_chk_res) > 0) {
+          $oikeus_chk = tarkista_oikeus("tuote.php");
 
-            $oikeus_chk = tarkista_oikeus("tuote.php");
+          $_html_rows = "";
+          $_html = "<td class='back pnopad ptop'>{$jarjlisa}";
 
-            echo "<td class='back nopad top'>$jarjlisa";
+          $_html .= "<table>";
+          $_html .= "<tr>";
+          $_html .= "<th>".t("Laatija")."</th>";
+          $_html .= "<th>".t("Pvm")."</th>";
+          $_html .= "<th>".t("M‰‰r‰")."</th>";
 
-            echo "<table>";
-            echo "<tr>";
-            echo "<th>", t("Laatija"), "</th>";
-            echo "<th>", t("Pvm"), "</th>";
-            echo "<th>", t("M‰‰r‰"), "</th>";
-            if ($oikeus_chk) {
-              echo "<th>", t("Kplhinta"), "</th>";
-              echo "<th>", t("Rivihinta"), "</th>";
-            }
-            echo "</tr>";
+          if ($oikeus_chk) {
+            $_html .= "<th>".t("Kplhinta")."</th>";
+            $_html .= "<th>".t("Rivihinta")."</th>";
+          }
 
-            while ($tapahtuma_chk_row = mysql_fetch_assoc($tapahtuma_chk_res)) {
-              echo "<tr>";
-              echo "<td>{$tapahtuma_chk_row['laatija']}</td>";
-              echo "<td>", tv1dateconv($tapahtuma_chk_row['laadittu']), "</td>";
-              echo "<td align='right'>".($tapahtuma_chk_row['kpl'] * -1)." {$tapahtuma_chk_row['yksikko']}</td>";
+          $_html .= "</tr>";
 
-              if ($oikeus_chk) {
+          $_rows_added = 0;
 
-                // Onko verolliset hinnat?
-                if ($yhtiorow["alv_kasittely"] == "") {
-                  $tapahtuma_chk_row['kplhinta'] = $tapahtuma_chk_row['kplhinta'] * (1 + $tapahtuma_chk_row["alv"] / 100);
+          $cur_date = new DateTime();
+          $date_2yo = new DateTime();
+          $date_2yo->sub(new DateInterval('P2Y'));
+
+          // Jos kahden vuoden aikarajaus ylittyy, breikataan looppi
+          while ($cur_date >= $date_2yo) {
+
+            $cur_date->sub(new DateInterval('P1M'));
+            $pre_date = new DateTime($cur_date->format('Y-m-d'));
+            $pre_date->add(new DateInterval('P1M'));
+
+            $query = "SELECT tilausrivi.*,
+                      if (kuka.nimi IS NOT NULL AND kuka.nimi != '', kuka.nimi, tilausrivi.laatija) laatija
+                      FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
+                      JOIN lasku USE INDEX (PRIMARY) ON (
+                        lasku.yhtio                 = tilausrivi.yhtio AND
+                        lasku.tunnus                = tilausrivi.otunnus AND
+                        lasku.liitostunnus          = '{$laskurow['liitostunnus']}' AND
+                        lasku.tila                  = 'L' AND
+                        lasku.alatila               = 'X'
+                      )
+                      LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja)
+                      WHERE tilausrivi.yhtio        = '{$kukarow['yhtio']}'
+                      AND tilausrivi.tyyppi         = 'L'
+                      AND tilausrivi.tuoteno        = '{$tuote['tuoteno']}'
+                      AND tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."'
+                      AND tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."'
+                      ORDER BY tilausrivi.laskutettuaika DESC, tilausrivi.tunnus DESC";
+            $tapahtuma_chk_res = pupe_query($query);
+
+            if (mysql_num_rows($tapahtuma_chk_res) > 0) {
+
+              while ($tapahtuma_chk_row = mysql_fetch_assoc($tapahtuma_chk_res)) {
+
+                $_html_rows .= "<tr>";
+                $_html_rows .= "<td>{$tapahtuma_chk_row['laatija']}</td>";
+                $_html_rows .= "<td>".tv1dateconv($tapahtuma_chk_row['laskutettuaika'])."</td>";
+                $_html_rows .= "<td align='right'>";
+                $_html_rows .= "{$tapahtuma_chk_row['kpl']} {$tapahtuma_chk_row['yksikko']}";
+                $_html_rows .= "</td>";
+
+                if ($oikeus_chk) {
+                  // Onko verolliset hinnat?
+                  if ($yhtiorow["alv_kasittely"] == "") {
+                    $tapahtuma_chk_row['rivihinta'] *= (1 + $tapahtuma_chk_row["alv"] / 100);
+                  }
+
+                  $_kplhinta = $tapahtuma_chk_row['rivihinta'] / $tapahtuma_chk_row['kpl'];
+
+                  $_html_rows .= "<td align='right'>";
+                  $_html_rows .= hintapyoristys($_kplhinta);
+                  $_html_rows .= "</td>";
+
+                  $_html_rows .= "<td align='right'>";
+                  $_html_rows .= hintapyoristys($tapahtuma_chk_row['rivihinta']);
+                  $_html_rows .= "</td>";
                 }
 
-                echo "<td align='right'>", hintapyoristys($tapahtuma_chk_row['kplhinta']), "</td>";
-                echo "<td align='right'>", hintapyoristys($tapahtuma_chk_row['kplhinta']*($tapahtuma_chk_row['kpl'] * -1)), "</td>";
-              }
-              echo "</tr>";
-            }
+                $_html_rows .= "</tr>";
+                $_rows_added++;
 
+                if ($_rows_added == 5) {
+                  break 2;
+                }
+              }
+            }
+          }
+
+          if (!empty($_html_rows)) {
+            echo $_html;
+            echo $_html_rows;
             echo "</table>";
           }
         }
@@ -8928,15 +8980,15 @@ if ($tee == '') {
         $sallijyvitys = FALSE;
 
         if ($kukarow["extranet"] == "") {
-          if ($yhtiorow["salli_jyvitys_myynnissa"] == "" and ($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '')) {
+          if ($yhtiorow["salli_jyvitys_myynnissa"] == "" and ($kukarow['kassamyyja'] != '' or $kukarow['dynaaminen_kassamyynti'] != '') and $toim != 'SIIRTOLISTA') {
             $sallijyvitys = TRUE;
           }
 
-          if ($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] != '') {
+          if ($yhtiorow["salli_jyvitys_myynnissa"] == "V" and $kukarow['jyvitys'] != '' and $toim != 'SIIRTOLISTA') {
             $sallijyvitys = TRUE;
           }
 
-          if ($yhtiorow["salli_jyvitys_myynnissa"] == "K" or $yhtiorow["salli_jyvitys_myynnissa"] == "S") {
+          if (($yhtiorow["salli_jyvitys_myynnissa"] == "K" or $yhtiorow["salli_jyvitys_myynnissa"] == "S") and $toim != 'SIIRTOLISTA') {
             $sallijyvitys = TRUE;
           }
 

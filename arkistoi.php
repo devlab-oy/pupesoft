@@ -352,6 +352,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
               AND lasku.tila    = 'G'
               and lasku.alatila in ('V','X')
               AND lasku.tapvm <= '$vv-$kk-$pp'
+              AND lasku.tapvm != '0000-00-00'
               AND tiliointi.tunnus is null";
     pupe_query($query);
     $del = mysql_affected_rows();

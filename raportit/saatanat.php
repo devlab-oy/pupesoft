@@ -176,6 +176,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
   $kustpmuuttuja    = "";
   $saatavat_yhtio    = $kukarow['yhtio'];
   $eta_asiakaslisa  = '';
+  $indeksi = "yhtio_tila_mapvm";
 
   if ($sanimi != '') {
     $generoitumuuttuja .= " and lasku.nimi like '%$sanimi%' ";
@@ -183,6 +184,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 
   if (($eiliittymaa == 'ON' and !empty($sliitostunnus) and $yhtiorow["myyntitilaus_saatavat"] == "") or ($eiliittymaa != 'ON' and !empty($sliitostunnus))) {
     $generoitumuuttuja = " AND lasku.liitostunnus = $sliitostunnus ";
+    $indeksi = "yhtio_tila_liitostunnus_tapvm";
   }
   elseif (!empty($sytunnus)) {
 
@@ -222,6 +224,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
     }
 
     $generoitumuuttuja .= " and lasku.liitostunnus in ($row[tunnukset]) ";
+    $indeksi = "yhtio_tila_liitostunnus_tapvm";
   }
 
   if ($yli != 0) {
@@ -300,7 +303,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
             {$summalisa}
             min(lasku.liitostunnus) litu,
             min(lasku.tunnus) latunnari
-            FROM lasku use index (yhtio_tila_mapvm)
+            FROM lasku use index ({$indeksi})
             JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl' {$tiliointilisa})
             {$luottolisa}
             WHERE lasku.yhtio = '{$saatavat_yhtio}'
@@ -319,7 +322,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
             {$summalisa}
             min(lasku.liitostunnus) litu,
             min(lasku.tunnus) latunnari
-            FROM lasku use index (yhtio_tila_mapvm)
+            FROM lasku use index ({$indeksi})
             JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl' {$tiliointilisa})
             {$luottolisa}
             WHERE lasku.yhtio = '{$saatavat_yhtio}'

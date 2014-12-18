@@ -217,6 +217,7 @@ if ($tee == 'VALMIS') {
               tuote READ,
               tuotepaikat WRITE,
               varastopaikat READ,
+              varaston_hyllypaikat READ,
               yhtion_toimipaikat READ";
     pupe_query($query);
 
@@ -454,7 +455,19 @@ if ($tee == 'VALMIS') {
 
         if (mysql_num_rows($result) == 0 and $virhe != 1) {
 
-          if ($lisaselite == "PERUSTA" or $fileesta == "ON") {
+          if ($yhtiorow['kerayserat'] == 'K') {
+            $hyllyalue = strtoupper($hyllyalue);
+            $hyllynro  = strtoupper($hyllynro);
+            $hyllyvali = strtoupper($hyllyvali);
+            $hyllytaso = strtoupper($hyllytaso);
+
+            if (!tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso))  {
+              echo "<font class='error'>".t("VIRHE: Varastopaikkaa ei ole olemassa")."! $tuoteno $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso</font><br>";
+              $virhe = 1;
+            }
+          }
+
+          if (($lisaselite == "PERUSTA" or $fileesta == "ON") and  $virhe != 1) {
             // PERUSTETAAN tuotepaikka
 
             // katotaa löytyykö tuote

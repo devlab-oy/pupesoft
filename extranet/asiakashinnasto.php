@@ -123,7 +123,7 @@ else {
     $tarkistus = "SELECT count(tunnus)
                   FROM tuotteen_avainsanat
                   WHERE yhtio = '{$yhtiorow['yhtio']}'
-                  AND laji = 'tuoteryhmaosasto'";
+                  AND laji    = 'tuoteryhmaosasto'";
     $tarkistus = pupe_query($tarkistus);
     $tarkistus = mysql_result($tarkistus, 0);
 

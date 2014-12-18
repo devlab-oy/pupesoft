@@ -5524,16 +5524,16 @@ if ($tee == '') {
                       if (kuka.nimi IS NOT NULL AND kuka.nimi != '', kuka.nimi, tilausrivi.laatija) laatija
                       FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
                       JOIN lasku USE INDEX (PRIMARY) ON (
-                        lasku.yhtio = tilausrivi.yhtio AND
-                        lasku.tunnus = tilausrivi.otunnus AND
-                        lasku.liitostunnus = '{$laskurow['liitostunnus']}' AND
-                        lasku.tila = 'L' AND
-                        lasku.alatila = 'X'
+                        lasku.yhtio                 = tilausrivi.yhtio AND
+                        lasku.tunnus                = tilausrivi.otunnus AND
+                        lasku.liitostunnus          = '{$laskurow['liitostunnus']}' AND
+                        lasku.tila                  = 'L' AND
+                        lasku.alatila               = 'X'
                       )
                       LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja)
-                      WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                      AND tilausrivi.tyyppi = 'L'
-                      AND tilausrivi.tuoteno = '{$tuote['tuoteno']}'
+                      WHERE tilausrivi.yhtio        = '{$kukarow['yhtio']}'
+                      AND tilausrivi.tyyppi         = 'L'
+                      AND tilausrivi.tuoteno        = '{$tuote['tuoteno']}'
                       AND tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."'
                       AND tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."'
                       ORDER BY tilausrivi.laskutettuaika DESC, tilausrivi.tunnus DESC";

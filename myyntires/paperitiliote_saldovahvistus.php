@@ -208,10 +208,10 @@ function rivi($firstpage, $row, $saldovahvistus, $boss = false) {
 
     $query = "SELECT nimi
               FROM lasku
-              WHERE yhtio = '{$yhtiorow['yhtio']}'
+              WHERE yhtio  = '{$yhtiorow['yhtio']}'
               AND laskunro = '{$row['laskunro']}'
-              AND tila = 'U'
-              AND alatila = 'X'";
+              AND tila     = 'U'
+              AND alatila  = 'X'";
     $_nimi_res = pupe_query($query);
     $_nimi_row = mysql_fetch_assoc($_nimi_res);
 

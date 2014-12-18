@@ -79,6 +79,8 @@ if ($table == "tuotteen_toimittajat_pakkauskoot") {
         <option value='3'>".t("Käytetään toimittajan ytunnusta sekä omassa sarakkeessa toim_tuoteno:a")."</option>
         <option value='4'>".t("Käytetään toimittajan toimittajanumeroa sekä omassa sarakkeessa tuotenumero:a")."</option>
         <option value='5'>".t("Käytetään toimittajan toimittajanumeroa sekä omassa sarakkeessa toim_tuoteno:a")."</option>
+        <option value='6'>".t("Käytetään toimittajan tunnusta sekä omassa sarakkeessa tuotenumero:a")."</option>
+        <option value='7'>".t("Käytetään toimittajan tunnusta sekä omassa sarakkeessa toim_tuoteno:a")."</option>
         </select></td>
     </tr>";
 }
@@ -91,6 +93,8 @@ if ($table == "tuotteen_toimittajat_tuotenumerot") {
         <option value='3'>".t("Käytetään toimittajan ytunnusta sekä omassa sarakkeessa toim_tuoteno:a")."</option>
         <option value='4'>".t("Käytetään toimittajan toimittajanumeroa sekä omassa sarakkeessa tuotenumero:a")."</option>
         <option value='5'>".t("Käytetään toimittajan toimittajanumeroa sekä omassa sarakkeessa toim_tuoteno:a")."</option>
+        <option value='6'>".t("Käytetään toimittajan tunnusta sekä omassa sarakkeessa tuotenumero:a")."</option>
+        <option value='7'>".t("Käytetään toimittajan tunnusta sekä omassa sarakkeessa toim_tuoteno:a")."</option>
         </select></td>
     </tr>";
 }

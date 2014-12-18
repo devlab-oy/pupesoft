@@ -407,6 +407,16 @@ if ($kasitellaan_tiedosto) {
           $toimikentta = "toimittajanro";
           $tuotenokentta = "toim_tuoteno";
           break;
+        case "6":
+          if ($column == "TUOTENUMERO") $chk_tuoteno = $key;
+          $toimikentta = "tunnus";
+          $tuotenokentta = "tuoteno";
+          break;
+        case "7":
+          if ($column == "TOIM_TUOTENO") $chk_toim_tuoteno = $key;
+          $toimikentta = "tunnus";
+          $tuotenokentta = "toim_tuoteno";
+          break;
         }
       }
     }
@@ -479,6 +489,16 @@ if ($kasitellaan_tiedosto) {
         case "5":
           if ($column == "TOIM_TUOTENO") $chk_toim_tuoteno = $key;
           $toimikentta = "toimittajanro";
+          $tuotenokentta = "toim_tuoteno";
+          break;
+        case "6":
+          if ($column == "TUOTENUMERO") $chk_tuoteno = $key;
+          $toimikentta = "tunnus";
+          $tuotenokentta = "tuoteno";
+          break;
+        case "7":
+          if ($column == "TOIM_TUOTENO") $chk_toim_tuoteno = $key;
+          $toimikentta = "tunnus";
           $tuotenokentta = "toim_tuoteno";
           break;
         }

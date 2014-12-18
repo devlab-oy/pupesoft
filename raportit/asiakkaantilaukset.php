@@ -70,7 +70,7 @@ $til = "";
 if ($cleantoim == 'MYYNTI') {
   echo "<font class='head'>".t("Asiakkaan tilaukset").":</font><hr>";
 
-  $til = " tila in ('L','U','N','R','E','D') ";
+  $til = " tila in ('L','U','N','R','E','D','G') ";
 }
 if ($cleantoim == 'VALMISTUSMYYNTI') {
   echo "<font class='head'>".t("Asiakkaan tilaukset ja valmistukset").":</font><hr>";

@@ -203,7 +203,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
     $del = mysql_affected_rows();
 
     is_log("Poistettiin $del poistettua myyntitilausta.");
-      
+
     // Tallennettu web-tilaus/tarjoukset
     $query = "DELETE lasku FROM lasku
               WHERE yhtio = '$kukarow[yhtio]'
@@ -343,9 +343,9 @@ if (isset($teearkistointi) and $teearkistointi != "") {
     $del = mysql_affected_rows();
 
     is_log("Poistettiin $del tiliotetta.");
-    
+
     // Vastaanotetut siirtolistat
-    $query = "DELETE lasku 
+    $query = "DELETE lasku
               FROM lasku
               LEFT JOIN tiliointi ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tapvm > '$vv-$kk-$pp')
               WHERE lasku.yhtio = '$kukarow[yhtio]'
@@ -358,7 +358,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
     $del = mysql_affected_rows();
 
     is_log("Poistettiin $del vastaanotettua siirtolistaa.");
-    
+
     // Laskun lisätiedot
     $query = "DELETE laskun_lisatiedot
               FROM laskun_lisatiedot
@@ -369,7 +369,7 @@ if (isset($teearkistointi) and $teearkistointi != "") {
     $del = mysql_affected_rows();
 
     is_log("Poistettiin $del laskun lisätietoriviä.");
-    
+
     // Tilausrivit
     $query = "DELETE tilausrivi
               FROM tilausrivi

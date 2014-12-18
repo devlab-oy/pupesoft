@@ -33,8 +33,8 @@ $request['synkronointi_tyypit'] = array(
     'kaikki'         => t('Kaikki'),
     'kategoriat'     => t('Kategoriat'),
     'tuotteet'       => t('Tuotteet ja tuotekuvat'),
-    'asiakkaat'      => t('Asiakkaat'),
     'asiakasryhmat'  => t('Asiakasryhmät'),
+    'asiakkaat'      => t('Asiakkaat'),
     'asiakas_hinnat' => t('Asiakashinnat'),
     'tilaukset'      => t('Tilauksien haku'),
 );
@@ -69,16 +69,17 @@ if ($request['action'] == 'sync') {
     $ok = $presta_products->sync_products($tuotteet);
   }
 
+  if ($ok and in_array('asiakasryhmat', $synkronoi)) {
+    $groups = hae_asiakasryhmat();
+    $presta_customer_groups = new PrestaCustomerGroups($presta_url, $presta_api_key);
+    $presta_customer_groups->set_kukarow($kukarow);
+    $ok = $presta_customer_groups->sync_groups($groups);
+  }
+
   if ($ok and in_array('asiakkaat', $synkronoi)) {
     $asiakkaat = hae_asiakkaat1();
     $presta_customer = new PrestaCustomers($presta_url, $presta_api_key);
     $ok = $presta_customer->sync_customers($asiakkaat);
-  }
-
-  if ($ok and in_array('asiakasryhmat', $synkronoi)) {
-    $groups = hae_asiakasryhmat();
-    $presta_customer_groups = new PrestaCustomerGroups($presta_url, $presta_api_key);
-    $ok = $presta_customer_groups->sync_groups($groups);
   }
 
   die();
@@ -146,9 +147,14 @@ function hae_asiakkaat1() {
 function hae_asiakasryhmat() {
   global $kukarow, $yhtiorow;
 
-  $query = "SELECT *
+  $query = "SELECT perusalennus.*,
+            avainsana.selitetark AS presta_customergroup_id
             FROM perusalennus
-            WHERE yhtio = '{$kukarow['yhtio']}'";
+            LEFT JOIN avainsana
+            ON ( avainsana.yhtio = perusalennus.yhtio
+              AND avainsana.selite = perusalennus.tunnus
+              AND avainsana.laji = 'PRE_RYH_ID' )
+            WHERE perusalennus.yhtio = '{$kukarow['yhtio']}'";
   $result = pupe_query($query);
 
   $ryhmat = array();

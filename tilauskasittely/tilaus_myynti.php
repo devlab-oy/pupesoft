@@ -5489,7 +5489,7 @@ if ($tee == '') {
 
         if (in_array($toim, array('RIVISYOTTO', 'PIKATILAUS', 'REKLAMAATIO'))) {
 
-            $oikeus_chk = tarkista_oikeus("tuote.php");
+          $oikeus_chk = tarkista_oikeus("tuote.php");
 
           $_html_rows = "";
           $_html = "<td class='back pnopad ptop'>{$jarjlisa}";
@@ -5500,10 +5500,10 @@ if ($tee == '') {
           $_html .= "<th>".t("Pvm")."</th>";
           $_html .= "<th>".t("M‰‰r‰")."</th>";
 
-            if ($oikeus_chk) {
+          if ($oikeus_chk) {
             $_html .= "<th>".t("Kplhinta")."</th>";
             $_html .= "<th>".t("Rivihinta")."</th>";
-            }
+          }
 
           $_html .= "</tr>";
 
@@ -5541,7 +5541,7 @@ if ($tee == '') {
 
             if (mysql_num_rows($tapahtuma_chk_res) > 0) {
 
-            while ($tapahtuma_chk_row = mysql_fetch_assoc($tapahtuma_chk_res)) {
+              while ($tapahtuma_chk_row = mysql_fetch_assoc($tapahtuma_chk_res)) {
 
                 $_html_rows .= "<tr>";
                 $_html_rows .= "<td>{$tapahtuma_chk_row['laatija']}</td>";
@@ -5550,11 +5550,11 @@ if ($tee == '') {
                 $_html_rows .= "{$tapahtuma_chk_row['kpl']} {$tapahtuma_chk_row['yksikko']}";
                 $_html_rows .= "</td>";
 
-              if ($oikeus_chk) {
-                // Onko verolliset hinnat?
-                if ($yhtiorow["alv_kasittely"] == "") {
+                if ($oikeus_chk) {
+                  // Onko verolliset hinnat?
+                  if ($yhtiorow["alv_kasittely"] == "") {
                     $tapahtuma_chk_row['rivihinta'] *= (1 + $tapahtuma_chk_row["alv"] / 100);
-                }
+                  }
 
                   $_kplhinta = $tapahtuma_chk_row['rivihinta'] / $tapahtuma_chk_row['kpl'];
 
@@ -5565,14 +5565,14 @@ if ($tee == '') {
                   $_html_rows .= "<td align='right'>";
                   $_html_rows .= hintapyoristys($tapahtuma_chk_row['rivihinta']);
                   $_html_rows .= "</td>";
-              }
+                }
 
                 $_html_rows .= "</tr>";
                 $_rows_added++;
 
                 if ($_rows_added == 5) {
                   break 2;
-            }
+                }
               }
             }
           }

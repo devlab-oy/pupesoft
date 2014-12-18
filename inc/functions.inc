@@ -29870,10 +29870,10 @@ if (!function_exists("paivita_sopimusrivit")) {
 }
 
 if (!function_exists("sanitoi_javascript_id")) {
-  function sanitoi_javascript_id($value){
-    # ID and NAME tokens must begin with a letter ([A-Za-z])
-    # and may be followed by any number of letters, digits ([0-9]),
-    # hyphens ("-"), underscores ("_"), colons (":"), and periods (".").
+  function sanitoi_javascript_id($value) {
+    // ID and NAME tokens must begin with a letter ([A-Za-z])
+    // and may be followed by any number of letters, digits ([0-9]),
+    // hyphens ("-"), underscores ("_"), colons (":"), and periods (".").
     return preg_replace("/[^a-zöäåA-ZÖÄÅ0-9\-\:\_\.]/i", "", $value);
   }
 }
@@ -29881,7 +29881,7 @@ if (!function_exists("sanitoi_javascript_id")) {
 if (!function_exists("poista_osakeyhtio_lyhenne")) {
   function poista_osakeyhtio_lyhenne($nimi) {
 
-    # strtolower ei osaa pienentää tämmöisiä erikoismerkkejä
+    // strtolower ei osaa pienentää tämmöisiä erikoismerkkejä
     $old = array("Ü", "Ž");
     $new = array("ü", "ž");
     $nimi = str_replace($old, $new, $nimi);

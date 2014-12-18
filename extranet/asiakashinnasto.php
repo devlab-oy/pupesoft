@@ -125,7 +125,7 @@ else {
                   WHERE yhtio = '{$yhtiorow['yhtio']}'
                   AND laji = 'tuoteryhmaosasto'";
     $tarkistus = pupe_query($tarkistus);
-    $tarkistus = mysql_result($tarkistus,0);
+    $tarkistus = mysql_result($tarkistus, 0);
 
     if ($tarkistus > 0) {
       echo "<tr><th>".t("Esitystapa").":</th><td><select name='ryhmittely'>";

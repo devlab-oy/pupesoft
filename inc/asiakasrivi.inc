@@ -636,9 +636,9 @@ if ($fieldname == "ketjutus") {
 }
 
 if ($fieldname == "fakta" or
-    $fieldname == "sisviesti1" or
-    $fieldname == "sisviesti2" or
-    $fieldname == "myynti_kommentti1"
+  $fieldname == "sisviesti1" or
+  $fieldname == "sisviesti2" or
+  $fieldname == "myynti_kommentti1"
 ) {
 
   $ulos = "<td><textarea cols='45' rows='5' name='$nimi'>$trow[$i]</textarea></td>";

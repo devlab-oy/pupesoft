@@ -527,6 +527,13 @@ if (isset($jatka) and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" o
 // tehdään oikeellisuus
 if ($toim == "YLLAPITO") {
 
+  if ($kuukausihinnoittelu == "Y" and count($yllapito_pp) > 1) {
+    echo
+      "<font class='error'>" .
+      t("Jos olet valinnut kuukausilaskutuksen, voit valita vain yhden laskutuspäivän") .
+      "</font>";
+  }
+
   if ((count($yllapito_kk) == 0 or count($yllapito_pp) == 0) and isset($jatka)) {
     echo "<font class='error'>".t("VIRHE: Laskutusaikataulu on syötettävä")."!</font><br>";
     $tee = "OTSIK";

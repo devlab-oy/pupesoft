@@ -54,53 +54,45 @@ if (isset($task) and $task == 'perusta_saapuminen') {
   }
   else {
 
-    $query  = "SELECT *
-               FROM toimi
-               WHERE yhtio = '{$kukarow['yhtio']}'
-               AND tunnus = '{$toimittaja}'";
-    $result = pupe_query($query);
+    require_once "inc/luo_ostotilausotsikko.inc";
 
-    $toimittajarow = mysql_fetch_assoc($result);
+    // haetaan toimittajan tiedot
+    $query = "SELECT *
+              FROM toimi
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$toimittajatunnus}'";
+    $toimres = pupe_query($query);
+    $toimrow = mysql_fetch_assoc($toimres);
 
-    $saapumistunnus = uusi_saapuminen($toimittajarow);
+    $params = array(
+      'liitostunnus' => $toimrow['tunnus'],
+      'nimi' => $toimrow['nimi'],
+      'myytil_toimaika' => $data['toimitusaika'],
+      'varasto' => $data['varasto_id'],
+      'osoite' => $toimrow['osoite'],
+      'postino' => $toimrow['postino'],
+      'postitp' => $toimrow['postitp'],
+      'maa' => $toimrow['maa'],
+      'varasto' => $varastotunnus,
+      'uusi' => 'JOO'
+    );
 
-    $vuosi = date("y");
-    $varastokoodi = "RP";
-
-    // haetaan seuraava vapaa juokseva numero
-    $query  = "SELECT asiakkaan_tilausnumero AS saapumiskoodi
-               FROM lasku
-               WHERE yhtio = '{$kukarow['yhtio']}'
-               AND tila = 'K'
-               AND viesti = 'tullivarasto'
-               AND asiakkaan_tilausnumero LIKE '%/{$vuosi}'
-               ORDER BY tunnus DESC
-               LIMIT 1";
-    $result = pupe_query($query);
-    $row = mysql_fetch_assoc($result);
-
-    if ($row) {
-      $koodin_osat = explode("/", $row['juoksu']);
-      $juoksunumero = (int) $kodin_osat[1];
-      $saapumiskoodi = $varastokoodi . '/' . $juoksunumero + 1 . "/" . $vuosi;
-    }
-    else {
-      $saapumiskoodi = $varastokoodi . '/1/' . $vuosi;
-    }
+    $laskurow = luo_ostotilausotsikko($params);
 
     $query = "UPDATE lasku SET
-              asiakkaan_tilausnumero = '{$saapumiskoodi}'
-              viesti = 'tullivarasto',
+              asiakkaan_tilausnumero = '{$tulonumero}',
+              viesti = 'tullivarasto'
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus = '{$saapumistunnus}'";
+              AND tunnus = '{$laskurow['tunnus']}'";
     pupe_query($query);
 
     foreach ($tuote as $key => $tiedot) {
 
-      $uusi_tuoteno = $saapumistunnus . "-" . $key;
+      $uusi_tuoteno = $tulonumero . "-" . $key;
 
       $nimitys = mysql_real_escape_string($tiedot['nimitys']);
-      $tuotemassa = number_format($tiedot['paino'], 6);
+      $tuotemassa = number_format($tiedot['bruttopaino'], 6);
+      $malli = mysql_real_escape_string($tiedot['malli']);
 
       $query = "INSERT INTO tuote
                 SET yhtio = '{$kukarow['yhtio']}',
@@ -113,17 +105,52 @@ if (isset($task) and $task == 'perusta_saapuminen') {
       $query = "INSERT INTO tuotteen_toimittajat
                 SET yhtio = '{$kukarow['yhtio']}',
                 tuoteno = '{$uusi_tuoteno}',
-                liitostunnus = '{$toimittaja}'";
+                liitostunnus = '{$toimittajatunnus}'";
       pupe_query($query);
 
-      require "../tilauskasittely/lisaarivi.inc";
+      // haetaan tuotteen tiedot
+      $query = "SELECT *
+                FROM tuote
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tuoteno = '{$uusi_tuoteno}'";
+      $tuoteres = pupe_query($query);
+
+      $trow = mysql_fetch_assoc($tuoteres);
+      $kpl = $tiedot['maara'];
+      $kerayspvm = $toimaika = date();
+      $toim = '';
+      $hinta = 0;
+      $var = '';
+      $kutsuja = '';
+      $kpl2 = 0;
+      $toimittajan_tunnus = $toimrow['tunnus'];
+
+      $kukarow['kesken'] = $laskurow['tunnus'];
+
+      require "tilauskasittely/lisaarivi.inc";
 
     }
+    header("Location: tullivarastointi.php?pe=ok&tn={$tulonumero}");
   }
 }
 
 
-if (!isset($task) or $task == 'uusi_saapuminen') {
+if ($task == 'aloita_perustus' or $task == 'uusi_saapuminen') {
+
+  if ($varastotunnus_ja_koodi == 'X' and $task == 'uusi_saapuminen') {
+    $errors['varastotunnus_ja_koodi'] = t("Valitse varasto");
+  }
+
+  if ($toimittajatunnus == 'X' and $task == 'uusi_saapuminen') {
+    $errors['toimittajatunnus'] = t("Valitse toimittaja");
+  }
+
+  if (!is_numeric($tuoteryhmien_maara) and $task == 'uusi_saapuminen') {
+    $errors['tuoteryhmien_maara'] = t("Tarkista m‰‰ra");
+  }
+  elseif (empty($tuoteryhmien_maara)) {
+   $tuoteryhmien_maara = 0;
+  }
 
   //haetaan toimittajat valmiiksi
   $query = "SELECT nimi, tunnus
@@ -136,22 +163,72 @@ if (!isset($task) or $task == 'uusi_saapuminen') {
     $toimittajat[$toimittaja['tunnus']] = $toimittaja['nimi'];
   }
 
+  if (count($errors) > 0) {
+    unset($task);
+  }
 }
 
-echo "<font class='head'>".t("Saapumisen perustaminen")."</font><hr><br>";
+if (!isset($task)) {
+  $otsikko = t("Perustetut tulonumerot");
+}
+else {
+  $otsikko = t("Saapuvan rahdin perustaminen");
+}
+
+echo "<font class='head'>{$otsikko}</font><hr><br>";
+
+if (isset($pe) and $pe == "ok") {
+  echo "<p class='green'>", t("Tulonumero: "), $tn, ' ', t("perustettu"), "</p>";
+  echo "<br>";
+}
 
 if (isset($task) and $task == "uusi_saapuminen") {
+
+  $varastotunnus_ja_koodi = explode("#", $varastotunnus_ja_koodi);
+  $varastotunnus = $varastotunnus_ja_koodi[0];
+  $varastokoodi = $varastotunnus_ja_koodi[1];
+
+  $vuosi = date("y");
+
+  // haetaan seuraava vapaa juokseva numero
+  $query  = "SELECT asiakkaan_tilausnumero AS saapumiskoodi
+             FROM lasku
+             WHERE yhtio = '{$kukarow['yhtio']}'
+             AND tila = 'O'
+             AND viesti = 'tullivarasto'
+             AND asiakkaan_tilausnumero LIKE '%-{$vuosi}'
+             ORDER BY tunnus DESC
+             LIMIT 1";
+  $result = pupe_query($query);
+  $row = mysql_fetch_assoc($result);
+
+  if ($row) {
+    $koodin_osat = explode("-", $row['saapumiskoodi']);
+    $juoksunumero = $koodin_osat[1] + 1;
+    $tulonumero = $varastokoodi . "-" . $juoksunumero . "-" . $vuosi;
+  }
+  else {
+    $tulonumero = $varastokoodi . "-1-" . $vuosi;
+  }
 
   echo "
   <form method='post'>
   <input type='hidden' name='task' value='perusta_saapuminen' />
   <input type='hidden' name='toimittajatunnus' value='$toimittajatunnus' />
   <input type='hidden' name='tuoteryhmien_maara' value='$tuoteryhmien_maara' />
+  <input type='hidden' name='varastotunnus' value='$varastotunnus' />
+  <input type='hidden' name='varastokoodi' value='$varastokoodi' />
+  <input type='hidden' name='tulonumero' value='$tulonumero' />
   <table>
   <tr>
+
     <th>" . t("Toimittaja") ."</th>
     <td>{$toimittajat[$toimittajatunnus]}</td>
-    <td class='back error'>{$errors['konttinumero']}</td>
+    <td class='back'>&nbsp;</td>
+
+    <th>" . t("Tulonumero") ."</th>
+    <td>{$tulonumero}</td>
+    <td class='back'>&nbsp;</td>
   </tr>
   </table>";
 
@@ -205,20 +282,26 @@ if (isset($task) and $task == "uusi_saapuminen") {
 
       <tr>
         <th>" . t("Tilavuus") ."</th>
-        <td><input type='text' name='tuote[{$laskuri}][tilauvuus]' value='{$tilavuus}' /></td>
+        <td><input type='text' name='tuote[{$laskuri}][tilavuus]' value='{$tilavuus}' /></td>
         <td class='back error'>{$errors[$laskuri]['tilavuus']}</td>
       </tr>
     </table>";
 
     $laskuri++;
-
   }
 
-  echo "<br><br><input type='submit' value='". t("Perusta saapuminen ja tuotteet") ."' /></form>";
+  if ($laskuri > 1) {
+    echo "<br><br><input type='submit' value='". t("Perusta saapuminen ja tuotteet") ."' /></form>";
+  }
+  else {
+    echo "<br><br><input type='submit' value='". t("Perusta saapuminen") ."' /></form>";
+  }
+
+
 
 }
 
-if (!isset($task)) {
+if (isset($task) and $task == 'aloita_perustus') {
 
   echo "
   <form method='post'>
@@ -229,42 +312,58 @@ if (!isset($task)) {
     <th>" . t("Toimittaja") ."</th>
     <td>
     <select name='toimittajatunnus'>
-      <option>" . t("Valitse toimittaja") ."</option>";
+      <option value='X'>" . t("Valitse toimittaja") ."</option>";
 
       foreach ($toimittajat as $tunnus => $nimi) {
-        echo "<option value='{$tunnus}'>{$nimi}</option>";
+
+        if ($tunnus == $toimittajatunnus) {
+          $selected = 'selected';
+        }
+        else {
+          $selected = '';
+        }
+
+        echo "<option value='{$tunnus}' {$selected}>{$nimi}</option>";
       }
 
   echo "</select></td>
-    <td class='back error'></td>
+    <td class='back error'>{$errors['toimittajatunnus']}</td>
   </tr>
 
   <tr>
     <th>" . t("Tuoteryhmien m‰‰r‰") . "</th>
     <td><input type='text' name='tuoteryhmien_maara' value='{$tuoteryhmien_maara}' /></td>
-    <td class='back error'>{$errors['maara']}</td>
+    <td class='back error'>{$errors['tuoteryhmien_maara']}</td>
   </tr>
 
   <tr>
     <th>" . t("Varasto") . "</th>
     <td>
-      <select name='toimittajatunnus'>
-        <option>" . t("Valitse varasto") ."</option>";
+      <select name='varastotunnus_ja_koodi'>
+        <option value='X'>" . t("Valitse varasto") ."</option>";
 
-        // dummy-array...
-        $varastot = array(
-          '100' => 'Rompintie (v‰liaikainen)',
-          '101' => 'Rompintie (tullivarasto)',
-          '102' => 'Hanskinmaantie (v‰liaikainen)',
-          '103' => 'Hanskinmaantie (tullivarasto)',
-          '104' => 'Yhteisˆtavara'
-          );
+        $query = "SELECT *
+                  FROM varastopaikat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND nimitark != ''";
+        $result = pupe_query($query);
 
-        foreach ($varastot as $tunnus => $nimi) {
-          echo "<option value='{$tunnus}'>{$nimi}</option>";
+        while ($varasto = mysql_fetch_assoc($result)) {
+
+          if ($varastotunnus_ja_koodi == $varasto['tunnus']."#".$varasto['nimitark']) {
+            $selected = 'selected';
+          }
+          else {
+            $selected = '';
+          }
+
+          $varastotunnus_ja_koodi = $varasto['tunnus']."#".$varasto['nimitark'];
+
+          echo "<option value='{$varastotunnus_ja_koodi}' {$selected}>{$varasto['nimitys']}</option>";
         }
 
-    echo "</select></td>
+
+    echo "</select></td><td class='back error'>{$errors['varastotunnus_ja_koodi']}</td>
   </tr>
 
   <tr>
@@ -274,6 +373,79 @@ if (!isset($task)) {
   </tr>
   </table>
   </form>";
+
+}
+
+if (!isset($task)) {
+
+  echo "
+    <form>
+    <input type='hidden' name='task' value='aloita_perustus' />
+    <input type='submit' value='". t("Perusta uusi tulo") . "' />
+    </form><br><br>";
+
+  $query = "SELECT lasku.asiakkaan_tilausnumero,
+            tilausrivi.tilkpl as kpl,
+            tilausrivi.nimitys,
+            lasku.varasto,
+            lasku.nimi
+            FROM lasku
+            JOIN tilausrivi
+              ON tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+            WHERE lasku.yhtio = 'rplog' AND viesti = 'tullivarasto'
+            GROUP BY concat(lasku.tunnus, tilausrivi.tunnus)";
+  $result = pupe_query($query);
+
+  $tulot = array();
+  $tuotteet = array();
+
+  while ($tulo = mysql_fetch_assoc($result)) {
+
+    $tuoteinfo = array('nimitys' => $tulo['nimitys'], 'kpl' => $tulo['kpl']);
+
+    $tuotteet[$tulo['asiakkaan_tilausnumero']]['tuoteinfo'][] = $tuoteinfo;
+    $tuotteet[$tulo['asiakkaan_tilausnumero']]['toimittaja'] = $tulo['nimi'];
+    $tuotteet[$tulo['asiakkaan_tilausnumero']]['varasto'] = $tulo['varasto'];
+
+  }
+
+  echo "<table>";
+  echo "<tr>";
+  echo "<th>".t("Tulonumero")."</th>";
+  echo "<th>".t("Toimittaja")."</th>";
+  echo "<th>".t("Kohdevarasto")."</th>";
+  echo "<th>".t("Tuotteet")."</th>";
+  echo "<th class='back'></th>";
+  echo "</tr>";
+
+  foreach ($tuotteet as $key => $info) {
+
+    echo "<tr>";
+
+    echo "<td valign='top'>";
+    echo $key;
+    echo "</td>";
+
+    echo "<td valign='top'>";
+    echo $info['toimittaja'];
+    echo "</td>";
+
+    echo "<td valign='top'>";
+    echo $info['varasto'];
+    echo "</td>";
+
+    echo "<td valign='top'>";
+
+    foreach ($info['tuoteinfo'] as $tuote) {
+      echo $tuote['nimitys'], ' - ',  (int) $tuote['kpl'], " kpl<br>";
+    }
+
+    echo "</td>";
+    echo "</tr>";
+
+  }
+  echo "</table>";
 
 }
 

@@ -116,7 +116,8 @@ verkkokauppa/ostoskori-kysely.php
 verkkokauppa/ostoskori.inc
 verkkokauppa/ostoskori.php
 verkkokauppa/tyhjenna_ostoskorit.php
-tiedostokirjasto.php"
+tiedostokirjasto.php
+tiedostofunkkarit.inc"
 
 # Yhdistä muuttujat ja vaihda rivinvaihdot spaceiksi
 ALL_FILES=`echo ${DIRECTORIES} ${CONTENT} ${FILES} ${EXTRA_FILES} | tr '\n' ' '`

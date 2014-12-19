@@ -8,7 +8,7 @@ else {
   exit;
 }
 
-require_once("tiedostofunkkarit.inc");
+require_once "tiedostofunkkarit.inc";
 
 $toim           = isset($toim) ? strtoupper($toim) : "";
 $aihealue       = isset($aihealue) ? $aihealue : "";
@@ -146,7 +146,7 @@ function piirra_formi($params) {
   }
   elseif ($valittu_aihealue) {
     echo
-      "<tr>
+    "<tr>
          <td colspan='2'>
            <font class='error'>" .
       t("Tälle aihealueelle ei ole vielä lisätty tiedostotyyppejä") .

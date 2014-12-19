@@ -217,6 +217,7 @@ if ($tee == 'VALMIS') {
               tuote READ,
               tuotepaikat WRITE,
               varastopaikat READ,
+              varaston_hyllypaikat READ,
               yhtion_toimipaikat READ";
     pupe_query($query);
 
@@ -454,7 +455,19 @@ if ($tee == 'VALMIS') {
 
         if (mysql_num_rows($result) == 0 and $virhe != 1) {
 
-          if ($lisaselite == "PERUSTA" or $fileesta == "ON") {
+          if ($yhtiorow['kerayserat'] == 'K') {
+            $hyllyalue = strtoupper($hyllyalue);
+            $hyllynro  = strtoupper($hyllynro);
+            $hyllyvali = strtoupper($hyllyvali);
+            $hyllytaso = strtoupper($hyllytaso);
+
+            if (!tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso))  {
+              echo "<font class='error'>".t("VIRHE: Varastopaikkaa ei ole olemassa")."! $tuoteno $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso</font><br>";
+              $virhe = 1;
+            }
+          }
+
+          if (($lisaselite == "PERUSTA" or $fileesta == "ON") and  $virhe != 1) {
             // PERUSTETAAN tuotepaikka
 
             // katotaa lˆytyykˆ tuote
@@ -742,11 +755,19 @@ if ($tee == 'VALMIS') {
               }
 
               $summa = round($erotus * $row['kehahin'], 2);
+              $tarkistus_summa = round($cursaldo * $row['kehahin'], 2);
             }
 
             // jos loppusumma on isompi kuin tietokannassa oleva tietuen koko (10 numeroa + 2 desimaalia), niin herjataan
-            if ($summa != '' and abs($summa) > 0) {
-              $ylitettava_summa_chk = $cursaldo*$summa;
+            if (($summa != '' and abs($summa) > 0) or ($tarkistus_summa != '' and abs($tarkistus_summa) > 0)) {
+              // Katsotaan kumpi tarkistusluvuista on isompi
+              // tiliˆit‰v‰ summa vai tarkistussumma
+              if ($summa >= $tarkistus_summa) {
+                $ylitettava_summa_chk = $summa;
+              }
+              else {
+                $ylitettava_summa_chk = $tarkistus_summa;
+              }
 
               if (abs($ylitettava_summa_chk) > 9999999999.99) {
                 echo "<font class='error'>".t("VIRHE: liian iso loppusumma")."!<br/>", t("Tuote"), ": $tuoteno ", t("lopullinen kappalem‰‰r‰"), " $kpl (", t("loppusumma"), ": $ylitettava_summa_chk)</font><br>";

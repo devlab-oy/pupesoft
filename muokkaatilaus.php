@@ -829,16 +829,16 @@ if (strpos($_SERVER['SCRIPT_NAME'], "muokkaatilaus.php") !== FALSE) {
   echo "</th>";
   echo "<td>";
   echo "<select name='pv_rajaus'>";
-  echo "<option value='0' {$_sel['0']}>",t("Ei rajausta"),"</option>";
-  echo "<option value='1' {$_sel['1']}>",t("%d p‰iv‰‰", "", 1),"</option>";
-  echo "<option value='2' {$_sel['2']}>",t("%d p‰iv‰‰", "", 2),"</option>";
-  echo "<option value='3' {$_sel['3']}>",t("%d p‰iv‰‰", "", 3),"</option>";
-  echo "<option value='5' {$_sel['5']}>",t("%d p‰iv‰‰", "", 5),"</option>";
-  echo "<option value='7' {$_sel['7']}>",t("%d p‰iv‰‰", "", 7),"</option>";
-  echo "<option value='14' {$_sel['14']}>",t("%d p‰iv‰‰", "", 14),"</option>";
-  echo "<option value='30' {$_sel['30']}>",t("%d p‰iv‰‰", "", 30),"</option>";
-  echo "<option value='60' {$_sel['60']}>",t("%d p‰iv‰‰", "", 60),"</option>";
-  echo "<option value='90' {$_sel['90']}>",t("%d p‰iv‰‰", "", 90),"</option>";
+  echo "<option value='0' {$_sel['0']}>", t("Ei rajausta"), "</option>";
+  echo "<option value='1' {$_sel['1']}>", t("%d p‰iv‰‰", "", 1), "</option>";
+  echo "<option value='2' {$_sel['2']}>", t("%d p‰iv‰‰", "", 2), "</option>";
+  echo "<option value='3' {$_sel['3']}>", t("%d p‰iv‰‰", "", 3), "</option>";
+  echo "<option value='5' {$_sel['5']}>", t("%d p‰iv‰‰", "", 5), "</option>";
+  echo "<option value='7' {$_sel['7']}>", t("%d p‰iv‰‰", "", 7), "</option>";
+  echo "<option value='14' {$_sel['14']}>", t("%d p‰iv‰‰", "", 14), "</option>";
+  echo "<option value='30' {$_sel['30']}>", t("%d p‰iv‰‰", "", 30), "</option>";
+  echo "<option value='60' {$_sel['60']}>", t("%d p‰iv‰‰", "", 60), "</option>";
+  echo "<option value='90' {$_sel['90']}>", t("%d p‰iv‰‰", "", 90), "</option>";
   echo "</select>";
   echo "</td>";
 
@@ -3025,7 +3025,7 @@ if (mysql_num_rows($result) != 0) {
       echo "<tr>";
       echo "<tr><th>".t("Excel").":</th>";
       echo "<td class='back'>";
-      echo "<input type='submit' name='tee_excel' value='",t("Tee Excel"),"' />";
+      echo "<input type='submit' name='tee_excel' value='", t("Tee Excel"), "' />";
       echo "</td>";
       echo "</tr>";
       echo "</table>";

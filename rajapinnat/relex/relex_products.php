@@ -288,6 +288,7 @@ $header .= "tuotekorkeus;";
 $header .= "tuoteleveys;";
 $header .= "tuotesyvyys;";
 $header .= "tuotemassa;";
+$header .= "tilavuus;";
 $header .= "ostajanro;";
 $header .= "tuotepaallikko;";
 $header .= "tuotetunnus;";
@@ -368,6 +369,7 @@ $query = "SELECT
           tuote.tuoteleveys,
           tuote.tuotesyvyys,
           tuote.tuotemassa,
+          round(tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys, 5) tilavuus,
           tuote.ostajanro,
           tuote.tuotepaallikko,
           tuote.tunnus
@@ -422,6 +424,7 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi .= "{$row['tuoteleveys']};";
   $rivi .= "{$row['tuotesyvyys']};";
   $rivi .= "{$row['tuotemassa']};";
+  $rivi .= "{$row['tilavuus']};";
   $rivi .= "{$row['ostajanro']};";
   $rivi .= "{$row['tuotepaallikko']};";
   $rivi .= "{$row['tunnus']};";
@@ -569,7 +572,7 @@ while ($row = mysql_fetch_assoc($res)) {
 
       // Nolla tai pienempi on virhe, laitetaan ne vikaks
       if ($ostohinta <= 0) {
-        $ostohinta = $ostohinta_netto = 9999999999.99;
+        $ostohinta = $ostohinta_netto = 0;
         $netto     = "N";
       }
 

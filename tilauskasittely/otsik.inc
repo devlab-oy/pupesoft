@@ -3066,6 +3066,37 @@ if ($tila == "" and !isset($jatka)) {
 
       $disable = "";
 
+      echo "<script>
+              (function () {
+                window.onload = function () {
+                  var checkboxes = document.getElementsByName('yllapito_pp[]');
+                  var kuukausihinnoittelu = document.getElementById('kuukausihinnoittelu');
+
+                  for (var i = 0; i < checkboxes.length; i++) {
+                    checkboxes[i].addEventListener('click', function (e) {
+                      if (kuukausihinnoittelu.checked) {
+                        for (var j = 0; j < checkboxes.length; j++) {
+                          if (checkboxes[j] !== e.target) {
+                            checkboxes[j].disabled = e.target.checked;
+                          }
+                        }
+                      }
+                    });
+                  }
+
+                  kuukausihinnoittelu.addEventListener('click', function (e) {
+                    for (var i = 0; i < checkboxes.length; i++) {
+                      if (!e.target.checked) {
+                        checkboxes[i].disabled = false;
+                      } else {
+                        checkboxes[i].checked = false;
+                      }
+                    }
+                  });
+                };
+              })();
+            </script>";
+
       // jos alatila on X niin pit‰‰ tehd‰ hidden muuttujat ettei nollaannu
       if ($srow["alatila"] == "X") {
         $disable = "disabled";

@@ -28,7 +28,7 @@ echo "<form method='post'>";
 echo "<input type='hidden' name='tee' value='kaikki'>";
 
 // M‰‰ritell‰‰n mitk‰ latikot halutaan mukaan
-$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI");
+$monivalintalaatikot = array("OSASTO", "TRY", "TUOTEMERKKI", "<br>DYNAAMINEN_TUOTE");
 
 if (file_exists("tilauskasittely/monivalintalaatikot.inc")) {
   require "tilauskasittely/monivalintalaatikot.inc";

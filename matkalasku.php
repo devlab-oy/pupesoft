@@ -1246,6 +1246,14 @@ if ($tee == "MUOKKAA") {
       $leveys = 80;
     }
     elseif ($tyyppi == "B") {
+      $alkumm = isset($alkumm) ? $alkumm : date("i");
+      $alkuhh = isset($alkuhh) ? $alkuhh : date("H");
+      $alkupp = isset($alkupp) ? $alkupp : date("d");
+
+      $loppumm = isset($loppumm) ? $loppumm : date("i");
+      $loppuhh = isset($loppuhh) ? $loppuhh : date("H");
+      $loppupp = isset($loppupp) ? $loppupp : date("d");
+
       $lisa = "";
       if ($maa != "" and $maa != $yhtiorow["maa"]) {
         $lisa = "<th>".t("Ulkomaan ALV")."</th>";

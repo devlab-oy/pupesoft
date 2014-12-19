@@ -283,6 +283,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "SALDOVAHVISTUS")  $ulos .= "<option value='SALDOVAHVISTUS' {$avain_sel['SALDOVAHVISTUS']}>  ".t("Saldovahvistuksen viesti")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "DPAVAINSANALAJI") $ulos .= "<option value='DPAVAINSANALAJI' {$avain_sel['DPAVAINSANALAJI']}>        ".t("Dynaamisen puun avainsanojen laji")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "LITETY_TKIRJAST") $ulos .= "<option value='LITETY_TKIRJAST' {$avain_sel['LITETY_TKIRJAST']}>".t("Tiedostokirjastossa selailtava tiedostotyyppi")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "TOIMIT_TKIRJAST") $ulos .= "<option value='TOIMIT_TKIRJAST' {$avain_sel['TOIMIT_TKIRJAST']}>".t("Tiedostokirjastossa näkyvä toimittaja")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "AIHEAL_LAATUAS")  $ulos .= "<option value='AIHEAL_LAATUAS' {$avain_sel['AIHEAL_LAATUAS']}>" . t("Laatuasiakirjaselaimessa näytettävä aihealue") . "</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "LITETY_LAATUAS")  $ulos .= "<option value='LITETY_LAATUAS' {$avain_sel['LITETY_LAATUAS']}>" . t("Laatuasiakirjaselaimessa näytettävä tiedostotyyppi") . "</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "RELEX_TUOTEPAR")  $ulos .= "<option value='RELEX_TUOTEPAR' {$avain_sel['RELEX_TUOTEPAR']}>".t("Relex tuoteparametrit")."</option>";
@@ -873,6 +874,29 @@ if ($avain_sel["LITETY_LAATUAS"] == "SELECTED" and $_selite) {
     $sel = ($row["selite"] == $trow[$i]) ? ' selected' : '';
     $ulos .= "<option value = '{$row["selite"]}'$sel>{$row["selite"]}</option>";
   }
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($avain_sel["TOIMIT_TKIRJAST"] == "SELECTED" and $_selite) {
+  $query = "SELECT toimi.tunnus,
+            toimi.nimi
+            FROM toimi
+            WHERE toimi.yhtio = '{$kukarow["yhtio"]}'
+            AND toimi.oletus_vienti IN ('C', 'J', 'F', 'K', 'I', 'L')
+            AND toimi.tyyppi NOT IN ('P', 'PP')
+            ORDER BY toimi.nimi";
+
+  $toimittaja_result = pupe_query($query);
+
+  $ulos = "<td><select name='{$nimi}' onclick='submit();'>";
+
+  while ($toimittaja = mysql_fetch_assoc($toimittaja_result)) {
+    $sel = ($toimittaja["tunnus"] == $trow[$i]) ? ' selected' : '';
+    $ulos .= "<option value='{$toimittaja["tunnus"]}' $sel>{$toimittaja["nimi"]}</option>";
+  }
+
   $ulos .= "</select></td>";
 
   $jatko = 0;

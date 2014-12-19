@@ -804,7 +804,11 @@ if ($tee == "MUOKKAA") {
       $errori = lisaa_paivaraha($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, "$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm", "$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm", $kommentti, $kustp, $kohde, $projekti);
     }
     else {
-      $errori = lisaa_kulu($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $kpl, $vero, $hinta, $kommentti, $maa, $kustp, $kohde, $projekti);
+      $errori =
+        lisaa_kulu($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $kpl, $vero,
+                   $hinta, $kommentti, $maa, $kustp, $kohde, $projekti,
+                   "$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm",
+                   "$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm");
     }
 
     if ($errori == "") {
@@ -1251,7 +1255,9 @@ if ($tee == "MUOKKAA") {
         $cols = 5;
       }
 
-      echo "<th>".t("Kustannuspaikka")."</th><th>".t("Kohdemaa")."</th><th>".t("M‰‰r‰")."</th><th>".t("Hinta")."</th><th>".t("Alv")."</th>$lisa</tr>";
+      echo "<th>" . t("Kustannuspaikka") . "</th><th>" . t("Alku") . "</th><th>" . t("Loppu") .
+           "</th><th>" . t("Kohdemaa") . "</th><th>" . t("M‰‰r‰") . "</th><th>" . t("Hinta") .
+           "</th><th>" . t("Alv") . "</th>{$lisa}</tr>";
       echo "<tr><td>";
 
       if ($kustannuspaikka != "") {
@@ -1261,7 +1267,17 @@ if ($tee == "MUOKKAA") {
         echo t("Ei kustannuspaikkaa");
       }
 
-      echo "</td>";
+      echo
+        "</td><td><input type='text' name='alkupp' value='{$alkupp}' size='3' maxlength='2'>
+         <input type='text' name='alkukk' value='{$alkukk}' size='3' maxlength='2'>
+         <input type='text' name='alkuvv' value='{$alkuvv}' size='5' maxlength='4'> " . t("klo") .
+        ":<input type='text' name='alkuhh' value='{$alkuhh}' size='3' maxlength='2'>:
+         <input type='text' name='alkumm' value='{$alkumm}' size='3' maxlength='2'>&nbsp;</td>
+         <td>&nbsp;<input type='text' name='loppupp' value='{$loppupp}' size='3' maxlength='2'>
+         <input type='text' name='loppukk' value='{$loppukk}' size='3' maxlength='2'>
+         <input type='text' name='loppuvv' value='{$loppuvv}' size='5' maxlength='4'> " . t("klo") .
+        ":<input type='text' name='loppuhh' value='{$loppuhh}' size='3' maxlength='2'>:
+         <input type='text' name='loppumm' value='{$loppumm}' size='3' maxlength='2'>";
 
       $query = "SELECT distinct koodi, nimi
                 FROM maat
@@ -2163,8 +2179,11 @@ function lisaa_paivaraha($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilin
   return lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $alku, $loppu, "", 0, "", "", $kommentti, "A", $kustp, $kohde, $projekti);
 }
 
-function lisaa_kulu($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $kpl, $vero, $hinta, $kommentti, $maa, $kustp, $kohde, $projekti) {
-  return lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, "", "", $kpl, $vero, $hinta, $maa, $kommentti, "B", $kustp, $kohde, $projekti);
+function lisaa_kulu($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $kpl, $vero,
+                    $hinta, $kommentti, $maa, $kustp, $kohde, $projekti, $alku, $loppu) {
+  return lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $alku,
+                        $loppu, $kpl, $vero, $hinta, $maa, $kommentti, "B", $kustp, $kohde,
+                        $projekti);
 }
 
 function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $alku, $loppu, $kpl, $vero, $hinta, $maa, $kommentti, $tyyppi, $kustp, $kohde, $projekti) {
@@ -2513,8 +2532,8 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 
           if ($tyyppi == "B") {
             // Kulut vied‰‰n aina vain yhdelle riville (siksi $i = $kpl_array[$indeksi])
-            $_alkuaika  = date('Y-m-d H:i:s');
-            $_loppuaika = date('Y-m-d H:i:s');
+            $_alkuaika  = $alku ? $alku : date('Y-m-d H:i:s');
+            $_loppuaika = $loppu ? $loppu : date('Y-m-d H:i:s');
             $ins_kpl    = $kpl_array[$indeksi];
             $i         = $kpl_array[$indeksi];
           }

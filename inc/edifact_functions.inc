@@ -1777,7 +1777,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
     'postino' => $toimrow['postino'],
     'postitp' => $toimrow['postitp'],
     'maa' => $toimrow['maa'],
-    'edi' => 'X'
+    'uusi' => 'JOO'
   );
 
   $laskurow = luo_ostotilausotsikko($params);
@@ -2342,9 +2342,12 @@ function peruuta_bookkaus($rullamaara, $tilausnro, $rivinro, $konttiviite) {
 function hae_saapumistiedot($saapumiskoodi) {
   global $kukarow;
 
-  $query = "SELECT *
+  $query = "SELECT tilausrivi.*
             FROM lasku
-            WHERE yhtio = '{$kukarow['yhtio']}'
+            JOIN tilausrivi
+              ON tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND asiakkaan_tilausnumero = '{$saapumiskoodi}'";
   $result = pupe_query($query);
 
@@ -2352,8 +2355,12 @@ function hae_saapumistiedot($saapumiskoodi) {
     return false;
   }
   else {
-    $lasku = mysql_fetch_assoc($result);
-    return $lasku;
+
+    $rivit = array();
+    while ($rivi = mysql_fetch_assoc($result)) {
+      $rivit[] = $rivi;
+    }
+    return $rivit;
   }
 }
 

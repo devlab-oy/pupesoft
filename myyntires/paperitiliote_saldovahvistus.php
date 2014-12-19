@@ -247,7 +247,7 @@ function rivi($firstpage, $row, $saldovahvistus, $boss = false) {
 function loppu($firstpage, $saldovahvistus) {
   global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kieli, $lask, $kala, $bold;
 
-  if ($lask > 28) {
+  if (($sivu > 1 and $lask > 28) or ($sivu == 1 and $lask > 19)) {
     $sivu++;
     $lask = 1;
     $firstpage = alku($saldovahvistus);

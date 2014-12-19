@@ -626,11 +626,48 @@ function sepa_get_certificate($params) {
   }
 
   $return = array(
-    "bank_encryption_certificate" => base64_decode($response["bank_encryption_certificate"]),
-    "bank_root_certificate"       => base64_decode($response["bank_root_certificate"]),
-    "own_encryption_certificate"  => base64_decode($response["own_encryption_certificate"]),
-    "own_signing_certificate"     => base64_decode($response["own_signing_certificate"]),
-    "ca_certificate"              => base64_decode($response["ca_certificate"]),
+    "bank_encryption_certificate" => base64_decode($response["bankEncryptionCertificate"]),
+    "bank_root_certificate"       => base64_decode($response["bankRootCertificate"]),
+    "own_encryption_certificate"  => base64_decode($response["ownEncryptionCertificate"]),
+    "own_signing_certificate"     => base64_decode($response["ownSigningCertificate"]),
+    "ca_certificate"              => base64_decode($response["caCertificate"]),
+  );
+
+  return $return;
+}
+
+function sepa_get_bank_certificate($params) {
+  global $kukarow, $yhtiorow, $sepa_pankkiyhteys_token;
+
+  $bank        = parameter($params["bank"]);
+  $customer_id = parameter($params["customer_id"]);
+
+  if (empty($bank) or empty($customer_id)) {
+    return false;
+  }
+
+  $parameters = array(
+    "method" => "POST",
+    "data" => array(
+      "customer_id" => $customer_id,
+      "environment" => "production", // Voi olla joko "TEST" tai "PRODUCTION"
+    ),
+    "url" => "https://sepa.devlab.fi/api/{$bank}/get_bank_certificate",
+    "headers" => array(
+      "Content-Type: application/json",
+      "Authorization: Token token={$sepa_pankkiyhteys_token}"
+    )
+  );
+
+  list($code, $response) = pupesoft_rest($parameters);
+
+  if (!vastaus_kunnossa($code)) {
+    return false;
+  }
+
+  $return = array(
+    "bank_encryption_certificate" => base64_decode($response["bankEncryptionCertificate"]),
+    "bank_root_certificate"       => base64_decode($response["bankRootCertificate"])
   );
 
   return $return;
@@ -865,6 +902,7 @@ function pankkiyhteyden_paivamaarat($pankkiyhteys) {
 
   return $_certit_ok;
 }
+
 
 /**
  * Laitaa kaikki tietyntyyppiset tiedostot pankista ja

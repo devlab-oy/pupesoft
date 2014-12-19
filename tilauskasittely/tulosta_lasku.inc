@@ -2334,7 +2334,9 @@ if (!function_exists('alvierittely')) {
       $kala -= 10;
     }
 
-    if ($yhtiorow['maksupaate_kassamyynti'] != '') {
+    if (($yhtiorow['maksupaate_kassamyynti'] == 'K' and $kukarow["maksupaate_kassamyynti"] == "") or
+        $kukarow["maksupaate_kassamyynti"] == "K"
+    ) {
       // Jos maksupääte on enabloitu, tarvitaan myös maksupäätetapahtumien kuitit
       $query = "SELECT ifnull(group_concat(distinct tunnus SEPARATOR ', '), 0) tilnot
                 FROM lasku

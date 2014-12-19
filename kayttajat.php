@@ -603,6 +603,7 @@ if ($tee == 'MUUTA') {
               kassalipas_otto               = '{$kassalipas_otto}',
               kassamyyja                    = '{$kassamyyja}',
               dynaaminen_kassamyynti        = '{$dynaaminen_kassamyynti}',
+              maksupaate_kassamyynti        = '{$maksupaate_kassamyynti}',
               jyvitys                       = '{$jyvitys}',
               oletus_ohjelma                = '{$oletus_ohjelma}',
               naytetaan_katteet_tilauksella = '{$naytetaan_katteet_tilauksella}',
@@ -1158,6 +1159,36 @@ if ($tee == 'MUUTA') {
         echo "<option value='' {$sel1}>", t("Kassalipasta ei voi valita tilauksella"), "</option>";
         echo "<option value='o' {$sel2}>", t("Kassalippaan voi valita tilauksella"), "</option>";
         echo "</select></td>";
+
+        $maksupaate_sel_1 = "";
+        $maksupaate_sel_2 = "";
+
+        if ($krow["maksupaate_kassamyynti"] == "") {
+          $maksupaate_sel_1 = "selected";
+        }
+        elseif ($krow["maksupaate_kassamyynti"] == "E") {
+          $maksupaate_sel_2 = "selected";
+        }
+        else {
+          $maksupaate_sel_3 = "selected";
+        }
+
+        echo "<tr>
+                <th align='left'>" . t("Maksup‰‰te kassamyynti") . ":</th>
+                <td>
+                  <select name='maksupaate_kassamyynti'>
+                    <option value=''
+                            {$maksupaate_sel_1}>" . t("Yhtiˆn oletus") . "
+                    </option>
+                    <option value='E'
+                            {$maksupaate_sel_2}>" . t("Ei k‰ytet‰ maksup‰‰tett‰ kassamyynniss‰") . "
+                    </option>
+                    <option value='K'
+                            {$maksupaate_sel_3}>" . t("K‰ytet‰‰n maksup‰‰tett‰ kassamyynniss‰") . "
+                    </option>
+                  </select>
+                </td>
+              </tr>";
 
         $sel0 = $sel1 = "";
 

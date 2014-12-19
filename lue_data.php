@@ -442,7 +442,8 @@ if ($kasitellaan_tiedosto) {
                   FROM tuotteen_toimittajat AS tt
                   JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.{$toimikentta} = '{$chk_tunnus_val}')
                   WHERE tt.yhtio = '{$kukarow['yhtio']}'
-                  AND tt.{$tuotenokentta} = '{$chk_tuoteno_val}'";
+                  AND tt.{$tuotenokentta} = '{$chk_tuoteno_val}'
+                  AND tt.liitostunnus = toimi.tunnus";
         $chk_tunnus_res = pupe_query($query);
 
         if (mysql_num_rows($chk_tunnus_res) == 1) {

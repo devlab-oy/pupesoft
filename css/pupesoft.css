@@ -40,11 +40,11 @@ td {
   vertical-align: middle;
 }
 
-.nopad {
-  padding: 0px;
+.pnopad {
+  padding: 0;
 }
 
-.top {
+.ptop {
   vertical-align: top;
 }
 
@@ -84,6 +84,11 @@ select {
   background-image: url('../pics/facelift/dropdown_arrow.png');
   background-repeat: no-repeat;
   background-position: right;
+}
+
+select:disabled {
+  background-image: none;
+  border-style: none;
 }
 
 select.multipleselect {
@@ -129,4 +134,17 @@ input[type=submit].poista_btn {
   background-repeat: no-repeat;
   background-position: right;
   padding-right: 35px;
+}
+
+.monivalintadiv {
+  display: inline-block;
+}
+
+table.ostorivien_kohdistus input[type=text], table.ostorivien_kohdistus input[type=button], table.ostorivien_kohdistus select {
+  margin: 0;
+  padding: 1px;
+}
+
+select.minpad_select {
+  padding: 8px 15px 8px 4px;
 }

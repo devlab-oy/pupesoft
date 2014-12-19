@@ -1084,7 +1084,7 @@ if ($tila == "" and !isset($jatka)) {
   }
 
   echo "<table>";
-  echo "<tr><td class='nopad top'>";
+  echo "<tr><td class='pnopad ptop'>";
 
   echo "<table>";
   echo "<tr>
@@ -1231,7 +1231,7 @@ if ($tila == "" and !isset($jatka)) {
       echo "<input type='hidden' name='ytunnus'              value = '$srow[ytunnus]'>";
     }
 
-    echo "<td class='nopad top'>";
+    echo "<td class='pnopad ptop'>";
     echo "<table>";
     echo "<tr>
         <th colspan='2'>".t("Toimitusosoite").":</td></tr>";
@@ -1307,7 +1307,7 @@ if ($tila == "" and !isset($jatka)) {
     echo "</table>";
     echo "</td>";
 
-    echo "<td class='nopad top'>";
+    echo "<td class='pnopad ptop'>";
     echo "<table>";
     echo "<tr>
         <th colspan='2'>&nbsp; ".t("Laskun postitusosoite").":</td></tr>";
@@ -3267,7 +3267,7 @@ if ($tila == "" and !isset($jatka)) {
     echo "<tr><td>".t("Ohjausmerkki").":</td><td><input type='text' size='43' name='ohjausmerkki' value='$srow[ohjausmerkki]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("lähete")."</td></tr>";
 
     echo "<tr><td>".t("Puhelin toimitukseen").":</td><td><input type='text' size='43' name='tpuh' value='$srow[toim_puh]'</td><td></td></tr>";
-    
+
     if ($yhtiorow["vahvistusviesti_asiakkaalle"]) {
       echo "<tr><td>".t("Email toimitukseen").":</td><td><input type='text' size='43' name='temail' value='$srow[toim_email]'</td><td></td></tr>";
     }

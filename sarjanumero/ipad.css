@@ -367,7 +367,9 @@ th {
   -moz-border-radius: 3px;
   -webkit-border-radius: 3px;
   border-radius: 3px;
-  background-color:#eeeeff
+  background-color:#eeeeff;
+  margin:4px 0;
+  padding:4px;
 }
 
 .haettu {color:green}

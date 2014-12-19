@@ -82,10 +82,23 @@ if ($view == 'saapumiskoodi') {
 }
 
 if ($view == 'tiedot') {
-  echo "<div style='text-align:center'>";
-  echo "<h2>tiedot tähän</h2>";
-  print_r($saapumistiedot);
-  echo "<div>";
+  echo "<div class='alue_0'>";
+  echo "<div class='alue_1 alue'>";
+
+  foreach ($saapumistiedot as $rivi) {
+
+    $kpl = number_format($rivi['tilkpl']);
+
+    echo "<div class='tilaus_alue'>";
+    echo $rivi['nimitys'], ' - ', $kpl, ' kpl';
+    echo "</div>";
+  }
+
+
+
+
+  echo "</div>";
+  echo "</div>";
 }
 
 if (count($viestit) > 0) {

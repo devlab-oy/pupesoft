@@ -393,7 +393,8 @@ if (!isset($task)) {
             JOIN tilausrivi
               ON tilausrivi.yhtio = lasku.yhtio
               AND tilausrivi.otunnus = lasku.tunnus
-            WHERE lasku.yhtio = 'rplog' AND viesti = 'tullivarasto'
+            WHERE lasku.yhtio = 'rplog'
+            AND viesti = 'tullivarasto'
             GROUP BY concat(lasku.tunnus, tilausrivi.tunnus)";
   $result = pupe_query($query);
 

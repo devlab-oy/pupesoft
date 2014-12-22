@@ -651,11 +651,11 @@ if (!isset($task)) {
       }
 
       if ($tilaus['rullat'] == 0) {
-        $rullamaara = $tilaus['rullamaara'] . " (" . t("Ennakkoarvio") . ")";
+        $rullamaara = $tilaus['rullamaara'] . t(" kpl") . " (" . t("Ennakkoarvio") . ")";
       }
       else {
 
-        $rullamaara = $tilaus['rullat'];
+        $rullamaara = $tilaus['rullat'] . t(" kpl") . "<br>" . t("Ennakkoarvio: ") . $tilaus['rullamaara'] . t(" kpl");
 
         $poikkeukset = array(
           'odottaa hylkäystä' => $tilaus['hylattavat'],
@@ -783,7 +783,7 @@ if (!isset($task)) {
       }
 
       echo "<td valign='top' align='center'>";
-      echo $rullamaara . " kpl.";
+      echo $rullamaara;
 
       if (array_sum($poikkeukset) > 0) {
         echo "<br>Joista:";

@@ -719,19 +719,19 @@ if (!isset($task)) {
           if (($tilaus['kontittamatta'] - $tilaus['ylijaama'] - $tilaus['hylatyt']) == 0) {
             $tapahtumat .= "&bull; " .  t("Rullat kontitettu") . "<br>";
 
-            $query = "SELECT count(tilausrivi.tunnus) AS riveja
+            $query = "SELECT count(tilausrivi.tunnus) AS kontittamatta
                       FROM tilausrivi
                       JOIN sarjanumeroseuranta AS ss
                         ON ss.yhtio = tilausrivi.yhtio
                         AND ss.myyntirivitunnus = tilausrivi.tunnus
                       WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
                       AND tilausrivi.otunnus IN ({$konttiviitteen_alaiset_tilaukset})
-                      AND tilausrivi.keratty != ''
+                      AND tilausrivi.keratty = ''
                       AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusaus')";
             $result = pupe_query($query);
             $konttiviitteesta_kontittamatta = mysql_result($result, 0);
 
-            if ($konttiviitteesta_kontittamatta != 0) {
+            if ($konttiviitteesta_kontittamatta == 0) {
               $kontit_sinetointivalmiit = true;
             }
 
@@ -769,11 +769,8 @@ if (!isset($task)) {
             $tapahtumat .= "&bull; " .  t("Osa konteista sinetöity") . "<br>";
           }
 
-          $mrn_tullut = false;
-
          if (($tilaus['mrn_vastaanottamatta'] - $tilaus['ylijaama'] - $tilaus['hylatyt']) == 0) {
             $tapahtumat .= "&bull; " .  t("MRN-numerot vastaanotettu") . "<br>";
-            $mrn_tullut = true;
           }
           elseif ($tilaus['mrn_vastaanottamatta']  < $tilaus['rullat']) {
            $tapahtumat .= "&bull; " .  t("Osa MRN-numeroista vastaanotettu") . "<br>";
@@ -866,6 +863,8 @@ if (!isset($task)) {
           $kontit[] = $v;
         }
 
+        $mrn_tullut = true;
+
         foreach ($kontit as $konttinumero => $kontti) {
 
           if ($kontti['konttinumero'] == '') {
@@ -941,7 +940,9 @@ if (!isset($task)) {
               echo "<div style='text-align:center; margin:6px 0'>MRN: ";
               echo "<input type='text'  value='{$kontti['mrn']}' readonly>";
               echo "</div>";
-
+            }
+            else {
+              $mrn_tullut = false;
             }
           }
 

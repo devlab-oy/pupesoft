@@ -871,6 +871,7 @@ if (!isset($task)) {
 
           if ($kontti['sinettinumero'] == '') {
             echo t("Kontitusta ei ole vielä vahvistettu"), '<br>';
+            $kesken++;
           }
           elseif ($kontti['sinettinumero'] == 'X') {
             echo "<form method='post'>";

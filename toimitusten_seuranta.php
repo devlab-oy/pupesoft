@@ -860,6 +860,7 @@ if (!isset($task)) {
         foreach ($kontit as $konttinumero => $kontti) {
 
           if ($kontti['konttinumero'] == '') {
+            $kesken++;
             continue;
           }
 

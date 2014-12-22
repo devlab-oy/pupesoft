@@ -81,13 +81,12 @@ if ($request['action'] == 'sync') {
     $ok = $presta_customer->sync_customers($asiakkaat);
   }
 
-  die();
   if ($ok and in_array('asiakashinnat', $synkronoi)) {
     $hinnat = hae_asiakashinnat();
     $presta_prices = new PrestaSpecificPrices($presta_url, $presta_api_key);
     $presta_prices->sync_prices($hinnat);
   }
-
+die();
   if ($ok and in_array('tilaukset', $synkronoi)) {
     $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key);
     $presta_orders->transfer_orders_to_pupesoft();

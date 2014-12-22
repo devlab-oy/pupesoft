@@ -491,6 +491,7 @@ if (!isset($task)) {
   echo "</form><br><br>";
 
   $query = "SELECT lasku.asiakkaan_tilausnumero,
+            lasku.sisviesti1 AS ohje,
             laskun_lisatiedot.matkakoodi,
             laskun_lisatiedot.konttiviite,
             laskun_lisatiedot.konttimaara,
@@ -554,6 +555,7 @@ if (!isset($task)) {
     echo "<th>".t("Lähtöpäivä")."</th>";
     echo "<th>".t("Konttiviite")."</th>";
     echo "<th>".t("Rullien määrä")."</th>";
+    echo "<th>".t("Ohje")."</th>";
     echo "<th>".t("Tapahtumat")."</th>";
     echo "<th>".t("Kontit")."</th>";
     echo "<th class='back'></th>";
@@ -832,6 +834,14 @@ if (!isset($task)) {
       }
 
       echo "</td>";
+
+      if (!$konttiviite_kasitelty) {
+
+        echo "<td valign='top' style='width:100px;' rowspan='{$tilauksia_viitteella}'>";
+        echo $tilaus['ohje'];
+        echo "</td>";
+
+      }
 
       echo "<td valign='top'>";
       echo $tapahtumat;

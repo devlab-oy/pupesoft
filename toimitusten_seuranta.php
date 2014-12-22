@@ -860,6 +860,8 @@ if (!isset($task)) {
         foreach ($kontit as $konttinumero => $kontti) {
 
           if ($kontti['konttinumero'] == '') {
+
+            echo $kontti['kpl'], " rullaa kontittamatta<hr>";
             $kesken++;
             continue;
           }

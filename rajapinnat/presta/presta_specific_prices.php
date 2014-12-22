@@ -1,21 +1,18 @@
 <?php
 
 require_once 'rajapinnat/presta/presta_client.php';
-require_once 'rajapinnat/presta/presta_products.php';
+require_once 'rajapinnat/presta/presta_shops.php';
 
 class PrestaSpecificPrices extends PrestaClient {
 
   const RESOURCE = 'specific_prices';
 
-  private $products = array();
+  private $shop;
 
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
 
-    $presta_products = new PrestaProducts($url, $api_key);
-    $this->products = $presta_products->all_skus();
-
-
+    $this->shop = null;
   }
 
   protected function resource_name() {
@@ -35,31 +32,28 @@ class PrestaSpecificPrices extends PrestaClient {
       $xml = $existing_specific_price;
     }
 
-    /**
-     * <specific_price>
-<id/>
-<id_shop_group/>
-<id_shop/>
-<id_cart/>
-<id_product/>
-<id_product_attribute/>
-<id_currency/>
-<id_country/>
-<id_group/>
-<id_customer/>
-<id_specific_price_rule/>
-<price/>
-<from_quantity/>
-<reduction/>
-<reduction_type/>
-<from/>
-<to/>
-</specific_price>
-     */
-
-    if (!empty($specific_price['tuoteno'])) {
-      $xml->specific_price->id_product;
+    if (!empty($specific_price['presta_customergroup_id'])) {
+      $xml->specific_price->id_group = $specific_price['presta_customergroup_id'];
     }
+    if (!empty($specific_price['presta_customer_id'])) {
+      $xml->specific_price->id_customer = $specific_price['presta_customer_id'];
+    }
+    if ($specific_price['alkupvm'] != '0000-00-00') {
+      $xml->specific_price->from = $specific_price['alkupvm'];
+    }
+    if ($specific_price['loppupvm'] != '0000-00-00') {
+      $xml->specific_price->to = $specific_price['loppupvm'];
+    }
+
+    $xml->specific_price->from_quantity = 1;
+    if (!empty($specific_price['minkpl'])) {
+      $xml->specific_price->from_quantity = $specific_price['minkpl'];
+    }
+
+    $xml->specific_price->id_product = $specific_price['tuoteno'];
+    $xml->specific_price->reduction_type = 'amount';
+    $xml->specific_price->reduction = $specific_price['hinta_muutos'];
+    $xml->specific_price->id_shop = $this->shop['id'];
 
     return $xml;
   }
@@ -70,7 +64,14 @@ class PrestaSpecificPrices extends PrestaClient {
     try {
       $this->schema = $this->get_empty_schema();
 
+      $presta_shop = new PrestaShops($this->get_url(), $this->get_api_key());
+      $this->shop = $presta_shop->first_shop();
+
       foreach ($prices as $price) {
+        //In pupesoft tuoteno is not mandatory but in presta it is.
+        if (empty($price['tuoteno'])) {
+          continue;
+        }
         try {
           $this->create($price);
         }

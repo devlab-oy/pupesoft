@@ -35,7 +35,7 @@ $request['synkronointi_tyypit'] = array(
     'tuotteet'       => t('Tuotteet ja tuotekuvat'),
     'asiakasryhmat'  => t('Asiakasryhm‰t'),
     'asiakkaat'      => t('Asiakkaat'),
-    'asiakas_hinnat' => t('Asiakashinnat'),
+    'asiakashinnat' => t('Asiakashinnat'),
     'tilaukset'      => t('Tilauksien haku'),
 );
 
@@ -171,8 +171,24 @@ function hae_asiakasryhmat() {
 function hae_asiakashinnat() {
   global $kukarow, $yhtiorow;
 
-  $query = "SELECT *
+  //Huom! yhteyshenkilo.liitostunnus = asiakashinta.asiakas tarkoittaa ett‰ sama asiakashintarivi
+  //voi tulla monta kertaa koska asiakas has_many yhteyshenkilo. N‰in pit‰‰kin koska yhteyshenkilo
+  //on prestassa asiakas.
+  $query = "SELECT asiakashinta.*,
+            (tuote.myyntihinta - asiakashinta.hinta) AS hinta_muutos,
+            avainsana.selitetark_5 AS presta_customergroup_id,
+            yhteyshenkilo.ulkoinen_asiakasnumero AS presta_customer_id
             FROM asiakashinta
+            JOIN tuote
+            ON ( tuote.yhtio = asiakashinta.yhtio
+              AND tuote.tuoteno = asiakashinta.tuoteno )
+            LEFT JOIN avainsana
+            ON ( avainsana.yhtio = asiakashinta.yhtio
+              AND avainsana.selite = asiakashinta.asiakas_ryhma
+              AND avainsana.laji = 'ASIAKASRYHMA' )
+            LEFT JOIN yhteyshenkilo
+            ON ( yhteyshenkilo.yhtio = asiakashinta.yhtio
+              AND yhteyshenkilo.liitostunnus = asiakashinta.asiakas )
             WHERE asiakashinta.yhtio = '{$kukarow['yhtio']}'";
   $result = pupe_query($query);
 

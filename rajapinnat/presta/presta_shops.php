@@ -39,8 +39,7 @@ class PrestaShops extends PrestaClient {
    */
   public function update_shops_category($category_id) {
     try {
-      $shops = $this->all();
-      $shop = $shops[0];
+      $shop = $this->first_shop();
       $shop_id = $shop['id'];
 
       $shop = $this->get_as_xml($shop_id);
@@ -55,5 +54,26 @@ class PrestaShops extends PrestaClient {
 
       throw $e;
     }
+  }
+
+  /**
+   * Fetches the first shop in presta
+   *
+   * @return array
+   * @throws Exception
+   */
+  public function first_shop() {
+    try {
+      $shops = $this->all();
+      $shop = $shops[0];
+    }
+    catch (Exception $e) {
+      $msg = "first_shop haku epäonnistui";
+      $this->logger->log($msg, $e);
+
+      throw $e;
+    }
+
+    return $shop;
   }
 }

@@ -39,6 +39,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
       $tpostino        = $asiakasrow["toim_postino"];
       $tpostitp        = $asiakasrow["toim_postitp"];
       $toim_maa        = $asiakasrow["toim_maa"];
+      $tpuh            = $asiakasrow["puhelin"];
       $laskutus_nimi     = $asiakasrow["laskutus_nimi"];
       $laskutus_nimitark = $asiakasrow["laskutus_nimitark"];
       $laskutus_osoite   = $asiakasrow["laskutus_osoite"];

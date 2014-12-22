@@ -6,18 +6,12 @@ class PrestaCustomerGroups extends PrestaClient {
 
   const RESOURCE = 'groups';
 
-  private $kukarow = array();
-
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
   }
 
   protected function resource_name() {
     return self::RESOURCE;
-  }
-
-  public function set_kukarow($kukarow) {
-    $this->kukarow = $kukarow;
   }
 
   /**
@@ -33,21 +27,22 @@ class PrestaCustomerGroups extends PrestaClient {
       $xml = $existing_group;
     }
 
-    $xml->group->reduction = $group['alennus'];
+    if (empty($group['selitetark_2'])) {
+      $xml->group->reduction = 0;
+    }
+    else {
+      $xml->group->reduction = $group['selitetark_2'];
+    }
     //1 = Tax excluded, 0 = tax included in presta
     $xml->group->price_display_method = 0;
     $xml->group->show_prices = 1;
-    $xml->group->name->language[0] = $group['selite'];
-    $xml->group->name->language[1] = $group['selite'];
+    $xml->group->name->language[0] = $group['selitetark'];
+    $xml->group->name->language[1] = $group['selitetark'];
 
     return $xml;
   }
 
   public function sync_groups($groups) {
-    if (empty($this->kukarow)) {
-      throw new Exception('Kukarow on tyhjä');
-    }
-
     $this->logger->log('---------Start group sync---------');
 
     try {
@@ -64,7 +59,7 @@ class PrestaCustomerGroups extends PrestaClient {
           else {
             $presta_group = $this->create($group);
             $id = (int) $presta_group['group']['id'];
-            $this->insert_id_to_pupesoft($id, $group);
+            $this->update_id_to_pupesoft($id, $group);
           }
         }
         catch (Exception $e) {
@@ -86,31 +81,16 @@ class PrestaCustomerGroups extends PrestaClient {
     return true;
   }
 
-  private function insert_id_to_pupesoft($id, $group) {
+  private function update_id_to_pupesoft($id, $group) {
     if (empty($id)) {
       return false;
     }
 
-    $query = "SELECT tunnus
-              FROM avainsana
+    $query = "UPDATE avainsana
+              SET selitetark_5 = '{$id}'
               WHERE yhtio = '{$group['yhtio']}'
-              AND laji = 'PRE_RYH_ID'
-              AND selite = '{$group['tunnus']}'";
-    $result = pupe_query($query);
-
-    if (mysql_num_rows($result) == 0) {
-      $query = "INSERT INTO avainsana
-                SET yhtio = '{$this->kukarow['yhtio']}',
-                kieli = 'fi',
-                laji = 'PRE_RYH_ID',
-                laatija = '{$this->kukarow['kuka']}',
-                muuttaja = '{$this->kukarow['kuka']}',
-                luontiaika = NOW(),
-                muutospvm = NOW(),
-                selitetark = {$id},
-                selite = {$group['tunnus']}";
-      pupe_query($query);
-    }
+              AND tunnus = {$group['tunnus']}";
+    pupe_query($query);
   }
 
   private function delete_unnecessary_groups($pupesoft_groups, $presta_groups) {

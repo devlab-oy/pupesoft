@@ -72,7 +72,6 @@ if ($request['action'] == 'sync') {
   if ($ok and in_array('asiakasryhmat', $synkronoi)) {
     $groups = hae_asiakasryhmat();
     $presta_customer_groups = new PrestaCustomerGroups($presta_url, $presta_api_key);
-    $presta_customer_groups->set_kukarow($kukarow);
     $ok = $presta_customer_groups->sync_groups($groups);
   }
 
@@ -155,14 +154,11 @@ function hae_asiakkaat1() {
 function hae_asiakasryhmat() {
   global $kukarow, $yhtiorow;
 
-  $query = "SELECT perusalennus.*,
-            avainsana.selitetark AS presta_customergroup_id
-            FROM perusalennus
-            LEFT JOIN avainsana
-            ON ( avainsana.yhtio = perusalennus.yhtio
-              AND avainsana.selite = perusalennus.tunnus
-              AND avainsana.laji = 'PRE_RYH_ID' )
-            WHERE perusalennus.yhtio = '{$kukarow['yhtio']}'";
+  $query = "SELECT avainsana.*,
+            avainsana.selitetark_5 AS presta_customergroup_id
+            FROM avainsana
+            WHERE avainsana.yhtio = '{$kukarow['yhtio']}'
+            AND laji = 'ASIAKASRYHMA'";
   $result = pupe_query($query);
 
   $ryhmat = array();

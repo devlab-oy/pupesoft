@@ -131,7 +131,7 @@ function hae_asiakkaat1() {
   global $kukarow, $yhtiorow, $verkkokauppatyyppi;
 
   $query = "SELECT yhteyshenkilo.*,
-            avainsana.selite AS presta_customergroup_id
+            avainsana.selitetark_5 AS presta_customergroup_id
             FROM yhteyshenkilo
             JOIN asiakas
             ON ( asiakas.yhtio = yhteyshenkilo.yhtio
@@ -139,7 +139,7 @@ function hae_asiakkaat1() {
             LEFT JOIN avainsana
             ON ( avainsana.yhtio = asiakas.yhtio
               AND avainsana.selite = asiakas.ryhma
-              AND avainsana.laji = 'PRE_RYH_ID' )
+              AND avainsana.laji = 'ASIAKASRYHMA' )
             WHERE yhteyshenkilo.yhtio = '{$kukarow['yhtio']}'";
   $result = pupe_query($query);
 

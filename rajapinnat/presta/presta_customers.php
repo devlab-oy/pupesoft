@@ -37,6 +37,11 @@ class PrestaCustomers extends PrestaClient {
     }
     $xml->customer->email = $email;
 
+    if (!empty($customer['presta_customergroup_id'])) {
+      $xml->customer->id_default_group = $customer['presta_customergroup_id'];
+      $xml->customer->associations->groups->groups->id = $customer['presta_customergroup_id'];
+    }
+
     return $xml;
   }
 

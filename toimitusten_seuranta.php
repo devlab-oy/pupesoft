@@ -857,11 +857,21 @@ if (!isset($task)) {
 
         $kesken = 0;
 
+        asort($kontit);
+
+        $v = $kontit[''];
+        unset($kontit['']);
+
+        if (count($v) > 0) {
+          $kontit[] = $v;
+        }
+
         foreach ($kontit as $konttinumero => $kontti) {
 
           if ($kontti['konttinumero'] == '') {
-
-            echo $kontti['kpl'], " rullaa kontittamatta<hr>";
+            echo "<div style='margin:0 5px 8px 5px; padding:5px; border-bottom:1px solid grey;'>";
+            echo t("Konttiviitteestä "), $kontti['kpl'], t(" rullaa kontittamatta");
+            echo "</div>";
             $kesken++;
             continue;
           }

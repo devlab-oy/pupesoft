@@ -95,7 +95,7 @@ if (isset($submit)) {
       $kontissa = false;
       $ei_kontissa = false;
       $kontitettu = false;
-      $mrn = false;
+      $mrn = true;
 
       $hylatyt = array();
       $hylattavat = array();
@@ -113,8 +113,8 @@ if (isset($submit)) {
 
         while ($rulla = mysql_fetch_assoc($result)) {
 
-          if ($rulla['kontin_mrn'] != '') {
-            $mrn = true;
+          if ($rulla['kontin_mrn'] == '') {
+            $mrn = false;
           }
 
           if ($rulla['var'] == 'P') {

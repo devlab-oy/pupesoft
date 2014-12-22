@@ -37,7 +37,6 @@ $query = "SELECT
             ON ss.yhtio = lasku.yhtio
             AND ss.ostorivitunnus = tr.tunnus
           WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-          AND tila = 'O'
           {$lisa}
           GROUP BY lasku.tunnus
           ORDER BY trlt.rahtikirja_id";

@@ -726,12 +726,12 @@ if (!isset($task)) {
                         AND ss.myyntirivitunnus = tilausrivi.tunnus
                       WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
                       AND tilausrivi.otunnus IN ({$konttiviitteen_alaiset_tilaukset})
-                      AND tilausrivi.keratty = ''
+                      AND tilausrivi.keratty != ''
                       AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusaus')";
             $result = pupe_query($query);
             $konttiviitteesta_kontittamatta = mysql_result($result, 0);
 
-            if ($konttiviitteesta_kontittamatta == 0) {
+            if ($konttiviitteesta_kontittamatta != 0) {
               $kontit_sinetointivalmiit = true;
             }
 
@@ -845,7 +845,7 @@ if (!isset($task)) {
         //echo t("Sama konttiviite kuin yllä.");
         //echo "</td>";
       }
-      elseif (!$kontit_sinetointivalmiit and !$konttiviitteesta_vahvistettu) {
+      elseif (!$kontit_sinetointivalmiit) {
         echo "<td valign='top' rowspan='{$tilauksia_viitteella}' align='center'>";
         echo $tilaus['konttimaara'] . " kpl (ennakkoarvio)";
         echo "</td>";

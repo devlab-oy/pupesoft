@@ -81,7 +81,7 @@ if (isset($submit)) {
                        toimitettu = '',
                        toimitettuaika = '0000-00-00 00:00:00'
                        WHERE yhtio = '{$kukarow['yhtio']}'
-                       AND tunnus IN '{$rulla['tunnus']}'";
+                       AND tunnus = '{$rulla['tunnus']}'";
             pupe_query($uquery);
 
           }

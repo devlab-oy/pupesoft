@@ -859,7 +859,7 @@ if (!isset($task)) {
 
         foreach ($kontit as $konttinumero => $kontti) {
 
-          if ($kontti['sinettinumero'] == '') {
+          if ($kontti['konttinumero'] == '') {
             continue;
           }
 
@@ -869,7 +869,10 @@ if (!isset($task)) {
           echo "<div style='margin:0 5px 8px 5px; padding:5px; border-bottom:1px solid grey;'>";
           echo "{$_konttinumero}. ({$kontti['kpl']} kpl, {$kontti['paino']} kg)&nbsp;&nbsp;";
 
-          if ($kontti['sinettinumero'] == 'X') {
+          if ($kontti['sinettinumero'] == '') {
+            echo t("Kontitusta ei ole vielä vahvistettu"), '<br>';
+          }
+          elseif ($kontti['sinettinumero'] == 'X') {
             echo "<form method='post'>";
             echo "<input type='hidden' name='task' value='anna_konttitiedot' />";
             echo "<input type='hidden' name='temp_konttinumero' value='{$konttinumero}' />";
@@ -896,35 +899,36 @@ if (!isset($task)) {
             echo "</form>";
           }
 
-          js_openFormInNewWindow();
+          if ($kontti['sinettinumero'] != '') {
 
-          $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
-          $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
+            js_openFormInNewWindow();
 
-          echo "&nbsp;<form method='post' id='hae_pakkalista{$_konttinumero}'>";
-          echo "<input type='hidden' name='task' value='hae_pakkalista' />";
-          echo "<input type='hidden' name='pakkalista' value='{$kontti['pakkalista']}' />";
-          echo "<input type='hidden' name='tee' value='XXX' />";
-          echo "<input type='hidden' name='konttinumero' value='{$konttinumero}' />";
-          echo "<input type='hidden' name='sinettinumero' value='{$kontti['sinettinumero']}' />";
-          echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
-          echo "<input type='hidden' name='session' value='{$session}' />";
-          echo "<input type='hidden' name='logo_url' value='{$logo_url}' />";
-          echo "<input type='hidden' name='taara' value='{$kontti['taara']}' />";
-          echo "<input type='hidden' name='kpl' value='{$kontti['kpl']}' />";
-          echo "<input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />";
-          echo "</form>";
-          echo "<button onClick=\"js_openFormInNewWindow('hae_pakkalista{$_konttinumero}', 'Pakkalista'); return false;\" />";
-          echo t("Pakkalista");
-          echo "</button>";
+            $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
+            $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
 
-          echo $kontti['kontin_mrn'];
+            echo "&nbsp;<form method='post' id='hae_pakkalista{$_konttinumero}'>";
+            echo "<input type='hidden' name='task' value='hae_pakkalista' />";
+            echo "<input type='hidden' name='pakkalista' value='{$kontti['pakkalista']}' />";
+            echo "<input type='hidden' name='tee' value='XXX' />";
+            echo "<input type='hidden' name='konttinumero' value='{$konttinumero}' />";
+            echo "<input type='hidden' name='sinettinumero' value='{$kontti['sinettinumero']}' />";
+            echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
+            echo "<input type='hidden' name='session' value='{$session}' />";
+            echo "<input type='hidden' name='logo_url' value='{$logo_url}' />";
+            echo "<input type='hidden' name='taara' value='{$kontti['taara']}' />";
+            echo "<input type='hidden' name='kpl' value='{$kontti['kpl']}' />";
+            echo "<input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />";
+            echo "</form>";
+            echo "<button onClick=\"js_openFormInNewWindow('hae_pakkalista{$_konttinumero}', 'Pakkalista'); return false;\" />";
+            echo t("Pakkalista");
+            echo "</button>";
 
-          if ($kontti['mrn'] != '') {
-            echo "<div style='text-align:center; margin:6px 0'>MRN: ";
-            echo "<input type='text'  value='{$kontti['mrn']}' readonly>";
-            echo "</div>";
+            if ($kontti['mrn'] != '') {
+              echo "<div style='text-align:center; margin:6px 0'>MRN: ";
+              echo "<input type='text'  value='{$kontti['mrn']}' readonly>";
+              echo "</div>";
 
+            }
           }
 
           echo "</div>";

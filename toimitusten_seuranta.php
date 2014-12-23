@@ -920,7 +920,7 @@ if (!isset($task)) {
                 echo "</form>";
                 $kesken++;
               }
-              else {
+              elseif ($tilaus['satamavahvistus_pvm'] == '0000-00-00 00:00:00') {
                 echo "<button type='button' disabled>" . t("Sinetöity") . "</button>";
                 echo "<form method='post'>";
                 echo "<input type='hidden' name='task' value='korjaa_konttitiedot' />";
@@ -934,6 +934,9 @@ if (!isset($task)) {
                 echo "<input type='hidden' name='sinetoitava_konttiviite' value='{$tilaus['konttiviite']}' />";
                 echo "<input type='submit' value='". t("Korjaa") ."' />";
                 echo "</form>";
+              }
+              else {
+                echo "<button type='button' disabled>" . t("Sinetöity") . "</button>";
               }
 
               if ($kontti['sinettinumero'] != '') {

@@ -8,11 +8,13 @@ class PrestaSpecificPrices extends PrestaClient {
   const RESOURCE = 'specific_prices';
 
   private $shop;
+  private $product_ids;
 
   public function __construct($url, $api_key) {
     parent::__construct($url, $api_key);
 
     $this->shop = null;
+    $this->product_ids = array();
   }
 
   protected function resource_name() {
@@ -32,15 +34,20 @@ class PrestaSpecificPrices extends PrestaClient {
       $xml = $existing_specific_price;
     }
 
+    $xml->specific_price->id_group = 0;
     if (!empty($specific_price['presta_customergroup_id'])) {
       $xml->specific_price->id_group = $specific_price['presta_customergroup_id'];
     }
     if (!empty($specific_price['presta_customer_id'])) {
       $xml->specific_price->id_customer = $specific_price['presta_customer_id'];
     }
+
+    $xml->specific_price->from = '0000-00-00 00:00:00';
     if ($specific_price['alkupvm'] != '0000-00-00') {
       $xml->specific_price->from = $specific_price['alkupvm'];
     }
+
+    $xml->specific_price->to = '0000-00-00 00:00:00';
     if ($specific_price['loppupvm'] != '0000-00-00') {
       $xml->specific_price->to = $specific_price['loppupvm'];
     }
@@ -50,10 +57,17 @@ class PrestaSpecificPrices extends PrestaClient {
       $xml->specific_price->from_quantity = $specific_price['minkpl'];
     }
 
-    $xml->specific_price->id_product = $specific_price['tuoteno'];
+    $xml->specific_price->id_product = $specific_price['presta_product_id'];
     $xml->specific_price->reduction_type = 'amount';
     $xml->specific_price->reduction = $specific_price['hinta_muutos'];
     $xml->specific_price->id_shop = $this->shop['id'];
+    $xml->specific_price->id_cart = 0;
+    $xml->specific_price->id_currency = 0;
+    $xml->specific_price->id_country = 0;
+
+    //Price == -1 if Leave base price is checked. Otherwise its the given price.
+    //Pupe -> presta we allways use the calculated price difference (hinta_muutos)
+    $xml->specific_price->price = -1;
 
     return $xml;
   }
@@ -67,12 +81,16 @@ class PrestaSpecificPrices extends PrestaClient {
       $presta_shop = new PrestaShops($this->get_url(), $this->get_api_key());
       $this->shop = $presta_shop->first_shop();
 
+      $presta_product = new PrestaProducts($this->get_url(), $this->get_api_key());
+      $this->product_ids = $presta_product->all_skus();
+
       foreach ($prices as $price) {
         //In pupesoft tuoteno is not mandatory but in presta it is.
         if (empty($price['tuoteno'])) {
           continue;
         }
         try {
+          $price['presta_product_id'] = $this->find_presta_product_id($price['tuoteno']);
           $this->create($price);
         }
         catch (Exception $e) {
@@ -90,5 +108,23 @@ class PrestaSpecificPrices extends PrestaClient {
     $this->logger->log('---------End specific price sync---------');
 
     return true;
+  }
+
+  /**
+   * Finds presta product id from $this->product_ids
+   *
+   * @param string $tuoteno
+   * @return int
+   * @throws Exception
+   */
+  private function find_presta_product_id($tuoteno) {
+    $presta_product_id = array_search($tuoteno, $this->product_ids);
+    if ($presta_product_id === false) {
+      $msg = "Tuotetta {$tuoteno} ei löytynyt";
+      $this->logger->log($msg);
+      throw new Exception($msg);
+    }
+
+    return (int) $presta_product_id;
   }
 }

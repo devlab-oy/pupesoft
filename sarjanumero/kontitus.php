@@ -829,7 +829,7 @@ if ($view == 'kontituslista') {
       echo "</div>";
 
       echo "<div class='otsikko_center'>";
-      echo $rulla['asiakkaan_tilausnumero'];
+      echo $rulla['asiakkaan_tilausnumero'].':'.$rulla['rivinro'];
       echo " - " . $rulla['paikka'];
       echo " - " . $rullat_ja_kontit['ryhma_laskuri'][$group_class] . " kpl";
       echo "</div>";
@@ -900,7 +900,16 @@ echo "
       $('.{$luokka}').slideDown(200);
       $('.aktiivi_group').val('{$luokka}');
       $('.nuoli').html('&#x25BC;');
-      $('.{$luokka}-nuoli').html('');
+      $('.{$luokka}-nuoli').html('&#x25B2;');
+
+    }
+    else {
+
+      $('.otsikkodiv').removeClass('avoin_otsikko');
+      $('.perus').slideUp(200);
+      $('.aktiivi_group').val('');
+      $('.nuoli').html('&#x25BC;');
+      $('.{$luokka}-nuoli').html('&#x25BC;');
 
     }
 

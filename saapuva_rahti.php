@@ -25,7 +25,8 @@ $query = "SELECT
           sum(if(ss.lisatieto = 'Hyl‰tty', 1, 0)) AS hylatyt,
           sum(if(ss.lisatieto = 'Hyl‰t‰‰n', 1, 0)) AS hylattavat,
           sum(if(ss.lisatieto = 'Lusattava', 1, 0)) AS lusattavat,
-          sum(if(ss.lisatieto = 'Toimitettu', 1, 0)) AS toimitettu
+          sum(if(ss.lisatieto = 'Toimitettu', 1, 0)) AS toimitettu,
+          trlt.kuljetuksen_rekno
           FROM lasku
           JOIN tilausrivi AS tr
             ON tr.yhtio = lasku.yhtio
@@ -56,6 +57,7 @@ else {
   echo "<th>".t("Tilausrivit")."</th>";
   echo "<th>".t("Rullien m‰‰r‰")."</th>";
   echo "<th>".t("Rahdin paino")."</th>";
+  echo "<th>".t("Rekisterinumero")."</th>";
   echo "<th>".t("Sanoma vastaanotettu")."</th>";
   echo "<th>".t("Rahti vastaanotettu")."</th>";
   echo "<th>".t("Varastoon viety")."</th>";
@@ -107,6 +109,10 @@ else {
     echo "<td valign='top' align='center'>";
     echo (int) $rahti['paino'];
     echo " kg </td>";
+
+    echo "<td valign='top' align='center'>";
+    echo $rahti['kuljetuksen_rekno'];
+    echo "</td>";
 
     echo "<td valign='top' align='center'>";
     echo date("j.n.Y H:i", strtotime($rahti['luontiaika']));

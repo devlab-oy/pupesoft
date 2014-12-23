@@ -584,10 +584,9 @@ if ($view == 'konttiviite_maxkg') {
     echo "
     <form method='post' action=''>
       <div style='text-align:center;padding:10px;'>
-        <label for='maxkg'>", t("Konttien maksimi kilom‰‰r‰"), "</label><br>
         <input type='hidden' name='konttiviite' value='{$konttiviite}' />
         <input type='hidden' name='bookattu_konttimaara' value='{$info['konttimaara']}' />
-        <input type='text' id='maxkg' name='maxkg' style='margin:10px;' value='{$info['maxkg']}' />
+        <input type='hidden' id='maxkg' name='maxkg' style='margin:10px;' value='{$info['maxkg']}' />
         <br>
         <button name='submit' value='konttiviite_maxkg' onclick='submit();' class='button'>", t("Jatka"), "</button>
       </div>

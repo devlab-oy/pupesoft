@@ -645,11 +645,16 @@ if (!isset($task)) {
       }
 
       if (!$konttiviite_kasitelty) {
-
         echo "<td valign='top' rowspan='{$tilauksia_viitteella}'>";
-        echo date("j.n.Y", strtotime($tilaus['toimaika']));
-        echo "</td>";
 
+        if ($tilaus['satamavahvistus_pvm'] == '0000-00-00 00:00:00') {
+          echo date("j.n.Y", strtotime($tilaus['toimaika']));
+        }
+        else {
+          echo date("j.n.Y H:i", strtotime($tilaus['satamavahvistus_pvm']));
+        }
+
+        echo "</td>";
       }
 
       if (!$konttiviite_kasitelty) {

@@ -561,7 +561,7 @@ function laskutusraportti_parametrit($konttiviite) {
             laskun_lisatiedot.konttiviite,
             group_concat(DISTINCT kontin_mrn) AS kontit,
             group_concat(DISTINCT DATE(tilausrivi.toimitettuaika)) AS sisaan,
-            group_concat(DISTINCT tilausrivi.laskutettuaika) AS ulos
+            group_concat(DISTINCT DATE(laskun_lisatiedot.satamavahvistus_pvm)) AS ulos
             FROM laskun_lisatiedot
             JOIN lasku
               ON lasku.yhtio = laskun_lisatiedot.yhtio

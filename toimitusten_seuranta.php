@@ -503,7 +503,9 @@ if (!isset($task)) {
             lasku.tila,
             lasku.alatila,
             lasku.tunnus,
+            trlt.konttinumero,
             COUNT(tilausrivi.tunnus) AS rullat,
+            SUM(IF(trlt.sinettinumero != '', 1, 0)) AS kontti_vahvistettu,
             SUM(IF(tilausrivi.var = 'P', 1, 0)) AS tulouttamatta,
             SUM(IF(tilausrivi.keratty = '', 1, 0)) AS kontittamatta,
             SUM(IF(tilausrivi.toimitettu = '', 1, 0)) AS toimittamatta,
@@ -561,7 +563,13 @@ if (!isset($task)) {
     echo "<th class='back'></th>";
     echo "</tr>";
 
+    $vahvistetut_kontit = array();
+
     foreach ($tilaukset as $key => $tilaus) {
+
+      if ($tilaus['kontti_vahvistettu'] > 0) {
+        $vahvistetut_kontit[] = $tilaus['konttinumero'];
+      }
 
       $poikkeukset = array();
 
@@ -827,7 +835,6 @@ if (!isset($task)) {
                 echo "&bull; " . $kpl . " " . $poikkeus . "<br>";
                 break;
             }
-
           }
         }
         echo "</div>";
@@ -852,7 +859,7 @@ if (!isset($task)) {
         //echo t("Sama konttiviite kuin yllä.");
         //echo "</td>";
       }
-      elseif (!$kontit_sinetointivalmiit) {
+      elseif (!$kontit_sinetointivalmiit and  count($vahvistetut_kontit) == 0) {
         echo "<td valign='top' rowspan='{$tilauksia_viitteella}' align='center'>";
         echo $tilaus['konttimaara'] . " kpl (ennakkoarvio)";
         echo "</td>";
@@ -862,174 +869,181 @@ if (!isset($task)) {
 
         $kontit = kontitustiedot($tilaus['konttiviite']);
 
-        $kesken = 0;
+        if ($kontit) {
 
-        asort($kontit);
+            $kesken = 0;
 
-        $v = $kontit[''];
-        unset($kontit['']);
+            asort($kontit);
 
-        if (count($v) > 0) {
-          $kontit[] = $v;
-        }
+            $v = $kontit[''];
+            unset($kontit['']);
 
-        $mrn_tullut = true;
+            if (count($v) > 0) {
+              $kontit[] = $v;
+            }
 
-        foreach ($kontit as $konttinumero => $kontti) {
+            $mrn_tullut = true;
 
-          if ($kontti['konttinumero'] == '') {
-            echo "<div style='margin:0 5px 8px 5px; padding:5px; border-bottom:1px solid grey;'>";
-            echo t("Konttiviitteestä "), $kontti['kpl'], t(" rullaa kontittamatta");
-            echo "</div>";
-            $kesken++;
-            continue;
-          }
+            foreach ($kontit as $konttinumero => $kontti) {
 
-          $temp_array = explode("/", $konttinumero);
-          $_konttinumero = $temp_array[0];
+              if ($kontti['konttinumero'] == '') {
+                echo "<div style='margin:0 5px 8px 5px; padding:5px; border-bottom:1px solid grey;'>";
+                echo t("Konttiviitteestä "), $kontti['kpl'], t(" rullaa kontittamatta");
+                echo "</div>";
+                $kesken++;
+                continue;
+              }
 
-          echo "<div style='margin:0 5px 8px 5px; padding:5px; border-bottom:1px solid grey;'>";
-          echo "{$_konttinumero}. ({$kontti['kpl']} kpl, {$kontti['paino']} kg)&nbsp;&nbsp;";
+              $temp_array = explode("/", $konttinumero);
+              $_konttinumero = $temp_array[0];
 
-          if ($kontti['sinettinumero'] == '') {
-            echo t("Kontitusta ei ole vielä vahvistettu"), '<br>';
-            $kesken++;
-          }
-          elseif ($kontti['sinettinumero'] == 'X') {
-            echo "<form method='post'>";
-            echo "<input type='hidden' name='task' value='anna_konttitiedot' />";
-            echo "<input type='hidden' name='temp_konttinumero' value='{$konttinumero}' />";
-            echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
-            echo "<input type='hidden' name='rullia' value='{$kontti['kpl']}' />";
-            echo "<input type='hidden' name='sinetoitava_konttiviite' value='{$tilaus['konttiviite']}' />";
-            echo "<input type='submit' value='". t("Sinetöi") ."' />";
-            echo "</form>";
-            $kesken++;
-          }
-          else {
-            echo "<button type='button' disabled>" . t("Sinetöity") . "</button>";
-            echo "<form method='post'>";
-            echo "<input type='hidden' name='task' value='korjaa_konttitiedot' />";
-            echo "<input type='hidden' name='temp_konttinumero' value='{$konttinumero}' />";
-            echo "<input type='hidden' name='konttinumero' value='{$kontti['konttinumero']}' />";
-            echo "<input type='hidden' name='sinettinumero' value='{$kontti['sinettinumero']}' />";
-            echo "<input type='hidden' name='taara' value='{$kontti['taara']}' />";
-            echo "<input type='hidden' name='isokoodi' value='{$kontti['isokoodi']}' />";
-            echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
-            echo "<input type='hidden' name='rullia' value='{$kontti['kpl']}' />";
-            echo "<input type='hidden' name='sinetoitava_konttiviite' value='{$tilaus['konttiviite']}' />";
-            echo "<input type='submit' value='". t("Korjaa") ."' />";
-            echo "</form>";
-          }
+              echo "<div style='margin:0 5px 8px 5px; padding:5px; border-bottom:1px solid grey;'>";
+              echo "{$_konttinumero}. ({$kontti['kpl']} kpl, {$kontti['paino']} kg)&nbsp;&nbsp;";
 
-          if ($kontti['sinettinumero'] != '') {
+              if ($kontti['sinettinumero'] == '') {
+                echo t("Kontitusta ei ole vielä vahvistettu"), '<br>';
+                $kesken++;
+              }
+              elseif ($kontti['sinettinumero'] == 'X') {
+                echo "<form method='post'>";
+                echo "<input type='hidden' name='task' value='anna_konttitiedot' />";
+                echo "<input type='hidden' name='temp_konttinumero' value='{$konttinumero}' />";
+                echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
+                echo "<input type='hidden' name='rullia' value='{$kontti['kpl']}' />";
+                echo "<input type='hidden' name='sinetoitava_konttiviite' value='{$tilaus['konttiviite']}' />";
+                echo "<input type='submit' value='". t("Sinetöi") ."' />";
+                echo "</form>";
+                $kesken++;
+              }
+              else {
+                echo "<button type='button' disabled>" . t("Sinetöity") . "</button>";
+                echo "<form method='post'>";
+                echo "<input type='hidden' name='task' value='korjaa_konttitiedot' />";
+                echo "<input type='hidden' name='temp_konttinumero' value='{$konttinumero}' />";
+                echo "<input type='hidden' name='konttinumero' value='{$kontti['konttinumero']}' />";
+                echo "<input type='hidden' name='sinettinumero' value='{$kontti['sinettinumero']}' />";
+                echo "<input type='hidden' name='taara' value='{$kontti['taara']}' />";
+                echo "<input type='hidden' name='isokoodi' value='{$kontti['isokoodi']}' />";
+                echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
+                echo "<input type='hidden' name='rullia' value='{$kontti['kpl']}' />";
+                echo "<input type='hidden' name='sinetoitava_konttiviite' value='{$tilaus['konttiviite']}' />";
+                echo "<input type='submit' value='". t("Korjaa") ."' />";
+                echo "</form>";
+              }
 
-            js_openFormInNewWindow();
+              if ($kontti['sinettinumero'] != '') {
 
-            $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
-            $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
+                js_openFormInNewWindow();
 
-            echo "&nbsp;<form method='post' id='hae_pakkalista{$_konttinumero}'>";
-            echo "<input type='hidden' name='task' value='hae_pakkalista' />";
-            echo "<input type='hidden' name='pakkalista' value='{$kontti['pakkalista']}' />";
-            echo "<input type='hidden' name='tee' value='XXX' />";
-            echo "<input type='hidden' name='konttinumero' value='{$konttinumero}' />";
-            echo "<input type='hidden' name='sinettinumero' value='{$kontti['sinettinumero']}' />";
-            echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
-            echo "<input type='hidden' name='session' value='{$session}' />";
-            echo "<input type='hidden' name='logo_url' value='{$logo_url}' />";
-            echo "<input type='hidden' name='taara' value='{$kontti['taara']}' />";
-            echo "<input type='hidden' name='kpl' value='{$kontti['kpl']}' />";
-            echo "<input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />";
-            echo "</form>";
-            echo "<button onClick=\"js_openFormInNewWindow('hae_pakkalista{$_konttinumero}', 'Pakkalista'); return false;\" />";
-            echo t("Pakkalista");
-            echo "</button>";
+                $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
+                $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
 
-            if ($kontti['mrn'] != '') {
-              echo "<div style='text-align:center; margin:6px 0'>MRN: ";
-              echo "<input type='text'  value='{$kontti['mrn']}' readonly>";
+                echo "&nbsp;<form method='post' id='hae_pakkalista{$_konttinumero}'>";
+                echo "<input type='hidden' name='task' value='hae_pakkalista' />";
+                echo "<input type='hidden' name='pakkalista' value='{$kontti['pakkalista']}' />";
+                echo "<input type='hidden' name='tee' value='XXX' />";
+                echo "<input type='hidden' name='konttinumero' value='{$konttinumero}' />";
+                echo "<input type='hidden' name='sinettinumero' value='{$kontti['sinettinumero']}' />";
+                echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
+                echo "<input type='hidden' name='session' value='{$session}' />";
+                echo "<input type='hidden' name='logo_url' value='{$logo_url}' />";
+                echo "<input type='hidden' name='taara' value='{$kontti['taara']}' />";
+                echo "<input type='hidden' name='kpl' value='{$kontti['kpl']}' />";
+                echo "<input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />";
+                echo "</form>";
+                echo "<button onClick=\"js_openFormInNewWindow('hae_pakkalista{$_konttinumero}', 'Pakkalista'); return false;\" />";
+                echo t("Pakkalista");
+                echo "</button>";
+
+                if ($kontti['mrn'] != '') {
+                  echo "<div style='text-align:center; margin:6px 0'>MRN: ";
+                  echo "<input type='text'  value='{$kontti['mrn']}' readonly>";
+                  echo "</div>";
+                }
+                else {
+                  $mrn_tullut = false;
+                }
+              }
+
+
               echo "</div>";
             }
-            else {
-              $mrn_tullut = false;
+
+            if ($kesken == 0 and $mrn_tullut and $tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
+
+              echo "
+              <div style='text-align:center;margin:10px 0;'>
+                <button type='button' disabled>" . t("Satamavahvistus lähetetty") . "</button>";
+
             }
+            elseif ($kesken == 0 and $mrn_tullut) {
+
+              echo "
+                <div style='text-align:center;margin:10px 0;'>
+                <form method='post'>
+                <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />
+                <input type='hidden' name='matkakoodi' value='{$tilaus['matkakoodi']}' />
+                <input type='hidden' name='lahtopvm_arvio' value='{$tilaus['toimaika']}' />
+                <input type='hidden' name='task' value='tee_satamavahvistus' />
+                <input type='submit' value='". t("Tee satamavahvistus") ."' />
+                </form>";
+            }
+
+            if ($kesken == 0 and $mrn_tullut) {
+
+              $parametrit = lahtoilmoitus_parametrit($tilaus['konttiviite']);
+              $parametrit = serialize($parametrit);
+              $parametrit = base64_encode($parametrit);
+
+              $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
+              $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
+
+              echo "
+              <form method='post' id='nayta_lahtoilmoitus{$id}'>
+              <input type='hidden' name='parametrit' value='{$parametrit}' />
+              <input type='hidden' name='task' value='nayta_lahtoilmoitus' />
+              <input type='hidden' name='session' value='{$session}' />
+              <input type='hidden' name='logo_url' value='{$logo_url}' />
+              <input type='hidden' name='tee' value='XXX' />
+              </form>
+              <button onClick=\"js_openFormInNewWindow('nayta_lahtoilmoitus{$id}',
+               'Satamavahvistus'); return false;\" />";
+
+              echo t("Näytä lähtöilmoitus");
+              echo "</button></div>";
+
+              if ($tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
+
+                $parametrit = laskutusraportti_parametrit($tilaus['konttiviite']);
+                $parametrit = serialize($parametrit);
+                $parametrit = base64_encode($parametrit);
+
+                echo "
+                <div style='text-align:center'>
+                <form method='post' id='nayta_laskutusraportti{$id}'>
+                <input type='hidden' name='parametrit' value='{$parametrit}' />
+                <input type='hidden' name='task' value='nayta_laskutusraportti' />
+                <input type='hidden' name='session' value='{$session}' />
+                <input type='hidden' name='logo_url' value='{$logo_url}' />
+                <input type='hidden' name='tee' value='XXX' />
+                </form>
+                <button onClick=\"js_openFormInNewWindow('nayta_laskutusraportti{$id}',
+                 'Satamavahvistus'); return false;\" />";
+
+                echo t("Laskutusraportti");
+                echo "</button></div>";
+              }
+
+              echo "</div>";
+            }
+
+            echo "</td>";
+            $kasitellyt_konttivitteet[] = $tilaus['konttiviite'];
           }
 
-          echo "</div>";
         }
 
-        if ($kesken == 0 and $mrn_tullut and $tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
 
-          echo "
-          <div style='text-align:center;margin:10px 0;'>
-            <button type='button' disabled>" . t("Satamavahvistus lähetetty") . "</button>";
-
-        }
-        elseif ($kesken == 0 and $mrn_tullut) {
-
-          echo "
-            <div style='text-align:center;margin:10px 0;'>
-            <form method='post'>
-            <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />
-            <input type='hidden' name='matkakoodi' value='{$tilaus['matkakoodi']}' />
-            <input type='hidden' name='lahtopvm_arvio' value='{$tilaus['toimaika']}' />
-            <input type='hidden' name='task' value='tee_satamavahvistus' />
-            <input type='submit' value='". t("Tee satamavahvistus") ."' />
-            </form>";
-        }
-
-        if ($kesken == 0 and $mrn_tullut) {
-
-          $parametrit = lahtoilmoitus_parametrit($tilaus['konttiviite']);
-          $parametrit = serialize($parametrit);
-          $parametrit = base64_encode($parametrit);
-
-          $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
-          $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
-
-          echo "
-          <form method='post' id='nayta_lahtoilmoitus{$id}'>
-          <input type='hidden' name='parametrit' value='{$parametrit}' />
-          <input type='hidden' name='task' value='nayta_lahtoilmoitus' />
-          <input type='hidden' name='session' value='{$session}' />
-          <input type='hidden' name='logo_url' value='{$logo_url}' />
-          <input type='hidden' name='tee' value='XXX' />
-          </form>
-          <button onClick=\"js_openFormInNewWindow('nayta_lahtoilmoitus{$id}',
-           'Satamavahvistus'); return false;\" />";
-
-          echo t("Näytä lähtöilmoitus");
-          echo "</button></div>";
-
-          if ($tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
-
-            $parametrit = laskutusraportti_parametrit($tilaus['konttiviite']);
-            $parametrit = serialize($parametrit);
-            $parametrit = base64_encode($parametrit);
-
-            echo "
-            <div style='text-align:center'>
-            <form method='post' id='nayta_laskutusraportti{$id}'>
-            <input type='hidden' name='parametrit' value='{$parametrit}' />
-            <input type='hidden' name='task' value='nayta_laskutusraportti' />
-            <input type='hidden' name='session' value='{$session}' />
-            <input type='hidden' name='logo_url' value='{$logo_url}' />
-            <input type='hidden' name='tee' value='XXX' />
-            </form>
-            <button onClick=\"js_openFormInNewWindow('nayta_laskutusraportti{$id}',
-             'Satamavahvistus'); return false;\" />";
-
-            echo t("Laskutusraportti");
-            echo "</button></div>";
-          }
-
-          echo "</div>";
-        }
-
-        echo "</td>";
-        $kasitellyt_konttivitteet[] = $tilaus['konttiviite'];
-      }
 
       echo "</tr>";
     }

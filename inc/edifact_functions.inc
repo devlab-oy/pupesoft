@@ -2795,13 +2795,14 @@ function pdf_logo($logo_url, $sessio) {
       'method'=>"POST",
       'header'=>"Accept-language: en\r\n" .
                 "Cookie: pupesoft_session={$sessio}\r\n"
-    )
+    ),
+    'ssl' => array( 'SNI_enabled' => true)
   );
 
   $context = stream_context_create($opts);
-  //$string = file_get_contents($logo_url, false, $context);
+  $string = file_get_contents($logo_url, false, $context);
 
-  $string = curl_get_contents($logo_url, $sessio);
+  //$string = curl_get_contents($logo_url, $sessio);
 
   $image = imagecreatefromstring($string);
   $file = "/tmp/".md5(uniqid(rand(),true)).".png";

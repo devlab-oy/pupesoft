@@ -32,7 +32,7 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
             ss.hyllyalue,
             ss.hyllynro,
             concat(ss.hyllyalue, '-', ss.hyllynro) AS paikka,
-            concat(la.asiakkaan_tilausnumero, ss.hyllyalue, '-', ss.hyllynro) AS group_class,
+            concat(la.asiakkaan_tilausnumero,trlt.asiakkaan_rivinumero,ss.hyllyalue,ss.hyllynro) AS group_class,
             la.asiakkaan_tilausnumero
             FROM lasku AS la
             JOIN tilausrivi AS tr
@@ -44,7 +44,7 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
             WHERE la.yhtio = '{$kukarow['yhtio']}'
             AND la.tunnus IN ({$laskujen_tunnukset})
             AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu' OR ss.lisatieto = 'Toimitettu' OR ss.lisatieto = 'Siirretty')
-            ORDER BY asiakkaan_tilausnumero, paikka";
+            ORDER BY group_class";
   $result = pupe_query($query);
 
   $kontit = array();
@@ -2824,7 +2824,7 @@ function curl_get_contents($url, $sessio) {
 
     curl_setopt($ch, CURLOPT_SSLVERSION, 3); // OpenSSL issue
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);  // Wildcard certificate
-    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
     curl_setopt($ch, CURLOPT_COOKIE, "pupesoft_session=$sessio");
     curl_setopt($ch, CURLOPT_HEADER, 0);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

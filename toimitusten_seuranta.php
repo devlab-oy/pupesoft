@@ -563,9 +563,9 @@ if (!isset($task)) {
     echo "<th class='back'></th>";
     echo "</tr>";
 
-    $vahvistetut_kontit = array();
-
     foreach ($tilaukset as $key => $tilaus) {
+
+      $vahvistetut_kontit = array();
 
       if ($tilaus['kontti_vahvistettu'] > 0) {
         $vahvistetut_kontit[] = $tilaus['konttinumero'];

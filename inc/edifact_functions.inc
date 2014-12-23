@@ -2821,6 +2821,10 @@ function pdf_logo($logo_url, $sessio) {
 function curl_get_contents($url, $sessio) {
     $ch = curl_init();
 
+
+    curl_setopt($ch, CURLOPT_SSLVERSION, 3); // OpenSSL issue
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);  // Wildcard certificate
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
     curl_setopt($ch, CURLOPT_COOKIE, "pupesoft_session=$sessio");
     curl_setopt($ch, CURLOPT_HEADER, 0);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

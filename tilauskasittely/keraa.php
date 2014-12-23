@@ -658,6 +658,7 @@ if ($tee == 'P') {
                 $keratty    = "'$who'";
                 $kerattyaik = "now()";
                 $rkomm      = $tilrivirow["kommentti"];
+                $rperheid   = $tilrivirow["perheid"];
               }
             }
             elseif ($tilrivirow["var"] == 'J' and $maara[$apui] > 0) {
@@ -700,6 +701,12 @@ if ($tee == 'P') {
                 $keratty    = "''";
                 $kerattyaik = "''";
                 $rkomm      = $tilrivirow["kommentti"];
+                if ($yhtiorow["kerasyerat"] == "" and $tilrivirow["perheid"] != 0) {
+                  $rperheid  = 0;
+                }
+                else {
+                  $rperheid  = $tilrivirow['perheid'];
+                }
               }
             }
             elseif (($tilrivirow["var"] == 'J' or $tilrivirow["var"] == 'P') and $maara[$apui] == 0 and $poikkeama_kasittely[$apui] == "MI") {
@@ -737,6 +744,7 @@ if ($tee == 'P') {
                 $keratty  = "''";
                 $kerattyaik  = "''";
                 $rkomm     = $tilrivirow["kommentti"];
+                $rperheid  = $tilrivirow["peheid"];
               }
 
               if ($otsikkorivi['clearing'] == 'JT-TILAUS') {
@@ -762,6 +770,12 @@ if ($tee == 'P') {
                 $keratty  = "''";
                 $kerattyaik  = "''";
                 $rkomm     = $tilrivirow["kommentti"];
+                if ($yhtiorow["kerasyerat"] == "" and $tilrivirow["perheid"] != 0) {
+                  $rperheid  = 0;
+                }
+                else {
+                  $rperheid  = $tilrivirow['perheid'];
+                } 
               }
 
               // Etsit‰‰n sopiva otsikko jolle rivi laitetaan
@@ -829,6 +843,18 @@ if ($tee == 'P') {
                 // Laitetaan t‰lle otsikolle, voi menn‰ solmuun, mutta ei katoa ainakaan kokonaan
                 $rotunnus = $tilrivirow['otunnus'];
               }
+              if ($otsikkorivi['clearing'] == 'JT-TILAUS' and $yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] == 0) {
+                $query1 = "SELECT tunnus FROM tilausrivi 
+                            WHERE tilausrivi.yhtio    = '$tilrivirow[yhtio]'
+                            AND tilausrivi.tunnus     = '$tilrivirow[tunnus]'";
+                $prresult = pupe_query($query1);
+
+                if (mysql_num_rows($prresult) == 1) {  
+                  $perheup  = "UPDATE tilausrivi SET perheid = 0 yhtio = '$tilrivirow[yhtio]' AND '$tilrivirow[tunnus]'";
+                  $perheup  = pupe_query($perheup);
+                }
+  
+              }
             }
             elseif ($tilrivirow["var"] != 'J' and $tilrivirow["var"] != 'P') {
               // Jos t‰m‰ on normaali rivi
@@ -868,6 +894,7 @@ if ($tee == 'P') {
                   $keratty  = "''";
                   $kerattyaik  = "''";
                   $rkomm     = $tilrivirow['kommentti'];
+                  $rperheid  = $tilrivirow['perheid'];
                 }
               }
               else {
@@ -888,6 +915,12 @@ if ($tee == 'P') {
                 $rvar    = "P";
                 $keratty  = "'$who'";
                 $kerattyaik  = "now()";
+                if ($yhtiorow["kerasyerat"] == "" and $tilrivirow["perheid"] != 0) {
+                  $rperheid  = 0;
+                }
+                else {
+                  $rperheid  = $tilrivirow['perheid'];
+                } 
 
                 $puurivires = t_avainsana("PUUTEKOMM");
 
@@ -920,6 +953,12 @@ if ($tee == 'P') {
                 $keratty  = "''";
                 $kerattyaik  = "''";
                 $rkomm     = $tilrivirow["kommentti"];
+                if ($yhtiorow["kerasyerat"] == "" and $tilrivirow["perheid"] != 0) {
+                  $rperheid  = 0;
+                }
+                else {
+                  $rperheid  = $tilrivirow['perheid'];
+                }
               }
               elseif ($poikkeama_kasittely[$apui] == "MI") {
 
@@ -939,6 +978,7 @@ if ($tee == 'P') {
                 $keratty  = "''";
                 $kerattyaik  = "''";
                 $rkomm     = $tilrivirow["kommentti"];
+                $rperheid   = $tilrivirow["perheid"];
               }
               elseif ($poikkeama_kasittely[$apui] == "UT") {
                 // Riville tehd‰‰n osatoimitus ja loput siirret‰‰n ihan uudelle tilaukselle
@@ -1043,6 +1083,7 @@ if ($tee == 'P') {
                 $keratty  = "''";
                 $kerattyaik  = "''";
                 $rkomm     = $tilrivirow["kommentti"];
+                $rperheid   = $tilrivirow["perheid"];
               }
             }
 
@@ -1086,7 +1127,7 @@ if ($tee == 'P') {
                          var             = '$rvar',
                          try             = '$tilrivirow[try]',
                          osasto          = '$tilrivirow[osasto]',
-                         perheid         = '$tilrivirow[perheid]',
+                         perheid         = '$rperheid',
                          perheid2        = '$tilrivirow[perheid2]',
                          nimitys         = '$tilrivirow[nimitys]',
                          jaksotettu      = '$tilrivirow[jaksotettu]'";

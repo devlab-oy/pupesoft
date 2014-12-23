@@ -2037,6 +2037,10 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
             AND laskun_lisatiedot.konttiviite = '{$konttiviite}'";
   $result = pupe_query($query);
 
+  if (mysql_num_rows($result) == 0) {
+    return false;
+  }
+
   $kontit = array();
 
   while ($rulla = mysql_fetch_assoc($result)) {

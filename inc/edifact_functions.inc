@@ -95,6 +95,8 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
 
 function laheta_sanoma($sanoma){
 
+  return true;
+
   if ($sanoma == '') {
     return false;
   }
@@ -1742,7 +1744,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
         'tuoteno' => $tuoteno,
         'juoksu' => $juoksu,
         'sarjanumero' => $sarjanumero,
-        'matkakoodi' => $_matkakoodi
+        'matkakoodi' => $_matkakoodi,
         'tilausnro' => $_tilausnro,
         'rivinro' => $_rivi,
         'tilauksen_paino' => $_paino

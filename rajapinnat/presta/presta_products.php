@@ -36,6 +36,7 @@ class PrestaProducts extends PrestaClient {
     $xml->product->reference = $product['tuoteno'];
     $xml->product->supplier_reference = $product['tuoteno'];
     $xml->product->price = $product['myyntihinta'];
+    $xml->product->available_for_order = 1;
 
     $link_rewrite = $this->saniteze_link_rewrite($product['nimi']);
     $xml->product->link_rewrite->language[0] = $link_rewrite;

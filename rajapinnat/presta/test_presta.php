@@ -16,6 +16,7 @@ require_once "rajapinnat/presta/presta_sales_orders.php";
 require_once 'rajapinnat/presta/presta_product_stocks.php';
 require_once 'rajapinnat/presta/presta_shops.php';
 require_once 'rajapinnat/presta/presta_specific_prices.php';
+require_once 'rajapinnat/presta/presta_addresses.php';
 
 if (!isset($action)) {
   $action = '';
@@ -30,13 +31,13 @@ $request = array(
 );
 
 $request['synkronointi_tyypit'] = array(
-    'kaikki'         => t('Kaikki'),
-    'kategoriat'     => t('Kategoriat'),
-    'tuotteet'       => t('Tuotteet ja tuotekuvat'),
-    'asiakasryhmat'  => t('Asiakasryhmät'),
-    'asiakkaat'      => t('Asiakkaat'),
+    'kaikki'        => t('Kaikki'),
+    'kategoriat'    => t('Kategoriat'),
+    'tuotteet'      => t('Tuotteet ja tuotekuvat'),
+    'asiakasryhmat' => t('Asiakasryhmät'),
+    'asiakkaat'     => t('Asiakkaat'),
     'asiakashinnat' => t('Asiakashinnat'),
-    'tilaukset'      => t('Tilauksien haku'),
+    'tilaukset'     => t('Tilauksien haku'),
 );
 
 if ($request['action'] == 'sync') {
@@ -86,7 +87,7 @@ if ($request['action'] == 'sync') {
     $presta_prices = new PrestaSpecificPrices($presta_url, $presta_api_key);
     $presta_prices->sync_prices($hinnat);
   }
-die();
+  die();
   if ($ok and in_array('tilaukset', $synkronoi)) {
     $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key);
     $presta_orders->transfer_orders_to_pupesoft();
@@ -144,6 +145,8 @@ function hae_asiakkaat1() {
 
   $asiakkaat = array();
   while ($asiakas = mysql_fetch_assoc($result)) {
+    $asiakas['etunimi'] = '-';
+    $asiakas['sukunimi'] = preg_replace('/[^a-zA-Z]/', '', $asiakas['nimi']);
     $asiakkaat[] = $asiakas;
   }
 

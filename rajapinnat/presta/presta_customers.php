@@ -1,6 +1,7 @@
 <?php
 
 require_once 'rajapinnat/presta/presta_client.php';
+require_once 'rajapinnat/presta/presta_addresses.php';
 
 class PrestaCustomers extends PrestaClient {
 
@@ -27,15 +28,15 @@ class PrestaCustomers extends PrestaClient {
       $xml = $existing_customer;
     }
 
-    $xml->customer->firstname = '-';
-
-    $name = preg_replace('/[^a-zA-Z]/', '', $customer['nimi']);
-    $xml->customer->lastname = $name;
-    $email = 'test@example.com';
-    if (!empty($customer['email'])) {
-      $email = $customer['email'];
+    $xml->customer->firstname = $customer['etunimi'];
+    $xml->customer->lastname = $customer['sukunimi'];
+    //Email is mandatory
+    $xml->customer->email = $customer['email'];
+    if (empty($customer['email'])) {
+      $xml->customer->email = 'test@example.com';
     }
-    $xml->customer->email = $email;
+
+    $xml->customer->active = 1;
 
     if (!empty($customer['presta_customergroup_id'])) {
       $xml->customer->id_default_group = $customer['presta_customergroup_id'];
@@ -55,13 +56,20 @@ class PrestaCustomers extends PrestaClient {
 
       foreach ($customers as $customer) {
         try {
+          $presta_address = new PrestaAddresses($this->get_url(), $this->get_api_key());
           if (in_array($customer['ulkoinen_asiakasnumero'], $existing_customers)) {
             $id = $customer['ulkoinen_asiakasnumero'];
             $this->update($id, $customer);
+
+            $customer['presta_customer_id'] = $id;
+            $presta_address->update_with_customer_id($customer);
           }
           else {
             $response = $this->create($customer);
             $id = (string) $response['customer']['id'];
+
+            $customer['presta_customer_id'] = $id;
+            $presta_address->create($customer);
           }
 
           $this->update_to_pupesoft($id, $customer['tunnus'], $customer['yhtio']);

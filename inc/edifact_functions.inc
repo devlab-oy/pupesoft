@@ -1669,6 +1669,13 @@ function kasittele_rahtikirjasanoma($edi_data) {
           $tilaus_info_osat = explode(":", $tilaus_info);
           $_tilausnro = $tilaus_info_osat[1];
           $_rivi = $tilaus_info_osat[2];
+        }
+
+        if (substr($edi_data[$luetaan], 0, 7) == "RFF+VON") {
+          $osat = explode("+", $edi_data[$luetaan]);
+          $matka_info = $osat[1];
+          $matka_info_osat = explode(":", $matka_info);
+          $_matkakoodi = $matka_info_osat[1];
           $valmis = true;
         }
 
@@ -1735,6 +1742,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
         'tuoteno' => $tuoteno,
         'juoksu' => $juoksu,
         'sarjanumero' => $sarjanumero,
+        'matkakoodi' => $_matkakoodi
         'tilausnro' => $_tilausnro,
         'rivinro' => $_rivi,
         'tilauksen_paino' => $_paino
@@ -1882,47 +1890,61 @@ function kasittele_rahtikirjasanoma($edi_data) {
       pupe_query($query);
 
       // katsotaan onko tilauksesta luotu jo myyntitilaus
-      $query = "SELECT *
+      $query = "SELECT lasku.*, laskun_lisatiedot.matkakoodi, laskun_lisatiedot.konttiviite
                 FROM lasku
+                JOIN laskun_lisatiedot
+                  ON laskun_lisatiedot.yhtio = lasku.yhtio
+                  AND laskun_lisatiedot.otunnus = lasku.tunnus
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND asiakkaan_tilausnumero = '{$rulla['tilausnro']}'
                 AND tilaustyyppi = 'N'";
       $result = pupe_query($query);
 
-      if (mysql_num_rows($result) != 0) {
+      $laskurow = false;
 
-       $laskurow = mysql_fetch_assoc($result);
-       $kukarow['kesken'] = $laskurow['tunnus'];
-       $var = 'P';
-       require "tilauskasittely/lisaarivi.inc";
+      if (mysql_num_rows($result) > 0) {
+        while($tilaus = mysql_fetch_assoc($result)) {
 
-       $update_query = "UPDATE lasku SET
-                        tila = 'N',
-                        alatila = ''
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tunnus = '{$laskurow['tunnus']}'";
-       pupe_query($update_query);
+          if ($tilaus['matkakoodi'] == $rulla['matkakoodi']) {
+            $laskurow = $tilaus;
+            break;
+          }
+        }
+      }
 
-       $update_query = "UPDATE tilausrivin_lisatiedot SET
-                        juoksu = '{$rulla['juoksu']}',
-                        tilauksen_paino = '{$rulla['tilauksen_paino']}',
-                        asiakkaan_tilausnumero = '{$rulla['tilausnro']}',
-                        asiakkaan_rivinumero = '{$rulla['rivinro']}'
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tilausrivitunnus = '{$lisatty_tun}'";
-       pupe_query($update_query);
+      if ($laskurow) {
 
-       $update_query = "UPDATE tilausrivi
-                        SET var2 = 'OK'
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND tunnus = '{$lisatty_tun}'";
-       pupe_query($update_query);
+        $kukarow['kesken'] = $laskurow['tunnus'];
+        $var = 'P';
+        require "tilauskasittely/lisaarivi.inc";
 
-       $update_query = "UPDATE sarjanumeroseuranta
-                        SET myyntirivitunnus = '{$lisatty_tun}'
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND sarjanumero = '{$rulla['sarjanumero']}'";
-       pupe_query($update_query);
+        $update_query = "UPDATE lasku SET
+                         tila = 'N',
+                         alatila = ''
+                         WHERE yhtio = '{$kukarow['yhtio']}'
+                         AND tunnus = '{$laskurow['tunnus']}'";
+        pupe_query($update_query);
+
+        $update_query = "UPDATE tilausrivin_lisatiedot SET
+                         juoksu = '{$rulla['juoksu']}',
+                         tilauksen_paino = '{$rulla['tilauksen_paino']}',
+                         asiakkaan_tilausnumero = '{$rulla['tilausnro']}',
+                         asiakkaan_rivinumero = '{$rulla['rivinro']}'
+                         WHERE yhtio = '{$kukarow['yhtio']}'
+                         AND tilausrivitunnus = '{$lisatty_tun}'";
+        pupe_query($update_query);
+
+        $update_query = "UPDATE tilausrivi
+                         SET var2 = 'OK'
+                         WHERE yhtio = '{$kukarow['yhtio']}'
+                         AND tunnus = '{$lisatty_tun}'";
+        pupe_query($update_query);
+
+        $update_query = "UPDATE sarjanumeroseuranta
+                         SET myyntirivitunnus = '{$lisatty_tun}'
+                         WHERE yhtio = '{$kukarow['yhtio']}'
+                         AND sarjanumero = '{$rulla['sarjanumero']}'";
+        pupe_query($update_query);
 
       }
     }
@@ -2214,27 +2236,20 @@ function paivita_tilausrivit_ja_sarjanumeroseuranta($ostorivitunnus, $hylly, $va
 function hae_rullat($rahtikirja_id) {
   global $kukarow;
 
-  $query = "SELECT
-            ss.sarjanumero,
-            tr.uusiotunnus,
-            tr.tunnus,
-            tr.otunnus,
-            ss.hyllyalue AS alue,
+  $query = "SELECT ss.hyllyalue AS alue,
             ss.hyllynro AS nro,
             ss.hyllyvali AS vali,
             ss.hyllytaso AS taso,
-            ss.massa AS paino,
-            trlt.asiakkaan_tilausnumero AS tno
+            SUM(ss.massa) AS paino,
+            COUNT(tr.tunnus) AS rullia,
+            COUNT(IF(tr.uusiotunnus = 0, 1, 0)) AS varastossa,
+            trlt.asiakkaan_tilausnumero AS tno,
+            trlt.asiakkaan_rivinumero AS rno
             FROM tilausrivi AS tr
-            JOIN tilausrivin_lisatiedot AS trlt
-              ON trlt.yhtio = tr.yhtio
-              AND trlt.tilausrivitunnus = tr.tunnus
-            JOIN sarjanumeroseuranta AS ss
-              ON ss.yhtio = tr.yhtio
-              AND ss.ostorivitunnus = tr.tunnus
-            WHERE tr.yhtio = '{$kukarow['yhtio']}'
-            AND tr.tyyppi = 'O'
-            AND trlt.rahtikirja_id = '{$rahtikirja_id}'";
+            JOIN tilausrivin_lisatiedot AS trlt ON trlt.yhtio = tr.yhtio AND trlt.tilausrivitunnus = tr.tunnus
+            JOIN sarjanumeroseuranta AS ss ON ss.yhtio = tr.yhtio AND ss.ostorivitunnus = tr.tunnus
+            WHERE tr.yhtio = 'rplog' AND tr.tyyppi = 'O' AND trlt.rahtikirja_id = '5108522'
+            GROUP BY tno, rno, alue, nro";
   $result = pupe_query($query);
 
   $viematta = 0;
@@ -2246,7 +2261,7 @@ function hae_rullat($rahtikirja_id) {
     }
     $laskutunnus = $rulla['otunnus'];
   }
-
+/*
   if ($viematta == 0) {
     $query = "UPDATE lasku
               SET alatila = 'X'
@@ -2254,6 +2269,7 @@ function hae_rullat($rahtikirja_id) {
               AND tunnus  = '{$laskutunnus}'";
     pupe_query($query);
   }
+*/
 
 return $rullat;
 }

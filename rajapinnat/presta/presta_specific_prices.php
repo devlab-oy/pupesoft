@@ -84,6 +84,8 @@ class PrestaSpecificPrices extends PrestaClient {
       $presta_product = new PrestaProducts($this->get_url(), $this->get_api_key());
       $this->product_ids = $presta_product->all_skus();
 
+      $this->delete_all();
+
       foreach ($prices as $price) {
         //In pupesoft tuoteno is not mandatory but in presta it is.
         if (empty($price['tuoteno'])) {

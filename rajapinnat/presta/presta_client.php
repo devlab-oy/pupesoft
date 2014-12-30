@@ -46,12 +46,8 @@ abstract class PrestaClient {
    */
   protected function get_empty_schema() {
     $resource = $this->resource_name();
-//    $opt = array(
-//        'resource' => "{$resource}?schema=blank"
-//    );
-
     $opt = array(
-        'url' => 'https://demo.devlab.fi/prestashop/prestashop/webservice/dispatcher.php?url=customers&schema=blank',
+        'resource' => "{$resource}?schema=blank"
     );
 
     try {

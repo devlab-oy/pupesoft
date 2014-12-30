@@ -128,13 +128,13 @@ class PrestaShopWebservice
 				$curl_options[$defkey] = $curl_params[$defkey];
 
 		curl_setopt_array($session, $curl_options);
-        
+
         //@TODO HUOM TÄTÄ KOHTAA ON KANS MUOKATTU. ALKU
         if (stristr($this->url, 'https')) {
           curl_setopt($session, CURLOPT_SSL_VERIFYPEER, false);
         }
         //@TODO HUOM TÄTÄ KOHTAA ON KANS MUOKATTU. LOPPU
-        
+
 		$response = curl_exec($session);
 
 		$index = strpos($response, "\r\n\r\n");
@@ -246,13 +246,7 @@ class PrestaShopWebservice
 		$request = self::executeRequest($url, array(CURLOPT_CUSTOMREQUEST => 'POST', CURLOPT_POSTFIELDS => $xml));
 
     //TÄMÄ BLOKKI ON ITSE MUOKATTU
-    $message = '';
-    if (!empty($request['response'])) {
-      $response_xml = self::parseXML($request['response']);
-      if (isset($response_xml->errors->error->message)) {
-        $message = (string) $response_xml->errors->error->message;
-      }
-    }
+    $message = $this->human_readable_error($request['response']);
     //TÄMÄ BLOKKI ON ITSE MUOKATTU
 		self::checkStatusCode($request['status_code'], $message);
 		return self::parseXML($request['response']);
@@ -310,7 +304,8 @@ class PrestaShopWebservice
 
 		$request = self::executeRequest($url, array(CURLOPT_CUSTOMREQUEST => 'GET'));
 
-		self::checkStatusCode($request['status_code']);// check the response validity
+    $message = $this->human_readable_error($request['response']);
+		self::checkStatusCode($request['status_code'], $message);
 		return self::parseXML($request['response']);
 	}
 
@@ -342,7 +337,8 @@ class PrestaShopWebservice
 		else
 			throw new PrestaShopWebserviceException('Bad parameters given');
 		$request = self::executeRequest($url, array(CURLOPT_CUSTOMREQUEST => 'HEAD', CURLOPT_NOBODY => true));
-		self::checkStatusCode($request['status_code']);// check the response validity
+    $message = $this->human_readable_error($request['response']);
+		self::checkStatusCode($request['status_code'], $message);// check the response validity
 		return $request['header'];
 	}
 	/**
@@ -372,7 +368,11 @@ class PrestaShopWebservice
 			throw new PrestaShopWebserviceException('Bad parameters given');
 
 		$request = self::executeRequest($url,  array(CURLOPT_CUSTOMREQUEST => 'PUT', CURLOPT_POSTFIELDS => $xml));
-		self::checkStatusCode($request['status_code']);// check the response validity
+
+    //@TODO HUOM TÄTÄ KOHTAA ON KANS MUOKATTU. START
+    $message = $this->human_readable_error($request['response']);
+		self::checkStatusCode($request['status_code'], $message);// check the response validity
+    //@TODO HUOM TÄTÄ KOHTAA ON KANS MUOKATTU. END
 		return self::parseXML($request['response']);
 	}
 
@@ -413,7 +413,8 @@ class PrestaShopWebservice
 		if (isset($options['id_group_shop']))
 			$url .= '&id_group_shop='.$options['id_group_shop'];
 		$request = self::executeRequest($url, array(CURLOPT_CUSTOMREQUEST => 'DELETE'));
-		self::checkStatusCode($request['status_code']);// check the response validity
+    $message = $this->human_readable_error($request['response']);
+		self::checkStatusCode($request['status_code'], $message);// check the response validity
 		return true;
 	}
 
@@ -458,13 +459,13 @@ class PrestaShopWebservice
     curl_setopt($ch, CURLOPT_USERPWD, $this->key . ':');
     curl_setopt($ch, CURLOPT_POSTFIELDS, $imagedata);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    
+
     //@TODO HUOM TÄTÄ KOHTAA ON KANS MUOKATTU. ALKU
     if (stristr($this->url, 'https')) {
       curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     }
     //@TODO HUOM TÄTÄ KOHTAA ON KANS MUOKATTU. LOPPU
-        
+
     $response = curl_exec($ch);
 
     $index = strpos($response, "\r\n\r\n");
@@ -485,8 +486,23 @@ class PrestaShopWebservice
 
     unlink($filepath);
 
-    self::checkStatusCode($status_code);
+    $message = $this->human_readable_error($body);
+    self::checkStatusCode($status_code, $message);
     return array('status_code' => $status_code, 'response' => $body, 'header' => $header);
+  }
+
+  private function human_readable_error($response_xml_string) {
+    $message = '';
+    if (empty($response_xml_string)) {
+      return $message;
+    }
+
+    $response_xml = self::parseXML($response_xml_string);
+    if (isset($response_xml->errors->error->message)) {
+      $message = (string) $response_xml->errors->error->message;
+    }
+
+    return $message;
   }
 
 

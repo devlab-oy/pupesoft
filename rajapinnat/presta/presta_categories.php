@@ -133,7 +133,7 @@ class PrestaCategories extends PrestaClient {
     $this->categories = $categories;
 
     if (empty($this->root)) {
-      throw new RuntimeException('Preta root element id:tä ei ole setattu');
+      throw new RuntimeException('Presta root element id:tä ei ole setattu');
     }
 
     try {
@@ -259,7 +259,6 @@ class PrestaCategories extends PrestaClient {
       }
     }
 
-    $this->logger->log('Kaikki kategoriat poistettu');
     $this->logger->log('---------End category delete all---------');
   }
 }

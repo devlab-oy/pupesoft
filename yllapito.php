@@ -1736,7 +1736,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   $result = pupe_query($query);
   $trow = mysql_fetch_array($result);
 
-  echo "<table><tr><td class='back top' style='padding: 0px;'>";
+  echo "<table><tr><td class='back pnopad ptop'>";
 
   echo "<table>";
 
@@ -2015,7 +2015,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   }
 
   echo "</td>";
-  echo "<td class='back top'>";
+  echo "<td class='back pnopad ptop'>";
 
   if ($errori == '' and $toim == "sarjanumeron_lisatiedot") {
     @include "inc/arviokortti.inc";

@@ -442,8 +442,6 @@ if (isset($task) and $task == 'laheta_satamavahvistus') {
 
 if (!isset($task)) {
 
-  $konttiviite_kasitelty = array();
-
   echo "<font class='head'>".t("Toimitusten seuranta")."</font><hr><br>";
 
   if (!isset($rajaus)) {
@@ -524,7 +522,6 @@ if (!isset($task)) {
             LEFT JOIN tilausrivi
               ON tilausrivi.yhtio = lasku.yhtio
               AND tilausrivi.otunnus = lasku.tunnus
-              AND tilausrivi.tyyppi = 'L'
             LEFT JOIN tilausrivin_lisatiedot AS trlt
               ON trlt.yhtio = lasku.yhtio
               AND trlt.tilausrivitunnus = tilausrivi.tunnus
@@ -579,7 +576,7 @@ if (!isset($task)) {
 
       $id = md5($tilaus['konttiviite']);
 
-      if (in_array($tilaus['konttiviite'], $kasitellyt_konttivitteet)) {
+      if (in_array($tilaus['konttiviite'], $kasitellyt_konttiviitteet)) {
         $konttiviite_kasitelty = true;
       }
       else{
@@ -642,7 +639,7 @@ if (!isset($task)) {
         echo "</form></div>";
         echo "</td>";
 
-        $kasitellyt_konttivitteet[] = $tilaus['konttiviite'];
+        $kasitellyt_konttiviitteet[] = $tilaus['konttiviite'];
       }
 
       if (!$konttiviite_kasitelty) {
@@ -709,7 +706,6 @@ if (!isset($task)) {
 
         $rahtikirjat = array_count_values($rahtikirjat);
         $rahtikirjat = count($rahtikirjat);
-
 
         if ($rahtikirjat > 0) {
           $tapahtumat .= "&bull; <a href='saapuva_rahti.php?tnum={$tilaus['asiakkaan_tilausnumero']}'>" . $rahtikirjat ." kpl rahtikirjasanomia</a> haettu<br>";
@@ -1048,12 +1044,10 @@ if (!isset($task)) {
             }
 
             echo "</td>";
-            $kasitellyt_konttivitteet[] = $tilaus['konttiviite'];
+            $kasitellyt_konttiviitteet[] = $tilaus['konttiviite'];
           }
 
         }
-
-
 
       echo "</tr>";
     }
@@ -1064,7 +1058,6 @@ if (!isset($task)) {
     echo "Ei tilauksia...";
   }
 }
-
 
 echo "<script type='text/javascript'>
 

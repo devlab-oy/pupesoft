@@ -472,7 +472,64 @@ function lahtoilmoitus_parametrit($konttiviite) {
   $parametrit['lahtopaiva'] = $lahtopaiva;
 
   return $parametrit;
+}
 
+function konttierittely_parametrit($konttiviite) {
+  global $kukarow;
+
+  $query = "SELECT
+            tilausrivin_lisatiedot.konttinumero,
+            tilausrivin_lisatiedot.kontin_mrn,
+            tilausrivin_lisatiedot.sinettinumero,
+            tilausrivin_lisatiedot.asiakkaan_tilausnumero,
+            tilausrivin_lisatiedot.asiakkaan_rivinumero,
+            count(tilausrivi.tunnus) AS rullia,
+            sum(sarjanumeroseuranta.massa) AS paino
+            FROM lasku
+            JOIN tilausrivi
+              ON tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+            JOIN tilausrivin_lisatiedot
+              ON tilausrivin_lisatiedot.yhtio = lasku.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+            JOIN laskun_lisatiedot
+              ON laskun_lisatiedot.yhtio = lasku.yhtio
+              AND laskun_lisatiedot.otunnus = lasku.tunnus
+            JOIN sarjanumeroseuranta
+              ON sarjanumeroseuranta.yhtio = lasku.yhtio
+              AND sarjanumeroseuranta.myyntirivitunnus = tilausrivi.tunnus
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
+            GROUP BY konttinumero, asiakkaan_tilausnumero, asiakkaan_rivinumero";
+  $result = pupe_query($query);
+
+  $kontit = array();
+  $total_paino = 0;
+  $total_rullat = 0;
+
+  while ($rivi = mysql_fetch_assoc($result)) {
+
+    //$kontit[$rivi['konttinumero']][$rivi['asiakkaan_tilausnumero']][$rivi['asiakkaan_rivinumero']] = $rivi;
+
+    $total_paino += $rivi['paino'];
+    $total_rullat += $rivi['rullia'];
+
+    $kontit[$rivi['konttinumero']]['paino'] += $rivi['paino'];
+    $kontit[$rivi['konttinumero']]['rullia'] += $rivi['rullia'];
+
+    $kontit[$rivi['konttinumero']][$rivi['asiakkaan_tilausnumero']]['paino'] += $rivi['paino'];
+    $kontit[$rivi['konttinumero']][$rivi['asiakkaan_tilausnumero']]['rullia'] += $rivi['rullia'];
+
+    $kontit[$rivi['konttinumero']][$rivi['asiakkaan_tilausnumero']][$rivi['asiakkaan_rivinumero']]['paino'] += $rivi['paino'];
+    $kontit[$rivi['konttinumero']][$rivi['asiakkaan_tilausnumero']][$rivi['asiakkaan_rivinumero']]['rullia'] += $rivi['rullia'];
+  }
+
+
+  $parametrit['kontit'] = $kontit;
+  $parametrit['konttiviite'] = $konttiviite;
+  $parametrit['total_paino'] = $total_paino;
+  $parametrit['total_rullat'] = $total_rullat;
+  return $parametrit;
 }
 
 function satamavahvistus_parametrit($konttiviite) {
@@ -2480,6 +2537,131 @@ function pakkalista_pdf($pdf_data) {
 
   return $pdffilenimi;
 
+}
+
+function konttierittely_pdf($pdf_data) {
+
+  extract($pdf_data);
+
+  //PDF:n luonti ja defaultit
+  require_once("pdflib/phppdflib.class.php");
+
+  //PDF parametrit
+  $pdf = new pdffile;
+  $pdf->set_default('margin-top',   0);
+  $pdf->set_default('margin-bottom',   0);
+  $pdf->set_default('margin-left',   0);
+  $pdf->set_default('margin-right',   0);
+
+  //fontit
+  $pieni["height"] = 11;
+  $pieni["font"] = "Times-Roman";
+
+  $bold["height"] = 11;
+  $bold["font"] = "Times-Bold";
+
+  // sitten aletaan piirtämään itse PDF sisältöä
+  $sivu = $pdf->new_page("a4");
+
+  $sivunro = 1;
+  // lasketaan sivumäärä
+  $riveja = count($pakkalista) + 4;
+  $sivuja = ceil($riveja / 49);
+
+  $image = $pdf->png_embed($logodata);
+  $logoparam['scale'] = $pdf_data['scale'];
+  $pdf->image_place($image, 780, 420, $sivu, $logoparam);
+
+  $x = 40;
+  $y = 800;
+
+  $xx = array(20,580);
+
+  $pdf->draw_text($x, $y, "Konttierittely", $sivu, $bold);
+  $y -= 20;
+  $pdf->draw_text($x, $y, 'Konttiviite:', $sivu, $bold);
+  $pdf->draw_text($x+100, $y, $konttiviite, $sivu, $bold);
+  $y -= 15;
+  $pdf->draw_text($x, $y, 'Kokonaispaino', $sivu, $bold);
+  $pdf->draw_text($x+100, $y, $total_paino." kg", $sivu, $bold);
+  $y -= 15;
+  $pdf->draw_text($x, $y, 'Rullia', $sivu, $bold);
+  $pdf->draw_text($x+100, $y, $total_rullat." kpl", $sivu, $bold);
+  $y -= 15;
+
+  $y -= 15;
+  $yy[0] = $yy[1] = $y;
+  $pdf->draw_line($xx, $yy, $sivu);
+  $y -= 20;
+
+  foreach ($kontit as $konttiviite => $tilaukset) {
+
+    $pdf->draw_text($x, $y, 'Kontti:', $sivu, $bold);
+    $pdf->draw_text($x+60, $y, $konttiviite, $sivu, $bold);
+    $pdf->draw_text($x+160, $y, $tilaukset['paino']. ' kg / '.$tilaukset['rullia']. ' kpl', $sivu, $bold);
+    $y -= 15;
+
+    unset($tilaukset['rullia']);
+    unset($tilaukset['paino']);
+
+    foreach ($tilaukset as $tilausnumero => $rivit) {
+
+      $pdf->draw_text($x, $y, 'Tilaus:', $sivu, $bold);
+      $pdf->draw_text($x+60, $y, $tilausnumero, $sivu, $bold);
+      $pdf->draw_text($x+160, $y, $rivit['paino']. ' kg / '.$rivit['rullia']. ' kpl', $sivu, $bold);
+      $y -= 15;
+
+      unset($rivit['rullia']);
+      unset($rivit['paino']);
+
+      foreach ($rivit as $rivinumero => $rivi) {
+
+        $pdf->draw_text($x, $y, 'Rivi:', $sivu, $bold);
+        $pdf->draw_text($x+60, $y, $rivinumero, $sivu, $bold);
+        $pdf->draw_text($x+160, $y, $rivi['paino']. ' kg / '.$rivi['rullia']. ' kpl', $sivu, $bold);
+        $y -= 15;
+
+      }
+    }
+
+    $y -= 15;
+    $yy[0] = $yy[1] = $y;
+    $pdf->draw_line($xx, $yy, $sivu);
+    $y -= 20;
+  }
+
+/*
+    if ($y < 20) {
+      $sivu = $pdf->new_page("a4");
+      $y = 800;
+
+      $sivunro++;
+
+      $pdf->draw_text($x, $y, "PAKKALISTA", $sivu, $bold);
+      $y -= 20;
+      $pdf->draw_text($x, $y, 'Konttinumero', $sivu, $bold);
+      $pdf->draw_text($x+100, $y, $konttinumero, $sivu, $bold);
+      $pdf->draw_text($x+500, $y, "sivu {$sivunro}/{$sivuja}", $sivu, $bold);
+      $y -= 15;
+      $yy[0] = $yy[1] = $y;
+      $pdf->draw_line($xx, $yy, $sivu);
+      $y -= 20;
+
+    }
+
+    $pdf->draw_text($x, $y, $rulla, $sivu, $bold);
+    $y -= 15;
+*/
+
+  //keksitään uudelle failille joku varmasti uniikki nimi:
+  $pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(),true)).".pdf";
+
+  //kirjoitetaan pdf faili levylle..
+  $fh = fopen($pdffilenimi, "w");
+  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
+  fclose($fh);
+
+  return $pdffilenimi;
 }
 
 function lahtoilmoitus_pdf($pdf_data) {

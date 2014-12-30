@@ -28,6 +28,13 @@ abstract class PrestaClient {
   protected $logger = null;
 
   public function __construct($url, $api_key) {
+    if (empty($url)) {
+      throw new Exception('Presta URL puuttuu');
+    }
+    if (empty($api_key)) {
+      throw new Exception('Presta API key puuttuu');
+    }
+
     $this->logger = new Logger('/tmp/presta_log.txt');
     $this->logger->set_date_format('Y-m-d H:i:s');
 

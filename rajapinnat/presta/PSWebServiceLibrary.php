@@ -486,8 +486,8 @@ class PrestaShopWebservice
 
     unlink($filepath);
 
-    $message = $this->human_readable_error($body);
-    self::checkStatusCode($status_code, $message);
+    //HUOM tässä kohtaa ei saa human_readable_erroria koska presta ws ei palauta xml:ää
+    self::checkStatusCode($status_code);
     return array('status_code' => $status_code, 'response' => $body, 'header' => $header);
   }
 

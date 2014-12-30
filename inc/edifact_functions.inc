@@ -95,8 +95,6 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
 
 function laheta_sanoma($sanoma){
 
-  return true;
-
   if ($sanoma == '') {
     return false;
   }
@@ -1897,9 +1895,9 @@ function kasittele_rahtikirjasanoma($edi_data) {
                 JOIN laskun_lisatiedot
                   ON laskun_lisatiedot.yhtio = lasku.yhtio
                   AND laskun_lisatiedot.otunnus = lasku.tunnus
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND asiakkaan_tilausnumero = '{$rulla['tilausnro']}'
-                AND tilaustyyppi = 'N'";
+                WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+                AND lasku.asiakkaan_tilausnumero = '{$rulla['tilausnro']}'
+                AND lasku.tilaustyyppi = 'N'";
       $result = pupe_query($query);
 
       $laskurow = false;

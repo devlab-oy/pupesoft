@@ -129,168 +129,172 @@ if ($view == 'syotto') {
 
 if ($view == 'tiedot') {
 
-  if ($tiedot['rullien_maara'] == 0) {
-    foreach ($tiedot['tilaukset'] as $tilausnumero => $tilaus_tiedot) {
-      $tiedot['rullien_maara'] += $tilaus_tiedot['rullien_maara_arvio'];
+  foreach ($tiedot['konttiviitteet'] as $konttiviite) {
+
+    if ($tiedot['rullien_maara'][$konttiviite] == 0) {
+
+      foreach ($tiedot['tilaukset'][$konttiviite] as $tilausnumero => $tilaus_tiedot) {
+        $tiedot[$konttiviite]['rullien_maara'] += $tilaus_tiedot['rullien_maara_arvio'];
+      }
+      $tiedot['rullien_paino'][$konttiviite] = 'Ei tietoa';
+
     }
-    $tiedot['rullien_paino'] = 'Ei tietoa';
   }
 
   echo "
     <div style='text-align:center; margin-top:30px;'>
     <a href='hae_tiedot.php' class='button'>", t("Uusi haku"), "</a></div>";
 
+  foreach ($tiedot['konttiviitteet'] as $konttiviite) {
 
-  echo "<div class='alue_0'>";
-  echo "<div class='alue alue_1'>";
-
-  echo "
-    <div style='overflow:auto; margin-bottom:25px;'>
-
-    <div style='float:left; width:226px; text-align:left;'>
-    Konttiviite<br>{$tiedot['konttiviite']}
-    </div>
-
-    <div style='float:left; width:226px; text-align:center;'>
-    Rullia: {$tiedot['rullien_maara']} kpl<br>
-    Paino: {$tiedot['rullien_paino']}
-    </div>
-
-    <div style='float:left; width:226px; text-align:right;'>
-    Lähtöaika<br>";
-
-    echo date("d.m.Y", strtotime($tiedot['menoaika']));
-
-  echo "
-    </div>
-    </div>";
-
-
-
-  foreach ($tiedot['tilaukset'] as $tilausnumero => $tilaus_tiedot) {
-
-    $haetun_vp = array();
-    $haetun_st = array();
-
-    if ($tilaus_tiedot['rullien_maara'] == 0) {
-      $rulla_kpl = $tilaus_tiedot['rullien_maara_arvio'] . ' kpl';
-      $paino = 'Ei painotietoa';
-    }
-    else {
-      $rulla_kpl = $tilaus_tiedot['rullien_maara'] . ' kpl';
-      $paino = $tilaus_tiedot['rullien_paino'] . ' kg';
-    }
+    echo "<div class='alue_0'>";
+    echo "<div class='alue alue_1'>";
 
     echo "
-      <div style='padding:10px 0; margin:4px 0;'class='tilaus_alue'>
-      <div style='overflow:auto;'>
-      <div style='float:left; width:226px; text-align:left; padding-left:10px;' >
-        {$tilausnumero}
+      <div style='overflow:auto; margin-bottom:25px;'>
+
+      <div style='float:left; width:226px; text-align:left;'>
+      Konttiviite<br>{$konttiviite}
       </div>
 
       <div style='float:left; width:226px; text-align:center;'>
-        {$rulla_kpl}
+      Rullia: {$tiedot['rullien_maara'][$konttiviite]} kpl<br>
+      Paino: {$tiedot['rullien_paino'][$konttiviite]} kg
       </div>
 
       <div style='float:left; width:226px; text-align:right;'>
-        {$paino}
+      Lähtöaika<br>";
+
+      echo date("d.m.Y", strtotime($tiedot['menoaika'][$konttiviite]));
+
+    echo "
       </div>
       </div>";
 
-    if (count($tiedot['rullat']) > 0) {
+    foreach ($tiedot['tilaukset'][$konttiviite] as $tilausnumero => $tilaus_tiedot) {
 
-      echo "<div style=' padding:10px; text-align:center'>";
+      $haetun_vp = array();
+      $haetun_st = array();
 
-      $statukset = array();
-      $varastopaikat = array();
-
-      foreach ($tiedot['rullat'] as $rulla) {
-        if ($rulla['asiakkaan_tilausnumero'] == $tilausnumero) {
-
-          if ($rulla['konttinumero'] != '') {
-
-            if ($rulla['sinettinumero'] == 'X') {
-              $vp = 'Kontitettu';
-            }
-            else {
-              $vp = 'Toimitettu';
-            }
-
-          }
-          elseif ($rulla['hyllyalue'] == '') {
-            $vp = t("Ei paikkaa");
-          }
-          else {
-            $vp = $rulla['hyllyalue'].'-'.$rulla['hyllynro'];
-          }
-
-          $statukset[$rulla['lisatieto']]++;
-          $varastopaikat[$vp]++;
-
-          if ($rulla['haettu'] == 1) {
-            $haetun_vp[$vp][] = 'X';
-            $haetun_st[$rulla['lisatieto']][] = 'X';
-          }
-          else {
-            $haetun_vp[$vp][] = '0';
-            $haetun_st[$rulla['lisatieto']][] = '0';
-          }
-
-        }
+      if ($tilaus_tiedot['rullien_maara'] == 0) {
+        $rulla_kpl = $tilaus_tiedot['rullien_maara_arvio'] . ' kpl';
+        $paino = 'Ei painotietoa';
       }
-
-      $_statukset = "";
-      foreach ($statukset as $status => $kpl) {
-        if (in_array('X', $haetun_st[$status])) {
-          $luokka = 'haettu';
-          $pic = "<img src='{$palvelin2}pics/lullacons/arrow-single-right-green.png'/>&nbsp;";
-        }
-        else {
-          $luokka = '';
-          $pic = '';
-        }
-        $_statukset .= "<div class='{$luokka}'>{$pic}" . $status . ' ' . $kpl . ' kpl</div>';
-      }
-
-      $_varastopaikat = "";
-
-      foreach ($varastopaikat as $vp => $kpl) {
-        if (in_array('X', $haetun_vp[$vp])) {
-          $luokka = 'haettu';
-          $pic = "<img src='{$palvelin2}pics/lullacons/arrow-single-right-green.png'/>&nbsp;";
-        }
-        else {
-          $luokka = '';
-          $pic = '';
-        }
-        $_varastopaikat .= "<div class='{$luokka}'>{$pic}" . $vp . ' ' . $kpl . ' kpl</div>';
+      else {
+        $rulla_kpl = $tilaus_tiedot['rullien_maara'] . ' kpl';
+        $paino = $tilaus_tiedot['rullien_paino'] . ' kg';
       }
 
       echo "
+        <div style='padding:10px 0; margin:4px 0;'class='tilaus_alue'>
         <div style='overflow:auto;'>
-        <div style='float:left; width:226px; text-align:left;' >
-        <br>
+        <div style='float:left; width:226px; text-align:left; padding-left:10px;' >
+          {$tilausnumero}
         </div>
 
         <div style='float:left; width:226px; text-align:center;'>
-        {$_statukset}
+          {$rulla_kpl}
         </div>
 
         <div style='float:left; width:226px; text-align:right;'>
-        {$_varastopaikat}
+          {$paino}
         </div>
         </div>";
+
+      if (count($tiedot['rullat']) > 0) {
+
+        echo "<div style=' padding:10px; text-align:center'>";
+
+        $statukset = array();
+        $varastopaikat = array();
+
+        foreach ($tiedot['rullat'][$konttiviite] as $rulla) {
+          if ($rulla['asiakkaan_tilausnumero'] == $tilausnumero) {
+
+            if ($rulla['konttinumero'] != '') {
+
+              if ($rulla['sinettinumero'] == 'X') {
+                $vp = 'Kontitettu';
+              }
+              else {
+                $vp = 'Toimitettu';
+              }
+
+            }
+            elseif ($rulla['hyllyalue'] == '') {
+              $vp = t("Ei paikkaa");
+            }
+            else {
+              $vp = $rulla['hyllyalue'].'-'.$rulla['hyllynro'];
+            }
+
+            $statukset[$rulla['lisatieto']]++;
+            $varastopaikat[$vp]++;
+
+            if ($rulla['haettu'] == 1) {
+              $haetun_vp[$vp][] = 'X';
+              $haetun_st[$rulla['lisatieto']][] = 'X';
+            }
+            else {
+              $haetun_vp[$vp][] = '0';
+              $haetun_st[$rulla['lisatieto']][] = '0';
+            }
+
+          }
+        }
+
+        $_statukset = "";
+        foreach ($statukset as $status => $kpl) {
+          if (in_array('X', $haetun_st[$status])) {
+            $luokka = 'haettu';
+            $pic = "<img src='{$palvelin2}pics/lullacons/arrow-single-right-green.png'/>&nbsp;";
+          }
+          else {
+            $luokka = '';
+            $pic = '';
+          }
+          $_statukset .= "<div class='{$luokka}'>{$pic}" . $status . ' ' . $kpl . ' kpl</div>';
+        }
+
+        $_varastopaikat = "";
+
+        foreach ($varastopaikat as $vp => $kpl) {
+          if (in_array('X', $haetun_vp[$vp])) {
+            $luokka = 'haettu';
+            $pic = "<img src='{$palvelin2}pics/lullacons/arrow-single-right-green.png'/>&nbsp;";
+          }
+          else {
+            $luokka = '';
+            $pic = '';
+          }
+          $_varastopaikat .= "<div class='{$luokka}'>{$pic}" . $vp . ' ' . $kpl . ' kpl</div>';
+        }
+
+        echo "
+          <div style='overflow:auto;'>
+          <div style='float:left; width:226px; text-align:left;' >
+          <br>
+          </div>
+
+          <div style='float:left; width:226px; text-align:center;'>
+          {$_statukset}
+          </div>
+
+          <div style='float:left; width:226px; text-align:right;'>
+          {$_varastopaikat}
+          </div>
+          </div>";
+        echo "</div>";
+      }
       echo "</div>";
     }
+
+    echo "</div>";
     echo "</div>";
   }
-echo "</div>";
-echo "</div>";
 }
 
-
 require 'inc/footer.inc';
-
 
 function hae_tiedot($hakukoodi, $tyyppi) {
   global $kukarow;
@@ -324,7 +328,14 @@ function hae_tiedot($hakukoodi, $tyyppi) {
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND lasku.asiakkaan_tilausnumero = '{$hakukoodi}'";
     $result = pupe_query($query);
-    $konttiviite = mysql_result($result, 0);
+
+    $konttiviitteet = array();
+
+    while ($konttiviite = mysql_fetch_assoc($result)) {
+      $konttiviitteet[] = $konttiviite['konttiviite'];
+    }
+
+    $konttiviite = implode("','", $konttiviitteet);
   }
 
   if ($tyyppi == 'konttiviite') {
@@ -368,32 +379,41 @@ function hae_tiedot($hakukoodi, $tyyppi) {
               ON ostotilausrivi.yhtio = laskun_lisatiedot.yhtio
               AND ostotilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
             WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
-            AND laskun_lisatiedot.konttiviite = '{$konttiviite}'";
+            AND laskun_lisatiedot.konttiviite IN ('{$konttiviite}')";
   $result = pupe_query($query);
 
+  $konttiviitteet = array();
   $rullat = array();
   $tilaukset = array();
   $tilauksen_rivit = array();
-  $rullien_paino = 0;
+  $rullien_paino = array();
+  $konttiviitteet = array();
+  $menoaika = array();
 
   while ($row = mysql_fetch_assoc($result)) {
 
-    $konttiviite = $row['konttiviite'];
-    $menoaika = $row['toimaika'];
-    $rullien_paino = $rullien_paino + $row['massa'] . ' kg';
+    if (!in_array($row['konttiviite'], $konttiviitteet)) {
+      $konttiviitteet[] = $row['konttiviite'];
+    }
 
-    $tilaukset[$row['asiakkaan_tilausnumero']]['rullien_paino'] += $row['massa'];
+    $menoaika[$row['konttiviite']] = $row['toimaika'];
 
-    $tilaukset[$row['asiakkaan_tilausnumero']]['rullien_maara_arvio'] = $row['rullamaara'];
+    $rullien_paino[$row['konttiviite']] += $row['massa'];
 
-    if (!isset($tilaukset[$row['asiakkaan_tilausnumero']]['rullien_maara'])) {
-      $tilaukset[$row['asiakkaan_tilausnumero']]['rullien_maara'] = 0;
+    $rullien_maara[$row['konttiviite']]++;
+
+    $tilaukset[$row['konttiviite']][$row['asiakkaan_tilausnumero']]['rullien_paino'] += $row['massa'];
+
+    $tilaukset[$row['konttiviite']][$row['asiakkaan_tilausnumero']]['rullien_maara_arvio'] = $row['rullamaara'];
+
+    if (!isset($tilaukset[$row['konttiviite']][$row['asiakkaan_tilausnumero']]['rullien_maara'])) {
+      $tilaukset[$row['konttiviite']][$row['asiakkaan_tilausnumero']]['rullien_maara'] = 0;
     }
 
     if ($row['sarjanumero'] != false) {
 
-      $tilaukset[$row['asiakkaan_tilausnumero']]['rullien_maara']++;
-      $tilaukset[$row['asiakkaan_tilausnumero']]['rivinumerot'][$row['asiakkaan_rivinumero']]['rullien_maara']++;
+      $tilaukset[$row['konttiviite']][$row['asiakkaan_tilausnumero']]['rullien_maara']++;
+      $tilaukset[$row['konttiviite']][$row['asiakkaan_tilausnumero']]['rivinumerot'][$row['asiakkaan_rivinumero']]['rullien_maara']++;
 
       if ($tyyppi == 'sarjanumero' and $row['sarjanumero'] == $hakukoodi) {
         $row['haettu'] = 1;
@@ -402,22 +422,20 @@ function hae_tiedot($hakukoodi, $tyyppi) {
         $row['haettu'] = 0;
       }
 
-      $rullat[] = $row;
+      $rullat[$row['konttiviite']][] = $row;
     }
 
-    $tilaukset[$row['asiakkaan_tilausnumero']]['rivinumerot'][$row['asiakkaan_rivinumero']]['rullien_paino'] += $row['massa'];
-
+    $tilaukset[$row['konttiviite']][$row['asiakkaan_tilausnumero']]['rivinumerot'][$row['asiakkaan_rivinumero']]['rullien_paino'] += $row['massa'];
   }
 
   $tiedot = array(
-    'konttiviite' => $konttiviite,
+    'konttiviitteet' => $konttiviitteet,
     'menoaika' => $menoaika,
     'rullien_paino' => $rullien_paino,
-    'rullien_maara' => count($rullat),
+    'rullien_maara' => $rullien_maara,
     'tilaukset' => $tilaukset,
     'rullat' => $rullat
   );
 
   return $tiedot;
-
 }

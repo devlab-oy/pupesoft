@@ -73,6 +73,7 @@ class PrestaSpecificPrices extends PrestaClient {
   }
 
   public function sync_prices($prices) {
+    $this->delete_all();
     $this->logger->log('---------Start specific price sync---------');
 
     try {
@@ -83,8 +84,6 @@ class PrestaSpecificPrices extends PrestaClient {
 
       $presta_product = new PrestaProducts($this->get_url(), $this->get_api_key());
       $this->product_ids = $presta_product->all_skus();
-
-      $this->delete_all();
 
       foreach ($prices as $price) {
         //In pupesoft tuoteno is not mandatory but in presta it is.

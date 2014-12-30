@@ -33,6 +33,9 @@ if (!isset($presta_api_key)) {
 if (!isset($presta_edi_folderpath)) {
   die('Presta edi folder path puuttuu');
 }
+if (!isset($yhtiorow)) {
+  die('Yhtiorow puuttuu');
+}
 
 $request = array(
     'action'              => $action,

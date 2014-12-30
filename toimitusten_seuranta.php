@@ -686,7 +686,7 @@ if (!isset($task)) {
                     AND trlt.tilausrivitunnus = tilausrivi.tunnus
                   WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
                   AND tilausrivi.tyyppi = 'O'
-                  AND trlt.asiakkaan_rivinumero IN ('{$tilaus['tilausrivit']}')
+                  AND trlt.asiakkaan_rivinumero IN ({$tilaus['tilausrivit']})
                   AND trlt.asiakkaan_tilausnumero = '{$tilaus['asiakkaan_tilausnumero']}'";
         $result = pupe_query($query);
 

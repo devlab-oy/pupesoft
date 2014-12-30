@@ -24,6 +24,15 @@ if (!isset($action)) {
 if (!isset($synkronointi_tyyppi)) {
   $synkronointi_tyyppi = '';
 }
+if (!isset($presta_url)) {
+  die('Presta url puuttuu');
+}
+if (!isset($presta_api_key)) {
+  die('Presta api key puuttuu');
+}
+if (!isset($presta_edi_folderpath)) {
+  die('Presta edi folder path puuttuu');
+}
 
 $request = array(
     'action'              => $action,
@@ -87,9 +96,11 @@ if ($request['action'] == 'sync') {
     $presta_prices = new PrestaSpecificPrices($presta_url, $presta_api_key);
     $presta_prices->sync_prices($hinnat);
   }
-  die();
+
   if ($ok and in_array('tilaukset', $synkronoi)) {
     $presta_orders = new PrestaSalesOrders($presta_url, $presta_api_key);
+    $presta_orders->set_edi_filepath($presta_edi_folderpath);
+    $presta_orders->set_yhtiorow($yhtiorow);
     $presta_orders->transfer_orders_to_pupesoft();
   }
 }
@@ -151,6 +162,25 @@ function hae_asiakkaat1() {
   }
 
   return $asiakkaat;
+}
+
+function hae_yhteyshenkilon_asiakas_ulkoisella_asiakasnumerolla($asiakasnumero) {
+  global $kukarow, $yhtiorow;
+
+  if (empty($asiakasnumero)) {
+    return false;
+  }
+
+  $query = "SELECT a.*
+            FROM yhteyshenkilo AS y
+            JOIN asiakas AS a
+            ON ( a.yhtio = y.yhtio
+              AND a.tunnus = y.liitostunnus )
+            WHERE y.yhtio = '{$kukarow['yhtio']}'
+            AND y.ulkoinen_asiakasnumero = {$asiakasnumero}";
+  $result = pupe_query($query);
+
+  return mysql_fetch_assoc($result);
 }
 
 function hae_asiakasryhmat() {

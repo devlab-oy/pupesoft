@@ -504,6 +504,7 @@ if (!isset($task)) {
             lasku.alatila,
             lasku.tunnus,
             trlt.konttinumero,
+            GROUP_CONCAT(DISTINCT trlt.asiakkaan_rivinumero) AS tilausrivit,
             COUNT(tilausrivi.tunnus) AS rullat,
             SUM(IF(trlt.sinettinumero != '', 1, 0)) AS kontti_vahvistettu,
             SUM(IF(tilausrivi.var = 'P', 1, 0)) AS tulouttamatta,
@@ -678,7 +679,7 @@ if (!isset($task)) {
           'odottaa lusausta' => $tilaus['lusattavat'],
           'lusattu' => $tilaus['lusatut'],
           'ylijäämä' => $tilaus['ylijaama'],
-          'siirretty' => $tilaus['siirretty'],
+          'siirretty' => $tilaus['siirretty']
           );
 
         $query = "SELECT tilausrivi.toimitettu, trlt.rahtikirja_id
@@ -688,8 +689,8 @@ if (!isset($task)) {
                     AND trlt.tilausrivitunnus = tilausrivi.tunnus
                   WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
                   AND tilausrivi.tyyppi = 'O'
+                  AND trlt.asiakkaan_rivinumero IN ('{$tilaus['tilausrivit']}')
                   AND trlt.asiakkaan_tilausnumero = '{$tilaus['asiakkaan_tilausnumero']}'";
-
         $result = pupe_query($query);
 
         $kuitattu = $kuittaamatta = 0;
@@ -708,6 +709,7 @@ if (!isset($task)) {
 
         $rahtikirjat = array_count_values($rahtikirjat);
         $rahtikirjat = count($rahtikirjat);
+
 
         if ($rahtikirjat > 0) {
           $tapahtumat .= "&bull; <a href='saapuva_rahti.php?tnum={$tilaus['asiakkaan_tilausnumero']}'>" . $rahtikirjat ." kpl rahtikirjasanomia</a> haettu<br>";

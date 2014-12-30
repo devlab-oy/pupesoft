@@ -329,7 +329,7 @@ abstract class PrestaClient {
     $existing_resources = array_column($existing_resources, 'id');
 
     foreach ($existing_resources as $id) {
-      if ($id == 1) {
+      if ($id == 1 and $this->resource_name() == 'categories') {
         //Root category can not be deleted
         continue;
       }

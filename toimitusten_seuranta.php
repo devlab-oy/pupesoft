@@ -2,6 +2,26 @@
 
 require 'inc/edifact_functions.inc';
 
+if (isset($_POST['task']) and $_POST['task'] == 'nayta_konttierittely') {
+
+  $pdf_data = unserialize(base64_decode($_POST['parametrit']));
+
+  $sessio = $_POST['session'];
+  $logo_url = $_POST['logo_url'];
+  $logo_info = pdf_logo($logo_url, $sessio);
+
+  $pdf_data['logodata'] = $logo_info['logodata'];
+  $pdf_data['scale'] = $logo_info['scale'];
+
+
+
+  $pdf_tiedosto = konttierittely_pdf($pdf_data);
+
+  header("Content-type: application/pdf");
+  echo file_get_contents($pdf_tiedosto);
+  die;
+}
+
 if (isset($_POST['task']) and $_POST['task'] == 'nayta_laskutusraportti') {
 
   $pdf_data = unserialize(base64_decode($_POST['parametrit']));
@@ -992,7 +1012,8 @@ if (!isset($task)) {
                 <input type='hidden' name='lahtopvm_arvio' value='{$tilaus['toimaika']}' />
                 <input type='hidden' name='task' value='tee_satamavahvistus' />
                 <input type='submit' value='". t("Tee satamavahvistus") ."' />
-                </form>";
+                </form>
+                </div>";
             }
 
             if ($kesken == 0 and $mrn_tullut) {
@@ -1005,6 +1026,7 @@ if (!isset($task)) {
               $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
 
               echo "
+              <div style='text-align:center;margin:10px 0;'>
               <form method='post' id='nayta_lahtoilmoitus{$id}'>
               <input type='hidden' name='parametrit' value='{$parametrit}' />
               <input type='hidden' name='task' value='nayta_lahtoilmoitus' />
@@ -1017,6 +1039,26 @@ if (!isset($task)) {
 
               echo t("Näytä lähtöilmoitus");
               echo "</button></div>";
+
+              $parametrit = konttierittely_parametrit($tilaus['konttiviite']);
+              $parametrit = serialize($parametrit);
+              $parametrit = base64_encode($parametrit);
+
+              echo "
+              <div style='text-align:center;margin:10px 0;'>
+              <form method='post' id='nayta_konttierittely{$id}'>
+              <input type='hidden' name='parametrit' value='{$parametrit}' />
+              <input type='hidden' name='task' value='nayta_konttierittely' />
+              <input type='hidden' name='session' value='{$session}' />
+              <input type='hidden' name='logo_url' value='{$logo_url}' />
+              <input type='hidden' name='tee' value='XXX' />
+              </form>
+              <button onClick=\"js_openFormInNewWindow('nayta_konttierittely{$id}',
+               'Satamavahvistus'); return false;\" />";
+
+              echo t("Näytä konttierittely");
+              echo "</button></div>";
+
 
               if ($tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
 

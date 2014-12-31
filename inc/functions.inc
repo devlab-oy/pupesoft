@@ -30052,6 +30052,8 @@ if (!function_exists('xml_to_array')) {
       return array();
     }
 
+    $xml_string = str_replace(array("\n", "\r", "\t"), '', $xml_string);
+
     //@TODO t‰‰ on xml:lle joka sis‰lt‰‰ CDATA nodeissa jos xml ei sis‰ll‰ CDATAA niin t‰m‰ ei toimi
     //Korjaa jossain vaiheessa
     $xml = simplexml_load_string($xml_string, null, LIBXML_NOCDATA);

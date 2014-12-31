@@ -163,7 +163,7 @@ class PrestaCategories extends PrestaClient {
 
         //Shop has id_category_default which needs to be updated. Otherwise presta will fail.
         if (!$shop_category_updated) {
-          $presta_shop = new PrestaShops($this->get_url(), $this->get_api_key());
+          $presta_shop = new PrestaShops($this->url(), $this->api_key());
           $presta_shop->update_shops_category($root_category_id);
         }
       }

@@ -64,7 +64,7 @@ class PrestaProducts extends PrestaClient {
    * @return int
    */
   private function add_category(SimpleXMLElement &$xml, $ancestors) {
-    $presta_categories = new PrestaCategories($this->get_url(), $this->get_api_key());
+    $presta_categories = new PrestaCategories($this->url(), $this->api_key());
     $category_id = $presta_categories->find_category($ancestors);
     if (!is_null($category_id)) {
       $category = $xml->product->associations->categories->addChild('category');
@@ -101,7 +101,7 @@ class PrestaProducts extends PrestaClient {
           }
 
           if (!empty($product['saldo'])) {
-            $presta_stock = new PrestaProductStocks($this->get_url(), $this->get_api_key());
+            $presta_stock = new PrestaProductStocks($this->url(), $this->api_key());
             $presta_stock->create_or_update($id, $product['saldo']);
           }
 

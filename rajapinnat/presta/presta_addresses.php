@@ -28,7 +28,7 @@ class PrestaAddresses extends PrestaClient {
       $xml = $existing_address;
     }
 
-    $presta_country = new PrestaCountries($this->get_url(), $this->get_api_key());
+    $presta_country = new PrestaCountries($this->url(), $this->api_key());
     $finland = $presta_country->find_findland();
     $xml->address->id_country = $finland['id'];
     $xml->address->id_customer = $address['presta_customer_id'];

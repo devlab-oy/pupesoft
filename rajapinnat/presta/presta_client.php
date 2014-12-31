@@ -445,7 +445,7 @@ abstract class PrestaClient {
    *
    * @return string
    */
-  protected function get_url() {
+  protected function url() {
     return $this->url;
   }
 
@@ -453,7 +453,7 @@ abstract class PrestaClient {
    *
    * @return string
    */
-  protected function get_api_key() {
+  protected function api_key() {
     return $this->api_key;
   }
 

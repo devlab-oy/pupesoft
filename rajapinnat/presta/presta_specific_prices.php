@@ -79,10 +79,10 @@ class PrestaSpecificPrices extends PrestaClient {
     try {
       $this->schema = $this->get_empty_schema();
 
-      $presta_shop = new PrestaShops($this->get_url(), $this->get_api_key());
+      $presta_shop = new PrestaShops($this->url(), $this->api_key());
       $this->shop = $presta_shop->first_shop();
 
-      $presta_product = new PrestaProducts($this->get_url(), $this->get_api_key());
+      $presta_product = new PrestaProducts($this->url(), $this->api_key());
       $this->product_ids = $presta_product->all_skus();
 
       foreach ($prices as $price) {

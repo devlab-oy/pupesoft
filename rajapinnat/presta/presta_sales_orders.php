@@ -285,7 +285,7 @@ class PrestaSalesOrders extends PrestaClient {
           'order_id'    => $id,
           'order_state' => self::FETCHED,
       );
-      $presta_order_history = new PrestaOrderHistories($this->get_url(), $this->get_api_key());
+      $presta_order_history = new PrestaOrderHistories($this->url(), $this->api_key());
       $presta_order_history->create($order_history);
     }
     catch (Exception $e) {

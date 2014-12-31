@@ -56,7 +56,7 @@ class PrestaCustomers extends PrestaClient {
 
       foreach ($customers as $customer) {
         try {
-          $presta_address = new PrestaAddresses($this->get_url(), $this->get_api_key());
+          $presta_address = new PrestaAddresses($this->url(), $this->api_key());
           if (in_array($customer['ulkoinen_asiakasnumero'], $existing_customers)) {
             $id = $customer['ulkoinen_asiakasnumero'];
             $this->update($id, $customer);

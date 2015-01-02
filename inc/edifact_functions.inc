@@ -500,6 +500,7 @@ function konttierittely_parametrit($konttiviite) {
               AND sarjanumeroseuranta.myyntirivitunnus = tilausrivi.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
+            AND tilausrivin_lisatiedot.konttinumero != ''
             GROUP BY konttinumero, asiakkaan_tilausnumero, asiakkaan_rivinumero";
   $result = pupe_query($query);
 
@@ -509,10 +510,11 @@ function konttierittely_parametrit($konttiviite) {
 
   while ($rivi = mysql_fetch_assoc($result)) {
 
-    //$kontit[$rivi['konttinumero']][$rivi['asiakkaan_tilausnumero']][$rivi['asiakkaan_rivinumero']] = $rivi;
-
     $total_paino += $rivi['paino'];
     $total_rullat += $rivi['rullia'];
+
+    $kontit[$rivi['konttinumero']]['mrn'] = $rivi['kontin_mrn'];
+    $kontit[$rivi['konttinumero']]['sinetti'] =$rivi['sinettinumero'];
 
     $kontit[$rivi['konttinumero']]['paino'] += $rivi['paino'];
     $kontit[$rivi['konttinumero']]['rullia'] += $rivi['rullia'];
@@ -524,10 +526,10 @@ function konttierittely_parametrit($konttiviite) {
     $kontit[$rivi['konttinumero']][$rivi['asiakkaan_tilausnumero']][$rivi['asiakkaan_rivinumero']]['rullia'] += $rivi['rullia'];
   }
 
-
   $parametrit['kontit'] = $kontit;
   $parametrit['konttiviite'] = $konttiviite;
   $parametrit['total_paino'] = $total_paino;
+  $parametrit['konttimaara'] = count($kontit);
   $parametrit['total_rullat'] = $total_rullat;
   return $parametrit;
 }
@@ -2289,24 +2291,30 @@ function paivita_tilausrivit_ja_sarjanumeroseuranta($ostorivitunnus, $hylly, $va
   }
 
 }
-
 function hae_rullat($rahtikirja_id) {
   global $kukarow;
 
-  $query = "SELECT ss.hyllyalue AS alue,
+  $query = "SELECT
+            ss.sarjanumero,
+            tr.uusiotunnus,
+            tr.tunnus,
+            tr.otunnus,
+            ss.hyllyalue AS alue,
             ss.hyllynro AS nro,
             ss.hyllyvali AS vali,
             ss.hyllytaso AS taso,
-            SUM(ss.massa) AS paino,
-            COUNT(tr.tunnus) AS rullia,
-            COUNT(IF(tr.uusiotunnus = 0, 1, 0)) AS varastossa,
-            trlt.asiakkaan_tilausnumero AS tno,
-            trlt.asiakkaan_rivinumero AS rno
+            ss.massa AS paino,
+            trlt.asiakkaan_tilausnumero AS tno
             FROM tilausrivi AS tr
-            JOIN tilausrivin_lisatiedot AS trlt ON trlt.yhtio = tr.yhtio AND trlt.tilausrivitunnus = tr.tunnus
-            JOIN sarjanumeroseuranta AS ss ON ss.yhtio = tr.yhtio AND ss.ostorivitunnus = tr.tunnus
-            WHERE tr.yhtio = 'rplog' AND tr.tyyppi = 'O' AND trlt.rahtikirja_id = '5108522'
-            GROUP BY tno, rno, alue, nro";
+            JOIN tilausrivin_lisatiedot AS trlt
+              ON trlt.yhtio = tr.yhtio
+              AND trlt.tilausrivitunnus = tr.tunnus
+            JOIN sarjanumeroseuranta AS ss
+              ON ss.yhtio = tr.yhtio
+              AND ss.ostorivitunnus = tr.tunnus
+            WHERE tr.yhtio = '{$kukarow['yhtio']}'
+            AND tr.tyyppi = 'O'
+            AND trlt.rahtikirja_id = '{$rahtikirja_id}'";
   $result = pupe_query($query);
 
   $viematta = 0;
@@ -2318,7 +2326,7 @@ function hae_rullat($rahtikirja_id) {
     }
     $laskutunnus = $rulla['otunnus'];
   }
-/*
+
   if ($viematta == 0) {
     $query = "UPDATE lasku
               SET alatila = 'X'
@@ -2326,7 +2334,6 @@ function hae_rullat($rahtikirja_id) {
               AND tunnus  = '{$laskutunnus}'";
     pupe_query($query);
   }
-*/
 
 return $rullat;
 }
@@ -2582,14 +2589,16 @@ function konttierittely_pdf($pdf_data) {
   $pdf->draw_text($x, $y, 'Konttiviite:', $sivu, $bold);
   $pdf->draw_text($x+100, $y, $konttiviite, $sivu, $bold);
   $y -= 15;
-  $pdf->draw_text($x, $y, 'Kokonaispaino', $sivu, $bold);
+  $pdf->draw_text($x, $y, 'Kokonaispaino:', $sivu, $bold);
   $pdf->draw_text($x+100, $y, $total_paino." kg", $sivu, $bold);
   $y -= 15;
-  $pdf->draw_text($x, $y, 'Rullia', $sivu, $bold);
+  $pdf->draw_text($x, $y, 'Kontteja:', $sivu, $bold);
+  $pdf->draw_text($x+100, $y, $konttimaara. " kpl", $sivu, $bold);
+  $y -= 15;
+  $pdf->draw_text($x, $y, 'Rullia:', $sivu, $bold);
   $pdf->draw_text($x+100, $y, $total_rullat." kpl", $sivu, $bold);
   $y -= 15;
 
-  $y -= 15;
   $yy[0] = $yy[1] = $y;
   $pdf->draw_line($xx, $yy, $sivu);
   $y -= 20;
@@ -2598,60 +2607,41 @@ function konttierittely_pdf($pdf_data) {
 
     $pdf->draw_text($x, $y, 'Kontti:', $sivu, $bold);
     $pdf->draw_text($x+60, $y, $konttiviite, $sivu, $bold);
-    $pdf->draw_text($x+160, $y, $tilaukset['paino']. ' kg / '.$tilaukset['rullia']. ' kpl', $sivu, $bold);
+    $pdf->draw_text($x+160, $y, $tilaukset['paino']. ' kg / '.$tilaukset['rullia']. ' rullaa', $sivu, $bold);
     $y -= 15;
+
+    $pdf->draw_text($x, $y, 'MRN:', $sivu, $bold);
+    $pdf->draw_text($x+60, $y, $tilaukset['mrn'], $sivu, $bold);
+    $y -= 15;
+
+    $pdf->draw_text($x, $y, 'Sinetti:', $sivu, $bold);
+    $pdf->draw_text($x+60, $y, $tilaukset['sinetti'], $sivu, $bold);
+    $y -= 20;
 
     unset($tilaukset['rullia']);
     unset($tilaukset['paino']);
+    unset($tilaukset['mrn']);
+    unset($tilaukset['sinetti']);
+
+    $pdf->draw_text($x, $y, 'Tilaukset:', $sivu, $bold);
+    $y -= 15;
 
     foreach ($tilaukset as $tilausnumero => $rivit) {
-
-      $pdf->draw_text($x, $y, 'Tilaus:', $sivu, $bold);
-      $pdf->draw_text($x+60, $y, $tilausnumero, $sivu, $bold);
-      $pdf->draw_text($x+160, $y, $rivit['paino']. ' kg / '.$rivit['rullia']. ' kpl', $sivu, $bold);
-      $y -= 15;
 
       unset($rivit['rullia']);
       unset($rivit['paino']);
 
       foreach ($rivit as $rivinumero => $rivi) {
-
-        $pdf->draw_text($x, $y, 'Rivi:', $sivu, $bold);
-        $pdf->draw_text($x+60, $y, $rivinumero, $sivu, $bold);
-        $pdf->draw_text($x+160, $y, $rivi['paino']. ' kg / '.$rivi['rullia']. ' kpl', $sivu, $bold);
+        $pdf->draw_text($x, $y, $tilausnumero.":".$rivinumero, $sivu, $bold);
+        $pdf->draw_text($x+100, $y, $rivi['paino']. ' kg / '.$rivi['rullia']. ' rullaa', $sivu, $bold);
         $y -= 15;
-
       }
     }
 
-    $y -= 15;
     $yy[0] = $yy[1] = $y;
     $pdf->draw_line($xx, $yy, $sivu);
     $y -= 20;
   }
-
-/*
-    if ($y < 20) {
-      $sivu = $pdf->new_page("a4");
-      $y = 800;
-
-      $sivunro++;
-
-      $pdf->draw_text($x, $y, "PAKKALISTA", $sivu, $bold);
-      $y -= 20;
-      $pdf->draw_text($x, $y, 'Konttinumero', $sivu, $bold);
-      $pdf->draw_text($x+100, $y, $konttinumero, $sivu, $bold);
-      $pdf->draw_text($x+500, $y, "sivu {$sivunro}/{$sivuja}", $sivu, $bold);
-      $y -= 15;
-      $yy[0] = $yy[1] = $y;
-      $pdf->draw_line($xx, $yy, $sivu);
-      $y -= 20;
-
-    }
-
-    $pdf->draw_text($x, $y, $rulla, $sivu, $bold);
-    $y -= 15;
-*/
 
   //keksitään uudelle failille joku varmasti uniikki nimi:
   $pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(),true)).".pdf";

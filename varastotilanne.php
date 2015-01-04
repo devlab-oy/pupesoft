@@ -349,6 +349,7 @@ if (!isset($task)) {
     <input type='hidden' name='session' value='{$session}' />
     <input type='hidden' name='logo_url' value='{$logo_url}' />
     <input type='hidden' name='tee' value='XXX' />
+    <input type='submit' />
     </form>
     <button onClick=\"js_openFormInNewWindow('nayta_varastoraportti', 'Varastoraportti'); return false;\" />";
 

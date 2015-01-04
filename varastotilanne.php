@@ -250,8 +250,7 @@ if (!isset($task)) {
             WHERE ss.yhtio = '{$kukarow['yhtio']}'
             AND (ss.lisatieto != 'Toimitettu' OR ss.lisatieto IS NULL)
             AND ss.varasto IS NOT NULL
-            ORDER BY ss.hyllyalue, CAST(ss.hyllynro AS SIGNED)
-            LIMIT 340";
+            ORDER BY ss.hyllyalue, CAST(ss.hyllynro AS SIGNED)";
   $result = pupe_query($query);
 
   echo "<font class='head'>".t("Varastotilanne")."</font><hr><br>";

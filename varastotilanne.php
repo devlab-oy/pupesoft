@@ -6,8 +6,6 @@ if (isset($_POST['task']) and $_POST['task'] == 'nayta_varastoraportti') {
 
   $varastot = unserialize(base64_decode($_POST['varastot']));
 
-  //$varastot['B-4'] = array_pad($varastot['B-4'], 120, $varastot['B-4'][0]);
-
   $sessio = $_POST['session'];
   $logo_url = $_POST['logo_url'];
   $logo_info = pdf_logo($logo_url, $sessio);

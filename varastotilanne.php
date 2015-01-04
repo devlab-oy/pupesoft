@@ -342,8 +342,6 @@ if (!isset($task)) {
     $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
     $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
 
-    $varastot = 'xxx';
-
     echo "
     <form method='post' id='nayta_varastoraportti' action='varastotilanne.php'>
     <input type='hidden' name='varastot' value='{$varastot}' />

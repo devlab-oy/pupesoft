@@ -2895,7 +2895,13 @@ function varastoraportti_pdf($pdf_data) {
 
       $pdf->draw_text($x+160, $y, (int) $rulla['massa'] . ' kg', $sivu, $pieni);
 
-      $kombo = $rulla['asiakkaan_tilausnumero'] . ":" . $rulla['asiakkaan_rivinumero'];
+      if ($rulla['myyntirivinumero'] == NULL) {
+        $kombo = $rulla['ostotilausnumero'] . ":" . $rulla['ostorivinumero'];
+      }
+      else {
+        $kombo = $rulla['myyntitilausnumero'] . ":" . $rulla['myyntirivinumero'];
+      }
+
       $pdf->draw_text($x+220, $y, $kombo, $sivu, $pieni);
 
       $pdf->draw_text($x+320, $y, $rulla['status'], $sivu, $pieni);

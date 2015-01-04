@@ -95,6 +95,8 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
 
 function laheta_sanoma($sanoma){
 
+  return true;
+
   if ($sanoma == '') {
     return false;
   }
@@ -1376,14 +1378,20 @@ function kasittele_bookkaussanoma($edi_data) {
               AND asiakkaan_rivinumero = '{$rivinro}'";
     $result = pupe_query($query);
 
-    if (mysql_num_rows($result) > 0) {
+    $rullat = array();
+
+    while ($rulla = mysql_fetch_assoc($result)) {
+      $rullat[] = $rulla;
+    }
+
+    if (count($rullat) > 0) {
 
       $laskuquery = "SELECT *
                      FROM lasku
                      WHERE yhtio = '{$kukarow['yhtio']}'
                      AND tunnus = '{$tunnus}'";
       $laskuresult = pupe_query($laskuquery);
-      $laskurow = mysql_fetch_assoc($laskuresult, 0);
+      $laskurow = mysql_fetch_assoc($laskuresult);
 
       $kukarow['kesken'] = $laskurow['tunnus'];
 
@@ -1394,13 +1402,14 @@ function kasittele_bookkaussanoma($edi_data) {
                      AND tuoteno = '123'";
       $tuoteresult = pupe_query($tuotequery);
 
-      $trow = mysql_fetch_assoc($tuoteres);
+      $trow = mysql_fetch_assoc($tuoteresult);
+
       $kpl = 1;
       $var = 'P';
 
-      while ($rulla = mysql_fetch_assoc($result)) {
+      foreach ($rullat as $rulla) {
 
-        require "lisaarivi.inc";
+        require "tilauskasittely/lisaarivi.inc";
 
         $update_query = "UPDATE tilausrivi
                          SET var2 = 'OK'
@@ -1417,7 +1426,7 @@ function kasittele_bookkaussanoma($edi_data) {
         $update_query = "UPDATE tilausrivin_lisatiedot SET
                          juoksu = '{$rulla['juoksu']}',
                          tilauksen_paino = '{$rulla['tilauksen_paino']}',
-                         asiakkaan_tilausnumero = '{$rulla['asiakkaan_tilausnumero']}'
+                         asiakkaan_tilausnumero = '{$rulla['asiakkaan_tilausnumero']}',
                          asiakkaan_rivinumero = '{$rulla['asiakkaan_rivinumero']}'
                          WHERE yhtio = '{$kukarow['yhtio']}'
                          AND tilausrivitunnus = '{$lisatty_tun}'";
@@ -1735,6 +1744,11 @@ function kasittele_rahtikirjasanoma($edi_data) {
           $matka_info = $osat[1];
           $matka_info_osat = explode(":", $matka_info);
           $_matkakoodi = $matka_info_osat[1];
+
+          if ($_matkakoodi === NULL) {
+            $_matkakoodi = 'bookkaukseton';
+          }
+
           $valmis = true;
         }
 
@@ -1969,6 +1983,36 @@ function kasittele_rahtikirjasanoma($edi_data) {
             break;
           }
         }
+      }
+
+      if (!$laskurow and $rulla['matkakoodi'] == "bookkaukseton") {
+
+        $kukarow['kesken'] = 0;
+
+        require_once "tilauskasittely/luo_myyntitilausotsikko.inc";
+
+        $tunnus = luo_myyntitilausotsikko('RIVISYOTTO', 106);
+
+        $update_query = "UPDATE lasku SET
+                         asiakkaan_tilausnumero = '{$_tilausnro}'
+                         WHERE yhtio = '{$kukarow['yhtio']}'
+                         AND tunnus = '{$tunnus}'";
+        pupe_query($update_query);
+
+        $update_query = "UPDATE laskun_lisatiedot SET
+                         konttiviite = 'bookkaukseton',
+                         matkakoodi = 'bookkaukseton'
+                         WHERE yhtio = '{$kukarow['yhtio']}'
+                         AND otunnus = '{$tunnus}'";
+        pupe_query($update_query);
+
+        $laskuquery = "SELECT *
+                       FROM lasku
+                       WHERE yhtio = '{$kukarow['yhtio']}'
+                       AND tunnus = '{$tunnus}'";
+        $laskuresult = pupe_query($laskuquery);
+        $laskurow = mysql_fetch_assoc($laskuresult, 0);
+
       }
 
       if ($laskurow) {

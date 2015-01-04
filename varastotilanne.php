@@ -332,9 +332,9 @@ if (!isset($task)) {
     }
     echo "</table>";
 
-  echo '<br>';
+    echo '<br>';
 
-  js_openFormInNewWindow();
+    js_openFormInNewWindow();
 
     $varastot = serialize($varastot);
     $varastot = base64_encode($varastot);
@@ -342,8 +342,10 @@ if (!isset($task)) {
     $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
     $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
 
+    $varastot = 'xxx';
+
     echo "
-    <form method='post' id='nayta_varastoraportti'>
+    <form method='post' id='nayta_varastoraportti' action='varastotilanne.php'>
     <input type='hidden' name='varastot' value='{$varastot}' />
     <input type='hidden' name='task' value='nayta_varastoraportti' />
     <input type='hidden' name='session' value='{$session}' />

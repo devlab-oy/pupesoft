@@ -7427,8 +7427,6 @@ if (!function_exists("js_openFormInNewWindow")) {
     <SCRIPT TYPE="text/javascript" LANGUAGE="JavaScript">
       function js_openFormInNewWindow(formID, name) {
 
-        alert(formID+" - "+name);
-
         if (!name) {
           name='Pupesoft'+Math.floor(Math.random()*1001);
         }

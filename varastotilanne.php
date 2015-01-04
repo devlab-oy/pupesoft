@@ -224,32 +224,33 @@ if (isset($task) and ($task == 'ylijaamakasittely')) {
 if (!isset($task)) {
 
   $query = "SELECT ss.*,
-            tilausrivin_lisatiedot.asiakkaan_rivinumero,
+            tilausrivin_lisatiedot.asiakkaan_rivinumero AS myyntirivinumero,
+            tilausrivin_lisatiedot.asiakkaan_tilausnumero AS myyntitilausnumero,
+            ostotilausrivin_lisatiedot.asiakkaan_rivinumero AS ostorivinumero,
+            ostotilausrivin_lisatiedot.asiakkaan_tilausnumero AS ostotilausnumero,
             ostotilausrivin_lisatiedot.kuljetuksen_rekno,
-            IF(ss.lisatieto IS NULL, 'Normaali', ss.lisatieto) AS status,
-            lasku.asiakkaan_tilausnumero
+            IF(ss.lisatieto IS NULL, 'Normaali', ss.lisatieto) AS status
             FROM sarjanumeroseuranta AS ss
-            JOIN tilausrivi
+            LEFT JOIN tilausrivi
               ON tilausrivi.yhtio = ss.yhtio
               AND tilausrivi.tunnus = ss.myyntirivitunnus
-            JOIN tilausrivin_lisatiedot
+            LEFT JOIN tilausrivin_lisatiedot
               ON tilausrivin_lisatiedot.yhtio = ss.yhtio
               AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-            JOIN tilausrivi AS ostotilausrivi
+            LEFT JOIN tilausrivi AS ostotilausrivi
               ON ostotilausrivi.yhtio = ss.yhtio
               AND ostotilausrivi.tunnus = ss.ostorivitunnus
-            JOIN tilausrivin_lisatiedot AS ostotilausrivin_lisatiedot
+            LEFT JOIN tilausrivin_lisatiedot AS ostotilausrivin_lisatiedot
               ON ostotilausrivin_lisatiedot.yhtio = ss.yhtio
               AND ostotilausrivin_lisatiedot.tilausrivitunnus = ostotilausrivi.tunnus
-            JOIN lasku
+            LEFT JOIN lasku
               ON lasku.yhtio = ss.yhtio
               AND lasku.tunnus = tilausrivi.otunnus
-            JOIN laskun_lisatiedot
+            LEFT JOIN laskun_lisatiedot
               ON laskun_lisatiedot.yhtio = ss.yhtio
               AND laskun_lisatiedot.otunnus = lasku.tunnus
             WHERE ss.yhtio = '{$kukarow['yhtio']}'
             AND (ss.lisatieto != 'Toimitettu' OR ss.lisatieto IS NULL)
-            AND tilausrivin_lisatiedot.sinettinumero = ''
             AND ss.varasto IS NOT NULL";
   $result = pupe_query($query);
 
@@ -302,7 +303,14 @@ if (!isset($task)) {
 
       $tilausnumerot = array();
       foreach ($rullat as $rulla) {
-        $kombo = $rulla['asiakkaan_tilausnumero'] . ":" . $rulla['asiakkaan_rivinumero'];
+
+        if ($rulla['myyntirivinumero'] == NULL) {
+          $kombo = $rulla['ostotilausnumero'] . ":" . $rulla['ostorivinumero'];
+        }
+        else {
+          $kombo = $rulla['myyntitilausnumero'] . ":" . $rulla['myyntirivinumero'];
+        }
+
         if (!in_array($kombo, $tilausnumerot)) {
           $tilausnumerot[] = $kombo;
           echo $kombo, '<br>';

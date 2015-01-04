@@ -665,7 +665,10 @@ if (!isset($task)) {
       if (!$konttiviite_kasitelty) {
         echo "<td valign='top' rowspan='{$tilauksia_viitteella}'>";
 
-        if ($tilaus['satamavahvistus_pvm'] == '0000-00-00 00:00:00') {
+        if ($tilaus['matkakoodi'] == 'bookkaukseton') {
+          # code...
+        }
+        elseif ($tilaus['satamavahvistus_pvm'] == '0000-00-00 00:00:00') {
           echo date("j.n.Y", strtotime($tilaus['toimaika']));
         }
         else {
@@ -683,12 +686,16 @@ if (!isset($task)) {
 
       }
 
-      if ($tilaus['rullat'] == 0) {
+      if ($tilaus['rullat'] == 0 and $tilaus['matkakoodi'] != 'bookkaukseton') {
         $rullamaara = $tilaus['rullamaara'] . t(" kpl") . " (" . t("Ennakkoarvio") . ")";
       }
       else {
 
-        $rullamaara = $tilaus['rullat'] . t(" kpl") . "<br>" . t("Ennakkoarvio: ") . $tilaus['rullamaara'] . t(" kpl");
+        $rullamaara = $tilaus['rullat'] . t(" kpl");
+
+        if ($tilaus['matkakoodi'] != 'bookkaukseton') {
+          $rullamaara .= "<br>" . t("Ennakkoarvio: ") . $tilaus['rullamaara'] . t(" kpl");
+        }
 
         $poikkeukset = array(
           'odottaa hylkäystä' => $tilaus['hylattavat'],
@@ -881,6 +888,11 @@ if (!isset($task)) {
         //echo "<td valign='top' align='center'>";
         //echo t("Sama konttiviite kuin yllä.");
         //echo "</td>";
+      }
+      elseif ($tilaus['matkakoodi'] == 'bookkaukseton') {
+        echo "<td valign='top' rowspan='{$tilauksia_viitteella}' align='center'>";
+        echo t("Ei tietoa");
+        echo "</td>";
       }
       elseif (!$kontit_sinetointivalmiit and  count($vahvistetut_kontit) == 0) {
         echo "<td valign='top' rowspan='{$tilauksia_viitteella}' align='center'>";

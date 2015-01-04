@@ -1307,6 +1307,7 @@ function kasittele_bookkaussanoma($edi_data) {
 
   $tarvitaan_uusi_tilaus = false;
   $tunnus_johon_liitetaan = 0;
+  $kviitteet = array();
 
   if (mysql_num_rows($result) != 0) {
 
@@ -1322,15 +1323,12 @@ function kasittele_bookkaussanoma($edi_data) {
                  AND lasku.tilaustyyppi = 'N'";
     $kv_result = pupe_query($kv_query);
 
-    $kviitteet = array();
-
     while ($laskuinfo = mysql_fetch_assoc($kv_result)) {
       $kviitteet[] = $laskuinfo;
     }
-
   }
 
-  if (count($kviitteet) == 1 and $kviitteet[0]['konttiviite'] != $konttiviite) {
+  if (count($kviitteet) == 1 and $kviitteet[0]['konttiviite'] != $konttiviite and $kviitteet[0]['konttiviite'] != 'bookkaukseton') {
     $tarvitaan_uusi_tilaus = true;
   }
 
@@ -1473,9 +1471,17 @@ function kasittele_bookkaussanoma($edi_data) {
                       konttimaara  = '{$konttimaara}',
                       konttityyppi = '{$konttityyppi}',
                       matkakoodi   = '{$matkakoodi}',
-                      rullamaara   = '{$rullamaara}'
+                      rullamaara   = '{$rullamaara}',
+                      matkatiedot  = '{$matkatiedot}'
                       WHERE yhtio  = '{$kukarow['yhtio']}'
                       AND otunnus  = '{$tunnus}'";
+    pupe_query($update_query);
+
+    $update_query = "UPDATE lasku SET
+                     sisviesti1 = '{$ohje}',
+                     toimaika = '{$lahtopvm}'
+                     WHERE yhtio = '{$kukarow['yhtio']}'
+                     AND tunnus = '{$tunnus}'";
     pupe_query($update_query);
 
   }

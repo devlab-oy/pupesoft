@@ -638,7 +638,8 @@ if ($tee == "H") {
 
   $laskurow = mysql_fetch_assoc($result);
 
-  if ($laskurow["h4time"] != "0000-00-00 00:00:00" and $laskurow["h5time"] == "0000-00-00 00:00:00"
+  if ($yhtiorow["tarkenteet_pakolliset_tilioinneissa"] == "K" and
+      $laskurow["h4time"] != "0000-00-00 00:00:00" and $laskurow["h5time"] == "0000-00-00 00:00:00"
   ) {
     $tarkistus_query = "SELECT count(*) AS vajaat_tilioinnit_kpl
                         FROM tiliointi

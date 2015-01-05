@@ -1521,7 +1521,15 @@ while ($tietue = fgets($fd)) {
       if (!empty($varasto)) {
         $insertvarasto = $varasto;
       }
-
+      
+      // Anvian verkkokaupasta toim.puhelinnro tulee OSTOTIL.OT_YHTEYSHENKILONPUH:ss‰
+      if ($yhteyshenkilon_puhelin != '' and $ltoim_puh == '') {
+        $tpuh = $yhteyshenkilon_puhelin;
+      }
+      else {
+        $tpuh = $arow['toim_puh'];
+      }
+      
       // Lis‰t‰‰n otsikko
       $query = "INSERT into lasku SET
                 aktiivinen_kuljetus     = '$suunnistus',
@@ -1585,7 +1593,7 @@ while ($tietue = fgets($fd)) {
                 toimitustapa            = '$editilaus_toimitustapa',
                 toimvko                 = '',
                 toim_maa                = '$arow[toim_maa]',
-                toim_puh                = '$arow[toim_puh]',
+                toim_puh                = '$tpuh',
                 toim_nimi               = '$arow[toim_nimi]',
                 toim_nimitark           = '$arow[toim_nimitark]',
                 toim_osoite             = '$arow[toim_osoite]',

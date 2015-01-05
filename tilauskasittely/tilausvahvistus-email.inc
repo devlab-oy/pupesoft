@@ -139,7 +139,8 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
             if(tilausrivi.var not in ('P','J','O','S'), tilausrivi.varattu, 0) varattu,
             if(tilausrivi.var = 'J', tilausrivi.jt+tilausrivi.varattu , 0) jt,
             tilausrivi.toimaika, tilausrivi.kommentti, tilausrivi.tilkpl, tilausrivi.alv,
-            tilausrivi.nimitys,  tilausrivi.hinta, {$ale_query_select_lisa} tilausrivi.kommentti, tilausrivi.var
+            tilausrivi.nimitys,  tilausrivi.hinta, {$ale_query_select_lisa} tilausrivi.kommentti, tilausrivi.var,
+            tuote.status
             FROM tilausrivi
             LEFT JOIN tuote USING (yhtio, tuoteno)
             WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
@@ -334,6 +335,20 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
       if ($tvtilausrivirow['kommentti'] != "") {
         $ulos .= "     * ".sprintf("%-75.75s", $tvtilausrivirow['kommentti'])."\n";
+      }
+
+      // Lisätään mahdollinen saapumisaika tuoterivin alle, jos kyseessä on jt-rivi
+      if ($tvtilausrivirow["jt"] > 0) {
+        $myytavissa   = saldo_myytavissa($tvtilausrivirow["tuoteno"]);
+        $myytavissa   = $myytavissa[2];
+        $saapumisaika = hae_tuotteen_saapumisaika($tvtilausrivirow["tuoteno"],
+                                                  $tvtilausrivirow["status"], $myytavissa);
+        if (count($saapumisaika > 0)) {
+          $saapumisaika = $saapumisaika[1];
+
+          list($teksti, $paivamaara) = explode("!¡!", $saapumisaika);
+          $ulos .= "{$teksti} " . strip_tags($paivamaara);
+        }
       }
 
       // Tehrään liitetiedosto

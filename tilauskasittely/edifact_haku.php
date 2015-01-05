@@ -1,5 +1,4 @@
 <?php
-die;
 
 require '../inc/edifact_functions.inc';
 

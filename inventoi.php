@@ -290,7 +290,7 @@ if ($tee == 'VALMIS') {
         }
 
         // Jos on syötetty käsin inventointipvm pp, kk tai vvvv kokorimpsun pitää olla validi
-        if (isset($paivamaaran_kasisyotto) and (!empty($inventointipvm_pp) or !empty($inventointipvm_kk) or !empty($inventointipvm_vv))) {
+        if (isset($paivamaaran_kasisyotto) and $paivamaaran_kasisyotto == "JOO" and (!empty($inventointipvm_pp) or !empty($inventointipvm_kk) or !empty($inventointipvm_vv))) {
 
           if (!is_numeric($inventointipvm_pp)) $virhe = 1;
           if (!is_numeric($inventointipvm_kk)) $virhe = 1;
@@ -1568,7 +1568,7 @@ if ($tee == 'INVENTOI') {
               if ($sarjarow['laskutettuaika'] == '0000-00-00') {
                 echo "<input type='hidden' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>";
                 echo "<font class='message'>**", t("UUSI"), "**</font>";
-                echo " <a href='inventoi.php?tee=POISTAERANUMERO&tuoteno=$tuoteno&lista=$lista&lista_aika=$lista_aika&alku=$alku&toiminto=poistaeranumero&sarjatunnus=$sarjarow[tunnus]'>".t("Poista")."</a>";
+                echo " <a href='inventoi.php?tee=POISTAERANUMERO&tuoteno=$tuoteno&lista=$lista&lista_aika=$lista_aika&alku=$alku&toiminto=poistaeranumero&sarjatunnus=$sarjarow[tunnus]&paivamaaran_kasisyotto=$paivamaaran_kasisyotto'>".t("Poista")."</a>";
               }
               else {
                 echo "<input type='hidden' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>";
@@ -1592,7 +1592,7 @@ if ($tee == 'INVENTOI') {
 
           echo "</table>";
         }
-        echo "<br><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&toiminto=luouusitulo&hyllyalue=$tuoterow[hyllyalue]&hyllynro=$tuoterow[hyllynro]&hyllyvali=$tuoterow[hyllyvali]&hyllytaso=$tuoterow[hyllytaso]&from=INVENTOINTI&lopetus=", $palvelin2, "inventoi.php////tee=INVENTOI//tuoteno=$tuoteno//lista=$lista//lista_aika=$lista_aika//alku=$alku'>".t("Uusi eränumero")."</a>";
+        echo "<br><a href='tilauskasittely/sarjanumeroseuranta.php?tuoteno=".urlencode($tuoterow["tuoteno"])."&toiminto=luouusitulo&hyllyalue=$tuoterow[hyllyalue]&hyllynro=$tuoterow[hyllynro]&hyllyvali=$tuoterow[hyllyvali]&hyllytaso=$tuoterow[hyllytaso]&from=INVENTOINTI&lopetus=", $palvelin2, "inventoi.php////tee=INVENTOI//tuoteno=$tuoteno//lista=$lista//lista_aika=$lista_aika//alku=$alku//paivamaaran_kasisyotto=$paivamaaran_kasisyotto'>".t("Uusi eränumero")."</a>";
       }
 
       echo "</td><td valign='top'>";
@@ -1752,7 +1752,7 @@ if ($tee == 'INVENTOI') {
 
   echo "<tr><th>".t("Syötä inventointiselite:")."</th>";
   echo "<td><input type='text' size='50' id='lisaselite' name='lisaselite' value='$lisaselite'></td></tr>";
-  if (isset($paivamaaran_kasisyotto)) {
+  if (isset($paivamaaran_kasisyotto) and $paivamaaran_kasisyotto == "JOO") {
     echo "<tr><th>".t("Syötä inventointipäivämäärä (pp-kk-vvvv)").":</th>";
     echo "<td><input type='text' size='2' maxlength='2' name='inventointipvm_pp' value='$inventointipvm_pp'>";
     echo "<input type='text' size='2' maxlength='2' name='inventointipvm_kk' value='$inventointipvm_kk'>";

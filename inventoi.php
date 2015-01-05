@@ -895,6 +895,12 @@ if ($tee == 'VALMIS') {
 
               $tiliointisumma = round($summa, 2);
 
+              $tapvm = date('Y-m-d');
+
+              if (isset($paivamaaran_kasisyotto) and $paivamaaran_kasisyotto == "JOO" and (!empty($inventointipvm_pp) or !empty($inventointipvm_kk) or !empty($inventointipvm_vv))) {
+                $tapvm = "$inventointipvm_vv-$inventointipvm_kk-$inventointipvm_pp";
+              }
+
               $query = "INSERT into tiliointi set
                         yhtio    = '$kukarow[yhtio]',
                         ltunnus  = '$laskuid',
@@ -902,7 +908,7 @@ if ($tee == 'VALMIS') {
                         kustp    = '{$kustp_ins}',
                         kohde    = '{$kohde_ins}',
                         projekti = '{$projekti_ins}',
-                        tapvm    = now(),
+                        tapvm    = '{$tapvm}',
                         summa    = $tiliointisumma,
                         vero     = 0,
                         lukko    = '',
@@ -918,7 +924,7 @@ if ($tee == 'VALMIS') {
                         kustp    = '{$kustp_ins}',
                         kohde    = '{$kohde_ins}',
                         projekti = '{$projekti_ins}',
-                        tapvm    = now(),
+                        tapvm    = '{$tapvm}',
                         summa    = $tiliointisumma * -1,
                         vero     = 0,
                         lukko    = '',

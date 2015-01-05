@@ -57,6 +57,9 @@ if ($tee == "") {
   if ($toim == "LAATU" and empty($aihealueet)) {
     echo "<font class='error'>" . t("Aihealueita ei ole vielä lisätty") . "</font>";
   }
+  elseif ($toim == "" and empty($toimittajat)) {
+    echo "<font class='error'>" . t("Toimittajia ei ole vielä lisätty") . "</font>";
+  }
   else {
     piirra_formi($params);
   }

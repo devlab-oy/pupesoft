@@ -44,5 +44,6 @@ table.indexvas td {
 }
 
 .monivalintadiv {
-  display: inline-block;
+  float: left;
+  margin-right: 5px;
 }

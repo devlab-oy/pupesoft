@@ -583,10 +583,28 @@ if (!isset($task)) {
 
     foreach ($tilaukset as $key => $tilaus) {
 
-      $vahvistetut_kontit = array();
+      $kontit_sinetointivalmiit = false;
 
-      if ($tilaus['kontti_vahvistettu'] > 0) {
-        $vahvistetut_kontit[] = $tilaus['konttinumero'];
+      $query = "SELECT group_concat(otunnus)
+                FROM laskun_lisatiedot
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND konttiviite = '{$tilaus['konttiviite']}'";
+      $result = pupe_query($query);
+      $konttiviitteen_alaiset_tilaukset = mysql_result($result, 0);
+
+      $query = "SELECT count(tilausrivi.tunnus) AS vahvistettu
+                FROM tilausrivi
+                JOIN tilausrivin_lisatiedot AS trlt
+                  ON trlt.yhtio = tilausrivi.yhtio
+                  AND trlt.tilausrivitunnus = tilausrivi.tunnus
+                WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
+                AND tilausrivi.otunnus IN ({$konttiviitteen_alaiset_tilaukset})
+                AND trlt.sinettinumero != ''";
+      $result = pupe_query($query);
+      $vahvistettu = mysql_result($result, 0);
+
+      if ($vahvistettu > 0) {
+        $kontit_sinetointivalmiit = true;
       }
 
       $poikkeukset = array();
@@ -602,8 +620,6 @@ if (!isset($task)) {
       else{
        $konttiviite_kasitelty = false;
       }
-
-      $kontit_sinetointivalmiit = false;
 
       $query = "SELECT tunnus
                 FROM liitetiedostot
@@ -633,7 +649,6 @@ if (!isset($task)) {
         echo "<td valign='top' rowspan='{$tilauksia_viitteella}'>";
         echo $tilaus['matkakoodi'];
         echo "</td>";
-
       }
 
       if (!$konttiviite_kasitelty) {
@@ -674,7 +689,6 @@ if (!isset($task)) {
         else {
           echo date("j.n.Y H:i", strtotime($tilaus['satamavahvistus_pvm']));
         }
-
         echo "</td>";
       }
 
@@ -683,7 +697,6 @@ if (!isset($task)) {
         echo "<td valign='top' rowspan='{$tilauksia_viitteella}'>";
         echo $tilaus['konttiviite'];
         echo "</td>";
-
       }
 
       if ($tilaus['rullat'] == 0 and $tilaus['matkakoodi'] != 'bookkaukseton') {
@@ -747,34 +760,10 @@ if (!isset($task)) {
 
         if ($tilaus['tulouttamatta'] == 0) {
 
-          $query = "SELECT group_concat(otunnus)
-                    FROM laskun_lisatiedot
-                    WHERE yhtio = '{$yhtiorow['yhtio']}'
-                    AND konttiviite = '{$tilaus['konttiviite']}'";
-          $result = pupe_query($query);
-          $konttiviitteen_alaiset_tilaukset = mysql_result($result, 0);
-
           $tapahtumat .= "&bull; " .  t("Rullat viety varastoon") . "<br>";
 
           if (($tilaus['kontittamatta'] - $tilaus['ylijaama'] - $tilaus['hylatyt']) == 0) {
             $tapahtumat .= "&bull; " .  t("Rullat kontitettu") . "<br>";
-
-            $query = "SELECT count(tilausrivi.tunnus) AS kontittamatta
-                      FROM tilausrivi
-                      JOIN sarjanumeroseuranta AS ss
-                        ON ss.yhtio = tilausrivi.yhtio
-                        AND ss.myyntirivitunnus = tilausrivi.tunnus
-                      WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
-                      AND tilausrivi.otunnus IN ({$konttiviitteen_alaiset_tilaukset})
-                      AND tilausrivi.keratty = ''
-                      AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusaus')";
-            $result = pupe_query($query);
-            $konttiviitteesta_kontittamatta = mysql_result($result, 0);
-
-            if ($konttiviitteesta_kontittamatta == 0) {
-              $kontit_sinetointivalmiit = true;
-            }
-
           }
           elseif ($tilaus['kontittamatta'] < ($tilaus['rullat'] - $tilaus['ylijaama'] - $tilaus['hylatyt'])) {
             $tapahtumat .= "&bull; " .  t("Osa rullista kontitettu") . "<br>";
@@ -873,11 +862,9 @@ if (!isset($task)) {
       echo "</td>";
 
       if (!$konttiviite_kasitelty) {
-
         echo "<td valign='top' style='width:100px;' rowspan='{$tilauksia_viitteella}'>";
         echo $tilaus['ohje'];
         echo "</td>";
-
       }
 
       echo "<td valign='top'>";
@@ -894,7 +881,7 @@ if (!isset($task)) {
         echo t("Ei tietoa");
         echo "</td>";
       }
-      elseif (!$kontit_sinetointivalmiit and  count($vahvistetut_kontit) == 0) {
+      elseif (!$kontit_sinetointivalmiit) {
         echo "<td valign='top' rowspan='{$tilauksia_viitteella}' align='center'>";
         echo $tilaus['konttimaara'] . " kpl (ennakkoarvio)";
         echo "</td>";

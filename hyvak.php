@@ -618,23 +618,48 @@ if ($tee == 'L') {
   echo "</font><br><br>";
 }
 
-if ($tee == 'H') {
-  // Lasku merkit‰‰n hyv‰ksytyksi, tehd‰‰n timestamp ja p‰ivitet‰‰n hyvaksyja_nyt
+// Tarkistetaan, ett‰ laskun kaikilla tiliˆinneill‰ on kustannuspaikka ja projekti ja, ett‰ lasku
+// lˆytyy
+if ($tee == "H") {
   $query = "SELECT *
             FROM lasku
-            WHERE yhtio   = '$kukarow[yhtio]' and
-            tunnus        = '$tunnus' and
-            hyvaksyja_nyt = '$kukarow[kuka]'";
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND tunnus = '{$tunnus}'
+            AND hyvaksyja_nyt = '{$kukarow["kuka"]}'";
+
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
-    echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
+    echo "<font class = 'error'>" . t('Lasku kateissa') . "$tunnus</font>";
 
     require "inc/footer.inc";
     exit;
   }
 
   $laskurow = mysql_fetch_assoc($result);
+
+  $tarkistus_query = "SELECT count(*) AS vajaat_tilioinnit_kpl
+                      FROM tiliointi
+                      WHERE tiliointi.yhtio = '{$kukarow["yhtio"]}'
+                      AND tiliointi.ltunnus = {$laskurow["tunnus"]}
+                      AND tiliointi.lukko = ''
+                      AND tiliointi.korjattu = ''
+                      AND (kustp = 0 OR projekti = 0)";
+
+  $vajaat_tilioinnit_kpl = pupe_query($tarkistus_query);
+  $vajaat_tilioinnit_kpl = mysql_fetch_assoc($vajaat_tilioinnit_kpl);
+  $vajaat_tilioinnit_kpl = $vajaat_tilioinnit_kpl["vajaat_tilioinnit_kpl"];
+
+  if ($vajaat_tilioinnit_kpl > 0) {
+    echo "<font class = 'error'>" .
+         t('Laskulla on tiliˆintej‰, joilla ei ole kustannuspaikka tai projektia') . "</font>";
+
+    $tee = "";
+  }
+}
+
+if ($tee == 'H') {
+  // Lasku merkit‰‰n hyv‰ksytyksi, tehd‰‰n timestamp ja p‰ivitet‰‰n hyvaksyja_nyt
 
   //  Kun tehd‰‰n matkalaskun ensimm‰inen hyv‰ksynt‰..
   if ($laskurow["tilaustyyppi"] == "M" and $laskurow["h1time"]=="0000-00-00 00:00:00") {

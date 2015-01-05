@@ -618,8 +618,8 @@ if ($tee == 'L') {
   echo "</font><br><br>";
 }
 
-// Tarkistetaan, että laskun kaikilla tiliöinneillä on kustannuspaikka ja projekti ja, että lasku
-// löytyy
+// Tarkistetaan, että laskun kaikilla tiliöinneillä on kustannuspaikka, jos kyseessä on viimeinen
+// hyväksyjä. Tarkistetaan samalla, että lasku löytyy.
 if ($tee == "H") {
   $query = "SELECT *
             FROM lasku
@@ -638,23 +638,26 @@ if ($tee == "H") {
 
   $laskurow = mysql_fetch_assoc($result);
 
-  $tarkistus_query = "SELECT count(*) AS vajaat_tilioinnit_kpl
-                      FROM tiliointi
-                      WHERE tiliointi.yhtio = '{$kukarow["yhtio"]}'
-                      AND tiliointi.ltunnus = {$laskurow["tunnus"]}
-                      AND tiliointi.lukko = ''
-                      AND tiliointi.korjattu = ''
-                      AND (kustp = 0 OR projekti = 0)";
+  if ($laskurow["h4time"] != "0000-00-00 00:00:00" and $laskurow["h5time"] == "0000-00-00 00:00:00"
+  ) {
+    $tarkistus_query = "SELECT count(*) AS vajaat_tilioinnit_kpl
+                        FROM tiliointi
+                        WHERE tiliointi.yhtio = '{$kukarow["yhtio"]}'
+                        AND tiliointi.ltunnus = {$laskurow["tunnus"]}
+                        AND tiliointi.lukko = ''
+                        AND tiliointi.korjattu = ''
+                        AND (kustp = 0 OR projekti = 0)";
 
-  $vajaat_tilioinnit_kpl = pupe_query($tarkistus_query);
-  $vajaat_tilioinnit_kpl = mysql_fetch_assoc($vajaat_tilioinnit_kpl);
-  $vajaat_tilioinnit_kpl = $vajaat_tilioinnit_kpl["vajaat_tilioinnit_kpl"];
+    $vajaat_tilioinnit_kpl = pupe_query($tarkistus_query);
+    $vajaat_tilioinnit_kpl = mysql_fetch_assoc($vajaat_tilioinnit_kpl);
+    $vajaat_tilioinnit_kpl = $vajaat_tilioinnit_kpl["vajaat_tilioinnit_kpl"];
 
-  if ($vajaat_tilioinnit_kpl > 0) {
-    echo "<font class = 'error'>" .
-         t('Laskulla on tiliöintejä, joilla ei ole kustannuspaikka tai projektia') . "</font>";
+    if ($vajaat_tilioinnit_kpl > 0) {
+      echo "<font class = 'error'>" .
+           t('Laskulla on tiliöintejä, joilla ei ole kustannuspaikka tai projektia') . "</font>";
 
-    $tee = "";
+      $tee = "";
+    }
   }
 }
 

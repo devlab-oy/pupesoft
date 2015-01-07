@@ -414,19 +414,19 @@ if ($tee == 'VALMIS') {
             $erasyotetyt = round($erasyotetyt, 2);
 
             if (is_array($eranumero_kaikki[$i]) and substr($kpl, 0, 1) != '+' and substr($kpl, 0, 1) != '-' and $onko_uusia > 0) {
-              echo "<font class='error'>".t("VIRHE: Er‰numeroita ei voi lis‰t‰ kuin relatiivisella m‰‰r‰ll‰")."! (+1)</font><br>";
+              echo "<font class='error'>".t("417 VIRHE: Er‰numeroita ei voi lis‰t‰ kuin relatiivisella m‰‰r‰ll‰")."! (+1)</font><br>";
               $virhe = 1;
             }
             elseif (substr($kpl, 0, 1) == '+' and is_array($eranumero_kaikki[$i]) and $erasyotetyt != substr($kpl, 1)) {
-              echo "<font class='error'>".t("VIRHE: Er‰numeroiden m‰‰r‰ on oltava sama kuin laskettu syˆtetty m‰‰r‰")."! $tuoteno $kpl</font><br>";
+              echo "<font class='error'>".t("421 VIRHE: Er‰numeroiden m‰‰r‰ on oltava sama kuin laskettu syˆtetty m‰‰r‰")."! $tuoteno $kpl</font><br>";
               $virhe = 1;
             }
             elseif (substr($kpl, 0, 1) == '-' and is_array($eranumero_kaikki[$i]) and $erasyotetyt != substr($kpl, 1)) {
-              echo "<font class='error'>".t("VIRHE: Er‰numeroiden m‰‰r‰ on oltava sama kuin laskettu syˆtetty m‰‰r‰")."! $tuoteno $kpl</font><br>";
+              echo "<font class='error'>".t("425 VIRHE: Er‰numeroiden m‰‰r‰ on oltava sama kuin laskettu syˆtetty m‰‰r‰")."! $tuoteno $kpl</font><br>";
               $virhe = 1;
             }
             elseif (substr($kpl, 0, 1) != '-' and substr($kpl, 0, 1) != '+' and is_array($eranumero_kaikki[$i]) and $erasyotetyt != $kpl) {
-              echo "<font class='error'>".t("VIRHE: Er‰numeroiden m‰‰r‰ on oltava sama kuin laskettu syˆtetty m‰‰r‰")."! $tuoteno $kpl</font><br>";
+              echo "<font class='error'>".t("429 VIRHE: Er‰numeroiden m‰‰r‰ on oltava sama kuin laskettu syˆtetty m‰‰r‰")."! $tuoteno $kpl</font><br>";
               $virhe = 1;
             }
           }
@@ -897,7 +897,7 @@ if ($tee == 'VALMIS') {
 
               $tapvm = date('Y-m-d');
 
-              if (isset($paivamaaran_kasisyotto) and $paivamaaran_kasisyotto == "JOO" and (!empty($inventointipvm_pp) or !empty($inventointipvm_kk) or !empty($inventointipvm_vv))) {
+              if (isset($paivamaaran_kasisyotto) and $paivamaaran_kasisyotto == "JOO" and (!empty($inventointipvm_pp) and !empty($inventointipvm_kk) and !empty($inventointipvm_vv))) {
                 $tapvm = "$inventointipvm_vv-$inventointipvm_kk-$inventointipvm_pp";
               }
 
@@ -1062,6 +1062,7 @@ if ($tee == 'VALMIS') {
                               muutospvm   = now()
                               WHERE yhtio = '$kukarow[yhtio]'
                               and tunnus  = $enro_key";
+                    $sarjares = pupe_query($query);
                   }
                   elseif ($enro_val != '' and (float) $enro_val == 0) {
                     $query = "UPDATE sarjanumeroseuranta
@@ -1071,8 +1072,8 @@ if ($tee == 'VALMIS') {
                               muutospvm        = now()
                               WHERE yhtio      = '$kukarow[yhtio]'
                               and tunnus       = $enro_key";
+                    $sarjares = pupe_query($query);
                   }
-                  $sarjares = pupe_query($query);
                 }
 
                 // p‰ivitet‰‰n uusille sarjanumeroille laskutettuaika

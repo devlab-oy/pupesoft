@@ -223,7 +223,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
                  AND laji    in ('laskutus', 'kulutus')
                  AND tuoteno = '$epakurantti_row[tuoteno]'
                  AND kpl     < 0
-                 AND rivitunnus not in ('0', '-1')
+                 AND rivitunnus not in (0, -1)
                  ORDER BY laadittu DESC
                  LIMIT 1;";
       $tapres = pupe_query($query);

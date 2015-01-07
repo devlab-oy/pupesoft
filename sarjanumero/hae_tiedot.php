@@ -379,7 +379,8 @@ function hae_tiedot($hakukoodi, $tyyppi) {
               ON ostotilausrivi.yhtio = laskun_lisatiedot.yhtio
               AND ostotilausrivi.tunnus = sarjanumeroseuranta.ostorivitunnus
             WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
-            AND laskun_lisatiedot.konttiviite IN ('{$konttiviite}')";
+            AND laskun_lisatiedot.konttiviite IN ('{$konttiviite}')
+            AND sarjanumeroseuranta.sarjanumero IS NOT NULL";
   $result = pupe_query($query);
 
   $konttiviitteet = array();

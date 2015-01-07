@@ -2192,6 +2192,18 @@ if ($fieldname == "automaattinen_tuotehaku") {
   $jatko = 0;
 }
 
+if ($fieldname == "tuotekysely") {
+
+  $sel = $trow[$i] == "K" ? "selected" : "";
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+  $ulos .= "<option value=''>".t("Tuotekyselyss‰ haetaan kaikki tiedot oletuksena")."</option>";
+  $ulos .= "<option value='K' {$sel}>".t("Tuotekyselyss‰ k‰ytt‰j‰ hakee tiedot moduulikohtaisesti")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "oslapp_rakir_logo") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
@@ -3033,6 +3045,20 @@ if ($fieldname == "extranet_nayta_saldo") {
 
   $ulos .= "<option value = ''>" . t("Ei n‰ytet‰ saldoa extranetiss‰");
   $ulos .= "<option value = 'Y' $sel>" . t("N‰ytet‰‰n saldo extranetiss‰");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "extranet_poikkeava_toimitusosoite") {
+  $ulos = "<td><select name='{$nimi}' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel = $trow[$i] == 'Y' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>" . t("Ei poikkeavaa toimitusosoitetta extranet-tilauksissa");
+  $ulos .=
+    "<option value = 'Y' {$sel}>" .
+    t("Extranet-tilauksissa mahdollisuus syˆtt‰‰ poikkeava toimitusosoite");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -4358,6 +4384,41 @@ if ($fieldname == 'takuuvarasto') {
     $sel = $trow[$i] == $varow['tunnus'] ? "selected" : "";
     $ulos .= "<option value = '{$varow['tunnus']}' {$sel}>{$varow['nimitys']}</option>";
   }
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "muokkaatilaus_pv_rajaus") {
+
+  $_alkiot = array(
+    '0' => '',
+    '1' => '',
+    '2' => '',
+    '3' => '',
+    '5' => '',
+    '7' => '',
+    '14' => '',
+    '30' => '',
+    '60' => '',
+    '90' => '',
+  );
+
+  $_sel = array($trow[$i] => 'selected') + $_alkiot;
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $ulos .= "<option value='0' {$_sel['0']}>".t("Ei rajausta")."</option>";
+  $ulos .= "<option value='1' {$_sel['1']}>".t("%d p‰iv‰‰", "", 1)."</option>";
+  $ulos .= "<option value='2' {$_sel['2']}>".t("%d p‰iv‰‰", "", 2)."</option>";
+  $ulos .= "<option value='3' {$_sel['3']}>".t("%d p‰iv‰‰", "", 3)."</option>";
+  $ulos .= "<option value='5' {$_sel['5']}>".t("%d p‰iv‰‰", "", 5)."</option>";
+  $ulos .= "<option value='7' {$_sel['7']}>".t("%d p‰iv‰‰", "", 7)."</option>";
+  $ulos .= "<option value='14' {$_sel['14']}>".t("%d p‰iv‰‰", "", 14)."</option>";
+  $ulos .= "<option value='30' {$_sel['30']}>".t("%d p‰iv‰‰", "", 30)."</option>";
+  $ulos .= "<option value='60' {$_sel['60']}>".t("%d p‰iv‰‰", "", 60)."</option>";
+  $ulos .= "<option value='90' {$_sel['90']}>".t("%d p‰iv‰‰", "", 90)."</option>";
 
   $ulos .= "</select></td>";
 

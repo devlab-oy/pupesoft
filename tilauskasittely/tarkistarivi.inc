@@ -936,7 +936,7 @@ if (
   }
 
   if ($paikat != "" and $paikatlask > 1 and $row["hyllyalue"] != "!!M") {
-    $paikat = "<select name='paikka' style='width:120px;' onchange='submit();' {$paikka_disabled}>".$paikat."</select>";
+    $paikat = "<select name='paikka' class='minpad_select' style='width:120px;' onchange='submit();' {$paikka_disabled}>".$paikat."</select>";
   }
   elseif ($row["hyllyalue"] == "!!M") {
     $paikat = " $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]";
@@ -1003,7 +1003,7 @@ elseif (
   }
 
   if ($paikat != "" and $paikatlask > 1) {
-    $paikat = "<select name='paikka' style='width:120px;' onchange='submit();' {$paikka_disabled}>".$paikat."</select>";
+    $paikat = "<select name='paikka' class='minpad_select' style='width:120px;' onchange='submit();' {$paikka_disabled}>".$paikat."</select>";
   }
   elseif ($row["hyllyalue"] == "!!M") {
     $paikat = " $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]";
@@ -1060,7 +1060,7 @@ elseif (
     $paikat .= "<option value='!!!$krow[liitostunnus]' title='$title' $sel1>$title</option>";
   }
 
-  $paikat = "<select name='paikka' style='width:120px;' onchange='submit();' {$paikka_disabled}>".$paikat."</select>";
+  $paikat = "<select name='paikka' class='minpad_select' style='width:120px;' onchange='submit();' {$paikka_disabled}>".$paikat."</select>";
 }
 
 //  Onko tätä varattuna siirtolistalla?

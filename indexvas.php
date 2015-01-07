@@ -66,8 +66,10 @@ if (($yhtiorow["kayttoliittyma"] == "" and $kukarow["kayttoliittyma"] == "") or 
 
 $hiddenlisa = "";
 
-if (isset($_COOKIE["vas_frame_showhide"]) and $_COOKIE["vas_frame_showhide"] == "hidden") {
-  $hiddenlisa = " style='display: none;'";
+if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "U") {
+  if (isset($_COOKIE["vas_frame_showhide"]) and $_COOKIE["vas_frame_showhide"] == "hidden") {
+    $hiddenlisa = " style='display: none;'";
+  }
 }
 
 echo "<div id = 'indexvas_container'{$hiddenlisa}>";
@@ -291,7 +293,6 @@ if (($yhtiorow["kayttoliittyma"] == "U" and $kukarow["kayttoliittyma"] == "") or
 
   echo "
     <script>
-
         $('.menu').click(function(){
           $('.menu').removeClass('menu_aktivoitu');
           $(this).addClass('menu_aktivoitu');

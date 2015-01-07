@@ -1430,6 +1430,31 @@ if ($tee == "JATKA") {
                     }
                   }
 
+                  (function () {
+                    window.onload = function() {
+                      var buttons = document.getElementsByName('poistaValintaNappi');
+
+                      for (var i = 0;i < buttons.length;i++) {
+                        buttons[i].addEventListener('click', poistaValinnat, false);
+                      }
+
+                      function poistaValinnat(e) {
+                        e.preventDefault();
+
+                        var row = e.target.parentNode.parentNode;
+                        var inputs = row.getElementsByTagName('input');
+
+                        for (var i = 0;i < inputs.length;i++) {
+                          var input = inputs[i];
+
+                          if (input.type === 'radio') {
+                            input.checked = false;
+                          }
+                        }
+                      }
+                    };
+                  })();
+
                   //-->
                   </script>";
 
@@ -1864,6 +1889,7 @@ if ($tee == "JATKA") {
 
                     echo "<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA' $mita_check></td>";
                     echo "<td valign='top' align='center' $classlisa>".t("H")."<input type='radio' name='loput[$tunnukset]' value='VAKISIN' $mita_check></td>";
+                    echo "<td class='back'><button name='poistaValintaNappi'>" . t("Poista valinta") . "</button></td>";
                   }
                   elseif ($kukarow["extranet"] != "") {
                     echo "<td valign='top' $class><font style='color:green;'>".t("Voidaan toimittaa")."!</font></td>";
@@ -1958,6 +1984,7 @@ if ($tee == "JATKA") {
 
                   echo "<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA' $mita_check></td>";
                   echo "<td valign='top' align='center' $classlisa>".t("H")."<input type='radio' name='loput[$tunnukset]' value='VAKISIN' $mita_check></td>";
+                  echo "<td class='back'><button name='poistaValintaNappi'>" . t("Poista valinta") . "</button></td>";
 
                   $jt_rivilaskuri++;
                 }
@@ -2014,6 +2041,7 @@ if ($tee == "JATKA") {
 
                   echo "<td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA' $mita_check></td>";
                   echo "<td valign='top' align='center' $classlisa>".t("H")."<input type='radio' name='loput[$tunnukset]' value='VAKISIN' $mita_check></td>";
+                  echo "<td class='back'><button name='poistaValintaNappi'>" . t("Poista valinta") . "</button></td>";
 
                   $jt_rivilaskuri++;
                 }
@@ -2065,6 +2093,8 @@ if ($tee == "JATKA") {
                         <td valign='top' align='center' $class>&nbsp;</td>
                         <td valign='top' align='center' $classlisa>".t("M")."<input type='radio' name='loput[$tunnukset]' value='MITA' $mita_check></td>";
                     echo "<td valign='top' align='center' $classlisa>".t("H")."<input type='radio' name='loput[$tunnukset]' value='VAKISIN' $mita_check></td>";
+                    echo "<td class='back'><button name='poistaValintaNappi'>" . t("Poista valinta") . "</button></td>";
+
                   }
                   else {
                     echo "<td valign='top' align='center' $class>&nbsp;</td>";

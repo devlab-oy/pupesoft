@@ -3,23 +3,32 @@
 function hae_toimittajat_selectiin() {
   global $kukarow;
 
-  $query = "SELECT toimi.tunnus,
-            toimi.nimi
+  $result    = t_avainsana('TOIMIT_TKIRJAST');
+  $tunnukset = array();
+
+  while ($toimittaja = mysql_fetch_assoc($result)) {
+    array_push($tunnukset, $toimittaja["selite"]);
+  }
+
+  if (!empty($tunnukset)) {
+    $tunnukset = implode(",", $tunnukset);
+    $query     = "SELECT tunnus, nimi
             FROM toimi
-            WHERE toimi.yhtio = '{$kukarow["yhtio"]}'
-            AND toimi.oletus_vienti IN ('C', 'J', 'F', 'K', 'I', 'L')
-            AND toimi.tyyppi NOT IN ('P', 'PP')
+                  WHERE yhtio = '{$kukarow["yhtio"]}'
+                  AND tunnus IN ({$tunnukset})
             ORDER BY toimi.nimi";
 
   $result = pupe_query($query);
-
   $toimittajat = array();
 
-  while ($rivi = mysql_fetch_assoc($result)) {
-    array_push($toimittajat, $rivi);
+    while ($toimittaja = mysql_fetch_assoc($result)) {
+      array_push($toimittajat, $toimittaja);
   }
 
   return $toimittajat;
+}
+
+  return false;
 }
 
 function tiedostotyypit($aihealue = "") {
@@ -65,29 +74,29 @@ function hae_tiedostot($params) {
 
   if ($valittu_toimittaja) {
     $query = "SELECT liitetiedostot.tunnus,
-               liitetiedostot.kayttotarkoitus,
-               liitetiedostot.selite
-               FROM tuotteen_toimittajat
-               INNER JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio
-                 AND tuotteen_toimittajat.tuoteno = tuote.tuoteno)
-               INNER JOIN liitetiedostot ON (liitetiedostot.yhtio = tuotteen_toimittajat.yhtio
-                 AND liitetiedostot.liitos           = 'tuote'
-                 AND liitetiedostot.liitostunnus     = tuote.tunnus
-                 AND liitetiedostot.kayttotarkoitus  = '{$tiedoston_tyyppi}')
-               WHERE tuotteen_toimittajat.yhtio      = '{$kukarow['yhtio']}'
-               AND tuotteen_toimittajat.liitostunnus = '{$valittu_toimittaja}'
-               ORDER BY liitetiedostot.selite";
+              liitetiedostot.kayttotarkoitus,
+              liitetiedostot.selite
+              FROM tuotteen_toimittajat
+              INNER JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio
+                AND tuotteen_toimittajat.tuoteno    = tuote.tuoteno)
+              INNER JOIN liitetiedostot ON (liitetiedostot.yhtio = tuotteen_toimittajat.yhtio
+                AND liitetiedostot.liitos           = 'tuote'
+                AND liitetiedostot.liitostunnus     = tuote.tunnus
+                AND liitetiedostot.kayttotarkoitus  = '{$tiedoston_tyyppi}')
+              WHERE tuotteen_toimittajat.yhtio      = '{$kukarow['yhtio']}'
+              AND tuotteen_toimittajat.liitostunnus = '{$valittu_toimittaja}'
+              ORDER BY liitetiedostot.selite";
   }
   elseif ($aihealue and $tiedoston_tyyppi) {
     $query = "SELECT liitetiedostot.tunnus,
-               liitetiedostot.kayttotarkoitus,
-               liitetiedostot.selite
-               FROM liitetiedostot
-               WHERE liitetiedostot.liitos        = 'muut_tiedostot'
-               AND liitetiedostot.liitostunnus    = 0
-               AND liitetiedostot.kayttotarkoitus = '{$aihealue} | {$tiedoston_tyyppi}'
-               AND liitetiedostot.yhtio           = '{$kukarow["yhtio"]}'
-               ORDER BY liitetiedostot.selite";
+              liitetiedostot.kayttotarkoitus,
+              liitetiedostot.selite
+              FROM liitetiedostot
+              WHERE liitetiedostot.liitos        = 'muut_tiedostot'
+              AND liitetiedostot.liitostunnus    = 0
+              AND liitetiedostot.kayttotarkoitus = '{$aihealue} | {$tiedoston_tyyppi}'
+              AND liitetiedostot.yhtio           = '{$kukarow["yhtio"]}'
+              ORDER BY liitetiedostot.selite";
   }
 
   if (empty($query)) {

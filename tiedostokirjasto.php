@@ -8,7 +8,7 @@ else {
   exit;
 }
 
-require_once("tiedostofunkkarit.inc");
+require_once "tiedostofunkkarit.inc";
 
 $toim           = isset($toim) ? strtoupper($toim) : "";
 $aihealue       = isset($aihealue) ? $aihealue : "";
@@ -56,6 +56,9 @@ else {
 if ($tee == "") {
   if ($toim == "LAATU" and empty($aihealueet)) {
     echo "<font class='error'>" . t("Aihealueita ei ole vielä lisätty") . "</font>";
+  }
+  elseif ($toim == "" and empty($toimittajat)) {
+    echo "<font class='error'>" . t("Toimittajia ei ole vielä lisätty") . "</font>";
   }
   else {
     piirra_formi($params);
@@ -143,7 +146,7 @@ function piirra_formi($params) {
   }
   elseif ($valittu_aihealue) {
     echo
-      "<tr>
+    "<tr>
          <td colspan='2'>
            <font class='error'>" .
       t("Tälle aihealueelle ei ole vielä lisätty tiedostotyyppejä") .
@@ -172,6 +175,7 @@ function piirra_tiedostolista($tiedostot) {
     return;
   }
 
+  echo "<br>";
   echo "<table>";
   echo "<tbody>";
 

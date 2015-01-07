@@ -62,8 +62,6 @@ if (isset($_POST['task']) and $_POST['task'] == 'hae_pakkalista') {
 
   $pakkalista = unserialize(base64_decode($_POST['pakkalista']));
 
-  print_r($pakkalista);die;
-
   $pdf_data = array(
     'pakkalista' => $pakkalista,
     'taara' => $_POST['taara'],

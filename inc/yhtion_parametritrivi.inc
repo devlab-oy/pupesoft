@@ -2986,6 +2986,24 @@ if ($fieldname == "tilausvahvistus_jttoimituksista") {
   $jatko = 0;
 }
 
+if ($fieldname == "tilausvahvistus_jt_saapumisaika") {
+  $ulos = "<td><select name='{$nimi}' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel       = array();
+  $apu       = $trow[$i];
+  $sel[$apu] = "selected";
+
+  $ulos .=
+    "<option value=''>" . t("Ei n‰ytet‰ tilausvahvistuksessa jt-tuotteiden saapumisaikoja") .
+    "</option>";
+  $ulos .= "<option value='K' {$sel["K"]}>" .
+           t("N‰ytet‰‰n tilausvahvistuksessa jt-tuotteiden saapumisaika, jos se on tiedossa") .
+           "</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "tilauksen_myyntieratiedot") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

@@ -338,7 +338,7 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
       }
 
       // Lisätään mahdollinen saapumisaika tuoterivin alle, jos kyseessä on jt-rivi
-      if ($tvtilausrivirow["jt"] > 0) {
+      if ($yhtiorow["tilausvahvistus_jt_saapumisaika"] == "K" and $tvtilausrivirow["jt"] > 0) {
         $myytavissa   = saldo_myytavissa($tvtilausrivirow["tuoteno"]);
         $myytavissa   = $myytavissa[2];
         $saapumisaika = hae_tuotteen_saapumisaika($tvtilausrivirow["tuoteno"],

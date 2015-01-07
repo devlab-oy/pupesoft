@@ -15,7 +15,9 @@ if ($_kentta == "toim_tuoteno_tunnus") {
     $ulos = "<td><input type='hidden' name='$nimi' value='$lukitse_avaimeen'>$lukitse_avaimeen</td>";
     $jatko = 0;
   }
-
+  else {
+    $tyyppi = 0;
+  }
 }
 
 if ($_kentta == "yksikko") {

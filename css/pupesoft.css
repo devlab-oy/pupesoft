@@ -86,6 +86,11 @@ select {
   background-position: right;
 }
 
+select:disabled {
+  background-image: none;
+  border-style: none;
+}
+
 select.multipleselect {
   font-size: 10pt;
   padding: 2px 2px 2px 2px;
@@ -132,10 +137,15 @@ input[type=submit].poista_btn {
 }
 
 .monivalintadiv {
-  display: inline-block;
+  float: left;
+  margin-right: 5px;
 }
 
 table.ostorivien_kohdistus input[type=text], table.ostorivien_kohdistus input[type=button], table.ostorivien_kohdistus select {
   margin: 0;
   padding: 1px;
+}
+
+select.minpad_select {
+  padding: 8px 15px 8px 4px;
 }

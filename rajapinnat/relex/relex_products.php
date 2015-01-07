@@ -463,6 +463,7 @@ while ($row = mysql_fetch_assoc($res)) {
           if(tuotteen_toimittajat.toimitusaika = 0, toimi.oletus_toimaika, tuotteen_toimittajat.toimitusaika) toimitusaika,
           tuotteen_toimittajat.toim_tuoteno,
           tuotteen_toimittajat.toim_nimitys,
+          if(tuotteen_toimittajat.valuutta = '', toimi.oletus_valkoodi, tuotteen_toimittajat.valuutta) valuutta,
           if(tuotteen_toimittajat.osto_era = 0, 1, tuotteen_toimittajat.osto_era) osto_era,
           if(tuotteen_toimittajat.pakkauskoko = 0, '', tuotteen_toimittajat.pakkauskoko) pakkauskoko,
           tuotteen_toimittajat.ostohinta,
@@ -560,11 +561,33 @@ while ($row = mysql_fetch_assoc($res)) {
         $korjattu_ema = round($ttrow['toimitusaika'], 2);
       }
 
+      unset($valtrow);
+
+      if ($ttrow['valuutta'] != $yhtiorow['valkoodi']) {
+
+        // haetaan vienti_kurssi
+        $query = "SELECT nimi, kurssi, tunnus
+                  FROM valuu
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND nimi = '{$ttrow['valuutta']}'
+                  ORDER BY jarjestys";
+        $vresult = pupe_query($query);
+        if (mysql_num_rows($vresult) == 1) {
+          $valtrow = mysql_fetch_assoc($vresult);
+        }
+      }
+
+      if (!isset($valtrow)) $valtrow['kurssi'] = 1;
+
+      // alehinta_ostoa varten tehdään pieni kikka ja käännetään kurssi
+      // tämä siksi että toimittajan valuuttaa katsotaan funkkarissa ns kotivaluuttana vs oikea kotivaluutta
+      $valtrow['kurssi'] = 1 / $valtrow['kurssi'];
+
       // Hetaan kaikki ostohinnat yhtiön oletusvaluutassa
       $laskurow = array(
         'liitostunnus'  => $ttrow['toimittaja'],
         'valkoodi'      => $yhtiorow["valkoodi"],
-        'vienti_kurssi' => 1,
+        'vienti_kurssi' => $valtrow['kurssi'],
         'ytunnus'       => $ttrow['ytunnus'],
       );
 

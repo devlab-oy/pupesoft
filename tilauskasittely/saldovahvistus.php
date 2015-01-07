@@ -98,6 +98,15 @@ $request = array(
   'avoin_saldo_rajaus'                    => $avoin_saldo_rajaus,
 );
 
+$t = array(
+  "email" => t("Email puuttuu"),
+  "nayta_pdf" => t("Näytä pdf"),
+  "tulosta_pdf" => t("Tulosta pdf"),
+  "kohdistamaton" => t('Kohdistamaton suoritus'),
+);
+
+$request["t"] = $t;
+
 $request['laskut'] = array();
 $request['valitut_laskut'] = array();
 
@@ -467,7 +476,7 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
   echo $saldovahvistusrivi['saldovahvistus_viesti'];
   if ($saldovahvistusrivi['asiakas']['talhal_email'] == '') {
     echo "<br/>";
-    echo "<font class='error'>" . t('Email puuttuu') . "</font>";
+    echo "<font class='error'>{$request["t"]["email"]}</font>";
   }
   echo "</td>";
 
@@ -478,7 +487,7 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
   // .nayta_pdf_td ja .lasku_tunnus, jotta .saldovahvistus_rivi_valinta löytää lasku_tunnukset, jotka lähtee ajaxin mukana
   echo "<td class='back nayta_pdf_td'>";
   echo "<form method='POST' action='' id='" . implode('', $saldovahvistusrivi['lasku_tunnukset']) . "' name='" . implode('', $saldovahvistusrivi['lasku_tunnukset']) . "' autocomplete='off'>";
-  echo "<input type='submit' value='" . t("Näytä pdf") . "' onClick=\"js_openFormInNewWindow('" . implode('', $saldovahvistusrivi['lasku_tunnukset']) . "', '" . implode('', $saldovahvistusrivi['lasku_tunnukset']) . "'); return false;\">";
+  echo "<input type='submit' value='{$request["t"]["nayta_pdf"]}' onClick=\"js_openFormInNewWindow('" . implode('', $saldovahvistusrivi['lasku_tunnukset']) . "', '" . implode('', $saldovahvistusrivi['lasku_tunnukset']) . "'); return false;\">";
   echo "<input type='hidden' name='tee' value='NAYTATILAUS' />";
   echo "<input type='hidden' name='nayta_pdf' value='1' />";
   echo "<input type='hidden' name='pp' value='{$request['pp']}' />";
@@ -496,7 +505,7 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
   echo "<br/>";
 
   echo "<form method='POST' action=''>";
-  echo "<input type='submit' value='" . t('Tulosta pdf') . "' />";
+  echo "<input type='submit' value='{$request["t"]["tulosta_pdf"]}' />";
   echo "<input type='hidden' name='tee' value='tulosta_saldovahvistus_pdf' />";
   echo "<input type='hidden' name='pp' value='{$request['pp']}' />";
   echo "<input type='hidden' name='kk' value='{$request['kk']}' />";

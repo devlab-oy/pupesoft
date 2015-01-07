@@ -26884,7 +26884,8 @@ if (!function_exists('hae_lahetetyt_saldovahvistukset')) {
       }
     }
 
-    $lahetetyt_saldovahvistukset = keraa_kohdistamattomat_lahetetyista($lahetetyt_saldovahvistukset);
+    $t = $request["t"]["kohdistamaton"];
+    $lahetetyt_saldovahvistukset = keraa_kohdistamattomat_lahetetyista($lahetetyt_saldovahvistukset, $t);
 
     //Jos saldovahvistus_tunnus setattu niin halutaan tietty saldovahvistus pdf:nä.
     if (isset($request['saldovahvistus_tunnus'])) {
@@ -26951,7 +26952,7 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
               asiakas.tunnus AS asiakas_tunnus,
               lasku.summa,
               ROUND(SUM(tiliointi.summa), 2) AS avoin_saldo
-              FROM lasku USE INDEX (yhtio_tila_mapvm)
+              FROM lasku
               JOIN asiakas
               ON ( asiakas.yhtio = lasku.yhtio
                 AND asiakas.tunnus                   = lasku.liitostunnus
@@ -27156,7 +27157,7 @@ if (!function_exists('keraa_saldovahvistusrivit_ktunnus_ytunnus')) {
 }
 
 if (!function_exists('hae_kohdistamattomat_suoritukset')) {
-  function hae_kohdistamattomat_suoritukset($asiakas_tunnukset, $pvm) {
+  function hae_kohdistamattomat_suoritukset($asiakas_tunnukset, $pvm, $t) {
     global $kukarow, $yhtiorow;
 
     if (empty($asiakas_tunnukset)) {
@@ -27180,8 +27181,9 @@ if (!function_exists('hae_kohdistamattomat_suoritukset')) {
     $result = pupe_query($query);
 
     $kohdistamattomat_suoritukset = array();
+
     while ($kohdistamaton_suoritus = mysql_fetch_assoc($result)) {
-      $kohdistamaton_suoritus['laskunro'] = t('Kohdistamaton_suoritus');
+      $kohdistamaton_suoritus['laskunro'] = $t;
       $kohdistamattomat_suoritukset[] = $kohdistamaton_suoritus;
     }
 
@@ -27191,7 +27193,7 @@ if (!function_exists('hae_kohdistamattomat_suoritukset')) {
 
 if (!function_exists('hae_lahetetyt_kohdistamattomat_suoritukset')) {
 
-  function hae_lahetetyt_kohdistamattomat_suoritukset($saldovahvistus_tunnus) {
+  function hae_lahetetyt_kohdistamattomat_suoritukset($saldovahvistus_tunnus, $t) {
     global $kukarow, $yhtiorow;
 
     $query = "SELECT saldovahvistusrivit.tyyppi AS saldovahvistusrivi_tyyppi,
@@ -27204,8 +27206,9 @@ if (!function_exists('hae_lahetetyt_kohdistamattomat_suoritukset')) {
     $result = pupe_query($query);
 
     $saldovahvistusrivit = array();
+
     while ($saldovahvistusrivi = mysql_fetch_assoc($result)) {
-      $saldovahvistusrivi['laskunro'] = t('Kohdistamaton suoritus');
+      $saldovahvistusrivi['laskunro'] = $t;
       $saldovahvistusrivit[] = $saldovahvistusrivi;
     }
 
@@ -27219,12 +27222,14 @@ if (!function_exists('keraa_kohdistamattomat')) {
   function keraa_kohdistamattomat($request, $laskut) {
     global $kukarow, $yhtiorow;
 
+    $t = $request["t"]["kohdistamaton"];
+
     foreach ($laskut as &$lasku) {
       $pvm = $request['paiva'];
       $asiakasnumerot_ja_tunnukset = $lasku['asiakasnumerot'];
 
       $asiakas_tunnukset = search_array_key_recursive($asiakasnumerot_ja_tunnukset, 'asiakas_tunnus');
-      $kohdistamattomat_suoritukset = hae_kohdistamattomat_suoritukset($asiakas_tunnukset, $pvm);
+      $kohdistamattomat_suoritukset = hae_kohdistamattomat_suoritukset($asiakas_tunnukset, $pvm, $t);
 
       if (!empty($kohdistamattomat_suoritukset)) {
         $params = array(
@@ -27244,11 +27249,12 @@ if (!function_exists('keraa_kohdistamattomat')) {
 
 if (!function_exists('keraa_kohdistamattomat_lahetetyista')) {
 
-  function keraa_kohdistamattomat_lahetetyista($lahetetyt_saldovahvistukset) {
+  function keraa_kohdistamattomat_lahetetyista($lahetetyt_saldovahvistukset, $t) {
+
     foreach ($lahetetyt_saldovahvistukset as $lahetys_paiva => &$lasku_saldovahvistus) {
       foreach ($lasku_saldovahvistus as $saldovahvistus_tunnus => &$lasku_ytunnus) {
         foreach ($lasku_ytunnus as $ryhmittely => &$saldovahvistus) {
-          $lahetetyt_kohdistamattomat_suoritukset = hae_lahetetyt_kohdistamattomat_suoritukset($saldovahvistus_tunnus);
+          $lahetetyt_kohdistamattomat_suoritukset = hae_lahetetyt_kohdistamattomat_suoritukset($saldovahvistus_tunnus, $t);
 
           if (!empty($lahetetyt_kohdistamattomat_suoritukset)) {
             $params = array(

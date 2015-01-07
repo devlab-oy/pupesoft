@@ -2482,7 +2482,7 @@ if (!$cli and !isset($api_kentat)) {
     'toimittajahinta'                 => 'Toimittajan hinnat',
     'toimitustapa'                    => 'Toimitustavat',
     'toimitustavan_lahdot'            => 'Toimitustavan lähdöt',
-    'tullinimike'                     => 'Tullinimikeet',
+    'tullinimike'                     => 'Tullinimikkeet',
     'tuote'                           => 'Tuote',
     'tuotepaikat'                     => 'Tuotepaikat',
     'tuoteperhe'                      => 'Tuoteperheet',

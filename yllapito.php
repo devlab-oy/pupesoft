@@ -1771,7 +1771,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   $result = pupe_query($query);
   $trow = mysql_fetch_array($result);
 
-  echo "<table><tr><td class='back top' style='padding: 0px;'>";
+  echo "<table><tr><td class='back pnopad ptop'>";
 
   echo "<table>";
 
@@ -2050,7 +2050,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   }
 
   echo "</td>";
-  echo "<td class='back top'>";
+  echo "<td class='back pnopad ptop'>";
 
   if ($errori == '' and $toim == "sarjanumeron_lisatiedot") {
     @include "inc/arviokortti.inc";
@@ -2318,7 +2318,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
         if (!isset($seuraavatunnus)) $seuraavatunnus = 0;
 
-        echo "<tr><td class='back'>";
+        echo "<tr><td class='back pnopad'>";
         echo "<br />
           <form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post' onSubmit = 'return verify()' enctype='multipart/form-data'>
           <input type = 'hidden' name = 'toim' value = '$aputoim'>
@@ -2331,7 +2331,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
           <input type = 'hidden' name = 'lopetus' value = '$lopetus'>
           <input type = 'hidden' name = 'del' value ='1'>
           <input type='hidden' name='seuraavatunnus' value = '$seuraavatunnus'>
-          <input type = 'submit' value = '".t("Poista $otsikko_nappi")."'>
+          <input type = 'submit' class='poista_btn' value = '".t("Poista $otsikko_nappi")."'>
           </form>";
         echo "</td></tr>";
       }

@@ -1673,6 +1673,16 @@ if (!function_exists('rivi_lahete')) {
       }
     }
 
+    // Lis‰t‰‰n mahdollinen saapumisaika tuoterivin alle, jos kyseess‰ on jt-rivi
+    $saapumisaika = jt_saapumisaika_tilausvahvistus($row, $asrow1["status"]);
+
+    if (!empty($row["kommentti"])) {
+      $row["kommentti"] .= "\n{$saapumisaika}";
+    }
+    else {
+      $row["kommentti"] = $saapumisaika;
+    }
+
     // Mahtuuko rivi t‰lle sivulle
     $kalatest = $kala;
 

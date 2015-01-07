@@ -850,7 +850,7 @@ if ($tee == "KIRJOITA" or $tee == "KIRJOITAKOPIO") {
       $laskurow['viesti'] = (trim($laskurow['viesti']) == "") ? $laskurow['laskunro'] : $laskurow['viesti']." ".$laskurow['laskunro'];
     }
 
-    if ($kukarow["yhtio"] == "kiko") {
+    if ($kukarow["yhtio"] == "kiko" or $kukarow["yhtio"] == "artr") {
       // Tehd‰‰n er‰t per p‰iv‰ ja sepa-maksut yhteen ja muut toiseen
       if ($edpvm != $laskurow['olmapvm'] or $edsepa != $laskurow['sepa']) {
         sepa_paymentinfo($laskurow);

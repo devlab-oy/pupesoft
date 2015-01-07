@@ -639,13 +639,13 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       $yhtiorow['active_css'] = $yhtiorow['css_verkkokauppa'];
     }
     elseif ($kukarow["extranet"] != "" and $yhtiorow["css_extranet"] != "") {
-       $yhtiorow['active_css'] = $yhtiorow["css_extranet"];
+      $yhtiorow['active_css'] = $yhtiorow["css_extranet"];
     }
     elseif (($yhtiorow["kayttoliittyma"] == "" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "C") {
-       $yhtiorow['active_css'] = $yhtiorow['css_classic'];
+      $yhtiorow['active_css'] = $yhtiorow['css_classic'];
     }
     else {
-       $yhtiorow['active_css'] = $yhtiorow['css'];
+      $yhtiorow['active_css'] = $yhtiorow['css'];
     }
 
     if ($kukarow["kieli"] == "ru" and $yhtiorow['yhtio'] == 'allr') {

@@ -2044,7 +2044,7 @@ if ($kasitellaan_tiedosto) {
         }
 
         // Laitetaan oletuksena asiakashinnalle yhtiön valuutta
-        if ($table_mysql == "asiakashinta") {
+        if ($table_mysql == "asiakashinta" and $taulunrivit[$taulu][$eriviindex][$postoiminto] != "POISTA") {
           if (stripos($query, ", valkoodi = ") === FALSE) {
             $query .= ", valkoodi = '{$yhtiorow["valkoodi"]}' ";
           }
@@ -2353,7 +2353,7 @@ if (!$cli and !isset($api_kentat)) {
     'toimittajahinta'                 => 'Toimittajan hinnat',
     'toimitustapa'                    => 'Toimitustavat',
     'toimitustavan_lahdot'            => 'Toimitustavan lähdöt',
-    'tullinimike'                     => 'Tullinimikeet',
+    'tullinimike'                     => 'Tullinimikkeet',
     'tuote'                           => 'Tuote',
     'tuotepaikat'                     => 'Tuotepaikat',
     'tuoteperhe'                      => 'Tuoteperheet',

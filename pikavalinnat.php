@@ -24,11 +24,11 @@ $kuvakkeet_img = array ("Kalenteri"    => "calendar.png",
 
 if ($tee == "tallenna") {
   foreach ($skriptit as $i => $skripti) {
-    
+
     if ($jarjestykset[$i] == "") {
       $jarjestykset[$i] = 99;
     }
-    
+
     // Tsekataan, että kaikki tiedot on syötetty
     if (empty($skriptit[$i]) or empty($kuvakkeet[$i]) or empty($tekstit[$i])) {
       unset($skriptit[$i]);
@@ -37,21 +37,21 @@ if ($tee == "tallenna") {
       unset($jarjestykset[$i]);
     }
   }
-  
+
   asort($jarjestykset);
 
   $jarj = 1;
   $tallennettavat = array();
-  
+
   // laitetaan järjestykset kuntoon
-  foreach ($jarjestykset as $i => $j) {    
+  foreach ($jarjestykset as $i => $j) {
     $tallennettavat["skriptit"][]     = $skriptit[$i];
     $tallennettavat["kuvakkeet"][]    = $kuvakkeet[$i];
     $tallennettavat["tekstit"][]      = $tekstit[$i];
     $tallennettavat["jarjestykset"][] = $jarj;
     $jarj++;
   }
-  
+
   $tallennettavat = serialize($tallennettavat);
 }
 
@@ -71,12 +71,12 @@ if ($tee == "tallenna") {
             muutospvm    = now(),
             selitetark   = '$tallennettavat' ";
   pupe_query($query);
-  
-  
+
+
   echo "<script>";
   echo "parent.ylaframe.location.href = 'ylaframe.php';";
   echo "</script>";
-  
+
 }
 
 echo "<form method='post' action='pikavalinnat.php'>";
@@ -180,9 +180,9 @@ $kala = 0;
 
 foreach ($kuvakkeet_img as $kuvanimi => $kuva) {
   echo "<td><img src='{$palvelin2}pics/facelift/icons/$kuva'> $kuvanimi</td>";
-  
+
   $kala++;
-  
+
   if ($kala % 4 == 0) {
     echo "</tr><tr>";
   }

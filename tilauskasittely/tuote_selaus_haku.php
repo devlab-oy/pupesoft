@@ -1103,7 +1103,7 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
           if ($myytavissa <= 0) {
             if ($row_value['tuoteperhe'] == "") {
               // Jos tuote on vastaavauusketjussa, niin pienennetään vastaavuusketjun kokoa, niin saadaan rowspanit menemään nätisti.
-              if ($row_value["vastaavat"] != $row_value["tuoteno"] and $row_value["vastaavat"] > 0) {
+              if ($row_value["vastaavat"] != $row_value["tuoteno"] and $row_value["vastaavat"] > 0 and $row_value["mikavastaava"] != "") {
                 if (!isset($korjattavat_vastaavamaarat[$row_value["vastaavat"]])) $korjattavat_vastaavamaarat[$row_value["vastaavat"]] = 1;
                 else $korjattavat_vastaavamaarat[$row_value["vastaavat"]] += 1;
               }

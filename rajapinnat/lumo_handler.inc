@@ -27,7 +27,12 @@ foreach($suoritukset as $suoritus) {
 
   if ($suoritus == 1) $onnistuuko = false;
 
-  // Jos salasanat.phpst‰ puuttuu lumon osoite tai portti
+  $lumo_ip = explode(":", $kukarow["maksupaate_ip"]);
+  $lumo_service_address = $lumo_ip[0] ? $lumo_ip[0] : $lumo_service_address;
+  $lumo_service_port = $lumo_ip[1] ? $lumo_ip[1] : $lumo_service_port;
+
+  // Jos k‰ytt‰j‰lt‰ puuttuu maksup‰‰tteen IP ja salasanat.phpss‰ ei ole myˆsk‰‰n m‰‰ritelty IP:t‰
+  // ja porttia
   if(!isset($lumo_service_address) or !isset($lumo_service_port)) {
     $onnistuuko = "Maksup‰‰tett‰ ei ole konfiguroitu oikein";
     break;

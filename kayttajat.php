@@ -1197,7 +1197,8 @@ if ($tee == 'MUUTA') {
                   <input id='maksupaate_ip'
                          type='text'
                          name='maksupaate_ip'
-                         value='{$krow["maksupaate_ip"]}'/>
+                         value='{$krow["maksupaate_ip"]}'
+                         placeholder='" . t("IP tai IP:portti") . "'/>
                 </td>
               </tr>";
 

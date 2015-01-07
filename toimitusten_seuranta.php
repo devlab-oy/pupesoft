@@ -552,7 +552,6 @@ if (!isset($task)) {
             AND lasku.tilaustyyppi = 'N'
             {$rajauslisa}
             AND laskun_lisatiedot.konttiviite != ''
-            AND lasku.asiakkaan_tilausnumero != 'KAIN-400112'
             GROUP BY lasku.asiakkaan_tilausnumero, laskun_lisatiedot.konttiviite
             ORDER BY toimaika, konttiviite";
   $result = pupe_query($query);
@@ -612,6 +611,10 @@ if (!isset($task)) {
 
       $viitelasku = array_count_values($viitteet);
       $tilauksia_viitteella = $viitelasku[$tilaus['konttiviite']];
+
+      if ($tilaus['konttiviite'] == 'bookkaukseton') {
+        $tilauksia_viitteella = 1;
+      }
 
       $id = md5($tilaus['konttiviite']);
 
@@ -675,7 +678,9 @@ if (!isset($task)) {
         echo "</form></div>";
         echo "</td>";
 
-        $kasitellyt_konttiviitteet[] = $tilaus['konttiviite'];
+        if ($tilaus['konttiviite'] != 'bookkaukseton') {
+          $kasitellyt_konttiviitteet[] = $tilaus['konttiviite'];
+        }
       }
 
       if (!$konttiviite_kasitelty) {
@@ -894,30 +899,30 @@ if (!isset($task)) {
 
         if ($kontit) {
 
-            $kesken = 0;
+          $kesken = 0;
 
-            asort($kontit);
+          asort($kontit);
 
-            $v = $kontit[''];
-            unset($kontit['']);
+          $v = $kontit[''];
+          unset($kontit['']);
 
-            if (count($v) > 0) {
-              $kontit[] = $v;
+          if (count($v) > 0) {
+            $kontit[] = $v;
+          }
+
+          $mrn_tullut = true;
+
+          foreach ($kontit as $konttinumero => $kontti) {
+
+            if ($kontti['konttinumero'] == '') {
+              echo "<div style='margin:0 5px 8px 5px; padding:5px; border-bottom:1px solid grey;'>";
+              echo t("Konttiviitteestä "), $kontti['kpl'], t(" rullaa kontittamatta");
+              echo "</div>";
+              $kesken++;
+              continue;
             }
 
-            $mrn_tullut = true;
-
-            foreach ($kontit as $konttinumero => $kontti) {
-
-              if ($kontti['konttinumero'] == '') {
-                echo "<div style='margin:0 5px 8px 5px; padding:5px; border-bottom:1px solid grey;'>";
-                echo t("Konttiviitteestä "), $kontti['kpl'], t(" rullaa kontittamatta");
-                echo "</div>";
-                $kesken++;
-                continue;
-              }
-
-              $temp_array = explode("/", $konttinumero);
+            $temp_array = explode("/", $konttinumero);
               $_konttinumero = $temp_array[0];
 
               echo "<div style='margin:0 5px 8px 5px; padding:5px; border-bottom:1px solid grey;'>";
@@ -1059,7 +1064,6 @@ if (!isset($task)) {
               echo t("Näytä konttierittely");
               echo "</button></div>";
 
-
               if ($tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
 
                 $parametrit = laskutusraportti_parametrit($tilaus['konttiviite']);
@@ -1086,9 +1090,11 @@ if (!isset($task)) {
             }
 
             echo "</td>";
-            $kasitellyt_konttiviitteet[] = $tilaus['konttiviite'];
-          }
 
+            if ($tilaus['konttiviite'] != 'bookkaukseton') {
+              $kasitellyt_konttiviitteet[] = $tilaus['konttiviite'];
+            }
+          }
         }
 
       echo "</tr>";

@@ -1857,6 +1857,10 @@ function kasittele_rahtikirjasanoma($edi_data) {
     $result = pupe_query($query);
     $laskuinfo = mysql_fetch_assoc($result);
 
+    if (is_null($laskuinfo['tilausnumerot'])) {
+      return false;
+    }
+
     $query = "SELECT lasku.*,
               count(tilausrivi.tunnus) AS rullia
               FROM lasku
@@ -2149,7 +2153,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
 
         if ($laskurow) {
 
-          $kukarow['kesken'] = $tunnus = $laskurow['tunnus'];
+          $kukarow['kesken'] = $laskurow['tunnus'];
 
           require "tilauskasittely/lisaarivi.inc";
 

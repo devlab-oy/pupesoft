@@ -62,6 +62,8 @@ if (isset($_POST['task']) and $_POST['task'] == 'hae_pakkalista') {
 
   $pakkalista = unserialize(base64_decode($_POST['pakkalista']));
 
+  print_r($pakkalista);die;
+
   $pdf_data = array(
     'pakkalista' => $pakkalista,
     'taara' => $_POST['taara'],
@@ -468,16 +470,19 @@ if (!isset($task)) {
     $rajaus = 'aktiiviset';
   }
 
-  $disable1 = $disable2 = $disable3 = '';
+  $disable1 = $disable2 = $disable3 = $disable4 = '';
 
   switch ($rajaus) {
-  case 'kaikki':
-    $rajauslisa = '';
+
+  case 'tulevat':
+    $rajauslisa = " AND lasku.alatila != 'D' ";
+    $rajauslisa2 = " HAVING rullat = 0 ";
     $disable1 = 'disabled';
     break;
 
   case 'aktiiviset':
     $rajauslisa = " AND lasku.alatila != 'D' ";
+    $rajauslisa2 = " HAVING rullat > 0 ";
     $disable2 = 'disabled';
     break;
 
@@ -486,12 +491,23 @@ if (!isset($task)) {
     $disable3 = 'disabled';
     break;
 
+  case 'kaikki':
+    $rajauslisa = '';
+    $rajauslisa2 = '';
+    $disable4 = 'disabled';
+    break;
+
   default:
     $rajauslisa = '';
     break;
   }
 
   echo t("Näytä");
+  echo "&nbsp;";
+  echo "<form method='post'>";
+  echo "<input type='hidden' name='rajaus' value='tulevat' />";
+  echo "<input type='submit' {$disable1} value='" .t("Tulevat") ."'>";
+  echo "</form>";
   echo "&nbsp;";
   echo "<form method='post'>";
   echo "<input type='hidden' name='rajaus' value='aktiiviset' />";
@@ -505,7 +521,7 @@ if (!isset($task)) {
   echo "&nbsp;";
   echo "<form method='post'>";
   echo "<input type='hidden' name='rajaus' value='kaikki' />";
-  echo "<input type='submit' {$disable1} value='" .t("Kaikki") ."'>";
+  echo "<input type='submit' {$disable4} value='" .t("Kaikki") ."'>";
   echo "</form><br><br>";
 
   $query = "SELECT lasku.asiakkaan_tilausnumero,
@@ -552,9 +568,12 @@ if (!isset($task)) {
             AND lasku.tilaustyyppi = 'N'
             {$rajauslisa}
             AND laskun_lisatiedot.konttiviite != ''
-            AND ss.sarjanumero IS NOT NULL
             GROUP BY lasku.asiakkaan_tilausnumero, laskun_lisatiedot.konttiviite
+            {$rajauslisa2}
             ORDER BY toimaika, konttiviite";
+
+echo $query;
+
   $result = pupe_query($query);
 
   $tilaukset = array();
@@ -888,7 +907,7 @@ if (!isset($task)) {
         echo t("Ei tietoa");
         echo "</td>";
       }
-      elseif (!$kontit_sinetointivalmiit) {
+      elseif (!$kontit_sinetointivalmiit or $tilaus['rullat'] == 0) {
         echo "<td valign='top' rowspan='{$tilauksia_viitteella}' align='center'>";
         echo $tilaus['konttimaara'] . " kpl (ennakkoarvio)";
         echo "</td>";
@@ -924,7 +943,7 @@ if (!isset($task)) {
             }
 
             $temp_array = explode("/", $konttinumero);
-              $_konttinumero = $temp_array[0];
+              $_konttinumero = $konttinumero;
 
               echo "<div style='margin:0 5px 8px 5px; padding:5px; border-bottom:1px solid grey;'>";
               echo "{$_konttinumero}. ({$kontti['kpl']} kpl, {$kontti['paino']} kg)&nbsp;&nbsp;";

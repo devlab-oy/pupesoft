@@ -552,6 +552,7 @@ if (!isset($task)) {
             AND lasku.tilaustyyppi = 'N'
             {$rajauslisa}
             AND laskun_lisatiedot.konttiviite != ''
+            AND ss.sarjanumero IS NOT NULL
             GROUP BY lasku.asiakkaan_tilausnumero, laskun_lisatiedot.konttiviite
             ORDER BY toimaika, konttiviite";
   $result = pupe_query($query);

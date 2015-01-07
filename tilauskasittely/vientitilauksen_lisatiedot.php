@@ -28,7 +28,7 @@ if ($tapa == "tuonti" and $tee != "") {
     $ultilno = tarvitaanko_intrastat($maa_lahetys, $maa_maara);
 
     $query = "UPDATE lasku
-              SET maa_maara            = '$maa_maara',
+              SET maa_maara                    = '$maa_maara',
               maa_lahetys                      = '$maa_lahetys',
               kauppatapahtuman_luonne          = '$kauppatapahtuman_luonne',
               kuljetusmuoto                    = '$kuljetusmuoto',
@@ -253,7 +253,7 @@ elseif ($tee != "") {
       $ultilno = tarvitaanko_intrastat($varaston_row["maa"], $maa_maara);
 
       $query = "UPDATE lasku
-                SET maa_maara           = '$maa_maara',
+                SET maa_maara                  = '$maa_maara',
                 maa_lahetys                    = '$varaston_row[maa]',
                 kauppatapahtuman_luonne        = '$kauppatapahtuman_luonne',
                 kuljetusmuoto                  = '$kuljetusmuoto',
@@ -551,13 +551,11 @@ elseif ($tee != "") {
     echo "<td><input type='text' name='bruttopaino' value='$laskurow[bruttopaino]' style='width:300px;'></td>";
     echo "</tr>";
 
-    if ($laskurow["vienti"] == "K") {
-      echo "<tr>";
-      echo "<th>44.</th>";
-      echo "<th>".t("Lisätiedot")."</th>";
-      echo "<td><input type='text' name='lomake_lisatiedot' style='width:300px;' value='$laskurow[comments]'></td>";
-      echo "</tr>";
-    }
+    echo "<tr>";
+    echo "<th>44.</th>";
+    echo "<th>".t("Lisätiedot")."</th>";
+    echo "<td><input type='text' name='lomake_lisatiedot' style='width:300px;' value='$laskurow[comments]'></td>";
+    echo "</tr>";
 
     echo "</table>";
     echo "<br><input type='submit' value='".t("Päivitä tiedot")."'>";

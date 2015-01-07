@@ -571,9 +571,6 @@ if (!isset($task)) {
             GROUP BY lasku.asiakkaan_tilausnumero, laskun_lisatiedot.konttiviite
             {$rajauslisa2}
             ORDER BY toimaika, konttiviite";
-
-echo $query;
-
   $result = pupe_query($query);
 
   $tilaukset = array();

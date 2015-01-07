@@ -53,7 +53,7 @@ if (!function_exists("tuotepaikattarkista")) {
         $tmp_hyllyvali = strtoupper($tmp_hyllyvali);
         $tmp_hyllytaso = strtoupper($tmp_hyllytaso);
 
-        if (!tarkista_varaston_hyllypaikka($tmp_hyllyalue, $tmp_hyllynro, $tmp_hyllytaso, $tmp_hyllyvali))  {
+        if (!tarkista_varaston_hyllypaikka($tmp_hyllyalue, $tmp_hyllynro, $tmp_hyllyvali, $tmp_hyllytaso))  {
           $virhe[$tmp_tuotenoind] = $virhe[$i] = t("VIRHE: Syötettyä varastopaikkaa ei ole olemassa");
         }
       }

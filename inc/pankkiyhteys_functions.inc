@@ -883,7 +883,7 @@ function pankkiyhteyden_paivamaarat($pankkiyhteys) {
     $_time = $pankkiyhteys[$valid];
 
     // Nollaa jos meillä ei ole tätä serttiä
-    if ($_time == '0000-00-00 00:00:00') {
+    if ($_time == '') {
       continue;
     }
 

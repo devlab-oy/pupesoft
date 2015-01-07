@@ -482,7 +482,7 @@ if ($tee == "") {
     echo "<th>" . t("Sertifikaattien voimassaolo") . "</th>";
     echo "<th></th>";
     echo "<th></th>";
-    echo "<th></th>";
+    echo "<td class='back'></td>";
     echo "</tr>";
 
     echo "</thead>";
@@ -540,7 +540,7 @@ if ($tee == "") {
 
       // Danskella voi hakea uuden pankin sertifikaatin
       if ($pankkiyhteys['pankki'] == "DABAFIHH") {
-        echo "<td>";
+        echo "<td class='back'>";
         echo "<form method='post'>";
         echo "<input type='hidden' name='tee' value='pankin_sertifikaatti'/>";
         echo "<input type='hidden' name='pankkiyhteys_tunnus' value='{$pankkiyhteys["tunnus"]}'/>";
@@ -556,3 +556,5 @@ if ($tee == "") {
     echo "</table>";
   }
 }
+
+require "inc/footer.inc";

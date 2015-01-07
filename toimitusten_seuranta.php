@@ -479,8 +479,8 @@ if (!isset($task)) {
     break;
 
   case 'aktiiviset':
-    $rajauslisa = " AND lasku.alatila != 'D' ";
-    $rajauslisa2 = " HAVING rullat > 0 ";
+    $rajauslisa = " AND lasku.alatila != 'D' AND ss.sarjanumero IS NOT NULL ";
+    $rajauslisa2 = "";
     $disable2 = 'disabled';
     break;
 

@@ -604,6 +604,7 @@ if ($tee == 'MUUTA') {
               kassamyyja                    = '{$kassamyyja}',
               dynaaminen_kassamyynti        = '{$dynaaminen_kassamyynti}',
               maksupaate_kassamyynti        = '{$maksupaate_kassamyynti}',
+              maksupaate_ip                 = '{$maksupaate_ip}',
               jyvitys                       = '{$jyvitys}',
               oletus_ohjelma                = '{$oletus_ohjelma}',
               naytetaan_katteet_tilauksella = '{$naytetaan_katteet_tilauksella}',
@@ -1187,6 +1188,16 @@ if ($tee == 'MUUTA') {
                             {$maksupaate_sel_3}>" . t("K‰ytet‰‰n maksup‰‰tett‰ kassamyynniss‰") . "
                     </option>
                   </select>
+                </td>
+              </tr>";
+
+        echo "<tr>
+                <th align='left'>" . t("Maksup‰‰tteen IP") . ":</th>
+                <td>
+                  <input id='maksupaate_ip'
+                         type='text'
+                         name='maksupaate_ip'
+                         value='{$krow["maksupaate_ip"]}'/>
                 </td>
               </tr>";
 

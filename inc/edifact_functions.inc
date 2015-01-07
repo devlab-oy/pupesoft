@@ -409,7 +409,8 @@ function lahtoilmoitus_parametrit($konttiviite) {
   global $kukarow, $yhtiorow;
 
   $query = "SELECT lasku.asiakkaan_tilausnumero AS tilausnro,
-            matkakoodi,
+            tilausrivin_lisatiedot.asiakkaan_rivinumero AS rivinro,
+            laskun_lisatiedot.matkakoodi,
             matkatiedot,
             laskun_lisatiedot.satamavahvistus_pvm AS lahtoaika,
             laskun_lisatiedot.konttityyppi
@@ -417,8 +418,15 @@ function lahtoilmoitus_parametrit($konttiviite) {
             JOIN lasku
               ON lasku.yhtio = laskun_lisatiedot.yhtio
               AND lasku.tunnus = laskun_lisatiedot.otunnus
+            JOIN tilausrivi
+              ON tilausrivi.yhtio = laskun_lisatiedot.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+            JOIN tilausrivin_lisatiedot
+              ON tilausrivin_lisatiedot.yhtio = laskun_lisatiedot.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND konttiviite = '{$konttiviite}'";
+            AND konttiviite = '{$konttiviite}'
+            GROUP BY tilausnro, rivinro;";
   $result = pupe_query($query);
 
   $kaikki_matkatiedot = array();
@@ -429,7 +437,10 @@ function lahtoilmoitus_parametrit($konttiviite) {
     $matkakoodi = $tilaus['matkakoodi'];
     $lahtopaiva = $tilaus['lahtoaika'];
     $mt = unserialize($tilaus['matkatiedot']);
-    $kaikki_matkatiedot[$tilaus['tilausnro']] = $mt;
+
+    $kombo = $tilaus['tilausnro'] . ":" . $tilaus['rivinro'];
+
+    $kaikki_matkatiedot[$kombo] = $mt;
   }
 
   $kaikki_kontit = array();
@@ -443,7 +454,7 @@ function lahtoilmoitus_parametrit($konttiviite) {
                 ON ss.yhtio = trlt.yhtio
                 AND ss.myyntirivitunnus = trlt.tilausrivitunnus
               WHERE trlt.yhtio = '{$kukarow['yhtio']}'
-              AND trlt.asiakkaan_tilausnumero = '{$tilausnro}'
+              AND CONCAT(trlt.asiakkaan_tilausnumero, ':', trlt.asiakkaan_rivinumero) = '{$tilausnro}'
               AND trlt.kontin_mrn != ''
               AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu' OR ss.lisatieto = 'Toimitettu')";
     $result = pupe_query($query);

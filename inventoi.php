@@ -414,19 +414,19 @@ if ($tee == 'VALMIS') {
             $erasyotetyt = round($erasyotetyt, 2);
 
             if (is_array($eranumero_kaikki[$i]) and substr($kpl, 0, 1) != '+' and substr($kpl, 0, 1) != '-' and $onko_uusia > 0) {
-              echo "<font class='error'>".t("417 VIRHE: Eränumeroita ei voi lisätä kuin relatiivisella määrällä")."! (+1)</font><br>";
+              echo "<font class='error'>".t("VIRHE: Eränumeroita ei voi lisätä kuin relatiivisella määrällä")."! (+1)</font><br>";
               $virhe = 1;
             }
             elseif (substr($kpl, 0, 1) == '+' and is_array($eranumero_kaikki[$i]) and $erasyotetyt != substr($kpl, 1)) {
-              echo "<font class='error'>".t("421 VIRHE: Eränumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno $kpl</font><br>";
+              echo "<font class='error'>".t("VIRHE: Eränumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno $kpl</font><br>";
               $virhe = 1;
             }
             elseif (substr($kpl, 0, 1) == '-' and is_array($eranumero_kaikki[$i]) and $erasyotetyt != substr($kpl, 1)) {
-              echo "<font class='error'>".t("425 VIRHE: Eränumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno $kpl</font><br>";
+              echo "<font class='error'>".t("VIRHE: Eränumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno $kpl</font><br>";
               $virhe = 1;
             }
             elseif (substr($kpl, 0, 1) != '-' and substr($kpl, 0, 1) != '+' and is_array($eranumero_kaikki[$i]) and $erasyotetyt != $kpl) {
-              echo "<font class='error'>".t("429 VIRHE: Eränumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno $kpl</font><br>";
+              echo "<font class='error'>".t("VIRHE: Eränumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno $kpl</font><br>";
               $virhe = 1;
             }
           }

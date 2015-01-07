@@ -22289,15 +22289,23 @@ if (!function_exists('luottotilanne')) {
     $query_alennuksia = generoi_alekentta('M');
 
     // Avoimet tilaukset
-    $query = "SELECT
-              round(sum($avtilisa * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) tilausavoinsaldo
-              FROM lasku
-              JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi IN ('L','W'))
-              WHERE lasku.yhtio      = '$kukarow[yhtio]'
-              AND ((lasku.tila in ('L', 'N') and lasku.alatila != 'X')      # Kaikki myyntitilaukset, paitsi laskutetut
-                OR (lasku.tila = 'V' and lasku.alatila in ('','A','C','J','V'))  # Valmistukset
-              )
-              AND lasku.liitostunnus in ($liitostunnus)";
+    $query = "(SELECT
+               round(sum({$avtilisa} * if('{$yhtiorow['alv_kasittely']}' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) tilausavoinsaldo
+               FROM lasku
+               JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi = 'L')
+               WHERE lasku.yhtio       = '{$kukarow['yhtio']}'
+               AND lasku.tila          in ('L', 'N')
+               AND lasku.alatila      != 'X'      # Kaikki myyntitilaukset, paitsi laskutetut
+               AND lasku.liitostunnus  in ({$liitostunnus}))
+               UNION
+               (SELECT
+               round(sum({$avtilisa} * if('{$yhtiorow['alv_kasittely']}' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_alennuksia}),2) tilausavoinsaldo
+               FROM lasku
+               JOIN tilausrivi use index (yhtio_otunnus) on (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi = 'W')
+               WHERE lasku.yhtio       = '{$kukarow['yhtio']}'
+               AND lasku.tila          = 'V'
+               AND lasku.alatila       in ('','A','C','J','V')  # Valmistukset
+               AND lasku.liitostunnus  in ({$liitostunnus}))";
     $avoimettilauksetres = pupe_query($query);
     $avoimettilauksetrow = mysql_fetch_assoc($avoimettilauksetres);
 
@@ -27044,7 +27052,8 @@ if (!function_exists('hae_lahetetyt_saldovahvistukset')) {
                 saldovahvistukset.tunnus AS saldovahvistus_tunnus,
                 saldovahvistukset.lahetys_pvm AS lahetys_paiva,
                 saldovahvistusrivit.tyyppi AS saldovahvistusrivi_tyyppi,
-                saldovahvistusrivit.summa AS avoin_saldo
+                saldovahvistusrivit.summa AS avoin_saldo,
+                saldovahvistukset.liitostunnus AS saldovahvistus_liitostunnus
                 FROM saldovahvistukset
                 JOIN saldovahvistusrivit
                 ON ( saldovahvistusrivit.yhtio = saldovahvistukset.yhtio
@@ -27075,7 +27084,8 @@ if (!function_exists('hae_lahetetyt_saldovahvistukset')) {
       }
     }
 
-    $lahetetyt_saldovahvistukset = keraa_kohdistamattomat_lahetetyista($lahetetyt_saldovahvistukset);
+    $t = $request["t"]["kohdistamaton"];
+    $lahetetyt_saldovahvistukset = keraa_kohdistamattomat_lahetetyista($lahetetyt_saldovahvistukset, $t);
 
     //Jos saldovahvistus_tunnus setattu niin halutaan tietty saldovahvistus pdf:nä.
     if (isset($request['saldovahvistus_tunnus'])) {
@@ -27142,7 +27152,7 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
               asiakas.tunnus AS asiakas_tunnus,
               lasku.summa,
               ROUND(SUM(tiliointi.summa), 2) AS avoin_saldo
-              FROM lasku USE INDEX (yhtio_tila_mapvm)
+              FROM lasku
               JOIN asiakas
               ON ( asiakas.yhtio = lasku.yhtio
                 AND asiakas.tunnus                   = lasku.liitostunnus
@@ -27183,8 +27193,14 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
         }
       }
       else {
-        $lasku['ryhmittely_tyyppi'] = $request['ryhmittely_tyyppi_temp'];
-        if ($request['ryhmittely_tyyppi_temp'] == 'ytunnus') {
+        if (!isset($request['ryhmittely_tyyppi_temp']) and isset($request['saldovahvistus_rivi_ryhmittely_tyyppi'])) {
+          $lasku['ryhmittely_tyyppi'] = $request['saldovahvistus_rivi_ryhmittely_tyyppi'];
+        }
+        else {
+          $lasku['ryhmittely_tyyppi'] = $request['ryhmittely_tyyppi_temp'];
+        }
+
+        if ($lasku['ryhmittely_tyyppi'] == 'ytunnus') {
           $ryhmittely = $lasku['ytunnus'];
         }
         else {
@@ -27209,6 +27225,8 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
 
 if (!function_exists('keraa_saldovahvistusrivit_ytunnus')) {
   function keraa_saldovahvistusrivit_ytunnus(&$laskut, $lasku, $ryhmittely) {
+    global $kukarow;
+
     if (!isset($laskut[$ryhmittely]['avoin_saldo_summa'])) {
       $laskut[$ryhmittely]['avoin_saldo_summa'] = 0;
     }
@@ -27216,6 +27234,33 @@ if (!function_exists('keraa_saldovahvistusrivit_ytunnus')) {
       //asiakkaan nimeen tulee ensimmäisen laskun asiakkaan nimi, eli pääasiakkaan nimi
       $laskut[$ryhmittely]['asiakas_nimi'] = $lasku['nimi'];
       $laskut[$ryhmittely]['asiakas'] = hae_asiakas($lasku['liitostunnus']);
+
+      if (!empty($laskut[$ryhmittely]['asiakas']['ytunnus'])) {
+
+        $query = "SELECT *
+                  FROM asiakas
+                  JOIN asiakkaan_avainsanat AS aa ON (
+                    aa.yhtio           = asiakas.yhtio AND
+                    aa.laji            = 'PÄÄASIAKAS' AND
+                    aa.avainsana      != '' AND
+                    aa.liitostunnus    = asiakas.tunnus
+                  )
+                  WHERE asiakas.yhtio  = '{$kukarow['yhtio']}'
+                  AND asiakas.ytunnus  = '{$laskut[$ryhmittely]['asiakas']['ytunnus']}'
+                  LIMIT 1";
+        $chkres = pupe_query($query);
+
+        while ($chkrow = mysql_fetch_assoc($chkres)) {
+          if ($lasku['ryhmittely_tyyppi'] == 'ytunnus') {
+            $laskut[$ryhmittely]['asiakas'] = hae_asiakas($chkrow['liitostunnus']);
+            $laskut[$ryhmittely]['asiakas_nimi'] = $laskut[$ryhmittely]['asiakas']['nimi'];
+          }
+          else {
+            $laskut[$ryhmittely]['paaasiakas'] = hae_asiakas($chkrow['liitostunnus']);
+            $laskut[$ryhmittely]['asiakas']['talhal_email'] = $laskut[$ryhmittely]['paaasiakas']['talhal_email'];
+          }
+        }
+      }
     }
 
     $asiakasnumerot = search_array_key_for_value_recursive($laskut[$ryhmittely]['asiakasnumerot'], 'asiakasnumero', $lasku['asiakasnumero']);
@@ -27237,6 +27282,8 @@ if (!function_exists('keraa_saldovahvistusrivit_ytunnus')) {
 
 if (!function_exists('keraa_saldovahvistusrivit_ktunnus_ytunnus')) {
   function keraa_saldovahvistusrivit_ktunnus_ytunnus(&$laskut, $lasku, $ryhmittely) {
+    global $kukarow;
+
     if (!isset($laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['avoin_saldo_summa'])) {
       $laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['avoin_saldo_summa'] = 0;
     }
@@ -27244,6 +27291,48 @@ if (!function_exists('keraa_saldovahvistusrivit_ktunnus_ytunnus')) {
       //asiakkaan nimeen tulee ensimmäisen laskun asiakkaan nimi, eli pääasiakkaan nimi
       $laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['asiakas_nimi'] = $lasku['nimi'];
       $laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['asiakas'] = hae_asiakas($lasku['liitostunnus']);
+
+      $_ytunnus_chk = $laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['asiakas']['ytunnus'];
+      $_ryhmittely_tyyppi = $lasku['ryhmittely_tyyppi'];
+
+      if (!empty($lasku['saldovahvistus_liitostunnus']) or !empty($_ytunnus_chk)) {
+
+        if (!empty($lasku['saldovahvistus_liitostunnus'])) {
+          $query = "SELECT *
+                    FROM asiakas
+                    WHERE asiakas.yhtio = '{$kukarow['yhtio']}'
+                    AND asiakas.tunnus  = '{$lasku['saldovahvistus_liitostunnus']}'";
+        }
+        else {
+          $query = "SELECT asiakas.*
+                    FROM asiakas
+                    JOIN asiakkaan_avainsanat AS aa ON (
+                      aa.yhtio           = asiakas.yhtio AND
+                      aa.laji            = 'PÄÄASIAKAS' AND
+                      aa.avainsana      != '' AND
+                      aa.liitostunnus    = asiakas.tunnus
+                    )
+                    WHERE asiakas.yhtio  = '{$kukarow['yhtio']}'
+                    AND asiakas.ytunnus  = '{$_ytunnus_chk}'
+                    LIMIT 1";
+        }
+
+        $chkres = pupe_query($query);
+
+        while ($chkrow = mysql_fetch_assoc($chkres)) {
+
+          $_arr = &$laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely];
+
+          if ($_ryhmittely_tyyppi == 'ytunnus') {
+            $_arr['asiakas'] = hae_asiakas($chkrow['tunnus']);
+            $_arr['asiakas_nimi'] = $_arr['asiakas']['nimi'];
+          }
+          else {
+            $_arr['paaasiakas'] = hae_asiakas($chkrow['tunnus']);
+            $_arr['asiakas']['talhal_email'] = $_arr['paaasiakas']['talhal_email'];
+          }
+        }
+      }
     }
 
     $asiakasnumerot = search_array_key_for_value_recursive($laskut[$lasku['lahetys_paiva']][$lasku['saldovahvistus_tunnus']][$ryhmittely]['asiakasnumerot'], 'asiakasnumero', $lasku['asiakasnumero']);
@@ -27268,7 +27357,7 @@ if (!function_exists('keraa_saldovahvistusrivit_ktunnus_ytunnus')) {
 }
 
 if (!function_exists('hae_kohdistamattomat_suoritukset')) {
-  function hae_kohdistamattomat_suoritukset($asiakas_tunnukset, $pvm) {
+  function hae_kohdistamattomat_suoritukset($asiakas_tunnukset, $pvm, $t) {
     global $kukarow, $yhtiorow;
 
     if (empty($asiakas_tunnukset)) {
@@ -27292,8 +27381,9 @@ if (!function_exists('hae_kohdistamattomat_suoritukset')) {
     $result = pupe_query($query);
 
     $kohdistamattomat_suoritukset = array();
+
     while ($kohdistamaton_suoritus = mysql_fetch_assoc($result)) {
-      $kohdistamaton_suoritus['laskunro'] = t('Kohdistamaton_suoritus');
+      $kohdistamaton_suoritus['laskunro'] = $t;
       $kohdistamattomat_suoritukset[] = $kohdistamaton_suoritus;
     }
 
@@ -27303,7 +27393,7 @@ if (!function_exists('hae_kohdistamattomat_suoritukset')) {
 
 if (!function_exists('hae_lahetetyt_kohdistamattomat_suoritukset')) {
 
-  function hae_lahetetyt_kohdistamattomat_suoritukset($saldovahvistus_tunnus) {
+  function hae_lahetetyt_kohdistamattomat_suoritukset($saldovahvistus_tunnus, $t) {
     global $kukarow, $yhtiorow;
 
     $query = "SELECT saldovahvistusrivit.tyyppi AS saldovahvistusrivi_tyyppi,
@@ -27316,8 +27406,9 @@ if (!function_exists('hae_lahetetyt_kohdistamattomat_suoritukset')) {
     $result = pupe_query($query);
 
     $saldovahvistusrivit = array();
+
     while ($saldovahvistusrivi = mysql_fetch_assoc($result)) {
-      $saldovahvistusrivi['laskunro'] = t('Kohdistamaton suoritus');
+      $saldovahvistusrivi['laskunro'] = $t;
       $saldovahvistusrivit[] = $saldovahvistusrivi;
     }
 
@@ -27331,12 +27422,14 @@ if (!function_exists('keraa_kohdistamattomat')) {
   function keraa_kohdistamattomat($request, $laskut) {
     global $kukarow, $yhtiorow;
 
+    $t = $request["t"]["kohdistamaton"];
+
     foreach ($laskut as &$lasku) {
       $pvm = $request['paiva'];
       $asiakasnumerot_ja_tunnukset = $lasku['asiakasnumerot'];
 
       $asiakas_tunnukset = search_array_key_recursive($asiakasnumerot_ja_tunnukset, 'asiakas_tunnus');
-      $kohdistamattomat_suoritukset = hae_kohdistamattomat_suoritukset($asiakas_tunnukset, $pvm);
+      $kohdistamattomat_suoritukset = hae_kohdistamattomat_suoritukset($asiakas_tunnukset, $pvm, $t);
 
       if (!empty($kohdistamattomat_suoritukset)) {
         $params = array(
@@ -27356,11 +27449,12 @@ if (!function_exists('keraa_kohdistamattomat')) {
 
 if (!function_exists('keraa_kohdistamattomat_lahetetyista')) {
 
-  function keraa_kohdistamattomat_lahetetyista($lahetetyt_saldovahvistukset) {
+  function keraa_kohdistamattomat_lahetetyista($lahetetyt_saldovahvistukset, $t) {
+
     foreach ($lahetetyt_saldovahvistukset as $lahetys_paiva => &$lasku_saldovahvistus) {
       foreach ($lasku_saldovahvistus as $saldovahvistus_tunnus => &$lasku_ytunnus) {
         foreach ($lasku_ytunnus as $ryhmittely => &$saldovahvistus) {
-          $lahetetyt_kohdistamattomat_suoritukset = hae_lahetetyt_kohdistamattomat_suoritukset($saldovahvistus_tunnus);
+          $lahetetyt_kohdistamattomat_suoritukset = hae_lahetetyt_kohdistamattomat_suoritukset($saldovahvistus_tunnus, $t);
 
           if (!empty($lahetetyt_kohdistamattomat_suoritukset)) {
             $params = array(
@@ -27472,6 +27566,9 @@ if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
 
     $lahetetyt_count = 0;
     $ei_lahetetty_count = 0;
+
+    $ei_lahetetyt = array();
+
     foreach ($valitut_saldovahvistukset as $valittu_saldovahvistus) {
       $request['ryhmittely_tyyppi_temp'] = $valittu_saldovahvistus['ryhmittely_tyyppi'];
 
@@ -27490,7 +27587,17 @@ if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
       $saldovahvistus['laskun_avoin_paiva'] = $valittu_saldovahvistus['laskun_avoin_paiva'];
 
       if ($saldovahvistus['asiakas']['talhal_email'] != '') {
-        $pdf_filepath = hae_saldovahvistus_pdf($saldovahvistus);
+
+        $saldovahvistus['tiliotepvm'] = "{$request['vv']}-{$request['kk']}-{$request['pp']}";
+
+        if ($valittu_saldovahvistus['ryhmittely_tyyppi'] == 'ytunnus') {
+          $boss = true;
+        }
+        else {
+          $boss = false;
+        }
+
+        $pdf_filepath = hae_saldovahvistus_pdf($saldovahvistus, $boss);
 
         $params = array(
           "to"       => $saldovahvistus['asiakas']['talhal_email'],
@@ -27514,14 +27621,16 @@ if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
         }
         else {
           $ei_lahetetty_count++;
+          $ei_lahetetyt[$saldovahvistus['asiakas']['nimi']] = $saldovahvistus['asiakas']['nimi'];
         }
       }
       else {
         $ei_lahetetty_count++;
+        $ei_lahetetyt[$saldovahvistus['asiakas']['nimi']] = $saldovahvistus['asiakas']['nimi'];
       }
     }
 
-    return array($lahetetyt_count, $ei_lahetetty_count);
+    return array($lahetetyt_count, $ei_lahetetty_count, $ei_lahetetyt);
   }
 }
 
@@ -27529,11 +27638,24 @@ if (!function_exists('merkkaa_saldovahvistus_lahetetyksi')) {
   function merkkaa_saldovahvistus_lahetetyksi($saldovahvistus) {
     global $kukarow, $yhtiorow;
 
+    if ($saldovahvistus['ryhmittely_tyyppi'] == 'ytunnus') {
+      $_liitostunnus = $saldovahvistus['asiakas']['tunnus'];
+    }
+    elseif (!empty($saldovahvistus['paaasiakas'])) {
+      $_liitostunnus = $saldovahvistus['paaasiakas']['tunnus'];
+    }
+    else {
+      $_liitostunnus = 0;
+    }
+
+    $_date = date('Y-m-d', strtotime($saldovahvistus['laskun_avoin_paiva']));
+
     $query = "INSERT INTO saldovahvistukset
               SET lahetys_pvm = CURRENT_DATE,
               saldovahvistus_viesti = '{$saldovahvistus['saldovahvistus_viesti']['selite']}',
-              avoin_saldo_pvm       = '".date('Y-m-d', strtotime($saldovahvistus['laskun_avoin_paiva']))."',
+              avoin_saldo_pvm       = '{$_date}',
               ryhmittely_tyyppi     = '{$saldovahvistus['ryhmittely_tyyppi']}',
+              liitostunnus          = '{$_liitostunnus}',
               yhtio                 = '{$kukarow['yhtio']}'";
     pupe_query($query, $GLOBALS["masterlink"]);
     $saldovahvistus_tunnus = mysql_insert_id($GLOBALS["masterlink"]);
@@ -30068,10 +30190,19 @@ if (!function_exists("paivita_sopimusrivit")) {
   }
 }
 
+if (!function_exists("sanitoi_javascript_id")) {
+  function sanitoi_javascript_id($value) {
+    // ID and NAME tokens must begin with a letter ([A-Za-z])
+    // and may be followed by any number of letters, digits ([0-9]),
+    // hyphens ("-"), underscores ("_"), colons (":"), and periods (".").
+    return preg_replace("/[^a-zöäåA-ZÖÄÅ0-9\-\:\_\.]/i", "", $value);
+  }
+}
+
 if (!function_exists("poista_osakeyhtio_lyhenne")) {
   function poista_osakeyhtio_lyhenne($nimi) {
 
-    # strtolower ei osaa pienentää tämmöisiä erikoismerkkejä
+    // strtolower ei osaa pienentää tämmöisiä erikoismerkkejä
     $old = array("Ü", "Ž");
     $new = array("ü", "ž");
     $nimi = str_replace($old, $new, $nimi);

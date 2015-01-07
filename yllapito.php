@@ -514,7 +514,7 @@ if ($upd == 1) {
                      luontiaika = NOW(),
                      muutospvm  = NOW()";
           pupe_query($query1);
-        }
+    }
         if (isset($sammutin_koko) and $sammutin_koko != '') {
           $query1 = "INSERT INTO tuotteen_avainsanat
                      SET yhtio = '{$kukarow['yhtio']}',
@@ -629,7 +629,7 @@ if ($upd == 1) {
           if ($huoltosyklit_laitteet['huoltosykli_tunnus'] != 0) {
             $huoltosyklit_laitteet['laite_tunnus'] = $tunnus;
             lisaa_laitteen_huoltosykli($huoltosyklit_laitteet);
-          }
+    }
         }
       }
 
@@ -1840,7 +1840,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
             if (mysql_num_rows($huoltosykli_result) != 0) {
               echo "<td valign='top'>$fontlisa1 ".t('Löytyy')." $fontlisa2</td>";
             }
-            else {
+          else {
               echo "<td valign='top'><font class='error'> ".t('Ei löydy')."</font></td>";
             }
           }
@@ -1944,9 +1944,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     uusi_paikka_dialog('laitehallinta');
     uusi_paikka_dialog_css();
   }
-
-  echo "<table><tr><td class='back' valign='top' style='padding: 0px;'>";
-
+  echo "<table><tr><td class='back pnopad ptop'>";
   echo "<table>";
 
   if ($uusi == '1' and $toim == 'tuote') {
@@ -2349,7 +2347,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
   }
 
   echo "</td>";
-  echo "<td class='back top'>";
+  echo "<td class='back pnopad ptop'>";
 
   if ($errori == '' and $toim == "sarjanumeron_lisatiedot") {
     @include "inc/arviokortti.inc";
@@ -2629,7 +2627,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
 
         if (!isset($seuraavatunnus)) $seuraavatunnus = 0;
 
-        echo "<tr><td class='back'>";
+        echo "<tr><td class='back pnopad'>";
         echo "<br />
           <form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post' onSubmit = 'return verify()' enctype='multipart/form-data'>
           <input type = 'hidden' name = 'toim' value = '$aputoim'>
@@ -2642,7 +2640,7 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
           <input type = 'hidden' name = 'lopetus' value = '$lopetus'>
           <input type = 'hidden' name = 'del' value ='1'>
           <input type='hidden' name='seuraavatunnus' value = '$seuraavatunnus'>
-          <input type = 'submit' value = '".t("Poista $otsikko_nappi")."'>
+          <input type = 'submit' class='poista_btn' value = '".t("Poista $otsikko_nappi")."'>
           </form>";
         echo "</td></tr>";
       }

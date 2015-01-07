@@ -39,13 +39,27 @@ if ($indexvas == "1" and isset($_COOKIE[$cookie_secret])) {
 
 // Kirjaudutaan pankkiin
 if ($tee == "kirjaudu") {
+
   if (empty($salasana)) {
     virhe("Salasana täytyy antaa!");
     $virheet_count++;
   }
-  elseif (!hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana)) {
-    virhe("Antamasi salasana on väärä!");
-    $virheet_count++;
+
+  if ($virheet_count == 0) {
+    $pankki = hae_pankkiyhteys_ja_pura_salaus($pankkiyhteys_tunnus, $salasana);
+
+    if ($pankki === false) {
+      virhe("Antamasi salasana on väärä!");
+      $virheet_count++;
+    }
+  }
+
+  // Tarkistetaan päivämäärät
+  if ($virheet_count == 0) {
+    $sertit = pankkiyhteyden_paivamaarat($pankki);
+    if ($sertit === false) {
+      $virheet_count++;
+    }
   }
 
   if ($virheet_count > 0) {

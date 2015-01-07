@@ -2,7 +2,7 @@
 
 require 'pdflib/phppdflib.class.php';
 
-function hae_saldovahvistus_pdf($saldovahvistus) {
+function hae_saldovahvistus_pdf($saldovahvistus, $boss = false) {
   global $kukarow, $yhtiorow, $pdf, $kala, $sivu, $norm, $pieni, $kieli, $bold, $lask, $rectparam, $sivu_numero_obj_ids;
 
   $sivu_numero_obj_ids = array();
@@ -30,7 +30,7 @@ function hae_saldovahvistus_pdf($saldovahvistus) {
 
   $firstpage = alku($saldovahvistus);
 
-  $firstpage = rivit($firstpage, $saldovahvistus['laskut'], $saldovahvistus);
+  $firstpage = rivit($firstpage, $saldovahvistus['laskut'], $saldovahvistus, $boss);
 
   $kala -= 20;
   $pdf->draw_text(250, $kala, t('Avoin saldo yhteensä', $kieli), $firstpage, $bold);
@@ -67,15 +67,38 @@ function alku($saldovahvistus) {
 
   tulosta_logo_pdf($pdf, $firstpage, "");
 
+  $kala = 815;
+
   //Otsikko
   $pdf->draw_text(280, 815, t("Saldovahvistus", $kieli), $firstpage);
-  $sivu_numero_obj_ids[] = $pdf->draw_text(430, 815, t("Sivu", $kieli)." ".$sivu.' / ', $firstpage, $norm);
+  $sivu_numero_obj_ids[] = $pdf->draw_text(430, $kala, t("Sivu", $kieli)." ".$sivu.' / ', $firstpage, $norm);
 
-  $pdf->draw_text(30, 750, $saldovahvistus['asiakas']["nimi"], $firstpage, $bold);
-  $pdf->draw_text(30, 740, $saldovahvistus['asiakas']["nimitark"], $firstpage, $bold);
-  $pdf->draw_text(30, 730, $saldovahvistus['asiakas']["osoite"], $firstpage, $bold);
-  $pdf->draw_text(30, 720, $saldovahvistus['asiakas']["postino"]." ".$saldovahvistus['asiakas']["postitp"], $firstpage, $bold);
-  $pdf->draw_text(30, 710, $saldovahvistus['asiakas']["maa"], $firstpage, $bold);
+  $pdf->draw_text(30, $kala - 65, $saldovahvistus['asiakas']["nimi"], $firstpage, $bold);
+  $pdf->draw_text(30, $kala - 75, $saldovahvistus['asiakas']["nimitark"], $firstpage, $bold);
+  $pdf->draw_text(30, $kala - 85, $saldovahvistus['asiakas']["osoite"], $firstpage, $bold);
+  $pdf->draw_text(30, $kala - 95, $saldovahvistus['asiakas']["postino"]." ".$saldovahvistus['asiakas']["postitp"], $firstpage, $bold);
+  $pdf->draw_text(30, $kala - 105, $saldovahvistus['asiakas']["maa"], $firstpage, $bold);
+
+  $kala = 710;
+
+  if (!empty($saldovahvistus['paaasiakas'])) {
+
+    $_chk = ($saldovahvistus['asiakas']['tunnus'] != $saldovahvistus['paaasiakas']['tunnus']);
+
+    if ($_chk) {
+      $kala -= 10;
+
+      $pdf->draw_text(30, $kala - 10, $saldovahvistus['paaasiakas']["nimi"], $firstpage, $bold);
+      $pdf->draw_text(30, $kala - 20, $saldovahvistus['paaasiakas']["nimitark"], $firstpage, $bold);
+      $pdf->draw_text(30, $kala - 30, $saldovahvistus['paaasiakas']["osoite"], $firstpage, $bold);
+      $pdf->draw_text(30, $kala - 40, $saldovahvistus['paaasiakas']["postino"]." ".$saldovahvistus['asiakas']["postitp"], $firstpage, $bold);
+      $pdf->draw_text(30, $kala - 50, $saldovahvistus['paaasiakas']["maa"], $firstpage, $bold);
+
+      $kala -= 10;
+    }
+  }
+
+  $kala -= 60;
 
   $pdf->draw_text(380, 780, t("Päivämäärä", $kieli).': '.date('d.m.Y'), $firstpage, $norm);
 
@@ -87,22 +110,22 @@ function alku($saldovahvistus) {
   $pdf->draw_text(440, 750, $kukarow["puhno"], $firstpage, $norm);
 
   $pdf->draw_text(380, 740, t("Fax", $kieli).':', $firstpage, $norm);
-  $pdf->draw_text(440, 740, $saldovahvistus['asiakas']['fax'], $firstpage, $norm);
+  $pdf->draw_text(440, 740, $yhtiorow['fax'], $firstpage, $norm);
 
   $pdf->draw_text(380, 730, t("Sähköposti", $kieli).':', $firstpage, $norm);
   $pdf->draw_text(440, 730, $kukarow["eposti"], $firstpage, $norm);
 
   if ($pdf->currentPage['number'] == 0) {
-    $string = t('Ilmoitamme että avoin saldo ', $kieli)." ".date('d.m.Y', strtotime($saldovahvistus['laskun_avoin_paiva']))." ".t('on', $kieli).' '.$saldovahvistus['avoin_saldo_summa'].' '.$saldovahvistus['valkoodi'];
-    $pdf->draw_text(30, 650, $string, $firstpage, $norm);
+    $string = t('Ilmoitamme että avoin saldo ', $kieli)." ".date('d.m.Y', strtotime($saldovahvistus['tiliotepvm']))." ".t('on', $kieli).' '.$saldovahvistus['avoin_saldo_summa'].' '.$saldovahvistus['valkoodi'];
+    $pdf->draw_text(30, $kala, $string, $firstpage, $norm);
 
     // tehdään riveistä max 90 merkkiä
-    $viesti = wordwrap($saldovahvistus['saldovahvistus_viesti']['selitetark'], 90, "\n");
+    $viesti = wordwrap($saldovahvistus['saldovahvistus_viesti']['selitetark'], 120, "\n");
 
     $i = 0;
     $rivit = array();
     $rivit = explode("\n", $viesti);
-    $kala = 630;
+    $kala -= 10;
 
     foreach ($rivit as $rivi) {
       // laitetaan
@@ -124,15 +147,33 @@ function alku($saldovahvistus) {
   return $firstpage;
 }
 
-function rivit($firstpage, $rows, $saldovahvistus) {
+function rivit($firstpage, $rows, $saldovahvistus, $boss = false) {
   global $pdf, $kala, $sivu, $lask, $norm, $pieni, $yhtiorow, $rectparam, $kieli;
 
-  $pdf->draw_text(30, $kala, t("Laskunro", $kieli), $firstpage, $pieni);
-  $pdf->draw_text(100, $kala, t("Päivämäärä", $kieli), $firstpage, $pieni);
-  $pdf->draw_text(180, $kala, t("Eräpäivä", $kieli), $firstpage, $pieni);
+  $vasen_kala = 30;
+
+  if ($boss) {
+    $pdf->draw_text($vasen_kala, $kala, t("Tilaaja", $kieli), $firstpage, $pieni);
+    $vasen_kala += 190;
+  }
+
+  $pdf->draw_text($vasen_kala, $kala, t("Laskunro", $kieli), $firstpage, $pieni);
+  $vasen_kala += 70;
+
+  $pdf->draw_text($vasen_kala, $kala, t("Päivämäärä", $kieli), $firstpage, $pieni);
+  $vasen_kala += 80;
+
+  $pdf->draw_text($vasen_kala, $kala, t("Eräpäivä", $kieli), $firstpage, $pieni);
+
+  if ($boss) {
+    $vasen_kala += 110;
+  }
+  else {
+    $vasen_kala += 300;
+  }
 
   $oikpos = $pdf->strlen(t("Avoinsumma", $kieli), $pieni);
-  $pdf->draw_text(480 - $oikpos, $kala, t("Avoinsumma", $kieli), $firstpage, $pieni);
+  $pdf->draw_text($vasen_kala - $oikpos, $kala, t("Avoinsumma", $kieli), $firstpage, $pieni);
 
   $kala -= 15;
 
@@ -142,7 +183,7 @@ function rivit($firstpage, $rows, $saldovahvistus) {
   $pdf->draw_line($x, $y, $firstpage, $rectparam);
 
   foreach ($rows as $row) {
-    $firstpage = rivi($firstpage, $row, $saldovahvistus);
+    $firstpage = rivi($firstpage, $row, $saldovahvistus, $boss);
   }
 
   $y[0] = $y[1] = $kala + 5;
@@ -151,7 +192,7 @@ function rivit($firstpage, $rows, $saldovahvistus) {
   return $firstpage;
 }
 
-function rivi($firstpage, $row, $saldovahvistus) {
+function rivi($firstpage, $row, $saldovahvistus, $boss = false) {
   global $pdf, $kala, $sivu, $lask, $norm, $pieni, $yhtiorow;
 
   if ($lask == 37) {
@@ -161,12 +202,42 @@ function rivi($firstpage, $row, $saldovahvistus) {
     $lask = 1;
   }
 
-  $pdf->draw_text(30, $kala, $row["laskunro"], $firstpage, $norm);
-  $pdf->draw_text(100, $kala, tv1dateconv($row["tapvm"]), $firstpage, $norm);
-  $pdf->draw_text(180, $kala, tv1dateconv($row["erpcm"]), $firstpage, $norm);
+  $vasen_kala = 30;
+
+  if ($boss) {
+
+    $query = "SELECT nimi
+              FROM lasku
+              WHERE yhtio  = '{$yhtiorow['yhtio']}'
+              AND laskunro = '{$row['laskunro']}'
+              AND tila     = 'U'
+              AND alatila  = 'X'";
+    $_nimi_res = pupe_query($query);
+    $_nimi_row = mysql_fetch_assoc($_nimi_res);
+
+    list($ff_string, $ff_font) = pdf_fontfit($_nimi_row["nimi"], 190, $pdf, $norm);
+
+    $pdf->draw_text($vasen_kala, $kala, $ff_string, $firstpage, $ff_font);
+    $vasen_kala += 190;
+  }
+
+  $pdf->draw_text($vasen_kala, $kala, $row["laskunro"], $firstpage, $norm);
+  $vasen_kala += 70;
+
+  $pdf->draw_text($vasen_kala, $kala, tv1dateconv($row["tapvm"]), $firstpage, $norm);
+  $vasen_kala += 80;
+
+  $pdf->draw_text($vasen_kala, $kala, tv1dateconv($row["erpcm"]), $firstpage, $norm);
+
+  if ($boss) {
+    $vasen_kala += 110;
+  }
+  else {
+    $vasen_kala += 300;
+  }
 
   $oikpos = $pdf->strlen($row["avoin_saldo"], $norm);
-  $pdf->draw_text(480 - $oikpos, $kala, $row["avoin_saldo"], $firstpage, $norm);
+  $pdf->draw_text($vasen_kala - $oikpos, $kala, $row["avoin_saldo"], $firstpage, $norm);
 
   $kala = $kala - 13;
   $lask++;
@@ -176,7 +247,7 @@ function rivi($firstpage, $row, $saldovahvistus) {
 function loppu($firstpage, $saldovahvistus) {
   global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kieli, $lask, $kala, $bold;
 
-  if ($lask > 28) {
+  if (($sivu > 1 and $lask > 28) or ($sivu == 1 and $lask > 19)) {
     $sivu++;
     $lask = 1;
     $firstpage = alku($saldovahvistus);
@@ -243,7 +314,7 @@ function loppu($firstpage, $saldovahvistus) {
 
   $pdf->draw_text(30, $kala - 20, t('Saldovahvistus', $kieli), $firstpage, $bold);
 
-  $pdf->draw_text(30, $kala - 40, t('Todistamme että', $kieli)." {$saldovahvistus['asiakas']['nimi']} ".t('velka', $kieli).'/'.t('ennakkomaksu', $kieli)." {$yhtiorow['nimi']} ".date('d.m.Y', strtotime($saldovahvistus['laskun_avoin_paiva'])).' '.t('on', $kieli), $firstpage, $bold);
+  $pdf->draw_text(30, $kala - 40, t("Todistamme että %s velka / ennakkomaksu %s %s on", $kieli, $saldovahvistus['asiakas']['nimi'], $yhtiorow['nimi'], date('d.m.Y', strtotime($saldovahvistus['tiliotepvm']))), $firstpage, $bold);
 
   $x[0] = 30;
   $x[1] = 230;

@@ -71,6 +71,16 @@ $request = array(
   'saldovahvistus_tunnus'   => $saldovahvistus_tunnus,
 );
 
+$t = array(
+  "email" => t("Email puuttuu"),
+  "nayta_pdf" => t("Näytä pdf"),
+  "tulosta_pdf" => t("Tulosta pdf"),
+  "kohdistamaton" => t("Kohdistamaton suoritus"),
+  "laheta_asiakkaalle" => t("Lähetä asiakkaalle"),
+);
+
+$request["t"] = $t;
+
 $request['haku_tyypit'] = array(
   'ytunnus'   => t('Ytunnus'),
   'asiakasnro' => t('Asiakasnumero'),
@@ -94,7 +104,17 @@ elseif ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldovah
   $saldovahvistus['saldovahvistus_viesti'] = search_array_key_for_value_recursive($request['saldovahvistus_viestit'], 'selite', $saldovahvistus['saldovahvistus_viesti']);
   $saldovahvistus['saldovahvistus_viesti'] = $saldovahvistus['saldovahvistus_viesti'][0];
   $saldovahvistus['laskun_avoin_paiva'] = $saldovahvistus['avoin_saldo_pvm'];
-  $pdf_filepath = hae_saldovahvistus_pdf($saldovahvistus);
+
+  if ($saldovahvistus['ryhmittely_tyyppi'] == 'ytunnus') {
+    $boss = true;
+  }
+  else {
+    $boss = false;
+  }
+
+  $saldovahvistus['tiliotepvm'] = $saldovahvistus['laskun_avoin_paiva'];
+
+  $pdf_filepath = hae_saldovahvistus_pdf($saldovahvistus, $boss);
 
   if ($request['tee'] == 'NAYTATILAUS') {
     echo file_get_contents($pdf_filepath);
@@ -112,7 +132,7 @@ elseif ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldovah
   echo_lahetetyt_saldovahvistukset($request);
 }
 elseif ($request['tee'] == 'laheta_sahkoposti') {
-  list($lahetetyt_count, $ei_lahetetty_count) = generoi_saldovahvistus_sahkopostit($request, true);
+  list($lahetetyt_count, $ei_lahetetty_count, $ei_lahetetyt) = generoi_saldovahvistus_sahkopostit($request, true);
 }
 
 echo "<br/>";
@@ -136,6 +156,17 @@ if (isset($lahetetyt_count) and isset($ei_lahetetty_count)) {
   if ($ei_lahetetty_count > 0) {
     echo "<br/>";
     echo '<font class="message">'.$ei_lahetetty_count.' '.t('sähköpostin lähettäminen epäonnistui').'</font>';
+
+    if (count($ei_lahetetyt) > 0) {
+
+      echo "<br /><br />";
+
+      foreach ($ei_lahetetyt as $ei_lahetetty_nimi) {
+        echo "<font class='message'>";
+        echo t("Asiakkaan %s sähköpostin lähettäminen epäonnistui", "", $ei_lahetetty_nimi);
+        echo "</font><br />";
+      }
+    }
   }
 }
 ?>
@@ -251,7 +282,7 @@ function echo_lahetetty_saldovahvistus_rivi($saldovahvistusrivi, $request, $hidd
 
   echo "<td valign='top' class='back'>";
   echo "<form method='POST' action='' id='".implode('', $saldovahvistusrivi['lasku_tunnukset'])."' name='".implode('', $saldovahvistusrivi['lasku_tunnukset'])."' autocomplete='off'>";
-  echo "<input type='submit' value='".t("Näytä pdf")."' onClick=\"js_openFormInNewWindow('".implode('', $saldovahvistusrivi['lasku_tunnukset'])."', '".implode('', $saldovahvistusrivi['lasku_tunnukset'])."'); return false;\">";
+  echo "<input type='submit' value='{$request["t"]["nayta_pdf"]}' onClick=\"js_openFormInNewWindow('".implode('', $saldovahvistusrivi['lasku_tunnukset'])."', '".implode('', $saldovahvistusrivi['lasku_tunnukset'])."'); return false;\">";
   echo "<input type='hidden' name='tee' value='NAYTATILAUS' />";
   echo "<input type='hidden' name='nayta_pdf' value='1' />";
   echo "<input type='hidden' name='saldovahvistus_viesti' value='{$request['saldovahvistus_viesti']}' />";
@@ -263,7 +294,7 @@ function echo_lahetetty_saldovahvistus_rivi($saldovahvistusrivi, $request, $hidd
   echo "<br/>";
 
   echo "<form method='POST' action=''>";
-  echo "<input type='submit' value='".t('Tulosta pdf')."' />";
+  echo "<input type='submit' value='{$request["t"]["tulosta_pdf"]}' />";
   echo "<input type='hidden' name='tee' value='tulosta_saldovahvistus_pdf' />";
   echo "<input type='hidden' name='saldovahvistus_viesti' value='{$request['saldovahvistus_viesti']}' />";
   echo "<input type='hidden' name='ryhmittely_tyyppi' value='{$request['ryhmittely_tyyppi']}' />";
@@ -274,7 +305,7 @@ function echo_lahetetty_saldovahvistus_rivi($saldovahvistusrivi, $request, $hidd
   echo "<br/>";
 
   echo "<form method='POST' action=''>";
-  echo "<input type='submit' value='".t('Lähetä asiakkaalle')."' />";
+  echo "<input type='submit' value='{$request["t"]["laheta_asiakkaalle"]}' />";
   echo "<input type='hidden' name='tee' value='laheta_sahkoposti' />";
   echo "<input type='hidden' name='saldovahvistus[saldovahvistus_viesti]' value='{$saldovahvistusrivi['saldovahvistus_viesti']}' />";
   echo "<input type='hidden' name='saldovahvistus[laskun_avoin_paiva]' value='{$saldovahvistusrivi['avoin_saldo_pvm']}' />";

@@ -186,10 +186,6 @@ if ($_tuoterajaus) {
     fwrite($ofp, $rivi);
 
     $k_rivi++;
-
-    if ($k_rivi % 1000 == 0) {
-      echo "Käsitellään riviä {$k_rivi}\n";
-    }
   }
 
   fclose($ofp);
@@ -292,6 +288,7 @@ $header .= "tuotekorkeus;";
 $header .= "tuoteleveys;";
 $header .= "tuotesyvyys;";
 $header .= "tuotemassa;";
+$header .= "tilavuus;";
 $header .= "ostajanro;";
 $header .= "tuotepaallikko;";
 $header .= "tuotetunnus;";
@@ -372,6 +369,7 @@ $query = "SELECT
           tuote.tuoteleveys,
           tuote.tuotesyvyys,
           tuote.tuotemassa,
+          round(tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys, 5) tilavuus,
           tuote.ostajanro,
           tuote.tuotepaallikko,
           tuote.tunnus
@@ -386,7 +384,7 @@ $res = pupe_query($query);
 // Kerrotaan montako riviä käsitellään
 $rows = mysql_num_rows($res);
 
-echo "Tuoterivejä {$rows} kappaletta.\n";
+echo date("d.m.Y @ G:i:s") . ": Relex tuoterivejä {$rows} kappaletta.\n";
 
 $k_rivi = 0;
 
@@ -426,6 +424,7 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi .= "{$row['tuoteleveys']};";
   $rivi .= "{$row['tuotesyvyys']};";
   $rivi .= "{$row['tuotemassa']};";
+  $rivi .= "{$row['tilavuus']};";
   $rivi .= "{$row['ostajanro']};";
   $rivi .= "{$row['tuotepaallikko']};";
   $rivi .= "{$row['tunnus']};";
@@ -461,6 +460,7 @@ while ($row = mysql_fetch_assoc($res)) {
           if(tuotteen_toimittajat.toimitusaika = 0, toimi.oletus_toimaika, tuotteen_toimittajat.toimitusaika) toimitusaika,
           tuotteen_toimittajat.toim_tuoteno,
           tuotteen_toimittajat.toim_nimitys,
+          if(tuotteen_toimittajat.valuutta = '', toimi.oletus_valkoodi, tuotteen_toimittajat.valuutta) valuutta,
           if(tuotteen_toimittajat.osto_era = 0, 1, tuotteen_toimittajat.osto_era) osto_era,
           if(tuotteen_toimittajat.pakkauskoko = 0, '', tuotteen_toimittajat.pakkauskoko) pakkauskoko,
           tuotteen_toimittajat.ostohinta,
@@ -557,11 +557,33 @@ while ($row = mysql_fetch_assoc($res)) {
         $korjattu_ema = round($ttrow['toimitusaika'], 2);
       }
 
+      unset($valtrow);
+
+      if ($ttrow['valuutta'] != $yhtiorow['valkoodi']) {
+
+        // haetaan vienti_kurssi
+        $query = "SELECT nimi, kurssi, tunnus
+                  FROM valuu
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  AND nimi = '{$ttrow['valuutta']}'
+                  ORDER BY jarjestys";
+        $vresult = pupe_query($query);
+        if (mysql_num_rows($vresult) == 1) {
+          $valtrow = mysql_fetch_assoc($vresult);
+        }
+      }
+
+      if (!isset($valtrow)) $valtrow['kurssi'] = 1;
+
+      // alehinta_ostoa varten tehdään pieni kikka ja käännetään kurssi
+      // tämä siksi että toimittajan valuuttaa katsotaan funkkarissa ns kotivaluuttana vs oikea kotivaluutta
+      $valtrow['kurssi'] = 1 / $valtrow['kurssi'];
+
       // Hetaan kaikki ostohinnat yhtiön oletusvaluutassa
       $laskurow = array(
         'liitostunnus'  => $ttrow['toimittaja'],
         'valkoodi'      => $yhtiorow["valkoodi"],
-        'vienti_kurssi' => 1,
+        'vienti_kurssi' => $valtrow['kurssi'],
         'ytunnus'       => $ttrow['ytunnus'],
       );
 
@@ -573,7 +595,7 @@ while ($row = mysql_fetch_assoc($res)) {
 
       // Nolla tai pienempi on virhe, laitetaan ne vikaks
       if ($ostohinta <= 0) {
-        $ostohinta = $ostohinta_netto = 9999999999.99;
+        $ostohinta = $ostohinta_netto = 0;
         $netto     = "N";
       }
 
@@ -672,10 +694,6 @@ while ($row = mysql_fetch_assoc($res)) {
   fwrite($fp, $rivi);
 
   $k_rivi++;
-
-  if ($k_rivi % 1000 == 0) {
-    echo "Käsitellään riviä {$k_rivi}\n";
-  }
 }
 
 fclose($fp);
@@ -700,4 +718,4 @@ if ($paiva_ajo and !empty($relex_ftphost)) {
   require "inc/ftp-send.inc";
 }
 
-echo "Valmis.\n";
+echo date("d.m.Y @ G:i:s") . ": Relex tuotteet valmis.\n\n";

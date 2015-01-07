@@ -527,6 +527,13 @@ if (isset($jatka) and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" o
 // tehdään oikeellisuus
 if ($toim == "YLLAPITO") {
 
+  if ($kuukausihinnoittelu == "Y" and count($yllapito_pp) > 1) {
+    echo
+      "<font class='error'>" .
+      t("Jos olet valinnut kuukausilaskutuksen, voit valita vain yhden laskutuspäivän") .
+      "</font>";
+  }
+
   if ((count($yllapito_kk) == 0 or count($yllapito_pp) == 0) and isset($jatka)) {
     echo "<font class='error'>".t("VIRHE: Laskutusaikataulu on syötettävä")."!</font><br>";
     $tee = "OTSIK";
@@ -1084,7 +1091,7 @@ if ($tila == "" and !isset($jatka)) {
   }
 
   echo "<table>";
-  echo "<tr><td class='nopad top'>";
+  echo "<tr><td class='pnopad ptop'>";
 
   echo "<table>";
   echo "<tr>
@@ -1129,18 +1136,6 @@ if ($tila == "" and !isset($jatka)) {
     }
 
     echo "</select></td></tr>";
-
-    if ($yhtiorow["vahvistusviesti_asiakkaalle"]) {
-      echo "<tr>
-              <td valign='top'>" . t("Puh") . ": </td>
-              <td><input type='tel' name='tpuh' size='35' value='$srow[toim_puh]'></td>
-            </tr>";
-
-      echo "<tr>
-              <td valign='top'>" . t("Email") . ": </td>
-              <td><input type='email' name='temail' size='35' value='$srow[toim_email]'></td>
-            </tr>";
-    }
 
     if ($yhtiorow['myyntitilaus_ytunnus_syotto'] == 'K' and $asiarow['laji'] != 'H') {
       echo "<tr>";
@@ -1243,7 +1238,7 @@ if ($tila == "" and !isset($jatka)) {
       echo "<input type='hidden' name='ytunnus'              value = '$srow[ytunnus]'>";
     }
 
-    echo "<td class='nopad top'>";
+    echo "<td class='pnopad ptop'>";
     echo "<table>";
     echo "<tr>
         <th colspan='2'>".t("Toimitusosoite").":</td></tr>";
@@ -1319,7 +1314,7 @@ if ($tila == "" and !isset($jatka)) {
     echo "</table>";
     echo "</td>";
 
-    echo "<td class='nopad top'>";
+    echo "<td class='pnopad ptop'>";
     echo "<table>";
     echo "<tr>
         <th colspan='2'>&nbsp; ".t("Laskun postitusosoite").":</td></tr>";
@@ -3078,6 +3073,37 @@ if ($tila == "" and !isset($jatka)) {
 
       $disable = "";
 
+      echo "<script>
+              (function () {
+                window.onload = function () {
+                  var checkboxes = document.getElementsByName('yllapito_pp[]');
+                  var kuukausihinnoittelu = document.getElementById('kuukausihinnoittelu');
+
+                  for (var i = 0; i < checkboxes.length; i++) {
+                    checkboxes[i].addEventListener('click', function (e) {
+                      if (kuukausihinnoittelu.checked) {
+                        for (var j = 0; j < checkboxes.length; j++) {
+                          if (checkboxes[j] !== e.target) {
+                            checkboxes[j].disabled = e.target.checked;
+                          }
+                        }
+                      }
+                    });
+                  }
+
+                  kuukausihinnoittelu.addEventListener('click', function (e) {
+                    for (var i = 0; i < checkboxes.length; i++) {
+                      if (!e.target.checked) {
+                        checkboxes[i].disabled = false;
+                      } else {
+                        checkboxes[i].checked = false;
+                      }
+                    }
+                  });
+                };
+              })();
+            </script>";
+
       // jos alatila on X niin pitää tehdä hidden muuttujat ettei nollaannu
       if ($srow["alatila"] == "X") {
         $disable = "disabled";
@@ -3102,8 +3128,21 @@ if ($tila == "" and !isset($jatka)) {
         }
       }
 
+      $kuukausi_checked = $sopapurow["yllapito_kuukausihinnoittelu"] == "Y" ? "checked" : "";
+
       echo "<table>";
       echo "<tr><th colspan='2'>".t("Valitse ylläpitosopimuksen laskutusaikataulu").":</th></tr>";
+      echo "<tr>
+              <td colspan='2'>
+                <label>" . t("Kuukausihinnoittelu") . "
+                  <input type='checkbox'
+                         id='kuukausihinnoittelu'
+                         name='kuukausihinnoittelu'
+                         value='Y'
+                         {$kuukausi_checked}>
+                </label>
+              </td>
+            </tr>";
       echo "<tr>";
       echo "<td style='padding:0px;'>";
       echo "<table><tr>";
@@ -3279,6 +3318,10 @@ if ($tila == "" and !isset($jatka)) {
     echo "<tr><td>".t("Ohjausmerkki").":</td><td><input type='text' size='43' name='ohjausmerkki' value='$srow[ohjausmerkki]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("lähete")."</td></tr>";
 
     echo "<tr><td>".t("Puhelin toimitukseen").":</td><td><input type='text' size='43' name='tpuh' value='$srow[toim_puh]'</td><td></td></tr>";
+
+    if ($yhtiorow["vahvistusviesti_asiakkaalle"]) {
+      echo "<tr><td>".t("Email toimitukseen").":</td><td><input type='text' size='43' name='temail' value='$srow[toim_email]'</td><td></td></tr>";
+    }
 
     echo "<tr><td>".t("Kommentti")." 1:</td><td><textarea name='comments'   rows='2' cols='40'>$srow[comments]</textarea></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("valmistus")." + ".t("työmääräys")." + ".t("lähete")." + ".t("tarjous")."</td></tr>";
 
@@ -4405,6 +4448,7 @@ if (isset($jatka)) {
             yhtio            = '$kukarow[yhtio]',
             sopimus_kk          = '$sopimus_kk',
             sopimus_pp          = '$sopimus_pp',
+            yllapito_kuukausihinnoittelu = '{$kuukausihinnoittelu}',
             sopimus_alkupvm        = '$yllapito_alkuvv-$yllapito_alkukk-$yllapito_alkupp',
             sopimus_loppupvm      = '$yllapito_loppuvv-$yllapito_loppukk-$yllapito_loppupp',
             {$sopimus_info}

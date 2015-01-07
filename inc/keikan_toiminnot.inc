@@ -505,10 +505,10 @@ elseif ($_POST['ajax_toiminto'] == 'hae_saldo_myytavissa') {
   list ($saldo, $hyllyssa, $myytavissa, $bool) = saldo_myytavissa($_tuoteno, "", $_varasto);
 
   echo json_encode(array(
-    'saldo' => $saldo,
-    'hyllyssa' => $hyllyssa,
-    'myytavissa' => $myytavissa,
-  ));
+      'saldo' => $saldo,
+      'hyllyssa' => $hyllyssa,
+      'myytavissa' => $myytavissa,
+    ));
 }
 elseif ($_POST['ajax_toiminto'] == 'lisaa_suuntalava') {
   $otunnus      = $_POST['otunnus'];

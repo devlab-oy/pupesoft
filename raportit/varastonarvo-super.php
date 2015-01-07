@@ -494,29 +494,38 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
   //################# varattu-rajaukset ##################
   if (isset($varatturajaus) and $varatturajaus != "") {
-    $query = "SELECT group_concat(distinct concat('\'',tuoteno,'\'')) varatut_tuotteet
-              FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_varattu)
-              WHERE yhtio  = '$kukarow[yhtio]'
-              and tyyppi   in ('B','F','L','V','W')
-              and tuoteno != ''
-              and varattu != 0";
+    $query = "SELECT tuoteno,
+              sum(varattu) AS varattu_saldo
+              FROM tilausrivi
+              USE INDEX (yhtio_tyyppi_tuoteno_varattu)
+              WHERE yhtio = '{$kukarow["yhtio"]}'
+              AND tyyppi IN ('B', 'F', 'L', 'V', 'W')
+              AND tuoteno != ''
+              AND varattu != 0
+              GROUP BY tuoteno;";
+
     $varares = pupe_query($query);
-    $vararow = mysql_fetch_assoc($varares);
 
-    $varatut_tuotteet = "''";
+    $tuotevaraukset = array();
 
-    if ($vararow["varatut_tuotteet"] != "") {
-      $varatut_tuotteet = $vararow["varatut_tuotteet"];
+    while ($vararivi = mysql_fetch_assoc($varares)) {
+      $tuotevaraukset[$vararivi["tuoteno"]] = $vararivi["varattu_saldo"];
+    }
+
+    $varatut_tuotteet = "";
+
+    if (!empty($tuotevaraukset)) {
+      $varatut_tuotteet = implode("','", array_keys($tuotevaraukset));
     }
 
     // Näytetään vain varatut tuotteet
     if ($varatturajaus == "O") {
-      $tuote_lisa .= " and tuote.tuoteno in ($varatut_tuotteet) ";
+      $tuote_lisa .= " and tuote.tuoteno in ('$varatut_tuotteet') ";
     }
 
     // Näytetään vain EI varatut tuotteet
     if ($varatturajaus == "E") {
-      $tuote_lisa .= " and tuote.tuoteno not in ($varatut_tuotteet) ";
+      $tuote_lisa .= " and tuote.tuoteno not in ('$varatut_tuotteet') ";
     }
   }
 
@@ -730,10 +739,22 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
   $worksheet->writeString($excelrivi, $excelsarake, t("Saldo"),         $format_bold);
   $excelsarake++;
+
+  if ($varatturajaus == "O") {
+    $worksheet->writeString($excelrivi, $excelsarake, t("Varattu saldo"), $format_bold);
+    $excelsarake++;
+  }
+
   $worksheet->writeString($excelrivi, $excelsarake, t("Kehahin"),       $format_bold);
   $excelsarake++;
   $worksheet->writeString($excelrivi, $excelsarake, t("Varastonarvo"),     $format_bold);
   $excelsarake++;
+
+  if ($varatturajaus == "O") {
+    $worksheet->writeString($excelrivi, $excelsarake, t("Varattu varastonarvo"), $format_bold);
+    $excelsarake++;
+  }
+
   if ("$vv-$kk-$pp" != date("Y-m-d")) {
     $worksheet->writeString($excelrivi, $excelsarake, t("Bruttovarastonarvo")." ".t("Arvio"), $format_bold);
   }
@@ -877,8 +898,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         $summaus_lisa = "";
       }
 
-      $query = "SELECT tuotepaikat.tuoteno,
-                sum(tuotepaikat.saldo) saldo,
+      $query = "SELECT sum(tuotepaikat.saldo) saldo,
                 sum(tuotepaikat.saldo*if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0)) varasto,
                 sum(tuotepaikat.saldo*tuote.kehahin) bruttovarasto
                 FROM tuotepaikat
@@ -891,8 +911,13 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $vararvorow = mysql_fetch_assoc($vararvores);
 
       $kpl = (float) $vararvorow["saldo"];
-      $varaston_arvo = hinta_kuluineen( $vararvorow["tuoteno"], (float) $vararvorow["varasto"] );
-      $bruttovaraston_arvo = hinta_kuluineen( $vararvorow["tuoteno"], (float) $vararvorow["bruttovarasto"] );
+      $varattu_saldo = $tuotevaraukset[$row["tuoteno"]];
+      $varaston_arvo = hinta_kuluineen( $row["tuoteno"], (float) $vararvorow["varasto"] );
+      $varattu_varastonarvo = $varattu_saldo * $row["kehahin_nyt"];
+      $varattu_varastonarvo =
+        hinta_kuluineen($row["tuoteno"], (float) $varattu_varastonarvo);
+      $bruttovaraston_arvo =
+        hinta_kuluineen($row["tuoteno"], (float) $vararvorow["bruttovarasto"]);
     }
 
     // jos summaustaso on per paikka, otetaan varastonmuutos vain siltä paikalta
@@ -1224,10 +1249,22 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
       $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $muutoskpl));
       $excelsarake++;
+
+      if ($varatturajaus == "O") {
+        $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.02f", $varattu_saldo));
+        $excelsarake++;
+      }
+
       $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $kehasilloin));
       $excelsarake++;
       $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $muutoshinta));
       $excelsarake++;
+
+      if ($varatturajaus == "O") {
+        $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $varattu_varastonarvo));
+        $excelsarake++;
+      }
+
       $worksheet->writeNumber($excelrivi, $excelsarake, sprintf("%.06f", $bmuutoshinta));
       $excelsarake++;
 

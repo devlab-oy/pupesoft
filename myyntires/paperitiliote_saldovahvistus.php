@@ -110,7 +110,7 @@ function alku($saldovahvistus) {
   $pdf->draw_text(440, 750, $kukarow["puhno"], $firstpage, $norm);
 
   $pdf->draw_text(380, 740, t("Fax", $kieli).':', $firstpage, $norm);
-  $pdf->draw_text(440, 740, $saldovahvistus['asiakas']['fax'], $firstpage, $norm);
+  $pdf->draw_text(440, 740, $yhtiorow['fax'], $firstpage, $norm);
 
   $pdf->draw_text(380, 730, t("Sähköposti", $kieli).':', $firstpage, $norm);
   $pdf->draw_text(440, 730, $kukarow["eposti"], $firstpage, $norm);
@@ -208,10 +208,10 @@ function rivi($firstpage, $row, $saldovahvistus, $boss = false) {
 
     $query = "SELECT nimi
               FROM lasku
-              WHERE yhtio = '{$yhtiorow['yhtio']}'
+              WHERE yhtio  = '{$yhtiorow['yhtio']}'
               AND laskunro = '{$row['laskunro']}'
-              AND tila = 'U'
-              AND alatila = 'X'";
+              AND tila     = 'U'
+              AND alatila  = 'X'";
     $_nimi_res = pupe_query($query);
     $_nimi_row = mysql_fetch_assoc($_nimi_res);
 
@@ -247,7 +247,7 @@ function rivi($firstpage, $row, $saldovahvistus, $boss = false) {
 function loppu($firstpage, $saldovahvistus) {
   global $pdf, $yhtiorow, $kukarow, $sivu, $rectparam, $norm, $pieni, $kieli, $lask, $kala, $bold;
 
-  if ($lask > 28) {
+  if (($sivu > 1 and $lask > 28) or ($sivu == 1 and $lask > 19)) {
     $sivu++;
     $lask = 1;
     $firstpage = alku($saldovahvistus);

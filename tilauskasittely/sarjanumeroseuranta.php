@@ -1599,27 +1599,23 @@ if ($from == "valmistus") {
 }
 
 if ($from == "KORJAA") {
+  $urli = lopetus($lopetus, "", TRUE);
 
-  $lopetus = str_replace('//', '&',  $lopetus);
-
-  echo "<form method='post' action='../raportit/sarjanumerotarkistukset.php?$lopetus'>
-    <input type='hidden' name='toim' value='$aputoim'>
+  echo "<form method='post' action='$urli'>
     <input type='hidden' name='id'   value='$otunnus'>
     <input type='submit' value='".t("Takaisin laitemyyntien tarkistukseen")."'>
     </form>";
 }
 
 if ($from == "INVENTOINTI") {
+  $urli = lopetus($lopetus, "", TRUE);
 
-  $lopetus = str_replace('//', '&',  $lopetus);
-
-  echo "<form method='post' action='".$palvelin2."inventoi.php?$lopetus'>
-    <input type='hidden' name='toim' value='$aputoim'>
+  echo "<form method='post' action='$urli'>
     <input type='hidden' name='id'   value='$otunnus'>
     <input type='submit' value='".t("Takaisin inventointiin")."'>
     </form>";
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php")  !== FALSE) {
-  require "../inc/footer.inc";
+  require "inc/footer.inc";
 }

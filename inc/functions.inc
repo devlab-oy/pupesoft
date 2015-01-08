@@ -428,7 +428,7 @@ if (!function_exists("pupesoft_flock")) {
 
     $scriptname    = basename($scriptname);
     $lockfile      = isset($params["lockfile"]) ? "/tmp/".basename($params["lockfile"]) : "/tmp/##{$scriptname}-flock.lock";
-    $error_message = "VIRHE: {$scriptname} flocklock-jumissa! (".date("Y-m-d H:i:s").")\n";
+    $error_message = "VIRHE: {$scriptname} flocklock-jumissa! (".date("Y-m-d H:i:s").") ".gethostname()."\n";
     $locktime      = isset($params["locktime"]) ? $params["locktime"] : 300;
     $filecontent   = isset($params["filecontent"]) ? $params["filecontent"] : '';
     $flockreturn   = isset($params["return"]) ? $params["return"] : FALSE;

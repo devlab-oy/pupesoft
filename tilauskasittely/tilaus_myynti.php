@@ -5642,16 +5642,15 @@ if ($tee == '') {
 
           $_rows_added = 0;
 
-          $cur_date = new DateTime();
-          $date_2yo = new DateTime();
-          $date_2yo->sub(new DateInterval('P2Y'));
+          $cur_date = date('Y-m-d');
+          $date_2yo = date("Y-m-d", mktime(0, 0, 0, date("n"), date("j"), date("Y")-2));
 
           // Jos kahden vuoden aikarajaus ylittyy, breikataan looppi
           while ($cur_date >= $date_2yo) {
 
-            $cur_date->sub(new DateInterval('P1M'));
-            $pre_date = new DateTime($cur_date->format('Y-m-d'));
-            $pre_date->add(new DateInterval('P1M'));
+            $pre_date = $cur_date;
+            $cur_date = explode('-', $cur_date);
+            $cur_date = date("Y-m-d", mktime(0, 0, 0, $cur_date[1]-1, $cur_date[2], $cur_date[0]));
 
             $query = "SELECT tilausrivi.*,
                       if (kuka.nimi IS NOT NULL AND kuka.nimi != '', kuka.nimi, tilausrivi.laatija) laatija
@@ -5667,8 +5666,8 @@ if ($tee == '') {
                       WHERE tilausrivi.yhtio        = '{$kukarow['yhtio']}'
                       AND tilausrivi.tyyppi         = 'L'
                       AND tilausrivi.tuoteno        = '{$tuote['tuoteno']}'
-                      AND tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."'
-                      AND tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."'
+                      AND tilausrivi.laskutettuaika <= '{$pre_date}'
+                      AND tilausrivi.laskutettuaika >= '{$cur_date}'
                       ORDER BY tilausrivi.laskutettuaika DESC, tilausrivi.tunnus DESC";
             $tapahtuma_chk_res = pupe_query($query);
 

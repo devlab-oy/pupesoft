@@ -131,7 +131,9 @@ if ($nayta_pdf != 1) {
   echo "<br/>";
 }
 
-if (count($valitut_laskut) > 0 and !empty($_SESSION['valitut_laskut'])) {
+if (count($valitut_laskut) > 0 and !empty($_SESSION['valitut_laskut']) and $request['tee'] == 'laheta_sahkopostit') {
+  $lasku_tunnukset_temp = $request['lasku_tunnukset'];
+
   foreach ($valitut_laskut as $_id) {
     if (array_key_exists($_id, $_SESSION['valitut_laskut'])) {
       $valittu_lasku = $_SESSION['valitut_laskut'][$_id];
@@ -148,11 +150,13 @@ if (count($valitut_laskut) > 0 and !empty($_SESSION['valitut_laskut'])) {
       $request['valitut_laskut'][] = $lasku_temp;
     }
   }
-}
 
+  $request['lasku_tunnukset'] = $lasku_tunnukset_temp;
+  unset($request['ryhmittely_tyyppi_temp']);
+}
 // Tämä blocki on sitä varten, että muistetaan käyttäjän aiemmat haut,
 // jos käyttäjä vierailee toisissa softissa ja palaa tähän softaan myöhemmin
-if (!empty($_SESSION['valitut_laskut'])) {
+elseif (!empty($_SESSION['valitut_laskut'])) {
   $lasku_tunnukset_temp = $request['lasku_tunnukset'];
   foreach ($_SESSION['valitut_laskut'] as $valittu_lasku) {
     $request['lasku_tunnukset'] = $valittu_lasku['lasku_tunnukset'];

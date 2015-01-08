@@ -2240,7 +2240,9 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
   if ($rivityyppi == 'O' and $rivitunnus > 0 and isset($suoratoimitus_rivitun) and $suoratoimitus_rivitun > 0) {
     // Kappalemäärää ei voida lisätä
-    if ($toimittamatta >= $suoratoimitus_rivikpl) {
+    if ($yhtiorow["maarien_muuttaminen_saapuminen"] != "K" and
+        $toimittamatta >= $suoratoimitus_rivikpl
+    ) {
       $toimittamatta = $suoratoimitus_rivikpl;
     }
     else {

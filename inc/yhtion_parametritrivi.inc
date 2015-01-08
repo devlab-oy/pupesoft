@@ -4164,7 +4164,8 @@ if ($fieldname == 'maarien_muuttaminen_saapuminen') {
   $sel = $trow[$i] == 'K' ? 'selected' : '';
 
   $ulos .= "<option value=''>" . t("Tilausrivin m‰‰ri‰ ei voi lis‰t‰ saapumisella") . "</option>";
-  $ulos .= "<option value='K' {$sel}>" . t("Tilausrivin m‰‰ri‰ voi lis‰t‰ saapumisella") .
+  $ulos .= "<option value='K' {$sel}>" .
+           t("Tilausrivin m‰‰ri‰ voi lis‰t‰ saapumisella, joka on linkitetty myyntitilaukseen") .
            "</option>";
   $ulos .= "</select></td>";
 

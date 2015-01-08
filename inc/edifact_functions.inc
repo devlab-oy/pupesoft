@@ -1503,6 +1503,7 @@ function kasittele_bookkaussanoma($edi_data) {
 
     $tunnus = $tunnus_johon_liitetaan;
 
+    mysql_data_seek($result, 0);
     $lasku = mysqL_fetch_assoc($result);
 
     $update_query = "UPDATE lasku SET

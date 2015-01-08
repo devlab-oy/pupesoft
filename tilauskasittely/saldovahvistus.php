@@ -65,6 +65,10 @@ if (!isset($avoin_saldo_rajaus)) {
   $avoin_saldo_rajaus = "";
 }
 
+if (!isset($valitut_laskut)) {
+  $valitut_laskut = array();
+}
+
 if (!isset($pp)) {
   $pp = date('d');
 }
@@ -125,6 +129,25 @@ if ($nayta_pdf != 1) {
 
   echo "<br/>";
   echo "<br/>";
+}
+
+if (count($valitut_laskut) > 0 and !empty($_SESSION['valitut_laskut'])) {
+  foreach ($valitut_laskut as $_id) {
+    if (array_key_exists($_id, $_SESSION['valitut_laskut'])) {
+      $valittu_lasku = $_SESSION['valitut_laskut'][$_id];
+
+      $request['lasku_tunnukset'] = $valittu_lasku['lasku_tunnukset'];
+      $request['ryhmittely_tyyppi_temp'] = $valittu_lasku['ryhmittely_tyyppi'];
+
+      $_req = $request;
+      $_req['paiva'] = $valittu_lasku['laskun_avoin_paiva'];
+
+      $lasku_temp = hae_myyntilaskuja_joilla_avoin_saldo($_req, true);
+      $lasku_temp['saldovahvistus_viesti'] = $valittu_lasku['saldovahvistus_viesti'];
+      $lasku_temp['laskun_avoin_paiva'] = $valittu_lasku['laskun_avoin_paiva'];
+      $request['valitut_laskut'][] = $lasku_temp;
+    }
+  }
 }
 
 // Tämä blocki on sitä varten, että muistetaan käyttäjän aiemmat haut,

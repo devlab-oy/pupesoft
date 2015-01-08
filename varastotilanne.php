@@ -221,6 +221,39 @@ if (isset($task) and ($task == 'ylijaamakasittely')) {
 
 if (!isset($task)) {
 
+  // uusi query tulossa...
+
+  /*
+  $query = "SELECT
+            ss.hyllyalue,
+            ss.hyllynro,
+            concat(trlt.asiakkaan_tilausnumero, ':', trlt.asiakkaan_rivinumero) AS kombo,
+            count(tilausrivi.tunnus) AS rullia,
+            SUM(IF(ss.lisatieto IS NULL, 1,0)) AS Normaali,
+            SUM(IF(ss.lisatieto = 'Lusattu', 1,0)) AS Lusattu,
+            SUM(IF(ss.lisatieto = 'Ylijaama', 1,0)) AS Ylij‰‰m‰,
+            SUM(ss.massa)
+            FROM sarjanumeroseuranta AS ss
+            LEFT JOIN tilausrivi
+              ON tilausrivi.yhtio = ss.yhtio
+              AND tilausrivi.tunnus = ss.myyntirivitunnus
+            LEFT JOIN tilausrivin_lisatiedot AS trlt
+              ON trlt.yhtio = ss.yhtio
+              AND trlt.tilausrivitunnus = tilausrivi.tunnus
+            LEFT JOIN lasku
+              ON lasku.yhtio = ss.yhtio
+              AND lasku.tunnus = tilausrivi.otunnus
+            LEFT JOIN laskun_lisatiedot
+              ON laskun_lisatiedot.yhtio = ss.yhtio
+              AND laskun_lisatiedot.otunnus = lasku.tunnus
+            WHERE ss.yhtio = '{$kukarow['kuka']}'
+            AND (ss.lisatieto != 'Toimitettu' OR ss.lisatieto IS NULL)
+            AND ss.varasto IS NOT NULL
+            AND trlt.asiakkaan_tilausnumero IS NOT NULL
+            GROUP BY hyllyalue, hyllynro, kombo
+            ORDER BY ss.hyllyalue, CAST(ss.hyllynro AS SIGNED)";
+  */
+
   $query = "SELECT ss.*,
             tilausrivin_lisatiedot.asiakkaan_rivinumero AS myyntirivinumero,
             tilausrivin_lisatiedot.asiakkaan_tilausnumero AS myyntitilausnumero,

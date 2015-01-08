@@ -246,6 +246,11 @@ elseif ($request['tee'] == 'laheta_sahkopostit') {
   $(document).ready(function() {
     bind_saldovahvistus_rivi_valinta_checkbox_click();
     bind_valitse_kaikki_checkbox_click();
+    bind_valitse_kaikki_lahetettavaksi();
+    bind_valitse_lahetettavaksi();
+    $('#valitse_kaikki_lahetettavaksi').attr('checked', 'checked');
+    $('#valitse_kaikki_lahetettavaksi').trigger('click');
+    $('#valitse_kaikki_lahetettavaksi').attr('checked', 'checked');
   });
 
   function bind_saldovahvistus_rivi_valinta_checkbox_click() {
@@ -273,6 +278,51 @@ elseif ($request['tee'] == 'laheta_sahkopostit') {
 
       saldovahvistus_rivit.push(saldovahvistus_rivi);
       tallenna_sessioon(saldovahvistus_rivit, lisays);
+    });
+  }
+
+  function add_ids(that, $_id) {
+    if ($(that).is(':checked')) {
+      $_hidden = $('<input type=\'hidden\' />');
+      $_hidden.attr('name', 'valitut_laskut[]');
+      $_hidden.attr('class', $_id);
+      $_hidden.attr('value', $_id);
+      $('#lahetysformi').append($_hidden);
+    }
+    else {
+      $('.' + $_id).each(function() {
+        $(this).remove();
+      });
+    }
+  }
+
+  function bind_valitse_lahetettavaksi() {
+    $('.saldovahvistus_rivi_sahkoposti_valinta').on('click', function() {
+      $_id = $(this).prev('input.saldovahvistus_rivi_sahkoposti_valinta_id').val();
+
+      add_ids(this, $_id);
+    });
+  }
+
+  function bind_valitse_kaikki_lahetettavaksi() {
+    $('#valitse_kaikki_lahetettavaksi').on('click', function() {
+      var $table = $(this).parent().parent().parent().parent(),
+          $_checkboxes = $table.find('.saldovahvistus_rivi_sahkoposti_valinta');
+
+      if ($(this).is(':checked')) {
+        $_checkboxes.each(function() {
+          $(this).attr('checked', 'checked');
+          $_id = $(this).prev('input.saldovahvistus_rivi_sahkoposti_valinta_id').val();
+          add_ids(this, $_id);
+        });
+      }
+      else {
+        $_checkboxes.each(function() {
+          $(this).removeAttr('checked');
+          $_id = $(this).prev('input.saldovahvistus_rivi_sahkoposti_valinta_id').val();
+          add_ids(this, $_id);
+        });
+      }
     });
   }
 
@@ -349,7 +399,7 @@ function echo_saldovahvistukset($request) {
 
   //  echo "<table class='display'>";
 
-  pupe_DataTables(array(array($pupe_DataTables, 6, 8, false, false, true)));
+  pupe_DataTables(array(array($pupe_DataTables, 6, 9, false, false, true)));
   echo "<table class='display dataTable' id='{$pupe_DataTables}'>";
 
   echo "<thead>";
@@ -361,7 +411,8 @@ function echo_saldovahvistukset($request) {
   echo "<th>" . t('Nimi') . "</th>";
   echo "<th>" . t('Saldo') . "</th>";
   echo "<th>" . t('Viesti') . "</th>";
-  echo "<th class='hidden'></th>";
+  echo "<th>",t("Muistissa"),"</th>";
+  echo "<th>",t("Lähetä"),"</th>";
   echo "<th class='hidden'></th>";
   echo "</tr>";
 
@@ -373,6 +424,7 @@ function echo_saldovahvistukset($request) {
   echo "<td><input type='text' class='search_field' name='search_saldo'></td>";
   echo "<td><input type='text' class='search_field' name='search_viesti'></td>";
   echo "<td><input type='checkbox' id='valitse_kaikki' CHECKED /></td>";
+  echo "<td><input type='checkbox' id='valitse_kaikki_lahetettavaksi' /></td>";
   echo "<td class='hidden'></td>";
   echo "</tr>";
 
@@ -413,7 +465,7 @@ function echo_saldovahvistukset($request) {
 
   echo "</table>";
 
-  echo "<form method='POST' action = ''>";
+  echo "<form id='lahetysformi' method='POST' action = ''>";
   echo "<input type='hidden' name='tee' value='laheta_sahkopostit' />";
   echo "<input type='hidden' name='ryhmittely_tyyppi' value='{$request['ryhmittely_tyyppi']}' />";
   echo "<input type='hidden' name='pp' value='{$request['pp']}' />";
@@ -498,10 +550,17 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
   echo "<input type='checkbox' class='saldovahvistus_rivi_valinta' CHECKED />";
   echo "</td>";
 
+  $_id = implode('', $saldovahvistusrivi['lasku_tunnukset']);
+
+  echo "<td>";
+  echo "<input type='hidden' class='saldovahvistus_rivi_sahkoposti_valinta_id' value='{$_id}' />";
+  echo "<input type='checkbox' class='saldovahvistus_rivi_sahkoposti_valinta' />";
+  echo "</td>";
+
   // .nayta_pdf_td ja .lasku_tunnus, jotta .saldovahvistus_rivi_valinta löytää lasku_tunnukset, jotka lähtee ajaxin mukana
   echo "<td class='back nayta_pdf_td'>";
-  echo "<form method='POST' action='' id='" . implode('', $saldovahvistusrivi['lasku_tunnukset']) . "' name='" . implode('', $saldovahvistusrivi['lasku_tunnukset']) . "' autocomplete='off'>";
-  echo "<input type='submit' value='{$request["t"]["nayta_pdf"]}' onClick=\"js_openFormInNewWindow('" . implode('', $saldovahvistusrivi['lasku_tunnukset']) . "', '" . implode('', $saldovahvistusrivi['lasku_tunnukset']) . "'); return false;\">";
+  echo "<form method='POST' action='' id='{$_id}' name='{$_id}' autocomplete='off'>";
+  echo "<input type='submit' value='{$request["t"]["nayta_pdf"]}' onClick=\"js_openFormInNewWindow('{$_id}}', '{$_id}'); return false;\">";
   echo "<input type='hidden' name='tee' value='NAYTATILAUS' />";
   echo "<input type='hidden' name='nayta_pdf' value='1' />";
   echo "<input type='hidden' name='pp' value='{$request['pp']}' />";

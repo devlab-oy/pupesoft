@@ -34,18 +34,19 @@ if ($ajax_request) {
   if ($merkkaa_lahetettavaksi == '1') {
     foreach ($saldovahvistus_rivit as $saldovahvistus_rivi) {
       $lasku_tunnukset_key = implode('', $saldovahvistus_rivi['lasku_tunnukset']);
-
-      $saldovahvistusrivi = array(
-        'laskun_avoin_paiva'    => $saldovahvistus_rivi['laskun_avoin_paiva'],
-        'saldovahvistus_viesti' => $saldovahvistus_rivi['saldovahvistus_viesti'],
-        'lasku_tunnukset'       => $saldovahvistus_rivi['lasku_tunnukset'],
-        'ryhmittely_tyyppi'     => $saldovahvistus_rivi['ryhmittely_tyyppi'],
-      );
-
-      lisaa_sessioon_saldovahvistus_rivi($lasku_tunnukset_key, $saldovahvistusrivi);
+      if ($lisays == 'true') {
+        $saldovahvistusrivi = array(
+            'laskun_avoin_paiva'    => $saldovahvistus_rivi['laskun_avoin_paiva'],
+            'saldovahvistus_viesti' => $saldovahvistus_rivi['saldovahvistus_viesti'],
+            'lasku_tunnukset'       => $saldovahvistus_rivi['lasku_tunnukset'],
+            'ryhmittely_tyyppi'     => $saldovahvistus_rivi['ryhmittely_tyyppi'],
+        );
+        lisaa_sessioon_saldovahvistus_rivi($lasku_tunnukset_key, $saldovahvistusrivi);
+      }
+      else {
+        unset($_SESSION['valitut_laskut'][$lasku_tunnukset_key]);
+      }
     }
-
-    echo true;
   }
 
   exit;
@@ -249,6 +250,13 @@ elseif ($request['tee'] == 'laheta_sahkopostit') {
 
   function bind_saldovahvistus_rivi_valinta_checkbox_click() {
     $('.saldovahvistus_rivi_valinta').click(function() {
+      var lisays;
+      if ($(this).is(':checked')) {
+        lisays = true;
+      }
+      else {
+        lisays = false;
+      }
 
       var lasku_tunnukset = $(this).parent().parent().find('.nayta_pdf_td .lasku_tunnus').map(function() {
         return $(this).val();
@@ -264,19 +272,22 @@ elseif ($request['tee'] == 'laheta_sahkopostit') {
       };
 
       saldovahvistus_rivit.push(saldovahvistus_rivi);
-      tallenna_sessioon(saldovahvistus_rivit);
+      tallenna_sessioon(saldovahvistus_rivit, lisays);
     });
   }
 
   function bind_valitse_kaikki_checkbox_click() {
     $('#valitse_kaikki').click(function() {
       var $table = $(this).parent().parent().parent().parent();
+      var lisays;
 
       if ($(this).is(':checked')) {
-        $table.find('.saldovahvistus_rivi_valinta').attr('checked', 'checked');
+        lisays = true;
+        $table.find('.saldovahvistus_rivi').find('.saldovahvistus_rivi_valinta').attr('checked', 'checked');
       }
       else {
-        $table.find('.saldovahvistus_rivi_valinta').removeAttr('checked');
+        lisays = false;
+        $table.find('.saldovahvistus_rivi').find('.saldovahvistus_rivi_valinta').removeAttr('checked');
       }
 
       var saldovahvistus_rivit = [];
@@ -292,11 +303,11 @@ elseif ($request['tee'] == 'laheta_sahkopostit') {
         });
       });
 
-      tallenna_sessioon(saldovahvistus_rivit);
+      tallenna_sessioon(saldovahvistus_rivit, lisays);
     });
   }
 
-  function tallenna_sessioon(saldovahvistus_rivit) {
+  function tallenna_sessioon(saldovahvistus_rivit, lisays) {
     $.ajax({
       async: true,
       type: 'POST',
@@ -304,6 +315,7 @@ elseif ($request['tee'] == 'laheta_sahkopostit') {
         ajax_request: 1,
         no_head: 'yes',
         merkkaa_lahetettavaksi: 1,
+        lisays: lisays,
         saldovahvistus_rivit: saldovahvistus_rivit
       },
       url: 'saldovahvistus.php'

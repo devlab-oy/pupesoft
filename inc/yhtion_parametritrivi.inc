@@ -4157,6 +4157,20 @@ if ($fieldname == 'myyntihinta_paivitys_saapuminen') {
   $jatko = 0;
 }
 
+if ($fieldname == 'maarien_muuttaminen_saapuminen') {
+
+  $ulos = "<td><select name='{$nimi}' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos .= "<option value=''>" . t("Tilausrivin m‰‰ri‰ ei voi lis‰t‰ saapumisella") . "</option>";
+  $ulos .= "<option value='K' {$sel}>" . t("Tilausrivin m‰‰ri‰ voi lis‰t‰ saapumisella") .
+           "</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == 'matkalaskun_tarkastus') {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

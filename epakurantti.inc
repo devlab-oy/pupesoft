@@ -540,7 +540,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
             WHERE yhtio       = '{$kukarow["yhtio"]}'
             AND  tuoteno      = '{$tuoterow["tuoteno"]}'";
   $result = pupe_query($query);
-  echo "<br>$query<br>";
+
   ///* Tehd‰‰n tapahtuma *///
   $query = "INSERT into tapahtuma set
             yhtio    = '{$kukarow["yhtio"]}',

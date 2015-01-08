@@ -48,8 +48,6 @@ if ($ajax_request) {
     echo true;
   }
 
-  echo false;
-
   exit;
 }
 
@@ -117,6 +115,10 @@ $request['ryhmittely_tyypit'] = array(
 
 $request['saldovahvistus_viestit'] = hae_saldovahvistus_viestit();
 
+if ($request['tee'] == 'poista_valinnat') {
+  unset($_SESSION['valitut_laskut']);
+}
+
 if ($nayta_pdf != 1) {
   echo_kayttoliittyma($request);
 
@@ -140,13 +142,15 @@ if (!empty($_SESSION['valitut_laskut'])) {
     $lasku_temp['laskun_avoin_paiva'] = $valittu_lasku['laskun_avoin_paiva'];
     $request['valitut_laskut'][] = $lasku_temp;
   }
+
   $request['lasku_tunnukset'] = $lasku_tunnukset_temp;
   unset($request['ryhmittely_tyyppi_temp']);
 }
 
 //Echotaan saldovahvistukset, kun tehdään käyttöliittymästä haku
 //tai jos sessioon on tallennettu saldovahvistusrivejä edellisellä hakukerroilla ja ollaan välissä käyty jossain muussa ohjelmassa.
-if ($request['tee'] == 'aja_saldovahvistus' or (!empty($request['valitut_laskut']) and $request['tee'] == '')) {
+if (($request['tee'] == 'aja_saldovahvistus' and !empty($request['ryhmittely_arvo'])) or (!empty($request['valitut_laskut']) and $request['tee'] == 'valitut_laskut_haettu')) {
+
   js_openFormInNewWindow();
   if ($request['tee'] == 'aja_saldovahvistus') {
     $request['laskut'] = hae_myyntilaskuja_joilla_avoin_saldo($request);
@@ -226,9 +230,7 @@ elseif ($request['tee'] == 'laheta_sahkopostit') {
     }
   }
 }
-elseif ($request['tee'] == 'poista_valinnat') {
-  unset($_SESSION['valitut_laskut']);
-}
+
 ?>
 <style>
   tr.border_bottom td {
@@ -600,6 +602,25 @@ function echo_kayttoliittyma($request) {
   echo "</table>";
   echo "<input type='submit' value='" . t('Aja') . "' />";
   echo "</form>";
+
+  if (!empty($_SESSION['valitut_laskut'])) {
+    echo "<form method='POST' action=''>";
+    echo "<input type='hidden' name='tee' value='valitut_laskut_haettu' />";
+    echo "<input type='hidden' name='pp' value='{$request['pp']}' />";
+    echo "<input type='hidden' name='kk' value='{$request['kk']}' />";
+    echo "<input type='hidden' name='vv' value='{$request['vv']}' />";
+    echo "<input type='submit' value='".t("Hae kerätyt saldovahvistusrivit (%d kpl)", "", count($_SESSION['valitut_laskut']))."' />";
+    echo "</form>";
+
+
+    echo "<form method='POST' action=''>";
+    echo "<input type='hidden' name='tee' value='poista_valinnat' />";
+    echo "<input type='hidden' name='pp' value='{$request['pp']}' />";
+    echo "<input type='hidden' name='kk' value='{$request['kk']}' />";
+    echo "<input type='hidden' name='vv' value='{$request['vv']}' />";
+    echo "<input type='submit' value='".t('Poista kaikki kerätyt saldovahvistusrivit')."' onclick='return tarkista(\"".t('Oletko varma että haluat poistaa kaikki valitut')."\");' />";
+    echo "</form>";
+  }
 }
 
 function generoi_custom_excel_tiedosto($request) {

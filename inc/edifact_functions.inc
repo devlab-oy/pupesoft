@@ -2784,11 +2784,20 @@ function konttierittely_pdf($pdf_data) {
   $pdf->draw_text($x+100, $y, $total_rullat." kpl", $sivu, $bold);
   $y -= 15;
 
-  $yy[0] = $yy[1] = $y;
-  $pdf->draw_line($xx, $yy, $sivu);
-  $y -= 20;
-
   foreach ($kontit as $konttiviite => $tilaukset) {
+
+    $tarvittava_tila = 85;
+    $tilauksia = count($tilaukset);
+    $tarvittava_tila = 85 + ($tilauksia * 15);
+
+    if ($y < $tarvittava_tila) {
+      $sivu = $pdf->new_page("a4");
+      $y = 800;
+    }
+
+    $yy[0] = $yy[1] = $y;
+    $pdf->draw_line($xx, $yy, $sivu);
+    $y -= 20;
 
     $pdf->draw_text($x, $y, 'Kontti:', $sivu, $bold);
     $pdf->draw_text($x+60, $y, $konttiviite, $sivu, $bold);
@@ -2822,10 +2831,6 @@ function konttierittely_pdf($pdf_data) {
         $y -= 15;
       }
     }
-
-    $yy[0] = $yy[1] = $y;
-    $pdf->draw_line($xx, $yy, $sivu);
-    $y -= 20;
   }
 
   //keksitään uudelle failille joku varmasti uniikki nimi:

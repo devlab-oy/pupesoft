@@ -65,8 +65,8 @@ if (!isset($avoin_saldo_rajaus)) {
   $avoin_saldo_rajaus = "";
 }
 
-if (!isset($valitut_laskut)) {
-  $valitut_laskut = array();
+if (!isset($lahetettavat_laskut)) {
+  $lahetettavat_laskut = array();
 }
 
 if (!isset($pp)) {
@@ -99,6 +99,7 @@ $request = array(
   'lasku_tunnukset'                       => $lasku_tunnukset,
   'tallenna_exceliin'                     => $tallenna_exceliin,
   'avoin_saldo_rajaus'                    => $avoin_saldo_rajaus,
+  'lahetettavat_laskut'                   => $lahetettavat_laskut,
 );
 
 $t = array(
@@ -124,17 +125,17 @@ if ($request['tee'] == 'poista_valinnat') {
   unset($_SESSION['valitut_laskut']);
 }
 
-if ($nayta_pdf != 1) {
+if ($nayta_pdf != 1 and $request['tee'] != 'laheta_sahkopostit') {
   echo_kayttoliittyma($request);
 
   echo "<br/>";
   echo "<br/>";
 }
 
-if (count($valitut_laskut) > 0 and !empty($_SESSION['valitut_laskut']) and $request['tee'] == 'laheta_sahkopostit') {
+if (count($request['lahetettavat_laskut']) > 0 and !empty($_SESSION['valitut_laskut']) and $request['tee'] == 'laheta_sahkopostit') {
   $lasku_tunnukset_temp = $request['lasku_tunnukset'];
 
-  foreach ($valitut_laskut as $_id) {
+  foreach ($request['lahetettavat_laskut'] as $_id) {
     if (array_key_exists($_id, $_SESSION['valitut_laskut'])) {
       $valittu_lasku = $_SESSION['valitut_laskut'][$_id];
 
@@ -147,7 +148,7 @@ if (count($valitut_laskut) > 0 and !empty($_SESSION['valitut_laskut']) and $requ
       $lasku_temp = hae_myyntilaskuja_joilla_avoin_saldo($_req, true);
       $lasku_temp['saldovahvistus_viesti'] = $valittu_lasku['saldovahvistus_viesti'];
       $lasku_temp['laskun_avoin_paiva'] = $valittu_lasku['laskun_avoin_paiva'];
-      $request['valitut_laskut'][] = $lasku_temp;
+      $request['valitut_laskut'][$_id] = $lasku_temp;
     }
   }
 
@@ -238,7 +239,8 @@ elseif ($request['tee'] == 'NAYTATILAUS' or $request['tee'] == 'tulosta_saldovah
 }
 elseif ($request['tee'] == 'laheta_sahkopostit') {
   list($lahetetyt_count, $ei_lahetetty_count, $ei_lahetetyt) = generoi_saldovahvistus_sahkopostit($request);
-  unset($_SESSION['valitut_laskut']);
+
+  echo_kayttoliittyma($request);
 
   echo "<br/>";
   echo "<br/>";
@@ -311,7 +313,7 @@ elseif ($request['tee'] == 'laheta_sahkopostit') {
   function add_ids(that, $_id) {
     if ($(that).is(':checked')) {
       $_hidden = $('<input type=\'hidden\' />');
-      $_hidden.attr('name', 'valitut_laskut[]');
+      $_hidden.attr('name', 'lahetettavat_laskut[]');
       $_hidden.attr('class', $_id);
       $_hidden.attr('value', $_id);
       $('#lahetysformi').append($_hidden);

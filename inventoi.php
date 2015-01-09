@@ -407,6 +407,12 @@ if ($tee == 'VALMIS') {
                 break;
               }
 
+              if ((substr($kpl, 0, 1) == '+' or substr($kpl, 0, 1) == '-') and $ekpl == "") {
+                echo "<font class='error'>".t("VIRHE: Et voi nollata eriä, jos olet syöttänyt relatiivisen määrän")."!</font><br>";
+                $virhe = 1;
+                break;
+              }
+
               $erasyotetyt += (float) $ekpl;
 
               if ($eranumero_uudet[$i][$enro] == '0000-00-00') {
@@ -414,10 +420,11 @@ if ($tee == 'VALMIS') {
               }
             }
 
-            // Haetaan tuotepaikan tiedot
+            // Lasketaan paikan varastosaldo,
+            // jotta sitä voidaan verrata syötettyihin määriin
+            // ja saadaan tarkistettua relatiivisen määrän oikeellisuus oikein
             $query = "SELECT
-            	        SUM(saldo) AS saldo,
-            	        tunnus
+            	        SUM(saldo) AS saldo
                       FROM tuotepaikat
                       WHERE tuotepaikat.yhtio   = '{$kukarow['yhtio']}'
             	        AND tuotepaikat.tuoteno   = '$tuoteno'
@@ -1521,7 +1528,7 @@ if ($tee == 'INVENTOI') {
           echo "<br><table width='100%'>";
 
           $sarjalaskk = 1;
-echo "1511 $query <br><br>";
+
           while ($sarjarow = mysql_fetch_assoc($sarjares)) {
             if ($sarjanumero[$tuoterow["tptunnus"]][$sarjarow["tunnus"]] != '') {
               $chk = "CHECKED";
@@ -1542,7 +1549,7 @@ echo "1511 $query <br><br>";
             echo "</td><td>";
             echo "  <input type='hidden' name='sarjanumero_kaikki[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[tunnus]'>
                 <input type='hidden' name='sarjanumero_uudet[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value = '$sarjarow[laskutettuaika]'>";
-echo "1532 <br><br>";
+
             if ($sarjarow['laskutettuaika'] == '0000-00-00') {
               echo "<input type='hidden' name='sarjanumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[tunnus]'>";
               echo "<font class='message'>**", t("UUSI"), "**</font>";

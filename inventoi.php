@@ -414,17 +414,30 @@ if ($tee == 'VALMIS') {
               }
             }
 
+            // Haetaan tuotepaikan tiedot
+            $query = "SELECT
+            	        SUM(saldo) AS saldo,
+            	        tunnus
+                      FROM tuotepaikat
+                      WHERE tuotepaikat.yhtio   = '{$kukarow['yhtio']}'
+            	        AND tuotepaikat.tuoteno   = '$tuoteno'
+            	        AND tuotepaikat.tunnus = $i";
+            $paikkojen_saldo = mysql_fetch_assoc(pupe_query($query));
+
+            $saldo_vs_era = $erasyotetyt - $paikkojen_saldo["saldo"];
+
             $erasyotetyt = round($erasyotetyt, 2);
+            $saldo_vs_era = round($saldo_vs_era, 2);
 
             if (is_array($eranumero_kaikki[$i]) and substr($kpl, 0, 1) != '+' and substr($kpl, 0, 1) != '-' and $onko_uusia > 0) {
               echo "<font class='error'>".t("VIRHE: Er‰numeroita ei voi lis‰t‰ kuin relatiivisella m‰‰r‰ll‰")."! (+1)</font><br>";
               $virhe = 1;
             }
-            elseif (substr($kpl, 0, 1) == '+' and is_array($eranumero_kaikki[$i]) and $erasyotetyt != substr($kpl, 1)) {
+            elseif (substr($kpl, 0, 1) == '+' and is_array($eranumero_kaikki[$i]) and $saldo_vs_era != substr($kpl, 1)) {
               echo "<font class='error'>".t("VIRHE: Er‰numeroiden m‰‰r‰ on oltava sama kuin laskettu syˆtetty m‰‰r‰")."! $tuoteno $kpl</font><br>";
               $virhe = 1;
             }
-            elseif (substr($kpl, 0, 1) == '-' and is_array($eranumero_kaikki[$i]) and $erasyotetyt != substr($kpl, 1)) {
+            elseif (substr($kpl, 0, 1) == '-' and is_array($eranumero_kaikki[$i]) and $saldo_vs_era != substr($kpl, 1)) {
               echo "<font class='error'>".t("VIRHE: Er‰numeroiden m‰‰r‰ on oltava sama kuin laskettu syˆtetty m‰‰r‰")."! $tuoteno $kpl</font><br>";
               $virhe = 1;
             }
@@ -1508,7 +1521,7 @@ if ($tee == 'INVENTOI') {
           echo "<br><table width='100%'>";
 
           $sarjalaskk = 1;
-
+echo "1511 $query <br><br>";
           while ($sarjarow = mysql_fetch_assoc($sarjares)) {
             if ($sarjanumero[$tuoterow["tptunnus"]][$sarjarow["tunnus"]] != '') {
               $chk = "CHECKED";
@@ -1529,7 +1542,7 @@ if ($tee == 'INVENTOI') {
             echo "</td><td>";
             echo "  <input type='hidden' name='sarjanumero_kaikki[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[tunnus]'>
                 <input type='hidden' name='sarjanumero_uudet[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value = '$sarjarow[laskutettuaika]'>";
-
+echo "1532 <br><br>";
             if ($sarjarow['laskutettuaika'] == '0000-00-00') {
               echo "<input type='hidden' name='sarjanumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[tunnus]'>";
               echo "<font class='message'>**", t("UUSI"), "**</font>";
@@ -1577,7 +1590,7 @@ if ($tee == 'INVENTOI') {
             if ($sarjarow['laskutettuaika'] == '0000-00-00' or $sarjarow["myyntitunnus"] != 0) {
               if ($sarjarow['laskutettuaika'] == '0000-00-00') {
                 echo "<input type='hidden' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>";
-                echo "<font class='message'>**", t("UUSI"), "**</font>";
+                echo "<font class='message'>**", t("1580 UUSI"), "**</font>";
                 echo " <a href='inventoi.php?tee=POISTAERANUMERO&tuoteno=$tuoteno&lista=$lista&lista_aika=$lista_aika&alku=$alku&toiminto=poistaeranumero&sarjatunnus=$sarjarow[tunnus]&paivamaaran_kasisyotto=$paivamaaran_kasisyotto&inventointipvm_pp=$inventointipvm_pp&inventointipvm_kk=$inventointipvm_kk&inventointipvm_vv=$inventointipvm_vv'>".t("Poista")."</a>";
               }
               else {

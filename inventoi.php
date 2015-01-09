@@ -408,7 +408,7 @@ if ($tee == 'VALMIS') {
               }
 
               if ((substr($kpl, 0, 1) == '+' or substr($kpl, 0, 1) == '-') and $ekpl == "") {
-                echo "<font class='error'>".t("VIRHE: Et voi nollata eriä, jos olet syöttänyt relatiivisen määrän")."!</font><br>";
+                echo "<font class='error'>".t("VIRHE: Et voi nollata erää, jos olet syöttänyt relatiivisen määrän")."!</font><br>";
                 $virhe = 1;
                 break;
               }
@@ -858,9 +858,9 @@ if ($tee == 'VALMIS') {
 
             // Jos pävitettiin saldoa, tehdään kirjanpito. Vaikka summa olisi nolla. Muuten jälkilaskenta ei osaa korjata tätä, jos tiliöintejä ei tehdä.
             if (mysql_affected_rows() > 0) {
-              
+
               $lasku_tapvm = date('Y-m-d');
-              
+
               if ($paivamaaran_kasisyotto == "JOO" and (!empty($inventointipvm_pp) and !empty($inventointipvm_kk) and !empty($inventointipvm_vv))) {
                 $lasku_tapvm = "$inventointipvm_vv-$inventointipvm_kk-$inventointipvm_pp";
               }

@@ -858,10 +858,16 @@ if ($tee == 'VALMIS') {
 
             // Jos pävitettiin saldoa, tehdään kirjanpito. Vaikka summa olisi nolla. Muuten jälkilaskenta ei osaa korjata tätä, jos tiliöintejä ei tehdä.
             if (mysql_affected_rows() > 0) {
+              
+              $lasku_tapvm = date('Y-m-d');
+              
+              if ($paivamaaran_kasisyotto == "JOO" and (!empty($inventointipvm_pp) and !empty($inventointipvm_kk) and !empty($inventointipvm_vv))) {
+                $lasku_tapvm = "$inventointipvm_vv-$inventointipvm_kk-$inventointipvm_pp";
+              }
 
               $query = "INSERT into lasku set
                         yhtio      = '$kukarow[yhtio]',
-                        tapvm      = now(),
+                        tapvm      = '$lasku_tapvm',
                         tila       = 'X',
                         alatila    = 'I',
                         laatija    = '$kukarow[kuka]',

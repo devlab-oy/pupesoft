@@ -164,17 +164,18 @@ echo "<br />";
 echo "<form method='post' name='sendfile' enctype='multipart/form-data'>";
 echo "<input type='hidden' name='tee'    value = '3'>";
 
-echo t("tai"), "...";
-echo "<br />";
-echo "<br />";
+if (tarkista_oikeus('luotonhallinta.php', '', 1)) {
+  echo t("tai"), "...";
+  echo "<br />";
+  echo "<br />";
 
-echo "<font class='message'>", t("Päivitä asiakkaiden luottotietoja tiedostosta"), "</font><br />";
-echo "<font class='info'>", t("Otsikot: ytunnus, asiakasnro, luottoraja"), "</font><br />";
-echo "<table>";
-echo "<tr><th>", t("Valitse tiedosto"), "</th><td><input type='file' name='userfile' /></td><td class='back'><input type='submit' value='", t("Lähetä"), "' /></td></tr>";
-echo "</table>";
-echo "</form>";
-
+  echo "<font class='message'>", t("Päivitä asiakkaiden luottotietoja tiedostosta"), "</font><br />";
+  echo "<font class='info'>", t("Otsikot: ytunnus, asiakasnro, luottoraja"), "</font><br />";
+  echo "<table>";
+  echo "<tr><th>", t("Valitse tiedosto"), "</th><td><input type='file' name='userfile' /></td><td class='back'><input type='submit' value='", t("Lähetä"), "' /></td></tr>";
+  echo "</table>";
+  echo "</form>";
+}
 echo "<br>";
 echo "<br>";
 
@@ -458,8 +459,14 @@ if ($tee == "1") {
     $luottotilanne_nyt = round($asiakasrow["luottoraja"] - $avoimetlaskutrow["laskuavoinsaldo"] + $kaatotilirow["summa"] - $avoimettilauksetrow["tilausavoinsaldo"], 2);
 
     echo "<td align='right'>$luottotilanne_nyt</td>";
+    
+    if (tarkista_oikeus('luotonhallinta.php', '', 1)) {
+      echo "<td align='right'><input style='text-align:right' type='text' name='luottoraja[$asiakasrow[ytunnus]]' value='$asiakasrow[luottoraja]' size='11'></td>";
+    } 
+    else {
+      echo "<td>$asiakasrow[luottoraja]</td>";
+    } 
 
-    echo "<td align='right'><input style='text-align:right' type='text' name='luottoraja[$asiakasrow[ytunnus]]' value='$asiakasrow[luottoraja]' size='11'></td>";
     echo "<td align='right'><input type='checkbox' name='myyntikielto[$asiakasrow[ytunnus]]' value='K' $chk></td>";
 
     if ($luottorajauksia == 'G' or $luottorajauksia == 'H' or $luottorajauksia == 'I') {
@@ -475,11 +482,14 @@ if ($tee == "1") {
     echo "<input type='hidden' name='alkuperainen_myyntikielto[$asiakasrow[ytunnus]]' value='$asiakasrow[myyntikielto]'>";
   }
 
-  echo "<tr><td class='back' colspan='9' align='right'>".t("Ruksaa kaikki")." &raquo; <input type='checkbox' name='ruksaakaikki' onclick='toggleAll(this)'></td></tr>";
+  if (tarkista_oikeus('luotonhallinta.php', '', 1)) {
+    echo "<tr><td class='back' colspan='9' align='right'>".t("Ruksaa kaikki")." &raquo; <input type='checkbox' name='ruksaakaikki' onclick='toggleAll(this)'></td></tr>";
+  }
+
   echo "</table>";
-
-  echo "<input type='submit' value='".t("Päivitä luottorajat")."'>";
-
+  if (tarkista_oikeus('luotonhallinta.php', '', 1)) {
+    echo "<input type='submit' value='".t("Päivitä luottorajat")."'>";
+  }
   echo "</form>";
 }
 

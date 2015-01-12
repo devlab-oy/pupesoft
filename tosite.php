@@ -254,7 +254,6 @@ if ($tee == 'I') {
 
       if ($inputFileType == "CSV") {
         $objReader->setDelimiter("\t");
-        $objReader->setInputEncoding("ISO-8859-1");
       }
 
       /**

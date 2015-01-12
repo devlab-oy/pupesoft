@@ -75,6 +75,9 @@ if (isset($GLOBALS["pupe_query_debug"]) and $GLOBALS["pupe_query_debug"] > 0 and
 
 if (!isset($temporarylink)) $temporarylink = $masterlink;
 
+mb_language('uni');
+mb_internal_encoding("UTF-8");
+
 $pupe_resque = FALSE;
 
 // Otetaan php-resque käyttöön jos se on asennettu

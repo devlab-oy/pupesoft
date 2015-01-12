@@ -204,12 +204,11 @@ $tulos_ulos = "edi"; // tää on ftp-send.incissä
 $filename = trim($filename);
 if ($filename == "") die('Tiedostonimi puuttui!\n');
 
-// Mutetaan ISO-merkistöön jos UTF8:ia
+// Muutetaan UTF-8:ksi jos on jossain toisessa merkistössä
 $encoding = exec("file -b --mime-encoding $filename");
 
-if (preg_match("/(utf\-8|binary)/i", $encoding)) {
-  $convert = exec("iconv -c -f utf-8 -t ISO8859-1  $filename > $filename.ISO");
-  rename($filename.".ISO", $filename);
+if ($encoding != "" and mb_strtoupper($encoding) != 'UTF-8') {
+  exec("recode $encoding..UTF8 $filename");
 }
 
 if (!$fd = fopen($filename, "r")) die("Filen '$filename' ".t("avaus epäonnistui")."!\n");
@@ -1671,7 +1670,6 @@ while ($tietue = fgets($fd)) {
 
       // Tallennetaan alkuperäinen aineisto tilauksen liitetiedostoksi
       $liitefile = file_get_contents($mailfile);
-      $filesize  = strlen($liitefile);
       $filename  = basename($mailfile);
       $liitefile = mysql_real_escape_string($liitefile);
       $fileslite = t("Tilausnumero")." $id";
@@ -1684,7 +1682,7 @@ while ($tietue = fgets($fd)) {
                 selite          = '$fileslite',
                 kieli           = '$yhtiorow[kieli]',
                 filename        = '$filename',
-                filesize        = '$filesize',
+                filesize        = length(data),
                 filetype        = 'text/plain',
                 image_width     = '',
                 image_height    = '',

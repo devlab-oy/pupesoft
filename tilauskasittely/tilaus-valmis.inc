@@ -1057,6 +1057,15 @@ else {
 
       require "tilauskasittely/verkkolasku.php";
 
+      /**
+       * Tulostetaan kassakuitti
+       */
+      if ((int) $kateismaksu["kateinen"] == 0) {
+        require "tilauskasittely/tulosta_asiakkaan_kuitti.inc";
+
+        tulosta_asiakkaan_kuitti($laskurow["laskunro"], $kukarow["kuittitulostin"]);
+      }
+
       unset($valittu_tulostin);
     }
     // jos on myyntitilaus ja ei haluttu tulostaa lähetettä, merkataan rivit kerätyksi ja toimitetuksi ja laitetaan alatila D

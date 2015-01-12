@@ -1799,7 +1799,6 @@ if (!function_exists("verkkolasku_in")) {
         $selite = mysql_real_escape_string("$kuvalaskurow[nimi] $kuvalaskurow[summa] $kuvalaskurow[valkoodi]");
 
         // Tallennetaan laskun XML liitetiedostoksi
-        $filesize = strlen($xmlstr);
         $filename = array_pop(explode("/", $file));
         $xmlstr   = mysql_real_escape_string($xmlstr);
 
@@ -1821,7 +1820,7 @@ if (!function_exists("verkkolasku_in")) {
                   selite          = '$selite',
                   kieli           = '$yhtiorow[kieli]',
                   filename        = '$filename',
-                  filesize        = '$filesize',
+                  filesize        = length(data),
                   filetype        = 'text/xml',
                   image_width     = '',
                   image_height    = '',
@@ -1851,9 +1850,6 @@ if (!function_exists("verkkolasku_in")) {
           if (substr($sisalto, 0, 4) == "%PDF") {
             // tallennetaan kuva
             $filename = $ebid.".pdf";
-
-            //filesize functio ei toimi koska ei ole oikea file.
-            $filesize = strlen($sisalto);
             $data  = mysql_real_escape_string($sisalto);
 
             // lis‰t‰‰n kuva
@@ -1865,7 +1861,7 @@ if (!function_exists("verkkolasku_in")) {
                       selite          = '$selite',
                       kieli           = '$yhtiorow[kieli]',
                       filename        = '$file',
-                      filesize        = '$filesize',
+                      filesize        = length(data),
                       filetype        = 'application/pdf',
                       image_width     = '',
                       image_height    = '',
@@ -1891,8 +1887,6 @@ if (!function_exists("verkkolasku_in")) {
               if (strtoupper(substr($liitefile, -4)) == ".PDF") {
 
                 $data = file_get_contents($liitefile);
-                $filesize = strlen($data);
-
                 $data = mysql_real_escape_string($data);
 
                 $filename = str_replace("maventa_{$match[2]}_maventa-", "", basename($liitefile));
@@ -1906,7 +1900,7 @@ if (!function_exists("verkkolasku_in")) {
                           selite          = '$selite',
                           kieli           = '$yhtiorow[kieli]',
                           filename        = '$filename',
-                          filesize        = '$filesize',
+                          filesize        = length(data),
                           filetype        = 'application/pdf',
                           image_width     = '',
                           image_height    = '',
@@ -1937,7 +1931,6 @@ if (!function_exists("verkkolasku_in")) {
 
               if (strpos($editilaus_laskulle_data, "OSTOTIL.OT_NRO:".$laskun_asiakkaan_tilausnumero) !== FALSE) {
 
-                $editilaus_laskulle_filesize = filesize($editilaus_laskulle_polku.$path_parts['basename']);
                 $data  = mysql_real_escape_string($editilaus_laskulle_data);
 
                 $query = "INSERT INTO liitetiedostot SET
@@ -1948,7 +1941,7 @@ if (!function_exists("verkkolasku_in")) {
                           selite          = 'Futursoft-tilaus $laskun_asiakkaan_tilausnumero',
                           kieli           = '$yhtiorow[kieli]',
                           filename        = '$path_parts[basename]',
-                          filesize        = '$editilaus_laskulle_filesize',
+                          filesize        = length(data),
                           filetype        = 'text',
                           image_width     = '',
                           image_height    = '',

@@ -82,11 +82,14 @@ if ($toim == "MYYNTI") {
              ORDER BY pvm";
 
   // päivänäkymä
-  $query2 = "SELECT lasku.tunnus, if(lasku.nimi!=lasku.toim_nimi, concat_ws(' / ', lasku.nimi, lasku.toim_nimi),concat_ws(' / ', lasku.nimi, lasku.nimitark)) nimi, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(luontiaika,'%a') vkpvm,
+  $query2 = "SELECT lasku.tunnus, if(lasku.nimi!=lasku.toim_nimi, concat_ws(' / ', lasku.nimi, lasku.toim_nimi),concat_ws(' / ', lasku.nimi, lasku.nimitark)) nimi, DATE_FORMAT(lasku.luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(lasku.luontiaika,'%a') vkpvm,
              round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) summa,
-             round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) arvo
+             round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) arvo,
+             round(sum(if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)))) / sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) * 100, $yhtiorow[hintapyoristys]) AS 'Kate%'
              FROM lasku use index (yhtio_tila_luontiaika)
              JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
+             JOIN tuote ON (tuote.tuoteno = tilausrivi.tuoteno
+               AND tuote.yhtio = tilausrivi.yhtio)
              WHERE lasku.yhtio    = '$kukarow[yhtio]'
              and lasku.tila       = 'L'
              and lasku.luontiaika >= '$vv-$kk-$pp 00:00:00'

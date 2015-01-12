@@ -192,7 +192,7 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
                  clearing     = 'sopimus',
                  swift        = '$tilausnumero',
                  tilaustyyppi = '',
-                 viesti       = concat_ws(', ',
+                 sisviesti1   = concat_ws(', ',
                                           if(length(viesti), viesti, NULL),
                                           '" . t("Laskutuskausi") . " {$to[0]}')
                  WHERE yhtio  = '$kukarow[yhtio]'

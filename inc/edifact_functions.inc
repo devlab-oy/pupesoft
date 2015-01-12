@@ -1687,6 +1687,17 @@ function kasittele_rahtikirjasanoma($edi_data) {
           $rekno = $osat[8];
         }
 
+        /*
+        if (substr($edi_data[$luetaan], 0, 3) == "EQD+RR") {
+          $osat = explode("+", $edi_data[$luetaan]);
+          $kuljettaja_info = $osat[5];
+          $kuljettaja_info_osat = explode(":", $kuljettaja_info);
+          $kuljettaja = $kuljettaja_info_osat[3];
+          $rekno = $osat[8];
+        }
+
+        */
+
         if (substr($edi_data[$luetaan], 0, 5) == "LOC+8") {
           $osat = explode("+", $edi_data[$luetaan]);
           $paamaara_info = $osat[2];

@@ -487,7 +487,7 @@ if (!isset($task)) {
     break;
 
   case 'toimitetut':
-    $rajauslisa = " AND lasku.alatila = 'D' ";
+    $rajauslisa = " AND lasku.alatila = 'D' AND ss.sarjanumero IS NOT NULL ";
     $disable3 = 'disabled';
     break;
 

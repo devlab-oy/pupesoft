@@ -628,7 +628,8 @@ function laskutusraportti_parametrit($konttiviite) {
   $query = "SELECT myyntihinta
             FROM tuote
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND nimitys = 'Varastointi'";
+            AND tuoteno = 'varastointi'
+            AND nimitys = 'varastointi'";
   $result = pupe_query($query);
   $hinta = mysql_result($result,0);
 

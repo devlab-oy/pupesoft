@@ -1,5 +1,14 @@
 <?php
 
+if (isset($_POST['task']) and (
+  $_POST['task'] == 'nayta_konttierittely' or
+  $_POST['task'] == 'nayta_laskutusraportti' or
+  $_POST['task'] == 'nayta_lahtoilmoitus' or
+  $_POST['task'] == 'hae_pakkalista')) {
+  $no_head = "yes";
+}
+
+require "inc/parametrit.inc";
 require 'inc/edifact_functions.inc';
 
 if (isset($_POST['task']) and $_POST['task'] == 'nayta_konttierittely') {
@@ -9,11 +18,8 @@ if (isset($_POST['task']) and $_POST['task'] == 'nayta_konttierittely') {
   $sessio = $_POST['session'];
   $logo_url = $_POST['logo_url'];
   $logo_info = pdf_logo($logo_url, $sessio);
-
   $pdf_data['logodata'] = $logo_info['logodata'];
   $pdf_data['scale'] = $logo_info['scale'];
-
-
 
   $pdf_tiedosto = konttierittely_pdf($pdf_data);
 
@@ -29,9 +35,9 @@ if (isset($_POST['task']) and $_POST['task'] == 'nayta_laskutusraportti') {
   $sessio = $_POST['session'];
   $logo_url = $_POST['logo_url'];
   $logo_info = pdf_logo($logo_url, $sessio);
-
   $pdf_data['logodata'] = $logo_info['logodata'];
   $pdf_data['scale'] = $logo_info['scale'];
+  $pdf_data['vapaa_varastointi'] = $_POST['vapaa_varastointi'];
 
   $pdf_tiedosto = laskutusraportti_pdf($pdf_data);
 
@@ -47,7 +53,6 @@ if (isset($_POST['task']) and $_POST['task'] == 'nayta_lahtoilmoitus') {
   $sessio = $_POST['session'];
   $logo_url = $_POST['logo_url'];
   $logo_info = pdf_logo($logo_url, $sessio);
-
   $pdf_data['logodata'] = $logo_info['logodata'];
   $pdf_data['scale'] = $logo_info['scale'];
 
@@ -74,7 +79,6 @@ if (isset($_POST['task']) and $_POST['task'] == 'hae_pakkalista') {
   $sessio = $_POST['session'];
   $logo_url = $_POST['logo_url'];
   $logo_info = pdf_logo($logo_url, $sessio);
-
   $pdf_data['logodata'] = $logo_info['logodata'];
   $pdf_data['scale'] = $logo_info['scale'];
 
@@ -84,8 +88,6 @@ if (isset($_POST['task']) and $_POST['task'] == 'hae_pakkalista') {
   echo file_get_contents($pdf_tiedosto);
   die;
 }
-
-require "inc/parametrit.inc";
 
 if (!isset($errors)) $errors = array();
 
@@ -1081,24 +1083,13 @@ if (!isset($task)) {
 
               if ($tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
 
-                $parametrit = laskutusraportti_parametrit($tilaus['konttiviite']);
-                $parametrit = serialize($parametrit);
-                $parametrit = base64_encode($parametrit);
-
                 echo "
                 <div style='text-align:center'>
-                <form method='post' id='nayta_laskutusraportti{$id}'>
-                <input type='hidden' name='parametrit' value='{$parametrit}' />
-                <input type='hidden' name='task' value='nayta_laskutusraportti' />
-                <input type='hidden' name='session' value='{$session}' />
-                <input type='hidden' name='logo_url' value='{$logo_url}' />
-                <input type='hidden' name='tee' value='XXX' />
-                </form>
-                <button onClick=\"js_openFormInNewWindow('nayta_laskutusraportti{$id}',
-                 'Satamavahvistus'); return false;\" />";
-
-                echo t("Laskutusraportti");
-                echo "</button></div>";
+                <form method='post'>
+                <input type='hidden' name='task' value='tee_laskutusraportti' />
+                <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />
+                <input type='submit' value='". t("Laadi laskutusraportti") ."' />
+                </form></div>";
               }
 
               echo "</div>";
@@ -1374,6 +1365,75 @@ if (isset($task) and $task == 'lusaus') {
     </form><br>";
 
   }
+}
+
+if (isset($task) and $task == 'laadi_laskutusraportti') {
+
+  if ($vapaa_varastointi == '') {
+    $vapaa_varastointi_error = t("Syötä vuorokausimäärä");
+    $task = 'tee_laskutusraportti';
+  }
+  else {
+
+    echo "<a href='toimitusten_seuranta.php'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
+    echo "<font class='head'>".t("Laskutusraportti luotu")."</font></a><hr><br>";
+
+    $parametrit = laskutusraportti_parametrit($konttiviite, $vapaa_varastointi);
+    $parametrit = serialize($parametrit);
+    $parametrit = base64_encode($parametrit);
+
+    js_openFormInNewWindow();
+
+    echo "
+    <form method='post' id='nayta_laskutusraportti'>
+    <input type='hidden' name='parametrit' value='{$parametrit}' />
+    <input type='hidden' name='task' value='nayta_laskutusraportti' />
+    <input type='hidden' name='session' value='{$session}' />
+    <input type='hidden' name='vapaa_varastointi' value='{$vapaa_varastointi}' />
+    <input type='hidden' name='logo_url' value='{$logo_url}' />
+    <input type='hidden' name='tee' value='XXX' />
+    <table>
+    <tr><th>" . t("Asiakas") ."</th><td>Kotka Mills</td><td class='back'></td></tr>
+    <tr><th>" . t("Konttiviite") ."</th><td>{$konttiviite}</td><td class='back'></td></tr>
+    <tr><th>" . t("Vapaa varastointi") ."</th><td>{$vapaa_varastointi}&nbsp;Vrk.</td>
+    <td class='back'></td></tr>
+    <tr><th>" . t("Raportti luotu") ."</th><td align='right'>";
+
+    echo "<button onClick=\"js_openFormInNewWindow('nayta_laskutusraportti', 'Laskutusraportti'); return false;\" />";
+    echo t("Lataa pdf");
+    echo "</button>";
+
+    echo "
+    </td><td class='back'></td></tr>
+    </table>
+    </form>";
+  }
+}
+
+if (isset($task) and $task == 'tee_laskutusraportti') {
+
+  echo "<a href='toimitusten_seuranta.php'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
+  echo "<font class='head'>".t("Laadi laskutusraportti")."</font></a><hr><br>";
+
+  echo "
+  <form method='post' id='luo_laskutusraportti'>
+  <input type='hidden' name='task' value='laadi_laskutusraportti' />
+  <input type='hidden' name='konttiviite' value='{$konttiviite}' />
+  <table>
+  <tr><th>" . t("Asiakas") ."</th><td>Kotka Mills</td><td class='back'></td></tr>
+  <tr><th>" . t("Konttiviite") ."</th><td>{$konttiviite}</td><td class='back'></td></tr>
+  <tr><th>" . t("Vapaa varastointi");
+  echo "
+  </th><td><input type='text' size='3' name='vapaa_varastointi'>&nbsp;Vrk.</td>
+  <td class='back error'>{$vapaa_varastointi_error}</td></tr>
+  <tr><th></th><td align='right'>";
+
+  echo "<input type='submit' value='Luo raportti' />";
+
+  echo "
+  </td><td class='back'></td></tr>
+  </table>
+  </form>";
 }
 
 require "inc/footer.inc";

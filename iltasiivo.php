@@ -790,7 +790,8 @@ if (mysql_num_rows($poistettavat_tuotepaikat) > 0) {
             FROM tilausrivi
             WHERE yhtio        = '{$kukarow['yhtio']}'
             AND laskutettuaika = '0000-00-00'
-            AND tyyppi         IN ('L','O','G','M')";
+            AND tyyppi         IN ('L','O','G')
+            AND var != 'P'";
   $avoinrivi_result = pupe_query($query);
 
   while ($avoinrivi = mysql_fetch_assoc($avoinrivi_result)) {
@@ -801,8 +802,9 @@ if (mysql_num_rows($poistettavat_tuotepaikat) > 0) {
     $query = "SELECT CONCAT(tuoteno, hyllyalue, hyllynro, hyllytaso, hyllyvali) AS id
               FROM tilausrivi
               WHERE yhtio        = '{$kukarow['yhtio']}'
-              AND toimitettuaika = '0000-00-00'
-              AND tyyppi         IN ('V','W')";
+              AND toimitettuaika = '0000-00-00 00:00:00'
+              AND tyyppi         IN ('V','W','M')
+              AND var != 'P'";
     $avoinrivi_result = pupe_query($query);
 
     while ($avoinrivi = mysql_fetch_assoc($avoinrivi_result)) {
@@ -815,7 +817,8 @@ if (mysql_num_rows($poistettavat_tuotepaikat) > 0) {
             JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.kohde_hyllyalue != '')
             WHERE tilausrivi.yhtio        = '{$kukarow['yhtio']}'
             AND tilausrivi.laskutettuaika = '0000-00-00'
-            AND tilausrivi.tyyppi         = 'G'";
+            AND tilausrivi.tyyppi         = 'G'
+            AND var != 'P'";
   $avoinrivi_result = pupe_query($query);
 
   while ($avoinrivi = mysql_fetch_assoc($avoinrivi_result)) {

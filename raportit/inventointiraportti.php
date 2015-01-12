@@ -218,9 +218,8 @@ if (count($_POST) > 0) {
     if ($kaikkirivit != "") {
       if ($group!="") $group .= ",tapahtuma.tunnus,tapahtuma.laadittu";
       else $group  .= "tapahtuma.tunnus,tapahtuma.laadittu";
-      $select .= "tapahtuma.selite 'selite', tapahtuma.laadittu,";
+      $select .= "tapahtuma.selite 'selite', tapahtuma.laadittu, ";
       $order  = "tapahtuma.laadittu,".$order;
-      $gluku++;
     }
 
     if ($order != "") {
@@ -454,7 +453,7 @@ if (count($_POST) > 0) {
           }
 
           // Jos gruupataan enemmän kuin yksi taso niin tehdään välisumma
-          if ($gluku > 1 and $edluku != $row[mysql_field_name($result, 0)] and $edluku != 'x' and strpos($group, ',') !== FALSE and $mukaan != 'tuote') {
+          if ($gluku > 1 and $edluku != $row[mysql_field_name($result, 0)] and $edluku != 'x' and strpos($group, ',') !== FALSE ) {
             $excelsarake = $myyntiind = $kateind = $nettokateind = $myykplind = 0;
 
             foreach ($valisummat as $vnim => $vsum) {
@@ -500,28 +499,24 @@ if (count($_POST) > 0) {
               $worksheet->writeString($excelrivi, $i, strip_tags(str_replace("<br>", " / ", $row[$fieldname])));
             }
           }
+          if ($i < substr_count($select, ", ")) {
+            $valisummat[$i] = "";
+            $totsummat[$i]  = "";
+          }
+          else {
+            $valisummat[$i] += $row[$fieldname];
+            $totsummat[$i]  += $row[$fieldname];
+          }
         }
 
         if ($elements <= $rivilimitti) echo "</tr>\n";
         $excelrivi++;
-
-        for ($i=0; $i < $numfields; $i++) {
-
-          if ($i < substr_count($select, ", ")) {
-            $valisummat[$fieldname] = "";
-            $totsummat[$fieldname]  = "";
-          }
-          else {
-            $valisummat[$fieldname] += $row[$fieldname];
-            $totsummat[$fieldname]  += $row[$fieldname];
-          }
-        }
       }
 
       $apu = $numfields-11;
 
       // jos gruupataan enemmän kuin yksi taso niin tehdään välisumma
-      if ($gluku > 1 and $mukaan != 'tuote') {
+      if ($gluku > 1) {
 
         if ($elements <= $rivilimitti) echo "<tr>";
 
@@ -558,8 +553,8 @@ if (count($_POST) > 0) {
 
         if (isset($worksheet)) {
           $worksheet->writeNumber($excelrivi, $excelsarake, $vsum);
-          $excelsarake++;
         }
+        $excelsarake++;
       }
       $excelrivi++;
 

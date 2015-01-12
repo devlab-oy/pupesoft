@@ -96,11 +96,14 @@ if ($toim == "MYYNTI") {
              ORDER BY lasku.tunnus";
 
   // tilausnäkymä
-  $query3 = "SELECT otunnus tunnus, DATE_FORMAT(luontiaika,'%d.%m.%Y') pvm, tuoteno, concat(nimitys, if(kommentti!='', concat('<br>* ',kommentti),'')) nimitys, kpl+varattu kpl, tilausrivi.hinta, {$ale_query_select_lisa} lasku.erikoisale, tilausrivi.alv,
+  $query3 = "SELECT otunnus tunnus, DATE_FORMAT(lasku.luontiaika,'%d.%m.%Y') pvm, tilausrivi.tuoteno, concat(tilausrivi.nimitys, if(kommentti!='', concat('<br>* ',kommentti),'')) nimitys, kpl+varattu kpl, tilausrivi.hinta, {$ale_query_select_lisa} lasku.erikoisale, tilausrivi.alv,
              round(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') summa,
-             round(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') arvo
+             round(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') arvo,
+             round(if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt))) / (tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) * 100, $yhtiorow[hintapyoristys]) AS 'Kate%'
              FROM tilausrivi use index (yhtio_otunnus)
              JOIN lasku use index (PRIMARY) on (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus)
+             JOIN tuote ON (tuote.tuoteno = tilausrivi.tuoteno
+               AND tuote.yhtio = tilausrivi.yhtio)
              WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
              and tilausrivi.tyyppi  != 'D'
              and tilausrivi.otunnus  = '$tunnus'

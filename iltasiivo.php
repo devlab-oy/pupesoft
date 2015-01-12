@@ -785,12 +785,12 @@ $avoimet_rivit = array();
 // Jos on poistettavia, haetaan avoimet
 if (mysql_num_rows($poistettavat_tuotepaikat) > 0) {
 
-  // Haetaan avoimet tilausrivit arrayseen (myynti, osto, siirtolistat)
+  // Haetaan avoimet tilausrivit arrayseen (myynti & osto)
   $query = "SELECT CONCAT(tuoteno, hyllyalue, hyllynro, hyllytaso, hyllyvali) AS id
             FROM tilausrivi
             WHERE yhtio        = '{$kukarow['yhtio']}'
             AND laskutettuaika = '0000-00-00'
-            AND tyyppi         IN ('L','O','G')
+            AND tyyppi         IN ('L','O')
             AND var != 'P'";
   $avoinrivi_result = pupe_query($query);
 
@@ -798,12 +798,12 @@ if (mysql_num_rows($poistettavat_tuotepaikat) > 0) {
     $avoimet_rivit[] = $avoinrivi['id'];
   }
 
-    // Haetaan avoimet tilausrivit arrayseen (valmistukset)
+    // Haetaan avoimet tilausrivit arrayseen (valmistukset & siirtolistat)
     $query = "SELECT CONCAT(tuoteno, hyllyalue, hyllynro, hyllytaso, hyllyvali) AS id
               FROM tilausrivi
               WHERE yhtio        = '{$kukarow['yhtio']}'
               AND toimitettuaika = '0000-00-00 00:00:00'
-              AND tyyppi         IN ('V','W','M')
+              AND tyyppi         IN ('V','W','M','G')
               AND var != 'P'";
     $avoinrivi_result = pupe_query($query);
 
@@ -816,7 +816,7 @@ if (mysql_num_rows($poistettavat_tuotepaikat) > 0) {
             FROM tilausrivi
             JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.kohde_hyllyalue != '')
             WHERE tilausrivi.yhtio        = '{$kukarow['yhtio']}'
-            AND tilausrivi.laskutettuaika = '0000-00-00'
+            AND tilausrivi.toimitettuaika = '0000-00-00 00:00:00'
             AND tilausrivi.tyyppi         = 'G'
             AND var != 'P'";
   $avoinrivi_result = pupe_query($query);

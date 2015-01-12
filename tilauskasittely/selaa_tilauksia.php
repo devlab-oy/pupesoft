@@ -61,21 +61,28 @@ if ($keikkanrohaku != '' and $toim == 'KEIKKA' and is_numeric($keikkanrohaku)) {
 }
 
 // tässä myyntitilausten queryt
-if ($toim == "MYYNTI") {
+if ($toim == "MYYNTI" or $toim == "MYYNTI_KATE") {
   $query_ale_lisa = generoi_alekentta('M');
   $ale_query_select_lisa = generoi_alekentta_select('erikseen', 'M');
+
+  if ($toim == "MYYNTI_KATE") {
+    $kk_pv_kate_lisa = ",round(sum(if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)))) / sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) * 100, $yhtiorow[hintapyoristys]) AS 'Kate%' ";
+    $tilaus_kate_lisa = ",round(if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt))) / (tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) * 100, $yhtiorow[hintapyoristys]) AS 'Kate%' ";
+
+    $tuote_join = " JOIN tuote ON (tuote.tuoteno = tilausrivi.tuoteno
+                     AND tuote.yhtio = tilausrivi.yhtio) ";
+  }
 
   // kuukausinäkymä
   $query1 = "SELECT DATE_FORMAT(lasku.luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(lasku.luontiaika,'%a') vkpvm,
              count(distinct lasku.tunnus) tilauksia,
              count(distinct tilausrivi.tunnus) riveja,
              round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) summa,
-             round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) arvo,
-             round(sum(if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)))) / sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) * 100, $yhtiorow[hintapyoristys]) AS 'Kate%'
+             round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) arvo
+             {$kk_pv_kate_lisa}
              FROM lasku use index (yhtio_tila_luontiaika)
              JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
-             JOIN tuote ON (tuote.tuoteno = tilausrivi.tuoteno
-               AND tuote.yhtio = tilausrivi.yhtio)
+             {$tuote_join}
              WHERE lasku.yhtio    = '$kukarow[yhtio]'
              and lasku.tila       = 'L'
              and lasku.luontiaika >= '$vv-$kk-01 00:00:00'
@@ -87,12 +94,11 @@ if ($toim == "MYYNTI") {
   // päivänäkymä
   $query2 = "SELECT lasku.tunnus, if(lasku.nimi!=lasku.toim_nimi, concat_ws(' / ', lasku.nimi, lasku.toim_nimi),concat_ws(' / ', lasku.nimi, lasku.nimitark)) nimi, DATE_FORMAT(lasku.luontiaika,'%d.%m.%Y') pvm, DATE_FORMAT(lasku.luontiaika,'%a') vkpvm,
              round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) summa,
-             round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) arvo,
-             round(sum(if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)))) / sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) * 100, $yhtiorow[hintapyoristys]) AS 'Kate%'
+             round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}),2) arvo
+             {$kk_pv_kate_lisa}
              FROM lasku use index (yhtio_tila_luontiaika)
              JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.otunnus=lasku.tunnus and tilausrivi.tyyppi!='D')
-             JOIN tuote ON (tuote.tuoteno = tilausrivi.tuoteno
-               AND tuote.yhtio = tilausrivi.yhtio)
+             {$tuote_join}
              WHERE lasku.yhtio    = '$kukarow[yhtio]'
              and lasku.tila       = 'L'
              and lasku.luontiaika >= '$vv-$kk-$pp 00:00:00'
@@ -104,12 +110,11 @@ if ($toim == "MYYNTI") {
   // tilausnäkymä
   $query3 = "SELECT otunnus tunnus, DATE_FORMAT(lasku.luontiaika,'%d.%m.%Y') pvm, tilausrivi.tuoteno, concat(tilausrivi.nimitys, if(kommentti!='', concat('<br>* ',kommentti),'')) nimitys, kpl+varattu kpl, tilausrivi.hinta, {$ale_query_select_lisa} lasku.erikoisale, tilausrivi.alv,
              round(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') summa,
-             round(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') arvo,
-             round(if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt))) / (tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) * 100, $yhtiorow[hintapyoristys]) AS 'Kate%'
+             round(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]') arvo
+             {$tilaus_kate_lisa}
              FROM tilausrivi use index (yhtio_otunnus)
              JOIN lasku use index (PRIMARY) on (lasku.yhtio=tilausrivi.yhtio and lasku.tunnus=tilausrivi.otunnus)
-             JOIN tuote ON (tuote.tuoteno = tilausrivi.tuoteno
-               AND tuote.yhtio = tilausrivi.yhtio)
+             {$tuote_join}
              WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
              and tilausrivi.tyyppi  != 'D'
              and tilausrivi.otunnus  = '$tunnus'
@@ -462,7 +467,7 @@ if (mysql_num_rows($result) > 0) {
     }
 
     // jos kyseessä on myyntitilaus, ollaan päivänäkymässä ja meillä on oikeudet, niin tehdään tällänen nappula
-    if ($toim == "MYYNTI" and $tee == "paiva" and mysql_num_rows($apuoikeures) > 0) {
+    if (($toim == "MYYNTI" or $toim == "MYYNTI_KATE") and $tee == "paiva" and mysql_num_rows($apuoikeures) > 0) {
 
       // haetaan tässä keisissä vielä tila ja alatila
       $aputilaquery = "SELECT tila, alatila from lasku where yhtio='$kukarow[yhtio]' and tunnus='$row[tunnus]'";

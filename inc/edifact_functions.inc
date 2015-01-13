@@ -73,8 +73,6 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
 
   }
 
-  /*
-
   $konttimaara = count($kontit);
 
   if ($konttimaara < $bookattu_konttimaara) {
@@ -83,7 +81,7 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
       $konttimaara = count($kontit);
     }
   }
-*/
+
 
   $rullat_ja_kontit = array(
     'kontittamattomat' => $kontittamattomat,

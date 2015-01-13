@@ -16,8 +16,6 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
   $laskujen_tunnukset = mysql_result($result, 0, 0);
   $bookattu_konttimaara = mysql_result($result, 0, 1);
 
-  echo $laskujen_tunnukset;die("TEST");
-
   if (mysql_num_rows($result) == 0) {
     return false;
   }
@@ -48,6 +46,8 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
             AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu' OR ss.lisatieto = 'Toimitettu' OR ss.lisatieto = 'Siirretty')
             ORDER BY group_class";
   $result = pupe_query($query);
+
+  var_dump($result);die("TEST");
 
   $kontit = array();
   $kontitetut = array();

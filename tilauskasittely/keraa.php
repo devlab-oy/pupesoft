@@ -701,7 +701,13 @@ if ($tee == 'P') {
                 $keratty    = "''";
                 $kerattyaik = "''";
                 $rkomm      = $tilrivirow["kommentti"];
-                $rperheid  = $tilrivirow['perheid'];
+                
+                if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
+                   $rperheid = "0";
+                }
+                else {
+                  $rperheid  = $tilrivirow['perheid'];
+                }
               }
             }
             elseif (($tilrivirow["var"] == 'J' or $tilrivirow["var"] == 'P') and $maara[$apui] == 0 and $poikkeama_kasittely[$apui] == "MI") {
@@ -765,7 +771,13 @@ if ($tee == 'P') {
                 $keratty  = "''";
                 $kerattyaik  = "''";
                 $rkomm     = $tilrivirow["kommentti"];
-                $rperheid  = $tilrivirow['perheid'];
+                
+                if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
+                   $rperheid = "0";
+                }
+                else {
+                  $rperheid  = $tilrivirow['perheid'];
+                }
               }
 
               // Etsit‰‰n sopiva otsikko jolle rivi laitetaan
@@ -874,7 +886,7 @@ if ($tee == 'P') {
                   $kerattyaik  = "''";
                   $rkomm     = $tilrivirow['kommentti'];
                  
-                  if ($otsikkorivi['clearing'] == 'JT-TILAUS' and $yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
+                  if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
                      $rperheid = "0";
                   }
                   else {
@@ -932,7 +944,7 @@ if ($tee == 'P') {
                 $keratty  = "''";
                 $kerattyaik  = "''";
                 $rkomm     = $tilrivirow["kommentti"];
-                if ($otsikkorivi['clearing'] == 'JT-TILAUS' and $yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
+                if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
                    $rperheid = "0";
                 }
                 else {
@@ -957,7 +969,12 @@ if ($tee == 'P') {
                 $keratty  = "''";
                 $kerattyaik  = "''";
                 $rkomm     = $tilrivirow["kommentti"];
+                if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
+                   $rperheid = "0";
+                }
+                else {
                 $rperheid  = $tilrivirow['perheid'];
+                }
               }
               elseif ($poikkeama_kasittely[$apui] == "UT") {
                 // Riville tehd‰‰n osatoimitus ja loput siirret‰‰n ihan uudelle tilaukselle
@@ -1063,7 +1080,7 @@ if ($tee == 'P') {
                 $kerattyaik  = "''";
                 $rkomm     = $tilrivirow["kommentti"];
 
-                if ($otsikkorivi['clearing'] == 'JT-TILAUS' and $yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
+                if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
                    $rperheid = "0";
                 }
                 else {

@@ -16,6 +16,8 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
   $laskujen_tunnukset = mysql_result($result, 0, 0);
   $bookattu_konttimaara = mysql_result($result, 0, 1);
 
+  echo $laskujen_tunnukset;die("TEST");
+
   if (mysql_num_rows($result) == 0) {
     return false;
   }

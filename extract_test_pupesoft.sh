@@ -64,6 +64,17 @@ fi
 kasiteltava_backup=$1
 destination_database=$2
 mysql_root_password=$3
+
+mysql_sock=""
+
+# Neljäs optional parami on custom mysql-instanssin "nimi"
+if [[ "$4" != "" ]]; then
+  mysql_path="/var/lib/$4/"
+  mysql_sock="--socket=/var/lib/$4/$4.sock"
+  mysql_start="mysqld_safe --defaults-file=/etc/$4.cnf"
+  mysql_stop="kill $(ps aux | egrep '[m]ysqld .*'$4 | awk '{print $2}')"
+fi
+
 database_to="${mysql_path}${destination_database}"
 
 if [[ -z ${kasiteltava_backup} || -z ${destination_database} || -z ${mysql_root_password} ]]; then
@@ -74,7 +85,7 @@ if [[ ! -a ${kasiteltava_backup} ]]; then
   error "Tiedostoa '${kasiteltava_backup}' ei löydy!"
 fi
 
-mysql --user=root --password=${mysql_root_password} -e "use mysql" &> /dev/null
+mysql ${mysql_sock} --user=root --password=${mysql_root_password} -e "use mysql" &> /dev/null
 
 if [[ $? -ne 0 ]]; then
   error "Virheellinen salasana!"
@@ -112,20 +123,23 @@ decho "Siirretään ${database_to}.."
 mkdir -p "${database_to}" &> /dev/null
 
 # Stopataan mysql, moovataan db, chown ja mysql takas
-${mysql_stop} > /dev/null &&
+${mysql_stop} >/dev/null &&
 nice -n 19 rm -f "${database_to}/*" > /dev/null &&
 nice -n 19 mv -f "${tmpdir}/"* "${database_to}/" > /dev/null &&
-chown -R ${mysql_owner} "${database_to}" > /dev/null &&
-${mysql_start} > /dev/null
+chown -R ${mysql_owner} "${database_to}" > /dev/null
 
 if [[ $? -ne 0 ]]; then
   nice -n 19 rm -rf "${database_to}" &> /dev/null
   failure "Siirto epäonnistui!"
 fi
 
+${mysql_start} >/dev/null 2>&1 &
+
+sleep 5
+
 decho "Puhdistetaan '${destination_database}' tietokanta.."
 
-mysql --user=root --password=${mysql_root_password} "${destination_database}" 2> /dev/null << EOF
+mysql ${mysql_sock} --user=root --password=${mysql_root_password} "${destination_database}" 2> /dev/null << EOF
 
 UPDATE yhtio set
 nimi = concat('Testi ', nimi),

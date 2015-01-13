@@ -355,22 +355,6 @@ if (trim($trow["vienti"]) != '' and $row["tyyppi"] != "V" and $row["tyyppi"] != 
   }
 }
 
-if ($row["var"] == 'S') {
-  // otetaan maksuehto selville..
-  $query = "SELECT *
-            from maksuehto
-            where yhtio = '$kukarow[yhtio]'
-            and tunnus  = '$laskurow[maksuehto]'";
-  $maksuehtoresult = pupe_query($query);
-  $maksuehtorow = mysql_fetch_assoc($maksuehtoresult);
-
-  if ($maksuehtorow["jv"] != "") {
-    $varaosavirhe .= t("VIRHE: Et voi suoratoimittaa tuotetta jos maksuehtona on j‰lkivaatimus!")."<br>";
-    $riviok++;
-    $tilausok++;
-  }
-}
-
 // Otetaan oikea kappalem‰‰r‰ k‰sittelyyn
 if (in_array($row["var"], array('J', 'S', 'T', 'U'))) {
   // jos yhtiˆn parametreiss‰ jt-rivit varaavat saldoa, laitetaan "varattu kpl"-m‰‰r‰, muuten "jt kpl"-m‰‰r‰

@@ -68,20 +68,15 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
   }
 
   foreach ($kontitetut as $key => $rulla) {
-
     $kontit[$rulla['konttinumero']] = 0;
-
   }
 
   $konttimaara = count($kontit);
 
-  if ($konttimaara < $bookattu_konttimaara) {
-    while ($konttimaara < $bookattu_konttimaara) {
-      $kontit[$konttimaara + 1] = 0;
-      $konttimaara++;
-    }
+  while ($konttimaara < $bookattu_konttimaara+1) {
+    $kontit[$konttimaara+1] = 0;
+    $konttimaara++;
   }
-
 
   $rullat_ja_kontit = array(
     'kontittamattomat' => $kontittamattomat,

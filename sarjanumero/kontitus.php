@@ -262,12 +262,6 @@ if (isset($submit)) {
 
       $rullat_ja_kontit = rullat_ja_kontit($konttiviite, $maxkg);
 
-print_r($rullat_ja_kontit);
-
-echo '<hr>';
-
-die("testaus käynnissä");
-
       $kontittamattomat = $rullat_ja_kontit['kontittamattomat'];
       $kontitetut = $rullat_ja_kontit['kontitetut'];
       $kontit = $rullat_ja_kontit['kontit'];

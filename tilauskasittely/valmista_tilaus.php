@@ -801,6 +801,17 @@ if ($tee == 'TEEVALMISTUS') {
                   and otunnus = '$row[tunnus]'
                   and tyyppi  in ('V','W','M')";
         $chkresult4 = pupe_query($query);
+        
+        // P‰ivitet‰‰n er‰-/sarjanumerot laskutetuiksi, jotta ne poistuvat varastonarvosta oikein
+        $query = "UPDATE tilausrivi
+                  JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.sarjanumeroseuranta != '')
+                  SET tilausrivi.laskutettu = '$kukarow[kuka]',
+                  tilausrivi.laskutettuaika = now()
+                  WHERE tilausrivi.yhtio    = '$kukarow[yhtio]'
+                  AND tilausrivi.otunnus    = '$row[tunnus]'
+                  AND tilausrivi.tyyppi     = 'V'
+                  AND tilausrivi.laskutettuaika = '0000-00-00'";
+        $updresult = pupe_query($query);
       }
 
       echo "<br><br><font class='message'>Valmistus korjattu!</font><br>";

@@ -110,6 +110,33 @@ if (isset($task) and $task == 'laivamuutos') {
   unset($task);
 }
 
+if (isset($task) and $task == 'eu_tilaus') {
+
+  $query = "SELECT group_concat(tilausrivin_lisatiedot.tunnus)
+            FROM laskun_lisatiedot
+            JOIN tilausrivi
+              ON tilausrivi.yhtio = laskun_lisatiedot.yhtio
+              AND tilausrivi.otunnus = laskun_lisatiedot.otunnus
+            JOIN tilausrivin_lisatiedot
+              ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+            JOIN sarjanumeroseuranta AS ss
+              ON ss.yhtio = tilausrivi.yhtio
+              AND ss.myyntirivitunnus = tilausrivi.tunnus
+            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+            AND laskun_lisatiedot.konttiviite = '$konttiviite'";
+  $result = pupe_query($query);
+  $rivitunnukset = mysql_result($result, 0);
+
+  $query = "UPDATE tilausrivin_lisatiedot
+            SET kontin_mrn = 'EU'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus IN ({$rivitunnukset})";
+  pupe_query($query);
+
+  unset($task);
+}
+
 if (isset($task) and $task == 'suorita_hylky') {
 
   $parametrit = hylky_lusaus_parametrit($sarjanumero);
@@ -1003,12 +1030,29 @@ if (!isset($task)) {
                 echo t("Pakkalista");
                 echo "</button>";
 
-                if ($kontti['mrn'] != '') {
-                  echo "<div style='text-align:center; margin:6px 0'>MRN: ";
+                if ($kontti['mrn'] == 'EU') {
+
+                  echo "<div style='text-align:center; margin:8px 0'>";
+                  echo t("EU:n sisäinen tilaus");
+                  echo "</div>";
+                }
+                elseif ($kontti['mrn'] != '') {
+
+                  echo "<div style='text-align:center; margin:8px 0'>MRN: ";
                   echo "<input type='text'  value='{$kontti['mrn']}' readonly>";
                   echo "</div>";
                 }
                 else {
+
+                  echo "<div style='text-align:center; margin:8px 0'>";
+                  echo t("Odotetaan MRN-numeroa");
+                  echo "<br><form method='post' action='toimitusten_seuranta.php?rajaus={$rajaus}'>";
+                  echo "<input type='hidden' name='task' value='eu_tilaus' />";
+                  echo "<input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />";
+                  echo "<input type='submit' value='". t("EU-tilaus") ."' />&nbsp;";
+                  echo "</form>";
+                  echo "</div>";
+
                   $mrn_tullut = false;
                 }
               }

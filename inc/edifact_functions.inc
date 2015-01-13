@@ -67,13 +67,13 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
     }
   }
 
-  print_r($kontitetut);die("TEST");
-
   foreach ($kontitetut as $key => $rulla) {
 
     $kontit[$rulla['konttinumero']] = 0;
 
   }
+
+  /*
 
   $konttimaara = count($kontit);
 
@@ -83,6 +83,7 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
       $konttimaara = count($kontit);
     }
   }
+*/
 
   $rullat_ja_kontit = array(
     'kontittamattomat' => $kontittamattomat,

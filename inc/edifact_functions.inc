@@ -1388,7 +1388,10 @@ function kasittele_bookkaussanoma($edi_data) {
     // katsotaan onko tilaukseen kuuluvia rullia ostotilauksilla
     $query = "SELECT *
               FROM tilausrivin_lisatiedot
-              WHERE yhtio = '{$kukarow['yhtio']}'
+              JOIN sarjanumeroseuranta AS ss
+                ON ss.yhtio = tilausrivin_lisatiedot.yhtio
+                AND ss.ostorivitunnus = tilausrivin_lisatiedot.tilausrivitunnus
+              WHERE ss.yhtio = '{$kukarow['yhtio']}'
               AND asiakkaan_tilausnumero = '{$tilausnro}'
               AND asiakkaan_rivinumero = '{$rivinro}'";
     $result = pupe_query($query);

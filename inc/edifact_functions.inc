@@ -47,8 +47,6 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
             ORDER BY group_class";
   $result = pupe_query($query);
 
-  var_dump($result);die("TEST");
-
   $kontit = array();
   $kontitetut = array();
   $kontittamattomat = array();
@@ -68,6 +66,8 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
       $ryhmalaskuri[$rulla['group_class']]++;
     }
   }
+
+  print_r($kontitetut);die("TEST");
 
   foreach ($kontitetut as $key => $rulla) {
 

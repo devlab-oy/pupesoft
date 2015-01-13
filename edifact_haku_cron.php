@@ -51,11 +51,11 @@ $bookkaukset = array();
 $rahtikirjat = array();
 $iftstat = array();
 
-$nyt_miinus_tunti = time() - 3600;
+$nyt_miinus_15min = time() - 900;
 
 foreach ($files as $file) {
 
-  if (ftp_mdtm($yhteys, $file) > $nyt_miinus_tunti) {
+  if (ftp_mdtm($yhteys, $file) > $nyt_miinus_15min) {
 
     if (substr($file, -3) == 'IFF') {
       $bookkaukset[] = $file;

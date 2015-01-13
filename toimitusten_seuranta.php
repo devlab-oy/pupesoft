@@ -1063,15 +1063,13 @@ if (!isset($task)) {
             echo "<input type='submit' value='". t("EU-tilaus") ."' />&nbsp;";
             echo "</form>";
             echo "</div>";
-
           }
 
           if ($kesken == 0 and $mrn_tullut and $tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
 
-            echo "
-            <div style='text-align:center;margin:10px 0;'>
-              <button type='button' disabled>" . t("Satamavahvistus lähetetty") . "</button>";
-
+            echo "<div style='text-align:center;margin:10px 0;'><button type='button' disabled>";
+            echo t("Satamavahvistus lähetetty");
+            echo "</button>";
           }
           elseif ($kesken == 0 and $mrn_tullut) {
 
@@ -1087,75 +1085,73 @@ if (!isset($task)) {
               </div>";
           }
 
-            if ($kesken == 0 and $mrn_tullut) {
+          if ($kesken == 0 and $mrn_tullut) {
 
-              $parametrit = lahtoilmoitus_parametrit($tilaus['konttiviite']);
-              $parametrit = serialize($parametrit);
-              $parametrit = base64_encode($parametrit);
+            $parametrit = lahtoilmoitus_parametrit($tilaus['konttiviite']);
+            $parametrit = serialize($parametrit);
+            $parametrit = base64_encode($parametrit);
 
-              $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
-              $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
+            $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
+            $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
+
+            echo "
+            <div style='text-align:center;margin:10px 0;'>
+            <form method='post' id='nayta_lahtoilmoitus{$id}'>
+            <input type='hidden' name='parametrit' value='{$parametrit}' />
+            <input type='hidden' name='task' value='nayta_lahtoilmoitus' />
+            <input type='hidden' name='session' value='{$session}' />
+            <input type='hidden' name='logo_url' value='{$logo_url}' />
+            <input type='hidden' name='tee' value='XXX' />
+            </form>
+            <button onClick=\"js_openFormInNewWindow('nayta_lahtoilmoitus{$id}',
+             'Satamavahvistus'); return false;\" />";
+
+            echo t("Näytä lähtöilmoitus");
+            echo "</button></div>";
+
+            $parametrit = konttierittely_parametrit($tilaus['konttiviite']);
+            $parametrit = serialize($parametrit);
+            $parametrit = base64_encode($parametrit);
+
+            echo "
+            <div style='text-align:center;margin:10px 0;'>
+            <form method='post' id='nayta_konttierittely{$id}'>
+            <input type='hidden' name='parametrit' value='{$parametrit}' />
+            <input type='hidden' name='task' value='nayta_konttierittely' />
+            <input type='hidden' name='session' value='{$session}' />
+            <input type='hidden' name='logo_url' value='{$logo_url}' />
+            <input type='hidden' name='tee' value='XXX' />
+            </form>
+            <button onClick=\"js_openFormInNewWindow('nayta_konttierittely{$id}',
+             'Satamavahvistus'); return false;\" />";
+
+            echo t("Näytä konttierittely");
+            echo "</button></div>";
+
+            if ($tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
 
               echo "
-              <div style='text-align:center;margin:10px 0;'>
-              <form method='post' id='nayta_lahtoilmoitus{$id}'>
-              <input type='hidden' name='parametrit' value='{$parametrit}' />
-              <input type='hidden' name='task' value='nayta_lahtoilmoitus' />
-              <input type='hidden' name='session' value='{$session}' />
-              <input type='hidden' name='logo_url' value='{$logo_url}' />
-              <input type='hidden' name='tee' value='XXX' />
-              </form>
-              <button onClick=\"js_openFormInNewWindow('nayta_lahtoilmoitus{$id}',
-               'Satamavahvistus'); return false;\" />";
-
-              echo t("Näytä lähtöilmoitus");
-              echo "</button></div>";
-
-              $parametrit = konttierittely_parametrit($tilaus['konttiviite']);
-              $parametrit = serialize($parametrit);
-              $parametrit = base64_encode($parametrit);
-
-              echo "
-              <div style='text-align:center;margin:10px 0;'>
-              <form method='post' id='nayta_konttierittely{$id}'>
-              <input type='hidden' name='parametrit' value='{$parametrit}' />
-              <input type='hidden' name='task' value='nayta_konttierittely' />
-              <input type='hidden' name='session' value='{$session}' />
-              <input type='hidden' name='logo_url' value='{$logo_url}' />
-              <input type='hidden' name='tee' value='XXX' />
-              </form>
-              <button onClick=\"js_openFormInNewWindow('nayta_konttierittely{$id}',
-               'Satamavahvistus'); return false;\" />";
-
-              echo t("Näytä konttierittely");
-              echo "</button></div>";
-
-              if ($tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
-
-                echo "
-                <div style='text-align:center'>
-                <form method='post'>
-                <input type='hidden' name='task' value='tee_laskutusraportti' />
-                <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />
-                <input type='submit' value='". t("Laadi laskutusraportti") ."' />
-                </form></div>";
-              }
-
-              echo "</div>";
+              <div style='text-align:center'>
+              <form method='post'>
+              <input type='hidden' name='task' value='tee_laskutusraportti' />
+              <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />
+              <input type='submit' value='". t("Laadi laskutusraportti") ."' />
+              </form></div>";
             }
 
-            echo "</td>";
+            echo "</div>";
+          }
 
-            if ($tilaus['konttiviite'] != 'bookkaukseton') {
-              $kasitellyt_konttiviitteet[] = $tilaus['konttiviite'];
-            }
+          echo "</td>";
+
+          if ($tilaus['konttiviite'] != 'bookkaukseton') {
+            $kasitellyt_konttiviitteet[] = $tilaus['konttiviite'];
           }
         }
-
+      }
       echo "</tr>";
     }
     echo "</table>";
-
   }
   else {
     echo "Ei tilauksia...";

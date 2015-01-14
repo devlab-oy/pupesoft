@@ -176,6 +176,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
   $kustpmuuttuja    = "";
   $saatavat_yhtio    = $kukarow['yhtio'];
   $eta_asiakaslisa  = '';
+  $indeksi = "yhtio_tila_mapvm";
 
   if ($sanimi != '') {
     $generoitumuuttuja .= " and lasku.nimi like '%$sanimi%' ";
@@ -183,6 +184,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 
   if (($eiliittymaa == 'ON' and !empty($sliitostunnus) and $yhtiorow["myyntitilaus_saatavat"] == "") or ($eiliittymaa != 'ON' and !empty($sliitostunnus))) {
     $generoitumuuttuja = " AND lasku.liitostunnus = $sliitostunnus ";
+    $indeksi = "yhtio_tila_liitostunnus_tapvm";
   }
   elseif (!empty($sytunnus)) {
 
@@ -222,6 +224,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
     }
 
     $generoitumuuttuja .= " and lasku.liitostunnus in ($row[tunnukset]) ";
+    $indeksi = "yhtio_tila_liitostunnus_tapvm";
   }
 
   if ($yli != 0) {
@@ -295,16 +298,16 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
     $summalisa .= " sum(if(TO_DAYS('$savvl-$sakkl-$sappl')-TO_DAYS(lasku.erpcm) > {$saatavat_array[count($saatavat_array)-1]}, tiliointi.summa, 0)) 'yli_{$saatavat_array[count($saatavat_array)-1]}',\n";
   }
 
-  $query = "SELECT
+  $query = "(SELECT
             {$selecti},
             {$summalisa}
             min(lasku.liitostunnus) litu,
             min(lasku.tunnus) latunnari
-            FROM lasku use index (yhtio_tila_mapvm)
+            FROM lasku use index ({$indeksi})
             JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl' {$tiliointilisa})
             {$luottolisa}
             WHERE lasku.yhtio = '{$saatavat_yhtio}'
-            and (lasku.mapvm > '{$savvl}-{$sakkl}-{$sappl}' or lasku.mapvm = '0000-00-00')
+            and lasku.mapvm > '{$savvl}-{$sakkl}-{$sappl}'
             and lasku.tapvm   <= '{$savvl}-{$sakkl}-{$sappl}'
             and lasku.tapvm   > '0000-00-00'
             and lasku.tila    = 'U'
@@ -312,9 +315,27 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
             {$generoitumuuttuja}
             {$salisa1}
             GROUP BY {$grouppauslisa}
-            {$having}
+            {$having})
+            UNION
+            (SELECT
+            {$selecti},
+            {$summalisa}
+            min(lasku.liitostunnus) litu,
+            min(lasku.tunnus) latunnari
+            FROM lasku use index ({$indeksi})
+            JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl' {$tiliointilisa})
+            {$luottolisa}
+            WHERE lasku.yhtio = '{$saatavat_yhtio}'
+            and lasku.mapvm = '0000-00-00'
+            and lasku.tapvm   <= '{$savvl}-{$sakkl}-{$sappl}'
+            and lasku.tapvm   > '0000-00-00'
+            and lasku.tila    = 'U'
+            and lasku.alatila = 'X'
+            {$generoitumuuttuja}
+            {$salisa1}
+            GROUP BY {$grouppauslisa}
+            {$having})
             ORDER BY 1,2,3";
-
   $result = pupe_query($query);
 
   $saatavat_yhteensa       = array();
@@ -372,6 +393,30 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 
       $excelsarake = 0;
       $excelrivi++;
+    }
+
+    $_merged_rows = array();
+    $_indx = $grouppaus == "asiakas" ? "liitostunnus" : $grouppaus;
+
+    while ($row = mysql_fetch_assoc($result)) {
+      $_indx_key = $row[$_indx];
+
+      if (!isset($_merged_rows[$_indx_key])) {
+        $_merged_rows[$_indx_key] = $row;
+        continue;
+      }
+
+      $_merged_rows[$_indx_key]['avoimia'] += $row['avoimia'];
+      $_merged_rows[$_indx_key]['ylivito'] += $row['ylivito'];
+      $_merged_rows[$_indx_key]["alle_{$saatavat_array[0]}"]  += $row["alle_{$saatavat_array[0]}"];
+
+      for ($sa = 1; $sa < count($saatavat_array); $sa++) {
+        $_key = ($saatavat_array[$sa-1]+1)."_{$saatavat_array[$sa]}";
+        $_merged_rows[$_indx_key][$_key] += $row[$_key];
+      }
+
+      $_key = "yli_{$saatavat_array[count($saatavat_array)-1]}";
+      $_merged_rows[$_indx_key][$_key] += $row[$_key];
     }
 
     echo "<font class='head'>".t("Saatavat")." - $yhtiorow[nimi] - $sappl.$sakkl.$savvl</font><hr>";
@@ -432,7 +477,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
 
     $divi = "";
 
-    while ($row = mysql_fetch_assoc($result)) {
+    foreach ($_merged_rows as $_group => $row) {
 
       if (isset($row["liitostunnus"]) and $row["liitostunnus"] != "") {
 
@@ -608,23 +653,39 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
         }
 
         // Lasketaan yhteen
-        if (!isset($saatavat_yhteensa["alle_$saatavat_array[0]"])) $saatavat_yhteensa["alle_$saatavat_array[0]"] = $row["alle_$saatavat_array[0]"];
-        else $saatavat_yhteensa["alle_$saatavat_array[0]"] += $row["alle_$saatavat_array[0]"];
+        $_key = "alle_{$saatavat_array[0]}";
 
-        for ($sa = 1; $sa < count($saatavat_array); $sa++) {
-          if (!isset($saatavat_yhteensa[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]])) $saatavat_yhteensa[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]] = $row[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]];
-          else $saatavat_yhteensa[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]] += $row[($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa]];
+        if (!isset($saatavat_yhteensa[$_key])) {
+          $saatavat_yhteensa[$_key] = $row[$_key];
+        }
+        else {
+          $saatavat_yhteensa[$_key] += $row[$_key];
         }
 
-        if (!isset($saatavat_yhteensa["yli_{$saatavat_array[count($saatavat_array)-1]}"])) $saatavat_yhteensa["yli_{$saatavat_array[count($saatavat_array)-1]}"] = $row["yli_{$saatavat_array[count($saatavat_array)-1]}"];
-        else $saatavat_yhteensa["yli_{$saatavat_array[count($saatavat_array)-1]}"] += $row["yli_{$saatavat_array[count($saatavat_array)-1]}"];
+        for ($sa = 1; $sa < count($saatavat_array); $sa++) {
+          $_key = ($saatavat_array[$sa-1]+1)."_".$saatavat_array[$sa];
 
+          if (!isset($saatavat_yhteensa[$_key])) {
+            $saatavat_yhteensa[$_key] = $row[$_key];
+          }
+          else {
+            $saatavat_yhteensa[$_key] += $row[$_key];
+          }
+        }
 
+        $_key = "yli_{$saatavat_array[count($saatavat_array)-1]}";
 
-        $kaato_yhteensa       += $kaatotilisumma;
-        $avoimia_yhteensa       += $row["avoimia"];
-        $ylivito          += $row["ylivito"];
-        $avoimettilaukset_yhteensa   += $avoimettilaukset;
+        if (!isset($saatavat_yhteensa[$_key])) {
+          $saatavat_yhteensa[$_key] = $row[$_key];
+        }
+        else {
+          $saatavat_yhteensa[$_key] += $row[$_key];
+        }
+
+        $kaato_yhteensa             += $kaatotilisumma;
+        $avoimia_yhteensa           += $row["avoimia"];
+        $ylivito                    += $row["ylivito"];
+        $avoimettilaukset_yhteensa  += $avoimettilaukset;
         $luottotilanne_nyt_yhteensa += $luottotilanne_nyt;
         $rivilask++;
       }

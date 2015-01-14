@@ -1382,23 +1382,14 @@ if ($toiminto == "kaikkiok" and $tee == "varma") {
         $toimittajanrores = pupe_query($query);
         $toimittajanrorow = mysql_fetch_assoc($toimittajanrores);
 
-        $query = "SELECT status
-                  FROM asn_sanomat
+        $query = "UPDATE asn_sanomat SET
+                  status               = 'X'
                   WHERE yhtio          = '$kukarow[yhtio]'
                   AND toimittajanumero = '$toimittajanrorow[toimittajanro]'
                   AND asn_numero       = '$kulurow[laskunro]'
-                  AND status           = ''";
+                  AND status           = ''
+                  AND laji             = 'tec'";
         $asnsres = pupe_query($query);
-
-        if (mysql_num_rows($asnsres) > 0) {
-          $query = "UPDATE asn_sanomat SET
-                    status               = 'X'
-                    WHERE yhtio          = '$kukarow[yhtio]'
-                    AND toimittajanumero = '$toimittajanrorow[toimittajanro]'
-                    AND asn_numero       = '$kulurow[laskunro]'
-                    AND status           = ''";
-          $asnsres = pupe_query($query);
-        }
       }
     }
   }

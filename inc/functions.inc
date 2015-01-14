@@ -428,7 +428,7 @@ if (!function_exists("pupesoft_flock")) {
 
     $scriptname    = basename($scriptname);
     $lockfile      = isset($params["lockfile"]) ? "/tmp/".basename($params["lockfile"]) : "/tmp/##{$scriptname}-flock.lock";
-    $error_message = "VIRHE: {$scriptname} flocklock-jumissa! (".date("Y-m-d H:i:s").") ".gethostname()."\n";
+    $error_message = "VIRHE: {$scriptname} flocklock-jumissa! (".date("Y-m-d H:i:s").")\n";
     $locktime      = isset($params["locktime"]) ? $params["locktime"] : 300;
     $filecontent   = isset($params["filecontent"]) ? $params["filecontent"] : '';
     $flockreturn   = isset($params["return"]) ? $params["return"] : FALSE;
@@ -16098,9 +16098,8 @@ if (!function_exists("hae_hyvityshinta")) {
     $query_ale_lisa = generoi_alekentta('M');
 
     $i = 0;
-    $cur_date = new DateTime();
-    $date_2yo = new DateTime();
-    $date_2yo->sub(new DateInterval('P2Y'));
+    $cur_date = date('Y-m-d');
+    $date_2yo = date("Y-m-d", mktime(0, 0, 0, date("n"), date("j"), date("Y")-2));
 
     // Jos kahden vuoden aikarajaus ylittyy, breikataan looppi
     while ($cur_date >= $date_2yo) {
@@ -16108,9 +16107,9 @@ if (!function_exists("hae_hyvityshinta")) {
       $querylisa = $i == 0 ? " or tilausrivi.laskutettuaika = '0000-00-00'" : "";
       $i++;
 
-      $cur_date->sub(new DateInterval('P1M'));
-      $pre_date = new DateTime($cur_date->format('Y-m-d'));
-      $pre_date->add(new DateInterval('P1M'));
+      $pre_date = $cur_date;
+      $cur_date = explode('-', $cur_date);
+      $cur_date = date("Y-m-d", mktime(0, 0, 0, $cur_date[1]-1, $cur_date[2], $cur_date[0]));
 
       // Haetaan asiakkaan laskutetut/toimitetut veloitusrivit + toisella queryllä hyvitysrivit
       $query = "SELECT datediff(CURRENT_DATE, if(tilausrivi.laskutettuaika = '0000-00-00', CURRENT_DATE, tilausrivi.laskutettuaika)) AS ika,
@@ -16127,8 +16126,8 @@ if (!function_exists("hae_hyvityshinta")) {
                 AND tilausrivi.tuoteno   = '{$tuoteno}'
                 AND tilausrivi.varattu + tilausrivi.kpl > 0
                 AND tilausrivi.var       not in ('P','J')
-                AND tilausrivi.laadittu  >= '".$date_2yo->format('Y-m-d')." 00:00:00'
-                AND ((tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."' and tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."') $querylisa)
+                AND tilausrivi.laadittu  >= '{$date_2yo} 00:00:00'
+                AND ((tilausrivi.laskutettuaika <= '{$pre_date}' and tilausrivi.laskutettuaika >= '{$cur_date}') $querylisa)
                 GROUP BY ika, hinta
                 HAVING kpl != 0
 
@@ -16146,8 +16145,8 @@ if (!function_exists("hae_hyvityshinta")) {
                 AND tilausrivi.tuoteno   = '{$tuoteno}'
                 AND tilausrivi.varattu + tilausrivi.kpl < 0
                 AND tilausrivi.var       not in ('P','J')
-                AND tilausrivi.laadittu  >= '".$date_2yo->format('Y-m-d')." 00:00:00'
-                AND ((tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."' and tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."') $querylisa)
+                AND tilausrivi.laadittu  >= '{$date_2yo} 00:00:00'
+                AND ((tilausrivi.laskutettuaika <= '{$pre_date}' and tilausrivi.laskutettuaika >= '{$cur_date}') $querylisa)
                 GROUP BY ika, hinta
                 HAVING kpl != 0
 

@@ -36,6 +36,10 @@ require "vastaavat.class.php";
 
 if (isset($ajax)) {
 
+  if (isset($tuoteno)) {
+    $tuoteno = utf8_decode($tuoteno);
+  }
+
   if ($ajax == "varastopaikat") {
 
     $_return = "";

@@ -20489,10 +20489,9 @@ if (!function_exists("pupesoft_sahkoposti")) {
         }
       }
 
-      $resque_args = array(
-        'job_class'  => 'EmailWorkerJob',
-        'queue_name' => 'PupeEmail',
-        'arguments'  => array(
+      // Nämä välitetään ActiveJobin perform metodille parametreiksi
+      $perform_args = array(0 =>
+        array(
           'user'          => $kukarow["eposti"],
           'error_message' => utf8_encode(t("Sähköpostin lähetys epäonnistui").": $email_to"),
           'from'          => $yhtiorow["postittaja_email"],
@@ -20503,6 +20502,12 @@ if (!function_exists("pupesoft_sahkoposti")) {
           'body'          => utf8_encode($email_body),
           'attachements'  => $resque_liitteet
         )
+      );
+
+      $resque_args = array(
+        'job_class'  => 'EmailWorkerJob',
+        'queue_name' => 'PupeEmail',
+        'arguments'  => $perform_args
       );
 
       Resque::enqueue('PupeEmail', 'ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper', $resque_args);

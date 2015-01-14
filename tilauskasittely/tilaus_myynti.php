@@ -9836,8 +9836,14 @@ if ($tee == '') {
           $painike_txt = $otsikko.' '.t("valmis").' '.$laskelisa;
         }
 
+        $_takuu_tilaustyyppi = "";
+        if ($toim == 'REKLAMAATIO' and $laskurow['tilaustyyppi'] == 'U') {
+          $_takuu_tilaustyyppi = "<input type='hidden' name='tilaustyyppi' value = '$laskurow[tilaustyyppi]'>";
+        }
+
         echo "<form name='kaikkyht' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' $javalisa>
           <input type='hidden' name='toim' value='$toim'>
+          $_takuu_tilaustyyppi
           <input type='hidden' name='lopetus' value='$lopetus'>
           <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
           <input type='hidden' name='projektilla' value='$projektilla'>

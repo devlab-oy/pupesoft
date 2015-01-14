@@ -2245,7 +2245,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     ) {
       $toimittamatta = $suoratoimitus_rivikpl;
     }
-    else {
+    elseif ($toimittamatta < $suoratoimitus_rivikpl) {
       // Pienenntään suoratoimitusostorivin määrää, eli joudumme splittaamaan myyntirivin samassa suhteessa
       $suoratoimitus_splittaus = TRUE;
       // Pakotetaan loput omalle riville

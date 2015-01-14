@@ -67,7 +67,7 @@ if ($toim == "MYYNTI" or $toim == "MYYNTI_KATE") {
 
   if ($toim == "MYYNTI_KATE") {
     $kk_pv_kate_lisa = ",round(sum(if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)))) / sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) * 100, $yhtiorow[hintapyoristys]) AS 'Kate%' ";
-    $tilaus_kate_lisa = ",round(if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt))) / (tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) * 100, $yhtiorow[hintapyoristys]) AS 'Kate%' ";
+    $tilaus_kate_lisa = ",round(if(tilausrivi.laskutettu!='', if(tilausrivi.rivihinta < 0, tilausrivi.kate * -1, tilausrivi.kate), (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt))) / (tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) * 100, $yhtiorow[hintapyoristys]) AS 'Kate%' ";
 
     $tuote_join = " JOIN tuote ON (tuote.tuoteno = tilausrivi.tuoteno
                      AND tuote.yhtio = tilausrivi.yhtio) ";

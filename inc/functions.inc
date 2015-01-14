@@ -30029,3 +30029,32 @@ if (!function_exists("hae_saldo")) {
     }
   }
 }
+
+if (!function_exists("hae_viimeiset_hyvaksyjat")) {
+  function hae_viimeiset_hyvaksyjat($laskurow) {
+    $hyvaksyja_kentat = array();
+    $kentat = array("hyvak1", "hyvak2", "hyvak3", "hyvak4", "hyvak5");
+
+    foreach ($kentat as $kentta) {
+      if (!empty($laskurow[$kentta])) {
+        array_push($hyvaksyja_kentat, $kentta);
+      }
+    }
+
+    $viimeinen_hyvaksyja = array_pop($hyvaksyja_kentat);
+    $viimeinen_hyvaksyja = substr($viimeinen_hyvaksyja, -1);
+    $viimeinen_hyvaksyja_time = "h{$viimeinen_hyvaksyja}time";
+
+    $tokaviimeinen_hyvaksyja = array_pop($hyvaksyja_kentat);
+
+    if ($tokaviimeinen_hyvaksyja) {
+      $tokaviimeinen_hyvaksyja = substr($tokaviimeinen_hyvaksyja, -1);
+      $tokaviimeinen_hyvaksyja_time = "h{$tokaviimeinen_hyvaksyja}time";
+    }
+    else {
+      $tokaviimeinen_hyvaksyja_time = false;
+    }
+
+    return array($viimeinen_hyvaksyja_time, $tokaviimeinen_hyvaksyja_time);
+  }
+}

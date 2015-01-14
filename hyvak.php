@@ -638,26 +638,38 @@ if ($tee == "H") {
 
   $laskurow = mysql_fetch_assoc($result);
 
-  if ($yhtiorow["tarkenteet_pakolliset_tilioinneissa"] == "K" and
-      $laskurow["h4time"] != "0000-00-00 00:00:00" and $laskurow["h5time"] == "0000-00-00 00:00:00"
-  ) {
-    $tarkistus_query = "SELECT count(*) AS vajaat_tilioinnit_kpl
-                        FROM tiliointi
-                        WHERE tiliointi.yhtio = '{$kukarow["yhtio"]}'
-                        AND tiliointi.ltunnus = {$laskurow["tunnus"]}
-                        AND tiliointi.lukko = ''
-                        AND tiliointi.korjattu = ''
-                        AND (kustp = 0 OR projekti = 0)";
+  if ($yhtiorow["tarkenteet_pakolliset_tilioinneissa"] == "K") {
+    list($viimeinen_hyvaksyja_time,
+      $tokaviimeinen_hyvaksyja_time) = hae_viimeiset_hyvaksyjat($laskurow);
 
-    $vajaat_tilioinnit_kpl = pupe_query($tarkistus_query);
-    $vajaat_tilioinnit_kpl = mysql_fetch_assoc($vajaat_tilioinnit_kpl);
-    $vajaat_tilioinnit_kpl = $vajaat_tilioinnit_kpl["vajaat_tilioinnit_kpl"];
+    if ($laskurow[$tokaviimeinen_hyvaksyja_time] != "0000-00-00 00:00:00" and
+        $laskurow[$viimeinen_hyvaksyja_time] == "0000-00-00 00:00:00"
+    ) {
+      $ollaan_viimeinen_hyvaksyja = true;
+    }
+    else {
+      $ollaan_viimeinen_hyvaksyja = false;
+    }
 
-    if ($vajaat_tilioinnit_kpl > 0) {
-      echo "<font class = 'error'>" .
-           t('Laskulla on tiliöintejä, joilla ei ole kustannuspaikka tai projektia') . "</font>";
+    if ($ollaan_viimeinen_hyvaksyja) {
+      $tarkistus_query = "SELECT count(*) AS vajaat_tilioinnit_kpl
+                          FROM tiliointi
+                          WHERE tiliointi.yhtio = '{$kukarow["yhtio"]}'
+                          AND tiliointi.ltunnus = {$laskurow["tunnus"]}
+                          AND tiliointi.lukko = ''
+                          AND tiliointi.korjattu = ''
+                          AND (kustp = 0 OR projekti = 0)";
 
-      $tee = "";
+      $vajaat_tilioinnit_kpl = pupe_query($tarkistus_query);
+      $vajaat_tilioinnit_kpl = mysql_fetch_assoc($vajaat_tilioinnit_kpl);
+      $vajaat_tilioinnit_kpl = $vajaat_tilioinnit_kpl["vajaat_tilioinnit_kpl"];
+
+      if ($vajaat_tilioinnit_kpl > 0) {
+        echo "<font class = 'error'>" .
+             t('Laskulla on tiliöintejä, joilla ei ole kustannuspaikka tai projektia') . "</font>";
+
+        $tee = "";
+      }
     }
   }
 }

@@ -1058,7 +1058,12 @@ if ($tee == "") {
   echo "</form><br>";
 
   $haku='';
-  if (is_string($etsi))  $haku="and lasku.nimi LIKE '%$etsi%'";
+  if (is_string($etsi)) {
+    $haku = "AND (lasku.nimi LIKE '%{$etsi}%'
+                  OR lasku.toim_nimi LIKE '%{$etsi}%'
+                  OR lasku.nimitark LIKE '%{$etsi}%'
+                  OR lasku.toim_nimitark LIKE '%{$etsi}%')";
+  }
   if (is_numeric($etsi)) $haku="and lasku.tunnus='$etsi'";
 
   if ($yhtiorow["koontilaskut_yhdistetaan"] == 'T' or $yhtiorow['koontilaskut_yhdistetaan'] == 'V') {

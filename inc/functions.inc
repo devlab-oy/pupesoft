@@ -20498,9 +20498,10 @@ if (!function_exists("pupesoft_sahkoposti")) {
         'cc'            => $email_cc,
         'subject'       => utf8_encode($email_subject),
         'body'          => utf8_encode($email_body),
-        'attachements'  => $resque_liitteet);
+        'attachements'  => $resque_liitteet,
+        'job_class'     => 'EmailWorkerJob');
 
-      Resque::enqueue('PupeEmail', 'EmailWorkerJob', $resque_args);
+      Resque::enqueue('PupeEmail', 'ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper', $resque_args);
       return TRUE;
     }
 

@@ -223,7 +223,7 @@ $tuotteet = "";
 // Päiväajoon otetaan mukaan vain viimeisen vuorokauden aikana muuttuneet
 if ($paiva_ajo) {
 
-  $tuotelista       = "NULL";
+  $tuotelista       = "''";
   $namaonjotsekattu = "";
 
   $query = "SELECT tuote.tuoteno
@@ -361,7 +361,7 @@ $query = "SELECT
           if(tuote.halytysraja = 0, '', tuote.halytysraja) halytysraja,
           if(tuote.varmuus_varasto = 0, '', tuote.varmuus_varasto) varmuus_varasto,
           if(tuote.tilausmaara = 0, 1, tuote.tilausmaara) tilausmaara,
-          if(tuote.ostoehdotus != 'E', 'K', 'E') ostoehdotus,
+          if(tuote.epakurantti25pvm != '0000-00-00', 'E', if(tuote.ostoehdotus != 'E', 'K', 'E')) ostoehdotus,
           tuote.tahtituote,
           if(tuote.myynti_era = 0, 1, tuote.myynti_era) myynti_era,
           if(tuote.minimi_era = 0, '', tuote.minimi_era) minimi_era,

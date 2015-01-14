@@ -110,6 +110,7 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
              if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0) kehahin,
              tuote.kehahin bruttokehahin,
              tuote.luontiaika,
+             tuote.vihapvm,
              tuote.sarjanumeroseuranta,
              sum(tuotepaikat.saldo) saldo
              FROM tuote
@@ -205,7 +206,11 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
 
       if (!$tulorow = mysql_fetch_assoc($tapres)) {
 
-        if ($epakurantti_row["luontiaika"] != "0000-00-00 00:00:00") {
+        if ($epakurantti_row["luontiaika"] != "0000-00-00 00:00:00" and $epakurantti_row["luontiaika"] > $epakurantti_row["vihapvm"]) {
+          // Jos ei löydy tuloa, laitetaan tuotteen vihapvm (mikäli se on pienempi kuin luontiaika, konversiotapauksia varten)
+          $tulorow = array("laadittu" => substr($epakurantti_row["vihapvm"], 0, 10));
+        }
+        elseif ($epakurantti_row["luontiaika"] != "0000-00-00 00:00:00") {
           // Jos ei löydy tuloa, laitetaan tuotteen luontiaika
           $tulorow = array("laadittu" => substr($epakurantti_row["luontiaika"], 0, 10));
         }

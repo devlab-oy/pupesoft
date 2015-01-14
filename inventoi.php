@@ -446,11 +446,11 @@ if ($tee == 'VALMIS') {
               echo "<font class='error'>".t("VIRHE: Eränumeroita ei voi lisätä kuin relatiivisella määrällä")."! (+1)</font><br>";
               $virhe = 1;
             }
-            elseif (substr($kpl, 0, 1) == '+' and is_array($eranumero_kaikki[$i]) and substr($saldo_vs_era, 1) != substr($kpl, 1)) {
+            elseif (substr($kpl, 0, 1) == '+' and is_array($eranumero_kaikki[$i]) and $saldo_vs_era != substr($kpl, 1)) {
               echo "<font class='error'>".t("VIRHE: Eränumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno $kpl</font><br>";
               $virhe = 1;
             }
-            elseif (substr($kpl, 0, 1) == '-' and is_array($eranumero_kaikki[$i]) and substr($saldo_vs_era, 1) != substr($kpl, 1)) {
+            elseif (substr($kpl, 0, 1) == '-' and is_array($eranumero_kaikki[$i]) and $saldo_vs_era != $kpl) {
               echo "<font class='error'>".t("VIRHE: Eränumeroiden määrä on oltava sama kuin laskettu syötetty määrä")."! $tuoteno $kpl</font><br>";
               $virhe = 1;
             }
@@ -1056,17 +1056,8 @@ if ($tee == 'VALMIS') {
                   $enro_val = (float) str_replace(",", ".", $enro_val);
 
                   if ((float) $enro_val > 0) {
-                    $mita_jaa = $enro_val;
-
-                    $sarjaquerylisa = '';
-
-                    // jos erä loppuu niin poistetaan kyseinen erä
-                    if ($mita_jaa == 0) {
-                      $sarjaquerylisa = "myyntirivitunnus = '-1', siirtorivitunnus = '-1', ";
-                    }
-
                     $query = "UPDATE sarjanumeroseuranta
-                              SET era_kpl = '$mita_jaa',
+                              SET era_kpl = '$enro_val',
                               $sarjaquerylisa
                               muuttaja    = '$kukarow[kuka]',
                               muutospvm   = now()

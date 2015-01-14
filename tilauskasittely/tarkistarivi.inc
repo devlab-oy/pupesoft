@@ -183,6 +183,13 @@ if (in_array($row['var'], array('U', 'T', 'S')) and $meapurow['kateinen'] != '')
   $tilausok++;
 }
 
+if ($row['var'] == 'U' and $meapurow['jv'] != '') {
+
+  $varaosavirhe .= t("VIRHE: Et voi tilata toimittajalta asiakkaalle, koska maksuehto on jälkivaatimus!")."<br>";
+  $riviok++;
+  $tilausok++;
+}
+
 // katsotaan, ettei valmisteta epäkuranttia tuotetta
 if (($toim == "VALMISTAVARASTOON" or $toim == 'VALMISTAASIAKKAALLE') and $trow["epakurantti25pvm"] != '0000-00-00' and ($row["tyyppi"] == "W" or $row["tyyppi"] == "M") and $riviok == 0) {
   $varaosavirhe .= t("VIRHE: Tuote on epäkurantti, sitä ei saa valmistaa!");

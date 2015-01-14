@@ -20500,7 +20500,7 @@ if (!function_exists("pupesoft_sahkoposti")) {
         'body'          => utf8_encode($email_body),
         'attachements'  => $resque_liitteet);
 
-      Resque::enqueue('PupeEmail', 'EmailWorker', $resque_args);
+      Resque::enqueue('PupeEmail', 'EmailWorkerJob', $resque_args);
       return TRUE;
     }
 

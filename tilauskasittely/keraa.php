@@ -598,6 +598,9 @@ if ($tee == 'P') {
           $result = pupe_query($query1);
           $tilrivirow = mysql_fetch_assoc($result);
 
+          // Alkuperäinen perheid talteen, nollataan se myöhemmin, jos lapsia saa jättää ykis jt:ksi
+          $rperheid  = $tilrivirow['perheid'];
+          
           //Aloitellaan tilausrivi päivitysqueryä
           $query = "UPDATE tilausrivi
                     SET yhtio = yhtio ";
@@ -658,7 +661,6 @@ if ($tee == 'P') {
                 $keratty    = "'$who'";
                 $kerattyaik = "now()";
                 $rkomm      = $tilrivirow["kommentti"];
-                $rperheid  = $tilrivirow['perheid'];
               }
             }
             elseif ($tilrivirow["var"] == 'J' and $maara[$apui] > 0) {
@@ -705,9 +707,6 @@ if ($tee == 'P') {
                 if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
                    $rperheid = "0";
                 }
-                else {
-                  $rperheid  = $tilrivirow['perheid'];
-                }
               }
             }
             elseif (($tilrivirow["var"] == 'J' or $tilrivirow["var"] == 'P') and $maara[$apui] == 0 and $poikkeama_kasittely[$apui] == "MI") {
@@ -745,7 +744,6 @@ if ($tee == 'P') {
                 $keratty  = "''";
                 $kerattyaik  = "''";
                 $rkomm     = $tilrivirow["kommentti"];
-                $rperheid  = $tilrivirow['perheid'];
               }
 
               if ($otsikkorivi['clearing'] == 'JT-TILAUS') {
@@ -774,9 +772,6 @@ if ($tee == 'P') {
                 
                 if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
                    $rperheid = "0";
-                }
-                else {
-                  $rperheid  = $tilrivirow['perheid'];
                 }
               }
 
@@ -889,9 +884,6 @@ if ($tee == 'P') {
                   if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
                      $rperheid = "0";
                   }
-                  else {
-                    $rperheid  = $tilrivirow['perheid'];
-                  }
                 }
               }
               else {
@@ -912,7 +904,6 @@ if ($tee == 'P') {
                 $rvar    = "P";
                 $keratty  = "'$who'";
                 $kerattyaik  = "now()";
-                $rperheid  = $tilrivirow['perheid'];
                 $puurivires = t_avainsana("PUUTEKOMM");
 
                 if (mysql_num_rows($puurivires) > 0) {
@@ -947,9 +938,6 @@ if ($tee == 'P') {
                 if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
                    $rperheid = "0";
                 }
-                else {
-                  $rperheid  = $tilrivirow['perheid'];
-                }
               }
               elseif ($poikkeama_kasittely[$apui] == "MI") {
 
@@ -971,9 +959,6 @@ if ($tee == 'P') {
                 $rkomm     = $tilrivirow["kommentti"];
                 if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
                    $rperheid = "0";
-                }
-                else {
-                $rperheid  = $tilrivirow['perheid'];
                 }
               }
               elseif ($poikkeama_kasittely[$apui] == "UT") {
@@ -1082,9 +1067,6 @@ if ($tee == 'P') {
 
                 if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
                    $rperheid = "0";
-                }
-                else {
-                  $rperheid  = $tilrivirow['perheid'];
                 }
               }
             }

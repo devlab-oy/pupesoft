@@ -387,6 +387,20 @@ if ($tee == 'VALMIS') {
           $virhe = 1;
         }
 
+        // Haetaan tuotepaikan tiedot.
+        // Haetaan tiedot jo t‰ss‰ vaiheessa, jotta pystyt‰‰n tekem‰‰n saldovertailut kunnolla
+        $query = "SELECT *
+                  FROM tuotepaikat
+                    JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
+                  WHERE tuotepaikat.yhtio   = '$kukarow[yhtio]'
+                  AND tuotepaikat.tuoteno   = '$tuoteno'
+                  AND tuotepaikat.hyllyalue = '$hyllyalue'
+                  AND tuotepaikat.hyllynro  = '$hyllynro'
+                  AND tuotepaikat.hyllyvali = '$hyllyvali'
+                  AND tuotepaikat.hyllytaso = '$hyllytaso'";
+        $result = pupe_query($query);
+        $row = mysql_fetch_assoc($result);
+
         if (isset($eranumero_kaikki[$i]) and is_array($eranumero_kaikki[$i])) {
           if (is_array($eranumero_valitut[$i])) {
 
@@ -420,18 +434,10 @@ if ($tee == 'VALMIS') {
               }
             }
 
-            // Lasketaan paikan varastosaldo,
-            // jotta sit‰ voidaan verrata syˆtettyihin m‰‰riin
-            // ja saadaan tarkistettua relatiivisen m‰‰r‰n oikeellisuus oikein
-            $query = "SELECT
-            	        SUM(saldo) AS saldo
-                      FROM tuotepaikat
-                      WHERE tuotepaikat.yhtio   = '{$kukarow['yhtio']}'
-            	        AND tuotepaikat.tuoteno   = '$tuoteno'
-            	        AND tuotepaikat.tunnus = $i";
-            $paikkojen_saldo = mysql_fetch_assoc(pupe_query($query));
-
-            $saldo_vs_era = $erasyotetyt - $paikkojen_saldo["saldo"];
+            // Lasketaan uuden ja nykyisen saldo erotus
+            // relatiivisen m‰‰r‰ll‰ inventoinn tarkistusta varten
+            #$saldomaara = mysql_fetch_assoc($result);
+            $saldo_vs_era = $erasyotetyt - $row["saldo"];
 
             $erasyotetyt = round($erasyotetyt, 2);
             $saldo_vs_era = round($saldo_vs_era, 2);
@@ -440,11 +446,11 @@ if ($tee == 'VALMIS') {
               echo "<font class='error'>".t("VIRHE: Er‰numeroita ei voi lis‰t‰ kuin relatiivisella m‰‰r‰ll‰")."! (+1)</font><br>";
               $virhe = 1;
             }
-            elseif (substr($kpl, 0, 1) == '+' and is_array($eranumero_kaikki[$i]) and $saldo_vs_era != substr($kpl, 1)) {
+            elseif (substr($kpl, 0, 1) == '+' and is_array($eranumero_kaikki[$i]) and substr($saldo_vs_era, 1) != substr($kpl, 1)) {
               echo "<font class='error'>".t("VIRHE: Er‰numeroiden m‰‰r‰ on oltava sama kuin laskettu syˆtetty m‰‰r‰")."! $tuoteno $kpl</font><br>";
               $virhe = 1;
             }
-            elseif (substr($kpl, 0, 1) == '-' and is_array($eranumero_kaikki[$i]) and $saldo_vs_era != substr($kpl, 1)) {
+            elseif (substr($kpl, 0, 1) == '-' and is_array($eranumero_kaikki[$i]) and substr($saldo_vs_era, 1) != substr($kpl, 1)) {
               echo "<font class='error'>".t("VIRHE: Er‰numeroiden m‰‰r‰ on oltava sama kuin laskettu syˆtetty m‰‰r‰")."! $tuoteno $kpl</font><br>";
               $virhe = 1;
             }
@@ -463,18 +469,6 @@ if ($tee == 'VALMIS') {
           $virhe = 0;
           continue;
         }
-
-        //Haetaan tuotepaikan tiedot
-        $query = "SELECT *
-                  FROM tuotepaikat
-                  JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
-                  WHERE tuotepaikat.yhtio   = '$kukarow[yhtio]'
-                  and tuotepaikat.tuoteno   = '$tuoteno'
-                  and tuotepaikat.hyllyalue = '$hyllyalue'
-                  and tuotepaikat.hyllynro  = '$hyllynro'
-                  and tuotepaikat.hyllyvali = '$hyllyvali'
-                  and tuotepaikat.hyllytaso = '$hyllytaso'";
-        $result = pupe_query($query);
 
         if (mysql_num_rows($result) == 0 and $virhe != 1) {
 
@@ -545,8 +539,6 @@ if ($tee == 'VALMIS') {
         }
 
         if (mysql_num_rows($result) == 1 and $virhe != 1) {
-          $row = mysql_fetch_assoc($result);
-
 
           if (($lista != '' and $row["inventointilista_aika"] != "0000-00-00 00:00:00") or ($validi_kasinsyotetty_inventointipaivamaara) or ($lista == '' and $row["inventointilista_aika"] == "0000-00-00 00:00:00")) {
 
@@ -629,7 +621,6 @@ if ($tee == 'VALMIS') {
               $kpl = substr($kpl, 1);
               $skp = $kpl;
               $kpl = $row['saldo'] + $kpl;
-
             }
             elseif (substr($kpl, 0, 1) == '-') {
               $kpl = substr($kpl, 1);
@@ -1060,22 +1051,12 @@ if ($tee == 'VALMIS') {
                 }
               }
               elseif ((float) $skp < 0 or (float) $skp > 0) {
-
                 // Ollaan syˆtetty relatiivinen m‰‰r‰
                 foreach ($eranumero_valitut[$i] as $enro_key => $enro_val) {
                   $enro_val = (float) str_replace(",", ".", $enro_val);
 
                   if ((float) $enro_val > 0) {
-
-                    if ($skp < 0) {
-                      $mita_jaa = $eranumero_kaikki[$i][$enro_key] - $enro_val;
-                    }
-                    elseif ($skp > 0 and $onko_uusia == 0) {
-                      $mita_jaa = $eranumero_kaikki[$i][$enro_key] + $enro_val;
-                    }
-                    else {
-                      $mita_jaa = $enro_val;
-                    }
+                    $mita_jaa = $enro_val;
 
                     $sarjaquerylisa = '';
 

@@ -128,6 +128,43 @@ if (mysql_field_name($result, $i) == "selite") {
 
     $jatko = 0;
   }
+  elseif ($tem_laji == "tuotehinnastoryhmittely") {
+
+    // haetaan tarjolla olevat tuotehinnastoryhmat
+    $q = "SELECT *
+          FROM avainsana
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND laji = 'THR'
+          AND kieli = 'fi'";
+    $r = pupe_query($q);
+
+    $valitut_ryhmat = explode(",", $trow[$i]);
+
+    $ryhmat = array();
+
+    while ($thr = mysql_fetch_assoc($r)) {
+      $ryhmat[] = $thr;
+    }
+
+    $ulos  = "<td>";
+    $ulos .= "<div style='padding:4px'>";
+
+    foreach ($ryhmat as $thr) {
+
+      if (in_array($thr['selite'], $valitut_ryhmat)) {
+        $chk = 'checked';
+      }
+      else {
+       $chk = '';
+     }
+      $ulos .= "<label>". $thr['selite'] . "<input type='checkbox' name='{$nimi}[]' value='". $thr['selite'] . "' {$chk}></label>&nbsp;";
+    }
+
+    $ulos .= "</div>";
+    $ulos .= "</td>";
+
+    $jatko = 0;
+  }
   elseif ($tem_laji == "oletusvalinta") {
     $sel = array($trow[$i] => "SELECTED");
 

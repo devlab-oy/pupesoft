@@ -204,7 +204,7 @@ if ($_tuoterajaus) {
 
 $tecd = FALSE;
 
-if (@include "inc/tecdoc.inc") {
+if (@include "inc/tecdoc.class.php") {
   $tecd = TRUE;
 }
 
@@ -430,7 +430,7 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi .= "{$row['tunnus']};";
 
   if ($tecd) {
-    $rivi .= td_regcarsum($row['tuoteno']).";";
+    $rivi .= getRegSum($row['tuoteno']).";";
   }
   else {
     $rivi .= "0;";

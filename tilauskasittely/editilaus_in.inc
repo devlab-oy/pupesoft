@@ -1178,7 +1178,6 @@ while ($tietue = fgets($fd)) {
             if ($arow["laji"] != "H") {
               $arow["alv"] = 0;
             }
-
           }
         }
       }

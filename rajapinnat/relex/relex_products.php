@@ -430,7 +430,8 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi .= "{$row['tunnus']};";
 
   if ($tecd) {
-    $rivi .= getRegSum($row['tuoteno']).";";
+    $td = new tecdoc('pc', false);
+    $rivi .= $td->getRegSum($row['tuoteno']).";";
   }
   else {
     $rivi .= "0;";

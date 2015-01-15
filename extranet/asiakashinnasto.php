@@ -121,9 +121,9 @@ else {
 
     // n‰ytett‰‰n ryhmittelyvalinta vain jos tuoteryhm‰osastoja on perustettu
     $tarkistus = "SELECT count(tunnus)
-                  FROM tuotteen_avainsanat
+                  FROM avainsana
                   WHERE yhtio = '{$yhtiorow['yhtio']}'
-                  AND laji    = 'tuoteryhmaosasto'";
+                  AND laji    = 'THR'";
     $tarkistus = pupe_query($tarkistus);
     $tarkistus = mysql_result($tarkistus, 0);
 

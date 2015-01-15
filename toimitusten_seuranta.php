@@ -497,31 +497,63 @@ if (!isset($task)) {
     $rajaus = 'aktiiviset';
   }
 
-  $disable1 = $disable2 = $disable3 = $disable4 = '';
-
   switch ($rajaus) {
 
   case 'tulevat':
-    $rajauslisa = " AND lasku.alatila != 'D' ";
-    $rajauslisa2 = " HAVING rullat = 0 ";
+
+    $query = "SELECT GROUP_CONCAT(DISTINCT lasku.tunnus)
+              FROM lasku
+              LEFT OUTER JOIN tilausrivi
+                ON tilausrivi.yhtio = lasku.yhtio
+                AND tilausrivi.otunnus = lasku.tunnus
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+              AND tilausrivi.tunnus IS NULL";
+    $result = pupe_query($query);
+    $rullattomat = mysql_result($result, 0);
+
+    $rajauslisa = " AND lasku.alatila != 'D' AND lasku.tunnus IN ({$rullattomat}) ";
+    $rajauslisa2 = "";
     $disable1 = 'disabled';
     break;
 
   case 'aktiiviset':
+
     $rajauslisa = " AND lasku.alatila != 'D' AND ss.sarjanumero IS NOT NULL ";
-    $rajauslisa2 = "";
     $disable2 = 'disabled';
+    break;
+
+  case 'kontitetut':
+
+    $query = "SELECT lasku.tunnus,
+              group_concat(tilausrivi.tununs) AS rivitunnukset,
+              group_concat(DISTINCT IF(tilausrivi.laskutettu = '', 'kontittamatta', 'kontitettu')) AS tilanne
+              FROM lasku LEFT OUTER JOIN tilausrivi ON tilausrivi.otunnus = lasku.tunnus
+              WHERE lasku.yhtio = 'rplog' AND lasku.tilaustyyppi = 'N'
+              AND tilausrivi.tunnus IS NOT NULL
+              GROUP BY lasku.tunnus
+              HAVING tilanne = 'kontitettu'";
+    $result = pupe_query($query);
+
+    $kontitetut = array();
+
+    while ($lasku = mysql_fetch_assoc($result)) {
+      $kontitetut[] = $lasku['tunnus'];
+    }
+
+    $kontitetut = implode(",", $kontitetut);
+
+    $rajauslisa = " AND lasku.alatila != 'D' AND lasku.tunnus IN ({$kontitetut}) ";
+    $disable3 = 'disabled';
     break;
 
   case 'toimitetut':
     $rajauslisa = " AND lasku.alatila = 'D' AND ss.sarjanumero IS NOT NULL ";
-    $disable3 = 'disabled';
+    $disable4 = 'disabled';
     break;
 
   case 'kaikki':
     $rajauslisa = '';
-    $rajauslisa2 = '';
-    $disable4 = 'disabled';
+    $disable5 = 'disabled';
     break;
 
   default:
@@ -542,13 +574,18 @@ if (!isset($task)) {
   echo "</form>";
   echo "&nbsp;";
   echo "<form method='post'>";
+  echo "<input type='hidden' name='rajaus' value='kontitetut' />";
+  echo "<input type='submit' {$disable3} value='" .t("Kontitetut") ."'>";
+  echo "</form>";
+  echo "&nbsp;";
+  echo "<form method='post'>";
   echo "<input type='hidden' name='rajaus' value='toimitetut' />";
-  echo "<input type='submit' {$disable3} value='" .t("Toimitetut") ."'>";
+  echo "<input type='submit' {$disable4} value='" .t("Toimitetut") ."'>";
   echo "</form>";
   echo "&nbsp;";
   echo "<form method='post'>";
   echo "<input type='hidden' name='rajaus' value='kaikki' />";
-  echo "<input type='submit' {$disable4} value='" .t("Kaikki") ."'>";
+  echo "<input type='submit' {$disable5} value='" .t("Kaikki") ."'>";
   echo "</form><br><br>";
 
   $query = "SELECT lasku.asiakkaan_tilausnumero,
@@ -596,8 +633,7 @@ if (!isset($task)) {
             {$rajauslisa}
             AND laskun_lisatiedot.konttiviite != ''
             GROUP BY lasku.asiakkaan_tilausnumero, laskun_lisatiedot.konttiviite
-            {$rajauslisa2}
-            ORDER BY toimaika, konttiviite";
+            ORDER BY toimaika, konttiviite"; echo $query;die;
   $result = pupe_query($query);
 
   $tilaukset = array();
@@ -768,6 +804,10 @@ if (!isset($task)) {
           'ylijäämä' => $tilaus['ylijaama'],
           'siirretty' => $tilaus['siirretty']
           );
+
+        if ($tilaus['tilausrivit'] == '') {
+          $tilaus['tilausrivit'] = 0;
+        }
 
         $query = "SELECT tilausrivi.toimitettu, trlt.rahtikirja_id
                   FROM tilausrivi

@@ -1171,9 +1171,14 @@ while ($tietue = fgets($fd)) {
 
           if ($maa_eu_row["eu"] == "") {
             $arow["vienti"] = "K";
+            $arow["alv"] = 0;
           }
           else {
             $arow["vienti"] = "E";
+            if ($arow["laji"] != "H") {
+              $arow["alv"] = 0;
+            }
+
           }
         }
       }
@@ -1509,7 +1514,7 @@ while ($tietue = fgets($fd)) {
       if (!empty($varasto)) {
         $insertvarasto = $varasto;
       }
-      
+
       // Anvian verkkokaupasta toim.puhelinnro tulee OSTOTIL.OT_YHTEYSHENKILONPUH:ss‰
       if ($yhteyshenkilon_puhelin != '' and $ltoim_puh == '') {
         $tpuh = $yhteyshenkilon_puhelin;
@@ -1517,7 +1522,7 @@ while ($tietue = fgets($fd)) {
       else {
         $tpuh = $arow['toim_puh'];
       }
-      
+
       // Lis‰t‰‰n otsikko
       $query = "INSERT into lasku SET
                 aktiivinen_kuljetus     = '$suunnistus',

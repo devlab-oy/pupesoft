@@ -288,6 +288,10 @@ if ($upd == 1) {
   $result = pupe_query($query);
   $trow = mysql_fetch_array($result);
 
+  if ($t[3] == 'tuotehinnastoryhmittely') {
+      $t[4] = implode(",", $t[4]);
+  }
+
   //  Tehd‰‰n muuttujista linkit jolla luomme otsikolliset avaimet!
   for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
     if (isset($t["{$i}_uusi"]) and $t["{$i}_uusi"] != "") {

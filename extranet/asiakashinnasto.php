@@ -114,7 +114,7 @@ else {
       $ryhmittelylisa = " JOIN tuotteen_avainsanat
                           ON tuotteen_avainsanat.yhtio = tuote.yhtio
                           AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
-                          AND tuotteen_avainsanat.laji = 'tuoteryhmaosasto' ";
+                          AND tuotteen_avainsanat.laji = 'tuotehinnastoryhmittely' ";
       $selectlisa = ", tuotteen_avainsanat.selite AS tro, tuotteen_avainsanat.jarjestys AS jar ";
       $jarjestyslisa = " tro, jar, ";
     }
@@ -278,7 +278,38 @@ else {
       $tro = '';
     }
 
+    $rivit = array();
+
     while ($rrow = mysql_fetch_assoc($rresult)) {
+
+      if ($tuoteryhmaosasto) {
+
+        $trot = explode(",", $rrow['tro']);
+
+        foreach ($trot as $key => $value) {
+
+          $jq = "SELECT jarjestys
+                 FROM avainsana
+                 WHERE yhtio = '{$kukarow['yhtio']}'
+                 AND laji = 'THR'
+                 AND selite = '{$value}'
+                 AND kieli = '{$hinkieli}'";
+          $jr = pupe_query($jq);
+          $jarjestys = mysql_result($jr, 0);
+
+          $kopiorivi = $rrow;
+          $kopiorivi['tro'] = $value;
+          $kopiorivi['jar'] = $jarjestys;
+          $rivit[] = $kopiorivi;
+        }
+      }
+      else {
+
+        $rivit[] = $rrow;
+      }
+    }
+
+    foreach ($rivit as $rrow) {
 
       $bar->increase();
 

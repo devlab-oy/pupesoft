@@ -8,12 +8,6 @@ if ($_cli) {
   // Otetaan tietokanta connect
   require "inc/connect.inc";
   require "inc/functions.inc";
-}
-else {
-  require "inc/parametrit.inc";
-}
-
-if ($_cli){
 
   if (!isset($argv[1])) {
     echo "Anna yhtio!\n";
@@ -34,6 +28,9 @@ if ($_cli){
     echo "Toiminto {$tee} ei ole sallittu!\n";
     die;
   }
+}
+else {
+  require "inc/parametrit.inc";
 }
 
 if (!function_exists('hae_tuotteettomat')) {

@@ -276,6 +276,12 @@ if (!function_exists('tyomaarays_alku')) {
     if (trim($al_komm) != '') {
       $komm .= $al_komm;
     }
+    
+    if ($tyyppi == "Q") {
+      $pdf->draw_text(35, $kala+10, t("Huom! Hinnat ovat verolliset!"), $thispage, $boldi);
+    } elseif ($tyyppi == "A" or $tyyppi == "") {
+      $pdf->draw_text(35, $kala+10, t("Huom! Hinnat ovat verottomat!"), $thispage, $boldi);
+    }
 
     //Tulostetaan laskun kommentti
     if (trim($komm) != '') {

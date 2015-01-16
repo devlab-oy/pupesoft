@@ -290,17 +290,6 @@ if (!function_exists('tyomaarays_alku')) {
       $komm .= $al_komm;
     }
 
-
-    if (trim($verolliset_verottomat_hinnat) == 'verolliset') {
-      $veroteksti = t("Hinnat sis‰lt‰v‰t arvonlis‰veron.", $kieli)." ";
-    }
-    elseif (trim($verolliset_verottomat_hinnat) == 'verottomat') {
-      $veroteksti = t("Hinnat ovat nettohintoja joihin lis‰t‰‰n arvonlis‰vero.", $kieli)." ";
-    }
-    elseif ($yhtiorow['tarjouksen_alv_kasittely'] == '') {
-
-    }
-
     //Tulostetaan laskun kommentti
     if (trim($komm) != '') {
       $kommentit = explode("\n", trim($komm));

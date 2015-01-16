@@ -431,7 +431,7 @@ while ($row = mysql_fetch_assoc($res)) {
 
   if ($tecd) {
     $td = new tecdoc('pc', false);
-    $rivi .= $td->getRegSum($row['tuoteno']).";";
+    $rivi .= $td->getRegSumForProduct($row['tuoteno']).";";
   }
   else {
     $rivi .= "0;";

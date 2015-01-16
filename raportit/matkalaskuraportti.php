@@ -160,6 +160,8 @@ function generoi_matkalaskuraportti_rivit($request_params) {
             LEFT JOIN kustannuspaikka {$kustannuspaikka_join}
             {$where}
             {$group}";
+			query_dump($query);
+
 
   if ($request_params['debug'] == 1) {
     echo "<pre>";
@@ -718,7 +720,7 @@ function echo_matkalaskuraportti_form($request_params) {
   echo "<tr>
       <th>".t("N‰yt‰ myˆs alku ja loppup‰iv‰m‰‰r‰t")."</th>
       <td colspan='3'><input type='checkbox' name='paivamaaravali' {$paivamaaravalichk}></td>
-      <td class='back'>".t("(Toimii vain jos listaat matkalaskuittain, tai jos et valitse mit‰‰n listausta)")."</td>
+      <td class='back'>".t("(Toimii vain jos et valitse mit‰‰n listausta)")."</td>
     </tr>";
   echo "</table>";
 

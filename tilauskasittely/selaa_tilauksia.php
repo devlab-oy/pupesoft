@@ -66,8 +66,11 @@ if ($toim == "MYYNTI" or $toim == "MYYNTI_KATE") {
   $ale_query_select_lisa = generoi_alekentta_select('erikseen', 'M');
 
   if ($toim == "MYYNTI_KATE") {
-    $kk_pv_kate_lisa = ",round(sum(if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)))) / sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) * 100, $yhtiorow[hintapyoristys]) AS 'Kate%' ";
-    $tilaus_kate_lisa = ",round(if(tilausrivi.laskutettu!='', if(tilausrivi.rivihinta < 0, tilausrivi.kate * -1, tilausrivi.kate), (tilausrivi.hinta*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt))) / (tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.jt+tilausrivi.varattu+tilausrivi.kpl) * {$query_ale_lisa}) * 100, $yhtiorow[hintapyoristys]) AS 'Kate%' ";
+
+    $katesql = "if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)))";
+
+    $kk_pv_kate_lisa = ",round(sum($katesql), 2) AS 'kate' ";
+    $tilaus_kate_lisa = ",round($katesql, 2) AS 'kate' ";
 
     $tuote_join = " JOIN tuote ON (tuote.tuoteno = tilausrivi.tuoteno
                      AND tuote.yhtio = tilausrivi.yhtio) ";
@@ -422,7 +425,16 @@ if (mysql_num_rows($result) > 0) {
 
     for ($i = 0; $i < mysql_num_fields($result); $i++) {
 
-      if (is_numeric($row[$i]) and (mysql_field_type($result, $i) == 'real' or mysql_field_type($result, $i) == 'int')) {
+      if (mysql_field_name($result, $i) == "kate") {
+        $katepros = round($row["kate"] / $row["arvo"] * 100);
+
+        if ($row["kate"] < 0) {
+          $katepros = abs($katepros) * -1;
+        }
+
+        echo "<td align='right'>$katepros%</td>";
+      }
+      elseif (is_numeric($row[$i]) and (mysql_field_type($result, $i) == 'real' or mysql_field_type($result, $i) == 'int')) {
         echo "<td align='right'>$row[$i]</td>";
       }
       elseif (mysql_field_name($result, $i) == "hankintakulut") {
@@ -447,6 +459,7 @@ if (mysql_num_rows($result) > 0) {
     }
 
     $arvo  += $row["arvo"];
+    $kate  += $row["kate"];
     $summa += $row["summa"];
     $ostohinta_yhteesa += $row["ostohinta"];
 
@@ -490,13 +503,21 @@ if (mysql_num_rows($result) > 0) {
 
   if ($arvo != 0 or $summa != 0) {
     echo "<tr>";
-    $i = 2;
+    $i = 3;
     if ($osuus_kululaskuista_yhteensa != "" or $osuus_eturahdista_yhteensa != "" or $aputullimaara_yhteensa != "" or $rivinlisakulu_yhteensa != "") {
       $i = 6;
     }
     echo "<th colspan='".(mysql_num_fields($result)-$i)."'>".t("Yhteensä").": </th>";
     echo "<th align='right'>".sprintf('%.02f', $summa)."</td>";
     echo "<th align='right'>".sprintf('%.02f', $arvo)."</td>";
+
+    $kateprosyht = round($kate / $arvo * 100);
+
+    if ($kate < 0) {
+      $kateprosyht = abs($kateprosyht) * -1;
+    }
+
+    echo "<th align='right'>".sprintf('%.02f', $kateprosyht)."</td>";
 
     if ($osuus_kululaskuista_yhteensa != "" or $osuus_eturahdista_yhteensa != "" or $aputullimaara_yhteensa != "" or $rivinlisakulu_yhteensa != "") {
       echo "<th align='right'>&nbsp;</td>";

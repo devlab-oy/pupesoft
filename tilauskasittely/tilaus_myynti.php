@@ -5647,7 +5647,7 @@ if ($tee == '') {
           echo "<input type='hidden' id='yksikko' value='{$tuote['yksikko']}' />";
           echo "<input type='hidden' id='saldoaikalisa' value='{$saldoaikalisa}' />";
           echo "<input type='hidden' id='sarjanumeroseuranta' value='{$row['sarjanumeroseuranta']}' />";
-          echo "<input type='hidden' id='palvelin2' value='{$palvelin2}' />";
+          echo "<input type='hidden' id='myyntitilaus_saldolistaus' value='{$yhtiorow['myyntitilaus_saldolistaus']}' />";
 
           echo "<tr id='varastopaikat_container'><td colspan='2' class='back'>";
           echo "<input type='button' id='varastopaikat_button' value='",t("Näytä varastopaikkojen saldot"),"' />";

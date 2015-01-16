@@ -32,6 +32,10 @@ $(document).ready(function() {
     });
   });
 
+  if ($('#myyntitilaus_saldolistaus').val() == '') {
+    $('#varastopaikat_button').trigger('click');
+  }
+
   $('#myyja_id').on('change', function () {
     $(this).siblings('#myyjanro_id').val('');
     $(this).closest('form').submit();

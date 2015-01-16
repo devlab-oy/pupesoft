@@ -29889,7 +29889,7 @@ if (!function_exists("sanitoi_javascript_id")) {
     // ID and NAME tokens must begin with a letter ([A-Za-z])
     // and may be followed by any number of letters, digits ([0-9]),
     // hyphens ("-"), underscores ("_"), colons (":"), and periods (".").
-    return preg_replace("/[^a-zöäåA-ZÖÄÅ0-9\-\:\_\.]/i", "", $value);
+    return preg_replace("/[^a-zöäåA-ZÖÄÅ0-9\-\:\_]/i", "", $value);
   }
 }
 

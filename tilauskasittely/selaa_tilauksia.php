@@ -426,7 +426,7 @@ if (mysql_num_rows($result) > 0) {
     for ($i = 0; $i < mysql_num_fields($result); $i++) {
 
       if (mysql_field_name($result, $i) == "kate") {
-        $katepros = round($row["kate"] / $row["arvo"] * 100);
+        $katepros = round($row["kate"] / $row["arvo"] * 100, 2);
 
         if ($row["kate"] < 0) {
           $katepros = abs($katepros) * -1;
@@ -511,7 +511,7 @@ if (mysql_num_rows($result) > 0) {
     echo "<th align='right'>".sprintf('%.02f', $summa)."</td>";
     echo "<th align='right'>".sprintf('%.02f', $arvo)."</td>";
 
-    $kateprosyht = round($kate / $arvo * 100);
+    $kateprosyht = round($kate / $arvo * 100, 2);
 
     if ($kate < 0) {
       $kateprosyht = abs($kateprosyht) * -1;

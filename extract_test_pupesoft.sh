@@ -25,6 +25,25 @@ function failure {
   error "$1"
 }
 
+# Odotetaan, että joku palvelu käynnistyy tiettyyn tcp-porttiin
+function wait_for_service {
+  # Maksimiaika joka odotetaan palvelun käynnistymistä tai sulkemista
+  MAXWAIT=30
+
+  WAIT=0
+
+  # Tsekataan, että palvelu on noussut ylös
+  while ! nc -z localhost $1; do
+    if [ "${WAIT}" -ge "${MAXWAIT}" ]; then
+      error "Palvelu ei käynnistynyt porttiin $1"
+      break
+    fi
+
+    sleep 1;
+    WAIT=$((WAIT+1))
+  done
+}
+
 # Tuetaan Linux ja Mac
 if [[ $(uname) == "Linux" ]]; then
 
@@ -66,11 +85,13 @@ destination_database=$2
 mysql_root_password=$3
 
 mysql_sock=""
+mysql_port=3306
 
 # Neljäs optional parami on custom mysql-instanssin "nimi"
 if [[ "$4" != "" ]]; then
   mysql_path="/var/lib/$4/"
   mysql_sock="--socket=/var/lib/$4/$4.sock"
+  mysql_port=$(grep "port" /etc/$4.cnf | egrep -o "[0-9]*")
   mysql_start="mysqld_safe --defaults-file=/etc/$4.cnf"
   mysql_stop="kill $(ps aux | egrep '[m]ysqld .*'$4 | awk '{print $2}')"
 fi
@@ -135,7 +156,8 @@ fi
 
 ${mysql_start} >/dev/null 2>&1 &
 
-sleep 5
+# Odotetaan, että mysql on käynnistynyt
+wait_for_service ${mysql_port}
 
 decho "Puhdistetaan '${destination_database}' tietokanta.."
 

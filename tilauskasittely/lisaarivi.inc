@@ -54,28 +54,19 @@ else $rivitunnus = (int) $rivitunnus;
 
 if ($laskurow["tila"] == 'G' and !isset($kohde_alue) and isset($tuoteno)) {
 
-  # Tarkistetaan että tuote on olemassa
-  $query  = "SELECT *
-             FROM tuote
-             WHERE tuoteno = '{$tuoteno}'
-             AND yhtio     = '{$kukarow['yhtio']}'";
-  $result = pupe_query($query);
+  //Laitetaan tuote oletusvaraston tuotepaikalle
+  $tuotteen_oletuspaikka = hae_tuotteen_tuotepaikat($tuoteno, $laskurow['clearing']);
 
-  if (mysql_num_rows($result) > 0) {
-    //Laitetaan tuote oletusvaraston tuotepaikalle
-    $tuotteen_oletuspaikka = hae_tuotteen_tuotepaikat($tuoteno, $laskurow['clearing']);
-
-    if (empty($tuotteen_oletuspaikka)) {
-      //Jos tuotteella ei ole tuotepaikkaa kohdevarastossa, luodaan se
-      $tuotteen_oletuspaikka[0] = lisaa_tuotepaikka($tuoteno, "", "", "", "", "", "", 0, 0, $laskurow['clearing']);
-    }
-
-    // otetaan eka löytynyt tuotepaikka kohdetuotepaikaksi
-    $kohde_alue   = $tuotteen_oletuspaikka[0]['hyllyalue'];
-    $kohde_nro    = $tuotteen_oletuspaikka[0]['hyllynro'];
-    $kohde_vali   = $tuotteen_oletuspaikka[0]['hyllyvali'];
-    $kohde_taso   = $tuotteen_oletuspaikka[0]['hyllytaso'];
+  if (empty($tuotteen_oletuspaikka)) {
+    //Jos tuotteella ei ole tuotepaikkaa kohdevarastossa, luodaan se
+    $tuotteen_oletuspaikka[0] = lisaa_tuotepaikka($tuoteno, "", "", "", "", "", "", 0, 0, $laskurow['clearing']);
   }
+
+  // otetaan eka löytynyt tuotepaikka kohdetuotepaikaksi
+  $kohde_alue   = $tuotteen_oletuspaikka[0]['hyllyalue'];
+  $kohde_nro    = $tuotteen_oletuspaikka[0]['hyllynro'];
+  $kohde_vali   = $tuotteen_oletuspaikka[0]['hyllyvali'];
+  $kohde_taso   = $tuotteen_oletuspaikka[0]['hyllytaso'];
 }
 
 if (!isset($indeksi)) {

@@ -705,7 +705,7 @@ if ($tee == 'P') {
                 $rkomm      = $tilrivirow["kommentti"];
                 
                 if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
-                   $rperheid = "0";
+                   $rperheid = 0;
                 }
               }
             }
@@ -771,7 +771,7 @@ if ($tee == 'P') {
                 $rkomm     = $tilrivirow["kommentti"];
                 
                 if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
-                   $rperheid = "0";
+                   $rperheid = 0;
                 }
               }
 
@@ -882,7 +882,7 @@ if ($tee == 'P') {
                   $rkomm     = $tilrivirow['kommentti'];
                  
                   if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
-                     $rperheid = "0";
+                     $rperheid = 0;
                   }
                 }
               }
@@ -936,7 +936,7 @@ if ($tee == 'P') {
                 $kerattyaik  = "''";
                 $rkomm     = $tilrivirow["kommentti"];
                 if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
-                   $rperheid = "0";
+                   $rperheid = 0;
                 }
               }
               elseif ($poikkeama_kasittely[$apui] == "MI") {
@@ -958,7 +958,7 @@ if ($tee == 'P') {
                 $kerattyaik  = "''";
                 $rkomm     = $tilrivirow["kommentti"];
                 if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
-                   $rperheid = "0";
+                   $rperheid = 0;
                 }
               }
               elseif ($poikkeama_kasittely[$apui] == "UT") {
@@ -1066,7 +1066,7 @@ if ($tee == 'P') {
                 $rkomm     = $tilrivirow["kommentti"];
 
                 if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
-                   $rperheid = "0";
+                   $rperheid = 0;
                 }
               }
             }

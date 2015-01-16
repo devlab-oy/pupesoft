@@ -194,6 +194,19 @@ if (!function_exists('tyomaarays_alku')) {
     $pdf->draw_text(540, 614, "/", $thispage, $norm);
     $pdf->draw_text(550, 614, date("Y"), $thispage, $norm);
 
+    if ($tyyppi == "Q") {
+      $pdf->draw_text(310, 600, t("Tyˆm‰‰r‰yksen hinnat sis‰lt‰v‰t arvonlis‰veron"), $thispage, $pieni);
+    }
+    elseif ($tyyppi == "A" or $tyyppi == "") {
+
+      if ($yhtiorow['alv_kasittely'] != '') {
+        $pdf->draw_text(310, 600, t("Tyˆm‰‰r‰yksen hinnat ovat nettohintoja joihin lis‰t‰‰n arvonlis‰vero."), $thispage, $pieni);
+      }
+      else {
+        $pdf->draw_text(310, 600, t("Tyˆm‰‰r‰yksen hinnat sis‰lt‰v‰t arvonlis‰veron"), $thispage, $pieni);
+      }
+    }
+
     $kala  = 575;
 
     //T‰ysin dynaaminen osio
@@ -276,11 +289,16 @@ if (!function_exists('tyomaarays_alku')) {
     if (trim($al_komm) != '') {
       $komm .= $al_komm;
     }
-    
-    if ($tyyppi == "Q") {
-      $pdf->draw_text(35, $kala+10, t("Huom! Hinnat ovat verolliset!"), $thispage, $boldi);
-    } elseif ($tyyppi == "A" or $tyyppi == "") {
-      $pdf->draw_text(35, $kala+10, t("Huom! Hinnat ovat verottomat!"), $thispage, $boldi);
+
+
+    if (trim($verolliset_verottomat_hinnat) == 'verolliset') {
+      $veroteksti = t("Hinnat sis‰lt‰v‰t arvonlis‰veron.", $kieli)." ";
+    }
+    elseif (trim($verolliset_verottomat_hinnat) == 'verottomat') {
+      $veroteksti = t("Hinnat ovat nettohintoja joihin lis‰t‰‰n arvonlis‰vero.", $kieli)." ";
+    }
+    elseif ($yhtiorow['tarjouksen_alv_kasittely'] == '') {
+
     }
 
     //Tulostetaan laskun kommentti

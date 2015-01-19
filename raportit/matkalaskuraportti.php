@@ -160,8 +160,6 @@ function generoi_matkalaskuraportti_rivit($request_params) {
             LEFT JOIN kustannuspaikka {$kustannuspaikka_join}
             {$where}
             {$group}";
-			query_dump($query);
-
 
   if ($request_params['debug'] == 1) {
     echo "<pre>";

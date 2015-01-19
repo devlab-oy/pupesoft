@@ -1127,7 +1127,10 @@ if (!function_exists('tarjous_rivi_custom')) {
 }
 
 if (!function_exists('loppu_tarjous')) {
-  function loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $sivu, $tots, $total_uudet=0, $total_vanhat=0, $verolliset_verottomat_hinnat = '', $total_brutto = 0, $kala=0, $vikanrivin_sivu=0, $naytetaanko_rivihinta) {
+  function loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $sivu, $tots,
+                         $total_uudet = 0, $total_vanhat = 0, $verolliset_verottomat_hinnat = '',
+                         $total_brutto = 0, $kala = 0, $vikanrivin_sivu = 0, $naytetaanko_rivihinta,
+                         $naytetaanko_yhteissummarivi = "") {
     global $kukarow, $yhtiorow, $boldi, $pieni, $norm, $rectparam, $kaanteinen_verotus;
 
     // yhtiˆtiedot
@@ -1368,13 +1371,17 @@ if (!function_exists('loppu_tarjous')) {
           $kuha = 168;
         }
 
-        if ($vikanrivin_sivu != $sivu and $naytetaanko_rivihinta != 'kokonaan_ilman_hintoja') {
+        if ($vikanrivin_sivu != $sivu and $naytetaanko_rivihinta != 'kokonaan_ilman_hintoja' and
+                                          $naytetaanko_yhteissummarivi != "E"
+        ) {
           $pdf_tarjous->draw_text(30,  74, t("Tarjoamme teille yll‰olevan tarjouksen kohteet hintaan:", $kieli),   $page_tarjous[$vikanrivin_sivu], $boldi);
           $oikpos = $pdf_tarjous->strlen(sprintf("%.2f", $total_uudet)." ".$laskurow["valkoodi"], $boldi);
           $pdf_tarjous->draw_text(380-$oikpos, 74, sprintf("%.2f", $total_uudet)." ".$laskurow["valkoodi"], $page_tarjous[$vikanrivin_sivu], $boldi);
         }
 
-        if ($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja') {
+        if ($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja' and
+            $naytetaanko_yhteissummarivi != "E"
+        ) {
           $pdf_tarjous->draw_text(30,  $kuha,  t("Tarjoamme teille yll‰olevan tarjouksen kohteet hintaan:", $kieli),   $page_tarjous[$sivu], $boldi);
 
           $oikpos = $pdf_tarjous->strlen(sprintf("%.2f", $total_uudet)." ".$laskurow["valkoodi"], $boldi);
@@ -1592,7 +1599,9 @@ if (!function_exists('print_pdf_tarjous')) {
 }
 
 if (!function_exists('tulosta_tarjous')) {
-  function tulosta_tarjous($otunnus, $komento, $kieli = "", $tee = "", $hinnat = "", $verolliset_verottomat_hinnat = "", $naytetaanko_rivihinta = '', $naytetaanko_tuoteno = '') {
+  function tulosta_tarjous($otunnus, $komento, $kieli = "", $tee = "", $hinnat = "",
+                           $verolliset_verottomat_hinnat = "", $naytetaanko_rivihinta = '',
+                           $naytetaanko_tuoteno = '', $naytetaanko_yhteissummarivi = "") {
     global $yhtiorow, $kukarow, $norm, $pieni, $kala, $mista, $kaanteinen_verotus;
 
     // Haetaan laskun tiedot
@@ -1736,7 +1745,10 @@ if (!function_exists('tulosta_tarjous')) {
 
       // Jos on paljon rivej‰ tehd‰‰n uusi otsikko...
       if ($kala <= 80) {
-        list($page_tarjous, $sivu) = loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $sivu, 0, $verolliset_verottomat_hinnat, 0, 0, 0, $naytetaanko_rivihinta);
+        list($page_tarjous, $sivu) =
+          loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $sivu, 0,
+                        $verolliset_verottomat_hinnat, 0, 0, 0, $naytetaanko_rivihinta,
+                        $naytetaanko_yhteissummarivi);
 
         $sivu++;
 
@@ -1772,7 +1784,10 @@ if (!function_exists('tulosta_tarjous')) {
     $total_vanhat = $total - $total_uudet;
 
     if (($yhtiorow['tarjoustyyppi'] != 1 or ($naytetaanko_rivihinta != 'kokonaan_ilman_hintoja' and $yhtiorow['tarjoustyyppi'] == 1)) and $kala <= 170) {
-      list($page_tarjous, $sivu) = loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $sivu, 0, 0, 0, $verolliset_verottomat_hinnat, 0, 0, 0, $naytetaanko_rivihinta);
+      list($page_tarjous, $sivu) =
+        loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $sivu, 0, 0, 0,
+                      $verolliset_verottomat_hinnat, 0, 0, 0, $naytetaanko_rivihinta,
+                      $naytetaanko_yhteissummarivi);
 
       $sivu++;
 
@@ -1780,7 +1795,10 @@ if (!function_exists('tulosta_tarjous')) {
     }
 
     // Lopputekstit
-    list($page_tarjous, $sivu) = loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $sivu, 1, $total_uudet, $total_vanhat, $verolliset_verottomat_hinnat, $total_brutto, $kala, $vikanrivin_sivu, $naytetaanko_rivihinta);
+    list($page_tarjous, $sivu) =
+      loppu_tarjous($pdf_tarjous, $laskurow, $kieli, $page_tarjous, $sivu, 1, $total_uudet,
+                    $total_vanhat, $verolliset_verottomat_hinnat, $total_brutto, $kala,
+                    $vikanrivin_sivu, $naytetaanko_rivihinta, $naytetaanko_yhteissummarivi);
 
     // Piirret‰‰n sivut
     if ($yhtiorow['tarjoustyyppi'] == 1) {

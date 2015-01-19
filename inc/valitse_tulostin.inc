@@ -249,6 +249,12 @@ if ($toim == "TARJOUS") {
   echo "<option value='kokonaan_ilman_hintoja'>", t("Kokonaan ilman hintoja"), "</option>";
   echo "</select></td></tr>";
 
+  echo "<tr><th>" . t("Näytetäänkö yhteissummarivi") .
+       "</th><td><select name='naytetaanko_yhteissummarivi'>";
+  echo "<option value=''>" . t("Näytetään yhteissummarivi") . "</option>";
+  echo "<option value='E'>" . t("Ei näytetä yhteissummariviä") . "</option>";
+  echo "</select></td></tr>";
+
   echo "<tr><th>", t("Näytetäänkö tuotenumerot"), "</th><td><select name='naytetaanko_tuoteno'>";
   echo "<option value=''>", t("Kyllä"), "</option>";
   echo "<option value='ei'>", t("Ei"), "</option>";

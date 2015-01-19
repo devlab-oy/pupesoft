@@ -1498,6 +1498,10 @@ if (!function_exists('loppu_tarjous')) {
                                   $page_tarjous[$sivu], $boldi);
         }
         else {
+          $pdf_tarjous->draw_text(30, $kuha - 65,
+                                  t("Toivomme tarjouksemme kiinnostavan teitä ja johtavan " .
+                                    "tilaukseen", $kieli) . "!", $page_tarjous[$sivu], $boldi);
+
           $pdf_tarjous->draw_text(30, $kuha - 80, t("Kunnioittavasti", $kieli) . ",",
                                   $page_tarjous[$sivu], $boldi);
         }

@@ -3221,6 +3221,7 @@ if ($fieldname == "tarjoustyyppi") {
   $ulos .= "<option value = '0' $sel[0]>".t("Normaali tarjouspohja");
   $ulos .= "<option value = '2' $sel[2]>".t("Normaali tarjouspohja ei ALV");
   $ulos .= "<option value = '1' $sel[1]>".t("Pelkistetty tarjouspohja");
+  $ulos .= "<option value = '3' $sel[3]>".t("Lyhyt tarjouspohja");
   $ulos .= "</select></td>";
 
   $jatko = 0;

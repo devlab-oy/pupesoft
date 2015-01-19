@@ -2251,6 +2251,9 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       // Pakotetaan loput omalle riville
       $var = "LOJ#!¡!#$suoratoimitus_rivikpl";
     }
+    else {
+      $paivita_myyntitilaus = true;
+    }
   }
 
   if (substr($var, 0, 8) == "LOJ#!¡!#" or substr($var, 0, 8) == "LOP#!¡!#" or substr($lop, 0, 8) == "LOP#!¡!#") {
@@ -3242,7 +3245,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     $result = pupe_query($query);
     $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
-    if ($suoratoimitus_splittaus and $rivitunnus == $lisatty_tun) {
+    if (($suoratoimitus_splittaus or $paivita_myyntitilaus) and $rivitunnus == $lisatty_tun) {
       // Päivitetään suoratoimitus-myyntitilausrivin määrät
       $query = "UPDATE tilausrivi
                 JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.tilausrivilinkki > 0 and tilausrivin_lisatiedot.tilausrivilinkki = '$lisatty_tun')
@@ -3253,7 +3256,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
                 and tilausrivi.tunnus  = '$suoratoimitus_rivitun'";
       $result = pupe_query($query);
     }
-    elseif ($suoratoimitus_splittaus and $rivitunnus != $lisatty_tun) {
+    elseif (($suoratoimitus_splittaus or $paivita_myyntitilaus) and $rivitunnus != $lisatty_tun) {
       // Splitataan suoratoimitus-myyntitilausrivi
       $query = "SELECT varattu, jt
                 FROM tilausrivi

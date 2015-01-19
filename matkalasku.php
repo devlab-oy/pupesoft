@@ -1263,9 +1263,7 @@ if ($tee == "MUOKKAA") {
         $cols = 5;
       }
 
-      echo "<th>" . t("Kustannuspaikka") . "</th><th>" . t("Alku") . "</th><th>" . t("Loppu") .
-           "</th><th>" . t("Kohdemaa") . "</th><th>" . t("M‰‰r‰") . "</th><th>" . t("Hinta") .
-           "</th><th>" . t("Alv") . "</th>{$lisa}</tr>";
+      echo "<th>".t("Kustannuspaikka")."</th><th>".t("Kohdemaa")."</th><th>".t("M‰‰r‰")."</th><th>".t("Hinta")."</th><th>".t("Alv")."</th>$lisa</tr>";
       echo "<tr><td>";
 
       if ($kustannuspaikka != "") {
@@ -1275,17 +1273,7 @@ if ($tee == "MUOKKAA") {
         echo t("Ei kustannuspaikkaa");
       }
 
-      echo
-        "</td><td><input type='text' name='alkupp' value='{$alkupp}' size='3' maxlength='2'>
-         <input type='text' name='alkukk' value='{$alkukk}' size='3' maxlength='2'>
-         <input type='text' name='alkuvv' value='{$alkuvv}' size='5' maxlength='4'> " . t("klo") .
-        ":<input type='text' name='alkuhh' value='{$alkuhh}' size='3' maxlength='2'>:
-         <input type='text' name='alkumm' value='{$alkumm}' size='3' maxlength='2'>&nbsp;</td>
-         <td>&nbsp;<input type='text' name='loppupp' value='{$loppupp}' size='3' maxlength='2'>
-         <input type='text' name='loppukk' value='{$loppukk}' size='3' maxlength='2'>
-         <input type='text' name='loppuvv' value='{$loppuvv}' size='5' maxlength='4'> " . t("klo") .
-        ":<input type='text' name='loppuhh' value='{$loppuhh}' size='3' maxlength='2'>:
-         <input type='text' name='loppumm' value='{$loppumm}' size='3' maxlength='2'>";
+      echo "</td>";
 
       $query = "SELECT distinct koodi, nimi
                 FROM maat
@@ -1343,6 +1331,29 @@ if ($tee == "MUOKKAA") {
     }
 
     echo "<td class='back'><input type='submit' name='lisaa' value='".t("Lis‰‰")."'></td></tr>";
+
+    if ($tyyppi == "B") {
+      echo "<tr>";
+      echo "<th colspan='2'>" . t("Alku") . "</th><th colspan='3'>" . t("Loppu") .
+           "</th>";
+      echo "</tr>";
+      echo "<tr>";
+      echo
+        "<td colspan='2'><input type='text' name='alkupp' value='{$alkupp}' size='3' maxlength='2'>
+           <input type='text' name='alkukk' value='{$alkukk}' size='3' maxlength='2'>
+           <input type='text' name='alkuvv' value='{$alkuvv}' size='5' maxlength='4'> " . t("klo") .
+        ":<input type='text' name='alkuhh' value='{$alkuhh}' size='3' maxlength='2'>:
+           <input type='text' name='alkumm' value='{$alkumm}' size='3' maxlength='2'>&nbsp;</td>
+           <td colspan='3'>&nbsp;
+           <input type='text' name='loppupp' value='{$loppupp}' size='3' maxlength='2'>
+           <input type='text' name='loppukk' value='{$loppukk}' size='3' maxlength='2'>
+           <input type='text' name='loppuvv' value='{$loppuvv}' size='5' maxlength='4'> " .
+        t("klo") .
+        ":<input type='text' name='loppuhh' value='{$loppuhh}' size='3' maxlength='2'>:
+           <input type='text' name='loppumm' value='{$loppumm}' size='3' maxlength='2'>";
+      echo "</tr>";
+    }
+
     echo "<tr><th colspan='$cols'>".t("Kommentti")."</th></tr>";
     echo "<tr><td colspan='$cols'><textarea name='kommentti' rows='4' cols='80'>".str_replace("<br>", "\n", $kommentti)."</textarea></td>";
 

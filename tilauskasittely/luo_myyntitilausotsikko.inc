@@ -145,7 +145,24 @@ if (!function_exists("luo_myyntitilausotsikko")) {
         $viesti = trim($viesti." ".$asiakasrow["tilaus_viesti"]);
       }
 
-      $luokka  = $asiakasrow["luokka"];
+      //annetaan extranet-tilaukselle aina paras prioriteetti
+      if ($kukarow["extranet"] != '' and empty($yhtiorow['extranet_keraysprioriteetti'])) {
+        $query = "SELECT distinct selite
+                  FROM avainsana
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and laji = 'asiakasluokka'
+                  and selite != ''
+                  ORDER BY 1
+                  LIMIT 1";
+        $prioresult = pupe_query($query);
+        $priorow = mysql_fetch_assoc($prioresult);
+
+        $luokka = $priorow["selite"];
+      }
+      else {
+        $luokka = $asiakasrow["luokka"];
+      }
+
       $erikoisale  = $asiakasrow["erikoisale"];
 
       if ($yhtiorow["splittauskielto"] != '') {

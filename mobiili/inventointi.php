@@ -220,7 +220,7 @@ if ($tee == 'listat') {
         );
 
         if (!$_chk) {
-          continue;
+          continue 2;
         }
       }
       else {
@@ -281,13 +281,7 @@ if ($tee == 'laske' or $tee == 'inventoi') {
                    lpad(upper(tuotepaikat.hyllytaso), 5, '0')) as sorttauskentta
                FROM tuotepaikat
                JOIN tuote on (tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno)
-               -- JOIN varaston_hyllypaikat on (varaston_hyllypaikat.yhtio=tuotepaikat.yhtio
-               --                               and varaston_hyllypaikat.hyllyalue=tuotepaikat.hyllyalue
-               --                               and varaston_hyllypaikat.hyllynro=tuotepaikat.hyllynro
-               --                               and varaston_hyllypaikat.hyllyvali=tuotepaikat.hyllyvali
-               --                               and varaston_hyllypaikat.hyllytaso=tuotepaikat.hyllytaso)
                WHERE tuotepaikat.yhtio='{$kukarow['yhtio']}'
-               -- and varaston_hyllypaikat.reservipaikka='{$reservipaikka}'
                AND inventointilista='{$lista}'
                AND inventointilista_aika > '0000-00-00 00:00:00' # Inventoidut tuotteet on nollattu
                ORDER BY sorttauskentta, tuoteno

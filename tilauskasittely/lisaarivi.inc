@@ -1429,7 +1429,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   ({$yhtiorow["puute_jt_oletus"]} == O
                   or $varataan_saldoa == EI
                   or ({$zrow["myytavissa"]} > 0
-                      and (($rivityyppi == 'L'
+                      and ((($rivityyppi == 'L' 
+                        or (!$laaja_toim_kasittely and $rivityyppi == 'G'))
                           and {$kukarow['kassamyyja']} == ''
                           and $myy_erikoistoim_ok and {$zrow['varastotyyppi']} == 'E'
                           and {$zrow['erikoistoimitus_alarajasumma']} > 0
@@ -1449,7 +1450,8 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
           if ($yhtiorow["puute_jt_oletus"] == "O"
             or $varataan_saldoa == "EI"
             or ($zrow["myytavissa"] > 0
-              and (($rivityyppi == 'L'
+              and ((($rivityyppi == 'L' 
+                or (!$laaja_toim_kasittely and $rivityyppi == 'G'))
               and $kukarow['kassamyyja'] == '' 
               and $myy_erikoistoim_ok 
               and $zrow['varastotyyppi'] == 'E' 

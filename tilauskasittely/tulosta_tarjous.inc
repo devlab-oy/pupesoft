@@ -1420,30 +1420,53 @@ if (!function_exists('loppu_tarjous')) {
             }
           }
 
-          if ($laskurow["rahtivapaa"] == "") {
+          if ($yhtiorow["tarjoustyyppi"] != 3 and $laskurow["rahtivapaa"] == "") {
             $pdf_tarjous->draw_text(30,  $kuha-24, $veroteksti.t("Lisäksi veloitamme mahdollisesta toimituksesta aiheutuneet kulut.", $kieli), $page_tarjous[$sivu], $norm);
           }
           else {
             $pdf_tarjous->draw_text(30,  $kuha-24, $veroteksti, $page_tarjous[$sivu], $norm);
           }
 
-          $pdf_tarjous->draw_text(30,  $kuha-36, t("Tavarat ovat %s:n omaisuutta kunnes ne ovat kokonaisuudessaan maksettu.", $kieli, $yhtiorow["nimi"]), $page_tarjous[$sivu], $norm);
+          if ($yhtiorow["tarjoustyyppi"] != 3) {
+            $pdf_tarjous->draw_text(30, $kuha - 36,
+                                    t("Tavarat ovat %s:n omaisuutta kunnes ne ovat " .
+                                      "kokonaisuudessaan maksettu.", $kieli, $yhtiorow["nimi"]),
+                                    $page_tarjous[$sivu], $norm);
 
+            if ($laskurow["olmapvm"] != "" and $laskurow["olmapvm"] != "0000-00-00") {
+              $tvva = date("Y", mktime(0, 0, 0, substr($laskurow["olmapvm"], 5, 2),
+                                       substr($laskurow["olmapvm"], 8, 2),
+                                       substr($laskurow["olmapvm"], 0, 4)));
+              $tkka = date("m", mktime(0, 0, 0, substr($laskurow["olmapvm"], 5, 2),
+                                       substr($laskurow["olmapvm"], 8, 2),
+                                       substr($laskurow["olmapvm"], 0, 4)));
+              $tppa = date("d", mktime(0, 0, 0, substr($laskurow["olmapvm"], 5, 2),
+                                       substr($laskurow["olmapvm"], 8, 2),
+                                       substr($laskurow["olmapvm"], 0, 4)));
+            }
+            else {
+              $tvva = date("Y", mktime(0, 0, 0, substr($laskurow["muutospvm"], 5, 2),
+                                       substr($laskurow["muutospvm"], 8, 2) +
+                                       $yhtiorow["tarjouksen_voimaika"],
+                                       substr($laskurow["muutospvm"], 0, 4)));
+              $tkka = date("m", mktime(0, 0, 0, substr($laskurow["muutospvm"], 5, 2),
+                                       substr($laskurow["muutospvm"], 8, 2) +
+                                       $yhtiorow["tarjouksen_voimaika"],
+                                       substr($laskurow["muutospvm"], 0, 4)));
+              $tppa = date("d", mktime(0, 0, 0, substr($laskurow["muutospvm"], 5, 2),
+                                       substr($laskurow["muutospvm"], 8, 2) +
+                                       $yhtiorow["tarjouksen_voimaika"],
+                                       substr($laskurow["muutospvm"], 0, 4)));
+            }
 
-          if ($laskurow["olmapvm"] != "" and $laskurow["olmapvm"] != "0000-00-00") {
-            $tvva = date("Y", mktime(0, 0, 0, substr($laskurow["olmapvm"], 5, 2), substr($laskurow["olmapvm"], 8, 2), substr($laskurow["olmapvm"], 0, 4)));
-            $tkka = date("m", mktime(0, 0, 0, substr($laskurow["olmapvm"], 5, 2), substr($laskurow["olmapvm"], 8, 2), substr($laskurow["olmapvm"], 0, 4)));
-            $tppa = date("d", mktime(0, 0, 0, substr($laskurow["olmapvm"], 5, 2), substr($laskurow["olmapvm"], 8, 2), substr($laskurow["olmapvm"], 0, 4)));
+            $voimassa = tv1dateconv($tvva . "-" . $tkka . "-" . $tppa);
+
+            $pdf_tarjous->draw_text(30, $kuha - 48,
+                                    t("Tarjous on voimassa %s saakka", $kieli, $voimassa) . ". " .
+                                    t("Maksuehtomme on", $kieli) . " " .
+                                    trim($laskurow["maksuehto"]) . ".", $page_tarjous[$sivu],
+                                    $norm);
           }
-          else {
-            $tvva = date("Y", mktime(0, 0, 0, substr($laskurow["muutospvm"], 5, 2), substr($laskurow["muutospvm"], 8, 2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["muutospvm"], 0, 4)));
-            $tkka = date("m", mktime(0, 0, 0, substr($laskurow["muutospvm"], 5, 2), substr($laskurow["muutospvm"], 8, 2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["muutospvm"], 0, 4)));
-            $tppa = date("d", mktime(0, 0, 0, substr($laskurow["muutospvm"], 5, 2), substr($laskurow["muutospvm"], 8, 2)+$yhtiorow["tarjouksen_voimaika"], substr($laskurow["muutospvm"], 0, 4)));
-          }
-
-          $voimassa = tv1dateconv($tvva."-".$tkka."-".$tppa);
-
-          $pdf_tarjous->draw_text(30,  $kuha-48,  t("Tarjous on voimassa %s saakka", $kieli, $voimassa).". ".t("Maksuehtomme on", $kieli)." ".trim($laskurow["maksuehto"]).".", $page_tarjous[$sivu], $norm);
         }
         else {
           if (strlen($vakioteksti) > 110) {
@@ -1459,8 +1482,18 @@ if (!function_exists('loppu_tarjous')) {
           }
         }
 
-        $pdf_tarjous->draw_text(30,  $kuha-65, t("Toivomme tarjouksemme kiinnostavan teitä ja johtavan tilaukseen", $kieli)."!", $page_tarjous[$sivu], $boldi);
-        $pdf_tarjous->draw_text(30,  $kuha-80, t("Kunnioittavasti", $kieli).",", $page_tarjous[$sivu], $boldi);
+        if ($yhtiorow["tarjoustyyppi"] == 3) {
+          $pdf_tarjous->draw_text(30, $kuha - 50,
+                                  t("Toivomme tarjouksemme kiinnostavan teitä ja johtavan " .
+                                    "tilaukseen", $kieli) . "!", $page_tarjous[$sivu], $boldi);
+
+          $pdf_tarjous->draw_text(30, $kuha - 65, t("Terveisin", $kieli) . ",",
+                                  $page_tarjous[$sivu], $boldi);
+        }
+        else {
+          $pdf_tarjous->draw_text(30, $kuha - 80, t("Kunnioittavasti", $kieli) . ",",
+                                  $page_tarjous[$sivu], $boldi);
+        }
 
         $query  = "SELECT *
                    from kuka
@@ -1474,9 +1507,20 @@ if (!function_exists('loppu_tarjous')) {
           $myyrow = $kukarow;
         }
 
-        $pdf_tarjous->draw_text(30,  $kuha-93, $myyrow["nimi"], $page_tarjous[$sivu], $boldi);
-        $pdf_tarjous->draw_text(217, $kuha-93, t("Puh", $kieli).": ". $myyrow['puhno'], $page_tarjous[$sivu], $boldi);
-        $pdf_tarjous->draw_text(404, $kuha-93, "Email: $myyrow[eposti]", $page_tarjous[$sivu], $boldi);
+        if ($yhtiorow["tarjoustyyppi"] == 3) {
+          $pdf_tarjous->draw_text(30, $kuha - 80, $myyrow["nimi"], $page_tarjous[$sivu], $boldi);
+          $pdf_tarjous->draw_text(30, $kuha - 93, t("Puh", $kieli) . ": " . $myyrow['puhno'],
+                                  $page_tarjous[$sivu], $boldi);
+          $pdf_tarjous->draw_text(30, $kuha - 106, "Email: $myyrow[eposti]", $page_tarjous[$sivu],
+                                  $boldi);
+        }
+        else {
+          $pdf_tarjous->draw_text(30, $kuha - 93, $myyrow["nimi"], $page_tarjous[$sivu], $boldi);
+          $pdf_tarjous->draw_text(217, $kuha - 93, t("Puh", $kieli) . ": " . $myyrow['puhno'],
+                                  $page_tarjous[$sivu], $boldi);
+          $pdf_tarjous->draw_text(404, $kuha - 93, "Email: $myyrow[eposti]", $page_tarjous[$sivu],
+                                  $boldi);
+        }
 
         if ($yhtiorow['lomakkeiden_allekirjoitus'] == 'X') {
           $allekirjoitus_query = "SELECT nimi,

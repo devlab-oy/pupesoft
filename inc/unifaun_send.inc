@@ -468,7 +468,7 @@ class Unifaun {
     //$uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->asiakasrow["email"])); # E-mail
     //$uni_rcv_val->addAttribute('n', "email");
 
-    $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->rakir_row["puhelin"])); // Mobile phone number. For Sweden, the number must begin with 07 and contain 10 characters.
+    $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->postirow["toim_puh"])); // Mobile phone number. For Sweden, the number must begin with 07 and contain 10 characters.
     $uni_rcv_val->addAttribute('n', "sms");
 
     //$uni_rcv_val = $uni_receiver->addChild('val', ""); # Door code
@@ -703,10 +703,10 @@ class Unifaun {
       }
     }
 
-    if ($this->toitarow['virallinen_selite'] == "P19" and $this->rakir_row["puhelin"] != "") {
+    if ($this->toitarow['virallinen_selite'] == "P19" and $this->postirow["toim_puh"] != "") {
       $uni_addon = $uni_service->addChild('addon'); // Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
       $uni_addon->addAttribute('adnid', "NOTSMS");
-      $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->rakir_row["puhelin"])); // Defines value for misctype.
+      $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["toim_puh"])); // Defines value for misctype.
       $uni_add_val->addAttribute('n', "misc");
       $uni_add_val = $uni_addon->addChild('val', "PHONE"); // Used to define notification mode for add-on NOT. Valid values: PHONE = Phone, FAX = Fax.
       $uni_add_val->addAttribute('n', "misctype");

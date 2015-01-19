@@ -9,24 +9,11 @@ if (isset($_POST['piirtele_laiteluettelo'])) {
 
   // Määritellään jostain halutut kentät
   $kiissit = array(
-    // Sopimuskohtaiset -pitäisikö erotella valikossa jotenkin?
-    "asiakastiedot",
-    "sopimus_lisatietoja",
-    "sopimus_lisatietoja2",
-    // Laite- ja palvelu(tilausrivi)kohtaiset
-    "laitteen_tunnus",
-    "sarjanro",
-    "tuoteno",
-    "tuotemerkki",
-    "valmistaja",
-    "sla",
-    "nimitys",
-    "palvelu_alkaa",
-    "palvelu_loppuu",
-    "hinta",
-    "palvelukohtainen_hinta",
-    "valmistajan_sopimusnumero",
-    "valmistajan_sopimus_paattymispaiva",
+    "SP-FSNN-CO-NOC" => "SignalONE NOC", 
+    "SP-FSNN-CO-MDM" => "SignalONE Mobile Device Management",
+    "SP-FSNN-CO-MAINTENANCE" => "SignalControl OnSite Preventive Maintenance",
+    "SP-FSNN-SE-LCC" => "LifecycleCare",
+    "SP-FSNN-SE-LCM" => "LifecycleManagement"
   );
 
   echo "<form name='aja_ja_tallenna' method='post'>";
@@ -42,13 +29,13 @@ if (isset($_POST['piirtele_laiteluettelo'])) {
     $tsekk = "";
 
     foreach ($valitut_sarakkeet as $osuma) {
-      if ($osuma == $selite) {
+      if ($osuma == $i) {
         $tsekk = "CHECKED";
         break;
       }
     }
 
-    echo "<td align='left' valign='top' nowrap><input type='checkbox' class='sarakeboksi' name='valitut_sarakkeet[]' value='{$selite}' $tsekk>{$selite}</td>";
+    echo "<td align='left' valign='top' nowrap><input type='checkbox' class='sarakeboksi' name='valitut_sarakkeet[]' value='{$i}' $tsekk>{$selite}</td>";
 
     if ($secretcounter == 2) {
       echo "</tr>";
@@ -85,126 +72,267 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
   $excelrivi    = 0;
   $excelsarake = 0;
 
-  $sopimuskohtaiset = array(
-    "asiakastiedot",
-    "sopimus_lisatietoja",
-    "sopimus_lisatietoja2"
-  );
-  // Haetaan sopimuskentät, tilausrivien(palveluiden) ja valittavat laitetiedot
-  $query = "SELECT
-            lasku.tunnus,
-            concat(lasku.toim_nimi,'\n',
-            lasku.toim_osoite,'\n',
-            lasku.toim_postitp) asiakastiedot,
-            laitteen_sopimukset.laitteen_tunnus,
-            laite.sla,
-            laite.sarjanro,
-            laite.tuoteno,
-            laite.valmistajan_sopimusnumero,
-            laite.valmistajan_sopimus_paattymispaiva,
-            tuote.tuotemerkki,
-            avainsana.selitetark valmistaja,
-            tilausrivi.nimitys,
-            tilausrivi.hinta,
-            tilausrivi.netto,
-            laskun_lisatiedot.sopimus_lisatietoja,
-            laskun_lisatiedot.sopimus_lisatietoja2,
-            tilausrivin_lisatiedot.sopimus_alkaa palvelu_alkaa,
-            tilausrivin_lisatiedot.sopimus_loppuu palvelu_loppuu,
-            laskun_lisatiedot.sopimus_alkupvm,
-            laskun_lisatiedot.sopimus_loppupvm
+  // Haetaan sopimuksen laitteet
+  $query = "SELECT DISTINCT laitteen_sopimukset.laitteen_tunnus laitetunnus
             FROM laitteen_sopimukset
-            JOIN laite ON laite.tunnus = laitteen_sopimukset.laitteen_tunnus
-            JOIN tilausrivi ON tilausrivi.tunnus = laitteen_sopimukset.sopimusrivin_tunnus
-              AND tilausrivi.yhtio                        = '{$kukarow['yhtio']}'
-            JOIN tuote ON tuote.yhtio = tilausrivi.yhtio
-              AND tuote.tuoteno                           = laite.tuoteno
-            JOIN avainsana ON avainsana.yhtio = tuote.yhtio
-              AND avainsana.laji                          = 'TRY'
-              AND avainsana.selite                        = tuote.try
-            JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-            JOIN lasku ON lasku.yhtio = tilausrivi.yhtio
-              AND lasku.tunnus                            = tilausrivi.otunnus
-            JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = lasku.yhtio
-              AND laskun_lisatiedot.otunnus               = lasku.tunnus
-            WHERE lasku.tunnus                            = '{$tilausnumero}'
-            ORDER BY laitteen_tunnus, nimitys";
-  $result = pupe_query($query);
+            JOIN lasku ON lasku.yhtio = laitteen_sopimukset.yhtio
+              AND lasku.tunnus
+            WHERE lasku.tunnus = '{$tilausnumero}'
+              AND lasku.yhtio = '{$kukarow['yhtio']}'";
+  $laiteresult = pupe_query($query);
+                                           
+  // Haetaan sopimuskohtaiset tiedot
+  $query = "SELECT lasku.tunnus, tilausrivi.nimitys, tilausrivi.hinta * tilausrivi.tilkpl AS rivihinta,
+            lasku.asiakkaan_tilausnumero,
+            lasku.alv,
+            concat(lasku.toim_nimi,'\n',lasku.toim_osoite,'\n',lasku.toim_postino,' ',
+              lasku.toim_postitp,'\n',lasku.toim_maa) toimitusosoite,
+            concat(lasku.nimi,'\n',lasku.osoite,'\n',lasku.postino,' ',
+              lasku.postitp,'\n',lasku.maa) laskutusosoite
+            FROM lasku
+            JOIN tilausrivi ON lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus
+            WHERE lasku.tunnus = '{$tilausnumero}'
+              AND lasku.yhtio = '{$kukarow['yhtio']}'";
+  $sopimuskohtaisetresult = pupe_query($query);
+  $sopimuskohtaisetrivi = mysql_fetch_assoc($sopimuskohtaisetresult);
 
-  $eka_ajo = true;
-  $eka_laiterivi = true;
-  $kokonaishinta = 0;
-  $lisainffot = '';
-  // Rustaillaan henkseliin kaikki valitut sarakkeet
-  while ($row = mysql_fetch_assoc($result)) {
+  // Alkuun yhteenvetorivit
+  $worksheet->write($excelrivi++, $excelsarake, t("Sopimusnumero").": ".$sopimuskohtaisetrivi['asiakkaan_tilausnumero'] , $format_bold);
+  $worksheet->write($excelrivi, $excelsarake, t("Tuote"), $format_bold);
+  $worksheet->write($excelrivi, $excelsarake+1, t("e / kk summa"), $format_bold); 
+  $sopimus_alv = $sopimuskohtaisetrivi['alv'];
+  $laskutusosoite = $sopimuskohtaisetrivi['laskutusosoite'];
+  $toimitusosoite = $sopimuskohtaisetrivi['toimitusosoite'];
+  $excelrivi++;
 
-    // Sopimuskohtaiset kentät
-    if ($eka_ajo) {
-      // Defaultkentät:
-      $worksheet->write($excelrivi, $excelsarake, t("Sopimusnumero"),       $format_bold);
-      $worksheet->write($excelrivi+1, $excelsarake++, $row['tunnus']);
-      $worksheet->write($excelrivi, $excelsarake, t("Sopimus alkaa"),       $format_bold);
-      $worksheet->write($excelrivi+1, $excelsarake++, $row['sopimus_alkupvm']);
-      $worksheet->write($excelrivi, $excelsarake, t("Sopimus loppuu"),     $format_bold);
-      $worksheet->write($excelrivi+1, $excelsarake++, $row['sopimus_loppupvm']);
+  mysql_data_seek($sopimuskohtaisetresult, 0);
+  $totalvalue = 0;
+  while ($sopimusrivi = mysql_fetch_assoc($sopimuskohtaisetresult)) {
+    $worksheet->write($excelrivi, $excelsarake++, $sopimusrivi['nimitys']);
+    $value = str_replace(".", ",", hintapyoristys($sopimusrivi['rivihinta']));
+    $worksheet->write($excelrivi, $excelsarake++, $value);
+    $totalvalue += $sopimusrivi['rivihinta'];
+    $excelrivi++;
+    $excelsarake = 0;
+  }
 
-      // Valinnaiset sopimuskohtaiset kentät:
-      // Sopimuslisatietoja 1/2
-      // Asiakastiedot
-      foreach ($row as $key => $value) {
-        if (in_array($key, $sopimuskohtaiset) and in_array($key, $valitut_sarakkeet)) {
-          $worksheet->write($excelrivi, $excelsarake, t("{$key}"),     $format_bold);
-          $worksheet->write($excelrivi+1, $excelsarake++, $value);
-        }
+  // Hardcoded stuff
+  $worksheet->write($excelrivi++, $excelsarake, t("Erillisveloitettavat työt (Muutoksenhallinta, Häiriönselvitys ja muu erillislaskutettava työ)"), $format_bold);
+  $worksheet->write($excelrivi, $excelsarake++, t("Työpäivä"));
+  $worksheet->write($excelrivi++, $excelsarake, t("900 e / päivä"));
+  $excelsarake = 0;
+  $worksheet->write($excelrivi, $excelsarake++, t("Työtunti"));
+  $worksheet->write($excelrivi++, $excelsarake++, t("125 e / tunti"));
+  $excelsarake = 0;
+  $worksheet->write($excelrivi, $excelsarake++, t("Työt arkena 16:00 - 22:00"));
+  $worksheet->write($excelrivi++, $excelsarake++, t("+50 %"));
+  $excelsarake = 0;
+  $worksheet->write($excelrivi, $excelsarake++, t("Työt 22-08 arkena, lauantait ja pyhät"));
+  $worksheet->write($excelrivi++, $excelsarake++, t("+100 %"));
+  $excelsarake = 0;
+  $worksheet->write($excelrivi, $excelsarake++, t("Matkatunnit"));
+  $worksheet->write($excelrivi++, $excelsarake++, t("75 e / tunti"));
+  $excelsarake = 0;                                                   
+
+  $worksheet->write($excelrivi, $excelsarake++, t("Yhteensä").": (ALV {$sopimus_alv} %)", $format_bold);
+  $totalvalue = str_replace(".", ",", hintapyoristys($totalvalue));
+  $worksheet->write($excelrivi++, $excelsarake++, $totalvalue);
+  $excelsarake = 0;
+
+  $worksheet->write($excelrivi++, $excelsarake, t("Toimitusosoite").":", $format_bold);
+  $worksheet->write($excelrivi++, $excelsarake, $toimitusosoite);
+  $worksheet->write($excelrivi++, $excelsarake, t("Laskutusosoite").":", $format_bold);
+  $worksheet->write($excelrivi++, $excelsarake, $laskutusosoite);
+
+  $worksheet->write($excelrivi++, $excelsarake, t("Laitelista").":", $format_bold);
+
+  $worksheet->write($excelrivi, $excelsarake++, t("Laitevalmistaja"), $format_bold);
+  $worksheet->write($excelrivi, $excelsarake++, t("Malli"), $format_bold);
+  $worksheet->write($excelrivi, $excelsarake++, t("Sarjanumero"), $format_bold);
+  $worksheet->write($excelrivi, $excelsarake++, t("Service Desk SLA"), $format_bold);
+
+  if (in_array("SP-FSNN-CO-NOC", $valitut_sarakkeet)) {
+    $worksheet->write($excelrivi, $excelsarake++, t("NOC e/kk"), $format_bold);
+  }
+  if (in_array("SP-FSNN-CO-MDM", $valitut_sarakkeet)) {
+    $worksheet->write($excelrivi, $excelsarake++, t("MDM e/kk"), $format_bold);
+  }
+  if (in_array("SP-FSNN-CO-MAINTENANCE", $valitut_sarakkeet)) {
+    $worksheet->write($excelrivi, $excelsarake++, t("OnSite Preventive Maintenance"), $format_bold);
+  }
+  if (in_array("SP-FSNN-SE-LCC", $valitut_sarakkeet) or in_array("SP-FSNN-SE-LCM", $valitut_sarakkeet)) { 
+    $worksheet->write($excelrivi, $excelsarake++, t("LCC/LCM e/kk"), $format_bold);
+  }
+  $worksheet->write($excelrivi, $excelsarake++, t("LCC/LCM SLA"), $format_bold);
+  $worksheet->write($excelrivi, $excelsarake++, t("LCC Päättymispäivä"), $format_bold);
+
+  $excelrivi++;
+  $excelsarake = 0;
+
+  // Kirjoitetaan laiterivit
+  while ($row = mysql_fetch_assoc($laiteresult)) {
+
+    // Haetaan laitekohtaiset tiedot
+    $laitequery = "SELECT
+                   laite.*,
+                   avainsana.selitetark valmistaja,
+                   tuote.tuotemerkki malli
+                   FROM laite
+                   LEFT JOIN tuote on tuote.yhtio = laite.yhtio
+                     AND tuote.tuoteno    = laite.tuoteno
+                   LEFT JOIN avainsana on avainsana.yhtio = tuote.yhtio
+                     AND avainsana.laji   = 'TRY'
+                     AND avainsana.selite = tuote.try
+                   WHERE laite.yhtio      = '{$kukarow['yhtio']}'
+                   AND laite.tunnus = '{$row['laitetunnus']}'";
+
+    $laiteres = pupe_query($laitequery);
+
+    $laiterow = mysql_fetch_assoc($laiteres);
+
+    // Haetaan laitteen palvelut joiden hinnat ovat laitteiden lukumäärästä riippuvaisia
+    $palveluquery = "SELECT nimitys, hinta
+                     FROM tilausrivi
+                     JOIN laitteen_sopimukset ON tilausrivi.yhtio = laitteen_sopimukset.yhtio
+                       AND tilausrivi.tunnus = laitteen_sopimukset.sopimusrivin_tunnus
+                     WHERE tilausrivi.tuoteno = 'SP-FSNN-CO-MDM'
+                       AND laitteen_sopimukset.laitteen_tunnus = '{$row['laitetunnus']}'
+                       AND NOT EXISTS (SELECT *
+                         FROM tuotteen_avainsanat
+                         WHERE yhtio    = '{$kukarow['yhtio']}'
+                         AND tuoteno    = tilausrivi.tuoteno
+                         AND laji       = 'laatuluokka'
+                         AND selitetark = 'rivikohtainen')
+
+                     UNION
+
+                     SELECT nimitys, hinta
+                     FROM tilausrivi
+                     JOIN laitteen_sopimukset ON tilausrivi.yhtio = laitteen_sopimukset.yhtio
+                       AND tilausrivi.tunnus = laitteen_sopimukset.sopimusrivin_tunnus
+                     WHERE tilausrivi.tuoteno = 'SP-FSNN-SU-SD'
+                       AND laitteen_sopimukset.laitteen_tunnus = '{$row['laitetunnus']}'
+                       AND NOT EXISTS (SELECT *
+                          FROM tuotteen_avainsanat
+                          WHERE yhtio    = '{$kukarow['yhtio']}'
+                          AND tuoteno    = tilausrivi.tuoteno
+                          AND laji       = 'laatuluokka'
+                          AND selitetark = 'rivikohtainen')
+
+                     UNION
+
+                     SELECT nimitys, hinta
+                     FROM tilausrivi
+                     JOIN laitteen_sopimukset ON tilausrivi.yhtio = laitteen_sopimukset.yhtio
+                       AND tilausrivi.tunnus = laitteen_sopimukset.sopimusrivin_tunnus
+                     WHERE tilausrivi.tuoteno = 'SP-FSNN-CO-NOC'
+                       AND laitteen_sopimukset.laitteen_tunnus = '{$row['laitetunnus']}'
+                       AND NOT EXISTS (SELECT *
+                          FROM tuotteen_avainsanat
+                          WHERE yhtio    = '{$kukarow['yhtio']}'
+                          AND tuoteno    = tilausrivi.tuoteno
+                          AND laji       = 'laatuluokka'
+                          AND selitetark = 'rivikohtainen')
+
+                     UNION
+
+                     SELECT nimitys, hinta
+                     FROM tilausrivi
+                     JOIN laitteen_sopimukset ON tilausrivi.yhtio = laitteen_sopimukset.yhtio
+                       AND tilausrivi.tunnus = laitteen_sopimukset.sopimusrivin_tunnus
+                     WHERE tilausrivi.tuoteno = 'SP-FSNN-CO-MAINTENANCE'
+                       AND laitteen_sopimukset.laitteen_tunnus = '{$row['laitetunnus']}'
+                       AND NOT EXISTS (SELECT *
+                          FROM tuotteen_avainsanat
+                          WHERE yhtio    = '{$kukarow['yhtio']}'
+                          AND tuoteno    = tilausrivi.tuoteno
+                          AND laji       = 'laatuluokka'
+                          AND selitetark = 'rivikohtainen')
+
+                     UNION
+
+                     SELECT nimitys, hinta
+                     FROM tilausrivi
+                     JOIN laitteen_sopimukset ON tilausrivi.yhtio = laitteen_sopimukset.yhtio
+                       AND tilausrivi.tunnus = laitteen_sopimukset.sopimusrivin_tunnus
+                     WHERE tilausrivi.tuoteno = 'SP-FSNN-SE-LCC'
+                       AND laitteen_sopimukset.laitteen_tunnus = '{$row['laitetunnus']}'
+                       AND NOT EXISTS (SELECT *
+                          FROM tuotteen_avainsanat
+                          WHERE yhtio    = '{$kukarow['yhtio']}'
+                          AND tuoteno    = tilausrivi.tuoteno
+                          AND laji       = 'laatuluokka'
+                          AND selitetark = 'rivikohtainen')
+
+                     UNION
+                                          
+                     SELECT nimitys, hinta
+                     FROM tilausrivi
+                     JOIN laitteen_sopimukset ON tilausrivi.yhtio = laitteen_sopimukset.yhtio
+                       AND tilausrivi.tunnus = laitteen_sopimukset.sopimusrivin_tunnus
+                     WHERE tilausrivi.tuoteno = 'SP-FSNN-SE-LCM'
+                       AND laitteen_sopimukset.laitteen_tunnus = '{$row['laitetunnus']}'
+                       AND NOT EXISTS (SELECT *
+                          FROM tuotteen_avainsanat
+                          WHERE yhtio    = '{$kukarow['yhtio']}'
+                          AND tuoteno    = tilausrivi.tuoteno
+                          AND laji       = 'laatuluokka'
+                          AND selitetark = 'rivikohtainen')";
+
+    $palveluresult = pupe_query($palveluquery);
+    //$palvelurivit = mysql_fetch_assoc($palveluresult);
+
+    $worksheet->write($excelrivi, $excelsarake++, $laiterow['valmistaja']);
+    $worksheet->write($excelrivi, $excelsarake++, $laiterow['malli']);
+    $worksheet->write($excelrivi, $excelsarake++, $laiterow['sarjanro']);
+    $worksheet->write($excelrivi, $excelsarake++, $laiterow['sd_sla']);
+
+    $mdmvalue = '';
+    $sdvalue = '';
+    $nocvalue = '';
+    $maintvalue = '';
+    $lccvalue = '';
+    $lcmvalue = '';
+    while ($rivi = mysql_fetch_assoc($palveluresult)) {
+      if (empty($rivi['hinta'])) continue;
+      if ($rivi['nimitys'] == "SignalONE Mobile Device Management") {
+        $mdmvalue = str_replace(".", ",", hintapyoristys($rivi['hinta']));
       }
-      $excelrivi+=3;
-      $excelsarake = 0;
-      $eka_ajo = false;
+      elseif ($rivi['nimitys'] == "SignalONE NOC") {
+        $nocvalue = str_replace(".", ",", hintapyoristys($rivi['hinta']));
+      } 
+      elseif ($rivi['nimitys'] == "SignalControl OnSite Preventive Maintenance") {
+        $maintvalue = str_replace(".", ",", hintapyoristys($rivi['hinta']));
+      }
+      elseif ($rivi['nimitys'] == "LifecycleCare") {
+        $lccvalue = str_replace(".", ",", hintapyoristys($rivi['hinta']));
+      }
+      elseif ($rivi['nimitys'] == "LifecycleManagement") {
+        $lcmvalue = str_replace(".", ",", hintapyoristys($rivi['hinta']));
+      }
     }
 
-    // Laite-/palvelukohtaiset valinnaiset kentät
-
-    // Laitetunnus
-    // Sarjanumero
-    // Tuotenumero
-    // Tuotemerkki
-    // Valmistaja
-    // SLA
-    // VC numero / End date
-
-    // Nimitys(palvelu)
-    // Palvelu alku/loppu
-    // Kplhinta
-
-    foreach ($row as $key => $value) {
-      if (in_array($key, $valitut_sarakkeet) and !in_array($key, $sopimuskohtaiset)) {
-
-        if (is_numeric($value) and $key == "hinta") {
-          $value = str_replace(".", ",", hintapyoristys($value))." ".t("e / kk");
-          // Jos laitteiden kappalemäärä ei vaikuta palvelun hintaan
-          if ($row['netto'] != '') {
-            $value .= " **";
-            $lisainffot = "".t("** Palvelukohtainen hinta");
-          }
-        }
-
-        if ($eka_laiterivi) {
-          // Valittujen laiterivien headerit
-          $worksheet->write($excelrivi, $excelsarake, t("{$key}"),     $format_bold);
-          $worksheet->write($excelrivi+1, $excelsarake++, $value);
-        }
-        else {
-          $worksheet->write($excelrivi, $excelsarake++, $value);
-        }
-
-      }
+    // Palvelut
+    if (in_array("SP-FSNN-CO-NOC", $valitut_sarakkeet)){
+      $worksheet->write($excelrivi, $excelsarake++, $nocvalue);
     }
+    if (in_array("SP-FSNN-CO-MDM", $valitut_sarakkeet)){
+      $worksheet->write($excelrivi, $excelsarake++, $mdmvalue);
+    }
+    if (in_array("SP-FSNN-CO-MAINTENANCE", $valitut_sarakkeet)){ 
+      $worksheet->write($excelrivi, $excelsarake++, $maintvalue);
+    }
+    if (in_array("SP-FSNN-SE-LCC", $valitut_sarakkeet) or in_array("SP-FSNN-SE-LCM", $valitut_sarakkeet) ){ 
+      $arvo = (!empty($lccvalue) and !empty($lcmvalue)) ? $lccvalue."/".$lcmvalue : $lccvalue.$lcmvalue;
+      $worksheet->write($excelrivi, $excelsarake++, $arvo);
+    }
+    $worksheet->write($excelrivi, $excelsarake++, $laiterow['sla']);
+    $worksheet->write($excelrivi, $excelsarake++, $laiterow['valmistajan_sopimus_paattymispaiva']);
+
     $excelsarake = 0;
     $excelrivi++;
-    $eka_laiterivi = false;
   }
-  $worksheet->write($excelrivi, $excelsarake, $lisainffot);
+
   $excelnimi = $worksheet->close();
 
   if (isset($excelnimi)) {

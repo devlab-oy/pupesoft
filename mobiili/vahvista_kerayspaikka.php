@@ -11,8 +11,6 @@ elseif (@include_once "inc/parametrit.inc");
 // Nämä on pakollisia
 if (!isset($alusta_tunnus, $liitostunnus, $tilausrivi)) exit;
 
-$onko_varaston_hyllypaikat_kaytossa = onko_varaston_hyllypaikat_kaytossa();
-
 $alusta_tunnus = (int) $alusta_tunnus;
 $liitostunnus = (int) $liitostunnus;
 $tilausrivi = (int) $tilausrivi;
@@ -61,6 +59,9 @@ if (isset($hylly)) {
   $row['hyllyvali'] = $hylly[2];
   $row['hyllytaso'] = $hylly[3];
 }
+
+$_varasto = kuuluukovarastoon($row['hyllyalue'], $row['hyllynro']);
+$onko_varaston_hyllypaikat_kaytossa = onko_varaston_hyllypaikat_kaytossa($_varasto);
 
 // Alkuperäinen saapuminen talteen
 $alkuperainen_saapuminen = $saapuminen;

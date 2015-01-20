@@ -181,7 +181,7 @@ if ($paivitys_oikeus) {
 echo "<br>";
 echo "<br>";
 
-if ($tee == "3") {
+if ($tee == "3" and $paivitys_oikeus) {
 
   if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
 
@@ -226,7 +226,7 @@ if ($tee == "3") {
 }
 
 // päivitetään asiakkaat
-if ($tee == "2") {
+if ($tee == "2" and $paivitys_oikeus) {
 
   foreach ($luottoraja as $ytunnus => $summa) {
 

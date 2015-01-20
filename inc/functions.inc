@@ -29844,12 +29844,12 @@ if (!function_exists("cron_aikaleima")) {
     if (!empty($uusileima)) {
       // Tallennetaan timestamppi
       $query = "UPDATE avainsana SET
-                selite      = '{$datetime_checkpoint_uusi}'
+                selite      = '{$uusileima}'
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND laji    = '$aikaleima'";
       pupe_query($query);
 
-      $datetime_checkpoint = $datetime_checkpoint_uusi;
+      $datetime_checkpoint = $uusileima;
     }
     else {
       // Haetaan tallennettu aikaleima

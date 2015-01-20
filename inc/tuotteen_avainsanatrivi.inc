@@ -130,38 +130,52 @@ if (mysql_field_name($result, $i) == "selite") {
   }
   elseif ($tem_laji == "tuotehinnastoryhmittely") {
 
+    if (isset($t[2])) {
+      $kieli = $t[2];
+    }
+    else {
+      $kieli = $yhtiorow['kieli'];
+    }
+
     // haetaan tarjolla olevat tuotehinnastoryhmat
     $q = "SELECT *
           FROM avainsana
           WHERE yhtio = '{$kukarow['yhtio']}'
           AND laji = 'THR'
-          AND kieli = 'fi'";
+          AND kieli = '{$kieli}'";
     $r = pupe_query($q);
 
-    $valitut_ryhmat = explode(",", $trow[$i]);
-
-    $ryhmat = array();
-
-    while ($thr = mysql_fetch_assoc($r)) {
-      $ryhmat[] = $thr;
+    if (mysql_num_rows($r) < 1) {
+      $ulos  = "<td class='error'>" . t("Valitulle kielelle ei löytynyt tuotehinnastoryhmiä.") . "</td>";
     }
+    else {
 
-    $ulos  = "<td>";
-    $ulos .= "<div style='padding:4px'>";
+      $valitut_ryhmat = explode(",", $trow[$i]);
 
-    foreach ($ryhmat as $thr) {
+      $ryhmat = array();
 
-      if (in_array($thr['selite'], $valitut_ryhmat)) {
-        $chk = 'checked';
+      while ($thr = mysql_fetch_assoc($r)) {
+        $ryhmat[] = $thr;
       }
-      else {
-       $chk = '';
-     }
-      $ulos .= "<label>". $thr['selite'] . "<input type='checkbox' name='{$nimi}[]' value='". $thr['selite'] . "' {$chk}></label>&nbsp;";
-    }
 
-    $ulos .= "</div>";
-    $ulos .= "</td>";
+      $ulos  = "<td>";
+      $ulos .= "<div style='padding:4px'>";
+
+      foreach ($ryhmat as $thr) {
+
+        if (in_array($thr['selite'], $valitut_ryhmat)) {
+          $chk = 'checked';
+        }
+        else {
+         $chk = '';
+       }
+        $ulos .= "<div style='display:inline-block'><label>". $thr['selite'] . "<input type='checkbox' name='{$nimi}[]' value='". $thr['selite'] . "' {$chk}></label></div>&nbsp;";
+      }
+
+      $ulos .= "</div>";
+      $ulos .= "</td>";
+
+    }
 
     $jatko = 0;
   }
@@ -232,7 +246,7 @@ if (mysql_field_name($result, $i) == "selitetark") {
 }
 
 if (mysql_field_name($result, $i) == "kieli") {
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)." onchange='submit();'>";
 
   foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
     $sel = "";

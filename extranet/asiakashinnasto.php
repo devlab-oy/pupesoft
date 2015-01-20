@@ -107,6 +107,10 @@ else {
       $ryhmittelylisa = $selectlisa = $jarjestyslisa = "";
     }
 
+    if (!isset($hinkieli)) {
+      $hinkieli = $yhtiorow['kieli'];
+    }
+
     if ($ryhmittely == 2) {
       $sel2 = "SELECTED";
       $sel1 = "";
@@ -114,16 +118,18 @@ else {
       $ryhmittelylisa = " JOIN tuotteen_avainsanat
                           ON tuotteen_avainsanat.yhtio = tuote.yhtio
                           AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
-                          AND tuotteen_avainsanat.laji = 'tuotehinnastoryhmittely' ";
+                          AND tuotteen_avainsanat.laji = 'tuotehinnastoryhmittely'
+                          AND tuotteen_avainsanat.kieli = '{$hinkieli}' ";
       $selectlisa = ", tuotteen_avainsanat.selite AS tro, tuotteen_avainsanat.jarjestys AS jar ";
       $jarjestyslisa = " tro, jar, ";
     }
 
     // n‰ytett‰‰n ryhmittelyvalinta vain jos tuoteryhm‰osastoja on perustettu
     $tarkistus = "SELECT count(tunnus)
-                  FROM avainsana
+                  FROM tuotteen_avainsanat
                   WHERE yhtio = '{$yhtiorow['yhtio']}'
-                  AND laji    = 'THR'";
+                  AND laji    = 'tuotehinnastoryhmittely'
+                  AND kieli = '{$hinkieli}'";
     $tarkistus = pupe_query($tarkistus);
     $tarkistus = mysql_result($tarkistus, 0);
 

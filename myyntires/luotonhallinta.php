@@ -25,6 +25,9 @@ else {
   $kasittely_periaate = "asiakas.tunnus";
 }
 
+$paivitys_oikeus = tarkista_oikeus("luotonhallinta.php", '', 1);
+echo "29: $paivitys_oikeus <br><br>";
+
 if (isset($edytunnus) and isset($ytunnus) and $edytunnus != $ytunnus) {
   unset($asiakasid);
 }
@@ -164,7 +167,7 @@ echo "<br />";
 echo "<form method='post' name='sendfile' enctype='multipart/form-data'>";
 echo "<input type='hidden' name='tee'    value = '3'>";
 
-if (tarkista_oikeus('luotonhallinta.php', '', 1)) {
+if ($paivitys_oikeus) {
   echo t("tai"), "...";
   echo "<br />";
   echo "<br />";
@@ -460,7 +463,7 @@ if ($tee == "1") {
 
     echo "<td align='right'>$luottotilanne_nyt</td>";
     
-    if (tarkista_oikeus('luotonhallinta.php', '', 1)) {
+    if ($paivitys_oikeus) {
       echo "<td align='right'><input style='text-align:right' type='text' name='luottoraja[$asiakasrow[ytunnus]]' value='$asiakasrow[luottoraja]' size='11'></td>";
     } 
     else {
@@ -482,12 +485,12 @@ if ($tee == "1") {
     echo "<input type='hidden' name='alkuperainen_myyntikielto[$asiakasrow[ytunnus]]' value='$asiakasrow[myyntikielto]'>";
   }
 
-  if (tarkista_oikeus('luotonhallinta.php', '', 1)) {
+  if ($paivitys_oikeus) {
     echo "<tr><td class='back' colspan='9' align='right'>".t("Ruksaa kaikki")." &raquo; <input type='checkbox' name='ruksaakaikki' onclick='toggleAll(this)'></td></tr>";
   }
 
   echo "</table>";
-  if (tarkista_oikeus('luotonhallinta.php', '', 1)) {
+  if ($paivitys_oikeus) {
     echo "<input type='submit' value='".t("Päivitä luottorajat")."'>";
   }
   echo "</form>";

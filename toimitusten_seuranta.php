@@ -525,7 +525,7 @@ if (!isset($task)) {
   case 'kontitetut':
 
     $query = "SELECT lasku.tunnus,
-              group_concat(tilausrivi.tununs) AS rivitunnukset,
+              group_concat(tilausrivi.tunnus) AS rivitunnukset,
               group_concat(DISTINCT IF(tilausrivi.laskutettu = '', 'kontittamatta', 'kontitettu')) AS tilanne
               FROM lasku LEFT OUTER JOIN tilausrivi ON tilausrivi.otunnus = lasku.tunnus
               WHERE lasku.yhtio = 'rplog' AND lasku.tilaustyyppi = 'N'

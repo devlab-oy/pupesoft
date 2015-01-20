@@ -633,7 +633,7 @@ if (!isset($task)) {
             {$rajauslisa}
             AND laskun_lisatiedot.konttiviite != ''
             GROUP BY lasku.asiakkaan_tilausnumero, laskun_lisatiedot.konttiviite
-            ORDER BY toimaika, konttiviite"; echo $query;die;
+            ORDER BY toimaika, konttiviite";
   $result = pupe_query($query);
 
   $tilaukset = array();
@@ -1150,6 +1150,7 @@ if (!isset($task)) {
             echo "</button></div>";
 
             $parametrit = konttierittely_parametrit($tilaus['konttiviite']);
+            $tonnit = $parametrit['total_paino'] / 1000;
             $parametrit = serialize($parametrit);
             $parametrit = base64_encode($parametrit);
 
@@ -1170,12 +1171,30 @@ if (!isset($task)) {
 
             if ($tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
 
+              $query = "SELECT *
+                        FROM lasku
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND asiakkaan_tilausnumero = '{$tilaus['konttiviite']}'
+                        AND sisviesti1 = 'konttiviitelasku'";
+              $result = pupe_query($query);
+
+              if (mysql_num_rows($result) > 0) {
+                $nappi = t("Laskutusraportti");
+                $laadittu = 'joo';
+              }
+              else {
+                $nappi = t("Laadi laskutusraportti");
+                $laadittu = 'ei';
+              }
+
               echo "
               <div style='text-align:center'>
               <form method='post'>
-              <input type='hidden' name='task' value='tee_laskutusraportti' />
+              <input type='hidden' name='tonnit' value='{$tonnit}' />
+              <input type='hidden' name='task' value='laadi_laskutusraportti' />
+              <input type='hidden' name='laadittu' value='{$laadittu}' />
               <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />
-              <input type='submit' value='". t("Laadi laskutusraportti") ."' />
+              <input type='submit' value='{$nappi}' />
               </form></div>";
             }
 
@@ -1452,18 +1471,55 @@ if (isset($task) and $task == 'lusaus') {
   }
 }
 
-if (isset($task) and $task == 'laadi_laskutusraportti') {
+if (isset($task) and $task == 'luo_laskutusraportti') {
 
-  if ($vapaa_varastointi == '') {
-    $vapaa_varastointi_error = t("Syötä vuorokausimäärä");
-    $task = 'tee_laskutusraportti';
+  $uusi_nimike = false;
+  $edit_nimike = false;
+
+
+  if (isset($edit)) {
+    $edit_tunnus = key($edit);
+    $edit_nimike = true;
+    $task = 'laadi_laskutusraportti';
+  }
+  elseif (isset($lisaa_nimike_submit)) {
+    $uusi_nimike = true;
+    $task = 'laadi_laskutusraportti';
+  }
+  elseif (isset($vahvista_nimike_submit)) {
+
+    $laskuquery = "SELECT *
+                   FROM lasku
+                   WHERE yhtio = '{$kukarow['yhtio']}'
+                   AND asiakkaan_tilausnumero = '{$konttiviite}'";
+    $laskuresult = pupe_query($laskuquery);
+    $laskurow = mysql_fetch_assoc($laskuresult);
+
+    $kukarow['kesken'] = $laskurow['tunnus'];
+
+    // haetaan tuotteen tiedot
+    $tuotequery = "SELECT *
+                   FROM tuote
+                   WHERE yhtio = '{$kukarow['yhtio']}'
+                   AND tunnus = '{$lisattava_nimike}'";
+    $tuoteresult = pupe_query($tuotequery);
+    $trow = mysql_fetch_assoc($tuoteresult);
+
+    $kpl = $lisattava_kpl;
+
+    require "tilauskasittely/lisaarivi.inc";
+
+    $task = 'laadi_laskutusraportti';
   }
   else {
 
-    echo "<a href='toimitusten_seuranta.php'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
+    echo "<a href='toimitusten_seuranta.php?rajaus=toimitetut'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
     echo "<font class='head'>".t("Laskutusraportti luotu")."</font></a><hr><br>";
 
-    $parametrit = laskutusraportti_parametrit($konttiviite, $vapaa_varastointi);
+    $parametrit = laskutusraportti_parametrit($konttiviite);
+
+
+
     $parametrit = serialize($parametrit);
     $parametrit = base64_encode($parametrit);
 
@@ -1480,8 +1536,7 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
     <table>
     <tr><th>" . t("Asiakas") ."</th><td>Kotka Mills</td><td class='back'></td></tr>
     <tr><th>" . t("Konttiviite") ."</th><td>{$konttiviite}</td><td class='back'></td></tr>
-    <tr><th>" . t("Vapaa varastointi") ."</th><td>{$vapaa_varastointi}&nbsp;Vrk.</td>
-    <td class='back'></td></tr>
+    <tr><th>" . t("Tonnit") ."</th><td>{$tonnit}</td><td class='back'></td></tr>
     <tr><th>" . t("Raportti luotu") ."</th><td align='right'>";
 
     echo "<button onClick=\"js_openFormInNewWindow('nayta_laskutusraportti', 'Laskutusraportti'); return false;\" />";
@@ -1495,28 +1550,201 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
   }
 }
 
-if (isset($task) and $task == 'tee_laskutusraportti') {
+if (isset($task) and $task == 'laadi_laskutusraportti') {
 
-  echo "<a href='toimitusten_seuranta.php'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
+  if ($laadittu == 'ei')  {
+
+    $kukarow['kesken'] = 0;
+
+    require_once "tilauskasittely/luo_myyntitilausotsikko.inc";
+
+    $tunnus = luo_myyntitilausotsikko('RIVISYOTTO', 102);
+
+    $update_query = "UPDATE lasku SET
+                     asiakkaan_tilausnumero = '{$konttiviite}',
+                     sisviesti1 = 'konttiviitelasku',
+                     toimaika = now()
+                     WHERE yhtio = '{$kukarow['yhtio']}'
+                     AND tunnus = '{$tunnus}'";
+    pupe_query($update_query);
+
+    // ehkä asiakaskohtaiseksi tulevaisuudessa...
+    $vapaa_varastointi = 7;
+
+    $laskuquery = "SELECT *
+                   FROM lasku
+                   WHERE yhtio = '{$kukarow['yhtio']}'
+                   AND tunnus = '{$tunnus}'";
+    $laskuresult = pupe_query($laskuquery);
+    $laskurow = mysql_fetch_assoc($laskuresult);
+
+    $kukarow['kesken'] = $laskurow['tunnus'];
+
+    // haetaan tuotteen tiedot
+    $tuotequery = "SELECT *
+                   FROM tuote
+                   WHERE yhtio = '{$kukarow['yhtio']}'
+                   AND tuoteno = 'VARASTOINTI'";
+    $tuoteresult = pupe_query($tuotequery);
+    $trow = mysql_fetch_assoc($tuoteresult);
+
+    $varastointikaudet = hae_varastointikaudet($konttiviite);
+
+    foreach ($varastointikaudet as $kausi) {
+
+      $varastointipaivat = $kausi['varastointipaivat'] - $vapaa_varastointi;
+
+      if ($varastointipaivat > 0) {
+        $kpl = $varastointipaivat;
+        $hinta = $varastointipaivat * $kausi['total_paino'] * $trow['myyntihinta'];
+
+        require "tilauskasittely/lisaarivi.inc";
+
+        $sisaan = $kausi['sisaan'];
+        $ulos = $kausi['ulos'];
+
+        $update_query = "UPDATE tilausrivi SET
+                         toimaika = '{$sisaan}',
+                         kerayspvm = '{$ulos}'
+                         WHERE yhtio = '{$kukarow['yhtio']}'
+                         AND tunnus = '{$lisatty_tun}'";
+        pupe_query($update_query);
+      }
+    }
+  }
+
+  $query = "SELECT tilausrivi.*
+            FROM lasku
+            JOIN tilausrivi
+              ON tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND asiakkaan_tilausnumero = '{$konttiviite}'
+            AND sisviesti1 = 'konttiviitelasku'";
+  $result = pupe_query($query);
+
+  $nimikkeet = array();
+  $nimikenimet = array();
+
+  while ($rivi = mysql_fetch_assoc($result)) {
+    $nimikkeet[] = $rivi;
+    $nimikenimet[] = $rivi['nimitys'];
+  }
+
+  echo "<a href='toimitusten_seuranta.php?rajaus=toimitetut'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
   echo "<font class='head'>".t("Laadi laskutusraportti")."</font></a><hr><br>";
 
   echo "
   <form method='post' id='luo_laskutusraportti'>
-  <input type='hidden' name='task' value='laadi_laskutusraportti' />
+  <input type='hidden' name='task' value='luo_laskutusraportti' />
+  <input type='hidden' name='tonnit' value='{$tonnit}' />
   <input type='hidden' name='konttiviite' value='{$konttiviite}' />
   <table>
-  <tr><th>" . t("Asiakas") ."</th><td>Kotka Mills</td><td class='back'></td></tr>
-  <tr><th>" . t("Konttiviite") ."</th><td>{$konttiviite}</td><td class='back'></td></tr>
-  <tr><th>" . t("Vapaa varastointi");
-  echo "
-  </th><td><input type='text' size='3' name='vapaa_varastointi'>&nbsp;Vrk.</td>
-  <td class='back error'>{$vapaa_varastointi_error}</td></tr>
-  <tr><th></th><td align='right'>";
+  <tr><th>" . t("Asiakas") ."</th><td align='right'>Kotka Mills</td><td class='back'></td></tr>
+  <tr><th>" . t("Konttiviite") ."</th><td align='right'>{$konttiviite}</td><td class='back'></td></tr>
+  <tr><th>" . t("Tonnit") ."</th><td align='right'>{$tonnit}</td><td class='back'></td></tr>
+  <tr><th style='text-align:center' colspan='2'>" . t("Myydyt nimikkeet") ."</th><td class='back'></td></tr>";
 
-  echo "<input type='submit' value='Luo raportti' />";
+  foreach ($nimikkeet as $nimike) {
+
+    if (isset($edit_tunnus) and $nimike['tunnus'] == $edit_tunnus)  {
+
+        $query = "SELECT *
+                  FROM tilausrivi
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus = '{$edit_tunnus}'";
+        $result = pupe_query($query);
+        $tilausrivi = mysql_fetch_assoc($result);
+
+        echo "
+        <tr><th>" . $nimike['nimitys'] . "</th><td align='right'>";
+
+        echo "
+        <input type='text' name='muutettava_kpl' size='5' value='{$kpl}' /> kpl
+        <input type='submit' name='vahvista_muutos_submit' value='". t("Muuta") ."' /></td><td class='back'></td></tr>";
+
+    }
+    else {
+
+      if ($nimike['yksikko'] == 'PVA') {
+        $yksikko = t("vrk.");
+      }
+      elseif ($nimike['yksikko'] == 'KPL') {
+        $yksikko = t("kpl.");
+      }
+      elseif ($nimike['yksikko'] == 'KG') {
+        $yksikko = t("t.");
+      }
+
+      if ($nimike['nimitys'] == "Varastointi") {
+
+        $tuotequery = "SELECT *
+                       FROM tuote
+                       WHERE yhtio = '{$kukarow['yhtio']}'
+                       AND tuoteno = 'VARASTOINTI'";
+        $tuoteresult = pupe_query($tuotequery);
+        $trow = mysql_fetch_assoc($tuoteresult);
+
+        $tonnit = $nimike['hinta'] / $nimike['tilkpl'] / $trow['myyntihinta'];
+
+        $teksti = (int) $nimike['tilkpl'] . " vrk. &mdash; " .  $tonnit . " t. &mdash; " . number_format((float)$nimike['hinta'], 2, '.', '') . " €";
+      }
+      else {
+        $teksti =  (int) $nimike['tilkpl'] . " " . $yksikko . " &mdash; ". $nimike['tilkpl'] * $nimike['hinta'] ." €";
+      }
+
+      echo "<tr><th>" . $nimike['nimitys'] ."</th><td align='right'>";
+      echo $teksti;
+      echo "</td><td class='back'>";
+
+      if ($nimike['nimitys'] != "Varastointi") {
+        echo "<input type='submit' name='edit[{$nimike['tunnus']}]' value='" . t("Muokkaa") . "' />";
+      }
+
+      echo "</td></tr>";
+
+    }
+
+  }
+
+  $query = "SELECT *
+            FROM tuote
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND mallitarkenne = 'varastointinimike'";
+  $result = pupe_query($query);
+
+  $lisattavat_nimikkeet = array();
+
+  while ($nimike = mysql_fetch_assoc($result)) {
+   if (!in_array($nimike['nimitys'], $nimikenimet)) {
+      $lisattavat_nimikkeet[] = $nimike;
+    }
+  }
+
+  if ($uusi_nimike) {
+    echo "
+    <tr><th>" . t("Lisää nimike") ."</th><td align='right'><select name='lisattava_nimike'>";
+
+    echo "<option value='0'>Valitse nimike</option>";
+
+    foreach ($lisattavat_nimikkeet as $nimike) {
+      echo "<option value='". $nimike['tunnus'] ."'>". $nimike['nimitys'] ."</option>";
+    }
+
+    echo "<select />&nbsp;";
+    echo "<input type='text' name='lisattava_kpl' size='5' /> kpl";
+    echo "
+    <input type='submit' name='vahvista_nimike_submit' value='". t("Lisää") ."' /></td><td class='back'></td></tr>";
+
+  }
+  elseif (count($lisattavat_nimikkeet) > 0) {
+
+    echo "
+    <tr><th>" . t("Nimikkeen lisäys") ."</th><td align='right'><input type='submit' name='lisaa_nimike_submit' value='". t("Lisää nimike") ."' /></td><td class='back'></td></tr>";
+  }
 
   echo "
-  </td><td class='back'></td></tr>
+  <tr><th></th><td align='right'><input type='submit' value='Luo raportti' /></td><td class='back'></td></tr>
   </table>
   </form>";
 }

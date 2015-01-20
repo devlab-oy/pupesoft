@@ -422,7 +422,7 @@ function lahtoilmoitus_parametrit($konttiviite) {
               AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND konttiviite = '{$konttiviite}'
-            GROUP BY tilausnro, rivinro;";
+            GROUP BY tilausnro, rivinro";
   $result = pupe_query($query);
 
   $kaikki_matkatiedot = array();
@@ -618,26 +618,14 @@ function satamavahvistus_parametrit($konttiviite) {
   return $parametrit;
 }
 
-function laskutusraportti_parametrit($konttiviite) {
+function hae_varastointikaudet($konttiviite) {
   global $kukarow;
 
-  $query = "SELECT myyntihinta
-            FROM tuote
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tuoteno = 'varastointi'
-            AND nimitys = 'varastointi'";
-  $result = pupe_query($query);
-  $hinta = mysql_result($result,0);
-
-  $query = "SELECT lasku.asiakkaan_tilausnumero,
+  $query = "SELECT
+            group_concat(DISTINCT lasku.asiakkaan_tilausnumero) AS tilausnumerot,
             SUM(sarjanumeroseuranta.massa) AS total_paino,
-            laskun_lisatiedot.konttityyppi,
-            laskun_lisatiedot.konttiviite,
-            group_concat(DISTINCT kontin_mrn) AS kontit,
-            group_concat(DISTINCT DATE(tilausrivi.toimitettuaika)) AS sisaan_lasku,
-            group_concat(DISTINCT DATE(laskun_lisatiedot.satamavahvistus_pvm)) AS ulos_lasku,
-            group_concat(DISTINCT DATE_FORMAT(tilausrivi.toimitettuaika, '%d.%m.%y')) AS sisaan,
-            group_concat(DISTINCT DATE_FORMAT(laskun_lisatiedot.satamavahvistus_pvm, '%d.%m.%y')) AS ulos
+            DATE(tilausrivi.toimitettuaika) AS sisaan,
+            DATE(laskun_lisatiedot.satamavahvistus_pvm) AS ulos
             FROM laskun_lisatiedot
             JOIN lasku
               ON lasku.yhtio = laskun_lisatiedot.yhtio
@@ -655,43 +643,68 @@ function laskutusraportti_parametrit($konttiviite) {
             AND sarjanumeroseuranta.lisatieto != 'Hylätty'
             AND sarjanumeroseuranta.lisatieto != 'Ylijaama'
             AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
-            GROUP BY concat(lasku.asiakkaan_tilausnumero, DATE(tilausrivi.toimitettuaika))";
+            GROUP BY DATE(tilausrivi.toimitettuaika), DATE(laskun_lisatiedot.satamavahvistus_pvm)";
   $result = pupe_query($query);
 
-  $tilaukset = array();
-  $kaikki_kontit = array();
+  $varastointikaudet = array();
 
-  while ($tilaus = mysql_fetch_assoc($result)) {
+  while ($kausi = mysql_fetch_assoc($result)) {
 
-    $konttiviite = $tilaus['konttiviite'];
-
-    $kontti_array = explode(",", $tilaus['kontit']);
-    $kaikki_kontit = array_unique(array_merge($kontti_array, $kaikki_kontit));
-
-    $sisaan = new DateTime($tilaus['sisaan_lasku']);
-    $ulos = new DateTime($tilaus['ulos_lasku']);
+    $sisaan = new DateTime($kausi['sisaan']);
+    $ulos = new DateTime($kausi['ulos']);
     $ero = $ulos->diff($sisaan)->format("%a") + 1;
 
-    $tilaus['varastointipaivat'] = $ero;
+    $kausi['varastointipaivat'] = $ero;
 
-    $tilaus['total_paino'] = (int) $tilaus['total_paino'] / 1000;
+    $kausi['total_paino'] = (int) $kausi['total_paino'] / 1000;
 
-    $tilaukset[] = $tilaus;
+    $varastointikaudet[] = $kausi;
   }
 
-  $kpl_kontit = count($kaikki_kontit);
-  $kpl_tilaukset = count($tilaukset);
+  return $varastointikaudet;
+}
+
+function laskutusraportti_parametrit($konttiviite) {
+  global $kukarow;
+
+  $rivit = array();
+
+  $tuotequery = "SELECT *
+                 FROM tuote
+                 WHERE yhtio = '{$kukarow['yhtio']}'
+                 AND tuoteno = 'VARASTOINTI'";
+  $tuoteresult = pupe_query($tuotequery);
+  $trow = mysql_fetch_assoc($tuoteresult);
+
+  $varastointihinta = $trow['myyntihinta'];
+
+  $query = "SELECT tilausrivi.*, lasku.asiakkaan_tilausnumero
+            FROM tilausrivi
+            JOIN lasku
+              ON lasku.yhtio = tilausrivi.yhtio
+              AND lasku.tunnus = tilausrivi.otunnus
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.asiakkaan_tilausnumero = '{$konttiviite}'";
+  $result = pupe_query($query);
+
+  while ($rivi = mysql_fetch_assoc($result)) {
+
+    $sisaan = new DateTime($rivi['toimaika']);
+    $ulos = new DateTime($rivi['kerayspvm']);
+    $ero = $ulos->diff($sisaan)->format("%a") + 1;
+
+    $rivi['varastopaivat'] = $ero;
+
+    $rivit[] = $rivi;
+  }
 
   $parametrit = array(
-    'tilaukset' => $tilaukset,
-    'kpl_kontit' => $kpl_kontit,
-    'kpl_tilaukset' => $kpl_tilaukset,
+    'rivit' => $rivit,
     'konttiviite' => $konttiviite,
-    'hinta' => $hinta
-  );
+    'varastointihinta' => $varastointihinta
+    );
 
   return $parametrit;
-
 }
 
 function laadi_edifact_sanoma($parametrit, $korjaus = false) {
@@ -3130,7 +3143,7 @@ function laskutusraportti_pdf($pdf_data) {
   $xx = array(20,580);
 
   $pdf->draw_text($x, $y, "LASKUTUSRAPORTTI", $sivu, $iso);
-  $pvm = date("j.m.Y H:i");
+  $pvm = date("j.n.Y H:i");
   $y -= 20;
   $pdf->draw_text($x, $y, $pvm, $sivu, $bold);
 
@@ -3138,10 +3151,7 @@ function laskutusraportti_pdf($pdf_data) {
   $pdf->draw_text($x, $y, "Konttiviite: {$konttiviite}", $sivu, $bold);
 
   $y -= 15;
-  $pdf->draw_text($x, $y, "Kontteja: {$kpl_kontit} kpl", $sivu, $bold);
 
-  $y -= 15;
-  $pdf->draw_text($x, $y, "Tilauksia: {$kpl_tilaukset} kpl", $sivu, $bold);
 
   $y -= 10;
   $yy[0] = $yy[1] = $y;
@@ -3150,44 +3160,40 @@ function laskutusraportti_pdf($pdf_data) {
 
   $total_hinta = 0;
 
-  foreach ($tilaukset as $tilaus) {
+  foreach ($rivit as $rivi) {
 
-    $laskutettavat_paivat = $tilaus['varastointipaivat'] - $vapaa_varastointi;
+    $pdf->draw_text($x, $y, $rivi['nimitys'], $sivu, $pieni);
 
-    if ($laskutettavat_paivat <= 0) {
-      $tilauksen_hinta = 0;
+    if ($rivi['tuoteno'] == 'VARASTOINTI') {
+      /*
+      $sisaan = date("j.n.Y", strtotime($rivi['toimaika']));
+      $ulos = date("j.n.Y", strtotime($rivi['kerayspvm']));
+      */
+
+      $tonnit = $rivi['hinta'] / $rivi['tilkpl'] / $varastointihinta;
+
+      $pdf->draw_text($x+150, $y, $rivi['varastopaivat'] . " vrk. - {$tonnit} t.", $sivu, $pieni);
+
+      $hinta = $rivi['hinta'];
+      $pdf->draw_text($x+400, $y, chr(128).$rivi['hinta'], $sivu, $pieni);
     }
     else {
-      $tilauksen_hinta = $hinta * $laskutettavat_paivat * $tilaus['total_paino'];
+
+      $pdf->draw_text($x+150, $y, $rivi['tilkpl'] . " kpl.", $sivu, $pieni);
+
+      $hinta = $rivi['hinta'] * $rivi['tilkpl'];
+      $pdf->draw_text($x+400, $y, chr(128).$hinta, $sivu, $pieni);
+
     }
 
-    $paivat  = $tilaus['varastointipaivat'] . "vrk. - " . $vapaa_varastointi;
-    $paivat .= "vrk. vapaata varastointia" . " = " . $laskutettavat_paivat . " vrk.";
+    $y -= 15;
 
-    $pdf->draw_text($x, $y, "Tilaus:", $sivu, $pieni);
-    $pdf->draw_text($x+50, $y, $tilaus['asiakkaan_tilausnumero'], $sivu, $pieni);
-    $y -= 15;
-    $pdf->draw_text($x, $y, 'Tonnit:', $sivu, $pieni);
-    $pdf->draw_text($x+50, $y, $tilaus['total_paino'], $sivu, $pieni);
-    $y -= 15;
-    $pdf->draw_text($x, $y, utf8_decode("Sisään:"), $sivu, $pieni);
-    $pdf->draw_text($x+50, $y, $tilaus['sisaan'], $sivu, $pieni);
-    $y -= 15;
-    $pdf->draw_text($x, $y, 'Ulos:', $sivu, $pieni);
-    $pdf->draw_text($x+50, $y, $tilaus['ulos'], $sivu, $pieni);
-    $y -= 15;
-    $pdf->draw_text($x, $y, utf8_decode("Päivät:"), $sivu, $pieni);
-    $pdf->draw_text($x+50, $y, $paivat , $sivu, $pieni);
-    $y -= 15;
-    $pdf->draw_text($x, $y, "Hinta:", $sivu, $pieni);
-    $pdf->draw_text($x+50, $y, chr(128).$tilauksen_hinta, $sivu, $pieni);
-    $y -= 15;
 
     $yy[0] = $yy[1] = $y;
     $pdf->draw_line($xx, $yy, $sivu);
     $y -= 20;
 
-    $total_hinta +=  $tilauksen_hinta;
+    $total_hinta +=  $hinta;
   }
 
   $pdf->draw_text($x, $y, utf8_decode("Hinta yhteensä:"), $sivu, $bold);

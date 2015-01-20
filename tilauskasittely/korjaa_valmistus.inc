@@ -133,11 +133,11 @@ while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
                 and tunnus  = '$taparow[tunnus]'";
       $updresult = pupe_query($query);
     }
-#echo "136 mm. tilausrivin tiedot"; var_dump($raakaainerow); echo "<br><br><br>";
+
     // P‰ivitet‰‰n saldo oikeaksi vasta j‰lkilaskennan j‰lkeen kun valmistusmuutos otetaan huomioon
     // Pistet‰‰n saldo aina oletuspaikalle
     $mtos = $raakaainerow["varattu"] - $raakaainerow["kpl"];
-echo "140 mtos $mtos = raakaainerow Kpl {$raakaainerow["kpl"]} - Varattu {$raakaainerow["varattu"]} <br><br>";
+
     if ($raakaainerow["ei_saldoa"] == "") {
       $query = "UPDATE tuotepaikat
                 SET saldo = saldo+$mtos,

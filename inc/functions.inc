@@ -29807,6 +29807,62 @@ if (!function_exists("cron_log")) {
   }
 }
 
+if (!function_exists("cron_aikaleima")) {
+  function cron_aikaleima($aikaleima, $uusileima = 0) {
+    global $kukarow, $yhtiorow;
+
+    // Yll‰pidet‰‰n avainsanoissa aika jolloin tietty skripti on ajettu viimeksi
+
+    if (strlen($aikaleima) > 15) {
+      echo "Aikaleiman tunnus on liian pitk‰!<br>";
+      return;
+    }
+
+    if (substr($aikaleima, -5) != "_CRON") {
+      echo "Aikaleiman tunnus on p‰‰tytt‰v‰ '_CRON'!<br>";
+      return;
+    }
+
+    pupemaster_start();
+
+    $datetime_checkpoint_res = t_avainsana($aikaleima);
+
+    if (mysql_num_rows($datetime_checkpoint_res) != 1) {
+      $query = "DELETE FROM avainsana
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND laji    = '$aikaleima'";
+      pupe_query($query);
+
+      $query = "INSERT INTO avainsana SET
+                yhtio = '{$kukarow['yhtio']}',
+                laji  = '$aikaleima'";
+      pupe_query($query);
+
+      $datetime_checkpoint = "";
+    }
+
+    if (!empty($uusileima)) {
+      // Tallennetaan timestamppi
+      $query = "UPDATE avainsana SET
+                selite      = '{$datetime_checkpoint_uusi}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND laji    = '$aikaleima'";
+      pupe_query($query);
+
+      $datetime_checkpoint = $datetime_checkpoint_uusi;
+    }
+    else {
+      // Haetaan tallennettu aikaleima
+      $datetime_checkpoint_row = mysql_fetch_assoc($datetime_checkpoint_res);
+      $datetime_checkpoint = pupesoft_cleanstring($datetime_checkpoint_row['selite']);
+    }
+
+    pupemaster_stop();
+
+    return $datetime_checkpoint;
+  }
+}
+
 if (!function_exists("paivita_sopimusrivit")) {
   function paivita_sopimusrivit(array $sopimusrivitunnukset = array()) {
     global $kukarow;

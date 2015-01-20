@@ -7,23 +7,28 @@ if (isset($_POST['piirtele_laiteluettelo'])) {
   // Piirrell‰‰n laiteluettelo-valikko
   echo "<br><br>";
 
-  // M‰‰ritell‰‰n jostain halutut kent‰t
-  $kiissit = array(
-    "SP-FSNN-CO-NOC" => "SignalONE NOC", 
-    "SP-FSNN-CO-MDM" => "SignalONE Mobile Device Management",
-    "SP-FSNN-CO-MAINTENANCE" => "SignalControl OnSite Preventive Maintenance",
-    "SP-FSNN-SE-LCC" => "LifecycleCare",
-    "SP-FSNN-SE-LCM" => "LifecycleManagement"
+  // N‰ytett‰v‰t laitekohtaiset palveluhinnat sek‰ sopimuskohtaiset lis‰tyˆt
+  $ruksattavat_kentat = array(
+    #Lis‰tyˆt
+    "SPTYOTUNTI"     => t("Tyˆtunti"),
+    "SPTYOPV"        => t("Tyˆp‰iv‰"),
+    "SPMATKATUNTI"   => t("Matkatunnit"),
+    #Palveluhinnat
+    "SP-FSNN-CO-NOC" => t("SignalONE NOC"), 
+    "SP-FSNN-CO-MDM" => t("SignalONE Mobile Device Management"),
+    "SP-FSNN-CO-MAINTENANCE" => t("SignalControl OnSite Preventive Maintenance"),
+    "SP-FSNN-SE-LCC" => t("LifecycleCare"),
+    "SP-FSNN-SE-LCM" => t("LifecycleManagement")
   );
 
   echo "<form name='aja_ja_tallenna' method='post'>";
   echo "<table width='600'>";
-  echo "<tr><th>".t("Valitse sarakkeet")."</th></tr>";
+  echo "<tr><th>".t("Valitse laitekohtaiset sarakkeet")."</th></tr>";
 
   $secretcounter = 0;
   $eka_ajo = true;
 
-  foreach ($kiissit as $i => $selite) {
+  foreach ($ruksattavat_kentat as $i => $selite) {
     $nollaus = false;
     if ($secretcounter == 0) echo "<tr>";
     $tsekk = "";
@@ -116,23 +121,47 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
     $excelsarake = 0;
   }
 
-  // Hardcoded stuff
+  // Haetaan tuntiveloitukset
+  $veloitusquery = "SELECT tuoteno,nimitys,myyntihinta 
+                    FROM tuote 
+                    WHERE yhtio = '{$kukarow['yhtio']}' 
+                    AND tuoteno IN ('SPTYOPV','SPTYOTUNTI','SPMATKATUNTI')";
+  $veloitusres = pupe_query($veloitusquery);
+  $veloitukset = array();
+  while ($veloitusrow = mysql_fetch_assoc($veloitusres)) {
+    $veloitukset[$veloitusrow['tuoteno']] = $veloitusrow;
+  }
+
   $worksheet->write($excelrivi++, $excelsarake, t("Erillisveloitettavat tyˆt (Muutoksenhallinta, H‰iriˆnselvitys ja muu erillislaskutettava tyˆ)"), $format_bold);
-  $worksheet->write($excelrivi, $excelsarake++, t("Tyˆp‰iv‰"));
-  $worksheet->write($excelrivi++, $excelsarake, t("900 e / p‰iv‰"));
-  $excelsarake = 0;
-  $worksheet->write($excelrivi, $excelsarake++, t("Tyˆtunti"));
-  $worksheet->write($excelrivi++, $excelsarake++, t("125 e / tunti"));
-  $excelsarake = 0;
+
+  if (in_array("SPTYOPV", $valitut_sarakkeet)) {
+    $worksheet->write($excelrivi, $excelsarake++, t($veloitukset['SPTYOPV']['nimitys']));
+    $tyopaiva = $veloitukset['SPTYOPV']['myyntihinta'];
+    $tyopaiva = str_replace(".", ",", hintapyoristys($tyopaiva)); 
+    $worksheet->write($excelrivi++, $excelsarake, $tyopaiva." e / ".t("tunti"));
+    $excelsarake = 0;
+  }
+  if (in_array("SPTYOTUNTI", $valitut_sarakkeet)) {
+    $worksheet->write($excelrivi, $excelsarake++, t($veloitukset['SPTYOTUNTI']['nimitys']));
+    $tyotunti = $veloitukset['SPTYOTUNTI']['myyntihinta'];
+    $tyotunti = str_replace(".", ",", hintapyoristys($tyotunti));  
+    $worksheet->write($excelrivi++, $excelsarake++, $tyotunti." e / ".t("tunti"));
+    $excelsarake = 0;
+  }
+  if (in_array("SPMATKATUNTI", $valitut_sarakkeet)) {
+    $worksheet->write($excelrivi, $excelsarake++, t($veloitukset['SPMATKATUNTI']['nimitys']));
+    $matkatunti = $veloitukset['SPMATKATUNTI']['myyntihinta'];
+    $matkatunti = str_replace(".", ",", hintapyoristys($matkatunti));
+    $worksheet->write($excelrivi++, $excelsarake++, $matkatunti." e / ".t("tunti"));
+    $excelsarake = 0;
+  }
+  // Hardcoded stuff
   $worksheet->write($excelrivi, $excelsarake++, t("Tyˆt arkena 16:00 - 22:00"));
-  $worksheet->write($excelrivi++, $excelsarake++, t("+50 %"));
+  $worksheet->write($excelrivi++, $excelsarake++, "+50 %");
   $excelsarake = 0;
   $worksheet->write($excelrivi, $excelsarake++, t("Tyˆt 22-08 arkena, lauantait ja pyh‰t"));
-  $worksheet->write($excelrivi++, $excelsarake++, t("+100 %"));
-  $excelsarake = 0;
-  $worksheet->write($excelrivi, $excelsarake++, t("Matkatunnit"));
-  $worksheet->write($excelrivi++, $excelsarake++, t("75 e / tunti"));
-  $excelsarake = 0;                                                   
+  $worksheet->write($excelrivi++, $excelsarake++, "+100 %");
+  $excelsarake = 0;                                                  
 
   $worksheet->write($excelrivi, $excelsarake++, t("Yhteens‰").": (ALV {$sopimus_alv} %)", $format_bold);
   $totalvalue = str_replace(".", ",", hintapyoristys($totalvalue));
@@ -280,7 +309,6 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
                           AND selitetark = 'rivikohtainen')";
 
     $palveluresult = pupe_query($palveluquery);
-    //$palvelurivit = mysql_fetch_assoc($palveluresult);
 
     $worksheet->write($excelrivi, $excelsarake++, $laiterow['valmistaja']);
     $worksheet->write($excelrivi, $excelsarake++, $laiterow['malli']);

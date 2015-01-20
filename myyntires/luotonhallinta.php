@@ -26,7 +26,6 @@ else {
 }
 
 $paivitys_oikeus = tarkista_oikeus("luotonhallinta.php", '', 1);
-echo "29: $paivitys_oikeus <br><br>";
 
 if (isset($edytunnus) and isset($ytunnus) and $edytunnus != $ytunnus) {
   unset($asiakasid);

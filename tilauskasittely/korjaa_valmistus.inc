@@ -133,11 +133,11 @@ while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
                 and tunnus  = '$taparow[tunnus]'";
       $updresult = pupe_query($query);
     }
-
+#echo "136 mm. tilausrivin tiedot"; var_dump($raakaainerow); echo "<br><br><br>";
     // P‰ivitet‰‰n saldo oikeaksi vasta j‰lkilaskennan j‰lkeen kun valmistusmuutos otetaan huomioon
     // Pistet‰‰n saldo aina oletuspaikalle
-    $mtos = $raakaainerow["kpl"] - $raakaainerow["varattu"];
-
+    $mtos = $raakaainerow["varattu"] - $raakaainerow["kpl"];
+echo "140 mtos $mtos = raakaainerow Kpl {$raakaainerow["kpl"]} - Varattu {$raakaainerow["varattu"]} <br><br>";
     if ($raakaainerow["ei_saldoa"] == "") {
       $query = "UPDATE tuotepaikat
                 SET saldo = saldo+$mtos,
@@ -192,42 +192,47 @@ while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
     }
     else {
       if (in_array($raakaainerow["sarjanumeroseuranta"], array("E", "F", "G"))) {
-        // P‰vitet‰‰n raaka-aineen er‰numeron era_kpl-kentt‰‰n oikea luku
-        $query = "UPDATE sarjanumeroseuranta
-                  SET era_kpl = era_kpl+$mtos,
-                  muutospvm            = now(),
-                  muuttaja             = '$kukarow[kuka]'
-                  WHERE yhtio          = '$kukarow[yhtio]'
-                  and tuoteno          = '$raakaainerow[tuoteno]'
-                  and myyntirivitunnus = '$raakaainerow[tunnus]'
-                  LIMIT 1";
-        $result = pupe_query($query);
-
-        $query = "SELECT *
-                  FROM sarjanumeroseuranta
-                  WHERE yhtio          = '$kukarow[yhtio]'
-                  and tuoteno          = '$raakaainerow[tuoteno]'
-                  and myyntirivitunnus = '$raakaainerow[tunnus]'
-                  LIMIT 1";
-        $result = pupe_query($query);
-
-        if ($erarow = mysql_fetch_assoc($result)) {
-          // Ja palautetaan loput sinne mist‰ ne oli otettu
-          $query = "INSERT into sarjanumeroseuranta
-                    SET yhtio      = '$kukarow[yhtio]',
-                    tuoteno          = '$erarow[tuoteno]',
-                    myyntirivitunnus = 0,
-                    ostorivitunnus   = $erarow[tunnus],
-                    era_kpl          = $mtos*-1,
-                    laatija          = '$kukarow[kuka]',
-                    luontiaika       = now(),
-                    hyllyalue        = '$erarow[hyllyalue]',
-                    hyllynro         = '$erarow[hyllynro]',
-                    hyllyvali        = '$erarow[hyllyvali]',
-                    hyllytaso        = '$erarow[hyllytaso]',
-                    sarjanumero      = '$erarow[sarjanumero]',
-                    lisatieto        = '$erarow[lisatieto]'";
+        // Tilausrivin m‰‰r‰n v‰hent‰minen toimii hieman toisella tavalla
+        // kuin m‰‰r‰n lis‰‰minen tai kokonaan uuden rivi lis‰‰minen
+        if ($raakaainerow["laskutettuaika"] != '0000-00-00' and $mtos < 0) {
+          // Er‰‰ onkin k‰ytetty v‰hemm‰n - korjataan m‰‰r‰‰ pienemm‰ksi
+          // P‰vitet‰‰n raaka-aineen er‰numeron era_kpl-kentt‰‰n oikea luku
+          $query = "UPDATE sarjanumeroseuranta
+                    SET era_kpl = era_kpl + $mtos,
+                    muutospvm            = now(),
+                    muuttaja             = '$kukarow[kuka]'
+                    WHERE yhtio          = '$kukarow[yhtio]'
+                    and tuoteno          = '$raakaainerow[tuoteno]'
+                    and myyntirivitunnus = '$raakaainerow[tunnus]'
+                    LIMIT 1";
           $result = pupe_query($query);
+
+          $query = "SELECT *
+                    FROM sarjanumeroseuranta
+                    WHERE yhtio          = '$kukarow[yhtio]'
+                    and tuoteno          = '$raakaainerow[tuoteno]'
+                    and myyntirivitunnus = '$raakaainerow[tunnus]'
+                    LIMIT 1";
+          $result = pupe_query($query);
+
+          if ($erarow = mysql_fetch_assoc($result)) {
+            // Ja palautetaan loput sinne mist‰ ne oli otettu
+            $query = "INSERT into sarjanumeroseuranta
+                      SET yhtio      = '$kukarow[yhtio]',
+                      tuoteno          = '$erarow[tuoteno]',
+                      myyntirivitunnus = 0,
+                      ostorivitunnus   = $erarow[tunnus],
+                      era_kpl          = $mtos * -1,
+                      laatija          = '$kukarow[kuka]',
+                      luontiaika       = now(),
+                      hyllyalue        = '$erarow[hyllyalue]',
+                      hyllynro         = '$erarow[hyllynro]',
+                      hyllyvali        = '$erarow[hyllyvali]',
+                      hyllytaso        = '$erarow[hyllytaso]',
+                      sarjanumero      = '$erarow[sarjanumero]',
+                      lisatieto        = '$erarow[lisatieto]'";
+            $result = pupe_query($query);
+          }
         }
       }
 

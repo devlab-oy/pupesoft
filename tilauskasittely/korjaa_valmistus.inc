@@ -140,7 +140,7 @@ while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
 
     if ($raakaainerow["ei_saldoa"] == "") {
       $query = "UPDATE tuotepaikat
-                SET saldo = saldo+$mtos,
+                SET saldo = saldo + $mtos * -1,
                 saldoaika     = now()
                 WHERE yhtio   = '$kukarow[yhtio]'
                 and tuoteno   = '$raakaainerow[tuoteno]'
@@ -153,7 +153,7 @@ while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
 
       if (mysql_affected_rows() == 0) {
         $query = "UPDATE tuotepaikat
-                  SET saldo = saldo+$mtos,
+                  SET saldo = saldo + $mtos * -1,
                   saldoaika    = now()
                   WHERE yhtio  = '$kukarow[yhtio]'
                   and tuoteno  = '$raakaainerow[tuoteno]'
@@ -163,7 +163,7 @@ while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
 
         if (mysql_affected_rows() == 0) {
           $query = "UPDATE tuotepaikat
-                    SET saldo = saldo+$mtos,
+                    SET saldo = saldo + $mtos * -1,
                     saldoaika   = now()
                     WHERE yhtio = '$kukarow[yhtio]'
                     and tuoteno = '$raakaainerow[tuoteno]'

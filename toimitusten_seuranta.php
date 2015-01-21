@@ -1707,8 +1707,11 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
       elseif ($nimike['yksikko'] == 'KPL') {
         $yksikko = t("kpl.");
       }
-      elseif ($nimike['yksikko'] == 'KG') {
+      elseif ($nimike['yksikko'] == 'TON') {
         $yksikko = t("t.");
+      }
+      elseif ($nimike['yksikko'] == 'H') {
+        $yksikko = t("h.");
       }
 
       if ($nimike['nimitys'] == "Varastointi") {
@@ -1724,21 +1727,19 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
 
         $teksti = (int) $nimike['tilkpl'] . " vrk. - " .  $tonnit . " t. - " . number_format((float)$nimike['hinta'], 2, '.', '') . " Ä";
       }
-      elseif ($nimike['yksikko'] == 'TONNI') {
+      elseif ($nimike['yksikko'] == 'TON') {
 
-        // $teksti = $nimike['tilkpl'] . " vrk. - " .  $tonnit . " t. - " . number_format((float)$nimike['hinta'], 2, '.', '') . " Ä";
-
-        $teksti = number_format((float)($nimike['hinta'] * $tonnit), 2, '.', '') . " Ä";
+        $teksti = $tonnit . " " . $yksikko . " - " . number_format((float)($nimike['hinta'] * $tonnit), 2, '.', '') . " Ä";
       }
       else {
-        $teksti =  (int) $nimike['tilkpl'] . " " . $yksikko . " - ". $nimike['tilkpl'] * $nimike['hinta'] ." Ä";
+        $teksti =  (int) $nimike['tilkpl'] . " " .  $yksikko . " - ". $nimike['tilkpl'] * $nimike['hinta'] ." Ä";
       }
 
       echo "<tr><th>" . $nimike['nimitys'] ."</th><td align='right'>";
       echo $teksti;
       echo "</td><td class='back'>";
 
-      if ($nimike['yksikko'] != "KG") {
+      if ($nimike['yksikko'] != "TONNI" and $nimike['tuoteno'] != "VARASTOINTI") {
         echo "<input type='submit' name='edit[{$nimike['tunnus']}]' value='" . t("Muokkaa") . "' />";
       }
 
@@ -1768,7 +1769,7 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
 
   if ($uusi_nimike) {
     echo "
-    <tr><th>" . t("Lis‰‰ nimike") ."</th><td align='right'><select name='lisattava_nimike' id='nimikevalinta'>";
+    <tr><th>" . t("Lis‰‰ nimike") ."</th><td align='right'><select name='lisattava_nimike' id='nimikevalinta' style='width:190px;'>";
 
     echo "<option value='0'>Valitse nimike</option>";
 
@@ -1779,12 +1780,16 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
           $txt = $nimike['nimitys'] . " " . "(kpl.)";
           break;
 
-        case 'TONNI':
+        case 'TON':
           $txt = $nimike['nimitys'] . " " . "(t.)";
           break;
 
         case 'H':
           $txt = $nimike['nimitys'] . " " . "(h.)";
+          break;
+
+        case 'MET':
+          $txt = $nimike['nimitys'] . " " . "(m.)";
           break;
 
         default:
@@ -1823,7 +1828,7 @@ echo "
 
       var value = $('#hidden_tonnit').val();
 
-      $('#kplvalinta').prop('disabled', true);
+      $('#kplvalinta').prop('readonly', true);
       $('#kplvalinta').val(value);
       $('#nimikeyksikko').text('t.');
       $('#kplvalinta').css('visibility', 'visible');
@@ -1831,7 +1836,7 @@ echo "
     }
     else if (txt.indexOf('(kpl.)') >= 0) {
 
-      $('#kplvalinta').prop('disabled', false);
+      $('#kplvalinta').prop('readonly', false);
       $('#kplvalinta').val('');
       $('#nimikeyksikko').text('kpl.');
       $('#kplvalinta').css('visibility', 'visible');
@@ -1839,7 +1844,7 @@ echo "
     }
     else if (txt.indexOf('(h.)') >= 0) {
 
-      $('#kplvalinta').prop('disabled', false);
+      $('#kplvalinta').prop('readonly', false);
       $('#kplvalinta').val('');
       $('#nimikeyksikko').text('h.');
       $('#kplvalinta').css('visibility', 'visible');

@@ -22,10 +22,6 @@ if (isset($task) and $task == 'uusi_nimike') {
   }
   else {
 
-    if ($nimikedata['yksikko'] == 'KG') {
-      $nimikedata['myyntihinta'] = $nimikedata['myyntihinta'] / 1000;
-    }
-
     $query = "SELECT column_name
               FROM information_schema.columns
               WHERE table_name = 'tuote'
@@ -110,9 +106,10 @@ if (isset($task) and $task == 'aloita_perustus') {
     <th>" . t("Yksikkö") . "</th>
     <td>
       <select name='nimikedata[yksikko]'>
-        <option value='KG'>". t("Tonni") ."</option>
+        <option value='TONNI'>". t("Tonni") ."</option>
         <option value='KPL'>". t("Kpl") ."</option>
         <option value='H'>". t("Tunti") ."</option>
+        <option value='METRI'>". t("Metri") ."</option>
       </select></td><td class='back error'>{$errors['yksikko']}</td>
   </tr>
 
@@ -166,13 +163,7 @@ if (!isset($task)) {
 
   while ($tuote = mysql_fetch_assoc($result)) {
 
-    if ($tuote['yksikko'] == 'KG') {
-      $tuote['yksikko'] = "TONNI";
-      $hinta = $tuote['myyntihinta'] * 1000;
-    }
-    else {
-      $hinta = $tuote['myyntihinta'];
-    }
+    $hinta = $tuote['myyntihinta'];
 
     if (isset($edit_tunnus) and $tuote['tunnus'] == $edit_tunnus) {
 
@@ -188,15 +179,15 @@ if (!isset($task)) {
 
       echo "<td valign='top'>";
 
-      $valittu = array('KG' => '', 'KPL' => '', 'H' => '');
-
+      $valittu = array('TONNI' => '', 'KPL' => '', 'H' => '', 'METRI' => '');
       $valittu[$tuote['yksikko']] = 'SELECTED';
 
       echo "
         <select name='uusi_yksikko'>
-          <option value='KG' {$valittu['KG']}>". t("Tonni") ."</option>
+          <option value='TONNI' {$valittu['TONNI']}>". t("Tonni") ."</option>
           <option value='KPL' {$valittu['KPL']}>". t("Kpl") ."</option>
           <option value='H' {$valittu['H']}>". t("Tunti") ."</option>
+          <option value='METRI' {$valittu['METRI']}>". t("Metri") ."</option>
         </select>";
 
       echo "</td>";
@@ -219,7 +210,7 @@ if (!isset($task)) {
       echo "</td>";
 
       echo "<td valign='top' align='right'>";
-      echo number_format((float) $hinta, 2, '.', '');
+      echo number_format((float) $hinta, 3, '.', '');
       echo " €</td>";
 
       echo "<td valign='top'>";

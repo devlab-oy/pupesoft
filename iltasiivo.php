@@ -871,6 +871,13 @@ if ($poistettu > 0) {
   $iltasiivo .= is_log("Poistettiin $poistettu poistettavaksi merkattua tuotepaikkaa.");
 }
 
+if ($php_cli) {
+
+  $argv[2] = 'CLI_TUOTTEETTOMAT';
+
+  require "varastopaikkojen_siivous.php";
+}
+
 /**
  * Synkataan uusimmat mysqlaliakset
  */

@@ -1724,11 +1724,11 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
 
         $teksti = (int) $nimike['tilkpl'] . " vrk. - " .  $tonnit . " t. - " . number_format((float)$nimike['hinta'], 2, '.', '') . " €";
       }
-      elseif ($nimike['yksikko'] == 'KG') {
+      elseif ($nimike['yksikko'] == 'TONNI') {
 
         // $teksti = $nimike['tilkpl'] . " vrk. - " .  $tonnit . " t. - " . number_format((float)$nimike['hinta'], 2, '.', '') . " €";
 
-        $teksti = number_format((float)($nimike['hinta'] * $tonnit * 1000), 2, '.', '') . " €";
+        $teksti = number_format((float)($nimike['hinta'] * $tonnit), 2, '.', '') . " €";
       }
       else {
         $teksti =  (int) $nimike['tilkpl'] . " " . $yksikko . " - ". $nimike['tilkpl'] * $nimike['hinta'] ." €";
@@ -1779,7 +1779,7 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
           $txt = $nimike['nimitys'] . " " . "(kpl.)";
           break;
 
-        case 'KG':
+        case 'TONNI':
           $txt = $nimike['nimitys'] . " " . "(t.)";
           break;
 

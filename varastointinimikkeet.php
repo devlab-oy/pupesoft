@@ -158,7 +158,7 @@ if (!isset($task)) {
   echo "<th>".t("Nimitys")."</th>";
   echo "<th>".t("myyntihinta")."</th>";
   echo "<th>".t("yksikkö")."</th>";
-  echo "<th class='back'>d</th>";
+  echo "<th class='back'></th>";
   echo "</tr>";
 
   while ($tuote = mysql_fetch_assoc($result)) {
@@ -213,8 +213,31 @@ if (!isset($task)) {
       echo number_format((float) $hinta, 3, '.', '');
       echo " €</td>";
 
+      switch ($tuote['yksikko']) {
+
+        case 'KPL':
+          $yks = "kappale";
+          break;
+
+        case 'TON':
+          $yks = "tonni";
+          break;
+
+        case 'H':
+          $yks = "tunti";
+          break;
+
+        case 'MET':
+          $yks = "metri";
+          break;
+
+        default:
+          # code...
+          break;
+      }
+
       echo "<td valign='top'>";
-      echo $tuote['yksikko'];
+      echo $yks;
       echo "</td>";
 
       echo "<td class='back'>";

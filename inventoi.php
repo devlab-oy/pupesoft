@@ -398,8 +398,8 @@ if ($tee == 'VALMIS') {
                   AND tuotepaikat.hyllynro  = '$hyllynro'
                   AND tuotepaikat.hyllyvali = '$hyllyvali'
                   AND tuotepaikat.hyllytaso = '$hyllytaso'";
-        $result = pupe_query($query);
-        $row = mysql_fetch_assoc($result);
+        $tpresresult = pupe_query($query);
+        $row = mysql_fetch_assoc($tpresresult);
 
         if (isset($eranumero_kaikki[$i]) and is_array($eranumero_kaikki[$i])) {
           if (is_array($eranumero_valitut[$i])) {
@@ -436,7 +436,6 @@ if ($tee == 'VALMIS') {
 
             // Lasketaan uuden ja nykyisen saldo erotus
             // relatiivisen m‰‰r‰ll‰ inventoinn tarkistusta varten
-            #$saldomaara = mysql_fetch_assoc($result);
             $saldo_vs_era = $erasyotetyt - $row["saldo"];
 
             $erasyotetyt = round($erasyotetyt, 2);
@@ -470,7 +469,7 @@ if ($tee == 'VALMIS') {
           continue;
         }
 
-        if (mysql_num_rows($result) == 0 and $virhe != 1) {
+        if (mysql_num_rows($tpresresult) == 0 and $virhe != 1) {
 
           if ($yhtiorow['kerayserat'] == 'K') {
             $hyllyalue = strtoupper($hyllyalue);
@@ -520,7 +519,7 @@ if ($tee == 'VALMIS') {
                         and tuotepaikat.hyllynro  = '$hyllynro'
                         and tuotepaikat.hyllyvali = '$hyllyvali'
                         and tuotepaikat.hyllytaso = '$hyllytaso'";
-              $result = pupe_query($query);
+              $tpresresult = pupe_query($query);
 
               if (mysql_num_rows($result) == 1) {
                 //echo "<font class='error'>".t("Perustettiin varastopaikka tuotteelle")." $tuoteno $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso</font><br>";
@@ -538,7 +537,7 @@ if ($tee == 'VALMIS') {
           }
         }
 
-        if (mysql_num_rows($result) == 1 and $virhe != 1) {
+        if (mysql_num_rows($tpresresult) == 1 and $virhe != 1) {
 
           if (($lista != '' and $row["inventointilista_aika"] != "0000-00-00 00:00:00") or ($validi_kasinsyotetty_inventointipaivamaara) or ($lista == '' and $row["inventointilista_aika"] == "0000-00-00 00:00:00")) {
 

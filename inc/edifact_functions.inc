@@ -3177,6 +3177,14 @@ function laskutusraportti_pdf($pdf_data) {
       $hinta = $rivi['hinta'];
       $pdf->draw_text($x+400, $y, chr(128).$rivi['hinta'], $sivu, $pieni);
     }
+    elseif ($rivi['yksikko'] == 'KG') {
+
+      $pdf->draw_text($x+150, $y, $tonnit . " t.", $sivu, $pieni);
+
+      $hinta = $rivi['hinta'] * $tonnit * 1000;
+      $pdf->draw_text($x+400, $y, chr(128).$hinta, $sivu, $pieni);
+
+    }
     else {
 
       $pdf->draw_text($x+150, $y, $rivi['tilkpl'] . " kpl.", $sivu, $pieni);

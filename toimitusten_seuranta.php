@@ -1471,15 +1471,20 @@ if (isset($task) and $task == 'lusaus') {
   }
 }
 
-if (isset($task) and $task == 'luo_laskutusraportti') {
+if (isset($task) and $task == 'luo_laskutusraportti' and !isset($vahvista_muutos_submit)) {
 
   $uusi_nimike = false;
   $edit_nimike = false;
 
-
   if (isset($edit)) {
     $edit_tunnus = key($edit);
     $edit_nimike = true;
+    $task = 'laadi_laskutusraportti';
+  }
+  elseif (isset($delete)) {
+
+    $tunnus = key($delete);
+    pupe_query("DELETE FROM tilausrivi WHERE tunnus = '{$tunnus}'");
     $task = 'laadi_laskutusraportti';
   }
   elseif (isset($lisaa_nimike_submit)) {
@@ -1547,6 +1552,24 @@ if (isset($task) and $task == 'luo_laskutusraportti') {
     </form>";
   }
 }
+
+if (isset($vahvista_muutos_submit)) {
+
+  if (!empty($muutettava_kpl)) {
+
+    $uusikpl = mysql_real_escape_string($muutettava_kpl);
+    $tunnus = key($vahvista_muutos_submit);
+    $query = "UPDATE tilausrivi
+              SET tilkpl = '{$uusikpl}'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$tunnus}'";
+    pupe_query($query);
+  }
+  unset($vahvista_muutos_submit);
+  $task = 'laadi_laskutusraportti';
+  $laadittu = 'joo';
+}
+
 
 if (isset($task) and $task == 'laadi_laskutusraportti') {
 
@@ -1635,7 +1658,7 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
   echo "
   <form method='post' id='luo_laskutusraportti'>
   <input type='hidden' name='task' value='luo_laskutusraportti' />
-  <input type='hidden' name='tonnit' value='{$tonnit}' />
+  <input type='hidden' id='hidden_tonnit' name='tonnit' value='{$tonnit}' />
   <input type='hidden' name='konttiviite' value='{$konttiviite}' />
   <table>
   <tr><th>" . t("Asiakas") ."</th><td align='right'>Kotka Mills</td><td class='back'></td></tr>
@@ -1654,12 +1677,26 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
         $result = pupe_query($query);
         $tilausrivi = mysql_fetch_assoc($result);
 
+        switch ($tilausrivi['yksikko']) {
+          case 'KPL':
+            $yks = "kpl.";
+            break;
+
+          case 'H':
+            $yks = "h.";
+            break;
+
+          default:
+            # code...
+            break;
+        }
+
         echo "
         <tr><th>" . $nimike['nimitys'] . "</th><td align='right'>";
 
         echo "
-        <input type='text' name='muutettava_kpl' size='5' value='{$kpl}' /> kpl
-        <input type='submit' name='vahvista_muutos_submit' value='". t("Muuta") ."' /></td><td class='back'></td></tr>";
+        <input type='text' name='muutettava_kpl' size='5' value='{$tilausrivi['tilkpl']}' /> {$yks}
+        </td><td class='back'><input type='submit' name='vahvista_muutos_submit[{$tilausrivi['tunnus']}]' value='". t("Vahvista") ."' /></td></tr>";
 
     }
     else {
@@ -1685,24 +1722,28 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
 
         $tonnit = $nimike['hinta'] / $nimike['tilkpl'] / $trow['myyntihinta'];
 
-        $teksti = (int) $nimike['tilkpl'] . " vrk. &mdash; " .  $tonnit . " t. &mdash; " . number_format((float)$nimike['hinta'], 2, '.', '') . " Ä";
+        $teksti = (int) $nimike['tilkpl'] . " vrk. - " .  $tonnit . " t. - " . number_format((float)$nimike['hinta'], 2, '.', '') . " Ä";
       }
       elseif ($nimike['yksikko'] == 'KG') {
 
-        // $teksti = $nimike['tilkpl'] . " vrk. &mdash; " .  $tonnit . " t. &mdash; " . number_format((float)$nimike['hinta'], 2, '.', '') . " Ä";
+        // $teksti = $nimike['tilkpl'] . " vrk. - " .  $tonnit . " t. - " . number_format((float)$nimike['hinta'], 2, '.', '') . " Ä";
 
         $teksti = number_format((float)($nimike['hinta'] * $tonnit * 1000), 2, '.', '') . " Ä";
       }
       else {
-        $teksti =  (int) $nimike['tilkpl'] . " " . $yksikko . " &mdash; ". $nimike['tilkpl'] * $nimike['hinta'] ." Ä";
+        $teksti =  (int) $nimike['tilkpl'] . " " . $yksikko . " - ". $nimike['tilkpl'] * $nimike['hinta'] ." Ä";
       }
 
       echo "<tr><th>" . $nimike['nimitys'] ."</th><td align='right'>";
       echo $teksti;
       echo "</td><td class='back'>";
 
-      if ($nimike['nimitys'] != "Varastointi") {
+      if ($nimike['yksikko'] != "KG") {
         echo "<input type='submit' name='edit[{$nimike['tunnus']}]' value='" . t("Muokkaa") . "' />";
+      }
+
+      if ($nimike['tuoteno'] != "VARASTOINTI") {
+        echo "<input type='submit' name='delete[{$nimike['tunnus']}]' value='" . t("Poista") . "' />";
       }
 
       echo "</td></tr>";
@@ -1727,18 +1768,36 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
 
   if ($uusi_nimike) {
     echo "
-    <tr><th>" . t("Lis‰‰ nimike") ."</th><td align='right'><select name='lisattava_nimike'>";
+    <tr><th>" . t("Lis‰‰ nimike") ."</th><td align='right'><select name='lisattava_nimike' id='nimikevalinta'>";
 
     echo "<option value='0'>Valitse nimike</option>";
 
     foreach ($lisattavat_nimikkeet as $nimike) {
-      echo "<option value='". $nimike['tunnus'] ."'>". $nimike['nimitys'] ."</option>";
+
+      switch ($nimike['yksikko']) {
+        case 'KPL':
+          $txt = $nimike['nimitys'] . " " . "(kpl.)";
+          break;
+
+        case 'KG':
+          $txt = $nimike['nimitys'] . " " . "(t.)";
+          break;
+
+        case 'H':
+          $txt = $nimike['nimitys'] . " " . "(h.)";
+          break;
+
+        default:
+          # code...
+          break;
+      }
+
+      echo "<option value='{$nimike['tunnus']}'>{$txt}</option>";
     }
 
-    echo "<select />&nbsp;";
-    echo "<input type='text' name='lisattava_kpl' size='5' /> kpl";
-    echo "
-    <input type='submit' name='vahvista_nimike_submit' value='". t("Lis‰‰") ."' /></td><td class='back'></td></tr>";
+    echo "<select />&nbsp;&nbsp;&nbsp;";
+    echo "<input style='visibility:hidden; width:50px;' id='kplvalinta' type='text' name='lisattava_kpl' /> <div style='display:inline-block;width:40px; text-align:center;' id='nimikeyksikko'></div>";
+    echo "<span id='nimikelisaysnappi' style='visibility:hidden'><input type='submit' name='vahvista_nimike_submit' value='". t("Lis‰‰") ."' /></span></td><td class='back'></td></tr>";
 
   }
   elseif (count($lisattavat_nimikkeet) > 0) {
@@ -1748,9 +1807,53 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
   }
 
   echo "
-  <tr><th></th><td align='right'><input type='submit' value='Luo raportti' /></td><td class='back'></td></tr>
+  <tr><th></th><td align='right' width='350'><input type='submit' value='Luo raportti' /></td><td class='back'></td></tr>
   </table>
   </form>";
 }
+
+echo "
+<script type='text/javascript'>
+
+  $('#nimikevalinta').bind('change',function(){
+
+    var txt = $('#nimikevalinta option:selected').text();
+
+    if (txt.indexOf('(t.)') >= 0) {
+
+      var value = $('#hidden_tonnit').val();
+
+      $('#kplvalinta').prop('disabled', true);
+      $('#kplvalinta').val(value);
+      $('#nimikeyksikko').text('t.');
+      $('#kplvalinta').css('visibility', 'visible');
+      $('#nimikelisaysnappi').css('visibility', 'visible');
+    }
+    else if (txt.indexOf('(kpl.)') >= 0) {
+
+      $('#kplvalinta').prop('disabled', false);
+      $('#kplvalinta').val('');
+      $('#nimikeyksikko').text('kpl.');
+      $('#kplvalinta').css('visibility', 'visible');
+      $('#nimikelisaysnappi').css('visibility', 'visible');
+    }
+    else if (txt.indexOf('(h.)') >= 0) {
+
+      $('#kplvalinta').prop('disabled', false);
+      $('#kplvalinta').val('');
+      $('#nimikeyksikko').text('h.');
+      $('#kplvalinta').css('visibility', 'visible');
+      $('#nimikelisaysnappi').css('visibility', 'visible');
+    }
+    else {
+
+      $('#nimikeyksikko').text('');
+      $('#kplvalinta').css('visibility', 'hidden');
+      $('#nimikelisaysnappi').css('visibility', 'hidden');
+    }
+
+  });
+
+</script>";
 
 require "inc/footer.inc";

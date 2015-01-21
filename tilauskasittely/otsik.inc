@@ -12,7 +12,7 @@ if (php_sapi_name() != 'cli' and (!isset($ei_kayttoliittymaa) or $ei_kayttoliitt
   echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
       <!--
 
-      function merahti_oletus(kentta) {
+      function merahti_oletus(kentta) {        
         // Toimitustapa alasvetovalikon id
         var ttdd_id = document.getElementById(kentta);
 
@@ -1656,6 +1656,18 @@ if ($tila == "" and !isset($jatka)) {
       $vasen_sarake[$vasen] .= "<input type='text' name='kasinsyotetty_viite' value='$srow[kasinsyotetty_viite]' size='20'>";
       $vasen_sarake[$vasen] .= "</td>";
       $vasen++;
+    }
+    
+    $query = "SELECT tunnus, selite, merahti
+              FROM toimitustapa
+              WHERE yhtio = '$kukarow[yhtio]'
+              and (sallitut_maat = '' or sallitut_maat like '%$srow[toim_maa]%')
+              and (extranet in ('','M') or selite = '$srow[toimitustapa]')
+              ORDER BY jarjestys,selite";
+    $tresult = pupe_query($query);
+
+    while ($row = mysql_fetch_assoc($tresult)) {
+      echo "<div style='display: none; visibility: hidden;' id='merahti_toimitustapa_$row[tunnus]'>$row[merahti]</div>";
     }
 
     //Tehd‰‰n dummy toimitustapa td, jotta alempana voidaan luoda oikea toimitustapa selecti valikoidun varaston perusteella.

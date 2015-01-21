@@ -145,22 +145,22 @@ if (!function_exists("luo_myyntitilausotsikko")) {
         $viesti = trim($viesti." ".$asiakasrow["tilaus_viesti"]);
       }
 
-      //annetaan extranet-tilaukselle aina paras prioriteetti, tämä on hyvä porkkana.
-      if ($kukarow["extranet"] != '') {
-        $query  = "SELECT distinct selite
-                   FROM avainsana
-                   WHERE yhtio  = '$kukarow[yhtio]'
-                   and laji     = 'asiakasluokka'
-                   and selite  != ''
-                   ORDER BY 1
-                   LIMIT 1";
+      //annetaan extranet-tilaukselle aina paras prioriteetti
+      if ($kukarow["extranet"] != '' and empty($yhtiorow['extranet_keraysprioriteetti'])) {
+        $query = "SELECT distinct selite
+                  FROM avainsana
+                  WHERE yhtio = '$kukarow[yhtio]'
+                  and laji = 'asiakasluokka'
+                  and selite != ''
+                  ORDER BY 1
+                  LIMIT 1";
         $prioresult = pupe_query($query);
         $priorow = mysql_fetch_assoc($prioresult);
 
         $luokka = $priorow["selite"];
       }
       else {
-        $luokka  = $asiakasrow["luokka"];
+        $luokka = $asiakasrow["luokka"];
       }
 
       $erikoisale  = $asiakasrow["erikoisale"];

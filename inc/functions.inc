@@ -325,7 +325,7 @@ if (!function_exists("pupe_error")) {
 
       echo "<font class = 'error'>";
 
-      $puperror = htmlentities($puperror);
+      $puperror = htmlentities($puperror, ENT_SUBSTITUTE);
     }
 
     if ($_display == '1' or $_pupedebug !== false) {
@@ -29889,7 +29889,7 @@ if (!function_exists("sanitoi_javascript_id")) {
     // ID and NAME tokens must begin with a letter ([A-Za-z])
     // and may be followed by any number of letters, digits ([0-9]),
     // hyphens ("-"), underscores ("_"), colons (":"), and periods (".").
-    return preg_replace("/[^a-zˆ‰ÂA-Z÷ƒ≈0-9\-\:\_\.]/i", "", $value);
+    return preg_replace("/[^a-zˆ‰ÂA-Z÷ƒ≈0-9\-\:\_]/i", "", $value);
   }
 }
 
@@ -29984,6 +29984,46 @@ if (!function_exists("rakenna_relex_tuote_parametrit")) {
     }
 
     return $sql_where_lisa;
+  }
+}
+
+if (!function_exists('tuotteen_toimittajat_pakkauskoot')) {
+  function tuotteen_toimittajat_pakkauskoot($tt_tunnus, $ehto = '') {
+    global $yhtiorow, $kukarow;
+
+    $pakkaukset = array();
+
+    if ($ehto == 'suurin') {
+      $orderby_limit = 'ORDER BY abs(tuotteen_toimittajat_pakkauskoot.pakkauskoko) desc LIMIT 1';
+    }
+    elseif ($ehto == 'desc') {
+      $orderby_limit = 'ORDER BY abs(tuotteen_toimittajat_pakkauskoot.pakkauskoko) desc';
+    }
+    else {
+      $orderby_limit = 'ORDER BY abs(tuotteen_toimittajat_pakkauskoot.pakkauskoko) asc';
+    }
+
+    if (isset($tt_tunnus)) {
+
+      $query = "SELECT tuotteen_toimittajat_pakkauskoot.*
+                FROM tuotteen_toimittajat
+                JOIN tuotteen_toimittajat_pakkauskoot ON (
+                  tuotteen_toimittajat_pakkauskoot.yhtio                   = tuotteen_toimittajat.yhtio
+                  AND tuotteen_toimittajat_pakkauskoot.toim_tuoteno_tunnus = tuotteen_toimittajat.tunnus)
+                WHERE tuotteen_toimittajat.yhtio                           = '$kukarow[yhtio]'
+                AND tuotteen_toimittajat.tunnus= '$tt_tunnus'
+                $orderby_limit";
+      $result = pupe_query($query);
+
+      while ($trow = mysql_fetch_assoc($result)) {
+        $pakkaukset[] = array($trow['pakkauskoko'], $trow['yksikko']);
+      }
+
+      return $pakkaukset;
+    }
+    else {
+      return array();
+    }
   }
 }
 

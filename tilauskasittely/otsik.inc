@@ -12,7 +12,7 @@ if (php_sapi_name() != 'cli' and (!isset($ei_kayttoliittymaa) or $ei_kayttoliitt
   echo " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
       <!--
 
-      function merahti_oletus(kentta) {        
+      function merahti_oletus(kentta) {
         // Toimitustapa alasvetovalikon id
         var ttdd_id = document.getElementById(kentta);
 
@@ -1657,7 +1657,7 @@ if ($tila == "" and !isset($jatka)) {
       $vasen_sarake[$vasen] .= "</td>";
       $vasen++;
     }
-    
+
     $query = "SELECT tunnus, selite, merahti
               FROM toimitustapa
               WHERE yhtio = '$kukarow[yhtio]'

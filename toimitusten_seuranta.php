@@ -1517,9 +1517,7 @@ if (isset($task) and $task == 'luo_laskutusraportti') {
     echo "<font class='head'>".t("Laskutusraportti luotu")."</font></a><hr><br>";
 
     $parametrit = laskutusraportti_parametrit($konttiviite);
-
-
-
+    $parametrit['tonnit'] = $tonnit;
     $parametrit = serialize($parametrit);
     $parametrit = base64_encode($parametrit);
 
@@ -1688,6 +1686,12 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
         $tonnit = $nimike['hinta'] / $nimike['tilkpl'] / $trow['myyntihinta'];
 
         $teksti = (int) $nimike['tilkpl'] . " vrk. &mdash; " .  $tonnit . " t. &mdash; " . number_format((float)$nimike['hinta'], 2, '.', '') . " €";
+      }
+      elseif ($nimike['yksikko'] == 'KG') {
+
+        // $teksti = $nimike['tilkpl'] . " vrk. &mdash; " .  $tonnit . " t. &mdash; " . number_format((float)$nimike['hinta'], 2, '.', '') . " €";
+
+        $teksti = number_format((float)($nimike['hinta'] * $tonnit * 1000), 2, '.', '') . " €";
       }
       else {
         $teksti =  (int) $nimike['tilkpl'] . " " . $yksikko . " &mdash; ". $nimike['tilkpl'] * $nimike['hinta'] ." €";

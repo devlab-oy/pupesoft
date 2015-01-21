@@ -4,6 +4,7 @@
 $tilaus_valmis_ulos     = "";
 $ohjausmerkkilisa       = "";
 $luottorajavirhe        = "";
+$ylivito                = 0;
 $jtkielto               = "";
 $myy_varastosta_varasto = $laskurow['varasto'];
 
@@ -103,7 +104,16 @@ $erapaiva_chk   =  ($maksuehtorow['kateinen'] == '' and empty($maksuehtorow['jv'
       and ($kukarow["extranet"] != ""
         or $tilausvalmiskutsuja != "TILAUSMYYNTI")))) ? 1 : 0;
 
-if ($luottoraja_chk or $erapaiva_chk) {
+$_mika_toim = in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "ENNAKKO", "EXTENNAKKO"));
+$_rekla_toim = ($toim == "REKLAMAATIO" and $kaikkiyhteensa > 0);
+
+$_hyvitys = (in_array($toim, array("RIVISYOTTO", "PIKATILAUS")));
+$_hyvitys = ($_hyvitys and $laskurow['clearing'] == 'HYVITYS' and $kaikkiyhteensa > 0);
+
+$_toim_chk = ($_mika_toim or $_rekla_toim or $_hyvitys);
+$_kumpi_chk = ($luottoraja_chk or $erapaiva_chk);
+
+if ($_toim_chk and $_kumpi_chk) {
 
   // Parametrejä saatanat.php:lle
   $sytunnus       = $laskurow['ytunnus'];
@@ -197,6 +207,9 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
     else {
       $alatila = "F";
     }
+  }
+  elseif ($toim == "REKLAMAATIO") {
+    $alatila = "";
   }
   else {
 

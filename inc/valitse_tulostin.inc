@@ -61,6 +61,7 @@ echo "<form method='post' action='$PHP_SELF?$ulisa'>
   <input type='hidden' name='kerayseran_tilaukset' value='$kerayseran_tilaukset'>
   <input type='hidden' name='reservipaikka' value='{$reservipaikka}' />
   <input type='hidden' name='tilaustyyppi' value='{$tilaustyyppi}' />
+  <input type='hidden' name='kaikkiyhteensa' value='{$kaikkiyhteensa}' />
   <input type='hidden' name='keraysvyohyke' value='{$keraysvyohyke}' />";
 
 if ($nappikeikalle == 'menossa') {

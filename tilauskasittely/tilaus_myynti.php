@@ -5008,6 +5008,12 @@ if ($tee == '') {
 
   $_asiakas = ($laskurow['liitostunnus'] > 0);
   $_mika_toim = in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "ENNAKKO", "EXTENNAKKO"));
+  $_mika_toim = ($_mika_toim and $laskurow['clearing'] != 'HYVITYS');
+
+  $_hyvitys = (in_array($toim, array("RIVISYOTTO", "PIKATILAUS")));
+  $_hyvitys = ($_hyvitys and $laskurow['clearing'] == 'HYVITYS');
+
+  $_mika_toim = ($_mika_toim or $_hyvitys);
 
   $_luottoraja_ylivito = false;
 

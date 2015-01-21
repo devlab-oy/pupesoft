@@ -1450,15 +1450,15 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
             or $varataan_saldoa == "EI"
             or ($zrow["myytavissa"] > 0
               and (($rivityyppi == 'L'
-              and $kukarow['kassamyyja'] == ''
-              and $myy_erikoistoim_ok
-              and $zrow['varastotyyppi'] == 'E'
-              and $zrow['erikoistoimitus_alarajasumma'] > 0
-              and (float) $trow['myyntihinta'] >= (float) $zrow['erikoistoimitus_alarajasumma'])
-              or $zrow["varastotyyppi"] == ''
-              or $zrow["varastotyyppi"] == 'V'
-              or (is_array($varasto) and in_array($zrow["varasto"], $varasto)
-              and $laskurow["varasto"] == 0) or $laskurow["varasto"] == $zrow["varasto"]))) {
+                  and $kukarow['kassamyyja'] == ''
+                  and $myy_erikoistoim_ok
+                  and $zrow['varastotyyppi'] == 'E'
+                  and $zrow['erikoistoimitus_alarajasumma'] > 0
+                  and (float) $trow['myyntihinta'] >= (float) $zrow['erikoistoimitus_alarajasumma'])
+                or $zrow["varastotyyppi"] == ''
+                or $zrow["varastotyyppi"] == 'V'
+                or (is_array($varasto) and in_array($zrow["varasto"], $varasto)
+                  and $laskurow["varasto"] == 0) or $laskurow["varasto"] == $zrow["varasto"]))) {
 
             if ($lisaarivi_debug == 1) echo "Myyd‰‰n $tuoteno paikalta $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $zrow[myytavissa] kappaletta<br>";
 

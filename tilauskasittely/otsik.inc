@@ -529,7 +529,7 @@ if ($toim == "YLLAPITO") {
 
   if ($kuukausihinnoittelu == "Y" and count($yllapito_pp) > 1) {
     echo
-      "<font class='error'>" .
+    "<font class='error'>" .
       t("Jos olet valinnut kuukausilaskutuksen, voit valita vain yhden laskutuspäivän") .
       "</font>";
   }

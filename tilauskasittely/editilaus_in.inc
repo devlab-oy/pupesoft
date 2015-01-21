@@ -28,7 +28,7 @@ if ($php_cli) {
   $filename = $argv[1];
 
   if (trim($argv[2]) == 'futursoft' and (substr(strtolower(basename($filename)), 0, 13) == 'magento-order'
-  or substr(strtolower(basename($filename)), 0, 11) == 'anvia-order')) {
+      or substr(strtolower(basename($filename)), 0, 11) == 'anvia-order')) {
     $argv[2] = 'magento';
   }
 

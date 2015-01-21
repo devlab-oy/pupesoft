@@ -647,7 +647,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
             AND varaston_hyllypaikat.hyllyvali = tuotepaikat.hyllyvali) ";
   }
 
-  if (!empty($piilotaToim_tuoteno)) {
+  if (empty($piilotaToim_tuoteno)) {
     $select .= "group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno,";
     $joinlisa .= " LEFT JOIN tuotteen_toimittajat ON (
       tuotteen_toimittajat.yhtio = tuote.yhtio and

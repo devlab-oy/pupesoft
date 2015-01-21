@@ -1784,6 +1784,16 @@ if ($tee == 'N' or $tee == 'E') {
     $trow = mysql_fetch_assoc($result);
     $tuoteno = $trow['tuoteno'];
     $tee = 'Z';
+
+    // Kun ollaan siirrytty seuraavaan//edelliseen tuotteeseen
+    // niin päivitetään myös paluunappi vastaamaan tätä nykyistä tuotetta
+    if (!strpos($tkysy_lopetus, "tuoteno=$tuoteno")) {
+      $_pos = strpos($tkysy_lopetus, "tuoteno=");
+      $_loppu = strpos($tkysy_lopetus, "//", $_pos);
+
+      $korvattava = substr($tkysy_lopetus, $_pos, $_loppu - $_pos);
+      $tkysy_lopetus = str_replace("$korvattava", "tuoteno=$tuoteno", $tkysy_lopetus);
+    }
   }
   else {
     $varaosavirhe = t("Yhtään tuotetta ei löytynyt")."!";

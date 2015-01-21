@@ -27,7 +27,7 @@ if ($php_cli) {
   // ja parametri komentorivilt‰
   $filename = $argv[1];
 
-  if (trim($argv[2]) == 'futursoft' and (substr(strtolower(basename($filename)), 0, 13) == 'magento-order' 
+  if (trim($argv[2]) == 'futursoft' and (substr(strtolower(basename($filename)), 0, 13) == 'magento-order'
   or substr(strtolower(basename($filename)), 0, 11) == 'anvia-order')) {
     $argv[2] = 'magento';
   }
@@ -1523,7 +1523,7 @@ while ($tietue = fgets($fd)) {
       if (!empty($varasto)) {
         $insertvarasto = $varasto;
       }
-      
+
       // Anvian verkkokaupasta toim.puhelinnro tulee OSTOTIL.OT_YHTEYSHENKILONPUH:ss‰
       if ($yhteyshenkilon_puhelin != '' and $ltoim_puh == '') {
         $tpuh = $yhteyshenkilon_puhelin;
@@ -1531,7 +1531,7 @@ while ($tietue = fgets($fd)) {
       else {
         $tpuh = $arow['toim_puh'];
       }
-      
+
       // Lis‰t‰‰n otsikko
       $query = "INSERT into lasku SET
                 aktiivinen_kuljetus     = '$suunnistus',

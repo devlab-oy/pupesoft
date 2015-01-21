@@ -521,11 +521,11 @@ if ($tee == 'VALMIS') {
                         and tuotepaikat.hyllytaso = '$hyllytaso'";
               $tpresresult = pupe_query($query);
 
-              if (mysql_num_rows($result) == 1) {
+              if (mysql_num_rows($tpresresult) == 1) {
                 //echo "<font class='error'>".t("Perustettiin varastopaikka tuotteelle")." $tuoteno $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso</font><br>";
               }
               else {
-                echo "<font class='error'>(".mysql_num_rows($result).") ".t("Varastopaikan perustus epäonnistui")." $tuoteno $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso $query</font><br>";
+                echo "<font class='error'>(".mysql_num_rows($tpresresult).") ".t("Varastopaikan perustus epäonnistui")." $tuoteno $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso $query</font><br>";
               }
             }
             else {

@@ -5414,21 +5414,21 @@ if ($tee == '') {
                     lasku_ux.laskunro AS ux_laskunro
                     FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
                     JOIN lasku USE INDEX (PRIMARY) ON (
-                      lasku.yhtio = tilausrivi.yhtio AND
-                      lasku.tunnus = tilausrivi.otunnus AND
-                      lasku.liitostunnus = '{$laskurow['liitostunnus']}' AND
-                      lasku.tila = 'L' AND
-                      lasku.alatila = 'X'
+                      lasku.yhtio                  = tilausrivi.yhtio AND
+                      lasku.tunnus                 = tilausrivi.otunnus AND
+                      lasku.liitostunnus           = '{$laskurow['liitostunnus']}' AND
+                      lasku.tila                   = 'L' AND
+                      lasku.alatila                = 'X'
                     )
                     JOIN lasku AS lasku_ux ON (
-                      lasku_ux.yhtio = lasku.yhtio AND
-                      lasku_ux.tunnus = tilausrivi.uusiotunnus
+                      lasku_ux.yhtio               = lasku.yhtio AND
+                      lasku_ux.tunnus              = tilausrivi.uusiotunnus
                     )
                     WHERE tilausrivi.yhtio         = '{$kukarow['yhtio']}'
                     AND tilausrivi.tyyppi          = 'L'
                     AND tilausrivi.tuoteno         = '{$tuote['tuoteno']}'
-                    AND tilausrivi.laskutettuaika <= '{$pre_date}'
-                    AND tilausrivi.laskutettuaika >= '{$cur_date}'
+                    AND tilausrivi.laskutettuaika  <= '{$pre_date}'
+                    AND tilausrivi.laskutettuaika  >= '{$cur_date}'
                     AND tilausrivi.kpl            != 0
                     ORDER BY tilausrivi.tunnus DESC
                     LIMIT 1";

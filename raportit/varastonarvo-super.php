@@ -498,8 +498,8 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
               sum(varattu) AS varattu_saldo
               FROM tilausrivi
               USE INDEX (yhtio_tyyppi_tuoteno_varattu)
-              WHERE yhtio = '{$kukarow["yhtio"]}'
-              AND tyyppi IN ('B', 'F', 'L', 'V', 'W')
+              WHERE yhtio  = '{$kukarow["yhtio"]}'
+              AND tyyppi   IN ('B', 'F', 'L', 'V', 'W')
               AND tuoteno != ''
               AND varattu != 0
               GROUP BY tuoteno;";

@@ -13,10 +13,10 @@ function hae_toimittajat_selectiin() {
   if (!empty($tunnukset)) {
     $tunnukset = implode(",", $tunnukset);
     $query     = "SELECT tunnus, nimi
-            FROM toimi
-                  WHERE yhtio = '{$kukarow["yhtio"]}'
-                  AND tunnus IN ({$tunnukset})
-            ORDER BY toimi.nimi";
+                  FROM toimi
+                        WHERE yhtio = '{$kukarow["yhtio"]}'
+                        AND tunnus  IN ({$tunnukset})
+                  ORDER BY toimi.nimi";
 
     $result = pupe_query($query);
     $toimittajat = array();

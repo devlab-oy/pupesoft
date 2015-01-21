@@ -106,10 +106,10 @@ if (isset($task) and $task == 'aloita_perustus') {
     <th>" . t("Yksikkö") . "</th>
     <td>
       <select name='nimikedata[yksikko]'>
-        <option value='TONNI'>". t("Tonni") ."</option>
+        <option value='TON'>". t("Tonni") ."</option>
         <option value='KPL'>". t("Kpl") ."</option>
         <option value='H'>". t("Tunti") ."</option>
-        <option value='METRI'>". t("Metri") ."</option>
+        <option value='MET'>". t("Metri") ."</option>
       </select></td><td class='back error'>{$errors['yksikko']}</td>
   </tr>
 
@@ -179,15 +179,15 @@ if (!isset($task)) {
 
       echo "<td valign='top'>";
 
-      $valittu = array('TONNI' => '', 'KPL' => '', 'H' => '', 'METRI' => '');
+      $valittu = array('TON' => '', 'KPL' => '', 'H' => '', 'MET' => '');
       $valittu[$tuote['yksikko']] = 'SELECTED';
 
       echo "
         <select name='uusi_yksikko'>
-          <option value='TONNI' {$valittu['TONNI']}>". t("Tonni") ."</option>
+          <option value='TON' {$valittu['TON']}>". t("Tonni") ."</option>
           <option value='KPL' {$valittu['KPL']}>". t("Kpl") ."</option>
           <option value='H' {$valittu['H']}>". t("Tunti") ."</option>
-          <option value='METRI' {$valittu['METRI']}>". t("Metri") ."</option>
+          <option value='MET' {$valittu['MET']}>". t("Metri") ."</option>
         </select>";
 
       echo "</td>";

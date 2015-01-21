@@ -3649,11 +3649,11 @@ if ($tee == '') {
 
       if ($yhtiorow["extranet_poikkeava_toimitusosoite"] == "Y") {
         $toim_eroaa = ($laskurow["nimi"] != $laskurow["toim_nimi"] or
-                       $laskurow["nimitark"] != $laskurow["toim_nimitark"] or
-                       $laskurow["osoite"] != $laskurow["toim_osoite"] or
-                       $laskurow["postitp"] != $laskurow["toim_postitp"] or
-                       $laskurow["postino"] != $laskurow["toim_postino"] or
-                       $laskurow["maa"] != $laskurow["toim_maa"]);
+          $laskurow["nimitark"] != $laskurow["toim_nimitark"] or
+          $laskurow["osoite"] != $laskurow["toim_osoite"] or
+          $laskurow["postitp"] != $laskurow["toim_postitp"] or
+          $laskurow["postino"] != $laskurow["toim_postino"] or
+          $laskurow["maa"] != $laskurow["toim_maa"]);
 
         if ($toim_eroaa) {
           $poikkeava_toimitusosoite = "Y";
@@ -5414,21 +5414,21 @@ if ($tee == '') {
                     lasku_ux.laskunro AS ux_laskunro
                     FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
                     JOIN lasku USE INDEX (PRIMARY) ON (
-                      lasku.yhtio = tilausrivi.yhtio AND
-                      lasku.tunnus = tilausrivi.otunnus AND
-                      lasku.liitostunnus = '{$laskurow['liitostunnus']}' AND
-                      lasku.tila = 'L' AND
-                      lasku.alatila = 'X'
+                      lasku.yhtio                  = tilausrivi.yhtio AND
+                      lasku.tunnus                 = tilausrivi.otunnus AND
+                      lasku.liitostunnus           = '{$laskurow['liitostunnus']}' AND
+                      lasku.tila                   = 'L' AND
+                      lasku.alatila                = 'X'
                     )
                     JOIN lasku AS lasku_ux ON (
-                      lasku_ux.yhtio = lasku.yhtio AND
-                      lasku_ux.tunnus = tilausrivi.uusiotunnus
+                      lasku_ux.yhtio               = lasku.yhtio AND
+                      lasku_ux.tunnus              = tilausrivi.uusiotunnus
                     )
                     WHERE tilausrivi.yhtio         = '{$kukarow['yhtio']}'
                     AND tilausrivi.tyyppi          = 'L'
                     AND tilausrivi.tuoteno         = '{$tuote['tuoteno']}'
-                    AND tilausrivi.laskutettuaika <= '{$pre_date}'
-                    AND tilausrivi.laskutettuaika >= '{$cur_date}'
+                    AND tilausrivi.laskutettuaika  <= '{$pre_date}'
+                    AND tilausrivi.laskutettuaika  >= '{$cur_date}'
                     AND tilausrivi.kpl            != 0
                     ORDER BY tilausrivi.tunnus DESC
                     LIMIT 1";
@@ -5438,7 +5438,7 @@ if ($tee == '') {
             $viimhinta = mysql_fetch_assoc($viimhintares);
 
             echo "<tr>";
-            echo "<th>",t("Viimeisin hinta"),"</th>";
+            echo "<th>", t("Viimeisin hinta"), "</th>";
             echo "<td align='right'>";
             echo hintapyoristys($viimhinta["hinta"]);
             echo " {$yhtiorow['valkoodi']}";
@@ -5447,8 +5447,8 @@ if ($tee == '') {
 
             for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
               echo "<tr>";
-              echo "<th>",t("Viimeisin alennus"),"{$alepostfix}</th>";
-              echo "<td align='right'>",$viimhinta["ale{$alepostfix}"]," %</td>";
+              echo "<th>", t("Viimeisin alennus"), "{$alepostfix}</th>";
+              echo "<td align='right'>", $viimhinta["ale{$alepostfix}"], " %</td>";
               echo "</tr>";
             }
 
@@ -5456,7 +5456,7 @@ if ($tee == '') {
             $_href_post = "&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS";
 
             echo "<tr>";
-            echo "<th>",t("Tilausnumero"),"</th>";
+            echo "<th>", t("Tilausnumero"), "</th>";
             echo "<td align='right'>";
             echo "<a href='{$_href_pre}&tunnus={$viimhinta['tunnus']}{$_href_post}'>";
             echo $viimhinta['otunnus'];
@@ -5465,7 +5465,7 @@ if ($tee == '') {
             echo "</tr>";
 
             echo "<tr>";
-            echo "<th>",t("Lasku"),"</th>";
+            echo "<th>", t("Lasku"), "</th>";
             echo "<td align='right'>";
             echo "<a href='{$_href_pre}&tunnus={$viimhinta['ux_tunnus']}{$_href_post}'>";
             echo $viimhinta['ux_laskunro'];
@@ -5474,8 +5474,8 @@ if ($tee == '') {
             echo "</tr>";
 
             echo "<tr>";
-            echo "<th>",t("Laskutettu"),"</th>";
-            echo "<td align='right'>",tv1dateconv($viimhinta["laskutettuaika"]),"</td>";
+            echo "<th>", t("Laskutettu"), "</th>";
+            echo "<td align='right'>", tv1dateconv($viimhinta["laskutettuaika"]), "</td>";
             echo "</tr>";
 
             break;
@@ -10351,13 +10351,13 @@ function piirra_toimitusosoite($laskurow) {
       $sel = "selected";
     }
     elseif ($laskurow["toim_maa"] == "" and
-            strtoupper($maa["koodi"]) == strtoupper($yhtiorow["maa"])
+      strtoupper($maa["koodi"]) == strtoupper($yhtiorow["maa"])
     ) {
       $sel = "selected";
     }
 
     echo
-      "<option value='" . strtoupper($maa["koodi"]) . "' {$sel}>" . t($maa["nimi"]) . "</option>";
+    "<option value='" . strtoupper($maa["koodi"]) . "' {$sel}>" . t($maa["nimi"]) . "</option>";
   }
 
   echo "      </select>

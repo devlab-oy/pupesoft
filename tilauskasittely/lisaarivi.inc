@@ -461,12 +461,15 @@ elseif (isset($varasto) and (int) $varasto > 0) {
 elseif (isset($laskurow["varasto"]) and (int) $laskurow["varasto"] > 0) {
   $varasto = array((int) $laskurow["varasto"]);
 }
-elseif ($rivityyppi == 'L') {
+elseif ($rivityyppi == 'L' and $laaja_toim_kasittely) {
   $params = array(
     'asiakas_tunnus' => $laskurow['liitostunnus'],
     'toimipaikka_tunnus' => $laskurow['yhtio_toimipaikka'],
   );
   $varasto = sallitut_varastot($params);
+}
+elseif (isset($kukarow["varasto"]) and (int) $kukarow["varasto"] > 0) {
+  $varasto = explode(",", $kukarow["varasto"]);
 }
 else {
   unset($varasto);
@@ -1443,7 +1446,20 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   <br>";
           }
 
-          if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and (($rivityyppi == 'L' and $kukarow['kassamyyja'] == '' and $myy_erikoistoim_ok and $zrow['varastotyyppi'] == 'E' and $zrow['erikoistoimitus_alarajasumma'] > 0 and (float) $trow['myyntihinta'] >= (float) $zrow['erikoistoimitus_alarajasumma']) or $zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or (is_array($varasto) and in_array($zrow["varasto"], $varasto) and $laskurow["varasto"] == 0) or $laskurow["varasto"] == $zrow["varasto"]))) {
+          if ($yhtiorow["puute_jt_oletus"] == "O"
+            or $varataan_saldoa == "EI"
+            or ($zrow["myytavissa"] > 0
+              and (($rivityyppi == 'L'
+                  and $kukarow['kassamyyja'] == ''
+                  and $myy_erikoistoim_ok
+                  and $zrow['varastotyyppi'] == 'E'
+                  and $zrow['erikoistoimitus_alarajasumma'] > 0
+                  and (float) $trow['myyntihinta'] >= (float) $zrow['erikoistoimitus_alarajasumma'])
+                or $zrow["varastotyyppi"] == ''
+                or $zrow["varastotyyppi"] == 'V'
+                or (is_array($varasto) and in_array($zrow["varasto"], $varasto)
+                  and $laskurow["varasto"] == 0)
+                or $laskurow["varasto"] == $zrow["varasto"]))) {
 
             if ($lisaarivi_debug == 1) echo "Myyd‰‰n $tuoteno paikalta $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $zrow[myytavissa] kappaletta<br>";
 

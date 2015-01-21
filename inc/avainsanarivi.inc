@@ -883,9 +883,9 @@ if ($avain_sel["TOIMIT_TKIRJAST"] == "SELECTED" and $_selite) {
   $query = "SELECT toimi.tunnus,
             toimi.nimi
             FROM toimi
-            WHERE toimi.yhtio = '{$kukarow["yhtio"]}'
+            WHERE toimi.yhtio       = '{$kukarow["yhtio"]}'
             AND toimi.oletus_vienti IN ('C', 'J', 'F', 'K', 'I', 'L')
-            AND toimi.tyyppi NOT IN ('P', 'PP')
+            AND toimi.tyyppi        NOT IN ('P', 'PP')
             ORDER BY toimi.nimi";
 
   $toimittaja_result = pupe_query($query);

@@ -565,7 +565,7 @@ while ($row = mysql_fetch_assoc($res)) {
         $query = "SELECT nimi, kurssi, tunnus
                   FROM valuu
                   WHERE yhtio = '$kukarow[yhtio]'
-                  AND nimi = '{$ttrow['valuutta']}'
+                  AND nimi    = '{$ttrow['valuutta']}'
                   ORDER BY jarjestys";
         $vresult = pupe_query($query);
         if (mysql_num_rows($vresult) == 1) {

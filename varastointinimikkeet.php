@@ -126,7 +126,24 @@ if (isset($task) and $task == 'aloita_perustus') {
 
 }
 
+if (isset($task) and $task == 'edit_nimike_vahvista') {
 
+  if (!empty($uusi_nimitys) and !empty($uusi_hinta)) {
+
+    $nimitys = mysql_real_escape_string($uusi_nimitys);
+    $hinta = mysql_real_escape_string($uusi_hinta);
+
+    $query = "UPDATE tuote SET
+              nimitys = '{$nimitys}',
+              myyntihinta = '{$hinta}',
+              yksikko = '{$uusi_yksikko}'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$edit_tunnus_vahvista}'";
+    pupe_query($query);
+  }
+
+unset($task);
+}
 
 if (!isset($task)) {
 
@@ -144,7 +161,7 @@ if (!isset($task)) {
   echo "<th>".t("Nimitys")."</th>";
   echo "<th>".t("myyntihinta")."</th>";
   echo "<th>".t("yksikkö")."</th>";
-  echo "<th class='back'></th>";
+  echo "<th class='back'>d</th>";
   echo "</tr>";
 
   while ($tuote = mysql_fetch_assoc($result)) {
@@ -157,22 +174,68 @@ if (!isset($task)) {
       $hinta = $tuote['myyntihinta'];
     }
 
-    echo "<tr>";
+    if (isset($edit_tunnus) and $tuote['tunnus'] == $edit_tunnus) {
 
-    echo "<td valign='top'>";
-    echo $tuote['nimitys'];
-    echo "</td>";
+      echo "<tr>";
+      echo "<form method='post'>";
+      echo "<td valign='top'>";
+      echo "<input type='text' name='uusi_nimitys' value='{$tuote['nimitys']}' />";
+      echo "</td>";
 
-    echo "<td valign='top' align='right'>";
-    echo number_format((float) $hinta, 2, '.', '');
-    echo " €</td>";
+      echo "<td valign='top' align='right'>";
+      echo "<input type='text' name='uusi_hinta' size='5' value='{$hinta}' />";
+      echo " €</td>";
 
-    echo "<td valign='top'>";
-    echo $tuote['yksikko'];
-    echo "</td>";
+      echo "<td valign='top'>";
 
-    echo "</tr>";
+      $valittu = array('KG' => '', 'KPL' => '', 'H' => '');
 
+      $valittu[$tuote['yksikko']] = 'SELECTED';
+
+      echo "
+        <select name='uusi_yksikko'>
+          <option value='KG' {$valittu['KG']}>". t("Tonni") ."</option>
+          <option value='KPL' {$valittu['KPL']}>". t("Kpl") ."</option>
+          <option value='H' {$valittu['H']}>". t("Tunti") ."</option>
+        </select>";
+
+      echo "</td>";
+
+      echo "<td class='back'>";
+      echo "<input type='hidden' name='task' value='edit_nimike_vahvista' />";
+      echo "<input type='hidden' name='edit_tunnus_vahvista' value='{$tuote['tunnus']}' />";
+      echo "<input  type='submit' value='". t("Vahvista") ."' />";
+      echo "</td>";
+      echo "</form>";
+      echo "</tr>";
+
+    }
+    else {
+
+      echo "<tr>";
+
+      echo "<td valign='top'>";
+      echo $tuote['nimitys'];
+      echo "</td>";
+
+      echo "<td valign='top' align='right'>";
+      echo number_format((float) $hinta, 2, '.', '');
+      echo " €</td>";
+
+      echo "<td valign='top'>";
+      echo $tuote['yksikko'];
+      echo "</td>";
+
+      echo "<td class='back'>";
+      echo "<form method='post'>";
+      echo "<input type='hidden' name='edit_tunnus' value='{$tuote['tunnus']}' />";
+      echo "<input type='submit' value='". t("Muokkaa") ."' />";
+      echo "</form>";
+      echo "</td>";
+
+      echo "</tr>";
+
+    }
   }
   echo "</table>";
 

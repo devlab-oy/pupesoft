@@ -437,6 +437,7 @@ if (isset($ajax)) {
       $tkrow = mysql_fetch_assoc($tkresult);
 
       $maara = "";
+      $tkrow['tilikausi_loppu'] = $tkrow['tilikausi_loppu']." 99-99-99";
       $ehto  = " and tapahtuma.laadittu >= '$tkrow[tilikausi_alku]' and tapahtuma.laadittu <= '$tkrow[tilikausi_loppu]' ";
     }
     else {

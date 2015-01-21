@@ -387,20 +387,6 @@ if ($tee == 'VALMIS') {
           $virhe = 1;
         }
 
-        // Haetaan tuotepaikan tiedot.
-        // Haetaan tiedot jo t‰ss‰ vaiheessa, jotta pystyt‰‰n tekem‰‰n saldovertailut kunnolla
-        $query = "SELECT *
-                  FROM tuotepaikat
-                    JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
-                  WHERE tuotepaikat.yhtio   = '$kukarow[yhtio]'
-                  AND tuotepaikat.tuoteno   = '$tuoteno'
-                  AND tuotepaikat.hyllyalue = '$hyllyalue'
-                  AND tuotepaikat.hyllynro  = '$hyllynro'
-                  AND tuotepaikat.hyllyvali = '$hyllyvali'
-                  AND tuotepaikat.hyllytaso = '$hyllytaso'";
-        $tpresresult = pupe_query($query);
-        $row = mysql_fetch_assoc($tpresresult);
-
         if (isset($eranumero_kaikki[$i]) and is_array($eranumero_kaikki[$i])) {
           if (is_array($eranumero_valitut[$i])) {
 
@@ -421,12 +407,6 @@ if ($tee == 'VALMIS') {
                 break;
               }
 
-              if ((substr($kpl, 0, 1) == '+' or substr($kpl, 0, 1) == '-') and $ekpl == "") {
-                echo "<font class='error'>".t("VIRHE: Et voi nollata er‰‰, jos olet syˆtt‰nyt relatiivisen m‰‰r‰n")."!</font><br>";
-                $virhe = 1;
-                break;
-              }
-
               $erasyotetyt += (float) $ekpl;
 
               if ($eranumero_uudet[$i][$enro] == '0000-00-00') {
@@ -434,22 +414,17 @@ if ($tee == 'VALMIS') {
               }
             }
 
-            // Lasketaan uuden ja nykyisen saldo erotus
-            // relatiivisen m‰‰r‰ll‰ inventoinn tarkistusta varten
-            $saldo_vs_era = $erasyotetyt - $row["saldo"];
-
             $erasyotetyt = round($erasyotetyt, 2);
-            $saldo_vs_era = round($saldo_vs_era, 2);
 
             if (is_array($eranumero_kaikki[$i]) and substr($kpl, 0, 1) != '+' and substr($kpl, 0, 1) != '-' and $onko_uusia > 0) {
               echo "<font class='error'>".t("VIRHE: Er‰numeroita ei voi lis‰t‰ kuin relatiivisella m‰‰r‰ll‰")."! (+1)</font><br>";
               $virhe = 1;
             }
-            elseif (substr($kpl, 0, 1) == '+' and is_array($eranumero_kaikki[$i]) and $saldo_vs_era != substr($kpl, 1)) {
+            elseif (substr($kpl, 0, 1) == '+' and is_array($eranumero_kaikki[$i]) and $erasyotetyt != substr($kpl, 1)) {
               echo "<font class='error'>".t("VIRHE: Er‰numeroiden m‰‰r‰ on oltava sama kuin laskettu syˆtetty m‰‰r‰")."! $tuoteno $kpl</font><br>";
               $virhe = 1;
             }
-            elseif (substr($kpl, 0, 1) == '-' and is_array($eranumero_kaikki[$i]) and $saldo_vs_era != $kpl) {
+            elseif (substr($kpl, 0, 1) == '-' and is_array($eranumero_kaikki[$i]) and $erasyotetyt != substr($kpl, 1)) {
               echo "<font class='error'>".t("VIRHE: Er‰numeroiden m‰‰r‰ on oltava sama kuin laskettu syˆtetty m‰‰r‰")."! $tuoteno $kpl</font><br>";
               $virhe = 1;
             }
@@ -469,7 +444,19 @@ if ($tee == 'VALMIS') {
           continue;
         }
 
-        if (mysql_num_rows($tpresresult) == 0 and $virhe != 1) {
+        //Haetaan tuotepaikan tiedot
+        $query = "SELECT *
+                  FROM tuotepaikat
+                  JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno)
+                  WHERE tuotepaikat.yhtio   = '$kukarow[yhtio]'
+                  and tuotepaikat.tuoteno   = '$tuoteno'
+                  and tuotepaikat.hyllyalue = '$hyllyalue'
+                  and tuotepaikat.hyllynro  = '$hyllynro'
+                  and tuotepaikat.hyllyvali = '$hyllyvali'
+                  and tuotepaikat.hyllytaso = '$hyllytaso'";
+        $result = pupe_query($query);
+
+        if (mysql_num_rows($result) == 0 and $virhe != 1) {
 
           if ($yhtiorow['kerayserat'] == 'K') {
             $hyllyalue = strtoupper($hyllyalue);
@@ -519,13 +506,13 @@ if ($tee == 'VALMIS') {
                         and tuotepaikat.hyllynro  = '$hyllynro'
                         and tuotepaikat.hyllyvali = '$hyllyvali'
                         and tuotepaikat.hyllytaso = '$hyllytaso'";
-              $tpresresult = pupe_query($query);
+              $result = pupe_query($query);
 
-              if (mysql_num_rows($tpresresult) == 1) {
+              if (mysql_num_rows($result) == 1) {
                 //echo "<font class='error'>".t("Perustettiin varastopaikka tuotteelle")." $tuoteno $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso</font><br>";
               }
               else {
-                echo "<font class='error'>(".mysql_num_rows($tpresresult).") ".t("Varastopaikan perustus ep‰onnistui")." $tuoteno $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso $query</font><br>";
+                echo "<font class='error'>(".mysql_num_rows($result).") ".t("Varastopaikan perustus ep‰onnistui")." $tuoteno $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso $query</font><br>";
               }
             }
             else {
@@ -537,7 +524,9 @@ if ($tee == 'VALMIS') {
           }
         }
 
-        if (mysql_num_rows($tpresresult) == 1 and $virhe != 1) {
+        if (mysql_num_rows($result) == 1 and $virhe != 1) {
+          $row = mysql_fetch_assoc($result);
+
 
           if (($lista != '' and $row["inventointilista_aika"] != "0000-00-00 00:00:00") or ($validi_kasinsyotetty_inventointipaivamaara) or ($lista == '' and $row["inventointilista_aika"] == "0000-00-00 00:00:00")) {
 
@@ -620,6 +609,7 @@ if ($tee == 'VALMIS') {
               $kpl = substr($kpl, 1);
               $skp = $kpl;
               $kpl = $row['saldo'] + $kpl;
+
             }
             elseif (substr($kpl, 0, 1) == '-') {
               $kpl = substr($kpl, 1);
@@ -849,15 +839,9 @@ if ($tee == 'VALMIS') {
             // Jos p‰vitettiin saldoa, tehd‰‰n kirjanpito. Vaikka summa olisi nolla. Muuten j‰lkilaskenta ei osaa korjata t‰t‰, jos tiliˆintej‰ ei tehd‰.
             if (mysql_affected_rows() > 0) {
 
-              $lasku_tapvm = date('Y-m-d');
-
-              if ($paivamaaran_kasisyotto == "JOO" and (!empty($inventointipvm_pp) and !empty($inventointipvm_kk) and !empty($inventointipvm_vv))) {
-                $lasku_tapvm = "$inventointipvm_vv-$inventointipvm_kk-$inventointipvm_pp";
-              }
-
               $query = "INSERT into lasku set
                         yhtio      = '$kukarow[yhtio]',
-                        tapvm      = '$lasku_tapvm',
+                        tapvm      = now(),
                         tila       = 'X',
                         alatila    = 'I',
                         laatija    = '$kukarow[kuka]',
@@ -1050,13 +1034,32 @@ if ($tee == 'VALMIS') {
                 }
               }
               elseif ((float) $skp < 0 or (float) $skp > 0) {
+
                 // Ollaan syˆtetty relatiivinen m‰‰r‰
                 foreach ($eranumero_valitut[$i] as $enro_key => $enro_val) {
                   $enro_val = (float) str_replace(",", ".", $enro_val);
 
                   if ((float) $enro_val > 0) {
+
+                    if ($skp < 0) {
+                      $mita_jaa = $eranumero_kaikki[$i][$enro_key] - $enro_val;
+                    }
+                    elseif ($skp > 0 and $onko_uusia == 0) {
+                      $mita_jaa = $eranumero_kaikki[$i][$enro_key] + $enro_val;
+                    }
+                    else {
+                      $mita_jaa = $enro_val;
+                    }
+
+                    $sarjaquerylisa = '';
+
+                    // jos er‰ loppuu niin poistetaan kyseinen er‰
+                    if ($mita_jaa == 0) {
+                      $sarjaquerylisa = "myyntirivitunnus = '-1', siirtorivitunnus = '-1', ";
+                    }
+
                     $query = "UPDATE sarjanumeroseuranta
-                              SET era_kpl = '$enro_val',
+                              SET era_kpl = '$mita_jaa',
                               $sarjaquerylisa
                               muuttaja    = '$kukarow[kuka]',
                               muutospvm   = now()
@@ -1575,7 +1578,7 @@ if ($tee == 'INVENTOI') {
               if ($sarjarow['laskutettuaika'] == '0000-00-00') {
                 echo "<input type='hidden' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>";
                 echo "<font class='message'>**", t("UUSI"), "**</font>";
-                echo " <a href='inventoi.php?tee=POISTAERANUMERO&tuoteno=$tuoteno&lista=$lista&lista_aika=$lista_aika&alku=$alku&toiminto=poistaeranumero&sarjatunnus=$sarjarow[tunnus]&toim=$toim&paivamaaran_kasisyotto=$paivamaaran_kasisyotto&inventointipvm_pp=$inventointipvm_pp&inventointipvm_kk=$inventointipvm_kk&inventointipvm_vv=$inventointipvm_vv'>".t("Poista")."</a>";
+                echo " <a href='inventoi.php?tee=POISTAERANUMERO&tuoteno=$tuoteno&lista=$lista&lista_aika=$lista_aika&alku=$alku&toiminto=poistaeranumero&sarjatunnus=$sarjarow[tunnus]&paivamaaran_kasisyotto=$paivamaaran_kasisyotto&inventointipvm_pp=$inventointipvm_pp&inventointipvm_kk=$inventointipvm_kk&inventointipvm_vv=$inventointipvm_vv'>".t("Poista")."</a>";
               }
               else {
                 echo "<input type='hidden' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>";

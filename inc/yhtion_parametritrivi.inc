@@ -3064,6 +3064,24 @@ if ($fieldname == "extranet_poikkeava_toimitusosoite") {
   $jatko = 0;
 }
 
+if ($fieldname == "extranet_keraysprioriteetti") {
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'A' ? ' selected' : '';
+
+  $ulos .= "<option value=''>";
+  $ulos .= t("Extranet-tilaukset ker‰t‰‰n aina parhaalla prioriteetilla");
+  $ulos .= "</option>";
+
+  $ulos .= "<option value='A' {$sel}>";
+  $ulos .= t("Extranet-tilaukset ker‰t‰‰n asiakkaan prioriteetilla");
+  $ulos .= "</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "ext_tilauksen_hyvaksyja_myyjaksi") {
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 

@@ -183,6 +183,13 @@ if (in_array($row['var'], array('U', 'T', 'S')) and $meapurow['kateinen'] != '')
   $tilausok++;
 }
 
+if ($row['var'] == 'U' and $meapurow['jv'] != '') {
+
+  $varaosavirhe .= t("VIRHE: Et voi tilata toimittajalta asiakkaalle, koska maksuehto on jälkivaatimus!")."<br>";
+  $riviok++;
+  $tilausok++;
+}
+
 // katsotaan, ettei valmisteta epäkuranttia tuotetta
 if (($toim == "VALMISTAVARASTOON" or $toim == 'VALMISTAASIAKKAALLE') and $trow["epakurantti25pvm"] != '0000-00-00' and ($row["tyyppi"] == "W" or $row["tyyppi"] == "M") and $riviok == 0) {
   $varaosavirhe .= t("VIRHE: Tuote on epäkurantti, sitä ei saa valmistaa!");
@@ -352,22 +359,6 @@ if (trim($trow["vienti"]) != '' and $row["tyyppi"] != "V" and $row["tyyppi"] != 
     if ($yhtiorow["vientikiellon_ohitus"] == "K" and $kukarow["extranet"] == "") {
       $saako_hyvaksya++;
     }
-  }
-}
-
-if ($row["var"] == 'S') {
-  // otetaan maksuehto selville..
-  $query = "SELECT *
-            from maksuehto
-            where yhtio = '$kukarow[yhtio]'
-            and tunnus  = '$laskurow[maksuehto]'";
-  $maksuehtoresult = pupe_query($query);
-  $maksuehtorow = mysql_fetch_assoc($maksuehtoresult);
-
-  if ($maksuehtorow["jv"] != "") {
-    $varaosavirhe .= t("VIRHE: Et voi suoratoimittaa tuotetta jos maksuehtona on jälkivaatimus!")."<br>";
-    $riviok++;
-    $tilausok++;
   }
 }
 

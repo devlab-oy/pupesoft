@@ -1850,6 +1850,14 @@ echo "
       $('#kplvalinta').css('visibility', 'visible');
       $('#nimikelisaysnappi').css('visibility', 'visible');
     }
+    else if (txt.indexOf('(m.)') >= 0) {
+
+      $('#kplvalinta').prop('readonly', false);
+      $('#kplvalinta').val('');
+      $('#nimikeyksikko').text('m.');
+      $('#kplvalinta').css('visibility', 'visible');
+      $('#nimikelisaysnappi').css('visibility', 'visible');
+    }
     else {
 
       $('#nimikeyksikko').text('');

@@ -110,6 +110,27 @@ if (isset($task) and $task == 'laivamuutos') {
   unset($task);
 }
 
+if (isset($task) and $task == 'poistalasku') {
+
+  $query = "SELECT group_concat(tunnus) FROM tilausrivi where otunnus = '{$poistettavatunnus}'";
+  $result = pupe_query($query);
+  $trtunnarit = mysql_result($result, 0);
+
+  $query = "DELETE FROM lasku where tunnus = '{$poistettavatunnus}'";
+  pupe_query($query);
+
+  $query = "DELETE FROM tilausrivi where tunnus IN ({$trtunnarit})";
+  pupe_query($query);
+
+  $query = "DELETE FROM tilausrivin_lisatiedot where tilausrivitunnus IN ({$trtunnarit})";
+  pupe_query($query);
+
+  header("Location: toimitusten_seuranta.php?rajaus=toimitetut");
+  exit;
+
+}
+
+
 if (isset($task) and $task == 'eu_tilaus') {
 
   $query = "SELECT group_concat(tilausrivin_lisatiedot.tunnus)
@@ -1196,7 +1217,26 @@ if (!isset($task)) {
               <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />
               <input type='submit' value='{$nappi}' />
               </form></div>";
+
+              if ($laadittu == 'joo') {
+
+                $poistettavatunnus = mysql_fetch_assoc($result);
+
+                  echo "
+                  <div style='text-align:center; padding-top:6px;'>
+                  <form method='post'>
+                  <input type='hidden' name='task' value='poistalasku' />
+                  <input type='hidden' name='poistettavatunnus' value='{$poistettavatunnus['tunnus']}' />
+                  <input type='submit' value='laadi uudestaan' />
+                  </form></div>";
+
+              }
+
+
+
             }
+
+
 
             echo "</div>";
           }

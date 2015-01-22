@@ -624,8 +624,8 @@ function hae_varastointikaudet($konttiviite) {
   $query = "SELECT
             group_concat(DISTINCT lasku.asiakkaan_tilausnumero) AS tilausnumerot,
             SUM(sarjanumeroseuranta.massa) AS total_paino,
-            DATE(tilausrivi.toimitettuaika) AS sisaan,
-            DATE(laskun_lisatiedot.satamavahvistus_pvm) AS ulos
+            DATE(tilausrivi.toimaika) AS sisaan,
+            DATE(tilausrivi.toimitettuaika) AS ulos
             FROM laskun_lisatiedot
             JOIN lasku
               ON lasku.yhtio = laskun_lisatiedot.yhtio
@@ -643,7 +643,7 @@ function hae_varastointikaudet($konttiviite) {
             AND sarjanumeroseuranta.lisatieto != 'Hylätty'
             AND sarjanumeroseuranta.lisatieto != 'Ylijaama'
             AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
-            GROUP BY DATE(tilausrivi.toimitettuaika), DATE(laskun_lisatiedot.satamavahvistus_pvm)";
+            GROUP BY DATE(tilausrivi.toimaika), DATE(tilausrivi.toimitettuaika)";
   $result = pupe_query($query);
 
   $varastointikaudet = array();
@@ -678,7 +678,21 @@ function laskutusraportti_parametrit($konttiviite) {
 
   $varastointihinta = $trow['myyntihinta'];
 
-  $query = "SELECT tilausrivi.*, lasku.asiakkaan_tilausnumero
+  $query = "SELECT asiakkaan_tilausnumero
+            FROM lasku
+            JOIN laskun_lisatiedot
+              ON laskun_lisatiedot.yhtio = lasku.yhtio
+              AND laskun_lisatiedot.otunnus = lasku.tunnus
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND laskun_lisatiedot.konttiviite = '{$konttiviite}'";
+  $result = pupe_query($query);
+
+  $tilaukset = array();
+  while ($rivi = mysql_fetch_assoc($result)) {
+    $tilaukset[] = $rivi;
+  }
+
+  $query = "SELECT tilausrivi.*
             FROM tilausrivi
             JOIN lasku
               ON lasku.yhtio = tilausrivi.yhtio
@@ -701,7 +715,8 @@ function laskutusraportti_parametrit($konttiviite) {
   $parametrit = array(
     'rivit' => $rivit,
     'konttiviite' => $konttiviite,
-    'varastointihinta' => $varastointihinta
+    'varastointihinta' => $varastointihinta,
+    'tilaukset' => $tilaukset
     );
 
   return $parametrit;
@@ -3148,10 +3163,34 @@ function laskutusraportti_pdf($pdf_data) {
   $pdf->draw_text($x, $y, $pvm, $sivu, $bold);
 
   $y -= 15;
-  $pdf->draw_text($x, $y, "Konttiviite: {$konttiviite}", $sivu, $bold);
+  $pdf->draw_text($x, $y, "Konttiviite:", $sivu, $bold);
+  $pdf->draw_text($x+90, $y, "{$konttiviite}", $sivu, $bold);
 
   $y -= 15;
 
+  if (count($tilaukset) > 1) {
+
+    $pdf->draw_text($x, $y, "Tilausnumerot:", $sivu, $bold);
+    $y -= 15;
+
+    foreach ($tilaukset as $tilaus) {
+
+      $pdf->draw_text($x, $y, "{$tilaus['asiakkaan_tilausnumero']}", $sivu, $bold);
+      $y -= 15;
+    }
+  }
+  else {
+
+    $pdf->draw_text($x, $y, "Tilausnumero:", $sivu, $bold);
+    $pdf->draw_text($x+90, $y, "{$tilaukset[0]['asiakkaan_tilausnumero']}", $sivu, $bold);
+    $y -= 15;
+  }
+
+  $y -= 15;
+
+  $pdf->draw_text($x, $y, "NIMIKE", $sivu, $bold);
+  $pdf->draw_text($x+220, $y, utf8_decode("MÄÄRÄ"), $sivu, $bold);
+  $pdf->draw_text($x+440, $y, "HINTA", $sivu, $bold);
 
   $y -= 10;
   $yy[0] = $yy[1] = $y;
@@ -3162,35 +3201,45 @@ function laskutusraportti_pdf($pdf_data) {
 
   foreach ($rivit as $rivi) {
 
+    if ($y < 100) {
+      $sivu = $pdf->new_page("a4");
+      $y = 800;
+    }
+
     $pdf->draw_text($x, $y, $rivi['nimitys'], $sivu, $pieni);
 
     if ($rivi['tuoteno'] == 'VARASTOINTI') {
-      /*
+
+
       $sisaan = date("j.n.Y", strtotime($rivi['toimaika']));
       $ulos = date("j.n.Y", strtotime($rivi['kerayspvm']));
-      */
 
       $tonnit = $rivi['hinta'] / $rivi['tilkpl'] / $varastointihinta;
 
-      $pdf->draw_text($x+150, $y, $rivi['varastopaivat'] . " vrk. - {$tonnit} t.", $sivu, $pieni);
+      $txt  = $sisaan . " - " . $ulos . " | ";
+      $txt .= $rivi['varastopaivat'] - 7 . " vrk. - {$tonnit} t.";
+
+      $pdf->draw_text($x+180, $y, $txt, $sivu, $pieni);
 
       $hinta = $rivi['hinta'];
-      $pdf->draw_text($x+400, $y, chr(128).$rivi['hinta'], $sivu, $pieni);
+      $pdf->draw_text($x+440, $y, chr(128).number_format((float)($rivi['hinta']), 3, '.', ''), $sivu, $pieni);
+
+
     }
     elseif ($rivi['yksikko'] == 'TON') {
 
-      $pdf->draw_text($x+150, $y, $tonnit . " t.", $sivu, $pieni);
+      $pdf->draw_text($x+220, $y, $tonnit . " t.", $sivu, $pieni);
 
       $hinta = $rivi['hinta'] * $tonnit;
-      $pdf->draw_text($x+400, $y, chr(128).$hinta, $sivu, $pieni);
+      $pdf->draw_text($x+440, $y, chr(128).$hinta, $sivu, $pieni);
 
     }
     else {
 
-      $pdf->draw_text($x+150, $y, $rivi['tilkpl'] . " kpl.", $sivu, $pieni);
+      $pdf->draw_text($x+220, $y, $rivi['tilkpl'] . " kpl.", $sivu, $pieni);
 
       $hinta = $rivi['hinta'] * $rivi['tilkpl'];
-      $pdf->draw_text($x+400, $y, chr(128).$hinta, $sivu, $pieni);
+      $pdf->draw_text($x+440, $y, chr(128).$hinta, $sivu, $pieni);
 
     }
 

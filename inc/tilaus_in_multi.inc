@@ -18,6 +18,8 @@ $edytunnus = "luuppiinmeno_ekalla";
   netto
   var
   kommentti
+  viesti aka tilausviite
+  toimitustapa
 */
 
 while ($rivi = fgets($fd)) {
@@ -84,7 +86,7 @@ while ($rivi = fgets($fd)) {
 
       $arow = mysql_fetch_assoc($result);
 
-      $id = luo_myyntitilausotsikko("RIVISYOTTO", $arow["tunnus"], "", "", "", "", "", "", "", $tilaus_ketjutus);
+      $id = luo_myyntitilausotsikko("RIVISYOTTO", $arow["tunnus"], "", "", trim($rivi[11]), "", "", "", "", $tilaus_ketjutus, trim($rivi[12]));
 
       echo "Tehtiin tilaus $id asiakkaalle $ytunnus<br>";
 
@@ -111,18 +113,18 @@ while ($rivi = fgets($fd)) {
       $tuoteno         = $trow["tuoteno"];
       $toimaika        = $rivi[5] != "" ? $rivi[5] : $laskurow["toimaika"];
       $kerayspvm       = $laskurow["kerayspvm"];
-      $hinta          = str_replace(",", ".", $rivi[6]);
-      $netto          = strtoupper(trim($rivi[8]));
-      $alv         = str_replace(",", ".", $rivi[4]);
-      $var       = strtoupper(trim($rivi[9]));
-      $varasto        = "";
-      $rivitunnus     = "";
-      $korvaavakielto   = "";
-      $jtkielto      = $laskurow['jtkielto'];
+      $hinta           = str_replace(",", ".", $rivi[6]);
+      $netto           = strtoupper(trim($rivi[8]));
+      $alv             = str_replace(",", ".", $rivi[4]);
+      $var             = strtoupper(trim($rivi[9]));
+      $varasto         = "";
+      $rivitunnus      = "";
+      $korvaavakielto  = "";
+      $jtkielto        = $laskurow['jtkielto'];
       $varataan_saldoa = "";
       $myy_sarjatunnus = "";
-      $kommentti     = trim($rivi[10]);
-      $paikka       = "";
+      $kommentti       = trim($rivi[10]);
+      $paikka          = "";
 
       for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
         if ($alepostfix == 1) ${'ale'.$alepostfix} = str_replace(",", ".", $rivi[7]);

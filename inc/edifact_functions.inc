@@ -3254,7 +3254,7 @@ function laskutusraportti_pdf($pdf_data) {
   }
 
   $pdf->draw_text($x, $y, utf8_decode("Hinta yhteensä:"), $sivu, $bold);
-  $pdf->draw_text($x+80, $y, chr(128).$total_hinta, $sivu, $bold);
+  $pdf->draw_text($x+80, $y, chr(128).number_format((float)($total_hinta), 3, '.', ''), $sivu, $bold);
   $y -= 15;
 
   //keksitään uudelle failille joku varmasti uniikki nimi:

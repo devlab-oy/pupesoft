@@ -80,6 +80,8 @@ inc/sahkoposti.inc
 inc/tuotehaku.inc
 indexvas.php
 index.php
+ylaframe.php
+pikavalinnat.php
 korvaavat.class.php
 raportit/asiakasinfo.php
 raportit/naytatilaus.inc

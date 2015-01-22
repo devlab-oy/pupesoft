@@ -33,10 +33,11 @@ if (!empty($alusta_tunnus)) {
 if (!isset($row)) {
   $query = "SELECT
             tilausrivi.*,
-            tuotepaikat.hyllyalue,
-            tuotepaikat.hyllynro,
-            tuotepaikat.hyllyvali,
-            tuotepaikat.hyllytaso,
+            tuotepaikat.hyllyalue AS tuotepaikat_hyllyalue,
+            tuotepaikat.hyllynro AS tuotepaikat_hyllynro,
+            tuotepaikat.hyllyvali AS tuotepaikat_hyllyvali,
+            tuotepaikat.hyllytaso AS tuotepaikat_hyllytaso,
+            tuotepaikat.varasto AS tuotepaikat_varasto,
             tuotteen_toimittajat.toim_tuoteno
             FROM tilausrivi
             LEFT JOIN tuotteen_toimittajat
@@ -58,6 +59,13 @@ if (isset($hylly)) {
   $row['hyllynro'] = $hylly[1];
   $row['hyllyvali'] = $hylly[2];
   $row['hyllytaso'] = $hylly[3];
+}
+elseif ($row['varasto'] == $row['tuotepaikat_varasto']) {
+  // k‰ytet‰‰n oletuspaikan varastossa aina oletuspaikkaa
+  $row['hyllyalue'] = $row['tuotepaikat_hyllyalue'];
+  $row['hyllynro']  = $row['tuotepaikat_hyllynro'];
+  $row['hyllyvali'] = $row['tuotepaikat_hyllyvali'];
+  $row['hyllytaso'] = $row['tuotepaikat_hyllytaso'];
 }
 
 $_varasto = kuuluukovarastoon($row['hyllyalue'], $row['hyllynro']);

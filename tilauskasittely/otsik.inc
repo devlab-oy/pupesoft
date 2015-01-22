@@ -2623,7 +2623,9 @@ if ($tila == "" and !isset($jatka)) {
       if (!empty($toimitustapa['sallitut_maat']) and !stristr($toimitustapa['sallitut_maat'], $srow['toim_maa'])) {
         continue;
       }
-
+            
+      echo "<div style='display: none; visibility: hidden;' id='merahti_toimitustapa_$toimitustapa[tunnus]'>$toimitustapa[merahti]</div>";
+    
       if (in_array($toimitustapa['extranet'], array('', 'M')) or $toimitustapa['selite'] == $srow['toimitustapa']) {
         $sel = "";
         if (empty($asiakas) and $toimitustapa["selite"] == $srow["toimitustapa"]) {

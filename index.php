@@ -51,6 +51,10 @@ else {
   echo "<link rel='shortcut icon' href='{$palvelin2}devlab-shortcut.png'>\n";
 }
 
+if ($kukarow["extranet"] != "") {
+  echo $yhtiorow["web_seuranta"];
+}
+
 echo "</head>";
 
 if (($yhtiorow["kayttoliittyma"] == "" and $kukarow["kayttoliittyma"] == "") or $kukarow["kayttoliittyma"] == "C") {

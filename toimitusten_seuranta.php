@@ -1632,6 +1632,8 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
         pupe_query($update_query);
       }
     }
+    header("Location: toimitusten_seuranta.php?task=laadi_laskutusraportti&laadittu=joo&tonnit={$tonnit}&konttiviite={$konttiviite}");
+    exit;
   }
 
   $query = "SELECT tilausrivi.*
@@ -1725,7 +1727,14 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
 
         $tonnit = $nimike['hinta'] / $nimike['tilkpl'] / $trow['myyntihinta'];
 
-        $teksti = (int) $nimike['tilkpl'] . " vrk. - " .  $tonnit . " t. - " . number_format((float)$nimike['hinta'], 2, '.', '') . " €";
+        $sisaan = date("j.n.Y", strtotime($nimike['toimaika']));
+        $ulos = date("j.n.Y", strtotime($nimike['kerayspvm']));
+
+        $teksti = (int) $nimike['tilkpl'] . " " . t("vrk.") . " | ";
+
+        $teksti .=  $sisaan . " &mdash; " . $ulos . " | ";
+
+        $teksti .= $tonnit . " t. - " . number_format((float)$nimike['hinta'], 3, '.', '') . " €";
       }
       elseif ($nimike['yksikko'] == 'TON') {
 

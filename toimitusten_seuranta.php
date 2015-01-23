@@ -1,6 +1,9 @@
 <?php
 
 
+print_r($_POST);
+echo '<hr>';
+
 if (isset($_POST['task']) and (
   $_POST['task'] == 'nayta_konttierittely' or
   $_POST['task'] == 'nayta_laskutusraportti' or

@@ -411,7 +411,8 @@ function lahtoilmoitus_parametrit($konttiviite) {
             sum(sarjanumeroseuranta.massa) AS paino,
             laskun_lisatiedot.konttityyppi,
             laskun_lisatiedot.matkakoodi,
-            laskun_lisatiedot.satamavahvistus_pvm AS lahtoaika
+            laskun_lisatiedot.satamavahvistus_pvm AS lahtoaika,
+            laskun_lisatiedot.matkatiedot
             FROM lasku
             JOIN tilausrivi
               ON tilausrivi.yhtio = lasku.yhtio
@@ -438,6 +439,9 @@ function lahtoilmoitus_parametrit($konttiviite) {
     $konttityyppi = $tilausrivi['konttityyppi'];
     $matkakoodi = $tilausrivi['matkakoodi'];
     $lahtopaiva = $tilausrivi['lahtoaika'];
+
+    $matkatiedot = unserialize($tilausrivi['matkatiedot']);
+    $tilausrivi['laiva'] = $matkatiedot['transport_name'];
 
     $konttilista .= $tilausrivi['kontit'] . ",";
 
@@ -2946,7 +2950,7 @@ function lahtoilmoitus_pdf($pdf_data) {
     }
 
     $pdf->draw_text($x, $y, $tilausrivi['tilaus_ja_rivi'], $sivu, $bold);
-    $pdf->draw_text($x+100, $y, $tilausrivi['matkakoodi'], $sivu, $bold);
+    $pdf->draw_text($x+100, $y, $tilausrivi['laiva'], $sivu, $bold);
     $pdf->draw_text($x+260, $y, $tilausrivi['rullia'], $sivu, $bold);
     $pdf->draw_text($x+350, $y, $tilausrivi['paino'] / 1000, $sivu, $bold);
 

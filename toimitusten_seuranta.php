@@ -1514,7 +1514,22 @@ if (isset($task) and $task == 'lusaus') {
   }
 }
 
+if ($kukarow['kuka'] == 'admin') {
+
+  print_r($_POST);
+  echo '<hr>';
+
+}
+
 if (isset($task) and $task == 'luo_laskutusraportti' and !isset($vahvista_muutos_submit)) {
+
+
+  if ($kukarow['kuka'] == 'admin') {
+
+    print_r($_POST);
+    echo '<hr>';
+
+  }
 
   $uusi_nimike = false;
   $edit_nimike = false;
@@ -1612,7 +1627,6 @@ if (isset($vahvista_muutos_submit)) {
   $task = 'laadi_laskutusraportti';
   $laadittu = 'joo';
 }
-
 
 if (isset($task) and $task == 'laadi_laskutusraportti') {
 

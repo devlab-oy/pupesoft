@@ -119,11 +119,16 @@ if (isset($task) and $task == 'poistalasku') {
   $query = "DELETE FROM lasku where tunnus = '{$poistettavatunnus}'";
   pupe_query($query);
 
-  $query = "DELETE FROM tilausrivi where tunnus IN ({$trtunnarit})";
-  pupe_query($query);
+  if (!empty($trtunnarit)) {
 
-  $query = "DELETE FROM tilausrivin_lisatiedot where tilausrivitunnus IN ({$trtunnarit})";
-  pupe_query($query);
+    $query = "DELETE FROM tilausrivi where tunnus IN ({$trtunnarit})";
+    pupe_query($query);
+
+    $query = "DELETE FROM tilausrivin_lisatiedot where tilausrivitunnus IN ({$trtunnarit})";
+    pupe_query($query);
+
+  }
+
 
   header("Location: toimitusten_seuranta.php?rajaus=toimitetut");
   exit;

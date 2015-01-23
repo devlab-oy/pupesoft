@@ -1498,7 +1498,7 @@ if (!function_exists('loppu_tarjous')) {
 }
 
 if (!function_exists('print_pdf_tarjous')) {
-  function print_pdf_tarjous($pdf_tarjous, $laskurow, $komento, $tee) {
+  function print_pdf_tarjous($pdf_tarjous, $laskurow, $komento, $tee, $liita_tuotetiedot = "") {
     global $yhtiorow, $kukarow, $mista;
 
     $oslapp='';
@@ -1530,7 +1530,9 @@ if (!function_exists('print_pdf_tarjous')) {
       echo t("Tarjous tulostuu")."...<br>";
 
       if ($kukarow["extranet"] == '') {
-        $lisaliitteet = hae_tuotetieto_liitteet($laskurow["tunnus"]);
+        if ($liita_tuotetiedot == "Y") {
+          $lisaliitteet = hae_tuotetieto_liitteet($laskurow["tunnus"]);
+        }
 
         require "inc/sahkoposti.inc";
       }
@@ -1550,7 +1552,9 @@ if (!function_exists('print_pdf_tarjous')) {
 }
 
 if (!function_exists('tulosta_tarjous')) {
-  function tulosta_tarjous($otunnus, $komento, $kieli = "", $tee = "", $hinnat = "", $verolliset_verottomat_hinnat = "", $naytetaanko_rivihinta = '', $naytetaanko_tuoteno = '') {
+  function tulosta_tarjous($otunnus, $komento, $kieli = "", $tee = "", $hinnat = "",
+                           $verolliset_verottomat_hinnat = "", $naytetaanko_rivihinta = '',
+                           $naytetaanko_tuoteno = '', $liita_tuotetiedot = "") {
     global $yhtiorow, $kukarow, $norm, $pieni, $kala, $mista, $kaanteinen_verotus;
 
     // Haetaan laskun tiedot
@@ -1753,7 +1757,7 @@ if (!function_exists('tulosta_tarjous')) {
     }
 
     // Tulostetaan sivu
-    print_pdf_tarjous ($pdf_tarjous, $laskurow, $komento, $tee);
+    print_pdf_tarjous ($pdf_tarjous, $laskurow, $komento, $tee, $liita_tuotetiedot);
   }
 }
 

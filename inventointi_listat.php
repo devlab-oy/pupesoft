@@ -727,8 +727,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
         $join     = " JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuote.ei_saldoa = '' {$rajauslisatuote}";
         $lefttoimi   = " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuotepaikat.yhtio and tuotteen_toimittajat.tuoteno = tuotepaikat.tuoteno ";
 
-        $where    = " and tuotepaikat.varasto = '{$varasto}'
-                      and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $rajauslisa $invaamatta $extra ";
+        $where    = " and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $rajauslisa $invaamatta $extra ";
       }
       else {
         $join .= " and tuotepaikat.varasto = '{$varasto}' ";

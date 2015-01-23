@@ -1530,6 +1530,8 @@ if (!function_exists('print_pdf_tarjous')) {
       echo t("Tarjous tulostuu")."...<br>";
 
       if ($kukarow["extranet"] == '') {
+        $lisaliitteet = hae_tuotetieto_liitteet($laskurow["tunnus"]);
+
         require "inc/sahkoposti.inc";
       }
       else {
@@ -2007,4 +2009,36 @@ if (!function_exists('alvierittely')) {
 
     return array($page_tarjous, $sivu, $kala);
   }
+}
+
+function hae_tuotetieto_liitteet($laskun_tunnus) {
+  global $kukarow;
+
+  $query = "SELECT liitetiedostot.data,
+            liitetiedostot.filename
+            FROM lasku
+            INNER JOIN tilausrivi ON (tilausrivi.otunnus = lasku.tunnus
+              AND tilausrivi.yhtio = lasku.yhtio)
+            INNER JOIN tuote ON (tuote.tuoteno = tilausrivi.tuoteno
+              AND tuote.yhtio = tilausrivi.yhtio)
+            INNER JOIN liitetiedostot ON (liitetiedostot.liitostunnus = tuote.tunnus
+              AND liitetiedostot.liitos = 'tuote'
+              AND liitetiedostot.kayttotarkoitus = 'tuotetiedot'
+              AND liitetiedostot.yhtio = tuote.yhtio)
+            WHERE lasku.tunnus = {$laskun_tunnus}
+            AND lasku.yhtio = '{$kukarow["yhtio"]}';";
+
+  $result = pupe_query($query);
+
+  $tuoteliitteet = array();
+
+  while ($liitetiedosto = mysql_fetch_assoc($result)) {
+    $path = "/tmp/tuotetiedot-" . md5(uniqid(mt_rand(), true));
+    $tiedosto = fopen($path, "w");
+    fwrite($tiedosto, $liitetiedosto["data"]);
+    fclose($tiedosto);
+    $tuoteliitteet[$path] = $liitetiedosto["filename"];
+  }
+
+  return $tuoteliitteet;
 }

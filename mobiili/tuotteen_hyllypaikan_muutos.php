@@ -45,9 +45,12 @@ if (isset($submit)) {
     break;
   case 'ok':
 
+  $_varasto = kuuluukovarastoon($row['hyllyalue'], $row['hyllynro']);
+  $onko_varaston_hyllypaikat_kaytossa = onko_varaston_hyllypaikat_kaytossa($_varasto);
+
     // Tarkistetaan koodi
     $options = array('varmistuskoodi' => $mista_koodi);
-    if (!is_numeric($mista_koodi) or !tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], $options)) {
+    if ($onko_varaston_hyllypaikat_kaytossa and (!is_numeric($mista_koodi) or !tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], $options))) {
       $errors[] = t("Virheellinen varmistuskoodi")." ({$mista_koodi})";
     }
 
@@ -115,11 +118,11 @@ if (isset($submit)) {
       }
 
       // Tarkistetaan että tuotepaikka on olemassa
-      if (count($errors) == 0 and !tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
+      if ($onko_varaston_hyllypaikat_kaytossa and count($errors) == 0 and !tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
         $errors[] = t("Tuotepaikkaa (%s-%s-%s-%s) ei ole perustettu varaston hyllypaikkoihin", "", $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso).'.';
       }
 
-      if (count($errors) == 0) {
+      if ($onko_varaston_hyllypaikat_kaytossa and count($errors) == 0) {
         $options = array('varmistuskoodi' => $minne_koodi);
         if (!is_numeric($minne_koodi) or !tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $options)) {
           $errors[] = t("Virheellinen varmistuskoodi")." ({$minne_koodi})";

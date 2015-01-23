@@ -130,9 +130,7 @@ if (isset($task) and $task == 'poistalasku') {
 
   }
 
-
-  header("Location: toimitusten_seuranta.php?rajaus=toimitetut");
-  exit;
+unset($task);
 
 }
 
@@ -1618,8 +1616,6 @@ if (isset($vahvista_muutos_submit)) {
 
 
 if (isset($task) and $task == 'laadi_laskutusraportti') {
-
-  print_r($_POST);
 
   if ($laadittu == 'ei')  {
 

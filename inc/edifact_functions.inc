@@ -3214,10 +3214,10 @@ function laskutusraportti_pdf($pdf_data) {
       $sisaan = date("j.n.Y", strtotime($rivi['toimaika']));
       $ulos = date("j.n.Y", strtotime($rivi['kerayspvm']));
 
-      $tonnit = $rivi['hinta'] / $rivi['tilkpl'] / $varastointihinta;
+      $_tonnit = $rivi['hinta'] / $rivi['tilkpl'] / $varastointihinta;
 
       $txt  = $sisaan . " - " . $ulos . " | ";
-      $txt .= $rivi['varastopaivat'] - 7 . " vrk. - {$tonnit} t.";
+      $txt .= $rivi['varastopaivat'] - 7 . " vrk. - {$_tonnit} t.";
 
       $pdf->draw_text($x+180, $y, $txt, $sivu, $pieni);
 

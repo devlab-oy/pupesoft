@@ -1514,27 +1514,7 @@ if (isset($task) and $task == 'lusaus') {
   }
 }
 
-if ($kukarow['kuka'] == 'admin') {
-
-  print_r($_POST);
-
-  echo '<hr>';
-
-var_dump($vahvista_muutos_submit);
-
-  echo '<hr>';
-
-}
-
 if (isset($task) and $task == 'luo_laskutusraportti' and !isset($vahvista_muutos_submit)) {
-
-
-  if ($kukarow['kuka'] == 'admin') {
-
-    print_r($_POST);
-    echo '<hr>';
-
-  }
 
   $uusi_nimike = false;
   $edit_nimike = false;
@@ -1694,8 +1674,6 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
         pupe_query($update_query);
       }
     }
-    header("Location: toimitusten_seuranta.php?task=laadi_laskutusraportti&laadittu=joo&tonnit={$tonnit}&konttiviite={$konttiviite}");
-    exit;
   }
 
   $query = "SELECT tilausrivi.*

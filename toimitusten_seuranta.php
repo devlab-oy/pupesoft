@@ -1517,6 +1517,11 @@ if (isset($task) and $task == 'lusaus') {
 if ($kukarow['kuka'] == 'admin') {
 
   print_r($_POST);
+
+  echo '<hr>';
+
+var_dump($vahvista_muutos_submit);
+
   echo '<hr>';
 
 }

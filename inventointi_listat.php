@@ -648,7 +648,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
   }
 
   if (empty($piilotaToim_tuoteno)) {
-    $select .= "group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno,";
+    $select .= ", group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno ";
     $joinlisa .= " LEFT JOIN tuotteen_toimittajat ON (
       tuotteen_toimittajat.yhtio = tuote.yhtio and
       tuotteen_toimittajat.tuoteno = tuote.tuoteno

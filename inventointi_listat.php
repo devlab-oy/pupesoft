@@ -656,7 +656,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
   }
 
   $_tuote_chk = (!empty($tryt) or !empty($osastot) or !empty($toimittaja) or !empty($tuotemerkki));
-  $_tuote_chk = ($_tuote_chk or (!empty($ahyllyalue) and !empty($lhyllyalue)));
+  $_tuote_chk = ($_tuote_chk or (!empty($ahyllyalue) and !empty($lhyllyalue)) or (!empty($varasto)));
 
   if ($_tuote_chk) {
     ///* Inventoidaan *///
@@ -713,6 +713,25 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
               concat(rpad(upper('$ahyllyalue'), 5, '0'),lpad(upper('$ahyllynro'), 5, '0'),lpad(upper('$ahyllyvali'), 5, '0'),lpad(upper('$ahyllytaso'),5, '0'))
               and concat(rpad(upper(tuotepaikat.hyllyalue) ,5,'0'),lpad(upper(tuotepaikat.hyllynro) ,5,'0'),lpad(upper(tuotepaikat.hyllyvali) ,5,'0'),lpad(upper(tuotepaikat.hyllytaso) ,5,'0')) <=
               concat(rpad(upper('$lhyllyalue'), 5, '0'),lpad(upper('$lhyllynro'), 5, '0'),lpad(upper('$lhyllyvali'), 5, '0'),lpad(upper('$lhyllytaso'),5, '0'))";
+      }
+    }
+    
+    if ($varasto != '') {
+      ///* Inventoidaan tietty varasto *///
+
+      $kutsu .= " ".t("Varasto").": {$varasto}";
+
+      if ($from == '') {
+        $yhtiotaulu = "tuotepaikat";
+        $from     = " FROM tuotepaikat ";
+        $join     = " JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuote.ei_saldoa = '' {$rajauslisatuote}";
+        $lefttoimi   = " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuotepaikat.yhtio and tuotteen_toimittajat.tuoteno = tuotepaikat.tuoteno ";
+
+        $where    = " and tuotepaikat.varasto = '{$varasto}'
+                      and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $rajauslisa $invaamatta $extra ";
+      }
+      else {
+        $join .= " and tuotepaikat.varasto = '{$varasto}' ";
       }
     }
 

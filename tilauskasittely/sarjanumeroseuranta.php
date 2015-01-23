@@ -1405,150 +1405,151 @@ else {
   $kentta = "sarjanumero_haku";
 }
 
-if ($rivirow["tuoteno"] != '') {
-  echo "  <form name='sarjaformi' action='sarjanumeroseuranta.php' method='post'>
-      <input type='hidden' name='$tunnuskentta'     value='$rivitunnus'>
-      <input type='hidden' name='from'         value='$from'>
-      <input type='hidden' name='lopetus'       value='$lopetus'>
-      <input type='hidden' name='aputoim'       value='$aputoim'>
-      <input type='hidden' name='otunnus'       value='$otunnus'>
-      <input type='hidden' name='muut_siirrettavat'  value='$muut_siirrettavat'>
-      <input type='hidden' name='toiminto'       value='LISAA'>
-      <input type='hidden' name='valitut_sarjat'     value='".implode(",", $valitut_sarjat)."'>";
+if ($rivirow["tyyppi"] != 'V') {
+  if ($rivirow["tuoteno"] != '') {
+    echo "  <form name='sarjaformi' action='sarjanumeroseuranta.php' method='post'>
+        <input type='hidden' name='$tunnuskentta'     value='$rivitunnus'>
+        <input type='hidden' name='from'         value='$from'>
+        <input type='hidden' name='lopetus'       value='$lopetus'>
+        <input type='hidden' name='aputoim'       value='$aputoim'>
+        <input type='hidden' name='otunnus'       value='$otunnus'>
+        <input type='hidden' name='muut_siirrettavat'  value='$muut_siirrettavat'>
+        <input type='hidden' name='toiminto'       value='LISAA'>
+        <input type='hidden' name='valitut_sarjat'     value='".implode(",", $valitut_sarjat)."'>";
 
-  if ($rivirow["tuoteno"] != '' and ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G")) {
-    $query = "SELECT max(substring(sarjanumero, position('-' IN sarjanumero)+1)+0)+1 sarjanumero
-              FROM sarjanumeroseuranta
-              WHERE yhtio     = '$kukarow[yhtio]'
-              and tuoteno     = '$rivirow[tuoteno]'
-              and sarjanumero like '".t("Er‰")."-%'";
-    $vresult = pupe_query($query);
-    $vrow = mysql_fetch_assoc($vresult);
+    if ($rivirow["tuoteno"] != '' and ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G")) {
+      $query = "SELECT max(substring(sarjanumero, position('-' IN sarjanumero)+1)+0)+1 sarjanumero
+                FROM sarjanumeroseuranta
+                WHERE yhtio     = '$kukarow[yhtio]'
+                and tuoteno     = '$rivirow[tuoteno]'
+                and sarjanumero like '".t("Er‰")."-%'";
+      $vresult = pupe_query($query);
+      $vrow = mysql_fetch_assoc($vresult);
 
-    if ($vrow["sarjanumero"] > 0) {
-      $nxt = t("Er‰")."-".$vrow["sarjanumero"];
+      if ($vrow["sarjanumero"] > 0) {
+        $nxt = t("Er‰")."-".$vrow["sarjanumero"];
+      }
+      else {
+        $nxt = t("Er‰")."-1";
+      }
+
+      echo "<br><table>";
+      echo "<tr><th colspan='2'>".t("Lis‰‰ uusi er‰numero")."</th></tr>";
+      echo "<tr><th>".t("Er‰numero")."</th><td><input type='text' size='30' name='sarjanumero' value='$sarjanumero'></td><td class='back'><a href='#' onclick='document.sarjaformi.sarjanumero.value=\"$nxt\";'>".t("Seuraava er‰")."</a></td></tr>";
+
+      echo "<tr><th>".t("Er‰n suuruus")."</th><td><input type='text' size='30' name='era_kpl' value='$era_kpl'></td></tr>";
+
+      if ($rivirow["sarjanumeroseuranta"] == "F") {
+        echo "<tr><th>".t("Parasta ennen")."</th><td>
+        <input type='text' name='peppa' value='' size='3'>
+        <input type='text' name='pekka' value='' size='3'>
+        <input type='text' name='pevva' value='' size='5'></td>";
+      }
+
+      if ($rivirow['sarjanumeroseuranta'] == 'G') {
+        echo "<input type='hidden' name='kehahin' value='$kehahin'>";
+      }
+      else {
+        echo "<input type='hidden' name='kehahin' value='$rivirow[kehahin]'>";
+      }
+
+      echo "<tr><th>".t("Lis‰tieto")."</th><td><textarea rows='4' cols='27' name='lisatieto'>$lisatieto</textarea></td></tr>";
     }
-    else {
-      $nxt = t("Er‰")."-1";
-    }
-
-    echo "<br><table>";
-    echo "<tr><th colspan='2'>".t("Lis‰‰ uusi er‰numero")."</th></tr>";
-    echo "<tr><th>".t("Er‰numero")."</th><td><input type='text' size='30' name='sarjanumero' value='$sarjanumero'></td><td class='back'><a href='#' onclick='document.sarjaformi.sarjanumero.value=\"$nxt\";'>".t("Seuraava er‰")."</a></td></tr>";
-
-    echo "<tr><th>".t("Er‰n suuruus")."</th><td><input type='text' size='30' name='era_kpl' value='$era_kpl'></td></tr>";
-
-    if ($rivirow["sarjanumeroseuranta"] == "F") {
-      echo "<tr><th>".t("Parasta ennen")."</th><td>
-      <input type='text' name='peppa' value='' size='3'>
-      <input type='text' name='pekka' value='' size='3'>
-      <input type='text' name='pevva' value='' size='5'></td>";
-    }
-
-    if ($rivirow['sarjanumeroseuranta'] == 'G') {
-      echo "<input type='hidden' name='kehahin' value='$kehahin'>";
-    }
-    else {
+    elseif ($rivirow["sarjanumeroseuranta"] == "T") {
+      echo "<br><table>";
+      echo "<tr><th colspan='2'>".t("Lis‰‰ uusi sarjanumero")."</th></tr>";
+      echo "<tr><th>".t("Sarjanumero")."</th><td><input type='text' size='30' name='sarjanumero' value='$sarjanumero'></td></tr>";
       echo "<input type='hidden' name='kehahin' value='$rivirow[kehahin]'>";
     }
-
-    echo "<tr><th>".t("Lis‰tieto")."</th><td><textarea rows='4' cols='27' name='lisatieto'>$lisatieto</textarea></td></tr>";
-  }
-  elseif ($rivirow["sarjanumeroseuranta"] == "T") {
-    echo "<br><table>";
-    echo "<tr><th colspan='2'>".t("Lis‰‰ uusi sarjanumero")."</th></tr>";
-    echo "<tr><th>".t("Sarjanumero")."</th><td><input type='text' size='30' name='sarjanumero' value='$sarjanumero'></td></tr>";
-    echo "<input type='hidden' name='kehahin' value='$rivirow[kehahin]'>";
-  }
-  else {
-    $query = "SELECT max(substring(sarjanumero, position('-' IN sarjanumero)+1)+0)+1 sarjanumero
-              FROM sarjanumeroseuranta
-              WHERE yhtio='$kukarow[yhtio]'
-              and tuoteno     = '$rivirow[tuoteno]'
-              and sarjanumero like '".t("PUUTTUU")."-%'";
-    $vresult = pupe_query($query);
-    $vrow = mysql_fetch_assoc($vresult);
-
-    if ($vrow["sarjanumero"] > 0) {
-      $nxt = t("PUUTTUU")."-".$vrow["sarjanumero"];
-    }
     else {
-      $nxt = t("PUUTTUU")."-1";
-    }
+      $query = "SELECT max(substring(sarjanumero, position('-' IN sarjanumero)+1)+0)+1 sarjanumero
+                FROM sarjanumeroseuranta
+                WHERE yhtio='$kukarow[yhtio]'
+                and tuoteno     = '$rivirow[tuoteno]'
+                and sarjanumero like '".t("PUUTTUU")."-%'";
+      $vresult = pupe_query($query);
+      $vrow = mysql_fetch_assoc($vresult);
 
-    $query = "SELECT max(substring(sarjanumero, position('-' IN sarjanumero)+1)+0)+1 sarjanumero
-              FROM sarjanumeroseuranta
-              WHERE yhtio='$kukarow[yhtio]'
-              and tuoteno     = '$rivirow[tuoteno]'
-              and sarjanumero like '".t("EI SARJANUMEROA")."-%'";
-    $vresult = pupe_query($query);
-    $vrow = mysql_fetch_assoc($vresult);
-
-    if ($vrow["sarjanumero"] > 0) {
-      $nxt2 = t("EI SARJANUMEROA")."-".$vrow["sarjanumero"];
-    }
-    else {
-      $nxt2 = t("EI SARJANUMEROA")."-1";
-    }
-
-    if ($sarjanumero == "" and $rivirow["sarjanumeroseuranta"] == "U" and $from != "PIKATILAUS" and $from != "RIVISYOTTO") {
+      if ($vrow["sarjanumero"] > 0) {
+        $nxt = t("PUUTTUU")."-".$vrow["sarjanumero"];
+      }
+      else {
+        $nxt = t("PUUTTUU")."-1";
+      }
 
       $query = "SELECT max(substring(sarjanumero, position('-' IN sarjanumero)+1)+0)+1 sarjanumero
                 FROM sarjanumeroseuranta
                 WHERE yhtio='$kukarow[yhtio]'
-                and tuoteno = '$rivirow[tuoteno]'
-                and $tunnuskentta = '$rivirow[tunnus]'";
+                and tuoteno     = '$rivirow[tuoteno]'
+                and sarjanumero like '".t("EI SARJANUMEROA")."-%'";
       $vresult = pupe_query($query);
       $vrow = mysql_fetch_assoc($vresult);
 
-      $sarjanumero = $rivirow["nimitys"];
-
       if ($vrow["sarjanumero"] > 0) {
-        $sarjanumero = $sarjanumero."-".$vrow["sarjanumero"];
+        $nxt2 = t("EI SARJANUMEROA")."-".$vrow["sarjanumero"];
       }
       else {
-        $sarjanumero = $sarjanumero."-1";
+        $nxt2 = t("EI SARJANUMEROA")."-1";
+      }
+
+      if ($sarjanumero == "" and $rivirow["sarjanumeroseuranta"] == "U" and $from != "PIKATILAUS" and $from != "RIVISYOTTO") {
+
+        $query = "SELECT max(substring(sarjanumero, position('-' IN sarjanumero)+1)+0)+1 sarjanumero
+                  FROM sarjanumeroseuranta
+                  WHERE yhtio='$kukarow[yhtio]'
+                  and tuoteno = '$rivirow[tuoteno]'
+                  and $tunnuskentta = '$rivirow[tunnus]'";
+        $vresult = pupe_query($query);
+        $vrow = mysql_fetch_assoc($vresult);
+
+        $sarjanumero = $rivirow["nimitys"];
+
+        if ($vrow["sarjanumero"] > 0) {
+          $sarjanumero = $sarjanumero."-".$vrow["sarjanumero"];
+        }
+        else {
+          $sarjanumero = $sarjanumero."-1";
+        }
+      }
+
+      echo "<br><table>";
+      echo "<tr><th colspan='2'>".t("Lis‰‰ uusi sarjanumero")."</th></tr>";
+      echo "<tr><th>".t("Sarjanumero")."</th><td><input type='text' size='30' name='sarjanumero' value='$sarjanumero'></td><td class='back'><a onclick='document.sarjaformi.sarjanumero.value=\"$nxt\";'><u>".t("Sarjanumero ei tiedossa")."</u></a> <a onclick='document.sarjaformi.sarjanumero.value=\"$nxt2\";'><u>".t("Ei Sarjanumeroa")."</u></a></td></tr>";
+      echo "<tr><th>".t("Lis‰tieto")."</th><td><textarea rows='4' cols='27' name='lisatieto'>$lisatieto</textarea></td></tr>";
+
+      if ($rivirow["sarjanumeroseuranta"] == "S") {
+        $chk = "";
+        if ($kaytetty == "K") {
+          $chk = "CHECKED";
+        }
+        elseif ($sarjanumero == "" and $rivirow["osto_vai_hyvitys"] == "O") {
+          $chk = "CHECKED";
+        }
+
+        echo "<tr><th>".t("K‰ytetty")."</th><td><input type='checkbox' name='kaytetty' value='K' $chk></td></tr>";
+
+        echo "<tr><th>".t("Takuu")."</th><td>
+        <input type='text' name='tppa' value='' size='3'>
+        <input type='text' name='tkka' value='' size='3'>
+        <input type='text' name='tvva' value='' size='5'>
+        -
+        <input type='text' name='tppl' value='' size='3'>
+        <input type='text' name='tkkl' value='' size='3'>
+        <input type='text' name='tvvl' value='' size='5'></td>";
+      }
+
+      if ($rivirow['sarjanumeroseuranta'] == 'V') {
+        echo "<input type='hidden' name='kehahin' value='$rivirow[kehahin]'>";
+      }
+      elseif ($rivirow['sarjanumeroseuranta'] == 'S' or $rivirow['sarjanumeroseuranta'] == 'U') {
+        echo "<input type='hidden' name='kehahin' value='$kehahin'>";
       }
     }
 
-
-    echo "<br><table>";
-    echo "<tr><th colspan='2'>".t("Lis‰‰ uusi sarjanumero")."</th></tr>";
-    echo "<tr><th>".t("Sarjanumero")."</th><td><input type='text' size='30' name='sarjanumero' value='$sarjanumero'></td><td class='back'><a onclick='document.sarjaformi.sarjanumero.value=\"$nxt\";'><u>".t("Sarjanumero ei tiedossa")."</u></a> <a onclick='document.sarjaformi.sarjanumero.value=\"$nxt2\";'><u>".t("Ei Sarjanumeroa")."</u></a></td></tr>";
-    echo "<tr><th>".t("Lis‰tieto")."</th><td><textarea rows='4' cols='27' name='lisatieto'>$lisatieto</textarea></td></tr>";
-
-    if ($rivirow["sarjanumeroseuranta"] == "S") {
-      $chk = "";
-      if ($kaytetty == "K") {
-        $chk = "CHECKED";
-      }
-      elseif ($sarjanumero == "" and $rivirow["osto_vai_hyvitys"] == "O") {
-        $chk = "CHECKED";
-      }
-
-      echo "<tr><th>".t("K‰ytetty")."</th><td><input type='checkbox' name='kaytetty' value='K' $chk></td></tr>";
-
-      echo "<tr><th>".t("Takuu")."</th><td>
-      <input type='text' name='tppa' value='' size='3'>
-      <input type='text' name='tkka' value='' size='3'>
-      <input type='text' name='tvva' value='' size='5'>
-      -
-      <input type='text' name='tppl' value='' size='3'>
-      <input type='text' name='tkkl' value='' size='3'>
-      <input type='text' name='tvvl' value='' size='5'></td>";
-    }
-
-    if ($rivirow['sarjanumeroseuranta'] == 'V') {
-      echo "<input type='hidden' name='kehahin' value='$rivirow[kehahin]'>";
-    }
-    elseif ($rivirow['sarjanumeroseuranta'] == 'S' or $rivirow['sarjanumeroseuranta'] == 'U') {
-      echo "<input type='hidden' name='kehahin' value='$kehahin'>";
-    }
+    echo "<td class='back'><input type='submit' value='".t("Lis‰‰")."'></td>";
+    echo "</form>";
+    echo "</tr></table>";
   }
-
-  echo "<td class='back'><input type='submit' value='".t("Lis‰‰")."'></td>";
-  echo "</form>";
-  echo "</tr></table>";
 }
 
 echo "<br>";

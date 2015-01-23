@@ -761,6 +761,7 @@ if ($tee == 'TEEVALMISTUS') {
             $perutaan = "";
           }
 
+echo "764 "; var_dump($roxresult); echo "<br><br>";          
           require "korjaa_valmistus.inc";
         }
       }

@@ -1,5 +1,6 @@
 <?php
 
+
 if (isset($_POST['task']) and (
   $_POST['task'] == 'nayta_konttierittely' or
   $_POST['task'] == 'nayta_laskutusraportti' or
@@ -1617,6 +1618,8 @@ if (isset($vahvista_muutos_submit)) {
 
 
 if (isset($task) and $task == 'laadi_laskutusraportti') {
+
+  print_r($_POST);
 
   if ($laadittu == 'ei')  {
 

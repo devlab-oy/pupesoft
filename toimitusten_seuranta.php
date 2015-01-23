@@ -1766,7 +1766,7 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
         $tuoteresult = pupe_query($tuotequery);
         $trow = mysql_fetch_assoc($tuoteresult);
 
-        $tonnit = $nimike['hinta'] / $nimike['tilkpl'] / $trow['myyntihinta'];
+        $_tonnit = $nimike['hinta'] / $nimike['tilkpl'] / $trow['myyntihinta'];
 
         $sisaan = date("j.n.Y", strtotime($nimike['toimaika']));
         $ulos = date("j.n.Y", strtotime($nimike['kerayspvm']));
@@ -1775,7 +1775,7 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
 
         $teksti .=  $sisaan . " &mdash; " . $ulos . " | ";
 
-        $teksti .= $tonnit . " t. - " . number_format((float)$nimike['hinta'], 3, '.', '') . " €";
+        $teksti .= $_tonnit . " t. - " . number_format((float)$nimike['hinta'], 3, '.', '') . " €";
       }
       elseif ($nimike['yksikko'] == 'TON') {
 

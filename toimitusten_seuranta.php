@@ -130,6 +130,7 @@ if (isset($task) and $task == 'poistalasku') {
   }
 
 unset($task);
+$rajaus = 'toimitetut';
 
 }
 

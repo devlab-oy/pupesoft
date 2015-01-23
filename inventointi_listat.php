@@ -671,7 +671,10 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       $yhtiotaulu = "tuote";
       $from     = " FROM tuote use index (osasto_try_index) ";
       $join     = " JOIN tuotepaikat USE INDEX (tuote_index) ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' {$rajauslisa} {$invaamatta} {$extra} ";
-      $lefttoimi   = " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno ";
+
+      if (empty($piilotaToim_tuoteno)) {
+        $lefttoimi   = " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno ";
+      }
 
       $where    = " $lisa and tuote.ei_saldoa = '' {$rajauslisatuote}";
     }
@@ -684,7 +687,10 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
         $yhtiotaulu = "tuote";
         $from     = " FROM tuote use index (osasto_try_index) ";
         $join     = " JOIN tuotepaikat USE INDEX (tuote_index) ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' {$rajauslisa} {$invaamatta} {$extra} ";
-        $lefttoimi   = " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno ";
+
+        if (empty($piilotaToim_tuoteno)) {
+          $lefttoimi   = " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuote.yhtio and tuotteen_toimittajat.tuoteno = tuote.tuoteno ";
+        }
       }
       $where .= " and tuote.tuotemerkki = '$tuotemerkki' {$rajauslisatuote}";
     }
@@ -700,7 +706,10 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
         $yhtiotaulu = "tuotepaikat";
         $from     = " FROM tuotepaikat ";
         $join     = " JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuote.ei_saldoa = '' {$rajauslisatuote}";
-        $lefttoimi   = " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuotepaikat.yhtio and tuotteen_toimittajat.tuoteno = tuotepaikat.tuoteno ";
+
+        if (empty($piilotaToim_tuoteno)) {
+          $lefttoimi   = " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuotepaikat.yhtio and tuotteen_toimittajat.tuoteno = tuotepaikat.tuoteno ";
+        }
 
         $where    = "  and concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'),lpad(upper(tuotepaikat.hyllyvali), 5, '0'),lpad(upper(tuotepaikat.hyllytaso),5, '0')) >=
                 concat(rpad(upper('$ahyllyalue'), 5, '0'),lpad(upper('$ahyllynro'), 5, '0'),lpad(upper('$ahyllyvali'), 5, '0'),lpad(upper('$ahyllytaso'),5, '0'))
@@ -715,7 +724,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
               concat(rpad(upper('$lhyllyalue'), 5, '0'),lpad(upper('$lhyllynro'), 5, '0'),lpad(upper('$lhyllyvali'), 5, '0'),lpad(upper('$lhyllytaso'),5, '0'))";
       }
     }
-    
+
     if ($varasto != '') {
       ///* Inventoidaan tietty varasto *///
 
@@ -725,7 +734,10 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
         $yhtiotaulu = "tuotepaikat";
         $from     = " FROM tuotepaikat ";
         $join     = " JOIN tuote use index (tuoteno_index) ON tuote.yhtio = tuotepaikat.yhtio and tuote.tuoteno = tuotepaikat.tuoteno and tuote.ei_saldoa = '' {$rajauslisatuote}";
-        $lefttoimi   = " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuotepaikat.yhtio and tuotteen_toimittajat.tuoteno = tuotepaikat.tuoteno ";
+
+        if (empty($piilotaToim_tuoteno)) {
+          $lefttoimi   = " LEFT JOIN tuotteen_toimittajat ON tuotteen_toimittajat.yhtio = tuotepaikat.yhtio and tuotteen_toimittajat.tuoteno = tuotepaikat.tuoteno ";
+        }
 
         $where    = " and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' $rajauslisa $invaamatta $extra ";
       }
@@ -932,6 +944,13 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
         $orderby = " sorttauskentta, tuoteno ";
       }
 
+      if (empty($piilotaToim_tuoteno)) {
+        $_lisaleftjoin = "LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tapahtuma.yhtio and tuotteen_toimittajat.tuoteno = tapahtuma.tuoteno)";
+      }
+      else {
+        $_lisaleftjoin = "";
+      }
+
       $query = "SELECT $select
                 FROM tapahtuma use index (yhtio_laji_laadittu)
                 JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tapahtuma.yhtio and tuote.tuoteno = tapahtuma.tuoteno and tuote.ei_saldoa = '' {$rajauslisatuote})
@@ -943,7 +962,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
                                         AND tuotepaikat.hyllytaso             = tapahtuma.hyllytaso
                                         and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00'
                                         {$rajauslisa} {$invaamatta} {$extra})
-                LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tapahtuma.yhtio and tuotteen_toimittajat.tuoteno = tapahtuma.tuoteno)
+                {$_lisaleftjoin}
                 WHERE tapahtuma.yhtio                                         = '$kukarow[yhtio]'
                 AND tapahtuma.laji                                            IN ('tulo', 'laskutus', 'valmistus', 'siirto')
                 AND tapahtuma.laadittu BETWEEN '$vva-$kka-$ppa' and '$vvl-$kkl-$ppl'

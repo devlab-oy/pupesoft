@@ -30030,6 +30030,75 @@ if (!function_exists("hae_saldo")) {
   }
 }
 
+if (!function_exists("tiliointi_tarkistus")) {
+  function tiliointi_tarkistus($tiliointi_tarkistus, $kustp_tark, $kohde_tark, $projekti_tark) {
+
+    /*
+    0 = Ei pakollisia kenttiä
+    1 = pakollisia kenttiä tiliöinnissä on kustannuspaikka
+    2 = pakollisia kenttiä tiliöinnissä on kustannuspaikka, kohde
+    3 = pakollisia kenttiä tiliöinnissä on kustannuspaikka, projekti
+    4 = pakollisia kenttiä tiliöinnissä on kustannuspaikka, kohde ja projekti
+    5 = pakollisia kenttiä tiliöinnissä on kohde
+    6 = pakollisia kenttiä tiliöinnissä on kohde, projekti
+    7 = pakollisia kenttiä tiliöinnissä on projekti
+    */
+
+    $virhe = "";
+
+    $kustp_tark    = trim($kustp_tark);
+    $kohde_tark    = trim($kohde_tark);
+    $projekti_tark = trim($projekti_tark);
+
+    if (!empty($tiliointi_tarkistus)) {
+
+      if ($tiliointi_tarkistus == 1) {
+        if (empty($kustp_tark)) {
+          $virhe .= t("Tositteeseen on liitettävä kustannuspaikka")."!<br />";
+        }
+      }
+
+      if ($tiliointi_tarkistus == 2) {
+        if (empty($kustp_tark) or empty($kohde_tark)) {
+          $virhe .= t("Tositteeseen on liitettävä kustannuspaikka ja kohde")."!<br />";
+        }
+      }
+
+      if ($tiliointi_tarkistus == 3) {
+        if (empty($kustp_tark) or empty($projekti_tark)) {
+          $virhe .= t("Tositteeseen on liitettävä kustannuspaikka ja projekti")."!<br />";
+        }
+      }
+
+      if ($tiliointi_tarkistus == 4) {
+        if (empty($kustp_tark) or empty($kohde_tark) or empty($projekti_tark)) {
+          $virhe .= t("Tositteeseen on liitettävä kustannuspaikka ja kohde sekä projekti")."!<br />";
+        }
+      }
+
+      if ($tiliointi_tarkistus == 5) {
+        if (empty($kohde_tark)) {
+          $virhe .= t("Tositteeseen on liitettävä kohde")."!<br />";
+        }
+      }
+
+      if ($tiliointi_tarkistus == 6) {
+        if (empty($kohde_tark) or empty($projekti_tark)) {
+          $virhe .= t("Tositteeseen on liitettävä kohde sekä projekti")."!<br />";
+        }
+      }
+
+      if ($tiliointi_tarkistus == 7) {
+        if (empty($projekti_tark)) {
+          $virhe .= t("Tositteeseen on liitettävä projekti")."!<br />";
+        }
+      }
+    }
+
+    return $virhe;
+  }
+}
+
 if (!function_exists("hae_viimeiset_hyvaksyjat")) {
   function hae_viimeiset_hyvaksyjat($laskurow) {
     $hyvaksyja_kentat = array();

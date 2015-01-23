@@ -652,23 +652,22 @@ if ($tee == "H") {
     }
 
     if ($ollaan_viimeinen_hyvaksyja) {
-      $tarkistus_query = "SELECT count(*) AS vajaat_tilioinnit_kpl
+      $tarkistus_query = "SELECT distinct tili.tilino, tili.tiliointi_tarkistus, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti
                           FROM tiliointi
-                          WHERE tiliointi.yhtio = '{$kukarow["yhtio"]}'
-                          AND tiliointi.ltunnus = {$laskurow["tunnus"]}
-                          AND tiliointi.lukko = ''
+                          JOIN tili USING (yhtio, tilino)
+                          WHERE tiliointi.yhtio  = '{$kukarow["yhtio"]}'
+                          AND tiliointi.ltunnus  = {$laskurow["tunnus"]}
                           AND tiliointi.korjattu = ''
-                          AND (kustp = 0 OR projekti = 0)";
+                          AND tiliointi.lukko != 1";
+      $tilioinnit_tsek = pupe_query($tarkistus_query);
 
-      $vajaat_tilioinnit_kpl = pupe_query($tarkistus_query);
-      $vajaat_tilioinnit_kpl = mysql_fetch_assoc($vajaat_tilioinnit_kpl);
-      $vajaat_tilioinnit_kpl = $vajaat_tilioinnit_kpl["vajaat_tilioinnit_kpl"];
+      while ($tilioinnit_row = mysql_fetch_assoc($tilioinnit_tsek)) {
+        $pakotsek = tiliointi_tarkistus($tilioinnit_row['tiliointi_tarkistus'], $tilioinnit_row['kustp'], $tilioinnit_row['kohde'], $tilioinnit_row['projekti']);
 
-      if ($vajaat_tilioinnit_kpl > 0) {
-        echo "<font class = 'error'>" .
-             t('Laskulla on tiliöintejä, joilla ei ole kustannuspaikka tai projektia') . "</font>";
-
-        $tee = "";
+        if (!empty($pakotsek)) {
+          echo "<font class='error'>".t("VIRHE: Tililtä %s puuttuu pakollisia tietoja", "", $tilioinnit_row['tilino']).": $pakotsek</font><br>";
+          $tee = "";
+        }
       }
     }
   }
@@ -896,13 +895,13 @@ if ($tee == 'U') {
 
   $laskurow = mysql_fetch_assoc($result);
 
-  $summa       = str_replace( ",", ".", $summa);
-  $selausnimi   = 'tili'; // Minka niminen mahdollinen popup on?
-  $tositetila   = $laskurow["tila"];
-  $tositeliit   = $laskurow["liitostunnus"];
+  $summa         = str_replace( ",", ".", $summa);
+  $selausnimi    = 'tili'; // Minka niminen mahdollinen popup on?
+  $tositetila    = $laskurow["tila"];
+  $tositeliit    = $laskurow["liitostunnus"];
   $kustp_tark    = $kustp;
   $kohde_tark    = $kohde;
-  $projekti_tark  = $projekti;
+  $projekti_tark = $projekti;
 
   require "inc/tarkistatiliointi.inc";
 

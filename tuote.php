@@ -19,18 +19,6 @@ if (!isset($toimipaikka))    $toimipaikka = $kukarow['toimipaikka'] != 0 ? $kuka
 
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 
-if (isset($tuoteno)) {
-  $tkysy_lopetus = "{$palvelin2}tuote.php////toim=$toim//tee=Z//tuoteno=".urlencode($tuoteno)."//toimipaikka=$toimipaikka//raportti=$raportti//historia=$historia//tapahtumalaji=$tapahtumalaji";
-}
-else {
-  $tkysy_lopetus = "";
-}
-
-if ($lopetus != "") {
-  // Lis‰t‰‰n t‰m‰ lopetuslinkkiin
-  $tkysy_lopetus = $lopetus."/SPLIT/".$tkysy_lopetus;
-}
-
 require "korvaavat.class.php";
 require "vastaavat.class.php";
 
@@ -1784,22 +1772,25 @@ if ($tee == 'N' or $tee == 'E') {
     $trow = mysql_fetch_assoc($result);
     $tuoteno = $trow['tuoteno'];
     $tee = 'Z';
-
-    // Kun ollaan siirrytty seuraavaan//edelliseen tuotteeseen
-    // niin p‰ivitet‰‰n myˆs paluunappi vastaamaan t‰t‰ nykyist‰ tuotetta
-    if (!strpos($tkysy_lopetus, "tuoteno=$tuoteno")) {
-      $_pos = strpos($tkysy_lopetus, "tuoteno=");
-      $_loppu = strpos($tkysy_lopetus, "//", $_pos);
-
-      $korvattava = substr($tkysy_lopetus, $_pos, $_loppu - $_pos);
-      $tkysy_lopetus = str_replace("$korvattava", "tuoteno=$tuoteno", $tkysy_lopetus);
-    }
   }
   else {
     $varaosavirhe = t("Yht‰‰n tuotetta ei lˆytynyt")."!";
     $tuoteno = '';
     $tee = 'Y';
   }
+}
+
+// Tehd‰‰n lopetusmuuttuja, kun ollaan saatu oikea tuotenumero tietoon
+if (isset($tuoteno)) {
+  $tkysy_lopetus = "{$palvelin2}tuote.php////toim=$toim//tee=Z//tuoteno=".urlencode($tuoteno)."//toimipaikka=$toimipaikka//raportti=$raportti//historia=$historia//tapahtumalaji=$tapahtumalaji";
+}
+else {
+  $tkysy_lopetus = "";
+}
+
+if ($lopetus != "") {
+  // Lis‰t‰‰n t‰m‰ lopetuslinkkiin
+  $tkysy_lopetus = $lopetus."/SPLIT/".$tkysy_lopetus;
 }
 
 if ($tee == 'NAYTATILAUS') {

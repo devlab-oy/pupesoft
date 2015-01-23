@@ -404,66 +404,50 @@ function kontitus_parametrit($rullat_kontissa, $korjaus = false) {
 function lahtoilmoitus_parametrit($konttiviite) {
   global $kukarow, $yhtiorow;
 
-  $query = "SELECT lasku.asiakkaan_tilausnumero AS tilausnro,
-            tilausrivin_lisatiedot.asiakkaan_rivinumero AS rivinro,
+  $query = "SELECT
+            concat(lasku.asiakkaan_tilausnumero, ':', asiakkaan_rivinumero) AS tilaus_ja_rivi,
+            count(tilausrivi.tunnus) AS rullia,
+            group_concat(DISTINCT tilausrivin_lisatiedot.konttinumero) kontit,
+            sum(sarjanumeroseuranta.massa) AS paino,
+            laskun_lisatiedot.konttityyppi,
             laskun_lisatiedot.matkakoodi,
-            matkatiedot,
-            laskun_lisatiedot.satamavahvistus_pvm AS lahtoaika,
-            laskun_lisatiedot.konttityyppi
-            FROM laskun_lisatiedot
-            JOIN lasku
-              ON lasku.yhtio = laskun_lisatiedot.yhtio
-              AND lasku.tunnus = laskun_lisatiedot.otunnus
+            laskun_lisatiedot.satamavahvistus_pvm AS lahtoaika
+            FROM lasku
             JOIN tilausrivi
-              ON tilausrivi.yhtio = laskun_lisatiedot.yhtio
+              ON tilausrivi.yhtio = lasku.yhtio
               AND tilausrivi.otunnus = lasku.tunnus
             JOIN tilausrivin_lisatiedot
-              ON tilausrivin_lisatiedot.yhtio = laskun_lisatiedot.yhtio
+              ON tilausrivin_lisatiedot.yhtio = lasku.yhtio
               AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+            JOIN laskun_lisatiedot
+              ON laskun_lisatiedot.yhtio = lasku.yhtio
+              AND laskun_lisatiedot.otunnus = lasku.tunnus
+            JOIN sarjanumeroseuranta
+              ON sarjanumeroseuranta.yhtio = lasku.yhtio
+              AND sarjanumeroseuranta.myyntirivitunnus = tilausrivi.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND konttiviite = '{$konttiviite}'
-            GROUP BY tilausnro, rivinro";
+            AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
+            AND tilausrivin_lisatiedot.konttinumero != ''
+            GROUP BY lasku.asiakkaan_tilausnumero, asiakkaan_rivinumero";
   $result = pupe_query($query);
 
-  $kaikki_matkatiedot = array();
+  $konttilista = '';
 
-  while ($tilaus = mysql_fetch_assoc($result)) {
+  while ($tilausrivi = mysql_fetch_assoc($result)) {
 
-    $konttityyppi = $tilaus['konttityyppi'];
-    $matkakoodi = $tilaus['matkakoodi'];
-    $lahtopaiva = $tilaus['lahtoaika'];
-    $mt = unserialize($tilaus['matkatiedot']);
+    $konttityyppi = $tilausrivi['konttityyppi'];
+    $matkakoodi = $tilausrivi['matkakoodi'];
+    $lahtopaiva = $tilausrivi['lahtoaika'];
 
-    $kombo = $tilaus['tilausnro'] . ":" . $tilaus['rivinro'];
+    $konttilista .= $tilausrivi['kontit'] . ",";
 
-    $kaikki_matkatiedot[$kombo] = $mt;
+    $tilausrivit[] = $tilausrivi;
   }
 
-  $kaikki_kontit = array();
-
-  foreach ($kaikki_matkatiedot as $tilausnro => $tiedot) {
-    $query = "SELECT count(trlt.tunnus) AS rullia,
-              sum(ss.massa) AS paino,
-              group_concat(DISTINCT trlt.kontin_mrn) AS kontit
-              FROM tilausrivin_lisatiedot AS trlt
-              JOIN sarjanumeroseuranta AS ss
-                ON ss.yhtio = trlt.yhtio
-                AND ss.myyntirivitunnus = trlt.tilausrivitunnus
-              WHERE trlt.yhtio = '{$kukarow['yhtio']}'
-              AND CONCAT(trlt.asiakkaan_tilausnumero, ':', trlt.asiakkaan_rivinumero) = '{$tilausnro}'
-              AND trlt.kontin_mrn != ''
-              AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusattu' OR ss.lisatieto = 'Toimitettu')";
-    $result = pupe_query($query);
-    $info = mysql_fetch_assoc($result);
-
-    $kontti_array = explode(",", $info['kontit']);
-    $kaikki_kontit = array_unique(array_merge($kontti_array, $kaikki_kontit));
-
-    $kaikki_matkatiedot[$tilausnro]['rullia'] = $info['rullia'];
-    $kaikki_matkatiedot[$tilausnro]['paino'] = (int) $info['paino'];
-    $kaikki_matkatiedot[$tilausnro]['kontit'] = $info['kontit'];
-
-  }
+  $konttilista = rtrim($konttilista,',');
+  $konttilista = explode(',', $konttilista);
+  $konttilista = array_unique($konttilista);
+  $konttimaara = count($konttilista);
 
   if ($lahtopaiva != '0000-00-00 00:00:00') {
     $lahtopaiva = date("d.m.Y H:i", strtotime($lahtopaiva));
@@ -472,11 +456,11 @@ function lahtoilmoitus_parametrit($konttiviite) {
     $lahtopaiva = 'X';
   }
 
-  $parametrit['konttimaara'] = count($kaikki_kontit);
+  $parametrit['konttimaara'] = $konttimaara;
   $parametrit['konttityyppi'] = $konttityyppi;
-  $parametrit['matkatiedot'] = $kaikki_matkatiedot;
   $parametrit['matkakoodi'] = $matkakoodi;
   $parametrit['lahtopaiva'] = $lahtopaiva;
+  $parametrit['tilausrivit'] = $tilausrivit;
 
   return $parametrit;
 }
@@ -2954,17 +2938,17 @@ function lahtoilmoitus_pdf($pdf_data) {
   $pdf->draw_line($xx, $yy, $sivu);
   $y -= 20;
 
-  foreach ($matkatiedot as $tilausnro => $tilaus) {
+  foreach ($tilausrivit as $tilausrivi) {
 
     if ($y < 20) {
       $sivu = $pdf->new_page("a4");
       $y = 800;
     }
 
-    $pdf->draw_text($x, $y, $tilausnro, $sivu, $bold);
-    $pdf->draw_text($x+100, $y, $tilaus['transport_name'], $sivu, $bold);
-    $pdf->draw_text($x+260, $y, $tilaus['rullia'], $sivu, $bold);
-    $pdf->draw_text($x+350, $y, $tilaus['paino'] / 1000, $sivu, $bold);
+    $pdf->draw_text($x, $y, $tilausrivi['tilaus_ja_rivi'], $sivu, $bold);
+    $pdf->draw_text($x+100, $y, $tilausrivi['matkakoodi'], $sivu, $bold);
+    $pdf->draw_text($x+260, $y, $tilausrivi['rullia'], $sivu, $bold);
+    $pdf->draw_text($x+350, $y, $tilausrivi['paino'] / 1000, $sivu, $bold);
 
     $y -= 15;
 

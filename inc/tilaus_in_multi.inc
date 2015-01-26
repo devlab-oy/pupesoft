@@ -88,6 +88,9 @@ while ($rivi = fgets($fd)) {
 
       $id = luo_myyntitilausotsikko("RIVISYOTTO", $arow["tunnus"], "", "", trim($rivi[11]), "", "", "", "", $tilaus_ketjutus, trim($rivi[12]));
 
+
+      $id = luo_myyntitilausotsikko("RIVISYOTTO", $arow["tunnus"], "", "", trim($rivi[11]), "", "", "", "", $tilaus_ketjutus, "", trim($rivi[12]));
+
       echo "Tehtiin tilaus $id asiakkaalle $ytunnus<br>";
 
       // haetaan tilauksen tiedot

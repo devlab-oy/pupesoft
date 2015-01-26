@@ -19,18 +19,6 @@ if (!isset($toimipaikka))    $toimipaikka = $kukarow['toimipaikka'] != 0 ? $kuka
 
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 
-if (isset($tuoteno)) {
-  $tkysy_lopetus = "{$palvelin2}tuote.php////toim=$toim//tee=Z//tuoteno=".urlencode($tuoteno)."//toimipaikka=$toimipaikka//raportti=$raportti//historia=$historia//tapahtumalaji=$tapahtumalaji";
-}
-else {
-  $tkysy_lopetus = "";
-}
-
-if ($lopetus != "") {
-  // Lis‰t‰‰n t‰m‰ lopetuslinkkiin
-  $tkysy_lopetus = $lopetus."/SPLIT/".$tkysy_lopetus;
-}
-
 require "korvaavat.class.php";
 require "vastaavat.class.php";
 
@@ -1792,6 +1780,19 @@ if ($tee == 'N' or $tee == 'E') {
     $tuoteno = '';
     $tee = 'Y';
   }
+}
+
+// Tehd‰‰n lopetusmuuttuja, kun ollaan saatu oikea tuotenumero tietoon
+if (isset($tuoteno)) {
+  $tkysy_lopetus = "{$palvelin2}tuote.php////toim=$toim//tee=Z//tuoteno=".urlencode($tuoteno)."//toimipaikka=$toimipaikka//raportti=$raportti//historia=$historia//tapahtumalaji=$tapahtumalaji";
+}
+else {
+  $tkysy_lopetus = "";
+}
+
+if ($lopetus != "") {
+  // Lis‰t‰‰n t‰m‰ lopetuslinkkiin
+  $tkysy_lopetus = $lopetus."/SPLIT/".$tkysy_lopetus;
 }
 
 if ($tee == 'NAYTATILAUS') {

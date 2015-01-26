@@ -21166,7 +21166,9 @@ if (!function_exists('lisaa_tuotepaikka')) {
       $hyllyalue = $varasto['alkuhyllyalue'];
       $hyllynro  = $varasto['alkuhyllynro'];
       $hyllyvali = 0;
-      $hyllytaso = 0;
+      if ($hyllytaso == '') {
+        $hyllytaso = 0;
+      }  
     }
     elseif ($hyllyalue == '' and empty($varasto)) {
       return false;

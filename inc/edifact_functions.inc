@@ -1320,7 +1320,7 @@ function kasittele_bookkaussanoma($edi_data) {
             AND filename = '{$sanoma_id}'";
   $result = pupe_query($query);
 
-  if (mysql_num_rows($result) != 0 AND $tyyppi != 5) {
+  if (mysql_num_rows($result) != 0 AND $tyyppi != 5 and $tilausnro != 'KTIS-300019') {
     return false;
   }
 
@@ -1489,7 +1489,7 @@ function kasittele_bookkaussanoma($edi_data) {
                   AND laskun_lisatiedot.otunnus = lasku.tunnus
                 WHERE lasku.yhtio = '{$kukarow['yhtio']}'
                 AND lasku.asiakkaan_tilausnumero = '{$tilausnro}'
-                AND lasku.tila = 'N'";
+                AND lasku.tilaustyyppi = 'N'";
       $result = pupe_query($query);
 
     }

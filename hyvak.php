@@ -638,7 +638,7 @@ if ($tee == "H") {
 
   $laskurow = mysql_fetch_assoc($result);
 
-  if ($yhtiorow["tarkenteet_pakolliset_tilioinneissa"] == "K") {
+  if ($yhtiorow["tarkenteiden_tarkistus_hyvaksynnassa"] == "K") {
     list($viimeinen_hyvaksyja_time,
       $tokaviimeinen_hyvaksyja_time) = hae_viimeiset_hyvaksyjat($laskurow);
 

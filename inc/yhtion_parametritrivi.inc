@@ -4052,17 +4052,14 @@ if ($fieldname == 'ostolaskun_kulutilit_kayttaytyminen') {
   $jatko = 0;
 }
 
-if ($fieldname == "tarkenteet_pakolliset_tilioinneissa") {
+if ($fieldname == "tarkenteiden_tarkistus_hyvaksynnassa") {
 
   $ulos = "<td><select name='{$nimi}' " . js_alasvetoMaxWidth($nimi, 400) . ">";
 
   $sel = $trow[$i] == 'K' ? "selected" : "";
 
-  $ulos .= "<option value = ''>" . t("Tarkenteet eivät ole pakolliset tiliöinneissä") . "</option>";
-  $ulos .= "<option value = 'K' {$sel}>" .
-           t("Kustannuspaikka ja projekti ovat pakolliset tiliöinneissä laskuja hyväksyttäessä, " .
-             "kun kyseessä on viimeinen hyväksyjä.") . "</option>";
-
+  $ulos .= "<option value = ''>" . t("Kirjanpitotilin pakollisia tarkenteita ei tarkasteta ostolaskua hyväksyttäessä") . "</option>";
+  $ulos .= "<option value = 'K' {$sel}>" . t("Kirjanpitotilin pakolliset tarkenteet tarkistetaan kun ostolaskun viimeinen hyväksyjä hyväksyy laskun") . "</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

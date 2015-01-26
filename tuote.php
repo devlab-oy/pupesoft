@@ -28,6 +28,19 @@ if (isset($ajax)) {
     $tuoteno = utf8_decode($tuoteno);
   }
 
+  if ($ajax == "naytatilaus") {
+    $_return  = "<font class='head'>".t("Tilaus")." {$tunnus}:</font><hr>";
+    $_return .= "<div style='float:right;'>";
+    $_return .= "<a href=\"javascript:suljedivi('{$tunnus}');\">";
+    $_return .= t("Piilota")." <img src='{$palvelin2}pics/lullacons/stop.png'>";
+    $_return .= "</a>";
+    $_return .= "</div>";
+    ob_start();
+    require "raportit/naytatilaus.inc";
+    $_return .= ob_get_contents();
+    ob_end_clean();
+  }
+
   if ($ajax == "varastopaikat") {
 
     $_return = "";
@@ -585,10 +598,10 @@ if (isset($ajax)) {
           $_return .= "<a href=\"javascript:lataaiframe('{$prow['laskutunnus']}', '{$palvelin2}raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus={$prow['laskutunnus']}&ohje=off');\">".t("$prow[laji]")."</a>";
         }
         elseif ($prow["laji"] == "siirto" and $prow["laskutunnus"] != "") {
-          $_return .= "<a href=\"javascript:lataaiframe('{$prow['laskutunnus']}', '{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus={$prow['laskutunnus']}&ohje=off');\">".t("$prow[laji]")."</a>";
+          $_return .= "<a class='naytatilaus' id='{$prow['laskutunnus']}'>".t("$prow[laji]")."</a>";
         }
         elseif ($prow["laji"] == "valmistus" and $prow["laskutunnus"] != "") {
-          $_return .= "<a href=\"javascript:lataaiframe('{$prow['laskutunnus']}', '{$palvelin2}raportit/asiakkaantilaukset.php?tuoteno=".urlencode($tuoteno)."&toim=VALMISTUSMYYNTI&tee=NAYTATILAUS&tunnus={$prow['laskutunnus']}&ohje=off');\">".t("$prow[laji]")."</a>";
+          $_return .= "<a class='naytatilaus' id='{$prow['laskutunnus']}'>".t("$prow[laji]")."</a>";
 
           // N‰ytet‰‰n t‰m‰ vain jos k‰ytt‰j‰ll‰ on oikeus tehd‰ valmistuksia tai reseptej‰
           if ($oikeu_t1 or $oikeu_t2 or $oikeu_t3 or $oikeu_t4) {
@@ -1512,6 +1525,30 @@ echo "<script type='text/javascript'>
         }
 
         $(function() {
+
+          $('a.naytatilaus').live('click', function(e) {
+
+            e.preventDefault();
+
+            var tunnus = $(this).attr('id');
+            var ifd = $('#ifd_'+tunnus);
+
+            $.ajax({
+              async: false,
+              type: 'POST',
+              dataType: 'JSON',
+              data: {
+                ajax: 'naytatilaus',
+                no_head: 'yes',
+                ohje: 'off',
+                tunnus: tunnus
+              },
+              success: function(data) {
+                $(ifd).html(data);
+                $(ifd).show();
+              }
+            });
+          });
 
           $('#vastaavat').on('click', function() {
 

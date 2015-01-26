@@ -1320,7 +1320,7 @@ function kasittele_bookkaussanoma($edi_data) {
             AND filename = '{$sanoma_id}'";
   $result = pupe_query($query);
 
-  if (mysql_num_rows($result) != 0 AND $tyyppi != 5 and $tilausnro != 'KTIS-300019') {
+  if (mysql_num_rows($result) != 0 AND $tyyppi != 5) {
     return false;
   }
 

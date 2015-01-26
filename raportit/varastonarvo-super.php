@@ -1469,37 +1469,64 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
             $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row['epakurantti25pvm']));
           }
           else {
-            fwrite($fh, tv1dateconv($row['epakurantti25pvm']).";");
+            fwrite($fh, tv1dateconv($row['epakurantti25pvm']));
           }
         }
-        $excelsarake++;
+
+        if ($tallennusmuoto_check) {
+          $excelsarake++;
+        }
+        else {
+          fwrite($fh, ";");
+        }
+
         if ($row['epakurantti50pvm'] != '0000-00-00') {
           if ($tallennusmuoto_check) {
             $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row['epakurantti50pvm']));
           }
           else {
-            fwrite($fh, tv1dateconv($row['epakurantti50pvm']).";");
+            fwrite($fh, tv1dateconv($row['epakurantti50pvm']));
           }
         }
-        $excelsarake++;
+
+        if ($tallennusmuoto_check) {
+          $excelsarake++;
+        }
+        else {
+          fwrite($fh, ";");
+        }
+
         if ($row['epakurantti75pvm'] != '0000-00-00') {
           if ($tallennusmuoto_check) {
             $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row['epakurantti75pvm']));
           }
           else {
-            fwrite($fh, tv1dateconv($row['epakurantti75pvm']).";");
+            fwrite($fh, tv1dateconv($row['epakurantti75pvm']));
           }
         }
-        $excelsarake++;
+
+        if ($tallennusmuoto_check) {
+          $excelsarake++;
+        }
+        else {
+          fwrite($fh, ";");
+        }
+
         if ($row['epakurantti100pvm'] != '0000-00-00') {
           if ($tallennusmuoto_check) {
             $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row['epakurantti100pvm']));
           }
           else {
-            fwrite($fh, tv1dateconv($row['epakurantti100pvm']).";");
+            fwrite($fh, tv1dateconv($row['epakurantti100pvm']));
           }
         }
-        $excelsarake++;
+
+        if ($tallennusmuoto_check) {
+          $excelsarake++;
+        }
+        else {
+          fwrite($fh, ";");
+        }
 
         if ($tallennusmuoto_check) {
           $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row["vihapvm"]));

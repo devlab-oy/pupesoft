@@ -86,8 +86,8 @@ while ($rivi = fgets($fd)) {
 
       $arow = mysql_fetch_assoc($result);
 
-      if (!empty(trim($rivi[12]))) {
-        $toimitustapa = mysql_real_escape_string(trim($rivi[12]));
+      if (!empty($rivi[12])) {
+        $toimitustapa = trim($rivi[12]);
 
         # Tarkistetaan onko käyttäjän syöttämä toimitustapa olemassa
         $apuqu = "SELECT *

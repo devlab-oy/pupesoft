@@ -9,16 +9,14 @@ if (isset($_POST['piirtele_laiteluettelo'])) {
 
   // Näytettävät laitekohtaiset palveluhinnat sekä sopimuskohtaiset lisätyöt
   $ruksattavat_kentat = array(
-    #Lisätyöt
-    "SPTYOTUNTI"     => t("Työtunti"),
-    "SPTYOPV"        => t("Työpäivä"),
-    "SPMATKATUNTI"   => t("Matkatunnit"),
     #Palveluhinnat
     "SP-FSNN-CO-NOC" => t("SignalONE NOC"), 
     "SP-FSNN-CO-MDM" => t("SignalONE Mobile Device Management"),
     "SP-FSNN-CO-MAINTENANCE" => t("SignalControl OnSite Preventive Maintenance"),
     "SP-FSNN-SE-LCC" => t("LifecycleCare"),
-    "SP-FSNN-SE-LCM" => t("LifecycleManagement")
+    "SP-FSNN-SE-LCM" => t("LifecycleManagement"),
+    #Lisätyöt
+    "NAYTATYOT"      => t("Erillisveloitettavat työt")
   );
 
   echo "<form name='aja_ja_tallenna' method='post'>";
@@ -40,7 +38,12 @@ if (isset($_POST['piirtele_laiteluettelo'])) {
       }
     }
 
-    echo "<td align='left' valign='top' nowrap><input type='checkbox' class='sarakeboksi' name='valitut_sarakkeet[]' value='{$i}' $tsekk>{$selite}</td>";
+    echo "<td align='left' valign='top' nowrap><input type='checkbox' class='sarakeboksi' name='valitut_sarakkeet[]' value='{$i}' $tsekk>{$selite}";
+    if ($i == "NAYTATYOT") {
+      echo "<br><textarea rows='5' cols='40' maxlength='1000' name='hintahopinat' placeholder='".t("Vapaa teksti")."'>";
+      echo "</textarea>";
+    }
+    echo "</td>";
 
     if ($secretcounter == 2) {
       echo "</tr>";
@@ -121,47 +124,11 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
     $excelsarake = 0;
   }
 
-  // Haetaan tuntiveloitukset
-  $veloitusquery = "SELECT tuoteno,nimitys,myyntihinta 
-                    FROM tuote 
-                    WHERE yhtio = '{$kukarow['yhtio']}' 
-                    AND tuoteno IN ('SPTYOPV','SPTYOTUNTI','SPMATKATUNTI')";
-  $veloitusres = pupe_query($veloitusquery);
-  $veloitukset = array();
-  while ($veloitusrow = mysql_fetch_assoc($veloitusres)) {
-    $veloitukset[$veloitusrow['tuoteno']] = $veloitusrow;
-  }
-
-  $worksheet->write($excelrivi++, $excelsarake, t("Erillisveloitettavat työt (Muutoksenhallinta, Häiriönselvitys ja muu erillislaskutettava työ)"), $format_bold);
-
-  if (in_array("SPTYOPV", $valitut_sarakkeet)) {
-    $worksheet->write($excelrivi, $excelsarake++, t($veloitukset['SPTYOPV']['nimitys']));
-    $tyopaiva = $veloitukset['SPTYOPV']['myyntihinta'];
-    $tyopaiva = str_replace(".", ",", hintapyoristys($tyopaiva)); 
-    $worksheet->write($excelrivi++, $excelsarake, $tyopaiva." e / ".t("tunti"));
+  if (in_array("NAYTATYOT", $valitut_sarakkeet) && !empty($hintahopinat)) {
+    $worksheet->write($excelrivi++, $excelsarake, t("Erillisveloitettavat työt (Muutoksenhallinta, Häiriönselvitys ja muu erillislaskutettava työ)"), $format_bold);
+    $worksheet->write($excelrivi++, $excelsarake, $hintahopinat);
     $excelsarake = 0;
   }
-  if (in_array("SPTYOTUNTI", $valitut_sarakkeet)) {
-    $worksheet->write($excelrivi, $excelsarake++, t($veloitukset['SPTYOTUNTI']['nimitys']));
-    $tyotunti = $veloitukset['SPTYOTUNTI']['myyntihinta'];
-    $tyotunti = str_replace(".", ",", hintapyoristys($tyotunti));  
-    $worksheet->write($excelrivi++, $excelsarake++, $tyotunti." e / ".t("tunti"));
-    $excelsarake = 0;
-  }
-  if (in_array("SPMATKATUNTI", $valitut_sarakkeet)) {
-    $worksheet->write($excelrivi, $excelsarake++, t($veloitukset['SPMATKATUNTI']['nimitys']));
-    $matkatunti = $veloitukset['SPMATKATUNTI']['myyntihinta'];
-    $matkatunti = str_replace(".", ",", hintapyoristys($matkatunti));
-    $worksheet->write($excelrivi++, $excelsarake++, $matkatunti." e / ".t("tunti"));
-    $excelsarake = 0;
-  }
-  // Hardcoded stuff
-  $worksheet->write($excelrivi, $excelsarake++, t("Työt arkena 16:00 - 22:00"));
-  $worksheet->write($excelrivi++, $excelsarake++, "+50 %");
-  $excelsarake = 0;
-  $worksheet->write($excelrivi, $excelsarake++, t("Työt 22-08 arkena, lauantait ja pyhät"));
-  $worksheet->write($excelrivi++, $excelsarake++, "+100 %");
-  $excelsarake = 0;                                                  
 
   $worksheet->write($excelrivi, $excelsarake++, t("Yhteensä").": (ALV {$sopimus_alv} %)", $format_bold);
   $totalvalue = str_replace(".", ",", hintapyoristys($totalvalue));

@@ -13,7 +13,7 @@ if (!isset($nayta_kohdistetut))  $nayta_kohdistetut = "";
 if (!isset($nayta_kaikki))       $nayta_kaikki = "";
 if (!isset($ojarj))              $ojarj = "";
 if (!isset($tila))               $tila = "";
-echo "16 "; var_dump($nayta_siirrettavat); echo "<br><br>";
+
 $query  = "SELECT *
            FROM lasku
            WHERE tunnus  = '$otunnus'

@@ -1414,6 +1414,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       }
       else {
         fwrite($fh, sprintf("%.06f", $kehasilloin).";");
+        fwrite($fh, sprintf("%.06f", $muutoshinta).";");
       }
 
       if ($varatturajaus == "O") {

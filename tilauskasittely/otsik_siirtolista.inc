@@ -128,17 +128,17 @@ if ($tila == 'Muuta' and !isset($jatka)) {
 
   if ($toim == "SIIRTOLISTA") {
     if ($laaja_toim_kasittely) {
-      echo "<option value=''>".t("Valitse")."</option>";
+      echo "<option value=>".t("Valitse")."</option>";
     }
     else {
-      echo "<option value=''>".t("Siirrä kaikista")."</option>";
+      echo "<option value=0>".t("Siirrä kaikista")."</option>";
     }
   }
   elseif ($toim == "VALMISTAVARASTOON") {
-    echo "<option value=''>".t("Käytä kaikista")."</option>";
+    echo "<option value=0>".t("Käytä kaikista")."</option>";
   }
   elseif ($toim == "SIIRTOTYOMAARAYS") {
-    echo "<option value=''>".t("Käytä kaikista")."</option>";
+    echo "<option value=0>".t("Käytä kaikista")."</option>";
   }
 
   while ($vrow = mysql_fetch_array($vtresult)) {
@@ -148,7 +148,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
       $sel = 'selected';
     }
 
-    if ($varasto < 1 and $vrow['tunnus'] == $srow["varasto"]) {
+   if (!is_numeric($varasto) and $varasto == "" and $vrow['tunnus'] == $srow["varasto"]) {
       $sel = 'selected';
     }
 

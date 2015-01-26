@@ -124,7 +124,7 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
     $excelsarake = 0;
   }
 
-  if (in_array("NAYTATYOT", $valitut_sarakkeet) && !empty($hintahopinat)) {
+  if (in_array("NAYTATYOT", $valitut_sarakkeet) and !empty($hintahopinat)) {
     $worksheet->write($excelrivi++, $excelsarake, t("Erillisveloitettavat työt (Muutoksenhallinta, Häiriönselvitys ja muu erillislaskutettava työ)"), $format_bold);
     $worksheet->write($excelrivi++, $excelsarake, $hintahopinat);
     $excelsarake = 0;

@@ -86,7 +86,37 @@ while ($rivi = fgets($fd)) {
 
       $arow = mysql_fetch_assoc($result);
 
-      $id = luo_myyntitilausotsikko("RIVISYOTTO", $arow["tunnus"], "", "", trim($rivi[11]), "", "", "", "", $tilaus_ketjutus, trim($rivi[12]));
+      if (!empty(trim($rivi[12]))) {
+        $toimitustapa = mysql_real_escape_string(trim($rivi[12]));
+
+        # Tarkistetaan onko käyttäjän syöttämä toimitustapa olemassa
+        $apuqu = "SELECT *
+                  from toimitustapa
+                  where yhtio = '{$kukarow['yhtio']}'
+                  and selite  = '{$toimitustapa}'";
+        $meapu = pupe_query($apuqu);
+
+        if (mysql_num_rows($meapu) == 0) {
+          $toimitustapa = "";
+        }
+      }
+      else {
+        $toimitustapa = "";
+      }
+
+      $id = luo_myyntitilausotsikko(
+        "RIVISYOTTO",
+        $arow["tunnus"],
+        "",
+        "",
+        trim($rivi[11]),
+        "",
+        "",
+        "",
+        "",
+        $tilaus_ketjutus,
+        $toimitustapa
+      );
 
       echo "Tehtiin tilaus $id asiakkaalle $ytunnus<br>";
 

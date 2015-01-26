@@ -128,7 +128,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
 
   if ($toim == "SIIRTOLISTA") {
     if ($laaja_toim_kasittely) {
-      echo "<option value=>".t("Valitse")."</option>";
+      echo "<option value=''>".t("Valitse")."</option>";
     }
     else {
       echo "<option value=0>".t("Siirrä kaikista")."</option>";

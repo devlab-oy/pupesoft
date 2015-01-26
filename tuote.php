@@ -588,7 +588,7 @@ if (isset($ajax)) {
           $_return .= "<a href=\"javascript:lataaiframe('{$prow['laskutunnus']}', '{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus={$prow['laskutunnus']}&ohje=off');\">".t("$prow[laji]")."</a>";
         }
         elseif ($prow["laji"] == "valmistus" and $prow["laskutunnus"] != "") {
-          $_return .= "<a href=\"javascript:lataaiframe('{$prow['laskutunnus']}', '{$palvelin2}raportit/asiakkaantilaukset.php?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus={$prow['laskutunnus']}&ohje=off');\">".t("$prow[laji]")."</a>";
+          $_return .= "<a href=\"javascript:lataaiframe('{$prow['laskutunnus']}', '{$palvelin2}raportit/asiakkaantilaukset.php?tuoteno=".urlencode($tuoteno)."&toim=VALMISTUSMYYNTI&tee=NAYTATILAUS&tunnus={$prow['laskutunnus']}&ohje=off');\">".t("$prow[laji]")."</a>";
 
           // N‰ytet‰‰n t‰m‰ vain jos k‰ytt‰j‰ll‰ on oikeus tehd‰ valmistuksia tai reseptej‰
           if ($oikeu_t1 or $oikeu_t2 or $oikeu_t3 or $oikeu_t4) {

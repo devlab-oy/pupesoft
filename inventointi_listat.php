@@ -257,7 +257,7 @@ $invaste_tuotepaikat_result = t_avainsana("INVASTEPAIKKA");
 if (mysql_num_rows($invaste_tuotepaikat_result) > 0) {
 
   echo "<tr>";
-  echo "<th>", t("Ei huomioida avainsanoihin m‰‰riteltyj‰ tuotepaikkoja"), "</th>";
+  echo "<th>", t("Ei huomioida inventointiaste-raportin hylk‰‰mi‰ tuotepaikkoja"), "</th>";
   echo "<td>";
   echo "<input type='checkbox' name='ei_huomioida_tuotepaikkoja_avainsanoista[]' {$chk} /><br />";
 

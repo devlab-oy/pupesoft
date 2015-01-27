@@ -19,18 +19,6 @@ if (!isset($toimipaikka))    $toimipaikka = $kukarow['toimipaikka'] != 0 ? $kuka
 
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 
-if (isset($tuoteno)) {
-  $tkysy_lopetus = "{$palvelin2}tuote.php////toim=$toim//tee=Z//tuoteno=".urlencode($tuoteno)."//toimipaikka=$toimipaikka//raportti=$raportti//historia=$historia//tapahtumalaji=$tapahtumalaji";
-}
-else {
-  $tkysy_lopetus = "";
-}
-
-if ($lopetus != "") {
-  // Lis‰t‰‰n t‰m‰ lopetuslinkkiin
-  $tkysy_lopetus = $lopetus."/SPLIT/".$tkysy_lopetus;
-}
-
 require "korvaavat.class.php";
 require "vastaavat.class.php";
 
@@ -597,10 +585,10 @@ if (isset($ajax)) {
           $_return .= "<a href=\"javascript:lataaiframe('{$prow['laskutunnus']}', '{$palvelin2}raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus={$prow['laskutunnus']}&ohje=off');\">".t("$prow[laji]")."</a>";
         }
         elseif ($prow["laji"] == "siirto" and $prow["laskutunnus"] != "") {
-          $_return .= "<a href=\"javascript:lataaiframe('{$prow['laskutunnus']}', '{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus={$prow['laskutunnus']}&ohje=off');\">".t("$prow[laji]")."</a>";
+          $_return .= "<a href=\"javascript:lataaiframe('{$prow['laskutunnus']}', '{$palvelin2}tuote.php?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&ohje=off');\">".t("$prow[laji]")."</a>";
         }
         elseif ($prow["laji"] == "valmistus" and $prow["laskutunnus"] != "") {
-          $_return .= "<a href=\"javascript:lataaiframe('{$prow['laskutunnus']}', '{$palvelin2}raportit/asiakkaantilaukset.php?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus={$prow['laskutunnus']}&ohje=off');\">".t("$prow[laji]")."</a>";
+          $_return .= "<a href=\"javascript:lataaiframe('{$prow['laskutunnus']}', '{$palvelin2}tuote.php?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&ohje=off');\">".t("$prow[laji]")."</a>";
 
           // N‰ytet‰‰n t‰m‰ vain jos k‰ytt‰j‰ll‰ on oikeus tehd‰ valmistuksia tai reseptej‰
           if ($oikeu_t1 or $oikeu_t2 or $oikeu_t3 or $oikeu_t4) {
@@ -1524,7 +1512,6 @@ echo "<script type='text/javascript'>
         }
 
         $(function() {
-
           $('#vastaavat').on('click', function() {
 
             var _src = '{$palvelin2}pics/loading_blue_small.gif',
@@ -1794,11 +1781,23 @@ if ($tee == 'N' or $tee == 'E') {
   }
 }
 
+// Tehd‰‰n lopetusmuuttuja, kun ollaan saatu oikea tuotenumero tietoon
+if (isset($tuoteno)) {
+  $tkysy_lopetus = "{$palvelin2}tuote.php////toim=$toim//tee=Z//tuoteno=".urlencode($tuoteno)."//toimipaikka=$toimipaikka//raportti=$raportti//historia=$historia//tapahtumalaji=$tapahtumalaji";
+}
+else {
+  $tkysy_lopetus = "";
+}
+
+if ($lopetus != "") {
+  // Lis‰t‰‰n t‰m‰ lopetuslinkkiin
+  $tkysy_lopetus = $lopetus."/SPLIT/".$tkysy_lopetus;
+}
+
 if ($tee == 'NAYTATILAUS') {
   echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
   require "raportit/naytatilaus.inc";
-  echo "<br><br><br>";
-  $tee = "Z";
+  exit;
 }
 
 echo "<font class='head'>".t("Tuotekysely")."</font><hr>";

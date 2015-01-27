@@ -618,23 +618,63 @@ if ($tee == 'L') {
   echo "</font><br><br>";
 }
 
-if ($tee == 'H') {
-  // Lasku merkit‰‰n hyv‰ksytyksi, tehd‰‰n timestamp ja p‰ivitet‰‰n hyvaksyja_nyt
+// Tarkistetaan, ett‰ laskun kaikilla tiliˆinneill‰ on kustannuspaikka, jos kyseess‰ on viimeinen
+// hyv‰ksyj‰. Tarkistetaan samalla, ett‰ lasku lˆytyy.
+if ($tee == "H") {
   $query = "SELECT *
             FROM lasku
-            WHERE yhtio   = '$kukarow[yhtio]' and
-            tunnus        = '$tunnus' and
-            hyvaksyja_nyt = '$kukarow[kuka]'";
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND tunnus = '{$tunnus}'
+            AND hyvaksyja_nyt = '{$kukarow["kuka"]}'";
+
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 1) {
-    echo "<font class = 'error'>".t('Lasku kateissa') . "$tunnus</font>";
+    echo "<font class = 'error'>" . t('Lasku kateissa') . "$tunnus</font>";
 
     require "inc/footer.inc";
     exit;
   }
 
   $laskurow = mysql_fetch_assoc($result);
+
+  if ($yhtiorow["tarkenteiden_tarkistus_hyvaksynnassa"] == "K") {
+    list($viimeinen_hyvaksyja_time,
+      $tokaviimeinen_hyvaksyja_time) = hae_viimeiset_hyvaksyjat($laskurow);
+
+    if ($laskurow[$tokaviimeinen_hyvaksyja_time] != "0000-00-00 00:00:00" and
+        $laskurow[$viimeinen_hyvaksyja_time] == "0000-00-00 00:00:00"
+    ) {
+      $ollaan_viimeinen_hyvaksyja = true;
+    }
+    else {
+      $ollaan_viimeinen_hyvaksyja = false;
+    }
+
+    if ($ollaan_viimeinen_hyvaksyja) {
+      $tarkistus_query = "SELECT distinct tili.tilino, tili.tiliointi_tarkistus, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti
+                          FROM tiliointi
+                          JOIN tili USING (yhtio, tilino)
+                          WHERE tiliointi.yhtio  = '{$kukarow["yhtio"]}'
+                          AND tiliointi.ltunnus  = {$laskurow["tunnus"]}
+                          AND tiliointi.korjattu = ''
+                          AND tiliointi.lukko != 1";
+      $tilioinnit_tsek = pupe_query($tarkistus_query);
+
+      while ($tilioinnit_row = mysql_fetch_assoc($tilioinnit_tsek)) {
+        $pakotsek = tiliointi_tarkistus($tilioinnit_row['tiliointi_tarkistus'], $tilioinnit_row['kustp'], $tilioinnit_row['kohde'], $tilioinnit_row['projekti']);
+
+        if (!empty($pakotsek)) {
+          echo "<font class='error'>".t("VIRHE: Tililt‰ %s puuttuu pakollisia tietoja", "", $tilioinnit_row['tilino']).": $pakotsek</font><br>";
+          $tee = "";
+        }
+      }
+    }
+  }
+}
+
+if ($tee == 'H') {
+  // Lasku merkit‰‰n hyv‰ksytyksi, tehd‰‰n timestamp ja p‰ivitet‰‰n hyvaksyja_nyt
 
   //  Kun tehd‰‰n matkalaskun ensimm‰inen hyv‰ksynt‰..
   if ($laskurow["tilaustyyppi"] == "M" and $laskurow["h1time"]=="0000-00-00 00:00:00") {
@@ -855,13 +895,13 @@ if ($tee == 'U') {
 
   $laskurow = mysql_fetch_assoc($result);
 
-  $summa       = str_replace( ",", ".", $summa);
-  $selausnimi   = 'tili'; // Minka niminen mahdollinen popup on?
-  $tositetila   = $laskurow["tila"];
-  $tositeliit   = $laskurow["liitostunnus"];
+  $summa         = str_replace( ",", ".", $summa);
+  $selausnimi    = 'tili'; // Minka niminen mahdollinen popup on?
+  $tositetila    = $laskurow["tila"];
+  $tositeliit    = $laskurow["liitostunnus"];
   $kustp_tark    = $kustp;
   $kohde_tark    = $kohde;
-  $projekti_tark  = $projekti;
+  $projekti_tark = $projekti;
 
   require "inc/tarkistatiliointi.inc";
 

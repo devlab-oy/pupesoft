@@ -3425,7 +3425,7 @@ if (!function_exists("alv")) {
       if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 600;              // Otsikolla on valittu veroton myynti, esim Ahvenanmaan myntiä
       if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0) $alv = $trow["alv"]+600; // Otsikolla on valittu verollinen kotimaan myynti
       if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") $alv = 600;              // EU-vienti yritykselle --> alviton
-      if ($laskurow["vienti"] == "K" and $asrow["laji"] != "H") $alv = 600;              // Vienti eu:n ulkopuolelle yritykselle --> alviton
+      if ($laskurow["vienti"] == "K") $alv = 600;              // Vienti EU:n ulkopuolelle on aina alviton
 
       $alv = (float) $alv;
     }
@@ -3434,7 +3434,7 @@ if (!function_exists("alv")) {
       if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 500;              // Otsikolla on valittu veroton myynti, esim Ahvenanmaan myntiä
       if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0) $alv = $trow["alv"]+500; // Otsikolla on valittu verollinen kotimaan myynti
       if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") $alv = 500;              // EU-vienti yritykselle --> alviton
-      if ($laskurow["vienti"] == "K" and $asrow["laji"] != "H") $alv = 500;              // Vienti eu:n ulkopuolelle yritykselle --> alviton
+      if ($laskurow["vienti"] == "K") $alv = 500;              // Vienti EU:n ulkopuolelle on aina alviton
 
       $alv = (float) $alv;
     }
@@ -3443,7 +3443,7 @@ if (!function_exists("alv")) {
       if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 0;                           // Otsikolla on valittu veroton myynti, esim Ahvenanmaan myntiä
       if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0 and $alv == "") $alv = $trow["alv"]; // Otsikolla on valittu verollinen kotimaan myynti
       if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") $alv = 0;                           // EU-vienti yritykselle --> alviton
-      if ($laskurow["vienti"] == "K" and $asrow["laji"] != "H") $alv = 0;                           // Vienti eu:n ulkopuolelle yritykselle --> alviton
+      if ($laskurow["vienti"] == "K") $alv = 0;                           // Vienti EU:n ulkopuolelle on aina alviton
 
       $alv = (float) $alv;
     }
@@ -3452,7 +3452,7 @@ if (!function_exists("alv")) {
       if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 0;                           // Otsikolla on valittu veroton myynti, esim Ahvenanmaan myntiä
       if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0 and $alv == "") $alv = $trow["alv"]; // Otsikolla on valittu verollinen kotimaan myynti
       if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") $alv = 0;                           // EU-vienti yritykselle --> alviton
-      if ($laskurow["vienti"] == "K" and $asrow["laji"] != "H") $alv = 0;                           // Vienti eu:n ulkopuolelle yritykselle --> alviton
+      if ($laskurow["vienti"] == "K") $alv = 0;                           // Vienti EU:n ulkopuolelle on aina alviton
 
       $alv = (float) $alv;
       $trow['alv'] = (float) $trow['alv'];
@@ -21166,7 +21166,9 @@ if (!function_exists('lisaa_tuotepaikka')) {
       $hyllyalue = $varasto['alkuhyllyalue'];
       $hyllynro  = $varasto['alkuhyllynro'];
       $hyllyvali = 0;
-      $hyllytaso = 0;
+      if ($hyllytaso == '') {
+        $hyllytaso = 0;
+      }  
     }
     elseif ($hyllyalue == '' and empty($varasto)) {
       return false;
@@ -30077,5 +30079,103 @@ if (!function_exists("hae_saldo")) {
 
       return $saldo;
     }
+  }
+}
+
+if (!function_exists("tiliointi_tarkistus")) {
+  function tiliointi_tarkistus($tiliointi_tarkistus, $kustp_tark, $kohde_tark, $projekti_tark) {
+
+    /*
+    0 = Ei pakollisia kenttiä
+    1 = pakollisia kenttiä tiliöinnissä on kustannuspaikka
+    2 = pakollisia kenttiä tiliöinnissä on kustannuspaikka, kohde
+    3 = pakollisia kenttiä tiliöinnissä on kustannuspaikka, projekti
+    4 = pakollisia kenttiä tiliöinnissä on kustannuspaikka, kohde ja projekti
+    5 = pakollisia kenttiä tiliöinnissä on kohde
+    6 = pakollisia kenttiä tiliöinnissä on kohde, projekti
+    7 = pakollisia kenttiä tiliöinnissä on projekti
+    */
+
+    $virhe = "";
+
+    $kustp_tark    = trim($kustp_tark);
+    $kohde_tark    = trim($kohde_tark);
+    $projekti_tark = trim($projekti_tark);
+
+    if (!empty($tiliointi_tarkistus)) {
+
+      if ($tiliointi_tarkistus == 1) {
+        if (empty($kustp_tark)) {
+          $virhe .= t("Tositteeseen on liitettävä kustannuspaikka")."!<br />";
+        }
+      }
+
+      if ($tiliointi_tarkistus == 2) {
+        if (empty($kustp_tark) or empty($kohde_tark)) {
+          $virhe .= t("Tositteeseen on liitettävä kustannuspaikka ja kohde")."!<br />";
+        }
+      }
+
+      if ($tiliointi_tarkistus == 3) {
+        if (empty($kustp_tark) or empty($projekti_tark)) {
+          $virhe .= t("Tositteeseen on liitettävä kustannuspaikka ja projekti")."!<br />";
+        }
+      }
+
+      if ($tiliointi_tarkistus == 4) {
+        if (empty($kustp_tark) or empty($kohde_tark) or empty($projekti_tark)) {
+          $virhe .= t("Tositteeseen on liitettävä kustannuspaikka ja kohde sekä projekti")."!<br />";
+        }
+      }
+
+      if ($tiliointi_tarkistus == 5) {
+        if (empty($kohde_tark)) {
+          $virhe .= t("Tositteeseen on liitettävä kohde")."!<br />";
+        }
+      }
+
+      if ($tiliointi_tarkistus == 6) {
+        if (empty($kohde_tark) or empty($projekti_tark)) {
+          $virhe .= t("Tositteeseen on liitettävä kohde sekä projekti")."!<br />";
+        }
+      }
+
+      if ($tiliointi_tarkistus == 7) {
+        if (empty($projekti_tark)) {
+          $virhe .= t("Tositteeseen on liitettävä projekti")."!<br />";
+        }
+      }
+    }
+
+    return $virhe;
+  }
+}
+
+if (!function_exists("hae_viimeiset_hyvaksyjat")) {
+  function hae_viimeiset_hyvaksyjat($laskurow) {
+    $hyvaksyja_kentat = array();
+    $kentat = array("hyvak1", "hyvak2", "hyvak3", "hyvak4", "hyvak5");
+
+    foreach ($kentat as $kentta) {
+      if (!empty($laskurow[$kentta])) {
+        array_push($hyvaksyja_kentat, $kentta);
+      }
+    }
+
+    $viimeinen_hyvaksyja = array_pop($hyvaksyja_kentat);
+    $viimeinen_hyvaksyja = substr($viimeinen_hyvaksyja, -1);
+    $viimeinen_hyvaksyja_time = "h{$viimeinen_hyvaksyja}time";
+
+    $tokaviimeinen_hyvaksyja = array_pop($hyvaksyja_kentat);
+
+    if ($tokaviimeinen_hyvaksyja) {
+      $tokaviimeinen_hyvaksyja = substr($tokaviimeinen_hyvaksyja, -1);
+      $tokaviimeinen_hyvaksyja_time = "h{$tokaviimeinen_hyvaksyja}time";
+    }
+    else {
+      $tokaviimeinen_hyvaksyja_time = false;
+    }
+
+    return array($viimeinen_hyvaksyja_time, $tokaviimeinen_hyvaksyja_time);
   }
 }

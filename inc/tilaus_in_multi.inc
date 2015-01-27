@@ -85,6 +85,7 @@ while ($rivi = fgets($fd)) {
       }
 
       $arow = mysql_fetch_assoc($result);
+      $_toimitustapa_echo = "";
 
       if (!empty($rivi[12])) {
         $toimitustapa = trim($rivi[12]);
@@ -98,6 +99,8 @@ while ($rivi = fgets($fd)) {
 
         if (mysql_num_rows($meapu) == 0) {
           $toimitustapa = "";
+          $_toimitustapa_echo = ' '.t('HUOM').': '.t('toimitustapaa %s ei löytynyt, käytetään asiakkaan oletusta', '', $rivi[12]);
+          $_toimitustapa_echo = "<font class='error'>{$_toimitustapa_echo}</font>";
         }
       }
       else {
@@ -119,7 +122,7 @@ while ($rivi = fgets($fd)) {
         $toimitustapa
       );
 
-      echo "Tehtiin tilaus $id asiakkaalle $ytunnus<br>";
+      echo "Tehtiin tilaus $id asiakkaalle $ytunnus{$_toimitustapa_echo}<br>";
 
       // haetaan tilauksen tiedot
       $query = "SELECT *

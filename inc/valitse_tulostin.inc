@@ -54,6 +54,9 @@ echo "<form method='post' action='$PHP_SELF?$ulisa'>
   <input type='hidden' name='sorttauskentan_jarjestys3' value='$sorttauskentan_jarjestys3'>
   <input type='hidden' name='sorttauskentan_jarjestys4' value='$sorttauskentan_jarjestys4'>
   <input type='hidden' name='kertakassa' value='$kertakassa'>
+  <input type='hidden' name='status' value='{$status}'>
+  <input type='hidden' name='varasto' value='{$varasto}'>
+  <input type='hidden' name='ei_huomioida_tuotepaikkoja_avainsanoista' value='{$ei_huomioida_tuotepaikkoja_avainsanoista}'>
   <input type='hidden' name='otunnukset_array' value='$otunnukset_array'>
   <input type='hidden' name='varastoonvaikutus' value='$varastoonvaikutus'>
   <input type='hidden' name='varastonarvo' value='$varastonarvo'>

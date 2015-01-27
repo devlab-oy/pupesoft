@@ -105,6 +105,8 @@ $erapaiva_chk   =  ($maksuehtorow['kateinen'] == '' and empty($maksuehtorow['jv'
         or $tilausvalmiskutsuja != "TILAUSMYYNTI")))) ? 1 : 0;
 
 $_mika_toim = in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "ENNAKKO", "EXTENNAKKO"));
+$_mika_toim = ($_mika_toim and $laskurow['clearing'] != 'HYVITYS');
+
 $_rekla_toim = ($toim == "REKLAMAATIO" and $kaikkiyhteensa > 0);
 
 $_hyvitys = (in_array($toim, array("RIVISYOTTO", "PIKATILAUS")));

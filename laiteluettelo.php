@@ -131,7 +131,14 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
   }
 
   if (in_array("NAYTATYOT", $valitut_sarakkeet) and !empty($hintahopinat)) {
-    $worksheet->write($excelrivi++, $excelsarake, t("Erillisveloitettavat työt (Muutoksenhallinta, Häiriönselvitys ja muu erillislaskutettava työ)"), $format_bold);
+    $lisatyosarakeq = "SELECT selitetark 
+                       FROM avainsana 
+                       WHERE yhtio = '{$kukarow['yhtio']}'
+                       AND laji = 'SOP_LAITLUET' 
+                       AND selite = 'NAYTATYOT'";
+    $lisatyosarakeres = pupe_query($lisatyosarakeq);
+    $lisatyosarakerivi = mysql_fetch_assoc($lisatyosarakeres);
+    $worksheet->write($excelrivi++, $excelsarake, $lisatyosarakerivi['selitetark'], $format_bold);
     $worksheet->write($excelrivi++, $excelsarake, $hintahopinat);
     $excelsarake = 0;
   }

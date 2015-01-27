@@ -724,7 +724,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $excelsarake++;
     }
     else {
-      fwrite($fh, t("Varasto").";");
+      fwrite($fh, pupesoft_csvstring(t("Varasto"))."\t");
     }
   }
 
@@ -740,7 +740,10 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $excelsarake++;
     }
     else {
-      fwrite($fh, t("Hyllyalue").";".t("Hyllynro").";".t("Hyllyvali").";".t("Hyllytaso").";");
+      fwrite($fh, pupesoft_csvstring(t("Hyllyalue"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Hyllynro"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Hyllyvali"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Hyllytaso")."\t"));
     }
   }
 
@@ -750,7 +753,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $excelsarake++;
     }
     else {
-      fwrite($fh, t("Tuotemerkki").";");
+      fwrite($fh, pupesoft_csvstring(t("Tuotemerkki"))."\t");
     }
   }
 
@@ -767,7 +770,11 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     $excelsarake++;
   }
   else {
-    fwrite($fh, t("Osasto").";".t("Tuoteryhmä").";".t("Tuoteno").";".t("Nimitys").";".t("Yksikko").";");
+    fwrite($fh, pupesoft_csvstring(t("Osasto"))."\t");
+    fwrite($fh, pupesoft_csvstring(t("Tuoteryhmä"))."\t");
+    fwrite($fh, pupesoft_csvstring(t("Tuoteno"))."\t");
+    fwrite($fh, pupesoft_csvstring(t("Nimitys"))."\t");
+    fwrite($fh, pupesoft_csvstring(t("Yksikko"))."\t");
   }
 
   if ($variaatiosummaus != "") {
@@ -777,7 +784,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         $excelsarake++;
       }
       else {
-        fwrite($fh, "{$kokonimi};");
+        fwrite($fh, pupesoft_csvstring($kokonimi)."\t");
       }
     }
   }
@@ -787,7 +794,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     $excelsarake++;
   }
   else {
-    fwrite($fh, t("Saldo").";");
+    fwrite($fh, pupesoft_csvstring(t("Saldo"))."\t");
   }
 
   if ($varatturajaus == "O") {
@@ -796,7 +803,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $excelsarake++;
     }
     else {
-      fwrite($fh, t("Varattu saldo").";");
+      fwrite($fh, pupesoft_csvstring(t("Varattu saldo"))."\t");
     }
   }
 
@@ -807,7 +814,8 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     $excelsarake++;
   }
   else {
-    fwrite($fh, t("Kehahin").";".t("Varastonarvo").";");
+    fwrite($fh, pupesoft_csvstring(t("Kehahin"))."\t");
+    fwrite($fh, pupesoft_csvstring(t("Varastonarvo"))."\t");
   }
 
   if ($varatturajaus == "O") {
@@ -816,7 +824,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $excelsarake++;
     }
     else {
-      fwrite($fh, t("Varattu varastonarvo").";");
+      fwrite($fh, pupesoft_csvstring(t("Varattu varastonarvo"))."\t");
     }
   }
 
@@ -825,7 +833,9 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $worksheet->writeString($excelrivi, $excelsarake, t("Bruttovarastonarvo")." ".t("Arvio"), $format_bold);
     }
     else {
-      fwrite($fh, t("Bruttovarastonarvo")." ".t("Arvio").";");
+      fwrite($fh, pupesoft_csvstring(t("Bruttovarastonarvo")));
+      fwrite($fh, " ");
+      fwrite($fh, pupesoft_csvstring(t("Arvio"))."\t");
     }
   }
   else {
@@ -833,7 +843,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $worksheet->writeString($excelrivi, $excelsarake, t("Bruttovarastonarvo"),   $format_bold);
     }
     else {
-      fwrite($fh, t("Bruttovarastonarvo").";");
+      fwrite($fh, pupesoft_csvstring(t("Bruttovarastonarvo"))."\t");
     }
   }
   $excelsarake++;
@@ -848,7 +858,8 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         $excelsarake++;
       }
       else {
-        fwrite($fh, t("Kiertonopeus 12kk").";".t("Viimeisin laskutus")."/".t("kulutus").";");
+        fwrite($fh, pupesoft_csvstring(t("Kiertonopeus 12kk"))."\t");
+        fwrite($fh, pupesoft_csvstring(t("Viimeisin laskutus")."/".t("kulutus"))."\t");
       }
     }
 
@@ -864,11 +875,11 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $worksheet->writeString($excelrivi, $excelsarake, t("Viimeinen hankintapäivä"),   $format_bold);
     }
     else {
-      fwrite($fh, t("Epäkurantti 25%").";");
-      fwrite($fh, t("Epäkurantti 50%").";");
-      fwrite($fh, t("Epäkurantti 75%").";");
-      fwrite($fh, t("Epäkurantti 100%").";");
-      fwrite($fh, t("Viimeinen hankintapäivä").";");
+      fwrite($fh, pupesoft_csvstring(t("Epäkurantti 25%"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Epäkurantti 50%"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Epäkurantti 75%"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Epäkurantti 100%"))."\t");
+      fwrite($fh, pupesoft_csvstring(t("Viimeinen hankintapäivä"))."\t");
     }
   }
 
@@ -1295,7 +1306,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           $excelsarake++;
         }
         else {
-          fwrite($fh, $row["varastonnimi"].";");
+          fwrite($fh, pupesoft_csvstring($row["varastonnimi"])."\t");
         }
       }
 
@@ -1311,10 +1322,10 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           $excelsarake++;
         }
         else {
-          fwrite($fh, $row["hyllyalue"].";");
-          fwrite($fh, $row["hyllynro"].";");
-          fwrite($fh, $row["hyllyvali"].";");
-          fwrite($fh, $row["hyllytaso"].";");
+          fwrite($fh, pupesoft_csvstring($row["hyllyalue"])."\t");
+          fwrite($fh, pupesoft_csvstring($row["hyllynro"])."\t");
+          fwrite($fh, pupesoft_csvstring($row["hyllyvali"])."\t");
+          fwrite($fh, pupesoft_csvstring($row["hyllytaso"])."\t");
         }
       }
 
@@ -1324,7 +1335,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           $excelsarake++;
         }
         else {
-          fwrite($fh, $row["tuotemerkki"].";");
+          fwrite($fh, pupesoft_csvstring($row["tuotemerkki"])."\t");
         }
       }
 
@@ -1335,8 +1346,8 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         $excelsarake++;
       }
       else {
-        fwrite($fh, $row["osasto"].";");
-        fwrite($fh, $row["try"].";");
+        fwrite($fh, pupesoft_csvstring($row["osasto"])."\t");
+        fwrite($fh, pupesoft_csvstring($row["try"])."\t");
       }
 
       if ($variaatiosummaus != "") {
@@ -1348,7 +1359,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           $worksheet->writeString($excelrivi, $excelsarake, implode(" ", $tuotenoparts));
         }
         else {
-          fwrite($fh, implode(" ", $tuotenoparts).";");
+          fwrite($fh, pupesoft_csvstring(implode(" ", $tuotenoparts))."\t");
         }
       }
       else {
@@ -1356,7 +1367,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           $worksheet->writeString($excelrivi, $excelsarake, $row["tuoteno"]);
         }
         else {
-          fwrite($fh, $row["tuoteno"].";");
+          fwrite($fh, pupesoft_csvstring($row["tuoteno"])."\t");
         }
       }
 
@@ -1370,8 +1381,8 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         $excelsarake++;
       }
       else {
-        fwrite($fh, t_tuotteen_avainsanat($row, 'nimitys').";");
-        fwrite($fh, $row["yksikko"].";");
+        fwrite($fh, pupesoft_csvstring(t_tuotteen_avainsanat($row, 'nimitys'))."\t");
+        fwrite($fh, pupesoft_csvstring($row["yksikko"])."\t");
       }
 
       if ($variaatiosummaus != "") {
@@ -1381,7 +1392,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
               $worksheet->writeString($excelrivi, $excelsarake, $koot[$kokonimi]);
             }
             else {
-              fwrite($fh, $koot[$kokonimi].";");
+              fwrite($fh, pupesoft_csvstring($koot[$kokonimi])."\t");
             }
           }
           $excelsarake++;
@@ -1393,7 +1404,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         $excelsarake++;
       }
       else {
-        fwrite($fh, sprintf("%.02f", $muutoskpl).";");
+        fwrite($fh, pupesoft_csvstring(sprintf("%.02f", $muutoskpl))."\t");
       }
 
       if ($varatturajaus == "O") {
@@ -1402,7 +1413,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           $excelsarake++;
         }
         else {
-          fwrite($fh, sprintf("%.02f", $varattu_saldo).";");
+          fwrite($fh, pupesoft_csvstring(sprintf("%.02f", $varattu_saldo))."\t");
         }
       }
 
@@ -1413,8 +1424,8 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         $excelsarake++;
       }
       else {
-        fwrite($fh, sprintf("%.06f", $kehasilloin).";");
-        fwrite($fh, sprintf("%.06f", $muutoshinta).";");
+        fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $kehasilloin))."\t");
+        fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $muutoshinta))."\t");
       }
 
       if ($varatturajaus == "O") {
@@ -1423,7 +1434,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           $excelsarake++;
         }
         else {
-          fwrite($fh, sprintf("%.06f", $varattu_varastonarvo).";");
+          fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $varattu_varastonarvo))."\t");
         }
       }
 
@@ -1432,7 +1443,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         $excelsarake++;
       }
       else {
-        fwrite($fh, sprintf("%.06f", $bmuutoshinta).";");
+        fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $bmuutoshinta))."\t");
       }
 
       if (isset($valitut_varastot_rajaus) and $valitut_varastot_rajaus != "") {
@@ -1459,8 +1470,8 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
             $excelsarake++;
           }
           else {
-            fwrite($fh, sprintf("%.02f", $kierto).";");
-            fwrite($fh, tv1dateconv($vikamykupaiva).";");
+            fwrite($fh, pupesoft_csvstring(sprintf("%.02f", $kierto))."\t");
+            fwrite($fh, pupesoft_csvstring(tv1dateconv($vikamykupaiva))."\t");
           }
         }
 
@@ -1469,7 +1480,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
             $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row['epakurantti25pvm']));
           }
           else {
-            fwrite($fh, tv1dateconv($row['epakurantti25pvm']));
+            fwrite($fh, pupesoft_csvstring(tv1dateconv($row['epakurantti25pvm'])));
           }
         }
 
@@ -1477,7 +1488,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           $excelsarake++;
         }
         else {
-          fwrite($fh, ";");
+          fwrite($fh, "\t");
         }
 
         if ($row['epakurantti50pvm'] != '0000-00-00') {
@@ -1485,7 +1496,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
             $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row['epakurantti50pvm']));
           }
           else {
-            fwrite($fh, tv1dateconv($row['epakurantti50pvm']));
+            fwrite($fh, pupesoft_csvstring(tv1dateconv($row['epakurantti50pvm'])));
           }
         }
 
@@ -1493,7 +1504,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           $excelsarake++;
         }
         else {
-          fwrite($fh, ";");
+          fwrite($fh, "\t");
         }
 
         if ($row['epakurantti75pvm'] != '0000-00-00') {
@@ -1501,7 +1512,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
             $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row['epakurantti75pvm']));
           }
           else {
-            fwrite($fh, tv1dateconv($row['epakurantti75pvm']));
+            fwrite($fh, pupesoft_csvstring(tv1dateconv($row['epakurantti75pvm'])));
           }
         }
 
@@ -1509,7 +1520,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           $excelsarake++;
         }
         else {
-          fwrite($fh, ";");
+          fwrite($fh, "\t");
         }
 
         if ($row['epakurantti100pvm'] != '0000-00-00') {
@@ -1517,7 +1528,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
             $worksheet->writeString($excelrivi, $excelsarake, tv1dateconv($row['epakurantti100pvm']));
           }
           else {
-            fwrite($fh, tv1dateconv($row['epakurantti100pvm']));
+            fwrite($fh, pupesoft_csvstring(tv1dateconv($row['epakurantti100pvm'])));
           }
         }
 
@@ -1525,7 +1536,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           $excelsarake++;
         }
         else {
-          fwrite($fh, ";");
+          fwrite($fh, "\t");
         }
 
         if ($tallennusmuoto_check) {
@@ -1533,7 +1544,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           $excelsarake++;
         }
         else {
-          fwrite($fh, tv1dateconv($row["vihapvm"]).";");
+          fwrite($fh, pupesoft_csvstring(tv1dateconv($row["vihapvm"]))."\t");
         }
       }
 
@@ -1574,9 +1585,9 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
             $excelrivi++;
           }
           else {
-            fwrite($fh, $vararvorow["sarjanumero"].";");
-            fwrite($fh, $vararvorow["nimitys"].";");
-            fwrite($fh, sprintf("%.02f", $sarjanumeronarvo).";");
+            fwrite($fh, pupesoft_csvstring($vararvorow["sarjanumero"])."\t");
+            fwrite($fh, pupesoft_csvstring($vararvorow["nimitys"])."\t");
+            fwrite($fh, pupesoft_csvstring(sprintf("%.02f", $sarjanumeronarvo))."\t");
             fwrite($fh, "\r\n");
           }
         }

@@ -21,7 +21,7 @@ $useslave = 1;
 if (!$php_cli) {
   require "../inc/parametrit.inc";
 
-  ini_set("memory_limit", "2G");
+  ini_set("memory_limit", "5G");
 }
 else {
   require_once "../inc/functions.inc";
@@ -30,7 +30,7 @@ else {
   // Logitetaan ajo
   cron_log();
 
-  ini_set("memory_limit", "2G");
+  ini_set("memory_limit", "5G");
 
   ini_set("include_path", ini_get("include_path").PATH_SEPARATOR.dirname(dirname(__FILE__)).PATH_SEPARATOR."/usr/share/pear");
   error_reporting(E_ALL ^E_WARNING ^E_NOTICE);

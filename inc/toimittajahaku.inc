@@ -39,7 +39,7 @@ if ($tee == 'A') {
 
     echo "<br>";
     echo "<table>";
-    echo "<form action = 'raportit.php?toim=toimittajahaku' method='post'>
+    echo "<form action = 'raportit.php?toim=$toim' method='post'>
         <tr>
         <input type='hidden' name='tunnus' value='$tunnus'>
         <input type='hidden' name='tee' value='A'>";
@@ -117,7 +117,7 @@ if ($tee == 'A') {
       echo "<tr class='aktiivi'>";
       for ($i=0; $i<mysql_num_fields($result); $i++) {
         if ($i==0) {
-          echo "<td><a href='$PHP_SELF?toim=toimittajahaku&tee=A&laji=O&tunnus=$tunnus&kausi=$trow[$i]'>$trow[$i]</a></td>";
+          echo "<td><a href='$PHP_SELF?toim=$toim&tee=A&laji=O&tunnus=$tunnus&kausi=$trow[$i]'>$trow[$i]</a></td>";
         }
         else {
           echo "<td>$trow[$i]</td>";
@@ -177,7 +177,7 @@ if ($tee == 'A') {
       echo "</table>";
       echo "<br>";
 
-      echo "<form action = 'raportit.php?toim=toimittajahaku' method='post'>";
+      echo "<form action = 'raportit.php?toim=$toim' method='post'>";
 
       if (isset($tunnus) and $tunnus > 0) echo "<input type='hidden' name='tunnus' value='$tunnus'>";
       else echo "<input type='hidden' name='ytunnus' value='$ytunnus'>";
@@ -277,7 +277,7 @@ if ($tee == 'A') {
       echo "</table>";
       echo "</form>";
 
-      echo "<br><a href='$PHP_SELF?toim=toimittajahaku&tee=A&laji=$laji&tunnus=$tunnus&limit=NO&lopetus=$lopetus'>".t("Näytä kaikki laskut")."</a><br><br>";
+      echo "<br><a href='$PHP_SELF?toim=$toim&tee=A&laji=$laji&tunnus=$tunnus&limit=NO&lopetus=$lopetus'>".t("Näytä kaikki laskut")."</a><br><br>";
 
       $th_lisa = '';
 
@@ -311,8 +311,8 @@ if ($tee == 'A') {
       if ($limit != "NO") {
         $limlis = " LIMIT $alku, 50 ";
       }
-
-      if (isset($lisa) and strpos($lisa, "tiliointi.") !== FALSE) {
+      
+      if (isset($lisa) and strpos($lisa, "tiliointi.") !== FALSE or !empty($vainomakustp)) {
         $tiliointilisa = " JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio
                              AND tiliointi.ltunnus = lasku.tunnus
                              AND tiliointi.korjattu = '') ";
@@ -321,19 +321,27 @@ if ($tee == 'A') {
       else {
         $tiliointilisa = '';
       }
+      
+      // Rajataan AINA käyttäjän osaston kustannuspaikalla
+      $vainomakustp_lisa = "";
+  
+      if (!empty($vainomakustp)) {
+        $vainomakustp_lisa = " and tiliointi.kustp = '{$kukarow["osasto"]}' ";
+      }                  
 
       $query = "SELECT DISTINCT lasku.tapvm, lasku.erpcm, lasku.summa, lasku.valkoodi, lasku.vienti,
                 concat_ws(' ', lasku.viite, lasku.viesti) 'viite/viesti', lasku.ebid, lasku.tila, lasku.tunnus,
                 if(lasku.laskunro = 0, '', lasku.laskunro) laskunro,
                 round(lasku.summa * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi), 2) kotisumma
-                  FROM lasku
+                FROM lasku
                 {$tiliointilisa}
-                  WHERE lasku.yhtio = '$kukarow[yhtio]'
-                  $toimiliilisa
+                WHERE lasku.yhtio = '$kukarow[yhtio]'
+                $toimiliilisa
                 $th_lisa
                 $aikalisa
-                  and lasku.tila    in ('H', 'M', 'P', 'Q', 'Y')
-                  ORDER BY lasku.tapvm desc
+                $vainomakustp_lisa
+                and lasku.tila in ('H', 'M', 'P', 'Q', 'Y')
+                ORDER BY lasku.tapvm desc
                 $limlis";
       $result = pupe_query($query);
       $seraavako = mysql_num_rows($result);
@@ -456,14 +464,14 @@ if ($tee == 'A') {
 
         if ($alku > 0) {
           $siirry = $alku - 50;
-          echo "<a href = '$PHP_SELF?toim=toimittajahaku&tee=A&tunnus=$tunnus&ytunnus=$ytunnus&alku=$siirry&laji=$laji'>&laquo; ".t("Edelliset")."</a> ";
+          echo "<a href = '$PHP_SELF?toim=$toim&tee=A&tunnus=$tunnus&ytunnus=$ytunnus&alku=$siirry&laji=$laji'>&laquo; ".t("Edelliset")."</a> ";
         }
 
         echo "&nbsp;&nbsp;";
 
         if ($seraavako >= 50) {
           $siirry = $alku + 50;
-          echo "<a href = '$PHP_SELF?toim=toimittajahaku&tee=A&tunnus=$tunnus&ytunnus=$ytunnus&alku=$siirry&laji=$laji'>".t("Seuraavat")." &raquo;</a> ";
+          echo "<a href = '$PHP_SELF?toim=$toim&tee=A&tunnus=$tunnus&ytunnus=$ytunnus&alku=$siirry&laji=$laji'>".t("Seuraavat")." &raquo;</a> ";
           echo "<br><br>";
         }
 
@@ -544,7 +552,7 @@ if ($th_lisat != '') {
     echo "<th>" . t("Valitse")."</th><th></th></tr>";
 
     while ($trow = mysql_fetch_array($result)) {
-      echo "<form action = 'raportit.php?toim=toimittajahaku' method='post'>
+      echo "<form action = 'raportit.php?toim=$toim' method='post'>
           <tr>
           <input type='hidden' name='tunnus' value='$trow[tunnus]'>
           <input type='hidden' name='lopetus' value='$PHP_SELF////toim=$toim//tee=$tee//nimi=$nimi'>
@@ -572,7 +580,7 @@ if ($th_lisat != '') {
 
 if ($tee == '') {
   echo "<form name = 'valinta' action = 'raportit.php' method='post'>
-      <input type='hidden' name='toim' value='toimittajahaku'>
+      <input type='hidden' name='toim' value='$toim'>
       <br><table>
       <tr>
       <th>".t("Valitse toimittaja")."</th>

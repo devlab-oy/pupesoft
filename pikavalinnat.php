@@ -1,6 +1,8 @@
 <?php
 
-require "inc/parametrit.inc";
+if (@include "inc/parametrit.inc");
+elseif (@include "parametrit.inc");
+else exit;
 
 echo "<font class='head'>".t("Muokkaa pikavalintoja").":</font><hr>";
 
@@ -90,11 +92,19 @@ echo "<tr>
       <th>".t("Järjestys")."</th>
       </tr>";
 
+
+if ($kukarow["extranet"] != "") {
+  $sovellus_rajaus = " and sovellus like 'Extranet%' ";
+}
+else {
+  $sovellus_rajaus = " and sovellus not like 'Extranet%' ";
+}
+
 $query = "SELECT sovellus, nimi, alanimi, min(nimitys) nimitys, min(jarjestys) jarjestys, min(jarjestys2) jarjestys2, max(hidden) hidden
           FROM oikeu
           WHERE yhtio  = '$kukarow[yhtio]'
           and kuka     = '$kukarow[kuka]'
-          and sovellus not like 'Extranet%'
+          {$sovellus_rajaus}
           GROUP BY sovellus, nimi, alanimi
           ORDER BY sovellus, jarjestys, jarjestys2";
 $oikeures = pupe_query($query);

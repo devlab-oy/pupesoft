@@ -2571,7 +2571,7 @@ else {
                 $bulisa = " and asiakkaan_tunnus in ({$row['asiakaslista']}) ";
 
                 if ($vertailubu == "asbuos" and $tuosagroups > 0) {
-                  $bulisa .= " and osasto = '{$row['osasto']}' ";
+                  $bulisa .= " and osasto = '{$row['tuoteosasto']}' ";
                 }
                 elseif ($vertailubu == "asbuos") {
                   $bulisa .= " and osasto != '' ";

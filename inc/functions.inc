@@ -325,7 +325,7 @@ if (!function_exists("pupe_error")) {
 
       echo "<font class = 'error'>";
 
-      $puperror = htmlentities($puperror);
+      $puperror = htmlentities($puperror, ENT_SUBSTITUTE);
     }
 
     if ($_display == '1' or $_pupedebug !== false) {
@@ -3425,7 +3425,7 @@ if (!function_exists("alv")) {
       if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 600;              // Otsikolla on valittu veroton myynti, esim Ahvenanmaan myntiä
       if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0) $alv = $trow["alv"]+600; // Otsikolla on valittu verollinen kotimaan myynti
       if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") $alv = 600;              // EU-vienti yritykselle --> alviton
-      if ($laskurow["vienti"] == "K" and $asrow["laji"] != "H") $alv = 600;              // Vienti eu:n ulkopuolelle yritykselle --> alviton
+      if ($laskurow["vienti"] == "K") $alv = 600;              // Vienti EU:n ulkopuolelle on aina alviton
 
       $alv = (float) $alv;
     }
@@ -3434,7 +3434,7 @@ if (!function_exists("alv")) {
       if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 500;              // Otsikolla on valittu veroton myynti, esim Ahvenanmaan myntiä
       if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0) $alv = $trow["alv"]+500; // Otsikolla on valittu verollinen kotimaan myynti
       if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") $alv = 500;              // EU-vienti yritykselle --> alviton
-      if ($laskurow["vienti"] == "K" and $asrow["laji"] != "H") $alv = 500;              // Vienti eu:n ulkopuolelle yritykselle --> alviton
+      if ($laskurow["vienti"] == "K") $alv = 500;              // Vienti EU:n ulkopuolelle on aina alviton
 
       $alv = (float) $alv;
     }
@@ -3443,7 +3443,7 @@ if (!function_exists("alv")) {
       if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 0;                           // Otsikolla on valittu veroton myynti, esim Ahvenanmaan myntiä
       if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0 and $alv == "") $alv = $trow["alv"]; // Otsikolla on valittu verollinen kotimaan myynti
       if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") $alv = 0;                           // EU-vienti yritykselle --> alviton
-      if ($laskurow["vienti"] == "K" and $asrow["laji"] != "H") $alv = 0;                           // Vienti eu:n ulkopuolelle yritykselle --> alviton
+      if ($laskurow["vienti"] == "K") $alv = 0;                           // Vienti EU:n ulkopuolelle on aina alviton
 
       $alv = (float) $alv;
     }
@@ -3452,7 +3452,7 @@ if (!function_exists("alv")) {
       if ($laskurow["vienti"] == ""  and $laskurow["alv"] == 0) $alv = 0;                           // Otsikolla on valittu veroton myynti, esim Ahvenanmaan myntiä
       if (($laskurow["vienti"] == "" or $asrow["laji"] == "H") and $laskurow["alv"] != 0 and $alv == "") $alv = $trow["alv"]; // Otsikolla on valittu verollinen kotimaan myynti
       if ($laskurow["vienti"] == "E" and $asrow["laji"] != "H") $alv = 0;                           // EU-vienti yritykselle --> alviton
-      if ($laskurow["vienti"] == "K" and $asrow["laji"] != "H") $alv = 0;                           // Vienti eu:n ulkopuolelle yritykselle --> alviton
+      if ($laskurow["vienti"] == "K") $alv = 0;                           // Vienti EU:n ulkopuolelle on aina alviton
 
       $alv = (float) $alv;
       $trow['alv'] = (float) $trow['alv'];
@@ -16206,9 +16206,8 @@ if (!function_exists("hae_hyvityshinta")) {
     $query_ale_lisa = generoi_alekentta('M');
 
     $i = 0;
-    $cur_date = new DateTime();
-    $date_2yo = new DateTime();
-    $date_2yo->sub(new DateInterval('P2Y'));
+    $cur_date = date('Y-m-d');
+    $date_2yo = date("Y-m-d", mktime(0, 0, 0, date("n"), date("j"), date("Y")-2));
 
     // Jos kahden vuoden aikarajaus ylittyy, breikataan looppi
     while ($cur_date >= $date_2yo) {
@@ -16216,9 +16215,9 @@ if (!function_exists("hae_hyvityshinta")) {
       $querylisa = $i == 0 ? " or tilausrivi.laskutettuaika = '0000-00-00'" : "";
       $i++;
 
-      $cur_date->sub(new DateInterval('P1M'));
-      $pre_date = new DateTime($cur_date->format('Y-m-d'));
-      $pre_date->add(new DateInterval('P1M'));
+      $pre_date = $cur_date;
+      $cur_date = explode('-', $cur_date);
+      $cur_date = date("Y-m-d", mktime(0, 0, 0, $cur_date[1]-1, $cur_date[2], $cur_date[0]));
 
       // Haetaan asiakkaan laskutetut/toimitetut veloitusrivit + toisella queryllä hyvitysrivit
       $query = "SELECT datediff(CURRENT_DATE, if(tilausrivi.laskutettuaika = '0000-00-00', CURRENT_DATE, tilausrivi.laskutettuaika)) AS ika,
@@ -16235,8 +16234,8 @@ if (!function_exists("hae_hyvityshinta")) {
                 AND tilausrivi.tuoteno   = '{$tuoteno}'
                 AND tilausrivi.varattu + tilausrivi.kpl > 0
                 AND tilausrivi.var       not in ('P','J')
-                AND tilausrivi.laadittu  >= '".$date_2yo->format('Y-m-d')." 00:00:00'
-                AND ((tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."' and tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."') $querylisa)
+                AND tilausrivi.laadittu  >= '{$date_2yo} 00:00:00'
+                AND ((tilausrivi.laskutettuaika <= '{$pre_date}' and tilausrivi.laskutettuaika >= '{$cur_date}') $querylisa)
                 GROUP BY ika, hinta
                 HAVING kpl != 0
 
@@ -16254,8 +16253,8 @@ if (!function_exists("hae_hyvityshinta")) {
                 AND tilausrivi.tuoteno   = '{$tuoteno}'
                 AND tilausrivi.varattu + tilausrivi.kpl < 0
                 AND tilausrivi.var       not in ('P','J')
-                AND tilausrivi.laadittu  >= '".$date_2yo->format('Y-m-d')." 00:00:00'
-                AND ((tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."' and tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."') $querylisa)
+                AND tilausrivi.laadittu  >= '{$date_2yo} 00:00:00'
+                AND ((tilausrivi.laskutettuaika <= '{$pre_date}' and tilausrivi.laskutettuaika >= '{$cur_date}') $querylisa)
                 GROUP BY ika, hinta
                 HAVING kpl != 0
 
@@ -16306,13 +16305,27 @@ if (!function_exists("hae_hyvityshinta")) {
 
     // Asiakas ei ole ostanut tätä tuotette -> palautuskielto
     if (count($tilausrivit) == 0) {
-      $palautus[] = array("tuoteno" => $tuoteno, "kpl" => $kpl, "hinta" => 0, "ale" => 0, "kommentti" => "Palautuskielto", "palautuskielto" => "X");
+      $palautus[] = array(
+        "tuoteno" => $tuoteno,
+        "kpl" => $kpl,
+        "hinta" => 0,
+        "ale" => 0,
+        "kommentti" => t("Palautuskielto"),
+        "palautuskielto" => "X"
+      );
       return $palautus;
     }
 
     // Jos löytyi vähemmän myyntejä kun asiakas on palauttamassa -> palautuskielto
     if ($laskuri < $kpl) {
-      $palautus[] = array("tuoteno" => $tuoteno, "kpl" => $kpl, "hinta" => 0, "ale" => 0, "kommentti" => "Palautuskielto", "palautuskielto" => "X");
+      $palautus[] = array(
+        "tuoteno" => $tuoteno,
+        "kpl" => $kpl,
+        "hinta" => 0,
+        "ale" => 0,
+        "kommentti" => t("Palautuskielto"),
+        "palautuskielto" => "X"
+      );
       // echo "** Palautuskielto: $kpl<br>";
     }
 
@@ -16392,7 +16405,14 @@ if (!function_exists("hae_hyvityshinta")) {
 
       // Jos ei löytynyt yhtään hyvityssaantöjä -> palautuskielto
       if (!isset($ale)) {
-        $palautus[] = array("tuoteno" => $tuoteno, "kpl" => $tilausrivi_arvo['kpl'], "hinta" => 0, "ale" => 0, "kommentti" => "Palautuskielto", "palautuskielto" => "X");
+        $palautus[] = array(
+          "tuoteno" => $tuoteno,
+          "kpl" => $tilausrivi_arvo['kpl'],
+          "hinta" => 0,
+          "ale" => 0,
+          "kommentti" => t("Palautuskielto"),
+          "palautuskielto" => "X"
+        );
       }
       else {
 
@@ -16401,7 +16421,14 @@ if (!function_exists("hae_hyvityshinta")) {
           $ale = 0;
         }
 
-        $palautus[] = array("tuoteno" => $tuoteno, "kpl" => $tilausrivi_arvo['kpl'], "hinta" => $tilausrivi_arvo['hinta'], "ale" => $ale, "kommentti" => $kommentti, "palautuskielto" => $palautuskielto);
+        $palautus[] = array(
+          "tuoteno" => $tuoteno,
+          "kpl" => $tilausrivi_arvo['kpl'],
+          "hinta" => $tilausrivi_arvo['hinta'],
+          "ale" => $ale,
+          "kommentti" => $kommentti,
+          "palautuskielto" => $palautuskielto
+        );
       }
     }
 
@@ -20598,18 +20625,28 @@ if (!function_exists("pupesoft_sahkoposti")) {
         }
       }
 
-      $resque_args = array(
-        'user'          => $kukarow["eposti"],
-        'error_message' => utf8_encode(t("Sähköpostin lähetys epäonnistui").": $email_to"),
-        'from'          => $yhtiorow["postittaja_email"],
-        'from_name'     => utf8_encode($yhtiorow["nimi"]),
-        'to'            => $email_to,
-        'cc'            => $email_cc,
-        'subject'       => utf8_encode($email_subject),
-        'body'          => utf8_encode($email_body),
-        'attachements'  => $resque_liitteet);
+      // Nämä välitetään ActiveJobin perform metodille parametreiksi
+      $perform_args = array(0 =>
+        array(
+          'user'          => $kukarow["eposti"],
+          'error_message' => utf8_encode(t("Sähköpostin lähetys epäonnistui").": $email_to"),
+          'from'          => $yhtiorow["postittaja_email"],
+          'from_name'     => utf8_encode($yhtiorow["nimi"]),
+          'to'            => $email_to,
+          'cc'            => $email_cc,
+          'subject'       => utf8_encode($email_subject),
+          'body'          => utf8_encode($email_body),
+          'attachements'  => $resque_liitteet
+        )
+      );
 
-      Resque::enqueue('PupeEmail', 'EmailWorker', $resque_args);
+      $resque_args = array(
+        'job_class'  => 'EmailWorkerJob',
+        'queue_name' => 'PupeEmail',
+        'arguments'  => $perform_args
+      );
+
+      Resque::enqueue('PupeEmail', 'ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper', $resque_args);
       return TRUE;
     }
 
@@ -21265,7 +21302,9 @@ if (!function_exists('lisaa_tuotepaikka')) {
       $hyllyalue = $varasto['alkuhyllyalue'];
       $hyllynro  = $varasto['alkuhyllynro'];
       $hyllyvali = 0;
-      $hyllytaso = 0;
+      if ($hyllytaso == '') {
+        $hyllytaso = 0;
+      }
     }
     elseif ($hyllyalue == '' and empty($varasto)) {
       return false;
@@ -21358,13 +21397,16 @@ if (!function_exists('tarkista_varaston_hyllypaikka')) {
 }
 
 if (!function_exists('onko_varaston_hyllypaikat_kaytossa')) {
-  function onko_varaston_hyllypaikat_kaytossa() {
+  function onko_varaston_hyllypaikat_kaytossa($varasto = null) {
     global $kukarow;
+
+    $varastolisa = !empty($varasto) ? "and varasto = ".(int) $varasto : "";
 
     // Haetaan varastopaikka
     $query = "SELECT tunnus
               FROM varaston_hyllypaikat
               WHERE yhtio = '{$kukarow['yhtio']}'
+              {$varastolisa}
               LIMIT 1";
     $result = pupe_query($query);
     return (mysql_num_rows($result) == 0) ? false : true;
@@ -30195,7 +30237,7 @@ if (!function_exists("sanitoi_javascript_id")) {
     // ID and NAME tokens must begin with a letter ([A-Za-z])
     // and may be followed by any number of letters, digits ([0-9]),
     // hyphens ("-"), underscores ("_"), colons (":"), and periods (".").
-    return preg_replace("/[^a-zöäåA-ZÖÄÅ0-9\-\:\_\.]/i", "", $value);
+    return preg_replace("/[^a-zöäåA-ZÖÄÅ0-9\-\:\_]/i", "", $value);
   }
 }
 
@@ -30293,6 +30335,46 @@ if (!function_exists("rakenna_relex_tuote_parametrit")) {
   }
 }
 
+if (!function_exists('tuotteen_toimittajat_pakkauskoot')) {
+  function tuotteen_toimittajat_pakkauskoot($tt_tunnus, $ehto = '') {
+    global $yhtiorow, $kukarow;
+
+    $pakkaukset = array();
+
+    if ($ehto == 'suurin') {
+      $orderby_limit = 'ORDER BY abs(tuotteen_toimittajat_pakkauskoot.pakkauskoko) desc LIMIT 1';
+    }
+    elseif ($ehto == 'desc') {
+      $orderby_limit = 'ORDER BY abs(tuotteen_toimittajat_pakkauskoot.pakkauskoko) desc';
+    }
+    else {
+      $orderby_limit = 'ORDER BY abs(tuotteen_toimittajat_pakkauskoot.pakkauskoko) asc';
+    }
+
+    if (isset($tt_tunnus)) {
+
+      $query = "SELECT tuotteen_toimittajat_pakkauskoot.*
+                FROM tuotteen_toimittajat
+                JOIN tuotteen_toimittajat_pakkauskoot ON (
+                  tuotteen_toimittajat_pakkauskoot.yhtio                   = tuotteen_toimittajat.yhtio
+                  AND tuotteen_toimittajat_pakkauskoot.toim_tuoteno_tunnus = tuotteen_toimittajat.tunnus)
+                WHERE tuotteen_toimittajat.yhtio                           = '$kukarow[yhtio]'
+                AND tuotteen_toimittajat.tunnus= '$tt_tunnus'
+                $orderby_limit";
+      $result = pupe_query($query);
+
+      while ($trow = mysql_fetch_assoc($result)) {
+        $pakkaukset[] = array($trow['pakkauskoko'], $trow['yksikko']);
+      }
+
+      return $pakkaukset;
+    }
+    else {
+      return array();
+    }
+  }
+}
+
 if (!function_exists('aseta_kukarow_kesken')) {
   function aseta_kukarow_kesken($kesken) {
     global $kukarow, $yhtiorow;
@@ -30315,6 +30397,31 @@ if (!function_exists('aseta_kukarow_kesken')) {
 
     return false;
   }
+}
+
+function ei_huomioida_tuotepaikkoja_avainsanoista($huomioidaanko = false, $taulu) {
+
+  global $kukarow, $yhtiorow;
+
+  $ei_huomioida_lisa = "";
+
+  if ($huomioidaanko) {
+
+    $chk_res = t_avainsana('INVASTEPAIKKA');
+
+    if (mysql_num_rows($chk_res) > 0) {
+
+      $ei_huomioida_lisa = array();
+
+      while ($chk_row = mysql_fetch_assoc($chk_res)) {
+        $ei_huomioida_lisa[] = $chk_row['selite'];
+      }
+
+      $ei_huomioida_lisa = " AND CONCAT_WS('-', {$taulu}.hyllyalue, {$taulu}.hyllynro, {$taulu}.hyllyvali, {$taulu}.hyllytaso) NOT IN ('".implode("','", $ei_huomioida_lisa)."') ";
+    }
+  }
+
+  return $ei_huomioida_lisa;
 }
 
 if (!function_exists("hae_saldo")) {
@@ -30413,5 +30520,103 @@ if (!function_exists('hae_lasku')) {
 if (!function_exists('escape_single_quotes')) {
   function escape_single_quotes(&$item, $key) {
     $item = str_replace("'", "\'", $item);
+  }
+}
+
+if (!function_exists("tiliointi_tarkistus")) {
+  function tiliointi_tarkistus($tiliointi_tarkistus, $kustp_tark, $kohde_tark, $projekti_tark) {
+
+    /*
+    0 = Ei pakollisia kenttiä
+    1 = pakollisia kenttiä tiliöinnissä on kustannuspaikka
+    2 = pakollisia kenttiä tiliöinnissä on kustannuspaikka, kohde
+    3 = pakollisia kenttiä tiliöinnissä on kustannuspaikka, projekti
+    4 = pakollisia kenttiä tiliöinnissä on kustannuspaikka, kohde ja projekti
+    5 = pakollisia kenttiä tiliöinnissä on kohde
+    6 = pakollisia kenttiä tiliöinnissä on kohde, projekti
+    7 = pakollisia kenttiä tiliöinnissä on projekti
+    */
+
+    $virhe = "";
+
+    $kustp_tark    = trim($kustp_tark);
+    $kohde_tark    = trim($kohde_tark);
+    $projekti_tark = trim($projekti_tark);
+
+    if (!empty($tiliointi_tarkistus)) {
+
+      if ($tiliointi_tarkistus == 1) {
+        if (empty($kustp_tark)) {
+          $virhe .= t("Tositteeseen on liitettävä kustannuspaikka")."!<br />";
+        }
+      }
+
+      if ($tiliointi_tarkistus == 2) {
+        if (empty($kustp_tark) or empty($kohde_tark)) {
+          $virhe .= t("Tositteeseen on liitettävä kustannuspaikka ja kohde")."!<br />";
+        }
+      }
+
+      if ($tiliointi_tarkistus == 3) {
+        if (empty($kustp_tark) or empty($projekti_tark)) {
+          $virhe .= t("Tositteeseen on liitettävä kustannuspaikka ja projekti")."!<br />";
+        }
+      }
+
+      if ($tiliointi_tarkistus == 4) {
+        if (empty($kustp_tark) or empty($kohde_tark) or empty($projekti_tark)) {
+          $virhe .= t("Tositteeseen on liitettävä kustannuspaikka ja kohde sekä projekti")."!<br />";
+        }
+      }
+
+      if ($tiliointi_tarkistus == 5) {
+        if (empty($kohde_tark)) {
+          $virhe .= t("Tositteeseen on liitettävä kohde")."!<br />";
+        }
+      }
+
+      if ($tiliointi_tarkistus == 6) {
+        if (empty($kohde_tark) or empty($projekti_tark)) {
+          $virhe .= t("Tositteeseen on liitettävä kohde sekä projekti")."!<br />";
+        }
+      }
+
+      if ($tiliointi_tarkistus == 7) {
+        if (empty($projekti_tark)) {
+          $virhe .= t("Tositteeseen on liitettävä projekti")."!<br />";
+        }
+      }
+    }
+
+    return $virhe;
+  }
+}
+
+if (!function_exists("hae_viimeiset_hyvaksyjat")) {
+  function hae_viimeiset_hyvaksyjat($laskurow) {
+    $hyvaksyja_kentat = array();
+    $kentat = array("hyvak1", "hyvak2", "hyvak3", "hyvak4", "hyvak5");
+
+    foreach ($kentat as $kentta) {
+      if (!empty($laskurow[$kentta])) {
+        array_push($hyvaksyja_kentat, $kentta);
+      }
+    }
+
+    $viimeinen_hyvaksyja = array_pop($hyvaksyja_kentat);
+    $viimeinen_hyvaksyja = substr($viimeinen_hyvaksyja, -1);
+    $viimeinen_hyvaksyja_time = "h{$viimeinen_hyvaksyja}time";
+
+    $tokaviimeinen_hyvaksyja = array_pop($hyvaksyja_kentat);
+
+    if ($tokaviimeinen_hyvaksyja) {
+      $tokaviimeinen_hyvaksyja = substr($tokaviimeinen_hyvaksyja, -1);
+      $tokaviimeinen_hyvaksyja_time = "h{$tokaviimeinen_hyvaksyja}time";
+    }
+    else {
+      $tokaviimeinen_hyvaksyja_time = false;
+    }
+
+    return array($viimeinen_hyvaksyja_time, $tokaviimeinen_hyvaksyja_time);
   }
 }

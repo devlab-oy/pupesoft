@@ -74,7 +74,7 @@ if (isset($task) and $task == 'perusta_saapuminen') {
       'postitp' => $toimrow['postitp'],
       'maa' => $toimrow['maa'],
       'varasto' => $varastotunnus,
-      'uusi' => 'JOO'
+      'uusi_ostotilaus' => 'JOO'
     );
 
     $laskurow = luo_ostotilausotsikko($params);

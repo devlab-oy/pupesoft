@@ -20,6 +20,8 @@ if (!function_exists('luo_ostotilausotsikko')) {
      * $params['myyntitil_kerayspvm']
      * $params['myytil_myyja']
      * $params['myytil_sisviesti1']
+     * $params['myytil_comments']
+     * $params['uusi_ostotilaus']
      * $params['myytil_viesti']
      * $params['myytil_toimaika']
      * $params['myytil_toimitustapa']
@@ -38,6 +40,8 @@ if (!function_exists('luo_ostotilausotsikko')) {
     $params['myyntitil_kerayspvm'] = (!empty($params['myyntitil_kerayspvm'])) ? $params['myyntitil_kerayspvm'] : '';
     $params['myytil_myyja'] = (!empty($params['myytil_myyja'])) ? $params['myytil_myyja'] : '';
     $params['myytil_sisviesti1'] = (!empty($params['myytil_sisviesti1'])) ? $params['myytil_sisviesti1'] : '';
+    $params['myytil_comments'] = (!empty($params['myytil_comments'])) ? $params['myytil_comments'] : '';
+    $params['uusi_ostotilaus'] = (!empty($params['uusi_ostotilaus'])) ? $params['uusi_ostotilaus'] : '';
     $params['myytil_viesti'] = (!empty($params['myytil_viesti'])) ? $params['myytil_viesti'] : '';
     $params['myytil_toimaika'] = (!empty($params['myytil_toimaika'])) ? $params['myytil_toimaika'] : '';
     $params['myytil_toimitustapa'] = (!empty($params['myytil_toimitustapa'])) ? $params['myytil_toimitustapa'] : '';
@@ -150,11 +154,12 @@ if (!function_exists('luo_ostotilausotsikko')) {
     $ostotilaus_result = pupe_query($query);
 
     // ei löydy, tehdään uus otsikko
-    if (mysql_num_rows($ostotilaus_result) == 0 or $params['uusi'] == 'JOO') {
+    if (mysql_num_rows($ostotilaus_result) == 0 or $params['uusi_ostotilaus'] == 'JOO') {
 
       $query = "INSERT INTO lasku SET
                 alatila             = '',
                 chn                 = '$chn',
+                comments            = '{$params['myytil_comments']}',
                 huolitsija          = '{$tiltoi['huolitsija']}',
                 jakelu              = '{$params['jakelu']}',
                 kerayspvm           = '{$params['myyntitil_kerayspvm']}',

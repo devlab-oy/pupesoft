@@ -1958,7 +1958,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
       'postino' => $toimrow['postino'],
       'postitp' => $toimrow['postitp'],
       'maa' => $toimrow['maa'],
-      'uusi' => 'JOO'
+      'uusi_ostotilaus' => 'JOO'
     );
 
     $laskurow = luo_ostotilausotsikko($params);

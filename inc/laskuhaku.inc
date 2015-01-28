@@ -106,7 +106,7 @@ if (($tee == 'S' or $tee == 'N' or $tee == 'V' or $tee == 'K' or $tee == 'W' or 
 
 echo "<form name = 'valinta' action = 'raportit.php?selaus=n' method='post'>";
 echo "<input type = 'hidden' name = 'lopetus' value = '$lopetus'>";
-echo "<input type = 'hidden' name = 'toim' value = 'laskuhaku'>";
+echo "<input type = 'hidden' name = 'toim' value = '$toim'>";
 echo "<table>";
 
 $sel = array_fill_keys(array($pvm_rajaustyyppi), " selected") + array_fill_keys(array('tappvm', 'luopvm', 'laspvm'), '');
@@ -364,11 +364,18 @@ if ($tee != '') {
 
   $alku += 0;
 
-  if (isset($lisa) and strpos($lisa, "tiliointi.") !== FALSE) {
+  if (isset($lisa) and strpos($lisa, "tiliointi.") !== FALSE or !empty($vainomakustp)) {
     $tiliointilisa = " JOIN tiliointi on (tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and tiliointi.korjattu='') ";
   }
   else {
     $tiliointilisa = '';
+  }
+  
+  // Rajataan AINA käyttäjän osaston kustannuspaikalla
+  $vainomakustp_lisa = "";
+
+  if (!empty($vainomakustp)) {    
+    $vainomakustp_lisa = " and tiliointi.kustp = '{$kukarow["osasto"]}' ";
   }
 
   if ($rajaus == "" or !is_numeric($rajaus)) {
@@ -381,13 +388,14 @@ if ($tee != '') {
   $query = "SELECT DISTINCT lasku.tapvm, lasku.erpcm, concat_ws('<br>', lasku.nimi, lasku.nimitark) nimi,
             lasku.summa, lasku.valkoodi, lasku.vienti, concat_ws(' ', lasku.viite, lasku.viesti) 'viite/viesti',
             lasku.ebid, lasku.tila, lasku.alatila, lasku.tunnus, if(lasku.laskunro = 0, '', lasku.laskunro) laskunro
-              FROM lasku $index
+            FROM lasku $index
             $tiliointilisa
-              WHERE $ehto
+            WHERE $ehto
             and lasku.yhtio = '$kukarow[yhtio]'
             $lisa
-              ORDER BY $jarj
-              LIMIT $alku, $rajaus";
+            $vainomakustp_lisa
+            ORDER BY $jarj
+            LIMIT $alku, $rajaus";
   $result = pupe_query($query);
   $seraavako = mysql_num_rows($result);
 
@@ -489,7 +497,7 @@ if ($tee != '') {
 
   if ($alku > 0) {
     $siirry = $alku - 50;
-    echo "<a href = '$PHP_SELF?toim=laskuhaku";
+    echo "<a href = '$PHP_SELF?toim=$toim";
     echo "&tee=$tee";
     echo "&pvm=$pvm";
     echo "&summa1=$summa1&summa2=$summa2";
@@ -508,7 +516,7 @@ if ($tee != '') {
 
   if ($seraavako >= 50) {
     $siirry = $alku + 50;
-    echo "<a href = '$PHP_SELF?toim=laskuhaku";
+    echo "<a href = '$PHP_SELF?toim=$toim";
     echo "&tee=$tee";
     echo "&pvm=$pvm";
     echo "&summa1=$summa1&summa2=$summa2";

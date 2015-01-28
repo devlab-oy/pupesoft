@@ -1511,9 +1511,16 @@ if (!empty($id) and $echotaanko) {
 
     // Myyntitileill‰ on speciaali vastaanotto
     if ($toim == "MYYNTITILI") {
-
-      // Tehd‰‰n asiakkaan tunnuksesta myyntitili-varastopaikka
-      list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = myyntitili_varastopaikka($row["asiakkaan_tunnus"]);
+      if ($rivirow["kohde_hyllyalue"] == '') {
+        // Tehd‰‰n asiakkaan tunnuksesta myyntitili-varastopaikka
+        list($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso) = myyntitili_varastopaikka($row["asiakkaan_tunnus"]);
+      }
+      else {
+        $hyllyalue = $rivirow["kohde_hyllyalue"];
+        $hyllynro  = $rivirow["kohde_hyllynro"];
+        $hyllyvali = $rivirow["kohde_hyllyvali"];
+        $hyllytaso = $rivirow["kohde_hyllytaso"];  
+       }
 
       echo "<td>";
       echo "<input type='hidden' name='t1[$rivirow[tunnus]]' value='$hyllyalue' maxlength='5' size='5'>";

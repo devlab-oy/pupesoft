@@ -211,11 +211,12 @@ if ($tee == 'CLI_TUOTTEETTOMAT' and $_cli) {
     }
 
     $tee = 'CLEANTUOTTEETTOMAT';
-    $kukarow['yhtio'] = $yhtio;
   }
 }
 
 if ($tee == 'CLEANTUOTTEETTOMAT') {
+
+  $poistettu = 0;
 
   foreach ($paikkatunnus as $tunnus) {
     $query = "DELETE
@@ -223,6 +224,7 @@ if ($tee == 'CLEANTUOTTEETTOMAT') {
               WHERE yhtio = '$kukarow[yhtio]'
               AND tunnus  = '$tunnus'";
     $presult = pupe_query($query);
+    $poistettu++;
   }
 
   $tee = "";

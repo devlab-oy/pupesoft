@@ -656,7 +656,7 @@ while ($row = mysql_fetch_assoc($result)) {
 }
 
 if ($valmkorj > 0) {
-  $iltasiivo .= is_log("Merkattiin $valmkorj vaömistustilausta takaisin alkuperäisille alatiloille.");
+  $iltasiivo .= is_log("Merkattiin $valmkorj valmistustilausta takaisin alkuperäisille alatiloille.");
 }
 
 // Poistetaan kaikki myyntitili-varastopaikat, jos niiden saldo on nolla
@@ -798,18 +798,18 @@ if (mysql_num_rows($poistettavat_tuotepaikat) > 0) {
     $avoimet_rivit[] = $avoinrivi['id'];
   }
 
-    // Haetaan avoimet tilausrivit arrayseen (valmistukset & siirtolistat)
-    $query = "SELECT CONCAT(tuoteno, hyllyalue, hyllynro, hyllytaso, hyllyvali) AS id
-              FROM tilausrivi
-              WHERE yhtio        = '{$kukarow['yhtio']}'
-              AND toimitettuaika = '0000-00-00 00:00:00'
-              AND tyyppi         IN ('V','W','M','G')
-              AND var != 'P'";
-    $avoinrivi_result = pupe_query($query);
+  // Haetaan avoimet tilausrivit arrayseen (valmistukset & siirtolistat)
+  $query = "SELECT CONCAT(tuoteno, hyllyalue, hyllynro, hyllytaso, hyllyvali) AS id
+            FROM tilausrivi
+            WHERE yhtio        = '{$kukarow['yhtio']}'
+            AND toimitettuaika = '0000-00-00 00:00:00'
+            AND tyyppi         IN ('V','W','M','G')
+            AND var != 'P'";
+  $avoinrivi_result = pupe_query($query);
 
-    while ($avoinrivi = mysql_fetch_assoc($avoinrivi_result)) {
-      $avoimet_rivit[] = $avoinrivi['id'];
-    }
+  while ($avoinrivi = mysql_fetch_assoc($avoinrivi_result)) {
+    $avoimet_rivit[] = $avoinrivi['id'];
+  }
 
   // Haetaan avoimet tilausrivit arrayseen (siirtolistojen kohdepaikka)
   $query = "SELECT CONCAT(tilausrivi.tuoteno, tilausrivin_lisatiedot.kohde_hyllyalue, tilausrivin_lisatiedot.kohde_hyllynro, tilausrivin_lisatiedot.kohde_hyllytaso, tilausrivin_lisatiedot.kohde_hyllyvali) AS id
@@ -876,6 +876,10 @@ if ($php_cli) {
   $argv[2] = 'CLI_TUOTTEETTOMAT';
 
   require "varastopaikkojen_siivous.php";
+  
+  if ($poistettu > 0) {
+    $iltasiivo .= is_log("Poistettiin $poistettu tuotepaikkaa jonka tuotetta ei enää ole.");
+  }  
 }
 
 /**

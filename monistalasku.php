@@ -56,7 +56,7 @@ if ($tee == 'MONISTA' and strlen($kommentti) < 20 and $kommenttikentta == "P") {
 
   $tee = "";
 }
-
+// Monistetaan laskua
 if ($toim == '' and $tee == 'MONISTA' and count($monistettavat) > 0) {
 
   foreach ($monistettavat as $lasku_x => $kumpi_x) {
@@ -460,10 +460,10 @@ if ($tee == "ETSILASKU") {
 
         $('.toiminnot_chk').on('click', function() {
           if ($(this).val() == 'REKLAMA' && '{$yhtiorow['reklamaation_hinnoittelu']}' == 'K') {
-            $('.'+$(this).attr('id')).show();
+            $('.'+$(this).attr('id')).attr('checked', true).show();
           }
           else {
-            $('.'+$(this).attr('id')).hide();
+            $('.'+$(this).attr('id')).attr('checked', false).hide();
           }
         });
       });
@@ -640,7 +640,7 @@ if ($tee == "ETSILASKU") {
                   FROM lasku
                   WHERE yhtio  = '{$kukarow['yhtio']}'
                   AND laskunro = '{$row['laskunro']}'
-                  AND tila     = 'L'
+                  AND tila     = 'U'
                   AND alatila  = 'X'
                   GROUP BY 1";
         $otsikot_res = pupe_query($query);
@@ -659,7 +659,7 @@ if ($tee == "ETSILASKU") {
                     LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
                     LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '{$otsikot_row['liitostunnus']}')
                     WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                    AND tilausrivi.otunnus IN ({$otsikot_row['otsikot']})
+                    AND tilausrivi.uusiotunnus IN ({$otsikot_row['otsikot']})
                     AND tilausrivi.tyyppi  = 'L'";
           $nayta_rivit_res = pupe_query($query);
 

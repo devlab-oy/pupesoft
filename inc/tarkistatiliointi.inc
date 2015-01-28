@@ -1,9 +1,9 @@
 <?php
 
-$ok   = 0;
-$summa   = (float) $summa;
-$tili   = trim($tili);
-$ulos   = "";
+$ok    = 0;
+$summa = (float) $summa;
+$tili  = trim($tili);
+$ulos  = "";
 $asiakastoimittajavirhe = FALSE;
 
 if (!isset($mistatullaan)) $mistatullaan = "";
@@ -79,66 +79,13 @@ if ($summa != 0 or strlen($tili) > 0) {
       $asiakastoimittajavirhe = TRUE;
     }
 
-    /*
-    0 = Ei pakollisia kenttiä
-    1 = pakollisia kenttiä tiliöinnissä on kustannuspaikka
-    2 = pakollisia kenttiä tiliöinnissä on kustannuspaikka, kohde
-    3 = pakollisia kenttiä tiliöinnissä on kustannuspaikka, projekti
-    4 = pakollisia kenttiä tiliöinnissä on kustannuspaikka, kohde ja projekti
-    5 = pakollisia kenttiä tiliöinnissä on kohde
-    6 = pakollisia kenttiä tiliöinnissä on kohde, projekti
-    7 = pakollisia kenttiä tiliöinnissä on projekti
-    */
+    // Tsekataan pakolliset ksutannuspaikat, kohteet ja projektit
+    if (!isset($avaavatase) or $avaavatase != 'joo') {
+      $pakotsek = tiliointi_tarkistus($xrow['tiliointi_tarkistus'], $kustp_tark, $kohde_tark, $projekti_tark);
 
-    if ($xrow['tiliointi_tarkistus'] != 0 and (!isset($avaavatase) or $avaavatase != 'joo')) {
-
-      if ($xrow['tiliointi_tarkistus'] == 1) {
-        if ($kustp_tark == 0 or $kustp_tark == '' ) {
-          $virhe .= t("Tositteeseen on liitettävä kustannuspaikka")."!<br />";
-          $ok = 1;
-        }
-      }
-
-      if ($xrow['tiliointi_tarkistus'] == 2) {
-        if (($kustp_tark == 0 or $kustp_tark == '' ) or ($kohde_tark == 0 or $kohde_tark == '')) {
-          $virhe .= t("Tositteeseen on liitettävä kustannuspaikka ja kohde")."!<br />";
-          $ok = 1;
-        }
-      }
-
-      if ($xrow['tiliointi_tarkistus'] == 3) {
-        if (($kustp_tark == 0 or $kustp_tark == '' ) or ($projekti_tark == 0 or $projekti_tark == '')) {
-          $virhe .= t("Tositteeseen on liitettävä kustannuspaikka ja projekti")."!<br />";
-          $ok = 1;
-        }
-      }
-
-      if ($xrow['tiliointi_tarkistus'] == 4) {
-        if (($kustp_tark == 0 or $kustp_tark == '' ) or ($kohde_tark == 0 or $kohde_tark == '') or ($projekti_tark == 0 or $projekti_tark == '')) {
-          $virhe .= t("Tositteeseen on liitettävä kustannuspaikka ja kohde sekä projekti")."!<br />";
-          $ok = 1;
-        }
-      }
-
-      if ($xrow['tiliointi_tarkistus'] == 5) {
-        if ($kohde_tark == 0 or $kohde_tark == '') {
-          $virhe .= t("Tositteeseen on liitettävä kohde")."!<br />";
-          $ok = 1;
-        }
-      }
-
-      if ($xrow['tiliointi_tarkistus'] == 6) {
-        if (($kohde_tark == 0 or $kohde_tark == '') or ($projekti_tark == 0 or $projekti_tark == '')) {
-          $virhe .= t("Tositteeseen on liitettävä kohde sekä projekti")."!<br />";
-          $ok = 1;
-        }
-      }
-
-      if ($xrow['tiliointi_tarkistus'] == 7) {
-        if ($projekti_tark == 0 or $projekti_tark == '') {
-          $virhe .= t("Tositteeseen on liitettävä projekti")."!<br />";
-          $ok = 1;
-        }
+      if (!empty($pakotsek)) {
+        $virhe .= $pakotsek;
+        $ok = 1;
       }
     }
 

@@ -25,8 +25,6 @@ if (mysql_field_name($result, $i) == "laji") {
   $ulos .= "<option value='oletusvalinta' $sel[oletusvalinta]>".t("Tuotteen tilauksen oletusvalinta")."</option>";
   $ulos .= "<option value='osasto' $sel[osasto]>".t("Tuotteen osasto")."</option>";
   $ulos .= "<option value='try' $sel[try]>".t("Tuotteen tuoteryhmä")."</option>";
-  $ulos .= "<option value='pakkauskoko2' $sel[pakkauskoko2]>".t("Tuotteen pakkauskoko 2")."</option>";
-  $ulos .= "<option value='pakkauskoko3' $sel[pakkauskoko3]>".t("Tuotteen pakkauskoko 3")."</option>";
   $ulos .= "<option value='ei_edi_ostotilaukseen' {$sel['ei_edi_ostotilaukseen']}>".t("Tuotetta ei lisätä EDI-ostotilaukselle")."</option>";
   $ulos .= "<option value='hammastus' $sel[hammastus]>".t("Tuotteen hammastus")."</option>";
   $ulos .= "<option value='laatuluokka' {$sel['laatuluokka']}>".t("Tuotteen laatuluokka")."</option>";
@@ -174,24 +172,7 @@ if (mysql_field_name($result, $i) == "selite") {
 }
 
 if (mysql_field_name($result, $i) == "selitetark") {
-
-  if ($tem_laji == "pakkauskoko2" or $tem_laji == "pakkauskoko3") {
-    $vresult = t_avainsana("Y");
-    $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
-
-    while ($vrow=mysql_fetch_array($vresult)) {
-      $sel="";
-      if (strtoupper($trow[$i]) == strtoupper($vrow["selite"]) and $vrow["selite"] != "") {
-        $sel = "selected";
-      }
-      $ulos .= "<option value = '$vrow[selite]' $sel>$vrow[selite] - $vrow[selitetark]</option>";
-    }
-    $ulos .= "</select></td>";
-    $jatko = 0;
-  }
-  else {
-    $ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
-  }
+  $ulos = "<td><textarea rows=10 cols=50 name='$nimi'>{$trow[$i]}</textarea></td>";
 }
 
 if (mysql_field_name($result, $i) == "kieli") {

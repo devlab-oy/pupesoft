@@ -16,9 +16,19 @@ if (isset($_COOKIE["yla_frame_showhide"]) and $_COOKIE["yla_frame_showhide"] == 
 echo "<div id='ylaframe_container'{$hiddenlisa}>";
 echo "<table class='ylaframe'>";
 echo "<tr>";
+
+if ($kukarow["extranet"] != "") {
+  $logokuva = "extranet_logo.png";
+}
+else {
+  $logokuva = "logo.png";
+}
+
 echo "<td style='width: 175px; padding-right: 0;'>
         <a class='puhdas' target='mainframe' href='{$palvelin2}logout.php?toim=change'>
-        <img style='padding-left: 15px;' src='{$palvelin2}pics/facelift/logo.png'></a></td>";
+        <img style='padding-left: 15px;' src='{$palvelin2}pics/facelift/{$logokuva}'>
+        </a>        
+      </td>";
 
 unset($isizelogo);
 

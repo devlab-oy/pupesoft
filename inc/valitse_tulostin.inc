@@ -252,6 +252,12 @@ if ($toim == "TARJOUS") {
   echo "<option value='kokonaan_ilman_hintoja'>", t("Kokonaan ilman hintoja"), "</option>";
   echo "</select></td></tr>";
 
+  echo "<tr><th>" . t("Näytetäänkö yhteissummarivi") .
+       "</th><td><select name='naytetaanko_yhteissummarivi'>";
+  echo "<option value=''>" . t("Näytetään yhteissummarivi") . "</option>";
+  echo "<option value='E'>" . t("Ei näytetä yhteissummariviä") . "</option>";
+  echo "</select></td></tr>";
+
   echo "<tr><th>", t("Näytetäänkö tuotenumerot"), "</th><td><select name='naytetaanko_tuoteno'>";
   echo "<option value=''>", t("Kyllä"), "</option>";
   echo "<option value='ei'>", t("Ei"), "</option>";
@@ -344,6 +350,18 @@ foreach ($tulostimet as $tulostin) {
   if ($toim == "PROFORMA" or $toim == "VIENTILASKU") {
     echo "<tr><th>", t("Tulosta myös tullinimike ja alkuperämaa")."</th>";
     echo "<td><input type='checkbox' name='tullinimike_ja_alkuperamaa' /></td></tr>";
+  }
+
+  if ($toim == "TARJOUS") {
+    echo "<tr>";
+    echo "<th>" . t("Liitä tuotetiedot") . "</th>";
+    echo "<td>";
+    echo "<select name='liita_tuotetiedot'>";
+    echo "<option value=''>" . t("Ei") . "</option>";
+    echo "<option value='Y'>" . t("Kyllä") . "</option>";
+    echo "</select>";
+    echo "</td>";
+    echo "</tr>";
   }
 
   echo "<tr><th>".t("Valitse")." '".t("$tulostin")."' ".t("tulostuspaikka")."</th>";

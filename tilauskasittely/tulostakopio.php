@@ -1597,10 +1597,7 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee, $hinnat,
                       $verolliset_verottomat_hinnat, $naytetaanko_rivihinta, $naytetaanko_tuoteno,
-                      $liita_tuotetiedot);
-      tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee, $hinnat,
-                      $verolliset_verottomat_hinnat, $naytetaanko_rivihinta, $naytetaanko_tuoteno,
-                      $naytetaanko_yhteissummarivi);
+                      $liita_tuotetiedot, $naytetaanko_yhteissummarivi);
 
       $tee = '';
     }

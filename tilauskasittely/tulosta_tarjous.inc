@@ -1611,10 +1611,7 @@ if (!function_exists('print_pdf_tarjous')) {
 if (!function_exists('tulosta_tarjous')) {
   function tulosta_tarjous($otunnus, $komento, $kieli = "", $tee = "", $hinnat = "",
                            $verolliset_verottomat_hinnat = "", $naytetaanko_rivihinta = '',
-                           $naytetaanko_tuoteno = '', $liita_tuotetiedot = "") {
-  function tulosta_tarjous($otunnus, $komento, $kieli = "", $tee = "", $hinnat = "",
-                           $verolliset_verottomat_hinnat = "", $naytetaanko_rivihinta = '',
-                           $naytetaanko_tuoteno = '', $naytetaanko_yhteissummarivi = "") {
+                           $naytetaanko_tuoteno = '', $liita_tuotetiedot = "", $naytetaanko_yhteissummarivi = "") {
     global $yhtiorow, $kukarow, $norm, $pieni, $kala, $mista, $kaanteinen_verotus;
 
     // Haetaan laskun tiedot

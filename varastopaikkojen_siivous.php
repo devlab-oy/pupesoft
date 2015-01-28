@@ -6,8 +6,8 @@ $_cli = php_sapi_name() == 'cli' ? true : false;
 
 if ($_cli) {
   // Otetaan tietokanta connect
-  require "inc/connect.inc";
-  require "inc/functions.inc";
+  require_once "inc/connect.inc";
+  require_once "inc/functions.inc";
 
   if (!isset($argv[1])) {
     echo "Anna yhtio!\n";

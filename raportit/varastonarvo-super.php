@@ -69,6 +69,7 @@ $kk  = sprintf("%02d", trim($kk));
 $vv  = sprintf("%04d", trim($vv));
 
 if (!isset($kiertoviilasku)) $kiertoviilasku = "";
+if (!isset($huomioi_varastosiirrot)) $huomioi_varastosiirrot = "";
 
 // setataan
 $lisa = "";
@@ -280,6 +281,13 @@ if (!$php_cli) {
   echo "<option value='csv'>CSV</opton>";
   echo "<option value='excel' {$sel}>Excel</option>";
   echo "</select></td>";
+  echo "</tr>";
+
+  $chk = !empty($huomioi_varastosiirrot) ? "checked" : "";
+
+  echo "<tr>";
+  echo "<th>", t("Huomioi varastosiirrot viimeisimpänä tulona"), ":</th>";
+  echo "<td><input type='checkbox' name='huomioi_varastosiirrot' {$chk} /></td>";
   echo "</tr>";
 
   echo "<tr><th>", t("Näytä kiertonopeus sekä viimeisin myynti ja kulutus"), ":</th>";
@@ -1447,13 +1455,21 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       }
 
       if (isset($valitut_varastot_rajaus) and $valitut_varastot_rajaus != "") {
-        $query_a = "SELECT ifnull(max(laadittu), '0000-00-00') vihapvm
-                    FROM tapahtuma use index (yhtio_tuote_laadittu)
-                    WHERE tapahtuma.yhtio  = '$kukarow[yhtio]'
-                    and tapahtuma.tuoteno  = '{$row['tuoteno']}'
-                    and tapahtuma.laadittu >= date_sub('$vv-$kk-$pp', INTERVAL 12 month)
-                    $varasto_tapahtuma
-                    and tapahtuma.laji     = 'tulo'";
+
+        if (!empty($huomioi_varastosiirrot)) {
+          $_lajilisa = "AND tapahtuma.laji IN ('tulo','siirto')";
+        }
+        else {
+          $_lajilisa = "AND tapahtuma.laji = 'tulo'";
+        }
+
+        $query_a = "SELECT IFNULL(MAX(laadittu), '0000-00-00') vihapvm
+                    FROM tapahtuma USE INDEX (yhtio_tuote_laadittu)
+                    WHERE tapahtuma.yhtio  = '{$kukarow['yhtio']}'
+                    AND tapahtuma.tuoteno  = '{$row['tuoteno']}'
+                    AND tapahtuma.laadittu >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
+                    {$varasto_tapahtuma}
+                    {$_lajilisa}";
         $result_a = pupe_query($query_a);
         $resultti_a = mysql_fetch_assoc($result_a);
         $row['vihapvm'] = $resultti_a['vihapvm'];

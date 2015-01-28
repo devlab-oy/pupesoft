@@ -718,7 +718,10 @@ if ($tee2 == '') {
   }
 
   if (!is_numeric($etsi) and $etsi != '') {
-    $haku = "and (lasku.nimi LIKE '%$etsi%' or lasku.toim_nimi LIKE '%$etsi%')";
+    $haku = "AND (lasku.nimi LIKE '%{$etsi}%'
+                  OR lasku.toim_nimi LIKE '%{$etsi}%'
+                  OR lasku.nimitark LIKE '%{$etsi}%'
+                  OR lasku.toim_nimitark LIKE '%{$etsi}%')";
   }
 
   if (is_numeric($etsi) and $etsi != '') {

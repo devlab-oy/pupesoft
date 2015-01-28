@@ -268,7 +268,7 @@ if (isset($tee) and trim($tee) == 'aja') {
 
     if ($php_cli) $_linebreak = "\n";
     else $_linebreak = "<br>";
-    
+
     echo "Lis‰t‰‰n tuote {$tuote["tuoteno"]} $quantity {$tuote["yksikko"]} tilaukselle {$laskurow["tunnus"]}.$_linebreak";
   }
 

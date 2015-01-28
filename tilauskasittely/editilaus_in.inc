@@ -27,8 +27,8 @@ if ($php_cli) {
   // ja parametri komentoriviltä
   $filename = $argv[1];
 
-  if (trim($argv[2]) == 'futursoft' and (substr(strtolower(basename($filename)), 0, 13) == 'magento-order' 
-  or substr(strtolower(basename($filename)), 0, 11) == 'anvia-order')) {
+  if (trim($argv[2]) == 'futursoft' and (substr(strtolower(basename($filename)), 0, 13) == 'magento-order'
+      or substr(strtolower(basename($filename)), 0, 11) == 'anvia-order')) {
     $argv[2] = 'magento';
   }
 
@@ -1172,22 +1172,13 @@ while ($tietue = fgets($fd)) {
 
           if ($maa_eu_row["eu"] == "") {
             $arow["vienti"] = "K";
+            $arow["alv"] = 0;
           }
           else {
             $arow["vienti"] = "E";
-          }
-
-          // Jos yksityishenkilkölle menee verollisena
-          if ($veromaara != 0) {
-            $wquery = "SELECT selite
-                       FROM avainsana
-                       WHERE yhtio     = '$kukarow[yhtio]'
-                       AND laji        = 'alv'
-                       AND selitetark != ''";
-            $wtres  = pupe_query($wquery);
-            $wtrow  = mysql_fetch_assoc($wtres);
-
-            $arow["alv"] = $wtrow["selite"];
+            if ($arow["laji"] != "H") {
+              $arow["alv"] = 0;
+            }
           }
         }
       }
@@ -1523,7 +1514,7 @@ while ($tietue = fgets($fd)) {
       if (!empty($varasto)) {
         $insertvarasto = $varasto;
       }
-      
+
       // Anvian verkkokaupasta toim.puhelinnro tulee OSTOTIL.OT_YHTEYSHENKILONPUH:ssä
       if ($yhteyshenkilon_puhelin != '' and $ltoim_puh == '') {
         $tpuh = $yhteyshenkilon_puhelin;
@@ -1531,7 +1522,7 @@ while ($tietue = fgets($fd)) {
       else {
         $tpuh = $arow['toim_puh'];
       }
-      
+
       // Lisätään otsikko
       $query = "INSERT into lasku SET
                 aktiivinen_kuljetus     = '$suunnistus',

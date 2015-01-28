@@ -67,7 +67,7 @@ if ($toim == "MYYNTI" or $toim == "MYYNTI_KATE") {
 
   if ($toim == "MYYNTI_KATE") {
 
-    $katesql = "if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa}-(tuote.kehahin*(tilausrivi.varattu+tilausrivi.jt)))";
+    $katesql = "if(tilausrivi.laskutettu!='', tilausrivi.kate, (tilausrivi.hinta/if('{$yhtiorow['alv_kasittely']}'='',(1+tilausrivi.alv/100),1)*(tilausrivi.varattu+tilausrivi.jt))*{$query_ale_lisa} - (if(tuote.epakurantti100pvm = '0000-00-00', if(tuote.epakurantti75pvm = '0000-00-00', if(tuote.epakurantti50pvm = '0000-00-00', if(tuote.epakurantti25pvm = '0000-00-00', tuote.kehahin, tuote.kehahin * 0.75), tuote.kehahin * 0.5), tuote.kehahin * 0.25), 0) * (tilausrivi.varattu+tilausrivi.jt)))";
 
     $kk_pv_kate_lisa = ",round(sum($katesql), 2) AS 'kate' ";
     $tilaus_kate_lisa = ",round($katesql, 2) AS 'kate' ";

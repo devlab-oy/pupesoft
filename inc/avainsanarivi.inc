@@ -180,6 +180,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "" or $lukitse_laji == "HAMMASTUS")     $ulos .= "<option value='HAMMASTUS' $avain_sel[HAMMASTUS]>          ".t("Tuotteen hammastus")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "OLETUSPAIKKA")     $ulos .= "<option value='OLETUSPAIKKA' $avain_sel[OLETUSPAIKKA]>      ".t("Tuoteryhmän tai tuotestatuksen oletuspaikka")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "ELINKAARI")     $ulos .= "<option value='ELINKAARI' {$avain_sel['ELINKAARI']}>      ".t("Tuotteen elinkaarityyppi")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "KOPIOITUOTE") $ulos .= "<option value='KOPIOITUOTE' {$avain_sel['KOPIOITUOTE']}>      ".t("Kopioi tuote parametri")."</option>";
   if ($lukitse_laji== "") $ulos .= "</optgroup>";
 
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Asiakkaiden avainsanat")."'>";
@@ -409,6 +410,32 @@ if ($_siirtovarastot and $_selitetark_2) {
 
   $jatko = 0;
   $tyyppi = 1;
+}
+
+if ($avain_sel['KOPIOITUOTE'] == 'SELECTED') {
+  if ($_selite) {
+    $sel = $trow[$i] == 'OSTOEHDOTUS' ? "selected" : "";
+
+    $ulos .= "<td>";
+    $ulos .= "<select name = '{$nimi}'>";
+    $ulos .= "<option value = 'TT'>".t("Kopioi tuotteen toimittajat")."</option>";
+    $ulos .= "<option value = 'OSTOEHDOTUS' {$sel}>".t("Ehdotetaan ostoehdotusohjelmissa tilattavaksi")."</option>";
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+    $jatko = 0;
+  }
+
+  if ($_selitetark) {
+    $sel = $trow[$i] == 'E' ? "selected" : "";
+
+    $ulos .= "<td>";
+    $ulos .= "<select name = '{$nimi}'>";
+    $ulos .= "<option value = 'K'>".t("Kyllä")."</option>";
+    $ulos .= "<option value = 'E' {$sel}>".t("Ei")."</option>";
+    $ulos .= "</select>";
+    $ulos .= "</td>";
+    $jatko = 0;
+  }
 }
 
 $_toimmyynti = ($avain_sel['TOIMMYYNTI'] == 'SELECTED' and $_selite);
@@ -884,9 +911,9 @@ if ($avain_sel["TOIMIT_TKIRJAST"] == "SELECTED" and $_selite) {
   $query = "SELECT toimi.tunnus,
             toimi.nimi
             FROM toimi
-            WHERE toimi.yhtio = '{$kukarow["yhtio"]}'
+            WHERE toimi.yhtio       = '{$kukarow["yhtio"]}'
             AND toimi.oletus_vienti IN ('C', 'J', 'F', 'K', 'I', 'L')
-            AND toimi.tyyppi NOT IN ('P', 'PP')
+            AND toimi.tyyppi        NOT IN ('P', 'PP')
             ORDER BY toimi.nimi";
 
   $toimittaja_result = pupe_query($query);

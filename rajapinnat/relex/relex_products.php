@@ -219,7 +219,7 @@ if ($_tuoterajaus) {
 
 $tecd = FALSE;
 
-if (@include "inc/tecdoc.inc") {
+if (@include "inc/tecdoc.class.php") {
   $tecd = TRUE;
 }
 
@@ -315,6 +315,7 @@ $header .= "suppliers_code;";
 $header .= "suppliers_name;";
 $header .= "ostoera;";
 $header .= "pakkauskoko;";
+$header .= "lavakoko;";
 $header .= "purchase_price;";
 $header .= "alennus;";
 $header .= "valuutta;";
@@ -340,6 +341,7 @@ $header .= "suppliers_code;";
 $header .= "suppliers_name;";
 $header .= "ostoera;";
 $header .= "pakkauskoko;";
+$header .= "lavakoko;";
 $header .= "purchase_price;";
 $header .= "alennus;";
 $header .= "valuutta;";
@@ -446,7 +448,8 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi .= "{$row['tunnus']};";
 
   if ($tecd) {
-    $rivi .= td_regcarsum($row['tuoteno']).";";
+    $td = new tecdoc('pc', false);
+    $rivi .= $td->getRegSumForProduct($row['tuoteno']).";";
   }
   else {
     $rivi .= "0;";
@@ -471,6 +474,7 @@ while ($row = mysql_fetch_assoc($res)) {
 
   // haetaan kaikki tuotteen toimittajat ja valitaan sitten edullisin
   $ttq = "SELECT
+          tuotteen_toimittajat.tunnus tutotunnus,
           toimi.tunnus toimittaja,
           toimi.ytunnus ytunnus,
           if(tuotteen_toimittajat.toimitusaika = 0, toimi.oletus_toimaika, tuotteen_toimittajat.toimitusaika) toimitusaika,
@@ -503,6 +507,7 @@ while ($row = mysql_fetch_assoc($res)) {
       'toim_nimitys'                    => '',
       'osto_era'                        => '',
       'pakkauskoko'                     => '',
+      'lavakoko'                        => '',
       'ostohinta_oletusvaluutta'        => '',
       'alennukset_oletusvaluutta_netto' => '',
       'valuutta'                        => '',
@@ -581,7 +586,7 @@ while ($row = mysql_fetch_assoc($res)) {
         $query = "SELECT nimi, kurssi, tunnus
                   FROM valuu
                   WHERE yhtio = '$kukarow[yhtio]'
-                  AND nimi = '{$ttrow['valuutta']}'
+                  AND nimi    = '{$ttrow['valuutta']}'
                   ORDER BY jarjestys";
         $vresult = pupe_query($query);
         if (mysql_num_rows($vresult) == 1) {
@@ -629,6 +634,9 @@ while ($row = mysql_fetch_assoc($res)) {
       $ttrow['ostohinta_oletusvaluutta_netto']  = $ostohinta_netto;
       $ttrow['alennukset_oletusvaluutta_netto'] = $alennukset;
 
+      $pakkaukset = tuotteen_toimittajat_pakkauskoot($ttrow['tutotunnus'], 'suurin');
+      $ttrow['lavakoko'] = !empty($pakkaukset) ? $pakkaukset[0][0] : '0';
+
       $toimittajat_a_hinta[] = $ostohinta_netto;
       $toimittajat_a[]       = $ttrow;
 
@@ -640,6 +648,7 @@ while ($row = mysql_fetch_assoc($res)) {
       $trivi .= pupesoft_csvstring($ttrow['toim_nimitys']).";";
       $trivi .= "{$ttrow['osto_era']};";
       $trivi .= "{$ttrow['pakkauskoko']};";
+      $trivi .= "{$ttrow['lavakoko']};";
       $trivi .= "{$ttrow['ostohinta_oletusvaluutta']};";
       $trivi .= "{$ttrow['alennukset_oletusvaluutta_netto']};";
       $trivi .= "{$yhtiorow["valkoodi"]};";
@@ -674,6 +683,7 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi .= pupesoft_csvstring($parastoimittaja['toim_nimitys']).";";
   $rivi .= "{$parastoimittaja['osto_era']};";
   $rivi .= "{$parastoimittaja['pakkauskoko']};";
+  $rivi .= "{$parastoimittaja['lavakoko']};";
   $rivi .= "{$parastoimittaja['ostohinta_oletusvaluutta']};";
   $rivi .= "{$parastoimittaja['alennukset_oletusvaluutta_netto']};";
   $rivi .= "{$parastoimittaja['valuutta']};";

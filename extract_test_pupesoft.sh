@@ -115,23 +115,30 @@ fi
 echo
 decho "Puretaan ${kasiteltava_backup} -> '${destination_database}'.."
 
-# Tehdään temporary directory
-tmpdir=$(${make_temp})
+# Onko tietokanta valmiiksi purettu?
+ONKOSNAPSHOT=$(echo "${kasiteltava_backup}" | grep -o "_snapshot")
 
-# Katsotaan osetaanko purkaa parallel
-command -v pbunzip2 > /dev/null
-
-if [[ $? -eq 0 ]]; then
-  compress_prog="--use-compress-prog=pbunzip2"
+if [[ "${ONKOSNAPSHOT}" == "_snapshot" ]] ; then
+  tmpdir=${kasiteltava_backup}
 else
-  compress_prog="--use-compress-prog=bunzip2"
-fi
+  # Tehdään temporary directory
+  tmpdir=$(${make_temp})
 
-# Puretaan backup
-nice -n 19 tar -xf "${kasiteltava_backup}" ${compress_prog} -C "${tmpdir}"
+  # Katsotaan osetaanko purkaa parallel
+  command -v pbunzip2 > /dev/null
 
-if [[ $? -ne 0 ]]; then
-  failure "Purku epäonnistui!"
+  if [[ $? -eq 0 ]]; then
+    compress_prog="--use-compress-prog=pbunzip2"
+  else
+    compress_prog="--use-compress-prog=bunzip2"
+  fi
+
+  # Puretaan backup
+  nice -n 19 tar -xf "${kasiteltava_backup}" ${compress_prog} -C "${tmpdir}"
+
+  if [[ $? -ne 0 ]]; then
+    failure "Purku epäonnistui!"
+  fi
 fi
 
 if [[ -d ${database_to} ]]; then
@@ -159,9 +166,10 @@ ${mysql_start} >/dev/null 2>&1 &
 # Odotetaan, että mysql on käynnistynyt
 wait_for_service ${mysql_port}
 
-decho "Puhdistetaan '${destination_database}' tietokanta.."
+if [[ "${mysql_sock}" == "" ]]; then
+  decho "Puhdistetaan '${destination_database}' tietokanta.."
 
-mysql ${mysql_sock} --user=root --password=${mysql_root_password} "${destination_database}" 2> /dev/null << EOF
+  mysql --user=root --password=${mysql_root_password} "${destination_database}" 2> /dev/null << EOF
 
 UPDATE yhtio set
 nimi = concat('Testi ', nimi),
@@ -239,9 +247,10 @@ WHERE asiakas != '';
 
 EOF
 
-if [[ $? -ne 0 ]]; then
-  nice -n 19 rm -rf "${database_to}" &> /dev/null
-  failure "Puhdistus epäonnistui!"
+  if [[ $? -ne 0 ]]; then
+    nice -n 19 rm -rf "${database_to}" &> /dev/null
+    failure "Puhdistus epäonnistui!"
+  fi
 fi
 
 decho "Putsataan tmp -tiedostot.."

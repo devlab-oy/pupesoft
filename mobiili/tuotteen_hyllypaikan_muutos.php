@@ -31,6 +31,9 @@ $query = "SELECT tuotepaikat.*, tuote.yksikko
 $res = pupe_query($query);
 $row = mysql_fetch_assoc($res);
 
+$_varasto = kuuluukovarastoon($row['hyllyalue'], $row['hyllynro']);
+$onko_varaston_hyllypaikat_kaytossa = onko_varaston_hyllypaikat_kaytossa($_varasto);
+
 if (isset($submit)) {
   switch ($submit) {
   case 'kerayspaikka':
@@ -47,7 +50,7 @@ if (isset($submit)) {
 
     // Tarkistetaan koodi
     $options = array('varmistuskoodi' => $mista_koodi);
-    if (!is_numeric($mista_koodi) or !tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], $options)) {
+    if ($onko_varaston_hyllypaikat_kaytossa and (!is_numeric($mista_koodi) or !tarkista_varaston_hyllypaikka($row['hyllyalue'], $row['hyllynro'], $row['hyllyvali'], $row['hyllytaso'], $options))) {
       $errors[] = t("Virheellinen varmistuskoodi")." ({$mista_koodi})";
     }
 
@@ -115,11 +118,11 @@ if (isset($submit)) {
       }
 
       // Tarkistetaan että tuotepaikka on olemassa
-      if (count($errors) == 0 and !tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
+      if ($onko_varaston_hyllypaikat_kaytossa and count($errors) == 0 and !tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
         $errors[] = t("Tuotepaikkaa (%s-%s-%s-%s) ei ole perustettu varaston hyllypaikkoihin", "", $hyllyalue, $hyllynro, $hyllyvali, $hyllytaso).'.';
       }
 
-      if (count($errors) == 0) {
+      if ($onko_varaston_hyllypaikat_kaytossa and count($errors) == 0) {
         $options = array('varmistuskoodi' => $minne_koodi);
         if (!is_numeric($minne_koodi) or !tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso, $options)) {
           $errors[] = t("Virheellinen varmistuskoodi")." ({$minne_koodi})";
@@ -239,19 +242,25 @@ else {
   echo "<th>", t("Mistä hyllypaikka"), "</th>";
   echo "<td>{$row['hyllyalue']} {$row['hyllynro']} {$row['hyllyvali']} {$row['hyllytaso']}</td>";
   echo "</tr>";
-  echo "<tr>";
-  echo "<th>", t("Koodi"), "</th>";
-  echo "<td><input type='text' name='mista_koodi' id='mista_koodi' value='{$mista_koodi}' size='7' /></td>";
-  echo "</tr>";
+
+  if ($onko_varaston_hyllypaikat_kaytossa) {
+    echo "<tr>";
+    echo "<th>", t("Koodi"), "</th>";
+    echo "<td><input type='text' name='mista_koodi' id='mista_koodi' value='{$mista_koodi}' size='7' /></td>";
+    echo "</tr>";
+  }
 
   echo "<tr>";
   echo "<th>", t("Minne hyllypaikka"), "</th>";
   echo "<td><input type='text' name='minne_hyllypaikka' value='{$minne_hyllypaikka}' /></td>";
   echo "</tr>";
-  echo "<tr>";
-  echo "<th>", t("Koodi"), "</th>";
-  echo "<td><input type='text' id='minne_koodi' name='minne_koodi' value='{$minne_koodi}' size='7' /></td>";
-  echo "</tr>";
+
+  if ($onko_varaston_hyllypaikat_kaytossa) {
+    echo "<tr>";
+    echo "<th>", t("Koodi"), "</th>";
+    echo "<td><input type='text' id='minne_koodi' name='minne_koodi' value='{$minne_koodi}' size='7' /></td>";
+    echo "</tr>";
+  }
 
   echo "</table>";
   echo "<div class='controls'>";

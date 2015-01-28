@@ -19,18 +19,6 @@ if (!isset($toimipaikka))    $toimipaikka = $kukarow['toimipaikka'] != 0 ? $kuka
 
 $onkolaajattoimipaikat = ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikat_res = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikat_res) > 0) ? TRUE : FALSE;
 
-if (isset($tuoteno)) {
-  $tkysy_lopetus = "{$palvelin2}tuote.php////toim=$toim//tee=Z//tuoteno=".urlencode($tuoteno)."//toimipaikka=$toimipaikka//raportti=$raportti//historia=$historia//tapahtumalaji=$tapahtumalaji";
-}
-else {
-  $tkysy_lopetus = "";
-}
-
-if ($lopetus != "") {
-  // Lis‰t‰‰n t‰m‰ lopetuslinkkiin
-  $tkysy_lopetus = $lopetus."/SPLIT/".$tkysy_lopetus;
-}
-
 require "korvaavat.class.php";
 require "vastaavat.class.php";
 
@@ -597,17 +585,18 @@ if (isset($ajax)) {
           $_return .= "<a href=\"javascript:lataaiframe('{$prow['laskutunnus']}', '{$palvelin2}raportit/asiakkaantilaukset.php?toim=OSTO&tee=NAYTATILAUS&tunnus={$prow['laskutunnus']}&ohje=off');\">".t("$prow[laji]")."</a>";
         }
         elseif ($prow["laji"] == "siirto" and $prow["laskutunnus"] != "") {
-          $_return .= "<a href=\"javascript:lataaiframe('{$prow['laskutunnus']}', '{$palvelin2}raportit/asiakkaantilaukset.php?toim=MYYNTI&tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus={$prow['laskutunnus']}&ohje=off');\">".t("$prow[laji]")."</a>";
+          $_return .= "<a href=\"javascript:lataaiframe('{$prow['laskutunnus']}', '{$palvelin2}tuote.php?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&ohje=off');\">".t("$prow[laji]")."</a>";
         }
         elseif ($prow["laji"] == "valmistus" and $prow["laskutunnus"] != "") {
-          $_return .= "<a href=\"javascript:lataaiframe('{$prow['laskutunnus']}', '{$palvelin2}raportit/asiakkaantilaukset.php?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus={$prow['laskutunnus']}&ohje=off');\">".t("$prow[laji]")."</a>";
+          $_return .= "<a href=\"javascript:lataaiframe('{$prow['laskutunnus']}', '{$palvelin2}tuote.php?tuoteno=".urlencode($tuoteno)."&tee=NAYTATILAUS&tunnus=$prow[laskutunnus]&ohje=off');\">".t("$prow[laji]")."</a>";
 
           // N‰ytet‰‰n t‰m‰ vain jos k‰ytt‰j‰ll‰ on oikeus tehd‰ valmistuksia tai reseptej‰
           if ($oikeu_t1 or $oikeu_t2 or $oikeu_t3 or $oikeu_t4) {
-            $_return .= "&nbsp;<img src='{$palvelin2}pics/lullacons/info.png' class='tooltip' id='$prow[trivitunn]'>";
+            $id = md5(uniqid());
+            $_return .= "&nbsp;<img src='{$palvelin2}pics/lullacons/info.png' class='tooltip' id='$id'>";
 
             // N‰ytet‰‰n mist‰ tuotteista t‰m‰ on valmistettu
-            $_return .= "<div id='div_$prow[trivitunn]' class='popup' style='width:200px;'>";
+            $_return .= "<div id='div_$id' class='popup' style='width:200px;'>";
             $_return .= "<table>";
 
             $query = "SELECT tilausrivi.nimitys,
@@ -666,9 +655,9 @@ if (isset($ajax)) {
           else {
             $luokka = 'tooltip';
           }
-
-          $_return .= "&nbsp;<img src='{$palvelin2}pics/lullacons/info.png' class='{$luokka}' id='{$prow['trivitunn']}_info'>";
-          $_return .= "<div id='div_{$prow['trivitunn']}_info' class='popup'>";
+          $id = md5(uniqid());
+          $_return .= "&nbsp;<img src='{$palvelin2}pics/lullacons/info.png' class='{$luokka}' id='{$id}_info'>";
+          $_return .= "<div id='div_{$id}_info' class='popup'>";
           $_return .= $prow['korvamerkinta'];
           $_return .= "</div>";
         }
@@ -1397,7 +1386,8 @@ if (isset($ajax)) {
             <td>$jtrow[nimi]</td>";
 
         if ($jtrow["tyyppi"] == "O" and $jtrow["laskutila"] != "K" and $jtrow["keikkanro"] > 0 and $jtrow['comments'] != '') {
-          $_return .= "<td valign='top' class='tooltip' id='{$jtrow['tunnus']}{$jtrow['keikkanro']}'>";
+          $id = md5(uniqid());
+          $_return .= "<td valign='top' class='tooltip' id='{$id}'>";
         }
         else {
           $_return .= "<td>";
@@ -1414,8 +1404,8 @@ if (isset($ajax)) {
           $kuka_chk_res = pupe_query($query);
           $kuka_chk_row = mysql_fetch_assoc($kuka_chk_res);
 
-          $_return .= "&nbsp;<img src='{$palvelin2}/pics/lullacons/info.png' class='tooltip' id='{$jtrow['tunnus']}{$jtrow['keikkanro']}'>";
-          $_return .= "<div id='div_{$jtrow['tunnus']}{$jtrow['keikkanro']}' class='popup' style='width: 500px;'>";
+          $_return .= "&nbsp;<img src='{$palvelin2}/pics/lullacons/info.png' class='tooltip' id='{$id}'>";
+          $_return .= "<div id='div_{$id}' class='popup' style='width: 500px;'>";
           $_return .= t("Saapuminen"). ": {$jtrow['keikkanro']} / {$jtrow['nimi']}<br /><br />";
           $_return .= t("Laatija"). ": {$kuka_chk_row['nimi']}<br />";
           $_return .= t("Luontiaika"). ": ". tv1dateconv($jtrow['luontiaika'], "pitk‰"). "<br /><br />";
@@ -1435,9 +1425,9 @@ if (isset($ajax)) {
           else {
             $luokka = 'tooltip';
           }
-
-          $_return .= "&nbsp;<img src='{$palvelin2}pics/lullacons/info.png' class='{$luokka}' id='{$jtrow['trivitunn']}_info'>";
-          $_return .= "<div id='div_{$jtrow['trivitunn']}_info' class='popup'>";
+          $id = md5(uniqid());
+          $_return .= "&nbsp;<img src='{$palvelin2}pics/lullacons/info.png' class='{$luokka}' id='{$id}_info'>";
+          $_return .= "<div id='div_{$id}_info' class='popup'>";
           $_return .= $jtrow['korvamerkinta'];
           $_return .= "</div>";
         }
@@ -1522,7 +1512,6 @@ echo "<script type='text/javascript'>
         }
 
         $(function() {
-
           $('#vastaavat').on('click', function() {
 
             var _src = '{$palvelin2}pics/loading_blue_small.gif',
@@ -1792,11 +1781,23 @@ if ($tee == 'N' or $tee == 'E') {
   }
 }
 
+// Tehd‰‰n lopetusmuuttuja, kun ollaan saatu oikea tuotenumero tietoon
+if (isset($tuoteno)) {
+  $tkysy_lopetus = "{$palvelin2}tuote.php////toim=$toim//tee=Z//tuoteno=".urlencode($tuoteno)."//toimipaikka=$toimipaikka//raportti=$raportti//historia=$historia//tapahtumalaji=$tapahtumalaji";
+}
+else {
+  $tkysy_lopetus = "";
+}
+
+if ($lopetus != "") {
+  // Lis‰t‰‰n t‰m‰ lopetuslinkkiin
+  $tkysy_lopetus = $lopetus."/SPLIT/".$tkysy_lopetus;
+}
+
 if ($tee == 'NAYTATILAUS') {
   echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
   require "raportit/naytatilaus.inc";
-  echo "<br><br><br>";
-  $tee = "Z";
+  exit;
 }
 
 echo "<font class='head'>".t("Tuotekysely")."</font><hr>";
@@ -2159,7 +2160,7 @@ if ($tee == 'Z') {
 
         $trimtuoteno = str_replace(array(" ", "+"), "_", $tuoterow["tuoteno"]);
 
-        $divit = "<div id='div_{$trimtuoteno}' class='popup'>";
+        $divit = "<div id='div_".sanitoi_javascript_id($trimtuoteno)."' class='popup'>";
         $divit .= "<table><tr><td valign='top'><table>";
         $divit .= "<tr><td class='back' valign='top' align='center'>".t("Alkuper‰isnumero")."</td><td class='back' valign='top' align='center'>".t("Hinta")."</td><td class='back' valign='top' align='center'>".t("Merkki")."</td></tr>";
 
@@ -2178,7 +2179,7 @@ if ($tee == 'Z') {
         $divit .= "</table>";
         $divit .= "</div>";
 
-        echo "&nbsp;&nbsp;<a src='#' class='tooltip' id='{$trimtuoteno}'><img src='pics/lullacons/info.png' height='13'></a>";
+        echo "&nbsp;&nbsp;<a src='#' class='tooltip' id='".sanitoi_javascript_id($trimtuoteno)."'><img src='pics/lullacons/info.png' height='13'></a>";
       }
     }
 
@@ -2186,14 +2187,12 @@ if ($tee == 'Z') {
     echo "<br>".t_avainsana("TUOTEMERKKI", "", " and avainsana.selite='$tuoterow[tuotemerkki]'", "", "", "selite")."</td>";
     echo "<td>".t_avainsana("Y", "", "and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite");
 
-    $palautus = t_tuotteen_avainsanat($tuoterow, "pakkauskoko2");
-    if ($palautus != '' and $palautus != 'pakkauskoko2') {
-      echo "<br>$palautus";
-    }
+    foreach ($ttrow as $tt_rivi) {
 
-    $palautus = t_tuotteen_avainsanat($tuoterow, "pakkauskoko3");
-    if ($palautus != '' and $palautus != 'pakkauskoko3') {
-      echo "<br>$palautus";
+      $_pakkaukset = tuotteen_toimittajat_pakkauskoot($tt_rivi['tunnus']);
+      foreach ($_pakkaukset as $_pak) {
+        echo "<br>$_pak[0] $_pak[1]";
+      }
     }
 
     echo "</td>";

@@ -240,10 +240,10 @@ else {
       }
 
       if ($summaa == '') $worksheet->write($excelrivi, $sarake++, $lrow["piiri"]);
-      $worksheet->write($excelrivi, $sarake++, $lrow["kpl"]);
-      $worksheet->write($excelrivi, $sarake++, $lrow["summa"]);
-      $worksheet->write($excelrivi, $sarake++, $lrow["kate"]);
-      $worksheet->write($excelrivi, $sarake++, $katepros);
+      $worksheet->writeNumber($excelrivi, $sarake++, $lrow["kpl"]);
+      $worksheet->writeNumber($excelrivi, $sarake++, $lrow["summa"]);
+      $worksheet->writeNumber($excelrivi, $sarake++, $lrow["kate"]);
+      $worksheet->writeNumber($excelrivi, $sarake++, $katepros);
 
       $excelrivi++;
     }

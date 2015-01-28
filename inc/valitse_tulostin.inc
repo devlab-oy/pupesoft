@@ -352,6 +352,18 @@ foreach ($tulostimet as $tulostin) {
     echo "<td><input type='checkbox' name='tullinimike_ja_alkuperamaa' /></td></tr>";
   }
 
+  if ($toim == "TARJOUS") {
+    echo "<tr>";
+    echo "<th>" . t("Liitä tuotetiedot") . "</th>";
+    echo "<td>";
+    echo "<select name='liita_tuotetiedot'>";
+    echo "<option value=''>" . t("Ei") . "</option>";
+    echo "<option value='Y'>" . t("Kyllä") . "</option>";
+    echo "</select>";
+    echo "</td>";
+    echo "</tr>";
+  }
+
   echo "<tr><th>".t("Valitse")." '".t("$tulostin")."' ".t("tulostuspaikka")."</th>";
   echo "<td><select name='komento[$tulostin]'>";
   echo "<option value=''>".t("Ei kirjoitinta")."</option>";

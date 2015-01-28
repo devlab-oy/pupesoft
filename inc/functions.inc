@@ -16197,13 +16197,27 @@ if (!function_exists("hae_hyvityshinta")) {
 
     // Asiakas ei ole ostanut tätä tuotette -> palautuskielto
     if (count($tilausrivit) == 0) {
-      $palautus[] = array("tuoteno" => $tuoteno, "kpl" => $kpl, "hinta" => 0, "ale" => 0, "kommentti" => "Palautuskielto", "palautuskielto" => "X");
+      $palautus[] = array(
+        "tuoteno" => $tuoteno,
+        "kpl" => $kpl,
+        "hinta" => 0,
+        "ale" => 0,
+        "kommentti" => t("Palautuskielto"),
+        "palautuskielto" => "X"
+      );
       return $palautus;
     }
 
     // Jos löytyi vähemmän myyntejä kun asiakas on palauttamassa -> palautuskielto
     if ($laskuri < $kpl) {
-      $palautus[] = array("tuoteno" => $tuoteno, "kpl" => $kpl, "hinta" => 0, "ale" => 0, "kommentti" => "Palautuskielto", "palautuskielto" => "X");
+      $palautus[] = array(
+        "tuoteno" => $tuoteno,
+        "kpl" => $kpl,
+        "hinta" => 0,
+        "ale" => 0,
+        "kommentti" => t("Palautuskielto"),
+        "palautuskielto" => "X"
+      );
       // echo "** Palautuskielto: $kpl<br>";
     }
 
@@ -16283,7 +16297,14 @@ if (!function_exists("hae_hyvityshinta")) {
 
       // Jos ei löytynyt yhtään hyvityssaantöjä -> palautuskielto
       if (!isset($ale)) {
-        $palautus[] = array("tuoteno" => $tuoteno, "kpl" => $tilausrivi_arvo['kpl'], "hinta" => 0, "ale" => 0, "kommentti" => "Palautuskielto", "palautuskielto" => "X");
+        $palautus[] = array(
+          "tuoteno" => $tuoteno,
+          "kpl" => $tilausrivi_arvo['kpl'],
+          "hinta" => 0,
+          "ale" => 0,
+          "kommentti" => t("Palautuskielto"),
+          "palautuskielto" => "X"
+        );
       }
       else {
 
@@ -16292,7 +16313,14 @@ if (!function_exists("hae_hyvityshinta")) {
           $ale = 0;
         }
 
-        $palautus[] = array("tuoteno" => $tuoteno, "kpl" => $tilausrivi_arvo['kpl'], "hinta" => $tilausrivi_arvo['hinta'], "ale" => $ale, "kommentti" => $kommentti, "palautuskielto" => $palautuskielto);
+        $palautus[] = array(
+          "tuoteno" => $tuoteno,
+          "kpl" => $tilausrivi_arvo['kpl'],
+          "hinta" => $tilausrivi_arvo['hinta'],
+          "ale" => $ale,
+          "kommentti" => $kommentti,
+          "palautuskielto" => $palautuskielto
+        );
       }
     }
 
@@ -21168,7 +21196,7 @@ if (!function_exists('lisaa_tuotepaikka')) {
       $hyllyvali = 0;
       if ($hyllytaso == '') {
         $hyllytaso = 0;
-      }  
+      }
     }
     elseif ($hyllyalue == '' and empty($varasto)) {
       return false;

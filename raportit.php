@@ -36,6 +36,16 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 
+$cleantoim = $toim;
+
+// Rajataanko rappari näyttämään vain Omaa KustannusPaikkaa
+if (substr($toim, -4) == '_OKP') {
+  // käyttäjän osasto kertoo oletuskustannuspaikan
+  $vainomakustp = TRUE;
+  $mul_kustp[] = $kukarow["osasto"];
+  $cleantoim = substr($toim, 0, -4);
+}
+
 // Livesearch jutut
 enable_ajax();
 
@@ -55,7 +65,7 @@ if ($excel == "YES") {
   $excelrivi   = 0;
 }
 
-require "inc/".$toim.".inc";
+require "inc/{$cleantoim}.inc";
 
 if (isset($worksheet) and $excelrivi > 0) {
   $excelnimi = $worksheet->close();

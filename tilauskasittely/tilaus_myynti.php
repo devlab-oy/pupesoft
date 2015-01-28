@@ -817,6 +817,8 @@ if ((int) $kukarow["kesken"] > 0) {
 
   $laskurow = mysql_fetch_assoc($result);
 
+  maksa_maksupaatteella();
+
   if ($yhtiorow["extranet_poikkeava_toimitusosoite"] == "Y") {
     if (isset($poikkeava_toimitusosoite) and $poikkeava_toimitusosoite == "N") {
       $tnimi     = $laskurow["nimi"];
@@ -9450,8 +9452,19 @@ if ($tee == '') {
                       <input type='hidden' name='orig_alatila' value='$orig_alatila'>";
             }
             else {
-              echo "  <th colspan='5'>".t("Pyöristä loppusummaa").":</th>
-                  <td class='spec'>
+              list($maksutapahtumia_on, $maksettavaa_jaljella) = jaljella_oleva_maksupaatesumma();
+
+              if ($maksutapahtumia_on) {
+                $pyoristys_otsikko = "Maksettavaa jäljellä";
+                $align = "align='right'";
+              }
+              else {
+                $pyoristys_otsikko = "Pyöristä loppusummaa";
+                $align = "";
+              }
+
+              echo "  <th colspan='5'>".t($pyoristys_otsikko).":</th>
+                  <td class='spec' {$align}>
                   <form name='pyorista' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' autocomplete='off'>
                       <input type='hidden' name='tilausnumero' value='$tilausnumero'>
                       <input type='hidden' name='mista'     value = '$mista'>
@@ -9483,6 +9496,10 @@ if ($tee == '') {
               }
 
               echo "<td class='spec'>%</td>";
+            }
+            elseif ($maksutapahtumia_on) {
+              echo "{$maksettavaa_jaljella}</td>";
+              echo "<td class='spec'>{$laskurow["valkoodi"]}</td>";
             }
             else {
               echo "<input type='text' size='$koko' name='jysum' value='".sprintf("%.2f", $jysum)."' Style='text-align:right' $state></td>";
@@ -10606,10 +10623,22 @@ function tallenna_toimitusosoite($toimitusosoite, $laskurow) {
   return $laskurow;
 }
 
+function maksa_maksupaatteella() {
+  global $tilausnumero, $korttimaksu, $yhtiorow, $maksupaatetapahtuma, $kaikkiyhteensa, $laskurow,
+         $kukarow;
+
+  if (isset($maksupaatetapahtuma) and $maksupaatetapahtuma != '' and $tilausnumero != '') {
+    $korttimaksu = str_replace(",", ".", $korttimaksu);
+    $korttimaksu = number_format($korttimaksu, $yhtiorow['hintapyoristys'], '.', '');
+
+    require("rajapinnat/lumo_handler.inc");
+  }
+}
+
 function piirra_maksupaate_formi() {
-  global $kukarow, $yhtiorow, $laskurow, $palvelin2, $tilauskaslisa, $tilausnumero, $mista,
-         $kaikkiyhteensa, $valittu_kopio_tulostin, $kateinen, $kertakassa, $toim, $orig_tila,
-         $orig_alatila, $korttimaksu, $maksupaatetapahtuma;
+  global $kukarow, $laskurow, $palvelin2, $tilauskaslisa, $tilausnumero, $mista, $kaikkiyhteensa,
+         $valittu_kopio_tulostin, $kateinen, $kertakassa, $toim, $orig_tila, $orig_alatila,
+         $korttimaksu;
 
   $query_maksuehto = "SELECT *
                       FROM maksuehto
@@ -10668,14 +10697,6 @@ function piirra_maksupaate_formi() {
   $maksupaate_maksetut['luottokortti'] = $maksettu_lkortilla;
   $maksupaate_maksetut['pankkikortti'] = $maksettu_pkortilla;
 
-  // Kutsutaan scriptaa jos on syötetty summa KORTILLA-ruutuun ja klikattu oikeaa namiskaa
-  if (isset($maksupaatetapahtuma) and $maksupaatetapahtuma != '' and $tilausnumero != '') {
-    $korttimaksu = str_replace(",", ".", $korttimaksu);
-    $korttimaksu = number_format($korttimaksu, $yhtiorow['hintapyoristys'], '.', '');
-
-    require("rajapinnat/lumo_handler.inc");
-  }
-
   // Jos löytyy maksettuja korttimaksuja niin otetaan ne huomioon laskurissa
   if (isset($maksupaate_maksetut['luottokortti'])) {
     $kateismaksu['luottokortti'] = $maksupaate_maksetut['luottokortti'];
@@ -10710,4 +10731,46 @@ function piirra_maksupaate_formi() {
   echo "</table";
 
   echo "</form><br><br>";
+}
+
+function jaljella_oleva_maksupaatesumma() {
+  global $kukarow, $tilausnumero, $kaikkiyhteensa, $yhtiorow;
+
+  $loytyy = false;
+
+  // Tarkistetaan onko onnistuneita suorituksia (K)-korttimaksut
+  $query = "SELECT *
+            FROM maksupaatetapahtumat
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tilausnumero = '{$tilausnumero}'
+            AND maksutapa != ''
+            AND tila IN ('K', 'H')";
+
+  $result = pupe_query($query);
+
+  $maksettu_pkortilla = 0;
+  $maksettu_lkortilla = 0;
+
+  while ($ruutu = mysql_fetch_assoc($result)) {
+    $loytyy = true;
+
+    if ($ruutu['maksutapa'] == "LUOTTOKORTTI") {
+      $maksettu_lkortilla += $ruutu['summa_valuutassa'];
+    }
+    else {
+      $maksettu_pkortilla += $ruutu['summa_valuutassa'];
+    }
+  }
+  $maksupaate_maksetut['luottokortti'] = $maksettu_lkortilla;
+  $maksupaate_maksetut['pankkikortti'] = $maksettu_pkortilla;
+
+  $valisumma = 0;
+
+  foreach ($maksupaate_maksetut as $maksettu) {
+    $valisumma += $maksettu;
+  }
+
+  $totaalisumma = number_format($kaikkiyhteensa - $valisumma, $yhtiorow['hintapyoristys'], '.', '');
+
+  return array($loytyy, $totaalisumma);
 }

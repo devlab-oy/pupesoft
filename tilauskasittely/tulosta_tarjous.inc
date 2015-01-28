@@ -1381,7 +1381,7 @@ if (!function_exists('loppu_tarjous')) {
           $pdf_tarjous->draw_text(575-$oikpos, $kuha, sprintf("%.2f", $total_uudet)." ".$laskurow["valkoodi"], $page_tarjous[$sivu], $boldi);
         }
 
-        $result = t_avainsana('TARJOUS_VAKIOTE');
+        $result = t_avainsana('TARJOUS_VAKIOTE', $kieli);
         $vakioteksti_row = mysql_fetch_assoc($result);
         $vakioteksti = $vakioteksti_row['selitetark'];
 

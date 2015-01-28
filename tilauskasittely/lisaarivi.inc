@@ -56,9 +56,17 @@ if ($laskurow["tila"] == 'G' and !isset($kohde_alue) and isset($tuoteno)) {
   //Laitetaan tuote oletusvaraston tuotepaikalle
   $tuotteen_oletuspaikka = hae_tuotteen_tuotepaikat($tuoteno, $laskurow['clearing']);
 
-  if (empty($tuotteen_oletuspaikka)) {
+  if (empty($tuotteen_oletuspaikka) or ($laskurow['tilaustyyppi'] == 'M' and $kohde_taso == $laskurow['liitostunnus'])) {
+    // Kun kyseessä myyntitili, niin hyllytaso = laskun liitostunnus
+    if ($laskurow['tilaustyyppi'] == 'M') {
+      $kohde_taso   = $laskurow['liitostunnus'];
+    }
+    else {
+      $kohde_taso   = '';
+    }
+
     //Jos tuotteella ei ole tuotepaikkaa kohdevarastossa, luodaan se
-    $tuotteen_oletuspaikka[0] = lisaa_tuotepaikka($tuoteno, "", "", "", "", "", "", 0, 0, $laskurow['clearing']);
+    $tuotteen_oletuspaikka[0] = lisaa_tuotepaikka($tuoteno, "", "", "", $kohde_taso, "", "", 0, 0, $laskurow['clearing']);
   }
 
   // otetaan eka löytynyt tuotepaikka kohdetuotepaikaksi

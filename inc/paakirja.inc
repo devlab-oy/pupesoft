@@ -572,7 +572,7 @@ if ($tee != "") {
 
   if ($_konsernivalinnasta) {
     $toimittajajoini = " LEFT JOIN toimi ON (toimi.yhtio = lasku.yhtio
-    AND toimi.tunnus = = if(tiliointi.liitos = 'T', tiliointi.liitostunnus, lasku.liitostunnus))";
+    AND toimi.tunnus = if(tiliointi.liitos = 'T', tiliointi.liitostunnus, lasku.liitostunnus))";
   }
 
   if ($konsernirajaus == "AT") {

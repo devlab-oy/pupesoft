@@ -1849,7 +1849,7 @@ if ($tee == 'P' or $tee == 'E') {
 
       echo "<td valign='top'><input type='text' name='isumma[$i]' value='$isumma[$i]'></td>";
       echo "<td valign='top'>" . alv_popup('ivero['.$i.']', $ivero[$i]);
-      echo "$ivirhe[$i]";
+      echo " $ivirhe[$i]";
       echo "</td></tr>";
       echo "<tr id='tiliointirivi_hr_{$i}' style='display:none;'><td colspan='4'><hr></td></tr>";
     }

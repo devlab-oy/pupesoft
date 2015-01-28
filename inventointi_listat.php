@@ -789,7 +789,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       $join .= $lisa_parametri;
     }
 
-    if ($top > 0 and empty($ei_inventointi)) {
+    if ($top > 0) {
       $where .= il_topmyydyt($top, $where, $kutsujoinlisa, $rajauslisa, $rajauslisatuote, $invaamatta, $extra);
     }
 

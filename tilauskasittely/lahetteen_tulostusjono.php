@@ -294,6 +294,12 @@ if ($tee2 == 'TULOSTA') {
 
             $toim = $toim_bck;
           }
+
+          if ($toim == "TOIMITUSASIAKIRJAT") {
+            require_once "tulosta_lasku.inc";
+
+            tulosta_lasku($laskurow["tunnus"], "", "", "", $valittu_tulostin);
+          }
         }
         else {
           echo "<font class='error'>".t("Keräyslista on jo tulostettu")."! ($tilausnumeroita)</font><br>";

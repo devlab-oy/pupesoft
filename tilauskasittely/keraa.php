@@ -160,7 +160,6 @@ else {
               and toimitustapa.yhtio         = '$kukarow[yhtio]'
               and lasku.tunnus               = '$id'
               and ((toimitustapa.nouto is null or toimitustapa.nouto='') or lasku.vienti!='')
-              and toimitustapa.tulostustapa != 'H'
               and maksuehto.jv               = ''";
     $result = pupe_query($query);
 

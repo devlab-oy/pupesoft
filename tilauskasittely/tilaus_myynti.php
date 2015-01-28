@@ -1588,7 +1588,8 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
     require_once 'tulosta_tarjous.inc';
 
-    tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli,  $tee, '', $verolliset_verottomat_hinnat, $naytetaanko_rivihinta, $naytetaanko_tuoteno);
+    tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee, '', $verolliset_verottomat_hinnat,
+                    $naytetaanko_rivihinta, $naytetaanko_tuoteno, $liita_tuotetiedot, $naytetaanko_yhteissummarivi);
 
     $query = "UPDATE lasku SET alatila='A' where yhtio='$kukarow[yhtio]' and alatila='' and tunnus='$kukarow[kesken]'";
     $result = pupe_query($query);
@@ -7198,7 +7199,7 @@ if ($tee == '') {
 
             //valitaan näytetävä lippu varaston tai yhtiön maanperusteella
             if ($selpaikkamaa != '' and $yhtiorow['varastopaikan_lippu'] != '') {
-              echo "<img src='../pics/flag_icons/gif/".strtolower($selpaikkamaa).".gif'>";
+              echo "<img src='{$palvelin2}pics/flag_icons/gif/".strtolower($selpaikkamaa).".gif'>";
             }
 
             echo "<form method='post' name='paikat' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
@@ -7223,7 +7224,7 @@ if ($tee == '') {
           else {
 
             if ($varow['maa'] != '' and $yhtiorow['varastopaikan_lippu'] != '') {
-              echo "<td $class align='left' valign='top' nowrap><font class='error'><img src='../pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa) </font>";
+              echo "<td $class align='left' valign='top' nowrap><font class='error'><img src='{$palvelin2}pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa) </font>";
             }
             elseif ($varow['maa'] != '' and strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
               echo "<td $class align='left' valign='top' nowrap><font class='error'>".strtoupper($varow['maa'])." $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa) </font>";
@@ -7294,7 +7295,7 @@ if ($tee == '') {
         elseif ((($toim != "TARJOUS" and $toim != "EXTTARJOUS") or $yhtiorow['tarjouksen_tuotepaikat'] == "") and $kukarow['extranet'] == '') {
 
           if ($varow['maa'] != '' and $yhtiorow['varastopaikan_lippu'] != '') {
-            echo "<td $class align='left' valign='top'><font class='error'><img src='../pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font></td>";
+            echo "<td $class align='left' valign='top'><font class='error'><img src='{$palvelin2}pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font></td>";
           }
           elseif ($varow['maa'] != '' and strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
             echo "<td $class align='left' valign='top'><font class='error'>".strtoupper($varow['maa'])." $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font></td>";
@@ -7302,13 +7303,11 @@ if ($tee == '') {
           else {
             echo "<td $class align='left' valign='top'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</td>";
           }
-
-          //echo "<td $class align='left' valign='top'><img src='../pics/flag_icons/gif/".strtolower($yhtiorow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</td>";
         }
         elseif ((($toim != "TARJOUS" and $toim != "EXTTARJOUS") or $yhtiorow['tarjouksen_tuotepaikat'] == "") and $kukarow['extranet'] != '' and $yhtiorow['varastopaikan_lippu'] != '') {
 
           if ($varow['maa'] != '' ) {
-            echo "<td $class align='left' valign='top'><img src='".$palvelin2."flag_icons/gif/".strtolower($varow['maa']).".gif'></td>";
+            echo "<td $class align='left' valign='top'><img src='{$palvelin2}pics/flag_icons/gif/".strtolower($varow['maa']).".gif'></td>";
           }
           else {
             echo "<td $class align='left' valign='top'></td>";

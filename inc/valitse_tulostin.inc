@@ -54,6 +54,9 @@ echo "<form method='post' action='$PHP_SELF?$ulisa'>
   <input type='hidden' name='sorttauskentan_jarjestys3' value='$sorttauskentan_jarjestys3'>
   <input type='hidden' name='sorttauskentan_jarjestys4' value='$sorttauskentan_jarjestys4'>
   <input type='hidden' name='kertakassa' value='$kertakassa'>
+  <input type='hidden' name='status' value='{$status}'>
+  <input type='hidden' name='varasto' value='{$varasto}'>
+  <input type='hidden' name='ei_huomioida_tuotepaikkoja_avainsanoista' value='{$ei_huomioida_tuotepaikkoja_avainsanoista}'>
   <input type='hidden' name='otunnukset_array' value='$otunnukset_array'>
   <input type='hidden' name='varastoonvaikutus' value='$varastoonvaikutus'>
   <input type='hidden' name='varastonarvo' value='$varastonarvo'>
@@ -247,6 +250,12 @@ if ($toim == "TARJOUS") {
   echo "<option value=''>", t("Näytetään hinnat"), "</option>";
   echo "<option value='ei_rivihintaa'>", t("Ei näytetä rivihintaa"), "</option>";
   echo "<option value='kokonaan_ilman_hintoja'>", t("Kokonaan ilman hintoja"), "</option>";
+  echo "</select></td></tr>";
+
+  echo "<tr><th>" . t("Näytetäänkö yhteissummarivi") .
+       "</th><td><select name='naytetaanko_yhteissummarivi'>";
+  echo "<option value=''>" . t("Näytetään yhteissummarivi") . "</option>";
+  echo "<option value='E'>" . t("Ei näytetä yhteissummariviä") . "</option>";
   echo "</select></td></tr>";
 
   echo "<tr><th>", t("Näytetäänkö tuotenumerot"), "</th><td><select name='naytetaanko_tuoteno'>";

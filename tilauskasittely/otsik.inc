@@ -3967,8 +3967,9 @@ if (isset($jatka)) {
     $clearing = $laskurow['clearing'];
   }
 
-  // verollisuus oletuksena nollaksi jos on vientipoka ja asiakas ei oo yksityishenkilö
-  if ($vienti != "" and $liitostunnus > 0 and $asiarow["laji"] != "H") {
+  // Verollisuus oletuksena nollaksi, jos on vienti EU:n ulkopuolelle
+  // tai vienti EU:n sisällä yritykselle
+  if ($vienti != "" and $liitostunnus > 0 and ($asiarow["laji"] != "H" or $vienti == 'K')) {
     $alv = 0;
   }
 

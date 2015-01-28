@@ -174,20 +174,60 @@ if ($tee == 'listat') {
             count(tuoteno) as tuotteita,
             concat_ws('-', min(tuotepaikat.hyllyalue), max(tuotepaikat.hyllyalue)) as hyllyvali
             FROM tuotepaikat
-            JOIN varaston_hyllypaikat on (varaston_hyllypaikat.yhtio=tuotepaikat.yhtio
-                                          and varaston_hyllypaikat.hyllyalue=tuotepaikat.hyllyalue
-                                          and varaston_hyllypaikat.hyllynro=tuotepaikat.hyllynro
-                                          and varaston_hyllypaikat.hyllyvali=tuotepaikat.hyllyvali
-                                          and varaston_hyllypaikat.hyllytaso=tuotepaikat.hyllytaso)
             WHERE tuotepaikat.yhtio   = '{$kukarow['yhtio']}'
-            and varaston_hyllypaikat.reservipaikka='{$reservipaikka}'
             and inventointilista      > 0
             and inventointilista_aika > '0000-00-00 00:00:00'
-            GROUP BY inventointilista_aika
+            GROUP BY inventointilista_aika, hyllyvali
             ORDER BY inventointilista";
   $result = pupe_query($query);
 
+  $parametrit_tarkistettu = false;
+
   while ($row = mysql_fetch_assoc($result)) {
+
+    $query = "SELECT hyllyalue,
+              hyllynro,
+              hyllyvali,
+              hyllytaso
+              FROM tuotepaikat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND inventointilista = '{$row['lista']}'";
+    $_chk_res = pupe_query($query);
+
+    while ($_chk_row = mysql_fetch_assoc($_chk_res)) {
+
+      if (!$parametrit_tarkistettu) {
+        $parametrit_tarkistettu = true;
+        $_varasto = kuuluukovarastoon($_chk_row['hyllyalue'], $_chk_row['hyllynro']);
+        $onko_varaston_hyllypaikat_kaytossa = onko_varaston_hyllypaikat_kaytossa($_varasto);
+      }
+
+      if ($onko_varaston_hyllypaikat_kaytossa) {
+
+        if (!empty($reservipaikka)) {
+          $options = array('reservipaikka' => $reservipaikka);
+        }
+        else {
+          $options = array();
+        }
+
+        $_chk = tarkista_varaston_hyllypaikka(
+          $_chk_row['hyllyalue'],
+          $_chk_row['hyllynro'],
+          $_chk_row['hyllyvali'],
+          $_chk_row['hyllytaso'],
+          $options
+        );
+
+        if (!$_chk) {
+          continue 2;
+        }
+      }
+      else {
+        break;
+      }
+    }
+
     $row['url'] = "?tee=laske&lista={$row['lista']}&reservipaikka={$reservipaikka}";
     $listat[] = $row;
   }
@@ -241,13 +281,7 @@ if ($tee == 'laske' or $tee == 'inventoi') {
                    lpad(upper(tuotepaikat.hyllytaso), 5, '0')) as sorttauskentta
                FROM tuotepaikat
                JOIN tuote on (tuote.yhtio=tuotepaikat.yhtio and tuote.tuoteno=tuotepaikat.tuoteno)
-               JOIN varaston_hyllypaikat on (varaston_hyllypaikat.yhtio=tuotepaikat.yhtio
-                                             and varaston_hyllypaikat.hyllyalue=tuotepaikat.hyllyalue
-                                             and varaston_hyllypaikat.hyllynro=tuotepaikat.hyllynro
-                                             and varaston_hyllypaikat.hyllyvali=tuotepaikat.hyllyvali
-                                             and varaston_hyllypaikat.hyllytaso=tuotepaikat.hyllytaso)
                WHERE tuotepaikat.yhtio='{$kukarow['yhtio']}'
-               and varaston_hyllypaikat.reservipaikka='{$reservipaikka}'
                AND inventointilista='{$lista}'
                AND inventointilista_aika > '0000-00-00 00:00:00' # Inventoidut tuotteet on nollattu
                ORDER BY sorttauskentta, tuoteno
@@ -267,6 +301,8 @@ if ($tee == 'laske' or $tee == 'inventoi') {
               tuote.tuoteno,
               tuote.yksikko,
               tuotepaikat.tyyppi,
+              tuotepaikat.hyllyalue,
+              tuotepaikat.hyllynro,
               concat_ws('-',tuotepaikat.hyllyalue, tuotepaikat.hyllynro,
                     tuotepaikat.hyllyvali, tuotepaikat.hyllytaso) as tuotepaikka
               FROM tuotepaikat
@@ -278,6 +314,9 @@ if ($tee == 'laske' or $tee == 'inventoi') {
     $result = pupe_query($query);
   }
   $tuote = mysql_fetch_assoc($result);
+
+  $_varasto = kuuluukovarastoon($tuote['hyllyalue'], $tuote['hyllynro']);
+  $onko_varaston_hyllypaikat_kaytossa = onko_varaston_hyllypaikat_kaytossa($_varasto);
 
   // Haetaan sscc jos tyyppi
   if ($tuote['tyyppi'] == 'S') {
@@ -318,7 +357,7 @@ if ($tee == 'laske' or $tee == 'inventoi') {
   }
 
   // Jos varmistuskoodi kelpaa tai on keksiss‰ tallessa
-  if (tarkista_varmistuskoodi($tuote['tuotepaikka'], $varmistuskoodi, $tuotepaikalla)) {
+  if (!$onko_varaston_hyllypaikat_kaytossa or tarkista_varmistuskoodi($tuote['tuotepaikka'], $varmistuskoodi, $tuotepaikalla)) {
     $title = t("Laske m‰‰r‰");
     $query = "SELECT *
               FROM avainsana

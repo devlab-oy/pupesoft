@@ -612,6 +612,9 @@ if ($tee2 == '') {
   elseif ($toim == 'VASTAANOTA_REKLAMAATIO') {
     echo "<font class='head'>".t("Tulosta purkulista").":</font><hr>";
   }
+  elseif ($toim == "TOIMITUSASIAKIRJAT") {
+    echo "<font class='head'>".t("Tulosta toimitusasiakirjat").":</font><hr>";
+  }
   else {
     echo "<font class='head'>".t("Tulosta keräyslista").":</font><hr>";
   }

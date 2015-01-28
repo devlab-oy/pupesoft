@@ -96,7 +96,10 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
   $laiteresult = pupe_query($query);
                                            
   // Haetaan sopimuskohtaiset tiedot
-  $query = "SELECT lasku.tunnus, tilausrivi.nimitys, tilausrivi.hinta * tilausrivi.tilkpl AS rivihinta,
+  $query = "SELECT
+            lasku.tunnus,
+            tilausrivi.nimitys,
+            round(tilausrivi.hinta * tilausrivi.varattu * (1 - ale1 / 100) * (1 - ale2 / 100) * (1 - ale3 / 100), 2) rivihinta,
             lasku.asiakkaan_tilausnumero,
             lasku.alv,
             concat(lasku.toim_nimi,'\n',lasku.toim_osoite,'\n',lasku.toim_postino,' ',
@@ -202,7 +205,10 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
 
     // Haetaan laitteen palvelut joiden hinnat ovat laitteiden lukumäärästä riippuvaisia
     // ja ne on valittu käyttöliittymästä
-    $palveluquery = "SELECT tuoteno, nimitys, hinta
+    $palveluquery = "SELECT
+                     tuoteno,
+                     nimitys,
+                     round(tilausrivi.hinta * (1 - ale1 / 100) * (1 - ale2 / 100) * (1 - ale3 / 100), 2) hinta
                      FROM tilausrivi
                      JOIN laitteen_sopimukset ON tilausrivi.yhtio = laitteen_sopimukset.yhtio
                        AND tilausrivi.tunnus = laitteen_sopimukset.sopimusrivin_tunnus

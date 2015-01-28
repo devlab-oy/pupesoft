@@ -52,7 +52,10 @@ $count = count($array);
 for ($i = 0; $i <= $count; $i++) {
   if (isset($haku[$i]) and strlen($haku[$i]) > 0) {
     if ($array[$i] == "asiakas.nimi") {
-      $lisa .= " and (asiakas.nimi like '%".$haku[$i]."%' or asiakas.toim_nimi like '%".$haku[$i]."%')";
+      $lisa .= " AND (asiakas.nimi LIKE '%{$haku[$i]}%'
+                      OR asiakas.toim_nimi LIKE '%{$haku[$i]}%'
+                      OR asiakas.nimitark LIKE '%{$haku[$i]}%'
+                      OR asiakas.toim_nimitark LIKE '%{$haku[$i]}%')";
       $ulisa .= "&haku[" . $i . "]=" . $haku[$i];
     }
     else {

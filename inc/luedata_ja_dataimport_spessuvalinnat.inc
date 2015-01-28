@@ -71,6 +71,34 @@ if ($table == "tuotteen_toimittajat") {
     </tr>";
 }
 
+if ($table == "tuotteen_toimittajat_pakkauskoot") {
+  echo "<tr><th>".t("Tuotteen toimittajan tunnuksen valinta").":</th>
+        <td><select name='toimitunnusvalinta'>
+        <option value='1'>".t("Käytetään tuotteen toimittajan tunnusta")."</option>
+        <option value='2'>".t("Käytetään toimittajan ytunnusta sekä omassa sarakkeessa tuotenumero:a")."</option>
+        <option value='3'>".t("Käytetään toimittajan ytunnusta sekä omassa sarakkeessa toim_tuoteno:a")."</option>
+        <option value='4'>".t("Käytetään toimittajan toimittajanumeroa sekä omassa sarakkeessa tuotenumero:a")."</option>
+        <option value='5'>".t("Käytetään toimittajan toimittajanumeroa sekä omassa sarakkeessa toim_tuoteno:a")."</option>
+        <option value='6'>".t("Käytetään toimittajan tunnusta sekä omassa sarakkeessa tuotenumero:a")."</option>
+        <option value='7'>".t("Käytetään toimittajan tunnusta sekä omassa sarakkeessa toim_tuoteno:a")."</option>
+        </select></td>
+    </tr>";
+}
+
+if ($table == "tuotteen_toimittajat_tuotenumerot") {
+  echo "<tr><th>".t("Tuotteen toimittajan tunnuksen valinta").":</th>
+        <td><select name='toimitunnusvalinta'>
+        <option value='1'>".t("Käytetään tuotteen toimittajan tunnusta")."</option>
+        <option value='2'>".t("Käytetään toimittajan ytunnusta sekä omassa sarakkeessa tuotenumero:a")."</option>
+        <option value='3'>".t("Käytetään toimittajan ytunnusta sekä omassa sarakkeessa toim_tuoteno:a")."</option>
+        <option value='4'>".t("Käytetään toimittajan toimittajanumeroa sekä omassa sarakkeessa tuotenumero:a")."</option>
+        <option value='5'>".t("Käytetään toimittajan toimittajanumeroa sekä omassa sarakkeessa toim_tuoteno:a")."</option>
+        <option value='6'>".t("Käytetään toimittajan tunnusta sekä omassa sarakkeessa tuotenumero:a")."</option>
+        <option value='7'>".t("Käytetään toimittajan tunnusta sekä omassa sarakkeessa toim_tuoteno:a")."</option>
+        </select></td>
+    </tr>";
+}
+
 if ($table == "extranet_kayttajan_lisatiedot") {
   echo "<tr><th>".t("Liitostunnus").":</th>
       <td><select name='liitostunnusvalinta'>

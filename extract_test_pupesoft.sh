@@ -25,6 +25,25 @@ function failure {
   error "$1"
 }
 
+# Odotetaan, että joku palvelu käynnistyy tiettyyn tcp-porttiin
+function wait_for_service {
+  # Maksimiaika joka odotetaan palvelun käynnistymistä tai sulkemista
+  MAXWAIT=30
+
+  WAIT=0
+
+  # Tsekataan, että palvelu on noussut ylös
+  while ! nc -z localhost $1; do
+    if [ "${WAIT}" -ge "${MAXWAIT}" ]; then
+      error "Palvelu ei käynnistynyt porttiin $1"
+      break
+    fi
+
+    sleep 1;
+    WAIT=$((WAIT+1))
+  done
+}
+
 # Tuetaan Linux ja Mac
 if [[ $(uname) == "Linux" ]]; then
 
@@ -64,6 +83,19 @@ fi
 kasiteltava_backup=$1
 destination_database=$2
 mysql_root_password=$3
+
+mysql_sock=""
+mysql_port=3306
+
+# Neljäs optional parami on custom mysql-instanssin "nimi"
+if [[ "$4" != "" ]]; then
+  mysql_path="/var/lib/$4/"
+  mysql_sock="--socket=/var/lib/$4/$4.sock"
+  mysql_port=$(grep "port" /etc/$4.cnf | egrep -o "[0-9]*")
+  mysql_start="mysqld_safe --defaults-file=/etc/$4.cnf"
+  mysql_stop="kill $(ps aux | egrep '[m]ysqld .*'$4 | awk '{print $2}')"
+fi
+
 database_to="${mysql_path}${destination_database}"
 
 if [[ -z ${kasiteltava_backup} || -z ${destination_database} || -z ${mysql_root_password} ]]; then
@@ -74,7 +106,7 @@ if [[ ! -a ${kasiteltava_backup} ]]; then
   error "Tiedostoa '${kasiteltava_backup}' ei löydy!"
 fi
 
-mysql --user=root --password=${mysql_root_password} -e "use mysql" &> /dev/null
+mysql ${mysql_sock} --user=root --password=${mysql_root_password} -e "use mysql" &> /dev/null
 
 if [[ $? -ne 0 ]]; then
   error "Virheellinen salasana!"
@@ -83,23 +115,30 @@ fi
 echo
 decho "Puretaan ${kasiteltava_backup} -> '${destination_database}'.."
 
-# Tehdään temporary directory
-tmpdir=$(${make_temp})
+# Onko tietokanta valmiiksi purettu?
+ONKOSNAPSHOT=$(echo "${kasiteltava_backup}" | grep -o "_snapshot")
 
-# Katsotaan osetaanko purkaa parallel
-command -v pbunzip2 > /dev/null
-
-if [[ $? -eq 0 ]]; then
-  compress_prog="--use-compress-prog=pbunzip2"
+if [[ "${ONKOSNAPSHOT}" == "_snapshot" ]] ; then
+  tmpdir=${kasiteltava_backup}
 else
-  compress_prog="--use-compress-prog=bunzip2"
-fi
+  # Tehdään temporary directory
+  tmpdir=$(${make_temp})
 
-# Puretaan backup
-nice -n 19 tar -xf "${kasiteltava_backup}" ${compress_prog} -C "${tmpdir}"
+  # Katsotaan osetaanko purkaa parallel
+  command -v pbunzip2 > /dev/null
 
-if [[ $? -ne 0 ]]; then
-  failure "Purku epäonnistui!"
+  if [[ $? -eq 0 ]]; then
+    compress_prog="--use-compress-prog=pbunzip2"
+  else
+    compress_prog="--use-compress-prog=bunzip2"
+  fi
+
+  # Puretaan backup
+  nice -n 19 tar -xf "${kasiteltava_backup}" ${compress_prog} -C "${tmpdir}"
+
+  if [[ $? -ne 0 ]]; then
+    failure "Purku epäonnistui!"
+  fi
 fi
 
 if [[ -d ${database_to} ]]; then
@@ -112,20 +151,25 @@ decho "Siirretään ${database_to}.."
 mkdir -p "${database_to}" &> /dev/null
 
 # Stopataan mysql, moovataan db, chown ja mysql takas
-${mysql_stop} > /dev/null &&
+${mysql_stop} >/dev/null &&
 nice -n 19 rm -f "${database_to}/*" > /dev/null &&
 nice -n 19 mv -f "${tmpdir}/"* "${database_to}/" > /dev/null &&
-chown -R ${mysql_owner} "${database_to}" > /dev/null &&
-${mysql_start} > /dev/null
+chown -R ${mysql_owner} "${database_to}" > /dev/null
 
 if [[ $? -ne 0 ]]; then
   nice -n 19 rm -rf "${database_to}" &> /dev/null
   failure "Siirto epäonnistui!"
 fi
 
-decho "Puhdistetaan '${destination_database}' tietokanta.."
+${mysql_start} >/dev/null 2>&1 &
 
-mysql --user=root --password=${mysql_root_password} "${destination_database}" 2> /dev/null << EOF
+# Odotetaan, että mysql on käynnistynyt
+wait_for_service ${mysql_port}
+
+if [[ "${mysql_sock}" == "" ]]; then
+  decho "Puhdistetaan '${destination_database}' tietokanta.."
+
+  mysql --user=root --password=${mysql_root_password} "${destination_database}" 2> /dev/null << EOF
 
 UPDATE yhtio set
 nimi = concat('Testi ', nimi),
@@ -203,9 +247,10 @@ WHERE asiakas != '';
 
 EOF
 
-if [[ $? -ne 0 ]]; then
-  nice -n 19 rm -rf "${database_to}" &> /dev/null
-  failure "Puhdistus epäonnistui!"
+  if [[ $? -ne 0 ]]; then
+    nice -n 19 rm -rf "${database_to}" &> /dev/null
+    failure "Puhdistus epäonnistui!"
+  fi
 fi
 
 decho "Putsataan tmp -tiedostot.."

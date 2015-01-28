@@ -460,10 +460,10 @@ if ($tee == "ETSILASKU") {
 
         $('.toiminnot_chk').on('click', function() {
           if ($(this).val() == 'REKLAMA' && '{$yhtiorow['reklamaation_hinnoittelu']}' == 'K') {
-            $('.'+$(this).attr('id')).show();
+            $('.'+$(this).attr('id')).attr('checked', true).show();
           }
           else {
-            $('.'+$(this).attr('id')).hide();
+            $('.'+$(this).attr('id')).attr('checked', false).hide();
           }
         });
       });

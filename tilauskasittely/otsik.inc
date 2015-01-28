@@ -2623,7 +2623,9 @@ if ($tila == "" and !isset($jatka)) {
       if (!empty($toimitustapa['sallitut_maat']) and !stristr($toimitustapa['sallitut_maat'], $srow['toim_maa'])) {
         continue;
       }
-
+            
+      echo "<div style='display: none; visibility: hidden;' id='merahti_toimitustapa_$toimitustapa[tunnus]'>$toimitustapa[merahti]</div>";
+    
       if (in_array($toimitustapa['extranet'], array('', 'M')) or $toimitustapa['selite'] == $srow['toimitustapa']) {
         $sel = "";
         if (empty($asiakas) and $toimitustapa["selite"] == $srow["toimitustapa"]) {
@@ -3965,8 +3967,9 @@ if (isset($jatka)) {
     $clearing = $laskurow['clearing'];
   }
 
-  // verollisuus oletuksena nollaksi jos on vientipoka ja asiakas ei oo yksityishenkilö
-  if ($vienti != "" and $liitostunnus > 0 and $asiarow["laji"] != "H") {
+  // Verollisuus oletuksena nollaksi, jos on vienti EU:n ulkopuolelle
+  // tai vienti EU:n sisällä yritykselle
+  if ($vienti != "" and $liitostunnus > 0 and ($asiarow["laji"] != "H" or $vienti == 'K')) {
     $alv = 0;
   }
 

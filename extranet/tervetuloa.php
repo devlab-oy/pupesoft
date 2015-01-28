@@ -332,8 +332,8 @@ if ($tee == '') {
       <tr>
       <td colspan='2' class='back'><font class='head'>$uutinen[kentta01]</font><hr></td>
       </tr><tr>
-      <td valign='top' align='center' width='180'><br>$kuva<br><br></td>
-      <td valign='top'>$uutinen[kentta02]</td>
+      <td class='ptop' align='center' width='180'><br>$kuva<br><br></td>
+      <td class='ptop'>$uutinen[kentta02]</td>
       </tr><tr>
       <th colspan='2'>".t("Toimittaja").": $uutinen[nimi]<br>".t("Päivämäärä").": $uutinen[pvmalku]</th>
       </tr>

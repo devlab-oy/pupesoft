@@ -1595,7 +1595,9 @@ if ($tee == "TULOSTA" or $tee == 'NAYTATILAUS') {
 
       require_once "tulosta_tarjous.inc";
 
-      tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee, $hinnat, $verolliset_verottomat_hinnat, $naytetaanko_rivihinta, $naytetaanko_tuoteno);
+      tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee, $hinnat,
+                      $verolliset_verottomat_hinnat, $naytetaanko_rivihinta, $naytetaanko_tuoteno,
+                      $liita_tuotetiedot, $naytetaanko_yhteissummarivi);
 
       $tee = '';
     }

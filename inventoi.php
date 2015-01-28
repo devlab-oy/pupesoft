@@ -464,7 +464,7 @@ if ($tee == 'VALMIS') {
             $hyllyvali = strtoupper($hyllyvali);
             $hyllytaso = strtoupper($hyllytaso);
 
-            if (!tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso))  {
+            if (!tarkista_varaston_hyllypaikka($hyllyalue, $hyllynro, $hyllyvali, $hyllytaso)) {
               echo "<font class='error'>".t("VIRHE: Varastopaikkaa ei ole olemassa")."! $tuoteno $hyllyalue-$hyllynro-$hyllyvali-$hyllytaso</font><br>";
               $virhe = 1;
             }

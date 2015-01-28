@@ -1172,22 +1172,13 @@ while ($tietue = fgets($fd)) {
 
           if ($maa_eu_row["eu"] == "") {
             $arow["vienti"] = "K";
+            $arow["alv"] = 0;
           }
           else {
             $arow["vienti"] = "E";
-          }
-
-          // Jos yksityishenkilkölle menee verollisena
-          if ($veromaara != 0) {
-            $wquery = "SELECT selite
-                       FROM avainsana
-                       WHERE yhtio     = '$kukarow[yhtio]'
-                       AND laji        = 'alv'
-                       AND selitetark != ''";
-            $wtres  = pupe_query($wquery);
-            $wtrow  = mysql_fetch_assoc($wtres);
-
-            $arow["alv"] = $wtrow["selite"];
+            if ($arow["laji"] != "H") {
+              $arow["alv"] = 0;
+            }
           }
         }
       }

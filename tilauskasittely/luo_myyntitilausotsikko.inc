@@ -1,7 +1,7 @@
 <?php
 
 if (!function_exists("luo_myyntitilausotsikko")) {
-  function luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '', $kantaasiakastunnus = '', $ohjelmamoduli = '', $tilaustyyppi = '', $yhtiotoimipaikka = '', $ei_ketjutus = '', $eilahe_osatoim = '') {
+  function luo_myyntitilausotsikko($toim, $asiakasid, $tilausnumero = '', $myyjanro = '', $viesti = '', $kantaasiakastunnus = '', $ohjelmamoduli = '', $tilaustyyppi = '', $yhtiotoimipaikka = '', $ei_ketjutus = '', $eilahe_osatoim = '', $toimitustapa = '') {
     global $kukarow, $yhtiorow, $session;
 
     $query  = "SELECT *
@@ -173,7 +173,7 @@ if (!function_exists("luo_myyntitilausotsikko")) {
       }
 
       $jtkielto     = $asiakasrow['jtkielto'];
-      $toimitustapa   = $asiakasrow["toimitustapa"];
+      $toimitustapa   = !empty($toimitustapa) ? $toimitustapa : $asiakasrow["toimitustapa"];
 
       // Toimitusehto
       if (trim($asiakasrow["toimitusehto"]) != "") {

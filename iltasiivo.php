@@ -788,10 +788,10 @@ if (mysql_num_rows($poistettavat_tuotepaikat) > 0) {
   // Haetaan avoimet tilausrivit arrayseen (myynti & osto)
   $query = "SELECT CONCAT(tuoteno, hyllyalue, hyllynro, hyllytaso, hyllyvali) AS id
             FROM tilausrivi
-            WHERE yhtio        = '{$kukarow['yhtio']}'
-            AND laskutettuaika = '0000-00-00'
-            AND tyyppi         IN ('L','O')
-            AND var != 'P'";
+            WHERE yhtio         = '{$kukarow['yhtio']}'
+            AND laskutettuaika  = '0000-00-00'
+            AND tyyppi          IN ('L','O')
+            AND var            != 'P'";
   $avoinrivi_result = pupe_query($query);
 
   while ($avoinrivi = mysql_fetch_assoc($avoinrivi_result)) {
@@ -801,10 +801,10 @@ if (mysql_num_rows($poistettavat_tuotepaikat) > 0) {
   // Haetaan avoimet tilausrivit arrayseen (valmistukset & siirtolistat)
   $query = "SELECT CONCAT(tuoteno, hyllyalue, hyllynro, hyllytaso, hyllyvali) AS id
             FROM tilausrivi
-            WHERE yhtio        = '{$kukarow['yhtio']}'
-            AND toimitettuaika = '0000-00-00 00:00:00'
-            AND tyyppi         IN ('V','W','M','G')
-            AND var != 'P'";
+            WHERE yhtio         = '{$kukarow['yhtio']}'
+            AND toimitettuaika  = '0000-00-00 00:00:00'
+            AND tyyppi          IN ('V','W','M','G')
+            AND var            != 'P'";
   $avoinrivi_result = pupe_query($query);
 
   while ($avoinrivi = mysql_fetch_assoc($avoinrivi_result)) {
@@ -815,10 +815,10 @@ if (mysql_num_rows($poistettavat_tuotepaikat) > 0) {
   $query = "SELECT CONCAT(tilausrivi.tuoteno, tilausrivin_lisatiedot.kohde_hyllyalue, tilausrivin_lisatiedot.kohde_hyllynro, tilausrivin_lisatiedot.kohde_hyllytaso, tilausrivin_lisatiedot.kohde_hyllyvali) AS id
             FROM tilausrivi
             JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.kohde_hyllyalue != '')
-            WHERE tilausrivi.yhtio        = '{$kukarow['yhtio']}'
-            AND tilausrivi.toimitettuaika = '0000-00-00 00:00:00'
-            AND tilausrivi.tyyppi         = 'G'
-            AND var != 'P'";
+            WHERE tilausrivi.yhtio         = '{$kukarow['yhtio']}'
+            AND tilausrivi.toimitettuaika  = '0000-00-00 00:00:00'
+            AND tilausrivi.tyyppi          = 'G'
+            AND var                       != 'P'";
   $avoinrivi_result = pupe_query($query);
 
   while ($avoinrivi = mysql_fetch_assoc($avoinrivi_result)) {

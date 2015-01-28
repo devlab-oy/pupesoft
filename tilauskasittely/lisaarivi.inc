@@ -57,9 +57,17 @@ if ($laskurow["tila"] == 'G' and !isset($kohde_alue) and isset($tuoteno)) {
   //Laitetaan tuote oletusvaraston tuotepaikalle
   $tuotteen_oletuspaikka = hae_tuotteen_tuotepaikat($tuoteno, $laskurow['clearing']);
 
-  if (empty($tuotteen_oletuspaikka)) {
+  if (empty($tuotteen_oletuspaikka) or ($laskurow['tilaustyyppi'] == 'M' and $kohde_taso == $laskurow['liitostunnus'])) {
+    // Kun kyseessä myyntitili, niin hyllytaso = laskun liitostunnus
+    if ($laskurow['tilaustyyppi'] == 'M') {
+      $kohde_taso   = $laskurow['liitostunnus'];
+    }
+    else {
+      $kohde_taso   = '';
+    }
+
     //Jos tuotteella ei ole tuotepaikkaa kohdevarastossa, luodaan se
-    $tuotteen_oletuspaikka[0] = lisaa_tuotepaikka($tuoteno, "", "", "", "", "", "", 0, 0, $laskurow['clearing']);
+    $tuotteen_oletuspaikka[0] = lisaa_tuotepaikka($tuoteno, "", "", "", $kohde_taso, "", "", 0, 0, $laskurow['clearing']);
   }
 
   // otetaan eka löytynyt tuotepaikka kohdetuotepaikaksi
@@ -462,12 +470,15 @@ elseif (isset($varasto) and (int) $varasto > 0) {
 elseif (isset($laskurow["varasto"]) and (int) $laskurow["varasto"] > 0) {
   $varasto = array((int) $laskurow["varasto"]);
 }
-elseif ($rivityyppi == 'L') {
+elseif ($rivityyppi == 'L' and $laaja_toim_kasittely) {
   $params = array(
     'asiakas_tunnus' => $laskurow['liitostunnus'],
     'toimipaikka_tunnus' => $laskurow['yhtio_toimipaikka'],
   );
   $varasto = sallitut_varastot($params);
+}
+elseif (isset($kukarow["varasto"]) and (int) $kukarow["varasto"] > 0) {
+  $varasto = explode(",", $kukarow["varasto"]);
 }
 else {
   unset($varasto);
@@ -508,24 +519,17 @@ if ($kpl > 0 and $rivityyppi == 'O' and $yhtiorow['ostoera_pyoristys'] == 'K') {
   // Otetaan $trow laajemmin, tuotteen_toimittaja tiedot ja 2 avainsanaa
   $query = "SELECT
             tuote.*,
+            tt.tunnus tt_tunnus,
             tt.toim_tuoteno,
             if(tt.osto_era = 0, 1, tt.osto_era) AS osto_era,
             tt.pakkauskoko,
             tt.ostohinta,
             tt.valuutta,
-            tt.osto_alv,
-            ta1.selite pakkaus2,
-            ta2.selite pakkaus3
+            tt.osto_alv
             FROM tuote
             JOIN tuotteen_toimittajat AS tt ON (tt.yhtio = tuote.yhtio
               AND tuote.tuoteno   = tt.tuoteno
               AND tt.liitostunnus = '$laskurow[liitostunnus]')
-            LEFT JOIN tuotteen_avainsanat AS ta1 ON (ta1.yhtio = tuote.yhtio
-              AND ta1.tuoteno     = tuote.tuoteno
-              AND ta1.laji        = 'pakkauskoko2')
-            LEFT JOIN tuotteen_avainsanat AS ta2 ON (ta2.yhtio = tuote.yhtio
-              AND ta2.tuoteno     = tuote.tuoteno
-              AND ta2.laji        = 'pakkauskoko3')
             WHERE tuote.yhtio     = '{$kukarow["yhtio"]}'
             AND tuote.tuoteno     = '{$trow["tuoteno"]}'";
   $ttresult = pupe_query($query);
@@ -539,8 +543,12 @@ if ($kpl > 0 and $rivityyppi == 'O' and $yhtiorow['ostoera_pyoristys'] == 'K') {
     $jaannos = 0;
     $pakkauskoko = 0;
 
-    $ttrow["pakkaus3"] !="" ? $pakkausarray[] = $ttrow["pakkaus3"] : "";
-    $ttrow["pakkaus2"] !="" ? $pakkausarray[] = $ttrow["pakkaus2"] : "";
+    $_pakkaukset = tuotteen_toimittajat_pakkauskoot($ttrow['tt_tunnus'], 'desc');
+
+    foreach ($_pakkaukset as $_pak) {
+      $pakkausarray[] = $_pak[0];
+    }
+
     $pakkausarray[] = $ttrow["osto_era"]; // Oletus jos ei muuta löydy.
 
     foreach ($pakkausarray as $pak) {
@@ -1444,7 +1452,20 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   <br>";
           }
 
-          if ($yhtiorow["puute_jt_oletus"] == "O" or $varataan_saldoa == "EI" or ($zrow["myytavissa"] > 0 and (($rivityyppi == 'L' and $kukarow['kassamyyja'] == '' and $myy_erikoistoim_ok and $zrow['varastotyyppi'] == 'E' and $zrow['erikoistoimitus_alarajasumma'] > 0 and (float) $trow['myyntihinta'] >= (float) $zrow['erikoistoimitus_alarajasumma']) or $zrow["varastotyyppi"] == '' or $zrow["varastotyyppi"] == 'V' or (is_array($varasto) and in_array($zrow["varasto"], $varasto) and $laskurow["varasto"] == 0) or $laskurow["varasto"] == $zrow["varasto"]))) {
+          if ($yhtiorow["puute_jt_oletus"] == "O"
+            or $varataan_saldoa == "EI"
+            or ($zrow["myytavissa"] > 0
+              and (($rivityyppi == 'L'
+                  and $kukarow['kassamyyja'] == ''
+                  and $myy_erikoistoim_ok
+                  and $zrow['varastotyyppi'] == 'E'
+                  and $zrow['erikoistoimitus_alarajasumma'] > 0
+                  and (float) $trow['myyntihinta'] >= (float) $zrow['erikoistoimitus_alarajasumma'])
+                or $zrow["varastotyyppi"] == ''
+                or $zrow["varastotyyppi"] == 'V'
+                or (is_array($varasto) and in_array($zrow["varasto"], $varasto)
+                  and $laskurow["varasto"] == 0)
+                or $laskurow["varasto"] == $zrow["varasto"]))) {
 
             if ($lisaarivi_debug == 1) echo "Myydään $tuoteno paikalta $zrow[hyllyalue]-$zrow[hyllynro]-$zrow[hyllyvali]-$zrow[hyllytaso]: $zrow[myytavissa] kappaletta<br>";
 

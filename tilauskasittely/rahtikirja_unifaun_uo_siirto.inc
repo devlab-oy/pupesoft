@@ -36,7 +36,7 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
     $query = "SELECT unifaun_nimi
               FROM kirjoittimet
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus  = '{$reittietikettitulostin}'";
+              AND tunnus  = '{$kirjoitin_tunnus}'";
     $kirjoitin_res = pupe_query($query);
     $kirjoitin_row = mysql_fetch_assoc($kirjoitin_res);
 

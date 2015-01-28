@@ -87,6 +87,9 @@ if (isset($tee) and trim($tee) == 'aja') {
   // Heitet‰‰n eka rivi roskiin
   array_shift($rivit);
 
+  $_normal_positio  = strpos($filu, "normal");
+  $_comments        = substr($filu, $_normal_positio + 16, -4);
+
   foreach ($rivit as $line) {
     $fields = explode(";", $line);
 
@@ -203,7 +206,8 @@ if (isset($tee) and trim($tee) == 'aja') {
               AND toim_postitp  = '{$varasto["postitp"]}'
               AND toim_maa      = '{$varasto["maa"]}'
               AND varasto       = '{$varasto["tunnus"]}'
-              AND tilaustyyppi  = '{$tilaustyyppi}'";
+              AND tilaustyyppi  = '{$tilaustyyppi}'
+              AND comments      = '{$_comments}'";
     $result = pupe_query($query);
 
     // Ei lˆydy, tehd‰‰n uus tilaus
@@ -234,6 +238,8 @@ if (isset($tee) and trim($tee) == 'aja') {
         'myytil_myyja'            => $ostajarow['tunnus'],
         'tilaustyyppi'            => $tilaustyyppi,
         'myytil_viesti'           => t("Relex-ostotilaus"),
+        'myytil_comments'         => $_comments,
+        'uusi_ostotilaus'         => 'JOO',
         'ostotilauksen_kasittely' => "GEN", // t‰ll‰ erotellaan generoidut ja k‰sin tehdyt ostotilaukset
       );
 
@@ -260,7 +266,10 @@ if (isset($tee) and trim($tee) == 'aja') {
 
     lisaa_rivi($params);
 
-    echo "Lis‰t‰‰n tuote {$tuote["tuoteno"]} $quantity {$tuote["yksikko"]} tilaukselle {$laskurow["tunnus"]}.<br>";
+    if ($php_cli) $_linebreak = "\n";
+    else $_linebreak = "<br>";
+
+    echo "Lis‰t‰‰n tuote {$tuote["tuoteno"]} $quantity {$tuote["yksikko"]} tilaukselle {$laskurow["tunnus"]}.$_linebreak";
   }
 
   aseta_kukarow_kesken(0);

@@ -133,6 +133,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
         if ($koodi == "706"
           and $_maksupalvelu === FALSE
           and $_tilisiirto === FALSE
+          and $_luoton_nosto === FALSE
           and $_lainan_hoito === FALSE) {
           break;
         }

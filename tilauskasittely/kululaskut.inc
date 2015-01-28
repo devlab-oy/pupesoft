@@ -715,7 +715,7 @@ if ($silent == "") {
 
     if ($hakutapa == "N") $lisa = " and lasku.nimi like '%$haku%'";
     if ($hakutapa == "V") $lisa = " and lasku.viite = '$haku'";
-    
+
     if ($hakutapa == "L") {
       $lisa = " AND lasku.laskunro = '$haku'";
     }

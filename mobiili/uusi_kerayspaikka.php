@@ -47,8 +47,6 @@ else {
 $errors = array();
 if (!isset($tuotepaikka)) $tuotepaikka = '';
 
-$onko_varaston_hyllypaikat_kaytossa = onko_varaston_hyllypaikat_kaytossa();
-
 // Suuntalavan kanssa
 if (!empty($alusta_tunnus) and $yhtiorow['suuntalavat'] != "") {
   $res = suuntalavan_tuotteet(array($alusta_tunnus), $liitostunnus, "", "", "", $tilausrivi);
@@ -76,6 +74,9 @@ else {
             AND tilausrivi.yhtio    = '{$kukarow['yhtio']}'";
   $row = mysql_fetch_assoc(pupe_query($query));
 }
+
+$_varasto = kuuluukovarastoon($row['hyllyalue'], $row['hyllynro']);
+$onko_varaston_hyllypaikat_kaytossa = onko_varaston_hyllypaikat_kaytossa($_varasto);
 
 if (!isset($tullaan) or $tullaan != 'tuotteen_hyllypaikan_muutos') {
   // Tarkistetaan tuotteen saldo

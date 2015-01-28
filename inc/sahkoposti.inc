@@ -52,6 +52,12 @@ foreach ($liite as $key => $value) {
   );
 }
 
+if ($lisaliitteet) {
+  foreach ($lisaliitteet as $path => $nimi) {
+    $mail_liitteet[] = array("filename" => $path, "newfilename" => $nimi);
+  }
+}
+
 $content_body_ctype = "TEXT";
 
 if (preg_match("/<[^<]+>/", $content_body)) {

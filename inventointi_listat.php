@@ -116,7 +116,9 @@ echo "<td><select name='varasto'>";
 echo "<option value=''>", t("Valitse"), "</option>";
 
 while ($krow = mysql_fetch_assoc($kresult)) {
-  echo "<option value='{$krow['tunnus']}'>{$krow['nimitys']}</option>";
+  $sel = (!empty($oletusvarasto_chk) and $oletusvarasto_chk == $krow['tunnus']) ? "selected" : "";
+
+  echo "<option value='{$krow['tunnus']}' {$sel}>{$krow['nimitys']}</option>";
 }
 
 echo "</select></td></tr>";
@@ -268,6 +270,13 @@ if (mysql_num_rows($invaste_tuotepaikat_result) > 0) {
   echo "</td>";
   echo "</tr>";
 }
+
+echo "<tr>";
+echo "<th>", t("Tee vain Excel-raportti"), "</th>";
+echo "<td>";
+echo "<input type='checkbox' name='ei_inventointi' /><br />";
+echo "</td>";
+echo "</tr>";
 
 echo "<tr><th>".t("Listaa vain tuotteet joita ei ole inventoitu p‰iv‰m‰‰r‰n‰ tai sen j‰lkeen:")."</th>
   <td><input type='text' name='ippa' value='$ippa' size='3'>
@@ -780,7 +789,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
       $join .= $lisa_parametri;
     }
 
-    if ($top > 0) {
+    if ($top > 0 and empty($ei_inventointi)) {
       $where .= il_topmyydyt($top, $where, $kutsujoinlisa, $rajauslisa, $rajauslisatuote, $invaamatta, $extra);
     }
 

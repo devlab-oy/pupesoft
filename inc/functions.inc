@@ -16197,13 +16197,27 @@ if (!function_exists("hae_hyvityshinta")) {
 
     // Asiakas ei ole ostanut tätä tuotette -> palautuskielto
     if (count($tilausrivit) == 0) {
-      $palautus[] = array("tuoteno" => $tuoteno, "kpl" => $kpl, "hinta" => 0, "ale" => 0, "kommentti" => "Palautuskielto", "palautuskielto" => "X");
+      $palautus[] = array(
+        "tuoteno" => $tuoteno,
+        "kpl" => $kpl,
+        "hinta" => 0,
+        "ale" => 0,
+        "kommentti" => t("Palautuskielto"),
+        "palautuskielto" => "X"
+      );
       return $palautus;
     }
 
     // Jos löytyi vähemmän myyntejä kun asiakas on palauttamassa -> palautuskielto
     if ($laskuri < $kpl) {
-      $palautus[] = array("tuoteno" => $tuoteno, "kpl" => $kpl, "hinta" => 0, "ale" => 0, "kommentti" => "Palautuskielto", "palautuskielto" => "X");
+      $palautus[] = array(
+        "tuoteno" => $tuoteno,
+        "kpl" => $kpl,
+        "hinta" => 0,
+        "ale" => 0,
+        "kommentti" => t("Palautuskielto"),
+        "palautuskielto" => "X"
+      );
       // echo "** Palautuskielto: $kpl<br>";
     }
 
@@ -16283,7 +16297,14 @@ if (!function_exists("hae_hyvityshinta")) {
 
       // Jos ei löytynyt yhtään hyvityssaantöjä -> palautuskielto
       if (!isset($ale)) {
-        $palautus[] = array("tuoteno" => $tuoteno, "kpl" => $tilausrivi_arvo['kpl'], "hinta" => 0, "ale" => 0, "kommentti" => "Palautuskielto", "palautuskielto" => "X");
+        $palautus[] = array(
+          "tuoteno" => $tuoteno,
+          "kpl" => $tilausrivi_arvo['kpl'],
+          "hinta" => 0,
+          "ale" => 0,
+          "kommentti" => t("Palautuskielto"),
+          "palautuskielto" => "X"
+        );
       }
       else {
 
@@ -16292,7 +16313,14 @@ if (!function_exists("hae_hyvityshinta")) {
           $ale = 0;
         }
 
-        $palautus[] = array("tuoteno" => $tuoteno, "kpl" => $tilausrivi_arvo['kpl'], "hinta" => $tilausrivi_arvo['hinta'], "ale" => $ale, "kommentti" => $kommentti, "palautuskielto" => $palautuskielto);
+        $palautus[] = array(
+          "tuoteno" => $tuoteno,
+          "kpl" => $tilausrivi_arvo['kpl'],
+          "hinta" => $tilausrivi_arvo['hinta'],
+          "ale" => $ale,
+          "kommentti" => $kommentti,
+          "palautuskielto" => $palautuskielto
+        );
       }
     }
 
@@ -21168,7 +21196,7 @@ if (!function_exists('lisaa_tuotepaikka')) {
       $hyllyvali = 0;
       if ($hyllytaso == '') {
         $hyllytaso = 0;
-      }  
+      }
     }
     elseif ($hyllyalue == '' and empty($varasto)) {
       return false;
@@ -21261,13 +21289,16 @@ if (!function_exists('tarkista_varaston_hyllypaikka')) {
 }
 
 if (!function_exists('onko_varaston_hyllypaikat_kaytossa')) {
-  function onko_varaston_hyllypaikat_kaytossa() {
+  function onko_varaston_hyllypaikat_kaytossa($varasto = null) {
     global $kukarow;
+
+    $varastolisa = !empty($varasto) ? "and varasto = ".(int) $varasto : "";
 
     // Haetaan varastopaikka
     $query = "SELECT tunnus
               FROM varaston_hyllypaikat
               WHERE yhtio = '{$kukarow['yhtio']}'
+              {$varastolisa}
               LIMIT 1";
     $result = pupe_query($query);
     return (mysql_num_rows($result) == 0) ? false : true;
@@ -30051,6 +30082,31 @@ if (!function_exists('aseta_kukarow_kesken')) {
 
     return false;
   }
+}
+
+function ei_huomioida_tuotepaikkoja_avainsanoista($huomioidaanko = false, $taulu) {
+
+  global $kukarow, $yhtiorow;
+
+  $ei_huomioida_lisa = "";
+
+  if ($huomioidaanko) {
+
+    $chk_res = t_avainsana('INVASTEPAIKKA');
+
+    if (mysql_num_rows($chk_res) > 0) {
+
+      $ei_huomioida_lisa = array();
+
+      while ($chk_row = mysql_fetch_assoc($chk_res)) {
+        $ei_huomioida_lisa[] = $chk_row['selite'];
+      }
+
+      $ei_huomioida_lisa = " AND CONCAT_WS('-', {$taulu}.hyllyalue, {$taulu}.hyllynro, {$taulu}.hyllyvali, {$taulu}.hyllytaso) NOT IN ('".implode("','", $ei_huomioida_lisa)."') ";
+    }
+  }
+
+  return $ei_huomioida_lisa;
 }
 
 if (!function_exists("hae_saldo")) {

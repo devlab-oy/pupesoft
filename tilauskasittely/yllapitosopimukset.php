@@ -231,7 +231,7 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
 
           $kh2_query = "UPDATE tilausrivi
                         SET tilkpl = {$uusi_tilkpl},
-                        varattu = {$uusi_varattu}
+                        varattu      = {$uusi_varattu}
                         WHERE tunnus = {$tr_tunnus}";
 
           $kh2_result = pupe_query($kh2_query);

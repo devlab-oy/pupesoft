@@ -96,6 +96,19 @@ if ($tee == 'PERUSTA') {
           mysql_field_name($stresult, $i) == 'eankoodi') {
           $query .= mysql_field_name($stresult, $i)."='',";
         }
+        elseif (mysql_field_name($stresult, $i) == "ostoehdotus") {
+          if (!empty($ostoehdotus_avainsanoista)) {
+            if (count($ostoehdotus_avainsanoista) == 1 and $ostoehdotus_avainsanoista[0] == 'default') {
+              $query .= mysql_field_name($stresult, $i)."='E',";
+            }
+            else {
+              $query .= mysql_field_name($stresult, $i)."='',";
+            }
+          }
+          else {
+            $query .= mysql_field_name($stresult, $i)."='".$otsikkorivi[$i]."',";
+          }
+        }
         // ja kaikki muut paitsi tunnus sellaisenaan
         elseif (mysql_field_name($stresult, $i) != 'tunnus') {
           $query .= mysql_field_name($stresult, $i)."='".$otsikkorivi[$i]."',";
@@ -109,54 +122,56 @@ if ($tee == 'PERUSTA') {
       //  Tämä funktio tekee myös oikeustarkistukset!
       synkronoi($kukarow["yhtio"], "tuote", $tuote_id, "", "");
 
-      $query = "SELECT *
-                FROM tuotteen_toimittajat
-                WHERE yhtio = '$hakyhtio'
-                and tuoteno = '$tuoteno'";
-      $stresult = pupe_query($query);
+      if (!empty($kopioi_tt)) {
+        $query = "SELECT *
+                  FROM tuotteen_toimittajat
+                  WHERE yhtio = '$hakyhtio'
+                  and tuoteno = '$tuoteno'";
+        $stresult = pupe_query($query);
 
-      if (mysql_num_rows($stresult) != 0 ) {
-        while ($otsikkorivi = mysql_fetch_array($stresult)) {
+        if (mysql_num_rows($stresult) != 0 ) {
+          while ($otsikkorivi = mysql_fetch_array($stresult)) {
 
-          $query_fields = "";
+            $query_fields = "";
 
-          for ($i=0; $i<mysql_num_fields($stresult); $i++) {
+            for ($i=0; $i<mysql_num_fields($stresult); $i++) {
 
-            if (mysql_field_name($stresult, $i) == 'yhtio') {
-              $query_fields .= "yhtio='$kukarow[yhtio]',";
+              if (mysql_field_name($stresult, $i) == 'yhtio') {
+                $query_fields .= "yhtio='$kukarow[yhtio]',";
+              }
+              // tuotenumeroksi tietenkin uustuoteno
+              elseif (mysql_field_name($stresult, $i) == 'tuoteno') {
+                $query_fields .= "tuoteno='$uustuoteno',";
+              }
+              // laatijaksi klikkaaja
+              elseif (mysql_field_name($stresult, $i) == 'laatija') {
+                $query_fields .= "laatija='$kukarow[kuka]',";
+              }
+              // muuttajaksi klikkaaja
+              elseif (mysql_field_name($stresult, $i) == 'muuttaja') {
+                $query_fields .= "muuttaja='$kukarow[kuka]',";
+              }
+              // luontiaika
+              elseif (mysql_field_name($stresult, $i) == 'luontiaika' or mysql_field_name($stresult, $i) == 'muutospvm') {
+                $query_fields .= mysql_field_name($stresult, $i)."=now(),";
+              }
+              // ja kaikki muut paitsi tunnus sellaisenaan
+              elseif (mysql_field_name($stresult, $i) != 'tunnus') {
+                $query_fields .= mysql_field_name($stresult, $i)."='".$otsikkorivi[$i]."',";
+              }
             }
-            // tuotenumeroksi tietenkin uustuoteno
-            elseif (mysql_field_name($stresult, $i) == 'tuoteno') {
-              $query_fields .= "tuoteno='$uustuoteno',";
-            }
-            // laatijaksi klikkaaja
-            elseif (mysql_field_name($stresult, $i) == 'laatija') {
-              $query_fields .= "laatija='$kukarow[kuka]',";
-            }
-            // muuttajaksi klikkaaja
-            elseif (mysql_field_name($stresult, $i) == 'muuttaja') {
-              $query_fields .= "muuttaja='$kukarow[kuka]',";
-            }
-            // luontiaika
-            elseif (mysql_field_name($stresult, $i) == 'luontiaika' or mysql_field_name($stresult, $i) == 'muutospvm') {
-              $query_fields .= mysql_field_name($stresult, $i)."=now(),";
-            }
-            // ja kaikki muut paitsi tunnus sellaisenaan
-            elseif (mysql_field_name($stresult, $i) != 'tunnus') {
-              $query_fields .= mysql_field_name($stresult, $i)."='".$otsikkorivi[$i]."',";
-            }
+
+            // Tehdään vanhoista tuotteen_toimittajista 1:1 kopio...
+            $query  = "INSERT into tuotteen_toimittajat set ";
+            $query .= substr($query_fields, 0, -1);
+            $query .= " ON DUPLICATE KEY UPDATE ";
+            $query .= substr($query_fields, 0, -1);
+
+            $astresult = pupe_query($query);
+            $id2 = mysql_insert_id($GLOBALS["masterlink"]);
+
+            synkronoi($kukarow["yhtio"], "tuotteen_toimittajat", $id2, "", "");
           }
-
-          // Tehdään vanhoista tuotteen_toimittajista 1:1 kopio...
-          $query  = "INSERT into tuotteen_toimittajat set ";
-          $query .= substr($query_fields, 0, -1);
-          $query .= " ON DUPLICATE KEY UPDATE ";
-          $query .= substr($query_fields, 0, -1);
-
-          $astresult = pupe_query($query);
-          $id2 = mysql_insert_id($GLOBALS["masterlink"]);
-
-          synkronoi($kukarow["yhtio"], "tuotteen_toimittajat", $id2, "", "");
         }
       }
 
@@ -274,6 +289,7 @@ if ($tee == 'AVALITTU' and $tuoteno != '') {
   $formi  = 'performi';
   $kentta = 'uustuoteno';
 
+  echo "<form method='post' name='{$formi}' autocomplete='off'>";
   echo "<table>";
   echo "<tr><th>".t("Kopioitava tuote")."</th></tr>";
 
@@ -286,14 +302,39 @@ if ($tee == 'AVALITTU' and $tuoteno != '') {
 
   echo "<tr><td>$tu</td>";
 
-  echo "<tr><th>".t("Anna uusi tuotenumero")."<br>".t("joka perustetaan")."</th></tr>";
-  echo "<tr><form method='post' name='$formi' autocomplete='off'>";
+  $tresult_tt = t_avainsana("KOPIOITUOTE", "", "and selite = 'TT'");
+  $trow_tt = mysql_fetch_assoc($tresult_tt);
+  $chk = $trow_tt['selitetark'] == 'K' ? "checked='true'" : "";
+  $chk = mysql_num_rows($tresult_tt) != 0 ? $chk : "checked='true'";
+
+  echo "<tr>";
+  echo "<th>".t("Anna uusi tuotenumero")."<br>".t("joka perustetaan")."</th>";
+  echo "<td class='back'>";
+  echo "<input type='checkbox' name='kopioi_tt' {$chk} /> ",t("Kopioi tuotteen toimittajat");
+
+  echo "<br />";
+
+  $tresult_ostoehdotus = t_avainsana("KOPIOITUOTE", "", "and selite = 'OSTOEHDOTUS'");
+
+  if (mysql_num_rows($tresult_ostoehdotus) != 0) {
+    $trow_ostoehdotus = mysql_fetch_assoc($tresult_ostoehdotus);
+    $chk = $trow_ostoehdotus['selitetark'] == 'K' ? "checked='true'" : "";
+
+    echo "<input type='hidden' name='ostoehdotus_avainsanoista[]' value='default' />";
+    echo "<input type='checkbox' name='ostoehdotus_avainsanoista[]' value='K' {$chk} /> ";
+    echo t("Ehdotetaan ostoehdotusohjelmissa tilattavaksi");
+  }
+
+  echo "</td>";
+  echo "</tr>";
+
+  echo "<tr>";
   echo "<input type='hidden' name='tee' value='PERUSTA'>";
   echo "<input type='hidden' name='tuoteno' value='$tuoteno'>";
   echo "<td><input type='text' name='uustuoteno' size='22' maxlength='30' value=''></td>";
   echo "<td class='back'><input type='submit' value='".t("Kopioi")."'></td>";
   echo "<td class='back'><font class='error'>$varaosavirhe</font></td>";
-  echo "</form></tr></table>";
+  echo "</tr></table></form>";
 
   echo "<form action = 'kopioituote.php' method = 'post'>
     <input type='hidden' name='toim' value='$toim'>

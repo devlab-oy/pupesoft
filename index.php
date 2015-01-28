@@ -1,11 +1,21 @@
 <?php
 
-require "inc/parametrit.inc";
+if (@include "inc/parametrit.inc");
+elseif (@include "parametrit.inc");
+else exit;
 
 $go = $goso = '';
 
 if (isset($_REQUEST['go'])) {
+
   $go = $_REQUEST['go'];
+  
+  if (strpos($go, '?')) {
+    $go .= "&indexvas=1";
+  }
+  else {
+    $go .= "?indexvas=1";
+  }
 }
 
 if (isset($_REQUEST['goso'])) {
@@ -41,6 +51,10 @@ if (file_exists("pics/pupeicon.gif")) {
 }
 else {
   echo "<link rel='shortcut icon' href='{$palvelin2}devlab-shortcut.png'>\n";
+}
+
+if ($kukarow["extranet"] != "") {
+  echo $yhtiorow["web_seuranta"];
 }
 
 echo "</head>";

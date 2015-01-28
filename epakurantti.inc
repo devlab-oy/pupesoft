@@ -405,9 +405,7 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
 
   switch ($tee) {
   case "peru" :
-    $set_kehahin = "kehahin   = '{$uusi_keskihankintahinta}',
-              muutospvm = now(),
-              muuttaja  = '{$kukarow["kuka"]}', ";
+    $set_kehahin = "kehahin = '{$uusi_keskihankintahinta}', ";
 
   case "pois" :
     $pvm25  = "0000-00-00";
@@ -536,7 +534,9 @@ if ($tee == "paalle" or $tee == "25paalle" or $tee == "puolipaalle" or $tee == "
             epakurantti25pvm  =  {$pvm25},
             epakurantti50pvm  =  {$pvm50},
             epakurantti75pvm  =  {$pvm75},
-            epakurantti100pvm =  {$pvm100}
+            epakurantti100pvm =  {$pvm100},
+            muutospvm         = now(),
+            muuttaja          = '{$kukarow["kuka"]}'
             WHERE yhtio       = '{$kukarow["yhtio"]}'
             AND  tuoteno      = '{$tuoterow["tuoteno"]}'";
   $result = pupe_query($query);

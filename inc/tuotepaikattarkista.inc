@@ -33,11 +33,11 @@ if (!function_exists("tuotepaikattarkista")) {
     if (mysql_field_name($result, $i) == "hyllynro") {
       $tmp_hyllynro = $t[$i];
     }
-    
+
     if (mysql_field_name($result, $i) == "hyllyvali") {
       $tmp_hyllyvali = $t[$i];
     }
-    
+
     if (mysql_field_name($result, $i) == "hyllytaso") {
       $tmp_hyllytaso = $t[$i];
     }
@@ -46,14 +46,14 @@ if (!function_exists("tuotepaikattarkista")) {
       if (kuuluukovarastoon($tmp_hyllyalue, $tmp_hyllynro) == 0) {
         $virhe[$tmp_tuotenoind] = $virhe[$i] = t("VIRHE: Syötetty varastopaikka ei kuulu mihinkään varastoon");
       }
-    
+
       if ($yhtiorow['kerayserat'] == 'K') {
         $tmp_hyllyalue = strtoupper($tmp_hyllyalue);
         $tmp_hyllynro  = strtoupper($tmp_hyllynro);
         $tmp_hyllyvali = strtoupper($tmp_hyllyvali);
         $tmp_hyllytaso = strtoupper($tmp_hyllytaso);
 
-        if (!tarkista_varaston_hyllypaikka($tmp_hyllyalue, $tmp_hyllynro, $tmp_hyllyvali, $tmp_hyllytaso))  {
+        if (!tarkista_varaston_hyllypaikka($tmp_hyllyalue, $tmp_hyllynro, $tmp_hyllyvali, $tmp_hyllytaso)) {
           $virhe[$tmp_tuotenoind] = $virhe[$i] = t("VIRHE: Syötettyä varastopaikkaa ei ole olemassa");
         }
       }

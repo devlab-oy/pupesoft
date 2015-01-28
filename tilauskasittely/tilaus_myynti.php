@@ -1772,7 +1772,8 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
     require_once 'tulosta_tarjous.inc';
 
-    tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli,  $tee, '', $verolliset_verottomat_hinnat, $naytetaanko_rivihinta, $naytetaanko_tuoteno);
+    tulosta_tarjous($otunnus, $komento["Tarjous"], $kieli, $tee, '', $verolliset_verottomat_hinnat,
+                    $naytetaanko_rivihinta, $naytetaanko_tuoteno, $liita_tuotetiedot, $naytetaanko_yhteissummarivi);
 
     $query = "UPDATE lasku SET alatila='A' where yhtio='$kukarow[yhtio]' and alatila='' and tunnus='$kukarow[kesken]'";
     $result = pupe_query($query);
@@ -3862,11 +3863,11 @@ if ($tee == '') {
 
       if ($yhtiorow["extranet_poikkeava_toimitusosoite"] == "Y") {
         $toim_eroaa = ($laskurow["nimi"] != $laskurow["toim_nimi"] or
-                       $laskurow["nimitark"] != $laskurow["toim_nimitark"] or
-                       $laskurow["osoite"] != $laskurow["toim_osoite"] or
-                       $laskurow["postitp"] != $laskurow["toim_postitp"] or
-                       $laskurow["postino"] != $laskurow["toim_postino"] or
-                       $laskurow["maa"] != $laskurow["toim_maa"]);
+          $laskurow["nimitark"] != $laskurow["toim_nimitark"] or
+          $laskurow["osoite"] != $laskurow["toim_osoite"] or
+          $laskurow["postitp"] != $laskurow["toim_postitp"] or
+          $laskurow["postino"] != $laskurow["toim_postino"] or
+          $laskurow["maa"] != $laskurow["toim_maa"]);
 
         if ($toim_eroaa) {
           $poikkeava_toimitusosoite = "Y";
@@ -5607,16 +5608,15 @@ if ($tee == '') {
 
         $query_ale_select_lisa = generoi_alekentta_select('erikseen', 'M');
 
-        $cur_date = new DateTime();
-        $date_2yo = new DateTime();
-        $date_2yo->sub(new DateInterval('P2Y'));
+        $cur_date = date('Y-m-d');
+        $date_2yo = date("Y-m-d", mktime(0, 0, 0, date("n"), date("j"), date("Y")-2));
 
         // Jos kahden vuoden aikarajaus ylittyy, breikataan looppi
         while ($cur_date >= $date_2yo) {
 
-          $cur_date->sub(new DateInterval('P1M'));
-          $pre_date = new DateTime($cur_date->format('Y-m-d'));
-          $pre_date->add(new DateInterval('P1M'));
+          $pre_date = $cur_date;
+          $cur_date = explode('-', $cur_date);
+          $cur_date = date("Y-m-d", mktime(0, 0, 0, $cur_date[1]-1, $cur_date[2], $cur_date[0]));
 
           //haetaan viimeisin hinta millä asiakas on tuotetta ostanut
           $query = "SELECT tilausrivi.hinta,
@@ -5628,21 +5628,21 @@ if ($tee == '') {
                     lasku_ux.laskunro AS ux_laskunro
                     FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laskutettuaika)
                     JOIN lasku USE INDEX (PRIMARY) ON (
-                      lasku.yhtio = tilausrivi.yhtio AND
-                      lasku.tunnus = tilausrivi.otunnus AND
-                      lasku.liitostunnus = '{$laskurow['liitostunnus']}' AND
-                      lasku.tila = 'L' AND
-                      lasku.alatila = 'X'
+                      lasku.yhtio                  = tilausrivi.yhtio AND
+                      lasku.tunnus                 = tilausrivi.otunnus AND
+                      lasku.liitostunnus           = '{$laskurow['liitostunnus']}' AND
+                      lasku.tila                   = 'L' AND
+                      lasku.alatila                = 'X'
                     )
                     JOIN lasku AS lasku_ux ON (
-                      lasku_ux.yhtio = lasku.yhtio AND
-                      lasku_ux.tunnus = tilausrivi.uusiotunnus
+                      lasku_ux.yhtio               = lasku.yhtio AND
+                      lasku_ux.tunnus              = tilausrivi.uusiotunnus
                     )
                     WHERE tilausrivi.yhtio         = '{$kukarow['yhtio']}'
                     AND tilausrivi.tyyppi          = 'L'
                     AND tilausrivi.tuoteno         = '{$tuote['tuoteno']}'
-                    AND tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."'
-                    AND tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."'
+                    AND tilausrivi.laskutettuaika  <= '{$pre_date}'
+                    AND tilausrivi.laskutettuaika  >= '{$cur_date}'
                     AND tilausrivi.kpl            != 0
                     ORDER BY tilausrivi.tunnus DESC
                     LIMIT 1";
@@ -5652,7 +5652,7 @@ if ($tee == '') {
             $viimhinta = mysql_fetch_assoc($viimhintares);
 
             echo "<tr>";
-            echo "<th>",t("Viimeisin hinta"),"</th>";
+            echo "<th>", t("Viimeisin hinta"), "</th>";
             echo "<td align='right'>";
             echo hintapyoristys($viimhinta["hinta"]);
             echo " {$yhtiorow['valkoodi']}";
@@ -5661,8 +5661,8 @@ if ($tee == '') {
 
             for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
               echo "<tr>";
-              echo "<th>",t("Viimeisin alennus"),"{$alepostfix}</th>";
-              echo "<td align='right'>",$viimhinta["ale{$alepostfix}"]," %</td>";
+              echo "<th>", t("Viimeisin alennus"), "{$alepostfix}</th>";
+              echo "<td align='right'>", $viimhinta["ale{$alepostfix}"], " %</td>";
               echo "</tr>";
             }
 
@@ -5670,7 +5670,7 @@ if ($tee == '') {
             $_href_post = "&lopetus={$tilmyy_lopetus}//from=LASKUTATILAUS";
 
             echo "<tr>";
-            echo "<th>",t("Tilausnumero"),"</th>";
+            echo "<th>", t("Tilausnumero"), "</th>";
             echo "<td align='right'>";
             echo "<a href='{$_href_pre}&tunnus={$viimhinta['tunnus']}{$_href_post}'>";
             echo $viimhinta['otunnus'];
@@ -5679,7 +5679,7 @@ if ($tee == '') {
             echo "</tr>";
 
             echo "<tr>";
-            echo "<th>",t("Lasku"),"</th>";
+            echo "<th>", t("Lasku"), "</th>";
             echo "<td align='right'>";
             echo "<a href='{$_href_pre}&tunnus={$viimhinta['ux_tunnus']}{$_href_post}'>";
             echo $viimhinta['ux_laskunro'];
@@ -5688,8 +5688,8 @@ if ($tee == '') {
             echo "</tr>";
 
             echo "<tr>";
-            echo "<th>",t("Laskutettu"),"</th>";
-            echo "<td align='right'>",tv1dateconv($viimhinta["laskutettuaika"]),"</td>";
+            echo "<th>", t("Laskutettu"), "</th>";
+            echo "<td align='right'>", tv1dateconv($viimhinta["laskutettuaika"]), "</td>";
             echo "</tr>";
 
             break;
@@ -5856,16 +5856,15 @@ if ($tee == '') {
 
           $_rows_added = 0;
 
-          $cur_date = new DateTime();
-          $date_2yo = new DateTime();
-          $date_2yo->sub(new DateInterval('P2Y'));
+          $cur_date = date('Y-m-d');
+          $date_2yo = date("Y-m-d", mktime(0, 0, 0, date("n"), date("j"), date("Y")-2));
 
           // Jos kahden vuoden aikarajaus ylittyy, breikataan looppi
           while ($cur_date >= $date_2yo) {
 
-            $cur_date->sub(new DateInterval('P1M'));
-            $pre_date = new DateTime($cur_date->format('Y-m-d'));
-            $pre_date->add(new DateInterval('P1M'));
+            $pre_date = $cur_date;
+            $cur_date = explode('-', $cur_date);
+            $cur_date = date("Y-m-d", mktime(0, 0, 0, $cur_date[1]-1, $cur_date[2], $cur_date[0]));
 
             $query = "SELECT tilausrivi.*,
                       if (kuka.nimi IS NOT NULL AND kuka.nimi != '', kuka.nimi, tilausrivi.laatija) laatija
@@ -5881,8 +5880,8 @@ if ($tee == '') {
                       WHERE tilausrivi.yhtio        = '{$kukarow['yhtio']}'
                       AND tilausrivi.tyyppi         = 'L'
                       AND tilausrivi.tuoteno        = '{$tuote['tuoteno']}'
-                      AND tilausrivi.laskutettuaika <= '".$pre_date->format('Y-m-d')."'
-                      AND tilausrivi.laskutettuaika >= '".$cur_date->format('Y-m-d')."'
+                      AND tilausrivi.laskutettuaika <= '{$pre_date}'
+                      AND tilausrivi.laskutettuaika >= '{$cur_date}'
                       ORDER BY tilausrivi.laskutettuaika DESC, tilausrivi.tunnus DESC";
             $tapahtuma_chk_res = pupe_query($query);
 
@@ -7412,7 +7411,7 @@ if ($tee == '') {
 
             //valitaan näytetävä lippu varaston tai yhtiön maanperusteella
             if ($selpaikkamaa != '' and $yhtiorow['varastopaikan_lippu'] != '') {
-              echo "<img src='../pics/flag_icons/gif/".strtolower($selpaikkamaa).".gif'>";
+              echo "<img src='{$palvelin2}pics/flag_icons/gif/".strtolower($selpaikkamaa).".gif'>";
             }
 
             echo "<form method='post' name='paikat' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
@@ -7437,7 +7436,7 @@ if ($tee == '') {
           else {
 
             if ($varow['maa'] != '' and $yhtiorow['varastopaikan_lippu'] != '') {
-              echo "<td $class align='left' valign='top' nowrap><font class='error'><img src='../pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa) </font>";
+              echo "<td $class align='left' valign='top' nowrap><font class='error'><img src='{$palvelin2}pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa) </font>";
             }
             elseif ($varow['maa'] != '' and strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
               echo "<td $class align='left' valign='top' nowrap><font class='error'>".strtoupper($varow['maa'])." $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso] ($selpaikkamyytavissa) </font>";
@@ -7508,7 +7507,7 @@ if ($tee == '') {
         elseif ((($toim != "TARJOUS" and $toim != "EXTTARJOUS") or $yhtiorow['tarjouksen_tuotepaikat'] == "") and $kukarow['extranet'] == '') {
 
           if ($varow['maa'] != '' and $yhtiorow['varastopaikan_lippu'] != '') {
-            echo "<td $class align='left' valign='top'><font class='error'><img src='../pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font></td>";
+            echo "<td $class align='left' valign='top'><font class='error'><img src='{$palvelin2}pics/flag_icons/gif/".strtolower($varow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font></td>";
           }
           elseif ($varow['maa'] != '' and strtoupper($varow['maa']) != strtoupper($yhtiorow['maa'])) {
             echo "<td $class align='left' valign='top'><font class='error'>".strtoupper($varow['maa'])." $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</font></td>";
@@ -7516,13 +7515,11 @@ if ($tee == '') {
           else {
             echo "<td $class align='left' valign='top'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</td>";
           }
-
-          //echo "<td $class align='left' valign='top'><img src='../pics/flag_icons/gif/".strtolower($yhtiorow['maa']).".gif'> $row[hyllyalue] $row[hyllynro] $row[hyllyvali] $row[hyllytaso]</td>";
         }
         elseif ((($toim != "TARJOUS" and $toim != "EXTTARJOUS") or $yhtiorow['tarjouksen_tuotepaikat'] == "") and $kukarow['extranet'] != '' and $yhtiorow['varastopaikan_lippu'] != '') {
 
           if ($varow['maa'] != '' ) {
-            echo "<td $class align='left' valign='top'><img src='".$palvelin2."flag_icons/gif/".strtolower($varow['maa']).".gif'></td>";
+            echo "<td $class align='left' valign='top'><img src='{$palvelin2}pics/flag_icons/gif/".strtolower($varow['maa']).".gif'></td>";
           }
           else {
             echo "<td $class align='left' valign='top'></td>";
@@ -10051,8 +10048,14 @@ if ($tee == '') {
           $painike_txt = $otsikko.' '.t("valmis").' '.$laskelisa;
         }
 
+        $_takuu_tilaustyyppi = "";
+        if ($toim == 'REKLAMAATIO' and $laskurow['tilaustyyppi'] == 'U') {
+          $_takuu_tilaustyyppi = "<input type='hidden' name='tilaustyyppi' value = '$laskurow[tilaustyyppi]'>";
+        }
+
         echo "<form name='kaikkyht' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' $javalisa>
           <input type='hidden' name='toim' value='$toim'>
+          $_takuu_tilaustyyppi
           <input type='hidden' name='lopetus' value='$lopetus'>
           <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
           <input type='hidden' name='projektilla' value='$projektilla'>
@@ -10562,13 +10565,13 @@ function piirra_toimitusosoite($laskurow) {
       $sel = "selected";
     }
     elseif ($laskurow["toim_maa"] == "" and
-            strtoupper($maa["koodi"]) == strtoupper($yhtiorow["maa"])
+      strtoupper($maa["koodi"]) == strtoupper($yhtiorow["maa"])
     ) {
       $sel = "selected";
     }
 
     echo
-      "<option value='" . strtoupper($maa["koodi"]) . "' {$sel}>" . t($maa["nimi"]) . "</option>";
+    "<option value='" . strtoupper($maa["koodi"]) . "' {$sel}>" . t($maa["nimi"]) . "</option>";
   }
 
   echo "      </select>

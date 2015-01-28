@@ -194,6 +194,19 @@ if (!function_exists('tyomaarays_alku')) {
     $pdf->draw_text(540, 614, "/", $thispage, $norm);
     $pdf->draw_text(550, 614, date("Y"), $thispage, $norm);
 
+    if ($tyyppi == "Q") {
+      $pdf->draw_text(310, 600, t("Työmääräyksen hinnat sisältävät arvonlisäveron"), $thispage, $pieni);
+    }
+    elseif ($tyyppi == "A" or $tyyppi == "") {
+
+      if ($yhtiorow['alv_kasittely'] != '') {
+        $pdf->draw_text(310, 600, t("Työmääräyksen hinnat ovat nettohintoja joihin lisätään arvonlisävero."), $thispage, $pieni);
+      }
+      else {
+        $pdf->draw_text(310, 600, t("Työmääräyksen hinnat sisältävät arvonlisäveron"), $thispage, $pieni);
+      }
+    }
+
     $kala  = 575;
 
     //Täysin dynaaminen osio

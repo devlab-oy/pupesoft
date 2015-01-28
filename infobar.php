@@ -25,8 +25,9 @@ while ($info_row = mysql_fetch_assoc($info_res)) {
 
 if ($info_kpl > 0) {
 
-  echo "<div style='text-align:right; vertical-align:top; margin-right: 10px;'>";
+  echo "<div data-id='js_ext_til' style='text-align:right; vertical-align:top; margin-right: 60px;'>";
   echo "<font class='message ok'>";
   echo t("EXT-tilauksia %d kpl", "", $info_kpl);
   echo "</font></div>";
+  echo "<script>jQuery('div[data-id=\"js_ext_til\"]').css('margin-right', (25+jQuery('a[href^=\"/Ohjeet:\"]').outerWidth()) + 'px');</script>";
 }

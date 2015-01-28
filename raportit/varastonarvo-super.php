@@ -743,7 +743,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       fwrite($fh, pupesoft_csvstring(t("Hyllyalue"))."\t");
       fwrite($fh, pupesoft_csvstring(t("Hyllynro"))."\t");
       fwrite($fh, pupesoft_csvstring(t("Hyllyvali"))."\t");
-      fwrite($fh, pupesoft_csvstring(t("Hyllytaso")."\t"));
+      fwrite($fh, pupesoft_csvstring(t("Hyllytaso"))."\t");
     }
   }
 

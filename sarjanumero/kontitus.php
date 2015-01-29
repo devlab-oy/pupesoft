@@ -226,6 +226,9 @@ if (isset($submit)) {
           case 'C40HC':
             $info['maxkg'] = 27000;
             break;
+          case 'rekka':
+            $info['maxkg'] = 28000;
+            break;
           default:
             $info['maxkg'] = 22000;
           }

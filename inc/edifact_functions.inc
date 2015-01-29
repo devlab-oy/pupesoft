@@ -2094,7 +2094,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
         $tunnus = luo_myyntitilausotsikko('RIVISYOTTO', 106);
 
         $update_query = "UPDATE lasku SET
-                         asiakkaan_tilausnumero = '{$_tilausnro}'
+                         asiakkaan_tilausnumero = '{$rulla['tilausnro']}'
                          WHERE yhtio = '{$kukarow['yhtio']}'
                          AND tunnus = '{$tunnus}'";
         pupe_query($update_query);

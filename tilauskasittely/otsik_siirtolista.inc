@@ -34,6 +34,11 @@ if ($toim == 'SIIRTOLISTA' and isset($jatka) and $laaja_toim_kasittely and $vara
   unset($jatka);
 }
 
+if ($toim == 'SIIRTOLISTA' and isset($jatka) and $clearing == '') {
+  echo "<font class='error'>".t("Kohdevarasto pit‰‰ valita")."!!!</font><br><br>";
+  unset($jatka);
+}
+
 if ($tila == 'Muuta' and !isset($jatka)) {
 
   if ($toim == "SIIRTOLISTA") {

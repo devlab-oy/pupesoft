@@ -29,13 +29,14 @@ if ($toim == "VALMISTAVARASTOON" and isset($jatka) and $clearing != "" and $vara
 }
 
 $laaja_toim_kasittely = ($yhtiorow['toimipaikkakasittely'] == 'L');
+
 if ($toim == 'SIIRTOLISTA' and isset($jatka) and $laaja_toim_kasittely and $varasto == '') {
-  echo "<font class='error'>".t("L‰hdevarasto pit‰‰ valita")."!!!</font><br><br>";
+  echo "<br><font class='error'>".t("VIRHE: L‰hdevarasto on valittava")."!</font><br><br>";
   unset($jatka);
 }
 
 if ($toim == 'SIIRTOLISTA' and isset($jatka) and $clearing == '') {
-  echo "<font class='error'>".t("Kohdevarasto pit‰‰ valita")."!!!</font><br><br>";
+  echo "<br><font class='error'>".t("VIRHE: Kohdevarasto on valittava")."!</font><br><br>";
   unset($jatka);
 }
 

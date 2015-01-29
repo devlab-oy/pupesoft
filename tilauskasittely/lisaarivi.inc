@@ -53,6 +53,7 @@ if (!isset($rivitunnus)) $rivitunnus = 0;
 else $rivitunnus = (int) $rivitunnus;
 
 if ($laskurow["tila"] == 'G' and !isset($kohde_alue) and isset($tuoteno)) {
+
   //Laitetaan tuote oletusvaraston tuotepaikalle
   $tuotteen_oletuspaikka = hae_tuotteen_tuotepaikat($tuoteno, $laskurow['clearing']);
 

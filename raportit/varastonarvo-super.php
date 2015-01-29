@@ -1267,29 +1267,27 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           $xmyyres = pupe_query($query);
           $xmyyrow = mysql_fetch_assoc($xmyyres);
 
+          if (!empty($huomioi_varastosiirrot)) {
+            $_lajilisa = "AND tapahtuma.laji IN ('laskutus', 'siirto', 'kulutus')";
+          }
+          else {
+            $_lajilisa = "AND tapahtuma.laji IN ('laskutus', 'kulutus')";
+          }
+
           // Viimeisin laskutuspäivämäärä
+          // Viimeisin kulutuspäivämäärä
+          // Ja mahdollinen viimeisin siirtopäivämäärä
           $query = "SELECT ifnull(date_format(max(laadittu), '%Y%m%d'), 0) laskutettuaika
                     FROM tapahtuma use index (yhtio_tuote_laadittu)
                     WHERE tapahtuma.yhtio  = '$kukarow[yhtio]'
                     and tapahtuma.tuoteno  = '{$row['tuoteno']}'
                     and tapahtuma.laadittu > '{$xmyyrow['laskutettuaika']}'
                     $varastorajausjoini
-                    and tapahtuma.laji     = 'laskutus'";
+                    {$_lajilisa}";
           $xmyyres = pupe_query($query);
           $xmyypvmrow = mysql_fetch_assoc($xmyyres);
 
-          // Viimeisin kulutuspäivämäärä
-          $query = "SELECT ifnull(date_format(max(laadittu), '%Y%m%d'), 0) kulutettuaika
-                    FROM tapahtuma use index (yhtio_tuote_laadittu)
-                    WHERE tapahtuma.yhtio  = '$kukarow[yhtio]'
-                    and tapahtuma.tuoteno  = '{$row['tuoteno']}'
-                    and tapahtuma.laadittu > '{$xmyyrow['laskutettuaika']}'
-                    $varastorajausjoini
-                    and tapahtuma.laji     = 'kulutus'";
-          $xmyyres = pupe_query($query);
-          $xkulpvmrow = mysql_fetch_assoc($xmyyres);
-
-          $vikamykupaiva = max($xmyyrow['laskutettuaika'], $xmyypvmrow['laskutettuaika'], $xkulpvmrow['kulutettuaika']);
+          $vikamykupaiva = max($xmyyrow['laskutettuaika'], $xmyypvmrow['laskutettuaika']);
 
           if ($vikamykupaiva > 0) {
             $vikamykupaiva = substr($vikamykupaiva, 0, 4)."-".substr($vikamykupaiva, 4, 2)."-".substr($vikamykupaiva, 6, 2);
@@ -1456,23 +1454,33 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
       if (isset($valitut_varastot_rajaus) and $valitut_varastot_rajaus != "") {
 
-        if (!empty($huomioi_varastosiirrot)) {
-          $_lajilisa = "AND tapahtuma.laji IN ('tulo','siirto')";
-        }
-        else {
-          $_lajilisa = "AND tapahtuma.laji = 'tulo'";
-        }
-
         $query_a = "SELECT IFNULL(MAX(laadittu), '0000-00-00') vihapvm
                     FROM tapahtuma USE INDEX (yhtio_tuote_laadittu)
                     WHERE tapahtuma.yhtio  = '{$kukarow['yhtio']}'
                     AND tapahtuma.tuoteno  = '{$row['tuoteno']}'
                     AND tapahtuma.laadittu >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
                     {$varasto_tapahtuma}
-                    {$_lajilisa}";
+                    AND tapahtuma.laji = 'tulo'";
         $result_a = pupe_query($query_a);
         $resultti_a = mysql_fetch_assoc($result_a);
         $row['vihapvm'] = $resultti_a['vihapvm'];
+      }
+
+      # Huomioidaanko varastosiirrot viimeisimpänä tulona
+      if (!empty($huomioi_varastosiirrot)) {
+        $query_a = "SELECT IFNULL(MAX(laadittu), '0000-00-00') vihapvm
+                    FROM tapahtuma USE INDEX (yhtio_tuote_laadittu)
+                    WHERE tapahtuma.yhtio  = '{$kukarow['yhtio']}'
+                    AND tapahtuma.tuoteno  = '{$row['tuoteno']}'
+                    AND tapahtuma.laadittu >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
+                    {$varasto_tapahtuma}
+                    AND tapahtuma.laji = 'siirto'";
+        $result_a = pupe_query($query_a);
+        $resultti_a = mysql_fetch_assoc($result_a);
+
+        if ($resultti_a['vihapv'] > $row['vihapvm']) {
+          $row['vihapvm'] = $resultti_a['vihapvm'];
+        }
       }
 
       if ($variaatiosummaus == "") {

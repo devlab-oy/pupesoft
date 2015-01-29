@@ -381,45 +381,46 @@ $alkupera_hinta = $hinta;
 $alkupera_netto = $netto;
 $alkupera_alv   = $alv;
 
-$saldoyhteensa       = 0;                // tähän summaillaan saldoa yhteensä
-$lapsiyhteensa       = 0;
-$korvaavan_isaa_myyty   = 0;
-$perheid_lisaarivi     = 0;
-$lop           = "";
-$tuoteperhe         = array();            // Tuoteperheiden lapset menevät tänne
-$kaikkituotteet       = array(strtoupper($tuoteno)); // tähän arrayseen lisätään kaikki tuotteet ketjusta
-$isa_array          = array();
-$var           = strtoupper($var);        // varri isoks
-$netto           = strtoupper($netto);        // netto isoks
-$myyntierahuomatus      = FALSE;
-$ostoerahuomatus      = FALSE;
-$myy_erikoistoim_ok     = TRUE;
-$org_kpl         = "";
+$saldoyhteensa           = 0; // tähän summaillaan saldoa yhteensä
+$lapsiyhteensa           = 0;
+$korvaavan_isaa_myyty    = 0;
+$perheid_lisaarivi       = 0;
+$lop                     = "";
+$tuoteperhe              = array(); // Tuoteperheiden lapset menevät tänne
+$kaikkituotteet          = array(strtoupper($tuoteno)); // tähän arrayseen lisätään kaikki tuotteet ketjusta
+$isa_array               = array();
+$var                     = strtoupper($var); // varri isoks
+$netto                   = strtoupper($netto); // netto isoks
+$myyntierahuomatus       = FALSE;
+$ostoerahuomatus         = FALSE;
+$myy_erikoistoim_ok      = TRUE;
+$org_kpl                 = "";
 $suoratoimitus_splittaus = FALSE;
-$tlisatied_lisa       = "";
+$paivita_myyntitilaus    = FALSE;
+$tlisatied_lisa          = "";
 
-// näihin arraysiin tulee sitten myytävissä olevat tuotteet, kappaleet ja varastopaikat
-$myy_tuoteno   = array();
-$myy_kpl     = array();
-$myy_hyllyalue   = array();
-$myy_hyllynro   = array();
-$myy_hyllytaso   = array();
-$myy_hyllyvali   = array();
-$myy_varasto   = array();
+// Näihin arraysiin tulee sitten myytävissä olevat tuotteet, kappaleet ja varastopaikat
+$myy_tuoteno         = array();
+$myy_kpl             = array();
+$myy_hyllyalue       = array();
+$myy_hyllynro        = array();
+$myy_hyllytaso       = array();
+$myy_hyllyvali       = array();
+$myy_varasto         = array();
 $myy_erikoistoimitus = array();
-$myy_kpl_myyty   = array();
-$myy_hintakerr   = array();
-$myy_alekerroi   = array();
-$myy_era     = array();
-$myy_tyyppi    = array();
-$myy_lapsi_ein   = array();
-$myy_ohita_kerays = array();
-$lisatyt_rivit1 = array();
-$lisatyt_rivit2 = array();
-$korkieltokommi = array();
-$korlisakommi   = array();
-$myyntierahuom  = array();
-$ostoerahuom  = array();
+$myy_kpl_myyty       = array();
+$myy_hintakerr       = array();
+$myy_alekerroi       = array();
+$myy_era             = array();
+$myy_tyyppi          = array();
+$myy_lapsi_ein       = array();
+$myy_ohita_kerays    = array();
+$lisatyt_rivit1      = array();
+$lisatyt_rivit2      = array();
+$korkieltokommi      = array();
+$korlisakommi        = array();
+$myyntierahuom       = array();
+$ostoerahuom         = array();
 
 if ($laskurow['tila'] == 'O' or $laskurow['tila'] == 'K') {
   $rivityyppi = 'O';  // Ostotilausrivi
@@ -2251,17 +2252,17 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     $var = "";
   }
 
-  $puu_tuoteno   = array();
+  $puu_tuoteno = array();
   $puu_kpl     = array();
-  $puu_hintake  = array();
-  $puu_alekerr  = array();
+  $puu_hintake = array();
+  $puu_alekerr = array();
   $puu_ein     = array();
-  $puu_ohiker    = array();
-  $puu_var    = array();
+  $puu_ohiker  = array();
+  $puu_var     = array();
 
   if ($rivityyppi == 'O' and $rivitunnus > 0 and isset($suoratoimitus_rivitun) and $suoratoimitus_rivitun > 0) {
     // Kappalemäärää ei voida lisätä
-    if ($yhtiorow["maarien_muuttaminen_saapuminen"] != "K" and
+    if ($yhtiorow["suoratoim_lisamyynti_osto"] != "K" and
         $toimittamatta >= $suoratoimitus_rivikpl
     ) {
       $toimittamatta = $suoratoimitus_rivikpl;

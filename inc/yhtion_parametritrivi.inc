@@ -4189,15 +4189,15 @@ if ($fieldname == 'myyntihinta_paivitys_saapuminen') {
   $jatko = 0;
 }
 
-if ($fieldname == 'maarien_muuttaminen_saapuminen') {
+if ($fieldname == 'suoratoim_lisamyynti_osto') {
 
   $ulos = "<td><select name='{$nimi}' " . js_alasvetoMaxWidth($nimi, 400) . ">";
 
   $sel = $trow[$i] == 'K' ? 'selected' : '';
 
-  $ulos .= "<option value=''>" . t("Tilausrivin m‰‰ri‰ ei voi lis‰t‰ saapumisella") . "</option>";
+  $ulos .= "<option value=''>" . t("Suoratoimitusmyyntirivin m‰‰r‰‰ ei voi lis‰t‰ ostopuolella") . "</option>";
   $ulos .= "<option value='K' {$sel}>" .
-           t("Tilausrivin m‰‰ri‰ voi lis‰t‰ saapumisella, joka on linkitetty myyntitilaukseen") .
+           t("Suoratoimitusmyyntirivin m‰‰r‰‰ voi lis‰t‰ ostopuolella") .
            "</option>";
   $ulos .= "</select></td>";
 

@@ -2311,6 +2311,7 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
   $query = "SELECT tilausrivi.tunnus,
             ss.massa,
             trlt.konttinumero,
+            trlt.juoksu,
             trlt.sinettinumero,
             trlt.kontin_taarapaino,
             trlt.kontin_isokoodi,
@@ -2362,7 +2363,7 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
       $taara = $rulla['kontin_taarapaino'];
       $mrn = $rulla['kontin_mrn'];
 
-      $pakkalista[] = "UIB: " . $rulla['sarjanumero'] . " - " . (INT) $rulla['massa'] . " kg - " .$rulla['asiakkaan_tilausnumero'] . "\n";
+      $pakkalista[] = "UIB: " . $rulla['sarjanumero'] . " - " . (INT) $rulla['massa'] . " kg - " .$rulla['asiakkaan_tilausnumero'] . " - Rullanumero: {$rulla['juoksu']}\n";
 
       //$pakkalista .= "UIB: " . $rulla['sarjanumero'] . " - " . (INT) $rulla['massa'] . " kg - " .$rulla['asiakkaan_tilausnumero'] . "\n";
     }

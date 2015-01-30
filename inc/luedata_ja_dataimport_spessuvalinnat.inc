@@ -65,7 +65,7 @@ case "tuotepaikat":
   if ($yhtiorow['toimipaikkakasittely'] == "L") {
     $_toimipaikat = hae_toimipaikat();
 
-    echo "<tr><th>".t("Valitse toimipaikka").":</th>";
+    echo "<tr><th>".t("Mink‰ toimipaikan k‰ytt‰j‰n‰ tuotepaikat k‰sitell‰‰n").":</th>";
     echo "<td><select name='toimipaikkavalinta'>";
     echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
 

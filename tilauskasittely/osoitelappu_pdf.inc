@@ -433,7 +433,7 @@ for ($tulostuskpl = 1; $tulostuskpl <= $oslappkpl; $tulostuskpl++) {
     $pdf->draw_text(mm_pt(75), mm_pt(112), "Toimitustapa:",              $firstpage, $otsik);
   }
   else {
-    $pdf->draw_text(mm_pt(38),  mm_pt(112), substr($asiakasrow['puhelin'], 0, 15),    $firstpage, $kirj);
+    $pdf->draw_text(mm_pt(38),  mm_pt(112), substr($laskurow['toim_puh'], 0, 15),    $firstpage, $kirj);
     $pdf->draw_text(mm_pt(75), mm_pt(112), "Toimitustapa:",        $firstpage, $otsik);
     $pdf->draw_text(mm_pt(97), mm_pt(112), pdf_substr($laskurow["toimitustapa"], mm_pt(65), $pdf, $kirj),  $firstpage, $kirj);
   }

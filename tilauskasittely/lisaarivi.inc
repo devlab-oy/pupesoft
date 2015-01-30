@@ -53,6 +53,7 @@ if (!isset($rivitunnus)) $rivitunnus = 0;
 else $rivitunnus = (int) $rivitunnus;
 
 if ($laskurow["tila"] == 'G' and !isset($kohde_alue) and isset($tuoteno)) {
+
   //Laitetaan tuote oletusvaraston tuotepaikalle
   $tuotteen_oletuspaikka = hae_tuotteen_tuotepaikat($tuoteno, $laskurow['clearing']);
 
@@ -381,45 +382,46 @@ $alkupera_hinta = $hinta;
 $alkupera_netto = $netto;
 $alkupera_alv   = $alv;
 
-$saldoyhteensa       = 0;                // tähän summaillaan saldoa yhteensä
-$lapsiyhteensa       = 0;
-$korvaavan_isaa_myyty   = 0;
-$perheid_lisaarivi     = 0;
-$lop           = "";
-$tuoteperhe         = array();            // Tuoteperheiden lapset menevät tänne
-$kaikkituotteet       = array(strtoupper($tuoteno)); // tähän arrayseen lisätään kaikki tuotteet ketjusta
-$isa_array          = array();
-$var           = strtoupper($var);        // varri isoks
-$netto           = strtoupper($netto);        // netto isoks
-$myyntierahuomatus      = FALSE;
-$ostoerahuomatus      = FALSE;
-$myy_erikoistoim_ok     = TRUE;
-$org_kpl         = "";
+$saldoyhteensa           = 0; // tähän summaillaan saldoa yhteensä
+$lapsiyhteensa           = 0;
+$korvaavan_isaa_myyty    = 0;
+$perheid_lisaarivi       = 0;
+$lop                     = "";
+$tuoteperhe              = array(); // Tuoteperheiden lapset menevät tänne
+$kaikkituotteet          = array(strtoupper($tuoteno)); // tähän arrayseen lisätään kaikki tuotteet ketjusta
+$isa_array               = array();
+$var                     = strtoupper($var); // varri isoks
+$netto                   = strtoupper($netto); // netto isoks
+$myyntierahuomatus       = FALSE;
+$ostoerahuomatus         = FALSE;
+$myy_erikoistoim_ok      = TRUE;
+$org_kpl                 = "";
 $suoratoimitus_splittaus = FALSE;
-$tlisatied_lisa       = "";
+$paivita_myyntitilaus    = FALSE;
+$tlisatied_lisa          = "";
 
-// näihin arraysiin tulee sitten myytävissä olevat tuotteet, kappaleet ja varastopaikat
-$myy_tuoteno   = array();
-$myy_kpl     = array();
-$myy_hyllyalue   = array();
-$myy_hyllynro   = array();
-$myy_hyllytaso   = array();
-$myy_hyllyvali   = array();
-$myy_varasto   = array();
+// Näihin arraysiin tulee sitten myytävissä olevat tuotteet, kappaleet ja varastopaikat
+$myy_tuoteno         = array();
+$myy_kpl             = array();
+$myy_hyllyalue       = array();
+$myy_hyllynro        = array();
+$myy_hyllytaso       = array();
+$myy_hyllyvali       = array();
+$myy_varasto         = array();
 $myy_erikoistoimitus = array();
-$myy_kpl_myyty   = array();
-$myy_hintakerr   = array();
-$myy_alekerroi   = array();
-$myy_era     = array();
-$myy_tyyppi    = array();
-$myy_lapsi_ein   = array();
-$myy_ohita_kerays = array();
-$lisatyt_rivit1 = array();
-$lisatyt_rivit2 = array();
-$korkieltokommi = array();
-$korlisakommi   = array();
-$myyntierahuom  = array();
-$ostoerahuom  = array();
+$myy_kpl_myyty       = array();
+$myy_hintakerr       = array();
+$myy_alekerroi       = array();
+$myy_era             = array();
+$myy_tyyppi          = array();
+$myy_lapsi_ein       = array();
+$myy_ohita_kerays    = array();
+$lisatyt_rivit1      = array();
+$lisatyt_rivit2      = array();
+$korkieltokommi      = array();
+$korlisakommi        = array();
+$myyntierahuom       = array();
+$ostoerahuom         = array();
 
 if ($laskurow['tila'] == 'O' or $laskurow['tila'] == 'K') {
   $rivityyppi = 'O';  // Ostotilausrivi
@@ -2251,24 +2253,29 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     $var = "";
   }
 
-  $puu_tuoteno   = array();
+  $puu_tuoteno = array();
   $puu_kpl     = array();
-  $puu_hintake  = array();
-  $puu_alekerr  = array();
+  $puu_hintake = array();
+  $puu_alekerr = array();
   $puu_ein     = array();
-  $puu_ohiker    = array();
-  $puu_var    = array();
+  $puu_ohiker  = array();
+  $puu_var     = array();
 
   if ($rivityyppi == 'O' and $rivitunnus > 0 and isset($suoratoimitus_rivitun) and $suoratoimitus_rivitun > 0) {
     // Kappalemäärää ei voida lisätä
-    if ($toimittamatta >= $suoratoimitus_rivikpl) {
+    if ($yhtiorow["suoratoim_lisamyynti_osto"] != "K" and
+        $toimittamatta >= $suoratoimitus_rivikpl
+    ) {
       $toimittamatta = $suoratoimitus_rivikpl;
     }
-    else {
+    elseif ($toimittamatta < $suoratoimitus_rivikpl) {
       // Pienenntään suoratoimitusostorivin määrää, eli joudumme splittaamaan myyntirivin samassa suhteessa
       $suoratoimitus_splittaus = TRUE;
       // Pakotetaan loput omalle riville
       $var = "LOJ#!¡!#$suoratoimitus_rivikpl";
+    }
+    else {
+      $paivita_myyntitilaus = true;
     }
   }
 
@@ -3268,7 +3275,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
     $result = pupe_query($query);
     $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
-    if ($suoratoimitus_splittaus and $rivitunnus == $lisatty_tun) {
+    if (($suoratoimitus_splittaus or $paivita_myyntitilaus) and $rivitunnus == $lisatty_tun) {
       // Päivitetään suoratoimitus-myyntitilausrivin määrät
       $query = "UPDATE tilausrivi
                 JOIN tilausrivin_lisatiedot ON (tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus and tilausrivin_lisatiedot.tilausrivilinkki > 0 and tilausrivin_lisatiedot.tilausrivilinkki = '$lisatty_tun')
@@ -3279,7 +3286,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
                 and tilausrivi.tunnus  = '$suoratoimitus_rivitun'";
       $result = pupe_query($query);
     }
-    elseif ($suoratoimitus_splittaus and $rivitunnus != $lisatty_tun) {
+    elseif (($suoratoimitus_splittaus or $paivita_myyntitilaus) and $rivitunnus != $lisatty_tun) {
       // Splitataan suoratoimitus-myyntitilausrivi
       $query = "SELECT varattu, jt
                 FROM tilausrivi

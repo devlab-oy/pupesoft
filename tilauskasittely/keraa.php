@@ -597,6 +597,9 @@ if ($tee == 'P') {
           $result = pupe_query($query1);
           $tilrivirow = mysql_fetch_assoc($result);
 
+          // Alkuper‰inen perheid talteen, nollataan se myˆhemmin, jos lapsia saa j‰tt‰‰ ykis jt:ksi
+          $rperheid  = $tilrivirow['perheid'];
+          
           //Aloitellaan tilausrivi p‰ivitysquery‰
           $query = "UPDATE tilausrivi
                     SET yhtio = yhtio ";
@@ -699,6 +702,10 @@ if ($tee == 'P') {
                 $keratty    = "''";
                 $kerattyaik = "''";
                 $rkomm      = $tilrivirow["kommentti"];
+                
+                if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
+                   $rperheid = 0;
+                }
               }
             }
             elseif (($tilrivirow["var"] == 'J' or $tilrivirow["var"] == 'P') and $maara[$apui] == 0 and $poikkeama_kasittely[$apui] == "MI") {
@@ -761,6 +768,10 @@ if ($tee == 'P') {
                 $keratty  = "''";
                 $kerattyaik  = "''";
                 $rkomm     = $tilrivirow["kommentti"];
+                
+                if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
+                   $rperheid = 0;
+                }
               }
 
               // Etsit‰‰n sopiva otsikko jolle rivi laitetaan
@@ -828,6 +839,7 @@ if ($tee == 'P') {
                 // Laitetaan t‰lle otsikolle, voi menn‰ solmuun, mutta ei katoa ainakaan kokonaan
                 $rotunnus = $tilrivirow['otunnus'];
               }
+
             }
             elseif ($tilrivirow["var"] != 'J' and $tilrivirow["var"] != 'P') {
               // Jos t‰m‰ on normaali rivi
@@ -867,6 +879,10 @@ if ($tee == 'P') {
                   $keratty  = "''";
                   $kerattyaik  = "''";
                   $rkomm     = $tilrivirow['kommentti'];
+                 
+                  if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
+                     $rperheid = 0;
+                  }
                 }
               }
               else {
@@ -887,7 +903,6 @@ if ($tee == 'P') {
                 $rvar    = "P";
                 $keratty  = "'$who'";
                 $kerattyaik  = "now()";
-
                 $puurivires = t_avainsana("PUUTEKOMM");
 
                 if (mysql_num_rows($puurivires) > 0) {
@@ -919,6 +934,9 @@ if ($tee == 'P') {
                 $keratty  = "''";
                 $kerattyaik  = "''";
                 $rkomm     = $tilrivirow["kommentti"];
+                if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
+                   $rperheid = 0;
+                }
               }
               elseif ($poikkeama_kasittely[$apui] == "MI") {
 
@@ -938,6 +956,9 @@ if ($tee == 'P') {
                 $keratty  = "''";
                 $kerattyaik  = "''";
                 $rkomm     = $tilrivirow["kommentti"];
+                if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
+                   $rperheid = 0;
+                }
               }
               elseif ($poikkeama_kasittely[$apui] == "UT") {
                 // Riville tehd‰‰n osatoimitus ja loput siirret‰‰n ihan uudelle tilaukselle
@@ -1042,6 +1063,10 @@ if ($tee == 'P') {
                 $keratty  = "''";
                 $kerattyaik  = "''";
                 $rkomm     = $tilrivirow["kommentti"];
+
+                if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
+                   $rperheid = 0;
+                }
               }
             }
 
@@ -1085,7 +1110,7 @@ if ($tee == 'P') {
                          var             = '$rvar',
                          try             = '$tilrivirow[try]',
                          osasto          = '$tilrivirow[osasto]',
-                         perheid         = '$tilrivirow[perheid]',
+                         perheid         = '$rperheid',
                          perheid2        = '$tilrivirow[perheid2]',
                          nimitys         = '$tilrivirow[nimitys]',
                          jaksotettu      = '$tilrivirow[jaksotettu]'";

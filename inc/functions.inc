@@ -30088,29 +30088,31 @@ if (!function_exists('aseta_kukarow_kesken')) {
   }
 }
 
-function ei_huomioida_tuotepaikkoja_avainsanoista($huomioidaanko = false, $taulu) {
+if (!function_exists('ei_huomioida_tuotepaikkoja_avainsanoista')) {
+  function ei_huomioida_tuotepaikkoja_avainsanoista($huomioidaanko = false, $taulu) {
 
-  global $kukarow, $yhtiorow;
+    global $kukarow, $yhtiorow;
 
-  $ei_huomioida_lisa = "";
+    $ei_huomioida_lisa = "";
 
-  if ($huomioidaanko) {
+    if ($huomioidaanko) {
 
-    $chk_res = t_avainsana('INVASTEPAIKKA');
+      $chk_res = t_avainsana('INVASTEPAIKKA');
 
-    if (mysql_num_rows($chk_res) > 0) {
+      if (mysql_num_rows($chk_res) > 0) {
 
-      $ei_huomioida_lisa = array();
+        $ei_huomioida_lisa = array();
 
-      while ($chk_row = mysql_fetch_assoc($chk_res)) {
-        $ei_huomioida_lisa[] = $chk_row['selite'];
+        while ($chk_row = mysql_fetch_assoc($chk_res)) {
+          $ei_huomioida_lisa[] = $chk_row['selite'];
+        }
+
+        $ei_huomioida_lisa = " AND CONCAT_WS('-', {$taulu}.hyllyalue, {$taulu}.hyllynro, {$taulu}.hyllyvali, {$taulu}.hyllytaso) NOT IN ('".implode("','", $ei_huomioida_lisa)."') ";
       }
-
-      $ei_huomioida_lisa = " AND CONCAT_WS('-', {$taulu}.hyllyalue, {$taulu}.hyllynro, {$taulu}.hyllyvali, {$taulu}.hyllytaso) NOT IN ('".implode("','", $ei_huomioida_lisa)."') ";
     }
-  }
 
-  return $ei_huomioida_lisa;
+    return $ei_huomioida_lisa;
+  }
 }
 
 if (!function_exists("hae_saldo")) {

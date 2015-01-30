@@ -133,7 +133,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(18,  510, $postirow["yhtio_postino"]." ".$postirow["yhtio_postitp"], $firstpage, $norm);
 
   $pdf->draw_text(18,  490,  "Vastaanottaja Addressat To       puh.",    $firstpage, $pieni);
-  $pdf->draw_text(120, 490,  $rakir_row["puhelin"],             $firstpage, $pieni);
+  $pdf->draw_text(120, 490,  $rakir_row["toim_puh"],             $firstpage, $pieni);
   $pdf->draw_text(18,  480,  $rakir_row["toim_nimi"],             $firstpage, $iso);
   $pdf->draw_text(18,  470,  $rakir_row["toim_nimitark"],         $firstpage, $iso);
   $pdf->draw_text(18,  460,  $rakir_row["toim_osoite"],           $firstpage, $iso);
@@ -224,7 +224,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $pdf->draw_text(18,  188, $postirow["yhtio_postino"]." ".$postirow["yhtio_postitp"], $firstpage, $norm);
 
   $pdf->draw_text(18,  180,  "Vastaanottaja Addressat To       puh.",   $firstpage, $pieni);
-  $pdf->draw_text(120, 180,  $rakir_row["puhelin"],             $firstpage, $pieni);
+  $pdf->draw_text(120, 180,  $rakir_row["toim_puh"],             $firstpage, $pieni);
   $pdf->draw_text(18,  170,  $rakir_row["toim_nimi"],             $firstpage, $iso);
   $pdf->draw_text(18,  160,  $rakir_row["toim_nimitark"],         $firstpage, $iso);
   $pdf->draw_text(18,  150,  $rakir_row["toim_osoite"],           $firstpage, $iso);

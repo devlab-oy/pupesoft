@@ -241,7 +241,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
                {RC045;$rakir_row[toim_nimi]|}
 
          {PC045;0440,0370,05,05,I,00,B|}
-               {RC045;$rakir_row[puhelin]|}
+               {RC045;$rakir_row[toim_puh]|}
 
                {PC046;0060,0440,05,05,I,00,B|}
                {RC046;$rakir_row[toim_nimitark]|}
@@ -285,7 +285,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
                {RC064;$rakir_row[toim_nimi]|}
 
        {PC045;0440,1390,05,05,I,00,B|}
-               {RC045;$rakir_row[puhelin]|}
+               {RC045;$rakir_row[toim_puh]|}
 
                {PC065;0060,1465,05,05,I,00,B|}
                {RC065;$rakir_row[toim_nimitark]|}

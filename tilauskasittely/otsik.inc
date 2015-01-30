@@ -676,6 +676,7 @@ if ($tila == "" and !isset($jatka)) {
                 toim_postino        = '$assrow[toim_postino]',
                 toim_postitp        = '$assrow[toim_postitp]',
                 toim_maa            = '$assrow[toim_maa]',
+                toim_puh            = '$tpuh',
                 laskutusvkopv       = '$assrow[laskutusvkopv]',
                 chn                 = '$assrow[chn]',
                 verkkotunnus        = '$assrow[verkkotunnus]',
@@ -739,7 +740,13 @@ if ($tila == "" and !isset($jatka)) {
         $puhlisa = "";
       }
 
-      $squery = "SELECT asiakas.*, tilaus_viesti as viesti, myynti_kommentti1 as comments, $puhlisa asiakas.tunnus liitostunnus, 'O' kohdistettu, '' kohde, '' kauppatapahtuman_luonne
+      $squery = "SELECT asiakas.*, tilaus_viesti as viesti, myynti_kommentti1 as comments,
+                  $puhlisa
+                  asiakas.tunnus liitostunnus,
+                  'O' kohdistettu, '' kohde, '' kauppatapahtuman_luonne,
+                  if(asiakas.gsm != '', asiakas.gsm,
+                    if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
+                      if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
                  FROM asiakas
                  WHERE tunnus = '$asiakasid'";
 
@@ -792,7 +799,10 @@ if ($tila == "" and !isset($jatka)) {
     if (isset($toim_asiakasid) and $toim_asiakasid != 0) {
 
       $toim_asiakasid = mysql_real_escape_string($toim_asiakasid);
-      $toimasiakas_query = "SELECT *
+      $toimasiakas_query = "SELECT *,
+                            if(asiakas.gsm != '', asiakas.gsm,
+                              if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
+                                if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
                             FROM asiakas
                             WHERE yhtio = '{$kukarow["yhtio"]}'
                             AND tunnus  = '{$toim_asiakasid}'";
@@ -800,23 +810,24 @@ if ($tila == "" and !isset($jatka)) {
       $toimasiakas_row = mysql_fetch_assoc($toimasiakas_result);
 
       if (trim($toimasiakas_row["toim_nimi"]) != "") {
-        $srow["toim_nimi"]    = $toimasiakas_row["toim_nimi"];
-        $srow["toim_nimitark"]  = $toimasiakas_row["toim_nimitark"];
-        $srow["toim_osoite"]  = $toimasiakas_row["toim_osoite"];
+        $srow["toim_nimi"]     = $toimasiakas_row["toim_nimi"];
+        $srow["toim_nimitark"] = $toimasiakas_row["toim_nimitark"];
+        $srow["toim_osoite"]   = $toimasiakas_row["toim_osoite"];
         $srow["toim_postino"]  = $toimasiakas_row["toim_postino"];
         $srow["toim_postitp"]  = $toimasiakas_row["toim_postitp"];
-        $srow["toim_maa"]    = $toimasiakas_row["toim_maa"];
+        $srow["toim_maa"]      = $toimasiakas_row["toim_maa"];
       }
       else {
-        $srow["toim_nimi"]    = $toimasiakas_row["nimi"];
-        $srow["toim_nimitark"]  = $toimasiakas_row["nimitark"];
-        $srow["toim_osoite"]  = $toimasiakas_row["osoite"];
+        $srow["toim_nimi"]     = $toimasiakas_row["nimi"];
+        $srow["toim_nimitark"] = $toimasiakas_row["nimitark"];
+        $srow["toim_osoite"]   = $toimasiakas_row["osoite"];
         $srow["toim_postino"]  = $toimasiakas_row["postino"];
         $srow["toim_postitp"]  = $toimasiakas_row["postitp"];
-        $srow["toim_maa"]    = $toimasiakas_row["maa"];
+        $srow["toim_maa"]      = $toimasiakas_row["maa"];
       }
 
       $srow["toimitustapa"] = $toimasiakas_row["toimitustapa"];
+      $srow["toim_puh"]     = $toimasiakas_row["toim_puh"];
 
       if ($tilausnumero == 0) {
         echo "<font class='message'>".t("HUOM: Tilauksen oletustiedot haettu laskutusasiakkaan asiakasrekisteristä.")."</font><br>";
@@ -2623,9 +2634,9 @@ if ($tila == "" and !isset($jatka)) {
       if (!empty($toimitustapa['sallitut_maat']) and !stristr($toimitustapa['sallitut_maat'], $srow['toim_maa'])) {
         continue;
       }
-            
+
       echo "<div style='display: none; visibility: hidden;' id='merahti_toimitustapa_$toimitustapa[tunnus]'>$toimitustapa[merahti]</div>";
-    
+
       if (in_array($toimitustapa['extranet'], array('', 'M')) or $toimitustapa['selite'] == $srow['toimitustapa']) {
         $sel = "";
         if (empty($asiakas) and $toimitustapa["selite"] == $srow["toimitustapa"]) {
@@ -3319,7 +3330,7 @@ if ($tila == "" and !isset($jatka)) {
 
     echo "<tr><td>".t("Ohjausmerkki").":</td><td><input type='text' size='43' name='ohjausmerkki' value='$srow[ohjausmerkki]'></td><td>".t("tilausvahvistus")." + ".t("keräyslista")." + ".t("lähete")."</td></tr>";
 
-    echo "<tr><td>".t("Puhelin toimitukseen").":</td><td><input type='text' size='43' name='tpuh' value='$srow[toim_puh]'</td><td></td></tr>";
+    echo "<tr><td>".t("Puhelin toimitukseen").":</td><td><input type='text' size='43' name='tpuh' value='$srow[toim_puh]'</td><td>".t("rahtikirja")." + ".t("osoitelappu")."</td></tr>";
 
     if ($yhtiorow["vahvistusviesti_asiakkaalle"]) {
       echo "<tr><td>".t("Email toimitukseen").":</td><td><input type='text' size='43' name='temail' value='$srow[toim_email]'</td><td></td></tr>";

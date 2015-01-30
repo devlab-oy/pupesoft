@@ -29,8 +29,14 @@ if ($toim == "VALMISTAVARASTOON" and isset($jatka) and $clearing != "" and $vara
 }
 
 $laaja_toim_kasittely = ($yhtiorow['toimipaikkakasittely'] == 'L');
+
 if ($toim == 'SIIRTOLISTA' and isset($jatka) and $laaja_toim_kasittely and $varasto == '') {
-  echo "<font class='error'>".t("L‰hdevarasto pit‰‰ valita")."!!!</font><br><br>";
+  echo "<br><font class='error'>".t("VIRHE: L‰hdevarasto on valittava")."!</font><br><br>";
+  unset($jatka);
+}
+
+if ($toim == 'SIIRTOLISTA' and isset($jatka) and $clearing == '') {
+  echo "<br><font class='error'>".t("VIRHE: Kohdevarasto on valittava")."!</font><br><br>";
   unset($jatka);
 }
 
@@ -131,14 +137,14 @@ if ($tila == 'Muuta' and !isset($jatka)) {
       echo "<option value=''>".t("Valitse")."</option>";
     }
     else {
-      echo "<option value=''>".t("Siirr‰ kaikista")."</option>";
+      echo "<option value=0>".t("Siirr‰ kaikista")."</option>";
     }
   }
   elseif ($toim == "VALMISTAVARASTOON") {
-    echo "<option value=''>".t("K‰yt‰ kaikista")."</option>";
+    echo "<option value=0>".t("K‰yt‰ kaikista")."</option>";
   }
   elseif ($toim == "SIIRTOTYOMAARAYS") {
-    echo "<option value=''>".t("K‰yt‰ kaikista")."</option>";
+    echo "<option value=0>".t("K‰yt‰ kaikista")."</option>";
   }
 
   while ($vrow = mysql_fetch_array($vtresult)) {
@@ -148,7 +154,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
       $sel = 'selected';
     }
 
-    if ($varasto < 1 and $vrow['tunnus'] == $srow["varasto"]) {
+   if (!is_numeric($varasto) and $varasto == "" and $vrow['tunnus'] == $srow["varasto"]) {
       $sel = 'selected';
     }
 

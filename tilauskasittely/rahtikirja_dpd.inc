@@ -346,7 +346,7 @@ if ($kollityht > 0) {
     $asiakasrow = mysql_fetch_array($tempr);
 
     $pdf->draw_text(mm_pt(15),  mm_pt(112),  "Puh -Tel - Tel: ",    $firstpage, $otsik);
-    $pdf->draw_text(mm_pt(38),  mm_pt(112), $asiakasrow['puhelin'],    $firstpage, $kirj);
+    $pdf->draw_text(mm_pt(38),  mm_pt(112), $laskurow["toim_puh"],    $firstpage, $kirj);
 
     $pdf->draw_text(mm_pt(65), mm_pt(112), "Toimitustapa:",        $firstpage, $otsik);
     $pdf->draw_text(mm_pt(87), mm_pt(112), $laskurow["toimitustapa"],  $firstpage, $kirj);

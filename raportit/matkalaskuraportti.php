@@ -56,6 +56,7 @@ $request_params = array(
   "laskunro"        => $laskunro,
   "maksutieto"      => $maksutieto,
   "tapahtumapaiva"    => $tapahtumapaiva,
+  "paivamaaravali" => $paivamaaravali,
   "ppa"          => $ppa,
   "kka"          => $kka,
   "vva"          => $vva,
@@ -367,7 +368,19 @@ function generoi_select($request_params) {
       $select .= "sum(tilausrivi.kpl) as kpl, sum(tilausrivi.erikoisale) as ilmaiset_lounaat, avg(tilausrivi.hinta) as hinta, sum(tilausrivi.rivihinta) as rivihinta, ";
     }
     else {
-      $select .= "tilausrivi.kpl, tilausrivi.erikoisale as ilmaiset_lounaat, tilausrivi.hinta as hinta, tilausrivi.rivihinta as rivihinta, ";
+      if ($request_params["paivamaaravali"]) {
+        $pvm_vali_lisa =
+          ",tilausrivi.kerattyaika AS Alkupvm, tilausrivi.toimitettuaika AS Loppupvm";
+      }
+      else {
+        $pvm_vali_lisa = "";
+      }
+
+      $select .= "tilausrivi.kpl
+                  {$pvm_vali_lisa},
+                  tilausrivi.erikoisale AS ilmaiset_lounaat,
+                  tilausrivi.hinta AS hinta,
+                  tilausrivi.rivihinta AS rivihinta, ";
     }
   }
 
@@ -534,6 +547,7 @@ function echo_matkalaskuraportti_form($request_params) {
   if ($request_params['laskunro'] != '')            $laskunrochk           = "CHECKED";
   if ($request_params['maksutieto'] != '')          $maksutietochk        = "CHECKED";
   if ($request_params['tapahtumapaiva'] != '')        $tapahtumapaivachk      = "CHECKED";
+  if ($request_params['paivamaaravali'] != '')        $paivamaaravalichk      = "CHECKED";
 
   if ($request_params['ppl'] == '')              $request_params['ppl']    = $now[0];
   if ($request_params['kkl'] == '')              $request_params['kkl']    = $now[1];
@@ -700,6 +714,11 @@ function echo_matkalaskuraportti_form($request_params) {
       <th>".t("Näytä myös tapahtumapäivä")."</th>
       <td colspan='3'><input type='checkbox' name='tapahtumapaiva' {$tapahtumapaivachk}></td>
       <td class='back'>".t("(Toimii vain jos listaat matkalaskuittain, tai jos et valitse mitään listausta)")."</td>
+    </tr>";
+  echo "<tr>
+      <th>".t("Näytä myös alku ja loppupäivämäärät")."</th>
+      <td colspan='3'><input type='checkbox' name='paivamaaravali' {$paivamaaravalichk}></td>
+      <td class='back'>".t("(Toimii vain jos et valitse mitään listausta)")."</td>
     </tr>";
   echo "</table>";
 

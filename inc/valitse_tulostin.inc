@@ -366,8 +366,11 @@ foreach ($tulostimet as $tulostin) {
 
   echo "<tr><th>".t("Valitse")." '".t("$tulostin")."' ".t("tulostuspaikka")."</th>";
   echo "<td><select name='komento[$tulostin]'>";
-  echo "<option value=''>".t("Ei kirjoitinta")."</option>";
-  echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
+
+  if (empty($ei_inventointi)) {
+    echo "<option value=''>".t("Ei kirjoitinta")."</option>";
+    echo "<option value='PDF_RUUDULLE'>".t('PDF Ruudulle')."</option>";
+  }
 
   if ($tulostimet[0] == "Inventointi") {
     echo "<option value='excel'>".t('Excel-tiedosto')."</option>";
@@ -396,28 +399,30 @@ foreach ($tulostimet as $tulostin) {
     $rajaus = " and komento != 'edi' ";
   }
 
-  $querykieli = "SELECT *
-                 from kirjoittimet
-                 where yhtio='$kukarow[yhtio]'
-                 $rajaus
-                 ORDER BY kirjoitin";
-  $kires = pupe_query($querykieli);
+  if (empty($ei_inventointi)) {
+    $querykieli = "SELECT *
+                   from kirjoittimet
+                   where yhtio='$kukarow[yhtio]'
+                   $rajaus
+                   ORDER BY kirjoitin";
+    $kires = pupe_query($querykieli);
 
-  $seepra = false;
+    $seepra = false;
 
-  while ($kirow=mysql_fetch_array($kires)) {
+    while ($kirow=mysql_fetch_array($kires)) {
 
-    $sel = "";
-    if ($kirow["tunnus"] == $kukarow["kirjoitin"] and $valittu != "edi") {
-      $sel = "SELECTED";
+      $sel = "";
+      if ($kirow["tunnus"] == $kukarow["kirjoitin"] and $valittu != "edi") {
+        $sel = "SELECTED";
+      }
+      if ($kirow["komento"] == "edi" and $valittu == "edi") {
+        $sel = "SELECTED";
+      }
+
+      if ($kirow['merkisto'] != 0) $seepra = true;
+
+      echo "<option value='$kirow[komento]'$sel>$kirow[kirjoitin]</option>";
     }
-    if ($kirow["komento"] == "edi" and $valittu == "edi") {
-      $sel = "SELECTED";
-    }
-
-    if ($kirow['merkisto'] != 0) $seepra = true;
-
-    echo "<option value='$kirow[komento]'$sel>$kirow[kirjoitin]</option>";
   }
 
   echo "</select></td>";

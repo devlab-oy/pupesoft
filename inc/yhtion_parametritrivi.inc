@@ -4201,6 +4201,21 @@ if ($fieldname == 'myyntihinta_paivitys_saapuminen') {
   $jatko = 0;
 }
 
+if ($fieldname == 'suoratoim_lisamyynti_osto') {
+
+  $ulos = "<td><select name='{$nimi}' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel = $trow[$i] == 'K' ? 'selected' : '';
+
+  $ulos .= "<option value=''>" . t("Suoratoimitusmyyntirivin m‰‰r‰‰ ei voi lis‰t‰ ostopuolella") . "</option>";
+  $ulos .= "<option value='K' {$sel}>" .
+           t("Suoratoimitusmyyntirivin m‰‰r‰‰ voi lis‰t‰ ostopuolella") .
+           "</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == 'matkalaskun_tarkastus') {
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
 

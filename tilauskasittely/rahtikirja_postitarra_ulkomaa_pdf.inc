@@ -193,7 +193,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
 
   $pdf->draw_text(18,  485,  "Recipient (name and address) / Destinataire (nom et adresse)",    $firstpage, $pieni);
-  $pdf->draw_text(120, 485,  $rakir_row["puhelin"],             $firstpage, $pieni);
+  $pdf->draw_text(120, 485,  $rakir_row["toim_puh"],             $firstpage, $pieni);
   $pdf->draw_text(18,  475,  $rakir_row["toim_nimi"],             $firstpage, $iso);
   $pdf->draw_text(18,  465,  $rakir_row["toim_nimitark"],         $firstpage, $iso);
   $pdf->draw_text(18,  455,  $rakir_row["toim_osoite"],           $firstpage, $iso);
@@ -205,7 +205,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   $logoparam['scale'] = 0.12;
   $pdf->image_place($image, 418, 18, $firstpage, $logoparam);
 
-  $pdf->draw_text(35, 420,  $rakir_row["puhelin"],             $firstpage, $iso);
+  $pdf->draw_text(35, 420,  $rakir_row["toim_puh"],             $firstpage, $iso);
 
   $pdf->draw_text(115,  425,  "VAT No /",    $firstpage, $pieni);
   $pdf->draw_text(115,  420,  "No de T.V.A.",    $firstpage, $pieni);

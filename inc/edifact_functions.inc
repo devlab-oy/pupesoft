@@ -1321,7 +1321,7 @@ function kasittele_bookkaussanoma($edi_data) {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 0 AND $tyyppi != 5) {
-    return false;
+    //return false;
   }
 
   // katsotaan onko tilauksesta luotu jo myyntitilaus

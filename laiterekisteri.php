@@ -40,7 +40,7 @@ elseif ($toiminto == "LINKKAA" and isset($tilausrivin_tunnus) and isset($lisaa_l
   $query = "INSERT INTO laitteen_sopimukset
             SET sopimusrivin_tunnus = '{$tilausrivin_tunnus}',
             laitteen_tunnus = '{$lisaa_laite_sopimusriville}',
-            yhtio = '{$yhtiorow['yhtio']}'";
+            yhtio = '{$kukarow['yhtio']}'";
   pupe_query($query);
   $maara_paivitetty = true;
 }
@@ -220,7 +220,8 @@ if ($toiminto == "LINKKAA") {
   // Rajataan pois jo linkatut laitteet
   $kveri = "SELECT group_concat(DISTINCT laitteen_tunnus) sopimuksella
             FROM laitteen_sopimukset
-            WHERE sopimusrivin_tunnus = '{$tilausrivin_tunnus}'";
+            WHERE sopimusrivin_tunnus = '{$tilausrivin_tunnus}'
+              AND yhtio = '{$kukarow['yhtio']}'";
   $resu = pupe_query($kveri);
   $rivi = mysql_fetch_assoc($resu);
   if (!empty($rivi['sopimuksella'])) {

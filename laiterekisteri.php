@@ -30,7 +30,8 @@ if ($toiminto == "LINKKAA" and isset($tilausrivin_tunnus) and isset($poista_lait
   // Poistetaan laite sopimusrivilt‰
   $query = "DELETE FROM laitteen_sopimukset
             WHERE laitteen_tunnus   = '{$poista_laite_sopimusrivilta}'
-            AND sopimusrivin_tunnus = '{$tilausrivin_tunnus}'";
+            AND sopimusrivin_tunnus = '{$tilausrivin_tunnus}'
+            AND yhtio = '{$kukarow['yhtio']}'";
   pupe_query($query);
   $maara_paivitetty = true;
 }
@@ -38,7 +39,8 @@ elseif ($toiminto == "LINKKAA" and isset($tilausrivin_tunnus) and isset($lisaa_l
   // Lis‰t‰‰n laite sopimusriville
   $query = "INSERT INTO laitteen_sopimukset
             SET sopimusrivin_tunnus = '{$tilausrivin_tunnus}',
-            laitteen_tunnus = '{$lisaa_laite_sopimusriville}'";
+            laitteen_tunnus = '{$lisaa_laite_sopimusriville}',
+            yhtio = '{$kukarow['yhtio']}'";
   pupe_query($query);
   $maara_paivitetty = true;
 }
@@ -51,7 +53,7 @@ if ($maara_paivitetty and isset($tilausrivin_tunnus)) {
 if (isset($tallennetaan_muutokset) and isset($muokattava_laite) and $muokattava_laite > 0) {
   // Tallennetaan muutokset laitteen tietoihin
   $kveri = "UPDATE laite
-            SET kommentti = '{$kommentti}',
+            SET kommentti                      = '{$kommentti}',
             sla                                = '{$sla}',
             sd_sla                             = '{$sd_sla}',
             lcm_info                           = '{$lcm_info}',
@@ -61,7 +63,7 @@ if (isset($tallennetaan_muutokset) and isset($muokattava_laite) and $muokattava_
             valmistajan_sopimus_paattymispaiva = '{$vcloppuvv}-{$vcloppukk}-{$vcloppupp}',
             muutospvm                          = now(),
             muuttaja                           = '{$kukarow['kuka']}'
-            WHERE yhtio='{$kukarow['yhtio']}'
+            WHERE yhtio                        = '{$kukarow['yhtio']}'
             AND tunnus                         = '{$muokattava_laite}'";
   pupe_query($kveri);
   unset($toiminto);
@@ -76,7 +78,8 @@ elseif (isset($tallenna_uusi_laite) and isset($valitse_sarjanumero) and !empty($
   $query = "SELECT *
             FROM laite
             WHERE tuoteno = '{$uusilaite_tuotenumero}'
-            AND sarjanro  = '{$uusilaite_sarjanumero}'";
+            AND sarjanro  = '{$uusilaite_sarjanumero}'
+            AND yhtio     = '{$kukarow['yhtio']}'";
   $result = pupe_query($query);
   if (mysql_affected_rows() == 0) {
     // Lis‰t‰‰n uusi laite
@@ -94,7 +97,8 @@ elseif (isset($tallenna_uusi_laite) and isset($valitse_sarjanumero) and !empty($
               valmistajan_sopimusnumero          = '{$valmistajan_sopimusnumero}',
               valmistajan_sopimus_paattymispaiva = '{$vcloppuvv}-{$vcloppukk}-{$vcloppupp}',
               luontiaika                         = now(),
-              laatija                            = '{$kukarow['kuka']}'";
+              laatija                            = '{$kukarow['kuka']}',
+              yhtio                              = '{$kukarow['yhtio']}'";
     pupe_query($kveri);
     unset($toiminto);
   }
@@ -216,7 +220,8 @@ if ($toiminto == "LINKKAA") {
   // Rajataan pois jo linkatut laitteet
   $kveri = "SELECT group_concat(DISTINCT laitteen_tunnus) sopimuksella
             FROM laitteen_sopimukset
-            WHERE sopimusrivin_tunnus = '{$tilausrivin_tunnus}'";
+            WHERE sopimusrivin_tunnus = '{$tilausrivin_tunnus}'
+              AND yhtio = '{$kukarow['yhtio']}'";
   $resu = pupe_query($kveri);
   $rivi = mysql_fetch_assoc($resu);
   if (!empty($rivi['sopimuksella'])) {
@@ -396,7 +401,8 @@ else {
                 tilausrivin_lisatiedot.sopimus_loppuu
                 FROM tilausrivi
                 JOIN tilausrivin_lisatiedot ON tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-                WHERE tilausrivi.tunnus IN ({$rowi['sopimusrivin_tunnukset']})";
+                WHERE tilausrivi.tunnus IN ({$rowi['sopimusrivin_tunnukset']})
+                AND tilausrivi.yhtio = '{$kukarow['yhtio']}'";
       $ressi = pupe_query($kveri);
 
       $ed_sop_tun = '';

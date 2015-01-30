@@ -19,7 +19,7 @@ if (isset($_POST['piirtele_laiteluettelo'])) {
     // Tallennetaan myös selectilisa 
     $lisatuotenumerot .= "'".$avainsanarivi['selite']."',"; 
   }
-  
+
   $lisatuotenumerot = rtrim($lisatuotenumerot,',');
   $lisatuotenumerot = base64_encode($lisatuotenumerot);
 
@@ -94,12 +94,14 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
             WHERE lasku.tunnus = '{$tilausnumero}'
               AND lasku.yhtio = '{$kukarow['yhtio']}'";
   $laiteresult = pupe_query($query);
-                                           
+
+  $query_ale_lisa = generoi_alekentta('M');
+
   // Haetaan sopimuskohtaiset tiedot
   $query = "SELECT
             lasku.tunnus,
             tilausrivi.nimitys,
-            round(tilausrivi.hinta * tilausrivi.varattu * (1 - ale1 / 100) * (1 - ale2 / 100) * (1 - ale3 / 100), 2) rivihinta,
+            round(tilausrivi.hinta * (tilausrivi.varattu) * {$query_ale_lisa}, $yhtiorow[hintapyoristys]) rivihinta,
             lasku.asiakkaan_tilausnumero,
             lasku.alv,
             concat(lasku.toim_nimi,'\n',lasku.toim_osoite,'\n',lasku.toim_postino,' ',
@@ -163,9 +165,14 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
   $worksheet->write($excelrivi, $excelsarake++, t("Sarjanumero"), $format_bold);
   $worksheet->write($excelrivi, $excelsarake++, t("Service Desk SLA"), $format_bold);
 
+  // Poistetaan 'NAYTATYOT' valituista sarakkeista että saadaan oikeat sarakkeet laitekohtaisille
+  // riveille resetoimalla arrayn indeksit
+  $valikey = array_search('NAYTATYOT', $valitut_sarakkeet);  
+  unset($valitut_sarakkeet[$valikey]);
+  $valitut_sarakkeet = array_values($valitut_sarakkeet);
+
   // Piirretään sarakeotsikot valituille sarakkeille
   foreach ($valitut_sarakkeet as $key => $value) {
-    if ($value == 'NAYTATYOT') continue;
     $sarakeotsikkoquery = "SELECT selitetark 
                            FROM avainsana 
                            WHERE yhtio = '{$kukarow['yhtio']}'
@@ -203,12 +210,14 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
 
     $laiterow = mysql_fetch_assoc($laiteres);
 
+    $query_ale_lisa = generoi_alekentta('M');
+
     // Haetaan laitteen palvelut joiden hinnat ovat laitteiden lukumäärästä riippuvaisia
     // ja ne on valittu käyttöliittymästä
     $palveluquery = "SELECT
                      tuoteno,
                      nimitys,
-                     round(tilausrivi.hinta * (1 - ale1 / 100) * (1 - ale2 / 100) * (1 - ale3 / 100), 2) hinta
+                     round(tilausrivi.hinta * {$query_ale_lisa}, $yhtiorow[hintapyoristys]) hinta
                      FROM tilausrivi
                      JOIN laitteen_sopimukset ON tilausrivi.yhtio = laitteen_sopimukset.yhtio
                        AND tilausrivi.tunnus = laitteen_sopimukset.sopimusrivin_tunnus
@@ -230,7 +239,6 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
     $hinnat_jarjestyksessa = array();
     // Sortataan laiterivikohtaisten palveluiden hinnat
     while ($rivi = mysql_fetch_assoc($palveluresult)) {
-      if ($rivi['tuoteno'] == 'NAYTATYOT') continue;
       $oikea_sarake = array_search($rivi['tuoteno'], $valitut_sarakkeet);
       if ($oikea_sarake === false) continue;
       $hinnat_jarjestyksessa[$oikea_sarake] = hintapyoristys($rivi['hinta']);

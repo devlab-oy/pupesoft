@@ -164,6 +164,20 @@ if ($tee == "FILE") {
           continue;
         }
 
+        $_kerayserat = ($yhtiorow['kerayserat'] == 'K');
+        $hylp0 = $hylp[0];
+        $hylp1 = $hylp[1];
+        $hylp2 = $hylp[2];
+        $hylp3 = $hylp[3];
+
+        if ($_kerayserat and !tarkista_varaston_hyllypaikka($hylp0, $hylp1, $hylp2, $hylp3)) {
+          echo "<font class='error'>";
+          echo t("VIRHE: Varastopaikkaa ei ole olemassa")."! ";
+          echo t("Rivi %d", "", $excei + 1)," {$tuo} {$hyl}";
+          echo "</font><br />";
+          continue;
+        }
+
         $tuote[] = $tuo."###".$hylp[0]."###".$hylp[1]."###".$hylp[2]."###".$hylp[3];
         $maara[] = $maa;
         $selis[] = $lisaselite;

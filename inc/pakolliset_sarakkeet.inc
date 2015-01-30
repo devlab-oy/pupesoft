@@ -160,7 +160,7 @@ if (!function_exists("pakolliset_sarakkeet")) {
       break;
     case "tuotteen_avainsanat" :
       $pakolliset   = array("TUOTENO", "LAJI", "KIELI");
-      $wherelliset  = array("TUOTENO", "LAJI", "KIELI");
+      $wherelliset  = array("TUOTENO", "LAJI", "KIELI", "SELITE");
       $kielletyt    = array("LAATIJA", "LUONTIAIKA", "MUUTTAJA", "MUUTOSPVM");
       $joinattavat  = array("TUOTENO" => "tuote");
       $saakopoistaa = TRUE;

@@ -939,6 +939,9 @@ if ($kasitellaan_tiedosto) {
 
           $valinta .= " and TUOTENO='$tuoteno'";
         }
+        elseif ($taulunotsikot[$taulu][$j] == 'SELITE') {
+          $valinta .= " and SELITE = '{$taulunrivit[$taulu][$eriviindex][$j]}' ";
+        }
         elseif ($table_mysql == 'autoid_lisatieto' and $lue_data_autoid and ($taulunrivit[$taulu][$eriviindex][$postoiminto] == "POISTA" or $taulunrivit[$taulu][$eriviindex][$postoiminto] == "MUUTA") and !in_array($eriviindex, $lisatyt_indeksit)) {
           $tee = "pre_rivi_loop";
           require "lue_data_autoid.php";
@@ -1414,7 +1417,7 @@ if ($kasitellaan_tiedosto) {
           $taulunrivit[$taulu][$eriviindex][$postoiminto] = "LISAA";
         }
         elseif ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA' and mysql_num_rows($fresult) != 0) {
-          if ($table_mysql != 'asiakasalennus' and $table_mysql != 'asiakashinta' and $table_mysql != 'toimittajaalennus' and $table_mysql != 'toimittajahinta') {
+          if ($table_mysql != 'asiakasalennus' and $table_mysql != 'asiakashinta' and $table_mysql != 'toimittajaalennus' and $table_mysql != 'toimittajahinta' and $table_mysql != 'tuotteen_avainsanat') {
             lue_data_echo(t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("VIRHE:")." ".t("Rivi on jo olemassa, ei voida perustaa uutta!")."</font> $valinta<br>");
             $tila = 'ohita';
           }
@@ -2249,9 +2252,14 @@ if ($kasitellaan_tiedosto) {
         }
         elseif ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA' and mysql_num_rows($result) != 0) {
 
-          if ($table_mysql == 'asiakasalennus' or $table_mysql == 'asiakashinta' or $table_mysql == 'toimittajahinta' or $table_mysql == 'toimittajaalennus') {
+          if (   $table_mysql == 'asiakasalennus'
+              or $table_mysql == 'asiakashinta'
+              or $table_mysql == 'toimittajahinta'
+              or $table_mysql == 'toimittajaalennus'
+              or $table_mysql == 'tuotteen_avainsanat') {
             lue_data_echo(t("Virhe rivillä").": $rivilaskuri <font class='error'>".t("Riviä ei lisätty, koska se löytyi jo järjestelmästä")."!</font><br>");
           }
+
         }
         else {
           $tarkrow = mysql_fetch_array($result);

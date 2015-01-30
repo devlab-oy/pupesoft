@@ -2986,19 +2986,17 @@ if ($fieldname == "tilausvahvistus_jttoimituksista") {
   $jatko = 0;
 }
 
-if ($fieldname == "tilausvahvistus_jt_saapumisaika") {
+if ($fieldname == "jt_rivien_saapumisajan_nayttaminen") {
   $ulos = "<td><select name='{$nimi}' " . js_alasvetoMaxWidth($nimi, 400) . ">";
 
-  $sel       = array();
-  $apu       = $trow[$i];
+  $sel = array();
+  $apu = $trow[$i];
   $sel[$apu] = "selected";
 
-  $ulos .=
-    "<option value=''>" . t("Ei n‰ytet‰ tilausvahvistuksessa jt-tuotteiden saapumisaikoja") .
-    "</option>";
-  $ulos .= "<option value='K' {$sel["K"]}>" .
-           t("N‰ytet‰‰n tilausvahvistuksessa jt-tuotteiden saapumisaika, jos se on tiedossa") .
-           "</option>";
+  $ulos .= "<option value=''>" . t("Ei n‰ytet‰ jt-rivien saapumisaikoja") . "</option>";
+  $ulos .= "<option value='K' {$sel["K"]}>" . t("N‰ytet‰‰n jt-rivien saapumisaika " .
+                                                "tilausvahvistuksessa ja l‰hetteess‰, jos se on " .
+                                                "tiedossa") . "</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

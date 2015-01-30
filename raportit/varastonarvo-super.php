@@ -283,13 +283,6 @@ if (!$php_cli) {
   echo "</select></td>";
   echo "</tr>";
 
-  $chk = !empty($huomioi_varastosiirrot) ? "checked" : "";
-
-  echo "<tr>";
-  echo "<th>", t("Huomioi varastosiirrot viimeisimpänä tulona"), ":</th>";
-  echo "<td><input type='checkbox' name='huomioi_varastosiirrot' {$chk} /></td>";
-  echo "</tr>";
-
   echo "<tr><th>", t("Näytä kiertonopeus sekä viimeisin myynti ja kulutus"), ":</th>";
 
   echo "<td>";
@@ -302,6 +295,13 @@ if (!$php_cli) {
   echo "<input type='checkbox' name='kiertoviilasku' value='ON' $sel/>";
 
   echo "</td></tr>";
+
+  $chk = !empty($huomioi_varastosiirrot) ? "checked" : "";
+
+  echo "<tr>";
+  echo "<th>", t("Huomioi varastosiirrot viimeisin osto ja myyntitiedoissa"), ":</th>";
+  echo "<td><input type='checkbox' name='huomioi_varastosiirrot' {$chk} /></td>";
+  echo "</tr>";
 
   if ($piilotetut_varastot != 'on') {
     $piilotetut_varastot_where = ' AND tyyppi != "P"';
@@ -1478,7 +1478,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         $result_a = pupe_query($query_a);
         $resultti_a = mysql_fetch_assoc($result_a);
 
-        if ($resultti_a['vihapv'] > $row['vihapvm']) {
+        if ($resultti_a['vihapvm'] > $row['vihapvm']) {
           $row['vihapvm'] = $resultti_a['vihapvm'];
         }
       }

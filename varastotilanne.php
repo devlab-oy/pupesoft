@@ -1,8 +1,73 @@
 <?php
 
+function varastotilanne($hetki = false) {
+  global $kukarow;
+
+  if (!$hetki) {
+    $hetki = date("Y-m-d H:i:s");
+  }
+
+  $query = "SELECT
+            concat(ss.hyllyalue, ss.hyllynro) AS varastopaikka,
+            ss.massa,
+            concat(mtrlt.asiakkaan_tilausnumero, ':', mtrlt.asiakkaan_rivinumero) AS tilaus
+            FROM sarjanumeroseuranta AS ss
+            JOIN tilausrivi AS mtr
+              ON mtr.yhtio = ss.yhtio
+              AND mtr.tunnus = ss.myyntirivitunnus
+            JOIN tilausrivin_lisatiedot AS mtrlt
+              ON mtrlt.yhtio = ss.yhtio
+              AND mtrlt.tilausrivitunnus = mtr.tunnus
+            JOIN tilausrivi AS otr
+              ON otr.yhtio = ss.yhtio
+              AND otr.tunnus = ss.ostorivitunnus
+            WHERE ss.yhtio = '{$kukarow['yhtio']}'
+            AND ss.varasto IS NOT NULL
+            AND mtrlt.asiakkaan_tilausnumero IS NOT NULL
+            AND otr.toimitettuaika <= '{$hetki}'
+            AND (mtr.toimitettuaika >= '{$hetki}' OR mtr.toimitettuaika = '0000-00-00 00:00:00')
+            GROUP BY mtrlt.tunnus";
+  $result = pupe_query($query);
+
+  $paikat = array();
+  $totalpaino = 0;
+
+  while ($rulla = mysql_fetch_assoc($result)) {
+    $paikat[$rulla['varastopaikka']][$rulla['tilaus']][] = $rulla;
+    $totalpaino += $rulla['massa'];
+  }
+
+  $echo = "<br>Rullien kokonaismäärä: " . mysql_num_rows($result) . ' kpl';
+  $echo .= '<br>';
+  $echo .= "Rullien kokonaispaino: " . $totalpaino . ' kg';
+  $echo .= '<br>';
+
+  foreach ($paikat as $paikka => $tilaukset) {
+
+    $echo .= "<br><h2 style='font-weight:bold'>".$paikka.'</h2>';
+
+    foreach ($tilaukset as $tilaus => $rullat) {
+
+       $echo .= $tilaus . ' - ';
+
+       $paino = 0;
+       $rullia = 0;
+       foreach ($rullat as $rulla) {
+         $paino += $rulla['massa'];
+         $rullia++;
+       }
+
+       $echo .= $paino . ' kg - ' . $rullia . ' kpl<br>';
+
+     }
+  }
+
+return $echo;
+}
+
 require 'inc/edifact_functions.inc';
 
-if (isset($_POST['task']) and $_POST['task'] == 'nayta_varastoraportti') {
+if (isset($task) and $task == 'nayta_varastoraportti') {
 
   $varastot = unserialize(base64_decode($_POST['varastot']));
 
@@ -24,6 +89,101 @@ if (isset($_POST['task']) and $_POST['task'] == 'nayta_varastoraportti') {
 require "inc/parametrit.inc";
 
 if (!isset($errors)) $errors = array();
+
+
+
+
+if (isset($task) and ($task == 'saldoraportti' or $task == 'luo_saldoraportti')) {
+
+  echo "<a href='varastotilanne.php'>« " . t("Palaa varastontilanteeseen") . "</a><br><br>";
+  echo "<font class='head'>".t("Saldoraportti")."</font></a><hr><br>";
+
+  $nyt = date("d.m.Y");
+
+  echo "
+    <script>
+      $(function($){
+         $.datepicker.regional['fi'] = {
+                     closeText: 'Sulje',
+                     prevText: '&laquo;Edellinen',
+                     nextText: 'Seuraava&raquo;',
+                     currentText: 'T&auml;n&auml;&auml;n',
+             monthNames: ['Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kes&auml;kuu',
+              'Hein&auml;kuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu'],
+              monthNamesShort: ['Tammi','Helmi','Maalis','Huhti','Touko','Kes&auml;',
+              'Hein&auml;','Elo','Syys','Loka','Marras','Joulu'],
+                      dayNamesShort: ['Su','Ma','Ti','Ke','To','Pe','Su'],
+                      dayNames: ['Sunnuntai','Maanantai','Tiistai','Keskiviikko','Torstai','Perjantai','Lauantai'],
+                      dayNamesMin: ['Su','Ma','Ti','Ke','To','Pe','La'],
+                      weekHeader: 'Vk',
+              dateFormat: 'dd.mm.yy',
+                      firstDay: 1,
+                      isRTL: false,
+                      showMonthAfterYear: false,
+                      yearSuffix: ''};
+          $.datepicker.setDefaults($.datepicker.regional['fi']);
+      });
+
+      $(function() {
+        $('#pvm').datepicker();
+      });
+      </script>
+  ";
+
+  echo "
+    <form method='post'>
+    <table>
+    <tr><th>" . t("Päivä") ."</th><td><input type='text' id='pvm' name='pvm' value='{$nyt}' /></td></tr>
+    <tr><th>" . t("Kellonaika") ."</th><td>";
+
+  echo "<select name='tunti'>";
+  echo "<option value='00'>Tunti</option>";
+  $h = 0;
+  while ($h <= 23) {
+    $_h = str_pad($h,2,"0",STR_PAD_LEFT);
+    echo "<option value='{$_h}'>{$_h}</option>";
+    $h++;
+  }
+  echo "</select>";
+
+  echo " : ";
+
+  echo "<select name='minuutti'>";
+  echo "<option value='00'>Minuutti</option>";
+  $m = 0;
+  while ($m <= 59) {
+    $_m = str_pad($m,2,"0",STR_PAD_LEFT);
+    echo "<option value='{$_m}'>{$_m}</option>";
+    $m++;
+  }
+  echo "</select>";
+
+  echo "
+  </td></tr>
+  <tr><th></th><td align='right'><input type='submit' value='". t("Luo saldoraportti") ."' /></td></tr>
+  </table>
+  <input type='hidden' name='task' value='luo_saldoraportti' />
+  </form>";
+
+
+  if ($task == 'luo_saldoraportti') {
+
+    $ajat = explode(".", $pvm);
+
+    $paiva = $ajat[0];
+    $kuu = $ajat[1];
+    $vuosi = $ajat[2];
+
+    $hetki = $vuosi.'-'.$kuu.'-'.$paiva.' '.$tunti.':'.$minuutti.':00';
+
+    $echo = varastotilanne($hetki);
+
+    echo $echo;
+
+  }
+
+
+}
 
 if (isset($task) and ($task == 'ylijaamasiirto')) {
 
@@ -286,7 +446,7 @@ if (!isset($task)) {
             ORDER BY ss.hyllyalue, CAST(ss.hyllynro AS SIGNED)";
   $result = pupe_query($query);
 
-  echo "<font class='head'>".t("Varastotilanne")."</font><hr><br>";
+  echo "<font class='head'>".t("Varastotilanne")."</font><hr>";
 
   if (mysql_num_rows($result) == 0) {
     echo "Ei rullia varastossa...";
@@ -309,6 +469,39 @@ if (!isset($task)) {
     foreach ($statukset as $vp => $status) {
       $statukset[$vp] = array_count_values($status);
     }
+
+    js_openFormInNewWindow();
+
+    $_varastot = serialize($varastot);
+    $_varastot = base64_encode($_varastot);
+
+    $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
+    $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
+
+    echo "
+    <form method='post' id='nayta_varastoraportti' action='varastotilanne.php'>
+    <input type='hidden' name='varastot' value='{$_varastot}' />
+    <input type='hidden' name='task' value='nayta_varastoraportti' />
+    <input type='hidden' name='session' value='{$session}' />
+    <input type='hidden' name='logo_url' value='{$logo_url}' />
+    <input type='hidden' name='tee' value='XXX' />
+    </form>
+    <button onClick=\"js_openFormInNewWindow('nayta_varastoraportti', 'Varastoraportti'); return false;\" />";
+
+    echo t("Luo pdf");
+    echo "</button></div>";
+
+    echo "
+      <form>
+      <input type='hidden' name='task' value='ylijaamakasittely' />
+      <input type='submit' value='Käsittele ylijäämät' />
+      </form>";
+
+    echo "
+      <form>
+      <input type='hidden' name='task' value='saldoraportti' />
+      <input type='submit' value='Saldoraportti' />
+      </form><br><br>";
 
     echo "<table>";
     echo "<tr>";
@@ -365,35 +558,7 @@ if (!isset($task)) {
     }
     echo "</table>";
 
-    echo '<br>';
 
-    js_openFormInNewWindow();
-
-    $varastot = serialize($varastot);
-    $varastot = base64_encode($varastot);
-
-    $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
-    $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
-
-    echo "
-    <form method='post' id='nayta_varastoraportti' action='varastotilanne.php'>
-    <input type='hidden' name='varastot' value='{$varastot}' />
-    <input type='hidden' name='task' value='nayta_varastoraportti' />
-    <input type='hidden' name='session' value='{$session}' />
-    <input type='hidden' name='logo_url' value='{$logo_url}' />
-    <input type='hidden' name='tee' value='XXX' />
-    </form>
-    <button onClick=\"js_openFormInNewWindow('nayta_varastoraportti', 'Varastoraportti'); return false;\" />";
-
-    echo t("Luo pdf");
-    echo "</button></div>";
-
-    echo "
-      <br><br>
-      <form>
-      <input type='hidden' name='task' value='ylijaamakasittely' />
-      <input type='submit' value='Käsittele ylijäämät' />
-      </form>";
   }
 }
 

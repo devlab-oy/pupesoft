@@ -804,7 +804,11 @@ if ($tee == "MUOKKAA") {
       $errori = lisaa_paivaraha($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, "$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm", "$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm", $kommentti, $kustp, $kohde, $projekti);
     }
     else {
-      $errori = lisaa_kulu($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $kpl, $vero, $hinta, $kommentti, $maa, $kustp, $kohde, $projekti);
+      $errori =
+        lisaa_kulu($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $kpl, $vero,
+                   $hinta, $kommentti, $maa, $kustp, $kohde, $projekti,
+                   "$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm",
+                   "$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm");
     }
 
     if ($errori == "") {
@@ -1242,6 +1246,14 @@ if ($tee == "MUOKKAA") {
       $leveys = 80;
     }
     elseif ($tyyppi == "B") {
+      $alkumm = isset($alkumm) ? $alkumm : date("i");
+      $alkuhh = isset($alkuhh) ? $alkuhh : date("H");
+      $alkupp = isset($alkupp) ? $alkupp : date("d");
+
+      $loppumm = isset($loppumm) ? $loppumm : date("i");
+      $loppuhh = isset($loppuhh) ? $loppuhh : date("H");
+      $loppupp = isset($loppupp) ? $loppupp : date("d");
+
       $lisa = "";
       if ($maa != "" and $maa != $yhtiorow["maa"]) {
         $lisa = "<th>".t("Ulkomaan ALV")."</th>";
@@ -1319,6 +1331,29 @@ if ($tee == "MUOKKAA") {
     }
 
     echo "<td class='back'><input type='submit' name='lisaa' value='".t("Lis‰‰")."'></td></tr>";
+
+    if ($tyyppi == "B") {
+      echo "<tr>";
+      echo "<th colspan='2'>" . t("Alku") . "</th><th colspan='3'>" . t("Loppu") .
+           "</th>";
+      echo "</tr>";
+      echo "<tr>";
+      echo
+        "<td colspan='2'><input type='text' name='alkupp' value='{$alkupp}' size='3' maxlength='2'>
+           <input type='text' name='alkukk' value='{$alkukk}' size='3' maxlength='2'>
+           <input type='text' name='alkuvv' value='{$alkuvv}' size='5' maxlength='4'> " . t("klo") .
+        ":<input type='text' name='alkuhh' value='{$alkuhh}' size='3' maxlength='2'>:
+           <input type='text' name='alkumm' value='{$alkumm}' size='3' maxlength='2'>&nbsp;</td>
+           <td colspan='3'>&nbsp;
+           <input type='text' name='loppupp' value='{$loppupp}' size='3' maxlength='2'>
+           <input type='text' name='loppukk' value='{$loppukk}' size='3' maxlength='2'>
+           <input type='text' name='loppuvv' value='{$loppuvv}' size='5' maxlength='4'> " .
+        t("klo") .
+        ":<input type='text' name='loppuhh' value='{$loppuhh}' size='3' maxlength='2'>:
+           <input type='text' name='loppumm' value='{$loppumm}' size='3' maxlength='2'>";
+      echo "</tr>";
+    }
+
     echo "<tr><th colspan='$cols'>".t("Kommentti")."</th></tr>";
     echo "<tr><td colspan='$cols'><textarea name='kommentti' rows='4' cols='80'>".str_replace("<br>", "\n", $kommentti)."</textarea></td>";
 
@@ -2163,8 +2198,11 @@ function lisaa_paivaraha($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilin
   return lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $alku, $loppu, "", 0, "", "", $kommentti, "A", $kustp, $kohde, $projekti);
 }
 
-function lisaa_kulu($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $kpl, $vero, $hinta, $kommentti, $maa, $kustp, $kohde, $projekti) {
-  return lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, "", "", $kpl, $vero, $hinta, $maa, $kommentti, "B", $kustp, $kohde, $projekti);
+function lisaa_kulu($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $kpl, $vero,
+                    $hinta, $kommentti, $maa, $kustp, $kohde, $projekti, $alku, $loppu) {
+  return lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $alku,
+                        $loppu, $kpl, $vero, $hinta, $maa, $kommentti, "B", $kustp, $kohde,
+                        $projekti);
 }
 
 function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $alku, $loppu, $kpl, $vero, $hinta, $maa, $kommentti, $tyyppi, $kustp, $kohde, $projekti) {
@@ -2513,8 +2551,8 @@ function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino
 
           if ($tyyppi == "B") {
             // Kulut vied‰‰n aina vain yhdelle riville (siksi $i = $kpl_array[$indeksi])
-            $_alkuaika  = date('Y-m-d H:i:s');
-            $_loppuaika = date('Y-m-d H:i:s');
+            $_alkuaika  = $alku ? $alku : date('Y-m-d H:i:s');
+            $_loppuaika = $loppu ? $loppu : date('Y-m-d H:i:s');
             $ins_kpl    = $kpl_array[$indeksi];
             $i         = $kpl_array[$indeksi];
           }

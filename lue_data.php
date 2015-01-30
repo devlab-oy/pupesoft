@@ -612,6 +612,10 @@ if ($kasitellaan_tiedosto) {
     require 'inc/ProgressBar.class.php';
   }
 
+  if (isset($toimipaikkavalinta)) {
+    $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio'], $toimipaikkavalinta);
+  }
+
   // Otetaan pupen talut haltuun
   $query  = "SHOW TABLES FROM `$dbkanta`";
   $tableresult = pupe_query($query);

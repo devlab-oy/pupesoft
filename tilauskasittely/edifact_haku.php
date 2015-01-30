@@ -1,7 +1,6 @@
 <?php
 
-//require '../inc/edifact_functions.inc';
-
+require '../inc/edifact_functions.inc';
 require "../inc/parametrit.inc";
 
 if ($task == 'input') {
@@ -73,7 +72,7 @@ require "inc/footer.inc";
 
 
 
-
+/*
 
 
 function kasittele_rahtikirjasanoma($edi_data) {
@@ -139,16 +138,6 @@ function kasittele_rahtikirjasanoma($edi_data) {
           $rekno = $osat[8];
         }
 
-        /*
-        if (substr($edi_data[$luetaan], 0, 3) == "EQD+RR") {
-          $osat = explode("+", $edi_data[$luetaan]);
-          $kuljettaja_info = $osat[5];
-          $kuljettaja_info_osat = explode(":", $kuljettaja_info);
-          $kuljettaja = $kuljettaja_info_osat[3];
-          $rekno = $osat[8];
-        }
-
-        */
 
         if (substr($edi_data[$luetaan], 0, 5) == "LOC+8") {
           $osat = explode("+", $edi_data[$luetaan]);
@@ -156,16 +145,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
           $paamaara_info_osat = explode(":", $paamaara_info);
           $paamaara = $paamaara_info_osat[3];
 
-          /*
-          // haetaan varaston tiedot
-          $query = "SELECT tunnus
-                    FROM varastopaikat
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    AND locate(nimitys, '{$paamaara}') > 0
-                    LIMIT 1";
-          $varastores = pupe_query($query);
-          $varasto_id = mysql_result($varastores,0);
-          */
+
           $varasto_id = 101;
         }
 
@@ -421,3 +401,4 @@ function kasittele_rahtikirjasanoma($edi_data) {
 
 }
 
+*/

@@ -656,7 +656,7 @@ while ($row = mysql_fetch_assoc($result)) {
 }
 
 if ($valmkorj > 0) {
-  $iltasiivo .= is_log("Merkattiin $valmkorj vaömistustilausta takaisin alkuperäisille alatiloille.");
+  $iltasiivo .= is_log("Merkattiin $valmkorj valmistustilausta takaisin alkuperäisille alatiloille.");
 }
 
 // Poistetaan kaikki myyntitili-varastopaikat, jos niiden saldo on nolla
@@ -869,6 +869,17 @@ while ($tuotepaikka = mysql_fetch_assoc($poistettavat_tuotepaikat)) {
 
 if ($poistettu > 0) {
   $iltasiivo .= is_log("Poistettiin $poistettu poistettavaksi merkattua tuotepaikkaa.");
+}
+
+if ($php_cli) {
+
+  $argv[2] = 'CLI_TUOTTEETTOMAT';
+
+  require "varastopaikkojen_siivous.php";
+  
+  if ($poistettu > 0) {
+    $iltasiivo .= is_log("Poistettiin $poistettu tuotepaikkaa jonka tuotetta ei enää ole.");
+  }  
 }
 
 /**

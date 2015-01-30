@@ -2,14 +2,71 @@
 
 // Ei käytetä pakkausta
 $compression = FALSE;
+$_cli = php_sapi_name() == 'cli' ? true : false;
 
-require "inc/parametrit.inc";
+if ($_cli) {
+  // Otetaan tietokanta connect
+  require_once "inc/connect.inc";
+  require_once "inc/functions.inc";
 
-echo "<font class='head'>".t("Varastopaikkojen seuranta")."</font><hr>";
+  if (!isset($argv[1])) {
+    echo "Anna yhtio!\n";
+    die;
+  }
+
+  if (!isset($argv[2])) {
+    echo "Anna toiminto!\n";
+    die;
+  }
+
+  $_permitted = array('CLI_TUOTTEETTOMAT');
+
+  $kukarow['yhtio'] = mysql_real_escape_string($argv[1]);
+  $tee = $argv[2];
+
+  if (!in_array($tee, $_permitted)) {
+    echo "Toiminto {$tee} ei ole sallittu!\n";
+    die;
+  }
+}
+else {
+  require "inc/parametrit.inc";
+}
+
+if (!function_exists('hae_tuotteettomat')) {
+  function hae_tuotteettomat() {
+    global $kukarow;
+
+    $query = "SELECT tuotepaikat.tunnus ttun,
+            tuotepaikat.tuoteno,
+            tuotepaikat.saldo,
+            tuotepaikat.oletus,
+            concat_ws('-', tuotepaikat.hyllyalue,
+                           tuotepaikat.hyllynro,
+                           tuotepaikat.hyllyvali,
+                           tuotepaikat.hyllytaso) paikka,
+            tuote.tunnus
+            FROM tuotepaikat
+            LEFT JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio
+              AND tuote.tuoteno     = tuotepaikat.tuoteno)
+            WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+            AND (tuote.tunnus is null or tuote.ei_saldoa != '')
+            ORDER BY tuotepaikat.tuoteno";
+    $result = pupe_query($query);
+
+    return $result;
+  }
+}
+
+if (!$_cli) {
+  echo "<font class='head'>".t("Varastopaikkojen seuranta")."</font><hr>";
+}
 
 if ($tee == 'CLEAN') {
 
-  echo t("Poistetaan").": ".count($valittu)." ".t("varastopaikkaa!")."!<br>";
+  if (!$_cli) {
+    echo t("Poistetaan").": ".count($valittu)." ".t("varastopaikkaa!")."!<br>";
+  }
 
   if (count($valittu) != 0) {
     foreach ($valittu as $rastit) {
@@ -72,10 +129,14 @@ if ($tee == 'CLEAN') {
       }
     }
 
-    echo t("Valitut tuotepaikat poistettu")."!<br><br>";
+    if (!$_cli) {
+      echo t("Valitut tuotepaikat poistettu")."!<br><br>";
+    }
   }
   else {
-    echo t("Et valinnut yhtään paikkaa poistettavaksi")."!<br><br>";
+    if (!$_cli) {
+      echo t("Et valinnut yhtään paikkaa poistettavaksi")."!<br><br>";
+    }
   }
 
   $tee = "";
@@ -96,11 +157,15 @@ if ($tee == 'CLEANOLETUKSET') {
 
   if (mysql_num_rows($result) > 0) {
 
-    echo t("Korjataan oletuspaikkoja").":<br>";
+    if (!$_cli) {
+      echo t("Korjataan oletuspaikkoja").":<br>";
+    }
 
     while ($lrow = mysql_fetch_array($result)) {
 
-      echo "Korjataan oletuspaikka: $lrow[tuoteno]<br>";
+      if (!$_cli) {
+        echo "Korjataan oletuspaikka: $lrow[tuoteno]<br>";
+      }
 
       if ($lrow["oletukset"] == 0) {
         $query = "UPDATE tuotepaikat
@@ -134,7 +199,24 @@ if ($tee == 'CLEANOLETUKSET') {
   $tee = "";
 }
 
+if ($tee == 'CLI_TUOTTEETTOMAT' and $_cli) {
+  $result = hae_tuotteettomat();
+
+  if (mysql_num_rows($result) > 0) {
+
+    $paikkatunnus = array();
+
+    while ($lrow = mysql_fetch_assoc($result)) {
+      array_push($paikkatunnus, $lrow['ttun']);
+    }
+
+    $tee = 'CLEANTUOTTEETTOMAT';
+  }
+}
+
 if ($tee == 'CLEANTUOTTEETTOMAT') {
+
+  $poistettu = 0;
 
   foreach ($paikkatunnus as $tunnus) {
     $query = "DELETE
@@ -142,6 +224,7 @@ if ($tee == 'CLEANTUOTTEETTOMAT') {
               WHERE yhtio = '$kukarow[yhtio]'
               AND tunnus  = '$tunnus'";
     $presult = pupe_query($query);
+    $poistettu++;
   }
 
   $tee = "";
@@ -202,7 +285,9 @@ if ($tee == 'CLEANTUNTEMATTOMAT') {
       $presult = pupe_query($query);
     }
     else {
-      echo "Tuotteella on virheellisiä tuotepaikkoja! Korjaa ne ensin! Tuoteno: $paikkarow[tuoteno]<br>";
+      if (!$_cli) {
+        echo "Tuotteella on virheellisiä tuotepaikkoja! Korjaa ne ensin! Tuoteno: $paikkarow[tuoteno]<br>";
+      }
     }
 
   }
@@ -222,7 +307,9 @@ if ($tee == 'CLEANRIVIT') {
     $presult = pupe_query($query);
 
     if (mysql_num_rows($presult) != 1) {
-      echo "Tunnuksella {$tunnus} ei löytynyt riviä!<br>";
+      if (!$_cli) {
+        echo "Tunnuksella {$tunnus} ei löytynyt riviä!<br>";
+      }
       continue;
     }
 
@@ -237,7 +324,9 @@ if ($tee == 'CLEANRIVIT') {
     $presult = pupe_query($query);
 
     if (mysql_num_rows($presult) != 1) {
-      echo "Tuotteelle {$rivirow["tuoteno"]} ei löytynyt oletuspaikkaa!<br>";
+      if (!$_cli) {
+        echo "Tuotteelle {$rivirow["tuoteno"]} ei löytynyt oletuspaikkaa!<br>";
+      }
       continue;
     }
 
@@ -288,14 +377,16 @@ if ($tee == 'CLEANTAPAHTUMAT') {
       $presult = pupe_query($query);
     }
     else {
-      echo "Tuotteelle $rivirow[tuoteno] ei löytynyt oletuspaikkaa!<br>";
+      if (!$_cli) {
+        echo "Tuotteelle $rivirow[tuoteno] ei löytynyt oletuspaikkaa!<br>";
+      }
     }
   }
 
   $tee = "";
 }
 
-if ($tee == 'LISTAAOLETUKSET') {
+if ($tee == 'LISTAAOLETUKSET' and !$_cli) {
 
   echo "<font class='message'>".t("Tuotteet, joilla on virheellisiä oletuspaikkoja")."</font><hr>";
 
@@ -344,7 +435,7 @@ if ($tee == 'LISTAAOLETUKSET') {
   }
 }
 
-if ($tee == 'LISTAATUNTEMATTOMAT') {
+if ($tee == 'LISTAATUNTEMATTOMAT' and !$_cli) {
 
   echo "<font class='message'>".t("Tuotepaikat, joiden varastopaikka ei kuulu mihinkään varastoon")."</font><hr>";
 
@@ -407,26 +498,11 @@ if ($tee == 'LISTAATUNTEMATTOMAT') {
   }
 }
 
-if ($tee == 'LISTAATUOTTEETTOMAT') {
+if ($tee == 'LISTAATUOTTEETTOMAT' and !$_cli) {
 
   echo "<font class='message'>".t("Tuotepaikat, joiden tuotetta ei löydy")."</font><hr>";
 
-  $query = "SELECT tuotepaikat.tunnus ttun,
-            tuotepaikat.tuoteno,
-            tuotepaikat.saldo,
-            tuotepaikat.oletus,
-            concat_ws('-', tuotepaikat.hyllyalue,
-                           tuotepaikat.hyllynro,
-                           tuotepaikat.hyllyvali,
-                           tuotepaikat.hyllytaso) paikka,
-            tuote.tunnus
-            FROM tuotepaikat
-            LEFT JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio
-              AND tuote.tuoteno     = tuotepaikat.tuoteno)
-            WHERE tuotepaikat.yhtio = '$kukarow[yhtio]'
-            AND (tuote.tunnus is null or tuote.ei_saldoa != '')
-            ORDER BY tuotepaikat.tuoteno";
-  $result = pupe_query($query);
+  $result = hae_tuotteettomat();
 
   if (mysql_num_rows($result) > 0) {
 
@@ -459,7 +535,7 @@ if ($tee == 'LISTAATUOTTEETTOMAT') {
   }
 }
 
-if ($tee == 'LISTAA') {
+if ($tee == 'LISTAA' and !$_cli) {
   $lisaa  = "";
 
   if ($osasto != '') {
@@ -628,7 +704,7 @@ if ($tee == 'LISTAA') {
   }
 }
 
-if ($tee == "LISTAAVIRHEELLISETRIVIT") {
+if ($tee == "LISTAAVIRHEELLISETRIVIT" and !$_cli) {
 
   echo "<font class='message'>".t("Tilausrivit, joiden tuotepaikkoja ei löydy")."</font><hr>";
 
@@ -699,7 +775,7 @@ if ($tee == "LISTAAVIRHEELLISETRIVIT") {
 
 }
 
-if ($tee == "LISTAATAPAHTUMATILMANPAIKKAA") {
+if ($tee == "LISTAATAPAHTUMATILMANPAIKKAA" and !$_cli) {
 
   echo "<font class='message'>".t("Tapahtumat, joiden tuotepaikkoja ei löydy")."</font><hr>";
 
@@ -771,7 +847,7 @@ if ($tee == "LISTAATAPAHTUMATILMANPAIKKAA") {
 
 }
 
-if ($tee == "") {
+if ($tee == "" and !$_cli) {
   //Käyttöliittymä
 
   echo "<table><form name='piiri' method='post'>";
@@ -905,4 +981,6 @@ if ($tee == "") {
   echo "</table>";
 }
 
-require "inc/footer.inc";
+if (!$_cli) {
+  require "inc/footer.inc";
+}

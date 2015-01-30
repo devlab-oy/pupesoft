@@ -9452,7 +9452,8 @@ if ($tee == '') {
                       <input type='hidden' name='orig_alatila' value='$orig_alatila'>";
             }
             else {
-              list($maksutapahtumia_on, $maksettavaa_jaljella) = jaljella_oleva_maksupaatesumma();
+              list($maksutapahtumia_on, $maksettavaa_jaljella, $maksettu_lkortilla,
+                $maksettu_pkortilla) = jaljella_oleva_maksupaatesumma();
 
               if ($maksutapahtumia_on) {
                 $pyoristys_otsikko = "Maksettavaa jäljellä";
@@ -10638,7 +10639,7 @@ function maksa_maksupaatteella() {
 function piirra_maksupaate_formi() {
   global $kukarow, $laskurow, $palvelin2, $tilauskaslisa, $tilausnumero, $mista, $kaikkiyhteensa,
          $valittu_kopio_tulostin, $kateinen, $kertakassa, $toim, $orig_tila, $orig_alatila,
-         $korttimaksu;
+         $korttimaksu, $maksettu_lkortilla, $maksettu_pkortilla;
 
   $query_maksuehto = "SELECT *
                       FROM maksuehto
@@ -10649,10 +10650,10 @@ function piirra_maksupaate_formi() {
                         OR maksuehto.sallitut_maat LIKE '%{$laskurow["maa"]}%')";
 
   $maksuehtores = pupe_query($query_maksuehto);
-
   $maksuehtorow = mysql_fetch_assoc($maksuehtores);
 
-  echo "<table>";
+  echo "<table style='width: 100%;'>";
+  echo "<tr><td class='back'><font class='head'>" . t("Maksutapa") . "</font></td></tr>";
   echo "<form name='laskuri' id='laskuri' method='post'
               action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
 
@@ -10672,65 +10673,34 @@ function piirra_maksupaate_formi() {
   echo "<input type='hidden' name='maksupaatetapahtuma' id='maksupaatetapahtuma' value=''>";
   echo "<input type='hidden' id='peruutus' name='peruutus' value>";
 
-  // Tarkistetaan onko onnistuneita suorituksia (K)-korttimaksut
-  $query = "SELECT *
-            FROM maksupaatetapahtumat
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tilausnumero = {$tilausnumero}
-            AND maksutapa != ''
-            AND tila IN ('K', 'H')";
-
-  $result = pupe_query($query);
-
-  $maksettu_pkortilla = 0;
-  $maksettu_lkortilla = 0;
-
-  while ($ruutu = mysql_fetch_assoc($result)) {
-    if ($ruutu['maksutapa'] == "LUOTTOKORTTI") {
-      $maksettu_lkortilla += $ruutu['summa_valuutassa'];
-    }
-    else {
-      $maksettu_pkortilla += $ruutu['summa_valuutassa'];
-    }
-  }
-
-  $maksupaate_maksetut['luottokortti'] = $maksettu_lkortilla;
-  $maksupaate_maksetut['pankkikortti'] = $maksettu_pkortilla;
-
-  // Jos löytyy maksettuja korttimaksuja niin otetaan ne huomioon laskurissa
-  if (isset($maksupaate_maksetut['luottokortti'])) {
-    $kateismaksu['luottokortti'] = $maksupaate_maksetut['luottokortti'];
-  }
-
-  if (isset($maksupaate_maksetut['pankkikortti'])) {
-    $kateismaksu['pankkikortti'] = $maksupaate_maksetut['pankkikortti'];
-  }
-
   echo "<tr>";
-  echo "<td>" . t("Summa") . "</td>";
-  echo "<td>";
+  echo "<td><label for='korttimaksu'>" . t("Summa") . "</label>";
   echo "<input type='text' name='korttimaksu' id='korttimaksu' value='{$korttimaksu}' size='7'
                autocomplete='off'>";
-  echo "</td>";
+  echo "</td></tr>";
 
-  echo "<input type='hidden' name='kateismaksu[pankkikortti]' id='pankkikortti' value='{$kateismaksu['pankkikortti']}'";
-  echo "<input type='hidden' name='kateismaksu[luottokortti]' id='luottokortti' value='{$kateismaksu['luottokortti']}'";
+  echo "<input type='hidden' name='kateismaksu[pankkikortti]' id='pankkikortti'
+               value='{$maksettu_pkortilla}'";
+  echo "<input type='hidden' name='kateismaksu[luottokortti]' id='luottokortti'
+               value='{$maksettu_lkortilla}'";
 
   echo "<tr>
-              <td class='back'>
-                <input type='button'
-                       name='korttimaksunappi'
-                       id='korttimaksunappi'
-                       value='" . t("Kortti") . "'>
-                <input type='button'
-                       name='peruuta_viimeisin'
-                       id='peruuta_viimeisin'
-                       value='" . t("Peruuta viimeisin maksu") . "'
-              </td>
-            </tr>";
-  echo "</table";
-
-  echo "</form><br><br>";
+          <td>
+            <input type='button'
+                   name='kateismaksunappi'
+                   id='kateismaksunappi'
+                   value='" . t("Käteinen") . " (Alt+C)'>
+            <input type='button'
+                   name='korttimaksunappi'
+                   id='korttimaksunappi'
+                   value='" . t("Kortti") . " (Alt+K)'>
+            <input type='button'
+                   name='peruuta_viimeisin'
+                   id='peruuta_viimeisin'
+                   value='" . t("Peruuta viimeisin maksu") . "'
+          </td>
+        </tr>";
+  echo "</form></table>";
 }
 
 function jaljella_oleva_maksupaatesumma() {
@@ -10772,5 +10742,5 @@ function jaljella_oleva_maksupaatesumma() {
 
   $totaalisumma = number_format($kaikkiyhteensa - $valisumma, $yhtiorow['hintapyoristys'], '.', '');
 
-  return array($loytyy, $totaalisumma);
+  return array($loytyy, $totaalisumma, $maksettu_lkortilla, $maksettu_pkortilla);
 }

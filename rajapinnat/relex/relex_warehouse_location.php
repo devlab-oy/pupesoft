@@ -80,13 +80,12 @@ while ($row = mysql_fetch_assoc($res)) {
 
   $query = "SELECT DISTINCT varasto,
             oletus,
-            hyllypaikka,
             concat_ws('-', hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllypaikka
             FROM tuotepaikat
             WHERE yhtio='{$kukarow['yhtio']}'
             AND tuoteno='{$row['tuoteno']}'
             GROUP BY 1
-            ORDER BY 1,2,3 DESC";
+            ORDER BY 1,2 DESC,3 DESC";
   $tres = pupe_query($query);
 
   while ($trow = mysql_fetch_assoc($tres)) {

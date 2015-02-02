@@ -122,13 +122,30 @@ echo "<tr><th>".t("Näytä tuotteen nimitys ja arvonmuutos tulosteella")."</th>
 echo "<tr><td class='back'><br><input type='submit' value='".t("Aja raportti")."'></td></tr></form></table><br><br><br>";
 
 if ($tee == 'KORJAA') {
+  $tilino = $yhtiorow["varasto"];
+  $muutostilino = $yhtiorow["varastonmuutos"];
+
+  if ($yhtiorow["raaka_aine_tiliointi"] == "Y") {
+    $tilinot = "'{$yhtiorow["varasto"]}', '{$yhtiorow["raaka_ainevarasto"]}'";
+    $muutostilinot = "'{$yhtiorow["varastonmuutos"]}', '{$yhtiorow["raaka_ainevarastonmuutos"]}'," .
+                     " '{$yhtiorow["varastonmuutos_inventointi"]}'";
+
+    if ($tuotetyyppi == "R") {
+      $tilino = $yhtiorow["raaka_ainevarasto"];
+      $muutostilino = $yhtiorow["raaka_ainevarastonmuutos"];
+    }
+  }
+  else {
+    $tilinot = "'{$yhtiorow["varasto"]}'";
+    $muutostilinot = "'{$yhtiorow["varastonmuutos"]}', '{$yhtiorow["varastonmuutos_inventointi"]}'";
+  }
 
   $query = "SELECT lasku.tunnus tosite,
             t1.tunnus varasto, t1.selite sel1, t1.kustp kustp1,  t1.kohde kohde1,  t1.projekti projekti1,
             t2.tunnus varastonmuutos, t2.selite sel2, t2.kustp kustp2,  t2.kohde kohde2,  t2.projekti projekti2
             FROM lasku use index (yhtio_tila_tapvm)
-            JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu='' and t1.tilino = '$yhtiorow[varasto]'
-            JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu='' and t2.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]')
+            JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu='' and t1.tilino IN ({$tilinot})
+            JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu='' and t2.tilino IN ({$muutostilinot})
             WHERE lasku.yhtio = '$kukarow[yhtio]'
             and lasku.tila    = 'X'
             and lasku.tapvm   = '$tapvm'
@@ -168,7 +185,7 @@ if ($tee == 'KORJAA') {
     $query = "INSERT into tiliointi set
               yhtio    = '$kukarow[yhtio]',
               ltunnus  = '$kpitorow[tosite]',
-              tilino   = '$yhtiorow[varasto]',
+              tilino   = '{$tilino}',
               kustp    = '$kpitorow[kustp1]',
               kohde    = '$kpitorow[kohde1]',
               projekti = '$kpitorow[projekti1]',
@@ -184,7 +201,7 @@ if ($tee == 'KORJAA') {
     $query = "INSERT into tiliointi set
               yhtio    = '$kukarow[yhtio]',
               ltunnus  = '$kpitorow[tosite]',
-              tilino   = '$yhtiorow[varastonmuutos]',
+              tilino   = '{$muutostilino}',
               kustp    = '$kpitorow[kustp2]',
               kohde    = '$kpitorow[kohde2]',
               projekti = '$kpitorow[projekti2]',
@@ -450,6 +467,7 @@ if ($tee == 'Y') {
         echo "<input type='hidden' name='tapvm'     value='$tuoterow[tapvm]'>";
         echo "<input type='hidden' name='edarvo'     value='$kpitorow[summa]'>";
         echo "<input type='hidden' name='kpl'       value='$tuoterow[kpl]'>";
+        echo "<input type='hidden' name='tuotetyyppi' value='{$tuoterow["tuotetyyppi"]}'>";
         echo "<input type='text' size='15' name='arvo' value='".sprintf('%.2f', $kpitorow["summa"])."'>";
         echo "<input type='submit' name='valmis' value='".t("Korjaa")."'>";
         echo "</form>";

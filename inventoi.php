@@ -865,21 +865,20 @@ if ($tee == 'VALMIS') {
               $laskuid = mysql_insert_id($GLOBALS["masterlink"]);
 
               // Seuraako myyntitiliöinti tuotteen tyyppiä ja onko kyseessä raaka-aine?
-              $seuraa_tyyppia = $yhtiorow["raaka_aine_tiliointi"];
-              $raaka_ainetililta = ($seuraa_tyyppia == "Y" and $row["tuotetyyppi"] == "R");
-
+              $raaka_aine_tiliointi = $yhtiorow["raaka_aine_tiliointi"];
+              $raaka_ainetililta = ($raaka_aine_tiliointi == "Y" and $row["tuotetyyppi"] == "R");
 
               // Määritetään varastonmuutostili
-              if ($yhtiorow["varastonmuutos_inventointi"] != "") {
+              if ($raaka_ainetililta) {
+                $varastonmuutos_tili = $yhtiorow["raaka_ainevarastonmuutos"];
+              }
+              elseif ($yhtiorow["varastonmuutos_inventointi"] != "") {
                 if ($inven_laji_tilino != "") {
                   $varastonmuutos_tili = $inven_laji_tilino;
                 }
                 else {
                   $varastonmuutos_tili = $yhtiorow["varastonmuutos_inventointi"];
                 }
-              }
-              elseif ($raaka_ainetililta) {
-                $varastonmuutos_tili = $yhtiorow["raaka_ainevarastonmuutos"];
               }
               else {
                 $varastonmuutos_tili = $yhtiorow["varastonmuutos"];

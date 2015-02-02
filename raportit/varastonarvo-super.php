@@ -58,7 +58,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 
-if (!isset($tallennusmuoto)) $tallennusmuoto = 'csv';
+if (!isset($tallennusmuoto)) $tallennusmuoto = 'excel';
 
 if (!isset($pp)) $pp = date("d");
 if (!isset($kk)) $kk = date("m");
@@ -272,13 +272,13 @@ if (!$php_cli) {
 
   echo "</select></td></tr>";
 
-  $sel = $tallennusmuoto == 'excel' ? "selected" : "";
+  $sel = $tallennusmuoto == 'csv' ? "selected" : "";
 
   echo "<tr>";
   echo "<th>",t("Tallennusmuoto"),"</th>";
   echo "<td><select name='tallennusmuoto'>";
-  echo "<option value='csv'>CSV</opton>";
-  echo "<option value='excel' {$sel}>Excel</option>";
+  echo "<option value='excel'>Excel</option>";
+  echo "<option value='csv' {$sel}>CSV</opton>";
   echo "</select></td>";
   echo "</tr>";
 
@@ -691,8 +691,6 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     $variaatiosum_koot           = array();
     $variaatiosum_row          = array();
 
-    $tallennusmuoto_check = ($tallennusmuoto == "excel");
-
     //otetaan kaikki koot arrayseen
     $kaikkikoot = array();
 
@@ -704,6 +702,8 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
     mysql_data_seek($result, 0);
   }
+
+  $tallennusmuoto_check = ($tallennusmuoto == "excel");
 
   if ($tallennusmuoto_check) {
     include 'inc/pupeExcel.inc';

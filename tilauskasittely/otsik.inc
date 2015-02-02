@@ -2678,7 +2678,7 @@ if ($tila == "" and !isset($jatka)) {
     }
 
 
-    if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
+    if ("KALA" == "KALA" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
       echo "<tr><td class='back'><br></td></tr>";
       echo "<tr><th colspan='4'>".t("Työmääräyksen lisätiedot").":</th></tr>";
 
@@ -2770,7 +2770,7 @@ if ($tila == "" and !isset($jatka)) {
       echo "</select></td></tr>";
     }
 
-    if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A") {
+    if ("KALA" == "KALA" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $srow["tilaustyyppi"] == "A") {
       //Täysin dynaaminen osio
       $al_res = t_avainsana("TYOM_TYOKENTAT", "", "and avainsana.selitetark != ''");
 
@@ -4356,45 +4356,45 @@ if (isset($jatka)) {
       }
     }
 
-    if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO" or ($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $tilaustyyppi == "T" or $tilaustyyppi == "A") {
+    if ("KALA" == "KALA" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "EXTRANET_REKLAMAATIO" or ($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $tilaustyyppi == "T" or $tilaustyyppi == "A") {
       //otetaan kantaa pyörän malliin
       if ($merkki2 != 'eimenu' and $merkki2 != '') {
         $merkki = $merkki2;
       }
 
       $query2 .= "tyomaarays SET
-            yhtio      = '$kukarow[yhtio]',
-            kotipuh     = '$kotipuh',
-            tyopuh       = '$tyopuh',
-            myyjaliike     = '$myyjaliike',
-            ostopvm     = '$ostopvmvv-$ostopvmkk-$ostopvmpp',
-            rekno       = '$rekno',
-            mittarilukema   = '$mittarilukema',
-            merkki       = '$merkki',
-            mallivari     = '$mallivari',
-            valmnro     = '$valmnro',
-            tuotu       = '$tuotuvv-$tuotukk-$tuotupp',
-            luvattu     = '$luvattuvv-$luvattukk-$luvattupp',
-            sla = '$sla',
-            valmistajan_sopimusnumero = '$valmistajan_sopimusnumero',
-            komm1       = '$komm1',
-            komm2       = '$komm2',
-            suorittaja     = '$suorittaja',
-            viite       = '$viite',
-            prioriteetti  = '$prioriteetti',
-            jalleenmyyja   = '$jalleenmyyja',
-            tehdas      = '$tehdas',
-            tyoaika      = '$tyoaika',
-            vikakoodi    = '$vikakoodi',
-            takuunumero    = '$takuunumero',
-            tyokoodi    = '$tyokoodi',
-            hyvaksy      = '$hyvaksy',
-            otunnus     = '$kukarow[kesken]'";
+                  yhtio         = '$kukarow[yhtio]',
+                  kotipuh       = '$kotipuh',
+                  tyopuh        = '$tyopuh',
+                  myyjaliike    = '$myyjaliike',
+                  ostopvm       = '$ostopvmvv-$ostopvmkk-$ostopvmpp',
+                  rekno         = '$rekno',
+                  mittarilukema = '$mittarilukema',
+                  merkki        = '$merkki',
+                  mallivari     = '$mallivari',
+                  valmnro       = '$valmnro',
+                  tuotu         = '$tuotuvv-$tuotukk-$tuotupp',
+                  luvattu       = '$luvattuvv-$luvattukk-$luvattupp',
+                  sla           = '$sla',
+                  valmistajan_sopimusnumero = '$valmistajan_sopimusnumero',
+                  komm1         = '$komm1',
+                  komm2         = '$komm2',
+                  suorittaja    = '$suorittaja',
+                  viite         = '$viite',
+                  prioriteetti  = '$prioriteetti',
+                  jalleenmyyja  = '$jalleenmyyja',
+                  tehdas        = '$tehdas',
+                  tyoaika       = '$tyoaika',
+                  vikakoodi     = '$vikakoodi',
+                  takuunumero   = '$takuunumero',
+                  tyokoodi      = '$tyokoodi',
+                  hyvaksy       = '$hyvaksy',
+                  otunnus       = '$kukarow[kesken]'";
 
-      //Nämä kentät päivitetään vain, jos päivitetään sitä työmääräykseltä tai muualta missä nuo kaksi kenttää näkyy..
-      if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
-        $query2 .= ",  tyojono      = '$tyojono',
-                tyostatus    = '$tyostatus'";
+      // Nämä kentät päivitetään vain, jos päivitetään sitä työmääräykseltä tai muualta missä nuo kaksi kenttää näkyy..
+      if ("KALA" == "KALA" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ((($toim == 'TARJOUS' or $toim == 'EXTTARJOUS') or $srow["tilaustyyppi"] == "T") and $yhtiorow["tyomaaraystiedot_tarjouksella"] == "")) {
+        $query2 .= ", tyojono   = '$tyojono',
+                    tyostatus   = '$tyostatus'";
 
         if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
           // Jos käyttöliittymästä on muutettu työjonoa/työstatusta kirjataan se myös tyomaarayksen_tapahtumiin
@@ -4453,44 +4453,44 @@ if (isset($jatka)) {
 
       $sopimus_info = '';
       if ($toim != 'EXTENNAKKO' and $toim != 'EXTTARJOUS') {
-        $sopimus_info = "sopimus_lisatietoja      = '$sopimus_lisatietoja',
-                         sopimus_lisatietoja2     = '$sopimus_lisatietoja2', ";
+        $sopimus_info = "sopimus_lisatietoja  = '$sopimus_lisatietoja',
+                         sopimus_lisatietoja2 = '$sopimus_lisatietoja2', ";
       }
 
       $query3 .= "laskun_lisatiedot SET
-            yhtio            = '$kukarow[yhtio]',
-            sopimus_kk          = '$sopimus_kk',
-            sopimus_pp          = '$sopimus_pp',
-            yllapito_kuukausihinnoittelu = '{$kuukausihinnoittelu}',
-            sopimus_alkupvm        = '$yllapito_alkuvv-$yllapito_alkukk-$yllapito_alkupp',
-            sopimus_loppupvm      = '$yllapito_loppuvv-$yllapito_loppukk-$yllapito_loppupp',
-            {$sopimus_info}
-            kolm_ovttunnus        = '$kolm_ovttunnus',
-            kolm_nimi          = '$kolm_nimi',
-            kolm_nimitark        = '$kolm_nimitark',
-            kolm_osoite          = '$kolm_osoite',
-            kolm_postino        = '$kolm_postino',
-            kolm_postitp        = '$kolm_postitp',
-            kolm_maa          = '$kolm_maa',
-            laskutus_nimi        = '$laskutus_nimi',
-            laskutus_nimitark      = '$laskutus_nimitark',
-            laskutus_osoite        = '$laskutus_osoite',
-            laskutus_postino      = '$laskutus_postino',
-            laskutus_postitp      = '$laskutus_postitp',
-            laskutus_maa        = '$laskutus_maa',
-            toimitusehto2        = '$toimitusehto2',
-            projektipaallikko      = '$projektipaallikko',
-            yhteyshenkilo_kaupallinen  = '$yhteyshenkilo_kaupallinen',
-            yhteyshenkilo_tekninen    = '$yhteyshenkilo_tekninen',
-            seuranta          = '$seuranta',
-            projekti          = '$projekti',
-            saate            = '$saate',
-            tunnusnippu_tarjous      = '$tunnusnippu_tarjous',
-            rivihintoja_ei_nayteta    = '$rivihintoja_ei_nayteta',
-            kasinsyotetty_viite      = '$kasinsyotetty_viite',
-            kantaasiakastunnus      = '$kantaasiakastunnus',
-            asiakkaan_kohde        = '{$tkohde}',
-            otunnus           = '$kukarow[kesken]'";
+                  yhtio                     = '$kukarow[yhtio]',
+                  sopimus_kk                = '$sopimus_kk',
+                  sopimus_pp                = '$sopimus_pp',
+                  yllapito_kuukausihinnoittelu = '{$kuukausihinnoittelu}',
+                  sopimus_alkupvm           = '$yllapito_alkuvv-$yllapito_alkukk-$yllapito_alkupp',
+                  sopimus_loppupvm          = '$yllapito_loppuvv-$yllapito_loppukk-$yllapito_loppupp',
+                  {$sopimus_info}
+                  kolm_ovttunnus            = '$kolm_ovttunnus',
+                  kolm_nimi                 = '$kolm_nimi',
+                  kolm_nimitark             = '$kolm_nimitark',
+                  kolm_osoite               = '$kolm_osoite',
+                  kolm_postino              = '$kolm_postino',
+                  kolm_postitp              = '$kolm_postitp',
+                  kolm_maa                  = '$kolm_maa',
+                  laskutus_nimi             = '$laskutus_nimi',
+                  laskutus_nimitark         = '$laskutus_nimitark',
+                  laskutus_osoite           = '$laskutus_osoite',
+                  laskutus_postino          = '$laskutus_postino',
+                  laskutus_postitp          = '$laskutus_postitp',
+                  laskutus_maa              = '$laskutus_maa',
+                  toimitusehto2             = '$toimitusehto2',
+                  projektipaallikko         = '$projektipaallikko',
+                  yhteyshenkilo_kaupallinen = '$yhteyshenkilo_kaupallinen',
+                  yhteyshenkilo_tekninen    = '$yhteyshenkilo_tekninen',
+                  seuranta                  = '$seuranta',
+                  projekti                  = '$projekti',
+                  saate                     = '$saate',
+                  tunnusnippu_tarjous       = '$tunnusnippu_tarjous',
+                  rivihintoja_ei_nayteta    = '$rivihintoja_ei_nayteta',
+                  kasinsyotetty_viite       = '$kasinsyotetty_viite',
+                  kantaasiakastunnus        = '$kantaasiakastunnus',
+                  asiakkaan_kohde           = '{$tkohde}',
+                  otunnus                   = '$kukarow[kesken]'";
       $query3 .= $postquery3;
       $result = pupe_query($query3);
     }

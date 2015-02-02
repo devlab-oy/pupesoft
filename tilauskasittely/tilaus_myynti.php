@@ -729,7 +729,7 @@ if (
 //Haetaan otsikon kaikki tiedot
 if ((int) $kukarow["kesken"] > 0) {
 
-  if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "SIIRTOTYOMAARAYS" )) {
+  if ($kukarow["extranet"] == "" and ("KALA" == "KALA" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "SIIRTOTYOMAARAYS" )) {
     $query  = "SELECT laskun_lisatiedot.*, lasku.*, tyomaarays.*
                FROM lasku
                JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus)
@@ -2072,7 +2072,7 @@ if ($kukarow["extranet"] == "" and ($tee == "OTSIK" or ($toim != "PIKATILAUS" an
   }
 
   //Tässä halutaan jo hakea uuden tilauksen tiedot
-  if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "SIIRTOTYOMAARAYS" )) {
+  if ($kukarow["extranet"] == "" and ("KALA" == "KALA" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "SIIRTOTYOMAARAYS" )) {
     $query  = "SELECT laskun_lisatiedot.*, lasku.*, tyomaarays.*
                FROM lasku
                JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus)
@@ -2454,7 +2454,7 @@ if ($tee == '') {
     $result = pupe_query($query);
 
     //Haetaan laskurow uudestaan
-    if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "SIIRTOTYOMAARAYS" )) {
+    if ($kukarow["extranet"] == "" and ("KALA" == "KALA" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO" or $toim == "SIIRTOTYOMAARAYS" )) {
       $query  = "SELECT laskun_lisatiedot.*, lasku.*, tyomaarays.*
                  FROM lasku
                  JOIN tyomaarays ON (tyomaarays.yhtio = lasku.yhtio AND tyomaarays.otunnus = lasku.tunnus)
@@ -2628,7 +2628,7 @@ if ($tee == '') {
           </form>";
     }
 
-    if ($kukarow["extranet"] == "" and ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == 'REKLAMAATIO') and isset($sms_palvelin) and $sms_palvelin != "" and isset($sms_user)  and $sms_user != "" and isset($sms_pass)  and $sms_pass != "") {
+    if ($kukarow["extranet"] == "" and ("KALA" == "KALA" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == 'REKLAMAATIO') and isset($sms_palvelin) and $sms_palvelin != "" and isset($sms_user)  and $sms_user != "" and isset($sms_pass)  and $sms_pass != "") {
       echo "  <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>
           <input type='hidden' name='tilausnumero' value='$tilausnumero'>
           <input type='hidden' name='mista' value='$mista'>
@@ -2909,11 +2909,11 @@ if ($tee == '') {
       echo "</form>";
     }
 
-    if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO") {
+    if ("KALA" == "KALA" or $toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or $toim == "REKLAMAATIO") {
 
       if (tarkista_oikeus("tyojono.php")) {
 
-        if ($toim == 'TYOMAARAYS' or $toim == 'REKLAMAATIO') {
+        if ("KALA" == "KALA" or $toim == 'TYOMAARAYS' or $toim == 'REKLAMAATIO') {
           $toim2 = '';
         }
         else {

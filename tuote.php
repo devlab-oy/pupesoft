@@ -1765,6 +1765,7 @@ if ($tee == 'N' or $tee == 'E') {
             WHERE tuote.yhtio = '$kukarow[yhtio]'
             and tuote.tuoteno $oper '$tuoteno'
             and (tuote.status not in ('P','X') or (SELECT sum(saldo) FROM tuotepaikat WHERE tuotepaikat.yhtio=tuote.yhtio and tuotepaikat.tuoteno=tuote.tuoteno and tuotepaikat.saldo > 0) > 0)
+            and tuote.tuotetyyppi not in ('A','B')
             ORDER BY tuote.tuoteno $suun
             LIMIT 1";
   $result = pupe_query($query);

@@ -3256,6 +3256,7 @@ if ($fieldname == "hyvaksy_tarjous_tilaustyyppi") {
   $ulos .= "<option value = ''>".t("Hyväksytystä tarjouksesta luodaan oletuksena myyntitilaus");
   $ulos .= "<option value = 'T' $sel[T]>".t("Hyväksytystä tarjouksesta luodaan oletuksena työmääräys");
   $ulos .= "<option value = 'P' $sel[P]>".t("Hyväksytystä tarjouksesta luodaan oletuksena projekti");
+  $ulos .= "<option value = 'V' $sel[P]>".t("Hyväksytystä tarjouksesta luodaan oletuksena asiakkaallevalmistus");
   $ulos .= "</select></td>";
 
   $jatko = 0;

@@ -30,6 +30,12 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
       list($perusta, $asiakasjollepalautetaan) = explode("#", $perusta);
     }
 
+    $toim = "";
+
+    if ($perusta == "VALMISTAASIAKKAALLE") {
+      $toim = "VALMISTAASIAKKAALLE";
+    }
+
     //Kopioidaan otsikko ja siirretään rivit uudelle otsikolle
     $query = "SELECT * FROM lasku WHERE tunnus='$otunnus' and yhtio ='$kukarow[yhtio]'";
     $monistares = pupe_query($query);
@@ -89,6 +95,9 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
           if ($perusta == "TYOMAARAYS") {
             $values .= ", 'A'";
           }
+          elseif ($perusta == "VALMISTAASIAKKAALLE") {
+            $values .= ", 'V'";
+          }
           else {
             $values .= ", 'N'";
           }
@@ -96,6 +105,9 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
         case 'tilaustyyppi':
           if ($perusta == "TYOMAARAYS") {
             $values .= ", 'A'";
+          }
+          elseif ($perusta == "VALMISTAASIAKKAALLE") {
+            $values .= ", 'V'";
           }
           elseif ($monistarow["tila"] == "T") {
             $values .= ", 'T'";
@@ -358,6 +370,10 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
       $tymlisa    = t("työmääräykselle");
       $linkkilisa = "<a href='tilaus_myynti.php?toim=TYOMAARAYS&tilausnumero=$utunnus'>".t("Siirry myyntitilaukselle")."</a>";
     }
+    elseif ($perusta == "VALMISTAASIAKKAALLE") {
+      $tymlisa    = t("valmistukselle");
+      $linkkilisa = "<a href='tilaus_myynti.php?toim=VALMISTAASIAKKAALLE&tilausnumero=$utunnus'>".t("Siirry valmistukselle")."</a>";
+    }
     else {
       $tymlisa    = t("myyntitilaukselle");
       $linkkilisa = "<a href='tilaus_myynti.php?toim=PIKATILAUS&tilausnumero=$utunnus'>".t("Siirry myyntitilaukselle")."</a>";
@@ -429,13 +445,13 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
 
       $kommentti  = $coprivirow['kommentti'];
       $kerayspvm  = $coprivirow['kerayspvm'];
-      $toimaika  = $coprivirow['toimaika'];
-      $alv    = $coprivirow['alv'];
-      $ytunnus  = $laskurow["ytunnus"];
+      $toimaika   = $coprivirow['toimaika'];
+      $alv        = $coprivirow['alv'];
+      $ytunnus    = $laskurow["ytunnus"];
       $rivinumero = $coprivirow['tilaajanrivinro'];
 
-      $perheid  = $coprivirow['perheid'];
-      $perheid2  = $coprivirow['perheid2'];
+      $perheid    = $coprivirow['perheid'];
+      $perheid2   = $coprivirow['perheid2'];
 
       if ($perusta == "REKLAMAATIO") {
         $kpl = $kpl * -1;
@@ -486,6 +502,11 @@ if (!function_exists("tilauksesta_myyntitilaus")) {
           ${'ale'.$alepostfix} = $lis_ale_kaikki['ale'.$alepostfix];
         }
 
+        $varataan_saldoa = "EI";
+      }
+
+      // Valmistetaan, eli ei oteta varastosta
+      if ($perusta == "VALMISTAASIAKKAALLE") {
         $varataan_saldoa = "EI";
       }
 

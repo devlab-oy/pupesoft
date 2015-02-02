@@ -25189,11 +25189,31 @@ if (!function_exists('hyllysiirto')) {
             $laskuid = mysql_insert_id($GLOBALS["masterlink"]);
           }
 
+          $varastotili = $yhtiorow["varasto"];
+          $varastonmuutostili = $yhtiorow["varastonmuutos"];
+
+          // Jos tiliöidään raaka-ainemuutokset raaka-ainetileille ja kyseessä on raaka-aine
+          if ($yhtiorow["raaka_aine_tiliointi"] == "Y") {
+            $tuote_query = "SELECT tuotetyyppi
+                            FROM tuote
+                            WHERE tuoteno = '{$tuoteno}'
+                            AND yhtio = '{$kukarow["yhtio"]}';";
+
+            $tuote_result = pupe_query($tuote_query);
+            $tuote_row = mysql_fetch_assoc($tuote_result);
+
+            if ($tuote_row["tuotetyyppi"] == "R") {
+              $varastotili = $yhtiorow["raaka_ainevarasto"];
+              $varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
+            }
+          }
+
+
           // Mistä varasto
           $query = "INSERT into tiliointi set
                     yhtio           = '$kukarow[yhtio]',
                     ltunnus         = '$laskuid',
-                    tilino          = '$yhtiorow[varasto]',
+                    tilino          = '{$varastotili}',
                     kustp           = '{$mista_kustp}',
                     kohde           = '{$mista_kohde}',
                     projekti        = '{$mista_projekti}',
@@ -25211,7 +25231,7 @@ if (!function_exists('hyllysiirto')) {
           $query = "INSERT into tiliointi set
                     yhtio           = '$kukarow[yhtio]',
                     ltunnus         = '$laskuid',
-                    tilino          = '$yhtiorow[varastonmuutos]',
+                    tilino          = '{$varastonmuutostili}',
                     kustp           = '{$mista_kustp}',
                     kohde           = '{$mista_kohde}',
                     projekti        = '{$mista_projekti}',
@@ -25268,7 +25288,7 @@ if (!function_exists('hyllysiirto')) {
           $query = "INSERT into tiliointi set
                     yhtio           = '$kukarow[yhtio]',
                     ltunnus         = '$laskuid',
-                    tilino          = '$yhtiorow[varasto]',
+                    tilino          = '{$varastotili}',
                     kustp           = '{$minne_kustp}',
                     kohde           = '{$minne_kohde}',
                     projekti        = '{$minne_projekti}',
@@ -25286,7 +25306,7 @@ if (!function_exists('hyllysiirto')) {
           $query = "INSERT into tiliointi set
                     yhtio           = '$kukarow[yhtio]',
                     ltunnus         = '$laskuid',
-                    tilino          = '$yhtiorow[varastonmuutos]',
+                    tilino          = '{$varastonmuutostili}',
                     kustp           = '{$minne_kustp}',
                     kohde           = '{$minne_kohde}',
                     projekti        = '{$minne_projekti}',

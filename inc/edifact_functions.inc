@@ -1803,6 +1803,11 @@ function kasittele_rahtikirjasanoma($edi_data) {
         }
 
         if (substr($edi_data[$luetaan], 0, 7) == "CPS+PKG" or $luetaan >= $rivimaara) {
+
+          if ($_matkakoodi === NULL) {
+            $_matkakoodi = 'bookkaukseton';
+          }
+
           $valmis = true;
         }
 
@@ -1930,7 +1935,14 @@ function kasittele_rahtikirjasanoma($edi_data) {
     }
 
     if (count($ilman_rahtikirjaa_tulleet_bookkaukset) < 1) {
-      return false;
+
+      if ($data['tyyppi'] == 7) {
+        $lisataan_rullia_vain_myyntitilaukseen = true;
+      }
+      else {
+        return true;
+      }
+
     }
     else {
       $lisataan_rullia_vain_myyntitilaukseen = true;
@@ -2191,38 +2203,51 @@ function kasittele_rahtikirjasanoma($edi_data) {
       }
       else {
 
-        $query = "SELECT * from lasku
-                  where asiakkaan_tilausnumero = '{$rulla['tilausnro']}'
-                  AND lasku.tilaustyyppi = 'N'";
+        $query = "SELECT *
+                  FROM lasku
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND asiakkaan_tilausnumero = '{$rulla['tilausnro']}'
+                  AND tilaustyyppi = 'N'";
         $result = pupe_query($query);
         $laskurow = mysqL_fetch_assoc($result);
 
         if ($laskurow) {
 
-          $kukarow['kesken'] = $laskurow['tunnus'];
+          $query = "SELECT tunnus
+                    FROM sarjanumeroseuranta
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND sarjanumero = '{$rulla['sarjanumero']}'
+                    AND myyntirivitunnus = 0";
+          $result = pupe_query($query);
 
-          require "tilauskasittely/lisaarivi.inc";
+          if (mysql_num_rows($result) == 1) {
 
-          $update_query = "UPDATE tilausrivin_lisatiedot SET
-                           juoksu = '{$rulla['juoksu']}',
-                           tilauksen_paino = '{$rulla['tilauksen_paino']}',
-                           asiakkaan_tilausnumero = '{$rulla['tilausnro']}',
-                           asiakkaan_rivinumero = '{$rulla['rivinro']}'
-                           WHERE yhtio = '{$kukarow['yhtio']}'
-                           AND tilausrivitunnus = '{$lisatty_tun}'";
-          pupe_query($update_query);
+            $kukarow['kesken'] = $laskurow['tunnus'];
 
-          $update_query = "UPDATE tilausrivi
-                           SET var2 = 'OK'
-                           WHERE yhtio = '{$kukarow['yhtio']}'
-                           AND tunnus = '{$lisatty_tun}'";
-          pupe_query($update_query);
+            require "tilauskasittely/lisaarivi.inc";
 
-          $update_query = "UPDATE sarjanumeroseuranta
-                           SET myyntirivitunnus = '{$lisatty_tun}'
-                           WHERE yhtio = '{$kukarow['yhtio']}'
-                           AND sarjanumero = '{$rulla['sarjanumero']}'";
-          pupe_query($update_query);
+            $update_query = "UPDATE tilausrivin_lisatiedot SET
+                             juoksu = '{$rulla['juoksu']}',
+                             tilauksen_paino = '{$rulla['tilauksen_paino']}',
+                             asiakkaan_tilausnumero = '{$rulla['tilausnro']}',
+                             asiakkaan_rivinumero = '{$rulla['rivinro']}'
+                             WHERE yhtio = '{$kukarow['yhtio']}'
+                             AND tilausrivitunnus = '{$lisatty_tun}'";
+            pupe_query($update_query);
+
+            $update_query = "UPDATE tilausrivi
+                             SET var2 = 'OK'
+                             WHERE yhtio = '{$kukarow['yhtio']}'
+                             AND tunnus = '{$lisatty_tun}'";
+            pupe_query($update_query);
+
+            $update_query = "UPDATE sarjanumeroseuranta
+                             SET myyntirivitunnus = '{$lisatty_tun}'
+                             WHERE yhtio = '{$kukarow['yhtio']}'
+                             AND sarjanumero = '{$rulla['sarjanumero']}'";
+            pupe_query($update_query);
+
+          }
         }
       }
     }

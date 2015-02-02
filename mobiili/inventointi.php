@@ -179,6 +179,7 @@ if ($tee == 'listat') {
   $result = pupe_query($query);
 
   $parametrit_tarkistettu = false;
+  $listat = array();
 
   while ($row = mysql_fetch_assoc($result)) {
 

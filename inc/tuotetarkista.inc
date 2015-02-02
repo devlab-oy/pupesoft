@@ -447,6 +447,8 @@ if (!function_exists("tuotetarkista")) {
       }
 
       if (count($virhe) == 0
+        and $tem_tuotetyyppi != "A" 
+        and $tem_tuotetyyppi != "B"
         and $yhtiorow["tuotteen_oletuspaikka"] != ""
         and ((isset($tem_eisaldoa)
             and $tem_eisaldoa == "")

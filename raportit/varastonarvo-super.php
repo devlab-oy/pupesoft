@@ -58,7 +58,7 @@ if (isset($tee) and $tee == "lataa_tiedosto") {
   exit;
 }
 
-if (!isset($tallennusmuoto)) $tallennusmuoto = 'csv';
+if (!isset($tallennusmuoto)) $tallennusmuoto = 'excel';
 
 if (!isset($pp)) $pp = date("d");
 if (!isset($kk)) $kk = date("m");

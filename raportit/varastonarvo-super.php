@@ -1268,7 +1268,8 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           $xmyyrow = mysql_fetch_assoc($xmyyres);
 
           if (!empty($huomioi_varastosiirrot)) {
-            $_lajilisa = "AND tapahtuma.laji IN ('laskutus', 'siirto', 'kulutus')";
+            $_lajilisa = "AND (tapahtuma.laji IN ('laskutus', 'kulutus') OR
+                              (tapahtuma.laji = 'siirto' and tapahtuma.kpl < 0))";
           }
           else {
             $_lajilisa = "AND tapahtuma.laji IN ('laskutus', 'kulutus')";
@@ -1474,7 +1475,8 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
                     AND tapahtuma.tuoteno  = '{$row['tuoteno']}'
                     AND tapahtuma.laadittu >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
                     {$varasto_tapahtuma}
-                    AND tapahtuma.laji = 'siirto'";
+                    AND tapahtuma.laji = 'siirto'
+                    AND tapahtuma.kpl > 0";
         $result_a = pupe_query($query_a);
         $resultti_a = mysql_fetch_assoc($result_a);
 

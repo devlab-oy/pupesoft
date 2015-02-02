@@ -121,7 +121,7 @@ echo "<tr><th>".t("Näytä tuotteen nimitys ja arvonmuutos tulosteella")."</th>
 
 echo "<tr><td class='back'><br><input type='submit' value='".t("Aja raportti")."'></td></tr></form></table><br><br><br>";
 
-if ($tee == 'KORJAA') {
+if ($tee == "KORJAA" or $tee == "PERU") {
   $tilino = $yhtiorow["varasto"];
   $muutostilino = $yhtiorow["varastonmuutos"];
 
@@ -139,7 +139,9 @@ if ($tee == 'KORJAA') {
     $tilinot = "'{$yhtiorow["varasto"]}'";
     $muutostilinot = "'{$yhtiorow["varastonmuutos"]}', '{$yhtiorow["varastonmuutos_inventointi"]}'";
   }
+}
 
+if ($tee == 'KORJAA') {
   $query = "SELECT lasku.tunnus tosite,
             t1.tunnus varasto, t1.selite sel1, t1.kustp kustp1,  t1.kohde kohde1,  t1.projekti projekti1,
             t2.tunnus varastonmuutos, t2.selite sel2, t2.kustp kustp2,  t2.kohde kohde2,  t2.projekti projekti2
@@ -226,8 +228,8 @@ if ($tee == 'PERU') {
 
   $query = "SELECT lasku.tunnus tosite, t1.tunnus varasto, t1.selite sel1,  t2.tunnus varastonmuutos, t2.selite sel2
             FROM lasku use index (yhtio_tila_tapvm)
-            JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu='' and t1.tilino = '$yhtiorow[varasto]'
-            JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu='' and t2.tilino in ('$yhtiorow[varastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]')
+            JOIN tiliointi t1 ON lasku.yhtio=t1.yhtio and lasku.tunnus=t1.ltunnus and t1.korjattu='' and t1.tilino IN ({$tilinot})
+            JOIN tiliointi t2 ON lasku.yhtio=t2.yhtio and lasku.tunnus=t2.ltunnus and t2.korjattu='' and t2.tilino in ({$muutostilinot})
             WHERE lasku.yhtio = '$kukarow[yhtio]'
             and lasku.tila    = 'X'
             and lasku.tapvm   = '$tapvm'
@@ -498,6 +500,7 @@ if ($tee == 'Y') {
         echo "<input type='hidden' name='ttunnus'     value='$tuoterow[ttunnus]'>";
         echo "<input type='hidden' name='tapvm'     value='$tuoterow[tapvm]'>";
         echo "<input type='hidden' name='kpl'       value='$tuoterow[kpl]'>";
+        echo "<input type='hidden' name='tuotetyyppi' value='{$tuoterow["tuotetyyppi"]}'>";
         echo "<input type='submit' name='valmis' value='".t("Peru")."'>";
         echo "</form>";
         echo "</td></tr>";

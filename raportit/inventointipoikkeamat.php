@@ -344,7 +344,7 @@ if ($tee == 'Y') {
     $lisa_vamu = "HAVING arvo != 0";
   }
 
-  $query = "SELECT tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko,
+  $query = "SELECT tuote.tuoteno, tuotepaikat.hyllyalue, tuotepaikat.hyllynro, tuotepaikat.hyllyvali, tuotepaikat.hyllytaso, tuote.nimitys, tuote.yksikko, tuote.tuotetyyppi,
             tuotepaikat.inventointiaika, tuotepaikat.inventointipoikkeama, tapahtuma.selite, tapahtuma.kpl, tapahtuma.tunnus ttunnus, tapahtuma.hinta,
             tuote.sarjanumeroseuranta, tapahtuma.laatija, tapahtuma.laadittu,
             (tapahtuma.hinta * tapahtuma.kpl) arvo,
@@ -393,9 +393,16 @@ if ($tee == 'Y') {
 
       echo "<tr><td colspan='5'>$tuoterow[selite]</td></tr>";
 
+      if ($yhtiorow["raaka_aine_tiliointi"] == "Y" and $tuoterow["tuotetyyppi"] == "R") {
+        $varastotili = $yhtiorow["raaka_ainevarasto"];
+      }
+      else {
+        $varastotili = $yhtiorow["varasto"];
+      }
+
       $query = "SELECT sum(tiliointi.summa) summa
                 FROM lasku use index (yhtio_tila_tapvm)
-                JOIN tiliointi ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and tiliointi.korjattu = '' and tiliointi.tilino = '$yhtiorow[varasto]'
+                JOIN tiliointi ON lasku.yhtio=tiliointi.yhtio and lasku.tunnus=tiliointi.ltunnus and tiliointi.korjattu = '' and tiliointi.tilino = '{$varastotili}'
                 WHERE lasku.yhtio = '$kukarow[yhtio]'
                 and lasku.tila    = 'X'
                 and lasku.tapvm   = '$tuoterow[tapvm]'

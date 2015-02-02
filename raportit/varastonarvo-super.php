@@ -691,8 +691,6 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
     $variaatiosum_koot           = array();
     $variaatiosum_row          = array();
 
-    $tallennusmuoto_check = ($tallennusmuoto == "excel");
-
     //otetaan kaikki koot arrayseen
     $kaikkikoot = array();
 
@@ -704,6 +702,8 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
 
     mysql_data_seek($result, 0);
   }
+
+  $tallennusmuoto_check = ($tallennusmuoto == "excel");
 
   if ($tallennusmuoto_check) {
     include 'inc/pupeExcel.inc';

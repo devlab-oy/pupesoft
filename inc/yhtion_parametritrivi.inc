@@ -3095,31 +3095,18 @@ if ($fieldname == "ext_tilauksen_hyvaksyja_myyjaksi") {
 }
 
 if ($fieldname == "raaka_aine_tiliointi") {
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
 
-  // Tarkistetaan, että sekä, raaka-ainevarasto ja raaka-ainevarastonmuutos tilit ovat olemassa
-  $query = "SELECT COUNT(*) AS tilien_maara
-            FROM tili
-            WHERE tili.yhtio = '{$kukarow['yhtio']}'
-            AND tili.tilino IN ('{$yhtiorow['raaka_ainevarasto']}',
-                                '{$yhtiorow['raaka_ainevarastonmuutos']}')";
-  $result = pupe_query($query);
-  $tilien_maara = mysql_fetch_assoc($result);
-  $tilien_maara = $tilien_maara['tilien_maara'];
+  $sel = $trow[$i] == 'Y' ? ' selected' : '';
 
-  if ($tilien_maara == "2") {
-    $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+  $ulos .= "<option value = ''>"
+           . t("Ei tiliöidä raaka-aineiden varastoa ja varastonmuutosta raaka-ainetileille");
+  $ulos .= "<option value = 'Y' $sel>" .
+           t("Tiliöidään varasto ja varastonmuutos raaka-ainetileille, jos tuotetyyppi on " .
+             "raaka-aine");
+  $ulos .= "</select></td>";
 
-    $sel = $trow[$i] == 'Y' ? ' selected' : '';
-
-    $ulos .= "<option value = ''>"
-             . t("Ei tiliöidä raaka-aineiden varastoa ja varastonmuutosta raaka-ainetileille");
-    $ulos .= "<option value = 'Y' $sel>" .
-             t("Tiliöidään varasto ja varastonmuutos raaka-ainetileille, jos tuotetyyppi on " .
-               "raaka-aine");
-    $ulos .= "</select></td>";
-
-    $jatko = 0;
-  }
+  $jatko = 0;
 }
 
 if ($fieldname == "nayta_variaatiot") {

@@ -865,7 +865,7 @@ if ($tee == 'VALMIS') {
               $laskuid = mysql_insert_id($GLOBALS["masterlink"]);
 
               // Seuraako myyntitiliöinti tuotteen tyyppiä ja onko kyseessä raaka-aine?
-              $seuraa_tyyppia = $yhtiorow["seuraako_myyntitiliointi_tuotteen_tyyppia"];
+              $seuraa_tyyppia = $yhtiorow["raaka_aine_tiliointi"];
               $raaka_ainetililta = ($seuraa_tyyppia == "Y" and $row["tuotetyyppi"] == "R");
 
 

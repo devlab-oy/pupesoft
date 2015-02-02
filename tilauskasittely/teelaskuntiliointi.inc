@@ -11,7 +11,7 @@ else {
   $toimpriolisa = " ifnull(yhtion_toimipaikat.vat_numero, '') != '' and ";
 }
 
-if ($yhtiorow["seuraako_myyntitiliointi_tuotteen_tyyppia"] == "Y") {
+if ($yhtiorow["raaka_aine_tiliointi"] == "Y") {
   $myyntitiliointi_seuraa_tuotteen_tyyppia = "if(tuote.tuotetyyppi = 'R', 'raaka-aine', " .
     "'normaalituote') tuotetyyppi,";
   $myyntitiliointi_group = ",15";
@@ -358,7 +358,7 @@ else {
       // Toissijaisesti kokeillaan vielä varasto-tilin oletuskustannuspaikkaa
       list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
 
-      if ($yhtiorow["seuraako_myyntitiliointi_tuotteen_tyyppia"] == "Y" and
+      if ($yhtiorow["raaka_aine_tiliointi"] == "Y" and
           $xrow["tuotetyyppi"] == "raaka-aine") {
         $tilinumero = $yhtiorow["raaka_ainevarasto"];
         $muutostili = $yhtiorow["raaka_ainevarastonmuutos"];

@@ -3094,7 +3094,7 @@ if ($fieldname == "ext_tilauksen_hyvaksyja_myyjaksi") {
   $jatko = 0;
 }
 
-if ($fieldname == "seuraako_myyntitiliointi_tuotteen_tyyppia") {
+if ($fieldname == "raaka_aine_tiliointi") {
 
   // Tarkistetaan, että sekä, raaka-ainevarasto ja raaka-ainevarastonmuutos tilit ovat olemassa
   $query = "SELECT COUNT(*) AS tilien_maara
@@ -3111,8 +3111,11 @@ if ($fieldname == "seuraako_myyntitiliointi_tuotteen_tyyppia") {
 
     $sel = $trow[$i] == 'Y' ? ' selected' : '';
 
-    $ulos .= "<option value = ''>" . t("Myyntitiliointi ei seuraa tuotteen tyyppiä");
-    $ulos .= "<option value = 'Y' $sel>" . t("Myyntitiliointi seuraa tuotteen tyyppiä");
+    $ulos .= "<option value = ''>"
+             . t("Ei tiliöidä raaka-aineiden varastoa ja varastonmuutosta raaka-ainetileille");
+    $ulos .= "<option value = 'Y' $sel>" .
+             t("Tiliöidään varasto ja varastonmuutos raaka-ainetileille, jos tuotetyyppi on " .
+               "raaka-aine");
     $ulos .= "</select></td>";
 
     $jatko = 0;

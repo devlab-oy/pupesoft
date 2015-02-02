@@ -828,7 +828,7 @@ if ($varaston_muutos != 0 and (in_array($tee, array("paalle", "25paalle", "puoli
   if ($toim != "VAIHDAKEHAHIN" and $yhtiorow["varastonmuutos_epakurantti"] != "") {
     $varastonmuutos_tili = $yhtiorow["varastonmuutos_epakurantti"];
   }
-  elseif ($yhtiorow["seuraako_myyntitiliointi_tuotteen_tyyppia"] == "Y" and
+  elseif ($yhtiorow["raaka_aine_tiliointi"] == "Y" and
     $tuoterow["tuotetyyppi"] == "R") {
     $varastonmuutos_tili = $yhtiorow["raaka_ainevarastonmuutos"];
   }
@@ -836,7 +836,7 @@ if ($varaston_muutos != 0 and (in_array($tee, array("paalle", "25paalle", "puoli
     $varastonmuutos_tili = $yhtiorow["varastonmuutos"];
   }
 
-  if ($yhtiorow["seuraako_myyntitiliointi_tuotteen_tyyppia"] == "Y" and
+  if ($yhtiorow["raaka_aine_tiliointi"] == "Y" and
       $tuoterow["tuotetyyppi"] == "R") {
     $varastotili = $yhtiorow["raaka_ainevarasto"];
   }

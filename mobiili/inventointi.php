@@ -170,20 +170,28 @@ if ($tee == 'listat') {
   if (!isset($reservipaikka)) $reservipaikka = 'E';
 
   // Haetaan inventointilistat
-  $query = "SELECT DISTINCT(inventointilista) as lista,
-            count(tuoteno) as tuotteita,
-            concat_ws('-', min(tuotepaikat.hyllyalue), max(tuotepaikat.hyllyalue)) as hyllyvali
+  $query = "SELECT DISTINCT(inventointilista) as lista
             FROM tuotepaikat
             WHERE tuotepaikat.yhtio   = '{$kukarow['yhtio']}'
             and inventointilista      > 0
             and inventointilista_aika > '0000-00-00 00:00:00'
-            GROUP BY inventointilista_aika, hyllyvali
             ORDER BY inventointilista";
   $result = pupe_query($query);
 
   $parametrit_tarkistettu = false;
 
   while ($row = mysql_fetch_assoc($result)) {
+
+    $query = "SELECT count(tuoteno) as tuotteita,
+              concat_ws('-', min(tuotepaikat.hyllyalue), max(tuotepaikat.hyllyalue)) as hyllyvali
+              FROM tuotepaikat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND inventointilista = '{$row['lista']}'";
+    $_count_res = pupe_query($query);
+    $_count_row = mysql_fetch_assoc($_count_res);
+
+    $row['tuotteita'] = $_count_row['tuotteita'];
+    $row['hyllyvali'] = $_count_row['hyllyvali'];
 
     $query = "SELECT hyllyalue,
               hyllynro,

@@ -825,19 +825,17 @@ if ($varaston_muutos != 0 and (in_array($tee, array("paalle", "25paalle", "puoli
     $laskuid = mysql_insert_id($GLOBALS["masterlink"]);
   }
 
-  if ($toim != "VAIHDAKEHAHIN" and $yhtiorow["varastonmuutos_epakurantti"] != "") {
-    $varastonmuutos_tili = $yhtiorow["varastonmuutos_epakurantti"];
-  }
-  elseif ($yhtiorow["raaka_aine_tiliointi"] == "Y" and
-    $tuoterow["tuotetyyppi"] == "R") {
+  if ($yhtiorow["raaka_aine_tiliointi"] == "Y" and $tuoterow["tuotetyyppi"] == "R") {
     $varastonmuutos_tili = $yhtiorow["raaka_ainevarastonmuutos"];
+  }
+  elseif ($toim != "VAIHDAKEHAHIN" and $yhtiorow["varastonmuutos_epakurantti"] != "") {
+    $varastonmuutos_tili = $yhtiorow["varastonmuutos_epakurantti"];
   }
   else {
     $varastonmuutos_tili = $yhtiorow["varastonmuutos"];
   }
 
-  if ($yhtiorow["raaka_aine_tiliointi"] == "Y" and
-      $tuoterow["tuotetyyppi"] == "R") {
+  if ($yhtiorow["raaka_aine_tiliointi"] == "Y" and $tuoterow["tuotetyyppi"] == "R") {
     $varastotili = $yhtiorow["raaka_ainevarasto"];
   }
   else {

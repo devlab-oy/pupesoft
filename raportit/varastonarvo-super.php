@@ -272,13 +272,13 @@ if (!$php_cli) {
 
   echo "</select></td></tr>";
 
-  $sel = $tallennusmuoto == 'excel' ? "selected" : "";
+  $sel = $tallennusmuoto == 'csv' ? "selected" : "";
 
   echo "<tr>";
   echo "<th>",t("Tallennusmuoto"),"</th>";
   echo "<td><select name='tallennusmuoto'>";
-  echo "<option value='csv'>CSV</opton>";
-  echo "<option value='excel' {$sel}>Excel</option>";
+  echo "<option value='excel'>Excel</option>";
+  echo "<option value='csv' {$sel}>CSV</opton>";
   echo "</select></td>";
   echo "</tr>";
 

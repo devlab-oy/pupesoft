@@ -134,7 +134,6 @@ $rajaus = 'toimitetut';
 
 }
 
-
 if (isset($task) and $task == 'eu_tilaus') {
 
   $query = "SELECT group_concat(tilausrivin_lisatiedot.tunnus)
@@ -231,34 +230,73 @@ if (isset($task) and $task == 'suorita_lusaus') {
   }
 }
 
+if (isset($rekkakuljetukseksi) or isset($konttikuljetukseksi)) {
+
+  if ($task == 'sinetoi') {
+    $task = 'anna_konttitiedot';
+  }
+  else {
+    $task = 'korjaa_konttitiedot';
+  }
+
+  if (isset($rekkakuljetukseksi)) {
+    $kuljetustyyppi = 'rekka';
+  }
+  else {
+   $kuljetustyyppi = 'kontti';
+  }
+
+}
+
 if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
 
-  if (empty($konttinumero)) {
-    $errors['konttinumero'] = t("Syötä konttinumero!");
-  }
+  if ($kuljetustyyppi == 'rekka') {
 
-  if (empty($sinettinumero)) {
-    $errors['sinettinumero'] = t("Syötä sinettinumero!");
-  }
+    if (empty($kuljettaja)) {
+      $errors['kuljettaja'] = t("Syötä kuljetusfirma!");
+    }
 
-  if (empty($taara)) {
-    $errors['taara'] = t("Syötä taarapaino!");
-  }
+    if (empty($rekisterinumero)) {
+      $errors['rekisterinumero'] = t("Syötä rekisterinumero!");
+    }
 
-  if (!is_numeric($taara)) {
-    $errors['taara'] = t("Epäkelpo taarapaino!");
-  }
+    if (empty($rekisterinumero_traileri)) {
+      $errors['rekisterinumero_traileri'] = t("Syötä trailerin rekisterinumero!");
+    }
 
-  if (empty($isokoodi)) {
-    $errors['isokoodi'] = t("Syötä ISO-koodi!");
+    if (empty($maaranpaa)) {
+      $errors['maaranpaa'] = t("Syötä määränpää!");
+    }
   }
+  else {
 
-  if (strlen($konttinumero) > 17) {
-    $errors['konttinumero'] = t("Konttinumero saa olla korkeintaan 17 merkkiä pitkä.");
-  }
+    if (empty($konttinumero)) {
+      $errors['konttinumero'] = t("Syötä konttinumero!");
+    }
 
-  if (strlen($sinettinumero) > 10) {
-    $errors['sinettinumero'] = t("Sinettinumero saa olla korkeintaan 10 merkkiä pitkä.");
+    if (empty($sinettinumero)) {
+      $errors['sinettinumero'] = t("Syötä sinettinumero!");
+    }
+
+    if (empty($taara)) {
+      $errors['taara'] = t("Syötä taarapaino!");
+    }
+
+    if (!is_numeric($taara)) {
+      $errors['taara'] = t("Epäkelpo taarapaino!");
+    }
+
+    if (empty($isokoodi)) {
+      $errors['isokoodi'] = t("Syötä ISO-koodi!");
+    }
+
+    if (strlen($konttinumero) > 17) {
+      $errors['konttinumero'] = t("Konttinumero saa olla korkeintaan 17 merkkiä pitkä.");
+    }
+
+    if (strlen($sinettinumero) > 10) {
+      $errors['sinettinumero'] = t("Sinettinumero saa olla korkeintaan 10 merkkiä pitkä.");
+    }
   }
 
   if (count($errors) == 0) {
@@ -283,10 +321,22 @@ if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
               AND tunnus IN ({$lista})";
     pupe_query($query);
 
-    $konttinumero = mysql_real_escape_string($konttinumero);
-    $sinettinumero = mysql_real_escape_string($sinettinumero);
-    $taara = mysql_real_escape_string($taara);
-    $isokoodi = mysql_real_escape_string($isokoodi);
+    if ($kuljetustyyppi == 'kontti') {
+
+      $konttinumero = mysql_real_escape_string($konttinumero);
+      $sinettinumero = mysql_real_escape_string($sinettinumero);
+      $taara = mysql_real_escape_string($taara);
+      $isokoodi = mysql_real_escape_string($isokoodi);
+
+    }
+    else {
+
+      $konttinumero = mysql_real_escape_string($rekisterinumero);
+      $sinettinumero = mysql_real_escape_string($kuljettaja);
+      $taara = '1';
+      $isokoodi = 'TRAILERI';
+
+    }
 
     $query = "UPDATE tilausrivin_lisatiedot SET
               konttinumero      = '{$konttinumero}',
@@ -298,11 +348,29 @@ if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
               AND tilausrivitunnus IN ({$lista})";
     pupe_query($query);
 
-    $parametrit = kontitus_parametrit($lista, $korjaus);
+    $parametrit = kontitus_parametrit($lista);
 
     if ($parametrit) {
+
       $parametrit['kontitus_info']['konttinumero'] = $konttinumero;
       $parametrit['kontitus_info']['sinettinumero'] = $sinettinumero;
+
+      if ($kuljetustyyppi == 'rekka') {
+        $parametrit['laji'] = 'rekkakontitus';
+
+        $koodi = strtoupper(substr($kuljettaja, 0, 4));
+        $nimi = $kuljettaja;
+
+        $kuljettaja_info = array(
+          'koodi' => $koodi,
+          'nimi' => $nimi,
+          'auto_rekno' => $rekisterinumero,
+          'traileri_rekno' => $rekisterinumero_traileri,
+          'maaranpaa' => $maaranpaa
+          );
+
+        $parametrit['kuljettaja_info'] = $kuljettaja_info;
+      }
 
       if ($korjaus) {
 
@@ -316,11 +384,8 @@ if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
                   AND selite = '{$temp_konttinumero}'
                   AND liitostunnus IN ({$tilaukset})";
         $result = pupe_query($query);
-
         $liite_info = mysql_fetch_array($result);
-
         $parametrit['sanomanumero'] = $liite_info['filename'];
-
       }
 
       $sanoma = laadi_edifact_sanoma($parametrit, $korjaus);
@@ -1288,6 +1353,10 @@ if (isset($task) and ($task == 'anna_konttitiedot' or $task == 'korjaa_konttitie
   echo "<a href='toimitusten_seuranta.php'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
   echo "<font class='head'>".t("Kontin sinetöinti")."</font></a><hr><br>";
 
+  if (!isset($sinetoitava_konttiviite)) {
+    $sinetoitava_konttiviite = $konttiviite;
+  }
+
   echo "
   <form method='post'>
   <input type='hidden' name='task' value='{$uusi_task}' />
@@ -1295,45 +1364,108 @@ if (isset($task) and ($task == 'anna_konttitiedot' or $task == 'korjaa_konttitie
   <input type='hidden' name='paino' value='{$paino}' />
   <input type='hidden' name='konttiviite' value='{$sinetoitava_konttiviite}' />
   <input type='hidden' name='temp_konttinumero' value='{$temp_konttinumero}' />
-  <table>
-  <tr>
-    <th>" . t("Konttinumero") ."</th>
-    <td><input type='text' name='konttinumero' value='{$konttinumero}' /></td>
-    <td class='back error'>{$errors['konttinumero']}</td>
-  </tr>
-  <tr>
-    <th>" . t("Sinettinumero") ."</th>
-    <td><input type='text' name='sinettinumero' value='{$sinettinumero}' /></td>
-    <td class='back error'>{$errors['sinettinumero']}</td>
-  </tr>
-  <tr>
-    <th>" . t("Taarapaino") ." (kg)</th>
-    <td><input type='text' name='taara' value='{$taara}' /></td>
-    <td class='back error'>{$errors['taara']}</td>
-  </tr>
-  <tr>
-    <th>" . t("ISO-koodi") ."</th>
-    <td><input type='text' name='isokoodi' value='{$isokoodi}' /></td>
-    <td class='back error'>{$errors['isokoodi']}</td>
-  </tr>
-  <tr>
+  <table>";
+
+  if ($isokoodi == 'TRAILERI') {
+
+    $kuljetustyyppi = 'rekka';
+    $kuljettaja = $sinettinumero;
+    $rekisterinumero = $konttinumero;
+
+  }
+
+  if (isset($rekkakuljetukseksi) or $kuljetustyyppi == 'rekka') {
+
+    $kuljetustyyppi = 'rekka';
+
+    echo "
+    <tr>
+      <th>" . t("Kuljetusfirma") ."</th>
+      <td><input type='text' name='kuljettaja' value='{$kuljettaja}' /></td>
+      <td class='back error'>{$errors['kuljettaja']}</td>
+    </tr>
+    <tr>
+      <th>" . t("Auton rekisterinumero") ."</th>
+      <td><input type='text' name='rekisterinumero' value='{$rekisterinumero}' /></td>
+      <td class='back error'>{$errors['rekisterinumero']}</td>
+    </tr>
+    <tr>
+    <tr>
+      <th>" . t("Trailerin rekisterinumero") ."</th>
+      <td><input type='text' name='rekisterinumero_traileri' value='{$rekisterinumero_traileri}' /></td>
+      <td class='back error'>{$errors['rekisterinumero_traileri']}</td>
+    </tr>
+    <tr>
+      <th>" . t("Määränpää") ."</th>
+      <td><input type='text' name='maaranpaa' value='{$maaranpaa}' /></td>
+      <td class='back error'>{$errors['maaranpaa']}</td>
+    </tr>
+    <tr>";
+
+  }
+  else {
+
+    $kuljetustyyppi = 'kontti';
+
+    echo "
+    <tr>
+      <th>" . t("Konttinumero") ."</th>
+      <td><input type='text' name='konttinumero' value='{$konttinumero}' /></td>
+      <td class='back error'>{$errors['konttinumero']}</td>
+    </tr>
+    <tr>
+      <th>" . t("Sinettinumero") ."</th>
+      <td><input type='text' name='sinettinumero' value='{$sinettinumero}' /></td>
+      <td class='back error'>{$errors['sinettinumero']}</td>
+    </tr>
+    <tr>
+      <th>" . t("Taarapaino") ." (kg)</th>
+      <td><input type='text' name='taara' value='{$taara}' /></td>
+      <td class='back error'>{$errors['taara']}</td>
+    </tr>
+    <tr>
+      <th>" . t("ISO-koodi") ."</th>
+      <td><input type='text' name='isokoodi' value='{$isokoodi}' /></td>
+      <td class='back error'>{$errors['isokoodi']}</td>
+    </tr>";
+
+  }
+
+  echo "<tr>
     <th>" . t("Rullien määrä") ."</th>
     <td>{$rullia} kpl</td>
     <td class='back'></td>
   </tr>
   <tr>
     <th>" . t("Paino") ."</th>
-    <td>{$paino}</td>
+    <td>{$paino} kg</td>
+    <td class='back'></td>
+  </tr>
+  <tr>
+    <th>" . t("Kuljetustyypin vaihto") ."</th>
+    <td>";
+
+    if (isset($rekkakuljetukseksi) or $kuljetustyyppi == 'rekka') {
+      echo "<input type='submit' disabled  value='". t("Rekka") ."' />";
+      echo "<input type='submit' name='konttikuljetukseksi' value='". t("Kontti") ."' />";
+    }
+    else {
+      echo "<input type='submit' name='rekkakuljetukseksi' value='". t("Rekka") ."' />";
+      echo "<input type='submit' disabled value='". t("Kontti") ."' />";
+    }
+
+  echo "</td>
     <td class='back'></td>
   </tr>
   <tr>
     <th></th>
-    <td align='right'><input type='submit' value='". t("Sinetöi") ."' /></td>
+    <td align='right'>
+    <input type='hidden' name='kuljetustyyppi' value='{$kuljetustyyppi}' />
+    <input type='submit' value='". t("Sinetöi") ."' /></td>
     <td class='back'></td>
   </tr>
   </table>
   </form>";
-
 }
 
 if (isset($task) and $task == 'tee_satamavahvistus') {

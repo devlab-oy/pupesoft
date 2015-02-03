@@ -25,6 +25,16 @@ cron_log();
 
 $ajopaiva  = date("Y-m-d");
 
+if (isset($argv[2]) and $argv[2] != '') {
+
+  if (strpos($argv[2], "-") !== FALSE) {
+    list($y, $m, $d) = explode("-", $argv[2]);
+    if (is_numeric($y) and is_numeric($m) and is_numeric($d) and checkdate($m, $d, $y)) {
+      $ajopaiva = $argv[2];
+    }
+  }
+}
+
 // Yhtiö
 $yhtio = mysql_real_escape_string($argv[1]);
 
@@ -32,7 +42,7 @@ $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
 // Tallennetaan rivit tiedostoon
-$filepath = "/tmp/warehouse_location_{$yhtio}_$ajopaiva.csv";
+$filepath = "/tmp/product_locations_update_{$yhtio}_$ajopaiva.csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
   die("Tiedoston avaus epäonnistui: $filepath\n");
@@ -80,7 +90,7 @@ while ($row = mysql_fetch_assoc($res)) {
   }
 
   foreach ($tuotepaikat as $_varasto => $_arr) {
-    $rivi  = pupesoft_csvstring($row['tuoteno']).";";
+    $rivi  = "{$row['maa']}-".pupesoft_csvstring($row['tuoteno']).";";
     $rivi .= "{$row['maa']}-{$_arr['varasto']};";
     $rivi .= pupesoft_csvstring($_arr['hyllypaikka']);
     $rivi .= "\n";

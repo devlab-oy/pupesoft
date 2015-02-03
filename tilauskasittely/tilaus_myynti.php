@@ -1877,32 +1877,10 @@ if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $tee == "LEPAA" an
 }
 
 if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $tee == "ODOTTAA" and $yhtiorow['reklamaation_kasittely'] == 'U') {
-  // Reklamaatio p‰ivitet‰‰n tilaan 'odottaa tuotteita'
-  $query = "UPDATE lasku set
-            alatila     = 'A'
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND tunnus  = '$tilausnumero'
-            AND tila    = 'C'";
-  $result = pupe_query($query);
+  $tilausvalmiskutsuja = "TILAUSMYYNTI";
 
-  $query  = "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and kesken = '$tilausnumero'";
-  $result = pupe_query($query);
-
-  if ($laskurow['tilaustyyppi'] == 'U') {
-    echo "<font class='message'>".t("Takuu: %s siirretty odottamaan tuotteita", '', $tilausnumero).".</font><br><br>";
-  }
-  else {
-    echo "<font class='message'>".t("Reklamaatio: %s siirretty odottamaan tuotteita", '', $tilausnumero).".</font><br><br>";
-  }
-
-  $tee        = '';
-  $tilausnumero    = '';
-  $laskurow      = '';
-  $kukarow['kesken']  = '';
-
-  if ($kukarow["extranet"] == "" and $lopetus != '') {
-    lopetus($lopetus, "META");
-  }
+  // tulostetaan l‰hetteet ja tilausvahvistukset tai sis‰inen lasku..
+  require "tilaus-valmis.inc";
 }
 
 if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'

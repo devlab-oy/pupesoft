@@ -367,6 +367,35 @@ elseif ($laskurow["tila"] == 'T') {
             and tyyppi  in ('L','T')";
   $result = pupe_query($query);
 }
+elseif ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $tee == "ODOTTAA" and $yhtiorow['reklamaation_kasittely'] == 'U') {
+
+  // Reklamaatio p‰ivitet‰‰n tilaan 'odottaa tuotteita'
+  $query = "UPDATE lasku set
+            alatila     = 'A'
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND tunnus  = '$tilausnumero'
+            AND tila    = 'C'";
+  $result = pupe_query($query);
+
+  $query  = "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and kesken = '$tilausnumero'";
+  $result = pupe_query($query);
+
+  if ($laskurow['tilaustyyppi'] == 'U') {
+    echo "<font class='message'>".t("Takuu: %s siirretty odottamaan tuotteita", '', $tilausnumero).".</font><br><br>";
+  }
+  else {
+    echo "<font class='message'>".t("Reklamaatio: %s siirretty odottamaan tuotteita", '', $tilausnumero).".</font><br><br>";
+  }
+
+  $tee        = '';
+  $tilausnumero    = '';
+  $laskurow      = '';
+  $kukarow['kesken']  = '';
+
+  if ($lopetus != '') {
+    lopetus($lopetus, "META");
+  }
+}
 else {
   // T‰ss‰ on normaalit tilaukset
 

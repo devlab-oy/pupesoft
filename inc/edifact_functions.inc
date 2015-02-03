@@ -611,8 +611,8 @@ function hae_varastointikaudet($konttiviite) {
 
   $query = "SELECT
             group_concat(DISTINCT lasku.asiakkaan_tilausnumero) AS tilausnumerot,
-            SUM(sarjanumeroseuranta.massa) AS total_paino,
-            DATE(tilausrivi.toimaika) AS sisaan,
+            SUM(ss.massa) AS total_paino,
+            DATE(otr.toimitettuaika) AS sisaan,
             DATE(tilausrivi.toimitettuaika) AS ulos
             FROM laskun_lisatiedot
             JOIN lasku
@@ -624,14 +624,17 @@ function hae_varastointikaudet($konttiviite) {
             JOIN tilausrivin_lisatiedot
               ON tilausrivin_lisatiedot.yhtio = laskun_lisatiedot.yhtio
               AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-            JOIN sarjanumeroseuranta
-              ON sarjanumeroseuranta.yhtio = laskun_lisatiedot.yhtio
-              AND sarjanumeroseuranta.myyntirivitunnus = tilausrivi.tunnus
+            JOIN sarjanumeroseuranta AS ss
+              ON ss.yhtio = laskun_lisatiedot.yhtio
+              AND ss.myyntirivitunnus = tilausrivi.tunnus
+            JOIN tilausrivi AS otr
+              ON otr.yhtio = ss.yhtio
+              AND otr.tunnus = ss.ostorivitunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND sarjanumeroseuranta.lisatieto != 'Hylätty'
-            AND sarjanumeroseuranta.lisatieto != 'Ylijaama'
+            AND ss.lisatieto != 'Hylätty'
+            AND ss.lisatieto != 'Ylijaama'
             AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
-            GROUP BY DATE(tilausrivi.toimaika), DATE(tilausrivi.toimitettuaika)";
+            GROUP BY DATE(otr.toimitettuaika), DATE(tilausrivi.toimitettuaika)";
   $result = pupe_query($query);
 
   $varastointikaudet = array();
@@ -1940,7 +1943,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
         $lisataan_rullia_vain_myyntitilaukseen = true;
       }
       else {
-        return true;
+        return false;
       }
 
     }

@@ -499,23 +499,16 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
 
     $boob = 0;
 
-    $maksaa_clean = poista_osakeyhtio_lyhenne($maksaa);
 
     $query = "SELECT ytunnus FROM toimi WHERE yhtio = '$yritirow[yhtio]' and nimi LIKE '%$maksaa%'";
     $suotoiresult = pupe_query($query);
-
-    if (mysql_num_rows($suotoiresult) == 0) {
-      $query = "SELECT ytunnus
-                FROM toimi
-                WHERE yhtio = '{$yritirow['yhtio']}'
-                AND nimi LIKE '%{$maksaa_clean}%'";
-      $suotoiresult = pupe_query($query);
-    }
 
     if (mysql_num_rows($suotoiresult) > 0) {
       echo "<a href=\"javascript:lataaiframe('{$tiliotedatarow['tunnus']}', '{$palvelin2}suori.php?tee=W&tiliote=Z&mav=$tpv&mak=$tpk&map=$tpp&mtili=$yritirow[tunnus]&tiliotesumma=".(-1*$maara)."&ohje=off');\">".t("Ostosuoritus")."</a><br>\n";
       $boob = 1;
     }
+
+    $maksaa_clean = poista_osakeyhtio_lyhenne($maksaa);
 
     //Olisiko tämä meidän asiakas
     $query = "SELECT * FROM asiakas WHERE yhtio = '$yritirow[yhtio]' and nimi LIKE '%$maksaa%'";

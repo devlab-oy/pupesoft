@@ -511,10 +511,31 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
     $maksaa_clean = poista_osakeyhtio_lyhenne($maksaa);
 
     //Olisiko tämä meidän asiakas
-    $query = "SELECT * FROM asiakas WHERE yhtio = '$yritirow[yhtio]' and nimi LIKE '%$maksaa%'";
+    $query = "SELECT *
+              FROM asiakas
+              WHERE yhtio = '{$yritirow['yhtio']}'
+              AND nimi LIKE '%{$maksaa}%'
+              AND laji != 'P'";
     $suoasiresult = pupe_query($query);
 
-    if (mysql_num_rows($suoasiresult) == 0) {
+    if (mysql_num_rows($suoasiresult) != 1) {
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$yritirow['yhtio']}'
+                AND nimi LIKE '%{$maksaa}%'";
+      $suoasiresult = pupe_query($query);
+    }
+
+    if (mysql_num_rows($suoasiresult) != 1) {
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$yritirow['yhtio']}'
+                AND nimi LIKE '%{$maksaa_clean}%'
+                AND laji != 'P'";
+      $suoasiresult = pupe_query($query);
+    }
+
+    if (mysql_num_rows($suoasiresult) != 1) {
       $query = "SELECT *
                 FROM asiakas
                 WHERE yhtio = '{$yritirow['yhtio']}'

@@ -533,7 +533,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
     }
 
     //  Annetaan Muu aina
-    echo "<a href=\"javascript:lataaiframe('{$tiliotedatarow['tunnus']}', '{$palvelin2}myyntires/maksunsyotto.php?summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z&selite=$selite_maksuavarten&maksaja_haku={$maksaa_clean}&ohje=off');\">".t("Myyntisuoritus muu")."</a>";
+    echo "<a href=\"javascript:lataaiframe('{$tiliotedatarow['tunnus']}', '{$palvelin2}myyntires/maksunsyotto.php?summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z&selite=$selite_maksuavarten&maksaja_haku=".urlencode($maksaa_clean)."&ohje=off');\">".t("Myyntisuoritus muu")."</a>";
 
   }
   echo "</td><td name='td_{$td_perheid}' class='$class'>";

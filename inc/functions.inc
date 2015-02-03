@@ -29933,10 +29933,15 @@ if (!function_exists("poista_osakeyhtio_lyhenne")) {
     $old = array("Ü", "Ž");
     $new = array("ü", "ž");
     $nimi = str_replace($old, $new, $nimi);
+    $nimi = strtolower($nimi);
 
     $replace = "oy|ab|as|oü|ou|mtü|tü|ttü";
 
-    return trim(preg_replace("/\b({$replace})\b/i", '', strtolower($nimi)));
+    foreach (explode("|", $replace) as $rep) {
+      $nimi = str_replace($rep, '', $nimi);
+    }
+
+    return trim($nimi);
   }
 }
 

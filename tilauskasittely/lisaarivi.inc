@@ -2762,7 +2762,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
         if (isset($jt_manual) and $jt_manual != '' and !empty($yhtiorow['jt_manual'])) {
           $kerayspvm = date('Y-m-d', strtotime('now'));
         }
-        elseif ((isset($jt_muidenmukana) and $jt_muidenmukana == 'KYLLA') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
+        elseif ($laskurow["tila"] != 'G' and ((isset($jt_muidenmukana) and $jt_muidenmukana == 'KYLLA') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A'))) {
           $kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
         }
         elseif ((isset($jt_muidenmukana) and $jt_muidenmukana == 'EI') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {

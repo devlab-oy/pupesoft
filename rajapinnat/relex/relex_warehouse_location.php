@@ -24,18 +24,6 @@ require 'inc/functions.inc';
 cron_log();
 
 $ajopaiva  = date("Y-m-d");
-$paiva_ajo = FALSE;
-
-if (isset($argv[2]) and $argv[2] != '') {
-
-  if (strpos($argv[2], "-") !== FALSE) {
-    list($y, $m, $d) = explode("-", $argv[2]);
-    if (is_numeric($y) and is_numeric($m) and is_numeric($d) and checkdate($m, $d, $y)) {
-      $ajopaiva = $argv[2];
-    }
-  }
-  $paiva_ajo = TRUE;
-}
 
 // Yhtiö
 $yhtio = mysql_real_escape_string($argv[1]);
@@ -44,7 +32,7 @@ $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
 // Tallennetaan rivit tiedostoon
-$filepath = "/tmp/supplier_update_{$yhtio}_$ajopaiva.csv";
+$filepath = "/tmp/warehouse_location_{$yhtio}_$ajopaiva.csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
   die("Tiedoston avaus epäonnistui: $filepath\n");
@@ -53,22 +41,14 @@ if (!$fp = fopen($filepath, 'w+')) {
 $header = "product;location;varastopaikka\n";
 fwrite($fp, $header);
 
-// Otetaan mukaan vain viimeisen vuorokauden jälkeen muuttuneet
-if ($paiva_ajo) {
-  $tuoterajaus = "AND (
-                    tuote.muutospvm >= date_sub(now(), interval 24 HOUR) or
-                    tuote.luontiaika >= date_sub(now(), interval 24 HOUR)
-                  )";
-}
-else {
-  $tuoterajaus = "";
-}
+$tuoterajaus = rakenna_relex_tuote_parametrit();
 
+// Otetaan mukaan vain viimeisen vuorokauden jälkeen muuttuneet
 $query = "SELECT tuote.tuoteno, yhtio.maa
           FROM tuote
-          JOIN yhtio ON (toimi.yhtio = yhtio.yhtio)
+          JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
           WHERE tuote.yhtio = '{$kukarow['yhtio']}'
-          AND tuote.status != 'P'";
+          {$tuoterajaus}";
 $res = pupe_query($query);
 
 // Kerrotaan montako riviä käsitellään
@@ -78,30 +58,41 @@ echo date("d.m.Y @ G:i:s") . ": Relex tuoterivejä {$rows} kappaletta.\n";
 
 while ($row = mysql_fetch_assoc($res)) {
 
+  $tuotepaikat = array();
+
   $query = "SELECT DISTINCT varasto,
             oletus,
+            saldo,
             concat_ws('-', hyllyalue, hyllynro, hyllyvali, hyllytaso) hyllypaikka
             FROM tuotepaikat
             WHERE yhtio='{$kukarow['yhtio']}'
             AND tuoteno='{$row['tuoteno']}'
-            GROUP BY 1
             ORDER BY 1,2 DESC,3 DESC";
   $tres = pupe_query($query);
 
   while ($trow = mysql_fetch_assoc($tres)) {
+
+    if (!empty($tuotepaikat[$trow['varasto']])) {
+      continue;
+    }
+
+    $tuotepaikat[$trow['varasto']] = $trow;
+  }
+
+  foreach ($tuotepaikat as $_varasto => $_arr) {
     $rivi  = pupesoft_csvstring($row['tuoteno']).";";
-    $rivi .= "{$row['maa']}-{$trow['varasto']};";
-    $rivi .= pupesoft_csvstring($trow['hyllypaikka']);
+    $rivi .= "{$row['maa']}-{$_arr['varasto']};";
+    $rivi .= pupesoft_csvstring($_arr['hyllypaikka']);
     $rivi .= "\n";
 
-    fwrite($fp, $rivi);
+   fwrite($fp, $rivi);
   }
 }
 
 fclose($fp);
 
 // Tehdään FTP-siirto
-if ($paiva_ajo and !empty($relex_ftphost)) {
+if (!empty($relex_ftphost)) {
   $ftphost = $relex_ftphost;
   $ftpuser = $relex_ftpuser;
   $ftppass = $relex_ftppass;

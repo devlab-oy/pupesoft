@@ -9780,6 +9780,7 @@ if ($tee == '') {
                 <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
                 <input type='hidden' name='projektilla' value='$projektilla'>
                 <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+                <input type='hidden' name='kaikkiyhteensa' value='$kaikkiyhteensa'>
                 <input type='hidden' name='mista' value = '$mista'>
                 <input type='hidden' name='orig_tila' value='$orig_tila'>
                 <input type='hidden' name='orig_alatila' value='$orig_alatila'>";

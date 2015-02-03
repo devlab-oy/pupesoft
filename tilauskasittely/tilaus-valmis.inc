@@ -269,10 +269,20 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
     $errortext .= t("Asiakkaalla on yli %s pv sitten er‰‰ntyneit‰ laskuja", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja']) . ". ";
   }
 
-  echo "<font class='error'>" . $errortext . t("Tilausta ei merkit‰ valmiiksi"), ".</font><br/><br/>";
-
   // Laitetaan lopetus tyhj‰ksi, niin ei refreshata ruutua jos tultiin muokkauksesta tms.
   $lopetus = "";
+
+  if ($toim == "REKLAMAATIO") {
+    $tee        = '';
+    $tilausnumero    = '';
+    $laskurow      = '';
+    $kukarow['kesken']  = '';
+
+    echo "<font class='error'>" . $errortext . t("Reklamaatiota ei merkit‰ valmiiksi"), ".</font><br/><br/>";
+  }
+  else {
+    echo "<font class='error'>" . $errortext . t("Tilausta ei merkit‰ valmiiksi"), ".</font><br/><br/>";
+  }
 }
 elseif ($tilausvalmis_asiakas_row['myyntikielto'] == 'K') {
   $query = "UPDATE lasku SET

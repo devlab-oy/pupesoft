@@ -1,70 +1,5 @@
 <?php
 
-function varastotilanne($hetki = false) {
-  global $kukarow;
-
-  if (!$hetki) {
-    $hetki = date("Y-m-d H:i:s");
-  }
-
-  $query = "SELECT
-            concat(ss.hyllyalue, ss.hyllynro) AS varastopaikka,
-            ss.massa,
-            concat(mtrlt.asiakkaan_tilausnumero, ':', mtrlt.asiakkaan_rivinumero) AS tilaus
-            FROM sarjanumeroseuranta AS ss
-            JOIN tilausrivi AS mtr
-              ON mtr.yhtio = ss.yhtio
-              AND mtr.tunnus = ss.myyntirivitunnus
-            JOIN tilausrivin_lisatiedot AS mtrlt
-              ON mtrlt.yhtio = ss.yhtio
-              AND mtrlt.tilausrivitunnus = mtr.tunnus
-            JOIN tilausrivi AS otr
-              ON otr.yhtio = ss.yhtio
-              AND otr.tunnus = ss.ostorivitunnus
-            WHERE ss.yhtio = '{$kukarow['yhtio']}'
-            AND ss.varasto IS NOT NULL
-            AND mtrlt.asiakkaan_tilausnumero IS NOT NULL
-            AND otr.toimitettuaika <= '{$hetki}'
-            AND (mtr.toimitettuaika >= '{$hetki}' OR mtr.toimitettuaika = '0000-00-00 00:00:00')
-            GROUP BY mtrlt.tunnus";
-  $result = pupe_query($query);
-
-  $paikat = array();
-  $totalpaino = 0;
-
-  while ($rulla = mysql_fetch_assoc($result)) {
-    $paikat[$rulla['varastopaikka']][$rulla['tilaus']][] = $rulla;
-    $totalpaino += $rulla['massa'];
-  }
-
-  $echo = "<br>Rullien kokonaism‰‰r‰: " . mysql_num_rows($result) . ' kpl';
-  $echo .= '<br>';
-  $echo .= "Rullien kokonaispaino: " . $totalpaino . ' kg';
-  $echo .= '<br>';
-
-  foreach ($paikat as $paikka => $tilaukset) {
-
-    $echo .= "<br><h2 style='font-weight:bold'>".$paikka.'</h2>';
-
-    foreach ($tilaukset as $tilaus => $rullat) {
-
-       $echo .= $tilaus . ' - ';
-
-       $paino = 0;
-       $rullia = 0;
-       foreach ($rullat as $rulla) {
-         $paino += $rulla['massa'];
-         $rullia++;
-       }
-
-       $echo .= $paino . ' kg - ' . $rullia . ' kpl<br>';
-
-     }
-  }
-
-return $echo;
-}
-
 require 'inc/edifact_functions.inc';
 
 if (isset($task) and $task == 'nayta_varastoraportti') {
@@ -91,12 +26,9 @@ require "inc/parametrit.inc";
 if (!isset($errors)) $errors = array();
 
 
+if (!isset($task) or $task == 'luo_saldoraportti') {
 
-
-if (isset($task) and ($task == 'saldoraportti' or $task == 'luo_saldoraportti')) {
-
-  echo "<a href='varastotilanne.php'>´ " . t("Palaa varastontilanteeseen") . "</a><br><br>";
-  echo "<font class='head'>".t("Saldoraportti")."</font></a><hr><br>";
+  echo "<font class='head'>".t("Varastotilanne")."</font></a><hr><br>";
 
   $nyt = date("d.m.Y");
 
@@ -136,12 +68,23 @@ if (isset($task) and ($task == 'saldoraportti' or $task == 'luo_saldoraportti'))
     <tr><th>" . t("P‰iv‰") ."</th><td><input type='text' id='pvm' name='pvm' value='{$nyt}' /></td></tr>
     <tr><th>" . t("Kellonaika") ."</th><td>";
 
+  $t = time();
+  $minuutti = date("i",$t);
+  $tunti = date("H",$t);
+
   echo "<select name='tunti'>";
-  echo "<option value='00'>Tunti</option>";
   $h = 0;
   while ($h <= 23) {
     $_h = str_pad($h,2,"0",STR_PAD_LEFT);
-    echo "<option value='{$_h}'>{$_h}</option>";
+
+    if ($_h == $tunti) {
+      $sel = 'selected';
+    }
+    else {
+     $sel = '';
+    }
+
+    echo "<option value='{$_h}' {$sel}>{$_h}</option>";
     $h++;
   }
   echo "</select>";
@@ -149,24 +92,42 @@ if (isset($task) and ($task == 'saldoraportti' or $task == 'luo_saldoraportti'))
   echo " : ";
 
   echo "<select name='minuutti'>";
-  echo "<option value='00'>Minuutti</option>";
   $m = 0;
   while ($m <= 59) {
     $_m = str_pad($m,2,"0",STR_PAD_LEFT);
-    echo "<option value='{$_m}'>{$_m}</option>";
+
+    if ($_m == $minuutti) {
+      $sel = 'selected';
+    }
+    else {
+     $sel = '';
+    }
+
+    echo "<option value='{$_m}' {$sel}>{$_m}</option>";
     $m++;
   }
   echo "</select>";
 
   echo "
   </td></tr>
-  <tr><th></th><td align='right'><input type='submit' value='". t("Luo saldoraportti") ."' /></td></tr>
+  <tr><th></th><td align='right'><input type='submit' value='". t("Hae tiedot") ."' /></td></tr>
   </table>
   <input type='hidden' name='task' value='luo_saldoraportti' />
   </form>";
 
+  echo "<br>
+    <form>
+    <input type='hidden' name='task' value='ylijaamakasittely' />
+    <input type='submit' value='K‰sittele ylij‰‰m‰t' />
+    </form>";
 
   if ($task == 'luo_saldoraportti') {
+
+    echo "
+      <form>
+      <input type='hidden' name='task' value='saldoraportti' />
+      <input type='submit' disabled value='Lataa pdf' />
+      </form><br>";
 
     $ajat = explode(".", $pvm);
 
@@ -179,10 +140,7 @@ if (isset($task) and ($task == 'saldoraportti' or $task == 'luo_saldoraportti'))
     $echo = varastotilanne($hetki);
 
     echo $echo;
-
   }
-
-
 }
 
 if (isset($task) and ($task == 'ylijaamasiirto')) {
@@ -378,190 +336,5 @@ if (isset($task) and ($task == 'ylijaamakasittely')) {
     echo "</table>";
   }
 }
-
-if (!isset($task)) {
-
-  // uusi query tulossa...
-
-  /*
-  $query = "SELECT
-            ss.hyllyalue,
-            ss.hyllynro,
-            concat(trlt.asiakkaan_tilausnumero, ':', trlt.asiakkaan_rivinumero) AS kombo,
-            count(tilausrivi.tunnus) AS rullia,
-            SUM(IF(ss.lisatieto IS NULL, 1,0)) AS Normaali,
-            SUM(IF(ss.lisatieto = 'Lusattu', 1,0)) AS Lusattu,
-            SUM(IF(ss.lisatieto = 'Ylijaama', 1,0)) AS Ylij‰‰m‰,
-            SUM(ss.massa)
-            FROM sarjanumeroseuranta AS ss
-            LEFT JOIN tilausrivi
-              ON tilausrivi.yhtio = ss.yhtio
-              AND tilausrivi.tunnus = ss.myyntirivitunnus
-            LEFT JOIN tilausrivin_lisatiedot AS trlt
-              ON trlt.yhtio = ss.yhtio
-              AND trlt.tilausrivitunnus = tilausrivi.tunnus
-            LEFT JOIN lasku
-              ON lasku.yhtio = ss.yhtio
-              AND lasku.tunnus = tilausrivi.otunnus
-            LEFT JOIN laskun_lisatiedot
-              ON laskun_lisatiedot.yhtio = ss.yhtio
-              AND laskun_lisatiedot.otunnus = lasku.tunnus
-            WHERE ss.yhtio = '{$kukarow['kuka']}'
-            AND (ss.lisatieto != 'Toimitettu' OR ss.lisatieto IS NULL)
-            AND ss.varasto IS NOT NULL
-            AND trlt.asiakkaan_tilausnumero IS NOT NULL
-            GROUP BY hyllyalue, hyllynro, kombo
-            ORDER BY ss.hyllyalue, CAST(ss.hyllynro AS SIGNED)";
-  */
-
-  $query = "SELECT ss.*,
-            tilausrivin_lisatiedot.asiakkaan_rivinumero AS myyntirivinumero,
-            tilausrivin_lisatiedot.asiakkaan_tilausnumero AS myyntitilausnumero,
-            ostotilausrivin_lisatiedot.asiakkaan_rivinumero AS ostorivinumero,
-            ostotilausrivin_lisatiedot.asiakkaan_tilausnumero AS ostotilausnumero,
-            ostotilausrivin_lisatiedot.kuljetuksen_rekno,
-            IF(ss.lisatieto IS NULL, 'Normaali', ss.lisatieto) AS status
-            FROM sarjanumeroseuranta AS ss
-            LEFT JOIN tilausrivi
-              ON tilausrivi.yhtio = ss.yhtio
-              AND tilausrivi.tunnus = ss.myyntirivitunnus
-            LEFT JOIN tilausrivin_lisatiedot
-              ON tilausrivin_lisatiedot.yhtio = ss.yhtio
-              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-            LEFT JOIN tilausrivi AS ostotilausrivi
-              ON ostotilausrivi.yhtio = ss.yhtio
-              AND ostotilausrivi.tunnus = ss.ostorivitunnus
-            LEFT JOIN tilausrivin_lisatiedot AS ostotilausrivin_lisatiedot
-              ON ostotilausrivin_lisatiedot.yhtio = ss.yhtio
-              AND ostotilausrivin_lisatiedot.tilausrivitunnus = ostotilausrivi.tunnus
-            LEFT JOIN lasku
-              ON lasku.yhtio = ss.yhtio
-              AND lasku.tunnus = tilausrivi.otunnus
-            LEFT JOIN laskun_lisatiedot
-              ON laskun_lisatiedot.yhtio = ss.yhtio
-              AND laskun_lisatiedot.otunnus = lasku.tunnus
-            WHERE ss.yhtio = '{$kukarow['yhtio']}'
-            AND (ss.lisatieto != 'Toimitettu' OR ss.lisatieto IS NULL)
-            AND ss.varasto IS NOT NULL
-            ORDER BY ss.hyllyalue, CAST(ss.hyllynro AS SIGNED)";
-  $result = pupe_query($query);
-
-  echo "<font class='head'>".t("Varastotilanne")."</font><hr>";
-
-  if (mysql_num_rows($result) == 0) {
-    echo "Ei rullia varastossa...";
-  }
-  else {
-
-    $varastot = array();
-    $painot = array();
-
-    while ($rulla = mysql_fetch_assoc($result)) {
-
-      $varastopaikka = $rulla['hyllyalue'] . "-" . $rulla['hyllynro'];
-
-      $varastot[$varastopaikka][] = $rulla;
-      $painot[$varastopaikka] = $painot[$varastopaikka] + $rulla['massa'];
-      $statukset[$varastopaikka][] = $rulla['status'];
-
-    }
-
-    foreach ($statukset as $vp => $status) {
-      $statukset[$vp] = array_count_values($status);
-    }
-
-    js_openFormInNewWindow();
-
-    $_varastot = serialize($varastot);
-    $_varastot = base64_encode($_varastot);
-
-    $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
-    $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
-
-    echo "
-    <form method='post' id='nayta_varastoraportti' action='varastotilanne.php'>
-    <input type='hidden' name='varastot' value='{$_varastot}' />
-    <input type='hidden' name='task' value='nayta_varastoraportti' />
-    <input type='hidden' name='session' value='{$session}' />
-    <input type='hidden' name='logo_url' value='{$logo_url}' />
-    <input type='hidden' name='tee' value='XXX' />
-    </form>
-    <button onClick=\"js_openFormInNewWindow('nayta_varastoraportti', 'Varastoraportti'); return false;\" />";
-
-    echo t("Luo pdf");
-    echo "</button></div>";
-
-    echo "
-      <form>
-      <input type='hidden' name='task' value='ylijaamakasittely' />
-      <input type='submit' value='K‰sittele ylij‰‰m‰t' />
-      </form>";
-
-    echo "
-      <form>
-      <input type='hidden' name='task' value='saldoraportti' />
-      <input type='submit' value='Saldoraportti' />
-      </form><br><br>";
-
-    echo "<table>";
-    echo "<tr>";
-    echo "<th>".t("Varastopaikka")."</th>";
-    echo "<th>".t("Rullien m‰‰r‰")."</th>";
-    echo "<th>".t("Tilausnumerot ja -rivit")."</th>";
-    echo "<th>".t("Statukset")."</th>";
-    echo "<th>".t("Yhteispaino")."</th>";
-    echo "</tr>";
-
-    foreach ($varastot as $vp => $rullat) {
-
-      echo "<tr>";
-
-      echo "<td valign='top' align='center'>";
-      echo $vp;
-      echo "</td>";
-
-      echo "<td valign='top' align='center'>";
-      echo count($rullat);
-      echo " kpl</td>";
-
-      echo "<td valign='top' align='center'>";
-
-      $tilausnumerot = array();
-      foreach ($rullat as $rulla) {
-
-        if ($rulla['myyntirivinumero'] == NULL) {
-          $kombo = $rulla['ostotilausnumero'] . ":" . $rulla['ostorivinumero'];
-        }
-        else {
-          $kombo = $rulla['myyntitilausnumero'] . ":" . $rulla['myyntirivinumero'];
-        }
-
-        if (!in_array($kombo, $tilausnumerot)) {
-          $tilausnumerot[] = $kombo;
-          echo $kombo, '<br>';
-        }
-      }
-
-      echo "</td>";
-
-      echo "<td valign='top' align='center'>";
-      foreach ($statukset[$vp] as $status => $kpl) {
-        echo $status, ' ', $kpl, ' kpl<br>';
-      }
-      echo "</td>";
-
-      echo "<td valign='top' align='center'>";
-      echo $painot[$vp];
-      echo " kg</td>";
-
-      echo "</tr>";
-    }
-    echo "</table>";
-
-
-  }
-}
-
-
 
 require "inc/footer.inc";

@@ -106,7 +106,7 @@ function laheta_sanoma($sanoma){
   $login = ftp_login($yhteys, $user, $pass);
 
   if ((!$yhteys) || (!$login)) {
-    die('ei yhteytt√§');
+    die('ei yhteytt‰');
   }
 
   ftp_chdir($yhteys, 'in-prod');
@@ -631,7 +631,7 @@ function hae_varastointikaudet($konttiviite) {
               ON otr.yhtio = ss.yhtio
               AND otr.tunnus = ss.ostorivitunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND ss.lisatieto != 'Hyl√§tty'
+            AND ss.lisatieto != 'Hyl‰tty'
             AND ss.lisatieto != 'Ylijaama'
             AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
             GROUP BY DATE(otr.toimitettuaika), DATE(tilausrivi.toimitettuaika)";
@@ -744,6 +744,10 @@ function laadi_edifact_sanoma($parametrit, $korjaus = false) {
       $lajikoodi = '833';
       $assosiaatiokoodi = 'EXTU11';
       break;
+    case 'rekkakontitus':
+      $lajikoodi = '15';
+      $assosiaatiokoodi = 'EXWL16';
+      break;
     case 'satamavahvistus':
         $lajikoodi = '122';
         $assosiaatiokoodi = 'EXPC13';
@@ -809,6 +813,15 @@ function laadi_edifact_sanoma($parametrit, $korjaus = false) {
   if ($laji == 'kontitus') {
     // RFF+VON -segmentti
     $s .= "RFF+VON:" . $kontitus_info['matkakoodi'] . "'";
+    $segmentit++;
+  }
+  elseif ($laji == 'rekkakontitus') {
+    // TDT -segmentti
+    $s .= "TDT+20++3++". $kuljettaja_info['koodi'] ."::86:". $kuljettaja_info['nimi'] ."+++" . $kuljettaja_info['rekno'] . "'";
+    $segmentit++;
+
+    // LOC -segmentti
+    $s .= "LOC+8+XXX::86:". $kuljettaja_info['maaranpaa'] ."'";
     $segmentit++;
   }
 
@@ -879,6 +892,13 @@ function laadi_edifact_sanoma($parametrit, $korjaus = false) {
     $s .= "SEL+" . $kontitus_info['sinettinumero'] ."+TO:::" . $kontitus_info['sinetoija'] . "'";
     $segmentit++;
   }
+  elseif ($laji == 'rekkakontitus') {
+
+    // EQD+CN -segmentti (kontti-infoa)
+    $s .= "EQD+TE+". $kuljettaja_info['traileri_rekno'] ."+::TE+++5'";
+    $segmentit++;
+
+  }
 
   if ($tyyppi == 'RECADV' and !empty($varasto_info['koodi1'])) {
     // LOC -segmentti
@@ -894,17 +914,17 @@ function laadi_edifact_sanoma($parametrit, $korjaus = false) {
     $s .= "TDT+20++1++" . $matka_info['carrier_id'] .":100:ZZZ+++" . $matka_info['transport_id'] .":103::" . $matka_info['transport_name'] ."'";
     $segmentit++;
 
-    // LOC -segmentti l√§ht√∂paikka
+    // LOC -segmentti l‰htˆpaikka
     $s .= "LOC+5+" . $matka_info['lahtopaikka_id'] ."::6:" . $matka_info['lahtopaikka_nimi'] ."'";
     $segmentit++;
 
-    // DTM -segmentti l√§ht√∂aika
+    // DTM -segmentti l‰htˆaika
     $s .= "DTM+186:";
     $s .= $matka_info['lahtoaika'];
     $s .= ":203'";
     $segmentit++;
 
-    // LOC -segmentti m√§√§r√§np√§√§
+    // LOC -segmentti m‰‰r‰np‰‰
     $s .= "LOC+8+" . $matka_info['valisatama_id'] ."'";
     $segmentit++;
 
@@ -912,7 +932,7 @@ function laadi_edifact_sanoma($parametrit, $korjaus = false) {
     $s .= "TDT+30++1++::ZZZ+++:::" . $matka_info['jatko_transport_name'] ."'";
     $segmentit++;
 
-    // LOC -segmentti m√§√§r√§np√§√§tarkenne
+    // LOC -segmentti m‰‰r‰np‰‰tarkenne
     $s .= "LOC+8+" . $matka_info['maaranpaa_id'] ."'";
     $segmentit++;
 
@@ -1001,7 +1021,7 @@ function laadi_edifact_sanoma($parametrit, $korjaus = false) {
     $segmentit += 4;
   }
 
-  if ($laji == 'kontitus') {
+  if ($laji == 'kontitus' or $laji == 'rekkakontitus') {
 
     foreach ($rullarivit as $key => $rullarivi) {
 
@@ -1151,7 +1171,7 @@ function kasittele_bookkaussanoma($edi_data) {
     if (substr($rivi, 0, 3) == 'UNB') {
       $osat = explode("+", $rivi);
 
-      /* n√§ill√§ ei nyt olekaan viel√§ k√§ytt√∂√§
+      /* n‰ill‰ ei nyt olekaan viel‰ k‰yttˆ‰
       $vastaanottaja_ovt_info = $osat[3];
       $vastaanottaja_ovt_info_osat = explode(":", $vastaanottaja_ovt_info);
       $vastaanottaja_ovt = $vastaanottaja_ovt_info_osat[0];
@@ -1164,8 +1184,8 @@ function kasittele_bookkaussanoma($edi_data) {
       $sanoma_id = $osat[5];
     }
 
-    // katsotaan onko viesti alkuper√§inen vai korvaava vai peruutus (9 vai 5 vai 1)
-    // tulee ehk√§ olemaan oleellinen tieto
+    // katsotaan onko viesti alkuper‰inen vai korvaava vai peruutus (9 vai 5 vai 1)
+    // tulee ehk‰ olemaan oleellinen tieto
     if (substr($rivi, 0, 3) == 'BGM') {
       $osat = explode("+", $rivi);
       $matkakoodi = $osat[2];
@@ -1313,10 +1333,10 @@ function kasittele_bookkaussanoma($edi_data) {
   $matkatiedot = serialize($matkatiedot);
   $matkatiedot = mysql_real_escape_string($matkatiedot);
 
-  // t√§ss√§ vaiheessa vastaanottaja on aina steveco
+  // t‰ss‰ vaiheessa vastaanottaja on aina steveco
   $asiakas_id = 106;
 
-  // tarkistetaan onko t√§m√§ sanoma jostakin syyst√§ jo k√§sitelty
+  // tarkistetaan onko t‰m‰ sanoma jostakin syyst‰ jo k‰sitelty
   $query = "SELECT tunnus
             FROM liitetiedostot
             WHERE yhtio = '{$kukarow['yhtio']}'
@@ -1647,7 +1667,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
 
   $edi_data = str_replace("\n", "", $edi_data);
 
-  // otetaan talteen liitetiedoston lis√§√§mist√§ varten
+  // otetaan talteen liitetiedoston lis‰‰mist‰ varten
   $filesize = strlen($edi_data);
   $liitedata = mysql_real_escape_string($edi_data);
 
@@ -1886,7 +1906,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
 
   $data = $rahti;
 
-  // tarkistetaan onko t√§m√§ sanoma jostakin syyst√§ jo k√§sitelty
+  // tarkistetaan onko t‰m‰ sanoma jostakin syyst‰ jo k‰sitelty
   $query = "SELECT *
             FROM liitetiedostot
             WHERE yhtio = '{$kukarow['yhtio']}'
@@ -2280,8 +2300,8 @@ function kasittele_iftsta($edi_data) {
 
     $rivi = str_replace("#%#", "'", $rivi);
 
-    // katsotaan onko viesti alkuper√§inen vai korvaava vai peruutus (9 vai 5 vai 1)
-    // tulee ehk√§ olemaan oleellinen tieto
+    // katsotaan onko viesti alkuper‰inen vai korvaava vai peruutus (9 vai 5 vai 1)
+    // tulee ehk‰ olemaan oleellinen tieto
     if (substr($rivi, 0, 3) == 'BGM') {
       $osat = explode("+", $rivi);
       $matkakoodi = $osat[2];
@@ -2717,11 +2737,11 @@ function pakkalista_pdf($pdf_data) {
   $bold["height"] = 11;
   $bold["font"] = "Times-Bold";
 
-  // sitten aletaan piirt√§m√§√§n itse PDF sis√§lt√∂√§
+  // sitten aletaan piirt‰m‰‰n itse PDF sis‰ltˆ‰
   $sivu = $pdf->new_page("a4");
 
   $sivunro = 1;
-  // lasketaan sivum√§√§r√§
+  // lasketaan sivum‰‰r‰
   $riveja = count($pakkalista) + 4;
   $sivuja = ceil($riveja / 49);
 
@@ -2782,12 +2802,12 @@ function pakkalista_pdf($pdf_data) {
 
   }
 
-  //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
+  //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
   $pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(),true)).".pdf";
 
   //kirjoitetaan pdf faili levylle..
   $fh = fopen($pdffilenimi, "w");
-  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep√§onnistui $pdffilenimi");
+  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
   fclose($fh);
 
   return $pdffilenimi;
@@ -2815,11 +2835,11 @@ function konttierittely_pdf($pdf_data) {
   $bold["height"] = 11;
   $bold["font"] = "Times-Bold";
 
-  // sitten aletaan piirt√§m√§√§n itse PDF sis√§lt√∂√§
+  // sitten aletaan piirt‰m‰‰n itse PDF sis‰ltˆ‰
   $sivu = $pdf->new_page("a4");
 
   $sivunro = 1;
-  // lasketaan sivum√§√§r√§
+  // lasketaan sivum‰‰r‰
   $riveja = count($pakkalista) + 4;
   $sivuja = ceil($riveja / 49);
 
@@ -2896,12 +2916,12 @@ function konttierittely_pdf($pdf_data) {
     }
   }
 
-  //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
+  //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
   $pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(),true)).".pdf";
 
   //kirjoitetaan pdf faili levylle..
   $fh = fopen($pdffilenimi, "w");
-  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep√§onnistui $pdffilenimi");
+  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
   fclose($fh);
 
   return $pdffilenimi;
@@ -2928,7 +2948,7 @@ function lahtoilmoitus_pdf($pdf_data) {
   $bold["height"] = 11;
   $bold["font"] = "Times-Bold";
 
-  // sitten aletaan piirt√§m√§√§n itse PDF sis√§lt√∂√§
+  // sitten aletaan piirt‰m‰‰n itse PDF sis‰ltˆ‰
   $sivu = $pdf->new_page("a4");
 
   $image = $pdf->png_embed($logodata);
@@ -2991,12 +3011,12 @@ function lahtoilmoitus_pdf($pdf_data) {
   $pdf->draw_text($x+440, $y, "{$konttimaara} x {$konttityyppi}", $sivu, $bold);
   $y -= 30;
 
-  //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
+  //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
   $pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(),true)).".pdf";
 
   //kirjoitetaan pdf faili levylle..
   $fh = fopen($pdffilenimi, "w");
-  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep√§onnistui $pdffilenimi");
+  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
   fclose($fh);
 
   return $pdffilenimi;
@@ -3026,7 +3046,7 @@ function varastoraportti_pdf($pdf_data) {
   $iso["height"] = 20;
   $iso["font"] = "Times-Bold";
 
-  // sitten aletaan piirt√§m√§√§n itse PDF sis√§lt√∂√§
+  // sitten aletaan piirt‰m‰‰n itse PDF sis‰ltˆ‰
   $sivu = $pdf->new_page("a4");
 
   $image = $pdf->png_embed($logodata);
@@ -3127,12 +3147,12 @@ function varastoraportti_pdf($pdf_data) {
     }
   }
 
-  //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
+  //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
   $pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(),true)).".pdf";
 
   //kirjoitetaan pdf faili levylle..
   $fh = fopen($pdffilenimi, "w");
-  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep√§onnistui $pdffilenimi");
+  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
   fclose($fh);
 
   return $pdffilenimi;
@@ -3162,7 +3182,7 @@ function laskutusraportti_pdf($pdf_data) {
   $iso["height"] = 20;
   $iso["font"] = "Times-Bold";
 
-  // sitten aletaan piirt√§m√§√§n itse PDF sis√§lt√∂√§
+  // sitten aletaan piirt‰m‰‰n itse PDF sis‰ltˆ‰
   $sivu = $pdf->new_page("a4");
 
   $image = $pdf->png_embed($logodata);
@@ -3206,7 +3226,7 @@ function laskutusraportti_pdf($pdf_data) {
   $y -= 15;
 
   $pdf->draw_text($x, $y, "NIMIKE", $sivu, $bold);
-  $pdf->draw_text($x+220, $y, utf8_decode("M√Ñ√ÑR√Ñ"), $sivu, $bold);
+  $pdf->draw_text($x+220, $y, utf8_decode("MƒƒRƒ"), $sivu, $bold);
   $pdf->draw_text($x+440, $y, "HINTA", $sivu, $bold);
 
   $y -= 10;
@@ -3270,16 +3290,16 @@ function laskutusraportti_pdf($pdf_data) {
     $total_hinta +=  $hinta;
   }
 
-  $pdf->draw_text($x, $y, utf8_decode("Hinta yhteens√§:"), $sivu, $bold);
+  $pdf->draw_text($x, $y, utf8_decode("Hinta yhteens‰:"), $sivu, $bold);
   $pdf->draw_text($x+80, $y, chr(128).number_format((float)($total_hinta), 3, '.', ''), $sivu, $bold);
   $y -= 15;
 
-  //keksit√§√§n uudelle failille joku varmasti uniikki nimi:
+  //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
   $pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(),true)).".pdf";
 
   //kirjoitetaan pdf faili levylle..
   $fh = fopen($pdffilenimi, "w");
-  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep√§onnistui $pdffilenimi");
+  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
   fclose($fh);
 
   return $pdffilenimi;
@@ -3332,6 +3352,99 @@ function curl_get_contents($url, $sessio) {
     curl_close($ch);
 
     return $data;
+}
+
+function varastotilanne($hetki = false) {
+  global $kukarow;
+
+  if (!$hetki) {
+    $hetki = date("Y-m-d H:i:s");
+  }
+
+  $query = "SELECT
+            concat(ss.hyllyalue, ss.hyllynro) AS varastopaikka,
+            ss.massa,
+            concat(mtrlt.asiakkaan_tilausnumero, ':', mtrlt.asiakkaan_rivinumero) AS tilaus
+            FROM sarjanumeroseuranta AS ss
+            JOIN tilausrivi AS mtr
+              ON mtr.yhtio = ss.yhtio
+              AND mtr.tunnus = ss.myyntirivitunnus
+            JOIN tilausrivin_lisatiedot AS mtrlt
+              ON mtrlt.yhtio = ss.yhtio
+              AND mtrlt.tilausrivitunnus = mtr.tunnus
+            JOIN tilausrivi AS otr
+              ON otr.yhtio = ss.yhtio
+              AND otr.tunnus = ss.ostorivitunnus
+            WHERE ss.yhtio = '{$kukarow['yhtio']}'
+            AND ss.varasto IS NOT NULL
+            AND mtrlt.asiakkaan_tilausnumero IS NOT NULL
+            AND otr.toimitettuaika <= '{$hetki}'
+            AND (mtr.toimitettuaika >= '{$hetki}' OR mtr.toimitettuaika = '0000-00-00 00:00:00')
+            GROUP BY mtrlt.tunnus
+            ORDER BY ss.hyllyalue, CAST(ss.hyllynro as SIGNED INTEGER) ASC";
+  $result = pupe_query($query);
+
+  $paikat = array();
+  $totalpaino = 0;
+
+  while ($rulla = mysql_fetch_assoc($result)) {
+    $paikat[$rulla['varastopaikka']][$rulla['tilaus']][] = $rulla;
+    $totalpaino += $rulla['massa'];
+  }
+
+  $echo = "<br>Rullien kokonaism‰‰r‰: " . mysql_num_rows($result) . ' kpl';
+  $echo .= '<br>';
+  $echo .= "Rullien kokonaispaino: " . $totalpaino . ' kg';
+  $echo .= '<br><br>';
+
+
+  $echo .= "<table>";
+
+  foreach ($paikat as $paikka => $tilaukset) {
+
+    $rivimaara = count($tilaukset) + 2;
+
+    $echo .= "<tr><th valign='top' rowspan={$rivimaara}''>";
+    $echo .= "<h2 style='font-weight:bold'>".$paikka.'</h2>';
+    $echo .= "</th><th>";
+    $echo .= "</th></tr>";
+
+    $tilauspaino = 0;
+    $tilausrullia = 0;
+    foreach ($tilaukset as $tilaus => $rullat) {
+      $echo .= "<tr><td>";
+
+
+      $echo .= "<div style='display:inline-block; width:130px; padding:0 10px'>" . $tilaus . "</div>";
+
+      $paino = 0;
+      $rullia = 0;
+      foreach ($rullat as $rulla) {
+        $paino += $rulla['massa'];
+        $rullia++;
+        $tilauspaino += $rulla['massa'];
+        $tilausrullia++;
+      }
+
+      $echo .= "<div style='display:inline-block; width:80px; text-align:right; padding-right:10px;'>" . $paino . " kg</div>";
+      $echo .= "<div style='display:inline-block; text-align:left;'>" . $rullia . " kpl</div>";
+
+
+
+      $echo .= "</td></tr>";
+    }
+    $echo .= "<tr><td>";
+
+    $echo .= "<div style='display:inline-block; width:130px; padding:0 10px; font-weight:bold;'>" . t("Yhteens‰:") . "</div>";
+    $echo .= "<div style='display:inline-block; width:80px; text-align:right; padding-right:10px;  font-weight:bold;'>" . $tilauspaino . " kg</div>";
+    $echo .= "<div style='display:inline-block; text-align:left;  font-weight:bold;'>" . $tilausrullia . " kpl</div>";
+
+    $echo .= "</td></tr>";
+
+  }
+  $echo .= "</table>";
+
+return $echo;
 }
 
 ?>

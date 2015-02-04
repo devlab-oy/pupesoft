@@ -3225,9 +3225,9 @@ function laskutusraportti_pdf($pdf_data) {
 
   $y -= 15;
 
-  $pdf->draw_text($x, $y, "NIMIKE", $sivu, $bold);
-  $pdf->draw_text($x+220, $y, utf8_decode("MÄÄRÄ"), $sivu, $bold);
-  $pdf->draw_text($x+440, $y, "HINTA", $sivu, $bold);
+  $pdf->draw_text($x, $y, t("NIMIKE"), $sivu, $bold);
+  $pdf->draw_text($x+220, $y, t("MÄÄRÄ"), $sivu, $bold);
+  $pdf->draw_text($x+440, $y, t("HINTA"), $sivu, $bold);
 
   $y -= 10;
   $yy[0] = $yy[1] = $y;
@@ -3290,7 +3290,7 @@ function laskutusraportti_pdf($pdf_data) {
     $total_hinta +=  $hinta;
   }
 
-  $pdf->draw_text($x, $y, utf8_decode("Hinta yhteensä:"), $sivu, $bold);
+  $pdf->draw_text($x, $y, t("Hinta yhteensä:"), $sivu, $bold);
   $pdf->draw_text($x+80, $y, chr(128).number_format((float)($total_hinta), 3, '.', ''), $sivu, $bold);
   $y -= 15;
 

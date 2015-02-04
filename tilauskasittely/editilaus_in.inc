@@ -1928,7 +1928,7 @@ while ($tietue = fgets($fd)) {
     // TAI kun tullaan magentosta ja me luotetaan verkkokaupan hintoihin.
     if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $tieto != '') {
       // T‰m‰ hinta on aina veroton, joten lasketaan vero p‰‰lle jos myyntihinnat ovat verollisia
-      $editilaus_hinta = (float) trim($tieto);
+      $editilaus_hinta = (float) trim(str_replace( ",", ".", $tieto));
 
       if ($yhtiorow["alv_kasittely"] == '' and !isset($verkkokauppa_hinnatedifailistaverollisina)) {
         $editilaus_hinta = round($editilaus_hinta * (1 + $laskurow["alv"]/100), 2);

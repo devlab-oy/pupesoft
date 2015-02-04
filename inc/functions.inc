@@ -29986,13 +29986,18 @@ if (!function_exists("poista_osakeyhtio_lyhenne")) {
   function poista_osakeyhtio_lyhenne($nimi) {
 
     // strtolower ei osaa pienentää tämmöisiä erikoismerkkejä
-    $old = array("Ü", "Ž");
-    $new = array("ü", "ž");
+    $old = array("Ü", "Ž", "Ä", "Ö", "Å");
+    $new = array("ü", "ž", "ä", "ö", "å");
     $nimi = str_replace($old, $new, $nimi);
+    $nimi = strtolower($nimi);
 
     $replace = "oy|ab|as|oü|ou|mtü|tü|ttü";
 
-    return trim(preg_replace("/\b({$replace})\b/i", '', strtolower($nimi)));
+    foreach (explode("|", $replace) as $rep) {
+      $nimi = str_replace($rep, '', $nimi);
+    }
+
+    return trim($nimi);
   }
 }
 

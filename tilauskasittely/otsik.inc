@@ -740,13 +740,21 @@ if ($tila == "" and !isset($jatka)) {
         $puhlisa = "";
       }
 
-      $squery = "SELECT asiakas.*, tilaus_viesti as viesti, myynti_kommentti1 as comments,
-                  $puhlisa
-                  asiakas.tunnus liitostunnus,
-                  'O' kohdistettu, '' kohde, '' kauppatapahtuman_luonne,
-                  if(asiakas.gsm != '', asiakas.gsm,
-                    if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
-                      if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
+      if ($yhtiorow['asiakastiedot_otsikolle'] = 'K') {
+        $toim_puhlisa = " , if(asiakas.gsm != '', asiakas.gsm,
+                          if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
+                          if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh ";
+      }
+
+      $squery = "SELECT
+                 asiakas.*,
+                 tilaus_viesti as viesti,
+                 myynti_kommentti1 as comments,
+                 $puhlisa
+                 asiakas.tunnus liitostunnus,
+                 'O' kohdistettu, '' kohde,
+                 '' kauppatapahtuman_luonne
+                 $toim_puhlisa
                  FROM asiakas
                  WHERE tunnus = '$asiakasid'";
 

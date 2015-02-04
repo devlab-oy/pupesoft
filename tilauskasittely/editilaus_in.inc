@@ -178,6 +178,7 @@ $verkkokauppa                 = "";
 $verkkokauppavarasto          = "";
 $verkkokauppavarasto_li       = "";
 $veromaara                    = "";
+$verokanta                    = "";
 $viite                        = "";
 $yhteyshenkilon_puhelin       = "";
 $ovt_tunnus                   = "";
@@ -1917,6 +1918,11 @@ while ($tietue = fgets($fd)) {
     $edi_nimitys = $type[4]; // rivin nelj‰nness‰ segmentiss‰ tulee oikee info
     break;
 
+  case 'OSTOTILRIV.OTR_VEROKANTA':
+    // magento-keisiss‰, tilausrivin veron m‰‰r‰
+    $verokanta = (int) trim($tieto);
+    break;
+
   case 'OSTOTILRIV.OTR_OSTOHINTA' :
     // Kun tullaan magentosta ja meill‰ on rahtikulu, niin otetaan hinta talteeen
     // TAI kun tullaan magentosta ja me luotetaan verkkokaupan hintoihin.
@@ -1926,6 +1932,11 @@ while ($tietue = fgets($fd)) {
 
       if ($yhtiorow["alv_kasittely"] == '' and !isset($verkkokauppa_hinnatedifailistaverollisina)) {
         $editilaus_hinta = round($editilaus_hinta * (1 + $laskurow["alv"]/100), 2);
+      }
+      // Jos saatu hinta kuitenkin sis‰lt‰‰ jo verot ja halutaan laskea ne pois
+      if (isset($verkkokauppa_hinnoistalasketaanverotpois) 
+        and $verkkokauppa_hinnoistalasketaanverotpois == 'JOO' and !empty($verokanta)) {
+        $editilaus_hinta = round($editilaus_hinta / (1 + $verokanta/100), 2);
       }
     }
 
@@ -2480,6 +2491,7 @@ while ($tietue = fgets($fd)) {
     $verkkokauppavarasto          = "";
     $verkkokauppavarasto_li       = "";
     $veromaara                    = "";
+    $verokanta                    = "";
     $viite                        = "";
     $yhteyshenkilon_puhelin       = "";
     $ovt_tunnus                   = "";

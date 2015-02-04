@@ -745,6 +745,9 @@ if ($tila == "" and !isset($jatka)) {
                           if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
                           if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh ";
       }
+      else {
+        $toim_puhlisa = '';
+      }
 
       $squery = "SELECT
                  asiakas.*,

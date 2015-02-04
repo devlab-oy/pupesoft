@@ -740,7 +740,7 @@ if ($tila == "" and !isset($jatka)) {
         $puhlisa = "";
       }
 
-      if ($yhtiorow['asiakastiedot_otsikolle'] == 'K') {
+      if ($yhtiorow['asiakastiedot_otsikolle'] == '') {
         $toim_puhlisa = " , if(asiakas.gsm != '', asiakas.gsm,
                           if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
                           if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh ";

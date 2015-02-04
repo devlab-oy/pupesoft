@@ -4496,11 +4496,11 @@ if ($fieldname == "asiakastiedot_otsikolle") {
   $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 
   $ulos .= "<option value = ''>";
-  $ulos .= t("Ei kopioida asiakkaan puhelinumeroa otsikolle");
+  $ulos .= t("Kopioidaan asiakkaan puhelinnumero otsikolle");
   $ulos .= "</option>";
 
-  $ulos .= "<option value = 'K' {$sel}>";
-  $ulos .= t("Kopioidaan asiakkaan puhelinumero otsikolle");
+  $ulos .= "<option value = 'E' {$sel}>";
+  $ulos .= t("Ei kopioida asiakkaan puhelinnumeroa otsikolle");
   $ulos .= "</option>";
 
   $ulos .= "</select></td>";

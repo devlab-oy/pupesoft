@@ -4491,7 +4491,7 @@ if ($fieldname == "tilausrivin_korvamerkinta") {
 }
 
 if ($fieldname == "asiakastiedot_otsikolle") {
-  $sel = $trow[$i] == "K" ? "selected" : "";
+  $sel = $trow[$i] == "E" ? "selected" : "";
 
   $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 

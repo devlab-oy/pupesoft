@@ -29840,6 +29840,62 @@ if (!function_exists("cron_log")) {
   }
 }
 
+if (!function_exists("cron_aikaleima")) {
+  function cron_aikaleima($aikaleima, $uusileima = 0) {
+    global $kukarow, $yhtiorow;
+
+    // Ylläpidetään avainsanoissa aika jolloin tietty skripti on ajettu viimeksi
+
+    if (strlen($aikaleima) > 15) {
+      echo "Aikaleiman tunnus on liian pitkä!<br>";
+      return;
+    }
+
+    if (substr($aikaleima, -5) != "_CRON") {
+      echo "Aikaleiman tunnus on päätyttävä '_CRON'!<br>";
+      return;
+    }
+
+    pupemaster_start();
+
+    $datetime_checkpoint_res = t_avainsana($aikaleima);
+
+    if (mysql_num_rows($datetime_checkpoint_res) != 1) {
+      $query = "DELETE FROM avainsana
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND laji    = '$aikaleima'";
+      pupe_query($query);
+
+      $query = "INSERT INTO avainsana SET
+                yhtio = '{$kukarow['yhtio']}',
+                laji  = '$aikaleima'";
+      pupe_query($query);
+
+      $datetime_checkpoint = "";
+    }
+
+    if (!empty($uusileima)) {
+      // Tallennetaan timestamppi
+      $query = "UPDATE avainsana SET
+                selite      = '{$uusileima}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND laji    = '$aikaleima'";
+      pupe_query($query);
+
+      $datetime_checkpoint = $uusileima;
+    }
+    else {
+      // Haetaan tallennettu aikaleima
+      $datetime_checkpoint_row = mysql_fetch_assoc($datetime_checkpoint_res);
+      $datetime_checkpoint = pupesoft_cleanstring($datetime_checkpoint_row['selite']);
+    }
+
+    pupemaster_stop();
+
+    return $datetime_checkpoint;
+  }
+}
+
 if (!function_exists("paivita_sopimusrivit")) {
   function paivita_sopimusrivit(array $sopimusrivitunnukset = array()) {
     global $kukarow;
@@ -29930,13 +29986,18 @@ if (!function_exists("poista_osakeyhtio_lyhenne")) {
   function poista_osakeyhtio_lyhenne($nimi) {
 
     // strtolower ei osaa pienentää tämmöisiä erikoismerkkejä
-    $old = array("Ü", "Ž");
-    $new = array("ü", "ž");
+    $old = array("Ü", "Ž", "Ä", "Ö", "Å");
+    $new = array("ü", "ž", "ä", "ö", "å");
     $nimi = str_replace($old, $new, $nimi);
+    $nimi = strtolower($nimi);
 
     $replace = "oy|ab|as|oü|ou|mtü|tü|ttü";
 
-    return trim(preg_replace("/\b({$replace})\b/i", '', strtolower($nimi)));
+    foreach (explode("|", $replace) as $rep) {
+      $nimi = str_replace($rep, '', $nimi);
+    }
+
+    return trim($nimi);
   }
 }
 

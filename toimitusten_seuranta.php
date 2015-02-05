@@ -163,19 +163,22 @@ if (isset($task) and $task == 'eu_tilaus') {
 
 if (isset($task) and $task == 'suorita_hylky') {
 
-  $parametrit = hylky_lusaus_parametrit($sarjanumero);
-  $parametrit['laji'] = 'hylky';
+  $parametrit = array('laji' => 'hylky', 'sarjanumero' => $sarjanumero);
+  $parametrit = hylky_lusaus_parametrit($parametrit);
 
-  $sanoma = laadi_edifact_sanoma($parametrit);
+  if ($parametrit) {
 
-  $query = "UPDATE sarjanumeroseuranta SET
-            lisatieto = 'Hylätty'
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND sarjanumero = '{$sarjanumero}'";
-  pupe_query($query);
+    $sanoma = laadi_edifact_sanoma($parametrit);
 
-  if (laheta_sanoma($sanoma)) {
-    $viesti = "UIB: {$sarjanumero} merkitty hylätyksi.";
+    $query = "UPDATE sarjanumeroseuranta SET
+              lisatieto = 'Hylätty'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND sarjanumero = '{$sarjanumero}'";
+    pupe_query($query);
+
+    if (laheta_sanoma($sanoma)) {
+      $viesti = "UIB: {$sarjanumero} merkitty hylätyksi.";
+    }
   }
 
   if ($hylattavat_kpl > 1) {
@@ -202,23 +205,26 @@ if (isset($task) and $task == 'suorita_lusaus') {
   }
   else {
 
-    $parametrit = hylky_lusaus_parametrit($sarjanumero);
+    $parametrit = array('laji' => 'lusaus', 'sarjanumero' => $sarjanumero);
+    $parametrit = hylky_lusaus_parametrit($parametrit);
 
-    $parametrit['poistettu_paino'] = $vanha_paino - $uusi_paino;
-    $parametrit['paino'] = $uusi_paino;
-    $parametrit['laji'] = 'lusaus';
+    if ($parametrit) {
 
-    $sanoma = laadi_edifact_sanoma($parametrit);
+      $parametrit['poistettu_paino'] = $vanha_paino - $uusi_paino;
+      $parametrit['paino'] = $uusi_paino;
 
-    $query = "UPDATE sarjanumeroseuranta SET
-              massa = '{$uusi_paino}',
-              lisatieto = 'Lusattu'
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND sarjanumero = '{$sarjanumero}'";
-    pupe_query($query);
+      $sanoma = laadi_edifact_sanoma($parametrit);
 
-    if (laheta_sanoma($sanoma)) {
-      $viesti = "UIB: {$sarjanumero} uudeksi painoksi on päivitetty $uusi_paino kg.";
+      $query = "UPDATE sarjanumeroseuranta SET
+                massa = '{$uusi_paino}',
+                lisatieto = 'Lusattu'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND sarjanumero = '{$sarjanumero}'";
+      pupe_query($query);
+
+      if (laheta_sanoma($sanoma)) {
+        $viesti = "UIB: {$sarjanumero} uudeksi painoksi on päivitetty $uusi_paino kg.";
+      }
     }
 
     if ($lusattavat_kpl > 1) {

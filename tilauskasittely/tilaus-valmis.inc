@@ -107,7 +107,26 @@ $erapaiva_chk   =  ($maksuehtorow['kateinen'] == '' and empty($maksuehtorow['jv'
 $_mika_toim = in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "ENNAKKO", "EXTENNAKKO"));
 $_mika_toim = ($_mika_toim and $laskurow['clearing'] != 'HYVITYS');
 
-$_rekla_toim = ($toim == "REKLAMAATIO" and $kaikkiyhteensa > 0);
+$query_ale_lisa = generoi_alekentta('M');
+
+if ($toim == "REKLAMAATIO") {
+  $query = "SELECT SUM(
+            tilausrivi.hinta * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}
+            ) kaikkiyhteensa_chk
+            FROM tilausrivi
+            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+            AND tilausrivi.tyyppi != 'D'
+            AND tilausrivi.otunnus = '{$laskurow['tunnus']}'";
+  $chk_kaikkiyhteensa_res = pupe_query($query);
+  $chk_kaikkiyhteensa_row = mysql_fetch_assoc($chk_kaikkiyhteensa_res);
+
+  query_dump($query);
+
+  $_rekla_toim = ($chk_kaikkiyhteensa_row['kaikkiyhteensa_chk'] > 0);
+}
+else {
+  $_rekla_toim = false;
+}
 
 $_hyvitys = (in_array($toim, array("RIVISYOTTO", "PIKATILAUS")));
 $_hyvitys = ($_hyvitys and $laskurow['clearing'] == 'HYVITYS' and $kaikkiyhteensa > 0);

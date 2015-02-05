@@ -17968,6 +17968,8 @@ if (!function_exists("tee_keraysera")) {
     $eran_koko_pintaala = 0;
     $eran_koko_tuotteet = 0;
 
+    $eka_kierros = true;
+
     mysql_data_seek($res, 0);
 
     //foreach ($fixed_main_array as $key => $tilaukset) {
@@ -17986,8 +17988,6 @@ if (!function_exists("tee_keraysera")) {
         $era_valmis = true;
         break;
       }
-
-      $eka_kierros = true;
 
       $eran_koko_chk = 0;
       $eran_koko_pintaala_chk = 0;

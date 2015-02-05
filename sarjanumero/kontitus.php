@@ -448,7 +448,7 @@ if ($view == 'konttiviite') {
       <form method='post' action=''>
         <input type='hidden' name='konttiviite' value='{$konttiviite}' />
         <input type='hidden' name='muutos' value='muutos' />
-        <button name='submit' value='konttiviite' onclick='submit();' class='{$luokka}'>" . t("Muuta kontitusta") . "</button>
+        <button name='submit' disabled value='konttiviite' onclick='submit();' class='{$luokka}'>" . t("Muuta kontitusta") . "</button>
       </form>
       </div>";
   }

@@ -190,7 +190,8 @@ if ($haetaanpulkkarit) {
 
 if ($php_cli) {
   $display_h = "";
-  $limit = 1;
+  // Pit‰‰ hakea kaksi uusinta vetoa, jotta voidaan hakea niitten v‰liset muutokset logista
+  $limit = 2;
   $muutoksiaoli = FALSE;
 }
 else {

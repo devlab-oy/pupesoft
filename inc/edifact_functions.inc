@@ -314,7 +314,7 @@ function hylky_lusaus_parametrit($parametrit) {
     'vastaanottajan_ovt' => $row['ovttunnus'],
     'sanomaid' => $sanomaid,
     'sanomanumero' => $sanomanumero,
-    'sarjanumero' => $sarjanumero,
+    'sarjanumero' => $parametrit['sarjanumero'],
     'juoksunumero' => $juoksunumero,
     'varastonimi' => $row['varastonimi'],
     'varastokoodi' => $row['varastokoodi'],
@@ -724,7 +724,7 @@ function laskutusraportti_parametrit($konttiviite) {
 }
 
 function laadi_edifact_sanoma($parametrit, $korjaus = false) {
-  global $kukarow, $yhtiorow;
+  global $kukarow;
 
   //validoidaan parametrit ja setataan muita muuttujia
   //

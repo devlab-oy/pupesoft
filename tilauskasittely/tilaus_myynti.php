@@ -2878,7 +2878,7 @@ if ($tee == '') {
 
     echo "</form>";
 
-    if ($kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+    if ($kukarow["extranet"] == "" and ($toim == "PIKATILAUS" or $toim == "RIVISYOTTO") and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $laskurow["tila"] != 'G') {
       echo "  <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='jalkitoimita'>
             <input type='hidden' name='toim'       value = '$toim'>
             <input type='hidden' name='lopetus'     value = '$lopetus'>
@@ -7824,7 +7824,7 @@ if ($tee == '') {
         if ($row['var'] == 'J' and $row['jt_manual'] == 'K') {
           $var_temp = $row['var'] . " - ".t("Manuaalinen");
         }
-        elseif ($row['var'] == 'J' and strtotime($row['kerayspvm']) > strtotime($laskurow['kerayspvm']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and !empty($yhtiorow['jt_automatiikka'])) {
+        elseif ($laskurow["tila"] != 'G' and $row['var'] == 'J' and strtotime($row['kerayspvm']) > strtotime($laskurow['kerayspvm']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and !empty($yhtiorow['jt_automatiikka'])) {
           $var_temp = $row['var'] . " - ".t("Muiden mukana");
         }
         else {
@@ -8309,7 +8309,7 @@ if ($tee == '') {
                   <input type='submit' value='{$napinnimi}'>
                   </form> ";
 
-            if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A') {
+            if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $laskurow["tila"] != 'G') {
               echo " <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='jalkitoimita'>
                   <input type='hidden' name='toim'       value = '$toim'>
                   <input type='hidden' name='lopetus'     value = '$lopetus'>
@@ -8430,7 +8430,7 @@ if ($tee == '') {
                   </form> ";
           }
 
-          if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $row['var'] == 'J' and strtotime($row['kerayspvm']) == strtotime($laskurow['kerayspvm']) and !$_luottoraja_ylivito) {
+          if (!empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A' and $row['var'] == 'J' and strtotime($row['kerayspvm']) == strtotime($laskurow['kerayspvm']) and !$_luottoraja_ylivito and $laskurow["tila"] != 'G') {
             echo " <form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='jalkitoimita'>
                   <input type='hidden' name='toim'       value = '$toim'>
                   <input type='hidden' name='lopetus'     value = '$lopetus'>

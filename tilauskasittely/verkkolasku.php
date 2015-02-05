@@ -2917,11 +2917,7 @@ else {
           "subject" => t("Pupesoft-Finvoice-aineiston siirto eteenpäin"),
           "ctype" => "text",
           "body" => $verkkolasmail,
-          "attachements" => array(
-            array(
-              "filename" => $ftpfile,
-            ),
-          ),
+          "attachements" => "",
         );
 
         pupesoft_sahkoposti($_params);

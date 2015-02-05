@@ -85,6 +85,22 @@ if ($tee == "edit") {
 
     require "inc/asiakasrivi.inc";
 
+    if (mysql_field_name($result, $i) == "luottoraja" and $yhtiorow["myyntitilaus_saatavat"] == "Y") {
+
+      $qry = "SELECT luottoraja
+                FROM asiakas
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND ytunnus = '{$trow['ytunnus']}'
+                GROUP BY luottoraja";
+      $res = pupe_query($qry);
+
+      if (mysql_num_rows($res) > 1) {
+        $luottorajahuomautus = t(" Eri luottorajoja saman Y-tunnuksen alaisilla asiakkailla!");
+      }
+
+      $jatko = 1;
+    }
+
     if (mysql_field_name($result, $i) == "muutospvm") {
       $tyyppi = 0;
       $jatko = 0;
@@ -144,10 +160,15 @@ if ($tee == "edit") {
         echo "$trow[$i]";
       }
 
+      if ($luottorajahuomautus) {
+        echo "<font class='message'>$luottorajahuomautus</font>";
+        unset($luottorajahuomautus);
+      }
+
       echo "</td>";
     }
 
-    if ($tyyppi > 0) {
+    if ($tyyppi > 0 and !empty($virhe[$i])) {
       echo "<td class='back'><font class='error'>$virhe[$i]</font></td></tr>\n";
     }
   }

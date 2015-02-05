@@ -262,8 +262,18 @@ function kuittaus_parametrit($hakunumero) {
 
 }
 
-function hylky_lusaus_parametrit($sarjanumero) {
-  global $kukarow, $yhtiorow;
+function hylky_lusaus_parametrit($parametrit) {
+  global $kukarow;
+
+  if ($parametrit['laji'] == 'hylky') {
+    $lisatieto = 'Hylättävä';
+  }
+  elseif ($parametrit['laji'] == 'lusaus') {
+   $lisatieto = 'Lusattava';
+  }
+  else {
+    return false;
+  }
 
   $query = "SELECT lasku.ovttunnus,
             lasku.asiakkaan_tilausnumero AS tilauskoodi,
@@ -283,9 +293,8 @@ function hylky_lusaus_parametrit($sarjanumero) {
             JOIN varastopaikat ON varastopaikat.yhtio = tilausrivi.yhtio
               AND varastopaikat.tunnus = tilausrivi.varasto
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-            AND sarjanumeroseuranta.sarjanumero = '{$sarjanumero}'
-            AND sarjanumeroseuranta.lisatieto = 'Lusattava'
-            AND tilausrivin_lisatiedot.sinettinumero = ''";
+            AND sarjanumeroseuranta.sarjanumero = '{$parametrit['sarjanumero']}'
+            AND sarjanumeroseuranta.lisatieto = '{$lisatieto}'";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -311,7 +320,8 @@ function hylky_lusaus_parametrit($sarjanumero) {
     'varastokoodi' => $row['varastokoodi'],
     'tilauskoodi' => $row['tilauskoodi'],
     'tilausrivi' => $row['asiakkaan_rivinumero'],
-    'paino' => $paino
+    'paino' => $paino,
+    'laji' => $parametrit['laji']
   );
 
   return $parametrit;

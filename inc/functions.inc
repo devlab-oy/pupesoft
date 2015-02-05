@@ -18432,6 +18432,8 @@ if (!function_exists("tee_keraysera")) {
                 $ed_ohjausmerkki = $ohjausmerkki[$tuoterow['otunnus']];
                 $ed_jiivee = $jiivee[$tuoterow['otunnus']];
 
+                $eka_kierros = true;
+
                 break 2;
               }
             }

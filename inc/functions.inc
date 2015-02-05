@@ -17975,7 +17975,7 @@ if (!function_exists("tee_keraysera")) {
     $_fixed_main_array_count = count($fixed_main_array);
     $_fixed_main_array_keys = array_keys($fixed_main_array);
 
-    for ($_main_i = 0; $_fixed_main_array_count >= $_main_i; $_main_i++) {
+    for ($_main_i = 0; $_fixed_main_array_count > $_main_i; $_main_i++) {
 
       $key = $_fixed_main_array_keys[$_main_i];
       $tilaukset = $fixed_main_array[$key];

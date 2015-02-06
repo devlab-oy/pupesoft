@@ -142,6 +142,7 @@ if ($tee == "KORJAA" or $tee == "PERU") {
 }
 
 if ($tee == 'KORJAA') {
+
   $query = "SELECT lasku.tunnus tosite,
             t1.tunnus varasto, t1.selite sel1, t1.kustp kustp1,  t1.kohde kohde1,  t1.projekti projekti1,
             t2.tunnus varastonmuutos, t2.selite sel2, t2.kustp kustp2,  t2.kohde kohde2,  t2.projekti projekti2

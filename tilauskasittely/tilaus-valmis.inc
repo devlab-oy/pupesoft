@@ -109,7 +109,10 @@ $_mika_toim = ($_mika_toim and $laskurow['clearing'] != 'HYVITYS');
 
 $query_ale_lisa = generoi_alekentta('M');
 
-if ($toim == "REKLAMAATIO") {
+$_hyvitys = (in_array($toim, array("RIVISYOTTO", "PIKATILAUS")));
+$_hyvitys = ($_hyvitys and $laskurow['clearing'] == 'HYVITYS');
+
+if ($toim == "REKLAMAATIO" or $_hyvitys) {
   $query = "SELECT SUM(
             tilausrivi.hinta * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}
             ) kaikkiyhteensa_chk
@@ -120,16 +123,19 @@ if ($toim == "REKLAMAATIO") {
   $chk_kaikkiyhteensa_res = pupe_query($query);
   $chk_kaikkiyhteensa_row = mysql_fetch_assoc($chk_kaikkiyhteensa_res);
 
-  query_dump($query);
-
-  $_rekla_toim = ($chk_kaikkiyhteensa_row['kaikkiyhteensa_chk'] > 0);
+  if ($toim == "REKLAMAATIO") {
+    $_rekla_toim = ($chk_kaikkiyhteensa_row['kaikkiyhteensa_chk'] > 0);
+    $_hyvitys = false;
+  }
+  else {
+    $_rekla_toim = false;
+    $_hyvitys = ($chk_kaikkiyhteensa_row['kaikkiyhteensa_chk'] > 0);
+  }
 }
 else {
   $_rekla_toim = false;
+  $_hyvitys = false;
 }
-
-$_hyvitys = (in_array($toim, array("RIVISYOTTO", "PIKATILAUS")));
-$_hyvitys = ($_hyvitys and $laskurow['clearing'] == 'HYVITYS' and $kaikkiyhteensa > 0);
 
 $_toim_chk = ($_mika_toim or $_rekla_toim or $_hyvitys);
 $_kumpi_chk = ($luottoraja_chk or $erapaiva_chk);

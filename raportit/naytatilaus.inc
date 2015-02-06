@@ -28,6 +28,7 @@ if (!isset($tee)) $tee = "";
 $toimittajan_ostotilaus = array();
 
 $_asiakkaantilaus = (strpos($_SERVER['SCRIPT_NAME'], "asiakkaantilaukset.php") !== FALSE);
+$_tulostakopio = (strpos($_SERVER['SCRIPT_NAME'], "tulostakopio.php") !== FALSE);
 
 $query = "SELECT lasku.*,
           laskun_lisatiedot.laskutus_nimi,
@@ -685,17 +686,57 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
   $aputullimaara_yhteensa     = "";
   $rivinlisakulu_yhteensa     = "";
 
-  if ($lopetus != '') $lopetus .= "/SPLIT/";
-  $lopetus .= $palvelin2;
-  $lopetus .= "raportit/asiakkaantilaukset.php";
-  $lopetus .= "////tee=NAYTATILAUS";
-  $lopetus .= "//toim=OSTO";
-  $lopetus .= "//asiakasid=$asiakasid";
-  $lopetus .= "//toimittajaid=$toimittajaid";
-  $lopetus .= "//laskunro=$laskunro";
-  $lopetus .= "//lasku_yhtio=$row[yhtio]";
-  $lopetus .= "//ytunnus=$ytunnus";
-  $lopetus .= "//tunnus=$tunnus";
+  if ($lopetus != '') {
+    $_lopetus_talteen       = $lopetus;
+    $_lopetus_talteen_array = explode("/SPLIT/", $_lopetus_talteen);
+    $lopetus_vika           = array_pop($_lopetus_talteen_array);
+    $lopetus               .= "/SPLIT/";
+  }
+
+  if ($_tulostakopio) {
+    $lopetus .= $palvelin2;
+    $lopetus .= "tilauskasittely/tulostakopio.php";
+    $lopetus .= "////toim=OSTO";
+    $lopetus .= "//tee=NAYTAHTML";
+    $lopetus .= "//asiakasid=$asiakasid";
+    $lopetus .= "//toimittajaid=$toimittajaid";
+    $lopetus .= "//laskunro=$laskunro";
+    $lopetus .= "//lasku_yhtio=$row[yhtio]";
+    $lopetus .= "//ytunnus=$ytunnus";
+    $lopetus .= "//tunnus=$tunnus";
+    $lopetus .= "//ppa=$ppa";
+    $lopetus .= "//kka=$kka";
+    $lopetus .= "//vva=$vva";
+    $lopetus .= "//ppl=$ppl";
+    $lopetus .= "//kkl=$kkl";
+    $lopetus .= "//vvl=$vvl";
+
+    if (strpos($lopetus_vika, "tilauskasittely/tulostakopio.php") !== FALSE) {
+      $lopetus = $_lopetus_talteen;
+    } 
+  }
+  else {
+    $lopetus .= $palvelin2;
+    $lopetus .= "raportit/asiakkaantilaukset.php";
+    $lopetus .= "////tee=NAYTATILAUS";
+    $lopetus .= "//toim=OSTO";
+    $lopetus .= "//asiakasid=$asiakasid";
+    $lopetus .= "//toimittajaid=$toimittajaid";
+    $lopetus .= "//laskunro=$laskunro";
+    $lopetus .= "//lasku_yhtio=$row[yhtio]";
+    $lopetus .= "//ytunnus=$ytunnus";
+    $lopetus .= "//tunnus=$tunnus";
+    $lopetus .= "//ppa=$ppa";
+    $lopetus .= "//kka=$kka";
+    $lopetus .= "//vva=$vva";
+    $lopetus .= "//ppl=$ppl";
+    $lopetus .= "//kkl=$kkl";
+    $lopetus .= "//vvl=$vvl";
+
+    if (strpos($lopetus_vika, "raportit/asiakkaantilaukset.php") !== FALSE) {
+      $lopetus = $_lopetus_talteen;
+    } 
+  }
 
   while ($prow = mysql_fetch_assoc($presult)) {
 
@@ -968,6 +1009,10 @@ else {
   $tuoteperhe_kayty   = '';
   $edotunnus       = 0;
   $tuotekyslinkki    = "";
+  $lopetus_apu = "";
+  $lopetus_vika = "";
+  $_lopetus_talteen = "";
+  $_lopetus_talteen_array = array();
 
   $summa_yht     = 0;
   $arvo_yht      = 0;
@@ -978,25 +1023,71 @@ else {
 
   $_myyntispessut = (in_array($toim, array('LASKU', 'TILAUSVAHVISTUS', 'LAHETE', 'TYOMAARAYS')));
 
-  if ($lopetus != '') $lopetus .= "/SPLIT/";
-  $lopetus .= $palvelin2;
-  $lopetus .= "raportit/asiakkaantilaukset.php";
-  $lopetus .= "////tee=NAYTATILAUS";
-  $lopetus .= "//asiakasid=$asiakasid";
-  $lopetus .= "//toimittajaid=$toimittajaid";
-  $lopetus .= "//laskunro=$laskunro";
-  $lopetus .= "//lasku_yhtio=$row[yhtio]";
-  $lopetus .= "//ytunnus=$ytunnus";
-  $lopetus .= "//tunnus=$tunnus";
-
-  if (!$_asiakkaantilaus and $_myyntispessut) {
-    $lopetus .= "//toim=MYYNTI";
+  if ($lopetus != '') {
+    $_lopetus_talteen       = $lopetus;
+    $_lopetus_talteen_array = explode("/SPLIT/", $_lopetus_talteen);
+    $lopetus_vika           = array_pop($_lopetus_talteen_array);
+    $lopetus               .= "/SPLIT/";
   }
-  elseif ($_asiakkaantilaus) {
-    $lopetus .= "//toim=$toim";
+
+  if ($_tulostakopio) {
+    $lopetus_apu .= $palvelin2;
+    $lopetus_apu .= "tilauskasittely/tulostakopio.php";
+    $lopetus_apu .= "////tee=NAYTAHTML";
+    $lopetus_apu .= "//asiakasid=$asiakasid";
+    $lopetus_apu .= "//toimittajaid=$toimittajaid";
+    $lopetus_apu .= "//laskunro=$laskunro";
+    $lopetus_apu .= "//lasku_yhtio=$row[yhtio]";
+    $lopetus_apu .= "//ytunnus=$ytunnus";
+    $lopetus_apu .= "//tunnus=$tunnus";
+    $lopetus_apu .= "//ppa=$ppa";
+    $lopetus_apu .= "//kka=$kka";
+    $lopetus_apu .= "//vva=$vva";
+    $lopetus_apu .= "//ppl=$ppl";
+    $lopetus_apu .= "//kkl=$kkl";
+    $lopetus_apu .= "//vvl=$vvl";
+    $lopetus_apu .= "//toim=$toim";
+
+    if (strpos($lopetus_vika, "tilauskasittely/tulostakopio.php") !== FALSE) {
+      $lopetus = str_replace($lopetus_vika, "", $_lopetus_talteen) . "/SPLIT/" . $lopetus_apu;
+    }
+    else {
+      $lopetus .= $lopetus_apu;
+    }
   }
   else {
-    $lopetus = '';
+    $lopetus_apu .= $palvelin2;
+    $lopetus_apu .= "raportit/asiakkaantilaukset.php";
+    $lopetus_apu .= "////tee=NAYTATILAUS";
+    $lopetus_apu .= "//asiakasid=$asiakasid";
+    $lopetus_apu .= "//toimittajaid=$toimittajaid";
+    $lopetus_apu .= "//laskunro=$laskunro";
+    $lopetus_apu .= "//lasku_yhtio=$row[yhtio]";
+    $lopetus_apu .= "//ytunnus=$ytunnus";
+    $lopetus_apu .= "//tunnus=$tunnus";
+    $lopetus_apu .= "//ppa=$ppa";
+    $lopetus_apu .= "//kka=$kka";
+    $lopetus_apu .= "//vva=$vva";
+    $lopetus_apu .= "//ppl=$ppl";
+    $lopetus_apu .= "//kkl=$kkl";
+    $lopetus_apu .= "//vvl=$vvl";
+
+    if ($_myyntispessut) {
+      $lopetus_apu .= "//toim=MYYNTI";
+    }
+    elseif ($_asiakkaantilaus) {
+      $lopetus_apu .= "//toim=$toim";
+    }
+    else {
+      $lopetus = '';
+    }
+
+    if (strpos($lopetus_vika, "raportit/asiakkaantilaukset.php") !== FALSE) {
+      $lopetus = str_replace($lopetus_vika, "", $_lopetus_talteen) . "/SPLIT/" . $lopetus_apu;
+    }
+    else {
+      $lopetus .= $lopetus_apu;
+    }
   }
 
   while ($row = mysql_fetch_assoc($result)) {

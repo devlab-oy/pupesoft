@@ -30218,7 +30218,7 @@ if (!function_exists("jt_saapumisaika_tilausvahvistus")) {
         list($teksti, $paivamaara) = explode("!¡!", $saapumisaika);
         $saapumisaika = "{$teksti} " . strip_tags($paivamaara);
 
-        return $saapumisaika;
+        return trim($saapumisaika);
       }
 
       return "";

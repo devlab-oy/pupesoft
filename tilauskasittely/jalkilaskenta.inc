@@ -13,10 +13,13 @@ Palautetaan $jlerror, joka on 1, jos jotain epätavallista sattui
 
 $jalkilaskenta_debug = 0; // 0 = ei echoilla debug koodia, 1 = ehchoillaa infoa, 2 = echoillaan infoa plus queryt
 
+list($varastotili, $varastonmuutostili) = hae_varastotilit($tuoteno);
+
 // Jos kaikki on ok, palautetaan 0, muuten 1
 if (!function_exists("korjaalaskut")) {
   function korjaalaskut($tuoteno, $kehahin, $alku, $loppu, $korjtunnus) {
-    global $kukarow, $yhtiorow, $jalkilaskenta_debug, $jalkilaskenta_debug_text;
+    global $kukarow, $yhtiorow, $jalkilaskenta_debug, $jalkilaskenta_debug_text, $varastotili,
+           $varastonmuutostili;
 
     if ($korjtunnus != 0) {
       $lisa = " and tilausrivi.tunnus = '$korjtunnus' ";
@@ -98,7 +101,7 @@ if (!function_exists("korjaalaskut")) {
                 FROM tiliointi
                  WHERE yhtio  = '$kukarow[yhtio]'
                  AND ltunnus  = '$tilausrivi[ltunnus]'
-                 AND tilino   = '$yhtiorow[varastonmuutos]'
+                 AND tilino   = '{$varastonmuutostili}'
                  AND kustp    = '$xrivi[kustp]'
                  AND kohde    = '$xrivi[kohde]'
                  AND projekti = '$xrivi[projekti]'
@@ -114,7 +117,7 @@ if (!function_exists("korjaalaskut")) {
                   FROM tiliointi
                    WHERE yhtio = '$kukarow[yhtio]'
                    and ltunnus = '$tilausrivi[ltunnus]'
-                   and tilino  = '$yhtiorow[varastonmuutos]'
+                   and tilino  = '{$varastonmuutostili}'
                   and korjattu = ''
                   ORDER BY tapvm DESC, summa DESC
                   LIMIT 1";
@@ -165,7 +168,7 @@ if (!function_exists("korjaalaskut")) {
         $query = "INSERT into tiliointi set
                   yhtio    = '$kukarow[yhtio]',
                   ltunnus  = '$lasku[tunnus]',
-                  tilino   = '$yhtiorow[varasto]',
+                  tilino   = '{$varastotili}',
                   kustp    = '{$kustp_ins}',
                   kohde    = '{$kohde_ins}',
                   projekti = '{$projekti_ins}',
@@ -185,7 +188,7 @@ if (!function_exists("korjaalaskut")) {
         $query = "INSERT into tiliointi set
                   yhtio    = '$kukarow[yhtio]',
                   ltunnus  = '$lasku[tunnus]',
-                  tilino   = '$yhtiorow[varastonmuutos]',
+                  tilino   = '{$varastonmuutostili}',
                   kustp    = '{$kustp_ins}',
                   kohde    = '{$kohde_ins}',
                   projekti = '{$projekti_ins}',
@@ -229,7 +232,7 @@ if (!function_exists("korjaalaskut")) {
                   FROM tiliointi
                    WHERE yhtio = '$kukarow[yhtio]'
                   and ltunnus  = '$tilausrivi[ltunnus]'
-                  and tilino   = '$yhtiorow[varasto]'
+                  and tilino   = '{$varastotili}'
                   and kustp    = '$xrivi[kustp]'
                   and kohde    = '$xrivi[kohde]'
                   and projekti = '$xrivi[projekti]'
@@ -244,7 +247,7 @@ if (!function_exists("korjaalaskut")) {
                     FROM tiliointi
                      WHERE yhtio = '$kukarow[yhtio]'
                     and ltunnus  = '$tilausrivi[ltunnus]'
-                    and tilino   = '$yhtiorow[varasto]'
+                    and tilino   = '{$varastotili}'
                     and korjattu = ''
                     ORDER BY tapvm DESC, tunnus DESC
                     LIMIT 1";
@@ -255,7 +258,7 @@ if (!function_exists("korjaalaskut")) {
 
           echo "<font class='error'>".t("Emme osanneet korjata kirjanpitoa eikä katteita!")." ".t("Laskulta ei löydy sopivaa tiliöintiä (varasto)")."
           tuoteno:                  $tuoteno,
-          tilino:                   $yhtiorow[varastonmuutos],
+          tilino:                   {$varastonmuutostili},
           kustp:                    $xrivi[kustp],
           kohde:                    $xrivi[kohde],
           projekti:                  $xrivi[projekti],
@@ -555,6 +558,33 @@ if (!function_exists('korjaatapahtuma')) {
 
       if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
     }
+  }
+}
+
+if (!function_exists("hae_varastotilit")) {
+  function hae_varastotilit($tuoteno) {
+    global $kukarow, $yhtiorow;
+
+    $varastotili = $yhtiorow["varasto"];
+    $varastonmuutostili = $yhtiorow["varastonmuutos"];
+
+    // Katsotaan, onko tuote raaka-aine ja jos on, tiliöidään muutokset raaka-ainetileille
+    if ($yhtiorow["raaka_aine_tiliointi"] == "Y") {
+      $tuote_query = "SELECT tuotetyyppi
+                      FROM tuote
+                      WHERE yhtio = '{$kukarow["yhtio"]}'
+                      AND tuoteno = '{$tuoteno}'";
+
+      $tuote_result = pupe_query($tuote_query);
+      $tuote_row = mysql_fetch_assoc($tuote_result);
+
+      if ($tuote_row["tuotetyyppi"] == "R") {
+        $varastotili = $yhtiorow["raaka_ainevarasto"];
+        $varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
+      }
+    }
+
+    return array($varastotili, $varastonmuutostili);
   }
 }
 
@@ -1060,7 +1090,7 @@ if ($tuoteno != '') {
                             FROM tiliointi
                             WHERE yhtio  = '$kukarow[yhtio]'
                             AND ltunnus  = '$invrow[tunnus]'
-                            AND tilino   = '$yhtiorow[varasto]'
+                            AND tilino   = '{$varastotili}'
                             and korjattu = ''
                             ORDER BY tapvm DESC, tunnus DESC
                             LIMIT 1";
@@ -1092,6 +1122,11 @@ if ($tuoteno != '') {
 
                     $varasto_tilit = "'{$yhtiorow['varasto']}', '{$yhtiorow['varastonmuutos']}', '{$yhtiorow['varastonmuutos_inventointi']}'";
 
+                    if ($yhtiorow["raaka_aine_tiliointi"] == "Y") {
+                      $varasto_tilit .= ", '{$yhtiorow["raaka_ainevarasto"]}', " .
+                                        "'{$yhtiorow["raaka_ainevarastonmuutos"]}'";
+                    }
+
                     if ($inv_varasto_tilit['tilit'] != '') {
                       $varasto_tilit .= ", {$inv_varasto_tilit['tilit']}";
                     }
@@ -1118,7 +1153,7 @@ if ($tuoteno != '') {
                         $query = "SELECT *
                                   FROM tiliointi
                                   WHERE yhtio   = '{$kukarow['yhtio']}'
-                                  AND tilino   != '{$yhtiorow['varasto']}'
+                                  AND tilino   != '{$varastotili}'
                                   AND ltunnus   = '{$invrow['ltunnus']}'
                                   AND korjattu  = ''
                                   ORDER BY tapvm DESC, tunnus DESC
@@ -1164,7 +1199,7 @@ if ($tuoteno != '') {
                         $query = "SELECT *
                                   FROM tiliointi
                                   WHERE yhtio   = '{$kukarow['yhtio']}'
-                                  AND tilino   != '{$yhtiorow['varasto']}'
+                                  AND tilino   != '{$varastotili}'
                                   AND ltunnus   = '{$invrow['ltunnus']}'
                                   AND korjattu  = ''
                                   ORDER BY tapvm DESC, tunnus DESC
@@ -1231,7 +1266,7 @@ if ($tuoteno != '') {
                                   WHERE yhtio  = '$kukarow[yhtio]'
                                   AND ltunnus  = '$invrow[ltunnus]'
                                   AND korjattu = ''
-                                  AND tilino   = '$yhtiorow[varasto]'";
+                                  AND tilino   = '{$varastotili}'";
                         if ($jalkilaskenta_debug > 1) $jalkilaskenta_debug_text .= "$query<br>";
                         $invupd = pupe_query($query);
 
@@ -1239,7 +1274,7 @@ if ($tuoteno != '') {
                         $query = "INSERT INTO tiliointi SET
                                   yhtio    = '$kukarow[yhtio]',
                                   ltunnus  = '$invrow[ltunnus]',
-                                  tilino   = '$yhtiorow[varasto]',
+                                  tilino   = '{$varastotili}',
                                   kustp    = '{$invrow['kustp']}',
                                   kohde    = '{$invrow['kohde']}',
                                   projekti = '{$invrow['projekti']}',

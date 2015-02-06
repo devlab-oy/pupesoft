@@ -1293,6 +1293,7 @@ if (!isset($task)) {
               <input type='submit' value='{$nappi}' />
               </form></div>";
 
+              /*
               if ($laadittu == 'joo') {
 
                 $poistettavatunnus = mysql_fetch_assoc($result);
@@ -1306,6 +1307,7 @@ if (!isset($task)) {
                   </form></div>";
 
               }
+              */
 
 
 

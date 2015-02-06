@@ -2,6 +2,14 @@
 
 $pupe_DataTables = 'keikka';
 
+if (isset($_REQUEST["komento"]) and in_array("PDF_RUUDULLE", $_REQUEST["komento"])) {
+  $_REQUEST["tee"] = $_POST["tee"] = $_GET["tee"] = "NAYTATILAUS";
+}
+
+if ((isset($_REQUEST["tee"]) and $_REQUEST["tee"] == 'NAYTATILAUS') or
+  (isset($_POST["tee"]) and $_POST["tee"] == 'NAYTATILAUS') or
+  (isset($_GET["tee"]) and $_GET["tee"] == 'NAYTATILAUS')) $nayta_pdf = 1; //Generoidaan .pdf-file
+
 if (isset($_POST["tee"])) {
   if ($_POST["tee"] == 'lataa_tiedosto') {
     $lataa_tiedosto = 1;

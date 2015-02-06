@@ -611,7 +611,9 @@ if ($ytunnus != '' and $tee == "") {
 
 if ($tee == "" and $ytunnus == "") {
 
-  $maksaja_haku = htmlentities($maksaja_haku);
+  if (empty($iframe)) {
+    $maksaja_haku = htmlentities($maksaja_haku);
+  }
 
   echo "<font class='message'>", t("Maksajan hakuinfo"), " ", asiakashakuohje(), "</font><br>";
   echo "<br>";

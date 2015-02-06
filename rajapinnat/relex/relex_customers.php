@@ -61,8 +61,14 @@ fwrite($fp, $header);
 
 $asiakasrajaus = "";
 
-// Otetaan mukaan vain viimeisen vuorokauden j‰lkeen muuttuneet
-if ($paiva_ajo) {
+// Haetaan aika jolloin t‰m‰ skripti on viimeksi ajettu
+$datetime_checkpoint = cron_aikaleima("RELEX_CUST_CRON");
+
+// Otetaan mukaan vain edellisen ajon j‰lkeen muuttuneet
+if ($paiva_ajo and $datetime_checkpoint != "") {
+  $asiakasrajaus = " AND (asiakas.muutospvm > '$datetime_checkpoint' or asiakas.luontiaika > '$datetime_checkpoint')";
+}
+elseif ($paiva_ajo) {
   $asiakasrajaus = " AND (asiakas.muutospvm >= date_sub(now(), interval 24 HOUR) or asiakas.luontiaika >= date_sub(now(), interval 24 HOUR))";
 }
 
@@ -79,6 +85,9 @@ $query = "SELECT
           {$asiakasrajaus}
           ORDER BY asiakas.tunnus";
 $res = pupe_query($query);
+
+// Tallennetaan aikaleima
+cron_aikaleima("RELEX_CUST_CRON", date('Y-m-d H:i:s'));
 
 // Kerrotaan montako rivi‰ k‰sitell‰‰n
 $rows = mysql_num_rows($res);

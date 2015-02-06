@@ -827,7 +827,7 @@ function laadi_edifact_sanoma($parametrit, $korjaus = false) {
   }
   elseif ($laji == 'rekkakontitus') {
     // TDT -segmentti
-    $s .= "TDT+20++3++". $kuljettaja_info['koodi'] ."::86:". $kuljettaja_info['nimi'] ."+++" . $kuljettaja_info['rekno'] . "'";
+    $s .= "TDT+20++3++". $kuljettaja_info['koodi'] ."::86:". $kuljettaja_info['nimi'] ."+++" . $kuljettaja_info['auto_rekno'] . "'";
     $segmentit++;
 
     // LOC -segmentti

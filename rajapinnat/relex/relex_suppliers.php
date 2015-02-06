@@ -61,8 +61,14 @@ fwrite($fp, $header);
 
 $toimittajarajaus = "";
 
-// Otetaan mukaan vain viimeisen vuorokauden j‰lkeen muuttuneet
-if ($paiva_ajo) {
+// Haetaan aika jolloin t‰m‰ skripti on viimeksi ajettu
+$datetime_checkpoint = cron_aikaleima("RELEX_SUPL_CRON");
+
+// Otetaan mukaan vain edellisen ajon j‰lkeen muuttuneet
+if ($paiva_ajo and $datetime_checkpoint != "") {
+  $toimittajarajaus = " AND (toimi.muutospvm > '$datetime_checkpoint' or toimi.luontiaika > '$datetime_checkpoint')";
+}
+elseif ($paiva_ajo) {
   $toimittajarajaus = " AND (toimi.muutospvm >= date_sub(now(), interval 24 HOUR) or toimi.luontiaika >= date_sub(now(), interval 24 HOUR))";
 }
 
@@ -81,6 +87,9 @@ $query = "SELECT
           {$toimittajarajaus}
           ORDER BY toimi.tunnus";
 $res = pupe_query($query);
+
+// Tallennetaan aikaleima
+cron_aikaleima("RELEX_SUPL_CRON", date('Y-m-d H:i:s'));
 
 // Kerrotaan montako rivi‰ k‰sitell‰‰n
 $rows = mysql_num_rows($res);

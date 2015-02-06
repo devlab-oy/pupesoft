@@ -11,7 +11,7 @@ if (empty($tila)) {
 }
 
 //  Tehd‰‰n hieman oikeellisuustarkistuksia valmistuksesta.. "ei viel‰ hanskaa k‰yt‰ kaikista valintaa"
-if ($toim == "VALMISTAVARASTOON" and isset($jatka) and $clearing != "" and $varasto != "") {
+if ($toim == "VALMISTAVARASTOON" and isset($jatka) and !empty($clearing) and !empty($varasto)) {
   //  Valmistuksia voi tehd‰ vain saman maan sis‰ll‰!
   $query  = "SELECT maa from varastopaikat where yhtio='$kukarow[yhtio]' and tunnus='$clearing'";
   $abures = pupe_query($query);
@@ -22,8 +22,8 @@ if ($toim == "VALMISTAVARASTOON" and isset($jatka) and $clearing != "" and $vara
   $lahdev = mysql_fetch_array($abures);
 
   if ($lahdev["maa"] != $kohdev["maa"]) {
-    echo "<font class='error'>".t("Valmistus on mahdollista vain saman maan sis‰ll‰")."!!!</font><br><br>";
-    $tila == "Muuta";
+    echo "<font class='error'>".t("Valmistus on mahdollista vain saman maan sis‰ll‰")."!</font><br><br>";
+    $tila = "Muuta";
     unset($jatka);
   }
 }

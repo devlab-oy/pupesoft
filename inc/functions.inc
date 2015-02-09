@@ -17238,8 +17238,6 @@ if (!function_exists("tee_keraysera")) {
                  AND varaston_hyllypaikat.hyllytaso           = tilausrivi.hyllytaso
                   and varaston_hyllypaikat.keraysvyohyke       = 9)
                JOIN keraysvyohyke ON (keraysvyohyke.yhtio = lasku.yhtio
-
-                 AND keraysvyohyke.tunnus                     = '9')
                  AND keraysvyohyke.tunnus                     = varaston_hyllypaikat.keraysvyohyke)
                JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio
                  AND toimitustapa.selite                      = lasku.toimitustapa)

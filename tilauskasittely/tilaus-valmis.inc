@@ -1061,7 +1061,7 @@ else {
        * Tulostetaan kassakuitti
        */
 
-      require "tilauskasittely/tulosta_asiakkaan_kuitti.inc";
+      require_once "tilauskasittely/tulosta_asiakkaan_kuitti.inc";
 
       $kuitin_parametrit = array("kateinen" => $kateismaksu["kateinen"]);
 

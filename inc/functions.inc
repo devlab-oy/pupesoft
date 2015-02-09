@@ -19024,8 +19024,8 @@ if (!function_exists("tee_keraysera")) {
 
         if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1510): Tuoteno $fail_tuoteno (Tilaus $fail_otunnus)<br>\n";
 
-        $query = "UPDATE lasku SET toimitustavan_lahto = 0, toimitustavan_lahto_siirto = 0 WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$fail_otunnus}'";
-        $upd_res = pupe_query($query);
+        // $query = "UPDATE lasku SET toimitustavan_lahto = 0, toimitustavan_lahto_siirto = 0 WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$fail_otunnus}'";
+        // $upd_res = pupe_query($query);
       }
 
       if ($yhtiorow['alert_varasto_kayttajat'] != '') {

@@ -26,6 +26,10 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
+$maksupaate_kassamyynti = (($yhtiorow['maksupaate_kassamyynti'] == 'K' and
+                            $kukarow["maksupaate_kassamyynti"] == "") or
+                           $kukarow["maksupaate_kassamyynti"] == "K");
+
 if ($tulosta_kuitti) {
   require_once "tilauskasittely/tulosta_asiakkaan_kuitti.inc";
 
@@ -9668,6 +9672,10 @@ if ($tee == '') {
 
   // tulostetaan loppuun parit napit..
   if ((int) $kukarow["kesken"] > 0 and (!isset($ruutulimit) or $ruutulimit == 0)) {
+    if ($maksupaate_kassamyynti) {
+      piirra_maksupaate_formi();
+    }
+
     echo "<br><table width='100%'><tr>$jarjlisa";
 
     if ($kukarow["extranet"] == "" and $toim == "MYYNTITILI" and $laskurow["alatila"] == "V") {
@@ -10064,7 +10072,9 @@ if ($tee == '') {
 
         echo "<input type='hidden' name='kateinen' value='$kateinen'>";
 
-        echo "<input type='submit' ACCESSKEY='V' value='$painike_txt'>";
+        if (!$maksupaate_kassamyynti) {
+          echo "<input type='submit' ACCESSKEY='V' value='$painike_txt'>";
+        }
 
         if ($kukarow["extranet"] == "" and ($yhtiorow["tee_osto_myyntitilaukselta"] == "Z" or $yhtiorow["tee_osto_myyntitilaukselta"] == "Q") and in_array($toim, array("PROJEKTI", "RIVISYOTTO", "PIKATILAUS"))) {
           $lisateksti = ($nayta_sostolisateksti == "TOTTA") ? " & ".t("Päivitä ostotilausta samalla") : " & ".t("Tee tilauksesta ostotilaus");
@@ -10437,9 +10447,6 @@ if ($tee == '') {
     }
 
     echo "</table>";
-
-    piirra_maksupaate_formi();
-
   }
 }
 
@@ -10640,7 +10647,7 @@ function piirra_maksupaate_formi() {
           </form>
         </div>";
 
-  echo "<table style='width: 100%;'>";
+  echo "<table style='width: 100%; margin-top: 20px;'>";
   echo "<tr><td class='back'><font class='head'>" . t("Maksutapa") . "</font></td></tr>";
   echo "<form name='laskuri' id='laskuri' method='post'
               action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";

@@ -10639,7 +10639,7 @@ function maksa_maksupaatteella() {
 function piirra_maksupaate_formi() {
   global $kukarow, $laskurow, $palvelin2, $tilauskaslisa, $tilausnumero, $mista, $kaikkiyhteensa,
          $valittu_kopio_tulostin, $kateinen, $kertakassa, $toim, $orig_tila, $orig_alatila,
-         $korttimaksu, $maksettu_lkortilla, $maksettu_pkortilla;
+         $korttimaksu, $maksettu_lkortilla, $maksettu_pkortilla, $maksettavaa_jaljella;
 
   $query_maksuehto = "SELECT *
                       FROM maksuehto
@@ -10652,6 +10652,23 @@ function piirra_maksupaate_formi() {
   $maksuehtores = pupe_query($query_maksuehto);
   $maksuehtorow = mysql_fetch_assoc($maksuehtores);
 
+  echo "<div id='dialog' title='Käteislaskuri'>
+          <form id='kateisFormi' class='multisubmit'>
+            <ul class='list-unstyled'>
+              <li class='text-medium'>Summa:</li>
+              <li id='jaljella'
+                  class='text-large'>{$maksettavaa_jaljella} {$laskurow["valkoodi"]}</li>
+              <li class='text-medium'>Annettu:</li>
+              <li><input id='annettu' type='number' min='0.01' step='0.01' class='text-large'></li>
+              <li class='text-medium'>Takaisin:</li>
+              <li>
+                <span id='takaisin' class='text-large'></span>
+                <span class='text-large'>{$laskurow["valkoodi"]}</span>
+              </li>
+            </ul>
+          </form>
+        </div>";
+
   echo "<table style='width: 100%;'>";
   echo "<tr><td class='back'><font class='head'>" . t("Maksutapa") . "</font></td></tr>";
   echo "<form name='laskuri' id='laskuri' method='post'
@@ -10660,7 +10677,7 @@ function piirra_maksupaate_formi() {
   echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
   echo "<input type='hidden' name='tilausnumero' value='{$tilausnumero}'>";
   echo "<input type='hidden' name='mista' value='{$mista}'>";
-  echo "<input type='hidden' name='tee' value=''>";
+  echo "<input id='laskuriTee' type='hidden' name='tee' value=''>";
   echo "<input type='hidden' name='maksutapa' value='{$maksuehtorow["tunnus"]}'>";
   echo "<input type='hidden' name='kaikkiyhteensa' value='{$kaikkiyhteensa}'>";
   echo "<input type='hidden' name='valittu_kopio_tulostin' value='{$valittu_kopio_tulostin}'>";
@@ -10680,9 +10697,10 @@ function piirra_maksupaate_formi() {
   echo "</td></tr>";
 
   echo "<input type='hidden' name='kateismaksu[pankkikortti]' id='pankkikortti'
-               value='{$maksettu_pkortilla}'";
+               value='{$maksettu_pkortilla}'>";
   echo "<input type='hidden' name='kateismaksu[luottokortti]' id='luottokortti'
-               value='{$maksettu_lkortilla}'";
+               value='{$maksettu_lkortilla}'>";
+  echo "<input type='hidden' name='kateismaksu[kateinen]' id='kateinen'>";
 
   echo "<tr>
           <td>

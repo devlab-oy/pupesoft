@@ -1,4 +1,80 @@
 $(document).ready(function() {
+  var dialogi = $('#dialog');
+  var annettu = $('#annettu');
+  var hyvaksyKateinen = $('#hyvaksyKateinen');
+  var saaSubmitataLaskurin = false;
+
+  dialogi.dialog({
+    modal: true,
+    draggable: false,
+    resizable: false,
+    dialogClass: "no-close no-title",
+    autoOpen: false,
+    minWidth: 500,
+    minHeight: 250,
+    buttons: [
+      {
+        text: "Peru maksu",
+        click: function () {
+          $(this).dialog("close");
+        }
+      },
+      {
+        id: "hyvaksyKateinen",
+        text: "Hyväksy (Enter)",
+        disabled: 'disabled',
+        click: submitLaskuri
+      }
+    ]
+  });
+
+  $('#kateismaksunappi').on('click', function () {
+    dialogi.dialog("open");
+  });
+
+  annettu.on('input', function () {
+    var annettuInt = Math.round(parseFloat(annettu.val()) * 100);
+    var jaljellaInt = Math.round(parseFloat($('#jaljella').text()) * 100);
+    var erotus = (annettuInt - jaljellaInt) / 100;
+
+    var hyvaksyKateinen = $('#hyvaksyKateinen');
+
+    if (isNaN(erotus) || erotus < 0) {
+      saaSubmitataLaskurin = false;
+      hyvaksyKateinen.button('option', 'disabled', true);
+    }
+    else {
+      saaSubmitataLaskurin = true;
+      hyvaksyKateinen.button('option', 'disabled', false);
+    }
+
+    var takaisin = $('#takaisin');
+
+    if (isNaN(erotus)) {
+      takaisin.text("");
+    }
+    else {
+      takaisin.text(erotus);
+    }
+  });
+
+  $('#kateisFormi').on('submit', function (e) {
+    e.preventDefault();
+    if (saaSubmitataLaskurin) {
+      submitLaskuri();
+    }
+  });
+
+
+  function submitLaskuri() {
+    $('#kateinen').val(annettu.val());
+    $('#seka').val('kylla');
+    $('#laskuriTee').val('VALMIS');
+
+    setTimeout(function () {
+      $("#laskuri").submit();
+    }, 4000);
+  }
 
   $('#myyja_id').on('change', function () {
     $(this).siblings('#myyjanro_id').val('');

@@ -69,6 +69,18 @@ else {
     $rakir_row['toim_postino'] = $rakir_row['postino'];
     $rakir_row['toim_osoite']  = $rakir_row['osoite'];
     $rakir_row['toim_nimi']    = $rakir_row['nimi'];
+    if ($rakir_row['gsm'] != '') {
+       $rakir_row['toim_puh'] = $rakir_row['gsm']; 
+    }
+    elseif ($rakir_row['tyopuhelin'] != '') {
+       $rakir_row['toim_puh'] = $rakir_row['tyopuhelin']; 
+    }
+    elseif ($rakir_row['puhelin'] != '') {
+       $rakir_row['toim_puh'] = $rakir_row['puhelin']; 
+    }
+    else{
+       $rakir_row['toim_puh'] = ''; 
+    } 
   }
 }
 

@@ -373,7 +373,7 @@ if ($tee == 'tulosta') {
             IF(lasku.toim_puh != '', lasku.toim_puh,
             IF(asiakas.gsm != '', asiakas.gsm,
             IF(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
-            IF(asiakas.puhelin != '', asiakas.puhelin, '')))) puhelin
+            IF(asiakas.puhelin != '', asiakas.puhelin, '')))) AS toim_puh
             FROM rahtikirjat
             JOIN lasku USE INDEX (PRIMARY) on (lasku.tunnus=rahtikirjat.otsikkonro and lasku.yhtio=rahtikirjat.yhtio and lasku.tila in ('L','G') ";
 

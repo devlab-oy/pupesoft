@@ -163,6 +163,7 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
         $osoitelappurow["toim_postitp"] = $tpostitp;
         $osoitelappurow["toim_osoite"]   = $tosoite;
         $osoitelappurow["toim_maa"]   = $tmaa;
+        $osoitelappurow["toim_puh"]   = $tpuh;
       }
       elseif ($asiakasrow["toim_nimi"] != '') {
         $osoitelappurow["toim_postino"] = $asiakasrow["toim_postino"];
@@ -171,6 +172,18 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
         $osoitelappurow["toim_postitp"] = $asiakasrow["toim_postitp"];
         $osoitelappurow["toim_maa"]   = $asiakasrow["toim_maa"];
         $osoitelappurow["toim_osoite"]   = $asiakasrow["toim_osoite"];
+        if ($asiakasrow['gsm'] != '') {
+           $osoitelappurow['toim_puh'] = $asiakasrow['gsm']; 
+        }
+        elseif ($asiakasrow['tyopuhelin'] != '') {
+           $osoitelappurow['toim_puh'] = $asiakasrow['tyopuhelin']; 
+        }
+        elseif ($asiakasrow['puhelin'] != '') {
+           $osoitelappurow['toim_puh'] = $asiakasrow['puhelin']; 
+        }
+        else{
+           $osoitelappurow['toim_puh'] = ''; 
+        } 
       }
       else {
         $osoitelappurow["toim_postino"] = $asiakasrow["postino"];
@@ -179,6 +192,18 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
         $osoitelappurow["toim_postitp"] = $asiakasrow["postitp"];
         $osoitelappurow["toim_maa"]   = $asiakasrow["maa"];
         $osoitelappurow["toim_osoite"]   = $asiakasrow["osoite"];
+        if ($asiakasrow['gsm'] != '') {
+           $osoitelappurow['toim_puh'] = $asiakasrow['gsm']; 
+        }
+        elseif ($asiakasrow['tyopuhelin'] != '') {
+           $osoitelappurow['toim_puh'] = $asiakasrow['tyopuhelin']; 
+        }
+        elseif ($asiakasrow['puhelin'] != '') {
+           $osoitelappurow['toim_puh'] = $asiakasrow['puhelin']; 
+        }
+        else{
+           $osoitelappurow['toim_puh'] = ''; 
+        } 
       }
     }
     else {
@@ -188,12 +213,14 @@ if ((isset($tulosta) or isset($tulostakopio)) and $otsikkonro > 0) {
       $osoitelappurow["postino"]     = $tpostino;
       $osoitelappurow["postitp"]     = $tpostitp;
       $osoitelappurow["maa"]       = $tmaa;
+      $osoitelappurow["toim_puh"]   = $tpuh;
 
       $osoitelappurow["toim_postino"] = $tpostino;
       $osoitelappurow["toim_nimi"]   = $tnimi;
       $osoitelappurow["toim_nimitark"]= $tnimitark;
       $osoitelappurow["toim_postitp"] = $tpostitp;
       $osoitelappurow["toim_maa"]   = $tmaa;
+      $osoitelappurow["toim_puh"]   = $tpuh;
       $osoitelappurow["toim_osoite"]   = $tosoite;
     }
 
@@ -429,7 +456,18 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
     $asiakasrow['toim_nimi']     = $tnimi;
     $asiakasrow['toim_maa']      = $tmaa;
   }
-
+  if ($asiakasrow['gsm'] != '') {
+     $tpuh = $asiakasrow['gsm']; 
+  }
+  elseif ($asiakasrow['tyopuhelin'] != '') {
+     $tpuh = $asiakasrow['tyopuhelin']; 
+  }
+  elseif ($asiakasrow['puhelin'] != '') {
+     $tpuh = $asiakasrow['puhelin']; 
+  }
+  else{
+     $tpuh = ''; 
+  } 
   echo "<form method='post' action='rahtikirja_custom.php' name='rahtikirja'><table>";
   echo "<tr>
       <th colspan='2' align='left' valign='top'>&nbsp; ".t("Asiakkaan tiedot").":</td></tr>";
@@ -445,6 +483,9 @@ if ($asiakasid or $rahtikirja_ilman_asiakasta) {
   echo "<tr>
       <td valign='top'>".t("Postitp").": </td>
       <td><input type='text' name='tpostino' size='10' value='$asiakasrow[toim_postino]'> <input type='text' name='tpostitp' size='21' value='$asiakasrow[toim_postitp]'></td></tr>";
+  echo "<tr>
+      <td valign='top'>".t("Toim. puh").": </td>
+      <td><input type='text' name='tpuh' size='35' value='$tpuh'></td></tr>";
 
 
   $query = "SELECT distinct koodi, nimi

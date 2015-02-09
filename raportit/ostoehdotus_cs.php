@@ -141,9 +141,16 @@ function myynnit($myynti_varasto = '', $myynti_maa = '') {
     $laskujoin = " JOIN lasku USE INDEX (PRIMARY) on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus $laskuntoimmaa) ";
   }
 
+  // Default rajaus
+  $pvmrajausperuste = 'laskutettuaika';
+
+  if (isset($kayta_kerayspvm)) {
+    $pvmrajausperuste = 'kerayspvm';
+  }
+
   // tutkaillaan myynti
   $query = "SELECT
-            sum(if((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') and tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4', tilausrivi.kpl, 0)) kpl4,
+            sum(if((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') and tilausrivi.{$pvmrajausperuste} >= '$vva4-$kka4-$ppa4' and tilausrivi.{$pvmrajausperuste} <= '$vvl4-$kkl4-$ppl4', tilausrivi.kpl, 0)) kpl4,
             sum(if((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') and tilausrivi.var not in ('P','J','O','S'), tilausrivi.varattu, 0)) ennpois,
             sum(if(tilausrivi.tyyppi = 'L' and tilausrivi.var  = 'J', tilausrivi.jt $lisavarattu, 0)) jt,
             sum(if(tilausrivi.tyyppi = 'E' and tilausrivi.var != 'O', tilausrivi.varattu, 0)) ennakko
@@ -155,7 +162,7 @@ function myynnit($myynti_varasto = '', $myynti_maa = '') {
             and tilausrivi.tyyppi  in ('L','V','E')
             and tilausrivi.tuoteno = '$row[tuoteno]'
             $varastot
-            and ((tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4') or tilausrivi.laskutettuaika = '0000-00-00')";
+            and ((tilausrivi.{$pvmrajausperuste} >= '$vva4-$kka4-$ppa4' and tilausrivi.{$pvmrajausperuste} <= '$vvl4-$kkl4-$ppl4') or tilausrivi.{$pvmrajausperuste} = '0000-00-00')";
   $result   = pupe_query($query);
   $laskurow = mysql_fetch_assoc($result);
 
@@ -1050,7 +1057,10 @@ echo "  <tr><th>".t("Kausi")."</th>
     <td><input type='text' name='ppl4' value='$ppl4' size='5'></td>
     <td><input type='text' name='kkl4' value='$kkl4' size='5'></td>
     <td><input type='text' name='vvl4' value='$vvl4' size='5'></td>
-    </tr>";
+    </tr>"; 
+
+$scheck = ($kayta_kerayspvm != "") ? "CHECKED": "";
+echo "<tr><td>".t('Rajaa ker‰ysp‰iv‰m‰‰r‰ll‰')."<input type='checkbox' name='kayta_kerayspvm' $scheck></td></tr>";
 
 echo "</table><table><br>";
 

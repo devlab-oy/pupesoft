@@ -1988,8 +1988,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
           $kateisohitus == "" and
           (($yhtiorow["maksupaate_kassamyynti"] == "" and
             $kukarow["maksupaate_kassamyynti"] == "") or
-           $kukarow["maksupaate_kassamyynti"] == "E" or
-           $kateismaksu["kateinen"] != "")
+           $kukarow["maksupaate_kassamyynti"] == "E")
       ) {
         echo "  <script type='text/javascript' language='JavaScript'>
             <!--

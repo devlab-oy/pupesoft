@@ -17185,7 +17185,7 @@ if (!function_exists("tee_keraysera")) {
     // esim. muutetaan metrit senteiksi
     $mittakerroin = 100;
 
-    if ($tee_keraysera_debugdir != "" and is_dir($tee_keraysera_debugdir)) {
+    if (1 == 1 or ($tee_keraysera_debugdir != "" and is_dir($tee_keraysera_debugdir))) {
 
       if ($yhtiorow["kayttoliittyma"] == "U") {
         $css = $yhtiorow['css'];
@@ -17236,9 +17236,10 @@ if (!function_exists("tee_keraysera")) {
                  AND varaston_hyllypaikat.hyllynro            = tilausrivi.hyllynro
                  AND varaston_hyllypaikat.hyllyvali           = tilausrivi.hyllyvali
                  AND varaston_hyllypaikat.hyllytaso           = tilausrivi.hyllytaso
-                 AND varaston_hyllypaikat.keraysvyohyke       IN ({$keraysvyohyke}))
+                  and varaston_hyllypaikat.keraysvyohyke       = 9)
                JOIN keraysvyohyke ON (keraysvyohyke.yhtio = lasku.yhtio
-                 AND keraysvyohyke.tunnus                     IN ({$keraysvyohyke})
+
+                 AND keraysvyohyke.tunnus                     = '9')
                  AND keraysvyohyke.tunnus                     = varaston_hyllypaikat.keraysvyohyke)
                JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio
                  AND toimitustapa.selite                      = lasku.toimitustapa)
@@ -17262,7 +17263,7 @@ if (!function_exists("tee_keraysera")) {
 
                UNION
 
-               (SELECT SQL_NO_CACHE
+               (SELECT
                lasku.prioriteettinro as prioriteetti,
                0 as erotus,
                lasku.ohjausmerkki,
@@ -17496,6 +17497,7 @@ if (!function_exists("tee_keraysera")) {
                 WHERE lasku.yhtio                              = '{$kukarow['yhtio']}'
                 {$tilat}
                 AND lasku.vakisin_kerays                       = ''
+                and lasku.tunnus in (13839128, 13831437,13832233,13821803,13836825,13835152,13835052,13831914,13839644,13836345,13836346,13836343,13836341,13836347,13839568,13799338,13832130,13832123,13832116,13837129,13840146)
                 AND lasku.varasto                              = '{$varasto}'
                 AND kuka.tunnus is null
                 {$_group_by_lisa}
@@ -17977,6 +17979,10 @@ if (!function_exists("tee_keraysera")) {
     $_fixed_main_array_count = count($fixed_main_array);
     $_fixed_main_array_keys = array_keys($fixed_main_array);
 
+    $kukarow['debugstring'] .= var_dump($fixed_main_array)."\n";
+    $kukarow['debugstring'] .= var_dump($_fixed_main_array_count)."\n";
+    $kukarow['debugstring'] .= var_dump($_fixed_main_array_keys)."\n";
+
     for ($_main_i = 0; $_fixed_main_array_count > $_main_i; $_main_i++) {
 
       $eka_kierros = true;
@@ -18391,6 +18397,7 @@ if (!function_exists("tee_keraysera")) {
             $kukarow['debugstring'] .= "(E1001): Katsotaan nurkan takaa<br>\n";
           }
 
+          /*
           for ($_nurkka_i = ($_main_i + 1); $_fixed_main_array_count > $_nurkka_i; $_nurkka_i++) {
 
             $_key = $_fixed_main_array_keys[$_nurkka_i];
@@ -18452,6 +18459,7 @@ if (!function_exists("tee_keraysera")) {
               }
             }
           }
+          */
 
           if (isset($kukarow['debugstring'])) {
             $kukarow['debugstring'] .= "(E1003): Ei löytynyt nurkan takaa<br>\n";
@@ -19298,6 +19306,9 @@ if (!function_exists("tee_keraysera")) {
       $kukarow['debugstring'] .= var_export($erat, TRUE);
       $kukarow['debugstring'] .= "</pre>\n";
     }
+
+    echo $kukarow['debugstring'];
+    exit;
 
     if (isset($kukarow['debugstring'])) {
       $filenimi = "Kerayseradebug-".md5(uniqid(mt_rand(), true)).".html";

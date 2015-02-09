@@ -17237,7 +17237,7 @@ if (!function_exists("tee_keraysera")) {
                  AND varaston_hyllypaikat.hyllynro            = tilausrivi.hyllynro
                  AND varaston_hyllypaikat.hyllyvali           = tilausrivi.hyllyvali
                  AND varaston_hyllypaikat.hyllytaso           = tilausrivi.hyllytaso
-                  and varaston_hyllypaikat.keraysvyohyke       = 9)
+                  AND varaston_hyllypaikat.keraysvyohyke       = '14')
                JOIN keraysvyohyke ON (keraysvyohyke.yhtio = lasku.yhtio
                  AND keraysvyohyke.tunnus                     = varaston_hyllypaikat.keraysvyohyke)
                JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio
@@ -17256,6 +17256,7 @@ if (!function_exists("tee_keraysera")) {
                WHERE lasku.yhtio                              = '{$kukarow['yhtio']}'
                {$tilat}
                AND lasku.vakisin_kerays                       = ''
+               and lasku.tunnus in ('13858812','13858848','13858847','13853989')
                AND lasku.varasto                              = '{$varasto}'
                AND kuka.tunnus is null
                GROUP BY 1,2,3,4,5,6,7)
@@ -17496,7 +17497,7 @@ if (!function_exists("tee_keraysera")) {
                 WHERE lasku.yhtio                              = '{$kukarow['yhtio']}'
                 {$tilat}
                 AND lasku.vakisin_kerays                       = ''
-                and lasku.tunnus in (13839128, 13831437,13832233,13821803,13836825,13835152,13835052,13831914,13839644,13836345,13836346,13836343,13836341,13836347,13839568,13799338,13832130,13832123,13832116,13837129,13840146)
+                and lasku.tunnus in ('13858812','13858848','13858847','13853989')
                 AND lasku.varasto                              = '{$varasto}'
                 AND kuka.tunnus is null
                 {$_group_by_lisa}
@@ -18397,8 +18398,11 @@ if (!function_exists("tee_keraysera")) {
             $kukarow['debugstring'] .= "(E1001): Katsotaan nurkan takaa<br>\n";
           }
 
-          /*
-          for ($_nurkka_i = ($_main_i + 1); $_fixed_main_array_count > $_nurkka_i; $_nurkka_i++) {
+          if (isset($kukarow['debugstring'])) {
+            $kukarow['debugstring'] .= "(E10011): Nurkan takaa for-ehdot: $_nurkka_i = ($_main_i + 1); ($_main_i + 4 and $_fixed_main_array_count) > $_nurkka_i; $_nurkka_i++<br>\n";
+          }
+
+          for ($_nurkka_i = ($_main_i + 1); ($_main_i + 4) > $_nurkka_i and $_fixed_main_array_count > $_nurkka_i; $_nurkka_i++) {
 
             $_key = $_fixed_main_array_keys[$_nurkka_i];
             $_tilaukset = $fixed_main_array[$_key];
@@ -18436,11 +18440,15 @@ if (!function_exists("tee_keraysera")) {
               $eran_koko_pintaala
             );
 
+            $kukarow['debugstring'] .= "(E10014): Nurkan takaa kaytettava pakkaus: $kaytettava_pakkaus<br>\n";
+
             if ($kaytettava_pakkaus != '') {
 
               $_leveys = $pakkaukset[$kaytettava_pakkaus]['leveys'];
               $_syvyys = $pakkaukset[$kaytettava_pakkaus]['syvyys'];
               $_til_koko_chk = $eran_koko_pintaala + ($_leveys * $_syvyys);
+
+              $kukarow['debugstring'] .= "(E10015): Nurkan takaa check: $eran_koko_pintaala + ($_leveys * $_syvyys) <= $keraysvyohyketiedot[max_keraysera_pintaala]<br>\n";
 
               if ($_til_koko_chk <= $keraysvyohyketiedot['max_keraysera_pintaala']) {
 
@@ -18460,20 +18468,26 @@ if (!function_exists("tee_keraysera")) {
               }
             }
           }
-          */
 
           if (isset($kukarow['debugstring'])) {
             $kukarow['debugstring'] .= "(E1003): Ei löytynyt nurkan takaa<br>\n";
           }
 
-          if (($kaytettava_pakkaus != '' and ($eran_koko_pintaala + ($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])) > $keraysvyohyketiedot['max_keraysera_pintaala'])
-            or ($kaytettava_pakkaus == '' and $eran_koko_pintaala > 0 and ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $tuoterow['y_maara']) > $keraysvyohyketiedot['max_keraysera_pintaala']))) {
+          // if (($kaytettava_pakkaus != '' and ($eran_koko_pintaala + ($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])) > $keraysvyohyketiedot['max_keraysera_pintaala'])
+          //   or ($kaytettava_pakkaus == '' and $eran_koko_pintaala > 0 and ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $tuoterow['y_maara']) > $keraysvyohyketiedot['max_keraysera_pintaala']))) {
 
-            if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1000): Tuleva pakkaus ylittäisi JOKA TAPAUKSESSA keräyserän sallitun pinta-alan ($eran_koko_pintaala cm2 + (pakkauksen ".($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])." cm2 tai tuotteen $tuoterow[pisin_sorttaus] * $tuoterow[lyhin_sorttaus] * $tuoterow[y_maara]) > $keraysvyohyketiedot[max_keraysera_pintaala] cm2). Keräyserä valmis!<br>\n";
+          //   if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1000): Tuleva pakkaus ylittäisi JOKA TAPAUKSESSA keräyserän sallitun pinta-alan ($eran_koko_pintaala cm2 + (pakkauksen ".($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys'])." cm2 tai tuotteen $tuoterow[pisin_sorttaus] * $tuoterow[lyhin_sorttaus] * $tuoterow[y_maara]) > $keraysvyohyketiedot[max_keraysera_pintaala] cm2). Keräyserä valmis!<br>\n";
 
-            $era_valmis = true;
-            break 2;
+          //   $era_valmis = true;
+          //   break 2;
+          // }
+
+          if (isset($kukarow['debugstring'])) {
+            $kukarow['debugstring'] .= "(E10035): Erä valmis<br>\n";
           }
+
+          $era_valmis = true;
+          break 2;
         }
 
         if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1010): JUOKSEVA NRO: $juokseva_nro KÄYTETTÄVÄ PAKKAUS: $kaytettava_pakkaus<br>\n";
@@ -19308,13 +19322,15 @@ if (!function_exists("tee_keraysera")) {
       $kukarow['debugstring'] .= "</pre>\n";
     }
 
-    echo $kukarow['debugstring'];
-    exit;
-
     if (isset($kukarow['debugstring'])) {
       $filenimi = "Kerayseradebug-".md5(uniqid(mt_rand(), true)).".html";
 
+      $tee_keraysera_debugdir = "/tmp";
+
       file_put_contents($tee_keraysera_debugdir."/".$filenimi, $kukarow['debugstring']);
+
+    echo $kukarow['debugstring'];
+    exit;
 
       // Tyhjennetään tämä tässä ja lisätään tallenna_keräyserässä vielä vähän lisää jos on tarvis
       $kukarow['debugstring'] = "";

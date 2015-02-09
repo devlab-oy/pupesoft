@@ -7983,7 +7983,8 @@ if ($tee == '') {
             }
 
             if ($_laite_huolto_ja_muokkaus_lukko) {
-              echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='vaihda_rivi'>
+              if (!isset($vaihda_rivi)) {
+                echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='vaihda_rivi'>
                   <input type='hidden' name='toim'       value = '$toim'>
                   <input type='hidden' name='lopetus'     value = '$lopetus'>
                   <input type='hidden' name='ruutulimit'     value = '$ruutulimit'>
@@ -8001,6 +8002,26 @@ if ($tee == '') {
                   <input type='hidden' name='var'       value = 'P'>
                   <input type='Submit' value='".t("Vaihda toimenpide")."'>
                   </form> ";
+              }
+              else {
+                echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='vaihda_rivi'>
+                  <input type='hidden' name='toim'       value = '$toim'>
+                  <input type='hidden' name='lopetus'     value = '$lopetus'>
+                  <input type='hidden' name='ruutulimit'     value = '$ruutulimit'>
+                  <input type='hidden' name='projektilla'   value = '$projektilla'>
+                  <input type='hidden' name='tilausnumero'   value = '$tilausnumero'>
+                  <input type='hidden' name='mista'       value = '$mista'>
+                  <input type='hidden' name='rivitunnus'     value = '$row[tunnus]'>
+                  <input type='hidden' name='rivilaadittu'  value = '$row[laadittu]'>
+                  <input type='hidden' name='menutila'     value = '$menutila'>
+                  <input type='hidden' name='orig_tila'    value = '$orig_tila'>
+                  <input type='hidden' name='orig_alatila'  value = '$orig_alatila'>
+                  <input type='hidden' name='tila'       value = 'MUUTA'>
+                  <input type='hidden' name='tapa'       value = 'VAIHDAJAPOISTA'>
+                  <input type='hidden' name='var'       value = ''>
+                  <input type='Submit' value='".t("Peru toimenpiteenvaihto")."'>
+                  </form> ";
+              }
             }
           }
 
@@ -8155,6 +8176,7 @@ if ($tee == '') {
             and $row["status"] != 'P'
             and $row["status"] != 'X'
             and !$_luottoraja_ylivito
+            and $yhtiorow['laite_huolto'] == ''
           ) {
 
             echo "<br />";

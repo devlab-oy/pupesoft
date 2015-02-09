@@ -17142,7 +17142,8 @@ if (!function_exists('hae_tuotteet_ja_pisin_mitta')) {
       $pisin_tuote_per_asiakas,
       $eran_koko_chk,
       $eran_koko_pintaala_chk,
-      $eran_paino_chk
+      $eran_paino_chk,
+      $tuoteres
     );
   }
 }
@@ -18043,7 +18044,8 @@ if (!function_exists("tee_keraysera")) {
         $pisin_tuote_per_asiakas,
         $eran_koko_chk,
         $eran_koko_pintaala_chk,
-        $eran_paino_chk
+        $eran_paino_chk,
+        $tuoteres
       ) = hae_tuotteet_ja_pisin_mitta($args);
 
       if (isset($kukarow['debugstring'])) {
@@ -18418,7 +18420,8 @@ if (!function_exists("tee_keraysera")) {
               $_pisin_tuote_per_asiakas,
               $_eran_koko_chk,
               $_eran_koko_pintaala_chk,
-              $_eran_paino_chk
+              $_eran_paino_chk,
+              $tuoteres
             ) = hae_tuotteet_ja_pisin_mitta($args);
 
             $kaytettava_pakkaus = valitse_pakkaus(

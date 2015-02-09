@@ -47,3 +47,35 @@ table.indexvas td {
   float: left;
   margin-right: 5px;
 }
+
+.esierio {
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  padding:2px;
+  margin-bottom: 2px;
+}
+
+.erio {
+  display:inline-block;
+  padding:1px;
+  margin:1px;
+  background:silver;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+
+.kielipallo {
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  border-radius: 50%;
+  padding:2px;
+  display:inline-block;
+  width:20px;
+  text-align: center;
+  background:white;
+}
+.padding4 {
+  padding:4px;
+}

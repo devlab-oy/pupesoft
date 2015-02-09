@@ -65,6 +65,11 @@ $(document).ready(function() {
     }
   });
 
+  $('#korttimaksunappi').on('click', function () {
+    $('#seka').val('X');
+    $('#maksupaatetapahtuma').val('X');
+    $('#laskuri').submit();
+  });
 
   function submitLaskuri() {
     $('#kateinen').val(annettu.val());
@@ -75,6 +80,13 @@ $(document).ready(function() {
       $("#laskuri").submit();
     }, 4000);
   }
+
+  $('#peruuta_viimeisin').click(function () {
+    $('#seka').val('X');
+    $('#maksupaatetapahtuma').val('X');
+    $('#peruutus').val('X');
+    $('#laskuri').submit();
+  });
 
   $('#myyja_id').on('change', function () {
     $(this).siblings('#myyjanro_id').val('');

@@ -10706,11 +10706,13 @@ function piirra_maksupaate_formi() {
             <input type='button'
                    name='kateismaksunappi'
                    id='kateismaksunappi'
-                   value='" . t("Käteinen") . " (Alt+C)'>
+                   value='" . t("Käteinen") . " (Alt+C)'
+                   accesskey='c'>
             <input type='button'
                    name='korttimaksunappi'
                    id='korttimaksunappi'
-                   value='" . t("Kortti") . " (Alt+K)'>
+                   value='" . t("Kortti") . " (Alt+K)'
+                   accesskey='k'>
             <input type='button'
                    name='peruuta_viimeisin'
                    id='peruuta_viimeisin'

@@ -10116,6 +10116,11 @@ if (!function_exists('livesearch_kohdehaku')) {
         document.getElementById('livesearch_$hakuid').style.visibility = 'visible';
       </script>";
 
+      if (!is_numeric($relaatio_tunnus)) {
+        echo "<div style='padding:2px'><font class='message'>".t("Asiakas pit‰‰ olla numero").".</font></div>";
+        return;
+      }
+
       if (empty($kukarow['kieli'])) {
         $kieli = $yhtiorow['kieli'];
       }

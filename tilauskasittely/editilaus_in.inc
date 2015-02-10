@@ -1930,12 +1930,13 @@ while ($tietue = fgets($fd)) {
       // Tämä hinta on aina veroton, joten lasketaan vero päälle jos myyntihinnat ovat verollisia
       $editilaus_hinta = (float) trim(str_replace( ",", ".", $tieto));
 
+      // Käytössä on verolliset myyntihinnat, mutta edifailissa hinnat ovat verottomia
       if ($yhtiorow["alv_kasittely"] == '' and !isset($verkkokauppa_hinnatedifailistaverollisina)) {
         $editilaus_hinta = round($editilaus_hinta * (1 + $laskurow["alv"]/100), 2);
       }
-      // Jos saatu hinta kuitenkin sisältää jo verot ja halutaan laskea ne pois
-      if (isset($verkkokauppa_hinnoistalasketaanverotpois) 
-        and $verkkokauppa_hinnoistalasketaanverotpois == 'JOO' and !empty($verokanta)) {
+
+      // Käytössä on verottomat myyntihinnat, mutta edifailissa hinta kuitenkin sisältää verot ja halutaan laskea ne pois
+      if ($yhtiorow["alv_kasittely"] != '' and isset($verkkokauppa_hinnatedifailistaverollisina) and !empty($verokanta)) {
         $editilaus_hinta = round($editilaus_hinta / (1 + $verokanta/100), 2);
       }
     }

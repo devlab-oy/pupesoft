@@ -18454,7 +18454,7 @@ if (!function_exists("tee_keraysera")) {
 
                 unset($pisin_tuote[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']]);
 
-                if (count($pisin_tuote[$tuoterow['tuoteno']]['tilaus']) == 0 and count($pisin_tuote) > 1) {
+                if (count($pisin_tuote[$tuoterow['tuoteno']]['tilaus']) == 0 and count($pisin_tuote) > 0) {
                   if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "<font class='message'>18458 (E1080): Otetaan pois tuote \"pisin tuote listalta\" ($tuoterow[tuoteno])...</font><br><br>\n";
 
                   unset($pisin_tuote[$tuoterow['tuoteno']]);
@@ -18560,8 +18560,8 @@ if (!function_exists("tee_keraysera")) {
 
             unset($pisin_tuote[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']]);
 
-            if (count($pisin_tuote[$tuoterow['tuoteno']]['tilaus']) == 0 and count($pisin_tuote) > 1) {
-              if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "<font class='message'>(E1150): Otetaan pois tuote \"pisin tuote listalta\" ($tuoterow[tuoteno])...</font><br><br>\n";
+            if (count($pisin_tuote[$tuoterow['tuoteno']]['tilaus']) == 0 and count($pisin_tuote) > 0) {
+              if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "18564F <font class='message'>(E1150): Otetaan pois tuote \"pisin tuote listalta\" ($tuoterow[tuoteno])...</font><br><br>\n";
 
               unset($pisin_tuote[$tuoterow['tuoteno']]);
             }

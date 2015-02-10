@@ -18604,6 +18604,16 @@ if (!function_exists("tee_keraysera")) {
           }
         }
 
+        if (isset($kukarow['debugstring'])) {
+          $kukarow['debugstring'] .= "(E1175): Myyntierä: {$tuoterow['myynti_era']}<br>\n";
+          $kukarow['debugstring'] .= "(E1175): Pakkaukset kaytettava_pakkaus tilavuus: {$pakkaukset[$kaytettava_pakkaus]['tilavuus']}<br>\n";
+          $kukarow['debugstring'] .= "(E1175): Pakkaukset kaytettava_pakkaus kaytetty_tilavuus: {$pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus']}<br>\n";
+          $kukarow['debugstring'] .= "(E1175): Tuoterow y_koko: {$tuoterow['y_koko']}<br>\n";
+          $kukarow['debugstring'] .= "(E1175): Pakkaukset kaytettava_pakkaus paino: {$pakkaukset[$kaytettava_pakkaus]['paino']}<br>\n";
+          $kukarow['debugstring'] .= "(E1175): Pakkaukset kaytettava_pakkaus kaytetty_paino: {$pakkaukset[$kaytettava_pakkaus]['kaytetty_paino']}<br>\n";
+          $kukarow['debugstring'] .= "(E1175): Tuoterow y_paino: {$tuoterow['y_paino']}<br>\n";
+        }
+
         if ($pakkaukset[$kaytettava_pakkaus]['tilavuus'] >= ($pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] + $tuoterow['tuotteen_koko'])
           and $pakkaukset[$kaytettava_pakkaus]['paino'] > ($pakkaukset[$kaytettava_pakkaus]['kaytetty_paino'] + ($tuoterow['y_maara'] * $tuoterow['y_paino']))) {
 

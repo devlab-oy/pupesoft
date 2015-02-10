@@ -30478,6 +30478,24 @@ if (!function_exists('hae_tilausrivi')) {
   }
 }
 
+if (!function_exists('hae_tilausrivin_lisatiedot')) {
+  function hae_tilausrivin_lisatiedot($tilausrivi_tunnus) {
+    global $kukarow, $yhtiorow;
+
+    if (empty($tilausrivi_tunnus)) {
+      return false;
+    }
+
+    $query = "SELECT *
+              FROM tilausrivin_lisatiedot
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tilausrivitunnus = {$tilausrivi_tunnus}";
+    $result = pupe_query($query);
+
+    return mysql_fetch_assoc($result);
+  }
+}
+
 if (!function_exists('hae_tilausrivit')) {
 
   function hae_tilausrivit($otunnus) {

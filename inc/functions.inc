@@ -18671,7 +18671,7 @@ if (!function_exists("tee_keraysera")) {
 
               if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1260): splitattava määrä on $myyeramaara = floor($i / $tuoterow[myynti_era]) * $tuoterow[myynti_era]<br>\n";
 
-              if ($myyeramaara > 0 and fmod($myyeramaara, $tuoterow['myynti_era']) == 0) {
+              if ($myyeramaara > 0) {
                 $kaytettavat_pakkaukset[$kaytettava_pakkaus][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro][$tuoterow['tunnus']] = $myyeramaara;
                 break;
               }

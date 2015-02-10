@@ -76,15 +76,6 @@ $query = "SELECT *
 $maksuehto_result = pupe_query($query);
 $maksuehtorow = mysql_fetch_assoc($maksuehto_result);
 
-// Tarkistetaan, onko kaikki rivit hyvitysrivejä -> ei luottorajatarkistusta
-$query = "SELECT tunnus
-          FROM tilausrivi
-          WHERE yhtio  = '{$kukarow['yhtio']}'
-          AND otunnus  = '{$laskurow['tunnus']}'
-          AND tyyppi  != 'D'
-          AND (varattu + jt) > 0 ";
-$veloitus_result = pupe_query($query);
-
 // Myynti esteteään jos luottoraja on ylitetty (K - kaikki estetään, E -  kaikki muu ku myyjien tekemä estetään)
 // Jos maksuehto on käteinen, sallitaan luottorajan ylitys
 // samma på erapaivan_ylityksen_raja
@@ -94,8 +85,7 @@ $luottoraja_chk = ((in_array($yhtiorow["luottorajan_ylitys"], array("K", "J", "L
         or $tilausvalmiskutsuja != "TILAUSMYYNTI")))
   and $tilausvalmis_asiakas_row['luottoraja'] != 0
   and $maksuehtorow['kateinen'] == '' and empty($maksuehtorow['jv'])
-  and strpos($_SERVER['SCRIPT_NAME'], "korkolasku.php") === FALSE
-  and mysql_num_rows($veloitus_result) > 0) ? 1 : 0;
+  and strpos($_SERVER['SCRIPT_NAME'], "korkolasku.php") === FALSE) ? 1 : 0;
 
 $erapaiva_chk   =  ($maksuehtorow['kateinen'] == '' and empty($maksuehtorow['jv'])
   and mysql_num_rows($veloitus_result) > 0

@@ -98,7 +98,7 @@ if (!isset($naytetaankolukitut)) $naytetaankolukitut = "";
 if (!isset($lopetus)) $lopetus = "";
 
 if ($tee == "lataa_tiedosto") {
-  readfile("$pupe_root_polku/dataout/".basename($filenimi));
+  readfile("/tmp/".basename($filenimi));
   exit;
 }
 

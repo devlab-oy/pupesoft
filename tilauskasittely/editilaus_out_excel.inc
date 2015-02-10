@@ -30,64 +30,55 @@ if (mysql_num_rows($result) == 0) {
   echo "<font class='error'>".t("Lähetettäviä tilausrivejä ei löydy")."</font>";
 }
 else {
+  
+  include 'inc/pupeExcel.inc';
+  
+  $worksheet   = new pupeExcel();
+  $format_bold = array("bold" => TRUE);
+  $excelrivi   = 0;
+  $excelsarake = 0;
 
-  require_once 'Spreadsheet/Excel/Writer.php';
+  $worksheet->writeString($excelrivi++,   1, trim($laskurow["toim_nimi"]." ".$laskurow["toim_nimitark"]), $boldi);
+  $worksheet->writeString($excelrivi++, 1, $laskurow["toim_osoite"], $boldi);
+  $worksheet->writeString($excelrivi++, 1, $laskurow["toim_maa"]."-".$laskurow["toim_postino"]." ".$laskurow["toim_postitp"], $boldi);
 
-  $excel_editilaus = $pupe_root_polku."/dataout/excel-order-$laskurow[tunnus].xls";
-
-  $workbook = new Spreadsheet_Excel_Writer($excel_editilaus);
-
-  $workbook->setVersion(8);
-
-  $thispage = $workbook->addWorksheet($laskurow["tunnus"]);
-
-  $boldi = $workbook->addFormat();
-  $boldi->setBold();
-
-  $thispage->setColumn(1, 2, 25);
-
-  $excelrivi = 1;
-  $thispage->writeString($excelrivi++,   1, trim($laskurow["toim_nimi"]." ".$laskurow["toim_nimitark"]), $boldi);
-  $thispage->writeString($excelrivi++, 1, $laskurow["toim_osoite"], $boldi);
-  $thispage->writeString($excelrivi++, 1, $laskurow["toim_maa"]."-".$laskurow["toim_postino"]." ".$laskurow["toim_postitp"], $boldi);
-
-  $thispage->writeString($excelrivi, 1, "Order Number:", $boldi);
-  $thispage->writeString($excelrivi++, 2, $laskurow["tunnus"]);
-  $thispage->writeString($excelrivi, 1, "Date of order:", $boldi);
-  $thispage->writeString($excelrivi++, 2, date("Y-m-d"));
+  $worksheet->writeString($excelrivi, 1, "Order Number:", $boldi);
+  $worksheet->writeString($excelrivi++, 2, $laskurow["tunnus"]);
+  $worksheet->writeString($excelrivi, 1, "Date of order:", $boldi);
+  $worksheet->writeString($excelrivi++, 2, date("Y-m-d"));
 
   $excelrivi++;
-  $thispage->writeString($excelrivi, 0, "Line", $boldi);
-  $thispage->writeString($excelrivi, 1, "Your product code", $boldi);
-  $thispage->writeString($excelrivi, 2, "Our product code", $boldi);
-  $thispage->writeString($excelrivi, 4, "Quantity", $boldi);
-  $thispage->writeString($excelrivi, 5, "Price", $boldi);
+  $worksheet->writeString($excelrivi, 0, "Line", $boldi);
+  $worksheet->writeString($excelrivi, 1, "Your product code", $boldi);
+  $worksheet->writeString($excelrivi, 2, "Our product code", $boldi);
+  $worksheet->writeString($excelrivi, 4, "Quantity", $boldi);
+  $worksheet->writeString($excelrivi, 5, "Price", $boldi);
   $excelrivi++;
 
   $lask = 1;
 
   while ($tilausrivirow = mysql_fetch_assoc($result)) {
 
-    $thispage->writeString($excelrivi, 0, $lask);
-    $thispage->writeString($excelrivi, 1, $tilausrivirow['toim_tuoteno']);
-    $thispage->writeString($excelrivi, 2, $tilausrivirow['tuoteno']);
-    $thispage->writeNumber($excelrivi, 4, $tilausrivirow['varattu']);
-    $thispage->writeNumber($excelrivi, 5, $tilausrivirow['nettohinta']);
+    $worksheet->writeString($excelrivi, 0, $lask);
+    $worksheet->writeString($excelrivi, 1, $tilausrivirow['toim_tuoteno']);
+    $worksheet->writeString($excelrivi, 2, $tilausrivirow['tuoteno']);
+    $worksheet->writeNumber($excelrivi, 4, $tilausrivirow['varattu']);
+    $worksheet->writeNumber($excelrivi, 5, $tilausrivirow['nettohinta']);
     $excelrivi++;
 
     $lask++;
   }
 
   // We need to explicitly close the workbook
-  $workbook->close();
+  $tmpfilenimi = $worksheet->close();
 
   echo "<table>";
   echo "<tr><th>".t("Tallenna ostotilaus").":</th>";
-  echo "<form method='post' action='{$palvelin2}tilauskasittely/tilaus_osto.php'>";
+  echo "<form method='post' action='{$palvelin}tilauskasittely/tilaus_osto.php'>";
   echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-  echo "<input type='hidden' name='kaunisnimi' value='Order_{$laskurow["tunnus"]}.xls'>";
-  echo "<input type='hidden' name='filenimi' value='$excel_editilaus'>";
-  echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+  echo "<input type='hidden' name='kaunisnimi' value='Order_{$laskurow["tunnus"]}.xlsx'>";
+  echo "<input type='hidden' name='filenimi' value='{$tmpfilenimi}'>";
+  echo "<td class='back'><input type='submit' value='".t("Tallenna Excel")."'></td></form></tr>";
   echo "</table><br>";
 }
 

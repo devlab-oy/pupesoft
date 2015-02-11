@@ -7,6 +7,7 @@ $(document).ready(function() {
     var seka = $('#seka');
     var maksupaateTapahtuma = $('#maksupaatetapahtuma');
     var maksupaate = $('#maksupaate');
+    var jaljella = $('#jaljella');
 
     dialogi.dialog({
       modal: true,
@@ -38,7 +39,7 @@ $(document).ready(function() {
 
     annettu.on('input', function() {
       var annettuInt = Math.round(parseFloat(annettu.val()) * 100);
-      var jaljellaInt = Math.round(parseFloat($('#jaljella').text()) * 100);
+      var jaljellaInt = Math.round(parseFloat(jaljella.text()) * 100);
       var erotus = (annettuInt - jaljellaInt) / 100;
 
       var hyvaksyKateinen = $('#hyvaksyKateinen');
@@ -78,7 +79,7 @@ $(document).ready(function() {
     });
 
     function submitMaksupaate() {
-      $('#kateinen').val(annettu.val());
+      $('#kateinen').val(jaljella.text());
       seka.val('kylla');
       $('#laskuriTee').val('VALMIS');
       saaSubmittaa = true;

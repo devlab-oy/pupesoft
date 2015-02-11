@@ -10637,8 +10637,10 @@ function piirra_maksupaate_formi() {
           <form id='kateisFormi' class='multisubmit'>
             <ul class='list-unstyled'>
               <li class='text-medium'>Summa:</li>
-              <li id='jaljella'
-                  class='text-large'>{$maksettavaa_jaljella} {$laskurow["valkoodi"]}</li>
+              <li>
+                <span id='jaljella' class='text-large'>{$maksettavaa_jaljella}</span>
+                <span class='text-large'>{$laskurow["valkoodi"]}</span>
+              </li>
               <li class='text-medium'>Annettu:</li>
               <li><input id='annettu' type='number' min='0.01' step='0.01' class='text-large'></li>
               <li class='text-medium'>Takaisin:</li>

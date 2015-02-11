@@ -39,6 +39,7 @@ if (!isset($tarkkuus) or $tarkkuus == "") $tarkkuus = "1";
 if (!isset($alvp) or $alvp == "") $alvp = date("d", mktime(0, 0, 0, (date("m")+1), 0, date("Y")));
 if (!isset($alvv) or $alvv == "") $alvv = date("Y");
 if (!isset($alvk) or $alvk == "") $alvk = date("m");
+if (!isset($tuloslaskelmakausien_maara))     $tuloslaskelmakausien_maara = 4;
 
 if (isset($teetiedosto)) {
   if ($teetiedosto == "lataa_tiedosto") {
@@ -167,7 +168,7 @@ else {
   $sel = array();
   $sel[$plvv] = "SELECTED";
 
-  for ($i = date("Y"); $i >= date("Y")-4; $i--) {
+  for ($i = date("Y"); $i >= date("Y")-$tuloslaskelmakausien_maara; $i--) {
 
     if (!isset($sel[$i])) {
       $sel[$i] = "";

@@ -10665,6 +10665,7 @@ function piirra_maksupaate_formi() {
   echo "<input type='hidden' name='seka' id='seka' value='X'>";
   echo "<input type='hidden' name='orig_tila' value='{$orig_tila}'>";
   echo "<input type='hidden' name='orig_alatila' value='{$orig_alatila}'>";
+  echo "<input type='hidden' name='toimitustapa' value='{$laskurow["toimitustapa"]}'>";
   echo "<input type='hidden' name='maksupaatetapahtuma' id='maksupaatetapahtuma' value=''>";
   echo "<input type='hidden' id='peruutus' name='peruutus' value>";
 

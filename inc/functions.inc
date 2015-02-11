@@ -29992,10 +29992,10 @@ if (!function_exists("poista_osakeyhtio_lyhenne")) {
     $replace = "oy|ab|as|oü|ou|mtü|tü|ttü";
 
     // Nimen edestä
-    $nimi = preg_replace("/^($replace) \b/", "", $nimi);
+    $nimi = preg_replace("/^($replace) /", "", $nimi);
 
     // Nimen takaa
-    $nimi = preg_replace("/\b ($replace)$/", "", $nimi);
+    $nimi = preg_replace("/ ($replace)$/", "", $nimi);
 
     return trim($nimi);
   }

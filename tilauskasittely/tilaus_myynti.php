@@ -9672,7 +9672,7 @@ if ($tee == '') {
 
   // tulostetaan loppuun parit napit..
   if ((int) $kukarow["kesken"] > 0 and (!isset($ruutulimit) or $ruutulimit == 0)) {
-    if ($maksupaate_kassamyynti) {
+    if ($maksupaate_kassamyynti and $maksuehtorow["kateinen"] != "") {
       piirra_maksupaate_formi();
     }
 
@@ -10072,7 +10072,7 @@ if ($tee == '') {
 
         echo "<input type='hidden' name='kateinen' value='$kateinen'>";
 
-        if (!$maksupaate_kassamyynti) {
+        if (!$maksupaate_kassamyynti or $maksuehtorow["kateinen"] == "") {
           echo "<input type='submit' ACCESSKEY='V' value='$painike_txt'>";
         }
 

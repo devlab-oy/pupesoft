@@ -18604,7 +18604,7 @@ if (!function_exists("tee_keraysera")) {
         }
 
         if ($pakkaukset[$kaytettava_pakkaus]['tilavuus'] >= ($pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] + $tuoterow['tuotteen_koko'])
-          and $pakkaukset[$kaytettava_pakkaus]['paino'] > ($pakkaukset[$kaytettava_pakkaus]['kaytetty_paino'] + ($tuoterow['y_maara'] * $tuoterow['y_paino']))) {
+          and $pakkaukset[$kaytettava_pakkaus]['paino'] >= ($pakkaukset[$kaytettava_pakkaus]['kaytetty_paino'] + ($tuoterow['y_maara'] * $tuoterow['y_paino']))) {
 
           $pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] += $tuoterow['tuotteen_koko'];
           $pakkaukset[$kaytettava_pakkaus]['kaytetty_paino'] += ($tuoterow['y_maara'] * $tuoterow['y_paino']);

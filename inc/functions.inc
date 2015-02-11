@@ -18630,7 +18630,7 @@ if (!function_exists("tee_keraysera")) {
           }
 
           unset($pisin_tuote[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']]);
-          
+
           if (count($pisin_tuote[$tuoterow['tuoteno']]['tilaus']) == 0 and count($pisin_tuote) > 0) {
             if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "<font class='message'>(E1210): Otetaan pois tuote \"pisin tuote listalta\" ($tuoterow[tuoteno])...</font><br><br>\n";
 
@@ -29991,9 +29991,11 @@ if (!function_exists("poista_osakeyhtio_lyhenne")) {
 
     $replace = "oy|ab|as|oü|ou|mtü|tü|ttü";
 
-    foreach (explode("|", $replace) as $rep) {
-      $nimi = str_replace($rep, '', $nimi);
-    }
+    // Nimen edestä
+    $nimi = preg_replace("/^($replace) /", "", $nimi);
+
+    // Nimen takaa
+    $nimi = preg_replace("/ ($replace)$/", "", $nimi);
 
     return trim($nimi);
   }

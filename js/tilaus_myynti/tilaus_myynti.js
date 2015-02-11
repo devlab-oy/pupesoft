@@ -1,5 +1,7 @@
 $(document).ready(function() {
   (function() {
+    "use strict";
+
     var dialogi = $('#dialog');
     var annettu = $('#annettu');
     var kateinenKunnossa = false;
@@ -8,6 +10,7 @@ $(document).ready(function() {
     var maksupaateTapahtuma = $('#maksupaatetapahtuma');
     var maksupaate = $('#maksupaate');
     var jaljella = $('#jaljella');
+    var laskuriTee = $('#laskuriTee');
 
     dialogi.dialog({
       modal: true,
@@ -81,7 +84,7 @@ $(document).ready(function() {
     function submitMaksupaate() {
       $('#kateinen').val(jaljella.text());
       seka.val('kylla');
-      $('#laskuriTee').val('VALMIS');
+      laskuriTee.val('VALMIS');
       saaSubmittaa = true;
 
       setTimeout(function() {
@@ -105,6 +108,13 @@ $(document).ready(function() {
       } else {
         dialogi.dialog("open");
       }
+    });
+
+    $('#keraykseen').on('click', function() {
+      laskuriTee.val('VALMIS');
+      $(this.form.kateisohitus).val('X');
+
+      this.form.submit();
     });
   })();
 

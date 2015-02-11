@@ -1,92 +1,111 @@
 $(document).ready(function() {
-  var dialogi = $('#dialog');
-  var annettu = $('#annettu');
-  var hyvaksyKateinen = $('#hyvaksyKateinen');
-  var saaSubmitataLaskurin = false;
+  (function() {
+    var dialogi = $('#dialog');
+    var annettu = $('#annettu');
+    var kateinenKunnossa = false;
+    var saaSubmittaa = false;
+    var seka = $('#seka');
+    var maksupaateTapahtuma = $('#maksupaatetapahtuma');
+    var maksupaate = $('#maksupaate');
 
-  dialogi.dialog({
-    modal: true,
-    draggable: false,
-    resizable: false,
-    dialogClass: "no-close no-title",
-    autoOpen: false,
-    minWidth: 500,
-    minHeight: 250,
-    buttons: [
-      {
-        text: "Peru maksu",
-        click: function () {
-          $(this).dialog("close");
+    dialogi.dialog({
+      modal: true,
+      draggable: false,
+      resizable: false,
+      dialogClass: "no-close no-title",
+      autoOpen: false,
+      minWidth: 500,
+      minHeight: 250,
+      buttons: [
+        {
+          text: "Peru maksu",
+          click: function() {
+            $(this).dialog("close");
+          }
+        },
+        {
+          id: "hyvaksyKateinen",
+          text: "Hyväksy (Enter)",
+          disabled: 'disabled',
+          click: submitMaksupaate
         }
-      },
-      {
-        id: "hyvaksyKateinen",
-        text: "Hyväksy (Enter)",
-        disabled: 'disabled',
-        click: submitLaskuri
+      ]
+    });
+
+    $('#kateismaksunappi').on('click', function() {
+      dialogi.dialog("open");
+    });
+
+    annettu.on('input', function() {
+      var annettuInt = Math.round(parseFloat(annettu.val()) * 100);
+      var jaljellaInt = Math.round(parseFloat($('#jaljella').text()) * 100);
+      var erotus = (annettuInt - jaljellaInt) / 100;
+
+      var hyvaksyKateinen = $('#hyvaksyKateinen');
+
+      if (isNaN(erotus) || erotus < 0) {
+        kateinenKunnossa = false;
+        hyvaksyKateinen.button('option', 'disabled', true);
       }
-    ]
-  });
+      else {
+        kateinenKunnossa = true;
+        hyvaksyKateinen.button('option', 'disabled', false);
+      }
 
-  $('#kateismaksunappi').on('click', function () {
-    dialogi.dialog("open");
-  });
+      var takaisin = $('#takaisin');
 
-  annettu.on('input', function () {
-    var annettuInt = Math.round(parseFloat(annettu.val()) * 100);
-    var jaljellaInt = Math.round(parseFloat($('#jaljella').text()) * 100);
-    var erotus = (annettuInt - jaljellaInt) / 100;
+      if (isNaN(erotus)) {
+        takaisin.text("");
+      }
+      else {
+        takaisin.text(erotus);
+      }
+    });
 
-    var hyvaksyKateinen = $('#hyvaksyKateinen');
+    $('#kateisFormi').on('submit', function(e) {
+      e.preventDefault();
 
-    if (isNaN(erotus) || erotus < 0) {
-      saaSubmitataLaskurin = false;
-      hyvaksyKateinen.button('option', 'disabled', true);
+      if (kateinenKunnossa) {
+        submitMaksupaate();
+      }
+    });
+
+    $('#korttimaksunappi').on('click', function() {
+      seka.val('X');
+      maksupaateTapahtuma.val('X');
+      saaSubmittaa = true;
+      maksupaate.submit();
+    });
+
+    function submitMaksupaate() {
+      $('#kateinen').val(annettu.val());
+      seka.val('kylla');
+      $('#laskuriTee').val('VALMIS');
+      saaSubmittaa = true;
+
+      setTimeout(function() {
+        maksupaate.submit();
+      }, 4000);
     }
-    else {
-      saaSubmitataLaskurin = true;
-      hyvaksyKateinen.button('option', 'disabled', false);
-    }
 
-    var takaisin = $('#takaisin');
+    $('#peruuta_viimeisin').click(function() {
+      saaSubmittaa = true;
+      seka.val('X');
+      maksupaateTapahtuma.val('X');
+      $('#peruutus').val('X');
+      maksupaate.submit();
+    });
 
-    if (isNaN(erotus)) {
-      takaisin.text("");
-    }
-    else {
-      takaisin.text(erotus);
-    }
-  });
+    maksupaate.on('submit', function(e) {
+      e.preventDefault();
 
-  $('#kateisFormi').on('submit', function (e) {
-    e.preventDefault();
-    if (saaSubmitataLaskurin) {
-      submitLaskuri();
-    }
-  });
-
-  $('#korttimaksunappi').on('click', function () {
-    $('#seka').val('X');
-    $('#maksupaatetapahtuma').val('X');
-    $('#laskuri').submit();
-  });
-
-  function submitLaskuri() {
-    $('#kateinen').val(annettu.val());
-    $('#seka').val('kylla');
-    $('#laskuriTee').val('VALMIS');
-
-    setTimeout(function () {
-      $("#laskuri").submit();
-    }, 4000);
-  }
-
-  $('#peruuta_viimeisin').click(function () {
-    $('#seka').val('X');
-    $('#maksupaatetapahtuma').val('X');
-    $('#peruutus').val('X');
-    $('#laskuri').submit();
-  });
+      if (saaSubmittaa) {
+        this.submit();
+      } else {
+        dialogi.dialog("open");
+      }
+    });
+  })();
 
   $('#myyja_id').on('change', function () {
     $(this).siblings('#myyjanro_id').val('');

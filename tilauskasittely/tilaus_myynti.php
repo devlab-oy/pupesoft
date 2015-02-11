@@ -10652,7 +10652,7 @@ function piirra_maksupaate_formi() {
 
   echo "<table style='width: 100%; margin-top: 20px;'>";
   echo "<tr><td class='back'><font class='head'>" . t("Maksutapa") . "</font></td></tr>";
-  echo "<form name='laskuri' id='laskuri' method='post'
+  echo "<form name='maksupaate' id='maksupaate' method='post'
               action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
 
   echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";

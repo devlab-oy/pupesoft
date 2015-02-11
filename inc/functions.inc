@@ -17256,7 +17256,6 @@ if (!function_exists("tee_keraysera")) {
                WHERE lasku.yhtio                              = '{$kukarow['yhtio']}'
                {$tilat}
                AND lasku.vakisin_kerays                       = ''
-               and lasku.tunnus in ('13858812','13858848','13858847','13853989')
                AND lasku.varasto                              = '{$varasto}'
                AND kuka.tunnus is null
                GROUP BY 1,2,3,4,5,6,7)
@@ -17497,7 +17496,6 @@ if (!function_exists("tee_keraysera")) {
                 WHERE lasku.yhtio                              = '{$kukarow['yhtio']}'
                 {$tilat}
                 AND lasku.vakisin_kerays                       = ''
-                and lasku.tunnus in ('13858812','13858848','13858847','13853989')
                 AND lasku.varasto                              = '{$varasto}'
                 AND kuka.tunnus is null
                 {$_group_by_lisa}
@@ -18411,36 +18409,36 @@ if (!function_exists("tee_keraysera")) {
               'mittakerroin' => $mittakerroin,
               'tilaukset' => $_tilaukset,
               'keraysvyohyke' => $keraysvyohyke,
-              'pisin_tuote' => $pisin_tuote,
-              'pisin_tuote_per_asiakas' => $pisin_tuote_per_asiakas,
-              'eran_koko_chk' => $eran_koko_chk,
-              'eran_koko_pintaala_chk' => $eran_koko_pintaala_chk,
-              'eran_paino_chk' => $eran_paino_chk,
+              'pisin_tuote' => array(),
+              'pisin_tuote_per_asiakas' => array(),
+              'eran_koko_chk' => 0,
+              'eran_koko_pintaala_chk' => 0,
+              'eran_paino_chk' => 0,
             );
 
             list(
               $_inner_main_array,
-              $_pisin_tuote,
-              $_pisin_tuote_per_asiakas,
-              $_eran_koko_chk,
-              $_eran_koko_pintaala_chk,
-              $_eran_paino_chk,
+              $pisin_tuote,
+              $pisin_tuote_per_asiakas,
+              $eran_koko_chk,
+              $eran_koko_pintaala_chk,
+              $eran_paino_chk,
               $tuoteres
             ) = hae_tuotteet_ja_pisin_mitta($args);
 
             $kaytettava_pakkaus = valitse_pakkaus(
               $keraysvyohyketiedot,
               $pakkaukset,
-              $_pisin_tuote,
-              $_pisin_tuote_per_asiakas,
+              $pisin_tuote,
+              $pisin_tuote_per_asiakas,
               $eran_koko,
               $eran_paino,
-              $_eran_koko_chk,
-              $_eran_paino_chk,
+              $eran_koko_chk,
+              $eran_paino_chk,
               $eran_koko_pintaala
             );
 
-            $kukarow['debugstring'] .= "(E10014): Nurkan takaa kaytettava pakkaus: $kaytettava_pakkaus<br>\n";
+            if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E10014): Nurkan takaa kaytettava pakkaus: $kaytettava_pakkaus<br>\n";
 
             if ($kaytettava_pakkaus != '') {
 
@@ -18448,7 +18446,7 @@ if (!function_exists("tee_keraysera")) {
               $_syvyys = $pakkaukset[$kaytettava_pakkaus]['syvyys'];
               $_til_koko_chk = $eran_koko_pintaala + ($_leveys * $_syvyys);
 
-              $kukarow['debugstring'] .= "(E10015): Nurkan takaa check: $eran_koko_pintaala + ($_leveys * $_syvyys) <= $keraysvyohyketiedot[max_keraysera_pintaala]<br>\n";
+              if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E10015): Nurkan takaa check: $eran_koko_pintaala + ($_leveys * $_syvyys) <= $keraysvyohyketiedot[max_keraysera_pintaala]<br>\n";
 
               if ($_til_koko_chk <= $keraysvyohyketiedot['max_keraysera_pintaala']) {
 
@@ -18466,6 +18464,9 @@ if (!function_exists("tee_keraysera")) {
 
                 break 2;
               }
+            }
+            else {
+              if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E10016): Nurkan takaa ei löytynyt sopivaa pakkausta<br>\n";
             }
           }
 

@@ -2511,8 +2511,12 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
       foreach ($siirto_varastot as $siirto_varasto) {
         $saldo_myytavissa = $siirto_varasto['tuote']['myytavissa'];
-        if ($_onko_isatuote or $_onko_lapsituote) {
+        if ($_onko_isatuote) {
           $tuoteperhe_saldomyytavissa = tuoteperhe_myytavissa($isatuoteno, '', '', $siirto_varasto['lahde_tunnus']);
+          $saldo_myytavissa = $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']];
+        }
+        elseif ($_onko_lapsituote) {
+          $tuoteperhe_saldomyytavissa = tuoteperhe_myytavissa($tuoteno, '', '', $siirto_varasto['lahde_tunnus']);
           $saldo_myytavissa = $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']];
         }
 

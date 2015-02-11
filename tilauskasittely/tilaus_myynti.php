@@ -3460,15 +3460,6 @@ if ($tee == '') {
         }
       }
 
-      echo "<td>" .
-        "<input " .
-        "id='myyjanro_id'" .
-        "name='myyjanro' " .
-        "size='8' " .
-        "value='{$myyjanumero}' {$required} $state> ".t("tai")." ";
-
-      echo "<select id='myyja_id' name='myyja' $state>";
-
       while ($row = mysql_fetch_assoc($yresult)) {
         $sel = "";
         if ($laskurow['myyja'] == '' or $laskurow['myyja'] == 0) {
@@ -3479,10 +3470,17 @@ if ($tee == '') {
         else {
           if ($row['tunnus'] == $laskurow['myyja']) {
             $sel = 'selected';
+            $myyjanumero = $row["myyja"];
           }
         }
-        echo "<option value='$row[tunnus]' $sel>$row[nimi]</option>";
+        $options .= "<option value='{$row["tunnus"]}' {$sel}>{$row["nimi"]}</option>";
       }
+
+      echo "<td>
+              <input id='myyjanro_id' name='myyjanro' size='8' value='{$myyjanumero}' {$required}
+                     {$state}> " . t("tai");
+      echo "<select id='myyja_id' name='myyja' {$state}>";
+      echo $options;
       echo "</select></td></tr>";
 
       if (trim($faktarow["fakta"]) != "" and $toim != "SIIRTOTYOMAARAYS"  and $toim != "SIIRTOLISTA" and $toim != "VALMISTAVARASTOON") {

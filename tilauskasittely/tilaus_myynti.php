@@ -10467,7 +10467,7 @@ function piirra_maksupaate_formi() {
   global $kukarow, $laskurow, $palvelin2, $tilauskaslisa, $tilausnumero, $mista, $kaikkiyhteensa,
          $valittu_kopio_tulostin, $kateinen, $kertakassa, $toim, $orig_tila, $orig_alatila,
          $korttimaksu, $maksettu_lkortilla, $maksettu_pkortilla, $maksettavaa_jaljella,
-         $korttimaksutapahtuman_status;
+         $korttimaksutapahtuman_status, $loytyy_maksutapahtumia;
 
   $query_maksuehto = "SELECT *
                       FROM maksuehto
@@ -10542,13 +10542,15 @@ function piirra_maksupaate_formi() {
                    name='korttimaksunappi'
                    id='korttimaksunappi'
                    value='" . t("Kortti") . " (Alt+K)'
-                   accesskey='k'>
-            <input type='button'
-                   name='peruuta_viimeisin'
-                   id='peruuta_viimeisin'
-                   value='" . t("Peruuta viimeisin maksu") . "'>
-            <input name='keraykseen' id='keraykseen' type='button'
-                   value='" . t("Ei vielä laskuteta, siirrä tilaus keräykseen") . "'>
+                   accesskey='k'>";
+
+  if ($loytyy_maksutapahtumia) {
+    echo "<input type='button' class='margin-left-20' name='peruuta_viimeisin'
+                 id='peruuta_viimeisin' value='" . t("Peruuta viimeisin maksu") . "'>";
+  }
+
+  echo "<input name='keraykseen' id='keraykseen' type='button' class='margin-left-20'
+               value='" . t("Ei vielä laskuteta, siirrä tilaus keräykseen") . "'>
           </td>
         </tr>";
   echo "</table></form>";
@@ -10573,8 +10575,6 @@ function jaljella_oleva_maksupaatesumma() {
   $maksettu_lkortilla = 0;
 
   while ($ruutu = mysql_fetch_assoc($result)) {
-    $loytyy = true;
-
     if ($ruutu['maksutapa'] == "LUOTTOKORTTI") {
       $maksettu_lkortilla += $ruutu['summa_valuutassa'];
     }
@@ -10589,6 +10589,10 @@ function jaljella_oleva_maksupaatesumma() {
 
   foreach ($maksupaate_maksetut as $maksettu) {
     $valisumma += $maksettu;
+  }
+
+  if ($valisumma > 0) {
+    $loytyy = true;
   }
 
   $totaalisumma = number_format($kaikkiyhteensa - $valisumma, $yhtiorow['hintapyoristys'], '.', '');

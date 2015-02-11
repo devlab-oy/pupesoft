@@ -171,3 +171,7 @@ ul.list-unstyled {
 .text-medium {
   font-size: 1.25rem !important;
 }
+
+.margin-left-20 {
+  margin-left: 20px !important;
+}

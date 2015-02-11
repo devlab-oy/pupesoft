@@ -778,7 +778,7 @@ if ((int) $kukarow["kesken"] > 0) {
 
   $laskurow = mysql_fetch_assoc($result);
 
-  maksa_maksupaatteella();
+  $korttimaksutapahtuman_status = maksa_maksupaatteella();
   list($loytyy_maksutapahtumia, $maksettavaa_jaljella, $kateismaksu["luottokortti"],
     $kateismaksu["pankkikortti"]) = jaljella_oleva_maksupaatesumma();
 
@@ -10611,13 +10611,16 @@ function maksa_maksupaatteella() {
     }
 
     require("rajapinnat/lumo_handler.inc");
+
+    return $korttimaksutapahtuman_status;
   }
 }
 
 function piirra_maksupaate_formi() {
   global $kukarow, $laskurow, $palvelin2, $tilauskaslisa, $tilausnumero, $mista, $kaikkiyhteensa,
          $valittu_kopio_tulostin, $kateinen, $kertakassa, $toim, $orig_tila, $orig_alatila,
-         $korttimaksu, $maksettu_lkortilla, $maksettu_pkortilla, $maksettavaa_jaljella;
+         $korttimaksu, $maksettu_lkortilla, $maksettu_pkortilla, $maksettavaa_jaljella,
+         $korttimaksutapahtuman_status;
 
   $query_maksuehto = "SELECT *
                       FROM maksuehto
@@ -10673,6 +10676,7 @@ function piirra_maksupaate_formi() {
   echo "<td><label for='korttimaksu'>" . t("Summa") . "</label>";
   echo "<input type='text' name='korttimaksu' id='korttimaksu' value='{$maksettavaa_jaljella}'
                size='7' autocomplete='off'>";
+  echo "<span class='error'>{$korttimaksutapahtuman_status}</span>";
   echo "</td></tr>";
 
   echo "<input type='hidden' name='kateismaksu[kateinen]' id='kateinen'>";

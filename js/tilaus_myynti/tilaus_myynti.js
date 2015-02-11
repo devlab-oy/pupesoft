@@ -74,12 +74,7 @@ $(document).ready(function() {
       }
     });
 
-    $('#korttimaksunappi').on('click', function() {
-      seka.val('X');
-      maksupaateTapahtuma.val('X');
-      saaSubmittaa = true;
-      maksupaate.submit();
-    });
+    $('#korttimaksunappi').on('click', maksaMaksupaatteella);
 
     function submitMaksupaate() {
       $('#kateinen').val(jaljella.text());
@@ -106,7 +101,7 @@ $(document).ready(function() {
       if (saaSubmittaa) {
         this.submit();
       } else {
-        dialogi.dialog("open");
+        maksaMaksupaatteella();
       }
     });
 
@@ -116,6 +111,13 @@ $(document).ready(function() {
 
       this.form.submit();
     });
+
+    function maksaMaksupaatteella() {
+      seka.val('X');
+      maksupaateTapahtuma.val('X');
+      saaSubmittaa = true;
+      maksupaate.submit();
+    }
   })();
 
   $('#myyja_id').on('change', function () {

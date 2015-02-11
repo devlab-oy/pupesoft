@@ -14,7 +14,7 @@
     <tr>
       <th>M‰‰r‰</th>
       <td>
-        <input type='text' name='maara' value='<?php echo $maara ?>' size='6' autofocus>
+        <input type='text' name='maara' value='<?php echo $maara > 0 ? $maara : '' ?>' size='6' autofocus>
         <b><?php echo $tuote['yksikko'] ?><b>
         <?php if( $tuote['inventointilista_naytamaara']!='' ) { ?>
           <strong>

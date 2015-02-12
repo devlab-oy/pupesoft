@@ -2515,10 +2515,6 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           $tuoteperhe_saldomyytavissa = tuoteperhe_myytavissa($isatuoteno, '', '', $siirto_varasto['lahde_tunnus']);
           $saldo_myytavissa = $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']];
         }
-        elseif ($_onko_lapsituote) {
-          $tuoteperhe_saldomyytavissa = tuoteperhe_myytavissa($tuoteno, '', '', $siirto_varasto['lahde_tunnus']);
-          $saldo_myytavissa = $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']];
-        }
 
         //Jos tilausrivin toimittajan_tunnus ja siirto_varasto.tunnus on samat,
         //tarkoittaa se että tilausriville on valittu kyseinen siirtovarasto

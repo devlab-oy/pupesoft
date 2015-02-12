@@ -16396,7 +16396,7 @@ if (!function_exists("pisin_tuote")) {
 }
 
 if (!function_exists("valitse_pakkaus")) {
-  function valitse_pakkaus($keraysvyohyketiedot, $pakkaukset, $pisin_tuote_array, $pisin_tuote_per_asiakas, $eran_koko = '', $kaytetty_paino = '', $koko_nippu_tilavuus = 0, $koko_nippu_paino = 0, $eran_koko_pintaala = 0) {
+  function valitse_pakkaus($keraysvyohyketiedot, $pakkaukset, $pisin_tuote_array, $pisin_tuote_per_asiakas, $eran_koko = '', $kaytetty_paino = '', $koko_nippu_tilavuus = 0, $koko_nippu_paino = 0, $eran_koko_pintaala = 0, $nurkan_takaa = false) {
     global $kukarow, $yhtiorow;
 
     $kaytettava_pakkaus = "";
@@ -16460,35 +16460,37 @@ if (!function_exists("valitse_pakkaus")) {
         $kukarow['debugstring'] .= "kaytettava_pakkaus: $kaytettava_pakkaus valitse_pakkaus erän koko: $eran_koko<br>kaytetty_paino: $kaytetty_paino<br>";
       }
 
-      // jos erän koko on tosi iso, niin katsotaan pakkauksista mikä on pakkauksia tarvittava minimimäärä
-      $pakkauksien_jako = array();
+      if (!$nurkan_takaa) {
+        // jos erän koko on tosi iso, niin katsotaan pakkauksista mikä on pakkauksia tarvittava minimimäärä
+        $pakkauksien_jako = array();
 
-      foreach ($pakkaukset as $_indx => $_pakkaus_array) {
+        foreach ($pakkaukset as $_indx => $_pakkaus_array) {
 
-        $jako = $eran_koko / $_pakkaus_array['tilavuus'];
+          $jako = $eran_koko / $_pakkaus_array['tilavuus'];
 
-        if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "$_indx: $jako = $eran_koko / $_pakkaus_array[tilavuus]<br>";
+          if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "$_indx: $jako = $eran_koko / $_pakkaus_array[tilavuus]<br>";
 
-        // jos jako on pienempi kuin yksi, halutaan arvo mikä on lähinnä ykköstä = optimaalinen täyttömäärä!!!!
-        if ($jako < 1) {
-          $jako = 1 - $jako;
+          // jos jako on pienempi kuin yksi, halutaan arvo mikä on lähinnä ykköstä = optimaalinen täyttömäärä!!!!
+          if ($jako < 1) {
+            $jako = 1 - $jako;
+          }
+
+          $pakkauksien_jako["k$_indx"] = $jako;
         }
 
-        $pakkauksien_jako["k$_indx"] = $jako;
+        asort($pakkauksien_jako);
+
+        // pienin arvo
+        // esim "k53";
+        $tmp = array_keys($pakkauksien_jako);
+
+        // poistetaan k-merkintä edestä
+        $tmp = substr($tmp[0], 1);
+
+        $kaytettava_pakkaus = $tmp;
+
+        if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "kaytettava_pakkaus : $kaytettava_pakkaus<br>";
       }
-
-      asort($pakkauksien_jako);
-
-      // pienin arvo
-      // esim "k53";
-      $tmp = array_keys($pakkauksien_jako);
-
-      // poistetaan k-merkintä edestä
-      $tmp = substr($tmp[0], 1);
-
-      $kaytettava_pakkaus = $tmp;
-
-      if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "kaytettava_pakkaus : $kaytettava_pakkaus<br>";
     }
     else {
 
@@ -18440,7 +18442,8 @@ if (!function_exists("tee_keraysera")) {
               $eran_paino,
               $eran_koko_chk,
               $eran_paino_chk,
-              $eran_koko_pintaala
+              $eran_koko_pintaala,
+              true
             );
 
             if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E10014): Nurkan takaa kaytettava pakkaus: $kaytettava_pakkaus<br>\n";

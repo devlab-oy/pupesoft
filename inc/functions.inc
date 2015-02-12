@@ -17392,6 +17392,9 @@ if (!function_exists("tee_keraysera")) {
                   AND maksuehto.jv                            != '')
                 LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio
                   and kuka.kesken                              = lasku.tunnus)
+                LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio
+                  AND kerayserat.otunnus = lasku.tunnus
+                )
                 JOIN lahdot ON (lahdot.yhtio = toimitustapa.yhtio
                   AND lahdot.liitostunnus                      = toimitustapa.tunnus
                   AND lahdot.aktiivi                           IN ('', 'T')
@@ -17402,6 +17405,7 @@ if (!function_exists("tee_keraysera")) {
                 AND lasku.vakisin_kerays                       = ''
                 AND lasku.varasto                              = '{$varasto}'
                 AND kuka.tunnus is null
+                AND kerayserat.tunnus is null
                 {$_group_by_lisa}
                 ORDER BY prioriteetti,erotus,lahdon_tiedot,h1time,liitostunnus,ohjausmerkki";
     }
@@ -17446,11 +17450,15 @@ if (!function_exists("tee_keraysera")) {
                   AND maksuehto.jv                            != '')
                 LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio
                   and kuka.kesken                              = lasku.tunnus)
+                LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio
+                  AND kerayserat.otunnus = lasku.tunnus
+                )
                 WHERE lasku.yhtio                              = '{$kukarow['yhtio']}'
                 {$tilat}
                 AND lasku.vakisin_kerays                      != ''
                 AND lasku.varasto                              = '{$varasto}'
                 AND kuka.tunnus is null
+                AND kerayserat.tunnus is null
                 {$_group_by_lisa}
                 ORDER BY prioriteetti,erotus,lahdon_tiedot,h1time,liitostunnus,ohjausmerkki";
     }

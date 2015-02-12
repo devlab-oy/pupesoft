@@ -292,7 +292,7 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
       $linkurl = substr($linkurl, 0, -4); // vika br pois
     }
     //luodaan dpd seurantalinkki
-    elseif ($dpdtun != '' and $dpdss != '' and $rakirrow["rahtikirja"] == 'rahtikirja_dpd_siirto.inc' and $rakirrow['rahtikirjanro'] != '') {
+    elseif ($dpdtun != '' and $dpdss != '' and ($rakirrow["rahtikirja"] == 'rahtikirja_dpd_siirto.inc' or $rakirrow["rahtikirja"] == 'rahtikirja_dpd.inc') and $rakirrow['rahtikirjanro'] != '') {
       $linkurl = "";
 
       for ($dpdi=1; $dpdi<$rakirrow['kollit']+1; $dpdi++) {

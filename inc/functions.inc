@@ -17350,6 +17350,7 @@ if (!function_exists("tee_keraysera")) {
               keraysvyohyke READ,
               toimitustapa READ,
               maksuehto READ,
+              kerayserat READ,
               kuka READ,
               lahdot READ";
     pupe_query($query);

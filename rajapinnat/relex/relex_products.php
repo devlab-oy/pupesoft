@@ -463,12 +463,18 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi .= "{$row['tullinimike2']};";
   $rivi .= "{$row['tullikohtelu']};";
   
-  $query = "SELECT yk_nro
-            FROM vak
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = {$row['vakkoodi']}";
-  $vak_res = pupe_query($query);
-  $vak_row = mysql_fetch_assoc($vak_res);
+  if (!empty($row['vakkoodi']) and $yhtiorow['vak_kasittely'] == 'P') {
+    
+    $query = "SELECT yk_nro
+              FROM vak
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = {$row['vakkoodi']}";
+    $vak_res = pupe_query($query);
+    $vak_row = mysql_fetch_assoc($vak_res);
+  }
+  else {
+    $vak_row['yk_nro'] = '';
+  }
   
   $rivi .= "{$vak_row['yk_nro']};";
   $rivi .= "{$row['vakmaara']};";

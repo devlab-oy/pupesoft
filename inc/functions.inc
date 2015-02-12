@@ -17972,6 +17972,8 @@ if (!function_exists("tee_keraysera")) {
 
     mysql_data_seek($res, 0);
 
+    $nurkan_takaa = false;
+
     //foreach ($fixed_main_array as $key => $tilaukset) {
 
     $_fixed_main_array_count = count($fixed_main_array);
@@ -18000,9 +18002,12 @@ if (!function_exists("tee_keraysera")) {
       $eran_koko_chk = 0;
       $eran_koko_pintaala_chk = 0;
       $eran_paino_chk = 0;
-      $kaytettava_pakkaus = "";
       $pisin_tuote = array();
       $pisin_tuote_per_asiakas = array();
+
+      if (!$nurkan_takaa) {
+        $kaytettava_pakkaus = "";
+      }
 
       $ohjausmerkki = $jiivee = array();
 
@@ -18462,6 +18467,8 @@ if (!function_exists("tee_keraysera")) {
                 $ed_ohjausmerkki = $ohjausmerkki[$tuoterow['otunnus']];
                 $ed_jiivee = $jiivee[$tuoterow['otunnus']];
 
+                $nurkan_takaa = true;
+
                 break 2;
               }
             }
@@ -18793,7 +18800,7 @@ if (!function_exists("tee_keraysera")) {
           }
 
           unset($pisin_tuote[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']]);
-          
+
           if (count($pisin_tuote[$tuoterow['tuoteno']]['tilaus']) == 0 and count($pisin_tuote) > 0) {
             if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "<font class='message'>(E1210): Otetaan pois tuote \"pisin tuote listalta\" ($tuoterow[tuoteno])...</font><br><br>\n";
 
@@ -18845,6 +18852,13 @@ if (!function_exists("tee_keraysera")) {
               if ($i == $tuoterow['y_maara']) {
                 $ed_tuote = $tuoterow['tuoteno'];
                 $rivit++;
+
+                if ($max_tuoterivit == $ii) {
+                  $eran_koko += $pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'];
+                  $eran_koko_pintaala += ($pakkaukset[$kaytettava_pakkaus]['leveys'] * $pakkaukset[$kaytettava_pakkaus]['syvyys']);
+
+                  $ed_tilausnro = $tuoterow['otunnus'];
+                }
               }
 
               $pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] += $tuoterow['y_koko'];
@@ -19018,7 +19032,7 @@ if (!function_exists("tee_keraysera")) {
         $ed_jiivee = $jiivee[$tuoterow['otunnus']];
       }
 
-      if (mysql_num_rows($tuoteres) > 0 and $pakkaukset[$kaytettava_pakkaus]['yksin_eraan'] != 'K') {
+      if (mysql_num_rows($tuoteres) > 0 and $pakkaukset[$kaytettava_pakkaus]['yksin_eraan'] != 'K' and !$nurkan_takaa) {
         // tilaus loppuu, tehdään vielä tässä vaiheessa pakkaustsekki
         list($pakkaukset, $kaytettava_pakkaus, $kaytettavat_pakkaukset, $eran_koko, $eran_koko_pintaala) = pakkauksen_iterointi($keraysvyohyketiedot, $pakkaukset, $kaytettava_pakkaus, $pisin_tuote, $kaytettavat_pakkaukset, $eka_kierros, $eran_koko, $eran_koko_pintaala, $juokseva_nro, $kerailyniput_tiedot, $kerailyniput_key, $key, $pisin_tuote_per_asiakas);
       }

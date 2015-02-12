@@ -463,8 +463,10 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi .= "{$row['tullinimike2']};";
   $rivi .= "{$row['tullikohtelu']};";
   
-  if (!empty($row['vakkoodi']) and $yhtiorow['vak_kasittely'] == 'P') {
-    
+  if (empty($row['vakkoodi'])) {
+    $vak_row['yk_nro'] = '';
+  }
+  elseif ($yhtiorow['vak_kasittely'] == 'P') {
     $query = "SELECT yk_nro
               FROM vak
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -473,9 +475,9 @@ while ($row = mysql_fetch_assoc($res)) {
     $vak_row = mysql_fetch_assoc($vak_res);
   }
   else {
-    $vak_row['yk_nro'] = '';
+    $vak_row['yk_nro'] = $row['vakkoodi'];
   }
-  
+
   $rivi .= "{$vak_row['yk_nro']};";
   $rivi .= "{$row['vakmaara']};";
   $rivi .= "{$row['leimahduspiste']};";

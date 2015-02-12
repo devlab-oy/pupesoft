@@ -22995,8 +22995,9 @@ if (!function_exists('hae_maa')) {
     $maa_res = pupe_query($query);
     $maa_row = mysql_fetch_assoc($maa_res);
 
-    $maan_tiedot['nimi'] = strtoupper($maa_row['name']) != '' ? strtoupper($maa_row['name']) : $maa_row['koodi'];
-
+    $maan_tiedot['nimi'] = $maa_row['name'] != '' ? $maa_row['name'] : $maa_row['koodi'];
+    $maan_tiedot['nimi'] = strtoupper($maan_tiedot['nimi']);
+    
     return $maan_tiedot;
   }
 }

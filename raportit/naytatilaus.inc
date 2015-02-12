@@ -78,17 +78,6 @@ if (!in_array($laskurow["vienti_kurssi"], array(1, 0))) {
   $vientikurssi = $laskurow["vienti_kurssi"];
 }
 
-if ($laskurow['tila']=='L' or $laskurow['tila']=='G') {
-  // haetaan eka rahtikirjat tietue, niin saadaan rahtikirjanumerot tietoon
-  $query = "SELECT *
-            from rahtikirjat
-            where yhtio    = '$kukarow[yhtio]'
-            and otsikkonro = '$laskurow[tunnus]'
-            limit 1";
-  $rakre = pupe_query($query);
-  $rakirrow = mysql_fetch_assoc($rakre);
-}
-
 //  Onko koko projekti maksettu
 if ($laskurow['tila'] == 'R') {
   $query = "SELECT count(distinct laskunro) laskuja, sum(if (laskunro=0, 1, 0)) laskuttamatta,
@@ -261,11 +250,24 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
   if (isset($dpdss[$kukarow['yhtio']]))  $dpdss  = $dpdss[$kukarow['yhtio']];
   else $dpdss = "";
 
-  $possi = strpos(strtoupper($laskurow['toimitustapa']), "DPD");
+  // haetaan eka rahtikirjat tietue, niin saadaan rahtikirjanumerot tietoon
+  $query = "SELECT rahtikirjat.rahtikirjanro, toimitustapa.rahtikirja, sum(rahtikirjat.kollit) kollit
+            FROM rahtikirjat
+            JOIN toimitustapa ON (toimitustapa.yhtio=rahtikirjat.yhtio and rahtikirjat.toimitustapa=toimitustapa.selite)
+            WHERE rahtikirjat.yhtio    = '$kukarow[yhtio]'
+            AND rahtikirjat.otsikkonro = '$laskurow[tunnus]'
+            GROUP BY 1";
+  $rakre = pupe_query($query);
 
-  if (isset($rakirrow)) {
+  while ($rakirrow = mysql_fetch_assoc($rakre)) {
+    // Unifaunilla on oma seuranta
+    if ($yhtiorow['kerayserat'] != 'K' and !empty($unifaun_url_key) and ($rakirrow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $rakirrow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
+      foreach (explode("\n", $rakirrow['rahtikirjanro']) as $rakirno) {
+        $linkurl .= "<a class='linkki' href='http://www.unifaunonline.se/ext.uo.fi.track?key={$unifaun_url_key}&order={$laskurow['tunnus']}' target='_blank'>{$rakirno}</a><br>";
+      }
+    }
     // postin rahtikirjat alkaa JJFI, ja tehd‰‰n niille linkki suoraan postin seurantaan
-    if (stripos($rakirrow['rahtikirjanro'], "JJFI") !== FALSE) {
+    elseif (stripos($rakirrow['rahtikirjanro'], "JJFI") !== FALSE) {
       $linkurl = "";
 
       preg_match_all("/JJFI ?[0-9]{6} ?[0-9]{11}/", $rakirrow['rahtikirjanro'], $match);
@@ -289,8 +291,8 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
 
       $linkurl = substr($linkurl, 0, -4); // vika br pois
     }
-    //luodaan dpd seurantalinkk
-    elseif ($possi !== FALSE and $rakirrow['rahtikirjanro'] != '' and $dpdtun != '' and $dpdss != '') {
+    //luodaan dpd seurantalinkki
+    elseif ($dpdtun != '' and $dpdss != '' and $rakirrow["rahtikirja"] == 'rahtikirja_dpd_siirto.inc' and $rakirrow['rahtikirjanro'] != '') {
       $linkurl = "";
 
       for ($dpdi=1; $dpdi<$rakirrow['kollit']+1; $dpdi++) {
@@ -713,7 +715,7 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
 
     if (strpos($lopetus_vika, "tilauskasittely/tulostakopio.php") !== FALSE) {
       $lopetus = $_lopetus_talteen;
-    } 
+    }
   }
   else {
     $lopetus .= $palvelin2;
@@ -735,7 +737,7 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
 
     if (strpos($lopetus_vika, "raportit/asiakkaantilaukset.php") !== FALSE) {
       $lopetus = $_lopetus_talteen;
-    } 
+    }
   }
 
   while ($prow = mysql_fetch_assoc($presult)) {

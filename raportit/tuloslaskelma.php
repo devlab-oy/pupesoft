@@ -39,7 +39,6 @@ if (!isset($tarkkuus) or $tarkkuus == "") $tarkkuus = "1";
 if (!isset($alvp) or $alvp == "") $alvp = date("d", mktime(0, 0, 0, (date("m")+1), 0, date("Y")));
 if (!isset($alvv) or $alvv == "") $alvv = date("Y");
 if (!isset($alvk) or $alvk == "") $alvk = date("m");
-if (!isset($tuloslaskelmakausien_maara))     $tuloslaskelmakausien_maara = 4;
 
 if (isset($teetiedosto)) {
   if ($teetiedosto == "lataa_tiedosto") {
@@ -123,7 +122,13 @@ else {
       $tltee = '';
     }
   }
-
+  
+  $query = "SELECT min(tilikausi_alku) alkukausi, min(tilikausi_loppu) loppukausi
+            FROM tilikaudet
+            WHERE yhtio         = '$kukarow[yhtio]'";
+  $result = pupe_query($query);
+  $ekakausirow = mysql_fetch_assoc($result); 
+  
   // tehdään käyttöliittymä, näytetään aina
   $sel = array(4 => "", 3 => "", "T" => "", 1 => "", 2 => "");
   if ($tyyppi != "") $sel[$tyyppi] = "SELECTED";
@@ -168,7 +173,7 @@ else {
   $sel = array();
   $sel[$plvv] = "SELECTED";
 
-  for ($i = date("Y"); $i >= date("Y")-$tuloslaskelmakausien_maara; $i--) {
+  for ($i = date("Y"); $i >= (float) substr($ekakausirow['alkukausi'], 0, 4); $i--) {
 
     if (!isset($sel[$i])) {
       $sel[$i] = "";
@@ -220,7 +225,7 @@ else {
   $sel = array();
   $sel[$alvv] = "SELECTED";
 
-  for ($i = date("Y")+1; $i >= date("Y")-4; $i--) {
+  for ($i = date("Y")+1; $i >= (float) substr($ekakausirow['loppukausi'], 0, 4); $i--) {
     echo "<option value='$i' $sel[$i]>$i</option>";
   }
 

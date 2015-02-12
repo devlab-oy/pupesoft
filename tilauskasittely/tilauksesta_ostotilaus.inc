@@ -32,16 +32,15 @@ if (!function_exists("tilauksesta_ostotilaus")) {
     $myytilrow = mysql_fetch_assoc($result);
 
     //otetaan ensin vain lisävarusteettomat tuotteet, lisävarusteperheiden isät tai rungolliset tuotteet
-    $query = "SELECT tilausrivin_lisatiedot.*, tilausrivi.*, tilausrivi.tunnus rivitunnus, tuote.ei_saldoa, tuote.sarjanumeroseuranta, tuoteperhe.isatuoteno
+    $query = "SELECT tilausrivin_lisatiedot.*, tilausrivi.*, tilausrivi.tunnus rivitunnus, tuote.ei_saldoa, tuote.sarjanumeroseuranta
               FROM tilausrivi
               LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
-              LEFT JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.tuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
               JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
               WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
               and tilausrivi.otunnus  = '$otunnus'
               and tilausrivi.tyyppi  != 'D'
               $vars
-              and (tilausrivi.perheid2 = tilausrivi.tunnus or tilausrivi.perheid2 = 0 or (tuoteperhe.isatuoteno != '' and tilausrivi.perheid != 0 and tilausrivi.perheid != tilausrivi.tunnus))
+              and (tilausrivi.perheid2 = tilausrivi.tunnus or tilausrivi.perheid2 = 0 or (tilausrivi.perheid != 0 and tilausrivi.perheid != tilausrivi.tunnus))
               ORDER BY tilausrivi.perheid2, tilausrivi.perheid, tilausrivi.tunnus";
     $result = pupe_query($query);
 
@@ -329,10 +328,11 @@ if (!function_exists("tilauksesta_ostotilaus")) {
           if (in_array($ostotilauksen_kasittely, array('1', '3', '5'))) $tunnukset[$tunnus] = $tunnus;
 
           //Haetaan myös ns. lisävarusteperheet.
-          $query = "SELECT tuoteperhe.ohita_kerays, tilausrivi.*, tilausrivi.tunnus rivitunnus, jt+varattu kpl, tilausrivin_lisatiedot.tilausrivilinkki tilausrivilinkki
+          $query = "SELECT tilausrivin_lisatiedot.ohita_kerays, 
+                      tilausrivi.*, tilausrivi.tunnus rivitunnus, 
+                      jt+varattu kpl, tilausrivin_lisatiedot.tilausrivilinkki tilausrivilinkki
                     FROM tilausrivi
                     LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
-                    LEFT JOIN tuoteperhe ON (tuoteperhe.yhtio = tilausrivi.yhtio and tilausrivi.tuoteno = tuoteperhe.isatuoteno AND tuoteperhe.tyyppi in ('P','')  AND tuoteperhe.ohita_kerays != '')
                     where tilausrivi.yhtio  = '$kukarow[yhtio]'
                     and tilausrivi.otunnus  = '$otunnus'
                     and tilausrivi.tyyppi  != 'D'

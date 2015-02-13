@@ -9517,7 +9517,13 @@ if ($tee == '') {
 
   // tulostetaan loppuun parit napit..
   if ((int) $kukarow["kesken"] > 0 and (!isset($ruutulimit) or $ruutulimit == 0)) {
-    if ($maksupaate_kassamyynti and $maksuehtorow["kateinen"] != "") {
+    if ($maksupaate_kassamyynti and $maksuehtorow["kateinen"] != "" and
+                                    ($muokkauslukko == "" or $toim == "PROJEKTI" or
+                                     $toim == "YLLAPITO") and $laskurow["liitostunnus"] != 0 and
+                                                              $tilausok == 0 and
+                                                              $rivilaskuri > 0 and
+                                                              $asiakasOnProspekti != "JOO"
+    ) {
       piirra_maksupaate_formi();
     }
 

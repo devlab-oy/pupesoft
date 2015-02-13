@@ -923,3 +923,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 if (isset($yhtiorow) and $yhtiorow['laite_huolto'] == 'X' and $kukarow['kuka'] == 'admin') {
   $pupe_query_debug = 0.0001;
 }
+
+if ($kukarow['yhtio'] != 'lpk') {
+  die('Palvelinta huolletaaan klo 17 - 19 välissä');
+}

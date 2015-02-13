@@ -24987,7 +24987,8 @@ if (!function_exists('hyllysiirto')) {
                             tuote.kehahin * 0.5),
                           tuote.kehahin * 0.25),
                         0),
-                      6) kehahin
+                      6) kehahin,
+                      tuotetyyppi
                       FROM tuote
                       WHERE yhtio = '{$kukarow['yhtio']}'
                       and tuoteno = '{$tuoteno}'";
@@ -25203,15 +25204,7 @@ if (!function_exists('hyllysiirto')) {
 
           // Jos tiliöidään raaka-ainemuutokset raaka-ainetileille ja kyseessä on raaka-aine
           if ($yhtiorow["raaka_aine_tiliointi"] == "Y") {
-            $tuote_query = "SELECT tuotetyyppi
-                            FROM tuote
-                            WHERE tuoteno = '{$tuoteno}'
-                            AND yhtio = '{$kukarow["yhtio"]}';";
-
-            $tuote_result = pupe_query($tuote_query);
-            $tuote_row = mysql_fetch_assoc($tuote_result);
-
-            if ($tuote_row["tuotetyyppi"] == "R") {
+            if ($kehahin_row["tuotetyyppi"] == "R") {
               $varastotili = $yhtiorow["raaka_ainevarasto"];
               $varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
             }

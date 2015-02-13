@@ -18396,6 +18396,33 @@ if (!function_exists("tee_keraysera")) {
             $kukarow['debugstring'] .= "(E1001): Katsotaan nurkan takaa<br>\n";
           }
 
+          $_mahtuu = false;
+
+          // tarkistetaan mahtuuko yksikään pakkaus enää keräykseen
+          foreach ($pakkaukset as $indx => $p_arr) {
+            $_leveys = $p_arr['leveys'];
+            $_syvyys = $p_arr['syvyys'];
+            $_til_koko_chk = $eran_koko_pintaala + ($_leveys * $_syvyys);
+
+            if (isset($kukarow['debugstring'])) {
+              $kukarow['debugstring'] .= "(E10011): Nurkan takaa pakkauscheck: $eran_koko_pintaala + ($_leveys * $_syvyys) <= $keraysvyohyketiedot[max_keraysera_pintaala]<br>\n";
+            }
+
+            if ($_til_koko_chk <= $keraysvyohyketiedot['max_keraysera_pintaala']) {
+              $_mahtuu = true;
+              break;
+            }
+          }
+
+          if (!$_mahtuu) {
+            if (isset($kukarow['debugstring'])) {
+              $kukarow['debugstring'] .= "(E10012): Yhtään pakettia ei enää mahdu keräykseen<br>\n";
+            }
+
+            $era_valmis = true;
+            break 2;
+          }
+
           if (isset($kukarow['debugstring'])) {
             $kukarow['debugstring'] .= "(E10011): Nurkan takaa for-ehdot: $_nurkka_i = ($_main_i + 1); ($_main_i + 4 and $_fixed_main_array_count) > $_nurkka_i; $_nurkka_i++<br>\n";
           }

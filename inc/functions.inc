@@ -18404,6 +18404,10 @@ if (!function_exists("tee_keraysera")) {
             $_syvyys = $p_arr['syvyys'];
             $_til_koko_chk = $eran_koko_pintaala + ($_leveys * $_syvyys);
 
+            if (empty($_leveys) or empty($_syvyys)) {
+              continue;
+            }
+
             if (isset($kukarow['debugstring'])) {
               $kukarow['debugstring'] .= "(E10011): Nurkan takaa pakkauscheck: $eran_koko_pintaala + ($_leveys * $_syvyys) <= $keraysvyohyketiedot[max_keraysera_pintaala]<br>\n";
             }

@@ -122,13 +122,21 @@ else {
       $tltee = '';
     }
   }
-  
+
   $query = "SELECT min(tilikausi_alku) alkukausi, min(tilikausi_loppu) loppukausi
             FROM tilikaudet
-            WHERE yhtio         = '$kukarow[yhtio]'";
+            WHERE yhtio = '$kukarow[yhtio]'";
   $result = pupe_query($query);
-  $ekakausirow = mysql_fetch_assoc($result); 
-  
+  $ekakausirow = mysql_fetch_assoc($result);
+
+  if (empty($ekakausirow['alkukausi'])) {
+    $ekakausirow['alkukausi'] = date("Y")-10;
+  }
+
+  if (empty($ekakausirow['loppukausi'])) {
+    $ekakausirow['loppukausi'] = date("Y")-10;
+  }
+
   // tehdään käyttöliittymä, näytetään aina
   $sel = array(4 => "", 3 => "", "T" => "", 1 => "", 2 => "");
   if ($tyyppi != "") $sel[$tyyppi] = "SELECTED";

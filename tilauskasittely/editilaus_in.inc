@@ -178,6 +178,7 @@ $verkkokauppa                 = "";
 $verkkokauppavarasto          = "";
 $verkkokauppavarasto_li       = "";
 $veromaara                    = "";
+$verokanta                    = "";
 $viite                        = "";
 $yhteyshenkilon_puhelin       = "";
 $ovt_tunnus                   = "";
@@ -1917,15 +1918,26 @@ while ($tietue = fgets($fd)) {
     $edi_nimitys = $type[4]; // rivin neljännessä segmentissä tulee oikee info
     break;
 
+  case 'OSTOTILRIV.OTR_VEROKANTA':
+    // magento-keisissä, tilausrivin veron määrä
+    $verokanta = (int) trim($tieto);
+    break;
+
   case 'OSTOTILRIV.OTR_OSTOHINTA' :
     // Kun tullaan magentosta ja meillä on rahtikulu, niin otetaan hinta talteeen
     // TAI kun tullaan magentosta ja me luotetaan verkkokaupan hintoihin.
     if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $tieto != '') {
       // Tämä hinta on aina veroton, joten lasketaan vero päälle jos myyntihinnat ovat verollisia
-      $editilaus_hinta = (float) trim($tieto);
+      $editilaus_hinta = (float) trim(str_replace( ",", ".", $tieto));
 
+      // Käytössä on verolliset myyntihinnat, mutta edifailissa hinnat ovat verottomia
       if ($yhtiorow["alv_kasittely"] == '' and !isset($verkkokauppa_hinnatedifailistaverollisina)) {
         $editilaus_hinta = round($editilaus_hinta * (1 + $laskurow["alv"]/100), 2);
+      }
+
+      // Käytössä on verottomat myyntihinnat, mutta edifailissa hinta kuitenkin sisältää verot ja halutaan laskea ne pois
+      if ($yhtiorow["alv_kasittely"] != '' and isset($verkkokauppa_hinnatedifailistaverollisina) and !empty($verokanta)) {
+        $editilaus_hinta = round($editilaus_hinta / (1 + $verokanta/100), 2);
       }
     }
 
@@ -2480,6 +2492,7 @@ while ($tietue = fgets($fd)) {
     $verkkokauppavarasto          = "";
     $verkkokauppavarasto_li       = "";
     $veromaara                    = "";
+    $verokanta                    = "";
     $viite                        = "";
     $yhteyshenkilon_puhelin       = "";
     $ovt_tunnus                   = "";

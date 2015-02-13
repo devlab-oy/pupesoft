@@ -1835,7 +1835,7 @@ if ($tee == 'P') {
 
             $tulostettulisa = "";
 
-            // Merataan tieto tulostetuksi jos tulostustapa on hetitulostus ja lappu on jo tullut Unifaunista
+            // Merkataan tieto tulostetuksi jos tulostustapa on hetitulostus ja lappu on jo tullut Unifaunista
             if ($laskurow['tulostustapa'] == 'H' and ($laskurow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $laskurow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
               $tulostettulisa = " , tulostettu = now() ";
             }

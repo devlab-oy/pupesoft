@@ -13,8 +13,6 @@ Palautetaan $jlerror, joka on 1, jos jotain epätavallista sattui
 
 $jalkilaskenta_debug = 0; // 0 = ei echoilla debug koodia, 1 = ehchoillaa infoa, 2 = echoillaan infoa plus queryt
 
-list($varastotili, $varastonmuutostili) = hae_varastotilit($tuoteno);
-
 // Jos kaikki on ok, palautetaan 0, muuten 1
 if (!function_exists("korjaalaskut")) {
   function korjaalaskut($tuoteno, $kehahin, $alku, $loppu, $korjtunnus) {
@@ -562,22 +560,14 @@ if (!function_exists('korjaatapahtuma')) {
 }
 
 if (!function_exists("hae_varastotilit")) {
-  function hae_varastotilit($tuoteno) {
-    global $kukarow, $yhtiorow;
+  function hae_varastotilit($tuote_row) {
+    global $yhtiorow;
 
     $varastotili = $yhtiorow["varasto"];
     $varastonmuutostili = $yhtiorow["varastonmuutos"];
 
     // Katsotaan, onko tuote raaka-aine ja jos on, tiliöidään muutokset raaka-ainetileille
     if ($yhtiorow["raaka_aine_tiliointi"] == "Y") {
-      $tuote_query = "SELECT tuotetyyppi
-                      FROM tuote
-                      WHERE yhtio = '{$kukarow["yhtio"]}'
-                      AND tuoteno = '{$tuoteno}'";
-
-      $tuote_result = pupe_query($tuote_query);
-      $tuote_row = mysql_fetch_assoc($tuote_result);
-
       if ($tuote_row["tuotetyyppi"] == "R") {
         $varastotili = $yhtiorow["raaka_ainevarasto"];
         $varastonmuutostili = $yhtiorow["raaka_ainevarastonmuutos"];
@@ -601,6 +591,8 @@ if ($tuoteno != '') {
             and tuoteno = '$tuoteno'";
   $result = pupe_query($query);
   $tuote = mysql_fetch_assoc($result);
+
+  list($varastotili, $varastonmuutostili) = hae_varastotilit($tuote);
 
   if (mysql_num_rows($result) == 1 and ($tuote["sarjanumeroseuranta"] == "S" or $tuote["sarjanumeroseuranta"] == "U" or $tuote["sarjanumeroseuranta"] == "G")) {
     //Tähän haaraan mennään jos tuotteella on sarjanumeroseurantaa ja varastonarvo lasketaan suoraan osto ja myyntiriveiltä

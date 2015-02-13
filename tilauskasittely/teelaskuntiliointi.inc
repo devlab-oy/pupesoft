@@ -12,9 +12,13 @@ else {
 }
 
 if ($yhtiorow["raaka_aine_tiliointi"] == "Y") {
-  $myyntitiliointi_seuraa_tuotteen_tyyppia = "if(tuote.tuotetyyppi = 'R', 'raaka-aine', " .
-    "'normaalituote') tuotetyyppi,";
-  $myyntitiliointi_group = ",15";
+  $raaka_aine_tiliointi_lisa = "if(tuote.tuotetyyppi = 'R', 'raaka-aine', " .
+                               "'normaalituote') tuotetyyppi,";
+  $raaka_aine_tiliointi_group = ",15";
+}
+else {
+  $raaka_aine_tiliointi_lisa = "";
+  $raaka_aine_tiliointi_group = "";
 }
 
 // Tehtaan tiliointiaineisto suoraan sql:lla
@@ -32,7 +36,7 @@ $query = "SELECT tilausrivi.alv alv,
           if(tilausrivi.alv >= 500 and tilausrivi.alv < 600 and tilausrivi.kpl < 0 and tilausrivin_lisatiedot.osto_vai_hyvitys = 'O', 'KYLLA', 'EI') marginaaliostot,
           if(tilausrivi.alv >= 500 and tilausrivi.alv < 600 and tilausrivi.kpl > 0 and tilausrivin_lisatiedot.osto_vai_hyvitys = 'H', 'KYLLA', 'EI') marginaalihyvitys,
           if(ifnull(yhtion_toimipaikat.toim_alv, '') != '', yhtion_toimipaikat.toim_alv, yhtio.alv) alvtilino,
-          {$myyntitiliointi_seuraa_tuotteen_tyyppia}
+          {$raaka_aine_tiliointi_lisa}
           sum(tilausrivi.rivihinta) summa,
           sum(tilausrivi.rivihinta_valuutassa) summa_valuutassa,
           sum(tilausrivi.kate) kate,
@@ -49,7 +53,7 @@ $query = "SELECT tilausrivi.alv alv,
           WHERE tilausrivi.uusiotunnus = '$lasku[tunnus]'
           AND tilausrivi.tyyppi        = 'L'
           AND tilausrivi.yhtio         = '$kukarow[yhtio]'
-          GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14{$myyntitiliointi_group}";
+          GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14{$raaka_aine_tiliointi_group}";
 $xresult = pupe_query($query);
 
 if (mysql_num_rows($xresult) == 0) {

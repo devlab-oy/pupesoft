@@ -3099,8 +3099,9 @@ if ($fieldname == "raaka_aine_tiliointi") {
 
   $sel = $trow[$i] == 'Y' ? ' selected' : '';
 
-  $ulos .= "<option value = ''>"
-           . t("Ei tiliöidä raaka-aineiden varastoa ja varastonmuutosta raaka-ainetileille");
+  $ulos .= "<option value = ''>" .
+           t("Tiliöidään raaka-aineiden varasto ja varastonmuutokset varasto ja " .
+             "varastonmuutostileille");
   $ulos .= "<option value = 'Y' $sel>" .
            t("Tiliöidään varasto ja varastonmuutos raaka-ainetileille, jos tuotetyyppi on " .
              "raaka-aine");

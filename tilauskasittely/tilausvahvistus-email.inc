@@ -339,7 +339,10 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 
       // Lis‰t‰‰n mahdollinen saapumisaika tuoterivin alle, jos kyseess‰ on jt-rivi
       $saapumisaika = jt_saapumisaika_tilausvahvistus($tvtilausrivirow, $tvtilausrivirow["status"]);
-      $ulos .= $saapumisaika;
+
+      if (!empty($saapumisaika)) {
+        $ulos .= $saapumisaika;
+      }
 
       // Tehr‰‰n liitetiedosto
       $liite .= $rivino."\t".$tvtilausrivirow['nimitys']."\t".$tvtilausrivirow['tuoteno']."\t".$tvtilausrivirow['varattu']."\t";

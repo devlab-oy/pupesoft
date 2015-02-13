@@ -10513,6 +10513,7 @@ function piirra_maksupaate_formi() {
   echo "<input type='hidden' name='toimitustapa' value='{$laskurow["toimitustapa"]}'>";
   echo "<input type='hidden' name='maksupaatetapahtuma' id='maksupaatetapahtuma' value=''>";
   echo "<input type='hidden' id='peruutus' name='peruutus' value>";
+  echo "<input type='hidden' name='kateismaksu[kateinen]' id='kateinen'>";
 
   echo "<table style='width: 100%; margin-top: 20px;'>";
   echo "<tr><td class='back'><font class='head'>" . t("Maksutapa") . "</font></td></tr>";
@@ -10522,8 +10523,6 @@ function piirra_maksupaate_formi() {
                size='7' autocomplete='off'>";
   echo "<span class='error'>" . t($korttimaksutapahtuman_status) . "</span>";
   echo "</td></tr>";
-
-  echo "<input type='hidden' name='kateismaksu[kateinen]' id='kateinen'>";
 
   echo "<tr>
           <td>

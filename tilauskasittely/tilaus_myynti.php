@@ -30,16 +30,6 @@ $maksupaate_kassamyynti = (($yhtiorow['maksupaate_kassamyynti'] == 'K' and
                             $kukarow["maksupaate_kassamyynti"] == "") or
                            $kukarow["maksupaate_kassamyynti"] == "K");
 
-if ($tulosta_kuitti) {
-  require_once "tilauskasittely/tulosta_asiakkaan_kuitti.inc";
-
-  $kuitin_parametrit = array(
-    "kateinen" => $kateisraha
-  );
-
-  tulosta_asiakkaan_kuitti($laskunro, $kukarow["kuittitulostin"], $kuitin_parametrit);
-}
-
 if ($tee == "laheta_viesti" and $yhtiorow["vahvistusviesti_asiakkaalle"] == "Y") {
   require_once "inc/jt_ja_tyomaarays_valmis_viesti.inc";
 
@@ -10484,17 +10474,17 @@ function piirra_maksupaate_formi() {
   $maksuehtores = pupe_query($query_maksuehto);
   $maksuehtorow = mysql_fetch_assoc($maksuehtores);
 
-  echo "<div id='dialog' title='Käteislaskuri'>
+  echo "<div id='dialog' title='" . t("Käteislaskuri") . "'>
           <form id='kateisFormi' class='multisubmit'>
             <ul class='list-unstyled'>
-              <li class='text-medium'>Summa:</li>
+              <li class='text-medium'>" . t("Summa") . ":</li>
               <li>
                 <span id='jaljella' class='text-large'>{$maksettavaa_jaljella}</span>
                 <span class='text-large'>{$laskurow["valkoodi"]}</span>
               </li>
-              <li class='text-medium'>Annettu:</li>
+              <li class='text-medium'>" . t("Annettu") . ":</li>
               <li><input id='annettu' type='number' min='0.01' step='0.01' class='text-large'></li>
-              <li class='text-medium'>Takaisin:</li>
+              <li class='text-medium'>" . t("Takaisin") . ":</li>
               <li>
                 <span id='takaisin' class='text-large'></span>
                 <span class='text-large'>{$laskurow["valkoodi"]}</span>
@@ -10530,7 +10520,7 @@ function piirra_maksupaate_formi() {
   echo "<td><label for='korttimaksu'>" . t("Summa") . "</label>";
   echo "<input type='text' name='korttimaksu' id='korttimaksu' value='{$maksettavaa_jaljella}'
                size='7' autocomplete='off'>";
-  echo "<span class='error'>{$korttimaksutapahtuman_status}</span>";
+  echo "<span class='error'>" . t($korttimaksutapahtuman_status) . "</span>";
   echo "</td></tr>";
 
   echo "<input type='hidden' name='kateismaksu[kateinen]' id='kateinen'>";

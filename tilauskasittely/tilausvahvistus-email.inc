@@ -139,7 +139,8 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
             if(tilausrivi.var not in ('P','J','O','S'), tilausrivi.varattu, 0) varattu,
             if(tilausrivi.var = 'J', tilausrivi.jt+tilausrivi.varattu , 0) jt,
             tilausrivi.toimaika, tilausrivi.kommentti, tilausrivi.tilkpl, tilausrivi.alv,
-            tilausrivi.nimitys,  tilausrivi.hinta, {$ale_query_select_lisa} tilausrivi.kommentti, tilausrivi.var
+            tilausrivi.nimitys,  tilausrivi.hinta, {$ale_query_select_lisa} tilausrivi.kommentti, tilausrivi.var,
+            tuote.status
             FROM tilausrivi
             LEFT JOIN tuote USING (yhtio, tuoteno)
             WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
@@ -335,6 +336,10 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
       if ($tvtilausrivirow['kommentti'] != "") {
         $ulos .= "     * ".sprintf("%-75.75s", $tvtilausrivirow['kommentti'])."\n";
       }
+
+      // Lis‰t‰‰n mahdollinen saapumisaika tuoterivin alle, jos kyseess‰ on jt-rivi
+      $saapumisaika = jt_saapumisaika_tilausvahvistus($tvtilausrivirow, $tvtilausrivirow["status"]);
+      $ulos .= $saapumisaika;
 
       // Tehr‰‰n liitetiedosto
       $liite .= $rivino."\t".$tvtilausrivirow['nimitys']."\t".$tvtilausrivirow['tuoteno']."\t".$tvtilausrivirow['varattu']."\t";

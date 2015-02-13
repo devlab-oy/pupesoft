@@ -30212,6 +30212,33 @@ if (!function_exists("hae_saldo")) {
   }
 }
 
+if (!function_exists("jt_saapumisaika_tilausvahvistus")) {
+  function jt_saapumisaika_tilausvahvistus($tilausrivi, $status) {
+    global $yhtiorow;
+
+    if ($yhtiorow["jt_rivien_saapumisajan_nayttaminen"] == "K" and
+        ($tilausrivi["jtsort"] > 0 or $tilausrivi["jt"] > 0)
+    ) {
+      $myytavissa = saldo_myytavissa($tilausrivi["tuoteno"]);
+      $myytavissa = $myytavissa[2];
+      $saapumisaika = hae_tuotteen_saapumisaika($tilausrivi["tuoteno"],
+                                                $status, $myytavissa);
+      if (count($saapumisaika > 0)) {
+        $saapumisaika = $saapumisaika[1];
+
+        list($teksti, $paivamaara) = explode("!¡!", $saapumisaika);
+        $saapumisaika = "{$teksti} " . strip_tags($paivamaara);
+
+        return trim($saapumisaika);
+      }
+
+      return "";
+    }
+
+    return "";
+  }
+}
+
 if (!function_exists("tiliointi_tarkistus")) {
   function tiliointi_tarkistus($tiliointi_tarkistus, $kustp_tark, $kohde_tark, $projekti_tark) {
 

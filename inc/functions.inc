@@ -25120,7 +25120,7 @@ if (!function_exists('hyllysiirto')) {
                 hyllynro   = '{$minnerow['hyllynro']}',
                 hyllyvali  = '{$minnerow['hyllyvali']}',
                 hyllytaso  = '{$minnerow['hyllytaso']}',
-                selite     = '".t("Saldo täsmäsi")."',
+                selite     = '".t("Saldo %d täsmäsi. Automaattinen inventointi siirron yhteydessä", "", $kappaleet)."',
                 laatija    = '{$kukarow['kuka']}',
                 laadittu   = '$_laadittu'";
       $result = pupe_query($query);

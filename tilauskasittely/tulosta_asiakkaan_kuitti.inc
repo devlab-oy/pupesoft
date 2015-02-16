@@ -173,7 +173,11 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $kuitin_teksti .= t($tilausnumero_teksti, $asiakkaan_kieli) .
     ": " .
     implode(", ", $tilausnumerot) .
-    "\n\n\n";
+    "\n\n";
+
+  $kuitin_teksti .= date("d.m.Y H:i:s");
+
+  $kuitin_teksti .= "\n\n\n";
 
   $kuitin_teksti .= "{$emphasized_on}";
   $kuitin_teksti .= "{$yhtiorow['www']}\n\n";

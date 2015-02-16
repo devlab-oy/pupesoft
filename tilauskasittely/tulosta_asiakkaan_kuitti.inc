@@ -94,7 +94,13 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $tilausnumero_teksti = count($tilausnumerot) > 1 ? "Tilausnumerot" : "Tilausnumero";
 
   // Printattavan stringin luominen
-  $kuitin_teksti = "{$logo}\n\n";
+  $kuitin_teksti = "";
+
+  if ($avaa_lipas_lopuksi) {
+    $kuitin_teksti .= $avaa_lipas;
+  }
+
+  $kuitin_teksti .= "{$logo}\n\n";
 
   $kuitin_teksti .= "{$align_center}";
 
@@ -196,10 +202,6 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
   $kuitin_teksti .= "\n\n\n\n\n\n";
   $kuitin_teksti .= $katkaisu;
-
-  if ($avaa_lipas_lopuksi) {
-    $kuitin_teksti .= $avaa_lipas;
-  }
 
   lpr($kuitin_teksti, $tulostimen_tunnus);
 

@@ -62,7 +62,8 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $asiakkaan_kieli      = $lasku["asiakkaan_kieli"];
 
   // Arvojen asettelu spritfillä ja muu asettelu
-  $yhteensa = sprintf("%34.34s", $yhteensa);
+  $yhteensa_left = 32 - strlen($lasku["valkoodi"]);
+  $yhteensa = sprintf("%{$yhteensa_left}.{$yhteensa_left}s", $yhteensa);
 
   if ($pyoristys) {
     $pyoristys  = sprintf("%33.33s", $pyoristys);
@@ -127,7 +128,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
   // Hinta yhteensä
   $kuitin_teksti .= "==========================================\n";
-  $kuitin_teksti .= "{$emphasized_on}YHTEENSÄ{$yhteensa}{$emphasized_off}\n";
+  $kuitin_teksti .= "{$emphasized_on}YHTEENSÄ, {$lasku["valkoodi"]}{$yhteensa}{$emphasized_off}\n";
 
   if ($pyoristys) {
     $kuitin_teksti .= "{$emphasized_on}PYÖRISTYS{$pyoristys}{$emphasized_off}\n";

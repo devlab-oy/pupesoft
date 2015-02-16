@@ -24942,21 +24942,13 @@ if (!function_exists('hyllysiirto')) {
       $uusipaikka_chk_res = pupe_query($query);
       $uusipaikka_chk_row = mysql_fetch_assoc($uusipaikka_chk_res);
 
-      if (mysql_num_rows($uusipaikka_chk_res) == 0 or $uusipaikka_chk_row['laji'] != 'uusipaikka') {
-        $query = "SELECT laji
-                  FROM tapahtuma
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tuoteno = '{$tuoteno}'
-                  AND hyllyalue  = '{$minnerow['hyllyalue']}'
-                  AND hyllynro   = '{$minnerow['hyllynro']}'
-                  AND hyllyvali  = '{$minnerow['hyllyvali']}'
-                  AND hyllytaso  = '{$minnerow['hyllytaso']}'
-                  ORDER BY laadittu DESC
-                  LIMIT 1";
-        $uusipaikka_chk_res = pupe_query($query);
-        $uusipaikka_chk_row = mysql_fetch_assoc($uusipaikka_chk_res);
+      if (in_array($uusipaikka_chk_row['laji'], array('uusipaikka','inventointi'))) {
 
-        if (mysql_num_rows($uusipaikka_chk_res) != 0 and $uusipaikka_chk_row['laji'] == 'inventointi') {
+        if ($uusipaikka_chk_row['laji'] == 'uusipaikka') {
+          $_chk = true;
+        }
+        else {
+          # Jos tapahtuma oli inventointi
           $query = "SELECT tunnus
                     FROM tuotepaikat
                     WHERE yhtio = '{$kukarow['yhtio']}'
@@ -24972,9 +24964,6 @@ if (!function_exists('hyllysiirto')) {
             $_chk = true;
           }
         }
-      }
-      else {
-        $_chk = true;
       }
 
       if ($_chk) {

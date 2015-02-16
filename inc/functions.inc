@@ -24942,9 +24942,11 @@ if (!function_exists('hyllysiirto')) {
       $uusipaikka_chk_res = pupe_query($query);
       $uusipaikka_chk_row = mysql_fetch_assoc($uusipaikka_chk_res);
 
-      if (in_array($uusipaikka_chk_row['laji'], array('uusipaikka','inventointi'))) {
+      $_laji_chk = strtolower($uusipaikka_chk_row['laji']);
 
-        if ($uusipaikka_chk_row['laji'] == 'uusipaikka') {
+      if (in_array($_laji_chk, array('uusipaikka','inventointi'))) {
+
+        if ($_laji_chk == 'uusipaikka') {
           $_chk = true;
         }
         else {

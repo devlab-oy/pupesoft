@@ -105,7 +105,7 @@ if ($luottoraja_chk or $erapaiva_chk) {
             FROM tilausrivi
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             AND tilausrivi.tyyppi != 'D'
-            AND tilausrivi.var not in ('P','J','O','S')
+            AND tilausrivi.var != 'P'
             AND tilausrivi.otunnus = '{$laskurow['tunnus']}'";
   $chk_kaikkiyhteensa_res = pupe_query($query);
   $chk_kaikkiyhteensa_row = mysql_fetch_assoc($chk_kaikkiyhteensa_res);

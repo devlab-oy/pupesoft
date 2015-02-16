@@ -39,9 +39,6 @@ if ($tee == "PAIVITA_KASSALIPAS" and ($kukarow["dynaaminen_kassamyynti"] != "" o
 
   $tee = "";
 }
-else {
-  $tee = "";
-}
 
 $maksupaate_kassamyynti = (($yhtiorow['maksupaate_kassamyynti'] == 'K' and
                             $kukarow["maksupaate_kassamyynti"] == "") or
@@ -2440,7 +2437,12 @@ if ($tee == '') {
           echo "<font class='error'>".t("Toimitustapa on oltava nouto, koska maksuehto on käteinen")."!</font><br><br>";
         }
 
-        $kassalipas = $kukarow["kassamyyja"];
+        if (empty($laskurow["kassalipas"])) {
+          $kassalipas = $kukarow["kassamyyja"];
+        }
+        else {
+          $kassalipas = $laskurow["kassalipas"];
+        }
       }
     }
 

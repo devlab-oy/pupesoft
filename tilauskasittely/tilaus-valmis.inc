@@ -2158,7 +2158,17 @@ else {
 //tyhjennet‰‰n ett‰ se ei kummittele uudella tilauksella
 $hinta = '';
 
-if (empty($luottorajavirhe) and empty($ylivito)) {
+if (!empty($ylivito) and in_array($yhtiorow['erapaivan_ylityksen_toimenpide'], array('J','L'))) {
+  $luottorajavirhe_ylivito_valmis = false;
+}
+elseif (!empty($luottorajavirhe) and in_array($yhtiorow['luottorajan_ylitys'], array('J','L'))) {
+  $luottorajavirhe_ylivito_valmis = false;
+}
+else {
+  $luottorajavirhe_ylivito_valmis = true;
+}
+
+if ($luottorajavirhe_ylivito_valmis) {
   // tilaus ei en‰‰ kesken...
   $query  = "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
   $result = pupe_query($query);

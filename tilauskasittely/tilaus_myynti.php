@@ -1787,7 +1787,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
         }
         echo "<br />";
       }
-      elseif (!isset($splitatut) and empty($luottorajavirhe) and empty($ylivito)) {
+      elseif (!isset($splitatut) and $luottorajavirhe_ylivito_valmis) {
         echo "<font class='message'>";
         echo $otsikko, ' ', $kukarow['kesken'], ' ';
         echo t("valmis");
@@ -1829,7 +1829,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 
     $tee        = '';
 
-    if (empty($luottorajavirhe) and empty($ylivito)) {
+    if ($luottorajavirhe_ylivito_valmis) {
       $tilausnumero    = '';
       $laskurow      = '';
       $kukarow['kesken']  = '';
@@ -1848,7 +1848,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
     }
   }
 
-  if ($kukarow["extranet"] == "" and $lopetus != '' and empty($luottorajavirhe) and empty($ylivito)) {
+  if ($kukarow["extranet"] == "" and $lopetus != '' and $luottorajavirhe_ylivito_valmis) {
     lopetus($lopetus, "META");
   }
 }

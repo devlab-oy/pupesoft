@@ -96,7 +96,7 @@ $erapaiva_chk   =  ($maksuehtorow['kateinen'] == '' and empty($maksuehtorow['jv'
 
 // tarkistetaan ettei kyseess‰ ole hyvitys
 if ($luottoraja_chk or $erapaiva_chk) {
-  
+
   $query_ale_lisa = generoi_alekentta('M');
 
   $query = "SELECT SUM(
@@ -2158,9 +2158,11 @@ else {
 //tyhjennet‰‰n ett‰ se ei kummittele uudella tilauksella
 $hinta = '';
 
-// tilaus ei en‰‰ kesken...
-$query  = "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
-$result = pupe_query($query);
+if (empty($luottorajavirhe) and empty($ylivito)) {
+  // tilaus ei en‰‰ kesken...
+  $query  = "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+  $result = pupe_query($query);
+}
 
 if (!isset($silent) or $silent == "") {
   echo $tilaus_valmis_ulos;

@@ -23007,7 +23007,7 @@ if (!function_exists('hae_maa')) {
 
     $maan_tiedot['nimi'] = $maa_row['name'] != '' ? $maa_row['name'] : $maa_row['koodi'];
     $maan_tiedot['nimi'] = strtoupper($maan_tiedot['nimi']);
-    
+
     return $maan_tiedot;
   }
 }
@@ -24925,6 +24925,56 @@ if (!function_exists('hyllysiirto')) {
       $lisavarlisa2 = "";
     }
 
+    $uusi_paikka = false;
+
+    if ($yhtiorow['inventointi_siirron_yhteydessa'] == "K") {
+      $query = "SELECT tunnus
+                FROM tapahtuma
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tuoteno = '{$tuoteno}'
+                AND hyllyalue  = '{$minnerow['hyllyalue']}'
+                AND hyllynro   = '{$minnerow['hyllynro']}'
+                AND hyllyvali  = '{$minnerow['hyllyvali']}'
+                AND hyllytaso  = '{$minnerow['hyllytaso']}'
+                AND laji = 'uusipaikka'
+                ORDER BY laadittu DESC
+                LIMIT 1";
+      $uusipaikka_chk_res = pupe_query($query);
+
+      if (mysql_num_rows($uusipaikka_chk_res) == 0) {
+        $query = "SELECT tunnus
+                  FROM tapahtuma
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno = '{$tuoteno}'
+                  AND laji = 'inventointi'
+                  AND hyllyalue  = '{$minnerow['hyllyalue']}'
+                  AND hyllynro   = '{$minnerow['hyllynro']}'
+                  AND hyllyvali  = '{$minnerow['hyllyvali']}'
+                  AND hyllytaso  = '{$minnerow['hyllytaso']}'
+                  ORDER BY laadittu DESC
+                  LIMIT 1";
+        $uusipaikka_chk_res = pupe_query($query);
+
+        if (mysql_num_rows($uusipaikka_chk_res) != 0) {
+          $query = "SELECT tunnus
+                    FROM tuotepaikat
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tuoteno = '{$tuoteno}'
+                    AND hyllyalue  = '{$minnerow['hyllyalue']}'
+                    AND hyllynro   = '{$minnerow['hyllynro']}'
+                    AND hyllyvali  = '{$minnerow['hyllyvali']}'
+                    AND hyllytaso  = '{$minnerow['hyllytaso']}'
+                    AND saldo = 0";
+          $uusipaikka_chk_res = pupe_query($query);
+        }
+      }
+
+      if (mysql_num_rows($uusipaikka_chk_res) != 0) {
+        $uusi_paikka = true;
+        $lisavarlisa2 .= " inventointiaika = now(), ";
+      }
+    }
+
     // Mist‰ varastosta otetaan?
     $query = "UPDATE tuotepaikat
               set saldo   = saldo - {$kappaleet},
@@ -25058,6 +25108,26 @@ if (!function_exists('hyllysiirto')) {
               laadittu   = '$_laadittu'";
     $result = pupe_query($query);
     $minne_tapa_tunnus = mysql_insert_id($GLOBALS["masterlink"]);
+
+    if ($yhtiorow['inventointi_siirron_yhteydessa'] == "K" and $uusi_paikka) {
+      $query = "INSERT into tapahtuma set
+                yhtio      = '{$kukarow['yhtio']}',
+                tuoteno    = '{$tuoteno}',
+                kpl        = '{$kappaleet}',
+                kplhinta   = '{$keskihankintahinta}',
+                hinta      = '{$keskihankintahinta}',
+                laji       = 'Inventointi',
+                hyllyalue  = '{$minnerow['hyllyalue']}',
+                hyllynro   = '{$minnerow['hyllynro']}',
+                hyllyvali  = '{$minnerow['hyllyvali']}',
+                hyllytaso  = '{$minnerow['hyllytaso']}',
+                rivitunnus = {$tun},
+                selite     = '".t("Inventoitiin")." {$minne_texti} ".t("siirron yhteydess‰")." {$kappaleet}{$selite}',
+                laatija    = '{$kukarow['kuka']}',
+                laadittu   = '$_laadittu'";
+      $result = pupe_query($query);
+      $_tapahtumatunnus = mysql_insert_id($GLOBALS["masterlink"]);
+    }
 
     // Tehd‰‰n kirjanpito
     if ($yhtiorow["tarkenteiden_prioriteetti"] == "T") {

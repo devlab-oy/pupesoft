@@ -652,9 +652,15 @@ while ($row = mysql_fetch_assoc($res)) {
       $alennukset      = 1;
       $ostohinta_netto = $ostohinta;
 
+      // lis‰t‰‰n kuluprosentti hintaan jos sit‰ k‰ytet‰‰n saapumisellakin
+      if (in_array($yhtiorow['jalkilaskenta_kuluperuste'], array('KP','VS'))) {
+        $ostohinta_netto = $ostohinta_netto * (1 + ($ttrow['oletus_kulupros'] / 100));
+      }
+
       // Nolla tai pienempi on virhe, laitetaan ne vikaks
       if ($ostohinta <= 0) {
-        $ostohinta = $ostohinta_netto = 0;
+        $ostohinta = 0;
+        $ostohinta_netto = 9999999;
         $netto     = "N";
       }
 
@@ -667,6 +673,8 @@ while ($row = mysql_fetch_assoc($res)) {
 
       $ostohinta_netto = round($ostohinta_netto, 6);
       $alennukset = round((1 - $alennukset) * 100, 2);
+
+      echo "\n osthinnet: $ostohinta_netto - ost: $ostohinta - al: $alennukset - kulu: {$ttrow['oletus_kulupros']}\n";
 
       $ttrow['ostohinta_oletusvaluutta']        = $ostohinta;
       $ttrow['ostohinta_oletusvaluutta_netto']  = $ostohinta_netto;
@@ -700,17 +708,40 @@ while ($row = mysql_fetch_assoc($res)) {
       fwrite($tfp, $trivi);
     }
 
-    // Valitaan edullisin toimittaja
-    /*
-    TODO, toistaiseksi p‰‰toimittajaksi Pupen p‰‰toimittaja (order by j‰rjestys)
-    Myˆhemmin lis‰t‰‰n tuki, ett‰ voidaan kertoa miss‰ tapauksissa
-    otetaan halvimman hinnan mukaan ja miss‰ Pupen p‰‰toimittaja
-    Relexin p‰‰toimittajaksi.
-    */
-    // array_multisort($toimittajat_a_hinta, SORT_ASC, $toimittajat_a);
-  }
+    // p‰‰toimittaja talteen t‰s vaihees
+    $parastoimittaja = $toimittajat_a[0];
 
-  $parastoimittaja = $toimittajat_a[0];
+    $relex_halvin_toimittaja = t_tuotteen_avainsanat($row, "RELEX_HALVIN_TOIMITTAJA");
+    
+    echo "\n$relex_halvin_toimittaja\n";
+   /* 
+    $avainsana_query = "";
+    if (mysql_num_rows($avainsana_query) == 1) {
+      $valtrow = mysql_fetch_assoc($avainsana_query);
+    }
+    */
+
+    // jos halutaan p‰‰toimittajaksi halvin
+    if ($relex_halvin_toimittaja) {
+      
+      $_kulu = 1;
+
+      // jos selite-kent‰ss‰ numero, k‰ytet‰‰n sit‰ ns ylim‰‰r‰isen‰ kuluna halvimmalla toimittajalla
+      if (!empty($relex_halvin_toimittaja) and is_numeric($relex_halvin_toimittaja)) {
+        $_kulu = 1 + ($relex_halvin_toimittaja / 100);
+      }
+
+      array_multisort($toimittajat_a_hinta, SORT_ASC, $toimittajat_a);
+    
+      echo "\n{$parastoimittaja['ostohinta_oletusvaluutta_netto']} > ({$toimittajat_a[0]['ostohinta_oletusvaluutta_netto']} * $_kulu)\n";
+    
+      // tarkistetaan onko halvin hinta yli 5% p‰‰toimittajaa halvempi, jotta vaihto on kannattavaa
+      if ($parastoimittaja['ostohinta_oletusvaluutta_netto'] > ($toimittajat_a[0]['ostohinta_oletusvaluutta_netto'] * $_kulu)) {
+        $parastoimittaja = $toimittajat_a[0];
+        echo "\nvaihdettiin halvempi toimittaja\n";
+      } 
+    }
+  }
 
   if ($parastoimittaja['toimittaja'] > 0) {
     $parastoimittaja['toimittaja'] = $row['maa']."-".$parastoimittaja['toimittaja'];

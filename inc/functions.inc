@@ -24926,9 +24926,10 @@ if (!function_exists('hyllysiirto')) {
     }
 
     $uusi_paikka = false;
+    $_chk = false;
 
     if ($yhtiorow['inventointi_siirron_yhteydessa'] == "K") {
-      $query = "SELECT tunnus
+      $query = "SELECT laji
                 FROM tapahtuma
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tuoteno = '{$tuoteno}'
@@ -24936,17 +24937,16 @@ if (!function_exists('hyllysiirto')) {
                 AND hyllynro   = '{$minnerow['hyllynro']}'
                 AND hyllyvali  = '{$minnerow['hyllyvali']}'
                 AND hyllytaso  = '{$minnerow['hyllytaso']}'
-                AND laji = 'uusipaikka'
                 ORDER BY laadittu DESC
                 LIMIT 1";
       $uusipaikka_chk_res = pupe_query($query);
+      $uusipaikka_chk_row = mysql_fetch_assoc($uusipaikka_chk_res);
 
-      if (mysql_num_rows($uusipaikka_chk_res) == 0) {
-        $query = "SELECT tunnus
+      if (mysql_num_rows($uusipaikka_chk_res) == 0 or $uusipaikka_chk_row['laji'] != 'uusipaikka') {
+        $query = "SELECT laji
                   FROM tapahtuma
                   WHERE yhtio = '{$kukarow['yhtio']}'
                   AND tuoteno = '{$tuoteno}'
-                  AND laji = 'inventointi'
                   AND hyllyalue  = '{$minnerow['hyllyalue']}'
                   AND hyllynro   = '{$minnerow['hyllynro']}'
                   AND hyllyvali  = '{$minnerow['hyllyvali']}'
@@ -24954,8 +24954,9 @@ if (!function_exists('hyllysiirto')) {
                   ORDER BY laadittu DESC
                   LIMIT 1";
         $uusipaikka_chk_res = pupe_query($query);
+        $uusipaikka_chk_row = mysql_fetch_assoc($uusipaikka_chk_res);
 
-        if (mysql_num_rows($uusipaikka_chk_res) != 0) {
+        if (mysql_num_rows($uusipaikka_chk_res) != 0 and $uusipaikka_chk_row['laji'] == 'inventointi') {
           $query = "SELECT tunnus
                     FROM tuotepaikat
                     WHERE yhtio = '{$kukarow['yhtio']}'
@@ -24966,10 +24967,17 @@ if (!function_exists('hyllysiirto')) {
                     AND hyllytaso  = '{$minnerow['hyllytaso']}'
                     AND saldo = 0";
           $uusipaikka_chk_res = pupe_query($query);
+
+          if (mysql_num_rows($uusipaikka_chk_res) != 0) {
+            $_chk = true;
+          }
         }
       }
+      else {
+        $_chk = true;
+      }
 
-      if (mysql_num_rows($uusipaikka_chk_res) != 0) {
+      if ($_chk) {
         $uusi_paikka = true;
         $lisavarlisa2 .= " inventointiaika = now(), ";
       }

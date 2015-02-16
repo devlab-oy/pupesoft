@@ -25122,7 +25122,6 @@ if (!function_exists('hyllysiirto')) {
                 laatija    = '{$kukarow['kuka']}',
                 laadittu   = '$_laadittu'";
       $result = pupe_query($query);
-      $_tapahtumatunnus = mysql_insert_id($GLOBALS["masterlink"]);
     }
 
     // Tehd‰‰n kirjanpito

@@ -369,7 +369,8 @@ if ($kasitellaan_tiedosto) {
     for ($excej = 0; $excej < $excelsarakemaara; $excej++) {
       // haetaan kaikille perheille uusi perhenumero
       if (strtoupper($excelrivit[0][$excej]) == 'PERHE' and $thr) {
-        if (!in_array($excelrivit[$excei][$excej], $uniikit_perheet) and !empty($excelrivit[$excei][$excej])) {
+
+        if (!in_array($excelrivit[$excei][$excej], $uniikit_perheet)) {
 
           $pquery = "SELECT max(perhe) AS uusi_perhe
                       FROM avainsana";
@@ -378,14 +379,14 @@ if ($kasitellaan_tiedosto) {
           $uusi_perhe = $prow['uusi_perhe'] + $perhelisa;
           $perhelisa++;
 
-          $uniikit_perheet[$uusi_perhe] = $excelrivit[$excei][$excej];
+          if (!empty($excelrivit[$excei][$excej])) {
+            $uniikit_perheet[$uusi_perhe] = $excelrivit[$excei][$excej];
+          }
 
           $taulunrivit[$taulut[$excej]][$excei-1][] = $uusi_perhe;
         }
-        elseif (empty($excelrivit[$excei][$excej])) {
-          $taulunrivit[$taulut[$excej]][$excei-1][] = '';
-        }
         else {
+
           $perhe = array_search($excelrivit[$excei][$excej], $uniikit_perheet);
           $taulunrivit[$taulut[$excej]][$excei-1][] = $perhe;
         }

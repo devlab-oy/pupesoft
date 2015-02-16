@@ -24948,7 +24948,8 @@ if (!function_exists('hyllysiirto')) {
           $_chk = true;
         }
         else {
-          # Jos tapahtuma oli inventointi
+          # Jos tapahtuma oli inventointi ja tuotepaikalla on vain siirron verran saldoa
+          # Tarkoittaa sitä että ennen siirtoa saldo oli 0
           $query = "SELECT tunnus
                     FROM tuotepaikat
                     WHERE yhtio = '{$kukarow['yhtio']}'
@@ -24957,7 +24958,7 @@ if (!function_exists('hyllysiirto')) {
                     AND hyllynro   = '{$minnerow['hyllynro']}'
                     AND hyllyvali  = '{$minnerow['hyllyvali']}'
                     AND hyllytaso  = '{$minnerow['hyllytaso']}'
-                    AND saldo = 0";
+                    AND saldo = {$kappaleet}";
           $uusipaikka_chk_res = pupe_query($query);
 
           if (mysql_num_rows($uusipaikka_chk_res) != 0) {

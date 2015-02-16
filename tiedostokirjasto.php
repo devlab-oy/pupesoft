@@ -167,6 +167,8 @@ function piirra_formi($params) {
 }
 
 function piirra_tiedostolista($tiedostot) {
+  global $extranet, $toim;
+
   if (empty($tiedostot)) {
     echo "<font class='error'>";
     echo t("Valitulle toimittajalle ei löytynyt valitun tyyppisiä liitetiedostoja");
@@ -177,6 +179,11 @@ function piirra_tiedostolista($tiedostot) {
 
   echo "<br>";
   echo "<table>";
+
+  if ($extranet == "" and $toim == "") {
+    echo "<thead><tr><th>" . t("Nimitys") . "</th><th>" . t("Tuote") . "</th></tr></thead>";
+  }
+
   echo "<tbody>";
 
   foreach ($tiedostot as $tiedosto) {
@@ -185,6 +192,15 @@ function piirra_tiedostolista($tiedostot) {
     echo "<a href='view.php?id={$tiedosto['tunnus']}'
              target='Attachment'>{$tiedosto['selite']}</a>";
     echo "</td>";
+
+    if ($extranet == "" and $toim == "") {
+      echo "<td>
+              <a href='yllapito.php?toim=tuote&tunnus={$tiedosto["tunnus"]}'>
+                {$tiedosto["tuoteno"]}
+              </a>
+            </td>";
+    }
+
     echo "</tr>";
   }
 

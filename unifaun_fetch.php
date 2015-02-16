@@ -152,11 +152,48 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
         $eranumero_sscc = preg_replace("/[^0-9\,]/", "", str_replace("_", ",", $eranumero_sscc));
 
         if (!empty($eranumero_sscc)) {
-          $query = "UPDATE rahtikirjat SET
-                    sscc_ulkoinen = '{$sscc_ulkoinen}'
-                    WHERE yhtio   = '{$kukarow['yhtio']}'
-                    AND tunnus    in ($eranumero_sscc)";
-          $upd_res  = pupe_query($query);
+          $query = "SELECT tunnus
+                    FROM rahtikirjat
+                    WHERE yhtio    = '{$kukarow['yhtio']}'
+                    AND otsikkonro = '{$eranumero_sscc}'
+                    ORDER BY tunnus
+                    LIMIT 1";
+          $rakir_res = pupe_query($query);
+          $rakir_row = mysql_fetch_assoc($rakir_res);
+
+          if (!empty($rakir_row['tunnus'])) {
+            $query = "UPDATE rahtikirjat SET
+                      rahtikirjanro = trim(concat(rahtikirjanro, '\n$sscc_ulkoinen')),
+                      sscc_ulkoinen = trim(concat(sscc_ulkoinen, '\n$sscc_ulkoinen'))
+                      WHERE yhtio   = '{$kukarow['yhtio']}'
+                      AND tunnus    = '{$rakir_row['tunnus']}'";
+            pupe_query($query);
+          }
+          else {
+            $query = "SELECT *
+                      FROM lasku
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus  = '{$eranumero_sscc}'";
+            $lasku_res = pupe_query($query);
+            $lasku_row = mysql_fetch_assoc($lasku_res);
+
+            if (!empty($lasku_row['tunnus'])) {
+              $query  = "INSERT INTO rahtikirjat SET
+                         kollit         = '1',
+                         kilot          = '1',
+                         pakkaus        = '',
+                         pakkauskuvaus  = '',
+                         rahtikirjanro  = '$sscc_ulkoinen',
+                         sscc_ulkoinen  = '$sscc_ulkoinen',
+                         otsikkonro     = '{$lasku_row['tunnus']}',
+                         tulostuspaikka = '{$lasku_row['varasto']}',
+                         toimitustapa   = '{$lasku_row['toimitustapa']}',
+                         tulostettu     = now(),
+                         yhtio          = '{$kukarow['yhtio']}',
+                         viesti         = ''";
+              pupe_query($query);
+            }
+          }
         }
       }
 

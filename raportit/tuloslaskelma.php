@@ -123,6 +123,20 @@ else {
     }
   }
 
+  $query = "SELECT min(tilikausi_alku) alkukausi, min(tilikausi_loppu) loppukausi
+            FROM tilikaudet
+            WHERE yhtio = '$kukarow[yhtio]'";
+  $result = pupe_query($query);
+  $ekakausirow = mysql_fetch_assoc($result);
+
+  if (empty($ekakausirow['alkukausi'])) {
+    $ekakausirow['alkukausi'] = date("Y")-10;
+  }
+
+  if (empty($ekakausirow['loppukausi'])) {
+    $ekakausirow['loppukausi'] = date("Y")-10;
+  }
+
   // tehdään käyttöliittymä, näytetään aina
   $sel = array(4 => "", 3 => "", "T" => "", 1 => "", 2 => "");
   if ($tyyppi != "") $sel[$tyyppi] = "SELECTED";
@@ -167,7 +181,7 @@ else {
   $sel = array();
   $sel[$plvv] = "SELECTED";
 
-  for ($i = date("Y"); $i >= date("Y")-4; $i--) {
+  for ($i = date("Y"); $i >= (float) substr($ekakausirow['alkukausi'], 0, 4); $i--) {
 
     if (!isset($sel[$i])) {
       $sel[$i] = "";
@@ -219,7 +233,7 @@ else {
   $sel = array();
   $sel[$alvv] = "SELECTED";
 
-  for ($i = date("Y")+1; $i >= date("Y")-4; $i--) {
+  for ($i = date("Y")+1; $i >= (float) substr($ekakausirow['loppukausi'], 0, 4); $i--) {
     echo "<option value='$i' $sel[$i]>$i</option>";
   }
 

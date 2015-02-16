@@ -346,13 +346,6 @@ if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == 'VALMI
 
 if ($toim == "REKLAMAATIO" and $tee == 'VALMIS') {
 
-  $query  = "UPDATE lasku
-             SET tila = 'L'
-             WHERE tunnus = '$laskurow[tunnus]'
-             and tila     = 'C'
-             and yhtio    = '$kukarow[yhtio]'";
-  $result = pupe_query($query);
-
   // Katotaan löytyykö tilausrivejä
   $query = "SELECT tilausrivi.*, tilausrivin_lisatiedot.asiakkaan_positio
             FROM tilausrivi
@@ -400,9 +393,18 @@ if ($toim == "REKLAMAATIO" and $tee == 'VALMIS') {
     }
 
     require "tilauskasittely/tilaus-valmis.inc";
-  }
 
-  $tee = "";
+    if (empty($luottorajavirhe) and empty($ylivito)) {
+      $query  = "UPDATE lasku
+                 SET tila = 'L'
+                 WHERE tunnus = '$laskurow[tunnus]'
+                 and tila     = 'C'
+                 and yhtio    = '$kukarow[yhtio]'";
+      $result = pupe_query($query);
+    }
+
+    $tee = "";
+  }
 }
 
 if ($toim == "SIIRTOTYOMAARAYS" and $tee == 'VALMIS') {

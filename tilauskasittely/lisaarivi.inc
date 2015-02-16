@@ -2511,7 +2511,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
       foreach ($siirto_varastot as $siirto_varasto) {
         $saldo_myytavissa = $siirto_varasto['tuote']['myytavissa'];
-        if ($_onko_isatuote or $_onko_lapsituote) {
+        if ($_onko_isatuote) {
           $tuoteperhe_saldomyytavissa = tuoteperhe_myytavissa($isatuoteno, '', '', $siirto_varasto['lahde_tunnus']);
           $saldo_myytavissa = $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']];
         }
@@ -2762,7 +2762,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
         if (isset($jt_manual) and $jt_manual != '' and !empty($yhtiorow['jt_manual'])) {
           $kerayspvm = date('Y-m-d', strtotime('now'));
         }
-        elseif ((isset($jt_muidenmukana) and $jt_muidenmukana == 'KYLLA') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {
+        elseif ($laskurow["tila"] != 'G' and ((isset($jt_muidenmukana) and $jt_muidenmukana == 'KYLLA') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A'))) {
           $kerayspvm = date('Y-m-d', strtotime('now + 3 month'));
         }
         elseif ((isset($jt_muidenmukana) and $jt_muidenmukana == 'EI') or (!isset($jt_muidenmukana) and !empty($yhtiorow['jt_automatiikka']) and $yhtiorow['automaattinen_jt_toimitus'] == 'A')) {

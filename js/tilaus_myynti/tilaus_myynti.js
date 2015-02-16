@@ -78,6 +78,7 @@ $(document).ready(function() {
 
     function submitMaksupaate() {
       $('#kateinen').val(jaljella.text());
+      $('#kateistaAnnettu').val(annettu.val());
       seka.val('kylla');
       laskuriTee.val('VALMIS');
       saaSubmittaa = true;

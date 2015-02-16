@@ -10533,6 +10533,7 @@ function piirra_maksupaate_formi() {
   echo "<input type='hidden' name='maksupaatetapahtuma' id='maksupaatetapahtuma' value=''>";
   echo "<input type='hidden' id='peruutus' name='peruutus' value>";
   echo "<input type='hidden' name='kateismaksu[kateinen]' id='kateinen'>";
+  echo "<input type='hidden' name='kateista_annettu' id='kateistaAnnettu'>";
 
   echo "<table style='width: 100%; margin-top: 20px;'>";
   echo "<tr><td class='back'><font class='head'>" . t("Maksutapa") . "</font></td></tr>";

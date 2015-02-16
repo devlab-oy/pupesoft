@@ -195,7 +195,7 @@ function piirra_tiedostolista($tiedostot) {
 
     if ($extranet == "" and $toim == "") {
       echo "<td>
-              <a href='yllapito.php?toim=tuote&tunnus={$tiedosto["tunnus"]}'>
+              <a href='yllapito.php?toim=tuote&tunnus={$tiedosto["tuote_tunnus"]}'>
                 {$tiedosto["tuoteno"]}
               </a>
             </td>";

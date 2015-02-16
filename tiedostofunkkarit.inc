@@ -77,7 +77,7 @@ function hae_tiedostot($params) {
               liitetiedostot.kayttotarkoitus,
               liitetiedostot.selite,
               tuotteen_toimittajat.tuoteno,
-              tuote.tunnus
+              tuote.tunnus AS tuote_tunnus
               FROM tuotteen_toimittajat
               INNER JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio
                 AND tuotteen_toimittajat.tuoteno    = tuote.tuoteno)

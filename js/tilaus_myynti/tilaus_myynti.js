@@ -120,6 +120,11 @@ $(document).ready(function() {
     }
   })();
 
+  $('#kertakassa').on('change', function() {
+    $('#kaikkyhtTee').val('PAIVITA_KASSALIPAS');
+    $('#kaikkyht').submit();
+  });
+
   $('#myyja_id').on('change', function () {
     $(this).siblings('#myyjanro_id').val('');
     $(this).closest('form').submit();

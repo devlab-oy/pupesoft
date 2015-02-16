@@ -26,6 +26,23 @@ if (@include "../inc/parametrit.inc");
 elseif (@include "parametrit.inc");
 else exit;
 
+if ($tee == "PAIVITA_KASSALIPAS" and ($kukarow["dynaaminen_kassamyynti"] != "" or
+                                      ($kukarow["dynaaminen_kassamyynti"] == "" and
+                                       $yhtiorow["dynaaminen_kassamyynti"] != ""))
+) {
+  $paivita_kassalipas_query = "UPDATE lasku
+                               SET kassalipas = '{$kertakassa}'
+                               WHERE yhtio = '{$kukarow["yhtio"]}'
+                               AND tunnus = '{$kukarow["kesken"]}'";
+
+  pupe_query($paivita_kassalipas_query);
+
+  $tee = "";
+}
+else {
+  $tee = "";
+}
+
 $maksupaate_kassamyynti = (($yhtiorow['maksupaate_kassamyynti'] == 'K' and
                             $kukarow["maksupaate_kassamyynti"] == "") or
                            $kukarow["maksupaate_kassamyynti"] == "K");
@@ -9886,13 +9903,13 @@ if ($tee == '') {
           $_takuu_tilaustyyppi = "<input type='hidden' name='tilaustyyppi' value = '$laskurow[tilaustyyppi]'>";
         }
 
-        echo "<form name='kaikkyht' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' $javalisa>
+        echo "<form name='kaikkyht' id='kaikkyht' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' $javalisa>
           <input type='hidden' name='toim' value='$toim'>
           $_takuu_tilaustyyppi
           <input type='hidden' name='lopetus' value='$lopetus'>
           <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
           <input type='hidden' name='projektilla' value='$projektilla'>
-          <input type='hidden' name='tee' value='$tee_value'>
+          <input type='hidden' name='tee' value='$tee_value' id='kaikkyhtTee'>
           <input type='hidden' name='tilausnumero' value='$tilausnumero'>
           <input type='hidden' name='mista' value = '$mista'>
           <input type='hidden' name='rahtipainohinta' value='$rahtihinta'>
@@ -9999,7 +10016,7 @@ if ($tee == '') {
 
           if (($kukarow["dynaaminen_kassamyynti"] != "" or $yhtiorow["dynaaminen_kassamyynti"] != "")) {
             echo "<br><br>".t("Valitse kassalipas").":<br>
-                <select name='kertakassa'>
+                <select name='kertakassa' id='kertakassa'>
                 <option value='EI_KASSAMYYNTIA'>".t("Ei kassamyyntiä")."</option>";
 
             $kassalipaslisa = $kukarow['toimipaikka'] != 0 ? "and toimipaikka IN (0, {$kukarow['toimipaikka']})" : "";

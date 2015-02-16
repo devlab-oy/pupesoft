@@ -118,7 +118,7 @@ else {
       $ryhmittelylisa = " JOIN tuotteen_avainsanat
                             ON tuotteen_avainsanat.yhtio = tuote.yhtio
                             AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
-                            AND tuotteen_avainsanat.laji = 'tuotehinnastoryhmittely'
+                            AND tuotteen_avainsanat.laji = 'hinnastoryhmittely'
                           JOIN avainsana
                             ON avainsana.yhtio = tuote.yhtio
                             AND avainsana.kieli = '{$hinkieli}'
@@ -131,7 +131,7 @@ else {
     $tarkistus = "SELECT count(tunnus)
                   FROM tuotteen_avainsanat
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND laji    = 'tuotehinnastoryhmittely'";
+                  AND laji    = 'hinnastoryhmittely'";
     $tarkistus = pupe_query($tarkistus);
     $tarkistus = mysql_result($tarkistus, 0);
 
@@ -335,9 +335,10 @@ else {
 
         $sort = array();
         foreach ($rivit as $key => $rivi) {
-            $sort[$key] = $rivi['jar'];
+            $sort1[$key] = $rivi['jar'];
+            $sort2[$key] = $rivi['tro'];
         }
-        array_multisort($sort, SORT_ASC, $rivit);
+        array_multisort($sort1, SORT_ASC, $sort2, SORT_ASC, $rivit);
       }
 
       foreach ($rivit as $rrow) {

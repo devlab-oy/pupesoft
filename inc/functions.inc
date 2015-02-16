@@ -25110,7 +25110,7 @@ if (!function_exists('hyllysiirto')) {
       $query = "INSERT into tapahtuma set
                 yhtio      = '{$kukarow['yhtio']}',
                 tuoteno    = '{$tuoteno}',
-                kpl        = '{$kappaleet}',
+                kpl        = '0',
                 kplhinta   = '{$keskihankintahinta}',
                 hinta      = '{$keskihankintahinta}',
                 laji       = 'Inventointi',
@@ -25118,8 +25118,7 @@ if (!function_exists('hyllysiirto')) {
                 hyllynro   = '{$minnerow['hyllynro']}',
                 hyllyvali  = '{$minnerow['hyllyvali']}',
                 hyllytaso  = '{$minnerow['hyllytaso']}',
-                rivitunnus = {$tun},
-                selite     = '".t("Inventoitiin")." {$minne_texti} ".t("siirron yhteydessä")." {$kappaleet}{$selite}',
+                selite     = '".t("Saldo täsmäsi")."',
                 laatija    = '{$kukarow['kuka']}',
                 laadittu   = '$_laadittu'";
       $result = pupe_query($query);

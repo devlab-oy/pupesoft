@@ -4,6 +4,7 @@
 $tilaus_valmis_ulos     = "";
 $ohjausmerkkilisa       = "";
 $luottorajavirhe        = "";
+$ylivito                = 0;
 $jtkielto               = "";
 $myy_varastosta_varasto = $laskurow['varasto'];
 
@@ -75,15 +76,6 @@ $query = "SELECT *
 $maksuehto_result = pupe_query($query);
 $maksuehtorow = mysql_fetch_assoc($maksuehto_result);
 
-// Tarkistetaan, onko kaikki rivit hyvitysrivej‰ -> ei luottorajatarkistusta
-$query = "SELECT tunnus
-          FROM tilausrivi
-          WHERE yhtio  = '{$kukarow['yhtio']}'
-          AND otunnus  = '{$laskurow['tunnus']}'
-          AND tyyppi  != 'D'
-          AND (varattu + jt) > 0 ";
-$veloitus_result = pupe_query($query);
-
 // Myynti estete‰‰n jos luottoraja on ylitetty (K - kaikki estet‰‰n, E -  kaikki muu ku myyjien tekem‰ estet‰‰n)
 // Jos maksuehto on k‰teinen, sallitaan luottorajan ylitys
 // samma pÂ erapaivan_ylityksen_raja
@@ -93,8 +85,7 @@ $luottoraja_chk = ((in_array($yhtiorow["luottorajan_ylitys"], array("K", "J", "L
         or $tilausvalmiskutsuja != "TILAUSMYYNTI")))
   and $tilausvalmis_asiakas_row['luottoraja'] != 0
   and $maksuehtorow['kateinen'] == '' and empty($maksuehtorow['jv'])
-  and strpos($_SERVER['SCRIPT_NAME'], "korkolasku.php") === FALSE
-  and mysql_num_rows($veloitus_result) > 0) ? 1 : 0;
+  and strpos($_SERVER['SCRIPT_NAME'], "korkolasku.php") === FALSE) ? 1 : 0;
 
 $erapaiva_chk   =  ($maksuehtorow['kateinen'] == '' and empty($maksuehtorow['jv'])
   and mysql_num_rows($veloitus_result) > 0
@@ -102,6 +93,30 @@ $erapaiva_chk   =  ($maksuehtorow['kateinen'] == '' and empty($maksuehtorow['jv'
     or (in_array($yhtiorow["erapaivan_ylityksen_toimenpide"], array("E", "F"))
       and ($kukarow["extranet"] != ""
         or $tilausvalmiskutsuja != "TILAUSMYYNTI")))) ? 1 : 0;
+
+// tarkistetaan ettei kyseess‰ ole hyvitys
+if ($luottoraja_chk or $erapaiva_chk) {
+  
+  $query_ale_lisa = generoi_alekentta('M');
+
+  $query = "SELECT SUM(
+            tilausrivi.hinta * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}
+            ) kaikkiyhteensa_chk
+            FROM tilausrivi
+            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+            AND tilausrivi.tyyppi != 'D'
+            AND tilausrivi.var != 'P'
+            AND tilausrivi.otunnus = '{$laskurow['tunnus']}'";
+  $chk_kaikkiyhteensa_res = pupe_query($query);
+  $chk_kaikkiyhteensa_row = mysql_fetch_assoc($chk_kaikkiyhteensa_res);
+
+  // nollataan luottoraja_chk ja er‰p‰iv‰_chk hyvityksiss‰, koska hyvitykset saa menn‰ l‰pi
+  // luottorajan ja er‰p‰iv‰n ylityksen tarkistuksesta
+  if ($chk_kaikkiyhteensa_row['kaikkiyhteensa_chk'] < 0) {
+    $luottoraja_chk = 0;
+    $erapaiva_chk = 0;
+  }
+}
 
 if ($luottoraja_chk or $erapaiva_chk) {
 
@@ -198,6 +213,9 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
       $alatila = "F";
     }
   }
+  elseif ($toim == "REKLAMAATIO") {
+    $alatila = "";
+  }
   else {
 
     // laitetaan tilaan Odottaa asiakkaan suoritusta tai kesken
@@ -254,10 +272,20 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
     $errortext .= t("Asiakkaalla on yli %s pv sitten er‰‰ntyneit‰ laskuja", $kukarow['kieli'], $yhtiorow['erapaivan_ylityksen_raja']) . ". ";
   }
 
-  echo "<font class='error'>" . $errortext . t("Tilausta ei merkit‰ valmiiksi"), ".</font><br/><br/>";
-
   // Laitetaan lopetus tyhj‰ksi, niin ei refreshata ruutua jos tultiin muokkauksesta tms.
   $lopetus = "";
+
+  if ($toim == "REKLAMAATIO") {
+    $tee        = '';
+    $tilausnumero    = '';
+    $laskurow      = '';
+    $kukarow['kesken']  = '';
+
+    echo "<font class='error'>" . $errortext . t("Reklamaatiota ei merkit‰ valmiiksi"), ".</font><br/><br/>";
+  }
+  else {
+    echo "<font class='error'>" . $errortext . t("Tilausta ei merkit‰ valmiiksi"), ".</font><br/><br/>";
+  }
 }
 elseif ($tilausvalmis_asiakas_row['myyntikielto'] == 'K') {
   $query = "UPDATE lasku SET
@@ -351,6 +379,35 @@ elseif ($laskurow["tila"] == 'T') {
             and otunnus = '$laskurow[tunnus]'
             and tyyppi  in ('L','T')";
   $result = pupe_query($query);
+}
+elseif ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $tee == "ODOTTAA" and $yhtiorow['reklamaation_kasittely'] == 'U') {
+
+  // Reklamaatio p‰ivitet‰‰n tilaan 'odottaa tuotteita'
+  $query = "UPDATE lasku set
+            alatila     = 'A'
+            WHERE yhtio = '$kukarow[yhtio]'
+            AND tunnus  = '$tilausnumero'
+            AND tila    = 'C'";
+  $result = pupe_query($query);
+
+  $query  = "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and kesken = '$tilausnumero'";
+  $result = pupe_query($query);
+
+  if ($laskurow['tilaustyyppi'] == 'U') {
+    echo "<font class='message'>".t("Takuu: %s siirretty odottamaan tuotteita", '', $tilausnumero).".</font><br><br>";
+  }
+  else {
+    echo "<font class='message'>".t("Reklamaatio: %s siirretty odottamaan tuotteita", '', $tilausnumero).".</font><br><br>";
+  }
+
+  $tee        = '';
+  $tilausnumero    = '';
+  $laskurow      = '';
+  $kukarow['kesken']  = '';
+
+  if ($lopetus != '') {
+    lopetus($lopetus, "META");
+  }
 }
 else {
   // T‰ss‰ on normaalit tilaukset

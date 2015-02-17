@@ -2090,32 +2090,10 @@ if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $tee == "LEPAA" an
 }
 
 if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $tee == "ODOTTAA" and $yhtiorow['reklamaation_kasittely'] == 'U') {
-  // Reklamaatio p‰ivitet‰‰n tilaan 'odottaa tuotteita'
-  $query = "UPDATE lasku set
-            alatila     = 'A'
-            WHERE yhtio = '$kukarow[yhtio]'
-            AND tunnus  = '$tilausnumero'
-            AND tila    = 'C'";
-  $result = pupe_query($query);
+  $tilausvalmiskutsuja = "TILAUSMYYNTI";
 
-  $query  = "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and kesken = '$tilausnumero'";
-  $result = pupe_query($query);
-
-  if ($laskurow['tilaustyyppi'] == 'U') {
-    echo "<font class='message'>".t("Takuu: %s siirretty odottamaan tuotteita", '', $tilausnumero).".</font><br><br>";
-  }
-  else {
-    echo "<font class='message'>".t("Reklamaatio: %s siirretty odottamaan tuotteita", '', $tilausnumero).".</font><br><br>";
-  }
-
-  $tee        = '';
-  $tilausnumero    = '';
-  $laskurow      = '';
-  $kukarow['kesken']  = '';
-
-  if ($kukarow["extranet"] == "" and $lopetus != '') {
-    lopetus($lopetus, "META");
-  }
+  // tulostetaan l‰hetteet ja tilausvahvistukset tai sis‰inen lasku..
+  require "tilaus-valmis.inc";
 }
 
 if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
@@ -5222,6 +5200,7 @@ if ($tee == '') {
 
   $_asiakas = ($laskurow['liitostunnus'] > 0);
   $_mika_toim = in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "ENNAKKO", "EXTENNAKKO"));
+  $_mika_toim = ($_mika_toim and $laskurow['clearing'] != 'HYVITYS');
 
   $_luottoraja_ylivito = false;
 
@@ -10014,6 +9993,7 @@ if ($tee == '') {
                 <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
                 <input type='hidden' name='projektilla' value='$projektilla'>
                 <input type='hidden' name='tilausnumero' value='$tilausnumero'>
+                <input type='hidden' name='kaikkiyhteensa' value='$kaikkiyhteensa'>
                 <input type='hidden' name='mista' value = '$mista'>
                 <input type='hidden' name='orig_tila' value='$orig_tila'>
                 <input type='hidden' name='orig_alatila' value='$orig_alatila'>";

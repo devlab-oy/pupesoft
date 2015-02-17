@@ -9856,7 +9856,7 @@ if ($tee == '') {
         }
 
         if ($yhtiorow['lahetteen_tulostustapa'] == 'I' and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "REKLAMAATIO"))
-          and (($laskurow['tila'] == 'N' and $laskurow['alatila'] != '') or ($laskurow['tila'] == 'C' and $laskurow['alatila'] != ''))) {
+          and (($laskurow['tila'] == 'N' and $laskurow['alatila'] == '') or ($laskurow['tila'] == 'C' and $laskurow['alatila'] == ''))) {
           echo "<br />";
           echo "<br />";
           echo t("Tulosta lähete"),": ";

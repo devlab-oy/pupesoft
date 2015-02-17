@@ -133,7 +133,7 @@ if (!function_exists("onkokaikkivalmistettu")) {
 
     //katotaan onko enää mitään valmistettavaa
     foreach ($valmkpllat as $rivitunnus => $tuoteno) {
-       //Haetaan tilausrivi
+      //Haetaan tilausrivi
       $query = "SELECT otunnus, uusiotunnus
                 FROM tilausrivi
                 WHERE yhtio = '$kukarow[yhtio]'

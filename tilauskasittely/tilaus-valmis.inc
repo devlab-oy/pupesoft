@@ -96,7 +96,7 @@ $erapaiva_chk   =  ($maksuehtorow['kateinen'] == '' and empty($maksuehtorow['jv'
 
 // tarkistetaan ettei kyseessä ole hyvitys
 if ($luottoraja_chk or $erapaiva_chk) {
-  
+
   $query_ale_lisa = generoi_alekentta('M');
 
   $query = "SELECT SUM(
@@ -1156,26 +1156,28 @@ else {
           sahkoinen_lahete($laskurow);
         }
 
-        if ($toim != "REKLAMAATIO") {
+        if ($toim != "REKLAMAATIO" and !empty($tulosta_kerayslista_chkbx)) {
           // Tulostetaan keräyslista
           $tilausnumeroita = $laskurow["tunnus"];
           require "tilaus-valmis-tulostus.inc";
         }
 
-        // Tulostetaan lähete
-        $params = array(
-          'laskurow'          => $laskurow,
-          'sellahetetyyppi'       => "",
-          'extranet_tilausvahvistus'   => "",
-          'naytetaanko_rivihinta'    => "",
-          'tee'            => "",
-          'toim'            => $toim,
-          'komento'           => $komento,
-          'lahetekpl'          => "",
-          'kieli'           => ""
-        );
+        if (!empty($tulosta_lahete_chkbx)) {
+          // Tulostetaan lähete
+          $params = array(
+            'laskurow'          => $laskurow,
+            'sellahetetyyppi'       => "",
+            'extranet_tilausvahvistus'   => "",
+            'naytetaanko_rivihinta'    => "",
+            'tee'            => "",
+            'toim'            => $toim,
+            'komento'           => $komento,
+            'lahetekpl'          => "",
+            'kieli'           => ""
+          );
 
-        pupesoft_tulosta_lahete($params);
+          pupesoft_tulosta_lahete($params);
+        }
 
         // Jos tehdaspalautus
         if (file_exists("$tilausvalmis_asiakas_row[toimitusvahvistus]") and $tilausvalmis_asiakas_row["toimitusvahvistus"] == "editilaus_out_futur.inc") {

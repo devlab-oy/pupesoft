@@ -9855,6 +9855,16 @@ if ($tee == '') {
           echo "<input type='submit' name='tee_osto' value='$otsikko ".t("valmis")." $lisateksti' $tilausjavalisa> ";
         }
 
+        if ($yhtiorow['lahetteen_tulostustapa'] == 'I' and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "REKLAMAATIO"))) {
+          echo "<br />";
+          echo "<br />";
+          echo t("Tulosta lähete"),": ";
+          echo "<input type='checkbox' name='tulosta_lahete_chkbx' checked />";
+          echo "<br />";
+          echo t("Tulosta keräyslista"),": ";
+          echo "<input type='checkbox' name='tulosta_kerayslista_chkbx' checked />";
+        }
+
         if ($yhtiorow['lahetteen_tulostustapa'] == "I" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "REKLAMAATIO")) and
           (
             ($yhtiorow['lahetteen_tulostustapa'] == "I" and (($laskurow['tila'] == 'N' and $laskurow['alatila'] != '') or ($laskurow['tila'] == 'C' and $laskurow['alatila'] != ''))) or

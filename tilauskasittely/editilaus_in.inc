@@ -108,7 +108,7 @@ if (!function_exists('hae_erikoiskaupan_parametrit')) {
   function hae_erikoiskaupan_parametrit($storename, $verkkokauppa_erikoiskasittely) {
 
     foreach ($verkkokauppa_erikoiskasittely as $sp) {
-      if (strpos($storename, $sp[0])) {
+      if (strpos($storename, $sp[0]) !== false) {
         return $sp;
       }
     }
@@ -1294,14 +1294,49 @@ while ($tietue = fgets($fd)) {
 
       if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
         and count($verkkokauppa_erikoiskasittely) > 0) {
-
-        list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa, $editilaus_myyja) = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+        list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa, $editilaus_myyja, 
+          $vaihtoehtoinen_ovt) = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+        
         // Jos löytyy erikoiskäsittely niin näytetään se myös käyttöliittymässä
         if (isset($nimi) and !empty($nimi)) {
           $edi_ulos .= t("Tilauksen erikoiskäsittely")."-> {$nimi},
               ".t("tilaustyyppi").": {$editilaus_tilaustyyppi},
               ".t("tilaustyyppilisä").": {$tilaustyyppilisa},
               ".t("myyjänumero").": {$editilaus_myyja} \n\n";
+        }
+        // Jos erikoskäsittelyyn on määritelty eri yhtiö tälle tilaukselle niin päivitetään tiedot
+        if (isset($vaihtoehtoinen_ovt) and !empty($vaihtoehtoinen_ovt)) {
+          $edi_ulos .= t("Käännetään tilaus yritykselle")." '$vaihtoehtoinen_ovt' ";
+
+          $query = "SELECT * FROM yhtio WHERE ovttunnus = '$vaihtoehtoinen_ovt' and ovttunnus != ''";
+          $result = pupe_query($query);
+
+          if (mysql_num_rows($result) != 1) {
+            $edi_ulos .= "\n".t("Vastaanottavaa yritystä ei löydy tunnuksella")." '$vaihtoehtoinen_ovt'\n";
+            break;
+          }
+
+          $yhtiorow = mysql_fetch_assoc($result);
+          $yhtiorow = hae_yhtion_parametrit($yhtiorow["yhtio"]);
+
+          // Jos ajetaan komentoriviltä, niin haetaan kukarow
+          if ($php_cli) {
+            $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
+
+            // Komentoriviltä ku ajetaan, niin ei haluta posteja admin-käyttäjälle
+            $kukarow["eposti"] = "";
+          }
+
+          $kukarow['yhtio'] = $yhtiorow['yhtio']; // Tämä on vaarallista, mutta tätä ilman ei mikän toimi!
+          $kukarow['kuka']  = $edi_laatija;
+
+          // nollataan argv ja laitetaan ensimmäiseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
+          $argv       = array();
+          $argv[0]    = "";
+          $argv[1]    = $kukarow["yhtio"];
+          $editil_cli = TRUE;
+
+          $edi_ulos .= "-> $yhtiorow[nimi] ($kukarow[yhtio])\n";
         }
       }
 

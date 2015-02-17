@@ -1156,13 +1156,21 @@ else {
           sahkoinen_lahete($laskurow);
         }
 
-        if ($toim != "REKLAMAATIO" and !empty($tulosta_kerayslista_chkbx)) {
+        $_kerayslista_chkbx = !empty($tulosta_kerayslista_chkbx);
+        $_kerayslista_chkbx = ($_kerayslista_chkbx and count($tulosta_kerayslista_chkbx) > 1);
+        $_kerayslista_chkbx = ($_kerayslista_chkbx or !isset($tulosta_kerayslista_chkbx));
+
+        if ($toim != "REKLAMAATIO" and $_kerayslista_chkbx) {
           // Tulostetaan keräyslista
           $tilausnumeroita = $laskurow["tunnus"];
           require "tilaus-valmis-tulostus.inc";
         }
 
-        if (!empty($tulosta_lahete_chkbx)) {
+        $_lahete_chkbx = !empty($tulosta_lahete_chkbx);
+        $_lahete_chkbx = ($_lahete_chkbx and count($tulosta_lahete_chkbx) > 1);
+        $_lahete_chkbx = ($_lahete_chkbx or !isset($tulosta_lahete_chkbx));
+
+        if ($_lahete_chkbx) {
           // Tulostetaan lähete
           $params = array(
             'laskurow'          => $laskurow,

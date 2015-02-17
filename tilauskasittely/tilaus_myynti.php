@@ -9860,10 +9860,12 @@ if ($tee == '') {
           echo "<br />";
           echo "<br />";
           echo t("Tulosta lähete"),": ";
-          echo "<input type='checkbox' name='tulosta_lahete_chkbx' checked />";
+          echo "<input type='hidden' name='tulosta_lahete_chkbx[]' value='default' />";
+          echo "<input type='checkbox' name='tulosta_lahete_chkbx[]' value='1' checked />";
           echo "<br />";
           echo t("Tulosta keräyslista"),": ";
-          echo "<input type='checkbox' name='tulosta_kerayslista_chkbx' checked />";
+          echo "<input type='hidden' name='tulosta_kerayslista_chkbx[]' value='default' />";
+          echo "<input type='checkbox' name='tulosta_kerayslista_chkbx[]' value='1' checked />";
         }
 
         if ($yhtiorow['lahetteen_tulostustapa'] == "I" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "REKLAMAATIO")) and

@@ -141,7 +141,7 @@ if (!function_exists("onkokaikkivalmistettu")) {
                 and tyyppi  in ('W','M')";
       $roxresult = pupe_query($query);
       $tilrivirow = mysql_fetch_assoc($roxresult);
-      
+
       //Katsotaan onko yht‰‰n valmistamatonta rivi‰ t‰ll‰ tilauksella/jobilla
       $query = "SELECT tunnus
                 FROM tilausrivi

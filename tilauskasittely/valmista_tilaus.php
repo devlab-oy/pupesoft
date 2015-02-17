@@ -133,6 +133,15 @@ if (!function_exists("onkokaikkivalmistettu")) {
 
     //katotaan onko en‰‰ mit‰‰n valmistettavaa
     foreach ($valmkpllat as $rivitunnus => $tuoteno) {
+       //Haetaan tilausrivi
+      $query = "SELECT otunnus, uusiotunnus
+                FROM tilausrivi
+                WHERE yhtio = '$kukarow[yhtio]'
+                and tunnus  = '{$rivitunnus}'
+                and tyyppi  in ('W','M')";
+      $roxresult = pupe_query($query);
+      $tilrivirow = mysql_fetch_assoc($roxresult);
+      
       //Katsotaan onko yht‰‰n valmistamatonta rivi‰ t‰ll‰ tilauksella/jobilla
       $query = "SELECT tunnus
                 FROM tilausrivi

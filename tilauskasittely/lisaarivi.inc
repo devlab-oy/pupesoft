@@ -2228,7 +2228,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               }
 
               $rivitunnus      = 0;
-              $kommentti       = "";
+              if ($toimittamatta == 0)  $kommentti = "";
               $tuotenimitys     = "";
               $tuotenimitys_force = "";
               $omalle_tilaukselle = "";

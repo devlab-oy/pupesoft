@@ -116,6 +116,54 @@ if (!function_exists('hae_erikoiskaupan_parametrit')) {
   }
 }
 
+if (!function_exists('hae_yhtiotiedot')) {
+  function hae_yhtiotiedot($tieto) {
+    global $yhtiorow, $kukarow, $edi_ulos, $php_cli;
+
+    $query = "SELECT * FROM yhtio WHERE ovttunnus = '$tieto' and ovttunnus != ''";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) != 1) {
+      // Kokeillaan tehdä ovttunnuksesta ytunnus
+      $tieto2 = substr($tieto, 4, 8);     // etunollilla
+      $tieto  = substr($tieto, 4, 8) * 1; // ilman etunollio
+
+      // Häkki Örumia varten
+      if ((int) $tieto == 0) $tieto = "20428100";
+
+      $query = "SELECT * FROM yhtio WHERE ytunnus in ('$tieto', '$tieto2') and ytunnus != ''";
+      $result = pupe_query($query);
+    }
+
+    if (mysql_num_rows($result) != 1) {
+      $edi_ulos .= "\n".t("Vastaanottavaa yritystä ei löydy tunnuksella")." '$tieto', '$tieto2', '$mailfile'\n";
+      break;
+    }
+
+    $yhtiorow = mysql_fetch_assoc($result);
+    $yhtiorow = hae_yhtion_parametrit($yhtiorow["yhtio"]);
+
+    // Jos ajetaan komentoriviltä, niin haetaan kukarow
+    if ($php_cli) {
+      $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
+
+      // Komentoriviltä ku ajetaan, niin ei haluta posteja admin-käyttäjälle
+      $kukarow["eposti"] = "";
+    }
+
+    $kukarow['yhtio'] = $yhtiorow['yhtio']; // Tämä on vaarallista, mutta tätä ilman ei mikän toimi!
+    $kukarow['kuka']  = $edi_laatija;
+
+    // nollataan argv ja laitetaan ensimmäiseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
+    $argv       = array();
+    $argv[0]    = "";
+    $argv[1]    = $kukarow["yhtio"];
+    $editil_cli = TRUE;
+
+    $edi_ulos .= "-> $yhtiorow[nimi] ($kukarow[yhtio])\n";
+  }
+}
+
 // nollataan kaikki laskun muuttujat (nämä samat pitää tehdä whilen lopussa)
 unset($arow);
 unset($arow_viite);
@@ -380,47 +428,7 @@ while ($tietue = fgets($fd)) {
 
     $edi_ulos .= t("Tilaus yritykselle")." '$tieto' ";
 
-    $query = "SELECT * FROM yhtio WHERE ovttunnus = '$tieto' and ovttunnus != ''";
-    $result = pupe_query($query);
-
-    if (mysql_num_rows($result) != 1) {
-      // Kokeillaan tehdä ovttunnuksesta ytunnus
-      $tieto2 = substr($tieto, 4, 8);     // etunollilla
-      $tieto  = substr($tieto, 4, 8) * 1; // ilman etunollio
-
-      // Häkki Örumia varten
-      if ((int) $tieto == 0) $tieto = "20428100";
-
-      $query = "SELECT * FROM yhtio WHERE ytunnus in ('$tieto', '$tieto2') and ytunnus != ''";
-      $result = pupe_query($query);
-    }
-
-    if (mysql_num_rows($result) != 1) {
-      $edi_ulos .= "\n".t("Vastaanottavaa yritystä ei löydy tunnuksella")." '$tieto', '$tieto2', '$mailfile'\n";
-      break;
-    }
-
-    $yhtiorow = mysql_fetch_assoc($result);
-    $yhtiorow = hae_yhtion_parametrit($yhtiorow["yhtio"]);
-
-    // Jos ajetaan komentoriviltä, niin haetaan kukarow
-    if ($php_cli) {
-      $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
-
-      // Komentoriviltä ku ajetaan, niin ei haluta posteja admin-käyttäjälle
-      $kukarow["eposti"] = "";
-    }
-
-    $kukarow['yhtio'] = $yhtiorow['yhtio']; // Tämä on vaarallista, mutta tätä ilman ei mikän toimi!
-    $kukarow['kuka']  = $edi_laatija;
-
-    // nollataan argv ja laitetaan ensimmäiseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
-    $argv       = array();
-    $argv[0]    = "";
-    $argv[1]    = $kukarow["yhtio"];
-    $editil_cli = TRUE;
-
-    $edi_ulos .= "-> $yhtiorow[nimi] ($kukarow[yhtio])\n";
+    hae_yhtiotiedot($tieto);
     break;
 
   case 'ONADBY_DO' :
@@ -1307,36 +1315,7 @@ while ($tietue = fgets($fd)) {
         // Jos erikoskäsittelyyn on määritelty eri yhtiö tälle tilaukselle niin päivitetään tiedot
         if (isset($vaihtoehtoinen_ovt) and !empty($vaihtoehtoinen_ovt)) {
           $edi_ulos .= t("Käännetään tilaus yritykselle")." '$vaihtoehtoinen_ovt' ";
-
-          $query = "SELECT * FROM yhtio WHERE ovttunnus = '$vaihtoehtoinen_ovt' and ovttunnus != ''";
-          $result = pupe_query($query);
-
-          if (mysql_num_rows($result) != 1) {
-            $edi_ulos .= "\n".t("Vastaanottavaa yritystä ei löydy tunnuksella")." '$vaihtoehtoinen_ovt'\n";
-            break;
-          }
-
-          $yhtiorow = mysql_fetch_assoc($result);
-          $yhtiorow = hae_yhtion_parametrit($yhtiorow["yhtio"]);
-
-          // Jos ajetaan komentoriviltä, niin haetaan kukarow
-          if ($php_cli) {
-            $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
-
-            // Komentoriviltä ku ajetaan, niin ei haluta posteja admin-käyttäjälle
-            $kukarow["eposti"] = "";
-          }
-
-          $kukarow['yhtio'] = $yhtiorow['yhtio']; // Tämä on vaarallista, mutta tätä ilman ei mikän toimi!
-          $kukarow['kuka']  = $edi_laatija;
-
-          // nollataan argv ja laitetaan ensimmäiseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
-          $argv       = array();
-          $argv[0]    = "";
-          $argv[1]    = $kukarow["yhtio"];
-          $editil_cli = TRUE;
-
-          $edi_ulos .= "-> $yhtiorow[nimi] ($kukarow[yhtio])\n";
+          hae_yhtiotiedot($vaihtoehtoinen_ovt);
         }
       }
 

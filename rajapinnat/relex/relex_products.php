@@ -710,19 +710,20 @@ while ($row = mysql_fetch_assoc($res)) {
     $parastoimittaja = $toimittajat_a[0];
 
     $relex_halvin_toimittaja = t_tuotteen_avainsanat($row, "RELEX_HALVIN_TOIMITTAJA");
+    $relex_halvin_toimittaja_check = ($relex_halvin_toimittaja != "RELEX_HALVIN_TOIMITTAJA");
 
     // jos halutaan päätoimittajaksi halvin
-    if ($relex_halvin_toimittaja) {
-
+    if ($relex_halvin_toimittaja_check) {
+      
       $_kulu = 1;
 
       // jos selite-kentässä numero, käytetään sitä ns ylimääräisenä kuluna halvimmalla toimittajalla
       if (!empty($relex_halvin_toimittaja) and is_numeric($relex_halvin_toimittaja)) {
-        $_kulu = 1 + ($relex_halvin_toimittaja / 100);
+        $_kulu += ($relex_halvin_toimittaja / 100);
       }
 
       array_multisort($toimittajat_a_hinta, SORT_ASC, $toimittajat_a);
-
+    
       // tarkistetaan onko halvin hinta yli 5% päätoimittajaa halvempi, jotta vaihto on kannattavaa
       if ($parastoimittaja['ostohinta_oletusvaluutta_netto'] > ($toimittajat_a[0]['ostohinta_oletusvaluutta_netto'] * $_kulu * 1.05)) {
         $parastoimittaja = $toimittajat_a[0];

@@ -674,7 +674,7 @@ while ($row = mysql_fetch_assoc($res)) {
       $ostohinta_netto = round($ostohinta_netto, 6);
       $alennukset = round((1 - $alennukset) * 100, 2);
 
-      echo "\n osthinnet: $ostohinta_netto - ost: $ostohinta - al: $alennukset - kulu: {$ttrow['oletus_kulupros']}\n";
+      echo "\nToim: {$ttrow['ytunnus']} ({$ttrow['toim_tuoteno']}) ostohintanetto: $ostohinta_netto - ostohinta: $ostohinta - ale: $alennukset - kulu: {$ttrow['oletus_kulupros']}";
 
       $ttrow['ostohinta_oletusvaluutta']        = $ostohinta;
       $ttrow['ostohinta_oletusvaluutta_netto']  = $ostohinta_netto;
@@ -713,13 +713,7 @@ while ($row = mysql_fetch_assoc($res)) {
 
     $relex_halvin_toimittaja = t_tuotteen_avainsanat($row, "RELEX_HALVIN_TOIMITTAJA");
     
-    echo "\n$relex_halvin_toimittaja\n";
-   /* 
-    $avainsana_query = "";
-    if (mysql_num_rows($avainsana_query) == 1) {
-      $valtrow = mysql_fetch_assoc($avainsana_query);
-    }
-    */
+    echo "\n\nHalvin toimittaja tägi tuotteella! Kulupros annettu: $relex_halvin_toimittaja\n";
 
     // jos halutaan päätoimittajaksi halvin
     if ($relex_halvin_toimittaja) {
@@ -731,15 +725,18 @@ while ($row = mysql_fetch_assoc($res)) {
         $_kulu = 1 + ($relex_halvin_toimittaja / 100);
       }
 
+      echo "käytetään kerrointa $_kulu";
+
       array_multisort($toimittajat_a_hinta, SORT_ASC, $toimittajat_a);
-    
-      echo "\n{$parastoimittaja['ostohinta_oletusvaluutta_netto']} > ({$toimittajat_a[0]['ostohinta_oletusvaluutta_netto']} * $_kulu)\n";
+      
+      echo "\nhalvin toimittaja {$toimittajat_a[0]['ytunnus']} ({$toimittajat_a[0]['toim_tuoteno']}):";
+      echo "\n{$parastoimittaja['ostohinta_oletusvaluutta_netto']} > ({$toimittajat_a[0]['ostohinta_oletusvaluutta_netto']} * $_kulu * 1.05 eli ".$toimittajat_a[0]['ostohinta_oletusvaluutta_netto'] * $_kulu * 1.05.")\n\n";
     
       // tarkistetaan onko halvin hinta yli 5% päätoimittajaa halvempi, jotta vaihto on kannattavaa
-      if ($parastoimittaja['ostohinta_oletusvaluutta_netto'] > ($toimittajat_a[0]['ostohinta_oletusvaluutta_netto'] * $_kulu)) {
+      if ($parastoimittaja['ostohinta_oletusvaluutta_netto'] > ($toimittajat_a[0]['ostohinta_oletusvaluutta_netto'] * $_kulu * 1.05)) {
         $parastoimittaja = $toimittajat_a[0];
-        echo "\nvaihdettiin halvempi toimittaja\n";
-      } 
+        echo "vaihdettiin halvempi toimittaja\n\n";
+      }
     }
   }
 

@@ -462,7 +462,7 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi .= "{$row['tullinimike1']};";
   $rivi .= "{$row['tullinimike2']};";
   $rivi .= "{$row['tullikohtelu']};";
-  
+
   if (empty($row['vakkoodi'])) {
     $vak_row['yk_nro'] = '';
   }
@@ -671,10 +671,8 @@ while ($row = mysql_fetch_assoc($res)) {
         $ostohinta_netto = $ostohinta_netto * $alennukset;
       }
 
-      $ostohinta_netto = round($ostohinta_netto, 6);
-      $alennukset = round((1 - $alennukset) * 100, 2);
-
-      echo "\nToim: {$ttrow['ytunnus']} ({$ttrow['toim_tuoteno']}) ostohintanetto: $ostohinta_netto - ostohinta: $ostohinta - ale: $alennukset - kulu: {$ttrow['oletus_kulupros']}";
+      $ostohinta_netto  = round($ostohinta_netto, 6);
+      $alennukset       = round((1 - $alennukset) * 100, 2);
 
       $ttrow['ostohinta_oletusvaluutta']        = $ostohinta;
       $ttrow['ostohinta_oletusvaluutta_netto']  = $ostohinta_netto;
@@ -712,12 +710,10 @@ while ($row = mysql_fetch_assoc($res)) {
     $parastoimittaja = $toimittajat_a[0];
 
     $relex_halvin_toimittaja = t_tuotteen_avainsanat($row, "RELEX_HALVIN_TOIMITTAJA");
-    
-    echo "\n\nHalvin toimittaja tägi tuotteella! Kulupros annettu: $relex_halvin_toimittaja\n";
 
     // jos halutaan päätoimittajaksi halvin
     if ($relex_halvin_toimittaja) {
-      
+
       $_kulu = 1;
 
       // jos selite-kentässä numero, käytetään sitä ns ylimääräisenä kuluna halvimmalla toimittajalla
@@ -725,17 +721,11 @@ while ($row = mysql_fetch_assoc($res)) {
         $_kulu = 1 + ($relex_halvin_toimittaja / 100);
       }
 
-      echo "käytetään kerrointa $_kulu";
-
       array_multisort($toimittajat_a_hinta, SORT_ASC, $toimittajat_a);
-      
-      echo "\nhalvin toimittaja {$toimittajat_a[0]['ytunnus']} ({$toimittajat_a[0]['toim_tuoteno']}):";
-      echo "\n{$parastoimittaja['ostohinta_oletusvaluutta_netto']} > ({$toimittajat_a[0]['ostohinta_oletusvaluutta_netto']} * $_kulu * 1.05 eli ".$toimittajat_a[0]['ostohinta_oletusvaluutta_netto'] * $_kulu * 1.05.")\n\n";
-    
+
       // tarkistetaan onko halvin hinta yli 5% päätoimittajaa halvempi, jotta vaihto on kannattavaa
       if ($parastoimittaja['ostohinta_oletusvaluutta_netto'] > ($toimittajat_a[0]['ostohinta_oletusvaluutta_netto'] * $_kulu * 1.05)) {
         $parastoimittaja = $toimittajat_a[0];
-        echo "vaihdettiin halvempi toimittaja\n\n";
       }
     }
   }

@@ -137,7 +137,7 @@ if (!function_exists('hae_yhtiotiedot')) {
 
     if (mysql_num_rows($result) != 1) {
       $edi_ulos .= "\n".t("Vastaanottavaa yritystä ei löydy tunnuksella")." '$tieto', '$tieto2', '$mailfile'\n";
-      break;
+      return;
     }
 
     $yhtiorow = mysql_fetch_assoc($result);

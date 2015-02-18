@@ -432,6 +432,9 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                         jaksotettu      = ''";
               $updre = pupe_query($query);
               $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
+              if ($tilrivirow['tunnus'] == $tilrivirow['perheid']) {
+                $isatunnus = $lisatty_tun;
+              }
 
               // Lisätään ostorivin lisätiedot
               $query = "INSERT INTO tilausrivin_lisatiedot
@@ -474,12 +477,12 @@ if (!function_exists("tilauksesta_ostotilaus")) {
 
             // SATULA-RUNKO case
             // jos tilausrivin_lisatiedot joinissa tilausrivin_lisatiedot.ohita_kerays != ''
-            if ($tilrivirow['rivitunnus'] == $tilrivirow['perheid'] and $tilrivirow['ohita_kerays'] != '') {
-              $perheid = $lisatty_tun;
+            if ($tilrivirow['rivitunnus'] == $tilrivirow['perheid']  and $isatunnus > 0) {
+              $perheid = $isatunnus;
 
               $query = "UPDATE tilausrivi
                         SET perheid = '{$perheid}'
-                        WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$perheid}'";
+                        WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$lisatty_tun}'";
               $perheres = pupe_query($query);
             }
           }

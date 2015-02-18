@@ -464,34 +464,6 @@ if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
   else {
     $task = 'anna_konttitiedot';
   }
-
-}
-
-if (isset($task) and $task == 'kuittaa_lahto') {
-
-  $lahtoajat = explode(".", $lahtopvm);
-
-  $lahtopaiva = $lahtoajat[0];
-  $lahtokuu = $lahtoajat[1];
-  $lahtovuosi = $lahtoajat[2];
-
-  if (!isset($lahtotunti)) {
-    $lahtotunti = '00';
-  }
-
-  if (!isset($lahtominuutti)) {
-    $lahtominuutti = '00';
-  }
-
-  $lahtoaika = $lahtovuosi.'-'.$lahtokuu.'-'.$lahtopaiva.' '.$lahtotunti.':'.$lahtominuutti.':00';
-
-  $parametrit = array(
-    'lahtoaika' => $lahtoaika,
-    'konttiviite' => $konttiviite
-    );
-
-  eu_lahtokuittaus($parametrit);
-  unset($task);
 }
 
 if (isset($task) and $task == 'laheta_satamavahvistus') {
@@ -563,7 +535,6 @@ if (isset($task) and $task == 'laheta_satamavahvistus') {
                   filetype        = 'text/plain',
                   kayttotarkoitus = 'satamavahvistus'";
         pupe_query($query);
-
       }
 
       $query = "UPDATE lasku SET
@@ -571,7 +542,6 @@ if (isset($task) and $task == 'laheta_satamavahvistus') {
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tunnus = '{$tunnus}'";
       pupe_query($query);
-
     }
 
     foreach ($parametrit['rullat'] as $rulla) {
@@ -591,7 +561,6 @@ if (isset($task) and $task == 'laheta_satamavahvistus') {
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tunnus = '{$rulla['tilausrivitunnus']}'";
       pupe_query($query);
-
     }
   }
   else{
@@ -762,12 +731,7 @@ if (isset($task) and ($task == 'tee_satamavahvistus' or $task == 'tee_lahtokuitt
       </script>
   ";
 
-  if ($task == 'tee_lahtokuittaus') {
-    $otsikko = t("EU:n sisäinen lähtökuittaus");
-  }
-  else {
-    $otsikko = t("Satamavahvistus");
-  }
+  $otsikko = t("Satamavahvistus");
 
   echo "<a href='toimitusten_seuranta.php?rajaus=Aktiiviset'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
   echo "<font class='head'>".$otsikko."</font><hr><br>";
@@ -802,22 +766,12 @@ if (isset($task) and ($task == 'tee_satamavahvistus' or $task == 'tee_lahtokuitt
   }
   echo "</select>";
 
-  if ($task == 'tee_lahtokuittaus') {
-    echo "
-    </td></tr>
-    <tr><th></th><td align='right'><input type='submit' value='". t("Kuittaa") ."' /></td></tr>
-    </table>
-    <input type='hidden' name='task' value='kuittaa_lahto' />
-    </form>";
-  }
-  else {
-    echo "
-    </td></tr>
-    <tr><th></th><td align='right'><input type='submit' value='". t("Lähetä satamavahvistus") ."' /></td></tr>
-    </table>
-    <input type='hidden' name='task' value='laheta_satamavahvistus' />
-    </form>";
-  }
+  echo "
+  </td></tr>
+  <tr><th></th><td align='right'><input type='submit' value='". t("Lähetä satamavahvistus") ."' /></td></tr>
+  </table>
+  <input type='hidden' name='task' value='laheta_satamavahvistus' />
+  </form>";
 }
 
 if (isset($task) and $task == 'hylky') {
@@ -1363,7 +1317,8 @@ if (!isset($task)) {
               group_concat(DISTINCT lasku.asiakkaan_tilausnumero SEPARATOR '<br>') AS tilaukset,
               llt.konttiviite,
               lasku.toimaika AS lahtoaika,
-              llt.rullamaara AS rullat
+              llt.rullamaara AS bookatut_rullat,
+              llt.konttimaara AS bookattu_konttimaara
               FROM lasku
               LEFT JOIN tilausrivi AS tr
                 ON tr.yhtio = lasku.yhtio
@@ -1385,11 +1340,14 @@ if (!isset($task)) {
               group_concat(DISTINCT lasku.asiakkaan_tilausnumero SEPARATOR '<br>') AS tilaukset,
               llt.konttiviite,
               lasku.toimaika AS lahtoaika,
+              llt.rullamaara AS bookatut_rullat,
               COUNT(ss.tunnus) AS rullat,
               SUM(ss.massa) AS paino,
               SUM(IF(trlt.sinettinumero != '', 1, 0)) AS sinetti_tilanne,
               SUM(IF(trlt.kontin_mrn != '', 1, 0)) AS mrn_tilanne,
-              group_concat(DISTINCT kontin_mrn) mrn_numerot
+              group_concat(DISTINCT kontin_mrn) mrn_numerot,
+              group_concat(DISTINCT trlt.konttinumero SEPARATOR '<br>') AS kontit,
+              llt.konttimaara AS bookattu_konttimaara
               FROM lasku
               JOIN tilausrivi AS tr
                 ON tr.yhtio = lasku.yhtio
@@ -1496,6 +1454,7 @@ if (!isset($task)) {
     echo "<th>".t("Tilaukset")."</th>";
     echo "<th>".t("Lähtöpäivä")."</th>";
     echo "<th>" . t("Rullat") ."</th>";
+    echo "<th>" . t("Kontit") ."</th>";
     echo "<th>" . t("Status") ."</th>";
     echo "</tr>";
 
@@ -1508,10 +1467,22 @@ if (!isset($task)) {
       echo "<td valign='top'>";
 
       if ($rajaus == 'Tulevat') {
-        echo $rivi['rullat'] . " kpl. (" . t("Ennakkoarvio") . ")";
+        echo $rivi['bookatut_rullat'] . " kpl. (" . t("Bookattu määrä") . ")";
       }
       else {
-        echo $rivi['rullat'] . " kpl. / " . (int) $rivi['paino'] . " kg.";
+        echo $rivi['rullat'] . " kpl. / " . (int) $rivi['paino'] . " kg.<br>";
+        echo $rivi['bookatut_rullat'] . " kpl. (" . t("Bookattu määrä") . ")";
+      }
+      echo "</td>";
+
+      echo "<td valign='top'>";
+
+      if (!empty($rivi['kontit'])) {
+        echo $rivi['kontit'] . '<br>';
+        echo $rivi['bookattu_konttimaara'] . " kpl. (" . t("Bookattu konttimäärä") . ")";
+      }
+      else {
+        echo $rivi['bookattu_konttimaara'] . " kpl. (" . t("Bookattu konttimäärä") . ")";
       }
 
       echo "</td>";
@@ -1530,10 +1501,12 @@ if (!isset($task)) {
         elseif ($rivi['sinetti_tilanne'] > 0 and $rivi['sinetti_tilanne'] < $rivi['rullat']) {
             $status = t("Kontitus kesken");
         }
+        elseif ($rivi['mrn_tilanne'] < $rivi['rullat']) {
+          $status = t("Odotetaan MRN-numeroa");
+        }
         elseif ($rivi['mrn_tilanne'] == $rivi['rullat']) {
           $status = t("Satamavahvistus lähettämättä");
         }
-
       }
       elseif ($rajaus == 'Toimitetut') {
         $status = t("Toimitettu");
@@ -1545,6 +1518,9 @@ if (!isset($task)) {
         else {
           $status = t("Rullat ei vielä varastossa");
         }
+      }
+      else {
+        $status = 'x';
       }
 
       echo "<td valign='top'>" . $status . "</td>";
@@ -2109,50 +2085,24 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
             echo "</div>";
           }
 
-          if ($kontti['mrn'] == 'EU') {
+          if ($kesken == 0 and $mrn_tullut and $tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
 
-            if ($kesken == 0 and $mrn_tullut and $tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
-
-              echo "<div style='text-align:center;margin:10px 0;'><button type='button' disabled>";
-              echo t("Lähtökuittaus tehty");
-              echo "</button>";
-            }
-            elseif ($kesken == 0 and $mrn_tullut) {
-
-              echo "
-                <div style='text-align:center;margin:10px 0;'>
-                <form method='post'>
-                <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />
-                <input type='hidden' name='matkakoodi' value='{$tilaus['matkakoodi']}' />
-                <input type='hidden' name='lahtopvm_arvio' value='{$tilaus['toimaika']}' />
-                <input type='hidden' name='task' value='tee_lahtokuittaus' />
-                <input type='submit' value='". t("Tee lähtökuittaus") ."' />
-                </form>
-                </div>";
-            }
-
+            echo "<div style='text-align:center;margin:10px 0;'><button type='button' disabled>";
+            echo t("Satamavahvistus lähetetty");
+            echo "</button>";
           }
-          else {
+          elseif ($kesken == 0 and $mrn_tullut) {
 
-            if ($kesken == 0 and $mrn_tullut and $tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
-
-              echo "<div style='text-align:center;margin:10px 0;'><button type='button' disabled>";
-              echo t("Satamavahvistus lähetetty");
-              echo "</button>";
-            }
-            elseif ($kesken == 0 and $mrn_tullut) {
-
-              echo "
-                <div style='text-align:center;margin:10px 0;'>
-                <form method='post'>
-                <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />
-                <input type='hidden' name='matkakoodi' value='{$tilaus['matkakoodi']}' />
-                <input type='hidden' name='lahtopvm_arvio' value='{$tilaus['toimaika']}' />
-                <input type='hidden' name='task' value='tee_satamavahvistus' />
-                <input type='submit' value='". t("Tee satamavahvistus") ."' />
-                </form>
-                </div>";
-            }
+            echo "
+              <div style='text-align:center;margin:10px 0;'>
+              <form method='post'>
+              <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />
+              <input type='hidden' name='matkakoodi' value='{$tilaus['matkakoodi']}' />
+              <input type='hidden' name='lahtopvm_arvio' value='{$tilaus['toimaika']}' />
+              <input type='hidden' name='task' value='tee_satamavahvistus' />
+              <input type='submit' value='". t("Tee satamavahvistus") ."' />
+              </form>
+              </div>";
           }
 
           if ($kesken == 0 and $mrn_tullut) {

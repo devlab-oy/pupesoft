@@ -13,6 +13,11 @@ $(document).ready(function() {
     var maksupaate = $('#maksupaate');
     var jaljella = $('#jaljella');
     var laskuriTee = $('#laskuriTee');
+    var erotus;
+    var kateisFormi = $('#kateisFormi');
+    var korttimaksu = $('#korttimaksu');
+    var kateinen = $('#kateinen');
+    var pyoristysSarake = $('#pyoristysSarake');
 
     dialogi.dialog({
       modal: true,
@@ -33,60 +38,48 @@ $(document).ready(function() {
           id: "hyvaksyKateinen",
           text: "Hyväksy (Enter)",
           disabled: 'disabled',
-          click: submitMaksupaate
+          click: function() {
+            kateisFormi.submit()
+          }
         }
       ]
     });
 
     $('#kateismaksunappi').on('click', function() {
+      var kateisFloat = parseFloat(kateinen.val());
+      var korttimaksuFloat = parseFloat(korttimaksu.val());
+
+      if (kateisFloat) {
+        annettu.val(korttimaksuFloat + kateisFloat);
+      }
+      else {
+        annettu.val(korttimaksuFloat);
+      }
+
+      paivitaLaskurinLuvut();
       dialogi.dialog("open");
     });
 
-    annettu.on('input', function() {
-      var annettuInt = Math.round(parseFloat(annettu.val()) * 100);
-      var jaljellaInt = Math.round(parseFloat(jaljella.text()) * 100);
-      var erotus = (annettuInt - jaljellaInt) / 100;
+    annettu.on('input', paivitaLaskurinLuvut);
 
-      var hyvaksyKateinen = $('#hyvaksyKateinen');
-
-      if (isNaN(erotus) || erotus < 0) {
-        kateinenKunnossa = false;
-        hyvaksyKateinen.button('option', 'disabled', true);
-      }
-      else {
-        kateinenKunnossa = true;
-        hyvaksyKateinen.button('option', 'disabled', false);
-      }
-
-      var takaisin = $('#takaisin');
-
-      if (isNaN(erotus)) {
-        takaisin.text("");
-      }
-      else {
-        takaisin.text(erotus);
-      }
-    });
-
-    $('#kateisFormi').on('submit', function(e) {
+    kateisFormi.on('submit', function(e) {
       e.preventDefault();
 
       if (kateinenKunnossa) {
         submitMaksupaate();
       }
+      else {
+        kateinen.val(annettu.val());
+        $('#kateistaAnnettu').val(annettu.val());
+        korttimaksu.val(Math.abs(erotus));
+        $('#pyoristysOtsikko').text('Maksettavaa jäljellä');
+        pyoristysSarake.text(Math.abs(erotus));
+        pyoristysSarake.attr('align', 'right');
+        dialogi.dialog("close");
+      }
     });
 
     $('#korttimaksunappi').on('click', maksaMaksupaatteella);
-
-    function submitMaksupaate() {
-      $('#kateinen').val(jaljella.text());
-      $('#kateistaAnnettu').val(annettu.val());
-      seka.val('kylla');
-      laskuriTee.val('VALMIS');
-      saaSubmittaa = true;
-
-      maksupaate.submit();
-    }
 
     $('#peruuta_viimeisin').click(function() {
       saaSubmittaa = true;
@@ -113,11 +106,48 @@ $(document).ready(function() {
       this.form.submit();
     });
 
+    function submitMaksupaate() {
+      kateinen.val(jaljella.text());
+      $('#kateistaAnnettu').val(annettu.val());
+      seka.val('kylla');
+      laskuriTee.val('VALMIS');
+      saaSubmittaa = true;
+
+      maksupaate.submit();
+    }
+
     function maksaMaksupaatteella() {
       seka.val('X');
       maksupaateTapahtuma.val('X');
       saaSubmittaa = true;
       maksupaate.submit();
+    }
+
+    function paivitaLaskurinLuvut() {
+      var annettuInt = Math.round(parseFloat(annettu.val()) * 100);
+      var jaljellaInt = Math.round(parseFloat(jaljella.text()) * 100);
+      var takaisin = $('#takaisin');
+      erotus = (annettuInt - jaljellaInt) / 100;
+
+      var hyvaksyKateinen = $('#hyvaksyKateinen');
+
+      if (isNaN(erotus)) {
+        takaisin.text("");
+        kateinenKunnossa = false;
+        hyvaksyKateinen.button('option', 'disabled', true);
+      }
+      else if (erotus < 0) {
+        takaisin.text(Math.abs(erotus));
+        kateinenKunnossa = false;
+        hyvaksyKateinen.button('option', 'disabled', false);
+        $('#takaisinTeksti').text("Kortille jää");
+      }
+      else {
+        takaisin.text(erotus);
+        kateinenKunnossa = true;
+        hyvaksyKateinen.button('option', 'disabled', false);
+        $('#takaisinTeksti').text("Takaisin");
+      }
     }
   })();
 

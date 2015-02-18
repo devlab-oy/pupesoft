@@ -786,7 +786,7 @@ if ((int) $kukarow["kesken"] > 0) {
   list($loytyy_maksutapahtumia, $maksettavaa_jaljella, $kateismaksu["luottokortti"],
     $kateismaksu["pankkikortti"]) = jaljella_oleva_maksupaatesumma();
 
-  if ($loytyy_maksutapahtumia and $maksettavaa_jaljella == 0 and
+  if ($loytyy_maksutapahtumia and ($maksettavaa_jaljella - $kateista_annettu) == 0 and
                                   ($kateismaksu["luottokortti"] > 0 or
                                    $kateismaksu["pankkikortti"] > 0)
   ) {
@@ -9281,6 +9281,8 @@ if ($tee == '') {
               list($loytyy_maksutapahtumia, $maksettavaa_jaljella, $kateismaksu["luottokortti"],
                 $kateismaksu["pankkikortti"]) = jaljella_oleva_maksupaatesumma();
 
+              $maksettavaa_jaljella = $maksettavaa_jaljella - $kateismaksu["kateinen"];
+
               if ($loytyy_maksutapahtumia) {
                 $pyoristys_otsikko = "Maksettavaa jäljellä";
                 $align = "align='right'";
@@ -9290,8 +9292,8 @@ if ($tee == '') {
                 $align = "";
               }
 
-              echo "  <th colspan='5'>".t($pyoristys_otsikko).":</th>
-                  <td class='spec' {$align}>
+              echo "  <th colspan='5' id='pyoristysOtsikko'>".t($pyoristys_otsikko).":</th>
+                  <td id='pyoristysSarake' class='spec' {$align}>
                   <form name='pyorista' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' autocomplete='off'>
                       <input type='hidden' name='tilausnumero' value='$tilausnumero'>
                       <input type='hidden' name='mista'     value = '$mista'>
@@ -10483,7 +10485,7 @@ function piirra_maksupaate_formi() {
   global $kukarow, $laskurow, $palvelin2, $tilauskaslisa, $tilausnumero, $mista, $kaikkiyhteensa,
          $valittu_kopio_tulostin, $kateinen, $kertakassa, $toim, $orig_tila, $orig_alatila,
          $korttimaksu, $maksettu_lkortilla, $maksettu_pkortilla, $maksettavaa_jaljella,
-         $korttimaksutapahtuman_status, $loytyy_maksutapahtumia;
+         $korttimaksutapahtuman_status, $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu;
 
   $query_maksuehto = "SELECT *
                       FROM maksuehto
@@ -10506,7 +10508,7 @@ function piirra_maksupaate_formi() {
               </li>
               <li class='text-medium'>" . t("Annettu") . ":</li>
               <li><input id='annettu' type='number' min='0.01' step='0.01' class='text-large'></li>
-              <li class='text-medium'>" . t("Takaisin") . ":</li>
+              <li id='takaisinTeksti' class='text-medium'>" . t("Takaisin") . ":</li>
               <li>
                 <span id='takaisin' class='text-large'></span>
                 <span class='text-large'>{$laskurow["valkoodi"]}</span>
@@ -10535,8 +10537,8 @@ function piirra_maksupaate_formi() {
   echo "<input type='hidden' name='toimitustapa' value='{$laskurow["toimitustapa"]}'>";
   echo "<input type='hidden' name='maksupaatetapahtuma' id='maksupaatetapahtuma' value=''>";
   echo "<input type='hidden' id='peruutus' name='peruutus' value>";
-  echo "<input type='hidden' name='kateismaksu[kateinen]' id='kateinen'>";
-  echo "<input type='hidden' name='kateista_annettu' id='kateistaAnnettu'>";
+  echo "<input type='hidden' name='kateismaksu[kateinen]' id='kateinen' value='{$kateismaksu["kateinen"]}'>";
+  echo "<input type='hidden' name='kateista_annettu' id='kateistaAnnettu' value='{$kateista_annettu}'>";
 
   echo "<table style='width: 100%; margin-top: 20px;'>";
   echo "<tr><td class='back'><font class='head'>" . t("Maksutapa") . "</font></td></tr>";

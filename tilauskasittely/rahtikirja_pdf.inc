@@ -459,18 +459,22 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
   }
 
   $rakir_i_kala = 510;
-  $astilnrot_rakir = '';
   
   //kollit
   for ($rakir_i = 0; $rakir_i < 100; $rakir_i++) {
 
     $pdf->draw_text(62, $rakir_i_kala, $lotsikot[$rakir_i], $firstpage, $kirj);
-    if ($astilnrot[$rakir_i] != '') $astilnrot_rakir = $astilnrot_rakir.$astilnrot[$rakir_i].", ";
+    
     $pdf->draw_text(143, $rakir_i_kala, $kollit[$rakir_i]."  ". $pakkaus[$rakir_i], $firstpage, $kirj);
     $pdf->draw_text(206, $rakir_i_kala, trim($pakkauskuvaus[$rakir_i]." ".$pakkauskuvaustark[$rakir_i]), $firstpage, $kirj);
 
     $pdf->draw_text(422, $rakir_i_kala, $kilot[$rakir_i], $firstpage, $kirj);
     $pdf->draw_text(486, $rakir_i_kala, $kuutiot[$rakir_i], $firstpage, $kirj);
+
+    if ($astilnrot[$rakir_i] != '')  {
+      $rakir_i_kala-= 10;
+      $pdf->draw_text(62, $rakir_i_kala, t("Astilnro").": ".$astilnrot[$rakir_i], $firstpage, $kirj);
+    }
 
     $alempiteksti = trim($vakit[$rakir_i]." ".$lisatiedot[$rakir_i]);
 
@@ -487,10 +491,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
       break;
     }
   }
-  if ($astilnrot_rakir != '') {
-    $astilnrot_rakir = substr($astilnrot_rakir, 0, -2);
-    $pdf->draw_text(62, $rakir_i_kala, t("Astilnro").": ".$astilnrot_rakir, $firstpage, $kirj);
-  }
+  
   //alarivi
   $pdf->draw_text(183, 404 , t("Kollit yht. Kolliantal tot."),          $firstpage, $norm);
   $pdf->draw_text(183, 390 , $kollityht,                      $firstpage, $kirj);

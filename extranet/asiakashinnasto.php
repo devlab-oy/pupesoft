@@ -118,7 +118,7 @@ else {
       $ryhmittelylisa = " JOIN tuotteen_avainsanat
                             ON tuotteen_avainsanat.yhtio = tuote.yhtio
                             AND tuotteen_avainsanat.tuoteno = tuote.tuoteno
-                            AND tuotteen_avainsanat.laji = 'hinnastoryhmä'
+                            AND tuotteen_avainsanat.laji = 'hinnastoryhmittely'
                           JOIN avainsana
                             ON avainsana.yhtio = tuote.yhtio
                             AND avainsana.kieli = '{$hinkieli}'
@@ -131,7 +131,7 @@ else {
     $tarkistu1 = "SELECT count(tunnus)
                   FROM tuotteen_avainsanat
                   WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND laji    = 'hinnastoryhmä'";
+                  AND laji    = 'hinnastoryhmittely'";
     $tarkistu1 = pupe_query($tarkistu1);
     $tarkistu1 = mysql_result($tarkistu1, 0);
 

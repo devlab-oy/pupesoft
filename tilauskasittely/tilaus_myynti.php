@@ -1834,6 +1834,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
       $tilausnumero    = '';
       $laskurow      = '';
       $kukarow['kesken']  = '';
+      $tila = '';
     }
 
     if ($kukarow["extranet"] != "") {

@@ -478,6 +478,33 @@ if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
 
 }
 
+if (isset($task) and $task == 'kuittaa_lahto') {
+
+  $lahtoajat = explode(".", $lahtopvm);
+
+  $lahtopaiva = $lahtoajat[0];
+  $lahtokuu = $lahtoajat[1];
+  $lahtovuosi = $lahtoajat[2];
+
+  if (!isset($lahtotunti)) {
+    $lahtotunti = '00';
+  }
+
+  if (!isset($lahtominuutti)) {
+    $lahtominuutti = '00';
+  }
+
+  $lahtoaika = $lahtovuosi.'-'.$lahtokuu.'-'.$lahtopaiva.' '.$lahtotunti.':'.$lahtominuutti.':00';
+
+  $parametrit = array(
+    'lahtoaika' => $lahtoaika,
+    'konttiviite' => $konttiviite
+    );
+
+  eu_lahtokuittaus($parametrit);
+  unset($task);
+}
+
 if (isset($task) and $task == 'laheta_satamavahvistus') {
 
   $parametrit = satamavahvistus_parametrit($konttiviite);
@@ -584,770 +611,6 @@ if (isset($task) and $task == 'laheta_satamavahvistus') {
 
   unset($task);
 }
-
-if (!isset($task)) {
-
-  echo "<font class='head'>".t("Toimitusten seuranta")."</font><hr><br>";
-
-  if (!isset($rajaus)) {
-    $rajaus = 'aktiiviset';
-  }
-
-  switch ($rajaus) {
-
-  case 'tulevat':
-
-    $query = "SELECT GROUP_CONCAT(DISTINCT lasku.tunnus)
-              FROM lasku
-              LEFT OUTER JOIN tilausrivi
-                ON tilausrivi.yhtio = lasku.yhtio
-                AND tilausrivi.otunnus = lasku.tunnus
-              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-              AND tilausrivi.tunnus IS NULL";
-    $result = pupe_query($query);
-    $rullattomat = mysql_result($result, 0);
-
-    $rajauslisa = " AND lasku.alatila != 'D' AND lasku.tunnus IN ({$rullattomat}) ";
-    $rajauslisa2 = "";
-    $disable1 = 'disabled';
-    break;
-
-  case 'aktiiviset':
-
-    $rajauslisa = " AND lasku.alatila != 'D' AND ss.sarjanumero IS NOT NULL ";
-    $disable2 = 'disabled';
-    break;
-
-  case 'kontitetut':
-
-    $query = "SELECT lasku.tunnus,
-              group_concat(tilausrivi.tunnus) AS rivitunnukset,
-              group_concat(DISTINCT IF(tilausrivi.laskutettu = '', 'kontittamatta', 'kontitettu')) AS tilanne
-              FROM lasku LEFT OUTER JOIN tilausrivi ON tilausrivi.otunnus = lasku.tunnus
-              WHERE lasku.yhtio = 'rplog' AND lasku.tilaustyyppi = 'N'
-              AND tilausrivi.tunnus IS NOT NULL
-              GROUP BY lasku.tunnus
-              HAVING tilanne = 'kontitettu'";
-    $result = pupe_query($query);
-
-    $kontitetut = array();
-
-    while ($lasku = mysql_fetch_assoc($result)) {
-      $kontitetut[] = $lasku['tunnus'];
-    }
-
-    $kontitetut = implode(",", $kontitetut);
-
-    $rajauslisa = " AND lasku.alatila != 'D' AND lasku.tunnus IN ({$kontitetut}) ";
-    $disable3 = 'disabled';
-    break;
-
-  case 'toimitetut':
-    $rajauslisa = " AND lasku.alatila = 'D' AND ss.sarjanumero IS NOT NULL ";
-    $disable4 = 'disabled';
-    break;
-
-  case 'kaikki':
-    $rajauslisa = '';
-    $disable5 = 'disabled';
-    break;
-
-  default:
-    $rajauslisa = '';
-    break;
-  }
-
-  echo t("Näytä");
-  echo "&nbsp;";
-  echo "<form method='post'>";
-  echo "<input type='hidden' name='rajaus' value='tulevat' />";
-  echo "<input type='submit' {$disable1} value='" .t("Tulevat") ."'>";
-  echo "</form>";
-  echo "&nbsp;";
-  echo "<form method='post'>";
-  echo "<input type='hidden' name='rajaus' value='aktiiviset' />";
-  echo "<input type='submit' {$disable2} value='" .t("Aktiiviset") ."'>";
-  echo "</form>";
-  echo "&nbsp;";
-  echo "<form method='post'>";
-  echo "<input type='hidden' name='rajaus' value='kontitetut' />";
-  echo "<input type='submit' {$disable3} value='" .t("Kontitetut") ."'>";
-  echo "</form>";
-  echo "&nbsp;";
-  echo "<form method='post'>";
-  echo "<input type='hidden' name='rajaus' value='toimitetut' />";
-  echo "<input type='submit' {$disable4} value='" .t("Toimitetut") ."'>";
-  echo "</form>";
-  echo "&nbsp;";
-  echo "<form method='post'>";
-  echo "<input type='hidden' name='rajaus' value='kaikki' />";
-  echo "<input type='submit' {$disable5} value='" .t("Kaikki") ."'>";
-  echo "</form><br><br>";
-
-  $query = "SELECT lasku.asiakkaan_tilausnumero,
-            lasku.sisviesti1 AS ohje,
-            laskun_lisatiedot.matkakoodi,
-            laskun_lisatiedot.konttiviite,
-            laskun_lisatiedot.konttimaara,
-            laskun_lisatiedot.matkatiedot,
-            laskun_lisatiedot.konttityyppi,
-            laskun_lisatiedot.satamavahvistus_pvm,
-            laskun_lisatiedot.rullamaara,
-            lasku.toimaika,
-            lasku.tila,
-            lasku.alatila,
-            lasku.tunnus,
-            trlt.konttinumero,
-            GROUP_CONCAT(DISTINCT trlt.asiakkaan_rivinumero) AS tilausrivit,
-            COUNT(tilausrivi.tunnus) AS rullat,
-            SUM(IF(trlt.sinettinumero != '', 1, 0)) AS kontti_vahvistettu,
-            SUM(IF(tilausrivi.var = 'P', 1, 0)) AS tulouttamatta,
-            SUM(IF(tilausrivi.keratty = '', 1, 0)) AS kontittamatta,
-            SUM(IF(tilausrivi.toimitettu = '', 1, 0)) AS toimittamatta,
-            SUM(IF(trlt.kontin_mrn = '', 1, 0)) AS mrn_vastaanottamatta,
-            SUM(IF(ss.lisatieto = 'Hylättävä', 1, 0)) AS hylattavat,
-            SUM(IF(ss.lisatieto = 'Hylätty', 1, 0)) AS hylatyt,
-            SUM(IF(ss.lisatieto = 'Lusattava', 1, 0)) AS lusattavat,
-            SUM(IF(ss.lisatieto = 'Lusattu', 1, 0)) AS lusatut,
-            SUM(IF(ss.lisatieto = 'Ylijaama', 1, 0)) AS ylijaama,
-            SUM(IF(ss.lisatieto = 'Siirretty', 1, 0)) AS siirretty
-            FROM lasku
-            JOIN laskun_lisatiedot
-              ON laskun_lisatiedot.yhtio = lasku.yhtio
-              AND laskun_lisatiedot.otunnus = lasku.tunnus
-            LEFT JOIN tilausrivi
-              ON tilausrivi.yhtio = lasku.yhtio
-              AND tilausrivi.otunnus = lasku.tunnus
-            LEFT JOIN tilausrivin_lisatiedot AS trlt
-              ON trlt.yhtio = lasku.yhtio
-              AND trlt.tilausrivitunnus = tilausrivi.tunnus
-            LEFT JOIN sarjanumeroseuranta AS ss
-              ON ss.yhtio = lasku.yhtio
-              AND ss.myyntirivitunnus = tilausrivi.tunnus
-            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND lasku.tilaustyyppi = 'N'
-            {$rajauslisa}
-            AND laskun_lisatiedot.konttiviite != ''
-            GROUP BY lasku.asiakkaan_tilausnumero, laskun_lisatiedot.konttiviite
-            ORDER BY toimaika, konttiviite";
-  $result = pupe_query($query);
-
-  $tilaukset = array();
-
-  $viitteet = array();
-
-  if (mysql_num_rows($result) > 0) {
-
-    while ($rivi = mysql_fetch_assoc($result)) {
-      $viitteet[] = $rivi['konttiviite'];
-      $tilaukset[$rivi['asiakkaan_tilausnumero'].$rivi['konttiviite']] = $rivi;
-    }
-
-    echo "<table>";
-    echo "<tr>";
-    echo "<th>".t("Tilauskoodi")."</th>";
-    echo "<th>".t("Matkakoodi")."</th>";
-    echo "<th>".t("Laiva")."</th>";
-    echo "<th>".t("Lähtöpäivä")."</th>";
-    echo "<th>".t("Konttiviite")."</th>";
-    echo "<th>".t("Rullien määrä")."</th>";
-    echo "<th>".t("Ohje")."</th>";
-    echo "<th>".t("Tapahtumat")."</th>";
-    echo "<th>".t("Kontit")."</th>";
-    echo "<th class='back'></th>";
-    echo "</tr>";
-
-    foreach ($tilaukset as $key => $tilaus) {
-
-      $kontit_sinetointivalmiit = false;
-
-      $query = "SELECT group_concat(otunnus)
-                FROM laskun_lisatiedot
-                WHERE yhtio = '{$yhtiorow['yhtio']}'
-                AND konttiviite = '{$tilaus['konttiviite']}'";
-      $result = pupe_query($query);
-      $konttiviitteen_alaiset_tilaukset = mysql_result($result, 0);
-
-      $query = "SELECT count(tilausrivi.tunnus) AS vahvistettu
-                FROM tilausrivi
-                JOIN tilausrivin_lisatiedot AS trlt
-                  ON trlt.yhtio = tilausrivi.yhtio
-                  AND trlt.tilausrivitunnus = tilausrivi.tunnus
-                WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
-                AND tilausrivi.otunnus IN ({$konttiviitteen_alaiset_tilaukset})
-                AND trlt.sinettinumero != ''";
-      $result = pupe_query($query);
-      $vahvistettu = mysql_result($result, 0);
-
-      if ($vahvistettu > 0) {
-        $kontit_sinetointivalmiit = true;
-      }
-
-      $poikkeukset = array();
-
-      $viitelasku = array_count_values($viitteet);
-      $tilauksia_viitteella = $viitelasku[$tilaus['konttiviite']];
-
-      if ($tilaus['konttiviite'] == 'bookkaukseton') {
-        $tilauksia_viitteella = 1;
-      }
-
-      $id = md5($tilaus['konttiviite']);
-
-      if (in_array($tilaus['konttiviite'], $kasitellyt_konttiviitteet)) {
-        $konttiviite_kasitelty = true;
-      }
-      else{
-       $konttiviite_kasitelty = false;
-      }
-
-      $query = "SELECT tunnus
-                FROM liitetiedostot
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND liitos = 'lasku'
-                AND liitostunnus = '{$tilaus['tunnus']}'
-                AND kayttotarkoitus = 'bookkaussanoma'";
-      $result = pupe_query($query);
-
-      $sanoma_numero = 1;
-
-      $tapahtumat = "";
-
-      while ($sanoma = mysql_fetch_assoc($result)) {
-        $tapahtumat .= "&bull; <a href='view.php?id={$sanoma['tunnus']}' target='_blank'>{$sanoma_numero}. bookkaussanoma</a> haettu<br>";
-        $sanoma_numero++;
-      }
-
-      echo "<tr>";
-
-      echo "<td valign='top'>";
-      echo $tilaus['asiakkaan_tilausnumero'];
-      echo "</td>";
-
-      if (!$konttiviite_kasitelty) {
-
-        echo "<td valign='top' rowspan='{$tilauksia_viitteella}'>";
-        echo $tilaus['matkakoodi'];
-        echo "</td>";
-      }
-
-      if (!$konttiviite_kasitelty) {
-
-        echo "<td valign='top' rowspan='{$tilauksia_viitteella}'>";
-
-        $matkatiedot = unserialize($tilaus['matkatiedot']);
-        $vanhat_tiedot = base64_encode($tilaus['matkatiedot']);
-
-        echo "<a style='cursor:pointer;' id='uusilaivanappi{$id}' class='uusilaivanappi'>";
-        echo $matkatiedot['transport_name'];
-        echo "</a>";
-
-        echo "<div style='display:none;' class='uusilaivaformi' id='uusilaivaformi{$id}'>";
-        echo "<form method='post' action='toimitusten_seuranta.php?rajaus={$rajaus}'>";
-        echo "<input type='hidden' name='task' value='laivamuutos' />";
-        echo "<input type='hidden' name='vanhat_tiedot' value='{$vanhat_tiedot}' />";
-        echo "<input type='hidden' name='konttiviite' ";
-        echo "value='{$tilaus['konttiviite']}' />";
-        echo "<input type='text' class='uusilaivainput' name='uusilaiva' style='width:100px' /><br>";
-        echo "<input type='submit' value='". t("Muuta") ."' />&nbsp;";
-        echo "<img src='{$palvelin2}pics/lullacons/stop.png' alt='Peru' title='Peru' class='uusilaivaperu' style='position:relative; top:4px;'>";
-        echo "</form></div>";
-        echo "</td>";
-
-        if ($tilaus['konttiviite'] != 'bookkaukseton') {
-          $kasitellyt_konttiviitteet[] = $tilaus['konttiviite'];
-        }
-      }
-
-      if (!$konttiviite_kasitelty) {
-        echo "<td valign='top' rowspan='{$tilauksia_viitteella}'>";
-
-        if ($tilaus['matkakoodi'] == 'bookkaukseton') {
-          # code...
-        }
-        elseif ($tilaus['satamavahvistus_pvm'] == '0000-00-00 00:00:00') {
-          echo date("j.n.Y", strtotime($tilaus['toimaika']));
-        }
-        else {
-          echo date("j.n.Y H:i", strtotime($tilaus['satamavahvistus_pvm']));
-        }
-        echo "</td>";
-      }
-
-      if (!$konttiviite_kasitelty) {
-
-        echo "<td valign='top' rowspan='{$tilauksia_viitteella}'>";
-        echo $tilaus['konttiviite'];
-        echo "</td>";
-      }
-
-      if ($tilaus['rullat'] == 0 and $tilaus['matkakoodi'] != 'bookkaukseton') {
-        $rullamaara = $tilaus['rullamaara'] . t(" kpl") . " (" . t("Ennakkoarvio") . ")";
-      }
-      else {
-
-        $rullamaara = $tilaus['rullat'] . t(" kpl");
-
-        if ($tilaus['matkakoodi'] != 'bookkaukseton') {
-          $rullamaara .= "<br>" . t("Ennakkoarvio: ") . $tilaus['rullamaara'] . t(" kpl");
-        }
-
-        $poikkeukset = array(
-          'odottaa hylkäystä' => $tilaus['hylattavat'],
-          'hylatty' => $tilaus['hylatyt'],
-          'odottaa lusausta' => $tilaus['lusattavat'],
-          'lusattu' => $tilaus['lusatut'],
-          'ylijäämä' => $tilaus['ylijaama'],
-          'siirretty' => $tilaus['siirretty']
-          );
-
-        if ($tilaus['tilausrivit'] == '') {
-          $tilaus['tilausrivit'] = 0;
-        }
-
-        $query = "SELECT tilausrivi.toimitettu, trlt.rahtikirja_id
-                  FROM tilausrivi
-                  JOIN tilausrivin_lisatiedot AS trlt
-                    ON trlt.yhtio = tilausrivi.yhtio
-                    AND trlt.tilausrivitunnus = tilausrivi.tunnus
-                  WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-                  AND tilausrivi.tyyppi = 'O'
-                  AND trlt.asiakkaan_rivinumero IN ({$tilaus['tilausrivit']})
-                  AND trlt.asiakkaan_tilausnumero = '{$tilaus['asiakkaan_tilausnumero']}'";
-        $result = pupe_query($query);
-
-        $kuitattu = $kuittaamatta = 0;
-        $rahtikirjat = array();
-
-        // katsotaan onko rahtikirja(t) kuitattu ja kuinka monta rahtikirjaa
-        while ($rulla = mysql_fetch_assoc($result)) {
-          if ($rulla['toimitettu'] == '' ) {
-            $kuittaamatta++;
-          }
-          else {
-            $kuitattu++;
-          }
-          $rahtikirjat[] = $rulla['rahtikirja_id'];
-        }
-
-        $rahtikirjat = array_count_values($rahtikirjat);
-        $rahtikirjat = count($rahtikirjat);
-
-        if ($rahtikirjat > 0) {
-          $tapahtumat .= "&bull; <a href='saapuva_rahti.php?tnum={$tilaus['asiakkaan_tilausnumero']}'>" . $rahtikirjat ." kpl rahtikirjasanomia</a> haettu<br>";
-        }
-
-        if ($kuittaamatta == 0) {
-          $tapahtumat .= "&bull; " .  t("Rahti kuitattu saapuneeksi") . "<br>";
-        }
-        elseif ($kuitattu > 0) {
-          $tapahtumat .= "&bull; " .  t("Osa rahdista kuitattu saapuneeksi") . "<br>";
-        }
-
-        if ($tilaus['tulouttamatta'] == 0) {
-
-          $tapahtumat .= "&bull; " .  t("Rullat viety varastoon") . "<br>";
-
-          if (($tilaus['kontittamatta'] - $tilaus['ylijaama'] - $tilaus['hylatyt']) == 0) {
-            $tapahtumat .= "&bull; " .  t("Rullat kontitettu") . "<br>";
-          }
-          elseif ($tilaus['kontittamatta'] < ($tilaus['rullat'] - $tilaus['ylijaama'] - $tilaus['hylatyt'])) {
-            $tapahtumat .= "&bull; " .  t("Osa rullista kontitettu") . "<br>";
-
-            $query = "SELECT group_concat(tilausrivi.tunnus) AS riveja
-                      FROM tilausrivi
-                      JOIN tilausrivin_lisatiedot AS trlt
-                        ON trlt.yhtio = tilausrivi.yhtio
-                        AND trlt.tilausrivitunnus = tilausrivi.tunnus
-                      JOIN sarjanumeroseuranta AS ss
-                        ON ss.yhtio = tilausrivi.yhtio
-                        AND ss.myyntirivitunnus = tilausrivi.tunnus
-                      WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
-                      AND tilausrivi.otunnus IN ({$konttiviitteen_alaiset_tilaukset})
-                      AND trlt.sinettinumero != ''
-                      AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusaus')";
-            $result = pupe_query($query);
-
-            if (mysql_num_rows($result) > 0) {
-              $konttiviitteesta_vahvistettu = mysql_result($result, 0);
-            }
-            else{
-              $konttiviitteesta_vahvistettu = false;
-            }
-
-          }
-
-          if (($tilaus['toimittamatta'] - $tilaus['ylijaama'] - $tilaus['hylatyt']) == 0) {
-            $tapahtumat .= "&bull; " .  t("Kontit sinetöity") . "<br>";
-          }
-          elseif ($tilaus['toimittamatta'] < $tilaus['rullat']) {
-            $tapahtumat .= "&bull; " .  t("Osa konteista sinetöity") . "<br>";
-          }
-
-         if (($tilaus['mrn_vastaanottamatta'] - $tilaus['ylijaama'] - $tilaus['hylatyt']) == 0) {
-            $tapahtumat .= "&bull; " .  t("MRN-numerot vastaanotettu") . "<br>";
-          }
-          elseif ($tilaus['mrn_vastaanottamatta']  < $tilaus['rullat']) {
-           $tapahtumat .= "&bull; " .  t("Osa MRN-numeroista vastaanotettu") . "<br>";
-          }
-
-        }
-        elseif ($tilaus['tulouttamatta'] < $tilaus['rullat']) {
-          $tapahtumat .= "&bull; " .  t("Osa rullista viety varastoon") . "<br>";
-        }
-      }
-
-      echo "<td valign='top' align='center'>";
-      echo $rullamaara;
-
-      if (array_sum($poikkeukset) > 0) {
-        echo "<br>Joista:";
-        echo "<div style='text-align:left'>";
-
-        foreach ($poikkeukset as $poikkeus => $kpl) {
-          if ($kpl > 0) {
-
-            switch ($poikkeus) {
-              case 'odottaa hylkäystä':
-
-                echo "<form method='post' name='hylkyform'>";
-                echo "<input type='hidden' name='task' value='hylky' />";
-                echo "<input type='hidden' name='tilausnumero' ";
-                echo "value='{$tilaus['asiakkaan_tilausnumero']}' />";
-                echo "</form>";
-
-                echo "&bull; <a style='cursor:pointer; text-decoration:underline;' ";
-                echo "onclick='document.forms[\"hylkyform\"].submit();'>";
-                echo $kpl . " " . $poikkeus . "</a><br>";
-
-                break;
-
-              case 'odottaa lusausta':
-
-                echo "<form method='post' name='lusausform'>";
-                echo "<input type='hidden' name='task' value='lusaus' />";
-                echo "<input type='hidden' name='tilausnumero' ";
-                echo "value='{$tilaus['asiakkaan_tilausnumero']}' />";
-                echo "</form>";
-
-                echo "&bull; <a style='cursor:pointer; text-decoration:underline;' ";
-                echo "onclick='document.forms[\"lusausform\"].submit();'>";
-                echo $kpl . " " . $poikkeus . "</a><br>";
-
-                break;
-
-              default:
-                echo "&bull; " . $kpl . " " . $poikkeus . "<br>";
-                break;
-            }
-          }
-        }
-        echo "</div>";
-      }
-
-      echo "</td>";
-
-      if (!$konttiviite_kasitelty) {
-        echo "<td valign='top' style='width:100px;' rowspan='{$tilauksia_viitteella}'>";
-        echo $tilaus['ohje'];
-        echo "</td>";
-      }
-
-      echo "<td valign='top'>";
-      echo $tapahtumat;
-      echo "</td>";
-
-      if ($konttiviite_kasitelty) {
-        //echo "<td valign='top' align='center'>";
-        //echo t("Sama konttiviite kuin yllä.");
-        //echo "</td>";
-      }
-      elseif ($tilaus['matkakoodi'] == 'bookkaukseton') {
-        echo "<td valign='top' rowspan='{$tilauksia_viitteella}' align='center'>";
-        echo t("Ei tietoa");
-        echo "</td>";
-      }
-      elseif (!$kontit_sinetointivalmiit or $tilaus['rullat'] == 0) {
-        echo "<td valign='top' rowspan='{$tilauksia_viitteella}' align='center'>";
-        echo $tilaus['konttimaara'] . " kpl (ennakkoarvio)";
-        echo "</td>";
-      }
-      else {
-        echo "<td valign='top' rowspan='{$tilauksia_viitteella}' align='right'>";
-
-        $kontit = kontitustiedot($tilaus['konttiviite']);
-
-        if ($kontit) {
-
-          $kesken = 0;
-
-          asort($kontit);
-
-          $v = $kontit[''];
-          unset($kontit['']);
-
-          if (count($v) > 0) {
-            $kontit[] = $v;
-          }
-
-          $mrn_tullut = true;
-
-          foreach ($kontit as $konttinumero => $kontti) {
-
-            if ($kontti['konttinumero'] == '') {
-              echo "<div style='margin:0 5px 8px 5px; padding:5px; border-bottom:1px solid grey;'>";
-              echo t("Konttiviitteestä "), $kontti['kpl'], t(" rullaa kontittamatta");
-              echo "</div>";
-              $kesken++;
-              continue;
-            }
-
-            $temp_array = explode("/", $konttinumero);
-            $_konttinumero = $konttinumero;
-
-            echo "<div style='margin:0 5px 8px 5px; padding:5px; border-bottom:1px solid grey;'>";
-            echo "{$_konttinumero}. ({$kontti['kpl']} kpl, {$kontti['paino']} kg)&nbsp;&nbsp;";
-
-            if ($kontti['sinettinumero'] == '') {
-              echo t("Kontitusta ei ole vielä vahvistettu"), '<br>';
-              $kesken++;
-            }
-            elseif ($kontti['sinettinumero'] == 'X') {
-              echo "<form method='post'>";
-              echo "<input type='hidden' name='task' value='anna_konttitiedot' />";
-              echo "<input type='hidden' name='temp_konttinumero' value='{$konttinumero}' />";
-              echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
-              echo "<input type='hidden' name='rullia' value='{$kontti['kpl']}' />";
-              echo "<input type='hidden' name='sinetoitava_konttiviite' value='{$tilaus['konttiviite']}' />";
-              echo "<input type='submit' value='". t("Sinetöi") ."' />";
-              echo "</form>";
-              $kesken++;
-            }
-            elseif ($tilaus['satamavahvistus_pvm'] == '0000-00-00 00:00:00') {
-              echo "<button type='button' disabled>" . t("Sinetöity") . "</button>";
-              echo "<form method='post'>";
-              echo "<input type='hidden' name='task' value='korjaa_konttitiedot' />";
-              echo "<input type='hidden' name='temp_konttinumero' value='{$konttinumero}' />";
-              echo "<input type='hidden' name='konttinumero' value='{$kontti['konttinumero']}' />";
-              echo "<input type='hidden' name='sinettinumero' value='{$kontti['sinettinumero']}' />";
-              echo "<input type='hidden' name='taara' value='{$kontti['taara']}' />";
-              echo "<input type='hidden' name='isokoodi' value='{$kontti['isokoodi']}' />";
-              echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
-              echo "<input type='hidden' name='rullia' value='{$kontti['kpl']}' />";
-              echo "<input type='hidden' name='sinetoitava_konttiviite' value='{$tilaus['konttiviite']}' />";
-              echo "<input type='submit' value='". t("Korjaa") ."' />";
-              echo "</form>";
-            }
-            else {
-              echo "<button type='button' disabled>" . t("Sinetöity") . "</button>";
-            }
-
-            if ($kontti['sinettinumero'] != '') {
-
-              js_openFormInNewWindow();
-
-              $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
-              $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
-
-              echo "&nbsp;<form method='post' id='hae_pakkalista{$_konttinumero}'>";
-              echo "<input type='hidden' name='task' value='hae_pakkalista' />";
-              echo "<input type='hidden' name='pakkalista' value='{$kontti['pakkalista']}' />";
-              echo "<input type='hidden' name='tee' value='XXX' />";
-              echo "<input type='hidden' name='konttinumero' value='{$konttinumero}' />";
-              echo "<input type='hidden' name='sinettinumero' value='{$kontti['sinettinumero']}' />";
-              echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
-              echo "<input type='hidden' name='session' value='{$session}' />";
-              echo "<input type='hidden' name='logo_url' value='{$logo_url}' />";
-              echo "<input type='hidden' name='taara' value='{$kontti['taara']}' />";
-              echo "<input type='hidden' name='kpl' value='{$kontti['kpl']}' />";
-              echo "<input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />";
-              echo "</form>";
-              echo "<button onClick=\"js_openFormInNewWindow('hae_pakkalista{$_konttinumero}', 'Pakkalista'); return false;\" />";
-              echo t("Pakkalista");
-              echo "</button>";
-
-              if ($kontti['mrn'] == 'EU') {
-
-                echo "<div style='text-align:center; margin:8px 0'>";
-                echo t("EU:n sisäinen tilaus");
-                echo "</div>";
-              }
-              elseif ($kontti['mrn'] != '') {
-
-                echo "<div style='text-align:center; margin:8px 0'>MRN: ";
-                echo "<input type='text'  value='{$kontti['mrn']}' readonly>";
-                echo "</div>";
-              }
-              else {
-
-                echo "<div style='text-align:center; margin:8px 0'>";
-                echo t("Odotetaan MRN-numeroa");
-                echo "</div>";
-
-                $mrn_tullut = false;
-              }
-            }
-            echo "</div>";
-          }
-
-          if ($kesken == 0 and !$mrn_tullut) {
-
-            echo "<div style='text-align:center; margin:8px 0'>";
-            echo "<form method='post' action='toimitusten_seuranta.php?rajaus={$rajaus}'>";
-            echo "<input type='hidden' name='task' value='eu_tilaus' />";
-            echo "<input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />";
-            echo "<input type='submit' value='". t("EU-tilaus") ."' />&nbsp;";
-            echo "</form>";
-            echo "</div>";
-          }
-
-          if ($kesken == 0 and $mrn_tullut and $tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
-
-            echo "<div style='text-align:center;margin:10px 0;'><button type='button' disabled>";
-            echo t("Satamavahvistus lähetetty");
-            echo "</button>";
-          }
-          elseif ($kesken == 0 and $mrn_tullut) {
-
-            echo "
-              <div style='text-align:center;margin:10px 0;'>
-              <form method='post'>
-              <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />
-              <input type='hidden' name='matkakoodi' value='{$tilaus['matkakoodi']}' />
-              <input type='hidden' name='lahtopvm_arvio' value='{$tilaus['toimaika']}' />
-              <input type='hidden' name='task' value='tee_satamavahvistus' />
-              <input type='submit' value='". t("Tee satamavahvistus") ."' />
-              </form>
-              </div>";
-          }
-
-          if ($kesken == 0 and $mrn_tullut) {
-
-            $parametrit = lahtoilmoitus_parametrit($tilaus['konttiviite']);
-            $parametrit = serialize($parametrit);
-            $parametrit = base64_encode($parametrit);
-
-            $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
-            $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
-
-            echo "
-            <div style='text-align:center;margin:10px 0;'>
-            <form method='post' id='nayta_lahtoilmoitus{$id}'>
-            <input type='hidden' name='parametrit' value='{$parametrit}' />
-            <input type='hidden' name='task' value='nayta_lahtoilmoitus' />
-            <input type='hidden' name='session' value='{$session}' />
-            <input type='hidden' name='logo_url' value='{$logo_url}' />
-            <input type='hidden' name='tee' value='XXX' />
-            </form>
-            <button onClick=\"js_openFormInNewWindow('nayta_lahtoilmoitus{$id}',
-             'Satamavahvistus'); return false;\" />";
-
-            echo t("Näytä lähtöilmoitus");
-            echo "</button></div>";
-
-            $parametrit = konttierittely_parametrit($tilaus['konttiviite']);
-            $tonnit = $parametrit['total_paino'] / 1000;
-            $parametrit = serialize($parametrit);
-            $parametrit = base64_encode($parametrit);
-
-            echo "
-            <div style='text-align:center;margin:10px 0;'>
-            <form method='post' id='nayta_konttierittely{$id}'>
-            <input type='hidden' name='parametrit' value='{$parametrit}' />
-            <input type='hidden' name='task' value='nayta_konttierittely' />
-            <input type='hidden' name='session' value='{$session}' />
-            <input type='hidden' name='logo_url' value='{$logo_url}' />
-            <input type='hidden' name='tee' value='XXX' />
-            </form>
-            <button onClick=\"js_openFormInNewWindow('nayta_konttierittely{$id}',
-             'Satamavahvistus'); return false;\" />";
-
-            echo t("Näytä konttierittely");
-            echo "</button></div>";
-
-            if ($tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
-
-              $query = "SELECT *
-                        FROM lasku
-                        WHERE yhtio = '{$kukarow['yhtio']}'
-                        AND asiakkaan_tilausnumero = '{$tilaus['konttiviite']}'
-                        AND sisviesti1 = 'konttiviitelasku'";
-              $result = pupe_query($query);
-
-              if (mysql_num_rows($result) > 0) {
-                $nappi = t("Laskutusraportti");
-                $laadittu = 'joo';
-              }
-              else {
-                $nappi = t("Laadi laskutusraportti");
-                $laadittu = 'ei';
-              }
-
-              echo "
-              <div style='text-align:center'>
-              <form method='post'>
-              <input type='hidden' name='tonnit' value='{$tonnit}' />
-              <input type='hidden' name='task' value='laadi_laskutusraportti' />
-              <input type='hidden' name='laadittu' value='{$laadittu}' />
-              <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />
-              <input type='submit' value='{$nappi}' />
-              </form></div>";
-
-              /*
-              if ($laadittu == 'joo') {
-
-                $poistettavatunnus = mysql_fetch_assoc($result);
-
-                  echo "
-                  <div style='text-align:center; padding-top:6px;'>
-                  <form method='post'>
-                  <input type='hidden' name='task' value='poistalasku' />
-                  <input type='hidden' name='poistettavatunnus' value='{$poistettavatunnus['tunnus']}' />
-                  <input type='submit' value='laadi uudestaan' />
-                  </form></div>";
-
-              }
-              */
-
-
-
-            }
-
-
-
-            echo "</div>";
-          }
-
-          echo "</td>";
-
-          if ($tilaus['konttiviite'] != 'bookkaukseton') {
-            $kasitellyt_konttiviitteet[] = $tilaus['konttiviite'];
-          }
-        }
-      }
-      echo "</tr>";
-    }
-    echo "</table>";
-  }
-  else {
-    echo "Ei tilauksia...";
-  }
-}
-
-echo "<script type='text/javascript'>
-
-  $('.uusilaivaperu').click(function() {
-    $('.uusilaivaformi').hide();
-    $('.uusilaivainput').val('');
-  });
-
-  $('.uusilaivanappi').bind('click',function(){
-    var id = $(this).attr('id').replace('nappi', 'formi');
-    $('.uusilaivaformi').hide();
-    $('#'+id).show();
-  });
-
-</script>";
 
 if (isset($task) and ($task == 'anna_konttitiedot' or $task == 'korjaa_konttitiedot')) {
 
@@ -1476,7 +739,7 @@ if (isset($task) and ($task == 'anna_konttitiedot' or $task == 'korjaa_konttitie
   </form>";
 }
 
-if (isset($task) and $task == 'tee_satamavahvistus') {
+if (isset($task) and ($task == 'tee_satamavahvistus' or $task == 'tee_lahtokuittaus')) {
 
   $lahtopvm_arvio = date("d.m.Y", strtotime($lahtopvm_arvio));
 
@@ -1510,8 +773,15 @@ if (isset($task) and $task == 'tee_satamavahvistus') {
       </script>
   ";
 
-  echo "<a href='toimitusten_seuranta.php'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
-  echo "<font class='head'>".t("Satamavahvistus")."</font><hr><br>";
+  if ($task == 'tee_lahtokuittaus') {
+    $otsikko = t("EU:n sisäinen lähtökuittaus");
+  }
+  else {
+    $otsikko = t("Satamavahvistus");
+  }
+
+  echo "<a href='toimitusten_seuranta.php?rajaus=Aktiiviset'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
+  echo "<font class='head'>".$otsikko."</font><hr><br>";
   echo "
     <form method='post'>
     <input type='hidden' name='konttiviite' value='{$konttiviite}' />
@@ -1543,12 +813,22 @@ if (isset($task) and $task == 'tee_satamavahvistus') {
   }
   echo "</select>";
 
-  echo "
-  </td></tr>
-  <tr><th></th><td align='right'><input type='submit' value='". t("Lähetä satamavahvistus") ."' /></td></tr>
-  </table>
-  <input type='hidden' name='task' value='laheta_satamavahvistus' />
-  </form>";
+  if ($task == 'tee_lahtokuittaus') {
+    echo "
+    </td></tr>
+    <tr><th></th><td align='right'><input type='submit' value='". t("Kuittaa") ."' /></td></tr>
+    </table>
+    <input type='hidden' name='task' value='kuittaa_lahto' />
+    </form>";
+  }
+  else {
+    echo "
+    </td></tr>
+    <tr><th></th><td align='right'><input type='submit' value='". t("Lähetä satamavahvistus") ."' /></td></tr>
+    </table>
+    <input type='hidden' name='task' value='laheta_satamavahvistus' />
+    </form>";
+  }
 }
 
 if (isset($task) and $task == 'hylky') {
@@ -1876,11 +1156,9 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
 
         echo "
         <tr><th>" . $nimike['nimitys'] . "</th><td align='right'>";
-
         echo "
         <input type='text' name='muutettava_kpl' size='5' value='{$tilausrivi['tilkpl']}' /> {$yks}
         </td><td class='back'><input type='submit' name='vahvista_muutos_submit[{$tilausrivi['tunnus']}]' value='". t("Vahvista") ."' /></td></tr>";
-
     }
     else {
 
@@ -1938,9 +1216,7 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
       }
 
       echo "</td></tr>";
-
     }
-
   }
 
   $query = "SELECT *
@@ -1993,7 +1269,6 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
     echo "<select />&nbsp;&nbsp;&nbsp;";
     echo "<input style='visibility:hidden; width:50px;' id='kplvalinta' type='text' name='lisattava_kpl' /> <div style='display:inline-block;width:40px; text-align:center;' id='nimikeyksikko'></div>";
     echo "<span id='nimikelisaysnappi' style='visibility:hidden'><input type='submit' name='vahvista_nimike_submit' value='". t("Lisää") ."' /></span></td><td class='back'></td></tr>";
-
   }
   elseif (count($lisattavat_nimikkeet) > 0) {
 
@@ -2005,7 +1280,6 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
   <tr><th></th><td align='right' width='350'><input type='submit' value='Luo raportti' /></td><td class='back'></td></tr>
   </table>
   </form>";
-}
 
 echo "
 <script type='text/javascript'>
@@ -2058,5 +1332,957 @@ echo "
   });
 
 </script>";
+}
+
+if (!isset($task)) {
+
+  if (!isset($rajaus)) {
+    $rajaus = 'Aktiiviset';
+  }
+
+  echo "<font class='head'>".t("Toimitusten seuranta"). " - " . $rajaus  ."</font><hr><br>";
+
+  $disable0 = $disable1 = $disable2 = $disable3 = '';
+
+  switch ($rajaus) {
+
+  case 'Bookkauksettomat':
+
+    $query = "SELECT lasku.asiakkaan_tilausnumero AS tilaukset,
+              COUNT(ss.tunnus) AS rullat,
+              SUM(ss.massa) AS paino,
+              llt.konttiviite,
+              'Ei tiedossa' AS lahtoaika,
+              ss.varasto
+              FROM lasku
+              JOIN laskun_lisatiedot AS llt
+                ON llt.yhtio = lasku.yhtio
+                AND llt.otunnus = lasku.tunnus
+              JOIN tilausrivi AS tr
+                ON tr.yhtio = llt.yhtio
+                AND tr.otunnus = llt.otunnus
+              JOIN sarjanumeroseuranta AS ss
+                ON ss.yhtio = llt.yhtio
+                AND ss.myyntirivitunnus = tr.tunnus
+              WHERE konttiviite = 'bookkaukseton'
+              GROUP BY lasku.tunnus";
+      break;
+
+  case 'Tulevat':
+
+    $query = "SELECT
+              group_concat(DISTINCT lasku.asiakkaan_tilausnumero SEPARATOR '<br>') AS tilaukset,
+              llt.konttiviite,
+              lasku.toimaika AS lahtoaika,
+              llt.rullamaara AS rullat
+              FROM lasku
+              LEFT JOIN tilausrivi AS tr
+                ON tr.yhtio = lasku.yhtio
+                AND tr.otunnus = lasku.tunnus
+              JOIN laskun_lisatiedot AS llt
+               ON llt.yhtio = lasku.yhtio
+               AND llt.otunnus = lasku.tunnus
+              WHERE lasku.yhtio = 'rplog'
+              AND lasku.tilaustyyppi = 'N'
+              AND lasku.asiakkaan_tilausnumero != ''
+              AND konttiviite != 'bookkaukseton'
+              GROUP BY konttiviite
+              HAVING count(tr.tunnus) = 0
+              ORDER BY lahtoaika, konttiviite";
+    break;
+  case 'Aktiiviset':
+
+    $query = "SELECT
+              group_concat(DISTINCT lasku.asiakkaan_tilausnumero SEPARATOR '<br>') AS tilaukset,
+              llt.konttiviite,
+              lasku.toimaika AS lahtoaika,
+              COUNT(ss.tunnus) AS rullat,
+              SUM(ss.massa) AS paino,
+              SUM(IF(trlt.sinettinumero != '', 1, 0)) AS sinetti_tilanne,
+              SUM(IF(trlt.kontin_mrn != '', 1, 0)) AS mrn_tilanne,
+              group_concat(DISTINCT kontin_mrn) mrn_numerot
+              FROM lasku
+              JOIN tilausrivi AS tr
+                ON tr.yhtio = lasku.yhtio
+                AND tr.otunnus = lasku.tunnus
+              JOIN laskun_lisatiedot AS llt
+                ON llt.yhtio = lasku.yhtio
+                AND llt.otunnus = lasku.tunnus
+              JOIN tilausrivin_lisatiedot AS trlt
+                ON trlt.yhtio = lasku.yhtio
+                AND trlt.tilausrivitunnus = tr.tunnus
+              JOIN sarjanumeroseuranta AS ss
+                ON ss.yhtio = lasku.yhtio
+                AND ss.myyntirivitunnus = tr.tunnus
+              WHERE lasku.yhtio = 'rplog'
+              AND tilaustyyppi = 'N'
+              AND konttiviite != 'bookkaukseton'
+              AND llt.satamavahvistus_pvm = '0000-00-00 00:00:00'
+              GROUP BY konttiviite
+              ORDER BY lahtoaika, konttiviite";
+      break;
+
+  case 'Toimitetut':
+
+    $query = "SELECT
+              group_concat(DISTINCT lasku.asiakkaan_tilausnumero SEPARATOR '<br>') AS tilaukset,
+              llt.konttiviite,
+              llt.satamavahvistus_pvm AS lahtoaika,
+              group_concat(DISTINCT trlt.konttinumero SEPARATOR '<br>') AS kontit,
+              COUNT(ss.tunnus) AS rullat,
+              SUM(ss.massa) AS paino
+              FROM lasku
+              JOIN tilausrivi AS tr
+                ON tr.yhtio = lasku.yhtio
+                AND tr.otunnus = lasku.tunnus
+              JOIN laskun_lisatiedot AS llt
+                ON llt.yhtio = lasku.yhtio
+                AND llt.otunnus = lasku.tunnus
+              JOIN tilausrivin_lisatiedot AS trlt
+                ON trlt.yhtio = lasku.yhtio
+                AND trlt.tilausrivitunnus = tr.tunnus
+              JOIN sarjanumeroseuranta AS ss
+                ON ss.yhtio = lasku.yhtio
+                AND ss.myyntirivitunnus = tr.tunnus
+              WHERE lasku.yhtio = 'rplog'
+              AND tilaustyyppi = 'N'
+              AND konttiviite != 'bookkaukseton'
+              AND trlt.konttinumero != ''
+              AND llt.satamavahvistus_pvm != '0000-00-00 00:00:00'
+              GROUP BY konttiviite
+              ORDER BY lahtoaika, konttiviite";
+    break;
+
+  default:
+    break;
+  }
+
+  echo t("Näytä: ");
+
+  if ($rajaus != 'Bookkauksettomat') {
+    echo "&nbsp;";
+    echo "<form method='post'>";
+    echo "<input type='hidden' name='rajaus' value='Bookkauksettomat' />";
+    echo "<input type='submit' value='" .t("Bookkauksettomat") ."'>";
+    echo "</form>";
+  }
+
+  if ($rajaus != 'Tulevat') {
+    echo "&nbsp;";
+    echo "<form method='post'>";
+    echo "<input type='hidden' name='rajaus' value='Tulevat' />";
+    echo "<input type='submit' value='" .t("Tulevat") ."'>";
+    echo "</form>";
+  }
+
+  if ($rajaus != 'Aktiiviset') {
+    echo "&nbsp;";
+    echo "<form method='post'>";
+    echo "<input type='hidden' name='rajaus' value='Aktiiviset' />";
+    echo "<input type='submit' value='" .t("Aktiiviset") ."'>";
+    echo "</form>";
+  }
+
+  if ($rajaus != 'Toimitetut') {
+    echo "&nbsp;";
+    echo "<form method='post'>";
+    echo "<input type='hidden' name='rajaus' value='Toimitetut' />";
+    echo "<input type='submit' value='" .t("Toimitetut") ."'>";
+    echo "</form>";
+  }
+
+  echo "<br><br>";
+
+  $result = pupe_query($query);
+
+  $tilaukset = array();
+
+  $viitteet = array();
+
+  if (mysql_num_rows($result) > 0) {
+
+    echo "<table>";
+    echo "<tr>";
+    echo "<th>".t("Konttiviite")."</th>";
+    echo "<th>".t("Tilaukset")."</th>";
+    echo "<th>".t("Lähtöpäivä")."</th>";
+    echo "<th>" . t("Rullat") ."</th>";
+    echo "<th>" . t("Status") ."</th>";
+    echo "</tr>";
+
+    while ($rivi = mysql_fetch_assoc($result)) {
+
+      echo "<tr>";
+      echo "<td valign='top'><a href='toimitusten_seuranta.php?kv={$rivi['konttiviite']}&task=nkv&r={$rajaus}'>" . $rivi['konttiviite'] . "</a></td>";
+      echo "<td valign='top'>" . $rivi['tilaukset'] . "</td>";
+      echo "<td valign='top'>" . date("j.n.Y H:i", strtotime($rivi['lahtoaika'])) . "</td>";
+      echo "<td valign='top'>";
+
+      if ($rajaus == 'Tulevat') {
+        echo $rivi['rullat'] . " kpl. (" . t("Ennakkoarvio") . ")";
+      }
+      else {
+        echo $rivi['rullat'] . " kpl. / " . (int) $rivi['paino'] . " kg.";
+      }
+
+      echo "</td>";
+
+      if ($rajaus == 'Tulevat') {
+        $status = t("Rahtia ei vielä vastaanotettu");
+      }
+      elseif ($rajaus == 'Aktiiviset') {
+
+        if ($rivi['mrn_numerot'] == 'EU') {
+          $status = t("Eu:n sisäinen tilaus");
+        }
+        elseif ($rivi['sinetti_tilanne'] == 0) {
+          $status = t("Kontitusta ei vielä aloitettu");
+        }
+        elseif ($rivi['sinetti_tilanne'] > 0 and $rivi['sinetti_tilanne'] < $rivi['rullat']) {
+            $status = t("Kontitus kesken");
+        }
+        elseif ($rivi['mrn_tilanne'] == $rivi['rullat']) {
+          $status = t("Satamavahvistus lähettämättä");
+        }
+
+      }
+      elseif ($rajaus == 'Toimitetut') {
+        $status = t("Toimitettu");
+      }
+      elseif ($rajaus == 'Bookkauksettomat') {
+        if ($rivi['varasto'] > 0) {
+          $status = t("Rullat viety varastoon");
+        }
+        else {
+          $status = t("Rullat ei vielä varastossa");
+        }
+      }
+
+      echo "<td valign='top'>" . $status . "</td>";
+      echo "</tr>";
+    }
+    echo "</table>";
+  }
+  else {
+    echo "Ei tilauksia...";
+  }
+}
+
+
+
+if (isset($kv) and isset($task) and $task == 'nkv') {
+
+  if ($r == 'Tulevat') {
+
+    $query = "SELECT lasku.asiakkaan_tilausnumero,
+              lasku.sisviesti1 AS ohje,
+              laskun_lisatiedot.matkakoodi,
+              laskun_lisatiedot.konttimaara,
+              laskun_lisatiedot.matkatiedot,
+              laskun_lisatiedot.konttityyppi,
+              laskun_lisatiedot.satamavahvistus_pvm,
+              laskun_lisatiedot.rullamaara,
+              lasku.toimaika,
+              lasku.tila,
+              lasku.alatila,
+              lasku.tunnus,
+              laskun_lisatiedot.konttiviite
+              FROM lasku
+              JOIN laskun_lisatiedot
+                ON laskun_lisatiedot.yhtio = lasku.yhtio
+                AND laskun_lisatiedot.otunnus = lasku.tunnus
+              WHERE lasku.yhtio = 'rplog'
+              AND lasku.tilaustyyppi = 'N'
+              AND laskun_lisatiedot.konttiviite = '{$kv}'
+              GROUP BY lasku.asiakkaan_tilausnumero, laskun_lisatiedot.konttiviite
+              ORDER BY toimaika, konttiviite";
+
+  }
+  else {
+
+  $query = "SELECT lasku.asiakkaan_tilausnumero,
+            lasku.sisviesti1 AS ohje,
+            laskun_lisatiedot.matkakoodi,
+            laskun_lisatiedot.konttimaara,
+            laskun_lisatiedot.matkatiedot,
+            laskun_lisatiedot.konttityyppi,
+            laskun_lisatiedot.satamavahvistus_pvm,
+            laskun_lisatiedot.rullamaara,
+            lasku.toimaika,
+            lasku.tila,
+            lasku.alatila,
+            lasku.tunnus,
+            laskun_lisatiedot.konttiviite,
+            GROUP_CONCAT(DISTINCT trlt.asiakkaan_rivinumero) AS tilausrivit,
+            COUNT(ss.tunnus) AS rullat,
+            SUM(ss.massa) AS paino,
+            SUM(IF(trlt.sinettinumero != '', 1, 0)) AS kontti_vahvistettu,
+            SUM(IF(tilausrivi.var = 'P', 1, 0)) AS tulouttamatta,
+            SUM(IF(tilausrivi.keratty = '', 1, 0)) AS kontittamatta,
+            SUM(IF(tilausrivi.toimitettu = '', 1, 0)) AS toimittamatta,
+            SUM(IF(trlt.kontin_mrn = '' OR trlt.kontin_mrn = 'EU', 1, 0)) AS mrn_vastaanottamatta,
+            SUM(IF(ss.lisatieto = 'Hylättävä', 1, 0)) AS hylattavat,
+            SUM(IF(ss.lisatieto = 'Hylätty', 1, 0)) AS hylatyt,
+            SUM(IF(ss.lisatieto = 'Lusattava', 1, 0)) AS lusattavat,
+            SUM(IF(ss.lisatieto = 'Lusattu', 1, 0)) AS lusatut,
+            SUM(IF(ss.lisatieto = 'Ylijaama', 1, 0)) AS ylijaama,
+            SUM(IF(ss.lisatieto = 'Siirretty', 1, 0)) AS siirretty
+            FROM lasku
+            JOIN laskun_lisatiedot
+              ON laskun_lisatiedot.yhtio = lasku.yhtio
+              AND laskun_lisatiedot.otunnus = lasku.tunnus
+            JOIN tilausrivi
+              ON tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+            JOIN tilausrivin_lisatiedot AS trlt
+              ON trlt.yhtio = lasku.yhtio
+              AND trlt.tilausrivitunnus = tilausrivi.tunnus
+            JOIN sarjanumeroseuranta AS ss
+              ON ss.yhtio = lasku.yhtio
+              AND ss.myyntirivitunnus = tilausrivi.tunnus
+            WHERE lasku.yhtio = 'rplog'
+            AND lasku.tilaustyyppi = 'N'
+            AND laskun_lisatiedot.konttiviite = '{$kv}'
+            GROUP BY lasku.asiakkaan_tilausnumero, laskun_lisatiedot.konttiviite
+            ORDER BY toimaika, konttiviite";
+  }
+
+  $result = pupe_query($query);
+
+  $tilaukset = array();
+  $viitteet = array();
+
+  if (mysql_num_rows($result) > 0) {
+
+    while ($rivi = mysql_fetch_assoc($result)) {
+      $viitteet[] = $rivi['konttiviite'];
+      $tilaukset[$rivi['asiakkaan_tilausnumero'].$rivi['konttiviite']] = $rivi;
+    }
+
+    echo "<a href='toimitusten_seuranta.php?rajaus={$r}'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
+    echo "<font class='head'>".t("Konttiviite: ") . $kv ."</font></a><hr><br>";
+
+    echo "<table>";
+    echo "<tr>";
+    echo "<th>".t("Tilauskoodi")."</th>";
+    echo "<th>".t("Matkakoodi")."</th>";
+    echo "<th>".t("Laiva")."</th>";
+    echo "<th>".t("Lähtöpäivä")."</th>";
+    echo "<th>".t("Konttiviite")."</th>";
+    echo "<th>".t("Rullat")."</th>";
+    echo "<th>".t("Ohje")."</th>";
+    echo "<th>".t("Tapahtumat")."</th>";
+    echo "<th>".t("Kontit")."</th>";
+    echo "<th class='back'></th>";
+    echo "</tr>";
+
+    foreach ($tilaukset as $key => $tilaus) {
+
+      $kontit_sinetointivalmiit = false;
+
+      $query = "SELECT group_concat(otunnus)
+                FROM laskun_lisatiedot
+                WHERE yhtio = '{$yhtiorow['yhtio']}'
+                AND konttiviite = '{$tilaus['konttiviite']}'";
+      $result = pupe_query($query);
+      $konttiviitteen_alaiset_tilaukset = mysql_result($result, 0);
+
+      $query = "SELECT count(tilausrivi.tunnus) AS vahvistettu
+                FROM tilausrivi
+                JOIN tilausrivin_lisatiedot AS trlt
+                  ON trlt.yhtio = tilausrivi.yhtio
+                  AND trlt.tilausrivitunnus = tilausrivi.tunnus
+                WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
+                AND tilausrivi.otunnus IN ({$konttiviitteen_alaiset_tilaukset})
+                AND trlt.sinettinumero != ''";
+      $result = pupe_query($query);
+      $vahvistettu = mysql_result($result, 0);
+
+      if ($vahvistettu > 0) {
+        $kontit_sinetointivalmiit = true;
+      }
+
+      $poikkeukset = array();
+
+      $viitelasku = array_count_values($viitteet);
+      $tilauksia_viitteella = $viitelasku[$tilaus['konttiviite']];
+
+      if ($tilaus['konttiviite'] == 'bookkaukseton') {
+        $tilauksia_viitteella = 1;
+      }
+
+      $id = md5($tilaus['konttiviite']);
+
+      if (in_array($tilaus['konttiviite'], $kasitellyt_konttiviitteet)) {
+        $konttiviite_kasitelty = true;
+      }
+      else{
+       $konttiviite_kasitelty = false;
+      }
+
+      $query = "SELECT tunnus
+                FROM liitetiedostot
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND liitos = 'lasku'
+                AND liitostunnus = '{$tilaus['tunnus']}'
+                AND kayttotarkoitus = 'bookkaussanoma'";
+      $result = pupe_query($query);
+
+      $sanoma_numero = 1;
+
+      $tapahtumat = "";
+
+      while ($sanoma = mysql_fetch_assoc($result)) {
+        $tapahtumat .= "&bull; <a href='view.php?id={$sanoma['tunnus']}' target='_blank'>{$sanoma_numero}. bookkaussanoma</a> haettu<br>";
+        $sanoma_numero++;
+      }
+
+      echo "<tr>";
+
+      echo "<td valign='top'>";
+      echo $tilaus['asiakkaan_tilausnumero'];
+      echo "</td>";
+
+      if (!$konttiviite_kasitelty) {
+
+        echo "<td valign='top' rowspan='{$tilauksia_viitteella}'>";
+        echo $tilaus['matkakoodi'];
+        echo "</td>";
+      }
+
+      if (!$konttiviite_kasitelty) {
+
+        echo "<td valign='top' rowspan='{$tilauksia_viitteella}'>";
+
+        $matkatiedot = unserialize($tilaus['matkatiedot']);
+        $vanhat_tiedot = base64_encode($tilaus['matkatiedot']);
+
+        echo "<a style='cursor:pointer;' id='uusilaivanappi{$id}' class='uusilaivanappi'>";
+        echo $matkatiedot['transport_name'];
+        echo "</a>";
+
+        echo "<div style='display:none;' class='uusilaivaformi' id='uusilaivaformi{$id}'>";
+        echo "<form method='post' action='toimitusten_seuranta.php?rajaus={$rajaus}'>";
+        echo "<input type='hidden' name='task' value='laivamuutos' />";
+        echo "<input type='hidden' name='vanhat_tiedot' value='{$vanhat_tiedot}' />";
+        echo "<input type='hidden' name='konttiviite' ";
+        echo "value='{$tilaus['konttiviite']}' />";
+        echo "<input type='text' class='uusilaivainput' name='uusilaiva' style='width:100px' /><br>";
+        echo "<input type='submit' value='". t("Muuta") ."' />&nbsp;";
+        echo "<img src='{$palvelin2}pics/lullacons/stop.png' alt='Peru' title='Peru' class='uusilaivaperu' style='position:relative; top:4px;'>";
+        echo "</form></div>";
+        echo "</td>";
+
+        if ($tilaus['konttiviite'] != 'bookkaukseton') {
+          $kasitellyt_konttiviitteet[] = $tilaus['konttiviite'];
+        }
+      }
+
+      if (!$konttiviite_kasitelty) {
+        echo "<td valign='top' rowspan='{$tilauksia_viitteella}'>";
+
+        if ($tilaus['matkakoodi'] == 'bookkaukseton') {
+          # code...
+        }
+        elseif ($tilaus['satamavahvistus_pvm'] == '0000-00-00 00:00:00') {
+          echo date("j.n.Y", strtotime($tilaus['toimaika']));
+        }
+        else {
+          echo date("j.n.Y H:i", strtotime($tilaus['satamavahvistus_pvm']));
+        }
+        echo "</td>";
+      }
+
+      if (!$konttiviite_kasitelty) {
+
+        echo "<td valign='top' rowspan='{$tilauksia_viitteella}'>";
+        echo $tilaus['konttiviite'];
+        echo "</td>";
+      }
+
+      if ($tilaus['rullat'] == 0 and $tilaus['matkakoodi'] != 'bookkaukseton') {
+        $rullamaara = $tilaus['rullamaara'] . t(" kpl") . " (" . t("Ennakkoarvio") . ")";
+      }
+      else {
+
+        $rullamaara = $tilaus['rullat'] . t(" kpl.") . " / " . (int) $tilaus['paino'] . t(" kg.");
+
+        if ($tilaus['matkakoodi'] != 'bookkaukseton') {
+          $rullamaara .= "<br>" . t("Ennakkoarvio: ") . $tilaus['rullamaara'] . t(" kpl");
+        }
+
+        $poikkeukset = array(
+          'odottaa hylkäystä' => $tilaus['hylattavat'],
+          'hylatty' => $tilaus['hylatyt'],
+          'odottaa lusausta' => $tilaus['lusattavat'],
+          'lusattu' => $tilaus['lusatut'],
+          'ylijäämä' => $tilaus['ylijaama'],
+          'siirretty' => $tilaus['siirretty']
+          );
+
+        if ($tilaus['tilausrivit'] == '') {
+          $tilaus['tilausrivit'] = 0;
+        }
+
+        $query = "SELECT tilausrivi.toimitettu, trlt.rahtikirja_id
+                  FROM tilausrivi
+                  JOIN tilausrivin_lisatiedot AS trlt
+                    ON trlt.yhtio = tilausrivi.yhtio
+                    AND trlt.tilausrivitunnus = tilausrivi.tunnus
+                  WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                  AND tilausrivi.tyyppi = 'O'
+                  AND trlt.asiakkaan_rivinumero IN ({$tilaus['tilausrivit']})
+                  AND trlt.asiakkaan_tilausnumero = '{$tilaus['asiakkaan_tilausnumero']}'";
+        $result = pupe_query($query);
+
+        $kuitattu = $kuittaamatta = 0;
+        $rahtikirjat = array();
+
+        // katsotaan onko rahtikirja(t) kuitattu ja kuinka monta rahtikirjaa
+        while ($rulla = mysql_fetch_assoc($result)) {
+          if ($rulla['toimitettu'] == '' ) {
+            $kuittaamatta++;
+          }
+          else {
+            $kuitattu++;
+          }
+          $rahtikirjat[] = $rulla['rahtikirja_id'];
+        }
+
+        $rahtikirjat = array_count_values($rahtikirjat);
+        $rahtikirjat = count($rahtikirjat);
+
+        if ($rahtikirjat > 0) {
+          $tapahtumat .= "&bull; <a href='saapuva_rahti.php?tnum={$tilaus['asiakkaan_tilausnumero']}'>" . $rahtikirjat ." kpl rahtikirjasanomia</a> haettu<br>";
+        }
+
+        if ($kuittaamatta == 0) {
+          $tapahtumat .= "&bull; " .  t("Rahti kuitattu saapuneeksi") . "<br>";
+        }
+        elseif ($kuitattu > 0) {
+          $tapahtumat .= "&bull; " .  t("Osa rahdista kuitattu saapuneeksi") . "<br>";
+        }
+
+        if ($tilaus['tulouttamatta'] == 0) {
+
+          $tapahtumat .= "&bull; " .  t("Rullat viety varastoon") . "<br>";
+
+          if (($tilaus['kontittamatta'] - $tilaus['ylijaama'] - $tilaus['hylatyt']) == 0) {
+            $tapahtumat .= "&bull; " .  t("Rullat kontitettu") . "<br>";
+          }
+          elseif ($tilaus['kontittamatta'] < ($tilaus['rullat'] - $tilaus['ylijaama'] - $tilaus['hylatyt'])) {
+            $tapahtumat .= "&bull; " .  t("Osa rullista kontitettu") . "<br>";
+
+            $query = "SELECT group_concat(tilausrivi.tunnus) AS riveja
+                      FROM tilausrivi
+                      JOIN tilausrivin_lisatiedot AS trlt
+                        ON trlt.yhtio = tilausrivi.yhtio
+                        AND trlt.tilausrivitunnus = tilausrivi.tunnus
+                      JOIN sarjanumeroseuranta AS ss
+                        ON ss.yhtio = tilausrivi.yhtio
+                        AND ss.myyntirivitunnus = tilausrivi.tunnus
+                      WHERE tilausrivi.yhtio = '{$yhtiorow['yhtio']}'
+                      AND tilausrivi.otunnus IN ({$konttiviitteen_alaiset_tilaukset})
+                      AND trlt.sinettinumero != ''
+                      AND (ss.lisatieto IS NULL OR ss.lisatieto = 'Lusaus')";
+            $result = pupe_query($query);
+
+            if (mysql_num_rows($result) > 0) {
+              $konttiviitteesta_vahvistettu = mysql_result($result, 0);
+            }
+            else{
+              $konttiviitteesta_vahvistettu = false;
+            }
+
+          }
+
+          if (($tilaus['toimittamatta'] - $tilaus['ylijaama'] - $tilaus['hylatyt']) == 0) {
+            $tapahtumat .= "&bull; " .  t("Kontit sinetöity") . "<br>";
+          }
+          elseif ($tilaus['toimittamatta'] < $tilaus['rullat']) {
+            $tapahtumat .= "&bull; " .  t("Osa konteista sinetöity") . "<br>";
+          }
+
+         if (($tilaus['mrn_vastaanottamatta'] - $tilaus['ylijaama'] - $tilaus['hylatyt']) == 0) {
+            $tapahtumat .= "&bull; " .  t("MRN-numerot vastaanotettu") . "<br>";
+          }
+          elseif ($tilaus['mrn_vastaanottamatta']  < $tilaus['rullat']) {
+           $tapahtumat .= "&bull; " .  t("Osa MRN-numeroista vastaanotettu") . "<br>";
+          }
+
+        }
+        elseif ($tilaus['tulouttamatta'] < $tilaus['rullat']) {
+          $tapahtumat .= "&bull; " .  t("Osa rullista viety varastoon") . "<br>";
+        }
+      }
+
+      echo "<td valign='top' align='center'>";
+      echo $rullamaara;
+
+      if (array_sum($poikkeukset) > 0) {
+        echo "<br>Joista:";
+        echo "<div style='text-align:left'>";
+
+        foreach ($poikkeukset as $poikkeus => $kpl) {
+          if ($kpl > 0) {
+
+            switch ($poikkeus) {
+              case 'odottaa hylkäystä':
+
+                echo "<form method='post' name='hylkyform'>";
+                echo "<input type='hidden' name='task' value='hylky' />";
+                echo "<input type='hidden' name='tilausnumero' ";
+                echo "value='{$tilaus['asiakkaan_tilausnumero']}' />";
+                echo "</form>";
+
+                echo "&bull; <a style='cursor:pointer; text-decoration:underline;' ";
+                echo "onclick='document.forms[\"hylkyform\"].submit();'>";
+                echo $kpl . " " . $poikkeus . "</a><br>";
+
+                break;
+
+              case 'odottaa lusausta':
+
+                echo "<form method='post' name='lusausform'>";
+                echo "<input type='hidden' name='task' value='lusaus' />";
+                echo "<input type='hidden' name='tilausnumero' ";
+                echo "value='{$tilaus['asiakkaan_tilausnumero']}' />";
+                echo "</form>";
+
+                echo "&bull; <a style='cursor:pointer; text-decoration:underline;' ";
+                echo "onclick='document.forms[\"lusausform\"].submit();'>";
+                echo $kpl . " " . $poikkeus . "</a><br>";
+
+                break;
+
+              default:
+                echo "&bull; " . $kpl . " " . $poikkeus . "<br>";
+                break;
+            }
+          }
+        }
+        echo "</div>";
+      }
+
+      echo "</td>";
+
+      if (!$konttiviite_kasitelty) {
+        echo "<td valign='top' style='width:100px;' rowspan='{$tilauksia_viitteella}'>";
+        echo $tilaus['ohje'];
+        echo "</td>";
+      }
+
+      echo "<td valign='top'>";
+      echo $tapahtumat;
+      echo "</td>";
+
+      if ($konttiviite_kasitelty) {
+        //echo "<td valign='top' align='center'>";
+        //echo t("Sama konttiviite kuin yllä.");
+        //echo "</td>";
+      }
+      elseif ($tilaus['matkakoodi'] == 'bookkaukseton') {
+        echo "<td valign='top' rowspan='{$tilauksia_viitteella}' align='center'>";
+        echo t("Ei tietoa");
+        echo "</td>";
+      }
+      elseif (!$kontit_sinetointivalmiit or $tilaus['rullat'] == 0) {
+        echo "<td valign='top' rowspan='{$tilauksia_viitteella}' align='center'>";
+        echo $tilaus['konttimaara'] . " kpl (ennakkoarvio)";
+        echo "</td>";
+      }
+      else {
+        echo "<td valign='top' rowspan='{$tilauksia_viitteella}' align='right'>";
+
+        $kontit = kontitustiedot($tilaus['konttiviite']);
+
+        if ($kontit) {
+
+          $kesken = 0;
+
+          asort($kontit);
+
+          $v = $kontit[''];
+          unset($kontit['']);
+
+          if (count($v) > 0) {
+            $kontit[] = $v;
+          }
+
+          $mrn_tullut = true;
+
+          foreach ($kontit as $konttinumero => $kontti) {
+
+            if ($kontti['konttinumero'] == '') {
+              echo "<div style='margin:0 5px 8px 5px; padding:5px; border-bottom:1px solid grey;'>";
+              echo t("Konttiviitteestä "), $kontti['kpl'], t(" rullaa kontittamatta");
+              echo "</div>";
+              $kesken++;
+              continue;
+            }
+
+            $temp_array = explode("/", $konttinumero);
+            $_konttinumero = $konttinumero;
+
+            echo "<div style='margin:0 5px 8px 5px; padding:5px; border-bottom:1px solid grey;'>";
+            echo "{$_konttinumero}. ({$kontti['kpl']} kpl, {$kontti['paino']} kg)&nbsp;&nbsp;";
+
+            if ($kontti['sinettinumero'] == '') {
+              echo t("Kontitusta ei ole vielä vahvistettu"), '<br>';
+              $kesken++;
+            }
+            elseif ($kontti['sinettinumero'] == 'X') {
+              echo "<form method='post'>";
+              echo "<input type='hidden' name='task' value='anna_konttitiedot' />";
+              echo "<input type='hidden' name='temp_konttinumero' value='{$konttinumero}' />";
+              echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
+              echo "<input type='hidden' name='rullia' value='{$kontti['kpl']}' />";
+              echo "<input type='hidden' name='sinetoitava_konttiviite' value='{$tilaus['konttiviite']}' />";
+              echo "<input type='submit' value='". t("Sinetöi") ."' />";
+              echo "</form>";
+              $kesken++;
+            }
+            elseif ($tilaus['satamavahvistus_pvm'] == '0000-00-00 00:00:00') {
+              echo "<button type='button' disabled>" . t("Sinetöity") . "</button>";
+              echo "<form method='post'>";
+              echo "<input type='hidden' name='task' value='korjaa_konttitiedot' />";
+              echo "<input type='hidden' name='temp_konttinumero' value='{$konttinumero}' />";
+              echo "<input type='hidden' name='konttinumero' value='{$kontti['konttinumero']}' />";
+              echo "<input type='hidden' name='sinettinumero' value='{$kontti['sinettinumero']}' />";
+              echo "<input type='hidden' name='taara' value='{$kontti['taara']}' />";
+              echo "<input type='hidden' name='isokoodi' value='{$kontti['isokoodi']}' />";
+              echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
+              echo "<input type='hidden' name='rullia' value='{$kontti['kpl']}' />";
+              echo "<input type='hidden' name='sinetoitava_konttiviite' value='{$tilaus['konttiviite']}' />";
+              echo "<input type='submit' value='". t("Korjaa") ."' />";
+              echo "</form>";
+            }
+            else {
+              echo "<button type='button' disabled>" . t("Sinetöity") . "</button>";
+            }
+
+            if ($kontti['sinettinumero'] != '') {
+
+              js_openFormInNewWindow();
+
+              $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
+              $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
+
+              echo "&nbsp;<form method='post' id='hae_pakkalista{$_konttinumero}'>";
+              echo "<input type='hidden' name='task' value='hae_pakkalista' />";
+              echo "<input type='hidden' name='pakkalista' value='{$kontti['pakkalista']}' />";
+              echo "<input type='hidden' name='tee' value='XXX' />";
+              echo "<input type='hidden' name='konttinumero' value='{$konttinumero}' />";
+              echo "<input type='hidden' name='sinettinumero' value='{$kontti['sinettinumero']}' />";
+              echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
+              echo "<input type='hidden' name='session' value='{$session}' />";
+              echo "<input type='hidden' name='logo_url' value='{$logo_url}' />";
+              echo "<input type='hidden' name='taara' value='{$kontti['taara']}' />";
+              echo "<input type='hidden' name='kpl' value='{$kontti['kpl']}' />";
+              echo "<input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />";
+              echo "</form>";
+              echo "<button onClick=\"js_openFormInNewWindow('hae_pakkalista{$_konttinumero}', 'Pakkalista'); return false;\" />";
+              echo t("Pakkalista");
+              echo "</button>";
+
+              if ($kontti['mrn'] == 'EU') {
+
+                echo "<div style='text-align:center; margin:8px 0'>";
+                echo t("EU:n sisäinen tilaus");
+                echo "</div>";
+              }
+              elseif ($kontti['mrn'] != '') {
+
+                echo "<div style='text-align:center; margin:8px 0'>MRN: ";
+                echo "<input type='text'  value='{$kontti['mrn']}' readonly>";
+                echo "</div>";
+              }
+              else {
+
+                echo "<div style='text-align:center; margin:8px 0'>";
+                echo t("Odotetaan MRN-numeroa");
+                echo "</div>";
+
+                $mrn_tullut = false;
+              }
+            }
+            echo "</div>";
+          }
+
+          if ($kesken == 0 and !$mrn_tullut) {
+
+            echo "<div style='text-align:center; margin:8px 0'>";
+            echo "<form method='post' action='toimitusten_seuranta.php?rajaus={$rajaus}'>";
+            echo "<input type='hidden' name='task' value='eu_tilaus' />";
+            echo "<input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />";
+            echo "<input type='submit' value='". t("EU-tilaus") ."' />&nbsp;";
+            echo "</form>";
+            echo "</div>";
+          }
+
+          if ($kontti['mrn'] == 'EU') {
+
+            if ($kesken == 0 and $mrn_tullut and $tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
+
+              echo "<div style='text-align:center;margin:10px 0;'><button type='button' disabled>";
+              echo t("Lähtökuittaus tehty");
+              echo "</button>";
+            }
+            elseif ($kesken == 0 and $mrn_tullut) {
+
+              echo "
+                <div style='text-align:center;margin:10px 0;'>
+                <form method='post'>
+                <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />
+                <input type='hidden' name='matkakoodi' value='{$tilaus['matkakoodi']}' />
+                <input type='hidden' name='lahtopvm_arvio' value='{$tilaus['toimaika']}' />
+                <input type='hidden' name='task' value='tee_lahtokuittaus' />
+                <input type='submit' value='". t("Tee lähtökuittaus") ."' />
+                </form>
+                </div>";
+            }
+
+          }
+          else {
+
+            if ($kesken == 0 and $mrn_tullut and $tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
+
+              echo "<div style='text-align:center;margin:10px 0;'><button type='button' disabled>";
+              echo t("Satamavahvistus lähetetty");
+              echo "</button>";
+            }
+            elseif ($kesken == 0 and $mrn_tullut) {
+
+              echo "
+                <div style='text-align:center;margin:10px 0;'>
+                <form method='post'>
+                <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />
+                <input type='hidden' name='matkakoodi' value='{$tilaus['matkakoodi']}' />
+                <input type='hidden' name='lahtopvm_arvio' value='{$tilaus['toimaika']}' />
+                <input type='hidden' name='task' value='tee_satamavahvistus' />
+                <input type='submit' value='". t("Tee satamavahvistus") ."' />
+                </form>
+                </div>";
+            }
+          }
+
+          if ($kesken == 0 and $mrn_tullut) {
+
+            $parametrit = lahtoilmoitus_parametrit($tilaus['konttiviite']);
+            $parametrit = serialize($parametrit);
+            $parametrit = base64_encode($parametrit);
+
+            $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
+            $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
+
+            echo "
+            <div style='text-align:center;margin:10px 0;'>
+            <form method='post' id='nayta_lahtoilmoitus{$id}'>
+            <input type='hidden' name='parametrit' value='{$parametrit}' />
+            <input type='hidden' name='task' value='nayta_lahtoilmoitus' />
+            <input type='hidden' name='session' value='{$session}' />
+            <input type='hidden' name='logo_url' value='{$logo_url}' />
+            <input type='hidden' name='tee' value='XXX' />
+            </form>
+            <button onClick=\"js_openFormInNewWindow('nayta_lahtoilmoitus{$id}',
+             'Satamavahvistus'); return false;\" />";
+
+            echo t("Näytä lähtöilmoitus");
+            echo "</button></div>";
+
+            $parametrit = konttierittely_parametrit($tilaus['konttiviite']);
+            $tonnit = $parametrit['total_paino'] / 1000;
+            $parametrit = serialize($parametrit);
+            $parametrit = base64_encode($parametrit);
+
+            echo "
+            <div style='text-align:center;margin:10px 0;'>
+            <form method='post' id='nayta_konttierittely{$id}'>
+            <input type='hidden' name='parametrit' value='{$parametrit}' />
+            <input type='hidden' name='task' value='nayta_konttierittely' />
+            <input type='hidden' name='session' value='{$session}' />
+            <input type='hidden' name='logo_url' value='{$logo_url}' />
+            <input type='hidden' name='tee' value='XXX' />
+            </form>
+            <button onClick=\"js_openFormInNewWindow('nayta_konttierittely{$id}',
+             'Satamavahvistus'); return false;\" />";
+
+            echo t("Näytä konttierittely");
+            echo "</button></div>";
+
+            if ($tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
+
+              $query = "SELECT *
+                        FROM lasku
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND asiakkaan_tilausnumero = '{$tilaus['konttiviite']}'
+                        AND sisviesti1 = 'konttiviitelasku'";
+              $result = pupe_query($query);
+
+              if (mysql_num_rows($result) > 0) {
+                $nappi = t("Laskutusraportti");
+                $laadittu = 'joo';
+              }
+              else {
+                $nappi = t("Laadi laskutusraportti");
+                $laadittu = 'ei';
+              }
+
+              echo "
+              <div style='text-align:center'>
+              <form method='post'>
+              <input type='hidden' name='tonnit' value='{$tonnit}' />
+              <input type='hidden' name='task' value='laadi_laskutusraportti' />
+              <input type='hidden' name='laadittu' value='{$laadittu}' />
+              <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />
+              <input type='submit' value='{$nappi}' />
+              </form></div>";
+
+              /*
+              if ($laadittu == 'joo') {
+
+                $poistettavatunnus = mysql_fetch_assoc($result);
+
+                  echo "
+                  <div style='text-align:center; padding-top:6px;'>
+                  <form method='post'>
+                  <input type='hidden' name='task' value='poistalasku' />
+                  <input type='hidden' name='poistettavatunnus' value='{$poistettavatunnus['tunnus']}' />
+                  <input type='submit' value='laadi uudestaan' />
+                  </form></div>";
+
+              }
+              */
+            }
+            echo "</div>";
+          }
+
+          echo "</td>";
+
+          if ($tilaus['konttiviite'] != 'bookkaukseton') {
+            $kasitellyt_konttiviitteet[] = $tilaus['konttiviite'];
+          }
+        }
+      }
+      echo "</tr>";
+    }
+    echo "</table>";
+}
+
+  echo "<script type='text/javascript'>
+
+    $('.uusilaivaperu').click(function() {
+      $('.uusilaivaformi').hide();
+      $('.uusilaivainput').val('');
+    });
+
+    $('.uusilaivanappi').bind('click',function(){
+      var id = $(this).attr('id').replace('nappi', 'formi');
+      $('.uusilaivaformi').hide();
+      $('#'+id).show();
+    });
+
+  </script>";
+}
 
 require "inc/footer.inc";

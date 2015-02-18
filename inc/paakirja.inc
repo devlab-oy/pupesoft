@@ -418,6 +418,14 @@ if ($tee != "") {
 
     // Jos haetaan p‰iv‰m‰‰rill‰ niin nollataan tilikausi
     $tkausi = 0;
+    
+    $query = "SELECT *
+              FROM tilikaudet
+              WHERE yhtio         = '$kukarow[yhtio]'
+              and tilikausi_alku  <= '$alvv-$alvk-$alvp'
+              and tilikausi_loppu >= '$llvv-$llvk-$llvp'";
+    $result = pupe_query($query);
+    $tilikaudetrow = mysql_fetch_array($result);
   }
   else {
     if ($tkausi == 0) {

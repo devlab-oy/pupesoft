@@ -65,7 +65,8 @@ echo "<form method='post' action='$PHP_SELF?$ulisa'>
   <input type='hidden' name='reservipaikka' value='{$reservipaikka}' />
   <input type='hidden' name='tilaustyyppi' value='{$tilaustyyppi}' />
   <input type='hidden' name='keraysvyohyke' value='{$keraysvyohyke}' />
-  <input type='hidden' name='kateismaksu[kateinen]' value='{$kateismaksu["kateinen"]}'>";
+  <input type='hidden' name='kateismaksu[kateinen]' value='{$kateismaksu["kateinen"]}'>
+  <input type='hidden' name='kaikkiyhteensa' value='{$kaikkiyhteensa}' />";
 
 if ($nappikeikalle == 'menossa') {
   echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";

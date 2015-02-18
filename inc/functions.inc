@@ -18453,7 +18453,7 @@ if (!function_exists("tee_keraysera")) {
 
                 unset($pisin_tuote[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']]);
 
-                if (count($pisin_tuote[$tuoterow['tuoteno']]['tilaus']) == 0 and count($pisin_tuote) > 1) {
+                if (count($pisin_tuote[$tuoterow['tuoteno']]['tilaus']) == 0 and count($pisin_tuote) > 0) {
                   if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "<font class='message'>(E1080): Otetaan pois tuote \"pisin tuote listalta\" ($tuoterow[tuoteno])...</font><br><br>\n";
 
                   unset($pisin_tuote[$tuoterow['tuoteno']]);
@@ -18559,7 +18559,7 @@ if (!function_exists("tee_keraysera")) {
 
             unset($pisin_tuote[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']]);
 
-            if (count($pisin_tuote[$tuoterow['tuoteno']]['tilaus']) == 0 and count($pisin_tuote) > 1) {
+            if (count($pisin_tuote[$tuoterow['tuoteno']]['tilaus']) == 0 and count($pisin_tuote) > 0) {
               if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "<font class='message'>(E1150): Otetaan pois tuote \"pisin tuote listalta\" ($tuoterow[tuoteno])...</font><br><br>\n";
 
               unset($pisin_tuote[$tuoterow['tuoteno']]);
@@ -18603,6 +18603,16 @@ if (!function_exists("tee_keraysera")) {
           }
         }
 
+        if (isset($kukarow['debugstring'])) {
+          $kukarow['debugstring'] .= "(E1175): Myyntierä: {$tuoterow['myynti_era']}<br>\n";
+          $kukarow['debugstring'] .= "(E1175): Pakkaukset kaytettava_pakkaus tilavuus: {$pakkaukset[$kaytettava_pakkaus]['tilavuus']}<br>\n";
+          $kukarow['debugstring'] .= "(E1175): Pakkaukset kaytettava_pakkaus kaytetty_tilavuus: {$pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus']}<br>\n";
+          $kukarow['debugstring'] .= "(E1175): Tuoterow y_koko: {$tuoterow['y_koko']}<br>\n";
+          $kukarow['debugstring'] .= "(E1175): Pakkaukset kaytettava_pakkaus paino: {$pakkaukset[$kaytettava_pakkaus]['paino']}<br>\n";
+          $kukarow['debugstring'] .= "(E1175): Pakkaukset kaytettava_pakkaus kaytetty_paino: {$pakkaukset[$kaytettava_pakkaus]['kaytetty_paino']}<br>\n";
+          $kukarow['debugstring'] .= "(E1175): Tuoterow y_paino: {$tuoterow['y_paino']}<br>\n";
+        }
+
         if ($pakkaukset[$kaytettava_pakkaus]['tilavuus'] >= ($pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] + $tuoterow['tuotteen_koko'])
           and $pakkaukset[$kaytettava_pakkaus]['paino'] >= ($pakkaukset[$kaytettava_pakkaus]['kaytetty_paino'] + ($tuoterow['y_maara'] * $tuoterow['y_paino']))) {
 
@@ -18628,11 +18638,9 @@ if (!function_exists("tee_keraysera")) {
             $ed_tilausnro = $tuoterow['otunnus'];
           }
 
-          if ($max_tuoterivit > $ii) {
-            unset($pisin_tuote[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']]);
-          }
+          unset($pisin_tuote[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']]);
 
-          if (count($pisin_tuote[$tuoterow['tuoteno']]['tilaus']) == 0 and count($pisin_tuote) > 1) {
+          if (count($pisin_tuote[$tuoterow['tuoteno']]['tilaus']) == 0 and count($pisin_tuote) > 0) {
             if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "<font class='message'>(E1210): Otetaan pois tuote \"pisin tuote listalta\" ($tuoterow[tuoteno])...</font><br><br>\n";
 
             unset($pisin_tuote[$tuoterow['tuoteno']]);
@@ -22991,7 +22999,8 @@ if (!function_exists('hae_maa')) {
     $maa_row = mysql_fetch_assoc($maa_res);
 
     $maan_tiedot['nimi'] = $maa_row['name'] != '' ? $maa_row['name'] : $maa_row['koodi'];
-
+    $maan_tiedot['nimi'] = strtoupper($maan_tiedot['nimi']);
+    
     return $maan_tiedot;
   }
 }
@@ -29982,9 +29991,11 @@ if (!function_exists("poista_osakeyhtio_lyhenne")) {
 
     $replace = "oy|ab|as|oü|ou|mtü|tü|ttü";
 
-    foreach (explode("|", $replace) as $rep) {
-      $nimi = str_replace($rep, '', $nimi);
-    }
+    // Nimen edestä
+    $nimi = preg_replace("/^($replace) /", "", $nimi);
+
+    // Nimen takaa
+    $nimi = preg_replace("/ ($replace)$/", "", $nimi);
 
     return trim($nimi);
   }
@@ -30232,6 +30243,33 @@ if (!function_exists("mb_str_split")) {
     }
 
     return $parts;
+  }
+}
+
+if (!function_exists("jt_saapumisaika_tilausvahvistus")) {
+  function jt_saapumisaika_tilausvahvistus($tilausrivi, $status) {
+    global $yhtiorow;
+
+    if ($yhtiorow["jt_rivien_saapumisajan_nayttaminen"] == "K" and
+        ($tilausrivi["jtsort"] > 0 or $tilausrivi["jt"] > 0)
+    ) {
+      $myytavissa = saldo_myytavissa($tilausrivi["tuoteno"]);
+      $myytavissa = $myytavissa[2];
+      $saapumisaika = hae_tuotteen_saapumisaika($tilausrivi["tuoteno"],
+                                                $status, $myytavissa);
+      if (count($saapumisaika > 0)) {
+        $saapumisaika = $saapumisaika[1];
+
+        list($teksti, $paivamaara) = explode("!¡!", $saapumisaika);
+        $saapumisaika = "{$teksti} " . strip_tags($paivamaara);
+
+        return trim($saapumisaika);
+      }
+
+      return "";
+    }
+
+    return "";
   }
 }
 

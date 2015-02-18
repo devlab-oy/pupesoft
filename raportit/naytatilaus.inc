@@ -263,7 +263,7 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
     // Unifaunilla on oma seuranta
     if ($yhtiorow['kerayserat'] != 'K' and !empty($unifaun_url_key) and ($rakirrow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $rakirrow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
       foreach (explode("\n", $rakirrow['rahtikirjanro']) as $rakirno) {
-        $linkurl .= "<a class='linkki' href='http://www.unifaunonline.se/ext.uo.fi.track?key={$unifaun_url_key}&order={$laskurow['tunnus']}' target='_blank'>{$rakirno}</a><br>";
+        $linkurl .= "<a class='linkki' href='https://www.unifaunonline.com/ext.uo.fi.track?key={$unifaun_url_key}&order={$laskurow['tunnus']}' target='_blank'>{$rakirno}</a><br>";
       }
     }
     // postin rahtikirjat alkaa JJFI, ja tehd‰‰n niille linkki suoraan postin seurantaan

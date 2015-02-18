@@ -3532,4 +3532,69 @@ function varastotilanne($hetki = false) {
 return $echo;
 }
 
+function eu_lahtokuittaus($parametrit) {
+  global $kukarow;
+
+  extract($parametrit);
+
+  $query = "SELECT lasku.tunnus
+            FROM laskun_lisatiedot AS llt
+            JOIN lasku
+             ON lasku.yhtio = llt.yhtio
+             AND lasku.tunnus = llt.otunnus
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND llt.konttiviite = '{$konttiviite}'";
+  $result = pupe_query($query);
+
+  while ($lasku = mysql_fetch_assoc($result)) {
+
+    $update1 = "UPDATE laskun_lisatiedot
+                SET satamavahvistus_pvm = '{$lahtoaika}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND otunnus = '{$lasku['tunnus']}'";
+    pupe_query($update1);
+
+    $update2 = "UPDATE lasku
+                SET alatila = 'D'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = '{$lasku['tunnus']}'";
+    pupe_query($update2);
+
+    $query = "SELECT tr.tunnus, tr.tuoteno, ss.hyllyalue, ss.hyllynro
+              FROM tilausrivi AS tr
+              JOIN sarjanumeroseuranta AS ss
+                ON ss.yhtio = tr.yhtio
+                AND ss.myyntirivitunnus = tr.tunnus
+              WHERE tr.yhtio = '{$kukarow['yhtio']}'
+              AND tr.otunnus = '{$lasku['tunnus']}'";
+    $result = pupe_query($query);
+
+    while ($rulla = mysql_fetch_assoc($result)) {
+
+      $update3 = "UPDATE sarjanumeroseuranta
+                  SET lisatieto = 'Toimitettu'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND myyntirivitunnus = '{$rulla['tunnus']}'";
+      pupe_query($update3);
+
+      $update4 = "UPDATE tilausrivi SET
+                  varattu = 0,
+                  laskutettu = '{$kukarow['kuka']}',
+                  laskutettuaika = NOW()
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus = '{$rulla['tunnus']}'";
+      pupe_query($update4);
+
+      $update5 = "UPDATE tuotepaikat SET
+                  saldo = saldo - 1
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno = '{$rulla['tuoteno']}'
+                  AND hyllyalue = '{$rulla['hyllyalue']}'
+                  AND hyllynro = '{$rulla['hyllynro']}'";
+      pupe_query($update5);
+
+    }
+  }
+}
+
 ?>

@@ -14,10 +14,7 @@ require 'inc/edifact_functions.inc';
 if (isset($_POST['task']) and $_POST['task'] == 'nayta_konttierittely') {
 
   $pdf_data = unserialize(base64_decode($_POST['parametrit']));
-
-  $sessio = $_POST['session'];
-  $logo_url = $_POST['logo_url'];
-  $logo_info = pdf_logo($logo_url, $sessio);
+  $logo_info = pdf_logo();
   $pdf_data['logodata'] = $logo_info['logodata'];
   $pdf_data['scale'] = $logo_info['scale'];
 
@@ -31,10 +28,7 @@ if (isset($_POST['task']) and $_POST['task'] == 'nayta_konttierittely') {
 if (isset($_POST['task']) and $_POST['task'] == 'nayta_laskutusraportti') {
 
   $pdf_data = unserialize(base64_decode($_POST['parametrit']));
-
-  $sessio = $_POST['session'];
-  $logo_url = $_POST['logo_url'];
-  $logo_info = pdf_logo($logo_url, $sessio);
+  $logo_info = pdf_logo();
   $pdf_data['logodata'] = $logo_info['logodata'];
   $pdf_data['scale'] = $logo_info['scale'];
   $pdf_data['vapaa_varastointi'] = $_POST['vapaa_varastointi'];
@@ -49,10 +43,7 @@ if (isset($_POST['task']) and $_POST['task'] == 'nayta_laskutusraportti') {
 if (isset($_POST['task']) and $_POST['task'] == 'nayta_lahtoilmoitus') {
 
   $pdf_data = unserialize(base64_decode($_POST['parametrit']));
-
-  $sessio = $_POST['session'];
-  $logo_url = $_POST['logo_url'];
-  $logo_info = pdf_logo($logo_url, $sessio);
+  $logo_info = pdf_logo();
   $pdf_data['logodata'] = $logo_info['logodata'];
   $pdf_data['scale'] = $logo_info['scale'];
 
@@ -76,9 +67,7 @@ if (isset($_POST['task']) and $_POST['task'] == 'hae_pakkalista') {
     'sinettinumero' => $_POST['sinettinumero']
     );
 
-  $sessio = $_POST['session'];
-  $logo_url = $_POST['logo_url'];
-  $logo_info = pdf_logo($logo_url, $sessio);
+  $logo_info = pdf_logo();
   $pdf_data['logodata'] = $logo_info['logodata'];
   $pdf_data['scale'] = $logo_info['scale'];
 

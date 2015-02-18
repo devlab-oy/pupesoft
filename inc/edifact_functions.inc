@@ -3390,21 +3390,16 @@ function laskutusraportti_pdf($pdf_data) {
   return $pdffilenimi;
 }
 
-function pdf_logo($logo_url, $sessio) {
+function pdf_logo() {
+  global $kukarow, $yhtiorow;
 
-  $opts = array(
-    'http'=>array(
-      'method'=>"POST",
-      'header'=>"Accept-language: en\r\n" .
-                "Cookie: pupesoft_session={$sessio}\r\n"
-    ),
-    'ssl' => array( 'SNI_enabled' => true)
-  );
-
-  $context = stream_context_create($opts);
-  $string = file_get_contents($logo_url, false, $context);
-
-  //$string = curl_get_contents($logo_url, $sessio);
+  $query = "SELECT data
+            FROM liitetiedostot
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus='{$yhtiorow['logo']}'";
+  $liiteres = pupe_query($query);
+  $liiterow = mysql_fetch_assoc($liiteres);
+  $string = $liiterow["data"];
 
   $image = imagecreatefromstring($string);
   $file = "/tmp/".md5(uniqid(rand(),true)).".png";
@@ -3419,24 +3414,6 @@ function pdf_logo($logo_url, $sessio) {
   $return = array('logodata' => $logodata, 'scale' => $scale);
 
   return $return;
-}
-
-function curl_get_contents($url, $sessio) {
-    $ch = curl_init();
-
-
-    curl_setopt($ch, CURLOPT_SSLVERSION, 3); // OpenSSL issue
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);  // Wildcard certificate
-    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-    curl_setopt($ch, CURLOPT_COOKIE, "pupesoft_session=$sessio");
-    curl_setopt($ch, CURLOPT_HEADER, 0);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_URL, $url);
-
-    $data = curl_exec($ch);
-    curl_close($ch);
-
-    return $data;
 }
 
 function varastotilanne($hetki = false) {

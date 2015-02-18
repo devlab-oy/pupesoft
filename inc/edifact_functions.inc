@@ -89,7 +89,7 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
   return $rullat_ja_kontit;
 }
 
-function laheta_sanoma($sanoma){
+function laheta_sanoma($sanoma) {
 
   if ($sanoma == '') {
     return false;

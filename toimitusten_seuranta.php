@@ -1378,7 +1378,8 @@ if (!isset($task)) {
               llt.satamavahvistus_pvm AS lahtoaika,
               group_concat(DISTINCT trlt.konttinumero SEPARATOR '<br>') AS kontit,
               COUNT(ss.tunnus) AS rullat,
-              SUM(ss.massa) AS paino
+              SUM(ss.massa) AS paino,
+              llt.konttimaara AS bookattu_konttimaara
               FROM lasku
               JOIN tilausrivi AS tr
                 ON tr.yhtio = lasku.yhtio

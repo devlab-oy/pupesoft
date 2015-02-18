@@ -9278,18 +9278,20 @@ if ($tee == '') {
                       <input type='hidden' name='orig_alatila' value='$orig_alatila'>";
             }
             else {
-              list($loytyy_maksutapahtumia, $maksettavaa_jaljella, $kateismaksu["luottokortti"],
-                $kateismaksu["pankkikortti"]) = jaljella_oleva_maksupaatesumma();
+              $pyoristys_otsikko = "Pyöristä loppusummaa";
+              $align = "";
+              $loytyy_maksutapahtumia = false;
 
-              $maksettavaa_jaljella = $maksettavaa_jaljella - $kateismaksu["kateinen"];
+              if ($maksupaate_kassamyynti and $maksuehtorow["kateinen"] != "") {
+                list($loytyy_maksutapahtumia, $maksettavaa_jaljella, $kateismaksu["luottokortti"],
+                  $kateismaksu["pankkikortti"]) = jaljella_oleva_maksupaatesumma();
 
-              if ($loytyy_maksutapahtumia) {
-                $pyoristys_otsikko = "Maksettavaa jäljellä";
-                $align = "align='right'";
-              }
-              else {
-                $pyoristys_otsikko = "Pyöristä loppusummaa";
-                $align = "";
+                $maksettavaa_jaljella = $maksettavaa_jaljella - $kateismaksu["kateinen"];
+
+                if ($loytyy_maksutapahtumia) {
+                  $pyoristys_otsikko = "Maksettavaa jäljellä";
+                  $align = "align='right'";
+                }
               }
 
               echo "  <th colspan='5' id='pyoristysOtsikko'>".t($pyoristys_otsikko).":</th>
@@ -9339,7 +9341,10 @@ if ($tee == '') {
               echo "<td class='spec'>$laskurow[valkoodi]</td>";
             }
 
-            echo "<td class='back' colspan='2'><input type='submit' value='".t("Jyvitä")."' $state></form></td>";
+            if (!$loytyy_maksutapahtumia) {
+              echo "<td class='back' colspan='2'><input type='submit' value='" . t("Jyvitä") .
+                   "' $state></form></td>";
+            }
 
           }
 

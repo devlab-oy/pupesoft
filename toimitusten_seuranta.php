@@ -567,7 +567,8 @@ if (isset($task) and $task == 'laheta_satamavahvistus') {
     echo "Lähetys epäonnistui!";
   }
 
-  unset($task);
+  $task = 'nkv';
+  $kv = $konttiviite;
 }
 
 if (isset($task) and ($task == 'anna_konttitiedot' or $task == 'korjaa_konttitiedot')) {

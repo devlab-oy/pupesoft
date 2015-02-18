@@ -290,6 +290,10 @@ if ($upd == 1) {
   $result = pupe_query($query);
   $trow = mysql_fetch_array($result);
 
+  if ($t[3] == 'hinnastoryhmittely') {
+      $t[4] = implode(",", $t[4]);
+  }
+
   //  Tehd‰‰n muuttujista linkit jolla luomme otsikolliset avaimet!
   for ($i=1; $i < mysql_num_fields($result)-1; $i++) {
     if (isset($t["{$i}_uusi"]) and $t["{$i}_uusi"] != "") {
@@ -480,6 +484,9 @@ if ($upd == 1) {
             $t[$i] = $t[$i] != "NULL" ? "'".(float) str_replace(",", ".", $t[$i])."'" : $t[$i];
 
             $query .= ", ". mysql_field_name($result, $i)." = {$t[$i]} ";
+          }
+          elseif ($toim == 'tuotteen_avainsanat' and mysql_field_name($result, $i) == 'kieli') {
+            $query .= ", ". mysql_field_name($result, $i)." = 'fi' ";
           }
           else {
             $query .= ", ". mysql_field_name($result, $i)." = '".trim($t[$i])."' ";
@@ -1678,6 +1685,42 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
           }
           elseif (mysql_field_name($result, $i) == 'koko') {
             echo "<td>$fontlisa1 ".size_readable($trow[$i])." $fontlisa2</td>";
+          }
+         elseif (mysql_field_name($result, $i) == 'kieli' and $trow['laji'] == 'hinnastoryhmittely') {
+            echo "<td></td>";
+          }
+          elseif (mysql_field_name($result, $i) == 'selite' and $trow['laji'] == 'hinnastoryhmittely') {
+
+            $perheet = explode(',', $trow['selite']);
+
+            $qry = "SELECT * FROM avainsana
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND laji = 'THR'
+                      AND perhe IN ({$trow['selite']})
+                      ORDER BY perhe";
+            $res = pupe_query($qry);
+
+            $kaikkiryhmat = array();
+            while ($rivi = mysql_fetch_assoc($res)) {
+
+            $kaikkiryhmat[$rivi['kieli']][] = $rivi;
+
+            }
+
+            echo "<td>";
+            foreach ($kaikkiryhmat as $kieli => $ryhmat) {
+              echo "<div class='esierio'>";
+              echo "<div class='kielipallo'>{$kieli}</div>";
+
+              foreach ($ryhmat as $ryhma) {
+                echo "<div class='erio'>";
+                echo $ryhma['selite'];
+                echo "</div>";
+              }
+              echo '</div>';
+            }
+
+            echo "</td>";
           }
           else {
 

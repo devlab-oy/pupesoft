@@ -15,42 +15,62 @@ if (mysql_field_name($result, $i) == "laji") {
 
   $tem_laji = $trow[$i];
 
-  $ulos = "<td><select name='$nimi' onchange='submit();'>";
-  $ulos .= "<option value='nimitys' $sel[nimitys]>".t("Tuotteen nimitys")."</option>";
-  $ulos .= "<option value='lyhytkuvaus' $sel[lyhytkuvaus]>".t("Tuotteen lyhytkuvaus")."</option>";
-  $ulos .= "<option value='kuvaus' $sel[kuvaus]>".t("Tuotteen kuvaus")."</option>";
-  $ulos .= "<option value='mainosteksti' $sel[mainosteksti]>".t("Tuotteen mainosteksti")."</option>";
-  $ulos .= "<option value='tarratyyppi' $sel[tarratyyppi]>".t("Tuotteen tarratyyppi")."</option>";
-  $ulos .= "<option value='sistoimittaja' $sel[sistoimittaja]>".t("Tuotteen sisäinen toimittaja")."</option>";
-  $ulos .= "<option value='oletusvalinta' $sel[oletusvalinta]>".t("Tuotteen tilauksen oletusvalinta")."</option>";
-  $ulos .= "<option value='osasto' $sel[osasto]>".t("Tuotteen osasto")."</option>";
-  $ulos .= "<option value='try' $sel[try]>".t("Tuotteen tuoteryhmä")."</option>";
-  $ulos .= "<option value='ei_edi_ostotilaukseen' {$sel['ei_edi_ostotilaukseen']}>".t("Tuotetta ei lisätä EDI-ostotilaukselle")."</option>";
-  $ulos .= "<option value='hammastus' $sel[hammastus]>".t("Tuotteen hammastus")."</option>";
-  $ulos .= "<option value='laatuluokka' {$sel['laatuluokka']}>".t("Tuotteen laatuluokka")."</option>";
-  $ulos .= "<option value='synkronointi' {$sel['synkronointi']}>".t("Tuotteen synkronointi")."</option>";
-  $ulos .= "<option value='toimpalautus' {$sel['toimpalautus']}>".t("Palautus toimittajalle")."</option>";
-  $ulos .= "<option value='varastopalautus' {$sel['varastopalautus']}>".t("Palautus sallittuihin varastoihin")."</option>";
+  if ($tem_laji == 'hinnastoryhmittely') {
+    $ulos = "<td class='padding4'>" . t("Hinnastoryhmittely") . "</td>";
+    $ulos .= "<input type='hidden' name='$nimi' value='{$trow[$i]}' />";
 
-  $sresult = t_avainsana("TUOTEULK");
-
-  while ($srow = mysql_fetch_array($sresult)) {
-    $ulos .= "<option value='$srow[selite]' ".$sel[$srow["selite"]].">$srow[selite] $srow[selitetark]</option>";
   }
+  else {
 
-  $vresult = t_avainsana("PARAMETRI");
+    $ulos = "<td><select name='$nimi' onchange='submit();'>";
+    $ulos .= "<option value='nimitys' $sel[nimitys]>".t("Tuotteen nimitys")."</option>";
+    $ulos .= "<option value='lyhytkuvaus' $sel[lyhytkuvaus]>".t("Tuotteen lyhytkuvaus")."</option>";
+    $ulos .= "<option value='kuvaus' $sel[kuvaus]>".t("Tuotteen kuvaus")."</option>";
+    $ulos .= "<option value='mainosteksti' $sel[mainosteksti]>".t("Tuotteen mainosteksti")."</option>";
+    $ulos .= "<option value='tarratyyppi' $sel[tarratyyppi]>".t("Tuotteen tarratyyppi")."</option>";
+    $ulos .= "<option value='sistoimittaja' $sel[sistoimittaja]>".t("Tuotteen sisäinen toimittaja")."</option>";
+    $ulos .= "<option value='oletusvalinta' $sel[oletusvalinta]>".t("Tuotteen tilauksen oletusvalinta")."</option>";
+    $ulos .= "<option value='osasto' $sel[osasto]>".t("Tuotteen osasto")."</option>";
+    $ulos .= "<option value='try' $sel[try]>".t("Tuotteen tuoteryhmä")."</option>";
+    $ulos .= "<option value='pakkauskoko2' $sel[pakkauskoko2]>".t("Tuotteen pakkauskoko 2")."</option>";
+    $ulos .= "<option value='pakkauskoko3' $sel[pakkauskoko3]>".t("Tuotteen pakkauskoko 3")."</option>";
+    $ulos .= "<option value='ei_edi_ostotilaukseen' {$sel['ei_edi_ostotilaukseen']}>".t("Tuotetta ei lisätä EDI-ostotilaukselle")."</option>";
+    $ulos .= "<option value='hammastus' $sel[hammastus]>".t("Tuotteen hammastus")."</option>";
+    $ulos .= "<option value='laatuluokka' {$sel['laatuluokka']}>".t("Tuotteen laatuluokka")."</option>";
+    $ulos .= "<option value='synkronointi' {$sel['synkronointi']}>".t("Tuotteen synkronointi")."</option>";
+    $ulos .= "<option value='toimpalautus' {$sel['toimpalautus']}>".t("Palautus toimittajalle")."</option>";
+    $ulos .= "<option value='varastopalautus' {$sel['varastopalautus']}>".t("Palautus sallittuihin varastoihin")."</option>";
 
-  while ($vrow = mysql_fetch_assoc($vresult)) {
-    $ulos .= "<option value='parametri_$vrow[selite]' ".$sel["parametri_".$vrow["selite"]].">".t("Tuotteen parametri").": $vrow[selitetark]</option>";
+    $sresult = t_avainsana("TUOTEULK");
+
+    $qry = "SELECT tunnus
+            FROM tuotteen_avainsanat
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND laji = 'hinnastoryhmittely'
+            AND tuoteno = '{$lukitse_avaimeen}'";
+    $res = pupe_query($qry);
+
+    while ($srow = mysql_fetch_array($sresult)) {
+
+      if ($srow['selite'] != 'hinnastoryhmittely' or mysql_num_rows($res) == 0) {
+        $ulos .= "<option value='$srow[selite]' ".$sel[$srow["selite"]].">$srow[selite] $srow[selitetark]</option>";
+      }
+    }
+
+    $vresult = t_avainsana("PARAMETRI");
+
+    while ($vrow = mysql_fetch_assoc($vresult)) {
+      $ulos .= "<option value='parametri_$vrow[selite]' ".$sel["parametri_".$vrow["selite"]].">".t("Tuotteen parametri").": $vrow[selitetark]</option>";
+    }
+
+    $lresult = t_avainsana("LISATIETO");
+
+    while ($lrow = mysql_fetch_assoc($lresult)) {
+      $ulos .= "<option value='lisatieto_$lrow[selite]' ".$sel["lisatieto_".$lrow["selite"]].">".t("Tuotteen lisätieto").": $lrow[selitetark]</option>";
+    }
+
+    $ulos .= "</select></td>";
   }
-
-  $lresult = t_avainsana("LISATIETO");
-
-  while ($lrow = mysql_fetch_assoc($lresult)) {
-    $ulos .= "<option value='lisatieto_$lrow[selite]' ".$sel["lisatieto_".$lrow["selite"]].">".t("Tuotteen lisätieto").": $lrow[selitetark]</option>";
-  }
-
-  $ulos .= "</select></td>";
   $jatko = 0;
 }
 
@@ -126,9 +146,82 @@ if (mysql_field_name($result, $i) == "selite") {
 
     $jatko = 0;
   }
+  elseif ($tem_laji == "hinnastoryhmittely") {
+
+    if (isset($t['kieli'])) {
+      $kieli = $t['kieli'];
+    }
+    else {
+      $kieli = $trow['kieli'];
+    }
+
+    // haetaan tarjolla olevat hinnastoryhmat
+    $q = "SELECT *
+          FROM avainsana
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND laji = 'THR'";
+    $r = pupe_query($q);
+
+    $valitut_ryhmat = explode(",", $trow[$i]);
+
+    $ryhmat_oikea_kieli = array();
+    $ryhmat_muu_kieli = array();
+
+    while ($thr = mysql_fetch_assoc($r)) {
+
+      if ($thr['kieli'] == $kieli) {
+        $ryhmat_oikea_kieli[] = $thr;
+      }
+      else {
+        $ryhmat_muu_kieli[] = $thr;
+      }
+    }
+
+    $ulos  = "<td>";
+    $ulos .= "<div class='padding4'>";
+
+    if (count($ryhmat_oikea_kieli) == 0) {
+
+      $ulos .= "<span class='error'>" . t("Ei ryhmiä valitulla kielellä") . "</span>";
+    }
+    else {
+
+      foreach ($ryhmat_oikea_kieli as $thr) {
+
+        if (in_array($thr['perhe'], $valitut_ryhmat)) {
+          $chk = 'checked';
+        }
+        else {
+          $chk = '';
+        }
+
+        $ulos .= "<div style='display:inline-block'><label>". $thr['selite'];
+        $ulos .= "<input type='checkbox' name='{$nimi}[]' value='". $thr['perhe'];
+        $ulos .= "' {$chk}></label></div>&nbsp;";
+
+        $naytetyt[] = $thr['perhe'];
+      }
+
+    }
+
+    foreach ($ryhmat_muu_kieli as $thr) {
+
+      if (    in_array($thr['perhe'], $valitut_ryhmat)
+          and !in_array($thr['perhe'], $naytetyt)
+          and !in_array($thr['perhe'], $piilotetut)) {
+
+        $ulos .= "<input type='hidden' name='{$nimi}[]' value='{$thr['perhe']}' />";
+        $piilotetut[] = $thr['perhe'];
+      }
+    }
+
+    $ulos .= "</div>";
+    $ulos .= "</td>";
+
+    $jatko = 0;
+  }
   elseif ($tem_laji == "oletusvalinta") {
     $sel = array($trow[$i] => "SELECTED");
-
 
     $ulos = "<td>
           <select name='$nimi'>
@@ -176,7 +269,22 @@ if (mysql_field_name($result, $i) == "selitetark") {
 }
 
 if (mysql_field_name($result, $i) == "kieli") {
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300).">";
+
+  if (isset($t['laji'])) {
+    $laji = $t['laji'];
+  }
+  else {
+    $laji = $trow['laji'];
+  }
+
+  if ($laji == 'hinnastoryhmittely') {
+    $onchange = "onchange='submit();'";
+  }
+  else {
+   $onchange = "";
+  }
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 300)."' {$onchange}>";
 
   foreach ($GLOBALS["sanakirja_kielet"] as $sanakirja_kieli => $sanakirja_kieli_nimi) {
     $sel = "";

@@ -352,11 +352,48 @@ if ($kasitellaan_tiedosto) {
   // sarakemäärä excelissä
   $excelsarakemaara = count($headers);
 
+  $uniikit_perheet = array();
+  $perhelisa = 1;
+
   // Luetaan tiedosto loppuun ja tehdään taulukohtainen array koko datasta, tässä kohtaa putsataan jokaisen solun sisältö pupesoft_cleanstring -funktiolla
   for ($excei = 1; $excei < $excelrivimaara; $excei++) {
-    for ($excej = 0; $excej < $excelsarakemaara; $excej++) {
 
-      $taulunrivit[$taulut[$excej]][$excei-1][] = pupesoft_cleanstring($excelrivit[$excei][$excej]);
+    // onko kyseessä tuotehinnastoryhmä
+    if (in_array("THR", $excelrivit[$excei])) {
+      $thr = true;
+    }
+    else {
+     $thr = false;
+    }
+
+    for ($excej = 0; $excej < $excelsarakemaara; $excej++) {
+      // haetaan kaikille perheille uusi perhenumero
+      if (strtoupper($excelrivit[0][$excej]) == 'PERHE' and $thr) {
+
+        if (!in_array($excelrivit[$excei][$excej], $uniikit_perheet)) {
+
+          $pquery = "SELECT max(perhe) AS uusi_perhe
+                      FROM avainsana";
+          $presult = pupe_query($pquery);
+          $prow = mysql_fetch_assoc($presult);
+          $uusi_perhe = $prow['uusi_perhe'] + $perhelisa;
+          $perhelisa++;
+
+          if (!empty($excelrivit[$excei][$excej])) {
+            $uniikit_perheet[$uusi_perhe] = $excelrivit[$excei][$excej];
+          }
+
+          $taulunrivit[$taulut[$excej]][$excei-1][] = $uusi_perhe;
+        }
+        else {
+
+          $perhe = array_search($excelrivit[$excei][$excej], $uniikit_perheet);
+          $taulunrivit[$taulut[$excej]][$excei-1][] = $perhe;
+        }
+      }
+      else {
+        $taulunrivit[$taulut[$excej]][$excei-1][] = pupesoft_cleanstring($excelrivit[$excei][$excej]);
+      }
 
       // Pitääkö tämä sarake laittaa myös johonki toiseen tauluun?
       foreach ($taulunotsikot as $taulu => $joinit) {
@@ -1474,6 +1511,31 @@ if ($kasitellaan_tiedosto) {
 
         if ($taulunrivit[$taulu][$eriviindex][$postoiminto] == 'POISTA') {
           $query = "DELETE LOW_PRIORITY FROM $table_mysql ";
+        }
+
+        if ($table_mysql == 'tuotteen_avainsanat' and $taulunrivit[$taulu][$eriviindex][$postoiminto] == 'LISAA') {
+
+          $perheet_key = array_search("SELITE", $taulunotsikot[$taulu]);
+          $ryhmittely = $taulunrivit[$taulu][$eriviindex][$perheet_key];
+
+          $ryhmat = explode(",", $ryhmittely);
+
+          $perheet = array();
+          foreach ($ryhmat as $ryhma) {
+            $r_query = "SELECT perhe
+                        FROM avainsana
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND selite = '{$ryhma}'";
+            $r_result = pupe_query($r_query);
+
+            if (mysql_num_rows($r_result) > 0) {
+              $perheet[] = mysql_result($r_result, 0);
+            }
+          }
+
+          $rymittely = implode(",", $perheet);
+
+          $taulunrivit[$taulu][$eriviindex][$perheet_key] = $rymittely;
         }
 
         foreach ($taulunotsikot[$taulu] as $r => $otsikko) {

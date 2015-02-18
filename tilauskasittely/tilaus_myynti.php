@@ -9862,6 +9862,32 @@ if ($tee == '') {
           echo t("Tulosta lähete"),": ";
           echo "<input type='hidden' name='tulosta_lahete_chkbx[]' value='default' />";
           echo "<input type='checkbox' name='tulosta_lahete_chkbx[]' value='1' checked />";
+          echo "&nbsp;&nbsp;&nbsp;<select name='komento[Lähete]'>";
+          echo "<option value=''>".t("Ei kirjoitinta")."</option>";
+
+          $querykieli = "SELECT *
+                         FROM kirjoittimet
+                         WHERE yhtio  = '{$kukarow['yhtio']}'
+                         AND komento != 'edi'
+                         ORDER BY kirjoitin";
+          $kires = pupe_query($querykieli);
+
+          while ($kirow = mysql_fetch_assoc($kires)) {
+
+            if ($apuprintteri != 0) {
+              $sel = $kirow["tunnus"] == $apuprintteri ? "selected" : "";
+            }
+            elseif ($kirow["tunnus"] == $kukarow["kirjoitin"]) {
+              $sel = "selected";
+            }
+            else {
+              $sel = "";
+            }
+
+            echo "<option value='{$kirow['komento']}'{$sel}>{$kirow['kirjoitin']}</option>";
+          }
+
+          echo "</select>";
           echo "<br />";
           echo t("Tulosta keräyslista"),": ";
           echo "<input type='hidden' name='tulosta_kerayslista_chkbx[]' value='default' />";

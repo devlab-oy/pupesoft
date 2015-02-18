@@ -131,6 +131,10 @@ if (!function_exists("onkokaikkivalmistettu")) {
   function onkokaikkivalmistettu($valmkpllat) {
     global $kukarow, $tee, $valmistettavat;
 
+    // Oletetaan että tilaus on kokonaan valmistettu,
+    // alla tarkastetaan onko tilaus valmsitettu kokonaan vai ei
+    $valmistettu = TRUE;
+
     //katotaan onko enää mitään valmistettavaa
     foreach ($valmkpllat as $rivitunnus => $tuoteno) {
       //Haetaan tilausrivi
@@ -151,34 +155,10 @@ if (!function_exists("onkokaikkivalmistettu")) {
                 and toimitettuaika = '0000-00-00 00:00:00'";
       $chkresult1 = pupe_query($query);
 
-      //eli tilaus on kokonaan valmistettu
-      if (mysql_num_rows($chkresult1) == 0) {
-        //Jos kyseessä on varastovalmistus
-        $query = "UPDATE lasku
-                  SET alatila  = 'V'
-                  WHERE yhtio      = '$kukarow[yhtio]'
-                  and tunnus       = $tilrivirow[otunnus]
-                  and tila         = 'V'
-                  and alatila      = 'C'
-                  and tilaustyyppi = 'W'";
-        $chkresult2 = pupe_query($query);
-
-        //Jos kyseessä on asiakaalle valmistus
-        $query = "UPDATE lasku
-                  SET tila  = 'L',
-                  alatila          = 'C'
-                  WHERE yhtio      = '$kukarow[yhtio]'
-                  and tunnus       = $tilrivirow[otunnus]
-                  and tila         = 'V'
-                  and alatila      = 'C'
-                  and tilaustyyppi = 'V'";
-        $chkresult2 = pupe_query($query);
-
-        $tee       = "";
-        $valmistettavat = "";
-      }
-      else {
-        $tee = "VALMISTA";
+      // Eli tilaus ei ole vielä kokonaan valmistettu, jos rivi löytyy
+      // ei siis tulla laittamaan valmistusta vielä valmiiksi
+      if (mysql_num_rows($chkresult1) != 0) {
+        $valmistettu = FALSE;
       }
 
       //jos rivit oli siirretty toiselta otsikolta niin siirretään ne nyt takaisin
@@ -227,6 +207,38 @@ if (!function_exists("onkokaikkivalmistettu")) {
         }
       }
     }
+
+    // Laitetaan valmistus valmis tilaan vain,
+    // jos kaikki on jo valmsitettu
+    if ($valmistettu) {
+      //Jos kyseessä on varastovalmistus
+      $query = "UPDATE lasku
+                SET alatila  = 'V'
+                WHERE yhtio      = '$kukarow[yhtio]'
+                and tunnus       = $tilrivirow[otunnus]
+                and tila         = 'V'
+                and alatila      = 'C'
+                and tilaustyyppi = 'W'";
+      $chkresult2 = pupe_query($query);
+
+      //Jos kyseessä on asiakaalle valmistus
+      $query = "UPDATE lasku
+                SET tila  = 'L',
+                alatila          = 'C'
+                WHERE yhtio      = '$kukarow[yhtio]'
+                and tunnus       = $tilrivirow[otunnus]
+                and tila         = 'V'
+                and alatila      = 'C'
+                and tilaustyyppi = 'V'";
+      $chkresult2 = pupe_query($query);
+
+      $tee       = "";
+      $valmistettavat = "";
+    }
+    else {
+      $tee = "VALMISTA";
+    }
+
   }
 }
 

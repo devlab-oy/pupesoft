@@ -1,4 +1,6 @@
 $(document).ready(function() {
+
+  /** Maksupäätetoiminnallisuus */
   (function() {
     "use strict";
 
@@ -83,9 +85,7 @@ $(document).ready(function() {
       laskuriTee.val('VALMIS');
       saaSubmittaa = true;
 
-      setTimeout(function() {
-        maksupaate.submit();
-      }, 4000);
+      maksupaate.submit();
     }
 
     $('#peruuta_viimeisin').click(function() {

@@ -1821,6 +1821,29 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
         echo "! ($aika) $kaikkiyhteensa {$laskurow['valkoodi']}</font><br /><br />";
       }
 
+      if ($maksupaate_kassamyynti and
+          $maksuehtorow["kateinen"] != "" and $kateismaksu["kateinen"] != ""
+      ) {
+        $kateista_takaisin = $kateista_annettu - $kateismaksu["kateinen"];
+
+        echo "<table class='kateis-table'>
+                <thead>
+                  <tr>
+                    <th>" . t("Yhteensä") . "</th>
+                    <th>" . t("Annettu") . "</th>
+                    <th>" . t("Takaisin") . "</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{$kateismaksu["kateinen"]} {$laskurow["valkoodi"]}</td>
+                    <td>{$kateista_annettu} {$laskurow["valkoodi"]}</td>
+                    <td>{$kateista_takaisin} {$laskurow["valkoodi"]}</td>
+                  </tr>
+                </tbody>
+              </table>";
+      }
+
       if (($kukarow["kassamyyja"] != '' or
            $kukarow["dynaaminen_kassamyynti"] != "" or
            $yhtiorow["dynaaminen_kassamyynti"] != "") and

@@ -175,3 +175,11 @@ ul.list-unstyled {
 .margin-left-20 {
   margin-left: 20px !important;
 }
+
+.kateis-table {
+  margin-bottom: 20px;
+}
+
+.kateis-table th, .kateis-table td {
+  font-size: 1.25rem;
+}

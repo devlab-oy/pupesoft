@@ -443,7 +443,7 @@ if ($tee == 'VALMIS') {
                 }
               }
             }
-            
+
             if ($eravirhe == 1) {
               echo "<font class='error'>".t("VIRHE: Uusia eriä syötettäessä ei voi muokata vanhoja eriä")."!</font><br>";
             }
@@ -873,6 +873,9 @@ if ($tee == 'VALMIS') {
             // Jos pävitettiin saldoa, tehdään kirjanpito. Vaikka summa olisi nolla. Muuten jälkilaskenta ei osaa korjata tätä, jos tiliöintejä ei tehdä.
             if (mysql_affected_rows() > 0) {
 
+              // Päivämäärällä inventoitaessa laitetaan tämäpäivämäärä,
+              // jos eri päivämäärä ei ole syötetty,
+              // mutta jos päivämäärä on syötetty laitetaan se luotavan laskun tapahtumapäivämääräksi
               $lasku_tapvm = date('Y-m-d');
 
               if ($paivamaaran_kasisyotto == "JOO" and (!empty($inventointipvm_pp) and !empty($inventointipvm_kk) and !empty($inventointipvm_vv))) {
@@ -881,7 +884,7 @@ if ($tee == 'VALMIS') {
 
               $query = "INSERT into lasku set
                         yhtio      = '$kukarow[yhtio]',
-                        tapvm      = $lasku_tapvm,
+                        tapvm      = '{$lasku_tapvm}',
                         tila       = 'X',
                         alatila    = 'I',
                         laatija    = '$kukarow[kuka]',
@@ -1597,6 +1600,8 @@ if ($tee == 'INVENTOI') {
 
           $sarjalaskk = 1;
 
+          // Katsotaan onko uusia eriä syötetty,
+          // koska jos uusia eriä on syötetty tyhjennetään vanhojen erien kpl kentät
           $_onko_uusia = FALSE;
 
           while ($sarjarow = mysql_fetch_assoc($sarjares)) {

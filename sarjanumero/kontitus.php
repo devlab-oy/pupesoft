@@ -56,6 +56,7 @@ if (isset($submit)) {
                   AND ss.myyntirivitunnus = tilausrivi.tunnus
                 WHERE laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}'
                 AND laskun_lisatiedot.konttiviite = '{$konttiviite}'";
+
       if ($muutos == 'muutos' ) {
 
         $result = pupe_query($query);
@@ -97,12 +98,17 @@ if (isset($submit)) {
       $kontitettu = false;
       $mrn = true;
 
+      $kontitetut = array();
+      $vahvistetut = array();
+
       $hylatyt = array();
       $hylattavat = array();
       $lusattavat = array();
       $rullia = 0;
 
       $result = pupe_query($query);
+
+      $rullamaara = mysql_num_rows($result);
 
       if (mysql_num_rows($result) == 0) {
         $rullia_loytyy = false;
@@ -123,10 +129,12 @@ if (isset($submit)) {
 
           if ($rulla['toimitettu'] != '') {
             $kontitettu = true;
+            $vahvistetut[] = $rulla;
           }
 
           if ($rulla['konttinumero'] != '') {
             $kontissa = true;
+            $kontitetut[] = $rulla;
           }
           else {
             $ei_kontissa = true;
@@ -155,6 +163,15 @@ if (isset($submit)) {
         }
       }
 
+      $vahvistetut = count($vahvistetut);
+      $kontitetut = count($kontitetut);
+
+
+
+      if ($kontitetut == $rullamaara and $vahvistetut < $rullamaara) {
+        $kontitettu_ilman_vahvistusta = true;
+      }
+
       $rivitunnukset = rtrim($rivitunnukset, ',');
 
       if ($mrn == true) {
@@ -169,11 +186,7 @@ if (isset($submit)) {
         $errors[] = t("Kaikkia rullia ei ole tuloutettu.");
         $view = 'konttiviite';
       }
-      /*elseif ($kontitettu == true) {
-        $errors[] = t("Rullat on jo kontitettu ja kontti sinetöity.");
-        $view = 'konttiviite';
-      }*/
-      elseif ($kontissa == true and $ei_kontissa == false and !$jatka) {
+      elseif (($kontissa == true and $ei_kontissa == false and !$jatka) and !$kontitettu_ilman_vahvistusta) {
         $errors[] = t("Kaikki viitteen alaiset rullat on jo kontitettu.");
         $yliajo = true;
         $view = 'konttiviite';

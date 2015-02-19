@@ -421,7 +421,7 @@ if ($tee == 'VALMIS') {
                 $virhe = 1;
                 break;
               }
-echo "423 eranumero uudet "; var_dump($eranumero_uudet); echo "<br><br><br> eranumero valitut  "; var_dump($eranumero_valitut); echo "<br><br><br>";
+
               $erasyotetyt += (float) $ekpl;
 
               if ($eranumero_uudet[$i][$enro] == '0000-00-00') {
@@ -430,17 +430,17 @@ echo "423 eranumero uudet "; var_dump($eranumero_uudet); echo "<br><br><br> eran
               }
             }
 
-            foreach ($eranumero_valitut[$i] as $enro => $ekpl) {
-              if (!empty($ekpl)) {
-echo "435 $enro & $ekpl <br><br>";
-                if (!array_key_exists($enro, $_uudet[$i])) {
-                  echo "<font class='error'>".t("VIRHE: Uusia eriä syötettäessä ei voi muokata vanhoja eriä")."!</font><br>";
-                  $virhe = 1;
+            if ($onko_uusia > 0) {
+              foreach ($eranumero_valitut[$i] as $enro => $ekpl) {
+                if (!empty($ekpl)) {
+                  if (!array_key_exists($enro, $_uudet[$i])) {
+                    echo "<font class='error'>".t("VIRHE: Uusia eriä syötettäessä ei voi muokata vanhoja eriä")."!</font><br>";
+                    $virhe = 1;
+                  }
                 }
               }
             }
 
-echo "432 "; var_dump($_uudet); echo "<br><br>";
             $erasyotetyt = round($erasyotetyt, 2);
 
             if (is_array($eranumero_kaikki[$i]) and substr($kpl, 0, 1) != '+' and substr($kpl, 0, 1) != '-' and $onko_uusia > 0) {
@@ -465,7 +465,7 @@ echo "432 "; var_dump($_uudet); echo "<br><br>";
             $virhe = 1;
           }
         }
-#$virhe = 1; echo "kissa!!! <br><br>";
+
         if ($fileesta == "ON" and $virhe == 1) {
           $virhe = 0;
           continue;
@@ -865,9 +865,9 @@ echo "432 "; var_dump($_uudet); echo "<br><br>";
 
             // Jos pävitettiin saldoa, tehdään kirjanpito. Vaikka summa olisi nolla. Muuten jälkilaskenta ei osaa korjata tätä, jos tiliöintejä ei tehdä.
             if (mysql_affected_rows() > 0) {
-              
+
               $lasku_tapvm = date('Y-m-d');
-              
+
               if ($paivamaaran_kasisyotto == "JOO" and (!empty($inventointipvm_pp) and !empty($inventointipvm_kk) and !empty($inventointipvm_vv))) {
                 $lasku_tapvm = "$inventointipvm_vv-$inventointipvm_kk-$inventointipvm_pp";
               }

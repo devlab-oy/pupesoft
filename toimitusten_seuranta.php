@@ -1468,7 +1468,10 @@ if (!isset($task)) {
       echo "<td valign='top'>" . date("j.n.Y H:i", strtotime($rivi['lahtoaika'])) . "</td>";
       echo "<td valign='top'>";
 
-      if ($rajaus == 'Tulevat') {
+      if ($rajaus == 'Bookkauksettomat') {
+        echo $rivi['rullat'] . " kpl. / " . (int) $rivi['paino'] . " kg.<br>";
+      }
+      elseif ($rajaus == 'Tulevat') {
         echo $rivi['bookatut_rullat'] . " kpl. (" . t("Bookattu m‰‰r‰") . ")";
       }
       else {
@@ -1479,7 +1482,10 @@ if (!isset($task)) {
 
       echo "<td valign='top'>";
 
-      if (!empty($rivi['kontit'])) {
+      if ($rajaus == 'Bookkauksettomat') {
+        echo t("Ei tiedossa");
+      }
+      elseif (!empty($rivi['kontit'])) {
         echo $rivi['kontit'] . '<br>';
         echo $rivi['bookattu_konttimaara'] . " kpl. (" . t("Bookattu konttim‰‰r‰") . ")";
       }

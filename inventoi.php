@@ -430,15 +430,22 @@ if ($tee == 'VALMIS') {
               }
             }
 
+            // Katsotaan ettei olla yritetty muokata vanhoja eriä
+            // vanhojen erien muokkaus sekoittaa uusien erien lisäyksen
+            $eravirhe = 0;
             if ($onko_uusia > 0) {
               foreach ($eranumero_valitut[$i] as $enro => $ekpl) {
                 if (!empty($ekpl)) {
                   if (!array_key_exists($enro, $_uudet[$i])) {
-                    echo "<font class='error'>".t("VIRHE: Uusia eriä syötettäessä ei voi muokata vanhoja eriä")."!</font><br>";
+                    $eravirhe = 1;
                     $virhe = 1;
                   }
                 }
               }
+            }
+            
+            if ($eravirhe == 1) {
+              echo "<font class='error'>".t("VIRHE: Uusia eriä syötettäessä ei voi muokata vanhoja eriä")."!</font><br>";
             }
 
             $erasyotetyt = round($erasyotetyt, 2);

@@ -1353,7 +1353,25 @@ if ($tee == "VALMIS"
     $maksuehtores = pupe_query($query_maksuehto);
 
     if (mysql_num_rows($maksuehtores) > 1) {
-      echo "<table><tr><th>".t("Maksutapa").":</th>";
+      echo "<table><tr><th>" . t("Maksutapa") . ":</th>";
+      while ($maksuehtorow = mysql_fetch_assoc($maksuehtores)) {
+        echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
+        echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
+        echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+        echo "<input type='hidden' name='mista' value='$mista'>";
+        echo "<input type='hidden' name='tee' value='VALMIS'>";
+        echo "<input type='hidden' name='maksutapa' value='$maksuehtorow[tunnus]'>";
+        echo "<input type='hidden' name='kaikkiyhteensa' value='$kaikkiyhteensa'>";
+        echo "<input type='hidden' name='kateinen' value='$kateinen'>";
+        echo "<input type='hidden' name='valittu_kopio_tulostin' value='$valittu_kopio_tulostin'>";
+        echo "<input type='hidden' name='kertakassa' value='$kertakassa'>";
+        echo "<input type='hidden' name='toim' value='$toim'>";
+        echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
+        echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
+        echo "<td><input type='submit' value='" .
+             t_tunnus_avainsanat($maksuehtorow, "teksti", "MAKSUEHTOKV") . "'></td>";
+        echo "</form>";
+      }
 
       echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
       echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
@@ -1409,7 +1427,7 @@ if ($tee == "VALMIS"
 
     $maksuehtorow = mysql_fetch_assoc($maksuehtores);
 
-    echo "<table><form name='laskuri' id='laskuri' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
+    echo "<form name='laskuri' id='laskuri' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'><table class='laskuri'>";
 
     echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
     echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
@@ -1481,9 +1499,9 @@ if ($tee == "VALMIS"
     $totaalisumma = 0.00;
 
     echo "<tr><th>".t("Erotus")."</th><td name='loppusumma' id='loppusumma' align='right'><strong>$totaalisumma</strong></td><td>$laskurow[valkoodi]</td></tr>";
-    echo "<tr><td class='back'><input type='button' name='hyvaksy_nappi' id='hyvaksy_nappi' value='".t("Hyväksy")."' $disabloi_hyvaksy></td></tr>";
+    echo "<tr><td class='back'><input type='submit' name='hyvaksy_nappi' id='hyvaksy_nappi' value='".t("Hyväksy")."' $disabloi_hyvaksy></td></tr>";
 
-    echo "</form><br><br>";
+    echo "</table></form><br><br>";
 
     $formi  = "laskuri";
     $kentta = "kateismaksu";
@@ -1867,7 +1885,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
               }
             -->
             </script>";
-        echo "<table><form name='laskuri' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
+        echo "<table class='laskuri'><form name='laskuri' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
 
         if (!isset($kateismaksu['kateinen']) or $kateismaksu['kateinen'] == '') {
           $yhteensa_teksti = t("Yhteensä");

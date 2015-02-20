@@ -18244,7 +18244,12 @@ if (!function_exists("tee_keraysera")) {
         $kukarow['debugstring'] .= "(KALAJOOSEPPI 005) eka_kierros ".(int) $eka_kierros."<br>";
 
         if ($kaytettava_pakkaus == '' and $eran_koko_chk > 0 and $tuoterow['yksin_kerailyalustalle'] == "" and !isset($tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']])) {
-          $kaytettava_pakkaus = valitse_pakkaus($keraysvyohyketiedot, $pakkaukset, $pisin_tuote, $pisin_tuote_per_asiakas, $eran_koko, $eran_paino, $eran_koko_chk, $eran_paino_chk, $eran_koko_pintaala);
+          if ($nurkan_takaa) {
+            $kaytettava_pakkaus = valitse_pakkaus($keraysvyohyketiedot, $pakkaukset, $pisin_tuote, $pisin_tuote_per_asiakas, '', '', $eran_koko_chk, $eran_paino_chk, $eran_koko_pintaala);
+          }
+          else {
+            $kaytettava_pakkaus = valitse_pakkaus($keraysvyohyketiedot, $pakkaukset, $pisin_tuote, $pisin_tuote_per_asiakas, $eran_koko, $eran_paino, $eran_koko_chk, $eran_paino_chk, $eran_koko_pintaala);
+          }
         }
 
         $kukarow['debugstring'] .= "(KALAJOOSEPPI 006) eka_kierros ".(int) $eka_kierros."<br>";
@@ -18434,6 +18439,8 @@ if (!function_exists("tee_keraysera")) {
           if (isset($kukarow['debugstring'])) {
             $kukarow['debugstring'] .= "(E10011): Nurkan takaa for-ehdot: $_nurkka_i = ($_main_i + 1); ($_main_i + 4 and $_fixed_main_array_count) > $_nurkka_i; $_nurkka_i++<br>\n";
           }
+
+          $juokseva_nro--;
 
           for ($_nurkka_i = ($_main_i + 1); ($_main_i + 6) > $_nurkka_i and $_fixed_main_array_count > $_nurkka_i; $_nurkka_i++) {
 
@@ -19067,6 +19074,8 @@ if (!function_exists("tee_keraysera")) {
         // tilaus loppuu, tehd‰‰n viel‰ t‰ss‰ vaiheessa pakkaustsekki
         list($pakkaukset, $kaytettava_pakkaus, $kaytettavat_pakkaukset, $eran_koko, $eran_koko_pintaala) = pakkauksen_iterointi($keraysvyohyketiedot, $pakkaukset, $kaytettava_pakkaus, $pisin_tuote, $kaytettavat_pakkaukset, $eka_kierros, $eran_koko, $eran_koko_pintaala, $juokseva_nro, $kerailyniput_tiedot, $kerailyniput_key, $key, $pisin_tuote_per_asiakas);
       }
+
+      $nurkan_takaa = false;
     }
 
     // nyt on luultavasti mennyt jotain vikaan. yksi syy voi olla tuotteiden hullut mitat.

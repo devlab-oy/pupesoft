@@ -771,7 +771,6 @@ if ($tee == 'TEEVALMISTUS') {
             $perutaan = "";
           }
 
-echo "764 "; var_dump($roxresult); echo "<br><br>";          
           require "korjaa_valmistus.inc";
         }
       }
@@ -812,7 +811,7 @@ echo "764 "; var_dump($roxresult); echo "<br><br>";
                   and otunnus = '$row[tunnus]'
                   and tyyppi  in ('V','W','M')";
         $chkresult4 = pupe_query($query);
-        
+
         // P‰ivitet‰‰n er‰-/sarjanumerot laskutetuiksi, jotta ne poistuvat varastonarvosta oikein
         $query = "UPDATE tilausrivi
                   JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.sarjanumeroseuranta != '')

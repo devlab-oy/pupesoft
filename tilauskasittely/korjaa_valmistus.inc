@@ -21,7 +21,7 @@ $query = "SELECT tilausrivi.*,
           AND tilausrivi.tyyppi  = 'V'
           ORDER BY tilausrivi.tuoteno";
 $raakaaineres = pupe_query($query);
-echo "24 $query <br><br>";
+
 $uusiarvo = 0;
 
 while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
@@ -137,7 +137,7 @@ while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
     // P‰ivitet‰‰n saldo oikeaksi vasta j‰lkilaskennan j‰lkeen kun valmistusmuutos otetaan huomioon
     // Pistet‰‰n saldo aina oletuspaikalle
     $mtos = $raakaainerow["varattu"] - $raakaainerow["kpl"];
-echo "140 mtos $mtos = raakaaineRow Varattu {$raakaainerow["varattu"]} - Kpl {$raakaainerow["kpl"]}";
+
     if ($raakaainerow["ei_saldoa"] == "") {
       $query = "UPDATE tuotepaikat
                 SET saldo = saldo + $mtos * -1,
@@ -172,7 +172,7 @@ echo "140 mtos $mtos = raakaaineRow Varattu {$raakaainerow["varattu"]} - Kpl {$r
         }
       }
     }
-echo "175 "; var_dump($raakaainerow); echo "<br><br>";
+
     if ($perutaan == "JOO") {
       if (in_array($raakaainerow["sarjanumeroseuranta"], array("E", "F", "G"))) {
         $query = "UPDATE sarjanumeroseuranta

@@ -19089,7 +19089,7 @@ if (!function_exists("tee_keraysera")) {
       if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1500): Virhe keräyserää tehdessä. Tarkista tuotteen mitat, paino, yksin keräilyalustalle ehto ja laita tilaukselle lähtö!<br>\n";
 
       $message = t("Virhe keräyserää tehdessä").". ";
-      $message .= t("Tarkista tuotteen mitat, paino, yksin keräilyalustalle ehto ja laita tilaukselle lähtö")."! ";
+      $message .= t("Tarkista tuotteen mitat, paino, ostoerä, myyntierä, yksin keräilyalustalle ehto ja laita tilaukselle lähtö")."! ";
 
       foreach (explode("|||", $fail) as $failures) {
         list($fail_tuoteno, $fail_otunnus) = explode("###", $failures);

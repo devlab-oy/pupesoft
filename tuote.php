@@ -1686,7 +1686,7 @@ echo "<script type='text/javascript'>
             var _src = '{$palvelin2}pics/loading_blue_small.gif',
                 sarjanumeroseuranta = $('#sarjanumeroseuranta').val(),
                 _tp_kasittely = $('#_tp_kasittely').val(),
-                toimipaikka = $('#toimipaikka option:selected').val()
+                toimipaikka = $('#toimipaikka option:selected').val(),
                 saldoaikalisa = $('#saldoaikalisa').val();
 
             $(this).val('".t("Päivitä")."');

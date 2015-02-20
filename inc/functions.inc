@@ -18435,7 +18435,7 @@ if (!function_exists("tee_keraysera")) {
             $kukarow['debugstring'] .= "(E10011): Nurkan takaa for-ehdot: $_nurkka_i = ($_main_i + 1); ($_main_i + 4 and $_fixed_main_array_count) > $_nurkka_i; $_nurkka_i++<br>\n";
           }
 
-          for ($_nurkka_i = ($_main_i + 1); ($_main_i + 4) > $_nurkka_i and $_fixed_main_array_count > $_nurkka_i; $_nurkka_i++) {
+          for ($_nurkka_i = ($_main_i + 1); ($_main_i + 6) > $_nurkka_i and $_fixed_main_array_count > $_nurkka_i; $_nurkka_i++) {
 
             $_key = $_fixed_main_array_keys[$_nurkka_i];
             $_tilaukset = $fixed_main_array[$_key];

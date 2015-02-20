@@ -18632,8 +18632,9 @@ if (!function_exists("tee_keraysera")) {
                       unset($kaytettavat_pakkaukset[999][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro][$tuoterow['tunnus']]);
                     }
 
-                    $era_valmis = true;
-                    break 3;
+                    $juokseva_nro--;
+                    # skipataan kyseinen nippu
+                    break 2;
                   }
 
                   // esimerkki

@@ -132,7 +132,7 @@ if (!function_exists("onkokaikkivalmistettu")) {
     global $kukarow, $tee, $valmistettavat;
 
     // Oletetaan ett‰ tilaus on kokonaan valmistettu,
-    // alla tarkastetaan onko tilaus valmsitettu kokonaan vai ei
+    // alla tarkastetaan onko tilaus valmistettu kokonaan vai ei
     $valmistettu = TRUE;
 
     //katotaan onko en‰‰ mit‰‰n valmistettavaa
@@ -344,7 +344,6 @@ if ($tee == "TEEVALMISTUS" and $era_new_paikka != "") {
 }
 
 if ($tee == 'TEEVALMISTUS' and count($valmkpllat) == 0 and count($tilkpllat) == 0) {
-
   //katotaan onko en‰‰ mit‰‰n valmistettavaa
   onkokaikkivalmistettu ($valmisteet_chk);
 }

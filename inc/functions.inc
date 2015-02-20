@@ -18617,7 +18617,7 @@ if (!function_exists("tee_keraysera")) {
                   }
 
                   if ($eran_koko_pintaala + ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $kappalemaara) > $keraysvyohyketiedot['max_keraysera_pintaala']) {
-                    if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1050): Tuotteen $tuoterow[tuoteno] lisäys ylittäisi max keräyserä pinta-alan ($keraysvyohyketiedot[max_keraysera_pintaala]). $kappalemaara kpl. ($tuoterow[pisin_sorttaus] * $tuoterow[lyhin_sorttaus] * $ix)<br><br>\n";
+                    if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1050): Tuotteen $tuoterow[tuoteno] lisäys ylittäisi max keräyserä pinta-alan ($keraysvyohyketiedot[max_keraysera_pintaala]). $kappalemaara kpl. ($tuoterow[pisin_sorttaus] * $tuoterow[lyhin_sorttaus] * $ix)<br>ostoerä: {$order_chk_row['osto_era']}<br>myyntierä: {$tuoterow['myynti_era']}<br><br>\n";
 
                     if ($eran_koko == 0) {
                       if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1060): Laitetaan herja!!!<br><br>\n";

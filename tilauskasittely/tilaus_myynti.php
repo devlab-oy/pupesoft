@@ -9363,6 +9363,9 @@ if ($tee == '') {
               echo "<td class='back' colspan='2'><input type='submit' value='" . t("Jyvitä") .
                    "' $state></form></td>";
             }
+            else {
+              echo "</form>";
+            }
 
           }
 

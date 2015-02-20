@@ -16516,13 +16516,16 @@ if (!function_exists("valitse_pakkaus")) {
         }
       }
 
-      if ($kaytettava_pakkaus == "") {
-        if (isset($kukarow['debugstring'])) {
-          $kukarow['debugstring'] .= "pisin mitta: $pisin_tuote[koko]<br>";
-          $kukarow['debugstring'] .= "<pre>";
-          $kukarow['debugstring'] .= var_export($pisin_tuote, TRUE);
-          $kukarow['debugstring'] .= "</pre>";
-        }
+      if (isset($kukarow['debugstring'])) {
+        $kukarow['debugstring'] .= "pisin mitta: $pisin_tuote[koko]<br>";
+        $kukarow['debugstring'] .= "<pre>";
+        $kukarow['debugstring'] .= var_export($pisin_tuote, TRUE);
+        $kukarow['debugstring'] .= "</pre>";
+        $kukarow['debugstring'] .= "koko_nippu_tilavuus: $koko_nippu_tilavuus<br>";
+        $kukarow['debugstring'] .= "koko_nippu_paino: $koko_nippu_paino<br>";
+      }
+
+      if ($kaytettava_pakkaus == "" and !$nurkan_takaa) {
 
         // pakkaukset ovat pienimmästä isoimpaan
         foreach ($pakkaukset as $indx => $pakkaus_array) {

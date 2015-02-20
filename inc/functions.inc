@@ -17151,11 +17151,15 @@ if (!function_exists("tee_keraysera")) {
                  and maksuehto.tunnus                         = lasku.maksuehto
                  and maksuehto.jv                            != '')
                LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio and kuka.kesken = lasku.tunnus)
+               LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio
+                 AND kerayserat.otunnus = lasku.tunnus
+               )
                WHERE lasku.yhtio                              = '{$kukarow['yhtio']}'
                {$tilat}
                AND lasku.vakisin_kerays                       = ''
                AND lasku.varasto                              = '{$varasto}'
                AND kuka.tunnus is null
+               AND kerayserat.tunnus is null
                GROUP BY 1,2,3,4,5,6,7)
 
                UNION
@@ -17195,11 +17199,15 @@ if (!function_exists("tee_keraysera")) {
                  AND maksuehto.jv                            != '')
                LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio
                  AND kuka.kesken                              = lasku.tunnus)
+               LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio
+                 AND kerayserat.otunnus = lasku.tunnus
+               )
                WHERE lasku.yhtio                              = '{$kukarow['yhtio']}'
                {$tilat}
                AND lasku.vakisin_kerays                      != ''
                AND lasku.varasto                              = '{$varasto}'
                AND kuka.tunnus is null
+               AND kerayserat.tunnus is null
                GROUP BY 1,2,3,4,5,6,7)
                ORDER BY 1,2,3,4,5,6";
     $res = pupe_query($query);
@@ -17342,6 +17350,7 @@ if (!function_exists("tee_keraysera")) {
               keraysvyohyke READ,
               toimitustapa READ,
               maksuehto READ,
+              kerayserat READ,
               kuka READ,
               lahdot READ";
     pupe_query($query);
@@ -17384,6 +17393,9 @@ if (!function_exists("tee_keraysera")) {
                   AND maksuehto.jv                            != '')
                 LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio
                   and kuka.kesken                              = lasku.tunnus)
+                LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio
+                  AND kerayserat.otunnus = lasku.tunnus
+                )
                 JOIN lahdot ON (lahdot.yhtio = toimitustapa.yhtio
                   AND lahdot.liitostunnus                      = toimitustapa.tunnus
                   AND lahdot.aktiivi                           IN ('', 'T')
@@ -17394,6 +17406,7 @@ if (!function_exists("tee_keraysera")) {
                 AND lasku.vakisin_kerays                       = ''
                 AND lasku.varasto                              = '{$varasto}'
                 AND kuka.tunnus is null
+                AND kerayserat.tunnus is null
                 {$_group_by_lisa}
                 ORDER BY prioriteetti,erotus,lahdon_tiedot,h1time,liitostunnus,ohjausmerkki";
     }
@@ -17438,11 +17451,15 @@ if (!function_exists("tee_keraysera")) {
                   AND maksuehto.jv                            != '')
                 LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio
                   and kuka.kesken                              = lasku.tunnus)
+                LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio
+                  AND kerayserat.otunnus = lasku.tunnus
+                )
                 WHERE lasku.yhtio                              = '{$kukarow['yhtio']}'
                 {$tilat}
                 AND lasku.vakisin_kerays                      != ''
                 AND lasku.varasto                              = '{$varasto}'
                 AND kuka.tunnus is null
+                AND kerayserat.tunnus is null
                 {$_group_by_lisa}
                 ORDER BY prioriteetti,erotus,lahdon_tiedot,h1time,liitostunnus,ohjausmerkki";
     }
@@ -18454,7 +18471,7 @@ if (!function_exists("tee_keraysera")) {
 
                 unset($pisin_tuote[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']]);
 
-                if (count($pisin_tuote[$tuoterow['tuoteno']]['tilaus']) == 0 and count($pisin_tuote) > 1) {
+                if (count($pisin_tuote[$tuoterow['tuoteno']]['tilaus']) == 0 and count($pisin_tuote) > 0) {
                   if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "<font class='message'>(E1080): Otetaan pois tuote \"pisin tuote listalta\" ($tuoterow[tuoteno])...</font><br><br>\n";
 
                   unset($pisin_tuote[$tuoterow['tuoteno']]);
@@ -18560,7 +18577,7 @@ if (!function_exists("tee_keraysera")) {
 
             unset($pisin_tuote[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']]);
 
-            if (count($pisin_tuote[$tuoterow['tuoteno']]['tilaus']) == 0 and count($pisin_tuote) > 1) {
+            if (count($pisin_tuote[$tuoterow['tuoteno']]['tilaus']) == 0 and count($pisin_tuote) > 0) {
               if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "<font class='message'>(E1150): Otetaan pois tuote \"pisin tuote listalta\" ($tuoterow[tuoteno])...</font><br><br>\n";
 
               unset($pisin_tuote[$tuoterow['tuoteno']]);
@@ -18604,8 +18621,18 @@ if (!function_exists("tee_keraysera")) {
           }
         }
 
+        if (isset($kukarow['debugstring'])) {
+          $kukarow['debugstring'] .= "(E1175): Myyntierä: {$tuoterow['myynti_era']}<br>\n";
+          $kukarow['debugstring'] .= "(E1175): Pakkaukset kaytettava_pakkaus tilavuus: {$pakkaukset[$kaytettava_pakkaus]['tilavuus']}<br>\n";
+          $kukarow['debugstring'] .= "(E1175): Pakkaukset kaytettava_pakkaus kaytetty_tilavuus: {$pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus']}<br>\n";
+          $kukarow['debugstring'] .= "(E1175): Tuoterow y_koko: {$tuoterow['y_koko']}<br>\n";
+          $kukarow['debugstring'] .= "(E1175): Pakkaukset kaytettava_pakkaus paino: {$pakkaukset[$kaytettava_pakkaus]['paino']}<br>\n";
+          $kukarow['debugstring'] .= "(E1175): Pakkaukset kaytettava_pakkaus kaytetty_paino: {$pakkaukset[$kaytettava_pakkaus]['kaytetty_paino']}<br>\n";
+          $kukarow['debugstring'] .= "(E1175): Tuoterow y_paino: {$tuoterow['y_paino']}<br>\n";
+        }
+
         if ($pakkaukset[$kaytettava_pakkaus]['tilavuus'] >= ($pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] + $tuoterow['tuotteen_koko'])
-          and $pakkaukset[$kaytettava_pakkaus]['paino'] > ($pakkaukset[$kaytettava_pakkaus]['kaytetty_paino'] + ($tuoterow['y_maara'] * $tuoterow['y_paino']))) {
+          and $pakkaukset[$kaytettava_pakkaus]['paino'] >= ($pakkaukset[$kaytettava_pakkaus]['kaytetty_paino'] + ($tuoterow['y_maara'] * $tuoterow['y_paino']))) {
 
           $pakkaukset[$kaytettava_pakkaus]['kaytetty_tilavuus'] += $tuoterow['tuotteen_koko'];
           $pakkaukset[$kaytettava_pakkaus]['kaytetty_paino'] += ($tuoterow['y_maara'] * $tuoterow['y_paino']);
@@ -18629,11 +18656,9 @@ if (!function_exists("tee_keraysera")) {
             $ed_tilausnro = $tuoterow['otunnus'];
           }
 
-          if ($max_tuoterivit > $ii) {
-            unset($pisin_tuote[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']]);
-          }
+          unset($pisin_tuote[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']]);
 
-          if (count($pisin_tuote[$tuoterow['tuoteno']]['tilaus']) == 0 and count($pisin_tuote) > 1) {
+          if (count($pisin_tuote[$tuoterow['tuoteno']]['tilaus']) == 0 and count($pisin_tuote) > 0) {
             if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "<font class='message'>(E1210): Otetaan pois tuote \"pisin tuote listalta\" ($tuoterow[tuoteno])...</font><br><br>\n";
 
             unset($pisin_tuote[$tuoterow['tuoteno']]);
@@ -22998,7 +23023,8 @@ if (!function_exists('hae_maa')) {
     $maa_row = mysql_fetch_assoc($maa_res);
 
     $maan_tiedot['nimi'] = $maa_row['name'] != '' ? $maa_row['name'] : $maa_row['koodi'];
-
+    $maan_tiedot['nimi'] = strtoupper($maan_tiedot['nimi']);
+    
     return $maan_tiedot;
   }
 }
@@ -29840,6 +29866,62 @@ if (!function_exists("cron_log")) {
   }
 }
 
+if (!function_exists("cron_aikaleima")) {
+  function cron_aikaleima($aikaleima, $uusileima = 0) {
+    global $kukarow, $yhtiorow;
+
+    // Ylläpidetään avainsanoissa aika jolloin tietty skripti on ajettu viimeksi
+
+    if (strlen($aikaleima) > 15) {
+      echo "Aikaleiman tunnus on liian pitkä!<br>";
+      return;
+    }
+
+    if (substr($aikaleima, -5) != "_CRON") {
+      echo "Aikaleiman tunnus on päätyttävä '_CRON'!<br>";
+      return;
+    }
+
+    pupemaster_start();
+
+    $datetime_checkpoint_res = t_avainsana($aikaleima);
+
+    if (mysql_num_rows($datetime_checkpoint_res) != 1) {
+      $query = "DELETE FROM avainsana
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND laji    = '$aikaleima'";
+      pupe_query($query);
+
+      $query = "INSERT INTO avainsana SET
+                yhtio = '{$kukarow['yhtio']}',
+                laji  = '$aikaleima'";
+      pupe_query($query);
+
+      $datetime_checkpoint = "";
+    }
+
+    if (!empty($uusileima)) {
+      // Tallennetaan timestamppi
+      $query = "UPDATE avainsana SET
+                selite      = '{$uusileima}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND laji    = '$aikaleima'";
+      pupe_query($query);
+
+      $datetime_checkpoint = $uusileima;
+    }
+    else {
+      // Haetaan tallennettu aikaleima
+      $datetime_checkpoint_row = mysql_fetch_assoc($datetime_checkpoint_res);
+      $datetime_checkpoint = pupesoft_cleanstring($datetime_checkpoint_row['selite']);
+    }
+
+    pupemaster_stop();
+
+    return $datetime_checkpoint;
+  }
+}
+
 if (!function_exists("paivita_sopimusrivit")) {
   function paivita_sopimusrivit(array $sopimusrivitunnukset = array()) {
     global $kukarow;
@@ -29930,13 +30012,20 @@ if (!function_exists("poista_osakeyhtio_lyhenne")) {
   function poista_osakeyhtio_lyhenne($nimi) {
 
     // strtolower ei osaa pienentää tämmöisiä erikoismerkkejä
-    $old = array("Ü", "");
-    $new = array("ü", "");
+    $old = array("Ü", "", "Ä", "Ö", "Å");
+    $new = array("ü", "", "ä", "ö", "å");
     $nimi = str_replace($old, $new, $nimi);
+    $nimi = strtolower($nimi);
 
     $replace = "oy|ab|as|oü|ou|mtü|tü|ttü";
 
-    return trim(preg_replace("/\b({$replace})\b/i", '', strtolower($nimi)));
+    // Nimen edestä
+    $nimi = preg_replace("/^($replace) /", "", $nimi);
+
+    // Nimen takaa
+    $nimi = preg_replace("/ ($replace)$/", "", $nimi);
+
+    return trim($nimi);
   }
 }
 
@@ -30137,6 +30226,33 @@ if (!function_exists("hae_saldo")) {
 
       return $saldo;
     }
+  }
+}
+
+if (!function_exists("jt_saapumisaika_tilausvahvistus")) {
+  function jt_saapumisaika_tilausvahvistus($tilausrivi, $status) {
+    global $yhtiorow;
+
+    if ($yhtiorow["jt_rivien_saapumisajan_nayttaminen"] == "K" and
+        ($tilausrivi["jtsort"] > 0 or $tilausrivi["jt"] > 0)
+    ) {
+      $myytavissa = saldo_myytavissa($tilausrivi["tuoteno"]);
+      $myytavissa = $myytavissa[2];
+      $saapumisaika = hae_tuotteen_saapumisaika($tilausrivi["tuoteno"],
+                                                $status, $myytavissa);
+      if (count($saapumisaika > 0)) {
+        $saapumisaika = $saapumisaika[1];
+
+        list($teksti, $paivamaara) = explode("!¡!", $saapumisaika);
+        $saapumisaika = "{$teksti} " . strip_tags($paivamaara);
+
+        return trim($saapumisaika);
+      }
+
+      return "";
+    }
+
+    return "";
   }
 }
 

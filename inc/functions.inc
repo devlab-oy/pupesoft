@@ -24944,28 +24944,12 @@ if (!function_exists('hyllysiirto')) {
 
       $_laji_chk = strtolower($uusipaikka_chk_row['laji']);
 
-      if (in_array($_laji_chk, array('uusipaikka','inventointi'))) {
-
-        if ($_laji_chk == 'uusipaikka') {
-          $_chk = true;
-        }
-        else {
-          # Jos tapahtuma oli inventointi ja saldo oli 0
-          $query = "SELECT tunnus
-                    FROM tuotepaikat
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tuoteno = '{$tuoteno}'
-                    AND hyllyalue  = '{$minnerow['hyllyalue']}'
-                    AND hyllynro   = '{$minnerow['hyllynro']}'
-                    AND hyllyvali  = '{$minnerow['hyllyvali']}'
-                    AND hyllytaso  = '{$minnerow['hyllytaso']}'
-                    AND saldo = 0";
-          $uusipaikka_chk_res = pupe_query($query);
-
-          if (mysql_num_rows($uusipaikka_chk_res) != 0) {
-            $_chk = true;
-          }
-        }
+      if ($_laji_chk == 'uusipaikka') {
+        $_chk = true;
+      }
+      elseif ($_laji_chk == 'inventointi' and $minnerow['saldo'] == 0) {
+        # Jos tapahtuma oli inventointi ja saldo oli 0
+        $_chk = true;
       }
 
       if ($_chk) {
@@ -24976,14 +24960,14 @@ if (!function_exists('hyllysiirto')) {
 
     // Mist‰ varastosta otetaan?
     $query = "UPDATE tuotepaikat
-              set saldo   = saldo - {$kappaleet},
+              set saldo = saldo - {$kappaleet},
               {$lisavarlisa1}
-              saldoaika               = now(),
-              muuttaja                = '{$kukarow['kuka']}',
-              muutospvm               = now()
-                        WHERE tuoteno = '{$tuoteno}'
-              and yhtio               = '{$kukarow['yhtio']}'
-              and tunnus              = {$tuotepaikat_tunnus_otetaan}";
+              saldoaika = now(),
+              muuttaja  = '{$kukarow['kuka']}',
+              muutospvm = now()
+              WHERE tuoteno = '{$tuoteno}'
+              and yhtio     = '{$kukarow['yhtio']}'
+              and tunnus    = {$tuotepaikat_tunnus_otetaan}";
     $result = pupe_query($query);
 
     // Minne varastoon vied‰‰n?

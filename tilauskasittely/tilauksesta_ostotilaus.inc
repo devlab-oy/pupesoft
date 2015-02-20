@@ -51,6 +51,11 @@ if (!function_exists("tilauksesta_ostotilaus")) {
 
         $ostotilauksen_kasittely = $myytilrow['ostotilauksen_kasittely'];
 
+        // Tuoteperheiden ohita_kerays-lapset ohitetaan tässä, koska ne haetaan automaattisesti $tilrivires-kyslyssä
+        if ($rivi['perheid'] > 0 and $rivi['perheid'] != $rivi['rivitunnus'] and $rivi['ohita_kerays'] != "") {
+          continue;
+        }
+
         //  Jos tehdään vaan tämä tilaus niin haetaan tämän oletustoimittaja, by default
         if ($tyyppi == "KAIKKI" and $rivi["toimittajan_tunnus"] == 0) {
           $query = "SELECT liitostunnus, if (jarjestys = 0, 9999, jarjestys) sorttaus
@@ -71,10 +76,9 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                       muuttaja             = '$kukarow[kuka]'
                       WHERE yhtio          = '$kukarow[yhtio]'
                       and tilausrivitunnus = '$rivi[rivitunnus]'";
-            $updres = pupe_query($query);
+            pupe_query($query);
 
             $rivi["toimittajan_tunnus"] = $aburow["liitostunnus"];
-
           }
           elseif ($rivi['ei_saldoa'] != '') {
             // jos ollaan erikseen laitettu saldottomalle tuotteelle toimittaja niin ehkä sitä halutaan myös ostaa,
@@ -130,20 +134,20 @@ if (!function_exists("tilauksesta_ostotilaus")) {
           // Katsotaan onko toimittajalla avoimia ostotilauksia
           // Pitää olla myös oikeat osoitetiedot
           if ($tyyppi == "U" or ($tyyppi == 'KAIKKI' and $yhtiorow["tee_osto_myyntitilaukselta"] == 'Q')) {
-            $toim_nimi       = $myytilrow["toim_nimi"];
-            $toim_nimitark     = $myytilrow["toim_nimitark"];
-            $toim_osoite     = $myytilrow["toim_osoite"];
-            $toim_postino     = $myytilrow["toim_postino"];
-            $toim_postitp     = $myytilrow["toim_postitp"];
-            $toim_maa       = $myytilrow["toim_maa"];
+            $toim_nimi     = $myytilrow["toim_nimi"];
+            $toim_nimitark = $myytilrow["toim_nimitark"];
+            $toim_osoite   = $myytilrow["toim_osoite"];
+            $toim_postino  = $myytilrow["toim_postino"];
+            $toim_postitp  = $myytilrow["toim_postitp"];
+            $toim_maa      = $myytilrow["toim_maa"];
           }
           else {
-            $toim_nimi       = $yhtiorow["nimi"];
-            $toim_nimitark     = $yhtiorow["nimitark"];
-            $toim_osoite     = $yhtiorow["osoite"];
-            $toim_postino     = $yhtiorow["postino"];
-            $toim_postitp     = $yhtiorow["postitp"];
-            $toim_maa       = $yhtiorow["maa"];
+            $toim_nimi     = $yhtiorow["nimi"];
+            $toim_nimitark = $yhtiorow["nimitark"];
+            $toim_osoite   = $yhtiorow["osoite"];
+            $toim_postino  = $yhtiorow["postino"];
+            $toim_postitp  = $yhtiorow["postitp"];
+            $toim_maa      = $yhtiorow["maa"];
           }
 
           $valkoodi = $tiltoi["oletus_valkoodi"];
@@ -306,7 +310,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                       yhtio               = '$kukarow[yhtio]',
                       ytunnus             = '$tiltoi[ytunnus]'
                       {$suoratoimitus}";
-            $updre = pupe_query($query);
+            pupe_query($query);
             $tunnus = (string) mysql_insert_id($GLOBALS["masterlink"]);
 
             // hintojen ja alennuksien hakuun tarvitaan laskurow, tehdään tässä array kuntoon alehinta_osto() funktiota varten
@@ -326,7 +330,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
           if (in_array($ostotilauksen_kasittely, array('1', '3', '5'))) $tunnukset[$tunnus] = $tunnus;
 
           // Lisätään joukkoon myös lisävarusteperheiden lapset
-          // sekä ohita_kerays-tyyppiset tuoteperheiden lapset
+          // sekä ohita_kerays-tyyppiset tuoteperheiden lapset, jotka ovat jääneet eri var-tilaan kuin isät
           $query = "(SELECT
                     tilausrivi.*,
                     tilausrivin_lisatiedot.ohita_kerays,
@@ -341,16 +345,16 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                     and tilausrivi.otunnus  = '$otunnus'
                     and tilausrivi.tyyppi  != 'D'
                     and (tilausrivi.tunnus = '$rivi[tunnus]' or tilausrivi.perheid2 = '$rivi[tunnus]'))
-                    
+
                     UNION
-                    
+
                     (SELECT
                     tilausrivi.*,
                     tilausrivin_lisatiedot.ohita_kerays,
                     tilausrivi.tunnus rivitunnus,
                     tilausrivi.perheid2 p2,
                     tilausrivi.perheid p1,
-                    jt+varattu kpl,
+                    tilkpl kpl,
                     tilausrivin_lisatiedot.tilausrivilinkki tilausrivilinkki
                     FROM tilausrivi
                     JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus and tilausrivin_lisatiedot.ohita_kerays != '')
@@ -452,7 +456,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                         perheid2        = '{$pid2}',
                         nimitys         = '$tilrivirow[nimitys]',
                         jaksotettu      = ''";
-              $updre = pupe_query($query);
+              pupe_query($query);
               $lisatty_tun = mysql_insert_id($GLOBALS["masterlink"]);
 
               // Lisätään ostorivin lisätiedot
@@ -461,7 +465,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                         luontiaika = now(),
                         laatija    = '$kukarow[kuka]',
                         yhtio      = '$kukarow[yhtio]'";
-              $updres = pupe_query($query);
+              pupe_query($query);
             }
 
             // Onko suoratoimitus
@@ -481,7 +485,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                       muuttaja             = '$kukarow[kuka]'
                       WHERE yhtio          = '$kukarow[yhtio]'
                       and tilausrivitunnus = '$tilrivirow[rivitunnus]'";
-            $updres = pupe_query($query);
+            pupe_query($query);
 
             $tilauksesta_ostotilaus .= "<font class='message'>Tuote: $tilrivirow[tuoteno] $tilrivirow[kpl] kpl lisätty ostotilaukselle: $tunnus</font><br>";
 
@@ -493,7 +497,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                         set perheid2 = {$pid2}
                         where yhtio  = '$kukarow[yhtio]'
                         and tunnus   = {$lisatty_tun}";
-              $perheres = pupe_query($query);
+              pupe_query($query);
             }
 
             // ohita_kerays-perheen isä
@@ -504,7 +508,22 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                         SET perheid = {$pid1}
                         WHERE yhtio = '{$kukarow['yhtio']}'
                         AND tunnus  = {$lisatty_tun}";
-              $perheres = pupe_query($query);
+              pupe_query($query);
+            }
+
+            // jos ohita_kerays-perheen lapsi on jätetty puutteeksi myyntitilaukselle, niin päivitetään myös se JT-riviksi.
+            if ($tilrivirow['rivitunnus'] != $tilrivirow['perheid'] and $tilrivirow['perheid'] > 0 and mysql_num_rows($tilrivires) > 1) {
+              $query = "UPDATE tilausrivi
+                        SET var   = 'J',
+                        jt        = if('{$yhtiorow["varaako_jt_saldoa"]}'  = '', tilkpl, 0),
+                        varattu   = if('{$yhtiorow["varaako_jt_saldoa"]}' != '', tilkpl, 0),
+                        hyllyalue = '',
+                        hyllynro  = '',
+                        hyllyvali = '',
+                        hyllytaso = ''
+                        WHERE yhtio = '{$kukarow['yhtio']}'
+                        AND tunnus  = {$tilrivirow['rivitunnus']}";
+              pupe_query($query);
             }
           }
         }
@@ -515,7 +534,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                     set var = 'J'
                     where yhtio = '$kukarow[yhtio]'
                     and tunnus  = '$rivi[rivitunnus]'";
-          $updre = pupe_query($query);
+          pupe_query($query);
 
           // Vapautetaan JT-rivin erät jos niitä on
           if ($rivi["sarjanumeroseuranta"] == "E" or $rivi["sarjanumeroseuranta"] == "F" or $rivi["sarjanumeroseuranta"] == "G") {
@@ -530,7 +549,7 @@ if (!function_exists("tilauksesta_ostotilaus")) {
                       and tunnus   = '$rivi[rivitunnus]'
                       and jt       = 0
                       and varattu != 0";
-            $updre = pupe_query($query);
+            pupe_query($query);
           }
         }
       }

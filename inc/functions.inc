@@ -18219,6 +18219,10 @@ if (!function_exists("tee_keraysera")) {
           $kukarow['debugstring'] .= "(E690): simuloitu: $eran_koko_chk eran koko: $eran_koko<br>\n";
         }
 
+        if ($nurkan_takaa) {
+          $kaytettava_pakkaus = "";
+        }
+
         $looppi_koko = 0;
 
         $eka_kierros = false;
@@ -18462,8 +18466,8 @@ if (!function_exists("tee_keraysera")) {
               $pakkaukset,
               $pisin_tuote,
               $pisin_tuote_per_asiakas,
-              $eran_koko,
-              $eran_paino,
+              '',
+              '',
               $eran_koko_chk,
               $eran_paino_chk,
               $eran_koko_pintaala,

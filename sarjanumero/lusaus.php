@@ -37,9 +37,9 @@ if (isset($submit)) {
     if (!$tiedot) {
       $errors[] = t("Sarjanumerolla ei löytynyt mitään.");
     }
-    //elseif ($tiedot['sinettinumero'] != '') {
-    //  $errors[] = t("Rulla on jo kontitettu ja kontti sinetöity.");
-    //}
+    elseif ($tiedot['sinettinumero'] != '') {
+      $errors[] = t("Rulla on jo kontitettu ja kontti sinetöity.");
+    }
     elseif ($tiedot['lisatieto'] == 'Hylätty') {
       $errors[] = t("Rulla on jo merkitty hylätyksi.");
     }

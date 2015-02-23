@@ -33,13 +33,16 @@ echo "<input type='hidden' name='tee' value='kaikki'>";
 
 if ($toim == "TARKKA") {
   $classes = 'hidden';
+  $noautosubmit = true;
+  $monivalintalaatikot = array('laskumyyja');
 }
 else {
   $classes = '';
+  $lisa = "";
 }
 
+echo "<div id='valinnat' class='{$classes}'>";
 echo "<table>";
-echo "<tbody id='valinnat' class='{$classes}'>";
 echo "<tr>";
 echo "<th>".t("Anna alkukausi (kk-vuosi)")."</th>";
 echo "  <td>
@@ -54,10 +57,18 @@ echo "  <td>
     <input type='text' name='loppuvv' value='$loppuvv' size='5'>
     </td>";
 echo "</tr>";
-echo "</tbody>";
-echo "<tfoot>";
+echo "</table>";
+
+if ($toim == "TARKKA") {
+  require_once "tilauskasittely/monivalintalaatikot.inc";
+}
+
+echo "</div>";
+
+echo "<table>";
+echo "<tbody>";
 echo "<tr>";
-echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'>";
+echo "<td class='back'><input type='submit' value='" . t("Aja raportti") . "'>";
 
 if ($toim == "TARKKA") {
   echo "<input id='naytaValinnat' type='button' value='" . t("N‰yt‰ valinnat") . "'>";
@@ -65,8 +76,9 @@ if ($toim == "TARKKA") {
 
 echo "</td>";
 echo "</tr>";
-echo "</tfoot>";
+echo "</tbody>";
 echo "</table>";
+
 echo "<br>";
 
 if ($tee != '') {
@@ -80,6 +92,7 @@ if ($tee != '') {
             FROM lasku use index (yhtio_tila_tapvm)
             LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja)
             WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+            {$lisa}
             and lasku.tila    = 'L'
             and lasku.alatila = 'X'
             and lasku.tapvm   >= '$pvmalku'
@@ -88,6 +101,12 @@ if ($tee != '') {
             HAVING summa <> 0 OR kate <> 0
             ORDER BY myyja";
   $result = pupe_query($query);
+
+  if (mysql_num_rows($result) < 1) {
+    echo "<span class='error'>" . t("Valitulla myyj‰ll‰ ei ole yht‰‰n myynti‰") . "</span>";
+    require_once "inc/footer.inc";
+    exit;
+  }
 
   $summa = array();
   $kate = array();
@@ -174,7 +193,14 @@ if ($tee != '') {
   foreach ($rajataulu as $kausi) {
     $yhteensa_summa += $yhteensa_summa_kausi[$kausi];
     $yhteensa_kate += $yhteensa_kate_kausi[$kausi];
-    $kate_prosentti = round($yhteensa_kate_kausi[$kausi] / $yhteensa_summa_kausi[$kausi] * 100);
+
+    if ($yhteensa_summa_kausi[$kausi] != 0) {
+      $kate_prosentti = round($yhteensa_kate_kausi[$kausi] / $yhteensa_summa_kausi[$kausi] * 100);
+    }
+    else {
+      $kate_prosentti = 0;
+    }
+
     echo "<th style='text-align:right;'>$yhteensa_summa_kausi[$kausi]<br>$yhteensa_kate_kausi[$kausi]<br>$kate_prosentti%</th>";
 
   }

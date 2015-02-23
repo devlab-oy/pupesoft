@@ -9863,64 +9863,12 @@ if ($tee == '') {
           echo "<input type='hidden' name='tulosta_lahete_chkbx[]' value='default' />";
           echo "<input type='checkbox' name='tulosta_lahete_chkbx[]' value='1' checked />";
 
-          //valitaan sopivat printterit
-          if ($laskurow["varasto"] == 0) {
-            $query = "SELECT *
-                      from varastopaikat
-                      WHERE yhtio  = '$kukarow[yhtio]'
-                      AND tyyppi  != 'P'
-                      order by alkuhyllyalue,alkuhyllynro
-                      limit 1";
-          }
-          else {
-            $query = "SELECT *
-                      from varastopaikat
-                      where yhtio = '$kukarow[yhtio]'
-                      and tunnus  = '$laskurow[varasto]'";
-          }
-          $prires = pupe_query($query);
-
-          if (mysql_num_rows($prires) > 0) {
-            $prirow = mysql_fetch_assoc($prires);
-
-            $apuprintteri = $prirow['printteri1']; // l‰heteprintteri
-
-            //haetaan optimaalinen tulostin t‰lle l‰hetteelle
-            $tilaus  = $tilausnumeroita;
-            $varasto = $laskurow["varasto"];
-
-            require "varaston_tulostusalue.inc";
-
-            if (isset($kirjoitin) and $kirjoitin != '') {
-              $apuprintteri = $kirjoitin;
-            }
-
-            // Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
-            if (!empty($laskurow['yhtio_toimipaikka'])) {
-              $avainsana_where = " and avainsana.selite       = '{$laskurow['varasto']}'
-                                   and avainsana.selitetark   = '{$laskurow['yhtio_toimipaikka']}'
-                                   and avainsana.selitetark_2 = 'printteri1'";
-
-              $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
-
-              if (!empty($tp_tulostin)) {
-                $apuprintteri = $tp_tulostin;
-              }
-            }
-
-            //haetaan l‰hetteen tulostuskomento
-            $query = "SELECT komento
-                      FROM kirjoittimet
-                      WHERE yhtio = '$kukarow[yhtio]'
-                      AND tunnus  = '$apuprintteri'";
-            $kirres = pupe_query($query);
-            $kirrow = mysql_fetch_assoc($kirres);
-
-            $komento = $kirrow['komento'];
-          }
-          else {
-            $komento = "";
-          }
+          $komento = hae_lahete_printteri(
+            $laskurow['varasto'],
+            $laskurow['yhtio_toimipaikka'],
+            $laskurow['tunnus'],
+            ''
+          );
 
           echo "<input type='hidden' name='komento[L‰hete]' value='{$komento}' />";
           echo "<br />";

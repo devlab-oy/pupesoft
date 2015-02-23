@@ -581,7 +581,7 @@ if (isset($task) and ($task == 'anna_konttitiedot' or $task == 'korjaa_konttitie
   }
 
   echo "<a href='toimitusten_seuranta.php'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
-  echo "<font class='head'>".t("Kontin sinetöinti")."</font></a><hr><br>";
+  echo "<font class='head'>".t("Kontin sinetöinti")."</font><hr><br>";
 
   if (!isset($sinetoitava_konttiviite)) {
     $sinetoitava_konttiviite = $konttiviite;
@@ -794,7 +794,7 @@ if (isset($task) and $task == 'hylky') {
   $result = pupe_query($query);
 
   echo "<a href='toimitusten_seuranta.php'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
-  echo "<font class='head'>".t("Rullien hylkääminen")."</font></a><hr><br>";
+  echo "<font class='head'>".t("Rullien hylkääminen")."</font><hr><br>";
 
   $hylattavat_kpl = mysql_num_rows($result);
 
@@ -841,7 +841,7 @@ if (isset($task) and $task == 'lusaus') {
   $result = pupe_query($query);
 
   echo "<a href='toimitusten_seuranta.php'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
-  echo "<font class='head'>".t("Rullien lusaus")."</font></a><hr><br>";
+  echo "<font class='head'>".t("Rullien lusaus")."</font><hr><br>";
 
   if (isset($viesti)) {
     echo $viesti;
@@ -927,7 +927,7 @@ if (isset($task) and $task == 'luo_laskutusraportti' and !isset($vahvista_muutos
   else {
 
     echo "<a href='toimitusten_seuranta.php?rajaus=toimitetut'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
-    echo "<font class='head'>".t("Laskutusraportti luotu")."</font></a><hr><br>";
+    echo "<font class='head'>".t("Laskutusraportti luotu")."</font><hr><br>";
 
     $parametrit = laskutusraportti_parametrit($konttiviite);
     $parametrit['tonnit'] = $tonnit;
@@ -1060,7 +1060,7 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
   }
 
   echo "<a href='toimitusten_seuranta.php?rajaus=toimitetut'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
-  echo "<font class='head'>".t("Laadi laskutusraportti")."</font></a><hr><br>";
+  echo "<font class='head'>".t("Laadi laskutusraportti")."</font><hr><br>";
 
   echo "
   <form method='post' id='luo_laskutusraportti'>
@@ -1344,11 +1344,14 @@ if (!isset($task)) {
               llt.rullamaara AS bookatut_rullat,
               COUNT(ss.tunnus) AS rullat,
               SUM(ss.massa) AS paino,
-              SUM(IF(trlt.sinettinumero != '', 1, 0)) AS sinetti_tilanne,
-              SUM(IF(trlt.kontin_mrn != '', 1, 0)) AS mrn_tilanne,
               group_concat(DISTINCT kontin_mrn) mrn_numerot,
               group_concat(DISTINCT trlt.konttinumero SEPARATOR '<br>') AS kontit,
-              llt.konttimaara AS bookattu_konttimaara
+              llt.konttimaara AS bookattu_konttimaara,
+              SUM(IF(otr.toimitettu != '', 1, 0)) AS kuitatut_rullat,
+              SUM(IF(ss.varasto IS NOT NULL, 1, 0)) AS varastoidut_rullat,
+              SUM(IF(trlt.sinettinumero != '', 1, 0)) AS kontitetut_rullat,
+              SUM(IF(trlt.kontin_mrn != '', 1, 0)) AS mrn_tilanne,
+              SUM(IF(tr.toimitettu != '', 1, 0)) AS toimitetut_rullat
               FROM lasku
               JOIN tilausrivi AS tr
                 ON tr.yhtio = lasku.yhtio
@@ -1362,6 +1365,9 @@ if (!isset($task)) {
               JOIN sarjanumeroseuranta AS ss
                 ON ss.yhtio = lasku.yhtio
                 AND ss.myyntirivitunnus = tr.tunnus
+              JOIN tilausrivi AS otr
+                ON otr.yhtio = lasku.yhtio
+                AND otr.tunnus = ss.ostorivitunnus
               WHERE lasku.yhtio = 'rplog'
               AND tilaustyyppi = 'N'
               AND konttiviite != 'bookkaukseton'
@@ -1500,21 +1506,55 @@ if (!isset($task)) {
       }
       elseif ($rajaus == 'Aktiiviset') {
 
-        if ($rivi['mrn_numerot'] == 'EU') {
-          $status = t("Eu:n sisäinen tilaus");
+        $rullia = $rivi['rullat'];
+        $kuitatut = $rivi['kuitatut_rullat'];
+        $varastoidut = $rivi['varastoidut_rullat'];
+        $kontitetut = $rivi['kontitetut_rullat'];
+        $toimitetut = $rivi['toimitetut_rullat'];
+        $mrn_tilanne = $rivi['mrn_tilanne'];
+
+        $status = t("Rahtikirja vastaanotettu");
+
+        if ($kuitatut > 0 and $kuitatut < $rullia) {
+          $status = t("Osa rahdista kuitattu vastaanotetuksi");
         }
-        elseif ($rivi['sinetti_tilanne'] == 0) {
-          $status = t("Kontitusta ei vielä aloitettu");
+
+        if ($kuitatut > 0 and $kuitatut == $rullia) {
+          $status = t("Rahti kuitattu vastaanotetuksi");
         }
-        elseif ($rivi['sinetti_tilanne'] > 0 and $rivi['sinetti_tilanne'] < $rivi['rullat']) {
-            $status = t("Kontitus kesken");
+
+        if ($varastoidut > 0 and $varastoidut < $rullia) {
+          $status = t("Osa rullista viety varastoon");
         }
-        elseif ($rivi['mrn_tilanne'] < $rivi['rullat']) {
-          $status = t("Odotetaan MRN-numeroa");
+
+        if ($varastoidut > 0 and $varastoidut == $rullia) {
+          $status = t("Rullat viety varastoon");
         }
-        elseif ($rivi['mrn_tilanne'] == $rivi['rullat']) {
-          $status = t("Satamavahvistus lähettämättä");
+
+        if ($kontitetut > 0 and $kontitetut < $rullia) {
+          $status = t("Kontitus kesken");
         }
+
+        if ($kontitetut > 0 and $kontitetut == $rullia) {
+          $status = t("Rullat kontitettu");
+        }
+
+        if ($toimitetut > 0 and $toimitetut < $rullia) {
+          $status = t("Osa konteista sinetöity");
+        }
+
+        if ($toimitetut > 0 and $toimitetut == $rullia) {
+          $status = t("Kontit sinetöity");
+        }
+
+        if ($mrn_tilanne > 0 and $mrn_tilanne > $rullia) {
+          $status = t("Osa MRN-numeroista vastaanotettu");
+        }
+
+        if ($mrn_tilanne > 0 and $mrn_tilanne > $rullia) {
+          $status = t("MRN-numerot vastaanotettu");
+        }
+
       }
       elseif ($rajaus == 'Toimitetut') {
         $status = t("Toimitettu");
@@ -1633,7 +1673,17 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
     }
 
     echo "<a href='toimitusten_seuranta.php?rajaus={$r}'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
-    echo "<font class='head'>".t("Konttiviite: ") . $kv ."</font></a><hr><br>";
+    echo "<font class='head'>".t("Konttiviite: ") . $kv ."</font>&nbsp;";
+
+    echo "
+      <form method='post'>
+      <input type='hidden' name='kv' value='{$kv}' />
+      <input type='hidden' name='task' value='nkv' />
+      <input type='hidden' name='rajaus' value='{$r}' />
+      <input type='submit' value='". t("Lataa uudelleen") ."' />
+      </form>";
+
+    echo "<hr><br>";
 
     echo "<table>";
     echo "<tr>";

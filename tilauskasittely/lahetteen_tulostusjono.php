@@ -8,7 +8,7 @@ if (isset($tee) and $tee == "TILAA_AJAX") {
   require_once "inc/tilaa_ajax.inc";
 }
 
-if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] != 'U') {
+if ($toim == "VASTAANOTA_REKLAMAATIO" and !in_array($yhtiorow['reklamaation_kasittely'], array('U','X'))) {
   echo "<font class='error'>".t("HUOM: Ohjelma on käytössä vain kun käytetään laajaa reklamaatioprosessia")."!</font>";
   exit;
 }
@@ -967,6 +967,10 @@ if ($tee2 == '') {
 
   if ($yhtiorow["pakkaamolokerot"] != "") {
     $grouppi .= ", lasku.varasto, lasku.tulostusalue";
+  }
+
+  if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X') {
+    $grouppi .= ", lasku.varasto, lasku.yhtio_toimipaikka";
   }
 
   $tilausrivi_tuoteno_join = '';

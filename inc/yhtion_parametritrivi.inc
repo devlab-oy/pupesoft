@@ -3486,18 +3486,12 @@ if ($fieldname == "ostoera_pyoristys" ) {
 
 if ($fieldname == "reklamaation_kasittely") {
 
-  $sela = $selb = "";
+  $sel = array($trow[$i] => 'selected') + array('' => '', 'U' => '', 'X' => '');
 
-  if ($trow[$i] == 'U') {
-    $selb = "selected";
-  }
-  else {
-    $sela = "selected";
-  }
-
-  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
-        <option value = '' $sela>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n lyhyemp‰‰ prosessia")."</option>
-        <option value = 'U' $selb>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n laajempaa prosessia vastaanotolla, purkulistalla ja vastaanottokuittauksella")."</option>
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
+        <option value = ''>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n lyhyemp‰‰ prosessia")."</option>
+        <option value = 'U' {$sel['U']}>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n laajempaa prosessia vastaanotolla, purkulistalla ja vastaanottokuittauksella")."</option>
+        <option value = 'X' {$sel['X']}>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n laajempaa prosessia purkulistalla ja vastaanottokuittauksella")."</option>
       </select></td>";
 
   $jatko = 0;

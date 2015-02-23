@@ -2034,9 +2034,12 @@ if ($tila == '') {
     $_src = "{$palvelin2}pics/lullacons/info.png";
     $_title = t("Näytä saldo");
 
-    echo "<img title='{$_title}' src='{$_src}' class='hae_saldo' id='{$rivirow['tuoteno']}' />";
-    echo "<input type='hidden' id='{$rivirow['tuoteno']}_varasto' value='{$rivirow['varasto']}' />";
-    echo "<span class='saldo_{$rivirow['tuoteno']}' style='display:none;'></span>";
+    $id = md5(uniqid());
+
+    echo "<img title='{$_title}' src='{$_src}' class='hae_saldo' id='{$id}' />";
+    echo "<input type='hidden' id='{$id}_tuoteno' value='{$rivirow['tuoteno']}' />";
+    echo "<input type='hidden' id='{$id}_varasto' value='{$rivirow['varasto']}' />";
+    echo "<span class='saldo_{$id}' style='display:none;'></span>";
 
     if ($rivirow["sarjanumeroseuranta"] != "") {
       if ($rivirow["siskpl"] < 0) {

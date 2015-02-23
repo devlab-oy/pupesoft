@@ -162,9 +162,21 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
           $rakir_row = mysql_fetch_assoc($rakir_res);
 
           if (!empty($rakir_row['tunnus'])) {
+            if ($rakir_row['rahtikirjanro'] == '') {
+              $rakir_row['rahtikirjanro'] = trim($sscc_ulkoinen);
+            }
+            else {
+              $rakir_row['rahtikirjanro'] = $rakir_row['rahtikirjanro']. ", ".trim($sscc_ulkoinen);
+            }
+            if ($rakir_row['sscc_ulkoinen'] == '') {
+              $rakir_row['sscc_ulkoinen'] = trim($sscc_ulkoinen);
+            }
+            else {
+              $rakir_row['sscc_ulkoinen'] = $rakir_row['sscc_ulkoinen']. ", ".trim($sscc_ulkoinen);
+            }
             $query = "UPDATE rahtikirjat SET
-                      rahtikirjanro = trim(concat(rahtikirjanro, '\n$sscc_ulkoinen')),
-                      sscc_ulkoinen = trim(concat(sscc_ulkoinen, '\n$sscc_ulkoinen'))
+                      rahtikirjanro = '{$rakir_row['rahtikirjanro']}',
+                      sscc_ulkoinen = '{$rakir_row['sscc_ulkoinen']}'
                       WHERE yhtio   = '{$kukarow['yhtio']}'
                       AND tunnus    = '{$rakir_row['tunnus']}'";
             pupe_query($query);

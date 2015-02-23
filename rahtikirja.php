@@ -650,7 +650,9 @@ if ($tee == 'add') {
             $rakirow = mysql_fetch_assoc($result);
             $rakirno = $rakirow["rakirno"]+1;
           }
-
+          elseif ($rakirno != $otsikkonro) {
+            $rakirno = ''; 
+          }
           //Tässä otetaan kaikkien tilausten tunnukset joille syötetään rahtikirjan tiedot
           $tilaukset = explode(',', $tunnukset);
 

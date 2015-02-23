@@ -7,7 +7,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
   js_popup();
 }
 
-if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] != 'U') {
+if ($toim == "VASTAANOTA_REKLAMAATIO" and !in_array($yhtiorow['reklamaation_kasittely'], array('U','X'))) {
   echo "<font class='error'>", t("HUOM: Ohjelma on käytössä vain kun käytetään laajaa reklamaatioprosessia"), "!</font>";
   exit;
 }
@@ -599,7 +599,7 @@ if ($tee == 'P') {
 
           // Alkuperäinen perheid talteen, nollataan se myöhemmin, jos lapsia saa jättää ykis jt:ksi
           $rperheid  = $tilrivirow['perheid'];
-          
+
           //Aloitellaan tilausrivi päivitysqueryä
           $query = "UPDATE tilausrivi
                     SET yhtio = yhtio ";
@@ -702,7 +702,7 @@ if ($tee == 'P') {
                 $keratty    = "''";
                 $kerattyaik = "''";
                 $rkomm      = $tilrivirow["kommentti"];
-                
+
                 if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
                    $rperheid = 0;
                 }
@@ -768,7 +768,7 @@ if ($tee == 'P') {
                 $keratty  = "''";
                 $kerattyaik  = "''";
                 $rkomm     = $tilrivirow["kommentti"];
-                
+
                 if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
                    $rperheid = 0;
                 }
@@ -879,7 +879,7 @@ if ($tee == 'P') {
                   $keratty  = "''";
                   $kerattyaik  = "''";
                   $rkomm     = $tilrivirow['kommentti'];
-                 
+
                   if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
                      $rperheid = 0;
                   }

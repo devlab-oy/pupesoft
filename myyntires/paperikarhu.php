@@ -282,9 +282,21 @@ if (!function_exists("rivi")) {
       $karhukertarow = mysql_fetch_assoc($karhukertares);
 
       $karhukertanro = $karhukertarow["ktun"];
+
+      $query = "SELECT
+                max(karhukierros.pvm) as kpvm
+                FROM karhu_lasku
+                JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.tyyppi = '')
+                WHERE ltunnus = {$row['tunnus']}
+                AND ktunnus  < $karhutunnus";
+      $karhukertares = pupe_query($query);
+      $karhukertarow = mysql_fetch_assoc($karhukertares);
+
+      $karhuedpvm = $karhukertarow["kpvm"];
     }
     else {
       $karhukertanro = $row["karhuttu"] + 1;
+      $karhuedpvm = $row["kpvm"];
     }
 
     if ($yhtiorow['maksukehotus_kentat'] == 'J' or $yhtiorow['maksukehotus_kentat'] == 'L') {
@@ -304,7 +316,7 @@ if (!function_exists("rivi")) {
         $pdf->draw_text(460-$oikpos, $kala, $row["summa"],        $firstpage, $norm);
       }
       if ($yhtiorow["maksukehotus_kentat"] == "" or $yhtiorow["maksukehotus_kentat"] == "J") {
-        $pdf->draw_text(295, $kala, tv1dateconv($row["kpvm"]),       $firstpage, $norm);
+        $pdf->draw_text(295, $kala, tv1dateconv($karhuedpvm),       $firstpage, $norm);
         $oikpos = $pdf->strlen($karhukertanro, $norm);
         $pdf->draw_text(385-$oikpos, $kala, $karhukertanro,       $firstpage, $norm);
       }
@@ -332,7 +344,7 @@ if (!function_exists("rivi")) {
       }
 
       if ($yhtiorow["maksukehotus_kentat"] == "" or $yhtiorow["maksukehotus_kentat"] == "J") {
-        $pdf->draw_text(365, $kala, tv1dateconv($row["kpvm"]),   $firstpage, $norm);
+        $pdf->draw_text(365, $kala, tv1dateconv($karhuedpvm),   $firstpage, $norm);
         $oikpos = $pdf->strlen($karhukertanro, $norm);
         $pdf->draw_text(560-$oikpos, $kala, $karhukertanro,   $firstpage, $norm);
       }
@@ -671,22 +683,16 @@ if (!isset($karhuviesti)) {
   $res = pupe_query($query);
   $r = 0;
 
-  error_log($query);
-
   while ($a = mysql_fetch_assoc($res)) {
     $r += $a["kpl"];
   }
 
   //  T‰m‰ on mik‰ on karhujen keskim‰‰r‰inen kierroskerta
   $avg = floor(($r/mysql_num_rows($res))+1);
-  
-  error_log($avg);
-  
+
   if ($tee_pdf == 'tulosta_karhu') {
     $avg--;
   }
-  
-  error_log($avg);
 
   // Etsit‰‰n asiakkaan kielell‰:
   $query = "SELECT tunnus

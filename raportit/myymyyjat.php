@@ -41,6 +41,7 @@ if ($toim == "TARKKA") {
                    AND tuote.tuoteno = tilausrivi.tuoteno)";
   $summa_lisa = "tilausrivi.rivihinta";
   $kate_lisa = "tilausrivi.kate";
+  $osasto_lisa = "tuote.osasto,";
 }
 else {
   $classes = '';
@@ -48,6 +49,7 @@ else {
   $tuote_lisa = "";
   $summa_lisa = "lasku.arvo";
   $kate_lisa = "lasku.kate";
+  $osasto_lisa = "";
 }
 
 echo "<div id='valinnat' class='{$classes}'>";
@@ -95,6 +97,7 @@ if ($tee != '') {
   // myynnit
   $query = "SELECT lasku.myyja,
             kuka.nimi,
+            {$osasto_lisa}
             date_format(lasku.tapvm,'%Y/%m') kausi,
             round(sum({$summa_lisa}),0) summa,
             round(sum({$kate_lisa}),0) kate
@@ -107,7 +110,7 @@ if ($tee != '') {
             and lasku.alatila = 'X'
             and lasku.tapvm   >= '$pvmalku'
             and lasku.tapvm   <= '$pvmloppu'
-            GROUP BY myyja, nimi, kausi
+            GROUP BY myyja, {$osasto_lisa} nimi, kausi
             HAVING summa <> 0 OR kate <> 0
             ORDER BY myyja";
   $result = pupe_query($query);
@@ -124,8 +127,14 @@ if ($tee != '') {
 
   while ($row = mysql_fetch_array($result)) {
     $myyja_nimi[$row["myyja"]] = $row["nimi"];
-    $summa[$row["myyja"]][$row["kausi"]] = $row["summa"];
-    $kate[$row["myyja"]][$row["kausi"]] = $row["kate"];
+    $summa[$row["myyja"]][$row["kausi"]] += $row["summa"];
+
+    if ($toim == "TARKKA") {
+      $kate[$row["myyja"]][$row["kausi"]][$row["osasto"]] += $row["kate"];
+    }
+    else {
+      $kate[$row["myyja"]][$row["kausi"]] = $row["kate"];
+    }
   }
 
   $sarakkeet  = 0;
@@ -170,7 +179,13 @@ if ($tee != '') {
     echo "<td>$myyja_nimi[$myyja] ($myyja)</td>";
 
     $yhteensa_summa = 0;
-    $yhteensa_kate = 0;
+
+    if ($toim == "TARKKA") {
+      $yhteensa_kate = array();
+    }
+    else {
+      $yhteensa_kate = 0;
+    }
 
     foreach ($rajataulu as $kausi) {
 
@@ -178,18 +193,49 @@ if ($tee != '') {
       if (!isset($yhteensa_kate_kausi[$kausi])) $yhteensa_kate_kausi[$kausi] = 0;
 
       $summa = isset($kausi_array[$kausi]) ? $kausi_array[$kausi] : "";
-      $kate_summa = isset($kate[$myyja][$kausi]) ? $kate[$myyja][$kausi] : "";
+
+      if ($toim != "TARKKA") {
+        $kate_summa = isset($kate[$myyja][$kausi]) ? $kate[$myyja][$kausi] : "";
+        $yhteensa_kate += $kate_summa;
+        $yhteensa_kate_kausi[$kausi] += $kate_summa;
+      }
 
       $yhteensa_summa += $summa;
-      $yhteensa_kate += $kate_summa;
 
       $yhteensa_summa_kausi[$kausi] += $summa;
-      $yhteensa_kate_kausi[$kausi] += $kate_summa;
 
-      echo "<td style='text-align:right;'>$summa<br>$kate_summa</td>";
+      echo "<td style='text-align:right;'>{$summa}";
+
+      if ($toim == "TARKKA") {
+        $katteet = $kate[$myyja];
+
+        if ($katteet[$kausi]) {
+          foreach ($katteet[$kausi] as $osasto => $osaston_kate) {
+            $yhteensa_kate[$osasto] += $osaston_kate;
+            $yhteensa_kate_kausi[$kausi] += $osaston_kate;
+            echo "<br>{$osaston_kate}";
+          }
+        }
+      }
+      else {
+        echo "<br>{$kate_summa}";
+      }
+
+      echo "</td>";
     }
 
-    echo "<td style='text-align:right;'>$yhteensa_summa<br>$yhteensa_kate</td>";
+    echo "<td style='text-align:right;'>{$yhteensa_summa}";
+
+    if ($toim == "TARKKA") {
+      foreach ($yhteensa_kate as $osaston_kate) {
+        echo "<br>{$osaston_kate}";
+      }
+    }
+    else {
+      echo "<br>{$yhteensa_kate}";
+    }
+
+    echo "</td>";
     echo "</tr>";
   }
 

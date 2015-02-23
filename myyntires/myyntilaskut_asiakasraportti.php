@@ -825,7 +825,7 @@ if ($tee == "") {
           if ($maksurow["korkolaspvm"] != '0000-00-00') echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['korkolaspvm']).tv1dateconv($maksurow["korkolaspvm"])."</td>";
           else echo "<td></td>";
 
-          echo "<td align='right' nowrap>";
+          echo "<td align='left' nowrap>";
 
           $linkki  = "<a href='".$palvelin2."muutosite.php?tee=E&tunnus=##TUNNUS##";
           $linkki .= "&lopetus=".$lopetus."/SPLIT/".$palvelin2."myyntires/";

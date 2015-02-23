@@ -265,8 +265,16 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
     pupe_query($query);
   }
 
+  if ($toim == "REKLAMAATIO" and !$luottorajavirhe_ylivito_valmis) {
+    $tilaupd = "tila = 'C',";
+  }
+  else {
+    $tilaupd = "";
+  }
+
   $query = "UPDATE lasku SET
             alatila             = '$alatila',
+            {$tilaupd}
             toimitustavan_lahto = 0
             WHERE yhtio         = '$kukarow[yhtio]'
             AND tunnus          = '$laskurow[tunnus]'";

@@ -1292,7 +1292,8 @@ if (!isset($task)) {
 
   case 'Bookkauksettomat':
 
-    $query = "SELECT lasku.asiakkaan_tilausnumero AS tilaukset,
+    $query = "SELECT
+              group_concat(CONCAT(trlt.asiakkaan_tilausnumero, ':', trlt.asiakkaan_rivinumero)) AS rivirullatieto,
               COUNT(ss.tunnus) AS rullat,
               SUM(ss.massa) AS paino,
               llt.konttiviite,
@@ -1308,6 +1309,9 @@ if (!isset($task)) {
               JOIN sarjanumeroseuranta AS ss
                 ON ss.yhtio = llt.yhtio
                 AND ss.myyntirivitunnus = tr.tunnus
+              JOIN tilausrivin_lisatiedot AS trlt
+                ON trlt.yhtio = lasku.yhtio
+                AND trlt.tilausrivitunnus = tr.tunnus
               WHERE konttiviite = 'bookkaukseton'
               GROUP BY lasku.tunnus";
       break;
@@ -1338,7 +1342,7 @@ if (!isset($task)) {
   case 'Aktiiviset':
 
     $query = "SELECT
-              group_concat(DISTINCT lasku.asiakkaan_tilausnumero SEPARATOR '<br>') AS tilaukset,
+              group_concat(CONCAT(trlt.asiakkaan_tilausnumero, ':', trlt.asiakkaan_rivinumero)) AS rivirullatieto,
               llt.konttiviite,
               lasku.toimaika AS lahtoaika,
               llt.rullamaara AS bookatut_rullat,
@@ -1379,7 +1383,7 @@ if (!isset($task)) {
   case 'Toimitetut':
 
     $query = "SELECT
-              group_concat(DISTINCT lasku.asiakkaan_tilausnumero SEPARATOR '<br>') AS tilaukset,
+              group_concat(CONCAT(trlt.asiakkaan_tilausnumero, ':', trlt.asiakkaan_rivinumero)) AS rivirullatieto,
               llt.konttiviite,
               llt.satamavahvistus_pvm AS lahtoaika,
               group_concat(DISTINCT trlt.konttinumero SEPARATOR '<br>') AS kontit,
@@ -1471,7 +1475,29 @@ if (!isset($task)) {
 
       echo "<tr>";
       echo "<td valign='top'><a href='toimitusten_seuranta.php?kv={$rivi['konttiviite']}&task=nkv&r={$rajaus}'>" . $rivi['konttiviite'] . "</a></td>";
-      echo "<td valign='top'>" . $rivi['tilaukset'] . "</td>";
+
+      if ($rajaus == 'Tulevat') {
+        echo "<td valign='top'>" . $rivi['tilaukset'] . "</td>";
+      }
+      else {
+
+       $rivirullatieto_array = explode(',', $rivi['rivirullatieto']);
+       $tilausrivit = array();
+       foreach ($rivirullatieto_array as  $rivirulla) {
+         $tilausrivit[$rivirulla][] = $rivirulla;
+       }
+       echo "<td valign='top'>";
+
+       foreach ($tilausrivit as $tilausrivi => $value) {
+         echo $tilausrivi;
+         echo " (";
+         echo count($tilausrivit[$tilausrivi]);
+         echo " kpl.)<br>";
+       }
+
+       echo "</td>";
+      }
+
       echo "<td valign='top'>" . date("j.n.Y H:i", strtotime($rivi['lahtoaika'])) . "</td>";
       echo "<td valign='top'>";
 

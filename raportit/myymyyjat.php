@@ -5,6 +5,10 @@ $useslave = 1;
 
 require '../inc/parametrit.inc';
 
+if ($toim == "TARKKA") {
+  echo "<script src='myymyyjat.js'></script>";
+}
+
 echo "<font class='head'>".t("Myyjien myynnit").":</font><hr>";
 
 // Käyttöliittymä
@@ -27,7 +31,15 @@ else {
 echo "<form method='post'>";
 echo "<input type='hidden' name='tee' value='kaikki'>";
 
+if ($toim == "TARKKA") {
+  $classes = 'hidden';
+}
+else {
+  $classes = '';
+}
+
 echo "<table>";
+echo "<tbody id='valinnat' class='{$classes}'>";
 echo "<tr>";
 echo "<th>".t("Anna alkukausi (kk-vuosi)")."</th>";
 echo "  <td>
@@ -41,8 +53,19 @@ echo "  <td>
     <input type='text' name='loppukk' value='$loppukk' size='2'>-
     <input type='text' name='loppuvv' value='$loppuvv' size='5'>
     </td>";
-echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td>";
 echo "</tr>";
+echo "</tbody>";
+echo "<tfoot>";
+echo "<tr>";
+echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'>";
+
+if ($toim == "TARKKA") {
+  echo "<input id='naytaValinnat' type='button' value='" . t("Näytä valinnat") . "'>";
+}
+
+echo "</td>";
+echo "</tr>";
+echo "</tfoot>";
 echo "</table>";
 echo "<br>";
 

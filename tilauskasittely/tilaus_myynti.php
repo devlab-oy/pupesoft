@@ -9855,6 +9855,28 @@ if ($tee == '') {
           echo "<input type='submit' name='tee_osto' value='$otsikko ".t("valmis")." $lisateksti' $tilausjavalisa> ";
         }
 
+        if ($yhtiorow['lahetteen_tulostustapa'] == 'I' and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "REKLAMAATIO"))
+          and (($laskurow['tila'] == 'N' and $laskurow['alatila'] == '') or ($laskurow['tila'] == 'C' and $laskurow['alatila'] == ''))) {
+          echo "<br />";
+          echo "<br />";
+          echo t("Tulosta lähete"),": ";
+          echo "<input type='hidden' name='tulosta_lahete_chkbx[]' value='default' />";
+          echo "<input type='checkbox' name='tulosta_lahete_chkbx[]' value='1' checked />";
+
+          $komento = hae_lahete_printteri(
+            $laskurow['varasto'],
+            $laskurow['yhtio_toimipaikka'],
+            $laskurow['tunnus'],
+            ''
+          );
+
+          echo "<input type='hidden' name='komento[Lähete]' value='{$komento}' />";
+          echo "<br />";
+          echo t("Tulosta keräyslista"),": ";
+          echo "<input type='hidden' name='tulosta_kerayslista_chkbx[]' value='default' />";
+          echo "<input type='checkbox' name='tulosta_kerayslista_chkbx[]' value='1' checked />";
+        }
+
         if ($yhtiorow['lahetteen_tulostustapa'] == "I" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "REKLAMAATIO")) and
           (
             ($yhtiorow['lahetteen_tulostustapa'] == "I" and (($laskurow['tila'] == 'N' and $laskurow['alatila'] != '') or ($laskurow['tila'] == 'C' and $laskurow['alatila'] != ''))) or

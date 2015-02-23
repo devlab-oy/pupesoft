@@ -30376,6 +30376,74 @@ if (!function_exists("tiliointi_tarkistus")) {
   }
 }
 
+if (!function_exists('hae_lahete_printteri')) {
+  function hae_lahete_printteri($varasto = 0, $toimipaikka = 0, $tilaus = 0, $valittu_tulostin = '') {
+
+    global $kukarow, $yhtiorow;
+
+    $komento = "";
+
+    //tulostetaan faili ja valitaan sopivat printterit
+    if ($varasto == 0) {
+      $query = "SELECT *
+                from varastopaikat
+                WHERE yhtio  = '{$kukarow['yhtio']}'
+                AND tyyppi  != 'P'
+                order by alkuhyllyalue,alkuhyllynro
+                limit 1";
+    }
+    else {
+      $query = "SELECT *
+                from varastopaikat
+                where yhtio = '{$kukarow['yhtio']}'
+                and tunnus  = '{$varasto}'";
+    }
+    $prires = pupe_query($query);
+
+    if (mysql_num_rows($prires) > 0) {
+      $prirow = mysql_fetch_assoc($prires);
+
+      $apuprintteri = $prirow['printteri1']; // l‰heteprintteri
+
+      require "varaston_tulostusalue.inc";
+
+      if (isset($kirjoitin) and $kirjoitin != '') {
+        $apuprintteri = $kirjoitin;
+      }
+
+      // Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
+      if (!empty($toimipaikka)) {
+        $avainsana_where = " and avainsana.selite       = '{$varasto}'
+                             and avainsana.selitetark   = '{$toimipaikka}'
+                             and avainsana.selitetark_2 = 'printteri1'";
+
+        $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
+
+        if (!empty($tp_tulostin)) {
+          $apuprintteri = $tp_tulostin;
+        }
+      }
+
+      // k‰sinvalittu printteri
+      if (!empty($valittu_tulostin)) {
+        $apuprintteri = $valittu_tulostin;
+      }
+
+      //haetaan l‰hetteen tulostuskomento
+      $query = "SELECT komento
+                FROM kirjoittimet
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$apuprintteri}'";
+      $kirres = pupe_query($query);
+      $kirrow = mysql_fetch_assoc($kirres);
+
+      $komento = $kirrow['komento'];
+    }
+
+    return $komento;
+  }
+}
+
 if (!function_exists("hae_viimeiset_hyvaksyjat")) {
   function hae_viimeiset_hyvaksyjat($laskurow) {
     $hyvaksyja_kentat = array();

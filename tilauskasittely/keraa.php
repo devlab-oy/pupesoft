@@ -599,7 +599,7 @@ if ($tee == 'P') {
 
           // Alkuperäinen perheid talteen, nollataan se myöhemmin, jos lapsia saa jättää ykis jt:ksi
           $rperheid  = $tilrivirow['perheid'];
-          
+
           //Aloitellaan tilausrivi päivitysqueryä
           $query = "UPDATE tilausrivi
                     SET yhtio = yhtio ";
@@ -702,7 +702,7 @@ if ($tee == 'P') {
                 $keratty    = "''";
                 $kerattyaik = "''";
                 $rkomm      = $tilrivirow["kommentti"];
-                
+
                 if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
                    $rperheid = 0;
                 }
@@ -768,7 +768,7 @@ if ($tee == 'P') {
                 $keratty  = "''";
                 $kerattyaik  = "''";
                 $rkomm     = $tilrivirow["kommentti"];
-                
+
                 if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
                    $rperheid = 0;
                 }
@@ -879,7 +879,7 @@ if ($tee == 'P') {
                   $keratty  = "''";
                   $kerattyaik  = "''";
                   $rkomm     = $tilrivirow['kommentti'];
-                 
+
                   if ($yhtiorow["kerayserat"] == '' and $tilrivirow["perheid"] != 0) {
                      $rperheid = 0;
                   }
@@ -1929,7 +1929,7 @@ if ($tee == 'P') {
       // Tutkitaan vielä aivan lopuksi mihin tilaan me laitetaan tämä otsikko
       // Keräysvaiheessahan tilausrivit muuttuvat ja tarkastamme nyt tilanteen uudestaan
       // Tämä tehdään vain myyntitilauksille
-      if ($tila == "'L'") {
+      if (stripos($tila, "L") !== FALSE) {
         $kutsuja = "keraa.php";
 
         $query = "SELECT *

@@ -2227,12 +2227,15 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 }
               }
 
-              $rivitunnus      = 0;
-              $kommentti       = "";
-              $tuotenimitys     = "";
+              $rivitunnus = 0;              
               $tuotenimitys_force = "";
               $omalle_tilaukselle = "";
-              $ale_peruste    = "";
+              $ale_peruste = "";
+              
+              if ($toimittamatta == 0) {
+                $kommentti = "";
+                $tuotenimitys = "";
+              }
 
             } // Tällä rundilla myydyt
           } // Jos tuoteperhettä löytyi riittävästi tai myytiin pelkää isää

@@ -479,7 +479,11 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
     $alempiteksti = trim($vakit[$rakir_i]." ".$lisatiedot[$rakir_i]);
 
     if ($alempiteksti != "") {
-      $rakir_i_kala-= 10;
+
+      if ($astilnrot[$rakir_i] == '')  {
+        $rakir_i_kala-= 10;
+      }
+
       list($ff_string, $ff_font) = pdf_fontfit($alempiteksti, 360, $pdf, $kirj);
       $pdf->draw_text(206, $rakir_i_kala, $ff_string, $firstpage, $ff_font);
     }

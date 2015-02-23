@@ -34,11 +34,20 @@ echo "<input type='hidden' name='tee' value='kaikki'>";
 if ($toim == "TARKKA") {
   $classes = 'hidden';
   $noautosubmit = true;
-  $monivalintalaatikot = array('laskumyyja');
+  $monivalintalaatikot = array('laskumyyja', 'osasto');
+  $tuote_lisa = "INNER JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio
+                   AND tilausrivi.otunnus = lasku.tunnus)
+                 INNER JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio
+                   AND tuote.tuoteno = tilausrivi.tuoteno)";
+  $summa_lisa = "tilausrivi.rivihinta";
+  $kate_lisa = "tilausrivi.kate";
 }
 else {
   $classes = '';
   $lisa = "";
+  $tuote_lisa = "";
+  $summa_lisa = "lasku.arvo";
+  $kate_lisa = "lasku.kate";
 }
 
 echo "<div id='valinnat' class='{$classes}'>";
@@ -87,10 +96,11 @@ if ($tee != '') {
   $query = "SELECT lasku.myyja,
             kuka.nimi,
             date_format(lasku.tapvm,'%Y/%m') kausi,
-            round(sum(lasku.arvo),0) summa,
-            round(sum(lasku.kate),0) kate
+            round(sum({$summa_lisa}),0) summa,
+            round(sum({$kate_lisa}),0) kate
             FROM lasku use index (yhtio_tila_tapvm)
             LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja)
+            {$tuote_lisa}
             WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
             {$lisa}
             and lasku.tila    = 'L'

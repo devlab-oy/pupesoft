@@ -1,18 +1,19 @@
 <?php
 
+if (isset($_POST['task']) and ($_POST['task'] == 'saldoraportti_pdf')) {
+  $no_head = "yes";
+}
+
+require "inc/parametrit.inc";
 require 'inc/edifact_functions.inc';
 
-if (isset($task) and $task == 'nayta_varastoraportti') {
+if (isset($task) and $task == 'saldoraportti_pdf') {
 
-  $varastot = unserialize(base64_decode($_POST['varastot']));
+  $pdf_data = unserialize(base64_decode($varastotiedot));
 
-  $sessio = $_POST['session'];
-  $logo_url = $_POST['logo_url'];
-  $logo_info = pdf_logo($logo_url, $sessio);
-
+  $logo_info = pdf_logo();
   $pdf_data['logodata'] = $logo_info['logodata'];
   $pdf_data['scale'] = $logo_info['scale'];
-  $pdf_data['varastot'] = $varastot;
 
   $pdf_tiedosto = varastoraportti_pdf($pdf_data);
 
@@ -20,8 +21,6 @@ if (isset($task) and $task == 'nayta_varastoraportti') {
   echo file_get_contents($pdf_tiedosto);
   die;
 }
-
-require "inc/parametrit.inc";
 
 if (!isset($errors)) $errors = array();
 
@@ -123,12 +122,6 @@ if (!isset($task) or $task == 'luo_saldoraportti') {
 
   if ($task == 'luo_saldoraportti') {
 
-    echo "
-      <form>
-      <input type='hidden' name='task' value='saldoraportti' />
-      <input type='submit' disabled value='Lataa pdf' />
-      </form><br>";
-
     $ajat = explode(".", $pvm);
 
     $paiva = $ajat[0];
@@ -137,7 +130,77 @@ if (!isset($task) or $task == 'luo_saldoraportti') {
 
     $hetki = $vuosi.'-'.$kuu.'-'.$paiva.' '.$tunti.':'.$minuutti.':00';
 
-    $echo = varastotilanne($hetki);
+    $varastotiedot = varastotilanne($hetki);
+    extract($varastotiedot);
+
+    $varastotiedot = serialize($varastotiedot);
+    $varastotiedot = base64_encode($varastotiedot);
+
+    js_openFormInNewWindow();
+
+    echo "
+      <form id='saldoraportti_pdf' method='post'>
+      <input type='hidden' name='task' value='saldoraportti_pdf' />
+      <input type='hidden' name='tee' value='XXX' />
+      <input type='hidden' name='varastotiedot' value='{$varastotiedot}' />
+      </form>";
+
+    echo "<button onClick=\"js_openFormInNewWindow('saldoraportti_pdf','Saldoraportti'); return false;\" />";
+    echo t("Lataa pdf");
+    echo "</button><br />";
+
+
+    $echo = "<br>Rullien kokonaism‰‰r‰: " . $totalmaara . ' kpl';
+    $echo .= '<br>';
+    $echo .= "Rullien kokonaispaino: " . $totalpaino . ' kg';
+    $echo .= '<br><br>';
+
+    $echo .= "<table>";
+
+    foreach ($paikat as $paikka => $tilaukset) {
+
+      $rivimaara = count($tilaukset) + 2;
+
+      $echo .= "<tr><th valign='top' rowspan={$rivimaara}''>";
+      $echo .= "<h2 style='font-weight:bold'>".$paikka.'</h2>';
+      $echo .= "</th><th>";
+      $echo .= "</th></tr>";
+
+      $tilauspaino = 0;
+      $tilausrullia = 0;
+      foreach ($tilaukset as $tilaus => $rullat) {
+        $echo .= "<tr><td>";
+
+
+        $echo .= "<div style='display:inline-block; width:130px; padding:0 10px'>" . $tilaus . "</div>";
+
+        $paino = 0;
+        $rullia = 0;
+        foreach ($rullat as $rulla) {
+          $paino += $rulla['massa'];
+          $rullia++;
+          $tilauspaino += $rulla['massa'];
+          $tilausrullia++;
+        }
+
+        $echo .= "<div style='display:inline-block; width:80px; text-align:right; padding-right:10px;'>" . $paino . " kg</div>";
+        $echo .= "<div style='display:inline-block; text-align:left;'>" . $rullia . " kpl</div>";
+
+
+
+        $echo .= "</td></tr>";
+      }
+      $echo .= "<tr><td>";
+
+      $echo .= "<div style='display:inline-block; width:130px; padding:0 10px; font-weight:bold;'>" . t("Yhteens‰:") . "</div>";
+      $echo .= "<div style='display:inline-block; width:80px; text-align:right; padding-right:10px;  font-weight:bold;'>" . $tilauspaino . " kg</div>";
+      $echo .= "<div style='display:inline-block; text-align:left;  font-weight:bold;'>" . $tilausrullia . " kpl</div>";
+
+      $echo .= "</td></tr>";
+
+    }
+    $echo .= "</table>";
+
 
     echo $echo;
   }

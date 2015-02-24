@@ -2534,6 +2534,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
                 min(lasku.lahetepvm) lahetepvm,
                 min(lasku.kerayspvm) kerayspvm,
                 min(lasku.toimaika) toimaika,
+                min(lasku.yhtio_toimipaikka) yhtio_toimipaikka,
                 group_concat(DISTINCT lasku.laatija) laatija,
                 group_concat(DISTINCT lasku.toimitustapa SEPARATOR '<br>') toimitustapa,
                 group_concat(DISTINCT concat_ws('\n\n', if (comments!='',concat('".t("Lähetteen lisätiedot").":\n',comments),NULL), if (sisviesti2!='',concat('".t("Keräyslistan lisätiedot").":\n',sisviesti2),NULL)) SEPARATOR '\n') ohjeet,
@@ -2588,6 +2589,11 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
       if ($logistiikka_yhtio != '') {
         echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='yhtio'; document.forms['find'].submit();\">", t("Yhtiö"), "</a></th>";
       }
+
+      if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X') {
+        echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='yhtio_toimipaikka'; document.forms['find'].submit();\">", t("Toimipaikka"), "</a></th>";
+      }
+
       echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='prioriteetti'; document.forms['find'].submit();\">", t("Pri"), "</a><br>";
       //echo "<a href='#' onclick=\"getElementById('jarj').value='varastonimi'; document.forms['find'].submit();\">".t("Varastoon")."</a></th>";
 
@@ -2635,6 +2641,18 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
 
         if ($logistiikka_yhtio != '') {
           echo "<td valign='top'>{$row['yhtio_nimi']}</td>";
+        }
+
+        if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X') {
+          if (!empty($row['yhtio_toimipaikka'])) {
+            $_tp_res = hae_yhtion_toimipaikat($kukarow['yhtio'], $row['yhtio_toimipaikka']);
+            $_tp_row = mysql_fetch_assoc($_tp_res);
+
+            echo "<{$ero}>{$_tp_row['nimi']}</{$ero}>";
+          }
+          else {
+            echo "<{$ero}></{$ero}>";
+          }
         }
 
         if (isset($row['ohjeet']) and trim($row["ohjeet"]) != "") {

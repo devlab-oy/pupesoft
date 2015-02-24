@@ -2499,7 +2499,6 @@ else {
               // Yksikköhinta on laskulla aina veroton
               if ($yhtiorow["alv_kasittely"] == '') {
                 $tilrow["hinta"] = $tilrow["hinta"] / (1 + $tilrow["alv"] / 100);
-
               }
 
               // Veron määrä

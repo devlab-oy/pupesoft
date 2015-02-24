@@ -1137,7 +1137,7 @@ if ($tee2 == '') {
       echo "<$ero valign='top'>".str_replace(',', '<br>', $tilrow["otunnus"])."</$ero>";
 
       if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X' and $tilrow['tilauksia'] > 1) {
-        echo "<{$ero} valign='top'>",t("Useita"),"<{$ero}>";
+        echo "<{$ero} valign='top'>",t("Useita"),"</{$ero}>";
       }
       else {
         echo "<$ero valign='top'>$tilrow[ytunnus]";
@@ -1342,6 +1342,10 @@ if ($tee2 == '') {
     echo "<th>".$riveja_yht."</th>";
 
     $spanni = ($yhtiorow["pakkaamolokerot"] != "" or $logistiikka_yhtio != '') ? 4 : 3;
+
+    if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X') {
+      $spanni++;
+    }
 
     echo "<th colspan='$spanni'></th>";
     echo "</tr>";

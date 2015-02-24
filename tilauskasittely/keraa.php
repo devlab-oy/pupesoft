@@ -2843,7 +2843,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           if ($toim == 'VASTAANOTA_REKLAMAATIO') {
             echo "<br><form action='tilaus_myynti.php' method='POST'>";
             echo "<input type='hidden' name='toim' value = 'REKLAMAATIO'>";
-            echo "<input type='hidden' name='tilausnumero' value = '{$tilausnumeroita}'>";
+            echo "<input type='hidden' name='tilausnumero' value = '{$otsik_row['tunnus']}'>";
             echo "<input type='hidden' name='mista' value = 'keraa'>";
             echo "<input type='submit' value='", t("Muokkaa"), "'/> ";
             echo "</form>";

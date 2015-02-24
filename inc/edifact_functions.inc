@@ -3015,7 +3015,7 @@ function konttierittely_pdf($pdf_data) {
 
   $xx = array(20,580);
 
-  $pdf->draw_text($x, $y, "CONTAINER BREAKDOWN", $sivu, $bold);
+  $pdf->draw_text($x, $y, "CONTAINER SPECIFICATION", $sivu, $bold);
   $y -= 20;
   $pdf->draw_text($x, $y, 'Container Ref.:', $sivu, $bold);
   $pdf->draw_text($x+100, $y, $konttiviite, $sivu, $bold);

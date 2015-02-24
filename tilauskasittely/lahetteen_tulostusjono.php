@@ -990,6 +990,7 @@ if ($tee2 == '') {
   }
 
   $query = "SELECT lasku.yhtio, lasku.yhtio_nimi, lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.varasto,
+            lasku.yhtio_toimipaikka,
             if (tila = 'V', lasku.viesti, lasku.toimitustapa) toimitustapa,
             if (maksuehto.jv!='', lasku.tunnus, '') jvgrouppi,
             if (lasku.vienti!='', lasku.tunnus, '') vientigrouppi,
@@ -1045,6 +1046,11 @@ if ($tee2 == '') {
     if ($logistiikka_yhtio != '') {
       echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='yhtio'; document.forms['find'].submit();\">".t("Yhtiö")."</a></th>";
     }
+
+    if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X') {
+      echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='yhtio_toimipaikka'; document.forms['find'].submit();\">".t("Toimipaikka")."</a></th>";
+    }
+
     echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='prioriteetti'; document.forms['find'].submit();\">".t("Pri")."</a><br>
           <a href='#' onclick=\"getElementById('jarj').value='varastonimi'; document.forms['find'].submit();\">".t("Varastoon")."</a></th>";
 
@@ -1094,6 +1100,18 @@ if ($tee2 == '') {
 
       if ($logistiikka_yhtio != '') {
         echo "<$ero valign='top'>$tilrow[yhtio_nimi]</$ero>";
+      }
+
+      if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X') {
+        if (!empty($tilrow['yhtio_toimipaikka'])) {
+          $_tp_res = hae_yhtion_toimipaikat($kukarow['yhtio'], $tilrow['yhtio_toimipaikka']);
+          $_tp_row = mysql_fetch_assoc($_tp_res);
+
+          echo "<{$ero}>{$_tp_row['nimi']}</{$ero}>";
+        }
+        else {
+          echo "<{$ero}></{$ero}>";
+        }
       }
 
       echo "<$ero valign='top' align='right'>$tilrow[t_tyyppi] $tilrow[prioriteetti] ";

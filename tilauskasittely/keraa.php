@@ -2541,6 +2541,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
                 min(if (lasku.clearing = '', 'N', if (lasku.clearing = 'JT-TILAUS', 'J', if (lasku.clearing = 'ENNAKKOTILAUS', 'E', '')))) t_tyyppi,
                 #(select nimitys from varastopaikat where varastopaikat.tunnus=min(lasku.varasto)) varastonimi,
                 count(*) riveja,
+                count(distinct lasku.tunnus) tilauksia,
                 lasku.yhtio yhtio,
                 lasku.yhtio_nimi yhtio_nimi
                 from lasku use index (tila_index)
@@ -2674,6 +2675,9 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
 
         if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
           echo "<td valign='top'>{$row['asiakas']}</td>";
+        }
+        elseif ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X' and $row['tilauksia'] > 1) {
+          echo "<td valign='top'>",t("Useita"),"</td>";
         }
         else {
           echo "<td valign='top'>{$row['ytunnus']}<br />{$row['asiakas']}</td>";
@@ -2822,13 +2826,30 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
 
       echo "<tr><th>", t("Tilaus"), "</th><th>", t("Ostaja"), "</th><th>", t("Toimitusosoite"), "</th></tr>";
 
-      if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
+      $_ker_chk = ($yhtiorow['kerayserat'] == 'K' and $toim == "");
+      $_rek_chk = ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X');
+
+      $_ker_rek = ($_ker_chk or $_rek_chk);
+
+      if ($_ker_rek) {
 
         mysql_data_seek($result, 0);
 
         while ($otsik_row = mysql_fetch_assoc($result)) {
           echo "<tr>";
-          echo "<td>{$otsik_row['tunnus']}<br />{$otsik_row['clearing']}</td>";
+          echo "<td>";
+          echo "{$otsik_row['tunnus']}<br />{$otsik_row['clearing']}";
+
+          if ($toim == 'VASTAANOTA_REKLAMAATIO') {
+            echo "<br><form action='tilaus_myynti.php' method='POST'>";
+            echo "<input type='hidden' name='toim' value = 'REKLAMAATIO'>";
+            echo "<input type='hidden' name='tilausnumero' value = '{$tilausnumeroita}'>";
+            echo "<input type='hidden' name='mista' value = 'keraa'>";
+            echo "<input type='submit' value='", t("Muokkaa"), "'/> ";
+            echo "</form>";
+          }
+
+          echo "</td>";
           echo "<td>{$otsik_row['nimi']} {$otsik_row['nimitark']}<br />{$otsik_row['osoite']}<br />{$otsik_row['postino']} {$otsik_row['postitp']}<br />", maa($otsik_row["maa"]), "</td>";
           echo "<td>{$otsik_row['toim_nimi']} {$otsik_row['toim_nimitark']}<br />{$otsik_row['toim_osoite']}<br />{$otsik_row['toim_postino']} {$otsik_row['toim_postitp']}<br />", maa($otsik_row["toim_maa"]), "</td>";
           echo "</tr>";

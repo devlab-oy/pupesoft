@@ -94,7 +94,12 @@ if (!function_exists('alku_kerayslista')) {
 
       tulosta_logo_pdf($pdf, $thispage, $laskurow);
 
-      if ($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0) {
+      $_ker_chk = ($yhtiorow['kerayserat'] == 'K');
+      $_rek_chk = ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X');
+
+      $_ker_rek = ($_ker_chk or $_rek_chk);
+
+      if ($_ker_rek and isset($kerayseran_numero) and $kerayseran_numero > 0) {
 
         $query = "SELECT count(distinct liitostunnus) asiakkaita
                   FROM lasku
@@ -192,7 +197,13 @@ if (!function_exists('alku_kerayslista')) {
       else {
         list($ff_string, $ff_font) = pdf_fontfit($tilausnumeroita, 270, $pdf, $boldi);
         $pdf->draw_text(310, 792, t("Tilausnumero(t)", $kieli),     $thispage, $pieni);
-        $pdf->draw_text(310, 782, $ff_string,              $thispage, $ff_font);
+
+        if ($_rek_chk and count(explode(",", $tilausnumeroita)) > 3) {
+          $pdf->draw_text(310, 782, t("Useita"), $thispage, $boldi);
+        }
+        else {
+          $pdf->draw_text(310, 782, $ff_string, $thispage, $ff_font);
+        }
       }
 
       $pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);

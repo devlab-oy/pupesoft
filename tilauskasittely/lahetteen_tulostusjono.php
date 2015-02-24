@@ -1117,13 +1117,19 @@ if ($tee2 == '') {
       echo "</$ero>";
 
       echo "<$ero valign='top'>".str_replace(',', '<br>', $tilrow["otunnus"])."</$ero>";
-      echo "<$ero valign='top'>$tilrow[ytunnus]";
 
-      if ($toim == 'SIIRTOLISTA' or $toim == 'SIIRTOTYOMAARAYS') {
-        echo "<br>$tilrow[nimi]</$ero>";
+      if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X' and $tilrow['tilauksia'] > 1) {
+        echo "<{$ero} valign='top'>",t("Useita"),"<{$ero}>";
       }
       else {
-        echo "<br>$tilrow[toim_nimi]</$ero>";
+        echo "<$ero valign='top'>$tilrow[ytunnus]";
+
+        if ($toim == 'SIIRTOLISTA' or $toim == 'SIIRTOTYOMAARAYS') {
+          echo "<br>$tilrow[nimi]</$ero>";
+        }
+        else {
+          echo "<br>$tilrow[toim_nimi]</$ero>";
+        }
       }
 
       $laadittu_e   = tv1dateconv($tilrow["laadittu"], "P", "LYHYT");

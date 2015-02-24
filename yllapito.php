@@ -245,7 +245,8 @@ if ($oikeurow['paivitys'] != '1') {
 }
 
 if ($del == 1 and $toim == 'huoltosykli') {
-  if (onko_huoltosyklilla_laitteita()) {
+  if (onko_huoltosyklilla_laitteita($tunnus)) {
+    echo "<font class='error'>" . t('Huoltosykliin on liitetty laitteita poistoa ei voida tehdä') . "</font>";
     unset($del);
   }
 }

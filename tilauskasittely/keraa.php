@@ -2648,10 +2648,10 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
             $_tp_res = hae_yhtion_toimipaikat($kukarow['yhtio'], $row['yhtio_toimipaikka']);
             $_tp_row = mysql_fetch_assoc($_tp_res);
 
-            echo "<{$ero}>{$_tp_row['nimi']}</{$ero}>";
+            echo "<td valign='top'>{$_tp_row['nimi']}</td>";
           }
           else {
-            echo "<{$ero}></{$ero}>";
+            echo "<td valign='top'></td>";
           }
         }
 

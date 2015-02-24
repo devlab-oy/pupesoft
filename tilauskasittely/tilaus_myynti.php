@@ -9754,7 +9754,7 @@ if ($tee == '') {
                     AND kerayslista != 0
                     AND kerayslista = '{$laskurow['kerayslista']}'
                     AND tila = 'C'
-                    AND alatila = ''C";
+                    AND alatila = 'C'";
           $takaisin_keraa_res = pupe_query($query);
           $takaisin_keraa_row = mysql_fetch_assoc($takaisin_keraa_res);
 

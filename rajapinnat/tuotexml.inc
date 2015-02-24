@@ -28,6 +28,9 @@ foreach ($dnstuote as $tuote) {
   $product->addChild('titleswe', utf8_encode(xmlentities($tuote["nimi_swe"])));
   $product->addChild('titleeng', utf8_encode(xmlentities($tuote["nimi_eng"])));
   $product->addChild('productsubgroupcode', $tuote["try"]);
+  $product->addChild('handlingunit', utf8_encode(xmlentities($tuote["yksikko"])));
+  $product->addChild('handlingunitfactor', $tuote["myynti_era"]);
+  $product->addChild('description', utf8_encode(xmlentities($tuote["mainosteksti"])));
 
   $units = $product->addChild('units');
   $unit = $units->addChild('unit');

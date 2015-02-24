@@ -72,8 +72,6 @@ if (!function_exists("asiakastarkista")) {
         if (mysql_num_rows($res) > 0) {
           $t['luottoraja'] = mysql_result($res,0);
         }
-
-        var_dump($t['luottoraja']);
       }
     }
 

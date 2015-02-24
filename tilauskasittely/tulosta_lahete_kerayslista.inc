@@ -94,12 +94,12 @@ if (!function_exists('alku_kerayslista')) {
 
       tulosta_logo_pdf($pdf, $thispage, $laskurow);
 
-      $_ker_chk = ($yhtiorow['kerayserat'] == 'K');
+      $_ker_chk = ($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0);
       $_rek_chk = ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X');
 
       $_ker_rek = ($_ker_chk or $_rek_chk);
 
-      if ($_ker_rek and isset($kerayseran_numero) and $kerayseran_numero > 0) {
+      if ($_ker_rek) {
 
         $query = "SELECT count(distinct liitostunnus) asiakkaita
                   FROM lasku

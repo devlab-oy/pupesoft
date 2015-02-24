@@ -197,13 +197,7 @@ if (!function_exists('alku_kerayslista')) {
       else {
         list($ff_string, $ff_font) = pdf_fontfit($tilausnumeroita, 270, $pdf, $boldi);
         $pdf->draw_text(310, 792, t("Tilausnumero(t)", $kieli),     $thispage, $pieni);
-
-        if ($_rek_chk and count(explode(",", $tilausnumeroita)) > 3) {
-          $pdf->draw_text(310, 782, t("Useita"), $thispage, $boldi);
-        }
-        else {
-          $pdf->draw_text(310, 782, $ff_string, $thispage, $ff_font);
-        }
+        $pdf->draw_text(310, 782, $ff_string, $thispage, $ff_font);
       }
 
       $pdf->draw_rectangle(779, 300, 758, 580, $thispage, $rectparam);

@@ -970,7 +970,7 @@ if ($tee2 == '') {
   }
 
   if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X') {
-    $grouppi .= ", lasku.varasto, lasku.yhtio_toimipaikka";
+    $grouppi = "GROUP BY lasku.varasto, lasku.yhtio_toimipaikka";
   }
 
   $tilausrivi_tuoteno_join = '';

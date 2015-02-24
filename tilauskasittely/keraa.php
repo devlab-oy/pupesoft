@@ -2665,7 +2665,12 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           echo "<td valign='top'>{$row['keraysera']}{$_moduuli}</td>";
         }
 
-        echo "<td valign='top'>{$row['tunnus']}</td>";
+        if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X') {
+          echo "<td valign='top'>{$row['tunnukset']}</td>";
+        }
+        else {
+          echo "<td valign='top'>{$row['tunnus']}</td>";
+        }
 
         if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
           echo "<td valign='top'>{$row['asiakas']}</td>";

@@ -2468,7 +2468,7 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
       $taara = $rulla['kontin_taarapaino'];
       $mrn = $rulla['kontin_mrn'];
 
-      $pakkalista[] = "UIB: " . $rulla['sarjanumero'] . " - " . (INT) $rulla['massa'] . " kg - " .$rulla['asiakkaan_tilausnumero'] . " - Rullanumero: {$rulla['juoksu']}\n";
+      $pakkalista[] = "UIB: " . $rulla['sarjanumero'] . " - " . (INT) $rulla['massa'] . " kg - " .$rulla['asiakkaan_tilausnumero'] . " - Roll Number: {$rulla['juoksu']}\n";
 
       //$pakkalista .= "UIB: " . $rulla['sarjanumero'] . " - " . (INT) $rulla['massa'] . " kg - " .$rulla['asiakkaan_tilausnumero'] . "\n";
     }
@@ -2917,23 +2917,23 @@ function pakkalista_pdf($pdf_data) {
 
   $xx = array(20,580);
 
-  $pdf->draw_text($x, $y, "PAKKALISTA", $sivu, $bold);
+  $pdf->draw_text($x, $y, "PACKING LIST", $sivu, $bold);
   $y -= 20;
-  $pdf->draw_text($x, $y, 'Konttinumero', $sivu, $bold);
+  $pdf->draw_text($x, $y, 'Container Number', $sivu, $bold);
   $pdf->draw_text($x+100, $y, $konttinumero, $sivu, $bold);
   $y -= 15;
-  $pdf->draw_text($x, $y, 'Sinettinumero', $sivu, $bold);
+  $pdf->draw_text($x, $y, 'Seal Number', $sivu, $bold);
   $pdf->draw_text($x+100, $y, $sinettinumero, $sivu, $bold);
   $y -= 15;
-  $pdf->draw_text($x, $y, 'Paino', $sivu, $bold);
+  $pdf->draw_text($x, $y, 'Weight', $sivu, $bold);
   $pdf->draw_text($x+100, $y, $paino, $sivu, $bold);
   $y -= 15;
-  $pdf->draw_text($x, $y, 'Taara', $sivu, $bold);
+  $pdf->draw_text($x, $y, 'Tare Weight', $sivu, $bold);
   $pdf->draw_text($x+100, $y, $taara, $sivu, $bold);
   $y -= 15;
-  $pdf->draw_text($x, $y, 'Kpl', $sivu, $bold);
+  $pdf->draw_text($x, $y, 'Pcs.', $sivu, $bold);
   $pdf->draw_text($x+100, $y, $kpl, $sivu, $bold);
-  $pdf->draw_text($x+500, $y, "sivu {$sivunro}/{$sivuja}", $sivu, $bold);
+  $pdf->draw_text($x+500, $y, "Page {$sivunro}/{$sivuja}", $sivu, $bold);
 
   $y -= 15;
   $yy[0] = $yy[1] = $y;
@@ -2948,11 +2948,11 @@ function pakkalista_pdf($pdf_data) {
 
       $sivunro++;
 
-      $pdf->draw_text($x, $y, "PAKKALISTA", $sivu, $bold);
+      $pdf->draw_text($x, $y, "PACKING LIST", $sivu, $bold);
       $y -= 20;
-      $pdf->draw_text($x, $y, 'Konttinumero', $sivu, $bold);
+      $pdf->draw_text($x, $y, 'Container Number', $sivu, $bold);
       $pdf->draw_text($x+100, $y, $konttinumero, $sivu, $bold);
-      $pdf->draw_text($x+500, $y, "sivu {$sivunro}/{$sivuja}", $sivu, $bold);
+      $pdf->draw_text($x+500, $y, "Page {$sivunro}/{$sivuja}", $sivu, $bold);
       $y -= 15;
       $yy[0] = $yy[1] = $y;
       $pdf->draw_line($xx, $yy, $sivu);
@@ -3015,19 +3015,19 @@ function konttierittely_pdf($pdf_data) {
 
   $xx = array(20,580);
 
-  $pdf->draw_text($x, $y, "Konttierittely", $sivu, $bold);
+  $pdf->draw_text($x, $y, "CONTAINER BREAKDOWN", $sivu, $bold);
   $y -= 20;
-  $pdf->draw_text($x, $y, 'Konttiviite:', $sivu, $bold);
+  $pdf->draw_text($x, $y, 'Container Ref.:', $sivu, $bold);
   $pdf->draw_text($x+100, $y, $konttiviite, $sivu, $bold);
   $y -= 15;
-  $pdf->draw_text($x, $y, 'Kokonaispaino:', $sivu, $bold);
+  $pdf->draw_text($x, $y, 'Total Weight:', $sivu, $bold);
   $pdf->draw_text($x+100, $y, $total_paino." kg", $sivu, $bold);
   $y -= 15;
-  $pdf->draw_text($x, $y, 'Kontteja:', $sivu, $bold);
-  $pdf->draw_text($x+100, $y, $konttimaara. " kpl", $sivu, $bold);
+  $pdf->draw_text($x, $y, 'Containers:', $sivu, $bold);
+  $pdf->draw_text($x+100, $y, $konttimaara. " pcs.", $sivu, $bold);
   $y -= 15;
-  $pdf->draw_text($x, $y, 'Rullia:', $sivu, $bold);
-  $pdf->draw_text($x+100, $y, $total_rullat." kpl", $sivu, $bold);
+  $pdf->draw_text($x, $y, 'Rolls:', $sivu, $bold);
+  $pdf->draw_text($x+100, $y, $total_rullat." pcs", $sivu, $bold);
   $y -= 15;
 
   foreach ($kontit as $konttiviite => $tilaukset) {
@@ -3045,16 +3045,16 @@ function konttierittely_pdf($pdf_data) {
     $pdf->draw_line($xx, $yy, $sivu);
     $y -= 20;
 
-    $pdf->draw_text($x, $y, 'Kontti:', $sivu, $bold);
+    $pdf->draw_text($x, $y, 'Container:', $sivu, $bold);
     $pdf->draw_text($x+60, $y, $konttiviite, $sivu, $bold);
-    $pdf->draw_text($x+160, $y, $tilaukset['paino']. ' kg / '.$tilaukset['rullia']. ' rullaa', $sivu, $bold);
+    $pdf->draw_text($x+160, $y, $tilaukset['paino']. ' kg / '.$tilaukset['rullia']. ' rolls', $sivu, $bold);
     $y -= 15;
 
     $pdf->draw_text($x, $y, 'MRN:', $sivu, $bold);
     $pdf->draw_text($x+60, $y, $tilaukset['mrn'], $sivu, $bold);
     $y -= 15;
 
-    $pdf->draw_text($x, $y, 'Sinetti:', $sivu, $bold);
+    $pdf->draw_text($x, $y, 'Seal:', $sivu, $bold);
     $pdf->draw_text($x+60, $y, $tilaukset['sinetti'], $sivu, $bold);
     $y -= 20;
 
@@ -3063,7 +3063,7 @@ function konttierittely_pdf($pdf_data) {
     unset($tilaukset['mrn']);
     unset($tilaukset['sinetti']);
 
-    $pdf->draw_text($x, $y, 'Tilaukset:', $sivu, $bold);
+    $pdf->draw_text($x, $y, 'Orders:', $sivu, $bold);
     $y -= 15;
 
     foreach ($tilaukset as $tilausnumero => $rivit) {
@@ -3073,7 +3073,7 @@ function konttierittely_pdf($pdf_data) {
 
       foreach ($rivit as $rivinumero => $rivi) {
         $pdf->draw_text($x, $y, $tilausnumero.":".$rivinumero, $sivu, $bold);
-        $pdf->draw_text($x+100, $y, $rivi['paino']. ' kg / '.$rivi['rullia']. ' rullaa', $sivu, $bold);
+        $pdf->draw_text($x+100, $y, $rivi['paino']. ' kg / '.$rivi['rullia']. ' rolls', $sivu, $bold);
         $y -= 15;
       }
     }

@@ -2204,8 +2204,6 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
             <form method='post' id='nayta_lahtoilmoitus{$id}'>
             <input type='hidden' name='parametrit' value='{$parametrit}' />
             <input type='hidden' name='task' value='nayta_lahtoilmoitus' />
-            <input type='hidden' name='session' value='{$session}' />
-            <input type='hidden' name='logo_url' value='{$logo_url}' />
             <input type='hidden' name='tee' value='XXX' />
             </form>
             <button onClick=\"js_openFormInNewWindow('nayta_lahtoilmoitus{$id}',
@@ -2224,8 +2222,6 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
             <form method='post' id='nayta_konttierittely{$id}'>
             <input type='hidden' name='parametrit' value='{$parametrit}' />
             <input type='hidden' name='task' value='nayta_konttierittely' />
-            <input type='hidden' name='session' value='{$session}' />
-            <input type='hidden' name='logo_url' value='{$logo_url}' />
             <input type='hidden' name='tee' value='XXX' />
             </form>
             <button onClick=\"js_openFormInNewWindow('nayta_konttierittely{$id}',

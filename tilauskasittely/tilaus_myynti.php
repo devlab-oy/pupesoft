@@ -9747,9 +9747,18 @@ if ($tee == '') {
         $napin_teksti = $laskurow['tilaustyyppi'] == 'U' ? "Takuu" : "Reklamaatio";
 
         if ($mista == 'keraa') {
+
+          $query = "SELECT GROUP_CONCAT(tunnus) tunnukset
+                    FROM lasku
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND kerayslista != 0
+                    AND kerayslista = '{$laskurow['kerayslista']}'";
+          $takaisin_keraa_res = pupe_query($query);
+          $takaisin_keraa_row = mysql_fetch_assoc($takaisin_keraa_res);
+
           echo "<td class='back' valign='top'>
               <form method='post' action='keraa.php'>
-              <input type='hidden' name='id' value = '$tilausnumero'>
+              <input type='hidden' name='id' value = '{$takaisin_keraa_row['tunnukset']}'>
               <input type='hidden' name='toim' value = 'VASTAANOTA_REKLAMAATIO'>
               <input type='hidden' name='lasku_yhtio' value = '$kukarow[yhtio]'>
               <input type='submit' name='tila' value = '".t("Takaisin Hyllytykseen")."'>";

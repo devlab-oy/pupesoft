@@ -175,6 +175,16 @@ while ($rekisterinumero_row = mysql_fetch_assoc($rekisterinumero_result)) {
   pupe_query($query);
 }
 
+if (!empty($ylivito) and in_array($yhtiorow['erapaivan_ylityksen_toimenpide'], array('J','L'))) {
+  $luottorajavirhe_ylivito_valmis = false;
+}
+elseif (!empty($luottorajavirhe) and in_array($yhtiorow['luottorajan_ylitys'], array('J','L'))) {
+  $luottorajavirhe_ylivito_valmis = false;
+}
+else {
+  $luottorajavirhe_ylivito_valmis = true;
+}
+
 // Jos ennakkolaskun automatisointi on p‰‰ll‰ (asiakas > yhtiˆn oletus) ja maksuehtona on "osamaksu", laitetaan tilaus holdiin
 if ((!isset($vapauta_tilaus_keraykseen) or !$vapauta_tilaus_keraykseen)
   and $maksuehtorow['jaksotettu'] != ''
@@ -255,8 +265,16 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
     pupe_query($query);
   }
 
+  if ($toim == "REKLAMAATIO" and !$luottorajavirhe_ylivito_valmis) {
+    $tilaupd = "tila = 'C',";
+  }
+  else {
+    $tilaupd = "";
+  }
+
   $query = "UPDATE lasku SET
             alatila             = '$alatila',
+            {$tilaupd}
             toimitustavan_lahto = 0
             WHERE yhtio         = '$kukarow[yhtio]'
             AND tunnus          = '$laskurow[tunnus]'";
@@ -277,9 +295,12 @@ elseif ($luottorajavirhe != '' or $ylivito > 0) {
 
   if ($toim == "REKLAMAATIO") {
     $tee        = '';
-    $tilausnumero    = '';
-    $laskurow      = '';
-    $kukarow['kesken']  = '';
+
+    if ($luottorajavirhe_ylivito_valmis) {
+      $tilausnumero    = '';
+      $laskurow      = '';
+      $kukarow['kesken']  = '';
+    }
 
     echo "<font class='error'>" . $errortext . t("Reklamaatiota ei merkit‰ valmiiksi"), ".</font><br/><br/>";
   }
@@ -2168,9 +2189,11 @@ else {
 //tyhjennet‰‰n ett‰ se ei kummittele uudella tilauksella
 $hinta = '';
 
-// tilaus ei en‰‰ kesken...
-$query  = "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
-$result = pupe_query($query);
+if ($luottorajavirhe_ylivito_valmis) {
+  // tilaus ei en‰‰ kesken...
+  $query  = "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+  $result = pupe_query($query);
+}
 
 if (!isset($silent) or $silent == "") {
   echo $tilaus_valmis_ulos;

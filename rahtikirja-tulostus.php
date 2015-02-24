@@ -552,6 +552,7 @@ if ($tee == 'tulosta') {
         $rakir_row["toim_osoite"]  = $toitarow["toim_osoite"];
         $rakir_row["toim_postino"]  = $toitarow["toim_postino"];
         $rakir_row["toim_postitp"]  = $toitarow["toim_postitp"];
+		$rakir_row["toim_puh"]  = $toitarow["toim_puh"];
 
       }
 

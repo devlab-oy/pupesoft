@@ -969,7 +969,7 @@ if ($tee2 == '') {
     $grouppi .= ", lasku.varasto, lasku.tulostusalue";
   }
 
-  if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X') {
+  if ($toim == "VASTAANOTA_REKLAMAATIO") {
     $grouppi = "GROUP BY lasku.varasto, lasku.yhtio_toimipaikka";
   }
 
@@ -1047,7 +1047,7 @@ if ($tee2 == '') {
       echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='yhtio'; document.forms['find'].submit();\">".t("Yhtiö")."</a></th>";
     }
 
-    if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X') {
+    if ($toim == "VASTAANOTA_REKLAMAATIO") {
       echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='yhtio_toimipaikka'; document.forms['find'].submit();\">".t("Toimipaikka")."</a></th>";
     }
 
@@ -1102,7 +1102,7 @@ if ($tee2 == '') {
         echo "<$ero valign='top'>$tilrow[yhtio_nimi]</$ero>";
       }
 
-      if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X') {
+      if ($toim == "VASTAANOTA_REKLAMAATIO") {
         if (!empty($tilrow['yhtio_toimipaikka'])) {
           $_tp_res = hae_yhtion_toimipaikat($kukarow['yhtio'], $tilrow['yhtio_toimipaikka']);
           $_tp_row = mysql_fetch_assoc($_tp_res);
@@ -1136,7 +1136,7 @@ if ($tee2 == '') {
 
       echo "<$ero valign='top'>".str_replace(',', '<br>', $tilrow["otunnus"])."</$ero>";
 
-      if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X' and $tilrow['tilauksia'] > 1) {
+      if ($toim == "VASTAANOTA_REKLAMAATIO" and $tilrow['tilauksia'] > 1) {
         echo "<{$ero} valign='top'>",t("Useita"),"</{$ero}>";
       }
       else {
@@ -1343,7 +1343,7 @@ if ($tee2 == '') {
 
     $spanni = ($yhtiorow["pakkaamolokerot"] != "" or $logistiikka_yhtio != '') ? 4 : 3;
 
-    if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X') {
+    if ($toim == "VASTAANOTA_REKLAMAATIO") {
       $spanni++;
     }
 

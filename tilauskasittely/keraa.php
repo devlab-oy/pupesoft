@@ -2590,7 +2590,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
         echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='yhtio'; document.forms['find'].submit();\">", t("Yhtiö"), "</a></th>";
       }
 
-      if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X') {
+      if ($toim == "VASTAANOTA_REKLAMAATIO") {
         echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='yhtio_toimipaikka'; document.forms['find'].submit();\">", t("Toimipaikka"), "</a></th>";
       }
 
@@ -2643,7 +2643,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           echo "<td valign='top'>{$row['yhtio_nimi']}</td>";
         }
 
-        if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X') {
+        if ($toim == "VASTAANOTA_REKLAMAATIO") {
           if (!empty($row['yhtio_toimipaikka'])) {
             $_tp_res = hae_yhtion_toimipaikat($kukarow['yhtio'], $row['yhtio_toimipaikka']);
             $_tp_row = mysql_fetch_assoc($_tp_res);
@@ -2684,7 +2684,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           echo "<td valign='top'>{$row['keraysera']}{$_moduuli}</td>";
         }
 
-        if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X') {
+        if ($toim == "VASTAANOTA_REKLAMAATIO") {
           echo "<td valign='top'>{$row['tunnukset']}</td>";
         }
         else {
@@ -2694,7 +2694,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
         if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
           echo "<td valign='top'>{$row['asiakas']}</td>";
         }
-        elseif ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X' and $row['tilauksia'] > 1) {
+        elseif ($toim == "VASTAANOTA_REKLAMAATIO" and $row['tilauksia'] > 1) {
           echo "<td valign='top'>",t("Useita"),"</td>";
         }
         else {
@@ -2845,7 +2845,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
       echo "<tr><th>", t("Tilaus"), "</th><th>", t("Ostaja"), "</th><th>", t("Toimitusosoite"), "</th></tr>";
 
       $_ker_chk = ($yhtiorow['kerayserat'] == 'K' and $toim == "");
-      $_rek_chk = ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X');
+      $_rek_chk = ($toim == "VASTAANOTA_REKLAMAATIO");
 
       $_ker_rek = ($_ker_chk or $_rek_chk);
 

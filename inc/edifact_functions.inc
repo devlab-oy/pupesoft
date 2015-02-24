@@ -3222,92 +3222,70 @@ function varastoraportti_pdf($pdf_data) {
   $xx = array(20,580);
 
   $pdf->draw_text($x, $y, 'VARASTORAPORTTI', $sivu, $iso);
-  $pvm = date("j.m.Y H:i");
-  $y -= 20;
-  $pdf->draw_text($x, $y, $pvm, $sivu, $bold);
+  $y -= 15;
+  $pdf->draw_text($x, $y, date("j.n.Y H:i", strtotime($hetki)), $sivu, $bold);
+  $y -= 15;
+  $pdf->draw_text($x, $y, "Rullien kokonaism‰‰r‰: " . $totalmaara . " kpl.", $sivu, $bold);
+  $y -= 15;
+  $pdf->draw_text($x, $y, "Rullien kokonaispaino: " . $totalpaino . " kg.", $sivu, $bold);
 
   $y -= 50;
 
   $pdf->draw_text($x, $y, 'Paikka', $sivu, $bold);
-  $pdf->draw_text($x+70, $y, 'UIB', $sivu, $bold);
-  $pdf->draw_text($x+160, $y, 'Paino', $sivu, $bold);
-  $pdf->draw_text($x+220, $y, 'Tilaus:rivi', $sivu, $bold);
-  $pdf->draw_text($x+320, $y, 'Status', $sivu, $bold);
-  $pdf->draw_text($x+400, $y, 'Rek.#', $sivu, $bold);
+  $pdf->draw_text($x+120, $y, 'Tilaus:rivi', $sivu, $bold);
+  $pdf->draw_text($x+270, $y, 'Paino', $sivu, $bold);
+  $pdf->draw_text($x+400, $y, 'Kpl.', $sivu, $bold);
 
   $y -= 5;
   $yy[0] = $yy[1] = $y;
   $pdf->draw_line($xx, $yy, $sivu);
   $y -= 20;
 
-  foreach ($varastot as $vp => $rullat) {
+  foreach ($paikat as $paikka => $tilaukset) {
 
-    if ($y < 20) {
+    $riveja = count($tilaukset);
+    $tarvittava_tila = $riveja * 20 + 20;
+
+    if ($y < $tarvittava_tila) {
       $sivu = $pdf->new_page("a4");
       $y = 800;
     }
 
-    $pdf->draw_text($x, $y-5, $vp, $sivu, $iso);
+    $pdf->draw_text($x, $y-5, $paikka, $sivu, $iso);
 
-    $total_kg = 0;
-
-    end($rullat);
-    $vika = key($rullat);
-    reset($rullat);
-
-    foreach ($rullat as $key => $rulla) {
+    $tilauspaino = 0;
+    $tilausrullia = 0;
+    foreach ($tilaukset as $tilaus => $rullat) {
 
       if ($y < 20) {
         $sivu = $pdf->new_page("a4");
         $y = 800;
-
-        $pdf->draw_text($x, $y, 'Paikka', $sivu, $bold);
-        $pdf->draw_text($x+70, $y, 'UIB', $sivu, $bold);
-        $pdf->draw_text($x+160, $y, 'Paino', $sivu, $bold);
-        $pdf->draw_text($x+220, $y, 'Tilaus:rivi', $sivu, $bold);
-        $pdf->draw_text($x+320, $y, 'Status', $sivu, $bold);
-        $pdf->draw_text($x+400, $y, 'Rek.#', $sivu, $bold);
-
-        $y -= 5;
-        $yy[0] = $yy[1] = $y;
-        $pdf->draw_line($xx, $yy, $sivu);
-        $y -= 20;
-
-        $pdf->draw_text($x, $y-5, $vp, $sivu, $iso);
-
       }
 
-      $total_kg += $rulla['massa'];
+        $pdf->draw_text($x+120, $y, $tilaus, $sivu, $pieni);
 
-      $pdf->draw_text($x+70, $y, $rulla['sarjanumero'], $sivu, $pieni);
-
-      $pdf->draw_text($x+160, $y, (int) $rulla['massa'] . ' kg', $sivu, $pieni);
-
-      if ($rulla['myyntirivinumero'] == NULL) {
-        $kombo = $rulla['ostotilausnumero'] . ":" . $rulla['ostorivinumero'];
-      }
-      else {
-        $kombo = $rulla['myyntitilausnumero'] . ":" . $rulla['myyntirivinumero'];
+        $paino = 0;
+        $rullia = 0;
+        foreach ($rullat as $rulla) {
+          $paino += $rulla['massa'];
+          $rullia++;
+          $tilauspaino += $rulla['massa'];
+          $tilausrullia++;
       }
 
-      $pdf->draw_text($x+220, $y, $kombo, $sivu, $pieni);
+      $pdf->draw_text($x+270, $y, $paino, $sivu, $pieni);
+      $pdf->draw_text($x+400, $y, $rullia, $sivu, $pieni);
 
-      $pdf->draw_text($x+320, $y, $rulla['status'], $sivu, $pieni);
-
-      $pdf->draw_text($x+400, $y, $rulla['kuljetuksen_rekno'], $sivu, $pieni);
-
-      $y -= 15;
-
-      if ($key == $vika) {
-        $y -= 5;
-        $pdf->draw_text($x, $y, $total_kg . ' kg', $sivu, $bold);
-        $y -= 5;
-        $yy[0] = $yy[1] = $y;
-        $pdf->draw_line($xx, $yy, $sivu);
-        $y -= 20;
-      }
-
+      $y -= 20;
     }
+    $pdf->draw_text($x+120, $y, "Yhteens‰", $sivu, $bold);
+    $pdf->draw_text($x+270, $y, $tilauspaino, $sivu, $bold);
+    $pdf->draw_text($x+400, $y, $tilausrullia, $sivu, $bold);
+
+    $y -= 5;
+    $yy[0] = $yy[1] = $y;
+    $pdf->draw_line($xx, $yy, $sivu);
+    $y -= 20;
   }
 
   //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
@@ -3534,58 +3512,17 @@ function varastotilanne($hetki = false) {
     $totalpaino += $rulla['massa'];
   }
 
-  $echo = "<br>Rullien kokonaism‰‰r‰: " . mysql_num_rows($result) . ' kpl';
-  $echo .= '<br>';
-  $echo .= "Rullien kokonaispaino: " . $totalpaino . ' kg';
-  $echo .= '<br><br>';
+  $totalmaara = mysql_num_rows($result);
 
-  $echo .= "<table>";
+  $return = array(
+    'paikat' => $paikat,
+    'totalpaino' => $totalpaino,
+    'totalmaara' => $totalmaara,
+    'hetki' => $hetki
+  );
 
-  foreach ($paikat as $paikka => $tilaukset) {
+  return $return;
 
-    $rivimaara = count($tilaukset) + 2;
-
-    $echo .= "<tr><th valign='top' rowspan={$rivimaara}''>";
-    $echo .= "<h2 style='font-weight:bold'>".$paikka.'</h2>';
-    $echo .= "</th><th>";
-    $echo .= "</th></tr>";
-
-    $tilauspaino = 0;
-    $tilausrullia = 0;
-    foreach ($tilaukset as $tilaus => $rullat) {
-      $echo .= "<tr><td>";
-
-
-      $echo .= "<div style='display:inline-block; width:130px; padding:0 10px'>" . $tilaus . "</div>";
-
-      $paino = 0;
-      $rullia = 0;
-      foreach ($rullat as $rulla) {
-        $paino += $rulla['massa'];
-        $rullia++;
-        $tilauspaino += $rulla['massa'];
-        $tilausrullia++;
-      }
-
-      $echo .= "<div style='display:inline-block; width:80px; text-align:right; padding-right:10px;'>" . $paino . " kg</div>";
-      $echo .= "<div style='display:inline-block; text-align:left;'>" . $rullia . " kpl</div>";
-
-
-
-      $echo .= "</td></tr>";
-    }
-    $echo .= "<tr><td>";
-
-    $echo .= "<div style='display:inline-block; width:130px; padding:0 10px; font-weight:bold;'>" . t("Yhteens‰:") . "</div>";
-    $echo .= "<div style='display:inline-block; width:80px; text-align:right; padding-right:10px;  font-weight:bold;'>" . $tilauspaino . " kg</div>";
-    $echo .= "<div style='display:inline-block; text-align:left;  font-weight:bold;'>" . $tilausrullia . " kpl</div>";
-
-    $echo .= "</td></tr>";
-
-  }
-  $echo .= "</table>";
-
-return $echo;
 }
 
 ?>

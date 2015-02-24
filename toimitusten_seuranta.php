@@ -1349,13 +1349,14 @@ if (!isset($task)) {
               COUNT(ss.tunnus) AS rullat,
               SUM(ss.massa) AS paino,
               group_concat(DISTINCT kontin_mrn) mrn_numerot,
-              group_concat(DISTINCT trlt.konttinumero SEPARATOR '<br>') AS kontit,
+              group_concat(DISTINCT trlt.konttinumero) AS kontit,
               llt.konttimaara AS bookattu_konttimaara,
               SUM(IF(otr.toimitettu != '', 1, 0)) AS kuitatut_rullat,
               SUM(IF(ss.varasto IS NOT NULL, 1, 0)) AS varastoidut_rullat,
-              SUM(IF(trlt.sinettinumero != '', 1, 0)) AS kontitetut_rullat,
+              SUM(IF(trlt.konttinumero != '', 1, 0)) AS kontitetut_rullat,
               SUM(IF(trlt.kontin_mrn != '', 1, 0)) AS mrn_tilanne,
-              SUM(IF(tr.toimitettu != '', 1, 0)) AS toimitetut_rullat
+              SUM(IF(tr.toimitettu != '', 1, 0)) AS toimitetut_rullat,
+              SUM(IF(ss.lisatieto IN ('Ylijaama', 'Hyl‰tty'), 1, 0)) AS poikkeukset
               FROM lasku
               JOIN tilausrivi AS tr
                 ON tr.yhtio = lasku.yhtio
@@ -1386,11 +1387,12 @@ if (!isset($task)) {
               group_concat(CONCAT(trlt.asiakkaan_tilausnumero, ':', trlt.asiakkaan_rivinumero)) AS rivirullatieto,
               llt.konttiviite,
               llt.satamavahvistus_pvm AS lahtoaika,
-              group_concat(DISTINCT trlt.konttinumero SEPARATOR '<br>') AS kontit,
+              group_concat(DISTINCT trlt.konttinumero) AS kontit,
               COUNT(ss.tunnus) AS rullat,
               SUM(ss.massa) AS paino,
               llt.konttimaara AS bookattu_konttimaara,
-              llt.rullamaara AS bookatut_rullat
+              llt.rullamaara AS bookatut_rullat,
+              SUM(IF(ss.lisatieto IN ('Ylijaama', 'Hyl‰tty'), 1, 0)) AS poikkeukset
               FROM lasku
               JOIN tilausrivi AS tr
                 ON tr.yhtio = lasku.yhtio
@@ -1518,12 +1520,24 @@ if (!isset($task)) {
       if ($rajaus == 'Bookkauksettomat') {
         echo t("Ei tiedossa");
       }
-      elseif (!empty($rivi['kontit'])) {
-        echo $rivi['kontit'] . '<br>';
-        echo $rivi['bookattu_konttimaara'] . " kpl. (" . t("Bookattu konttim‰‰r‰") . ")";
-      }
       else {
-        echo $rivi['bookattu_konttimaara'] . " kpl. (" . t("Bookattu konttim‰‰r‰") . ")";
+
+        $kontit = explode(",", $rivi['kontit']);
+
+        foreach ($kontit as $key => $kontti) {
+          if (!empty($kontti)) {
+            echo $kontti . '<br>';
+          }
+          else {
+            unset($kontit[$key]);
+          }
+        }
+
+        if ($rajaus != 'Tulevat' and count($kontit) > 0) {
+          echo '<br>';
+        }
+
+        echo $rivi['bookattu_konttimaara'] . " kpl. (" . t("Bookattu m‰‰r‰") . ")";
       }
 
       echo "</td>";
@@ -1539,46 +1553,47 @@ if (!isset($task)) {
         $kontitetut = $rivi['kontitetut_rullat'];
         $toimitetut = $rivi['toimitetut_rullat'];
         $mrn_tilanne = $rivi['mrn_tilanne'];
+        $poikkeukset = $rivi['poikkeukset'];
 
         $status = t("Rahtikirja vastaanotettu");
 
-        if ($kuitatut > 0 and $kuitatut < $rullia) {
+        if ($kuitatut > 0 and $kuitatut < ($rullia - $poikkeukset)) {
           $status = t("Osa rahdista kuitattu vastaanotetuksi");
         }
 
-        if ($kuitatut > 0 and $kuitatut == $rullia) {
+        if ($kuitatut > 0 and $kuitatut == ($rullia - $poikkeukset)) {
           $status = t("Rahti kuitattu vastaanotetuksi");
         }
 
-        if ($varastoidut > 0 and $varastoidut < $rullia) {
+        if ($varastoidut > 0 and $varastoidut < ($rullia - $poikkeukset)) {
           $status = t("Osa rullista viety varastoon");
         }
 
-        if ($varastoidut > 0 and $varastoidut == $rullia) {
+        if ($varastoidut > 0 and $varastoidut == ($rullia - $poikkeukset)) {
           $status = t("Rullat viety varastoon");
         }
 
-        if ($kontitetut > 0 and $kontitetut < $rullia) {
+        if ($kontitetut > 0 and $kontitetut < ($rullia - $poikkeukset)) {
           $status = t("Kontitus kesken");
         }
 
-        if ($kontitetut > 0 and $kontitetut == $rullia) {
+        if ($kontitetut > 0 and $kontitetut == ($rullia - $poikkeukset)) {
           $status = t("Rullat kontitettu");
         }
 
-        if ($toimitetut > 0 and $toimitetut < $rullia) {
+        if ($toimitetut > 0 and $toimitetut < ($rullia - $poikkeukset)) {
           $status = t("Osa konteista sinetˆity");
         }
 
-        if ($toimitetut > 0 and $toimitetut == $rullia) {
+        if ($toimitetut > 0 and $toimitetut == ($rullia - $poikkeukset)) {
           $status = t("Kontit sinetˆity");
         }
 
-        if ($mrn_tilanne > 0 and $mrn_tilanne > $rullia) {
+        if ($mrn_tilanne > 0 and $mrn_tilanne < ($rullia - $poikkeukset)) {
           $status = t("Osa MRN-numeroista vastaanotettu");
         }
 
-        if ($mrn_tilanne > 0 and $mrn_tilanne > $rullia) {
+        if ($mrn_tilanne > 0 and $mrn_tilanne == ($rullia - $poikkeukset)) {
           $status = t("MRN-numerot vastaanotettu");
         }
 

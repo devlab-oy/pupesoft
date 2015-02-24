@@ -2,6 +2,7 @@
 
 if ($_REQUEST['malli'] == 'PDF24' or
   $_REQUEST['malli'] == 'PDF40' or
+    $_REQUEST['malli'] == 'PDF' or
   $_REQUEST['malli'] == 'Hintalappu PDF' and
   (!empty($_REQUEST['tuoteno']) or $_REQUEST['toim'] != 'HINTA')
 ) {
@@ -156,7 +157,7 @@ if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
 
     require_once "pdflib/phppdflib.class.php";
 
-    if ($malli == 'PDF24' or $malli == 'PDF40') {
+    if ($malli == 'PDF24' or $malli == 'PDF40' or $malli == 'PDF') {
       //PDF parametrit
       if (!isset($pdf)) {
         $pdf = new pdffile;
@@ -176,7 +177,7 @@ if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
           elseif ($malli == 'Intermec') {
             require "inc/tulosta_tuotetarrat_intermec.inc";
           }
-          elseif ($malli == 'PDF24' or $malli == 'PDF40') {
+          elseif ($malli == 'PDF24' or $malli == 'PDF40' or $malli == 'PDF') {
             require "inc/tulosta_tuotetarrat_pdf.inc";
           }
         }
@@ -186,7 +187,7 @@ if (($tee == 'Z' or $tee == 'H') and $ulos == '') {
       }
     }
 
-    if ($malli == 'PDF24' or $malli == 'PDF40') {
+    if ($malli == 'PDF24' or $malli == 'PDF40' or $malli == 'PDF') {
       //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
       list($usec, $sec) = explode(' ', microtime());
       mt_srand((float) $sec + ((float) $usec * 100000));
@@ -295,6 +296,7 @@ if (!isset($nayta_pdf)) {
     $pohjat[] = 'Zebra_tuote';
     $pohjat[] = 'PDF24';
     $pohjat[] = 'PDF40';
+    $pohjat[] = 'PDF';
 
     echo "<td><select name='malli'>";
     echo "<option value=''>" . t("Ei mallia") . "</option>";

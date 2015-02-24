@@ -421,6 +421,7 @@ if ($upd == 1) {
                                      WHERE yhtio       = '$kukarow[yhtio]'
                                      and laji          = 'MYSQLALIAS'
                                      and selite        = '$toim.$al_nimi'
+                                     and selitetark_2  = '$alias_set'
                                      and selitetark_4 != ''";
           $oletus_tarkistus_result = pupe_query($oletus_tarkistus_query);
 

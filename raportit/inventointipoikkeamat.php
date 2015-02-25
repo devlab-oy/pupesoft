@@ -160,6 +160,20 @@ if ($tee == 'KORJAA') {
 
   if ($kpitorow["tosite"] > 0 and $kpitorow["varasto"] > 0 and $kpitorow["varastonmuutos"] > 0 and (float) $arvo != 0 and (float) $arvo != (float) $edarvo) {
 
+    if (preg_match("/^KORJATTU:/", $kpitorow["sel1"])) {
+      $selite = $kpitorow["sel1"];
+    }
+    else {
+      $selite = "KORJATTU: {$kpitorow["sel1"]}";
+    }
+
+    if (preg_match("/^KORJATTU:/", $kpitorow["sel2"])) {
+      $selite_2 = $kpitorow["sel2"];
+    }
+    else {
+      $selite_2 = "KORJATTU: {$kpitorow["sel2"]}";
+    }
+
     $arvo = (float) $arvo;
 
     $query = "UPDATE tapahtuma
@@ -196,7 +210,7 @@ if ($tee == 'KORJAA') {
               summa    = '$arvo',
               vero     = 0,
               lukko    = '',
-              selite   = 'KORJATTU: $kpitorow[sel1]',
+              selite   = '{$selite}',
               laatija  = '$kukarow[kuka]',
               laadittu = now()";
     $result = pupe_query($query);
@@ -212,7 +226,7 @@ if ($tee == 'KORJAA') {
               summa    = $arvo * -1,
               vero     = 0,
               lukko    = '',
-              selite   = 'KORJATTU: $kpitorow[sel2]',
+              selite   = '{$selite_2}',
               laatija  = '$kukarow[kuka]',
               laadittu = now()";
     $result = pupe_query($query);

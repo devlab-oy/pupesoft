@@ -91,7 +91,7 @@ if ($tee == "tee") {
     $lvalinta = '';
 
     if ($trow['laji'] == 'laskutus')   $lvalinta = "tila = 'U' and alatila = 'X' and selite not like 'Varastoontulo%'";
-    if ($trow['laji'] == 'Inventointi') $lvalinta = "tila = 'X' and (selite like '%Inventointi%' or selite like '%KORJATTU: Inventointi%')";
+    if ($trow['laji'] == 'Inventointi') $lvalinta = "tila = 'X' and (selite like 'Inventointi%' or selite like 'KORJATTU: Inventointi%')";
     if ($trow['laji'] == 'Epäkurantti') $lvalinta = "tila = 'X' and selite like '%epäkura%'";
     if ($trow['laji'] == 'tulo')     $lvalinta = " ((tila in ('H', 'M', 'P', 'Q', 'Y') and vienti in ('B', 'C', 'E', 'F', 'H', 'I')) or (tila = 'U' and alatila = 'X' and selite like 'Varastoontulo%'))";
 
@@ -199,7 +199,7 @@ if ($tee == "tee") {
                JOIN lasku ON tiliointi.yhtio = lasku.yhtio and tiliointi.ltunnus = lasku.tunnus and lasku.tila = 'X' and lasku.viite = '$tapahtuma[tunnus]'
                WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
                and tiliointi.tapvm    = left('$tapahtuma[laadittu]', 10)
-               and (tiliointi.selite like '%Inventointi%' or tiliointi.selite like '%KORJATTU: Inventointi%')
+               and (tiliointi.selite like 'Inventointi%' or tiliointi.selite like 'KORJATTU: Inventointi%')
                and tiliointi.tilino   in ({$tilinot})
                and tiliointi.korjattu = ''
                GROUP BY lasku.tunnus";

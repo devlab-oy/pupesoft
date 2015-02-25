@@ -12,10 +12,18 @@ if ($toim == "TARKKA") {
 echo "<font class='head'>".t("Myyjien myynnit").":</font><hr>";
 
 // Käyttöliittymä
-if (!isset($alkukk)) $alkukk = date("m", mktime(0, 0, 0, date("m"), 1, date("Y")-1));
-if (!isset($alkuvv)) $alkuvv = date("Y", mktime(0, 0, 0, date("m"), 1, date("Y")-1));
-if (!isset($loppukk)) $loppukk = date("m", mktime(0, 0, 0, date("m")-1, 1, date("Y")));
-if (!isset($loppuvv)) $loppuvv = date("Y", mktime(0, 0, 0, date("m")-1, 1, date("Y")));
+if ($toim == "TARKKA") {
+  if (!isset($alkukk)) $alkukk = date("m");
+  if (!isset($alkuvv)) $alkuvv = date("Y");
+  if (!isset($loppukk)) $loppukk = date("m");
+  if (!isset($loppuvv)) $loppuvv = date("Y");
+}
+else {
+  if (!isset($alkukk)) $alkukk = date("m", mktime(0, 0, 0, date("m"), 1, date("Y")-1));
+  if (!isset($alkuvv)) $alkuvv = date("Y", mktime(0, 0, 0, date("m"), 1, date("Y")-1));
+  if (!isset($loppukk)) $loppukk = date("m", mktime(0, 0, 0, date("m")-1, 1, date("Y")));
+  if (!isset($loppuvv)) $loppuvv = date("Y", mktime(0, 0, 0, date("m")-1, 1, date("Y")));
+}
 $tee = isset($tee) ? trim($tee) : "";
 
 if (checkdate($alkukk, 1, $alkuvv) and checkdate($loppukk, 1, $loppuvv)) {

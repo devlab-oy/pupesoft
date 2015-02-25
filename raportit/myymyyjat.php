@@ -116,7 +116,7 @@ if ($tee != '') {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) < 1) {
-    echo "<span class='error'>" . t("Valitulla myyjällä ei ole yhtään myyntiä") . "</span>";
+    echo "<span class='error'>" . t("Valituilla asetuksilla ei löytynyt myyntiä") . "</span>";
     require_once "inc/footer.inc";
     exit;
   }
@@ -213,6 +213,7 @@ if ($tee != '') {
           foreach ($katteet[$kausi] as $osasto => $osaston_kate) {
             $yhteensa_kate[$osasto] += $osaston_kate;
             $yhteensa_kate_kausi[$kausi] += $osaston_kate;
+
             echo "<br>{$osaston_kate}";
           }
         }

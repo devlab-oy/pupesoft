@@ -13,6 +13,30 @@ echo "<font class='head'>".t("Myyjien myynnit").":</font><hr>";
 
 // Käyttöliittymä
 if ($toim == "TARKKA") {
+  $muuttujat = muistista("myymyyjat", "oletus");
+
+  if (!isset($alkukk) and $muuttujat["alkukk"]) {
+    $alkukk = $muuttujat["alkukk"];
+  }
+  if (!isset($alkuvv) and $muuttujat["alkuvv"]) {
+    $alkuvv = $muuttujat["alkuvv"];
+  }
+  if (!isset($kuluprosentti) and $muuttujat["kuluprosentti"]) {
+    $kuluprosentti = $muuttujat["kuluprosentti"];
+  }
+  if (!isset($loppukk) and $muuttujat["loppukk"]) {
+    $loppukk = $muuttujat["loppukk"];
+  }
+  if (!isset($loppuvv) and $muuttujat["loppuvv"]) {
+    $loppuvv = $muuttujat["loppuvv"];
+  }
+  if (!isset($mul_laskumyyja) and $muuttujat["mul_laskumyyja"]) {
+    $mul_laskumyyja = $muuttujat["mul_laskumyyja"];
+  }
+  if (!isset($mul_osasto) and $muuttujat["mul_osasto"]) {
+    $mul_osasto = $muuttujat["mul_osasto"];
+  }
+
   if (!isset($alkukk)) $alkukk = date("m");
   if (!isset($alkuvv)) $alkuvv = date("Y");
   if (!isset($loppukk)) $loppukk = date("m");
@@ -37,7 +61,7 @@ else {
 }
 
 echo "<form method='post'>";
-echo "<input type='hidden' name='tee' value='kaikki'>";
+echo "<input type='hidden' name='tee' id='myymyyjatTee' value='kaikki'>";
 
 if ($toim == "TARKKA") {
   $classes = 'hidden';
@@ -104,6 +128,8 @@ echo "</table>";
 
 if ($toim == "TARKKA") {
   require_once "tilauskasittely/monivalintalaatikot.inc";
+
+  echo "<input type='button' id='tallennaNappi' value='" . t("Tallenna haku oletukseksi") . "'>";
 }
 
 echo "</div>";
@@ -123,6 +149,20 @@ echo "</tbody>";
 echo "</table>";
 
 echo "<br>";
+
+if ($tee == "tallenna_haku") {
+  $muistettavat = array(
+    "alkukk"         => $alkukk,
+    "alkuvv"         => $alkuvv,
+    "loppukk"        => $loppukk,
+    "loppuvv"        => $loppuvv,
+    "kuluprosentti"  => $kuluprosentti,
+    "mul_laskumyyja" => $mul_laskumyyja,
+    "mul_osasto"     => $mul_osasto
+  );
+
+  muistiin("myymyyjat", "oletus", $muistettavat);
+}
 
 if ($tee != '') {
 

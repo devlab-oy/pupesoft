@@ -1668,13 +1668,44 @@ if ($tee == 'MONISTA') {
         $presult = pupe_query($pquery);
 
         if (mysql_num_rows($presult) == 0) {
+          // Jos paikkaa ei ole olemassa perustetaan sellainen varaston oletustietojen perusteella
+          $query = "SELECT alkuhyllyalue, alkuhyllynro
+                    FROM varastopaikat
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus  = '{$rivirow['varasto']}'";
+          $oletus_tuotepaikka_res = pupe_query($query);
+          $oletus_tuotepaikka_row = mysql_fetch_assoc($oletus_tuotepaikka_res);
+
+          lisaa_tuotepaikka($rivirow['tuoteno'], $oletus_tuotepaikka_row['alkuhyllyalue'], $oletus_tuotepaikka_row['alkuhyllynro'], 0, 0, "Tuotetta lis‰tt‰ess‰", "", 0, 0, 0);
+
+          $p_hyllyalue  = $oletus_tuotepaikka_row["alkuhyllyalue"];
+          $p_hyllynro    = $oletus_tuotepaikka_row["alkuhyllynro"];
+          $p_hyllyvali  = '0';
+          $p_hyllytaso  = '0';
+
+          // Varmistetaan viel‰ ett‰ todella luotiin varastopaikka
           $p2query = "SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso
                       FROM tuotepaikat
-                      WHERE yhtio  = '{$monistarow['yhtio']}'
-                      AND tuoteno  = '{$rivirow['tuoteno']}'
-                      AND oletus  != ''
+                      WHERE yhtio   = '{$monistarow['yhtio']}'
+                      AND tuoteno   = '{$rivirow['tuoteno']}'
+                      AND hyllyalue =  '{$p_hyllyalue}'
+                      AND hyllynro  = '{$p_hyllynro}'
+                      AND hyllyvali =  '{$p_hyllyvali}'
+                      AND hyllytaso =  '{$p_hyllytaso}'
                       LIMIT 1";
           $p2result = pupe_query($p2query);
+
+          // Pidet‰‰n viel‰ supersafetyna t‰m‰, ett‰ jos ei onnistuta tuota varastopaikkaa
+          // perustamaan niin laitetaan se sitten tuonne oletuspaikalle
+          if (mysql_num_rows($p2result) == 0) {
+            $p2query = "SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso
+                        FROM tuotepaikat
+                        WHERE yhtio  = '{$monistarow['yhtio']}'
+                        AND tuoteno  = '{$rivirow['tuoteno']}'
+                        AND oletus  != ''
+                        LIMIT 1";
+            $p2result = pupe_query($p2query);
+          }
 
           if (mysql_num_rows($p2result) == 1) {
             $paikka2row = mysql_fetch_assoc($p2result);

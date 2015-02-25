@@ -76,6 +76,22 @@ echo "  <td>
     <input type='text' name='loppuvv' value='$loppuvv' size='5'>
     </td>";
 echo "</tr>";
+
+if ($toim == "TARKKA") {
+  foreach ($osastojen_nimet as $osasto => $osaston_nimi) {
+    echo "<tr>";
+    echo "<th>";
+    echo "<label for='kuluprosentti_{$osasto}'>" . t("Kuluprosentti osastolle") .
+         " {$osaston_nimi}</label>";
+    echo "</th>";
+    echo "<td>";
+    echo "<input type='number' id='kuluprosentti_{$osasto}' name='kuluprosentti[{$osasto}]' min='0'
+                 max='100' value='{$kuluprosentti[$osasto]}'>";
+    echo "</td>";
+    echo "</tr>";
+  }
+}
+
 echo "</table>";
 
 if ($toim == "TARKKA") {
@@ -138,7 +154,15 @@ if ($tee != '') {
     $summa[$row["myyja"]][$row["kausi"]] += $row["summa"];
 
     if ($toim == "TARKKA") {
-      $kate[$row["myyja"]][$row["kausi"]][$row["osasto"]] += $row["kate"];
+      if ($kuluprosentti[$row["osasto"]] != 0) {
+        $kerroin = (float) $kuluprosentti[$row["osasto"]] / 100;
+
+        $kate[$row["myyja"]][$row["kausi"]][$row["osasto"]] += ($row["kate"] -
+                                                                $kerroin * $row["kate"]);
+      }
+      else {
+        $kate[$row["myyja"]][$row["kausi"]][$row["osasto"]] += $row["kate"];
+      }
       $kate[$row["myyja"]]["osastot"][] = $row["osasto"];
     }
     else {
@@ -245,7 +269,7 @@ if ($tee != '') {
               $yhteensa_kate[$osasto] += $katteet[$kausi][$osasto];
               $yhteensa_kate_kausi[$kausi] += $katteet[$kausi][$osasto];
 
-              echo "<br>{$katteet[$kausi][$osasto]}";
+              echo "<br>" . round($katteet[$kausi][$osasto]);
             }
             else {
               echo "<br>";
@@ -266,7 +290,7 @@ if ($tee != '') {
       ksort($yhteensa_kate);
 
       foreach ($yhteensa_kate as $osaston_kate) {
-        echo "<br>{$osaston_kate}";
+        echo "<br>" . round($osaston_kate);
       }
     }
     else {
@@ -299,12 +323,14 @@ if ($tee != '') {
       $kate_prosentti = 0;
     }
 
-    echo "<th style='text-align:right;'>$yhteensa_summa_kausi[$kausi]<br>$yhteensa_kate_kausi[$kausi]<br>$kate_prosentti%</th>";
+    echo "<th style='text-align:right;'>$yhteensa_summa_kausi[$kausi]<br>" .
+         round($yhteensa_kate_kausi[$kausi]) . "<br>$kate_prosentti%</th>";
 
   }
 
   $kate_prosentti = round($yhteensa_kate / $yhteensa_summa * 100);
-  echo "<th style='text-align:right;'>$yhteensa_summa<br>$yhteensa_kate<br>$kate_prosentti%</th>";
+  echo "<th style='text-align:right;'>$yhteensa_summa<br>" . round($yhteensa_kate) .
+       "<br>$kate_prosentti%</th>";
   echo "</tr>";
   echo "</table>";
 

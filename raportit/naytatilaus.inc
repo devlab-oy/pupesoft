@@ -251,7 +251,7 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
   else $dpdss = "";
 
   // haetaan eka rahtikirjat tietue, niin saadaan rahtikirjanumerot tietoon
-  $query = "SELECT rahtikirjat.rahtikirjanro, toimitustapa.rahtikirja, sum(rahtikirjat.kollit) kollit
+  $query = "SELECT rahtikirjat.rahtikirjanro, toimitustapa.virallinen_selite, toimitustapa.rahtikirja, rahtikirjat.sscc_ulkoinen, sum(rahtikirjat.kollit) kollit
             FROM rahtikirjat
             JOIN toimitustapa ON (toimitustapa.yhtio=rahtikirjat.yhtio and rahtikirjat.toimitustapa=toimitustapa.selite)
             WHERE rahtikirjat.yhtio    = '$kukarow[yhtio]'
@@ -261,9 +261,14 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
 
   while ($rakirrow = mysql_fetch_assoc($rakre)) {
     // Unifaunilla on oma seuranta
-    if ($yhtiorow['kerayserat'] != 'K' and !empty($unifaun_url_key) and ($rakirrow["rahtikirja"] == 'rahtikirja_unifaun_ps_siirto.inc' or $rakirrow["rahtikirja"] == 'rahtikirja_unifaun_uo_siirto.inc')) {
-      foreach (explode("\n", $rakirrow['rahtikirjanro']) as $rakirno) {
+    if ($yhtiorow['kerayserat'] != 'K' and !empty($unifaun_url_key) and stripos($rakirrow["rahtikirja"], "unifaun") !== FALSE) {
+      foreach (explode("\n", $rakirrow['sscc_ulkoinen']) as $rakirno) {
         $linkurl .= "<a class='linkki' href='https://www.unifaunonline.com/ext.uo.fi.track?key={$unifaun_url_key}&order={$laskurow['tunnus']}' target='_blank'>{$rakirno}</a><br>";
+      }
+    }
+    elseif ($dpdtun != '' and $dpdss != '' and stripos($rakirrow["virallinen_selite"], "dpd") !== FALSE and stripos($rakirrow["rahtikirja"], "unifaun") !== FALSE) {
+      foreach (explode("\n", $rakirrow['sscc_ulkoinen']) as $rakirno) {
+        $linkurl .= "<a target=newikkuna href='http://$dpdtun:$dpdss@tracking.dpd.de/cgi-bin/delistrack.acl?typ=4&pknr=$rakirno'>$rakirno</a><br>";
       }
     }
     // postin rahtikirjat alkaa JJFI, ja tehdään niille linkki suoraan postin seurantaan
@@ -277,7 +282,7 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
         $linkurl .= "<a target=newikkuna href='http://www.itella.fi/itemtracking/itella/search_by_shipment_id?ShipmentId={$nro}'>{$nro}</a><br>";
       }
 
-      $linkurl = substr($linkurl, 0, -4); // vika br pois
+      $linkurl = substr($linkurl, 0, -4);
     }
     //luodaan ups seurantalinkki
     elseif (stripos($rakirrow['rahtikirjanro'], 'UPS') !== FALSE) {
@@ -289,10 +294,10 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
         $linkurl .= "<a target=newikkuna href='http://wwwapps.ups.com/etracking/tracking.cgi?InquiryNumber1={$nro}&TypeOfInquiryNumber=T&AcceptUPSLicenseAgreement=yes&submit=Trac&loc=".strtolower($kukarow["kieli"])."_".strtoupper($kukarow["kieli"])."'>{$nro}</a><br>";
       }
 
-      $linkurl = substr($linkurl, 0, -4); // vika br pois
+      $linkurl = substr($linkurl, 0, -4);
     }
-    //luodaan dpd seurantalinkki
     elseif ($dpdtun != '' and $dpdss != '' and ($rakirrow["rahtikirja"] == 'rahtikirja_dpd_siirto.inc' or $rakirrow["rahtikirja"] == 'rahtikirja_dpd.inc') and $rakirrow['rahtikirjanro'] != '') {
+      //luodaan dpd seurantalinkki jos käytössä on Delisprint
       $linkurl = "";
 
       for ($dpdi=1; $dpdi<$rakirrow['kollit']+1; $dpdi++) {

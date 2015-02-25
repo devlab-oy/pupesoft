@@ -2495,7 +2495,8 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and
       $laskurow["tilaustyyppi"] != "U" and
       ($_tarjouksella or $_osto_myyntitilaukselta or $_extranetista) and
-      !in_array($var, array('V', 'H', 'P'))) {
+      !in_array($var, array('V', 'H', 'P'))
+      and $kpl > 0) {
 
       if (!empty($laskurow['varasto'])) {
         $kohde_varastot = array($laskurow['varasto']);
@@ -2554,7 +2555,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           $myy_hyllynro_temp = $tuotepaikka['hyllynro'];
           $myy_hyllytaso_temp = $tuotepaikka['hyllytaso'];
           $myy_hyllyvali_temp = $tuotepaikka['hyllyvali'];
-
+echo "2558 <br><br>";
           $paivita_hyllyt_varastosiirto = true;
           break;
         }

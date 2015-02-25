@@ -1427,7 +1427,11 @@ function kasittele_bookkaussanoma($edi_data) {
   $tunnus_johon_liitetaan = 0;
   $kviitteet = array();
 
-  if (mysql_num_rows($result) != 0) {
+  if (mysql_num_rows($result) == 1) {
+    $lasku = mysql_fetch_assoc($result);
+    $tunnus_johon_liitetaan = $lasku['tunnus'];
+  }
+  elseif (mysql_num_rows($result) > 1) {
 
     // tutkitaan jakautuuko tilaus moneen konttiviitteeseen
     $kv_query = "SELECT laskun_lisatiedot.konttiviite,
@@ -1614,6 +1618,23 @@ function kasittele_bookkaussanoma($edi_data) {
                      AND tunnus = '{$tunnus}'";
     pupe_query($update_query);
 
+    // katsotaan onko tilaukseen kuuluvia rullia myyntitilauksella
+    $rquery = "SELECT *
+              FROM tilausrivin_lisatiedot
+              JOIN sarjanumeroseuranta AS ss
+                ON ss.yhtio = tilausrivin_lisatiedot.yhtio
+                AND ss.myyntirivitunnus = tilausrivin_lisatiedot.tilausrivitunnus
+              WHERE ss.yhtio = '{$kukarow['yhtio']}'
+              AND asiakkaan_tilausnumero = '{$tilausnro}'
+              AND asiakkaan_rivinumero = '{$rivinro}'";
+    $rresult = pupe_query($rquery);
+
+    $myyntirullat = array();
+
+    while ($rulla = mysql_fetch_assoc($rresult)) {
+      $myyntirullat[] = $rulla;
+    }
+
     // katsotaan onko tilaukseen kuuluvia rullia ostotilauksilla
     $rquery = "SELECT *
               FROM tilausrivin_lisatiedot
@@ -1625,13 +1646,13 @@ function kasittele_bookkaussanoma($edi_data) {
               AND asiakkaan_rivinumero = '{$rivinro}'";
     $rresult = pupe_query($rquery);
 
-    $rullat = array();
+    $ostorullat = array();
 
     while ($rulla = mysql_fetch_assoc($rresult)) {
-      $rullat[] = $rulla;
+      $ostorullat[] = $rulla;
     }
 
-    if (count($rullat) > 0) {
+    if (count($myyntirullat) == 0 and count($ostorullat) > 0) {
 
       $laskuquery = "SELECT *
                      FROM lasku
@@ -2118,7 +2139,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
     $kerayspvm = $toimaika = $data['toimitusaika'];
     $toim = '';
     $hinta = 0;
-    $var = '';
+    $var = 'P';
     $kutsuja = '';
     $kpl2 = 0;
     $toimittajan_tunnus = '';
@@ -2777,7 +2798,7 @@ function peruuta_bookkaus($peruutusparametrit) {
               AND selite LIKE '{$tilausnro}:%'";
     $result = pupe_query($query);
 
-    $lliteinfo = mysql_fetch_assoc($result);
+    $liiteinfo = mysql_fetch_assoc($result);
 
     // yksi tilaus ja yksi rivi: poistetaan...
     if ($liiteinfo['omarivi'] == 1 and $liiteinfo['rivit'] == 1) {
@@ -2835,6 +2856,7 @@ function peruuta_bookkaus($peruutusparametrit) {
 
     $muutos = "UPDATE laskun_lisatiedot SET
                 konttiviite = 'bookkaukseton',
+                rullamaara = 0,
                 konttimaara = 0,
                 konttityyppi = '',
                 matkatiedot = '',

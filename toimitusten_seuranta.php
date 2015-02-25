@@ -1297,7 +1297,6 @@ if (!isset($task)) {
               COUNT(ss.tunnus) AS rullat,
               SUM(ss.massa) AS paino,
               llt.konttiviite,
-              'Ei tiedossa' AS lahtoaika,
               ss.varasto
               FROM lasku
               JOIN laskun_lisatiedot AS llt
@@ -1322,8 +1321,10 @@ if (!isset($task)) {
               group_concat(DISTINCT lasku.asiakkaan_tilausnumero SEPARATOR '<br>') AS tilaukset,
               llt.konttiviite,
               lasku.toimaika AS lahtoaika,
-              llt.rullamaara AS bookatut_rullat,
-              llt.konttimaara AS bookattu_konttimaara
+              group_concat(DISTINCT lasku.tunnus) AS laskutunnukset,
+              llt.konttimaara AS bookattu_konttimaara,
+              count(tr.tunnus) AS rullat,
+              SUM(IF(tr.var = 'P', 1, 0))
               FROM lasku
               LEFT JOIN tilausrivi AS tr
                 ON tr.yhtio = lasku.yhtio
@@ -1335,8 +1336,8 @@ if (!isset($task)) {
               AND lasku.tilaustyyppi = 'N'
               AND lasku.asiakkaan_tilausnumero != ''
               AND konttiviite != 'bookkaukseton'
+              AND tr.tunnus IS NULL
               GROUP BY konttiviite
-              HAVING count(tr.tunnus) = 0
               ORDER BY lahtoaika, konttiviite";
     break;
   case 'Aktiiviset':
@@ -1345,7 +1346,7 @@ if (!isset($task)) {
               group_concat(CONCAT(trlt.asiakkaan_tilausnumero, ':', trlt.asiakkaan_rivinumero)) AS rivirullatieto,
               llt.konttiviite,
               lasku.toimaika AS lahtoaika,
-              llt.rullamaara AS bookatut_rullat,
+              group_concat(DISTINCT lasku.tunnus) AS laskutunnukset,
               COUNT(ss.tunnus) AS rullat,
               SUM(ss.massa) AS paino,
               group_concat(DISTINCT kontin_mrn) mrn_numerot,
@@ -1391,7 +1392,7 @@ if (!isset($task)) {
               COUNT(ss.tunnus) AS rullat,
               SUM(ss.massa) AS paino,
               llt.konttimaara AS bookattu_konttimaara,
-              llt.rullamaara AS bookatut_rullat,
+              group_concat(DISTINCT lasku.tunnus) AS laskutunnukset,
               SUM(IF(ss.lisatieto IN ('Ylijaama', 'Hyl‰tty'), 1, 0)) AS poikkeukset
               FROM lasku
               JOIN tilausrivi AS tr
@@ -1473,13 +1474,74 @@ if (!isset($task)) {
     echo "<th>" . t("Status") ."</th>";
     echo "</tr>";
 
+
     while ($rivi = mysql_fetch_assoc($result)) {
+
+      if ($rajaus == 'Tulevat')  {
+
+        $laskutunnukset = explode(",", $rivi['laskutunnukset']);
+
+        $rullalliset = '';
+        foreach ($laskutunnukset as $tunnus) {
+
+          $qry = "SELECT count(tunnus)
+                  FROM tilausrivi
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND otunnus = '{$tunnus}'";
+          $res = pupe_query($qry);
+          $rullia = mysql_result($res, 0);
+
+          if ($rullia > 0) {
+           $rullalliset .= $tunnus . ',';
+          }
+
+        }
+
+        $rullalliset = rtrim($rullalliset, ",");
+
+        $rivi['rullalliset'] = $rullalliset;
+        $rivit[] = $rivi;
+      }
+      else {
+        $rivit[] = $rivi;
+      }
+    }
+
+    foreach ($rivit as $rivi) {
+
+    //while ($rivi = mysql_fetch_assoc($result)) {
 
       echo "<tr>";
       echo "<td valign='top'><a href='toimitusten_seuranta.php?kv={$rivi['konttiviite']}&task=nkv&r={$rajaus}'>" . $rivi['konttiviite'] . "</a></td>";
 
       if ($rajaus == 'Tulevat') {
-        echo "<td valign='top'>" . $rivi['tilaukset'] . "</td>";
+
+        $laskutunnukset = explode(",", $rivi['laskutunnukset']);
+
+        echo "<td valign='top'>";
+
+        foreach ($laskutunnukset as $tunnus) {
+
+          $qry = "SELECT asiakkaan_tilausnumero
+                  FROM lasku
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus = '{$tunnus}'";
+          $res = pupe_query($qry);
+          $tilaus = mysql_result($res, 0);
+
+          $rullalliset = explode(',', $rivi['rullalliset']);
+
+          if (in_array($tunnus, $rullalliset)) {
+            echo "<span style='color:green'>" . $tilaus . "</span><br>";
+          }
+          else {
+            echo $tilaus . "<br>";
+          }
+        }
+
+        echo "</td>";
+
+
       }
       else {
 
@@ -1500,19 +1562,37 @@ if (!isset($task)) {
        echo "</td>";
       }
 
-      echo "<td valign='top'>" . date("j.n.Y H:i", strtotime($rivi['lahtoaika'])) . "</td>";
+      echo "<td valign='top'>";
+      if ($rajaus == 'Bookkauksettomat') {
+        echo t("Ei tiedossa");
+      }
+      else {
+        echo date("j.n.Y H:i", strtotime($rivi['lahtoaika']));
+      }
+      echo "</td>";
+
       echo "<td valign='top'>";
 
       if ($rajaus == 'Bookkauksettomat') {
         echo $rivi['rullat'] . " kpl. / " . (int) $rivi['paino'] . " kg.<br>";
       }
-      elseif ($rajaus == 'Tulevat') {
-        echo $rivi['bookatut_rullat'] . " kpl. (" . t("Bookattu m‰‰r‰") . ")";
-      }
       else {
-        echo $rivi['rullat'] . " kpl. / " . (int) $rivi['paino'] . " kg.<br>";
-        echo $rivi['bookatut_rullat'] . " kpl. (" . t("Bookattu m‰‰r‰") . ")";
+
+        $qry = "SELECT SUM(rullamaara) AS bookattu_rullamaara
+                FROM laskun_lisatiedot
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND otunnus IN ({$rivi['laskutunnukset']})";
+        $res = pupe_query($qry);
+        $bookattu_rullamaara = mysql_fetch_assoc($res);
+        $bookattu_rullamaara = $bookattu_rullamaara['bookattu_rullamaara'];
+
+        if ($rajaus != 'Tulevat') {
+          echo $rivi['rullat'] . " kpl. / " . (int) $rivi['paino'] . " kg.<br>";
+        }
+
+        echo $bookattu_rullamaara . " kpl. (" . t("Bookattu m‰‰r‰") . ")";
       }
+
       echo "</td>";
 
       echo "<td valign='top'>";

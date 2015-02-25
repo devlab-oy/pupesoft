@@ -42,6 +42,14 @@ if ($toim == "TARKKA") {
   $summa_lisa = "tilausrivi.rivihinta";
   $kate_lisa = "tilausrivi.kate";
   $osasto_lisa = "tuote.osasto,";
+
+  $osasto_result = t_avainsana("OSASTO");
+
+  $osastojen_nimet = array();
+
+  while ($osasto = mysql_fetch_assoc($osasto_result)) {
+    $osastojen_nimet[$osasto["selite"]] = $osasto["selitetark"];
+  }
 }
 else {
   $classes = '';
@@ -131,6 +139,7 @@ if ($tee != '') {
 
     if ($toim == "TARKKA") {
       $kate[$row["myyja"]][$row["kausi"]][$row["osasto"]] += $row["kate"];
+      $kate[$row["myyja"]]["osastot"][] = $row["osasto"];
     }
     else {
       $kate[$row["myyja"]][$row["kausi"]] = $row["kate"];
@@ -145,6 +154,10 @@ if ($tee != '') {
   echo "<table>";
   echo "<tr>";
   echo "<th>".t("Myyj‰")."</th>";
+
+  if ($toim == "TARKKA") {
+    echo "<th></th>";
+  }
 
   while ($raja < substr($pvmloppu, 0, 7)) {
 
@@ -178,6 +191,23 @@ if ($tee != '') {
     echo "<tr class='aktiivi'>";
     echo "<td>$myyja_nimi[$myyja] ($myyja)</td>";
 
+    if ($toim == "TARKKA") {
+      echo "<td>" . t("Liikevaihto");
+
+      $myyjan_osastot = array_unique($kate[$myyja]["osastot"]);
+
+      foreach ($myyjan_osastot as $osasto) {
+        if ($osastojen_nimet[$osasto]) {
+          echo "<br>{$osastojen_nimet[$osasto]}";
+        }
+        else {
+          echo "<br>" . t("Ei osastoa");
+        }
+      }
+
+      echo "</td>";
+    }
+
     $yhteensa_summa = 0;
 
     if ($toim == "TARKKA") {
@@ -210,11 +240,16 @@ if ($tee != '') {
         $katteet = $kate[$myyja];
 
         if ($katteet[$kausi]) {
-          foreach ($katteet[$kausi] as $osasto => $osaston_kate) {
-            $yhteensa_kate[$osasto] += $osaston_kate;
-            $yhteensa_kate_kausi[$kausi] += $osaston_kate;
+          foreach ($myyjan_osastot as $osasto) {
+            if ($katteet[$kausi][$osasto]) {
+              $yhteensa_kate[$osasto] += $katteet[$kausi][$osasto];
+              $yhteensa_kate_kausi[$kausi] += $katteet[$kausi][$osasto];
 
-            echo "<br>{$osaston_kate}";
+              echo "<br>{$katteet[$kausi][$osasto]}";
+            }
+            else {
+              echo "<br>";
+            }
           }
         }
       }
@@ -228,6 +263,8 @@ if ($tee != '') {
     echo "<td style='text-align:right;'>{$yhteensa_summa}";
 
     if ($toim == "TARKKA") {
+      ksort($yhteensa_kate);
+
       foreach ($yhteensa_kate as $osaston_kate) {
         echo "<br>{$osaston_kate}";
       }
@@ -243,6 +280,10 @@ if ($tee != '') {
   // Piirret‰‰n yhteens‰rivi
   echo "<tr>";
   echo "<th>".t("Yhteens‰ summa")."<br>".t("Yhteens‰ kate")."<br>".t("Kateprosentti")."</th>";
+
+  if ($toim == "TARKKA") {
+    echo "<th></th>";
+  }
 
   $yhteensa_summa = 0;
   $yhteensa_kate = 0;

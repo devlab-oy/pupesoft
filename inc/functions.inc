@@ -19421,7 +19421,8 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
               {$jtsort_lisa}
               if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
               if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
-              tuote.sarjanumeroseuranta
+              tuote.sarjanumeroseuranta,
+              trim(eankoodi) eankoodi
               FROM tilausrivi
               $koontijoin
               JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno

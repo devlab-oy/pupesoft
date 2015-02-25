@@ -1476,35 +1476,7 @@ if (!isset($task)) {
 
 
     while ($rivi = mysql_fetch_assoc($result)) {
-
-      if ($rajaus == 'Tulevat')  {
-
-        $laskutunnukset = explode(",", $rivi['laskutunnukset']);
-
-        $rullalliset = '';
-        foreach ($laskutunnukset as $tunnus) {
-
-          $qry = "SELECT count(tunnus)
-                  FROM tilausrivi
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND otunnus = '{$tunnus}'";
-          $res = pupe_query($qry);
-          $rullia = mysql_result($res, 0);
-
-          if ($rullia > 0) {
-           $rullalliset .= $tunnus . ',';
-          }
-
-        }
-
-        $rullalliset = rtrim($rullalliset, ",");
-
-        $rivi['rullalliset'] = $rullalliset;
         $rivit[] = $rivi;
-      }
-      else {
-        $rivit[] = $rivi;
-      }
     }
 
     foreach ($rivit as $rivi) {
@@ -1516,32 +1488,9 @@ if (!isset($task)) {
 
       if ($rajaus == 'Tulevat') {
 
-        $laskutunnukset = explode(",", $rivi['laskutunnukset']);
-
         echo "<td valign='top'>";
-
-        foreach ($laskutunnukset as $tunnus) {
-
-          $qry = "SELECT asiakkaan_tilausnumero
-                  FROM lasku
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = '{$tunnus}'";
-          $res = pupe_query($qry);
-          $tilaus = mysql_result($res, 0);
-
-          $rullalliset = explode(',', $rivi['rullalliset']);
-
-          if (in_array($tunnus, $rullalliset)) {
-            echo "<span style='color:green'>" . $tilaus . "</span><br>";
-          }
-          else {
-            echo $tilaus . "<br>";
-          }
-        }
-
+        echo $rivi['tilaukset'];
         echo "</td>";
-
-
       }
       else {
 

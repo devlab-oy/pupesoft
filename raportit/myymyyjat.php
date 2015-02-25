@@ -277,6 +277,8 @@ if ($tee != '') {
         }
       }
 
+      echo "<br>Katteiden summa";
+
       echo "</td>";
     }
 
@@ -323,6 +325,9 @@ if ($tee != '') {
               echo "<br>";
             }
           }
+
+          echo "<br><strong style='font-weight:bold'>" . round(array_sum($katteet[$kausi])) .
+               "</strong>";
         }
       }
       else {
@@ -340,6 +345,9 @@ if ($tee != '') {
       foreach ($yhteensa_kate as $osaston_kate) {
         echo "<br>" . round($osaston_kate);
       }
+
+      echo "<br><strong style='font-weight:bold'>" . round(array_sum($yhteensa_kate)) .
+           "</strong>";
     }
     else {
       echo "<br>{$yhteensa_kate}";

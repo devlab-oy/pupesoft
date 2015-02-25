@@ -2227,11 +2227,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 }
               }
 
-              $rivitunnus = 0;              
+              $rivitunnus = 0;
               $tuotenimitys_force = "";
               $omalle_tilaukselle = "";
               $ale_peruste = "";
-              
+
               if ($toimittamatta == 0) {
                 $kommentti = "";
                 $tuotenimitys = "";
@@ -2555,7 +2555,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
           $myy_hyllynro_temp = $tuotepaikka['hyllynro'];
           $myy_hyllytaso_temp = $tuotepaikka['hyllytaso'];
           $myy_hyllyvali_temp = $tuotepaikka['hyllyvali'];
-echo "2558 <br><br>";
+
           $paivita_hyllyt_varastosiirto = true;
           break;
         }

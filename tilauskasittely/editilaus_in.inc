@@ -688,7 +688,8 @@ while ($tietue = fgets($fd)) {
       and count($verkkokauppa_erikoiskasittely) > 0) {
 
       $e_parametrit = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
-      if (count($e_parametrit) > 0) {
+      # Tänne ei saa mennä jos on käytössä vaihtoehtoinen ovt_tunnus
+      if (count($e_parametrit) > 0 and count($e_parametrit) < 5) {
         $tieto = $ot_verkkokauppa_asiakasnro;
 
         $verkkokauppamyyjanro = $e_parametrit[3];

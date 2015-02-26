@@ -1,4 +1,28 @@
-<?php
+<?php 
+
+/**
+ * Adds a CDATA property to an XML document.
+ *
+ * @param string $name
+ *   Name of property that should contain CDATA.
+ * @param string $value
+ *   Value that should be inserted into a CDATA child.
+ * @param object $parent
+ *   Element that the CDATA child should be attached too.
+ */
+if (!function_exists("add_cdata")) { 
+  function add_cdata($name, $value, &$parent) {
+    $child = $parent->addChild($name);
+
+    if ($child !== NULL) {
+      $child_node = dom_import_simplexml($child);
+      $child_owner = $child_node->ownerDocument;
+      $child_node->appendChild($child_owner->createCDATASection($value));
+    }
+
+    return $child;
+  };
+}
 
 $tiedoston_sijainti = "{$pupe_root_polku}/dataout/dnsproduct_".date("Y_m_d_Hi").".xml";
 
@@ -28,7 +52,8 @@ foreach ($dnstuote as $tuote) {
   $product->addChild('titleswe', utf8_encode(xmlentities($tuote["nimi_swe"])));
   $product->addChild('titleeng', utf8_encode(xmlentities($tuote["nimi_eng"])));
   $product->addChild('productsubgroupcode', $tuote["try"]);
-  $product->addChild('description', utf8_encode(xmlentities($tuote["mainosteksti"])));
+  add_cdata('description', utf8_encode($tuote["mainosteksti"]), $product);
+
 
   $units = $product->addChild('units');
   $unit = $units->addChild('unit');

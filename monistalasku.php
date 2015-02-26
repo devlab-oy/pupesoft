@@ -1676,22 +1676,17 @@ if ($tee == 'MONISTA') {
           $oletus_tuotepaikka_res = pupe_query($query);
           $oletus_tuotepaikka_row = mysql_fetch_assoc($oletus_tuotepaikka_res);
 
-          lisaa_tuotepaikka($rivirow['tuoteno'], $oletus_tuotepaikka_row['alkuhyllyalue'], $oletus_tuotepaikka_row['alkuhyllynro'], 0, 0, "Tuotetta lisättäessä", "", 0, 0, 0);
-
-          $p_hyllyalue  = $oletus_tuotepaikka_row["alkuhyllyalue"];
-          $p_hyllynro    = $oletus_tuotepaikka_row["alkuhyllynro"];
-          $p_hyllyvali  = '0';
-          $p_hyllytaso  = '0';
+          $oletus_tuotepaikka_row[0] = lisaa_tuotepaikka($rivirow['tuoteno'], $oletus_tuotepaikka_row['alkuhyllyalue'], $oletus_tuotepaikka_row['alkuhyllynro'], 0, 0, "", "", 0, 0, 0);
 
           // Varmistetaan vielä että todella luotiin varastopaikka
           $p2query = "SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso
                       FROM tuotepaikat
                       WHERE yhtio   = '{$monistarow['yhtio']}'
                       AND tuoteno   = '{$rivirow['tuoteno']}'
-                      AND hyllyalue =  '{$p_hyllyalue}'
-                      AND hyllynro  = '{$p_hyllynro}'
-                      AND hyllyvali =  '{$p_hyllyvali}'
-                      AND hyllytaso =  '{$p_hyllytaso}'
+                      AND hyllyalue =  '{$oletus_tuotepaikka_row[0]['hyllyalue']}'
+                      AND hyllynro  = '{$oletus_tuotepaikka_row[0]['hyllynro']}'
+                      AND hyllyvali =  '{$oletus_tuotepaikka_row[0]['hyllyvali']}'
+                      AND hyllytaso =  '{$oletus_tuotepaikka_row[0]['hyllytaso']}'
                       LIMIT 1";
           $p2result = pupe_query($p2query);
 

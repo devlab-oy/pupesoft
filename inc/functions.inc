@@ -19421,7 +19421,8 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
               {$jtsort_lisa}
               if (tuote.tuotetyyppi='K','2 Tyˆt','1 Muut') tuotetyyppi,
               if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
-              tuote.sarjanumeroseuranta
+              tuote.sarjanumeroseuranta,
+              trim(eankoodi) eankoodi
               FROM tilausrivi
               $koontijoin
               JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
@@ -23024,7 +23025,7 @@ if (!function_exists('hae_maa')) {
 
     $maan_tiedot['nimi'] = $maa_row['name'] != '' ? $maa_row['name'] : $maa_row['koodi'];
     $maan_tiedot['nimi'] = strtoupper($maan_tiedot['nimi']);
-    
+
     return $maan_tiedot;
   }
 }
@@ -24942,16 +24943,49 @@ if (!function_exists('hyllysiirto')) {
       $lisavarlisa2 = "";
     }
 
+    $uusi_paikka = false;
+    $_chk = false;
+
+    if ($yhtiorow['inventointi_siirron_yhteydessa'] == "K") {
+      $query = "SELECT laji
+                FROM tapahtuma
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tuoteno = '{$tuoteno}'
+                AND hyllyalue  = '{$minnerow['hyllyalue']}'
+                AND hyllynro   = '{$minnerow['hyllynro']}'
+                AND hyllyvali  = '{$minnerow['hyllyvali']}'
+                AND hyllytaso  = '{$minnerow['hyllytaso']}'
+                ORDER BY laadittu DESC
+                LIMIT 1";
+      $uusipaikka_chk_res = pupe_query($query);
+      $uusipaikka_chk_row = mysql_fetch_assoc($uusipaikka_chk_res);
+
+      $_laji_chk = strtolower($uusipaikka_chk_row['laji']);
+
+      if ($_laji_chk == 'uusipaikka') {
+        $_chk = true;
+      }
+      elseif ($_laji_chk == 'inventointi' and $minnerow['saldo'] == 0) {
+        # Jos tapahtuma oli inventointi ja saldo oli 0
+        $_chk = true;
+      }
+
+      if ($_chk) {
+        $uusi_paikka = true;
+        $lisavarlisa2 .= " inventointiaika = now(), ";
+      }
+    }
+
     // Mist‰ varastosta otetaan?
     $query = "UPDATE tuotepaikat
-              set saldo   = saldo - {$kappaleet},
+              set saldo = saldo - {$kappaleet},
               {$lisavarlisa1}
-              saldoaika               = now(),
-              muuttaja                = '{$kukarow['kuka']}',
-              muutospvm               = now()
-                        WHERE tuoteno = '{$tuoteno}'
-              and yhtio               = '{$kukarow['yhtio']}'
-              and tunnus              = {$tuotepaikat_tunnus_otetaan}";
+              saldoaika = now(),
+              muuttaja  = '{$kukarow['kuka']}',
+              muutospvm = now()
+              WHERE tuoteno = '{$tuoteno}'
+              and yhtio     = '{$kukarow['yhtio']}'
+              and tunnus    = {$tuotepaikat_tunnus_otetaan}";
     $result = pupe_query($query);
 
     // Minne varastoon vied‰‰n?
@@ -25075,6 +25109,24 @@ if (!function_exists('hyllysiirto')) {
               laadittu   = '$_laadittu'";
     $result = pupe_query($query);
     $minne_tapa_tunnus = mysql_insert_id($GLOBALS["masterlink"]);
+
+    if ($yhtiorow['inventointi_siirron_yhteydessa'] == "K" and $uusi_paikka) {
+      $query = "INSERT into tapahtuma set
+                yhtio      = '{$kukarow['yhtio']}',
+                tuoteno    = '{$tuoteno}',
+                kpl        = '0',
+                kplhinta   = '{$keskihankintahinta}',
+                hinta      = '{$keskihankintahinta}',
+                laji       = 'Inventointi',
+                hyllyalue  = '{$minnerow['hyllyalue']}',
+                hyllynro   = '{$minnerow['hyllynro']}',
+                hyllyvali  = '{$minnerow['hyllyvali']}',
+                hyllytaso  = '{$minnerow['hyllytaso']}',
+                selite     = '".t("Saldo %d t‰sm‰si. Automaattinen inventointi siirron yhteydess‰", "", $kappaleet)."',
+                laatija    = '{$kukarow['kuka']}',
+                laadittu   = '$_laadittu'";
+      $result = pupe_query($query);
+    }
 
     // Tehd‰‰n kirjanpito
     if ($yhtiorow["tarkenteiden_prioriteetti"] == "T") {
@@ -30322,6 +30374,74 @@ if (!function_exists("tiliointi_tarkistus")) {
     }
 
     return $virhe;
+  }
+}
+
+if (!function_exists('hae_lahete_printteri')) {
+  function hae_lahete_printteri($varasto = 0, $toimipaikka = 0, $tilaus = 0, $valittu_tulostin = '') {
+
+    global $kukarow, $yhtiorow;
+
+    $komento = "";
+
+    //tulostetaan faili ja valitaan sopivat printterit
+    if ($varasto == 0) {
+      $query = "SELECT *
+                from varastopaikat
+                WHERE yhtio  = '{$kukarow['yhtio']}'
+                AND tyyppi  != 'P'
+                order by alkuhyllyalue,alkuhyllynro
+                limit 1";
+    }
+    else {
+      $query = "SELECT *
+                from varastopaikat
+                where yhtio = '{$kukarow['yhtio']}'
+                and tunnus  = '{$varasto}'";
+    }
+    $prires = pupe_query($query);
+
+    if (mysql_num_rows($prires) > 0) {
+      $prirow = mysql_fetch_assoc($prires);
+
+      $apuprintteri = $prirow['printteri1']; // l‰heteprintteri
+
+      require "varaston_tulostusalue.inc";
+
+      if (isset($kirjoitin) and $kirjoitin != '') {
+        $apuprintteri = $kirjoitin;
+      }
+
+      // Katsotaan onko avainsanoihin m‰‰ritelty varaston toimipaikan l‰heteprintteri‰
+      if (!empty($toimipaikka)) {
+        $avainsana_where = " and avainsana.selite       = '{$varasto}'
+                             and avainsana.selitetark   = '{$toimipaikka}'
+                             and avainsana.selitetark_2 = 'printteri1'";
+
+        $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
+
+        if (!empty($tp_tulostin)) {
+          $apuprintteri = $tp_tulostin;
+        }
+      }
+
+      // k‰sinvalittu printteri
+      if (!empty($valittu_tulostin)) {
+        $apuprintteri = $valittu_tulostin;
+      }
+
+      //haetaan l‰hetteen tulostuskomento
+      $query = "SELECT komento
+                FROM kirjoittimet
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus  = '{$apuprintteri}'";
+      $kirres = pupe_query($query);
+      $kirrow = mysql_fetch_assoc($kirres);
+
+      $komento = $kirrow['komento'];
+    }
+
+    return $komento;
   }
 }
 

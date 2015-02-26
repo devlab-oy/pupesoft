@@ -214,6 +214,7 @@ if (!isset($variaatio_tuoteno)) $variaatio_tuoteno = "";
 if (!isset($var_array)) $var_array = "";
 if (!isset($yksi_suoratoimittaja)) $yksi_suoratoimittaja = "";
 if (!isset($ylatila)) $ylatila = "";
+if (!isset($luottorajavirhe_ylivito_valmis)) $luottorajavirhe_ylivito_valmis = true;
 
 if (!isset($valmiste_vai_raakaaine) and $toim == "VALMISTAVARASTOON") {
   $_cookie_isset = isset($_COOKIE["valmiste_vai_raakaaine"]);
@@ -1787,7 +1788,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
         }
         echo "<br />";
       }
-      elseif (!isset($splitatut)) {
+      elseif (!isset($splitatut) and $luottorajavirhe_ylivito_valmis) {
         echo "<font class='message'>";
         echo $otsikko, ' ', $kukarow['kesken'], ' ';
         echo t("valmis");
@@ -1828,9 +1829,13 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
     }
 
     $tee        = '';
-    $tilausnumero    = '';
-    $laskurow      = '';
-    $kukarow['kesken']  = '';
+
+    if ($luottorajavirhe_ylivito_valmis) {
+      $tilausnumero    = '';
+      $laskurow      = '';
+      $kukarow['kesken']  = '';
+      $tila = '';
+    }
 
     if ($kukarow["extranet"] != "") {
       if ($toim == 'EXTRANET_REKLAMAATIO') {
@@ -1845,7 +1850,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
     }
   }
 
-  if ($kukarow["extranet"] == "" and $lopetus != '') {
+  if ($kukarow["extranet"] == "" and $lopetus != '' and $luottorajavirhe_ylivito_valmis) {
     lopetus($lopetus, "META");
   }
 }
@@ -9853,6 +9858,28 @@ if ($tee == '') {
           $lisateksti = ($nayta_sostolisateksti == "TOTTA") ? " & ".t("Päivitä ostotilausta samalla") : " & ".t("Tee tilauksesta ostotilaus");
 
           echo "<input type='submit' name='tee_osto' value='$otsikko ".t("valmis")." $lisateksti' $tilausjavalisa> ";
+        }
+
+        if ($yhtiorow['lahetteen_tulostustapa'] == 'I' and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "REKLAMAATIO"))
+          and (($laskurow['tila'] == 'N' and $laskurow['alatila'] == '') or ($laskurow['tila'] == 'C' and $laskurow['alatila'] == ''))) {
+          echo "<br />";
+          echo "<br />";
+          echo t("Tulosta lähete"),": ";
+          echo "<input type='hidden' name='tulosta_lahete_chkbx[]' value='default' />";
+          echo "<input type='checkbox' name='tulosta_lahete_chkbx[]' value='1' checked />";
+
+          $komento = hae_lahete_printteri(
+            $laskurow['varasto'],
+            $laskurow['yhtio_toimipaikka'],
+            $laskurow['tunnus'],
+            ''
+          );
+
+          echo "<input type='hidden' name='komento[Lähete]' value='{$komento}' />";
+          echo "<br />";
+          echo t("Tulosta keräyslista"),": ";
+          echo "<input type='hidden' name='tulosta_kerayslista_chkbx[]' value='default' />";
+          echo "<input type='checkbox' name='tulosta_kerayslista_chkbx[]' value='1' checked />";
         }
 
         if ($yhtiorow['lahetteen_tulostustapa'] == "I" and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "REKLAMAATIO")) and

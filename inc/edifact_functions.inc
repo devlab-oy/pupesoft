@@ -1,6 +1,6 @@
 <?php
 
-function rullat_ja_kontit($konttiviite, $maxkg) {
+function rullat_ja_kontit($konttiviite, $konttimaara = false) {
   global $kukarow, $yhtiorow;
 
   // haetaan kaikki konttiviitteen alaiset rullat
@@ -15,6 +15,10 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
   $result = pupe_query($query);
   $laskujen_tunnukset = mysql_result($result, 0, 0);
   $bookattu_konttimaara = mysql_result($result, 0, 1);
+
+  if ($konttimaara) {
+    $bookattu_konttimaara = $konttimaara;
+  }
 
   if (mysql_num_rows($result) == 0) {
     return false;
@@ -72,9 +76,18 @@ function rullat_ja_kontit($konttiviite, $maxkg) {
   }
 
   $konttimaara = count($kontit);
+  $konttinimet = array_keys($kontit);
 
   while ($konttimaara < $bookattu_konttimaara) {
-    $kontit[$konttimaara+1] = 0;
+
+    $uusi_key = (int) $konttimaara + 1;
+
+    while (in_array($uusi_key, $konttinimet)) {
+      $uusi_key = $uusi_key + 1;
+    }
+
+    $kontit[$uusi_key] = 0;
+    $konttinimet = array_keys($kontit);
     $konttimaara++;
   }
 

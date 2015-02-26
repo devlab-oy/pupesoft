@@ -18,6 +18,74 @@ if (!isset($aktiivi_group)) {
 
 $errors = array();
 $sulku = false;
+$lisays = false;
+
+if (isset($submit) and $submit == "kontin_lisays") {
+  $konttimaara = (int) $konttimaara + 1;
+  $submit = 'konttiviite_maxkg';
+}
+
+if (isset($submit) and $submit == "rullapoisto") {
+
+  $query = "SELECT trlt.konttinumero, ss.myyntirivitunnus, llt.konttiviite
+            FROM sarjanumeroseuranta AS ss
+            JOIN tilausrivin_lisatiedot as trlt
+             ON trlt.yhtio = ss.yhtio
+             AND trlt.tilausrivitunnus = ss.myyntirivitunnus
+             JOIN tilausrivi as tr
+              ON tr.yhtio = ss.yhtio
+              AND tr.tunnus = ss.myyntirivitunnus
+            JOIN lasku
+              ON lasku.yhtio = ss.yhtio
+              AND lasku.tunnus = tr.otunnus
+            JOIN laskun_lisatiedot AS llt
+              ON llt.yhtio = ss.yhtio
+              AND llt.otunnus = lasku.tunnus
+            WHERE ss.yhtio = '{$kukarow['yhtio']}'
+            AND ss.sarjanumero = '{$sarjanumero}'";
+  $result = pupe_query($query);
+  $rullainfo = mysql_fetch_assoc($result);
+
+  $query = "SELECT group_concat(trlt.tunnus)
+            FROM lasku
+            JOIN laskun_lisatiedot AS llt
+              ON llt.yhtio = lasku.yhtio
+              AND llt.otunnus = lasku.tunnus
+            JOIN tilausrivi AS tr
+              ON tr.yhtio = lasku.yhtio
+              AND tr.otunnus = lasku.tunnus
+            JOIN tilausrivin_lisatiedot as trlt
+              ON trlt.yhtio = tr.yhtio
+              AND trlt.tilausrivitunnus = tr.tunnus
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND llt.konttiviite = '{$rullainfo['konttiviite']}'
+            AND trlt.konttinumero = '{$rullainfo['konttinumero']}'";
+  $result = pupe_query($query);
+  $tunnukset = mysql_result($result, 0);
+
+  $query = "UPDATE tilausrivin_lisatiedot SET
+            sinettinumero = ''
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tilausrivitunnus IN ({$tunnukset})";
+  pupe_query($query);
+
+  $query = "UPDATE tilausrivi SET
+            kerattyaika = '0000-00-00 00:00:00',
+            keratty = ''
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$rivitunnus}'";
+  pupe_query($query);
+
+  $query = "UPDATE tilausrivin_lisatiedot SET
+            konttinumero = '',
+            kontin_maxkg = 0,
+            konttien_maara = 0
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tilausrivitunnus = '{$rivitunnus}'";
+  pupe_query($query);
+
+  $submit = 'konttiviite_maxkg';
+}
 
 if (isset($submit)) {
 
@@ -276,18 +344,12 @@ if (isset($submit)) {
     }
     else {
 
-      $rullat_ja_kontit = rullat_ja_kontit($konttiviite, $maxkg);
+      $rullat_ja_kontit = rullat_ja_kontit($konttiviite, $konttimaara);
 
       $kontittamattomat = $rullat_ja_kontit['kontittamattomat'];
       $kontitetut = $rullat_ja_kontit['kontitetut'];
       $kontit = $rullat_ja_kontit['kontit'];
       $konttimaara = count($kontit);
-
-      if ($konttimaara > $bookattu_konttimaara) {
-        $erotus = $konttimaara - $bookattu_konttimaara;
-        $huomio  = t("Huom. N‰ytt‰‰ silt‰, ett‰ bookattu konttim‰‰r‰ ei riit‰ kaikille rullille:");
-        $huomio .= " " . $erotus . " " . t("konttia lis‰tty.");
-      }
 
       if ($rullat_ja_kontit === false) {
         $errors[] = t("Tilausnumerolla ei lˆydy tilausta.");
@@ -303,11 +365,12 @@ if (isset($submit)) {
     }
     break;
   case 'konttivalinta':
-    $rullat_ja_kontit = rullat_ja_kontit($konttiviite, $maxkg);
+    $rullat_ja_kontit = rullat_ja_kontit($konttiviite, $konttimaara);
     $kontittamattomat = $rullat_ja_kontit['kontittamattomat'];
     $kontitetut = $rullat_ja_kontit['kontitetut'];
     $kontit = $rullat_ja_kontit['kontit'];
     $konttimaara = count($kontit);
+
     $view = 'kontituslista';
     break;
   case 'konttivahvistus':
@@ -339,7 +402,7 @@ if (isset($submit)) {
       pupe_query($query);
     }
 
-    $rullat_ja_kontit = rullat_ja_kontit($konttiviite, $maxkg);
+    $rullat_ja_kontit = rullat_ja_kontit($konttiviite, $konttimaara);
     $kontittamattomat = $rullat_ja_kontit['kontittamattomat'];
     $kontitetut = $rullat_ja_kontit['kontitetut'];
     $kontit = $rullat_ja_kontit['kontit'];
@@ -347,15 +410,43 @@ if (isset($submit)) {
     $view = 'kontituslista';
     break;
   case 'sarjanumero':
-    $query = "SELECT myyntirivitunnus
-              FROM sarjanumeroseuranta
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND sarjanumero = '{$sarjanumero}'";
+    $query = "SELECT trlt.konttinumero, ss.myyntirivitunnus, llt.konttiviite, trlt.sinettinumero
+              FROM sarjanumeroseuranta AS ss
+              JOIN tilausrivin_lisatiedot as trlt
+               ON trlt.yhtio = ss.yhtio
+               AND trlt.tilausrivitunnus = ss.myyntirivitunnus
+               JOIN tilausrivi as tr
+                ON tr.yhtio = ss.yhtio
+                AND tr.tunnus = ss.myyntirivitunnus
+              JOIN lasku
+                ON lasku.yhtio = ss.yhtio
+                AND lasku.tunnus = tr.otunnus
+              JOIN laskun_lisatiedot AS llt
+                ON llt.yhtio = ss.yhtio
+                AND llt.otunnus = lasku.tunnus
+              WHERE ss.yhtio = '{$kukarow['yhtio']}'
+              AND ss.sarjanumero = '{$sarjanumero}'";
     $result = pupe_query($query);
-    $rivitunnus = mysql_result($result, 0);
+    $rullainfo = mysql_fetch_assoc($result);
 
-    if ($rivitunnus) {
+    $rivitunnus = $rullainfo['myyntirivitunnus'];
 
+    if (mysql_num_rows($result) == 0) {
+      $errors[] = t("Tuntematon sarjanumero");
+    }
+    elseif ($rullainfo['konttiviite'] != $konttiviite) {
+      $errors[] = t("Rulla kuulu konttiviitteeseen:") . " " . $rullainfo['konttiviite'];
+    }
+    elseif ($rullainfo['konttinumero'] != '') {
+      $errors[] = t("Rulla on jo kontissa") . " " . $rullainfo['konttinumero'];
+
+      if ($rullainfo['sinettinumero'] == 'X') {
+        $errors[] = t("Rullan poisto vapauttaa kontin lukituksen");
+      }
+
+      $poistomahdollisuus = true;
+    }
+    else {
       $query = "UPDATE tilausrivi SET
                 keratty = '{$kukarow['kuka']}',
                 kerattyaika = NOW()
@@ -374,11 +465,8 @@ if (isset($submit)) {
       pupe_query($query);
 
     }
-    else {
-      $errors[] = t("Tuntematon sarjanumero.");
-    }
 
-    $rullat_ja_kontit = rullat_ja_kontit($konttiviite, $maxkg);
+    $rullat_ja_kontit = rullat_ja_kontit($konttiviite, $konttimaara);
 
     $kontittamattomat = $rullat_ja_kontit['kontittamattomat'];
     $kontitetut = $rullat_ja_kontit['kontitetut'];
@@ -716,6 +804,7 @@ if ($view == 'kontituslista') {
       <input type='hidden' name='konttiviite' value='{$konttiviite}' />
       <input type='hidden' name='maxkg' value='{$maxkg}' />
       <input type='hidden' name='konttimaara' value='{$konttimaara}' />
+      <input type='hidden' name='bookattu_konttimaara' value='{$bookattu_konttimaara}' />
       <input type='hidden' name='aktiivinen_kontti' value='{$aktiivinen_kontti}' />
       <input type='hidden' name='aktiivi_group' class='aktiivi_group' value='{$aktiivi_group}' />
       <br>
@@ -744,9 +833,27 @@ if ($view == 'kontituslista') {
       echo $error."<br>";
     }
     echo "</div>";
+
+    if ($poistomahdollisuus === true) {
+      echo "
+      <form method='post' action=''>
+          <input type='hidden' name='sarjanumero' value='{$sarjanumero}' />
+          <input type='hidden' name='rivitunnus' value='{$rivitunnus}' />
+          <input type='hidden' name='konttiviite' value='{$konttiviite}' />
+          <input type='hidden' name='maxkg' value='{$maxkg}' />
+          <input type='hidden' name='konttimaara' value='{$konttimaara}' />
+          <input type='hidden' name='bookattu_konttimaara' value='{$bookattu_konttimaara}' />
+          <input type='hidden' name='aktiivinen_kontti' value='{$aktiivinen_kontti}' />
+          <input type='hidden' name='aktiivi_group' class='aktiivi_group' value='{$aktiivi_group}' />
+          <br>
+          <button name='submit' value='rullapoisto' onclick='submit();' class='button'>", t("Poista kontista"), "</button>
+      </form><br><br>";
+    }
   }
 
   echo "<div style='text-align:center; padding:10px; width:700px; margin:0 auto; overflow:auto;'>";
+
+  ksort($kontit);
 
   foreach ($kontit as $key => $kontti) {
 
@@ -776,6 +883,7 @@ if ($view == 'kontituslista') {
 
     echo "<input type='hidden' name='aktiivinen_kontti' value='{$key}' />";
     echo "<input type='hidden' name='konttiviite' value='{$konttiviite}' />";
+    echo "<input type='hidden' name='konttimaara' value='{$konttimaara}' />";
     echo "<input type='hidden' name='aktiivi_group' class='aktiivi_group' value='{$aktiivi_group}' />";
     echo "<input type='hidden' name='maxkg' value='{$maxkg}' />";
     echo "<button name='submit' value='konttivalinta' onclick='submit();' {$disablointi} class='{$luokka}'>";
@@ -786,8 +894,21 @@ if ($view == 'kontituslista') {
     }
 
     echo "</button></form></div>";
-
   }
+
+  echo "<div style='display:inline-block; margin:6px;'>";
+  echo "<form method='post' action=''>";
+  echo "<input type='hidden' name='sarjanumero' value='{$sarjanumero}' />";
+  echo "<input type='hidden' name='rivitunnus' value='{$rivitunnus}' />";
+  echo "<input type='hidden' name='konttiviite' value='{$konttiviite}' />";
+  echo "<input type='hidden' name='maxkg' value='{$maxkg}' />";
+  echo "<input type='hidden' name='konttimaara' value='{$konttimaara}' />";
+  echo "<input type='hidden' name='bookattu_konttimaara' value='{$bookattu_konttimaara}' />";
+  echo "<input type='hidden' name='aktiivinen_kontti' value='{$aktiivinen_kontti}' />";
+  echo "<input type='hidden' name='aktiivi_group' class='aktiivi_group' value='{$aktiivi_group}' />";
+  echo "<button name='submit' value='kontin_lisays' onclick='submit();' class='aktiivi'>";
+  echo t("Lis‰‰ kontti");
+  echo "</button></form></div>";
 
   if (count($kontittamattomat) > 0) {
 

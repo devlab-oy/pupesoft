@@ -604,7 +604,10 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
               // lasketaan isätuotteen riville lapsien hinnat yhteen
               $query = "SELECT
                         sum(tilausrivi.rivihinta) rivihinta,
-                        round(sum(tilausrivi.rivihinta) / $tilrow[kpl], '$yhtiorow[hintapyoristys]') hinta,
+                        round(sum(tilausrivi.hinta
+                            * (tilausrivi.varattu + tilausrivi.kpl)
+                            * {$query_ale_lisa})
+                          / $tilrow[kpl], '$yhtiorow[hintapyoristys]') hinta,
                         sum(round(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * {$query_ale_lisa}, $yhtiorow[hintapyoristys])) rivihinta_verollinen,
                         sum((tilausrivi.hinta / {$lasrow["vienti_kurssi"]}) / if ('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * {$query_ale_lisa}) rivihinta_valuutassa
                         FROM tilausrivi

@@ -430,6 +430,7 @@ if (isset($submit)) {
     $rullainfo = mysql_fetch_assoc($result);
 
     $rivitunnus = $rullainfo['myyntirivitunnus'];
+    $poistomahdollisuus = false;
 
     if (mysql_num_rows($result) == 0) {
       $errors[] = t("Tuntematon sarjanumero");
@@ -444,7 +445,13 @@ if (isset($submit)) {
         $errors[] = t("Rullan poisto vapauttaa kontin lukituksen");
       }
 
-      $poistomahdollisuus = true;
+      if ($rullainfo['sinettinumero'] == 'X' or $rullainfo['sinettinumero'] = '') {
+        $poistomahdollisuus = true;
+      }
+      else {
+        $errors[] = t("Kontti on jo sinetöity");
+      }
+
     }
     else {
       $query = "UPDATE tilausrivi SET

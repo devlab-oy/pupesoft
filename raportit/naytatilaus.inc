@@ -251,7 +251,11 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
   else $dpdss = "";
 
   // haetaan eka rahtikirjat tietue, niin saadaan rahtikirjanumerot tietoon
-  $query = "SELECT rahtikirjat.rahtikirjanro, toimitustapa.virallinen_selite, toimitustapa.rahtikirja, rahtikirjat.sscc_ulkoinen, sum(rahtikirjat.kollit) kollit
+  $query = "SELECT rahtikirjat.rahtikirjanro, 
+            toimitustapa.virallinen_selite, 
+            toimitustapa.rahtikirja, 
+            group_concat(DISTINCT if(rahtikirjat.sscc_ulkoinen='', NULL, rahtikirjat.sscc_ulkoinen)) sscc_ulkoinen,
+            sum(rahtikirjat.kollit) kollit
             FROM rahtikirjat
             JOIN toimitustapa ON (toimitustapa.yhtio=rahtikirjat.yhtio and rahtikirjat.toimitustapa=toimitustapa.selite)
             WHERE rahtikirjat.yhtio    = '$kukarow[yhtio]'

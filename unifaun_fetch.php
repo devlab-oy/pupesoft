@@ -160,30 +160,35 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
                       FROM rahtikirjat
                       WHERE yhtio    = '{$kukarow['yhtio']}'
                       AND otsikkonro = '{$eranumero_sscc}'
-                      ORDER BY tunnus
-                      LIMIT 1";
+                      ORDER BY tunnus";
             $rakir_res = pupe_query($query);
-            $rakir_row = mysql_fetch_assoc($rakir_res);
+            
+            if (mysql_num_rows($rakir_res)) {
+              
+              while($rakir_row = mysql_fetch_assoc($rakir_res)) {
+              
+                $rakirno = trim($rakir_row['rahtikirjanro']);
+                $sscculk = trim($rakir_row['sscc_ulkoinen']);
 
-            if (!empty($rakir_row['tunnus'])) {
+                if (!empty($rahtikirjanro) and !preg_match("/\b{$rahtikirjanro}\b/i", $rakirno)) {
+                  $rakirno = trim($rakirno."\n".$rahtikirjanro);
+                }
 
-              $rakirno = trim($rakir_row['rahtikirjanro']);
-              $sscculk = trim($rakir_row['sscc_ulkoinen']);
+                if (!empty($sscc_ulkoinen) and !preg_match("/\b{$sscc_ulkoinen}\b/i", $sscculk)) {
+                  $sscculk = trim($sscculk."\n".$sscc_ulkoinen);
+                }
 
-              if (!empty($rahtikirjanro) and !preg_match("/\b{$rahtikirjanro}\b/i", $rakirno)) {
-                $rakirno = trim($rakirno."\n".$rahtikirjanro);
+                if (empty($rakirno)) {
+                  $rakirno = $eranumero_sscc;
+                }
+
+                $query = "UPDATE rahtikirjat SET
+                          rahtikirjanro = '{$rakirno}',
+                          sscc_ulkoinen = '{$sscculk}'
+                          WHERE yhtio   = '{$kukarow['yhtio']}'
+                          AND tunnus    = '{$rakir_row['tunnus']}'";
+                pupe_query($query);
               }
-
-              if (!empty($sscc_ulkoinen) and !preg_match("/\b{$sscc_ulkoinen}\b/i", $sscculk)) {
-                $sscculk = trim($sscculk."\n".$sscc_ulkoinen);
-              }
-
-              $query = "UPDATE rahtikirjat SET
-                        rahtikirjanro = '{$rakirno}',
-                        sscc_ulkoinen = '{$sscculk}'
-                        WHERE yhtio   = '{$kukarow['yhtio']}'
-                        AND tunnus    = '{$rakir_row['tunnus']}'";
-              pupe_query($query);
             }
             else {
               $query = "SELECT *
@@ -196,7 +201,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
               if (!empty($lasku_row['tunnus'])) {
 
                 if (empty($rahtikirjanro)) {
-                  $rahtikirjanro = $sscc_ulkoinen;
+                  $rahtikirjanro = $eranumero_sscc;
                 }
 
                 $query  = "INSERT INTO rahtikirjat SET

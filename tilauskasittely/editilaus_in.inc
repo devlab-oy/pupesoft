@@ -684,7 +684,7 @@ while ($tietue = fgets($fd)) {
     if ($edi_tyyppi == "magento" and $verkkokauppa != '' 
       and isset($verkkokauppa_erikoiskasittely) and count($verkkokauppa_erikoiskasittely) > 0) {
       $e_parametrit = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
-      // Jos erikoisk‰sittelyyn on m‰‰ritelty eri yhtiˆ t‰lle tilaukselle niin p‰ivitet‰‰n tiedot
+      // Jos erikoisk‰sittelyyn on m‰‰ritelty eri yhtiˆ t‰lle kaupalle niin p‰ivitet‰‰n tiedot
       if (isset($e_parametrit[4]) and !empty($e_parametrit[4])) {
         $edi_ulos .= t("K‰‰nnet‰‰n tilaus yritykselle")." '{$e_parametrit[4]}' ";
         hae_yhtiotiedot($e_parametrit[4]);

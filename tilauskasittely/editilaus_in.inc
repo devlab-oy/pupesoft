@@ -681,7 +681,7 @@ while ($tietue = fgets($fd)) {
       }
     }
 
-    if ($edi_tyyppi == "magento" and $verkkokauppa != ''
+    if ($edi_tyyppi == "magento" and $verkkokauppa != '' 
       and isset($verkkokauppa_erikoiskasittely) and count($verkkokauppa_erikoiskasittely) > 0) {
       $e_parametrit = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
       // Jos erikoiskäsittelyyn on määritelty eri yhtiö tälle kaupalle niin päivitetään tiedot
@@ -690,7 +690,7 @@ while ($tietue = fgets($fd)) {
         hae_yhtiotiedot($e_parametrit[4]);
       }
     }
-
+    
     // Käytetään Magenton asiakasnumeroa jos sellainen löytyy ennalta määritellyistä kaupoista tulevilla tilauksilla
     // ja on setattu $verkkokauppa_erikoiskasittely:n
     if ($edi_tyyppi == "magento" and $ot_verkkokauppa_asiakasnro != ''
@@ -698,7 +698,7 @@ while ($tietue = fgets($fd)) {
       and count($verkkokauppa_erikoiskasittely) > 0) {
 
       $e_parametrit = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
-      // Jos ollaan annettu viides parametri(vaihtoehtoinen ovt-tunnus) niin ei haluta tarkistaa tätä
+      // Jos ollaan annettu viides parametri(vaihtoehtoinen ovt-tunnus) niin ei haluta tarkistaa tätä      
       if (count($e_parametrit) > 0 and count($e_parametrit < 5)) {
         $tieto = $ot_verkkokauppa_asiakasnro;
 
@@ -789,22 +789,6 @@ while ($tietue = fgets($fd)) {
                 FROM asiakas
                 WHERE yhtio   = '$kukarow[yhtio]'
                 and ovttunnus = '$tieto'
-                and ovttunnus not in ('','0')
-                and laji      not in ('R','P')";
-      $result = pupe_query($query);
-
-      if (mysql_num_rows($result) == 1) {
-        $arow = mysql_fetch_assoc($result);
-        $vastaustapa .= $arow['tilausvahvistus'];
-        $edi_ulos .= "$arow[nimi] $arow[nimitark] $arow[toim_nimi] $arow[toim_nimitark] $arow[toim_postitp]\n";
-      }
-    }
-
-    if (!is_array($arow) and isset($verkkokauppa_asiakasnro)) {
-      $query = "SELECT *
-                FROM asiakas
-                WHERE yhtio   = '$kukarow[yhtio]'
-                and ovttunnus = '$verkkokauppa_asiakasnro'
                 and ovttunnus not in ('','0')
                 and laji      not in ('R','P')";
       $result = pupe_query($query);
@@ -1331,7 +1315,7 @@ while ($tietue = fgets($fd)) {
         and count($verkkokauppa_erikoiskasittely) > 0) {
         list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa, $editilaus_myyja)
          = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
-
+        
         // Jos löytyy erikoiskäsittely niin näytetään se myös käyttöliittymässä
         if (isset($nimi) and !empty($nimi)) {
           $edi_ulos .= t("Tilauksen erikoiskäsittely")."-> {$nimi},

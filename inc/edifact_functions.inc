@@ -1398,6 +1398,7 @@ function kasittele_bookkaussanoma($edi_data) {
         'tilausnro' => $tilausnro,
         'rivinro' => $rivinro,
         'konttiviite' => $konttiviite,
+        'konttityyppi' => $konttityyppi,
         'matkakoodi' => $matkakoodi,
         'matkatiedot' => $matkatiedot,
         'konttimaara' => $konttimaara,

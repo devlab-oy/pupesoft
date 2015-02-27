@@ -2431,8 +2431,7 @@ function kasittele_iftsta($edi_data) {
   $update_query = "UPDATE tilausrivin_lisatiedot SET
                    kontin_mrn  = '{$mrn}'
                    WHERE yhtio = '{$kukarow['yhtio']}'
-                   AND tunnus IN ({$tunnukset})
-                   AND kontin_mrn = ''";
+                   AND tunnus IN ({$tunnukset})";
   pupe_query($update_query);
 
 }

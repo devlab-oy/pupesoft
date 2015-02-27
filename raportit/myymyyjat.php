@@ -270,14 +270,14 @@ if ($tee != '') {
 
       foreach ($myyjan_osastot as $osasto) {
         if ($osastojen_nimet[$osasto]) {
-          echo "<br>{$osastojen_nimet[$osasto]}";
+          echo "<br>{$osastojen_nimet[$osasto]} " . t("kate");
         }
         else {
           echo "<br>" . t("Ei osastoa");
         }
       }
 
-      echo "<br>Katteiden summa";
+      echo "<br>" . t("Katteiden summa");
 
       echo "</td>";
     }

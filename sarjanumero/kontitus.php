@@ -432,11 +432,14 @@ if (isset($submit)) {
     $rivitunnus = $rullainfo['myyntirivitunnus'];
     $poistomahdollisuus = false;
 
+    $syotetty_konttiviite = (string) $konttiviite;
+    $rullan_konttiviite = (string) $rullainfo['konttiviite'];
+
     if (mysql_num_rows($result) == 0) {
       $errors[] = t("Tuntematon sarjanumero");
     }
-    elseif ($rullainfo['konttiviite'] != $konttiviite) {
-      $errors[] = t("Rulla kuulu konttiviitteeseen:") . " " . $rullainfo['konttiviite'];
+    elseif ($rullan_konttiviite != $syotetty_konttiviite) {
+      $errors[] = t("Rulla kuulu konttiviitteeseen:") . " " . $rullan_konttiviite;
     }
     elseif ($rullainfo['konttinumero'] != '') {
       $errors[] = t("Rulla on jo kontissa") . " " . $rullainfo['konttinumero'];

@@ -8133,14 +8133,16 @@ if (!function_exists("muistiin")) {
 }
 
 if (!function_exists("muistista")) {
-  function muistista($muisti, $nimi) {
+  function muistista($muisti, $nimi, $tarkista_kuka = true) {
     global $kukarow;
+
+    $kuka_lisa = $tarkista_kuka ? "AND kuka = '{$kukarow["kuka"]}'" : "";
 
     $query = "SELECT *
               FROM muisti
               WHERE yhtio = '$kukarow[yhtio]'
               and haku    = '$muisti'
-              and kuka    = '$kukarow[kuka]'
+              {$kuka_lisa}
               and nimi    = '$nimi'";
     $result = pupe_query($query);
 

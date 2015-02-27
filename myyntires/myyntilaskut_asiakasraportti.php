@@ -84,6 +84,9 @@ if (!isset($valintra)) $valintra = "";
 if (!isset($alkupvm)) $alkupvm = "";
 if (!isset($loppupvm)) $loppupvm = "";
 
+// scripti balloonien tekemiseen
+js_popup();
+
 if ($tee == "") {
 
   /* visuaalinen esitys maksunopeudesta (hymynaama) */
@@ -825,7 +828,7 @@ if ($tee == "") {
           if ($maksurow["korkolaspvm"] != '0000-00-00') echo "<td align='right'>".pupe_DataTablesEchoSort($maksurow['korkolaspvm']).tv1dateconv($maksurow["korkolaspvm"])."</td>";
           else echo "<td></td>";
 
-          echo "<td>";
+          echo "<td align='right' nowrap>";
 
           $linkki  = "<a href='".$palvelin2."muutosite.php?tee=E&tunnus=##TUNNUS##";
           $linkki .= "&lopetus=".$lopetus."/SPLIT/".$palvelin2."myyntires/";
@@ -1049,7 +1052,7 @@ if ($tee == "") {
 require "inc/footer.inc";
 
 function hae_maksusuoritukset($maksurow, $linkki) {
-  global $kukarow, $yhtiorow;
+  global $kukarow, $yhtiorow, $palvelin2;
 
   // tiliöinneistä haettavat osasuoritukset ensin
   // haetaan kaikki yrityksen rahatilit mysql muodossa
@@ -1159,12 +1162,17 @@ function hae_maksusuoritukset($maksurow, $linkki) {
       // echotaan suoritusten tiedot
       while ($row3 = mysql_fetch_assoc($res3)) {
         echo "<span style='font-weight:bold'> ".t("Suoritus")."</span> &#124; ", $row3['summa'], " ";
-        echo $row3['valkoodi'], " &#124; ", tv1dateconv($row3['maksupvm']), "<br>";
+        echo $row3['valkoodi'], " &#124; ", tv1dateconv($row3['maksupvm']);
 
         // ja mahdollinen kommentti
         if (!empty($row3['viesti'])) {
-          echo $row3['viesti'], '<br><br>';
+          echo " <img class='tooltip' id='$row3[tunnus]' src='{$palvelin2}pics/lullacons/info.png'>";
+          echo "<div id='div_$row3[tunnus]' class='popup' style='width: 500px;'>";
+          echo $row3['viesti'];
+          echo "</div>";
         }
+
+        echo "<br>";
       }
 
       // haetaan laskujen tiedot

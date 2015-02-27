@@ -1149,6 +1149,16 @@ if (!function_exists('rivi_kerayslista')) {
         $row["kommentti"] = preg_replace("/ ".t("yhteens‰").": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
         $row["kommentti"] = preg_replace("/ "."yhteens‰".": [0-9\.]* [A-Z]{3}\./", "", $row["kommentti"]);
 
+        // Lis‰t‰‰n mahdollinen saapumisaika tuoterivin alle, jos kyseess‰ on jt-rivi
+        $saapumisaika = jt_saapumisaika_tilausvahvistus($row, $trow["status"]);
+
+        if (!empty($row["kommentti"]) and !empty($saapumisaika)) {
+          $row["kommentti"] .= "\n{$saapumisaika}";
+        }
+        elseif (!empty($saapumisaika)) {
+          $row["kommentti"] = $saapumisaika;
+        }
+
         // Trimmataan uudestaan
         $row["kommentti"] = trim($row["kommentti"]);
 

@@ -709,23 +709,24 @@ while ($row = mysql_fetch_assoc($res)) {
     // päätoimittaja talteen täs vaihees
     $parastoimittaja = $toimittajat_a[0];
 
-    $relex_halvin_toimittaja = t_tuotteen_avainsanat($row, "RELEX_HALVIN_TOIMITTAJA");
-    $relex_halvin_toimittaja_check = ($relex_halvin_toimittaja != "RELEX_HALVIN_TOIMITTAJA");
+    // jos järjestys parastoimitajal on 1, ei katsota ollenkaan halvempia toimittajia vaan mennään aina päätoimittajalla
+    $relex_halvin_toimittaja_check = ($parastoimittaja['jarjestys'] != 1);
 
-    // jos halutaan päätoimittajaksi halvin
     if ($relex_halvin_toimittaja_check) {
-      
-      $_kulu = 1;
-
-      // jos selite-kentässä numero, käytetään sitä ns ylimääräisenä kuluna halvimmalla toimittajalla
-      if (!empty($relex_halvin_toimittaja) and is_numeric($relex_halvin_toimittaja)) {
-        $_kulu += ($relex_halvin_toimittaja / 100);
-      }
 
       array_multisort($toimittajat_a_hinta, SORT_ASC, $toimittajat_a);
-    
-      // tarkistetaan onko halvin hinta yli 5% päätoimittajaa halvempi, jotta vaihto on kannattavaa
-      if ($parastoimittaja['ostohinta_oletusvaluutta_netto'] > ($toimittajat_a[0]['ostohinta_oletusvaluutta_netto'] * $_kulu * 1.05)) {
+      
+      $parastoimittaja_check = ($parastoimittaja['ostohinta_oletusvaluutta_netto'] > ($toimittajat_a[0]['ostohinta_oletusvaluutta_netto'] * 1.05));
+      
+      // jos parastoimittajan järjestys on 2 eli "ehdollinen päätoimittaja", 
+      // katsotaan onko halvin toimittaja yli 5% halvempi ja jos, niin käytetään sitä
+      if ($parastoimittaja['jarjestys'] == 2) {
+        if ($parastoimittaja_check) {
+          $parastoimittaja = $toimittajat_a[0];
+        }
+      }
+      else {
+        // muussa tapauksessa otetaan aina halvin toimittaja
         $parastoimittaja = $toimittajat_a[0];
       }
     }

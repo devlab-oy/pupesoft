@@ -311,7 +311,7 @@ if ($tee == 'A') {
       if ($limit != "NO") {
         $limlis = " LIMIT $alku, 50 ";
       }
-      
+
       if (isset($lisa) and strpos($lisa, "tiliointi.") !== FALSE or !empty($vainomakustp)) {
         $tiliointilisa = " JOIN tiliointi ON (tiliointi.yhtio = lasku.yhtio
                              AND tiliointi.ltunnus = lasku.tunnus
@@ -321,13 +321,6 @@ if ($tee == 'A') {
       else {
         $tiliointilisa = '';
       }
-      
-      // Rajataan AINA käyttäjän osaston kustannuspaikalla
-      $vainomakustp_lisa = "";
-  
-      if (!empty($vainomakustp)) {
-        $vainomakustp_lisa = " and tiliointi.kustp = '{$kukarow["osasto"]}' ";
-      }                  
 
       $query = "SELECT DISTINCT lasku.tapvm, lasku.erpcm, lasku.summa, lasku.valkoodi, lasku.vienti,
                 concat_ws(' ', lasku.viite, lasku.viesti) 'viite/viesti', lasku.ebid, lasku.tila, lasku.tunnus,
@@ -339,7 +332,6 @@ if ($tee == 'A') {
                 $toimiliilisa
                 $th_lisa
                 $aikalisa
-                $vainomakustp_lisa
                 and lasku.tila in ('H', 'M', 'P', 'Q', 'Y')
                 ORDER BY lasku.tapvm desc
                 $limlis";

@@ -18,20 +18,20 @@ else {
 }
 
 // Setataan muuttujat
-if (!isset($from))       $from = "";
-if (!isset($tltee))     $tltee = "";
-if (!isset($toim))       $toim = "";
-if (!isset($rtaso))     $rtaso = "TILI";
+if (!isset($from))           $from = "";
+if (!isset($tltee))          $tltee = "";
+if (!isset($toim))           $toim = "";
+if (!isset($rtaso))          $rtaso = "TILI";
 if (!isset($kaikkikaudet))   $kaikkikaudet = "";
-if (!isset($vertailued))   $vertailued = "";
-if (!isset($vertailubu))   $vertailubu = "";
-if (!isset($ei_yhteensa))   $ei_yhteensa = "";
-if (!isset($konsernirajaus))$konsernirajaus = "";
-if (!isset($sarakebox))   $sarakebox = "";
-if (!isset($tkausi))     $tkausi = "";
-if (!isset($ulisa))     $ulisa = "";
-if (!isset($lisa))       $lisa = "";
-if (!isset($toim_tee))     $toim_tee = "";
+if (!isset($vertailued))     $vertailued = "";
+if (!isset($vertailubu))     $vertailubu = "";
+if (!isset($ei_yhteensa))    $ei_yhteensa = "";
+if (!isset($konsernirajaus)) $konsernirajaus = "";
+if (!isset($sarakebox))      $sarakebox = "";
+if (!isset($tkausi))         $tkausi = "";
+if (!isset($ulisa))          $ulisa = "";
+if (!isset($lisa))           $lisa = "";
+if (!isset($toim_tee))       $toim_tee = "";
 
 if (!isset($desi) or $desi == "") $desi = "2";
 if (!isset($tyyppi) or $tyyppi == "") $tyyppi = "4";
@@ -39,6 +39,14 @@ if (!isset($tarkkuus) or $tarkkuus == "") $tarkkuus = "1";
 if (!isset($alvp) or $alvp == "") $alvp = date("d", mktime(0, 0, 0, (date("m")+1), 0, date("Y")));
 if (!isset($alvv) or $alvv == "") $alvv = date("Y");
 if (!isset($alvk) or $alvk == "") $alvk = date("m");
+
+// Rajataanko rappari näyttämään vain Omaa KustannusPaikkaa
+if (substr($toim, -4) == '_OKP') {
+  // käyttäjän osasto kertoo oletuskustannuspaikan
+  $vainomakustp = TRUE;
+  $mul_kustp    = array();
+  $mul_kustp[]  = $kukarow["osasto"];
+}
 
 if (isset($teetiedosto)) {
   if ($teetiedosto == "lataa_tiedosto") {
@@ -661,16 +669,17 @@ else {
     }
 
     // Tehdäänkö linkit päiväkirjaan
-    $query = "SELECT yhtio
+    $query = "SELECT alanimi
               FROM oikeu
               WHERE yhtio = '$kukarow[yhtio]'
               and kuka    = '$kukarow[kuka]'
               and nimi    = 'raportit.php'
-              and alanimi = 'paakirja'";
+              and alanimi IN ('paakirja','paakirja_OKP')";
     $oikresult = pupe_query($query);
 
     if (mysql_num_rows($oikresult) > 0) {
-      $paakirjalink = TRUE;
+      $oikrow = mysql_fetch_assoc($oikresult);
+      $paakirjalink = $oikrow["alanimi"];
     }
     else {
       $paakirjalink = FALSE;
@@ -799,6 +808,13 @@ else {
       $tilijoini = "  JOIN tili ON tiliointi.yhtio=tili.yhtio and tiliointi.tilino=tili.tilino";
     }
 
+    // Rajataan AINA käyttäjän osaston kustannuspaikalla
+    $vainomakustp_lisa = "";
+
+    if (!empty($vainomakustp)) {
+      $vainomakustp_lisa = " and tiliointi.kustp = '{$kukarow["osasto"]}' ";
+    }
+
     // Haetaan kaikki tiliöinnit
     $query = "SELECT tiliointi.tilino, $groupsarake groupsarake, $alkuquery1
               FROM tiliointi USE INDEX (yhtio_tapvm_tilino)
@@ -811,6 +827,7 @@ else {
               and tiliointi.tapvm    >= '$totalalku'
               and tiliointi.tapvm    <= '$totalloppu'
               $konsernilisa
+              $vainomakustp_lisa
               $lisa
               GROUP BY tiliointi.tilino, groupsarake
               ORDER BY tiliointi.tilino, groupsarake";
@@ -855,6 +872,7 @@ else {
                   and tiliointi.tapvm    <= '$totalloppu'
                   and tiliointi.tilino   in ({$tulosrow['tilit']})
                   $konsernilisa
+                  $vainomakustp_lisa
                   $lisa
                   GROUP BY groupsarake
                   ORDER BY groupsarake";
@@ -1206,8 +1224,8 @@ else {
 
                 $tilirivi .= "<td nowrap>";
 
-                if ($paakirjalink) {
-                  $tilirivi .= "<a href ='../raportit.php?toim=paakirja&tee=P&mista=tuloslaskelma&alvv=$alvv&alvk=$alvk&tili=$tnumero$ulisa$lopelinkki'>$tnumero - $tnimi</a>";
+                if (!empty($paakirjalink)) {
+                  $tilirivi .= "<a href ='../raportit.php?toim=$paakirjalink&tee=P&mista=tuloslaskelma&alvv=$alvv&alvk=$alvk&tili=$tnumero$ulisa$lopelinkki'>$tnumero - $tnimi</a>";
                 }
                 else {
                   $tilirivi .= "$tnumero - $tnimi";

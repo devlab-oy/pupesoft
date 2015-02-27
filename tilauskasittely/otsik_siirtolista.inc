@@ -57,8 +57,9 @@ if ($tila == 'Muuta' and !isset($jatka)) {
     $qlisa = " LEFT JOIN tyomaarays ON tyomaarays.yhtio=lasku.yhtio and tyomaarays.otunnus=lasku.tunnus ";
   }
 
-  if ((isset($kopioitava_otsikko) and $kopioitava_otsikko > 0) or $kukarow["kesken"] > 0) {
-    if (isset($kopioitava_otsikko) and $kopioitava_otsikko > 0) {
+  if (!empty($kopioitava_otsikko) or $kukarow["kesken"] > 0) {
+
+    if (!empty($kopioitava_otsikko)) {
       $squery = "SELECT tyomaarays.*, laskun_lisatiedot.*, lasku.*, lasku.hyvaksynnanmuutos as luokkaa
                  FROM lasku
                  LEFT JOIN laskun_lisatiedot ON lasku.yhtio=laskun_lisatiedot.yhtio and lasku.tunnus=laskun_lisatiedot.otunnus
@@ -75,30 +76,35 @@ if ($tila == 'Muuta' and !isset($jatka)) {
       $tilausnumero     = 0;
 
     }
-    elseif ($kukarow["kesken"] != 0) {
+    elseif ($kukarow["kesken"] > 0) {
       $squery = "SELECT *, hyvaksynnanmuutos as luokka
                  FROM lasku
                  $qlisa
                  WHERE tunnus = '$kukarow[kesken]'";
     }
+
     $sresult = pupe_query($squery);
-    $srow = mysql_fetch_array($sresult);
+    $srow = mysql_fetch_assoc($sresult);
 
     // jos meillä on jo alatila ja tila ei muokkailla niitä!
-    $alatila="";
-    $ylatila="";
+    $alatila = "";
+    $ylatila = "";
 
-    //  Jos meillä on kopioitu otsikko, ei kopioida alatilaa!
-    if (isset($kopioitava_otsikko) and $kopioitava_otsikko == 0 and $srow['alatila'] != '') {
-      $alatila=$srow['alatila'];
+    //  Alatila setataan vain jos ei olla kopsaamassa!
+    if (empty($kopioitava_otsikko) and $srow['alatila'] != '') {
+      $alatila = $srow['alatila'];
     }
-    if ($srow['tila'] != '') $ylatila = $srow['tila'];
+
+    if ($srow['tila'] != '') {
+      $ylatila = $srow['tila'];
+    }
   }
 
   if (!isset($srow)) {
     $query = "SELECT *, hyvaksynnanmuutos as luokka FROM lasku LIMIT 1";
     $result = pupe_query($query);
     $srow = mysql_fetch_assoc($result);
+
     foreach ($srow as $key => $value) {
       $srow[$key] = '';
     }

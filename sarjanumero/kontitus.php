@@ -445,7 +445,7 @@ if (isset($submit)) {
         $errors[] = t("Rullan poisto vapauttaa kontin lukituksen");
       }
 
-      if ($rullainfo['sinettinumero'] == 'X' or $rullainfo['sinettinumero'] = '') {
+      if ($rullainfo['sinettinumero'] == 'X' or $rullainfo['sinettinumero'] == '') {
         $poistomahdollisuus = true;
       }
       else {
@@ -945,6 +945,8 @@ if ($view == 'kontituslista') {
   }
 
   echo "</div>";
+
+  $otsikoidut = array();
 
   foreach ($kontittamattomat as $rulla) {
 

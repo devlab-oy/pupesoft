@@ -710,9 +710,7 @@ while ($row = mysql_fetch_assoc($res)) {
     $parastoimittaja = $toimittajat_a[0];
 
     // jos j‰rjestys parastoimitajal on 1, ei katsota ollenkaan halvempia toimittajia vaan menn‰‰n aina p‰‰toimittajalla
-    $relex_halvin_toimittaja_check = ($parastoimittaja['jarjestys'] != 1);
-
-    if ($relex_halvin_toimittaja_check) {
+    if ($parastoimittaja['jarjestys'] != 1) {
 
       array_multisort($toimittajat_a_hinta, SORT_ASC, $toimittajat_a);
       

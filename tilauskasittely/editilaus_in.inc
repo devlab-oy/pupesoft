@@ -681,16 +681,18 @@ while ($tietue = fgets($fd)) {
       }
     }
 
-    if ($edi_tyyppi == "magento" and $verkkokauppa != '' 
+    $kaannetty = false;
+    if ($edi_tyyppi == "magento" and $verkkokauppa != ''
       and isset($verkkokauppa_erikoiskasittely) and count($verkkokauppa_erikoiskasittely) > 0) {
       $e_parametrit = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
       // Jos erikoiskäsittelyyn on määritelty eri yhtiö tälle kaupalle niin päivitetään tiedot
       if (isset($e_parametrit[4]) and !empty($e_parametrit[4])) {
         $edi_ulos .= t("Käännetään tilaus yritykselle")." '{$e_parametrit[4]}' ";
         hae_yhtiotiedot($e_parametrit[4]);
+        $kaannetty = true;
       }
     }
-    
+
     // Käytetään Magenton asiakasnumeroa jos sellainen löytyy ennalta määritellyistä kaupoista tulevilla tilauksilla
     // ja on setattu $verkkokauppa_erikoiskasittely:n
     if ($edi_tyyppi == "magento" and $ot_verkkokauppa_asiakasnro != ''
@@ -698,7 +700,7 @@ while ($tietue = fgets($fd)) {
       and count($verkkokauppa_erikoiskasittely) > 0) {
 
       $e_parametrit = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
-      // Jos ollaan annettu viides parametri(vaihtoehtoinen ovt-tunnus) niin ei haluta tarkistaa tätä      
+      // Jos ollaan annettu viides parametri(vaihtoehtoinen ovt-tunnus) niin ei haluta tarkistaa tätä
       if (count($e_parametrit) > 0 and count($e_parametrit < 5)) {
         $tieto = $ot_verkkokauppa_asiakasnro;
 
@@ -785,10 +787,18 @@ while ($tietue = fgets($fd)) {
     }
 
     if (!is_array($arow)) {
+
+      if ($kaannetty and isset($verkkokauppa_asiakasnro)) {
+        $_tieto = $verkkokauppa_asiakasnro;
+      }
+      else {
+        $_tieto = $tieto;
+      }
+
       $query = "SELECT *
                 FROM asiakas
                 WHERE yhtio   = '$kukarow[yhtio]'
-                and ovttunnus = '$tieto'
+                and ovttunnus = '$_tieto'
                 and ovttunnus not in ('','0')
                 and laji      not in ('R','P')";
       $result = pupe_query($query);
@@ -1315,7 +1325,7 @@ while ($tietue = fgets($fd)) {
         and count($verkkokauppa_erikoiskasittely) > 0) {
         list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa, $editilaus_myyja)
          = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
-        
+
         // Jos löytyy erikoiskäsittely niin näytetään se myös käyttöliittymässä
         if (isset($nimi) and !empty($nimi)) {
           $edi_ulos .= t("Tilauksen erikoiskäsittely")."-> {$nimi},

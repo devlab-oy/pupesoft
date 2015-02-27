@@ -30475,3 +30475,38 @@ if (!function_exists("hae_viimeiset_hyvaksyjat")) {
     return array($viimeinen_hyvaksyja_time, $tokaviimeinen_hyvaksyja_time);
   }
 }
+
+if (!function_exists("paata_kvartaali")) {
+  function paata_kvartaali() {
+    $tama_vuosi = date('Y');
+    $kvartaalit = array(
+      4 => array(
+        "start_date" => "$tama_vuosi-01-01",
+        "end_date"   => "$tama_vuosi-03-31"
+      ),
+      1 => array(
+        "start_date" => "$tama_vuosi-04-01",
+        "end_date"   => "$tama_vuosi-06-30"
+      ),
+      2 => array(
+        "start_date" => "$tama_vuosi-07-01",
+        "end_date"   => "$tama_vuosi-09-30"
+      ),
+      3 => array(
+        "start_date" => "$tama_vuosi-10-01",
+        "end_date"   => "$tama_vuosi-12-31"
+      ),
+    );
+
+    //tarkisteaan mikä kvartaali on menossa.
+    foreach ($kvartaalit as $kvartaali) {
+      $now = date('Y-m-d');
+      if ($now >= $kvartaali['start_date'] and $now <= $kvartaali['end_date']) {
+        $nykyinen_kvartaali = $kvartaali;
+        break;
+      }
+    }
+
+    return $nykyinen_kvartaali;
+  }
+}

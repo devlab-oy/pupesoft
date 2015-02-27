@@ -16,32 +16,35 @@ echo "<font class='head'>".t("Myyjien myynnit").":</font><hr>";
 if ($toim == "TARKKA") {
   $muuttujat = muistista("myymyyjat", "oletus");
 
-  if (!isset($alkukk) and $muuttujat["alkukk"]) {
-    $alkukk = $muuttujat["alkukk"];
-  }
-  if (!isset($alkuvv) and $muuttujat["alkuvv"]) {
-    $alkuvv = $muuttujat["alkuvv"];
-  }
   if (!isset($kuluprosentti) and $muuttujat["kuluprosentti"]) {
     $kuluprosentti = $muuttujat["kuluprosentti"];
   }
-  if (!isset($loppukk) and $muuttujat["loppukk"]) {
-    $loppukk = $muuttujat["loppukk"];
-  }
-  if (!isset($loppuvv) and $muuttujat["loppuvv"]) {
-    $loppuvv = $muuttujat["loppuvv"];
-  }
+
   if (!isset($mul_laskumyyja) and $muuttujat["mul_laskumyyja"]) {
     $mul_laskumyyja = $muuttujat["mul_laskumyyja"];
   }
+
   if (!isset($mul_osasto) and $muuttujat["mul_osasto"]) {
     $mul_osasto = $muuttujat["mul_osasto"];
   }
 
-  if (!isset($alkukk)) $alkukk = date("m");
-  if (!isset($alkuvv)) $alkuvv = date("Y");
-  if (!isset($loppukk)) $loppukk = date("m");
-  if (!isset($loppuvv)) $loppuvv = date("Y");
+  $kvartaali = paata_kvartaali();
+  $kvartaali_alku = date_parse($kvartaali["start_date"]);
+  $kvartaali_loppu = date_parse($kvartaali["end_date"]);
+
+  if (!isset($alkukk)) {
+    $alkukk = $kvartaali_alku["month"];
+  }
+  if (!isset($alkuvv)) {
+    $alkuvv = $kvartaali_alku["year"];
+  }
+
+  if (!isset($loppukk)) {
+    $loppukk = $kvartaali_loppu["month"];
+  }
+  if (!isset($loppuvv)) {
+    $loppuvv = $kvartaali_loppu["year"];
+  }
 }
 else {
   if (!isset($alkukk)) $alkukk = date("m", mktime(0, 0, 0, date("m"), 1, date("Y")-1));
@@ -135,10 +138,6 @@ echo "<br>";
 
 if ($tee == "tallenna_haku") {
   $muistettavat = array(
-    "alkukk"         => $alkukk,
-    "alkuvv"         => $alkuvv,
-    "loppukk"        => $loppukk,
-    "loppuvv"        => $loppuvv,
     "kuluprosentti"  => $kuluprosentti,
     "mul_laskumyyja" => $mul_laskumyyja,
     "mul_osasto"     => $mul_osasto

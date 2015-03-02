@@ -2359,7 +2359,7 @@ else {
                     $query = "SELECT
                               sum(tilausrivi.rivihinta) rivihinta,
                               round(sum(tilausrivi.hinta
-                                  * (tilausrivi.varattu + tilausrivi.kpl)
+                                  * tilausrivi.kpl
                                   * {$query_ale_lisa})
                                 / $tilrow[kpl], '$yhtiorow[hintapyoristys]') hinta,
                               sum(round(tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * tilausrivi.kpl * {$query_ale_lisa}, $yhtiorow[hintapyoristys])) rivihinta_verollinen,

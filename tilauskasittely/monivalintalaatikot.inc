@@ -2125,9 +2125,16 @@ foreach ($monivalintalaatikot as $monivalintalaatikko) {
         }
       </script> ";
 
+    $omakustprajaus = "";
+
+    if (!empty($vainomakustp)) {
+        $omakustprajaus = " and kustannuspaikka.tunnus = {$kukarow["osasto"]} ";
+    }
+
     $query = "SELECT tunnus, nimi, koodi, isa_tarkenne
               FROM kustannuspaikka
               WHERE yhtio   = '$kukarow[yhtio]'
+              {$omakustprajaus}
               and kaytossa != 'E'
               and tyyppi    = 'K'
               ORDER BY isa_tarkenne, koodi+0, koodi, nimi";

@@ -26,9 +26,7 @@ if (!is_dir($kohdehakemisto) and !is_writable($kohdehakemisto)) {
 
 $kohdehakemisto = rtrim($kohdehakemisto, "/");
 
-// Orders 91.1 tulee ostajan tiedot ennen vastaanottajaa, joten meid‰n pit‰‰ heti t‰ss‰ vaiheessa kaivaa jo vastaanottajan tiedot
 $order_tietosisalto = file_get_contents($filename);
-
 $order_tietosisalto = str_replace("\n", "", $order_tietosisalto);
 $order_tietosisalto = explode("'", $order_tietosisalto);
 
@@ -44,13 +42,26 @@ $edi_rivi_temp         = array();
 
 $edi_rivi_temp[] = "EDIFACT_CROSSDOCK_SPLIT";
 
+
+$tilaustyyppi = 'varastotilaus';
+// Etsit‰‰n LOC-elementtej‰ jotta voidaan eroitella CrossDock sek‰ Varastotilaus toisistaan
+foreach ($order_tietosisalto as $tieto) {
+  if (strpos($tieto, 'LOC+8') !== false) $tilaustyyppi = 'crossdock';
+}                      
+
 foreach ($order_tietosisalto as $key => $value) {
 
   $value = trim($value);
 
   if ($value != "") {
-
-    if (substr($value, 0, 3) == "LOC") {
+    if (substr($value, 0, 6) == "NAD+CN" and $tilaustyyppi == 'varastotilaus') {
+      // Toimitusosoite
+      // Varastotoimituksissa puuttuu LOC mutta korvataan tieto NAD+CN:lla
+      $value = str_replace("NAD+CN", "NAD+DP", $value);
+      $arska[$value][] = array();
+      $current_customer = $value;
+    }
+    elseif (substr($value, 0, 3) == "LOC") {
       // Toimitusosoite
       $value = str_replace("LOC+8", "NAD+DP", $value);
       $arska[$value][] = array();
@@ -59,11 +70,10 @@ foreach ($order_tietosisalto as $key => $value) {
     elseif (substr($value, 0, 3) == "LIN") {
       // Toimitusosoite - Tuotteet
       // Tuotteen vaihtuessa nollataan current_customer ja price
-      if ($current_product != $value) {
+      if ($current_product != $value and $tilaustyyppi == 'crossdock') {
         $current_customer = '';
         $current_product_price = '';
       }
-
       $arska[$current_customer][] = $value;
       $current_product = $value;
     }
@@ -131,7 +141,6 @@ foreach ($arska as $key => &$value) {
         $edi_rivi .= "PCD+12'";
       }
     }
-
     // Lis‰t‰‰n koko sanoman lopputagit
     $edi_rivi .= $edi_rivi_loppu;
     // Splitataan n‰tisti 80merkkisiksi riveiksi

@@ -2227,12 +2227,15 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 }
               }
 
-              $rivitunnus      = 0;
-              $kommentti       = "";
-              $tuotenimitys     = "";
+              $rivitunnus = 0;
               $tuotenimitys_force = "";
               $omalle_tilaukselle = "";
-              $ale_peruste    = "";
+              $ale_peruste = "";
+
+              if ($toimittamatta == 0) {
+                $kommentti = "";
+                $tuotenimitys = "";
+              }
 
             } // Tällä rundilla myydyt
           } // Jos tuoteperhettä löytyi riittävästi tai myytiin pelkää isää
@@ -2492,7 +2495,8 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and
       $laskurow["tilaustyyppi"] != "U" and
       ($_tarjouksella or $_osto_myyntitilaukselta or $_extranetista) and
-      !in_array($var, array('V', 'H', 'P'))) {
+      !in_array($var, array('V', 'H', 'P'))
+      and $kpl > 0) {
 
       if (!empty($laskurow['varasto'])) {
         $kohde_varastot = array($laskurow['varasto']);
@@ -2511,7 +2515,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
 
       foreach ($siirto_varastot as $siirto_varasto) {
         $saldo_myytavissa = $siirto_varasto['tuote']['myytavissa'];
-        if ($_onko_isatuote or $_onko_lapsituote) {
+        if ($_onko_isatuote) {
           $tuoteperhe_saldomyytavissa = tuoteperhe_myytavissa($isatuoteno, '', '', $siirto_varasto['lahde_tunnus']);
           $saldo_myytavissa = $tuoteperhe_saldomyytavissa[$siirto_varasto['lahde_nimi']];
         }

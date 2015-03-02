@@ -8,8 +8,13 @@
 # Pull Request
 
 * Pidä huoli, että ominaisuutesi branch on ajantasalla kun teet Pull Requestin.
-* Pull Requestin otsikon tulee selkeästi kuvata muutos. Otsikon maksimipituus 50 merkkiä.
+* Pull Requestin otsikon tulee selkeästi kuvata muutos.
+  * Pidä otsikko lyhyenä. Otsikon maksimipituus 50 merkkiä.
+  * Viittaa otsikossa vain siihen ohjelmaan / asiaan jota pulkkarissa käsitellään. Otsikossa ei tarvitse yrittää kertoa mitä uutta on tehty ja/tai korjattu.
 * Pull Requestin kommentissa tulee kuvata ominaisuus tarkemmin. Kommenttiriveillä ei ole maksimipituutta.
+  * Kirjoita ohjelman loppukäyttäjän näkökulmasta, ei koodaajan eikä koodin näkökulmasta, mitä ollaan tehty.
+  * Kun korjataan jokin juttu, niin kerro mikä asia missä ohjelmassa meni ennen väärin ja miten se nyt korjattuna toimii. 
+  * Kun tehdään uusi ominaisuus, niin kerro loppukäyttäjän näkökulmasta mitä uutta pupeen on tehty ja miten ominaisuus otetaan käyttöön sekä lyhyesti miten ominaisuus toimii. 
 * Tarvittaessa siisti branchisi commitit ennen Pull Requestiä `git rebase -i master`.
 
 # Commit

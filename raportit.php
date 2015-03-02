@@ -42,8 +42,16 @@ $cleantoim = $toim;
 if (substr($toim, -4) == '_OKP') {
   // käyttäjän osasto kertoo oletuskustannuspaikan
   $vainomakustp = TRUE;
-  $mul_kustp[] = $kukarow["osasto"];
-  $cleantoim = substr($toim, 0, -4);
+  
+  if (empty($kukarow["osasto"])) {
+    echo "<br><br>".t("Käyttäjätiedoistasi puuttuu osasto")."!<br>";
+    require "inc/footer.inc";
+    exit;
+  }
+  
+  $mul_kustp    = array();
+  $mul_kustp[]  = $kukarow["osasto"];
+  $cleantoim    = substr($toim, 0, -4);
 }
 
 // Livesearch jutut

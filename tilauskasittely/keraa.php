@@ -1236,7 +1236,33 @@ if ($tee == 'P') {
 
             if (trim($varastorekla[$apui]) != '' and trim($vertaus_hylly[$apui]) != trim($varastorekla[$apui])) {
               // Ollaan valittu varastopaikka dropdownista
-              list($reklahyllyalue, $reklahyllynro, $reklahyllyvali, $reklahyllytaso) = explode("###", $varastorekla[$apui]);
+
+              if (isset($varastorekla[$apui]) and $varastorekla[$apui] != 'x' and $varastorekla[$apui] != '' and strpos($varastorekla[$apui], "###") === false) {
+                // tehdään uusi paikka jos valittiin paikaton lapsivarasto
+                if (substr($rivivarasto[$tun], 0, 1) == 'V') {
+                  $uusi_paikka = lisaa_tuotepaikka($tilrivirow["tuoteno"], '', '', '', '', '', '', 0, 0, substr($varastorekla[$apui], 1));
+                  $ptunnus = $uusi_paikka['tuotepaikan_tunnus'];
+                }
+                else {
+                  $ptunnus = $varastorekla[$apui];
+                }
+
+                $query_xxx = "SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso
+                              FROM tuotepaikat
+                              WHERE yhtio = '{$kukarow['yhtio']}'
+                              and tunnus  = '{$ptunnus}'
+                              and tuoteno = '{$tilrivirow['tuoteno']}'";
+                $_result_paikka = pupe_query($query_xxx);
+                $_row_paikka = mysql_fetch_assoc($_result_paikka);
+
+                $reklahyllyalue = $_row_paikka['hyllyalue'];
+                $reklahyllynro  = $_row_paikka['hyllynro'];
+                $reklahyllyvali = $_row_paikka['hyllyvali'];
+                $reklahyllytaso = $_row_paikka['hyllytaso'];
+              }
+              else {
+                list($reklahyllyalue, $reklahyllynro, $reklahyllyvali, $reklahyllytaso) = explode("###", $varastorekla[$apui]);
+              }
             }
             elseif (trim($vertaus_hylly[$apui]) == trim($varastorekla[$apui]) and $reklahyllyalue[$apui] != '') {
               // Ollaan syötetty varastopaikka käsin
@@ -3183,6 +3209,32 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
 
           if ($toim == 'VASTAANOTA_REKLAMAATIO') {
 
+            $_varow = hae_varasto($otsik_row['varasto']);
+
+            $vares = varaston_lapsivarastot(
+              $otsik_row['varasto'],
+              $row['tuoteno'],
+              $_varow['alkuhyllyalue'],
+              $_varow['alkuhyllynro'],
+              $_varow['loppuhyllyalue'],
+              $_varow['loppuhyllynro']
+            );
+
+            $s1_options = array();
+            $s2_options = array();
+            $s3_options = array();
+
+            while ($varow = mysql_fetch_assoc($vares)) {
+              $status = $varow['status'];
+              ${$status."_options"}[] = $varow;
+            }
+
+            $counts = array(
+              's1' => count($s1_options),
+              's2' => count($s2_options),
+              's3' => count($s3_options)
+            );
+
             if (!isset($reklahyllyalue[$row["tunnus"]])) $reklahyllyalue[$row["tunnus"]] = "";
             if (!isset($reklahyllynro[$row["tunnus"]]))  $reklahyllynro[$row["tunnus"]]  = "";
             if (!isset($reklahyllyvali[$row["tunnus"]])) $reklahyllyvali[$row["tunnus"]] = "";
@@ -3206,6 +3258,36 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
                 $sel = "SELECTED";
               }
               echo "<option value='$rivi[varastopaikka_rekla]' $sel>$rivi[varastopaikka]</option>";
+            }
+
+            if ($counts['s1'] > 0) {
+              echo "<optgroup label=", t("Kohdevaraston-paikat"), ">";
+              foreach ($s1_options as $tp) {
+                echo "<option value='", $tp['tunnus'], "'>";
+                echo $tp['hyllyalue'], ' ', $tp['hyllynro'], ' ', $tp['hyllyvali'], ' ', $tp['hyllytaso'];
+                echo "</option>";
+              }
+              echo "</optgroup>";
+            }
+
+            if ($counts['s2'] > 0) {
+              echo "<optgroup label=", t("Lapsivarastojen-paikat"), ">";
+              foreach ($s2_options as $tp) {
+                echo "<option value='", $tp['tunnus'], "'>";
+                echo $tp['hyllyalue'], ' ', $tp['hyllynro'], ' ', $tp['hyllyvali'], ' ', $tp['hyllytaso'];
+                echo "</option>";
+              }
+              echo "</optgroup>";
+            }
+
+            if ($counts['s3'] > 0) {
+              echo "<optgroup label=", t("Paikattomat-lapsivarastot"), ">";
+              foreach ($s3_options as $va) {
+                echo "<option value='V", $va['tunnus'], "'>";
+                echo $va['nimitys'];
+                echo "</option>";
+              }
+              echo "</optgroup>";
             }
 
             echo "</select><br />";

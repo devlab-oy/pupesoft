@@ -30445,6 +30445,81 @@ if (!function_exists('hae_lahete_printteri')) {
   }
 }
 
+if (!function_exists('varaston_lapsivarastot')) {
+  function varaston_lapsivarastot($varasto, $tuoteno, $alkuhyllyalue, $alkuhyllynro, $loppuhyllyalue, $loppuhyllynro) {
+    global $kukarow, $yhtiorow;
+
+    // katsotaan onko vastaanottavalla varastolla lapsivarastoja
+    $lv_query =  "SELECT *
+                  FROM varastopaikat
+                  WHERE yhtio     = '{$kukarow['yhtio']}'
+                  AND isa_varasto = '{$varasto}'";
+    $lv_res = pupe_query($lv_query);
+
+    if (mysql_num_rows($lv_res) > 0) {
+
+      // katsotaan onko tuotepaikallisia lapsivarastoja
+      $tlv_query = "SELECT GROUP_CONCAT(DISTINCT vp.tunnus)
+                    FROM tuotepaikat AS tp
+                    JOIN varastopaikat AS vp ON vp.yhtio = tp.yhtio AND vp.tunnus = tp.varasto
+                    WHERE tp.yhtio     = '{$kukarow['yhtio']}'
+                    AND vp.isa_varasto = '{$varasto}'
+                    AND tp.tuoteno     = '{$tuoteno}'
+                    GROUP BY tp.yhtio";
+      $tlv_res = pupe_query($tlv_query);
+
+      if (mysql_num_rows($tlv_res) < 1) {
+
+        $tlvlisa = '';
+
+        $lvlisa = " UNION
+                    SELECT tunnus, 'x','x','x','x', 's3' AS status, nimitys
+                    FROM varastopaikat
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND isa_varasto = '{$varasto}'";
+      }
+      else {
+
+        $tlv_lista = mysql_result($tlv_res, 0);
+
+        $tlvlisa="UNION
+                  SELECT tp.tunnus,
+                  tp.hyllyalue,
+                  tp.hyllynro,
+                  tp.hyllyvali,
+                  tp.hyllytaso,
+                  's2' AS status,
+                  'x' AS nimitys
+                  FROM tuotepaikat AS tp
+                  JOIN varastopaikat AS vp ON vp.yhtio = tp.yhtio AND vp.tunnus = tp.varasto
+                  WHERE tp.yhtio = '{$kukarow['yhtio']}'
+                  AND vp.isa_varasto = '{$varasto}'
+                  AND tp.tuoteno = '{$tuoteno}'";
+
+        $lvlisa= "UNION
+                  SELECT tunnus, 'x','x','x','x', 's3' AS status, vp.nimitys
+                  FROM varastopaikat AS vp
+                  WHERE vp.yhtio = '{$kukarow['yhtio']}'
+                  AND vp.isa_varasto = '{$varasto}'
+                  AND vp.tunnus NOT IN ({$tlv_lista})";
+      }
+    }
+    else {
+      $lvlisa = $tlvlisa = '';
+    }
+
+    $query = "SELECT tunnus, hyllyalue, hyllynro, hyllyvali, hyllytaso, 's1' AS status, 'x' AS nimitys
+              FROM tuotepaikat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tuoteno = '{$tuoteno}'
+              and concat(rpad(upper('{$alkuhyllyalue}'),  5, '0'),lpad(upper('{$alkuhyllynro}'),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+              and concat(rpad(upper('{$loppuhyllyalue}'), 5, '0'),lpad(upper('{$loppuhyllynro}'), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
+              $lvlisa
+              $tlvlisa";
+    return pupe_query($query);
+  }
+}
+
 if (!function_exists("hae_viimeiset_hyvaksyjat")) {
   function hae_viimeiset_hyvaksyjat($laskurow) {
     $hyvaksyja_kentat = array();

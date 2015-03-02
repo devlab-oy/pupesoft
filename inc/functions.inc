@@ -19421,7 +19421,8 @@ if (!function_exists("pupesoft_tulosta_lahete")) {
               {$jtsort_lisa}
               if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
               if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
-              tuote.sarjanumeroseuranta
+              tuote.sarjanumeroseuranta,
+              trim(eankoodi) eankoodi
               FROM tilausrivi
               $koontijoin
               JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
@@ -30377,7 +30378,7 @@ if (!function_exists("tiliointi_tarkistus")) {
 }
 
 if (!function_exists('hae_lahete_printteri')) {
-  function hae_lahete_printteri($varasto = 0, $toimipaikka = 0, $tilaus = 0, $valittu_tulostin = '') {
+  function hae_lahete_printteri($varasto = 0, $toimipaikka = 0, $tilaus = 0, $valittu_tulostin = '', $printterinro = 1) {
 
     global $kukarow, $yhtiorow;
 
@@ -30403,7 +30404,7 @@ if (!function_exists('hae_lahete_printteri')) {
     if (mysql_num_rows($prires) > 0) {
       $prirow = mysql_fetch_assoc($prires);
 
-      $apuprintteri = $prirow['printteri1']; // läheteprintteri
+      $apuprintteri = $prirow["printteri{$printterinro}"]; // läheteprintteri tai haluttu printteri
 
       require "varaston_tulostusalue.inc";
 
@@ -30415,7 +30416,7 @@ if (!function_exists('hae_lahete_printteri')) {
       if (!empty($toimipaikka)) {
         $avainsana_where = " and avainsana.selite       = '{$varasto}'
                              and avainsana.selitetark   = '{$toimipaikka}'
-                             and avainsana.selitetark_2 = 'printteri1'";
+                             and avainsana.selitetark_2 = 'printteri{$printterinro}'";
 
         $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
 

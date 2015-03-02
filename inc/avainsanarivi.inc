@@ -164,6 +164,7 @@ if (mysql_field_name($result, $i) == "laji") {
   if ($lukitse_laji== "") $ulos .= "<optgroup label='".t("Tuotteiden avainsanat")."'>";
   if ($lukitse_laji== "" or $lukitse_laji == "Y")         $ulos .= "<option value='Y' $avain_sel[Y]>                  ".t("Yksikko")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TRY")         $ulos .= "<option value='TRY' $avain_sel[TRY]>                ".t("Tuoteryhmä")."</option>";
+  if ($lukitse_laji== "" or $lukitse_laji == "THR")         $ulos .= "<option value='THR' $avain_sel[THR]>                ".t("Tuotehinnastoryhmä")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "OSASTO")       $ulos .= "<option value='OSASTO' $avain_sel[OSASTO]>            ".t("Tuoteosasto")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "TUOTEMERKKI")     $ulos .= "<option value='TUOTEMERKKI' $avain_sel[TUOTEMERKKI]>        ".t("Tuotemerkki")."</option>";
   if ($lukitse_laji== "" or $lukitse_laji == "MALLI")       $ulos .= "<option value='MALLI' $avain_sel[MALLI]>              ".t("Tuotemalli")."</option>";

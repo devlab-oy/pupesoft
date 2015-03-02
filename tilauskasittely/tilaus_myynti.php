@@ -9861,18 +9861,26 @@ if ($tee == '') {
         }
 
         if ($yhtiorow['lahetteen_tulostustapa'] == 'I' and in_array($toim, array("RIVISYOTTO", "PIKATILAUS", "REKLAMAATIO"))
-          and (($laskurow['tila'] == 'N' and $laskurow['alatila'] == '') or ($laskurow['tila'] == 'C' and $laskurow['alatila'] == ''))) {
+          and (($laskurow['tila'] == 'N' and $laskurow['alatila'] == '') or ($laskurow['tila'] == 'C' and $laskurow['alatila'] == '')
+          and ($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != ''))) {
           echo "<br />";
           echo "<br />";
           echo t("Tulosta lähete"),": ";
           echo "<input type='hidden' name='tulosta_lahete_chkbx[]' value='default' />";
           echo "<input type='checkbox' name='tulosta_lahete_chkbx[]' value='1' checked />";
-
+          
+          if ($toim == "REKLAMAATIO") {
+            $printterinro = 9;
+          }
+          else {
+            $printterinro = 1;
+          }
           $komento = hae_lahete_printteri(
             $laskurow['varasto'],
             $laskurow['yhtio_toimipaikka'],
             $laskurow['tunnus'],
-            ''
+            '',
+            $printterinro
           );
 
           echo "<input type='hidden' name='komento[Lähete]' value='{$komento}' />";

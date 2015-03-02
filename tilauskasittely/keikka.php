@@ -2,6 +2,14 @@
 
 $pupe_DataTables = 'keikka';
 
+if (isset($_REQUEST["komento"]) and in_array("PDF_RUUDULLE", $_REQUEST["komento"])) {
+  $_REQUEST["tee"] = $_POST["tee"] = $_GET["tee"] = "NAYTATILAUS";
+}
+
+if ((isset($_REQUEST["tee"]) and $_REQUEST["tee"] == 'NAYTATILAUS') or
+  (isset($_POST["tee"]) and $_POST["tee"] == 'NAYTATILAUS') or
+  (isset($_GET["tee"]) and $_GET["tee"] == 'NAYTATILAUS')) $nayta_pdf = 1; //Generoidaan .pdf-file
+
 if (isset($_POST["tee"])) {
   if ($_POST["tee"] == 'lataa_tiedosto') {
     $lataa_tiedosto = 1;
@@ -89,8 +97,10 @@ echo "<script type=\"text/javascript\" charset=\"utf-8\">
           });
 
           $('img.hae_saldo').live('click', function() {
-            var id = $(this).attr('id'),
-                varasto = $('#'+id+'_varasto').val();
+            var id = $(this).attr('id');
+            var varasto = $('#'+id+'_varasto').val(),
+                tuoteno = $('#'+id+'_tuoteno').val();
+
 
             if ($('.saldo_'+id).is(':visible')) {
               $('.saldo_'+id).hide();
@@ -98,7 +108,7 @@ echo "<script type=\"text/javascript\" charset=\"utf-8\">
             else {
               $.post('{$_SERVER['SCRIPT_NAME']}',
                 {   ajax_toiminto: 'hae_saldo_myytavissa',
-                    id: id,
+                    id: tuoteno,
                     varasto: varasto,
                     no_head: 'yes',
                     ohje: 'off' },

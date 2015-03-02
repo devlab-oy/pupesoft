@@ -74,8 +74,14 @@ fwrite($fp, $header);
 
 $korvaavatrajaus = "";
 
-// Otetaan mukaan vain viimeisen vuorokauden j‰lkeen muuttuneet
-if ($paiva_ajo) {
+// Haetaan aika jolloin t‰m‰ skripti on viimeksi ajettu
+$datetime_checkpoint = cron_aikaleima("RELEX_REPL_CRON");
+
+// Otetaan mukaan vain edellisen ajon j‰lkeen muuttuneet
+if ($paiva_ajo and $datetime_checkpoint != "") {
+  $korvaavatrajaus = " AND korvaavat.luontiaika > '$datetime_checkpoint' ";
+}
+elseif ($paiva_ajo) {
   $korvaavatrajaus = " AND korvaavat.luontiaika >= date_sub(now(), interval 24 HOUR) ";
 }
 
@@ -87,6 +93,9 @@ $query = "SELECT DISTINCT yhtio.maa, korvaavat.id
           WHERE tuote.yhtio = '$yhtio'
           {$tuoterajaus}";
 $res = pupe_query($query);
+
+// Tallennetaan aikaleima
+cron_aikaleima("RELEX_REPL_CRON", date('Y-m-d H:i:s'));
 
 // Kerrotaan montako rivi‰ k‰sitell‰‰n
 $rows = mysql_num_rows($res);

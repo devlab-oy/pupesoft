@@ -48,6 +48,22 @@ $yhtio = mysql_real_escape_string($argv[1]);
 $yhtiorow = hae_yhtion_parametrit($yhtio);
 $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
 
+$tuoteupdrajaus = "";
+$tuotetoimupdrajaus = "";
+
+// Haetaan aika jolloin tämä skripti on viimeksi ajettu
+$datetime_checkpoint = cron_aikaleima("RELEX_PROD_CRON");
+
+// Otetaan mukaan vain edellisen ajon jälkeen muuttuneet
+if ($paiva_ajo and $datetime_checkpoint != "") {
+  $tuoteupdrajaus = " AND (tuote.muutospvm > '$datetime_checkpoint' OR tuote.luontiaika > '$datetime_checkpoint')";
+  $tuotetoimupdrajaus = " AND (tuotteen_toimittajat.muutospvm > '$datetime_checkpoint' OR tuotteen_toimittajat.luontiaika > '$datetime_checkpoint')";
+}
+elseif ($paiva_ajo) {
+  $tuoteupdrajaus = " AND (tuote.muutospvm  >= date_sub(now(), interval 24 HOUR) OR tuote.luontiaika >= date_sub(now(), interval 24 HOUR))";
+  $tuotetoimupdrajaus = " AND (tuotteen_toimittajat.muutospvm  >= date_sub(now(), interval 24 HOUR) OR tuotteen_toimittajat.luontiaika >= date_sub(now(), interval 24 HOUR))";
+}
+
 $tuoterajaus = rakenna_relex_tuote_parametrit();
 
 // Jos relex tuoterajauksia tehdään "update-kentillä",
@@ -168,9 +184,8 @@ if ($_tuoterajaus) {
             FROM tuote
             JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
             WHERE tuote.yhtio     = '{$yhtio}'
-            $_tuoterajaus
-            AND (tuote.muutospvm  >= date_sub(now(), interval 24 HOUR)
-              OR tuote.luontiaika >= date_sub(now(), interval 24 HOUR))";
+            {$_tuoterajaus}
+            {$tuoteupdrajaus}";
   $res = pupe_query($query);
 
   $k_rivi = 0;
@@ -230,8 +245,7 @@ if ($paiva_ajo) {
             FROM tuote
             WHERE tuote.yhtio     = '{$yhtio}'
             {$tuoterajaus}
-            AND (tuote.muutospvm  >= date_sub(now(), interval 24 HOUR)
-              OR tuote.luontiaika >= date_sub(now(), interval 24 HOUR))";
+            {$tuoteupdrajaus}";
   $res = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($res)) {
@@ -242,8 +256,7 @@ if ($paiva_ajo) {
             FROM tuotteen_toimittajat
             WHERE tuotteen_toimittajat.yhtio    = '{$yhtio}'
             AND tuotteen_toimittajat.tuoteno    not in ($tuotelista)
-            AND (tuotteen_toimittajat.muutospvm >= date_sub(now(), interval 24 HOUR)
-             OR tuotteen_toimittajat.luontiaika >= date_sub(now(), interval 24 HOUR))";
+            {$tuotetoimupdrajaus}";
   $res = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($res)) {
@@ -252,6 +265,9 @@ if ($paiva_ajo) {
 
   $tuotteet = " AND tuote.tuoteno IN ({$tuotelista}) ";
 }
+
+// Tallennetaan aikaleima
+cron_aikaleima("RELEX_PROD_CRON", date('Y-m-d H:i:s'));
 
 // Otsikkotieto
 $header  = "code;";
@@ -291,6 +307,12 @@ $header .= "tuotemassa;";
 $header .= "tilavuus;";
 $header .= "ostajanro;";
 $header .= "tuotepaallikko;";
+$header .= "tullinimike;";
+$header .= "tullinimikelisa;";
+$header .= "tullikohtelukoodi;";
+$header .= "vakadrkoodi;";
+$header .= "vakmaara;";
+$header .= "leimahduspiste;";
 $header .= "tuotetunnus;";
 $header .= "rekisteriosumat;";
 $header .= "elinkaari;";
@@ -303,6 +325,7 @@ $header .= "lavakoko;";
 $header .= "purchase_price;";
 $header .= "alennus;";
 $header .= "valuutta;";
+$header .= "kuluprosentti;";
 $header .= "suppliers_unit;";
 $header .= "tuotekerroin;";
 $header .= "jarjestys;";
@@ -329,6 +352,7 @@ $header .= "lavakoko;";
 $header .= "purchase_price;";
 $header .= "alennus;";
 $header .= "valuutta;";
+$header .= "kuluprosentti;";
 $header .= "suppliers_unit;";
 $header .= "tuotekerroin;";
 $header .= "jarjestys;";
@@ -374,6 +398,12 @@ $query = "SELECT
           round(tuote.tuotekorkeus * tuote.tuoteleveys * tuote.tuotesyvyys, 5) tilavuus,
           tuote.ostajanro,
           tuote.tuotepaallikko,
+          tuote.tullinimike1,
+          tuote.tullinimike2,
+          tuote.tullikohtelu,
+          tuote.vakkoodi,
+          tuote.vakmaara,
+          tuote.leimahduspiste,
           tuote.tunnus
           FROM tuote
           JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
@@ -429,6 +459,28 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi .= "{$row['tilavuus']};";
   $rivi .= "{$row['ostajanro']};";
   $rivi .= "{$row['tuotepaallikko']};";
+  $rivi .= "{$row['tullinimike1']};";
+  $rivi .= "{$row['tullinimike2']};";
+  $rivi .= "{$row['tullikohtelu']};";
+  
+  if (empty($row['vakkoodi'])) {
+    $vak_row['yk_nro'] = '';
+  }
+  elseif ($yhtiorow['vak_kasittely'] == 'P') {
+    $query = "SELECT yk_nro
+              FROM vak
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = {$row['vakkoodi']}";
+    $vak_res = pupe_query($query);
+    $vak_row = mysql_fetch_assoc($vak_res);
+  }
+  else {
+    $vak_row['yk_nro'] = $row['vakkoodi'];
+  }
+
+  $rivi .= "{$vak_row['yk_nro']};";
+  $rivi .= "{$row['vakmaara']};";
+  $rivi .= "{$row['leimahduspiste']};";
   $rivi .= "{$row['tunnus']};";
 
   if ($tecd) {
@@ -469,6 +521,7 @@ while ($row = mysql_fetch_assoc($res)) {
           if(tuotteen_toimittajat.pakkauskoko = 0, '', tuotteen_toimittajat.pakkauskoko) pakkauskoko,
           tuotteen_toimittajat.ostohinta,
           tuotteen_toimittajat.alennus,
+          toimi.oletus_kulupros,
           toimi.oletus_valkoodi valuutta,
           tuotteen_toimittajat.toim_yksikko,
           if(tuotteen_toimittajat.tuotekerroin = 0, 1, tuotteen_toimittajat.tuotekerroin) tuotekerroin,
@@ -495,6 +548,7 @@ while ($row = mysql_fetch_assoc($res)) {
       'ostohinta_oletusvaluutta'        => '',
       'alennukset_oletusvaluutta_netto' => '',
       'valuutta'                        => '',
+      'kuluprosentti'                   => '',
       'toim_yksikko'                    => '',
       'tuotekerroin'                    => '',
       'jarjestys'                       => '',
@@ -636,6 +690,7 @@ while ($row = mysql_fetch_assoc($res)) {
       $trivi .= "{$ttrow['ostohinta_oletusvaluutta']};";
       $trivi .= "{$ttrow['alennukset_oletusvaluutta_netto']};";
       $trivi .= "{$yhtiorow["valkoodi"]};";
+      $trivi .= "{$ttrow["oletus_kulupros"]};";
       $trivi .= "{$ttrow['toim_yksikko']};";
       $trivi .= "{$ttrow['tuotekerroin']};";
       $trivi .= "{$ttrow['jarjestys']};";
@@ -671,6 +726,7 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi .= "{$parastoimittaja['ostohinta_oletusvaluutta']};";
   $rivi .= "{$parastoimittaja['alennukset_oletusvaluutta_netto']};";
   $rivi .= "{$parastoimittaja['valuutta']};";
+  $rivi .= "{$parastoimittaja['oletus_kulupros']};";
   $rivi .= "{$parastoimittaja['toim_yksikko']};";
   $rivi .= "{$parastoimittaja['tuotekerroin']};";
   $rivi .= "{$parastoimittaja['jarjestys']};";

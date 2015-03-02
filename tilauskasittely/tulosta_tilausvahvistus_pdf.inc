@@ -156,7 +156,9 @@ if (strpos($laskurow['tilausvahvistus'], 'Y') !== FALSE) {
             min(tilausrivi.tunnus) tunnus,
             sum(tilausrivi.tilkpl) tilkpl,
             sum(round(if (tuote.myymalahinta != 0, tuote.myymalahinta/if(tuote.myyntihinta_maara>0, tuote.myyntihinta_maara, 1), tilausrivi.hinta * if ('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1)),'$yhtiorow[hintapyoristys]')) ovhhinta,
-            sum(round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]')) rivihinta
+            sum(round(tilausrivi.hinta * (tilausrivi.varattu+tilausrivi.jt+tilausrivi.kpl) * {$query_ale_lisa},'$yhtiorow[hintapyoristys]')) rivihinta,
+            max(tuote.sarjanumeroseuranta) sarjanumeroseuranta,
+            max(trim(eankoodi)) eankoodi
             FROM tilausrivi
             JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
             JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus
@@ -179,7 +181,8 @@ else {
             {$jtsort_lisa}
             if (tuote.tuotetyyppi='K','2 Työt','1 Muut') tuotetyyppi,
             if (tuote.myyntihinta_maara=0, 1, tuote.myyntihinta_maara) myyntihinta_maara,
-            tuote.sarjanumeroseuranta
+            tuote.sarjanumeroseuranta,
+            trim(eankoodi) eankoodi
             FROM tilausrivi
             JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
             JOIN lasku ON tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus

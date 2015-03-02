@@ -586,6 +586,9 @@ if ($upd == 1) {
       $tehdas_saldo_chk = 0;
 
       for ($i=1; $i < mysql_num_fields($result); $i++) {
+        if (mysql_field_name($result, $i) == 'tuoteno') {
+          $tuoteno_temp = $t[$i];
+        }
         if (isset($t[$i]) or (isset($_FILES["liite_$i"]) and is_array($_FILES["liite_$i"]))) {
 
           if ($toim == 'tuotteen_toimittajat' and mysql_field_name($result, $i) == 'tehdas_saldo') $tehdas_saldo_chk = $t[$i];
@@ -621,6 +624,69 @@ if ($upd == 1) {
     }
 
     $result = pupe_query($query);
+
+    if ($yhtiorow['laite_huolto'] == 'X' and $toim == 'tuote') {
+      if (!empty($sammutin_tyyppi)) {
+        $query1 = " SELECT *
+                    FROM tuotteen_avainsanat
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tuoteno = '{$tuoteno_temp}'
+                    AND laji = 'sammutin_tyyppi'";
+        $result1 = pupe_query($query1);
+        if (mysql_num_rows($result1) == 0) {
+          $query1 = " INSERT INTO tuotteen_avainsanat
+                      SET yhtio = '{$kukarow['yhtio']}',
+                      tuoteno    = '{$tuoteno_temp}',
+                      kieli      = 'fi',
+                      laji       = 'sammutin_tyyppi',
+                      selite     = '{$sammutin_tyyppi}',
+                      laatija    = '{$kukarow['kuka']}',
+                      muuttaja   = '{$kukarow['kuka']}',
+                      luontiaika = NOW(),
+                      muutospvm  = NOW()";
+        }
+        else {
+          $query1 = " UPDATE tuotteen_avainsanat
+                      SET selite = '{$sammutin_tyyppi}',
+                      muuttaja = '{$kukarow['kuka']}',
+                      muutospvm = NOW()
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tuoteno = '{$tuoteno_temp}'";
+        }
+
+        pupe_query($query1);
+      }
+      if (!empty($sammutin_koko)) {
+        $query1 = " SELECT *
+                    FROM tuotteen_avainsanat
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tuoteno = '{$tuoteno_temp}'
+                    AND laji = 'sammutin_koko'";
+        $result1 = pupe_query($query);
+        if (mysql_num_rows($result1) == 0) {
+          $query1 = " INSERT INTO tuotteen_avainsanat
+                      SET yhtio = '{$kukarow['yhtio']}',
+                      tuoteno    = '{$tuoteno_temp}',
+                      kieli      = 'fi',
+                      laji       = 'sammutin_koko',
+                      selite     = '{$sammutin_koko}',
+                      laatija    = '{$kukarow['kuka']}',
+                      muuttaja   = '{$kukarow['kuka']}',
+                      luontiaika = NOW(),
+                      muutospvm  = NOW()";
+        }
+        else {
+          $query1 = " UPDATE tuotteen_avainsanat
+                      SET selite = '{$sammutin_koko}',
+                      muuttaja = '{$kukarow['kuka']}',
+                      muutospvm = NOW()
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tuoteno = '{$tuoteno_temp}'";
+        }
+
+        pupe_query($query1);
+      }
+    }
 
     if ($onko_tama_insert) {
       $tunnus = mysql_insert_id($GLOBALS["masterlink"]);

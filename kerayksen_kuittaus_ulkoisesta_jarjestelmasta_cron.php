@@ -163,6 +163,15 @@ if ($handle = opendir($path)) {
                     WHERE yhtio = '{$kukarow['yhtio']}'
                     AND tunnus  = '{$laskurow['tunnus']}'";
           $upd_res = pupe_query($query);
+          
+          // Etuk‰teen maksetut tilaukset pit‰‰ muuttaa takaisin "maksettu"-tilaan
+          $query = "UPDATE lasku SET
+                    alatila      = 'X'
+                    WHERE yhtio  = '$kukarow[yhtio]'
+                    AND tunnus   = '$laskurow[tunnus]'
+                    AND mapvm   != '0000-00-00'
+                    AND chn      = '999'";
+          $yoimresult  = pupe_query($query);
 
           if (count($kerayspoikkeama) != 0) {
 

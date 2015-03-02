@@ -174,6 +174,12 @@ if [[ "${jatketaanko}" = "k" ]]; then
     fi
 
     ${mysql_komento} -e "INSERT INTO git_paivitykset SET hash='${NEW_HEAD}', ip='${USER_IP}', date=now()" &> /dev/null
+
+    # Informoidaan käyttäjiä päivityksestä
+    while read -r line
+    do
+      php pupesoft_changelog.php $line
+    done < <(${mysql_komento%\-\-verbose} --skip-column-names -B -e "SELECT yhtio FROM yhtion_parametrit where changelog_email != ''" 2> /dev/null)
   fi
 
   if [[ $? -eq 0 ]]; then

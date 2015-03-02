@@ -179,10 +179,10 @@ class Edi {
         $edi_order .= "OSTOTILRIV.OTR_TILATTUMAARA:$kpl\n";
 
         // Verottomat hinnat
+        $edi_order .= "OSTOTILRIV.OTR_VEROKANTA:$alvprosentti\n";
         $edi_order .= "OSTOTILRIV.OTR_RIVISUMMA:$rivihinta_veroton\n";
         $edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:$veroton_hinta\n";
-        $edi_order .= "OSTOTILRIV.OTR_ALENNUS:$alennusprosentti\n";
-        $edi_order .= "OSTOTILRIV.OTR_VEROKANTA:$alvprosentti\n";
+        $edi_order .= "OSTOTILRIV.OTR_ALENNUS:$alennusprosentti\n";        
 
         $edi_order .= "OSTOTILRIV.OTR_VIITE:\n";
         $edi_order .= "OSTOTILRIV.OTR_OSATOIMITUSKIELTO:\n";

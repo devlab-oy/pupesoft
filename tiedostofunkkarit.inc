@@ -75,7 +75,9 @@ function hae_tiedostot($params) {
   if ($valittu_toimittaja) {
     $query = "SELECT liitetiedostot.tunnus,
               liitetiedostot.kayttotarkoitus,
-              liitetiedostot.selite
+              liitetiedostot.selite,
+              tuotteen_toimittajat.tuoteno,
+              tuote.tunnus AS tuote_tunnus
               FROM tuotteen_toimittajat
               INNER JOIN tuote ON (tuote.yhtio = tuotteen_toimittajat.yhtio
                 AND tuotteen_toimittajat.tuoteno    = tuote.tuoteno)

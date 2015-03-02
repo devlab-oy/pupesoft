@@ -638,11 +638,10 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
   $joinlisa = "";
 
   // Reservipaikka ja keräysvyöhyke rajaus vain jos keräyserät parametri on asetettu.
-  $ehto = ($yhtiorow["varastopaikkojen_maarittely"] != '');
   $sub_ehto1 = (isset($reservipaikka) and $yhtiorow["kerayserat"] == 'K');
   $sub_ehto2 = (isset($keraysvyohyke) and $yhtiorow["kerayserat"] == 'K');
 
-  if ($ehto and ($sub_ehto1 or $sub_ehto2)) {
+  if ($sub_ehto1 or $sub_ehto2) {
     $ressulisa = $reservipaikka != '' ? "varaston_hyllypaikat.reservipaikka = '".mysql_real_escape_string($reservipaikka)."' AND " : "";
     $vyohykelisa = $keraysvyohyke != '' ? "varaston_hyllypaikat.keraysvyohyke = '".mysql_real_escape_string($keraysvyohyke)."' AND " : "";
 
@@ -659,8 +658,7 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
   if (empty($piilotaToim_tuoteno)) {
     $select .= ", group_concat(distinct tuotteen_toimittajat.toim_tuoteno) toim_tuoteno ";
   }
-
-  $_tuote_chk = (!empty($tryt) or !empty($osastot) or !empty($toimittaja) or !empty($tuotemerkki));
+  $_tuote_chk = (!empty($lisa) or !empty($toimittaja) or !empty($tuotemerkki));
   $_tuote_chk = ($_tuote_chk or (!empty($ahyllyalue) and !empty($lhyllyalue)) or (!empty($varasto)));
 
   if ($_tuote_chk) {
@@ -668,11 +666,8 @@ if ($tee == 'TULOSTA' and isset($tulosta)) {
     $where = "";
     $kutsujoinlisa = "";
 
-    if ($tryt != '' or $osastot != '') {
-      ///* Inventoidaan osaston tai tuoteryhmän perusteella *///
-      if ($osastot != "") $kutsu .= " ".t("Osasto").": $osastot ";
-      if ($tryt != "") $kutsu .= " ".t("Tuoteryhmä").": $tryt ";
-
+    ///* Inventoidaan monivalintalaatikon tietojen perusteella *//
+    if ($lisa != '') {
       $yhtiotaulu = "tuote";
       $from     = " FROM tuote use index (osasto_try_index) ";
       $join     = " JOIN tuotepaikat USE INDEX (tuote_index) ON tuotepaikat.yhtio = tuote.yhtio and tuotepaikat.tuoteno = tuote.tuoteno and tuotepaikat.inventointilista_aika = '0000-00-00 00:00:00' {$rajauslisa} {$invaamatta} {$extra} ";

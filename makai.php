@@ -266,7 +266,7 @@ if ($tee == "KIRJOITA") {
                   left(concat_ws(' ', postino, postitp),20) postitp,
                   summa, lasku.valkoodi, viite, viesti,
                   tilinumero, lasku.tunnus, sisviesti2,
-                  yriti.tilino ytilino, alatila, kasumma, laskunro
+                  yriti.tilino ytilino, alatila, kasumma, laskunro, tilaustyyppi
                   FROM lasku, yriti
                   WHERE lasku.yhtio  = '$kukarow[yhtio]'
                   and tila           = 'P'
@@ -319,7 +319,10 @@ if ($tee == "KIRJOITA") {
           //Sampo/Danske haluaa viestiin ainakin yhden merkin
           if (substr($laskurow['ytilino'], 0, 1) == '8' and strlen(trim($laskuviesti)) == 0) $laskuviesti = ';';
 
-          if (strlen($laskurow["viite"]) > 0) {
+          if (strlen($laskurow["viite"]) > 0 and $laskurow["tilaustyyppi"] == 'M') {  // Matkalaskun viesti
+            $laskuviesti = $laskurow["viite"];
+          }
+          elseif (strlen(trim($laskurow["viite"])) > 0) {   // Viitteellinen lasku
             $laskuviesti = sprintf('%020s', $laskurow["viite"]); //Etunollatäyttö
             $laskutyyppi = 1;
           }

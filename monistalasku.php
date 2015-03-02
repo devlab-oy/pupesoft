@@ -1666,15 +1666,29 @@ if ($tee == 'MONISTA') {
         $presult = pupe_query($pquery);
 
         if (mysql_num_rows($presult) == 0) {
-          // Jos paikkaa ei ole olemassa perustetaan sellainen varaston oletustietojen perusteella
-          $query = "SELECT alkuhyllyalue, alkuhyllynro
-                    FROM varastopaikat
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tunnus  = '{$rivirow['varasto']}'";
-          $oletus_tuotepaikka_res = pupe_query($query);
-          $oletus_tuotepaikka_row = mysql_fetch_assoc($oletus_tuotepaikka_res);
+          // Onko alkuperäisessä vcarastossa toinen/uusi paikka?
+          $pquery = "SELECT *
+                     FROM tuotepaikat
+                     WHERE yhtio = '{$monistarow['yhtio']}'
+                     AND tuoteno = '{$rivirow['tuoteno']}'
+                     AND varasto = '{$rivirow['varasto']}'
+                     LIMIT 1";
+          $presult = pupe_query($pquery);
 
-          $uusipaikka = lisaa_tuotepaikka($rivirow['tuoteno'], $oletus_tuotepaikka_row['alkuhyllyalue'], $oletus_tuotepaikka_row['alkuhyllynro'], 0, 0, "", "", 0, 0, 0);
+          if (mysql_num_rows($presult) == 1) {
+            $uusipaikka = mysql_fetch_assoc($presult);
+          }
+          else {
+            // Jos paikkaa ei ole olemassa perustetaan sellainen varaston oletustietojen perusteella
+            $query = "SELECT alkuhyllyalue, alkuhyllynro
+                      FROM varastopaikat
+                      WHERE yhtio = '{$kukarow['yhtio']}'
+                      AND tunnus  = '{$rivirow['varasto']}'";
+            $oletus_tuotepaikka_res = pupe_query($query);
+            $oletus_tuotepaikka_row = mysql_fetch_assoc($oletus_tuotepaikka_res);
+
+            $uusipaikka = lisaa_tuotepaikka($rivirow['tuoteno'], $oletus_tuotepaikka_row['alkuhyllyalue'], $oletus_tuotepaikka_row['alkuhyllynro'], 0, 0, "", "", 0, 0, 0);
+          }
 
           $rivirow["hyllyalue"] = $uusipaikka["hyllyalue"];
           $rivirow["hyllynro"]  = $uusipaikka["hyllynro"];

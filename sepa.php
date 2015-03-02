@@ -339,7 +339,10 @@ function sepa_credittransfer($laskurow, $popvm_nyt, $netotetut_rivit = '') {
     $Ustrd = $RmtInf->addChild('Ustrd', sprintf("%-1.140s", $reference_number_and_message));          // Unstructured (max 140 char)
   }
   else {
-    if (strlen(trim($laskurow["viite"])) > 0) {
+    if (strlen(trim($laskurow["viite"])) > 0 and $laskurow["tilaustyyppi"] == 'M') {             // Matkalaskuilla viite viestiksi sanomalle
+      $Ustrd = $RmtInf->addChild('Ustrd', sprintf("%-1.140s", $laskurow['viite']));          // Unstructured (max 140 char)
+    }
+    elseif (strlen(trim($laskurow["viite"])) > 0) {
       $Strd = $RmtInf->addChild('Strd', '');                              // Structured (Max 9 occurrences)
       // $RfrdDocInf = $Strd->addChild('RfrdDocInf', '');                      // ReferredDocumentInformation
       //   $RfrdDocTp = $RfrdDocInf->addChild('RfrdDocTp', '');

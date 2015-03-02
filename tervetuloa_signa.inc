@@ -92,26 +92,25 @@ function echo_myyntiseuranta_table() {
     echo "</td>";
     echo "</tr>";
 
-    echo "<tr>";
-    echo "<td>";
-    echo t("Kate").' '.piirra_aikavali($nykyinen_kvartaali);
-    echo "</td>";
-    echo "<td align='right'>";
-    echo sprintf('%.2f', $myynti_ja_kate_nykyinen_kvartaali['kate']) . " {$yhtiorow['valkoodi']}";
-    echo "</td>";
-    echo "</tr>";
+    $katteiden_summa = 0.0;
 
     foreach ($katteet_osastoittain as $osasto => $kate) {
+      $katteiden_summa += $kate;
       $kate = sprintf("%.2f", $kate) . " {$yhtiorow["valkoodi"]}";
 
       echo "<tr>";
-      echo "<td>";
-      echo "<label>{$osasto} " . t("kate") . " " . piirra_aikavali($nykyinen_kvartaali) .
-           "</label>";
-      echo "</td>";
+      echo "<td>{$osasto} " . t("kate") . " " . piirra_aikavali($nykyinen_kvartaali) . "</td>";
       echo "<td align='right'>{$kate}</td>";
       echo "</tr>";
     }
+
+    $katteiden_summa = sprintf("%.2f", $katteiden_summa) . " {$yhtiorow["valkoodi"]}";
+    $tyyli = "style='font-weight:bold'";
+
+    echo "<tr>";
+    echo "<td><strong {$tyyli}>" . t("Katteet") . " " . t("yhteensä") . "</strong></td>";
+    echo "<td align='right'><strong {$tyyli}>{$katteiden_summa}</strong></td>";
+    echo "</tr>";
 
     echo "<tr>";
     echo "<td>";
@@ -194,7 +193,14 @@ function hae_myyjan_katteet_osastoittain($aika, $kuka_tunnus) {
 
   $osastojen_nimet = hae_osastojen_nimet();
   $muuttujat = muistista("myymyyjat", "oletus", false);
-  $osastot = implode("','", $muuttujat["mul_osasto"]);
+
+  if ($muuttujat["mul_osasto"]) {
+    $osastot = implode("','", $muuttujat["mul_osasto"]);
+    $osasto_lisa = "AND tuote.osasto IN ('{$osastot}')";
+  }
+  else {
+    $osasto_lisa = "";
+  }
 
   $query = "SELECT tuote.osasto,
             sum(tilausrivi.kate) AS kate
@@ -209,7 +215,7 @@ function hae_myyjan_katteet_osastoittain($aika, $kuka_tunnus) {
             AND lasku.tapvm >= '{$aika["start_date"]}'
             AND lasku.tapvm <= '{$aika["end_date"]}'
             AND lasku.myyja = '{$kuka_tunnus}'
-            AND tuote.osasto IN ('{$osastot}')
+            {$osasto_lisa}
             GROUP BY tuote.osasto;";
 
   $result = pupe_query($query);

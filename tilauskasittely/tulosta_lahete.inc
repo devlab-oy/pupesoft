@@ -1531,7 +1531,10 @@ if (!function_exists('rivi_lahete')) {
 
             list($perhetuoteno, $perhekpl) = explode('¡!¡!', $perhetuote);
 
-            $query = "SELECT * FROM tuote WHERE yhtio = '{$kukarow['yhtio']}' AND tuoteno = '$perhetuoteno'";
+            $query = "SELECT * 
+                      FROM tuote 
+                      WHERE yhtio = '{$kukarow['yhtio']}' 
+                      AND tuoteno = '$perhetuoteno'";
             $lapsi_res = pupe_query($query);
             $lapsi_row = mysql_fetch_assoc($lapsi_res);
 
@@ -2124,24 +2127,15 @@ if (!function_exists('rivi_hinta_ale_lahete')) {
     $kala = $kala - $rivinkorkeus;
 
     if ($base_lahetetyyppi == 'tulosta_lahete_viivakoodi_ykshinta_normaali.inc') {
-
-      // tutkitaan onko tuotteelle eankoodi
-      $eanquery = "SELECT trim(eankoodi) eankoodi
-                   from tuote
-                   where yhtio = '$kukarow[yhtio]'
-                   and tuoteno = '$row[tuoteno]'";
-      $eanres = pupe_query($eanquery);
-      $eanrow = mysql_fetch_assoc($eanres);
-
       $alakala = $kala;
 
       // tarkista_ean13 on uusi, jos syötettävä EAN-koodi on viallinen, niin ei tehdä viivakoodi tulostusta PDF:lle
-      if ($eanrow["eankoodi"] != "" and $eanrow["eankoodi"] != "0" and strlen($eanrow["eankoodi"]) == "13" and is_numeric($eanrow["eankoodi"]) and tarkista_ean13($eanrow["eankoodi"]) !== FALSE) {
+      if ($row["eankoodi"] != "" and $row["eankoodi"] != "0" and strlen($row["eankoodi"]) == "13" and is_numeric($row["eankoodi"]) and tarkista_ean13($row["eankoodi"]) !== FALSE) {
         //viivakoodi
-        $data = viivakoodi($eanrow["eankoodi"], "ean", 100, 10, "");
+        $data = viivakoodi($row["eankoodi"], "ean", 100, 10, "");
         $image = $pdf->jfif_embed($data);
         $pdf->image_place($image, $kala-15, 410, $thispage, array("scale" => 0.5));
-        $pdf->draw_text(425, $kala-17, $eanrow["eankoodi"], $thispage, $pieni);
+        $pdf->draw_text(425, $kala-17, $row["eankoodi"], $thispage, $pieni);
 
         $alakala = $kala-17-$rivinkorkeus;
       }
@@ -2303,24 +2297,15 @@ if (!function_exists('rivi_hinta_ale_lahete_ean')) {
     }
 
     $kala = $kala - $rivinkorkeus;
-
-    // tutkitaan onko tuotteelle eankoodi
-    $eanquery = "SELECT trim(eankoodi) eankoodi
-                 from tuote
-                 where yhtio = '$kukarow[yhtio]'
-                 and tuoteno = '$row[tuoteno]'";
-    $eanres = pupe_query($eanquery);
-    $eanrow = mysql_fetch_assoc($eanres);
-
     $alakala = $kala;
 
     // tarkista_ean13 on uusi, jos syötettävä EAN-koodi on viallinen, niin ei tehdä viivakoodi tulostusta PDF:lle
-    if ($eanrow["eankoodi"] != "" and $eanrow["eankoodi"] != "0" and strlen($eanrow["eankoodi"]) == "13" and is_numeric($eanrow["eankoodi"]) and tarkista_ean13($eanrow["eankoodi"]) !== FALSE) {
+    if ($row["eankoodi"] != "" and $row["eankoodi"] != "0" and strlen($row["eankoodi"]) == "13" and is_numeric($row["eankoodi"]) and tarkista_ean13($row["eankoodi"]) !== FALSE) {
       //viivakoodi
-      $data = viivakoodi($eanrow["eankoodi"], "ean", 100, 10, "");
+      $data = viivakoodi($row["eankoodi"], "ean", 100, 10, "");
       $image = $pdf->jfif_embed($data);
       $pdf->image_place($image, $kala-15, 410, $thispage, array("scale" => 0.5));
-      $pdf->draw_text(425, $kala-17, $eanrow["eankoodi"], $thispage, $pieni);
+      $pdf->draw_text(425, $kala-17, $row["eankoodi"], $thispage, $pieni);
 
       $alakala = $kala-17-$rivinkorkeus;
     }
@@ -2440,24 +2425,15 @@ if (!function_exists('rivi_hinta_eiale_lahete_ean')) {
     }
 
     $kala = $kala - $rivinkorkeus;
-
-    // tutkitaan onko tuotteelle eankoodi
-    $eanquery = "SELECT trim(eankoodi) eankoodi
-                 from tuote
-                 where yhtio = '$kukarow[yhtio]'
-                 and tuoteno = '$row[tuoteno]'";
-    $eanres = pupe_query($eanquery);
-    $eanrow = mysql_fetch_assoc($eanres);
-
     $alakala = $kala;
 
     // tarkista_ean13 on uusi, jos syötettävä EAN-koodi on viallinen, niin ei tehdä viivakoodi tulostusta PDF:lle
-    if ($eanrow["eankoodi"] != "" and $eanrow["eankoodi"] != "0" and strlen($eanrow["eankoodi"]) == "13" and is_numeric($eanrow["eankoodi"]) and tarkista_ean13($eanrow["eankoodi"]) !== FALSE) {
+    if ($row["eankoodi"] != "" and $row["eankoodi"] != "0" and strlen($row["eankoodi"]) == "13" and is_numeric($row["eankoodi"]) and tarkista_ean13($row["eankoodi"]) !== FALSE) {
       //viivakoodi
-      $data = viivakoodi($eanrow["eankoodi"], "ean", 100, 10, "");
+      $data = viivakoodi($row["eankoodi"], "ean", 100, 10, "");
       $image = $pdf->jfif_embed($data);
       $pdf->image_place($image, $kala-15, 410, $thispage, array("scale" => 0.5));
-      $pdf->draw_text(425, $kala-17, $eanrow["eankoodi"], $thispage, $pieni);
+      $pdf->draw_text(425, $kala-17, $row["eankoodi"], $thispage, $pieni);
 
       $alakala = $kala-17-$rivinkorkeus;
     }
@@ -3236,23 +3212,14 @@ if (!function_exists('rivi_viivakoodi_lahete')) {
     }
 
     $kala = $pohja - $rivinkorkeus;
-
-    // tutkitaan onko tuotteelle eankoodi
-    $eanquery = "SELECT eankoodi
-                 from tuote
-                 where yhtio = '$kukarow[yhtio]'
-                 and tuoteno = '$row[tuoteno]'";
-    $eanres = pupe_query($eanquery);
-    $eanrow = mysql_fetch_assoc($eanres);
-
     $alakala = $kala;
 
-    if (trim($eanrow["eankoodi"]) != "" and trim($eanrow["eankoodi"]) != '0') {
+    if (trim($row["eankoodi"]) != "" and trim($row["eankoodi"]) != '0') {
       // viivakoodi
-      $data = viivakoodi($eanrow["eankoodi"], "code128", 100, 10, "");
+      $data = viivakoodi($row["eankoodi"], "ean", 100, 10, "");
       $image = $pdf->jfif_embed($data);
       $pdf->image_place($image, $kala-15, 410, $thispage, array("scale" => 0.5));
-      $pdf->draw_text(420, $kala-17, $eanrow["eankoodi"], $thispage, $pieni);
+      $pdf->draw_text(420, $kala-17, $row["eankoodi"], $thispage, $pieni);
       $alakala = $kala-17-$rivinkorkeus;
     }
 
@@ -3374,14 +3341,14 @@ if (!function_exists('rivi_asiakviivakoodi_lahete')) {
                  and ytunnus = '$laskurow[ytunnus]'
                  and tuoteno = '$row[tuoteno]'";
     $eanres = pupe_query($eanquery);
-    $eanrow = mysql_fetch_assoc($eanres);
+    $komrow = mysql_fetch_assoc($eanres);
 
-    if ($eanrow["kommentti"] != "") {
+    if ($komrow["kommentti"] != "") {
       //viivakoodi
-      $data = viivakoodi($eanrow["kommentti"], "code128", 100, 10, "");
+      $data = viivakoodi($komrow["kommentti"], "code128", 100, 10, "");
       $image = $pdf->jfif_embed($data);
       $pdf->image_place($image, $kala-13, 45, $thispage, array("scale" => 0.5));
-      $pdf->draw_text(55, $kala-15, $eanrow["kommentti"], $thispage, $pieni);
+      $pdf->draw_text(55, $kala-15, $komrow["kommentti"], $thispage, $pieni);
 
       //viivakoodi
       $data = viivakoodi(sprintf("%08.2f", $row['varattu_viivakoodi']), "code128", 100, 10, "");
@@ -3438,23 +3405,15 @@ if (!function_exists('rivi_viivakoodi_lahete_ean13')) {
     $oikpos = $pdf->strlen($row["varattu"], $norm);
     $pdf->draw_text(575-$oikpos, $kala, $row["varattu"],                   $thispage, $norm);
 
-    // tutkitaan onko tuotteelle eankoodi
-    $eanquery = "SELECT trim(eankoodi) eankoodi
-                 from tuote
-                 where yhtio = '$kukarow[yhtio]'
-                 and tuoteno = '$row[tuoteno]'";
-    $eanres = pupe_query($eanquery);
-    $eanrow = mysql_fetch_assoc($eanres);
-
     $alakala = $kala;
 
     // tarkista_ean13 on uusi, jos syötettävä EAN-koodi on viallinen, niin ei tehdä viivakoodi tulostusta PDF:lle
-    if ($eanrow["eankoodi"] != "" and $eanrow["eankoodi"] != "0" and strlen($eanrow["eankoodi"]) == "13" and is_numeric($eanrow["eankoodi"]) and tarkista_ean13($eanrow["eankoodi"]) !== FALSE) {
+    if ($row["eankoodi"] != "" and $row["eankoodi"] != "0" and strlen($row["eankoodi"]) == "13" and is_numeric($row["eankoodi"]) and tarkista_ean13($row["eankoodi"]) !== FALSE) {
       //viivakoodi
-      $data = viivakoodi($eanrow["eankoodi"], "ean", 100, 10, "");
+      $data = viivakoodi($row["eankoodi"], "ean", 100, 10, "");
       $image = $pdf->jfif_embed($data);
       $pdf->image_place($image, $kala-25, 410, $thispage, array("scale" => 0.5));
-      $pdf->draw_text(425, $kala-27, $eanrow["eankoodi"], $thispage, $pieni);
+      $pdf->draw_text(425, $kala-27, $row["eankoodi"], $thispage, $pieni);
 
       $alakala = $kala-27-$rivinkorkeus;
     }

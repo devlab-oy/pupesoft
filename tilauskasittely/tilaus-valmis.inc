@@ -174,7 +174,7 @@ while ($rekisterinumero_row = mysql_fetch_assoc($rekisterinumero_result)) {
   pupe_query($query);
 }
 
-if (!empty($ylivito) and in_array($yhtiorow['erapaivan_ylityksen_toimenpide'], array('J','L'))) {
+if ($ylivito > 0 and in_array($yhtiorow['erapaivan_ylityksen_toimenpide'], array('J','L'))) {
   $luottorajavirhe_ylivito_valmis = false;
 }
 elseif (!empty($luottorajavirhe) and in_array($yhtiorow['luottorajan_ylitys'], array('J','L'))) {

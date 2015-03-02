@@ -44,6 +44,13 @@ if (!isset($alvk) or $alvk == "") $alvk = date("m");
 if (substr($toim, -4) == '_OKP') {
   // käyttäjän osasto kertoo oletuskustannuspaikan
   $vainomakustp = TRUE;
+
+  if (empty($kukarow["osasto"])) {
+    echo "<br><br>".t("Käyttäjätiedoistasi puuttuu osasto")."!<br>";
+    require "inc/footer.inc";
+    exit;
+  }
+
   $mul_kustp    = array();
   $mul_kustp[]  = $kukarow["osasto"];
 }

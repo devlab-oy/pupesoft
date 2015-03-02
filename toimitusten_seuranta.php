@@ -483,8 +483,18 @@ if (isset($task) and $task == 'laheta_satamavahvistus') {
 
   $parametrit['matka_info']['lahtoaika'] = $koko_lahtoaika;
 
+  if ($korjaus != '') {
+
+    $qry = "SELECT filename
+            FROM liitetiedostot
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND selite = '{$konttiviite}'";
+    $res = pupe_query($qry);
+    $parametrit['sanomanumero'] = mysql_result($res, 0);
+  }
+
   if ($parametrit) {
-    $sanoma = laadi_edifact_sanoma($parametrit);
+    $sanoma = laadi_edifact_sanoma($parametrit, $korjaus);
   }
   else{
     echo 'virhe<br>';die;
@@ -534,6 +544,20 @@ if (isset($task) and $task == 'laheta_satamavahvistus') {
                   filesize        = '$filesize',
                   filetype        = 'text/plain',
                   kayttotarkoitus = 'satamavahvistus'";
+        pupe_query($query);
+      }
+      elseif ($korjaus) {
+
+        $tunnus = mysql_result($result, 0);
+
+        $query = "UPDATE liitetiedostot SET
+                  laatija         = '{$kukarow['kuka']}',
+                  luontiaika      = NOW(),
+                  data            = '{$liitedata}',
+                  filename        = '{$parametrit['sanomanumero']}',
+                  filesize        = '$filesize'
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus = '{$tunnus}'";
         pupe_query($query);
       }
 
@@ -698,7 +722,7 @@ if (isset($task) and ($task == 'anna_konttitiedot' or $task == 'korjaa_konttitie
   </form>";
 }
 
-if (isset($task) and ($task == 'tee_satamavahvistus' or $task == 'tee_lahtokuittaus')) {
+if (isset($task) and ($task == 'tee_satamavahvistus' or $task == 'tee_lahtokuittaus' or $task == 'korjaa_satamavahvistus')) {
 
   $lahtopvm_arvio = date("d.m.Y", strtotime($lahtopvm_arvio));
 
@@ -767,10 +791,18 @@ if (isset($task) and ($task == 'tee_satamavahvistus' or $task == 'tee_lahtokuitt
   }
   echo "</select>";
 
+  if ($task == 'korjaa_satamavahvistus') {
+    $korjaus = 'korjaus';
+  }
+  else{
+    $korjaus = '';
+  }
+
   echo "
   </td></tr>
   <tr><th></th><td align='right'><input type='submit' value='". t("Lähetä satamavahvistus") ."' /></td></tr>
   </table>
+  <input type='hidden' name='korjaus' value='$korjaus' />
   <input type='hidden' name='task' value='laheta_satamavahvistus' />
   </form>";
 }
@@ -926,7 +958,7 @@ if (isset($task) and $task == 'luo_laskutusraportti' and !isset($vahvista_muutos
   }
   else {
 
-    echo "<a href='toimitusten_seuranta.php?rajaus=toimitetut'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
+    echo "<a href='toimitusten_seuranta.php?rajaus=Toimitetut'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
     echo "<font class='head'>".t("Laskutusraportti luotu")."</font><hr><br>";
 
     $parametrit = laskutusraportti_parametrit($konttiviite);
@@ -945,9 +977,10 @@ if (isset($task) and $task == 'luo_laskutusraportti' and !isset($vahvista_muutos
     <input type='hidden' name='logo_url' value='{$logo_url}' />
     <input type='hidden' name='tee' value='XXX' />
     <table>
-    <tr><th>" . t("Asiakas") ."</th><td>Kotka Mills</td><td class='back'></td></tr>
-    <tr><th>" . t("Konttiviite") ."</th><td>{$konttiviite}</td><td class='back'></td></tr>
-    <tr><th>" . t("Tonnit") ."</th><td>{$tonnit}</td><td class='back'></td></tr>
+    <tr><th>" . t("Asiakas") ."</th><td align='right'>Kotka Mills</td><td class='back'></td></tr>
+    <tr><th>" . t("Konttiviite") ."</th><td align='right'>{$konttiviite}</td><td class='back'></td></tr>
+    <tr><th>" . t("Tonnit") ."</th><td align='right'>{$tonnit}</td><td class='back'></td></tr>
+    <tr><th>" . t("Kontit") ."</th><td align='right'>{$kontit}</td><td class='back'></td></tr>
     <tr><th>" . t("Raportti luotu") ."</th><td align='right'>";
 
     echo "<button onClick=\"js_openFormInNewWindow('nayta_laskutusraportti', 'Laskutusraportti'); return false;\" />";
@@ -1059,18 +1092,20 @@ if (isset($task) and $task == 'laadi_laskutusraportti') {
     $nimikenimet[] = $rivi['nimitys'];
   }
 
-  echo "<a href='toimitusten_seuranta.php?rajaus=toimitetut'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
+  echo "<a href='toimitusten_seuranta.php?rajaus=Toimitetut'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
   echo "<font class='head'>".t("Laadi laskutusraportti")."</font><hr><br>";
 
   echo "
   <form method='post' id='luo_laskutusraportti'>
   <input type='hidden' name='task' value='luo_laskutusraportti' />
   <input type='hidden' id='hidden_tonnit' name='tonnit' value='{$tonnit}' />
+  <input type='hidden' id='hidden_kontit' name='kontit' value='{$kontit}' />
   <input type='hidden' name='konttiviite' value='{$konttiviite}' />
   <table>
   <tr><th>" . t("Asiakas") ."</th><td align='right'>Kotka Mills</td><td class='back'></td></tr>
   <tr><th>" . t("Konttiviite") ."</th><td align='right'>{$konttiviite}</td><td class='back'></td></tr>
   <tr><th>" . t("Tonnit") ."</th><td align='right'>{$tonnit}</td><td class='back'></td></tr>
+  <tr><th>" . t("Kontit") ."</th><td align='right'>{$kontit}</td><td class='back'></td></tr>
   <tr><th style='text-align:center' colspan='2'>" . t("Myydyt nimikkeet") ."</th><td class='back'></td></tr>";
 
   foreach ($nimikkeet as $nimike) {
@@ -2219,6 +2254,16 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
             echo "<div style='text-align:center;margin:10px 0;'><button type='button' disabled>";
             echo t("Satamavahvistus lähetetty");
             echo "</button>";
+            echo "
+              <form method='post'>
+              <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />
+              <input type='hidden' name='matkakoodi' value='{$tilaus['matkakoodi']}' />
+              <input type='hidden' name='lahtopvm_arvio' value='{$tilaus['toimaika']}' />
+              <input type='hidden' name='task' value='korjaa_satamavahvistus' />
+              <input type='submit' value='". t("Korjaa") ."' />
+              </form>
+              </div>";
+
           }
           elseif ($kesken == 0 and $mrn_tullut) {
 
@@ -2296,6 +2341,7 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
               <div style='text-align:center'>
               <form method='post'>
               <input type='hidden' name='tonnit' value='{$tonnit}' />
+              <input type='hidden' name='kontit' value='" . count($kontit) . "' />
               <input type='hidden' name='task' value='laadi_laskutusraportti' />
               <input type='hidden' name='laadittu' value='{$laadittu}' />
               <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />

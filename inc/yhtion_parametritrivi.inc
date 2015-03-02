@@ -4426,6 +4426,24 @@ if ($fieldname == "inventointi_yhteenveto") {
   $jatko = 0;
 }
 
+if ($fieldname == "inventointi_siirron_yhteydessa") {
+  $sel = $trow[$i] == "K" ? "selected" : "";
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $ulos .= "<option value = ''>";
+  $ulos .= t("Ei inventoida ");
+  $ulos .= "</option>";
+
+  $ulos .= "<option value = 'K' {$sel}>";
+  $ulos .= t("Inventoidaan varastosiirron yhteydess‰ automaattisesti jos hylly ennest‰‰n tyhj‰");
+  $ulos .= "</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == 'takuuvarasto') {
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
 

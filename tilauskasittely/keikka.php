@@ -97,8 +97,10 @@ echo "<script type=\"text/javascript\" charset=\"utf-8\">
           });
 
           $('img.hae_saldo').live('click', function() {
-            var id = $(this).attr('id'),
-                varasto = $('#'+id+'_varasto').val();
+            var id = $(this).attr('id');
+            var varasto = $('#'+id+'_varasto').val(),
+                tuoteno = $('#'+id+'_tuoteno').val();
+
 
             if ($('.saldo_'+id).is(':visible')) {
               $('.saldo_'+id).hide();
@@ -106,7 +108,7 @@ echo "<script type=\"text/javascript\" charset=\"utf-8\">
             else {
               $.post('{$_SERVER['SCRIPT_NAME']}',
                 {   ajax_toiminto: 'hae_saldo_myytavissa',
-                    id: id,
+                    id: tuoteno,
                     varasto: varasto,
                     no_head: 'yes',
                     ohje: 'off' },

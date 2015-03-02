@@ -681,6 +681,16 @@ while ($tietue = fgets($fd)) {
       }
     }
 
+    if ($edi_tyyppi == "magento" and $verkkokauppa != '' 
+      and isset($verkkokauppa_erikoiskasittely) and count($verkkokauppa_erikoiskasittely) > 0) {
+      $e_parametrit = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+      // Jos erikoiskäsittelyyn on määritelty eri yhtiö tälle kaupalle niin päivitetään tiedot
+      if (isset($e_parametrit[4]) and !empty($e_parametrit[4])) {
+        $edi_ulos .= t("Käännetään tilaus yritykselle")." '{$e_parametrit[4]}' ";
+        hae_yhtiotiedot($e_parametrit[4]);
+      }
+    }
+    
     // Käytetään Magenton asiakasnumeroa jos sellainen löytyy ennalta määritellyistä kaupoista tulevilla tilauksilla
     // ja on setattu $verkkokauppa_erikoiskasittely:n
     if ($edi_tyyppi == "magento" and $ot_verkkokauppa_asiakasnro != ''
@@ -688,7 +698,8 @@ while ($tietue = fgets($fd)) {
       and count($verkkokauppa_erikoiskasittely) > 0) {
 
       $e_parametrit = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
-      if (count($e_parametrit) > 0) {
+      // Jos ollaan annettu viides parametri(vaihtoehtoinen ovt-tunnus) niin ei haluta tarkistaa tätä      
+      if (count($e_parametrit) > 0 and count($e_parametrit < 5)) {
         $tieto = $ot_verkkokauppa_asiakasnro;
 
         $verkkokauppamyyjanro = $e_parametrit[3];
@@ -1302,8 +1313,8 @@ while ($tietue = fgets($fd)) {
 
       if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
         and count($verkkokauppa_erikoiskasittely) > 0) {
-        list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa, $editilaus_myyja, 
-          $vaihtoehtoinen_ovt) = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+        list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa, $editilaus_myyja)
+         = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
         
         // Jos löytyy erikoiskäsittely niin näytetään se myös käyttöliittymässä
         if (isset($nimi) and !empty($nimi)) {
@@ -1311,11 +1322,6 @@ while ($tietue = fgets($fd)) {
               ".t("tilaustyyppi").": {$editilaus_tilaustyyppi},
               ".t("tilaustyyppilisä").": {$tilaustyyppilisa},
               ".t("myyjänumero").": {$editilaus_myyja} \n\n";
-        }
-        // Jos erikoskäsittelyyn on määritelty eri yhtiö tälle tilaukselle niin päivitetään tiedot
-        if (isset($vaihtoehtoinen_ovt) and !empty($vaihtoehtoinen_ovt)) {
-          $edi_ulos .= t("Käännetään tilaus yritykselle")." '$vaihtoehtoinen_ovt' ";
-          hae_yhtiotiedot($vaihtoehtoinen_ovt);
         }
       }
 

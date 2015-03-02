@@ -268,7 +268,7 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
     }
     elseif ($dpdtun != '' and $dpdss != '' and stripos($rakirrow["virallinen_selite"], "dpd") !== FALSE and stripos($rakirrow["rahtikirja"], "unifaun") !== FALSE) {
       foreach (explode("\n", $rakirrow['sscc_ulkoinen']) as $rakirno) {
-        $linkurl .= "<a target=newikkuna href='http://$dpdtun:$dpdss@tracking.dpd.de/cgi-bin/delistrack.acl?typ=4&pknr=$rakirno'>$rakirno</a><br>";
+        $linkurl .= "<a target=newikkuna href='https://$dpdtun:$dpdss@extranet.dpd.de/cgi-bin/delistrack?typ=2&lang=de&pknr=$rakirno'>$rakirno</a><br>";
       }
     }
     // postin rahtikirjat alkaa JJFI, ja tehd‰‰n niille linkki suoraan postin seurantaan

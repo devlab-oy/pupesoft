@@ -692,18 +692,24 @@ function laskutusraportti_parametrit($konttiviite) {
 
   $varastointihinta = $trow['myyntihinta'];
 
-  $query = "SELECT asiakkaan_tilausnumero
+  $query = "SELECT lasku.asiakkaan_tilausnumero,
+            tilausrivi.toimitettuaika
             FROM lasku
-            JOIN laskun_lisatiedot
-              ON laskun_lisatiedot.yhtio = lasku.yhtio
-              AND laskun_lisatiedot.otunnus = lasku.tunnus
+            JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = lasku.yhtio AND laskun_lisatiedot.otunnus = lasku.tunnus
+            JOIN tilausrivi ON tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND laskun_lisatiedot.konttiviite = '{$konttiviite}'";
+            AND laskun_lisatiedot.konttiviite = '{$konttiviite}'
+            GROUP BY lasku.tunnus";
   $result = pupe_query($query);
 
+  $viimeinen_sinetointi = '0000-00-00 00:00:00';
   $tilaukset = array();
   while ($rivi = mysql_fetch_assoc($result)) {
     $tilaukset[] = $rivi;
+
+    if ($rivi['toimitettuaika'] > $viimeinen_sinetointi) {
+      $viimeinen_sinetointi = $rivi['toimitettuaika'];
+    }
   }
 
   $query = "SELECT tilausrivi.*
@@ -730,7 +736,8 @@ function laskutusraportti_parametrit($konttiviite) {
     'rivit' => $rivit,
     'konttiviite' => $konttiviite,
     'varastointihinta' => $varastointihinta,
-    'tilaukset' => $tilaukset
+    'tilaukset' => $tilaukset,
+    'sinetointi' => $viimeinen_sinetointi
     );
 
   return $parametrit;
@@ -3378,6 +3385,10 @@ function laskutusraportti_pdf($pdf_data) {
   $y -= 15;
   $pdf->draw_text($x, $y, "Konttiviite:", $sivu, $bold);
   $pdf->draw_text($x+90, $y, "{$konttiviite}", $sivu, $bold);
+
+  $y -= 15;
+  $pdf->draw_text($x, $y, "Lastauspäivä:", $sivu, $bold);
+  $pdf->draw_text($x+90, $y, date("j.n.Y", strtotime($sinetointi)) , $sivu, $bold);
 
   $y -= 15;
 

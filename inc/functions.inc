@@ -30380,7 +30380,7 @@ if (!function_exists("tiliointi_tarkistus")) {
 }
 
 if (!function_exists('hae_lahete_printteri')) {
-  function hae_lahete_printteri($varasto = 0, $toimipaikka = 0, $tilaus = 0, $valittu_tulostin = '') {
+  function hae_lahete_printteri($varasto = 0, $toimipaikka = 0, $tilaus = 0, $valittu_tulostin = '', $printterinro = 1) {
 
     global $kukarow, $yhtiorow;
 
@@ -30406,7 +30406,7 @@ if (!function_exists('hae_lahete_printteri')) {
     if (mysql_num_rows($prires) > 0) {
       $prirow = mysql_fetch_assoc($prires);
 
-      $apuprintteri = $prirow['printteri1']; // läheteprintteri
+      $apuprintteri = $prirow["printteri{$printterinro}"]; // läheteprintteri tai haluttu printteri
 
       require "varaston_tulostusalue.inc";
 
@@ -30418,7 +30418,7 @@ if (!function_exists('hae_lahete_printteri')) {
       if (!empty($toimipaikka)) {
         $avainsana_where = " and avainsana.selite       = '{$varasto}'
                              and avainsana.selitetark   = '{$toimipaikka}'
-                             and avainsana.selitetark_2 = 'printteri1'";
+                             and avainsana.selitetark_2 = 'printteri{$printterinro}'";
 
         $tp_tulostin = t_avainsana("VARTOIMTULOSTIN", '', $avainsana_where, '', '', "selitetark_3");
 

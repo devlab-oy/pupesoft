@@ -108,7 +108,7 @@ function echo_myyntiseuranta_table() {
     $tyyli = "style='font-weight:bold'";
 
     echo "<tr>";
-    echo "<td><strong {$tyyli}>" . t("Katteet") . " " . t("yhteensä") . "</strong></td>";
+    echo "<td><strong {$tyyli}>" . t("Kate") . " " . t("yhteensä") . "</strong></td>";
     echo "<td align='right'><strong {$tyyli}>{$katteiden_summa}</strong></td>";
     echo "</tr>";
 

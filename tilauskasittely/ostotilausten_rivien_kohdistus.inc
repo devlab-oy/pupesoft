@@ -2034,9 +2034,12 @@ if ($tila == '') {
     $_src = "{$palvelin2}pics/lullacons/info.png";
     $_title = t("Näytä saldo");
 
-    echo "<img title='{$_title}' src='{$_src}' class='hae_saldo' id='{$rivirow['tuoteno']}' />";
-    echo "<input type='hidden' id='{$rivirow['tuoteno']}_varasto' value='{$rivirow['varasto']}' />";
-    echo "<span class='saldo_{$rivirow['tuoteno']}' style='display:none;'></span>";
+    $id = md5(uniqid());
+
+    echo "<img title='{$_title}' src='{$_src}' class='hae_saldo' id='{$id}' />";
+    echo "<input type='hidden' id='{$id}_tuoteno' value='{$rivirow['tuoteno']}' />";
+    echo "<input type='hidden' id='{$id}_varasto' value='{$rivirow['varasto']}' />";
+    echo "<span class='saldo_{$id}' style='display:none;'></span>";
 
     if ($rivirow["sarjanumeroseuranta"] != "") {
       if ($rivirow["siskpl"] < 0) {
@@ -2138,7 +2141,7 @@ if ($tila == '') {
 
       for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
         echo "<$td $class align='right'>";
-        echo "<input size='4' type='text' name='rivi_ale{$alepostfix}[$rivirow[rivitunnus]]' value='". (float) $rivirow["ale$alepostfix"]."' style='text-align:right'>";
+        echo "<input size='4' type='text' class='ale-kentta-{$rivirow["rivitunnus"]}' name='rivi_ale{$alepostfix}[$rivirow[rivitunnus]]' value='". (float) $rivirow["ale$alepostfix"]."' style='text-align:right'>";
 
         if ($alepostfix == $yhtiorow["oston_alekentat"]) {
           if ($laskurow['vienti']=='C' or $laskurow['vienti']=='J') {
@@ -2154,7 +2157,7 @@ if ($tila == '') {
 
     }
 
-    echo "<$td $class align='right'><input size='4' type='text' name='rivi_erikoisale[$rivirow[rivitunnus]]' value='". (float) $rivirow["erikoisale"]."' style='text-align:right'></$td>";
+    echo "<$td $class align='right'><input size='4' type='text' name='rivi_erikoisale[$rivirow[rivitunnus]]' class='ale-kentta-{$rivirow["rivitunnus"]}' value='". (float) $rivirow["erikoisale"]."' style='text-align:right'></$td>";
 
     echo "<$td $class align='right'>". (float) $rivirow["rivihinta"]."<br>". (float) $rivirow["alerivihinta"]."</$td>";
 
@@ -2189,6 +2192,7 @@ if ($tila == '') {
            var myyntihintaInput = $('input[name=\"{$myyntihinta_name}\"]');
            var hintaInput = $('input[name=\"{$hinta_name}\"]');
            var maaraInput = $('#maara_{$rivirow["rivitunnus"]}');
+           var aleInputit = $('.ale-kentta-{$rivirow["rivitunnus"]}');
            var alv = {$alvi};
            var tuotekerroin = {$ulkkpl};
            var siskpl = {$siskpl};
@@ -2205,7 +2209,15 @@ if ($tila == '') {
 
              myyntihinta = alv > 0 ? (myyntihinta / (1 + alv / 100)) : myyntihinta;
 
-             var hinta = hintaInput.val().replace(',','.');
+             var hinta = parseFloat(hintaInput.val().replace(',','.'));
+
+             for (var i = 0;i < aleInputit.length;i++) {
+               var ale = parseFloat($(aleInputit[i]).val());
+
+               if (ale > 0) {
+                 hinta = hinta - hinta * (ale / 100);
+               }
+             }
 
              if (tuotekerroin != maara) {
                hinta = tuotekerroin * hinta / maara;
@@ -2221,9 +2233,13 @@ if ($tila == '') {
              kateContainer.text(kate);
            };
 
-           myyntihintaInput.on('keyup', paivitaKate);
-           hintaInput.on('keyup', paivitaKate);
-           maaraInput.on('keyup', paivitaKate);
+           myyntihintaInput.on('input', paivitaKate);
+           hintaInput.on('input', paivitaKate);
+           maaraInput.on('input', paivitaKate);
+
+           for (var i = 0;i < aleInputit.length;i++) {
+             $(aleInputit[i]).on('input', paivitaKate);
+           }
 
            paivitaKate();
          });";

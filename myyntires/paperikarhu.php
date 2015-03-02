@@ -258,7 +258,7 @@ if (!function_exists("alku")) {
 
 if (!function_exists("rivi")) {
   function rivi($firstpage, $summa, $korko) {
-    global $firstpage, $pdf, $yhtiorow, $kukarow, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli, $karhukertanro;
+    global $firstpage, $pdf, $yhtiorow, $kukarow, $row, $kala, $sivu, $lask, $rectparam, $norm, $pieni, $lask, $kieli, $karhutunnus;
 
     // siirrytäänkö uudelle sivulle?
     if ($kala < 153) {
@@ -271,6 +271,33 @@ if (!function_exists("rivi")) {
     $row['korko'] = ($row['summa'] >= 0) ? $row['korko'] : 0.0;
 
     $pdf->draw_text(30,  $kala, $row["laskunro"]." / ".$row["viite"],  $firstpage, $norm);
+
+    if (!empty($karhutunnus)) {
+      $query = "SELECT count(distinct ktunnus) ktun
+                FROM karhu_lasku
+                JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.tyyppi = '')
+                WHERE ltunnus = {$row['tunnus']}
+                AND ktunnus  <= $karhutunnus";
+      $karhukertares = pupe_query($query);
+      $karhukertarow = mysql_fetch_assoc($karhukertares);
+
+      $karhukertanro = $karhukertarow["ktun"];
+
+      $query = "SELECT
+                max(karhukierros.pvm) as kpvm
+                FROM karhu_lasku
+                JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.tyyppi = '')
+                WHERE ltunnus = {$row['tunnus']}
+                AND ktunnus  < $karhutunnus";
+      $karhukertares = pupe_query($query);
+      $karhukertarow = mysql_fetch_assoc($karhukertares);
+
+      $karhuedpvm = $karhukertarow["kpvm"];
+    }
+    else {
+      $karhukertanro = $row["karhuttu"] + 1;
+      $karhuedpvm = $row["kpvm"];
+    }
 
     if ($yhtiorow['maksukehotus_kentat'] == 'J' or $yhtiorow['maksukehotus_kentat'] == 'L') {
 
@@ -289,7 +316,7 @@ if (!function_exists("rivi")) {
         $pdf->draw_text(460-$oikpos, $kala, $row["summa"],        $firstpage, $norm);
       }
       if ($yhtiorow["maksukehotus_kentat"] == "" or $yhtiorow["maksukehotus_kentat"] == "J") {
-        $pdf->draw_text(295, $kala, tv1dateconv($row["kpvm"]),       $firstpage, $norm);
+        $pdf->draw_text(295, $kala, tv1dateconv($karhuedpvm),       $firstpage, $norm);
         $oikpos = $pdf->strlen($karhukertanro, $norm);
         $pdf->draw_text(385-$oikpos, $kala, $karhukertanro,       $firstpage, $norm);
       }
@@ -316,19 +343,11 @@ if (!function_exists("rivi")) {
         $pdf->draw_text(500-$oikpos, $kala, $row["summa"]." ".$row["valkoodi"],        $firstpage, $norm);
       }
 
-      if ($karhukertanro == "") {
-        $karhukertanro = $row["karhuttu"] + 1;
-      }
-
       if ($yhtiorow["maksukehotus_kentat"] == "" or $yhtiorow["maksukehotus_kentat"] == "J") {
-        $pdf->draw_text(365, $kala, tv1dateconv($row["kpvm"]),   $firstpage, $norm);
+        $pdf->draw_text(365, $kala, tv1dateconv($karhuedpvm),   $firstpage, $norm);
         $oikpos = $pdf->strlen($karhukertanro, $norm);
         $pdf->draw_text(560-$oikpos, $kala, $karhukertanro,   $firstpage, $norm);
       }
-    }
-
-    if ($karhukertanro == "") {
-      $karhukertanro = $row["karhuttu"] + 1;
     }
 
     $kala = $kala - 13;
@@ -337,9 +356,11 @@ if (!function_exists("rivi")) {
 
     if ($row["valkoodi"] != $yhtiorow["valkoodi"]) {
       $summa += $row["summa_valuutassa"];
-    } else {
+    }
+    else {
       $summa += $row["summa"];
     }
+
     $korko += $row["korko"];
 
     $palautus = array(
@@ -543,22 +564,11 @@ else {
 
 if ($nayta_pdf == 1 and $karhutunnus != '') {
   $karhutunnus = mysql_real_escape_string($karhutunnus);
-  $kjoinlisa = " and kl.ktunnus = '$karhutunnus' ";
-
-  $query = "SELECT count(distinct ktunnus) ktun
-            FROM karhu_lasku
-            JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.tyyppi = '')
-            WHERE ltunnus in ($ltunnukset)
-            AND ktunnus   <= $karhutunnus";
-  $karhukertares = pupe_query($query);
-  $karhukertarow = mysql_fetch_assoc($karhukertares);
-
-  $karhukertanro = $karhukertarow["ktun"];
+  $kjoinlisa   = " and kl.ktunnus = '$karhutunnus' ";
   $ikalaskenta = " TO_DAYS(kk.pvm) - TO_DAYS(l.erpcm) as ika, ";
 }
 else {
-  $kjoinlisa = "";
-  $karhukertanro = "";
+  $kjoinlisa   = "";
   $ikalaskenta = " TO_DAYS(now()) - TO_DAYS(l.erpcm) as ika, ";
 }
 
@@ -582,7 +592,7 @@ $query = "SELECT l.tunnus,
           and l.yhtio    = '$kukarow[yhtio]'
           and l.tila     = 'U'
           GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
-          ORDER BY l.erpcm";
+          ORDER BY l.erpcm, l.laskunro";
 $result = pupe_query($query);
 
 //otetaan maksuehto- ja asiakastiedot ekalta laskulta
@@ -669,7 +679,7 @@ if (!isset($karhuviesti)) {
   $query = "SELECT count(*) kpl
             FROM karhu_lasku
             WHERE ltunnus IN ($ltunnukset)
-            GROUP BY ltunnus;";
+            GROUP BY ltunnus";
   $res = pupe_query($query);
   $r = 0;
 

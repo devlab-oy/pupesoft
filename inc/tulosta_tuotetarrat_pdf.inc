@@ -14,7 +14,12 @@ $norm["height"] = 8;
 $norm["font"] = "Helvetica";
 
 // tehdään pdf:n uusi sivu
-$firstpage = $pdf->new_page("a4");
+if ($malli != 'PDF') {
+  $firstpage = $pdf->new_page("a4");
+}
+else {
+  $firstpage = $pdf->new_page('4.9x3cm');
+}
 
 // A4 pointteina 595x842
 
@@ -25,6 +30,14 @@ if ($malli == 'PDF40') {
   $kappalemaara = 41;
   $mm_pt = 35;
   $y = 292;
+}
+elseif ($malli == 'PDF') {
+  $x = 1;
+  $riville = 1;
+  $leveys = 456;
+  $kappalemaara = 2;
+  $mm_pt = 48;
+  $y = 25;
 }
 else {
   $x = 15;

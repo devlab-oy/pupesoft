@@ -21,6 +21,8 @@ if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
 
 $psx_ohjelmat = array(
   "valuu" => "{$palvelin2}pupenext/currencies",
+  "tili" => "{$palvelin2}pupenext/accounts",
+  "taso" => "{$palvelin2}pupenext/sum_levels"
 );
 
 if (array_key_exists($toim, $psx_ohjelmat)) {
@@ -419,6 +421,7 @@ if ($upd == 1) {
                                      WHERE yhtio       = '$kukarow[yhtio]'
                                      and laji          = 'MYSQLALIAS'
                                      and selite        = '$toim.$al_nimi'
+                                     and selitetark_2  = '$alias_set'
                                      and selitetark_4 != ''";
           $oletus_tarkistus_result = pupe_query($oletus_tarkistus_query);
 
@@ -2258,8 +2261,6 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $toim == "keraysvyohyke" or
     $toim == "avainsana" or
     $toim == "pakkaus" or
-    $toim == "tili" or
-    $toim == "taso" or
     $toim == "asiakasalennus" or
     $toim == "asiakashinta" or
     $toim == "perusalennus" or

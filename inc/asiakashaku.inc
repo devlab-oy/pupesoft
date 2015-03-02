@@ -190,6 +190,7 @@ elseif ($ytunnus != '') {
                 WHERE asiakas.$konsyhtiot
                 and REPLACE(REPLACE(asiakas.ytunnus, '-', ''), '+', '') = '".str_replace(array('-', '+'), '', $ytunnus)."'
                 and asiakas.ytunnus!=''
+                $toimipaikkalisa
                 $lajilisa $asiakasrajaus)
                 UNION
                 (SELECT asiakas.*, yhtio.nimi yhtionimi, '1' osuma
@@ -198,6 +199,7 @@ elseif ($ytunnus != '') {
                 WHERE asiakas.$konsyhtiot
                 and asiakas.asiakasnro             = '$ytunnus'
                 and asiakas.asiakasnro             not in ('0','')
+                $toimipaikkalisa
                 $lajilisa $asiakasrajaus)
                 UNION
                 (SELECT asiakas.*, yhtio.nimi yhtionimi, '1' osuma
@@ -206,6 +208,7 @@ elseif ($ytunnus != '') {
                 WHERE asiakas.$konsyhtiot
                 and REPLACE(REPLACE(asiakas.ovttunnus, '-', ''), '+', '') = '".str_replace(array('-', '+'), '', $ytunnus)."'
                 and asiakas.ovttunnus!=''
+                $toimipaikkalisa
                 $lajilisa $asiakasrajaus)
                 UNION
                 (SELECT asiakas.*, yhtio.nimi yhtionimi, '1' osuma
@@ -214,6 +217,7 @@ elseif ($ytunnus != '') {
                 WHERE asiakas.$konsyhtiot
                 and asiakas.toim_ovttunnus         = '$ytunnus'
                 and asiakas.toim_ovttunnus!=''
+                $toimipaikkalisa
                 $lajilisa $asiakasrajaus)
                 UNION
                 (SELECT asiakas.*, yhtio.nimi yhtionimi, '5' osuma
@@ -223,6 +227,7 @@ elseif ($ytunnus != '') {
                 WHERE asiakas.$konsyhtiot
                 and asiakkaan_avainsanat.avainsana = '$ytunnus'
                 and asiakkaan_avainsanat.avainsana!=''
+                $toimipaikkalisa
                 $lajilisa $asiakasrajaus)
                 ORDER BY nimi";
     $result = pupe_query($query);

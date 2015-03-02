@@ -370,19 +370,16 @@ if ($tee != '') {
   else {
     $tiliointilisa = '';
   }
-  
-  // Rajataan AINA käyttäjän osaston kustannuspaikalla
-  $vainomakustp_lisa = "";
-
-  if (!empty($vainomakustp)) {    
-    $vainomakustp_lisa = " and tiliointi.kustp = '{$kukarow["osasto"]}' ";
-  }
 
   if ($rajaus == "" or !is_numeric($rajaus)) {
     $rajaus = 50;
   }
   else {
     $rajaus = round($rajaus);
+  }
+  
+  if (!empty($jarj)) {
+    $jarj .= ", tunnus";
   }
 
   $query = "SELECT DISTINCT lasku.tapvm, lasku.erpcm, concat_ws('<br>', lasku.nimi, lasku.nimitark) nimi,
@@ -393,7 +390,6 @@ if ($tee != '') {
             WHERE $ehto
             and lasku.yhtio = '$kukarow[yhtio]'
             $lisa
-            $vainomakustp_lisa
             ORDER BY $jarj
             LIMIT $alku, $rajaus";
   $result = pupe_query($query);

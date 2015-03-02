@@ -1653,18 +1653,16 @@ if ($tee == 'MONISTA') {
       }
 
       foreach ($_rivit as $rivirow) {
-        $paikkavaihtu = 0;
         $uusikpl = 0;
 
         $pquery = "SELECT tunnus
                    FROM tuotepaikat
                    WHERE yhtio   = '{$monistarow['yhtio']}'
                    AND tuoteno   = '{$rivirow['tuoteno']}'
-                   AND hyllyalue =  '{$rivirow['hyllyalue']}'
+                   AND hyllyalue = '{$rivirow['hyllyalue']}'
                    AND hyllynro  = '{$rivirow['hyllynro']}'
-                   AND hyllyvali =  '{$rivirow['hyllyvali']}'
-                   AND hyllytaso =  '{$rivirow['hyllytaso']}'
-                   LIMIT 1";
+                   AND hyllyvali = '{$rivirow['hyllyvali']}'
+                   AND hyllytaso = '{$rivirow['hyllytaso']}'";
         $presult = pupe_query($pquery);
 
         if (mysql_num_rows($presult) == 0) {
@@ -1676,36 +1674,12 @@ if ($tee == 'MONISTA') {
           $oletus_tuotepaikka_res = pupe_query($query);
           $oletus_tuotepaikka_row = mysql_fetch_assoc($oletus_tuotepaikka_res);
 
-          $oletus_tuotepaikka_row[0] = lisaa_tuotepaikka($rivirow['tuoteno'], $oletus_tuotepaikka_row['alkuhyllyalue'], $oletus_tuotepaikka_row['alkuhyllynro'], 0, 0, "", "", 0, 0, 0);
+          $uusipaikka = lisaa_tuotepaikka($rivirow['tuoteno'], $oletus_tuotepaikka_row['alkuhyllyalue'], $oletus_tuotepaikka_row['alkuhyllynro'], 0, 0, "", "", 0, 0, 0);
 
-          // Varmistetaan viel‰ ett‰ todella luotiin varastopaikka
-          $p2query = "SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso
-                      FROM tuotepaikat
-                      WHERE yhtio   = '{$monistarow['yhtio']}'
-                      AND tuoteno   = '{$rivirow['tuoteno']}'
-                      AND hyllyalue =  '{$oletus_tuotepaikka_row[0]['hyllyalue']}'
-                      AND hyllynro  = '{$oletus_tuotepaikka_row[0]['hyllynro']}'
-                      AND hyllyvali =  '{$oletus_tuotepaikka_row[0]['hyllyvali']}'
-                      AND hyllytaso =  '{$oletus_tuotepaikka_row[0]['hyllytaso']}'
-                      LIMIT 1";
-          $p2result = pupe_query($p2query);
-
-          // Pidet‰‰n viel‰ supersafetyna t‰m‰, ett‰ jos ei onnistuta tuota varastopaikkaa
-          // perustamaan niin laitetaan se sitten tuonne oletuspaikalle
-          if (mysql_num_rows($p2result) == 0) {
-            $p2query = "SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso
-                        FROM tuotepaikat
-                        WHERE yhtio  = '{$monistarow['yhtio']}'
-                        AND tuoteno  = '{$rivirow['tuoteno']}'
-                        AND oletus  != ''
-                        LIMIT 1";
-            $p2result = pupe_query($p2query);
-          }
-
-          if (mysql_num_rows($p2result) == 1) {
-            $paikka2row = mysql_fetch_assoc($p2result);
-            $paikkavaihtu = 1;
-          }
+          $rivirow["hyllyalue"] = $uusipaikka["hyllyalue"];
+          $rivirow["hyllynro"]  = $uusipaikka["hyllynro"];
+          $rivirow["hyllyvali"] = $uusipaikka["hyllyvali"];
+          $rivirow["hyllytaso"] = $uusipaikka["hyllytaso"];
         }
 
         $rfields = "yhtio";
@@ -1788,38 +1762,6 @@ if ($tee == 'MONISTA') {
             }
             else {
               $rvalues .= ", '".($rivirow["kpl"] + $rivirow["jt"] + $rivirow["varattu"])."'";
-            }
-            break;
-          case 'hyllyalue':
-            if ($paikkavaihtu == 1) {
-              $rvalues .= ", '{$paikka2row['hyllyalue']}'";
-            }
-            else {
-              $rvalues .= ", '{$rivirow['hyllyalue']}'";
-            }
-            break;
-          case 'hyllynro':
-            if ($paikkavaihtu == 1) {
-              $rvalues .= ", '{$paikka2row['hyllynro']}'";
-            }
-            else {
-              $rvalues .= ", '{$rivirow['hyllynro']}'";
-            }
-            break;
-          case 'hyllyvali':
-            if ($paikkavaihtu == 1) {
-              $rvalues .= ", '{$paikka2row['hyllyvali']}'";
-            }
-            else {
-              $rvalues .= ", '{$rivirow['hyllyvali']}'";
-            }
-            break;
-          case 'hyllytaso':
-            if ($paikkavaihtu == 1) {
-              $rvalues .= ", '{$paikka2row['hyllytaso']}'";
-            }
-            else {
-              $rvalues .= ", '{$rivirow['hyllytaso']}'";
             }
             break;
           case 'alv':

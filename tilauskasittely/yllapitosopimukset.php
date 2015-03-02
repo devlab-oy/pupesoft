@@ -183,6 +183,14 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
                  and tila    = '0'";
       $result = pupe_query($query);
 
+      if ($soprow["yllapito_kuukausihinnoittelu"] == "Y") {
+        $laskutuskausilisa = ", sisviesti1 = concat_ws(', ', if(length(viesti), viesti, NULL),'" .
+                             t("Laskutuskausi") . " {$to[0]}')";
+      }
+      else {
+        $laskutuskausilisa = "";
+      }
+
       // päivitetään tila myyntitilaus valmis, suoraan laskutukseen (clearing on sopimus ja swift kentässä on mikä soppari on kopsattu)
       // Samalla pävitetään laskulle viesti, joista käy ilmi laskutuskausi
       $query  = "UPDATE lasku
@@ -191,10 +199,8 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
                  eilahetetta  = 'o',
                  clearing     = 'sopimus',
                  swift        = '$tilausnumero',
-                 tilaustyyppi = '',
-                 sisviesti1   = concat_ws(', ',
-                                          if(length(viesti), viesti, NULL),
-                                          '" . t("Laskutuskausi") . " {$to[0]}')
+                 tilaustyyppi = ''
+                 {$laskutuskausilisa}
                  WHERE yhtio  = '$kukarow[yhtio]'
                  and tunnus   = '$ok'
                  and tila     = '0'";

@@ -2227,11 +2227,11 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                 }
               }
 
-              $rivitunnus = 0;              
+              $rivitunnus = 0;
               $tuotenimitys_force = "";
               $omalle_tilaukselle = "";
               $ale_peruste = "";
-              
+
               if ($toimittamatta == 0) {
                 $kommentti = "";
                 $tuotenimitys = "";
@@ -2495,7 +2495,8 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $yhtiorow['tee_siirtolista_myyntitilaukselta'] == 'K' and
       $laskurow["tilaustyyppi"] != "U" and
       ($_tarjouksella or $_osto_myyntitilaukselta or $_extranetista) and
-      !in_array($var, array('V', 'H', 'P'))) {
+      !in_array($var, array('V', 'H', 'P'))
+      and $kpl > 0) {
 
       if (!empty($laskurow['varasto'])) {
         $kohde_varastot = array($laskurow['varasto']);

@@ -653,6 +653,7 @@ if ($laskurow["tila"] == 'O' or $laskurow["tila"] == 'K') {
             tilausrivi.tunnus,
             tilausrivi.uusiotunnus,
             tilausrivin_lisatiedot.hankintakulut,
+            tilausrivin_lisatiedot.korvamerkinta,
             $sorttauskentta
             FROM tilausrivi
             JOIN tuote USING (yhtio, tuoteno)
@@ -1470,7 +1471,22 @@ else {
       }
     }
 
-    echo "<td $classvar align='center' valign='top'>$row[var]&nbsp;</td>";
+    echo "<td $classvar align='center' valign='top'>";
+    echo $row['var'] . "&nbsp;";
+    if (!empty($row['korvamerkinta'])) {
+      if ($row['korvamerkinta'] == '.') {
+        $luokka = '';
+      }
+      else {
+        $luokka = 'tooltip';
+      }
+      echo "<img src='{$palvelin2}pics/lullacons/info.png' class='{$luokka}' id='{$row['tunnus']}_info'>";
+      echo "<div id='div_{$row['tunnus']}_info' class='popup'>";
+      echo $row['korvamerkinta'];
+      echo "</div>";
+    }
+    echo "&nbsp;</td>";
+
     echo "<td $class align='center' valign='top'>$row[netto]&nbsp;</td>";
 
     $kpl = $row["varattu"]+$row["jt"]+$row['kpl'];

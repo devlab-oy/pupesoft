@@ -1289,8 +1289,28 @@ if ($tee == 'P' or $tee == 'E') {
 
         </td><td class='back'>
 
-        <table>
-        <tr><th>".t("maa")."</th>    <td><input type='text' name='trow[maa]' maxlength='2'  size=4  value='$trow[maa]'></td></tr>
+        <table>";
+
+        $query = "SELECT DISTINCT koodi, nimi
+                  FROM maat
+                  WHERE nimi != ''
+                  ORDER BY koodi";
+        $vresult = pupe_query($query);
+
+        echo "<tr><th valign='top'> ".t("Maa").": </th>
+            <td><select name='trow[maa]' ".js_alasvetoMaxWidth("maa", 400).">";
+
+        while ($vrow = mysql_fetch_assoc($vresult)) {
+          $sel = "";
+          if (strtoupper($trow["maa"]) == strtoupper($vrow["koodi"])) {
+            $sel = "selected";
+          }
+          echo "<option value = '".strtoupper($vrow["koodi"])."' $sel>".t($vrow["nimi"])."</option>";
+        }
+
+        echo "</select></td></tr>";
+
+      echo "
         <tr><th>".t("IBAN")."</th>    <td><input type='text' name='trow[ultilno]'  maxlength='35' size=45 value='$trow[ultilno]'></td></tr>
         <tr><th>".t("SWIFT")."</th>    <td><input type='text' name='trow[swift]'    maxlength='11' size=45 value='$trow[swift]'></td></tr>
         <tr><th>".t("pankki1")."</th>  <td><input type='text' name='trow[pankki1]'  maxlength='35' size=45 value='$trow[pankki1]'></td></tr>
@@ -2017,10 +2037,6 @@ if ($tee == 'I') {
   }
 
   $toimipaikka = isset($toimipaikka) ? $toimipaikka : 0;
-
-  // Varmistetaan, että maakoodi on isoilla kirjaimilla
-  // koska muuten SEPA aineisto aiheuttaa ongelmia
-  $trow["maa"] = strtoupper($trow["maa"]);
 
   // Kirjoitetaan lasku
   $query = "INSERT into lasku set

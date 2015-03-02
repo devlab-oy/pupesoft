@@ -8133,14 +8133,16 @@ if (!function_exists("muistiin")) {
 }
 
 if (!function_exists("muistista")) {
-  function muistista($muisti, $nimi) {
+  function muistista($muisti, $nimi, $tarkista_kuka = true) {
     global $kukarow;
+
+    $kuka_lisa = $tarkista_kuka ? "AND kuka = '{$kukarow["kuka"]}'" : "";
 
     $query = "SELECT *
               FROM muisti
               WHERE yhtio = '$kukarow[yhtio]'
               and haku    = '$muisti'
-              and kuka    = '$kukarow[kuka]'
+              {$kuka_lisa}
               and nimi    = '$nimi'";
     $result = pupe_query($query);
 
@@ -30471,5 +30473,40 @@ if (!function_exists("hae_viimeiset_hyvaksyjat")) {
     }
 
     return array($viimeinen_hyvaksyja_time, $tokaviimeinen_hyvaksyja_time);
+  }
+}
+
+if (!function_exists("paata_kvartaali")) {
+  function paata_kvartaali() {
+    $tama_vuosi = date('Y');
+    $kvartaalit = array(
+      4 => array(
+        "start_date" => "$tama_vuosi-01-01",
+        "end_date"   => "$tama_vuosi-03-31"
+      ),
+      1 => array(
+        "start_date" => "$tama_vuosi-04-01",
+        "end_date"   => "$tama_vuosi-06-30"
+      ),
+      2 => array(
+        "start_date" => "$tama_vuosi-07-01",
+        "end_date"   => "$tama_vuosi-09-30"
+      ),
+      3 => array(
+        "start_date" => "$tama_vuosi-10-01",
+        "end_date"   => "$tama_vuosi-12-31"
+      ),
+    );
+
+    //tarkisteaan mikä kvartaali on menossa.
+    foreach ($kvartaalit as $kvartaali) {
+      $now = date('Y-m-d');
+      if ($now >= $kvartaali['start_date'] and $now <= $kvartaali['end_date']) {
+        $nykyinen_kvartaali = $kvartaali;
+        break;
+      }
+    }
+
+    return $nykyinen_kvartaali;
   }
 }

@@ -1,27 +1,53 @@
 <?php
 
-require "inc/parametrit.inc";
+// Kutsutaanko CLI:st‰
+$php_cli = (php_sapi_name() == 'cli');
+
+if ($php_cli) {
+  // otetaan tietokanta connect
+  require "inc/connect.inc";
+  require "inc/functions.inc";
+
+  if (!isset($argv[1]) or $argv[1] == '') {
+    echo "Anna yhtiˆ!!!\n";
+    die;
+  }
+
+  // Haetaan yhtiˆrow ja kukarow
+  $yhtiorow = hae_yhtion_parametrit($argv[1]);
+  $kukarow  = hae_kukarow('admin', $yhtiorow['yhtio']);
+
+  if (empty($yhtiorow['changelog_email'])) {
+    exit;
+  }
+
+  ob_start();
+}
+else {
+
+  require "inc/parametrit.inc";
+
+  echo "  <script type='text/javascript'>
+
+      $(function() {
+
+        $('.nayta_rivit').on('click', function() {
+          var id = $(this).attr('id');
+          var table = $('#table_'+id);
+
+          if (table.is(':visible')) {
+            table.hide();
+          }
+          else {
+            table.show();
+          }
+        });
+      });
+
+      </script>";
+}
 
 echo "<font class='head'>".t("Uudet ominaisuudet")."</font><hr><br>";
-
-echo "  <script type='text/javascript'>
-
-    $(function() {
-
-      $('.nayta_rivit').on('click', function() {
-        var id = $(this).attr('id');
-        var table = $('#table_'+id);
-
-        if (table.is(':visible')) {
-          table.hide();
-        }
-        else {
-          table.show();
-        }
-      });
-    });
-
-    </script>";
 
 // Haetaan pulkkareita githubista
 function github_api($url) {
@@ -55,8 +81,12 @@ $apirow = mysql_fetch_assoc($apires);
 
 $haetaanpulkkarit = TRUE;
 
-// Kutsutaan apia korkeintaan keran tunnissa
-if (!empty($apirow['haettu']) and strtotime($apirow['haettu']) > strtotime("1 hour ago")) {
+if (!$php_cli and !empty($apirow['haettu']) and strtotime($apirow['haettu']) > strtotime("1 hour ago")) {
+  // Kutsutaan apia korkeintaan kerran tunnissa
+  $haetaanpulkkarit = FALSE;
+}
+elseif ($php_cli and !empty($apirow['haettu']) and strtotime($apirow['haettu']) > strtotime("5 minute ago")) {
+  // Kutsutaan apia korkeintaan kerran 5 minuutissa kun vedet‰‰n narusta
   $haetaanpulkkarit = FALSE;
 }
 
@@ -158,17 +188,29 @@ if ($haetaanpulkkarit) {
   }
 }
 
-// Haetaan kymmenen uiusnta narustavetoa kannasta
+if ($php_cli) {
+  $display_h = "";
+  // Pit‰‰ hakea kaksi uusinta vetoa, jotta voidaan hakea niitten v‰liset muutokset logista
+  $limit = 2;
+  $muutoksiaoli = FALSE;
+}
+else {
+  $limit = 50;
+  $display_h = "display:none;";
+}
+
+// Haetaan uusimmat narustavedot kannasta
 $query  = "SELECT *
            FROM git_paivitykset
            WHERE hash != 'github_api_request'
            ORDER BY id DESC
-           LIMIT 50";
+           LIMIT $limit";
 $vetores = pupe_query($query);
 
 if (mysql_num_rows($vetores)) {
 
   $vedot = array();
+  $taveto_hash = "";
 
   while ($vetorow = mysql_fetch_assoc($vetores)) {
     $vedot[] = $vetorow;
@@ -180,7 +222,8 @@ if (mysql_num_rows($vetores)) {
   echo "<table style='width: 90%;'>";
 
   foreach ($vedot as $i => $veto) {
-    $taveto_hash = $veto["hash"];
+
+    if (!empty($veto["hash"])) $taveto_hash = $veto["hash"];
 
     if (isset($vedot[$i+1])) {
       $edveto_hash = $vedot[$i+1]["hash"];
@@ -201,7 +244,9 @@ if (mysql_num_rows($vetores)) {
         continue;
       }
 
-      echo "<tr><th><img style='float:left;' class='nayta_rivit' id='HEAD' src='{$palvelin2}pics/lullacons/switch.png' />".t("Tulossa olevat ominaisuudet").":</th></tr>";
+      echo "<tr><th>";
+      if (!$php_cli) echo "<img style='float:left;' class='nayta_rivit' id='HEAD' src='{$palvelin2}pics/lullacons/switch.png' /> ";
+      echo t("Tulossa olevat ominaisuudet").":</th></tr>";
       echo "<tr><td class='back' style='padding:0px;'><table id='table_HEAD'>";
 
       $pull_ids = $pulrow['idt'];
@@ -224,8 +269,10 @@ if (mysql_num_rows($vetores)) {
       // jos ei ollut yht‰‰n pulkkaria, niin skipataan koko rivi
       if ($pull_ids == "") continue;
 
-      echo "<tr><th><img style='float:left;' class='nayta_rivit' id='{$taveto_hash}' src='{$palvelin2}pics/lullacons/switch.png' />Pupesoft ".t("p‰ivitys").": ".tv1dateconv($veto["date"], "P")."</th></tr>";
-      echo "<tr><td class='back' style='padding:0px;'><table id='table_{$taveto_hash}' style='display:none;'>";
+      echo "<tr><th>";
+      if (!$php_cli) echo "<img style='float:left;' class='nayta_rivit' id='{$taveto_hash}' src='{$palvelin2}pics/lullacons/switch.png' />";
+      echo "Pupesoft-".t("p‰ivitys").": ".tv1dateconv($veto["date"], "P")."</th></tr>";
+      echo "<tr><td class='back' style='padding:0px;'><table id='table_{$taveto_hash}' style='$display_h'>";
     }
 
     if ($pull_ids != "") {
@@ -257,10 +304,10 @@ if (mysql_num_rows($vetores)) {
           $titlelisa = t("Pienkehitys");
         }
 
-        echo "<td class='$class'><font class='message'>$titlelisa</font>: <font class='$fclass'>$title</font></td>";
-        echo "<td class='$class'><a target='pulkkari' href='https://github.com/devlab-oy/pupesoft/pull/$pulrow[id]'>$pulrow[id]</a></td>";
+        echo "<td class='$class' style='width: 100%;'><font class='message'>$titlelisa</font>: <font class='$fclass'>$title</font></td>";
+        echo "<td class='$class' style='width: 100%;'><a target='pulkkari' href='https://github.com/devlab-oy/pupesoft/pull/$pulrow[id]'>$pulrow[id]</a></td>";
         echo "</tr>";
-        echo "<tr><td colspan='3'><pre style='white-space: pre-wrap;'>$body</pre>";
+        echo "<tr><td colspan='3' style='width: 100%;'><pre style='white-space: pre-wrap;'>$body</pre>";
 
         $files = unserialize($pulrow['files']);
 
@@ -284,9 +331,49 @@ if (mysql_num_rows($vetores)) {
     echo "</table>";
     echo "</td></tr>";
 
+    if ($php_cli and $veto != "HEAD") {
+      $muutoksiaoli = TRUE;
+      break;
+    }
   }
 
   echo "</table>";
+
 }
 
-require "inc/footer.inc";
+if ($php_cli) {
+  $viesti = ob_get_contents();
+  ob_end_clean();
+}
+
+if ($php_cli and $muutoksiaoli) {
+  if ($yhtiorow["kayttoliittyma"] == "U") {
+    $css = $yhtiorow['css'];
+  }
+  else {
+    $css = $yhtiorow['css_classic'];
+  }
+
+  $ulos  = "<html>\n<head>\n";
+  $ulos .= "<style type='text/css'>$css</style>\n";
+
+  $ulos .= "<title>Pupesoft-".t("p‰ivitys")."</title>\n";
+  $ulos .= "</head>\n";
+
+  $ulos .= "<body>\n";
+  $ulos .= $viesti."\n";
+  $ulos .= "</body></html>";
+
+  $params = array(
+    "to"      => $yhtiorow['changelog_email'],
+    "subject" => "Pupesoft update: ".date("H:i d.m.Y"),
+    "ctype"   => "html",
+    "body"    => $ulos
+  );
+
+  pupesoft_sahkoposti($params);
+}
+
+if (!$php_cli) {
+  require "inc/footer.inc";
+}

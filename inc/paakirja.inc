@@ -29,7 +29,7 @@ if ($toim_ytunnus != '' or $toimittajaid != '') {
 
 echo "<font class='head'>".t("P‰‰- ja p‰iv‰kirja")."</font><hr>
     <form name = 'valinta' action = 'raportit.php' method='post'>
-    <input type = 'hidden' name = 'toim' value = 'paakirja'>
+    <input type = 'hidden' name = 'toim' value = '$toim'>
     <input type = 'hidden' name = 'lopetus' value = '$lopetus'>
     <table><tr>
     <th>".t("Tyyppi")."</th>
@@ -418,6 +418,14 @@ if ($tee != "") {
 
     // Jos haetaan p‰iv‰m‰‰rill‰ niin nollataan tilikausi
     $tkausi = 0;
+
+    $query = "SELECT *
+              FROM tilikaudet
+              WHERE yhtio         = '$kukarow[yhtio]'
+              and tilikausi_alku  <= '$alvv-$alvk-$alvp'
+              and tilikausi_loppu >= '$llvv-$llvk-$llvp'";
+    $result = pupe_query($query);
+    $tilikaudetrow = mysql_fetch_array($result);
   }
   else {
     if ($tkausi == 0) {

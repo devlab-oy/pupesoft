@@ -497,19 +497,51 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
     $tpk = substr($pvm, 2, 2);
     $tpp = substr($pvm, 4, 2);
 
+    $boob = 0;
+
+
     $query = "SELECT ytunnus FROM toimi WHERE yhtio = '$yritirow[yhtio]' and nimi LIKE '%$maksaa%'";
     $suotoiresult = pupe_query($query);
-
-    $boob = 0;
 
     if (mysql_num_rows($suotoiresult) > 0) {
       echo "<a href=\"javascript:lataaiframe('{$tiliotedatarow['tunnus']}', '{$palvelin2}suori.php?tee=W&tiliote=Z&mav=$tpv&mak=$tpk&map=$tpp&mtili=$yritirow[tunnus]&tiliotesumma=".(-1*$maara)."&ohje=off');\">".t("Ostosuoritus")."</a><br>\n";
       $boob = 1;
     }
 
+    $maksaa_clean = poista_osakeyhtio_lyhenne($maksaa);
+
     //Olisiko tämä meidän asiakas
-    $query = "SELECT * FROM asiakas WHERE yhtio = '$yritirow[yhtio]' and nimi LIKE '%$maksaa%'";
+    $query = "SELECT *
+              FROM asiakas
+              WHERE yhtio = '{$yritirow['yhtio']}'
+              AND nimi LIKE '%{$maksaa}%'
+              AND laji != 'P'";
     $suoasiresult = pupe_query($query);
+
+    if (mysql_num_rows($suoasiresult) != 1) {
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$yritirow['yhtio']}'
+                AND nimi LIKE '%{$maksaa}%'";
+      $suoasiresult = pupe_query($query);
+    }
+
+    if (mysql_num_rows($suoasiresult) != 1) {
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$yritirow['yhtio']}'
+                AND nimi LIKE '%{$maksaa_clean}%'
+                AND laji != 'P'";
+      $suoasiresult = pupe_query($query);
+    }
+
+    if (mysql_num_rows($suoasiresult) != 1) {
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$yritirow['yhtio']}'
+                AND nimi LIKE '%{$maksaa_clean}%'";
+      $suoasiresult = pupe_query($query);
+    }
 
     if (mysql_num_rows($suoasiresult) == 1) {
       $suoasirow = mysql_fetch_assoc($suoasiresult);
@@ -522,7 +554,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
     }
 
     //  Annetaan Muu aina
-    echo "<a href=\"javascript:lataaiframe('{$tiliotedatarow['tunnus']}', '{$palvelin2}myyntires/maksunsyotto.php?summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z&selite=$selite_maksuavarten&maksaja_haku=$maksaa&ohje=off');\">".t("Myyntisuoritus muu")."</a>";
+    echo "<a href=\"javascript:lataaiframe('{$tiliotedatarow['tunnus']}', '{$palvelin2}myyntires/maksunsyotto.php?summa=$maara&ppa=$tpp&kka=$tpk&vva=$tpv&mtili=$yritirow[tunnus]&tiliote=Z&selite=$selite_maksuavarten&maksaja_haku=".urlencode($maksaa_clean)."&iframe=1&ohje=off');\">".t("Myyntisuoritus muu")."</a>";
 
   }
   echo "</td><td name='td_{$td_perheid}' class='$class'>";

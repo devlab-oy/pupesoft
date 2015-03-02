@@ -1639,7 +1639,8 @@ echo "<script type='text/javascript'>
                 tapahtumalaji = $('#tapahtumalaji option:selected').val(),
                 tilalehinta = $('#tilalehinta:checked').val(),
                 kokonaissaldo_tapahtumalle = $('#kokonaissaldo_tapahtumalle').val(),
-                toimipaikka = $('#toimipaikka option:selected').val();
+                toimipaikka = $('#toimipaikka option:selected').val(),
+                sarjanumero_kpl = $('#sarjanumero_kpl').val();
 
             $(this).val('".t("Päivitä")."');
 
@@ -1670,7 +1671,8 @@ echo "<script type='text/javascript'>
                 tapahtumalaji: tapahtumalaji,
                 tilalehinta: tilalehinta,
                 kokonaissaldo_tapahtumalle: kokonaissaldo_tapahtumalle,
-                toimipaikka: toimipaikka
+                toimipaikka: toimipaikka,
+                sarjanumero_kpl: sarjanumero_kpl
               },
               success: function(data) {
                 $('#tapahtumat_container').html(data);
@@ -1684,7 +1686,8 @@ echo "<script type='text/javascript'>
             var _src = '{$palvelin2}pics/loading_blue_small.gif',
                 sarjanumeroseuranta = $('#sarjanumeroseuranta').val(),
                 _tp_kasittely = $('#_tp_kasittely').val(),
-                toimipaikka = $('#toimipaikka option:selected').val();
+                toimipaikka = $('#toimipaikka option:selected').val(),
+                saldoaikalisa = $('#saldoaikalisa').val();
 
             $(this).val('".t("Päivitä")."');
             $('#varastopaikat_container').html('<img src=\"'+_src+'\" /><br />');
@@ -1700,7 +1703,8 @@ echo "<script type='text/javascript'>
                 tuoteno: $('#tuoteno').val(),
                 sarjanumeroseuranta: sarjanumeroseuranta,
                 _tp_kasittely: _tp_kasittely,
-                toimipaikka: toimipaikka
+                toimipaikka: toimipaikka,
+                saldoaikalisa: saldoaikalisa
               },
               success: function(data) {
                 $('#varastopaikat_container').html(data);
@@ -2009,6 +2013,8 @@ if ($tee == 'Z') {
         $tuoterow['kehahin'] = "";
       }
     }
+
+    echo "<input type='hidden' id='sarjanumero_kpl' value='{$sarjanumero_kpl}' />";
 
     // Lisätäänkö kuluja varastonarvoon / katteeseen
     $tuoterow['kehahin'] = hintapyoristys(hinta_kuluineen($tuoterow['tuoteno'], $tuoterow['kehahin']), 6, TRUE);

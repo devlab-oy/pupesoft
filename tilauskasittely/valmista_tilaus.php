@@ -657,6 +657,7 @@ if ($tee == 'TEEVALMISTUS' and isset($osatoimitus)) {
 }
 
 if ($tee == 'TEEVALMISTUS') {
+echo "660 "; var_dump($tilkpllat); echo "<br><br><br>"; var_dump($edtilkpllat); echo "<br><br><br>";
   //K‰yd‰‰n l‰pi rivien kappalem‰‰r‰t ja tehd‰‰n samalla pieni tsekki, ett‰ onko rivi jo valmistettu
   foreach ($tilkpllat as $rivitunnus => $tilkpl) {
 
@@ -720,14 +721,44 @@ if ($tee == 'TEEVALMISTUS') {
 
         $laskurow = mysql_fetch_assoc($result);
 
-        $query = "UPDATE tilausrivi
-                  SET varattu = '$tilkpl'
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and tunnus  = '$rivitunnus'";
-        $updresult = pupe_query($query);
+        // Pit‰‰ tiet‰‰ onko tuote er‰numeroseurannassa,
+        // koska er‰numeroseurattavien tuotteiden rivim‰‰r‰‰ ei saa lis‰t‰
+        $query =  "SELECT tuote.sarjanumeroseuranta
+                   FROM tuote
+                   JOIN tilausrivi ON (tilausrivi.yhtio = tuote.yhtio AND tilausrivi.tuoteno = tuote.tuoteno)
+                   WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+                   AND tilausrivi.tunnus = $rivitunnus
+                   AND tilausrivi.laskutettuaika != '0000-00-00'";
+        $_sarja = mysql_fetch_assoc(pupe_query($query));
 
-        $tee = "VALMISTA";
-        $virhe[$rivitunnus] .= "<font class='message'>".t("M‰‰r‰ p‰ivitetty")."!</font>";
+        if (in_array($_sarja["sarjanumeroseuranta"], array("E", "G", "F"))) {
+          if ($tilkpl <= $edtilkpllat[$rivitunnus]) {
+            $query = "UPDATE tilausrivi
+                      SET varattu = '$tilkpl'
+                      WHERE yhtio = '$kukarow[yhtio]'
+                      and tunnus  = '$rivitunnus'";
+            $updresult = pupe_query($query);
+
+            $tee = "VALMISTA";
+            $virhe[$rivitunnus] .= "<font class='message'>".t("M‰‰r‰ p‰ivitetty")."!</font>";
+          }
+          else {
+            $tee = "VALMISTA";
+            $virhe[$rivitunnus] .= "<font class='error'>".t("Er‰numerollisen tuotteen m‰‰r‰‰ ei saa lis‰t‰, jos rivi on jo k‰ytetty")."!</font>";
+          }
+
+        }
+        else {
+          $query = "UPDATE tilausrivi
+                    SET varattu = '$tilkpl'
+                    WHERE yhtio = '$kukarow[yhtio]'
+                    and tunnus  = '$rivitunnus'";
+          $updresult = pupe_query($query);
+
+          $tee = "VALMISTA";
+          $virhe[$rivitunnus] .= "<font class='message'>".t("M‰‰r‰ p‰ivitetty")."!</font>";
+
+        }
       }
     }
     else {

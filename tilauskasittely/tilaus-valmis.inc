@@ -758,7 +758,7 @@ else {
         // Jos kyseessä on käteismyyntiä tai maksuehdolla on itsetulostustäppä tai vientiä,
         // merkataan tilaukset kerätyksi mutta ei toimitetuksi ja alatila C/B 
         // tai toimitettu tilaus muutetaan maksuehdosta käteiseksi, tila pysyy D
-        if ($kukarow["kassamyyja"] != '' and $laskurow["alatila"] == 'D') {
+        if ($laskurow["alatila"] == 'D') {
           $alat = "D";
         }
         elseif ($laskurow["vienti"] != '') {

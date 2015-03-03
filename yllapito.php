@@ -22,7 +22,8 @@ if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
 $psx_ohjelmat = array(
   "valuu" => "{$palvelin2}pupenext/currencies",
   "tili" => "{$palvelin2}pupenext/accounts",
-  "taso" => "{$palvelin2}pupenext/sum_levels"
+  "taso" => "{$palvelin2}pupenext/sum_levels",
+  "kirjoittimet" => "{$palvelin2}pupenext/printers"
 );
 
 if (array_key_exists($toim, $psx_ohjelmat)) {
@@ -2268,7 +2269,6 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $toim == "yhteensopivuus_tuote_lisatiedot" or
     ($toim == "toimitustapa" and $poistolukko == "") or
     $toim == "toimitustavat_toimipaikat" or
-    $toim == "kirjoittimet" or
     $toim == "hinnasto" or
     $toim == "rahtimaksut" or
     $toim == "rahtisopimukset" or

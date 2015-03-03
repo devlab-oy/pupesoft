@@ -1235,11 +1235,11 @@ if ($tee == 'P') {
           if ($toim == 'VASTAANOTA_REKLAMAATIO' and $keraysvirhe == 0) {
 
             if (trim($varastorekla[$apui]) != '' and trim($vertaus_hylly[$apui]) != trim($varastorekla[$apui])) {
-              // Ollaan valittu varastopaikka dropdownista
 
+              // Ollaan valittu varastopaikka dropdownista
               if (isset($varastorekla[$apui]) and $varastorekla[$apui] != 'x' and $varastorekla[$apui] != '' and strpos($varastorekla[$apui], "###") === false) {
                 // tehd‰‰n uusi paikka jos valittiin paikaton lapsivarasto
-                if (substr($rivivarasto[$tun], 0, 1) == 'V') {
+                if (substr($varastorekla[$apui], 0, 1) == 'V') {
                   $uusi_paikka = lisaa_tuotepaikka($tilrivirow["tuoteno"], '', '', '', '', '', '', 0, 0, substr($varastorekla[$apui], 1));
                   $ptunnus = $uusi_paikka['tuotepaikan_tunnus'];
                 }

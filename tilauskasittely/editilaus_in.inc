@@ -689,12 +689,11 @@ while ($tietue = fgets($fd)) {
 
       $e_parametrit = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
       if (count($e_parametrit) > 0) {
-        $tieto = $ot_verkkokauppa_asiakasnro;
 
         $verkkokauppamyyjanro = $e_parametrit[3];
         // Haetaan asiakasta magento_id:llä avainsanoista
         if (!is_array($arow)) {
-          $edi_ulos .= t("Tilaava asiakas (magento_id)")." $tieto -> ";
+          $edi_ulos .= t("Tilaava asiakas (magento_id)")." $ot_verkkokauppa_asiakasnro -> ";
 
           $query = "SELECT asiakas.*
                     FROM asiakas

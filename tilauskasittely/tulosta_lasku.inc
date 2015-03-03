@@ -228,8 +228,13 @@ if (!function_exists('alku')) {
     $pdf_lasku->draw_text(310, $arvo[$rivi_ind], pdf_substr($laskurow["maksuehto"], 110, $pdf_lasku, $norm), $page_lasku[$sivu], $norm);
     $rivi_ind++;
 
-    $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Viivästyskorko", $kieli),                 $page_lasku[$sivu], $pieni);
-    $pdf_lasku->draw_text(310, $arvo[$rivi_ind], $laskurow["viikorkopros"],                   $page_lasku[$sivu], $norm);
+    if (!kyseessa_eramaksu($laskurow)) {
+      $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Viivästyskorko", $kieli), $page_lasku[$sivu],
+                            $pieni);
+      $pdf_lasku->draw_text(310, $arvo[$rivi_ind], $laskurow["viikorkopros"], $page_lasku[$sivu],
+                            $norm);
+    }
+
     $rivi_ind++;
 
     $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Valuutta", $kieli),                   $page_lasku[$sivu], $pieni);

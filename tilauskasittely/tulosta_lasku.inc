@@ -251,11 +251,19 @@ if (!function_exists('alku')) {
     // Riviindeksi
     $rivi_ind = $laskutyyppi == 17 ? 2 : 1;
 
-    $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Eräpäivä", $kieli),                   $page_lasku[$sivu], $pieni);
-    if (kyseessa_eramaksu($laskurow)) $erapaiva = tv1dateconv($laskurow["erpcm"]);
-    elseif ($laskurow["kateistyyppi"] != '') $erapaiva = t('MAKSETTU', $kieli);
-    else $erapaiva = tv1dateconv($laskurow["erpcm"]);
-    $pdf_lasku->draw_text(430, $arvo[$rivi_ind], $erapaiva,                         $page_lasku[$sivu], $norm);
+    if (!kyseessa_eramaksu($laskurow)) {
+      $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Eräpäivä", $kieli), $page_lasku[$sivu],
+                            $pieni);
+
+      if ($laskurow["kateistyyppi"] != '') {
+        $erapaiva = t('MAKSETTU', $kieli);
+      }
+      else {
+        $erapaiva = tv1dateconv($laskurow["erpcm"]);
+      }
+      $pdf_lasku->draw_text(430, $arvo[$rivi_ind], $erapaiva, $page_lasku[$sivu], $norm);
+    }
+
     $laskutyyppi == 17 ? $rivi_ind-- : $rivi_ind++;
 
     $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Laskun numero", $kieli),                 $page_lasku[$sivu], $pieni);

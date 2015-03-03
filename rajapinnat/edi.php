@@ -51,9 +51,14 @@ class Edi {
     //Tarkistetaan onko tämän nimiselle verkkokaupalle asetettu erikoiskäsittelyjä
     if (isset($verkkokauppa_erikoiskasittely) and count($verkkokauppa_erikoiskasittely) > 0) {
       $edi_store = str_replace("\n", " ", $order['store_name']);
-      foreach ($verkkokauppa_erikoiskasittely as $sp) {
-        if (strpos($edi_store, $sp[0]) !== false) {
-          $vaihtoehtoinen_ovt = $sp[4];
+      foreach ($verkkokauppa_erikoiskasittely as $verkkokauppaparametrit) {
+        // $verkkokauppaparametrit[0] - Verkkokaupan nimi
+        // $verkkokauppaparametrit[1] - Editilaus_tilaustyyppi
+        // $verkkokauppaparametrit[2] - Tilaustyyppilisa
+        // $verkkokauppaparametrit[3] - Myyjanumero
+        // $verkkokauppaparametrit[4] - Vaihtoehtoinen ovttunnus
+        if (strpos($edi_store, $verkkokauppaparametrit[0]) !== false) {
+          $vaihtoehtoinen_ovt = $verkkokauppaparametrit[4];
         }
       }
       // Jos erikoiskäsittelyyn on määritelty eri yhtiö tälle kaupalle niin yliajetaan $ovt_tunnus

@@ -2206,7 +2206,9 @@ if (!function_exists('alvierittely')) {
       $kala -= 10;
     }
 
-    $pdf_lasku->draw_text(360, $kala, t("Lasku Yhteensä", $kieli).":",                $thispage, $norm);
+    $yhteensa_teksti = kyseessa_eramaksu($laskurow) ? "Yhteensä" : "Lasku Yhteensä";
+
+    $pdf_lasku->draw_text(360, $kala, t($yhteensa_teksti, $kieli).":",                $thispage, $norm);
 
     if ($toim == 'PROFORMA') {
       $summa = $kassa_ale != '' ? $summa * (1-$kassa_ale/100) : $summa;

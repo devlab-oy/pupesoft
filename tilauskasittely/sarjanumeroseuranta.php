@@ -569,16 +569,26 @@ if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
   elseif (count($sarjataan) > 0) {
     $ktark = implode(",", $sarjataan);
 
-    $query = "SELECT tunnus
+    $query = "SELECT GROUP_CONCAT(tunnus) AS tunnukset,
+              COUNT(DISTINCT tunnus) AS tunnusKpl
               FROM sarjanumeroseuranta
               WHERE yhtio = '$kukarow[yhtio]'
               and $tunnuskentta = $rivitunnus
               and tunnus  not in (".$ktark.")";
     $result = pupe_query($query);
+    $_vap = mysql_fetch_assoc($result);
 
-    if (mysql_num_rows($result) > 0) {
+    if ($_vap["tunnusKpl"] > 0) {
 
-      $liityht = count($sarjataan)+mysql_num_rows($result);
+      // Jos rivin kappalem‰‰r‰ on v‰hennetty sarjanumeroiden liitt‰misen j‰lkeen
+      // voi olla tarvetta ottaa kohdistuksia pois ylim‰‰r‰isilt‰ riveilt‰
+      $query = "UPDATE sarjanumeroseuranta
+                SET $tunnuskentta = ''
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus IN ({$_vap['tunnukset']})";
+      pupe_query($query);
+
+      $liityht = count($sarjataan) + $_vap["tunnusKpl"];
 
       if ($liityht > $rivirow["varattu"]) {
         echo "<font class='error'>".t('Riviin voi liitt‰‰ enint‰‰n')." $rivirow[varattu] ".t_avainsana("Y", "", "and avainsana.selite='$rivirow[yksikko]'", "", "", "selite").".</font><br><br>";

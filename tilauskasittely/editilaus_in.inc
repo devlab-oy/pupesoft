@@ -681,6 +681,18 @@ while ($tietue = fgets($fd)) {
       }
     }
 
+    $kaannetty = false;
+    if ($edi_tyyppi == "magento" and $verkkokauppa != ''
+      and isset($verkkokauppa_erikoiskasittely) and count($verkkokauppa_erikoiskasittely) > 0) {
+      $e_parametrit = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+      // Jos erikoisk‰sittelyyn on m‰‰ritelty eri yhtiˆ t‰lle kaupalle niin p‰ivitet‰‰n tiedot
+      if (isset($e_parametrit[4]) and !empty($e_parametrit[4])) {
+        $edi_ulos .= t("K‰‰nnet‰‰n tilaus yritykselle")." '{$e_parametrit[4]}' ";
+        hae_yhtiotiedot($e_parametrit[4]);
+        $kaannetty = true;
+      }
+    }
+
     // K‰ytet‰‰n Magenton asiakasnumeroa jos sellainen lˆytyy ennalta m‰‰ritellyist‰ kaupoista tulevilla tilauksilla
     // ja on setattu $verkkokauppa_erikoiskasittely:n
     if ($edi_tyyppi == "magento" and $ot_verkkokauppa_asiakasnro != ''
@@ -688,7 +700,8 @@ while ($tietue = fgets($fd)) {
       and count($verkkokauppa_erikoiskasittely) > 0) {
 
       $e_parametrit = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
-      if (count($e_parametrit) > 0) {
+      // Jos ollaan annettu viides parametri(vaihtoehtoinen ovt-tunnus) niin ei haluta tarkistaa t‰t‰
+      if (count($e_parametrit) > 0 and count($e_parametrit < 5)) {
         $tieto = $ot_verkkokauppa_asiakasnro;
 
         $verkkokauppamyyjanro = $e_parametrit[3];
@@ -774,10 +787,18 @@ while ($tietue = fgets($fd)) {
     }
 
     if (!is_array($arow)) {
+
+      if ($kaannetty and isset($verkkokauppa_asiakasnro)) {
+        $_tieto = $verkkokauppa_asiakasnro;
+      }
+      else {
+        $_tieto = $tieto;
+      }
+
       $query = "SELECT *
                 FROM asiakas
                 WHERE yhtio   = '$kukarow[yhtio]'
-                and ovttunnus = '$tieto'
+                and ovttunnus = '$_tieto'
                 and ovttunnus not in ('','0')
                 and laji      not in ('R','P')";
       $result = pupe_query($query);
@@ -1302,20 +1323,15 @@ while ($tietue = fgets($fd)) {
 
       if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
         and count($verkkokauppa_erikoiskasittely) > 0) {
-        list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa, $editilaus_myyja, 
-          $vaihtoehtoinen_ovt) = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
-        
+        list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa, $editilaus_myyja)
+         = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+
         // Jos lˆytyy erikoisk‰sittely niin n‰ytet‰‰n se myˆs k‰yttˆliittym‰ss‰
         if (isset($nimi) and !empty($nimi)) {
           $edi_ulos .= t("Tilauksen erikoisk‰sittely")."-> {$nimi},
               ".t("tilaustyyppi").": {$editilaus_tilaustyyppi},
               ".t("tilaustyyppilis‰").": {$tilaustyyppilisa},
               ".t("myyj‰numero").": {$editilaus_myyja} \n\n";
-        }
-        // Jos erikosk‰sittelyyn on m‰‰ritelty eri yhtiˆ t‰lle tilaukselle niin p‰ivitet‰‰n tiedot
-        if (isset($vaihtoehtoinen_ovt) and !empty($vaihtoehtoinen_ovt)) {
-          $edi_ulos .= t("K‰‰nnet‰‰n tilaus yritykselle")." '$vaihtoehtoinen_ovt' ";
-          hae_yhtiotiedot($vaihtoehtoinen_ovt);
         }
       }
 

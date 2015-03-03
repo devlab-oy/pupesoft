@@ -689,12 +689,11 @@ while ($tietue = fgets($fd)) {
 
       $e_parametrit = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
       if (count($e_parametrit) > 0) {
-        $tieto = $ot_verkkokauppa_asiakasnro;
 
         $verkkokauppamyyjanro = $e_parametrit[3];
         // Haetaan asiakasta magento_id:ll‰ avainsanoista
         if (!is_array($arow)) {
-          $edi_ulos .= t("Tilaava asiakas (magento_id)")." $tieto -> ";
+          $edi_ulos .= t("Tilaava asiakas (magento_id)")." $ot_verkkokauppa_asiakasnro -> ";
 
           $query = "SELECT asiakas.*
                     FROM asiakas
@@ -1302,20 +1301,14 @@ while ($tietue = fgets($fd)) {
 
       if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
         and count($verkkokauppa_erikoiskasittely) > 0) {
-        list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa, $editilaus_myyja, 
-          $vaihtoehtoinen_ovt) = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
-        
+        list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa, $editilaus_myyja) =
+          hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
         // Jos lˆytyy erikoisk‰sittely niin n‰ytet‰‰n se myˆs k‰yttˆliittym‰ss‰
         if (isset($nimi) and !empty($nimi)) {
           $edi_ulos .= t("Tilauksen erikoisk‰sittely")."-> {$nimi},
               ".t("tilaustyyppi").": {$editilaus_tilaustyyppi},
               ".t("tilaustyyppilis‰").": {$tilaustyyppilisa},
               ".t("myyj‰numero").": {$editilaus_myyja} \n\n";
-        }
-        // Jos erikosk‰sittelyyn on m‰‰ritelty eri yhtiˆ t‰lle tilaukselle niin p‰ivitet‰‰n tiedot
-        if (isset($vaihtoehtoinen_ovt) and !empty($vaihtoehtoinen_ovt)) {
-          $edi_ulos .= t("K‰‰nnet‰‰n tilaus yritykselle")." '$vaihtoehtoinen_ovt' ";
-          hae_yhtiotiedot($vaihtoehtoinen_ovt);
         }
       }
 

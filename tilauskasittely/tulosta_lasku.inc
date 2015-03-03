@@ -219,13 +219,27 @@ if (!function_exists('alku')) {
     }
 
     $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Maksuehto", $kieli),           $page_lasku[$sivu], $pieni);
-    for ($s = strlen($laskurow["maksuehto"]); $s > 0; $s--) {
-      if ($pdf_lasku->strlen($laskurow["maksuehto"], $norm) > 110) {
-        $laskurow["maksuehto"] = substr($laskurow["maksuehto"], 0, $s);
-      }
-      else break;
+
+    if (kyseessa_eramaksu($laskurow)) {
+      $pdf_lasku->draw_text(310, $arvo[$rivi_ind],
+                            pdf_substr(t("Erämaksu"), 110, $pdf_lasku, $norm), $page_lasku[$sivu],
+                            $norm);
     }
-    $pdf_lasku->draw_text(310, $arvo[$rivi_ind], pdf_substr($laskurow["maksuehto"], 110, $pdf_lasku, $norm), $page_lasku[$sivu], $norm);
+    else {
+      for ($s = strlen($laskurow["maksuehto"]); $s > 0; $s--) {
+        if ($pdf_lasku->strlen($laskurow["maksuehto"], $norm) > 110) {
+          $laskurow["maksuehto"] = substr($laskurow["maksuehto"], 0, $s);
+        }
+        else {
+          break;
+        }
+      }
+
+      $pdf_lasku->draw_text(310, $arvo[$rivi_ind],
+                            pdf_substr($laskurow["maksuehto"], 110, $pdf_lasku, $norm),
+                            $page_lasku[$sivu], $norm);
+    }
+
     $rivi_ind++;
 
     if (!kyseessa_eramaksu($laskurow)) {

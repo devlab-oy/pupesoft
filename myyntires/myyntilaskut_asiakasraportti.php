@@ -237,6 +237,7 @@ if ($tee == "") {
               FROM asiakas
               WHERE yhtio = '{$kukarow['yhtio']}'
               and {$haku_sql}
+              and laji != 'P'
               ORDER BY email DESC";
     $result = pupe_query($query);
 

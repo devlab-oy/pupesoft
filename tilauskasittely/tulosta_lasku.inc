@@ -246,7 +246,7 @@ if (!function_exists('alku')) {
     $rivi_ind = $laskutyyppi == 17 ? 2 : 1;
 
     $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Eräpäivä", $kieli),                   $page_lasku[$sivu], $pieni);
-    if ($laskurow["kateistyyppi"] != '' and $laskurow['mapvm'] == "0000-00-00" and ($laskurow['saldo_maksettu'] != 0 or $laskurow['saldo_maksettu_valuutassa'] != 0)) $erapaiva = tv1dateconv($laskurow["erpcm"]);
+    if (kyseessa_eramaksu($laskurow)) $erapaiva = tv1dateconv($laskurow["erpcm"]);
     elseif ($laskurow["kateistyyppi"] != '') $erapaiva = t('MAKSETTU', $kieli);
     else $erapaiva = tv1dateconv($laskurow["erpcm"]);
     $pdf_lasku->draw_text(430, $arvo[$rivi_ind], $erapaiva,                         $page_lasku[$sivu], $norm);
@@ -589,7 +589,7 @@ if (!function_exists('uusi_sivu')) {
     $pdf_lasku->draw_text(310, 782, tv1dateconv($laskurow["tapvm"]),  $thispage, $norm);
     $pdf_lasku->draw_text(430, 792, t("Eräpäivä", $kieli),       $thispage, $pieni);
 
-    if ($laskurow["kateistyyppi"] != '' and $laskurow['mapvm'] == "0000-00-00" and ($laskurow['saldo_maksettu'] != 0 or $laskurow['saldo_maksettu_valuutassa'] != 0)) {
+    if (kyseessa_eramaksu($laskurow)) {
       $erapaiva = tv1dateconv($laskurow["erpcm"]);
     }
     elseif ($laskurow["kateistyyppi"] != '') {
@@ -1733,7 +1733,7 @@ if (!function_exists('loppu')) {
 
     $pdf_lasku->draw_text(30,  102+$vientikala+$barcode_korkeus, t("Eräpäivä", $kieli),  $thispage, $pieni);
 
-    if ($laskurow["kateistyyppi"] != '' and $laskurow['mapvm'] == "0000-00-00" and ($laskurow['saldo_maksettu'] != 0 or $laskurow['saldo_maksettu_valuutassa'] != 0)) {
+    if (kyseessa_eramaksu($laskurow)) {
       $erapaiva = tv1dateconv($laskurow["erpcm"]);
     }
     elseif ($laskurow["kateistyyppi"] != '') {
@@ -2224,7 +2224,7 @@ if (!function_exists('alvierittely')) {
     $kala -= 10;
 
     // Käteismaksutavat ja osasuoritukset - erittely
-    if ($laskurow["kateistyyppi"] != '' and $laskurow['mapvm'] == "0000-00-00" and ($laskurow['saldo_maksettu'] != 0 or $laskurow['saldo_maksettu_valuutassa'] != 0) and $toim != 'PROFORMA') {
+    if (kyseessa_eramaksu($laskurow) and $toim != 'PROFORMA') {
       $kala -= 10;
 
       if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
@@ -2977,4 +2977,10 @@ if (!function_exists("tulosta_lasku")) {
     unset($pdf_lasku);
     unset($page_lasku);
   }
+}
+
+function kyseessa_eramaksu($laskurow) {
+  return $laskurow["kateistyyppi"] != '' and $laskurow['mapvm'] == "0000-00-00" and
+                                             ($laskurow['saldo_maksettu'] != 0 or
+                                              $laskurow['saldo_maksettu_valuutassa'] != 0);
 }

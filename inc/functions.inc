@@ -30515,7 +30515,8 @@ if (!function_exists('varaston_lapsivarastot')) {
               and concat(rpad(upper('{$alkuhyllyalue}'),  5, '0'),lpad(upper('{$alkuhyllynro}'),  5, '0')) <= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
               and concat(rpad(upper('{$loppuhyllyalue}'), 5, '0'),lpad(upper('{$loppuhyllynro}'), 5, '0')) >= concat(rpad(upper(tuotepaikat.hyllyalue), 5, '0'),lpad(upper(tuotepaikat.hyllynro), 5, '0'))
               $lvlisa
-              $tlvlisa";
+              $tlvlisa
+              ORDER BY status, nimitys";
     return pupe_query($query);
   }
 }

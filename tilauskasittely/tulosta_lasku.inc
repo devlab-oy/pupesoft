@@ -2577,6 +2577,10 @@ if (!function_exists("tulosta_lasku")) {
     $laskurow["maksuehto"] = $masrow["teksti"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
     $laskurow["kateistyyppi"] = $masrow["kateinen"];
 
+    if (kyseessa_eramaksu($laskurow) and !$tulosta_lasku_kpl) {
+      $tulosta_lasku_kpl = 2;
+    }
+
     //PDF parametrit
     $pdf_lasku = new pdffile;
     $pdf_lasku->set_default('margin-top',    0);

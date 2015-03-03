@@ -1084,7 +1084,7 @@ echo "  <tr><th>".t("Kausi")."</th>
     <td><input type='text' name='ppl4' value='$ppl4' size='5'></td>
     <td><input type='text' name='kkl4' value='$kkl4' size='5'></td>
     <td><input type='text' name='vvl4' value='$vvl4' size='5'></td>
-    </tr>"; 
+    </tr>";
 
 echo "</table><table><br>";
 

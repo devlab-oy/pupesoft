@@ -18051,15 +18051,19 @@ if (!function_exists("tee_keraysera")) {
     $_fixed_main_array_count = count($fixed_main_array);
     $_fixed_main_array_keys = array_keys($fixed_main_array);
 
-    $kukarow['debugstring'] .= var_dump($fixed_main_array)."\n";
-    $kukarow['debugstring'] .= var_dump($_fixed_main_array_count)."\n";
-    $kukarow['debugstring'] .= var_dump($_fixed_main_array_keys)."\n";
+    if (isset($kukarow['debugstring'])) {
+      $kukarow['debugstring'] .= var_dump($fixed_main_array)."\n";
+      $kukarow['debugstring'] .= var_dump($_fixed_main_array_count)."\n";
+      $kukarow['debugstring'] .= var_dump($_fixed_main_array_keys)."\n";
+    }
 
     for ($_main_i = 0; $_fixed_main_array_count > $_main_i; $_main_i++) {
 
       $eka_kierros = true;
 
-      $kukarow['debugstring']  .= "(E001) nurkan_takaa: ".(int) $nurkan_takaa."<br>";
+      if (isset($kukarow['debugstring'])) {
+        $kukarow['debugstring']  .= "(E001) nurkan_takaa: ".(int) $nurkan_takaa."<br>";
+      }
 
       $key = $_fixed_main_array_keys[$_main_i];
       $tilaukset = $fixed_main_array[$key];
@@ -18245,9 +18249,8 @@ if (!function_exists("tee_keraysera")) {
         if (isset($kukarow['debugstring'])) {
           $kukarow['debugstring'] .= "<br>(E610): <br>Erän tilavuus NYT: $eran_koko cm3<br>\n";
           $kukarow['debugstring'] .= "(E620): Erän pinta-ala NYT: $eran_koko_pintaala cm2<br><br>\n";
+          $kukarow['debugstring'] .= "(E002) nurkan_takaa: ".(int) $nurkan_takaa."<br>";
         }
-
-        $kukarow['debugstring'] .= "(E002) nurkan_takaa: ".(int) $nurkan_takaa."<br>";
 
         if (!$eka_kierros) {
           $eran_koko += $pakkaukset[$kaytettava_pakkaus]['tilavuus'];
@@ -18278,9 +18281,8 @@ if (!function_exists("tee_keraysera")) {
         if (isset($kukarow['debugstring'])) {
           $kukarow['debugstring'] .= "<br>(E660): <br>Erän tilavuus NYT: $eran_koko cm3<br>\n";
           $kukarow['debugstring'] .= "(E670): Erän pinta-ala NYT: $eran_koko_pintaala cm2<br><br>\n";
+          $kukarow['debugstring'].= "(E003) nurkan_takaa: ".(int) $nurkan_takaa."<br>";
         }
-
-        $kukarow['debugstring'].= "(E003) nurkan_takaa: ".(int) $nurkan_takaa."<br>";
 
         if (!$eka_kierros) {
           $eran_koko += $pakkaukset[$kaytettava_pakkaus]['tilavuus'];
@@ -18301,7 +18303,9 @@ if (!function_exists("tee_keraysera")) {
         $eka_kierros = false;
       }
 
-      $kukarow['debugstring'] .= "(E004) nurkan_takaa: ".(int) $nurkan_takaa."<br>";
+      if (isset($kukarow['debugstring'])) {
+        $kukarow['debugstring'] .= "(E004) nurkan_takaa: ".(int) $nurkan_takaa."<br>";
+      }
 
       mysql_data_seek($tuoteres, 0);
       $max_tuoterivit = mysql_num_rows($tuoteres);
@@ -18314,7 +18318,9 @@ if (!function_exists("tee_keraysera")) {
 
       foreach ($inner_main_array as $inner_key => &$tuoterow) {
 
-        $kukarow['debugstring'] .= "(E005) nurkan_takaa: ".(int) $nurkan_takaa."<br>";
+        if (isset($kukarow['debugstring'])) {
+          $kukarow['debugstring'] .= "(E005) nurkan_takaa: ".(int) $nurkan_takaa."<br>";
+        }
 
         if ($kaytettava_pakkaus == '' and $eran_koko_chk > 0 and $tuoterow['yksin_kerailyalustalle'] == "" and !isset($tuote_yksin_keraysalustalle[$tuoterow['tuoteno']]['tilaus'][$tuoterow['otunnus']])) {
           if ($nurkan_takaa) {
@@ -18325,7 +18331,9 @@ if (!function_exists("tee_keraysera")) {
           }
         }
 
-        $kukarow['debugstring'] .= "(E006) nurkan_takaa: ".(int) $nurkan_takaa."<br>";
+        if (isset($kukarow['debugstring'])) {
+          $kukarow['debugstring'] .= "(E006) nurkan_takaa: ".(int) $nurkan_takaa."<br>";
+        }
 
         $yksin_kerailyalustalle_normi_tuote_trigger = false;
 
@@ -18336,7 +18344,9 @@ if (!function_exists("tee_keraysera")) {
           break 2;
         }
 
-        $kukarow['debugstring'] .= "(E007) nurkan_takaa: ".(int) $nurkan_takaa."<br>";
+        if (isset($kukarow['debugstring'])) {
+          $kukarow['debugstring'] .= "(E007) nurkan_takaa: ".(int) $nurkan_takaa."<br>";
+        }
 
         if (isset($kukarow['debugstring'])) {
           $kukarow['debugstring'] .= "<br>(E710): <br>Erän tilavuus NYT: $eran_koko cm3<br>\n";
@@ -19148,7 +19158,9 @@ if (!function_exists("tee_keraysera")) {
         list($pakkaukset, $kaytettava_pakkaus, $kaytettavat_pakkaukset, $eran_koko, $eran_koko_pintaala) = pakkauksen_iterointi($keraysvyohyketiedot, $pakkaukset, $kaytettava_pakkaus, $pisin_tuote, $kaytettavat_pakkaukset, $eka_kierros, $eran_koko, $eran_koko_pintaala, $juokseva_nro, $kerailyniput_tiedot, $kerailyniput_key, $key, $pisin_tuote_per_asiakas);
       }
 
-      $kukarow['debugstring'] .= "(E008) nurkan_takaa: ".(int) $nurkan_takaa."<br>";
+      if (isset($kukarow['debugstring'])) {
+        $kukarow['debugstring'] .= "(E008) nurkan_takaa: ".(int) $nurkan_takaa."<br>";
+      }
     }
 
     // nyt on luultavasti mennyt jotain vikaan. yksi syy voi olla tuotteiden hullut mitat.

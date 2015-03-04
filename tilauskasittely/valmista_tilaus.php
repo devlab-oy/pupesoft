@@ -657,7 +657,6 @@ if ($tee == 'TEEVALMISTUS' and isset($osatoimitus)) {
 }
 
 if ($tee == 'TEEVALMISTUS') {
-
   //Käydään läpi rivien kappalemäärät ja tehdään samalla pieni tsekki, että onko rivi jo valmistettu
   foreach ($tilkpllat as $rivitunnus => $tilkpl) {
 

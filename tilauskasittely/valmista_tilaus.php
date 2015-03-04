@@ -657,7 +657,7 @@ if ($tee == 'TEEVALMISTUS' and isset($osatoimitus)) {
 }
 
 if ($tee == 'TEEVALMISTUS') {
-echo "660 "; var_dump($tilkpllat); echo "<br><br><br>"; var_dump($edtilkpllat); echo "<br><br><br>";
+
   //Käydään läpi rivien kappalemäärät ja tehdään samalla pieni tsekki, että onko rivi jo valmistettu
   foreach ($tilkpllat as $rivitunnus => $tilkpl) {
 

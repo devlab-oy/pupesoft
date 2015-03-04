@@ -4523,3 +4523,21 @@ if ($fieldname == "tilausrivin_korvamerkinta") {
 
   $jatko = 0;
 }
+
+if ($fieldname == "asiakastiedot_otsikolle") {
+  $sel = $trow[$i] == "E" ? "selected" : "";
+
+  $ulos  = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $ulos .= "<option value = ''>";
+  $ulos .= t("Kopioidaan asiakkaan puhelinnumero otsikolle");
+  $ulos .= "</option>";
+
+  $ulos .= "<option value = 'E' {$sel}>";
+  $ulos .= t("Ei kopioida asiakkaan puhelinnumeroa otsikolle");
+  $ulos .= "</option>";
+
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}

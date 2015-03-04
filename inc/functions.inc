@@ -16606,7 +16606,7 @@ if (!function_exists("valitse_pakkaus")) {
     }
 
     if (isset($kukarow['debugstring'])) {
-      $kukarow['debugstring'] .= "(E510): KÄYTETÄÄN PAKKAUSTA <font class='head'>{$pakkaukset[$kaytettava_pakkaus]['nimi']}</font><br>\n";
+      $kukarow['debugstring'] .= "<br>(VALITSE PAKKAUS FUNKTIO): KÄYTETÄÄN PAKKAUSTA <font class='head'>{$pakkaukset[$kaytettava_pakkaus]['nimi']}</font><br><br>\n";
     }
 
     return $kaytettava_pakkaus;
@@ -17428,7 +17428,6 @@ if (!function_exists("tee_keraysera")) {
                 AND syvyys  > 0
                 AND korkeus > 0
                 AND tunnus  IN ({$keraysvyohyketiedot['sallitut_alustat']})
-                AND {$keraysvyohyketiedot['max_keraysera_pintaala']} >= (if(pakkaus.leveys  * {$mittakerroin} < 1, 1, pakkaus.leveys  * {$mittakerroin}) * if(pakkaus.syvyys  * {$mittakerroin} < 1, 1, pakkaus.syvyys  * {$mittakerroin}))
                 ORDER BY tilavuus ASC";
       $pakkaus_result = pupe_query($query);
 
@@ -18182,6 +18181,9 @@ if (!function_exists("tee_keraysera")) {
             $eran_koko_chk -= ($pisin_tuote[$arr_keys[0]]['tilavuus'] * $pisin_tuote[$arr_keys[0]]['kpl']);
 
             if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E500): eran_koko_chk jälkeen kun ollaan poistettu {$pisin_tuote[$arr_keys[0]]['kpl']} verran kappaleita: $eran_koko_chk<br>\n";
+          }
+          else {
+            break;
           }
         }
 

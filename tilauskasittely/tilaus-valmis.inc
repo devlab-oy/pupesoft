@@ -805,8 +805,12 @@ else {
         }
       }
 
-      if ($laskurow["sisainen"] != '' or ($kukarow["kassamyyja"] != '' 
-        and $laskurow["alatila"] == 'D')) {
+      if ($laskurow["sisainen"] != '' 
+        or ($kateinen == 'X' and $kateisohitus == "" 
+          and ($kukarow["kassamyyja"] != '' or $kertakassa != "") 
+          and $laskurow["vienti"] == '' 
+          and $laskurow["alatila"] == 'D')
+        or $korkolasku == 'kylla') {
         //laskutetaan koko tilaus heti jos se on sisainen lasku
         // tai maksuehto vaihdettu käteismyynniksi
         $laskutettavat  = $laskurow["tunnus"];

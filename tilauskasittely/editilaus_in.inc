@@ -118,7 +118,7 @@ if (!function_exists('hae_erikoiskaupan_parametrit')) {
 
 if (!function_exists('hae_yhtiotiedot')) {
   function hae_yhtiotiedot($tieto) {
-    global $yhtiorow, $kukarow, $edi_ulos, $php_cli;
+    global $yhtiorow, $kukarow, $edi_ulos, $php_cli, $argv, $editil_cli;
 
     $query = "SELECT * FROM yhtio WHERE ovttunnus = '$tieto' and ovttunnus != ''";
     $result = pupe_query($query);

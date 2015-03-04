@@ -750,13 +750,13 @@ else {
       pupesoft_tulosta_lahete($params);
     }
 
-    // jos on myyntitilaus ja ei haluttu tulostaa lähetettä, merkataan rivit kerätyksi 
+    // jos on myyntitilaus ja ei haluttu tulostaa lähetettä, merkataan rivit kerätyksi
     // ja toimitetuksi ja laitetaan alatila D
     if ($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '') {
-      if ($laskurow['sisainen'] == '' and ($kateinen == 'X' or $itsetulostus == "X" 
+      if ($laskurow['sisainen'] == '' and ($kateinen == 'X' or $itsetulostus == "X"
         or $laskurow["vienti"] != '')) {
         // Jos kyseessä on käteismyyntiä tai maksuehdolla on itsetulostustäppä tai vientiä,
-        // merkataan tilaukset kerätyksi mutta ei toimitetuksi ja alatila C/B 
+        // merkataan tilaukset kerätyksi mutta ei toimitetuksi ja alatila C/B
         // tai toimitettu tilaus muutetaan maksuehdosta käteiseksi, tila pysyy D
         if ($laskurow["alatila"] == 'D') {
           $alat = "D";
@@ -805,12 +805,12 @@ else {
         }
       }
 
-      if ($laskurow["sisainen"] != '' 
-        or ($kateinen == 'X' and $kateisohitus == "" 
-          and ($kukarow["kassamyyja"] != '' or $kertakassa != "") 
-          and $laskurow["vienti"] == '' 
+      if ($laskurow["sisainen"] != ''
+        or ($kateinen == 'X' and $kateisohitus == ""
+          and ($kukarow["kassamyyja"] != '' or $kertakassa != "")
+          and $laskurow["vienti"] == ''
           and $laskurow["alatila"] == 'D')
-        or $korkolasku == 'kylla') {
+      ) {
         //laskutetaan koko tilaus heti jos se on sisainen lasku
         // tai maksuehto vaihdettu käteismyynniksi
         $laskutettavat  = $laskurow["tunnus"];

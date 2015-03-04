@@ -18716,6 +18716,9 @@ if (!function_exists("tee_keraysera")) {
 
                   $kaytettavat_pakkaukset[999][$kerailyniput_tiedot[$key]['liitostunnus']][$juokseva_nro][$tuoterow['tunnus']] = $kappalemaara;
 
+                  $eran_koko += ($tuoterow['y_koko'] * $kappalemaara);
+                  $eran_koko_pintaala += ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $kappalemaara);
+
                   if ($ix < $lkm) {
                     $juokseva_nro++;
 
@@ -18727,9 +18730,6 @@ if (!function_exists("tee_keraysera")) {
                     }
                   }
                 }
-
-                $eran_koko += ($tuoterow['y_koko'] * $tuoterow['y_maara']);
-                $eran_koko_pintaala += ($tuoterow['pisin_sorttaus'] * $tuoterow['lyhin_sorttaus'] * $tuoterow['y_maara']);
 
                 $lisatyt_tilausrivit[$tuoterow['otunnus']][$tuoterow['tunnus']] = $tuoterow['tunnus'];
 

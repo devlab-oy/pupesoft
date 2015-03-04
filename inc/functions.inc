@@ -16551,24 +16551,47 @@ if (!function_exists("valitse_pakkaus")) {
 
       if ($kaytettava_pakkaus == "" and !$nurkan_takaa) {
 
+        if (isset($kukarow['debugstring'])) {
+          $kukarow['debugstring'] .= "Käytettävää pakkausta ei löytynyt. Ei olla nurkan takaa casessa. Katsotaan pakkaukset pienimmästä isompaan<br>";
+        }
+
         // pakkaukset ovat pienimmästä isoimpaan
         foreach ($pakkaukset as $indx => $pakkaus_array) {
+
+          if (isset($kukarow['debugstring'])) {
+            $kukarow['debugstring'] .= "$indx: ({$pakkaus_array['leveys']} >= {$pisin_tuote['koko']} or {$pakkaus_array['korkeus']} >= {$pisin_tuote['koko']} or {$pakkaus_array['syvyys']} >= {$pisin_tuote['koko']}) and {$pakkaus_array['paino']} >= {$pisin_tuote['paino']}<br>";
+          }
 
           if (($pakkaus_array['leveys'] >= $pisin_tuote['koko'] or $pakkaus_array['korkeus'] >= $pisin_tuote['koko'] or $pakkaus_array['syvyys'] >= $pisin_tuote['koko']) and $pakkaus_array['paino'] >= $pisin_tuote['paino']) {
             if ($koko_nippu_tilavuus > 0 and $koko_nippu_paino > 0) {
               if ($koko_nippu_tilavuus >= $pakkaus_array['minimi_tilavuus'] or $koko_nippu_paino >= $pakkaus_array['minimi_paino']) {
+
+                if (isset($kukarow['debugstring'])) {
+                  $kukarow['debugstring'] .= "$koko_nippu_tilavuus > 0 and $koko_nippu_paino > 0 and $koko_nippu_tilavuus >= {$pakkaus_array['minimi_tilavuus']} or $koko_nippu_paino >= {$pakkaus_array['minimi_paino']}<br>";
+                }
+
                 $kaytettava_pakkaus = $indx;
                 break;
               }
             }
             elseif ($koko_nippu_tilavuus > 0 and $koko_nippu_paino == 0) {
               if ($koko_nippu_tilavuus >= $pakkaus_array['minimi_tilavuus']) {
+
+                if (isset($kukarow['debugstring'])) {
+                  $kukarow['debugstring'] .= "$koko_nippu_tilavuus > 0 and $koko_nippu_paino == 0 and $koko_nippu_tilavuus >= {$pakkaus_array['minimi_tilavuus']}<br>";
+                }
+
                 $kaytettava_pakkaus = $indx;
                 break;
               }
             }
             elseif ($koko_nippu_tilavuus == 0 and $koko_nippu_paino > 0) {
               if ($koko_nippu_paino >= $pakkaus_array['minimi_paino']) {
+
+                if (isset($kukarow['debugstring'])) {
+                  $kukarow['debugstring'] .= "$koko_nippu_tilavuus == 0 and $koko_nippu_paino > 0 and $koko_nippu_paino >= {$pakkaus_array['minimi_paino']}<br>";
+                }
+
                 $kaytettava_pakkaus = $indx;
                 break;
               }
@@ -16580,6 +16603,10 @@ if (!function_exists("valitse_pakkaus")) {
           }
         }
       }
+    }
+
+    if (isset($kukarow['debugstring'])) {
+      $kukarow['debugstring'] .= "(E510): KÄYTETÄÄN PAKKAUSTA <font class='head'>{$pakkaukset[$kaytettava_pakkaus]['nimi']}</font><br>\n";
     }
 
     return $kaytettava_pakkaus;

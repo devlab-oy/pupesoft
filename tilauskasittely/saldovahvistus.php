@@ -178,7 +178,7 @@ elseif (!empty($_SESSION['valitut_laskut'])) {
 
 //Echotaan saldovahvistukset, kun tehdään käyttöliittymästä haku
 //tai jos sessioon on tallennettu saldovahvistusrivejä edellisellä hakukerroilla ja ollaan välissä käyty jossain muussa ohjelmassa.
-if (($request['tee'] == 'aja_saldovahvistus' and !empty($request['ryhmittely_arvo'])) or (!empty($request['valitut_laskut']) and $request['tee'] == 'valitut_laskut_haettu')) {
+if ($request['tee'] == 'aja_saldovahvistus' or (!empty($request['valitut_laskut']) and $request['tee'] == 'valitut_laskut_haettu')) {
 
   js_openFormInNewWindow();
   if ($request['tee'] == 'aja_saldovahvistus') {

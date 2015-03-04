@@ -61,6 +61,22 @@ if (!function_exists("asiakastarkista")) {
       if ($ytunnus == "") {
         $virhe[$i] = t("Y-tunnus puuttuu")."!";
       }
+      elseif ($yhtiorow["myyntitilaus_saatavat"] == "Y") {
+
+        $qry = "SELECT luottoraja
+                FROM asiakas
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND ytunnus = '{$ytunnus}'";
+        $res = pupe_query($qry);
+
+        if (mysql_num_rows($res) > 0) {
+          $t['luottoraja'] = mysql_result($res,0);
+        }
+      }
+    }
+
+    if (mysql_field_name($result, $i) == "luottoraja" and $yhtiorow["myyntitilaus_saatavat"] == "Y" and isset($t['luottoraja'])) {
+      $t[$i] = $t['luottoraja'];
     }
 
     if (mysql_field_name($result, $i) == "ytunnus" and $yhtiorow['asiakkaan_tarkenne'] == 'B') {

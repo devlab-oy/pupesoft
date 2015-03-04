@@ -294,6 +294,12 @@ if ($tee2 == 'TULOSTA') {
 
             $toim = $toim_bck;
           }
+
+          if ($toim == "TOIMITUSASIAKIRJAT") {
+            require_once "tulosta_lasku.inc";
+
+            tulosta_lasku($laskurow["tunnus"], "", "", "", $valittu_tulostin);
+          }
         }
         else {
           echo "<font class='error'>".t("Keräyslista on jo tulostettu")."! ($tilausnumeroita)</font><br>";
@@ -611,6 +617,9 @@ if ($tee2 == '') {
   }
   elseif ($toim == 'VASTAANOTA_REKLAMAATIO') {
     echo "<font class='head'>".t("Tulosta purkulista").":</font><hr>";
+  }
+  elseif ($toim == "TOIMITUSASIAKIRJAT") {
+    echo "<font class='head'>".t("Tulosta toimitusasiakirjat").":</font><hr>";
   }
   else {
     echo "<font class='head'>".t("Tulosta keräyslista").":</font><hr>";

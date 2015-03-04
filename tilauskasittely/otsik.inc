@@ -2150,7 +2150,7 @@ if ($tila == "" and !isset($jatka)) {
       'toimtapa_apuro' => $toimtapa_apuro,
     );
     $ei_lahetettako = eilahetetta($args);
-    if ($ei_lahetettako) {
+    if ($ei_lahetettako or $yhtiorow["tilaukset_suoraan_laskutukseen"] == "K") {
       $eilah = 'CHECKED';
     }
     if ($srow['ketjutus']    != '') $eiket          = 'CHECKED';
@@ -2187,7 +2187,7 @@ if ($tila == "" and !isset($jatka)) {
         'poikkeava_yhtiorow' => $vt_yhtiorow,
       );
       $ei_lahetettako = eilahetetta($args);
-      if ($ei_lahetettako) {
+      if ($ei_lahetettako or $yhtiorow["tilaukset_suoraan_laskutukseen"] == "K") {
         $eilah = 'CHECKED';
       }
 
@@ -2224,7 +2224,7 @@ if ($tila == "" and !isset($jatka)) {
         'poikkeava_yhtiorow' => $vt_yhtiorow,
       );
       $ei_lahetettako = eilahetetta($args);
-      if ($ei_lahetettako) {
+      if ($ei_lahetettako or $yhtiorow["tilaukset_suoraan_laskutukseen"] == "K") {
         $eilah = 'CHECKED';
       }
       else {

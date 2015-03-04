@@ -477,7 +477,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     print_pdf_kerayslista($params_kerayslista);
 
     // jos halutaan MYÖS lähete
-    if ($yhtiorow["lahetteen_tulostustapa"] == "L") {
+    if ($yhtiorow["lahetteen_tulostustapa"] == "L" or $toim == "TOIMITUSASIAKIRJAT") {
       $lahetteen_tulostustapa_query = "SELECT *
                                        FROM lasku
                                        WHERE yhtio = '{$kukarow["yhtio"]}'

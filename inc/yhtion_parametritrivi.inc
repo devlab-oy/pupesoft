@@ -3584,6 +3584,19 @@ if ($fieldname == "nouto_suoraan_laskutukseen") {
   $jatko = 0;
 }
 
+if ($fieldname == "tilaukset_suoraan_laskutukseen") {
+  $sel = $trow[$i] == "K" ? " selected" : "";
+
+  $ulos = "<td><select name='{$nimi}' " . js_alasvetoMaxWidth($nimi, 400) . ">
+        <option value = ''>" .
+          t("Tilaus suoraan laskutukseen -valinta ei ole oletuksena valittu") . "</option>
+        <option value = 'K' {$sel}>" .
+          t("Tilaus suoraan laskutukseen -valinta on oletuksena valittu tilausta tehtäessä") .
+          "</option></select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "reklamaation_vastaanottovarasto" ) {
   $query = "SELECT tunnus, nimitys
             FROM varastopaikat

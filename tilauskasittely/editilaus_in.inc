@@ -108,11 +108,59 @@ if (!function_exists('hae_erikoiskaupan_parametrit')) {
   function hae_erikoiskaupan_parametrit($storename, $verkkokauppa_erikoiskasittely) {
 
     foreach ($verkkokauppa_erikoiskasittely as $sp) {
-      if (strpos($storename, $sp[0])) {
+      if (strpos($storename, $sp[0]) !== false) {
         return $sp;
       }
     }
     return array();
+  }
+}
+
+if (!function_exists('hae_yhtiotiedot')) {
+  function hae_yhtiotiedot($tieto) {
+    global $yhtiorow, $kukarow, $edi_ulos, $php_cli;
+
+    $query = "SELECT * FROM yhtio WHERE ovttunnus = '$tieto' and ovttunnus != ''";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) != 1) {
+      // Kokeillaan tehd‰ ovttunnuksesta ytunnus
+      $tieto2 = substr($tieto, 4, 8);     // etunollilla
+      $tieto  = substr($tieto, 4, 8) * 1; // ilman etunollio
+
+      // H‰kki ÷rumia varten
+      if ((int) $tieto == 0) $tieto = "20428100";
+
+      $query = "SELECT * FROM yhtio WHERE ytunnus in ('$tieto', '$tieto2') and ytunnus != ''";
+      $result = pupe_query($query);
+    }
+
+    if (mysql_num_rows($result) != 1) {
+      $edi_ulos .= "\n".t("Vastaanottavaa yrityst‰ ei lˆydy tunnuksella")." '$tieto', '$tieto2', '$mailfile'\n";
+      return;
+    }
+
+    $yhtiorow = mysql_fetch_assoc($result);
+    $yhtiorow = hae_yhtion_parametrit($yhtiorow["yhtio"]);
+
+    // Jos ajetaan komentorivilt‰, niin haetaan kukarow
+    if ($php_cli) {
+      $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
+
+      // Komentorivilt‰ ku ajetaan, niin ei haluta posteja admin-k‰ytt‰j‰lle
+      $kukarow["eposti"] = "";
+    }
+
+    $kukarow['yhtio'] = $yhtiorow['yhtio']; // T‰m‰ on vaarallista, mutta t‰t‰ ilman ei mik‰n toimi!
+    $kukarow['kuka']  = $edi_laatija;
+
+    // nollataan argv ja laitetaan ensimm‰iseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
+    $argv       = array();
+    $argv[0]    = "";
+    $argv[1]    = $kukarow["yhtio"];
+    $editil_cli = TRUE;
+
+    $edi_ulos .= "-> $yhtiorow[nimi] ($kukarow[yhtio])\n";
   }
 }
 
@@ -379,47 +427,7 @@ while ($tietue = fgets($fd)) {
 
     $edi_ulos .= t("Tilaus yritykselle")." '$tieto' ";
 
-    $query = "SELECT * FROM yhtio WHERE ovttunnus = '$tieto' and ovttunnus != ''";
-    $result = pupe_query($query);
-
-    if (mysql_num_rows($result) != 1) {
-      // Kokeillaan tehd‰ ovttunnuksesta ytunnus
-      $tieto2 = substr($tieto, 4, 8);     // etunollilla
-      $tieto  = substr($tieto, 4, 8) * 1; // ilman etunollio
-
-      // H‰kki ÷rumia varten
-      if ((int) $tieto == 0) $tieto = "20428100";
-
-      $query = "SELECT * FROM yhtio WHERE ytunnus in ('$tieto', '$tieto2') and ytunnus != ''";
-      $result = pupe_query($query);
-    }
-
-    if (mysql_num_rows($result) != 1) {
-      $edi_ulos .= "\n".t("Vastaanottavaa yrityst‰ ei lˆydy tunnuksella")." '$tieto', '$tieto2', '$mailfile'\n";
-      break;
-    }
-
-    $yhtiorow = mysql_fetch_assoc($result);
-    $yhtiorow = hae_yhtion_parametrit($yhtiorow["yhtio"]);
-
-    // Jos ajetaan komentorivilt‰, niin haetaan kukarow
-    if ($php_cli) {
-      $kukarow = hae_kukarow('admin', $yhtiorow['yhtio']);
-
-      // Komentorivilt‰ ku ajetaan, niin ei haluta posteja admin-k‰ytt‰j‰lle
-      $kukarow["eposti"] = "";
-    }
-
-    $kukarow['yhtio'] = $yhtiorow['yhtio']; // T‰m‰ on vaarallista, mutta t‰t‰ ilman ei mik‰n toimi!
-    $kukarow['kuka']  = $edi_laatija;
-
-    // nollataan argv ja laitetaan ensimm‰iseksi paratemetriksi yhtio, niin verkkolaskutus toimii!
-    $argv       = array();
-    $argv[0]    = "";
-    $argv[1]    = $kukarow["yhtio"];
-    $editil_cli = TRUE;
-
-    $edi_ulos .= "-> $yhtiorow[nimi] ($kukarow[yhtio])\n";
+    hae_yhtiotiedot($tieto);
     break;
 
   case 'ONADBY_DO' :
@@ -1293,14 +1301,20 @@ while ($tietue = fgets($fd)) {
 
       if ($edi_tyyppi == "magento" and $verkkokauppa != '' and isset($verkkokauppa_erikoiskasittely)
         and count($verkkokauppa_erikoiskasittely) > 0) {
-
-        list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa, $editilaus_myyja) = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+        list ($nimi, $editilaus_tilaustyyppi, $tilaustyyppilisa, $editilaus_myyja, 
+          $vaihtoehtoinen_ovt) = hae_erikoiskaupan_parametrit($verkkokauppa, $verkkokauppa_erikoiskasittely);
+        
         // Jos lˆytyy erikoisk‰sittely niin n‰ytet‰‰n se myˆs k‰yttˆliittym‰ss‰
         if (isset($nimi) and !empty($nimi)) {
           $edi_ulos .= t("Tilauksen erikoisk‰sittely")."-> {$nimi},
               ".t("tilaustyyppi").": {$editilaus_tilaustyyppi},
               ".t("tilaustyyppilis‰").": {$tilaustyyppilisa},
               ".t("myyj‰numero").": {$editilaus_myyja} \n\n";
+        }
+        // Jos erikosk‰sittelyyn on m‰‰ritelty eri yhtiˆ t‰lle tilaukselle niin p‰ivitet‰‰n tiedot
+        if (isset($vaihtoehtoinen_ovt) and !empty($vaihtoehtoinen_ovt)) {
+          $edi_ulos .= t("K‰‰nnet‰‰n tilaus yritykselle")." '$vaihtoehtoinen_ovt' ";
+          hae_yhtiotiedot($vaihtoehtoinen_ovt);
         }
       }
 

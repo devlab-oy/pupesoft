@@ -157,11 +157,8 @@ foreach($suoritukset as $suoritus) {
         elseif(strpos($kuitti1, "HYVITYS") !== false) {
           $maksutyyppi = "HYVITYS";
         }
-        elseif(strpos($kuitti1, "OSTO") !== false) {
-          $maksutyyppi = "OSTO";
-        }
         else {
-          $maksutyyppi = "FAIL";
+          $maksutyyppi = "OSTO";
         }
 
         break;

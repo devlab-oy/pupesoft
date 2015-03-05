@@ -46,6 +46,9 @@ if (!function_exists('finvoice_otsik')) {
     case '003721291126':
       $tulostuspalvelu  = "PRINT";
       break;
+    case 'ITELFIHH':
+      $tulostuspalvelu  = "TULOSTUSPALVELU";
+      break;
     default:
       $tulostuspalvelu  = "";
       break;

@@ -3,7 +3,50 @@ require "inc/parametrit.inc";
 
 $errors = array();
 
-if (isset($task) and $task == 'perusta_saapuminen') {
+if (!isset($task)) {
+  $otsikko = t("Perustetut tulonumerot");
+  $view = "perus";
+}
+
+if (isset($task) and $task == 'aloita_perustus') {
+  $otsikko = t("Syötä saapumisen tiedot");
+  $view = "tulotiedot";
+}
+
+if (isset($task) and $task == 'anna_tulotiedot') {
+
+  if ($varastotunnus_ja_koodi == 'X') {
+    $errors['varastotunnus_ja_koodi'] = t("Valitse varasto");
+  }
+
+  if ($toimittajatunnus == 'X') {
+    $errors['toimittajatunnus'] = t("Valitse toimittaja");
+  }
+
+  if (empty($edeltava_asiakirja)) {
+    $errors['edeltava_asiakirja'] = t("Edeltävä asiakirja puuttuu");
+  }
+
+  if (!is_numeric($tuoteryhmien_maara)) {
+    $errors['tuoteryhmien_maara'] = t("Tarkista määra");
+  }
+  elseif (empty($tuoteryhmien_maara)) {
+   $tuoteryhmien_maara = 1;
+  }
+
+  if (count($errors) > 0) {
+    $otsikko = t("Saapuvan rahdin perustaminen");
+    $view = 'tulotiedot';
+  }
+  else {
+    $otsikko = t("Täydennä saapumisen tiedot");
+    $view = "tuotetiedot";
+  }
+
+}
+
+
+if (isset($task) and $task == 'perusta') {
 
   foreach ($tuote as $key => $tiedot) {
 
@@ -50,7 +93,7 @@ if (isset($task) and $task == 'perusta_saapuminen') {
   }
 
   if (count($errors) > 0) {
-    $task = 'uusi_saapuminen';
+    $view = 'tuotetiedot';
   }
   else {
 
@@ -68,12 +111,11 @@ if (isset($task) and $task == 'perusta_saapuminen') {
       'liitostunnus' => $toimrow['tunnus'],
       'nimi' => $toimrow['nimi'],
       'myytil_toimaika' => $data['toimitusaika'],
-      'varasto' => $data['varasto_id'],
+      'varasto' => $varastotunnus,
       'osoite' => $toimrow['osoite'],
       'postino' => $toimrow['postino'],
       'postitp' => $toimrow['postitp'],
       'maa' => $toimrow['maa'],
-      'varasto' => $varastotunnus,
       'uusi_ostotilaus' => 'JOO'
     );
 
@@ -123,112 +165,90 @@ if (isset($task) and $task == 'perusta_saapuminen') {
       $var = '';
       $kutsuja = '';
       $kpl2 = 0;
+      $varasto = $varastotunnus;
       $toimittajan_tunnus = $toimrow['tunnus'];
 
       $kukarow['kesken'] = $laskurow['tunnus'];
 
       require "tilauskasittely/lisaarivi.inc";
-
     }
     header("Location: tullivarastointi.php?pe=ok&tn={$tulonumero}");
   }
 }
 
 
-if ($task == 'aloita_perustus' or $task == 'uusi_saapuminen') {
 
-  if ($varastotunnus_ja_koodi == 'X' and $task == 'uusi_saapuminen') {
-    $errors['varastotunnus_ja_koodi'] = t("Valitse varasto");
-  }
 
-  if ($toimittajatunnus == 'X' and $task == 'uusi_saapuminen') {
-    $errors['toimittajatunnus'] = t("Valitse toimittaja");
-  }
 
-  if (!is_numeric($tuoteryhmien_maara) and $task == 'uusi_saapuminen') {
-    $errors['tuoteryhmien_maara'] = t("Tarkista määra");
-  }
-  elseif (empty($tuoteryhmien_maara)) {
-   $tuoteryhmien_maara = 0;
-  }
 
-  //haetaan toimittajat valmiiksi
-  $query = "SELECT nimi, tunnus
-            FROM toimi
-            WHERE yhtio = '{$kukarow['yhtio']}'";
-  $result = pupe_query($query);
-
-  $toimittajat = array();
-  while ($toimittaja = mysql_fetch_assoc($result)) {
-    $toimittajat[$toimittaja['tunnus']] = $toimittaja['nimi'];
-  }
-
-  if (count($errors) > 0) {
-    unset($task);
-  }
-}
-
-if (!isset($task)) {
-  $otsikko = t("Perustetut tulonumerot");
-}
-else {
-  $otsikko = t("Saapuvan rahdin perustaminen");
-}
-
-echo "<font class='head'>{$otsikko}</font><hr><br>";
+echo "<font class='head'>{$otsikko} {$task}</font><hr><br>";
 
 if (isset($pe) and $pe == "ok") {
   echo "<p class='green'>", t("Tulonumero: "), $tn, ' ', t("perustettu"), "</p>";
   echo "<br>";
 }
 
-if (isset($task) and $task == "uusi_saapuminen") {
+if (isset($view) and $view == "tuotetiedot") {
 
-  $varastotunnus_ja_koodi = explode("#", $varastotunnus_ja_koodi);
-  $varastotunnus = $varastotunnus_ja_koodi[0];
-  $varastokoodi = $varastotunnus_ja_koodi[1];
+  if(empty($tulonumero)) {
 
-  $vuosi = date("y");
+    $_varastotunnus_ja_koodi = explode("#", $varastotunnus_ja_koodi);
+    $varastotunnus = $_varastotunnus_ja_koodi[0];
+    $varastokoodi = $_varastotunnus_ja_koodi[1];
 
-  // haetaan seuraava vapaa juokseva numero
-  $query  = "SELECT asiakkaan_tilausnumero AS saapumiskoodi
-             FROM lasku
-             WHERE yhtio = '{$kukarow['yhtio']}'
-             AND tila = 'O'
-             AND viesti = 'tullivarasto'
-             AND asiakkaan_tilausnumero LIKE '%-{$vuosi}'
-             ORDER BY tunnus DESC
-             LIMIT 1";
-  $result = pupe_query($query);
-  $row = mysql_fetch_assoc($result);
+    $vuosi = date("y");
 
-  if ($row) {
-    $koodin_osat = explode("-", $row['saapumiskoodi']);
-    $juoksunumero = $koodin_osat[1] + 1;
-    $tulonumero = $varastokoodi . "-" . $juoksunumero . "-" . $vuosi;
+    // haetaan seuraava vapaa juokseva numero
+    $query  = "SELECT asiakkaan_tilausnumero AS saapumiskoodi
+               FROM lasku
+               WHERE yhtio = '{$kukarow['yhtio']}'
+               AND tila = 'O'
+               AND viesti = 'tullivarasto'
+               AND asiakkaan_tilausnumero LIKE '%-{$vuosi}'
+               ORDER BY tunnus DESC
+               LIMIT 1";
+    $result = pupe_query($query);
+    $row = mysql_fetch_assoc($result);
+
+    if ($row) {
+      $koodin_osat = explode("-", $row['saapumiskoodi']);
+      $juoksunumero = $koodin_osat[1] + 1;
+      $tulonumero = $varastokoodi . "-" . $juoksunumero . "-" . $vuosi;
+    }
+    else {
+      $tulonumero = $varastokoodi . "-1-" . $vuosi;
+    }
   }
-  else {
-    $tulonumero = $varastokoodi . "-1-" . $vuosi;
-  }
+
+  $toimittajat = toimittajat();
 
   echo "
   <form method='post'>
-  <input type='hidden' name='task' value='perusta_saapuminen' />
+  <input type='hidden' name='task' value='perusta' />
   <input type='hidden' name='toimittajatunnus' value='$toimittajatunnus' />
+  <input type='hidden' name='varastotunnus_ja_koodi' value='$varastotunnus_ja_koodi' />
   <input type='hidden' name='tuoteryhmien_maara' value='$tuoteryhmien_maara' />
   <input type='hidden' name='varastotunnus' value='$varastotunnus' />
   <input type='hidden' name='varastokoodi' value='$varastokoodi' />
-  <input type='hidden' name='tulonumero' value='$tulonumero' />
+  <input type='hidden' name='edeltava_asiakirja' value='$edeltava_asiakirja' />
+  <input type='hidden' name='tulonumero' value='$tulonumero' />";
+
+  echo "
   <table>
   <tr>
 
     <th>" . t("Toimittaja") ."</th>
-    <td>{$toimittajat[$toimittajatunnus]}</td>
-    <td class='back'>&nbsp;</td>
-
     <th>" . t("Tulonumero") ."</th>
+    <th>" . t("Edeltävä asiakirja") ."</th>
+    <th>" . t("Rekisterinumero") ."</th>
+    <th>" . t("Tulopäiva") ."</th>
+  </tr>
+  <tr>
+    <td>{$toimittajat[$toimittajatunnus]}</td>
     <td>{$tulonumero}</td>
-    <td class='back'>&nbsp;</td>
+    <td>{$edeltava_asiakirja}</td>
+    <td>{$rekisterinumero}</td>
+    <td>{$tulopaiva}</td>
   </tr>
   </table>";
 
@@ -296,16 +316,55 @@ if (isset($task) and $task == "uusi_saapuminen") {
   else {
     echo "<br><br><input type='submit' value='". t("Perusta saapuminen") ."' /></form>";
   }
-
-
-
 }
 
-if (isset($task) and $task == 'aloita_perustus') {
+
+
+
+
+
+
+if (isset($view) and $view == 'tulotiedot') {
+
+  $toimittajat = toimittajat();
+
+  if (!isset($tuoteryhmien_maara)) {
+    $tuoteryhmien_maara = 1;
+  }
+
+  echo "
+    <script>
+      $(function($){
+         $.datepicker.regional['fi'] = {
+                     closeText: 'Sulje',
+                     prevText: '&laquo;Edellinen',
+                     nextText: 'Seuraava&raquo;',
+                     currentText: 'T&auml;n&auml;&auml;n',
+             monthNames: ['Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kes&auml;kuu',
+              'Hein&auml;kuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu'],
+              monthNamesShort: ['Tammi','Helmi','Maalis','Huhti','Touko','Kes&auml;',
+              'Hein&auml;','Elo','Syys','Loka','Marras','Joulu'],
+                      dayNamesShort: ['Su','Ma','Ti','Ke','To','Pe','Su'],
+                      dayNames: ['Sunnuntai','Maanantai','Tiistai','Keskiviikko','Torstai','Perjantai','Lauantai'],
+                      dayNamesMin: ['Su','Ma','Ti','Ke','To','Pe','La'],
+                      weekHeader: 'Vk',
+              dateFormat: 'dd.mm.yy',
+                      firstDay: 1,
+                      isRTL: false,
+                      showMonthAfterYear: false,
+                      yearSuffix: ''};
+          $.datepicker.setDefaults($.datepicker.regional['fi']);
+      });
+
+      $(function() {
+        $('#tulopaiva').datepicker();
+      });
+      </script>
+  ";
 
   echo "
   <form method='post'>
-  <input type='hidden' name='task' value='uusi_saapuminen' />
+  <input type='hidden' name='task' value='anna_tulotiedot' />
   <input type='hidden' name='' value='' />
   <table>
   <tr>
@@ -342,29 +401,43 @@ if (isset($task) and $task == 'aloita_perustus') {
       <select name='varastotunnus_ja_koodi'>
         <option value='X'>" . t("Valitse varasto") ."</option>";
 
-        $query = "SELECT *
-                  FROM varastopaikat
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND nimitark != ''";
-        $result = pupe_query($query);
+        $varastot = varastot();
 
-        while ($varasto = mysql_fetch_assoc($result)) {
+        foreach ($varastot as $varasto) {
 
-          if ($varastotunnus_ja_koodi == $varasto['tunnus']."#".$varasto['nimitark']) {
+          if ($varastotunnus_ja_koodi == $varasto['varastokoodi']) {
             $selected = 'selected';
           }
           else {
             $selected = '';
           }
 
-          $varastotunnus_ja_koodi = $varasto['tunnus']."#".$varasto['nimitark'];
-
-          echo "<option value='{$varastotunnus_ja_koodi}' {$selected}>{$varasto['nimitys']}</option>";
+          echo "<option value='{$varasto['varastokoodi']}' {$selected}>{$varasto['nimitys']}</option>";
         }
 
 
     echo "</select></td><td class='back error'>{$errors['varastotunnus_ja_koodi']}</td>
   </tr>
+
+
+  <tr>
+    <th>" . t("Edeltävä asiakirja") . "</th>
+    <td><input type='text' name='edeltava_asiakirja' value='{$edeltava_asiakirja}' /></td>
+    <td class='back error'>{$errors['edeltava_asiakirja']}</td>
+  </tr>
+
+  <tr>
+    <th>" . t("Auton rekisterinumero") . "</th>
+    <td><input type='text' name='rekisterinumero' value='{$rekisterinumero}' /></td>
+    <td class='back error'>{$errors['rekisterinumero']}</td>
+  </tr>
+
+  <tr>
+    <th>" . t("Tulopäivä") . "</th>
+    <td><input type='text' name='tulopaiva' id='tulopaiva' value='{$tulopaiva}' /></td>
+    <td class='back error'>{$errors['tulopaiva']}</td>
+  </tr>
+
 
   <tr>
     <th></th>
@@ -376,12 +449,16 @@ if (isset($task) and $task == 'aloita_perustus') {
 
 }
 
-if (!isset($task)) {
+
+
+
+// perusnäkymä
+if (isset($view) and $view == "perus") {
 
   echo "
     <form>
     <input type='hidden' name='task' value='aloita_perustus' />
-    <input type='submit' value='". t("Perusta uusi tulo") . "' />
+    <input type='submit' value='". t("Perusta uusi saapuminen") . "' />
     </form><br><br>";
 
   $query = "SELECT lasku.asiakkaan_tilausnumero,
@@ -454,6 +531,46 @@ if (!isset($task)) {
 require "inc/footer.inc";
 
 
+
+
+
+
+
+function toimittajat() {
+  global $kukarow;
+
+  $query = "SELECT nimi, tunnus
+            FROM toimi
+            WHERE yhtio = '{$kukarow['yhtio']}'";
+  $result = pupe_query($query);
+
+  $toimittajat = array();
+  while ($toimittaja = mysql_fetch_assoc($result)) {
+    $toimittajat[$toimittaja['tunnus']] = $toimittaja['nimi'];
+  }
+
+  return $toimittajat;
+}
+
+
+function varastot() {
+  global $kukarow;
+
+  $query = "SELECT
+            concat(tunnus, '#', nimitark) AS varastokoodi,
+            nimitys
+            FROM varastopaikat
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND nimitark != ''";
+  $result = pupe_query($query);
+
+  $varastot = array();
+  while ($varasto = mysql_fetch_assoc($result)) {
+    $varastot[] = $varasto;
+  }
+
+  return $varastot;
+}
 
 
 

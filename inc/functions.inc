@@ -17242,7 +17242,7 @@ if (!function_exists("tee_keraysera")) {
     // esim. muutetaan metrit senteiksi
     $mittakerroin = 100;
 
-    if (1 == 1 or ($tee_keraysera_debugdir != "" and is_dir($tee_keraysera_debugdir))) {
+    if ($tee_keraysera_debugdir != "" and is_dir($tee_keraysera_debugdir)) {
 
       if ($yhtiorow["kayttoliittyma"] == "U") {
         $css = $yhtiorow['css'];
@@ -17293,8 +17293,9 @@ if (!function_exists("tee_keraysera")) {
                  AND varaston_hyllypaikat.hyllynro            = tilausrivi.hyllynro
                  AND varaston_hyllypaikat.hyllyvali           = tilausrivi.hyllyvali
                  AND varaston_hyllypaikat.hyllytaso           = tilausrivi.hyllytaso
-                  AND varaston_hyllypaikat.keraysvyohyke       = '14')
+                 AND varaston_hyllypaikat.keraysvyohyke       IN ({$keraysvyohyke}))
                JOIN keraysvyohyke ON (keraysvyohyke.yhtio = lasku.yhtio
+                 AND keraysvyohyke.tunnus                     IN ({$keraysvyohyke})
                  AND keraysvyohyke.tunnus                     = varaston_hyllypaikat.keraysvyohyke)
                JOIN toimitustapa ON (toimitustapa.yhtio = lasku.yhtio
                  AND toimitustapa.selite                      = lasku.toimitustapa)
@@ -17322,7 +17323,7 @@ if (!function_exists("tee_keraysera")) {
 
                UNION
 
-               (SELECT
+               (SELECT SQL_NO_CACHE
                lasku.prioriteettinro as prioriteetti,
                0 as erotus,
                lasku.ohjausmerkki,
@@ -18045,8 +18046,6 @@ if (!function_exists("tee_keraysera")) {
     mysql_data_seek($res, 0);
 
     $nurkan_takaa = false;
-
-    //foreach ($fixed_main_array as $key => $tilaukset) {
 
     $_fixed_main_array_count = count($fixed_main_array);
     $_fixed_main_array_keys = array_keys($fixed_main_array);
@@ -19179,8 +19178,8 @@ if (!function_exists("tee_keraysera")) {
 
         if (isset($kukarow['debugstring'])) $kukarow['debugstring'] .= "(E1510): Tuoteno $fail_tuoteno (Tilaus $fail_otunnus)<br>\n";
 
-        // $query = "UPDATE lasku SET toimitustavan_lahto = 0, toimitustavan_lahto_siirto = 0 WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$fail_otunnus}'";
-        // $upd_res = pupe_query($query);
+        $query = "UPDATE lasku SET toimitustavan_lahto = 0, toimitustavan_lahto_siirto = 0 WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$fail_otunnus}'";
+        $upd_res = pupe_query($query);
       }
 
       if ($yhtiorow['alert_varasto_kayttajat'] != '') {
@@ -19463,12 +19462,7 @@ if (!function_exists("tee_keraysera")) {
     if (isset($kukarow['debugstring'])) {
       $filenimi = "Kerayseradebug-".md5(uniqid(mt_rand(), true)).".html";
 
-      $tee_keraysera_debugdir = "/tmp";
-
       file_put_contents($tee_keraysera_debugdir."/".$filenimi, $kukarow['debugstring']);
-
-    echo $kukarow['debugstring'];
-    exit;
 
       // Tyhjennet‰‰n t‰m‰ t‰ss‰ ja lis‰t‰‰n tallenna_ker‰yser‰ss‰ viel‰ v‰h‰n lis‰‰ jos on tarvis
       $kukarow['debugstring'] = "";

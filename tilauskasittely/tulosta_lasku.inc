@@ -2412,7 +2412,30 @@ if (!function_exists('alvierittely')) {
         $pdf_lasku->draw_text(550, $kala, $laskurow["valkoodi"],                 $thispage, $norm);
       }
 
+      $kala -= 40;
+
+      $isoparams = array_merge($norm, array("height" => 12));
+      $luottoteksti = "Luoton myöntää Lindorff Invest Oy, jolta saatte laskun kotiinne lähipäivinä";
+      $pdf_lasku->draw_text(200, $kala, t($luottoteksti) . ".", $thispage, $isoparams);
+
+      $kala -= 50;
+
+      $lineparams = array("width" => 0.1);
+      $pdf_lasku->draw_line(array(200, 350), array($kala, $kala), $thispage, $lineparams);
+      $pdf_lasku->draw_line(array(400, 550), array($kala, $kala), $thispage, $lineparams);
+
       $kala -= 10;
+
+      $pdf_lasku->draw_text(200, $kala, t("Paikka ja aika"), $thispage, $norm);
+      $pdf_lasku->draw_text(400, $kala, t("Allekirjoitus"), $thispage, $norm);
+
+      $kala -= 30;
+
+      $pdf_lasku->draw_line(array(400, 550), array($kala, $kala), $thispage, $lineparams);
+
+      $kala -= 10;
+
+      $pdf_lasku->draw_text(400, $kala, t("Nimenselvennys"), $thispage, $norm);
     }
 
     return $kala;

@@ -36,7 +36,6 @@ if (isset($ajax)) {
       $query = "SELECT GROUP_CONCAT(tunnus) tunnukset
                 FROM varastopaikat
                 WHERE yhtio      = '{$kukarow['yhtio']}'
-                AND tyyppi      != 'P'
                 AND toimipaikka  = '{$kukarow['toimipaikka']}'";
 
       $toimipaikka_varasto_res = pupe_query($query);
@@ -48,7 +47,6 @@ if (isset($ajax)) {
         $query = "SELECT GROUP_CONCAT(tunnus) tunnukset
                   FROM varastopaikat
                   WHERE yhtio      = '{$kukarow['yhtio']}'
-                  AND tyyppi      != 'P'
                   AND toimipaikka  = 0";
         $toimipaikka_varasto_res = pupe_query($query);
         $toimipaikka_varasto_row = mysql_fetch_assoc($toimipaikka_varasto_res);
@@ -457,7 +455,6 @@ if (isset($ajax)) {
         $query  = "SELECT GROUP_CONCAT(tunnus) AS tunnukset
                    FROM varastopaikat
                    WHERE yhtio      = '{$kukarow['yhtio']}'
-                   AND tyyppi      != 'P'
                    AND toimipaikka  = '{$_toimipaikka}'";
         $vares = pupe_query($query);
         $varow = mysql_fetch_assoc($vares);
@@ -1008,7 +1005,6 @@ if (isset($ajax)) {
           $query  = "SELECT GROUP_CONCAT(tunnus) AS tunnukset
                      FROM varastopaikat
                      WHERE yhtio      = '{$kukarow['yhtio']}'
-                     AND tyyppi      != 'P'
                      AND toimipaikka  = '{$_toimipaikka}'";
           $vares = pupe_query($query);
           $varow = mysql_fetch_assoc($vares);

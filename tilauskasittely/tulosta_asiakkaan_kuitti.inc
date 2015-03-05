@@ -62,7 +62,8 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $asiakkaan_kieli      = $lasku["asiakkaan_kieli"];
 
   // Arvojen asettelu spritfillä ja muu asettelu
-  $yhteensa = sprintf("%34.34s", $yhteensa);
+  $yhteensa_left = 32 - strlen($lasku["valkoodi"]);
+  $yhteensa = sprintf("%{$yhteensa_left}.{$yhteensa_left}s", $yhteensa);
 
   if ($pyoristys) {
     $pyoristys  = sprintf("%33.33s", $pyoristys);
@@ -93,7 +94,13 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $tilausnumero_teksti = count($tilausnumerot) > 1 ? "Tilausnumerot" : "Tilausnumero";
 
   // Printattavan stringin luominen
-  $kuitin_teksti = "{$logo}\n\n";
+  $kuitin_teksti = "";
+
+  if ($avaa_lipas_lopuksi) {
+    $kuitin_teksti .= $avaa_lipas;
+  }
+
+  $kuitin_teksti .= "{$logo}\n\n";
 
   $kuitin_teksti .= "{$align_center}";
 
@@ -127,7 +134,7 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
   // Hinta yhteensä
   $kuitin_teksti .= "==========================================\n";
-  $kuitin_teksti .= "{$emphasized_on}YHTEENSÄ{$yhteensa}{$emphasized_off}\n";
+  $kuitin_teksti .= "{$emphasized_on}YHTEENSÄ, {$lasku["valkoodi"]}{$yhteensa}{$emphasized_off}\n";
 
   if ($pyoristys) {
     $kuitin_teksti .= "{$emphasized_on}PYÖRISTYS{$pyoristys}{$emphasized_off}\n";
@@ -173,7 +180,11 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $kuitin_teksti .= t($tilausnumero_teksti, $asiakkaan_kieli) .
     ": " .
     implode(", ", $tilausnumerot) .
-    "\n\n\n";
+    "\n\n";
+
+  $kuitin_teksti .= date("d.m.Y H:i:s");
+
+  $kuitin_teksti .= "\n\n\n";
 
   $kuitin_teksti .= "{$emphasized_on}";
   $kuitin_teksti .= "{$yhtiorow['www']}\n\n";
@@ -191,10 +202,6 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
   $kuitin_teksti .= "\n\n\n\n\n\n";
   $kuitin_teksti .= $katkaisu;
-
-  if ($avaa_lipas_lopuksi) {
-    $kuitin_teksti .= $avaa_lipas;
-  }
 
   lpr($kuitin_teksti, $tulostimen_tunnus);
 

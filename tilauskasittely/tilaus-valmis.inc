@@ -1137,11 +1137,13 @@ else {
       /**
        * Tulostetaan kassakuitti
        */
-      if ((int) $kateismaksu["kateinen"] == 0) {
-        require "tilauskasittely/tulosta_asiakkaan_kuitti.inc";
 
-        tulosta_asiakkaan_kuitti($laskurow["laskunro"], $kukarow["kuittitulostin"]);
-      }
+      require_once "tilauskasittely/tulosta_asiakkaan_kuitti.inc";
+
+      $kuitin_parametrit = array("kateinen" => $kateista_annettu);
+
+      tulosta_asiakkaan_kuitti($laskurow["laskunro"], $kukarow["kuittitulostin"],
+                               $kuitin_parametrit);
 
       unset($valittu_tulostin);
     }

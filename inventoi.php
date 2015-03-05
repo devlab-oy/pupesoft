@@ -405,6 +405,7 @@ if ($tee == 'VALMIS') {
           if (is_array($eranumero_valitut[$i])) {
 
             $erasyotetyt = 0;
+            $_uudet = array();
 
             foreach ($eranumero_valitut[$i] as $enro => $ekpl) {
               $ekpl = str_replace(",", ".", $ekpl);
@@ -425,7 +426,26 @@ if ($tee == 'VALMIS') {
 
               if ($eranumero_uudet[$i][$enro] == '0000-00-00') {
                 $onko_uusia++;
+                $_uudet[$i][$enro] = $eranumero_valitut[$i][$enro];
               }
+            }
+
+            // Katsotaan ettei olla yritetty muokata vanhoja eriä
+            // vanhojen erien muokkaus sekoittaa uusien erien lisäyksen
+            $eravirhe = 0;
+            if ($onko_uusia > 0) {
+              foreach ($eranumero_valitut[$i] as $enro => $ekpl) {
+                if (!empty($ekpl)) {
+                  if (!array_key_exists($enro, $_uudet[$i])) {
+                    $eravirhe = 1;
+                    $virhe = 1;
+                  }
+                }
+              }
+            }
+
+            if ($eravirhe == 1) {
+              echo "<font class='error'>".t("VIRHE: Uusia eriä syötettäessä ei voi muokata vanhoja eriä")."!</font><br>";
             }
 
             $erasyotetyt = round($erasyotetyt, 2);
@@ -853,9 +873,18 @@ if ($tee == 'VALMIS') {
             // Jos pävitettiin saldoa, tehdään kirjanpito. Vaikka summa olisi nolla. Muuten jälkilaskenta ei osaa korjata tätä, jos tiliöintejä ei tehdä.
             if (mysql_affected_rows() > 0) {
 
+              // Päivämäärällä inventoitaessa laitetaan tämäpäivämäärä,
+              // jos eri päivämäärä ei ole syötetty,
+              // mutta jos päivämäärä on syötetty laitetaan se luotavan laskun tapahtumapäivämääräksi
+              $lasku_tapvm = date('Y-m-d');
+
+              if ($paivamaaran_kasisyotto == "JOO" and (!empty($inventointipvm_pp) and !empty($inventointipvm_kk) and !empty($inventointipvm_vv))) {
+                $lasku_tapvm = "$inventointipvm_vv-$inventointipvm_kk-$inventointipvm_pp";
+              }
+
               $query = "INSERT into lasku set
                         yhtio      = '$kukarow[yhtio]',
-                        tapvm      = now(),
+                        tapvm      = '{$lasku_tapvm}',
                         tila       = 'X',
                         alatila    = 'I',
                         laatija    = '$kukarow[kuka]',
@@ -864,11 +893,32 @@ if ($tee == 'VALMIS') {
               $result = pupe_query($query);
               $laskuid = mysql_insert_id($GLOBALS["masterlink"]);
 
-              if ($yhtiorow["varastonmuutos_inventointi"] != "") {
-                $varastonmuutos_tili = $inven_laji_tilino != "" ? $inven_laji_tilino : $yhtiorow["varastonmuutos_inventointi"];
+              // Seuraako myyntitiliöinti tuotteen tyyppiä ja onko kyseessä raaka-aine?
+              $raaka_aine_tiliointi = $yhtiorow["raaka_aine_tiliointi"];
+              $raaka_ainetililta = ($raaka_aine_tiliointi == "Y" and $row["tuotetyyppi"] == "R");
+
+              // Määritetään varastonmuutostili
+              if ($raaka_ainetililta) {
+                $varastonmuutos_tili = $yhtiorow["raaka_ainevarastonmuutos"];
+              }
+              elseif ($yhtiorow["varastonmuutos_inventointi"] != "") {
+                if ($inven_laji_tilino != "") {
+                  $varastonmuutos_tili = $inven_laji_tilino;
+                }
+                else {
+                  $varastonmuutos_tili = $yhtiorow["varastonmuutos_inventointi"];
+                }
               }
               else {
                 $varastonmuutos_tili = $yhtiorow["varastonmuutos"];
+              }
+
+              // Määritetään varastotili
+              if ($raaka_ainetililta) {
+                $varastotili = $yhtiorow["raaka_ainevarasto"];
+              }
+              else {
+                $varastotili = $yhtiorow["varasto"];
               }
 
               if ($yhtiorow["tarkenteiden_prioriteetti"] == "T") {
@@ -921,7 +971,7 @@ if ($tee == 'VALMIS') {
               $query = "INSERT into tiliointi set
                         yhtio    = '$kukarow[yhtio]',
                         ltunnus  = '$laskuid',
-                        tilino   = '$yhtiorow[varasto]',
+                        tilino   = '{$varastotili}',
                         kustp    = '{$kustp_ins}',
                         kohde    = '{$kohde_ins}',
                         projekti = '{$projekti_ins}',
@@ -1571,6 +1621,18 @@ if ($tee == 'INVENTOI') {
 
           $sarjalaskk = 1;
 
+          // Katsotaan onko uusia eriä syötetty,
+          // koska jos uusia eriä on syötetty tyhjennetään vanhojen erien kpl kentät
+          $_onko_uusia = FALSE;
+
+          while ($sarjarow = mysql_fetch_assoc($sarjares)) {
+            if ($sarjarow['laskutettuaika'] == '0000-00-00') {
+              $_onko_uusia = TRUE;
+            }
+          }
+
+          mysql_data_seek($sarjares, 0);
+
           while ($sarjarow = mysql_fetch_assoc($sarjares)) {
             echo "<tr><td>$sarjalaskk. $sarjarow[sarjanumero]</td>
                 <td>$sarjarow[era_kpl] ".t_avainsana("Y", "", "and avainsana.selite='$sarjarow[yksikko]'", "", "", "selite")."</td>
@@ -1592,7 +1654,7 @@ if ($tee == 'INVENTOI') {
               if ($sarjarow['laskutettuaika'] == '0000-00-00') {
                 echo "<input type='hidden' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>";
                 echo "<font class='message'>**", t("UUSI"), "**</font>";
-                echo " <a href='inventoi.php?tee=POISTAERANUMERO&tuoteno=$tuoteno&lista=$lista&lista_aika=$lista_aika&alku=$alku&toiminto=poistaeranumero&sarjatunnus=$sarjarow[tunnus]&paivamaaran_kasisyotto=$paivamaaran_kasisyotto&inventointipvm_pp=$inventointipvm_pp&inventointipvm_kk=$inventointipvm_kk&inventointipvm_vv=$inventointipvm_vv'>".t("Poista")."</a>";
+                echo " <a href='inventoi.php?tee=POISTAERANUMERO&tuoteno=$tuoteno&lista=$lista&lista_aika=$lista_aika&alku=$alku&toiminto=poistaeranumero&sarjatunnus=$sarjarow[tunnus]&toim=$toim&paivamaaran_kasisyotto=$paivamaaran_kasisyotto&inventointipvm_pp=$inventointipvm_pp&inventointipvm_kk=$inventointipvm_kk&inventointipvm_vv=$inventointipvm_vv'>".t("Poista")."</a>";
               }
               else {
                 echo "<input type='hidden' name='eranumero_valitut[$tuoterow[tptunnus]][$sarjarow[tunnus]]' value='$sarjarow[era_kpl]'>";
@@ -1600,7 +1662,7 @@ if ($tee == 'INVENTOI') {
               }
             }
             else {
-              if ($onko_uusia > 0) {
+              if ($onko_uusia > 0 or $_onko_uusia) {
                 $apu_era_kpl = "";
               }
               else {

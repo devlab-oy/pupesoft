@@ -47,3 +47,7 @@ table.indexvas td {
   float: left;
   margin-right: 5px;
 }
+
+.hidden {
+  display: none;
+}

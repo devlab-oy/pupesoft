@@ -9,6 +9,7 @@ function echo_myyntiseuranta_table() {
 
   $tulos_ja_liikevaihto = hae_tulos_ja_liikevaihto($nykyinen_kvartaali);
   $avoimet_tilaukset = hae_avoimet_tilaukset($kukarow['tunnus']);
+  $katteet_osastoittain = hae_myyjan_katteet_osastoittain($nykyinen_kvartaali, $kukarow["tunnus"]);
 
   if (stristr($kukarow['asema'], 'myyjä')) {
     $tilikausi = array(
@@ -91,13 +92,24 @@ function echo_myyntiseuranta_table() {
     echo "</td>";
     echo "</tr>";
 
+    $katteiden_summa = 0.0;
+
+    foreach ($katteet_osastoittain as $osasto => $kate) {
+      $katteiden_summa += $kate;
+      $kate = sprintf("%.2f", $kate) . " {$yhtiorow["valkoodi"]}";
+
+      echo "<tr>";
+      echo "<td>{$osasto} " . t("kate") . " " . piirra_aikavali($nykyinen_kvartaali) . "</td>";
+      echo "<td align='right'>{$kate}</td>";
+      echo "</tr>";
+    }
+
+    $katteiden_summa = sprintf("%.2f", $katteiden_summa) . " {$yhtiorow["valkoodi"]}";
+    $tyyli = "style='font-weight:bold'";
+
     echo "<tr>";
-    echo "<td>";
-    echo t("Kate").' '.piirra_aikavali($nykyinen_kvartaali);
-    echo "</td>";
-    echo "<td align='right'>";
-    echo sprintf('%.2f', $myynti_ja_kate_nykyinen_kvartaali['kate']) . " {$yhtiorow['valkoodi']}";
-    echo "</td>";
+    echo "<td><strong {$tyyli}>" . t("Kate") . " " . t("yhteensä") . "</strong></td>";
+    echo "<td align='right'><strong {$tyyli}>{$katteiden_summa}</strong></td>";
     echo "</tr>";
 
     echo "<tr>";
@@ -174,39 +186,50 @@ function hae_myyjan_myynti_ja_kate($aika, $kuka_tunnus) {
   return mysql_fetch_assoc($result);
 }
 
-function piirra_aikavali($aika_vali) {
-  return date('d.m', strtotime($aika_vali['start_date'])).' - '.date('d.m', strtotime($aika_vali['end_date']));
-}
+function hae_myyjan_katteet_osastoittain($aika, $kuka_tunnus) {
+  global $kukarow;
 
-function paata_kvartaali() {
-  $tama_vuosi = date('Y');
-  $kvartaalit = array(
-    4   => array(
-      "start_date" => "$tama_vuosi-01-01",
-      "end_date"   => "$tama_vuosi-03-31"
-    ),
-    1   => array(
-      "start_date" => "$tama_vuosi-04-01",
-      "end_date"   => "$tama_vuosi-06-30"
-    ),
-    2   => array(
-      "start_date" => "$tama_vuosi-07-01",
-      "end_date"   => "$tama_vuosi-09-30"
-    ),
-    3   => array(
-      "start_date" => "$tama_vuosi-10-01",
-      "end_date"   => "$tama_vuosi-12-31"
-    ),
-  );
+  require_once "inc/myymyyjat.inc";
 
-  //tarkisteaan mikä kvartaali on menossa.
-  foreach ($kvartaalit as $kvartaali) {
-    $now = date('Y-m-d');
-    if ($now >= $kvartaali['start_date'] and $now <= $kvartaali['end_date']) {
-      $nykyinen_kvartaali = $kvartaali;
-      break;
-    }
+  $osastojen_nimet = hae_osastojen_nimet();
+  $muuttujat = muistista("myymyyjat", "oletus", false);
+
+  if ($muuttujat["mul_osasto"]) {
+    $osastot = implode("','", $muuttujat["mul_osasto"]);
+    $osasto_lisa = "AND tuote.osasto IN ('{$osastot}')";
+  }
+  else {
+    $osasto_lisa = "";
   }
 
-  return $nykyinen_kvartaali;
+  $query = "SELECT tuote.osasto,
+            sum(tilausrivi.kate) AS kate
+            FROM lasku
+            INNER JOIN tilausrivi ON (tilausrivi.otunnus = lasku.tunnus
+              AND tilausrivi.yhtio = lasku.yhtio)
+            INNER JOIN tuote ON (tuote.tuoteno = tilausrivi.tuoteno
+              AND tuote.yhtio = tilausrivi.yhtio)
+            WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
+            AND lasku.tila = 'L'
+            AND lasku.alatila = 'X'
+            AND lasku.tapvm >= '{$aika["start_date"]}'
+            AND lasku.tapvm <= '{$aika["end_date"]}'
+            AND lasku.myyja = '{$kuka_tunnus}'
+            {$osasto_lisa}
+            GROUP BY tuote.osasto;";
+
+  $result = pupe_query($query);
+
+  $katteet = array();
+
+  while ($row = mysql_fetch_assoc($result)) {
+    $kuluprosentti = (float) $muuttujat["kuluprosentti"][$row["osasto"]] / 100;
+    $katteet[$osastojen_nimet[$row["osasto"]]] = $row["kate"] - $kuluprosentti * $row["kate"];
+  }
+
+  return $katteet;
+}
+
+function piirra_aikavali($aika_vali) {
+  return date('d.m', strtotime($aika_vali['start_date'])).' - '.date('d.m', strtotime($aika_vali['end_date']));
 }

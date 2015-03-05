@@ -187,3 +187,7 @@ ul.list-unstyled {
 .laskuri {
   margin-bottom: 30px;
 }
+
+.hidden {
+  display: none;
+}

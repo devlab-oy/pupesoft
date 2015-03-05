@@ -147,7 +147,7 @@ if ($tee == "edit") {
       echo "</td>";
     }
 
-    if ($tyyppi > 0) {
+    if ($tyyppi > 0 and !empty($virhe[$i])) {
       echo "<td class='back'><font class='error'>$virhe[$i]</font></td></tr>\n";
     }
   }

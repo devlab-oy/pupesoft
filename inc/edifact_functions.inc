@@ -1486,6 +1486,8 @@ function kasittele_bookkaussanoma($edi_data) {
     }
   }
 
+  $tarvitaan_uusi_tilaus = true;
+
   if (mysql_num_rows($result) == 0 or $tarvitaan_uusi_tilaus) {
 
     require_once "tilauskasittely/luo_myyntitilausotsikko.inc";
@@ -1522,7 +1524,8 @@ function kasittele_bookkaussanoma($edi_data) {
                 AND ss.ostorivitunnus = trlt.tilausrivitunnus
               WHERE ss.yhtio = '{$kukarow['yhtio']}'
               AND asiakkaan_tilausnumero = '{$tilausnro}'
-              AND asiakkaan_rivinumero = '{$rivinro}'";
+              AND asiakkaan_rivinumero = '{$rivinro}'
+              AND ss.myyntirivitunnus = 0";
     $result = pupe_query($query);
 
     $rullat = array();
@@ -2584,7 +2587,7 @@ function hae_hylly($tuotepaikka) {
       "hyllytaso" => '0'
     );
 
-    if (!in_array($hylly['hyllyalue'], array("A","B")) ) {
+    if (!in_array($hylly['hyllyalue'], array("A","B", "AA", "BA", "CA", "DA"))) {
       return false;
     }
 
@@ -2899,7 +2902,7 @@ function peruuta_bookkaus($peruutusparametrit) {
 function hae_saapumistiedot($saapumiskoodi) {
   global $kukarow;
 
-  $query = "SELECT tilausrivi.*
+  $query = "SELECT tilausrivi.*, lasku.liitostunnus, lasku.varasto
             FROM lasku
             JOIN tilausrivi
               ON tilausrivi.yhtio = lasku.yhtio

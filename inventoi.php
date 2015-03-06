@@ -893,11 +893,32 @@ if ($tee == 'VALMIS') {
               $result = pupe_query($query);
               $laskuid = mysql_insert_id($GLOBALS["masterlink"]);
 
-              if ($yhtiorow["varastonmuutos_inventointi"] != "") {
-                $varastonmuutos_tili = $inven_laji_tilino != "" ? $inven_laji_tilino : $yhtiorow["varastonmuutos_inventointi"];
+              // Seuraako myyntitiliˆinti tuotteen tyyppi‰ ja onko kyseess‰ raaka-aine?
+              $raaka_aine_tiliointi = $yhtiorow["raaka_aine_tiliointi"];
+              $raaka_ainetililta = ($raaka_aine_tiliointi == "Y" and $row["tuotetyyppi"] == "R");
+
+              // M‰‰ritet‰‰n varastonmuutostili
+              if ($raaka_ainetililta) {
+                $varastonmuutos_tili = $yhtiorow["raaka_ainevarastonmuutos"];
+              }
+              elseif ($yhtiorow["varastonmuutos_inventointi"] != "") {
+                if ($inven_laji_tilino != "") {
+                  $varastonmuutos_tili = $inven_laji_tilino;
+                }
+                else {
+                  $varastonmuutos_tili = $yhtiorow["varastonmuutos_inventointi"];
+                }
               }
               else {
                 $varastonmuutos_tili = $yhtiorow["varastonmuutos"];
+              }
+
+              // M‰‰ritet‰‰n varastotili
+              if ($raaka_ainetililta) {
+                $varastotili = $yhtiorow["raaka_ainevarasto"];
+              }
+              else {
+                $varastotili = $yhtiorow["varasto"];
               }
 
               if ($yhtiorow["tarkenteiden_prioriteetti"] == "T") {
@@ -950,7 +971,7 @@ if ($tee == 'VALMIS') {
               $query = "INSERT into tiliointi set
                         yhtio    = '$kukarow[yhtio]',
                         ltunnus  = '$laskuid',
-                        tilino   = '$yhtiorow[varasto]',
+                        tilino   = '{$varastotili}',
                         kustp    = '{$kustp_ins}',
                         kohde    = '{$kohde_ins}',
                         projekti = '{$projekti_ins}',

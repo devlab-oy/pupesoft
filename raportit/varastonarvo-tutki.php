@@ -47,7 +47,7 @@ if ($tee == "tee") {
   echo "<font class='message'>".t("Logistiikan tapahtumat ja niiden varastonmuutos")."</font><br><br>";
 
   // haetaan halutut varastotaphtumat
-  $query  = "SELECT laji, count(*) kpl, round(sum(if(laji='tulo', kplhinta, hinta) * kpl), 2) logistiikka
+  $query  = "SELECT laji, count(*) kpl, round(sum(if(laji='tulo', kplhinta, hinta) * kpl), 2) logistiikka, tuote.tuotetyyppi
              FROM tapahtuma
              JOIN tuote ON (tapahtuma.yhtio = tuote.yhtio and tapahtuma.tuoteno = tuote.tuoteno and tuote.ei_saldoa = '')
              WHERE tapahtuma.yhtio = '$kukarow[yhtio]'
@@ -67,6 +67,18 @@ if ($tee == "tee") {
 
   $automaatit = 0;
   $summa_array = array();
+
+  if ($yhtiorow["raaka_aine_tiliointi"] == "Y") {
+    $tilinot = "'{$yhtiorow["varasto"]}', '{$yhtiorow["matkalla_olevat"]}', " .
+               "'{$yhtiorow["raaka_ainevarasto"]}'";
+    $muutostilinot = "'{$yhtiorow["varastonmuutos"]}', '{$yhtiorow["raaka_ainevarastonmuutos"]}'";
+    $raaka_aine_teksti = ", {$yhtiorow["raaka_ainevarasto"]}";
+  }
+  else {
+    $tilinot = "'{$yhtiorow["varasto"]}', '{$yhtiorow["matkalla_olevat"]}'";
+    $muutostilinot = "'{$yhtiorow["varastonmuutos"]}'";
+    $raaka_aine_teksti = "";
+  }
 
   while ($trow = mysql_fetch_assoc($result)) {
 
@@ -90,7 +102,7 @@ if ($tee == "tee") {
                  WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
                  and tiliointi.tapvm    >= '$vv-$kk-$pp'
                  and tiliointi.tapvm    <= '$vv1-$kk1-$pp1'
-                 and tiliointi.tilino   in ('$yhtiorow[varasto]', '$yhtiorow[matkalla_olevat]')
+                 and tiliointi.tilino   in ({$tilinot})
                  and tiliointi.korjattu = ''
                  and $lvalinta";
       $lresult = pupe_query($query);
@@ -127,12 +139,12 @@ if ($tee == "tee") {
              AND tiliointi.tapvm    >= '$vv-$kk-$pp'
              AND tiliointi.tapvm    <= '$vv1-$kk1-$pp1'
              AND tiliointi.korjattu = ''
-             AND tiliointi.tilino   in ('$yhtiorow[varasto]', '$yhtiorow[matkalla_olevat]')";
+             AND tiliointi.tilino   in ({$tilinot})";
   $lresult = pupe_query($query);
   $lrow = mysql_fetch_assoc($lresult);
 
   echo "<br>";
-  echo t("Samalta ajanjaksolta varastonarvoon vaikuttavat käsiviennit tileiltä"). " $yhtiorow[varasto] & $yhtiorow[matkalla_olevat]: ";
+  echo t("Samalta ajanjaksolta varastonarvoon vaikuttavat käsiviennit tileiltä"). " $yhtiorow[varasto]{$raaka_aine_teksti} & $yhtiorow[matkalla_olevat]: ";
   echo "<font class='message'>";
   echo round($lrow["summa"] - $automaatit, 2);
   echo " $yhtiorow[valkoodi]";
@@ -188,7 +200,7 @@ if ($tee == "tee") {
                WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
                and tiliointi.tapvm    = left('$tapahtuma[laadittu]', 10)
                and (tiliointi.selite like 'Inventointi%' or tiliointi.selite like 'KORJATTU: Inventointi%')
-               and tiliointi.tilino   in ('$yhtiorow[varasto]', '$yhtiorow[matkalla_olevat]')
+               and tiliointi.tilino   in ({$tilinot})
                and tiliointi.korjattu = ''
                GROUP BY lasku.tunnus";
     $lresult = pupe_query($query);
@@ -227,7 +239,7 @@ if ($tee == "tee") {
              and lasku.tila         = 'U'
              and lasku.alatila      = 'X'
              and tiliointi.ltunnus  = lasku.tunnus
-             and tiliointi.tilino   in ('$yhtiorow[varasto]', '$yhtiorow[matkalla_olevat]')
+             and tiliointi.tilino   in ({$tilinot})
              and tiliointi.korjattu = ''
              GROUP BY lasku.tunnus";
   $result = pupe_query($query);
@@ -339,7 +351,7 @@ if ($tee == "tee") {
                  WHERE yhtio  = '$kukarow[yhtio]'
                  and ltunnus  = $trow[uusiotunnus]
                  and korjattu = ''
-                 and tilino   = '$yhtiorow[varastonmuutos]'";
+                 and tilino  IN ({$muutostilinot})";
       $mres = pupe_query($query);
       $mrow = mysql_fetch_assoc($mres);
 
@@ -440,7 +452,7 @@ if ($tee == "tee") {
                 FROM tiliointi
                 WHERE yhtio  = '$kukarow[yhtio]'
                 and ltunnus  in ($keekrow[ostolaskut])
-                and tilino   in ('$yhtiorow[varasto]', '$yhtiorow[matkalla_olevat]')
+                and tilino   in ({$tilinot})
                 and korjattu = ''";
       $kpres = pupe_query($query);
       $kprow = mysql_fetch_assoc($kpres);
@@ -474,7 +486,7 @@ if ($tee == "tee") {
                 FROM tiliointi
                 WHERE yhtio  = '$kukarow[yhtio]'
                 and ltunnus  in ($keekrow[rahtilaskut])
-                and tilino   in ('$yhtiorow[varasto]', '$yhtiorow[matkalla_olevat]')
+                and tilino   in ({$tilinot})
                 and korjattu = ''";
       $k2pres = pupe_query($query);
       $k2prow = mysql_fetch_assoc($k2pres);

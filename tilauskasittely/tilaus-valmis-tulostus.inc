@@ -252,8 +252,6 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     $kerayslistatyyppi = "EXCEL1";
   }
 
-  $tyyppi = "";
-
   // keräyslistalle ei oletuksena tulosteta saldottomia tuotteita
   if ($yhtiorow["kerataanko_saldottomat"] == '') {
     $lisa1 = " and tuote.ei_saldoa = '' ";

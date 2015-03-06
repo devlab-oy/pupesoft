@@ -1542,14 +1542,7 @@ if (!empty($id) and $echotaanko) {
         echo "<td><input type='text' id='t3[$rivirow[tunnus]]' name='t3[$rivirow[tunnus]]' value='$privirow[t3]' maxlength='5' size='5'></td>";
         echo "<td><input type='text' id='t4[$rivirow[tunnus]]' name='t4[$rivirow[tunnus]]' value='$privirow[t4]' maxlength='5' size='5'></td>";
 
-        $vares = varaston_lapsivarastot(
-          $varow2['tunnus'],
-          $rivirow['tuoteno'],
-          $varow2['alkuhyllyalue'],
-          $varow2['alkuhyllynro'],
-          $varow2['loppuhyllyalue'],
-          $varow2['loppuhyllynro']
-        );
+        $vares = varaston_lapsivarastot($varow2['tunnus'], $rivirow['tuoteno']);
 
         $s1_options = array();
         $s2_options = array();

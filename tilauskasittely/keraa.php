@@ -3209,16 +3209,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
 
           if ($toim == 'VASTAANOTA_REKLAMAATIO') {
 
-            $_varow = hae_varasto($otsik_row['varasto']);
-
-            $vares = varaston_lapsivarastot(
-              $otsik_row['varasto'],
-              $row['tuoteno'],
-              $_varow['alkuhyllyalue'],
-              $_varow['alkuhyllynro'],
-              $_varow['loppuhyllyalue'],
-              $_varow['loppuhyllynro']
-            );
+            $vares = varaston_lapsivarastot($otsik_row['varasto'], $row['puhdas_tuoteno']);
 
             $s1_options = array();
             $s2_options = array();

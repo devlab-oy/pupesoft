@@ -896,7 +896,7 @@ if (empty($id) and $echotaanko) {
   }
 
   echo "</select></td></tr>";
-  if ($yhtiorow['toimipaikkakasittely'] == "L" and mysql_num_rows($toimipaikkares) > 0) {
+  if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikkares) > 0) {
     $toimipaikat_result = hae_yhtion_toimipaikat($kukarow['yhtio']);
     $toimipaikat = array();
     $toimipaikat[] = array(

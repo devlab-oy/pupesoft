@@ -4,14 +4,54 @@
 $useslave = 1;
 
 require '../inc/parametrit.inc';
+require 'inc/myymyyjat.inc';
+
+if ($toim == "TARKKA") {
+  echo "<script src='myymyyjat.js'></script>";
+}
 
 echo "<font class='head'>".t("Myyjien myynnit").":</font><hr>";
 
 // Käyttöliittymä
-if (!isset($alkukk)) $alkukk = date("m", mktime(0, 0, 0, date("m"), 1, date("Y")-1));
-if (!isset($alkuvv)) $alkuvv = date("Y", mktime(0, 0, 0, date("m"), 1, date("Y")-1));
-if (!isset($loppukk)) $loppukk = date("m", mktime(0, 0, 0, date("m")-1, 1, date("Y")));
-if (!isset($loppuvv)) $loppuvv = date("Y", mktime(0, 0, 0, date("m")-1, 1, date("Y")));
+if ($toim == "TARKKA") {
+  $muuttujat = muistista("myymyyjat", "oletus");
+
+  if (!isset($kuluprosentti) and $muuttujat["kuluprosentti"]) {
+    $kuluprosentti = $muuttujat["kuluprosentti"];
+  }
+
+  if (!isset($mul_laskumyyja) and $muuttujat["mul_laskumyyja"]) {
+    $mul_laskumyyja = $muuttujat["mul_laskumyyja"];
+  }
+
+  if (!isset($mul_osasto) and $muuttujat["mul_osasto"]) {
+    $mul_osasto = $muuttujat["mul_osasto"];
+  }
+
+  $kvartaali = paata_kvartaali();
+  $kvartaali_alku = date_parse($kvartaali["start_date"]);
+  $kvartaali_loppu = date_parse($kvartaali["end_date"]);
+
+  if (!isset($alkukk)) {
+    $alkukk = $kvartaali_alku["month"];
+  }
+  if (!isset($alkuvv)) {
+    $alkuvv = $kvartaali_alku["year"];
+  }
+
+  if (!isset($loppukk)) {
+    $loppukk = $kvartaali_loppu["month"];
+  }
+  if (!isset($loppuvv)) {
+    $loppuvv = $kvartaali_loppu["year"];
+  }
+}
+else {
+  if (!isset($alkukk)) $alkukk = date("m", mktime(0, 0, 0, date("m"), 1, date("Y")-1));
+  if (!isset($alkuvv)) $alkuvv = date("Y", mktime(0, 0, 0, date("m"), 1, date("Y")-1));
+  if (!isset($loppukk)) $loppukk = date("m", mktime(0, 0, 0, date("m")-1, 1, date("Y")));
+  if (!isset($loppuvv)) $loppuvv = date("Y", mktime(0, 0, 0, date("m")-1, 1, date("Y")));
+}
 $tee = isset($tee) ? trim($tee) : "";
 
 if (checkdate($alkukk, 1, $alkuvv) and checkdate($loppukk, 1, $loppuvv)) {
@@ -25,8 +65,20 @@ else {
 }
 
 echo "<form method='post'>";
-echo "<input type='hidden' name='tee' value='kaikki'>";
+echo "<input type='hidden' name='tee' id='myymyyjatTee' value='kaikki'>";
 
+if ($toim == "TARKKA") {
+  $classes = 'hidden';
+  $noautosubmit = true;
+  $monivalintalaatikot = array('laskumyyja', 'osasto');
+  $osastojen_nimet = hae_osastojen_nimet();
+}
+else {
+  $classes = '';
+  $lisa = "";
+}
+
+echo "<div id='valinnat' class='{$classes}'>";
 echo "<table>";
 echo "<tr>";
 echo "<th>".t("Anna alkukausi (kk-vuosi)")."</th>";
@@ -41,126 +93,61 @@ echo "  <td>
     <input type='text' name='loppukk' value='$loppukk' size='2'>-
     <input type='text' name='loppuvv' value='$loppuvv' size='5'>
     </td>";
-echo "<td class='back'><input type='submit' value='".t("Aja raportti")."'></td>";
 echo "</tr>";
-echo "</table>";
-echo "<br>";
 
-if ($tee != '') {
-
-  // myynnit
-  $query = "SELECT lasku.myyja,
-            kuka.nimi,
-            date_format(lasku.tapvm,'%Y/%m') kausi,
-            round(sum(lasku.arvo),0) summa,
-            round(sum(lasku.kate),0) kate
-            FROM lasku use index (yhtio_tila_tapvm)
-            LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio AND kuka.tunnus = lasku.myyja)
-            WHERE lasku.yhtio = '{$kukarow["yhtio"]}'
-            and lasku.tila    = 'L'
-            and lasku.alatila = 'X'
-            and lasku.tapvm   >= '$pvmalku'
-            and lasku.tapvm   <= '$pvmloppu'
-            GROUP BY myyja, nimi, kausi
-            HAVING summa <> 0 OR kate <> 0
-            ORDER BY myyja";
-  $result = pupe_query($query);
-
-  $summa = array();
-  $kate = array();
-  $myyja_nimi = array();
-
-  while ($row = mysql_fetch_array($result)) {
-    $myyja_nimi[$row["myyja"]] = $row["nimi"];
-    $summa[$row["myyja"]][$row["kausi"]] = $row["summa"];
-    $kate[$row["myyja"]][$row["kausi"]] = $row["kate"];
-  }
-
-  $sarakkeet  = 0;
-  $raja     = '0000-00';
-  $rajataulu   = array();
-
-  // Piirretään headerit
-  echo "<table>";
-  echo "<tr>";
-  echo "<th>".t("Myyjä")."</th>";
-
-  while ($raja < substr($pvmloppu, 0, 7)) {
-
-    $vuosi = substr($pvmalku, 0, 4);
-    $kk = substr($pvmalku, 5, 2);
-    $kk += $sarakkeet;
-
-    if ($kk > 12) {
-      $vuosi++;
-      $kk -= 12;
-    }
-
-    if ($kk < 10) $kk = '0'.$kk;
-
-    $rajataulu[$sarakkeet] = "$vuosi/$kk";
-    $sarakkeet++;
-    $raja = $vuosi."-".$kk;
-
-    echo "<th>$vuosi/$kk</th>";
-  }
-
-  echo "<th>".t("Yhteensä")."</th>";
-  echo "</tr>";
-
-  // Piirretään itse data
-  $yhteensa_summa_kausi = array();
-  $yhteensa_kate_kausi = array();
-
-  foreach ($summa as $myyja => $kausi_array) {
-
-    echo "<tr class='aktiivi'>";
-    echo "<td>$myyja_nimi[$myyja] ($myyja)</td>";
-
-    $yhteensa_summa = 0;
-    $yhteensa_kate = 0;
-
-    foreach ($rajataulu as $kausi) {
-
-      if (!isset($yhteensa_summa_kausi[$kausi])) $yhteensa_summa_kausi[$kausi] = 0;
-      if (!isset($yhteensa_kate_kausi[$kausi])) $yhteensa_kate_kausi[$kausi] = 0;
-
-      $summa = isset($kausi_array[$kausi]) ? $kausi_array[$kausi] : "";
-      $kate_summa = isset($kate[$myyja][$kausi]) ? $kate[$myyja][$kausi] : "";
-
-      $yhteensa_summa += $summa;
-      $yhteensa_kate += $kate_summa;
-
-      $yhteensa_summa_kausi[$kausi] += $summa;
-      $yhteensa_kate_kausi[$kausi] += $kate_summa;
-
-      echo "<td style='text-align:right;'>$summa<br>$kate_summa</td>";
-    }
-
-    echo "<td style='text-align:right;'>$yhteensa_summa<br>$yhteensa_kate</td>";
+if ($toim == "TARKKA") {
+  foreach ($osastojen_nimet as $osasto => $osaston_nimi) {
+    echo "<tr>";
+    echo "<th>";
+    echo "<label for='kuluprosentti_{$osasto}'>" . t("Kuluprosentti osastolle") .
+         " {$osaston_nimi}</label>";
+    echo "</th>";
+    echo "<td>";
+    echo "<input type='number' id='kuluprosentti_{$osasto}' name='kuluprosentti[{$osasto}]' min='0'
+                 max='100' value='{$kuluprosentti[$osasto]}'>";
+    echo "</td>";
     echo "</tr>";
   }
+}
 
-  // Piirretään yhteensärivi
-  echo "<tr>";
-  echo "<th>".t("Yhteensä summa")."<br>".t("Yhteensä kate")."<br>".t("Kateprosentti")."</th>";
+echo "</table>";
 
-  $yhteensa_summa = 0;
-  $yhteensa_kate = 0;
+if ($toim == "TARKKA") {
+  require_once "tilauskasittely/monivalintalaatikot.inc";
 
-  foreach ($rajataulu as $kausi) {
-    $yhteensa_summa += $yhteensa_summa_kausi[$kausi];
-    $yhteensa_kate += $yhteensa_kate_kausi[$kausi];
-    $kate_prosentti = round($yhteensa_kate_kausi[$kausi] / $yhteensa_summa_kausi[$kausi] * 100);
-    echo "<th style='text-align:right;'>$yhteensa_summa_kausi[$kausi]<br>$yhteensa_kate_kausi[$kausi]<br>$kate_prosentti%</th>";
+  echo "<input type='button' id='tallennaNappi' value='" . t("Tallenna haku oletukseksi") . "'>";
+}
 
-  }
+echo "</div>";
 
-  $kate_prosentti = round($yhteensa_kate / $yhteensa_summa * 100);
-  echo "<th style='text-align:right;'>$yhteensa_summa<br>$yhteensa_kate<br>$kate_prosentti%</th>";
-  echo "</tr>";
-  echo "</table>";
+echo "<table>";
+echo "<tbody>";
+echo "<tr>";
+echo "<td class='back'><input type='submit' value='" . t("Aja raportti") . "'>";
 
+if ($toim == "TARKKA") {
+  echo "<input id='naytaValinnat' type='button' value='" . t("Näytä valinnat") . "'>";
+}
+
+echo "</td>";
+echo "</tr>";
+echo "</tbody>";
+echo "</table>";
+
+echo "<br>";
+
+if ($tee == "tallenna_haku") {
+  $muistettavat = array(
+    "kuluprosentti"  => $kuluprosentti,
+    "mul_laskumyyja" => $mul_laskumyyja,
+    "mul_osasto"     => $mul_osasto
+  );
+
+  muistiin("myymyyjat", "oletus", $muistettavat);
+}
+
+if ($tee != '') {
+  piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentti, $osastojen_nimet);
 }
 
 require "inc/footer.inc";

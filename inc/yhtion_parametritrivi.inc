@@ -3110,6 +3110,22 @@ if ($fieldname == "ext_tilauksen_hyvaksyja_myyjaksi") {
   $jatko = 0;
 }
 
+if ($fieldname == "raaka_aine_tiliointi") {
+  $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
+
+  $sel = $trow[$i] == 'Y' ? ' selected' : '';
+
+  $ulos .= "<option value = ''>" .
+           t("Tiliöidään raaka-aineiden varasto ja varastonmuutokset varasto ja " .
+             "varastonmuutostileille");
+  $ulos .= "<option value = 'Y' $sel>" .
+           t("Tiliöidään varasto ja varastonmuutos raaka-ainetileille, jos tuotetyyppi on " .
+             "raaka-aine");
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "nayta_variaatiot") {
   $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
 

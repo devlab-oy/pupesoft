@@ -536,7 +536,15 @@ if ($tee == "HAE") {
 
         $worksheet->write($excelrivi, $excelsarake, tv1dateconv($tulrow["toimaika"]), $format_bold);
         $excelsarake++;
-        $worksheet->write($excelrivi, $excelsarake, t($laskutyyppi)."\n".t($alatila), $format_bold);
+
+        if (!empty($tulrow['korvamerkinta'])) {
+          $txt = t($laskutyyppi)."\n".t($alatila)."\n".$tulrow['korvamerkinta'];
+        }
+        else {
+         $txt = t($laskutyyppi)."\n".t($alatila);
+        }
+
+        $worksheet->write($excelrivi, $excelsarake, $txt, $format_bold);
 
         $excelsarake = 0;
         $excelrivi++;

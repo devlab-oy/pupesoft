@@ -18053,9 +18053,17 @@ if (!function_exists("tee_keraysera")) {
     $_fixed_main_array_keys = array_keys($fixed_main_array);
 
     if (isset($kukarow['debugstring'])) {
-      $kukarow['debugstring'] .= var_dump($fixed_main_array)."\n";
-      $kukarow['debugstring'] .= var_dump($_fixed_main_array_count)."\n";
-      $kukarow['debugstring'] .= var_dump($_fixed_main_array_keys)."\n";
+      $kukarow['debugstring'] .= "<pre>(E250): ";
+      $kukarow['debugstring'] .= var_export($fixed_main_array, TRUE);
+      $kukarow['debugstring'] .= "</pre>\n";
+
+      $kukarow['debugstring'] .= "<pre>(E250): ";
+      $kukarow['debugstring'] .= var_export($_fixed_main_array_count, TRUE);
+      $kukarow['debugstring'] .= "</pre>\n";
+
+      $kukarow['debugstring'] .= "<pre>(E250): ";
+      $kukarow['debugstring'] .= var_export($_fixed_main_array_keys, TRUE);
+      $kukarow['debugstring'] .= "</pre>\n";
     }
 
     for ($_main_i = 0; $_fixed_main_array_count > $_main_i; $_main_i++) {

@@ -3088,7 +3088,5 @@ if (!function_exists("tulosta_lasku")) {
 }
 
 function kyseessa_eramaksu($laskurow) {
-  return $laskurow["kateistyyppi"] != '' and $laskurow['mapvm'] == "0000-00-00" and
-                                             ($laskurow['saldo_maksettu'] != 0 or
-                                              $laskurow['saldo_maksettu_valuutassa'] != 0);
+  return $laskurow["kateistyyppi"] != '' and $laskurow['mapvm'] == "0000-00-00";
 }

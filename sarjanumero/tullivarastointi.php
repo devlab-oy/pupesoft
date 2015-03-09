@@ -11,9 +11,9 @@ if (!isset($view)) {
   $view = 'saapumiskoodi';
 }
 
-echo "<meta name='viewport' content='width=device-width, maximum-scale=1.0' />\n";
-echo "<link rel='stylesheet' type='text/css' href='ipad.css' />\n";
-echo "<body>";
+if (isset($view) and $view == 'splittaus') {
+  $submit = '';
+}
 
 if (isset($task) and $task == 'split') {
 
@@ -35,12 +35,43 @@ if (isset($task) and $task == 'split') {
     pupe_query($query);
   }
 
-
-  $submit = 'saapumiskoodi';
-
+  header("Location: tullivarastointi.php?saapumiskoodi={$saapumiskoodi}&submit=saapumiskoodi");
 }
 
+echo "<meta name='viewport' content='width=device-width, maximum-scale=1.0' />\n";
+echo "<link rel='stylesheet' type='text/css' href='ipad.css' />\n";
+echo "<body>";
+
 if (isset($task) and $task == 'vie_varastoon') {
+
+  $varastotarkistus = explode('-', $saapumiskoodi);
+
+  switch ($varastotarkistus[0]) {
+
+    case 'ROVV':
+      $hyllyaluelisa = 'XA';
+      break;
+
+    case 'ROTV':
+      $hyllyaluelisa = 'XB';
+      break;
+
+    case 'VRP':
+      $hyllyaluelisa = 'XC';
+      break;
+
+    case 'RP':
+      $hyllyaluelisa = 'XD';
+      break;
+
+    default:
+      # code...
+      break;
+  }
+
+  $vp = $hyllyaluelisa.$valittu_varastopaikka;
+
+  $hylly = hae_hylly($vp, true);
 
   $query = "SELECT *
             FROM toimi
@@ -78,8 +109,6 @@ if (isset($task) and $task == 'vie_varastoon') {
     $updated = pupe_query($update_kuka);
   }
 
-  $hylly = hae_hylly($vp);
-
   $hyllyalue = $hylly['hyllyalue'];
   $hyllynro = $hylly['hyllynro'];
   $hyllyvali = $hylly['hyllyvali'];
@@ -105,28 +134,76 @@ if (isset($task) and $task == 'vie_varastoon') {
               poistettava   = ''
               WHERE tuoteno = '{$tilausrivi['tuoteno']}'
               AND yhtio     = '{$kukarow['yhtio']}'
-              AND hyllyalue = '$hyllyalue'
-              AND hyllynro  = '$hyllynro'
-              AND hyllyvali = '$hyllyvali'
-              AND hyllytaso = '$hyllytaso'";
+              AND hyllyalue = '{$hyllyalue}'
+              AND hyllynro  = '{$hyllynro}'
+              AND hyllyvali = '{$hyllyvali}'
+              AND hyllytaso = '{$hyllytaso}'";
     pupe_query($query);
   }
 
-  $query = "UPDATE tilausrivi SET
-            uusiotunnus = '{$saapuminen}'
+  // katsotaan onko samaa tuotetta jo samalla paikalla...
+  $query = "SELECT tunnus
+            FROM tilausrivi
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus  = '{$tilausrivi['tunnus']}'";
-  pupe_query($query);
+            AND tuoteno = '{$tilausrivi['tuoteno']}'
+            AND hyllyalue = '{$hyllyalue}'
+            AND hyllynro  = '{$hyllynro}'";
+  $result = pupe_query($query);
 
-  $kukarow['ei_echoa'] = 'joo';
-  vie_varastoon($saapuminen, 0, $hylly, $tilausrivi['tunnus']);
-  unset($kukarow['ei_echoa']);
+  // ...jos on niin lis‰t‰‰n kpl olemassa olevaan riviin ja poistetaan toinen
+  if (mysql_num_rows($result) > 0) {
+
+    $olemassa_oleva_rivi = mysql_fetch_assoc($result);
+
+    $kpl = $tilausrivi['tilkpl'];
+
+    $query = "UPDATE tilausrivi SET
+              kpl = kpl + {$kpl},
+              tilkpl = tilkpl + {$kpl}
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$olemassa_oleva_rivi['tunnus']}'";
+    pupe_query($query);
+
+    // TODO: saldot oikein yhdist‰misen j‰ljilt‰...
+    // $query = "UPDATE tuotepaikat SET ...
+
+    $query = "DELETE FROM tilausrivi
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$tilausrivi['tunnus']}'";
+    pupe_query($query);
+  }
+  else {
+
+    $query = "UPDATE tilausrivi SET
+              uusiotunnus = '{$saapuminen}'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$tilausrivi['tunnus']}'";
+    pupe_query($query);
+
+    $kukarow['ei_echoa'] = 'joo';
+    vie_varastoon($saapuminen, 0, $hylly, $tilausrivi['tunnus']);
+    unset($kukarow['ei_echoa']);
+
+    $query = "UPDATE tilausrivi SET
+              hyllyalue = '{$hyllyalue}',
+              hyllynro = '{$hyllynro}',
+              hyllyvali = '{$hyllyvali}',
+              hyllytaso = '{$hyllytaso}'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$tilausrivi['tunnus']}'";
+    $result = pupe_query($query);
+  }
 
   $submit = 'saapumiskoodi';
 }
 
 if (!isset($errors)) $errors = array();
 if (!isset($viestit)) $viestit = array();
+
+if (isset($submit) and $submit == 'varastovalinta') {
+  $view = 'tiedot';
+  $saapumistiedot = hae_saapumistiedot($saapumiskoodi);
+}
 
 if (isset($submit) and $submit == 'saapumiskoodi') {
 
@@ -204,9 +281,11 @@ if ($view == 'splittaus') {
   echo "<div class='alue_0'>";
   echo "<div class='alue_1 alue' style='text-align:center;'>";
 
-  echo "<div style='margin:0 0 15px 0'>";
+  echo "<div style='margin:0 0 15px 0; text-align:left;'>";
   echo t("Saapumiser‰n jakaminen eri varastopaikoille");
   echo "</div>";
+
+  echo '<hr>';
 
   echo "<div class='tilaus_alue' style='overflow:auto'>";
 
@@ -281,87 +360,267 @@ if ($view == 'splittaus') {
 
 }
 
-
-
-
-
 if ($view == 'tiedot') {
+
   echo "<div class='alue_0'>";
   echo "<div class='alue_1 alue'>";
 
-  $varastotunnus = $saapumistiedot[0]['varasto'];
+  echo "<div style='overflow:auto; position:relative;'>";
+  echo "<h1 style='margin: 10px 0'>" . t("Saapuminen: ") . $saapumiskoodi . "</h1>";
 
-  $query = "SELECT CONCAT(hyllyalue, hyllynro) AS paikka
-            FROM tuotepaikat
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND varasto = '{$varastotunnus}'
-            GROUP BY paikka"; echo $query;
-  $result = pupe_query($query);
+  if (!$saapumistiedot['kaikki_viety']) {
 
-  $varastopaikat = array();
+    echo "<div id='piiloon_div' style='position:absolute; right:0px; top:0px;'>";
+    echo "<button id='piiloon' type='button' style='padding:10px; color:red; border:1px solid red;' class='button'>";
+    echo t("Piilota");
+    echo "</button>";
+    echo "</div>";
 
-  while ($paikka = mysql_fetch_assoc($result)) {
-    $varastopaikat[] = $paikka;
+    echo "<div id='esiin_div' style='position:absolute; right:0px; top:0px; display:none;'>";
+    echo "<button id='esiin' type='button' style='padding:10px; color:green; border:1px solid green;' class='button'>";
+    echo t("N‰yt‰");
+    echo "</button>";
+    echo "</div>";
   }
 
-  foreach ($varastopaikat as  $vp) {
+  echo "</div>";
+  echo '<hr>';
 
-    echo "<div style='display:inline-block; margin:6px;'>";
+
+  if (!$saapumistiedot['kaikki_viety']) {
+
+    $varastotarkistus = explode('-', $saapumiskoodi);
+
+    switch ($varastotarkistus[0]) {
+
+      case 'ROVV':
+        $koodi = 'XA';
+        break;
+
+      case 'ROTV':
+        $koodi = 'XB';
+        break;
+
+      case 'VRP':
+        $koodi = 'XC';
+        break;
+
+      case 'RP':
+        $koodi = 'XD';
+        break;
+
+      default:
+        $koodi = '?';
+        break;
+    }
+
+    $query = "SELECT *
+              FROM varastopaikat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND alkuhyllyalue LIKE '{$koodi}%'";
+    $result = pupe_query($query);
+    $varasto = mysql_fetch_assoc($result);
+
+    $query = "SELECT CONCAT(hyllyalue, hyllynro) AS paikka
+              FROM tuotepaikat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND hyllyalue LIKE '{$koodi}%'
+              GROUP BY paikka";
+    $result = pupe_query($query);
+
+    $varastopaikat = array();
+
+    if (mysql_num_rows($result) == 0) {
+      $varastopaikat[] = $koodi.'A1';
+      if (!isset($valittu_varastopaikka)) {
+        $valittu_varastopaikka = 'A1';
+      }
+    }
+    else {
+      while ($paikka = mysql_fetch_assoc($result)) {
+        $varastopaikat[] = $paikka['paikka'];
+      }
+    }
+
+    if (isset($uusi_varastopaikka)) {
+
+      $hylly = hae_hylly($uusi_varastopaikka, true);
+
+      if ($hylly) {
+        $uusi_varastopaikka = strtoupper($uusi_varastopaikka);
+        $varastopaikat[] = $koodi.$uusi_varastopaikka;
+      }
+      else {
+        $uusi_varastopaikka_error = t("Ep‰kelpo varastopaikka");
+        unset($uusi_varastopaikka);
+      }
+      unset($hylly);
+    }
+
+    if (!isset($valittu_varastopaikka) and !isset($uusi_varastopaikka)) {
+      $valittu_varastopaikka = substr($varastopaikat[0], 2);
+    }
+
+    echo "<div>";
+    echo t("Varasto: ");
+    echo $varasto['nimitys'];
+    echo "&nbsp&#124;&nbsp;";
+
+    if (isset($valittu_varastopaikka)) {
+      echo t("Vied‰‰n paikalle: ");
+      echo $valittu_varastopaikka;
+    }
+    elseif (isset($uusi_varastopaikka)) {
+      echo t("Vied‰‰n paikalle: ");
+      echo $uusi_varastopaikka;
+    }
+    else {
+      echo t("Valitse paikka");
+    }
+    echo "</div>";
+
+    echo "<span id='alue'>";
+
+    echo '<hr>';
+
+    sort($varastopaikat);
+    $varastopaikat = array_unique($varastopaikat);
+
+    foreach ($varastopaikat as $vp) {
+
+      $vp = substr($vp, 2);
+
+      if (
+          (isset($valittu_varastopaikka) and $vp == $valittu_varastopaikka) or
+          (isset($uusi_varastopaikka) and $vp == $uusi_varastopaikka)
+          ) {
+        $luokka = 'aktiivi';
+      }
+      else {
+       $luokka = '';
+      }
+
+      echo "<div style='display:inline-block; margin:5px;'>";
+      echo "<form method='post'>";
+      echo "<input type='hidden' name='valittu_varastopaikka' value='" . $vp . "' />";
+      echo "<input type='hidden' name='saapumiskoodi' value='{$saapumiskoodi}' />";
+      echo "<button name='submit' value='varastovalinta' style='padding:10px' class='button {$luokka}'>";
+      echo $vp;
+      echo "</button>";
+      echo "</form>";
+      echo "</div>";
+    }
+
+    echo '<hr>';
+
+    echo "<div>";
+    echo "<div id='lisaysnappi' style='display:inline-block; margin:5px;'>";
+    echo "<button name='submit' style='padding:10px' class='button'>";
+    echo t("Uusi paikka");
+    echo "</button>";
+    if (isset($uusi_varastopaikka_error)) {
+      echo "<font id='varastopaikka_error' class='error'>{$uusi_varastopaikka_error} {$task}</font>";
+    }
+    echo "</div>";
+
+    echo "<div id='lisaysformi' style='display:none; margin:5px; position:relative; '>";
     echo "<form method='post'>";
-    echo "<input type='hidden' name='paikka' value='" . $vp['paikka'] . "' />";
-    echo "<input type='hidden name='view' value='tiedot' />";
-    echo "<button name='submit' value='konttivahvistus' style='padding:10px' class='button aktiivi'>";
-    echo $vp['paikka'];
+    echo "<input id='lisaysinput' style='position:relative; top:4px; height:23px; margin-right:6px;'  type='text' size='4' name='uusi_varastopaikka' value='' />";
+    echo "<input type='hidden' name='saapumiskoodi' value='{$saapumiskoodi}' />";
+    echo "<button name='submit' value='varastovalinta' style='padding:10px' class='button aktiivi'>";
+    echo t("Ok");
+    echo "</button>";
+    echo '&nbsp;';
+    echo "<button id='perumisnappi' name='submit' type='button' style='padding:10px; color:red; border:1px solid red;' class='button'>";
+    echo t("Peru");
     echo "</button>";
     echo "</form>";
     echo "</div>";
+    echo "</div>";
+
+    echo "</span>";
+
+    echo "
+    <script type='text/javascript'>
+
+      $('#lisaysnappi').click(function() {
+        $('#lisaysformi').css('display', 'inline-block');
+        $('#lisaysnappi').css('display', 'none');
+      });
+
+      $('#perumisnappi').click(function() {
+        $('#lisaysinput').val('');
+        $('#lisaysformi').css('display', 'none');
+        $('#lisaysnappi').css('display', 'inline-block');
+        $('#varastopaikka_error').html('');
+      });
+
+      $('#piiloon').click(function() {
+        $('#alue').css('display', 'none');
+        $('#piiloon_div').css('display', 'none');
+        $('#esiin_div').css('display', 'block');
+      });
+
+    $('#esiin').click(function() {
+      $('#alue').css('display', 'block');
+      $('#piiloon_div').css('display', 'block');
+      $('#esiin_div').css('display', 'none');
+    });
+
+    </script>";
+
+    echo '<hr>';
 
   }
 
-
-
-
-  foreach ($saapumistiedot as $rivi) {
+  foreach ($saapumistiedot['rivit'] as $rivi) {
 
     $kpl = number_format($rivi['tilkpl']);
 
-    echo "<div class='tilaus_alue' style='overflow:auto'>";
+    echo "<div class='tilaus_alue' style='overflow:auto; height:55px; padding:0 10px;'>";
 
-    echo "<div style='float:left'>" . $rivi['nimitys'] . " - " . $kpl . " kpl</div>";
+    echo "<div style='float:left; position: relative; top: 50%; transform: translateY(-50%); max-width:300px; overflow:hidden; margin-right:10px;'>" . $rivi['nimitys'] . "</div>";
+    echo "<div style='float:left; position: relative; top: 50%; transform: translateY(-50%);'>" . $kpl . " kpl</div>";
 
     if ($rivi['varattu'] != 0) {
 
-      if (!isset($vvp)) {
-        $vvp = 'B1';
+      if (isset($uusi_varastopaikka)) {
+        $valittu_varastopaikka = $uusi_varastopaikka;
       }
 
       echo "
-        <div style='float:right;'>
-        <form method='post'>
-        <input type='hidden' name='vp' value='{$vvp}' />
-        <input type='hidden' name='rivitunnus' value='{$rivi['tunnus']}' />
-        <input type='hidden' name='toimittajatunnus' value='{$rivi['liitostunnus']}' />
-        <input type='hidden' name='task' value='vie_varastoon' />
-        <input type='submit' value='vie varastoon'>
-        </form>
-        </div>";
-
-        echo "
-          <div style='float:right; margin:0 10px 0 0''>
+        <div style='float:right; position: relative; top: 50%; transform: translateY(-50%);'>
           <form method='post'>
+          <input type='hidden' name='valittu_varastopaikka' value='{$valittu_varastopaikka}' />
           <input type='hidden' name='rivitunnus' value='{$rivi['tunnus']}' />
           <input type='hidden' name='toimittajatunnus' value='{$rivi['liitostunnus']}' />
           <input type='hidden' name='saapumiskoodi' value='{$saapumiskoodi}' />
-          <input type='hidden' name='view' value='splittaus' />
-          <input type='submit' value='splittaus'>
+          <input type='hidden' name='task' value='vie_varastoon' />
+          <input type='submit' value='".t("Varastoon")."'>
           </form>
-          </div>";
+        </div>";
+
+        if ($kpl > 1) {
+          echo "
+            <div style='float:right; margin:0 10px 0 0; position: relative; top: 50%; transform: translateY(-50%);'>
+              <form method='post'>
+              <input type='hidden' name='rivitunnus' value='{$rivi['tunnus']}' />
+              <input type='hidden' name='toimittajatunnus' value='{$rivi['liitostunnus']}' />
+              <input type='hidden' name='saapumiskoodi' value='{$saapumiskoodi}' />
+              <input type='hidden' name='view' value='splittaus' />
+              <input type='submit' value='".t("Jako")."'>
+              </form>
+            </div>";
+        }
     }
     else {
-      echo "
-        <div style='float:right'>
-        Viety varastoon
-        </div>";
+
+      $paikka = substr($rivi['hyllyalue'], 2) . $rivi['hyllynro'];
+
+      echo "<div style='float:right; position: relative; top: 50%; transform: translateY(-50%);'>";
+      echo t("Varastopaikka: ");
+      echo $paikka;
+      echo "</div>";
     }
     echo "</div>";
   }

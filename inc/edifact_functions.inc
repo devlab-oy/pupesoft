@@ -2536,7 +2536,7 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
   return $kontit;
 }
 
-function hae_hylly($tuotepaikka) {
+function hae_hylly($tuotepaikka, $tulli = false) {
 
   $paikkamerkit = str_split($tuotepaikka);
   $x = 0;
@@ -2587,8 +2587,14 @@ function hae_hylly($tuotepaikka) {
       "hyllytaso" => '0'
     );
 
-    if (!in_array($hylly['hyllyalue'], array("A","B", "AA", "BA", "CA", "DA"))) {
-      return false;
+    if (!$tulli) {
+      if (!in_array($hylly['hyllyalue'], array("A","B"))) {
+        return false;
+      }
+    }
+    else {
+
+      // TODO: käyvät rajat tullipuolelle
     }
 
     if ($hylly['hyllynro'] < 1 or $hylly['hyllynro'] > 21) {
@@ -2908,7 +2914,8 @@ function hae_saapumistiedot($saapumiskoodi) {
               ON tilausrivi.yhtio = lasku.yhtio
               AND tilausrivi.otunnus = lasku.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-            AND asiakkaan_tilausnumero = '{$saapumiskoodi}'";
+            AND asiakkaan_tilausnumero = '{$saapumiskoodi}'
+            ORDER BY uusiotunnus";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -2916,11 +2923,23 @@ function hae_saapumistiedot($saapumiskoodi) {
   }
   else {
 
+    $kaikki_viety = true;
     $rivit = array();
     while ($rivi = mysql_fetch_assoc($result)) {
+
+      if ($rivi['uusiotunnus'] == 0) {
+        $kaikki_viety = false;
+      }
+
       $rivit[] = $rivi;
     }
-    return $rivit;
+
+    $saapumistiedot = array(
+      'rivit' => $rivit,
+      'kaikki_viety' => $kaikki_viety
+    );
+
+    return $saapumistiedot;
   }
 }
 

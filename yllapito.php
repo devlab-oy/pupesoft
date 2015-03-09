@@ -671,7 +671,7 @@ if ($upd == 1) {
                     WHERE yhtio = '{$kukarow['yhtio']}'
                     AND tuoteno = '{$tuoteno_temp}'
                     AND laji = 'sammutin_koko'";
-        $result1 = pupe_query($query);
+        $result1 = pupe_query($query1);
         if (mysql_num_rows($result1) == 0) {
           $query1 = " INSERT INTO tuotteen_avainsanat
                       SET yhtio = '{$kukarow['yhtio']}',

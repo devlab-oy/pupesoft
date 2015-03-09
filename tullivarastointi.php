@@ -107,10 +107,13 @@ if (isset($task) and $task == 'perusta') {
     $toimres = pupe_query($query);
     $toimrow = mysql_fetch_assoc($toimres);
 
+    $palat = explode('.', $tulopaiva);
+    $toimaika = $palat[2] . '-' . $palat[1] . '-' . $palat[0];
+
     $params = array(
       'liitostunnus' => $toimrow['tunnus'],
       'nimi' => $toimrow['nimi'],
-      'myytil_toimaika' => $data['toimitusaika'],
+      'myytil_toimaika' => $toimaika,
       'varasto' => $varastotunnus,
       'osoite' => $toimrow['osoite'],
       'postino' => $toimrow['postino'],
@@ -171,17 +174,20 @@ if (isset($task) and $task == 'perusta') {
       $kukarow['kesken'] = $laskurow['tunnus'];
 
       require "tilauskasittely/lisaarivi.inc";
+
+      $query = "UPDATE tilausrivin_lisatiedot SET
+                kontin_mrn = '{$edeltava_asiakirja}',
+                kuljetuksen_rekno = '{$rekisterinumero}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = '{$lisatty_tun}'";
+      pupe_query($query);
+
     }
     header("Location: tullivarastointi.php?pe=ok&tn={$tulonumero}");
   }
 }
 
-
-
-
-
-
-echo "<font class='head'>{$otsikko} {$task}</font><hr><br>";
+echo "<font class='head'>{$otsikko}</font><hr><br>";
 
 if (isset($pe) and $pe == "ok") {
   echo "<p class='green'>", t("Tulonumero: "), $tn, ' ', t("perustettu"), "</p>";
@@ -229,7 +235,9 @@ if (isset($view) and $view == "tuotetiedot") {
   <input type='hidden' name='varastotunnus_ja_koodi' value='$varastotunnus_ja_koodi' />
   <input type='hidden' name='tuoteryhmien_maara' value='$tuoteryhmien_maara' />
   <input type='hidden' name='varastotunnus' value='$varastotunnus' />
+  <input type='hidden' name='rekisterinumero' value='$rekisterinumero' />
   <input type='hidden' name='varastokoodi' value='$varastokoodi' />
+  <input type='hidden' name='tulopaiva' value='$tulopaiva' />
   <input type='hidden' name='edeltava_asiakirja' value='$edeltava_asiakirja' />
   <input type='hidden' name='tulonumero' value='$tulonumero' />";
 
@@ -461,15 +469,24 @@ if (isset($view) and $view == "perus") {
     <input type='submit' value='". t("Perusta uusi saapuminen") . "' />
     </form><br><br>";
 
-  $query = "SELECT lasku.asiakkaan_tilausnumero,
+  $query = "SELECT
+            lasku.asiakkaan_tilausnumero,
             tilausrivi.tilkpl as kpl,
-            tilausrivi.nimitys,
+            tilausrivi.nimitys as tuote,
+            tilausrivi.hyllyalue,
+            tilausrivi.hyllynro,
+            concat(SUBSTRING(tilausrivi.hyllyalue, 3, 5),  tilausrivi.hyllynro) AS varastopaikka,
             lasku.varasto,
-            lasku.nimi
+            varastopaikat.nimitys AS varastonimi,
+            lasku.nimi,
+            lasku.toimaika
             FROM lasku
             JOIN tilausrivi
-              ON tilausrivi.yhtio = lasku.yhtio
-              AND tilausrivi.otunnus = lasku.tunnus
+            ON tilausrivi.yhtio = lasku.yhtio
+            AND tilausrivi.otunnus = lasku.tunnus
+            JOIN varastopaikat
+            ON varastopaikat.yhtio = lasku.yhtio
+            AND varastopaikat.tunnus = lasku.varasto
             WHERE lasku.yhtio = 'rplog'
             AND viesti = 'tullivarasto'
             GROUP BY concat(lasku.tunnus, tilausrivi.tunnus)";
@@ -480,20 +497,42 @@ if (isset($view) and $view == "perus") {
 
   while ($tulo = mysql_fetch_assoc($result)) {
 
-    $tuoteinfo = array('nimitys' => $tulo['nimitys'], 'kpl' => $tulo['kpl']);
+    $tuoteinfo = array('tuote' => $tulo['tuote'], 'kpl' => $tulo['kpl'], 'vp' => $tulo['varastopaikka']);
 
     $tuotteet[$tulo['asiakkaan_tilausnumero']]['tuoteinfo'][] = $tuoteinfo;
     $tuotteet[$tulo['asiakkaan_tilausnumero']]['toimittaja'] = $tulo['nimi'];
-    $tuotteet[$tulo['asiakkaan_tilausnumero']]['varasto'] = $tulo['varasto'];
+    $tuotteet[$tulo['asiakkaan_tilausnumero']]['varastonimi'] = $tulo['varastonimi'];
+    $tuotteet[$tulo['asiakkaan_tilausnumero']]['toimaika'] = $tulo['toimaika'];
 
   }
 
   echo "<table>";
   echo "<tr>";
-  echo "<th>".t("Tulonumero")."</th>";
+  echo "<th>".t("Saapumiskoodi")."</th>";
+  echo "<th>".t("Toimituspäivä")."</th>";
   echo "<th>".t("Toimittaja")."</th>";
   echo "<th>".t("Kohdevarasto")."</th>";
-  echo "<th>".t("Tuotteet")."</th>";
+ // echo "<th>".t("Nimitys").' '.t("Kpl.").' '.t("Varastopaikka")."</th>";
+
+  echo "<th>";
+
+  echo "<div style='overflow:auto'>";
+  echo "<div style='float:left; width:100px; text-align:center;'>";
+  echo t("nimitys");
+  echo '</div>';
+  echo "<div style='float:left; width:60px; text-align:center;'>";
+  echo t("Kpl.");
+  echo '</div>';
+  echo "<div style='float:left; width:60px; text-align:center;'>";
+  echo t("Paikka");
+  echo '</div>';
+  echo '</div>';
+
+
+  echo "</th>";
+
+
+
   echo "<th class='back'></th>";
   echo "</tr>";
 
@@ -506,17 +545,62 @@ if (isset($view) and $view == "perus") {
     echo "</td>";
 
     echo "<td valign='top'>";
+    echo $info['toimaika'];
+    echo "</td>";
+
+    echo "<td valign='top'>";
     echo $info['toimittaja'];
     echo "</td>";
 
     echo "<td valign='top'>";
-    echo $info['varasto'];
+    echo $info['varastonimi'];
     echo "</td>";
 
     echo "<td valign='top'>";
 
+/*
+
+    echo "<div style='overflow:auto'>";
+    echo "<div style='float:left; width:100px; text-align:center;'>";
+    echo t("nimitys");
+    echo '</div>';
+    echo "<div style='float:left; width:100px; text-align:center;'>";
+    echo t("Kpl.");
+    echo '</div>';
+    echo "<div style='float:left; width:100px; text-align:center;'>";
+    echo t("Varastopaikka");
+    echo '</div>';
+    echo '</div>';
+*/
+
     foreach ($info['tuoteinfo'] as $tuote) {
-      echo $tuote['nimitys'], ' - ',  (int) $tuote['kpl'], " kpl<br>";
+
+      if (empty($tuote['vp'])) {
+        $color = 'red';
+        $paikka = '-';
+      }
+      else {
+        $color = 'green';
+        $paikka = $tuote['vp'];
+      }
+
+      echo "<div style='overflow:auto; color:{$color};'>";
+
+      echo "<div style='float:left; width:100px; text-align:center; overflow:hidden;'>";
+      echo $tuote['tuote'];
+      echo '</div>';
+
+      echo "<div style='float:left; width:60px; text-align:center;'>";
+      echo (int) $tuote['kpl'];
+      echo '</div>';
+
+      echo "<div style='float:left; width:60px; text-align:center;'>";
+      echo $paikka;
+      echo '</div>';
+
+
+      echo '</div>';
+
     }
 
     echo "</td>";

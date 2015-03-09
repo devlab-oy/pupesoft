@@ -1495,9 +1495,12 @@ if ($tila == "" and !isset($jatka)) {
                 order by jarjestys, teksti, tunnus";
       $mresult = pupe_query($query);
 
+      $maksuehto_valinta = $kukarow["maksuehto"] != 0 ? $kukarow["maksuehto"] : $srow["maksuehto"];
+
       while ($row = mysql_fetch_assoc($mresult)) {
         $sel = "";
-        if ($row["tunnus"] == $srow["maksuehto"]) {
+
+        if ($row["tunnus"] == $maksuehto_valinta) {
           $sel = 'selected';
         }
         $vasen_sarake[$vasen] .= "<option value='$row[tunnus]' $sel>".t_tunnus_avainsanat($row, "teksti", "MAKSUEHTOKV")."</option>";

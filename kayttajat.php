@@ -1541,6 +1541,8 @@ if ($tee == 'MUUTA') {
 
       echo "<td><select id='toimitustapa' name='toimitustapa'>";
 
+      echo "<option value=''>" . t("Ei valintaa") . "</option>";
+
       while ($tt_row = mysql_fetch_array($tt_result)) {
         if ($krow["toimitustapa"] == $tt_row['selite']) {
           $selected = "selected";

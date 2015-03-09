@@ -2632,6 +2632,16 @@ if ($tila == "" and !isset($jatka)) {
       $asiakas = hae_asiakas($srow['liitostunnus']);
     }
 
+    if ($kukarow["toimitustapa"] != "") {
+      $toimitustapa_valinta = $kukarow["toimitustapa"];
+    }
+    elseif (empty($asiakas)) {
+      $toimitustapa_valinta = $srow["toimitustapa"];
+    }
+    elseif (!empty($asiakas)) {
+      $toimitustapa_valinta = $asiakas["toimitustapa"];
+    }
+
     foreach ($toimitustavat as $toimitustapa) {
 
       if (!empty($toimitustapa['sallitut_maat']) and !stristr($toimitustapa['sallitut_maat'], $srow['toim_maa'])) {
@@ -2641,13 +2651,7 @@ if ($tila == "" and !isset($jatka)) {
       echo "<div style='display: none; visibility: hidden;' id='merahti_toimitustapa_$toimitustapa[tunnus]'>$toimitustapa[merahti]</div>";
 
       if (in_array($toimitustapa['extranet'], array('', 'M')) or $toimitustapa['selite'] == $srow['toimitustapa']) {
-        $sel = "";
-        if (empty($asiakas) and $toimitustapa["selite"] == $srow["toimitustapa"]) {
-          $sel = 'selected';
-        }
-        elseif (!empty($asiakas) and $toimitustapa["selite"] == $asiakas["toimitustapa"]) {
-          $sel = 'selected';
-        }
+        $sel = $toimitustapa["selite"] == $toimitustapa_valinta ? 'selected' : "";
 
         $string .= "<option id='toimitustapa_$toimitustapa[tunnus]' value='$toimitustapa[selite]' $sel>";
         $string .= t_tunnus_avainsanat($toimitustapa, "selite", "TOIMTAPAKV");

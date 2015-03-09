@@ -2158,7 +2158,7 @@ if ($tila == "" and !isset($jatka)) {
       'toimtapa_apuro' => $toimtapa_apuro,
     );
     $ei_lahetettako = eilahetetta($args);
-    if ($kukarow["eilahetetta"] == "o" or $ei_lahetettako) {
+    if ((!isset($laskurow["eilahetetta"]) and $kukarow["eilahetetta"] == "o") or $ei_lahetettako) {
       $eilah = 'CHECKED';
     }
     if ($srow['ketjutus']    != '') $eiket          = 'CHECKED';
@@ -2195,7 +2195,8 @@ if ($tila == "" and !isset($jatka)) {
         'poikkeava_yhtiorow' => $vt_yhtiorow,
       );
       $ei_lahetettako = eilahetetta($args);
-      if ($kukarow["eilahetetta"] == "o" or $ei_lahetettako) {
+      if ((!isset($laskurow["eilahetetta"]) and $kukarow["eilahetetta"] == "o") or $ei_lahetettako
+      ) {
         $eilah = 'CHECKED';
       }
 
@@ -2232,7 +2233,8 @@ if ($tila == "" and !isset($jatka)) {
         'poikkeava_yhtiorow' => $vt_yhtiorow,
       );
       $ei_lahetettako = eilahetetta($args);
-      if ($kukarow["eilahetetta"] or $ei_lahetettako) {
+      if ((!isset($laskurow["eilahetetta"]) and $kukarow["eilahetetta"] == "o") or $ei_lahetettako
+      ) {
         $eilah = 'CHECKED';
       }
       else {

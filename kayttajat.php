@@ -606,6 +606,7 @@ if ($tee == 'MUUTA') {
               oletus_ohjelma                = '{$oletus_ohjelma}',
               maksuehto                     = '{$maksuehto}',
               toimitustapa                  = '{$toimitustapa}',
+              eilahetetta                   = '{$eilahetetta}',
               naytetaan_katteet_tilauksella = '{$naytetaan_katteet_tilauksella}',
               naytetaan_asiakashinta        = '{$naytetaan_asiakashinta}',
               naytetaan_tuotteet            = '{$naytetaan_tuotteet}',
@@ -1553,6 +1554,15 @@ if ($tee == 'MUUTA') {
       }
 
       echo "</select></td></tr>";
+
+      echo "<tr><th><label for='eilahetetta'>" . t("Tilaukset oletuksena suoraan laskutukseen") .
+           "</label></th>";
+      echo "<td>";
+
+      $checked = $krow["eilahetetta"] == "o" ? "checked" : "";
+
+      echo "<input id='eilahetetta' name='eilahetetta' type='checkbox' value='o' {$checked}>";
+      echo "</td></tr>";
     }
 
     echo "</table>";

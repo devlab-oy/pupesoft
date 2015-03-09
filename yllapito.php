@@ -467,6 +467,9 @@ if ($upd == 1) {
         if (mysql_field_name($result, $i) == 'tuoteno') {
           $tuoteno_temp = $t[$i];
         }
+        if ($yhtiorow['laite_huolto'] == 'X' and mysql_field_name($result, $i) == 'malli') {
+          $t[$i] = $malli;
+        }
         // Tuleeko tämä columni käyttöliittymästä
         if (isset($t[$i])) {
 
@@ -591,6 +594,9 @@ if ($upd == 1) {
       for ($i=1; $i < mysql_num_fields($result); $i++) {
         if (mysql_field_name($result, $i) == 'tuoteno') {
           $tuoteno_temp = $t[$i];
+        }
+        if ($yhtiorow['laite_huolto'] == 'X' and mysql_field_name($result, $i) == 'malli') {
+          $t[$i] = $malli;
         }
         if (isset($t[$i]) or (isset($_FILES["liite_$i"]) and is_array($_FILES["liite_$i"]))) {
 
@@ -2423,6 +2429,27 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     echo "<th>".t('Koko')."</th>";
     echo "<td>";
     echo "<input type='text' name='sammutin_koko' value='{$tuote_row['selite']}' />";
+    echo "</td>";
+    echo "</tr>";
+
+    $erikois_tuotteet = hae_erikoistuotteet();
+    array_unshift($erikois_tuotteet, t('Ei erikoistuote'));
+    echo "<tr>";
+    echo "<th>" . t('Erikoistuote') . "</th>";
+    echo "<td>";
+    echo "<select name='malli'>";
+    $sel = "";
+    if (!isset($malli)) {
+      $malli = $trow['malli'];
+    }
+    foreach ($erikois_tuotteet as $key => $erikois_tuote) {
+      if ($malli == $key) {
+        $sel = "SELECTED";
+      }
+      echo "<option value='{$key}' {$sel}>{$erikois_tuote}</option>";
+      $sel = "";
+    }
+    echo "</select>";
     echo "</td>";
     echo "</tr>";
   }

@@ -57,6 +57,16 @@ $onko_toim_laite = false;
 if ($yhtiorow['laite_huolto'] == 'X' and stristr($toim, 'laite')) {
   $onko_toim_laite = true;
 }
+if ($yhtiorow['laite_huolto'] == 'X' and !empty($sammutin_koko)) {
+  $matches = array();
+  preg_match('/\d+/', $sammutin_koko, $matches);
+  if (isset($matches[0])) {
+    $sammutin_koko = $matches[0];
+  }
+  else {
+    $sammutin_koko = 0;
+  }
+}
 
 if ($toim == "toimi" or $toim == "asiakas" or $toim == "tuote" or $toim == "avainsana" or $onko_toim_laite) {
   enable_ajax();

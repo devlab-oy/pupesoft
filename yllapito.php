@@ -702,7 +702,7 @@ if ($upd == 1) {
                       muutospvm = NOW()
                       WHERE yhtio = '{$kukarow['yhtio']}'
                       AND tuoteno = '{$tuoteno_temp}'
-                      AND laji = 'sammutin_tyyppi'";
+                      AND laji = 'sammutin_koko'";
         }
 
         pupe_query($query1);

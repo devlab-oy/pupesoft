@@ -4,22 +4,31 @@ require "inc/parametrit.inc";
 $errors = array();
 
 if (!isset($task)) {
-  $otsikko = t("Perustetut tulonumerot");
+  $otsikko = t("Hae tuotteita");
   $view = "perus";
 }
 
 if (isset($task) and $task == 'etsi') {
 
+  $hakusana = mysql_real_escape_string($hakusana);
+
   $query = "SELECT tilausrivi.*,
             CONCAT(SUBSTRING(tilausrivi.hyllyalue, 3, 4), tilausrivi.hyllynro) AS varastopaikka,
-            lasku.asiakkaan_tilausnumero AS saapumiskoodi
+            lasku.asiakkaan_tilausnumero AS saapumiskoodi,
+            varastopaikat.nimitys AS varastonimi,
+            tuote.malli
             FROM tilausrivi
             JOIN lasku
              ON lasku.yhtio = tilausrivi.yhtio
              AND lasku.tunnus = tilausrivi.otunnus
-            JOIN tilausrivin_lisatiedot
-             ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-             AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+            JOIN varastopaikat
+            ON varastopaikat.yhtio = lasku.yhtio
+            AND varastopaikat.tunnus = lasku.varasto
+
+            JOIN tuote
+            ON tuote.yhtio = lasku.yhtio
+            AND tuote.tuoteno = tilausrivi.tuoteno
+
             WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
             AND lasku.viesti = 'tullivarasto'
             AND tilausrivi.otunnus != 0";
@@ -29,10 +38,6 @@ if (isset($task) and $task == 'etsi') {
 
   if (mysql_num_rows($result) == 0) {
     $lisa = " AND tilausrivi.nimitys LIKE '%{$hakusana}%'";
-    $result = pupe_query($query.$lisa);
-  }
-  elseif (mysql_num_rows($result) == 0) {
-    $lisa = " AND tilausrivin_lisatiedot.kontin_mrn = '{$hakusana}'";
     $result = pupe_query($query.$lisa);
   }
   elseif (mysql_num_rows($result) == 0) {
@@ -47,6 +52,7 @@ if (isset($task) and $task == 'etsi') {
     }
   }
   $view = 'perus';
+  $otsikko = t("Toimituksen kokoaminen");
 }
 
 
@@ -67,18 +73,43 @@ if ($view == 'perus') {
     <tr>
       <th>" . t("Saapumiskoodi") ."</th>
       <th>" . t("Nimitys") ."</th>
+      <th>" . t("Malli") ."</th>
       <th>" . t("Kpl") ."</th>
+      <th>" . t("Varasto") ."</th>
       <th>" . t("Varastopaikka") ."</th>
+      <th class='back'></th>
     </tr>";
 
     foreach ($rivit as $rivi) {
+
+      if (empty($rivi['varastopaikka'])) {
+        $varastopaikka = t("Ei varastoitu!");
+      }
+      else {
+        $varastopaikka = $rivi['varastopaikka'];
+      }
 
       echo "
       <tr>
         <td>" . $rivi['saapumiskoodi'] ."</td>
         <td>" . $rivi['nimitys'] ."</td>
-        <td>" . $rivi['tilkpl'] ."</td>
-        <td>" . $rivi['varastopaikka'] ."</td>
+        <td>" . $rivi['malli'] ."</td>
+        <td>" . (int) $rivi['tilkpl'] ."</td>
+        <td>" . $rivi['varastonimi'] ."</td>
+        <td align='center'>" . $varastopaikka ."</td>
+        <td class='back'>";
+
+        if (!empty($rivi['varastopaikka'])) {
+
+          echo "
+            <form method='post'>
+            <input type='submit' value='" . t("Lis&auml;&auml; toimitukseen") . "'/>
+            </form>";
+
+        }
+
+      echo "
+        </td>
       </tr>";
 
     }

@@ -670,7 +670,8 @@ if ($upd == 1) {
                       muuttaja = '{$kukarow['kuka']}',
                       muutospvm = NOW()
                       WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tuoteno = '{$tuoteno_temp}'";
+                      AND tuoteno = '{$tuoteno_temp}'
+                      AND laji = 'sammutin_tyyppi'";
         }
 
         pupe_query($query1);
@@ -700,7 +701,8 @@ if ($upd == 1) {
                       muuttaja = '{$kukarow['kuka']}',
                       muutospvm = NOW()
                       WHERE yhtio = '{$kukarow['yhtio']}'
-                      AND tuoteno = '{$tuoteno_temp}'";
+                      AND tuoteno = '{$tuoteno_temp}'
+                      AND laji = 'sammutin_tyyppi'";
         }
 
         pupe_query($query1);

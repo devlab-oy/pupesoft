@@ -1495,7 +1495,12 @@ if ($tila == "" and !isset($jatka)) {
                 order by jarjestys, teksti, tunnus";
       $mresult = pupe_query($query);
 
-      $maksuehto_valinta = $kukarow["maksuehto"] != 0 ? $kukarow["maksuehto"] : $srow["maksuehto"];
+      if (empty($laskurow["maksuehto"]) and $kukarow["maksuehto"] != 0) {
+        $maksuehto_valinta = $kukarow["maksuehto"];
+      }
+      else {
+        $maksuehto_valinta = $srow["maksuehto"];
+      }
 
       while ($row = mysql_fetch_assoc($mresult)) {
         $sel = "";
@@ -2632,7 +2637,7 @@ if ($tila == "" and !isset($jatka)) {
       $asiakas = hae_asiakas($srow['liitostunnus']);
     }
 
-    if ($kukarow["toimitustapa"] != "") {
+    if (empty($laskurow["toimitustapa"]) and $kukarow["toimitustapa"] != "") {
       $toimitustapa_valinta = $kukarow["toimitustapa"];
     }
     elseif (empty($asiakas)) {

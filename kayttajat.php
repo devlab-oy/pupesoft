@@ -605,6 +605,7 @@ if ($tee == 'MUUTA') {
               jyvitys                       = '{$jyvitys}',
               oletus_ohjelma                = '{$oletus_ohjelma}',
               maksuehto                     = '{$maksuehto}',
+              toimitustapa                  = '{$toimitustapa}',
               naytetaan_katteet_tilauksella = '{$naytetaan_katteet_tilauksella}',
               naytetaan_asiakashinta        = '{$naytetaan_asiakashinta}',
               naytetaan_tuotteet            = '{$naytetaan_tuotteet}',
@@ -1524,6 +1525,31 @@ if ($tee == 'MUUTA') {
 
         echo "<option value='{$me_row["tunnus"]}' {$selected}>" .
              t_tunnus_avainsanat($me_row, "teksti", "MAKSUEHTOKV") . " {$sallitut_maat}</option>";
+      }
+
+      echo "</select></td></tr>";
+
+      echo "<tr><th><label for='toimitustapa'>" . t("Oletustoimitustapa") . "</label></th>";
+
+      $tt_query = "SELECT *
+                   FROM toimitustapa
+                   WHERE yhtio = '{$kukarow["yhtio"]}'
+                   ORDER BY jarjestys, selite";
+
+      $tt_result = pupe_query($tt_query);
+
+      echo "<td><select id='toimitustapa' name='toimitustapa'>";
+
+      while ($tt_row = mysql_fetch_array($tt_result)) {
+        if ($krow["toimitustapa"] == $tt_row['selite']) {
+          $selected = "selected";
+        }
+        else {
+          $selected = "";
+        }
+
+        echo "<option value='{$tt_row["selite"]}' {$selected}>" .
+             t_tunnus_avainsanat($tt_row, "selite", "TOIMTAPAKV") . "</option>";
       }
 
       echo "</select></td></tr>";

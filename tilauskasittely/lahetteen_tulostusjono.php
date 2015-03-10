@@ -8,7 +8,7 @@ if (isset($tee) and $tee == "TILAA_AJAX") {
   require_once "inc/tilaa_ajax.inc";
 }
 
-if ($toim == "VASTAANOTA_REKLAMAATIO" and !in_array($yhtiorow['reklamaation_kasittely'], array('U','X'))) {
+if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] != 'U') {
   echo "<font class='error'>".t("HUOM: Ohjelma on käytössä vain kun käytetään laajaa reklamaatioprosessia")."!</font>";
   exit;
 }
@@ -969,10 +969,6 @@ if ($tee2 == '') {
     $grouppi .= ", lasku.varasto, lasku.tulostusalue";
   }
 
-  if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X') {
-    $grouppi = "GROUP BY lasku.varasto, lasku.yhtio_toimipaikka";
-  }
-
   $tilausrivi_tuoteno_join = '';
   if (isset($tuoteno) and $tuoteno != '') {
     $tilausrivi_tuoteno_join = "  AND tilausrivi.tuoteno = '{$tuoteno}'";
@@ -990,7 +986,6 @@ if ($tee2 == '') {
   }
 
   $query = "SELECT lasku.yhtio, lasku.yhtio_nimi, lasku.ytunnus, lasku.toim_ovttunnus, lasku.toim_nimi, lasku.toim_nimitark, lasku.nimi, lasku.nimitark, lasku.toim_osoite, lasku.toim_postino, lasku.toim_postitp, lasku.toim_maa, lasku.varasto,
-            lasku.yhtio_toimipaikka,
             if (tila = 'V', lasku.viesti, lasku.toimitustapa) toimitustapa,
             if (maksuehto.jv!='', lasku.tunnus, '') jvgrouppi,
             if (lasku.vienti!='', lasku.tunnus, '') vientigrouppi,
@@ -1046,11 +1041,6 @@ if ($tee2 == '') {
     if ($logistiikka_yhtio != '') {
       echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='yhtio'; document.forms['find'].submit();\">".t("Yhtiö")."</a></th>";
     }
-
-    if ($toim == "VASTAANOTA_REKLAMAATIO") {
-      echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='yhtio_toimipaikka'; document.forms['find'].submit();\">".t("Toimipaikka")."</a></th>";
-    }
-
     echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='prioriteetti'; document.forms['find'].submit();\">".t("Pri")."</a><br>
           <a href='#' onclick=\"getElementById('jarj').value='varastonimi'; document.forms['find'].submit();\">".t("Varastoon")."</a></th>";
 
@@ -1102,18 +1092,6 @@ if ($tee2 == '') {
         echo "<$ero valign='top'>$tilrow[yhtio_nimi]</$ero>";
       }
 
-      if ($toim == "VASTAANOTA_REKLAMAATIO") {
-        if (!empty($tilrow['yhtio_toimipaikka'])) {
-          $_tp_res = hae_yhtion_toimipaikat($kukarow['yhtio'], $tilrow['yhtio_toimipaikka']);
-          $_tp_row = mysql_fetch_assoc($_tp_res);
-
-          echo "<{$ero}>{$_tp_row['nimi']}</{$ero}>";
-        }
-        else {
-          echo "<{$ero}></{$ero}>";
-        }
-      }
-
       echo "<$ero valign='top' align='right'>$tilrow[t_tyyppi] $tilrow[prioriteetti] ";
 
       if (trim($tilrow["sisviesti2"]) != "") {
@@ -1135,19 +1113,13 @@ if ($tee2 == '') {
       echo "</$ero>";
 
       echo "<$ero valign='top'>".str_replace(',', '<br>', $tilrow["otunnus"])."</$ero>";
+      echo "<$ero valign='top'>$tilrow[ytunnus]";
 
-      if ($toim == "VASTAANOTA_REKLAMAATIO" and $tilrow['tilauksia'] > 1) {
-        echo "<{$ero} valign='top'>",t("Useita"),"</{$ero}>";
+      if ($toim == 'SIIRTOLISTA' or $toim == 'SIIRTOTYOMAARAYS') {
+        echo "<br>$tilrow[nimi]</$ero>";
       }
       else {
-        echo "<$ero valign='top'>$tilrow[ytunnus]";
-
-        if ($toim == 'SIIRTOLISTA' or $toim == 'SIIRTOTYOMAARAYS') {
-          echo "<br>$tilrow[nimi]</$ero>";
-        }
-        else {
-          echo "<br>$tilrow[toim_nimi]</$ero>";
-        }
+        echo "<br>$tilrow[toim_nimi]</$ero>";
       }
 
       $laadittu_e   = tv1dateconv($tilrow["laadittu"], "P", "LYHYT");
@@ -1342,10 +1314,6 @@ if ($tee2 == '') {
     echo "<th>".$riveja_yht."</th>";
 
     $spanni = ($yhtiorow["pakkaamolokerot"] != "" or $logistiikka_yhtio != '') ? 4 : 3;
-
-    if ($toim == "VASTAANOTA_REKLAMAATIO") {
-      $spanni++;
-    }
 
     echo "<th colspan='$spanni'></th>";
     echo "</tr>";

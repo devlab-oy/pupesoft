@@ -27367,6 +27367,7 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
               lasku.valkoodi,
               asiakas.asiakasnro AS asiakasnumero,
               asiakas.tunnus AS asiakas_tunnus,
+              asiakas.kieli AS kieli,
               lasku.summa,
               ROUND(SUM(tiliointi.summa), 2) AS avoin_saldo
               FROM lasku
@@ -27391,7 +27392,7 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
               AND lasku.tapvm                        > '0000-00-00'
               AND lasku.tila                         = 'U'
               AND lasku.alatila                      = 'X'
-              GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
+              GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14
               ORDER BY asiakas.toim_ovttunnus ASC,
               asiakas.ytunnus ASC,
               lasku.tunnus ASC";
@@ -27778,7 +27779,7 @@ if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
       $valitut_saldovahvistukset = array($request['saldovahvistus']);
     }
     else {
-      $valitut_saldovahvistukset = $_SESSION['valitut_laskut'];
+      $valitut_saldovahvistukset = $request['lahetettavat_laskut'];
     }
 
     $lahetetyt_count = 0;
@@ -27787,27 +27788,26 @@ if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
     $ei_lahetetyt = array();
 
     foreach ($valitut_saldovahvistukset as $valittu_saldovahvistus) {
-      $request['ryhmittely_tyyppi_temp'] = $valittu_saldovahvistus['ryhmittely_tyyppi'];
 
       if ($lahetetyt) {
+        $request['ryhmittely_tyyppi_temp'] = $valittu_saldovahvistus['ryhmittely_tyyppi'];
         $request['saldovahvistus_tunnus'] = $valittu_saldovahvistus['saldovahvistus_tunnus'];
         $saldovahvistus = hae_lahetetyt_saldovahvistukset($request);
+
+        //Valittu saldovahvistusviesti
+        $saldovahvistus['saldovahvistus_viesti'] = search_array_key_for_value_recursive($request['saldovahvistus_viestit'], 'selite', $valittu_saldovahvistus['saldovahvistus_viesti']);
+        $saldovahvistus['saldovahvistus_viesti'] = $saldovahvistus['saldovahvistus_viesti'][0];
+        $saldovahvistus['laskun_avoin_paiva'] = $valittu_saldovahvistus['laskun_avoin_paiva'];
       }
       else {
-        $request['lasku_tunnukset'] = $valittu_saldovahvistus['lasku_tunnukset'];
-        $saldovahvistus = hae_myyntilaskuja_joilla_avoin_saldo($request, true);
+        $saldovahvistus = $request['valitut_laskut'][$valittu_saldovahvistus];
       }
-
-      //Valittu saldovahvistusviesti
-      $saldovahvistus['saldovahvistus_viesti'] = search_array_key_for_value_recursive($request['saldovahvistus_viestit'], 'selite', $valittu_saldovahvistus['saldovahvistus_viesti']);
-      $saldovahvistus['saldovahvistus_viesti'] = $saldovahvistus['saldovahvistus_viesti'][0];
-      $saldovahvistus['laskun_avoin_paiva'] = $valittu_saldovahvistus['laskun_avoin_paiva'];
 
       if ($saldovahvistus['asiakas']['talhal_email'] != '') {
 
         $saldovahvistus['tiliotepvm'] = "{$request['vv']}-{$request['kk']}-{$request['pp']}";
 
-        if ($valittu_saldovahvistus['ryhmittely_tyyppi'] == 'ytunnus') {
+        if ($saldovahvistus['ryhmittely_tyyppi'] == 'ytunnus') {
           $boss = true;
         }
         else {
@@ -27835,6 +27835,10 @@ if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
         if ($onko_sahkoposti_lahetetty) {
           merkkaa_saldovahvistus_lahetetyksi($saldovahvistus);
           $lahetetyt_count++;
+
+          if (!$lahetetyt) {
+            unset($_SESSION['valitut_laskut'][$valittu_saldovahvistus]);
+          }
         }
         else {
           $ei_lahetetty_count++;

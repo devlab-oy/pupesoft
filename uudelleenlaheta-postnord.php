@@ -15,7 +15,7 @@ if ($tee == "laheta" and $tilaukset != "") {
             FROM lasku
             JOIN varastopaikat ON (lasku.yhtio=varastopaikat.yhtio AND lasku.varasto=varastopaikat.tunnus AND varastopaikat.ulkoinen_jarjestelma = 'P')
             WHERE lasku.yhtio = '$kukarow[yhtio]'
-            AND lasku.tila    in ('L','N', 'G')
+            AND lasku.tila    in ('L','N')
             AND lasku.tunnus  in ($tilaukset)";
   $res  = pupe_query($query);
 

@@ -123,19 +123,12 @@ if ($handle = opendir($path)) {
               $varattuupdate = ", tilausrivi.varattu = '{$keratty}' ";
             }
 
-            if ($laskurow["tila"] == "G") {
-              $toimitettu_lisa = "";
-            }
-            else {
-              $toimitettu_lisa = ", tilausrivi.toimitettu = '{$kukarow['kuka']}',
-                                    tilausrivi.toimitettuaika = '{$toimaika} 00:00:00'";
-            }
-
             $query = "UPDATE tilausrivi
                       JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.eankoodi = '{$eankoodi}' AND tuote.tuoteno = tilausrivi.tuoteno)
                       SET tilausrivi.keratty = '{$kukarow['kuka']}',
-                      tilausrivi.kerattyaika    = '{$toimaika} 00:00:00'
-                      {$toimitettu_lisa}
+                      tilausrivi.kerattyaika    = '{$toimaika} 00:00:00',
+                      tilausrivi.toimitettu     = '{$kukarow['kuka']}',
+                      tilausrivi.toimitettuaika = '{$toimaika} 00:00:00'
                       {$varattuupdate}
                       WHERE tilausrivi.yhtio    = '{$kukarow['yhtio']}'
                       AND tilausrivi.tunnus     = '{$tilausrivin_tunnus}'";
@@ -164,15 +157,9 @@ if ($handle = opendir($path)) {
                      viesti         = ''";
           $result_rk = pupe_query($query);
 
-          if ($laskurow["tila"] == "G") {
-            $tilalisa = "tila = 'G', alatila = 'C'";
-          }
-          else {
-            $tilalisa = "tila = 'L', alatila = 'D'";
-          }
-
           $query = "UPDATE lasku SET
-                    {$tilalisa}
+                    tila        = 'L',
+                    alatila     = 'D'
                     WHERE yhtio = '{$kukarow['yhtio']}'
                     AND tunnus  = '{$laskurow['tunnus']}'";
           $upd_res = pupe_query($query);

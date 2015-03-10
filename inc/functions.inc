@@ -8136,7 +8136,7 @@ if (!function_exists("muistiin")) {
 }
 
 if (!function_exists("muistista")) {
-  function muistista($muisti, $nimi, $tarkista_kuka = true) {
+  function muistista($muisti, $nimi, $tarkista_kuka = true, $kuvaus_mukaan = false) {
     global $kukarow;
 
     $kuka_lisa = $tarkista_kuka ? "AND kuka = '{$kukarow["kuka"]}'" : "";
@@ -8161,6 +8161,10 @@ if (!function_exists("muistista")) {
       }
       else {
         $retval[$row["var"]] = stripslashes($row["value"]);
+      }
+
+      if ($kuvaus_mukaan) {
+        $retval["kuvaus"] = $row["kuvaus"];
       }
     }
 

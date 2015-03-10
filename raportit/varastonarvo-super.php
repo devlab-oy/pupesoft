@@ -1302,7 +1302,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
                         AND tilausrivi.tuoteno  = '{$row['tuoteno']}'
                         AND tilausrivi.laadittu >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
                         AND tilausrivi.kerattyaika >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
-                        AND tilausrivi.kpl > 0";
+                        AND tilausrivi.kpl + tilausrivi.varattu > 0";
             $xsiirtores = pupe_query($query_a);
             $xsiirtopvmrow = mysql_fetch_assoc($xsiirtores);
           }
@@ -1506,7 +1506,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
                     AND tilausrivi.tuoteno  = '{$row['tuoteno']}'
                     AND tilausrivi.laadittu >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
                     AND tilausrivi.toimitettuaika >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
-                    AND tilausrivi.kpl > 0";
+                    AND tilausrivi.kpl + tilausrivi.varattu > 0";
         $result_a = pupe_query($query_a);
         $resultti_a = mysql_fetch_assoc($result_a);
 

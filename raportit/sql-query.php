@@ -41,6 +41,21 @@ if ($tee == "aja_tallennettu_query" and isset($valittu_query)) {
 }
 
 if ($toim == "SUPER") {
+  if ($tee == "poista_query") {
+    $poisto_query = "DELETE FROM muisti
+                     WHERE yhtio = '{$kukarow["yhtio"]}'
+                     AND haku = 'sql-query'
+                     AND nimi = '{$poistettava_query}'";
+
+    $poisto_result = pupe_query($poisto_query);
+
+    if ($poisto_result) {
+      $poisto_success = t("Haku poistettiin onnistuneesti");
+    }
+
+    $tee = "";
+  }
+
   $haku["nimi"] = isset($haku["nimi"]) ? trim($haku["nimi"]) : "";
   $haku["kuvaus"] = isset($haku["kuvaus"]) ? trim($haku["kuvaus"]) : "";
 
@@ -69,6 +84,10 @@ if ($toim == "SUPER") {
 if ($tee == "") {
   echo "<font class='head'>".t("SQL-raportti").":</font><hr>";
 
+  if (isset($poisto_success) and !empty($poisto_success)) {
+    echo "<span class='ok'>{$poisto_success}</span><br><br>";
+  }
+
   $muisti_query = "SELECT *
                    FROM muisti
                    WHERE yhtio = 'Mesta'
@@ -94,6 +113,9 @@ if ($tee == "") {
     }
 
     echo "</select>";
+    echo "</td>";
+    echo "<td>";
+    echo "<input type='submit' value='" . t("Aja") . "'";
     echo "</td>";
     echo "</tr>";
     echo "</table>";
@@ -207,10 +229,12 @@ if ($tee == "") {
 
         echo "<form method='post'>";
         echo "<input type='hidden' name='tee' value='poista_query'>";
+        echo "<input type='hidden' name='poistettava_query' value='{$haku["nimi"]}'";
         echo "<table>";
         echo "<tr>";
         echo "<td class='back'>";
-        echo "<input type='submit' value='" . t("Poista haku") . "'>";
+        echo "<input type='submit' value='" . t("Poista haku") .
+             "' onclick='return confirm(\"" . t("Oletko varma") . "?\")'>";
         echo "</td>";
         echo "</tr>";
         echo "</table>";

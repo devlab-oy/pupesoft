@@ -783,16 +783,18 @@ if ((int) $kukarow["kesken"] > 0) {
 
   $laskurow = mysql_fetch_assoc($result);
 
-  $korttimaksutapahtuman_status = maksa_maksupaatteella();
-  list($loytyy_maksutapahtumia, $maksettavaa_jaljella, $kateismaksu["luottokortti"],
-    $kateismaksu["pankkikortti"]) = jaljella_oleva_maksupaatesumma();
+  if ($maksupaate_kassamyynti) {
+    $korttimaksutapahtuman_status = maksa_maksupaatteella();
+    list($loytyy_maksutapahtumia, $maksettavaa_jaljella, $kateismaksu["luottokortti"],
+      $kateismaksu["pankkikortti"]) = jaljella_oleva_maksupaatesumma();
 
-  if ($loytyy_maksutapahtumia and ($maksettavaa_jaljella - $kateista_annettu) == 0 and
-                                  ($kateismaksu["luottokortti"] > 0 or
-                                   $kateismaksu["pankkikortti"] > 0)
-  ) {
-    $tee = "VALMIS";
-    $seka = "kylla";
+    if ($loytyy_maksutapahtumia and ($maksettavaa_jaljella - $kateista_annettu) == 0 and
+                                    ($kateismaksu["luottokortti"] > 0 or
+                                     $kateismaksu["pankkikortti"] > 0)
+    ) {
+      $tee = "VALMIS";
+      $seka = "kylla";
+    }
   }
 
   if ($yhtiorow["extranet_poikkeava_toimitusosoite"] == "Y") {

@@ -30,6 +30,16 @@ if ($tee == "lataa_tiedosto") {
   exit;
 }
 
+if ($tee == "aja_tallennettu_query" and isset($valittu_query)) {
+  $muistista = muistista("sql-query", $valittu_query, false, true);
+
+  $haku["nimi"] = $valittu_query;
+  $haku["kuvaus"] = $muistista["kuvaus"];
+  $sqlhaku = $muistista["query"];
+
+  $tee = "";
+}
+
 if ($toim == "SUPER") {
   $haku["nimi"] = isset($haku["nimi"]) ? trim($haku["nimi"]) : "";
   $haku["kuvaus"] = isset($haku["kuvaus"]) ? trim($haku["kuvaus"]) : "";
@@ -70,6 +80,7 @@ if ($tee == "") {
     $valittu_query = isset($valittu_query) ? $valittu_query : "";
 
     echo "<form method='post'>";
+    echo "<input type='hidden' name='tee' value='aja_tallennettu_query'>";
     echo "<table>";
     echo "<tr>";
     echo "<th>" . t("Aja tallennettu haku") . "</th>";

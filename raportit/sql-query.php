@@ -59,6 +59,37 @@ if ($toim == "SUPER") {
 if ($tee == "") {
   echo "<font class='head'>".t("SQL-raportti").":</font><hr>";
 
+  $muisti_query = "SELECT *
+                   FROM muisti
+                   WHERE yhtio = 'Mesta'
+                   AND haku = 'sql-query'";
+
+  $muisti_result = pupe_query($muisti_query);
+
+  if (mysql_num_rows($muisti_result) > 0) {
+    $valittu_query = isset($valittu_query) ? $valittu_query : "";
+
+    echo "<form method='post'>";
+    echo "<table>";
+    echo "<tr>";
+    echo "<th>" . t("Aja tallennettu haku") . "</th>";
+    echo "<td>";
+    echo "<select name='valittu_query' onchange='submit()'>";
+
+    while ($muisti_row = mysql_fetch_assoc($muisti_result)) {
+      $sel = $muisti_row["nimi"] == $valittu_query ? "selected" : "";
+
+      echo "<option value='{$muisti_row["nimi"]}' {$sel}>{$muisti_row["nimi"]}</option>";
+    }
+
+    echo "</select>";
+    echo "</td>";
+    echo "</tr>";
+    echo "</table>";
+    echo "</form>";
+    echo "<br>";
+  }
+
   // käsitellään syötetty arvo nätiksi...
   $sqlhaku = stripslashes(strtolower(trim($sqlhaku)));
 

@@ -90,7 +90,7 @@ if ($tee == "") {
 
   $muisti_query = "SELECT *
                    FROM muisti
-                   WHERE yhtio = 'Mesta'
+                   WHERE yhtio = '{$kukarow["yhtio"]}'
                    AND haku = 'sql-query'";
 
   $muisti_result = pupe_query($muisti_query);

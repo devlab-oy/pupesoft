@@ -38,6 +38,34 @@ Toivottu ker‰ysajankohta
 Toivottu valmistusajankohta
 */
 
+function choose_correct_date($date) {
+  global $kukarow, $yhtiorow;
+
+  if (trim($date) == "") {
+    return '';
+  }
+
+  // P‰iv‰m‰‰r‰ oli ymm‰rrett‰v‰ss‰ muodossa
+  if (strtotime($date) !== false) {
+    // Palautetaan Y-m-d
+    return date('Y-m-d', strtotime($date));
+  }
+
+  // Exceliss‰ date voi tulla integerin‰
+  if (is_numeric($date)) {
+    /*  the date fields have integers that are the amount of days from 1900-00-00 */
+    return date('Y-m-d', mktime(0, 0, 0, 1, $date - 1, 1900));
+  }
+
+  // Ei osattu valita sopivaa p‰iv‰‰
+  echo "<font class='error'>";
+  echo t("Virheellinen p‰iv‰m‰‰r‰");
+  echo " \"{$date}\"";
+  echo "</font><br>";
+
+  return '';
+}
+
 if ($tee == "file") {
   if (is_uploaded_file($_FILES['userfile']['tmp_name']) === TRUE) {
     $timeparts = explode(" ", microtime());

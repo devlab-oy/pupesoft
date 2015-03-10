@@ -7,7 +7,7 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
   js_popup();
 }
 
-if ($toim == "VASTAANOTA_REKLAMAATIO" and !in_array($yhtiorow['reklamaation_kasittely'], array('U','X'))) {
+if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] != 'U') {
   echo "<font class='error'>", t("HUOM: Ohjelma on käytössä vain kun käytetään laajaa reklamaatioprosessia"), "!</font>";
   exit;
 }
@@ -1235,34 +1235,8 @@ if ($tee == 'P') {
           if ($toim == 'VASTAANOTA_REKLAMAATIO' and $keraysvirhe == 0) {
 
             if (trim($varastorekla[$apui]) != '' and trim($vertaus_hylly[$apui]) != trim($varastorekla[$apui])) {
-
               // Ollaan valittu varastopaikka dropdownista
-              if (isset($varastorekla[$apui]) and $varastorekla[$apui] != 'x' and $varastorekla[$apui] != '' and strpos($varastorekla[$apui], "###") === false) {
-                // tehdään uusi paikka jos valittiin paikaton lapsivarasto
-                if (substr($varastorekla[$apui], 0, 1) == 'V') {
-                  $uusi_paikka = lisaa_tuotepaikka($tilrivirow["tuoteno"], '', '', '', '', '', '', 0, 0, substr($varastorekla[$apui], 1));
-                  $ptunnus = $uusi_paikka['tuotepaikan_tunnus'];
-                }
-                else {
-                  $ptunnus = $varastorekla[$apui];
-                }
-
-                $query_xxx = "SELECT hyllyalue, hyllynro, hyllyvali, hyllytaso
-                              FROM tuotepaikat
-                              WHERE yhtio = '{$kukarow['yhtio']}'
-                              and tunnus  = '{$ptunnus}'
-                              and tuoteno = '{$tilrivirow['tuoteno']}'";
-                $_result_paikka = pupe_query($query_xxx);
-                $_row_paikka = mysql_fetch_assoc($_result_paikka);
-
-                $reklahyllyalue = $_row_paikka['hyllyalue'];
-                $reklahyllynro  = $_row_paikka['hyllynro'];
-                $reklahyllyvali = $_row_paikka['hyllyvali'];
-                $reklahyllytaso = $_row_paikka['hyllytaso'];
-              }
-              else {
-                list($reklahyllyalue, $reklahyllynro, $reklahyllyvali, $reklahyllytaso) = explode("###", $varastorekla[$apui]);
-              }
+              list($reklahyllyalue, $reklahyllynro, $reklahyllyvali, $reklahyllytaso) = explode("###", $varastorekla[$apui]);
             }
             elseif (trim($vertaus_hylly[$apui]) == trim($varastorekla[$apui]) and $reklahyllyalue[$apui] != '') {
               // Ollaan syötetty varastopaikka käsin
@@ -2560,7 +2534,6 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
                 min(lasku.lahetepvm) lahetepvm,
                 min(lasku.kerayspvm) kerayspvm,
                 min(lasku.toimaika) toimaika,
-                min(lasku.yhtio_toimipaikka) yhtio_toimipaikka,
                 group_concat(DISTINCT lasku.laatija) laatija,
                 group_concat(DISTINCT lasku.toimitustapa SEPARATOR '<br>') toimitustapa,
                 group_concat(DISTINCT concat_ws('\n\n', if (comments!='',concat('".t("Lähetteen lisätiedot").":\n',comments),NULL), if (sisviesti2!='',concat('".t("Keräyslistan lisätiedot").":\n',sisviesti2),NULL)) SEPARATOR '\n') ohjeet,
@@ -2568,7 +2541,6 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
                 min(if (lasku.clearing = '', 'N', if (lasku.clearing = 'JT-TILAUS', 'J', if (lasku.clearing = 'ENNAKKOTILAUS', 'E', '')))) t_tyyppi,
                 #(select nimitys from varastopaikat where varastopaikat.tunnus=min(lasku.varasto)) varastonimi,
                 count(*) riveja,
-                count(distinct lasku.tunnus) tilauksia,
                 lasku.yhtio yhtio,
                 lasku.yhtio_nimi yhtio_nimi
                 from lasku use index (tila_index)
@@ -2615,11 +2587,6 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
       if ($logistiikka_yhtio != '') {
         echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='yhtio'; document.forms['find'].submit();\">", t("Yhtiö"), "</a></th>";
       }
-
-      if ($toim == "VASTAANOTA_REKLAMAATIO") {
-        echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='yhtio_toimipaikka'; document.forms['find'].submit();\">", t("Toimipaikka"), "</a></th>";
-      }
-
       echo "<th valign='top'><a href='#' onclick=\"getElementById('jarj').value='prioriteetti'; document.forms['find'].submit();\">", t("Pri"), "</a><br>";
       //echo "<a href='#' onclick=\"getElementById('jarj').value='varastonimi'; document.forms['find'].submit();\">".t("Varastoon")."</a></th>";
 
@@ -2669,18 +2636,6 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           echo "<td valign='top'>{$row['yhtio_nimi']}</td>";
         }
 
-        if ($toim == "VASTAANOTA_REKLAMAATIO") {
-          if (!empty($row['yhtio_toimipaikka'])) {
-            $_tp_res = hae_yhtion_toimipaikat($kukarow['yhtio'], $row['yhtio_toimipaikka']);
-            $_tp_row = mysql_fetch_assoc($_tp_res);
-
-            echo "<td valign='top'>{$_tp_row['nimi']}</td>";
-          }
-          else {
-            echo "<td valign='top'></td>";
-          }
-        }
-
         if (isset($row['ohjeet']) and trim($row["ohjeet"]) != "") {
           echo "<div id='div_{$row['tunnus']}' class='popup' style='width: 500px;'>";
           echo t("Tilaukset"), ": {$row['tunnukset']}<br />";
@@ -2710,18 +2665,10 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
           echo "<td valign='top'>{$row['keraysera']}{$_moduuli}</td>";
         }
 
-        if ($toim == "VASTAANOTA_REKLAMAATIO") {
-          echo "<td valign='top'>{$row['tunnukset']}</td>";
-        }
-        else {
-          echo "<td valign='top'>{$row['tunnus']}</td>";
-        }
+        echo "<td valign='top'>{$row['tunnus']}</td>";
 
         if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
           echo "<td valign='top'>{$row['asiakas']}</td>";
-        }
-        elseif ($toim == "VASTAANOTA_REKLAMAATIO" and $row['tilauksia'] > 1) {
-          echo "<td valign='top'>",t("Useita"),"</td>";
         }
         else {
           echo "<td valign='top'>{$row['ytunnus']}<br />{$row['asiakas']}</td>";
@@ -2870,30 +2817,13 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
 
       echo "<tr><th>", t("Tilaus"), "</th><th>", t("Ostaja"), "</th><th>", t("Toimitusosoite"), "</th></tr>";
 
-      $_ker_chk = ($yhtiorow['kerayserat'] == 'K' and $toim == "");
-      $_rek_chk = ($toim == "VASTAANOTA_REKLAMAATIO");
-
-      $_ker_rek = ($_ker_chk or $_rek_chk);
-
-      if ($_ker_rek) {
+      if ($yhtiorow['kerayserat'] == 'K' and $toim == "") {
 
         mysql_data_seek($result, 0);
 
         while ($otsik_row = mysql_fetch_assoc($result)) {
           echo "<tr>";
-          echo "<td>";
-          echo "{$otsik_row['tunnus']}<br />{$otsik_row['clearing']}";
-
-          if ($toim == 'VASTAANOTA_REKLAMAATIO') {
-            echo "<br><form action='tilaus_myynti.php' method='POST'>";
-            echo "<input type='hidden' name='toim' value = 'REKLAMAATIO'>";
-            echo "<input type='hidden' name='tilausnumero' value = '{$otsik_row['tunnus']}'>";
-            echo "<input type='hidden' name='mista' value = 'keraa'>";
-            echo "<input type='submit' value='", t("Muokkaa"), "'/> ";
-            echo "</form>";
-          }
-
-          echo "</td>";
+          echo "<td>{$otsik_row['tunnus']}<br />{$otsik_row['clearing']}</td>";
           echo "<td>{$otsik_row['nimi']} {$otsik_row['nimitark']}<br />{$otsik_row['osoite']}<br />{$otsik_row['postino']} {$otsik_row['postitp']}<br />", maa($otsik_row["maa"]), "</td>";
           echo "<td>{$otsik_row['toim_nimi']} {$otsik_row['toim_nimitark']}<br />{$otsik_row['toim_osoite']}<br />{$otsik_row['toim_postino']} {$otsik_row['toim_postitp']}<br />", maa($otsik_row["toim_maa"]), "</td>";
           echo "</tr>";
@@ -3209,23 +3139,6 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
 
           if ($toim == 'VASTAANOTA_REKLAMAATIO') {
 
-            $vares = varaston_lapsivarastot($otsik_row['varasto'], $row['puhdas_tuoteno']);
-
-            $s1_options = array();
-            $s2_options = array();
-            $s3_options = array();
-
-            while ($varow = mysql_fetch_assoc($vares)) {
-              $status = $varow['status'];
-              ${$status."_options"}[] = $varow;
-            }
-
-            $counts = array(
-              's1' => count($s1_options),
-              's2' => count($s2_options),
-              's3' => count($s3_options)
-            );
-
             if (!isset($reklahyllyalue[$row["tunnus"]])) $reklahyllyalue[$row["tunnus"]] = "";
             if (!isset($reklahyllynro[$row["tunnus"]]))  $reklahyllynro[$row["tunnus"]]  = "";
             if (!isset($reklahyllyvali[$row["tunnus"]])) $reklahyllyvali[$row["tunnus"]] = "";
@@ -3249,36 +3162,6 @@ if (php_sapi_name() != 'cli' and strpos($_SERVER['SCRIPT_NAME'], "keraa.php") !=
                 $sel = "SELECTED";
               }
               echo "<option value='$rivi[varastopaikka_rekla]' $sel>$rivi[varastopaikka]</option>";
-            }
-
-            if ($counts['s1'] > 0) {
-              echo "<optgroup label=", t("Kohdevaraston-paikat"), ">";
-              foreach ($s1_options as $tp) {
-                echo "<option value='", $tp['tunnus'], "'>";
-                echo $tp['hyllyalue'], ' ', $tp['hyllynro'], ' ', $tp['hyllyvali'], ' ', $tp['hyllytaso'];
-                echo "</option>";
-              }
-              echo "</optgroup>";
-            }
-
-            if ($counts['s2'] > 0) {
-              echo "<optgroup label=", t("Lapsivarastojen-paikat"), ">";
-              foreach ($s2_options as $tp) {
-                echo "<option value='", $tp['tunnus'], "'>";
-                echo $tp['hyllyalue'], ' ', $tp['hyllynro'], ' ', $tp['hyllyvali'], ' ', $tp['hyllytaso'];
-                echo "</option>";
-              }
-              echo "</optgroup>";
-            }
-
-            if ($counts['s3'] > 0) {
-              echo "<optgroup label=", t("Paikattomat-lapsivarastot"), ">";
-              foreach ($s3_options as $va) {
-                echo "<option value='V", $va['tunnus'], "'>";
-                echo $va['nimitys'];
-                echo "</option>";
-              }
-              echo "</optgroup>";
             }
 
             echo "</select><br />";

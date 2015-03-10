@@ -240,6 +240,18 @@ else {
           $order  .= "ytunnus, nimi,";
           $gluku++;
         }
+
+        if ($mukaan == "toimitusehdoittain") {
+          if ($group!="") $group .= ",lasku.toimitusehto";
+          else $group  .= "lasku.toimitusehto";
+          $select .= "lasku.toimitusehto,";
+          $order  .= "lasku.toimitusehto,";
+          $gluku++;
+
+          if ($rajaus[$i] != "") {
+            $lisa .= " AND lasku.toimitusehto LIKE '%$rajaus[$i]%' ";
+          }
+        }
       }
 
       if ($order != "") {
@@ -897,6 +909,13 @@ else {
       <td><input type='text' name='jarjestys[140]' size='2' value='$jarjestys[140]'></td>
       <td><input type='checkbox' name='ruksit[140]' value='toimittaja' $ruk140chk></td>
       <td><input type='text' name='toimittaja' value='$toimittaja'></td>
+      </tr>
+      </tr>
+      <tr>
+      <th>".t("Listaa toimitusehdoittain")."</th>
+      <td><input type='text' name='jarjestys[150]' size='2' value='$jarjestys[150]'></td>
+      <td><input type='checkbox' name='ruksit[150]' value='toimitusehdoittain' $ruk150chk></td>
+      <td><input type='text' name='rajaus[150]' value='$rajaus[150]'></td>
       </tr>
       <td class='back'><br></td>
       </tr>

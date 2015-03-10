@@ -466,7 +466,7 @@ if (isset($view) and $view == "perus") {
   echo "
     <form>
     <input type='hidden' name='task' value='aloita_perustus' />
-    <input type='submit' value='". t("Perusta uusi saapuminen") . "' />
+    <input type='submit' value='". t("Perusta uusi tulonumero") . "' />
     </form><br><br>";
 
   $query = "SELECT

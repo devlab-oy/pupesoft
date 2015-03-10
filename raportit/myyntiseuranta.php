@@ -271,6 +271,7 @@ else {
     if ($ruksit[120] != '')     $ruk120chk         = "CHECKED";
     if ($ruksit[130] != '')     $ruk130chk         = "CHECKED";
     if ($ruksit[140] != '')     $ruk140chk         = "CHECKED";
+    if ($ruksit[150] != '')     $ruk150chk         = "CHECKED";
 
     if ($nimitykset != '')       $nimchk           = "CHECKED";
     if ($mitat != '')        $mitatchk        = "CHECKED";
@@ -475,6 +476,13 @@ else {
       <td><input type='text' name='jarjestys[140]' size='2' value='{$jarjestys[140]}'></td>
       <td><input type='checkbox' name='ruksit[140]' value='tilauksittain' {$ruk140chk}></td>
       <td><input type='text' name='rajaus[140]' value='{$rajaus[140]}'></td>
+      <td class='back'>", t("(Toimii vain jos ajat raporttia tilauksista)"), "</td>
+      </tr>
+      <tr>
+      <th>", t("Listaa toimitusehdoittain"), "</th>
+      <td><input type='text' name='jarjestys[150]' size='2' value='{$jarjestys[150]}'></td>
+      <td><input type='checkbox' name='ruksit[150]' value='toimitusehdoittain' {$ruk150chk}></td>
+      <td><input type='text' name='rajaus[150]' value='{$rajaus[150]}'></td>
       <td class='back'>", t("(Toimii vain jos ajat raporttia tilauksista)"), "</td>
       </tr>
       <tr>
@@ -1472,6 +1480,19 @@ else {
           if ($laskutuspaiva != "") $select .= "lasku.tapvm laskutuspvm, ";
         }
         //**  Tilauksittain loppu **//
+
+        //**  Toimitusehdoittain start **//
+        if ($mukaan == "toimitusehdoittain") {
+          $group .= ",lasku.toimitusehto";
+          $select .= "lasku.toimitusehto, ";
+          $order  .= "lasku.toimitusehto,";
+          $gluku++;
+
+          if ($rajaus[$i] != "") {
+            $lisa .= " and lasku.toimitusehto LIKE '%{$rajaus[$i]}%' ";
+          }
+        }
+        //**  Toimitusehdoittain loppu **//
       }
 
       // N‰ytet‰‰n tilausrivin kommentit ja groupataan tilausriveitt‰in

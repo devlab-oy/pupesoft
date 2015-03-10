@@ -30468,7 +30468,8 @@ if (!function_exists('varaston_lapsivarastot')) {
     $lv_query =  "SELECT GROUP_CONCAT(tunnus) lapsivarastot
                   FROM varastopaikat
                   WHERE yhtio     = '{$kukarow['yhtio']}'
-                  AND isa_varasto = '{$varasto}'";
+                  AND isa_varasto = '{$varasto}'
+                  AND isa_varasto != 0";
     $lv_res = pupe_query($lv_query);
     $lv_row = mysql_fetch_assoc($lv_res);
 

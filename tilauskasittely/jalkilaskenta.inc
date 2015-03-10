@@ -561,7 +561,7 @@ if (!function_exists('korjaatapahtuma')) {
 
 if (!function_exists("hae_varastotilit")) {
   function hae_varastotilit($tuote_row) {
-    global $yhtiorow;
+    global $yhtiorow, $varastonmuutostili, $varastotili;
 
     $varastotili = $yhtiorow["varasto"];
     $varastonmuutostili = $yhtiorow["varastonmuutos"];

@@ -72,9 +72,6 @@ if ($toim == "SUPER") {
 
     if (muistiin("sql-query", $haku["nimi"], $muistettava, "", $haku["kuvaus"])) {
       $success = t("Haun tallennus onnistui");
-
-      $haku["nimi"] = "";
-      $haku["kuvaus"] = "";
     }
 
     $tee = "";

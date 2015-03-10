@@ -8079,7 +8079,7 @@ if (!function_exists("hae_muisti")) {
 }
 
 if (!function_exists("muistiin")) {
-  function muistiin($muisti, $nimi, $muistettava, $exclude = "") {
+  function muistiin($muisti, $nimi, $muistettava, $exclude = "", $kuvaus = "") {
     global $kukarow;
 
     if ($muisti == "" or $nimi == "" or !is_array($muistettava)) {
@@ -8112,11 +8112,14 @@ if (!function_exists("muistiin")) {
 
         $value = mysql_real_escape_string($value);
 
+        $kuvauslisa = empty($kuvaus) ? "" : "kuvaus = '{$kuvaus}',";
+
         $query = "INSERT INTO muisti SET
                   yhtio      = '$kukarow[yhtio]',
                   kuka       = '$kukarow[kuka]',
                   haku       = '$muisti',
                   nimi       = '$nimi',
+                  {$kuvauslisa}
                   var        = '$key',
                   value      = '$value',
                   array      = '$array',

@@ -45,7 +45,12 @@ if ($toim == "SUPER") {
       "query" => $sqlhaku
     );
 
-    muistiin("sql-query", $haku["nimi"], $muistettava, "", $haku["kuvaus"]);
+    if (muistiin("sql-query", $haku["nimi"], $muistettava, "", $haku["kuvaus"])) {
+      $success = t("Haun tallennus onnistui");
+
+      $haku["nimi"] = "";
+      $haku["kuvaus"] = "";
+    }
 
     $tee = "";
   }
@@ -126,6 +131,10 @@ if ($tee == "") {
       if ($toim == "SUPER") {
         if (isset($error) and !empty($error)) {
           echo "<span class='error'>{$error}</span>";
+        }
+
+        if (isset($success) and !empty($success)) {
+          echo "<span class='ok'>{$success}</span>";
         }
 
         echo "<form method='post'>";

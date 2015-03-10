@@ -36,7 +36,7 @@ $query = "SELECT
           WHERE lasku.yhtio = '{$kukarow['yhtio']}'
           {$lisa}
           GROUP BY rahtikirja, tilaus
-          ORDER BY trlt.rahtikirja_id";
+          ORDER BY trlt.rahtikirja_id DESC";
 $result = pupe_query($query);
 
 echo "<font class='head'>".t("Saapuva rahti")."</font><hr><br>";

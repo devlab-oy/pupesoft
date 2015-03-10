@@ -23,13 +23,35 @@ ini_set("memory_limit", "2G");
 //Ja tässä laitetaan ne takas
 $sqlhaku = $sqlapu;
 
-if (isset($tee)) {
-  if ($tee == "lataa_tiedosto") {
-    readfile("/tmp/".$tmpfilenimi);
-    exit;
+$tee = isset($tee) ? $tee : "";
+
+if ($tee == "lataa_tiedosto") {
+  readfile("/tmp/" . $tmpfilenimi);
+  exit;
+}
+
+if ($toim == "SUPER") {
+  $haku["nimi"] = isset($haku["nimi"]) ? trim($haku["nimi"]) : "";
+  $haku["kuvaus"] = isset($haku["kuvaus"]) ? trim($haku["kuvaus"]) : "";
+
+  if ($tee == "tallenna_haku" and empty($haku["nimi"])) {
+    $error = t("Haulle täytyy antaa nimi");
+
+    $tee = "";
+  }
+
+  if ($tee == "tallenna_haku") {
+    $muistettava = array(
+      "query" => $sqlhaku
+    );
+
+    muistiin("sql-query", $haku["nimi"], $muistettava, "", $haku["kuvaus"]);
+
+    $tee = "";
   }
 }
-else {
+
+if ($tee == "") {
   echo "<font class='head'>".t("SQL-raportti").":</font><hr>";
 
   // käsitellään syötetty arvo nätiksi...
@@ -102,19 +124,26 @@ else {
       echo "</table><br>";
 
       if ($toim == "SUPER") {
-        echo "<form>";
+        if (isset($error) and !empty($error)) {
+          echo "<span class='error'>{$error}</span>";
+        }
+
+        echo "<form method='post'>";
         echo "<input type='hidden' name='tee' value='tallenna_haku'>";
+        echo "<input type='hidden' name='sqlhaku' value='{$sqlhaku}'>";
         echo "<table>";
         echo "<tr>";
         echo "<th><label for='haku_nimi'>" . t("Nimi") . "</label></th>";
         echo "<td>";
-        echo "<input type='textbox' id='haku_nimi' name='haku[nimi]' style='width:98%;'>";
+        echo "<input type='textbox' id='haku_nimi' name='haku[nimi]' style='width:98%;'
+                     value='{$haku["nimi"]}' required>";
         echo "</td>";
         echo "</tr>";
         echo "<tr>";
         echo "<th><label for='haku_kuvaus'>" . t("Haun kuvaus") . "</label></th>";
         echo "<td>";
-        echo "<textarea id='haku_kuvaus' name='haku[kuvaus]' rows='10' cols='40'></textarea>";
+        echo "<textarea id='haku_kuvaus' name='haku[kuvaus]' rows='10'
+                        cols='40'>{$haku["kuvaus"]}</textarea>";
         echo "</td>";
         echo "</tr>";
         echo "<tr>";

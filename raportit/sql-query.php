@@ -16,6 +16,8 @@ $compression = FALSE;
 
 require "../inc/parametrit.inc";
 
+$toim = isset($toim) ? $toim : "";
+
 ini_set("memory_limit", "2G");
 
 //Ja tässä laitetaan ne takas
@@ -91,12 +93,25 @@ else {
       $excelnimi = $worksheet->close();
 
       echo "<br><br><table>";
-      echo "<tr><th>".t("Tallenna tulos").":</th>";
+      echo "<tr><th>".t("Tallenna tulos").":</th><td class='back'>";
       echo "<form method='post' class='multisubmit'>";
       echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
       echo "<input type='hidden' name='kaunisnimi' value='SQLhaku.xlsx'>";
       echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
-      echo "<td class='back'><input type='submit' value='".t("Tallenna")."'></td></tr></form>";
+      echo "<input type='submit' value='".t("Tallenna")."'></form></td></tr>";
+
+      if ($toim == "SUPER") {
+        echo "<tr>";
+        echo "<th><label for='tallenna_haku'>" . t("Tallenna haku") . "</label></th>";
+        echo "<td class='back'>";
+        echo "<form>";
+        echo "<input type='hidden' name='tee' value='tallenna_haku'>";
+        echo "<input id='tallenna_haku' type='submit' value='" . t("Tallenna haku") . "'>";
+        echo "</form>";
+        echo "</td>";
+        echo "</tr>";
+      }
+
       echo "</table><br>";
 
       echo "<font class='message'>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("riviä").".</font><br>";

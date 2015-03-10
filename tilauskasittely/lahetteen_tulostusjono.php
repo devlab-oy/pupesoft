@@ -969,7 +969,7 @@ if ($tee2 == '') {
     $grouppi .= ", lasku.varasto, lasku.tulostusalue";
   }
 
-  if ($toim == "VASTAANOTA_REKLAMAATIO") {
+  if ($toim == "VASTAANOTA_REKLAMAATIO" and $yhtiorow['reklamaation_kasittely'] == 'X') {
     $grouppi = "GROUP BY lasku.varasto, lasku.yhtio_toimipaikka";
   }
 

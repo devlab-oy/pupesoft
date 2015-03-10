@@ -7,7 +7,12 @@ $pupe_DataTables = array("etusivun_tyomaarays");
 
 require "inc/parametrit.inc";
 
-echo "<font class='head'>".t("Tervetuloa pupesoft-j‰rjestelm‰‰n")."</font><hr><br>";
+if ($yhtiorow['laite_huolto'] == 'X') {
+  echo "<font class='head'>".t("Tervetuloa Turvanasi SafetyPupe-j‰rjestelm‰‰n")."</font><hr><br>";
+}
+else {
+  echo "<font class='head'>".t("Tervetuloa pupesoft-j‰rjestelm‰‰n")."</font><hr><br>";
+}
 
 if (!isset($tee) or $tee == '') {
 

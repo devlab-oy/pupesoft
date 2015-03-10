@@ -134,7 +134,7 @@ if ($tee == "") {
   echo "<form name='sql' method='post' autocomplete='off'>";
   echo "<table>";
   echo "<tr><th>".t("Syötä SQL kysely")."</th></tr>";
-  echo "<tr><td><textarea cols='100' rows='15' rows='15' name='sqlhaku' style='font-family:\"Courier New\",Courier'>$sqlhaku</textarea></td></tr>";
+  echo "<tr><td><textarea id='query_kentta' cols='100' rows='15' rows='15' name='sqlhaku' style='font-family:\"Courier New\",Courier'>$sqlhaku</textarea></td></tr>";
   echo "<tr><td class='back'><input type='submit' value='".t("Suorita")."'></td></tr>";
   echo "</table>";
   echo "</form>";
@@ -201,9 +201,21 @@ if ($tee == "") {
           echo "<span class='ok'>{$success}</span>";
         }
 
-        echo "<form method='post'>";
+        echo "<script>";
+        echo "$(function() {
+                'use strict';
+
+                $('#tallennus_formi').on('submit', function(e) {
+                  e.preventDefault();
+                  $('#query_inputti').val($('#query_kentta').val());
+                  this.submit();
+                });
+              })";
+        echo "</script>";
+
+        echo "<form method='post' id='tallennus_formi'>";
         echo "<input type='hidden' name='tee' value='tallenna_haku'>";
-        echo "<input type='hidden' name='sqlhaku' value='{$sqlhaku}'>";
+        echo "<input type='hidden' name='sqlhaku' value='{$sqlhaku}' id='query_inputti'>";
         echo "<table>";
         echo "<tr>";
         echo "<th><label for='haku_nimi'>" . t("Nimi") . "</label></th>";
@@ -229,7 +241,7 @@ if ($tee == "") {
 
         echo "<form method='post'>";
         echo "<input type='hidden' name='tee' value='poista_query'>";
-        echo "<input type='hidden' name='poistettava_query' value='{$haku["nimi"]}'";
+        echo "<input type='hidden' name='poistettava_query' value='{$haku["nimi"]}'>";
         echo "<table>";
         echo "<tr>";
         echo "<td class='back'>";

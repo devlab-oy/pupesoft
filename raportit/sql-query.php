@@ -99,20 +99,32 @@ else {
       echo "<input type='hidden' name='kaunisnimi' value='SQLhaku.xlsx'>";
       echo "<input type='hidden' name='tmpfilenimi' value='$excelnimi'>";
       echo "<input type='submit' value='".t("Tallenna")."'></form></td></tr>";
+      echo "</table><br>";
 
       if ($toim == "SUPER") {
-        echo "<tr>";
-        echo "<th><label for='tallenna_haku'>" . t("Tallenna haku") . "</label></th>";
-        echo "<td class='back'>";
         echo "<form>";
         echo "<input type='hidden' name='tee' value='tallenna_haku'>";
-        echo "<input id='tallenna_haku' type='submit' value='" . t("Tallenna haku") . "'>";
-        echo "</form>";
+        echo "<table>";
+        echo "<tr>";
+        echo "<th><label for='haku_nimi'>" . t("Nimi") . "</label></th>";
+        echo "<td>";
+        echo "<input type='textbox' id='haku_nimi' name='haku[nimi]' style='width:98%;'>";
         echo "</td>";
         echo "</tr>";
+        echo "<tr>";
+        echo "<th><label for='haku_kuvaus'>" . t("Haun kuvaus") . "</label></th>";
+        echo "<td>";
+        echo "<textarea id='haku_kuvaus' name='haku[kuvaus]' rows='10' cols='40'></textarea>";
+        echo "</td>";
+        echo "</tr>";
+        echo "<tr>";
+        echo "<td class='back'>";
+        echo "<input id='tallenna_haku' type='submit' value='" . t("Tallenna haku") . "'>";
+        echo "</td>";
+        echo "</tr>";
+        echo "</table>";
+        echo "</form>";
       }
-
-      echo "</table><br>";
 
       echo "<font class='message'>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("riviä").".</font><br>";
 

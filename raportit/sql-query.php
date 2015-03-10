@@ -204,6 +204,18 @@ if ($tee == "") {
         echo "</tr>";
         echo "</table>";
         echo "</form>";
+
+        echo "<form method='post'>";
+        echo "<input type='hidden' name='tee' value='poista_query'>";
+        echo "<table>";
+        echo "<tr>";
+        echo "<td class='back'>";
+        echo "<input type='submit' value='" . t("Poista haku") . "'>";
+        echo "</td>";
+        echo "</tr>";
+        echo "</table>";
+        echo "</form>";
+        echo "<br><br>";
       }
 
       echo "<font class='message'>".t("Haun tulos")." ".mysql_num_rows($result)." ".t("riviä").".</font><br>";

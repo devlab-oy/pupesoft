@@ -6,23 +6,28 @@ if (isset($_REQUEST["user"]) and $_REQUEST["user"] != '') {
   $login = "yes";
   require "inc/parametrit.inc";
 
-  if (!isset($salamd5)) $salamd5 = '';
-  if (!isset($mikayhtio)) $mikayhtio = '';
-  if (!isset($uusi1)) $uusi1 = '';
-  if (!isset($uusi2)) $uusi2 = '';
-  if (!isset($yhtio)) $yhtio = '';
+  if (!isset($salamd5))
+    $salamd5 = '';
+  if (!isset($mikayhtio))
+    $mikayhtio = '';
+  if (!isset($uusi1))
+    $uusi1 = '';
+  if (!isset($uusi2))
+    $uusi2 = '';
+  if (!isset($yhtio))
+    $yhtio = '';
 
   $params = array(
-    'user' => $user,
-    'salasana' => $salasana,
-    'salamd5' => $salamd5,
-    'mikayhtio' => $mikayhtio,
-    'uusi1' => $uusi1,
-    'uusi2' => $uusi2,
-    'yhtio' => $yhtio,
-    'browkieli' => $browkieli,
-    'palvelin' => $palvelin,
-    'palvelin2' => $palvelin2
+      'user'      => $user,
+      'salasana'  => $salasana,
+      'salamd5'   => $salamd5,
+      'mikayhtio' => $mikayhtio,
+      'uusi1'     => $uusi1,
+      'uusi2'     => $uusi2,
+      'yhtio'     => $yhtio,
+      'browkieli' => $browkieli,
+      'palvelin'  => $palvelin,
+      'palvelin2' => $palvelin2
   );
 
   $return = pupesoft_login($params);
@@ -38,7 +43,7 @@ if (!headers_sent()) {
   header("Content-Type: text/html; charset=iso-8859-1");
   header("Pragma: public");
   header("Expires: 0");
-  header("Last-Modified: ".gmdate("D, d M Y H:i:s")." GMT");
+  header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
   header("Cache-Control: no-store, no-cache, must-revalidate");
   header("Cache-Control: post-check=0, pre-check=0", false);
   header("Pragma: no-cache");
@@ -92,9 +97,13 @@ elseif (file_exists("pics/pupesoft_logo.gif")) {
 elseif (file_exists("pics/pupesoft_logo.png")) {
   echo "<a target='_top' href='{$palvelin2}'><img src='pics/pupesoft_logo.png' border='0'>";
 }
+else if (file_exists("pics/laite_huolto_logo.png")) {
+  echo "<a target='_top' href='{$palvelin2}'><img src='pics/laite_huolto_logo_small.png' border='0'>";
+}
 else {
   echo "<a target='_top' href='{$palvelin2}'><img src='{$pupesoft_scheme}api.devlab.fi/pupesoft_large.png' style='margin-top:30px;'>";
 }
+
 
 echo "</td><td><font class='head'>", t("Sis‰‰nkirjautuminen", $browkieli), "</font><br><br>";
 

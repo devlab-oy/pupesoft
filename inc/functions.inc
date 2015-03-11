@@ -30884,3 +30884,111 @@ if (!function_exists("paata_kvartaali")) {
     return $nykyinen_kvartaali;
   }
 }
+
+if (!function_exists("laske_tilausrivin_kate")) {
+  /**
+   * @param array  $tilausrivi Tilausrivi
+   * @param        $kotisumma_alviton
+   * @param        $kehahinta Tuoteen keh‰hinta
+   * @param string $kpl Kappalem‰‰r‰, jota tarvitaan, jos k‰ytˆss‰ on sarjanumeroseuranta, muuten se
+   *   otetaan tilausrivist‰
+   * @param array  $arow
+   *
+   * @return string Kate
+   */
+  function laske_tilausrivin_kate($tilausrivi, $kotisumma_alviton, $kehahinta, $kpl = "",
+                                  $arow = "") {
+    global $kukarow, $yhtiorow;
+
+    if ($kukarow['extranet'] == '' and
+        ($tilausrivi["sarjanumeroseuranta"] == "S" or $tilausrivi["sarjanumeroseuranta"] == "U")
+    ) {
+      if ($kpl > 0) {
+        //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on myynti‰
+        $ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $tilausrivi["tunnus"]);
+
+        // Kate = Hinta - Ostohinta
+        if ($kotisumma_alviton != 0) {
+          $ostohinta = hinta_kuluineen($tilausrivi["tuoteno"], $ostohinta);
+          $kate =
+            sprintf('%.2f', 100 * ($kotisumma_alviton - ($ostohinta * $kpl)) / $kotisumma_alviton);
+        }
+        elseif (($ostohinta * $kpl) != 0) {
+          $kate = "-100.00";
+        }
+      }
+      elseif ($kpl < 0 and $tilausrivi["osto_vai_hyvitys"] == "O") {
+        //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on OSTOA
+
+        // Kate = 0
+        $kate = "0";
+      }
+      elseif ($kpl < 0 and $tilausrivi["osto_vai_hyvitys"] == "" and !empty($arow)) {
+        //Jos tuotteella yll‰pidet‰‰n in-out varastonarvo ja kyseess‰ on HYVITYSTƒ
+
+        //T‰h‰n hyvitysriviin liitetyt sarjanumerot
+        $query = "SELECT sarjanumero, kaytetty
+                FROM sarjanumeroseuranta
+                WHERE yhtio        = '{$kukarow["yhtio"]}'
+                AND ostorivitunnus = '{$tilausrivi["tunnus"]}'";
+
+        $sarjares = pupe_query($query);
+
+        $ostohinta = 0;
+
+        while ($sarjarow = mysql_fetch_assoc($sarjares)) {
+
+          // Haetaan hyvitett‰vien myyntirivien kautta alkuper‰iset ostorivit
+          $query = "SELECT tilausrivi.rivihinta/tilausrivi.kpl ostohinta
+                  FROM sarjanumeroseuranta
+                  JOIN tilausrivi use index (PRIMARY) ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio
+                    AND tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
+                  WHERE sarjanumeroseuranta.yhtio          = '{$kukarow["yhtio"]}'
+                  AND sarjanumeroseuranta.tuoteno          = '{$tilausrivi["tuoteno"]}'
+                  AND sarjanumeroseuranta.sarjanumero      = '{$sarjarow["sarjanumero"]}'
+                  AND sarjanumeroseuranta.kaytetty         = '{$sarjarow["kaytetty"]}'
+                  AND sarjanumeroseuranta.myyntirivitunnus > 0
+                  AND sarjanumeroseuranta.ostorivitunnus   > 0
+                  ORDER BY sarjanumeroseuranta.tunnus
+                  LIMIT 1";
+
+          $sarjares1 = pupe_query($query);
+          $sarjarow1 = mysql_fetch_assoc($sarjares1);
+
+          $oh = hinta_kuluineen($tilausrivi['tuoteno'], $sarjarow1['ostohinta']);
+          $ostohinta += $oh;
+        }
+
+        // Kate = Hinta - Alkuper‰inen ostohinta
+        if ($kotisumma_alviton != 0) {
+          $kate =
+            sprintf('%.2f', 100 * ($kotisumma_alviton * -1 - $ostohinta) / $kotisumma_alviton);
+        }
+        else {
+          $kate = "100.00";
+        }
+      }
+      else {
+        $kate = "N/A";
+      }
+    }
+    elseif ($kukarow['extranet'] == '') {
+      if ($kotisumma_alviton != 0) {
+        $khh = hinta_kuluineen($tilausrivi['tuoteno'], $kehahinta);
+        $kate = sprintf('%.2f', 100 * ($kotisumma_alviton - ($khh * ($tilausrivi["varattu"] +
+                                                                     $tilausrivi["jt"]))) /
+                                $kotisumma_alviton);
+      }
+      elseif ($kehahinta != 0 and ($tilausrivi["varattu"] + $tilausrivi["jt"]) > 0) {
+        $kate = "-100.00";
+      }
+      elseif ($kehahinta != 0 and ($tilausrivi["varattu"] + $tilausrivi["jt"]) < 0) {
+        $kate = "100.00";
+      }
+    }
+
+    return $kate;
+  }
+}
+
+

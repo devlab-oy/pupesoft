@@ -6514,45 +6514,6 @@ if ($tee == '') {
           $muokkauslukko_rivi = "";
         }
 
-        // Rivin tarkistukset
-        if ($muokkauslukko == "" and $muokkauslukko_rivi == "") {
-          require 'tarkistarivi.inc';
-
-          //tarkistarivi.inc:stä saadaan $trow jossa on select * from tuote
-        }
-
-        if ($edotunnus == 0 or $edotunnus != $row["otunnus"]) {
-          if ($edotunnus > 0) echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><br></td></tr>";
-          if ($ruuturow["otunnukset"] > 1) echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'>".t("Toimitus").": $row[otunnus]</td></tr>";
-          echo $headerit;
-        }
-
-        $edotunnus = $row["otunnus"];
-
-        if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ($yhtiorow['tyomaaraystiedot_tarjouksella'] == '' and ($toim == "TARJOUS" or $toim == "EXTTARJOUS")) or $toim == "PROJEKTI") {
-          if ($tuotetyyppi == "" and $row["tuotetyyppi"] == '2 Työt') {
-            $tuotetyyppi = 1;
-
-            echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><br></td></tr>";
-            echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><font class='head'>".t("Työt")."</font>:</td></tr>";
-          }
-        }
-        elseif ($toim == 'EXTRANET' and $kukarow['extranet'] != '') {
-          if ($positio_varattu == '' and $row['positio'] == 'Ei varaa saldoa') {
-            $positio_varattu = 1;
-
-            echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><br></td></tr>";
-            echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><font class='head'>", t("Umpeutuneet tilausrivit"), "</font>:</td></tr>";
-            echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><font class='message'>", t("Pahoittelumme! Alla olevien tilausrivien varausajat ovat umpeutuneet");
-
-            if ($ei_saldoa_varausaika != '') {
-              echo " (", t("varausaika"), " $ei_saldoa_varausaika ", t("tuntia"), ")";
-            }
-
-            echo "</font></td></tr>";
-          }
-        }
-
         if ($toim == "MYYNTITILI" and $laskurow["alatila"] == "V") {
           $row['varattu'] = $row['kpl'];
         }
@@ -6604,6 +6565,45 @@ if ($tee == '') {
 
         if ($row["hinta"] == 0.00)   $row["hinta"] = '';
         if ($summa == 0.00)     $summa = '';
+
+        // Rivin tarkistukset
+        if ($muokkauslukko == "" and $muokkauslukko_rivi == "") {
+          require 'tarkistarivi.inc';
+
+          //tarkistarivi.inc:stä saadaan $trow jossa on select * from tuote
+        }
+
+        if ($edotunnus == 0 or $edotunnus != $row["otunnus"]) {
+          if ($edotunnus > 0) echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><br></td></tr>";
+          if ($ruuturow["otunnukset"] > 1) echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'>".t("Toimitus").": $row[otunnus]</td></tr>";
+          echo $headerit;
+        }
+
+        $edotunnus = $row["otunnus"];
+
+        if ($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA" or ($yhtiorow['tyomaaraystiedot_tarjouksella'] == '' and ($toim == "TARJOUS" or $toim == "EXTTARJOUS")) or $toim == "PROJEKTI") {
+          if ($tuotetyyppi == "" and $row["tuotetyyppi"] == '2 Työt') {
+            $tuotetyyppi = 1;
+
+            echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><br></td></tr>";
+            echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><font class='head'>".t("Työt")."</font>:</td></tr>";
+          }
+        }
+        elseif ($toim == 'EXTRANET' and $kukarow['extranet'] != '') {
+          if ($positio_varattu == '' and $row['positio'] == 'Ei varaa saldoa') {
+            $positio_varattu = 1;
+
+            echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><br></td></tr>";
+            echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><font class='head'>", t("Umpeutuneet tilausrivit"), "</font>:</td></tr>";
+            echo "<tr>$jarjlisa<td class='back' colspan='$sarakkeet'><font class='message'>", t("Pahoittelumme! Alla olevien tilausrivien varausajat ovat umpeutuneet");
+
+            if ($ei_saldoa_varausaika != '') {
+              echo " (", t("varausaika"), " $ei_saldoa_varausaika ", t("tuntia"), ")";
+            }
+
+            echo "</font></td></tr>";
+          }
+        }
 
         for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
           if ($row["ale{$alepostfix}"] == 0.00) $row["ale{$alepostfix}"] = '';
@@ -7735,86 +7735,7 @@ if ($tee == '') {
 
           if ($kukarow['extranet'] == '' and ($kukarow["naytetaan_katteet_tilauksella"] == "Y" or $kukarow["naytetaan_katteet_tilauksella"] == "B" or ($kukarow["naytetaan_katteet_tilauksella"] == "" and ($yhtiorow["naytetaan_katteet_tilauksella"] == "Y" or $yhtiorow["naytetaan_katteet_tilauksella"] == "B")))) {
             // Tän rivin kate
-            $kate = 0;
-
-            if ($kukarow['extranet'] == '' and ($row["sarjanumeroseuranta"] == "S" or $row["sarjanumeroseuranta"] == "U")) {
-
-              if ($kpl > 0) {
-                //Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on myyntiä
-                $ostohinta = sarjanumeron_ostohinta("myyntirivitunnus", $row["tunnus"]);
-
-                // Kate = Hinta - Ostohinta
-                if ($kotisumma_alviton != 0) {
-                  $ostohinta = hinta_kuluineen($row["tuoteno"], $ostohinta);
-                  $kate = sprintf('%.2f', 100*($kotisumma_alviton - ($ostohinta * $kpl))/$kotisumma_alviton);
-                }
-                elseif (($ostohinta * $kpl) != 0) {
-                  $kate = "-100.00";
-                }
-              }
-              elseif ($kpl < 0 and $row["osto_vai_hyvitys"] == "O") {
-                //Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on OSTOA
-
-                // Kate = 0
-                $kate = "0";
-              }
-              elseif ($kpl < 0 and $row["osto_vai_hyvitys"] == "") {
-                //Jos tuotteella ylläpidetään in-out varastonarvo ja kyseessä on HYVITYSTÄ
-
-                //Tähän hyvitysriviin liitetyt sarjanumerot
-                $query = "SELECT sarjanumero, kaytetty
-                          FROM sarjanumeroseuranta
-                          WHERE yhtio        = '$kukarow[yhtio]'
-                          and ostorivitunnus = '$row[tunnus]'";
-                $sarjares = pupe_query($query);
-
-                $ostohinta = 0;
-
-                while ($sarjarow = mysql_fetch_assoc($sarjares)) {
-
-                  // Haetaan hyvitettävien myyntirivien kautta alkuperäiset ostorivit
-                  $query  = "SELECT tilausrivi.rivihinta/tilausrivi.kpl ostohinta
-                             FROM sarjanumeroseuranta
-                             JOIN tilausrivi use index (PRIMARY) ON tilausrivi.yhtio=sarjanumeroseuranta.yhtio and tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus
-                             WHERE sarjanumeroseuranta.yhtio          = '$kukarow[yhtio]'
-                             and sarjanumeroseuranta.tuoteno          = '$row[tuoteno]'
-                             and sarjanumeroseuranta.sarjanumero      = '$sarjarow[sarjanumero]'
-                             and sarjanumeroseuranta.kaytetty         = '$sarjarow[kaytetty]'
-                             and sarjanumeroseuranta.myyntirivitunnus > 0
-                             and sarjanumeroseuranta.ostorivitunnus   > 0
-                             ORDER BY sarjanumeroseuranta.tunnus
-                             LIMIT 1";
-                  $sarjares1 = pupe_query($query);
-                  $sarjarow1 = mysql_fetch_assoc($sarjares1);
-
-                  $oh = hinta_kuluineen($arow['tuoteno'], $sarjarow1['ostohinta']);
-                  $ostohinta += $oh;
-                }
-
-                // Kate = Hinta - Alkuperäinen ostohinta
-                if ($kotisumma_alviton != 0) {
-                  $kate = sprintf('%.2f', 100 * ($kotisumma_alviton * -1 - $ostohinta)/$kotisumma_alviton);
-                }
-                else {
-                  $kate = "100.00";
-                }
-              }
-              else {
-                $kate = "N/A";
-              }
-            }
-            elseif ($kukarow['extranet'] == '') {
-              if ($kotisumma_alviton != 0) {
-                $khh = hinta_kuluineen($row['tuoteno'], $row["kehahin"]);
-                $kate = sprintf('%.2f', 100*($kotisumma_alviton - ($khh * ($row["varattu"]+$row["jt"]))) / $kotisumma_alviton);
-              }
-              elseif ($row["kehahin"] != 0 and ($row["varattu"]+$row["jt"]) > 0) {
-                $kate = "-100.00";
-              }
-              elseif ($row["kehahin"] != 0 and ($row["varattu"]+$row["jt"]) < 0) {
-                $kate = "100.00";
-              }
-            }
+            $kate = laske_tilausrivin_kate($row, $kotisumma_alviton, $row["kehahin"], $kpl, $arow);
 
             echo "<td $class align='right' valign='top' nowrap>$kate%</td>";
           }

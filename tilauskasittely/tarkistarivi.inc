@@ -135,6 +135,14 @@ if (
   }
 }
 
+$tilausrivin_kateraja = $yhtiorow["tilausrivin_kateraja"];
+$tilausrivin_kate = laske_tilausrivin_kate($row, $kotisumma_alviton, $row["kehahin"], $kpl, $arow);
+
+if ($tilausrivin_kateraja > 0 and $tilausrivin_kate < $tilausrivin_kateraja) {
+  $varaosavirhe .= t("HUOM: Kate alhainen!");
+  $riviok++;
+}
+
 if (in_array($row["var"], array('', 'H')) and $row["tyyppi"] != "E" and $row["tyyppi"] != "G") {
   if (($laskurow["tilaustyyppi"] != "H" and $row["varattu"] == 0) or
     ($laskurow["tilaustyyppi"] == "H" and $row["tilkpl"] == 0)

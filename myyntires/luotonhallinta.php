@@ -199,6 +199,13 @@ if ($tee == "3" and $paivitys_oikeus) {
     $cnt = 0;
 
     foreach ($excelrivit as $rivinumero => $rivi) {
+
+      // Tarkistetaan ett‰ tiedostossa ei ole ylim‰‰r‰isi‰ rivej‰
+      if ($rivi[3] != "") {
+        echo "<font class='error'>".t("Tiedostossa liikaa sarakkaita")." ! ".t("Tarkista tiedosto")."!</font><br />";
+        exit;
+      }
+
       $ytunnus  = mysql_real_escape_string(trim($rivi[0]));
       $asiakasnro  = trim($rivi[1]) != "" ? (int) trim($rivi[1]) : "";
       $luottoraja = (float) $rivi[2];
@@ -461,11 +468,11 @@ if ($tee == "1") {
     $luottotilanne_nyt = round($asiakasrow["luottoraja"] - $avoimetlaskutrow["laskuavoinsaldo"] + $kaatotilirow["summa"] - $avoimettilauksetrow["tilausavoinsaldo"], 2);
 
     echo "<td align='right'>$luottotilanne_nyt</td>";
-    
+
     if ($paivitys_oikeus) {
       echo "<td align='right'><input style='text-align:right' type='text' name='luottoraja[$asiakasrow[ytunnus]]' value='$asiakasrow[luottoraja]' size='11'></td>";
       echo "<td align='right'><input type='checkbox' name='myyntikielto[$asiakasrow[ytunnus]]' value='K' $chk></td>";
-    } 
+    }
     else {
       echo "<td>$asiakasrow[luottoraja]</td>";
       echo "<td>$asiakasrow[myyntikielto]</td>";

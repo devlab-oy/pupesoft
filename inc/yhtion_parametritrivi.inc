@@ -3691,15 +3691,14 @@ if ($fieldname == "intrastat_pvm") {
 
 if ($fieldname == "myynti_asiakhin_tallenna") {
 
-  $sel = "";
-
-  if ($trow[$i] != '') {
-    $sel = "selected";
-  }
+  $apu = $trow[$i];
+  $sel = array($apu => "selected");
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">
         <option value = ''>".t("Myyntitilauksella ei voi tallentaa asiakashintoja")."</option>
-        <option value = 'K' $sel>".t("Myyntitilauksen hinnat voi tallentaa asiakkaalle asiakashinnoiksi")."</option>
+        <option value = 'K' {$sel["K"]}>".t("Myyntitilauksen hinnat voi tallentaa asiakkaalle asiakashinnoiksi")."</option>
+        <option value='V' {$sel["V"]}>" . t("Myyntitilauksen hinnat voi tallentaa asiakkaalle " .
+                                "asiakashinnoiksi valitulla tavalla") . "</option>
       </select></td>";
 
   $jatko = 0;

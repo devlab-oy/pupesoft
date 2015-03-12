@@ -222,7 +222,7 @@ if ($tee == "3" and $paivitys_oikeus) {
                 {$asiakasnrolisa}";
       pupe_query($query);
 
-      $cnt++;
+      $cnt += mysql_affected_rows();
     }
 
     $plural = $cnt == 1 ? "rivi" : "riviä";

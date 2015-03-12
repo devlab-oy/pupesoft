@@ -604,6 +604,9 @@ if ($tee == 'MUUTA') {
               dynaaminen_kassamyynti        = '{$dynaaminen_kassamyynti}',
               jyvitys                       = '{$jyvitys}',
               oletus_ohjelma                = '{$oletus_ohjelma}',
+              maksuehto                     = '{$maksuehto}',
+              toimitustapa                  = '{$toimitustapa}',
+              eilahetetta                   = '{$eilahetetta}',
               naytetaan_katteet_tilauksella = '{$naytetaan_katteet_tilauksella}',
               naytetaan_asiakashinta        = '{$naytetaan_asiakashinta}',
               naytetaan_tuotteet            = '{$naytetaan_tuotteet}',
@@ -1493,6 +1496,75 @@ if ($tee == 'MUUTA') {
       }
 
       echo "<tr><th>".t('Käyttäjän myyntitavoite 12kk').":</th><td><input type='text' name='budjetti' value='{$krow['budjetti']}' size='12'></td></tr>";
+
+      echo "<tr><th><label for='maksuehto'>" . t("Oletusmaksuehto") . "</label></th>";
+
+      $me_query = "SELECT *
+                   FROM maksuehto
+                   WHERE yhtio  = '{$kukarow["yhtio"]}'
+                   and kaytossa = ''
+                   ORDER BY jarjestys, teksti";
+
+      $me_result = pupe_query($me_query);
+
+      echo "<td><select id='maksuehto' name='maksuehto'>";
+      echo "<option value='0'>" . t("Ei valintaa") . "</option>";
+
+      while ($me_row = mysql_fetch_assoc($me_result)) {
+        $sallitut_maat = "";
+
+        if ($me_row["tunnus"] == $krow["maksuehto"]) {
+          $selected = "selected";
+        }
+        else {
+          $selected = "";
+        }
+
+        if ($me_row["sallitut_maat"] != "") {
+          $sallitut_maat = "($me_row[sallitut_maat])";
+        }
+
+        echo "<option value='{$me_row["tunnus"]}' {$selected}>" .
+             t_tunnus_avainsanat($me_row, "teksti", "MAKSUEHTOKV") . " {$sallitut_maat}</option>";
+      }
+
+      echo "</select></td></tr>";
+
+      echo "<tr><th><label for='toimitustapa'>" . t("Oletustoimitustapa") . "</label></th>";
+
+      $tt_query = "SELECT *
+                   FROM toimitustapa
+                   WHERE yhtio = '{$kukarow["yhtio"]}'
+                   ORDER BY jarjestys, selite";
+
+      $tt_result = pupe_query($tt_query);
+
+      echo "<td><select id='toimitustapa' name='toimitustapa'>";
+
+      echo "<option value=''>" . t("Ei valintaa") . "</option>";
+
+      while ($tt_row = mysql_fetch_array($tt_result)) {
+        if ($krow["toimitustapa"] == $tt_row['selite']) {
+          $selected = "selected";
+        }
+        else {
+          $selected = "";
+        }
+
+        echo "<option value='{$tt_row["selite"]}' {$selected}>" .
+             t_tunnus_avainsanat($tt_row, "selite", "TOIMTAPAKV") . "</option>";
+      }
+
+      echo "</select></td></tr>";
+
+      echo "<tr><th><label for='eilahetetta'>" . t("Tilaukset oletuksena suoraan laskutukseen") .
+           "</label></th>";
+      echo "<td>";
+
+      $checked = $krow["eilahetetta"] == "o" ? "checked" : "";
+
+      echo "<input id='eilahetetta' name='eilahetetta' type='checkbox' value='o' {$checked}>";
+      echo "</td></tr>";
     }
 
     echo "</table>";

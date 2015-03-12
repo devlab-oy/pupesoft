@@ -23,7 +23,7 @@ $psx_ohjelmat = array(
   "valuu" => "{$palvelin2}pupenext/currencies",
   "tili" => "{$palvelin2}pupenext/accounts",
   "taso" => "{$palvelin2}pupenext/sum_levels",
-  "maksuehto" => "{$palvlein2}pupenext/terms_of_payments",
+  "maksuehto" => "{$palvelin2}pupenext/terms_of_payments",
 );
 
 if (array_key_exists($toim, $psx_ohjelmat)) {

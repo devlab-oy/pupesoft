@@ -18053,9 +18053,17 @@ if (!function_exists("tee_keraysera")) {
     $_fixed_main_array_keys = array_keys($fixed_main_array);
 
     if (isset($kukarow['debugstring'])) {
-      $kukarow['debugstring'] .= var_dump($fixed_main_array)."\n";
-      $kukarow['debugstring'] .= var_dump($_fixed_main_array_count)."\n";
-      $kukarow['debugstring'] .= var_dump($_fixed_main_array_keys)."\n";
+      $kukarow['debugstring'] .= "<pre>(E250): ";
+      $kukarow['debugstring'] .= var_export($fixed_main_array, TRUE);
+      $kukarow['debugstring'] .= "</pre>\n";
+
+      $kukarow['debugstring'] .= "<pre>(E250): ";
+      $kukarow['debugstring'] .= var_export($_fixed_main_array_count, TRUE);
+      $kukarow['debugstring'] .= "</pre>\n";
+
+      $kukarow['debugstring'] .= "<pre>(E250): ";
+      $kukarow['debugstring'] .= var_export($_fixed_main_array_keys, TRUE);
+      $kukarow['debugstring'] .= "</pre>\n";
     }
 
     for ($_main_i = 0; $_fixed_main_array_count > $_main_i; $_main_i++) {
@@ -26827,8 +26835,8 @@ if (!function_exists('posten_outbounddelivery')) {
               asiakas.email,
               tuote.eankoodi
               FROM lasku
-              JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-              JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND (tilausrivi.varattu+tilausrivi.tilkpl) > 0 AND tilausrivi.tyyppi= 'L')
+              LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+              JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND (tilausrivi.varattu+tilausrivi.tilkpl) > 0 AND tilausrivi.tyyppi IN ('L', 'G'))
               JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND lasku.tunnus  = '{$otunnus}'";
@@ -27359,6 +27367,7 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
               lasku.valkoodi,
               asiakas.asiakasnro AS asiakasnumero,
               asiakas.tunnus AS asiakas_tunnus,
+              asiakas.kieli AS kieli,
               lasku.summa,
               ROUND(SUM(tiliointi.summa), 2) AS avoin_saldo
               FROM lasku
@@ -27383,7 +27392,7 @@ if (!function_exists('hae_myyntilaskuja_joilla_avoin_saldo')) {
               AND lasku.tapvm                        > '0000-00-00'
               AND lasku.tila                         = 'U'
               AND lasku.alatila                      = 'X'
-              GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13
+              GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13,14
               ORDER BY asiakas.toim_ovttunnus ASC,
               asiakas.ytunnus ASC,
               lasku.tunnus ASC";
@@ -27770,7 +27779,7 @@ if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
       $valitut_saldovahvistukset = array($request['saldovahvistus']);
     }
     else {
-      $valitut_saldovahvistukset = $_SESSION['valitut_laskut'];
+      $valitut_saldovahvistukset = $request['lahetettavat_laskut'];
     }
 
     $lahetetyt_count = 0;
@@ -27779,27 +27788,26 @@ if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
     $ei_lahetetyt = array();
 
     foreach ($valitut_saldovahvistukset as $valittu_saldovahvistus) {
-      $request['ryhmittely_tyyppi_temp'] = $valittu_saldovahvistus['ryhmittely_tyyppi'];
 
       if ($lahetetyt) {
+        $request['ryhmittely_tyyppi_temp'] = $valittu_saldovahvistus['ryhmittely_tyyppi'];
         $request['saldovahvistus_tunnus'] = $valittu_saldovahvistus['saldovahvistus_tunnus'];
         $saldovahvistus = hae_lahetetyt_saldovahvistukset($request);
+
+        //Valittu saldovahvistusviesti
+        $saldovahvistus['saldovahvistus_viesti'] = search_array_key_for_value_recursive($request['saldovahvistus_viestit'], 'selite', $valittu_saldovahvistus['saldovahvistus_viesti']);
+        $saldovahvistus['saldovahvistus_viesti'] = $saldovahvistus['saldovahvistus_viesti'][0];
+        $saldovahvistus['laskun_avoin_paiva'] = $valittu_saldovahvistus['laskun_avoin_paiva'];
       }
       else {
-        $request['lasku_tunnukset'] = $valittu_saldovahvistus['lasku_tunnukset'];
-        $saldovahvistus = hae_myyntilaskuja_joilla_avoin_saldo($request, true);
+        $saldovahvistus = $request['valitut_laskut'][$valittu_saldovahvistus];
       }
-
-      //Valittu saldovahvistusviesti
-      $saldovahvistus['saldovahvistus_viesti'] = search_array_key_for_value_recursive($request['saldovahvistus_viestit'], 'selite', $valittu_saldovahvistus['saldovahvistus_viesti']);
-      $saldovahvistus['saldovahvistus_viesti'] = $saldovahvistus['saldovahvistus_viesti'][0];
-      $saldovahvistus['laskun_avoin_paiva'] = $valittu_saldovahvistus['laskun_avoin_paiva'];
 
       if ($saldovahvistus['asiakas']['talhal_email'] != '') {
 
         $saldovahvistus['tiliotepvm'] = "{$request['vv']}-{$request['kk']}-{$request['pp']}";
 
-        if ($valittu_saldovahvistus['ryhmittely_tyyppi'] == 'ytunnus') {
+        if ($saldovahvistus['ryhmittely_tyyppi'] == 'ytunnus') {
           $boss = true;
         }
         else {
@@ -27827,6 +27835,10 @@ if (!function_exists('generoi_saldovahvistus_sahkopostit')) {
         if ($onko_sahkoposti_lahetetty) {
           merkkaa_saldovahvistus_lahetetyksi($saldovahvistus);
           $lahetetyt_count++;
+
+          if (!$lahetetyt) {
+            unset($_SESSION['valitut_laskut'][$valittu_saldovahvistus]);
+          }
         }
         else {
           $ei_lahetetty_count++;
@@ -30731,6 +30743,81 @@ if (!function_exists('hae_lahete_printteri')) {
     }
 
     return $komento;
+  }
+}
+
+if (!function_exists('varaston_lapsivarastot')) {
+  function varaston_lapsivarastot($varasto, $tuoteno) {
+    global $kukarow, $yhtiorow;
+
+    // katsotaan onko vastaanottavalla varastolla lapsivarastoja
+    $lv_query =  "SELECT GROUP_CONCAT(tunnus) lapsivarastot
+                  FROM varastopaikat
+                  WHERE yhtio     = '{$kukarow['yhtio']}'
+                  AND isa_varasto = '{$varasto}'
+                  AND isa_varasto != 0";
+    $lv_res = pupe_query($lv_query);
+    $lv_row = mysql_fetch_assoc($lv_res);
+
+    if (!empty($lv_row['lapsivarastot'])) {
+
+      // katsotaan onko tuotepaikallisia lapsivarastoja
+      $tlv_query = "SELECT GROUP_CONCAT(DISTINCT varasto) varastot
+                    FROM tuotepaikat
+                    WHERE yhtio     = '{$kukarow['yhtio']}'
+                    AND varasto IN ({$lv_row['lapsivarastot']})
+                    AND tuoteno     = '{$tuoteno}'
+                    GROUP BY yhtio";
+      $tlv_res = pupe_query($tlv_query);
+      $tlv_lista = mysql_fetch_assoc($tlv_res);
+
+      if (empty($tlv_lista['varastot'])) {
+
+        $tlvlisa = '';
+
+        $lvlisa = " UNION
+                    SELECT tunnus, 'x','x','x','x', 's3' AS status, nimitys
+                    FROM varastopaikat
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND isa_varasto = '{$varasto}'";
+      }
+      else {
+
+        $tlvlisa="UNION
+                  SELECT tp.tunnus,
+                  tp.hyllyalue,
+                  tp.hyllynro,
+                  tp.hyllyvali,
+                  tp.hyllytaso,
+                  's2' AS status,
+                  'x' AS nimitys
+                  FROM tuotepaikat AS tp
+                  JOIN varastopaikat AS vp ON vp.yhtio = tp.yhtio AND vp.tunnus = tp.varasto
+                  WHERE tp.yhtio = '{$kukarow['yhtio']}'
+                  AND vp.isa_varasto = '{$varasto}'
+                  AND tp.tuoteno = '{$tuoteno}'";
+
+        $lvlisa= "UNION
+                  SELECT tunnus, 'x','x','x','x', 's3' AS status, vp.nimitys
+                  FROM varastopaikat AS vp
+                  WHERE vp.yhtio = '{$kukarow['yhtio']}'
+                  AND vp.isa_varasto = '{$varasto}'
+                  AND vp.tunnus NOT IN ({$tlv_lista['varastot']})";
+      }
+    }
+    else {
+      $lvlisa = $tlvlisa = '';
+    }
+
+    $query = "SELECT tunnus, hyllyalue, hyllynro, hyllyvali, hyllytaso, 's1' AS status, 'x' AS nimitys
+              FROM tuotepaikat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tuoteno = '{$tuoteno}'
+              AND varasto = '{$varasto}'
+              $lvlisa
+              $tlvlisa
+              ORDER BY status, nimitys";
+    return pupe_query($query);
   }
 }
 

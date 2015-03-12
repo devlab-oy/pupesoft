@@ -104,6 +104,8 @@ function rullat_ja_kontit($konttiviite, $konttimaara = false) {
 
 function laheta_sanoma($sanoma) {
 
+  return true;
+
   if ($sanoma == '') {
     return false;
   }
@@ -3591,6 +3593,78 @@ function varastotilanne($hetki = false) {
 
   return $return;
 
+}
+
+function toimittajat($rivitarkastus = false) {
+  global $kukarow;
+
+  $joinlisa = '';
+  $wherelisa = '';
+
+  if ($rivitarkastus) {
+    $lisa_0 = ", group_concat(DISTINCT tilausrivi.tuoteno) AS tuotteet ";
+
+    $lisa_1 = " JOIN lasku
+                    ON lasku.yhtio = toimi.yhtio
+                    AND lasku.liitostunnus = toimi.tunnus
+                  JOIN tilausrivi
+                    ON tilausrivi.yhtio = toimi.yhtio
+                    AND tilausrivi.otunnus = lasku.tunnus ";
+
+    $lisa_2 = " AND lasku.viesti = 'tullivarasto' AND lasku.tila != 'D' GROUP BY toimi.tunnus";
+  }
+
+  $query = "SELECT toimi.nimi, toimi.tunnus {$lisa_0}
+            FROM toimi
+            JOIN asiakas
+              ON asiakas.yhtio = toimi.yhtio
+              AND asiakas.asiakasnro = toimi.tunnus
+            {$lisa_1}
+            WHERE toimi.yhtio = '{$kukarow['yhtio']}'
+            {$lisa_2}";
+  $result = pupe_query($query);
+
+  $toimittajat = array();
+
+  while ($toimittaja = mysql_fetch_assoc($result)) {
+
+    if ($rivitarkastus) {
+      $tarjolla = 0;
+      $tuotteet = explode(',', $toimittaja['tuotteet']);
+
+      foreach ($tuotteet as $tuoteno) {
+        $saldot = saldo_myytavissa($tuoteno);
+        $tarjolla += $saldot[2];
+      }
+    }
+
+    if (!$rivitarkastus or $tarjolla > 0) {
+      $toimittajat[$toimittaja['tunnus']] = $toimittaja['nimi'];
+    }
+
+  }
+
+  return $toimittajat;
+}
+
+
+function varastot() {
+  global $kukarow;
+
+  $query = "SELECT
+            concat(tunnus, '#', nimitark) AS varastokoodi,
+            nimitys
+            FROM varastopaikat
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND nimitark != ''";
+  $result = pupe_query($query);
+
+  $varastot = array();
+  while ($varasto = mysql_fetch_assoc($result)) {
+    $varastot[] = $varasto;
+  }
+
+  return $varastot;
 }
 
 ?>

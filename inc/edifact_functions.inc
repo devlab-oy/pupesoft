@@ -104,7 +104,10 @@ function rullat_ja_kontit($konttiviite, $konttimaara = false) {
 
 function laheta_sanoma($sanoma) {
 
-  return true;
+  // ei lähetellä sanomia muualla kuin tuotannossa
+  if (strpos($_SERVER['HTTP_HOST'], 'rplogistics.devlab.fi') === false) {
+    return true;
+  }
 
   if ($sanoma == '') {
     return false;

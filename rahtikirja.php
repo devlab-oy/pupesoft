@@ -676,7 +676,6 @@ if ($tee == 'add') {
             if ($lavametri[$i] == '') $lavametri[$i] = 0;
             if ($kuutiot[$i] == '')    $kuutiot[$i]   = 0;
 
-            // Lisätään myös pakkausveloitus, mikäli sellainen on annettu
             $query = "SELECT pakkaus.*
                       FROM pakkaus
                       JOIN tuote ON tuote.yhtio = pakkaus.yhtio and tuote.tuoteno = pakkaus.pakkausveloitus_tuotenumero
@@ -689,7 +688,20 @@ if ($tee == 'add') {
             if (mysql_num_rows($pakres) == 1) {
               $pakrow = mysql_fetch_assoc($pakres);
 
-              lisaarivi($otsikkonro, $pakrow["pakkausveloitus_tuotenumero"], $kollit[$i]);
+              $lasku_query = "SELECT rahtivapaa
+                              FROM lasku
+                              WHERE yhtio = '{$kukarow["yhtio"]}'
+                              AND tunnus = {$otsikkonro}";
+
+              $lasku_result = pupe_query($lasku_query);
+              $laskurow = mysql_fetch_assoc($lasku_result);
+
+              // Lisätään myös pakkausveloitus, mikäli sellainen on annettu ja jos tilaus ei ole
+              // rahtivapaa ja pakkauksen takaa ei ole säädetty, että rahtivapaissa tilauksissa ei
+              // tule pakkausveloitusta
+              if ($pakrow["rahtivapaa_veloitus"] == "" or $laskurow["rahtivapaa"] == "") {
+                lisaarivi($otsikkonro, $pakrow["pakkausveloitus_tuotenumero"], $kollit[$i]);
+              }
             }
 
             if ($kilot[$i]!=0 or $kollit[$i]!=0 or $kuutiot[$i]!=0 or $lavametri[$i]!=0) {

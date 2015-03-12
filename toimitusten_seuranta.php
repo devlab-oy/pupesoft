@@ -1346,7 +1346,8 @@ if (!isset($task)) {
               JOIN tilausrivin_lisatiedot AS trlt
                 ON trlt.yhtio = lasku.yhtio
                 AND trlt.tilausrivitunnus = tr.tunnus
-              WHERE konttiviite = 'bookkaukseton'
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+              AND konttiviite = 'bookkaukseton'
               GROUP BY lasku.tunnus";
       break;
 
@@ -1367,7 +1368,7 @@ if (!isset($task)) {
               JOIN laskun_lisatiedot AS llt
                ON llt.yhtio = lasku.yhtio
                AND llt.otunnus = lasku.tunnus
-              WHERE lasku.yhtio = 'rplog'
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND lasku.tilaustyyppi = 'N'
               AND lasku.asiakkaan_tilausnumero != ''
               AND konttiviite != 'bookkaukseton'
@@ -1409,7 +1410,7 @@ if (!isset($task)) {
               JOIN tilausrivi AS otr
                 ON otr.yhtio = lasku.yhtio
                 AND otr.tunnus = ss.ostorivitunnus
-              WHERE lasku.yhtio = 'rplog'
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND tilaustyyppi = 'N'
               AND konttiviite != 'bookkaukseton'
               AND llt.satamavahvistus_pvm = '0000-00-00 00:00:00'
@@ -1442,7 +1443,7 @@ if (!isset($task)) {
               JOIN sarjanumeroseuranta AS ss
                 ON ss.yhtio = lasku.yhtio
                 AND ss.myyntirivitunnus = tr.tunnus
-              WHERE lasku.yhtio = 'rplog'
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND tilaustyyppi = 'N'
               AND konttiviite != 'bookkaukseton'
               AND trlt.konttinumero != ''
@@ -1710,7 +1711,7 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
               JOIN laskun_lisatiedot
                 ON laskun_lisatiedot.yhtio = lasku.yhtio
                 AND laskun_lisatiedot.otunnus = lasku.tunnus
-              WHERE lasku.yhtio = 'rplog'
+              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND lasku.tilaustyyppi = 'N'
               AND laskun_lisatiedot.konttiviite = '{$kv}'
               GROUP BY lasku.asiakkaan_tilausnumero, laskun_lisatiedot.konttiviite
@@ -1759,7 +1760,7 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
             JOIN sarjanumeroseuranta AS ss
               ON ss.yhtio = lasku.yhtio
               AND ss.myyntirivitunnus = tilausrivi.tunnus
-            WHERE lasku.yhtio = 'rplog'
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tilaustyyppi = 'N'
             AND laskun_lisatiedot.konttiviite = '{$kv}'
             GROUP BY lasku.asiakkaan_tilausnumero, laskun_lisatiedot.konttiviite

@@ -164,8 +164,13 @@ if (isset($task) and $task == 'vie_varastoon') {
               AND tunnus  = '{$olemassa_oleva_rivi['tunnus']}'";
     pupe_query($query);
 
-    // TODO: saldot oikein yhdistämisen jäljiltä...
-    // $query = "UPDATE tuotepaikat SET ...
+    $query = "UPDATE tuotepaikat SET
+              saldo = saldo + {$kpl}
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tuoteno = '{$tilausrivi['tuoteno']}'
+              AND hyllyalue = '{$hyllyalue}'
+              AND hyllynro  = '{$hyllynro}'";
+    pupe_query($query);
 
     $query = "DELETE FROM tilausrivi
               WHERE yhtio = '{$kukarow['yhtio']}'

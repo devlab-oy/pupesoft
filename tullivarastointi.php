@@ -1,5 +1,6 @@
 <?php
 require "inc/parametrit.inc";
+require 'inc/edifact_functions.inc';
 
 $errors = array();
 
@@ -613,49 +614,3 @@ if (isset($view) and $view == "perus") {
 
 
 require "inc/footer.inc";
-
-
-
-
-
-
-
-function toimittajat() {
-  global $kukarow;
-
-  $query = "SELECT nimi, tunnus
-            FROM toimi
-            WHERE yhtio = '{$kukarow['yhtio']}'";
-  $result = pupe_query($query);
-
-  $toimittajat = array();
-  while ($toimittaja = mysql_fetch_assoc($result)) {
-    $toimittajat[$toimittaja['tunnus']] = $toimittaja['nimi'];
-  }
-
-  return $toimittajat;
-}
-
-
-function varastot() {
-  global $kukarow;
-
-  $query = "SELECT
-            concat(tunnus, '#', nimitark) AS varastokoodi,
-            nimitys
-            FROM varastopaikat
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND nimitark != ''";
-  $result = pupe_query($query);
-
-  $varastot = array();
-  while ($varasto = mysql_fetch_assoc($result)) {
-    $varastot[] = $varasto;
-  }
-
-  return $varastot;
-}
-
-
-
-

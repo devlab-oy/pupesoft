@@ -466,9 +466,7 @@ else {
   //Tarkistetaan onko myyntitilaukselle tehty varastosiirto ja jos ei ole niin tehd‰‰n
   $_tehdaan_varastosiirto = false;
 
-  if ($kukarow["extranet"] == "" and $yhtiorow["tee_siirtolista_myyntitilaukselta"] == 'K' and $laskurow['tila'] == 'N'
-    and ($yhtiorow['toimipaikkakasittely'] != 'L'
-    or ($yhtiorow['toimipaikkakasittely'] == 'L' and $kukarow["toimipaikka"] == $laskurow['yhtio_toimipaikka']))) {
+  if ($kukarow["extranet"] == "" and $yhtiorow["tee_siirtolista_myyntitilaukselta"] == 'K' and $laskurow['tila'] == 'N') {
     $query = "SELECT tilausrivi.tunnus
               FROM tilausrivi
               WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'

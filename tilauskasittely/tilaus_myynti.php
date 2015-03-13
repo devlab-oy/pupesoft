@@ -1895,8 +1895,8 @@ if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $tee == "ODOTTAA" 
 }
 
 if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
-  and ($tee == 'VASTAANOTTO' or $tee == 'VALMIS')
-  and ($yhtiorow['reklamaation_kasittely'] == 'U' or 
+  and ($tee == 'VASTAANOTTO' or $tee == 'VALMIS') and
+  ($yhtiorow['reklamaation_kasittely'] == 'U' or 
   ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U'))) {
   // Joka tarkoittaa että "Reklamaatio on vastaanotettu
   // tämän jälkeen kun seuraavassa vaiheessa tullaan niin "Tulostetaan Purkulista"

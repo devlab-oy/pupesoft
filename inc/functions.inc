@@ -30891,3 +30891,33 @@ if (!function_exists("paata_kvartaali")) {
     return $nykyinen_kvartaali;
   }
 }
+
+if (!function_exists("choose_correct_date")) {
+  function choose_correct_date($date) {
+    global $kukarow, $yhtiorow;
+
+    if (trim($date) == "") {
+      return '';
+    }
+
+    // Päivämäärä oli ymmärrettävässä muodossa
+    if (strtotime($date) !== false) {
+      // Palautetaan Y-m-d
+      return date('Y-m-d', strtotime($date));
+    }
+
+    // Excelissä date voi tulla integerinä
+    if (is_numeric($date)) {
+      /*  the date fields have integers that are the amount of days from 1900-00-00 */
+      return date('Y-m-d', mktime(0, 0, 0, 1, $date - 1, 1900));
+    }
+
+    // Ei osattu valita sopivaa päivää
+    echo "<font class='error'>";
+    echo t("Virheellinen päivämäärä");
+    echo " \"{$date}\"";
+    echo "</font><br>";
+
+    return '';
+  }
+}

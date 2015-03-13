@@ -464,33 +464,32 @@ if (isset($view) and $view == 'tulotiedot') {
 // perusnäkymä
 if (isset($view) and $view == "perus") {
 
-  echo "
-    <form>
-    <input type='hidden' name='task' value='aloita_perustus' />
-    <input type='submit' value='". t("Perusta uusi tulonumero") . "' />
-    </form><br><br>";
-
   $query = "SELECT
             lasku.asiakkaan_tilausnumero,
             tilausrivi.tilkpl as kpl,
-            tilausrivi.nimitys as tuote,
+            concat(tilausrivi.nimitys, '&nbsp;-&nbsp;', tuote.malli) as tuote,
+            tilausrivi.tuoteno,
             tilausrivi.hyllyalue,
             tilausrivi.hyllynro,
             concat(SUBSTRING(tilausrivi.hyllyalue, 3, 5),  tilausrivi.hyllynro) AS varastopaikka,
             lasku.varasto,
             varastopaikat.nimitys AS varastonimi,
             lasku.nimi,
-            lasku.toimaika
+            lasku.toimaika,
+            tilausrivi.tunnus AS rivitunnus
             FROM lasku
             JOIN tilausrivi
-            ON tilausrivi.yhtio = lasku.yhtio
-            AND tilausrivi.otunnus = lasku.tunnus
+              ON tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
             JOIN varastopaikat
-            ON varastopaikat.yhtio = lasku.yhtio
-            AND varastopaikat.tunnus = lasku.varasto
+              ON varastopaikat.yhtio = lasku.yhtio
+              AND varastopaikat.tunnus = lasku.varasto
+            JOIN tuote
+              ON tuote.yhtio = lasku.yhtio
+              AND tuote.tuoteno = tilausrivi.tuoteno
             WHERE lasku.yhtio = 'rplog'
             AND viesti = 'tullivarasto'
-            GROUP BY concat(lasku.tunnus, tilausrivi.tunnus)";
+            GROUP BY lasku.tunnus, tilausrivi.tunnus";
   $result = pupe_query($query);
 
   $tulot = array();
@@ -498,7 +497,13 @@ if (isset($view) and $view == "perus") {
 
   while ($tulo = mysql_fetch_assoc($result)) {
 
-    $tuoteinfo = array('tuote' => $tulo['tuote'], 'kpl' => $tulo['kpl'], 'vp' => $tulo['varastopaikka']);
+    $tuoteinfo = array(
+      'rivitunnus' => $tulo['rivitunnus'],
+      'tuoteno' => $tulo['tuoteno'],
+      'tuote' => $tulo['tuote'],
+      'kpl' => $tulo['kpl'],
+      'vp' => $tulo['varastopaikka']
+    );
 
     $tuotteet[$tulo['asiakkaan_tilausnumero']]['tuoteinfo'][] = $tuoteinfo;
     $tuotteet[$tulo['asiakkaan_tilausnumero']]['toimittaja'] = $tulo['nimi'];
@@ -512,16 +517,15 @@ if (isset($view) and $view == "perus") {
   echo "<th>".t("Saapumiskoodi")."</th>";
   echo "<th>".t("Toimituspäivä")."</th>";
   echo "<th>".t("Toimittaja")."</th>";
-  echo "<th>".t("Kohdevarasto")."</th>";
- // echo "<th>".t("Nimitys").' '.t("Kpl.").' '.t("Varastopaikka")."</th>";
+  echo "<th>".t("Varasto")."</th>";
 
   echo "<th>";
 
   echo "<div style='overflow:auto'>";
-  echo "<div style='float:left; width:100px; text-align:center;'>";
+  echo "<div style='float:left; width:120px; text-align:center; border-right:1px solid white;'>";
   echo t("nimitys");
   echo '</div>';
-  echo "<div style='float:left; width:60px; text-align:center;'>";
+  echo "<div style='float:left; width:60px; text-align:center; border-right:1px solid white;'>";
   echo t("Kpl.");
   echo '</div>';
   echo "<div style='float:left; width:60px; text-align:center;'>";
@@ -532,7 +536,7 @@ if (isset($view) and $view == "perus") {
 
   echo "</th>";
 
-
+  echo "<th>".t("Status")."</th>";
 
   echo "<th class='back'></th>";
   echo "</tr>";
@@ -559,22 +563,29 @@ if (isset($view) and $view == "perus") {
 
     echo "<td valign='top'>";
 
-/*
-
-    echo "<div style='overflow:auto'>";
-    echo "<div style='float:left; width:100px; text-align:center;'>";
-    echo t("nimitys");
-    echo '</div>';
-    echo "<div style='float:left; width:100px; text-align:center;'>";
-    echo t("Kpl.");
-    echo '</div>';
-    echo "<div style='float:left; width:100px; text-align:center;'>";
-    echo t("Varastopaikka");
-    echo '</div>';
-    echo '</div>';
-*/
+    $statukset = array();
 
     foreach ($info['tuoteinfo'] as $tuote) {
+
+      $saldot = saldo_myytavissa($tuote['tuoteno']);
+      $tarjolla = $saldot[2];
+
+      if ($tarjolla === false) {
+        $statukset[$key][$tuote['rivitunnus']] = t("Ei vielä varastossa");
+      }
+      elseif ($tarjolla == 0) {
+        $statukset[$key][$tuote['rivitunnus']] = t("Kaikki liitetty toimituksiin");
+      }
+      elseif ($tarjolla < $tuote['kpl']) {
+        $statukset[$key][$tuote['rivitunnus']] = t("Osa liitetty toimituksiin");
+      }
+      elseif ($tarjolla == $tuote['kpl']) {
+        $statukset[$key][$tuote['rivitunnus']] = t("Ei vielä liitetty toimituksiin");
+      }
+      else {
+        //$statukset[$key][$tuote['rivitunnus']] = $tarjolla ." = ". $tuote['kpl'];
+      }
+
 
       if (empty($tuote['vp'])) {
         $color = 'red';
@@ -587,11 +598,11 @@ if (isset($view) and $view == "perus") {
 
       echo "<div style='overflow:auto; color:{$color};'>";
 
-      echo "<div style='float:left; width:100px; text-align:center; overflow:hidden;'>";
+      echo "<div style='float:left; width:120px; text-align:center; overflow:hidden; border-right:1px solid white;'>";
       echo $tuote['tuote'];
       echo '</div>';
 
-      echo "<div style='float:left; width:60px; text-align:center;'>";
+      echo "<div style='float:left; width:60px; text-align:center; border-right:1px solid white;'>";
       echo (int) $tuote['kpl'];
       echo '</div>';
 
@@ -605,12 +616,35 @@ if (isset($view) and $view == "perus") {
     }
 
     echo "</td>";
+
+    echo "<td valign='top'>";
+
+    foreach ($statukset as $tulo => $tuotteet) {
+      foreach ($tuotteet as $tuoteno => $status) {
+        echo $status . '<br>';
+      }
+    }
+
+    echo "</td>";
+
+    echo "<td class='back'>";
+    echo "</td>";
+
     echo "</tr>";
 
   }
   echo "</table>";
 
+
+  echo "<br>
+    <form>
+    <input type='hidden' name='task' value='aloita_perustus' />
+    <input type='submit' value='". t("Perusta uusi tulonumero") . "' />
+    </form><br><br>";
 }
+
+
+
 
 
 require "inc/footer.inc";

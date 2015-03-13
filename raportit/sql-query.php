@@ -30,12 +30,15 @@ if ($tee == "lataa_tiedosto") {
   exit;
 }
 
-if ($tee == "aja_tallennettu_query" and isset($valittu_query)) {
+if (!empty($valittu_query)) {
   $muistista = muistista("sql-query", $valittu_query, false, true);
 
-  $haku["nimi"] = $valittu_query;
+  $haku["nimi"]   = $valittu_query;
   $haku["kuvaus"] = $muistista["kuvaus"];
-  $sqlhaku = $muistista["query"];
+
+  if (empty($sqlhaku)) {
+    $sqlhaku = $muistista["query"];
+  }
 
   $tee = "";
 }
@@ -74,6 +77,7 @@ if ($toim == "SUPER") {
       $success = t("Haun tallennus onnistui");
     }
 
+    $sqlhaku = "";
     $tee = "";
   }
 }
@@ -89,19 +93,18 @@ if ($tee == "") {
                    FROM muisti
                    WHERE yhtio = '{$kukarow["yhtio"]}'
                    AND haku = 'sql-query'";
-
   $muisti_result = pupe_query($muisti_query);
 
   if (mysql_num_rows($muisti_result) > 0) {
     $valittu_query = isset($valittu_query) ? $valittu_query : "";
 
     echo "<form method='post'>";
-    echo "<input type='hidden' name='tee' value='aja_tallennettu_query'>";
     echo "<table>";
     echo "<tr>";
-    echo "<th>" . t("Aja tallennettu haku") . "</th>";
+    echo "<th>" . t("Tallennetut haut") . ":</th>";
     echo "<td>";
-    echo "<select name='valittu_query' onchange='submit()'>";
+    echo "<select name='valittu_query' onchange='submit();'>";
+    echo "<option value=''>".t("Valitse")."</option>";
 
     while ($muisti_row = mysql_fetch_assoc($muisti_result)) {
       $sel = $muisti_row["nimi"] == $valittu_query ? "selected" : "";
@@ -112,7 +115,7 @@ if ($tee == "") {
     echo "</select>";
     echo "</td>";
     echo "<td>";
-    echo "<input type='submit' value='" . t("Aja") . "'";
+    echo "<input type='submit' value='" . t("Valitse") . "'";
     echo "</td>";
     echo "</tr>";
     echo "</table>";
@@ -124,25 +127,40 @@ if ($tee == "") {
   $sqlhaku = stripslashes(strtolower(trim($sqlhaku)));
 
   // laitetaan aina kuudes merkki spaceks.. safetymeasure ni ei voi olla ku select
-  if (substr($sqlhaku, 6, 1) != " ") {
+  if (!empty($sqlhaku) and substr($sqlhaku, 6, 1) != " ") {
     $sqlhaku = substr($sqlhaku, 0, 6)." ".substr($sqlhaku, 6);
   }
 
   echo "<form name='sql' method='post' autocomplete='off'>";
+
+  if (!empty($valittu_query)) {
+    echo "<input type='hidden' name='valittu_query' value='$valittu_query'>";
+  }
+
+  if ($toim == "SUPER") {
+    if (isset($error) and !empty($error)) {
+      echo "<span class='error'>{$error}</span><br><br>";
+    }
+
+    if (isset($success) and !empty($success)) {
+      echo "<span class='ok'>{$success}</span><br><br>";
+    }
+  }
+
   echo "<table>";
   echo "<tr><th>".t("Syötä SQL kysely")."</th></tr>";
   echo "<tr><td><textarea id='query_kentta' cols='100' rows='15' rows='15' name='sqlhaku' style='font-family:\"Courier New\",Courier'>$sqlhaku</textarea></td></tr>";
-  echo "<tr><td class='back'><input type='submit' value='".t("Suorita")."'></td></tr>";
+  echo "<tr><td class='back'><input type='submit' name='suoritanappi' value='".t("Suorita")."'></td></tr>";
   echo "</table>";
   echo "</form>";
 
   // eka sana pitää olla select... safe enough kai.
-  if (substr($sqlhaku, 0, strpos($sqlhaku, " ")) != 'select') {
+  if (!empty($sqlhaku) and substr($sqlhaku, 0, strpos($sqlhaku, " ")) != 'select') {
     echo "<font class='error'>".t("Ainoastaan SELECT lauseet sallittu")."!</font><br>";
     $sqlhaku = "";
   }
 
-  if ($sqlhaku != '') {
+  if ($sqlhaku != '' and isset($suoritanappi)) {
 
     $result = pupe_query($sqlhaku);
 
@@ -152,9 +170,9 @@ if ($tee == "") {
 
       include 'inc/pupeExcel.inc';
 
-      $worksheet    = new pupeExcel();
+      $worksheet   = new pupeExcel();
       $format_bold = array("bold" => TRUE);
-      $excelrivi    = 0;
+      $excelrivi   = 0;
       $sarakemaara = mysql_num_fields($result);
 
       for ($i=0; $i < $sarakemaara; $i++) $worksheet->write($excelrivi, $i, ucfirst(t(mysql_field_name($result, $i))), $format_bold);
@@ -181,7 +199,7 @@ if ($tee == "") {
       $excelnimi = $worksheet->close();
 
       echo "<br><br><table>";
-      echo "<tr><th>".t("Tallenna tulos").":</th><td class='back'>";
+      echo "<tr><th>".t("Tallenna Excel").":</th><td class='back'>";
       echo "<form method='post' class='multisubmit'>";
       echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
       echo "<input type='hidden' name='kaunisnimi' value='SQLhaku.xlsx'>";
@@ -190,14 +208,6 @@ if ($tee == "") {
       echo "</table><br>";
 
       if ($toim == "SUPER") {
-        if (isset($error) and !empty($error)) {
-          echo "<span class='error'>{$error}</span>";
-        }
-
-        if (isset($success) and !empty($success)) {
-          echo "<span class='ok'>{$success}</span>";
-        }
-
         echo "<script>";
         echo "$(function() {
                 'use strict';
@@ -284,5 +294,5 @@ if ($tee == "") {
     $kentta = "sqlhaku";
   }
 
-  require "../inc/footer.inc";
+  require "inc/footer.inc";
 }

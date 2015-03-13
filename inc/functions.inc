@@ -8079,7 +8079,7 @@ if (!function_exists("hae_muisti")) {
 }
 
 if (!function_exists("muistiin")) {
-  function muistiin($muisti, $nimi, $muistettava, $exclude = "") {
+  function muistiin($muisti, $nimi, $muistettava, $exclude = "", $kuvaus = "") {
     global $kukarow;
 
     if ($muisti == "" or $nimi == "" or !is_array($muistettava)) {
@@ -8112,11 +8112,14 @@ if (!function_exists("muistiin")) {
 
         $value = mysql_real_escape_string($value);
 
+        $kuvauslisa = empty($kuvaus) ? "" : "kuvaus = '{$kuvaus}',";
+
         $query = "INSERT INTO muisti SET
                   yhtio      = '$kukarow[yhtio]',
                   kuka       = '$kukarow[kuka]',
                   haku       = '$muisti',
                   nimi       = '$nimi',
+                  {$kuvauslisa}
                   var        = '$key',
                   value      = '$value',
                   array      = '$array',
@@ -8133,7 +8136,7 @@ if (!function_exists("muistiin")) {
 }
 
 if (!function_exists("muistista")) {
-  function muistista($muisti, $nimi, $tarkista_kuka = true) {
+  function muistista($muisti, $nimi, $tarkista_kuka = true, $kuvaus_mukaan = false) {
     global $kukarow;
 
     $kuka_lisa = $tarkista_kuka ? "AND kuka = '{$kukarow["kuka"]}'" : "";
@@ -8158,6 +8161,10 @@ if (!function_exists("muistista")) {
       }
       else {
         $retval[$row["var"]] = stripslashes($row["value"]);
+      }
+
+      if ($kuvaus_mukaan) {
+        $retval["kuvaus"] = $row["kuvaus"];
       }
     }
 

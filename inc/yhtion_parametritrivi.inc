@@ -4535,7 +4535,7 @@ if ($fieldname == "tilausrivin_korvamerkinta") {
 }
 
 if ($fieldname == "tilausrivin_kateraja") {
-  $ulos = "<td><input type='number' min='0' max='100' name='{$nimi}'></td>";
+  $ulos = "<td><input type='number' min='0' max='100' name='{$nimi}' value='{$trow[$i]}'></td>";
 
   $jatko = 0;
 }

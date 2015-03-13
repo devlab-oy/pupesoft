@@ -9,12 +9,13 @@ $varastot_array = sallitut_varastot($params);
 
 //sisään tulee $row jossa on tilausrivi kaikki tiedot
 
-$riviok               = 0;
-$saako_hyvaksya       = 0;
-$saako_jalkitoimittaa = 0;
-$vastaavattuotteet    = 0;
-$varaosavirhe         = "";
-$vastaavat_html       = "";
+$riviok                         = 0;
+$saako_hyvaksya                 = 0;
+$ei_saa_hyvaksya_kaikkia_riveja = 0;
+$saako_jalkitoimittaa           = 0;
+$vastaavattuotteet              = 0;
+$varaosavirhe                   = "";
+$vastaavat_html                 = "";
 
 pupeslave_start();
 
@@ -143,6 +144,7 @@ if ($tilausrivin_kateraja > 0 and
 ) {
   $varaosavirhe .= t("HUOM: Kate alhainen!");
   $riviok++;
+  $ei_saa_hyvaksya_kaikkia_riveja++;
   $tilausok++;
   $saako_hyvaksya++;
 }

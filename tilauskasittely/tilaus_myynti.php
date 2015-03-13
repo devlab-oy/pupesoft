@@ -10046,7 +10046,7 @@ if ($tee == '') {
       $projektilask = 0;
     }
 
-    if (isset($saako_hyvaksya) and $saako_hyvaksya > 0) {
+    if (isset($saako_hyvaksya) and $saako_hyvaksya > 0 and $ei_saa_hyvaksya_kaikkia_riveja < 1) {
       echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php' name='hyvaksy'>
           <input type='hidden' name='toim'       value = '{$toim}'>
           <input type='hidden' name='lopetus'     value = '{$lopetus}'>

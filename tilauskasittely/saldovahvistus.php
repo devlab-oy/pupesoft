@@ -589,7 +589,7 @@ function echo_saldovahvistus_rivi($saldovahvistusrivi, $request, $valitut = fals
   // .nayta_pdf_td ja .lasku_tunnus, jotta .saldovahvistus_rivi_valinta löytää lasku_tunnukset, jotka lähtee ajaxin mukana
   echo "<td class='back nayta_pdf_td'>";
   echo "<form method='POST' action='' id='{$_id}' name='{$_id}' autocomplete='off'>";
-  echo "<input type='submit' value='{$request["t"]["nayta_pdf"]}' onClick=\"js_openFormInNewWindow('{$_id}}', '{$_id}'); return false;\">";
+  echo "<input type='submit' value='{$request["t"]["nayta_pdf"]}' onClick=\"js_openFormInNewWindow('{$_id}', '{$_id}'); return false;\">";
   echo "<input type='hidden' name='tee' value='NAYTATILAUS' />";
   echo "<input type='hidden' name='nayta_pdf' value='1' />";
   echo "<input type='hidden' name='pp' value='{$request['pp']}' />";

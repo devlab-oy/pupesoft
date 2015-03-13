@@ -2777,12 +2777,26 @@ if ($tee == '') {
           echo "<input {$style} type='submit' value='".t("Siirrä tuotteet asiakashinnoiksi")."'>";
 
       if ($yhtiorow["myynti_asiakhin_tallenna"] == "V") {
-        echo "<select id='asiakas_hinta_liitos' name='asiakas_hinta_liitos'>
-                <option value='liitostunnus'>" . t("Asiakkaan tunnuksella") . "</option>
-                <option value='ytunnus'>" . t("Y-tunnuksella") . "</option>
-                <option value='asiakasryhma'>" . t("Asiakasryhmälle") . "</option>
-                <option value='piiri'>" . t("Piirille") . "</option>
-              </select>";
+        $mahdolliset_liitokset = array(
+          "liitostunnus" => "Asiakkaan tunnuksella",
+          "ytunnus"      => "Y-tunnuksella"
+        );
+
+        if (!empty($asiakasrow["ryhma"])) {
+          $mahdolliset_liitokset["asiakasryhma"] = "Asiakasryhmälle";
+        }
+
+        if (!empty($asiakasrow["piiri"])) {
+          $mahdolliset_liitokset["piiri"] = "Piirille";
+        }
+
+        echo "<select id='asiakas_hinta_liitos' name='asiakas_hinta_liitos'>";
+
+        foreach ($mahdolliset_liitokset as $liitos => $teksti) {
+          echo "<option value='{$liitos}'>" . t($teksti) . "</option>";
+        }
+
+        echo "</select>";
       }
 
           echo "</form>";

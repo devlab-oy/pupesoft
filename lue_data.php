@@ -1476,11 +1476,31 @@ if ($kasitellaan_tiedosto) {
           $query = "DELETE LOW_PRIORITY FROM $table_mysql ";
         }
 
+        $asiakashinta_liitos_count = 0;
+        $asiakashinta_liitos_virhe = "<font class='error'>" .
+                                     t("Valitse vain asiakas, ytunnus, asiakasryhmä, " .
+                                       "asiakassegmentti tai piiri") . "!</font><br>";
+        $asiakas_liitokset = array("ASIAKAS", "YTUNNUS", "ASIAKAS_RYHMA", "ASIAKAS_SEGMENTTI",
+                                   "PIIRI");
+
         foreach ($taulunotsikot[$taulu] as $r => $otsikko) {
 
           //  Näitä ei koskaan lisätä
           if (is_array($apu_sarakkeet) and in_array($otsikko, $apu_sarakkeet)) {
             continue;
+          }
+
+          if ($table_mysql == "asiakashinta") {
+            if (in_array($otsikko, $asiakas_liitokset) and
+                !empty($taulunrivit[$taulu][$eriviindex][$r])
+            ) {
+              if ($asiakashinta_liitos_count > 0) {
+                lue_data_echo($asiakashinta_liitos_virhe);
+                $hylkaa++;
+              }
+
+              $asiakashinta_liitos_count++;
+            }
           }
 
           if ($r != $postoiminto) {

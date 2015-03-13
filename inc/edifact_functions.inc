@@ -1491,8 +1491,6 @@ function kasittele_bookkaussanoma($edi_data) {
     }
   }
 
-  $tarvitaan_uusi_tilaus = true;
-
   if (mysql_num_rows($result) == 0 or $tarvitaan_uusi_tilaus) {
 
     require_once "tilauskasittely/luo_myyntitilausotsikko.inc";
@@ -3647,7 +3645,12 @@ function toimittajat($rivitarkastus = false) {
 
   }
 
-  return $toimittajat;
+  if (count($toimittajat) < 1) {
+    return false;
+  }
+  else {
+    return $toimittajat;
+  }
 }
 
 

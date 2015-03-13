@@ -26843,7 +26843,7 @@ if (!function_exists('posten_outbounddelivery')) {
               tuote.eankoodi
               FROM lasku
               LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-              JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND (tilausrivi.varattu+tilausrivi.tilkpl) > 0 AND tilausrivi.tyyppi IN ('L', 'G'))
+              JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND (tilausrivi.varattu+tilausrivi.kpl) > 0 AND tilausrivi.tyyppi IN ('L', 'G'))
               JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND lasku.tunnus  = '{$otunnus}'";
@@ -26936,10 +26936,10 @@ if (!function_exists('posten_outbounddelivery')) {
       $line->addChild('Type', 1);
       $line->addChild('BBDate', 0);
 
-      if ($looprow["mapvm"] != '' and $looprow["mapvm"] != '0000-00-00') {
-        //Verkkokaupassa etukäteen maksettu tuote
-        $line->addChild('OrderedQuantity', $looprow['tilkpl']);
-        $line->addChild('DeliveredQuantity', $looprow['tilkpl']);
+      if ($looprow["alatila"] == 'X') {
+        //HAlutaan lähettää laskutettukin myyntitilaus jostain syystä uudelleen
+        $line->addChild('OrderedQuantity', $looprow['kpl']);
+        $line->addChild('DeliveredQuantity', $looprow['kpl']);
       }
       else {
         $line->addChild('OrderedQuantity', $looprow['varattu']);

@@ -1941,8 +1941,8 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
 }
 
 if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
-  and ($tee == 'VALMIS_VAINSALDOTTOMIA' or $tee == 'VALMIS')
-  and ($yhtiorow['reklamaation_kasittely'] == 'U' or 
+  and ($tee == 'VALMIS_VAINSALDOTTOMIA' or $tee == 'VALMIS') and
+  ($yhtiorow['reklamaation_kasittely'] == 'U' or 
   ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U'))) {
   // Reklamaatio/takuu on valmis laskutettavaksi
   // katsotaan onko tilausrivit Unikko-j‰rjestelm‰‰n
@@ -9757,7 +9757,8 @@ if ($tee == '') {
       elseif ($maksuehtorow['jaksotettu'] != '' and mysql_num_rows($jaksoresult) == 0) {
         echo "<font class='error'>".t("VIRHE: Tilauksella ei ole maksusopimusta!")."</font>";
       }
-      elseif ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and ($yhtiorow['reklamaation_kasittely'] == 'U' or 
+      elseif ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and 
+      ($yhtiorow['reklamaation_kasittely'] == 'U' or 
       ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U'))) {
 
         $napin_teksti = $laskurow['tilaustyyppi'] == 'U' ? "Takuu" : "Reklamaatio";
@@ -9831,7 +9832,8 @@ if ($tee == '') {
           echo "</form></td>";
         }
       }
-      elseif ($kukarow['tilaus_valmis'] != "4" and ($toim != 'REKLAMAATIO' or ($yhtiorow['reklamaation_kasittely'] != 'U' and 
+      elseif ($kukarow['tilaus_valmis'] != "4" and ($toim != 'REKLAMAATIO' or 
+      ($yhtiorow['reklamaation_kasittely'] != 'U' and 
       ($yhtiorow['reklamaation_kasittely'] != 'X' or $laskurow['tilaustyyppi'] == 'U')) )) {
 
         if (($kateinen == "X" and $kukarow["kassamyyja"] != "") or $laskurow["sisainen"] != "") {

@@ -61,9 +61,14 @@ if [ ! -d ${BACKUPDIR} ]; then
   exit
 fi
 
-TMPBACKUPDIR="/tmp/pupe_backup"
+# Jos /home:n alta löytyy tmp-kansio, niin käytetään sitä
+if [ -d "/home/tmp" ]; then
+  TMPBACKUPDIR="/home/tmp/pupe_backup"
+else
+  TMPBACKUPDIR="/tmp/pupe_backup"
+fi
 
-# Jos temppikansio löytyy, nin dellataan
+# Jos temppikansio löytyy, niin dellataan
 if [ -d ${TMPBACKUPDIR} ]; then
   rm -rf ${TMPBACKUPDIR}
 fi

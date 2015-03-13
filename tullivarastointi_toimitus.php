@@ -92,10 +92,9 @@ if (isset($task) and $task == 'hae_toimitusrivit') {
   $toimittaja = mysql_fetch_assoc($result);
 
   $query = "SELECT
-            lasku.asiakkaan_tilausnumero AS tulonumero,
-            group_concat(tilausrivi.nimitys SEPARATOR '<br>') AS nimitykset,
-            group_concat(tuote.malli SEPARATOR '<br>') AS mallit,
-            group_concat(tilausrivi.tilkpl SEPARATOR '<br>') AS kpl,
+            tilausrivi.nimitys,
+            tuote.malli,
+            SUM(tilausrivi.tilkpl) AS kpl,
             lasku.tunnus AS toimitustunnus
             FROM lasku
             JOIN tilausrivi
@@ -109,15 +108,19 @@ if (isset($task) and $task == 'hae_toimitusrivit') {
             AND lasku.tila != 'D'
             AND lasku.ytunnus = '{$toimittaja['ytunnus']}'
             AND lasku.nimi = '{$toimittaja['nimi']}'
-            GROUP BY toimitustunnus";
+            GROUP BY toimitustunnus, nimitys, malli";
     $result = pupe_query($query);
+
 
   if (mysql_num_rows($result) > 0) {
 
-    $toimitusrivit = array();
+    $toimitukset = array();
+
 
     while ($rivi = mysql_fetch_assoc($result)) {
-      $toimitusrivit[] = $rivi;
+
+      $toimitukset[$rivi['toimitustunnus']][] = $rivi;
+
     }
   }
   else {
@@ -125,11 +128,6 @@ if (isset($task) and $task == 'hae_toimitusrivit') {
     $task = 'hae_tulorivit';
   }
 }
-
-
-
-
-
 
 if (isset($task) and $task == 'hae_tulorivit') {
 
@@ -234,36 +232,45 @@ echo "<font class='head'>{$otsikko}</font><hr><br>";
 
 if (empty($toimittajatunnus)) {
 
-  echo "<form method='post'>";
-  echo "<input type='hidden' name='task' value='hae_toimitusrivit' />";
-  echo "<table><tr>";
-  echo "<th>" .t("Valitse toimittaja"). "</th>";
-  echo "<td>";
 
-  $toimittajat = toimittajat(TRUE);
 
-  echo "<select name='toimittajatunnus' onchange='submit();'>
-      <option value='X'>" . t("Valitse toimittaja") ."</option>";
+  if ($toimittajat = toimittajat(true)) {
 
-      foreach ($toimittajat as $tunnus => $nimi) {
+    echo "<form method='post'>";
+    echo "<input type='hidden' name='task' value='hae_toimitusrivit' />";
+    echo "<table><tr>";
+    echo "<th>" .t("Valitse toimittaja"). "</th>";
+    echo "<td>";
 
-        if ($tunnus == $toimittajatunnus) {
-          $selected = 'selected';
+    echo "<select name='toimittajatunnus' onchange='submit();'>
+        <option value='X'>" . t("Valitse toimittaja") ."</option>";
+
+        foreach ($toimittajat as $tunnus => $nimi) {
+
+          if ($tunnus == $toimittajatunnus) {
+            $selected = 'selected';
+          }
+          else {
+            $selected = '';
+          }
+
+          echo "<option value='{$tunnus}' {$selected}>{$nimi}</option>";
         }
-        else {
-          $selected = '';
-        }
 
-        echo "<option value='{$tunnus}' {$selected}>{$nimi}</option>";
-      }
-
-      echo "</select>";
+        echo "</select>";
 
 
-  echo "</td><td class='back'></td></tr>";
+    echo "</td><td class='back'></td></tr>";
 
-  echo "</table>";
-  echo "</form>";
+    echo "</table>";
+    echo "</form>";
+  }
+  else {
+
+    echo "<font class='message'>";
+    echo t("Ei löytynyt mitään toimitettavaa!");
+    echo "</font><br><br>";
+  }
 }
 else {
 
@@ -305,7 +312,7 @@ else {
 }
 
 
-if (isset($toimitusrivit) and count($toimitusrivit) > 0) {
+if (isset($toimitukset) and count($toimitukset) > 0) {
 
   echo "<br><font class='message'>";
   echo t("Valitse keskeneräinen toimitus tai perusta uusi.");
@@ -315,19 +322,30 @@ if (isset($toimitusrivit) and count($toimitusrivit) > 0) {
   echo "
   <tr>
     <th>" . t("Toimitusnumero") ."</th>
-    <th>" . t("Nimitykset") ."</th>
-    <th>" . t("mallit") ."</th>
+    <th>" . t("Tuotteet") ."</th>
+    <th>" . t("Mallit") ."</th>
     <th>" . t("kpl") ."</th>
     <th class='back'></th>
   </tr>";
 
-  foreach ($toimitusrivit as $toimitusrivi) {
+  foreach ($toimitukset as $tunnus => $toimitusrivit) {
+
+    $nimitykset = '';
+    $mallit = '';
+    $kappaleet = '';
+
+    foreach ($toimitusrivit as $toimitusrivi) {
+      $nimitykset .= $toimitusrivi['nimitys'] . "<br>";
+      $mallit .= $toimitusrivi['nimitys'] . "<br>";
+      $kappaleet .= $toimitusrivi['kpl'] . "<br>";
+    }
+
     echo "
       <tr>
-      <td valign='top' align='center'>" . $toimitusrivi['toimitustunnus'] ."</td>
-      <td valign='top' align='center'>" . $toimitusrivi['nimitykset'] ."</td>
-      <td valign='top' align='center'>" . $toimitusrivi['mallit'] ."</td>
-      <td valign='top' align='center'>" . $toimitusrivi['kpl'] ."</td>
+      <td valign='top' align='center'>" . $tunnus ."</td>
+      <td valign='top' align='center'>" . $nimitykset ."</td>
+      <td valign='top' align='center'>" . $mallit ."</td>
+      <td valign='top' align='center'>" . $kappaleet ."</td>
       <td  valign='bottom' class='back'>";
 
       echo "

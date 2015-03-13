@@ -2842,7 +2842,7 @@ else {
                   if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";
 
                   if (isset($worksheet)) {
-                    $worksheet->write($excelrivi, $excelsarake++, $vsum);
+                    $worksheet->writeNumber($excelrivi, $excelsarake++, $vsum);
                   }
                 }
 
@@ -3476,7 +3476,7 @@ else {
               if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";
 
               if (isset($worksheet)) {
-                $worksheet->write($excelrivi, $excelsarake++, $vsum);
+                $worksheet->writeNumber($excelrivi, $excelsarake++, $vsum);
               }
             }
 

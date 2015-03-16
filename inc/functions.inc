@@ -8079,7 +8079,7 @@ if (!function_exists("hae_muisti")) {
 }
 
 if (!function_exists("muistiin")) {
-  function muistiin($muisti, $nimi, $muistettava, $exclude = "") {
+  function muistiin($muisti, $nimi, $muistettava, $exclude = "", $kuvaus = "") {
     global $kukarow;
 
     if ($muisti == "" or $nimi == "" or !is_array($muistettava)) {
@@ -8112,11 +8112,14 @@ if (!function_exists("muistiin")) {
 
         $value = mysql_real_escape_string($value);
 
+        $kuvauslisa = empty($kuvaus) ? "" : "kuvaus = '{$kuvaus}',";
+
         $query = "INSERT INTO muisti SET
                   yhtio      = '$kukarow[yhtio]',
                   kuka       = '$kukarow[kuka]',
                   haku       = '$muisti',
                   nimi       = '$nimi',
+                  {$kuvauslisa}
                   var        = '$key',
                   value      = '$value',
                   array      = '$array',
@@ -8133,7 +8136,7 @@ if (!function_exists("muistiin")) {
 }
 
 if (!function_exists("muistista")) {
-  function muistista($muisti, $nimi, $tarkista_kuka = true) {
+  function muistista($muisti, $nimi, $tarkista_kuka = true, $kuvaus_mukaan = false) {
     global $kukarow;
 
     $kuka_lisa = $tarkista_kuka ? "AND kuka = '{$kukarow["kuka"]}'" : "";
@@ -8158,6 +8161,10 @@ if (!function_exists("muistista")) {
       }
       else {
         $retval[$row["var"]] = stripslashes($row["value"]);
+      }
+
+      if ($kuvaus_mukaan) {
+        $retval["kuvaus"] = $row["kuvaus"];
       }
     }
 
@@ -30992,3 +30999,33 @@ if (!function_exists("laske_tilausrivin_kate")) {
 }
 
 
+
+if (!function_exists("choose_correct_date")) {
+  function choose_correct_date($date) {
+    global $kukarow, $yhtiorow;
+
+    if (trim($date) == "") {
+      return '';
+    }
+
+    // Päivämäärä oli ymmärrettävässä muodossa
+    if (strtotime($date) !== false) {
+      // Palautetaan Y-m-d
+      return date('Y-m-d', strtotime($date));
+    }
+
+    // Excelissä date voi tulla integerinä
+    if (is_numeric($date)) {
+      /*  the date fields have integers that are the amount of days from 1900-00-00 */
+      return date('Y-m-d', mktime(0, 0, 0, 1, $date - 1, 1900));
+    }
+
+    // Ei osattu valita sopivaa päivää
+    echo "<font class='error'>";
+    echo t("Virheellinen päivämäärä");
+    echo " \"{$date}\"";
+    echo "</font><br>";
+
+    return '';
+  }
+}

@@ -489,7 +489,8 @@ if (isset($view) and $view == "perus") {
               AND tuote.tuoteno = tilausrivi.tuoteno
             WHERE lasku.yhtio = 'rplog'
             AND viesti = 'tullivarasto'
-            GROUP BY lasku.tunnus, tilausrivi.tunnus";
+            GROUP BY lasku.tunnus, tilausrivi.tunnus
+            ORDER BY lasku.tunnus DESC";
   $result = pupe_query($query);
 
   $tulot = array();
@@ -511,6 +512,12 @@ if (isset($view) and $view == "perus") {
     $tuotteet[$tulo['asiakkaan_tilausnumero']]['toimaika'] = $tulo['toimaika'];
 
   }
+
+  echo "
+    <form>
+    <input type='hidden' name='task' value='aloita_perustus' />
+    <input type='submit' value='". t("Perusta uusi tulonumero") . "' />
+    </form><br><br>";
 
   echo "<table>";
   echo "<tr>";
@@ -635,12 +642,6 @@ if (isset($view) and $view == "perus") {
   }
   echo "</table>";
 
-
-  echo "<br>
-    <form>
-    <input type='hidden' name='task' value='aloita_perustus' />
-    <input type='submit' value='". t("Perusta uusi tulonumero") . "' />
-    </form><br><br>";
 }
 
 

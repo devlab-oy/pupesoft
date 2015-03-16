@@ -294,6 +294,7 @@ if (isset($task) and ($task == 'ylijaamakasittely')) {
               AND trlt.tilausrivitunnus = tilausrivi.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tilaustyyppi = 'N'
+            AND lasku.sisviesti1 != 'konttiviitelasku'
             AND laskun_lisatiedot.satamavahvistus_pvm = '0000-00-00 00:00:00'
             GROUP BY lasku.asiakkaan_tilausnumero
             ORDER BY trlt.asiakkaan_tilausnumero";

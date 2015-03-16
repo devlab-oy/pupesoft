@@ -30866,7 +30866,7 @@ if (!function_exists('tee_palautustilaus')) {
 
     // Yht‰‰n rivi‰ ei ole
     if (mysql_num_rows($keres) == 0) {
-      return false
+      return false;
     }
     else {
 

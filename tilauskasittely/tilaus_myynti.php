@@ -1858,8 +1858,8 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
 }
 
 if ($kukarow["extranet"] == "" and ((($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == "LEPAA") or ($toim == "REKLAMAATIO" and $tee == "LEPAA" and 
-  ($yhtiorow['reklamaation_kasittely'] != 'U' and 
-  ($yhtiorow['reklamaation_kasittely'] != 'X' or $laskurow['tilaustyyppi'] == 'U'))))) {
+  ($yhtiorow['reklamaation_kasittely'] == '' or 
+  ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] == 'U'))))) {
   require "tyomaarays/tyomaarays.inc";
 }
 
@@ -9833,8 +9833,8 @@ if ($tee == '') {
         }
       }
       elseif ($kukarow['tilaus_valmis'] != "4" and ($toim != 'REKLAMAATIO' or 
-      ($yhtiorow['reklamaation_kasittely'] != 'U' and 
-      ($yhtiorow['reklamaation_kasittely'] != 'X' or $laskurow['tilaustyyppi'] == 'U')) )) {
+      ($yhtiorow['reklamaation_kasittely'] == '' or 
+      ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] == 'U')) )) {
 
         if (($kateinen == "X" and $kukarow["kassamyyja"] != "") or $laskurow["sisainen"] != "") {
           $laskelisa = " / ".t("Laskuta")." $otsikko";

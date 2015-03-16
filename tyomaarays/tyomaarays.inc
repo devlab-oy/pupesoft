@@ -346,7 +346,14 @@ if (($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == 'VALMI
 
 if ($toim == "REKLAMAATIO" and $tee == 'VALMIS') {
 
-  tee_palautustilaus($laskurow);
+  if (!tee_palautustilaus($laskurow)) {
+    $query = "UPDATE lasku SET alatila='X' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+    $result = pupe_query($query);
+
+    // tilaus ei en‰‰ kesken...
+    $query  = "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
+    $result = pupe_query($query);
+  }
 
   $query  = "UPDATE lasku
              SET tila = 'L'

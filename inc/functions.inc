@@ -30866,12 +30866,7 @@ if (!function_exists('tee_palautustilaus')) {
 
     // Yht‰‰n rivi‰ ei ole
     if (mysql_num_rows($keres) == 0) {
-      $query = "UPDATE lasku SET alatila='X' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
-      $result = pupe_query($query);
-
-      // tilaus ei en‰‰ kesken...
-      $query  = "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
-      $result = pupe_query($query);
+      return false
     }
     else {
 
@@ -30900,6 +30895,8 @@ if (!function_exists('tee_palautustilaus')) {
         }
       }
     }
+
+    return true;
   }
 }
 

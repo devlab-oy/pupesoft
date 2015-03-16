@@ -100,7 +100,7 @@ if ($toim == "TARKKA") {
     echo "<tr>";
     echo "<th>";
     echo "<label for='kuluprosentti_{$osasto}'>" . t("Kuluprosentti osastolle") .
-         " {$osaston_nimi}</label>";
+      " {$osaston_nimi}</label>";
     echo "</th>";
     echo "<td>";
     echo "<input type='number' id='kuluprosentti_{$osasto}' name='kuluprosentti[{$osasto}]' min='0'

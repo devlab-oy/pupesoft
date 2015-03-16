@@ -70,7 +70,7 @@ if ($tee == "tee") {
 
   if ($yhtiorow["raaka_aine_tiliointi"] == "Y") {
     $tilinot = "'{$yhtiorow["varasto"]}', '{$yhtiorow["matkalla_olevat"]}', " .
-               "'{$yhtiorow["raaka_ainevarasto"]}'";
+      "'{$yhtiorow["raaka_ainevarasto"]}'";
     $muutostilinot = "'{$yhtiorow["varastonmuutos"]}', '{$yhtiorow["raaka_ainevarastonmuutos"]}'";
     $raaka_aine_teksti = ", {$yhtiorow["raaka_ainevarasto"]}";
   }
@@ -351,7 +351,7 @@ if ($tee == "tee") {
                  WHERE yhtio  = '$kukarow[yhtio]'
                  and ltunnus  = $trow[uusiotunnus]
                  and korjattu = ''
-                 and tilino  IN ({$muutostilinot})";
+                 and tilino   IN ({$muutostilinot})";
       $mres = pupe_query($query);
       $mrow = mysql_fetch_assoc($mres);
 

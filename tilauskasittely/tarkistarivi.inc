@@ -9,12 +9,13 @@ $varastot_array = sallitut_varastot($params);
 
 //sisään tulee $row jossa on tilausrivi kaikki tiedot
 
-$riviok               = 0;
-$saako_hyvaksya       = 0;
-$saako_jalkitoimittaa = 0;
-$vastaavattuotteet    = 0;
-$varaosavirhe         = "";
-$vastaavat_html       = "";
+$riviok                         = 0;
+$saako_hyvaksya                 = 0;
+$ei_saa_hyvaksya_kaikkia_riveja = 0;
+$saako_jalkitoimittaa           = 0;
+$vastaavattuotteet              = 0;
+$varaosavirhe                   = "";
+$vastaavat_html                 = "";
 
 pupeslave_start();
 
@@ -133,6 +134,19 @@ if (
     $tilausok++;
     $saako_hyvaksya++;
   }
+}
+
+$tilausrivin_kateraja = $yhtiorow["tilausrivin_kateraja"];
+$tilausrivin_kate = laske_tilausrivin_kate($row, $kotisumma_alviton, $row["kehahin"], $kpl, $arow);
+
+if ($tilausrivin_kateraja > 0 and
+  $tilausrivin_kate < $tilausrivin_kateraja and $row["var2"] != "OK"
+) {
+  $varaosavirhe .= t("HUOM: Kate alhainen!")."<br>";
+  $riviok++;
+  $ei_saa_hyvaksya_kaikkia_riveja++;
+  $tilausok++;
+  $saako_hyvaksya++;
 }
 
 if (in_array($row["var"], array('', 'H')) and $row["tyyppi"] != "E" and $row["tyyppi"] != "G") {
@@ -856,7 +870,7 @@ if (
   if ($_siirtolista_myyntitilaukselta and
     $_ei_ole_takuu and
     !in_array($toim, array("VALMISTAVARASTOON", "SIIRTOLISTA", "SIIRTOTYOMAARAYS", "REKLAMAATIO")) and
-    in_array($laskurow['tila'], array('N', 'T')) and 
+    in_array($laskurow['tila'], array('N', 'T')) and
     in_array($laskurow['alatila'], array('', 'F'))) {
 
     $sel4 = "";

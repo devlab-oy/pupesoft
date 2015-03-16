@@ -541,7 +541,7 @@ if ($tee == "HAE") {
           $txt = t($laskutyyppi)."\n".t($alatila)."\n".$tulrow['korvamerkinta'];
         }
         else {
-         $txt = t($laskutyyppi)."\n".t($alatila);
+          $txt = t($laskutyyppi)."\n".t($alatila);
         }
 
         $worksheet->write($excelrivi, $excelsarake, $txt, $format_bold);

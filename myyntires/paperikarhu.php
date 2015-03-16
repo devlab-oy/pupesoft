@@ -277,7 +277,7 @@ if (!function_exists("rivi")) {
                 FROM karhu_lasku
                 JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.tyyppi = '')
                 WHERE ltunnus = {$row['tunnus']}
-                AND ktunnus  <= $karhutunnus";
+                AND ktunnus   <= $karhutunnus";
       $karhukertares = pupe_query($query);
       $karhukertarow = mysql_fetch_assoc($karhukertares);
 
@@ -288,7 +288,7 @@ if (!function_exists("rivi")) {
                 FROM karhu_lasku
                 JOIN karhukierros ON (karhukierros.tunnus = karhu_lasku.ktunnus AND karhukierros.tyyppi = '')
                 WHERE ltunnus = {$row['tunnus']}
-                AND ktunnus  < $karhutunnus";
+                AND ktunnus   < $karhutunnus";
       $karhukertares = pupe_query($query);
       $karhukertarow = mysql_fetch_assoc($karhukertares);
 

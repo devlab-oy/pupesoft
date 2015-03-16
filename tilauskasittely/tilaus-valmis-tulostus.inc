@@ -51,7 +51,7 @@ else {
   $siirtoalatila = "KJ";
 }
 
-if ($toim == 'VASTAANOTA_REKLAMAATIO' and in_array($yhtiorow['reklamaation_kasittely'], array('U','X'))) {
+if ($toim == 'VASTAANOTA_REKLAMAATIO' and in_array($yhtiorow['reklamaation_kasittely'], array('U', 'X'))) {
   $queryc = "SELECT sum(if(tila='C' and alatila='B', 1, 0)) ok, count(*) kaikki
              FROM lasku
              WHERE tunnus in ($tilausnumeroita)
@@ -88,7 +88,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
   }
 
   // P‰ivitet‰‰n tilaus pois jonosta ja avataan lukot
-  if ($toim == 'VASTAANOTA_REKLAMAATIO' and in_array($yhtiorow['reklamaation_kasittely'], array('U','X'))) {
+  if ($toim == 'VASTAANOTA_REKLAMAATIO' and in_array($yhtiorow['reklamaation_kasittely'], array('U', 'X'))) {
     $query = "UPDATE lasku SET
               alatila     = 'C',
               lahetepvm   = now(),
@@ -511,7 +511,7 @@ if ((int) $chk_row["ok"] == (int) $chk_row["kaikki"] and (int) $chk_row["ok"] !=
     echo "<br><font class='error'>".t("L‰hetteen tulostus ep‰onnistui")."! ".t("Tilaus")." $laskurow[tunnus] ".t("siirrettiin tulostusjonoon").". ".t("K‰y tulostamassa l‰hete tulostusjonosta").": <a href='lahetteen_tulostusjono.php'>".t("Tulostusjono")."</a>.</font><br><br>";
     $virheellinen = "X";
 
-    if ($toim == 'VASTAANOTA_REKLAMAATIO' and in_array($yhtiorow['reklamaation_kasittely'], array('U','X'))) {
+    if ($toim == 'VASTAANOTA_REKLAMAATIO' and in_array($yhtiorow['reklamaation_kasittely'], array('U', 'X'))) {
       $query = "UPDATE lasku SET
                 alatila     = 'B',
                 lahetepvm   = '0000-00-00 00:00:00',

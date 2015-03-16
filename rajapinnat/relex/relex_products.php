@@ -183,7 +183,7 @@ if ($_tuoterajaus) {
   $query = "SELECT $select_lisa tuote.tuoteno, yhtio.maa
             FROM tuote
             JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
-            WHERE tuote.yhtio     = '{$yhtio}'
+            WHERE tuote.yhtio = '{$yhtio}'
             {$_tuoterajaus}
             {$tuoteupdrajaus}";
   $res = pupe_query($query);
@@ -243,7 +243,7 @@ if ($paiva_ajo) {
 
   $query = "SELECT tuote.tuoteno
             FROM tuote
-            WHERE tuote.yhtio     = '{$yhtio}'
+            WHERE tuote.yhtio = '{$yhtio}'
             {$tuoterajaus}
             {$tuoteupdrajaus}";
   $res = pupe_query($query);
@@ -254,8 +254,8 @@ if ($paiva_ajo) {
 
   $query = "SELECT tuotteen_toimittajat.tuoteno
             FROM tuotteen_toimittajat
-            WHERE tuotteen_toimittajat.yhtio    = '{$yhtio}'
-            AND tuotteen_toimittajat.tuoteno    not in ($tuotelista)
+            WHERE tuotteen_toimittajat.yhtio = '{$yhtio}'
+            AND tuotteen_toimittajat.tuoteno not in ($tuotelista)
             {$tuotetoimupdrajaus}";
   $res = pupe_query($query);
 
@@ -470,7 +470,7 @@ while ($row = mysql_fetch_assoc($res)) {
     $query = "SELECT yk_nro
               FROM vak
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus = {$row['vakkoodi']}";
+              AND tunnus  = {$row['vakkoodi']}";
     $vak_res = pupe_query($query);
     $vak_row = mysql_fetch_assoc($vak_res);
   }
@@ -653,7 +653,7 @@ while ($row = mysql_fetch_assoc($res)) {
       $ostohinta_netto = $ostohinta;
 
       // lisätään kuluprosentti hintaan jos sitä käytetään saapumisellakin
-      if (in_array($yhtiorow['jalkilaskenta_kuluperuste'], array('KP','VS'))) {
+      if (in_array($yhtiorow['jalkilaskenta_kuluperuste'], array('KP', 'VS'))) {
         $ostohinta_netto = $ostohinta_netto * (1 + ($ttrow['oletus_kulupros'] / 100));
       }
 
@@ -713,8 +713,8 @@ while ($row = mysql_fetch_assoc($res)) {
     if ($parastoimittaja['jarjestys'] != 1) {
 
       array_multisort($toimittajat_a_hinta, SORT_ASC, $toimittajat_a);
-      
-      // jos parastoimittajan järjestys on 2 eli "ehdollinen päätoimittaja", 
+
+      // jos parastoimittajan järjestys on 2 eli "ehdollinen päätoimittaja",
       // katsotaan onko halvin toimittaja yli 5% halvempi ja jos, niin käytetään sitä
       if ($parastoimittaja['jarjestys'] == 2) {
         if ($parastoimittaja['ostohinta_oletusvaluutta_netto'] > ($toimittajat_a[0]['ostohinta_oletusvaluutta_netto'] * 1.05)) {

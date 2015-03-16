@@ -1292,9 +1292,9 @@ if ($tee == 'P' or $tee == 'E') {
         <table>";
 
       $query = "SELECT DISTINCT koodi, nimi
-                  FROM maat
-                  WHERE nimi != ''
-                  ORDER BY koodi";
+                FROM maat
+                WHERE nimi != ''
+                ORDER BY koodi";
       $vresult = pupe_query($query);
 
       echo "<tr><th valign='top'> ".t("Maa").": </th>

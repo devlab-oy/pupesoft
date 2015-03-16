@@ -3571,7 +3571,6 @@ function varastotilanne($hetki = false) {
             AND ss.varasto IS NOT NULL
             AND otr.toimitettuaika <= '{$hetki}'
             AND ((mtr.toimitettuaika >= '{$hetki}' OR mtr.toimitettuaika = '0000-00-00 00:00:00') OR mtr.toimitettuaika IS NULL)
-            GROUP BY mtrlt.tunnus
             ORDER BY ss.hyllyalue, CAST(ss.hyllynro AS SIGNED INTEGER) ASC";
   $result = pupe_query($query);
 

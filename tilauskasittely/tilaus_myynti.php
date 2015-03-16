@@ -1915,6 +1915,8 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
             $alatila_lisa";
   $result = pupe_query($query);
 
+  tee_palautustilaus($laskurow);
+
   $query  = "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and kesken = '$tilausnumero'";
   $result = pupe_query($query);
 
@@ -1924,8 +1926,6 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
   else {
     echo "<font class='message'>".t("Reklamaatio: %s kuitattu vastaanotetuksi", '', $tilausnumero).".</font><br><br>";
   }
-
-  tee_palautustilaus($laskurow);
 
   require 'tilauksesta_varastosiirto.inc';
 

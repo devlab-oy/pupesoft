@@ -3862,6 +3862,11 @@ if (isset($jatka)) {
   if ($laskutuskielto != '') {
     $chn = '999';
   }
+  // Verkkokaupasta tulleilla tilauksilla, joilla on jo laskunumero tarkoittaa, ett‰ se on jo maksettu
+  // t‰m‰n takia tulee olla chn == 999, jotta osataan ker‰yksen j‰lkeen p‰ivitt‰‰ tilaus laskutettu-tilaan (LX)
+  elseif ($otsikon_laskurow["laatija"] == "Magento" and $otsikon_laskurow["laskunro"] != 0) {
+    $chn = '999';
+  }
   elseif ($liitostunnus != "") {
     $chn = $asiarow['chn'];
 

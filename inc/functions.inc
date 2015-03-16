@@ -26837,13 +26837,14 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $query = "SELECT lasku.*,
               tilausrivi.*,
+              tilausrivi.kpl + tilausrivi.varattu AS kpl,
               tilausrivi.tunnus AS tilausrivin_tunnus,
               lasku.toimaika AS lasku_toimaika,
               asiakas.email,
               tuote.eankoodi
               FROM lasku
               LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-              JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND (tilausrivi.varattu+tilausrivi.kpl) > 0 AND tilausrivi.tyyppi IN ('L', 'G'))
+              JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND (tilausrivi.varattu + tilausrivi.kpl) > 0 AND tilausrivi.tyyppi IN ('L', 'G'))
               JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND lasku.tunnus  = '{$otunnus}'";
@@ -26936,15 +26937,9 @@ if (!function_exists('posten_outbounddelivery')) {
       $line->addChild('Type', 1);
       $line->addChild('BBDate', 0);
 
-      if ($looprow["alatila"] == 'X') {
-        //HAlutaan lähettää laskutettukin myyntitilaus jostain syystä uudelleen
-        $line->addChild('OrderedQuantity', $looprow['kpl']);
-        $line->addChild('DeliveredQuantity', $looprow['kpl']);
-      }
-      else {
-        $line->addChild('OrderedQuantity', $looprow['varattu']);
-        $line->addChild('DeliveredQuantity', $looprow['varattu']);
-      }
+      // Laitetaan kappalemŠŠrŠt kuntoon
+      $line->addChild('OrderedQuantity', $looprow['kpl']);
+      $line->addChild('DeliveredQuantity', $looprow['kpl']);
 
       $line->addChild('Unit', 0);
       $line->addChild('Price', 0);

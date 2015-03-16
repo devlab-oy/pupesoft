@@ -17320,7 +17320,7 @@ if (!function_exists("tee_keraysera")) {
                  and maksuehto.jv                            != '')
                LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio and kuka.kesken = lasku.tunnus)
                LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio
-                 AND kerayserat.otunnus = lasku.tunnus
+                 AND kerayserat.otunnus                       = lasku.tunnus
                )
                WHERE lasku.yhtio                              = '{$kukarow['yhtio']}'
                {$tilat}
@@ -17368,7 +17368,7 @@ if (!function_exists("tee_keraysera")) {
                LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio
                  AND kuka.kesken                              = lasku.tunnus)
                LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio
-                 AND kerayserat.otunnus = lasku.tunnus
+                 AND kerayserat.otunnus                       = lasku.tunnus
                )
                WHERE lasku.yhtio                              = '{$kukarow['yhtio']}'
                {$tilat}
@@ -17563,7 +17563,7 @@ if (!function_exists("tee_keraysera")) {
                 LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio
                   and kuka.kesken                              = lasku.tunnus)
                 LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio
-                  AND kerayserat.otunnus = lasku.tunnus
+                  AND kerayserat.otunnus                       = lasku.tunnus
                 )
                 JOIN lahdot ON (lahdot.yhtio = toimitustapa.yhtio
                   AND lahdot.liitostunnus                      = toimitustapa.tunnus
@@ -17621,7 +17621,7 @@ if (!function_exists("tee_keraysera")) {
                 LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio
                   and kuka.kesken                              = lasku.tunnus)
                 LEFT JOIN kerayserat ON (kerayserat.yhtio = lasku.yhtio
-                  AND kerayserat.otunnus = lasku.tunnus
+                  AND kerayserat.otunnus                       = lasku.tunnus
                 )
                 WHERE lasku.yhtio                              = '{$kukarow['yhtio']}'
                 {$tilat}
@@ -25240,12 +25240,12 @@ if (!function_exists('hyllysiirto')) {
     if ($yhtiorow['inventointi_siirron_yhteydessa'] == "K") {
       $query = "SELECT laji
                 FROM tapahtuma
-                WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tuoteno = '{$tuoteno}'
-                AND hyllyalue  = '{$minnerow['hyllyalue']}'
-                AND hyllynro   = '{$minnerow['hyllynro']}'
-                AND hyllyvali  = '{$minnerow['hyllyvali']}'
-                AND hyllytaso  = '{$minnerow['hyllytaso']}'
+                WHERE yhtio   = '{$kukarow['yhtio']}'
+                AND tuoteno   = '{$tuoteno}'
+                AND hyllyalue = '{$minnerow['hyllyalue']}'
+                AND hyllynro  = '{$minnerow['hyllynro']}'
+                AND hyllyvali = '{$minnerow['hyllyvali']}'
+                AND hyllytaso = '{$minnerow['hyllytaso']}'
                 ORDER BY laadittu DESC
                 LIMIT 1";
       $uusipaikka_chk_res = pupe_query($query);
@@ -25271,9 +25271,9 @@ if (!function_exists('hyllysiirto')) {
     $query = "UPDATE tuotepaikat
               set saldo = saldo - {$kappaleet},
               {$lisavarlisa1}
-              saldoaika = now(),
-              muuttaja  = '{$kukarow['kuka']}',
-              muutospvm = now()
+              saldoaika     = now(),
+              muuttaja      = '{$kukarow['kuka']}',
+              muutospvm     = now()
               WHERE tuoteno = '{$tuoteno}'
               and yhtio     = '{$kukarow['yhtio']}'
               and tunnus    = {$tuotepaikat_tunnus_otetaan}";
@@ -25404,19 +25404,19 @@ if (!function_exists('hyllysiirto')) {
 
     if ($yhtiorow['inventointi_siirron_yhteydessa'] == "K" and $uusi_paikka) {
       $query = "INSERT into tapahtuma set
-                yhtio      = '{$kukarow['yhtio']}',
-                tuoteno    = '{$tuoteno}',
-                kpl        = '0',
-                kplhinta   = '{$keskihankintahinta}',
-                hinta      = '{$keskihankintahinta}',
-                laji       = 'Inventointi',
-                hyllyalue  = '{$minnerow['hyllyalue']}',
-                hyllynro   = '{$minnerow['hyllynro']}',
-                hyllyvali  = '{$minnerow['hyllyvali']}',
-                hyllytaso  = '{$minnerow['hyllytaso']}',
-                selite     = '".t("Saldo %d täsmäsi. Automaattinen inventointi siirron yhteydessä", "", $kappaleet)."',
-                laatija    = '{$kukarow['kuka']}',
-                laadittu   = '$_laadittu'";
+                yhtio     = '{$kukarow['yhtio']}',
+                tuoteno   = '{$tuoteno}',
+                kpl       = '0',
+                kplhinta  = '{$keskihankintahinta}',
+                hinta     = '{$keskihankintahinta}',
+                laji      = 'Inventointi',
+                hyllyalue = '{$minnerow['hyllyalue']}',
+                hyllynro  = '{$minnerow['hyllynro']}',
+                hyllyvali = '{$minnerow['hyllyvali']}',
+                hyllytaso = '{$minnerow['hyllytaso']}',
+                selite    = '".t("Saldo %d täsmäsi. Automaattinen inventointi siirron yhteydessä", "", $kappaleet)."',
+                laatija   = '{$kukarow['kuka']}',
+                laadittu  = '$_laadittu'";
       $result = pupe_query($query);
     }
 
@@ -30760,8 +30760,8 @@ if (!function_exists('varaston_lapsivarastot')) {
     // katsotaan onko vastaanottavalla varastolla lapsivarastoja
     $lv_query =  "SELECT GROUP_CONCAT(tunnus) lapsivarastot
                   FROM varastopaikat
-                  WHERE yhtio     = '{$kukarow['yhtio']}'
-                  AND isa_varasto = '{$varasto}'
+                  WHERE yhtio      = '{$kukarow['yhtio']}'
+                  AND isa_varasto  = '{$varasto}'
                   AND isa_varasto != 0";
     $lv_res = pupe_query($lv_query);
     $lv_row = mysql_fetch_assoc($lv_res);
@@ -30771,9 +30771,9 @@ if (!function_exists('varaston_lapsivarastot')) {
       // katsotaan onko tuotepaikallisia lapsivarastoja
       $tlv_query = "SELECT GROUP_CONCAT(DISTINCT varasto) varastot
                     FROM tuotepaikat
-                    WHERE yhtio     = '{$kukarow['yhtio']}'
+                    WHERE yhtio = '{$kukarow['yhtio']}'
                     AND varasto IN ({$lv_row['lapsivarastot']})
-                    AND tuoteno     = '{$tuoteno}'
+                    AND tuoteno = '{$tuoteno}'
                     GROUP BY yhtio";
       $tlv_res = pupe_query($tlv_query);
       $tlv_lista = mysql_fetch_assoc($tlv_res);
@@ -30935,9 +30935,9 @@ if (!function_exists("laske_tilausrivin_kate")) {
 
         //Tähän hyvitysriviin liitetyt sarjanumerot
         $query = "SELECT sarjanumero, kaytetty
-                FROM sarjanumeroseuranta
-                WHERE yhtio        = '{$kukarow["yhtio"]}'
-                AND ostorivitunnus = '{$tilausrivi["tunnus"]}'";
+                  FROM sarjanumeroseuranta
+                  WHERE yhtio        = '{$kukarow["yhtio"]}'
+                  AND ostorivitunnus = '{$tilausrivi["tunnus"]}'";
 
         $sarjares = pupe_query($query);
 
@@ -30947,17 +30947,17 @@ if (!function_exists("laske_tilausrivin_kate")) {
 
           // Haetaan hyvitettävien myyntirivien kautta alkuperäiset ostorivit
           $query = "SELECT tilausrivi.rivihinta/tilausrivi.kpl ostohinta
-                  FROM sarjanumeroseuranta
-                  JOIN tilausrivi use index (PRIMARY) ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio
-                    AND tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
-                  WHERE sarjanumeroseuranta.yhtio          = '{$kukarow["yhtio"]}'
-                  AND sarjanumeroseuranta.tuoteno          = '{$tilausrivi["tuoteno"]}'
-                  AND sarjanumeroseuranta.sarjanumero      = '{$sarjarow["sarjanumero"]}'
-                  AND sarjanumeroseuranta.kaytetty         = '{$sarjarow["kaytetty"]}'
-                  AND sarjanumeroseuranta.myyntirivitunnus > 0
-                  AND sarjanumeroseuranta.ostorivitunnus   > 0
-                  ORDER BY sarjanumeroseuranta.tunnus
-                  LIMIT 1";
+                    FROM sarjanumeroseuranta
+                    JOIN tilausrivi use index (PRIMARY) ON (tilausrivi.yhtio=sarjanumeroseuranta.yhtio
+                      AND tilausrivi.tunnus=sarjanumeroseuranta.ostorivitunnus)
+                    WHERE sarjanumeroseuranta.yhtio          = '{$kukarow["yhtio"]}'
+                    AND sarjanumeroseuranta.tuoteno          = '{$tilausrivi["tuoteno"]}'
+                    AND sarjanumeroseuranta.sarjanumero      = '{$sarjarow["sarjanumero"]}'
+                    AND sarjanumeroseuranta.kaytetty         = '{$sarjarow["kaytetty"]}'
+                    AND sarjanumeroseuranta.myyntirivitunnus > 0
+                    AND sarjanumeroseuranta.ostorivitunnus   > 0
+                    ORDER BY sarjanumeroseuranta.tunnus
+                    LIMIT 1";
 
           $sarjares1 = pupe_query($query);
           $sarjarow1 = mysql_fetch_assoc($sarjares1);

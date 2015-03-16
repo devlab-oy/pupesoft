@@ -153,9 +153,9 @@ if (!function_exists("luo_myyntitilausotsikko")) {
       if ($kukarow["extranet"] != '' and empty($yhtiorow['extranet_keraysprioriteetti'])) {
         $query = "SELECT distinct selite
                   FROM avainsana
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and laji = 'asiakasluokka'
-                  and selite != ''
+                  WHERE yhtio  = '$kukarow[yhtio]'
+                  and laji     = 'asiakasluokka'
+                  and selite  != ''
                   ORDER BY 1
                   LIMIT 1";
         $prioresult = pupe_query($query);

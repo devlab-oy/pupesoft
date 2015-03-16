@@ -92,7 +92,7 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
             JOIN lasku ON lasku.yhtio = laitteen_sopimukset.yhtio
               AND lasku.tunnus
             WHERE lasku.tunnus = '{$tilausnumero}'
-              AND lasku.yhtio = '{$kukarow['yhtio']}'";
+              AND lasku.yhtio  = '{$kukarow['yhtio']}'";
   $laiteresult = pupe_query($query);
 
   $query_ale_lisa = generoi_alekentta('M');
@@ -111,7 +111,7 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
             FROM lasku
             JOIN tilausrivi ON lasku.yhtio = tilausrivi.yhtio AND lasku.tunnus = tilausrivi.otunnus
             WHERE lasku.tunnus = '{$tilausnumero}'
-              AND lasku.yhtio = '{$kukarow['yhtio']}'";
+              AND lasku.yhtio  = '{$kukarow['yhtio']}'";
   $sopimuskohtaisetresult = pupe_query($query);
   $sopimuskohtaisetrivi = mysql_fetch_assoc($sopimuskohtaisetresult);
 
@@ -139,8 +139,8 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
     $lisatyosarakeq = "SELECT selitetark
                        FROM avainsana
                        WHERE yhtio = '{$kukarow['yhtio']}'
-                       AND laji = 'SOP_LAITLUET'
-                       AND selite = 'NAYTATYOT'";
+                       AND laji    = 'SOP_LAITLUET'
+                       AND selite  = 'NAYTATYOT'";
     $lisatyosarakeres = pupe_query($lisatyosarakeq);
     $lisatyosarakerivi = mysql_fetch_assoc($lisatyosarakeres);
     $worksheet->write($excelrivi++, $excelsarake, $lisatyosarakerivi['selitetark'], $format_bold);
@@ -176,8 +176,8 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
     $sarakeotsikkoquery = "SELECT selitetark
                            FROM avainsana
                            WHERE yhtio = '{$kukarow['yhtio']}'
-                           AND laji = 'SOP_LAITLUET'
-                           AND selite = '{$value}'";
+                           AND laji    = 'SOP_LAITLUET'
+                           AND selite  = '{$value}'";
     $sarakeotsikkoresult = pupe_query($sarakeotsikkoquery);
     $sarakeotsikkorivi = mysql_fetch_assoc($sarakeotsikkoresult);
     $worksheet->write($excelrivi, $excelsarake++, $sarakeotsikkorivi['selitetark'], $format_bold);
@@ -204,7 +204,7 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
                      AND avainsana.laji   = 'TRY'
                      AND avainsana.selite = tuote.try
                    WHERE laite.yhtio      = '{$kukarow['yhtio']}'
-                   AND laite.tunnus = '{$row['laitetunnus']}'";
+                   AND laite.tunnus       = '{$row['laitetunnus']}'";
 
     $laiteres = pupe_query($laitequery);
 
@@ -220,15 +220,15 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
                      round(tilausrivi.hinta * {$query_ale_lisa}, $yhtiorow[hintapyoristys]) hinta
                      FROM tilausrivi
                      JOIN laitteen_sopimukset ON tilausrivi.yhtio = laitteen_sopimukset.yhtio
-                       AND tilausrivi.tunnus = laitteen_sopimukset.sopimusrivin_tunnus
-                     WHERE tilausrivi.tuoteno IN ({$lisatuotenumerot})
+                       AND tilausrivi.tunnus                   = laitteen_sopimukset.sopimusrivin_tunnus
+                     WHERE tilausrivi.tuoteno                  IN ({$lisatuotenumerot})
                        AND laitteen_sopimukset.laitteen_tunnus = '{$row['laitetunnus']}'
                        AND NOT EXISTS (SELECT *
                          FROM tuotteen_avainsanat
-                         WHERE yhtio = '{$kukarow['yhtio']}'
-                           AND tuoteno = tilausrivi.tuoteno
-                           AND laji = 'laatuluokka'
-                           AND selitetark = 'rivikohtainen');";
+                         WHERE yhtio                           = '{$kukarow['yhtio']}'
+                           AND tuoteno                         = tilausrivi.tuoteno
+                           AND laji                            = 'laatuluokka'
+                           AND selitetark                      = 'rivikohtainen');";
     $palveluresult = pupe_query($palveluquery);
 
     $worksheet->write($excelrivi, $excelsarake++, $laiterow['valmistaja']);

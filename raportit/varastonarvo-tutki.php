@@ -351,7 +351,7 @@ if ($tee == "tee") {
                  WHERE yhtio  = '$kukarow[yhtio]'
                  and ltunnus  = $trow[uusiotunnus]
                  and korjattu = ''
-                 and tilino  IN ({$muutostilinot})";
+                 and tilino   IN ({$muutostilinot})";
       $mres = pupe_query($query);
       $mrow = mysql_fetch_assoc($mres);
 

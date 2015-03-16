@@ -183,7 +183,7 @@ if ($_tuoterajaus) {
   $query = "SELECT $select_lisa tuote.tuoteno, yhtio.maa
             FROM tuote
             JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
-            WHERE tuote.yhtio     = '{$yhtio}'
+            WHERE tuote.yhtio = '{$yhtio}'
             {$_tuoterajaus}
             {$tuoteupdrajaus}";
   $res = pupe_query($query);
@@ -243,7 +243,7 @@ if ($paiva_ajo) {
 
   $query = "SELECT tuote.tuoteno
             FROM tuote
-            WHERE tuote.yhtio     = '{$yhtio}'
+            WHERE tuote.yhtio = '{$yhtio}'
             {$tuoterajaus}
             {$tuoteupdrajaus}";
   $res = pupe_query($query);
@@ -254,8 +254,8 @@ if ($paiva_ajo) {
 
   $query = "SELECT tuotteen_toimittajat.tuoteno
             FROM tuotteen_toimittajat
-            WHERE tuotteen_toimittajat.yhtio    = '{$yhtio}'
-            AND tuotteen_toimittajat.tuoteno    not in ($tuotelista)
+            WHERE tuotteen_toimittajat.yhtio = '{$yhtio}'
+            AND tuotteen_toimittajat.tuoteno not in ($tuotelista)
             {$tuotetoimupdrajaus}";
   $res = pupe_query($query);
 
@@ -470,7 +470,7 @@ while ($row = mysql_fetch_assoc($res)) {
     $query = "SELECT yk_nro
               FROM vak
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus = {$row['vakkoodi']}";
+              AND tunnus  = {$row['vakkoodi']}";
     $vak_res = pupe_query($query);
     $vak_row = mysql_fetch_assoc($vak_res);
   }

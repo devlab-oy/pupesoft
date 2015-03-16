@@ -132,10 +132,10 @@ if (!function_exists('alku_valm')) {
       $pdf->draw_text(310, 729, t("Myyj‰", $kieli),     $thispage, $pieni);
 
       //etsit‰‰n myyj‰n nimi
-      $query  = " SELECT nimi
-                  FROM kuka
-                  WHERE tunnus = '$laskurow[myyja]'
-                  AND yhtio    = '$kukarow[yhtio]'";
+      $query  = "SELECT nimi
+                 FROM kuka
+                 WHERE tunnus = '$laskurow[myyja]'
+                 AND yhtio    = '$kukarow[yhtio]'";
       $myyresult = pupe_query($query);
       $myyrow = mysql_fetch_array($myyresult);
 

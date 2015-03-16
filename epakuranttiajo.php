@@ -202,9 +202,9 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
                  WHERE yhtio = '$kukarow[yhtio]'
                  AND laji    in ('tulo', 'valmistus')
                  AND tuoteno = '$epakurantti_row[tuoteno]'
-                 AND selite not like '%alkusaldo%'
-                 AND selite not like 'Keskihankintahinnan muutos:%'
-                 AND selite not like '{$_vaihda_kehahin_selite}:%'
+                 AND selite  not like '%alkusaldo%'
+                 AND selite  not like 'Keskihankintahinnan muutos:%'
+                 AND selite  not like '{$_vaihda_kehahin_selite}:%'
                  ORDER BY laadittu DESC
                  LIMIT 1";
       $tapres = pupe_query($query);

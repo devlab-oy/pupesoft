@@ -2088,15 +2088,15 @@ function hae_tuotetieto_liitteet($laskun_tunnus) {
             liitetiedostot.filename
             FROM lasku
             INNER JOIN tilausrivi ON (tilausrivi.otunnus = lasku.tunnus
-              AND tilausrivi.yhtio = lasku.yhtio)
+              AND tilausrivi.yhtio               = lasku.yhtio)
             INNER JOIN tuote ON (tuote.tuoteno = tilausrivi.tuoteno
-              AND tuote.yhtio = tilausrivi.yhtio)
+              AND tuote.yhtio                    = tilausrivi.yhtio)
             INNER JOIN liitetiedostot ON (liitetiedostot.liitostunnus = tuote.tunnus
-              AND liitetiedostot.liitos = 'tuote'
+              AND liitetiedostot.liitos          = 'tuote'
               AND liitetiedostot.kayttotarkoitus = 'tuotetiedot'
-              AND liitetiedostot.yhtio = tuote.yhtio)
-            WHERE lasku.tunnus = {$laskun_tunnus}
-            AND lasku.yhtio = '{$kukarow["yhtio"]}';";
+              AND liitetiedostot.yhtio           = tuote.yhtio)
+            WHERE lasku.tunnus                   = {$laskun_tunnus}
+            AND lasku.yhtio                      = '{$kukarow["yhtio"]}';";
 
   $result = pupe_query($query);
 

@@ -155,12 +155,12 @@ else {
     // Nouto keississä ei mennä rahtikirjan syöttöön (paisti jos on vientiä)
     $query = "SELECT toimitustapa.tunnus
               FROM toimitustapa, lasku, maksuehto
-              WHERE toimitustapa.yhtio       = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa
-              and lasku.yhtio                = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
-              and toimitustapa.yhtio         = '$kukarow[yhtio]'
-              and lasku.tunnus               = '$id'
+              WHERE toimitustapa.yhtio = lasku.yhtio and toimitustapa.selite = lasku.toimitustapa
+              and lasku.yhtio          = maksuehto.yhtio and lasku.maksuehto = maksuehto.tunnus
+              and toimitustapa.yhtio   = '$kukarow[yhtio]'
+              and lasku.tunnus         = '$id'
               and ((toimitustapa.nouto is null or toimitustapa.nouto='') or lasku.vienti!='')
-              and maksuehto.jv               = ''";
+              and maksuehto.jv         = ''";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {

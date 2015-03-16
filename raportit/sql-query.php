@@ -47,8 +47,8 @@ if ($toim == "SUPER") {
   if ($tee == "poista_query") {
     $poisto_query = "DELETE FROM muisti
                      WHERE yhtio = '{$kukarow["yhtio"]}'
-                     AND haku = 'sql-query'
-                     AND nimi = '{$poistettava_query}'";
+                     AND haku    = 'sql-query'
+                     AND nimi    = '{$poistettava_query}'";
 
     $poisto_result = pupe_query($poisto_query);
 
@@ -92,7 +92,7 @@ if ($tee == "") {
   $muisti_query = "SELECT *
                    FROM muisti
                    WHERE yhtio = '{$kukarow["yhtio"]}'
-                   AND haku = 'sql-query'";
+                   AND haku    = 'sql-query'";
   $muisti_result = pupe_query($muisti_query);
 
   if (mysql_num_rows($muisti_result) > 0) {

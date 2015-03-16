@@ -741,12 +741,12 @@ if ($tila == "" and !isset($jatka)) {
       }
 
       $squery = "SELECT asiakas.*, tilaus_viesti as viesti, myynti_kommentti1 as comments,
-                  $puhlisa
-                  asiakas.tunnus liitostunnus,
-                  'O' kohdistettu, '' kohde, '' kauppatapahtuman_luonne,
-                  if(asiakas.gsm != '', asiakas.gsm,
-                    if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
-                      if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
+                 $puhlisa
+                 asiakas.tunnus liitostunnus,
+                 'O' kohdistettu, '' kohde, '' kauppatapahtuman_luonne,
+                 if(asiakas.gsm != '', asiakas.gsm,
+                   if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
+                     if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
                  FROM asiakas
                  WHERE tunnus = '$asiakasid'";
 

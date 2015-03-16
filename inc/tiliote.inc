@@ -513,16 +513,25 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
     //Olisiko tämä meidän asiakas
     $query = "SELECT *
               FROM asiakas
-              WHERE yhtio = '{$yritirow['yhtio']}'
-              AND nimi LIKE '%{$maksaa}%'
-              AND laji != 'P'";
+              WHERE yhtio  = '{$yritirow['yhtio']}'
+              AND nimi     LIKE '%{$maksaa}%'
+              AND laji    != 'P'";
     $suoasiresult = pupe_query($query);
 
     if (mysql_num_rows($suoasiresult) != 1) {
       $query = "SELECT *
                 FROM asiakas
                 WHERE yhtio = '{$yritirow['yhtio']}'
-                AND nimi LIKE '%{$maksaa}%'";
+                AND nimi    LIKE '%{$maksaa}%'";
+      $suoasiresult = pupe_query($query);
+    }
+
+    if (mysql_num_rows($suoasiresult) != 1) {
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio  = '{$yritirow['yhtio']}'
+                AND nimi     LIKE '%{$maksaa_clean}%'
+                AND laji    != 'P'";
       $suoasiresult = pupe_query($query);
     }
 
@@ -530,16 +539,7 @@ if ($tunnus != 'T11' and $tunnus != 'T81' and $maksu == 1) {
       $query = "SELECT *
                 FROM asiakas
                 WHERE yhtio = '{$yritirow['yhtio']}'
-                AND nimi LIKE '%{$maksaa_clean}%'
-                AND laji != 'P'";
-      $suoasiresult = pupe_query($query);
-    }
-
-    if (mysql_num_rows($suoasiresult) != 1) {
-      $query = "SELECT *
-                FROM asiakas
-                WHERE yhtio = '{$yritirow['yhtio']}'
-                AND nimi LIKE '%{$maksaa_clean}%'";
+                AND nimi    LIKE '%{$maksaa_clean}%'";
       $suoasiresult = pupe_query($query);
     }
 

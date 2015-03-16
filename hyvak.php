@@ -623,8 +623,8 @@ if ($tee == 'L') {
 if ($tee == "H") {
   $query = "SELECT *
             FROM lasku
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tunnus = '{$tunnus}'
+            WHERE yhtio       = '{$kukarow["yhtio"]}'
+            AND tunnus        = '{$tunnus}'
             AND hyvaksyja_nyt = '{$kukarow["kuka"]}'";
 
   $result = pupe_query($query);
@@ -655,10 +655,10 @@ if ($tee == "H") {
       $tarkistus_query = "SELECT distinct tili.tilino, tili.tiliointi_tarkistus, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti
                           FROM tiliointi
                           JOIN tili USING (yhtio, tilino)
-                          WHERE tiliointi.yhtio  = '{$kukarow["yhtio"]}'
-                          AND tiliointi.ltunnus  = {$laskurow["tunnus"]}
-                          AND tiliointi.korjattu = ''
-                          AND tiliointi.lukko != 1";
+                          WHERE tiliointi.yhtio   = '{$kukarow["yhtio"]}'
+                          AND tiliointi.ltunnus   = {$laskurow["tunnus"]}
+                          AND tiliointi.korjattu  = ''
+                          AND tiliointi.lukko    != 1";
       $tilioinnit_tsek = pupe_query($tarkistus_query);
 
       while ($tilioinnit_row = mysql_fetch_assoc($tilioinnit_tsek)) {

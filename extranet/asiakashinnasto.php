@@ -313,9 +313,9 @@ else {
             $jq = "SELECT jarjestys, selitetark
                    FROM avainsana
                    WHERE yhtio = '{$kukarow['yhtio']}'
-                   AND laji = 'THR'
-                   AND selite = '{$perhe}'
-                   AND kieli = '{$hinkieli}'";
+                   AND laji    = 'THR'
+                   AND selite  = '{$perhe}'
+                   AND kieli   = '{$hinkieli}'";
             $jr = pupe_query($jq);
 
             if (mysql_num_rows($jr) != 0) {

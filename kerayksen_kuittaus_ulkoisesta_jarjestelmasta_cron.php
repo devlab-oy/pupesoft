@@ -134,11 +134,11 @@ if ($handle = opendir($path)) {
             $query = "UPDATE tilausrivi
                       JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.eankoodi = '{$eankoodi}' AND tuote.tuoteno = tilausrivi.tuoteno)
                       SET tilausrivi.keratty = '{$kukarow['kuka']}',
-                      tilausrivi.kerattyaika    = '{$toimaika} 00:00:00'
+                      tilausrivi.kerattyaika = '{$toimaika} 00:00:00'
                       {$toimitettu_lisa}
                       {$varattuupdate}
-                      WHERE tilausrivi.yhtio    = '{$kukarow['yhtio']}'
-                      AND tilausrivi.tunnus     = '{$tilausrivin_tunnus}'";
+                      WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                      AND tilausrivi.tunnus  = '{$tilausrivin_tunnus}'";
             pupe_query($query);
 
             $query = "SELECT SUM(tuote.tuotemassa) paino

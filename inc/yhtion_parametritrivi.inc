@@ -3506,8 +3506,8 @@ if ($fieldname == "reklamaation_kasittely") {
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
         <option value = ''>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n lyhyemp‰‰ prosessia")."</option>
-        <option value = 'U' {$sel['U']}>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n laajempaa prosessia vastaanotolla, purkulistalla ja vastaanottokuittauksella")."</option>
-        <option value = 'X' {$sel['X']}>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n laajempaa prosessia purkulistalla ja vastaanottokuittauksella")."</option>
+        <option value = 'U' {$sel['U']}>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n laajempaa prosessia vastaanotolla, purkulistalla ja purkukuittauksella")."</option>
+        <option value = 'X' {$sel['X']}>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n laajempaa prosessia purkulistalla ja purkukuittauksella. Takuu lyhyemm‰ll‰ prosessilla")."</option>
       </select></td>";
 
   $jatko = 0;

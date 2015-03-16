@@ -30857,6 +30857,56 @@ if (!function_exists("hae_viimeiset_hyvaksyjat")) {
   }
 }
 
+if (!function_exists('tee_palautustilaus')) {
+  function tee_palautustilaus($laskurow) {
+    global $kukarow, $yhtiorow;
+
+    // Katotaan lˆytyykˆ tilausrivej‰
+    $query = "SELECT tilausrivi.*, tilausrivin_lisatiedot.asiakkaan_positio
+              FROM tilausrivi
+              LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+              WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
+              AND tilausrivi.otunnus  = '$laskurow[tunnus]'
+              AND tilausrivi.tyyppi  != 'D'
+              ORDER BY tilausrivin_lisatiedot.asiakkaan_positio";
+    $keres = pupe_query($query);
+
+    // Yht‰‰n rivi‰ ei ole
+    if (mysql_num_rows($keres) == 0) {
+      return false;
+    }
+    else {
+
+      // Luodaan toimittajalle palautettavat jos niit‰ on
+      $palautettavat = array();
+
+      while ($kerow = mysql_fetch_assoc($keres)) {
+        if ($kerow['asiakkaan_positio'] > 0) $palautettavat[$kerow['asiakkaan_positio']] .= $kerow['tunnus'].",";
+      }
+
+      if (count($palautettavat) > 0) {
+        require "tilauskasittely/tilauksesta_myyntitilaus.inc";
+
+        foreach ($palautettavat as $asiakas => $rivit) {
+          $rivitlisa = " AND tilausrivi.tunnus in (".substr($rivit, 0, -1).")";
+
+          $tilauksesta_myyntitilaus = tilauksesta_myyntitilaus($kukarow["kesken"], $rivitlisa, '', '', '', 'KOPSAAPAIKAT', "REKLAMAATIO#$asiakas");
+          if ($tilauksesta_myyntitilaus != '') echo "$tilauksesta_myyntitilaus<br><br>";
+
+          // P‰ivitet‰‰n rivit tilatuiksi
+          $query  = "UPDATE tilausrivin_lisatiedot
+                     SET asiakkaan_positio = asiakkaan_positio*-1
+                     WHERE yhtio          = '$kukarow[yhtio]'
+                     AND tilausrivitunnus in (".substr($rivit, 0, -1).")";
+          $result = pupe_query($query);
+        }
+      }
+    }
+
+    return true;
+  }
+}
+
 if (!function_exists("paata_kvartaali")) {
   function paata_kvartaali() {
     $tama_vuosi = date('Y');

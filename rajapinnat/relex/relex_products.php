@@ -41,7 +41,7 @@ if (isset($argv[2]) and $argv[2] != '') {
       $ajopaiva = $argv[2];
     }
   }
-  
+
   if (strtoupper($argv[2]) == 'WEEKLY') {
     $weekly_ajo = TRUE;
     $ajotext = "weekly_";

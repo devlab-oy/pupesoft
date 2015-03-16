@@ -354,17 +354,18 @@ if ($toim == "REKLAMAATIO" and $tee == 'VALMIS') {
     $query  = "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
     $result = pupe_query($query);
   }
+  else {
+    $query  = "UPDATE lasku
+               SET tila = 'L'
+               WHERE tunnus = '$laskurow[tunnus]'
+               and tila     = 'C'
+               and yhtio    = '$kukarow[yhtio]'";
+    $result = pupe_query($query);
 
-  $query  = "UPDATE lasku
-             SET tila = 'L'
-             WHERE tunnus = '$laskurow[tunnus]'
-             and tila     = 'C'
-             and yhtio    = '$kukarow[yhtio]'";
-  $result = pupe_query($query);
+    require "tilauskasittely/tilaus-valmis.inc";
 
-  require "tilauskasittely/tilaus-valmis.inc";
-
-  $tee = "";
+    $tee = "";
+  }
 }
 
 if ($toim == "SIIRTOTYOMAARAYS" and $tee == 'VALMIS') {

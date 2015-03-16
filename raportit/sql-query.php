@@ -253,7 +253,7 @@ if ($tee == "") {
         echo "<tr>";
         echo "<td class='back'>";
         echo "<input type='submit' value='" . t("Poista haku") .
-             "' onclick='return confirm(\"" . t("Oletko varma") . "?\")'>";
+          "' onclick='return confirm(\"" . t("Oletko varma") . "?\")'>";
         echo "</td>";
         echo "</tr>";
         echo "</table>";

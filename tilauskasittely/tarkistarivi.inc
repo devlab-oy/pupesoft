@@ -140,7 +140,7 @@ $tilausrivin_kateraja = $yhtiorow["tilausrivin_kateraja"];
 $tilausrivin_kate = laske_tilausrivin_kate($row, $kotisumma_alviton, $row["kehahin"], $kpl, $arow);
 
 if ($tilausrivin_kateraja > 0 and
-    $tilausrivin_kate < $tilausrivin_kateraja and $row["var2"] != "OK"
+  $tilausrivin_kate < $tilausrivin_kateraja and $row["var2"] != "OK"
 ) {
   $varaosavirhe .= t("HUOM: Kate alhainen!")."<br>";
   $riviok++;

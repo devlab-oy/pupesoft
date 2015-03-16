@@ -276,7 +276,7 @@ if (!$php_cli) {
   $sel = $tallennusmuoto == 'csv' ? "selected" : "";
 
   echo "<tr>";
-  echo "<th>",t("Tallennusmuoto"),"</th>";
+  echo "<th>", t("Tallennusmuoto"), "</th>";
   echo "<td><select name='tallennusmuoto'>";
   echo "<option value='excel'>Excel</option>";
   echo "<option value='csv' {$sel}>CSV</opton>";
@@ -1491,7 +1491,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         $row['vihapvm'] = $resultti_a['vihapvm'];
       }
 
-      # Huomioidaanko varastosiirrot viimeisimpänä tulona
+      // Huomioidaanko varastosiirrot viimeisimpänä tulona
       if (!empty($huomioi_varastosiirrot)) {
 
         $query_a = "SELECT IFNULL(MAX(tilausrivi.toimitettuaika), '0000-00-00') vihapvm

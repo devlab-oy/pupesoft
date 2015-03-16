@@ -2995,8 +2995,8 @@ if ($fieldname == "jt_rivien_saapumisajan_nayttaminen") {
 
   $ulos .= "<option value=''>" . t("Ei n‰ytet‰ jt-rivien saapumisaikoja") . "</option>";
   $ulos .= "<option value='K' {$sel["K"]}>" . t("N‰ytet‰‰n jt-rivien saapumisaika " .
-                                                "tilausvahvistuksessa ja l‰hetteess‰, jos se on " .
-                                                "tiedossa") . "</option>";
+    "tilausvahvistuksessa ja l‰hetteess‰, jos se on " .
+    "tiedossa") . "</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3116,11 +3116,11 @@ if ($fieldname == "raaka_aine_tiliointi") {
   $sel = $trow[$i] == 'Y' ? ' selected' : '';
 
   $ulos .= "<option value = ''>" .
-           t("Tiliˆid‰‰n raaka-aineiden varasto ja varastonmuutokset varasto ja " .
-             "varastonmuutostileille");
+    t("Tiliˆid‰‰n raaka-aineiden varasto ja varastonmuutokset varasto ja " .
+    "varastonmuutostileille");
   $ulos .= "<option value = 'Y' $sel>" .
-           t("Tiliˆid‰‰n varasto ja varastonmuutos raaka-ainetileille, jos tuotetyyppi on " .
-             "raaka-aine");
+    t("Tiliˆid‰‰n varasto ja varastonmuutos raaka-ainetileille, jos tuotetyyppi on " .
+    "raaka-aine");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -4223,8 +4223,8 @@ if ($fieldname == 'suoratoim_lisamyynti_osto') {
 
   $ulos .= "<option value=''>" . t("Suoratoimitusmyyntirivin m‰‰r‰‰ ei voi lis‰t‰ ostopuolella") . "</option>";
   $ulos .= "<option value='K' {$sel}>" .
-           t("Suoratoimitusmyyntirivin m‰‰r‰‰ voi lis‰t‰ ostopuolella") .
-           "</option>";
+    t("Suoratoimitusmyyntirivin m‰‰r‰‰ voi lis‰t‰ ostopuolella") .
+    "</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

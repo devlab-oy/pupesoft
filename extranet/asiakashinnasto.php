@@ -342,8 +342,8 @@ else {
 
         $sort = array();
         foreach ($rivit as $key => $rivi) {
-            $sort1[$key] = $rivi['jar'];
-            $sort2[$key] = $rivi['tro'];
+          $sort1[$key] = $rivi['jar'];
+          $sort2[$key] = $rivi['tro'];
         }
         array_multisort($sort1, SORT_ASC, $sort2, SORT_ASC, $rivit);
       }

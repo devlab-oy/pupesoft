@@ -70,7 +70,7 @@ if ($tee == "tee") {
 
   if ($yhtiorow["raaka_aine_tiliointi"] == "Y") {
     $tilinot = "'{$yhtiorow["varasto"]}', '{$yhtiorow["matkalla_olevat"]}', " .
-               "'{$yhtiorow["raaka_ainevarasto"]}'";
+      "'{$yhtiorow["raaka_ainevarasto"]}'";
     $muutostilinot = "'{$yhtiorow["varastonmuutos"]}', '{$yhtiorow["raaka_ainevarastonmuutos"]}'";
     $raaka_aine_teksti = ", {$yhtiorow["raaka_ainevarasto"]}";
   }

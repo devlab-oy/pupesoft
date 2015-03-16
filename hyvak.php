@@ -643,7 +643,7 @@ if ($tee == "H") {
       $tokaviimeinen_hyvaksyja_time) = hae_viimeiset_hyvaksyjat($laskurow);
 
     if ($laskurow[$tokaviimeinen_hyvaksyja_time] != "0000-00-00 00:00:00" and
-        $laskurow[$viimeinen_hyvaksyja_time] == "0000-00-00 00:00:00"
+      $laskurow[$viimeinen_hyvaksyja_time] == "0000-00-00 00:00:00"
     ) {
       $ollaan_viimeinen_hyvaksyja = true;
     }

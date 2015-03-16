@@ -20,7 +20,7 @@ if (isset($_POST['piirtele_laiteluettelo'])) {
     $lisatuotenumerot .= "'".$avainsanarivi['selite']."',";
   }
 
-  $lisatuotenumerot = rtrim($lisatuotenumerot,',');
+  $lisatuotenumerot = rtrim($lisatuotenumerot, ',');
   $lisatuotenumerot = base64_encode($lisatuotenumerot);
 
   echo "<form name='aja_ja_tallenna' method='post'>";
@@ -30,7 +30,7 @@ if (isset($_POST['piirtele_laiteluettelo'])) {
   $secretcounter = 0;
   $eka_ajo = true;
 
-  foreach ($ruksattavat_kentat as $key => $selite){
+  foreach ($ruksattavat_kentat as $key => $selite) {
 
     $nollaus = false;
     if ($secretcounter == 0) echo "<tr>";

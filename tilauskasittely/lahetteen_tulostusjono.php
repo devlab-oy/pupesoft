@@ -8,7 +8,7 @@ if (isset($tee) and $tee == "TILAA_AJAX") {
   require_once "inc/tilaa_ajax.inc";
 }
 
-if ($toim == "VASTAANOTA_REKLAMAATIO" and !in_array($yhtiorow['reklamaation_kasittely'], array('U','X'))) {
+if ($toim == "VASTAANOTA_REKLAMAATIO" and !in_array($yhtiorow['reklamaation_kasittely'], array('U', 'X'))) {
   echo "<font class='error'>".t("HUOM: Ohjelma on käytössä vain kun käytetään laajaa reklamaatioprosessia")."!</font>";
   exit;
 }
@@ -1137,7 +1137,7 @@ if ($tee2 == '') {
       echo "<$ero valign='top'>".str_replace(',', '<br>', $tilrow["otunnus"])."</$ero>";
 
       if ($toim == "VASTAANOTA_REKLAMAATIO" and $tilrow['tilauksia'] > 1) {
-        echo "<{$ero} valign='top'>",t("Useita"),"</{$ero}>";
+        echo "<{$ero} valign='top'>", t("Useita"), "</{$ero}>";
       }
       else {
         echo "<$ero valign='top'>$tilrow[ytunnus]";

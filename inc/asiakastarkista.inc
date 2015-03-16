@@ -70,7 +70,7 @@ if (!function_exists("asiakastarkista")) {
         $res = pupe_query($qry);
 
         if (mysql_num_rows($res) > 0) {
-          $t['luottoraja'] = mysql_result($res,0);
+          $t['luottoraja'] = mysql_result($res, 0);
         }
       }
     }

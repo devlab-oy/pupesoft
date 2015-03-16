@@ -9,15 +9,15 @@ if (isset($_POST['piirtele_laiteluettelo'])) {
 
   $ruksattavat_kentat = array();
 
-  // Haetaan avainsanoista laiteluettelon laitekohtaiset palveluhinnat 
+  // Haetaan avainsanoista laiteluettelon laitekohtaiset palveluhinnat
   // sekä sopimuskohtaiset lisätyöt hardcoded selitteellä "NAYTATYOT"
   $res = t_avainsana("SOP_LAITLUET");
   $lisatuotenumerot = '';
 
-  while ($avainsanarivi = mysql_fetch_assoc($res)) {                                   
+  while ($avainsanarivi = mysql_fetch_assoc($res)) {
     $ruksattavat_kentat[$avainsanarivi['selite']] = $avainsanarivi['selitetark'];
-    // Tallennetaan myös selectilisa 
-    $lisatuotenumerot .= "'".$avainsanarivi['selite']."',"; 
+    // Tallennetaan myös selectilisa
+    $lisatuotenumerot .= "'".$avainsanarivi['selite']."',";
   }
 
   $lisatuotenumerot = rtrim($lisatuotenumerot,',');
@@ -118,7 +118,7 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
   // Alkuun yhteenvetorivit
   $worksheet->write($excelrivi++, $excelsarake, t("Sopimusnumero").": ".$sopimuskohtaisetrivi['asiakkaan_tilausnumero'] , $format_bold);
   $worksheet->write($excelrivi, $excelsarake, t("Tuote"), $format_bold);
-  $worksheet->write($excelrivi, $excelsarake+1, t("e / kk summa"), $format_bold); 
+  $worksheet->write($excelrivi, $excelsarake+1, t("e / kk summa"), $format_bold);
   $sopimus_alv = $sopimuskohtaisetrivi['alv'];
   $laskutusosoite = $sopimuskohtaisetrivi['laskutusosoite'];
   $toimitusosoite = $sopimuskohtaisetrivi['toimitusosoite'];
@@ -136,10 +136,10 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
   }
 
   if (in_array("NAYTATYOT", $valitut_sarakkeet) and !empty($hintahopinat)) {
-    $lisatyosarakeq = "SELECT selitetark 
-                       FROM avainsana 
+    $lisatyosarakeq = "SELECT selitetark
+                       FROM avainsana
                        WHERE yhtio = '{$kukarow['yhtio']}'
-                       AND laji = 'SOP_LAITLUET' 
+                       AND laji = 'SOP_LAITLUET'
                        AND selite = 'NAYTATYOT'";
     $lisatyosarakeres = pupe_query($lisatyosarakeq);
     $lisatyosarakerivi = mysql_fetch_assoc($lisatyosarakeres);
@@ -167,16 +167,16 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
 
   // Poistetaan 'NAYTATYOT' valituista sarakkeista että saadaan oikeat sarakkeet laitekohtaisille
   // riveille resetoimalla arrayn indeksit
-  $valikey = array_search('NAYTATYOT', $valitut_sarakkeet);  
+  $valikey = array_search('NAYTATYOT', $valitut_sarakkeet);
   unset($valitut_sarakkeet[$valikey]);
   $valitut_sarakkeet = array_values($valitut_sarakkeet);
 
   // Piirretään sarakeotsikot valituille sarakkeille
   foreach ($valitut_sarakkeet as $key => $value) {
-    $sarakeotsikkoquery = "SELECT selitetark 
-                           FROM avainsana 
+    $sarakeotsikkoquery = "SELECT selitetark
+                           FROM avainsana
                            WHERE yhtio = '{$kukarow['yhtio']}'
-                           AND laji = 'SOP_LAITLUET' 
+                           AND laji = 'SOP_LAITLUET'
                            AND selite = '{$value}'";
     $sarakeotsikkoresult = pupe_query($sarakeotsikkoquery);
     $sarakeotsikkorivi = mysql_fetch_assoc($sarakeotsikkoresult);
@@ -235,7 +235,7 @@ elseif (isset($valitut_sarakkeet) and count($valitut_sarakkeet) > 0) {
     $worksheet->write($excelrivi, $excelsarake++, $laiterow['malli']);
     $worksheet->write($excelrivi, $excelsarake++, $laiterow['sarjanro']);
     $worksheet->write($excelrivi, $excelsarake++, $laiterow['sd_sla']);
-    
+
     $hinnat_jarjestyksessa = array();
     // Sortataan laiterivikohtaisten palveluiden hinnat
     while ($rivi = mysql_fetch_assoc($palveluresult)) {

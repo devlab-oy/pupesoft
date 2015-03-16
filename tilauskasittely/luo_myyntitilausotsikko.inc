@@ -5,8 +5,8 @@ if (!function_exists("luo_myyntitilausotsikko")) {
     global $kukarow, $yhtiorow, $session;
 
     $query  = "SELECT *,
-               if(asiakas.gsm != '', asiakas.gsm, 
-                 if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, 
+               if(asiakas.gsm != '', asiakas.gsm,
+                 if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
                    if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
                FROM asiakas
                WHERE yhtio = '$kukarow[yhtio]'

@@ -713,8 +713,8 @@ while ($row = mysql_fetch_assoc($res)) {
     if ($parastoimittaja['jarjestys'] != 1) {
 
       array_multisort($toimittajat_a_hinta, SORT_ASC, $toimittajat_a);
-      
-      // jos parastoimittajan järjestys on 2 eli "ehdollinen päätoimittaja", 
+
+      // jos parastoimittajan järjestys on 2 eli "ehdollinen päätoimittaja",
       // katsotaan onko halvin toimittaja yli 5% halvempi ja jos, niin käytetään sitä
       if ($parastoimittaja['jarjestys'] == 2) {
         if ($parastoimittaja['ostohinta_oletusvaluutta_netto'] > ($toimittajat_a[0]['ostohinta_oletusvaluutta_netto'] * 1.05)) {

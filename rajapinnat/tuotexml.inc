@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 /**
  * Adds a CDATA property to an XML document.
@@ -10,7 +10,7 @@
  * @param object $parent
  *   Element that the CDATA child should be attached too.
  */
-if (!function_exists("add_cdata")) { 
+if (!function_exists("add_cdata")) {
   function add_cdata($name, $value, &$parent) {
     $child = $parent->addChild($name);
 

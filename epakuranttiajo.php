@@ -210,14 +210,14 @@ if ($php_cli or (isset($ajo_tee) and ($ajo_tee == "NAYTA" or $ajo_tee == "NAYTAP
       $tapres = pupe_query($query);
 
       if (!$tulorow = mysql_fetch_assoc($tapres)) {
-        
+
         $_luontiaika            = substr($epakurantti_row["luontiaika"], 0, 10);
         $_luontiaika_check      = ($_luontiaika != "0000-00-00");
         $_vihapvm_check         = ($epakurantti_row["vihapvm"] != "0000-00-00");
         $_luontiaika_konversio  = ($_luontiaika > $epakurantti_row["vihapvm"]);
 
         if ($_luontiaika_check and $_vihapvm_check and $_luontiaika_konversio) {
-          // Jos ei löydy tuloa, laitetaan tuotteen vihapvm 
+          // Jos ei löydy tuloa, laitetaan tuotteen vihapvm
           // (mikäli se on pienempi kuin luontiaika, konversiotapauksia varten)
           $tulorow = array("laadittu" => $epakurantti_row["vihapvm"]);
         }

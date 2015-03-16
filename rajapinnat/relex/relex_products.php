@@ -30,6 +30,8 @@ cron_log();
 
 $ajopaiva  = date("Y-m-d");
 $paiva_ajo = FALSE;
+$weekly_ajo = FALSE;
+$ajotext = "";
 
 if (isset($argv[2]) and $argv[2] != '') {
 
@@ -39,7 +41,14 @@ if (isset($argv[2]) and $argv[2] != '') {
       $ajopaiva = $argv[2];
     }
   }
-  $paiva_ajo = TRUE;
+  
+  if (strtoupper($argv[2]) == 'WEEKLY') {
+    $weekly_ajo = TRUE;
+    $ajotext = "weekly_";
+  }
+  else {
+    $paiva_ajo = TRUE;
+  }
 }
 
 // Yhtiö
@@ -154,7 +163,7 @@ if ($_tuoterajaus) {
   $_tuoterajaus = $_tuoterajaus_ilman_hakukenttia ." AND (". substr($_tuoterajaus, 0, -4).")";
 
   // Tallennetaan rivit tiedostoon
-  $ofilepath = "/tmp/product_ostoehdotus_update_{$yhtio}_$ajopaiva.csv";
+  $ofilepath = "/tmp/product_ostoehdotus_update_{$yhtio}_{$ajotext}{$ajopaiva}.csv";
 
   if (!$ofp = fopen($ofilepath, 'w+')) {
     die("Tiedoston avaus epäonnistui: $ofilepath\n");
@@ -227,7 +236,7 @@ if (@include "inc/tecdoc.class.php") {
 require "vastaavat.class.php";
 
 // Tallennetaan tuoterivit tiedostoon
-$filepath = "/tmp/product_update_{$yhtio}_$ajopaiva.csv";
+$filepath = "/tmp/product_update_{$yhtio}_{$ajotext}{$ajopaiva}.csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
   die("Tiedoston avaus epäonnistui: $filepath\n");
@@ -334,7 +343,7 @@ $header .= "\n";
 fwrite($fp, $header);
 
 // Tallennetaan tuotteentoimittajarivit tiedostoon
-$tfilepath = "/tmp/product_suppliers_update_{$yhtio}_$ajopaiva.csv";
+$tfilepath = "/tmp/product_suppliers_update_{$yhtio}_{$ajotext}{$ajopaiva}.csv";
 
 if (!$tfp = fopen($tfilepath, 'w+')) {
   die("Tiedoston avaus epäonnistui: $tfilepath\n");
@@ -782,7 +791,7 @@ fclose($fp);
 fclose($tfp);
 
 // Tehdään FTP-siirto
-if ($paiva_ajo and !empty($relex_ftphost)) {
+if (($paiva_ajo or $weekly_ajo) and !empty($relex_ftphost)) {
   // Tuotetiedot
   $ftphost = $relex_ftphost;
   $ftpuser = $relex_ftpuser;

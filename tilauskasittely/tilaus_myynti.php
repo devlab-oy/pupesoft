@@ -1675,7 +1675,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
     $query  = "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
     $result = pupe_query($query);
 
-    if ($yhtiorow['reklamaation_kasittely'] == 'U' or 
+    if ($yhtiorow['reklamaation_kasittely'] == 'U' or
     ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U')) {
 
       $oslapp = "email";
@@ -1857,14 +1857,14 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
   }
 }
 
-if ($kukarow["extranet"] == "" and ((($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == "LEPAA") or ($toim == "REKLAMAATIO" and $tee == "LEPAA" and 
-  ($yhtiorow['reklamaation_kasittely'] == '' or 
+if ($kukarow["extranet"] == "" and ((($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == "LEPAA") or ($toim == "REKLAMAATIO" and $tee == "LEPAA" and
+  ($yhtiorow['reklamaation_kasittely'] == '' or
   ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] == 'U'))))) {
   require "tyomaarays/tyomaarays.inc";
 }
 
-if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $tee == "LEPAA" and 
-  ($yhtiorow['reklamaation_kasittely'] == 'U' or 
+if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $tee == "LEPAA" and
+  ($yhtiorow['reklamaation_kasittely'] == 'U' or
   ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U'))) {
 
   $query  = "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and kesken = '$tilausnumero'";
@@ -1896,7 +1896,7 @@ if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $tee == "ODOTTAA" 
 
 if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
   and ($tee == 'VASTAANOTTO' or $tee == 'VALMIS') and
-  ($yhtiorow['reklamaation_kasittely'] == 'U' or 
+  ($yhtiorow['reklamaation_kasittely'] == 'U' or
   ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U'))) {
   // Joka tarkoittaa ett‰ "Reklamaatio on vastaanotettu
   // t‰m‰n j‰lkeen kun seuraavassa vaiheessa tullaan niin "Tulostetaan Purkulista"
@@ -1925,6 +1925,8 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
     echo "<font class='message'>".t("Reklamaatio: %s kuitattu vastaanotetuksi", '', $tilausnumero).".</font><br><br>";
   }
 
+  tee_palautustilaus($laskurow);
+
   require 'tilauksesta_varastosiirto.inc';
 
   tilauksesta_varastosiirto($laskurow['tunnus'], 'P');
@@ -1942,7 +1944,7 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
 
 if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
   and ($tee == 'VALMIS_VAINSALDOTTOMIA' or $tee == 'VALMIS') and
-  ($yhtiorow['reklamaation_kasittely'] == 'U' or 
+  ($yhtiorow['reklamaation_kasittely'] == 'U' or
   ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U'))) {
   // Reklamaatio/takuu on valmis laskutettavaksi
   // katsotaan onko tilausrivit Unikko-j‰rjestelm‰‰n
@@ -6008,8 +6010,8 @@ if ($tee == '') {
     }
 
     // tarkistetaan kuuluuko kaikki reklamaation rivit samaan varastoon
-    if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and 
-      ($yhtiorow['reklamaation_kasittely'] == 'U' or 
+    if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and
+      ($yhtiorow['reklamaation_kasittely'] == 'U' or
       ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U'))) {
 
       $varasto_chk_array = array();
@@ -9757,8 +9759,8 @@ if ($tee == '') {
       elseif ($maksuehtorow['jaksotettu'] != '' and mysql_num_rows($jaksoresult) == 0) {
         echo "<font class='error'>".t("VIRHE: Tilauksella ei ole maksusopimusta!")."</font>";
       }
-      elseif ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and 
-      ($yhtiorow['reklamaation_kasittely'] == 'U' or 
+      elseif ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and
+      ($yhtiorow['reklamaation_kasittely'] == 'U' or
       ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U'))) {
 
         $napin_teksti = $laskurow['tilaustyyppi'] == 'U' ? "Takuu" : "Reklamaatio";
@@ -9832,8 +9834,8 @@ if ($tee == '') {
           echo "</form></td>";
         }
       }
-      elseif ($kukarow['tilaus_valmis'] != "4" and ($toim != 'REKLAMAATIO' or 
-      ($yhtiorow['reklamaation_kasittely'] == '' or 
+      elseif ($kukarow['tilaus_valmis'] != "4" and ($toim != 'REKLAMAATIO' or
+      ($yhtiorow['reklamaation_kasittely'] == '' or
       ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] == 'U')) )) {
 
         if (($kateinen == "X" and $kukarow["kassamyyja"] != "") or $laskurow["sisainen"] != "") {

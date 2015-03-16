@@ -310,7 +310,7 @@ class Unifaun {
     //$uni_par_val = $uni_sender_partner->addChild('val', "");   # Specifies an offshore account.
     //$uni_par_val->addAttribute('n', "konto");
 
-    $uni_par_val = $uni_sender_partner->addChild('val', utf8_encode($this->yhtiorow["pankkitili1"]));   // IBAN account number
+    $uni_par_val = $uni_sender_partner->addChild('val', utf8_encode($this->yhtiorow["pankkiiban1"]));   // IBAN account number
     $uni_par_val->addAttribute('n', "iban");
 
     $uni_par_val = $uni_sender_partner->addChild('val', utf8_encode($this->yhtiorow["pankkiswift1"]));   // BIC number

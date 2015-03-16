@@ -348,6 +348,15 @@ if ($toim == "REKLAMAATIO" and $tee == 'VALMIS') {
 
   tee_palautustilaus($laskurow);
 
+  $query  = "UPDATE lasku
+             SET tila = 'L'
+             WHERE tunnus = '$laskurow[tunnus]'
+             and tila     = 'C'
+             and yhtio    = '$kukarow[yhtio]'";
+  $result = pupe_query($query);
+
+  require "tilauskasittely/tilaus-valmis.inc";
+
   $tee = "";
 }
 

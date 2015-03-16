@@ -6,11 +6,14 @@ $_GET["no_css"] = 'yes';
 if (@include_once "../inc/parametrit.inc");
 elseif (@include_once "inc/parametrit.inc");
 
-
 if (!isset($view)) {
   $view = 'top';
   if ($kukarow['kuka'] != 'admin') {
     $view = 'rulla';
+  }
+
+  if ($kukarow['kuka'] == 'testaaja') {
+   $view = 'tulli';
   }
 }
 
@@ -30,14 +33,18 @@ echo "<div class='main valikko'>";
 
 if ($view == 'top') {
 
-  echo "<p><a href='index.php?view=tulli' class='button index_button'>", t("Tullivarasto tuloutus"), "</a>";
+  echo "<p><a href='index.php?view=tulli' class='button index_button'>", t("Tullivarastointi"), "</a>";
   echo "<a href='index.php?view=rulla' class='button index_button'>", t("Paperirullien käsittely"), "</a></p>";
 
 }
 elseif ($view == 'tulli') {
 
-  if (tarkista_oikeus("sarjanumero/kuittaa.php")) {
+  if (tarkista_oikeus("sarjanumero/tullivarastointi.php")) {
     echo "<p><a href='tullivarastointi.php' class='button index_button'>", t("Vie varastoon"), "</a></p>";
+  }
+
+  if (tarkista_oikeus("sarjanumero/tullivarastointi_kontitus.php")) {
+    echo "<p><a href='tullivarastointi_kontitus.php' class='button index_button'>", t("Kontitus"), "</a></p>";
   }
 
 }

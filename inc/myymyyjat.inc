@@ -1,7 +1,7 @@
 <?php
 
 function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentti,
-                                $osastojen_nimet) {
+  $osastojen_nimet) {
   global $kukarow;
 
   if ($toim == "TARKKA") {
@@ -58,7 +58,7 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
         $kerroin = (float) $kuluprosentti[$row["osasto"]] / 100;
 
         $kate[$row["myyja"]][$row["kausi"]][$row["osasto"]] += ($row["kate"] -
-                                                                $kerroin * $row["kate"]);
+          $kerroin * $row["kate"]);
       }
       else {
         $kate[$row["myyja"]][$row["kausi"]][$row["osasto"]] += $row["kate"];
@@ -185,7 +185,7 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
           }
 
           echo "<br><strong style='font-weight:bold'>" . round(array_sum($katteet[$kausi])) .
-               "</strong>";
+            "</strong>";
         }
       }
       else {
@@ -205,7 +205,7 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
       }
 
       echo "<br><strong style='font-weight:bold'>" . round(array_sum($yhteensa_kate)) .
-           "</strong>";
+        "</strong>";
     }
     else {
       echo "<br>{$yhteensa_kate}";
@@ -218,7 +218,7 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
   // Piirret‰‰n yhteens‰rivi
   echo "<tr>";
   echo "<th>" . t("Yhteens‰ summa") . "<br>" . t("Yhteens‰ kate") . "<br>" . t("Kateprosentti") .
-       "</th>";
+    "</th>";
 
   if ($toim == "TARKKA") {
     echo "<th></th>";
@@ -239,12 +239,12 @@ function piirra_myyjien_myynnit($lisa, $pvmalku, $pvmloppu, $toim, $kuluprosentt
     }
 
     echo "<th style='text-align:right;'>$yhteensa_summa_kausi[$kausi]<br>" .
-         round($yhteensa_kate_kausi[$kausi]) . "<br>$kate_prosentti%</th>";
+      round($yhteensa_kate_kausi[$kausi]) . "<br>$kate_prosentti%</th>";
   }
 
   $kate_prosentti = round($yhteensa_kate / $yhteensa_summa * 100);
   echo "<th style='text-align:right;'>$yhteensa_summa<br>" . round($yhteensa_kate) .
-       "<br>$kate_prosentti%</th>";
+    "<br>$kate_prosentti%</th>";
   echo "</tr>";
   echo "</table>";
 }

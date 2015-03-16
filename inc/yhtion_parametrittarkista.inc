@@ -238,7 +238,7 @@ if (!function_exists("yhtion_parametrittarkista")) {
       $query = "SELECT COUNT(*) AS tilien_maara
                 FROM tili
                 WHERE tili.yhtio = '{$kukarow['yhtio']}'
-                AND tili.tilino IN ('{$yhtiorow['raaka_ainevarasto']}',
+                AND tili.tilino  IN ('{$yhtiorow['raaka_ainevarasto']}',
                                     '{$yhtiorow['raaka_ainevarastonmuutos']}')";
 
       $result = pupe_query($query);

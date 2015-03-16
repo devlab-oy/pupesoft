@@ -276,7 +276,7 @@ if (!$php_cli) {
   $sel = $tallennusmuoto == 'csv' ? "selected" : "";
 
   echo "<tr>";
-  echo "<th>",t("Tallennusmuoto"),"</th>";
+  echo "<th>", t("Tallennusmuoto"), "</th>";
   echo "<td><select name='tallennusmuoto'>";
   echo "<option value='excel'>Excel</option>";
   echo "<option value='csv' {$sel}>CSV</opton>";
@@ -1282,7 +1282,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
                     and tapahtuma.tuoteno  = '{$row['tuoteno']}'
                     and tapahtuma.laadittu > '{$xmyyrow['laskutettuaika']}'
                     $varastorajausjoini
-                    AND tapahtuma.laji IN ('laskutus', 'kulutus')";
+                    AND tapahtuma.laji     IN ('laskutus', 'kulutus')";
           $xmyyres = pupe_query($query);
           $xmyypvmrow = mysql_fetch_assoc($xmyyres);
 
@@ -1293,15 +1293,15 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
             $query_a = "SELECT ifnull(date_format(max(tilausrivi.kerattyaika), '%Y%m%d'), 0) vihapvm
                         FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laadittu)
                         JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-                          AND lasku.tunnus = tilausrivi.otunnus
+                          AND lasku.tunnus          = tilausrivi.otunnus
                           $varastorajausjoini2
-                          AND lasku.varasto != lasku.clearing
-                          AND lasku.tila = 'G')
-                        WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
-                        AND tilausrivi.tyyppi = 'G'
-                        AND tilausrivi.tuoteno  = '{$row['tuoteno']}'
-                        AND tilausrivi.laadittu >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
-                        AND tilausrivi.kerattyaika >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
+                          AND lasku.varasto        != lasku.clearing
+                          AND lasku.tila            = 'G')
+                        WHERE tilausrivi.yhtio      = '{$kukarow['yhtio']}'
+                        AND tilausrivi.tyyppi       = 'G'
+                        AND tilausrivi.tuoteno      = '{$row['tuoteno']}'
+                        AND tilausrivi.laadittu     >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
+                        AND tilausrivi.kerattyaika  >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
                         AND tilausrivi.kpl + tilausrivi.varattu > 0";
             $xsiirtores = pupe_query($query_a);
             $xsiirtopvmrow = mysql_fetch_assoc($xsiirtores);
@@ -1485,27 +1485,27 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
                     AND tapahtuma.tuoteno  = '{$row['tuoteno']}'
                     AND tapahtuma.laadittu >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
                     {$varasto_tapahtuma}
-                    AND tapahtuma.laji = 'tulo'";
+                    AND tapahtuma.laji     = 'tulo'";
         $result_a = pupe_query($query_a);
         $resultti_a = mysql_fetch_assoc($result_a);
         $row['vihapvm'] = $resultti_a['vihapvm'];
       }
 
-      # Huomioidaanko varastosiirrot viimeisimpänä tulona
+      // Huomioidaanko varastosiirrot viimeisimpänä tulona
       if (!empty($huomioi_varastosiirrot)) {
 
         $query_a = "SELECT IFNULL(MAX(tilausrivi.toimitettuaika), '0000-00-00') vihapvm
                     FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laadittu)
                     JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
-                      AND lasku.tunnus = tilausrivi.otunnus
+                      AND lasku.tunnus             = tilausrivi.otunnus
                       $varastorajausjoini
-                      AND lasku.varasto != lasku.clearing
-                      AND lasku.tila = 'G')
-                    WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
-                    AND tilausrivi.tyyppi = 'G'
-                    AND tilausrivi.tuoteno  = '{$row['tuoteno']}'
-                    AND tilausrivi.laadittu >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
-                    AND tilausrivi.toimitettuaika >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
+                      AND lasku.varasto           != lasku.clearing
+                      AND lasku.tila               = 'G')
+                    WHERE tilausrivi.yhtio         = '{$kukarow['yhtio']}'
+                    AND tilausrivi.tyyppi          = 'G'
+                    AND tilausrivi.tuoteno         = '{$row['tuoteno']}'
+                    AND tilausrivi.laadittu        >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
+                    AND tilausrivi.toimitettuaika  >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
                     AND tilausrivi.kpl + tilausrivi.varattu > 0";
         $result_a = pupe_query($query_a);
         $resultti_a = mysql_fetch_assoc($result_a);

@@ -466,7 +466,7 @@ class Unifaun {
     $uni_rcv_val->addAttribute('n', "vatno");
 
     if ($this->asiakasrow["email"] != "") {
-      $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->asiakasrow["email"])); # E-mail
+      $uni_rcv_val = $uni_receiver->addChild('val', utf8_encode($this->asiakasrow["email"])); // E-mail
       $uni_rcv_val->addAttribute('n', "email");
     }
 

@@ -186,7 +186,7 @@ if ($tee == 'listat') {
     $query = "SELECT count(tuoteno) as tuotteita,
               concat_ws('-', min(tuotepaikat.hyllyalue), max(tuotepaikat.hyllyalue)) as hyllyvali
               FROM tuotepaikat
-              WHERE yhtio = '{$kukarow['yhtio']}'
+              WHERE yhtio          = '{$kukarow['yhtio']}'
               AND inventointilista = '{$row['lista']}'";
     $_count_res = pupe_query($query);
     $_count_row = mysql_fetch_assoc($_count_res);
@@ -199,7 +199,7 @@ if ($tee == 'listat') {
               hyllyvali,
               hyllytaso
               FROM tuotepaikat
-              WHERE yhtio = '{$kukarow['yhtio']}'
+              WHERE yhtio          = '{$kukarow['yhtio']}'
               AND inventointilista = '{$row['lista']}'";
     $_chk_res = pupe_query($query);
 

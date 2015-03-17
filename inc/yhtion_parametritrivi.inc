@@ -3698,7 +3698,7 @@ if ($fieldname == "myynti_asiakhin_tallenna") {
         <option value = ''>".t("Myyntitilauksella ei voi tallentaa asiakashintoja")."</option>
         <option value = 'K' {$sel["K"]}>".t("Myyntitilauksen hinnat voi tallentaa asiakkaalle asiakashinnoiksi")."</option>
         <option value='V' {$sel["V"]}>" . t("Myyntitilauksen hinnat voi tallentaa asiakkaalle " .
-                                "asiakashinnoiksi valitulla tavalla") . "</option>
+    "asiakashinnoiksi valitulla tavalla") . "</option>
       </select></td>";
 
   $jatko = 0;

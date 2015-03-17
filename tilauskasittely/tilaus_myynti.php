@@ -2784,7 +2784,7 @@ if ($tee == '') {
 
       $style = $yhtiorow["myynti_asiakhin_tallenna"] == "V" ? "style='margin-left:10px;'" : "";
 
-          echo "<input {$style} type='submit' value='".t("Siirrä tuotteet asiakashinnoiksi")."'>";
+      echo "<input {$style} type='submit' value='".t("Siirrä tuotteet asiakashinnoiksi")."'>";
 
       if ($yhtiorow["myynti_asiakhin_tallenna"] == "V") {
         $mahdolliset_liitokset = array(
@@ -2809,7 +2809,7 @@ if ($tee == '') {
         echo "</select>";
       }
 
-          echo "</form>";
+      echo "</form>";
     }
 
     if ($kukarow["extranet"] == "" and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T") and file_exists("osamaksusoppari.inc")) {

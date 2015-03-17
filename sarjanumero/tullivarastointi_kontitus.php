@@ -54,22 +54,17 @@ $query = "SELECT
           AND lasku.viesti = 'tullivarastotoimitus'
           AND lasku.tila = 'L'
           AND lasku.alatila = 'A'
-          GROUP BY toimitustunnus, nimitys, malli";
+          GROUP BY tilausrivi.tuoteno";
 $result = pupe_query($query);
 
 while ($rivi = mysql_fetch_assoc($result)) {
 
-  $toimitukset[$rivi['toimitustunnus']]['konttimaara'] = $rivi['konttimaara'];
   $toimitukset[$rivi['toimitustunnus']]['asiakas'] = $rivi['nimi'];
   $toimitukset[$rivi['toimitustunnus']]['rivit'][] = $rivi;
-
 }
 
 $otsikko = t("Valitse kontitettava erä");
 $view = 'valinta';
-
-
-
 
 echo "<meta name='viewport' content='width=device-width, maximum-scale=1.0' />\n";
 echo "<link rel='stylesheet' type='text/css' href='ipad.css' />\n";

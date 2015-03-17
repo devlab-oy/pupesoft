@@ -173,7 +173,7 @@ if ($tee == "FILE") {
         if ($_kerayserat and !tarkista_varaston_hyllypaikka($hylp0, $hylp1, $hylp2, $hylp3)) {
           echo "<font class='error'>";
           echo t("VIRHE: Varastopaikkaa ei ole olemassa")."! ";
-          echo t("Rivi %d", "", $excei + 1)," {$tuo} {$hyl}";
+          echo t("Rivi %d", "", $excei + 1), " {$tuo} {$hyl}";
           echo "</font><br />";
           continue;
         }

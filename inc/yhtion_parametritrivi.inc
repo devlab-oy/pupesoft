@@ -2995,8 +2995,8 @@ if ($fieldname == "jt_rivien_saapumisajan_nayttaminen") {
 
   $ulos .= "<option value=''>" . t("Ei n‰ytet‰ jt-rivien saapumisaikoja") . "</option>";
   $ulos .= "<option value='K' {$sel["K"]}>" . t("N‰ytet‰‰n jt-rivien saapumisaika " .
-                                                "tilausvahvistuksessa ja l‰hetteess‰, jos se on " .
-                                                "tiedossa") . "</option>";
+    "tilausvahvistuksessa ja l‰hetteess‰, jos se on " .
+    "tiedossa") . "</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3116,11 +3116,11 @@ if ($fieldname == "raaka_aine_tiliointi") {
   $sel = $trow[$i] == 'Y' ? ' selected' : '';
 
   $ulos .= "<option value = ''>" .
-           t("Tiliˆid‰‰n raaka-aineiden varasto ja varastonmuutokset varasto ja " .
-             "varastonmuutostileille");
+    t("Tiliˆid‰‰n raaka-aineiden varasto ja varastonmuutokset varasto ja " .
+    "varastonmuutostileille");
   $ulos .= "<option value = 'Y' $sel>" .
-           t("Tiliˆid‰‰n varasto ja varastonmuutos raaka-ainetileille, jos tuotetyyppi on " .
-             "raaka-aine");
+    t("Tiliˆid‰‰n varasto ja varastonmuutos raaka-ainetileille, jos tuotetyyppi on " .
+    "raaka-aine");
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -3507,8 +3507,8 @@ if ($fieldname == "reklamaation_kasittely") {
 
   $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">
         <option value = ''>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n lyhyemp‰‰ prosessia")."</option>
-        <option value = 'U' {$sel['U']}>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n laajempaa prosessia vastaanotolla, purkulistalla ja vastaanottokuittauksella")."</option>
-        <option value = 'X' {$sel['X']}>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n laajempaa prosessia purkulistalla ja vastaanottokuittauksella")."</option>
+        <option value = 'U' {$sel['U']}>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n laajempaa prosessia vastaanotolla, purkulistalla ja purkukuittauksella")."</option>
+        <option value = 'X' {$sel['X']}>".t("Reklamaation k‰sittelyss‰ k‰ytet‰‰n laajempaa prosessia purkulistalla ja purkukuittauksella. Takuu lyhyemm‰ll‰ prosessilla")."</option>
       </select></td>";
 
   $jatko = 0;
@@ -4223,8 +4223,8 @@ if ($fieldname == 'suoratoim_lisamyynti_osto') {
 
   $ulos .= "<option value=''>" . t("Suoratoimitusmyyntirivin m‰‰r‰‰ ei voi lis‰t‰ ostopuolella") . "</option>";
   $ulos .= "<option value='K' {$sel}>" .
-           t("Suoratoimitusmyyntirivin m‰‰r‰‰ voi lis‰t‰ ostopuolella") .
-           "</option>";
+    t("Suoratoimitusmyyntirivin m‰‰r‰‰ voi lis‰t‰ ostopuolella") .
+    "</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;
@@ -4530,6 +4530,12 @@ if ($fieldname == "tilausrivin_korvamerkinta") {
   $ulos .= "</option>";
 
   $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "tilausrivin_kateraja") {
+  $ulos = "<td><input type='number' min='0' max='100' name='{$nimi}' value='{$trow[$i]}'></td>";
 
   $jatko = 0;
 }

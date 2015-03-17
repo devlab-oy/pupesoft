@@ -128,7 +128,7 @@ if ($tee == "KORJAA" or $tee == "PERU") {
   if ($yhtiorow["raaka_aine_tiliointi"] == "Y") {
     $tilinot = "'{$yhtiorow["varasto"]}', '{$yhtiorow["raaka_ainevarasto"]}'";
     $muutostilinot = "'{$yhtiorow["varastonmuutos"]}', '{$yhtiorow["raaka_ainevarastonmuutos"]}'," .
-                     " '{$yhtiorow["varastonmuutos_inventointi"]}'";
+      " '{$yhtiorow["varastonmuutos_inventointi"]}'";
 
     if ($tuotetyyppi == "R") {
       $tilino = $yhtiorow["raaka_ainevarasto"];

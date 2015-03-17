@@ -29374,9 +29374,28 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
       $tuote_temp = TRUE;
     }
 
+    $tuote_temp = FALSE;
+
     mysql_data_seek($parametrit['result'], 0);
 
-    while ($row = mysql_fetch_assoc($parametrit['result'])) {
+    $_row_dummy = mysql_fetch_assoc($parametrit['result']);
+
+    mysql_data_seek($parametrit['result'], 0);
+
+    // foreach ($_row_dummy as $_header => &$_value) {
+    //   if ($_header == 'ytunnus') $_value = 'FI07099963';
+    //   else $_value = 1;
+    // }
+
+    $_rows = array();
+
+    while ($_row = mysql_fetch_assoc($parametrit['result'])) {
+      // array_push($_rows, $_row_dummy);
+      array_push($_rows, $_row);
+    }
+
+    // while ($row = mysql_fetch_assoc($parametrit['result'])) {
+    foreach ($_rows as $row) {
 
       $ryhmitys = '';
 
@@ -29393,8 +29412,7 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
             $ryhmitetty_array[$ryhmitys][$k] = 0;
           }
 
-          if (    isset($row[$k])
-            and $tuote_temp) {
+          if (isset($row[$k]) and $tuote_temp) {
 
             if (in_array($k, $parametrit['laske_kate'])) {
 
@@ -29402,9 +29420,7 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
               $hinta = $row[$b];
 
               $row[$k] = kate_kuluineen($row['tuoteno'], $hinta, $row[$k]);
-
             }
-
           }
 
           if (isset($row[$k])) {
@@ -29416,8 +29432,7 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
       else {
         foreach ($parametrit['sum'] as $k) {
 
-          if (    isset($row[$k])
-            and $tuote_temp) {
+          if (isset($row[$k]) and $tuote_temp) {
 
             if (in_array($k, $parametrit['laske_kate'])) {
 
@@ -29425,15 +29440,15 @@ if (!function_exists("tilausrivin_tarkistus_riveittain")) {
               $hinta = $row[$b];
 
               $row[$k] = kate_kuluineen($row['tuoteno'], $hinta, $row[$k]);
-
             }
-
           }
 
           if (isset($row[$k])) {
             $ryhmitetty_array[$ryhmitys][$k] =  $row[$k];
           }
-
+          else {
+            $ryhmitetty_array[$ryhmitys][$k] = 0;
+          }
         }
       }
 

@@ -2145,11 +2145,27 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
 
     $hintapyoristys_echo = $tilausrivi["hinta"] * generoi_alekentta_php($tilausrivi, 'M', 'kerto');
 
+    $asiakas_hinta_liitos = isset($asiakas_hinta_liitos) ? $asiakas_hinta_liitos : "";
+
+    switch ($asiakas_hinta_liitos) {
+    case "ytunnus":
+      $liitoslisa = "ytunnus = '{$asiakasrow["ytunnus"]}'";
+      break;
+    case "asiakasryhma":
+      $liitoslisa = "ryhma = '{$asiakasrow["ryhma"]}'";
+      break;
+    case "piiri":
+      $liitoslisa = "piiri = '{$asiakasrow["piiri"]}'";
+      break;
+    default:
+      $liitoslisa = "asiakas = '{$laskurow["liitostunnus"]}'";
+    }
+
     $query = "SELECT *
               FROM asiakashinta
               where yhtio  = '$kukarow[yhtio]'
               and tuoteno  = '$tilausrivi[tuoteno]'
-              and asiakas  = '$laskurow[liitostunnus]'
+              and {$liitoslisa}
               and hinta    = round($hintapyoristys_echo * $tilausrivi[myyntihinta_maara], $yhtiorow[hintapyoristys])
               and valkoodi = '$laskurow[valkoodi]'";
     $chk_result = pupe_query($query);
@@ -2158,7 +2174,7 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
       $query = "INSERT INTO asiakashinta SET
                 yhtio      = '$kukarow[yhtio]',
                 tuoteno    = '$tilausrivi[tuoteno]',
-                asiakas    = '$laskurow[liitostunnus]',
+                {$liitoslisa},
                 hinta      = round($hintapyoristys_echo * $tilausrivi[myyntihinta_maara], $yhtiorow[hintapyoristys]),
                 valkoodi   = '$laskurow[valkoodi]',
                 alkupvm    = now(),
@@ -2764,9 +2780,36 @@ if ($tee == '') {
           <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
           <input type='hidden' name='projektilla' value='$projektilla'>
           <input type='hidden' name='orig_tila' value='$orig_tila'>
-          <input type='hidden' name='orig_alatila' value='$orig_alatila'>
-          <input type='submit' value='".t("Siirrä tuotteet asiakashinnoiksi")."'>
-          </form>";
+          <input type='hidden' name='orig_alatila' value='$orig_alatila'>";
+
+      $style = $yhtiorow["myynti_asiakhin_tallenna"] == "V" ? "style='margin-left:10px;'" : "";
+
+      echo "<input {$style} type='submit' value='".t("Siirrä tuotteet asiakashinnoiksi")."'>";
+
+      if ($yhtiorow["myynti_asiakhin_tallenna"] == "V") {
+        $mahdolliset_liitokset = array(
+          "liitostunnus" => "Asiakkaan tunnuksella",
+          "ytunnus"      => "Y-tunnuksella"
+        );
+
+        if (!empty($asiakasrow["ryhma"])) {
+          $mahdolliset_liitokset["asiakasryhma"] = "Asiakasryhmälle";
+        }
+
+        if (!empty($asiakasrow["piiri"])) {
+          $mahdolliset_liitokset["piiri"] = "Piirille";
+        }
+
+        echo "<select id='asiakas_hinta_liitos' name='asiakas_hinta_liitos'>";
+
+        foreach ($mahdolliset_liitokset as $liitos => $teksti) {
+          echo "<option value='{$liitos}'>" . t($teksti) . "</option>";
+        }
+
+        echo "</select>";
+      }
+
+      echo "</form>";
     }
 
     if ($kukarow["extranet"] == "" and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T") and file_exists("osamaksusoppari.inc")) {

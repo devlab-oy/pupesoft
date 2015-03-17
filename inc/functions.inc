@@ -8379,7 +8379,7 @@ if (!function_exists('muuta_kuvan_koko')) {
   function muuta_kuvan_koko($ykoko, $xkoko, $type, $taulu, $upfile1) {
     global $kukarow, $yhtiorow, $_FILES;
 
-    if ($yhtiorow['kuvapankki_polku'] != "") $dirri = $yhtiorow['kuvapankki_polku']."/".$kukarow['yhtio']."/".$taulu."/".$type."/";
+    if ($taulu != "tmp" and $yhtiorow['kuvapankki_polku'] != "") $dirri = $yhtiorow['kuvapankki_polku']."/".$kukarow['yhtio']."/".$taulu."/".$type."/";
     else $dirri = "/tmp/";
 
     list($usec, $sec) = explode(" ", microtime());

@@ -81,7 +81,12 @@ if ($tee == 'LISAA') {
       echo $retval;
     }
     else {
+      $uusi_filu = muuta_kuvan_koko(0, 130, "thumb", "tmp", "userfile");
       $kuva = tallenna_liite("userfile", "kalenteri", 0, $selite);
+
+      if ($uusi_filu != "") {
+        unlink($uusi_filu);
+      }
     }
 
     $uutinen = nl2br(strip_tags($uutinen, '<a>'));

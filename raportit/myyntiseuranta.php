@@ -2778,6 +2778,11 @@ else {
         }
 
         $query .= $tilauslisa3;
+
+        if (!empty($group)) {
+          $query .= ", concat({$group}) group_by_column";
+        }
+
         $query .= "\nFROM lasku use index (yhtio_tila_tapvm)
               JOIN yhtio ON (yhtio.yhtio = lasku.yhtio)
               JOIN tilausrivi use index ({$index}) ON (tilausrivi.yhtio=lasku.yhtio and tilausrivi.{$ouusio}=lasku.tunnus and tilausrivi.tyyppi={$tyyppi})
@@ -2902,7 +2907,7 @@ else {
 
           $_parametrit["result"] = $result;
 
-          $rows = tilausrivin_tarkistus_riveittain($_parametrit);
+          $rows = tilausrivin_tarkistus_riveittain($_parametrit, true);
 
           echo "<pre>",var_dump($rows),"</pre>";
           // exit;

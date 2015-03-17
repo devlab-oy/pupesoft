@@ -503,6 +503,7 @@ function konttierittely_parametrit($konttiviite) {
   $query = "SELECT
             tilausrivin_lisatiedot.konttinumero,
             tilausrivin_lisatiedot.kontin_mrn,
+            tilausrivin_lisatiedot.kontin_taarapaino,
             tilausrivin_lisatiedot.sinettinumero,
             tilausrivin_lisatiedot.asiakkaan_tilausnumero,
             tilausrivin_lisatiedot.asiakkaan_rivinumero,
@@ -537,7 +538,8 @@ function konttierittely_parametrit($konttiviite) {
     $total_rullat += $rivi['rullia'];
 
     $kontit[$rivi['konttinumero']]['mrn'] = $rivi['kontin_mrn'];
-    $kontit[$rivi['konttinumero']]['sinetti'] =$rivi['sinettinumero'];
+    $kontit[$rivi['konttinumero']]['sinetti'] = $rivi['sinettinumero'];
+    $kontit[$rivi['konttinumero']]['taara'] = $rivi['kontin_taarapaino'];
 
     $kontit[$rivi['konttinumero']]['paino'] += $rivi['paino'];
     $kontit[$rivi['konttinumero']]['rullia'] += $rivi['rullia'];
@@ -2515,7 +2517,7 @@ function kontitustiedot($konttiviite, $konttinumero = false) {
       $taara = $rulla['kontin_taarapaino'];
       $mrn = $rulla['kontin_mrn'];
 
-      $pakkalista[] = "UIB: " . $rulla['sarjanumero'] . " - " . (INT) $rulla['massa'] . " kg - " .$rulla['asiakkaan_tilausnumero'] . " - Roll Number: {$rulla['juoksu']}\n";
+      $pakkalista[] = "UIB: " . $rulla['sarjanumero'] . " - " . (INT) $rulla['massa'] . " kg - " .$rulla['asiakkaan_tilausnumero'] . " - Reel Number: {$rulla['juoksu']}\n";
 
       //$pakkalista .= "UIB: " . $rulla['sarjanumero'] . " - " . (INT) $rulla['massa'] . " kg - " .$rulla['asiakkaan_tilausnumero'] . "\n";
     }
@@ -3093,7 +3095,7 @@ function konttierittely_pdf($pdf_data) {
   $pdf->draw_text($x, $y, 'Containers:', $sivu, $bold);
   $pdf->draw_text($x+100, $y, $konttimaara. " pcs.", $sivu, $bold);
   $y -= 15;
-  $pdf->draw_text($x, $y, 'Rolls:', $sivu, $bold);
+  $pdf->draw_text($x, $y, 'Reels:', $sivu, $bold);
   $pdf->draw_text($x+100, $y, $total_rullat." pcs", $sivu, $bold);
   $y -= 15;
 
@@ -3114,7 +3116,9 @@ function konttierittely_pdf($pdf_data) {
 
     $pdf->draw_text($x, $y, 'Container:', $sivu, $bold);
     $pdf->draw_text($x+60, $y, $konttiviite, $sivu, $bold);
-    $pdf->draw_text($x+160, $y, $tilaukset['paino']. ' kg / '.$tilaukset['rullia']. ' rolls', $sivu, $bold);
+    $pdf->draw_text($x+160, $y, $tilaukset['paino']. ' kg / '.$tilaukset['rullia']. ' reels', $sivu, $bold);
+    $pdf->draw_text($x+300, $y, 'Tare weight: '.$tilaukset['taara']. ' kg', $sivu, $bold);
+
     $y -= 15;
 
     $pdf->draw_text($x, $y, 'MRN:', $sivu, $bold);
@@ -3128,6 +3132,7 @@ function konttierittely_pdf($pdf_data) {
     unset($tilaukset['rullia']);
     unset($tilaukset['paino']);
     unset($tilaukset['mrn']);
+    unset($tilaukset['taara']);
     unset($tilaukset['sinetti']);
 
     $pdf->draw_text($x, $y, 'Orders:', $sivu, $bold);
@@ -3140,7 +3145,7 @@ function konttierittely_pdf($pdf_data) {
 
       foreach ($rivit as $rivinumero => $rivi) {
         $pdf->draw_text($x, $y, $tilausnumero.":".$rivinumero, $sivu, $bold);
-        $pdf->draw_text($x+100, $y, $rivi['paino']. ' kg / '.$rivi['rullia']. ' rolls', $sivu, $bold);
+        $pdf->draw_text($x+100, $y, $rivi['paino']. ' kg / '.$rivi['rullia']. ' reels', $sivu, $bold);
         $y -= 15;
       }
     }
@@ -3611,7 +3616,11 @@ function toimittajat($rivitarkastus = false) {
                     ON tilausrivi.yhtio = toimi.yhtio
                     AND tilausrivi.otunnus = lasku.tunnus ";
 
-    $lisa_2 = " AND lasku.viesti = 'tullivarasto' AND lasku.tila != 'D' GROUP BY toimi.tunnus";
+    $lisa_2 = " AND lasku.viesti = 'tullivarasto'
+                AND lasku.tila != 'D'
+                AND tilausrivi.tuoteno NOT LIKE 'ROVV-%'
+                AND tilausrivi.tuoteno NOT LIKE 'VRP-%'
+                GROUP BY toimi.tunnus";
   }
 
   $query = "SELECT toimi.nimi, toimi.tunnus {$lisa_0}

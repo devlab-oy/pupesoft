@@ -1,6 +1,73 @@
 <?php
+
+if (isset($_POST['task']) and $_POST['task'] == 'pakkalista') {
+  $no_head = "yes";
+}
+
 require "inc/parametrit.inc";
 require 'inc/edifact_functions.inc';
+
+if (isset($task) and $task == 'pakkalista') {
+
+  $query = "SELECT
+            tuote.nimitys,
+            tuote.malli,
+            tuote.tuotemassa,
+            tilausrivi.tilkpl,
+            tilausrivin_lisatiedot.kontin_taarapaino,
+            tilausrivin_lisatiedot.konttinumero,
+            tilausrivin_lisatiedot.sinettinumero
+            FROM lasku
+            JOIN tilausrivi
+              ON tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+            JOIN tilausrivin_lisatiedot
+              ON tilausrivin_lisatiedot.yhtio = lasku.yhtio
+              AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
+            JOIN tuote
+              ON tuote.yhtio = lasku.yhtio
+              AND tuote.tuoteno = tilausrivi.tuoteno
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tunnus = '{$toimitustunnus}'";
+  $result = pupe_query($query);
+
+  $pakkalista = array();
+  $paino = 0;
+  $kpl = 0;
+
+  while ($rivi = mysql_fetch_assoc($result)) {
+
+    $rivipaino = $rivi['tilkpl'] * $rivi['tuotemassa'];
+
+    $pakkalista[] = $rivi['nimitys'] . " - " . $rivi['malli'] . " - " . $rivipaino . ' kg';
+
+    $konttinumero = $rivi['konttinumero'];
+    $sinettinumero = $rivi['sinettinumero'];
+
+    $paino += $rivipaino;
+    $kpl += $rivi['tilkpl'];
+    $taara = $rivi['kontin_taarapaino'];
+  }
+
+  $pdf_data = array(
+    'pakkalista' => $pakkalista,
+    'taara' => $taara,
+    'kpl' => $kpl,
+    'paino' => $paino,
+    'konttinumero' => $konttinumero,
+    'sinettinumero' => $sinettinumero
+    );
+
+  $logo_info = pdf_logo();
+  $pdf_data['logodata'] = $logo_info['logodata'];
+  $pdf_data['scale'] = $logo_info['scale'];
+
+  $pdf_tiedosto = pakkalista_pdf($pdf_data);
+
+  header("Content-type: application/pdf");
+  echo file_get_contents($pdf_tiedosto);
+  die;
+}
 
 $errors = array();
 
@@ -16,7 +83,51 @@ if (isset($task) and $task == 'toimitus_valmis') {
 unset($task);
 }
 
+if (isset($task) and $task == 'sinetoi') {
 
+  if (empty($konttinumero)) {
+    $errors['konttinumero'] = t("Syötä konttinumero");
+  }
+
+  if (empty($sinettinumero)) {
+    $errors['sinettinumero'] = t("Syötä sinettinumero");
+  }
+
+  if(count($errors) == 0) {
+
+    $query = "UPDATE lasku SET
+              alatila = 'D'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$toimitustunnus}'";
+    pupe_query($query);
+
+    $query = "UPDATE tilausrivi SET
+              toimitettu = '{$kukarow['kuka']}',
+              toimitettuaika = NOW()
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND otunnus = '{$toimitustunnus}'";
+    pupe_query($query);
+
+    $query = "SELECT group_concat(tunnus)
+              FROM tilausrivi
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND otunnus = '{$toimitustunnus}'";
+    $result = pupe_query($query);
+    $tunnukset = mysql_result($result, 0);
+
+    $query = "UPDATE tilausrivin_lisatiedot SET
+              konttinumero = '{$konttinumero}',
+              sinettinumero = '{$sinettinumero}'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tilausrivitunnus IN ({$tunnukset})";
+    pupe_query($query);
+
+    unset($task);
+  }
+  else{
+    $task = 'konttitiedot';
+  }
+}
 
 if (isset($task) and $task == 'lisaa') {
 
@@ -83,6 +194,10 @@ if (isset($task) and $task == 'lisaa') {
 
 if (!isset($task)) {
   $otsikko = t("Toimitukset");
+}
+
+if (isset($task) and $task == 'konttitiedot') {
+  $otsikko = t("Syötä kontin tiedot");
 }
 
 if (isset($task) and $task == 'hae_toimitusrivit') {
@@ -578,6 +693,64 @@ if (isset($task) and ($task == 'hae_toimitusrivit' or $task == 'perusta'or $task
 }
 
 
+if (isset($task) and $task == 'konttitiedot') {
+
+  echo "
+    <form method='post'>
+    <table>
+    <tr>
+      <th>" . t("Asiakas") ."</th>
+      <td>{$asiakas}</td>
+      <td class='back error'></td>
+    </tr>
+
+    <tr>
+      <th>" . t("Toimitus#") ."</th>
+      <td>{$toimitustunnus}</td>
+      <td class='back error'></td>
+    </tr>
+
+    <tr>
+      <th>" . t("Konttinumero") ."</th>
+      <td><input type='text' name='konttinumero' value='{$konttinumero}' /></td>
+      <td class='back error'>{$errors['konttinumero']}</td>
+    </tr>
+    <tr>
+      <th>" . t("Sinettinumero") ."</th>
+      <td><input type='text' name='sinettinumero' value='{$sinettinumero}' /></td>
+      <td class='back error'>{$errors['sinettinumero']}</td>
+    </tr>";
+
+/* ei ehkä tarvita näitä
+
+    <tr>
+      <th>" . t("Taarapaino") ." (kg)</th>
+      <td><input type='text' name='taara' value='{$taara}' /></td>
+      <td class='back error'>{$errors['taara']}</td>
+    </tr>
+    <tr>
+      <th>" . t("ISO-koodi") ."</th>
+      <td><input type='text' name='isokoodi' value='{$isokoodi}' /></td>
+      <td class='back error'>{$errors['isokoodi']}</td>
+    </tr>
+    <tr>
+*/
+
+
+  echo "<th></th>
+      <td align='right'>
+      <input type='hidden' name='task' value='sinetoi' />
+      <input type='hidden' name='toimitustunnus' value='{$toimitustunnus}' />
+      <input type='hidden' name='asiakas' value='{$asiakas}' />
+      <input type='submit' value='". t("Sinetöi") ."' /></td>
+      <td class='back'></td>
+    </tr>
+    </table>
+    </form>";
+
+
+}
+
 
 
 if (!isset($task)) {
@@ -680,8 +853,9 @@ if (!isset($task)) {
         echo "
           <form method='post'>
           <input type='hidden' name='task' value='konttitiedot' />
+          <input type='hidden' name='asiakas' value='{$asiakkaat[$tunnus]}'>
           <input type='hidden' name='toimitustunnus' value='{$toimitusrivi['toimitustunnus']}'>
-          <input type='submit' value='" . t("syötä konttitiedot") . "'/>
+          <input type='submit' value='" . t("Syötä konttitiedot") . "'/>
           </form>";
       }
       elseif ($statuskoodit[$tunnus] == 'N') {
@@ -693,6 +867,21 @@ if (!isset($task)) {
           <input type='submit' value='" . t("Muokkaa") . "'/>
           </form>";
       }
+      elseif ($statuskoodit[$tunnus] == 'LD') {
+
+        js_openFormInNewWindow();
+
+        echo "<form method='post' id='hae_pakkalista{$toimitusrivi['toimitustunnus']}'>";
+        echo "<input type='hidden' name='task' value='pakkalista' />";
+        echo "<input type='hidden' name='tee' value='XXX' />";
+        echo "<input type='hidden' name='toimitustunnus' value='{$toimitusrivi['toimitustunnus']}' />";
+        echo "</form>";
+        echo "<button onClick=\"js_openFormInNewWindow('hae_pakkalista{$toimitusrivi['toimitustunnus']}', 'Pakkalista'); return false;\" />";
+        echo t("Pakkalista");
+        echo "</button>";
+
+
+      }
 
 
 
@@ -703,16 +892,5 @@ if (!isset($task)) {
   echo "</table>";
 }
 
-
-
-
-
-if (count($errors) > 0) {
-  echo "<div class='error' style='text-align:center'>";
-  foreach ($errors as $error) {
-    echo $error."<br>";
-  }
-  echo "</div>";
-}
 
 require "inc/footer.inc";

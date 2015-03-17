@@ -61,8 +61,15 @@ if ($yhtiorow['kerayserat'] != 'K' and $kollityht > 0) {
     $unifaun->setToimitustapaRow($toitarow);
     $unifaun->setMehto($mehto);
     $unifaun->setRahtikirjaRow($rakir_row);
-    $unifaun->setYhteensa($row['summa']);
-    $unifaun->setViite($row['viesti']);
+    $unifaun->setYhteensa($laskurow['summa']);
+
+    if ($rakir_row["jv"] != '' or $mehto['jv'] != '') {
+      $unifaun->setViite($laskurow['viite']);
+    }
+    else {
+      $unifaun->setViite($laskurow['viesti']);
+    }
+
     $unifaun->setKirjoitin($kirjoitin_row['unifaun_nimi']);
     $unifaun->_getXML();
 

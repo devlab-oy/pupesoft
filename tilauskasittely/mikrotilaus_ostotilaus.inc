@@ -29,6 +29,7 @@ if ($tee == "file") {
       $kpl      = (float) str_replace(",", ".", $rivi[1]);
 
       $toimaika   = pupesoft_cleanstring($rivi[2]);
+      $toimaika = choose_correct_date($toimaika);
 
       if (trim($toimaika) == "") {
         $toimaika = $laskurow["toimaika"];

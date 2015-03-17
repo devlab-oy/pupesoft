@@ -1531,9 +1531,9 @@ if (!function_exists('rivi_lahete')) {
 
             list($perhetuoteno, $perhekpl) = explode('¡!¡!', $perhetuote);
 
-            $query = "SELECT * 
-                      FROM tuote 
-                      WHERE yhtio = '{$kukarow['yhtio']}' 
+            $query = "SELECT *
+                      FROM tuote
+                      WHERE yhtio = '{$kukarow['yhtio']}'
                       AND tuoteno = '$perhetuoteno'";
             $lapsi_res = pupe_query($query);
             $lapsi_row = mysql_fetch_assoc($lapsi_res);

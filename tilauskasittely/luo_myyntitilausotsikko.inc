@@ -5,8 +5,8 @@ if (!function_exists("luo_myyntitilausotsikko")) {
     global $kukarow, $yhtiorow, $session;
 
     $query  = "SELECT *,
-               if(asiakas.gsm != '', asiakas.gsm, 
-                 if(asiakas.tyopuhelin != '', asiakas.tyopuhelin, 
+               if(asiakas.gsm != '', asiakas.gsm,
+                 if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
                    if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
                FROM asiakas
                WHERE yhtio = '$kukarow[yhtio]'
@@ -153,9 +153,9 @@ if (!function_exists("luo_myyntitilausotsikko")) {
       if ($kukarow["extranet"] != '' and empty($yhtiorow['extranet_keraysprioriteetti'])) {
         $query = "SELECT distinct selite
                   FROM avainsana
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  and laji = 'asiakasluokka'
-                  and selite != ''
+                  WHERE yhtio  = '$kukarow[yhtio]'
+                  and laji     = 'asiakasluokka'
+                  and selite  != ''
                   ORDER BY 1
                   LIMIT 1";
         $prioresult = pupe_query($query);

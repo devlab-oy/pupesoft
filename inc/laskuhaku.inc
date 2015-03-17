@@ -377,7 +377,7 @@ if ($tee != '') {
   else {
     $rajaus = round($rajaus);
   }
-  
+
   if (!empty($jarj)) {
     $jarj .= ", tunnus";
   }

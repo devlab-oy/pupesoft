@@ -17,7 +17,7 @@ $jalkilaskenta_debug = 0; // 0 = ei echoilla debug koodia, 1 = ehchoillaa infoa,
 if (!function_exists("korjaalaskut")) {
   function korjaalaskut($tuoteno, $kehahin, $alku, $loppu, $korjtunnus) {
     global $kukarow, $yhtiorow, $jalkilaskenta_debug, $jalkilaskenta_debug_text, $varastotili,
-           $varastonmuutostili;
+    $varastonmuutostili;
 
     if ($korjtunnus != 0) {
       $lisa = " and tilausrivi.tunnus = '$korjtunnus' ";
@@ -561,7 +561,7 @@ if (!function_exists('korjaatapahtuma')) {
 
 if (!function_exists("hae_varastotilit")) {
   function hae_varastotilit($tuote_row) {
-    global $yhtiorow;
+    global $yhtiorow, $varastonmuutostili, $varastotili;
 
     $varastotili = $yhtiorow["varasto"];
     $varastonmuutostili = $yhtiorow["varastonmuutos"];
@@ -1116,7 +1116,7 @@ if ($tuoteno != '') {
 
                     if ($yhtiorow["raaka_aine_tiliointi"] == "Y") {
                       $varasto_tilit .= ", '{$yhtiorow["raaka_ainevarasto"]}', " .
-                                        "'{$yhtiorow["raaka_ainevarastonmuutos"]}'";
+                        "'{$yhtiorow["raaka_ainevarastonmuutos"]}'";
                     }
 
                     if ($inv_varasto_tilit['tilit'] != '') {

@@ -95,7 +95,7 @@ while ($row = mysql_fetch_assoc($res)) {
     $rivi .= pupesoft_csvstring($_arr['hyllypaikka']);
     $rivi .= "\n";
 
-   fwrite($fp, $rivi);
+    fwrite($fp, $rivi);
   }
 }
 

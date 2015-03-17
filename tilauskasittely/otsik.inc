@@ -741,12 +741,12 @@ if ($tila == "" and !isset($jatka)) {
       }
 
       $squery = "SELECT asiakas.*, tilaus_viesti as viesti, myynti_kommentti1 as comments,
-                  $puhlisa
-                  asiakas.tunnus liitostunnus,
-                  'O' kohdistettu, '' kohde, '' kauppatapahtuman_luonne,
-                  if(asiakas.gsm != '', asiakas.gsm,
-                    if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
-                      if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
+                 $puhlisa
+                 asiakas.tunnus liitostunnus,
+                 'O' kohdistettu, '' kohde, '' kauppatapahtuman_luonne,
+                 if(asiakas.gsm != '', asiakas.gsm,
+                   if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
+                     if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS toim_puh
                  FROM asiakas
                  WHERE tunnus = '$asiakasid'";
 
@@ -1495,9 +1495,17 @@ if ($tila == "" and !isset($jatka)) {
                 order by jarjestys, teksti, tunnus";
       $mresult = pupe_query($query);
 
+      if (empty($laskurow["maksuehto"]) and $kukarow["maksuehto"] != 0) {
+        $maksuehto_valinta = $kukarow["maksuehto"];
+      }
+      else {
+        $maksuehto_valinta = $srow["maksuehto"];
+      }
+
       while ($row = mysql_fetch_assoc($mresult)) {
         $sel = "";
-        if ($row["tunnus"] == $srow["maksuehto"]) {
+
+        if ($row["tunnus"] == $maksuehto_valinta) {
           $sel = 'selected';
         }
         $vasen_sarake[$vasen] .= "<option value='$row[tunnus]' $sel>".t_tunnus_avainsanat($row, "teksti", "MAKSUEHTOKV")."</option>";
@@ -2150,7 +2158,7 @@ if ($tila == "" and !isset($jatka)) {
       'toimtapa_apuro' => $toimtapa_apuro,
     );
     $ei_lahetettako = eilahetetta($args);
-    if ($ei_lahetettako) {
+    if ((!isset($laskurow["eilahetetta"]) and $kukarow["eilahetetta"] == "o") or $ei_lahetettako) {
       $eilah = 'CHECKED';
     }
     if ($srow['ketjutus']    != '') $eiket          = 'CHECKED';
@@ -2187,7 +2195,8 @@ if ($tila == "" and !isset($jatka)) {
         'poikkeava_yhtiorow' => $vt_yhtiorow,
       );
       $ei_lahetettako = eilahetetta($args);
-      if ($ei_lahetettako) {
+      if ((!isset($laskurow["eilahetetta"]) and $kukarow["eilahetetta"] == "o") or $ei_lahetettako
+      ) {
         $eilah = 'CHECKED';
       }
 
@@ -2224,7 +2233,8 @@ if ($tila == "" and !isset($jatka)) {
         'poikkeava_yhtiorow' => $vt_yhtiorow,
       );
       $ei_lahetettako = eilahetetta($args);
-      if ($ei_lahetettako) {
+      if ((!isset($laskurow["eilahetetta"]) and $kukarow["eilahetetta"] == "o") or $ei_lahetettako
+      ) {
         $eilah = 'CHECKED';
       }
       else {
@@ -2629,6 +2639,16 @@ if ($tila == "" and !isset($jatka)) {
       $asiakas = hae_asiakas($srow['liitostunnus']);
     }
 
+    if (empty($laskurow["toimitustapa"]) and $kukarow["toimitustapa"] != "") {
+      $toimitustapa_valinta = $kukarow["toimitustapa"];
+    }
+    elseif (empty($asiakas)) {
+      $toimitustapa_valinta = $srow["toimitustapa"];
+    }
+    elseif (!empty($asiakas)) {
+      $toimitustapa_valinta = $asiakas["toimitustapa"];
+    }
+
     foreach ($toimitustavat as $toimitustapa) {
 
       if (!empty($toimitustapa['sallitut_maat']) and !stristr($toimitustapa['sallitut_maat'], $srow['toim_maa'])) {
@@ -2638,13 +2658,7 @@ if ($tila == "" and !isset($jatka)) {
       echo "<div style='display: none; visibility: hidden;' id='merahti_toimitustapa_$toimitustapa[tunnus]'>$toimitustapa[merahti]</div>";
 
       if (in_array($toimitustapa['extranet'], array('', 'M')) or $toimitustapa['selite'] == $srow['toimitustapa']) {
-        $sel = "";
-        if (empty($asiakas) and $toimitustapa["selite"] == $srow["toimitustapa"]) {
-          $sel = 'selected';
-        }
-        elseif (!empty($asiakas) and $toimitustapa["selite"] == $asiakas["toimitustapa"]) {
-          $sel = 'selected';
-        }
+        $sel = $toimitustapa["selite"] == $toimitustapa_valinta ? 'selected' : "";
 
         $string .= "<option id='toimitustapa_$toimitustapa[tunnus]' value='$toimitustapa[selite]' $sel>";
         $string .= t_tunnus_avainsanat($toimitustapa, "selite", "TOIMTAPAKV");

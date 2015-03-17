@@ -38,20 +38,20 @@ if (!function_exists('hae_tuotteettomat')) {
     global $kukarow;
 
     $query = "SELECT tuotepaikat.tunnus ttun,
-            tuotepaikat.tuoteno,
-            tuotepaikat.saldo,
-            tuotepaikat.oletus,
-            concat_ws('-', tuotepaikat.hyllyalue,
-                           tuotepaikat.hyllynro,
-                           tuotepaikat.hyllyvali,
-                           tuotepaikat.hyllytaso) paikka,
-            tuote.tunnus
-            FROM tuotepaikat
-            LEFT JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio
-              AND tuote.tuoteno     = tuotepaikat.tuoteno)
-            WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
-            AND (tuote.tunnus is null or tuote.ei_saldoa != '')
-            ORDER BY tuotepaikat.tuoteno";
+              tuotepaikat.tuoteno,
+              tuotepaikat.saldo,
+              tuotepaikat.oletus,
+              concat_ws('-', tuotepaikat.hyllyalue,
+                             tuotepaikat.hyllynro,
+                             tuotepaikat.hyllyvali,
+                             tuotepaikat.hyllytaso) paikka,
+              tuote.tunnus
+              FROM tuotepaikat
+              LEFT JOIN tuote ON (tuote.yhtio = tuotepaikat.yhtio
+                AND tuote.tuoteno     = tuotepaikat.tuoteno)
+              WHERE tuotepaikat.yhtio = '{$kukarow['yhtio']}'
+              AND (tuote.tunnus is null or tuote.ei_saldoa != '')
+              ORDER BY tuotepaikat.tuoteno";
     $result = pupe_query($query);
 
     return $result;

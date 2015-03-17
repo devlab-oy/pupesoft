@@ -310,7 +310,7 @@ if ($tee == 'AVALITTU' and $tuoteno != '') {
   echo "<tr>";
   echo "<th>".t("Anna uusi tuotenumero")."<br>".t("joka perustetaan")."</th>";
   echo "<td class='back'>";
-  echo "<input type='checkbox' name='kopioi_tt' {$chk} /> ",t("Kopioi tuotteen toimittajat");
+  echo "<input type='checkbox' name='kopioi_tt' {$chk} /> ", t("Kopioi tuotteen toimittajat");
 
   echo "<br />";
 

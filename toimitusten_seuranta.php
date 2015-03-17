@@ -2195,9 +2195,6 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
 
               js_openFormInNewWindow();
 
-              $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
-              $logo_url = $palvelin2."view.php?id=".$yhtiorow["logo"];
-
               echo "&nbsp;<form method='post' id='hae_pakkalista{$_konttinumero}'>";
               echo "<input type='hidden' name='task' value='hae_pakkalista' />";
               echo "<input type='hidden' name='pakkalista' value='{$kontti['pakkalista']}' />";
@@ -2205,8 +2202,6 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
               echo "<input type='hidden' name='konttinumero' value='{$konttinumero}' />";
               echo "<input type='hidden' name='sinettinumero' value='{$kontti['sinettinumero']}' />";
               echo "<input type='hidden' name='paino' value='{$kontti['paino']}' />";
-              echo "<input type='hidden' name='session' value='{$session}' />";
-              echo "<input type='hidden' name='logo_url' value='{$logo_url}' />";
               echo "<input type='hidden' name='taara' value='{$kontti['taara']}' />";
               echo "<input type='hidden' name='kpl' value='{$kontti['kpl']}' />";
               echo "<input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />";

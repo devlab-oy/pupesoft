@@ -166,9 +166,9 @@ if (isset($task) and $task == 'perusta') {
       $errors[$key]["tilavuus"] = t("Tarkista tilavuus");
     }
 
-    if (empty($tiedot['lisatieto'])) {
-      $errors[$key]["lisatieto"] = t("Syötä lisätiedot");
-    }
+    //if (empty($tiedot['lisatieto'])) {
+    //  $errors[$key]["lisatieto"] = t("Syötä lisätiedot");
+    //}
 
   }
 
@@ -226,6 +226,7 @@ if (isset($task) and $task == 'perusta') {
                 tuoteno = '{$uusi_tuoteno}',
                 nimitys = '{$nimitys}',
                 malli = '{$malli}',
+                yksikko = '{$yksikko}',
                 muuta = '{$lisatieto}',
                 tuotemassa = '{$tuotemassa}'";
       pupe_query($query);
@@ -393,7 +394,23 @@ if (isset($view) and $view == "tuotetiedot") {
 
       <tr>
         <th>" . t("Määrä") ."</th>
-        <td><input type='text' name='tuote[{$laskuri}][maara]' value='$maara' /></td>
+        <td>
+          <input type='text' style='width:40px;' name='tuote[{$laskuri}][maara]' value='$maara' />";
+
+          echo "&nbsp;<select name='tuote[{$laskuri}][yksikko]' style='width:70px;'>
+                  <option value='KPL'>KPL - Kappaletta</option>
+                  <option value='KG'>KG - Kilogrammaa</option>
+                  <option value='H'>H - Tuntia</option>
+                  <option value='KM'>KM - Kilometriä</option>
+                  <option value='L'>L - Litraa</option>
+                  <option value='M'>M - Metriä</option>
+                  <option value='M2'>M2 - Neliömetriä</option>
+                  <option value='M3'>M3 - Kuutiometriä</option>
+                  <option value='PVA'>PVA - Päivää</option>
+                </select>";
+
+
+      echo "</td>
         <td class='back error'>{$errors[$laskuri]['maara']}</td>
       </tr>
 
@@ -655,7 +672,7 @@ if (isset($view) and $view == "perus") {
 
   }
   echo "
-    <form>
+    <form method='post'>
     <input type='hidden' name='task' value='aloita_perustus' />
     <input type='submit' value='". t("Perusta uusi tulonumero") . "' />
     </form><br><br>";

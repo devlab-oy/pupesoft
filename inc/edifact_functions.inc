@@ -426,7 +426,8 @@ function kontitus_parametrit($rullat_kontissa, $korjaus = false) {
     'tilauskoodi' => $konttiviite,
     'kontitus_info' => $kontitus_info,
     'total_paino' => $total_paino,
-    'tilaukset' => $tilaukset
+    'tilaukset' => $tilaukset,
+    'rivitullinimikkeet' => $rivitullinimikkeet
   );
 
   return $parametrit;
@@ -2023,7 +2024,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
         'tilausnro' => $_tilausnro,
         'rivinro' => $_rivi,
         'tilauksen_paino' => $_paino,
-        'tullinimike' = $tullinimike
+        'tullinimike' => $tullinimike
         );
 
     }

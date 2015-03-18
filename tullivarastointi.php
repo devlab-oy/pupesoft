@@ -609,6 +609,12 @@ if (isset($view) and $view == 'tulotiedot') {
 // perusn‰kym‰
 if (isset($view) and $view == "perus") {
 
+  echo "
+    <form method='post'>
+    <input type='hidden' name='task' value='aloita_perustus' />
+    <input type='submit' value='". t("Perusta uusi tulonumero") . "' />
+    </form><br><br>";
+
   $query = "SELECT
             lasku.asiakkaan_tilausnumero,
             lasku.tunnus,
@@ -647,7 +653,7 @@ if (isset($view) and $view == "perus") {
   while ($tulo = mysql_fetch_assoc($result)) {
 
     if ($tulo['varastokoodi'] == 'ROVV' or $tulo['varastokoodi'] == 'VRP') {
-      $varastotyyppi = 'v‰liaikainen';
+        $varastotyyppi = 'v‰liaikainen';
     }
     else {
       $varastotyyppi = 'normaali';
@@ -669,13 +675,7 @@ if (isset($view) and $view == "perus") {
     $tuotteet[$tulo['asiakkaan_tilausnumero']]['vt'] = $varastotyyppi;
     $tuotteet[$tulo['asiakkaan_tilausnumero']]['tulotunnus'] = $tulo['tunnus'];
     $tuotteet[$tulo['asiakkaan_tilausnumero']]['varastokoodi'] = $tulo['varastokoodi'];
-
   }
-  echo "
-    <form method='post'>
-    <input type='hidden' name='task' value='aloita_perustus' />
-    <input type='submit' value='". t("Perusta uusi tulonumero") . "' />
-    </form><br><br>";
 
   echo "<table>";
   echo "<tr>";
@@ -683,9 +683,7 @@ if (isset($view) and $view == "perus") {
   echo "<th>".t("Toimitusp‰iv‰")."</th>";
   echo "<th>".t("Toimittaja")."</th>";
   echo "<th>".t("Varasto")."</th>";
-
   echo "<th>";
-
   echo "<div style='overflow:auto'>";
   echo "<div style='float:left; width:150px; text-align:center; border-right:1px solid white;'>";
   echo t("nimitys");
@@ -697,19 +695,15 @@ if (isset($view) and $view == "perus") {
   echo t("Paikka");
   echo '</div>';
   echo '</div>';
-
-
   echo "</th>";
-
   echo "<th>".t("Status")."</th>";
-
   echo "<th class='back'></th>";
   echo "</tr>";
+
 
   foreach ($tuotteet as $key => $info) {
 
     echo "<tr>";
-
     echo "<td valign='top'>";
     echo $key;
     echo "</td>";
@@ -729,18 +723,15 @@ if (isset($view) and $view == "perus") {
       $interval = $date1->diff($date2);
 
       echo (20 - $interval->days) . ' ' . t("P‰iv‰‰ j‰ljell‰");
-
-
       echo "<span>";
 
     }
 
-    echo "</td>";
 
+    echo "</td>";
     echo "<td valign='top'>";
     echo $info['toimittaja'];
     echo "</td>";
-
     echo "<td valign='top'>";
 
     if ($info['vt'] == 'v‰liaikainen') {
@@ -804,22 +795,17 @@ if (isset($view) and $view == "perus") {
 
       echo $tuote['tuote'];
       echo '</div>';
-
       echo "<div style='float:left; width:60px; text-align:center; border-right:1px solid white;'>";
       echo (int) $tuote['kpl'];
       echo '</div>';
-
       echo "<div style='float:left; width:60px; text-align:center;'>";
       echo $paikka;
       echo '</div>';
-
-
       echo '</div>';
 
     }
 
     echo "</td>";
-
     echo "<td valign='top'>";
 
     if ($info['vt'] == 'v‰liaikainen') {
@@ -849,7 +835,6 @@ if (isset($view) and $view == "perus") {
     }
 
     echo "</td>";
-
     echo "<td class='back' valign='top'>";
 
     if ($info['vt'] == 'v‰liaikainen' and $kaikki_varastossa) {
@@ -862,18 +847,10 @@ if (isset($view) and $view == "perus") {
         <input type='submit' value='" . t("Siirr‰ tullivarastoon") . "'/>
         </form><br><br>";
     }
-
     echo "</td>";
-
     echo "</tr>";
-
   }
   echo "</table>";
-
 }
-
-
-
-
 
 require "inc/footer.inc";

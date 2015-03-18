@@ -110,46 +110,32 @@ if ($view == 'valinta') {
   foreach ($toimitukset as $toimitustunnus => $toimitus) {
 
     echo "<form method='post' action=''><div style='margin-bottom:10px; background:silver;   border-radius: 5px;'>";
-
     echo "<table border='0' cellspacing='5' cellpadding='0'>";
     echo "<tr>";
-
     echo "<td valign='top' style='background:white; padding:5px; margin:5px; width:190px;  border-radius: 3px; text-align:left; line-height:20px;'>";
     echo $toimitus['asiakas'] . "<br>";
     echo t("Numero: ") . $toimitustunnus . "<br>";
     echo "</td>";
-
-
-
-
     echo "<td valign='top' style=' padding:0px; margin:0px; width:430px; border-radius: 3px;'>";
 
     $rivitunnukset = '';
 
     foreach ($toimitus['rivit'] as $toimitusrivi) {
 
-
-
       echo "<div style='text-align:left; padding:10px; background:#e7e7e7; border-radius: 3px; margin:3px; '>";
-
       echo "<div style='text-align:left;display:inline-block; width:150px;'>";
       echo "<input style='font-size:1em; width:60px;' type ='text' name='kpl[".$toimitusrivi['tunnus']."]' value='" . (int) $toimitusrivi['kpl'] . "' />";
       echo "<input type='hidden' name='alku_kpl[".$toimitusrivi['tunnus']."]' value='" . (int) $toimitusrivi['kpl'] . "' />";
       echo "&nbsp;" . t("kpl");
       echo "</div>";
-
       echo "<div style='text-align:left;display:inline-block; margin-right:20px;'>";
       echo $toimitusrivi['nimitys'] . ' - ' . $toimitusrivi['malli'];
       echo "</div>";
-
       echo "</div>";
 
       $rivitunnukset .= $toimitusrivi['tunnus'] . ',';
     }
     echo "</td>";
-
-
-
     echo "<td style='background:silver; padding:5px; margin:5px; border-radius: 3px;'>";
 
     $rivitunnukset = rtrim($rivitunnukset, ',');
@@ -167,7 +153,6 @@ if ($view == 'valinta') {
     echo "</div>";
   }
 
-
   echo "</div>";
 
   echo "<script type='text/javascript'>";
@@ -182,6 +167,5 @@ if ($view == 'valinta') {
   </script>";
 
 }
-
 
 require 'inc/footer.inc';

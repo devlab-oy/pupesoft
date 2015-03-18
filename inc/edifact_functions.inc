@@ -354,6 +354,7 @@ function kontitus_parametrit($rullat_kontissa, $korjaus = false) {
             tr.toimitettu,
             ss.massa as paino,
             trlt.juoksu,
+            trlt.tullinimike,
             trlt.asiakkaan_rivinumero as rivinro,
             lasku.asiakkaan_tilausnumero as tilauskoodi,
             laskun_lisatiedot.matkakoodi,
@@ -380,6 +381,7 @@ function kontitus_parametrit($rullat_kontissa, $korjaus = false) {
   $tilaukset = array();
   $rullarivit = array();
   $rivipainot = array();
+  $rivitullinimikkeet = array();
   $total_paino = 0;
 
   while ($row = mysql_fetch_assoc($result)) {
@@ -393,6 +395,7 @@ function kontitus_parametrit($rullat_kontissa, $korjaus = false) {
     $tilaukset[$laskutunnus]['laskutunnus'] = $laskutunnus;
 
     $rivipainot[$index] = $rivipainot[$index] + $row['paino'];
+    $rivitullinimikkeet[$index] = $row['tullinimike'];
 
     $total_paino = $total_paino + $row['paino'];
 
@@ -931,10 +934,13 @@ function laadi_edifact_sanoma($parametrit, $korjaus = false) {
   }
   elseif ($laji == 'rekkakontitus') {
 
+    // LOC+5 -segmentti (lähtö-infoa)
+    $s .= "LOC+5+FIKTMU::86:KOTKA+FIKTMU::86:MUSSALO'";
+    $segmentit++;
+
     // EQD+CN -segmentti (kontti-infoa)
     $s .= "EQD+TE+". $kuljettaja_info['traileri_rekno'] ."+::TE+++5'";
     $segmentit++;
-
   }
 
   if ($tyyppi == 'RECADV' and !empty($varasto_info['koodi1'])) {
@@ -1074,6 +1080,11 @@ function laadi_edifact_sanoma($parametrit, $korjaus = false) {
 
       $s .= "LIN+999'";
       $segmentit++;
+
+      if ($rivitullinimikkeet[$key] > 0) {
+        $s .= "PIA+1+" . $rivitullinimikkeet[$key] . ":HS'";
+        $segmentit++;
+      }
 
       // DTM -segmentti
       $s .= "DTM+411:";
@@ -1586,6 +1597,7 @@ function kasittele_bookkaussanoma($edi_data) {
 
         $update_query = "UPDATE tilausrivin_lisatiedot SET
                          juoksu = '{$rulla['juoksu']}',
+                         tullinimike = '{$rulla['tullinimike']}',
                          tilauksen_paino = '{$rulla['tilauksen_paino']}',
                          asiakkaan_tilausnumero = '{$rulla['asiakkaan_tilausnumero']}',
                          asiakkaan_rivinumero = '{$rulla['asiakkaan_rivinumero']}'
@@ -1722,6 +1734,7 @@ function kasittele_bookkaussanoma($edi_data) {
 
         $update_query = "UPDATE tilausrivin_lisatiedot SET
                          juoksu = '{$rulla['juoksu']}',
+                         tullinimike = '{$rulla['tullinimike']}',
                          tilauksen_paino = '{$rulla['tilauksen_paino']}',
                          asiakkaan_tilausnumero = '{$rulla['asiakkaan_tilausnumero']}',
                          asiakkaan_rivinumero = '{$rulla['asiakkaan_rivinumero']}'
@@ -1911,6 +1924,13 @@ function kasittele_rahtikirjasanoma($edi_data) {
           $_paino = $paino_info_osat[1];
         }
 
+        if (substr($edi_data[$luetaan], 0, 5) == "PIA+1") {
+          $osat = explode("+", $edi_data[$luetaan]);
+          $tullinimike_info = $osat[2];
+          $tullinimike_info_osat = explode(":", $tullinimike_info);
+          $tullinimike = $tullinimike_info_osat[0];
+        }
+
         if (substr($edi_data[$luetaan], 0, 6) == "RFF+CU") {
           $osat = explode("+", $edi_data[$luetaan]);
           $tilaus_info = $osat[1];
@@ -1942,7 +1962,6 @@ function kasittele_rahtikirjasanoma($edi_data) {
         }
 
       }
-
     }
 
     if (substr($value, 0, 7) == 'CPS+PKG') {
@@ -2003,7 +2022,8 @@ function kasittele_rahtikirjasanoma($edi_data) {
         'matkakoodi' => $_matkakoodi,
         'tilausnro' => $_tilausnro,
         'rivinro' => $_rivi,
-        'tilauksen_paino' => $_paino
+        'tilauksen_paino' => $_paino,
+        'tullinimike' = $tullinimike
         );
 
     }
@@ -2183,6 +2203,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
       $query = "UPDATE tilausrivin_lisatiedot SET
                 rahtikirja_id = '{$data['rahtikirja_id']}',
                 juoksu = '{$rulla['juoksu']}',
+                tullinimike = '{$rulla['tullinimike']}',
                 tilauksen_paino = '{$rulla['tilauksen_paino']}',
                 kuljetuksen_rekno = '{$data['rekisterinumero']}',
                 asiakkaan_tilausnumero = '{$rulla['tilausnro']}',
@@ -2272,6 +2293,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
 
         $update_query = "UPDATE tilausrivin_lisatiedot SET
                          juoksu = '{$rulla['juoksu']}',
+                         tullinimike = '{$rulla['tullinimike']}',
                          tilauksen_paino = '{$rulla['tilauksen_paino']}',
                          asiakkaan_tilausnumero = '{$rulla['tilausnro']}',
                          asiakkaan_rivinumero = '{$rulla['rivinro']}'
@@ -2312,6 +2334,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
 
         $update_query = "UPDATE tilausrivin_lisatiedot SET
                          juoksu = '{$rulla['juoksu']}',
+                         tullinimike = '{$rulla['tullinimike']}',
                          tilauksen_paino = '{$rulla['tilauksen_paino']}',
                          asiakkaan_tilausnumero = '{$rulla['tilausnro']}',
                          asiakkaan_rivinumero = '{$rulla['rivinro']}'
@@ -2358,6 +2381,7 @@ function kasittele_rahtikirjasanoma($edi_data) {
 
             $update_query = "UPDATE tilausrivin_lisatiedot SET
                              juoksu = '{$rulla['juoksu']}',
+                             tullinimike = '{$rulla['tullinimike']}',
                              tilauksen_paino = '{$rulla['tilauksen_paino']}',
                              asiakkaan_tilausnumero = '{$rulla['tilausnro']}',
                              asiakkaan_rivinumero = '{$rulla['rivinro']}'

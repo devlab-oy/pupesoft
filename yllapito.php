@@ -1136,10 +1136,10 @@ for ($i=0; $i<=$count; $i++) {
     }
     elseif ($from == "" and $toim == "tuotteen_toimittajat_tuotenumerot" and trim($array[$i]) == "toim_tuoteno_tunnus") {
 
-      $tutohaku = " SELECT group_concat(tunnus) tunnus
-                    FROM tuotteen_toimittajat
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    and toim_tuoteno $hakuehto";
+      $tutohaku = "SELECT group_concat(tunnus) tunnus
+                   FROM tuotteen_toimittajat
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   and toim_tuoteno $hakuehto";
       $tutores = pupe_query($tutohaku);
       $tutorow = mysql_fetch_assoc($tutores);
 
@@ -1155,10 +1155,10 @@ for ($i=0; $i<=$count; $i++) {
     }
     elseif ($from == "" and $toim == "tuotteen_toimittajat_pakkauskoot" and trim($array[$i]) == "toim_tuoteno_tunnus") {
 
-      $tutohaku = " SELECT group_concat(tunnus) tunnus
-                    FROM tuotteen_toimittajat
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    and toim_tuoteno $hakuehto";
+      $tutohaku = "SELECT group_concat(tunnus) tunnus
+                   FROM tuotteen_toimittajat
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   and toim_tuoteno $hakuehto";
       $tutores = pupe_query($tutohaku);
       $tutorow = mysql_fetch_assoc($tutores);
 

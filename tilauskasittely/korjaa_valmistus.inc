@@ -199,21 +199,21 @@ while ($raakaainerow = mysql_fetch_assoc($raakaaineres)) {
           // P‰vitet‰‰n raaka-aineen er‰numeron era_kpl-kentt‰‰n oikea luku
           $query = "UPDATE sarjanumeroseuranta
                     SET era_kpl = era_kpl + $mtos,
-                    muutospvm            = now(),
-                    muuttaja             = '$kukarow[kuka]'
-                    WHERE yhtio          = '$kukarow[yhtio]'
-                    and tuoteno          = '$raakaainerow[tuoteno]'
-                    and myyntirivitunnus = '$raakaainerow[tunnus]'
-                    and era_kpl         != 0
+                    muutospvm             = now(),
+                    muuttaja              = '$kukarow[kuka]'
+                    WHERE yhtio           = '$kukarow[yhtio]'
+                    and tuoteno           = '$raakaainerow[tuoteno]'
+                    and myyntirivitunnus  = '$raakaainerow[tunnus]'
+                    and era_kpl          != 0
                     LIMIT 1";
           $result = pupe_query($query);
 
           $query = "SELECT *
                     FROM sarjanumeroseuranta
-                    WHERE yhtio          = '$kukarow[yhtio]'
-                    and tuoteno          = '$raakaainerow[tuoteno]'
-                    and myyntirivitunnus = '$raakaainerow[tunnus]'
-                    and era_kpl         != 0
+                    WHERE yhtio           = '$kukarow[yhtio]'
+                    and tuoteno           = '$raakaainerow[tuoteno]'
+                    and myyntirivitunnus  = '$raakaainerow[tunnus]'
+                    and era_kpl          != 0
                     LIMIT 1";
           $result = pupe_query($query);
 

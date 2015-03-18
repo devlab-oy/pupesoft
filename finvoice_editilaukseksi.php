@@ -44,13 +44,33 @@ foreach ($files as $file) {
 
   require "inc/verkkolasku-in-finvoice.inc";
 
+  $laskuttajan_ovt = isset($laskuttajan_ovt) ? $laskuttajan_ovt : "";
+  $yhtio = isset($yhtio) ? $yhtio : "";
+  $rtuoteno = isset($rtuoteno) ? $rtuoteno : array();
+  $laskun_summa_eur = isset($laskun_summa_eur) ? $laskun_summa_eur : "";
+  $laskuttajan_valkoodi = isset($laskuttajan_valkoodi) ? $laskuttajan_valkoodi : "";
+
   $ovt_tunnus = $laskuttajan_ovt;
   $verkkokauppa_asiakasnro = $yhtio;
   $pupesoft_tilaustyyppi = "E";
 
+  $items = array();
+
+  foreach ($rtuoteno as $tilausrivi) {
+    $item = array(
+      "sku" => $tilausrivi["tuoteno"],
+      "qty_ordered" => $tilausrivi["kpl"],
+      "tax_percent" => $tilausrivi["alv"],
+      "price" => $tilausrivi["hinta"]
+    );
+
+    array_push($items, $item);
+  }
+
   $order = array(
-    "grand_total"  => $laskun_summa_eur,
-    "increment_id" => $laskun_numero
+    "grand_total" => $laskun_summa_eur,
+    "order_currency_code" => $laskuttajan_valkoodi,
+    "items" => $items
   );
 
   Edi::create($order, "finvoice");

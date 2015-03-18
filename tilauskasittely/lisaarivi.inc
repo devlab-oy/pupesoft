@@ -1838,6 +1838,12 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
                   $edi_ulos .= t("Ale")."$alepostfix ".$lis_ale_kaikki['ale'.$alepostfix]."% ";
                 }
 
+                if ($tilauksen_lahde == "finvoice" and
+                    $lis_hinta == 0 and !empty($kappalehinta_edista)
+                ) {
+                  $lis_hinta = $kappalehinta_edista;
+                }
+
                 $edi_ulos .= t("Hinta")." $lis_hinta $aperuste ".t("ALV")." $lis_alv% $rivikomm\n";
                 if ($lisaarivi_debug == 1) echo "$edi_ulos<br>";
               }

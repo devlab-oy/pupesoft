@@ -34,8 +34,10 @@ if ($php_cli) {
   }
 
   if (substr(strtolower(basename($filename)), 0, 14) == "finvoice_order") {
-    $argv[2]                = 'magento';
+    $argv[2] = 'magento';
+
     $asiakastiedot_kannasta = true;
+    $tilauksen_lahde        = "finvoice";
   }
 
   // ja toinen parametri komentoriviltä
@@ -1188,7 +1190,7 @@ while ($tietue = fgets($fd)) {
       $maksaja = $apuro['merahti'];
 
       // Verkkokauppatilauksissa luotamme tiedoston laskutustietoihin
-      if ($edi_tyyppi == "magento" and !$asiakastiedot_kannasta) {
+      if ($edi_tyyppi == "magento" and $tilauksen_lahde != "finvoice") {
         $arow["nimi"]       = $lnimi;
         $arow["nimitark"]   = $lnimitark;
         $arow["osoite"]     = $losoite;
@@ -1970,6 +1972,10 @@ while ($tietue = fgets($fd)) {
     break;
 
   case 'OSTOTILRIV.OTR_OSTOHINTA' :
+    if ($tilauksen_lahde == "finvoice") {
+      $kappalehinta_edista = (float) trim(str_replace(",", ".", $tieto));
+    }
+
     // Kun tullaan magentosta ja meillä on rahtikulu, niin otetaan hinta talteeen
     // TAI kun tullaan magentosta ja me luotetaan verkkokaupan hintoihin.
     if ($edi_tyyppi == "magento" and ((isset($verkkokauppa_hinnatedifailista) and $verkkokauppa_hinnatedifailista == "JOO") or strtolower($tuoteno) == strtolower($yhtiorow['rahti_tuotenumero'])) and $tieto != '') {

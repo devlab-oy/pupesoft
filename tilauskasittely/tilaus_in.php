@@ -82,7 +82,7 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
     // tarvitaan $filename
     echo "<pre>";
     $edi_tyyppi = "magento";
-    $asiakastiedot_kannasta = true;
+    $tilauksen_lahde = "finvoice";
     require "editilaus_in.inc";
     echo "</pre>";
   }

@@ -2152,7 +2152,7 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
       $liitoslisa = "ytunnus = '{$asiakasrow["ytunnus"]}'";
       break;
     case "asiakasryhma":
-      $liitoslisa = "ryhma = '{$asiakasrow["ryhma"]}'";
+      $liitoslisa = "asiakas_ryhma = '{$asiakasrow["ryhma"]}'";
       break;
     case "piiri":
       $liitoslisa = "piiri = '{$asiakasrow["piiri"]}'";

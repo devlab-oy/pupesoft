@@ -32975,3 +32975,31 @@ if (!function_exists('tuoteperheiden_hintojen_paivitys')) {
     }
   }
 }
+
+if (!function_exists("teksti_valista")) {
+  /**
+   * Palauttaa kahden stringin v‰liss‰ olevan tekstin
+   *
+   * @param string $alku Teksti ennen haluttua teksti‰
+   * @param string $loppu Teksti halutun tekstin j‰lkeen
+   * @param string $teksti Koko stringi, josta teksti‰ etsit‰‰n
+   *
+   * @return string
+   */
+  function teksti_valista($alku, $loppu, $teksti) {
+    $kohde = explode($alku, $teksti);
+
+    if (isset($kohde[1])) {
+      $kohde = $kohde[1];
+      $kohde = explode($loppu, $kohde);
+
+      if (isset($kohde[0])) {
+        $kohde = trim($kohde[0]);
+
+        return $kohde;
+      }
+    }
+
+    return "";
+  }
+}

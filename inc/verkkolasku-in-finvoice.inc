@@ -73,6 +73,11 @@ $ostaja_asiakkaantiedot["osoite"] = xml_string($xml->BuyerPartyDetails->BuyerPos
 $ostaja_asiakkaantiedot["postino"] = xml_string($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerPostCodeIdentifier);
 $ostaja_asiakkaantiedot["postitp"] = xml_string($xml->BuyerPartyDetails->BuyerPostalAddressDetails->BuyerTownName);
 
+// Parsitaan mahdolliset tiedot kommenttikentästä
+$kommenttiteksti = xml_string($xml->InvoiceDetails->InvoiceFreeText);
+$kohde = teksti_valista("Kohde:", "##", $kommenttiteksti);
+$kommentti = teksti_valista("Kommentti:", "##", $kommenttiteksti);
+
 if ($laskuttajan_vat == "" and $laskuttajan_identifier != "") {
   $laskuttajan_vat = $laskuttajan_identifier;
 }

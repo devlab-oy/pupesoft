@@ -136,7 +136,7 @@ if (!function_exists('hae_erikoiskaupan_parametrit')) {
 
 if (!function_exists('hae_yhtiotiedot')) {
   function hae_yhtiotiedot($tieto) {
-    global $yhtiorow, $kukarow, $edi_ulos, $php_cli, $argv, $editil_cli;
+    global $yhtiorow, $kukarow, $edi_ulos, $php_cli, $argv, $editil_cli, $edi_laatija;
 
     $query = "SELECT * FROM yhtio WHERE ovttunnus = '$tieto' and ovttunnus != ''";
     $result = pupe_query($query);
@@ -291,6 +291,10 @@ $mailfile = $filename;
 if ($edi_tyyppi == "futursoft") {
   $edi_subj = "Sis‰‰ntuleva Futursoft-tilaus";
   $edi_laatija = "FuturSoft";
+}
+elseif ($edi_tyyppi == "magento" and $tilauksen_lahde == "finvoice") {
+  $edi_subj = "Sis‰‰ntuleva Finvoice-tilaus";
+  $edi_laatija = "Finvoice";
 }
 elseif ($edi_tyyppi == "magento") {
   $edi_subj = "Sis‰‰ntuleva Verkkokauppa-tilaus";
@@ -1336,6 +1340,10 @@ while ($tietue = fgets($fd)) {
         elseif ($editilaus_tilaustyyppi == 'K') {
           $editilaus_tila   = 'N';
           $editilaus_alatila   = '';
+        }
+        elseif ($editilaus_tilaustyyppi == "D") {
+          $editilaus_tila = "L";
+          $editilaus_alatila = "D";
         }
       }
 

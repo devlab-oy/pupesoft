@@ -2172,7 +2172,10 @@ while ($tietue = fgets($fd)) {
 
           // Magento-tilauksessa katsotaan onko tilattavalla tuotteella saldoa.
           // Jos tilattu kpl-määrä on suurempi kuin myytävissä oleva kpl-määrä, niin pakotetaan rivi hyväksytyksi
-          if ($edi_tyyppi == "magento" and $tuoteno != '' and $kpl > 0 and $trow["ei_saldoa"] == "") {
+          if ($edi_tyyppi == "magento" and $tuoteno != '' and $kpl > 0 and
+                                                              $trow["ei_saldoa"] == "" and
+                                                              $tilauksen_lahde != "finvoice"
+          ) {
 
             list($chk_saldo, $chk_hyllyssa, $chk_myytavissa, $chk_true) = saldo_myytavissa($tuoteno, "", $verkkokauppavarasto);
 

@@ -13,13 +13,22 @@ class Edi {
 
 
   static function create($order, $tyyppi = "magento") {
+    // require 'magento_salasanat.php' muuttujat, jos kyseess‰ on magento
+    if ($tyyppi == "magento") {
+      global $magento_api_ht_edi, $ovt_tunnus, $pupesoft_tilaustyyppi, $magento_maksuehto_ohjaus,
+             $verkkokauppa_asiakasnro, $rahtikulu_tuoteno, $rahtikulu_nimitys,
+             $verkkokauppa_erikoiskasittely;
 
-    // require 'magento_salasanat.php' muuttujat
-    global $magento_api_ht_edi, $ovt_tunnus, $pupesoft_tilaustyyppi, $magento_maksuehto_ohjaus;
-    global $verkkokauppa_asiakasnro, $rahtikulu_tuoteno, $rahtikulu_nimitys, $verkkokauppa_erikoiskasittely;
-
-    if (empty($magento_api_ht_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi)) exit("Parametrej‰ puuttuu\n");
-    if (empty($verkkokauppa_asiakasnro) or empty($rahtikulu_tuoteno) or empty($rahtikulu_nimitys)) exit("Parametrej‰ puuttuu\n");
+      if (empty($magento_api_ht_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi) or
+          empty($verkkokauppa_asiakasnro) or empty($rahtikulu_tuoteno) or empty($rahtikulu_nimitys)
+      ) {
+        exit("Parametrej‰ puuttuu\n");
+      }
+    }
+    else {
+      $ovt_tunnus = $order["laskuttajan_ovt"];
+      $verkkokauppa_asiakasnro = $order["toim_ovttunnus"];
+    }
 
     //Tilauksella k‰ytetyt lahjakortit ei saa vehent‰‰ myynti pupen puolella
     $giftcards = json_decode($order['webtex_giftcard']);
@@ -69,7 +78,11 @@ class Edi {
     $valittu_ovt_tunnus = (isset($vaihtoehtoinen_ovt) and !empty($vaihtoehtoinen_ovt)) ? $vaihtoehtoinen_ovt : $ovt_tunnus;
     //Yrityksen ovt_tunnus MUISTA MUUTTAA
     $edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:".$valittu_ovt_tunnus."\n";
-    $edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:$pupesoft_tilaustyyppi\n";
+
+    if (!empty($pupesoft_tilaustyyppi)) {
+      $edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:$pupesoft_tilaustyyppi\n";
+    }
+
     $edi_order .= "OSTOTIL.VERKKOKAUPPA:".str_replace("\n", " ", $order['store_name'])."\n";
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_ASIAKASNRO:".$order['customer_id']."\n";
     $edi_order .= "OSTOTIL.OT_VERKKOKAUPPA_TILAUSVIITE:".str_replace("\n", " ", $order['reference_number'])."\n";
@@ -164,8 +177,6 @@ class Edi {
 
     $i = 1;
     foreach ($order['items'] as $item) {
-      $product_id = $item['product_id'];
-
       if ($item['product_type'] != "configurable") {
 
         // Tuoteno
@@ -243,31 +254,33 @@ class Edi {
 
 
     // // Rahtikulu, veroton
-    $rahti_veroton = $order['shipping_amount'];
+    if ($tyyppi == "magento") {
+      $rahti_veroton = $order['shipping_amount'];
 
-    if ($rahti_veroton != 0) {
-      // Rahtikulu, verollinen
-      $rahti = $order['shipping_amount'] + $order['shipping_tax_amount'];
+      if ($rahti_veroton != 0) {
+        // Rahtikulu, verollinen
+        $rahti = $order['shipping_amount'] + $order['shipping_tax_amount'];
 
-      // Rahtin alviprossa
-      $rahti_alvpros = round((($rahti / $rahti_veroton) - 1) * 100);
+        // Rahtin alviprossa
+        $rahti_alvpros = round((($rahti / $rahti_veroton) - 1) * 100);
 
-      $edi_order .= "*RS OSTOTILRIV $i\n";
-      $edi_order .= "OSTOTILRIV.OTR_NRO:".$order['increment_id']."\n";
-      $edi_order .= "OSTOTILRIV.OTR_RIVINRO:$i\n";
-      $edi_order .= "OSTOTILRIV.OTR_TOIMITTAJANRO:\n";
-      $edi_order .= "OSTOTILRIV.OTR_TUOTEKOODI:$rahtikulu_tuoteno\n";
-      $edi_order .= "OSTOTILRIV.OTR_NIMI:$rahtikulu_nimitys\n";
-      $edi_order .= "OSTOTILRIV.OTR_TILATTUMAARA:1\n";
-      $edi_order .= "OSTOTILRIV.OTR_RIVISUMMA:$rahti_veroton\n";
-      $edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:$rahti_veroton\n";
-      $edi_order .= "OSTOTILRIV.OTR_ALENNUS:0\n";
-      $edi_order .= "OSTOTILRIV.OTR_VEROKANTA:$rahti_alvpros\n";
-      $edi_order .= "OSTOTILRIV.OTR_VIITE:\n";
-      $edi_order .= "OSTOTILRIV.OTR_OSATOIMITUSKIELTO:\n";
-      $edi_order .= "OSTOTILRIV.OTR_JALKITOIMITUSKIELTO:\n";
-      $edi_order .= "OSTOTILRIV.OTR_YKSIKKO:\n";
-      $edi_order .= "*RE  OSTOTILRIV $i\n";
+        $edi_order .= "*RS OSTOTILRIV $i\n";
+        $edi_order .= "OSTOTILRIV.OTR_NRO:" . $order['increment_id'] . "\n";
+        $edi_order .= "OSTOTILRIV.OTR_RIVINRO:$i\n";
+        $edi_order .= "OSTOTILRIV.OTR_TOIMITTAJANRO:\n";
+        $edi_order .= "OSTOTILRIV.OTR_TUOTEKOODI:$rahtikulu_tuoteno\n";
+        $edi_order .= "OSTOTILRIV.OTR_NIMI:$rahtikulu_nimitys\n";
+        $edi_order .= "OSTOTILRIV.OTR_TILATTUMAARA:1\n";
+        $edi_order .= "OSTOTILRIV.OTR_RIVISUMMA:$rahti_veroton\n";
+        $edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:$rahti_veroton\n";
+        $edi_order .= "OSTOTILRIV.OTR_ALENNUS:0\n";
+        $edi_order .= "OSTOTILRIV.OTR_VEROKANTA:$rahti_alvpros\n";
+        $edi_order .= "OSTOTILRIV.OTR_VIITE:\n";
+        $edi_order .= "OSTOTILRIV.OTR_OSATOIMITUSKIELTO:\n";
+        $edi_order .= "OSTOTILRIV.OTR_JALKITOIMITUSKIELTO:\n";
+        $edi_order .= "OSTOTILRIV.OTR_YKSIKKO:\n";
+        $edi_order .= "*RE  OSTOTILRIV $i\n";
+      }
     }
 
     $edi_order .= "*ME\n";

@@ -8,7 +8,7 @@ elseif (@include_once "inc/parametrit.inc");
 require '../inc/edifact_functions.inc';
 
 if (!isset($view)) {
-  $view = 'saapumiskoodi';
+  $view = 'tulonumero';
 }
 
 if (isset($view) and $view == 'splittaus') {
@@ -35,7 +35,7 @@ if (isset($task) and $task == 'split') {
     pupe_query($query);
   }
 
-  header("Location: tullivarastointi.php?saapumiskoodi={$saapumiskoodi}&submit=saapumiskoodi");
+  header("Location: tullivarastointi.php?tulonumero={$tulonumero}&submit=tulonumero");
 }
 
 echo "<meta name='viewport' content='width=device-width, maximum-scale=1.0' />\n";
@@ -44,7 +44,7 @@ echo "<body>";
 
 if (isset($task) and $task == 'vie_varastoon') {
 
-  $varastotarkistus = explode('-', $saapumiskoodi);
+  $varastotarkistus = explode('-', $tulonumero);
 
   switch ($varastotarkistus[0]) {
 
@@ -89,23 +89,23 @@ if (isset($task) and $task == 'vie_varastoon') {
 
   $tuotenumero = $tilausrivi['tuoteno'];
   $sk_osat = explode("-", $tuotenumero);
-  $saapumiskoodi = $sk_osat[0] . '-' . $sk_osat[1] . '-' . $sk_osat[2];
+  $tulonumero = $sk_osat[0] . '-' . $sk_osat[1] . '-' . $sk_osat[2];
 
   // katsotaan onko saman rahdin paketteja laitettu saapumisella
   $query = "SELECT uusiotunnus
             FROM tilausrivi
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tuoteno LIKE '{$saapumiskoodi}-%'
+            AND tuoteno LIKE '{$tulonumero}-%'
             AND uusiotunnus != ''";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
-    $saapuminen = mysql_result($result, 0);
+    $tulo = mysql_result($result, 0);
   }
   else {
 
-    $saapuminen = uusi_saapuminen($toimittaja);
-    $update_kuka = "UPDATE kuka SET kesken={$saapuminen} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
+    $tulo = uusi_tulo($toimittaja);
+    $update_kuka = "UPDATE kuka SET kesken={$tulo} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
     $updated = pupe_query($update_kuka);
   }
 
@@ -180,13 +180,13 @@ if (isset($task) and $task == 'vie_varastoon') {
   else {
 
     $query = "UPDATE tilausrivi SET
-              uusiotunnus = '{$saapuminen}'
+              uusiotunnus = '{$tulo}'
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tunnus  = '{$tilausrivi['tunnus']}'";
     pupe_query($query);
 
     $kukarow['ei_echoa'] = 'joo';
-    vie_varastoon($saapuminen, 0, $hylly, $tilausrivi['tunnus']);
+    vie_varastoon($tulo, 0, $hylly, $tilausrivi['tunnus']);
     unset($kukarow['ei_echoa']);
 
     $query = "UPDATE tilausrivi SET
@@ -199,7 +199,7 @@ if (isset($task) and $task == 'vie_varastoon') {
     $result = pupe_query($query);
   }
 
-  $submit = 'saapumiskoodi';
+  $submit = 'tulonumero';
 }
 
 if (!isset($errors)) $errors = array();
@@ -207,16 +207,16 @@ if (!isset($viestit)) $viestit = array();
 
 if (isset($submit) and $submit == 'varastovalinta') {
   $view = 'tiedot';
-  $saapumistiedot = hae_saapumistiedot($saapumiskoodi);
+  $saapumistiedot = hae_saapumistiedot($tulonumero);
 }
 
-if (isset($submit) and $submit == 'saapumiskoodi') {
+if (isset($submit) and $submit == 'tulonumero') {
 
-  if (empty($saapumiskoodi)) {
-    $errors[] = t("Syötä saapumiskoodi");
+  if (empty($tulonumero)) {
+    $errors[] = t("Syötä tulonumero");
   }
   else {
-    $saapumistiedot = hae_saapumistiedot($saapumiskoodi);
+    $saapumistiedot = hae_saapumistiedot($tulonumero);
 
     if(!$saapumistiedot) {
       $errors[] = t("Koodilla ei löytynyt mitään.");
@@ -227,7 +227,7 @@ if (isset($submit) and $submit == 'saapumiskoodi') {
     $view = 'tiedot';
   }
   else {
-    $view = 'saapumiskoodi';
+    $view = 'tulonumero';
   }
 }
 
@@ -253,21 +253,21 @@ echo "</div>";
 
 echo "</div>";
 
-if ($view == 'saapumiskoodi') {
+if ($view == 'tulonumero') {
 
   echo "
   <form method='post' action=''>
     <div style='text-align:center;padding:10px;'>
-      <label for='saapumiskoodi'>", t("Syötä saapumiskoodi"), "</label><br>
-      <input type='text' id='saapumiskoodi' name='saapumiskoodi' style='margin:10px;' />
+      <label for='tulonumero'>", t("Syötä tulonumero"), "</label><br>
+      <input type='text' id='tulonumero' name='tulonumero' style='margin:10px;' />
       <br>
-      <button name='submit' value='saapumiskoodi' onclick='submit();' class='button'>", t("OK"), "</button>
+      <button name='submit' value='tulonumero' onclick='submit();' class='button'>", t("OK"), "</button>
     </div>
   </form>
 
   <script type='text/javascript'>
     $(document).on('touchstart', function(){
-      $('#saapumiskoodi').focus();
+      $('#tulonumero').focus();
     });
   </script>";
 
@@ -298,7 +298,7 @@ if ($view == 'splittaus') {
   echo "<input type='hidden' id='hidden_uusikpl' name='uusikpl' value='0' />";
   echo "<input type='hidden' name='task' value='split' />";
   echo "<input type='hidden' name='rivitunnus' value='{$rivitunnus}' />";
-  echo "<input type='hidden' name='saapumiskoodi' value='{$saapumiskoodi}' />";
+  echo "<input type='hidden' name='tulonumero' value='{$tulonumero}' />";
 
   echo "<div style='float:left; width:200px; text-align:left;'>";
   echo t("Alkuperäinen erä");
@@ -371,7 +371,7 @@ if ($view == 'tiedot') {
   echo "<div class='alue_1 alue'>";
 
   echo "<div style='overflow:auto; position:relative;'>";
-  echo "<h1 style='margin: 10px 0'>" . t("Saapuminen: ") . $saapumiskoodi . "</h1>";
+  echo "<h1 style='margin: 10px 0'>" . $tulonumero . "</h1>";
 
   if (!$saapumistiedot['kaikki_viety']) {
 
@@ -394,7 +394,7 @@ if ($view == 'tiedot') {
 
   if (!$saapumistiedot['kaikki_viety']) {
 
-    $varastotarkistus = explode('-', $saapumiskoodi);
+    $varastotarkistus = explode('-', $tulonumero);
 
     switch ($varastotarkistus[0]) {
 
@@ -508,7 +508,7 @@ if ($view == 'tiedot') {
       echo "<div style='display:inline-block; margin:5px;'>";
       echo "<form method='post'>";
       echo "<input type='hidden' name='valittu_varastopaikka' value='" . $vp . "' />";
-      echo "<input type='hidden' name='saapumiskoodi' value='{$saapumiskoodi}' />";
+      echo "<input type='hidden' name='tulonumero' value='{$tulonumero}' />";
       echo "<button name='submit' value='varastovalinta' style='padding:10px' class='button {$luokka}'>";
       echo $vp;
       echo "</button>";
@@ -531,7 +531,7 @@ if ($view == 'tiedot') {
     echo "<div id='lisaysformi' style='display:none; margin:5px; position:relative; '>";
     echo "<form method='post'>";
     echo "<input id='lisaysinput' style='position:relative; top:4px; height:23px; margin-right:6px;'  type='text' size='4' name='uusi_varastopaikka' value='' />";
-    echo "<input type='hidden' name='saapumiskoodi' value='{$saapumiskoodi}' />";
+    echo "<input type='hidden' name='tulonumero' value='{$tulonumero}' />";
     echo "<button name='submit' value='varastovalinta' style='padding:10px' class='button aktiivi'>";
     echo t("Ok");
     echo "</button>";
@@ -599,7 +599,7 @@ if ($view == 'tiedot') {
           <input type='hidden' name='valittu_varastopaikka' value='{$valittu_varastopaikka}' />
           <input type='hidden' name='rivitunnus' value='{$rivi['tunnus']}' />
           <input type='hidden' name='toimittajatunnus' value='{$rivi['liitostunnus']}' />
-          <input type='hidden' name='saapumiskoodi' value='{$saapumiskoodi}' />
+          <input type='hidden' name='tulonumero' value='{$tulonumero}' />
           <input type='hidden' name='task' value='vie_varastoon' />
           <input type='submit' value='".t("Varastoon")."'>
           </form>
@@ -611,7 +611,7 @@ if ($view == 'tiedot') {
               <form method='post'>
               <input type='hidden' name='rivitunnus' value='{$rivi['tunnus']}' />
               <input type='hidden' name='toimittajatunnus' value='{$rivi['liitostunnus']}' />
-              <input type='hidden' name='saapumiskoodi' value='{$saapumiskoodi}' />
+              <input type='hidden' name='tulonumero' value='{$tulonumero}' />
               <input type='hidden' name='view' value='splittaus' />
               <input type='submit' value='".t("Jako")."'>
               </form>

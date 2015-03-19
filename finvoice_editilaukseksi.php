@@ -45,35 +45,38 @@ foreach ($files as $file) {
   require "inc/verkkolasku-in-finvoice.inc";
 
   $laskuttajan_ovt = isset($laskuttajan_ovt) ? $laskuttajan_ovt : "";
-  $rtuoteno = isset($rtuoteno) ? $rtuoteno : array();
-  $laskun_summa_eur = isset($laskun_summa_eur) ? $laskun_summa_eur : "";
-  $laskuttajan_valkoodi = isset($laskuttajan_valkoodi) ? $laskuttajan_valkoodi : "";
-  $toim_asiakkaantiedot = isset($toim_asiakkaantiedot) ? $toim_asiakkaantiedot : array();
-  $laskun_numero = isset($laskun_numero) ? $laskun_numero : "";
-  $ostaja_asiakkaantiedot = isset($ostaja_asiakkaantiedot) ? $ostaja_asiakkaantiedot : array();
 
-  $items = array();
+  if ($laskuttajan_ovt == "037nnnnnnn999") {
+    $rtuoteno = isset($rtuoteno) ? $rtuoteno : array();
+    $laskun_summa_eur = isset($laskun_summa_eur) ? $laskun_summa_eur : "";
+    $laskuttajan_valkoodi = isset($laskuttajan_valkoodi) ? $laskuttajan_valkoodi : "";
+    $toim_asiakkaantiedot = isset($toim_asiakkaantiedot) ? $toim_asiakkaantiedot : array();
+    $laskun_numero = isset($laskun_numero) ? $laskun_numero : "";
+    $ostaja_asiakkaantiedot = isset($ostaja_asiakkaantiedot) ? $ostaja_asiakkaantiedot : array();
 
-  foreach ($rtuoteno as $tilausrivi) {
-    $item = array(
-      "sku" => $tilausrivi["tuoteno"],
-      "qty_ordered" => $tilausrivi["kpl"],
-      "tax_percent" => $tilausrivi["alv"],
-      "price" => $tilausrivi["hinta"]
+    $items = array();
+
+    foreach ($rtuoteno as $tilausrivi) {
+      $item = array(
+        "sku" => $tilausrivi["tuoteno"],
+        "qty_ordered" => $tilausrivi["kpl"],
+        "tax_percent" => $tilausrivi["alv"],
+        "price" => $tilausrivi["hinta"]
+      );
+
+      array_push($items, $item);
+    }
+
+    $order = array(
+      "increment_id" => $laskun_asiakkaan_tilausnumero,
+      "grand_total" => $laskun_summa_eur,
+      "order_currency_code" => $laskuttajan_valkoodi,
+      "items" => $items,
+      "laskuttajan_ovt" => $ostaja_asiakkaantiedot["toim_ovttunnus"],
+      "toim_ovttunnus" => $toim_asiakkaantiedot["toim_ovttunnus"],
+      "laskun_numero" => $laskun_numero
     );
 
-    array_push($items, $item);
+    Edi::create($order, "finvoice");
   }
-
-  $order = array(
-    "increment_id" => $laskun_asiakkaan_tilausnumero,
-    "grand_total" => $laskun_summa_eur,
-    "order_currency_code" => $laskuttajan_valkoodi,
-    "items" => $items,
-    "laskuttajan_ovt" => $ostaja_asiakkaantiedot["toim_ovttunnus"],
-    "toim_ovttunnus" => $toim_asiakkaantiedot["toim_ovttunnus"],
-    "laskun_numero" => $laskun_numero
-  );
-
-  Edi::create($order, "finvoice");
 }

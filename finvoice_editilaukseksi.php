@@ -50,6 +50,7 @@ foreach ($files as $file) {
   $laskuttajan_valkoodi = isset($laskuttajan_valkoodi) ? $laskuttajan_valkoodi : "";
   $toim_asiakkaantiedot = isset($toim_asiakkaantiedot) ? $toim_asiakkaantiedot : array();
   $laskun_numero = isset($laskun_numero) ? $laskun_numero : "";
+  $ostaja_asiakkaantiedot = isset($ostaja_asiakkaantiedot) ? $ostaja_asiakkaantiedot : array();
 
   $items = array();
 
@@ -69,7 +70,7 @@ foreach ($files as $file) {
     "grand_total" => $laskun_summa_eur,
     "order_currency_code" => $laskuttajan_valkoodi,
     "items" => $items,
-    "laskuttajan_ovt" => $laskuttajan_ovt,
+    "laskuttajan_ovt" => $ostaja_asiakkaantiedot["toim_ovttunnus"],
     "toim_ovttunnus" => $toim_asiakkaantiedot["toim_ovttunnus"],
     "laskun_numero" => $laskun_numero
   );

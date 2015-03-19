@@ -3687,20 +3687,23 @@ function toimittajat($rivitarkastus = false) {
 }
 
 
-function varastot() {
+function hae_tullivarastot() {
   global $kukarow;
 
-  $query = "SELECT
-            concat(tunnus, '#', nimitark) AS varastokoodi,
-            nimitys
+  $query = "SELECT nimi, tunnus, nimitys
             FROM varastopaikat
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND nimitark != ''";
+            AND nimitark = 'tulli'";
   $result = pupe_query($query);
 
   $varastot = array();
-  while ($varasto = mysql_fetch_assoc($result)) {
-    $varastot[] = $varasto;
+  while ($v = mysql_fetch_assoc($result)) {
+
+    list($tv, $vv, $eu) = explode('-', $v['nimi']);
+
+    $varastot[] = array('nimi' => $v['nimitys'].' - tulli', 'koodi' => $v['tunnus'].'#'.$tv);
+    $varastot[] = array('nimi' => $v['nimitys'].' - väliaikainen', 'koodi' => $v['tunnus'].'#'.$vv);
+    $varastot[] = array('nimi' => $v['nimitys'].' - EU', 'koodi' => $v['tunnus'].'#'.$eu);
   }
 
   return $varastot;

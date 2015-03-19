@@ -13,21 +13,30 @@ class Edi {
 
 
   static function create($order, $tyyppi = "magento") {
+    global $pupesoft_tilaustyyppi;
+
+    if (empty($pupesoft_tilaustyyppi)) {
+      exit("Parametrej‰ puuttuu\n");
+    }
+
     // require 'magento_salasanat.php' muuttujat, jos kyseess‰ on magento
     if ($tyyppi == "magento") {
       global $magento_api_ht_edi, $ovt_tunnus, $pupesoft_tilaustyyppi, $magento_maksuehto_ohjaus,
              $verkkokauppa_asiakasnro, $rahtikulu_tuoteno, $rahtikulu_nimitys,
              $verkkokauppa_erikoiskasittely;
 
-      if (empty($magento_api_ht_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi) or
-          empty($verkkokauppa_asiakasnro) or empty($rahtikulu_tuoteno) or empty($rahtikulu_nimitys)
+      if (empty($magento_api_ht_edi) or empty($ovt_tunnus) or empty($verkkokauppa_asiakasnro) or
+          empty($rahtikulu_tuoteno) or empty($rahtikulu_nimitys)
       ) {
         exit("Parametrej‰ puuttuu\n");
       }
+
+      $viitteenne = "";
     }
     else {
       $ovt_tunnus = $order["laskuttajan_ovt"];
       $verkkokauppa_asiakasnro = $order["toim_ovttunnus"];
+      $viitteenne = $order["laskun_numero"];
     }
 
     //Tilauksella k‰ytetyt lahjakortit ei saa vehent‰‰ myynti pupen puolella
@@ -108,7 +117,7 @@ class Edi {
 
     $edi_order .= "OSTOTIL.OT_MAKSUEHTO:$maksuehto\n";
     $edi_order .= "OSTOTIL.OT_VIITTEEMME:\n";
-    $edi_order .= "OSTOTIL.OT_VIITTEENNE:$storenimi\n";
+    $edi_order .= "OSTOTIL.OT_VIITTEENNE:{$viitteenne}\n";
     $edi_order .= "OSTOTIL.OT_VEROMAARA:".$order['tax_amount']."\n";
     $edi_order .= "OSTOTIL.OT_SUMMA:".$grand_total."\n";
     $edi_order .= "OSTOTIL.OT_VALUUTTAKOODI:".$order['order_currency_code']."\n";

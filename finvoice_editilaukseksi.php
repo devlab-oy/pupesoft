@@ -49,6 +49,7 @@ foreach ($files as $file) {
   $laskun_summa_eur = isset($laskun_summa_eur) ? $laskun_summa_eur : "";
   $laskuttajan_valkoodi = isset($laskuttajan_valkoodi) ? $laskuttajan_valkoodi : "";
   $toim_asiakkaantiedot = isset($toim_asiakkaantiedot) ? $toim_asiakkaantiedot : array();
+  $laskun_numero = isset($laskun_numero) ? $laskun_numero : "";
 
   $items = array();
 
@@ -64,11 +65,13 @@ foreach ($files as $file) {
   }
 
   $order = array(
+    "increment_id" => $laskun_asiakkaan_tilausnumero,
     "grand_total" => $laskun_summa_eur,
     "order_currency_code" => $laskuttajan_valkoodi,
     "items" => $items,
     "laskuttajan_ovt" => $laskuttajan_ovt,
-    "toim_ovttunnus" => $toim_asiakkaantiedot["toim_ovttunnus"]
+    "toim_ovttunnus" => $toim_asiakkaantiedot["toim_ovttunnus"],
+    "laskun_numero" => $laskun_numero
   );
 
   Edi::create($order, "finvoice");

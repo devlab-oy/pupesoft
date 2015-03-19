@@ -564,6 +564,8 @@ while ($row = mysql_fetch_assoc($res)) {
       'toimitusaika_ema'                => '')
   );
 
+  $parastoimittaja = array();
+
   if (mysql_num_rows($ttres) > 0) {
 
     // Nollataan defaultit pois

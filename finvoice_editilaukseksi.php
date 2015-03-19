@@ -53,6 +53,7 @@ foreach ($files as $file) {
     $toim_asiakkaantiedot = isset($toim_asiakkaantiedot) ? $toim_asiakkaantiedot : array();
     $laskun_numero = isset($laskun_numero) ? $laskun_numero : "";
     $ostaja_asiakkaantiedot = isset($ostaja_asiakkaantiedot) ? $ostaja_asiakkaantiedot : array();
+    $tilausyhteyshenkilo = isset($tilausyhteyshenkilo) ? $tilausyhteyshenkilo : "";
 
     $items = array();
 
@@ -74,7 +75,8 @@ foreach ($files as $file) {
       "items" => $items,
       "laskuttajan_ovt" => $ostaja_asiakkaantiedot["toim_ovttunnus"],
       "toim_ovttunnus" => $toim_asiakkaantiedot["toim_ovttunnus"],
-      "laskun_numero" => $laskun_numero
+      "laskun_numero" => $laskun_numero,
+      "tilausyhteyshenkilo" => $tilausyhteyshenkilo
     );
 
     Edi::create($order, "finvoice");

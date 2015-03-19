@@ -881,8 +881,15 @@ while ($tietue = fgets($fd)) {
     break;
 
   case 'OSTOTIL.OT_YHTEYSHENKILO':
-    $lnimi = trim($tieto);
+    if ($tilauksen_lahde == "finvoice") {
+      $tilausyhteyshenkilo = trim($tieto);
+    }
+    else {
+      $lnimi = trim($tieto);
+    }
+
     break;
+
 
   case 'ONADPL_PC' :
     // Asiakkaan joku toimitus ovttunnus tms... t‰‰ ylikirjottaa kaiken...

@@ -32,11 +32,14 @@ class Edi {
       }
 
       $viitteenne = "";
+      $yhteyshenkilo =
+        "{$order["billing_address"]["lastname"]} {$order['billing_address']['firstname']}";
     }
     else {
       $ovt_tunnus = $order["laskuttajan_ovt"];
       $verkkokauppa_asiakasnro = $order["toim_ovttunnus"];
       $viitteenne = $order["laskun_numero"];
+      $yhteyshenkilo = $order["tilausyhteyshenkilo"];
     }
 
     //Tilauksella k‰ytetyt lahjakortit ei saa vehent‰‰ myynti pupen puolella
@@ -141,8 +144,9 @@ class Edi {
     }
     else {
       $edi_order .= "OSTOTIL.OT_YRITYS:".$order['billing_address']['company']."\n";
-      $edi_order .= "OSTOTIL.OT_YHTEYSHENKILO:".$order['billing_address']['lastname']." ".$order['billing_address']['firstname']."\n";
+      $edi_order .= "OSTOTIL.OT_YHTEYSHENKILO:{$yhteyshenkilo}\n";
     }
+
     $edi_order .= "OSTOTIL.OT_KATUOSOITE:".$billingadress."\n";
     $edi_order .= "OSTOTIL.OT_POSTITOIMIPAIKKA:".$order['billing_address']['city']."\n";
     $edi_order .= "OSTOTIL.OT_POSTINRO:".$order['billing_address']['postcode']."\n";

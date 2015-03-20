@@ -564,6 +564,8 @@ while ($row = mysql_fetch_assoc($res)) {
       'toimitusaika_ema'                => '')
   );
 
+  $parastoimittaja = array();
+
   if (mysql_num_rows($ttres) > 0) {
 
     // Nollataan defaultit pois
@@ -662,7 +664,7 @@ while ($row = mysql_fetch_assoc($res)) {
       $ostohinta_netto = $ostohinta;
 
       // lis‰t‰‰n kuluprosentti hintaan jos sit‰ k‰ytet‰‰n saapumisellakin
-      if (in_array($yhtiorow['jalkilaskenta_kuluperuste'], array('KP', 'VS'))) {
+      if (in_array($yhtiorow['jalkilaskenta_kuluperuste'], array('KP', 'VS', 'PX'))) {
         $ostohinta_netto = $ostohinta_netto * (1 + ($ttrow['oletus_kulupros'] / 100));
       }
 

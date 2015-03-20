@@ -965,7 +965,7 @@ if (isset($view) and $view == "perus") {
         echo "<input type='hidden' name='tulotunnus' value='{$info['tulotunnus']}' />";
         echo "<select name='toimenpide' id='{$info['tulotunnus']}' class='tpselect' style='width:90px;'>";
 
-        echo "<option selected disabled>". t("Valitse") ."</option>";
+        echo "<option value='.' selected disabled>". t("Valitse") ."</option>";
 
         foreach ($toimenpiteet as $toimenpide) {
           echo "<option value='{$toimenpide}'>{$toimenpide}</option>";
@@ -1000,8 +1000,11 @@ if (isset($view) and $view == "perus") {
 
       $('.tpselect').change(function() {
         var tunnus = $(this).attr('id');
+        var valittu = $(this).val();
         var nappitunnus = tunnus+'_nappi';
         $('.nappi').prop('disabled', true);
+        $('.tpselect').val('.');
+        $(this).val(valittu);
         $('#'+nappitunnus).prop('disabled', false);
       });
 

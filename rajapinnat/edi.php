@@ -47,7 +47,7 @@ class Edi {
     $edi_order .= "*MS ".$order['increment_id']."\n";
     $edi_order .= "*RS OSTOTIL\n";
     $edi_order .= "OSTOTIL.OT_NRO:".$order['increment_id']."\n";
-    
+
     //Tarkistetaan onko tämän nimiselle verkkokaupalle asetettu erikoiskäsittelyjä
     if (isset($verkkokauppa_erikoiskasittely) and count($verkkokauppa_erikoiskasittely) > 0) {
       $edi_store = str_replace("\n", " ", $order['store_name']);
@@ -201,7 +201,7 @@ class Edi {
         $edi_order .= "OSTOTILRIV.OTR_VEROKANTA:$alvprosentti\n";
         $edi_order .= "OSTOTILRIV.OTR_RIVISUMMA:$rivihinta_veroton\n";
         $edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:$veroton_hinta\n";
-        $edi_order .= "OSTOTILRIV.OTR_ALENNUS:$alennusprosentti\n";        
+        $edi_order .= "OSTOTILRIV.OTR_ALENNUS:$alennusprosentti\n";
 
         $edi_order .= "OSTOTILRIV.OTR_VIITE:\n";
         $edi_order .= "OSTOTILRIV.OTR_OSATOIMITUSKIELTO:\n";

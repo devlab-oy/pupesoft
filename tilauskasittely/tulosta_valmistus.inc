@@ -132,10 +132,10 @@ if (!function_exists('alku_valm')) {
       $pdf->draw_text(310, 729, t("Myyjä", $kieli),     $thispage, $pieni);
 
       //etsitään myyjän nimi
-      $query  = " SELECT nimi
-                  FROM kuka
-                  WHERE tunnus = '$laskurow[myyja]' 
-                  AND yhtio    = '$kukarow[yhtio]'";
+      $query  = "SELECT nimi
+                 FROM kuka
+                 WHERE tunnus = '$laskurow[myyja]'
+                 AND yhtio    = '$kukarow[yhtio]'";
       $myyresult = pupe_query($query);
       $myyrow = mysql_fetch_array($myyresult);
 
@@ -154,12 +154,12 @@ if (!function_exists('alku_valm')) {
       }
       if ($laskurow["rahtivapaa"] == 'o' and onko_rahtituote_syotetty($laskurow) == 0) {
         $ttapae .= " / ". t("Rahtivapaa", $kieli);
-      }      
+      }
 
       $pdf->draw_rectangle(716, 300, 695, 580, $thispage, $rectparam);
       $pdf->draw_text(310, 708, t("Toimitustapa", $kieli)." / ".t("Rahtisopimus", $kieli), $thispage, $pieni);
       $pdf->draw_text(310, 698, $ttapae, $thispage, $boldi);
-      
+
       $pdf->draw_rectangle(695, 300, 674, 580, $thispage, $rectparam);
       $pdf->draw_text(310, 687, t("Toimitusehto", $kieli),   $thispage, $pieni);
       $pdf->draw_text(310, 677, $laskurow["toimitusehto"],   $thispage, $norm);

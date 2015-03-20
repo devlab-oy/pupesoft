@@ -313,9 +313,9 @@ else {
             $jq = "SELECT jarjestys, selitetark
                    FROM avainsana
                    WHERE yhtio = '{$kukarow['yhtio']}'
-                   AND laji = 'THR'
-                   AND selite = '{$perhe}'
-                   AND kieli = '{$hinkieli}'";
+                   AND laji    = 'THR'
+                   AND selite  = '{$perhe}'
+                   AND kieli   = '{$hinkieli}'";
             $jr = pupe_query($jq);
 
             if (mysql_num_rows($jr) != 0) {
@@ -342,8 +342,8 @@ else {
 
         $sort = array();
         foreach ($rivit as $key => $rivi) {
-            $sort1[$key] = $rivi['jar'];
-            $sort2[$key] = $rivi['tro'];
+          $sort1[$key] = $rivi['jar'];
+          $sort2[$key] = $rivi['tro'];
         }
         array_multisort($sort1, SORT_ASC, $sort2, SORT_ASC, $rivit);
       }

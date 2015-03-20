@@ -461,11 +461,11 @@ if ($tee == "1") {
     $luottotilanne_nyt = round($asiakasrow["luottoraja"] - $avoimetlaskutrow["laskuavoinsaldo"] + $kaatotilirow["summa"] - $avoimettilauksetrow["tilausavoinsaldo"], 2);
 
     echo "<td align='right'>$luottotilanne_nyt</td>";
-    
+
     if ($paivitys_oikeus) {
       echo "<td align='right'><input style='text-align:right' type='text' name='luottoraja[$asiakasrow[ytunnus]]' value='$asiakasrow[luottoraja]' size='11'></td>";
       echo "<td align='right'><input type='checkbox' name='myyntikielto[$asiakasrow[ytunnus]]' value='K' $chk></td>";
-    } 
+    }
     else {
       echo "<td>$asiakasrow[luottoraja]</td>";
       echo "<td>$asiakasrow[myyntikielto]</td>";

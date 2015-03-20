@@ -24,6 +24,7 @@ $psx_ohjelmat = array(
   "tili" => "{$palvelin2}pupenext/accounts",
   "taso" => "{$palvelin2}pupenext/sum_levels",
   "maksuehto" => "{$palvelin2}pupenext/terms_of_payments",
+  "kirjoittimet" => "{$palvelin2}pupenext/printers"
 );
 
 if (array_key_exists($toim, $psx_ohjelmat)) {
@@ -1136,10 +1137,10 @@ for ($i=0; $i<=$count; $i++) {
     }
     elseif ($from == "" and $toim == "tuotteen_toimittajat_tuotenumerot" and trim($array[$i]) == "toim_tuoteno_tunnus") {
 
-      $tutohaku = " SELECT group_concat(tunnus) tunnus
-                    FROM tuotteen_toimittajat
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    and toim_tuoteno $hakuehto";
+      $tutohaku = "SELECT group_concat(tunnus) tunnus
+                   FROM tuotteen_toimittajat
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   and toim_tuoteno $hakuehto";
       $tutores = pupe_query($tutohaku);
       $tutorow = mysql_fetch_assoc($tutores);
 
@@ -1155,10 +1156,10 @@ for ($i=0; $i<=$count; $i++) {
     }
     elseif ($from == "" and $toim == "tuotteen_toimittajat_pakkauskoot" and trim($array[$i]) == "toim_tuoteno_tunnus") {
 
-      $tutohaku = " SELECT group_concat(tunnus) tunnus
-                    FROM tuotteen_toimittajat
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    and toim_tuoteno $hakuehto";
+      $tutohaku = "SELECT group_concat(tunnus) tunnus
+                   FROM tuotteen_toimittajat
+                   WHERE yhtio = '$kukarow[yhtio]'
+                   and toim_tuoteno $hakuehto";
       $tutores = pupe_query($tutohaku);
       $tutorow = mysql_fetch_assoc($tutores);
 
@@ -2265,7 +2266,6 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $toim == "yhteensopivuus_tuote_lisatiedot" or
     ($toim == "toimitustapa" and $poistolukko == "") or
     $toim == "toimitustavat_toimipaikat" or
-    $toim == "kirjoittimet" or
     $toim == "hinnasto" or
     $toim == "rahtimaksut" or
     $toim == "rahtisopimukset" or

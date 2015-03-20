@@ -2960,13 +2960,22 @@ function hae_saapumistiedot($saapumiskoodi) {
       if ($rivi['uusiotunnus'] == 0) {
         $kaikki_viety = false;
       }
-
+      $varasto = $rivi['varasto'];
       $rivit[] = $rivi;
     }
 
+    $query = "SELECT LEFT(alkuhyllyalue,1)
+              FROM varastopaikat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$varasto}'";
+    $result = pupe_query($query);
+    $varastokirjain = mysql_result($result, 0);
+
     $saapumistiedot = array(
       'rivit' => $rivit,
-      'kaikki_viety' => $kaikki_viety
+      'kaikki_viety' => $kaikki_viety,
+      'varastokirjain' => $varastokirjain,
+      'varasto' => $varasto
     );
 
     return $saapumistiedot;
@@ -3686,7 +3695,6 @@ function toimittajat($rivitarkastus = false) {
   }
 }
 
-
 function hae_tullivarastot() {
   global $kukarow;
 
@@ -3708,5 +3716,51 @@ function hae_tullivarastot() {
 
   return $varastot;
 }
+
+function seuraava_vapaa_tulonumero($varastokoodi) {
+  global $kukarow;
+
+  $vuosi = date("y");
+
+  // haetaan seuraava vapaa juokseva numero
+  $query  = "SELECT asiakkaan_tilausnumero
+             FROM lasku
+             WHERE yhtio = '{$kukarow['yhtio']}'
+             AND tila = 'O'
+             AND viesti = 'tullivarasto'
+             AND asiakkaan_tilausnumero LIKE '{$varastokoodi}%'
+             ORDER BY tunnus DESC
+             LIMIT 1";
+  $result = pupe_query($query);
+  $edellinen = mysql_result($result, 0);
+
+  if ($edellinen) {
+
+    list($koodi, $juoksu, $_vuosi) = explode("-", $edellinen);
+
+    $juoksu = (int)$juoksu + 1;
+
+    if ($vuosi == $_vuosi) {
+      $tulonumero = $koodi . "-" . $juoksu . "-" . $vuosi;
+    }
+    else {
+      $tulonumero = $koodi . "-1-" . $vuosi;
+    }
+  }
+  else {
+    $tulonumero = $varastokoodi . "-1-" . $vuosi;
+  }
+
+  return $tulonumero;
+}
+
+function hae_toimenpiteet($tulotunnus) {
+  global $kukarow;
+
+  return array('muokkaus', 'siirto', 'poisto');
+
+}
+
+
 
 ?>

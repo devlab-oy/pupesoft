@@ -369,15 +369,11 @@ if (isset($task) and ($task == 'sinetoi' or $task == 'korjaa')) {
 
       if ($korjaus) {
 
-        $tilaukset = array_keys($parametrit['tilaukset']);
-        $tilaukset = implode(",", $tilaukset);
-
         $query = "SELECT filename
                   FROM liitetiedostot
                   WHERE yhtio = '{$kukarow['yhtio']}'
                   AND kayttotarkoitus = 'kontitussanoma'
-                  AND selite = '{$temp_konttinumero}'
-                  AND liitostunnus IN ({$tilaukset})";
+                  AND selite = '{$temp_konttinumero}'";
         $result = pupe_query($query);
         $liite_info = mysql_fetch_array($result);
         $parametrit['sanomanumero'] = $liite_info['filename'];

@@ -513,8 +513,8 @@ if ($tila == 'maksuehto') {
   $mehres = pupe_query($query);
   $mehrow = mysql_fetch_assoc($mehres);
 
-  if ($mehrow['kassa_abspvm'] != '0000-00-00' or $mehrow["kassa_relpvm"] > 0) {
-    if ($mehrow['kassa_abspvm'] == '0000-00-00') {
+  if ($mehrow['kassa_abspvm'] !== null or $mehrow["kassa_relpvm"] > 0) {
+    if ($mehrow['kassa_abspvm'] === null) {
       $kassa_erapvm = "adddate(tapvm, interval $mehrow[kassa_relpvm] day)";
     }
     else {
@@ -530,7 +530,7 @@ if ($tila == 'maksuehto') {
     $kassa_loppusumma_valuutassa = 0;
   }
 
-  if ($mehrow['abs_pvm'] == '0000-00-00') {
+  if ($mehrow['abs_pvm'] === null) {
     $uerapvm = "adddate(tapvm, interval $mehrow[rel_pvm] day)";
   }
   else {

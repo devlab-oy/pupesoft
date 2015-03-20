@@ -44,34 +44,9 @@ echo "<body>";
 
 if (isset($task) and $task == 'vie_varastoon') {
 
-  $varastotarkistus = explode('-', $tulonumero);
+  $hylly = hae_hylly($valittu_varastopaikka, true);
 
-  switch ($varastotarkistus[0]) {
-
-    case 'ROVV':
-      $hyllyaluelisa = 'XA';
-      break;
-
-    case 'ROTV':
-      $hyllyaluelisa = 'XB';
-      break;
-
-    case 'VRP':
-      $hyllyaluelisa = 'XC';
-      break;
-
-    case 'RP':
-      $hyllyaluelisa = 'XD';
-      break;
-
-    default:
-      # code...
-      break;
-  }
-
-  $vp = $hyllyaluelisa.$valittu_varastopaikka;
-
-  $hylly = hae_hylly($vp, true);
+  $hylly['hyllyalue'] = $varastokirjain.$hylly['hyllyalue'];
 
   $query = "SELECT *
             FROM toimi
@@ -104,7 +79,7 @@ if (isset($task) and $task == 'vie_varastoon') {
   }
   else {
 
-    $tulo = uusi_tulo($toimittaja);
+    $tulo = uusi_saapuminen($toimittaja);
     $update_kuka = "UPDATE kuka SET kesken={$tulo} WHERE yhtio='{$kukarow['yhtio']}' AND kuka='{$kukarow['kuka']}'";
     $updated = pupe_query($update_kuka);
   }
@@ -377,13 +352,13 @@ if ($view == 'tiedot') {
 
     echo "<div id='piiloon_div' style='position:absolute; right:0px; top:0px;'>";
     echo "<button id='piiloon' type='button' style='padding:10px; color:red; border:1px solid red;' class='button'>";
-    echo t("Piilota");
+    echo " &#9650; ";
     echo "</button>";
     echo "</div>";
 
     echo "<div id='esiin_div' style='position:absolute; right:0px; top:0px; display:none;'>";
     echo "<button id='esiin' type='button' style='padding:10px; color:green; border:1px solid green;' class='button'>";
-    echo t("N‰yt‰");
+    echo " &#9660; ";
     echo "</button>";
     echo "</div>";
   }
@@ -394,49 +369,47 @@ if ($view == 'tiedot') {
 
   if (!$saapumistiedot['kaikki_viety']) {
 
-    $varastotarkistus = explode('-', $tulonumero);
+    list($koodi, $juoksu, $vuosi) = explode("-", $tulonumero);
 
-    switch ($varastotarkistus[0]) {
+    switch ($koodi) {
 
-      case 'ROVV':
-        $koodi = 'XA';
+      case 'EU':
+        $nimilisa = ' - EU';
         break;
 
       case 'ROTV':
-        $koodi = 'XB';
-        break;
-
-      case 'VRP':
-        $koodi = 'XC';
-        break;
-
       case 'RP':
-        $koodi = 'XD';
+        $nimilisa = ' - tulli';
+        break;
+
+      case 'ROVV':
+      case 'VRP':
+        $nimilisa = ' - v‰liaikainen';
         break;
 
       default:
-        $koodi = '?';
+        # code...
         break;
     }
 
     $query = "SELECT *
               FROM varastopaikat
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND alkuhyllyalue LIKE '{$koodi}%'";
+              AND tunnus = '{$saapumistiedot['varasto']}'";
     $result = pupe_query($query);
     $varasto = mysql_fetch_assoc($result);
 
     $query = "SELECT CONCAT(hyllyalue, hyllynro) AS paikka
               FROM tuotepaikat
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND hyllyalue LIKE '{$koodi}%'
+              AND tuoteno LIKE '{$tulonumero}-%'
               GROUP BY paikka";
     $result = pupe_query($query);
 
     $varastopaikat = array();
 
     if (mysql_num_rows($result) == 0) {
-      $varastopaikat[] = $koodi.'A1';
+      $varastopaikat[] = $saapumistiedot['varastokirjain'].'A1';
       if (!isset($valittu_varastopaikka)) {
         $valittu_varastopaikka = 'A1';
       }
@@ -453,7 +426,8 @@ if ($view == 'tiedot') {
 
       if ($hylly) {
         $uusi_varastopaikka = strtoupper($uusi_varastopaikka);
-        $varastopaikat[] = $koodi.$uusi_varastopaikka;
+        $varastopaikat[] = $saapumistiedot['varastokirjain'].$uusi_varastopaikka;
+        $valittu_varastopaikka = $uusi_varastopaikka;
       }
       else {
         $uusi_varastopaikka_error = t("Ep‰kelpo varastopaikka");
@@ -467,25 +441,18 @@ if ($view == 'tiedot') {
     }
 
     echo "<div>";
+
     echo t("Varasto: ");
-    echo $varasto['nimitys'];
+    echo $varasto['nimitys'] . $nimilisa;
+
     echo "&nbsp&#124;&nbsp;";
 
-    if (isset($valittu_varastopaikka)) {
-      echo t("Vied‰‰n paikalle: ");
-      echo $valittu_varastopaikka;
-    }
-    elseif (isset($uusi_varastopaikka)) {
-      echo t("Vied‰‰n paikalle: ");
-      echo $uusi_varastopaikka;
-    }
-    else {
-      echo t("Valitse paikka");
-    }
+    echo t("Vied‰‰n paikalle: ");
+    echo $valittu_varastopaikka;
+
     echo "</div>";
 
     echo "<span id='alue'>";
-
     echo '<hr>';
 
     sort($varastopaikat);
@@ -493,12 +460,9 @@ if ($view == 'tiedot') {
 
     foreach ($varastopaikat as $vp) {
 
-      $vp = substr($vp, 2);
+      $vp = substr($vp, 1);
 
-      if (
-          (isset($valittu_varastopaikka) and $vp == $valittu_varastopaikka) or
-          (isset($uusi_varastopaikka) and $vp == $uusi_varastopaikka)
-          ) {
+      if ($vp == $valittu_varastopaikka) {
         $luokka = 'aktiivi';
       }
       else {
@@ -597,7 +561,9 @@ if ($view == 'tiedot') {
         <div style='float:right; position: relative; top: 50%; transform: translateY(-50%);'>
           <form method='post'>
           <input type='hidden' name='valittu_varastopaikka' value='{$valittu_varastopaikka}' />
+          <input type='hidden' name='varastokirjain' value='{$saapumistiedot['varastokirjain']}' />
           <input type='hidden' name='rivitunnus' value='{$rivi['tunnus']}' />
+          <input type='hidden' name='varasto' value='{$rivi['varasto']}' />
           <input type='hidden' name='toimittajatunnus' value='{$rivi['liitostunnus']}' />
           <input type='hidden' name='tulonumero' value='{$tulonumero}' />
           <input type='hidden' name='task' value='vie_varastoon' />
@@ -620,7 +586,7 @@ if ($view == 'tiedot') {
     }
     else {
 
-      $paikka = substr($rivi['hyllyalue'], 2) . $rivi['hyllynro'];
+      $paikka = substr($rivi['hyllyalue'], 1) . $rivi['hyllynro'];
 
       echo "<div style='float:right; position: relative; top: 50%; transform: translateY(-50%);'>";
       echo t("Varastopaikka: ");

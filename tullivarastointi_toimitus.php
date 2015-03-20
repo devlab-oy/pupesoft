@@ -237,26 +237,16 @@ if (isset($task) and $task == 'hae_toimitusrivit') {
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.viesti = 'tullivarastotoimitus'
             AND lasku.tila != 'D'
+            AND lasku.alatila NOT IN ('D','A')
             AND lasku.ytunnus = '{$toimittaja['ytunnus']}'
             AND lasku.nimi = '{$toimittaja['nimi']}'
             GROUP BY toimitustunnus, nimitys, malli";
-    $result = pupe_query($query);
+  $result = pupe_query($query);
 
+  $toimitukset = array();
 
-  if (mysql_num_rows($result) > 0) {
-
-    $toimitukset = array();
-
-
-    while ($rivi = mysql_fetch_assoc($result)) {
-
-      $toimitukset[$rivi['toimitustunnus']][] = $rivi;
-
-    }
-  }
-  else {
-    $otsikko = t("Toimituksen perustaminen");
-    $task = 'hae_tulorivit';
+  while ($rivi = mysql_fetch_assoc($result)) {
+  $toimitukset[$rivi['toimitustunnus']][] = $rivi;
   }
 }
 
@@ -311,12 +301,16 @@ if (isset($task) and $task == 'hae_tulorivit') {
 
 
   $query = "SELECT tilausrivi.*,
-            CONCAT(SUBSTRING(tilausrivi.hyllyalue, 3, 4), tilausrivi.hyllynro) AS varastopaikka,
+            CONCAT(SUBSTRING(tilausrivi.hyllyalue, 2), tilausrivi.hyllynro) AS varastopaikka,
             lasku.asiakkaan_tilausnumero AS tulonumero,
             varastopaikat.nimitys AS varastonimi,
             tuote.malli,
             lasku.nimi AS toimittajanimi,
-            lasku.ytunnus
+            lasku.ytunnus,
+            tilausrivi.hyllyalue,
+            tilausrivi.hyllynro,
+            tilausrivi.hyllyvali,
+            tilausrivi.hyllytaso
             FROM tilausrivi
             JOIN lasku
              ON lasku.yhtio = tilausrivi.yhtio
@@ -339,7 +333,8 @@ if (isset($task) and $task == 'hae_tulorivit') {
 
   while ($rivi = mysql_fetch_assoc($result)) {
 
-    $saldot = saldo_myytavissa($rivi['tuoteno']);
+    $saldot = saldo_myytavissa($rivi['tuoteno'], '', 109, '', $rivi['hyllyalue'], $rivi['hyllynro'], $rivi['hyllyvali'], $rivi['hyllytaso']);
+
     $rivi['vapaana'] = $saldot[2];
 
     if ($rivi['vapaana'] > 0) {

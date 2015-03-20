@@ -174,7 +174,7 @@ elseif ($sanoma == "GetPicks") {
   // Katsotaan onko käyttäjällä jo keräyserä keräyksessä
   // Jos on useampi, niin napataan vain yksi erä kerrallaan
   $query = "SELECT nro, min(keraysvyohyke) keraysvyohyke, GROUP_CONCAT(tilausrivi) AS tilausrivit,
-            GROUP_CONCAT(otunnus) AS otunnukset
+            GROUP_CONCAT(otunnus) AS otunnukset, min(otunnus) kerayslistatunnus
             FROM kerayserat
             WHERE yhtio        = '{$kukarow['yhtio']}'
             AND laatija        = '{$kukarow['kuka']}'
@@ -287,7 +287,7 @@ elseif ($sanoma == "GetPicks") {
                 lahetepvm   = now(),
                 hyvak3      = '{$kukarow['kuka']}',
                 h3time      = now(),
-                kerayslista = '{$kerayslistatunnus}'   ???????????
+                kerayslista = '({$kerattavat_rivit_row['kerayslistatunnus']})'
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tunnus  in ({$kerattavat_rivit_row['otunnukset']})
                 AND tila    = 'N'
@@ -303,7 +303,7 @@ elseif ($sanoma == "GetPicks") {
                   lahetepvm   = now(),
                   hyvak3      = '{$kukarow['kuka']}',
                   h3time      = now(),
-                  kerayslista = '{$kerayslistatunnus}' ????????????
+                  kerayslista = '({$kerattavat_rivit_row['kerayslistatunnus']})'
                   WHERE yhtio = '{$kukarow['yhtio']}'
                   AND tunnus  in ({$kerattavat_rivit_row['otunnukset']})
                   AND tila    = 'G'

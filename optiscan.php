@@ -169,7 +169,7 @@ elseif ($sanoma == "GetPicks") {
 
   // Napataan kukarow ja yhtorow
   $yhtiorow = hae_yhtion_parametrit("artr");
-  $kukarow  = hae_kukarow(mysql_real_escape_string(trim("#satu")), $yhtiorow["yhtio"]);
+  $kukarow  = hae_kukarow(mysql_real_escape_string(trim($sisalto[2])), $yhtiorow["yhtio"]);
   $otunnukset = '';
 
   // Katsotaan onko käyttäjällä jo keräyserä keräyksessä

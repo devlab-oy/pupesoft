@@ -169,12 +169,13 @@ elseif ($sanoma == "GetPicks") {
 
   // Napataan kukarow ja yhtorow
   $yhtiorow = hae_yhtion_parametrit("artr");
-  $kukarow  = hae_kukarow(mysql_real_escape_string(trim($sisalto[2])), $yhtiorow["yhtio"]);
+  $kukarow  = hae_kukarow(mysql_real_escape_string(trim("#satu")), $yhtiorow["yhtio"]);
+  $otunnukset = '';
 
   // Katsotaan onko k‰ytt‰j‰ll‰ jo ker‰yser‰ ker‰yksess‰
   // Jos on useampi, niin napataan vain yksi er‰ kerrallaan
   $query = "SELECT nro, min(keraysvyohyke) keraysvyohyke, GROUP_CONCAT(tilausrivi) AS tilausrivit,
-            GROUP_CONCAT(otunnus) AS otunnukset, min(otunnus) kerayslistatunnus
+            GROUP_CONCAT(distinct otunnus) AS otunnukset, min(otunnus) kerayslistatunnus
             FROM kerayserat
             WHERE yhtio        = '{$kukarow['yhtio']}'
             AND laatija        = '{$kukarow['kuka']}'
@@ -277,7 +278,7 @@ elseif ($sanoma == "GetPicks") {
     $kpl    = count($kpl_arr);
     $n      = 1;
     
-    if ($kerattavat_rivit_row['otunnukset'] != '') {
+    if ($kerattavat_rivit_row['otunnukset'] != '' and $otunnukset == '') {
 
       // jos ker‰yser‰ j‰‰nyt vaiheeseen ja ker‰‰j‰ ottaa sen uusiksi
       // p‰ivitet‰‰n myyntitilauksen tilat kohdalleen
@@ -287,13 +288,13 @@ elseif ($sanoma == "GetPicks") {
                 lahetepvm   = now(),
                 hyvak3      = '{$kukarow['kuka']}',
                 h3time      = now(),
-                kerayslista = '({$kerattavat_rivit_row['kerayslistatunnus']})'
+                kerayslista = '{$kerattavat_rivit_row['kerayslistatunnus']}'
                 WHERE yhtio = '{$kukarow['yhtio']}'
                 AND tunnus  in ({$kerattavat_rivit_row['otunnukset']})
                 AND tila    = 'N'
-                AND alatila = 'A'
+                AND alatila in ('A', 'KA')
                 AND hyvak3  = ''
-                AND h3time  = '0000-00-00 00:00:00";
+                AND h3time  = '0000-00-00 00:00:00'";
       pupe_query($query);
 
       if ($yhtiorow['kerayserat'] != '' and $yhtiorow['siirtolistan_tulostustapa'] == 'U') {
@@ -303,13 +304,13 @@ elseif ($sanoma == "GetPicks") {
                   lahetepvm   = now(),
                   hyvak3      = '{$kukarow['kuka']}',
                   h3time      = now(),
-                  kerayslista = '({$kerattavat_rivit_row['kerayslistatunnus']})'
+                  kerayslista = '{$kerattavat_rivit_row['kerayslistatunnus']}'
                   WHERE yhtio = '{$kukarow['yhtio']}'
                   AND tunnus  in ({$kerattavat_rivit_row['otunnukset']})
                   AND tila    = 'G'
-                  AND alatila = 'J'
+                  AND alatila in ('J', 'KJ')
                   AND hyvak3  = ''
-                  AND h3time  = '0000-00-00 00:00:00";
+                  AND h3time  = '0000-00-00 00:00:00'";
         pupe_query($query);
       }
     }

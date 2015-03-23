@@ -32,6 +32,7 @@ class Edi {
       }
 
       $viitteenne = "";
+      $viitteemme = "";
       $yhteyshenkilo =
         "{$order["billing_address"]["lastname"]} {$order['billing_address']['firstname']}";
     }
@@ -39,6 +40,7 @@ class Edi {
       $ovt_tunnus = $order["laskuttajan_ovt"];
       $verkkokauppa_asiakasnro = $order["toim_ovttunnus"];
       $viitteenne = $order["laskun_numero"];
+      $viitteemme = $order["kommenttiteksti"];
       $yhteyshenkilo = $order["tilausyhteyshenkilo"];
     }
 
@@ -119,7 +121,7 @@ class Edi {
     }
 
     $edi_order .= "OSTOTIL.OT_MAKSUEHTO:$maksuehto\n";
-    $edi_order .= "OSTOTIL.OT_VIITTEEMME:\n";
+    $edi_order .= "OSTOTIL.OT_VIITTEEMME:{$viitteemme}\n";
     $edi_order .= "OSTOTIL.OT_VIITTEENNE:{$viitteenne}\n";
     $edi_order .= "OSTOTIL.OT_VEROMAARA:".$order['tax_amount']."\n";
     $edi_order .= "OSTOTIL.OT_SUMMA:".$grand_total."\n";

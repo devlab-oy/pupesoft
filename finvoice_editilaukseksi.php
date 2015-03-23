@@ -55,6 +55,15 @@ foreach ($files as $file) {
     $ostaja_asiakkaantiedot = isset($ostaja_asiakkaantiedot) ? $ostaja_asiakkaantiedot : array();
     $tilausyhteyshenkilo = isset($tilausyhteyshenkilo) ? $tilausyhteyshenkilo : "";
     $kohde = isset($kohde) ? $kohde : "";
+
+    $erotin = str_repeat("-", 98);
+    $kommenttiteksti = "{$erotin}\n" .
+                       "Toimittava liike: {$laskuttajan_nimi}\n" .
+                       "Laskunumero: {$laskun_numero}\n" .
+                       "Tiedustelut tilauksesta ja laskusta:\n" .
+                       "Sähköposti: {$laskuttajan_email}\n" .
+                       "Puhelin: {$laskuttajan_puh}\n" .
+                       "{$erotin}";
     $kommenttiteksti = base64_encode($kommenttiteksti);
 
     $items = array();

@@ -1345,18 +1345,20 @@ while ($tietue = fgets($fd)) {
 
       // katsotaan magentotilauksilta tilaustyyppi
       if ($edi_tyyppi == "magento" and $editilaus_tilaustyyppi != "") {
-        // tyyppi 9, ohitetaan aina varastoprosessi ja aina sisäinen
-        if ($editilaus_tilaustyyppi == "9") {
+        switch ($editilaus_tilaustyyppi) {
+          // tyyppi 9, ohitetaan aina varastoprosessi ja aina sisäinen
+        case "9":
           $editilaus_eilahetetta = "o";
           $editilaus_sisainen = "o";
-        }
-        elseif ($editilaus_tilaustyyppi == 'K') {
-          $editilaus_tila   = 'N';
-          $editilaus_alatila   = '';
-        }
-        elseif ($editilaus_tilaustyyppi == "D") {
+          break;
+        case "K":
+          $editilaus_tila = 'N';
+          $editilaus_alatila = '';
+          break;
+        case "D":
           $editilaus_tila = "L";
           $editilaus_alatila = "D";
+          break;
         }
       }
 

@@ -80,7 +80,8 @@ foreach ($files as $file) {
       "laskun_numero" => $laskun_numero,
       "tilausyhteyshenkilo" => $tilausyhteyshenkilo,
       "target" => $kohde,
-      "kommenttiteksti" => $kommenttiteksti
+      "kommenttiteksti" => $kommenttiteksti,
+      "customer_email" => $laskuttajan_email
     );
 
     Edi::create($order, "finvoice");

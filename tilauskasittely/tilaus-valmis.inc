@@ -1210,6 +1210,10 @@ else {
           'extranet_tilausvahvistus'  => $extranet_tilausvahvistus,
         );
 
+        if (!empty($laskuttajan_email)) {
+          $params_tilausvahvistus["laskuttajan_email"] = $laskuttajan_email;
+        }
+
         laheta_tilausvahvistus($params_tilausvahvistus);
       }
 

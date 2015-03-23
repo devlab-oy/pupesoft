@@ -1031,8 +1031,16 @@ while ($tietue = fgets($fd)) {
     break;
 
   case 'OSTOTIL.OT_TOIMITUS_EMAIL' :
-    // toimitusosoitteen email
-    $ltoim_email = trim($tieto);
+    if ($tilauksen_lahde == "finvoice") {
+      // Finvoicen tapauksessa laskuttajan email otetaan toimitusemail kentästä, jotta saadaan
+      // tilausvahvistus oikeaan osoitteeseen
+      $laskuttajan_email = trim($tieto);
+    }
+    else {
+      // toimitusosoitteen email
+      $ltoim_email = trim($tieto);
+    }
+
     break;
 
   case 'OSTOTIL.OT_YHTEYSHENKILONPUH' :

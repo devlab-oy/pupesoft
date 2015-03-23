@@ -56,6 +56,7 @@ $laskun_asiakkaan_tilausnumero = xml_string($xml->InvoiceDetails->OrderIdentifie
 $kauttalaskutus = xml_string($xml->DeliveryDetails->TerminalAddressText);
 $laskun_toimitunnus = xml_string($xml->SellerPartyDetails->SellerPupesoftId);
 $tilausyhteyshenkilo = xml_string($xml->BuyerContactPersonName);
+$laskuttajan_email = xml_string(($xml->SellerCommunicationDetails->SellerEmailaddressIdentifier));
 
 $toim_asiakkaantiedot = array();
 $toim_asiakkaantiedot["toim_ovttunnus"] = xml_string($xml->DeliveryOrganisationUnitNumber);

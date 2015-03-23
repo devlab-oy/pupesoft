@@ -66,6 +66,17 @@ $toim_asiakkaantiedot["osoite"] = xml_string($xml->DeliveryPartyDetails->Deliver
 $toim_asiakkaantiedot["postino"] = xml_string($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryPostCodeIdentifier);
 $toim_asiakkaantiedot["postitp"] = xml_string($xml->DeliveryPartyDetails->DeliveryPostalAddressDetails->DeliveryTownName);
 
+// Finvoicen kauttalaskutuksessa otetaan asiakasnumero toimitusasiakkaan nimen perästä
+$asiakasnumero = explode(" ", $toim_asiakkaantiedot["nimi"]);
+$asiakasnumero = end($asiakasnumero);
+
+if (substr($asiakasnumero, 0, 2) == "ET") {
+  $asiakasnumero = substr($asiakasnumero, 2);
+  $toim_asiakkaantiedot["asiakasnumero"] = $asiakasnumero;
+}
+
+unset($asiakasnumero);
+
 $ostaja_asiakkaantiedot = array();
 $ostaja_asiakkaantiedot["toim_ovttunnus"] = xml_string($xml->BuyerOrganisationUnitNumber);
 $ostaja_asiakkaantiedot["ytunnus"] = xml_string($xml->BuyerPartyDetails->BuyerPartyIdentifier);

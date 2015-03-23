@@ -76,7 +76,7 @@ foreach ($files as $file) {
       "order_currency_code" => $laskuttajan_valkoodi,
       "items" => $items,
       "laskuttajan_ovt" => $ostaja_asiakkaantiedot["toim_ovttunnus"],
-      "toim_ovttunnus" => $toim_asiakkaantiedot["toim_ovttunnus"],
+      "asiakasnumero" => $toim_asiakkaantiedot["asiakasnumero"],
       "laskun_numero" => $laskun_numero,
       "tilausyhteyshenkilo" => $tilausyhteyshenkilo,
       "target" => $kohde,

@@ -723,6 +723,20 @@ while ($tietue = fgets($fd)) {
       }
     }
 
+    if ($tilauksen_lahde == "finvoice" and !empty($kukarow) and !empty($tieto)) {
+      $query = "SELECT *
+                FROM asiakas
+                WHERE yhtio = '{$kukarow["yhtio"]}'
+                AND asiakasnro = '{$tieto}'";
+      $result = pupe_query($query);
+
+      if (mysql_num_rows($result) == 1) {
+        $arow = mysql_fetch_assoc($result);
+        $edi_ulos .= "{$arow["nimi"]} {$arow["nimitark"]} {$arow["toim_nimi"]} " .
+                     "{$arow["toim_nimitark"]} {$arow["toim_postitp"]}\n";
+      }
+    }
+
     // Käytetään Magenton asiakasnumeroa jos sellainen löytyy ennalta määritellyistä kaupoista tulevilla tilauksilla
     // ja on setattu $verkkokauppa_erikoiskasittely:n
     if ($edi_tyyppi == "magento" and $ot_verkkokauppa_asiakasnro != ''

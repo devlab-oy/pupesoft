@@ -33,8 +33,8 @@ class Edi {
 
       $viitteenne = "";
       $viitteemme = "";
-      $yhteyshenkilo =
-        "{$order["billing_address"]["lastname"]} {$order['billing_address']['firstname']}";
+      $yhteyshenkilo = "{$order["billing_address"]["lastname"]} " .
+                       "{$order['billing_address']['firstname']}";
     }
     else {
       $ovt_tunnus = $order["laskuttajan_ovt"];
@@ -192,6 +192,8 @@ class Edi {
 
     $i = 1;
     foreach ($order['items'] as $item) {
+      $product_id = $item['product_id'];
+
       if ($item['product_type'] != "configurable") {
 
         // Tuoteno

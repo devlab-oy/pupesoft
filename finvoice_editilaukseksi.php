@@ -63,7 +63,8 @@ foreach ($files as $file) {
                        "Tiedustelut tilauksesta ja laskusta:\n" .
                        "Sähköposti: {$laskuttajan_email}\n" .
                        "Puhelin: {$laskuttajan_puh}\n" .
-                       "{$erotin}";
+                       "{$erotin}\n\n" .
+                       "{$kommentti}";
     $kommenttiteksti = base64_encode($kommenttiteksti);
 
     $items = array();

@@ -46,7 +46,7 @@ foreach ($files as $file) {
 
   $laskuttajan_ovt = isset($laskuttajan_ovt) ? $laskuttajan_ovt : "";
 
-  if ($laskuttajan_ovt == "037nnnnnnn999") {
+  if ($laskuttajan_ovt == $finvoice_kauttalaskutus_ovt) {
     $rtuoteno = isset($rtuoteno) ? $rtuoteno : array();
     $laskun_summa_eur = isset($laskun_summa_eur) ? $laskun_summa_eur : "";
     $laskuttajan_valkoodi = isset($laskuttajan_valkoodi) ? $laskuttajan_valkoodi : "";

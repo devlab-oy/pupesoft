@@ -265,7 +265,7 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
 
   if ($toim == "BIO") {
     //tilauksessa kerayspvm mukaan
-    $query = "SELECT ifnull(sum(tilausrivi.tilkpl), 0) tilattu
+    $query = "SELECT ifnull(sum(tilausrivi.varattu), 0) tilattu
               FROM tilausrivi use index (yhtio_tyyppi_tuoteno_kerayspvm)
               WHERE tilausrivi.yhtio in ($yhtiot)
               and tilausrivi.tyyppi  = 'O'
@@ -716,7 +716,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
     }
     elseif ($toim == "BIO") {
       # V‰hennet‰‰n myynneist‰ vapaa saldo ja ostot
-      $ostoehdotus = $enp - $saldot + $ostot;
+      $ostoehdotus = $enp - ($saldot + $ostot);
 
       if ($ostoehdotus < 0) {
         $ostoehdotus = 0;

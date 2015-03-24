@@ -399,7 +399,7 @@ $org_kpl                 = "";
 $suoratoimitus_splittaus = FALSE;
 $paivita_myyntitilaus    = FALSE;
 $tlisatied_lisa          = "";
-
+echo "402 myy_hyllyalue_temp $myy_hyllyalue_temp <br><br>";
 // N‰ihin arraysiin tulee sitten myyt‰viss‰ olevat tuotteet, kappaleet ja varastopaikat
 $myy_tuoteno         = array();
 $myy_kpl             = array();
@@ -407,6 +407,10 @@ $myy_hyllyalue       = array();
 $myy_hyllynro        = array();
 $myy_hyllytaso       = array();
 $myy_hyllyvali       = array();
+$myy_hyllyalue_temp  = "";
+$myy_hyllynro_temp   = "";
+$myy_hyllyvali_temp  = "";
+$myy_hyllytaso_temp  = "";
 $myy_varasto         = array();
 $myy_erikoistoimitus = array();
 $myy_kpl_myyty       = array();
@@ -623,7 +627,7 @@ if (substr($paikka, 0, 3) == "°°S") {
       $lahdevarasto_tuotepaikka = $tuotepaikkojen_saldot[0];
 
       $updatelisa_lapsi = $lapsirivi['var'] == 'P' ? "varattu = tilkpl," : "";
-
+echo "626 {$lahdevarasto_tuotepaikka["hyllyalue"]} <br><br>";
       $query = "UPDATE tilausrivi
                 SET var     = 'S',
                 {$updatelisa_lapsi}
@@ -697,7 +701,7 @@ elseif ($var == "S" and substr($paikka, 0, 3) != "°°S" and substr($paikka, 0, 3)
       }
 
       $updatelisa_lapsi = $_var == 'P' ? "varattu = 0," : "";
-
+echo "700 {$lahdevarasto_tuotepaikka["hyllyalue"]} <br><br>";
       $query = "UPDATE tilausrivi
                 SET var = '{$_var}',
                 {$updatelisa_lapsi}
@@ -1925,14 +1929,14 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
               $_hyllynro_tmp = (isset($myy_hyllynro_temp) and $myy_hyllynro_temp != '');
               $_hyllyvali_tmp = (isset($myy_hyllyvali_temp) and $myy_hyllyvali_temp != '');
               $_hyllytaso_tmp = (isset($myy_hyllytaso_temp) and $myy_hyllytaso_temp != '');
-
+echo "1928 {$myy_hyllyalue[$indeksi]} <br> hyllyalue_tmp $myy_hyllyalue_temp <br><br>";
               if ($_hyllyalue_tmp and $_hyllynro_tmp and $_hyllyvali_tmp and $_hyllytaso_tmp) {
                 $myy_hyllyalue[$indeksi] = $myy_hyllyalue_temp;
                 $myy_hyllynro[$indeksi] = $myy_hyllynro_temp;
                 $myy_hyllytaso[$indeksi] = $myy_hyllytaso_temp;
                 $myy_hyllyvali[$indeksi] = $myy_hyllyvali_temp;
               }
-
+echo "1935 {$myy_hyllyalue[$indeksi]} <br><br>";
               $query = "INSERT into tilausrivi set
                         hyllyalue       = '$myy_hyllyalue[$indeksi]',
                         hyllynro        = '$myy_hyllynro[$indeksi]',
@@ -3225,7 +3229,7 @@ if ($toimittamatta > 0 or trim($var) != '' or $rivityyppi == 'O') {
       $p_hyllytaso = $myy_hyllytaso_temp;
       $p_hyllyvali = $myy_hyllyvali_temp;
     }
-
+echo "3228 $p_hyllyalue <br><br>";
     // lis‰t‰‰n puuterivi
     $query = "INSERT into tilausrivi set
               hyllyalue       = '$p_hyllyalue',

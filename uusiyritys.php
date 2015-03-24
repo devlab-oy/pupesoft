@@ -420,7 +420,6 @@ if ($tila == 'kirjoitin') {
     while ($row = mysql_fetch_array($kukar)) {
       $query = "INSERT INTO kirjoittimet SET
                 yhtio         = '$yhtio',
-                fax           = '$row[fax]',
                 kirjoitin     = '$row[kirjoitin]',
                 komento       = '$row[komento]',
                 merkisto      = '$row[merkisto]',

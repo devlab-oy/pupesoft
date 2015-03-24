@@ -209,6 +209,18 @@ else {
           }
         }
 
+        if ($mukaan == "maa") {
+          if ($group!="") $group .= ",lasku.maa";
+          else $group .= "lasku.maa";
+          $select .= "lasku.maa maa, ";
+          $order  .= "lasku.maa,";
+          $gluku++;
+
+          if ($rajaus[$i] != "") {
+            $lisa .= " and lasku.maa='{$rajaus[$i]}' ";
+          }
+        }
+
         if ($mukaan == "tuoteostaja") {
           if ($group!="") $group .= ",tuote.ostajanro";
           else $group  .= "tuote.ostajanro";
@@ -869,6 +881,12 @@ else {
       <td><input type='text' name='jarjestys[80]' size='2' value='$jarjestys[80]'></td>
       <td><input type='checkbox' name='ruksit[80]' value='tuote' $ruk80chk></td>
       <td><input type='text' name='rajaus[80]' value='$rajaus[80]'></td>
+      </tr>
+      <tr>
+      <th>", t("Listaa maittain"), "</th>
+      <td><input type='text' name='jarjestys[90]' size='2' value='{$jarjestys[90]}'></td>
+      <td><input type='checkbox' name='ruksit[90]' value='maa' {$ruk90chk}></td>
+      <td><input type='text' name='rajaus[90]' value='{$rajaus[90]}'></td>
       </tr>
       <tr>
       <th>".t("Listaa tuoteostajittain")."</th>

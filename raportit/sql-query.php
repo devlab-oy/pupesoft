@@ -242,7 +242,7 @@ if ($tee == "") {
 
                 $('#tallennus_formi').on('submit', function(e) {
                   e.preventDefault();
-                  $('#query_inputti').val($('#query_kentta').val());
+                  $('#query_inputti').val(encodeURIComponent($('#query_kentta').val()));
                   this.submit();
                 });
               })";

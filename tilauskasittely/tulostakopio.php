@@ -73,8 +73,11 @@ if ($tee == 'NAYTAHTML') {
   if ($logistiikka_yhtio != '' and $konsernivarasto_yhtiot != '') {
     echo "<font class='head'>", t("Yhtiön"), " $yhtiorow[nimi] ", t("tilaus"), " $tunnus:</font><hr>";
   }
-  else {
+  elseif ($toim != "LASKU") {
     echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
+  }
+  else {
+    echo "<font class='head'>".t("Lasku").":</font><hr>";
   }
 
   require "raportit/naytatilaus.inc";

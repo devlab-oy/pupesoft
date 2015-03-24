@@ -17,7 +17,12 @@ $summa_f = $summa * 100;
 
 $jaljella_oleva_summa = $summa_f - maksettu_kortilla_yhteensa($laskurow["tunnus"]);
 
-$voi_maksaa_viela = $jaljella_oleva_summa >= $korttimaksu_f;
+if ($jaljella_oleva_summa >= 0) {
+  $voi_maksaa_viela = $jaljella_oleva_summa >= $korttimaksu_f;
+}
+else {
+  $voi_maksaa_viela = $jaljella_oleva_summa <= $korttimaksu_f;
+}
 
 
 // 1 = tee maksutapahtuma, 2 = hae asiakkaan kuitti, 3 = hae kauppiaan kuitti

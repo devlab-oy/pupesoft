@@ -15,9 +15,14 @@ if (isset($task) and $task == 'saldoraportti_pdf') {
   $pdf_data['logodata'] = $logo_info['logodata'];
   $pdf_data['scale'] = $logo_info['scale'];
 
-  $pdf_tiedosto = varastoraportti_pdf($pdf_data);
+  $pdf_tiedosto = varastoraportti_pdf($pdf_data, $tyyppi);
 
   header("Content-type: application/pdf");
+
+  if ($lataus == '1') {
+    header("Content-Disposition:attachment;filename='saldoraportti.pdf'");
+  }
+
   echo file_get_contents($pdf_tiedosto);
   die;
 }
@@ -68,10 +73,17 @@ if (!isset($task) or $task == 'luo_saldoraportti') {
     <tr><th>" . t("Kellonaika") ."</th><td>";
 
   $t = time();
-  $minuutti = date("i",$t);
-  $tunti = date("H",$t);
+
+  if (!isset($minuutti)) {
+    $minuutti = date("i",$t);
+  }
+
+  if (!isset($tunti)) {
+    $tunti = date("H",$t);
+  }
 
   echo "<select name='tunti'>";
+
   $h = 0;
   while ($h <= 23) {
     $_h = str_pad($h,2,"0",STR_PAD_LEFT);
@@ -109,7 +121,11 @@ if (!isset($task) or $task == 'luo_saldoraportti') {
 
   echo "
   </td></tr>
-  <tr><th></th><td align='right'><input type='submit' value='". t("Hae tiedot") ."' /></td></tr>
+  <tr><th>". t("Hae tiedot") ."</th>
+  <td align='right'>
+  <button name='submit' value='paikka' onclick='submit();'>". t("Paikoittain") ."</button>
+  <button name='submit' value='tilaus' onclick='submit();'>". t("Tilauksittain") ."</button>
+  </td></tr>
   </table>
   <input type='hidden' name='task' value='luo_saldoraportti' />
   </form>";
@@ -130,7 +146,13 @@ if (!isset($task) or $task == 'luo_saldoraportti') {
 
     $hetki = $vuosi.'-'.$kuu.'-'.$paiva.' '.$tunti.':'.$minuutti.':00';
 
-    $varastotiedot = varastotilanne($hetki);
+    if ($submit == 'paikka') {
+      $varastotiedot = varastotilanne($hetki);
+    }
+    else {
+      $varastotiedot = varastotilanne2($hetki);
+    }
+
     extract($varastotiedot);
 
     $varastotiedot = serialize($varastotiedot);
@@ -139,70 +161,100 @@ if (!isset($task) or $task == 'luo_saldoraportti') {
     js_openFormInNewWindow();
 
     echo "
-      <form id='saldoraportti_pdf' method='post'>
+      <form id='nayta_saldoraportti_pdf' method='post'>
       <input type='hidden' name='task' value='saldoraportti_pdf' />
-      <input type='hidden' name='tee' value='XXX' />
+      <input type='hidden' name='tyyppi' value='{$submit}' />
+      <input type='hidden' name='tee' value='x' />
       <input type='hidden' name='varastotiedot' value='{$varastotiedot}' />
       </form>";
 
-    echo "<button onClick=\"js_openFormInNewWindow('saldoraportti_pdf','Saldoraportti'); return false;\" />";
+    echo "<button onClick=\"js_openFormInNewWindow('nayta_saldoraportti_pdf','Saldoraportti'); return false;\" />";
+    echo t("Näytä pdf");
+    echo "</button>";
+
+    echo "
+      <form id='lataa_saldoraportti_pdf' method='post'>
+      <input type='hidden' name='task' value='saldoraportti_pdf' />
+      <input type='hidden' name='tyyppi' value='{$submit}' />
+      <input type='hidden' name='tee' value='x' />
+      <input type='hidden' name='lataus' value='1' />
+      <input type='hidden' name='varastotiedot' value='{$varastotiedot}' />
+      </form>";
+
+    echo "<button onClick=\"js_openFormInNewWindow('lataa_saldoraportti_pdf','Saldoraportti'); return false;\" />";
     echo t("Lataa pdf");
     echo "</button><br />";
 
 
-    $echo = "<br>Rullien kokonaismäärä: " . $totalmaara . ' kpl';
-    $echo .= '<br>';
-    $echo .= "Rullien kokonaispaino: " . $totalpaino . ' kg';
-    $echo .= '<br><br>';
+    echo "<br>Rullien kokonaismäärä: " . $totalmaara . " kpl";
+    echo "<br>";
+    echo "Rullien kokonaispaino: " . $totalpaino . " kg";
+    echo "<br><br>";
 
-    $echo .= "<table>";
+    echo "<table>";
 
-    foreach ($paikat as $paikka => $tilaukset) {
+    if ($submit == 'tilaus') {
 
-      $rivimaara = count($tilaukset) + 2;
+      foreach ($tilaukset as $tiedot) {
+        echo "<tr>";
+        echo "<th>";
+        echo $tiedot['tilaus'];
+        echo "</th>";
 
-      $echo .= "<tr><th valign='top' rowspan={$rivimaara}''>";
-      $echo .= "<h2 style='font-weight:bold'>".$paikka.'</h2>';
-      $echo .= "</th><th>";
-      $echo .= "</th></tr>";
-
-      $tilauspaino = 0;
-      $tilausrullia = 0;
-      foreach ($tilaukset as $tilaus => $rullat) {
-        $echo .= "<tr><td>";
-
-
-        $echo .= "<div style='display:inline-block; width:130px; padding:0 10px'>" . $tilaus . "</div>";
-
-        $paino = 0;
-        $rullia = 0;
-        foreach ($rullat as $rulla) {
-          $paino += $rulla['massa'];
-          $rullia++;
-          $tilauspaino += $rulla['massa'];
-          $tilausrullia++;
-        }
-
-        $echo .= "<div style='display:inline-block; width:80px; text-align:right; padding-right:10px;'>" . $paino . " kg</div>";
-        $echo .= "<div style='display:inline-block; text-align:left;'>" . $rullia . " kpl</div>";
-
-
-
-        $echo .= "</td></tr>";
+        echo "<td>";
+        echo (int)$tiedot['paino'] . " kg (" . $tiedot['kpl'] . " kpl.)";
+        echo "</td>";
+        echo "</tr>";
       }
-      $echo .= "<tr><td>";
 
-      $echo .= "<div style='display:inline-block; width:130px; padding:0 10px; font-weight:bold;'>" . t("Yhteensä:") . "</div>";
-      $echo .= "<div style='display:inline-block; width:80px; text-align:right; padding-right:10px;  font-weight:bold;'>" . $tilauspaino . " kg</div>";
-      $echo .= "<div style='display:inline-block; text-align:left;  font-weight:bold;'>" . $tilausrullia . " kpl</div>";
-
-      $echo .= "</td></tr>";
+      echo "</table>";
 
     }
-    $echo .= "</table>";
+    elseif ($submit == 'paikka') {
 
+      foreach ($paikat as $paikka => $tilaukset) {
 
-    echo $echo;
+        $rivimaara = count($tilaukset) + 2;
+
+        $echo .= "<tr><th valign='top' rowspan={$rivimaara}''>";
+        $echo .= "<h2 style='font-weight:bold'>".$paikka.'</h2>';
+        $echo .= "</th><th>";
+        $echo .= "</th></tr>";
+
+        $tilauspaino = 0;
+        $tilausrullia = 0;
+        foreach ($tilaukset as $tilaus => $rullat) {
+          $echo .= "<tr><td>";
+
+          $echo .= "<div style='display:inline-block; width:130px; padding:0 10px'>" . $tilaus . "</div>";
+
+          $paino = 0;
+          $rullia = 0;
+          foreach ($rullat as $rulla) {
+            $paino += $rulla['massa'];
+            $rullia++;
+            $tilauspaino += $rulla['massa'];
+            $tilausrullia++;
+          }
+
+          $echo .= "<div style='display:inline-block; width:80px; text-align:right; padding-right:10px;'>" . $paino . " kg</div>";
+          $echo .= "<div style='display:inline-block; text-align:left;'>" . $rullia . " kpl</div>";
+
+          $echo .= "</td></tr>";
+        }
+        $echo .= "<tr><td>";
+
+        $echo .= "<div style='display:inline-block; width:130px; padding:0 10px; font-weight:bold;'>" . t("Yhteensä:") . "</div>";
+        $echo .= "<div style='display:inline-block; width:80px; text-align:right; padding-right:10px;  font-weight:bold;'>" . $tilauspaino . " kg</div>";
+        $echo .= "<div style='display:inline-block; text-align:left;  font-weight:bold;'>" . $tilausrullia . " kpl</div>";
+
+        $echo .= "</td></tr>";
+
+      }
+      $echo .= "</table>";
+      echo $echo;
+
+    }
   }
 }
 
@@ -271,6 +323,20 @@ if (isset($task) and ($task == 'ylijaamasiirto')) {
   $task = 'ylijaamakasittely';
 }
 
+if (isset($task) and ($task == 'palautus')) {
+
+
+  $query = "UPDATE tilausrivi SET
+            toimitettu = '{$kukarow['kuka']}',
+            toimitettuaika = NOW()
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$rivitunnus}'";
+  pupe_query($query);
+
+  $task = 'ylijaamakasittely';
+}
+
+
 if (isset($task) and ($task == 'ylijaamakasittely')) {
 
   echo "<a href='varastotilanne.php'>« " . t("Palaa varastontilanteeseen") . "</a><br><br>";
@@ -294,7 +360,9 @@ if (isset($task) and ($task == 'ylijaamakasittely')) {
               AND trlt.tilausrivitunnus = tilausrivi.tunnus
             WHERE lasku.yhtio = '{$kukarow['yhtio']}'
             AND lasku.tilaustyyppi = 'N'
+            AND lasku.asiakkaan_tilausnumero != ''
             AND lasku.sisviesti1 != 'konttiviitelasku'
+            AND laskun_lisatiedot.konttiviite != 'bookkaukseton'
             AND laskun_lisatiedot.satamavahvistus_pvm = '0000-00-00 00:00:00'
             GROUP BY lasku.asiakkaan_tilausnumero
             ORDER BY trlt.asiakkaan_tilausnumero";
@@ -333,7 +401,8 @@ if (isset($task) and ($task == 'ylijaamakasittely')) {
               ON laskun_lisatiedot.yhtio = ss.yhtio
               AND laskun_lisatiedot.otunnus = lasku.tunnus
             WHERE ss.yhtio = '{$kukarow['yhtio']}'
-            AND ss.lisatieto = 'Ylijaama'";
+            AND ss.lisatieto = 'Ylijaama'
+            AND tilausrivi.toimitettu = ''";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) == 0) {
@@ -394,7 +463,15 @@ if (isset($task) and ($task == 'ylijaamakasittely')) {
         echo "<input type='hidden' name='leveys' value='{$rulla['leveys']}' />";
         echo "<input type='submit' value='Siirrä' />";
       }
-      echo "</form></td>";
+      echo "</form>";
+
+      echo "&nbsp;<form>";
+      echo "<input type='hidden' name='task' value='palautus' />";
+      echo "<input type='hidden' name='rivitunnus' value='{$rulla['tunnus']}' />";
+      echo "<input type='submit' value='Palautus' />";
+      echo "</form>";
+
+      echo "</td>";
       echo "</tr>";
     }
     echo "</table>";

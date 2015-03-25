@@ -789,8 +789,8 @@ if ((int) $kukarow["kesken"] > 0) {
       $kateismaksu["pankkikortti"]) = jaljella_oleva_maksupaatesumma();
 
     if ($loytyy_maksutapahtumia and ($maksettavaa_jaljella - $kateista_annettu) == 0 and
-                                    ($kateismaksu["luottokortti"] > 0 or
-                                     $kateismaksu["pankkikortti"] > 0)
+                                    ($kateismaksu["luottokortti"] != 0 or
+                                     $kateismaksu["pankkikortti"] != 0)
     ) {
       $tee = "VALMIS";
       $seka = "kylla";
@@ -10657,6 +10657,7 @@ function jaljella_oleva_maksupaatesumma() {
       $maksettu_pkortilla += $ruutu['summa_valuutassa'];
     }
   }
+
   $maksupaate_maksetut['luottokortti'] = $maksettu_lkortilla;
   $maksupaate_maksetut['pankkikortti'] = $maksettu_pkortilla;
 
@@ -10666,7 +10667,7 @@ function jaljella_oleva_maksupaatesumma() {
     $valisumma += $maksettu;
   }
 
-  if ($valisumma > 0) {
+  if ($valisumma != 0) {
     $loytyy = true;
   }
 

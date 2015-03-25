@@ -153,3 +153,11 @@ select.minpad_select {
 .hidden {
   display: none;
 }
+
+.left {
+  float: left;
+}
+
+.right {
+  float: right;
+}

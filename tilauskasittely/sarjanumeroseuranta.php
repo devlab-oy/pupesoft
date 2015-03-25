@@ -15,6 +15,24 @@ echo "<SCRIPT type='text/javascript'>
     //-->
     </SCRIPT>";
 
+$javascripti = "$(function() {
+  var sarjanumeroEnable = $('#sarjanumeroEnable');
+  var sarjanumero = $('#sarjanumero');
+  var sarjanumeroLinkit = $('#sarjanumeroLinkit');
+
+  sarjanumeroEnable.on('click', function() {
+    var onVarma = confirm('" . t("Oletko varma, ett‰ haluat muuttaa sarjanumeroa") . "?');
+
+    if (onVarma) {
+      sarjanumero.removeAttr('disabled');
+      sarjanumeroLinkit.show();
+      this.style.display = 'none';
+    }
+  });
+});";
+
+echo "<script>{$javascripti}</script>";
+
 if ($toiminto == "sarjanumeronlisatiedot_popup") {
   @include 'sarjanumeron_lisatiedot_popup.inc';
 
@@ -158,11 +176,13 @@ if ($toiminto == 'MUOKKAA') {
 
     $era_kpl = (float) str_replace(",", ".", $era_kpl);
 
+    $sarjanumero_lisa = isset($sarjanumero) ? "sarjanumero = '{$sarjanumero}'," : "";
+
     if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G") {
 
       $query = "UPDATE sarjanumeroseuranta
                 SET lisatieto   = '$lisatieto',
-                sarjanumero   = '$sarjanumero',
+                {$sarjanumero_lisa}
                 kaytetty      = '$kaytetty',
                 muuttaja      = '$kukarow[kuka]',
                 muutospvm     = now(),
@@ -175,7 +195,7 @@ if ($toiminto == 'MUOKKAA') {
     else {
       $query = "UPDATE sarjanumeroseuranta
                 SET lisatieto   = '$lisatieto',
-                sarjanumero   = '$sarjanumero',
+                {$sarjanumero_lisa}
                 kaytetty      = '$kaytetty',
                 muuttaja      = '$kukarow[kuka]',
                 muutospvm     = now(),
@@ -236,7 +256,7 @@ if ($toiminto == 'MUOKKAA') {
 
       $muutarow = mysql_fetch_assoc($muutares);
 
-      echo "<table class='left'>";
+      echo "<table class='left' style='width:60%;'>";
 
       if ($muutarow["sarjanumeroseuranta"] == "E" or $muutarow["sarjanumeroseuranta"] == "F" or $muutarow["sarjanumeroseuranta"] == "G") {
         echo "<tr><th colspan='2'>".t("Muuta er‰numerotietoja").":</th></tr>";
@@ -301,7 +321,31 @@ if ($toiminto == 'MUOKKAA') {
         $nxt2 = t("EI SARJANUMEROA")."-1";
       }
 
-      echo "<td><input type='text' size='30' name='sarjanumero' value='$muutarow[sarjanumero]'> <a onclick='document.muokkaaformi.sarjanumero.value=\"$nxt\";'><u>".t("Sarjanumero ei tiedossa")."</u></a> <a onclick='document.muokkaaformi.sarjanumero.value=\"$nxt2\";'><u>".t("Ei Sarjanumeroa")."</u></a>";
+      if ($muutarow["myyntirivitunnus"] > 0) {
+        $disabled = "disabled";
+        $style = "style='display:none;'";
+      }
+      else {
+        $disabled = "";
+        $style = "";
+      }
+
+      echo "<td>
+              <input id='sarjanumero'
+                     type='text'
+                     size='30'
+                     name='sarjanumero'
+                     value='$muutarow[sarjanumero]'
+                     {$disabled}>";
+
+      echo "<span id='sarjanumeroLinkit' {$style}>";
+      echo "<a onclick='document.muokkaaformi.sarjanumero.value=\"$nxt\";'>
+              <u>".t("Sarjanumero ei tiedossa")."</u>
+            </a>
+            <a onclick='document.muokkaaformi.sarjanumero.value=\"$nxt2\";'>
+              <u>".t("Ei Sarjanumeroa")."</u>
+            </a>";
+      echo "</span>";
 
       if ($muutarow["myyntirivitunnus"] > 0) {
         if ($muutarow["sarjanumeroseuranta"] == "E" or $muutarow["sarjanumeroseuranta"] == "F" or $muutarow["sarjanumeroseuranta"] == "G") {
@@ -309,6 +353,8 @@ if ($toiminto == 'MUOKKAA') {
         }
         else {
           echo "<br><br><font class='error'>".t("HUOM: Sarjanumero on liitetty tilaukseen! Tilauksen tiedot muuttuvat jos muokkaat sarjanumeroa.")."</font>";
+          echo "<br>
+                <button id='sarjanumeroEnable' type='button'>" . t("Muokkaa silti") . "</button>";
         }
       }
 
@@ -383,7 +429,7 @@ if ($toiminto == 'MUOKKAA') {
       echo "<iframe id='liitetiedostot_iframe'
                     name='liitetiedostot_iframe'
                     class='right'
-                    style='width: 600px; border: 0px; display: block;'
+                    style='width:40%;border:0px;display:block;'
                     frameborder='0'
                     src='{$palvelin2}yllapito.php" .
                       "?toim=liitetiedostot" .
@@ -1200,7 +1246,25 @@ if (is_resource($sarjaresiso) and mysql_num_rows($sarjaresiso) > 0) {
     }
 
     echo "<tr>";
-    echo "<td valign='top'>".strtoupper($sarjarow["sarjanumero"])."<a name='$sarjarow[sarjanumero]'></a>";
+    echo "<td valign='top'>
+            <a href='$PHP_SELF" .
+                 "?toiminto=MUOKKAA" .
+                 "&$tunnuskentta=$rivitunnus" .
+                 "&from=$from" .
+                 "&aputoim=$aputoim" .
+                 "&otunnus=$otunnus" .
+                 "&sarjatunnus=$sarjarow[tunnus]" .
+                 "&sarjanumero_haku=$sarjanumero_haku" .
+                 "&tuoteno_haku=".urlencode($tuoteno_haku)."" .
+                 "&nimitys_haku=$nimitys_haku" .
+                 "&varasto_haku=$varasto_haku" .
+                 "&ostotilaus_haku=$ostotilaus_haku" .
+                 "&myyntitilaus_haku=$myyntitilaus_haku" .
+                 "&lisatieto_haku=$lisatieto_haku" .
+                 "&muut_siirrettavat=$muut_siirrettavat'>".
+              strtoupper($sarjarow["sarjanumero"]).
+           "</a>
+            <a name='$sarjarow[sarjanumero]'></a>";
 
     if ($rivirow["sarjanumeroseuranta"] == "E" or $rivirow["sarjanumeroseuranta"] == "F" or $rivirow["sarjanumeroseuranta"] == "G") {
 
@@ -1366,10 +1430,6 @@ if (is_resource($sarjaresiso) and mysql_num_rows($sarjaresiso) > 0) {
     $viiva = strpos($sarjarow['sarjanumero'], "-");
     if ($viiva === FALSE) {
       $viiva = 0;
-    }
-    //jos saa muuttaa niin n‰ytet‰‰n muokkaa linkki, Jos myyntirivi on laskutettu niin ei muokata
-    if ((strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php") !== FALSE or $PHP_SELF == "sarjanumeroseuranta.php" or strpos($_SERVER['SCRIPT_NAME'], "tervetuloa.php") !== FALSE or $PHP_SELF == "tervetuloa.php") and ($sarjarow["myynti_laskaika"] == "" or $sarjarow["myynti_laskaika"] == "0000-00-00" or (substr($sarjarow['sarjanumero'], 0, $viiva) == "PUUTTUU" or substr($sarjarow['sarjanumero'], 0, $viiva) == t("PUUTTUU") or substr($sarjarow['sarjanumero'], 0, $viiva) == t("PUUTTUU", $yhtiorow["kieli"])))) {
-      echo "<a href='$PHP_SELF?toiminto=MUOKKAA&$tunnuskentta=$rivitunnus&from=$from&aputoim=$aputoim&otunnus=$otunnus&sarjatunnus=$sarjarow[tunnus]&sarjanumero_haku=$sarjanumero_haku&tuoteno_haku=".urlencode($tuoteno_haku)."&nimitys_haku=$nimitys_haku&varasto_haku=$varasto_haku&ostotilaus_haku=$ostotilaus_haku&myyntitilaus_haku=$myyntitilaus_haku&lisatieto_haku=$lisatieto_haku&muut_siirrettavat=$muut_siirrettavat'>".t("Muokkaa")."</a>";
     }
 
     if ($sarjarow['sarjaseutyyppi'] == "S" and $sarjarow['ostorivitunnus'] > 0 and ($from == "" or $from == "SIIRTOTYOMAARAYS") and ($sarjarow["myynti_laskaika"] == "0000-00-00" or $sarjarow["myynti_laskaika"] == "" or ($sarjarow['myynti_laskaika'] <= $yhtiorow["tilikausi_loppu"] and $sarjarow['myynti_laskaika'] >= $yhtiorow["tilikausi_alku"]))) {

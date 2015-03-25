@@ -236,7 +236,7 @@ if ($toiminto == 'MUOKKAA') {
 
       $muutarow = mysql_fetch_assoc($muutares);
 
-      echo "<table>";
+      echo "<table class='left'>";
 
       if ($muutarow["sarjanumeroseuranta"] == "E" or $muutarow["sarjanumeroseuranta"] == "F" or $muutarow["sarjanumeroseuranta"] == "G") {
         echo "<tr><th colspan='2'>".t("Muuta eränumerotietoja").":</th></tr>";
@@ -378,7 +378,20 @@ if ($toiminto == 'MUOKKAA') {
       }
 
       echo "<td class='back'><input type='submit' name='PAIVITA' value='".t("Päivitä")."'></td>";
-      echo "</tr></form></table><br><br>";
+      echo "</tr></form></table>";
+
+      echo "<iframe id='liitetiedostot_iframe'
+                    name='liitetiedostot_iframe'
+                    class='right'
+                    style='width: 600px; border: 0px; display: block;'
+                    frameborder='0'
+                    src='{$palvelin2}yllapito.php" .
+                      "?toim=liitetiedostot" .
+                      "&from=yllapito" .
+                      "&haku[7]=@sarjanumeroseuranta" .
+                      "&haku[8]=@{$muutarow["tunnus"]}" .
+                      "&lukitse_avaimeen={$muutarow["tunnus"]}" .
+                      "&lukitse_laji=sarjanumeroseuranta'></iFrame>";
     }
     else {
       echo t("Muutettava sarjanumero on kadonnut")."!!!!<br>";
@@ -1085,7 +1098,7 @@ if ($rivirow["tuoteno"] != '') {
   echo "</table><br>";
 }
 
-echo "<table>";
+echo "<table class='left'>";
 echo "<tr>";
 echo "<th>".t("Sarjanumero")."</th>";
 echo "<th>".t("Tuoteno")."</th>";
@@ -1628,5 +1641,7 @@ if ($from == "INVENTOINTI") {
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php")  !== FALSE) {
+  echo "<div class='left'>";
   require "inc/footer.inc";
+  echo "</div>";
 }

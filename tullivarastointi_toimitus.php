@@ -310,7 +310,8 @@ if (isset($task) and $task == 'hae_tulorivit') {
             tilausrivi.hyllyalue,
             tilausrivi.hyllynro,
             tilausrivi.hyllyvali,
-            tilausrivi.hyllytaso
+            tilausrivi.hyllytaso,
+            varastopaikat.tunnus AS varastotunnus
             FROM tilausrivi
             JOIN lasku
              ON lasku.yhtio = tilausrivi.yhtio
@@ -333,7 +334,7 @@ if (isset($task) and $task == 'hae_tulorivit') {
 
   while ($rivi = mysql_fetch_assoc($result)) {
 
-    $saldot = saldo_myytavissa($rivi['tuoteno'], '', 109, '', $rivi['hyllyalue'], $rivi['hyllynro'], $rivi['hyllyvali'], $rivi['hyllytaso']);
+    $saldot = saldo_myytavissa($rivi['tuoteno'], '', $rivi['varastotunnus'], '', $rivi['hyllyalue'], $rivi['hyllynro'], $rivi['hyllyvali'], $rivi['hyllytaso']);
 
     $rivi['vapaana'] = $saldot[2];
 

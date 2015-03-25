@@ -108,6 +108,7 @@ if (isset($submit)) {
                 ss.hyllyalue,
                 ss.hyllynro,
                 ss.lisatieto,
+                ss.massa,
                 lasku.asiakkaan_tilausnumero
                 FROM laskun_lisatiedot
                 JOIN lasku
@@ -322,13 +323,17 @@ if (isset($submit)) {
           $_tilaus = array();
           foreach ($rullat as $key => $rulla) {
             $varasto = $rulla['hyllyalue'] . "-" . $rulla['hyllynro'];
+            $paino = $rulla['massa'];
             if (!isset($_tilaus[$varasto])) {
-              $_tilaus[$varasto] = 1;
+              $_tilaus[$varasto]['kpl'] = 1;
+              $_tilaus[$varasto]['paino'] = $paino;
             }
             else {
-              $_tilaus[$varasto]++;
+              $_tilaus[$varasto]['kpl']++;
+              $_tilaus[$varasto]['paino'] = $_tilaus[$varasto]['paino'] + $paino;
             }
           }
+
           $rullat_varastossa[$tilaus] = $_tilaus;
         }
 
@@ -648,23 +653,27 @@ if ($view == 'konttiviite_maxkg') {
   echo "<td colspan='2'  style='padding:8px 0'>Rullien sijainnit:</td>";
   echo "</tr>";
 
+  $totalpaino = 0;
+
   foreach ($rullat_varastossa as $tilaus => $varastot) {
 
     echo "<tr>";
-    echo "<td style='text-align:center; width:100%; padding:10px  0 0 0' colspan='2'><b>{$tilaus}</b></td>";
+    echo "<td style='text-align:center; width:100%; padding:10px  0 10px 0' colspan='2'><b>{$tilaus}</b></td>";
     echo "</tr>";
 
-    foreach ($varastot as $hylly => $maara) {
+    foreach ($varastot as $hylly => $tiedot) {
       echo "<tr>";
       echo "<td style='text-align:right; width:50%'>{$hylly}: </td>";
-      echo "<td style='text-align:left; width:50%'> {$maara} kpl.</td>";
+      echo "<td style='text-align:left; width:50%'> {$tiedot['kpl']} kpl. / {$tiedot['paino']} kg.</td>";
       echo "</tr>";
+
+      $totalpaino = $totalpaino + $tiedot['paino'];
     }
   }
 
   echo "<tr>";
   echo "<td align='right' style='padding-top:10px'>Yhteensä: </td>";
-  echo "<td align='left'  style='padding-top:10px'> " . $rullia . " kpl.</td>";
+  echo "<td align='left'  style='padding-top:10px'> " . $rullia . " kpl. / {$totalpaino} kg.</td>";
   echo "</tr>";
 
   echo "</table>";

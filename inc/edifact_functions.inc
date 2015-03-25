@@ -3399,8 +3399,11 @@ function varastoraportti_pdf($pdf_data, $tyyppi) {
   else {
 
     $pdf->draw_text($x, $y, 'Tilaus:rivi', $sivu, $bold);
-    $pdf->draw_text($x+150, $y, 'Paino', $sivu, $bold);
-    $pdf->draw_text($x+250, $y, 'Kpl.', $sivu, $bold);
+    $pdf->draw_text($x+100, $y, 'Paino', $sivu, $bold);
+    $pdf->draw_text($x+150, $y, 'Rullia', $sivu, $bold);
+    $pdf->draw_text($x+200, $y, 'Leveys', $sivu, $bold);
+    $pdf->draw_text($x+270, $y, 'Halkaisija', $sivu, $bold);
+    $pdf->draw_text($x+370, $y, 'Toimitusaika', $sivu, $bold);
 
     $y -= 5;
     $yy[0] = $yy[1] = $y;
@@ -3415,10 +3418,14 @@ function varastoraportti_pdf($pdf_data, $tyyppi) {
       }
 
       $pdf->draw_text($x, $y, $tilaus['tilaus'], $sivu, $pieni);
-      $pdf->draw_text($x+150, $y, (int)$tilaus['paino'] . ' kg', $sivu, $pieni);
-      $pdf->draw_text($x+250, $y, $tilaus['kpl'], $sivu, $pieni);
+      $pdf->draw_text($x+100, $y, (int)$tilaus['paino'] . ' kg.', $sivu, $pieni);
+      $pdf->draw_text($x+150, $y, $tilaus['kpl']. ' kpl.', $sivu, $pieni);
+      $pdf->draw_text($x+200, $y, (int) $tilaus['leveys']. ' mm.', $sivu, $pieni);
+      $pdf->draw_text($x+270, $y, $tilaus['halkaisijat']. ' mm.', $sivu, $pieni);
+      $pdf->draw_text($x+370, $y, $tilaus['toimituspaivat'], $sivu, $pieni);
 
-      $y -= 5;
+
+      $y -= 10;
       $yy[0] = $yy[1] = $y;
       $pdf->draw_line($xx, $yy, $sivu);
       $y -= 20;
@@ -3626,7 +3633,10 @@ function varastotilanne_tilauksittain($hetki = false) {
   $query = "SELECT
             concat(otrlt.asiakkaan_tilausnumero, ':', otrlt.asiakkaan_rivinumero) AS tilaus,
             sum(ss.massa) AS paino,
-            count(ss.tunnus) AS kpl
+            count(ss.tunnus) AS kpl,
+            ss.leveys AS leveys,
+            group_concat(DISTINCT ss.halkaisija) halkaisijat,
+            group_concat(DISTINCT DATE(otr.toimitettuaika)) AS toimituspaivat
             FROM sarjanumeroseuranta AS ss
             JOIN tilausrivi AS otr
               ON otr.yhtio = ss.yhtio
@@ -3653,6 +3663,29 @@ function varastotilanne_tilauksittain($hetki = false) {
   $totalmaara = 0;
 
   while ($tilaus = mysql_fetch_assoc($result)) {
+
+    if (strpos($tilaus['halkaisijat'], ',') !== false) {
+
+      $halkaisijat = explode(',', $tilaus['halkaisijat']);
+      $tilaus['halkaisijat'] = (int) min($halkaisijat) . " - " .  (int) max($halkaisijat);
+    }
+    else {
+      $tilaus['halkaisijat'] = (int) $tilaus['halkaisijat'];
+    }
+
+    if (strpos($tilaus['toimituspaivat'], ',') !== false) {
+
+      $toimituspaivat = explode(',', $tilaus['toimituspaivat']);
+
+      $eka = date("d.m.y", strtotime(min($toimituspaivat)));
+      $vika = date("d.m.y", strtotime(max($toimituspaivat)));
+
+      $tilaus['toimituspaivat'] = $eka . " - " . $vika;
+    }
+    else {
+      $tilaus['toimituspaivat'] = date("d.m.y", strtotime($tilaus['toimituspaivat']));
+    }
+
     $tilaukset[] = $tilaus;
     $totalpaino += $tilaus['paino'];
     $totalmaara += $tilaus['kpl'];

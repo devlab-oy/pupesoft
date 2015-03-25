@@ -3291,7 +3291,7 @@ function lahtoilmoitus_pdf($pdf_data) {
   return $pdffilenimi;
 }
 
-function varastoraportti_pdf($pdf_data) {
+function varastoraportti_pdf($pdf_data, $tyyppi) {
 
   extract($pdf_data);
 
@@ -3337,62 +3337,96 @@ function varastoraportti_pdf($pdf_data) {
 
   $y -= 50;
 
-  $pdf->draw_text($x, $y, 'Paikka', $sivu, $bold);
-  $pdf->draw_text($x+120, $y, 'Tilaus:rivi', $sivu, $bold);
-  $pdf->draw_text($x+270, $y, 'Paino', $sivu, $bold);
-  $pdf->draw_text($x+400, $y, 'Kpl.', $sivu, $bold);
+  if ($tyyppi == 'paikka') {
 
-  $y -= 5;
-  $yy[0] = $yy[1] = $y;
-  $pdf->draw_line($xx, $yy, $sivu);
-  $y -= 20;
-
-  foreach ($paikat as $paikka => $tilaukset) {
-
-    $riveja = count($tilaukset);
-    $tarvittava_tila = $riveja * 20 + 20;
-
-    if ($y < $tarvittava_tila) {
-      $sivu = $pdf->new_page("a4");
-      $y = 800;
-    }
-
-    $pdf->draw_text($x, $y-5, $paikka, $sivu, $iso);
-
-    $tilauspaino = 0;
-    $tilausrullia = 0;
-    foreach ($tilaukset as $tilaus => $rullat) {
-
-      if ($y < 20) {
-        $sivu = $pdf->new_page("a4");
-        $y = 800;
-      }
-
-        $pdf->draw_text($x+120, $y, $tilaus, $sivu, $pieni);
-
-        $paino = 0;
-        $rullia = 0;
-        foreach ($rullat as $rulla) {
-          $paino += $rulla['massa'];
-          $rullia++;
-          $tilauspaino += $rulla['massa'];
-          $tilausrullia++;
-      }
-
-      $pdf->draw_text($x+270, $y, $paino, $sivu, $pieni);
-      $pdf->draw_text($x+400, $y, $rullia, $sivu, $pieni);
-
-      $y -= 20;
-    }
-    $pdf->draw_text($x+120, $y, "Yhteens‰", $sivu, $bold);
-    $pdf->draw_text($x+270, $y, $tilauspaino, $sivu, $bold);
-    $pdf->draw_text($x+400, $y, $tilausrullia, $sivu, $bold);
+    $pdf->draw_text($x, $y, 'Paikka', $sivu, $bold);
+    $pdf->draw_text($x+120, $y, 'Tilaus:rivi', $sivu, $bold);
+    $pdf->draw_text($x+270, $y, 'Paino', $sivu, $bold);
+    $pdf->draw_text($x+400, $y, 'Kpl.', $sivu, $bold);
 
     $y -= 5;
     $yy[0] = $yy[1] = $y;
     $pdf->draw_line($xx, $yy, $sivu);
     $y -= 20;
+
+    foreach ($paikat as $paikka => $tilaukset) {
+      $riveja = count($tilaukset);
+      $tarvittava_tila = $riveja * 20 + 20;
+
+      if ($y < $tarvittava_tila) {
+        $sivu = $pdf->new_page("a4");
+        $y = 800;
+      }
+
+      $pdf->draw_text($x, $y-5, $paikka, $sivu, $iso);
+
+      $tilauspaino = 0;
+      $tilausrullia = 0;
+      foreach ($tilaukset as $tilaus => $rullat) {
+
+        if ($y < 20) {
+          $sivu = $pdf->new_page("a4");
+          $y = 800;
+        }
+
+          $pdf->draw_text($x+120, $y, $tilaus, $sivu, $pieni);
+
+          $paino = 0;
+          $rullia = 0;
+          foreach ($rullat as $rulla) {
+            $paino += $rulla['massa'];
+            $rullia++;
+            $tilauspaino += $rulla['massa'];
+            $tilausrullia++;
+        }
+
+        $pdf->draw_text($x+270, $y, $paino, $sivu, $pieni);
+        $pdf->draw_text($x+400, $y, $rullia, $sivu, $pieni);
+
+        $y -= 20;
+      }
+      $pdf->draw_text($x+120, $y, "Yhteens‰", $sivu, $bold);
+      $pdf->draw_text($x+270, $y, $tilauspaino, $sivu, $bold);
+      $pdf->draw_text($x+400, $y, $tilausrullia, $sivu, $bold);
+
+      $y -= 5;
+      $yy[0] = $yy[1] = $y;
+      $pdf->draw_line($xx, $yy, $sivu);
+      $y -= 20;
+    }
+
   }
+  else {
+
+    $pdf->draw_text($x, $y, 'Tilaus:rivi', $sivu, $bold);
+    $pdf->draw_text($x+150, $y, 'Paino', $sivu, $bold);
+    $pdf->draw_text($x+250, $y, 'Kpl.', $sivu, $bold);
+
+    $y -= 5;
+    $yy[0] = $yy[1] = $y;
+    $pdf->draw_line($xx, $yy, $sivu);
+    $y -= 20;
+
+    foreach ($tilaukset as $tilaus) {
+
+      if ($y < 30) {
+        $sivu = $pdf->new_page("a4");
+        $y = 800;
+      }
+
+      $pdf->draw_text($x, $y, $tilaus['tilaus'], $sivu, $pieni);
+      $pdf->draw_text($x+150, $y, (int)$tilaus['paino'] . ' kg', $sivu, $pieni);
+      $pdf->draw_text($x+250, $y, $tilaus['kpl'], $sivu, $pieni);
+
+      $y -= 5;
+      $yy[0] = $yy[1] = $y;
+      $pdf->draw_line($xx, $yy, $sivu);
+      $y -= 20;
+    }
+
+  }
+
+
 
   //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
   $pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(),true)).".pdf";
@@ -3582,6 +3616,58 @@ function pdf_logo() {
   return $return;
 }
 
+function varastotilanne_tilauksittain($hetki = false) {
+  global $kukarow;
+
+  if (!$hetki) {
+    $hetki = date("Y-m-d H:i:s");
+  }
+
+  $query = "SELECT
+            concat(otrlt.asiakkaan_tilausnumero, ':', otrlt.asiakkaan_rivinumero) AS tilaus,
+            sum(ss.massa) AS paino,
+            count(ss.tunnus) AS kpl
+            FROM sarjanumeroseuranta AS ss
+            JOIN tilausrivi AS otr
+              ON otr.yhtio = ss.yhtio
+              AND otr.tunnus = ss.ostorivitunnus
+            JOIN tilausrivin_lisatiedot AS otrlt
+              ON otrlt.yhtio = ss.yhtio
+              AND otrlt.tilausrivitunnus = otr.tunnus
+            LEFT JOIN tilausrivi AS mtr
+              ON mtr.yhtio = ss.yhtio
+              AND mtr.tunnus = ss.myyntirivitunnus
+            LEFT JOIN tilausrivin_lisatiedot AS mtrlt
+              ON mtrlt.yhtio = ss.yhtio
+              AND mtrlt.tilausrivitunnus = mtr.tunnus
+            WHERE ss.yhtio = '{$kukarow['yhtio']}'
+            AND ss.varasto IS NOT NULL
+            AND otr.toimitettuaika <= '{$hetki}'
+            AND ((mtr.toimitettuaika >= '{$hetki}' OR mtr.toimitettuaika = '0000-00-00 00:00:00') OR mtr.toimitettuaika IS NULL)
+            GROUP BY tilaus
+            ORDER BY tilaus ASC";
+            $result = pupe_query($query);
+
+  $tilaukset = array();
+  $totalpaino = 0;
+  $totalmaara = 0;
+
+  while ($tilaus = mysql_fetch_assoc($result)) {
+    $tilaukset[] = $tilaus;
+    $totalpaino += $tilaus['paino'];
+    $totalmaara += $tilaus['kpl'];
+  }
+
+  $return = array(
+    'tilaukset' => $tilaukset,
+    'totalpaino' => $totalpaino,
+    'totalmaara' => $totalmaara,
+    'hetki' => $hetki
+  );
+
+  return $return;
+}
+
 function varastotilanne($hetki = false) {
   global $kukarow;
 
@@ -3757,10 +3843,211 @@ function seuraava_vapaa_tulonumero($varastokoodi) {
 function hae_toimenpiteet($tulotunnus) {
   global $kukarow;
 
-  return array('muokkaus', 'siirto', 'poisto');
+  return array('muokkaus', 'siirto', 'poisto', 'rivien_lis‰ys');
 
 }
 
+function tulon_tuotteet_ja_tiedot($tulonumero) {
+  global $kukarow;
 
+  $query = "SELECT
+            tuote.tunnus AS tuotetunnus,
+            tuote.nimitys,
+            tuote.malli,
+            tuote.pakkauslaji,
+            tuote.pakkauskpl AS maara2,
+            tuote.tuotemassa_netto AS nettopaino,
+            tuote.tuotemassa AS bruttopaino,
+            tuote.tuotetilavuus AS tilavuus,
+            tuote.muuta AS lisatieto,
+            tr.tilkpl AS maara1,
+            tr.tunnus AS tilausrivitunnus
+            FROM tuote
+            JOIN tilausrivi AS tr
+              ON tr.yhtio = tuote.yhtio
+              AND tr.tuoteno = tuote.tuoteno
+            JOIN lasku
+              ON lasku.yhtio = tuote.yhtio
+              AND lasku.tunnus = tr.otunnus
+            WHERE tuote.yhtio = '{$kukarow['yhtio']}'
+            AND tuote.tuoteno LIKE '{$tulonumero}-%'
+            AND tr.tyyppi = 'O'
+            AND lasku.asiakkaan_tilausnumero = '{$tulonumero}'
+            GROUP BY tr.tunnus";
+  $result = pupe_query($query);
+
+  $tuotteet = array();
+  $laskuri = 1;
+
+  while ($tuote = mysql_fetch_assoc($result)) {
+
+    $tuote['tyyppi'] = 'vanha';
+
+    $tuotteet[$laskuri] = $tuote;
+    $laskuri++;
+  }
+
+  $query = "SELECT *
+            FROM lasku
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND asiakkaan_tilausnumero = '{$tulonumero}'";
+  $result = pupe_query($query);
+  $laskurow = mysql_fetch_assoc($result);
+
+  $varastotunnus = $laskurow['varasto'];
+  $tulopaiva = $laskurow['toimaika'];
+  $toimittajatunnus = $laskurow['liitostunnus'];
+
+  $query = "SELECT *
+            FROM tilausrivin_lisatiedot
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND asiakkaan_tilausnumero = '{$tulonumero}'
+            LIMIT 1";
+  $result = pupe_query($query);
+
+  $lisatiedot = mysql_fetch_assoc($result);
+
+  $rekisterinumero = $lisatiedot['kuljetuksen_rekno'];
+  $sinettinumero = $lisatiedot['sinettinumero'];
+  $konttinumero = $lisatiedot['konttinumero'];
+  $edeltava_asiakirja = $lisatiedot['kontin_mrn'];
+
+  $tulon_tuotteet_ja_tiedot = array(
+    'varastotunnus_ja_koodi' => $varastotunnus_ja_koodi,
+    'edeltava_asiakirja' => $edeltava_asiakirja,
+    'toimittajatunnus' => $toimittajatunnus,
+    'rekisterinumero' => $rekisterinumero,
+    'varastotunnus' => $varastotunnus,
+    'sinettinumero' => $sinettinumero,
+    'konttinumero' => $konttinumero,
+    'tulopaiva' => $tulopaiva,
+    'tulotunnus' => $laskurow['tunnus'],
+    'tuotteet' => $tuotteet
+    );
+
+  return $tulon_tuotteet_ja_tiedot;
+}
+
+function paivita_tullivarastointituote($tiedot) {
+  global $kukarow;
+
+  $query = "UPDATE tuote SET
+            nimitys = '{$tiedot['nimitys']}',
+            malli = '{$tiedot['malli']}',
+            pakkauslaji = '{$tiedot['pakkauslaji']}',
+            pakkauskpl = '{$tiedot['pakkauskpl']}',
+            tuotemassa = '{$tiedot['bruttopaino']}',
+            tuotemassa_netto = '{$tiedot['nettopaino']}',
+            tuotetilavuus = '{$tiedot['tilavuus']}',
+            muuta = '{$tiedot['lisatieto']}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$tiedot['tuotetunnus']}'";
+  pupe_query($query);
+
+}
+
+function paivita_tullivarastointirivi($tiedot) {
+  global $kukarow;
+
+  print_r($tiedot);die;
+/*
+  $query = "UPDATE tilausrivi SET
+            kpl = kpl + {$kpl},
+            tilkpl = tilkpl + {$kpl}
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus  = '{$olemassa_oleva_rivi['tunnus']}'";
+  pupe_query($query);
+
+  $query = "UPDATE tuotepaikat SET
+            saldo = saldo + {$kpl}
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tuoteno = '{$tilausrivi['tuoteno']}'
+            AND hyllyalue = '{$hyllyalue}'
+            AND hyllynro  = '{$hyllynro}'";
+  pupe_query($query);
+*/
+
+}
+
+function tullituotelisays($tuotteen_lisays_parametrit) {
+  global $kukarow, $yhtiorow;
+
+  extract($tuotteen_lisays_parametrit);
+
+  // haetaan seuraava juokseva numero tulon tuotteelle
+  $query = "SELECT tuoteno
+            FROM tuote
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tuoteno LIKE '{$tulonumero}-%'
+            ORDER BY tunnus DESC
+            LIMIT 1";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) != 0) {
+
+    $edellinen = mysql_result($result, 0);
+    list(,,,$juoksunumero) = $edellinen;
+    $tuoteno = $edellinen + 1;
+  }
+  else {
+    $tuoteno = $tulonumero . '-1';
+  }
+
+  $query = "INSERT INTO tuote
+            SET yhtio = '{$kukarow['yhtio']}',
+            tuoteno = '{$tuoteno}',
+            nimitys = '{$nimitys}',
+            malli = '{$malli}',
+            yksikko = 'KPL',
+            muuta = '{$lisatieto}',
+            tuotemassa = '{$bruttopaino}',
+            tuotemassa_netto = '{$nettopaino}',
+            tuotetilavuus = '{$tilavuus}',
+            pakkauslaji = '{$pakkauslaji}',
+            pakkauskpl = '{$pakkauskpl}'";
+  pupe_query($query);
+
+  $query = "INSERT INTO tuotteen_toimittajat
+            SET yhtio = '{$kukarow['yhtio']}',
+            tuoteno = '{$tuoteno}',
+            liitostunnus = '{$toimittajan_tunnus}'";
+  pupe_query($query);
+
+  // haetaan tuotteen tiedot
+  $query = "SELECT *
+            FROM tuote
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tuoteno = '{$tuoteno}'";
+  $tuoteres = pupe_query($query);
+
+  $trow = mysql_fetch_assoc($tuoteres);
+
+  $toim = '';
+  $hinta = 0;
+  $var = '';
+  $kutsuja = '';
+  $kpl2 = 0;
+  $ale1 = 0;
+  $alv = 0;
+  $netto = '';
+  $kvkasittely = false;
+  $tuotenimitys_force = '';
+
+  $kukarow['kesken'] = $laskurow['tunnus'];
+
+  require "tilauskasittely/lisaarivi.inc";
+
+  $query = "UPDATE tilausrivin_lisatiedot SET
+            kontin_mrn = '{$edeltava_asiakirja}',
+            kuljetuksen_rekno = '{$kuljetuksen_rekno}',
+            konttinumero = '{$konttinumero}',
+            sinettinumero = '{$sinettinumero}',
+            asiakkaan_tilausnumero = '{$tulonumero}'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tilausrivitunnus = '{$lisatty_tun}'";
+  pupe_query($query);
+
+}
 
 ?>
+

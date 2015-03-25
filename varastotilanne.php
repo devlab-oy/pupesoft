@@ -150,7 +150,7 @@ if (!isset($task) or $task == 'luo_saldoraportti') {
       $varastotiedot = varastotilanne($hetki);
     }
     else {
-      $varastotiedot = varastotilanne2($hetki);
+      $varastotiedot = varastotilanne_tilauksittain($hetki);
     }
 
     extract($varastotiedot);

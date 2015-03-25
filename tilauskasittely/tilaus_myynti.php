@@ -5999,57 +5999,71 @@ if ($tee == '') {
 
     if (count($vak_chk_array) > 0) {
       $vakit_eri_tilaukselle = $tm_toimitustaparow["vaihtoehtoinen_vak_toimitustapa"] != "";
-      if ($kukarow['extranet'] == '') {
+      $vak_toimitustapa = $tm_toimitustaparow["vaihtoehtoinen_vak_toimitustapa"];
+
+      if ($vakit_eri_tilaukselle) {
+        $query = "SELECT tunnus
+                  FROM toimitustapa
+                  WHERE yhtio    = '{$kukarow["yhtio"]}'
+                  AND selite     = '{$vak_toimitustapa}'
+                  AND vak_kielto = ''";
+        $vak_check_res = pupe_query($query);
+
+        // CHECK! vaihtoehtoisen toimitustavan t‰ytyy sallia vak-tuotteiden toimitus
+        if (mysql_num_rows($vak_check_res) == 1) {
+          echo "<br><font class='error'>" . t("HUOM: T‰m‰ toimitustapa ei salli VAK-tuotteita") .
+               "! ($toimtapa_kv)</font><br>";
+          echo "<font class='error'>$toimtapa_kv " .
+               t("toimitustavan VAK-tuotteet siirret‰‰n omalle tilaukselleen toimitustavalla") .
+               " {$vak_toimitustapa}.</font> ";
+        }
+        else {
+          echo "<br><font class='error'>" . t("VIRHE: T‰m‰ toimitustapa ei salli VAK-tuotteita") .
+               "! (" . implode(",", $vak_chk_array) . ")</font><br>";
+          echo "<font class='error'>" .
+               t("Toimitustavalle on valitti, ett‰ VAK-tuotteet siirret‰‰n omalle tilaukselleen, " .
+                 "mutta valittu toimitustapa ei myˆsk‰‰n salli VAK-tuotteita") .
+               "!</font><br><br>";
+        }
+      }
+      elseif ($kukarow['extranet'] == '') {
         // jos vak-toimituksissa halutaan k‰ytt‰‰ vaihtoehtoista toimitustapaa
-        if (($tm_toimitustaparow['vak_kielto'] != '' and $tm_toimitustaparow['vak_kielto'] != 'K') or $vakit_eri_tilaukselle) {
-          if ($vakit_eri_tilaukselle) {
-            $vak_toimitustapa = $tm_toimitustaparow["vaihtoehtoinen_vak_toimitustapa"];
-            $vak_teksti = "toimitustavan VAK-tuotteet siirret‰‰n omalle tilaukselleen toimitustavalla";
-          }
-          else {
-            $vak_toimitustapa = $tm_toimitustaparow["vak_kielto"];
-            $vak_teksti = "toimitustavan VAK-tuotteet toimitetaan vaihtoehtoisella toimitustavalla";
-          }
+        if ($tm_toimitustaparow['vak_kielto'] != '' and $tm_toimitustaparow['vak_kielto'] != 'K') {
 
           $query = "SELECT tunnus
                     FROM toimitustapa
                     WHERE yhtio    = '$kukarow[yhtio]'
-                    AND selite     = '{$vak_toimitustapa}'
+                    AND selite     = '$tm_toimitustaparow[vak_kielto]'
                     AND vak_kielto = ''";
           $vak_check_res = pupe_query($query);
 
           // CHECK! vaihtoehtoisen toimitustavan t‰ytyy sallia vak-tuotteiden toimitus
           if (mysql_num_rows($vak_check_res) == 1) {
-            if (!$vakit_eri_tilaukselle) {
-              $query = "UPDATE lasku SET
-                        toimitustapa = '{$vak_toimitustapa}'
-                        WHERE yhtio  = '$kukarow[yhtio]'
-                        AND tunnus   = '$laskurow[tunnus]'";
-              $toimtapa_update_res = pupe_query($query);
-
-              $tilausok++;
-            }
+            $query = "UPDATE lasku SET
+                      toimitustapa = '$tm_toimitustaparow[vak_kielto]'
+                      WHERE yhtio  = '$kukarow[yhtio]'
+                      AND tunnus   = '$laskurow[tunnus]'";
+            $toimtapa_update_res = pupe_query($query);
 
             echo "<br><font class='error'>".t("HUOM: T‰m‰ toimitustapa ei salli VAK-tuotteita")."! ($toimtapa_kv)</font><br>";
-            echo "<font class='error'>$toimtapa_kv ".t($vak_teksti)." {$vak_toimitustapa}.</font> ";
+            echo "<font class='error'>$toimtapa_kv ".t("toimitustavan VAK-tuotteet toimitetaan vaihtoehtoisella toimitustavalla")." $tm_toimitustaparow[vak_kielto].</font> ";
 
-            if (!$vakit_eri_tilaukselle) {
-              echo "<form name='tilaus' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
-              echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
-              echo "<input type='hidden' name='mista' value='$mista'>";
-              echo "<input type='hidden' name='toim' value='$toim'>";
-              echo "<input type='hidden' name='tee' value='$tee'>";
-              echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
-              echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
-              echo "<input type='submit' name='tyhjenna' value='" . t("OK") . "'>";
-              echo "</form>";
-              echo "<br/><br/>";
-            }
+            echo "<form name='tilaus' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
+            echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+            echo "<input type='hidden' name='mista' value='$mista'>";
+            echo "<input type='hidden' name='toim' value='$toim'>";
+            echo "<input type='hidden' name='tee' value='$tee'>";
+            echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
+            echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
+            echo "<input type='submit' name='tyhjenna' value='".t("OK")."'>";
+            echo "</form>";
+            echo "<br/><br/>";
           }
           else {
             echo "<br><font class='error'>".t("VIRHE: T‰m‰ toimitustapa ei salli VAK-tuotteita")."! (".implode(",", $vak_chk_array).")</font><br>";
             echo "<font class='error'>".t("Valitse uusi toimitustapa")."!</font><br><br>";
           }
+          $tilausok++;
         }
         elseif ($tm_toimitustaparow['vak_kielto'] == 'K') {
           echo "<br><font class='error'>".t("VIRHE: T‰m‰ toimitustapa ei salli VAK-tuotteita")."! (".implode(",", $vak_chk_array).")</font><br>";

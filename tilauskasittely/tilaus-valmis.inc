@@ -1566,6 +1566,7 @@ else {
       }
 
       $vakit_eri_tilaukselle = $totarowx["vaihtoehtoinen_vak_toimitustapa"] != "";
+
       if ($vakit_eri_tilaukselle) {
         $tuote_select = "tuote.vakkoodi AS vakkoodi,";
         $tuote_join = "JOIN tuote ON (tuote.tuoteno = tilausrivi.tuoteno

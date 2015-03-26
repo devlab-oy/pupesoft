@@ -1,16 +1,16 @@
 $(document).ready(function() {
 
-  $('#myyja_id').on('change', function () {
+  $('#myyja_id').on('change', function() {
     $(this).siblings('#myyjanro_id').val('');
     $(this).closest('form').submit();
   });
 
   $('#hintojen_vaihto').on('change', function() {
-    $('.hv_hidden').val( this.checked ? 'JOO' : 'EI' );
+    $('.hv_hidden').val(this.checked ? 'JOO' : 'EI');
   });
 
   $('#hae_asiakasta_hintavaihto_cb').on('change', function() {
-    $('#hae_asiakasta_hv_hidden').val( this.checked ? 'JOO' : 'EI' );
+    $('#hae_asiakasta_hv_hidden').val(this.checked ? 'JOO' : 'EI');
   });
 
   $('#hae_asiakasta_linkki').on('click', function(e) {
@@ -28,7 +28,7 @@ $(document).ready(function() {
   });
 
   $('#hae_asiakasta_boksi').keypress(function(e) {
-    if(e.keyCode == 13) {
+    if (e.keyCode == 13) {
       $('#hae_asiakasta_formi').submit();
     }
   });
@@ -42,12 +42,12 @@ $(document).ready(function() {
 
   bind_valitut_rivit_checkbox_click();
 
-  var hinta_laskurit = $.parseJSON( $('#hinta_laskurit').val() );
+  var hinta_laskurit = $.parseJSON($('#hinta_laskurit').val());
 
   // Liipaise hintalaskurit käyntiin.
   $.each(hinta_laskurit, function(perheid, hinta_laskuri) {
     // Jos vain korkeintaan yksi valmiste tai ei raaka-aineita, ei laskuria tarvita.
-    if( hinta_laskuri.valmisteet.length<2 || hinta_laskuri.raakaaineiden_kehahinta_summa==0 )
+    if (hinta_laskuri.valmisteet.length < 2 || hinta_laskuri.raakaaineiden_kehahinta_summa == 0)
       return true;
 
     new Hinta_laskuri(perheid, hinta_laskuri.raakaaineiden_kehahinta_summa, hinta_laskuri.valmisteiden_painoarvot);
@@ -86,7 +86,7 @@ function nappi_onclick_confirm(message) {
   ok = confirm(message);
 
   return ok;
-};
+}
 
 // Hinta_kokoelmaa käytetään yhteenkuuluvien raaka-ainerivien ja valmisterivien hintojen hallintaan.
 function Hinta_laskuri(perheid, raakaaineiden_kehahinta_summa, valmisteiden_painoarvot) {
@@ -100,14 +100,14 @@ function Hinta_laskuri(perheid, raakaaineiden_kehahinta_summa, valmisteiden_pain
 
   // Valuuttainputit, tunnus ja jQuery elementti avaimena ja arvona.
   this.valmiste_hinta_inputit = {};
-  $('input[name^="valmiste_valuutta"][data-perheid="'+ this.perheid +'"]').each(function(index, input) {
+  $('input[name^="valmiste_valuutta"][data-perheid="' + this.perheid + '"]').each(function(index, input) {
     var $input = $(input);
     me.valmiste_hinta_inputit[ $input.data('tunnus') ] = $input;
   });
 
   // Lukkocheckboxit, tunnus ja jQuery elementti avaimena ja arvona.
   this.valmiste_lukko_inputit = {};
-  $('input.valmiste_lukko[data-perheid="'+ this.perheid +'"]').each(function(index, input) {
+  $('input.valmiste_lukko[data-perheid="' + this.perheid + '"]').each(function(index, input) {
     var $input = $(input);
     me.valmiste_lukko_inputit[ $input.data('tunnus') ] = $input;
   });
@@ -125,9 +125,10 @@ function Hinta_laskuri(perheid, raakaaineiden_kehahinta_summa, valmisteiden_pain
     $input.change(function() {
 
       var vanha_arvo = $input.data('vanha-arvo'),
-          _val = parseFloat($input.val().replace(',','.'));
+              _val = parseFloat($input.val().replace(',', '.'));
 
-      if (isNaN(_val)) _val = vanha_arvo;
+      if (isNaN(_val))
+        _val = vanha_arvo;
 
       $input.val(_val);
 
@@ -138,7 +139,7 @@ function Hinta_laskuri(perheid, raakaaineiden_kehahinta_summa, valmisteiden_pain
       }
 
       // Jos hinnat menevät yli tai ali, palauta vanha arvo ja infoa käyttäjää.
-      if (me.tarkista_hinnat()===false) {
+      if (me.tarkista_hinnat() === false) {
         $input.val(vanha_arvo);
         alert('Hinta on liian pieni tai suuri');
         return;
@@ -153,13 +154,13 @@ function Hinta_laskuri(perheid, raakaaineiden_kehahinta_summa, valmisteiden_pain
 
   // Jaa valmisteiden hinnan muutos tasaisesti lukottomien valmisteiden hintoihin.
   this.jaa_muutos_vapaille = function(muutos) {
-    var lukottomien_lkm = $('input.valmiste_lukko[data-perheid="'+ this.perheid +'"]:not(:checked)').length;
+    var lukottomien_lkm = $('input.valmiste_lukko[data-perheid="' + this.perheid + '"]:not(:checked)').length;
     var muutos_per_lukoton = muutos / lukottomien_lkm;
 
     $.each(this.valmiste_hinta_inputit, function(tunnus, $input) {
       // Vain inputit, jotka eivät ole merkitty lukituiksi.
       if (me.valmiste_lukko_inputit[tunnus].attr('checked') != 'checked') {
-        $input.val( (parseFloat($input.val()) + muutos_per_lukoton).toFixed(desimaalia) );
+        $input.val((parseFloat($input.val()) + muutos_per_lukoton).toFixed(desimaalia));
       }
     });
   };
@@ -181,7 +182,7 @@ function Hinta_laskuri(perheid, raakaaineiden_kehahinta_summa, valmisteiden_pain
   this.laske_hinnat = function() {
     var me = this;
     $.each(this.valmiste_hinta_inputit, function(tunnus, $input) {
-      $input.val( (me.valmisteiden_painoarvot[tunnus] * me.raakaaineiden_kehahinta_summa).toFixed(desimaalia) );
+      $input.val((me.valmisteiden_painoarvot[tunnus] * me.raakaaineiden_kehahinta_summa).toFixed(desimaalia));
     });
   };
 
@@ -213,4 +214,4 @@ function Hinta_laskuri(perheid, raakaaineiden_kehahinta_summa, valmisteiden_pain
   // Init laskennat.
   this.laske_hinnat();
   this.laske_painoarvot();
-};
+}

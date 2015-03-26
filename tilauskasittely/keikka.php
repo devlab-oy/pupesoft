@@ -1363,9 +1363,12 @@ if ($toiminto == "" and (($ytunnus != "" or $keikkarajaus != '') and $toimittaja
             echo "<option value='kalkyyli'>"     .t("Vie varastoon")."</option>";
           }
         }
-
+        $laskut_liitetty = (isset($llrow["volasku_ok"]) and isset($llrow["volasku"]));
         // jos lisätiedot, kohdistus ja paikat on ok sekä kaikki rivit on viety varastoon, ja kaikki liitetyt laskut on hyväksytty (kukarow.taso 3 voi ohittaa tämän), niin saadaan laskea virallinen varastonarvo
-        if ($lisok == 1 and $kohok == 1 and $varok == 1 and $kplyhteensa == $kplvarasto and $sarjanrook == 1 and (($llrow["volasku"] == $llrow["volasku_ok"] and $llrow["kulasku"] == $llrow["kulasku_ok"]) or $kukarow["taso"] == "3")) {
+        if ($lisok == 1 and $kohok == 1 and $varok == 1 and $kplyhteensa == $kplvarasto 
+          and $sarjanrook == 1
+          and (($llrow["volasku"] == $llrow["volasku_ok"] and $laskut_liitetty 
+          and $llrow["kulasku"] == $llrow["kulasku_ok"]) or $kukarow["taso"] == "3")) {
           echo "<option value='kaikkiok'>"     .t("Laske virallinen varastonarvo")."</option>";
         }
 

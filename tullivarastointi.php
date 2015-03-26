@@ -10,10 +10,21 @@ if (isset($task) and $task == 'suorita_toimenpide') {
   $task = $toimenpide;
 }
 
+if (isset($task) and $task == 'eusiirto') {
+  unset($task);
+}
+
+if (isset($task) and $task == 'varaustaydennys') {
+  $otsikko = t("T‰ydenn‰ tulon {$tulonumero} tiedot");
+  $view = "tulotiedot";
+}
+
 if (isset($task) and $task == 'muokkaus') {
+
   $otsikko = t("Tulon tuotetiedot");
   $view = "tuotetiedot";
   $tulon_tuotteet_ja_tiedot = tulon_tuotteet_ja_tiedot($tulonumero);
+
   extract($tulon_tuotteet_ja_tiedot);
 
   if ($lisatuote == 1) {
@@ -129,10 +140,7 @@ if (isset($task) and $task == 'varaa_tulonumero') {
   header("Location: tullivarastointi.php?va=ok&tn={$tulonumero}");
 }
 
-
-
-
-if (isset($task) and $task == 'siirto') {
+if (isset($task) and $task == 'tullisiirto') {
 
   if ($varastokoodi == 'ROVV') {
     $uusi_koodi = 'ROTV';
@@ -199,6 +207,14 @@ if (isset($task) and $task == 'siirto') {
             asiakkaan_tilausnumero = '{$uusi_tulonumero}'
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tunnus = '{$tulotunnus}'";
+  pupe_query($query);
+
+  $query = "INSERT INTO lasku
+            SET yhtio = '{$kukarow['yhtio']}',
+            viesti = 'tullivarasto',
+            tila = 'O',
+            asiakkaan_tilausnumero = '{$tulonumero}',
+            sisviesti1 = '{$uusi_tulonumero}'";
   pupe_query($query);
 
   unset($task);
@@ -282,15 +298,15 @@ if (isset($task) and ($task == 'perusta' or $task == 'tallenna')) {
     if ($task == 'perusta') {
       $otsikko = t("T‰ydenn‰ tulotiedot");
     }
+    elseif ($task == 'tallenna') {
+
+    }
     else {
       $otsikko = t("Tulon tuotetiedot");
       $task = 'muokkaus';
     }
   }
   elseif ($task == 'perusta') {
-
-    $konttinumero = $kontti;
-    $kuljetuksen_rekno = $rekisterinumero;
 
     require_once "inc/luo_ostotilausotsikko.inc";
 
@@ -358,6 +374,38 @@ if (isset($task) and ($task == 'perusta' or $task == 'tallenna')) {
   }
   elseif ($task == 'tallenna') {
 
+    $palat = explode('.', $tulopaiva);
+    $toimaika = $palat[2] . '-' . $palat[1] . '-' . $palat[0];
+
+    if (isset($varaustaydennys)) {
+
+      $query = "SELECT *
+                FROM toimi
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = '{$toimittajatunnus}'";
+      $result = pupe_query($query);
+      $toimittaja = mysql_fetch_assoc($result);
+
+      $query = "UPDATE lasku SET
+                nimi  = '{$toimittaja['nimi']}',
+                osoite = '{$toimittaja['osoite']}',
+                postino = '{$toimittaja['postino']}',
+                postitp  = '{$toimittaja['postitp']}',
+                maa       = '{$toimittaja['maa']}',
+                toim_nimi  = '{$toimittaja['nimi']}',
+                toim_osoite = '{$toimittaja['osoite']}',
+                toim_postino = '{$toimittaja['postino']}',
+                toim_postitp  = '{$toimittaja['postitp']}',
+                toim_maa       = '{$toimittaja['maa']}',
+                ytunnus         = '{$toimittaja['ytunnus']}',
+                ovttunnus        = '{$toimittaja['ovttunnus']}',
+                liitostunnus      = '{$toimittaja['tunnus']}',
+                toimaika           = '{$toimaika}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = '{$tulotunnus}'";
+      pupe_query($query);
+    }
+
     $query = "SELECT *
               FROM lasku
               WHERE yhtio = '{$kukarow['yhtio']}'
@@ -408,6 +456,7 @@ if (isset($task) and ($task == 'perusta' or $task == 'tallenna')) {
       }
     } //muutetut vanhat sek‰ uudet tuotteet k‰yty l‰pi
   }
+  unset($task);
 }
 
 if (!isset($task)) {
@@ -439,7 +488,7 @@ if (isset($view) and $view == "tuotetiedot") {
 
   $toimittajat = toimittajat();
 
-  if (isset($task) and $task == 'muokkaus') {
+  if ((isset($task) and $task == 'muokkaus') or isset($varaustaydennys)) {
     $taskvalue = 'tallenna';
   }
   else {
@@ -447,20 +496,24 @@ if (isset($view) and $view == "tuotetiedot") {
   }
 
   echo "
-  <form method='post'>
+  <form action='tullivarastointi.php' action='tullivarastointi.php' method='post'>
   <input type='hidden' name='task' value='{$taskvalue}' />
   <input type='hidden' name='toimittajatunnus' value='{$toimittajatunnus}' />
   <input type='hidden' name='varastotunnus_ja_koodi' value='{$varastotunnus_ja_koodi}' />
   <input type='hidden' name='tuoteryhmien_maara' value='{$tuoteryhmien_maara}' />
   <input type='hidden' name='varastotunnus' value='{$varastotunnus}' />
-  <input type='hidden' name='rekisterinumero' value='{$rekisterinumero}' />
-  <input type='hidden' name='kontti' value='{$konttinumero}' />
+  <input type='hidden' name='kuljetuksen_rekno' value='{$rekisterinumero}' />
+  <input type='hidden' name='konttinumero' value='{$konttinumero}' />
   <input type='hidden' name='sinettinumero' value='{$sinettinumero}' />
   <input type='hidden' name='varastokoodi' value='{$varastokoodi}' />
   <input type='hidden' name='tulopaiva' value='{$tulopaiva}' />
   <input type='hidden' name='edeltava_asiakirja' value='{$edeltava_asiakirja}' />
   <input type='hidden' name='tulonumero' value='{$tulonumero}' />
   <input type='hidden' name='tulotunnus' value='{$tulotunnus}' />";
+
+  if (isset($varaustaydennys)) {
+    echo "<input type='hidden' name='varaustaydennys' value='1'>";
+  }
 
   if (!empty($konttinumero)) {
     $rekisteri_tai_kontti_otsikko = t("Konttinumero");
@@ -517,7 +570,7 @@ if (isset($view) and $view == "tuotetiedot") {
       $tilavuus = '';
       $lisatieto = '';
       $pakkauslaji = '';
-      $tyyppi = '';
+      $tyyppi = 'uusi';
       $tuotetunnus = '';
     }
 
@@ -604,26 +657,21 @@ if (isset($view) and $view == "tuotetiedot") {
 
   </script>";
 
-
-  if (isset($task) and $task == 'muokkaus') {
+  if (isset($varaustaydennys)) {
+    echo "<br><br><input type='submit' value='". t("Lisaa tuotteet") ."' /></form>&nbsp;";
+  }
+  elseif (isset($task) and $task == 'muokkaus') {
     echo "<br><br><input type='submit' value='". t("Tallenna") ."' /></form>&nbsp;";
 
     if (!$lisatuote and count($errors) == 0) {
-      echo "<form method='post'><input type='hidden' name='tulonumero' value='{$tulonumero}' />";
+      echo "<form action='tullivarastointi.php' method='post'><input type='hidden' name='tulonumero' value='{$tulonumero}' />";
       echo "<input type='hidden' name='task' value='muokkaus' />";
       echo "<input type='hidden' name='lisatuote' value='1' />";
       echo "<input type='submit' value='". t("Lis‰‰ tuote") ."' /></form>";
     }
   }
   else {
-
-    if ($laskuri > 1) {
-      echo "<br><br><input type='submit' value='". t("Perusta tulo ja tuotteet") ."' /></form>";
-    }
-    else {
-      echo "<br><br><input type='submit' value='". t("Perusta tulo") ."' /></form>";
-    }
-
+    echo "<br><br><input type='submit' value='". t("Perusta tulo ja tuotteet") ."' /></form>";
   }
 }
 
@@ -631,7 +679,7 @@ if (isset($view) and $view == "tuotetiedot") {
 if (isset($view) and $view == 'aloita_varaus') {
 
   echo "
-  <form method='post'>
+  <form action='tullivarastointi.php' method='post'>
   <input type='hidden' name='task' value='varaa_tulonumero' />
   <input type='hidden' name='' value='' />
   <table>
@@ -705,7 +753,7 @@ if (isset($view) and $view == 'tulotiedot') {
   }
 
   echo "
-  <form method='post'>
+  <form action='tullivarastointi.php' method='post'>
   <input type='hidden' name='task' value='anna_tulotiedot' />
   <input type='hidden' name='' value='' />
   <table>
@@ -739,25 +787,43 @@ if (isset($view) and $view == 'tulotiedot') {
 
   <tr>
     <th>" . t("Varasto") . "</th>
-    <td>
-      <select name='varastotunnus_ja_koodi'>
-        <option selected disabled>" . t("Valitse varasto") ."</option>";
+    <td>";
 
-        $varastot = hae_tullivarastot();
+  if (isset($varastonimi)) {
+    echo $varastonimi;
 
-        foreach ($varastot as $varasto) {
+    $varastotunnus_ja_koodi = $varastotunnus.'#'.$varastokoodi;
 
-          if ($varastotunnus_ja_koodi == $varasto['koodi']) {
-            $selected = 'selected';
+    echo "<input type='hidden' name='varastotunnus_ja_koodi' value='{$varastotunnus_ja_koodi}'>";
+    echo "<input type='hidden' name='varastonimi' value='{$varastonimi}'>";
+    echo "<input type='hidden' name='tulonumero' value='{$tulonumero}'>";
+    echo "<input type='hidden' name='tulotunnus' value='{$tulotunnus}'>";
+    echo "<input type='hidden' name='varaustaydennys' value='1'>";
+  }
+  else {
+
+    echo "<select name='varastotunnus_ja_koodi'>
+          <option selected disabled>" . t("Valitse varasto") ."</option>";
+
+          $varastot = hae_tullivarastot();
+
+          foreach ($varastot as $varasto) {
+
+            if ($varastotunnus_ja_koodi == $varasto['koodi']) {
+              $selected = 'selected';
+            }
+            else {
+              $selected = '';
+            }
+
+            echo "<option value='{$varasto['koodi']}' {$selected}>{$varasto['nimi']}</option>";
           }
-          else {
-            $selected = '';
-          }
 
-          echo "<option value='{$varasto['koodi']}' {$selected}>{$varasto['nimi']}</option>";
-        }
+      echo "</select>";
 
-    echo "</select></td><td class='back error'>{$errors['varastotunnus_ja_koodi']}</td>
+  }
+
+  echo "</td><td class='back error'>{$errors['varastotunnus_ja_koodi']}</td>
   </tr>
 
 
@@ -790,7 +856,6 @@ if (isset($view) and $view == 'tulotiedot') {
     <td><input type='text' name='tulopaiva' id='tulopaiva' value='{$tulopaiva}' /></td>
     <td class='back error'>{$errors['tulopaiva']}</td>
   </tr>
-
 
   <tr>
     <th></th>
@@ -833,6 +898,7 @@ if (isset($view) and $view == "perus") {
               AND tuote.tuoteno = tilausrivi.tuoteno
             WHERE lasku.yhtio = 'rplog'
             AND viesti = 'tullivarasto'
+            AND sisviesti1 = ''
             GROUP BY lasku.tunnus, tilausrivi.tunnus
             ORDER BY lasku.tunnus DESC";
   $result = pupe_query($query);
@@ -844,13 +910,13 @@ if (isset($view) and $view == "perus") {
   }
 
   echo "
-    <form method='post'>
+    <form action='tullivarastointi.php' method='post'>
     <input type='hidden' name='task' value='aloita_perustus' />
     <input type='submit' value='". t("Perusta uusi tulonumero") . "' />
     </form>";
 
   echo "
-    <form method='post'>
+    <form action='tullivarastointi.php' method='post'>
     <input type='hidden' name='task' value='aloita_varaus' />
     <input type='submit' value='". t("Varaa tulonumero") . "' />
     </form><br><br>";
@@ -859,6 +925,7 @@ if (isset($view) and $view == "perus") {
 
     $tulot = array();
     $tuotteet = array();
+
 
     while ($tulo = mysql_fetch_assoc($result)) {
 
@@ -899,35 +966,33 @@ if (isset($view) and $view == "perus") {
         $vp = $tulo['varastopaikka'];
       }
 
-
       $tuoteinfo = array(
         'varastotunnus' => $tulo['varastotunnus'],
-        'hyllyalue' => $tulo['hyllyalue'],
-        'hyllynro' => $tulo['hyllynro'],
         'rivitunnus' => $tulo['rivitunnus'],
         'lisatieto' => $tulo['lisatieto'],
+        'hyllyalue' => $tulo['hyllyalue'],
+        'hyllynro' => $tulo['hyllynro'],
         'tuoteno' => $tulo['tuoteno'],
         'tuote' => $tulo['tuote'],
         'kpl' => $tulo['kpl'],
         'vp' => $vp
       );
 
-      $tuotteet[$tulo['asiakkaan_tilausnumero']]['tuoteinfo'][] = $tuoteinfo;
       $tuotteet[$tulo['asiakkaan_tilausnumero']]['toimittaja'] = $tulo['nimi'];
       $tuotteet[$tulo['asiakkaan_tilausnumero']]['varastonimi'] = $tulo['varastonimi'].$nimilisa;
       $tuotteet[$tulo['asiakkaan_tilausnumero']]['toimaika'] = $tulo['toimaika'];
       $tuotteet[$tulo['asiakkaan_tilausnumero']]['vt'] = $varastotyyppi;
       $tuotteet[$tulo['asiakkaan_tilausnumero']]['tulotunnus'] = $tulo['tunnus'];
       $tuotteet[$tulo['asiakkaan_tilausnumero']]['varastokoodi'] = $varastokoodi;
+      $tuotteet[$tulo['asiakkaan_tilausnumero']]['varastotunnus'] = $tulo['varastotunnus'];
+      $tuotteet[$tulo['asiakkaan_tilausnumero']]['tuoteinfo'][] = $tuoteinfo;
     }
 
     echo "<table>";
     echo "<tr>";
     echo "<th>".t("Tulo")."</th>";
-    echo "<th>".t("Varasto")."</th>";
-
     echo "<th>".t("Tuotteet")."</th>";
-
+    echo "<th>".t("Varasto")."</th>";
     echo "<th>".t("Status")."</th>";
     echo "<th>".t("Toimenpiteet")."</th>";
     echo "<th class='back'></th>";
@@ -936,6 +1001,8 @@ if (isset($view) and $view == "perus") {
     foreach ($tuotteet as $tulonumero => $info) {
 
       echo "<tr>";
+
+      // Tulosolu
       echo "<td valign='top'>";
       echo "<span class='message'>".$tulonumero."</span>";
 
@@ -944,44 +1011,21 @@ if (isset($view) and $view == "perus") {
         echo "&nbsp;&mdash;&nbsp;" . $toimaika;
       }
 
-
       if ($info['toimittaja'] != '') {
         echo '<br>';
         echo $info['toimittaja'];
       }
-
-      echo "</td>";
-      echo "<td valign='top'>";
-
-      if ($info['vt'] == 'v‰liaikainen') {
-        echo "<span class='valivarastospan' style='color:red'>";
-      }
-
-      echo $info['varastonimi'];
-
-      if ($info['vt'] == 'v‰liaikainen') {
-
-
-        $date1 = new DateTime($info['toimaika']);
-        $date2 = new DateTime('today');
-        $interval = $date1->diff($date2);
-
-        echo '<br>';
-        echo (20 - $interval->days) . ' ' . t("P‰iv‰‰ j‰ljell‰");
-
-
-        echo "</span>";
+      else {
+        echo '<br><br>';
       }
       echo "</td>";
 
+      // tuotesolu
       echo "<td align='center' valign='top'>";
-
       $statukset = array();
-
       $tuotemaara = count($info['tuoteinfo']);
       $ei_varastossa = 0;
       $varastossa = 0;
-
 
       foreach ($info['tuoteinfo'] as $tuote) {
 
@@ -1027,46 +1071,33 @@ if (isset($view) and $view == "perus") {
         else {
           echo "<div>". $tuote['tuote'] . "&nbsp;&mdash;&nbsp;" . $tuote['kpl'] . " " .t("kpl.") . "</div>";
         }
-
-
-
-
-/*
-
-        echo "<div style='overflow:auto;'>";
-
-        echo "<div style='float:left; padding:5px 10px;  widthx:150px; text-align:center; overflow:hidden; border-right:1px solid white;'>";
-        echo $tuote['tuote'];
-        echo '</div>';
-
-        echo "<div style='float:left; padding:5px 10px;  widthx:60px; text-align:center; border-right:1px solid white;'>";
-        echo $tuote['kpl'];
-        echo '</div>';
-
-        echo "<div style='float:left; padding:5px 10px;  widthx:60px; text-align:center; border-right:1px solid white;'>";
-        echo $paikka;
-        echo '</div>';
-
-        echo "<div style='float:left; padding:5px 10px;  widthx:60px; text-align:center;'>";
-        if (!empty($tuote['lisatieto'])) {
-          echo "<img src='{$palvelin2}pics/lullacons/info.png' class='tooltip' id='{$tuote['rivitunnus']}'>";
-          echo "<div id='div_{$tuote['rivitunnus']}' class='popup'>";
-          echo $tuote['lisatieto'];
-          echo "</div>";
-        }
-        else {
-          echo '&mdash;';
-        }
-        echo '</div>';
-
-        echo '</div>';
-
-*/
-
       }
-
-
       echo "</td>";
+
+      // varastosolu
+      echo "<td valign='top'>";
+      echo $info['varastonimi'];
+
+      $varoitusehto1 = ($info['vt'] == 'v‰liaikainen');
+      $varoitusehto2 = (!empty($info['toimittaja']));
+      $varoitusehto3 = ($varastossa > 0);
+
+      if ($varoitusehto1 and $varoitusehto2 and $varoitusehto3) {
+        $date1 = new DateTime($info['toimaika']);
+        $date2 = new DateTime('today');
+        $interval = $date1->diff($date2);
+        $jaljella = (20 - $interval->days);
+
+        if ($jaljella > 0) {
+         echo '<br>';
+         echo "<span class='error'>";
+         echo $jaljella . ' ' . t("P‰iv‰‰ j‰ljell‰");
+         echo "</span>";
+        }
+      }
+      echo "</td>";
+
+      // statussolu
       echo "<td align='center' valign='top'>";
 
       if ($tuote['kpl'] == '') {
@@ -1097,21 +1128,24 @@ if (isset($view) and $view == "perus") {
       }
       echo "</td>";
 
+      // toimenpidesolu
       echo "<td valign='top'>";
 
       if ($toimenpiteet = hae_toimenpiteet($info['tulotunnus'])) {
 
-        echo "<form method='post'>";
+        echo "<form action='tullivarastointi.php' method='post'>";
         echo "<input type='hidden' name='task' value='suorita_toimenpide' />";
         echo "<input type='hidden' name='varastokoodi' value='{$info['varastokoodi']}'>";
+        echo "<input type='hidden' name='varastotunnus' value='{$info['varastotunnus']}'>";
+        echo "<input type='hidden' name='varastonimi' value='{$info['varastonimi']}'>";
         echo "<input type='hidden' name='tulonumero' value='{$tulonumero}' />";
         echo "<input type='hidden' name='tulotunnus' value='{$info['tulotunnus']}' />";
         echo "<select name='toimenpide' id='{$info['tulotunnus']}' class='tpselect' style='width:90px;'>";
 
         echo "<option value='.' selected disabled>". t("Valitse") ."</option>";
 
-        foreach ($toimenpiteet as $toimenpide) {
-          echo "<option value='{$toimenpide}'>{$toimenpide}</option>";
+        foreach ($toimenpiteet as $koodi => $teksti) {
+          echo "<option value='{$koodi}'>{$teksti}</option>";
         }
 
         echo "</select>";
@@ -1122,18 +1156,7 @@ if (isset($view) and $view == "perus") {
 
       echo "</td>";
 
-      echo "<td class='back' valign='top'>";
-      if ($info['vt'] == 'v‰liaikainen' and $kaikki_varastossa) {
-
-        echo "
-          <form method='post'>
-          <input type='hidden' name='task' value='siirto' />
-          <input type='hidden' name='varastokoodi' value='{$info['varastokoodi']}'>
-          <input type='hidden' name='tulonumero' value='{$info['tulotunnus']}'>
-          <input type='submit' value='" . t("Siirr‰ tullivarastoon") . "'/>
-          </form><br><br>";
-      }
-      echo "</td>";
+      echo "<td class='back' valign='top'></td>";
       echo "</tr>";
     }
     echo "</table>";

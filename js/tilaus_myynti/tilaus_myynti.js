@@ -1,4 +1,6 @@
 $(document).ready(function() {
+  bind_vaihda_toimenpide_click();
+  bind_tuoteno_autocomplete();
 
   $('#myyja_id').on('change', function() {
     $(this).siblings('#myyjanro_id').val('');
@@ -43,6 +45,9 @@ $(document).ready(function() {
   bind_valitut_rivit_checkbox_click();
 
   var hinta_laskurit = $.parseJSON($('#hinta_laskurit').val());
+  if (hinta_laskurit == null) {
+    hinta_laskurit = [];
+  }
 
   // Liipaise hintalaskurit k√§yntiin.
   $.each(hinta_laskurit, function(perheid, hinta_laskuri) {
@@ -214,4 +219,36 @@ function Hinta_laskuri(perheid, raakaaineiden_kehahinta_summa, valmisteiden_pain
   // Init laskennat.
   this.laske_hinnat();
   this.laske_painoarvot();
+}
+
+function bind_tuoteno_autocomplete() {
+  new Tuote_autocomplete($('tuoteno_autocomplete'), function() {
+  });
+}
+
+function bind_vaihda_toimenpide_click() {
+  $('*[data-dv-vaihda-toimenpide]').on('click', function() {
+    new Vaihda_toimenpide_modal();
+  });
+}
+
+function Vaihda_toimenpide_modal() {
+  var dialog = $("#vaihda_toimenpide_dialog").dialog({
+    autoOpen: false,
+    height: 200,
+    width: 300,
+    modal: true,
+    buttons: {
+      "Vaihda": function() {
+        //T‰h‰n toimenpiteen vaihto ajax
+        //ja sit tyhjenn‰ formin submit kun edellinen done
+        dialog.dialog("close");
+      },
+      Cancel: function() {
+        dialog.dialog("close");
+      }
+    }
+  });
+
+  dialog.dialog("open");
 }

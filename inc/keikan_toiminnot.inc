@@ -397,6 +397,8 @@ elseif ($_POST['ajax_toiminto'] == 'kohdista_rivi') {
     $alvti
   ) = paivita_saapumisen_summa($laskurow, $kulurow, $toimittajaid, $otunnus);
 
+  $data['laskunsumma'] = $hintarow['hinta'];
+
   echo json_encode($data);
 }
 elseif ($_POST['ajax_toiminto'] == 'rivi_ale') {

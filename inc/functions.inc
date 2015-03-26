@@ -13920,6 +13920,10 @@ if (!function_exists("pupe_DataTables")) {
 
                     var data = jQuery.parseJSON(return_value);
 
+                    $('input[name=\"laskunsumma\"]').each(function() {
+                      $(this).val(data.laskunsumma);
+                    });
+
                     if (data.suuntalava != null && data.suuntalava > 0) {
 
                       if ($('#option_'+rivi_ja_otsikko[0]+'_'+data.suuntalava).length > 0) {
@@ -13972,6 +13976,10 @@ if (!function_exists("pupe_DataTables")) {
                     $('.'+rivi_ja_otsikko[0]+' td').removeClass('tumma');
 
                     var data = jQuery.parseJSON(return_value);
+
+                    $('input[name=\"laskunsumma\"]').each(function() {
+                      $(this).val(data.laskunsumma);
+                    });
 
                     $('#suuntalava_'+rivi_ja_otsikko[0]+' option:first').attr('selected', 'selected');
                     //$('#suuntalavan_sscc_'+rivi_ja_otsikko[0]).html('');

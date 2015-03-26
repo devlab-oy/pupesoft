@@ -144,7 +144,8 @@ if ($view == 'valinta') {
         <input type='hidden' name='rivitunnukset' value='{$rivitunnukset}' />
         <input type='hidden' name='toimitustunnus' value='{$toimitustunnus}' />
         <input type='hidden' name='konttimaara' value='{$toimitus['konttimaara']}' />
-        <button name='task' value='kontitus' onclick='submit();' class='button'>&#10145;</button>
+        <input type ='hidden'name='task' value='kontitus' >
+        <input type='submit' class='button' value='&#10145' />
       </form>";
     echo "</td>";
 
@@ -154,17 +155,6 @@ if ($view == 'valinta') {
   }
 
   echo "</div>";
-
-  echo "<script type='text/javascript'>";
-
-  echo "
-
-    $('.tapfocus').bind('touchstart',function(){
-      $('input').focus();
-      $('input').setSelectionRange(0, 9999);
-    });
-
-  </script>";
 
 }
 

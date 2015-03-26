@@ -260,64 +260,37 @@ if (!isset($task) or $task == 'luo_saldoraportti') {
 
 if (isset($task) and ($task == 'ylijaamasiirto')) {
 
-  $query = "UPDATE tilausrivi
-            SET otunnus = {$uusi_tilaus}
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus = '{$rivitunnus}'";
-  pupe_query($query);
+  list($uusi_tilaus, $tilausnumero) = explode('#', $uusi_tilaus);
 
-  $query = "UPDATE sarjanumeroseuranta
-            SET lisatieto = 'Siirretty'
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND myyntirivitunnus = '{$rivitunnus}'";
-  pupe_query($query);
-
-
-  $query = "SELECT tilausrivin_lisatiedot.asiakkaan_rivinumero,
-              lasku.asiakkaan_tilausnumero,
-              ss.leveys
-              FROM lasku
-              LEFT JOIN tilausrivi
-                ON tilausrivi.yhtio = lasku.yhtio
-                AND tilausrivi.otunnus = lasku.tunnus
-              LEFT JOIN sarjanumeroseuranta AS ss
-                ON ss.yhtio = tilausrivi.yhtio
-                AND ss.myyntirivitunnus = tilausrivi.tunnus
-              LEFT JOIN tilausrivin_lisatiedot
-                ON tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio
-                AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus
-              WHERE lasku.yhtio = '{$kukarow['yhtio']}'
-              AND lasku.tunnus = '{$uusi_tilaus}'
-              AND tilausrivi.tunnus != '{$rivitunnus}'
-              GROUP BY concat(lasku.asiakkaan_tilausnumero,ss.leveys)
-              ORDER BY asiakkaan_rivinumero ASC";
-  $result = pupe_query($query);
-
-  $rivinumero = 0;
-  $uusi_rivi = false;
-  while ($rivi = mysql_fetch_assoc($result)) {
-
-    if ($leveys == $rivi['leveys']) {
-      $uusi_rivi = $rivi['asiakkaan_rivinumero'];
-      $tilausnumero = $rivi['asiakkaan_tilausnumero'];
-      break;
-    }
-
-    $rivinumero = $rivi['asiakkaan_rivinumero'];
+  if (empty($uusi_tilaus)) {
+    $errors[$rivitunnus] = t("Valitse tilaus");
   }
+  elseif (!empty($uusi_rivi) and is_numeric($uusi_rivi)) {
 
-  if ($rivinumero > 0) {
+    $query = "UPDATE tilausrivi
+              SET otunnus = {$uusi_tilaus}
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$rivitunnus}'";
+    pupe_query($query);
 
-    if (!$uusi_rivi) {
-      $uusi_rivi = $rivinumero + 1;
-    }
+    $query = "UPDATE sarjanumeroseuranta
+              SET lisatieto = 'Siirretty'
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND myyntirivitunnus = '{$rivitunnus}'";
+    pupe_query($query);
 
     $query = "UPDATE tilausrivin_lisatiedot SET
               asiakkaan_rivinumero = '{$uusi_rivi}',
-              asiakkaan_tilausnumero = '{$info['asiakkaan_tilausnumero']}'
+              asiakkaan_tilausnumero = '{$tilausnumero}'
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tilausrivitunnus = '{$rivitunnus}'";
     pupe_query($query);
+
+    $viesti = t("Rulla siirretty tilaukselle: ") . $tilausnumero;
+  }
+  else {
+    $errors[$rivitunnus] = t("Rivinumero ei kelpaa");
+    $kombo = $rivitunnus.$uusi_tilaus;
   }
 
   $task = 'ylijaamakasittely';
@@ -341,6 +314,10 @@ if (isset($task) and ($task == 'ylijaamakasittely')) {
 
   echo "<a href='varastotilanne.php'>´ " . t("Palaa varastontilanteeseen") . "</a><br><br>";
   echo "<font class='head'>".t("Ylij‰‰m‰rullien k‰sittely")."</font></a><hr><br>";
+
+  if (isset($viesti)) {
+    echo "<font class='message'>{$viesti}</font><br><br>";
+  }
 
   // haetaan aktiiviset tilaukset joihin voi siirt‰‰ ylij‰‰mi‰
   $query = "SELECT lasku.asiakkaan_tilausnumero,
@@ -416,6 +393,8 @@ if (isset($task) and ($task == 'ylijaamakasittely')) {
     echo "<th>".t("UIB")."</th>";
     echo "<th>".t("Vanha tilaus:rivi")."</th>";
     echo "<th>".t("Uusi tilaus")."</th>";
+    echo "<th>".t("Uusi rivi")."</th>";
+    echo "<th class='back'></th>";
     echo "<th class='back'></th>";
     echo "</tr>";
 
@@ -424,7 +403,7 @@ if (isset($task) and ($task == 'ylijaamakasittely')) {
       echo "<tr>";
 
       echo "<td valign='top' align='center'>";
-      echo $rulla['paikka'];
+      echo "<a name='{$rulla['tunnus']}'>" . $rulla['paikka'] . "<a>";
       echo "</td>";
 
       echo "<td valign='top' align='center'>";
@@ -436,15 +415,24 @@ if (isset($task) and ($task == 'ylijaamakasittely')) {
       echo "</td>";
 
       echo "<td valign='top' align='center'>";
-      echo "<form method='post'><select name='uusi_tilaus'>";
+      echo "<form method='post' action='varastotilanne.php#{$rulla['tunnus']}'><select name='uusi_tilaus'>";
 
       if (count($avoimet_tilaukset) > 0) {
-        echo "<option>". t("Valitse uusi tilaus") ."</option>";
+        echo "<option selected disabled>". t("Valitse uusi tilaus") ."</option>";
 
         foreach ($avoimet_tilaukset as $avoin_tilaus) {
 
+          if (isset($kombo) and $kombo == $rulla['tunnus'].$avoin_tilaus['tunnus']) {
+            $sel = 'selected';
+          }
+          else {
+            $sel = '';
+          }
+
+          $value = $avoin_tilaus['tunnus'].'#'.$avoin_tilaus['asiakkaan_tilausnumero'];
+
           if ($rulla['asiakkaan_tilausnumero'] != $avoin_tilaus['asiakkaan_tilausnumero']) {
-            echo "<option value='{$avoin_tilaus['tunnus']}'>{$avoin_tilaus['asiakkaan_tilausnumero']}</option>";
+            echo "<option value='{$value}' {$sel}>{$avoin_tilaus['asiakkaan_tilausnumero']}</option>";
           }
         }
 
@@ -455,6 +443,11 @@ if (isset($task) and ($task == 'ylijaamakasittely')) {
       }
 
       echo "</td>";
+
+      echo "<td valign='top' align='center'>";
+      echo "<input type='text' size='3' name='uusi_rivi' />";
+      echo "</td>";
+
       echo "<td class='back' valign='top' align='center'>";
 
       if (count($avoimet_tilaukset) > 0) {
@@ -472,6 +465,12 @@ if (isset($task) and ($task == 'ylijaamakasittely')) {
       echo "</form>";
 
       echo "</td>";
+      echo "<td class='back error'>";
+      if (isset($errors[$rulla['tunnus']])) {
+        echo $errors[$rulla['tunnus']];
+      }
+      echo "</td>";
+
       echo "</tr>";
     }
     echo "</table>";

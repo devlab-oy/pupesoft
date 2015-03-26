@@ -80,6 +80,55 @@ if (isset($_POST['task']) and $_POST['task'] == 'hae_pakkalista') {
 
 if (!isset($errors)) $errors = array();
 
+/*
+if (isset($task) and $task == 'poista_konttiviite') {
+
+  $query = "SELECT group_concat(otunnus)
+            FROM laskun_lisatiedot
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND konttiviite = '{$kv}'";
+  $result = pupe_query($query);
+  $laskutunnukset = mysql_result($result, 0);
+
+  // ei ehkä voi poistaa rivillisiä
+  //
+  /*
+  $query = "SELECT group_concat(tunnus)
+            FROM tilausrivi
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND otunnus  IN ({$laskutunnukset})";
+  $result = pupe_query($query);
+  $rivitunnukset = mysql_result($result, 0);
+
+  if ($rivitunnukset) {
+
+    $query = "UPDATE sarjanumeroseuranta SET
+              myyntirivitunnus = 0
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND myyntirivitunnus IN ({$rivitunnukset})";
+    pupe_query($query);
+
+    $query = "DELETE FROM tilausrivi
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus IN ({$rivitunnukset})";
+    pupe_query($query);
+
+    $query = "DELETE FROM tilausrivin_lisatiedot
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tilausrivitunnus IN ({$rivitunnukset})";
+    pupe_query($query);
+  }
+
+
+  $query = "UPDATE lasku SET
+            tilaustyyppi = 'D'
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus IN ({$laskutunnukset})";
+  pupe_query($query);
+
+  unset($task);
+}*/
+
 if (isset($task) and $task == 'laivamuutos') {
 
   if (!empty($uusilaiva)) {
@@ -1368,6 +1417,7 @@ if (!isset($task)) {
               AND lasku.tilaustyyppi = 'N'
               AND lasku.asiakkaan_tilausnumero != ''
               AND konttiviite != 'bookkaukseton'
+              AND konttiviite != ''
               AND tr.tunnus IS NULL
               GROUP BY konttiviite
               ORDER BY lahtoaika, konttiviite";
@@ -1785,6 +1835,30 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
       <input type='hidden' name='rajaus' value='{$r}' />
       <input type='submit' value='". t("Lataa uudelleen") ."' />
       </form>";
+
+      /*if (!isset($poistovahvistus)) {
+
+        echo "
+          <form method='post'>
+          <input type='hidden' name='kv' value='{$kv}' />
+          <input type='hidden' name='task' value='nkv' />
+          <input type='hidden' name='poistovahvistus' value='1' />
+          <input type='hidden' name='rajaus' value='{$r}' />
+          <input type='submit' value='". t("Poista") ."' />
+          </form>";
+      }
+      else{
+        echo "&nbsp;<font class='error'>" . t("Haluatko varmasti poistaa tämän konttiviitteen bookkaukset?") . "</font>&nbsp;";
+
+        echo "
+          <form method='post'>
+          <input type='hidden' name='kv' value='{$kv}' />
+          <input type='hidden' name='task' value='poista_konttiviite' />
+          <input type='hidden' name='rajaus' value='{$r}' />
+          <input type='submit' value='". t("Kyllä") ."' />
+          </form>";
+      }*/
+
 
     echo "<hr><br>";
 

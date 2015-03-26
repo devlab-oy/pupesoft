@@ -3876,7 +3876,44 @@ function seuraava_vapaa_tulonumero($varastokoodi) {
 function hae_toimenpiteet($tulotunnus) {
   global $kukarow;
 
-  return array('muokkaus', 'siirto', 'poisto', 'rivien_lisäys');
+  $toimenpiteet = array();
+
+  $query = "SELECT
+            lasku.liitostunnus,
+            lasku.asiakkaan_tilausnumero,
+            count(tilausrivi.tunnus) AS tuoterivit,
+            IF(GROUP_CONCAT(DISTINCT tilausrivi.hyllyalue) > '', 'JOO', 'EI') AS varastoitu
+            FROM lasku
+            LEFT JOIN tilausrivi
+              ON tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.tunnus = '{$tulotunnus}'
+            GROUP BY lasku.tunnus";
+  $result = pupe_query($query);
+  $tulo = mysql_fetch_assoc($result);
+
+  if ($tulo['liitostunnus'] == 0) {
+    $toimenpiteet['varaustaydennys'] = t("Varauksen tietojen täydennys");
+  }
+  else {
+   $toimenpiteet['muokkaus'] = t("Tulon tietojen muokkaus");
+  }
+
+  list($varastokoodi, $tulojuoksu, $vuosi) = explode('-', $tulo['asiakkaan_tilausnumero']);
+
+  if ($tulo['varastoitu'] == 'JOO') {
+
+    if ($varastokoodi != 'EU') {
+      $toimenpiteet['eusiirto'] = t("Siirto EU-numerolle");
+    }
+
+    if ($varastokoodi == 'ROVV' or $varastokoodi == 'VRP') {
+      $toimenpiteet['tullisiirto'] = t("Siirto tullivarastoon");
+    }
+  }
+
+  return $toimenpiteet;
 
 }
 
@@ -3926,9 +3963,8 @@ function tulon_tuotteet_ja_tiedot($tulonumero) {
             AND asiakkaan_tilausnumero = '{$tulonumero}'";
   $result = pupe_query($query);
   $laskurow = mysql_fetch_assoc($result);
-
   $varastotunnus = $laskurow['varasto'];
-  $tulopaiva = $laskurow['toimaika'];
+  $tulopaiva = date("d.m.Y", strtotime($laskurow['toimaika']));
   $toimittajatunnus = $laskurow['liitostunnus'];
 
   $query = "SELECT *
@@ -3982,7 +4018,7 @@ function paivita_tullivarastointituote($tiedot) {
 function paivita_tullivarastointirivi($tiedot) {
   global $kukarow;
 
-  print_r($tiedot);die;
+  //print_r($tiedot);die;
 /*
   $query = "UPDATE tilausrivi SET
             kpl = kpl + {$kpl},
@@ -4017,14 +4053,15 @@ function tullituotelisays($tuotteen_lisays_parametrit) {
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) != 0) {
-
     $edellinen = mysql_result($result, 0);
-    list(,,,$juoksunumero) = $edellinen;
-    $tuoteno = $edellinen + 1;
+    list(,,,$tuotejuoksu) = $edellinen;
+    $uusi_tuotejuoksu = $tuotejuoksu + 1;
   }
   else {
-    $tuoteno = $tulonumero . '-1';
+    $uusi_tuotejuoksu = '1';
   }
+
+  $tuoteno = $tulonumero . '-' . $uusi_tuotejuoksu;
 
   $query = "INSERT INTO tuote
             SET yhtio = '{$kukarow['yhtio']}',

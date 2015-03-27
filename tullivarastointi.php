@@ -1,6 +1,28 @@
 <?php
+
+if (isset($_POST['task']) and ($_POST['task'] == 'purkuraportti_pdf')) {
+  $no_head = "yes";
+}
+
 require "inc/parametrit.inc";
 require 'inc/edifact_functions.inc';
+
+if (isset($task) and $task == 'purkuraportti_pdf') {
+
+  $pdf_data = unserialize(base64_decode($pdf_data));
+
+  $logo_info = pdf_logo();
+  $pdf_data['logodata'] = $logo_info['logodata'];
+  $pdf_data['scale'] = $logo_info['scale'];
+
+  $pdf_tiedosto = purkuraportti_pdf($pdf_data);
+
+  header("Content-type: application/pdf");
+  header("Content-Disposition:attachment;filename='purkuraportti_{$tulonumero}.pdf'");
+
+  echo file_get_contents($pdf_tiedosto);
+  die;
+}
 
 js_popup();
 
@@ -10,8 +32,22 @@ if (isset($task) and $task == 'suorita_toimenpide') {
   $task = $toimenpide;
 }
 
+
 if (isset($task) and $task == 'eusiirto') {
-  unset($task);
+  $otsikko = t("Siirto EU-numerolle");
+  $view = 'eusiirto';
+  $tulon_tuotteet_ja_tiedot = tulon_tuotteet_ja_tiedot($tulonumero);
+}
+
+if (isset($task) and $task == 'purkuraportti') {
+  $otsikko = t("Purkuraportin lataus");
+  $view = 'purkuraportin_lataus';
+
+  $purkuraportti_parametrit = purkuraportti_parametrit($tulotunnus);
+  extract($purkuraportti_parametrit);
+  $pdf_data = serialize($purkuraportti_parametrit);
+  $pdf_data = base64_encode($pdf_data);
+
 }
 
 if (isset($task) and $task == 'varaustaydennys') {
@@ -473,6 +509,10 @@ if (isset($va) and $va == "ok" and !isset($task)) {
   echo "<br>";
 }
 
+//////////////////////////
+// tuotetieto-näkymä alkaa
+//////////////////////////
+
 if (isset($view) and $view == "tuotetiedot") {
 
   if(empty($tulonumero)) {
@@ -672,6 +712,9 @@ if (isset($view) and $view == "tuotetiedot") {
   }
 }
 
+//////////////////////////
+// varaus-näkymä alkaa
+//////////////////////////
 
 if (isset($view) and $view == 'aloita_varaus') {
 
@@ -705,6 +748,10 @@ if (isset($view) and $view == 'aloita_varaus') {
   </table>
   </form>";
 }
+
+//////////////////////////
+// tulotieto-näkymä alkaa
+//////////////////////////
 
 if (isset($view) and $view == 'tulotiedot') {
 
@@ -864,7 +911,10 @@ if (isset($view) and $view == 'tulotiedot') {
 
 }
 
-// perusnäkymä
+//////////////////////////
+// perus-näkymä alkaa
+//////////////////////////
+
 if (isset($view) and $view == "perus") {
 
   $query = "SELECT
@@ -1172,9 +1222,102 @@ if (isset($view) and $view == "perus") {
       });
 
     </script>";
-
-
   }
+}
+
+//////////////////////////
+// purkurasportin-lataus-näkymä alkaa
+//////////////////////////
+
+if (isset($view) and $view == "purkuraportin_lataus") {
+
+  js_openFormInNewWindow();
+
+  echo "<table>";
+  echo "<tr>";
+  echo "<th>".t("Toimittaja")."</th>";
+  echo "<th>".t("Tulonumero")."</th>";
+  echo "<th>".t("Saapumispäivä")."</th>";
+  echo "<tr>";
+  echo "<tr>";
+  echo "<td>{$toimittaja}</td>";
+  echo "<td>{$tulonumero}</td>";
+  echo "<td>{$saapumispaiva}</td>";
+  echo "<tr>";
+  echo "</table>";
+
+  echo '<br>';
+
+  echo "<table>";
+  echo "<tr>";
+  echo "<th>".t("Nimitys")."</th>";
+  echo "<th>".t("Malli")."</th>";
+  echo "<th>".t("kpl.")."</th>";
+  echo "<th>".t("Purkuaika")."</th>";
+  echo "<th class='back'></th>";
+  echo "</tr>";
+
+foreach ($puretut_tuotteet as $tuote) {
+
+  echo "<tr>";
+  echo "<td>";
+  echo $tuote['nimitys'];
+  echo "</td>";
+  echo "<td>";
+  echo $tuote['malli'];
+  echo "</td>";
+  echo "<td>";
+  echo $tuote['kpl'];
+  echo "</td>";
+  echo "<td>";
+  echo $tuote['purkuaika'];
+  echo "</td>";
+  echo "</tr>";
+
+}
+
+echo "</table>";
+
+echo '<br>';
+
+echo "
+  <form method='post' action='tullivarastointi.php'>
+  <input type='hidden' name='task' value='purkuraportti_pdf' />
+  <input type='hidden' name='tulonumero' value='{$tulonumero}' />
+  <input type='hidden' name='pdf_data' value='{$pdf_data}' />
+  <input type='submit' value='" . t("Lataa PDF") . "' />
+  </form>";
+
+/*
+echo "
+  <form id='lataa_purkuraportti_pdf' method='post' action='tullivarastointi.php'>
+  <input type='hidden' name='task' value='purkuraportti_pdf' />
+  <input type='hidden' name='tee' value='x' />
+  <input type='hidden' name='pdf_data' value='{$pdf_data}' />
+  </form>";
+
+echo "<button onClick=\"js_openFormInNewWindow('lataa_purkuraportti_pdf','Purkuraportti'); return false;\" />";
+echo t("Lataa pdf");
+echo "</button><br />";
+
+*/
+
+}
+
+
+//////////////////////////
+// EU-siirto-näkymä alkaa
+//////////////////////////
+
+if (isset($view) and $view == "eusiirto") {
+
+  echo $tulonumero;
+echo '<hr>';
+
+
+
+print_r($tulon_tuotteet_ja_tiedot);
+
 }
 
 require "inc/footer.inc";

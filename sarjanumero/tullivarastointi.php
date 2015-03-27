@@ -168,7 +168,9 @@ if (isset($task) and $task == 'vie_varastoon') {
               hyllyalue = '{$hyllyalue}',
               hyllynro = '{$hyllynro}',
               hyllyvali = '{$hyllyvali}',
-              hyllytaso = '{$hyllytaso}'
+              hyllytaso = '{$hyllytaso}',
+              keratty = '{$kukarow['kuka']}',
+              kerattyaika = NOW()
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tunnus = '{$tilausrivi['tunnus']}'";
     $result = pupe_query($query);

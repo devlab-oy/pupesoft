@@ -242,8 +242,7 @@ if (!function_exists("tee_jt_tilaus")) {
         // Tarvitsemmeko uuden otsikon?
         $query = "SELECT lasku.*
                   FROM lasku
-                  #$lisatjoin
-                  JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus
+                  $lisatjoin
                   WHERE lasku.yhtio          = '$kukarow[yhtio]'
                   AND lasku.laatija          = '$kukarow[kuka]'
                   AND lasku.alatila          = '$alatila'

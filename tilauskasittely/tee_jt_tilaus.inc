@@ -242,7 +242,8 @@ if (!function_exists("tee_jt_tilaus")) {
         // Tarvitsemmeko uuden otsikon?
         $query = "SELECT lasku.*
                   FROM lasku
-                  $lisatjoin
+                  #$lisatjoin
+                  JOIN laskun_lisatiedot ON laskun_lisatiedot.yhtio = lasku.yhtio and laskun_lisatiedot.otunnus = lasku.tunnus
                   WHERE lasku.yhtio          = '$kukarow[yhtio]'
                   AND lasku.laatija          = '$kukarow[kuka]'
                   AND lasku.alatila          = '$alatila'
@@ -281,7 +282,16 @@ if (!function_exists("tee_jt_tilaus")) {
         $stresult = pupe_query($query);
       }
 
-      if (mysql_num_rows($stresult) != 0) {
+      $saa_yhdistaa = TRUE;
+
+       // Ollaan vapauttamassa siirtolistaa,
+       // katsotaan halutaanko v‰ltt‰m‰tt‰ uusi otsikko aina
+       // vai saako siirtolistoja yhdist‰‰ jos voi
+       if ($otsikkorivi["tila"] == 'G' and $yhtiorow["jt_siirtolistojen_yhdistaminen"] == 'K') {
+         $saa_yhdistaa = FALSE;
+       }
+
+      if (mysql_num_rows($stresult) != 0 and $saa_yhdistaa) {
         $otsikkorivi = mysql_fetch_assoc($stresult);
         $id = $otsikkorivi['tunnus'];
         if ($debug == 1) echo t("Lis‰‰n laskun olemassaolevaan")." $otsikkorivi[nimi] $id<br>";

@@ -4004,7 +4004,7 @@ function paivita_tullivarastointituote($tiedot) {
             nimitys = '{$tiedot['nimitys']}',
             malli = '{$tiedot['malli']}',
             pakkauslaji = '{$tiedot['pakkauslaji']}',
-            pakkauskpl = '{$tiedot['pakkauskpl']}',
+            pakkauskpl = '{$tiedot['maara2']}',
             tuotemassa = '{$tiedot['bruttopaino']}',
             tuotemassa_netto = '{$tiedot['nettopaino']}',
             tuotetilavuus = '{$tiedot['tilavuus']}',

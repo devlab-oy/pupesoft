@@ -3904,6 +3904,8 @@ function hae_toimenpiteet($tulotunnus) {
 
   if ($tulo['varastoitu'] == 'JOO') {
 
+    $toimenpiteet['purkuraportti'] = t("Purkuraportti");
+
     if ($varastokoodi != 'EU') {
       $toimenpiteet['eusiirto'] = t("Siirto EU-numerolle");
     }
@@ -4116,6 +4118,140 @@ function tullituotelisays($tuotteen_lisays_parametrit) {
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tilausrivitunnus = '{$lisatty_tun}'";
   pupe_query($query);
+
+}
+
+function purkuraportti_parametrit($tulotunnus) {
+  global $kukarow;
+
+  $query = "SELECT
+            lasku.toim_nimi AS toimittaja,
+            lasku.asiakkaan_tilausnumero AS tulonumero,
+            lasku.toimaika AS saapumispaiva,
+            tr.kerattyaika AS purkuaika,
+            tr.nimitys,
+            tuote.malli,
+            FLOOR(SUM(tr.tilkpl)) as kpl
+            FROM lasku
+            JOIN tilausrivi AS tr
+            ON tr.yhtio = lasku.yhtio
+            AND tr.otunnus = lasku.tunnus
+            JOIN tuote
+            ON tuote.yhtio = lasku.yhtio
+            AND tuote.tuoteno = tr.tuoteno
+            WHERE lasku.yhtio  = '{$kukarow['yhtio']}'
+            AND lasku.tunnus = '{$tulotunnus}'
+            GROUP BY tuote.tuoteno";
+  $result = pupe_query($query);
+
+  $puretut_tuotteet = array();
+
+  while ($rivi = mysql_fetch_assoc($result)) {
+
+    $saapumispaiva = date("d.m.Y", strtotime($rivi['saapumispaiva']));
+    $tulonumero = $rivi['tulonumero'];
+    $toimittaja = $rivi['toimittaja'];
+
+    $rivi['purkuaika'] = date("d.m.Y H:i", strtotime($rivi['purkuaika']));
+
+    $puretut_tuotteet[] = $rivi;
+  }
+
+  $purkuraportti_parametrit = array(
+    'toimittaja' => $toimittaja,
+    'saapumispaiva' => $saapumispaiva,
+    'tulonumero' => $tulonumero,
+    'puretut_tuotteet' => $puretut_tuotteet
+  );
+
+  return $purkuraportti_parametrit;
+}
+
+function purkuraportti_pdf($pdf_data) {
+
+  extract($pdf_data);
+
+  //PDF:n luonti ja defaultit
+  require_once("pdflib/phppdflib.class.php");
+
+  //PDF parametrit
+  $pdf = new pdffile;
+  $pdf->set_default('margin-top',   0);
+  $pdf->set_default('margin-bottom',   0);
+  $pdf->set_default('margin-left',   0);
+  $pdf->set_default('margin-right',   0);
+
+  //fontit
+  $pieni["height"] = 11;
+  $pieni["font"] = "Times-Roman";
+
+  $bold["height"] = 11;
+  $bold["font"] = "Times-Bold";
+
+  // sitten aletaan piirtämään itse PDF sisältöä
+  $sivu = $pdf->new_page("a4");
+
+  $sivunro = 1;
+  // lasketaan sivumäärä
+  $riveja = count($pakkalista) + 4;
+  $sivuja = ceil($riveja / 49);
+
+  $image = $pdf->png_embed($logodata);
+  $logoparam['scale'] = $pdf_data['scale'];
+  $pdf->image_place($image, 780, 420, $sivu, $logoparam);
+
+  $x = 40;
+  $y = 800;
+
+  $xx = array(20,580);
+
+  $pdf->draw_text($x, $y, t("PURKURAPORTTI"), $sivu, $bold);
+  $y -= 20;
+  $pdf->draw_text($x, $y, t("Toimittaja"), $sivu, $bold);
+  $pdf->draw_text($x+100, $y, $toimittaja, $sivu, $bold);
+  $y -= 15;
+  $pdf->draw_text($x, $y, t("Tulonumero"), $sivu, $bold);
+  $pdf->draw_text($x+100, $y, $tulonumero, $sivu, $bold);
+  $y -= 15;
+  $pdf->draw_text($x, $y, t("Saapumispäivä"), $sivu, $bold);
+  $pdf->draw_text($x+100, $y, $saapumispaiva, $sivu, $bold);
+  $y -= 15;
+
+  $y -= 10;
+  $yy[0] = $yy[1] = $y;
+  $pdf->draw_line($xx, $yy, $sivu);
+  $y -= 20;
+
+  $pdf->draw_text($x, $y, t("Nimitys"), $sivu, $bold);
+  $pdf->draw_text($x+100, $y, t("Malli"), $sivu, $bold);
+  $pdf->draw_text($x+200, $y, t("Kpl."), $sivu, $bold);
+  $pdf->draw_text($x+300, $y, t("Purkuaika"), $sivu, $bold);
+
+  $y -= 10;
+  $yy[0] = $yy[1] = $y;
+  $pdf->draw_line($xx, $yy, $sivu);
+  $y -= 20;
+
+  foreach ($puretut_tuotteet as $tuote) {
+
+    $pdf->draw_text($x, $y, $tuote['nimitys'], $sivu, $pieni);
+    $pdf->draw_text($x+100, $y, $tuote['malli'], $sivu, $pieni);
+    $pdf->draw_text($x+200, $y, $tuote['kpl'], $sivu, $pieni);
+    $pdf->draw_text($x+300, $y,$tuote['purkuaika'], $sivu, $pieni);
+
+    $y -= 15;
+
+  }
+
+  //keksitään uudelle failille joku varmasti uniikki nimi:
+  $pdffilenimi = "/tmp/kuitti-".md5(uniqid(rand(),true)).".pdf";
+
+  //kirjoitetaan pdf faili levylle..
+  $fh = fopen($pdffilenimi, "w");
+  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
+  fclose($fh);
+
+  return $pdffilenimi;
 
 }
 

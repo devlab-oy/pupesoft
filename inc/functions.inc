@@ -2666,12 +2666,8 @@ if (!function_exists("synkronoi")) {
                       and kassa_alepros      = '$aburow[kassa_alepros]'
                       and kassa_relpvm       = '$aburow[kassa_relpvm]'
                       and kateinen           = '$aburow[kateinen]'
-                      and osamaksuehto1      = '$aburow[osamaksuehto1]'
-                      and osamaksuehto2      = '$aburow[osamaksuehto2]'
                       and rel_pvm            = '$aburow[rel_pvm]'
                       and sallitut_maat      = '$aburow[sallitut_maat]'
-                      and summanjakoprososa2 = '$aburow[summanjakoprososa2]'
-                      and suoraveloitus      = '$aburow[suoraveloitus]'
                       LIMIT 1";
             $tarkres = pupe_query($query);
 

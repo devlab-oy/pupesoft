@@ -4054,7 +4054,7 @@ function tullituotelisays($tuotteen_lisays_parametrit) {
 
   if (mysql_num_rows($result) != 0) {
     $edellinen = mysql_result($result, 0);
-    list(,,,$tuotejuoksu) = $edellinen;
+    list(,,,$tuotejuoksu) = explode('-', $edellinen);
     $uusi_tuotejuoksu = $tuotejuoksu + 1;
   }
   else {

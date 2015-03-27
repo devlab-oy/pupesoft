@@ -295,11 +295,8 @@ if (isset($task) and ($task == 'perusta' or $task == 'tallenna')) {
   if (count($errors) > 0) {
     $view = 'tuotetiedot';
 
-    if ($task == 'perusta') {
+    if ($task == 'perusta' or $task == 'tallenna') {
       $otsikko = t("Täydennä tulotiedot");
-    }
-    elseif ($task == 'tallenna') {
-
     }
     else {
       $otsikko = t("Tulon tuotetiedot");

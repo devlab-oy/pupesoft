@@ -265,7 +265,7 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
 
   if ($toim == "BIO") {
     //tilauksessa kerayspvm mukaan
-    $query = "SELECT sum(tilausrivi.varattu) tilattu
+    $query = "SELECT ifnull(sum(tilausrivi.varattu), 0) tilattu
               FROM tilausrivi use index (yhtio_tyyppi_tuoteno_kerayspvm)
               WHERE tilausrivi.yhtio in ($yhtiot)
               and tilausrivi.tyyppi  = 'O'
@@ -603,7 +603,12 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 
   echo "<th valign='top'>".t("Saldo")."</th>";
   echo "<th valign='top'>".t("Tilattu")."<br>".t("Varattu")."</th>";
-  echo "<th valign='top'>".t("Ostoehdotus")."<br>".t("Vuosikulutus")."</th>";
+  if ($toim == "BIO") {
+    echo "<th valign='top'>".t("Ostoehdotus")."<br>".t("Kulutus")."</th>";
+  }
+  else {
+    echo "<th valign='top'>".t("Ostoehdotus")."<br>".t("Vuosikulutus")."</th>";
+  }
 
   if ($toim == "KK") echo "<th valign='top'>".t("Tilausm‰‰r‰")."<br>".t("Varastoitava")."</th>";
   else echo "<th valign='top'>".t("Pakkauskoko")."<br>".t("Varastoitava")."</th>";
@@ -706,6 +711,14 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
         }
       }
       else {
+        $ostoehdotus = 0;
+      }
+    }
+    elseif ($toim == "BIO") {
+      # V‰hennet‰‰n myynneist‰ vapaa saldo ja ostot
+      $ostoehdotus = $enp - ($saldot + $ostot);
+
+      if ($ostoehdotus < 0) {
         $ostoehdotus = 0;
       }
     }

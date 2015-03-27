@@ -39,6 +39,25 @@ if (mysql_num_rows($result) != 1) {
 
 $trow = mysql_fetch_assoc($result);
 
+$query = "SELECT GROUP_CONCAT(DISTINCT oletus_rahatili) rahatilit,
+          GROUP_CONCAT(DISTINCT oletus_kulutili) kulutilit
+          FROM yriti
+          WHERE yhtio = '{$kukarow['yhtio']}'
+          AND kaytossa = ''";
+$tilit_chk_res = pupe_query($query);
+$tilit_chk_row = mysql_fetch_assoc($tilit_chk_res);
+
+$not_in_tilit = "";
+
+if (!empty($tilit_chk_row['rahatilit'])) {
+  $not_in_tilit = ",{$tilit_chk_row['rahatilit']}";
+}
+
+if (!empty($tilit_chk_row['kulutilit'])) {
+  if (!empty($not_in_tilit)) $not_in_tilit .= ",{$tilit_chk_row['kulutilit']}";
+  else $not_in_tilit = ",{$tilit_chk_row['kulutilit']}";
+}
+
 //Poistetaan suoraveloitus
 if ($tila == 'A') {
   $query = "UPDATE lasku SET
@@ -1013,7 +1032,9 @@ if ($tila == 'W') {
               WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
               AND tiliointi.ltunnus  = '$tunnus'
               AND tiliointi.tapvm    = '$trow[tapvm]'
-              AND tiliointi.tilino   not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]')
+              AND tiliointi.tilino   not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]'
+                {$not_in_tilit}
+              )
               AND tiliointi.korjattu = ''
               AND (taso.kayttotarkoitus is null or taso.kayttotarkoitus  in ('','O'))";
     $result = pupe_query($query);
@@ -1077,7 +1098,7 @@ if ($tila == 'W') {
               WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
               AND tiliointi.ltunnus  = '$tunnus'
               AND tiliointi.tapvm    = '$trow[tapvm]'
-              AND tiliointi.tilino   not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]', '{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')
+              AND tiliointi.tilino   not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]', '{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}' {$not_in_tilit})
               AND tiliointi.korjattu = ''
               AND (taso.kayttotarkoitus is null or taso.kayttotarkoitus  in ('','O'))";
     $result_x = pupe_query($query);
@@ -1536,7 +1557,9 @@ if ($tila == 'ostolasku_kulut') {
               WHERE tiliointi.yhtio  = '$kukarow[yhtio]'
               AND tiliointi.ltunnus  = '$tunnus'
               {$tapvmlisa}
-              AND tiliointi.tilino   not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]', '{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}')
+              AND tiliointi.tilino   not in ('$yhtiorow[ostovelat]', '$yhtiorow[alv]', '$yhtiorow[konserniostovelat]', '$yhtiorow[matkalla_olevat]', '$yhtiorow[varasto]', '$yhtiorow[varastonmuutos]', '$yhtiorow[raaka_ainevarasto]', '$yhtiorow[raaka_ainevarastonmuutos]', '$yhtiorow[varastonmuutos_inventointi]', '$yhtiorow[varastonmuutos_epakurantti]', '{$yhtiorow['osto_rahti']}', '{$yhtiorow['osto_kulu']}', '{$yhtiorow['osto_rivi_kulu']}'
+                {$not_in_tilit}
+              )
               AND tiliointi.korjattu = ''
               AND (taso.kayttotarkoitus is null or taso.kayttotarkoitus  in ('','O'))";
     $result_tiliointi = pupe_query($query);

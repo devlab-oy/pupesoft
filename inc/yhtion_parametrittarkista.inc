@@ -95,10 +95,6 @@ if (!function_exists("yhtion_parametrittarkista")) {
       }
     }
 
-    if ($fieldname == "maksuehto_tuotenumero") {
-      $tuote = trim($t[$i]);
-    }
-
     if ($fieldname == "myynnin_alekentat_muokkaus") {
       if (count($t[$i]) > 0) {
         if (count($t[$i]) == 1 and $t[$i][0] == 'default') {

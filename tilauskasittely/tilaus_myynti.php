@@ -93,13 +93,7 @@ if (isset($ajax_toiminto) and trim($ajax_toiminto) == 'tarkista_tehtaan_saldot')
   echo json_encode($data);
   exit;
 }
-
-if (isset($livesearch_tee) and $livesearch_tee == "SARJANUMEROHAKU") {
-  livesearch_sarjanumerohaku();
-  exit;
-}
-
-if ($yhtiorow['laite_huolto'] == 'X' and $ajax == 'true') {
+if ($yhtiorow['laite_huolto'] == 'X' and isset($ajax_toiminto)) {
   require_once('inc/laite_huolto_functions.inc');
   if ($action == 'vaihda_toimenpide') {
     $query = "SELECT asiakkaan_positio
@@ -139,6 +133,11 @@ if ($yhtiorow['laite_huolto'] == 'X' and $ajax == 'true') {
     echo true;
   }
 
+  exit;
+}
+
+if (isset($livesearch_tee) and $livesearch_tee == "SARJANUMEROHAKU") {
+  livesearch_sarjanumerohaku();
   exit;
 }
 
@@ -305,6 +304,14 @@ if ($yhtiorow['laite_huolto'] == 'X') {
   echo "<br/>";
   echo "<input data-dv-tuoteno-autocomplete type='text' style='width: 90%;'/>";
   echo "</div>";
+  echo "<form id='refresh_form' method='POST' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
+  echo "<input type='hidden' name='tilausnumero' value='$tilausnumero'>";
+  echo "<input type='hidden' name='mista' value='$mista'>";
+  echo "<input type='hidden' name='toim' value='$toim'>";
+  echo "<input type='hidden' name='orig_tila' value='$orig_tila'>";
+  echo "<input type='hidden' name='orig_alatila' value='$orig_alatila'>";
+  echo "<input style='display:none;' type='submit' value='".t("Refresh")."' />";
+  echo "</form>";
 }
 
 if ($kukarow["extranet"] == "") {

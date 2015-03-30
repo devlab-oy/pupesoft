@@ -138,7 +138,7 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
       <input type='hidden' name='perheid' value = '$perheid'>
       <input type='hidden' name='perheid2' value = '$perheid2'>
       <input type='hidden' name='takaisin' value = '$takaisin'>
-      <input id='tyhjenna_button' type='submit' class='poista_btn' name='tyhjenna' value='".t("Tyhjenn‰")."'> <font class='error'>$varaosavirhe</font></td>
+      <input type='submit' class='poista_btn' name='tyhjenna' value='".t("Tyhjenn‰")."'> <font class='error'>$varaosavirhe</font></td>
     </tr>";
 
   // jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..
@@ -452,15 +452,6 @@ elseif (!$variaaritorivi and $kukarow["extranet"] == '' and ($toim == "RIVISYOTT
   }
 
   echo "<td valign='top' class='back'>";
-  if (isset($vaihda_rivi) and $vaihda_rivi or !empty($vaihdettava_rivi)) {
-    if (!empty($vaihdettava_rivi)) {
-      $rivi_tunnus = $vaihdettava_rivi;
-    }
-    else {
-      $rivi_tunnus = $rivitunnus_temp;
-    }
-    echo "<input type='hidden' name='vaihdettava_rivi' value='{$rivi_tunnus}'/>";
-  }
   echo "<input type='hidden' name='aputapa' value='$tapa'>";
   echo "<input type='submit' class='lisaa_btn' value='".t("Lis‰‰")."'> <font class='error'>$varaosavirhe</font></td></tr>";
 

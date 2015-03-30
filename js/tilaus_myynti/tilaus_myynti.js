@@ -235,10 +235,9 @@ function Vaihda_toimenpide_modal() {
     buttons: {
       "Vaihda": function() {
         var toimenpiteen_vaihto = vaihda_toimenpide($('*[data-dv-vaihdettava-rivi-tunnus]').val(), $('*[data-dv-tuoteno-autocomplete]').val());
-
         toimenpiteen_vaihto.done(function(){
           dialog.dialog("close");
-          $('#tyhjenna_button').click();
+          $('#refresh_form').submit();
         });
       },
       Cancel: function() {
@@ -258,7 +257,7 @@ function vaihda_toimenpide(vaihdettava_rivi, uuden_rivin_tuoteno) {
     async: true,
     dataType: 'json',
     type: 'POST',
-    url: 'tilaus_myynti.php?toim=TYOMAARAYS&no_head=yes&ajax=true&action="vaihda_toimenpide"',
+    url: 'tilaus_myynti.php?toim=TYOMAARAYS&no_head=yes&ajax_toiminto=true&action="vaihda_toimenpide"',
     data: {
       vaihdettava_rivi: vaihdettava_rivi,
       uuden_rivin_tuoteno: uuden_rivin_tuoteno

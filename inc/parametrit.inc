@@ -755,6 +755,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       echo "<script language='javascript' type='text/javascript'>
         var submitattu = false;
         var skippaa_tama_submitti = false;
+        var palvelin2 = '{$palvelin2}';
 
         $(document).ready(function(){
           $('form').submit(function(){

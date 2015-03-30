@@ -109,12 +109,6 @@ if ($yhtiorow['laite_huolto'] == 'X' and $ajax == 'true') {
     $lisatiedot_result = pupe_query($query);
     $tilausrivin_lisatiedot = mysql_fetch_assoc($lisatiedot_result);
 
-    $query = "UPDATE tilausrivin_lisatiedot
-              SET asiakkaan_positio = 0
-              WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tilausrivitunnus = {$vaihdettava_rivi}";
-    pupe_query($query);
-
     aseta_tilausrivien_var(array($vaihdettava_rivi), 'P');
 
     $_laite_tunnus = $tilausrivin_lisatiedot['asiakkaan_positio'];

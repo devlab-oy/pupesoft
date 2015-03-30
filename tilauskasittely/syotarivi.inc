@@ -138,7 +138,7 @@ if (!$variaaritorivi and $kukarow["extranet"] == '' and $toim == "PIKATILAUS") {
       <input type='hidden' name='perheid' value = '$perheid'>
       <input type='hidden' name='perheid2' value = '$perheid2'>
       <input type='hidden' name='takaisin' value = '$takaisin'>
-      <input type='submit' class='poista_btn' name='tyhjenna' value='".t("Tyhjenn‰")."'> <font class='error'>$varaosavirhe</font></td>
+      <input id='tyhjenna_button' type='submit' class='poista_btn' name='tyhjenna' value='".t("Tyhjenn‰")."'> <font class='error'>$varaosavirhe</font></td>
     </tr>";
 
   // jos meill‰ on rivi muuttuja t‰‰ll‰, niin ollaan muokkaamassa rivej‰..

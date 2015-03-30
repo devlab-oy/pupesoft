@@ -99,6 +99,55 @@ if (isset($livesearch_tee) and $livesearch_tee == "SARJANUMEROHAKU") {
   exit;
 }
 
+if ($yhtiorow['laite_huolto'] == 'X' and $ajax == 'true') {
+  require_once('inc/laite_huolto_functions.inc');
+  if ($action == 'vaihda_toimenpide') {
+    $query = "SELECT asiakkaan_positio
+              FROM tilausrivin_lisatiedot
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tilausrivitunnus = {$vaihdettava_rivi}";
+    $lisatiedot_result = pupe_query($query);
+    $tilausrivin_lisatiedot = mysql_fetch_assoc($lisatiedot_result);
+
+    $query = "UPDATE tilausrivin_lisatiedot
+              SET asiakkaan_positio = 0
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tilausrivitunnus = {$vaihdettava_rivi}";
+    pupe_query($query);
+
+    aseta_tilausrivien_var(array($vaihdettava_rivi), 'P');
+
+    $_laite_tunnus = $tilausrivin_lisatiedot['asiakkaan_positio'];
+
+    $sisaltyvat_tyot = hae_riviin_sisaltyvat_tyot($_laite_tunnus, $uuden_rivin_tuoteno);
+    $_vaihdettava_rivi = hae_tilausrivi($vaihdettava_rivi);
+    foreach ($sisaltyvat_tyot as $sisaltyva_tyo) {
+      //import = false koska viimeinen_paivamaara tsekkiä ei haluta tehdä. Huoltosyklin päivä
+      //pitää muuttua huolimatta mikä päivä sinne syötetään.
+      $import = false;
+      paivita_viimenen_tapahtuma_laitteen_huoltosyklille($_laite_tunnus, $sisaltyva_tyo['huoltosykli_tunnus'], $_vaihdettava_rivi['toimaika'], $import);
+    }
+
+    $params = array(
+        'tyomaarays_tunnus' => $_vaihdettava_rivi['otunnus'],
+        'tuote'             => hae_tuote($uuden_rivin_tuoteno),
+        'laite_tunnus'      => $_laite_tunnus,
+        'toim_aika'         => $_vaihdettava_rivi['toim_aika'],
+        'toimitettu'        => $_vaihdettava_rivi['toimitettu'],
+    );
+    $tilausrivi_tunnus = luo_tilausrivi($params);
+    $uusi_tilausrivi = hae_tilausrivi($tilausrivi_tunnus);
+    $uuden_rivin_huoltosykli = hae_rivin_huoltosykli($_laite_tunnus, $uusi_tilausrivi['tuoteno']);
+    paivita_viimenen_tapahtuma_laitteen_huoltosyklille($_laite_tunnus, $uuden_rivin_huoltosykli['huoltosykli_tunnus'], $_vaihdettava_rivi['toimaika'], $import);
+
+    paivita_uuden_toimenpide_rivin_tilausrivi_linkki($tilausrivi_tunnus, $vaihdettava_rivi, $_laite_tunnus);
+
+    echo true;
+  }
+
+  exit;
+}
+
 enable_ajax();
 
 $tilauskaslisa = "";
@@ -260,7 +309,7 @@ if ($yhtiorow['laite_huolto'] == 'X') {
   echo "<label for='tuotenumero'>Tuotenumero</label>";
   echo "<br/>";
   echo "<br/>";
-  echo "<input id='tuoteno_autocomplete' type='text' style='width: 90%;'/>";
+  echo "<input data-dv-tuoteno-autocomplete type='text' style='width: 90%;'/>";
   echo "</div>";
 }
 
@@ -7976,6 +8025,7 @@ if ($tee == '') {
             }
 
             if ($_laite_huolto_ja_muokkaus_lukko) {
+              echo "<input data-dv-vaihdettava-rivi-tunnus type='hidden' value='{$row['tunnus']}' />";
               echo "<button data-dv-vaihda-toimenpide type='button'>".t('Vaihda toimenpide')."</button>";
             }
           }

@@ -880,9 +880,6 @@ else {
           $tulos_ulos_maksusoppari .= t("Maksusopimustilaus siirretty odottamaan loppulaskutusta").": $laskurow[tunnus] $laskurow[nimi]<br>\n";
         }
       }
-      else {
-        require "maksuehtosplittaus.inc";
-      }
     }
 
     if (isset($tulos_ulos_sarjanumerot) and $tulos_ulos_sarjanumerot != '' and ($silent == "" or $silent == "VIENTI")) {

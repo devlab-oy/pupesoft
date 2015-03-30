@@ -115,18 +115,8 @@ if (trim($konserni) != '') {
   echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_yhtio_haku'></td>";
 }
 
-echo "<td valign='top'><input type='text'   size='10' class='search_field' name='search_myyntitilaus_haku'></td>";
-
-// Haetaan prioriteetti avainsanat
-echo "<td><input type='hidden'  size='10' class='search_field' name='search_prioriteetti_haku'>";
-echo "<select class='prioriteetti_sort'>";
-echo "<option value=''>".t('Ei rajausta')."</option>";
-
-$prioriteetti_result = t_avainsana("TYOM_PRIORIT");
-while ($prioriteetti_row = mysql_fetch_assoc($prioriteetti_result)) {
-  echo "<option value='$prioriteetti_row[selitetark]'>$prioriteetti_row[selitetark]</option>";
-}
-echo "</select></td>";
+echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_myyntitilaus_haku'></td>";
+echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_prioriteetti_haku'></td>";
 
 echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_asiakasnimi_haku'></td>";
 

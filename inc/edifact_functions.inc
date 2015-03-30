@@ -3933,7 +3933,9 @@ function tulon_tuotteet_ja_tiedot($tulonumero) {
             tuote.tuotetilavuus AS tilavuus,
             tuote.muuta AS lisatieto,
             tr.tilkpl AS maara1,
-            tr.tunnus AS tilausrivitunnus
+            tr.tunnus AS tilausrivitunnus,
+            tr.hyllyalue,
+            tr.hyllynro
             FROM tuote
             JOIN tilausrivi AS tr
               ON tr.yhtio = tuote.yhtio
@@ -4020,23 +4022,12 @@ function paivita_tullivarastointituote($tiedot) {
 function paivita_tullivarastointirivi($tiedot) {
   global $kukarow;
 
-  //print_r($tiedot);die;
-/*
   $query = "UPDATE tilausrivi SET
-            kpl = kpl + {$kpl},
-            tilkpl = tilkpl + {$kpl}
+            tilkpl = {$tiedot['maara1']},
+            varattu = {$tiedot['maara1']}
             WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tunnus  = '{$olemassa_oleva_rivi['tunnus']}'";
+            AND tunnus  = '{$tiedot['tilausrivitunnus']}'";
   pupe_query($query);
-
-  $query = "UPDATE tuotepaikat SET
-            saldo = saldo + {$kpl}
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tuoteno = '{$tilausrivi['tuoteno']}'
-            AND hyllyalue = '{$hyllyalue}'
-            AND hyllynro  = '{$hyllynro}'";
-  pupe_query($query);
-*/
 
 }
 

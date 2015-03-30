@@ -33,10 +33,28 @@ if (isset($task) and $task == 'suorita_toimenpide') {
 }
 
 
+if (isset($task) and $task == 'suorita_eusiirto') {
+
+  foreach ($siirtotuotteet as $key => $tuote) {
+    if ($tuote['siirrettava_maara'] > $tuote['varastossa']) {
+      $errors[$key] = t("Liian suuri m‰‰r‰");
+    }
+  }
+
+  if (count($errors) > 0) {
+    $task = 'eusiirto';
+  }
+  else {
+    unset($task);
+  }
+}
+
+
 if (isset($task) and $task == 'eusiirto') {
   $otsikko = t("Siirto EU-numerolle");
   $view = 'eusiirto';
   $tulon_tuotteet_ja_tiedot = tulon_tuotteet_ja_tiedot($tulonumero);
+  extract($tulon_tuotteet_ja_tiedot);
 }
 
 if (isset($task) and $task == 'purkuraportti') {
@@ -488,6 +506,7 @@ if (isset($task) and ($task == 'perusta' or $task == 'tallenna')) {
 
       }
     } //muutetut vanhat sek‰ uudet tuotteet k‰yty l‰pi
+  header("Location: tullivarastointi.php");
   }
   unset($task);
 }
@@ -596,6 +615,7 @@ if (isset($view) and $view == "tuotetiedot") {
       $pakkauslaji = $tuotteet[$laskuri]['pakkauslaji'];
       $tyyppi = $tuotteet[$laskuri]['tyyppi'];
       $tuotetunnus = $tuotteet[$laskuri]['tuotetunnus'];
+      $tilausrivitunnus = $tuotteet[$laskuri]['tilausrivitunnus'];
     }
     else {
       $nimitys = '';
@@ -609,12 +629,15 @@ if (isset($view) and $view == "tuotetiedot") {
       $pakkauslaji = '';
       $tyyppi = 'uusi';
       $tuotetunnus = '';
+      $tilausrivitunnus = '';
     }
 
     echo "
 
     <input type='hidden' name='tuotteet[{$laskuri}][tyyppi]' value='{$tyyppi}' />
     <input type='hidden' name='tuotteet[{$laskuri}][tuotetunnus]' value='{$tuotetunnus}' />
+    <input type='hidden' name='tuotteet[{$laskuri}][tilausrivitunnus]' value='{$tilausrivitunnus}' />
+    <input type='hidden' name='tuotteet[{$laskuri}][hidden_maara1]' value='$maara1' />
     <input type='hidden' id='mm{$laskuri}' name='tuotteet[{$laskuri}][muutosmittari]' value='' />
 
     <table id='tuotetaulu{$laskuri}' class='tuotetaulu' style='display:inline-block; margin:10px 10px 0 0;'>
@@ -1288,20 +1311,6 @@ echo "
   <input type='submit' value='" . t("Lataa PDF") . "' />
   </form>";
 
-/*
-echo "
-  <form id='lataa_purkuraportti_pdf' method='post' action='tullivarastointi.php'>
-  <input type='hidden' name='task' value='purkuraportti_pdf' />
-  <input type='hidden' name='tee' value='x' />
-  <input type='hidden' name='pdf_data' value='{$pdf_data}' />
-  </form>";
-
-echo "<button onClick=\"js_openFormInNewWindow('lataa_purkuraportti_pdf','Purkuraportti'); return false;\" />";
-echo t("Lataa pdf");
-echo "</button><br />";
-
-*/
-
 }
 
 
@@ -1311,12 +1320,62 @@ echo "</button><br />";
 
 if (isset($view) and $view == "eusiirto") {
 
-  echo $tulonumero;
-echo '<hr>';
+  echo "<form method='post' action='tullivarastointi.php'>";
+  echo "<table>";
 
+  echo "<tr>";
 
+  echo "<th>";
+  echo t("Tuote");
+  echo "</th>";
 
-print_r($tulon_tuotteet_ja_tiedot);
+  echo "<th>";
+  echo t("Varastossa");
+  echo "</th>";
+
+  echo "<th>";
+  echo t("Siirrett‰v‰ m‰‰r‰");
+  echo "</th>";
+  echo "</tr>";
+
+  foreach ($tuotteet as $key => $tuote) {
+
+    if ($tuote['hyllyalue'] != '') {
+
+      echo "<tr>";
+      echo "<td>";
+      echo $tuote['nimitys'] . ' - ' . $tuote['malli'];
+      echo "</td>";
+
+      echo "<td>";
+      echo $tuote['maara1'];
+      echo "<input type='hidden' name='siirotuotteet[{$key}][varastossa]' value='{$tuote['maara1']}' />";
+      echo "</td>";
+
+      echo "<td align='right'>";
+      echo "<input type='text' size='8'  name='siirtotuotteet[{$key}][siirrettava_maara]' />";
+      echo "</td>";
+
+      echo "<td class='back'>";
+
+      if (isset($errors[$key])) {
+        echo $errors[$key];
+      }
+
+      echo "</td>";
+      echo "</tr>";
+    }
+
+  }
+
+  echo "</table>";
+
+  echo "<br>
+    <input type='hidden' name='tulonumero' value='{$tulonumero}' />
+    <input type='hidden' name='task' value='suorita_eusiirto' />
+    <input type='hidden' name='pdf_data' value='{$pdf_data}' />
+    <input type='submit' value='" . t("Siirr‰") . "' />
+    </form>";
 
 }
 

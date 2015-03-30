@@ -1,6 +1,5 @@
 $(document).ready(function() {
   bind_vaihda_toimenpide_click();
-  bind_tuoteno_autocomplete();
 
   $('#myyja_id').on('change', function() {
     $(this).siblings('#myyjanro_id').val('');
@@ -221,11 +220,6 @@ function Hinta_laskuri(perheid, raakaaineiden_kehahinta_summa, valmisteiden_pain
   this.laske_painoarvot();
 }
 
-function bind_tuoteno_autocomplete() {
-  new Tuote_autocomplete($('tuoteno_autocomplete'), function() {
-  });
-}
-
 function bind_vaihda_toimenpide_click() {
   $('*[data-dv-vaihda-toimenpide]').on('click', function() {
     new Vaihda_toimenpide_modal();
@@ -240,15 +234,34 @@ function Vaihda_toimenpide_modal() {
     modal: true,
     buttons: {
       "Vaihda": function() {
-        //Tähän toimenpiteen vaihto ajax
-        //ja sit tyhjennä formin submit kun edellinen done
-        dialog.dialog("close");
+        var toimenpiteen_vaihto = vaihda_toimenpide($('*[data-dv-vaihdettava-rivi-tunnus]').val(), $('*[data-dv-tuoteno-autocomplete]').val());
+
+        toimenpiteen_vaihto.done(function(){
+          dialog.dialog("close");
+          $('#tyhjenna_button').click();
+        });
       },
       Cancel: function() {
         dialog.dialog("close");
       }
     }
   });
-
   dialog.dialog("open");
+
+  // Inputin autocomplete luodaan dialogin luomisen jälkeen jotta autocomplete listan z-index on suurempi kuin dialogin
+  new Tuote_autocomplete($('*[data-dv-tuoteno-autocomplete]'), function() {
+  });
+}
+
+function vaihda_toimenpide(vaihdettava_rivi, uuden_rivin_tuoteno) {
+  return $.ajax({
+    async: true,
+    dataType: 'json',
+    type: 'POST',
+    url: 'tilaus_myynti.php?toim=TYOMAARAYS&no_head=yes&ajax=true&action="vaihda_toimenpide"',
+    data: {
+      vaihdettava_rivi: vaihdettava_rivi,
+      uuden_rivin_tuoteno: uuden_rivin_tuoteno
+    }
+  });
 }

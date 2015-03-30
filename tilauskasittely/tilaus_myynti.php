@@ -268,8 +268,6 @@ elseif (!isset($valmiste_vai_raakaaine)) {
   $valmiste_vai_raakaaine = 'valmiste';
 }
 
-$rivitunnus_temp = $rivitunnus;
-
 // Setataan lopetuslinkki, jotta p‰‰semme takaisin tilaukselle jos k‰yd‰‰n jossain muualla
 $tilmyy_lopetus = "{$palvelin2}{$tilauskaslisa}tilaus_myynti.php////toim=$toim//projektilla=$projektilla//tilausnumero=$tilausnumero//ruutulimit=$ruutulimit//tilausrivi_alvillisuus=$tilausrivi_alvillisuus//mista=$mista";
 
@@ -4831,43 +4829,6 @@ if ($tee == '') {
 
       if ($tuoteno != '' and $kpl != 0) {
         require 'lisaarivi.inc';
-      }
-
-      if ((!empty($vaihdettava_rivi) or $_SESSION['laite_tunnus']) and !isset($vaihda_rivi)) {
-        if (!empty($vaihdettava_rivi)) {
-          $query = "SELECT asiakkaan_positio
-                    FROM tilausrivin_lisatiedot
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tilausrivitunnus = {$vaihdettava_rivi}";
-          $lisatiedot_result = pupe_query($query);
-          $tilausrivin_lisatiedot = mysql_fetch_assoc($lisatiedot_result);
-
-          $query = "UPDATE tilausrivin_lisatiedot
-                    SET asiakkaan_positio = 0
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tilausrivitunnus = {$vaihdettava_rivi}";
-          pupe_query($query);
-
-          $_laite_tunnus = $tilausrivin_lisatiedot['asiakkaan_positio'];
-
-          $sisaltyvat_tyot = hae_riviin_sisaltyvat_tyot($_laite_tunnus, $tuoteno);
-          $_vaihdettava_rivi = hae_tilausrivi($vaihdettava_rivi);
-          foreach ($sisaltyvat_tyot as $sisaltyva_tyo) {
-            //import = false koska viimeinen_paivamaara tsekki‰ ei haluta tehd‰. Huoltosyklin p‰iv‰
-            //pit‰‰ muuttua huolimatta mik‰ p‰iv‰ sinne syˆtet‰‰n.
-            $import = false;
-            paivita_viimenen_tapahtuma_laitteen_huoltosyklille($_laite_tunnus, $sisaltyva_tyo['huoltosykli_tunnus'], $_vaihdettava_rivi['toimaika'], $import);
-          }
-
-          $uusi_tilausrivi = hae_tilausrivi($lisatty_tun);
-          $uuden_rivin_huoltosykli = hae_rivin_huoltosykli($_laite_tunnus, $uusi_tilausrivi['tuoteno']);
-          paivita_viimenen_tapahtuma_laitteen_huoltosyklille($_laite_tunnus, $uuden_rivin_huoltosykli['huoltosykli_tunnus'], $_vaihdettava_rivi['toimaika'], $import);
-        }
-        else {
-          $_laite_tunnus = $_SESSION['laite_tunnus'];
-        }
-
-        paivita_uuden_toimenpide_rivin_tilausrivi_linkki($lisatty_tun, $vaihdettava_rivi, $_laite_tunnus);
       }
 
       $hinta   = '';

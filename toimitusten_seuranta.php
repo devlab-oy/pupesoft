@@ -545,7 +545,11 @@ if (isset($task) and $task == 'laheta_satamavahvistus') {
     echo 'virhe<br>';die;
   }
 
-  if (laheta_sanoma($sanoma)) {
+  if ($matkakoodi != 'rekka') {
+    $sanoma_ok = laheta_sanoma($sanoma);
+  }
+
+  if ($sanoma_ok or $matkakoodi == 'rekka') {
 
     $sv_pvm = $lahtovuosi.'-'.$lahtokuu.'-'.$lahtopaiva.' '.$lahtotunti.':'.$lahtominuutti.':00';
 
@@ -801,7 +805,14 @@ if (isset($task) and ($task == 'tee_satamavahvistus' or $task == 'tee_lahtokuitt
       </script>
   ";
 
-  $otsikko = t("Satamavahvistus");
+  if ($matkakoodi == 'rekka') {
+    $otsikko = t("Lähtökuittaus");
+    $nappiteksti = t("Kuittaa");
+  }
+  else {
+    $otsikko = t("Satamavahvistus");
+    $nappiteksti = t("Lähetä satamavahvistus");
+  }
 
   echo "<a href='toimitusten_seuranta.php?rajaus=Aktiiviset'>« " . t("Palaa toimitusten seurantaan") . "</a><br><br>";
   echo "<font class='head'>".$otsikko."</font><hr><br>";
@@ -845,9 +856,10 @@ if (isset($task) and ($task == 'tee_satamavahvistus' or $task == 'tee_lahtokuitt
 
   echo "
   </td></tr>
-  <tr><th></th><td align='right'><input type='submit' value='". t("Lähetä satamavahvistus") ."' /></td></tr>
+  <tr><th></th><td align='right'><input type='submit' value='". $nappiteksti ."' /></td></tr>
   </table>
   <input type='hidden' name='korjaus' value='$korjaus' />
+  <input type='hidden' name='matkakoodi' value='$matkakoodi' />
   <input type='hidden' name='task' value='laheta_satamavahvistus' />
   </form>";
 }
@@ -2317,21 +2329,31 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
 
           if ($kesken == 0 and $mrn_tullut and $tilaus['satamavahvistus_pvm'] != '0000-00-00 00:00:00') {
 
-            echo "<div style='text-align:center;margin:10px 0;'><button type='button' disabled>";
-            echo t("Satamavahvistus lähetetty");
-            echo "</button>";
-            echo "
-              <form method='post'>
-              <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />
-              <input type='hidden' name='matkakoodi' value='{$tilaus['matkakoodi']}' />
-              <input type='hidden' name='lahtopvm_arvio' value='{$tilaus['toimaika']}' />
-              <input type='hidden' name='task' value='korjaa_satamavahvistus' />
-              <input type='submit' value='". t("Korjaa") ."' />
-              </form>
-              </div>";
+            if ($tilaus['matkakoodi'] != 'rekka') {
+
+              echo "<div style='text-align:center;margin:10px 0;'><button type='button' disabled>";
+              echo t("Satamavahvistus lähetetty");
+              echo "</button>";
+              echo "
+                <form method='post'>
+                <input type='hidden' name='konttiviite' value='{$tilaus['konttiviite']}' />
+                <input type='hidden' name='matkakoodi' value='{$tilaus['matkakoodi']}' />
+                <input type='hidden' name='lahtopvm_arvio' value='{$tilaus['toimaika']}' />
+                <input type='hidden' name='task' value='korjaa_satamavahvistus' />
+                <input type='submit' value='". t("Korjaa") ."' />
+                </form>
+                </div>";
+            }
 
           }
           elseif ($kesken == 0 and $mrn_tullut) {
+
+            if ($tilaus['matkakoodi'] == 'rekka') {
+              $nappiteksti = t("Tee lähtökuittaus");
+            }
+            else {
+              $nappiteksti = t("Tee satamavahvistus");
+            }
 
             echo "
               <div style='text-align:center;margin:10px 0;'>
@@ -2340,9 +2362,10 @@ if (isset($kv) and isset($task) and $task == 'nkv') {
               <input type='hidden' name='matkakoodi' value='{$tilaus['matkakoodi']}' />
               <input type='hidden' name='lahtopvm_arvio' value='{$tilaus['toimaika']}' />
               <input type='hidden' name='task' value='tee_satamavahvistus' />
-              <input type='submit' value='". t("Tee satamavahvistus") ."' />
+              <input type='submit' value='". $nappiteksti ."' />
               </form>
               </div>";
+
           }
 
           if ($kesken == 0 and $mrn_tullut) {

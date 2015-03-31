@@ -10,10 +10,6 @@ require '../inc/edifact_functions.inc';
 
 if (isset($task) and $task == 'kontitus') {
 
-
-
-
-
   $query = "UPDATE tilausrivi SET
             kerattyaika = NOW(),
             keratty = '{$kukarow['kuka']}'

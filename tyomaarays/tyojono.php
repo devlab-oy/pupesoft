@@ -569,6 +569,11 @@ if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
 else {
   $datatables_conf[] = array($pupe_DataTables[0], 9, 8, true, true);
 }
+// Jos on ruksattu konserni, inkrementoidaan molempia sarakkeita yhdellä
+if (trim($konserni) != '' and count($datatables_conf[0]) > 0) {
+  $datatables_conf[0][1]++;
+  $datatables_conf[0][2]++;
+}
 
 if (count($tyomaarays_tunti_yhteensa) > 0 and $toim == 'TYOMAARAYS_ASENTAJA') {
 

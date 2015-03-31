@@ -3897,7 +3897,7 @@ function hae_toimenpiteet($tulotunnus) {
     $toimenpiteet['varaustaydennys'] = t("Varauksen tietojen täydennys");
   }
   else {
-   $toimenpiteet['muokkaus'] = t("Tulon tietojen muokkaus");
+   $toimenpiteet['muokkaus'] = t("Muokkaa / tarkastele");
   }
 
   list($varastokoodi, $tulojuoksu, $vuosi) = explode('-', $tulo['asiakkaan_tilausnumero']);
@@ -3927,12 +3927,13 @@ function tulon_tuotteet_ja_tiedot($tulonumero) {
             tuote.nimitys,
             tuote.malli,
             tuote.pakkauslaji,
+            tuote.tuoteno,
             tuote.pakkauskpl AS maara2,
             tuote.tuotemassa_netto AS nettopaino,
             tuote.tuotemassa AS bruttopaino,
             tuote.tuotetilavuus AS tilavuus,
             tuote.muuta AS lisatieto,
-            tr.tilkpl AS maara1,
+            FLOOR(tr.tilkpl) AS maara1,
             tr.tunnus AS tilausrivitunnus,
             tr.hyllyalue,
             tr.hyllynro
@@ -3969,6 +3970,7 @@ function tulon_tuotteet_ja_tiedot($tulonumero) {
   $laskurow = mysql_fetch_assoc($result);
   $varastotunnus = $laskurow['varasto'];
   $tulopaiva = date("d.m.Y", strtotime($laskurow['toimaika']));
+  $toimaika = $laskurow['toimaika'];
   $toimittajatunnus = $laskurow['liitostunnus'];
 
   $query = "SELECT *
@@ -3995,10 +3997,12 @@ function tulon_tuotteet_ja_tiedot($tulonumero) {
     'konttinumero' => $konttinumero,
     'tulopaiva' => $tulopaiva,
     'tulotunnus' => $laskurow['tunnus'],
-    'tuotteet' => $tuotteet
+    'tuotteet' => $tuotteet,
+    'toimaika' => $toimaika
     );
 
   return $tulon_tuotteet_ja_tiedot;
+
 }
 
 function paivita_tullivarastointituote($tiedot) {
@@ -4022,9 +4026,24 @@ function paivita_tullivarastointituote($tiedot) {
 function paivita_tullivarastointirivi($tiedot) {
   global $kukarow;
 
+  if ($tiedot['hyllyalue'] == '') {
+    $muutettava = 'varattu';
+  }
+  else {
+   $muutettava = 'kpl';
+
+   $query = "UPDATE tuotepaikat SET
+             saldo = {$tiedot['maara1']}
+             WHERE yhtio = '{$kukarow['yhtio']}'
+             AND tuoteno = '{$tiedot['tuotenumero']}'
+             AND hyllyalue = '{$tiedot['hyllyalue']}'
+             AND hyllynro = '{$tiedot['hyllynro']}'";
+   pupe_query($query);
+  }
+
   $query = "UPDATE tilausrivi SET
             tilkpl = {$tiedot['maara1']},
-            varattu = {$tiedot['maara1']}
+            {$muutettava} = {$tiedot['maara1']}
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tunnus  = '{$tiedot['tilausrivitunnus']}'";
   pupe_query($query);
@@ -4244,6 +4263,141 @@ function purkuraportti_pdf($pdf_data) {
 
   return $pdffilenimi;
 
+}
+
+
+function eu_kopioi_rivit($kopiointiparametrit) {
+  global $kukarow;
+
+  extract($kopiointiparametrit);
+
+  foreach ($kopioitavat as $taulu => $rivit) {
+
+    $query = "INSERT INTO {$taulu} SET ";
+
+    foreach ($rivit as $kolumni => $arvo) {
+
+      switch ($kolumni) {
+
+        case 'tuoteno':
+          $query .= "tuoteno = '{$tuotenumero}', ";
+          break;
+
+        case 'saldo':
+          $query .= "saldo = '{$rivitiedot['siirrettava_maara']}', ";
+          break;
+
+        case 'tilkpl':
+          $query .= "tilkpl = '{$rivitiedot['siirrettava_maara']}', ";
+          break;
+
+        case 'otunnus':
+          $query .= "otunnus = '{$uusi_tulotunnus}', ";
+          break;
+
+        case 'asiakkaan_tilausnumero':
+          $query .= "asiakkaan_tilausnumero = '{$uusi_tulonumero}', ";
+          break;
+
+        case 'tilausrivitunnus':
+          $query .= "tilausrivitunnus = '{$uusi_tilausrivitunnus}', ";
+          break;
+
+        case 'tunnus':
+          // ei tehdä mitään
+          break;
+
+        case 'tilausrivi_kommentti':
+          $query .= "tilausrivi_kommentti = '{$rivitiedot['tuoteno']}', ";
+          break;
+
+        case 'kpl':
+          $query .= "kpl = '{$rivitiedot['siirrettava_maara']}', ";
+          break;
+
+        default:
+          $query .= "{$kolumni} = '{$arvo}', ";
+          break;
+      }
+    }
+
+    $query = rtrim($query, ", ");
+
+    pupe_query($query);
+
+    if ($taulu == 'tilausrivi') {
+      $uusi_tilausrivitunnus = mysql_insert_id($GLOBALS["masterlink"]);
+    }
+  }
+
+  if ($rivitiedot['tyyppi'] == 'splittaus') {
+
+    $kpl = (int) $rivitiedot['siirrettava_maara'];
+
+    $query = "UPDATE tilausrivi SET
+              tilkpl = tilkpl - {$kpl},
+              kpl = kpl - {$kpl}
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus  = '{$rivitunnus}'";
+    pupe_query($query);
+
+    $query = "UPDATE tuotepaikat SET
+              saldo = saldo - {$kpl}
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tuoteno = '{$rivitiedot['tuoteno']}'
+              AND hyllyalue = '{$rivitiedot['hyllyalue']}'
+              AND hyllynro = '{$rivitiedot['hyllynro']}'";
+    pupe_query($query);
+
+  }
+  else {
+
+    $poisto = "DELETE FROM tilausrivi
+               WHERE yhtio = '{$kukarow['yhtio']}'
+               AND tunnus  = '{$rivitunnus}'";
+    pupe_query($poisto);
+
+    $poisto = "DELETE FROM tilausrivin_lisatiedot
+               WHERE yhtio = '{$kukarow['yhtio']}'
+               AND tilausrivitunnus  = '{$rivitunnus}'";
+    pupe_query($poisto);
+  }
+
+}
+
+function tullivarastoraportti($kopiointiparametrit) {
+  global $kukarow;
+
+  $query = "SELECT
+            tuote.nimitys,
+            tuote.malli,
+            sum(tilausrivi.kpl),
+            lasku.asiakkaan_tilausnumero
+            FROM lasku
+            JOIN tilausrivi
+              ON tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+            JOIN tuote
+              ON tuote.yhtio = lasku.yhtio
+              AND tuote.tuoteno = tilausrivi.tuoteno
+            WHERE lasku.viesti = 'tullivarasto'
+            AND tilausrivi.hyllyalue != ''
+            GROUP BY lasku.asiakkaan_tilausnumero";
+  $result = pupe_query($query);
+
+  if (mysql_num_rows($result) > 0) {
+
+    $varastosaldot_tulonumeroittain = array();
+
+    while ($tulon_tavarat = mysql_fetch_assoc($result)) {
+      $varastosaldot_tulonumeroittain = $tulon_tavarat;
+    }
+
+    return $varastosaldot_tulonumeroittain;
+  }
+  else {
+    return false;
+  }
 }
 
 ?>

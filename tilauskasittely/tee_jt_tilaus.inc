@@ -238,6 +238,19 @@ if (!function_exists("tee_jt_tilaus")) {
                          AND laskun_lisatiedot.laskutus_postitp  = '$lisatiedot_row[laskutus_postitp]'
                          AND laskun_lisatiedot.laskutus_maa      = '$lisatiedot_row[laskutus_maa]'";
         }
+        elseif ($otsikkorivi["tila"] == 'G' and $yhtiorow["jt_siirtolistojen_yhdistaminen"] == 'K') {
+          // Ollaan vapauttamassa siirtolistaa,
+          // katsotaan halutaanko v‰ltt‰m‰tt‰ uusi otsikko aina
+          // vai saako siirtolistoja yhdist‰‰ jos voi
+          // Kuitenkin niin, ett‰ mahdollisuuksien mukaan ei eroteta samalla siirtolistalla olleita rivej‰
+          // - t‰m‰ tehd‰‰n vanhan siirtolistanumeron mukaan
+          $lisatjoin = "JOIN tilausrivi 
+          		            ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus)
+          	            JOIN tilausrivin_lisatiedot 
+          		            ON (tilausrivin_lisatiedot.yhtio = lasku.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)";
+          
+          $lisatehdot = "AND tilausrivin_lisatiedot.vanha_otunnus = {$otsikkorivi["tunnus"]}";
+        }
 
         // Tarvitsemmeko uuden otsikon?
         $query = "SELECT lasku.*
@@ -280,17 +293,9 @@ if (!function_exists("tee_jt_tilaus")) {
                   $yhdlisa";
         $stresult = pupe_query($query);
       }
-
-      $saa_yhdistaa = TRUE;
-
-       // Ollaan vapauttamassa siirtolistaa,
-       // katsotaan halutaanko v‰ltt‰m‰tt‰ uusi otsikko aina
-       // vai saako siirtolistoja yhdist‰‰ jos voi
-       if ($otsikkorivi["tila"] == 'G' and $yhtiorow["jt_siirtolistojen_yhdistaminen"] == 'K') {
-         $saa_yhdistaa = FALSE;
-       }
-
-      if (mysql_num_rows($stresult) != 0 and $saa_yhdistaa) {
+$riveja = mysql_num_rows($stresult);
+echo "283 <pre> $query </pre> <br> lisaehdot $lisatehdot <br> $riveja <br><br>";
+      if (mysql_num_rows($stresult) != 0) {
         $otsikkorivi = mysql_fetch_assoc($stresult);
         $id = $otsikkorivi['tunnus'];
         if ($debug == 1) echo t("Lis‰‰n laskun olemassaolevaan")." $otsikkorivi[nimi] $id<br>";

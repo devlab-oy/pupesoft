@@ -35,20 +35,257 @@ if (isset($task) and $task == 'suorita_toimenpide') {
 
 if (isset($task) and $task == 'suorita_eusiirto') {
 
+  $siirrettavat = array();
+  $koskemattomat = array();
+
   foreach ($siirtotuotteet as $key => $tuote) {
+
     if ($tuote['siirrettava_maara'] > $tuote['varastossa']) {
       $errors[$key] = t("Liian suuri määrä");
     }
+
+    if (!ctype_digit($tuote['siirrettava_maara']) and $tuote['siirrettava_maara'] != '') {
+      $errors[$key] = t("Tarkista määrä");
+    }
+
+    if (empty($tuote['siirrettava_maara'])) {
+      continue;
+    }
+
+    if ($tuote['siirrettava_maara'] < $tuote['varastossa']) {
+
+      $siirrettavat[$tuote['tilausrivitunnus']]['siirrettava_maara'] = $tuote['siirrettava_maara'];
+      $siirrettavat[$tuote['tilausrivitunnus']]['tuoteno'] = $tuote['tuoteno'];
+      $siirrettavat[$tuote['tilausrivitunnus']]['hyllyalue'] = $tuote['hyllyalue'];
+      $siirrettavat[$tuote['tilausrivitunnus']]['hyllynro'] = $tuote['hyllynro'];
+      $siirrettavat[$tuote['tilausrivitunnus']]['tyyppi'] = 'splittaus';
+    }
+    elseif ($tuote['siirrettava_maara'] == $tuote['varastossa']) {
+
+      $siirrettavat[$tuote['tilausrivitunnus']]['siirrettava_maara'] = $tuote['siirrettava_maara'];
+      $siirrettavat[$tuote['tilausrivitunnus']]['tuoteno'] = $tuote['tuoteno'];
+      $siirrettavat[$tuote['tilausrivitunnus']]['hyllyalue'] = $tuote['hyllyalue'];
+      $siirrettavat[$tuote['tilausrivitunnus']]['hyllynro'] = $tuote['hyllynro'];
+      $siirrettavat[$tuote['tilausrivitunnus']]['tyyppi'] = 'kokonaissiirto';
+    }
   }
 
-  if (count($errors) > 0) {
+  if (count($errors) > 0 or count($siirrettavat) == 0) {
     $task = 'eusiirto';
   }
   else {
+
+    // pitääkö perustaa uusi tulonumero
+    $query = "SELECT *
+              FROM lasku
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND sisviesti2 = '{$vanha_tulonumero}'";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) == 0) {
+
+      // perustetaan uusi EU-tyyppinen tulonumero
+      $query = "SELECT *
+                FROM toimi
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = '{$toimittajatunnus}'";
+      $toimres = pupe_query($query);
+      $toimrow = mysql_fetch_assoc($toimres);
+
+      $params = array(
+        'liitostunnus' => $toimrow['tunnus'],
+        'nimi' => $toimrow['nimi'],
+        'myytil_toimaika' => $toimaika,
+        'varasto' => $varastotunnus,
+        'osoite' => $toimrow['osoite'],
+        'postino' => $toimrow['postino'],
+        'postitp' => $toimrow['postitp'],
+        'maa' => $toimrow['maa'],
+        'uusi_ostotilaus' => 'JOO',
+        'toimipaikka' => ''
+      );
+
+      require_once "inc/luo_ostotilausotsikko.inc";
+
+      $laskurow = luo_ostotilausotsikko($params);
+
+      $uusi_tulonumero = seuraava_vapaa_tulonumero('EU');
+
+      $query = "UPDATE lasku SET
+                asiakkaan_tilausnumero = '{$uusi_tulonumero}',
+                viesti = 'tullivarasto',
+                sisviesti2 = '{$vanha_tulonumero}'
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tunnus = '{$laskurow['tunnus']}'";
+      pupe_query($query);
+
+    }
+    else {
+
+      $laskurow = mysql_fetch_assoc($result);
+      $uusi_tulonumero = $laskurow['asiakkaan_tilausnumero'];
+    }
+
+    foreach ($siirrettavat as $rivitunnus => $tiedot) {
+
+      $kopioitavat = array();
+      $kopiointiparametrit = array();
+
+      $kopiointiparametrit['rivitiedot'] = $tiedot;
+      $kopiointiparametrit['uusi_tulonumero'] = $uusi_tulonumero;
+      $kopiointiparametrit['uusi_tulotunnus'] = $laskurow['tunnus'];
+      $kopiointiparametrit['rivitunnus'] = $rivitunnus;
+
+      // pitääkö perustaa uusi tuote ja toimittaja
+      $query = "SELECT *
+                FROM tuote
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tuoteno LIKE '{$uusi_tulonumero}-%'
+                ORDER BY tuoteno ASC";
+      $result = pupe_query($query);
+
+      while ($tuote = mysql_fetch_assoc($result)) {
+        if ($tuote['tilausrivi_kommentti'] == $tiedot['tuoteno']) {
+          $tuotenumero = $tuote['tuoteno'];
+        }
+        $suurin_tuotenumero = $tuote['tuoteno'];
+      }
+
+      if (mysql_num_rows($result) == 0 or !isset($tuotenumero)) {
+
+        $query = "SELECT *
+                  FROM tuote
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno = '{$tiedot['tuoteno']}'";
+        $result = pupe_query($query);
+        $kopioitavat['tuote'] = mysql_fetch_assoc($result);
+
+        $query = "SELECT *
+                  FROM tuotteen_toimittajat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno = '{$tiedot['tuoteno']}'
+                  AND liitostunnus = '{$toimittajatunnus}'";
+        $result = pupe_query($query);
+        $kopioitavat['tuotteen_toimittajat'] = mysql_fetch_assoc($result);
+
+        if (isset($suurin_tuotenumero)) {
+          list(,,,$tuotejuoksu) = explode('-', $suurin_tuotenumero);
+          $uusi_tuotejuoksu = $tuotejuoksu + 1;
+        }
+        else {
+          $uusi_tuotejuoksu = '1';
+        }
+
+        $tuotenumero = $uusi_tulonumero . '-' . $uusi_tuotejuoksu;
+      }
+
+      $kopiointiparametrit['tuotenumero'] = $tuotenumero;
+
+      // pitääkö perustaa tuotepaikka
+      $query = "SELECT *
+                FROM tuotepaikat
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tuoteno = '{$tuotenumero}'
+                AND hyllyalue = '{$tiedot['hyllyalue']}'
+                AND hyllynro = '{$tiedot['hyllynro']}'";
+      $result = pupe_query($query);
+
+      if (mysql_num_rows($result) == 0) {
+
+        $query = "SELECT *
+                  FROM tuotepaikat
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno = '{$tiedot['tuoteno']}'
+                  AND hyllyalue = '{$tiedot['hyllyalue']}'
+                  AND hyllynro = '{$tiedot['hyllynro']}'";
+        $result = pupe_query($query);
+        $kopioitavat['tuotepaikat']  = mysql_fetch_assoc($result);
+      }
+
+      // pitääkö kopioida uusi tilausrivi lisätietoineen
+      $query = "SELECT *
+                FROM tilausrivi
+                WHERE yhtio = '{$kukarow['yhtio']}'
+                AND tuoteno = '{$tuotenumero}'
+                AND hyllyalue = '{$tiedot['hyllyalue']}'
+                AND hyllynro = '{$tiedot['hyllynro']}'";
+      $result = pupe_query($query);
+
+      if (mysql_num_rows($result) == 0) {
+
+        $query = "SELECT *
+                  FROM tilausrivi
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus = '{$rivitunnus}'";
+        $result = pupe_query($query);
+        $kopioitavat['tilausrivi'] = mysql_fetch_assoc($result);
+
+        $query = "SELECT *
+                  FROM tilausrivin_lisatiedot
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tilausrivitunnus = '{$rivitunnus}'";
+        $result = pupe_query($query);
+        $kopioitavat['tilausrivin_lisatiedot'] = mysql_fetch_assoc($result);
+      }
+      else {
+
+        $tilausrivi = mysql_fetch_assoc($result);
+
+        $query = "UPDATE tilausrivi SET
+                  tilkpl = tilkpl + {$tiedot['siirrettava_maara']},
+                  kpl = kpl + {$tiedot['siirrettava_maara']}
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus  = '{$tilausrivi['tunnus']}'";
+        pupe_query($query);
+
+        $query = "UPDATE tuotepaikat SET
+                  saldo = saldo + {$tiedot['siirrettava_maara']}
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tuoteno = '{$tuotenumero}'
+                  AND hyllyalue = '{$tiedot['hyllyalue']}'
+                  AND hyllynro = '{$tiedot['hyllynro']}'";
+        pupe_query($query);
+
+      }
+
+      $kopiointiparametrit['kopioitavat'] = $kopioitavat;
+
+      eu_kopioi_rivit($kopiointiparametrit);
+    }
+
+
+    $query = "SELECT *
+              FROM tilausrivi
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tunnus = '{$tulotunnus}'";
+    $result = pupe_query($query);
+
+    if (mysql_num_rows($result) == 0) {
+
+      $poisto = "DELETE FROM lasku
+                 WHERE yhtio = '{$kukarow['yhtio']}'
+                 AND tunnus  = '{$tulotunnus}'";
+      pupe_query($poisto);
+
+      $poisto = "DELETE FROM tuote
+                 WHERE yhtio = '{$kukarow['yhtio']}'
+                 AND tuoteno  LIKE '{$vanha_tulonumero}-%'";
+      pupe_query($poisto);
+
+      $poisto = "DELETE FROM tuotepaikat
+                 WHERE yhtio = '{$kukarow['yhtio']}'
+                 AND tuoteno  LIKE '{$vanha_tulonumero}-%'";
+      pupe_query($poisto);
+
+      $poisto = "DELETE FROM tuotteen_toimittajat
+                 WHERE yhtio = '{$kukarow['yhtio']}'
+                 AND tuoteno  LIKE '{$vanha_tulonumero}-%'";
+      pupe_query($poisto);
+
+    }
     unset($task);
   }
 }
-
 
 if (isset($task) and $task == 'eusiirto') {
   $otsikko = t("Siirto EU-numerolle");
@@ -616,6 +853,9 @@ if (isset($view) and $view == "tuotetiedot") {
       $tyyppi = $tuotteet[$laskuri]['tyyppi'];
       $tuotetunnus = $tuotteet[$laskuri]['tuotetunnus'];
       $tilausrivitunnus = $tuotteet[$laskuri]['tilausrivitunnus'];
+      $hyllyalue = $tuotteet[$laskuri]['hyllyalue'];
+      $hyllynro = $tuotteet[$laskuri]['hyllynro'];
+      $tuotenumero = $tuotteet[$laskuri]['tuoteno'];
     }
     else {
       $nimitys = '';
@@ -630,20 +870,25 @@ if (isset($view) and $view == "tuotetiedot") {
       $tyyppi = 'uusi';
       $tuotetunnus = '';
       $tilausrivitunnus = '';
+      $hyllyalue = '';
+      $hyllynro = '';
     }
 
-    echo "
+    $hylly = substr($hyllyalue, 1) . $hyllynro;
 
+    echo "
+    <input type='hidden' name='tuotteet[{$laskuri}][hyllynro]' value='{$hyllynro}' />
+    <input type='hidden' name='tuotteet[{$laskuri}][hyllyalue]' value='{$hyllyalue}' />
     <input type='hidden' name='tuotteet[{$laskuri}][tyyppi]' value='{$tyyppi}' />
     <input type='hidden' name='tuotteet[{$laskuri}][tuotetunnus]' value='{$tuotetunnus}' />
+    <input type='hidden' name='tuotteet[{$laskuri}][tuotenumero]' value='{$tuotenumero}' />
     <input type='hidden' name='tuotteet[{$laskuri}][tilausrivitunnus]' value='{$tilausrivitunnus}' />
     <input type='hidden' name='tuotteet[{$laskuri}][hidden_maara1]' value='$maara1' />
     <input type='hidden' id='mm{$laskuri}' name='tuotteet[{$laskuri}][muutosmittari]' value='' />
 
     <table id='tuotetaulu{$laskuri}' class='tuotetaulu' style='display:inline-block; margin:10px 10px 0 0;'>
-
       <tr>
-        <th colspan='2'>" . t("Tuote") ." {$laskuri}</th>
+        <th colspan='2'>" . t("Tuote") ." {$laskuri} {$hylly}</th>
         <td class='back error'></td>
       </tr>
 
@@ -1112,7 +1357,7 @@ if (isset($view) and $view == "perus") {
 
         $tarjolla = $saldot[2];
 
-        if ($tarjolla === false) {
+        if ($tarjolla === false or $tuote['hyllyalue'] == '') {
           $statukset[$tulonumero][$tuote['rivitunnus']] = t("Ei varastossa");
         }
         elseif ($tarjolla == 0) {
@@ -1342,6 +1587,13 @@ if (isset($view) and $view == "eusiirto") {
 
     if ($tuote['hyllyalue'] != '') {
 
+      if (isset($siirtotuotteet[$key]['siirrettava_maara'])) {
+        $siirtomaara = $siirtotuotteet[$key]['siirrettava_maara'];
+      }
+      else {
+        $siirtomaara = '';
+      }
+
       echo "<tr>";
       echo "<td>";
       echo $tuote['nimitys'] . ' - ' . $tuote['malli'];
@@ -1349,14 +1601,18 @@ if (isset($view) and $view == "eusiirto") {
 
       echo "<td>";
       echo $tuote['maara1'];
-      echo "<input type='hidden' name='siirotuotteet[{$key}][varastossa]' value='{$tuote['maara1']}' />";
+      echo "<input type='hidden' name='siirtotuotteet[{$key}][tuoteno]' value='{$tuote['tuoteno']}' />";
+      echo "<input type='hidden' name='siirtotuotteet[{$key}][hyllyalue]' value='{$tuote['hyllyalue']}' />";
+      echo "<input type='hidden' name='siirtotuotteet[{$key}][hyllynro]' value='{$tuote['hyllynro']}' />";
+      echo "<input type='hidden' name='siirtotuotteet[{$key}][tilausrivitunnus]' value='{$tuote['tilausrivitunnus']}' />";
+      echo "<input type='hidden' name='siirtotuotteet[{$key}][varastossa]' value='{$tuote['maara1']}' />";
       echo "</td>";
 
       echo "<td align='right'>";
-      echo "<input type='text' size='8'  name='siirtotuotteet[{$key}][siirrettava_maara]' />";
+      echo "<input type='text' size='8'  name='siirtotuotteet[{$key}][siirrettava_maara]' value='{$siirtomaara}' />";
       echo "</td>";
 
-      echo "<td class='back'>";
+      echo "<td class='back error'>";
 
       if (isset($errors[$key])) {
         echo $errors[$key];
@@ -1371,7 +1627,12 @@ if (isset($view) and $view == "eusiirto") {
   echo "</table>";
 
   echo "<br>
+    <input type='hidden' name='toimittajatunnus' value='{$toimittajatunnus}' />
+    <input type='hidden' name='vanha_tulonumero' value='{$tulonumero}' />
     <input type='hidden' name='tulonumero' value='{$tulonumero}' />
+    <input type='hidden' name='toimaika' value='{$toimaika}' />
+    <input type='hidden' name='tulotunnus' value='{$tulotunnus}' />
+    <input type='hidden' name='varastotunnus' value='{$varastotunnus}' />
     <input type='hidden' name='task' value='suorita_eusiirto' />
     <input type='hidden' name='pdf_data' value='{$pdf_data}' />
     <input type='submit' value='" . t("Siirrä") . "' />

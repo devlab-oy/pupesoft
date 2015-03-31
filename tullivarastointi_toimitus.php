@@ -605,8 +605,8 @@ if (isset($task) and ($task == 'hae_toimitusrivit' or $task == 'perusta'or $task
               SUBSTRING_INDEX(tilausrivi.tuoteno,'-',3) AS tulonumero,
               tilausrivi.nimitys,
               sum(tilausrivi.tilkpl) AS kpl,
-              CONCAT(SUBSTRING(tilausrivi.hyllyalue, 3, 4), tilausrivi.hyllynro) AS varastopaikka,
-              SUBSTRING(tilausrivi.hyllyalue, 1, 2) AS varastokoodi,
+              CONCAT(SUBSTRING(tilausrivi.hyllyalue, 2), tilausrivi.hyllynro) AS varastopaikka,
+              SUBSTRING(tilausrivi.hyllyalue, 1, 1) AS varastokoodi,
               tuote.malli,
               lasku.nimi AS toimittajanimi,
               lasku.ytunnus
@@ -656,7 +656,7 @@ if (isset($task) and ($task == 'hae_toimitusrivit' or $task == 'perusta'or $task
         $qry = "SELECT nimitys
                 FROM varastopaikat
                 WHERE yhtio = '{$kukarow['yhtio']}'
-                AND SUBSTRING(alkuhyllyalue, 1, 2) = '{$perustettava_rivi['varastokoodi']}'";
+                AND SUBSTRING(alkuhyllyalue, 1,1) = '{$perustettava_rivi['varastokoodi']}'";
         $res = pupe_query($qry);
         $varastonimi = mysql_result($res, 0);
 

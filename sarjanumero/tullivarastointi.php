@@ -33,6 +33,24 @@ if (isset($task) and $task == 'split') {
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tunnus  = '{$rivitunnus}'";
     pupe_query($query);
+
+    $query = "SELECT *
+              FROM tilausrivin_lisatiedot
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tilausrivitunnus = '{$rivitunnus}'";
+    $result = pupe_query($query);
+    $lisatiedot = mysql_fetch_assoc($result);
+
+    $query = "INSERT INTO tilausrivin_lisatiedot SET
+              yhtio = '{$kukarow['yhtio']}',
+              tilausrivitunnus = '{$uusitunnus}',
+              toimittajan_tunnus = '{$lisatiedot['toimittajan_tunnus']}',
+              kontin_mrn = '{$lisatiedot['kontin_mrn']}',
+              kuljetuksen_rekno = '{$lisatiedot['kuljetuksen_rekno']}',
+              konttinumero = '{$lisatiedot['konttinumero']}',
+              sinettinumero = '{$lisatiedot['sinettinumero']}',
+              asiakkaan_tilausnumero = '{$lisatiedot['asiakkaan_tilausnumero']}'";
+    pupe_query($query);
   }
 
   header("Location: tullivarastointi.php?tulonumero={$tulonumero}&submit=tulonumero");
@@ -439,7 +457,7 @@ if ($view == 'tiedot') {
     }
 
     if (!isset($valittu_varastopaikka) and !isset($uusi_varastopaikka)) {
-      $valittu_varastopaikka = substr($varastopaikat[0], 2);
+      $valittu_varastopaikka = substr($varastopaikat[0], 1);
     }
 
     echo "<div>";
@@ -550,8 +568,8 @@ if ($view == 'tiedot') {
 
     echo "<div class='tilaus_alue' style='overflow:auto; height:55px; padding:0 10px;'>";
 
-    echo "<div style='float:left; position: relative; top: 50%; transform: translateY(-50%); max-width:300px; overflow:hidden; margin-right:10px;'>" . $rivi['nimitys'] . "</div>";
-    echo "<div style='float:left; position: relative; top: 50%; transform: translateY(-50%);'>" . $kpl . " kpl</div>";
+    echo "<div style='float:left; max-width:300px; overflow:hidden; margin-right:10px;' class='pystykeski'>" . $rivi['nimitys'] . "</div>";
+    echo "<div style='float:left;' class='pystykeski'>" . $kpl . " kpl</div>";
 
     if ($rivi['varattu'] != 0) {
 
@@ -560,7 +578,7 @@ if ($view == 'tiedot') {
       }
 
       echo "
-        <div style='float:right; position: relative; top: 50%; transform: translateY(-50%);'>
+        <div style='float:right;' class='pystykeski'>
           <form method='post'>
           <input type='hidden' name='valittu_varastopaikka' value='{$valittu_varastopaikka}' />
           <input type='hidden' name='varastokirjain' value='{$saapumistiedot['varastokirjain']}' />
@@ -575,7 +593,7 @@ if ($view == 'tiedot') {
 
         if ($kpl > 1) {
           echo "
-            <div style='float:right; margin:0 10px 0 0; position: relative; top: 50%; transform: translateY(-50%);'>
+            <div style='float:right; margin:0 10px 0 0;' class='pystykeski'>
               <form method='post'>
               <input type='hidden' name='rivitunnus' value='{$rivi['tunnus']}' />
               <input type='hidden' name='toimittajatunnus' value='{$rivi['liitostunnus']}' />

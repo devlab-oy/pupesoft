@@ -3897,7 +3897,8 @@ function hae_toimenpiteet($tulotunnus) {
     $toimenpiteet['varaustaydennys'] = t("Varauksen tietojen täydennys");
   }
   else {
-   $toimenpiteet['muokkaus'] = t("Muokkaa / tarkastele");
+   $toimenpiteet['muokkaus'] = t("Muokkaa");
+   $toimenpiteet['tarkastelu'] = t("Tarkastele");
   }
 
   list($varastokoodi, $tulojuoksu, $vuosi) = explode('-', $tulo['asiakkaan_tilausnumero']);

@@ -4372,7 +4372,7 @@ function tullivarastoraportti($kopiointiparametrit) {
   $query = "SELECT
             tuote.nimitys,
             tuote.malli,
-            sum(tilausrivi.kpl),
+            SUM(tilausrivi.kpl),
             lasku.asiakkaan_tilausnumero
             FROM lasku
             JOIN tilausrivi

@@ -38,6 +38,22 @@ if (!function_exists("toimitustapatarkista")) {
 
         echo "<font class='message'>".t("Päivitettiin")." ".mysql_affected_rows()." ".t("toimitustapa");
 
+        $query = "UPDATE toimitustapa
+                  SET vak_kielto='{$toita}'
+                  WHERE vak_kielto='{$trow[$i]}'
+                  AND yhtio='{$kukarow["yhtio"]}'";
+        pupe_query($query);
+
+        echo ", " . mysql_affected_rows() . " " . t("VAK-käsittelyä");
+
+        $query = "UPDATE toimitustapa
+                  SET vaihtoehtoinen_vak_toimitustapa='{$toita}'
+                  WHERE vaihtoehtoinen_vak_toimitustapa='{$trow[$i]}'
+                  AND yhtio='{$kukarow["yhtio"]}'";
+        pupe_query($query);
+
+        echo ", " . mysql_affected_rows() . " " . t("vaihtoehtoista VAK-toimitustapaa");
+
         $query = "UPDATE asiakas set toimitustapa='$toita' where toimitustapa='$trow[$i]' and yhtio='$kukarow[yhtio]'";
         $updre = pupe_query($query);
 

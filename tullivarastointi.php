@@ -788,7 +788,7 @@ if (isset($view) and $view == "tuotetiedot") {
    $taskvalue = 'perusta';
   }
 
-  if ($task != 'tarkastele') {
+  if ($task != 'tarkastelu') {
 
    echo "
    <form action='tullivarastointi.php' action='tullivarastointi.php' method='post'>
@@ -879,7 +879,7 @@ if (isset($view) and $view == "tuotetiedot") {
 
     $hylly = substr($hyllyalue, 1) . $hyllynro;
 
-    if ($task != 'tarkastele') {
+    if ($task != 'tarkastelu') {
 
       echo "
       <input type='hidden' name='tuotteet[{$laskuri}][hyllynro]' value='{$hyllynro}' />
@@ -903,7 +903,7 @@ if (isset($view) and $view == "tuotetiedot") {
         <th>" . t("Nimitys") ."</th>
         <td>";
 
-    if ($task != 'tarkastele') {
+    if ($task != 'tarkastelu') {
       echo "<input type='text' name='tuotteet[{$laskuri}][nimitys]' value='{$nimitys}' />";
     }
     else {
@@ -919,7 +919,7 @@ if (isset($view) and $view == "tuotetiedot") {
         <th>" . t("Malli") ."</th>
         <td>";
 
-    if ($task != 'tarkastele') {
+    if ($task != 'tarkastelu') {
       echo "<input type='text' name='tuotteet[{$laskuri}][malli]' value='{$malli}' />";
     }
     else {
@@ -935,7 +935,7 @@ if (isset($view) and $view == "tuotetiedot") {
         <th>" . t("Pakkauslaji") ."</th>
         <td>";
 
-    if ($task != 'tarkastele') {
+    if ($task != 'tarkastelu') {
       echo "<input type='text' name='tuotteet[{$laskuri}][pakkauslaji]' value='{$pakkauslaji}' />";
     }
     else {
@@ -951,7 +951,7 @@ if (isset($view) and $view == "tuotetiedot") {
         <th>" . t("M‰‰r‰") ."</th>
         <td>";
 
-    if ($task != 'tarkastele') {
+    if ($task != 'tarkastelu') {
 
       echo "
         <input type='text' style='width:45px;' name='tuotteet[{$laskuri}][maara1]' value='$maara1' />
@@ -973,7 +973,7 @@ if (isset($view) and $view == "tuotetiedot") {
         <th>" . t("Nettopaino") ."</th>
         <td>";
 
-        if ($task != 'tarkastele') {
+        if ($task != 'tarkastelu') {
           echo "<input type='text' name='tuotteet[{$laskuri}][nettopaino]' value='{$nettopaino}' />";
         }
         else {
@@ -989,7 +989,7 @@ if (isset($view) and $view == "tuotetiedot") {
         <th>" . t("Bruttopaino") ."</th>
         <td>";
 
-        if ($task != 'tarkastele') {
+        if ($task != 'tarkastelu') {
           echo "<input type='text' name='tuotteet[{$laskuri}][bruttopaino]' value='{$bruttopaino}' />";
         }
         else {
@@ -1005,7 +1005,7 @@ if (isset($view) and $view == "tuotetiedot") {
         <th>" . t("Tilavuus") ."</th>
         <td>";
 
-        if ($task != 'tarkastele') {
+        if ($task != 'tarkastelu') {
           echo "<input type='text' name='tuotteet[{$laskuri}][tilavuus]' value='{$tilavuus}' />";
         }
         else {
@@ -1021,7 +1021,7 @@ if (isset($view) and $view == "tuotetiedot") {
         <th>" . t("Lis‰tietoja") ."</th>
         <td>";
 
-        if ($task != 'tarkastele') {
+        if ($task != 'tarkastelu') {
           echo "<textarea name='tuotteet[{$laskuri}][lisatieto]'>{$lisatieto}</textarea>";
         }
         else {
@@ -1038,7 +1038,7 @@ if (isset($view) and $view == "tuotetiedot") {
     $laskuri++;
   }
 
-  if ($task != 'tarkastele') {
+  if ($task != 'tarkastelu') {
 
     echo "
     <script type='text/javascript'>

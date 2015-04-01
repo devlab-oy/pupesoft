@@ -571,7 +571,8 @@ if ($tee == 'add') {
               toimitustapa.nouto,
               lasku.vienti,
               rahtikirjat.pakkaus,
-              lasku.pakkaamo
+              lasku.pakkaamo,
+              lasku.rahtivapaa
               FROM lasku use index (tila_index)
               JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != '' AND tilausrivi.tyyppi != 'D')
               $joinmaksuehto
@@ -687,14 +688,7 @@ if ($tee == 'add') {
 
             if (mysql_num_rows($pakres) == 1) {
               $pakrow = mysql_fetch_assoc($pakres);
-
-              $lasku_query = "SELECT rahtivapaa
-                              FROM lasku
-                              WHERE yhtio = '{$kukarow["yhtio"]}'
-                              AND tunnus = {$otsikkonro}";
-
-              $lasku_result = pupe_query($lasku_query);
-              $laskurow = mysql_fetch_assoc($lasku_result);
+              $laskurow = mysql_fetch_assoc($tilre);
 
               // Lisätään myös pakkausveloitus, mikäli sellainen on annettu ja jos tilaus ei ole
               // rahtivapaa ja pakkauksen takaa ei ole säädetty, että rahtivapaissa tilauksissa ei

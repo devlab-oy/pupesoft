@@ -427,6 +427,11 @@ $korlisakommi        = array();
 $myyntierahuom       = array();
 $ostoerahuom         = array();
 
+// Kun tullaan jt-/ennakko-selauksesta, niin kytketään erikoistoimitus_alarajasumma-ominaisuus pois
+if (isset($from_tee_jt_tilaus) and $from_tee_jt_tilaus === TRUE) {
+  $myy_erikoistoim_ok = FALSE;
+}
+
 if ($laskurow['tila'] == 'O' or $laskurow['tila'] == 'K') {
   $rivityyppi = 'O';  // Ostotilausrivi
 }
@@ -810,7 +815,7 @@ if (isset($tilausrivilinkki) and $tilausrivilinkki > 0) {
 if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
 
   // Katsotaan onko maksuehto jälkivaatimus, koska silloin ei toimiteta erikoisvarastoista vaikka erikoistoimitus_alarajasumma ylittyisi
-  if (!isset($jvtsekres)) {
+  if (!isset($jvtsekres) and $myy_erikoistoim_ok) {
     $apuqu = "SELECT tunnus
               FROM maksuehto
               WHERE yhtio  = '$kukarow[yhtio]'
@@ -824,7 +829,7 @@ if ($rivityyppi != 'O' and trim($var) == "" and $trow["tuoteno"] != "") {
   }
 
   // Vientiasiakkaille ei myydä erikoisvarastoista jos toimitustapa on nouto
-  if (!isset($tntsekres)) {
+  if (!isset($tntsekres) and $myy_erikoistoim_ok) {
     $apuqu = "SELECT tunnus
               FROM toimitustapa
               WHERE yhtio  = '$kukarow[yhtio]'

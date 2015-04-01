@@ -57,23 +57,7 @@ if ($kukarow["kesken"] == 0 or $kukarow["kesken"] != $laskurow["tunnus"]) {
 }
 
 // katsotaan onko tälle keikalle jo liitetty vaihto-omaisuuslaskuja (kotimaa, eu tai ei-eu)
-$query = "SELECT sum(summa) summa, sum(arvo) arvo, sum(abs(summa)) abssumma, sum(osto_kulu + osto_rahti + osto_rivi_kulu) as osto_kulut, valkoodi, vienti
-          FROM lasku
-          WHERE yhtio     = '$kukarow[yhtio]'
-          and tila        = 'K'
-          and laskunro    = '$laskurow[laskunro]'
-          and vanhatunnus <> 0
-          and vienti      in ('C','F','I','J','K','L')
-          GROUP BY valkoodi, vienti";
-$result = pupe_query($query);
-
-// jos on, haetaan liitettyjen laskujen
-if (mysql_num_rows($result) == 1) {
-  $kulurow = mysql_fetch_assoc($result);
-}
-else {
-  $kulurow = array("vienti" => "", "summa" => 0, "arvo" => 0, "valkoodi" => "", "osto_kulut" => 0); // muuten tyhjää
-}
+$kulurow = saapumisen_laskut($laskurow);
 
 //nyt kohdistus on onnistunut sentilleen. Ollan valmiita ja tulostetaan purkulistat
 if ($tila == 'valmis') {
@@ -1087,73 +1071,12 @@ if ($tila == 'tee_kohdistus') {
 //näytetään rivilista ja ruksataan kohdistettavia rivejä
 if ($tila == '') {
 
-  // jos ollaan liitetty jo vaihto-omaisuuslasku, käytetään sen vientikenttää
-  if ($kulurow["vienti"] != "") $laskurow["vienti"] = $kulurow["vienti"];
-
-  $alvti = " if(tuotteen_toimittajat.osto_alv >= 0, tuotteen_toimittajat.osto_alv, tuote.alv) ";
-
-  // jos kysessä on kotimainen vaihto-omaisuuslasku, pitää lisätä tuotteen hintaan alvi, jos ostolaskuilla on alvia!
-  if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
-
-    // Lasketaan verokanta
-    if ($kulurow["arvo"] != 0) $simualv = round(100 * (($kulurow["summa"]/$kulurow["arvo"])-1), 2);
-    else $simualv = 0;
-
-    if ($kulurow["arvo"] > 0 and $simualv == 0) {
-      $alvti = 0;
-      $alvit = 0;
-    }
-    // Onko miellä oletuksista poikkeava alvi. Verokantoja ennen viimeisintä alv-muutosta.
-    elseif (in_array($simualv, array(23, 13, 9))) {
-      $alvti = $simualv;
-      $alvit = $simualv;
-    }
-    else {
-      $alvit = "if(tuotteen_toimittajat.osto_alv >= 0, tuotteen_toimittajat.osto_alv, tuote.alv)";
-    }
-
-    if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
-      // tutkitaan ollaanko siellä alv-rekisteröity
-      $alhqur = "SELECT *
-                 FROM yhtion_toimipaikat
-                 WHERE yhtio     = '$kukarow[yhtio]'
-                 AND maa         = '$laskurow[maa]'
-                 AND vat_numero != ''";
-      $alhire = pupe_query($alhqur);
-
-      // ollaan alv-rekisteröity
-      if (mysql_num_rows($alhire) == 1) {
-        $alvit = "tuotteen_alv.alv";
-        $alvti = " ifnull(tuotteen_alv.alv, 0) ";
-      }
-    }
-  }
-  else {
-    $alvit = 0;
-  }
-
-  $query_ale_lisa = generoi_alekentta('O');
-
-  $query = "SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa} *
-            (1+(if ((SELECT max(kaytetty) kaytetty
-                FROM sarjanumeroseuranta
-                WHERE sarjanumeroseuranta.yhtio=tilausrivi.yhtio
-                and sarjanumeroseuranta.tuoteno=tilausrivi.tuoteno
-                and ((tilausrivi.varattu+tilausrivi.kpl < 0 and sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus) or (tilausrivi.varattu+tilausrivi.kpl > 0 and sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus))) = 'K', 0, $alvit)/100))) hinta
-            FROM tilausrivi use index (uusiotunnus_index)
-            JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '')
-            LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno AND tuotteen_toimittajat.liitostunnus = '$toimittajaid')
-            LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio AND tuotteen_alv.tuoteno = tilausrivi.tuoteno AND tuotteen_alv.maa = '$laskurow[maa]')
-            WHERE tilausrivi.yhtio      = '$kukarow[yhtio]'
-            AND tilausrivi.uusiotunnus  = '$otunnus'
-            AND tilausrivi.tyyppi      != 'D'
-            AND tilausrivi.kpl+tilausrivi.varattu != 0";
-  $result   = pupe_query($query);
-  $hintarow = mysql_fetch_assoc($result);
-
-  // päivitetään samantien tämä tieto laskulle
-  $query   = "UPDATE lasku set summa='$hintarow[hinta]', kohdistettu='' where yhtio ='$kukarow[yhtio]' and tunnus='$otunnus'";
-  $hinresu = pupe_query($query);
+  list(
+    $hintarow,
+    $valitutrivit,
+    $alvit,
+    $alvti
+  ) = paivita_saapumisen_summa($laskurow, $kulurow, $toimittajaid, $otunnus);
 
   // Jos käyttäjä on syöttänyt alvillisen hinnan niin lisätään alvi
   if ((int) $laskurow["rahti_etu_alv"] != 0) {
@@ -1169,7 +1092,6 @@ if ($tila == '') {
   $laskunsumma        = sprintf("%.2f", round($kulurow["summa"] - $laskurow["rahti_etu"] - $laskurow['pyoristys_erot']- $valittusumma - $kulurow['osto_kulut'], 2));
   $checksumma         = $kulurow["summa"] - $laskurow["rahti_etu"] - $laskurow['pyoristys_erot'] - $hintarow["hinta"] - $kulurow['osto_kulut'];
   $kohdistettava_summa   = sprintf("%.2f", round($kulurow["summa"] - $laskurow["rahti_etu"] - $laskurow['pyoristys_erot'] - $kulurow['osto_kulut'], 2));
-  $valitutrivit       = mysql_num_rows($result);
 
   if ($laskunsumma != 0.00 and $checksumma < 0.01 and $checksumma > -0.01 and $kohdistettava_summa == $valittusumma) {
     $laskunsumma = 0.00;
@@ -1190,6 +1112,8 @@ if ($tila == '') {
   for ($alepostfix = 1; $alepostfix <= $yhtiorow['oston_alekentat']; $alepostfix++) {
     $kentat_array[] = "tilausrivi.ale$alepostfix ale$alepostfix"; // 8,9,10
   }
+
+  $query_ale_lisa = generoi_alekentta('O');
 
   $kentat_array[] = "$alvti alv";
   $kentat_array[] = "tilausrivi.erikoisale";

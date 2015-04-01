@@ -22,6 +22,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
 $psx_ohjelmat = array(
   "valuu" => "{$palvelin2}pupenext/currencies",
   "tili" => "{$palvelin2}pupenext/accounts",
+  "pakkaamo" => "{$palvelin2}pupenext/packing_areas",
   "taso" => "{$palvelin2}pupenext/sum_levels",
   "kirjoittimet" => "{$palvelin2}pupenext/printers"
 );
@@ -2278,7 +2279,6 @@ if ($tunnus > 0 or $uusi != 0 or $errori != '') {
     $toim == "vaihtoehtoiset_verkkolaskutunnukset" or
     $toim == "toimittajahinta" or
     $toim == "varaston_tulostimet" or
-    $toim == "pakkaamo" or
     $toim == "asiakaskommentti" or
     $toim == "yhteyshenkilo" or
     $toim == "autodata_tuote" or

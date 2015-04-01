@@ -31113,3 +31113,98 @@ if (!function_exists("choose_correct_date")) {
     return '';
   }
 }
+
+if (!function_exists("piirra_maksupaate_formi")) {
+  function piirra_maksupaate_formi() {
+    global $kukarow, $laskurow, $palvelin2, $tilauskaslisa, $tilausnumero, $mista, $kaikkiyhteensa,
+           $valittu_kopio_tulostin, $kateinen, $kertakassa, $toim, $orig_tila, $orig_alatila,
+           $korttimaksu, $maksettu_lkortilla, $maksettu_pkortilla, $maksettavaa_jaljella,
+           $korttimaksutapahtuman_status, $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu;
+
+    $query_maksuehto = "SELECT *
+                        FROM maksuehto
+                        WHERE yhtio='{$kukarow["yhtio"]}'
+                        AND kateinen != ''
+                        AND kaytossa  = ''
+                        AND (maksuehto.sallitut_maat = ''
+                          OR maksuehto.sallitut_maat LIKE '%{$laskurow["maa"]}%')";
+
+    $maksuehtores = pupe_query($query_maksuehto);
+    $maksuehtorow = mysql_fetch_assoc($maksuehtores);
+
+    echo "<div id='dialog' title='" . t("Käteislaskuri") . "'>
+          <form id='kateisFormi' class='multisubmit'>
+            <ul class='list-unstyled'>
+              <li class='text-medium'>" . t("Summa") . ":</li>
+              <li>
+                <span id='jaljella' class='text-large'>{$maksettavaa_jaljella}</span>
+                <span class='text-large'>{$laskurow["valkoodi"]}</span>
+              </li>
+              <li class='text-medium'>" . t("Annettu") . ":</li>
+              <li><input id='annettu' type='number' min='0.01' step='0.01' class='text-large'></li>
+              <li id='takaisinTeksti' class='text-medium'>" . t("Takaisin") . ":</li>
+              <li>
+                <span id='takaisin' class='text-large'></span>
+                <span class='text-large'>{$laskurow["valkoodi"]}</span>
+              </li>
+            </ul>
+          </form>
+        </div>";
+
+    echo "<form name='maksupaate' id='maksupaate' method='post'
+              action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
+
+    echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
+    echo "<input type='hidden' name='tilausnumero' value='{$tilausnumero}'>";
+    echo "<input type='hidden' name='mista' value='{$mista}'>";
+    echo "<input type='hidden' name='tee' id='laskuriTee' value=''>";
+    echo "<input type='hidden' name='maksutapa' value='{$maksuehtorow["tunnus"]}'>";
+    echo "<input type='hidden' name='kaikkiyhteensa' value='{$kaikkiyhteensa}'>";
+    echo "<input type='hidden' name='valittu_kopio_tulostin' value='{$valittu_kopio_tulostin}'>";
+    echo "<input type='hidden' name='kateinen' value='{$kateinen}'>";
+    echo "<input type='hidden' name='kertakassa' value='{$kertakassa}'>";
+    echo "<input type='hidden' name='toim' value='{$toim}'>";
+    echo "<input type='hidden' name='seka' id='seka' value='X'>";
+    echo "<input type='hidden' name='orig_tila' value='{$orig_tila}'>";
+    echo "<input type='hidden' name='orig_alatila' value='{$orig_alatila}'>";
+    echo "<input type='hidden' name='kateisohitus'>";
+    echo "<input type='hidden' name='toimitustapa' value='{$laskurow["toimitustapa"]}'>";
+    echo "<input type='hidden' name='maksupaatetapahtuma' id='maksupaatetapahtuma' value=''>";
+    echo "<input type='hidden' id='peruutus' name='peruutus' value>";
+    echo "<input type='hidden' name='kateismaksu[kateinen]' id='kateinen' value='{$kateismaksu["kateinen"]}'>";
+    echo "<input type='hidden' name='kateista_annettu' id='kateistaAnnettu' value='{$kateista_annettu}'>";
+
+    echo "<table style='width: 100%; margin-top: 20px;'>";
+    echo "<tr><td class='back'><font class='head'>" . t("Maksutapa") . "</font></td></tr>";
+    echo "<tr>";
+    echo "<td><label for='korttimaksu'>" . t("Summa") . "</label>";
+    echo "<input type='text' name='korttimaksu' id='korttimaksu' value='{$maksettavaa_jaljella}'
+               size='7' autocomplete='off'>";
+    echo "<span class='error'>" . t($korttimaksutapahtuman_status) . "</span>";
+    echo "</td></tr>";
+
+    echo "<tr>
+          <td>
+            <input type='button'
+                   name='kateismaksunappi'
+                   id='kateismaksunappi'
+                   value='" . t("Käteinen") . " (Alt+C)'
+                   accesskey='c'>
+            <input type='button'
+                   name='korttimaksunappi'
+                   id='korttimaksunappi'
+                   value='" . t("Kortti") . " (Alt+K)'
+                   accesskey='k'>";
+
+    if ($loytyy_maksutapahtumia) {
+      echo "<input type='button' class='margin-left-20' name='peruuta_viimeisin'
+                 id='peruuta_viimeisin' value='" . t("Peruuta viimeisin maksu") . "'>";
+    }
+
+    echo "<input name='keraykseen' id='keraykseen' type='button' class='margin-left-20'
+               value='" . t("Ei vielä laskuteta, siirrä tilaus keräykseen") . "'>
+          </td>
+        </tr>";
+    echo "</table></form>";
+  }
+}

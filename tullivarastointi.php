@@ -903,7 +903,7 @@ if (isset($view) and $view == "tuotetiedot") {
         <th>" . t("Nimitys") ."</th>
         <td>";
 
-    if ($task == 'muokkaus') {
+    if ($task != 'tarkastele') {
       echo "<input type='text' name='tuotteet[{$laskuri}][nimitys]' value='{$nimitys}' />";
     }
     else {
@@ -919,7 +919,7 @@ if (isset($view) and $view == "tuotetiedot") {
         <th>" . t("Malli") ."</th>
         <td>";
 
-    if ($task == 'muokkaus') {
+    if ($task != 'tarkastele') {
       echo "<input type='text' name='tuotteet[{$laskuri}][malli]' value='{$malli}' />";
     }
     else {
@@ -935,7 +935,7 @@ if (isset($view) and $view == "tuotetiedot") {
         <th>" . t("Pakkauslaji") ."</th>
         <td>";
 
-    if ($task == 'muokkaus') {
+    if ($task != 'tarkastele') {
       echo "<input type='text' name='tuotteet[{$laskuri}][pakkauslaji]' value='{$pakkauslaji}' />";
     }
     else {
@@ -951,7 +951,7 @@ if (isset($view) and $view == "tuotetiedot") {
         <th>" . t("M‰‰r‰") ."</th>
         <td>";
 
-    if ($task == 'muokkaus') {
+    if ($task != 'tarkastele') {
 
       echo "
         <input type='text' style='width:45px;' name='tuotteet[{$laskuri}][maara1]' value='$maara1' />
@@ -964,7 +964,6 @@ if (isset($view) and $view == "tuotetiedot") {
       echo $maara1 . ' X ' . $maara2;
     }
 
-
     echo "
       </td>
         <td class='back error'>{$errors[$laskuri]['maara']}</td>
@@ -974,7 +973,7 @@ if (isset($view) and $view == "tuotetiedot") {
         <th>" . t("Nettopaino") ."</th>
         <td>";
 
-        if ($task == 'muokkaus') {
+        if ($task != 'tarkastele') {
           echo "<input type='text' name='tuotteet[{$laskuri}][nettopaino]' value='{$nettopaino}' />";
         }
         else {
@@ -990,7 +989,7 @@ if (isset($view) and $view == "tuotetiedot") {
         <th>" . t("Bruttopaino") ."</th>
         <td>";
 
-        if ($task == 'muokkaus') {
+        if ($task != 'tarkastele') {
           echo "<input type='text' name='tuotteet[{$laskuri}][bruttopaino]' value='{$bruttopaino}' />";
         }
         else {
@@ -1006,7 +1005,7 @@ if (isset($view) and $view == "tuotetiedot") {
         <th>" . t("Tilavuus") ."</th>
         <td>";
 
-        if ($task == 'muokkaus') {
+        if ($task != 'tarkastele') {
           echo "<input type='text' name='tuotteet[{$laskuri}][tilavuus]' value='{$tilavuus}' />";
         }
         else {
@@ -1022,7 +1021,7 @@ if (isset($view) and $view == "tuotetiedot") {
         <th>" . t("Lis‰tietoja") ."</th>
         <td>";
 
-        if ($task == 'muokkaus') {
+        if ($task != 'tarkastele') {
           echo "<textarea name='tuotteet[{$laskuri}][lisatieto]'>{$lisatieto}</textarea>";
         }
         else {
@@ -1039,7 +1038,7 @@ if (isset($view) and $view == "tuotetiedot") {
     $laskuri++;
   }
 
-  if ($task == 'muokkaus') {
+  if ($task != 'tarkastele') {
 
     echo "
     <script type='text/javascript'>

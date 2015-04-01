@@ -441,7 +441,7 @@ if ($kasitellaan_tiedosto) {
         $query = "SELECT tt.tunnus
                   FROM tuotteen_toimittajat AS tt
                   JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.{$toimikentta} = '{$chk_tunnus_val}')
-                  WHERE tt.yhtio = '{$kukarow['yhtio']}'
+                  WHERE tt.yhtio      = '{$kukarow['yhtio']}'
                   AND tt.{$tuotenokentta} = '{$chk_tuoteno_val}'
                   AND tt.liitostunnus = toimi.tunnus";
         $chk_tunnus_res = pupe_query($query);
@@ -526,7 +526,7 @@ if ($kasitellaan_tiedosto) {
         $query = "SELECT tt.tunnus
                   FROM tuotteen_toimittajat AS tt
                   JOIN toimi ON (toimi.yhtio = tt.yhtio AND toimi.{$toimikentta} = '{$chk_tunnus_val}')
-                  WHERE tt.yhtio = '{$kukarow['yhtio']}'
+                  WHERE tt.yhtio      = '{$kukarow['yhtio']}'
                   AND tt.{$tuotenokentta} = '{$chk_tuoteno_val}'
                   AND tt.liitostunnus = toimi.tunnus";
         $chk_tunnus_res = pupe_query($query);

@@ -587,7 +587,7 @@ if (mysql_field_name($result, $i) == "vaihtoehtoinen_vak_toimitustapa") {
 
   $ulos = "<td>
              <select name='{$nimi}'>
-               <option>" . t("VAK-tuotteita ei siirretä omalle tilaukselleen") . "</option>";
+               <option value>" . t("VAK-tuotteita ei siirretä omalle tilaukselleen") . "</option>";
 
   $query = "SELECT DISTINCT selite
             FROM toimitustapa

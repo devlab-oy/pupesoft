@@ -7,6 +7,8 @@ if (isset($_POST["tee"])) {
 
 require "../inc/parametrit.inc";
 
+echo "<script src='../js/maksupaate.js'></script>";
+
 if (!isset($tee)) {
   $tee = "";
 }
@@ -63,6 +65,49 @@ if ($tee == 'MAKSUEHTO') {
 }
 
 $query_ale_lisa = generoi_alekentta('M');
+
+$maksupaate_kassamyynti =
+  (($yhtiorow['maksupaate_kassamyynti'] == 'K' and $kukarow["maksupaate_kassamyynti"] == "") or
+   $kukarow["maksupaate_kassamyynti"] == "K");
+
+if ($maksupaate_kassamyynti) {
+  if (!empty($tunnukset)) {
+    $tunnari = $tunnukset;
+  }
+  elseif (!empty($tilausnumero)) {
+    $tunnari = $tilausnumero;
+  }
+  else {
+    $tunnari = "''";
+  }
+  $res = hae_tilaukset_result($query_ale_lisa, $tunnari, $alatilat, $vientilisa);
+
+  $ekarow = mysql_fetch_assoc($res);
+
+  list($loytyy_maksutapahtumia, $maksettavaa_jaljella, $kateismaksu["luottokortti"],
+    $kateismaksu["pankkikortti"]) =
+    jaljella_oleva_maksupaatesumma($ekarow["tunnus"], $ekarow["summa"]);
+
+  if (isset($maksupaatetapahtuma)) {
+    if ($maksupaatetapahtuma) {
+      $korttimaksutapahtuman_status =
+        maksa_maksupaatteella($ekarow, $ekarow["summa"], $korttimaksu, $peruutus);
+    }
+
+    list($loytyy_maksutapahtumia, $maksettavaa_jaljella, $kateismaksu["luottokortti"],
+      $kateismaksu["pankkikortti"]) =
+      jaljella_oleva_maksupaatesumma($ekarow["tunnus"], $ekarow["summa"]);
+
+    if (($loytyy_maksutapahtumia and ($maksettavaa_jaljella - $kateista_annettu) == 0 and
+                                     ($kateismaksu["luottokortti"] != 0 or
+                                      $kateismaksu["pankkikortti"] != 0)) or
+        ($maksettavaa_jaljella - $kateista_annettu <= 0)
+    ) {
+      $tee = "TOIMITA";
+      $tunnus = array($tunnari);
+    }
+  }
+}
 
 if ($tee == 'TOIMITA' and isset($maksutapa) and $maksutapa == 'seka') {
 
@@ -331,61 +376,7 @@ if ($tee == 'TOIMITA') {
 
 if ($tee == "VALITSE") {
 
-  $query = "SELECT
-            if (lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
-            if ((((asiakas.koontilaskut_yhdistetaan = '' and ('{$yhtiorow['koontilaskut_yhdistetaan']}' = 'U' or '{$yhtiorow['koontilaskut_yhdistetaan']}' = 'V')) or asiakas.koontilaskut_yhdistetaan = 'U') and lasku.tilaustyyppi in ('R','U')), 1, 0) reklamaatiot_lasku,
-            lasku.tunnus,
-            lasku.luontiaika,
-            lasku.chn,
-            lasku.ytunnus,
-            lasku.nimi,
-            lasku.osoite,
-            lasku.postino,
-            lasku.postitp,
-            lasku.maa,
-            lasku.toim_nimi,
-            lasku.toim_osoite,
-            lasku.toim_postino,
-            lasku.toim_postitp,
-            lasku.toim_maa,
-            lasku.laskutusvkopv,
-            lasku.rahtivapaa,
-            lasku.toimitustapa,
-            laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
-            maksuehto.teksti meh,
-            maksuehto.itsetulostus,
-            maksuehto.kateinen,
-            ifnull(kuka.nimi, lasku.laatija) kukanimi,
-            lasku.valkoodi,
-            lasku.liitostunnus,
-            lasku.tila,
-            lasku.vienti,
-            lasku.alv,
-            lasku.kohdistettu,
-            lasku.jaksotettu,
-            lasku.verkkotunnus,
-            lasku.erikoisale,
-            round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) arvo,
-            round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa
-            FROM lasku use index (tila_index)
-            LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}' AND laskun_lisatiedot.laskutus_nimi != '' AND laskun_lisatiedot.otunnus = lasku.tunnus AND CONCAT(laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa) != CONCAT(lasku.nimi, lasku.osoite, lasku.postino, lasku.postitp, lasku.maa))
-            JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi='L'
-            JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
-            LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus
-            LEFT JOIN kuka on kuka.yhtio = lasku.yhtio and kuka.kuka = lasku.laatija
-            LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus
-            WHERE lasku.yhtio       = '$kukarow[yhtio]'
-            and lasku.tila          = 'L'
-            and lasku.tunnus        in ($tunnukset)
-            and (tilausrivi.keratty != '' or tuote.ei_saldoa!='')
-            and tilausrivi.varattu != 0
-            $alatilat
-            $vientilisa
-            GROUP BY ketjutuskentta, reklamaatiot_lasku, lasku.tunnus,lasku.luontiaika,lasku.chn,lasku.ytunnus,lasku.nimi,lasku.osoite,lasku.postino,lasku.postitp,lasku.maa,lasku.toim_nimi,lasku.toim_osoite,lasku.toim_postino,lasku.toim_postitp,lasku.toim_maa,lasku.laskutusvkopv,lasku.rahtivapaa,lasku.toimitustapa,
-            laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
-            maksuehto.teksti,maksuehto.itsetulostus,maksuehto.kateinen,kuka.nimi,lasku.valkoodi,lasku.liitostunnus,lasku.tila,lasku.vienti,lasku.alv,lasku.kohdistettu,lasku.jaksotettu,lasku.verkkotunnus,lasku.erikoisale
-            ORDER BY ketjutuskentta, reklamaatiot_lasku, lasku.tunnus";
-  $res = pupe_query($query);
+  $res = hae_tilaukset_result($query_ale_lisa, $tunnukset, $alatilat, $vientilisa);
 
   $kateinen = "";
   $maa = "";
@@ -917,6 +908,11 @@ if ($tee == "VALITSE") {
     echo "<br><input type='submit' value='".t("Takaisin tilauksen valintaan")."'>";
     echo "</form>";
 
+    $kateista_annettu = isset($kateista_annettu) ? $kateista_annettu : 0;
+    piirra_maksupaate_formi($ekarow, $ekarow["summa"], $kateinen, $maksettavaa_jaljella,
+                            $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
+                            $korttimaksutapahtuman_status);
+
     echo "  <SCRIPT LANGUAGE=JAVASCRIPT>
 
           function verify(){
@@ -1253,3 +1249,65 @@ if ($tee == "") {
 }
 
 require "inc/footer.inc";
+
+function hae_tilaukset_result($query_ale_lisa, $tunnukset, $alatilat, $vientilisa) {
+  global $kukarow, $yhtiorow;
+
+  $query = "SELECT
+            if (lasku.ketjutus = '', '', if (lasku.vanhatunnus > 0, lasku.vanhatunnus, lasku.tunnus)) ketjutuskentta,
+            if ((((asiakas.koontilaskut_yhdistetaan = '' and ('{$yhtiorow['koontilaskut_yhdistetaan']}' = 'U' or '{$yhtiorow['koontilaskut_yhdistetaan']}' = 'V')) or asiakas.koontilaskut_yhdistetaan = 'U') and lasku.tilaustyyppi in ('R','U')), 1, 0) reklamaatiot_lasku,
+            lasku.tunnus,
+            lasku.luontiaika,
+            lasku.chn,
+            lasku.ytunnus,
+            lasku.nimi,
+            lasku.osoite,
+            lasku.postino,
+            lasku.postitp,
+            lasku.maa,
+            lasku.toim_nimi,
+            lasku.toim_osoite,
+            lasku.toim_postino,
+            lasku.toim_postitp,
+            lasku.toim_maa,
+            lasku.laskutusvkopv,
+            lasku.rahtivapaa,
+            lasku.toimitustapa,
+            laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
+            maksuehto.teksti meh,
+            maksuehto.itsetulostus,
+            maksuehto.kateinen,
+            ifnull(kuka.nimi, lasku.laatija) kukanimi,
+            lasku.valkoodi,
+            lasku.liitostunnus,
+            lasku.tila,
+            lasku.vienti,
+            lasku.alv,
+            lasku.kohdistettu,
+            lasku.jaksotettu,
+            lasku.verkkotunnus,
+            lasku.erikoisale,
+            round(sum(tilausrivi.hinta / if('$yhtiorow[alv_kasittely]'  = '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) arvo,
+            round(sum(tilausrivi.hinta * if('$yhtiorow[alv_kasittely]' != '' and tilausrivi.alv < 500, (1+tilausrivi.alv/100), 1) * (tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}),2) summa
+            FROM lasku use index (tila_index)
+            LEFT JOIN laskun_lisatiedot ON (laskun_lisatiedot.yhtio = '{$kukarow['yhtio']}' AND laskun_lisatiedot.laskutus_nimi != '' AND laskun_lisatiedot.otunnus = lasku.tunnus AND CONCAT(laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa) != CONCAT(lasku.nimi, lasku.osoite, lasku.postino, lasku.postitp, lasku.maa))
+            JOIN tilausrivi use index (yhtio_otunnus) ON tilausrivi.yhtio = lasku.yhtio and lasku.tunnus = tilausrivi.otunnus and tilausrivi.tyyppi='L'
+            JOIN tuote ON tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno
+            LEFT JOIN maksuehto ON lasku.yhtio=maksuehto.yhtio and lasku.maksuehto=maksuehto.tunnus
+            LEFT JOIN kuka on kuka.yhtio = lasku.yhtio and kuka.kuka = lasku.laatija
+            LEFT JOIN asiakas ON asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus
+            WHERE lasku.yhtio       = '$kukarow[yhtio]'
+            and lasku.tila          = 'L'
+            and lasku.tunnus        in ($tunnukset)
+            and (tilausrivi.keratty != '' or tuote.ei_saldoa!='')
+            and tilausrivi.varattu != 0
+            $alatilat
+            $vientilisa
+            GROUP BY ketjutuskentta, reklamaatiot_lasku, lasku.tunnus,lasku.luontiaika,lasku.chn,lasku.ytunnus,lasku.nimi,lasku.osoite,lasku.postino,lasku.postitp,lasku.maa,lasku.toim_nimi,lasku.toim_osoite,lasku.toim_postino,lasku.toim_postitp,lasku.toim_maa,lasku.laskutusvkopv,lasku.rahtivapaa,lasku.toimitustapa,
+            laskun_lisatiedot.laskutus_nimi, laskun_lisatiedot.laskutus_nimitark, laskun_lisatiedot.laskutus_osoite, laskun_lisatiedot.laskutus_postino, laskun_lisatiedot.laskutus_postitp, laskun_lisatiedot.laskutus_maa,
+            maksuehto.teksti,maksuehto.itsetulostus,maksuehto.kateinen,kuka.nimi,lasku.valkoodi,lasku.liitostunnus,lasku.tila,lasku.vienti,lasku.alv,lasku.kohdistettu,lasku.jaksotettu,lasku.verkkotunnus,lasku.erikoisale
+            ORDER BY ketjutuskentta, reklamaatiot_lasku, lasku.tunnus";
+  $res = pupe_query($query);
+
+  return $res;
+}

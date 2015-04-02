@@ -783,10 +783,18 @@ if ((int) $kukarow["kesken"] > 0) {
 
   $laskurow = mysql_fetch_assoc($result);
 
-  if ($maksupaate_kassamyynti) {
-    $korttimaksutapahtuman_status = maksa_maksupaatteella();
+  if ($maksupaate_kassamyynti and isset($maksupaatetapahtuma)) {
+    if ($maksupaatetapahtuma) {
+      $korttimaksutapahtuman_status =
+        maksa_maksupaatteella($laskurow, $kaikkiyhteensa, $korttimaksu, $peruutus);
+    }
+
+    $kaikkiyhteensa = isset($kaikkiyhteensa) ? $kaikkiyhteensa : false;
+    $kateista_annettu = isset($kateista_annettu) ? $kateista_annettu : 0;
+
     list($loytyy_maksutapahtumia, $maksettavaa_jaljella, $kateismaksu["luottokortti"],
-      $kateismaksu["pankkikortti"]) = jaljella_oleva_maksupaatesumma();
+      $kateismaksu["pankkikortti"]) =
+      jaljella_oleva_maksupaatesumma($laskurow["tunnus"], $kaikkiyhteensa);
 
     if ($loytyy_maksutapahtumia and ($maksettavaa_jaljella - $kateista_annettu) == 0 and
                                     ($kateismaksu["luottokortti"] != 0 or
@@ -9285,7 +9293,8 @@ if ($tee == '') {
 
               if ($maksupaate_kassamyynti and $maksuehtorow["kateinen"] != "") {
                 list($loytyy_maksutapahtumia, $maksettavaa_jaljella, $kateismaksu["luottokortti"],
-                  $kateismaksu["pankkikortti"]) = jaljella_oleva_maksupaatesumma();
+                  $kateismaksu["pankkikortti"]) =
+                  jaljella_oleva_maksupaatesumma($laskurow["tunnus"], $kaikkiyhteensa);
 
                 $maksettavaa_jaljella = $maksettavaa_jaljella - $kateismaksu["kateinen"];
 
@@ -9546,7 +9555,13 @@ if ($tee == '') {
                                                               $rivilaskuri > 0 and
                                                               $asiakasOnProspekti != "JOO"
     ) {
-      piirra_maksupaate_formi();
+      $kateinen = isset($kateinen) ? $kateinen : "";
+      $kateista_annettu = isset($kateista_annettu) ? $kateista_annettu : 0;
+      $korttimaksutapahtuman_status =
+        isset($korttimaksutapahtuman_status) ? $korttimaksutapahtuman_status : "";
+      piirra_maksupaate_formi($laskurow, $kaikkiyhteensa, $kateinen, $maksettavaa_jaljella,
+                              $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
+                              $korttimaksutapahtuman_status);
     }
 
     echo "<br><table width='100%'><tr>$jarjlisa";
@@ -10517,68 +10532,4 @@ function tallenna_toimitusosoite($toimitusosoite, $laskurow) {
   $laskurow["toim_maa"]      = $toimitusosoite["maa"];
 
   return $laskurow;
-}
-
-function maksa_maksupaatteella() {
-  global $tilausnumero, $korttimaksu, $yhtiorow, $maksupaatetapahtuma, $kaikkiyhteensa, $laskurow,
-         $kukarow, $peruutus;
-
-  if (isset($maksupaatetapahtuma) and $maksupaatetapahtuma != '' and $tilausnumero != '') {
-    if ($peruutus == "X") {
-      $korttimaksu = 0;
-    }
-    else {
-      $korttimaksu = str_replace(",", ".", $korttimaksu);
-      $korttimaksu = number_format($korttimaksu, $yhtiorow['hintapyoristys'], '.', '');
-    }
-
-    require("rajapinnat/lumo_handler.inc");
-
-    return $korttimaksutapahtuman_status;
-  }
-}
-
-function jaljella_oleva_maksupaatesumma() {
-  global $kukarow, $tilausnumero, $kaikkiyhteensa, $yhtiorow;
-
-  $loytyy = false;
-
-  // Tarkistetaan onko onnistuneita suorituksia (K)-korttimaksut
-  $query = "SELECT *
-            FROM maksupaatetapahtumat
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tilausnumero = '{$tilausnumero}'
-            AND maksutapa != ''
-            AND tila IN ('K', 'H')";
-
-  $result = pupe_query($query);
-
-  $maksettu_pkortilla = 0;
-  $maksettu_lkortilla = 0;
-
-  while ($ruutu = mysql_fetch_assoc($result)) {
-    if ($ruutu['maksutapa'] == "LUOTTOKORTTI") {
-      $maksettu_lkortilla += $ruutu['summa_valuutassa'];
-    }
-    else {
-      $maksettu_pkortilla += $ruutu['summa_valuutassa'];
-    }
-  }
-
-  $maksupaate_maksetut['luottokortti'] = $maksettu_lkortilla;
-  $maksupaate_maksetut['pankkikortti'] = $maksettu_pkortilla;
-
-  $valisumma = 0;
-
-  foreach ($maksupaate_maksetut as $maksettu) {
-    $valisumma += $maksettu;
-  }
-
-  if ($valisumma != 0) {
-    $loytyy = true;
-  }
-
-  $totaalisumma = number_format($kaikkiyhteensa - $valisumma, $yhtiorow['hintapyoristys'], '.', '');
-
-  return array($loytyy, $totaalisumma, $maksettu_lkortilla, $maksettu_pkortilla);
 }

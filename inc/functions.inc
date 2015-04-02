@@ -31115,11 +31115,10 @@ if (!function_exists("choose_correct_date")) {
 }
 
 if (!function_exists("piirra_maksupaate_formi")) {
-  function piirra_maksupaate_formi() {
-    global $kukarow, $laskurow, $palvelin2, $tilauskaslisa, $tilausnumero, $mista, $kaikkiyhteensa,
-           $valittu_kopio_tulostin, $kateinen, $kertakassa, $toim, $orig_tila, $orig_alatila,
-           $korttimaksu, $maksettu_lkortilla, $maksettu_pkortilla, $maksettavaa_jaljella,
-           $korttimaksutapahtuman_status, $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu;
+  function piirra_maksupaate_formi($laskurow, $kaikkiyhteensa, $kateinen, $maksettavaa_jaljella,
+                                   $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
+                                   $korttimaksutapahtuman_status) {
+    global $kukarow, $mista, $valittu_kopio_tulostin, $kertakassa, $toim, $orig_tila, $orig_alatila;
 
     $query_maksuehto = "SELECT *
                         FROM maksuehto
@@ -31151,11 +31150,10 @@ if (!function_exists("piirra_maksupaate_formi")) {
           </form>
         </div>";
 
-    echo "<form name='maksupaate' id='maksupaate' method='post'
-              action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
+    echo "<form name='maksupaate' id='maksupaate' method='post'>";
 
     echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
-    echo "<input type='hidden' name='tilausnumero' value='{$tilausnumero}'>";
+    echo "<input type='hidden' name='tilausnumero' value='{$laskurow["tunnus"]}'>";
     echo "<input type='hidden' name='mista' value='{$mista}'>";
     echo "<input type='hidden' name='tee' id='laskuriTee' value=''>";
     echo "<input type='hidden' name='maksutapa' value='{$maksuehtorow["tunnus"]}'>";
@@ -31206,5 +31204,84 @@ if (!function_exists("piirra_maksupaate_formi")) {
           </td>
         </tr>";
     echo "</table></form>";
+  }
+}
+
+if (!function_exists("maksa_maksupaatteella")) {
+  function maksa_maksupaatteella($laskurow, $kaikkiyhteensa, $korttimaksu, $peruutus) {
+    global $yhtiorow, $kukarow;
+
+    $tilausnumero = $laskurow["tunnus"];
+
+    if (!empty($tilausnumero)) {
+      if ($peruutus == "X") {
+        $korttimaksu = 0;
+      }
+      else {
+        $korttimaksu = str_replace(",", ".", $korttimaksu);
+        $korttimaksu = number_format($korttimaksu, $yhtiorow['hintapyoristys'], '.', '');
+      }
+
+      require("rajapinnat/lumo_handler.inc");
+    }
+
+    $korttimaksutapahtuman_status =
+      isset($korttimaksutapahtuman_status) ? $korttimaksutapahtuman_status : "";
+
+    return $korttimaksutapahtuman_status;
+  }
+}
+
+if (!function_exists("jaljella_oleva_maksupaatesumma")) {
+  function jaljella_oleva_maksupaatesumma($tilausnumero, $kaikkiyhteensa) {
+    global $kukarow, $yhtiorow;
+
+    $loytyy = false;
+
+    // Tarkistetaan onko onnistuneita suorituksia (K)-korttimaksut
+    $query = "SELECT *
+              FROM maksupaatetapahtumat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tilausnumero = '{$tilausnumero}'
+              AND maksutapa != ''
+              AND tila IN ('K', 'H')";
+
+    $result = pupe_query($query);
+
+    $maksettu_pkortilla = 0;
+    $maksettu_lkortilla = 0;
+
+    while ($ruutu = mysql_fetch_assoc($result)) {
+      if ($ruutu['maksutapa'] == "LUOTTOKORTTI") {
+        $maksettu_lkortilla += $ruutu['summa_valuutassa'];
+      }
+      else {
+        $maksettu_pkortilla += $ruutu['summa_valuutassa'];
+      }
+    }
+
+    $maksupaate_maksetut['luottokortti'] = $maksettu_lkortilla;
+    $maksupaate_maksetut['pankkikortti'] = $maksettu_pkortilla;
+
+    $valisumma = 0;
+
+    foreach ($maksupaate_maksetut as $maksettu) {
+      $valisumma += $maksettu;
+    }
+
+    if ($valisumma != 0) {
+      $loytyy = true;
+    }
+
+    if ($kaikkiyhteensa) {
+      $totaalisumma =
+        number_format($kaikkiyhteensa - $valisumma, $yhtiorow['hintapyoristys'], '.', '');
+      $palautettava = array($loytyy, $totaalisumma, $maksettu_lkortilla, $maksettu_pkortilla);
+    }
+    else {
+      $palautettava = array($loytyy, false, $maksettu_lkortilla, $maksettu_pkortilla);
+    }
+
+    return $palautettava;
   }
 }

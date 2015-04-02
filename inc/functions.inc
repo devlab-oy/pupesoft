@@ -13512,9 +13512,10 @@ if (!function_exists("pupe_DataTables")) {
       $info       = isset($param[4]) ? $param[4] : "false";
       $sorting     = isset($param[5]) ? $param[5] : "true";
       $aoColumns     = "";
+      $tyojonostatushakukentta = $param[6];
       $paginationtype = $paginate !== false ? "full_numbers" : "two_button";
 
-      $json_pass[$taulu] = array($sarakkeetVis, $sarakkeetTot, $paginate, $paginationtype, $info, $sorting);
+      $json_pass[$taulu] = array($sarakkeetVis, $sarakkeetTot, $paginate, $paginationtype, $info, $sorting, $tyojonostatushakukentta);
     }
 
     preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['active_css'], $varitmatch);
@@ -14712,12 +14713,11 @@ if (!function_exists("pupe_DataTables")) {
         $('select.tyojono_sort, select.tyostatus_sort').change(function() {
           var tyojono = $('select.tyojono_sort option:selected');
           var tyostatus = $('select.tyostatus_sort option:selected');
-          var hakuarvo;
 
           // Jos tyojono tai tyostatus on tyhja, haetaan vain yhdellä ehdolla
-          haku_arvo = tyojono.val() +' '+ tyostatus.val();
-
-          datatablesit[0].fnFilter(haku_arvo, 8, true, false);
+          var haku_arvo = tyojono.val() +' '+ tyostatus.val();
+          var haku_sarake = parametrit['tyojono0'][6];
+          datatablesit[0].fnFilter(haku_arvo, haku_sarake, true, false);
         } );
 
         // Suuntalavan rajausta dropdownilla

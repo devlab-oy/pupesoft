@@ -115,18 +115,8 @@ if (trim($konserni) != '') {
   echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_yhtio_haku'></td>";
 }
 
-echo "<td valign='top'><input type='text'   size='10' class='search_field' name='search_myyntitilaus_haku'></td>";
-
-// Haetaan prioriteetti avainsanat
-echo "<td><input type='hidden'  size='10' class='search_field' name='search_prioriteetti_haku'>";
-echo "<select class='prioriteetti_sort'>";
-echo "<option value=''>".t('Ei rajausta')."</option>";
-
-$prioriteetti_result = t_avainsana("TYOM_PRIORIT");
-while ($prioriteetti_row = mysql_fetch_assoc($prioriteetti_result)) {
-  echo "<option value='$prioriteetti_row[selitetark]'>$prioriteetti_row[selitetark]</option>";
-}
-echo "</select></td>";
+echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_myyntitilaus_haku'></td>";
+echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_prioriteetti_haku'></td>";
 
 echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_asiakasnimi_haku'></td>";
 
@@ -140,34 +130,13 @@ if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
 echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_suorittaja_haku'></td>";
 echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_toimitetaan_haku'></td>";
 echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_myyja_haku'></td>";
+echo "<td style='visibility:hidden; display:none;'><input type='hidden' class='search_field' name='search_tyojonostatushaku_haku'></td>";
+echo "<td valign='top'><input type='text' size='10' class='search_field' name='search_tyostatusjono_haku'></td>"; 
 
-echo "<td>";
-
-echo "<select class='tyojono_sort'>";
-echo "<option value=''>".t('Ei rajausta')."</option>";
-echo "<option value='EIJONOA'>".t("Ei jonossa")."</option>";
-
-// Haetaan tyojono avainsanat
-$tyojono_result = t_avainsana("TYOM_TYOJONO");
-while ($tyojono_row = mysql_fetch_assoc($tyojono_result)) {
-  echo "<option value='$tyojono_row[selitetark]'>$tyojono_row[selitetark]</option>";
+if ($yhtiorow['laiterekisteri_kaytossa'] == '') {
+  echo "<td><input type='hidden' class='search_field' name='search_muokkaa_haku'></td>";
 }
-echo "</select><br>";
-echo "<select class='tyostatus_sort'>";
-echo "<option value=''>".t('Ei rajausta')."</option>";
-echo "<option value='EISTATUSTA'>".t("Ei statusta")."</option>";
 
-// Haetaan tyostatus avainsanat
-$tyostatus_result = t_avainsana("TYOM_TYOSTATUS");
-while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
-  echo "<option value='$tyostatus_row[selitetark]'>$tyostatus_row[selitetark]</option>";
-}
-echo "</select>";
-echo "</td>";
-$piilotus = $yhtiorow['laiterekisteri_kaytossa'] != '' ? " style='visibility:hidden; display:none;'" : '';
-echo "<td $piilotus>";
-echo "<input type='hidden' class='search_field' name='search_muokkaa_haku'></td>";
-echo "<td style='visibility:hidden; display:none;'><input type='hidden' class='search_field' name='search_statusjono_haku'></td>";
 echo "</tr>";
 echo "</thead>";
 
@@ -566,6 +535,7 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
   }
 
   echo "</td>";
+  echo "<td style='visibility:hidden; display:none;'>$vrow[tyojono] $vrow[tyostatus]</td>";
 
   if ($yhtiorow['laiterekisteri_kaytossa'] == '' and $toim != 'TYOMAARAYS_ASENTAJA' or $olenko_asentaja_tassa_hommassa) {
     $muoklinkki = "";
@@ -585,7 +555,6 @@ while ($vrow = mysql_fetch_assoc($vresult)) {
     $vrow["tyostatus"] = "EISTATUSTA";
   }
 
-  echo "<td style='visibility:hidden; display:none;'>$vrow[tyojono] $vrow[tyostatus]</td>";
   echo "</tr>";
 }
 
@@ -599,6 +568,11 @@ if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
 }
 else {
   $datatables_conf[] = array($pupe_DataTables[0], 9, 8, true, true);
+}
+// Jos on ruksattu konserni, inkrementoidaan molempia sarakkeita yhdellä
+if (trim($konserni) != '' and count($datatables_conf[0]) > 0) {
+  $datatables_conf[0][1]++;
+  $datatables_conf[0][2]++;
 }
 
 if (count($tyomaarays_tunti_yhteensa) > 0 and $toim == 'TYOMAARAYS_ASENTAJA') {

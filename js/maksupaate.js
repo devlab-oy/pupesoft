@@ -15,6 +15,9 @@ $(function() {
   var korttimaksu = $('#korttimaksu');
   var kateinen = $('#kateinen');
   var pyoristysSarake = $('#pyoristysSarake');
+  var laskuForm = $('#laskuForm');
+  var laskuTee = $('#laskuTee');
+  var yksiValittu = $('#yksiValittu');
 
   dialogi.dialog({
     modal: true,
@@ -101,6 +104,16 @@ $(function() {
     $(this.form.kateisohitus).val('X');
 
     this.form.submit();
+  });
+
+  laskuForm.on('click', 'input', function(e) {
+    if (laskuForm.data('maksupaate') === 'kylla') {
+      laskuForm.find('input').removeAttr('checked');
+      $(e.target).attr('checked', 'checked');
+      laskuTee.val('VALITSE');
+      yksiValittu.val('JOO');
+      laskuForm.submit();
+    }
   });
 
   function submitMaksupaate() {

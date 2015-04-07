@@ -31117,7 +31117,7 @@ if (!function_exists("choose_correct_date")) {
 if (!function_exists("piirra_maksupaate_formi")) {
   function piirra_maksupaate_formi($laskurow, $kaikkiyhteensa, $kateinen, $maksettavaa_jaljella,
                                    $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
-                                   $korttimaksutapahtuman_status) {
+                                   $korttimaksutapahtuman_status, $piirra_keraysnappula = true) {
     global $kukarow, $mista, $valittu_kopio_tulostin, $kertakassa, $toim, $orig_tila, $orig_alatila;
 
     $query_maksuehto = "SELECT *
@@ -31199,10 +31199,12 @@ if (!function_exists("piirra_maksupaate_formi")) {
                  id='peruuta_viimeisin' value='" . t("Peruuta viimeisin maksu") . "'>";
     }
 
-    echo "<input name='keraykseen' id='keraykseen' type='button' class='margin-left-20'
-               value='" . t("Ei vielä laskuteta, siirrä tilaus keräykseen") . "'>
-          </td>
-        </tr>";
+    if ($piirra_keraysnappula) {
+      echo "<input name='keraykseen' id='keraykseen' type='button' class='margin-left-20'
+                 value='" . t("Ei vielä laskuteta, siirrä tilaus keräykseen") . "'>";
+    }
+
+    echo "</td></tr>";
     echo "</table></form>";
   }
 }

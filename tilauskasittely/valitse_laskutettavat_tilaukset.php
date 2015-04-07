@@ -118,7 +118,6 @@ if ($maksupaate_kassamyynti) {
       }
       else {
         $tee = "VALITSE";
-        $tunnus = array($tunnari);
         $yksi_valittu = "KYLLA";
       }
     }
@@ -395,7 +394,7 @@ if ($tee == 'TOIMITA') {
 
 if ($tee == "VALITSE") {
 
-  $tunnukset = isset($tunnukset) ? $tunnukset : reset($tunnus);
+  $tunnukset = isset($tunnukset) ? $tunnukset : $tunnari;
 
   $res = hae_tilaukset_result($query_ale_lisa, $tunnukset, $alatilat, $vientilisa);
 

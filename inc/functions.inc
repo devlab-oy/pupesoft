@@ -9060,6 +9060,10 @@ if (!function_exists("livesearch_tuotehaku")) {
     $submit = $_REQUEST["livesearch_submit"];
     $haku = trim($_REQUEST["livesearch_haku"]);
 
+    if (!PUPE_UNICODE and mb_detect_encoding($haku, mb_detect_order(), TRUE) == "UTF-8") {
+      $haku = iconv("UTF-8", "latin1//TRANSLIT", $haku);
+    }
+
     if (strlen($haku) > 2 and substr($haku, 0, 1) != "*" and substr($haku, -1) != '*' and substr($haku, 0, 1) != "?" and substr($haku, 0, 1) != "#") {
 
       echo "
@@ -11827,7 +11831,13 @@ if (!function_exists("pupesoft_cleanstring")) {
     if (!is_numeric($string) and !is_string($string)) return "";
 
     $src = array("\"", "'", "<", ">", "\\", ";");
-    $rpl = array("{DOULEPRIME}" , "{PRIME}", "" , "", "", "");
+
+    if (!PUPE_UNICODE) {
+      $rpl = array("" , "", "" , "", "", "");
+    }
+    else {
+      $rpl = array("{DOULEPRIME}" , "{PRIME}", "" , "", "", "");
+    }
 
     if (count($exclude) > 0) {
       foreach ($exclude as $ex) {
@@ -19979,7 +19989,14 @@ if (!function_exists("pupeFileReader")) {
         /**
          * Luetaan CSV rivi tiedostosta *
          */
-        $rivi = str_getcsv($rivi);
+
+        // Katsotaan onko UTF-8 muodossa
+        if (!PUPE_UNICODE and mb_detect_encoding($rivi, 'UTF-8', true) !== FALSE) {
+          $rivi = str_getcsv(utf8_decode($rivi));
+        }
+        else {
+          $rivi = str_getcsv($rivi);
+        }
 
         $excelrivit[] = $rivi;
       }
@@ -29674,6 +29691,10 @@ if (!function_exists("tallenna_tiliote_viite")) {
     $repl = array("ä", "ö", "å", "Ä", "Ö" , "Å", " ");
 
     while (!feof($fd)) {
+
+      if (!PUPE_UNICODE and mb_detect_encoding($tietue, 'UTF-8', true) !== FALSE) {
+        $tietue = utf8_decode($tietue);
+      }
 
       $tietue      = str_replace($serc, $repl, $tietue);
       $tietue_type = substr($tietue, 0, 3);

@@ -1,5 +1,8 @@
 <?php
 
+// Pupe oletuksena Latin1, voidaan yliajaa salasanat:phpssä
+define("PUPE_UNICODE", FALSE);
+
 require "salasanat.php";
 
 // $masterlink on aina linkki master-kantaan.
@@ -75,8 +78,10 @@ if (isset($GLOBALS["pupe_query_debug"]) and $GLOBALS["pupe_query_debug"] > 0 and
 
 if (!isset($temporarylink)) $temporarylink = $masterlink;
 
-mb_language('uni');
-mb_internal_encoding("UTF-8");
+if (PUPE_UNICODE) {
+  mb_language('uni');
+  mb_internal_encoding("UTF-8");
+}
 
 $pupe_resque = FALSE;
 

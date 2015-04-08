@@ -1291,24 +1291,24 @@ if ($tee == 'P' or $tee == 'E') {
 
         <table>";
 
-        $query = "SELECT DISTINCT koodi, nimi
-                  FROM maat
-                  WHERE nimi != ''
-                  ORDER BY koodi";
-        $vresult = pupe_query($query);
+      $query = "SELECT DISTINCT koodi, nimi
+                FROM maat
+                WHERE nimi != ''
+                ORDER BY koodi";
+      $vresult = pupe_query($query);
 
-        echo "<tr><th valign='top'> ".t("Maa").": </th>
+      echo "<tr><th valign='top'> ".t("Maa").": </th>
             <td><select name='trow[maa]' ".js_alasvetoMaxWidth("maa", 400).">";
 
-        while ($vrow = mysql_fetch_assoc($vresult)) {
-          $sel = "";
-          if (strtoupper($trow["maa"]) == strtoupper($vrow["koodi"])) {
-            $sel = "selected";
-          }
-          echo "<option value = '".strtoupper($vrow["koodi"])."' $sel>".t($vrow["nimi"])."</option>";
+      while ($vrow = mysql_fetch_assoc($vresult)) {
+        $sel = "";
+        if (strtoupper($trow["maa"]) == strtoupper($vrow["koodi"])) {
+          $sel = "selected";
         }
+        echo "<option value = '".strtoupper($vrow["koodi"])."' $sel>".t($vrow["nimi"])."</option>";
+      }
 
-        echo "</select></td></tr>";
+      echo "</select></td></tr>";
 
       echo "
         <tr><th>".t("IBAN")."</th>    <td><input type='text' name='trow[ultilno]'  maxlength='35' size=45 value='$trow[ultilno]'></td></tr>

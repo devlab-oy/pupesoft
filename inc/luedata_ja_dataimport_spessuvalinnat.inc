@@ -67,7 +67,7 @@ case "tuotepaikat":
 
     echo "<tr><th>".t("Mink‰ toimipaikan k‰ytt‰j‰n‰ tuotepaikat k‰sitell‰‰n").":</th>";
     echo "<td><select name='toimipaikkavalinta'>";
-    echo "<option value='0'>",t("Ei toimipaikkaa"),"</option>";
+    echo "<option value='0'>", t("Ei toimipaikkaa"), "</option>";
 
     foreach ($_toimipaikat as $_toimipaikka) {
       if (!isset($toimipaikkavalinta) and $kukarow['toimipaikka'] == $_toimipaikka['tunnus']) {

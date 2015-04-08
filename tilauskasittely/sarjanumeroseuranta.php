@@ -585,7 +585,7 @@ if ($from != '' and $rivitunnus != "" and $formista == "kylla") {
       $query = "UPDATE sarjanumeroseuranta
                 SET $tunnuskentta = ''
                 WHERE yhtio = '{$kukarow['yhtio']}'
-                AND tunnus IN ({$_vap['tunnukset']})";
+                AND tunnus  IN ({$_vap['tunnukset']})";
       pupe_query($query);
 
       $liityht = count($sarjataan) + $_vap["tunnusKpl"];

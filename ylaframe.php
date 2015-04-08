@@ -27,7 +27,7 @@ else {
 echo "<td style='width: 175px; padding-right: 0;'>
         <a class='puhdas' target='mainframe' href='{$palvelin2}logout.php?toim=change'>
         <img style='padding-left: 15px;' src='{$palvelin2}pics/facelift/{$logokuva}'>
-        </a>        
+        </a>
       </td>";
 
 unset($isizelogo);

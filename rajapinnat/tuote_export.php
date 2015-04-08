@@ -293,7 +293,9 @@ while ($row = mysql_fetch_array($res)) {
     'hinnastohinta'        => $hinnastoresult['hinta'],
     'asiakashinnat'        => $asiakashinnat,
     'tuotepuun_nodet'      => $tuotepuun_nodet,
-    'tuotteen_parametrit'  => $tuotteen_parametrit
+    'tuotteen_parametrit'  => $tuotteen_parametrit,
+    'mainosteksti'         => $row['mainosteksti'],
+    'myynti_era'           => $row['myynti_era']
   );
 }
 

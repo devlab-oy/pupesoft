@@ -377,11 +377,27 @@ elseif ($_POST['ajax_toiminto'] == 'kohdista_rivi') {
 
   // saapuminen
   $otunnus = (int) $_POST['otunnus'];
+  $keikan_otunnus = (int) $_POST['keikan_otunnus'];
 
   $suuntalavan_tunnus = $_POST['suuntalavan_tunnus'];
   $suoratoimitusrivi  = $_POST['suoratoimitusrivi'];
+  $toimittajaid = (int) $_POST['toimittajaid'];
 
   $data = kohdista_rivi($laskurow, $valittutunnus, $valittuotunnus, $otunnus, $suuntalavan_tunnus, $suoratoimitusrivi);
+
+  if (empty($otunnus)) {
+    $otunnus = $keikan_otunnus;
+  }
+
+  $kulurow = saapumisen_laskut($laskurow);
+  list(
+    $hintarow,
+    $valitutrivit,
+    $alvit,
+    $alvti
+  ) = paivita_saapumisen_summa($laskurow, $kulurow, $toimittajaid, $otunnus);
+
+  $data['laskunsumma'] = $hintarow['hinta'];
 
   echo json_encode($data);
 }

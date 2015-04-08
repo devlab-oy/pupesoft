@@ -102,8 +102,8 @@ else {
 
 $query = "SELECT sovellus, nimi, alanimi, min(nimitys) nimitys, min(jarjestys) jarjestys, min(jarjestys2) jarjestys2, max(hidden) hidden
           FROM oikeu
-          WHERE yhtio  = '$kukarow[yhtio]'
-          and kuka     = '$kukarow[kuka]'
+          WHERE yhtio = '$kukarow[yhtio]'
+          and kuka    = '$kukarow[kuka]'
           {$sovellus_rajaus}
           GROUP BY sovellus, nimi, alanimi
           ORDER BY sovellus, jarjestys, jarjestys2";

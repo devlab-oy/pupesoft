@@ -332,38 +332,38 @@ if (!function_exists("tilauksesta_ostotilaus")) {
           // Lisätään joukkoon myös lisävarusteperheiden lapset
           // sekä ohita_kerays-tyyppiset tuoteperheiden lapset, jotka ovat jääneet eri var-tilaan kuin isät
           $query = "(SELECT
-                    tilausrivi.*,
-                    tilausrivin_lisatiedot.ohita_kerays,
-                    tilausrivi.tunnus rivitunnus,
-                    tilausrivi.perheid2 p2,
-                    tilausrivi.perheid p1,
-                    jt+varattu kpl,
-                    tilausrivin_lisatiedot.tilausrivilinkki tilausrivilinkki
-                    FROM tilausrivi
-                    LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
-                    where tilausrivi.yhtio  = '$kukarow[yhtio]'
-                    and tilausrivi.otunnus  = '$otunnus'
-                    and tilausrivi.tyyppi  != 'D'
-                    and (tilausrivi.tunnus = '$rivi[tunnus]' or tilausrivi.perheid2 = '$rivi[tunnus]'))
+                     tilausrivi.*,
+                     tilausrivin_lisatiedot.ohita_kerays,
+                     tilausrivi.tunnus rivitunnus,
+                     tilausrivi.perheid2 p2,
+                     tilausrivi.perheid p1,
+                     jt+varattu kpl,
+                     tilausrivin_lisatiedot.tilausrivilinkki tilausrivilinkki
+                     FROM tilausrivi
+                     LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus)
+                     where tilausrivi.yhtio  = '$kukarow[yhtio]'
+                     and tilausrivi.otunnus  = '$otunnus'
+                     and tilausrivi.tyyppi  != 'D'
+                     and (tilausrivi.tunnus = '$rivi[tunnus]' or tilausrivi.perheid2 = '$rivi[tunnus]'))
 
-                    UNION
+                     UNION
 
-                    (SELECT
-                    tilausrivi.*,
-                    tilausrivin_lisatiedot.ohita_kerays,
-                    tilausrivi.tunnus rivitunnus,
-                    tilausrivi.perheid2 p2,
-                    tilausrivi.perheid p1,
-                    tilkpl kpl,
-                    tilausrivin_lisatiedot.tilausrivilinkki tilausrivilinkki
-                    FROM tilausrivi
-                    JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus and tilausrivin_lisatiedot.ohita_kerays != '')
-                    WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
-                    and tilausrivi.otunnus  = '$otunnus'
-                    and tilausrivi.tyyppi  != 'D'
-                    and tilausrivi.tunnus  != '$rivi[tunnus]'
-                    and tilausrivi.perheid  = '$rivi[tunnus]')
-                    ORDER BY p2, p1, rivitunnus";
+                     (SELECT
+                     tilausrivi.*,
+                     tilausrivin_lisatiedot.ohita_kerays,
+                     tilausrivi.tunnus rivitunnus,
+                     tilausrivi.perheid2 p2,
+                     tilausrivi.perheid p1,
+                     tilkpl kpl,
+                     tilausrivin_lisatiedot.tilausrivilinkki tilausrivilinkki
+                     FROM tilausrivi
+                     JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus and tilausrivin_lisatiedot.ohita_kerays != '')
+                     WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
+                     and tilausrivi.otunnus  = '$otunnus'
+                     and tilausrivi.tyyppi  != 'D'
+                     and tilausrivi.tunnus  != '$rivi[tunnus]'
+                     and tilausrivi.perheid  = '$rivi[tunnus]')
+                     ORDER BY p2, p1, rivitunnus";
           $tilrivires = pupe_query($query);
 
           $pid1 = 0;
@@ -495,8 +495,8 @@ if (!function_exists("tilauksesta_ostotilaus")) {
 
               $query = "UPDATE tilausrivi
                         set perheid2 = {$pid2}
-                        where yhtio  = '$kukarow[yhtio]'
-                        and tunnus   = {$lisatty_tun}";
+                        where yhtio = '$kukarow[yhtio]'
+                        and tunnus  = {$lisatty_tun}";
               pupe_query($query);
             }
 
@@ -515,12 +515,12 @@ if (!function_exists("tilauksesta_ostotilaus")) {
             if ($tilrivirow['rivitunnus'] != $tilrivirow['perheid'] and $tilrivirow['perheid'] > 0 and mysql_num_rows($tilrivires) > 1) {
               $query = "UPDATE tilausrivi
                         SET var   = 'J',
-                        jt        = if('{$yhtiorow["varaako_jt_saldoa"]}'  = '', tilkpl, 0),
-                        varattu   = if('{$yhtiorow["varaako_jt_saldoa"]}' != '', tilkpl, 0),
-                        hyllyalue = '',
-                        hyllynro  = '',
-                        hyllyvali = '',
-                        hyllytaso = ''
+                        jt          = if('{$yhtiorow["varaako_jt_saldoa"]}'  = '', tilkpl, 0),
+                        varattu     = if('{$yhtiorow["varaako_jt_saldoa"]}' != '', tilkpl, 0),
+                        hyllyalue   = '',
+                        hyllynro    = '',
+                        hyllyvali   = '',
+                        hyllytaso   = ''
                         WHERE yhtio = '{$kukarow['yhtio']}'
                         AND tunnus  = {$tilrivirow['rivitunnus']}";
               pupe_query($query);

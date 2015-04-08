@@ -90,7 +90,7 @@ while ($rivi = fgets($fd)) {
       if (!empty($rivi[12])) {
         $toimitustapa = trim($rivi[12]);
 
-        # Tarkistetaan onko käyttäjän syöttämä toimitustapa olemassa
+        // Tarkistetaan onko käyttäjän syöttämä toimitustapa olemassa
         $apuqu = "SELECT *
                   from toimitustapa
                   where yhtio = '{$kukarow['yhtio']}'

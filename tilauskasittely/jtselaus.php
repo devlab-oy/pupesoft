@@ -1108,6 +1108,7 @@ if ($tee == "JATKA") {
 
       $jt_rivilaskuri  = 1;
       $jt_hintalaskuri = 0;
+      $jt_toim_hintalaskuri = 0;
       $saapumisajat    = array();
 
       while ($jtrow = mysql_fetch_assoc($isaresult)) {
@@ -1352,6 +1353,11 @@ if ($tee == "JATKA") {
 
           // Saldoa on tai halutaan n‰hd‰ kaikki rivit
           if ($kokonaismyytavissa > 0 or $toimi == '') {
+
+            // Lasktetaan toimitettavat yhteens‰
+            if ($kokonaismyytavissa > 0) {
+              $jt_toim_hintalaskuri += $jtrow["jt_rivihinta"];
+            }
 
             //Tulostetaan otsikot
             if ($automaaginen == '' and $jt_rivilaskuri == 1) {
@@ -2391,7 +2397,9 @@ if ($tee == "JATKA") {
 
         echo "</table>";
 
-        echo "<table><th>".t("Kaikki j‰lkitoimitusrivit yhteens‰")."</th><td>".sprintf("%.02f", $jt_hintalaskuri)." {$yhtiorow["valkoodi"]}</td></tr></table>";
+        echo "<table><th>".t("Toimitettavat j‰lkitoimitusrivit yhteens‰")."</th><td>".sprintf("%.02f", $jt_toim_hintalaskuri)." {$yhtiorow["valkoodi"]}</td></tr>";
+
+        echo "<th>".t("Kaikki j‰lkitoimitusrivit yhteens‰")."</th><td>".sprintf("%.02f", $jt_hintalaskuri)." {$yhtiorow["valkoodi"]}</td></tr></table>";
 
         if ($jtseluas_rivienmaara >= 1000 and $ei_limiittia == "") {
           echo "<font class='error'>".t("Haun tulos liian suuri! N‰ytet‰‰n ensimm‰iset 1000 rivi‰!")."</font><br>";

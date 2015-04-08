@@ -81,7 +81,12 @@ if ($tee == 'LISAA') {
       echo $retval;
     }
     else {
+      $uusi_filu = muuta_kuvan_koko(0, 130, "thumb", "tmp", "userfile");
       $kuva = tallenna_liite("userfile", "kalenteri", 0, $selite);
+
+      if ($uusi_filu != "") {
+        unlink($uusi_filu);
+      }
     }
 
     $uutinen = nl2br(strip_tags($uutinen, '<a>'));
@@ -242,7 +247,7 @@ if ($tee == "SYOTA") {
       if ($rivi["kieli"] == $sanakirja_kieli or ($rivi["kieli"] == "" and $sanakirja_kieli == $yhtiorow["kieli"]) and count($lang) == 0) $sel = "CHECKED";
       if (in_array($sanakirja_kieli, $lang)) $sel = "CHECKED";
 
-      echo "<input type='checkbox' name='lang[]' value='$sanakirja_kieli' $sel>".t($sanakirja_kieli_nimi)."<br>";
+      echo "<input type='radio' name='lang[]' value='$sanakirja_kieli' $sel>".t($sanakirja_kieli_nimi)."<br>";
     }
     elseif ($tunnus > 0) {
       if ($rivi["kieli"] == $sanakirja_kieli) $sel = "CHECKED";
@@ -442,45 +447,7 @@ if ($tee == '') {
       $kuva = "";
 
       if ($uutinen["kentta03"] != "") {
-
-        $query  = "SELECT *
-                   from liitetiedostot
-                   where tunnus = '$uutinen[kentta03]'";
-        $lisatietores = pupe_query($query);
-
-        if (mysql_num_rows($lisatietores) > 0) {
-          $lisatietorow = mysql_fetch_array($lisatietores);
-
-          if ($lisatietorow["image_width"] > 130 or $lisatietorow["image_width"] == 0) {
-            // Tehd‰‰n nyt t‰h‰n t‰llanen convert juttu niin k‰ytt‰j‰ien megakokoiset kuvat eiv‰t j‰‰ niin isoina kantaan
-            $nimi1 = "/tmp/".md5(uniqid(rand(), true)).".jpg";
-
-            $fh = fopen($nimi1, "w");
-            if (fwrite($fh, $lisatietorow["data"]) === FALSE) die("Kirjoitus ep‰onnistui $nimi1");
-            fclose($fh);
-
-            $nimi2 = "/tmp/".md5(uniqid(rand(), true)).".jpg";
-
-            // Haetaan kuvan v‰riprofiili
-            exec("nice -n 20 identify -format %[colorspace] \"$nimi1\"", $identify);
-
-            $colorspace = "sRGB";
-            if ($identify[0] != "") $colorspace = $identify[0];
-
-            passthru("nice -n 20 convert -resize 130x -quality 90 -colorspace $colorspace -strip \"$nimi1\" \"$nimi2\"", $palautus);
-
-            // Tallennetaa skeilattu kuva
-            $ltsc = tallenna_liite($nimi2, "kalenteri", 0, $lisatietorow["selite"], '', $lisatietorow["tunnus"]);
-
-            //dellataan tmp filet kuleksimasta
-            system("rm -f $nimi1 $nimi2");
-
-            $kuva = "<img src='view.php?id=$uutinen[kentta03]' width='130'>";
-          }
-          else {
-            $kuva = "<img src='view.php?id=$uutinen[kentta03]' width='130'>";
-          }
-        }
+        $kuva = "<img src='view.php?id=$uutinen[kentta03]' width='130'>";
       }
 
       if ((int) $yhtiorow["logo"] > 0 and $kuva == '') {

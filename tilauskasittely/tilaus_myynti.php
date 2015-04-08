@@ -1167,7 +1167,7 @@ if ($tee == 'POISTA' and $muokkauslukko == "" and $kukarow["mitatoi_tilauksia"] 
   $query = "DELETE from rahtikirjat WHERE yhtio='$kukarow[yhtio]' and otsikkonro='$kukarow[kesken]'";
   $result = pupe_query($query);
 
-  $query = "UPDATE lasku SET tila='D', alatila='L', comments='$kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen ohjelmassa tilaus_myynti.php")." ".date("d.m.y @ G:i:s")."' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
+  $query = "UPDATE lasku SET alatila = tila, tila = 'D', comments = '$kukarow[nimi] ($kukarow[kuka]) ".t("mitätöi tilauksen ohjelmassa tilaus_myynti.php")." ".date("d.m.y @ G:i:s")."' where yhtio='$kukarow[yhtio]' and tunnus='$kukarow[kesken]'";
   $result = pupe_query($query);
 
   $query  = "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
@@ -1675,7 +1675,9 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
     $query  = "UPDATE kuka set kesken=0 where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]'";
     $result = pupe_query($query);
 
-    if (in_array($yhtiorow['reklamaation_kasittely'], array('U', 'X'))) {
+    if ($yhtiorow['reklamaation_kasittely'] == 'U' or
+      ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U')) {
+
       $oslapp = "email";
       $oslappkpl = 1;
       require "osoitelappu_pdf.inc";
@@ -1855,11 +1857,15 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
   }
 }
 
-if ($kukarow["extranet"] == "" and ((($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == "LEPAA") or ($toim == "REKLAMAATIO" and $tee == "LEPAA" and !in_array($yhtiorow['reklamaation_kasittely'], array('U', 'X'))))) {
+if ($kukarow["extranet"] == "" and ((($toim == "TYOMAARAYS" or $toim == "TYOMAARAYS_ASENTAJA") and $tee == "LEPAA") or ($toim == "REKLAMAATIO" and $tee == "LEPAA" and
+      ($yhtiorow['reklamaation_kasittely'] == '' or
+        ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] == 'U'))))) {
   require "tyomaarays/tyomaarays.inc";
 }
 
-if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $tee == "LEPAA" and in_array($yhtiorow['reklamaation_kasittely'], array('U', 'X'))) {
+if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $tee == "LEPAA" and
+  ($yhtiorow['reklamaation_kasittely'] == 'U' or
+    ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U'))) {
 
   $query  = "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and kesken = '$tilausnumero'";
   $result = pupe_query($query);
@@ -1889,16 +1895,17 @@ if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and $tee == "ODOTTAA" 
 }
 
 if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
-  and ($tee == 'VASTAANOTTO' or $tee == 'VALMIS')
-  and in_array($yhtiorow['reklamaation_kasittely'], array('U', 'X'))) {
+  and ($tee == 'VASTAANOTTO' or $tee == 'VALMIS') and
+  ($yhtiorow['reklamaation_kasittely'] == 'U' or
+    ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U'))) {
   // Joka tarkoittaa että "Reklamaatio on vastaanotettu
   // tämän jälkeen kun seuraavassa vaiheessa tullaan niin "Tulostetaan Purkulista"
 
   if ($tee == 'VALMIS' or $yhtiorow['reklamaation_kasittely'] == 'X') {
-    $alatila_lisa = "AND alatila = ''";              // takuu
+    $alatila_lisa = "AND alatila = ''";              // semilaaja reklamaatio & takuu
   }
   else {
-    $alatila_lisa = "AND alatila = 'A'";             // reklamaatio
+    $alatila_lisa = "AND alatila = 'A'";             // laajin reklamaatio
   }
   $query = "UPDATE lasku set
             alatila     = 'B'
@@ -1907,6 +1914,8 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
             AND tila    = 'C'
             $alatila_lisa";
   $result = pupe_query($query);
+
+  tee_palautustilaus($laskurow);
 
   $query  = "UPDATE kuka set kesken='0' where yhtio='$kukarow[yhtio]' and kuka='$kukarow[kuka]' and kesken = '$tilausnumero'";
   $result = pupe_query($query);
@@ -1934,8 +1943,9 @@ if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
 }
 
 if ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO'
-  and ($tee == 'VALMIS_VAINSALDOTTOMIA' or $tee == 'VALMIS')
-  and in_array($yhtiorow['reklamaation_kasittely'], array('U', 'X'))) {
+  and ($tee == 'VALMIS_VAINSALDOTTOMIA' or $tee == 'VALMIS') and
+  ($yhtiorow['reklamaation_kasittely'] == 'U' or
+    ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U'))) {
   // Reklamaatio/takuu on valmis laskutettavaksi
   // katsotaan onko tilausrivit Unikko-järjestelmään
   if ($laskurow['tilaustyyppi'] == 'U' or $laskurow['tilaustyyppi'] == 'R') {
@@ -2135,11 +2145,27 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
 
     $hintapyoristys_echo = $tilausrivi["hinta"] * generoi_alekentta_php($tilausrivi, 'M', 'kerto');
 
+    $asiakas_hinta_liitos = isset($asiakas_hinta_liitos) ? $asiakas_hinta_liitos : "";
+
+    switch ($asiakas_hinta_liitos) {
+    case "ytunnus":
+      $liitoslisa = "ytunnus = '{$asiakasrow["ytunnus"]}'";
+      break;
+    case "asiakasryhma":
+      $liitoslisa = "asiakas_ryhma = '{$asiakasrow["ryhma"]}'";
+      break;
+    case "piiri":
+      $liitoslisa = "piiri = '{$asiakasrow["piiri"]}'";
+      break;
+    default:
+      $liitoslisa = "asiakas = '{$laskurow["liitostunnus"]}'";
+    }
+
     $query = "SELECT *
               FROM asiakashinta
               where yhtio  = '$kukarow[yhtio]'
               and tuoteno  = '$tilausrivi[tuoteno]'
-              and asiakas  = '$laskurow[liitostunnus]'
+              and {$liitoslisa}
               and hinta    = round($hintapyoristys_echo * $tilausrivi[myyntihinta_maara], $yhtiorow[hintapyoristys])
               and valkoodi = '$laskurow[valkoodi]'";
     $chk_result = pupe_query($query);
@@ -2148,7 +2174,7 @@ if ($tee == "tuotteetasiakashinnastoon" and in_array($toim, array("TARJOUS", "EX
       $query = "INSERT INTO asiakashinta SET
                 yhtio      = '$kukarow[yhtio]',
                 tuoteno    = '$tilausrivi[tuoteno]',
-                asiakas    = '$laskurow[liitostunnus]',
+                {$liitoslisa},
                 hinta      = round($hintapyoristys_echo * $tilausrivi[myyntihinta_maara], $yhtiorow[hintapyoristys]),
                 valkoodi   = '$laskurow[valkoodi]',
                 alkupvm    = now(),
@@ -2754,9 +2780,36 @@ if ($tee == '') {
           <input type='hidden' name='ruutulimit' value = '$ruutulimit'>
           <input type='hidden' name='projektilla' value='$projektilla'>
           <input type='hidden' name='orig_tila' value='$orig_tila'>
-          <input type='hidden' name='orig_alatila' value='$orig_alatila'>
-          <input type='submit' value='".t("Siirrä tuotteet asiakashinnoiksi")."'>
-          </form>";
+          <input type='hidden' name='orig_alatila' value='$orig_alatila'>";
+
+      $style = $yhtiorow["myynti_asiakhin_tallenna"] == "V" ? "style='margin-left:10px;'" : "";
+
+      echo "<input {$style} type='submit' value='".t("Siirrä tuotteet asiakashinnoiksi")."'>";
+
+      if ($yhtiorow["myynti_asiakhin_tallenna"] == "V") {
+        $mahdolliset_liitokset = array(
+          "liitostunnus" => "Asiakkaan tunnuksella",
+          "ytunnus"      => "Y-tunnuksella"
+        );
+
+        if (!empty($asiakasrow["ryhma"])) {
+          $mahdolliset_liitokset["asiakasryhma"] = "Asiakasryhmälle";
+        }
+
+        if (!empty($asiakasrow["piiri"])) {
+          $mahdolliset_liitokset["piiri"] = "Piirille";
+        }
+
+        echo "<select id='asiakas_hinta_liitos' name='asiakas_hinta_liitos'>";
+
+        foreach ($mahdolliset_liitokset as $liitos => $teksti) {
+          echo "<option value='{$liitos}'>" . t($teksti) . "</option>";
+        }
+
+        echo "</select>";
+      }
+
+      echo "</form>";
     }
 
     if ($kukarow["extranet"] == "" and (($toim == "TARJOUS" or $toim == "EXTTARJOUS") or $laskurow["tilaustyyppi"] == "T") and file_exists("osamaksusoppari.inc")) {
@@ -6000,7 +6053,9 @@ if ($tee == '') {
     }
 
     // tarkistetaan kuuluuko kaikki reklamaation rivit samaan varastoon
-    if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and in_array($yhtiorow['reklamaation_kasittely'], array('U', 'X'))) {
+    if ($kukarow["extranet"] == "" and $toim == "REKLAMAATIO" and
+      ($yhtiorow['reklamaation_kasittely'] == 'U' or
+        ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U'))) {
 
       $varasto_chk_array = array();
       $reklamaatio_saldoton_count = 0;
@@ -9668,7 +9723,9 @@ if ($tee == '') {
       elseif ($maksuehtorow['jaksotettu'] != '' and mysql_num_rows($jaksoresult) == 0) {
         echo "<font class='error'>".t("VIRHE: Tilauksella ei ole maksusopimusta!")."</font>";
       }
-      elseif ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and in_array($yhtiorow['reklamaation_kasittely'], array('U', 'X'))) {
+      elseif ($kukarow["extranet"] == "" and $toim == 'REKLAMAATIO' and
+        ($yhtiorow['reklamaation_kasittely'] == 'U' or
+          ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U'))) {
 
         $napin_teksti = $laskurow['tilaustyyppi'] == 'U' ? "Takuu" : "Reklamaatio";
 
@@ -9729,7 +9786,7 @@ if ($tee == '') {
                 <input type='hidden' name='orig_alatila' value='$orig_alatila'>";
 
             if (($mista == 'vastaanota' and in_array($laskurow["alatila"], array('A', 'B', 'C'))) or
-              ($yhtiorow['reklamaation_kasittely'] == 'X' and in_array($laskurow["alatila"], array('', 'A', 'B', 'C')))) {
+              ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] != 'U' and in_array($laskurow["alatila"], array('', 'A', 'B', 'C')))) {
               echo "<input type='hidden' name='tee' value='VASTAANOTTO'>";
               echo "<input type='submit' value='* ".t("{$napin_teksti} Vastaanotettu")." *'>";
             }
@@ -9741,7 +9798,9 @@ if ($tee == '') {
           echo "</form></td>";
         }
       }
-      elseif ($kukarow['tilaus_valmis'] != "4" and ($toim != 'REKLAMAATIO' or !in_array($yhtiorow['reklamaation_kasittely'], array('U', 'X')))) {
+      elseif ($kukarow['tilaus_valmis'] != "4" and ($toim != 'REKLAMAATIO' or
+          ($yhtiorow['reklamaation_kasittely'] == '' or
+            ($yhtiorow['reklamaation_kasittely'] == 'X' and $laskurow['tilaustyyppi'] == 'U')) )) {
 
         if (($kateinen == "X" and $kukarow["kassamyyja"] != "") or $laskurow["sisainen"] != "") {
           $laskelisa = " / ".t("Laskuta")." $otsikko";

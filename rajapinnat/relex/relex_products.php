@@ -30,6 +30,8 @@ cron_log();
 
 $ajopaiva  = date("Y-m-d");
 $paiva_ajo = FALSE;
+$weekly_ajo = FALSE;
+$ajotext = "";
 
 if (isset($argv[2]) and $argv[2] != '') {
 
@@ -39,7 +41,14 @@ if (isset($argv[2]) and $argv[2] != '') {
       $ajopaiva = $argv[2];
     }
   }
-  $paiva_ajo = TRUE;
+
+  if (strtoupper($argv[2]) == 'WEEKLY') {
+    $weekly_ajo = TRUE;
+    $ajotext = "weekly_";
+  }
+  else {
+    $paiva_ajo = TRUE;
+  }
 }
 
 // Yhtiˆ
@@ -154,7 +163,7 @@ if ($_tuoterajaus) {
   $_tuoterajaus = $_tuoterajaus_ilman_hakukenttia ." AND (". substr($_tuoterajaus, 0, -4).")";
 
   // Tallennetaan rivit tiedostoon
-  $ofilepath = "/tmp/product_ostoehdotus_update_{$yhtio}_$ajopaiva.csv";
+  $ofilepath = "/tmp/product_ostoehdotus_update_{$yhtio}_{$ajotext}{$ajopaiva}.csv";
 
   if (!$ofp = fopen($ofilepath, 'w+')) {
     die("Tiedoston avaus ep‰onnistui: $ofilepath\n");
@@ -227,7 +236,7 @@ if (@include "inc/tecdoc.class.php") {
 require "vastaavat.class.php";
 
 // Tallennetaan tuoterivit tiedostoon
-$filepath = "/tmp/product_update_{$yhtio}_$ajopaiva.csv";
+$filepath = "/tmp/product_update_{$yhtio}_{$ajotext}{$ajopaiva}.csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
   die("Tiedoston avaus ep‰onnistui: $filepath\n");
@@ -334,7 +343,7 @@ $header .= "\n";
 fwrite($fp, $header);
 
 // Tallennetaan tuotteentoimittajarivit tiedostoon
-$tfilepath = "/tmp/product_suppliers_update_{$yhtio}_$ajopaiva.csv";
+$tfilepath = "/tmp/product_suppliers_update_{$yhtio}_{$ajotext}{$ajopaiva}.csv";
 
 if (!$tfp = fopen($tfilepath, 'w+')) {
   die("Tiedoston avaus ep‰onnistui: $tfilepath\n");
@@ -555,6 +564,22 @@ while ($row = mysql_fetch_assoc($res)) {
       'toimitusaika_ema'                => '')
   );
 
+  $parastoimittaja = array(
+    "toimittaja" => '',
+    "toim_tuoteno" => '',
+    "toim_nimitys" => '',
+    "osto_era" => '',
+    "pakkauskoko" => '',
+    "lavakoko" => '',
+    "ostohinta_oletusvaluutta" => '',
+    "alennukset_oletusvaluutta_netto" => '',
+    "valuutta" => '',
+    "oletus_kulupros" => '',
+    "toim_yksikko" => '',
+    "tuotekerroin" => '',
+    "jarjestys" => '',
+  );
+
   if (mysql_num_rows($ttres) > 0) {
 
     // Nollataan defaultit pois
@@ -653,7 +678,7 @@ while ($row = mysql_fetch_assoc($res)) {
       $ostohinta_netto = $ostohinta;
 
       // lis‰t‰‰n kuluprosentti hintaan jos sit‰ k‰ytet‰‰n saapumisellakin
-      if (in_array($yhtiorow['jalkilaskenta_kuluperuste'], array('KP', 'VS'))) {
+      if (in_array($yhtiorow['jalkilaskenta_kuluperuste'], array('KP', 'VS', 'PX'))) {
         $ostohinta_netto = $ostohinta_netto * (1 + ($ttrow['oletus_kulupros'] / 100));
       }
 
@@ -782,7 +807,7 @@ fclose($fp);
 fclose($tfp);
 
 // Tehd‰‰n FTP-siirto
-if ($paiva_ajo and !empty($relex_ftphost)) {
+if (($paiva_ajo or $weekly_ajo) and !empty($relex_ftphost)) {
   // Tuotetiedot
   $ftphost = $relex_ftphost;
   $ftpuser = $relex_ftpuser;

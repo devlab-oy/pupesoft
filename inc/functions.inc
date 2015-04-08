@@ -13896,6 +13896,7 @@ if (!function_exists("pupe_DataTables")) {
           $('input[name^=\"rivi_valitut_tunnukset\"]').live('click', function(){
             rivi_ja_otsikko = this.value.split(\"###\", 2);
             var otunnus   = $('input[name=\"otunnus\"]').val();
+            var toimittajaid = $('input[name=\"toimittajaid\"]').val();
 
             if (check_arrival_validity(otunnus)) {
               if ($(this).is(':checked')) {
@@ -13910,12 +13911,17 @@ if (!function_exists("pupe_DataTables")) {
                     valittu: this.value,
                     suuntalavan_tunnus: suuntalavan_tunnus,
                     suoratoimitusrivi: suoratoimitusrivi,
+                    toimittajaid: toimittajaid,
                     no_head: 'yes',
                     ohje: 'off' },
                   function(return_value) {
                     $('.'+rivi_ja_otsikko[0]+' td').addClass('tumma');
 
                     var data = jQuery.parseJSON(return_value);
+
+                    $('input[name=\"laskunsumma\"]').each(function() {
+                      $(this).val(data.laskunsumma);
+                    });
 
                     if (data.suuntalava != null && data.suuntalava > 0) {
 
@@ -13962,12 +13968,17 @@ if (!function_exists("pupe_DataTables")) {
                     otunnus: 0,
                     ajax_toiminto: 'kohdista_rivi',
                     valittu: this.value,
+                    toimittajaid: toimittajaid,
                     no_head: 'yes',
                     ohje: 'off' },
                   function(return_value) {
                     $('.'+rivi_ja_otsikko[0]+' td').removeClass('tumma');
 
                     var data = jQuery.parseJSON(return_value);
+
+                    $('input[name=\"laskunsumma\"]').each(function() {
+                      $(this).val(data.laskunsumma);
+                    });
 
                     $('#suuntalava_'+rivi_ja_otsikko[0]+' option:first').attr('selected', 'selected');
                     //$('#suuntalavan_sscc_'+rivi_ja_otsikko[0]).html('');
@@ -26830,13 +26841,14 @@ if (!function_exists('posten_outbounddelivery')) {
 
     $query = "SELECT lasku.*,
               tilausrivi.*,
+              tilausrivi.kpl + tilausrivi.varattu AS kpl,
               tilausrivi.tunnus AS tilausrivin_tunnus,
               lasku.toimaika AS lasku_toimaika,
               asiakas.email,
               tuote.eankoodi
               FROM lasku
               LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
-              JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND (tilausrivi.varattu+tilausrivi.tilkpl) > 0 AND tilausrivi.tyyppi IN ('L', 'G'))
+              JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.otunnus = lasku.tunnus AND (tilausrivi.varattu + tilausrivi.kpl) > 0 AND tilausrivi.tyyppi IN ('L', 'G'))
               JOIN tuote ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.ei_saldoa = '')
               WHERE lasku.yhtio = '{$kukarow['yhtio']}'
               AND lasku.tunnus  = '{$otunnus}'";
@@ -26929,15 +26941,9 @@ if (!function_exists('posten_outbounddelivery')) {
       $line->addChild('Type', 1);
       $line->addChild('BBDate', 0);
 
-      if ($looprow["mapvm"] != '' and $looprow["mapvm"] != '0000-00-00') {
-        //Verkkokaupassa etukäteen maksettu tuote
-        $line->addChild('OrderedQuantity', $looprow['tilkpl']);
-        $line->addChild('DeliveredQuantity', $looprow['tilkpl']);
-      }
-      else {
-        $line->addChild('OrderedQuantity', $looprow['varattu']);
-        $line->addChild('DeliveredQuantity', $looprow['varattu']);
-      }
+      // Laitetaan kappalemŠŠrŠt kuntoon
+      $line->addChild('OrderedQuantity', $looprow['kpl']);
+      $line->addChild('DeliveredQuantity', $looprow['kpl']);
 
       $line->addChild('Unit', 0);
       $line->addChild('Price', 0);
@@ -31082,7 +31088,116 @@ if (!function_exists("laske_tilausrivin_kate")) {
   }
 }
 
+if (!function_exists('paivita_saapumisen_summa')) {
+  function paivita_saapumisen_summa($laskurow, $kulurow, $toimittajaid, $otunnus) {
 
+    global $kukarow, $yhtiorow;
+
+    // jos ollaan liitetty jo vaihto-omaisuuslasku, käytetään sen vientikenttää
+    if ($kulurow["vienti"] != "") $laskurow["vienti"] = $kulurow["vienti"];
+
+    $alvti = " if(tuotteen_toimittajat.osto_alv >= 0, tuotteen_toimittajat.osto_alv, tuote.alv) ";
+
+    // jos kysessä on kotimainen vaihto-omaisuuslasku, pitää lisätä tuotteen hintaan alvi, jos ostolaskuilla on alvia!
+    if ($laskurow['vienti'] == 'C' or $laskurow['vienti'] == 'J') {
+
+      // Lasketaan verokanta
+      if ($kulurow["arvo"] != 0) $simualv = round(100 * (($kulurow["summa"]/$kulurow["arvo"])-1), 2);
+      else $simualv = 0;
+
+      if ($kulurow["arvo"] > 0 and $simualv == 0) {
+        $alvti = 0;
+        $alvit = 0;
+      }
+      // Onko miellä oletuksista poikkeava alvi. Verokantoja ennen viimeisintä alv-muutosta.
+      elseif (in_array($simualv, array(23, 13, 9))) {
+        $alvti = $simualv;
+        $alvit = $simualv;
+      }
+      else {
+        $alvit = "if(tuotteen_toimittajat.osto_alv >= 0, tuotteen_toimittajat.osto_alv, tuote.alv)";
+      }
+
+      if ($laskurow["maa"] != "" and $laskurow["maa"] != $yhtiorow["maa"]) {
+        // tutkitaan ollaanko siellä alv-rekisteröity
+        $alhqur = "SELECT *
+                   FROM yhtion_toimipaikat
+                   WHERE yhtio     = '$kukarow[yhtio]'
+                   AND maa         = '$laskurow[maa]'
+                   AND vat_numero != ''";
+        $alhire = pupe_query($alhqur);
+
+        // ollaan alv-rekisteröity
+        if (mysql_num_rows($alhire) == 1) {
+          $alvit = "tuotteen_alv.alv";
+          $alvti = " ifnull(tuotteen_alv.alv, 0) ";
+        }
+      }
+    }
+    else {
+      $alvit = 0;
+    }
+
+    $query_ale_lisa = generoi_alekentta('O');
+
+    $query = "SELECT sum((tilausrivi.varattu+tilausrivi.kpl)*if (tuotteen_toimittajat.tuotekerroin<=0 or tuotteen_toimittajat.tuotekerroin is null,1,tuotteen_toimittajat.tuotekerroin) * tilausrivi.hinta * {$query_ale_lisa} *
+              (1+(if ((SELECT max(kaytetty) kaytetty
+                  FROM sarjanumeroseuranta
+                  WHERE sarjanumeroseuranta.yhtio=tilausrivi.yhtio
+                  and sarjanumeroseuranta.tuoteno=tilausrivi.tuoteno
+                  and ((tilausrivi.varattu+tilausrivi.kpl < 0 and sarjanumeroseuranta.myyntirivitunnus=tilausrivi.tunnus) or (tilausrivi.varattu+tilausrivi.kpl > 0 and sarjanumeroseuranta.ostorivitunnus=tilausrivi.tunnus))) = 'K', 0, $alvit)/100))) hinta
+              FROM tilausrivi use index (uusiotunnus_index)
+              JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno and tuote.ei_saldoa = '')
+              LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio = tilausrivi.yhtio AND tuotteen_toimittajat.tuoteno = tilausrivi.tuoteno AND tuotteen_toimittajat.liitostunnus = '$toimittajaid')
+              LEFT JOIN tuotteen_alv ON (tuotteen_alv.yhtio = tilausrivi.yhtio AND tuotteen_alv.tuoteno = tilausrivi.tuoteno AND tuotteen_alv.maa = '$laskurow[maa]')
+              WHERE tilausrivi.yhtio      = '$kukarow[yhtio]'
+              AND tilausrivi.uusiotunnus  = '$otunnus'
+              AND tilausrivi.tyyppi      != 'D'
+              AND tilausrivi.kpl+tilausrivi.varattu != 0";
+    $result   = pupe_query($query);
+    $hintarow = mysql_fetch_assoc($result);
+
+    // päivitetään samantien tämä tieto laskulle
+    $query   = "UPDATE lasku set summa='$hintarow[hinta]', kohdistettu='' where yhtio ='$kukarow[yhtio]' and tunnus='$otunnus'";
+    $hinresu = pupe_query($query);
+
+    return array($hintarow, mysql_num_rows($result), $alvit, $alvti);
+  }
+}
+
+if (!function_exists('saapumisen_laskut')) {
+  function saapumisen_laskut($laskurow) {
+    global $kukarow;
+
+    // katsotaan onko tälle keikalle jo liitetty vaihto-omaisuuslaskuja (kotimaa, eu tai ei-eu)
+    $query = "SELECT sum(summa) summa, sum(arvo) arvo, sum(abs(summa)) abssumma, sum(osto_kulu + osto_rahti + osto_rivi_kulu) as osto_kulut, valkoodi, vienti, GROUP_CONCAT(DISTINCT lasku.vanhatunnus) laskut
+              FROM lasku
+              WHERE yhtio     = '$kukarow[yhtio]'
+              and tila        = 'K'
+              and laskunro    = '$laskurow[laskunro]'
+              and vanhatunnus <> 0
+              and vienti      in ('C','F','I','J','K','L')
+              GROUP BY valkoodi, vienti";
+    $result = pupe_query($query);
+
+    // jos on, haetaan liitettyjen laskujen
+    if (mysql_num_rows($result) == 1) {
+      $kulurow = mysql_fetch_assoc($result);
+    }
+    else {
+      $kulurow = array(
+        "vienti" => "",
+        "summa" => 0,
+        "arvo" => 0,
+        "valkoodi" => "",
+        "osto_kulut" => 0,
+        "laskut" => ""
+      ); // muuten tyhjää
+    }
+
+    return $kulurow;
+  }
+}
 
 if (!function_exists("choose_correct_date")) {
   function choose_correct_date($date) {

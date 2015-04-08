@@ -35,9 +35,8 @@ if (isset($ajax)) {
     if ($_tp_kasittely) {
       $query = "SELECT GROUP_CONCAT(tunnus) tunnukset
                 FROM varastopaikat
-                WHERE yhtio      = '{$kukarow['yhtio']}'
-                AND tyyppi      != 'P'
-                AND toimipaikka  = '{$kukarow['toimipaikka']}'";
+                WHERE yhtio     = '{$kukarow['yhtio']}'
+                AND toimipaikka = '{$kukarow['toimipaikka']}'";
 
       $toimipaikka_varasto_res = pupe_query($query);
       $toimipaikka_varasto_row = mysql_fetch_assoc($toimipaikka_varasto_res);
@@ -47,9 +46,8 @@ if (isset($ajax)) {
       if ($toimipaikan_varastot_alkuperainen == '' and !empty($kukarow['toimipaikka'])) {
         $query = "SELECT GROUP_CONCAT(tunnus) tunnukset
                   FROM varastopaikat
-                  WHERE yhtio      = '{$kukarow['yhtio']}'
-                  AND tyyppi      != 'P'
-                  AND toimipaikka  = 0";
+                  WHERE yhtio     = '{$kukarow['yhtio']}'
+                  AND toimipaikka = 0";
         $toimipaikka_varasto_res = pupe_query($query);
         $toimipaikka_varasto_row = mysql_fetch_assoc($toimipaikka_varasto_res);
       }
@@ -457,9 +455,8 @@ if (isset($ajax)) {
 
         $query  = "SELECT GROUP_CONCAT(tunnus) AS tunnukset
                    FROM varastopaikat
-                   WHERE yhtio      = '{$kukarow['yhtio']}'
-                   AND tyyppi      != 'P'
-                   AND toimipaikka  = '{$_toimipaikka}'";
+                   WHERE yhtio     = '{$kukarow['yhtio']}'
+                   AND toimipaikka = '{$_toimipaikka}'";
         $vares = pupe_query($query);
         $varow = mysql_fetch_assoc($vares);
 
@@ -1008,9 +1005,8 @@ if (isset($ajax)) {
 
           $query  = "SELECT GROUP_CONCAT(tunnus) AS tunnukset
                      FROM varastopaikat
-                     WHERE yhtio      = '{$kukarow['yhtio']}'
-                     AND tyyppi      != 'P'
-                     AND toimipaikka  = '{$_toimipaikka}'";
+                     WHERE yhtio     = '{$kukarow['yhtio']}'
+                     AND toimipaikka = '{$_toimipaikka}'";
           $vares = pupe_query($query);
           $varow = mysql_fetch_assoc($vares);
 

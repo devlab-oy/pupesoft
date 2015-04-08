@@ -658,9 +658,9 @@ if ($tee == "ETSILASKU") {
                     FROM tilausrivi
                     LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
                     LEFT JOIN tuotteen_toimittajat ON (tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '{$otsikot_row['liitostunnus']}')
-                    WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
+                    WHERE tilausrivi.yhtio     = '{$kukarow['yhtio']}'
                     AND tilausrivi.uusiotunnus IN ({$otsikot_row['otsikot']})
-                    AND tilausrivi.tyyppi  = 'L'";
+                    AND tilausrivi.tyyppi      = 'L'";
           $nayta_rivit_res = pupe_query($query);
 
           if (mysql_num_rows($nayta_rivit_res) > 0) {
@@ -1903,21 +1903,21 @@ if ($tee == 'MONISTA') {
             if ($sarjatuoterow["sarjanumeroseuranta"] == "E" or $sarjatuoterow["sarjanumeroseuranta"] == "F" or $sarjatuoterow["sarjanumeroseuranta"] == "G") {
               $query = "INSERT INTO sarjanumeroseuranta
                         SET yhtio      = '{$kukarow['yhtio']}',
-                        tuoteno        = '{$rivirow['tuoteno']}',
-                        sarjanumero    = '{$sarjarow['sarjanumero']}',
-                        lisatieto      = '{$sarjarow['lisatieto']}',
-                        kaytetty       = '{$sarjarow['kaytetty']}',
+                        tuoteno       = '{$rivirow['tuoteno']}',
+                        sarjanumero   = '{$sarjarow['sarjanumero']}',
+                        lisatieto     = '{$sarjarow['lisatieto']}',
+                        kaytetty      = '{$sarjarow['kaytetty']}',
                         {$uusi_tunken} = '{$insid}',
-                        takuu_alku     = '{$sarjarow['takuu_alku']}',
-                        takuu_loppu    = '{$sarjarow['takuu_loppu']}',
-                        parasta_ennen  = '{$sarjarow['parasta_ennen']}',
-                        era_kpl        = '{$sarjarow['era_kpl']}',
-                        hyllyalue      = '{$rivirow['hyllyalue']}',
-                        hyllynro       = '{$rivirow['hyllynro']}',
-                        hyllytaso      = '{$rivirow['hyllytaso']}',
-                        hyllyvali      = '{$rivirow['hyllyvali']}',
-                        laatija        = '{$kukarow['kuka']}',
-                        luontiaika     = now()";
+                        takuu_alku    = '{$sarjarow['takuu_alku']}',
+                        takuu_loppu   = '{$sarjarow['takuu_loppu']}',
+                        parasta_ennen = '{$sarjarow['parasta_ennen']}',
+                        era_kpl       = '{$sarjarow['era_kpl']}',
+                        hyllyalue     = '{$rivirow['hyllyalue']}',
+                        hyllynro      = '{$rivirow['hyllynro']}',
+                        hyllytaso     = '{$rivirow['hyllytaso']}',
+                        hyllyvali     = '{$rivirow['hyllyvali']}',
+                        laatija       = '{$kukarow['kuka']}',
+                        luontiaika    = now()";
               $sres = pupe_query($query);
             }
             else {
@@ -1936,10 +1936,10 @@ if ($tee == 'MONISTA') {
 
                 $query = "UPDATE sarjanumeroseuranta
                           SET {$uusi_tunken} = '{$insid}',
-                          hyllyalue   = '{$rivirow['hyllyalue']}',
-                          hyllynro    = '{$rivirow['hyllynro']}',
-                          hyllytaso   = '{$rivirow['hyllytaso']}',
-                          hyllyvali   = '{$rivirow['hyllyvali']}'
+                          hyllyalue    = '{$rivirow['hyllyalue']}',
+                          hyllynro     = '{$rivirow['hyllynro']}',
+                          hyllytaso    = '{$rivirow['hyllytaso']}',
+                          hyllyvali    = '{$rivirow['hyllyvali']}'
                           WHERE tunnus = '{$sarjarow1['tunnus']}'
                           AND yhtio    = '{$kukarow['yhtio']}'";
                 $sres = pupe_query($query);
@@ -1947,21 +1947,21 @@ if ($tee == 'MONISTA') {
               else {
                 $query = "INSERT INTO sarjanumeroseuranta
                           SET yhtio      = '{$kukarow['yhtio']}',
-                          tuoteno        = '{$rivirow['tuoteno']}',
-                          sarjanumero    = '{$sarjarow['sarjanumero']}',
-                          lisatieto      = '{$sarjarow['lisatieto']}',
-                          kaytetty       = '{$sarjarow['kaytetty']}',
+                          tuoteno       = '{$rivirow['tuoteno']}',
+                          sarjanumero   = '{$sarjarow['sarjanumero']}',
+                          lisatieto     = '{$sarjarow['lisatieto']}',
+                          kaytetty      = '{$sarjarow['kaytetty']}',
                           {$uusi_tunken} = '{$insid}',
-                          takuu_alku     = '{$sarjarow['takuu_alku']}',
-                          takuu_loppu    = '{$sarjarow['takuu_loppu']}',
-                          parasta_ennen  = '{$sarjarow['parasta_ennen']}',
-                          era_kpl        = '{$sarjarow['era_kpl']}',
-                          hyllyalue      = '{$rivirow['hyllyalue']}',
-                          hyllynro       = '{$rivirow['hyllynro']}',
-                          hyllytaso      = '{$rivirow['hyllytaso']}',
-                          hyllyvali      = '{$rivirow['hyllyvali']}',
-                          laatija        = '{$kukarow['kuka']}',
-                          luontiaika     = now()";
+                          takuu_alku    = '{$sarjarow['takuu_alku']}',
+                          takuu_loppu   = '{$sarjarow['takuu_loppu']}',
+                          parasta_ennen = '{$sarjarow['parasta_ennen']}',
+                          era_kpl       = '{$sarjarow['era_kpl']}',
+                          hyllyalue     = '{$rivirow['hyllyalue']}',
+                          hyllynro      = '{$rivirow['hyllynro']}',
+                          hyllytaso     = '{$rivirow['hyllytaso']}',
+                          hyllyvali     = '{$rivirow['hyllyvali']}',
+                          laatija       = '{$kukarow['kuka']}',
+                          luontiaika    = now()";
                 $sres = pupe_query($query);
               }
             }

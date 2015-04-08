@@ -806,9 +806,9 @@ if ($tee == "MUOKKAA") {
     else {
       $errori =
         lisaa_kulu($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $kpl, $vero,
-                   $hinta, $kommentti, $maa, $kustp, $kohde, $projekti,
-                   "$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm",
-                   "$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm");
+        $hinta, $kommentti, $maa, $kustp, $kohde, $projekti,
+        "$alkuvv-$alkukk-$alkupp $alkuhh:$alkumm",
+        "$loppuvv-$loppukk-$loppupp $loppuhh:$loppumm");
     }
 
     if ($errori == "") {
@@ -1335,11 +1335,11 @@ if ($tee == "MUOKKAA") {
     if ($tyyppi == "B") {
       echo "<tr>";
       echo "<th colspan='2'>" . t("Alku") . "</th><th colspan='3'>" . t("Loppu") .
-           "</th>";
+        "</th>";
       echo "</tr>";
       echo "<tr>";
       echo
-        "<td colspan='2'><input type='text' name='alkupp' value='{$alkupp}' size='3' maxlength='2'>
+      "<td colspan='2'><input type='text' name='alkupp' value='{$alkupp}' size='3' maxlength='2'>
            <input type='text' name='alkukk' value='{$alkukk}' size='3' maxlength='2'>
            <input type='text' name='alkuvv' value='{$alkuvv}' size='5' maxlength='4'> " . t("klo") .
         ":<input type='text' name='alkuhh' value='{$alkuhh}' size='3' maxlength='2'>:
@@ -2199,10 +2199,10 @@ function lisaa_paivaraha($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilin
 }
 
 function lisaa_kulu($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $kpl, $vero,
-                    $hinta, $kommentti, $maa, $kustp, $kohde, $projekti, $alku, $loppu) {
+  $hinta, $kommentti, $maa, $kustp, $kohde, $projekti, $alku, $loppu) {
   return lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $alku,
-                        $loppu, $kpl, $vero, $hinta, $maa, $kommentti, "B", $kustp, $kohde,
-                        $projekti);
+    $loppu, $kpl, $vero, $hinta, $maa, $kommentti, "B", $kustp, $kohde,
+    $projekti);
 }
 
 function lisaa_kulurivi($tilausnumero, $rivitunnus, $perheid, $perheid2, $tilino, $tuoteno, $alku, $loppu, $kpl, $vero, $hinta, $maa, $kommentti, $tyyppi, $kustp, $kohde, $projekti) {

@@ -366,8 +366,11 @@ if ($_valittu_laji and $_laji_ja_kentan_tarkistus) {
 
 if ($_vartoimtulostin and $_selitetark_2) {
 
+  $sel = $trow[$i] == 'printteri9' ? "selected" : "";
+
   $ulos .= "<td><select name = '{$nimi}'>";
   $ulos .= "<option value='printteri1'>".t("Lähete")."</option>";
+  $ulos .= "<option value='printteri9' $sel>".t("Purkulista")."</option>";
   $ulos .= "</select></td>";
   $jatko = 0;
 }

@@ -160,7 +160,7 @@ if ($tila == 'Muuta' and !isset($jatka)) {
       $sel = 'selected';
     }
 
-   if (!is_numeric($varasto) and $varasto == "" and $vrow['tunnus'] == $srow["varasto"]) {
+    if (!is_numeric($varasto) and $varasto == "" and $vrow['tunnus'] == $srow["varasto"]) {
       $sel = 'selected';
     }
 

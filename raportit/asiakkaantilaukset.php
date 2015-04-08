@@ -144,7 +144,18 @@ if ($tee != 'NAYTATILAUS' and $ytunnus == '' and $otunnus == '' and $laskunro ==
 }
 
 if ($tee == 'NAYTATILAUS') {
-  echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
+  $query = "SELECT tila
+            FROM lasku
+            WHERE tunnus = $tunnus
+            AND $logistiikka_yhtiolisa";
+  $_tila = mysql_fetch_assoc(pupe_query($query));
+
+  if ($_tila["tila"] != "U") {
+    echo "<font class='head'>".t("Tilaus")." $tunnus:</font><hr>";
+  }
+  else {
+    echo "<font class='head'>".t("Lasku").":</font><hr>";
+  }
 
   require "naytatilaus.inc";
 

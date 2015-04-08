@@ -271,6 +271,7 @@ else {
     if ($ruksit[120] != '')     $ruk120chk         = "CHECKED";
     if ($ruksit[130] != '')     $ruk130chk         = "CHECKED";
     if ($ruksit[140] != '')     $ruk140chk         = "CHECKED";
+    if ($ruksit[150] != '')     $ruk150chk         = "CHECKED";
 
     if ($nimitykset != '')       $nimchk           = "CHECKED";
     if ($mitat != '')        $mitatchk        = "CHECKED";
@@ -475,6 +476,13 @@ else {
       <td><input type='text' name='jarjestys[140]' size='2' value='{$jarjestys[140]}'></td>
       <td><input type='checkbox' name='ruksit[140]' value='tilauksittain' {$ruk140chk}></td>
       <td><input type='text' name='rajaus[140]' value='{$rajaus[140]}'></td>
+      <td class='back'>", t("(Toimii vain jos ajat raporttia tilauksista)"), "</td>
+      </tr>
+      <tr>
+      <th>", t("Listaa toimitusehdoittain"), "</th>
+      <td><input type='text' name='jarjestys[150]' size='2' value='{$jarjestys[150]}'></td>
+      <td><input type='checkbox' name='ruksit[150]' value='toimitusehdoittain' {$ruk150chk}></td>
+      <td><input type='text' name='rajaus[150]' value='{$rajaus[150]}'></td>
       <td class='back'>", t("(Toimii vain jos ajat raporttia tilauksista)"), "</td>
       </tr>
       <tr>
@@ -1096,13 +1104,13 @@ else {
             $select .= "{$ytgfe}{$etuliite}.postino{$ytgft} postino, ";
             $select .= "{$ytgfe}{$etuliite}.postitp{$ytgft} postitp, ";
             $select .= "{$ytgfe}{$etuliite}.maa{$ytgft} maa, ";
-            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, concat_ws('<br>',{$etuliite}.toim_nimi), concat_ws('<br>',{$etuliite}.nimi)){$ytgft} toim_nimi, ";
-            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, concat_ws('<br>',{$etuliite}.toim_nimitark), concat_ws('<br>',{$etuliite}.nimitark)){$ytgft} toim_nimitark, ";
-            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_osoite, {$etuliite}.osoite){$ytgft} toim_osoite, ";
-            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_postino, {$etuliite}.postino){$ytgft} toim_postino, ";
-            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_postitp, {$etuliite}.postitp){$ytgft} toim_postitp, ";
-            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi, {$etuliite}.toim_maa, {$etuliite}.maa){$ytgft} toim_maa, ";
-            $select .= "{$ytgfe}if(asiakas.puhelin!='', asiakas.puhelin, asiakas.gsm){$ytgft} puhelin, ";
+            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi,concat_ws('<br>',{$etuliite}.toim_nimi),concat_ws('<br>',{$etuliite}.nimi)){$ytgft} toim_nimi, ";
+            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi,concat_ws('<br>',{$etuliite}.toim_nimitark),concat_ws('<br>',{$etuliite}.nimitark)){$ytgft} toim_nimitark, ";
+            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi,{$etuliite}.toim_osoite,{$etuliite}.osoite){$ytgft} toim_osoite, ";
+            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi,{$etuliite}.toim_postino,{$etuliite}.postino){$ytgft} toim_postino, ";
+            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi,{$etuliite}.toim_postitp,{$etuliite}.postitp){$ytgft} toim_postitp, ";
+            $select .= "{$ytgfe}if({$etuliite}.toim_nimi!='' and {$etuliite}.nimi!={$etuliite}.toim_nimi,{$etuliite}.toim_maa,{$etuliite}.maa){$ytgft} toim_maa, ";
+            $select .= "{$ytgfe}if(asiakas.puhelin!='',asiakas.puhelin,asiakas.gsm){$ytgft} puhelin, ";
             $select .= "{$ytgfe}asiakas.email{$ytgft} email, ";
           }
           else {
@@ -1472,6 +1480,19 @@ else {
           if ($laskutuspaiva != "") $select .= "lasku.tapvm laskutuspvm, ";
         }
         //**  Tilauksittain loppu **//
+
+        //**  Toimitusehdoittain start **//
+        if ($mukaan == "toimitusehdoittain") {
+          $group .= ",lasku.toimitusehto";
+          $select .= "lasku.toimitusehto, ";
+          $order  .= "lasku.toimitusehto,";
+          $gluku++;
+
+          if ($rajaus[$i] != "") {
+            $lisa .= " and lasku.toimitusehto LIKE '%{$rajaus[$i]}%' ";
+          }
+        }
+        //**  Toimitusehdoittain loppu **//
       }
 
       // N‰ytet‰‰n tilausrivin kommentit ja groupataan tilausriveitt‰in
@@ -2821,7 +2842,7 @@ else {
                   if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";
 
                   if (isset($worksheet)) {
-                    $worksheet->write($excelrivi, $excelsarake++, $vsum);
+                    $worksheet->writeNumber($excelrivi, $excelsarake++, $vsum);
                   }
                 }
 
@@ -3455,7 +3476,7 @@ else {
               if ($rivimaara <= $rivilimitti) echo "<td class='tumma' align='right'>{$vsum}</td>";
 
               if (isset($worksheet)) {
-                $worksheet->write($excelrivi, $excelsarake++, $vsum);
+                $worksheet->writeNumber($excelrivi, $excelsarake++, $vsum);
               }
             }
 

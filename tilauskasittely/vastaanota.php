@@ -896,38 +896,39 @@ if (empty($id) and $echotaanko) {
   }
 
   echo "</select></td></tr>";
-
-  $toimipaikat_result = hae_yhtion_toimipaikat($kukarow['yhtio']);
-  $toimipaikat = array();
-  $toimipaikat[] = array(
-    'tunnus' => 'kaikki',
-    'nimi' => t('Kaikki toimipaikat')
-  );
-  $toimipaikat[] = array(
-    'tunnus' => '0',
-    'nimi' => t('Ei toimipaikkaa')
-  );
-  while ($toimipaikka = mysql_fetch_assoc($toimipaikat_result)) {
-    $toimipaikat[] = $toimipaikka;
-  }
-  echo "<tr>";
-  echo "<th>";
-  echo t('Toimipaikka');
-  echo "</th>";
-  echo "<td>";
-  echo "<select name='toimipaikkarajaus'>";
-  $sel = '';
-  foreach ($toimipaikat as $toimipaikka) {
-    if  ((isset($toimipaikkarajaus) and $toimipaikkarajaus === $toimipaikka['tunnus']) or (!isset($toimipaikkarajaus) and $kukarow['toimipaikka'] == $toimipaikka['tunnus']) ) {
-      $sel = 'SELECTED';
+  if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikkares) > 0) {
+    $toimipaikat_result = hae_yhtion_toimipaikat($kukarow['yhtio']);
+    $toimipaikat = array();
+    $toimipaikat[] = array(
+      'tunnus' => 'kaikki',
+      'nimi' => t('Kaikki toimipaikat')
+    );
+    $toimipaikat[] = array(
+      'tunnus' => '0',
+      'nimi' => t('Ei toimipaikkaa')
+    );
+    while ($toimipaikka = mysql_fetch_assoc($toimipaikat_result)) {
+      $toimipaikat[] = $toimipaikka;
     }
+    echo "<tr>";
+    echo "<th>";
+    echo t('Toimipaikka');
+    echo "</th>";
+    echo "<td>";
+    echo "<select name='toimipaikkarajaus'>";
+    $sel = '';
+    foreach ($toimipaikat as $toimipaikka) {
+      if  ((isset($toimipaikkarajaus) and $toimipaikkarajaus === $toimipaikka['tunnus']) or (!isset($toimipaikkarajaus) and $kukarow['toimipaikka'] == $toimipaikka['tunnus']) ) {
+        $sel = 'SELECTED';
+      }
 
-    echo "<option value='{$toimipaikka['tunnus']}' {$sel}>{$toimipaikka['nimi']}</option>";
-    $sel = "";
+      echo "<option value='{$toimipaikka['tunnus']}' {$sel}>{$toimipaikka['nimi']}</option>";
+      $sel = "";
+    }
+    echo "</select>";
+    echo "</td>";
+    echo "</tr>";
   }
-  echo "</select>";
-  echo "</td>";
-  echo "</tr>";
 
   $query = "SELECT distinct koodi, nimi
             FROM maat
@@ -965,16 +966,19 @@ if (empty($id) and $echotaanko) {
     $varasto .= ' AND lasku.clearing = '.(int) $kukarow['oletus_varasto'];
   }
 
-  if (isset($toimipaikkarajaus) and $toimipaikkarajaus != 'kaikki') {
-    $varasto .= " AND lasku.yhtio_toimipaikka = {$toimipaikkarajaus}";
-  }
-  elseif (!isset($toimipaikkarajaus) and $yhtiorow['toimipaikkakasittely'] == "L") {
-    // rajataan vaikka käyttäjällä ei ole toimipaikkaa
-    $varasto .= " AND lasku.yhtio_toimipaikka = {$kukarow['toimipaikka']}";
-  }
-  elseif (!isset($toimipaikkarajaus) and $kukarow['toimipaikka'] != 0) {
-    // rajataan vain kun käyttäjällä on toimipaikka
-    $varasto .= " AND lasku.yhtio_toimipaikka = {$kukarow['toimipaikka']}";
+
+  if ($yhtiorow['toimipaikkakasittely'] == "L" and $toimipaikkares = hae_yhtion_toimipaikat($kukarow['yhtio']) and mysql_num_rows($toimipaikkares) > 0) {
+    if (isset($toimipaikkarajaus) and $toimipaikkarajaus != 'kaikki') {
+      $varasto .= " AND lasku.yhtio_toimipaikka = {$toimipaikkarajaus}";
+    }
+    elseif (!isset($toimipaikkarajaus) and $yhtiorow['toimipaikkakasittely'] == "L") {
+      // rajataan vaikka käyttäjällä ei ole toimipaikkaa
+      $varasto .= " AND lasku.yhtio_toimipaikka = {$kukarow['toimipaikka']}";
+    }
+    elseif (!isset($toimipaikkarajaus) and $kukarow['toimipaikka'] != 0) {
+      // rajataan vain kun käyttäjällä on toimipaikka
+      $varasto .= " AND lasku.yhtio_toimipaikka = {$kukarow['toimipaikka']}";
+    }
   }
 
   if (isset($maa) and !empty($maa)) {
@@ -1519,8 +1523,8 @@ if (!empty($id) and $echotaanko) {
         $hyllyalue = $rivirow["kohde_hyllyalue"];
         $hyllynro  = $rivirow["kohde_hyllynro"];
         $hyllyvali = $rivirow["kohde_hyllyvali"];
-        $hyllytaso = $rivirow["kohde_hyllytaso"];  
-       }
+        $hyllytaso = $rivirow["kohde_hyllytaso"];
+      }
 
       echo "<td>";
       echo "<input type='hidden' name='t1[$rivirow[tunnus]]' value='$hyllyalue' maxlength='5' size='5'>";
@@ -1542,73 +1546,7 @@ if (!empty($id) and $echotaanko) {
         echo "<td><input type='text' id='t3[$rivirow[tunnus]]' name='t3[$rivirow[tunnus]]' value='$privirow[t3]' maxlength='5' size='5'></td>";
         echo "<td><input type='text' id='t4[$rivirow[tunnus]]' name='t4[$rivirow[tunnus]]' value='$privirow[t4]' maxlength='5' size='5'></td>";
 
-        // katsotaan onko vastaanottavalla varastolla lapsivarastoja
-        $lv_query =  "SELECT *
-                      FROM varastopaikat
-                      WHERE yhtio     = '$kukarow[yhtio]'
-                      AND isa_varasto = $varow2[tunnus]";
-        $lv_res = pupe_query($lv_query);
-
-        if (mysql_num_rows($lv_res) > 0) {
-
-          // katsotaan onko tuotepaikallisia lapsivarastoja
-          $tlv_query = "SELECT GROUP_CONCAT(DISTINCT vp.tunnus)
-                        FROM tuotepaikat AS tp
-                        JOIN varastopaikat AS vp ON vp.yhtio = tp.yhtio AND vp.tunnus = tp.varasto
-                        WHERE tp.yhtio     = '$kukarow[yhtio]'
-                        AND vp.isa_varasto = $varow2[tunnus]
-                        AND tp.tuoteno     = '$rivirow[tuoteno]'
-                        GROUP BY tp.yhtio";
-          $tlv_res = pupe_query($tlv_query);
-
-          if (mysql_num_rows($tlv_res) < 1) {
-
-            $tlvlisa = '';
-
-            $lvlisa = " UNION
-                        SELECT tunnus, 'x','x','x','x', 's3' AS status, nimitys
-                        FROM varastopaikat
-                        WHERE yhtio = '$kukarow[yhtio]'
-                        AND isa_varasto = $varow2[tunnus]";
-          }
-          else {
-
-            $tlv_lista = mysql_result($tlv_res, 0);
-
-            $tlvlisa="UNION
-                      SELECT tp.tunnus,
-                      tp.hyllyalue,
-                      tp.hyllynro,
-                      tp.hyllyvali,
-                      tp.hyllytaso,
-                      's2' AS status,
-                      'x' AS nimitys
-                      FROM tuotepaikat AS tp
-                      JOIN varastopaikat AS vp ON vp.yhtio = tp.yhtio AND vp.tunnus = tp.varasto
-                      WHERE tp.yhtio = '$kukarow[yhtio]'
-                      AND vp.isa_varasto = $varow2[tunnus]
-                      AND tp.tuoteno = '$rivirow[tuoteno]'";
-
-            $lvlisa= "UNION
-                      SELECT tunnus, 'x','x','x','x', 's3' AS status, vp.nimitys
-                      FROM varastopaikat AS vp
-                      WHERE vp.yhtio = '$kukarow[yhtio]'
-                      AND vp.isa_varasto = $varow2[tunnus]
-                      AND vp.tunnus NOT IN ($tlv_lista)";
-          }
-        }
-        else {
-          $lvlisa = $tlvlisa = '';
-        }
-
-        $query = "SELECT tunnus, hyllyalue, hyllynro, hyllyvali, hyllytaso, 's1' AS status, 'x' AS nimitys
-                  FROM tuotepaikat
-                  WHERE yhtio = '$kukarow[yhtio]'
-                  AND tuoteno = '$rivirow[tuoteno]'
-                  $lisa
-                  $lvlisa
-                  $tlvlisa";
-        $vares = pupe_query($query);
+        $vares = varaston_lapsivarastot($varow2['tunnus'], $rivirow['tuoteno']);
 
         $s1_options = array();
         $s2_options = array();

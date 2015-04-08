@@ -97,8 +97,7 @@ elseif (isset($tallenna_uusi_laite) and isset($valitse_sarjanumero) and !empty($
               valmistajan_sopimusnumero          = '{$valmistajan_sopimusnumero}',
               valmistajan_sopimus_paattymispaiva = '{$vcloppuvv}-{$vcloppukk}-{$vcloppupp}',
               luontiaika                         = now(),
-              laatija                            = '{$kukarow['kuka']}',
-              yhtio                              = '{$kukarow['yhtio']}'";
+              laatija                            = '{$kukarow['kuka']}'";
     pupe_query($kveri);
     unset($toiminto);
   }

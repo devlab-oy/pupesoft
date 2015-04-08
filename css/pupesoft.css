@@ -149,3 +149,7 @@ table.ostorivien_kohdistus input[type=text], table.ostorivien_kohdistus input[ty
 select.minpad_select {
   padding: 8px 15px 8px 4px;
 }
+
+.hidden {
+  display: none;
+}

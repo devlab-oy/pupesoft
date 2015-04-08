@@ -102,10 +102,10 @@ if ($luottoraja_chk or $erapaiva_chk) {
             tilausrivi.hinta * (tilausrivi.kpl+tilausrivi.varattu+tilausrivi.jt) * {$query_ale_lisa}
             ) kaikkiyhteensa_chk
             FROM tilausrivi
-            WHERE tilausrivi.yhtio = '{$kukarow['yhtio']}'
-            AND tilausrivi.tyyppi != 'D'
-            AND tilausrivi.var != 'P'
-            AND tilausrivi.otunnus = '{$laskurow['tunnus']}'";
+            WHERE tilausrivi.yhtio  = '{$kukarow['yhtio']}'
+            AND tilausrivi.tyyppi  != 'D'
+            AND tilausrivi.var     != 'P'
+            AND tilausrivi.otunnus  = '{$laskurow['tunnus']}'";
   $chk_kaikkiyhteensa_res = pupe_query($query);
   $chk_kaikkiyhteensa_row = mysql_fetch_assoc($chk_kaikkiyhteensa_res);
 
@@ -174,10 +174,10 @@ while ($rekisterinumero_row = mysql_fetch_assoc($rekisterinumero_result)) {
   pupe_query($query);
 }
 
-if ($ylivito > 0 and in_array($yhtiorow['erapaivan_ylityksen_toimenpide'], array('J','L'))) {
+if ($ylivito > 0 and in_array($yhtiorow['erapaivan_ylityksen_toimenpide'], array('J', 'L'))) {
   $luottorajavirhe_ylivito_valmis = false;
 }
-elseif (!empty($luottorajavirhe) and in_array($yhtiorow['luottorajan_ylitys'], array('J','L'))) {
+elseif (!empty($luottorajavirhe) and in_array($yhtiorow['luottorajan_ylitys'], array('J', 'L'))) {
   $luottorajavirhe_ylivito_valmis = false;
 }
 else {
@@ -750,11 +750,18 @@ else {
       pupesoft_tulosta_lahete($params);
     }
 
-    // jos on myyntitilaus ja ei haluttu tulostaa lähetettä, merkataan rivit kerätyksi ja toimitetuksi ja laitetaan alatila D
+    // jos on myyntitilaus ja ei haluttu tulostaa lähetettä, merkataan rivit kerätyksi
+    // ja toimitetuksi ja laitetaan alatila D
     if ($laskurow['eilahetetta'] != '' or $laskurow['sisainen'] != '') {
-      if ($laskurow['sisainen'] == '' and ($kateinen == 'X' or $itsetulostus == "X" or $laskurow["vienti"] != '')) {
-        // Jos kyseessä on käteismyyntiä tai maksuehtolla on itsetulostustäppä tai vientiä, merkataan tilaukset kerätyksi mutta ei toimitetuksi ja alatila C/B
-        if ($laskurow["vienti"] != '') {
+      if ($laskurow['sisainen'] == '' and ($kateinen == 'X' or $itsetulostus == "X"
+          or $laskurow["vienti"] != '')) {
+        // Jos kyseessä on käteismyyntiä tai maksuehdolla on itsetulostustäppä tai vientiä,
+        // merkataan tilaukset kerätyksi mutta ei toimitetuksi ja alatila C/B
+        // tai toimitettu tilaus muutetaan maksuehdosta käteiseksi, tila pysyy D
+        if ($laskurow["alatila"] == 'D') {
+          $alat = "D";
+        }
+        elseif ($laskurow["vienti"] != '') {
           $alat = "B";
         }
         else {
@@ -798,8 +805,14 @@ else {
         }
       }
 
-      if ($laskurow["sisainen"] != '') {
+      if ($laskurow["sisainen"] != ''
+        or ($kateinen == 'X' and $kateisohitus == ""
+          and ($kukarow["kassamyyja"] != '' or $kertakassa != "")
+          and $laskurow["vienti"] == ''
+          and $laskurow["alatila"] == 'D')
+      ) {
         //laskutetaan koko tilaus heti jos se on sisainen lasku
+        // tai maksuehto vaihdettu käteismyynniksi
         $laskutettavat  = $laskurow["tunnus"];
         $tee       = "TARKISTA";
         $laskutakaikki   = "KYLLA";
@@ -1825,7 +1838,7 @@ else {
                       AND tilausrivi.tunnus  != '{$row['perheid']}'";
             $ohnoes_res = pupe_query($query);
 
-            if (mysql_num_rows($ohnoes_res) > 0 or $row['omalle_tilaukselle'] != '') {
+            if (mysql_num_rows($ohnoes_res) > 0 or $row['omalle_tilaukselle'] > 0) {
               $query = "UPDATE tilausrivi
                         SET otunnus = '{$laskurow['tunnus']}'
                         WHERE yhtio  = '{$kukarow['yhtio']}'

@@ -623,8 +623,8 @@ if ($tee == 'L') {
 if ($tee == "H") {
   $query = "SELECT *
             FROM lasku
-            WHERE yhtio = '{$kukarow["yhtio"]}'
-            AND tunnus = '{$tunnus}'
+            WHERE yhtio       = '{$kukarow["yhtio"]}'
+            AND tunnus        = '{$tunnus}'
             AND hyvaksyja_nyt = '{$kukarow["kuka"]}'";
 
   $result = pupe_query($query);
@@ -643,7 +643,7 @@ if ($tee == "H") {
       $tokaviimeinen_hyvaksyja_time) = hae_viimeiset_hyvaksyjat($laskurow);
 
     if ($laskurow[$tokaviimeinen_hyvaksyja_time] != "0000-00-00 00:00:00" and
-        $laskurow[$viimeinen_hyvaksyja_time] == "0000-00-00 00:00:00"
+      $laskurow[$viimeinen_hyvaksyja_time] == "0000-00-00 00:00:00"
     ) {
       $ollaan_viimeinen_hyvaksyja = true;
     }
@@ -655,10 +655,10 @@ if ($tee == "H") {
       $tarkistus_query = "SELECT distinct tili.tilino, tili.tiliointi_tarkistus, tiliointi.kustp, tiliointi.kohde, tiliointi.projekti
                           FROM tiliointi
                           JOIN tili USING (yhtio, tilino)
-                          WHERE tiliointi.yhtio  = '{$kukarow["yhtio"]}'
-                          AND tiliointi.ltunnus  = {$laskurow["tunnus"]}
-                          AND tiliointi.korjattu = ''
-                          AND tiliointi.lukko != 1";
+                          WHERE tiliointi.yhtio   = '{$kukarow["yhtio"]}'
+                          AND tiliointi.ltunnus   = {$laskurow["tunnus"]}
+                          AND tiliointi.korjattu  = ''
+                          AND tiliointi.lukko    != 1";
       $tilioinnit_tsek = pupe_query($tarkistus_query);
 
       while ($tilioinnit_row = mysql_fetch_assoc($tilioinnit_tsek)) {

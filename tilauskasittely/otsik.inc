@@ -163,17 +163,17 @@ if (($nimi != '' and !isset($jatka) and $asiakasid == 0 and !isset($vaihdatoim_a
   $kutsuja     = "otsik.inc";
 
   if (isset($vaihdatoim_asiakas) and $tnimi != "") {
-    $ytunnus     = $tnimi;
+    $ytunnus    = $tnimi;
     $osoite     = $tosoite;
-    $postitp     = $tpostitp;
+    $postitp    = $tpostitp;
     $postino    = $tpostino;
     $tila       = "vaihdatoim_asiakas";
     $muutparametrit = $asiakasid;
-    $kutsuja     = "";
+    $kutsuja    = "";
   }
 
-  $asiakasid  = "";
-  $ahlopetus   = "tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//mista=$mista//tila=$tila//from=ASIAKASYLLAPITO";
+  $asiakasid = "";
+  $ahlopetus = "tilauskasittely/tilaus_myynti.php////toim=$toim//tee=$tee//tilausnumero=$tilausnumero//mista=$mista//tila=$tila//from=ASIAKASYLLAPITO";
   $lause     = "<font class='head'>".t("Valitse asiakas").":</font><hr><br>";
 
   require "inc/asiakashaku.inc";
@@ -236,14 +236,14 @@ if ($kukarow['kesken'] > 0 and isset($laskurow) and (($laskurow['tila'] == 'N' a
   if (empty($_kateis) and empty($_jv)) {
 
     // Parametrejä saatanat.php:lle
-    $sytunnus       = $laskurow['ytunnus'];
+    $sytunnus        = $laskurow['ytunnus'];
     $sliitostunnus   = $laskurow['liitostunnus'];
-    $eiliittymaa    = "ON";
+    $eiliittymaa     = "ON";
     $luottorajavirhe = "";
-    $jvvirhe      = "";
-    $ylivito      = 0;
-    $trattavirhe    = "";
-    $laji        = "MA";
+    $jvvirhe         = "";
+    $ylivito         = 0;
+    $trattavirhe     = "";
+    $laji            = "MA";
     $grouppaus       = ($yhtiorow["myyntitilaus_saatavat"] == "Y") ? "ytunnus" : "";
 
     ob_start();
@@ -431,35 +431,32 @@ if ($erpcmvv != "" or $erpcmkk != "" or $erpcmpp != "" or $meapurow["erapvmkasin
   $erpcmkk = (int) $erpcmkk;
   $erpcmpp = (int) $erpcmpp;
 
-
-  if ($erpcmvv != "" or $erpcmkk != "" or $erpcmpp != "") {
-    if ($kukarow['extranet'] == '') {
-      if ($erpcmvv < date("Y")) {
-        echo "<font class='error'>".t("VIRHE: Syötetty eräpäivä on virheellinen")."!</font><br>";
-        $tee  = "OTSIK";
-        unset($jatka);
-        $erpcm_virhe = "X"; // apumuuttuja
-        if ($kukarow['kesken'] != 0) {
-          $tiedot_laskulta = "ok";
-        }
+  if ($kukarow['extranet'] == '' and empty($olderpcm) and ($erpcmvv != "" or $erpcmkk != "" or $erpcmpp != "")) {
+    if ($erpcmvv < date("Y")) {
+      echo "<font class='error'>".t("VIRHE: Syötetty eräpäivä on virheellinen")."!</font><br>";
+      $tee  = "OTSIK";
+      unset($jatka);
+      $erpcm_virhe = "X"; // apumuuttuja
+      if ($kukarow['kesken'] != 0) {
+        $tiedot_laskulta = "ok";
       }
-      elseif ($erpcmvv == date("Y") and ($erpcmkk < date("n") or $erpcmkk < date("m"))) {
-        echo "<font class='error'>".t("VIRHE: Syötetty eräpäivä on virheellinen")."!</font><br>";
-        $tee  = "OTSIK";
-        unset($jatka);
-        $erpcm_virhe = "X"; // apumuuttuja
-        if ($kukarow['kesken'] != 0) {
-          $tiedot_laskulta = "ok";
-        }
+    }
+    elseif ($erpcmvv == date("Y") and ($erpcmkk < date("n") or $erpcmkk < date("m"))) {
+      echo "<font class='error'>".t("VIRHE: Syötetty eräpäivä on virheellinen")."!</font><br>";
+      $tee  = "OTSIK";
+      unset($jatka);
+      $erpcm_virhe = "X"; // apumuuttuja
+      if ($kukarow['kesken'] != 0) {
+        $tiedot_laskulta = "ok";
       }
-      elseif ($erpcmvv == date("Y") and ($erpcmkk == date("n") or $erpcmkk == date("m")) and ($erpcmpp < date("j") or $erpcmpp < date("d"))) {
-        echo "<font class='error'>".t("VIRHE: Syötetty eräpäivä on virheellinen")."!</font><br>";
-        $tee  = "OTSIK";
-        unset($jatka);
-        $erpcm_virhe = "X"; // apumuuttuja
-        if ($kukarow['kesken'] != 0) {
-          $tiedot_laskulta = "ok";
-        }
+    }
+    elseif ($erpcmvv == date("Y") and ($erpcmkk == date("n") or $erpcmkk == date("m")) and ($erpcmpp < date("j") or $erpcmpp < date("d"))) {
+      echo "<font class='error'>".t("VIRHE: Syötetty eräpäivä on virheellinen")."!</font><br>";
+      $tee  = "OTSIK";
+      unset($jatka);
+      $erpcm_virhe = "X"; // apumuuttuja
+      if ($kukarow['kesken'] != 0) {
+        $tiedot_laskulta = "ok";
       }
     }
   }
@@ -1489,9 +1486,17 @@ if ($tila == "" and !isset($jatka)) {
                 order by jarjestys, teksti, tunnus";
       $mresult = pupe_query($query);
 
+      if (empty($laskurow["maksuehto"]) and $kukarow["maksuehto"] != 0) {
+        $maksuehto_valinta = $kukarow["maksuehto"];
+      }
+      else {
+        $maksuehto_valinta = $srow["maksuehto"];
+      }
+
       while ($row = mysql_fetch_assoc($mresult)) {
         $sel = "";
-        if ($row["tunnus"] == $srow["maksuehto"]) {
+
+        if ($row["tunnus"] == $maksuehto_valinta) {
           $sel = 'selected';
         }
         $vasen_sarake[$vasen] .= "<option value='$row[tunnus]' $sel>".t_tunnus_avainsanat($row, "teksti", "MAKSUEHTOKV")."</option>";
@@ -1534,9 +1539,20 @@ if ($tila == "" and !isset($jatka)) {
       $vasen_sarake[$vasen] .= t("Ei käytössä");
     }
     else {
-      $vasen_sarake[$vasen] .= "<input type='text' name='erpcmpp' value='$erpcmpp' size='3'>
-          <input type='text' name='erpcmkk' value='$erpcmkk' size='3'>
-          <input type='text' name='erpcmvv' value='$erpcmvv' size='6'>";
+      $edis = "";
+
+      if ($srow["mapvm"] != '0000-00-00' and $srow["chn"] == '999') {
+        $edis = "disabled";
+
+        echo "<input type='hidden' name='olderpcm' value='OK'>";
+        echo "<input type='hidden' name='erpcmpp' value='$erpcmpp'>";
+        echo "<input type='hidden' name='erpcmkk' value='$erpcmkk'>";
+        echo "<input type='hidden' name='erpcmvv' value='$erpcmvv'>";
+      }
+
+      $vasen_sarake[$vasen] .= "<input type='text' name='erpcmpp' value='$erpcmpp' size='3' $edis>
+          <input type='text' name='erpcmkk' value='$erpcmkk' size='3' $edis>
+          <input type='text' name='erpcmvv' value='$erpcmvv' size='6' $edis>";
     }
     $vasen_sarake[$vasen] .= "</td>";
     $vasen++;
@@ -2144,7 +2160,7 @@ if ($tila == "" and !isset($jatka)) {
       'toimtapa_apuro' => $toimtapa_apuro,
     );
     $ei_lahetettako = eilahetetta($args);
-    if ($ei_lahetettako) {
+    if ((!isset($laskurow["eilahetetta"]) and $kukarow["eilahetetta"] == "o") or $ei_lahetettako) {
       $eilah = 'CHECKED';
     }
     if ($srow['ketjutus']    != '') $eiket          = 'CHECKED';
@@ -2181,7 +2197,8 @@ if ($tila == "" and !isset($jatka)) {
         'poikkeava_yhtiorow' => $vt_yhtiorow,
       );
       $ei_lahetettako = eilahetetta($args);
-      if ($ei_lahetettako) {
+      if ((!isset($laskurow["eilahetetta"]) and $kukarow["eilahetetta"] == "o") or $ei_lahetettako
+      ) {
         $eilah = 'CHECKED';
       }
 
@@ -2218,7 +2235,8 @@ if ($tila == "" and !isset($jatka)) {
         'poikkeava_yhtiorow' => $vt_yhtiorow,
       );
       $ei_lahetettako = eilahetetta($args);
-      if ($ei_lahetettako) {
+      if ((!isset($laskurow["eilahetetta"]) and $kukarow["eilahetetta"] == "o") or $ei_lahetettako
+      ) {
         $eilah = 'CHECKED';
       }
       else {
@@ -2480,9 +2498,13 @@ if ($tila == "" and !isset($jatka)) {
     $vasen_sarake[$vasen] .= "</select></td>";
     $vasen++;
 
-    if ($yhtiorow['laskutuskielto'] != 0 and $toim != "MYYNTITILI") {
+    if (!empty($yhtiorow['laskutuskielto']) and $toim != "MYYNTITILI") {
       $oikea_sarake[$oikea] = "<td>".t("Laskutuskieltoon").":</td><td><input type='checkbox' name='laskutuskielto' $laskkielto></td>";
       $oikea++;
+    }
+    elseif ($toim != "MYYNTITILI" and $srow['chn'] == '999') {
+      // Laskutuskielto on muilla tavoin asetettu (esim. verkkokauppatilausket) ja jätetään se päälle
+      echo "<input type='hidden' name='laskutuskielto' value='ON'>";
     }
 
     if ($toim == "RIVISYOTTO" or $toim == "PIKATILAUS") {
@@ -2623,6 +2645,16 @@ if ($tila == "" and !isset($jatka)) {
       $asiakas = hae_asiakas($srow['liitostunnus']);
     }
 
+    if (empty($laskurow["toimitustapa"]) and $kukarow["toimitustapa"] != "") {
+      $toimitustapa_valinta = $kukarow["toimitustapa"];
+    }
+    elseif (empty($asiakas)) {
+      $toimitustapa_valinta = $srow["toimitustapa"];
+    }
+    elseif (!empty($asiakas)) {
+      $toimitustapa_valinta = $asiakas["toimitustapa"];
+    }
+
     foreach ($toimitustavat as $toimitustapa) {
 
       if (!empty($toimitustapa['sallitut_maat']) and !stristr($toimitustapa['sallitut_maat'], $srow['toim_maa'])) {
@@ -2632,13 +2664,7 @@ if ($tila == "" and !isset($jatka)) {
       echo "<div style='display: none; visibility: hidden;' id='merahti_toimitustapa_$toimitustapa[tunnus]'>$toimitustapa[merahti]</div>";
 
       if (in_array($toimitustapa['extranet'], array('', 'M')) or $toimitustapa['selite'] == $srow['toimitustapa']) {
-        $sel = "";
-        if (empty($asiakas) and $toimitustapa["selite"] == $srow["toimitustapa"]) {
-          $sel = 'selected';
-        }
-        elseif (!empty($asiakas) and $toimitustapa["selite"] == $asiakas["toimitustapa"]) {
-          $sel = 'selected';
-        }
+        $sel = $toimitustapa["selite"] == $toimitustapa_valinta ? 'selected' : "";
 
         $string .= "<option id='toimitustapa_$toimitustapa[tunnus]' value='$toimitustapa[selite]' $sel>";
         $string .= t_tunnus_avainsanat($toimitustapa, "selite", "TOIMTAPAKV");

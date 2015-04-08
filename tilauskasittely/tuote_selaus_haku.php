@@ -1129,8 +1129,14 @@ if ($submit_button != '' and ($lisa != '' or $lisa_parametri != '')) {
             if ($row_value['tuoteperhe'] != "" and isset($poistettavat_perheet[$row_value['tuoteperhe']])) {
               unset($rows[$row_key]);
             }
-            if ($row_value["vastaavat"] != $row_value["tuoteno"] and $row_value["vastaavat"] > 0 and $row_value["vastaavamaara"] > 0 and isset($korjattavat_vastaavamaarat[$row_value["vastaavat"]])) {
-              $rows[$row_key]["vastaavamaara"] -= $korjattavat_vastaavamaarat[$row_value["vastaavat"]];
+
+            if ($row_value["mikavastaava"] != $row_value["tuoteno"] and $row_value["vastaavat"] > 0 and $row_value["vastaavamaara"] > 0) {
+
+              if (isset($korjattavat_vastaavamaarat[$row_value["vastaavat"]])) {
+                $rows[$row_key]["vastaavamaara"] -= $korjattavat_vastaavamaarat[$row_value["vastaavat"]];
+              }
+
+              if ($rows[$row_key]["vastaavamaara"] < 2) unset($rows[$row_key]);
             }
           }
           if ($kukarow['extranet'] != '' and hae_saldo($row_value, 'NORMI') <= 0) {

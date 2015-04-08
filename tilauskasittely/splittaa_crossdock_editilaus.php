@@ -47,7 +47,7 @@ $tilaustyyppi = 'varastotilaus';
 // Etsitään LOC-elementtejä jotta voidaan eroitella CrossDock sekä Varastotilaus toisistaan
 foreach ($order_tietosisalto as $tieto) {
   if (strpos($tieto, 'LOC+8') !== false) $tilaustyyppi = 'crossdock';
-}                      
+}
 
 foreach ($order_tietosisalto as $key => $value) {
 

@@ -571,7 +571,8 @@ if ($tee == 'add') {
               toimitustapa.nouto,
               lasku.vienti,
               rahtikirjat.pakkaus,
-              lasku.pakkaamo
+              lasku.pakkaamo,
+              lasku.rahtivapaa
               FROM lasku use index (tila_index)
               JOIN tilausrivi use index (yhtio_otunnus) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus and tilausrivi.toimitettu = '' and tilausrivi.keratty != '' AND tilausrivi.tyyppi != 'D')
               $joinmaksuehto
@@ -676,7 +677,6 @@ if ($tee == 'add') {
             if ($lavametri[$i] == '') $lavametri[$i] = 0;
             if ($kuutiot[$i] == '')    $kuutiot[$i]   = 0;
 
-            // Lisätään myös pakkausveloitus, mikäli sellainen on annettu
             $query = "SELECT pakkaus.*
                       FROM pakkaus
                       JOIN tuote ON tuote.yhtio = pakkaus.yhtio and tuote.tuoteno = pakkaus.pakkausveloitus_tuotenumero
@@ -688,8 +688,14 @@ if ($tee == 'add') {
 
             if (mysql_num_rows($pakres) == 1) {
               $pakrow = mysql_fetch_assoc($pakres);
+              $laskurow = mysql_fetch_assoc($tilre);
 
-              lisaarivi($otsikkonro, $pakrow["pakkausveloitus_tuotenumero"], $kollit[$i]);
+              // Lisätään myös pakkausveloitus, mikäli sellainen on annettu ja jos tilaus ei ole
+              // rahtivapaa ja pakkauksen takaa ei ole säädetty, että rahtivapaissa tilauksissa ei
+              // tule pakkausveloitusta
+              if ($pakrow["rahtivapaa_veloitus"] == "" or $laskurow["rahtivapaa"] == "") {
+                lisaarivi($otsikkonro, $pakrow["pakkausveloitus_tuotenumero"], $kollit[$i]);
+              }
             }
 
             if ($kilot[$i]!=0 or $kollit[$i]!=0 or $kuutiot[$i]!=0 or $lavametri[$i]!=0) {

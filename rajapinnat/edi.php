@@ -14,7 +14,7 @@ class Edi {
 
     // require 'magento_salasanat.php' muuttujat
     global $magento_api_ht_edi, $ovt_tunnus, $pupesoft_tilaustyyppi;
-    global $verkkokauppa_asiakasnro, $rahtikulu_tuoteno, $rahtikulu_nimitys;
+    global $verkkokauppa_asiakasnro, $rahtikulu_tuoteno, $rahtikulu_nimitys, $verkkokauppa_erikoiskasittely;
 
     if (empty($magento_api_ht_edi) or empty($ovt_tunnus) or empty($pupesoft_tilaustyyppi)) exit("Parametrejä puuttuu\n");
     if (empty($verkkokauppa_asiakasnro) or empty($rahtikulu_tuoteno) or empty($rahtikulu_nimitys)) exit("Parametrejä puuttuu\n");
@@ -47,6 +47,25 @@ class Edi {
     $edi_order .= "*MS ".$order['increment_id']."\n";
     $edi_order .= "*RS OSTOTIL\n";
     $edi_order .= "OSTOTIL.OT_NRO:".$order['increment_id']."\n";
+
+    //Tarkistetaan onko tämän nimiselle verkkokaupalle asetettu erikoiskäsittelyjä
+    if (isset($verkkokauppa_erikoiskasittely) and count($verkkokauppa_erikoiskasittely) > 0) {
+      $edi_store = str_replace("\n", " ", $order['store_name']);
+      foreach ($verkkokauppa_erikoiskasittely as $verkkokauppaparametrit) {
+        // $verkkokauppaparametrit[0] - Verkkokaupan nimi
+        // $verkkokauppaparametrit[1] - Editilaus_tilaustyyppi
+        // $verkkokauppaparametrit[2] - Tilaustyyppilisa
+        // $verkkokauppaparametrit[3] - Myyjanumero
+        // $verkkokauppaparametrit[4] - Vaihtoehtoinen ovttunnus
+        if (strpos($edi_store, $verkkokauppaparametrit[0]) !== false) {
+          $vaihtoehtoinen_ovt = $verkkokauppaparametrit[4];
+        }
+      }
+      // Jos erikoiskäsittelyyn on määritelty eri yhtiö tälle kaupalle niin yliajetaan $ovt_tunnus
+      if (isset($vaihtoehtoinen_ovt) and !empty($vaihtoehtoinen_ovt)) {
+        $ovt_tunnus = $vaihtoehtoinen_ovt;
+      }
+    }
     //Yrityksen ovt_tunnus MUISTA MUUTTAA
     $edi_order .= "OSTOTIL.OT_TOIMITTAJANRO:".$ovt_tunnus."\n";
     $edi_order .= "OSTOTIL.OT_TILAUSTYYPPI:$pupesoft_tilaustyyppi\n";
@@ -182,7 +201,7 @@ class Edi {
         $edi_order .= "OSTOTILRIV.OTR_VEROKANTA:$alvprosentti\n";
         $edi_order .= "OSTOTILRIV.OTR_RIVISUMMA:$rivihinta_veroton\n";
         $edi_order .= "OSTOTILRIV.OTR_OSTOHINTA:$veroton_hinta\n";
-        $edi_order .= "OSTOTILRIV.OTR_ALENNUS:$alennusprosentti\n";        
+        $edi_order .= "OSTOTILRIV.OTR_ALENNUS:$alennusprosentti\n";
 
         $edi_order .= "OSTOTILRIV.OTR_VIITE:\n";
         $edi_order .= "OSTOTILRIV.OTR_OSATOIMITUSKIELTO:\n";

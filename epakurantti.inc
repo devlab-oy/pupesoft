@@ -33,6 +33,7 @@ if ($tuoteno != "") {
             tuote.kohde,
             tuote.projekti,
             tuote.myyntihinta,
+            tuote.tuotetyyppi,
             round(if (tuote.epakurantti100pvm = '0000-00-00',
                 if (tuote.epakurantti75pvm = '0000-00-00',
                   if (tuote.epakurantti50pvm = '0000-00-00',
@@ -824,11 +825,21 @@ if ($varaston_muutos != 0 and (in_array($tee, array("paalle", "25paalle", "puoli
     $laskuid = mysql_insert_id($GLOBALS["masterlink"]);
   }
 
-  if ($toim != "VAIHDAKEHAHIN" and $yhtiorow["varastonmuutos_epakurantti"] != "") {
+  if ($yhtiorow["raaka_aine_tiliointi"] == "Y" and $tuoterow["tuotetyyppi"] == "R") {
+    $varastonmuutos_tili = $yhtiorow["raaka_ainevarastonmuutos"];
+  }
+  elseif ($toim != "VAIHDAKEHAHIN" and $yhtiorow["varastonmuutos_epakurantti"] != "") {
     $varastonmuutos_tili = $yhtiorow["varastonmuutos_epakurantti"];
   }
   else {
     $varastonmuutos_tili = $yhtiorow["varastonmuutos"];
+  }
+
+  if ($yhtiorow["raaka_aine_tiliointi"] == "Y" and $tuoterow["tuotetyyppi"] == "R") {
+    $varastotili = $yhtiorow["raaka_ainevarasto"];
+  }
+  else {
+    $varastotili = $yhtiorow["varasto"];
   }
 
   // tehd‰‰n kirjaukset per toimipaikka, kustannuspaikka tulee ensisijaisesti toimipaikan takaa
@@ -880,7 +891,7 @@ if ($varaston_muutos != 0 and (in_array($tee, array("paalle", "25paalle", "puoli
       $query = "INSERT into tiliointi set
                 yhtio    = '$kukarow[yhtio]',
                 ltunnus  = '$laskuid',
-                tilino   = '$yhtiorow[varasto]',
+                tilino   = '{$varastotili}',
                 kustp    = '{$kustp_ins}',
                 kohde    = '{$kohde_ins}',
                 projekti = '{$projekti_ins}',
@@ -925,7 +936,7 @@ if ($varaston_muutos != 0 and (in_array($tee, array("paalle", "25paalle", "puoli
     $query = "INSERT into tiliointi set
               yhtio    = '$kukarow[yhtio]',
               ltunnus  = '$laskuid',
-              tilino   = '$yhtiorow[varasto]',
+              tilino   = '{$varastotili}',
               kustp    = '{$kustp_ins}',
               kohde    = '{$kohde_ins}',
               projekti = '{$projekti_ins}',

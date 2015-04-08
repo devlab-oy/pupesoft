@@ -141,24 +141,44 @@ function myynnit($myynti_varasto = '', $myynti_maa = '') {
     $laskujoin = " JOIN lasku USE INDEX (PRIMARY) on (lasku.yhtio = tilausrivi.yhtio and lasku.tunnus = tilausrivi.otunnus $laskuntoimmaa) ";
   }
 
-  // tutkaillaan myynti
-  $query = "SELECT
-            sum(if((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') and tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4', tilausrivi.kpl, 0)) kpl4,
-            sum(if((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') and tilausrivi.var not in ('P','J','O','S'), tilausrivi.varattu, 0)) ennpois,
-            sum(if(tilausrivi.tyyppi = 'L' and tilausrivi.var  = 'J', tilausrivi.jt $lisavarattu, 0)) jt,
-            sum(if(tilausrivi.tyyppi = 'E' and tilausrivi.var != 'O', tilausrivi.varattu, 0)) ennakko
-            FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-            {$laskujoin}
-            {$lisaa3}
-            {$varastotapa}
-            WHERE tilausrivi.yhtio in ($yhtiot)
-            and tilausrivi.tyyppi  in ('L','V','E')
-            and tilausrivi.tuoteno = '$row[tuoteno]'
-            $varastot
-            and ((tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4') or tilausrivi.laskutettuaika = '0000-00-00')";
-  $result   = pupe_query($query);
-  $laskurow = mysql_fetch_assoc($result);
-
+  if ($toim == "BIO") {
+    // tutkaillaan myynti ker‰ysp‰iv‰n mukaan
+    $query = "SELECT
+              sum(if((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') and tilausrivi.kerayspvm >= '$vva4-$kka4-$ppa4' and tilausrivi.kerayspvm <= '$vvl4-$kkl4-$ppl4', tilausrivi.kpl, 0)) kpl4,
+              sum(if((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') and tilausrivi.var not in ('P','J','O','S'), tilausrivi.varattu, 0)) ennpois,
+              sum(if(tilausrivi.tyyppi = 'L' and tilausrivi.var  = 'J', tilausrivi.jt $lisavarattu, 0)) jt,
+              sum(if(tilausrivi.tyyppi = 'E' and tilausrivi.var != 'O', tilausrivi.varattu, 0)) ennakko
+              FROM tilausrivi use index (yhtio_tyyppi_tuoteno_kerayspvm)
+              {$laskujoin}
+              {$lisaa3}
+              {$varastotapa}
+              WHERE tilausrivi.yhtio in ($yhtiot)
+              and tilausrivi.tyyppi  in ('L','V','E')
+              and tilausrivi.tuoteno = '$row[tuoteno]'
+              $varastot
+              and ((tilausrivi.kerayspvm >= '$vva4-$kka4-$ppa4' and tilausrivi.kerayspvm <= '$vvl4-$kkl4-$ppl4') or tilausrivi.kerayspvm = '0000-00-00')";
+    $result   = pupe_query($query);
+    $laskurow = mysql_fetch_assoc($result);
+  }
+  else {
+    // tutkaillaan myynti
+    $query = "SELECT
+              sum(if((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') and tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4', tilausrivi.kpl, 0)) kpl4,
+              sum(if((tilausrivi.tyyppi = 'L' or tilausrivi.tyyppi = 'V') and tilausrivi.var not in ('P','J','O','S'), tilausrivi.varattu, 0)) ennpois,
+              sum(if(tilausrivi.tyyppi = 'L' and tilausrivi.var  = 'J', tilausrivi.jt $lisavarattu, 0)) jt,
+              sum(if(tilausrivi.tyyppi = 'E' and tilausrivi.var != 'O', tilausrivi.varattu, 0)) ennakko
+              FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
+              {$laskujoin}
+              {$lisaa3}
+              {$varastotapa}
+              WHERE tilausrivi.yhtio in ($yhtiot)
+              and tilausrivi.tyyppi  in ('L','V','E')
+              and tilausrivi.tuoteno = '$row[tuoteno]'
+              $varastot
+              and ((tilausrivi.laskutettuaika >= '$vva4-$kka4-$ppa4' and tilausrivi.laskutettuaika <= '$vvl4-$kkl4-$ppl4') or tilausrivi.laskutettuaika = '0000-00-00')";
+    $result   = pupe_query($query);
+    $laskurow = mysql_fetch_assoc($result);
+  }
   // Myydyt kappaleet
   $returnstring2 += (float) $laskurow['kpl4'];
   $returnstring1 += (float) ($laskurow['ennpois'] + $laskurow['jt']);
@@ -243,17 +263,31 @@ function ostot($myynti_varasto = '', $myynti_maa = '') {
     }
   }
 
-  //tilauksessa
-  $query = "SELECT sum(tilausrivi.varattu) tilattu
-            FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
-            WHERE tilausrivi.yhtio in ($yhtiot)
-            and tilausrivi.tyyppi  = 'O'
-            and tilausrivi.tuoteno = '$row[tuoteno]'
-            $varastot
-            and tilausrivi.varattu > 0";
-  $result = pupe_query($query);
-  $ostorow = mysql_fetch_assoc($result);
-
+  if ($toim == "BIO") {
+    //tilauksessa kerayspvm mukaan
+    $query = "SELECT ifnull(sum(tilausrivi.varattu), 0) tilattu
+              FROM tilausrivi use index (yhtio_tyyppi_tuoteno_kerayspvm)
+              WHERE tilausrivi.yhtio in ($yhtiot)
+              and tilausrivi.tyyppi  = 'O'
+              and tilausrivi.tuoteno = '$row[tuoteno]'
+              $varastot
+              and tilausrivi.varattu > 0
+              and ((tilausrivi.kerayspvm >= '$vva4-$kka4-$ppa4' and tilausrivi.kerayspvm <= '$vvl4-$kkl4-$ppl4') or tilausrivi.kerayspvm = '0000-00-00')";
+    $result = pupe_query($query);
+    $ostorow = mysql_fetch_assoc($result);
+  }
+  else {
+    //tilauksessa
+    $query = "SELECT sum(tilausrivi.varattu) tilattu
+              FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
+              WHERE tilausrivi.yhtio in ($yhtiot)
+              and tilausrivi.tyyppi  = 'O'
+              and tilausrivi.tuoteno = '$row[tuoteno]'
+              $varastot
+              and tilausrivi.varattu > 0";
+    $result = pupe_query($query);
+    $ostorow = mysql_fetch_assoc($result);
+  }
   // tilattu kpl
   $returnstring += (float) $ostorow['tilattu'];
 
@@ -569,7 +603,12 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
 
   echo "<th valign='top'>".t("Saldo")."</th>";
   echo "<th valign='top'>".t("Tilattu")."<br>".t("Varattu")."</th>";
-  echo "<th valign='top'>".t("Ostoehdotus")."<br>".t("Vuosikulutus")."</th>";
+  if ($toim == "BIO") {
+    echo "<th valign='top'>".t("Ostoehdotus")."<br>".t("Kulutus")."</th>";
+  }
+  else {
+    echo "<th valign='top'>".t("Ostoehdotus")."<br>".t("Vuosikulutus")."</th>";
+  }
 
   if ($toim == "KK") echo "<th valign='top'>".t("Tilausm‰‰r‰")."<br>".t("Varastoitava")."</th>";
   else echo "<th valign='top'>".t("Pakkauskoko")."<br>".t("Varastoitava")."</th>";
@@ -672,6 +711,14 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
         }
       }
       else {
+        $ostoehdotus = 0;
+      }
+    }
+    elseif ($toim == "BIO") {
+      # V‰hennet‰‰n myynneist‰ vapaa saldo ja ostot
+      $ostoehdotus = $enp - ($saldot + $ostot);
+
+      if ($ostoehdotus < 0) {
         $ostoehdotus = 0;
       }
     }

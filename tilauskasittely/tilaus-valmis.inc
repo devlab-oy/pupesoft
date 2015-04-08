@@ -1849,7 +1849,7 @@ else {
                       AND tilausrivi.tunnus  != '{$row['perheid']}'";
             $ohnoes_res = pupe_query($query);
 
-            if (mysql_num_rows($ohnoes_res) > 0 or $row['omalle_tilaukselle'] != '') {
+            if (mysql_num_rows($ohnoes_res) > 0 or $row['omalle_tilaukselle'] > 0) {
               $query = "UPDATE tilausrivi
                         SET otunnus = '{$laskurow['tunnus']}'
                         WHERE yhtio  = '{$kukarow['yhtio']}'

@@ -74,7 +74,7 @@ if ($tee == 'MAKSUEHTO') {
 $query_ale_lisa = generoi_alekentta('M');
 
 if ($maksupaate_kassamyynti) {
-  if (!empty($tunnukset)) {
+  if (!empty($tunnukset) and !$yksi_valittu) {
     $tunnari = $tunnukset;
   }
   elseif (!empty($tilausnumero)) {
@@ -394,7 +394,7 @@ if ($tee == 'TOIMITA') {
 
 if ($tee == "VALITSE") {
 
-  $tunnukset = isset($tunnukset) ? $tunnukset : $tunnari;
+  $tunnukset = isset($tunnari) ? $tunnari : $tunnukset;
 
   $res = hae_tilaukset_result($query_ale_lisa, $tunnukset, $alatilat, $vientilisa);
 

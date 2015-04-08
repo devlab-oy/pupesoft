@@ -334,6 +334,11 @@ if (!function_exists("tee_jt_tilaus")) {
           elseif ($fieldname == 'laatija') {
             $query .= "laatija='$kukarow[kuka]',";
           }
+          // varasto
+          elseif ($fieldname == 'varasto') {
+            // Nollataan varasto, koska alkuperäisen tilauksen varastolla ei ole uudella otsikolla virkaa.
+            $query .= "varasto=0,";
+          }
           // keräysaika ja toimitusaikaan now
           elseif ($fieldname == 'kerayspvm' or
             $fieldname == 'toimaika') {

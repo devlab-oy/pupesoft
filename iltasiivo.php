@@ -876,10 +876,10 @@ if ($php_cli) {
   $argv[2] = 'CLI_TUOTTEETTOMAT';
 
   require "varastopaikkojen_siivous.php";
-  
+
   if ($poistettu > 0) {
     $iltasiivo .= is_log("Poistettiin $poistettu tuotepaikkaa jonka tuotetta ei enää ole.");
-  }  
+  }
 }
 
 /**

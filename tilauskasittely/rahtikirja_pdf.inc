@@ -471,7 +471,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
     $pdf->draw_text(422, $rakir_i_kala, $kilot[$rakir_i], $firstpage, $kirj);
     $pdf->draw_text(486, $rakir_i_kala, $kuutiot[$rakir_i], $firstpage, $kirj);
 
-    if ($astilnrot[$rakir_i] != '')  {
+    if ($astilnrot[$rakir_i] != '') {
       $rakir_i_kala-= 10;
       $pdf->draw_text(62, $rakir_i_kala, t("Astilnro").": ".$astilnrot[$rakir_i], $firstpage, $kirj);
     }
@@ -480,7 +480,7 @@ for ($tulostuskpl=1; $tulostuskpl<=$tulostakolli; $tulostuskpl++) {
 
     if ($alempiteksti != "") {
 
-      if ($astilnrot[$rakir_i] == '')  {
+      if ($astilnrot[$rakir_i] == '') {
         $rakir_i_kala-= 10;
       }
 

@@ -13,7 +13,7 @@ else {
 
 if ($yhtiorow["raaka_aine_tiliointi"] == "Y") {
   $raaka_aine_tiliointi_lisa = "if(tuote.tuotetyyppi = 'R', 'raaka-aine', " .
-                               "'normaalituote') tuotetyyppi,";
+    "'normaalituote') tuotetyyppi,";
   $raaka_aine_tiliointi_group = ",15";
 }
 else {
@@ -363,7 +363,7 @@ else {
       list($kustp_ins, $kohde_ins, $projekti_ins) = kustannuspaikka_kohde_projekti($yhtiorow["varasto"], $kustp_ins, $kohde_ins, $projekti_ins);
 
       if ($yhtiorow["raaka_aine_tiliointi"] == "Y" and
-          $xrow["tuotetyyppi"] == "raaka-aine") {
+        $xrow["tuotetyyppi"] == "raaka-aine") {
         $tilinumero = $yhtiorow["raaka_ainevarasto"];
         $muutostili = $yhtiorow["raaka_ainevarastonmuutos"];
       }

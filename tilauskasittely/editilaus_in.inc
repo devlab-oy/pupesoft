@@ -2342,7 +2342,12 @@ while ($tietue = fgets($fd)) {
         $silent = "SILENT";
         $tilausvalmiskutsuja = "EDITILAUS";
 
-        require "tilaus-valmis.inc";
+        // Vientitilauksille saa kutsua tilaus-valmis.inci‰ vaan kerran
+        // Kotimaan tilauksilel kutsutaan tilaus-valmis.inci‰ kahdesti,
+        // koska ekalla kerralla niille luodaan pupeen lasku
+        if ($laskurow["vienti"] == "") {
+          require "tilaus-valmis.inc";
+        }
 
         // jos magentosta tullut tilaus on jo maksettu, p‰ivitet‰‰n se takaisin ker‰ysjonoon (paitsi tilaustyyppi 9, jossa halutaan ohittaa varastoprosessi ja laskuttaa kaikki)
         if ($edi_tyyppi == "magento" and $editilaus_kassalipas != "" and $editilaus_tilaustyyppi != "9") {

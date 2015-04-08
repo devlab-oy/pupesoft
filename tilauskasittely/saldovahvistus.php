@@ -36,10 +36,10 @@ if ($ajax_request) {
       $lasku_tunnukset_key = implode('', $saldovahvistus_rivi['lasku_tunnukset']);
       if ($lisays == 'true') {
         $saldovahvistusrivi = array(
-            'laskun_avoin_paiva'    => $saldovahvistus_rivi['laskun_avoin_paiva'],
-            'saldovahvistus_viesti' => $saldovahvistus_rivi['saldovahvistus_viesti'],
-            'lasku_tunnukset'       => $saldovahvistus_rivi['lasku_tunnukset'],
-            'ryhmittely_tyyppi'     => $saldovahvistus_rivi['ryhmittely_tyyppi'],
+          'laskun_avoin_paiva'    => $saldovahvistus_rivi['laskun_avoin_paiva'],
+          'saldovahvistus_viesti' => $saldovahvistus_rivi['saldovahvistus_viesti'],
+          'lasku_tunnukset'       => $saldovahvistus_rivi['lasku_tunnukset'],
+          'ryhmittely_tyyppi'     => $saldovahvistus_rivi['ryhmittely_tyyppi'],
         );
         lisaa_sessioon_saldovahvistus_rivi($lasku_tunnukset_key, $saldovahvistusrivi);
       }
@@ -440,8 +440,8 @@ function echo_saldovahvistukset($request) {
   echo "<th>" . t('Nimi') . "</th>";
   echo "<th>" . t('Saldo') . "</th>";
   echo "<th>" . t('Viesti') . "</th>";
-  echo "<th>",t("Muistissa"),"</th>";
-  echo "<th>",t("Lähetä"),"</th>";
+  echo "<th>", t("Muistissa"), "</th>";
+  echo "<th>", t("Lähetä"), "</th>";
   echo "<th class='hidden'></th>";
   echo "</tr>";
 

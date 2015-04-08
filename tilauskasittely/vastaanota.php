@@ -1524,7 +1524,7 @@ if (!empty($id) and $echotaanko) {
         $hyllynro  = $rivirow["kohde_hyllynro"];
         $hyllyvali = $rivirow["kohde_hyllyvali"];
         $hyllytaso = $rivirow["kohde_hyllytaso"];
-       }
+      }
 
       echo "<td>";
       echo "<input type='hidden' name='t1[$rivirow[tunnus]]' value='$hyllyalue' maxlength='5' size='5'>";

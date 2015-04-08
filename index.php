@@ -9,7 +9,7 @@ $go = $goso = '';
 if (isset($_REQUEST['go'])) {
 
   $go = $_REQUEST['go'];
-  
+
   if (strpos($go, '?')) {
     $go .= "&indexvas=1";
   }

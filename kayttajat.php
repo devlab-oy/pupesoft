@@ -1525,7 +1525,7 @@ if ($tee == 'MUUTA') {
         }
 
         echo "<option value='{$me_row["tunnus"]}' {$selected}>" .
-             t_tunnus_avainsanat($me_row, "teksti", "MAKSUEHTOKV") . " {$sallitut_maat}</option>";
+          t_tunnus_avainsanat($me_row, "teksti", "MAKSUEHTOKV") . " {$sallitut_maat}</option>";
       }
 
       echo "</select></td></tr>";
@@ -1552,13 +1552,13 @@ if ($tee == 'MUUTA') {
         }
 
         echo "<option value='{$tt_row["selite"]}' {$selected}>" .
-             t_tunnus_avainsanat($tt_row, "selite", "TOIMTAPAKV") . "</option>";
+          t_tunnus_avainsanat($tt_row, "selite", "TOIMTAPAKV") . "</option>";
       }
 
       echo "</select></td></tr>";
 
       echo "<tr><th><label for='eilahetetta'>" . t("Tilaukset oletuksena suoraan laskutukseen") .
-           "</label></th>";
+        "</label></th>";
       echo "<td>";
 
       $checked = $krow["eilahetetta"] == "o" ? "checked" : "";

@@ -95,7 +95,7 @@ if (!function_exists('alku_kerayslista')) {
       tulosta_logo_pdf($pdf, $thispage, $laskurow);
 
       $_ker_chk = ($yhtiorow['kerayserat'] == 'K' and isset($kerayseran_numero) and $kerayseran_numero > 0);
-      $_rek_chk = ($toim == "VASTAANOTA_REKLAMAATIO" and in_array($yhtiorow['reklamaation_kasittely'], array('U','X')));
+      $_rek_chk = ($toim == "VASTAANOTA_REKLAMAATIO" and in_array($yhtiorow['reklamaation_kasittely'], array('U', 'X')));
 
       $_ker_rek = ($_ker_chk or $_rek_chk);
 

@@ -2669,7 +2669,7 @@ else {
     if (filesize($nimixml) == 0) {
       unlink($nimixml);
     }
-    else {
+    elseif (PUPE_UNICODE) {
       // Muutetaan ISO-8859-15:ksi jos lasku on jossain toisessa merkistössä
       exec("recode --force UTF8..ISO-8859-15 $nimixml");
     }
@@ -2677,7 +2677,7 @@ else {
     if (filesize($nimifinvoice) == 0) {
       unlink($nimifinvoice);
     }
-    else {
+    elseif (PUPE_UNICODE) {
       // Muutetaan ISO-8859-15:ksi jos lasku on jossain toisessa merkistössä
       exec("recode --force UTF8..ISO-8859-15 $nimifinvoice");
     }
@@ -2685,7 +2685,7 @@ else {
     if (filesize($nimiedi) == 0) {
       unlink($nimiedi);
     }
-    else {
+    elseif (PUPE_UNICODE) {
       // Muutetaan ISO-8859-15:ksi jos lasku on jossain toisessa merkistössä
       exec("recode --force UTF8..ISO-8859-15 $nimiedi");
     }
@@ -2693,7 +2693,7 @@ else {
     if (filesize($nimisisainenfinvoice) == 0) {
       unlink($nimisisainenfinvoice);
     }
-    else {
+    elseif (PUPE_UNICODE) {
       // Muutetaan ISO-8859-15:ksi jos lasku on jossain toisessa merkistössä
       exec("recode --force UTF8..ISO-8859-15 $nimisisainenfinvoice");
     }

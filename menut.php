@@ -115,12 +115,8 @@ if ((isset($synkronoireferenssi) or isset($synkronoireferenssialapaivita)) and c
   curl_setopt($ch, CURLOPT_HEADER, FALSE);
   $referenssit = curl_exec($ch);
 
-  // Katsotaan onko meillä UTF-8 merkistö Pupesoftissa käytössä
-  $tervetuloa = file_get_contents("tervetuloa.php");
-  $utf8_enabled = (mb_detect_encoding($tervetuloa, 'UTF-8', true) !== false);
-
   // Käännetään aliakset UTF-8 muotoon, jos Pupe on UTF-8:ssa
-  if ($utf8_enabled) {
+  if (PUPE_UNICODE) {
     // Tässä on "//NO_MB_OVERLOAD"-kommentti
     // jotta UTF8-konversio ei osu tähän riviin
     $referenssit = utf8_encode($referenssit); ; //NO_MB_OVERLOAD
@@ -633,12 +629,8 @@ if ($tee == "") {
         curl_setopt($ch, CURLOPT_HEADER, FALSE);
         $referenssit = curl_exec($ch);
 
-        // Katsotaan onko meillä UTF-8 merkistö Pupesoftissa käytössä
-        $tervetuloa = file_get_contents("tervetuloa.php");
-        $utf8_enabled = (mb_detect_encoding($tervetuloa, 'UTF-8', true) !== false);
-
         // Käännetään aliakset UTF-8 muotoon, jos Pupe on UTF-8:ssa
-        if ($utf8_enabled) {
+        if (PUPE_UNICODE) {
           // Tässä on "//NO_MB_OVERLOAD"-kommentti
           // jotta UTF8-konversio ei osu tähän riviin
           $referenssit = utf8_encode($referenssit); ; //NO_MB_OVERLOAD

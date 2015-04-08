@@ -13,21 +13,52 @@ error_reporting(E_ERROR);
 ini_set("display_errors", 0);
 ini_set("log_errors", 1);
 
-$alkumem    = memory_get_usage();
-$timeparts    = explode(" ", microtime());
-$starttime    = $timeparts[1].substr($timeparts[0], 1);
+$alkumem   = memory_get_usage();
+$timeparts = explode(" ", microtime());
+$starttime = $timeparts[1].substr($timeparts[0], 1);
+$src       = array("\"", "'", "<", ">", "\\", ";");
+
 unset($_GET["param_clean"], $_POST["param_clean"], $_REQUEST["param_clean"]);
 
-if (!function_exists("pupe_register_globals")) {
-  function pupe_register_globals($param_clean) {
-    $src = array("\"", "'", "<", ">", "\\", ";");
-    $rpl = array("{DOULEPRIME}" , "{PRIME}", "" , "" , ""  , "");
-
-    foreach ($param_clean as $key => $value) {
-      $param_clean[$key] = $GLOBALS[$key] = str_replace($src, $rpl, $param_clean[$key]);
+if (!PUPE_UNICODE) {
+  if (!function_exists("pupe_iconv")) {
+    function pupe_iconv(&$item, $key) {
+      $item = iconv("UTF-8", "latin1//TRANSLIT", $item);
     }
+  }
 
-    return $param_clean;
+  if (!function_exists("pupe_register_globals")) {
+    function pupe_register_globals($param_clean) {
+      foreach ($param_clean as $key => $value) {
+
+        if (isset($_REQUEST["sourceCharset"]) and $_REQUEST["sourceCharset"] == "UTF-8") {
+          if (is_array($param_clean[$key])) {
+            array_walk_recursive($param_clean[$key], "pupe_iconv");
+          }
+          else {
+            $param_clean[$key] = iconv("UTF-8", "latin1//TRANSLIT", $param_clean[$key]);
+          }
+        }
+
+        $param_clean[$key] = $GLOBALS[$key] = str_replace($src, "", $param_clean[$key]);
+      }
+
+      return $param_clean;
+    }
+  }
+}
+else {
+  if (!function_exists("pupe_register_globals")) {
+    function pupe_register_globals($param_clean) {
+
+      $rpl = array("{DOULEPRIME}" , "{PRIME}", "" , "" , ""  , "");
+
+      foreach ($param_clean as $key => $value) {
+        $param_clean[$key] = $GLOBALS[$key] = str_replace($src, $rpl, $param_clean[$key]);
+      }
+
+      return $param_clean;
+    }
   }
 }
 
@@ -639,8 +670,15 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       $yhtiorow['active_css'] = $yhtiorow['css'];
     }
 
+    if (!PUPE_UNICODE) {
+      $charset = "iso-8859-1";
+    }
+    else {
+      $charset = "utf-8";
+    }
+
     if (!headers_sent()) {
-      header("Content-Type: text/html; charset=utf-8");
+      header("Content-Type: text/html; charset=$charset");
       header("Pragma: public");
       header("Expires: 0");
       header("Last-Modified: ".gmdate("D, d M Y H:i:s")." GMT");
@@ -663,7 +701,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       echo "<meta http-equiv='cache-control' content='no-cache'>\n";
       echo "<meta http-equiv='pragma' content='no-cache'>\n";
       echo "<meta http-equiv='expires' content='-1'>\n";
-      echo "<meta http-equiv='content-type' content='text/html; charset=utf-8'>\n";
+      echo "<meta http-equiv='content-type' content='text/html; charset=$charset'>\n";
 
       // Jos mobile on setattu, otetaan auto-zoom pois käytöstä
       if (isset($mobile) and $mobile) {

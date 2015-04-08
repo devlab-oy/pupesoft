@@ -74,11 +74,11 @@ if ($tee == 'MAKSUEHTO') {
 $query_ale_lisa = generoi_alekentta('M');
 
 if ($maksupaate_kassamyynti) {
-  if (!empty($tunnukset) and !$yksi_valittu) {
-    $tunnari = $tunnukset;
-  }
-  elseif (!empty($tilausnumero)) {
+if (!empty($tilausnumero)) {
     $tunnari = $tilausnumero;
+  }
+  elseif (!empty($tunnukset) and !$yksi_valittu) {
+    $tunnari = $tunnukset;
   }
   elseif (!empty($tunnus)) {
     $tunnari = reset($tunnus);
@@ -916,10 +916,17 @@ if ($tee == "VALITSE") {
         echo "<td colspan='3'><input type='checkbox' name='tullinimike_ja_alkuperamaa' /></td></tr>";
       }
 
-      echo "<tr><th>".t("Syötä poikkeava laskutuspäivämäärä (pp-kk-vvvv)").":</th>
-          <td><input type='text' name='laskpp' value='' size='3'></td>
-          <td><input type='text' name='laskkk' value='' size='3'></td>
-          <td><input type='text' name='laskvv' value='' size='5'></td></tr>";
+      if (!$kaytetaan_maksupaatetta) {
+        echo "<tr><th>" . t("Syötä poikkeava laskutuspäivämäärä (pp-kk-vvvv)") . ":</th>
+            <td><input type='text' name='laskpp' value='' size='3'></td>
+            <td><input type='text' name='laskkk' value='' size='3'></td>
+            <td><input type='text' name='laskvv' value='' size='5'></td></tr>";
+      }
+      else {
+        echo "<input type='hidden' name='laskpp' value>
+              <input type='hidden' name='laskkk' value>
+              <input type='hidden' name='laskvv' value>";
+      }
 
       if ($yhtiorow["myyntilaskun_erapvmlaskenta"] == "K") {
         echo "<tr><th>".t("Laske eräpäivä").":</th>

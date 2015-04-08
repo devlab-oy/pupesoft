@@ -270,8 +270,8 @@ if ($yhtiorow["livetuotehaku_tilauksella"] == "K") {
 
 if ($kukarow["extranet"] == "") {
   echo "<script src='../js/tilaus.js'></script>";
-
   echo "<script src='../js/tilaus_myynti/tilaus_myynti.js'></script>";
+  echo "<script src='../js/maksupaate.js'></script>";
 }
 
 if ((int) $luotunnusnippu > 0 and $tilausnumero == $kukarow["kesken"] and (int) $kukarow["kesken"] > 0) {
@@ -783,10 +783,18 @@ if ((int) $kukarow["kesken"] > 0) {
 
   $laskurow = mysql_fetch_assoc($result);
 
-  if ($maksupaate_kassamyynti) {
-    $korttimaksutapahtuman_status = maksa_maksupaatteella();
+  if ($maksupaate_kassamyynti and isset($maksupaatetapahtuma)) {
+    if ($maksupaatetapahtuma) {
+      $korttimaksutapahtuman_status =
+        maksa_maksupaatteella($laskurow, $kaikkiyhteensa, $korttimaksu, $peruutus);
+    }
+
+    $kaikkiyhteensa = isset($kaikkiyhteensa) ? $kaikkiyhteensa : false;
+    $kateista_annettu = isset($kateista_annettu) ? $kateista_annettu : 0;
+
     list($loytyy_maksutapahtumia, $maksettavaa_jaljella, $kateismaksu["luottokortti"],
-      $kateismaksu["pankkikortti"]) = jaljella_oleva_maksupaatesumma();
+      $kateismaksu["pankkikortti"]) =
+      jaljella_oleva_maksupaatesumma($laskurow["tunnus"], $kaikkiyhteensa);
 
     if ($loytyy_maksutapahtumia and ($maksettavaa_jaljella - $kateista_annettu) == 0 and
                                     ($kateismaksu["luottokortti"] != 0 or
@@ -9285,7 +9293,8 @@ if ($tee == '') {
 
               if ($maksupaate_kassamyynti and $maksuehtorow["kateinen"] != "") {
                 list($loytyy_maksutapahtumia, $maksettavaa_jaljella, $kateismaksu["luottokortti"],
-                  $kateismaksu["pankkikortti"]) = jaljella_oleva_maksupaatesumma();
+                  $kateismaksu["pankkikortti"]) =
+                  jaljella_oleva_maksupaatesumma($laskurow["tunnus"], $kaikkiyhteensa);
 
                 $maksettavaa_jaljella = $maksettavaa_jaljella - $kateismaksu["kateinen"];
 
@@ -9546,7 +9555,13 @@ if ($tee == '') {
                                                               $rivilaskuri > 0 and
                                                               $asiakasOnProspekti != "JOO"
     ) {
-      piirra_maksupaate_formi();
+      $kateinen = isset($kateinen) ? $kateinen : "";
+      $kateista_annettu = isset($kateista_annettu) ? $kateista_annettu : 0;
+      $korttimaksutapahtuman_status =
+        isset($korttimaksutapahtuman_status) ? $korttimaksutapahtuman_status : "";
+      piirra_maksupaate_formi($laskurow, $kaikkiyhteensa, $kateinen, $maksettavaa_jaljella,
+                              $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
+                              $korttimaksutapahtuman_status);
     }
 
     echo "<br><table width='100%'><tr>$jarjlisa";
@@ -10517,161 +10532,4 @@ function tallenna_toimitusosoite($toimitusosoite, $laskurow) {
   $laskurow["toim_maa"]      = $toimitusosoite["maa"];
 
   return $laskurow;
-}
-
-function maksa_maksupaatteella() {
-  global $tilausnumero, $korttimaksu, $yhtiorow, $maksupaatetapahtuma, $kaikkiyhteensa, $laskurow,
-         $kukarow, $peruutus;
-
-  if (isset($maksupaatetapahtuma) and $maksupaatetapahtuma != '' and $tilausnumero != '') {
-    if ($peruutus == "X") {
-      $korttimaksu = 0;
-    }
-    else {
-      $korttimaksu = str_replace(",", ".", $korttimaksu);
-      $korttimaksu = number_format($korttimaksu, $yhtiorow['hintapyoristys'], '.', '');
-    }
-
-    require("rajapinnat/lumo_handler.inc");
-
-    return $korttimaksutapahtuman_status;
-  }
-}
-
-function piirra_maksupaate_formi() {
-  global $kukarow, $laskurow, $palvelin2, $tilauskaslisa, $tilausnumero, $mista, $kaikkiyhteensa,
-         $valittu_kopio_tulostin, $kateinen, $kertakassa, $toim, $orig_tila, $orig_alatila,
-         $korttimaksu, $maksettu_lkortilla, $maksettu_pkortilla, $maksettavaa_jaljella,
-         $korttimaksutapahtuman_status, $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu;
-
-  $query_maksuehto = "SELECT *
-                      FROM maksuehto
-                      WHERE yhtio='{$kukarow["yhtio"]}'
-                      AND kateinen != ''
-                      AND kaytossa  = ''
-                      AND (maksuehto.sallitut_maat = ''
-                        OR maksuehto.sallitut_maat LIKE '%{$laskurow["maa"]}%')";
-
-  $maksuehtores = pupe_query($query_maksuehto);
-  $maksuehtorow = mysql_fetch_assoc($maksuehtores);
-
-  echo "<div id='dialog' title='" . t("Käteislaskuri") . "'>
-          <form id='kateisFormi' class='multisubmit'>
-            <ul class='list-unstyled'>
-              <li class='text-medium'>" . t("Summa") . ":</li>
-              <li>
-                <span id='jaljella' class='text-large'>{$maksettavaa_jaljella}</span>
-                <span class='text-large'>{$laskurow["valkoodi"]}</span>
-              </li>
-              <li class='text-medium'>" . t("Annettu") . ":</li>
-              <li><input id='annettu' type='number' min='0.01' step='0.01' class='text-large'></li>
-              <li id='takaisinTeksti' class='text-medium'>" . t("Takaisin") . ":</li>
-              <li>
-                <span id='takaisin' class='text-large'></span>
-                <span class='text-large'>{$laskurow["valkoodi"]}</span>
-              </li>
-            </ul>
-          </form>
-        </div>";
-
-  echo "<form name='maksupaate' id='maksupaate' method='post'
-              action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
-
-  echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
-  echo "<input type='hidden' name='tilausnumero' value='{$tilausnumero}'>";
-  echo "<input type='hidden' name='mista' value='{$mista}'>";
-  echo "<input type='hidden' name='tee' id='laskuriTee' value=''>";
-  echo "<input type='hidden' name='maksutapa' value='{$maksuehtorow["tunnus"]}'>";
-  echo "<input type='hidden' name='kaikkiyhteensa' value='{$kaikkiyhteensa}'>";
-  echo "<input type='hidden' name='valittu_kopio_tulostin' value='{$valittu_kopio_tulostin}'>";
-  echo "<input type='hidden' name='kateinen' value='{$kateinen}'>";
-  echo "<input type='hidden' name='kertakassa' value='{$kertakassa}'>";
-  echo "<input type='hidden' name='toim' value='{$toim}'>";
-  echo "<input type='hidden' name='seka' id='seka' value='X'>";
-  echo "<input type='hidden' name='orig_tila' value='{$orig_tila}'>";
-  echo "<input type='hidden' name='orig_alatila' value='{$orig_alatila}'>";
-  echo "<input type='hidden' name='kateisohitus'>";
-  echo "<input type='hidden' name='toimitustapa' value='{$laskurow["toimitustapa"]}'>";
-  echo "<input type='hidden' name='maksupaatetapahtuma' id='maksupaatetapahtuma' value=''>";
-  echo "<input type='hidden' id='peruutus' name='peruutus' value>";
-  echo "<input type='hidden' name='kateismaksu[kateinen]' id='kateinen' value='{$kateismaksu["kateinen"]}'>";
-  echo "<input type='hidden' name='kateista_annettu' id='kateistaAnnettu' value='{$kateista_annettu}'>";
-
-  echo "<table style='width: 100%; margin-top: 20px;'>";
-  echo "<tr><td class='back'><font class='head'>" . t("Maksutapa") . "</font></td></tr>";
-  echo "<tr>";
-  echo "<td><label for='korttimaksu'>" . t("Summa") . "</label>";
-  echo "<input type='text' name='korttimaksu' id='korttimaksu' value='{$maksettavaa_jaljella}'
-               size='7' autocomplete='off'>";
-  echo "<span class='error'>" . t($korttimaksutapahtuman_status) . "</span>";
-  echo "</td></tr>";
-
-  echo "<tr>
-          <td>
-            <input type='button'
-                   name='kateismaksunappi'
-                   id='kateismaksunappi'
-                   value='" . t("Käteinen") . " (Alt+C)'
-                   accesskey='c'>
-            <input type='button'
-                   name='korttimaksunappi'
-                   id='korttimaksunappi'
-                   value='" . t("Kortti") . " (Alt+K)'
-                   accesskey='k'>";
-
-  if ($loytyy_maksutapahtumia) {
-    echo "<input type='button' class='margin-left-20' name='peruuta_viimeisin'
-                 id='peruuta_viimeisin' value='" . t("Peruuta viimeisin maksu") . "'>";
-  }
-
-  echo "<input name='keraykseen' id='keraykseen' type='button' class='margin-left-20'
-               value='" . t("Ei vielä laskuteta, siirrä tilaus keräykseen") . "'>
-          </td>
-        </tr>";
-  echo "</table></form>";
-}
-
-function jaljella_oleva_maksupaatesumma() {
-  global $kukarow, $tilausnumero, $kaikkiyhteensa, $yhtiorow;
-
-  $loytyy = false;
-
-  // Tarkistetaan onko onnistuneita suorituksia (K)-korttimaksut
-  $query = "SELECT *
-            FROM maksupaatetapahtumat
-            WHERE yhtio = '{$kukarow['yhtio']}'
-            AND tilausnumero = '{$tilausnumero}'
-            AND maksutapa != ''
-            AND tila IN ('K', 'H')";
-
-  $result = pupe_query($query);
-
-  $maksettu_pkortilla = 0;
-  $maksettu_lkortilla = 0;
-
-  while ($ruutu = mysql_fetch_assoc($result)) {
-    if ($ruutu['maksutapa'] == "LUOTTOKORTTI") {
-      $maksettu_lkortilla += $ruutu['summa_valuutassa'];
-    }
-    else {
-      $maksettu_pkortilla += $ruutu['summa_valuutassa'];
-    }
-  }
-
-  $maksupaate_maksetut['luottokortti'] = $maksettu_lkortilla;
-  $maksupaate_maksetut['pankkikortti'] = $maksettu_pkortilla;
-
-  $valisumma = 0;
-
-  foreach ($maksupaate_maksetut as $maksettu) {
-    $valisumma += $maksettu;
-  }
-
-  if ($valisumma != 0) {
-    $loytyy = true;
-  }
-
-  $totaalisumma = number_format($kaikkiyhteensa - $valisumma, $yhtiorow['hintapyoristys'], '.', '');
-
-  return array($loytyy, $totaalisumma, $maksettu_lkortilla, $maksettu_pkortilla);
 }

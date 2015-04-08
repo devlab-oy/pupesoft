@@ -771,7 +771,7 @@ if ($tee == "VALITSE") {
                             ORDER BY tunnus";
         $maksuehtores = pupe_query($query_maksuehto);
 
-        if (mysql_num_rows($maksuehtores) > 1) {
+        if (!$kaytetaan_maksupaatetta and mysql_num_rows($maksuehtores) > 1) {
           echo "<tr><th>".t("Maksutapa")."</th><td colspan='3'>";
 
           echo "<select name='maksutapa'>";

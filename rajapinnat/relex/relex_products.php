@@ -564,7 +564,21 @@ while ($row = mysql_fetch_assoc($res)) {
       'toimitusaika_ema'                => '')
   );
 
-  $parastoimittaja = array();
+  $parastoimittaja = array(
+    "toimittaja" => '',
+    "toim_tuoteno" => '',
+    "toim_nimitys" => '',
+    "osto_era" => '',
+    "pakkauskoko" => '',
+    "lavakoko" => '',
+    "ostohinta_oletusvaluutta" => '',
+    "alennukset_oletusvaluutta_netto" => '',
+    "valuutta" => '',
+    "oletus_kulupros" => '',
+    "toim_yksikko" => '',
+    "tuotekerroin" => '',
+    "jarjestys" => '',
+  );
 
   if (mysql_num_rows($ttres) > 0) {
 

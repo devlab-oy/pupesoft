@@ -2,7 +2,7 @@
 
 if ($_REQUEST['malli'] == 'PDF24' or
   $_REQUEST['malli'] == 'PDF40' or
-    $_REQUEST['malli'] == 'PDF' or
+  $_REQUEST['malli'] == 'PDF' or
   $_REQUEST['malli'] == 'Hintalappu PDF' and
   (!empty($_REQUEST['tuoteno']) or $_REQUEST['toim'] != 'HINTA')
 ) {

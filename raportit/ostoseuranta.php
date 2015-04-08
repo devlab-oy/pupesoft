@@ -209,6 +209,18 @@ else {
           }
         }
 
+        if ($mukaan == "maa") {
+          if ($group!="") $group .= ",lasku.maa";
+          else $group .= "lasku.maa";
+          $select .= "lasku.maa maa, ";
+          $order  .= "lasku.maa,";
+          $gluku++;
+
+          if ($rajaus[$i] != "") {
+            $lisa .= " and lasku.maa='{$rajaus[$i]}' ";
+          }
+        }
+
         if ($mukaan == "tuoteostaja") {
           if ($group!="") $group .= ",tuote.ostajanro";
           else $group  .= "tuote.ostajanro";
@@ -239,6 +251,18 @@ else {
           $select .= "lasku.ytunnus, group_concat(distinct lasku.nimi SEPARATOR '<br>') nimi,";
           $order  .= "ytunnus, nimi,";
           $gluku++;
+        }
+
+        if ($mukaan == "toimitusehdoittain") {
+          if ($group!="") $group .= ",lasku.toimitusehto";
+          else $group  .= "lasku.toimitusehto";
+          $select .= "lasku.toimitusehto,";
+          $order  .= "lasku.toimitusehto,";
+          $gluku++;
+
+          if ($rajaus[$i] != "") {
+            $lisa .= " AND lasku.toimitusehto LIKE '%$rajaus[$i]%' ";
+          }
         }
       }
 
@@ -859,6 +883,12 @@ else {
       <td><input type='text' name='rajaus[80]' value='$rajaus[80]'></td>
       </tr>
       <tr>
+      <th>", t("Listaa maittain"), "</th>
+      <td><input type='text' name='jarjestys[90]' size='2' value='{$jarjestys[90]}'></td>
+      <td><input type='checkbox' name='ruksit[90]' value='maa' {$ruk90chk}></td>
+      <td><input type='text' name='rajaus[90]' value='{$rajaus[90]}'></td>
+      </tr>
+      <tr>
       <th>".t("Listaa tuoteostajittain")."</th>
       <td><input type='text' name='jarjestys[110]' size='2' value='$jarjestys[110]'></td>
       <td><input type='checkbox' name='ruksit[110]' value='tuoteostaja' $ruk110chk></td>
@@ -897,6 +927,13 @@ else {
       <td><input type='text' name='jarjestys[140]' size='2' value='$jarjestys[140]'></td>
       <td><input type='checkbox' name='ruksit[140]' value='toimittaja' $ruk140chk></td>
       <td><input type='text' name='toimittaja' value='$toimittaja'></td>
+      </tr>
+      </tr>
+      <tr>
+      <th>".t("Listaa toimitusehdoittain")."</th>
+      <td><input type='text' name='jarjestys[150]' size='2' value='$jarjestys[150]'></td>
+      <td><input type='checkbox' name='ruksit[150]' value='toimitusehdoittain' $ruk150chk></td>
+      <td><input type='text' name='rajaus[150]' value='$rajaus[150]'></td>
       </tr>
       <td class='back'><br></td>
       </tr>

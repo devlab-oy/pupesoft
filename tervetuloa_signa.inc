@@ -177,36 +177,3 @@ function hae_myyjan_myynti_ja_kate($aika, $kuka_tunnus) {
 function piirra_aikavali($aika_vali) {
   return date('d.m', strtotime($aika_vali['start_date'])).' - '.date('d.m', strtotime($aika_vali['end_date']));
 }
-
-function paata_kvartaali() {
-  $tama_vuosi = date('Y');
-  $kvartaalit = array(
-    4   => array(
-      "start_date" => "$tama_vuosi-01-01",
-      "end_date"   => "$tama_vuosi-03-31"
-    ),
-    1   => array(
-      "start_date" => "$tama_vuosi-04-01",
-      "end_date"   => "$tama_vuosi-06-30"
-    ),
-    2   => array(
-      "start_date" => "$tama_vuosi-07-01",
-      "end_date"   => "$tama_vuosi-09-30"
-    ),
-    3   => array(
-      "start_date" => "$tama_vuosi-10-01",
-      "end_date"   => "$tama_vuosi-12-31"
-    ),
-  );
-
-  //tarkisteaan mikä kvartaali on menossa.
-  foreach ($kvartaalit as $kvartaali) {
-    $now = date('Y-m-d');
-    if ($now >= $kvartaali['start_date'] and $now <= $kvartaali['end_date']) {
-      $nykyinen_kvartaali = $kvartaali;
-      break;
-    }
-  }
-
-  return $nykyinen_kvartaali;
-}

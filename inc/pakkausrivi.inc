@@ -19,3 +19,18 @@ if (mysql_field_name($result, $i) == "erikoispakkaus" or mysql_field_name($resul
 
   $jatko = 0;
 }
+
+if (mysql_field_name($result, $i) == "rahtivapaa_veloitus") {
+  $sel = $trow[$i] == "E" ? "selected" : "";
+
+  $ulos = "<td>
+          <select name='{$nimi}'>
+            <option value='' {$sel}>" .
+          t("Tehd‰‰n lavaveloitus, vaikka tilaus olisi merkitty rahtivapaaksi") . "</option>
+            <option value='E' {$sel}>" .
+          t("Ei tehd‰ lavaveloitusta, jos tilaus on merkitty rahtivapaaksi") . "</option>
+          </select>
+          </td>";
+
+  $jatko = 0;
+}

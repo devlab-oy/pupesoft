@@ -41,6 +41,9 @@ if (!function_exists('alku')) {
         if ($toim == 'PROFORMA') {
           $pdf_lasku->draw_text(310, 815, t("Proformalasku", $kieli), $page_lasku[$sivu], $iso);
         }
+        elseif (kyseessa_eramaksu($laskurow)) {
+          $pdf_lasku->draw_text(310, 815, t("Maksutosite", $kieli),  $page_lasku[$sivu], $iso);
+        }
         elseif ($laskurow["kateistyyppi"] != '') {
           $pdf_lasku->draw_text(310, 815, t("Käteiskuitti", $kieli),  $page_lasku[$sivu], $iso);
         }
@@ -58,6 +61,9 @@ if (!function_exists('alku')) {
     else {
       if ($toim == 'PROFORMA') {
         $pdf_lasku->draw_text(310, 815, t("Proformalasku", $kieli), $page_lasku[$sivu], $iso);
+      }
+      elseif (kyseessa_eramaksu($laskurow)) {
+        $pdf_lasku->draw_text(310, 815, t("Maksutosite", $kieli),  $page_lasku[$sivu], $iso);
       }
       elseif ($laskurow["kateistyyppi"] != '') {
         $pdf_lasku->draw_text(310, 815, t("Käteiskuitti", $kieli),  $page_lasku[$sivu], $iso);
@@ -213,17 +219,36 @@ if (!function_exists('alku')) {
     }
 
     $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Maksuehto", $kieli),           $page_lasku[$sivu], $pieni);
-    for ($s = strlen($laskurow["maksuehto"]); $s > 0; $s--) {
-      if ($pdf_lasku->strlen($laskurow["maksuehto"], $norm) > 110) {
-        $laskurow["maksuehto"] = substr($laskurow["maksuehto"], 0, $s);
-      }
-      else break;
+
+    if (kyseessa_eramaksu($laskurow)) {
+      $pdf_lasku->draw_text(310, $arvo[$rivi_ind],
+        pdf_substr(t("Erämaksu"), 110, $pdf_lasku, $norm), $page_lasku[$sivu],
+        $norm);
     }
-    $pdf_lasku->draw_text(310, $arvo[$rivi_ind], pdf_substr($laskurow["maksuehto"], 110, $pdf_lasku, $norm), $page_lasku[$sivu], $norm);
+    else {
+      for ($s = strlen($laskurow["maksuehto"]); $s > 0; $s--) {
+        if ($pdf_lasku->strlen($laskurow["maksuehto"], $norm) > 110) {
+          $laskurow["maksuehto"] = substr($laskurow["maksuehto"], 0, $s);
+        }
+        else {
+          break;
+        }
+      }
+
+      $pdf_lasku->draw_text(310, $arvo[$rivi_ind],
+        pdf_substr($laskurow["maksuehto"], 110, $pdf_lasku, $norm),
+        $page_lasku[$sivu], $norm);
+    }
+
     $rivi_ind++;
 
-    $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Viivästyskorko", $kieli),                 $page_lasku[$sivu], $pieni);
-    $pdf_lasku->draw_text(310, $arvo[$rivi_ind], $laskurow["viikorkopros"],                   $page_lasku[$sivu], $norm);
+    if (!kyseessa_eramaksu($laskurow)) {
+      $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Viivästyskorko", $kieli), $page_lasku[$sivu],
+        $pieni);
+      $pdf_lasku->draw_text(310, $arvo[$rivi_ind], $laskurow["viikorkopros"], $page_lasku[$sivu],
+        $norm);
+    }
+
     $rivi_ind++;
 
     $pdf_lasku->draw_text(310, $otsik[$rivi_ind], t("Valuutta", $kieli),                   $page_lasku[$sivu], $pieni);
@@ -245,18 +270,26 @@ if (!function_exists('alku')) {
     // Riviindeksi
     $rivi_ind = $laskutyyppi == 17 ? 2 : 1;
 
-    $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Eräpäivä", $kieli),                   $page_lasku[$sivu], $pieni);
-    if ($laskurow["kateistyyppi"] != '' and $laskurow['mapvm'] == "0000-00-00" and ($laskurow['saldo_maksettu'] != 0 or $laskurow['saldo_maksettu_valuutassa'] != 0)) $erapaiva = tv1dateconv($laskurow["erpcm"]);
-    elseif ($laskurow["kateistyyppi"] != '') $erapaiva = t('MAKSETTU', $kieli);
-    else $erapaiva = tv1dateconv($laskurow["erpcm"]);
-    $pdf_lasku->draw_text(430, $arvo[$rivi_ind], $erapaiva,                         $page_lasku[$sivu], $norm);
+    if (!kyseessa_eramaksu($laskurow)) {
+      $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Eräpäivä", $kieli), $page_lasku[$sivu],
+        $pieni);
+
+      if ($laskurow["kateistyyppi"] != '') {
+        $erapaiva = t('MAKSETTU', $kieli);
+      }
+      else {
+        $erapaiva = tv1dateconv($laskurow["erpcm"]);
+      }
+      $pdf_lasku->draw_text(430, $arvo[$rivi_ind], $erapaiva, $page_lasku[$sivu], $norm);
+    }
+
     $laskutyyppi == 17 ? $rivi_ind-- : $rivi_ind++;
 
     $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Laskun numero", $kieli),                 $page_lasku[$sivu], $pieni);
     if ($laskurow["laskunro"] != 0) $pdf_lasku->draw_text(430, $arvo[$rivi_ind], $laskurow["laskunro"],   $page_lasku[$sivu], $boldi);
     $rivi_ind = $laskutyyppi == 17 ? $rivi_ind + 2 : $rivi_ind + 1;
 
-    if ($laskutyyppi != 8) {
+    if ($laskutyyppi != 8 and !kyseessa_eramaksu($laskurow)) {
       $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Kassa-alennus", $kieli)." ".$laskurow["valkoodi"],   $page_lasku[$sivu], $pieni);
 
       if ($laskurow["kasumma"] != 0.00) {
@@ -275,6 +308,9 @@ if (!function_exists('alku')) {
         $pdf_lasku->draw_text(430, $arvo[$rivi_ind], tv1dateconv($laskurow["kapvm"]), $page_lasku[$sivu], $norm);
       }
       $rivi_ind++;
+    }
+    elseif (kyseessa_eramaksu($laskurow)) {
+      $rivi_ind += 2;
     }
 
     $pdf_lasku->draw_text(430, $otsik[$rivi_ind], t("Asiaa hoitaa", $kieli),   $page_lasku[$sivu], $pieni);
@@ -553,6 +589,9 @@ if (!function_exists('uusi_sivu')) {
         if ($toim == 'PROFORMA') {
           $pdf_lasku->draw_text(310, 815, t("Proformalasku", $kieli), $thispage);
         }
+        elseif (kyseessa_eramaksu($laskurow)) {
+          $pdf_lasku->draw_text(310, 815, t("Maksutosite", $kieli),  $thispage, $iso);
+        }
         elseif ($laskurow["kateistyyppi"] != '') {
           $pdf_lasku->draw_text(310, 815, t("Käteiskuitti", $kieli),  $thispage, $iso);
         }
@@ -570,6 +609,9 @@ if (!function_exists('uusi_sivu')) {
     else {
       if ($toim == 'PROFORMA') {
         $pdf_lasku->draw_text(310, 815, t("Proformalasku", $kieli), $thispage);
+      }
+      elseif (kyseessa_eramaksu($laskurow)) {
+        $pdf_lasku->draw_text(310, 815, t("Maksutosite", $kieli),  $thispage);
       }
       elseif ($laskurow["kateistyyppi"] != '') {
         $pdf_lasku->draw_text(310, 815, t("Käteiskuitti", $kieli),  $thispage);
@@ -589,7 +631,7 @@ if (!function_exists('uusi_sivu')) {
     $pdf_lasku->draw_text(310, 782, tv1dateconv($laskurow["tapvm"]),  $thispage, $norm);
     $pdf_lasku->draw_text(430, 792, t("Eräpäivä", $kieli),       $thispage, $pieni);
 
-    if ($laskurow["kateistyyppi"] != '' and $laskurow['mapvm'] == "0000-00-00" and ($laskurow['saldo_maksettu'] != 0 or $laskurow['saldo_maksettu_valuutassa'] != 0)) {
+    if (kyseessa_eramaksu($laskurow)) {
       $erapaiva = tv1dateconv($laskurow["erpcm"]);
     }
     elseif ($laskurow["kateistyyppi"] != '') {
@@ -1725,167 +1767,204 @@ if (!function_exists('loppu')) {
       $pdf_lasku->draw_text(30, 132+$vientikala+$barcode_korkeus, $allekirjoitus_row['asema'], $thispage, $norm);
     }
 
-    //yhteensärivi
-    $pdf_lasku->draw_rectangle(110+$vientikala+$barcode_korkeus, 20,  90+$vientikala+$barcode_korkeus, 580,  $thispage, $rectparam);
-    $pdf_lasku->draw_rectangle(110+$vientikala+$barcode_korkeus, 207, 90+$vientikala+$barcode_korkeus, 580,  $thispage, $rectparam);
-    $pdf_lasku->draw_rectangle(110+$vientikala+$barcode_korkeus, 394, 90+$vientikala+$barcode_korkeus, 580,  $thispage, $rectparam);
-    $pdf_lasku->draw_rectangle(110+$vientikala+$barcode_korkeus, 540, 90+$vientikala+$barcode_korkeus, 580,  $thispage, $rectparam);
+    if (!kyseessa_eramaksu($laskurow)) {
+      //yhteensärivi
+      $pdf_lasku->draw_rectangle(110 + $vientikala + $barcode_korkeus, 20,
+        90 + $vientikala + $barcode_korkeus, 580, $thispage, $rectparam);
+      $pdf_lasku->draw_rectangle(110 + $vientikala + $barcode_korkeus, 207,
+        90 + $vientikala + $barcode_korkeus, 580, $thispage, $rectparam);
+      $pdf_lasku->draw_rectangle(110 + $vientikala + $barcode_korkeus, 394,
+        90 + $vientikala + $barcode_korkeus, 580, $thispage, $rectparam);
+      $pdf_lasku->draw_rectangle(110 + $vientikala + $barcode_korkeus, 540,
+        90 + $vientikala + $barcode_korkeus, 580, $thispage, $rectparam);
 
-    $pdf_lasku->draw_text(30,  102+$vientikala+$barcode_korkeus, t("Eräpäivä", $kieli),  $thispage, $pieni);
+      $pdf_lasku->draw_text(30, 102 + $vientikala + $barcode_korkeus, t("Eräpäivä", $kieli),
+        $thispage, $pieni);
 
-    if ($laskurow["kateistyyppi"] != '' and $laskurow['mapvm'] == "0000-00-00" and ($laskurow['saldo_maksettu'] != 0 or $laskurow['saldo_maksettu_valuutassa'] != 0)) {
-      $erapaiva = tv1dateconv($laskurow["erpcm"]);
-    }
-    elseif ($laskurow["kateistyyppi"] != '') {
-      $erapaiva = t('MAKSETTU', $kieli);
-    }
-    else {
-      $erapaiva = tv1dateconv($laskurow["erpcm"]);
-    }
-
-    $pdf_lasku->draw_text(30,  92+$vientikala+$barcode_korkeus,  $erapaiva,    $thispage, ($laskutyyppi == 17 ? $boldi : $norm));
-
-    if ($laskutyyppi != 8) {
-      $pdf_lasku->draw_text(217, 102+$vientikala+$barcode_korkeus, t("Viitenumero", $kieli),  $thispage, $pieni);
-      $pdf_lasku->draw_text(217, 92+$vientikala+$barcode_korkeus,  $laskurow["viite"],    $thispage, $boldi);
-    }
-
-    if ($vikasivu != "") {
-      $pdf_lasku->draw_text(404, 92+$vientikala+$barcode_korkeus,  t("Yhteensä", $kieli).":", $thispage, $norm);
-
-      if ($toim == 'PROFORMA') {
-        if ($yhtiorow["laskunsummapyoristys"] != '' or $asiakasrow["laskunsummapyoristys"] != '') {
-          $summa = round($summa, 0);
-        }
-
-        $pdf_lasku->draw_text(490, 92+$vientikala + $barcode_korkeus,  sprintf('%.2f', $summa),      $thispage, $boldi);
+      if (kyseessa_eramaksu($laskurow)) {
+        $erapaiva = tv1dateconv($laskurow["erpcm"]);
       }
-      elseif ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
-        $oikpos = $pdf_lasku->strlen(sprintf('%.2f', $laskurow["summa_valuutassa"]), $boldi);
-        $pdf_lasku->draw_text(535-$oikpos, 92+$vientikala+$barcode_korkeus, sprintf('%.2f', $laskurow["summa_valuutassa"]), $thispage, $boldi);
+      elseif ($laskurow["kateistyyppi"] != '') {
+        $erapaiva = t('MAKSETTU', $kieli);
       }
       else {
-        $oikpos = $pdf_lasku->strlen(sprintf('%.2f', $laskurow["summa"]), $boldi);
-        $pdf_lasku->draw_text(535-$oikpos, 92+$vientikala+$barcode_korkeus, sprintf('%.2f', $laskurow["summa"]), $thispage, $boldi);
+        $erapaiva = tv1dateconv($laskurow["erpcm"]);
       }
 
-      $pdf_lasku->draw_text(550, 92+$vientikala+$barcode_korkeus,  $laskurow["valkoodi"],        $thispage, $boldi);
-    }
-    else {
-      $pdf_lasku->draw_text(470, 92+$vientikala+$barcode_korkeus,  t("Jatkuu", $kieli)."...",      $thispage, $boldi);
-    }
+      $pdf_lasku->draw_text(30, 92 + $vientikala + $barcode_korkeus, $erapaiva, $thispage,
+        ($laskutyyppi == 17 ? $boldi : $norm));
 
-    //Haetaan factoringsopimuksen tiedot
-    if ($masrow["factoring"] != '') {
-      $query = "SELECT *
-                FROM factoring
-                WHERE yhtio        = '$kukarow[yhtio]'
-                and factoringyhtio = '$masrow[factoring]'
-                and valkoodi       = '$laskurow[valkoodi]'";
-      $fres = pupe_query($query);
-      $frow = mysql_fetch_assoc($fres);
-    }
-    else {
-      unset($frow);
-    }
+      if ($laskutyyppi != 8) {
+        $pdf_lasku->draw_text(217, 102 + $vientikala + $barcode_korkeus, t("Viitenumero", $kieli),
+          $thispage, $pieni);
+        $pdf_lasku->draw_text(217, 92 + $vientikala + $barcode_korkeus, $laskurow["viite"],
+          $thispage, $boldi);
+      }
 
-    $pankkitiedot = array();
+      if ($vikasivu != "") {
+        $pdf_lasku->draw_text(404, 92 + $vientikala + $barcode_korkeus, t("Yhteensä", $kieli) . ":",
+          $thispage, $norm);
 
-    //Laitetaan pankkiyhteystiedot kuntoon
-    if ($masrow["factoring"] != "") {
-      $pankkitiedot["pankkinimi1"]  =  $frow["pankkinimi1"];
-      $pankkitiedot["pankkitili1"]  =  $frow["pankkitili1"];
-      $pankkitiedot["pankkiiban1"]  =  $frow["pankkiiban1"];
-      $pankkitiedot["pankkiswift1"] =  $frow["pankkiswift1"];
-      $pankkitiedot["pankkinimi2"]  =  $frow["pankkinimi2"];
-      $pankkitiedot["pankkitili2"]  =  $frow["pankkitili2"];
-      $pankkitiedot["pankkiiban2"]  =  $frow["pankkiiban2"];
-      $pankkitiedot["pankkiswift2"] = $frow["pankkiswift2"];
-      $pankkitiedot["pankkinimi3"]  =  "";
-      $pankkitiedot["pankkitili3"]  =  "";
-      $pankkitiedot["pankkiiban3"]  =  "";
-      $pankkitiedot["pankkiswift3"] =  "";
-    }
-    elseif ($masrow["pankkinimi1"] != "") {
-      $pankkitiedot["pankkinimi1"]  =  $masrow["pankkinimi1"];
-      $pankkitiedot["pankkitili1"]  =  $masrow["pankkitili1"];
-      $pankkitiedot["pankkiiban1"]  =  $masrow["pankkiiban1"];
-      $pankkitiedot["pankkiswift1"] =  $masrow["pankkiswift1"];
-      $pankkitiedot["pankkinimi2"]  =  $masrow["pankkinimi2"];
-      $pankkitiedot["pankkitili2"]  =  $masrow["pankkitili2"];
-      $pankkitiedot["pankkiiban2"]  =  $masrow["pankkiiban2"];
-      $pankkitiedot["pankkiswift2"] = $masrow["pankkiswift2"];
-      $pankkitiedot["pankkinimi3"]  =  $masrow["pankkinimi3"];
-      $pankkitiedot["pankkitili3"]  =  $masrow["pankkitili3"];
-      $pankkitiedot["pankkiiban3"]  =  $masrow["pankkiiban3"];
-      $pankkitiedot["pankkiswift3"] =  $masrow["pankkiswift3"];
-    }
-    else {
-      $pankkitiedot["pankkinimi1"]  =  $yhtiorow["pankkinimi1"];
-      $pankkitiedot["pankkitili1"]  =  $yhtiorow["pankkitili1"];
-      $pankkitiedot["pankkiiban1"]  =  $yhtiorow["pankkiiban1"];
-      $pankkitiedot["pankkiswift1"] =  $yhtiorow["pankkiswift1"];
-      $pankkitiedot["pankkinimi2"]  =  $yhtiorow["pankkinimi2"];
-      $pankkitiedot["pankkitili2"]  =  $yhtiorow["pankkitili2"];
-      $pankkitiedot["pankkiiban2"]  =  $yhtiorow["pankkiiban2"];
-      $pankkitiedot["pankkiswift2"] = $yhtiorow["pankkiswift2"];
-      $pankkitiedot["pankkinimi3"]  =  $yhtiorow["pankkinimi3"];
-      $pankkitiedot["pankkitili3"]  =  $yhtiorow["pankkitili3"];
-      $pankkitiedot["pankkiiban3"]  =  $yhtiorow["pankkiiban3"];
-      $pankkitiedot["pankkiswift3"] =  $yhtiorow["pankkiswift3"];
-    }
+        if ($toim == 'PROFORMA') {
+          if ($yhtiorow["laskunsummapyoristys"] != '' or $asiakasrow["laskunsummapyoristys"] != ''
+          ) {
+            $summa = round($summa, 0);
+          }
 
-    if ($vientikala == 0) {
-      $tileja = -20;
-    }
-    else {
-      $tileja = 0;
-    }
+          $pdf_lasku->draw_text(490, 92 + $vientikala + $barcode_korkeus, sprintf('%.2f', $summa),
+            $thispage, $boldi);
+        }
+        elseif ($laskurow["valkoodi"] != '' and
+          trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))
+        ) {
+          $oikpos = $pdf_lasku->strlen(sprintf('%.2f', $laskurow["summa_valuutassa"]), $boldi);
+          $pdf_lasku->draw_text(535 - $oikpos, 92 + $vientikala + $barcode_korkeus,
+            sprintf('%.2f', $laskurow["summa_valuutassa"]), $thispage, $boldi);
+        }
+        else {
+          $oikpos = $pdf_lasku->strlen(sprintf('%.2f', $laskurow["summa"]), $boldi);
+          $pdf_lasku->draw_text(535 - $oikpos, 92 + $vientikala + $barcode_korkeus,
+            sprintf('%.2f', $laskurow["summa"]), $thispage, $boldi);
+        }
 
-    // ei factoroida niin normitiedot
-    $pdf_lasku->draw_text(30,  102 + $tileja + $barcode_korkeus, t("Pankkiyhteys", $kieli),                          $thispage, $pieni);
+        $pdf_lasku->draw_text(550, 92 + $vientikala + $barcode_korkeus, $laskurow["valkoodi"],
+          $thispage, $boldi);
+      }
+      else {
+        $pdf_lasku->draw_text(470, 92 + $vientikala + $barcode_korkeus, t("Jatkuu", $kieli) . "...",
+          $thispage, $boldi);
+      }
 
-    $pdf_lasku->draw_text(30,  92 + $tileja + $barcode_korkeus, $pankkitiedot["pankkinimi1"]."  ".$pankkitiedot["pankkitili1"],            $thispage, $norm);
+      //Haetaan factoringsopimuksen tiedot
+      if ($masrow["factoring"] != '') {
+        $query = "SELECT *
+                  FROM factoring
+                  WHERE yhtio        = '$kukarow[yhtio]'
+                  and factoringyhtio = '$masrow[factoring]'
+                  and valkoodi       = '$laskurow[valkoodi]'";
+        $fres = pupe_query($query);
+        $frow = mysql_fetch_assoc($fres);
+      }
+      else {
+        unset($frow);
+      }
 
-    if ($pankkitiedot["pankkiiban1"]) {
-      $pdf_lasku->draw_text(217, 92 + $tileja + $barcode_korkeus, "IBAN: ".$pankkitiedot["pankkiiban1"],                      $thispage, $norm);
+      $pankkitiedot = array();
+
+      //Laitetaan pankkiyhteystiedot kuntoon
+      if ($masrow["factoring"] != "") {
+        $pankkitiedot["pankkinimi1"] = $frow["pankkinimi1"];
+        $pankkitiedot["pankkitili1"] = $frow["pankkitili1"];
+        $pankkitiedot["pankkiiban1"] = $frow["pankkiiban1"];
+        $pankkitiedot["pankkiswift1"] = $frow["pankkiswift1"];
+        $pankkitiedot["pankkinimi2"] = $frow["pankkinimi2"];
+        $pankkitiedot["pankkitili2"] = $frow["pankkitili2"];
+        $pankkitiedot["pankkiiban2"] = $frow["pankkiiban2"];
+        $pankkitiedot["pankkiswift2"] = $frow["pankkiswift2"];
+        $pankkitiedot["pankkinimi3"] = "";
+        $pankkitiedot["pankkitili3"] = "";
+        $pankkitiedot["pankkiiban3"] = "";
+        $pankkitiedot["pankkiswift3"] = "";
+      }
+      elseif ($masrow["pankkinimi1"] != "") {
+        $pankkitiedot["pankkinimi1"] = $masrow["pankkinimi1"];
+        $pankkitiedot["pankkitili1"] = $masrow["pankkitili1"];
+        $pankkitiedot["pankkiiban1"] = $masrow["pankkiiban1"];
+        $pankkitiedot["pankkiswift1"] = $masrow["pankkiswift1"];
+        $pankkitiedot["pankkinimi2"] = $masrow["pankkinimi2"];
+        $pankkitiedot["pankkitili2"] = $masrow["pankkitili2"];
+        $pankkitiedot["pankkiiban2"] = $masrow["pankkiiban2"];
+        $pankkitiedot["pankkiswift2"] = $masrow["pankkiswift2"];
+        $pankkitiedot["pankkinimi3"] = $masrow["pankkinimi3"];
+        $pankkitiedot["pankkitili3"] = $masrow["pankkitili3"];
+        $pankkitiedot["pankkiiban3"] = $masrow["pankkiiban3"];
+        $pankkitiedot["pankkiswift3"] = $masrow["pankkiswift3"];
+      }
+      else {
+        $pankkitiedot["pankkinimi1"] = $yhtiorow["pankkinimi1"];
+        $pankkitiedot["pankkitili1"] = $yhtiorow["pankkitili1"];
+        $pankkitiedot["pankkiiban1"] = $yhtiorow["pankkiiban1"];
+        $pankkitiedot["pankkiswift1"] = $yhtiorow["pankkiswift1"];
+        $pankkitiedot["pankkinimi2"] = $yhtiorow["pankkinimi2"];
+        $pankkitiedot["pankkitili2"] = $yhtiorow["pankkitili2"];
+        $pankkitiedot["pankkiiban2"] = $yhtiorow["pankkiiban2"];
+        $pankkitiedot["pankkiswift2"] = $yhtiorow["pankkiswift2"];
+        $pankkitiedot["pankkinimi3"] = $yhtiorow["pankkinimi3"];
+        $pankkitiedot["pankkitili3"] = $yhtiorow["pankkitili3"];
+        $pankkitiedot["pankkiiban3"] = $yhtiorow["pankkiiban3"];
+        $pankkitiedot["pankkiswift3"] = $yhtiorow["pankkiswift3"];
+      }
+
+      if ($vientikala == 0) {
+        $tileja = -20;
+      }
+      else {
+        $tileja = 0;
+      }
+
+      // ei factoroida niin normitiedot
+      $pdf_lasku->draw_text(30, 102 + $tileja + $barcode_korkeus, t("Pankkiyhteys", $kieli),
+        $thispage, $pieni);
+
+      $pdf_lasku->draw_text(30, 92 + $tileja + $barcode_korkeus,
+        $pankkitiedot["pankkinimi1"] . "  " . $pankkitiedot["pankkitili1"],
+        $thispage, $norm);
+
+      if ($pankkitiedot["pankkiiban1"]) {
+        $pdf_lasku->draw_text(217, 92 + $tileja + $barcode_korkeus,
+          "IBAN: " . $pankkitiedot["pankkiiban1"], $thispage, $norm);
+      }
+      if ($pankkitiedot["pankkiswift1"]) {
+        $pdf_lasku->draw_text(404, 92 + $tileja + $barcode_korkeus,
+          "SWIFT: " . $pankkitiedot["pankkiswift1"], $thispage, $norm);
+      }
+
+      $pdf_lasku->draw_text(30, 82 + $tileja + $barcode_korkeus,
+        $pankkitiedot["pankkinimi2"] . "  " . $pankkitiedot["pankkitili2"],
+        $thispage, $norm);
+
+      if ($pankkitiedot["pankkiiban2"]) {
+        $pdf_lasku->draw_text(217, 82 + $tileja + $barcode_korkeus,
+          "IBAN: " . $pankkitiedot["pankkiiban2"], $thispage, $norm);
+      }
+      if ($pankkitiedot["pankkiswift2"]) {
+        $pdf_lasku->draw_text(404, 82 + $tileja + $barcode_korkeus,
+          "SWIFT: " . $pankkitiedot["pankkiswift2"], $thispage, $norm);
+      }
+
+      $pdf_lasku->draw_text(30, 72 + $tileja + $barcode_korkeus,
+        $pankkitiedot["pankkinimi3"] . "  " . $pankkitiedot["pankkitili3"],
+        $thispage, $norm);
+
+      if ($pankkitiedot["pankkiiban3"]) {
+        $pdf_lasku->draw_text(217, 72 + $tileja + $barcode_korkeus,
+          "IBAN: " . $pankkitiedot["pankkiiban3"], $thispage, $norm);
+      }
+      if ($pankkitiedot["pankkiswift3"]) {
+        $pdf_lasku->draw_text(404, 72 + $tileja + $barcode_korkeus,
+          "SWIFT: " . $pankkitiedot["pankkiswift3"], $thispage, $norm);
+      }
+
+      if ($pankkitiedot["pankkinimi2"] . $pankkitiedot["pankkitili2"] .
+        $pankkitiedot["pankkiiban2"] != '' and $vientikala == 0
+      ) {
+        $tileja -= 10;
+      }
+
+      if ($pankkitiedot["pankkinimi3"] . $pankkitiedot["pankkitili3"] .
+        $pankkitiedot["pankkitili3"] != '' and $vientikala == 0
+      ) {
+        $tileja -= 10;
+      }
+
+      if ($vientikala == 0) {
+        $tileja += 20;
+      }
+
+      //Pankkiyhteystiedot
+      $pdf_lasku->draw_rectangle(90 + $vientikala + $barcode_korkeus, 20,
+        20 + $tileja + $barcode_korkeus, 580, $thispage, $rectparam);
     }
-    if ($pankkitiedot["pankkiswift1"]) {
-      $pdf_lasku->draw_text(404, 92 + $tileja + $barcode_korkeus, "SWIFT: ".$pankkitiedot["pankkiswift1"],                    $thispage, $norm);
-    }
-
-    $pdf_lasku->draw_text(30,  82 + $tileja + $barcode_korkeus, $pankkitiedot["pankkinimi2"]."  ".$pankkitiedot["pankkitili2"],            $thispage, $norm);
-
-    if ($pankkitiedot["pankkiiban2"]) {
-      $pdf_lasku->draw_text(217, 82 + $tileja + $barcode_korkeus, "IBAN: ".$pankkitiedot["pankkiiban2"],                      $thispage, $norm);
-    }
-    if ($pankkitiedot["pankkiswift2"]) {
-      $pdf_lasku->draw_text(404, 82 + $tileja + $barcode_korkeus, "SWIFT: ".$pankkitiedot["pankkiswift2"],                    $thispage, $norm);
-    }
-
-    $pdf_lasku->draw_text(30,  72 + $tileja + $barcode_korkeus, $pankkitiedot["pankkinimi3"]."  ".$pankkitiedot["pankkitili3"],            $thispage, $norm);
-
-    if ($pankkitiedot["pankkiiban3"]) {
-      $pdf_lasku->draw_text(217, 72 + $tileja + $barcode_korkeus, "IBAN: ".$pankkitiedot["pankkiiban3"],                      $thispage, $norm);
-    }
-    if ($pankkitiedot["pankkiswift3"]) {
-      $pdf_lasku->draw_text(404, 72 + $tileja + $barcode_korkeus, "SWIFT: ".$pankkitiedot["pankkiswift3"],                    $thispage, $norm);
-    }
-
-    if ($pankkitiedot["pankkinimi2"].$pankkitiedot["pankkitili2"].$pankkitiedot["pankkiiban2"] != '' and $vientikala == 0) {
-      $tileja-=10;
-    }
-
-    if ($pankkitiedot["pankkinimi3"].$pankkitiedot["pankkitili3"].$pankkitiedot["pankkitili3"] != '' and $vientikala == 0) {
-      $tileja-=10;
-    }
-
-    if ($vientikala == 0) {
-      $tileja+=20;
-    }
-
-    //Pankkiyhteystiedot
-    $pdf_lasku->draw_rectangle(90+$vientikala+$barcode_korkeus, 20, 20+$tileja+$barcode_korkeus, 580,  $thispage, $rectparam);
 
     // yhtiötiedot
     $y_tiedot_ok  = FALSE;
@@ -2164,7 +2243,9 @@ if (!function_exists('alvierittely')) {
       $kala -= 10;
     }
 
-    $pdf_lasku->draw_text(360, $kala, t("Lasku Yhteensä", $kieli).":",                $thispage, $norm);
+    $yhteensa_teksti = kyseessa_eramaksu($laskurow) ? "Yhteensä" : "Lasku Yhteensä";
+
+    $pdf_lasku->draw_text(360, $kala, t($yhteensa_teksti, $kieli).":",                $thispage, $norm);
 
     if ($toim == 'PROFORMA') {
       $summa = $kassa_ale != '' ? $summa * (1-$kassa_ale/100) : $summa;
@@ -2224,7 +2305,7 @@ if (!function_exists('alvierittely')) {
     $kala -= 10;
 
     // Käteismaksutavat ja osasuoritukset - erittely
-    if ($laskurow["kateistyyppi"] != '' and $laskurow['mapvm'] == "0000-00-00" and ($laskurow['saldo_maksettu'] != 0 or $laskurow['saldo_maksettu_valuutassa'] != 0) and $toim != 'PROFORMA') {
+    if (kyseessa_eramaksu($laskurow) and $toim != 'PROFORMA') {
       $kala -= 10;
 
       if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
@@ -2316,7 +2397,7 @@ if (!function_exists('alvierittely')) {
 
       if ($laskurow["valkoodi"] != '' and trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]))) {
         $pyoristys = $kassa_ale != '' ? $laskurow["pyoristys_valuutassa"] * (1-$kassa_ale/100) : $laskurow["pyoristys_valuutassa"];
-        $pdf_lasku->draw_text(360, $kala, t("Rahoituksella / Osamaksulla", $kieli).":",          $thispage, $norm);
+        $pdf_lasku->draw_text(360, $kala, t("Erämaksulla", $kieli).":",          $thispage, $norm);
         $summeli = sprintf('%.2f', $laskurow["summa_valuutassa"]-$laskurow["saldo_maksettu_valuutassa"]);
         $oikpos = $pdf_lasku->strlen($summeli, $norm);
         $pdf_lasku->draw_text(535-$oikpos, $kala, sprintf('%.2f', $summeli - $pyoristys * -1), $thispage, $norm);
@@ -2324,14 +2405,37 @@ if (!function_exists('alvierittely')) {
       }
       else {
         $pyoristys = $kassa_ale != '' ? $laskurow["pyoristys"] * (1-$kassa_ale/100) : $laskurow["pyoristys"];
-        $pdf_lasku->draw_text(360, $kala, t("Rahoituksella / Osamaksulla", $kieli).":",          $thispage, $norm);
+        $pdf_lasku->draw_text(360, $kala, t("Erämaksulla", $kieli).":",          $thispage, $norm);
         $summeli = sprintf('%.2f', $laskurow["summa"]-$laskurow["saldo_maksettu"]);
         $oikpos = $pdf_lasku->strlen($summeli, $norm);
         $pdf_lasku->draw_text(535-$oikpos, $kala, sprintf('%.2f', $summeli - $pyoristys * -1), $thispage, $norm);
         $pdf_lasku->draw_text(550, $kala, $laskurow["valkoodi"],                 $thispage, $norm);
       }
 
+      $kala -= 40;
+
+      $isoparams = array_merge($norm, array("height" => 12));
+      $luottoteksti = "Luoton myöntää Lindorff Invest Oy, jolta saatte laskun kotiinne lähipäivinä";
+      $pdf_lasku->draw_text(200, $kala, t($luottoteksti) . ".", $thispage, $isoparams);
+
+      $kala -= 50;
+
+      $lineparams = array("width" => 0.1);
+      $pdf_lasku->draw_line(array(200, 350), array($kala, $kala), $thispage, $lineparams);
+      $pdf_lasku->draw_line(array(400, 550), array($kala, $kala), $thispage, $lineparams);
+
       $kala -= 10;
+
+      $pdf_lasku->draw_text(200, $kala, t("Paikka ja aika"), $thispage, $norm);
+      $pdf_lasku->draw_text(400, $kala, t("Allekirjoitus"), $thispage, $norm);
+
+      $kala -= 30;
+
+      $pdf_lasku->draw_line(array(400, 550), array($kala, $kala), $thispage, $lineparams);
+
+      $kala -= 10;
+
+      $pdf_lasku->draw_text(400, $kala, t("Nimenselvennys"), $thispage, $norm);
     }
 
     return $kala;
@@ -2495,6 +2599,10 @@ if (!function_exists("tulosta_lasku")) {
     // Maksuehto tekstinä
     $laskurow["maksuehto"] = $masrow["teksti"] = t_tunnus_avainsanat($masrow, "teksti", "MAKSUEHTOKV", $kieli);
     $laskurow["kateistyyppi"] = $masrow["kateinen"];
+
+    if (kyseessa_eramaksu($laskurow) and !$tulosta_lasku_kpl) {
+      $tulosta_lasku_kpl = 2;
+    }
 
     //PDF parametrit
     $pdf_lasku = new pdffile;
@@ -2977,4 +3085,8 @@ if (!function_exists("tulosta_lasku")) {
     unset($pdf_lasku);
     unset($page_lasku);
   }
+}
+
+function kyseessa_eramaksu($laskurow) {
+  return $laskurow["kateistyyppi"] != '' and $laskurow['mapvm'] == "0000-00-00";
 }

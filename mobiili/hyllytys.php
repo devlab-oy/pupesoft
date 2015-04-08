@@ -24,7 +24,7 @@ $query = "SELECT
             2) AS ulkkpl,
           tuotteen_toimittajat.toim_tuoteno,
           tuotteen_toimittajat.tuotekerroin,
-          if(tuotepaikat.varasto = tilausrivi.varasto, 
+          if(tuotepaikat.varasto = tilausrivi.varasto,
             concat_ws(' ',
               tuotepaikat.hyllyalue,
               tuotepaikat.hyllynro,

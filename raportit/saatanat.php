@@ -299,32 +299,32 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
   }
 
   $query = "(SELECT GROUP_CONCAT(lasku.tunnus) tunnukset, round(sum(tiliointi.summa_valuutassa),2) avoimia
-              FROM lasku use index ({$indeksi1})
-              JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl' {$tiliointilisa})
-              {$luottolisa}
-              WHERE lasku.yhtio = '{$saatavat_yhtio}'
-              and lasku.mapvm > '{$savvl}-{$sakkl}-{$sappl}'
-              and lasku.tapvm   <= '{$savvl}-{$sakkl}-{$sappl}'
-              and lasku.tapvm   > '0000-00-00'
-              and lasku.tila    = 'U'
-              and lasku.alatila = 'X'
-              {$generoitumuuttuja}
-              {$salisa1}
-              {$having})
-              UNION
-              (SELECT GROUP_CONCAT(lasku.tunnus) tunnukset, round(sum(tiliointi.summa_valuutassa),2) avoimia
-              FROM lasku use index ({$indeksi2})
-              JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl' {$tiliointilisa})
-              {$luottolisa}
-              WHERE lasku.yhtio = '{$saatavat_yhtio}'
-              and lasku.mapvm = '0000-00-00'
-              and lasku.tapvm   <= '{$savvl}-{$sakkl}-{$sappl}'
-              and lasku.tapvm   > '0000-00-00'
-              and lasku.tila    = 'U'
-              and lasku.alatila = 'X'
-              {$generoitumuuttuja}
-              {$salisa1}
-              {$having})";
+             FROM lasku use index ({$indeksi1})
+             JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl' {$tiliointilisa})
+             {$luottolisa}
+             WHERE lasku.yhtio = '{$saatavat_yhtio}'
+             and lasku.mapvm   > '{$savvl}-{$sakkl}-{$sappl}'
+             and lasku.tapvm   <= '{$savvl}-{$sakkl}-{$sappl}'
+             and lasku.tapvm   > '0000-00-00'
+             and lasku.tila    = 'U'
+             and lasku.alatila = 'X'
+             {$generoitumuuttuja}
+             {$salisa1}
+             {$having})
+             UNION
+             (SELECT GROUP_CONCAT(lasku.tunnus) tunnukset, round(sum(tiliointi.summa_valuutassa),2) avoimia
+             FROM lasku use index ({$indeksi2})
+             JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl' {$tiliointilisa})
+             {$luottolisa}
+             WHERE lasku.yhtio = '{$saatavat_yhtio}'
+             and lasku.mapvm   = '0000-00-00'
+             and lasku.tapvm   <= '{$savvl}-{$sakkl}-{$sappl}'
+             and lasku.tapvm   > '0000-00-00'
+             and lasku.tila    = 'U'
+             and lasku.alatila = 'X'
+             {$generoitumuuttuja}
+             {$salisa1}
+             {$having})";
   $result = pupe_query($query);
 
   $_tunnukset = "";
@@ -344,7 +344,7 @@ if ($tee == 'NAYTA' or $eiliittymaa == 'ON') {
             JOIN tiliointi use index (tositerivit_index) ON (lasku.yhtio = tiliointi.yhtio and lasku.tunnus = tiliointi.ltunnus and tiliointi.tilino in ($tili) and tiliointi.korjattu = '' and tiliointi.tapvm <= '$savvl-$sakkl-$sappl' {$tiliointilisa})
             {$luottolisa}
             WHERE lasku.yhtio = '{$saatavat_yhtio}'
-            and lasku.tunnus IN ({$_tunnukset})
+            and lasku.tunnus  IN ({$_tunnukset})
             GROUP BY {$grouppauslisa}
             {$having}
             ORDER BY 1,2,3";

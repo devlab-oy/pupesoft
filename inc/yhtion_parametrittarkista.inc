@@ -233,6 +233,23 @@ if (!function_exists("yhtion_parametrittarkista")) {
       }
     }
 
+    if ($fieldname == "raaka_aine_tiliointi") {
+      // Tarkistetaan, ett‰ sek‰, raaka-ainevarasto ja raaka-ainevarastonmuutos tilit ovat olemassa
+      $query = "SELECT COUNT(*) AS tilien_maara
+                FROM tili
+                WHERE tili.yhtio = '{$kukarow['yhtio']}'
+                AND tili.tilino  IN ('{$yhtiorow['raaka_ainevarasto']}',
+                                    '{$yhtiorow['raaka_ainevarastonmuutos']}')";
+
+      $result = pupe_query($query);
+      $tilien_maara = mysql_fetch_assoc($result);
+      $tilien_maara = $tilien_maara['tilien_maara'];
+
+      if ($tilien_maara != 2) {
+        $virhe[$i] = t("Raaka-ainetilej‰ ei ole m‰‰ritelty oikein");
+      }
+    }
+
     if ($fieldname == "tunnus") {
       // Tsekataan, ett‰ tietyt tuotteen ei oo samoja kesken‰‰n
       if ($rahti_tuotenumero != "" and $rahti_tuotenumero == $erilliskasiteltava_tuotenumero) {

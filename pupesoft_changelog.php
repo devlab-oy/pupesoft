@@ -354,7 +354,7 @@ if ($php_cli and $muutoksiaoli) {
     $css = $yhtiorow['css_classic'];
   }
 
-  $ulos  = "<html>\n<head>\n";
+  $ulos  = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 Transitional//EN\">\n<html>\n<head>\n";
   $ulos .= "<style type='text/css'>$css</style>\n";
 
   $ulos .= "<title>Pupesoft-".t("päivitys")."</title>\n";

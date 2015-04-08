@@ -274,6 +274,8 @@ else {
         else {
           $worksheet->writeString($excelrivi, $excelsarake, t("Veroton Myyntihinta", $hinkieli), $format_bold);
           $excelsarake++;
+          $worksheet->writeString($excelrivi, $excelsarake, t("Verollinen Myyntihinta", $hinkieli), $format_bold);
+          $excelsarake++;
         }
 
         for ($alepostfix = 1; $alepostfix <= $yhtiorow['myynnin_alekentat']; $alepostfix++) {
@@ -495,6 +497,8 @@ else {
           }
           else {
             $worksheet->writeNumber($excelrivi, $excelsarake, $veroton);
+            $excelsarake++;
+            $worksheet->writeNumber($excelrivi, $excelsarake, $verollinen);
             $excelsarake++;
           }
 

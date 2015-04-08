@@ -276,7 +276,7 @@ if (!$php_cli) {
   $sel = $tallennusmuoto == 'csv' ? "selected" : "";
 
   echo "<tr>";
-  echo "<th>",t("Tallennusmuoto"),"</th>";
+  echo "<th>", t("Tallennusmuoto"), "</th>";
   echo "<td><select name='tallennusmuoto'>";
   echo "<option value='excel'>Excel</option>";
   echo "<option value='csv' {$sel}>CSV</opton>";
@@ -943,12 +943,16 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
       $varasto_tuotepaikat = "AND tuotepaikat.varasto in ($mistavarastosta)";
       $varasto_tilausrivi = "AND tilausrivi.varasto in ($mistavarastosta)";
       $varasto_varastopaikat = "AND varastopaikat.tunnus in ($mistavarastosta)";
+      $varasto_laskuvarasto = "AND lasku.varasto in ($mistavarastosta)";
+      $varasto_laskuclearing = "AND lasku.clearing in ($mistavarastosta)";
     }
     else {
       $varasto_tapahtuma = "";
       $varasto_tuotepaikat = "";
       $varasto_tilausrivi = "";
       $varasto_varastopaikat = "";
+      $varasto_laskuvarasto = "";
+      $varasto_laskuclearing = "";
     }
 
     // Jos tuote on sarjanumeroseurannassa niin varastonarvo lasketaan yksilöiden ostohinnoista (ostetut yksilöt jotka eivät vielä ole laskutettu)
@@ -1245,8 +1249,11 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         }
 
         $varastorajausjoini = '';
+        $varastorajausjoini2 = '';
+
         if (isset($valitut_varastot_rajaus) and $valitut_varastot_rajaus != "") {
           $varastorajausjoini = $varasto_tapahtuma;
+          $varastorajausjoini2 = $varasto_laskuvarasto;
         }
 
         if ($kiertoviilasku != "") {
@@ -1254,8 +1261,7 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           // Haetaan tuotteen kulutetut kappaleet
           $query  = "SELECT
                      ifnull(sum(if(tilausrivi.tyyppi='L', tilausrivi.kpl, 0)), 0) myykpl,
-                     ifnull(sum(if(tilausrivi.tyyppi='V', tilausrivi.kpl, 0)), 0) kulkpl,
-                     ifnull(date_format(max(tilausrivi.laskutettuaika), '%Y%m%d'), 0) laskutettuaika
+                     ifnull(sum(if(tilausrivi.tyyppi='V', tilausrivi.kpl, 0)), 0) kulkpl
                      FROM tilausrivi use index (yhtio_tyyppi_tuoteno_laskutettuaika)
                      WHERE tilausrivi.yhtio        = '$kukarow[yhtio]'
                      and tilausrivi.tyyppi         in ('L','V')
@@ -1267,14 +1273,6 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
           $xmyyres = pupe_query($query);
           $xmyyrow = mysql_fetch_assoc($xmyyres);
 
-          if (!empty($huomioi_varastosiirrot)) {
-            $_lajilisa = "AND (tapahtuma.laji IN ('laskutus', 'kulutus') OR
-                              (tapahtuma.laji = 'siirto' and tapahtuma.kpl < 0))";
-          }
-          else {
-            $_lajilisa = "AND tapahtuma.laji IN ('laskutus', 'kulutus')";
-          }
-
           // Viimeisin laskutuspäivämäärä
           // Viimeisin kulutuspäivämäärä
           // Ja mahdollinen viimeisin siirtopäivämäärä
@@ -1284,11 +1282,32 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
                     and tapahtuma.tuoteno  = '{$row['tuoteno']}'
                     and tapahtuma.laadittu > '{$xmyyrow['laskutettuaika']}'
                     $varastorajausjoini
-                    {$_lajilisa}";
+                    AND tapahtuma.laji     IN ('laskutus', 'kulutus')";
           $xmyyres = pupe_query($query);
           $xmyypvmrow = mysql_fetch_assoc($xmyyres);
 
-          $vikamykupaiva = max($xmyyrow['laskutettuaika'], $xmyypvmrow['laskutettuaika']);
+          $xsiirtopvmrow['vihapvm'] = 0;
+
+          if (!empty($huomioi_varastosiirrot)) {
+
+            $query_a = "SELECT ifnull(date_format(max(tilausrivi.kerattyaika), '%Y%m%d'), 0) vihapvm
+                        FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laadittu)
+                        JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
+                          AND lasku.tunnus          = tilausrivi.otunnus
+                          $varastorajausjoini2
+                          AND lasku.varasto        != lasku.clearing
+                          AND lasku.tila            = 'G')
+                        WHERE tilausrivi.yhtio      = '{$kukarow['yhtio']}'
+                        AND tilausrivi.tyyppi       = 'G'
+                        AND tilausrivi.tuoteno      = '{$row['tuoteno']}'
+                        AND tilausrivi.laadittu     >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
+                        AND tilausrivi.kerattyaika  >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
+                        AND tilausrivi.kpl + tilausrivi.varattu > 0";
+            $xsiirtores = pupe_query($query_a);
+            $xsiirtopvmrow = mysql_fetch_assoc($xsiirtores);
+          }
+
+          $vikamykupaiva = max($xmyypvmrow['laskutettuaika'], $xsiirtopvmrow['vihapvm']);
 
           if ($vikamykupaiva > 0) {
             $vikamykupaiva = substr($vikamykupaiva, 0, 4)."-".substr($vikamykupaiva, 4, 2)."-".substr($vikamykupaiva, 6, 2);
@@ -1453,7 +1472,12 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
         fwrite($fh, pupesoft_csvstring(sprintf("%.06f", $bmuutoshinta))."\t");
       }
 
+      $varastorajausjoini = '';
+
       if (isset($valitut_varastot_rajaus) and $valitut_varastot_rajaus != "") {
+
+        // jos osto/myynti vain valituista varastoista, laitetaan myös varastosiirtoihin varastorajaus
+        $varastorajausjoini = $varasto_laskuclearing;
 
         $query_a = "SELECT IFNULL(MAX(laadittu), '0000-00-00') vihapvm
                     FROM tapahtuma USE INDEX (yhtio_tuote_laadittu)
@@ -1461,22 +1485,28 @@ if (isset($supertee) and $supertee == "RAPORTOI" or ($php_cli and $argv[0] == 'v
                     AND tapahtuma.tuoteno  = '{$row['tuoteno']}'
                     AND tapahtuma.laadittu >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
                     {$varasto_tapahtuma}
-                    AND tapahtuma.laji = 'tulo'";
+                    AND tapahtuma.laji     = 'tulo'";
         $result_a = pupe_query($query_a);
         $resultti_a = mysql_fetch_assoc($result_a);
         $row['vihapvm'] = $resultti_a['vihapvm'];
       }
 
-      # Huomioidaanko varastosiirrot viimeisimpänä tulona
+      // Huomioidaanko varastosiirrot viimeisimpänä tulona
       if (!empty($huomioi_varastosiirrot)) {
-        $query_a = "SELECT IFNULL(MAX(laadittu), '0000-00-00') vihapvm
-                    FROM tapahtuma USE INDEX (yhtio_tuote_laadittu)
-                    WHERE tapahtuma.yhtio  = '{$kukarow['yhtio']}'
-                    AND tapahtuma.tuoteno  = '{$row['tuoteno']}'
-                    AND tapahtuma.laadittu >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
-                    {$varasto_tapahtuma}
-                    AND tapahtuma.laji = 'siirto'
-                    AND tapahtuma.kpl > 0";
+
+        $query_a = "SELECT IFNULL(MAX(tilausrivi.toimitettuaika), '0000-00-00') vihapvm
+                    FROM tilausrivi USE INDEX (yhtio_tyyppi_tuoteno_laadittu)
+                    JOIN lasku ON (lasku.yhtio = tilausrivi.yhtio
+                      AND lasku.tunnus             = tilausrivi.otunnus
+                      $varastorajausjoini
+                      AND lasku.varasto           != lasku.clearing
+                      AND lasku.tila               = 'G')
+                    WHERE tilausrivi.yhtio         = '{$kukarow['yhtio']}'
+                    AND tilausrivi.tyyppi          = 'G'
+                    AND tilausrivi.tuoteno         = '{$row['tuoteno']}'
+                    AND tilausrivi.laadittu        >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
+                    AND tilausrivi.toimitettuaika  >= DATE_SUB('{$vv}-{$kk}-{$pp}', INTERVAL 12 MONTH)
+                    AND tilausrivi.kpl + tilausrivi.varattu > 0";
         $result_a = pupe_query($query_a);
         $resultti_a = mysql_fetch_assoc($result_a);
 

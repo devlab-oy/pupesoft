@@ -185,7 +185,7 @@ if ($tee == "laskuta" and count($laskutapvm) > 0) {
 
       if ($soprow["yllapito_kuukausihinnoittelu"] == "Y") {
         $laskutuskausilisa = ", sisviesti1 = concat_ws(', ', if(length(viesti), viesti, NULL),'" .
-                             t("Laskutuskausi") . " {$to[0]}')";
+          t("Laskutuskausi") . " {$to[0]}')";
       }
       else {
         $laskutuskausilisa = "";

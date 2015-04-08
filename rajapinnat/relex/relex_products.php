@@ -30,6 +30,8 @@ cron_log();
 
 $ajopaiva  = date("Y-m-d");
 $paiva_ajo = FALSE;
+$weekly_ajo = FALSE;
+$ajotext = "";
 
 if (isset($argv[2]) and $argv[2] != '') {
 
@@ -39,7 +41,14 @@ if (isset($argv[2]) and $argv[2] != '') {
       $ajopaiva = $argv[2];
     }
   }
-  $paiva_ajo = TRUE;
+
+  if (strtoupper($argv[2]) == 'WEEKLY') {
+    $weekly_ajo = TRUE;
+    $ajotext = "weekly_";
+  }
+  else {
+    $paiva_ajo = TRUE;
+  }
 }
 
 // Yhtiˆ
@@ -154,7 +163,7 @@ if ($_tuoterajaus) {
   $_tuoterajaus = $_tuoterajaus_ilman_hakukenttia ." AND (". substr($_tuoterajaus, 0, -4).")";
 
   // Tallennetaan rivit tiedostoon
-  $ofilepath = "/tmp/product_ostoehdotus_update_{$yhtio}_$ajopaiva.csv";
+  $ofilepath = "/tmp/product_ostoehdotus_update_{$yhtio}_{$ajotext}{$ajopaiva}.csv";
 
   if (!$ofp = fopen($ofilepath, 'w+')) {
     die("Tiedoston avaus ep‰onnistui: $ofilepath\n");
@@ -183,7 +192,7 @@ if ($_tuoterajaus) {
   $query = "SELECT $select_lisa tuote.tuoteno, yhtio.maa
             FROM tuote
             JOIN yhtio ON (tuote.yhtio = yhtio.yhtio)
-            WHERE tuote.yhtio     = '{$yhtio}'
+            WHERE tuote.yhtio = '{$yhtio}'
             {$_tuoterajaus}
             {$tuoteupdrajaus}";
   $res = pupe_query($query);
@@ -227,7 +236,7 @@ if (@include "inc/tecdoc.class.php") {
 require "vastaavat.class.php";
 
 // Tallennetaan tuoterivit tiedostoon
-$filepath = "/tmp/product_update_{$yhtio}_$ajopaiva.csv";
+$filepath = "/tmp/product_update_{$yhtio}_{$ajotext}{$ajopaiva}.csv";
 
 if (!$fp = fopen($filepath, 'w+')) {
   die("Tiedoston avaus ep‰onnistui: $filepath\n");
@@ -243,7 +252,7 @@ if ($paiva_ajo) {
 
   $query = "SELECT tuote.tuoteno
             FROM tuote
-            WHERE tuote.yhtio     = '{$yhtio}'
+            WHERE tuote.yhtio = '{$yhtio}'
             {$tuoterajaus}
             {$tuoteupdrajaus}";
   $res = pupe_query($query);
@@ -254,8 +263,8 @@ if ($paiva_ajo) {
 
   $query = "SELECT tuotteen_toimittajat.tuoteno
             FROM tuotteen_toimittajat
-            WHERE tuotteen_toimittajat.yhtio    = '{$yhtio}'
-            AND tuotteen_toimittajat.tuoteno    not in ($tuotelista)
+            WHERE tuotteen_toimittajat.yhtio = '{$yhtio}'
+            AND tuotteen_toimittajat.tuoteno not in ($tuotelista)
             {$tuotetoimupdrajaus}";
   $res = pupe_query($query);
 
@@ -334,7 +343,7 @@ $header .= "\n";
 fwrite($fp, $header);
 
 // Tallennetaan tuotteentoimittajarivit tiedostoon
-$tfilepath = "/tmp/product_suppliers_update_{$yhtio}_$ajopaiva.csv";
+$tfilepath = "/tmp/product_suppliers_update_{$yhtio}_{$ajotext}{$ajopaiva}.csv";
 
 if (!$tfp = fopen($tfilepath, 'w+')) {
   die("Tiedoston avaus ep‰onnistui: $tfilepath\n");
@@ -462,7 +471,7 @@ while ($row = mysql_fetch_assoc($res)) {
   $rivi .= "{$row['tullinimike1']};";
   $rivi .= "{$row['tullinimike2']};";
   $rivi .= "{$row['tullikohtelu']};";
-  
+
   if (empty($row['vakkoodi'])) {
     $vak_row['yk_nro'] = '';
   }
@@ -470,7 +479,7 @@ while ($row = mysql_fetch_assoc($res)) {
     $query = "SELECT yk_nro
               FROM vak
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus = {$row['vakkoodi']}";
+              AND tunnus  = {$row['vakkoodi']}";
     $vak_res = pupe_query($query);
     $vak_row = mysql_fetch_assoc($vak_res);
   }
@@ -553,6 +562,22 @@ while ($row = mysql_fetch_assoc($res)) {
       'tuotekerroin'                    => '',
       'jarjestys'                       => '',
       'toimitusaika_ema'                => '')
+  );
+
+  $parastoimittaja = array(
+    "toimittaja" => '',
+    "toim_tuoteno" => '',
+    "toim_nimitys" => '',
+    "osto_era" => '',
+    "pakkauskoko" => '',
+    "lavakoko" => '',
+    "ostohinta_oletusvaluutta" => '',
+    "alennukset_oletusvaluutta_netto" => '',
+    "valuutta" => '',
+    "oletus_kulupros" => '',
+    "toim_yksikko" => '',
+    "tuotekerroin" => '',
+    "jarjestys" => '',
   );
 
   if (mysql_num_rows($ttres) > 0) {
@@ -652,9 +677,15 @@ while ($row = mysql_fetch_assoc($res)) {
       $alennukset      = 1;
       $ostohinta_netto = $ostohinta;
 
+      // lis‰t‰‰n kuluprosentti hintaan jos sit‰ k‰ytet‰‰n saapumisellakin
+      if (in_array($yhtiorow['jalkilaskenta_kuluperuste'], array('KP', 'VS', 'PX'))) {
+        $ostohinta_netto = $ostohinta_netto * (1 + ($ttrow['oletus_kulupros'] / 100));
+      }
+
       // Nolla tai pienempi on virhe, laitetaan ne vikaks
       if ($ostohinta <= 0) {
-        $ostohinta = $ostohinta_netto = 0;
+        $ostohinta = 0;
+        $ostohinta_netto = 9999999;
         $netto     = "N";
       }
 
@@ -665,8 +696,8 @@ while ($row = mysql_fetch_assoc($res)) {
         $ostohinta_netto = $ostohinta_netto * $alennukset;
       }
 
-      $ostohinta_netto = round($ostohinta_netto, 6);
-      $alennukset = round((1 - $alennukset) * 100, 2);
+      $ostohinta_netto  = round($ostohinta_netto, 6);
+      $alennukset       = round((1 - $alennukset) * 100, 2);
 
       $ttrow['ostohinta_oletusvaluutta']        = $ostohinta;
       $ttrow['ostohinta_oletusvaluutta_netto']  = $ostohinta_netto;
@@ -700,17 +731,27 @@ while ($row = mysql_fetch_assoc($res)) {
       fwrite($tfp, $trivi);
     }
 
-    // Valitaan edullisin toimittaja
-    /*
-    TODO, toistaiseksi p‰‰toimittajaksi Pupen p‰‰toimittaja (order by j‰rjestys)
-    Myˆhemmin lis‰t‰‰n tuki, ett‰ voidaan kertoa miss‰ tapauksissa
-    otetaan halvimman hinnan mukaan ja miss‰ Pupen p‰‰toimittaja
-    Relexin p‰‰toimittajaksi.
-    */
-    // array_multisort($toimittajat_a_hinta, SORT_ASC, $toimittajat_a);
-  }
+    // p‰‰toimittaja talteen t‰s vaihees
+    $parastoimittaja = $toimittajat_a[0];
 
-  $parastoimittaja = $toimittajat_a[0];
+    // jos j‰rjestys parastoimitajal on 1, ei katsota ollenkaan halvempia toimittajia vaan menn‰‰n aina p‰‰toimittajalla
+    if ($parastoimittaja['jarjestys'] != 1) {
+
+      array_multisort($toimittajat_a_hinta, SORT_ASC, $toimittajat_a);
+
+      // jos parastoimittajan j‰rjestys on 2 eli "ehdollinen p‰‰toimittaja",
+      // katsotaan onko halvin toimittaja yli 5% halvempi ja jos, niin k‰ytet‰‰n sit‰
+      if ($parastoimittaja['jarjestys'] == 2) {
+        if ($parastoimittaja['ostohinta_oletusvaluutta_netto'] > ($toimittajat_a[0]['ostohinta_oletusvaluutta_netto'] * 1.05)) {
+          $parastoimittaja = $toimittajat_a[0];
+        }
+      }
+      else {
+        // muussa tapauksessa otetaan aina halvin toimittaja
+        $parastoimittaja = $toimittajat_a[0];
+      }
+    }
+  }
 
   if ($parastoimittaja['toimittaja'] > 0) {
     $parastoimittaja['toimittaja'] = $row['maa']."-".$parastoimittaja['toimittaja'];
@@ -766,7 +807,7 @@ fclose($fp);
 fclose($tfp);
 
 // Tehd‰‰n FTP-siirto
-if ($paiva_ajo and !empty($relex_ftphost)) {
+if (($paiva_ajo or $weekly_ajo) and !empty($relex_ftphost)) {
   // Tuotetiedot
   $ftphost = $relex_ftphost;
   $ftpuser = $relex_ftpuser;

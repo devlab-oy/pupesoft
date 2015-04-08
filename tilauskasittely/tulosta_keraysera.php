@@ -859,7 +859,7 @@ if ($tee != '') {
                       kerayserat.tunnus AS rivitunnus,
                       kerayserat.pakkausnro,
                       tilausrivi.tuoteno,
-                      TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark)) asiakasnimi,
+                      IFNULL(TRIM(CONCAT(asiakas.nimi, ' ', asiakas.nimitark)), TRIM(CONCAT(lasku.nimi, ' ', lasku.nimitark))) asiakasnimi,
                       if (kerayserat.kerattyaika = '0000-00-00 00:00:00', kerayserat.kpl, kerayserat.kpl_keratty) kpl,
                       lasku.liitostunnus,
                       CONCAT(tilausrivi.hyllyalue, ' ', tilausrivi.hyllynro, ' ', tilausrivi.hyllyvali, ' ', tilausrivi.hyllytaso) hyllypaikka,
@@ -867,7 +867,7 @@ if ($tee != '') {
                       FROM kerayserat
                       JOIN tilausrivi ON (tilausrivi.yhtio = kerayserat.yhtio AND tilausrivi.tunnus = kerayserat.tilausrivi)
                       JOIN lasku ON (lasku.yhtio = kerayserat.yhtio AND lasku.tunnus = kerayserat.otunnus)
-                      JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
+                      LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND asiakas.tunnus = lasku.liitostunnus)
                       WHERE kerayserat.yhtio    = '{$kukarow['yhtio']}'
                       AND kerayserat.nro        = '{$kerayserat_row['nro']}'
                       AND kerayserat.pakkausnro = '{$rivit_row['pakkausnro']}'

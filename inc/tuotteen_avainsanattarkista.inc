@@ -17,7 +17,7 @@ if (!function_exists("tuotteen_avainsanattarkista")) {
                   AND tuoteno = '$t[$i]'";
         $sresult = pupe_query($query);
 
-        if (mysql_num_rows($sresult) != 1) {
+        if (mysql_num_rows($sresult) != 1 and $trow["luedata_toiminto"] != "POISTA") {
 
           if (substr($t[$i], -1) != '*') $tuoteno = $t[$i]."*";
           else $tuoteno = $t[$i];

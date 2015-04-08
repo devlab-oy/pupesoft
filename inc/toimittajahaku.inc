@@ -332,7 +332,7 @@ if ($tee == 'A') {
                 $toimiliilisa
                 $th_lisa
                 $aikalisa
-                and lasku.tila in ('H', 'M', 'P', 'Q', 'Y')
+                and lasku.tila    in ('H', 'M', 'P', 'Q', 'Y')
                 ORDER BY lasku.tapvm desc
                 $limlis";
       $result = pupe_query($query);

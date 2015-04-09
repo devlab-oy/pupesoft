@@ -2671,7 +2671,7 @@ else {
     }
     elseif (PUPE_UNICODE) {
       // Muutetaan ISO-8859-15:ksi jos lasku on jossain toisessa merkistössä
-      exec("recode --force UTF8..ISO-8859-15 $nimixml");
+      exec("recode --force UTF8..ISO-8859-15 '$nimixml'");
     }
 
     if (filesize($nimifinvoice) == 0) {
@@ -2679,7 +2679,7 @@ else {
     }
     elseif (PUPE_UNICODE) {
       // Muutetaan ISO-8859-15:ksi jos lasku on jossain toisessa merkistössä
-      exec("recode --force UTF8..ISO-8859-15 $nimifinvoice");
+      exec("recode --force UTF8..ISO-8859-15 '$nimifinvoice'");
     }
 
     if (filesize($nimiedi) == 0) {
@@ -2687,7 +2687,7 @@ else {
     }
     elseif (PUPE_UNICODE) {
       // Muutetaan ISO-8859-15:ksi jos lasku on jossain toisessa merkistössä
-      exec("recode --force UTF8..ISO-8859-15 $nimiedi");
+      exec("recode --force UTF8..ISO-8859-15 '$nimiedi'");
     }
 
     if (filesize($nimisisainenfinvoice) == 0) {
@@ -2695,7 +2695,7 @@ else {
     }
     elseif (PUPE_UNICODE) {
       // Muutetaan ISO-8859-15:ksi jos lasku on jossain toisessa merkistössä
-      exec("recode --force UTF8..ISO-8859-15 $nimisisainenfinvoice");
+      exec("recode --force UTF8..ISO-8859-15 '$nimisisainenfinvoice'");
     }
 
     // poistetaan lukot

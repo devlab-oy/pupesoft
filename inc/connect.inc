@@ -1,7 +1,15 @@
 <?php
 
-// Pupe oletuksena Latin1, voidaan yliajaa salasanat:phpssä
-define("PUPE_UNICODE", FALSE);
+// Tsekataan ajetaanko Pupea Latin1- vai UTF-8-moodissa
+// (Ohjataan mssql.charset-muuttujalla php.ini-tiedostossa)
+if (!defined("PUPE_UNICODE")) {
+  if (get_cfg_var('mssql.charset') == "UTF-8") {
+    define("PUPE_UNICODE", TRUE);
+  }
+  else {
+    define("PUPE_UNICODE", FALSE);
+  }
+}
 
 require "salasanat.php";
 

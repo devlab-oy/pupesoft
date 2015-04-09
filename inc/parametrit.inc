@@ -13,6 +13,17 @@ error_reporting(E_ERROR);
 ini_set("display_errors", 0);
 ini_set("log_errors", 1);
 
+// Tsekataan ajetaanko Pupea Latin1- vai UTF-8-moodissa
+// (Ohjataan mssql.charset-muuttujalla php.ini-tiedostossa)
+if (!defined("PUPE_UNICODE")) {
+  if (get_cfg_var('mssql.charset') == "UTF-8") {
+    define("PUPE_UNICODE", TRUE);
+  }
+  else {
+    define("PUPE_UNICODE", FALSE);
+  }
+}
+
 $alkumem   = memory_get_usage();
 $timeparts = explode(" ", microtime());
 $starttime = $timeparts[1].substr($timeparts[0], 1);

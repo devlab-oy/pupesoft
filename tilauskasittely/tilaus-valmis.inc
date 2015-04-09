@@ -1625,6 +1625,7 @@ else {
 
       $ohjausmerkki_nro  = 1;
       $tilaus_splitattu   = FALSE;
+      $splitattu_vakiksi = false;
       unset($laskusplitres);
 
       if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and is_string($toimitustavan_lahto)) {
@@ -1657,7 +1658,7 @@ else {
             ) or
             ($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $edomalle_tilaukselle == 0 and $yhtiorow["splittauskielto"] == "K") or
             ($omalle_tilaukselle != $edomalle_tilaukselle and $edomalle_tilaukselle != 'x') or
-            ($vakit_eri_tilaukselle and $row["vakkoodi"] != "" and !$tilaus_splitattu)
+            ($vakit_eri_tilaukselle and $row["vakkoodi"] != "" and !$splitattu_vakiksi)
           )
           and $laskurow["osatoimitus"] == '') {
 
@@ -1709,6 +1710,7 @@ else {
           }
 
           if ($vakit_eri_tilaukselle and $row["vakkoodi"] != "") {
+            $splitattu_vakiksi = true;
             $split_toimitustapa = $totarowx["vaihtoehtoinen_vak_toimitustapa"];
           }
 

@@ -63,7 +63,7 @@ else {
   if (!function_exists("pupe_register_globals")) {
     function pupe_register_globals($param_clean) {
       $src = array("\"", "'", "<", ">", "\\", ";");
-      $rpl = array("{DOULEPRIME}" , "{PRIME}", "" , "" , ""  , "");
+      $rpl = array("{DOULEPRIME}", "{PRIME}", "" , "" , ""  , "");
 
       foreach ($param_clean as $key => $value) {
         $param_clean[$key] = $GLOBALS[$key] = str_replace($src, $rpl, $param_clean[$key]);

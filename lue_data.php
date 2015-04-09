@@ -2586,7 +2586,14 @@ if (!$cli and !isset($api_kentat)) {
     $_taulu = array_shift($taulut);
   }
 
-  list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($_taulu);
+  if (substr($_taulu, 0, 10) == 'puun_alkio') {
+    $_taulu_query = "puun_alkio";
+  }
+  else {
+    $_taulu_query = $_taulu;
+  }
+
+  list($pakolliset, $kielletyt, $wherelliset, $eiyhtiota, $joinattavat, $saakopoistaa, $oletukset) = pakolliset_sarakkeet($_taulu_query);
 
   echo "  <tr><td class='tumma'>".t("Tietokantataulun pakolliset tiedot").":</td>";
   echo "  <td>".strtolower(implode(", ", $pakolliset))."</td></tr>";
@@ -2600,6 +2607,30 @@ if (!$cli and !isset($api_kentat)) {
     echo "  <tr><td class='tumma'>".t("Sarakkeet joita ei saa aineistossa kertoa").":</td>";
     echo "  <td>".strtolower(implode(", ", $kielletyt))."</td></tr>";
   }
+
+  $query = "DESC {$_taulu_query}";
+  $_res = pupe_query($query);
+
+  echo "<tr>";
+  echo "<td class='tumma'>",t("Sarakkeet joita saa aineistossa kertoa"),":</td>";
+  echo "<td>";
+
+  $_kentat = array();
+
+  while ($_row = mysql_fetch_assoc($_res)) {
+    if (in_array($_row['Field'], array('tunnus','yhtio'))) {
+      continue;
+    }
+
+    if (!in_array(strtoupper($_row['Field']), $pakolliset) and !in_array(strtoupper($_row['Field']), $wherelliset) and !in_array(strtoupper($_row['Field']), $kielletyt)) {
+      $_kentat[] = $_row['Field'];
+    }
+  }
+
+  echo implode(", ", $_kentat);
+
+  echo "</td>";
+  echo "</tr>";
 
   echo "  <tr><th>".t("Valitse tiedosto").":</th>
         <td><input name='userfile' type='file'></td>

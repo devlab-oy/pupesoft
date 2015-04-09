@@ -92,7 +92,7 @@ if (isset($livesearch_tee) and $livesearch_tee == "TUOTEHAKU") {
   exit;
 }
 
-if ($yhtiorow['laite_huolto'] == 'X' and !empty($del) and in_array($toim, array('kohde', 'tuote', 'paikka', 'laite', 'asiakas'))) {
+if ($yhtiorow['laite_huolto'] == 'X' and !empty($del) and $del != 3 and in_array($toim, array('kohde', 'tuote', 'paikka', 'laite', 'asiakas'))) {
   die('Poistaminen kielletty');
 }
 

@@ -587,6 +587,7 @@ if ($tee == 'MUUTA') {
               oletus_ostovarasto            = '{$oletus_ostovarasto}',
               oletus_pakkaamo               = '{$oletus_pakkaamo}',
               kirjoitin                     = '{$kirjoitin}',
+              kuittitulostin                = '{$kuittitulostin}',
               oletus_asiakas                = '{$oletus_asiakas}',
               oletus_asiakastiedot          = '{$oletus_asiakastiedot}',
               oletus_profiili               = '{$oletus_profiili}',
@@ -602,6 +603,8 @@ if ($tee == 'MUUTA') {
               kassalipas_otto               = '{$kassalipas_otto}',
               kassamyyja                    = '{$kassamyyja}',
               dynaaminen_kassamyynti        = '{$dynaaminen_kassamyynti}',
+              maksupaate_kassamyynti        = '{$maksupaate_kassamyynti}',
+              maksupaate_ip                 = '{$maksupaate_ip}',
               jyvitys                       = '{$jyvitys}',
               oletus_ohjelma                = '{$oletus_ohjelma}',
               maksuehto                     = '{$maksuehto}',
@@ -1083,6 +1086,34 @@ if ($tee == 'MUUTA') {
 
         echo "</select></td></tr>";
 
+        echo "<tr><th align='left'>", t("Kuittitulostin"), ":</th>";
+        echo "<td>" .
+          "<select name='kuittitulostin'>" .
+          "<option value=''>" . t("Ei kuittitulostinta") .
+          "</option>";
+
+        $kuittitulostin_query =
+          "SELECT tunnus, kirjoitin
+           FROM kirjoittimet
+           WHERE yhtio     = '{$kukarow['yhtio']}'
+           AND mediatyyppi = 'kuittitulostin'";
+
+        $kuittitulostin_result = pupe_query($kuittitulostin_query);
+
+        while ($kuittitulostin_rivi = mysql_fetch_assoc($kuittitulostin_result)) {
+          $sel = '';
+
+          if ($kuittitulostin_rivi['tunnus'] == $krow["kuittitulostin"]) {
+            $sel = 'selected';
+          }
+
+          echo "<option " .
+            "value='{$kuittitulostin_rivi['tunnus']}' {$sel}>{$kuittitulostin_rivi['kirjoitin']}" .
+            "</option>";
+        }
+
+        echo "</select></td></tr>";
+
         $kassalipaslisa = $krow['toimipaikka'] != 0 ? "and (toimipaikka = 0 or toimipaikka = {$krow['toimipaikka']})" : "";
         $query = "SELECT *
                   FROM kassalipas
@@ -1132,6 +1163,47 @@ if ($tee == 'MUUTA') {
         echo "<option value='' {$sel1}>", t("Kassalipasta ei voi valita tilauksella"), "</option>";
         echo "<option value='o' {$sel2}>", t("Kassalippaan voi valita tilauksella"), "</option>";
         echo "</select></td>";
+
+        $maksupaate_sel_1 = "";
+        $maksupaate_sel_2 = "";
+
+        if ($krow["maksupaate_kassamyynti"] == "") {
+          $maksupaate_sel_1 = "selected";
+        }
+        elseif ($krow["maksupaate_kassamyynti"] == "E") {
+          $maksupaate_sel_2 = "selected";
+        }
+        else {
+          $maksupaate_sel_3 = "selected";
+        }
+
+        echo "<tr>
+                <th align='left'>" . t("Maksup‰‰te kassamyynti") . ":</th>
+                <td>
+                  <select name='maksupaate_kassamyynti'>
+                    <option value=''
+                            {$maksupaate_sel_1}>" . t("Yhtiˆn oletus") . "
+                    </option>
+                    <option value='E'
+                            {$maksupaate_sel_2}>" . t("Ei k‰ytet‰ maksup‰‰tett‰ kassamyynniss‰") . "
+                    </option>
+                    <option value='K'
+                            {$maksupaate_sel_3}>" . t("K‰ytet‰‰n maksup‰‰tett‰ kassamyynniss‰") . "
+                    </option>
+                  </select>
+                </td>
+              </tr>";
+
+        echo "<tr>
+                <th align='left'>" . t("Maksup‰‰tteen IP") . ":</th>
+                <td>
+                  <input id='maksupaate_ip'
+                         type='text'
+                         name='maksupaate_ip'
+                         value='{$krow["maksupaate_ip"]}'
+                         placeholder='" . t("IP tai IP:portti") . "'/>
+                </td>
+              </tr>";
 
         $sel0 = $sel1 = "";
 

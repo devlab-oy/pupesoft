@@ -158,12 +158,14 @@ function erittele_laskut($file) {
 
       //  T‰m‰ siksi ett‰ haluamme k‰ytt‰‰ paikallista kuvausta eik‰ ladata kuvausta verkosta!
       $xmldata = preg_replace("/^.*?<Invoice>/ms", "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<?xml-stylesheet type=\"text/xsl\" href=\"datain/teccom-invoice.xsl\"?>\n<Invoice>", $xmldata, 1);
-      
+
       // Jos data ei oo UTF-8 muodossa niin laitetaan se siihen
       if (!PUPE_UNICODE and mb_detect_encoding($xmldata, 'UTF-8', true) === FALSE) {
-        $xmldata = utf8_encode($xmldata);
+        // T‰ss‰ on "//NO_MB_OVERLOAD"-kommentti
+        // jotta UTF8-konversio ei osu t‰h‰n riviin
+        $xmldata = utf8_encode($xmldata); //NO_MB_OVERLOAD
       }
-      
+
       $save = file_put_contents($file, $xmldata);
       $path_parts = pathinfo($file);
 

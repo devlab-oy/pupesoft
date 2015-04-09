@@ -5,7 +5,9 @@ if (!function_exists("xml_float")) {
     $value = (string) $value;
 
     if (!PUPE_UNICODE and mb_detect_encoding($value, 'UTF-8', true) !== FALSE) {
-      $value = utf8_decode($value);
+      // Tässä on "//NO_MB_OVERLOAD"-kommentti
+      // jotta UTF8-konversio ei osu tähän riviin
+      $value = utf8_decode($value); //NO_MB_OVERLOAD
     }
 
     return pupesoft_cleannumber($value);
@@ -17,7 +19,9 @@ if (!function_exists("xml_string")) {
     $value = (string) $value;
 
     if (!PUPE_UNICODE and mb_detect_encoding($value, 'UTF-8', true) !== FALSE) {
-      $value = utf8_decode($value);
+      // Tässä on "//NO_MB_OVERLOAD"-kommentti
+      // jotta UTF8-konversio ei osu tähän riviin
+      $value = utf8_decode($value); //NO_MB_OVERLOAD
     }
 
     return pupesoft_cleanstring($value);

@@ -81,10 +81,10 @@ if ($handle = opendir($laskut)) {
     // Muutetaan oikeaan merkistöön
     $encoding = exec("file -b --mime-encoding $nimi");
 
-    if (!PUPE_UNICODE and $encoding != "" and mb_strtoupper($encoding) != 'ISO-8859-1') {
+    if (!PUPE_UNICODE and $encoding != "" and strtoupper($encoding) != 'ISO-8859-1') {
       exec("recode $encoding..ISO-8859-1 $nimi");
     }
-    elseif (PUPE_UNICODE and $encoding != "" and mb_strtoupper($encoding) != 'UTF-8') {
+    elseif (PUPE_UNICODE and $encoding != "" and strtoupper($encoding) != 'UTF-8') {
       exec("recode $encoding..UTF8 $nimi");
     }
 

@@ -255,13 +255,13 @@ $filename = trim($filename);
 if ($filename == "") die('Tiedostonimi puuttui!\n');
 
 // Muutetaan oikeaan merkistöön
-$encoding = exec("file -b --mime-encoding $filename");
+$encoding = exec("file -b --mime-encoding '$filename'");
 
 if (!PUPE_UNICODE and $encoding != "" and mb_strtoupper($encoding) != 'ISO-8859-1') {
-  exec("recode $encoding..ISO-8859-1 $filename");
+  exec("recode $encoding..ISO-8859-1 '$filename'");
 }
 elseif (PUPE_UNICODE and $encoding != "" and mb_strtoupper($encoding) != 'UTF-8') {
-  exec("recode $encoding..UTF8 $filename");
+  exec("recode $encoding..UTF8 '$filename'");
 }
 
 if (!$fd = fopen($filename, "r")) die("Filen '$filename' ".t("avaus epäonnistui")."!\n");

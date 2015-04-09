@@ -41,10 +41,10 @@ $ftptmpr         = !isset($ftptmpr) ? TRUE : $ftptmpr;
 
 // Lähetetään oletuksena ISO-8859-15 merkistömuodossa
 if (PUPE_UNICODE and !isset($ftputf8) or !$ftputf8) {
-  $encoding = exec("file -b --mime-encoding $ftpfile");
+  $encoding = exec("file -b --mime-encoding '$ftpfile'");
 
   if (strtoupper($encoding) == 'UTF-8') {
-    exec("recode --force UTF8..ISO-8859-15 $ftpfile");
+    exec("recode --force UTF8..ISO-8859-15 '$ftpfile'");
   }
 }
 

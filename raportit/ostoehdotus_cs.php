@@ -388,8 +388,8 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
             valittuvarasto: valittuvarasto,
             no_head: 'yes',
             ohje: 'off' },
-          function(return_value) {
-            var message = jQuery.parseJSON(return_value);
+          function(json) {
+            var message = JSON && JSON.parse(json) || $.parseJSON(json);
 
             if (message == \"ok\") {
               $(\"#\"+submitid).val('".t("Tilattu")."').attr('disabled', true);

@@ -414,6 +414,7 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
       $.post('{$_SERVER['SCRIPT_NAME']}',
         {   tee: 'PAIVITA_AJAX',
           tuoteno: tuoteno,
+          async: false,
           toimittaja: toimittaja,
           varmuusvarastot: varmuusvarastot,
           pakkauskoot: pakkauskoot,
@@ -421,8 +422,8 @@ if ($tee == "RAPORTOI" and isset($ehdotusnappi)) {
           varastoitavat: varastoitavat,
           no_head: 'yes',
           ohje: 'off' },
-        function(return_value) {
-          var message = jQuery.parseJSON(return_value);
+        function(json) {
+          var message = JSON && JSON.parse(json) || $.parseJSON(json);
 
           if (message == \"ok\") {
             $(\"#paivitetty_\"+osat[1]).html(' ".t("Tiedot päivitetty")."!');

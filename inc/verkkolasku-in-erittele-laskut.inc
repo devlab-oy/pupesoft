@@ -161,9 +161,7 @@ function erittele_laskut($file) {
 
       // Jos data ei oo UTF-8 muodossa niin laitetaan se siihen
       if (!PUPE_UNICODE and mb_detect_encoding($xmldata, 'UTF-8', true) === FALSE) {
-        // Tässä on "//NO_MB_OVERLOAD"-kommentti
-        // jotta UTF8-konversio ei osu tähän riviin
-        $xmldata = utf8_encode($xmldata); //NO_MB_OVERLOAD
+        $xmldata = utf8_encode($xmldata);
       }
 
       $save = file_put_contents($file, $xmldata);

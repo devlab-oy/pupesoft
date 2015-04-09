@@ -310,7 +310,7 @@ if ($tee == 'GO') {
     }
 
     // katotaan josko nimessä olisi alaviiva, katkaistaan siitä
-    if (mb_strpos($kuva, "_") !== FALSE and $kukarow["yhtio"] == "filla") {
+    if (strpos($kuva, "_") !== FALSE and $kukarow["yhtio"] == "filla") {
       list($kuva, $jarjestys) = explode("_", $kuva);
       $kuva = "$kuva.$ext";
     }

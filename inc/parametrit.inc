@@ -682,7 +682,12 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     }
 
     if (!PUPE_UNICODE) {
-      $charset = "iso-8859-1";
+      if ($kukarow["kieli"] == "ru" and $yhtiorow['yhtio'] == 'allr') {
+        $charset = "utf-8";
+      }
+      else {
+        $charset = "iso-8859-1";
+      }
     }
     else {
       $charset = "utf-8";

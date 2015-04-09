@@ -43,7 +43,7 @@ $ftptmpr         = !isset($ftptmpr) ? TRUE : $ftptmpr;
 if (PUPE_UNICODE and !isset($ftputf8) or !$ftputf8) {
   $encoding = exec("file -b --mime-encoding $ftpfile");
 
-  if (mb_strtoupper($encoding) == 'UTF-8') {
+  if (strtoupper($encoding) == 'UTF-8') {
     exec("recode --force UTF8..ISO-8859-15 $ftpfile");
   }
 }

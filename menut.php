@@ -119,7 +119,7 @@ if ((isset($synkronoireferenssi) or isset($synkronoireferenssialapaivita)) and c
   if (PUPE_UNICODE) {
     // Tässä on "//NO_MB_OVERLOAD"-kommentti
     // jotta UTF8-konversio ei osu tähän riviin
-    $referenssit = utf8_encode($referenssit); ; //NO_MB_OVERLOAD
+    $referenssit = utf8_encode($referenssit); //NO_MB_OVERLOAD
   }
 
   $referenssit = explode("\n", trim($referenssit));
@@ -633,7 +633,7 @@ if ($tee == "") {
         if (PUPE_UNICODE) {
           // Tässä on "//NO_MB_OVERLOAD"-kommentti
           // jotta UTF8-konversio ei osu tähän riviin
-          $referenssit = utf8_encode($referenssit); ; //NO_MB_OVERLOAD
+          $referenssit = utf8_encode($referenssit); //NO_MB_OVERLOAD
         }
 
         $referenssit = explode("\n", trim($referenssit));

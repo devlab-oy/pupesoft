@@ -4884,6 +4884,10 @@ if ($tee == '') {
         require 'lisaarivi.inc';
       }
 
+      if ($yhtiorow['laite_huolto'] == 'X'){
+        paivita_uuden_toimenpide_rivin_tilausrivi_linkki($lisatty_tun, $vaihdettava_rivi, $_SESSION['laite_tunnus']);
+      }
+
       $hinta   = '';
       $netto   = '';
       $var   = '';

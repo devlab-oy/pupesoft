@@ -86,7 +86,7 @@ else {
   ini_set('zlib.output_compression', 'On');
 }
 
-// Nollataan kaikki muuttujat joita voi setata salasanat.php:ss√§
+// Nollataan kaikki muuttujat joita voi setata salasanat.php:ss‰
 unset($palvelin);
 unset($palvelin_ip);
 unset($dbhost);
@@ -289,27 +289,27 @@ elseif (@include_once "functions.inc") {
 }
 else exit;
 
-$link = @mysql_connect($dbhost, $dbuser, $dbpass) or die ("Tietokantapalvelimeen ei saada yhteytt√§. Se on pois p√§√§lt√§ tai k√§ytt√§j√§tietosi ovat virheelliset.");
-mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta ei l√∂ydy palvelimelta $dbhost! (parametrit.inc)");
+$link = @mysql_connect($dbhost, $dbuser, $dbpass) or die ("Tietokantapalvelimeen ei saada yhteytt‰. Se on pois p‰‰lt‰ tai k‰ytt‰j‰tietosi ovat virheelliset.");
+mysql_select_db($dbkanta) or die ("Tietokantaa $dbkanta ei lˆydy palvelimelta $dbhost! (parametrit.inc)");
 mysql_set_charset("latin1", $link);
 mysql_query("set group_concat_max_len=1000000", $link);
 
 // pupesoft_cleanstring ALL THE COOKIES!!
 $_COOKIE = array_map("pupesoft_cleanstring", $_COOKIE);
 
-// Palvelin-muuttujassa pit√§√§ olla lopussa kauttaviiva
+// Palvelin-muuttujassa pit‰‰ olla lopussa kauttaviiva
 $palvelin = rtrim($palvelin, "/")."/";
 
 $pupesoft_url = parse_url($palvelin);
 
-// Otetaan tietoa t√§st√§ requestist√§
+// Otetaan tietoa t‰st‰ requestist‰
 $PHP_SELF = $_SERVER["PHP_SELF"];
 $phpnimi = basename($_SERVER["SCRIPT_NAME"]);
 $pupesoft_scheme = (isset($_SERVER["HTTPS"]) and $_SERVER["HTTPS"] == 'on') ? "https://" : "http://";
 $pupesoft_server = (isset($_SERVER['HTTP_X_FORWARDED_SERVER']) and isset($palvelin_ip) and $palvelin_ip == $_SERVER['SERVER_NAME']) ? $_SERVER['HTTP_X_FORWARDED_SERVER'] : $_SERVER['SERVER_NAME'];
 $pupesoft_port = ($_SERVER['SERVER_PORT'] != '80' and $_SERVER['SERVER_PORT'] != '443') ? ":".$_SERVER['SERVER_PORT'] : "";
 
-// $palvelin muuttujassa on Pupesoft root url, joka tulee salasat.php:st√§
+// $palvelin muuttujassa on Pupesoft root url, joka tulee salasat.php:st‰
 // $palvelin2 muuttujassa on Pupesoft root url, mutta scheme/server/portti on muutettu tarpeen mukaan
 $palvelin2 = $pupesoft_scheme.$pupesoft_server.$pupesoft_port.$pupesoft_url["path"];
 
@@ -319,7 +319,7 @@ $pupesoft_dirname = str_replace(array($phpnimi, $palvelin2), array("", ""), $pup
 // Haetaan session
 $session = (isset($_COOKIE["pupesoft_session"]) and $_COOKIE["pupesoft_session"] != "deleted") ? $_COOKIE["pupesoft_session"] : "";
 
-// k√§yt√∂ss√§ olevat kielet
+// k‰ytˆss‰ olevat kielet
 $sanakirja_kielet = array("fi" => "Suomi",
   "en" => "Englanti",
   "se" => "Ruotsi",
@@ -327,13 +327,13 @@ $sanakirja_kielet = array("fi" => "Suomi",
   "de" => "Saksa",
   "dk" => "Tanska",
   "no" => "Norja",
-  "ru" => "Ven√§j√§");
+  "ru" => "Ven‰j‰");
 
 //Initioidaan pari muuttujaa
 if (!isset($login))    $login = "";
 if (!isset($extranet)) $extranet = "";
 
-// jos saamme n√§m√§ muuttujat getiss√§, kokeillaan logata niill√§ sis√§√§n
+// jos saamme n‰m‰ muuttujat getiss‰, kokeillaan logata niill‰ sis‰‰n
 if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_GET["yhtio"] != "") {
 
   $_GET["yhtio"] = mysql_real_escape_string($_GET["yhtio"]);
@@ -353,7 +353,7 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
 
     $apukukarow = mysql_fetch_assoc($result);
 
-    // jos meill√§ on sessio niin poistetaan se tietokannasta jo aluks
+    // jos meill‰ on sessio niin poistetaan se tietokannasta jo aluks
     if ($session != "") {
       $query = "UPDATE kuka
                 SET session = ''
@@ -382,7 +382,7 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
     $bool = setcookie("pupesoft_session", $session, time()+43200, "/"); // 12 tuntia voimassa
 
     if ($bool === FALSE) {
-      die ("Sis√§√§nkirjaus ep√§onnistui!");
+      die ("Sis‰‰nkirjaus ep‰onnistui!");
     }
 
     // refreshataan vain jos ei ole ostoskoria mukana
@@ -392,10 +392,10 @@ if (isset($_GET["user"]) and $_GET["user"] != "" and $_GET["pass"] != "" and $_G
     }
   }
   else {
-    die ("Sis√§√§nkirjaus ep√§onnistui!");
+    die ("Sis‰‰nkirjaus ep‰onnistui!");
   }
 }
-// jos sessionia ei ole ja ei olla loginissa, menn√§√§n login ruutuun ja exit...
+// jos sessionia ei ole ja ei olla loginissa, menn‰‰n login ruutuun ja exit...
 elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkkokauppa == '')) {
 
   if ($phpnimi != 'index.php') {
@@ -432,12 +432,12 @@ elseif ($session == '' and $login != 'yes' and (!isset($verkkokauppa) or $verkko
 //  Verkkokauppamoodissa ei koskaan ohjetta!
 if (isset($verkkokauppa) and $verkkokauppa != "") $_GET["ohje"] = "off";
 
-// jos meill√§ on sessio
+// jos meill‰ on sessio
 if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login != 'yes')) {
 
-  //  Kirjataan verkkokauppak√§ytt√§j√§
+  //  Kirjataan verkkokauppak‰ytt‰j‰
   if (isset($verkkokauppa) and $verkkokauppa != "" and $session == "") {
-    //  T√§√§ll√§ ei ole mit√§√§n oikeuksia
+    //  T‰‰ll‰ ei ole mit‰‰n oikeuksia
     $oikeurow = array();
     $kukarow["kuka"]     = "www";
     $kukarow["nimi"]     = "Verkkokauppa";
@@ -471,7 +471,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
     $kukarow = mysql_fetch_assoc($result);
 
-    // Tehd√§√§n cookieita, jos tarvitaan
+    // Tehd‰‰n cookieita, jos tarvitaan
 
     // Muokka Tilaus
     if ($phpnimi == "muokkaatilaus.php") {
@@ -480,7 +480,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
         setcookie("pupesoft_muokkaatilaus", $asiakastiedot, time()+60*60*24*90, "/");
       }
 
-      // N√§ytet√§√§n riitt√§√§k√∂ saldo ker√§ysp√§iv√§n√§
+      // N‰ytet‰‰n riitt‰‰kˆ saldo ker‰ysp‰iv‰n‰
       if ($naytetaanko_saldot == 'kylla') {
         setcookie("naytetaanko_saldot", $naytetaanko_saldot, time()+60*60*24*90, "/");
       }
@@ -491,7 +491,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
     // Tuoteperhe
     if ($phpnimi == "tuoteperhe.php") {
-      // Muistetaan ker√§yksen ohituksen valinta
+      // Muistetaan ker‰yksen ohituksen valinta
       if (isset($tallenna_keksiin) and $ohita_kerays == "on") {
         setcookie("pupesoft_tuoteperhe", "ohitetaan", time()+60*60*24*90, "/");
         $_COOKIE["pupesoft_tuoteperhe"] = "ohitetaan";
@@ -577,7 +577,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       }
     }
 
-    // T√§nne p√§√§see aina!
+    // T‰nne p‰‰see aina!
     if ($phpnimi != 'indexvas.php'
       and $phpnimi != 'index.php'
       and $phpnimi != 'tervetuloa.php'
@@ -595,7 +595,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
         echo "<tr>";
         echo "<td style='text-align:center;font-size:9pt;font-family:Lucida,Verdana,Helvetica,Arial; color: #666;'>";
         echo "<img src='{$palvelin2}pics/facelift/pupe.gif'><br><br>";
-        echo "K√§ytt√§j√§ {$kukarow["kuka"]} pyysi toimintoa $phpnimi $toim, joka on kielletty!";
+        echo "K‰ytt‰j‰ {$kukarow["kuka"]} pyysi toimintoa $phpnimi $toim, joka on kielletty!";
         echo "</td>";
         echo "</tr>";
         echo "</table>";
@@ -607,7 +607,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
   $yhtiorow = hae_yhtion_parametrit($kukarow['yhtio']);
 
   if ((isset($nayta_pdf) and $nayta_pdf == 1) or (isset($lataa_tiedosto) and $lataa_tiedosto == 1)) {
-    // Kerrotaan selaimelle, ett√§ t√§m√§ on tiedosto
+    // Kerrotaan selaimelle, ett‰ t‰m‰ on tiedosto
     header("Pragma: public");
     header("Expires: 0");
     header("HTTP/1.1 200 OK");
@@ -643,7 +643,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       }
       elseif (isset($pankkifilenimi) and $pankkifilenimi != '') {
 
-        // Onko maksuaineistoille annettu salasanat.php:ss√§ oma polku jonne tallennetaan
+        // Onko maksuaineistoille annettu salasanat.php:ss‰ oma polku jonne tallennetaan
         if (isset($pankkitiedostot_polku) and trim($pankkitiedostot_polku) != "") {
 
           $pankkitiedostot_polku = trim($pankkitiedostot_polku);
@@ -659,8 +659,8 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
         header("Content-Length: ".filesize($pankkitiedostot_polku.basename($pankkifilenimi)));
       }
       else {
-        // T√§ss√§ on "//NO_MB_OVERLOAD"-kommentti
-        // jotta UTF8-konversio ei osu t√§h√§n riviin
+        // T‰ss‰ on "//NO_MB_OVERLOAD"-kommentti
+        // jotta UTF8-konversio ei osu t‰h‰n riviin
         $_file_size = strlen($file); //NO_MB_OVERLOAD
 
         header("Content-Length: {$_file_size}");
@@ -720,7 +720,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       echo "<meta http-equiv='expires' content='-1'>\n";
       echo "<meta http-equiv='content-type' content='text/html; charset=$charset'>\n";
 
-      // Jos mobile on setattu, otetaan auto-zoom pois k√§yt√∂st√§
+      // Jos mobile on setattu, otetaan auto-zoom pois k‰ytˆst‰
       if (isset($mobile) and $mobile) {
         echo "<meta name='viewport' content='width=250,height=246, user-scalable=no, maximum-scale=1'>\n";
         echo "<link rel='stylesheet' type='text/css' href='kasipaate.css' />\n";
@@ -888,7 +888,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
         echo "<div><a href='#' onclick=\"divi=document.getElementById('$_GET[sulje]'); document.body.removeChild(divi); return false;\"><font style='color: red;'>x</font></a><br></div>";
       }
 
-      // Autetaan sanakirjan yll√§pidossa
+      // Autetaan sanakirjan yll‰pidossa
       if ($kukarow["yhtio"] != "" and $kukarow["kuka"] != "") {
         $query = "SELECT yhtio
                   FROM oikeu
@@ -926,7 +926,7 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
 
           while ($message_row = mysql_fetch_assoc($message_result)) {
             echo "<div id='{$message_row['tunnus']}'>";
-            echo t("Viesti k√§ytt√§j√§lt√§").": ";
+            echo t("Viesti k‰ytt‰j‰lt‰").": ";
             echo "{$message_row['nimi']} @ ".tv1dateconv($message_row['luontiaika'], 'yes').": ";
             echo "{$message_row['viesti']} ";
             echo "<input type='button' onClick=\"javascript:sndReq('{$message_row['tunnus']}','?tee=message_luettu&amp;toim={$toim}&amp;message_tunnus={$message_row['tunnus']}&amp;ohje=off&amp;no_css=yes', false, false)\" value='".t("Kuittaa")."'><br>";
@@ -946,10 +946,10 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
     }
   }
 
-  // luodaan tietokantayhteys uudelleen, niin saadaan slave k√§ytt√∂√∂n jos sellaista tarvitaan
+  // luodaan tietokantayhteys uudelleen, niin saadaan slave k‰yttˆˆn jos sellaista tarvitaan
   require "connect.inc";
 
-  // Katsotaan onko Pupesoftissa SEPA rajapinta asetettuna, eli pankkiyhteys k√§yt√∂ss√§
+  // Katsotaan onko Pupesoftissa SEPA rajapinta asetettuna, eli pankkiyhteys k‰ytˆss‰
   $_sepa_pankkiyhteys = true;
   $_sepa_pankkiyhteys &= (isset($_SERVER["HTTPS"]) and $_SERVER["HTTPS"] == 'on');
   $_sepa_pankkiyhteys &= ($yhtiorow["pankkitiedostot"] == "F");

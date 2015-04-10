@@ -2651,6 +2651,19 @@ if ($fieldname == "jt_asiakkaan_tilausnumero") {
   $jatko = 0;
 }
 
+if ($fieldname == "jt_siirtolistojen_yhdistaminen") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? " selected" : "";
+
+  $ulos .= "<option value = ''>".t("Siirtolistat yhdistet‰‰n JT-rivien vapautuksessa, jos t‰m‰ on mahdollista")."</option>";
+  $ulos .= "<option value = 'K'{$sel}>".t("Siirtolistoja ei yhdistet‰ JT-rivien vapautuksessa")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "tilausvahvistus_tallenna") {
 
   $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";

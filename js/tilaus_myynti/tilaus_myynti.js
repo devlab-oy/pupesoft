@@ -1,4 +1,8 @@
 $(document).ready(function() {
+  $('#kertakassa').on('change', function() {
+    $('#kaikkyhtTee').val('PAIVITA_KASSALIPAS');
+    $('#kaikkyht').submit();
+  });
 
   $('#myyja_id').on('change', function () {
     $(this).siblings('#myyjanro_id').val('');
@@ -45,13 +49,15 @@ $(document).ready(function() {
   var hinta_laskurit = $.parseJSON( $('#hinta_laskurit').val() );
 
   // Liipaise hintalaskurit käyntiin.
-  $.each(hinta_laskurit, function(perheid, hinta_laskuri) {
-    // Jos vain korkeintaan yksi valmiste tai ei raaka-aineita, ei laskuria tarvita.
-    if( hinta_laskuri.valmisteet.length<2 || hinta_laskuri.raakaaineiden_kehahinta_summa==0 )
-      return true;
+  if (hinta_laskurit) {
+    $.each(hinta_laskurit, function (perheid, hinta_laskuri) {
+      // Jos vain korkeintaan yksi valmiste tai ei raaka-aineita, ei laskuria tarvita.
+      if (hinta_laskuri.valmisteet.length < 2 || hinta_laskuri.raakaaineiden_kehahinta_summa == 0)
+        return true;
 
-    new Hinta_laskuri(perheid, hinta_laskuri.raakaaineiden_kehahinta_summa, hinta_laskuri.valmisteiden_painoarvot);
-  });
+      new Hinta_laskuri(perheid, hinta_laskuri.raakaaineiden_kehahinta_summa, hinta_laskuri.valmisteiden_painoarvot);
+    });
+  }
 });
 
 function bind_valitut_rivit_checkbox_click() {

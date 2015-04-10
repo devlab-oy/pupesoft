@@ -308,6 +308,8 @@ if ($toiminto == 'MUOKKAA') {
         $nxt2 = t("EI SARJANUMEROA")."-1";
       }
 
+      //jos ei saa muuttaa niin disabloidaan sarjanumeron muokkauskenttä, Jos myyntirivi on
+      // laskutettu niin ei muokata
       if ((strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php") !== false or
            $PHP_SELF == "sarjanumeroseuranta.php" or
            strpos($_SERVER['SCRIPT_NAME'], "tervetuloa.php") !== false or

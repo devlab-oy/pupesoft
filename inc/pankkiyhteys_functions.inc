@@ -1047,7 +1047,7 @@ function pura_salaus($salattu_data, $salasana) {
 
   // Tässä on "//NO_MB_OVERLOAD"-kommentti
   // jotta UTF8-konversio ei osu tähän riviin
-  $iv = substr($salattu_data_binaari, 0, $iv_size);  //NO_MB_OVERLOAD
+  $iv = substr($salattu_data_binaari, 0, $iv_size); //NO_MB_OVERLOAD
 
   // Tässä on "//NO_MB_OVERLOAD"-kommentti
   // jotta UTF8-konversio ei osu tähän riviin

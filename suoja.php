@@ -1,340 +1,288 @@
 <?php
 
-require "inc/parametrit.inc";
+	require ("inc/parametrit.inc");
 
-echo " <!-- Enabloidaan shiftillä checkboxien chekkaus //-->
-    <script src='inc/checkboxrange.js'></script>
+	// Muutetaanko jonkun muun oikeuksia??
+	if ($selkuka != '') {
+		$query = "	SELECT nimi, kuka, tunnus
+					FROM kuka
+					WHERE tunnus='$selkuka'";
+		$result = mysql_query($query) or pupe_error($query);
+		$selkukarow = mysql_fetch_array($result);
+	}
+	elseif ($toim != "extranet") {
+		$query = "	SELECT nimi, kuka, tunnus
+					FROM kuka
+					WHERE tunnus='$kukarow[tunnus]'";
+		$result = mysql_query($query) or pupe_error($query);
+		$selkukarow = mysql_fetch_array($result);
+	}
 
-    <script language='javascript' type='text/javascript'>
-      $(document).ready(function(){
-        $(\".shift\").shiftcheckbox();
-      });
-    </script>";
 
-// Muutetaanko jonkun muun oikeuksia??
-if ($selkuka != '') {
-  $query = "SELECT nimi, kuka, tunnus
-            FROM kuka
-            WHERE tunnus='$selkuka'";
-  $result = pupe_query($query);
-  $selkukarow = mysql_fetch_array($result);
-}
-elseif ($toim != "extranet") {
-  $query = "SELECT nimi, kuka, tunnus
-            FROM kuka
-            WHERE tunnus='$kukarow[tunnus]'";
-  $result = pupe_query($query);
-  $selkukarow = mysql_fetch_array($result);
-}
+	// tehdään oikeuksien päivitys
+	if ($update == 'totta' and $selkukarow["kuka"] != "") {
+		// poistetaan ihan aluksi kaikki.. iiik.
+		$query = "	DELETE
+					FROM oikeu
+					WHERE yhtio='$kukarow[yhtio]' and kuka = '$selkukarow[kuka]'";
+		if ($sovellus != '') {
+			$query .= " and sovellus='$sovellus'";
+		}
+		$result = mysql_query($query) or pupe_error($query);
 
-// tehdään oikeuksien päivitys
-if ($update == 'totta' and $selkukarow["kuka"] != "") {
-  // poistetaan ihan aluksi kaikki.. iiik.
-  $query = "DELETE
-            FROM oikeu
-            WHERE yhtio = '$kukarow[yhtio]'
-            and kuka    = '$selkukarow[kuka]'";
+		// sitten tutkaillaan onko jotain ruksattu...
+		if (count($valittu) != 0) {
+			foreach ($valittu as $rastit) { // Tehdään oikeudet
+				list ($nimi, $alanimi, $sov) = explode("#", $rastit);
 
-  if ($sovellus != '' and $sovellus != 'kaikki_sovellukset') {
-    $query .= " and sovellus='$sovellus'";
-  }
+				//haetaan menu itemi
+				$query = "	SELECT nimi, nimitys, jarjestys, alanimi, sovellus, jarjestys2, hidden
+							FROM oikeu
+							WHERE kuka='' and nimi='$nimi' and alanimi='$alanimi' and sovellus='$sov' and yhtio='$kukarow[yhtio]'";
+				$result = mysql_query($query) or pupe_error($query);
+				$trow = mysql_fetch_array($result);
 
-  $result = pupe_query($query);
+				$query = "	INSERT into oikeu
+							SET
+							kuka		= '$selkukarow[kuka]',
+							sovellus	= '$trow[sovellus]',
+							nimi		= '$trow[nimi]',
+							alanimi 	= '$trow[alanimi]',
+							paivitys	= '',
+							lukittu		= '',
+							nimitys		= '$trow[nimitys]',
+							jarjestys 	= '$trow[jarjestys]',
+							jarjestys2	= '$trow[jarjestys2]',
+							hidden		= '$trow[hidden]',
+							yhtio		= '$kukarow[yhtio]'";
 
-  // sitten tutkaillaan onko jotain ruksattu...
-  if (count($valittu) != 0) {
-    foreach ($valittu as $rastit) { // Tehdään oikeudet
-      list ($nimi, $alanimi, $sov) = explode("#", $rastit);
+				$result = mysql_query($query) or pupe_error($query);
+			}
+			echo "<font class='message'>".t("Käyttöoikeudet päivitetty")."!</font><br>";
+		}
 
-      //haetaan menu itemi
-      $query = "SELECT nimi, nimitys, jarjestys, alanimi, sovellus, jarjestys2, hidden
-                FROM oikeu
-                WHERE kuka='' and nimi='$nimi' and alanimi='$alanimi' and sovellus='$sov' and yhtio='$kukarow[yhtio]'";
-      $result = pupe_query($query);
-      $trow = mysql_fetch_array($result);
+		if (count($paivitys) != 0) {
+			foreach ($paivitys as $rastit) { // Päivitetään päivitys-kenttä
+				list ($nimi, $alanimi, $sov) = explode("#", $rastit);
 
-      $query = "INSERT into oikeu
-                SET
-                kuka       = '$selkukarow[kuka]',
-                user_id    = '{$selkukarow['tunnus']}',
-                sovellus   = '$trow[sovellus]',
-                nimi       = '$trow[nimi]',
-                alanimi    = '$trow[alanimi]',
-                paivitys   = '',
-                lukittu    = '',
-                nimitys    = '$trow[nimitys]',
-                jarjestys  = '$trow[jarjestys]',
-                jarjestys2 = '$trow[jarjestys2]',
-                hidden     = '$trow[hidden]',
-                yhtio      = '$kukarow[yhtio]',
-                laatija    = '{$kukarow['kuka']}',
-                luontiaika = now(),
-                muutospvm  = now(),
-                muuttaja   = '{$kukarow['kuka']}'";
-      $result = pupe_query($query);
-    }
-    echo "<font class='message'>".t("Käyttöoikeudet päivitetty")."!</font><br>";
-  }
+				$query = "	SELECT nimi
+							FROM oikeu
+							WHERE yhtio='$kukarow[yhtio]' and kuka='$selkukarow[kuka]' and nimi='$nimi' and alanimi='$alanimi' and sovellus='$sov'";
+				$result = mysql_query($query) or pupe_error($query);
 
-  if (count($paivitys) != 0) {
-    foreach ($paivitys as $rastit) { // Päivitetään päivitys-kenttä
-      list ($nimi, $alanimi, $sov) = explode("#", $rastit);
+				if (mysql_num_rows($result) == 1) {
+					$query = "UPDATE oikeu SET paivitys = '1' where yhtio='$kukarow[yhtio]' and kuka='$selkukarow[kuka]' and nimi='$nimi' and alanimi='$alanimi' and sovellus='$sov'";
+					$result = mysql_query($query) or pupe_error($query);
+				}
+			}
+		}
 
-      $query = "SELECT nimi
-                FROM oikeu
-                WHERE yhtio='$kukarow[yhtio]' and kuka='$selkukarow[kuka]' and nimi='$nimi' and alanimi='$alanimi' and sovellus='$sov'";
-      $result = pupe_query($query);
+		if (count($lukot) != 0) {
+			foreach ($lukot as $rastit) { // Päivitetään lukittu-kenttä
+				list ($nimi, $alanimi, $sov) = explode("#", $rastit);
 
-      if (mysql_num_rows($result) == 1) {
-        $query = "UPDATE oikeu
-                  SET paivitys = '1',
-                  muutospvm    = now(),
-                  muuttaja     = '{$kukarow['kuka']}'
-                  WHERE yhtio  = '$kukarow[yhtio]'
-                  AND kuka     = '$selkukarow[kuka]'
-                  AND nimi     = '$nimi'
-                  AND alanimi  = '$alanimi'
-                  AND sovellus = '$sov'";
-        $result = pupe_query($query);
-      }
-    }
-  }
+				$query = "	SELECT nimi
+							FROM oikeu
+							WHERE yhtio='$kukarow[yhtio]' and kuka='$selkukarow[kuka]' and nimi='$nimi' and alanimi='$alanimi' and sovellus='$sov'";
+				$result = mysql_query($query) or pupe_error($query);
 
-  if (count($lukot) != 0) {
-    foreach ($lukot as $rastit) { // Päivitetään lukittu-kenttä
-      list ($nimi, $alanimi, $sov) = explode("#", $rastit);
+				if (mysql_num_rows($result) == 1) {
+					$query = "UPDATE oikeu SET lukittu = '1' where yhtio='$kukarow[yhtio]' and kuka='$selkukarow[kuka]' and nimi='$nimi' and alanimi='$alanimi' and sovellus='$sov'";
+					$result = mysql_query($query) or pupe_error($query);
+				}
+			}
+		}
+	}
 
-      $query = "SELECT nimi
-                FROM oikeu
-                WHERE yhtio  = '$kukarow[yhtio]'
-                AND kuka     = '$selkukarow[kuka]'
-                AND nimi     = '$nimi'
-                AND alanimi  = '$alanimi'
-                AND sovellus = '$sov'";
-      $result = pupe_query($query);
+	echo "<font class='head'>".t("Tietosuoja").":</font><hr>";
 
-      if (mysql_num_rows($result) == 1) {
-        $query = "UPDATE oikeu
-                  SET lukittu = '1',
-                  muutospvm    = now(),
-                  muuttaja     = '{$kukarow['kuka']}'
-                  WHERE yhtio  = '$kukarow[yhtio]'
-                  AND kuka     = '$selkukarow[kuka]'
-                  AND nimi     = '$nimi'
-                  AND alanimi  = '$alanimi'
-                  AND sovellus = '$sov'";
-        $result = pupe_query($query);
-      }
-    }
-  }
+	echo "<font class='message'>".t("Käyttäjän")." $selkukarow[nimi] ".t("käyttöoikeudet")." ($yhtiorow[nimi])</font><hr>";
 
-  // päiviteään kuka-tauluun mitkä käyttäjät on aktiivisia ja mitkä poistettuja
-  paivita_aktiiviset_kayttajat($selkukarow["kuka"]);
-}
+	echo "<table>
+			<form action='$PHP_SELF' method='post'>
+			<input type='hidden' name='toim' value='$toim'>
+			<input type='hidden' name='sovellus' value='$sovellus'>
 
-echo "<font class='head'>".t("Tietosuoja").":</font><hr>";
+			<tr>
+				<th>".t("Valitse käyttäjä").":</th>
+				<td><select name='selkuka' onchange='submit()'>";
 
-echo "<font class='message'>".t("Käyttäjän")." $selkukarow[nimi] ".t("käyttöoikeudet")." ($yhtiorow[nimi])</font><hr>";
+	if ($toim == "" or $selkukarow["kuka"] != "") {
+		echo "<option selected value='$selkukarow[tunnus]'>$selkukarow[nimi] ($selkukarow[kuka])</option>";
+	}
+	elseif ($toim == "extranet" and $selkukarow["kuka"] == "") {
+		echo "<option selected value=''>".t("Valitse käyttäjä")."</option>";
+	}
 
-echo "<table>
-    <tr>
-      <th>".t("Valitse käyttäjä").":</th>
-      <td>
-      <form method='post'>
-      <input type='hidden' name='toim' value='$toim'>
-      <input type='hidden' name='sovellus' value='$sovellus'>
-      <select name='selkuka' onchange='submit()'>";
+	if ($toim == "extranet" and $selkukarow["tunnus"] != "") {
+		$query = "SELECT *
+				  FROM kuka
+				  WHERE tunnus!='$selkukarow[tunnus]' and yhtio='$kukarow[yhtio]' and extranet != ''
+				  ORDER BY nimi";
+	}
+	elseif ($toim == "extranet" and $selkukarow["tunnus"] == "") {
+		$query = "SELECT *
+				  FROM kuka
+				  WHERE yhtio='$kukarow[yhtio]' and extranet != ''
+				  ORDER BY nimi";
+	}
+	else {
+		$query = "SELECT *
+				  FROM kuka
+				  WHERE tunnus!='$selkukarow[tunnus]' and extranet = '' and yhtio='$kukarow[yhtio]'
+				  ORDER BY nimi";
+	}
+	$kukares = mysql_query($query) or pupe_error($query);
 
-if ($toim == "" or $selkukarow["kuka"] != "") {
-  echo "<option selected value='$selkukarow[tunnus]'>$selkukarow[nimi] ($selkukarow[kuka])</option>";
-}
-elseif ($toim == "extranet" and $selkukarow["kuka"] == "") {
-  echo "<option selected value=''>".t("Valitse käyttäjä")."</option>";
-}
+	while ($kurow=mysql_fetch_array($kukares)) {
+		echo "<option value='$kurow[tunnus]'>$kurow[nimi] ($kurow[kuka])</option>";
+	}
 
-if ($toim == "extranet" and $selkukarow["tunnus"] != "") {
-  $query = "SELECT *
-            FROM kuka
-            WHERE tunnus!='$selkukarow[tunnus]' and yhtio='$kukarow[yhtio]' and extranet != ''
-            ORDER BY nimi";
-}
-elseif ($toim == "extranet" and $selkukarow["tunnus"] == "") {
-  $query = "SELECT *
-            FROM kuka
-            WHERE yhtio='$kukarow[yhtio]' and extranet != ''
-            ORDER BY nimi";
-}
-else {
-  $query = "SELECT *
-            FROM kuka
-            WHERE tunnus!='$selkukarow[tunnus]' and extranet = '' and yhtio='$kukarow[yhtio]'
-            ORDER BY nimi";
-}
-$kukares = pupe_query($query);
+	echo "</select></td></form>";
 
-while ($kurow=mysql_fetch_array($kukares)) {
-  echo "<option value='$kurow[tunnus]'>$kurow[nimi] ($kurow[kuka])</option>";
-}
+	if ($toim == "extranet") {
+		$sovellus_rajaus = " and sovellus like 'Extranet%' ";
+	}
+	else {
+		$sovellus_rajaus = " and sovellus not like 'Extranet%' ";	
+	}
+	
+	$query = "	SELECT distinct sovellus
+				FROM oikeu
+				where yhtio = '$kukarow[yhtio]'
+				$sovellus_rajaus
+				order by sovellus";
+	$result = mysql_query($query) or pupe_error($query);
 
-echo "</select></form></td></tr>";
+	if (mysql_num_rows($result) > 1) {
+		echo "	<form action='$PHP_SELF' name='vaihdaSovellus' method='POST'>
+				<input type='hidden' name='selkuka' value='$selkukarow[tunnus]'>
+				<input type='hidden' name='toim' value='$toim'>
+				<tr><th>".t("Valitse sovellus").":</th><td>
+				<select name='sovellus' onchange='submit()'>
+				<option value=''>".t("Nayta kaikki")."</option>";
 
-if ($toim == "extranet") {
-  $sovellus_rajaus = " and sovellus like 'Extranet%' ";
-}
-else {
-  $sovellus_rajaus = " and sovellus not like 'Extranet%' ";
-}
+		while ($orow = mysql_fetch_array($result)) {
+			$sel = '';
+			if ($sovellus == $orow[0] and $orow[0] != '') {
+				$sel = "SELECTED";
+			}
+			if ($orow[0] != '') {
+				echo "<option value='$orow[0]' $sel>".t("$orow[0]")."</option>";
+			}
+		}
+	}
+	echo "</select></td><td class='back'></td></tr></table></form>";
 
-$query = "SELECT distinct sovellus
-          FROM oikeu
-          where yhtio = '$kukarow[yhtio]'
-          $sovellus_rajaus
-          order by sovellus";
-$result = pupe_query($query);
+	// näytetään oikeuslista
+	echo "<table>";
 
-if (mysql_num_rows($result) > 0) {
+	$query = "	SELECT *
+				FROM oikeu
+				WHERE kuka = ''	
+				and yhtio = '$kukarow[yhtio]' 
+				$sovellus_rajaus";
+	
+	if ($sovellus != '') {
+		$query .= " and sovellus='$sovellus'";
+	}
+	
+	$query .= "	ORDER BY sovellus, jarjestys, jarjestys2";
+	$result = mysql_query($query) or pupe_error($query);
 
-  $sel = $sovellus == "kaikki_sovellukset" ? " selected" : "";
+	print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
+		<!--
 
-  echo "
-      <tr><th>".t("Valitse sovellus").":</th>
-      <td>
-      <form name='vaihdaSovellus' method='POST'>
-      <input type='hidden' name='selkuka' value='$selkukarow[tunnus]'>
-      <input type='hidden' name='toim' value='$toim'>
-      <select name='sovellus' onchange='submit()'>
-      <option value=''>".t("Valitse")."</option>
-      <option value='kaikki_sovellukset'$sel>".t("Nayta kaikki")."</option>";
+		function toggleAll(toggleBox) {
 
-  while ($orow = mysql_fetch_array($result)) {
-    $sel = '';
-    if ($sovellus == $orow[0] and $orow[0] != '') {
-      $sel = "SELECTED";
-    }
-    if ($orow[0] != '') {
-      echo "<option value='$orow[0]' $sel>".t("$orow[0]")."</option>";
-    }
-  }
+			var currForm = toggleBox.form;
+			var isChecked = toggleBox.checked;
+			var nimi = toggleBox.name;
 
-  echo "</select></td></form>";
-}
+			for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
+				if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,3) == nimi) {
+					currForm.elements[elementIdx].checked = isChecked;
+				}
+			}
+		}
 
-echo "<td class='back'></td></tr></table>";
+		//-->
+		</script>";
 
-if ($sovellus == "") {
-  require "inc/footer.inc";
-  exit;
-}
+	echo "<form action='$PHP_SELF' name='suojax' method='post'>
+			<input type='hidden' name='update' value='totta'>
+			<input type='hidden' name='sovellus' value='$sovellus'>
+			<input type='hidden' name='toim' value='$toim'>
+			<input type='hidden' name='selkuka' value='$selkukarow[tunnus]'>";
 
-// näytetään oikeuslista
-echo "<table>";
+	while ($orow=mysql_fetch_array($result)) {
 
-$query = "SELECT *
-          FROM oikeu
-          WHERE kuka = ''
-          and yhtio  = '$kukarow[yhtio]'
-          $sovellus_rajaus";
 
-if ($sovellus != '' and $sovellus != 'kaikki_sovellukset') {
-  $query .= " and sovellus='$sovellus'";
-}
+		if ($vsove != $orow['sovellus']) {
+			echo "<tr><td class='back colspan='5'><br></td></tr>";
+			echo "<tr><th>".t("Sovellus")."</th>
+				<th colspan='2'>".t("Toiminto")."</th>
+				<th>".t("Käyttö")."</th>
+				<th>".t("Päivitys")."</th>
+				<th>".t("Lukittu")."</th>
+				</tr>";
+		}
 
-$query .= "  ORDER BY sovellus, jarjestys, jarjestys2";
-$result = pupe_query($query);
+		$checked	= '';
+		$paivit		= '';
+		$luk		= '';
 
-print " <SCRIPT TYPE=\"text/javascript\" LANGUAGE=\"JavaScript\">
-  <!--
+		if ($selkukarow["kuka"] != "") {
+			$oq = "	SELECT *
+					FROM oikeu
+					WHERE yhtio='$kukarow[yhtio]' and kuka='$selkukarow[kuka]' and nimi='$orow[nimi]' and alanimi='$orow[alanimi]' and sovellus='$orow[sovellus]'";
+			$or = mysql_query($oq) or pupe_error($oq);
 
-  function toggleAll(toggleBox) {
+			if (mysql_num_rows($or) != 0) {
+				$checked = "CHECKED";
 
-    var currForm = toggleBox.form;
-    var isChecked = toggleBox.checked;
-    var nimi = toggleBox.name;
+				$oikeurow=mysql_fetch_array($or);
 
-    for (var elementIdx=0; elementIdx<currForm.elements.length; elementIdx++) {
-      if (currForm.elements[elementIdx].type == 'checkbox' && currForm.elements[elementIdx].name.substring(0,3) == nimi) {
-        currForm.elements[elementIdx].checked = isChecked;
-      }
-    }
-  }
+				if ($oikeurow["paivitys"] == 1) {
+					$paivit = "CHECKED";
+				}
 
-  //-->
-  </script>";
+				if ($oikeurow["lukittu"] == 1) {
+					$luk = "CHECKED";
+				}
+			}
+		}
 
-echo "<form name='suojax' method='post'>
-    <input type='hidden' name='update' value='totta'>
-    <input type='hidden' name='sovellus' value='$sovellus'>
-    <input type='hidden' name='toim' value='$toim'>
-    <input type='hidden' name='selkuka' value='$selkukarow[tunnus]'>";
+		echo "<tr><td>".t("$orow[sovellus]")."</td>";
 
-$lask = 1;
+		if ($orow['jarjestys2']!='0') {
+			echo "<td class='back'>--></td><td>";
+		}
+		else {
+			echo "<td colspan='2'>";
+		}
 
-while ($orow=mysql_fetch_array($result)) {
+		echo "	".t("$orow[nimitys]")."</td>
+				<td align='center'><input type='checkbox' $checked 	value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='valittu[]'></td>
+				<td align='center'><input type='checkbox' $paivit  	value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='paivitys[]'></td>
+				<td align='center'><input type='checkbox' $luk  	value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='lukot[]'></td>
+				</tr>";
 
-  if ($vsove != $orow['sovellus']) {
-    echo "<tr><td class='back colspan='5'><br></td></tr>";
-    echo "<tr><th>".t("Sovellus")."</th>
-      <th colspan='2'>".t("Toiminto")."</th>
-      <th>".t("Käyttö")."</th>
-      <th>".t("Päivitys")."</th>
-      <th>".t("Lukittu")."</th>
-      </tr>";
-  }
+		$vsove = $orow['sovellus'];
+	}
+	echo "<tr>
+			<th colspan='3'>".t("Ruksaa kaikki")."</th>
+			<td align='center'><input type='checkbox' name='val' onclick='toggleAll(this);'></td>
+			<td align='center'><input type='checkbox' name='pai' onclick='toggleAll(this)'></td>
+			<td align='center'><input type='checkbox' name='luk' onclick='toggleAll(this)'></td>
+			</tr>";
+	echo "</table>";
 
-  $checked  = '';
-  $paivit    = '';
-  $luk    = '';
+	if ($toim == "" or ($toim == "extranet" and $selkukarow["kuka"] != "")) {
+		echo "<input type='submit' value='".t("Päivitä tiedot")."'></form>";
+	}
 
-  if ($selkukarow["kuka"] != "") {
-    $oq = "SELECT *
-           FROM oikeu
-           WHERE yhtio='$kukarow[yhtio]' and kuka='$selkukarow[kuka]' and nimi='$orow[nimi]' and alanimi='$orow[alanimi]' and sovellus='$orow[sovellus]'";
-    $or = pupe_query($oq);
+	require("inc/footer.inc");
 
-    if (mysql_num_rows($or) != 0) {
-      $checked = "CHECKED";
 
-      $oikeurow=mysql_fetch_array($or);
-
-      if ($oikeurow["paivitys"] == 1) {
-        $paivit = "CHECKED";
-      }
-
-      if ($oikeurow["lukittu"] == 1) {
-        $luk = "CHECKED";
-      }
-    }
-  }
-
-  echo "<tr><td>".t("$orow[sovellus]")."</td>";
-
-  if ($orow['jarjestys2']!='0') {
-    echo "<td class='back'>--></td><td>";
-  }
-  else {
-    echo "<td colspan='2'>";
-  }
-
-  echo "  ".t("$orow[nimitys]")."</td>
-      <td align='center'><input type='checkbox' class='A".str_pad($lask, 6, 0, STR_PAD_LEFT)." shift' $checked value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='valittu[]'></td>
-      <td align='center'><input type='checkbox' class='B".str_pad($lask, 6, 0, STR_PAD_LEFT)." shift' $paivit  value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='paivitys[]'></td>
-      <td align='center'><input type='checkbox' class='C".str_pad($lask, 6, 0, STR_PAD_LEFT)." shift' $luk      value='$orow[nimi]#$orow[alanimi]#$orow[sovellus]' name='lukot[]'></td>
-      </tr>";
-
-  $vsove = $orow['sovellus'];
-  $lask++;
-}
-echo "<tr>
-    <th colspan='3'>".t("Ruksaa kaikki")."</th>
-    <td align='center'><input type='checkbox' name='val' onclick='toggleAll(this);'></td>
-    <td align='center'><input type='checkbox' name='pai' onclick='toggleAll(this)'></td>
-    <td align='center'><input type='checkbox' name='luk' onclick='toggleAll(this)'></td>
-    </tr>";
-echo "</table>";
-
-if ($toim == "" or ($toim == "extranet" and $selkukarow["kuka"] != "")) {
-  echo "<br>";
-  echo "<input type='submit' value='".t("Päivitä tiedot")."'></form>";
-}
-
-require "inc/footer.inc";
+?>

@@ -1,260 +1,152 @@
 <?php
 
-//* Tämä skripti käyttää slave-tietokantapalvelinta *//
-$useslave = 1;
+	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+	$useslave = 1;
 
-if (isset($_POST["tee"])) {
-  if ($_POST["tee"] == 'lataa_tiedosto') $lataa_tiedosto=1;
-  if ($_POST["kaunisnimi"] != '') $_POST["kaunisnimi"] = str_replace("/", "", $_POST["kaunisnimi"]);
-}
+	require ("../inc/parametrit.inc");
 
-require "../inc/parametrit.inc";
+	echo "<font class='head'>".t("Verottomat korvaukset")."</font><hr><br>";
 
-if (isset($tee) and $tee == "lataa_tiedosto") {
-  readfile("/tmp/".$tmpfilenimi);
-  exit;
-}
+	echo "<form method='post'>";
+	echo "<input type='hidden' name='tee' value ='NAYTA'>";
 
-echo "<font class='head'>".t("Verottomat korvaukset")."</font><hr><br>";
+	echo "<table>";
+	echo "<tr>";
+	echo "<th>".t("Valitse vuosi")."</th>";
+	echo "<td>";
 
-echo "<form method='post'>";
-echo "<input type='hidden' name='tee' value ='NAYTA'>";
+	$sel = array();
+	$sel[$vv] = "SELECTED";
 
-echo "<table>";
-echo "<tr>";
-echo "<th>".t("Valitse vuosi")."</th>";
-echo "<td>";
+	if (!isset($vv)) $vv = date("Y");
 
-$sel = array();
-$sel[$vv] = "SELECTED";
+	echo "<select name='vv'>";
+	for ($i = date("Y"); $i >= date("Y")-4; $i--) {
+		echo "<option value='$i' $sel[$i]>$i</option>";
+	}
+	echo "</select>";
+	echo "</td>";
 
-if (!isset($vv)) $vv = date("Y");
+	echo "<td class='back'><input type='submit' value='".t("Näytä")."'></td>";
+	echo "</tr>";
 
-echo "<select name='vv'>";
-for ($i = date("Y"); $i >= date("Y")-4; $i--) {
-  echo "<option value='$i' $sel[$i]>$i</option>";
-}
-echo "</select>";
-echo "</td>";
+	echo "</table>";
 
-echo "<td class='back'><input type='submit' value='".t("Näytä")."'></td>";
-echo "</tr>";
+	echo "</form>";
+	echo "<br>";
 
-echo "</table>";
+	if ($tee == "NAYTA") {
 
-echo "</form>";
-echo "<br>";
+		$query = "	SELECT if (kuka.nimi IS NULL, lasku.toim_ovttunnus, kuka.nimi) nimi,
+					tuote.kuvaus,
+					lasku.toim_ovttunnus,
+					avg(tilausrivi.hinta) hinta,
+					sum(tilausrivi.kpl) kpl,
+					sum(tilausrivi.rivihinta) yhteensa
+					FROM lasku
+					JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+					JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuotetyyppi IN ('A', 'B') and tuote.kuvaus in ('50', '56'))
+					LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio and kuka.kuka = lasku.toim_ovttunnus)
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					AND tila = 'Y'
+					AND tilaustyyppi = 'M'
+					AND tapvm >= '$vv-01-01'
+					AND tapvm <= '$vv-12-31'
+					GROUP BY nimi, lasku.toim_ovttunnus, tuote.tuotetyyppi";
+		$result = mysql_query($query) or pupe_error($query);
 
-if ($tee == "NAYTA") {
+		if (mysql_num_rows($result) > 0) {
 
-  $query = "SELECT
-            toimi.tunnus,
-            toimi.ytunnus,
-            if(kuka.nimi IS NULL or toimi.tyyppi = 'P', concat('~POISTETTU ', toimi.nimi), kuka.nimi) nimi,
-            tuote.kuvaus,
-            avg(tilausrivi.hinta) hinta,
-            sum(tilausrivi.kpl) kpl,
-            sum(tilausrivi.rivihinta) yhteensa
-            FROM lasku
-            JOIN toimi on (toimi.yhtio = lasku.yhtio and toimi.tunnus = lasku.liitostunnus)
-            LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio and kuka.kuka = toimi.nimi)
-            JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
-            JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuotetyyppi IN ('A', 'B') and tuote.kuvaus in ('50', '56'))
-            WHERE lasku.yhtio      = '$kukarow[yhtio]'
-            AND lasku.tila         = 'Y'
-            AND lasku.tilaustyyppi = 'M'
-            AND lasku.tapvm        >= '$vv-01-01'
-            AND lasku.tapvm        <= '$vv-12-31'
-            GROUP BY 1,2,3,4
-            ORDER BY nimi, kuvaus";
-  $result = pupe_query($query);
+			echo "<table>";
 
-  if (mysql_num_rows($result) > 0) {
+			echo "<tr>";
+			echo "<th>".t("Kuka")."</th>";
+			echo "<th>".t("Verokodi")." / ".t("Korvaus")."</th>";
+			echo "<th>".t("Kappaletta")."</th>";
+			echo "<th>".t("Hinta")."</th>";
+			echo "<th>".t("Yhteensä")."</th>";
+			echo "</tr>";
 
-    echo "<table>";
+			$ednimi = "";
+			$summat = array();
+			$kappaleet = array();
 
-    echo "<tr>";
-    echo "<th>".t("Kuka")."</th>";
-    echo "<th>".t("Verokodi")." / ".t("Korvaus")."</th>";
-    echo "<th>".t("Kappaletta")."</th>";
-    echo "<th>".t("Hinta")."</th>";
-    echo "<th>".t("Yhteensä")."</th>";
-    echo "</tr>";
+			while ($row = mysql_fetch_array($result)) {
 
-    $ednimi    = "";
-    $summat    = array();
-    $kappaleet = array();
-    $vspserie  = array();
+				if ($row["kuvaus"] == '50') {
+					$kuvaus = t("Päivärahat ja ateriakorvaukset");
+				}
+				else {
+					$kuvaus = t("Verovapaa kilometrikorvaus");
+				}
 
-    while ($row = mysql_fetch_assoc($result)) {
+				if ($ednimi == "" or $ednimi != $row["nimi"]) {
+					$nimi = $row["nimi"];
+					if ($ednimi != "") {
+						echo "<tr><td class='back' colspan='5'></td></tr>";
+					}
+				}
+				else {
+					$nimi = "";
+				}
 
-      if ($row["kuvaus"] == '50') {
-        $kuvaus = t("Päivärahat ja ateriakorvaukset");
-      }
-      else {
-        $kuvaus = t("Verovapaa kilometrikorvaus");
-      }
+				echo "<tr class='aktiivi'>";
+				echo "<td>$nimi</td>";
+				echo "<td>$row[kuvaus] $kuvaus</td>";
+				echo "<td align='right'>".number_format($row["kpl"], 0, ',', ' ')."</td>";
+				echo "<td align='right'>".number_format($row["hinta"], 2, ',', ' ')."</td>";
+				echo "<td align='right'>".number_format($row["yhteensa"], 2, ',', ' ')."</td>";
+				echo "</tr>";
 
-      if ($ednimi == "" or $ednimi != $row["nimi"]) {
-        $nimi = $row["nimi"];
+				// erittely
+				$query = "	SELECT tilausrivi.tuoteno, tuote.nimitys, avg(tilausrivi.hinta) hinta, sum(tilausrivi.kpl) kpl, sum(tilausrivi.rivihinta) yhteensa
+							FROM lasku
+							JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
+							JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuotetyyppi IN ('A', 'B') and tuote.kuvaus = '$row[kuvaus]')
+							LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio and kuka.kuka = lasku.toim_ovttunnus)
+							WHERE lasku.yhtio = '$kukarow[yhtio]'
+							AND tila = 'Y'
+							AND tilaustyyppi = 'M'
+							AND tapvm >= '$vv-01-01'
+							AND tapvm <= '$vv-12-31'
+							AND lasku.toim_ovttunnus = '$row[toim_ovttunnus]'
+							GROUP BY tuote.tuoteno";
+				$eres = mysql_query($query) or pupe_error($query);
 
-        if ($ednimi != "") {
-          echo "<tr><td class='back' colspan='5'></td></tr>";
-        }
-      }
-      else {
-        $nimi = "";
-      }
+				while ($erow = mysql_fetch_array($eres)) {
+					echo "<tr class='aktiivi'>";
+					echo "<td class='spec'></td>";
+					echo "<td class='spec'><font class='info'>&raquo; $erow[tuoteno] - $erow[nimitys]</font></td>";
+					echo "<td class='spec' align='right'>".number_format($erow["kpl"], 0, ',', ' ')."</td>";
+					echo "<td class='spec' align='right'>".number_format($erow["hinta"], 2, ',', ' ')."</td>";
+					echo "<td class='spec' align='right'>".number_format($erow["yhteensa"], 2, ',', ' ')."</td>";
+					echo "</tr>";
+				}
 
-      echo "<tr class='aktiivi'>";
+				$ednimi = $row["nimi"];
+				$summat[$row["kuvaus"]] += $row["yhteensa"];
+				$kappaleet[$row["kuvaus"]] += $row["kpl"];
 
-      if ($nimi != "") {
-        echo "<td>$nimi</td>";
+			}
 
-        $vspserie[$row["ytunnus"]]["paivarahat"]       = 0;
-        $vspserie[$row["ytunnus"]]["kotimaanpuolipaivat"] = 0;
-        $vspserie[$row["ytunnus"]]["kotimaanpaivat"]     = 0;
-        $vspserie[$row["ytunnus"]]["ulkomaanpaivat"]      = 0;
-        $vspserie[$row["ytunnus"]]["kilsat"]         = 0;
-        $vspserie[$row["ytunnus"]]["kilsat_raha"]       = 0;
-      }
-      else {
-        echo "<td class='back'></td>";
-      }
+			echo "<tr><td class='back' colspan='5'></td></tr>";
 
-      echo "<td>$row[kuvaus] $kuvaus</td>";
-      echo "<td align='right'>".number_format($row["kpl"], 0, ',', ' ')."</td>";
-      echo "<td align='right'>".number_format($row["hinta"], 2, ',', ' ')."</td>";
-      echo "<td align='right'>".number_format($row["yhteensa"], 2, ',', ' ')."</td>";
-      echo "</tr>";
+			echo "<tr class='aktiivi'>";
+			echo "<th colspan='2'>50 ".t("Päivärahat ja ateriakorvaukset")."</th>";
+			echo "<td align='right'>".number_format($kappaleet[50], 2, ',', ' ')."</td>";
+			echo "<td colspan='2' align='right'>".number_format($summat[50], 2, ',', ' ')."</td>";
+			echo "</tr>";
 
-      if ($row['kuvaus'] == 50) {
-        $vspserie[$row["ytunnus"]]["paivarahat"] = $row["yhteensa"];
-        $vspserie[$row["ytunnus"]]["kotimaanpuolipaivat"] = 0;
-        $vspserie[$row["ytunnus"]]["kotimaanpaivat"] = 0;
-        $vspserie[$row["ytunnus"]]["ulkomaanpaivat"] = 0;
-      }
+			echo "<tr class='aktiivi'>";
+			echo "<th colspan='2'>56 ".t("Verovapaa kilometrikorvaus")."</th>";
+			echo "<td align='right'>".number_format($kappaleet[56], 2, ',', ' ')."</td>";
+			echo "<td colspan='2' align='right'>".number_format($summat[56], 2, ',', ' ')."</td>";
+			echo "</tr>";
 
-      if ($row['kuvaus'] == 56) {
-        $vspserie[$row["ytunnus"]]["kilsat"] = $row["kpl"];
-        $vspserie[$row["ytunnus"]]["kilsat_raha"] = $row["yhteensa"];
-      }
+			echo "</table>";
+		}
+	}
 
-      // var:t otettiin käyttöön vasta 2013
-      if ($vv >= 2013) {
-        $varlisa = "tilausrivi.var";
-      }
-      else {
-        $varlisa = "''";
-      }
+	require ("inc/footer.inc");
 
-      // erittely
-      $query = "SELECT tilausrivi.tuoteno,
-                tilausrivi.nimitys,
-                tuote.vienti,
-                {$varlisa} var,
-                avg(tilausrivi.hinta) hinta,
-                sum(tilausrivi.kpl) kpl,
-                sum(tilausrivi.rivihinta) yhteensa
-                FROM lasku
-                JOIN tilausrivi ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.otunnus = lasku.tunnus)
-                JOIN tuote ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuotetyyppi IN ('A','B') and tuote.kuvaus = '$row[kuvaus]')
-                LEFT JOIN kuka ON (kuka.yhtio = lasku.yhtio and kuka.kuka = lasku.toim_ovttunnus)
-                WHERE lasku.yhtio      = '$kukarow[yhtio]'
-                AND lasku.tila         = 'Y'
-                AND lasku.tilaustyyppi = 'M'
-                AND lasku.tapvm        >= '$vv-01-01'
-                AND lasku.tapvm        <= '$vv-12-31'
-                AND lasku.liitostunnus = '$row[tunnus]'
-                GROUP BY 1,2,3,4
-                ORDER BY 1,2";
-      $eres = pupe_query($query);
-
-      while ($erow = mysql_fetch_assoc($eres)) {
-
-        if ($row['kuvaus'] == "50" and strtoupper($erow['vienti']) == "FI" and (substr($erow['tuoteno'], 0, 3) == "PPR" or $erow['var'] == "2" or $erow['var'] == "4")) {
-          $vspserie[$row["ytunnus"]]["kotimaanpuolipaivat"] = 1;
-        }
-        elseif ($row['kuvaus'] == "50" and strtoupper($erow['vienti']) == "FI") {
-          $vspserie[$row["ytunnus"]]["kotimaanpaivat"] = 1;
-        }
-        elseif ($row['kuvaus'] == "50") {
-          $vspserie[$row["ytunnus"]]["ulkomaanpaivat"] = 1;
-        }
-
-        echo "<tr class='aktiivi'>";
-        echo "<td class='back'></td>";
-        echo "<td class='spec'><font class='info'>&raquo; $erow[tuoteno] - $erow[nimitys]</font></td>";
-        echo "<td class='spec' align='right'>".number_format($erow["kpl"], 0, ',', ' ')."</td>";
-        echo "<td class='spec' align='right'>".number_format($erow["hinta"], 2, ',', ' ')."</td>";
-        echo "<td class='spec' align='right'>".number_format($erow["yhteensa"], 2, ',', ' ')."</td>";
-        echo "</tr>";
-      }
-
-      $ednimi = $row["nimi"];
-      $summat[$row["kuvaus"]] += $row["yhteensa"];
-      $kappaleet[$row["kuvaus"]] += $row["kpl"];
-    }
-
-    echo "<tr><td class='back' colspan='5'></td></tr>";
-
-    echo "<tr class='aktiivi'>";
-    echo "<th colspan='2'>50 ".t("Päivärahat ja ateriakorvaukset")."</th>";
-    echo "<td align='right'>".number_format($kappaleet[50], 2, ',', ' ')."</td>";
-    echo "<td colspan='2' align='right'>".number_format($summat[50], 2, ',', ' ')."</td>";
-    echo "</tr>";
-
-    echo "<tr class='aktiivi'>";
-    echo "<th colspan='2'>56 ".t("Verovapaa kilometrikorvaus")."</th>";
-    echo "<td align='right'>".number_format($kappaleet[56], 2, ',', ' ')."</td>";
-    echo "<td colspan='2' align='right'>".number_format($summat[56], 2, ',', ' ')."</td>";
-    echo "</tr>";
-
-    echo "</table>";
-
-    $file = "";
-    $lask = 1;
-    $ytunnus = tulosta_ytunnus($yhtiorow['ytunnus']);
-
-    foreach ($vspserie as $htunnus => $matkustaja) {
-
-      $matkustaja['paivarahat']  = number_format(round($matkustaja['paivarahat'],  2), 2, "", "");
-      $matkustaja['kilsat_raha'] = number_format(round($matkustaja['kilsat_raha'], 2), 2, "", "");
-      $matkustaja['kilsat']      = round($matkustaja['kilsat']);
-
-      $file .= "000:VSPSERIE\n";
-      $file .= "101:0\n";
-      $file .= "110:P\n";
-      $file .= "109:$vv\n";
-      $file .= "102:{$ytunnus}\n";
-      $file .= "111:{$htunnus}\n";
-      $file .= "114:0\n";
-      $file .= "115:0\n";
-      $file .= "150:{$matkustaja['paivarahat']}\n";
-      $file .= "151:{$matkustaja['kotimaanpaivat']}\n";
-      $file .= "152:{$matkustaja['kotimaanpuolipaivat']}\n";
-      $file .= "153:{$matkustaja['ulkomaanpaivat']}\n";
-      $file .= "154:0\n";
-      $file .= "155:{$matkustaja['kilsat']}\n";
-      $file .= "156:{$matkustaja['kilsat_raha']}\n";
-      $file .= "157:0\n";
-      $file .= "999:$lask\n";
-
-      $lask++;
-    }
-
-    $filenimi = "VSPSERIE-$kukarow[yhtio]-".date("dmy-His").".txt";
-    file_put_contents("/tmp/".$filenimi, $file);
-
-    echo "<br><form method='post' class='multisubmit'>
-          <input type='hidden' name='tee' value='lataa_tiedosto'>
-          <input type='hidden' name='lataa_tiedosto' value='1'>
-          <input type='hidden' name='kaunisnimi' value='".t("Verottomat_korvaukset")."-$kukarow[yhtio]-$vv.txt'>
-          <input type='hidden' name='tmpfilenimi' value='$filenimi'>
-          <input type='submit' name='tallenna' value='".t("Tallenna saajakohtainen erittely")."'>
-        </form><br><br>";
-
-  }
-}
-
-require "inc/footer.inc";
+?>

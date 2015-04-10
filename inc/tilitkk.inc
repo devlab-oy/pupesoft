@@ -1,163 +1,166 @@
 <?php
+    echo "<font class='head'>".t("Tilien summat kuukausittain")."<hr></font>";
 
-echo "<font class='head'>".t("Tilien summat kuukausittain")."<hr></font>";
+	if ($tee == '') {
+		echo "<form action = 'raportit.php' method='post'>
+				<input type = 'hidden' name = 'toim' value = 'tilitkk'>
+				<input type = 'hidden' name = 'tee' value = '1'>
+				<table><tr>
+				<th>".t("Ajalta")."</th>
+				<td><select name='alvv'>";
 
-if ($tee == '') {
-  echo "<form action = 'raportit.php' method='post'>
-        <input type = 'hidden' name = 'toim' value = 'tilitkk'>
-        <input type = 'hidden' name = 'tee' value = '1'>
-        <table><tr>
-        <th>".t("Ajalta")."</th>
-        <td><select name='alvv'>";
+		for ($i = date("Y"); $i >= date("Y")-4; $i--) {
+			if ($i == date("Y")) $sel = "selected";
+			else $sel = "";
+			echo "<option value='$i' $sel>$i</option>";
+		}
 
-  for ($i = date("Y"); $i >= date("Y")-4; $i--) {
-    if ($i == date("Y")) $sel = "selected";
-    else $sel = "";
-    echo "<option value='$i' $sel>$i</option>";
-  }
+		echo "
+		</select>
+		</td></tr>";
 
-  echo "</select></td></tr>";
+		echo "<tr><th>".t("Vain kustannuspaikka")."</th>";
 
-  echo "<tr><th>".t("Vain kustannuspaikka")."</th>";
+		$query = "	SELECT tunnus, nimi
+					FROM kustannuspaikka
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytossa != 'E'
+					and tyyppi = 'K'
+					ORDER BY koodi+0, koodi, nimi";
+		$vresult = mysql_query($query) or pupe_error($query);
 
-  $query = "SELECT tunnus, nimi
-            FROM kustannuspaikka
-            WHERE yhtio   = '$kukarow[yhtio]'
-            and kaytossa != 'E'
-            and tyyppi    = 'K'
-            ORDER BY koodi+0, koodi, nimi";
-  $vresult = pupe_query($query);
+		echo "<td><select name='kustp'><option value=' '>".t("Ei valintaa")."";
 
-  echo "<td><select name='kustp'><option value=' '>".t("Ei valintaa");
+		while ($vrow=mysql_fetch_array($vresult)) {
+			$sel="";
+			if ($trow[$i] == $vrow[0]) {
+				$sel = "selected";
+			}
+			echo "<option value = '$vrow[0]' $sel>$vrow[1]";
+		}
+		echo "</select></td>";
+		echo "</tr>";
+		echo "<tr><th>".t("Vain kohde")."</th>";
 
-  while ($vrow=mysql_fetch_array($vresult)) {
-    $sel="";
-    if ($trow[$i] == $vrow[0]) {
-      $sel = "selected";
-    }
-    echo "<option value = '$vrow[0]' $sel>$vrow[1]";
-  }
+		$query = "	SELECT tunnus, nimi
+					FROM kustannuspaikka
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytossa != 'E'
+					and tyyppi = 'O'
+					ORDER BY koodi+0, koodi, nimi";
+		$vresult = mysql_query($query) or pupe_error($query);
 
-  echo "</select></td>";
-  echo "</tr>";
-  echo "<tr><th>".t("Vain kohde")."</th>";
+		echo "<td><select name='kohde'><option value=' '>".t("Ei valintaa")."";
 
-  $query = "SELECT tunnus, nimi
-            FROM kustannuspaikka
-            WHERE yhtio   = '$kukarow[yhtio]'
-            and kaytossa != 'E'
-            and tyyppi    = 'O'
-            ORDER BY koodi+0, koodi, nimi";
-  $vresult = pupe_query($query);
+		while ($vrow=mysql_fetch_array($vresult)) {
+			$sel="";
+			if ($trow[$i] == $vrow[0]) {
+				$sel = "selected";
+			}
+			echo "<option value = '$vrow[0]' $sel>$vrow[1]";
+		}
 
-  echo "<td><select name='kohde'><option value=' '>".t("Ei valintaa");
+		echo "</select></td>";
+		echo "</tr>";
+		echo "<tr><th>".t("Vain projekti")."</th>";
 
-  while ($vrow=mysql_fetch_array($vresult)) {
-    $sel="";
-    if ($trow[$i] == $vrow[0]) {
-      $sel = "selected";
-    }
-    echo "<option value = '$vrow[0]' $sel>$vrow[1]";
-  }
+		$query = "	SELECT tunnus, nimi
+					FROM kustannuspaikka
+					WHERE yhtio = '$kukarow[yhtio]'
+					and kaytossa != 'E'
+					and tyyppi = 'P'
+					ORDER BY koodi+0, koodi, nimi";
+		$vresult = mysql_query($query) or pupe_error($query);
 
-  echo "</select></td>";
-  echo "</tr>";
-  echo "<tr><th>".t("Vain projekti")."</th>";
+		echo "<td><select name='proj'><option value=' '>".t("Ei valintaa")."";
 
-  $query = "SELECT tunnus, nimi
-            FROM kustannuspaikka
-            WHERE yhtio   = '$kukarow[yhtio]'
-            and kaytossa != 'E'
-            and tyyppi    = 'P'
-            ORDER BY koodi+0, koodi, nimi";
-  $vresult = pupe_query($query);
+		while ($vrow=mysql_fetch_array($vresult)) {
+			$sel="";
+			if ($trow[$i] == $vrow[0]) {
+				$sel = "selected";
+			}
+			echo "<option value = '$vrow[0]' $sel>$vrow[1]";
+		}
+		echo "</select></td>";
+		echo "</tr>";
 
-  echo "<td><select name='proj'><option value=' '>".t("Ei valintaa");
+		echo "</table>";
 
-  while ($vrow=mysql_fetch_array($vresult)) {
-    $sel="";
-    if ($trow[$i] == $vrow[0]) {
-      $sel = "selected";
-    }
-    echo "<option value = '$vrow[0]' $sel>$vrow[1]";
-  }
+		echo "<br><br><input type = 'submit' value = '".t("Näytä")."'></form>";
 
-  echo "</select></td>";
-  echo "</tr>";
-  echo "</table>";
+		require ("inc/footer.inc");
+		exit;
+	}
 
-  echo "<br><br><input type = 'submit' value = '".t("Näytä")."'></form>";
+	$timeparts = explode(" ",microtime());
+	$phptime = $timeparts[1].substr($timeparts[0],1);
 
-  require "inc/footer.inc";
-  exit;
-}
-
-$timeparts = explode(" ", microtime());
-$phptime = $timeparts[1].substr($timeparts[0], 1);
-
-// Onko meillä lisärajoitteita??
-$lisa='';
-$teksti='';
-
-if (strlen(trim($kustp)) > 0) {
-  $lisa .= " and tiliointi.kustp = '$kustp'";
-  $teksti.=" - Kustannuspaikka $kustp";
-}
-if (strlen(trim($proj)) > 0) {
-  $lisa .= " and tiliointi.projekti = '$proj'";
-  $teksti.=" - Projekti $proj";
-}
-if (strlen(trim($kohde)) > 0) {
-  $lisa .= " and tiliointi.kohde = '$kohde'";
-  $teksti.=" - Kohde $kohde";
-}
+	// Onko meillä lisärajoitteita??
+	$lisa='';
+	$teksti='';
+	if (strlen(trim($kustp)) > 0) {
+		$lisa .= " and tiliointi.kustp = '$kustp'";
+		$teksti.=" - Kustannuspaikka $kustp";
+	}
+	if (strlen(trim($proj)) > 0) {
+		$lisa .= " and tiliointi.projekti = '$proj'";
+		$teksti.=" - Projekti $proj";
+	}
+	if (strlen(trim($kohde)) > 0) {
+		$lisa .= " and tiliointi.kohde = '$kohde'";
+		$teksti.=" - Kohde $kohde";
+	}
 
 // Mita tileja loytyy?
-$query = "SELECT sisainen_taso, tilino, nimi
-          FROM tili
-          WHERE yhtio='$kukarow[yhtio]'
-          ORDER BY tilino";
-$result = pupe_query($query);
 
-echo "<font class='message'>".t("Vuosi")." $alvv $teksti</font>";
-echo "<table>";
-echo "<tr><th>".t("taso")."</th><th>".t("tili")."</th><th>".t("nimi")."</th><th>".t("tammi")."</th><th>".t("helmi")."</th><th>".t("maalis")."</th><th>".t("huhti")."</th><th>".t("touko")."</th><th>".t("kesä")."</th><th>".t("heinä")."</th><th>".t("elo")."</th><th>".t("syys")."</th><th>".t("loka")."</th><th>".t("marras")."</th><th>".t("joulu")."</th></tr>";
+	$query = "SELECT sisainen_taso, tilino, nimi
+			FROM tili
+			WHERE yhtio='$kukarow[yhtio]'
+			ORDER BY tilino";
+	$result = mysql_query($query) or pupe_error($query);
 
-while ($tilirow = mysql_fetch_array($result)) {
+	echo "<font class='message'>".t("Vuosi")." $alvv $teksti</font>";
+	echo "<table>";
 
-  // haetaan kaikki, summataan phpssä..
+	echo "<tr><th>".t("taso")."</th><th>".t("tili")."</th><th>".t("nimi")."</th><th>".t("tammi")."</th><th>".t("helmi")."</th><th>".t("maalis")."</th><th>".t("huhti")."</th><th>".t("touko")."</th><th>".t("kesä")."</th><th>".t("heinä")."</th><th>".t("elo")."</th><th>".t("syys")."</th><th>".t("loka")."</th><th>".t("marras")."</th><th>".t("joulu")."</th></tr>";
 
-  $alku  = $alvv."-01-01";
-  $loppu = $alvv*1+1 ."-01-01";
+	while ($tilirow=mysql_fetch_array($result)) {
 
-  $query = "SELECT DATE_FORMAT(tapvm, '%Y-%m') kausi, tiliointi.tilino, sum(tiliointi.summa) summa
-            FROM tiliointi
-            WHERE tilino = '$tilirow[tilino]'
-            and yhtio    = '$kukarow[yhtio]'
-            and korjattu=''
-            and tapvm>='$alku' and tapvm<'$loppu'
-            $lisa
-             GROUP BY DATE_FORMAT(tapvm, '%Y-%m')";
-  $aresult = pupe_query($query);
+		// haetaan kaikki, summataan phpssä..
 
-  $kausi='';
-  $summa='';
+		$alku  = $alvv."-01-01";
+		$loppu = $alvv*1+1 ."-01-01";
 
-  while ($tiliointirow=mysql_fetch_array($aresult)) {
-    $kk = substr($tiliointirow['kausi'], 5, 2)*1;
-    $kausi[$kk]=$tiliointirow['kausi'];
-    $summa[$kk]=$tiliointirow['summa'];
-  }
+		$query = "SELECT DATE_FORMAT(tapvm, '%Y-%m') kausi, tiliointi.tilino, sum(tiliointi.summa) summa
+					 FROM tiliointi
+					 WHERE tilino = '$tilirow[tilino]'
+					   and yhtio  = '$kukarow[yhtio]'
+					   and korjattu=''
+					   and tapvm>='$alku' and tapvm<'$loppu'
+					   $lisa
+					 GROUP BY DATE_FORMAT(tapvm, '%Y-%m')";
+		$aresult = mysql_query($query) or pupe_error($query);
 
-  echo "<tr><td>$tilirow[sisainen_taso]</td><td>$tilirow[tilino]</td><td>$tilirow[nimi]</td>";
+		$kausi='';
+		$summa='';
 
-  for ($i=1; $i<13; $i++) {
-    echo "<td align='right'>";
-    echo str_replace(".", ",", sprintf("%.2f", $summa[$i]));
-    echo "</td>";
-  }
+		while ($tiliointirow=mysql_fetch_array ($aresult)) {
+			$kk = substr($tiliointirow['kausi'],5,2)*1;
+			$kausi[$kk]=$tiliointirow['kausi'];
+			$summa[$kk]=$tiliointirow['summa'];
+		}
 
-  echo "</tr>";
-}
+		echo "<tr><td>$tilirow[sisainen_taso]</td><td>$tilirow[tilino]</td><td>$tilirow[nimi]</td>";
 
-echo "</table>";
+		for ($i=1; $i<13; $i++) {
+			echo "<td align='right'>";
+			echo str_replace(".",",",sprintf("%.2f", $summa[$i]));
+			echo "</td>";
+		}
+
+		echo "</tr>";
+
+	} // Tili
+
+	echo "<table>";
+?>

@@ -1,208 +1,205 @@
 <?php
 
-// tarvitaan $tapa jossa on vienti / tuonti
-// ja $row jossa on kenttä kaikkitunnukset ja kaikkituotteet
-// kasvatetaan $virhe muuttujaa jos löytyy virheitä
-// itse virheet tulee $virhetxt muuttujaan
+	// tarvitaan $tapa jossa on vienti / tuonti
+	// ja $row jossa on kenttä kaikkitunnukset ja kaikkituotteet
+	// kasvatetaan $virhe muuttujaa jos löytyy virheitä
+	// itse virheet tulee $virhetxt muuttujaan
 
-$virhetxt = "";
-$specutxt = "";
+	$virhetxt = "";
+	$specutxt = "";
+	$lopetus  = "$palvelin2"."intrastat.php////tee=tulosta//kk=$kk//vv=$vv//tapa=$tapa//outputti=$outputti//lahetys=nope//vaintullinimike=$vaintullinimike//kayttajan_valinta_maa=$kayttajan_valinta_maa//tapahtumalaji=$tapahtumalaji";
 
-$tuotteet = explode(",", $row['kaikkituotteet']);
+	// käydään läpi kaikki tuotteet
+	$query = "	SELECT *,
+					(SELECT alkuperamaa
+					FROM tuotteen_toimittajat
+					WHERE tuotteen_toimittajat.yhtio = tuote.yhtio
+					and tuotteen_toimittajat.tuoteno = tuote.tuoteno
+					and tuotteen_toimittajat.alkuperamaa != ''
+					ORDER BY if(alkuperamaa = '$yhtiorow[maa]', '2', '1')
+					LIMIT 1) alkuperamaa
+				FROM tuote
+				WHERE tuote.yhtio = '$kukarow[yhtio]'
+				AND tuote.tuoteno in ($row[kaikkituotteet])";
+	$intrtuores = mysql_query($query) or pupe_error($query);
 
-if ($row["tullinimike1"] == '' or $row["tullinimike1"] == 0) {
-  foreach ($tuotteet as $tuotetiedot) {
-    list($tuotetunnus, $tuoteno) = explode("!¡!", $tuotetiedot);
+	while ($intrtuorow = mysql_fetch_array($intrtuores)) {
 
-    $virhetxt .= t("Tuote").": <a href='yllapito.php?toim=tuote&tunnus=$tuotetunnus&lopetus=$lopetus_intra1$lopetus_intra2'>$tuoteno</a>. ".t("Tullinimike tuotteelta puuttuu")."!<br>";
-    $virhe++;
-  }
-}
-elseif ($row["tullinimike1"] != "") {
-  $query = "SELECT cn
-            FROM tullinimike
-            WHERE cn   = '$row[tullinimike1]'
-            AND kieli  = '$yhtiorow[kieli]'
-            AND cn    != ''";
-  $tulserul = pupe_query($query);
+		if ($intrtuorow["tullinimike1"] == '' or $intrtuorow["tullinimike1"] == 0) {
+		  	$virhetxt .= t("Tuote").": <a href='yllapito.php?toim=tuote&tunnus=$intrtuorow[tunnus]&lopetus=$lopetus'>$intrtuorow[tuoteno]</a>. ".t("Tullinimike tuotteelta puuttuu")."!<br>";
+			$virhe++;
+		}
+		elseif ($intrtuorow["tullinimike1"] != "") {
+			$query = "	SELECT cn
+						FROM tullinimike
+						WHERE cn = '$intrtuorow[tullinimike1]'
+						AND kieli = '$yhtiorow[kieli]'
+						AND cn != ''";
+			$tulserul = mysql_query($query) or pupe_error($query);
 
-  if (mysql_num_rows($tulserul) == 0) {
+			if (mysql_num_rows($tulserul) == 0) {
+			  	$virhetxt .= t("Tuote").": <a href='yllapito.php?toim=tuote&tunnus=$intrtuorow[tunnus]&lopetus=$lopetus'>$intrtuorow[tuoteno]</a> ".t("Tullinimike on virheellinen")." $intrtuorow[tullinimike1]<br>";
+				$virhe++;
+			}
+		}
+		else {
+		  	$virhetxt .= t("Tuote").": <a href='yllapito.php?toim=tuote&tunnus=$intrtuorow[tunnus]&lopetus=$lopetus'>$intrtuorow[tuoteno]</a> ".t("Tullinimike on virheellinen")." $intrtuorow[tullinimike1]<br>";
+			$virhe++;
+		}
 
-    foreach ($tuotteet as $tuotetiedot) {
-      list($tuotetunnus, $tuoteno) = explode("!¡!", $tuotetiedot);
+		// #TODO tällänen häkki, että toimii :) vois korjata joskus
+		if ($intrtuorow["alkuperamaa"] == $yhtiorow["maa"] and $intrtuorow["toim_maa"] == $yhtiorow["maa"]) {
+			$intrtuorow["alkuperamaa"] = "SE";
+		}
 
-      $virhetxt .= t("Tuote").": <a href='yllapito.php?toim=tuote&tunnus=$tuotetunnus&lopetus=$lopetus_intra1$lopetus_intra2'>$tuoteno</a> ".t("Tullinimike on virheellinen")." $row[tullinimike1]<br>";
-      $virhe++;
-    }
-  }
-}
-else {
-  foreach ($tuotteet as $tuotetiedot) {
-    list($tuotetunnus, $tuoteno) = explode("!¡!", $tuotetiedot);
+		if ($intrtuorow["alkuperamaa"] == '') {
+			$virhetxt .= t("Alkuperämaa puuttuu tuotteelta")." <a href='yllapito.php?toim=tuote&tunnus=$intrtuorow[tunnus]&lopetus=$lopetus'>$intrtuorow[tuoteno]</a>!<br>";
+			$virhe++;
+		}
+		elseif ($intrtuorow["alkuperamaa"] == $yhtiorow["maa"] and $tapa != "vienti") {
+			$virhetxt .= t("Tuote").": <a href='yllapito.php?toim=tuote&tunnus=$intrtuorow[tunnus]&lopetus=$lopetus'>$intrtuorow[tuoteno]</a>. ".t("Alkuperämaa ei voi olla sama kuin yhtiön kotimaa")."!<br>";
+			$virhe++;
+		}
+		else {
+			$query = "	SELECT distinct koodi
+						FROM maat
+						WHERE koodi='$intrtuorow[alkuperamaa]'";
+			$maaresult = mysql_query($query) or pupe_error($query);
 
-    $virhetxt .= t("Tuote").": <a href='yllapito.php?toim=tuote&tunnus=$tuotetunnus&lopetus=$lopetus_intra1$lopetus_intra2'>$tuoteno</a> ".t("Tullinimike on virheellinen")." $row[tullinimike1]<br>";
-    $virhe++;
-  }
-}
+			if (mysql_num_rows($maaresult) == 0) {
+				$virhetxt .= t("Tuote").": <a href='yllapito.php?toim=tuote&tunnus=$intrtuorow[tunnus]&lopetus=$lopetus'>$intrtuorow[tuoteno]</a>. ".t("Alkuperämaa on virheellinen")."!<br>";
+				$virhe++;
+			}
+		}
+	}
 
-if ($row["alkuperamaa"] == '') {
-  foreach ($tuotteet as $tuotetiedot) {
-    list($tuotetunnus, $tuoteno) = explode("!¡!", $tuotetiedot);
+	// käydään läpi kaikki laskut
+	$query = "	SELECT lasku.*,
+				if(lasku.maa_lahetys = '', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
+				if(lasku.maa_maara = '', lasku.toim_maa, lasku.maa_maara) maamaara
+	 			FROM lasku
+				LEFT JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto)
+				WHERE lasku.yhtio = '$kukarow[yhtio]'
+				AND lasku.tunnus in ($row[kaikkitunnukset])";
+	$intrlasres = mysql_query($query) or pupe_error($query);
 
-    $virhetxt .= t("Alkuperämaa puuttuu tuotteelta")." <a href='yllapito.php?toim=tuote&tunnus=$intrtuorow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrtuorow[tuoteno]</a>!<br>";
-    $virhe++;
-  }
-}
-elseif ($row["alkuperamaa"] == $yhtiorow["maa"] and $tapa != "vienti") {
-  foreach ($tuotteet as $tuotetiedot) {
-    list($tuotetunnus, $tuoteno) = explode("!¡!", $tuotetiedot);
+	while ($intrlasrow = mysql_fetch_array($intrlasres)) {
 
-    $virhetxt .= t("Tuote").": <a href='yllapito.php?toim=tuote&tunnus=$intrtuorow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrtuorow[tuoteno]</a>. ".t("Alkuperämaa ei voi olla sama kuin yhtiön kotimaa")."!<br>";
-    $virhe++;
-  }
-}
-else {
-  $query = "SELECT distinct koodi
-            FROM maat
-            WHERE koodi = '$row[alkuperamaa]'";
-  $maaresult = pupe_query($query);
+		$specutxt = "";
 
-  if (mysql_num_rows($maaresult) == 0) {
-    foreach ($tuotteet as $tuotetiedot) {
-      list($tuotetunnus, $tuoteno) = explode("!¡!", $tuotetiedot);
+		// erikoiskeissi jos kyseessä on keikka joka on vientiä
+		if ($tapa == "vienti" and $row["tapa"] == "Keikka") {
+			$specutxt = "Tämä on keikka joka on viety kotimaasta ulkomaanvarastoon.<br>";
+			$tapa = "vientituonti";
+		}
 
-      $virhetxt .= t("Tuote").": <a href='yllapito.php?toim=tuote&tunnus=$intrtuorow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrtuorow[tuoteno]</a>. ".t("Alkuperämaa on virheellinen")."!<br>";
-      $virhe++;
-    }
-  }
-}
+		// erikoiskeissi jos kyseessä on lasku joka on tuontia
+		if ($tapa == "tuonti" and $row["tapa"] == "Lasku") {
+			$specutxt  = "Tämä on myyntilasku joka on myyty ulkomaanvarastosta kotimaahan.<br>";
+			$tapa = "tuontivienti";
+		}
 
+		// echoillaan tällästä infoa
+		if ($tapa == "vienti" and $row["tapa"] == "Siirtolista") {
+			$specutxt = "Tämä on siirtolista joka on viety kotimaasta ulkomaanvarastoon.<br>";
+		}
 
-// käydään läpi kaikki laskut
-$query = "SELECT lasku.*,
-          if(lasku.maa_lahetys = '', ifnull(varastopaikat.maa, lasku.yhtio_maa), lasku.maa_lahetys) maalahetys,
-          if(lasku.maa_maara = '', lasku.toim_maa, lasku.maa_maara) maamaara
-           FROM lasku
-          LEFT JOIN varastopaikat ON (varastopaikat.yhtio = lasku.yhtio and varastopaikat.tunnus = lasku.varasto)
-          WHERE lasku.yhtio = '$kukarow[yhtio]'
-          AND lasku.tunnus  in ($row[kaikkitunnukset])";
-$intrlasres = pupe_query($query);
+		// echoillaan tällästä infoa
+		if ($tapa == "tuonti" and $row["tapa"] == "Siirtolista") {
+			$specutxt  = "Tämä on siirtolista joka on tuotu ulkomaanvarastosta kotimaahan.<br>";
+		}
 
-while ($intrlasrow = mysql_fetch_array($intrlasres)) {
+		// kauniiiimpaa
+		if ($row["tapa"] == "Siirtolista") {
+			$intrlasrow["laskunro"] = $intrlasrow["tunnus"];
+		}
 
-  $specutxt = "";
+		// tuontispecific tarkistuksia
+		if ($tapa == 'tuonti' or $tapa == 'tuontivienti') {
 
-  // erikoiskeissi jos kyseessä on saapuminen joka on vientiä
-  if ($tapa == "vienti" and $row["tapa"] == "Saapuminen") {
-    $specutxt = "Tämä on saapuminen joka on viety kotimaasta ulkomaanvarastoon.<br>";
-    $tapa = "vientituonti";
-  }
+			if ($intrlasrow["maalahetys"] == '') {
+				$virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus'>$intrlasrow[laskunro]</a>. ".t("Lähetysmaa puuttuu")."!<br>";
+				$virhe++;
+			}
+			elseif ($intrlasrow["maalahetys"] == $yhtiorow["maa"]) {
+				$virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus'>$intrlasrow[laskunro]</a>. ".t("Lähetysmaa ei voi olla sama kuin yhtiön kotimaa")."!<br>";
+				$virhe++;
+			}
+			else {
+				$query = "	SELECT distinct koodi, eu
+							FROM maat
+							WHERE koodi = '$intrlasrow[maalahetys]'";
+				$maaresult = mysql_query($query) or pupe_error($query);
 
-  // erikoiskeissi jos kyseessä on lasku joka on tuontia
-  if ($tapa == "tuonti" and $row["tapa"] == "Lasku") {
-    $specutxt  = "Tämä on myyntilasku joka on myyty ulkomaanvarastosta kotimaahan.<br>";
-    $tapa = "tuontivienti";
-  }
+				if (mysql_num_rows($maaresult) == 0) {
+					$virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus'>$intrlasrow[laskunro]</a>. ".t("Lähetysmaa on virheellinen")."!<br>";
+					$virhe++;
+				}
+				else {
+					$eurow = mysql_fetch_array($maaresult);
+					if ($eurow["eu"] == "") {
+						$virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus'>$intrlasrow[laskunro]</a>. ".t("Lähetysmaa on virheellinen").": NON-EU!<br>";
+						$virhe++;
+					}
+				}
+			}
 
-  // echoillaan tällästä infoa
-  if ($tapa == "vienti" and $row["tapa"] == "Siirtolista") {
-    $specutxt = "Tämä on siirtolista joka on viety kotimaasta ulkomaanvarastoon.<br>";
-  }
+		}
 
-  // echoillaan tällästä infoa
-  if ($tapa == "tuonti" and $row["tapa"] == "Siirtolista") {
-    $specutxt  = "Tämä on siirtolista joka on tuotu ulkomaanvarastosta kotimaahan.<br>";
-  }
+		// vientispecifig tarkistuksia
+		if ($tapa == 'vienti' or $tapa == 'vientituonti') {
 
-  // kauniiiimpaa
-  if ($row["tapa"] == "Siirtolista") {
-    $intrlasrow["laskunro"] = $intrlasrow["tunnus"];
-  }
+			if ($intrlasrow["maamaara"] == '') {
+				$virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus'>$intrlasrow[laskunro]</a>. ".t("Määrämaa puuttuu")."!<br>";
+				$virhe++;
+			}
+			elseif ($intrlasrow["maamaara"] == $yhtiorow["maa"]) {
+				$virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus'>$intrlasrow[laskunro]</a>. ".t("Määrämaa ei voi olla sama kuin yhtiön kotimaa")."!<br>";
+				$virhe++;
+			}
+			else {
+				$query = "	SELECT distinct koodi, eu
+							FROM maat
+							WHERE koodi = '$intrlasrow[maamaara]'";
+				$maaresult = mysql_query($query) or pupe_error($query);
 
-  // tuontispecific tarkistuksia
-  if ($tapa == 'tuonti' or $tapa == 'tuontivienti') {
+				if (mysql_num_rows($maaresult) == 0) {
+					$virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus'>$intrlasrow[laskunro]</a>. ".t("Määrämaa on virheellinen")."!<br>";
+					$virhe++;
+				}
+				else {
+					$eurow = mysql_fetch_array($maaresult);
+					if ($eurow["eu"] == "") {
+						$virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus'>$intrlasrow[laskunro]</a>. ".t("Määrämaa on virheellinen").": NON-EU!<br>";
+						$virhe++;
+					}
+				}
+			}
 
-    if ($intrlasrow["maalahetys"] == '') {
-      $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Lähetysmaa puuttuu")."!<br>";
-      $virhe++;
-    }
-    elseif ($intrlasrow["maalahetys"] == $yhtiorow["maa"]) {
-      $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Lähetysmaa ei voi olla sama kuin yhtiön kotimaa")."!<br>";
-      $virhe++;
-    }
-    else {
-      $query = "SELECT distinct koodi, eu
-                FROM maat
-                WHERE koodi = '$intrlasrow[maalahetys]'";
-      $maaresult = pupe_query($query);
+		}
 
-      if (mysql_num_rows($maaresult) == 0) {
-        $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Lähetysmaa on virheellinen")."!<br>";
-        $virhe++;
-      }
-      else {
-        $eurow = mysql_fetch_array($maaresult);
-        if ($eurow["eu"] == "") {
-          $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Lähetysmaa on virheellinen").": NON-EU!<br>";
-          $virhe++;
-        }
-      }
-    }
+		if ((int) $intrlasrow["kauppatapahtuman_luonne"] <= 0) {
+		   	$virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus'>$intrlasrow[laskunro]</a>. ".t("Kauppatapahtuman luonne puuttuu")."!<br>";
+			$virhe++;
+		}
 
-  }
+		if ((int) $intrlasrow["kuljetusmuoto"] == 0) {
+		    $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus'>$intrlasrow[laskunro]</a>. ".t("Kuljetusmuoto puuttuu")."!<br>";
+			$virhe++;
+		}
 
-  // vientispecifig tarkistuksia
-  if ($tapa == 'vienti' or $tapa == 'vientituonti') {
+		if ($tapa == "tuontivienti") {
+			$tapa = "tuonti";
+		}
 
-    if ($intrlasrow["maamaara"] == '') {
-      $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Määrämaa puuttuu")."!<br>";
-      $virhe++;
-    }
-    elseif ($intrlasrow["maamaara"] == $yhtiorow["maa"]) {
-      $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Määrämaa ei voi olla sama kuin yhtiön kotimaa")."!<br>";
-      $virhe++;
-    }
-    else {
-      $query = "SELECT distinct koodi, eu
-                FROM maat
-                WHERE koodi = '$intrlasrow[maamaara]'";
-      $maaresult = pupe_query($query);
+		if ($tapa == "vientituonti") {
+			$tapa = "vienti";
+		}
 
-      if (mysql_num_rows($maaresult) == 0) {
-        $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Määrämaa on virheellinen")."!<br>";
-        $virhe++;
-      }
-      else {
-        $eurow = mysql_fetch_array($maaresult);
-        if ($eurow["eu"] == "") {
-          $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Määrämaa on virheellinen").": NON-EU!<br>";
-          $virhe++;
-        }
-      }
-    }
+	}
 
-  }
+	if ($virhetxt != "") {
+		$virhetxt = $specutxt . $virhetxt;
+	}
 
-  if ((int) $intrlasrow["kauppatapahtuman_luonne"] <= 0) {
-    $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Kauppatapahtuman luonne puuttuu")."!<br>";
-    $virhe++;
-  }
-
-  if ((int) $intrlasrow["kuljetusmuoto"] == 0) {
-    $virhetxt .= t($row["tapa"]).": <a href='tilauskasittely/vientitilauksen_lisatiedot.php?tapa=$tapa&tee=K&otunnus=$intrlasrow[tunnus]&lopetus=$lopetus_intra1$lopetus_intra2'>$intrlasrow[laskunro]</a>. ".t("Kuljetusmuoto puuttuu")."!<br>";
-    $virhe++;
-  }
-
-  if ($tapa == "tuontivienti") {
-    $tapa = "tuonti";
-  }
-
-  if ($tapa == "vientituonti") {
-    $tapa = "vienti";
-  }
-
-}
-
-if ($virhetxt != "") {
-  $virhetxt = $specutxt . $virhetxt;
-}
+?>

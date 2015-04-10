@@ -114,6 +114,14 @@ if ((isset($synkronoireferenssi) or isset($synkronoireferenssialapaivita)) and c
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   curl_setopt($ch, CURLOPT_HEADER, FALSE);
   $referenssit = curl_exec($ch);
+
+  // K‰‰nnet‰‰n aliakset UTF-8 muotoon, jos Pupe on UTF-8:ssa
+  if (PUPE_UNICODE) {
+    // T‰ss‰ on "//NO_MB_OVERLOAD"-kommentti
+    // jotta UTF8-konversio ei osu t‰h‰n riviin
+    $referenssit = utf8_encode($referenssit); //NO_MB_OVERLOAD
+  }
+
   $referenssit = explode("\n", trim($referenssit));
 
   // Eka rivi roskikseen
@@ -620,6 +628,14 @@ if ($tee == "") {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HEADER, FALSE);
         $referenssit = curl_exec($ch);
+
+        // K‰‰nnet‰‰n aliakset UTF-8 muotoon, jos Pupe on UTF-8:ssa
+        if (PUPE_UNICODE) {
+          // T‰ss‰ on "//NO_MB_OVERLOAD"-kommentti
+          // jotta UTF8-konversio ei osu t‰h‰n riviin
+          $referenssit = utf8_encode($referenssit); //NO_MB_OVERLOAD
+        }
+
         $referenssit = explode("\n", trim($referenssit));
 
         // Eka rivi roskikseen

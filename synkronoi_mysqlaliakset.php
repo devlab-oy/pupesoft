@@ -18,13 +18,11 @@ if ($tee == "TEE" or strpos($_SERVER['SCRIPT_NAME'], "iltasiivo.php") !== FALSE)
   curl_setopt($ch, CURLOPT_HEADER, FALSE);
   $aliakset = curl_exec($ch);
 
-  // Katsotaan onko meillä UTF-8 merkistö Pupesoftissa käytössä
-  $tervetuloa = file_get_contents("tervetuloa.php");
-  $utf8_enabled = (mb_detect_encoding($tervetuloa, 'UTF-8', true) !== false);
-
   // Käännetään aliakset UTF-8 muotoon, jos Pupe on UTF-8:ssa
-  if ($utf8_enabled) {
-    $aliakset = utf8_encode($aliakset);
+  if (PUPE_UNICODE) {
+    // Tässä on "//NO_MB_OVERLOAD"-kommentti
+    // jotta UTF8-konversio ei osu tähän riviin
+    $aliakset = utf8_encode($aliakset); //NO_MB_OVERLOAD
   }
 
   $aliakset = explode("\n", trim($aliakset));

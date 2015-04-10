@@ -13,34 +13,64 @@ error_reporting(E_ERROR);
 ini_set("display_errors", 0);
 ini_set("log_errors", 1);
 
-$alkumem    = memory_get_usage();
-$timeparts    = explode(" ", microtime());
-$starttime    = $timeparts[1].substr($timeparts[0], 1);
-unset($_GET["param_clean"], $_POST["param_clean"], $_REQUEST["param_clean"]);
-
-if (!function_exists("pupe_iconv")) {
-  function pupe_iconv(&$item, $key) {
-    $item = iconv("UTF-8", "latin1//TRANSLIT", $item);
+// Tsekataan ajetaanko Pupea Latin1- vai UTF-8-moodissa
+// (Ohjataan mssql.charset-muuttujalla php.ini-tiedostossa)
+if (!defined("PUPE_UNICODE")) {
+  if (get_cfg_var('mssql.charset') == "UTF-8") {
+    define("PUPE_UNICODE", TRUE);
+  }
+  else {
+    define("PUPE_UNICODE", FALSE);
   }
 }
 
-if (!function_exists("pupe_register_globals")) {
-  function pupe_register_globals($param_clean) {
-    foreach ($param_clean as $key => $value) {
+$alkumem   = memory_get_usage();
+$timeparts = explode(" ", microtime());
+$starttime = $timeparts[1].substr($timeparts[0], 1);
 
-      if (isset($_REQUEST["sourceCharset"]) and $_REQUEST["sourceCharset"] == "UTF-8") {
-        if (is_array($param_clean[$key])) {
-          array_walk_recursive($param_clean[$key], "pupe_iconv");
+unset($_GET["param_clean"], $_POST["param_clean"], $_REQUEST["param_clean"]);
+
+if (!PUPE_UNICODE) {
+  if (!function_exists("pupe_iconv")) {
+    function pupe_iconv(&$item, $key) {
+      $item = iconv("UTF-8", "latin1//TRANSLIT", $item);
+    }
+  }
+
+  if (!function_exists("pupe_register_globals")) {
+    function pupe_register_globals($param_clean) {
+      $src = array("\"", "'", "<", ">", "\\", ";");
+
+      foreach ($param_clean as $key => $value) {
+
+        if (isset($_REQUEST["sourceCharset"]) and $_REQUEST["sourceCharset"] == "UTF-8") {
+          if (is_array($param_clean[$key])) {
+            array_walk_recursive($param_clean[$key], "pupe_iconv");
+          }
+          else {
+            $param_clean[$key] = iconv("UTF-8", "latin1//TRANSLIT", $param_clean[$key]);
+          }
         }
-        else {
-          $param_clean[$key] = iconv("UTF-8", "latin1//TRANSLIT", $param_clean[$key]);
-        }
+
+        $param_clean[$key] = $GLOBALS[$key] = str_replace($src, "", $param_clean[$key]);
       }
 
-      $param_clean[$key] = $GLOBALS[$key] = str_replace(array("\"", "'", "<", ">", "\\", ";"), "", $param_clean[$key]);
+      return $param_clean;
     }
+  }
+}
+else {
+  if (!function_exists("pupe_register_globals")) {
+    function pupe_register_globals($param_clean) {
+      $src = array("\"", "'", "<", ">", "\\", ";");
+      $rpl = array("{DOULEPRIME}", "{PRIME}", "" , "" , ""  , "");
 
-    return $param_clean;
+      foreach ($param_clean as $key => $value) {
+        $param_clean[$key] = $GLOBALS[$key] = str_replace($src, $rpl, $param_clean[$key]);
+      }
+
+      return $param_clean;
+    }
   }
 }
 
@@ -629,7 +659,11 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
         header("Content-Length: ".filesize($pankkitiedostot_polku.basename($pankkifilenimi)));
       }
       else {
-        header("Content-Length: ".strlen($file));
+        // Tässä on "//NO_MB_OVERLOAD"-kommentti
+        // jotta UTF8-konversio ei osu tähän riviin
+        $_file_size = strlen($file); //NO_MB_OVERLOAD
+
+        header("Content-Length: {$_file_size}");
       }
     }
   }
@@ -648,11 +682,16 @@ if ($session != '' or ((isset($verkkokauppa) and $verkkokauppa != "") and $login
       $yhtiorow['active_css'] = $yhtiorow['css'];
     }
 
-    if ($kukarow["kieli"] == "ru" and $yhtiorow['yhtio'] == 'allr') {
-      $charset = "utf-8";
+    if (!PUPE_UNICODE) {
+      if ($kukarow["kieli"] == "ru" and $yhtiorow['yhtio'] == 'allr') {
+        $charset = "utf-8";
+      }
+      else {
+        $charset = "iso-8859-1";
+      }
     }
     else {
-      $charset = "iso-8859-1";
+      $charset = "utf-8";
     }
 
     if (!headers_sent()) {

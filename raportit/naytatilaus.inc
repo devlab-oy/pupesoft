@@ -348,8 +348,23 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
     }
   }
 
-  echo "<tr><th colspan='4'>".t("Toimitustapa")." / ".t("Rahtikirjanro")."</th><th colspan='2'>".t("Toimitusehto")."</th></tr>";
-  echo "<tr><td colspan='4'>".t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV")." / $linkurl</td><td colspan='2'>$laskurow[toimitusehto]</td></tr>";
+  if ($laskurow["kassalipas"] != "") {
+    $kassalipas_row = hae_kassalipas($laskurow["kassalipas"]);
+    $toimitus_colspan = 3;
+    $kassalipas_header = "<th>Kassalipas</th>";
+    $kassalipas_data = "<td>{$kassalipas_row["nimi"]}</td>";
+  }
+  else {
+    $toimitus_colspan = 4;
+    $kassalipas_header = "";
+    $kassalipas_data = "";
+  }
+
+  echo "<tr><th colspan='{$toimitus_colspan}'>" . t("Toimitustapa") . " / " . t("Rahtikirjanro") .
+       "</th><th colspan='2'>" . t("Toimitusehto") . "</th>{$kassalipas_header}</tr>";
+  echo "<tr><td colspan='{$toimitus_colspan}'>" .
+       t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV") .
+       " / $linkurl</td><td colspan='2'>$laskurow[toimitusehto]</td>{$kassalipas_data}</tr>";
 }
 
 if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $kukarow["extranet"] == "") {
@@ -2184,4 +2199,17 @@ if ($tee != "NAYTA") {
       echo t("Ei tilauksia")."...<br><br>";
     }
   }
+}
+
+function hae_kassalipas($tunnus) {
+  global $kukarow;
+
+  $query = "SELECT nimi
+            FROM kassalipas
+            WHERE yhtio = '{$kukarow["yhtio"]}'
+            AND tunnus = {$tunnus}";
+
+  $result = pupe_query($query);
+
+  return mysql_fetch_assoc($result);
 }

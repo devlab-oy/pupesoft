@@ -202,7 +202,7 @@ if ($tee == "3" and $paivitys_oikeus) {
 
       // Tarkistetaan ett‰ tiedostossa ei ole ylim‰‰r‰isi‰ rivej‰
       if ($rivi[3] != "") {
-        echo "<font class='error'>".t("Tiedostossa liikaa sarakkaita")." ! ".t("Tarkista tiedosto")."!</font><br />";
+        echo "<font class='error'>".t("Tiedostossa liikaa sarakkeita")." ! ".t("Tarkista tiedosto")."!</font><br />";
         exit;
       }
 

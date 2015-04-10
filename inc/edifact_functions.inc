@@ -2938,7 +2938,10 @@ function peruuta_bookkaus($peruutusparametrit) {
 function hae_saapumistiedot($saapumiskoodi) {
   global $kukarow;
 
-  $query = "SELECT tilausrivi.*, lasku.liitostunnus, lasku.varasto
+  $query = "SELECT tilausrivi.*,
+            lasku.liitostunnus,
+            lasku.varasto,
+            FLOOR(tilausrivi.tilkpl) AS kpl
             FROM lasku
             JOIN tilausrivi
               ON tilausrivi.yhtio = lasku.yhtio
@@ -3873,7 +3876,7 @@ function seuraava_vapaa_tulonumero($varastokoodi) {
   return $tulonumero;
 }
 
-function hae_toimenpiteet($tulotunnus) {
+function tulotoimenpiteet($tulotunnus) {
   global $kukarow;
 
   $toimenpiteet = array();
@@ -3899,6 +3902,7 @@ function hae_toimenpiteet($tulotunnus) {
   else {
    $toimenpiteet['muokkaus'] = t("Muokkaa");
    $toimenpiteet['tarkastelu'] = t("Tarkastele");
+   $toimenpiteet['viivakoodit'] = t("Tulosta viivakoodit");
   }
 
   list($varastokoodi, $tulojuoksu, $vuosi) = explode('-', $tulo['asiakkaan_tilausnumero']);
@@ -3915,6 +3919,87 @@ function hae_toimenpiteet($tulotunnus) {
       $toimenpiteet['tullisiirto'] = t("Siirto tullivarastoon");
     }
   }
+
+  return $toimenpiteet;
+}
+
+function toimitukset($toimitustunnus) {
+  global $kukarow;
+
+  $query = "SELECT
+            tilausrivi.nimitys,
+            tuote.malli,
+            SUM(tilausrivi.tilkpl) AS kpl,
+            lasku.tunnus AS toimitustunnus,
+            lasku.nimi,
+            lasku.liitostunnus,
+            concat(lasku.tila, lasku.alatila) AS status
+            FROM lasku
+            JOIN tilausrivi
+              ON tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+            JOIN tuote
+              ON tuote.yhtio = lasku.yhtio
+              AND tuote.tuoteno = tilausrivi.tuoteno
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.viesti = 'tullivarastotoimitus'
+            AND lasku.tila != 'D'
+            AND tuote.mallitarkenne != 'varastointinimike'
+            GROUP BY toimitustunnus, nimitys, malli
+            ORDER BY toimitustunnus DESC";
+  $result = pupe_query($query);
+
+  $toimitukset = array();
+
+  while ($rivi = mysql_fetch_assoc($result)) {
+
+    if ($rivi['status'] == 'N') {
+      $status = t('Kokoaminen kesken');
+    }
+    elseif ($rivi['status'] == 'LA') {
+      $status = t('Valmis kerättäväksi');
+    }
+    elseif ($rivi['status'] == 'LC') {
+      $status = t('Kerätty');
+    }
+    elseif ($rivi['status'] == 'LD') {
+      $status = t('Toimitettu');
+    }
+
+    if (empty($toimitukset[$rivi['toimitustunnus']]['tuotetiedot'])) {
+      $toimitukset[$rivi['toimitustunnus']]['tuotetiedot'] = '';
+    }
+
+    $toimitukset[$rivi['toimitustunnus']]['tuotetiedot'] .= $rivi['nimitys'] .' - '. $rivi['malli'] .' - '. $rivi['kpl'] . ' kpl.<br>';
+    $toimitukset[$rivi['toimitustunnus']]['asiakas'] = $rivi['nimi'];
+    $toimitukset[$rivi['toimitustunnus']]['toimittajatunnus'] = $rivi['liitostunnus'];
+    $toimitukset[$rivi['toimitustunnus']]['status'] = $status;
+    $toimitukset[$rivi['toimitustunnus']]['statuskoodi'] = $rivi['status'];
+
+  }
+
+  return $toimitukset;
+}
+
+
+function toimitustoimenpiteet($toimitustunnus, $status) {
+  global $kukarow;
+
+  $toimenpiteet = array();
+
+  if ($status == 'LD') {
+    $toimenpiteet['pakkalista'] = t("Lataa pakkalista");
+  }
+
+  if ($status == 'LC') {
+    $toimenpiteet['konttitiedot'] = t("Syötä konttitiedot");
+  }
+
+  if ($status == 'N') {
+    $toimenpiteet['hae_tulorivit'] = t("Muokkaa");
+  }
+
+  $toimenpiteet['lisaa_nimike'] = t("Työnimikkeet");
 
   return $toimenpiteet;
 
@@ -3989,7 +4074,6 @@ function tulon_tuotteet_ja_tiedot($tulonumero) {
   $edeltava_asiakirja = $lisatiedot['kontin_mrn'];
 
   $tulon_tuotteet_ja_tiedot = array(
-    'varastotunnus_ja_koodi' => $varastotunnus_ja_koodi,
     'edeltava_asiakirja' => $edeltava_asiakirja,
     'toimittajatunnus' => $toimittajatunnus,
     'rekisterinumero' => $rekisterinumero,
@@ -4178,6 +4262,49 @@ function purkuraportti_parametrit($tulotunnus) {
   return $purkuraportti_parametrit;
 }
 
+function viivakoodi_pdf($tuoteno) {
+
+  //PDF:n luonti ja defaultit
+  require_once("pdflib/phppdflib.class.php");
+
+  //PDF parametrit
+  $pdf = new pdffile;
+  $pdf->set_default('margin-top',   0);
+  $pdf->set_default('margin-bottom',   0);
+  $pdf->set_default('margin-left',   0);
+  $pdf->set_default('margin-right',   0);
+
+  $bold["height"] = 11;
+  $bold["font"] = "Times-Bold";
+
+  $x = 40;
+  $y = 800;
+
+  // sitten aletaan piirtämään itse PDF sisältöä
+  $sivu = $pdf->new_page("a4");
+
+  $data = viivakoodi($tuoteno, 'code128');
+  $image = $pdf->jfif_embed($data);
+  $parametrit['scale'] = 0.7;
+  $pdf->image_place($image, 600, 100, $sivu, $parametrit);
+
+  $pdf->image_place($image, 400, 100, $sivu, $parametrit);
+
+  //keksitään uudelle failille joku varmasti uniikki nimi:
+  $pdffilenimi = "/tmp/".md5(uniqid(rand(),true)).".pdf";
+
+  //kirjoitetaan pdf faili levylle..
+  $fh = fopen($pdffilenimi, "w");
+  if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
+  fclose($fh);
+
+  return $pdffilenimi;
+}
+
+
+
+
+
 function purkuraportti_pdf($pdf_data) {
 
   extract($pdf_data);
@@ -4363,7 +4490,38 @@ function eu_kopioi_rivit($kopiointiparametrit) {
                AND tilausrivitunnus  = '{$rivitunnus}'";
     pupe_query($poisto);
   }
+}
 
+function datepicker($input_id) {
+
+  echo "
+    <script>
+      $(function($){
+         $.datepicker.regional['fi'] = {
+                     closeText: 'Sulje',
+                     prevText: '&laquo;Edellinen',
+                     nextText: 'Seuraava&raquo;',
+                     currentText: 'T&auml;n&auml;&auml;n',
+             monthNames: ['Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kes&auml;kuu',
+              'Hein&auml;kuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu'],
+              monthNamesShort: ['Tammi','Helmi','Maalis','Huhti','Touko','Kes&auml;',
+              'Hein&auml;','Elo','Syys','Loka','Marras','Joulu'],
+                      dayNamesShort: ['Su','Ma','Ti','Ke','To','Pe','Su'],
+                      dayNames: ['Sunnuntai','Maanantai','Tiistai','Keskiviikko','Torstai','Perjantai','Lauantai'],
+                      dayNamesMin: ['Su','Ma','Ti','Ke','To','Pe','La'],
+                      weekHeader: 'Vk',
+              dateFormat: 'dd.mm.yy',
+                      firstDay: 1,
+                      isRTL: false,
+                      showMonthAfterYear: false,
+                      yearSuffix: ''};
+          $.datepicker.setDefaults($.datepicker.regional['fi']);
+      });
+
+      $(function() {
+        $('#{$input_id}').datepicker();
+      });
+      </script>";
 }
 
 function tullivarastoraportti($kopiointiparametrit) {
@@ -4399,6 +4557,241 @@ function tullivarastoraportti($kopiointiparametrit) {
   else {
     return false;
   }
+}
+
+function laskutusraportti_kuukaudet($asiakastunnus) {
+  global $kukarow;
+
+  $query = "SELECT lasku.toimaika
+            FROM lasku
+            JOIN tilausrivi
+              ON tilausrivi.yhtio = lasku.yhtio
+              AND tilausrivi.otunnus = lasku.tunnus
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND lasku.liitostunnus = '{$asiakastunnus}'
+            AND lasku.viesti = 'tullivarasto'
+            ORDER BY lasku.toimaika ASC
+            LIMIT 1";
+  $result = pupe_query($query);
+  $eka_kuukausi = mysql_fetch_assoc($result);
+  $nyt = date("Y-m-d");
+
+  $start = new DateTime($eka_kuukausi['toimaika']);
+  $start->modify('first day of this month');
+  $end = new DateTime($nyt);
+  $end->modify('first day of next month');
+  $interval = DateInterval::createFromDateString('1 month');
+  $period = new DatePeriod($start, $interval, $end);
+
+  $kuukaudet = array();
+
+  foreach ($period as $dt) {
+
+    $kuu = $dt->format("m.Y");
+    $aikaleima = strtotime($dt->format("Y-m-d"));
+
+    $kuukaudet[$kuu] = $aikaleima;
+  }
+
+  return $kuukaudet;
+}
+
+
+function tullivarasto_laskutustiedot($parametrit) {
+  global $kukarow;
+
+  extract($parametrit);
+
+  $rkl = new DateTime($raporttikuun_alku);
+  $rkl->modify('last day of this month');
+  $raporttikuun_loppu = $rkl->format("Y-m-d");
+
+  $query = "SELECT
+            tilausrivi.tyyppi,
+            tilausrivi.tuoteno,
+            lasku.toimaika,
+            lasku.tunnus,
+            lasku.asiakkaan_tilausnumero AS tulonumero,
+            SUM(tilausrivi.tilkpl) AS kpl,
+            tuote.tuotemassa,
+            tuote.tuotetilavuus,
+            tuote.nimitys,
+            tuote.malli,
+            tuote.mallitarkenne,
+            tuote.myyntihinta,
+            toimi.nimi
+            FROM lasku
+            JOIN tilausrivi
+            ON tilausrivi.yhtio = lasku.yhtio
+            AND tilausrivi.otunnus = lasku.tunnus
+            JOIN toimi
+            ON toimi.yhtio = lasku.yhtio
+            AND toimi.tunnus = lasku.liitostunnus
+            JOIN tuote
+            ON tuote.yhtio = lasku.yhtio
+            AND tuote.tuoteno = tilausrivi.tuoteno
+            WHERE lasku.yhtio = '{$kukarow['yhtio']}'
+            AND toimi.tunnus = '{$asiakastunnus}'
+            GROUP BY tilausrivi.tuoteno, tilausrivi.tyyppi, lasku.toimaika";
+  $result = pupe_query($query);
+
+  $tuotteet = array();
+  $nimikkeet = array();
+
+  while ($rivi = mysql_fetch_assoc($result)) {
+
+    $tuote = $rivi['nimitys'] . ' - ' . $rivi['malli'];
+
+    if ($rivi['tyyppi'] == 'O') {
+
+      if (strtotime($rivi['toimaika']) > strtotime($raporttikuun_loppu) ) {
+        //continue;
+      }
+
+      $tuotteet[$rivi['tuoteno']]['sisaan'] = $rivi;
+      $tuotteet[$rivi['tuoteno']]['tulonumero'] = $rivi['tulonumero'];
+      $tuotteet[$rivi['tuoteno']]['tuote'] = $tuote;
+    }
+    elseif ($rivi['mallitarkenne'] == 'varastointinimike') {
+
+      if (strtotime($rivi['toimaika']) < strtotime($raporttikuun_alku) ) {
+        //continue;
+      }
+
+      $hinta = $rivi['myyntihinta'] * $rivi['kpl'];
+
+      $nimike_info = array(
+        'kpl' => $rivi['kpl'],
+        'toimitusnumero' => $rivi['tunnus'],
+        'hinta' => $hinta
+      );
+
+      $nimikkeet[$rivi['nimitys']] = $nimike_info;
+    }
+    elseif ($rivi['tyyppi'] == 'L') {
+
+      if (strtotime($rivi['toimaika']) < strtotime($raporttikuun_alku) ) {
+        //continue;
+      }
+
+      $tuotteet[$rivi['tuoteno']]['ulos'][] = $rivi;
+    }
+  }
+
+  $kaudet = array();
+
+  $varastointihinta = 125; // tosihinta jostakin...
+
+  foreach ($tuotteet as $tuote => $tiedot) {
+
+    $tulonumero = $tiedot['tulonumero'];
+    $sisaan = $tiedot['sisaan']['toimaika'];
+    $sisaan_kpl = $tiedot['sisaan']['kpl'];
+    $nimitys_malli = $tiedot['tuote'];
+
+    if (strtotime($sisaan) < strtotime($raporttikuun_alku) ) {
+      $sisaan = $raporttikuun_alku;
+    }
+
+    if (isset($tiedot['ulos'])) {
+
+      foreach ($tiedot['ulos'] as $rivi) {
+
+        $ulos = $rivi['toimaika'];
+
+        if (strtotime($ulos) > strtotime($raporttikuun_loppu) ) {
+          $ulos = $raporttikuun_loppu;
+        }
+
+        $kpl = floor($rivi['kpl']);
+        $date1 = new DateTime($sisaan);
+        $date2 = new DateTime($ulos);
+        $interval = $date1->diff($date2);
+        $paivat = $interval->days + 1;
+        $hinta = $varastointihinta * $paivat * $kpl; // laskutustapa...
+
+        $kausi_info = array(
+          'nimitys_malli' => $nimitys_malli,
+          'sisaan' => $sisaan,
+          'ulos' => $ulos,
+          'paivat' => $paivat,
+          'kpl' => $kpl,
+          'tonnit' => $rivi['tuotemassa'] * $kpl,
+          'tilavuus' =>$rivi['tuotetilavuus'] * $kpl,
+          'hinta' => $hinta,
+          'tulonumero' => $tulonumero,
+        );
+
+        $kaudet[$tuote][] = $kausi_info;
+
+        $sisaan_kpl = $sisaan_kpl - $kpl;
+      }
+
+      if ($sisaan_kpl > 0) {
+
+        // katsotaanko kesken kuun otetussa raportissa kuun loppu vai tänään?
+        $ulos = $raporttikuun_loppu;
+
+        $date1 = new DateTime($sisaan);
+        $date2 = new DateTime($ulos);
+        $interval = $date1->diff($date2);
+        $paivat = $interval->days + 1;
+
+        $hinta = $varastointihinta * $paivat * $sisaan_kpl; // laskutustapa...
+
+        $kausi_info = array(
+          'nimitys_malli' => $nimitys_malli,
+          'sisaan' => $sisaan,
+          'ulos'=> $ulos,
+          'paivat' => $paivat,
+          'kpl' => $sisaan_kpl,
+          'tonnit' => $rivi['tuotemassa'] * $sisaan_kpl,
+          'tilavuus' =>$rivi['tuotetilavuus'] * $sisaan_kpl,
+          'hinta' => $hinta,
+          'tulonumero' => $tulonumero
+        );
+
+        $kaudet[$tuote][] = $kausi_info;
+      }
+
+    }
+    else {
+
+      $ulos = $raporttikuun_loppu;
+
+      $date1 = new DateTime($sisaan);
+      $date2 = new DateTime($ulos);
+      $interval = $date1->diff($date2);
+      $paivat = $interval->days + 1;
+
+      $kpl = $tiedot['sisaan']['kpl'];
+      $tonnit = ($tiedot['sisaan']['tuotemassa'] * $kpl);
+      $tilavuus = ($tiedot['sisaan']['tuotetilavuus'] * $kpl);
+
+      $hinta = $varastointihinta * $paivat * $kpl; // laskutustapa...
+
+      $kausi_info = array(
+        'nimitys_malli' => $nimitys_malli,
+        'sisaan' => $sisaan,
+        'ulos'=> $ulos,
+        'paivat' => $paivat,
+        'kpl' => $kpl,
+        'tonnit' => $tonnit,
+        'tilavuus' => $tilavuus,
+        'hinta' => $hinta,
+        'tulonumero' => $tulonumero
+      );
+
+      $kaudet[$tuote][] = $kausi_info;
+    }
+  }
+
+  $tiedot = array(
+    'tuotekaudet' => $kaudet,
+    'nimikkeet' => $nimikkeet
+  );
+
+  return $tiedot;
 }
 
 ?>

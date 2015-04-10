@@ -1,8 +1,9 @@
 <?php
 
-if (isset($_POST['task']) and ($_POST['task'] == 'purkuraportti_pdf')) {
+if (isset($_POST['task']) and (strpos($_POST['task'], "_pdf") !== false)) {
   $no_head = "yes";
 }
+
 
 require "inc/parametrit.inc";
 require 'inc/edifact_functions.inc';
@@ -24,12 +25,32 @@ if (isset($task) and $task == 'purkuraportti_pdf') {
   die;
 }
 
+
+if (isset($task) and $task == 'viivakoodi_pdf') {
+
+  $pdf_tiedosto = viivakoodi_pdf($tuotenumero);
+
+  header("Content-type: application/pdf");
+  header("Content-Disposition:attachment;filename='viivakoodi_{$tuotenumero}.pdf'");
+
+  echo file_get_contents($pdf_tiedosto);
+  die;
+}
+
 js_popup();
 
 $errors = array();
 
 if (isset($task) and $task == 'suorita_toimenpide') {
   $task = $toimenpide;
+}
+
+if (isset($task) and $task == 'viivakoodit') {
+
+  $tulon_tuotteet_ja_tiedot = tulon_tuotteet_ja_tiedot($tulonumero);
+  extract($tulon_tuotteet_ja_tiedot);
+  $otsikko = t("Viivakoodien lataus");
+  $view = 'viivakoodit';
 }
 
 
@@ -753,6 +774,10 @@ if (!isset($task)) {
   $view = "perus";
 }
 
+if ($view != 'perus') {
+  echo "<a href='tullivarastointi.php'>« " . t("Takaisin tulonumeroihin") . "</a><br><br>";
+}
+
 echo "<font class='head'>{$otsikko}</font><hr><br>";
 
 if (isset($pe) and $pe == "ok" and !isset($task)) {
@@ -1079,7 +1104,6 @@ if (isset($view) and $view == 'aloita_varaus') {
   echo "
   <form action='tullivarastointi.php' method='post'>
   <input type='hidden' name='task' value='varaa_tulonumero' />
-  <input type='hidden' name='' value='' />
   <table>
   <tr>
     <th>" . t("Varasto") . "</th>
@@ -1119,36 +1143,7 @@ if (isset($view) and $view == 'tulotiedot') {
     $tuoteryhmien_maara = 1;
   }
 
-  echo "
-    <script>
-      $(function($){
-         $.datepicker.regional['fi'] = {
-                     closeText: 'Sulje',
-                     prevText: '&laquo;Edellinen',
-                     nextText: 'Seuraava&raquo;',
-                     currentText: 'T&auml;n&auml;&auml;n',
-             monthNames: ['Tammikuu','Helmikuu','Maaliskuu','Huhtikuu','Toukokuu','Kes&auml;kuu',
-              'Hein&auml;kuu','Elokuu','Syyskuu','Lokakuu','Marraskuu','Joulukuu'],
-              monthNamesShort: ['Tammi','Helmi','Maalis','Huhti','Touko','Kes&auml;',
-              'Hein&auml;','Elo','Syys','Loka','Marras','Joulu'],
-                      dayNamesShort: ['Su','Ma','Ti','Ke','To','Pe','Su'],
-                      dayNames: ['Sunnuntai','Maanantai','Tiistai','Keskiviikko','Torstai','Perjantai','Lauantai'],
-                      dayNamesMin: ['Su','Ma','Ti','Ke','To','Pe','La'],
-                      weekHeader: 'Vk',
-              dateFormat: 'dd.mm.yy',
-                      firstDay: 1,
-                      isRTL: false,
-                      showMonthAfterYear: false,
-                      yearSuffix: ''};
-          $.datepicker.setDefaults($.datepicker.regional['fi']);
-      });
-
-      $(function() {
-        $('#tulopaiva').datepicker();
-      });
-      </script>
-  ";
-
+  datepicker('tulopaiva');
 
   if (!isset($tulopaiva)) {
     $tulopaiva = date("d.m.Y", time());
@@ -1177,19 +1172,19 @@ if (isset($view) and $view == 'tulotiedot') {
         echo "<option value='{$tunnus}' {$selected}>{$nimi}</option>";
       }
 
-  echo "</select></td>
-    <td class='back error'>{$errors['toimittajatunnus']}</td>
-  </tr>
+    echo "</select></td>
+      <td class='back error'>{$errors['toimittajatunnus']}</td>
+    </tr>
 
-  <tr>
-    <th>" . t("Tuoteryhmien määrä") . "</th>
-    <td><input type='text' name='tuoteryhmien_maara' value='{$tuoteryhmien_maara}' /></td>
-    <td class='back error'>{$errors['tuoteryhmien_maara']}</td>
-  </tr>
+    <tr>
+      <th>" . t("Tuoteryhmien määrä") . "</th>
+      <td><input type='text' name='tuoteryhmien_maara' value='{$tuoteryhmien_maara}' /></td>
+      <td class='back error'>{$errors['tuoteryhmien_maara']}</td>
+    </tr>
 
-  <tr>
-    <th>" . t("Varasto") . "</th>
-    <td>";
+    <tr>
+      <th>" . t("Varasto") . "</th>
+      <td>";
 
   if (isset($varastonimi)) {
     echo $varastonimi;
@@ -1266,7 +1261,6 @@ if (isset($view) and $view == 'tulotiedot') {
   </tr>
   </table>
   </form>";
-
 }
 
 //////////////////////////
@@ -1426,7 +1420,7 @@ if (isset($view) and $view == "perus") {
       echo "</td>";
 
       // tuotesolu
-      echo "<td align='center' valign='top'>";
+      echo "<td valign='top'>";
       $statukset = array();
       $tuotemaara = count($info['tuoteinfo']);
       $ei_varastossa = 0;
@@ -1538,7 +1532,7 @@ if (isset($view) and $view == "perus") {
       // toimenpidesolu
       echo "<td valign='top'>";
 
-      if ($toimenpiteet = hae_toimenpiteet($info['tulotunnus'])) {
+      if ($toimenpiteet = tulotoimenpiteet($info['tulotunnus'])) {
 
         if ($liitetty_toimituksiin) {
           unset($toimenpiteet['eusiirto']);
@@ -1566,6 +1560,9 @@ if (isset($view) and $view == "perus") {
         echo "<input id='{$info['tulotunnus']}_nappi' class='nappi' disabled type='submit' value='" . t("Suorita") . "'/>";
         echo "</form>";
       }
+      else {
+
+      }
 
       echo "</td>";
 
@@ -1592,7 +1589,7 @@ if (isset($view) and $view == "perus") {
 }
 
 //////////////////////////
-// purkurasportin-lataus-näkymä alkaa
+// purkuraportin-lataus-näkymä alkaa
 //////////////////////////
 
 if (isset($view) and $view == "purkuraportin_lataus") {
@@ -1623,39 +1620,98 @@ if (isset($view) and $view == "purkuraportin_lataus") {
   echo "<th class='back'></th>";
   echo "</tr>";
 
-foreach ($puretut_tuotteet as $tuote) {
+  foreach ($puretut_tuotteet as $tuote) {
+
+    echo "<tr>";
+    echo "<td>";
+    echo $tuote['nimitys'];
+    echo "</td>";
+    echo "<td>";
+    echo $tuote['malli'];
+    echo "</td>";
+    echo "<td>";
+    echo $tuote['kpl'];
+    echo "</td>";
+    echo "<td>";
+    echo $tuote['purkuaika'];
+    echo "</td>";
+    echo "</tr>";
+
+  }
+
+  echo "</table>";
+  echo '<br>';
+
+  echo "
+    <form method='post' class='multisubmit' action='tullivarastointi.php'>
+    <input type='hidden' name='task' value='purkuraportti_pdf' />
+    <input type='hidden' name='tulonumero' value='{$tulonumero}' />
+    <input type='hidden' name='pdf_data' value='{$pdf_data}' />
+    <input type='submit' value='" . t("Lataa PDF") . "' />
+    </form>";
+
+}
+
+//////////////////////////
+// Viivakoodi-näkymä alkaa
+//////////////////////////
+
+if (isset($view) and $view == "viivakoodit") {
+
+
+  echo "<table>";
 
   echo "<tr>";
-  echo "<td>";
-  echo $tuote['nimitys'];
-  echo "</td>";
-  echo "<td>";
-  echo $tuote['malli'];
-  echo "</td>";
-  echo "<td>";
-  echo $tuote['kpl'];
-  echo "</td>";
-  echo "<td>";
-  echo $tuote['purkuaika'];
-  echo "</td>";
+
+  echo "<th>";
+  echo t("Nimitys");
+  echo "</th>";
+
+  echo "<th>";
+  echo t("Malli");
+  echo "</th>";
+
+  echo "<th class='back'>";
+  echo "</th>";
   echo "</tr>";
 
+  foreach ($tuotteet as $key => $tuote) {
+
+    echo "<tr>";
+
+    echo "<td>";
+    echo $tuote['nimitys'];
+    echo "</td>";
+
+    echo "<td>";
+    echo $tuote['malli'];
+    echo "</td>";
+
+
+    echo "<td class='back'>";
+    echo "<form method='post' class='multisubmit' action='tullivarastointi.php'>";
+    echo "<input type='hidden' name='tuotenumero' value='{$tuote['tuoteno']}' />";
+    echo "<input type='hidden' name='task' value='viivakoodi_pdf' />";
+    echo "<input type='submit' value='" . t("Lataa tiedosto") . "' />";
+    echo "</form>";
+    echo "</td>";
+
+    echo "<td class='back error'>";
+
+    if (isset($errors[$key])) {
+      echo $errors[$key];
+    }
+
+    echo "</td>";
+    echo "</tr>";
+
+
+  }
+
+  echo "</table>";
+
+
 }
-
-echo "</table>";
-
-echo '<br>';
-
-echo "
-  <form method='post' action='tullivarastointi.php'>
-  <input type='hidden' name='task' value='purkuraportti_pdf' />
-  <input type='hidden' name='tulonumero' value='{$tulonumero}' />
-  <input type='hidden' name='pdf_data' value='{$pdf_data}' />
-  <input type='submit' value='" . t("Lataa PDF") . "' />
-  </form>";
-
-}
-
 
 //////////////////////////
 // EU-siirto-näkymä alkaa

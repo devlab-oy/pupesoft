@@ -847,14 +847,33 @@ if (isset($tee) and ($tee == "GENEROI" or $tee == "NAYTATILAUS") and $laskunumer
   if (filesize($nimixml) == 0) {
     unlink($nimixml);
   }
+  elseif (PUPE_UNICODE) {
+    // Muutetaan ISO-8859-15:ksi jos lasku on jossain toisessa merkistössä
+    exec("recode --force UTF8..ISO-8859-15 '$nimixml'");
+  }
+
   if (filesize($nimifinvoice) == 0) {
     unlink($nimifinvoice);
   }
+  elseif (PUPE_UNICODE) {
+    // Muutetaan ISO-8859-15:ksi jos lasku on jossain toisessa merkistössä
+    exec("recode --force UTF8..ISO-8859-15 '$nimifinvoice'");
+  }
+
   if (filesize($nimiedi) == 0) {
     unlink($nimiedi);
   }
+  elseif (PUPE_UNICODE) {
+    // Muutetaan ISO-8859-15:ksi jos lasku on jossain toisessa merkistössä
+    exec("recode --force UTF8..ISO-8859-15 '$nimiedi'");
+  }
+
   if (filesize($nimisisainenfinvoice) == 0) {
     unlink($nimisisainenfinvoice);
+  }
+  elseif (PUPE_UNICODE) {
+    // Muutetaan ISO-8859-15:ksi jos lasku on jossain toisessa merkistössä
+    exec("recode --force UTF8..ISO-8859-15 '$nimisisainenfinvoice'");
   }
 
   if (count($tulostettavat_apix) > 0) {

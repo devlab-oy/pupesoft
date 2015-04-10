@@ -150,6 +150,52 @@ select.minpad_select {
   padding: 8px 15px 8px 4px;
 }
 
+.no-close .ui-dialog-titlebar-close {
+  display: none;
+}
+
+.no-title .ui-dialog-titlebar {
+  display: none;
+}
+
+ul.list-unstyled {
+  list-style: none;
+  padding-left: 20px;
+}
+
+.text-large {
+  font-size: 2rem !important;
+  margin-bottom: 10px;
+}
+
+.text-medium {
+  font-size: 1.25rem !important;
+}
+
+.margin-left-20 {
+  margin-left: 20px !important;
+}
+
+.kateis-table {
+  margin-bottom: 20px;
+}
+
+.kateis-table th, .kateis-table td {
+  font-size: 1.25rem;
+}
+
+.laskuri {
+  margin-bottom: 30px;
+}
+
 .hidden {
   display: none;
+}
+
+.left {
+  float: left;
+}
+
+.right {
+  float: right;
 }

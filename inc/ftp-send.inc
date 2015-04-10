@@ -30,14 +30,23 @@ else exit;
 // echo "ftpfail --> $ftpfail<br>";
 // echo "ftpsucc --> $ftpsucc<br>";
 
-$syy       = "";
-$palautus     = 0;
-$tulos_ulos_ftp   = "";
-$ncftplisa     = "";
+$syy             = "";
+$palautus        = 0;
+$tulos_ulos_ftp  = "";
+$ncftplisa       = "";
 $renameftpfile   = isset($renameftpfile) ? basename(trim($renameftpfile)) : "";
 $palautus_pyynto = isset($palautus_pyynto) ? trim($palautus_pyynto) : "";
-$filenimi     = basename($ftpfile);
-$ftptmpr     = !isset($ftptmpr) ? TRUE : $ftptmpr;
+$filenimi        = basename($ftpfile);
+$ftptmpr         = !isset($ftptmpr) ? TRUE : $ftptmpr;
+
+// Lähetetään oletuksena ISO-8859-15 merkistömuodossa
+if (PUPE_UNICODE and !isset($ftputf8) or !$ftputf8) {
+  $encoding = exec("file -b --mime-encoding '$ftpfile'");
+
+  if (strtoupper($encoding) == 'UTF-8') {
+    exec("recode --force UTF8..ISO-8859-15 '$ftpfile'");
+  }
+}
 
 if ($ftphost == 'localhost' and $ftppath != '' and is_dir($ftppath) and is_writable($ftppath) and $ftpfile != '' and is_file($ftpfile) and is_writable($ftpfile)) {
 

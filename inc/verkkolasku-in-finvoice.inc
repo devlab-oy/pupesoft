@@ -4,7 +4,7 @@ if (!function_exists("xml_float")) {
   function xml_float($value) {
     $value = (string) $value;
 
-    if (mb_detect_encoding($value, 'UTF-8', true) !== FALSE) {
+    if (!PUPE_UNICODE and mb_detect_encoding($value, 'UTF-8', true) !== FALSE) {
       $value = utf8_decode($value);
     }
 
@@ -16,7 +16,7 @@ if (!function_exists("xml_string")) {
   function xml_string($value) {
     $value = (string) $value;
 
-    if (mb_detect_encoding($value, 'UTF-8', true) !== FALSE) {
+    if (!PUPE_UNICODE and mb_detect_encoding($value, 'UTF-8', true) !== FALSE) {
       $value = utf8_decode($value);
     }
 

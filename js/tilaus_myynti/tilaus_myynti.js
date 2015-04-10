@@ -1,5 +1,9 @@
 $(document).ready(function() {
   bind_vaihda_toimenpide_click();
+  $('#kertakassa').on('change', function() {
+    $('#kaikkyhtTee').val('PAIVITA_KASSALIPAS');
+    $('#kaikkyht').submit();
+  });
 
   $('#myyja_id').on('change', function() {
     $(this).siblings('#myyjanro_id').val('');
@@ -49,13 +53,15 @@ $(document).ready(function() {
   }
 
   // Liipaise hintalaskurit käyntiin.
-  $.each(hinta_laskurit, function(perheid, hinta_laskuri) {
-    // Jos vain korkeintaan yksi valmiste tai ei raaka-aineita, ei laskuria tarvita.
-    if (hinta_laskuri.valmisteet.length < 2 || hinta_laskuri.raakaaineiden_kehahinta_summa == 0)
-      return true;
+  if (hinta_laskurit) {
+    $.each(hinta_laskurit, function (perheid, hinta_laskuri) {
+      // Jos vain korkeintaan yksi valmiste tai ei raaka-aineita, ei laskuria tarvita.
+      if (hinta_laskuri.valmisteet.length < 2 || hinta_laskuri.raakaaineiden_kehahinta_summa == 0)
+        return true;
 
-    new Hinta_laskuri(perheid, hinta_laskuri.raakaaineiden_kehahinta_summa, hinta_laskuri.valmisteiden_painoarvot);
-  });
+      new Hinta_laskuri(perheid, hinta_laskuri.raakaaineiden_kehahinta_summa, hinta_laskuri.valmisteiden_painoarvot);
+    });
+  }
 });
 
 function bind_valitut_rivit_checkbox_click() {
@@ -92,7 +98,7 @@ function nappi_onclick_confirm(message) {
   return ok;
 }
 
-// Hinta_kokoelmaa käytetään yhteenkuuluvien raaka-ainerivien ja valmisterivien hintojen hallintaan.
+// Hinta_kokoelmaa k√§ytet√§√§n yhteenkuuluvien raaka-ainerivien ja valmisterivien hintojen hallintaan.
 function Hinta_laskuri(perheid, raakaaineiden_kehahinta_summa, valmisteiden_painoarvot) {
   var me = this;
 
@@ -117,7 +123,7 @@ function Hinta_laskuri(perheid, raakaaineiden_kehahinta_summa, valmisteiden_pain
   });
 
   $.each(this.valmiste_hinta_inputit, function(tunnus, $input) {
-    // Kun valmisteinput fokusoidaan, tallennetaan vanha arvo ja checkataan lukko päälle.
+    // Kun valmisteinput fokusoidaan, tallennetaan vanha arvo ja checkataan lukko p√§√§lle.
     $input.focus(function() {
       // Tallenna vanha arvo.
       $input.data('vanha-arvo', $input.val());
@@ -142,14 +148,14 @@ function Hinta_laskuri(perheid, raakaaineiden_kehahinta_summa, valmisteiden_pain
         return;
       }
 
-      // Jos hinnat menevät yli tai ali, palauta vanha arvo ja infoa käyttäjää.
+      // Jos hinnat menev√§t yli tai ali, palauta vanha arvo ja infoa k√§ytt√§j√§√§.
       if (me.tarkista_hinnat() === false) {
         $input.val(vanha_arvo);
         alert('Hinta on liian pieni tai suuri');
         return;
       }
 
-      // Validit hinnat, jaa muutos lukottomille inputeille ja päivitä painoarvot.
+      // Validit hinnat, jaa muutos lukottomille inputeille ja p√§ivit√§ painoarvot.
       me.jaa_muutos_vapaille(vanha_arvo - $input.val());
       me.laske_painoarvot();
       $input.data('vanha-arvo', $input.val());
@@ -162,7 +168,7 @@ function Hinta_laskuri(perheid, raakaaineiden_kehahinta_summa, valmisteiden_pain
     var muutos_per_lukoton = muutos / lukottomien_lkm;
 
     $.each(this.valmiste_hinta_inputit, function(tunnus, $input) {
-      // Vain inputit, jotka eivät ole merkitty lukituiksi.
+      // Vain inputit, jotka eiv√§t ole merkitty lukituiksi.
       if (me.valmiste_lukko_inputit[tunnus].attr('checked') != 'checked') {
         $input.val((parseFloat($input.val()) + muutos_per_lukoton).toFixed(desimaalia));
       }
@@ -178,7 +184,7 @@ function Hinta_laskuri(perheid, raakaaineiden_kehahinta_summa, valmisteiden_pain
       me.valmisteiden_painoarvot[tunnus] = painoarvo;
     });
 
-    // Päivitä painoarvot kantaan aina kun ne päivittyvät.
+    // P√§ivit√§ painoarvot kantaan aina kun ne p√§ivittyv√§t.
     $.post('', {ajax_toiminto: 'tallenna_painoarvot', no_head: 'yes', painoarvot: this.valmisteiden_painoarvot});
   };
 
@@ -204,7 +210,7 @@ function Hinta_laskuri(perheid, raakaaineiden_kehahinta_summa, valmisteiden_pain
       }
     });
 
-    // Tarkista, ettei lukitut hinnat ylitä raaka-aineiden hintoja.
+    // Tarkista, ettei lukitut hinnat ylit√§ raaka-aineiden hintoja.
     if (lukollisten_hintojen_summa > this.raakaaineiden_kehahinta_summa)
       return false;
 
@@ -247,7 +253,7 @@ function Vaihda_toimenpide_modal() {
   });
   dialog.dialog("open");
 
-  // Inputin autocomplete luodaan dialogin luomisen j�lkeen jotta autocomplete listan z-index on suurempi kuin dialogin
+  // Inputin autocomplete luodaan dialogin luomisen j‰lkeen jotta autocomplete listan z-index on suurempi kuin dialogin
   new Tuote_autocomplete($('*[data-dv-tuoteno-autocomplete]'), function() {
   });
 }

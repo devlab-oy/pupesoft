@@ -980,11 +980,6 @@ if ($kasitellaan_tiedosto) {
           }
         }
         elseif ($table_mysql == 'sanakirja' and $taulunotsikot[$taulu][$j] == "FI") {
-          // jos ollaan mulkkaamassa RU ni tehdään utf-8 -> latin-1 konversio FI kentällä
-          if (in_array("RU", $taulunotsikot[$taulu])) {
-            $taulunrivit[$taulu][$eriviindex][$j] = iconv("UTF-8", "ISO-8859-1", $taulunrivit[$taulu][$eriviindex][$j]);
-          }
-
           $valinta .= " and {$taulunotsikot[$taulu][$j]} = BINARY '{$taulunrivit[$taulu][$eriviindex][$j]}'";
         }
         elseif ($table_mysql == 'tuotepaikat' and $taulunotsikot[$taulu][$j] == "OLETUS") {
@@ -1663,13 +1658,6 @@ if ($kasitellaan_tiedosto) {
             }
 
             // tehdään riville oikeellisuustsekkejä
-            if ($table_mysql == 'sanakirja' and $otsikko == 'FI') {
-              // jos ollaan mulkkaamassa RU ni tehdään utf-8 -> latin-1 konversio FI kentällä
-              if (in_array("RU", $taulunotsikot[$taulu])) {
-                $taulunrivit[$taulu][$eriviindex][$r] = iconv("UTF-8", "ISO-8859-1", $taulunrivit[$taulu][$eriviindex][$r]);
-              }
-            }
-
             if ($lue_data_autoid) {
               $tee = "rivi_loop";
               require "lue_data_autoid.php";

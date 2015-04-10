@@ -1,280 +1,150 @@
 <?php
 
-if (@include_once "inc/functions.inc");
-elseif (@include_once "functions.inc");
+if (@include_once("inc/functions.inc"));
+elseif (@include_once("functions.inc"));
 else exit;
 
-// Parametrit:
-// $ftphost --> FTP-palvelin
-// $ftpuser --> Käyttäjätunnus
-// $ftppass --> Salasana
-// $ftppath --> Kansio FTP-palvelimella jonne failit työnnetään
-// $ftpfile --> Siirrettävä tiedosto
-// $ftpport --> Custom portti, ei pakollinen
-// $ftpfail --> Kansio jonne laitetaan failit jos siirto feilaa, ei pakollinen
-// $ftpsucc --> Kansio jonne tallennetaan failit jos siirto onnistuu, ei pakollinen
-// $ftptype --> FTP-palvelimen tyyppi esim "AS400", ei pakollinen
-// $ftptmpr --> Käytetäänkö .TMP päätettä siirron aikana.
+// tarvitaan $ftphost $ftpuser $ftppass $ftppath $ftpfile
+// palautetaan $palautus ja $syy
 
-// Palautetaan:
-// $palautus
-// $syy
+$dummy			= array();
+$syy			= "";
+$palautus		= 0;
+$tulos_ulos_ftp	= "";
 
-// Debug:
-// echo "ftphost --> $ftphost<br>";
-// echo "ftpuser --> $ftpuser<br>";
-// echo "ftppass --> $ftppass<br>";
-// echo "ftppath --> $ftppath<br>";
-// echo "ftpfile --> $ftpfile<br>";
-// echo "ftpport --> $ftpport<br>";
-// echo "ftpfail --> $ftpfail<br>";
-// echo "ftpsucc --> $ftpsucc<br>";
+$filenimi = basename($ftpfile);
 
-$syy             = "";
-$palautus        = 0;
-$tulos_ulos_ftp  = "";
-$ncftplisa       = "";
-$renameftpfile   = isset($renameftpfile) ? basename(trim($renameftpfile)) : "";
-$palautus_pyynto = isset($palautus_pyynto) ? trim($palautus_pyynto) : "";
-$filenimi        = basename($ftpfile);
-$ftptmpr         = !isset($ftptmpr) ? TRUE : $ftptmpr;
-
-// Lähetetään oletuksena ISO-8859-15 merkistömuodossa
-if (PUPE_UNICODE and !isset($ftputf8) or !$ftputf8) {
-  $encoding = exec("file -b --mime-encoding '$ftpfile'");
-
-  if (strtoupper($encoding) == 'UTF-8') {
-    exec("recode --force UTF8..ISO-8859-15 '$ftpfile'");
-  }
-}
-
-if ($ftphost == 'localhost' and $ftppath != '' and is_dir($ftppath) and is_writable($ftppath) and $ftpfile != '' and is_file($ftpfile) and is_writable($ftpfile)) {
-
-  $ftppath = rtrim(realpath($ftppath), "/")."/";
-  $file_from = realpath($ftpfile);
-  $file_to = $ftppath.$filenimi;
-
-  if (rename($file_from, $file_to)) {
-    $tulos_ulos_ftp .= t("Tiedoston siirto onnistui")."<br>\n";
-  }
-  else {
-    $tulos_ulos_ftp .= t("Tiedoston siirto epäonnistui")."<br>\n";
-  }
-}
-elseif ($ftphost == '' or $ftpuser == '' or $ftppass == '' or $ftppath == '' or $ftpfile == '') {
-  $tulos_ulos_ftp .= "<font class='error'>".t("Lähetykseen tarvittavia tietoja puuttuu")."! (host, user, pass, path, file)</font><br>\n";
-  $palautus = 9;
-  $syy = t("Lähetykseen tarvittavia tietoja puuttuu");
+if ($ftphost=='' or $ftpuser=='' or $ftppass=='' or $ftppath=='' or $ftpfile=='') {
+	$tulos_ulos_ftp .= "<font class='error'>".t("Lähetykseen tarvittavia tietoja puuttuu")."! (host, user, pass, path, file)</font><br>";
 }
 else {
-  //lähetetään tiedosto
 
-  // Onko käytössä custom portti
-  if (isset($ftpport) and (int) $ftpport > 0) {
-    $ftpport = (int) $ftpport;
+	//lähetetään tiedosto
+	$conn_id = ftp_connect($ftphost);
 
-    $ncftplisa = "-P $ftpport";
+	// jos connectio ok, kokeillaan loginata
+	if ($conn_id) {
+		$login_result = ftp_login($conn_id, $ftpuser, $ftppass);
+	}
 
-    $conn_id = ftp_connect($ftphost, $ftpport);
-  }
-  else {
-    $conn_id = ftp_connect($ftphost);
-  }
+	// jos viimeinen merkki pathissä ei ole kauttaviiva lisätään kauttaviiva...
+	if (substr($ftppath, -1) != "/") {
+		$ftppath .= "/";
+	}
 
-  // jos connectio ok, kokeillaan loginata
-  if ($conn_id) {
-    $login_result = ftp_login($conn_id, $ftpuser, $ftppass);
-  }
+	$cmd = "/usr/bin/ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile";
 
-  // jos viimeinen merkki pathissä ei ole kauttaviiva lisätään kauttaviiva...
-  if (substr($ftppath, -1) != "/") {
-    $ftppath .= "/";
-  }
+	// jos login ok kokeillaan uploadata
+	if ($login_result) {
 
-  if ($renameftpfile != "") {
-    // ncftp:llä ei hanskata uudelleennimeämistä, joten laitetaan suoraan lopullisella nimellä...
-    $cmd = "/usr/bin/ncftpput -u ".escapeshellarg($ftpuser)." -p ".escapeshellarg($ftppass)." $ncftplisa ".escapeshellarg($ftphost)." ".escapeshellarg($ftppath)." ".escapeshellarg($renameftpfile);
-  }
-  else {
-    $cmd = "/usr/bin/ncftpput -u ".escapeshellarg($ftpuser)." -p ".escapeshellarg($ftppass)." $ncftplisa ".escapeshellarg($ftphost)." ".escapeshellarg($ftppath)." ".escapeshellarg($ftpfile);
-  }
+		ftp_pasv($conn_id, false);
+		$upload = @ftp_put($conn_id, $ftppath.$filenimi, realpath($ftpfile), FTP_ASCII);
 
-  // jos login ok kokeillaan uploadata
-  if (isset($login_result) and $login_result) {
+		// kokeillaan passiivista siirtoa jos aktiivi feilaa
+		if ($upload === FALSE) {
+			ftp_pasv($conn_id, true);
+			$upload = ftp_put($conn_id, $ftppath.$filenimi, realpath($ftpfile), FTP_ASCII);
+		}
 
-    // Tehdään NAMEFMT komento, jos kyseessä on iSeries/AS400 palvelin
-    if (isset($ftptype) and $ftptype == "AS400") {
-      $quote = ftp_site($conn_id, "NAMEFMT 1");
-    }
+		if ($upload === FALSE) {
+			exec($cmd, $skit, $upload_ncftp);
 
-    if ($ftptmpr) {
-      // Käytetään aina .TMP päätettä kun siirto on kesken
-      $ftpfile_tmp = $filenimi.".TMP";
-    }
-    else {
-      // Ei käytetä .TMP päätettä
-      $ftpfile_tmp = $filenimi;
-    }
+			if ($upload_ncftp == 0) $upload = TRUE;
+		}
 
-    // Kokeillaan passiivista siirtoa
-    ftp_pasv($conn_id, TRUE);
-    $upload = @ftp_put($conn_id, $ftppath.$ftpfile_tmp, realpath($ftpfile), FTP_ASCII);
+		if ($upload === TRUE and $renameftpfile != "") {
+			$renameftpfile = basename($renameftpfile);
+			$rename = ftp_rename($conn_id, $ftppath.$filenimi, $ftppath.$renameftpfile);
+		}
+	}
 
-    // Kokeillaan aktiivista siirtoa jos passiivi feilaa
-    if ($upload === FALSE) {
-      ftp_pasv($conn_id, FALSE);
-      $upload = ftp_put($conn_id, $ftppath.$ftpfile_tmp, realpath($ftpfile), FTP_ASCII);
-    }
+	if ($conn_id) {
+		ftp_close($conn_id);
+	}
 
-    if ($ftptmpr) {
-      // Otetaan .TMP pääte veks ku siirto on valmis
-      if (isset($ftpport) and (int) $ftpport > 0 and $upload === TRUE) {
-        // Jos $ftpport on käytössä niin käytetään näitä komentoja.
-        // Näyttää siltä, että ftp_rename ei osaa hanskata renametusta kun käytetään custom porttia
-        $rename = ftp_raw($conn_id, "RNFR {$ftppath}{$ftpfile_tmp}");
-        $rename = ftp_raw($conn_id, "RNTO {$ftppath}{$filenimi}");
+	// mikä feilas?
+	if ($conn_id === FALSE) {
+		$palautus = 1;
+	}
+	if ($login_result === FALSE) {
+		$palautus = 2;
+	}
+	if ($upload === FALSE) {
+		$palautus = 3;
+	}
+	if ($rename === FALSE) {
+		$palautus = 4;
+	}
 
-        if (stripos($rename[0], "command successful") === FALSE and stripos($rename[0], "file renamed") === FALSE) {
-          $rename1 = FALSE;
-        }
-      }
-      elseif ($upload === TRUE) {
-        $rename1 = ftp_rename($conn_id, "{$ftppath}{$ftpfile_tmp}", "{$ftppath}{$filenimi}");
+	$to_email = $yhtiorow['alert_email'];
 
-        // Jos rename epäonnistuu, koitetaan poistaa .TMP tiedosto
-        if ($rename1 === FALSE) {
-          $delete1 = ftp_delete($conn_id, "{$ftppath}{$ftpfile_tmp}");
+	// jos siirto epäonnistuu
+	if ($palautus<>0) {
 
-          if ($delete1 === FALSE) {
-            $raw = ftp_raw($conn_id, "quote dele {$ftppath}{$ftpfile_tmp}");
-          }
-        }
-      }
-    }
+		// ncftpput:in exit valuet
+		switch ($palautus) {
+			case  1:
+				$syy = "Could not connect to remote host. ($ftphost)";
+				break;
+			case  2:
+				$syy = "Could not login to remote host ($conn_id, $ftpuser, $ftppass)";
+				break;
+			case  3:
+				$syy = "Transfer failed ($conn_id, $ftppath, ".realpath($ftpfile).")";
+				break;
+			case  4:
+				$syy = "Rename failed ($conn_id, $ftppath, $ftppath.$filenimi -> $ftppath.$renameftpfile)";
+				break;
+			default:
+				$syy = t("Tuntematon errorkoodi")." ($palautus)!!";
+		}
 
-    // Pitääkö faili vielä nimetä kokonaan uudestaan (Finvoice iPost)
-    if ($upload === TRUE and $renameftpfile != "") {
-      $rename2 = ftp_rename($conn_id, "{$ftppath}{$filenimi}", "{$ftppath}{$renameftpfile}");
+		$rivi  = "$PHP_SELF\n";
+		$rivi .= "\n";
+		$rivi .= "".t("Tiedoston")." '$ftpfile' ".t("lähetys epäonnistui")."!\n";
+		$rivi .= "\n";
+		$rivi .= "$cmd\n";
+		$rivi .= "\n";
+		$rivi .= "$syy\n";
+		
+		/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lisätty paranneltu sendMail */
+		//$boob = mail("$to_email", mb_encode_mimeheader(t("Tiedostonsiirto epäonnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+		include_once '/var/www/html/lib/functions/sendMail.php';  // Lisätään sendMail funktio
+		$boob = sendMail($yhtiorow['postittaja_email'], $to_email, t("Tiedostonsiirto epäonnistui")."!", $rivi);
 
-      // Jos rename epäonnistuu, koitetaan poistaa turha välitiedosto
-      if ($rename2 === FALSE) {
-        $rename2 = ftp_delete($conn_id, "{$ftppath}{$filenimi}");
-        if ($rename2 === FALSE) {
-          $raw = ftp_raw($conn_id, "quote dele {$ftppath}{$filenimi}");
-        }
-        $rename2 = FALSE;
-      }
-    }
+		if ($boob===FALSE) {
+			$tulos_ulos_ftp .= "<font class='error'>\n";
+			$tulos_ulos_ftp .= "".t("Tiedostonsiirto epäonnistui! Ja meilin lähettäminen")." $to_email ".t("epäonnistui myös!")."\n";
+			$tulos_ulos_ftp .= "</font><br>\n";
 
-    // Kokeillaan ncftp-ohjelmalla, uudelleenimeäminen ei onnaa joten laitetaan suoraan lopullisella nimellä
-    if ($upload === FALSE) {
-      exec($cmd, $skit, $upload_ncftp);
-
-      if ($upload_ncftp == 0) {
-        $upload = TRUE;
-      }
-    }
-  }
-
-  if ($conn_id) {
-    ftp_close($conn_id);
-  }
-
-  // mikä feilas?
-  if (isset($conn_id) and $conn_id === FALSE) {
-    $palautus = 1;
-  }
-  if (isset($login_result) and $login_result === FALSE) {
-    $palautus = 2;
-  }
-  if (isset($upload) and $upload === FALSE) {
-    $palautus = 3;
-  }
-  if (isset($rename1) and $rename1 === FALSE) {
-    $palautus = 4;
-  }
-  if (isset($rename2) and $rename2 === FALSE) {
-    $palautus = 5;
-  }
-  if (isset($delete1) and $delete1 === FALSE) {
-    $palautus = 6;
-  }
-
-  // Siirto onnistui
-  if ($palautus == 0 and isset($ftpsucc) and $ftpsucc != "") {
-    // Siirretään faili talteen jos siirto onnasi ja ok failit halutaan tallentaa
-    rename($ftpfile, $ftpsucc."/".$filenimi);
-  }
-  elseif ($palautus != 0 and isset($ftpfail) and $ftpfail != "") {
-    // Siirretään faili outboxiin odottamaan uutta yritystä jos siirto feilasi
-    rename($ftpfile, $ftpfail."/".$filenimi);
-  }
-
-  // jos siirto epäonnistuu ja faildirri ei oo setattu nin lähetetään maili
-  // jos faildirri ON setattu niin ei ekoteta eikä meilata mittään
-  if ($palautus != 0 and (!isset($ftpfail) or $ftpfail == "")) {
-    // ncftpput:in exit valuet
-    switch ($palautus) {
-    case  1:
-      $syy = "Could not connect to remote host. ($ftphost)";
-      break;
-    case  2:
-      $syy = "Could not login to remote host ($ftpuser, $ftppass)";
-      break;
-    case  3:
-      $syy = "Transfer failed ($ftppath, ".realpath($ftpfile).")";
-      break;
-    case  4:
-      $syy = "Rename failed ($ftppath, {$ftppath}{$ftpfile_tmp} --> {$ftppath}{$filenimi})";
-      break;
-    case  5:
-      $syy = "Rename failed ($ftppath, {$ftppath}{$filenimi} --> {$ftppath}{$renameftpfile})";
-      break;
-    case  6:
-      $syy = "Delete failed ({$ftppath}{$ftpfile_tmp})";
-      break;
-    default:
-      $syy = t("Tuntematon errorkoodi")." ($palautus)!!";
-    }
-
-    $rivi  = "{$_SERVER['SCRIPT_NAME']}\n";
-    $rivi .= "\n";
-    $rivi .= t("Tiedoston")." '$ftpfile' ".t("lähetys epäonnistui")."!\n";
-    $rivi .= "\n";
-    $rivi .= "$cmd\n";
-    $rivi .= "\n";
-    $rivi .= "$syy\n";
-
-    $boob = mail($yhtiorow['alert_email'], mb_encode_mimeheader(t("Tiedostonsiirto epäonnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-
-    if ($boob === FALSE) {
-      $tulos_ulos_ftp .= "<font class='error'>\n";
-      $tulos_ulos_ftp .= t("Tiedostonsiirto epäonnistui! Ja meilin lähettäminen")." $yhtiorow[alert_email] ".t("epäonnistui myös!")."\n";
-      $tulos_ulos_ftp .= "</font><br>\n";
-
-      $tulos_ulos_ftp .= "<br><pre>$rivi</pre><br>\n";
-    }
-    else {
-      $tulos_ulos_ftp .= "<font class='error'>FAILED! (".t("lähetettiin sähköposti")." $yhtiorow[alert_email])</font><br>\n";
-    }
-  }
-  elseif ($palautus_pyynto != "") {
-    $rivi  = "{$_SERVER['SCRIPT_NAME']}\n";
-    $rivi .= "\n";
-    $rivi .= t("Tiedoston")." '$ftpfile' ".t("lähetys onnistui")."!\n";
-    $rivi .= "\n";
-    $rivi .= "$ftpuser @ $ftphost : $ftppath\n";
-    $rivi .= "\n";
-    $rivi .= "\n";
-
-    $silari = mail($yhtiorow['alert_email'], mb_encode_mimeheader(t("Tiedostonsiirto onnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
-  }
+			$tulos_ulos_ftp .= "<br><pre>$rivi</pre><br>\n";
+		}
+		else {
+			$tulos_ulos_ftp .= "<font class='error'>FAILED! (".t("lähetettiin sähköposti")." $to_email)</font><br>\n";
+		}
+	}
+	elseif ($palautus_pyynto != "") {
+		$rivi  = "$PHP_SELF\n";
+		$rivi .= "\n";
+		$rivi .= "".t("Tiedoston")." '$ftpfile' ".t("lähetys onnistui")."!\n";
+		$rivi .= "\n";
+		$rivi .= "$ftpuser @ $ftphost : $ftppath\n";
+		$rivi .= "\n";
+		$rivi .= "\n";
+		
+		/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lisätty paranneltu sendMail */
+		//$silari = mail("$to_email", mb_encode_mimeheader(t("Tiedostonsiirto onnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+		include_once '/var/www/html/lib/functions/sendMail.php';  // Lisätään sendMail funktio
+		$silari = sendMail($yhtiorow['postittaja_email'], $to_email, t("Tiedostonsiirto onnistui")."!", $rivi);
+	}
 }
 
 //echotaan rudulle jos kyseessä ei ole batch-ajo
-if (!isset($tulos_ulos) or $tulos_ulos == "") {
-  echo $tulos_ulos_ftp;
+if ($tulos_ulos == "") {
+	echo $tulos_ulos_ftp;
 }
 elseif ($tulos_ulos == "edi") {
-  $edi_ulos .= strip_tags($tulos_ulos_ftp);
+	$edi_ulos .= strip_tags($tulos_ulos_ftp);
 }
+
+?>

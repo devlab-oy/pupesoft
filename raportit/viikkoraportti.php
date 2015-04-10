@@ -6,14 +6,10 @@ $useslave = 1;
 
 // Kutsutaanko CLI:stä
 if (php_sapi_name() != 'cli') {
-  die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
+	die ("Tätä scriptiä voi ajaa vain komentoriviltä!");
 }
 
-require "../inc/connect.inc";
-require "../inc/functions.inc";
-
-// Logitetaan ajo
-cron_log();
+require ("../inc/connect.inc");
 
 // hmm.. jännää
 $kukarow['yhtio'] = addslashes(trim($argv[1]));
@@ -21,161 +17,186 @@ $pomomail = addslashes(trim($argv[2]));
 $pomomail2 = addslashes(trim($argv[3]));
 
 $query    = "SELECT * FROM yhtio WHERE yhtio='$kukarow[yhtio]'";
-$yhtiores = pupe_query($query);
+$yhtiores = mysql_query($query) or die($query);
 
 if (mysql_num_rows($yhtiores)==1) {
-  $yhtiorow = mysql_fetch_array($yhtiores);
+	$yhtiorow = mysql_fetch_array($yhtiores);
 
-  $query = "SELECT *
-            FROM yhtion_parametrit
-            WHERE yhtio='$kukarow[yhtio]'";
-  $result = pupe_query($query);
+	$query = "	SELECT *
+				FROM yhtion_parametrit
+				WHERE yhtio='$kukarow[yhtio]'";
+	$result = mysql_query($query) or die ("Kysely ei onnistu yhtio $query");
 
-  if (mysql_num_rows($result) == 1) {
-    $yhtion_parametritrow = mysql_fetch_array($result);
+	if (mysql_num_rows($result) == 1) {
+		$yhtion_parametritrow = mysql_fetch_array($result);
 
-    // lisätään kaikki yhtiorow arrayseen
-    foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
-      $yhtiorow[$parametrit_nimi] = $parametrit_arvo;
-    }
-  }
+		// lisätään kaikki yhtiorow arrayseen
+		foreach ($yhtion_parametritrow as $parametrit_nimi => $parametrit_arvo) {
+			$yhtiorow[$parametrit_nimi] = $parametrit_arvo;
+		}
+	}
 }
 else {
-  die ("Yhtiö $kukarow[yhtio] ei löydy!");
+	die ("Yhtiö $kukarow[yhtio] ei löydy!");
 }
 
 echo "Viikkoraportti\n--------------\n\n";
 
 $query = "select distinct myyjanro from asiakas where yhtio='$kukarow[yhtio]' and myyjanro > 0";
-$myyre = pupe_query($query);
+$myyre = mysql_query($query) or die($query);
 
 echo "Myyjät haettu...";
 
 $query = "select distinct tuotemerkki from tuote where yhtio='$kukarow[yhtio]' order by 1";
-$merre = pupe_query($query);
+$merre = mysql_query($query) or die($query);
 
 echo "Merkit haettu... Alotellaan.\n";
 echo "--------------------------------------------\n";
 
-while ($myyjarow = mysql_fetch_array($myyre)) {
+while ($myyjarow = mysql_fetch_array ($myyre)) {
 
-  $query = "SELECT tunnus, ytunnus, nimi
-            from asiakas
-            where yhtio  = '$kukarow[yhtio]'
-            and myyjanro = '$myyjarow[myyjanro]'
-            AND myyjanro > 0";
-  $asire = pupe_query($query);
+	$query = "	SELECT tunnus, ytunnus, nimi
+				from asiakas
+				where yhtio = '$kukarow[yhtio]'
+				and myyjanro = '$myyjarow[myyjanro]'
+				AND myyjanro > 0";
+	$asire = mysql_query($query) or die($query);
 
-  // merkit kelataan kalkuun
-  mysql_data_seek($merre, 0);
+	// merkit kelataan kalkuun
+	mysql_data_seek ($merre, 0);
 
-  $sivu = "asiakas\tnimi\t";
-  $sivu .= "Yhteensä tämä\tYhteensä edel\t";
-  while ($merkkirow = mysql_fetch_array($merre)) {
+	$sivu = "asiakas\tnimi\t";
+	$sivu .= "Yhteensä tämä\tYhteensä edel\t";
+	while ($merkkirow = mysql_fetch_array ($merre)) {
 
-    $sivu .= "$merkkirow[tuotemerkki] tämä\t$merkkirow[tuotemerkki] edel\t";
-  }
+		$sivu .= "$merkkirow[tuotemerkki] tämä\t$merkkirow[tuotemerkki] edel\t";
+	}
 
-  $sivu .= "\n";
+	$sivu .= "\n";
 
-  while ($asiakasrow = mysql_fetch_array($asire)) {
+	while ($asiakasrow = mysql_fetch_array($asire)) {
 
-    // merkit kelataan kalkuun
-    mysql_data_seek($merre, 0);
+		// merkit kelataan kalkuun
+		mysql_data_seek ($merre, 0);
 
-    $sivu .= "$asiakasrow[ytunnus]\t$asiakasrow[nimi]\t";
+		$sivu .= "$asiakasrow[ytunnus]\t$asiakasrow[nimi]\t";
 
-    $query = "SELECT
-              sum(if(lasku.tapvm >= DATE_SUB(now(),INTERVAL 1 YEAR),tilausrivi.rivihinta,0)) ceur,
-              sum(if(lasku.tapvm < DATE_SUB(now(),INTERVAL 1 YEAR),tilausrivi.rivihinta,0)) eeur
-              FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-              JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
-              JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
-              WHERE lasku.yhtio  = '$kukarow[yhtio]' and
-              lasku.tila         = 'U' and
-              lasku.alatila      = 'X' and
-              lasku.liitostunnus = '$asiakasrow[tunnus]' and
-              lasku.tapvm        > date_sub(now(), INTERVAL 2 YEAR)";
-    $sumsumres = pupe_query($query);
-    $sumsumrow = mysql_fetch_array($sumsumres);
+		$query = "SELECT
+				sum(if(lasku.tapvm >= DATE_SUB(now(),INTERVAL 1 YEAR),tilausrivi.rivihinta,0)) ceur,
+				sum(if(lasku.tapvm < DATE_SUB(now(),INTERVAL 1 YEAR),tilausrivi.rivihinta,0)) eeur
+				FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+				JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
+				JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno)
+				WHERE lasku.yhtio = '$kukarow[yhtio]' and
+				lasku.tila = 'U' and
+				lasku.alatila = 'X' and
+				lasku.liitostunnus = '$asiakasrow[tunnus]' and
+				lasku.tapvm > date_sub(now(), INTERVAL 2 YEAR)";
+		$sumsumres = mysql_query($query) or die($query);
+		$sumsumrow = mysql_fetch_array ($sumsumres);
 
-    $sumsumrow['ceur'] = str_replace('.', ',', $sumsumrow['ceur']);
-    $sumsumrow['eeur'] = str_replace('.', ',', $sumsumrow['eeur']);
-    $sivu .= "$sumsumrow[ceur]\t$sumsumrow[eeur]\t";
+		$sumsumrow['ceur'] = str_replace('.',',',$sumsumrow['ceur']);
+		$sumsumrow['eeur'] = str_replace('.',',',$sumsumrow['eeur']);
+		$sivu .= "$sumsumrow[ceur]\t$sumsumrow[eeur]\t";
 
-    while ($merkkirow = mysql_fetch_array($merre)) {
+		while ($merkkirow = mysql_fetch_array ($merre)) {
 
-      $query = "SELECT
-                sum(if(lasku.tapvm >= DATE_SUB(now(),INTERVAL 1 YEAR),tilausrivi.rivihinta,0)) ceur,
-                sum(if(lasku.tapvm < DATE_SUB(now(),INTERVAL 1 YEAR),tilausrivi.rivihinta,0)) eeur
-                FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
-                JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
-                JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuotemerkki = '$merkkirow[tuotemerkki]')
-                WHERE lasku.yhtio  = '$kukarow[yhtio]' and
-                lasku.tila         = 'U' and
-                lasku.alatila      = 'X' and
-                lasku.liitostunnus = '$asiakasrow[tunnus]' and
-                lasku.tapvm        > date_sub(now(),INTERVAL 2 YEAR)";
-      $sumres = pupe_query($query);
-      $sumrow = mysql_fetch_array($sumres);
+			$query = "SELECT
+					sum(if(lasku.tapvm >= DATE_SUB(now(),INTERVAL 1 YEAR),tilausrivi.rivihinta,0)) ceur,
+					sum(if(lasku.tapvm < DATE_SUB(now(),INTERVAL 1 YEAR),tilausrivi.rivihinta,0)) eeur
+					FROM lasku use index (yhtio_tila_liitostunnus_tapvm)
+					JOIN tilausrivi use index (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
+					JOIN tuote use index (tuoteno_index) ON (tuote.yhtio = lasku.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuotemerkki = '$merkkirow[tuotemerkki]')
+					WHERE lasku.yhtio = '$kukarow[yhtio]' and
+					lasku.tila = 'U' and
+					lasku.alatila = 'X' and
+					lasku.liitostunnus = '$asiakasrow[tunnus]' and
+					lasku.tapvm > date_sub(now(),INTERVAL 2 YEAR)";
+			$sumres = mysql_query($query) or die($query);
+			$sumrow = mysql_fetch_array ($sumres);
 
-      $sumrow['ceur'] = str_replace('.', ',', $sumrow['ceur']);
-      $sumrow['eeur'] = str_replace('.', ',', $sumrow['eeur']);
-      $sivu .= "$sumrow[ceur]\t$sumrow[eeur]\t";
-    }
+			$sumrow['ceur'] = str_replace('.',',',$sumrow['ceur']);
+			$sumrow['eeur'] = str_replace('.',',',$sumrow['eeur']);
+			$sivu .= "$sumrow[ceur]\t$sumrow[eeur]\t";
+		}
 
-    $sivu .= "\n";
-  }
+		$sivu .= "\n";
+	}
 
-  $query = "SELECT eposti, nimi
-            from kuka
-            where yhtio = '$kukarow[yhtio]'
-            and myyja   = '$myyjarow[myyjanro]'
-            AND myyja   > 0";
-  $kukre = pupe_query($query);
-  $kukro = mysql_fetch_array($kukre);
+	$query = "	SELECT eposti, nimi
+				from kuka
+				where yhtio = '$kukarow[yhtio]'
+				and myyja = '$myyjarow[myyjanro]'
+				AND myyja > 0";
+	$kukre = mysql_query($query) or die($query);
+	$kukro = mysql_fetch_array ($kukre);
 
-  if ($kukro["eposti"] == "") {
-    echo "Myyjällä $kukro[nimi] ($myyjarow[myyjanro]) ei ole sähköpostiosoitetta!\n";
-  }
-  else {
-    echo "Lähetetään meili $kukro[eposti].\n";
+	if ($kukro["eposti"] == "") {
+		echo "Myyjällä $kukro[nimi] ($myyjarow[myyjanro]) ei ole sähköpostiosoitetta!\n";
+	}
+	else {
+		echo "Lähetetään meili $kukro[eposti].\n";
 
-    $nyt = date('d.m.y');
-    $bound = uniqid(time()."_") ;
+		$nyt = date('d.m.y');
+        $bound = uniqid(time()."_") ;
+		
+		/* Lisätty 17.2.2014, lisätty taulukot liitteille ja niiden nimille */
+		$liitteet = array();
+		$liite_nimet = array();
 
-    $header   = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
-    $header  .= "MIME-Version: 1.0\n" ;
-    $header  .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
+        $header   = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
+        $header  .= "MIME-Version: 1.0\n" ;
+        $header  .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
-    $content  = "--$bound\n";
+        $content  = "--$bound\n";
 
-    $content .= "Content-Type: application/vnd.ms-excel; name=\"Excel-viikkoraportti$nyt.xls\"\n" ;
-    $content .= "Content-Transfer-Encoding: base64\n" ;
-    $content .= "Content-Disposition: attachment; filename=\"Excel-viikkoraportti$nyt.xls\"\n\n";
+        $content .= "Content-Type: application/vnd.ms-excel; name=\"Excel-viikkoraportti$nyt.xls\"\n" ;
+        $content .= "Content-Transfer-Encoding: base64\n" ;
+        $content .= "Content-Disposition: attachment; filename=\"Excel-viikkoraportti$nyt.xls\"\n\n";
 
-    $content .= chunk_split(base64_encode($sivu));
-    $content .= "\n" ;
+        $content .= chunk_split(base64_encode($sivu));
+        $content .= "\n" ;
+		
+		/* Lisätty 17.2.2014, lisätään liiteet ja niiden nimet taulukoihin */
+		array_push($liitteet, $sivu);
+		array_push($liite_nimet, "Excel-viikkoraportti$nyt.xls");
 
-    $content .= "--$bound\n";
+        $content .= "--$bound\n";
 
-    $content .= "Content-Type: text/x-comma-separated-values; name=\"OpenOffice-viikkoraportti$nyt.csv\"\n" ;
-    $content .= "Content-Transfer-Encoding: base64\n" ;
-    $content .= "Content-Disposition: attachment; filename=\"OpenOffice-viikkoraportti$nyt.csv\"\n\n";
+        $content .= "Content-Type: text/x-comma-separated-values; name=\"OpenOffice-viikkoraportti$nyt.csv\"\n" ;
+        $content .= "Content-Transfer-Encoding: base64\n" ;
+        $content .= "Content-Disposition: attachment; filename=\"OpenOffice-viikkoraportti$nyt.csv\"\n\n";
 
-    $content .= chunk_split(base64_encode($sivu));
-    $content .= "\n" ;
+        $content .= chunk_split(base64_encode($sivu));
+        $content .= "\n" ;
+		
+		/* Lisätty 17.2.2014, lisätään liiteet ja niiden nimet taulukoihin */
+		array_push($liitteet, $sivu);
+		array_push($liite_nimet, "OpenOffice-viikkoraportti$nyt.csv");
 
-    $content .= "--$bound\n";
+        $content .= "--$bound\n";
+		
+		$content_body = "";
 
-    $boob = mail($kukro["eposti"], mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+        /* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lisätty paranneltu sendMail */
+		//$boob = mail($kukro["eposti"], mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		include_once '/var/www/html/lib/functions/sendMail.php';  // Lisätään sendMail funktio
+		$boob = sendMail($yhtiorow['postittaja_email'], $kukro["eposti"], "Viikkoraportti $kukro[nimi] ".date("d.m.Y"), $content_body, false, $liitteet, $liite_nimet);
 
-    if ($pomomail != '') {
-      $boob = mail($pomomail, mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
-    }
-    if ($pomomail2 != '') {
-      $boob = mail($pomomail2, mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
-    }
-  }
+		if ($pomomail != '') {
+			/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lisätty paranneltu sendMail */
+			//$boob = mail($pomomail, mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+			include_once '/var/www/html/lib/functions/sendMail.php';  // Lisätään sendMail funktio
+			$boob = sendMail($yhtiorow['postittaja_email'], $pomomail, "Viikkoraportti $kukro[nimi] ".date("d.m.Y"), $content_body, false, $liitteet, $liite_nimet);
+		}
+		if ($pomomail2 != '') {
+			/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lisätty paranneltu sendMail */
+			//$boob = mail($pomomail2, mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+			include_once '/var/www/html/lib/functions/sendMail.php';  // Lisätään sendMail funktio
+			$boob = sendMail($yhtiorow['postittaja_email'], $pomomail2, "Viikkoraportti $kukro[nimi] ".date("d.m.Y"), $content_body, false, $liitteet, $liite_nimet);
+		}
+	}
 
 }
+
+?>

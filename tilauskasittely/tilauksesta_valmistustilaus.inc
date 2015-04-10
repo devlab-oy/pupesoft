@@ -1,241 +1,296 @@
 <?php
 
-// jos halutaan generoida ostotilaus tämän tilauksen riveistä
-// tarvitaan myyntitilauksen tunnus muuttujassa $otunnus
+	// jos halutaan generoida ostotilaus tämän tilauksen riveistä
+	// tarvitaan myyntitilauksen tunnus muuttujassa $otunnus
 
-if (!function_exists("tilauksesta_valmistustilaus")) {
-  function tilauksesta_valmistustilaus($otunnus) {
-    global $yhtiorow, $kukarow, $tuoteno_array, $kpl_array, $kommentti_array, $lapsenlap_array;
+	if (!function_exists("tilauksesta_valmistustilaus")) {
+		function tilauksesta_valmistustilaus($otunnus) {
+			global $yhtiorow, $kukarow;
 
-    $tilauksesta_valmistustilaus = "";
-    $kukakesken  = $kukarow["kesken"];
-    $tehtiin_uusi_otsikko = false;
+			$tilauksesta_valmistustilaus = "";
+			$kukakesken	= $kukarow["kesken"];
 
-    $query = "SELECT *
-              FROM lasku
-              WHERE yhtio = '$kukarow[yhtio]'
-              and tunnus  = '$otunnus'";
-    $result = pupe_query($query);
-    $myytilrow = mysql_fetch_array($result);
+			$query = "	SELECT *
+						FROM lasku
+						WHERE yhtio	= '$kukarow[yhtio]'
+						and tunnus	= '$otunnus'";
+			$result = mysql_query($query) or pupe_error($query);
+			$myytilrow = mysql_fetch_array($result);
 
-    //otetaan ensin vain lisävarusteettomat tuotteet tai lisävarusteperheiden isät
-    $query = "SELECT tilausrivin_lisatiedot.*, tilausrivi.*, jt+varattu kpl, tilausrivi.tunnus rivitunnus
-              FROM tilausrivi
-              LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
-              WHERE tilausrivi.yhtio   = '$kukarow[yhtio]'
-              and tilausrivi.otunnus   = '$otunnus'
-              and tilausrivi.tyyppi   != 'D'
-              and tilausrivi.var       = 'R'
-              and tilausrivi.perheid   = 0
-              and tilausrivi.perheid2  = 0
-              ORDER BY tilausrivi.tunnus";
-    $lsresult = pupe_query($query);
+			//	Halutaan kohteen nimi jos sellainen on
+			$query = "	SELECT asiakkaan_kohde.kohde
+						FROM laskun_lisatiedot
+						JOIN asiakkaan_kohde ON asiakkaan_kohde.yhtio=laskun_lisatiedot.yhtio and asiakkaan_kohde.tunnus=laskun_lisatiedot.asiakkaan_kohde
+						WHERE laskun_lisatiedot.yhtio = '$kukarow[yhtio]'
+						and asiakkaan_kohde > 0
+						and otunnus = '$otunnus'";
+			$result = mysql_query($query) or pupe_error($query);
+			$kohderow = mysql_fetch_array($result);
 
-    if (mysql_num_rows($lsresult) > 0) {
-      while ($valmlisaarivi = mysql_fetch_array($lsresult)) {
+			//otetaan ensin vain lisävarusteettomat tuotteet tai lisävarusteperheiden isät
+			$query = "	SELECT tilausrivin_lisatiedot.*, tilausrivi.*, jt+varattu kpl, tilausrivi.tunnus rivitunnus
+						FROM tilausrivi
+						LEFT JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio=tilausrivi.yhtio and tilausrivin_lisatiedot.tilausrivitunnus=tilausrivi.tunnus)
+						WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+						and tilausrivi.otunnus = '$otunnus'
+						and tilausrivi.tyyppi != 'D'
+						and tilausrivi.var = 'R'
+						and tilausrivi.perheid = 0
+						and tilausrivi.perheid2 = 0
+						ORDER BY tilausrivi.tunnus";
+			$lsresult = mysql_query($query) or pupe_error($query);
 
-        $viesti = trim($myytilrow["tunnusnippu"]." ".$myytilrow["toim_nimi"]);
+			if (mysql_num_rows($lsresult) > 0) {
+				while ($valmlisaarivi = mysql_fetch_array($lsresult)) {
 
-        // Tarkistetaan onko meillä jo otsikko
-        $query = "SELECT tunnus
-                  from lasku
-                  where yhtio       = '$kukarow[yhtio]'
-                  and liitostunnus  = '999999999'
-                  and tila          = 'V'
-                  and tilaustyyppi  = 'W'
-                  and alatila       = ''
-                  and toim_nimi     = '$myytilrow[toim_nimi]'
-                  and toim_nimitark = '$myytilrow[toim_nimitark]'
-                  and toim_osoite   = '$myytilrow[toim_osoite]'
-                  and toim_postino  = '$myytilrow[toim_postino]'
-                  and toim_postitp  = '$myytilrow[toim_postitp]'
-                  and toim_maa      = '$myytilrow[toim_maa]'
-                  and toimaika      = '$myytilrow[toimaika]'
-                  and kerayspvm     = '$myytilrow[kerayspvm]'
-                  and viesti        = '$viesti'
-                  and left(luontiaika,10) = left(now(),10)
-                  and laatija       = '$kukarow[kuka]'";
-        $jtsre = pupe_query($query);
+					$viesti = trim($myytilrow["tunnusnippu"]." ".$myytilrow["toim_nimi"]." ".$kohderow["kohde"]." ".$valmlisaarivi["tuoteno"]);
 
-        // ei löydy, tehdään uus otsikko
-        if (mysql_num_rows($jtsre) == 0) {
+					// Tarkistetaan onko meillä jo otsikko
+					$query = "	SELECT tunnus
+								from lasku
+								where yhtio 		= '$kukarow[yhtio]'
+								and liitostunnus 	= '$tiltoi[tunnus]'
+								and tila 			= 'V'
+								and tilaustyyppi 	= 'W'
+								and alatila 		= ''
+								and toim_nimi		= '$myytilrow[toim_nimi]'
+								and toim_nimitark	= '$myytilrow[toim_nimitark]'
+								and toim_osoite		= '$myytilrow[toim_osoite]'
+								and toim_postino	= '$myytilrow[toim_postino]'
+								and toim_postitp	= '$myytilrow[toim_postitp]'
+								and toim_maa		= '$myytilrow[toim_maa]'
+								and viite			= '$viesti'
+								and left(luontiaika,10) = left(now(),10)
+								and laatija 		= '$kukarow[kuka]'";
+					$jtsre = mysql_query($query) or pupe_error($query);
 
-          $query = "SELECT *
-                    FROM varastopaikat
-                    WHERE yhtio  = '$kukarow[yhtio]'
-                    and tyyppi  != 'E'
-                    ORDER BY tyyppi, nimitys
-                    LIMIT 1";
-          $vtresult = pupe_query($query);
-          $vrow = mysql_fetch_array($vtresult);
+					// ei löydy, tehdään uus otsikko
+					if (mysql_num_rows($jtsre) == 0) {
 
-          $jatka         = TRUE;
-          $toim        = "VALMISTAVARASTOON";
-          $kukarow["kesken"]  = 0;
-          $clearing       = $vrow["tunnus"];
-          $comments       = $viesti;
-          $eilahe       = "";
-          $viesti       = $viesti;
-          $alatila      = "";
-          $varasto       = "";
-          $luokka       = "";
-          $tunnusnippu    = $myytilrow["tunnusnippu"];
-          $toimitustapa    = "";
-          $tilausnumero     = 0;
-          $nokeskupdate     = TRUE;
-          $toim_nimi      = $myytilrow['toim_nimi'];
-          $toim_nimitark    = $myytilrow['toim_nimitark'];
-          $toim_osoite    = $myytilrow['toim_osoite'];
-          $toim_postino    = $myytilrow['toim_postino'];
-          $toim_postitp    = $myytilrow['toim_postitp'];
-          $toim_maa      = $myytilrow['toim_maa'];
+						$query = "	SELECT *
+									FROM varastopaikat
+									WHERE yhtio = '$kukarow[yhtio]'
+									and tyyppi != 'E'
+									ORDER BY nimitys
+									LIMIT 1";
+						$vtresult = mysql_query($query) or pupe_error($query);
+						$vrow = mysql_fetch_array($vtresult);
 
-          if ($yhtiorow["kerataanko_valmistukset"] == "E" and ($toim == "VALMISTAASIAKKAALLE" or $toim == "VALMISTAVARASTOON")) {
-            $eilahe = 'CHECKED';
-          }
+						$jatka 				= TRUE;
+						$toim				= "VALMISTAVARASTOON";
+						$kukarow["kesken"]	= 0;
+						$clearing 			= $vrow["tunnus"];
+						$comments 			= $viesti;
+						$eilahe 			= "";
+						$viesti 			= $viesti;
+						$alatila			= "";
+						$varasto 			= "";
+						$luokka 			= "";
+						$tunnusnippu		= $myytilrow["tunnusnippu"];
+						$toimitustapa		= "";
+						$tilausnumero 		= 0;
+						$nokeskupdate 		= TRUE;
 
-          list($toimvv, $toimkk, $toimpp) = explode('-', $myytilrow["toimaika"]);
-          list($kervv, $kerkk, $kerpp)    = explode('-', $myytilrow["kerayspvm"]);
+						list($toimvv, $toimkk, $toimpp) = explode('-', $myytilrow["toimaika"]);
+						list($kervv, $kerkk, $kerpp)    = explode('-', $myytilrow["kerayspvm"]);
 
-          require "tilauskasittely/otsik_siirtolista.inc";
+						require("tilauskasittely/otsik_siirtolista.inc");
 
-          $tunnus = $id;
-          $tehtiin_uusi_otsikko = true;
+						$tunnus = $id;
 
-          $tilauksesta_valmistustilaus = "<font class='message'>".t("Perustettiin valmistus %s", $kukarow["kieli"], $tunnus)."</font><br>";
-        }
-        else {
-          // tilaus löyty, otetaan tunnus
-          $jtsro = mysql_fetch_array($jtsre);
-          $tunnus = $jtsro["tunnus"];
-        }
+						$tilauksesta_valmistustilaus = "<font class='message'>".t("Perustettiin valmistus %s", $kukarow["kieli"], $tunnus)."</font><br>";
+					}
+					else {
+						// tilaus löyty, otetaan tunnus
+						$jtsro = mysql_fetch_array($jtsre);
+						$tunnus = $jtsro["tunnus"];
+					}
 
-        if (!isset($laskurow)) {
-          $query = "SELECT *
-                    FROM lasku
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    and tunnus  = '$tunnus'";
-          $lresult = pupe_query($query);
-          $laskurow = mysql_fetch_array($lresult);
-        }
+					if (!isset($laskurow)) {
+						$query = "	SELECT *
+									FROM lasku
+									WHERE yhtio	= '$kukarow[yhtio]'
+									and tunnus	= '$tunnus'";
+						$lresult = mysql_query($query) or pupe_error($query);
+						$laskurow = mysql_fetch_array($lresult);
+					}
 
-        // $myy_sarjatunnus  --> Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
-        // $osto_sarjatunnus --> Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
+					// $myy_sarjatunnus  --> Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
+					// $osto_sarjatunnus --> Jos halutaan automaattisesti linkata joku sarjanumero-olio tilausriviin
+					$query = "	SELECT *
+								FROM tuote
+								WHERE yhtio = '$kukarow[yhtio]' and tuoteno = '$valmlisaarivi[tuoteno]'";
+					$tresult = mysql_query($query) or pupe_error($query);
+					$trow = mysql_fetch_array($tresult);
 
-        //funktio populoi globaalit muuttujat $tuoteno_array $kpl_array $kommentti_array $lapsenlap_array
-        $tuoteno_array = array($valmlisaarivi['tuoteno']);
-        $kpl_array = array(
-          $valmlisaarivi['tuoteno'] => $valmlisaarivi['kpl']
-        );
+					$kukarow["kesken"] 	= $tunnus;
+					$kpl 				= $valmlisaarivi["kpl"];
+					$tuoteno			= $valmlisaarivi["tuoteno"];
+					$toimaika			= $myytilrow["kerayspvm"];
+					$kerayspvm			= $myytilrow["kerayspvm"];
+					$hinta				= 0;
+					$var 				= "";
+					$varasto			= "";
+					$paikka				= "";
 
-        pupesoft_lisaa_valmisteen_rekursiiviset_reseptit();
 
-        foreach ($tuoteno_array as $tuoteno_temp) {
-          $kukarow["kesken"]   = $tunnus;
-          $kpl         = $kpl_array[$tuoteno_temp];
-          $tuoteno      = $tuoteno_temp;
-          $toimaika      = $myytilrow["kerayspvm"];
-          $kerayspvm      = $myytilrow["kerayspvm"];
-          $hinta        = 0;
-          $var         = "";
-          $varasto      = "";
-          $paikka        = "";
-          $varataan_saldoa  = "EI";
-          $kommentti      = $kommentti_array[$tuoteno_temp];
+					// $perheid_lisaarivi on perustetun rivin tunnus
+					require ("lisaarivi.inc");
 
-          $query = "SELECT *
-                    FROM tuote
-                    WHERE yhtio = '$kukarow[yhtio]'
-                    AND tuoteno = '$tuoteno'";
-          $tuoteres = pupe_query($query);
-          $trow = mysql_fetch_assoc($tuoteres);
+					//	Päivitetään tilausrivin lisatietoihin tilausrivitunnus
+					$query = "	UPDATE tilausrivin_lisatiedot SET
+									tilausrivilinkki 		= '$perheid_lisaarivi',
+									suoraan_laskutukseen	= '',
+									muutospvm				= now(),
+									muuttaja				= '$kukarow[kuka]'
+								WHERE yhtio	= '$kukarow[yhtio]' and tilausrivitunnus = '$valmlisaarivi[tunnus]'";
+					$updres = mysql_query($query) or pupe_error($query);
 
-          require 'lisaarivi.inc';
-        }
+					//Kopioidaan otsikon lisatiedot
+					$query = "SELECT * FROM laskun_lisatiedot WHERE otunnus='$otunnus' and yhtio ='$kukarow[yhtio]'";
+					$lisatiedotres = mysql_query($query) or pupe_error($query);
+					$lisatiedotrow = mysql_fetch_array($lisatiedotres);
 
-        // Ainoastaan asiakkaalle valmistetut jälkitoimitusrivit kohdistetaan ja toimitetaan automaattisesti valmistuksen yhteydessä
-        $suoraan_laskutukseen_lisa = $yhtiorow['automaattinen_jt_toimitus_valmistus'] == 'S' ? 'o' : '';
+					$fields = mysql_field_name($lisatiedotres,0);
+					$values = "'".$lisatiedotrow[0]."'";
 
-        //  Päivitetään tilausrivin lisatietoihin tilausrivitunnus
-        $query = "UPDATE tilausrivin_lisatiedot SET
-                  tilausrivilinkki     = '$perheid_lisaarivi',
-                  suoraan_laskutukseen = '{$suoraan_laskutukseen_lisa}',
-                  muutospvm            = now(),
-                  muuttaja             = '$kukarow[kuka]'
-                  WHERE yhtio          = '$kukarow[yhtio]' and tilausrivitunnus = '$valmlisaarivi[tunnus]'";
-        $updres = pupe_query($query);
+					for($i=1; $i < mysql_num_fields($lisatiedotres)-1; $i++) { // Ei monisteta tunnusta
 
-        //Kopioidaan otsikon lisatiedot
-        if ($tehtiin_uusi_otsikko) {
-          $query = "SELECT * FROM laskun_lisatiedot WHERE otunnus='$otunnus' and yhtio ='$kukarow[yhtio]'";
-          $lisatiedotres = pupe_query($query);
-          $lisatiedotrow = mysql_fetch_array($lisatiedotres);
+						$fields .= ", ".mysql_field_name($lisatiedotres,$i);
 
-          $fields = mysql_field_name($lisatiedotres, 0);
-          $values = "'".$lisatiedotrow[0]."'";
+						switch (mysql_field_name($lisatiedotres,$i)) {
+							case 'otunnus':
+								$values .= ", '$tunnus'";
+								break;
+							default:
+								$values .= ", '".$lisatiedotrow[$i]."'";
+						}
+					}
 
-          for ($i=1; $i < mysql_num_fields($lisatiedotres)-1; $i++) { // Ei monisteta tunnusta
+					$kysely  = "INSERT into laskun_lisatiedot ($fields) VALUES ($values)";
+					$insres2 = mysql_query($kysely) or pupe_error($kysely);
 
-            $fields .= ", ".mysql_field_name($lisatiedotres, $i);
+					//	Päivitetään myös tilausriville oikeammat tiedot!
+					$query = "	SELECT *
+								FROM tilausrivin_lisatiedot
+								WHERE tilausrivitunnus='$valmlisaarivi[tunnus]' and yhtio ='$kukarow[yhtio]'";
+					$trlisatiedotres = mysql_query($query) or pupe_error($query);
+					$trlisatiedotrow = mysql_fetch_array($trlisatiedotres);
 
-            switch (mysql_field_name($lisatiedotres, $i)) {
-            case 'otunnus':
-              $values .= ", '$tunnus'";
-              break;
-            default:
-              $values .= ", '".$lisatiedotrow[$i]."'";
-            }
-          }
+					$values = mysql_field_name($trlisatiedotres,0)." = '".$trlisatiedotrow[0]."'";
 
-          $kysely  = "INSERT into laskun_lisatiedot ($fields) VALUES ($values)";
-          $insres2 = pupe_query($kysely);
+					for($i=1; $i < mysql_num_fields($trlisatiedotres)-1; $i++) { // Ei monisteta tunnusta
 
-          $tehtiin_uusi_otsikko = false;
-        }
+						switch (mysql_field_name($trlisatiedotres,$i)) {
+							case 'tilausrivitunnus':
+								$values .= ", ".mysql_field_name($trlisatiedotres,$i)." = '$perheid_lisaarivi'";
+								break;
+							case 'tilausrivilinkki':
+								$values .= ", ".mysql_field_name($trlisatiedotres,$i)." = ''";
+								break;
+							case 'pituus':
+								$pituus = $trlisatiedotrow[$i];
+								$uusiPituus = $pituus;
+								$values .= ", ".mysql_field_name($trlisatiedotres,$i)." = '1000'";
+								break;
+							default:
+								$values .= ", ".mysql_field_name($trlisatiedotres,$i)." = '".$trlisatiedotrow[$i]."'";
+						}
+					}
 
-        //  Päivitetään myös tilausriville oikeammat tiedot!
-        $query = "SELECT *
-                  FROM tilausrivin_lisatiedot
-                  WHERE tilausrivitunnus='$valmlisaarivi[tunnus]' and yhtio ='$kukarow[yhtio]'";
-        $trlisatiedotres = pupe_query($query);
-        $trlisatiedotrow = mysql_fetch_array($trlisatiedotres);
+					$kysely  = "UPDATE tilausrivin_lisatiedot SET $values WHERE yhtio='$kukarow[yhtio]' and tilausrivitunnus = '$perheid_lisaarivi'";
+					$insres2 = mysql_query($kysely) or pupe_error($kysely);
 
-        $values = mysql_field_name($trlisatiedotres, 0)." = '".$trlisatiedotrow[0]."'";
+					if($uusiPituus > 0) {
+						//	Fiksataan vielä rakenteen osapalikat jos meillä on multidimensionaalinen kappale valmistettavana
+						$query = "	SELECT 	tilausrivi.tunnus, tuote.vaaditaan_kpl2,
+											if(tilausrivin_lisatiedot.pituus>0, tilausrivi.hinta/(tilausrivin_lisatiedot.pituus/1000), tilausrivi.hinta) yksikkohinta,
+											if(tilausrivin_lisatiedot.pituus>0, tilausrivi.tilkpl/(tilausrivin_lisatiedot.pituus/1000), tilausrivi.tilkpl) yksikkotilkpl,
+											if(tilausrivin_lisatiedot.pituus>0, tilausrivi.varattu/(tilausrivin_lisatiedot.pituus/1000), tilausrivi.varattu) yksikkovarattu
+									FROM tilausrivi use index (yhtio_otunnus)
+									LEFT JOIN tilausrivin_lisatiedot ON tilausrivi.yhtio = tilausrivin_lisatiedot.yhtio and tilausrivi.tunnus = tilausrivin_lisatiedot.tilausrivitunnus
+									LEFT JOIN tuote ON tilausrivi.yhtio = tuote.yhtio and tilausrivi.tuoteno = tuote.tuoteno
+									WHERE tilausrivi.yhtio = '$kukarow[yhtio]'
+									and tilausrivi.otunnus = '$tunnus'
+									and (tilausrivi.tunnus = '$perheid_lisaarivi' or (tilausrivi.perheid!=0 and tilausrivi.perheid = '$perheid_lisaarivi' and (tilausrivin_lisatiedot.ei_nayteta = 'P' or tilausrivi.tyyppi IN ('W','V'))) or (tilausrivi.perheid2!=0 and tilausrivi.perheid2 = '$perheid_lisaarivi' and (tilausrivin_lisatiedot.ei_nayteta = 'P' or tilausrivi.tyyppi IN ('W','V'))))
+									ORDER BY tunnus";
+						$lapsires = mysql_query($query) or pupe_error($query);
 
-        for ($i=1; $i < mysql_num_fields($trlisatiedotres)-1; $i++) { // Ei monisteta tunnusta
+						while($lapsi = mysql_fetch_array($lapsires)) {
 
-          switch (mysql_field_name($trlisatiedotres, $i)) {
-          case 'tilausrivitunnus':
-            $values .= ", ".mysql_field_name($trlisatiedotres, $i)." = '$perheid_lisaarivi'";
-            break;
-          case 'tilausrivilinkki':
-            $values .= ", ".mysql_field_name($trlisatiedotres, $i)." = ''";
-            break;
-          case 'pituus':
-            $pituus = $trlisatiedotrow[$i];
-            $uusiPituus = $pituus;
-            $values .= ", ".mysql_field_name($trlisatiedotres, $i)." = '1000'";
-            break;
-          default:
-            $values .= ", ".mysql_field_name($trlisatiedotres, $i)." = '".$trlisatiedotrow[$i]."'";
-          }
-        }
+							//	Päivitetään positio tai rivityyppi
+							$query = "	UPDATE tilausrivin_lisatiedot
+										SET $lisaalisa
+										muutospvm				= now(),
+										muuttaja				= '$kukarow[kuka]'
+										WHERE yhtio			 = '$kukarow[yhtio]'
+										and tilausrivitunnus = '$lapsi[tunnus]'";
+							$uresult = mysql_query($query) or pupe_error($query);
 
-        $kysely  = "UPDATE tilausrivin_lisatiedot SET $values WHERE yhtio='$kukarow[yhtio]' and tilausrivitunnus = '$perheid_lisaarivi'";
-        $insres2 = pupe_query($kysely);
+							//	Fiksataan määrää tai hinta
+							if(in_array($lapsi["vaaditaan_kpl2"], array("P","K","M")) and (isset($asiakkaan_positio) or isset($pituus))) {
 
-        //  Tehdään rivistä normi JT
-        $query = "UPDATE tilausrivi set var='J' where yhtio='$kukarow[yhtio]' and tunnus='$valmlisaarivi[tunnus]'";
-        $updre = pupe_query($query);
-      }
-    }
+								//	Lasketaan kertoimet, ekana tulee aina perheen faija
+								if(!isset($uusiPituus)) {
+									if($lapsi["vaaditaan_kpl2"] == "P") {
+										$query  = "	SELECT pituus
+													FROM asiakkaan_positio
+													WHERE yhtio = '$kukarow[yhtio]'
+													and tunnus = '$asiakkaan_positio'";
+										$posres = mysql_query($query) or pupe_error($query);
+										$posrow = mysql_fetch_array($posres);
+										$uusiPituus = $posrow["pituus"];
+									}
+									elseif($lapsi["vaaditaan_kpl2"] == "M") {
+										$uusiPituus = $pituus;
+									}
 
-    if ($yhtiorow['valmistuksien_kasittely'] == 'Y') {
-      $valmistus_tunnukset = splittaa_valmistukset($tunnus);
-    }
+									//	Varmistetaan, että saadaan aina jotain lukuja
+									if( (int) $uusiPituus == 0) {
+										$uusiPituus == 10000;
+									}
+								}
 
-    $kukarow["kesken"] = $kukakesken;
+								if($lapsi["vaaditaan_kpl2"] == "P") {
+									$uhinta = round(($uusiPituus * $lapsi["yksikkohinta"])/1000, $yhtiorow['hintapyoristys']);
 
-    return $tilauksesta_valmistustilaus;
-  }
-}
+									$query = "	UPDATE tilausrivi
+												SET hinta = '$uhinta'
+												WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$lapsi[tunnus]'";
+									$updre = mysql_query($query) or pupe_error($query);
+								}
+								elseif($lapsi["vaaditaan_kpl2"] == "K") {
+									$uvarattu = $uusiPituus*($lapsi["yksikkovarattu"]/1000);
+									$utilkpl = $uusiPituus*($lapsi["yksikkotilkpl"]/1000);
+
+									$query = "	UPDATE tilausrivi
+												SET varattu = '$uvarattu',
+													tilkpl	= '$utilkpl'
+												WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$lapsi[tunnus]'";
+									$updre = mysql_query($query) or pupe_error($query);
+									//echo $query."<br>";
+								}
+
+								//	Tallennetaan tämä pituus vielä lisätietoihin
+								$query = "	UPDATE tilausrivin_lisatiedot SET
+												pituus 					= '$uusiPituus',
+												muutospvm				= now(),
+												muuttaja				= '$kukarow[kuka]'
+											WHERE yhtio = '$kukarow[yhtio]' and tilausrivitunnus = '$lapsi[tunnus]'";
+								$updre = mysql_query($query) or pupe_error($query);
+							}
+						}
+					}
+
+					//	Tehdään rivistä normi JT
+					$query = "UPDATE tilausrivi set var='J' where yhtio='$kukarow[yhtio]' and tunnus='$valmlisaarivi[tunnus]'";
+					$updre = mysql_query($query) or pupe_error($query);
+				}
+			}
+
+			$kukarow["kesken"] = $kukakesken;
+
+			return $tilauksesta_valmistustilaus;
+		}
+	}
+?>

@@ -1,109 +1,111 @@
 <?php
 
-if (!isset($tee)) $tee = "";
+require ("inc/parametrit.inc");
 
-if (strpos($_SERVER['SCRIPT_NAME'], "synkronoi_mysqlaliakset.php") !== FALSE) {
-  require "inc/parametrit.inc";
+echo "<font class='head'>".t("Mysqlaliaksien synkronointi")."</font><hr>";
 
-  echo "<font class='head'>".t("Mysqlaliaksien synkronointi")."</font><hr>";
+if ($oikeurow['paivitys'] != '1') { // Saako p‰ivitt‰‰
+	if ($uusi == 1) {
+		echo "<b>".t("Sinulla ei ole oikeutta lis‰t‰")."</b><br>";
+		$uusi = '';
+	}
+	if ($del == 1) {
+		echo "<b>".t("Sinulla ei ole oikeuttaa poistaa")."</b><br>";
+		$del = '';
+		$tunnus = 0;
+	}
+	if ($upd == 1) {
+		echo "<b>".t("Sinulla ei ole oikeuttaa muuttaa")."</b><br>";
+		$upd = '';
+		$uusi = 0;
+		$tunnus = 0;
+	}
 }
 
-if ($tee == "TEE" or strpos($_SERVER['SCRIPT_NAME'], "iltasiivo.php") !== FALSE) {
+if ($tee == "TEE") {
 
-  $ch  = curl_init();
-  curl_setopt($ch, CURLOPT_URL, "http://api.devlab.fi/referenssialiakset.sql");
-  curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-  curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-  curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($ch, CURLOPT_HEADER, FALSE);
-  $aliakset = curl_exec($ch);
+	$file = fopen("http://api.devlab.fi/referenssialiakset.sql","r") or die (t("Tiedoston avaus ep‰onnistui")."!");
 
-  // K‰‰nnet‰‰n aliakset UTF-8 muotoon, jos Pupe on UTF-8:ssa
-  if (PUPE_UNICODE) {
-    // T‰ss‰ on "//NO_MB_OVERLOAD"-kommentti
-    // jotta UTF8-konversio ei osu t‰h‰n riviin
-    $aliakset = utf8_encode($aliakset); //NO_MB_OVERLOAD
-  }
+	$taulut = array();
+	$rivit = array();
 
-  $aliakset = explode("\n", trim($aliakset));
+	// Eka rivi roskikseen
+	$rivi = fgets($file);
+	
+	while ($rivi = fgets($file)) {
+		list($perhe, $kieli, $selite, $selitetark, $selitetark_2, $selitetark_3, $jarjestys) = explode("\t", trim($rivi));
+		
+		list($taulu, $sarake) = explode(".", $selite);
+		
+		$taulut[] = $taulu."###".$selitetark_2;
+		$rivit[] = $rivi;
+	}
+	
+	fclose($file);
+	
+	$taulut = array_unique($taulut);
+	
+	// Poistetaan vanhat
+	foreach ($taulut as $taulujaalias) {
+		list($taul, $alia) = explode("###", $taulujaalias);
+	
+		$sanakirjaquery = "	DELETE FROM avainsana 
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and laji = 'MYSQLALIAS' 
+							and selite like '$taul%' 
+							and selitetark_2 = '$alia'";
+		$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
+	}
+	
+	
+	echo "<br><table>";
+	
+	foreach ($rivit as $rivi) {
+		list($perhe, $kieli, $selite, $selitetark, $selitetark_2, $selitetark_3, $jarjestys) = explode("\t", trim($rivi));
 
-  $taulut = array();
-  $rivit  = array();
+		$sanakirjaquery = "	SELECT * 
+							FROM avainsana 
+							WHERE yhtio = '$kukarow[yhtio]' 
+							and laji = 'MYSQLALIAS' 
+							and selite = '$selite' 
+							and selitetark_2 = '$selitetark_2'";
+		$sanakirjaresult = mysql_query($sanakirjaquery) or pupe_error($sanakirjaquery);
 
-  // Eka rivi roskikseen
-  array_shift($aliakset);
-
-  foreach ($aliakset as $rivi) {
-    list($perhe, $kieli, $selite, $selitetark, $selitetark_2, $selitetark_3, $jarjestys, $nakyvyys) = explode("\t", trim($rivi));
-
-    list($taulu, $sarake) = explode(".", $selite);
-
-    $taulut[] = $taulu."###".$selitetark_2;
-    $rivit[]  = $rivi;
-  }
-
-  $taulut = array_unique($taulut);
-
-  if ($tee == "TEE") echo "<br><table>";
-
-  foreach ($rivit as $rivi) {
-    list($perhe, $kieli, $selite, $selitetark, $selitetark_2, $selitetark_3, $selitetark_4, $jarjestys, $nakyvyys) = explode("\t", trim($rivi));
-
-    $sanakirjaquery = "SELECT *
-                       FROM avainsana
-                       WHERE yhtio      = '$kukarow[yhtio]'
-                       and laji         = 'MYSQLALIAS'
-                       and selite       = '$selite'
-                       and selitetark_2 = '$selitetark_2'";
-    $sanakirjaresult = pupe_query($sanakirjaquery);
-
-    if (mysql_num_rows($sanakirjaresult) > 0) {
-      $sanakirjaquery  = "UPDATE avainsana SET
-                          selitetark       = '$selitetark'
-                          WHERE yhtio      = '$kukarow[yhtio]'
-                          AND laji         = 'MYSQLALIAS'
-                          AND selite       = '$selite'
-                          AND selitetark_2 = '$selitetark_2'";
-      pupe_query($sanakirjaquery);
-
-      if ($tee == "TEE") echo "<tr><th>".t("P‰ivitet‰‰n mysqlalias")."</th><td>$selite</td><td>$selitetark</td><td>$selitetark_2</td></tr>";
-    }
-    else {
-      $sanakirjaquery  = "INSERT INTO avainsana SET
-                          yhtio        = '$kukarow[yhtio]',
-                          laji         = 'MYSQLALIAS',
-                          perhe        = '$perhe',
-                          kieli        = '$kieli',
-                          nakyvyys     = '$nakyvyys',
-                          selite       = '$selite',
-                          selitetark   = '$selitetark',
-                          selitetark_2 = '$selitetark_2',
-                          selitetark_3 = '$selitetark_3',
-                          selitetark_4 = '$selitetark_4',
-                          jarjestys    = '$jarjestys',
-                          laatija      = '$kukarow[kuka]',
-                          luontiaika   = now()";
-      pupe_query($sanakirjaquery);
-
-      if ($tee == "TEE") echo "<tr><th>".t("Lis‰t‰‰n mysqlalias")."</th><td>$selite</td><td>$selitetark</td><td>$selitetark_2</td></tr>";
-    }
-  }
-
-  if ($tee == "TEE") {
-    echo "</table><br>";
-    echo "<br>".t("Mysqlaliakset synkronoitu onnistuneesti")."!<br>";
-  }
-  else {
-    $iltasiivo .= is_log("Mysqlaliakset synkronoitu onnistuneesti.");
-  }
+		if (mysql_num_rows($sanakirjaresult) > 0) {
+			echo "<tr><th>".t("Ei lis‰t‰ mysqlaliasta")."</th><td>$selite</td><td>".htmlentities($selitetark)."</td><td>$selitetark_2</td></tr>";
+		}
+		else {
+			$sanakirjaquery  = "INSERT INTO avainsana SET
+								yhtio			= '$kukarow[yhtio]',
+								laji 			= 'MYSQLALIAS',
+								perhe			= '$perhe', 
+								kieli			= '$kieli', 
+								selite			= '$selite', 
+								selitetark		= '$selitetark', 
+								selitetark_2	= '$selitetark_2', 
+								selitetark_3	= '$selitetark_3', 
+								jarjestys		= '$jarjestys', 
+								laatija			= '$kukarow[kuka]', 
+								luontiaika		= now()";
+			$sanakirjaresult = mysql_query($sanakirjaquery, $link) or pupe_error($sanakirjaquery);
+			
+			echo "<tr><th>".t("Lis‰t‰‰n mysqlalias")."</th><td>$selite</td><td>".htmlentities($selitetark)."</td><td>$selitetark_2</td></tr>";
+		}
+	}
+	
+	echo "</table><br>";
+	
+	echo t("Mysqlaliakset synkronoitu onnistuneesti")."!<br>";
+	
 }
 
-if (strpos($_SERVER['SCRIPT_NAME'], "synkronoi_mysqlaliakset.php") !== FALSE) {
-  echo "  <br><br>
-      <form method='post'>
-      <input type='hidden' name='tee' value='TEE'>
-      <input type='submit' value='".t("Hae uusimmat mysqlaliakset")."'>
-      </form>";
+echo "	<br><br>
+		<form method='post' action='$PHP_SELF'>
+		<input type='hidden' name='tee' value='TEE'>
+		<input type='submit' value='".t("Hae uusimmat mysqlaliakset")."'>
+		</form>";
 
-  require "inc/footer.inc";
-}
+
+require ("inc/footer.inc");
+
+?>

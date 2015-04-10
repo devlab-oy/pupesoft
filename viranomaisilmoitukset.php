@@ -1,293 +1,505 @@
 <?php
 
-require 'inc/parametrit.inc';
+require('inc/parametrit.inc');
 
 if (!isset($tee)) $tee = '';
+if (!isset($kk)) $kk = '';
+if (!isset($vv)) $vv = '';
 
 if ($tee == "lataa_tiedosto") {
-  echo file_get_contents("$pupe_root_polku/dataout/".$filenimi);
-  exit;
+	echo file_get_contents("$pupe_root_polku/dataout/".$filenimi);
+	exit;
 }
 
-echo "<font class='head'>".t("Arvonlis‰veron yhteenvetoilmoitus")."</font><hr><br>";
+echo "<font class='head'>".t("Viranomaisilmoitukset")."</font><hr><br><br>";
 
-// Oletusvalinta edellinen kuukausi
-if (isset($kohdekausi) and $kohdekausi != "") {
-  $default_kausi = $kohdekausi;
+if ($tee == "VSRALVKK_VANHA" or $tee == 'VSRALVKK_VANHA_erittele') {
+	include ('raportit/alv_laskelma.php');
+	alvlaskelma($kk,$vv);
 }
-else {
-  $default_kausi = date("m/Y", mktime(0, 0, 0, date("m") - 1, 1, date("Y")));
+elseif ($tee == "VSRALVKK_UUSI" or $tee == 'VSRALVKK_UUSI_erittele') {
+	include ('raportit/alv_laskelma_uusi.php');
 }
-
-echo "<form method = 'post'  class = 'multisubmit'>";
-echo "<input type = 'hidden' name = 'tee' value = 'VSRALVYV'>";
-
-echo "<table>";
-echo "<tr>";
-echo "<th>".t("Valitse kohdekuukausi")."</th>";
-echo "<td>";
-echo "<select name = 'kohdekausi'>";
-
-// N‰ytet‰‰n kausivalinnat kaksi kuukautta eteenp‰in ja vuosi taaksep‰in
-for ($i = 0; $i < 15; $i++) {
-  $kuukausi = date("m/Y", mktime(0, 0, 0, date("m") - 1 + $i, 1, date("Y")-1));
-  $sel = ($kuukausi == $default_kausi) ? " selected" : "";
-  echo "<option value = '$kuukausi'$sel>$kuukausi</option>";
-}
-
-echo "</select>";
-echo "</td>";
-echo "</tr>";
-echo "</table>";
-
-echo "<br>";
-echo "<input type='submit' value='".t("Aja")."'>";
-echo "</form>";
-echo "<br><br>";
 
 if ($tee == "VSRALVYV") {
 
-  // Erotellaan kuukausi ja vuosi
-  list($kuukausi, $vuosi) = explode("/", $kohdekausi);
+	if (!isset($kohdekausi)) $kohdekausi = '';
+	if (!isset($kohdekuukausi)) $kohdekuukausi = '';
+	if (!isset($ytunnus)) $ytunnus = '';
+	if (!isset($kausi)) $kausi = '';
 
-  // Tehd‰‰n alku ja loppup‰iv‰
-  $alkupvm  = date("Y-m-d", mktime(0, 0, 0, $kuukausi,   1, $vuosi));
-  $loppupvm = date("Y-m-d", mktime(0, 0, 0, $kuukausi+1, 0, $vuosi));
+	echo "<table>";
+	echo "<tr><th>".t("Arvonlis‰veron yhteenvetoilmoitus kaudelta").":</th>";
 
-  // Haetaan EU-vientilaskujen summat per koodi, ytunnus, maa (Huom, "koodi" on t-funktioitu piirtovaiheessa)
-  $query = "SELECT
-            if (lasku.kolmikantakauppa != '', 'Kolmikanta', if (tuote.tuotetyyppi = 'K', 'Palvelu', 'Tavara')) koodi,
-            lasku.ytunnus,
-            if (lasku.maa = '', asiakas.maa, lasku.maa) maa,
-            if (lasku.maa = '', 'X', '') asiakkaan_maa,
-            max(asiakas.nimi) nimi,
-            round(sum(rivihinta), 2) summa,
-            count(distinct(lasku.tunnus)) laskuja
-            FROM lasku USE INDEX (yhtio_tila_tapvm)
-            JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio AND tilausrivi.uusiotunnus = lasku.tunnus)
-            JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio AND tuote.tuoteno = tilausrivi.tuoteno AND tuote.tuoteno != '{$yhtiorow["ennakkomaksu_tuotenumero"]}')
-            JOIN asiakas ON (asiakas.yhtio = lasku.yhtio AND lasku.liitostunnus = asiakas.tunnus)
-            WHERE lasku.yhtio       = '{$kukarow["yhtio"]}'
-            AND lasku.tila          = 'U'
-            AND lasku.alatila       = 'X'
-            AND lasku.tapvm         >= '$alkupvm'
-            AND lasku.tapvm         <= '$loppupvm'
-            AND lasku.vienti        = 'E'
-            and lasku.tilaustyyppi != '9'
-            GROUP BY 1, 2, 3, 4";
-  $result = pupe_query($query);
+	//	Haetaan alkupiste
+	$query = "	SELECT ((year(now())-year(min(tilikausi_alku)))*4), quarter(now())
+				from tilikaudet
+				where tilikausi_alku != '0000-00-00'
+				and yhtio='$kukarow[yhtio]'";
+	$result = mysql_query($query) or pupe_error($query);
+	$row = mysql_fetch_array($result);
 
-  if (mysql_num_rows($result) > 0) {
+	$kausia = $row[0] + $row[1] + 1;
+	$kvarttaali = $row[1];
+	$vuosi = date("Y");
 
-    echo "<table>";
+	//	Ei n‰ytet‰ ihan kaikeka
+	if ($kausia > 10) $kausia = 10;
 
-    echo "<tr>";
-    echo "<th>".t("Koodi")."</th>";
-    echo "<th>".t("Maatunnus")."</th>";
-    echo "<th>".t("Ytunnus")."</th>";
-    echo "<th>".t("Asiakas")."</th>";
-    echo "<th>".t("Myynti")."</th>";
-    echo "<th>".t("Laskuja")."</th>";
-    echo "</tr>";
+	echo "<td>";
+	echo "<form enctype='multipart/form-data' action='$PHP_SELF' method='post'>
+			<input type='hidden' name='tee' value='$tee'>
+			<input type='hidden' name='tyyppi' value='kausi'>
+			<select name='kohdekausi' onchange='submit();'>
+				<option value = ''>".t('Valitse kohdekausi')."</option>";
 
-    // Yhteissumma
-    $summa_yhteensa = 0;
+	for ($i=1; $i<$kausia; $i++) {
 
-    // Tehd‰‰n tietuetta
-    $tietue_rivi = 0;
-    $tietue_rivitiedot = "";
+		if ($kohdekausi == $kvarttaali."/".$vuosi) {
+			$sel = "SELECTED";
+		}
+		else {
+			$sel = "";
+		}
 
-    // T‰h‰n ker‰t‰‰n raportin data
-    $yhteenvetoilmoitus_array = array();
+		if ($kohdekuukausi != '') $sel = '';
 
-    // Myynnit
-    while ($row = mysql_fetch_array($result)) {
-      $array_key = $row["koodi"].$row["ytunnus"].$row["maa"];
-      $yhteenvetoilmoitus_array[$array_key]["koodi"] = $row["koodi"];
-      $yhteenvetoilmoitus_array[$array_key]["ytunnus"] = $row["ytunnus"];
-      $yhteenvetoilmoitus_array[$array_key]["maa"] = $row["maa"];
-      $yhteenvetoilmoitus_array[$array_key]["asiakkaan_maa"] = $row["asiakkaan_maa"];
-      $yhteenvetoilmoitus_array[$array_key]["nimi"] = $row["nimi"];
-      $yhteenvetoilmoitus_array[$array_key]["laskuja"] = $row["laskuja"];
-      $yhteenvetoilmoitus_array[$array_key]["summa"] = $row["summa"];
-      $yhteenvetoilmoitus_array[$array_key]["kale"] = 0;
-    }
+		echo "<option value='$kvarttaali/$vuosi' $sel>$kvarttaali/$vuosi</option>";
 
-    // Tavaramyynnin k‰teisalennukset
-    list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($alkupvm, $loppupvm, "", "", "fi311", 0, TRUE);
+		if ($kvarttaali == 1) {
+			$kvarttaali = 4;
+			$vuosi--;
+		}
+		else {
+			$kvarttaali--;
+		}
+	}
+	echo "</select></form></td></tr>";
 
-    if (is_resource($ttres)) {
-      while ($trow = mysql_fetch_assoc($ttres)) {
-        $bruttosumma = round($kakerroinlisa * $trow['bruttosumma'], 2);
-        if ($bruttosumma != 0) {
-          $array_key = "Tavara".$trow["ytunnus"].$trow["maa"];
-          $yhteenvetoilmoitus_array[$array_key]["koodi"] = "Tavara";
-          $yhteenvetoilmoitus_array[$array_key]["ytunnus"] = $trow["ytunnus"];
-          $yhteenvetoilmoitus_array[$array_key]["maa"] = $trow["maa"];
-          $yhteenvetoilmoitus_array[$array_key]["asiakkaan_maa"] = "";
-          $yhteenvetoilmoitus_array[$array_key]["nimi"] = $trow["laskunimi"];
-          $yhteenvetoilmoitus_array[$array_key]["summa"] += $bruttosumma;
-          $yhteenvetoilmoitus_array[$array_key]["laskuja"] += 1;
-          $yhteenvetoilmoitus_array[$array_key]["kale"] += 1;
-        }
-      }
-    }
+	echo "<tr><th>".t("Arvonlis‰veron yhteenvetoilmoitus kuukaudelta").":</th>";
 
-    // Palvelumyynnin k‰teisalennukset
-    list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($alkupvm, $loppupvm, "", "", "fi312", 0, TRUE);
+	//	Haetaan alkupiste
+	$kausia = 24;
+	$kuukausi = date("m");
+	$vuosi = date("Y");
 
-    if (is_resource($ttres)) {
-      while ($trow = mysql_fetch_assoc($ttres)) {
-        $bruttosumma = round($kakerroinlisa * $trow['bruttosumma'], 2);
-        if ($bruttosumma != 0) {
-          $array_key = "Palvelu".$trow["ytunnus"].$trow["maa"];
-          $yhteenvetoilmoitus_array[$array_key]["koodi"] = "Palvelu";
-          $yhteenvetoilmoitus_array[$array_key]["ytunnus"] = $trow["ytunnus"];
-          $yhteenvetoilmoitus_array[$array_key]["maa"] = $trow["maa"];
-          $yhteenvetoilmoitus_array[$array_key]["asiakkaan_maa"] = "";
-          $yhteenvetoilmoitus_array[$array_key]["nimi"] = $trow["laskunimi"];
-          $yhteenvetoilmoitus_array[$array_key]["summa"] += $bruttosumma;
-          $yhteenvetoilmoitus_array[$array_key]["laskuja"] += 1;
-          $yhteenvetoilmoitus_array[$array_key]["kale"] += 1;
-        }
-      }
-    }
+	echo "<td>";
+	echo "	<form enctype='multipart/form-data' action='$PHP_SELF' method='post'>
+				<input type='hidden' name='tee' value='$tee'>
+				<input type='hidden' name='tyyppi' value='kuukausi'>
+				<select name='kohdekuukausi' onchange='submit();'>
+				<option value = ''>".t('Valitse kohdekuukausi')."</option>";
 
-    // Kolmikantamyynnin k‰teisalennukset
-    list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($alkupvm, $loppupvm, "", "", "kolmikanta", 0, TRUE);
+	for ($i=1; $i<$kausia; $i++) {
 
-    if (is_resource($ttres)) {
-      while ($trow = mysql_fetch_assoc($ttres)) {
-        $bruttosumma = round($kakerroinlisa * $trow['bruttosumma'], 2);
-        if ($bruttosumma != 0) {
-          $array_key = "Kolmikanta".$trow["ytunnus"].$trow["maa"];
-          $yhteenvetoilmoitus_array[$array_key]["koodi"] = "Kolmikanta";
-          $yhteenvetoilmoitus_array[$array_key]["ytunnus"] = $trow["ytunnus"];
-          $yhteenvetoilmoitus_array[$array_key]["maa"] = $trow["maa"];
-          $yhteenvetoilmoitus_array[$array_key]["asiakkaan_maa"] = "";
-          $yhteenvetoilmoitus_array[$array_key]["nimi"] = $trow["laskunimi"];
-          $yhteenvetoilmoitus_array[$array_key]["summa"] += $bruttosumma;
-          $yhteenvetoilmoitus_array[$array_key]["laskuja"] += 1;
-          $yhteenvetoilmoitus_array[$array_key]["kale"] += 1;
-        }
-      }
-    }
+		$kuukausi = str_pad((int) $kuukausi, 2, 0, STR_PAD_LEFT);
 
-    // Sortataan multidimensoinen array. Pit‰‰ ensiksi tehd‰ sortattavista keyst‰ omat arrayt
-    $apusort_jarj1 = $apusort_jarj2 = $apusort_jarj3 = array();
+		if ($kohdekuukausi == $kuukausi."/".$vuosi) {
+			$sel = "SELECTED";
+		}
+		else {
+			$sel = "";
+		}
 
-    foreach ($yhteenvetoilmoitus_array as $apusort_key => $apusort_row) {
-      $apusort_jarj1[$apusort_key] = $apusort_row['koodi'];
-      $apusort_jarj2[$apusort_key] = $apusort_row['maa'];
-      $apusort_jarj3[$apusort_key] = $apusort_row['ytunnus'];
-    }
+		if ($kohdekausi != '') {
+			$sel = '';
+		}
 
-    // Sortataan taulukko koodi, maa, ytunnus j‰rjestykseen
-    array_multisort($apusort_jarj1, SORT_DESC, $apusort_jarj2, SORT_ASC, $apusort_jarj3, SORT_ASC, $yhteenvetoilmoitus_array);
+		echo "<option value='$kuukausi/$vuosi' $sel>$kuukausi/$vuosi</option>";
 
-    // Piirret‰‰n data ruudulle
-    foreach ($yhteenvetoilmoitus_array as $row) {
-      echo "<tr class='aktiivi'>";
-      echo "<td>".t($row["koodi"])."</td>";
-      echo "<td>{$row["maa"]}</td>";
-      echo "<td>{$row["ytunnus"]}</td>";
-      echo "<td>{$row["nimi"]}</td>";
-      echo "<td align='right'>{$row["summa"]}</td>";
-      echo "<td align='right'>{$row["laskuja"]}</td>";
+		if ($kuukausi == 01) {
+			$kuukausi = 12;
+			$vuosi--;
+		}
+		else {
+			$kuukausi--;
+		}
 
-      if ($row["maa"] == "") {
-        echo "<td class='back'><font class='error'>";
-        echo t("VIRHE! Maa puuttuu laskulta sek‰ asiakkaalta")."!<br>";
-        echo t("Rivi‰ ei huomioida yhteissummassa").".<br>";
-        echo t("Korjaa asiakkaan tiedot ennen ilmoittamista")."!";
-        echo "</font></td>";
-      }
-      elseif ($row["maa"] != "" and $row["asiakkaan_maa"] == "X") {
-        echo "<td class='back'><font class='info'>".t("HUOM: Maa haettu asiakkaan tiedoista")."</font></td>";
-      }
+	}
+	echo "</select></form></td></tr></table>";
 
-      if ($row["kale"] != 0 and $row["kale"] != $row["laskuja"]) {
-        echo "<td class='back'><font class='info'>".t("HUOM: Myynniss‰ on huomioitu %s kassa-alennus(ta)", $kukarow["kieli"], $row["kale"]).".</font></td>";
-      }
+	if (strtoupper($yhtiorow["maa"])== 'FI') {
+		//muutetaan ytunnus takas oikean n‰kˆseks
+		$ytunpit = 8-strlen($yhtiorow["ytunnus"]);
 
-      if ($row["kale"] != 0 and $row["kale"] == $row["laskuja"]) {
-        echo "<td class='back'><font class='info'>".t("HUOM: Kassa-alennus", $kukarow["kieli"], $row["kale"]).".</font></td>";
-      }
+		if ($ytunpit > 0) {
+			$uytunnus = $yhtiorow["ytunnus"];
+			while ($ytunpit > 0) {
+			    $uytunnus = "0".$uytunnus; $ytunpit--;
+			}
+		}
+		else {
+			$uytunnus = $yhtiorow["ytunnus"];
+		}
 
-      echo "</tr>";
+		$uytunnus = substr($uytunnus,0,7)."-".substr($uytunnus,7,1);
+	}
+	else {
+		$uytunnus = $yhtiorow["ytunnus"];
+	}
 
-      if ($row["maa"] != "") {
-        $summa_yhteensa += $row["summa"];
+	if ($kohdekausi != "" or $kohdekuukausi != "") {
 
-        // Tehd‰‰n tietuetta
-        $tietue_rivi++;
+		if ($kohdekausi != '' and $tyyppi == 'kausi') {
+			list($kvarttaali, $vuosi) = explode("/", $kohdekausi);
+		}
+		else {
+			list($kuukausi, $vuosi) = explode("/", $kohdekuukausi);
+		}
 
-        // Kauppatapakoodit
-        if ($row["koodi"] == "Kolmikanta") {
-          $koodi = 3;
-        }
-        elseif ($row["koodi"] == "Palvelu") {
-          $koodi = 4;
-        }
-        else {
-          $koodi = "";
-        }
+		if ($kvarttaali != '' and $tyyppi == 'kausi') {
+			switch ($kvarttaali) {
+				case 1:
+					$alkupvm = "$vuosi-01-01";
+					$loppupvm = "$vuosi-04-01";
+					break;
+				case 2:
+					$alkupvm = "$vuosi-04-01";
+					$loppupvm = "$vuosi-07-01";
+					break;
+				case 3:
+					$alkupvm = "$vuosi-07-01";
+					$loppupvm = "$vuosi-10-01";
+					break;
+				case 4:
+					$alkupvm = "$vuosi-10-01";
+					$loppupvm = ($vuosi+1)."-01-01";
+					break;
+				default:
+					die("Kohdekausi on v‰‰r‰!!!");
+			}
+		}
+		elseif ($kuukausi != '') {
+			$alkupvm = "$vuosi-$kuukausi-01";
+			$loppupvm = date("Y-m-d", mktime(0, 0, 0, $kuukausi+1, 1, $vuosi));
+		}
 
-        $ytunnus = sprintf("%012.12s", str_ireplace(array($row["maa"], "-", "_"), "", $row["ytunnus"]));
-        $arvo = round($row["summa"] * 100);
+		echo "<br><hr>";
 
-        // Rivitiedot
-        $tietue_rivitiedot .= "102:{$row["maa"]}\n";  // Maatunnus. Asiakkaan arvonlis‰verotunnisteen maatunnusosa.
-        $tietue_rivitiedot .= "103:{$ytunnus}\n";    // Asiakkaan arvonlis‰verotunniste. Asiakkaan arvonlis‰verotunniste ilman maatunnusta.
-        $tietue_rivitiedot .= "210:{$arvo}\n";      // Myynnin arvo EU-maihin
-        $tietue_rivitiedot .= "104:{$koodi}\n";      // Kauppatapakoodi. Tavaramyynnin koodi on tyhj‰. Kolmikantakaupassa koodi on 3. Palvelumyynnin koodi on 4.
-        $tietue_rivitiedot .= "009:{$tietue_rivi}\n";  // Toistuvien osatietoryhmien v‰limerkki: juokseva numero.
-      }
-    }
+		if ($ytunnus != "") {
+			//	Onko syˆtetty maa oikea
+			$query = "SELECT distinct(koodi) from maat where koodi = '$maa'";
+			$result = mysql_query($query) or pupe_error($query);
 
-    echo "<tr>";
-    echo "<th colspan = '4'>".t("Yhteens‰")."</th>";
-    echo "<td class = 'tumma' align = 'right'>".sprintf("%.2f", $summa_yhteensa)."</th>";
-    echo "<th></th>";
-    echo "</tr>";
+			if (mysql_num_rows($result) == 1) {
+				$query = "	UPDATE asiakas SET maa = '$maa'
+							WHERE yhtio = '$kukarow[yhtio]'and ytunnus='$ytunnus'";
+				$result = mysql_query($query) or pupe_error($query);
+				echo "<font class='message'>".t("Korjattiin asiakkaan")." '$ytunnus' ".t("maaksi")." '$maa'</font><br>";
+			}
+			else {
+				echo "<font class='error'>".t("Syˆtetty maa on v‰‰rin")."</font><br>";
+			}
+		}
 
-    echo "</table>";
-    echo "<br>";
+		$query = "SELECT group_concat(distinct(koodi) SEPARATOR '\',\'') from maat where eu != '' and koodi != 'FI'";
+		$result = mysql_query($query) or pupe_error($query);
+		$row = mysql_fetch_array($result);
 
-    // Tehd‰‰n tietue
-    $uytunnus = tulosta_ytunnus($yhtiorow["ytunnus"]);
-    $arvo = round($summa_yhteensa * 100);
-    $tunniste = substr(md5(date("YmdHis")), 0, 9);
+		$eumaat = $row[0];
 
-    $tietue  = "000:VSRALVYV\n";          // Tietovirran nimi
-    $tietue .= "100:".date("dmY")."\n";        // Saapumisp‰iv‰ ppkkvvvv. Ilmoituksen arvop‰iv‰ eli p‰iv‰, jona tiedonkeruupalvelu vastaanotti tiedot.
-    $tietue .= "051:".date("H:i:s").":00\n";    // Saapumisp‰iv‰n kellonaika hh:mm:ss:dd. Ilmoituksen arvop‰iv‰n kellonaika, jona tiedonkeruupalvelu vastaanotti tiedot.
-    $tietue .= "105:VW\n";              // Vastaanottavan palvelun tunnus, joka sovitaan palvelukohtaisesti.
-    // Positio 1: E=Itella, S=TeliaSonera, U=Aditro, N=Logica, K=Koivuniemi, V=Ilmoitin.fi
-    // Positio 2: W=Webin kautta syˆtetty tietue, O=Ohjelmistointegraation tuottama
-    $tietue .= "107:{$tunniste}\n";          // Tunniste, jonka tiedonkeruupalvelu muodostaa yksilˆim‰‰n ilmoituksen
-    $tietue .= "010:{$uytunnus}\n";          // Y-tunnus tai Y-tunnus ja siihen liitetty toimipaikkatunnus
-    $tietue .= "053:{$kohdekausi}\n";        // Kohdekausi kk/vvvv
-    $tietue .= "098:1\n";              // Rahayksikkˆ, mill‰ tiedot annetaan: euro=1
-    $tietue .= "101:{$arvo}\n";            // Koko yhteisˆmyynnin arvo kohdekautena
-    $tietue .= "001:{$tietue_rivi}\n";        // Toistuvien osatietoryhmien lukum‰‰r‰ ja alkumerkki (= n ryhm‰‰)
-    $tietue .= $tietue_rivitiedot;
-    $tietue .= "999:1\n";              // Lopputunnus: Tietueen juokseva numero. Verovelvolliskohtainen ilmoitus p‰‰ttyy.
+		$query = "	SELECT
+					if(tuote.tuotetyyppi != 'K', 'JOO', 'EI') tav_pal,
+					lasku.ytunnus,
+					if(lasku.maa='', asiakas.maa, lasku.maa) as maa,
+					if(lasku.maa='','X','') asiakkaan_maa,
+					max(asiakas.nimi) nimi,
+					round(sum(rivihinta),2) summa,
+					round(sum(rivihinta)*100,0) arvo,
+					count(distinct(lasku.tunnus)) laskuja,
+					group_concat(DISTINCT lasku.tunnus) ltunnus
+					FROM lasku USE INDEX (yhtio_tila_tapvm)
+					JOIN tilausrivi USE INDEX (uusiotunnus_index) ON (tilausrivi.yhtio = lasku.yhtio and tilausrivi.uusiotunnus = lasku.tunnus)
+					JOIN tuote USE INDEX (tuoteno_index) ON (tuote.yhtio = tilausrivi.yhtio and tuote.tuoteno = tilausrivi.tuoteno and tuote.tuoteno != '$yhtiorow[ennakkomaksu_tuotenumero]')
+					LEFT JOIN asiakas ON (asiakas.yhtio = lasku.yhtio and lasku.liitostunnus = asiakas.tunnus)
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.tila = 'U'
+					and lasku.tapvm >= '$alkupvm'
+					and lasku.tapvm < '$loppupvm'
+					and lasku.vienti = 'E'
+					GROUP BY 1,2,3,4
+					ORDER BY tav_pal DESC, tuote.tuotetyyppi, lasku.ytunnus, asiakas.nimi ";
+		$result = mysql_query($query) or pupe_error($query);
 
-    $filenimi = "VSRALVYV-$vuosi-$kuukausi-".date("His").".txt";
-    file_put_contents("$pupe_root_polku/dataout/$filenimi", $tietue);
+		$ok = 0;
 
-    echo "<form method='post' class = 'multisubmit'>";
-    echo "<input type='hidden' name='tee' value='lataa_tiedosto'>";
-    echo "<input type='hidden' name='lataa_tiedosto' value='1'>";
-    echo "<input type='hidden' name='kaunisnimi' value='$filenimi'>";
-    echo "<input type='hidden' name='filenimi' value='$filenimi'>";
-    echo "<input type='submit' name='tallenna' value='".t("Tallenna tiedosto")."'>";
-    echo "</form>";
-  }
-  else {
-    echo "<font class='error'>".t("Ei aineistoa valitulla kaudella")."!</font>";
-  }
+		if (mysql_num_rows($result) > 0) {
+
+			$arvo 		= 0;
+			$summa_tav	= 0;
+			$summa_pal	= 0;
+
+			$osatiedot 	= "";
+			$i			= 0;
+			$edtav_pal	= "XXX";
+
+			echo "<table>";
+			echo "<tr><td class='back' colspan='5'><br>".t("Normaalit, Valmisteet ja Raaka-Aineet").":</td></tr>";
+
+			$kassaalearray_tav = array();
+			$kassaalearray_pal = array();
+
+			// Tavaramyynnin k‰teisalennus
+			list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($alkupvm, $loppupvm, "", "", "fi311", 0, TRUE);
+
+			if (is_resource($ttres)) {
+				while ($trow = mysql_fetch_assoc($ttres)) {
+					if (round($kakerroinlisa*$trow['bruttosumma'], 2) != 0) {
+						$kassaalearray_tav[$trow["ytunnus"]][$trow["maa"]][$trow["laskunimi"]] = round($kakerroinlisa*$trow['bruttosumma'], 2);
+					}
+				}
+			}
+
+			// Palvelumyynnin k‰teisalennus
+			list($kakerroinlisa, $ttres) = alvilmo_kassa_ale_erittely($alkupvm, $loppupvm, "", "", "fi312", 0, TRUE);
+
+			if (is_resource($ttres)) {
+				while ($trow = mysql_fetch_assoc($ttres)) {
+					if (round($kakerroinlisa*$trow['bruttosumma'], 2) != 0) {
+						$kassaalearray_pal[$trow["ytunnus"]][$trow["maa"]][$trow["laskunimi"]] = round($kakerroinlisa*$trow['bruttosumma'], 2);
+					}
+				}
+			}
+
+			$palotsikot = FALSE;
+
+			while ($row = mysql_fetch_array($result)) {
+
+				if ($row["tav_pal"] != $edtav_pal or $edtav_pal == "XXX") {
+					if ($edtav_pal != "XXX") {
+
+						// Piirret‰‰n tavaramyynnin kassa-alet jotka ei osunut t‰n kuun asiakkaisiin
+						if (count($kassaalearray_tav) > 0) {
+							foreach ($kassaalearray_tav as $ytunnus => $a) {
+								foreach ($a as $maa => $b) {
+									foreach ($b as $nimi => $c) {
+
+										$arvo+=round($c*100, 0);
+										$summa_tav+=$c;
+
+										echo "<tr class='aktiivi'><td>1</td><td>$maa</td><td>$ytunnus</td><td>$nimi</td><td align='right'>$c</td><td align='right'>1</td></tr>";
+
+										$i++;
+										$osatiedot .= "102:$maa\n";
+										$osatiedot .= "103:".sprintf("%012.12s",str_ireplace(array($maa,"-","_"), "", $ytunnus))."\n";
+										$osatiedot .= "210:".round($c*100, 0)."\n";
+										$osatiedot .= "104:\n";
+										$osatiedot .= "009:$i\n";
+									}
+								}
+							}
+						}
+
+						unset($kassaalearray_tav);
+
+						$palotsikot = TRUE;
+
+						echo "<tr><th colspan='3'></th><td class='tumma' align='right'>".sprintf("%.2f", $summa_tav)."</th><th></th></tr>";
+						echo "<tr><td class='back' colspan='5'><br><br><br>".t("Palvelutuotteet").":</td></tr>";
+					}
+
+					echo "<tr><th>".t("Maatunnus")."</th><th>".t("Ytunnus")."</th><th>".t("Asiakas")."</th><th>".t("Arvo")."</th><th>".t("Laskuja")."</th></tr>";
+				}
+
+				$edtav_pal = $row["tav_pal"];
+
+				if ($row["tav_pal"] == "JOO") {
+					// K‰sitell‰‰n tavaramyynnin kassa-alet jotka osuu t‰n kuun asiakkaisiin
+					if (isset($kassaalearray_tav[$row["ytunnus"]][$row["maa"]][$row["nimi"]])) {
+						$row["summa"] = $row["summa"] + $kassaalearray_tav[$row["ytunnus"]][$row["maa"]][$row["nimi"]];
+						$row["arvo"] = $row["arvo"] + round(($kassaalearray_tav[$row["ytunnus"]][$row["maa"]][$row["nimi"]]*100), 0);
+
+						unset($kassaalearray_tav[$row["ytunnus"]][$row["maa"]][$row["nimi"]]);
+					}
+				}
+				else {
+					// K‰sitell‰‰n palvelumyynnin kassa-alet jotka osuu t‰n kuun asiakkaisiin
+					if (isset($kassaalearray_pal[$row["ytunnus"]][$row["maa"]][$row["nimi"]])) {
+						$row["summa"] = $row["summa"] + $kassaalearray_pal[$row["ytunnus"]][$row["maa"]][$row["nimi"]];
+						$row["arvo"] = $row["arvo"] + round(($kassaalearray_pal[$row["ytunnus"]][$row["maa"]][$row["nimi"]]*100), 0);
+
+						unset($kassaalearray_pal[$row["ytunnus"]][$row["maa"]][$row["nimi"]]);
+					}
+				}
+
+				if ($row["maa"] == "") {
+					$query = "	SELECT distinct koodi, nimi
+								FROM maat
+								WHERE nimi != ''
+								ORDER BY koodi";
+					$vresult = mysql_query($query) or pupe_error($query);
+					$ulos = "<select name='maa'>";
+
+					$ulos .= "<option value=''>".t("Valitse maa")."</option>";
+
+					while ($vrow = mysql_fetch_array($vresult)) {
+
+						$ulos .= "<option value = '".strtoupper($vrow[0])."'>".t($vrow[1])."</option>";
+					}
+
+					$ulos .= "</select>";
+
+					echo "<tr><form enctype='multipart/form-data' action='$PHP_SELF' method='post'>
+								<input type='hidden' name='tee' value='$tee'>
+								<input type='hidden' name='ytunnus' value='$row[ytunnus]'>
+								<input type='hidden' name='kohdekausi' value='$kohdekausi'>
+								<td>$ulos</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td>$row[summa]</td><td>$row[laskuja]</td>
+								<td class='back'>
+								<font class='error'>".t("VIRHE: Asiakkaan maa puuttuu")."!</font><br>
+								<input type='submit' name='tallenna' value='".t("Korjaa asiakkaan maa")."'>
+								</td></form></tr>";
+					$ok = 1;
+				}
+				elseif($row["maa"] != "" and $row["asiakkaan_maa"] == "X") {
+					echo "<tr class='aktiivi'><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td align='right'>$row[summa]</td><td align='right'>$row[laskuja]</td><td class='back'><font class='info'>".t("HUOM! Maa haettu asiakkaan tiedoista")."</font></td></tr>";
+				}
+				else {
+					echo "<tr class='aktiivi'><td>$row[maa]</td><td>$row[ytunnus]</td><td>$row[nimi]</td><td align='right'>$row[summa]</td><td align='right'>$row[laskuja]</td></tr>";
+				}
+
+				if ($row["maa"] != "") {
+					if ($row["tav_pal"] == "JOO") {
+						$arvo+=$row["arvo"];
+						$summa_tav+=$row["summa"];
+						$koodi = "";
+					}
+					else {
+						$arvo+=$row["arvo"];
+						$summa_pal+=$row["summa"];
+						$koodi = "4";
+					}
+
+					$i++;
+					$osatiedot .= "102:$row[maa]\n";
+					$osatiedot .= "103:".sprintf("%012.12s",str_ireplace(array($row["maa"],"-","_"), "", $row["ytunnus"]))."\n";
+					$osatiedot .= "210:$row[arvo]\n";
+					$osatiedot .= "104:$koodi\n";
+					$osatiedot .= "009:$i\n";
+				}
+			}
+
+			// Piirret‰‰n tavaramyynnin kassa-alet jotka ei osunut t‰n kuun asiakkaisiin
+			if (count($kassaalearray_tav) > 0) {
+				foreach ($kassaalearray_tav as $ytunnus => $a) {
+					foreach ($a as $maa => $b) {
+						foreach ($b as $nimi => $c) {
+							echo "<tr class='aktiivi'><td>$maa</td><td>$ytunnus</td><td>$nimi</td><td align='right'>$c</td><td align='right'>1</td></tr>";
+
+							$arvo+=round($c*100, 0);
+							$summa_tav+=$c;
+
+							$i++;
+							$osatiedot .= "102:$maa\n";
+							$osatiedot .= "103:".sprintf("%012.12s",str_ireplace(array($maa,"-","_"), "", $ytunnus))."\n";
+							$osatiedot .= "210:".round($c*100, 0)."\n";
+							$osatiedot .= "104:\n";
+							$osatiedot .= "009:$i\n";
+						}
+					}
+				}
+			}
+
+			// Piirret‰‰n palvelumyynnin kassa-alet jotka ei osunut t‰n kuun asiakkaisiin
+			if (count($kassaalearray_pal) > 0) {
+				if (!$palotsikot) {
+					echo "<tr><th colspan='3'></th><td class='tumma' align='right'>".sprintf("%.2f", $summa_tav)."</th><th></th></tr>";
+					echo "<tr><td class='back' colspan='5'><br><br><br>".t("Palvelutuotteet").":</td></tr>";
+					echo "<tr><th>".t("Maatunnus")."</th><th>".t("Ytunnus")."</th><th>".t("Asiakas")."</th><th>".t("Arvo")."</th><th>".t("Laskuja")."</th></tr>";
+				}
+
+				foreach ($kassaalearray_pal as $ytunnus => $a) {
+					foreach ($a as $maa => $b) {
+						foreach ($b as $nimi => $c) {
+							echo "<tr class='aktiivi'><td>$maa</td><td>$ytunnus</td><td>$nimi</td><td align='right'>$c</td><td align='right'>1</td></tr>";
+
+							$arvo+=round($c*100, 0);
+							$summa_pal+=$c;
+
+							$i++;
+							$osatiedot .= "102:$maa\n";
+							$osatiedot .= "103:".sprintf("%012.12s",str_ireplace(array($maa,"-","_"), "", $ytunnus))."\n";
+							$osatiedot .= "210:".round($c*100, 0)."\n";
+							$osatiedot .= "104:4\n";
+							$osatiedot .= "009:$i\n";
+						}
+					}
+				}
+			}
+
+			echo "<tr><th colspan='3'></th><td class='tumma' align='right'>".sprintf("%.2f", $summa_pal)."</th><th></th></tr>";
+			echo "<tr><th colspan='3'></th><td class='tumma' align='right'>".sprintf("%.2f", ($summa_tav+$summa_pal))."</th><th></th></tr>";
+			echo "</table>";
+
+			if ($ok == 0) {
+
+				$kohdekausi = $kohdekuukausi != '' ? $kohdekuukausi : $kohdekausi;
+				$kvarttaali = $kuukausi != '' ? $kuukausi : $kvarttaali;
+
+				if (substr($kohdekausi,0,1) == 0) {
+					$kohdekausi = substr($kohdekausi,1);
+				}
+
+				// Korjataan kerikan maakoodi. wtf?
+				$osatiedot = str_replace("102:GR", "102:EL", $osatiedot);
+
+				$file  = "000:$tee\n";
+				$file .= "100:".date("dmY")."\n";
+				$file .= "051:".date("H:i:s").":00\n";
+				$file .= "105:E03\n";
+				$file .= "010:$uytunnus\n";
+				$file .= "053:$kohdekausi\n";
+				$file .= "098:1\n";
+				$file .= "101:$arvo\n";
+				$file .= "001:$i\n";
+				$file .= $osatiedot;
+				$file .= "999:1\n";
+
+				$filenimi = "VSRALVYV-$kvarttaali$vuosi	".date("dmy-His").".txt";
+				$fh = fopen("$pupe_root_polku/dataout/".$filenimi, "w");
+
+				if (fwrite($fh, $file) === FALSE) die("Kirjoitus ep‰onnistui $filenimi");
+				fclose($fh);
+
+				echo "<br><form enctype='multipart/form-data' action='$PHP_SELF' method='post'>
+						<input type='hidden' name='tee' value='lataa_tiedosto'>
+						<input type='hidden' name='kausi' value='$kausi'>
+						<input type='hidden' name='lataa_tiedosto' value='1'>
+						<input type='hidden' name='kaunisnimi' value='".t("Arvonlis‰veron_yhteenvetoilmoitus")."-$kvarttaali$vuosi.txt'>
+						<input type='hidden' name='filenimi' value='$filenimi'>
+						<input type='submit' name='tallenna' value='".t("Tallenna tiedosto")."'></form>";
+			}
+			else {
+				echo "<br><font class='error'>".t("Korjaa virheet maat ennen ilmoituksen l‰hett‰mist‰")."</font>";
+			}
+		}
+		else {
+			echo "<br><font class='message'>".t("Ei aineistoa valitulla kaudella")."</font>";
+		}
+	}
 }
 
-require "inc/footer.inc";
+if ($tee == "") {
+	echo "<table>";
+	echo "<tr><th>",t("Vanha arvonlis‰veroilmoitus"),"</th>";
+	echo "<td>";
+	echo "<form action='viranomaisilmoitukset.php' method='post'>
+			<input type='hidden' name='tee' value='VSRALVKK_VANHA'>
+			<input type='submit' value='",t("Valitse"),"'></form>";
+	echo "</td></tr>";
+	echo "<tr><th>",t("Uusi arvonlis‰veroilmoitus"),"</th>";
+	echo "<td>";
+	echo "<form action='viranomaisilmoitukset.php' method='post'>
+			<input type='hidden' name='tee' value='VSRALVKK_UUSI'>
+			<input type='submit' value='",t("Valitse"),"'></form>";
+	echo "</td></tr>";
+	echo "<tr><th>",t("Arvonlis‰veron yhteenvetoilmoitus"),"</th>";
+	echo "<td>";
+	echo "<form action='viranomaisilmoitukset.php' method='post'>
+			<input type='hidden' name='tee' value='VSRALVYV'>
+			<input type='submit' value='",t("Valitse"),"'></form>";
+	echo "</td></tr></table>";
+}
+
+require ("inc/footer.inc");
+
+?>

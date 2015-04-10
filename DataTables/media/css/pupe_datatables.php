@@ -1,6 +1,7 @@
 <?php
 
-preg_match("/.*?\/\*(.*?(TH_BACKGROUND))\*\//", $yhtiorow['active_css'], $varitmatch);
+// Otetaan yhtiön css:stä TH_BACKGROUND
+preg_match("/.*?\/\*(.*?(TH_BACKGROUND))\*\//", $yhtiorow['css'], $varitmatch);
 preg_match("/(#[a-f0-9]{3,6});/i", $varitmatch[0], $varirgb);
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -49,7 +50,7 @@ float: left;
 
 .dataTables_paginate {
 width: 44px;
-  * width: 50px;
+	* width: 50px;
 float: left;
 text-align: left;
 }
@@ -89,7 +90,7 @@ width: 90%;
 table.display thead th {
 font-weight: bold;
 cursor: pointer;
-  * cursor: hand;
+	* cursor: hand;
 }
 
 table.display tfoot th {
@@ -106,13 +107,13 @@ text-align: center;
 
 .sorting_asc {
 background: $varirgb[1] url('{$palvelin2}DataTables/media/images/sort_asc.png') no-repeat center right;
-}
-
-.sorting_desc {
+}                
+                 
+.sorting_desc {  
 background: $varirgb[1] url('{$palvelin2}DataTables/media/images/sort_desc.png') no-repeat center right;
-}
-
-.sorting {
+}                
+                 
+.sorting {       
 background: $varirgb[1] url('{$palvelin2}DataTables/media/images/sort_both.png') no-repeat center right;
 }
 
@@ -166,7 +167,7 @@ clear: both;
 }
 
 .dataTables_scrollBody {
-  *margin-top: -1px;
+	*margin-top: -1px;
 }
 
 .top, .bottom {
@@ -200,18 +201,18 @@ height: 22px;
 line-height: 22px;
 }
 
-.paging_full_numbers a.paginate_button,
-   .paging_full_numbers a.paginate_active {
+.paging_full_numbers span.paginate_button,
+ 	.paging_full_numbers span.paginate_active {
 -webkit-border-radius: 5px;
 -moz-border-radius: 5px;
 padding: 2px 5px;
 margin: 0 3px;
 cursor: pointer;
-  *cursor: hand;
+	*cursor: hand;
 }
 
 span.paginate_active {
-  font-weight: bold;
+	font-weight: bold;
 }
 
 /*
@@ -230,3 +231,4 @@ overflow: auto;
 // = Banner =
 // ==========
 ";
+?>

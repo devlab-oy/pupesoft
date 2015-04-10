@@ -1,47 +1,44 @@
 <?php
 
-//* Tämä skripti käyttää slave-tietokantapalvelinta *//
+//* TÃ¤mÃ¤ skripti kÃ¤yttÃ¤Ã¤ slave-tietokantapalvelinta *//
 $useslave = 1;
 
-if (@include "inc/connect.inc") {
-  require "inc/functions.inc";
-}
-elseif (@include "connect.inc") {
-  require "functions.inc";
+if (file_exists("inc/connect.inc")) {
+	require ("inc/connect.inc");
 }
 else {
-  exit;
+	require ("connect.inc");
 }
 
 $session = mysql_real_escape_string($_COOKIE["pupesoft_session"]);
 
-$query = "SELECT *
-          FROM kuka
-          WHERE session = '$session'";
-$result = pupe_query($query, $GLOBALS["masterlink"]);
+$query = "	SELECT *
+			FROM kuka
+			WHERE session = '$session'";
+$result = mysql_query($query) or die(mysql_error());
 $kuka_check_row = mysql_fetch_assoc($result);
 
 if (mysql_num_rows($result) != 1) {
-  exit;
+	exit;
 }
 
 $id = (int) $_GET["id"];
 
-$query = "SELECT *
-          FROM liitetiedostot
-          where tunnus = '$id'";
-$liiteres = pupe_query($query);
+$query = "SELECT * FROM liitetiedostot where tunnus = '$id'";
+$liiteres = mysql_query($query) or die(mysql_error());
 $liiterow = mysql_fetch_assoc($liiteres);
 
 if ($kuka_check_row['yhtio'] != $liiterow['yhtio'] and $liiterow['liitos'] != 'kalenteri') {
-  exit;
+	exit;
 }
 
 if (mysql_num_rows($liiteres) > 0) {
-  header("Content-type: $liiterow[filetype]");
-  header("Content-length: $liiterow[filesize]");
-  header("Content-Disposition: inline; filename=$liiterow[filename]");
-  header("Content-Description: $liiterow[selite]");
+	header("Content-type: $liiterow[filetype]");
+	header("Content-length: $liiterow[filesize]");
+	header("Content-Disposition: inline; filename=$liiterow[filename]");
+	header("Content-Description: $liiterow[selite]");
 
-  echo $liiterow["data"];
+	echo $liiterow["data"];
 }
+
+?>

@@ -7,241 +7,237 @@ $useslave = 1;
 $php_cli = FALSE;
 
 if (php_sapi_name() == 'cli') {
-  $php_cli = TRUE;
+	$php_cli = TRUE;
 }
 
 if (!$php_cli) {
-  require "inc/parametrit.inc";
-  $kyhtio = $kukarow['yhtio'];
+	require ("inc/parametrit.inc");
+	$kyhtio = $kukarow['yhtio'];
 }
 else {
-  //tarvitaan yhtiö
-  if ($argv[1] != "") $kyhtio = trim($argv[1]);
-  else die ("Yhtiö on annettava!");
+	//tarvitaan yhtiö
+	if ($argv[1] != "") $kyhtio = trim($argv[1]);
+	else die ("Yhtiö on annettava!");
 
-  require "/var/www/html/pupesoft/inc/connect.inc";
-  require "/var/www/html/pupesoft/inc/functions.inc";
-
-  // Logitetaan ajo
-  cron_log();
-
-  $tee = "aja";
+	require ("/var/www/html/pupesoft/inc/connect.inc");
+	require ("/var/www/html/pupesoft/inc/functions.inc");
+	$tee = "aja";
 }
 
 function ftp_rmfiles($ftp_stream, $directory, $nodel = "", $nodelpict = "") {
 
-  if (!is_resource($ftp_stream) ||
-    get_resource_type($ftp_stream) !== 'FTP Buffer') {
-    return false;
-  }
-
-  ftp_pasv($ftp_stream, true);
-
-  $i             = 0;
-  $files         = array();
-  $statusnext    = false;
-  $statusprev    = false;
-  $currentfolder = $directory;
-
-  $list = ftp_rawlist($ftp_stream, $directory, true);
-
-  foreach ($list as $current) {
-
-    if (empty($current)) {
-      if ($statusprev == true) {
-        $statusprev = false;
-        continue;
-      }
-      $statusnext = true;
-      continue;
+    if (!is_resource($ftp_stream) ||
+        get_resource_type($ftp_stream) !== 'FTP Buffer') {
+        return false;
     }
 
-    if ($statusnext === true) {
-      $currentfolder = substr($current, 0, -1);
-      $statusnext = false;
-      $statusprev = true;
-      continue;
-    }
+	ftp_pasv($ftp_stream, true);
 
-    $split = preg_split('[ ]', $current, 9, PREG_SPLIT_NO_EMPTY);
-    $entry = $split[8];
-    $isdir = ($split[0]{0} === 'd') ? true : false;
+    $i             = 0;
+    $files         = array();
+    $statusnext    = false;
+    $statusprev    = false;
+    $currentfolder = $directory;
 
-    if ($entry === '.' || $entry === '..') {
-      continue;
-    }
+    $list = ftp_rawlist($ftp_stream, $directory, true);
 
-    if ($isdir !== true) {
-      $files[] = $currentfolder . '/' . $entry;
-    }
+    foreach ($list as $current) {
 
-  }
-
-  foreach ($files as $file) {
-    //HUOM: Kuvia joiden nimessä on stringi "eipoisteta" ei poisteta
-    if (stripos($file, "eipoisteta") === FALSE) {
-      if ($nodelpict != '') {
-        if (strpos($file, $nodelpict) === FALSE) {
-          ftp_delete($ftp_stream, $file);
+        if (empty($current)) {
+			if ($statusprev == true) {
+				$statusprev = false;
+				continue;
+			}
+            $statusnext = true;
+            continue;
         }
-      }
-      else {
-        ftp_delete($ftp_stream, $file);
-      }
+
+        if ($statusnext === true) {
+			$currentfolder = substr($current, 0, -1);
+            $statusnext = false;
+			$statusprev = true;
+            continue;
+        }
+
+        $split = preg_split('[ ]', $current, 9, PREG_SPLIT_NO_EMPTY);
+        $entry = $split[8];
+        $isdir = ($split[0]{0} === 'd') ? true : false;
+
+        if ($entry === '.' || $entry === '..') {
+            continue;
+        }
+
+        if ($isdir !== true) {
+            $files[] = $currentfolder . '/' . $entry;
+        }
+
     }
-  }
+
+    foreach ($files as $file) {
+		#HUOM: Kuvia joiden nimessä on stringi "eipoisteta" ei poisteta
+		if (stripos($file, "eipoisteta") === FALSE) {
+			if ($nodelpict != '') {
+				if (strpos($file, $nodelpict) === FALSE) {
+		        	ftp_delete($ftp_stream, $file);
+				}
+			}
+			else {
+	        	ftp_delete($ftp_stream, $file);
+			}
+		}
+    }
 }
 
 if ($tee == "aja") {
 
-  echo date("H:i:s").": Aloitetaan tuotekuvien siirto.\n";
+	echo date("H:i:s").": Aloitetaan tuotekuvien siirto.\n";
 
-  // tarvitaan $ftpkuvahost $ftpkuvauser $ftpkuvapass $ftpkuvapath $ftpmuupath
-  // palautetaan $palautus ja $syy
+	// tarvitaan $ftpkuvahost $ftpkuvauser $ftpkuvapass $ftpkuvapath $ftpmuupath
+	// palautetaan $palautus ja $syy
 
-  $dummy      = array();
-  $syy      = "";
-  $poistosyy    = "";
-  $palautus    = "";
-  $tulos_ulos_ftp  = "";
+	$dummy			= array();
+	$syy			= "";
+	$poistosyy		= "";
+	$palautus		= "";
+	$tulos_ulos_ftp	= "";
 
-  if ($ftpkuvahost=='' or $ftpkuvauser=='' or $ftpkuvapass=='' or $ftpkuvapath=='' or $ftpmuupath == '') {
-    $tulos_ulos_ftp .= "<font class='error'>".t("Lähetykseen tarvittavia tietoja puuttuu")."! (host, user, pass, path)</font><br>";
-  }
-  else {
+	if ($ftpkuvahost=='' or $ftpkuvauser=='' or $ftpkuvapass=='' or $ftpkuvapath=='' or $ftpmuupath == '') {
+		$tulos_ulos_ftp .= "<font class='error'>".t("Lähetykseen tarvittavia tietoja puuttuu")."! (host, user, pass, path)</font><br>";
+	}
+	else {
 
-    //tehdään kysely tässä, ettei tule timeouttia
-    $query = "SELECT liitetiedostot.*
-              FROM liitetiedostot
-              JOIN tuote ON tuote.yhtio = liitetiedostot.yhtio and tuote.hinnastoon = 'W' and tuote.tunnus = liitetiedostot.liitostunnus
-              WHERE liitetiedostot.yhtio         = '$kyhtio'
-              and liitetiedostot.liitos          = 'tuote'
-              and liitetiedostot.kayttotarkoitus in ('TK','MU')
-              ORDER BY liitetiedostot.kayttotarkoitus ASC";
-    $result = pupe_query($query);
+		//tehdään kysely tässä, ettei tule timeouttia
+		$query = "	SELECT liitetiedostot.*
+					FROM liitetiedostot
+					JOIN tuote ON tuote.yhtio = liitetiedostot.yhtio and tuote.hinnastoon = 'W' and tuote.tunnus = liitetiedostot.liitostunnus
+					WHERE liitetiedostot.yhtio = '$kyhtio' and liitetiedostot.liitos = 'tuote' and liitetiedostot.kayttotarkoitus in ('TK','MU')
+					ORDER BY liitetiedostot.kayttotarkoitus ASC";
+		$result = pupe_query($query);
 
-    //lähetetään tiedosto
-    $conn_id = ftp_connect($ftpkuvahost);
+		//lähetetään tiedosto
+		$conn_id = ftp_connect($ftpkuvahost);
 
-    // jos connectio ok, kokeillaan loginata
-    if ($conn_id) {
-      $login_result = ftp_login($conn_id, $ftpkuvauser, $ftpkuvapass);
+		// jos connectio ok, kokeillaan loginata
+		if ($conn_id) {
+			$login_result = ftp_login($conn_id, $ftpkuvauser, $ftpkuvapass);
 
-      if ($login_result === FALSE) {
-        $syy .= "Could not login to remote host ($conn_id, $ftpkuvauser, $ftpkuvapass)\n";
-      }
-    }
-    else {
-      $syy .= "Could not connect to remote host. ($ftpkuvahost)\n";
-    }
+			if ($login_result === FALSE) {
+				$syy .= "Could not login to remote host ($conn_id, $ftpkuvauser, $ftpkuvapass)\n";
+			}
+		}
+		else {
+			$syy .= "Could not connect to remote host. ($ftpkuvahost)\n";
+		}
 
-    // jos viimeinen merkki pathissä ei ole kauttaviiva lisätään kauttaviiva...
-    if (substr($ftpkuvapath, -1) != "/") {
-      $ftpkuvapath .= "/";
-    }
+		// jos viimeinen merkki pathissä ei ole kauttaviiva lisätään kauttaviiva...
+		if (substr($ftpkuvapath, -1) != "/") {
+			 $ftpkuvapath .= "/";
+		}
 
-    if (substr($ftpmuupath, -1) != "/") {
-      $ftpmuupath .= "/";
-    }
+		if (substr($ftpmuupath, -1) != "/") {
+			 $ftpmuupath .= "/";
+		}
 
-    // jos login ok kokeillaan uploadata
-    if ($login_result) {
+		// jos login ok kokeillaan uploadata
+		if ($login_result) {
 
-      $dirri = "/tmp";
+			$dirri = "/tmp";
 
-      if (!is_writable($dirri)) {
-        die("$kokonimi ei ole määritelty kirjoitusoikeutta. Ei voida jatkaa!<br>");
-      }
+			if (!is_writable($dirri)) {
+				die("$kokonimi ei ole määritelty kirjoitusoikeutta. Ei voida jatkaa!<br>");
+			}
 
-      ftp_rmfiles($conn_id, $ftpmuupath);
-      ftp_rmfiles($conn_id, $ftpkuvapath, "672x", "kategoria");
+			ftp_rmfiles($conn_id, $ftpmuupath);
+			ftp_rmfiles($conn_id, $ftpkuvapath, "672x", "kategoria");
 
-      $counter = 0;
+			$counter = 0;
 
-      while ($row = mysql_fetch_array($result) and $counter < 10) {
+			while ($row = mysql_fetch_array($result) and $counter < 10) {
 
-        if ($row["liitos"] == '' or $row["kayttotarkoitus"] == '' or $row["filename"] == '') {
-          continue;
-        }
+				if ($row["liitos"] == '' or $row["kayttotarkoitus"] == '' or $row["filename"] == '') {
+					continue;
+				}
 
-        //Laitetaan oikean maan kansioon
-        if ($row["kieli"] == "" or $row["kieli"] == "fi") {
-          $ftpmuupathlisa = "fi/";
-        }
-        else {
-          $ftpmuupathlisa = $row["kieli"]."/";
-        }
+				//Laitetaan oikean maan kansioon
+				if ($row["kieli"] == "" or $row["kieli"] == "fi") {
+					$ftpmuupathlisa = "fi/";
+				}
+				else {
+					$ftpmuupathlisa = $row["kieli"]."/";
+				}
 
-        $kokonimi = $dirri;
+				$kokonimi = $dirri;
 
-        $kokonimi .= "/".$row["filename"];
+				$kokonimi .= "/".$row["filename"];
 
-        if (!file_exists($kokonimi)) {
-          $handle = fopen("$kokonimi", "x");
+				if (!file_exists($kokonimi)) {
+					$handle = fopen("$kokonimi", "x");
 
-          if ($handle === FALSE) {
-            $syy .= "Tiedoston $row[filename] luonti epäonnistui!\n";
-            $counter++;
-          }
-          else {
-            file_put_contents($kokonimi, $row["data"]);
-            fclose($handle);
+					if ($handle === FALSE) {
+						$syy .= "Tiedoston $row[filename] luonti epäonnistui!\n";
+						$counter++;
+					}
+					else {
+						file_put_contents($kokonimi,$row["data"]);
+						fclose($handle);
 
-            list($mtype, $crap) = explode("/", $row["filetype"]);
+						list($mtype, $crap) = explode("/", $row["filetype"]);
 
-            if ($mtype == "image") {
-              $upload = ftp_put($conn_id, $ftpkuvapath.$row["filename"], realpath($kokonimi), FTP_BINARY);
-            }
-            else {
-              $upload = ftp_put($conn_id, $ftpmuupath.$ftpmuupathlisa.$row["filename"], realpath($kokonimi), FTP_BINARY);
-            }
+						if ($mtype == "image") {
+							$upload = ftp_put($conn_id, $ftpkuvapath.$row["filename"], realpath($kokonimi), FTP_BINARY);
+						}
+						else {
+							$upload = ftp_put($conn_id, $ftpmuupath.$ftpmuupathlisa.$row["filename"], realpath($kokonimi), FTP_BINARY);
+						}
 
-            //check upload
-            if ($upload === FALSE) {
-              if ($mtype == "image") {
-                $syy .= "Transfer failed ($conn_id, $ftpkuvapath, ".realpath($kokonimi).")\n";
-              }
-              else {
-                $syy .= "Transfer failed ($conn_id, $ftpmuupath, ".realpath($kokonimi).")\n";
-              }
+						//check upload
+						if ($upload === FALSE) {
+							if ($mtype == "image") {
+								$syy .= "Transfer failed ($conn_id, $ftpkuvapath, ".realpath($kokonimi).")\n";
+							}
+							else {
+								$syy .= "Transfer failed ($conn_id, $ftpmuupath, ".realpath($kokonimi).")\n";
+							}
 
-              $counter++;
-            }
-          }
+							$counter++;
+						}
+					}
 
-          //poistetaan filu
-          system("rm -f '$kokonimi'");
-        }
+					//poistetaan filu
+					system("rm -f '$kokonimi'");
+				}
 
-      }
+			}
 
-    }
+		}
 
-    if ($conn_id) {
-      ftp_close($conn_id);
-    }
+		if ($conn_id) {
+			ftp_close($conn_id);
+		}
 
-    if ($poistosyy != "") {
-      echo $poistosyy;
-    }
+		if ($poistosyy != "") {
+			echo $poistosyy;
+		}
 
-    if ($syy != "") {
-      echo $syy;
-    }
+		if ($syy != "") {
+			echo $syy;
+		}
 
-  }
+	}
 
-  echo date("H:i:s").": Tuotekuvien siirto valmis.\n\n";
+	echo date("H:i:s").": Tuotekuvien siirto valmis.\n\n";
 
 }
 
 if ($tee == "") {
-  echo "<font class='head'>".t("Tuotekuvien siirto verkkokauppaan")."</font><hr>";
+	echo "<font class='head'>".t("Tuotekuvien siirto verkkokauppaan")."</font><hr>";
 
-  echo "<table><form name='uliuli' method='post'>";
-  echo "<input type='hidden' name='tee' value='aja'>";
-  echo "<tr><td class='back' colspan='2'><br><input type='submit' value='".t("Siirrä tuotekuvat")."'></td></tr>";
-  echo "</table>";
-  echo "</form>";
+	echo "<table><form name='uliuli' method='post' action='$PHP_SELF'>";
+	echo "<input type='hidden' name='tee' value='aja'>";
+	echo "<tr><td class='back' colspan='2'><br><input type='submit' value='".t("Siirrä tuotekuvat")."'></td></tr>";
+	echo "</table>";
+	echo "</form>";
 
 }
+
+?>

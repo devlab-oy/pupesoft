@@ -1,230 +1,220 @@
 <?php
 
-//  Jos olemme tekemässä jotain meillä on oltava kuka tai listaamme kaikki laskut mitä tietokannasta löytyy!
-if ($tee == "T" and strlen(trim($kuka)) == 0) {
-  echo "<font class='error'>".t("VIRHE: Hyväksyjä puuttuu")."!</font><br><br>";
-  $tee = "";
+//	Jos olemme tekemässä jotain meillä on oltava kuka tai listaamme kaikki laskut mitä tietokannasta löytyy!
+if($tee == "T" and strlen(trim($kuka)) == 0) {
+	echo "<font class='error'>".t("VIRHE: Hyväksyjä puuttuu")."!</font><br><br>";
+	$tee = "";
 }
 
 if ($tee == '') {
-  // Summaus hyväksynnässä olevista laskuista
-  echo "<font class='head'>".t("Laskuja hyväksymättä")."</font><hr>";
+ 	// Summaus hyväksynnässä olevista laskuista
+	echo "<font class='head'>".t("Laskuja hyväksymättä")."</font><hr>";
 
-  $query = "SELECT hyvaksyja_nyt,
-            if(kuka.nimi is not null, kuka.nimi, hyvaksyja_nyt) nimi,
-            concat_ws('/',sum(1), sum(if(alatila='H', 1, 0))) kplpys,
-            min(erpcm) erpcm,
-            max(erpcm) maxerpcm,
-            round(sum(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi)), 2) summa
-            FROM lasku
-            LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvaksyja_nyt
-            WHERE lasku.yhtio  = '$kukarow[yhtio]'
-            and tila           = 'H'
-            and hyvaksyja_nyt != ''
-            GROUP BY 1,2
-            ORDER BY nimi";
-  $result = pupe_query($query);
+	/* Lisätty 2013 ehto, jolla osataan hakea oikea yhtiö/toimipiste  */
+	if ($kukarow['yhtio'] == "myyra")
+	{
+		$apuquery = "SELECT ovttunnus FROM yhtio WHERE yhtio='$kukarow[yhtio]'";
+		$apuresult = mysql_query($apuquery) or pupe_error($apuquery);
+		$tunnus = mysql_fetch_assoc($apuresult);
+		
+		$query = "	SELECT hyvaksyja_nyt,
+					if(kuka.nimi is not null, kuka.nimi, hyvaksyja_nyt) nimi,
+					concat_ws('/',sum(1), sum(if(alatila='H', 1, 0))) kplpys,
+					min(erpcm) erpcm,
+					max(erpcm) maxerpcm,
+					round(sum(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi)), 2) summa
+					FROM lasku
+					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvaksyja_nyt
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.yhtio_ovttunnus in (lasku.yhtio_ovttunnus,$tunnus[ovttunnus])
+					and tila = 'H'
+					and hyvaksyja_nyt != ''
+					GROUP BY 1,2
+					ORDER BY nimi";
+	}
+	else
+	{
+		$query = "	SELECT hyvaksyja_nyt,
+					if(kuka.nimi is not null, kuka.nimi, hyvaksyja_nyt) nimi,
+					concat_ws('/',sum(1), sum(if(alatila='H', 1, 0))) kplpys,
+					min(erpcm) erpcm,
+					max(erpcm) maxerpcm,
+					round(sum(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi)), 2) summa
+					FROM lasku
+					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvaksyja_nyt
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and tila = 'H'
+					and hyvaksyja_nyt != ''
+					GROUP BY 1,2
+					ORDER BY nimi";
+	}
+	$result = mysql_query($query) or pupe_error($query);
 
-  echo "<table>";
-  echo "<tr>";
-  echo "<th>".t("Kuka")."</th>";
-  echo "<th>".t("Kpl")."/".t("pysäytetty")."</th>";
-  echo "<th>".t("Min")." ".t("eräpvm")."</th>";
-  echo "<th>".t("Max")." ".t("eräpvm")."</th>";
-  echo "<th>".t("Summa")." $yhtiorow[valkoodi]</th>";
-  echo "</tr>";
+	echo "<table>";
+	echo "<tr>";
+	echo "<th>".t("Kuka")."</th>";
+	echo "<th>".t("Kpl")."/".t("pysäytetty")."</th>";
+	echo "<th>".t("Min")." ".t("eräpvm")."</th>";
+	echo "<th>".t("Max")." ".t("eräpvm")."</th>";
+	echo "<th>".t("Summa")." $yhtiorow[valkoodi]</th>";
+	echo "</tr>";
 
-  while ($trow = mysql_fetch_array($result)) {
-    echo "<tr class='aktiivi'>";
-    echo "<td><a href = 'raportit.php?toim=hyvaksynta&tee=T&kuka=$trow[hyvaksyja_nyt]'>$trow[nimi]</a></td>";
-    echo "<td>$trow[kplpys]</td>";
-    echo "<td>".tv1dateconv($trow["erpcm"])."</td>";
-    echo "<td>".tv1dateconv($trow["maxerpcm"])."</td>";
-    echo "<td align='right'>$trow[summa]</td>";
-    echo "</tr>";
-  }
-  echo "</table><br>";
+	while ($trow = mysql_fetch_array($result)) {
+		
+		// Lisätty 3.7.2013, lisätty if lause, ettei tule vääriä hyväksyntiä
+		if ($trow['summa'] > 0)
+		{
+			echo "<tr class='aktiivi'>";
+			echo "<td><a href = 'raportit.php?toim=hyvaksynta&tee=T&kuka=$trow[hyvaksyja_nyt]'>$trow[nimi]</a></td>";
+			echo "<td>$trow[kplpys]</td>";
+			echo "<td>".tv1dateconv($trow["erpcm"])."</td>";
+			echo "<td>".tv1dateconv($trow["maxerpcm"])."</td>";
+			echo "<td align='right'>$trow[summa]</td>";
+			echo "</tr>";
+		}
+	}
+	echo "</table><br>";
 }
 
 // Yhden käyttäjän pöydällä olevat laskut tai sen muutos
 if ($tee == 'T') {
-  // Muutetaan hyväksyntää
-  if ((strlen($mika) > 0) and (strlen($nimi) > 0)) {
-    $query = "SELECT hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, hyvaksyja_nyt, h1time, h2time, h3time, h4time, h5time
-              FROM lasku
-              WHERE tunnus = '$mika' and yhtio = '$kukarow[yhtio]'";
-    $result = pupe_query($query);
+	// Muutetaan hyväksyntää
+	if ((strlen($mika) > 0) and (strlen($nimi) > 0)) {
+		$query = "	SELECT hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, hyvaksyja_nyt, h1time, h2time, h3time, h4time, h5time
+				  	FROM lasku
+				  	WHERE tunnus = '$mika' and yhtio = '$kukarow[yhtio]'";
+		$result = mysql_query($query) or pupe_error($query);
 
-    if (mysql_num_rows($result) == 0) {
-      echo "<font class='error'>".t("Muutettavaa laskua ei löytynyt")."!</font>";
-      exit;
-    }
+		if (mysql_num_rows($result) == 0) {
+			echo "<font class='error'>".t("Muutettavaa laskua ei löytynyt")."!</font>";
+			exit;
+		}
+		$trow=mysql_fetch_array ($result);
 
-    $trow = mysql_fetch_array($result);
-    $mita = "";
+		$mita="";
 
-    // Aikaikkunan poisto, joku muu ehti ennen meitä
-    if ($trow['hyvaksyja_nyt'] == $kuka) {
-      if (($trow['hyvak1'] == $kuka) and ($trow['h1time'] == '0000-00-00 00:00:00')) $mita = "hyvak1";
-      elseif (($trow['hyvak2'] == $kuka) and ($trow['h2time'] == '0000-00-00 00:00:00')) $mita = "hyvak2";
-      elseif (($trow['hyvak3'] == $kuka) and ($trow['h3time'] == '0000-00-00 00:00:00')) $mita = "hyvak3";
-      elseif (($trow['hyvak4'] == $kuka) and ($trow['h4time'] == '0000-00-00 00:00:00')) $mita = "hyvak4";
-      elseif (($trow['hyvak5'] == $kuka) and ($trow['h5time'] == '0000-00-00 00:00:00')) $mita = "hyvak5";
-      else {
-        echo "<font class='error'>".t("Laskun siirto ei onnistunut")."</font> '$kuka' --> '$nimi'<br>";
-        exit;
-      }
+		// Aikaikkunan poisto, joku muu ehti ennen meitä
+		if ($trow['hyvaksyja_nyt'] == $kuka) {
+			if (($trow['hyvak1'] == $kuka) and ($trow['h1time'] == '0000-00-00 00:00:00')) $mita = "hyvak1";
+			elseif (($trow['hyvak2'] == $kuka) and ($trow['h2time'] == '0000-00-00 00:00:00')) $mita = "hyvak2";
+			elseif (($trow['hyvak3'] == $kuka) and ($trow['h3time'] == '0000-00-00 00:00:00')) $mita = "hyvak3";
+			elseif (($trow['hyvak4'] == $kuka) and ($trow['h4time'] == '0000-00-00 00:00:00')) $mita = "hyvak4";
+			elseif (($trow['hyvak5'] == $kuka) and ($trow['h5time'] == '0000-00-00 00:00:00')) $mita = "hyvak5";
+			else {
+				echo "<font class='error'>".t("Laskun siirto ei onnistunut")."</font> '$kuka' --> '$nimi'<br>";
+				exit;
+			}
 
-      $query = "UPDATE lasku set
-                $mita = '$nimi',
-                hyvaksyja_nyt  = '$nimi',
-                alatila        = ''
-                  WHERE tunnus = '$mika'";
-      $result = pupe_query($query);
-      echo "<font class='message'>".t("Lasku siirrettiin").".. '$kuka' --> '$nimi'</font><br>";
-    }
-    else {
-      echo "<font class='error'>".t("Lasku ei enää ollut siirrettävissä")."!</font><br>";
-    }
-  }
+			$query = "	UPDATE lasku set
+						$mita = '$nimi',
+						hyvaksyja_nyt = '$nimi',
+						alatila = ''
+					  	WHERE tunnus = '$mika'";
+			$result = mysql_query($query) or pupe_error($query);
+			echo "<font class='message'>".t("Lasku siirrettiin").".. '$kuka' --> '$nimi'</font><br>";
+		}
+		else {
+			echo "<font class='error'>".t("Lasku ei enää ollut siirrettävissä")."!</font><br>";
+		}
+	}
 
-  $query = "SELECT nimi, kuka, tuuraaja
-            FROM kuka
-            WHERE yhtio = '$kukarow[yhtio]'
-            and kuka    = '$kuka'";
-  $result = pupe_query($query);
+	$query = "	SELECT nimi, kuka, tuuraaja
+			  	FROM kuka
+			  	WHERE yhtio = '$kukarow[yhtio]'
+				and kuka = '$kuka'";
+	$result = mysql_query($query) or pupe_error($query);
 
-  if (mysql_num_rows($result) == 0) {
-    echo "<font class='message'>".t("Käyttäjää ei enää löydy tältä yhtiöltä")."!</font><br>";
-    $trow = array();
-  }
-  else {
-    $trow = mysql_fetch_array($result);
-  }
+	if (mysql_num_rows($result) == 0) {
+		echo "<font class='message'>".t("Käyttäjää ei enää löydy tältä yhtiöltä")."!</font><br>";
+		$trow = array();
+	}
+	else {
+		$trow = mysql_fetch_array ($result);
+	}
 
-  echo "<font class='head'>$trow[nimi]".t(":n pöydällä olevat laskut")."</font><hr>";
+	echo "<font class='head'>$trow[nimi]".t(":n pöydällä olevat laskut")."</font><hr>";
 
-  // Tehdään popup, jolla voidaan hyväksyjä myöhemmin vaihtaa
-  $query = "SELECT DISTINCT kuka.kuka, kuka.nimi
-            FROM kuka
-            JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi like '%hyvak.php'
-            WHERE kuka.yhtio    = '$kukarow[yhtio]'
-            AND kuka.aktiivinen = 1
-            AND kuka.extranet   = ''
-            AND kuka.hyvaksyja  = 'o'
-            ORDER BY kuka.nimi";
-  $result = pupe_query($query);
+	// Tehdään popup, jolla voidaan hyväksyjä myöhemmin vaihtaa
+	$query = "	SELECT DISTINCT kuka.kuka, kuka.nimi
+				FROM kuka
+				JOIN oikeu ON oikeu.yhtio = kuka.yhtio and oikeu.kuka = kuka.kuka and oikeu.nimi like '%hyvak.php'
+				WHERE kuka.yhtio = '$kukarow[yhtio]'
+				and kuka.hyvaksyja = 'o'
+				ORDER BY kuka.nimi";
+	$result = mysql_query($query) or pupe_error($query);
 
-  $ulos = "<select name='nimi'>";
+	$ulos = "<select name='nimi'>";
 
-  while ($vrow = mysql_fetch_array($result)) {
-    $sel = "";
-    if ($vrow['kuka'] == $trow['tuuraaja']) {
-      $sel = "selected";
-    }
-    $ulos .= "<option value = '$vrow[kuka]' $sel>$vrow[nimi]";
-  }
-  $ulos .= "</select>";
+	while ($vrow = mysql_fetch_array($result)) {
+		$sel = "";
+		if ($vrow['kuka'] == $trow['tuuraaja']) {
+			$sel = "selected";
+		}
+		$ulos .= "<option value = '$vrow[kuka]' $sel>$vrow[nimi]";
+	}
+	$ulos .= "</select>";
 
-  $query = "SELECT tapvm, kapvm, erpcm, if(alatila='',nimi,concat_ws('<br>', nimi, comments)) nimi, postitp, round(summa * vienti_kurssi, 2) 'kotisumma',
-            summa, valkoodi, ebid, tunnus, alatila, if(laskunro = 0, '', laskunro) laskunro
-            FROM lasku
-            WHERE hyvaksyja_nyt='$kuka'
-            and yhtio = '$kukarow[yhtio]'
-            and tila  in ('H','Y','M','P','Q')
-            ORDER BY erpcm";
-  $result = pupe_query($query);
+	$query = "	SELECT tapvm, kapvm, erpcm, if(alatila='',nimi,concat_ws('<br>', nimi, comments)) nimi, postitp, round(summa * vienti_kurssi, 2) 'kotisumma',
+				summa, valkoodi, ebid, tunnus, alatila, if(laskunro = 0, '', laskunro) laskunro
+				FROM lasku
+				WHERE hyvaksyja_nyt='$kuka'
+				and yhtio = '$kukarow[yhtio]'
+				and tila in ('H','Y','M','P','Q')
+				ORDER BY erpcm";
+	$result = mysql_query($query) or pupe_error($query);
 
-  pupe_DataTables(array(array($pupe_DataTables[0], 11, 11)));
+	echo "<table><tr>";
+	echo "<th>".t("Tapvm")."</th>";
+	echo "<th>".t("Kapvm")."</th>";
+	echo "<th>".t("Eräpvm")."</th>";
+	echo "<th>".t("Nimi")."</th>";
+	echo "<th>".t("Postitp")."</th>";
+	echo "<th>".t("Laskunro")."</th>";
+	echo "<th>".t("Yhtiön valuutassa")."</th>";
+	echo "<th>".t("Laskun valuutassa")."</th>";
+	echo "<th>".t("EBID")."</th>";
+	echo "<th>".t("Siirrä")."</th>";
+	echo "</tr>";
 
-  echo "<table class='display dataTable' id='$pupe_DataTables[0]'>";
-  echo "<thead>";
-  echo "<tr>";
-  echo "<th>".t("Tapvm")."</th>";
-  echo "<th>".t("Kapvm")."</th>";
-  echo "<th>".t("Eräpvm")."</th>";
-  echo "<th>".t("Nimi")."</th>";
-  echo "<th>".t("Postitp")."</th>";
-  echo "<th>".t("Laskunro")."</th>";
-  echo "<th>".t("Yhtiön valuutassa")."</th>";
-  echo "<th>".t("Laskun valuutassa")."</th>";
-  echo "<th>".t("Kustp")."</th>";
-  echo "<th>".t("EBID")."</th>";
-  echo "<th>".t("Siirrä")."</th>";
-  echo "</tr>";
-  echo "<tr>";
-  echo "<td><input type='text' class='search_field' name='search_tapvm'></td>";
-  echo "<td><input type='text' class='search_field' name='search_kapvm'></td>";
-  echo "<td><input type='text' class='search_field' name='search_erpcm'></td>";
-  echo "<td><input type='text' class='search_field' name='search_nimi'></td>";
-  echo "<td><input type='text' class='search_field' name='search_postitp'></td>";
-  echo "<td><input type='text' class='search_field' name='search_laskunro'></td>";
-  echo "<td><input type='text' class='search_field' name='search_kotisumma'></td>";
-  echo "<td><input type='text' class='search_field' name='search_summa'></td>";
-  echo "<td><input type='text' class='search_field' name='search_kustp'></td>";
-  echo "<td><input type='text' class='search_field' name='search_ebid'></td>";
-  echo "<td><input type='text' class='search_field' name='search_siirra'></td>";
-  echo "</tr>";
-  echo "</thead>";
+	while ($trow = mysql_fetch_array ($result)) {
 
-  while ($trow = mysql_fetch_array($result)) {
+		echo "<tr class='aktiivi'>";
 
-    echo "<tr class='aktiivi'>";
+		if ($trow['alatila'] == 'H') {
+			$erotin = 'th';
+	 	}
+		else {
+			$erotin = 'td';
+		}
 
-    if ($trow['alatila'] == 'H') {
-      $erotin = 'th';
-    }
-    else {
-      $erotin = 'td';
-    }
+		echo "<$erotin>".tv1dateconv($trow["tapvm"])."</$erotin>";
 
-    echo "<$erotin>".tv1dateconv($trow["tapvm"])."</$erotin>";
+		if ($trow["kapvm"] != "0000-00-00") {
+			echo "<$erotin>".tv1dateconv($trow["kapvm"])."</$erotin>";
+		}
+		else {
+			echo "<$erotin></$erotin>";
+		}
 
-    if ($trow["kapvm"] != "0000-00-00") {
-      echo "<$erotin>".tv1dateconv($trow["kapvm"])."</$erotin>";
-    }
-    else {
-      echo "<$erotin></$erotin>";
-    }
+		echo "<$erotin>".tv1dateconv($trow["erpcm"])."</$erotin>";
+		echo "<$erotin>$trow[nimi]</$erotin>";
+		echo "<$erotin>$trow[postitp]</$erotin>";
+		echo "<$erotin>$trow[laskunro]</$erotin>";
+		echo "<$erotin style='text-align: right;'>$trow[kotisumma] $yhtiorow[valkoodi]</$erotin>";
+		echo "<$erotin style='text-align: right;'>$trow[summa] $trow[valkoodi]</$erotin>";
 
-    echo "<$erotin>".tv1dateconv($trow["erpcm"])."</$erotin>";
-    echo "<$erotin>$trow[nimi]</$erotin>";
-    echo "<$erotin>$trow[postitp]</$erotin>";
-    echo "<$erotin>$trow[laskunro]</$erotin>";
-    echo "<$erotin style='text-align: right;'>$trow[kotisumma] $yhtiorow[valkoodi]</$erotin>";
-    echo "<$erotin style='text-align: right;'>$trow[summa] $trow[valkoodi]</$erotin>";
+		// tehdään lasku linkki
+		echo "<$erotin>". ebid($trow['tunnus']) ."</$erotin>";
 
-    // Selvitetään laskun kustannuspaikat
-    $kustpq = "SELECT tiliointi.kustp, kustannuspaikka.nimi
-               FROM tiliointi
-               JOIN kustannuspaikka ON (kustannuspaikka.yhtio = tiliointi.yhtio AND kustannuspaikka.tunnus = tiliointi.kustp)
-               WHERE tiliointi.yhtio   = '$kukarow[yhtio]'
-               AND tiliointi.ltunnus   = '$trow[tunnus]'
-               and tiliointi.kustp    != 0
-               and tiliointi.korjattu  = ''
-               ORDER BY tiliointi.tunnus LIMIT 1";
-    $kustpres = pupe_query($kustpq);
-
-    $kustannuspaikan_nimi = "";
-
-    if (mysql_num_rows($kustpres) == 1) {
-      $kustprivi = mysql_fetch_assoc($kustpres);
-      $kustannuspaikan_nimi = $kustprivi["nimi"];
-    }
-
-    echo "<td>$kustannuspaikan_nimi</td>";
-
-    // tehdään lasku linkki
-    echo "<$erotin>". ebid($trow['tunnus']) ."</$erotin>";
-
-    echo "  <form action = 'raportit.php?toim=hyvaksynta&tee=T&kuka=$kuka' method = 'post'>
-        <input type = 'hidden' name = 'mika' value = '$trow[tunnus]'>";
-    echo "  <$erotin>
-        $ulos
-        <input type = 'submit' value = '".t("Siirrä")."'>
-        </$erotin>
-        </form></tr>";
-
-  }
-  echo "</table><br>";
+		echo "	<form action = 'raportit.php?toim=hyvaksynta&tee=T&kuka=$kuka' method = 'post'>
+				<input type = 'hidden' name = 'mika' value = '$trow[tunnus]'>";
+		echo "	<$erotin>
+				$ulos
+				<input type = 'submit' value = '".t("Siirrä")."'>
+				</$erotin>
+				</form></tr>";
+	}
+	echo "</table><br>";
 }
+
+?>

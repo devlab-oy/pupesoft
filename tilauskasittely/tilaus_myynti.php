@@ -1364,6 +1364,7 @@ if ($tee == "VALMIS"
     $maksuehtores = pupe_query($query_maksuehto);
 
     if (mysql_num_rows($maksuehtores) > 1) {
+      echo "<font class='head'>$otsikko</font><hr><br>";
       echo "<table><tr><th>" . t("Maksutapa") . ":</th>";
       while ($maksuehtorow = mysql_fetch_assoc($maksuehtores)) {
         echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
@@ -1872,7 +1873,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
                     <td>{$kateista_takaisin} {$laskurow["valkoodi"]}</td>
                   </tr>
                 </tbody>
-              </table>";
+              </table><br>";
       }
 
       if (($kukarow["kassamyyja"] != '' or
@@ -1911,6 +1912,7 @@ if ($tee == "VALMIS" and ($muokkauslukko == "" or $toim == "PROJEKTI")) {
         echo "<tr><th>$yhteensa_teksti</th><td align='right'>$kaikkiyhteensa</td><td>$laskurow[valkoodi]</td></tr>";
         echo "<tr><th>".t("Annettu")."</th><td><input size='7' autocomplete='off' type='text' id='kateisraha' name='kateisraha' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
         echo "<tr><th>".t("Takaisin")."</th><td name='loppusumma' id='loppusumma' align='right'><strong>0.00</strong></td><td>$laskurow[valkoodi]</td></tr>";
+        echo "</table><br>";
 
         $formi  = "laskuri";
         $kentta = "kateisraha";

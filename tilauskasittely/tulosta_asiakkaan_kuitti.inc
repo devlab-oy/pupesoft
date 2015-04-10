@@ -9,24 +9,37 @@
  * @param array   $params
  *  Esimerkki config parametreistä arvoina defaultit:
  *    array(
- *      "header_teksti"     => false,
- *      "footer_teksti"     => false,
- *      "avaa_lipas_lopuksi => false
+ *      "header_teksti"      => false,
+ *      "footer_teksti"      => false,
+ *      "avaa_lipas_lopuksi" => true,
+ *      "kateinen"           => false
  *    );
+ *
+ * @return bool
  */
 
 
 function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array()) {
   global $yhtiorow;
 
+  if (tulostimen_tyyppi($tulostimen_tunnus) != "kuittitulostin" or empty($laskunro)) {
+    return false;
+  }
+
   $footer_teksti      = empty($params["footer_teksti"]) ? false : $params["footer_teksti"];
   $header_teksti      = empty($params["header_teksti"]) ? false : $params["header_teksti"];
-  $avaa_lipas_lopuksi = $params["avaa_lipas_lopuksi"];
+  $kateinen           = empty($params["kateinen"]) ? false : hintapyoristys($params["kateinen"]);
+  $avaa_lipas_lopuksi = empty($params["avaa_lipas_lopuksi"]) ? true : $params["avaa_lipas_lopuksi"];
 
-  $lasku                = hae_myyntilasku($laskunro);
-  $maksupaatetapahtumat = hae_maksupaatetapahtumat($laskunro);
+  list($maksupaatetapahtumat, $maksupaatesumma) = hae_maksupaatetapahtumat($laskunro);
   list($tilausrivit, $tilausnumerot, $verot) = hae_tilausrivit($laskunro);
+  $lasku = hae_myyntilasku($laskunro);
   list($yhteensa, $pyoristys, $loppusumma) = summat($lasku);
+
+  if ($kateinen) {
+    $takaisin = $kateinen - $loppusumma + $maksupaatesumma;
+    $takaisin = hintapyoristys($takaisin);
+  }
 
   // Escape sequencejä printterille
   $logo           = "\x1C\x70\x01\x10";
@@ -49,11 +62,24 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $asiakkaan_kieli      = $lasku["asiakkaan_kieli"];
 
   // Arvojen asettelu spritfillä ja muu asettelu
-  $yhteensa = sprintf("%34.34s", $yhteensa);
+  $yhteensa_left = 32 - strlen($lasku["valkoodi"]);
+  $yhteensa = sprintf("%{$yhteensa_left}.{$yhteensa_left}s", $yhteensa);
 
   if ($pyoristys) {
     $pyoristys  = sprintf("%33.33s", $pyoristys);
     $loppusumma = sprintf("%32.32s", $loppusumma);
+  }
+
+  if ($maksupaatesumma != 0) {
+    $maksupaatesumma = sprintf("%36.36s", $maksupaatesumma);
+  }
+
+  if ($kateinen != 0) {
+    $kateinen = sprintf("%34.34s", $kateinen);
+
+    if (isset($takaisin)) {
+      $takaisin = sprintf("%34.34s", $takaisin);
+    }
   }
 
   $verorivit = array();
@@ -68,7 +94,13 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $tilausnumero_teksti = count($tilausnumerot) > 1 ? "Tilausnumerot" : "Tilausnumero";
 
   // Printattavan stringin luominen
-  $kuitin_teksti = "{$logo}\n\n";
+  $kuitin_teksti = "";
+
+  if ($avaa_lipas_lopuksi) {
+    $kuitin_teksti .= $avaa_lipas;
+  }
+
+  $kuitin_teksti .= "{$logo}\n\n";
 
   $kuitin_teksti .= "{$align_center}";
 
@@ -102,11 +134,24 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
 
   // Hinta yhteensä
   $kuitin_teksti .= "==========================================\n";
-  $kuitin_teksti .= "{$emphasized_on}YHTEENSÄ{$yhteensa}{$emphasized_off}\n";
+  $kuitin_teksti .= "{$emphasized_on}YHTEENSÄ, {$lasku["valkoodi"]}{$yhteensa}{$emphasized_off}\n";
 
   if ($pyoristys) {
     $kuitin_teksti .= "{$emphasized_on}PYÖRISTYS{$pyoristys}{$emphasized_off}\n";
     $kuitin_teksti .= "{$emphasized_on}LOPPUSUMMA{$loppusumma}{$emphasized_off}\n";
+  }
+
+  // Maksutapaerottelu
+  if ($maksupaatesumma != 0) {
+    $kuitin_teksti .= t("KORTTI") . "{$maksupaatesumma}\n";
+  }
+
+  if ($kateinen != 0) {
+    $kuitin_teksti .= t("KÄTEINEN") . "{$kateinen}\n";
+
+    if (isset($takaisin)) {
+      $kuitin_teksti .= t("TAKAISIN") . "{$takaisin}\n";
+    }
   }
 
   // Verotiedot
@@ -135,7 +180,11 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $kuitin_teksti .= t($tilausnumero_teksti, $asiakkaan_kieli) .
     ": " .
     implode(", ", $tilausnumerot) .
-    "\n\n\n";
+    "\n\n";
+
+  $kuitin_teksti .= date("d.m.Y H:i:s");
+
+  $kuitin_teksti .= "\n\n\n";
 
   $kuitin_teksti .= "{$emphasized_on}";
   $kuitin_teksti .= "{$yhtiorow['www']}\n\n";
@@ -154,11 +203,9 @@ function tulosta_asiakkaan_kuitti($laskunro, $tulostimen_tunnus, $params = array
   $kuitin_teksti .= "\n\n\n\n\n\n";
   $kuitin_teksti .= $katkaisu;
 
-  if ($avaa_lipas_lopuksi) {
-    $kuitin_teksti .= $avaa_lipas;
-  }
-
   lpr($kuitin_teksti, $tulostimen_tunnus);
+
+  return true;
 }
 
 function hae_myyntilasku($laskunro) {
@@ -205,12 +252,14 @@ function hae_maksupaatetapahtumat($laskunro) {
   $result = pupe_query($query);
 
   $tapahtumat = array();
+  $summa      = 0;
 
   while ($tapahtuma = mysql_fetch_assoc($result)) {
     array_push($tapahtumat, $tapahtuma);
+    $summa += $tapahtuma["summa_valuutassa"];
   }
 
-  return $tapahtumat;
+  return array($tapahtumat, hintapyoristys($summa));
 }
 
 function hae_tilausrivit($laskunro) {
@@ -332,28 +381,23 @@ function summat($lasku) {
 }
 
 function laske_yksikkohinta($tilausrivi) {
-  global $yhtiorow;
+  return $tilausrivi["hinta"];
+}
 
-  if ($yhtiorow["alv_kasittely"] == '') {
-    $laskalv = $tilausrivi["alv"];
+function tulosta_kauppiaan_kuitti($teksti, $tulostimen_tunnus) {
+  lpr("{$teksti}\n\n\n\n\n\n\x1B\x69", $tulostimen_tunnus);
+}
 
-    if ($tilausrivi["alv"] >= 500) {
-      $laskalv = 0;
-    }
+function tulostimen_tyyppi($tulostimen_tunnus) {
+  global $kukarow;
 
-    $ehto1 = $laskurow["valkoodi"] != '';
-    $ehto2 = trim(strtoupper($laskurow["valkoodi"])) != trim(strtoupper($yhtiorow["valkoodi"]));
+  $query = "SELECT mediatyyppi
+            FROM kirjoittimet
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$tulostimen_tunnus}'";
 
-    if ($ehto1 and $ehto2) {
-      $yksikkohinta = $tilausrivi["hinta"] / (1 + $laskalv / 100);
-    }
-    else {
-      $yksikkohinta = round($tilausrivi["hinta"] / (1 + $laskalv / 100), 2);
-    }
-  }
-  else {
-    $yksikkohinta = $tilausrivi["hinta"];
-  }
+  $result = pupe_query($query);
+  $result = mysql_fetch_assoc($result);
 
-  return $yksikkohinta;
+  return $result["mediatyyppi"];
 }

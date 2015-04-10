@@ -341,7 +341,7 @@ if (!function_exists('finvoice_otsik')) {
         xml_add("InvoiceRecipientPartyIdentifier", tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa']),  $tootfinvoice, 35);
 
         $laskutus_nimitieto = trim($laskutusosoitetiedot["laskutus_nimi"]." ".$laskutusosoitetiedot["laskutus_nimitark"]);
-        $laskutus_nimitieto_array = str_split($laskutus_nimitieto, 35);
+        $laskutus_nimitieto_array = str_split($laskutus_nimitieto, 35, 2);
 
         foreach ($laskutus_nimitieto_array as $laskutus_nimi_osa) {
           xml_add("InvoiceRecipientOrganisationName", $laskutus_nimi_osa, $tootfinvoice, 35, 2);
@@ -373,7 +373,7 @@ if (!function_exists('finvoice_otsik')) {
       xml_add("BuyerPartyIdentifier",  tulosta_ytunnus($lasrow['ytunnus'], $lasrow['maa']),         $tootfinvoice, 35);
 
       $asiakas_nimitieto = trim($lasrow['nimi']." ".$lasrow['nimitark']);
-      $asiakas_nimitieto_array = str_split($asiakas_nimitieto, 35);
+      $asiakas_nimitieto_array = str_split($asiakas_nimitieto, 35, 2);
 
       foreach ($asiakas_nimitieto_array as $asiakas_nimi_osa) {
         xml_add("BuyerOrganisationName", $asiakas_nimi_osa, $tootfinvoice, 35, 2);

@@ -969,7 +969,9 @@ if ($tila == 'tee_kohdistus') {
       foreach ($tuoteno_array as $_tuoteno => $_myyntihinta) {
 
         $query = "UPDATE tuote SET
-                  myyntihinta = '{$_myyntihinta}'
+                  myyntihinta = '{$_myyntihinta}',
+                  muutospvm   = now(),
+                  muuttaja    = '$kukarow[kuka]'
                   WHERE yhtio = '{$kukarow['yhtio']}'
                   AND tuoteno = '{$_tuoteno}'";
         pupe_query($query);

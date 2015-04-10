@@ -51,3 +51,11 @@ table.indexvas td {
 .hidden {
   display: none;
 }
+
+.left {
+  float: left;
+}
+
+.right {
+  float: right;
+}

@@ -12,12 +12,6 @@ echo "\nSTART: $hname :$dbkanta\n";
 $sql = "ALTER DATABASE $dbkanta CHARACTER SET utf8 COLLATE utf8_unicode_ci;";
 pupe_query($sql);
 
-$sql = "ALTER TABLE budjetti_tuote drop index tubu;";
-pupe_query($sql);
-
-$sql = "CREATE INDEX tubu on budjetti_tuote (yhtio, kausi, tuoteno, osasto(50), try(50));";
-pupe_query($sql);
-
 $query  = "SHOW TABLES FROM $dbkanta";
 $tabresult = pupe_query($query);
 

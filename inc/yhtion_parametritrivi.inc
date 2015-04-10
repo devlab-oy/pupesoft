@@ -2658,7 +2658,7 @@ if ($fieldname == "jt_siirtolistojen_yhdistaminen") {
   $sel = $trow[$i] == 'K' ? " selected" : "";
 
   $ulos .= "<option value = ''>".t("Siirtolistat yhdistet‰‰n JT-rivien vapautuksessa, jos t‰m‰ on mahdollista")."</option>";
-  $ulos .= "<option value = 'K'{$sel}>".t("Siirtolistoja ei ikin‰ yhdistet‰ JT-rivien vapautuksessa")."</option>";
+  $ulos .= "<option value = 'K'{$sel}>".t("Siirtolistoja ei yhdistet‰ JT-rivien vapautuksessa")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

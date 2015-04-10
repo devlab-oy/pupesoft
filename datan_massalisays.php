@@ -309,6 +309,12 @@ if ($tee == 'GO') {
       $kuva = "$kuva.$ext";
     }
 
+    // katotaan josko nimessä olisi alaviiva, katkaistaan siitä
+    if (strpos($kuva, "_") !== FALSE and $kukarow["yhtio"] == "filla") {
+      list($kuva, $jarjestys) = explode("_", $kuva);
+      $kuva = "$kuva.$ext";
+    }
+
     $apuselite = "";
     $mikakieli = "fi";
 

@@ -2438,6 +2438,46 @@ if (!function_exists('alvierittely')) {
       $pdf_lasku->draw_text(400, $kala, t("Nimenselvennys"), $thispage, $norm);
     }
 
+    if (($yhtiorow['maksupaate_kassamyynti'] == 'K' and $kukarow["maksupaate_kassamyynti"] == "") or
+        $kukarow["maksupaate_kassamyynti"] == "K"
+    ) {
+      // Jos maksupääte on enabloitu, tarvitaan myös maksupäätetapahtumien kuitit
+      $query = "SELECT ifnull(group_concat(distinct tunnus SEPARATOR ', '), 0) tilnot
+                FROM lasku
+                WHERE yhtio   = '$kukarow[yhtio]'
+                and laskunro  = '$laskurow[laskunro]'
+                and tila      = 'L'
+                and laskunro != 0";
+      $result = pupe_query($query);
+      $tilnorivi = mysql_fetch_assoc($result);
+      $tilausnumerot = $tilnorivi['tilnot'];
+
+      $query = "SELECT
+                *
+                FROM maksupaatetapahtumat
+                WHERE yhtio ='{$yhtiorow['yhtio']}'
+                AND tilausnumero IN ($tilausnumerot)
+                AND maksutapa != ''
+                AND tila != ''
+                AND asiakkaan_kuitti != ''
+                AND tilausnumero != 0";
+      $result = pupe_query($query);
+      
+      if (mysql_affected_rows() > 0) {
+        $pdf_lasku->draw_text(20, $kala, t("Maksupäätetapahtumat"), $thispage, $norm);
+        $kala -= 10;
+      }
+      // TODO sivunvaihto kun ylitetään tietty pituus (jos tapahtumia on tarpeeksi niin ei mahdu sivulle)
+      while ($maksupaatetapahtuma = mysql_fetch_assoc($result)) {
+        $tapahtuman_kaikki_rivit = explode("\n", $maksupaatetapahtuma['asiakkaan_kuitti']);
+        foreach ($tapahtuman_kaikki_rivit as $yksittainen_tapahtumarivi) {
+          $pdf_lasku->draw_text(20, $kala, $yksittainen_tapahtumarivi, $thispage, $pieni);
+          $kala -= 7;
+        }
+      }
+
+      $kala -= 10;
+    }
     return $kala;
   }
 }

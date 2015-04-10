@@ -354,8 +354,6 @@ if ($handle = opendir($teccomkansio)) {
             // loop_packet funktio tekee kaikki lisäykset asn-sanomatauluun ja palauttaa viimeisen lisätyn rivin mysql_id() joka laitetaan liitetiedostoon.
             $tunnus_liitetiedostoon = loop_packet($xml, $parameters);
 
-            $filesize = strlen($tiedosto_sisalto);
-
             $tecquery = "INSERT INTO liitetiedostot SET
                          yhtio           = '$kukarow[yhtio]',
                          liitos          = 'asn_sanomat',
@@ -363,7 +361,7 @@ if ($handle = opendir($teccomkansio)) {
                          data            = '$tiedosto_sisalto',
                          selite          = '$tavarantoimittajanumero ASN_sanoman $asn_numero tiedosto',
                          filename        = '$file',
-                         filesize        = '$filesize',
+                         filesize        = length(data),
                          filetype        = 'text/xml',
                          image_width     = '',
                          image_height    = '',

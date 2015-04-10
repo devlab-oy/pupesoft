@@ -50,6 +50,7 @@ $query = "SELECT
           AND lasku.viesti = 'tullivarastotoimitus'
           AND lasku.tila = 'L'
           AND lasku.alatila = 'A'
+          AND tuote.mallitarkenne != 'varastointinimike'
           GROUP BY tilausrivi.tuoteno";
 $result = pupe_query($query);
 

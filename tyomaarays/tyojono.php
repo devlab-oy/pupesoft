@@ -164,10 +164,8 @@ while ($tyostatus_row = mysql_fetch_assoc($tyostatus_result)) {
 }
 echo "</select>";
 echo "</td>";
-$piilotus = $yhtiorow['laiterekisteri_kaytossa'] != '' ? " style='visibility:hidden; display:none;'" : '';
-echo "<td $piilotus>";
-echo "<input type='hidden' class='search_field' name='search_muokkaa_haku'></td>";
-echo "<td style='visibility:hidden; display:none;'><input type='hidden' class='search_field' name='search_statusjono_haku'></td>";
+echo "<td style='visibility:hidden; display:none;'><input type='hidden' class='search_field' name='search_muokkaa_haku'></td>";
+if ($yhtiorow['laiterekisteri_kaytossa'] == '') echo "<td></td>";
 echo "</tr>";
 echo "</thead>";
 
@@ -595,10 +593,16 @@ echo "<br><br>";
 
 // Konffataan datatablesit
 if ($yhtiorow['laiterekisteri_kaytossa'] != '') {
-  $datatables_conf[] = array($pupe_DataTables[0], 12, 11, true, true);
+  $datatables_conf[] = array($pupe_DataTables[0], 12, 11, true, true, null, 11);
 }
 else {
-  $datatables_conf[] = array($pupe_DataTables[0], 9, 8, true, true);
+  $datatables_conf[] = array($pupe_DataTables[0], 9, 8, true, true, null, 8);
+}
+// Jos on ruksattu konserni, inkrementoidaan molempia sarakkeita sekä hakusaraketta yhdellä
+if (trim($konserni) != '' and count($datatables_conf[0]) > 0) {
+  $datatables_conf[0][1]++;
+  $datatables_conf[0][2]++;
+  $datatables_conf[0][6]++;
 }
 
 if (count($tyomaarays_tunti_yhteensa) > 0 and $toim == 'TYOMAARAYS_ASENTAJA') {

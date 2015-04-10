@@ -809,12 +809,8 @@ if (!function_exists("maa")) {
     if ($kieli == "" and isset($GLOBALS["kieli"])) {
       $kieli = $GLOBALS["kieli"];
     }
-    if (function_exists("mb_strtolower")) {
-      return ucfirst(mb_strtolower(substr(t($maa['nimi'], $kieli), 5)));
-    }
-    else {
-      return ucfirst(strtolower(substr(t($maa['nimi'], $kieli), 5)));
-    }
+
+    return ucfirst(strtolower(substr(t($maa['nimi'], $kieli), 5)));
   }
 }
 
@@ -9064,7 +9060,7 @@ if (!function_exists("livesearch_tuotehaku")) {
     $submit = $_REQUEST["livesearch_submit"];
     $haku = trim($_REQUEST["livesearch_haku"]);
 
-    if (mb_detect_encoding($haku, mb_detect_order(), TRUE) == "UTF-8") {
+    if (!PUPE_UNICODE and mb_detect_encoding($haku, mb_detect_order(), TRUE) == "UTF-8") {
       $haku = iconv("UTF-8", "latin1//TRANSLIT", $haku);
     }
 
@@ -11834,13 +11830,27 @@ if (!function_exists("pupesoft_cleanstring")) {
 
     if (!is_numeric($string) and !is_string($string)) return "";
 
-    $illegal = array("\"", "'", "<", ">", "\\", ";");
+    $src = array("\"", "'", "<", ">", "\\", ";");
 
-    if (count($exclude) > 0) {
-      $illegal = array_diff($illegal, $exclude);
+    if (!PUPE_UNICODE) {
+      $rpl = array("" , "", "" , "", "", "");
+    }
+    else {
+      $rpl = array("{DOULEPRIME}" , "{PRIME}", "" , "", "", "");
     }
 
-    return mysql_real_escape_string(trim(str_replace($illegal, "", $string)));
+    if (count($exclude) > 0) {
+      foreach ($exclude as $ex) {
+        $key = array_search($ex, $src);
+
+        if ($key !== FALSE) {
+          unset($src[$key]);
+          unset($rpl[$key]);
+        }
+      }
+    }
+
+    return mysql_real_escape_string(trim(str_replace($src, $rpl, $string)));
   }
 }
 
@@ -12537,7 +12547,6 @@ if (!function_exists('liita_tilaus_laskun_liitetiedostoksi')) {
 
           if (strpos($editilaus_laskulle_data, "OSTOTIL.OT_NRO:".$laskun_asiakkaan_tilausnumero) !== FALSE) {
 
-            $editilaus_laskulle_filesize = filesize($editilaus_laskulle_polku.$path_parts['basename']);
             $data  = mysql_real_escape_string($editilaus_laskulle_data);
 
             $query = "INSERT INTO liitetiedostot SET
@@ -12548,7 +12557,7 @@ if (!function_exists('liita_tilaus_laskun_liitetiedostoksi')) {
                       selite          = 'Futursoft-tilaus $laskun_asiakkaan_tilausnumero',
                       kieli           = '$yhtiorow[kieli]',
                       filename        = '$path_parts[basename]',
-                      filesize        = '$editilaus_laskulle_filesize',
+                      filesize        = length(data),
                       filetype        = 'text',
                       image_width     = '',
                       image_height    = '',
@@ -13512,9 +13521,10 @@ if (!function_exists("pupe_DataTables")) {
       $info       = isset($param[4]) ? $param[4] : "false";
       $sorting     = isset($param[5]) ? $param[5] : "true";
       $aoColumns     = "";
+      $tyojonostatushakukentta = $param[6];
       $paginationtype = $paginate !== false ? "full_numbers" : "two_button";
 
-      $json_pass[$taulu] = array($sarakkeetVis, $sarakkeetTot, $paginate, $paginationtype, $info, $sorting);
+      $json_pass[$taulu] = array($sarakkeetVis, $sarakkeetTot, $paginate, $paginationtype, $info, $sorting, $tyojonostatushakukentta);
     }
 
     preg_match("/.*?\/\*(.*?(OK_COLOR))\*\//", $yhtiorow['active_css'], $varitmatch);
@@ -14712,12 +14722,11 @@ if (!function_exists("pupe_DataTables")) {
         $('select.tyojono_sort, select.tyostatus_sort').change(function() {
           var tyojono = $('select.tyojono_sort option:selected');
           var tyostatus = $('select.tyostatus_sort option:selected');
-          var hakuarvo;
 
           // Jos tyojono tai tyostatus on tyhja, haetaan vain yhdellä ehdolla
-          haku_arvo = tyojono.val() +' '+ tyostatus.val();
-
-          datatablesit[0].fnFilter(haku_arvo, 8, true, false);
+          var haku_arvo = tyojono.val() +' '+ tyostatus.val();
+          var haku_sarake = parametrit['tyojono0'][6];
+          datatablesit[0].fnFilter(haku_arvo, haku_sarake, true, false);
         } );
 
         // Suuntalavan rajausta dropdownilla
@@ -19980,8 +19989,9 @@ if (!function_exists("pupeFileReader")) {
         /**
          * Luetaan CSV rivi tiedostosta *
          */
+
         // Katsotaan onko UTF-8 muodossa
-        if (mb_detect_encoding($rivi, 'UTF-8', true) !== FALSE) {
+        if (!PUPE_UNICODE and mb_detect_encoding($rivi, 'UTF-8', true) !== FALSE) {
           $rivi = str_getcsv(utf8_decode($rivi));
         }
         else {
@@ -29698,7 +29708,7 @@ if (!function_exists("tallenna_tiliote_viite")) {
 
     while (!feof($fd)) {
 
-      if (mb_detect_encoding($tietue, 'UTF-8', true) !== FALSE) {
+      if (!PUPE_UNICODE and mb_detect_encoding($tietue, 'UTF-8', true) !== FALSE) {
         $tietue = utf8_decode($tietue);
       }
 
@@ -30611,6 +30621,51 @@ if (!function_exists("hae_saldo")) {
   }
 }
 
+if (!function_exists("mb_str_pad")) {
+  function mb_str_pad($input, $pad_length, $pad_string = ' ', $pad_type = STR_PAD_RIGHT) {
+      // Tässä on "//NO_MB_OVERLOAD"-kommentti
+      // jotta UTF8-konversio ei osu tähän riviin
+      $pad_string_length =  mb_strlen($pad_string);
+      $diff = ($pad_length - strlen($input)) * $pad_string_length; //NO_MB_OVERLOAD
+      return str_pad($input, $diff, $pad_string, $pad_type); //NO_MB_OVERLOAD
+  }
+}
+
+if (!function_exists("mb_str_split")) {
+  function mb_str_split($string, $string_length = 1, $string_min_length = 1) {
+    $parts = array();
+
+    if (mb_strlen($string) > $string_length or !$string_length) {
+      do {
+        $c = mb_strlen($string);
+        $parts[] = mb_substr($string, 0, $string_length);
+        $string  = mb_substr($string, $string_length, $c-$string_length);
+
+      } while(!empty($string));
+
+      // Tsekataan, että vika stringi ei ole liian lyhyt jos meillä on minimipituus annettu
+      if ($string_min_length > 1 and mb_strlen(end($parts)) < $string_min_length and count($parts) > 1) {
+        $vika = array_pop($parts);
+        $tokavika = array_pop($parts);
+
+        // montako merkkiä tarvitaan tokavikasta vikaan, jotta se ei olisi liian lyhyt
+        $vikapituus = mb_strlen($vika);
+
+        $ero = ($string_min_length - $vikapituus);
+        $siiretaan_vikaan = mb_substr($tokavika, -$ero);
+
+        $parts[] = mb_substr($tokavika, 0, -$ero);
+        $parts[] = $siiretaan_vikaan.$vika;
+      }
+    }
+    else {
+      $parts[] = $string;
+    }
+
+    return $parts;
+  }
+}
+
 if (!function_exists("jt_saapumisaika_tilausvahvistus")) {
   function jt_saapumisaika_tilausvahvistus($tilausrivi, $status) {
     global $yhtiorow;
@@ -31208,5 +31263,179 @@ if (!function_exists("choose_correct_date")) {
     echo "</font><br>";
 
     return '';
+  }
+}
+
+if (!function_exists("piirra_maksupaate_formi")) {
+  function piirra_maksupaate_formi($laskurow, $kaikkiyhteensa, $kateinen, $maksettavaa_jaljella,
+                                   $loytyy_maksutapahtumia, $kateismaksu, $kateista_annettu,
+                                   $korttimaksutapahtuman_status, $piirra_keraysnappula = true) {
+    global $kukarow, $mista, $valittu_kopio_tulostin, $kertakassa, $toim, $orig_tila, $orig_alatila;
+
+    $query_maksuehto = "SELECT *
+                        FROM maksuehto
+                        WHERE yhtio='{$kukarow["yhtio"]}'
+                        AND kateinen != ''
+                        AND kaytossa  = ''
+                        AND (maksuehto.sallitut_maat = ''
+                          OR maksuehto.sallitut_maat LIKE '%{$laskurow["maa"]}%')";
+
+    $maksuehtores = pupe_query($query_maksuehto);
+    $maksuehtorow = mysql_fetch_assoc($maksuehtores);
+
+    echo "<div id='dialog' title='" . t("Käteislaskuri") . "'>
+          <form id='kateisFormi' class='multisubmit'>
+            <ul class='list-unstyled'>
+              <li class='text-medium'>" . t("Summa") . ":</li>
+              <li>
+                <span id='jaljella' class='text-large'>{$maksettavaa_jaljella}</span>
+                <span class='text-large'>{$laskurow["valkoodi"]}</span>
+              </li>
+              <li class='text-medium'>" . t("Annettu") . ":</li>
+              <li><input id='annettu' type='number' min='0.01' step='0.01' class='text-large'></li>
+              <li id='takaisinTeksti' class='text-medium'>" . t("Takaisin") . ":</li>
+              <li>
+                <span id='takaisin' class='text-large'></span>
+                <span class='text-large'>{$laskurow["valkoodi"]}</span>
+              </li>
+            </ul>
+          </form>
+        </div>";
+
+    echo "<form name='maksupaate' id='maksupaate' method='post'>";
+
+    echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
+    echo "<input type='hidden' name='tilausnumero' value='{$laskurow["tunnus"]}'>";
+    echo "<input type='hidden' name='mista' value='{$mista}'>";
+    echo "<input type='hidden' name='tee' id='laskuriTee' value=''>";
+    echo "<input type='hidden' name='maksutapa' value='{$maksuehtorow["tunnus"]}'>";
+    echo "<input type='hidden' name='kaikkiyhteensa' value='{$kaikkiyhteensa}'>";
+    echo "<input type='hidden' name='valittu_kopio_tulostin' value='{$valittu_kopio_tulostin}'>";
+    echo "<input type='hidden' name='kateinen' value='{$kateinen}'>";
+    echo "<input type='hidden' name='kertakassa' value='{$kertakassa}'>";
+    echo "<input type='hidden' name='toim' value='{$toim}'>";
+    echo "<input type='hidden' name='seka' id='seka' value='X'>";
+    echo "<input type='hidden' name='orig_tila' value='{$orig_tila}'>";
+    echo "<input type='hidden' name='orig_alatila' value='{$orig_alatila}'>";
+    echo "<input type='hidden' name='kateisohitus'>";
+    echo "<input type='hidden' name='toimitustapa' value='{$laskurow["toimitustapa"]}'>";
+    echo "<input type='hidden' name='maksupaatetapahtuma' id='maksupaatetapahtuma' value=''>";
+    echo "<input type='hidden' id='peruutus' name='peruutus' value>";
+    echo "<input type='hidden' name='kateismaksu[kateinen]' id='kateinen' value='{$kateismaksu["kateinen"]}'>";
+    echo "<input type='hidden' name='kateista_annettu' id='kateistaAnnettu' value='{$kateista_annettu}'>";
+
+    echo "<table style='width: 100%; margin-top: 20px;'>";
+    echo "<tr><td class='back'><font class='head'>" . t("Maksutapa") . "</font></td></tr>";
+    echo "<tr>";
+    echo "<td><label for='korttimaksu'>" . t("Summa") . "</label>";
+    echo "<input type='text' name='korttimaksu' id='korttimaksu' value='{$maksettavaa_jaljella}'
+               size='7' autocomplete='off'>";
+    echo "<span class='error'>" . t($korttimaksutapahtuman_status) . "</span>";
+    echo "</td></tr>";
+
+    echo "<tr>
+          <td>
+            <input type='button'
+                   name='kateismaksunappi'
+                   id='kateismaksunappi'
+                   value='" . t("Käteinen") . " (Alt+C)'
+                   accesskey='c'>
+            <input type='button'
+                   name='korttimaksunappi'
+                   id='korttimaksunappi'
+                   value='" . t("Kortti") . " (Alt+K)'
+                   accesskey='k'>";
+
+    if ($loytyy_maksutapahtumia) {
+      echo "<input type='button' class='margin-left-20' name='peruuta_viimeisin'
+                 id='peruuta_viimeisin' value='" . t("Peruuta viimeisin maksu") . "'>";
+    }
+
+    if ($piirra_keraysnappula) {
+      echo "<input name='keraykseen' id='keraykseen' type='button' class='margin-left-20'
+                 value='" . t("Ei vielä laskuteta, siirrä tilaus keräykseen") . "'>";
+    }
+
+    echo "</td></tr>";
+    echo "</table></form>";
+  }
+}
+
+if (!function_exists("maksa_maksupaatteella")) {
+  function maksa_maksupaatteella($laskurow, $kaikkiyhteensa, $korttimaksu, $peruutus) {
+    global $yhtiorow, $kukarow;
+
+    $tilausnumero = $laskurow["tunnus"];
+
+    if (!empty($tilausnumero)) {
+      if ($peruutus == "X") {
+        $korttimaksu = 0;
+      }
+      else {
+        $korttimaksu = str_replace(",", ".", $korttimaksu);
+        $korttimaksu = number_format($korttimaksu, $yhtiorow['hintapyoristys'], '.', '');
+      }
+
+      require("rajapinnat/lumo_handler.inc");
+    }
+
+    $korttimaksutapahtuman_status =
+      isset($korttimaksutapahtuman_status) ? $korttimaksutapahtuman_status : "";
+
+    return $korttimaksutapahtuman_status;
+  }
+}
+
+if (!function_exists("jaljella_oleva_maksupaatesumma")) {
+  function jaljella_oleva_maksupaatesumma($tilausnumero, $kaikkiyhteensa) {
+    global $kukarow, $yhtiorow;
+
+    $loytyy = false;
+
+    // Tarkistetaan onko onnistuneita suorituksia (K)-korttimaksut
+    $query = "SELECT *
+              FROM maksupaatetapahtumat
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND tilausnumero = '{$tilausnumero}'
+              AND maksutapa != ''
+              AND tila IN ('K', 'H')";
+
+    $result = pupe_query($query);
+
+    $maksettu_pkortilla = 0;
+    $maksettu_lkortilla = 0;
+
+    while ($ruutu = mysql_fetch_assoc($result)) {
+      if ($ruutu['maksutapa'] == "LUOTTOKORTTI") {
+        $maksettu_lkortilla += $ruutu['summa_valuutassa'];
+      }
+      else {
+        $maksettu_pkortilla += $ruutu['summa_valuutassa'];
+      }
+    }
+
+    $maksupaate_maksetut['luottokortti'] = $maksettu_lkortilla;
+    $maksupaate_maksetut['pankkikortti'] = $maksettu_pkortilla;
+
+    $valisumma = 0;
+
+    foreach ($maksupaate_maksetut as $maksettu) {
+      $valisumma += $maksettu;
+    }
+
+    if ($valisumma != 0) {
+      $loytyy = true;
+    }
+
+    if ($kaikkiyhteensa) {
+      $totaalisumma =
+        number_format($kaikkiyhteensa - $valisumma, $yhtiorow['hintapyoristys'], '.', '');
+      $palautettava = array($loytyy, $totaalisumma, $maksettu_lkortilla, $maksettu_pkortilla);
+    }
+    else {
+      $palautettava = array($loytyy, false, $maksettu_lkortilla, $maksettu_pkortilla);
+    }
+
+    return $palautettava;
   }
 }

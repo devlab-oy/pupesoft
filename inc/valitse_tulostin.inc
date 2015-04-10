@@ -64,8 +64,23 @@ echo "<form method='post' action='$PHP_SELF?$ulisa'>
   <input type='hidden' name='kerayseran_tilaukset' value='$kerayseran_tilaukset'>
   <input type='hidden' name='reservipaikka' value='{$reservipaikka}' />
   <input type='hidden' name='tilaustyyppi' value='{$tilaustyyppi}' />
-  <input type='hidden' name='kaikkiyhteensa' value='{$kaikkiyhteensa}' />
-  <input type='hidden' name='keraysvyohyke' value='{$keraysvyohyke}' />";
+  <input type='hidden' name='keraysvyohyke' value='{$keraysvyohyke}' />
+  <input type='hidden' name='kaikkiyhteensa' value='{$kaikkiyhteensa}' />";
+
+if (!empty($kateismaksu["kateinen"])) {
+  echo "<input type='hidden' name='kateismaksu[kateinen]'
+               value='{$kateismaksu["kateinen"]}'>";
+}
+
+if (!empty($kateismaksu["pankkikortti"])) {
+  echo "<input type='hidden' name='kateismaksu[pankkikortti]'
+               value='{$kateismaksu["pankkikortti"]}'>";
+}
+
+if (!empty($kateismaksu["luottokortti"])) {
+  echo "<input type='hidden' name='kateismaksu[luottokortti]'
+               value='{$kateismaksu["luottokortti"]}'>";
+}
 
 if ($nappikeikalle == 'menossa') {
   echo "<input type='hidden' name='nappikeikalla' value='ollaan'>";

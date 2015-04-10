@@ -1576,6 +1576,19 @@ else {
         $sorttaus = ", vh.keraysvyohyke {$sorttaus}";
       }
 
+      $vakit_eri_tilaukselle = $totarowx["vaihtoehtoinen_vak_toimitustapa"] != "";
+
+      if ($vakit_eri_tilaukselle) {
+        $tuote_select = "tuote.vakkoodi AS vakkoodi,";
+        $tuote_join = "JOIN tuote ON (tuote.tuoteno = tilausrivi.tuoteno
+                         AND tuote.yhtio = tilausrivi.yhtio)";
+        $sorttaus = ", tuote.vakkoodi";
+      }
+      else {
+        $tuote_select = "";
+        $tuote_join = "";
+      }
+
       //haetaan kaikkien tilausrivien varastopaikat (varattu+kpl koska magenton tilaukset on laskutettu jo tässä vaiheessa...)
       $query = "SELECT tilausrivi.otunnus,
                 tilausrivi.perheid,
@@ -1591,10 +1604,12 @@ else {
                 if (tilausrivin_lisatiedot.omalle_tilaukselle != '', concat(tilausrivi.perheid,tilausrivi.tunnus), 0) omalle_tilaukselle_sort,
                 tilausrivin_lisatiedot.ohita_kerays,
                 {$kerayserat_select}
+                {$tuote_select}
                 concat(rpad(upper(tilausrivi.hyllyalue), 5, '0'),lpad(upper(tilausrivi.hyllynro), 5, '0'),lpad(upper(tilausrivi.hyllyvali), 5, '0'),lpad(upper(tilausrivi.hyllytaso), 5, '0')) sorttauskentta
                 FROM tilausrivi
                 JOIN tilausrivin_lisatiedot ON (tilausrivin_lisatiedot.yhtio = tilausrivi.yhtio AND tilausrivin_lisatiedot.tilausrivitunnus = tilausrivi.tunnus AND tilausrivin_lisatiedot.ohita_kerays = '')
                 {$kerayserat_join}
+                {$tuote_join}
                 WHERE tilausrivi.yhtio  = '$kukarow[yhtio]'
                 and tilausrivi.otunnus  = '$laskurow[tunnus]'
                 AND tilausrivi.tyyppi  != 'D'
@@ -1621,6 +1636,7 @@ else {
 
       $ohjausmerkki_nro  = 1;
       $tilaus_splitattu   = FALSE;
+      $splitattu_vakiksi = false;
       unset($laskusplitres);
 
       if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and is_string($toimitustavan_lahto)) {
@@ -1652,7 +1668,8 @@ else {
               ) and ($maehrowx["jv"] == '' or $totarowx["tulostustapa"] != 'H') and $laskurow["splittauskielto"] != "E"
             ) or
             ($row["kerayspvm"] != $edkerayspvm and $edkerayspvm != 'x' and $edomalle_tilaukselle == 0 and $yhtiorow["splittauskielto"] == "K") or
-            ($omalle_tilaukselle != $edomalle_tilaukselle and $edomalle_tilaukselle != 'x')
+            ($omalle_tilaukselle != $edomalle_tilaukselle and $edomalle_tilaukselle != 'x') or
+            ($vakit_eri_tilaukselle and $row["vakkoodi"] != "" and !$splitattu_vakiksi)
           )
           and $laskurow["osatoimitus"] == '') {
 
@@ -1701,6 +1718,11 @@ else {
             $split_kohdistettu  = "K";
             $split_rahtivapaa  = "o";
             $split_toimitustapa = $varaston_row["erikoistoimitus_toimitustapa"];
+          }
+
+          if ($vakit_eri_tilaukselle and $row["vakkoodi"] != "") {
+            $splitattu_vakiksi = true;
+            $split_toimitustapa = $totarowx["vaihtoehtoinen_vak_toimitustapa"];
           }
 
           if ($yhtiorow['kerayserat'] == 'K' and isset($toimitustavan_lahto) and isset($toimitustavan_lahto[$varasto]) and $toimitustavan_lahto[$varasto] > 0) {

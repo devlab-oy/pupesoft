@@ -6090,7 +6090,17 @@ if ($tee == '') {
     }
 
     if (count($vak_chk_array) > 0) {
-      if ($kukarow['extranet'] == '') {
+      $vakit_eri_tilaukselle = $tm_toimitustaparow["vaihtoehtoinen_vak_toimitustapa"] != "";
+      $vak_toimitustapa = $tm_toimitustaparow["vaihtoehtoinen_vak_toimitustapa"];
+
+      if ($vakit_eri_tilaukselle) {
+        echo "<br><font class='error'>" . t("HUOM: T‰m‰ toimitustapa ei salli VAK-tuotteita") .
+             "! ($toimtapa_kv)</font><br>";
+        echo "<font class='error'>$toimtapa_kv " .
+             t("toimitustavan VAK-tuotteet siirret‰‰n omalle tilaukselleen toimitustavalla") .
+             " {$vak_toimitustapa}.</font> ";
+      }
+      elseif ($kukarow['extranet'] == '') {
         // jos vak-toimituksissa halutaan k‰ytt‰‰ vaihtoehtoista toimitustapaa
         if ($tm_toimitustaparow['vak_kielto'] != '' and $tm_toimitustaparow['vak_kielto'] != 'K') {
 

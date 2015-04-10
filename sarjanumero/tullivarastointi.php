@@ -564,7 +564,7 @@ if ($view == 'tiedot') {
 
   foreach ($saapumistiedot['rivit'] as $rivi) {
 
-    $kpl = number_format($rivi['tilkpl']);
+    $kpl = (int) $rivi['kpl'];
 
     echo "<div class='tilaus_alue' style='overflow:auto; height:55px; padding:0 10px;'>";
 

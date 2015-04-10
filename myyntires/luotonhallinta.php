@@ -199,6 +199,13 @@ if ($tee == "3" and $paivitys_oikeus) {
     $cnt = 0;
 
     foreach ($excelrivit as $rivinumero => $rivi) {
+
+      // Tarkistetaan ett‰ tiedostossa ei ole ylim‰‰r‰isi‰ rivej‰
+      if ($rivi[3] != "") {
+        echo "<font class='error'>".t("Tiedostossa liikaa sarakkeita")." ! ".t("Tarkista tiedosto")."!</font><br />";
+        exit;
+      }
+
       $ytunnus  = mysql_real_escape_string(trim($rivi[0]));
       $asiakasnro  = trim($rivi[1]) != "" ? (int) trim($rivi[1]) : "";
       $luottoraja = (float) $rivi[2];
@@ -215,7 +222,7 @@ if ($tee == "3" and $paivitys_oikeus) {
                 {$asiakasnrolisa}";
       pupe_query($query);
 
-      $cnt++;
+      $cnt += mysql_affected_rows();
     }
 
     $plural = $cnt == 1 ? "rivi" : "rivi‰";

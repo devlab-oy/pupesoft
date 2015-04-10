@@ -127,12 +127,11 @@ if (!function_exists("menu")) {
   function menu($osasto = "", $try = "") {
     global $yhtiorow, $kukarow, $verkkokauppa, $verkkokauppa_tuotemerkit, $verkkokauppa_saldotsk, $verkkokauppa_anon, $verkkokauppa_hakualkuun, $palvelin2;
 
-
-    if (isset($osasto) and mb_detect_encoding($osasto, mb_detect_order(), TRUE) == "UTF-8") {
+    if (!PUPE_UNICODE and isset($osasto) and mb_detect_encoding($osasto, mb_detect_order(), TRUE) == "UTF-8") {
       $osasto = iconv("UTF-8", "latin1//TRANSLIT", $osasto);
     }
 
-    if (isset($try) and mb_detect_encoding($try, mb_detect_order(), TRUE) == "UTF-8") {
+    if (!PUPE_UNICODE and isset($try) and mb_detect_encoding($try, mb_detect_order(), TRUE) == "UTF-8") {
       $try = iconv("UTF-8", "latin1//TRANSLIT", $try);
     }
 
@@ -1134,7 +1133,7 @@ if ($tee == "selaa") {
 
   $tuoteno = $toim_tuoteno = $nimitys = $alkukoodilla = "";
 
-  if (isset($tuotehaku) and mb_detect_encoding($tuotehaku, mb_detect_order(), TRUE) == "UTF-8") {
+  if (!PUPE_UNICODE and isset($tuotehaku) and mb_detect_encoding($tuotehaku, mb_detect_order(), TRUE) == "UTF-8") {
     $tuotehaku = iconv("UTF-8", "latin1//TRANSLIT", $tuotehaku);
 
     $_GET["tuotehaku"]    = $tuotehaku;
@@ -1142,7 +1141,7 @@ if ($tee == "selaa") {
     $_REQUEST["tuotehaku"]  = $tuotehaku;
   }
 
-  if (isset($tuotemerkki) and mb_detect_encoding($tuotemerkki, mb_detect_order(), TRUE) == "UTF-8") {
+  if (!PUPE_UNICODE and isset($tuotemerkki) and mb_detect_encoding($tuotemerkki, mb_detect_order(), TRUE) == "UTF-8") {
     $tuotemerkki = iconv("UTF-8", "latin1//TRANSLIT", $tuotemerkki);
 
     $_GET["tuotemerkki"]    = $tuotemerkki;

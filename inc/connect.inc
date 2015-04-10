@@ -1,5 +1,16 @@
 <?php
 
+// Tsekataan ajetaanko Pupea Latin1- vai UTF-8-moodissa
+// (Ohjataan mssql.charset-muuttujalla php.ini-tiedostossa)
+if (!defined("PUPE_UNICODE")) {
+  if (get_cfg_var('mssql.charset') == "UTF-8") {
+    define("PUPE_UNICODE", TRUE);
+  }
+  else {
+    define("PUPE_UNICODE", FALSE);
+  }
+}
+
 require "salasanat.php";
 
 // $masterlink on aina linkki master-kantaan.
@@ -74,6 +85,11 @@ if (isset($GLOBALS["pupe_query_debug"]) and $GLOBALS["pupe_query_debug"] > 0 and
 }
 
 if (!isset($temporarylink)) $temporarylink = $masterlink;
+
+if (PUPE_UNICODE) {
+  mb_language('uni');
+  mb_internal_encoding("UTF-8");
+}
 
 $pupe_resque = FALSE;
 

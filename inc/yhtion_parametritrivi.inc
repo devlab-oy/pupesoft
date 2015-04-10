@@ -1268,6 +1268,23 @@ if ($fieldname == "dynaaminen_kassamyynti") {
   $jatko = 0;
 }
 
+if ($fieldname == "maksupaate_kassamyynti") {
+
+  $ulos = "<td><select name='$nimi' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel1="";
+
+  if ($trow[$i] != "") {
+    $sel1 = "selected";
+  }
+
+  $ulos .= "<option value=''>".t("Ei k‰ytet‰ maksup‰‰tett‰ kassamyynniss‰")."</option>";
+  $ulos .= "<option value='K' $sel1>".t("K‰ytet‰‰n maksup‰‰tett‰ kassamyynniss‰")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
 if ($fieldname == "pikatilaus_focus") {
   $ulos = "<td><select name='$nimi' " . js_alasvetoMaxWidth($nimi, 400) . ">";
 
@@ -2629,6 +2646,19 @@ if ($fieldname == "jt_asiakkaan_tilausnumero") {
 
   $ulos .= "<option value = ''>".t("Asiakkaan tilausnumeroa ei huomioida kun tutkitaan pit‰‰kˆ perustaa uusi jt-tilaus.")."</option>";
   $ulos .= "<option value = 'K'{$sel}>".t("Asiakkaan tilausnumero huomioidaan kun tutkitaan pit‰‰kˆ perustaa uusi jt-tilaus.")."</option>";
+  $ulos .= "</select></td>";
+
+  $jatko = 0;
+}
+
+if ($fieldname == "jt_siirtolistojen_yhdistaminen") {
+
+  $ulos = "<td><select name='{$nimi}' ".js_alasvetoMaxWidth($nimi, 400).">";
+
+  $sel = $trow[$i] == 'K' ? " selected" : "";
+
+  $ulos .= "<option value = ''>".t("Siirtolistat yhdistet‰‰n JT-rivien vapautuksessa, jos t‰m‰ on mahdollista")."</option>";
+  $ulos .= "<option value = 'K'{$sel}>".t("Siirtolistoja ei yhdistet‰ JT-rivien vapautuksessa")."</option>";
   $ulos .= "</select></td>";
 
   $jatko = 0;

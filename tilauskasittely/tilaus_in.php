@@ -33,6 +33,16 @@ if (move_uploaded_file($_FILES['userfile']['tmp_name'], $filename)) {
     exit;
   }
 
+  // Muutetaan oikeaan merkistöön
+  $encoding = exec("file -b --mime-encoding '$filename'");
+
+  if (!PUPE_UNICODE and $encoding != "" and mb_strtoupper($encoding) != 'ISO-8859-1') {
+    exec("recode $encoding..ISO-8859-1 '$filename'");
+  }
+  elseif (PUPE_UNICODE and $encoding != "" and mb_strtoupper($encoding) != 'UTF-8') {
+    exec("recode $encoding..UTF8 '$filename'");
+  }
+
   echo "<font class='message'>".t("Käsittelen")." $tyyppi ".t("tiedoston")."</font><br><br>";
 
   if ($tyyppi == 'multi') {

@@ -1147,6 +1147,17 @@ else {
 
       require "tilauskasittely/verkkolasku.php";
 
+      /**
+       * Tulostetaan kassakuitti
+       */
+
+      require_once "tilauskasittely/tulosta_asiakkaan_kuitti.inc";
+
+      $kuitin_parametrit = array("kateinen" => $kateista_annettu);
+
+      tulosta_asiakkaan_kuitti($laskurow["laskunro"], $kukarow["kuittitulostin"],
+                               $kuitin_parametrit);
+
       unset($valittu_tulostin);
     }
     // jos on myyntitilaus ja ei haluttu tulostaa lähetettä, merkataan rivit kerätyksi ja toimitetuksi ja laitetaan alatila D

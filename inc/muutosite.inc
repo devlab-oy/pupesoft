@@ -294,8 +294,16 @@ if ($kukarow['taso'] != 1) {
 
   //Täällä päivitetään muun tositteen pvm
   if ($tila == 'P') {
-
-    $query = "UPDATE lasku SET tapvm = '$vv-$kk-$pp'  WHERE tunnus = '$tunnus' and yhtio = '$kukarow[yhtio]' and tapvm = '$trow[tapvm]'";
+    
+    // Päivitetään myyntilaskulle "popvm"-jotta me saadaan osittain käteisellä maksetut laskut
+    // näkymään käteismyynnit-raportissa oikealla päivällä vaikka mapvm on nolla
+    // Tämä siis vain jos myyntlaskun popvm oli ennestään setattu
+    $query = "UPDATE lasku
+              SET tapvm = '$vv-$kk-$pp',
+              popvm = if (tila = 'U' and popvm > 0, '$vv-$kk-$pp', popvm)
+              WHERE tunnus = '$tunnus'
+              AND yhtio = '$kukarow[yhtio]'
+              AND tapvm = '$trow[tapvm]'";
     $result = pupe_query($query);
 
     $query = "LOCK table tiliointi WRITE";
@@ -1973,7 +1981,7 @@ if ($tila == '') {
   // Lasku on suoritettu
   if ((($trow['tila'] == 'Y') or ($trow['tila'] == 'U')) and ($trow['mapvm'] != '0000-00-00')) {
     if ($trow['mapvm'] >= $yhtiorow['tilikausi_alku']) {
-      $pvm=erottele($trow['mapvm']);
+      $pvm = erottele($trow['mapvm']);
       echo "<form method='post'>
           <input type = 'hidden' name = 'lopetus' value = '{$lopetus}'>
         <input type = 'hidden' name='tila' value='S'>

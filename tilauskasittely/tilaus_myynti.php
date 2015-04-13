@@ -1366,6 +1366,7 @@ if ($tee == "VALMIS"
     if (mysql_num_rows($maksuehtores) > 1) {
       echo "<font class='head'>$otsikko</font><hr><br>";
       echo "<table><tr><th>" . t("Maksutapa") . ":</th>";
+
       while ($maksuehtorow = mysql_fetch_assoc($maksuehtores)) {
         echo "<form method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'>";
         echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
@@ -1439,6 +1440,7 @@ if ($tee == "VALMIS"
 
     $maksuehtorow = mysql_fetch_assoc($maksuehtores);
 
+    echo "<font class='head'>$otsikko</font><hr><br>";
     echo "<form name='laskuri' id='laskuri' method='post' action='{$palvelin2}{$tilauskaslisa}tilaus_myynti.php'><table class='laskuri'>";
 
     echo "<input type='hidden' name='kassamyyja_kesken' value='ei'>";
@@ -1475,9 +1477,9 @@ if ($tee == "VALMIS"
 
     echo "  summa = Math.round(summa*100)/100;
 
-            if (summa == 0 && (document.getElementById('kateismaksu').value != '' || 
-                document.getElementById('pankkikortti').value != '' || 
-                document.getElementById('luottokortti').value != '' || 
+            if (summa == 0 && (document.getElementById('kateismaksu').value != '' ||
+                document.getElementById('pankkikortti').value != '' ||
+                document.getElementById('luottokortti').value != '' ||
                 document.getElementById('laskulle').value != '')) {
 
               summa = 0.00;
@@ -1485,7 +1487,7 @@ if ($tee == "VALMIS"
               if(document.getElementById('korttimaksunappi')){
                   document.getElementById('korttimaksunappi').disabled = true;
               }
-   
+
               document.getElementById('seka').value = 'kylla';
             } else {
               document.getElementById('hyvaksy_nappi').disabled = true;
@@ -1506,6 +1508,10 @@ if ($tee == "VALMIS"
 
     echo "<tr $styyli><td>".t("Pankkikortilla")."</td><td><input type='text' name='kateismaksu[pankkikortti]' id='pankkikortti' value='{$kateismaksu['pankkikortti']}' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
     echo "<tr $styyli><td>".t("Luottokortilla")."</td><td><input type='text' name='kateismaksu[luottokortti]' id='luottokortti' value='{$kateismaksu['luottokortti']}' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
+
+    if ($yhtiorow['sallitaanko_kateismyynti_laskulle'] != '') {
+      echo "<tr $styyli><td>".t("Laskulle")."</td><td><input type='text' name='kateismaksu[laskulle]' id='laskulle' value='{$kateismaksu['laskulle']}' size='7' autocomplete='off' onkeyup='update_summa(\"$kaikkiyhteensa\");'></td><td>$laskurow[valkoodi]</td></tr>";
+    }
 
     $disabloi_hyvaksy = 'disabled';
     $totaalisumma = 0.00;

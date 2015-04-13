@@ -2596,29 +2596,35 @@ if (!$cli and !isset($api_kentat)) {
     echo "  <td>".strtolower(implode(", ", $kielletyt))."</td></tr>";
   }
 
-  $query = "DESC {$_taulu_query}";
-  $_res = pupe_query($query);
+  $_ei_olemassa = array('todo');
 
-  echo "<tr>";
-  echo "<td class='tumma'>",t("Sarakkeet joita saa aineistossa kertoa"),":</td>";
-  echo "<td>";
+  if (!in_array($_taulu_query, $_ei_olemassa)) {
+    $query = "DESC {$_taulu_query}";
+    $_res = pupe_query($query);
 
-  $_kentat = array();
+    $_kentat = array();
 
-  while ($_row = mysql_fetch_assoc($_res)) {
-    if (in_array($_row['Field'], array('tunnus','yhtio'))) {
-      continue;
+    while ($_row = mysql_fetch_assoc($_res)) {
+      if (in_array($_row['Field'], array('tunnus','yhtio'))) {
+        continue;
+      }
+
+      if (!in_array(strtoupper($_row['Field']), $pakolliset) and !in_array(strtoupper($_row['Field']), $wherelliset) and !in_array(strtoupper($_row['Field']), $kielletyt)) {
+        $_kentat[] = $_row['Field'];
+      }
     }
 
-    if (!in_array(strtoupper($_row['Field']), $pakolliset) and !in_array(strtoupper($_row['Field']), $wherelliset) and !in_array(strtoupper($_row['Field']), $kielletyt)) {
-      $_kentat[] = $_row['Field'];
+    if (!empty($_kentat)) {
+      echo "<tr>";
+      echo "<td class='tumma'>",t("Sarakkeet joita saa aineistossa kertoa"),":</td>";
+      echo "<td>";
+
+      echo implode(", ", $_kentat);
+
+      echo "</td>";
+      echo "</tr>";
     }
   }
-
-  echo implode(", ", $_kentat);
-
-  echo "</td>";
-  echo "</tr>";
 
   echo "  <tr><th>".t("Valitse tiedosto").":</th>
         <td><input name='userfile' type='file'></td>

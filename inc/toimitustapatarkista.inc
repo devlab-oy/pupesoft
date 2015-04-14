@@ -164,7 +164,7 @@ if (!function_exists("toimitustapatarkista")) {
       }
     }
 
-    if ((mysql_field_name($result, $i) == "vak_kielto") and ($t[$i] != "")) {
+    if ($trow and (mysql_field_name($result, $i) == "vak_kielto") and ($t[$i] != "")) {
       $query = "SELECT count(*) AS count
                 FROM toimitustapa
                 WHERE yhtio = '{$kukarow["yhtio"]}'

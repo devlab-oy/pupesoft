@@ -722,13 +722,13 @@ class Unifaun {
       $uni_addon = $uni_service->addChild('addon'); // Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
       $uni_addon->addAttribute('adnid', "COD");
       
-      $uni_par_val = $uni_addon->addChild('val', utf8_encode($this->yhtiorow["pankkiswift1"]));   // IBAN account number
+      $uni_par_val = $uni_addon->addChild('val', utf8_encode($this->yhtiorow["pankkiswift1"]));   // BIC number
       $uni_par_val->addAttribute('n', "bank");
 
       $uni_par_val = $uni_addon->addChild('val', utf8_encode($this->yhtiorow["pankkiiban1"]));   // IBAN account number
       $uni_par_val->addAttribute('n', "account");
 
-      $uni_par_val = $uni_addon->addChild('val', "IBAN");   // BIC number
+      $uni_par_val = $uni_addon->addChild('val', "IBAN");   // Account type
       $uni_par_val->addAttribute('n', "accounttype");
 
       $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->yhteensa)); // Amount. Used only with add-on COD (Cash On Delivery).

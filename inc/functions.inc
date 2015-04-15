@@ -31831,3 +31831,20 @@ if (!function_exists("jaljella_oleva_maksupaatesumma")) {
     return $palautettava;
   }
 }
+
+if (!function_exists('hae_yhtio_alv')) {
+
+  function hae_yhtio_alv() {
+    global $kukarow, $yhtiorow;
+
+    $query = "SELECT *
+              FROM avainsana
+              WHERE yhtio = '{$kukarow['yhtio']}'
+              AND laji = 'ALV'
+              AND selitetark = 'o'
+              LIMIT 1";
+    $result = pupe_query($query);
+
+    return mysql_fetch_assoc($result);
+  }
+}

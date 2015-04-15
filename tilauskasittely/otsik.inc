@@ -1400,8 +1400,8 @@ if ($tila == "" and !isset($jatka)) {
             <td valign='top'>".t("Kotipuhelin")."</td>
             <td>$srow[puhelin]</td></tr>";
         echo "<tr>
-            <td valign='top'>".t("Työpuhelin").": </td>
-            <td>$srow[fax]</td></tr>";
+            <td valign='top'>".t("Toimituspuhelin").": </td>
+            <td>$srow[toim_puh]</td></tr>";
         echo "<tr>
             <td valign='top'>&nbsp;</td>
             <td></td></tr>";

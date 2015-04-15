@@ -217,7 +217,7 @@ if (!function_exists('desadv_header')) {
         $x++;
       }
       else {
-        $yhteyshenkilo_puh = $desadv_laskurow['puhelin'] != '' ? $desadv_laskurow['puhelin'] : ($desadv_laskurow['gsm'] != '' ? $desadv_laskurow['gsm'] : ($desadv_laskurow['tyopuhelin'] != '' ? $desadv_laskurow['tyopuhelin'] : '')); // max 15 merkkiä, C
+        $yhteyshenkilo_puh = $desadv_laskurow['toim_puh'];  // max 15 merkkiä, C
 
         if ($yhteyshenkilo_puh != '') {
           $desadv_message .= "COM+".substr($yhteyshenkilo_puh, 0, 512).":TE'";

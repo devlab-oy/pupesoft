@@ -157,7 +157,7 @@ if (!function_exists('rivi_erittely')) {
 
       if (mysql_num_rows($yhres) == 0) {
         $query = "SELECT '2' O, '' nimi,
-                  IF(puhelin != '', puhelin, IF(gsm != '', gsm, '')) puh
+                  toim_puh puh
                   FROM asiakas
                   WHERE yhtio = '{$kukarow['yhtio']}'
                   AND tunnus  = '{$laskurow['liitostunnus']}'";

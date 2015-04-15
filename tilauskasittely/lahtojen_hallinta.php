@@ -322,6 +322,7 @@ if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
                       lasku.toim_ovttunnus,
                       lasku.toim_postino,
                       lasku.toim_postitp,
+                      lasku.toim_puh,
                       lasku.maa,
                       lasku.nimi,
                       lasku.nimitark,
@@ -332,10 +333,7 @@ if (isset($siirra_lahtoon) and $onko_paivitysoikeuksia_ohjelmaan) {
                       if(maksuehto.jv is null, '', maksuehto.jv) AS jv,
                       lasku.alv,
                       lasku.vienti,
-                      asiakas.toimitusvahvistus,
-                      if(asiakas.gsm != '', asiakas.gsm,
-                        if(asiakas.tyopuhelin != '', asiakas.tyopuhelin,
-                          if(asiakas.puhelin != '', asiakas.puhelin, ''))) AS puhelin
+                      asiakas.toimitusvahvistus
                       FROM lasku
                       JOIN asiakas ON (asiakas.yhtio = lasku.yhtio
                         AND asiakas.tunnus  = lasku.liitostunnus)

@@ -705,7 +705,7 @@ class Unifaun {
       }
     }
 
-    $itella_rahdinkuljettaja = array(
+    $posti_rahdinkuljettaja = array(
       'ITELLAMAILEC',
       'IT16',
       'IT14',
@@ -727,8 +727,8 @@ class Unifaun {
       'ITKYVAK',
     );
 
-    // perille toimitettavissa Itellan toimitustavoissa käytetään MPS:sää
-    if (($this->rakir_row["jv"] == '' or $this->mehto['jv'] == '') and in_array($this->toitarow['virallinen_selite'], $itella_rahdinkuljettaja)) {
+    // perille toimitettavissa Postin toimitustavoissa käytetään MPS:sää
+    if (($this->rakir_row["jv"] == '' or $this->mehto['jv'] == '') and in_array($this->toitarow['virallinen_selite'], $posti_rahdinkuljettaja)) {
           $uni_addon = $uni_service->addChild('addon');
           $uni_addon->addAttribute('adnid', 'cons');
 

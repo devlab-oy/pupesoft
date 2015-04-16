@@ -398,6 +398,28 @@ class Unifaun {
         'IT09',
         'IT14',
       );
+      
+      $itella_rahdinkuljettaja = array(
+        'ITELLAMAILEC',
+        'IT16',
+        'IT14',
+        'ITKY14',
+        'ITKY14I',
+        'IT14I',
+        'ITEXPC',
+        'ITKYEXPC',
+        'IT21',
+        'ITKY21',
+        'IT09',
+        'ITKY09',
+        'TPSTD',
+        'ITELLALOGKR',
+        'ITELLAMAILPR',
+        'ITPR',
+        'ITSP',
+        'ITVAK',
+        'ITKYVAK',
+      );
     }
 
     if ($this->toitarow['rahdinkuljettaja'] == 'HIT') {
@@ -704,18 +726,15 @@ class Unifaun {
         $uni_add_val->addAttribute('n', "reference");
       }
     }
-    elseif ($this->toitarow['merahti'] != "" and ($this->toitarow['virallinen_selite'] == "IT09"
-      or $this->toitarow['virallinen_selite'] == "IT14") 
-        #and $this->postirow["toim_osoite"]  == $toim_osoite 
-        #and $this->postirow["toim_postino"] == $toim_postino 
-        #and $this->postirow["toim_postitp"] == $toim_postitp
-    ) {
+
+    // perille toimitettavissa Itellan toimitustavoissa käytetään MPS:sää
+    if ($this->rakir_row["jv"] == '' and in_array($this->toitarow['virallinen_selite'], $itella_rahdinkuljettaja)) {
           $uni_addon = $uni_service->addChild('addon');
           $uni_addon->addAttribute('adnid', 'cons');
-          
+
           $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["ytunnus"])); // MPS-lähetyksen kokoava tekijä
           $uni_add_val->addAttribute('n', "reference");
-    } 
+    }
 
     if ($this->toitarow['virallinen_selite'] == "P19" and $this->postirow["toim_puh"] != "") {
       $uni_addon = $uni_service->addChild('addon'); // Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.

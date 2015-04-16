@@ -24,7 +24,6 @@ if ($type == '0') {
   // print "Varalla => ".substr($tietue, 23, 67)."\n";
 }
 elseif ($type == '3' or ($type == 'S')) {
-#elseif ($type == '3' or ($type == 'S' and $factoring_oikaisutunnus == '0' )) {
   // viitesiirto
   // print "Oikaisutunnus => ".substr($tietue, 87, 1)."\n";
   // print "Välitystapa => ".substr($tietue, 88, 1)."\n";

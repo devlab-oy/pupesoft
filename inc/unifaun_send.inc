@@ -732,6 +732,11 @@ class Unifaun {
       $uni_addon->addAttribute('adnid', "NOT");
       $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["toim_puh"])); // Used to define notification mode for add-on NOT.
       $uni_add_val->addAttribute('n', "text3");
+      
+      if ($this->asiakasrow["email"] != '') {
+        $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->asiakasrow["email"])); // Used to define notification mode for add-on NOT.
+        $uni_add_val->addAttribute('n', "text4");
+      }
     }
     elseif ($this->toitarow['virallinen_selite'] == "P19") {
       $uni_addon = $uni_service->addChild('addon'); // Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.

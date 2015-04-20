@@ -241,7 +241,7 @@ if (!isset($nayta_pdf)) {
 
   $tarrat = $toim == "HINTA" ? "hintalaput" : "tuotetarrat";
 
-  $colspan = $toim == 'HINTA' ? "2" : "4";
+  $colspan = $toim == 'HINTA' ? "2" : "5";
 
   echo
   "<tr><th colspan='{$colspan}'><center>" .
@@ -254,6 +254,7 @@ if (!isset($nayta_pdf)) {
   if ($toim != 'HINTA') {
     echo "<th>" . t("Kirjoitin") . "</th>";
     echo "<th>" . t("Malli") . "</th>";
+    echo "<th>" . t("Viivakoodityyppi") . "</th>";
   }
 
   if ($uusean!= '') {
@@ -312,6 +313,13 @@ if (!isset($nayta_pdf)) {
     }
 
     echo "</select></td>";
+
+    echo "<td>";
+    echo "<select name='viivakoodityyppi'>";
+    echo "<option value='viivakoodi'>" . t("Viivakoodi") . "</option>";
+    echo "<option value='qr_koodi'>" . t("QR-koodi") . "</option>";
+    echo "</select>";
+    echo "</td>";
   }
 
   if ($uusean != '') {

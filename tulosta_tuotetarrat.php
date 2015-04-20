@@ -11,6 +11,7 @@ if ($_REQUEST['malli'] == 'PDF24' or
 }
 
 require "inc/parametrit.inc";
+require "inc/pupenext_functions.inc";
 
 // $toim='YKS' tarkottaa yksinkertainen ja silloin ei välitetä onko tuotteella eankoodia vaan
 // tulostetaan suoraan tuoteno viivakoodiin

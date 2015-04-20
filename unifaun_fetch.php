@@ -96,11 +96,18 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
 
         list($eranumero_sscc, $sscc_ulkoinen, $rahtikirjanro, $timestamp, $viite) = explode(";", $rivi);
 
+        $query = "SELECT toimitustapa
+                  FROM lasku
+                  WHERE yhtio = '{$kukarow['yhtio']}'
+                  AND tunnus = $eranumero_sscc";
+        $toimitrow = mysql_fetch_assoc(pupe_query($query));
+
         $sscc_ulkoinen = (is_int($sscc_ulkoinen) and $sscc_ulkoinen == 1) ? '' : trim($sscc_ulkoinen);
 
         // Unifaun laittaa viivakoodiin kaksi etunollaa jos SSCC on numeerinen
         // Palautussanomasta etunollaat puuttuu, joten lis‰t‰‰n ne t‰ss‰
-        if (is_numeric($sscc_ulkoinen)) {
+        // DPD:hen ei tule ylim‰‰r‰isi‰ nollia lis‰t‰.
+        if (is_numeric($sscc_ulkoinen) and strpos($toimitrow["toimitustapa"], "DPD") === FALSE) {
           $sscc_ulkoinen = "00".$sscc_ulkoinen;
         }
 

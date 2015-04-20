@@ -1582,7 +1582,7 @@ else {
         $tuote_select = "tuote.vakkoodi AS vakkoodi,";
         $tuote_join = "JOIN tuote ON (tuote.tuoteno = tilausrivi.tuoteno
                          AND tuote.yhtio = tilausrivi.yhtio)";
-        $sorttaus = ", tuote.vakkoodi";
+        $sorttaus = ", tuote.vakkoodi {$sorttaus}";
       }
       else {
         $tuote_select = "";

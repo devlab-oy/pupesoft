@@ -9,7 +9,7 @@ viikonpaivat($kausi);
 $query = "SELECT asiakas.ytunnus, asiakas.asiakasnro, kalenteri.yhtio, left(kalenteri.pvmalku,10) pvmalku,
           asiakas.nimi, asiakas.nimitark, asiakas.osoite, asiakas.postino, asiakas.maa, asiakas.postitp,
           asiakas.toim_nimi, asiakas.toim_nimitark, asiakas.toim_osoite, asiakas.toim_postino, asiakas.toim_maa, asiakas.toim_postitp,
-          asiakas.puhelin, asiakas.toim_puh, asiakas.email,
+          asiakas.puhelin, asiakas.fax, asiakas.email,
           kentta01, kentta02, kentta03, kentta04, if(right(pvmalku,8)='00:00:00','',right(pvmalku,8)) aikaalku, if(right(pvmloppu,8)='00:00:00','',right(pvmloppu,8)) aikaloppu
           FROM kalenteri
           LEFT JOIN kuka ON kalenteri.kuka=kuka.kuka and kalenteri.yhtio=kuka.yhtio
@@ -40,9 +40,9 @@ while ($row = mysql_fetch_assoc($aresult)) {
   $viesti .= "Toimituspostitp:  $row[toim_postitp]\r\n";
   $viesti .= "Toimitusmaa:      $row[toim_maa]\r\n\r\n";
 
-  $viesti .= "Puhelin:              $row[puhelin]\r\n";
-  $viesti .= "Puhelin toimituksiin: $row[toim_puh]\r\n";
-  $viesti .= "Sähköposti:           $row[email]\r\n\r\n";
+  $viesti .= "Puhelin:     $row[puhelin]\r\n";
+  $viesti .= "Fax:         $row[fax]\r\n";
+  $viesti .= "Sähköposti:  $row[email]\r\n\r\n";
 
   $query = "SELECT *
             FROM yhteyshenkilo

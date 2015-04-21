@@ -96,6 +96,7 @@ for ($i = 1; $i < $kappalemaara; $i++) {
   else {
     $qr_params = array(
       "format" => "jpg",
+      "size" => 10,
       "height" => 400
     );
 

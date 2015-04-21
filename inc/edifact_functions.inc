@@ -4352,8 +4352,6 @@ function viivakoodi_pdf($tuoteno) {
   $parametrit['scale'] = 0.7;
   $pdf->image_place($image, 600, 100, $sivu, $parametrit);
 
-  $pdf->image_place($image, 400, 100, $sivu, $parametrit);
-
   //keksit‰‰n uudelle failille joku varmasti uniikki nimi:
   $pdffilenimi = "/tmp/".md5(uniqid(rand(),true)).".pdf";
 

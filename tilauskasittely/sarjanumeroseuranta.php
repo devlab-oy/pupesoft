@@ -1696,7 +1696,7 @@ if ($from == "INVENTOINTI") {
 }
 
 if (strpos($_SERVER['SCRIPT_NAME'], "sarjanumeroseuranta.php")  !== FALSE) {
-  echo "<div class='left'>";
+  echo "<div class='left clear'>";
   require "inc/footer.inc";
   echo "</div>";
 }

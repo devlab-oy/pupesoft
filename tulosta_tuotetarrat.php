@@ -255,7 +255,7 @@ if (!isset($nayta_pdf)) {
   if ($toim != 'HINTA') {
     echo "<th>" . t("Kirjoitin") . "</th>";
     echo "<th>" . t("Malli") . "</th>";
-    echo "<th>" . t("Viivakoodityyppi") . "</th>";
+    echo "<th><label for='viivakoodityyppi_1'>" . t("Viivakoodityyppi") . "</label></th>";
   }
 
   if ($uusean!= '') {
@@ -316,7 +316,7 @@ if (!isset($nayta_pdf)) {
     echo "</select></td>";
 
     echo "<td>";
-    echo "<select name='viivakoodityyppi'>";
+    echo "<select id='viivakoodityyppi_1' name='viivakoodityyppi'>";
     echo "<option value='viivakoodi'>" . t("Viivakoodi") . "</option>";
     echo "<option value='qr_koodi'>" . t("QR-koodi") . "</option>";
     echo "</select>";
@@ -415,6 +415,17 @@ if (!isset($nayta_pdf)) {
     }
 
     echo "</select></td>";
+
+    echo "<tr>";
+    echo "<th><label for='viivakoodityyppi_2'>" . t("Viivakoodityyppi") . "</label></th>";
+    echo "<td>";
+    echo "<select id='viivakoodityyppi_2' name='viivakoodityyppi'>";
+    echo "<option value='viivakoodi'>" . t("Viivakoodi") . "</option>";
+    echo "<option value='qr_koodi'>" . t("QR-koodi") . "</option>";
+    echo "</select>";
+    echo "</td>";
+    echo "</tr>";
+
     echo
     "<tr><td class='back'></td><td class='back'><input type='submit' value='" .
       t("Tulosta tarrat") .

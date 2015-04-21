@@ -1038,7 +1038,7 @@ if (!isset($from_kaikkikorj)) {
 
     $_jarj = $yhtiorow['tilauksen_jarjestys_suunta'];
 
-    if ($row["tilaus"] == "" or $valmistettavat == "") {
+    if ($row["Tilaus"] == "" or $valmistettavat == "") {
       echo "<font class='error'>".t("Taisit painaa takaisin tai päivitä nappia. Näin ei saa tehdä")."!</font>";
       exit;
     }

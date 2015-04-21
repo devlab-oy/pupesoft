@@ -125,7 +125,7 @@ else {
     //tyhjennet‰‰n laskun varastokentt‰, siell‰ oli tieto varastoon optimoinnista mutta nyt se kertoo mihin varastoon l‰hete kuuluu laittaa
     $laskurow['varasto'] = 0;
 
-    //Toimitustava hetier‰ tarvitaan
+    //Toimitustavan hetier‰ ja vaihtoehtoinen vak toimitustapa tarvitaan
     $query = "SELECT tulostustapa,
               vaihtoehtoinen_vak_toimitustapa
               FROM toimitustapa
@@ -161,7 +161,7 @@ else {
       $tuote_select = "tuote.vakkoodi AS vakkoodi,";
       $tuote_join = "JOIN tuote ON (tuote.tuoteno = tilausrivi.tuoteno
                          AND tuote.yhtio = tilausrivi.yhtio)";
-      $sorttaus = "tuote.vakkoodi";
+      $sorttaus = "tuote.vakkoodi, {$sorttaus}";
     }
     else {
       $tuote_select = "";

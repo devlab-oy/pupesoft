@@ -1485,7 +1485,7 @@ else {
 
 if ($rivirow["tyyppi"] != 'V') {
   if ($rivirow["tuoteno"] != '') {
-    echo "  <form name='sarjaformi' action='sarjanumeroseuranta.php' method='post'>
+    echo "  <form name='sarjaformi' action='sarjanumeroseuranta.php' method='post' class='left clear'>
         <input type='hidden' name='$tunnuskentta'     value='$rivitunnus'>
         <input type='hidden' name='from'         value='$from'>
         <input type='hidden' name='lopetus'       value='$lopetus'>

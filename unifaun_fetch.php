@@ -99,6 +99,10 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
         $toimitrow = array();
         $toimitrow["toimitustapa"] = FALSE;
 
+        // Jos on mittoihin perustuvat keräyserät käytössä 
+        // tuohon kenttään tallennetaan eranumero ja SSCC tiedot
+        // eikä laskun tunnusta
+        // ei siis ole järkeä yrittää etsiä lasku näillä tiedoilla
         if ($yhtiorow['kerayserat'] != 'K') {
           $query = "SELECT toimitustapa
                     FROM lasku

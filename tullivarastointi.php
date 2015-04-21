@@ -4,7 +4,6 @@ if (isset($_POST['task']) and (strpos($_POST['task'], "_pdf") !== false)) {
   $no_head = "yes";
 }
 
-
 require "inc/parametrit.inc";
 require 'inc/edifact_functions.inc';
 
@@ -41,6 +40,11 @@ js_popup();
 
 $errors = array();
 
+if (isset($task) and $task == 'nollaus') {
+  tullinollaus();
+  unset($task);
+}
+
 if (isset($task) and $task == 'suorita_toimenpide') {
   $task = $toimenpide;
 }
@@ -53,11 +57,9 @@ if (isset($task) and $task == 'viivakoodit') {
   $view = 'viivakoodit';
 }
 
-
 if (isset($task) and $task == 'suorita_eusiirto') {
 
   $siirrettavat = array();
-  $koskemattomat = array();
 
   foreach ($siirtotuotteet as $key => $tuote) {
 
@@ -165,6 +167,10 @@ if (isset($task) and $task == 'suorita_eusiirto') {
                 ORDER BY tuoteno ASC";
       $result = pupe_query($query);
 
+      if (isset($tuotenumero)) {
+        unset($tuotenumero);
+      }
+
       while ($tuote = mysql_fetch_assoc($result)) {
         if ($tuote['tilausrivi_kommentti'] == $tiedot['tuoteno']) {
           $tuotenumero = $tuote['tuoteno'];
@@ -266,7 +272,6 @@ if (isset($task) and $task == 'suorita_eusiirto') {
                   AND hyllyalue = '{$tiedot['hyllyalue']}'
                   AND hyllynro = '{$tiedot['hyllynro']}'";
         pupe_query($query);
-
       }
 
       $kopiointiparametrit['kopioitavat'] = $kopioitavat;
@@ -274,36 +279,22 @@ if (isset($task) and $task == 'suorita_eusiirto') {
       eu_kopioi_rivit($kopiointiparametrit);
     }
 
-
     $query = "SELECT *
               FROM tilausrivi
               WHERE yhtio = '{$kukarow['yhtio']}'
-              AND tunnus = '{$tulotunnus}'";
+              AND otunnus = '{$tulotunnus}'
+              AND kommentti != 'kokonaan siirretty eu-numerolle'";
     $result = pupe_query($query);
 
     if (mysql_num_rows($result) == 0) {
 
-      $poisto = "DELETE FROM lasku
+      $muutos = "UPDATE lasku
+                 SET sisviesti1 = 'siirretty eu-numerolle'
                  WHERE yhtio = '{$kukarow['yhtio']}'
                  AND tunnus  = '{$tulotunnus}'";
-      pupe_query($poisto);
-
-      $poisto = "DELETE FROM tuote
-                 WHERE yhtio = '{$kukarow['yhtio']}'
-                 AND tuoteno  LIKE '{$vanha_tulonumero}-%'";
-      pupe_query($poisto);
-
-      $poisto = "DELETE FROM tuotepaikat
-                 WHERE yhtio = '{$kukarow['yhtio']}'
-                 AND tuoteno  LIKE '{$vanha_tulonumero}-%'";
-      pupe_query($poisto);
-
-      $poisto = "DELETE FROM tuotteen_toimittajat
-                 WHERE yhtio = '{$kukarow['yhtio']}'
-                 AND tuoteno  LIKE '{$vanha_tulonumero}-%'";
-      pupe_query($poisto);
-
+      pupe_query($muutos);
     }
+
     unset($task);
   }
 }
@@ -418,7 +409,6 @@ if (isset($task) and $task == 'anna_tulotiedot') {
   }
 }
 
-
 if (isset($task) and $task == 'varaa_tulonumero') {
 
   $_varastotunnus_ja_koodi = explode("#", $varastotunnus_ja_koodi);
@@ -490,7 +480,8 @@ if (isset($task) and $task == 'tullisiirto') {
     pupe_query($query);
 
     $query = "UPDATE tuote SET
-              tuoteno = '{$uusi_tuotenumero}'
+              tuoteno = '{$uusi_tuotenumero}',
+              tilausrivi_kommentti = '{$tuotenumero}'
               WHERE yhtio = '{$kukarow['yhtio']}'
               AND tuoteno = '{$tuotenumero}'";
     pupe_query($query);
@@ -515,8 +506,16 @@ if (isset($task) and $task == 'tullisiirto') {
 
   }
 
+  $query = "SELECT toimaika, luontiaika
+            FROM lasku
+            WHERE yhtio = '{$kukarow['yhtio']}'
+            AND tunnus = '{$tulotunnus}'";
+  $result = pupe_query($query);
+  $tulorivi = mysql_fetch_assoc($result);
+
   $query = "UPDATE lasku SET
-            asiakkaan_tilausnumero = '{$uusi_tulonumero}'
+            asiakkaan_tilausnumero = '{$uusi_tulonumero}',
+            luontiaika = NOW()
             WHERE yhtio = '{$kukarow['yhtio']}'
             AND tunnus = '{$tulotunnus}'";
   pupe_query($query);
@@ -526,7 +525,9 @@ if (isset($task) and $task == 'tullisiirto') {
             viesti = 'tullivarasto',
             tila = 'O',
             asiakkaan_tilausnumero = '{$tulonumero}',
-            sisviesti1 = '{$uusi_tulonumero}'";
+            sisviesti1 = '{$uusi_tulonumero}',
+            toimaika = '{$tulorivi['toimaika']}',
+            luontiaika = '{$tulorivi['luontiaika']}'";
   pupe_query($query);
 
   unset($task);
@@ -564,36 +565,24 @@ if (isset($task) and ($task == 'perusta' or $task == 'tallenna')) {
       $errors[$key]["nettopaino"] = t("Syˆt‰ nettopaino");
     }
     else {
-      $nettopaino = str_replace(',', '.', $tiedot['nettopaino']);
-      $nettopaino = number_format($nettopaino, 4);
+      $tiedot['nettopaino'] = str_replace(',', '.', $tiedot['nettopaino']);
+      $tiedot['nettopaino'] = number_format($tiedot['nettopaino'], 4);
     }
 
     if (empty($tiedot['bruttopaino'])) {
       $errors[$key]["bruttopaino"] = t("Syˆt‰ bruttopaino");
     }
     else {
-      $bruttopaino = str_replace(',', '.', $tiedot['bruttopaino']);
-      $bruttopaino = number_format($bruttopaino, 4);
+      $tiedot['bruttopaino'] = str_replace(',', '.', $tiedot['bruttopaino']);
+      $tiedot['bruttopaino'] = number_format($tiedot['bruttopaino'], 4);
     }
 
     if (empty($tiedot['tilavuus'])) {
       $errors[$key]["tilavuus"] = t("Syˆt‰ tilavuus");
     }
     else {
-      $tilavuus = str_replace(',', '.', $tiedot['tilavuus']);
-      $tilavuus = number_format($tilavuus, 4);
-    }
-
-    if (!$nettopaino) {
-      $errors[$key]["nettopaino"] = t("Tarkista nettopaino");
-    }
-
-    if (!$bruttopaino) {
-      $errors[$key]["bruttopaino"] = t("Tarkista bruttopaino");
-    }
-
-    if (!$tilavuus) {
-      $errors[$key]["tilavuus"] = t("Tarkista tilavuus");
+      $tiedot['tilavuus'] = str_replace(',', '.', $tiedot['tilavuus']);
+      $tiedot['tilavuus'] = number_format($tiedot['tilavuus'], 4);
     }
 
     if (empty($tiedot['pakkauslaji'])) {
@@ -662,9 +651,9 @@ if (isset($task) and ($task == 'perusta' or $task == 'tallenna')) {
         'lisatieto' => mysql_real_escape_string($tiedot['lisatieto']),
         'pakkauslaji' => strtoupper(mysql_real_escape_string($tiedot['pakkauslaji'])),
         'pakkauskpl' => $tiedot['maara2'],
-        'bruttopaino' => $bruttopaino,
-        'nettopaino' => $nettopaino,
-        'tilavuus' => $tilavuus,
+        'bruttopaino' => $tiedot['bruttopaino'],
+        'nettopaino' => $tiedot['nettopaino'],
+        'tilavuus' => $tiedot['tilavuus'],
         'kpl' => $tiedot['maara1'],
         'varasto' => $varastotunnus,
         'toimittajan_tunnus' => $toimittajatunnus,
@@ -1217,7 +1206,6 @@ if (isset($view) and $view == 'tulotiedot') {
           }
 
       echo "</select>";
-
   }
 
   echo "</td><td class='back error'>{$errors['varastotunnus_ja_koodi']}</td>
@@ -1294,10 +1282,11 @@ if (isset($view) and $view == "perus") {
               AND varastopaikat.tunnus = lasku.varasto
             LEFT JOIN tuote
               ON tuote.yhtio = lasku.yhtio
-              AND tuote.tuoteno = tilausrivi.tuoteno
+              AND (tuote.tuoteno = tilausrivi.tuoteno OR tuote.tilausrivi_kommentti = tilausrivi.tuoteno)
             WHERE lasku.yhtio = 'rplog'
             AND viesti = 'tullivarasto'
             AND sisviesti1 = ''
+            AND tilausrivi.kommentti != 'kokonaan siirretty eu-numerolle'
             GROUP BY lasku.tunnus, tilausrivi.tunnus
             ORDER BY lasku.tunnus DESC";
   $result = pupe_query($query);
@@ -1307,6 +1296,14 @@ if (isset($view) and $view == "perus") {
     echo t("Ei perustettuja tulonumeroita!");
     echo "</font><br><br>";
   }
+
+  /*
+  echo "
+    <form action='tullivarastointi.php' method='post'>
+    <input type='hidden' name='task' value='nollaus' />
+    <input type='submit' value='". t("Nollaa") . "' />
+    </form>";
+  */
 
   echo "
     <form action='tullivarastointi.php' method='post'>
@@ -1391,8 +1388,8 @@ if (isset($view) and $view == "perus") {
     echo "<tr>";
     echo "<th>".t("Tulo")."</th>";
     echo "<th>".t("Tuotteet")."</th>";
-    echo "<th>".t("Varasto")."</th>";
     echo "<th>".t("Status")."</th>";
+    echo "<th>".t("Varasto")."</th>";
     echo "<th>".t("Toimenpiteet")."</th>";
     echo "<th class='back'></th>";
     echo "</tr>";
@@ -1475,29 +1472,6 @@ if (isset($view) and $view == "perus") {
       }
       echo "</td>";
 
-      // varastosolu
-      echo "<td valign='top'>";
-      echo $info['varastonimi'];
-
-      $varoitusehto1 = ($info['vt'] == 'v‰liaikainen');
-      $varoitusehto2 = (!empty($info['toimittaja']));
-      $varoitusehto3 = ($varastossa > 0);
-
-      if ($varoitusehto1 and $varoitusehto2 and $varoitusehto3) {
-        $date1 = new DateTime($info['toimaika']);
-        $date2 = new DateTime('today');
-        $interval = $date1->diff($date2);
-        $jaljella = (20 - $interval->days);
-
-        if ($jaljella > 0) {
-         echo '<br>';
-         echo "<span class='error'>";
-         echo $jaljella . ' ' . t("P‰iv‰‰ j‰ljell‰");
-         echo "</span>";
-        }
-      }
-      echo "</td>";
-
       // statussolu
       echo "<td align='center' valign='top'>";
 
@@ -1525,6 +1499,29 @@ if (isset($view) and $view == "perus") {
           foreach ($tuotteet as $tuoteno => $status) {
             echo $status . '<br>';
           }
+        }
+      }
+      echo "</td>";
+
+      // varastosolu
+      echo "<td valign='top'>";
+      echo $info['varastonimi'];
+
+      $varoitusehto1 = ($info['vt'] == 'v‰liaikainen');
+      $varoitusehto2 = (!empty($info['toimittaja']));
+      $varoitusehto3 = ($varastossa > 0);
+
+      if ($varoitusehto1 and $varoitusehto2 and $varoitusehto3) {
+        $date1 = new DateTime($info['toimaika']);
+        $date2 = new DateTime('today');
+        $interval = $date1->diff($date2);
+        $jaljella = (20 - $interval->days);
+
+        if ($jaljella > 0) {
+         echo '<br>';
+         echo "<span class='error'>";
+         echo $jaljella . ' ' . t("P‰iv‰‰ j‰ljell‰");
+         echo "</span>";
         }
       }
       echo "</td>";
@@ -1704,13 +1701,9 @@ if (isset($view) and $view == "viivakoodit") {
 
     echo "</td>";
     echo "</tr>";
-
-
   }
 
   echo "</table>";
-
-
 }
 
 //////////////////////////
@@ -1739,7 +1732,7 @@ if (isset($view) and $view == "eusiirto") {
 
   foreach ($tuotteet as $key => $tuote) {
 
-    if ($tuote['hyllyalue'] != '') {
+    if ($tuote['hyllyalue'] != '' and $tuote['maara1'] != 0) {
 
       if (isset($siirtotuotteet[$key]['siirrettava_maara'])) {
         $siirtomaara = $siirtotuotteet[$key]['siirrettava_maara'];
@@ -1775,7 +1768,6 @@ if (isset($view) and $view == "eusiirto") {
       echo "</td>";
       echo "</tr>";
     }
-
   }
 
   echo "</table>";

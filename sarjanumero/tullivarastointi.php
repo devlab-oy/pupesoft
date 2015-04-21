@@ -386,7 +386,6 @@ if ($view == 'tiedot') {
   echo "</div>";
   echo '<hr>';
 
-
   if (!$saapumistiedot['kaikki_viety']) {
 
     list($koodi, $juoksu, $vuosi) = explode("-", $tulonumero);
@@ -618,6 +617,11 @@ if ($view == 'tiedot') {
 
   echo "</div>";
   echo "</div>";
+
+  if ($saapumistiedot['kaikki_viety']) {
+    echo "<div style='text-align:center'><a href='tullivarastointi.php'><button class='button'>", t("Uusi tulonumero"), "</button></a></div>";
+  }
+
 }
 
 if (count($viestit) > 0) {

@@ -508,6 +508,9 @@ if (isset($view) and $view == 'kasittely') {
   else {
 
     echo "<form method='post'>";
+    echo "<input type='hidden' name='task' value='lisaa' />";
+    echo "<input type='hidden' name='toimittajatunnus' value='{$toimittajatunnus}' />";
+    echo "<input type='hidden' name='toimitustunnus' value='{$toimitustunnus}' />";
     echo "<table><tr>";
     echo "<th>" .t("Toimittaja"). "</th>";
     echo "<td>";
@@ -515,12 +518,9 @@ if (isset($view) and $view == 'kasittely') {
     echo "</td><td class='back'>";
 
     if (isset($toimitukset) and count($toimitukset) > 0) {
-      echo "<form method='post'>
-      <input type='hidden' name='task' value='perusta' />
-      <input type='submit' value='" . t("Vaihda") . "' /></form>";
+      echo "
+      <input type='submit' name='vaihtosubmit' value='" . t("Vaihda") . "' />";
     }
-
-
 
     echo "</td></tr>";
 
@@ -541,7 +541,7 @@ if (isset($view) and $view == 'kasittely') {
       echo "<tr>";
       echo "<th>" .t("Malli"). "</th>";
       echo "<td><input type='text' name='hakusana_malli' value='{$hakusana_malli}'></td>";
-      echo "<td class='back'><input type='submit' value='" . t("Etsi") . "'></td>";
+      echo "<td class='back'><input type='submit' name='etsisubmit' value='" . t("Etsi") . "'></td>";
       echo "</tr>";
     }
 
@@ -1007,75 +1007,94 @@ if (isset($view) and $view == 'perus') {
     <input type='submit' value='" . t("Perusta uusi toimitus") . "'/>
     </form><br><br>";
 
-  echo "<table>";
-  echo "
-  <tr>
-    <th>" . t("Asiakas") ."</th>
-    <th>" . t("Toimitus#") ."</th>
-    <th>" . t("Tuotetiedot") ."</th>
-    <th>" . t("Status") ."</th>
-    <th>" . t("Toimenpiteet") ."</th>
-    <th class='back'></th>
-  </tr>";
+  if ($toimitukset) {
 
-
-  foreach ($toimitukset as $tunnus => $toimitustiedot) {
-
+    echo "<table>";
     echo "
-      <tr>
-      <td valign='top'>" . $toimitustiedot['asiakas'] ."</td>
-      <td valign='top' align='center'>" . $tunnus ."</td>
-      <td valign='top'>" . $toimitustiedot['tuotetiedot'] ."</td>
-      <td valign='top'>" . $toimitustiedot['status'] ."</td>";
+    <tr>
+      <th>" . t("Asiakas") ."</th>
+      <th>" . t("Toimitus#") ."</th>
+      <th>" . t("Tuotetiedot") ."</th>
+      <th>" . t("Status") ."</th>
+      <th>" . t("Toimenpiteet") ."</th>
+      <th class='back'></th>
+    </tr>";
 
-      echo "<td valign='top'>";
 
 
-      if ($toimenpiteet = toimitustoimenpiteet($tunnus, $toimitustiedot['statuskoodi'])) {
-
-        echo "<form action='tullivarastointi_toimitus.php' class='multisubmit' method='post'>";
-        echo "<input type='hidden' name='task' value='suorita_toimenpide' />";
-        echo "<input type='hidden' name='toimitustunnus' value='{$tunnus}' />";
-        echo "<select name='toimenpide' id='{$tunnus}' class='tpselect' style='width:90px;'>";
-
-        echo "<option value='.' selected disabled>". t("Valitse") ."</option>";
-
-        foreach ($toimenpiteet as $koodi => $teksti) {
-          echo "<option value='{$koodi}'>{$teksti}</option>";
-        }
-
-        echo "</select>";
-        echo "&nbsp;";
-        echo "<input id='{$tunnus}_nappi' class='nappi' disabled type='submit' value='" . t("Suorita") . "'/>";
-        echo "</form>";
-      }
-      else {
-
-      }
+    foreach ($toimitukset as $tunnus => $toimitustiedot) {
 
       echo "
-      </td>
-      </tr>";
+        <tr>
+        <td valign='top'>" . $toimitustiedot['asiakas'] ."</td>
+        <td valign='top' align='center'>" . $tunnus ."</td>
+        <td valign='top'>" . $toimitustiedot['tuotetiedot'] ."</td>
+        <td valign='top'>" . $toimitustiedot['status'] ."</td>";
+
+        echo "<td valign='top'>";
+
+
+        if ($toimenpiteet = toimitustoimenpiteet($tunnus, $toimitustiedot['statuskoodi'])) {
+
+          echo "<form action='tullivarastointi_toimitus.php' class='multisubmit' method='post'>";
+          echo "<input type='hidden' name='task' value='suorita_toimenpide' />";
+          echo "<input type='hidden' name='asiakas' value='{$toimitustiedot['asiakas']}' />";
+          echo "<input type='hidden' name='toimittajatunnus' value='{$toimitustiedot['toimittajatunnus']}' />";
+          echo "<input type='hidden' name='toimitustunnus' value='{$tunnus}' />";
+          echo "<select name='toimenpide' id='{$tunnus}' class='tpselect' style='width:90px;'>";
+
+          echo "<option value='.' selected disabled>". t("Valitse") ."</option>";
+
+          foreach ($toimenpiteet as $koodi => $teksti) {
+            echo "<option value='{$koodi}'>{$teksti}</option>";
+          }
+
+          echo "</select>";
+          echo "&nbsp;";
+          echo "<input id='{$tunnus}_nappi' class='nappi' disabled type='submit' value='" . t("Suorita") . "'/>";
+          echo "</form>";
+        }
+        else {
+
+        }
+
+        echo "
+        </td>
+        </tr>";
+    }
+    echo "</table>";
+
+    echo "
+    <script type='text/javascript'>
+
+      $('.tpselect').change(function() {
+        var tunnus = $(this).attr('id');
+        var valittu = $(this).val();
+        var nappitunnus = tunnus+'_nappi';
+        $('.nappi').prop('disabled', true);
+        $('.tpselect').val('.');
+        $(this).val(valittu);
+        $('#'+nappitunnus).prop('disabled', false);
+      });
+
+    </script>";
+
+    echo "</td>
+    <td  valign='top' class='back'>";
+
   }
-  echo "</table>";
+  else {
 
-  echo "
-  <script type='text/javascript'>
+    echo "<font class='message'>" . t("Ei perustettuja toimituksia") . "</font><br>";
 
-    $('.tpselect').change(function() {
-      var tunnus = $(this).attr('id');
-      var valittu = $(this).val();
-      var nappitunnus = tunnus+'_nappi';
-      $('.nappi').prop('disabled', true);
-      $('.tpselect').val('.');
-      $(this).val(valittu);
-      $('#'+nappitunnus).prop('disabled', false);
-    });
+  }
 
-  </script>";
 
-  echo "</td>
-  <td  valign='top' class='back'>";
+
+
+
+
+
 
 }
 

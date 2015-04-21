@@ -94,11 +94,16 @@ for ($i = 1; $i < $kappalemaara; $i++) {
     }
   }
   else {
+    $qr_params = array(
+      "format" => "jpg",
+      "height" => 400
+    );
+
     if ($koodi == 'eankoodi' and tarkista_ean13($eankoodirow['eankoodi']) !== false) {
-      $data = qr_koodi($eankoodirow['eankoodi'], 13);
+      $data = qr_koodi($eankoodirow['eankoodi'], $qr_params);
     }
     else {
-      $data = qr_koodi($eankoodirow[$koodi], 13);
+      $data = qr_koodi($eankoodirow[$koodi], $qr_params);
     }
   }
 

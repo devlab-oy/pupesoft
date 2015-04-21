@@ -18,12 +18,23 @@ if (!function_exists("pupenext_rest")) {
 }
 
 if (!function_exists("qr_koodi")) {
-  function qr_koodi($string, $size = 3, $format = "jpg") {
+  function qr_koodi($string, $params = array()) {
+
     $data = array(
-      "string" => $string,
-      "format" => $format,
-      "size" => $size
+      "string" => $string
     );
+
+    if ($params["format"]) {
+      $data["format"] = $params["format"];
+    }
+
+    if ($params["size"]) {
+      $data["size"] = $params["size"];
+    }
+
+    if ($params["height"]) {
+      $data["height"] = $params["height"];
+    }
 
     $response = pupenext_rest($data, "qr_codes/generate");
 

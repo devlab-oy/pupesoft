@@ -99,7 +99,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
         $toimitrow = array();
         $toimitrow["toimitustapa"] = FALSE;
 
-        // Jos on mittoihin perustuvat keräyserät käytössä 
+        // Jos on mittoihin perustuvat keräyserät käytössä
         // tuohon kenttään tallennetaan eranumero ja SSCC tiedot
         // eikä laskun tunnusta
         // ei siis ole järkeä yrittää etsiä lasku näillä tiedoilla
@@ -116,7 +116,7 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
         // Unifaun laittaa viivakoodiin kaksi etunollaa jos SSCC on numeerinen
         // Palautussanomasta etunollaat puuttuu, joten lisätään ne tässä
         // DPD:hen ei tule ylimääräisiä nollia lisätä.
-        if (is_numeric($sscc_ulkoinen) and strpos($toimitrow["toimitustapa"], "DPD") === FALSE) {
+        if (is_numeric($sscc_ulkoinen) and stripos($toimitrow["toimitustapa"], "DPD") === FALSE) {
           $sscc_ulkoinen = "00".$sscc_ulkoinen;
         }
 

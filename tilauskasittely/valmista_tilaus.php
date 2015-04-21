@@ -1000,7 +1000,7 @@ if (!isset($from_kaikkikorj)) {
     else {
       $korjataan = "";
     }
-echo "1003 valmistettavat $valmistettavat tulin $tulin <br><br>";
+
     //Jos valmistetaan per tuote niin valinnasta/hausta tulee vain valmisteiden tunnukset, tarvitsemme kuitenkin myös raaka-aineiden tunnukset joten haetaan ne tässä
     if ($toim == "TUOTE" and $tulin == "VALINNASTA") {
       $query = "SELECT
@@ -1011,7 +1011,7 @@ echo "1003 valmistettavat $valmistettavat tulin $tulin <br><br>";
                 and  tilausrivi.perheid in ($valmistettavat)";
       $ktres = pupe_query($query);
       $ktrow = mysql_fetch_assoc($ktres);
-echo "1014 $query <br> valmistettavat: {$ktrow["valmistettavat"]} <br><br>";
+
       $valmistettavat = $ktrow["valmistettavat"];
     }
 
@@ -1020,7 +1020,7 @@ echo "1014 $query <br> valmistettavat: {$ktrow["valmistettavat"]} <br><br>";
     for ($i=0; $i < mysql_num_fields($result)-1; $i++) {
       echo "<tr><th align='left'>" . t(mysql_field_name($result, $i)) ."</th><td>{$row[mysql_field_name($result, $i)]}</td></tr>";
     }
-echo "1023 toim $toim rowTilas {$row["tilaus"]} rowTilaustyyppi {$row["tilaustyyppi"]} <br><br>";
+
     //  Voidaan hypätä suoraan muokkaamaan tilausta
     if ($toim == "" and strpos($row["Tilaus"], ",") === FALSE and $row["Tilaustyyppi"] == "W") {
       echo "  <tr>
@@ -1037,7 +1037,7 @@ echo "1023 toim $toim rowTilas {$row["tilaus"]} rowTilaustyyppi {$row["tilaustyy
     echo "</table><br>";
 
     $_jarj = $yhtiorow['tilauksen_jarjestys_suunta'];
-    
+
     if ($row["tilaus"] == "" or $valmistettavat == "") {
       echo "<font class='error'>".t("Taisit painaa takaisin tai päivitä nappia. Näin ei saa tehdä")."!</font>";
       exit;
@@ -1091,7 +1091,7 @@ echo "1023 toim $toim rowTilas {$row["tilaus"]} rowTilaustyyppi {$row["tilaustyy
               tunnus";
     $presult = pupe_query($query);
     $riveja = mysql_num_rows($presult);
-echo "1089 Q $query <br><br>";
+
     echo "<table><tr>";
     $miinus = 3;
 

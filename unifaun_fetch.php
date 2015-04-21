@@ -96,11 +96,16 @@ if ($handle = opendir($ftpget_dest[$operaattori])) {
 
         list($eranumero_sscc, $sscc_ulkoinen, $rahtikirjanro, $timestamp, $viite) = explode(";", $rivi);
 
-        $query = "SELECT toimitustapa
-                  FROM lasku
-                  WHERE yhtio = '{$kukarow['yhtio']}'
-                  AND tunnus = $eranumero_sscc";
-        $toimitrow = mysql_fetch_assoc(pupe_query($query));
+        $toimitrow = array();
+        $toimitrow["toimitustapa"] = FALSE;
+
+        if ($yhtiorow['kerayserat'] != 'K') {
+          $query = "SELECT toimitustapa
+                    FROM lasku
+                    WHERE yhtio = '{$kukarow['yhtio']}'
+                    AND tunnus = '{$eranumero_sscc}'";
+          $toimitrow = mysql_fetch_assoc(pupe_query($query));
+        }
 
         $sscc_ulkoinen = (is_int($sscc_ulkoinen) and $sscc_ulkoinen == 1) ? '' : trim($sscc_ulkoinen);
 

@@ -53,6 +53,10 @@
 	if ($fakt_lahetys != "" and $sisalto != '') {
 		//keksitään uudelle failille joku varmasti uniikki nimi:
 		$pdffilenimi  = "Autofakt-".substr(md5(uniqid(rand(),true)),0,10).".txt";
+		
+		/* Lisätty 17.2.2014, lisätty taulukot liitteille ja niiden nimille */
+		$liitteet = array();
+		$liite_nimet = array();
 
 		//tässa on kaikki failit jotka tarvitaan
 		$bound = uniqid(time()."_") ;
@@ -69,10 +73,19 @@
 
 		$content .= chunk_split(base64_encode($sisalto));
 		$content .= "\r\n" ;
+		
+		/* Lisätty 17.2.2014, lisätään liiteet ja niiden nimet taulukoihin */
+		array_push($liitteet, $sisalto);
+		array_push($liite_nimet, $pdffilenimi);
+		
+		$content_body = "";
 
 		$subjekti = $frow["sopimusnumero"]." ".$pdffilenimi;
 
-		if($frow["email"] == '' or !mail($frow["email"], mb_encode_mimeheader($subjekti, "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]")) {
+		/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lisätty paranneltu sendMail */
+		//if($frow["email"] == '' or !mail($frow["email"], mb_encode_mimeheader($subjekti, "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]")) {
+		include_once '/var/www/html/lib/functions/sendMail.php';  // Lisätään sendMail funktio
+		if($frow["email"] == '' or !sendMail($yhtiorow['postittaja_email'], $frow["email"], $subjekti, $content_body, false, $liitteet, $liite_nimet)) {
 			$sebfact_ulos .= sprintf(t("VIRHE: Laskutuksen factoring-sähköpostisiirtoa ei voitu suorittaa osoitteeseen: %s"),$frow["email"])."<br>\r\n";
 		}
 		else {
@@ -80,7 +93,10 @@
 		}
 
 		//lähetetään meili myös yhtiön adminille
-		mail($yhtiorow["alert_email"], mb_encode_mimeheader($subjekti, "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lisätty paranneltu sendMail */
+		//mail($yhtiorow["alert_email"], mb_encode_mimeheader($subjekti, "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		include_once '/var/www/html/lib/functions/sendMail.php';  // Lisätään sendMail funktio
+		$posti = sendMail($yhtiorow['postittaja_email'], $yhtiorow["alert_email"], $subjekti, $content_body, false, $liitteet, $liite_nimet);
 
 		//echotaan rudulle jos kyseessä ei ole batch-ajo
 		if ($tulos_ulos == "") {

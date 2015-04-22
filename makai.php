@@ -194,7 +194,8 @@
 			}
 
 			// --- LM03 AINEISTO MAKSUTILIT
-			$query = "	SELECT yriti.tunnus, yriti.tilino, yriti.nimi nimi
+			/* Muokattu 20.9.2013, lis‰tty hakuun lasku.yhtio_nimi, lasku.yhtio_osoite, lasku.yhtio_ovttunnus jotka halutessaan voi kirjoittaa aineistoon */
+			$query = "	SELECT yriti.tunnus, yriti.tilino, yriti.nimi nimi, lasku.yhtio_nimi, lasku.yhtio_osoite, lasku.yhtio_ovttunnus
 						FROM lasku, yriti
 						WHERE lasku.yhtio 	= '$kukarow[yhtio]'
 						and tila 			= 'P'
@@ -204,7 +205,7 @@
 						and yriti.kaytossa  = ''
 						and maksaja 		= '$kukarow[kuka]'
 						and olmapvm 		= '$pvmrow[olmapvm]'
-						GROUP BY yriti.tilino";
+						GROUP BY lasku.yhtio_nimi, yriti.tilino";  // Muokattu 20.11.2013, laitettu GROUP BY lasku.yhtio_nimi. N‰in saadaan eritelty‰ toimipisteiden laskut.
 			$yritiresult = mysql_query($query) or pupe_error($query);
 
 			if (mysql_num_rows($yritiresult) != 0) {
@@ -214,6 +215,9 @@
 					$yritystilino 	= $yritirow['tilino'];
 					$yrityytunnus 	= $yhtiorow['ytunnus'];
 					$maksupvm 		= $pvmrow['olmapvm'];
+					$nimi = $yritirow['yhtio_nimi'];         // Lis‰tty 20.9.2013
+					$osote = $yritirow['yhtio_osoite'];      // Lis‰tty 20.9.2013
+					$ttunnus = $yritirow['yhtio_ovttunnus']; // Lis‰tty 20.9.2013
 					$yritysnimi 	= $yhtiorow['nimi'];
 
 					if (!is_resource($toot)) {
@@ -277,7 +281,8 @@
 								and maksaja 		= '$kukarow[kuka]'
 								and maksu_tili 		= $yritirow[tunnus]
 								and olmapvm 		= '$pvmrow[olmapvm]'
-								ORDER BY tilinumero, summa desc";
+								and lasku.yhtio_nimi = '$nimi'
+								ORDER BY tilinumero, summa desc";  // Muokattu 20.11.2013, lis‰tty -> and lasku.yhtio_nimi = '$nimi'. T‰ll‰in saadaan eritelty‰ eri toimipaikat/toiminimet.
 					$result = mysql_query($query) or pupe_error($query);
 
 					while ($laskurow = mysql_fetch_array ($result)) {
@@ -345,11 +350,16 @@
 						require("inc/bginsumma.inc");
 					}
 
-					echo "<tr><td class='back'><br></td></tr>";
-					echo "<tr><th>".t("Maksup‰iv‰")."</th><td>".tv1dateconv($pvmrow["olmapvm"])."</td></tr>";
-					echo "<tr><th>".t("Maksutili")."</th><td>$yritirow[nimi] $yritirow[tilino]</td></tr>";
-					echo "<tr><th>".t("Summa")."</th><td>".sprintf('%.2f', $makssumma)."</td></tr>";
-					echo "<tr><th>".t("Tapahtumia")."</td><td>$makskpl ".t("kpl")."</td></tr>";
+					/* Lis‰tty 20.11.2013, lis‰tty ehto, jonka avulla saadaan tyhj‰t rivit j‰tetty‰ tulostamatta */
+					if ($makssumma > 0)
+					{
+						echo "<tr><td class='back'><br></td></tr>";
+						echo "<tr><th>".t("Maksup‰iv‰")."</th><td>".tv1dateconv($pvmrow["olmapvm"])."</td></tr>";
+						echo "<tr><th>".t("Maksutili")."</th><td>$yritirow[nimi] $yritirow[tilino]</td></tr>";
+						echo "<tr><th>".t("Summa")."</th><td>".sprintf('%.2f', $makssumma)."</td></tr>";
+						echo "<tr><th>".t("Tapahtumia")."</td><td>$makskpl ".t("kpl")."</td></tr>";
+					}
+					/* Lis‰ys p‰‰ttyy 20.11.2013 */
 
 					// Jokainen pankki ja p‰iv‰ omaan tiedostoon
 					if ($yhtiorow['pankkitiedostot'] != '') {
@@ -379,7 +389,8 @@
 					          	and maksaja 	= '$kukarow[kuka]'
 					          	and maksu_tili	= '$yritirow[tunnus]'
 					          	and olmapvm 	= '$pvmrow[olmapvm]'
-					          	ORDER BY yhtio, tila";
+								and yhtio_nimi  = '$nimi'
+					          	ORDER BY yhtio, tila";  // Muokattu 20.11.2013, lis‰tty -> and yhtio_nimi  = '$nimi'. N‰in saadaan maksuaineistoon oikeat tiedot ja estet‰‰n se, ettei kaikki laskut merkkaannu kerralla.
 					$result = mysql_query($query) or pupe_error($query);
 
 					$makskpl 	= 0;

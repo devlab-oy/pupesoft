@@ -5,11 +5,11 @@
 	$ulos = "LM03";												// 01 Aineistotunnus
 	$ulos .= sprintf('%1.1s', $laskutapahtuma{0});				// 02 Tietuetunnus (1 = maksutapahtuma, 2 = erittelytapahtuma)
 	$ulos .= sprintf('%1.1s', $laskutapahtuma{1});				// 03 Tapahtumalaji (0 = maksu, 2 = hyvitys)
-	$ulos .= sprintf('%-14.14s', $lmp_mt_4kentta);				// 04 Sampon speksissä Maksajan tilinumero / Nordean speksissä "varalla"
+	$ulos .= sprintf('%-18.18s', $lmp_mt_4kentta);				// 04 Sampon speksissä Maksajan tilinumero / Nordean speksissä "varalla". Muokattu 13.9.2013, muutettu numerot 14 -> 18
 	$ulos .= sprintf('%-30.30s', $laskunimi1);					// 05 Saajan tarkenne 1
 	$ulos .= sprintf('%-20.20s', $laskunimi2);					// 06 Saajan tarkenne 2
 	$ulos .= sprintf('%-20.20s', $laskunimi3);					// 07 Saajan tarkenne 3
-	$ulos .= sprintf('%-14.14s', $laskutilno);					// 08 Saajan tilinumero
+	$ulos .= sprintf('%-18.18s', $laskutilno);					// 08 Saajan tilinumero. Muokattu 13.9.2013, muutettu numerot 14 -> 18
 	$ulos .= sprintf('%3.3s', '');								// 09 Sampon speksissä Maksunaihe / Nordean Speksissä "varalla"
 	$ulos .= sprintf('%1.1s', $laskutyyppi);					// 10 Viestityyppi (Viestityypit: 1, 2, 5, 6, 7)
 	$ulos .= sprintf('%-70.70s', $laskuviesti);					// 11 Viesti

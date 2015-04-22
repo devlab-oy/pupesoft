@@ -358,8 +358,11 @@
 				$header	 = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
 				$header .= "MIME-Version: 1.0\n" ;
 				$subject = "Iltasiivo ".date("d.m.Y")." - $yhtiorow[nimi]";
-
-				mail($yhtiorow["admin_email"], mb_encode_mimeheader("Iltasiivo yhtiölle '{$yhtiorow["yhtio"]}'", "ISO-8859-1", "Q"), $iltasiivo, $header, " -f $yhtiorow[postittaja_email]");
+				
+				/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lisätty paranneltu sendMail */
+				//mail($yhtiorow["admin_email"], mb_encode_mimeheader("Iltasiivo yhtiölle '{$yhtiorow["yhtio"]}'", "ISO-8859-1", "Q"), $iltasiivo, $header, " -f $yhtiorow[postittaja_email]");
+				include_once '/var/www/html/lib/functions/sendMail.php';  // Lisätään sendMail funktio
+				$posti = sendMail($yhtiorow['postittaja_email'], $yhtiorow["admin_email"], "Iltasiivo yhtiölle '{$yhtiorow["yhtio"]}'", $iltasiivo);
 			}
 		}
 	}

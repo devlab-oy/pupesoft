@@ -149,6 +149,9 @@
 		if ($lukitse_laji== "" or $lukitse_laji == "LUETTELO") 			$ulos .= "<option value='LUETTELO' $avain_sel[LUETTELO]>					".t("Luettelotyyppi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TRIVITYYPPI") 		$ulos .= "<option value='TRIVITYYPPI' $avain_sel[TRIVITYYPPI]>				".t("Tilausrivin tyyppi")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "LASKUTUS_SAATE")	$ulos .= "<option value='LASKUTUS_SAATE' $avain_sel[LASKUTUS_SAATE]>		".t("Laskun sähköpostisaatekirje asiakkaalle")."</option>";
+//tehty uusi laji ostotilaus_saattelle
+		if ($lukitse_laji== "" or $lukitse_laji == "OSTOTILAUS_SAAT")	$ulos .= "<option value='OSTOTILAUS_SAAT' $avain_sel[OSTOTILAUS_SAAT]>		".t("Ostotilauksen sähköpostisaatekirje")."</option>";
+
 		if ($lukitse_laji== "" or $lukitse_laji == "PALAUTUS_SAATE")	$ulos .= "<option value='PALAUTUS_SAATE' $avain_sel[PALAUTUS_SAATE]>		".t("Palautuksen sähköpostisaatekirje asiakkaalle")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "TV_LISATIETO") 		$ulos .= "<option value='TV_LISATIETO' $avain_sel[TV_LISATIETO]>			".t("Tilausvahvistuksen lisätiedot")."</option>";
 		if ($lukitse_laji== "" or $lukitse_laji == "INVEN_LAJI") 		$ulos .= "<option value='INVEN_LAJI' $avain_sel[INVEN_LAJI]>				".t("Inventoinnin laji")."</option>";

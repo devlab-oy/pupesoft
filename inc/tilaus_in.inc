@@ -682,8 +682,17 @@ if (($tyyppi == 'yct') and ($id != '')) {
 			$content .= "\r\n" ;
 
 			$content .= "--$bound\r\n";
-
-			$boob = mail($mailiosoite, mb_encode_mimeheader(t("tarveraportti")." ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+			
+			$content_body = "";
+			
+			/* Lis‰tty 17.2.2014, lis‰tty muuttujat liitteelle ja liitteen nimelle */
+			$liite = $rivi;
+			$liite_nimi = "Excel-".t("tarveraportti")."$ny.xls";
+			
+			/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+			//$boob = mail($mailiosoite, mb_encode_mimeheader(t("tarveraportti")." ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+			include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+			$boob = sendMail($yhtiorow['postittaja_email'], $mailiosoite, t("tarveraportti")." ".date("d.m.Y"), $content_body, false, $liite, $liite_nimi);
 		}
 	}
 }

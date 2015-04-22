@@ -21,7 +21,8 @@ if(!function_exists("pankkitiedot")) {
 	function pankkitiedot($tilino, $asiakastunnus) {
 		global $yhtiorow;
 
-		$tmp_tilino=substr($tilino,0,1);
+		//$tmp_tilino=substr($tilino,2,3); Vanha, kommentoitu 19.9.2013
+		$tmp_tilino=substr($tilino,2,1); // Muokattu 19.9.2013, käytetään substr funktiota kuten on ajateltu
 
 		//	oletuksia
 
@@ -54,7 +55,8 @@ if(!function_exists("pankkitiedot")) {
 				$pankki["swift"]			= "NDEAFIHH";
 				break;
 			case (3) :
-				$tmp_tilino = substr($tilino, 1, 1);
+				// $tmp_tilino = substr($tilino, 3, 4); Vanha, kommentoitu 19.9.2013
+				$tmp_tilino = substr($tilino, 3, 1);  // Muokattu 19.9.2013, käytetään substr funktiota kuten on ajateltu
 				switch ($tmp_tilino) {
 					case (1) : //Handelsbanken
 						$pankki["rahalaitos"] 		= '  ';
@@ -123,6 +125,13 @@ if(!function_exists("pankkitiedot")) {
 				$pankki["tiedostonimi"] 	= "LEOL2L.DAT";
 				$pankki["tiedostonimilum2"]	= "LEUM2L.DAT";
 				$pankki["swift"]			= "DABAFIHH";
+				break;
+			case (9) : // Aino pankki, vain TAMKin käytössä!!!!!!
+				$pankki["rahalaitos"]		= '9 ';
+				$pankki["pankkilaitos"] 	= "Aino";
+				$pankki["tiedostonimi"] 	= "AINOLM03.DAT";
+				$pankki["tiedostonimilum2"]	= "AINOLUM2.DAT";
+				$pankki["swift"]			= "AINOFIHH";
 				break;
 			default :		
 				if (trim($tmp_tilino) != "" and !is_numeric($tmp_tilino)) { //Maksetaan kassasta tai selvittelytililtä

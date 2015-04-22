@@ -282,6 +282,30 @@
 						WHERE tunnus = '$tunnus' and
 						yhtio = '$kukarow[yhtio]'";
 			$result = pupe_query($query);
+			
+			/* Lisätty 14.8.2013, muutetaan myös "saatavat" laskua */
+			$query = "	SELECT vanhatunnus as tunnus, luontiaika
+						FROM lasku
+						WHERE tunnus = '$tunnus' and
+						yhtio = '$kukarow[yhtio]'";
+						
+			$tunnus_result = pupe_query($query);
+			$tunnari = mysql_fetch_assoc($tunnus_result);
+			
+			if ($tunnari['tunnus'] == 0)
+			{
+				$tunnus_uus = (int) $tunnus - 1;
+				$query = "	UPDATE lasku SET
+							alatila = 'H',
+							tila = 'D',
+							comments = '$komm'
+							WHERE tunnus = '$tunnus_uus'
+							AND luontiaika = '$tunnari[luontiaika]'";
+						
+				$result = pupe_query($query);
+			}
+			
+			/* Lisäys päättyy 14.8.2013 */
 
 			echo "<font class='error'>".sprintf(t('Poistit %s:n laskun tunnuksella %d.'), $trow['nimi'], $tunnus)."</font><br>";
 		}
@@ -395,11 +419,36 @@
 						WHERE tunnus = '$tunnus' and
 						yhtio = '$kukarow[yhtio]'";
 			$result = pupe_query($query);
-
+			
+			/* Lisätty 14.8.2013, muutetaan myös "saatavat" laskua */
+			$query = "	SELECT vanhatunnus as tunnus, luontiaika
+						FROM lasku
+						WHERE tunnus = '$tunnus' and
+						yhtio = '$kukarow[yhtio]'";
+						
+			$tunnus_result = pupe_query($query);
+			$tunnari = mysql_fetch_assoc($tunnus_result);
+			
+			if ($tunnari['tunnus'] == 0)
+			{
+				$tunnus_uus = (int) $tunnus - 1;
+				$query = "	UPDATE lasku SET
+							$upd
+							WHERE tunnus = '$tunnus_uus'
+							AND luontiaika = '$tunnari[luontiaika]'";
+						
+				$result = pupe_query($query);
+			}
+			
+			/* Lisäys päättyy 14.8.2013 */
+			
 			echo "<font class='message'>".t('Palauttettiin lasku käyttäjälle')." $krow[nimi]</font><br>";
 
 			//	Lähetetään maili virheen merkiksi!
-			mail($krow["eposti"], mb_encode_mimeheader("Hyväksymäsi lasku palautettiin", "ISO-8859-1", "Q"), t("Hyväksymäsi lasku toimittajalta %s, %s %s palautettiin korjattavaksi.\n\nSyy: %s \n\nPalauttaja:", $krow["kieli"], $lrow["nimi"], $lrow["summa"], $lrow["valkoodi"], $viesti)." $kukarow[nimi], $yhtiorow[nimi]", "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+			/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lisätty paranneltu sendMail */
+			//mail($krow["eposti"], mb_encode_mimeheader("Hyväksymäsi lasku palautettiin", "ISO-8859-1", "Q"), t("Hyväksymäsi lasku toimittajalta %s, %s %s palautettiin korjattavaksi.\n\nSyy: %s \n\nPalauttaja:", $krow["kieli"], $lrow["nimi"], $lrow["summa"], $lrow["valkoodi"], $viesti)." $kukarow[nimi], $yhtiorow[nimi]", "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+			include_once '/var/www/html/lib/functions/sendMail.php';  // Lisätään sendMail funktio
+			$posti = sendMail($yhtiorow['postittaja_email'], $krow["eposti"], "Hyväksymäsi lasku palautettiin", t("Hyväksymäsi lasku toimittajalta %s, %s %s palautettiin korjattavaksi.\n\nSyy: %s \n\nPalauttaja:", $krow["kieli"], $lrow["nimi"], $lrow["summa"], $lrow["valkoodi"], $viesti)." $kukarow[nimi], $yhtiorow[nimi]");
 			$tunnus = "";
 			$tee = "";
 		}
@@ -492,6 +541,25 @@
 		$query = "UPDATE lasku set comments = '$komm', alatila='H' WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
 		$result = pupe_query($query);
 
+		/* Lisätty 14.8.2013, muutetaan myös "saatavat" laskua */
+		$query = "	SELECT vanhatunnus as tunnus, luontiaika
+					FROM lasku
+					WHERE tunnus = '$tunnus' and
+					yhtio = '$kukarow[yhtio]'";
+					
+		$tunnus_result = pupe_query($query);
+		$tunnari = mysql_fetch_assoc($tunnus_result);
+		
+		if ($tunnari['tunnus'] == 0)
+		{
+			$tunnus_uus = (int) $tunnus - 1;
+			$query = "UPDATE lasku set comments = '$komm', alatila='H' WHERE tunnus = '$tunnus_uus' AND luontiaika = '$tunnari[luontiaika]'";
+					
+			$result = pupe_query($query);
+		}
+			
+		/* Lisäys päättyy 14.8.2013 */
+		
 		$tunnus = '';
 		$tee = '';
 	}
@@ -519,6 +587,25 @@
 		$query = "UPDATE lasku set comments = '$komm' WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
 		$result = pupe_query($query);
 
+		/* Lisätty 14.8.2013, muutetaan myös "saatavat" laskua */
+		$query = "	SELECT vanhatunnus as tunnus, luontiaika
+					FROM lasku
+					WHERE tunnus = '$tunnus' and
+					yhtio = '$kukarow[yhtio]'";
+					
+		$tunnus_result = pupe_query($query);
+		$tunnari = mysql_fetch_assoc($tunnus_result);
+		
+		if ($tunnari['tunnus'] == 0)
+		{
+			$tunnus_uus = (int) $tunnus - 1;
+			$query = "UPDATE lasku set comments = '$komm', WHERE tunnus = '$tunnus_uus' AND luontiaika = '$tunnari[luontiaika]'";
+					
+			$result = pupe_query($query);
+		}
+			
+		/* Lisäys päättyy 14.8.2013 */
+		
 		$tee = '';
 	}
 
@@ -556,6 +643,31 @@
 					and tunnus = '$tunnus'";
 		$result = pupe_query($query);
 
+		/* Lisätty 14.8.2013, muutetaan myös "saatavat" laskua */
+		$query = "	SELECT vanhatunnus as tunnus, luontiaika
+					FROM lasku
+					WHERE tunnus = '$tunnus' and
+					yhtio = '$kukarow[yhtio]'";
+					
+		$tunnus_result = pupe_query($query);
+		$tunnari = mysql_fetch_assoc($tunnus_result);
+		
+		if ($tunnari['tunnus'] == 0)
+		{
+			$tunnus_uus = (int) $tunnus - 1;
+			$query = "	UPDATE lasku SET
+						hyvak2 = '$hyvak[2]',
+						hyvak3 = '$hyvak[3]',
+						hyvak4 = '$hyvak[4]',
+						hyvak5 = '$hyvak[5]'
+						WHERE tunnus = '$tunnus_uus'
+						AND luontiaika = '$tunnari[luontiaika]'";
+					
+			$result = pupe_query($query);
+		}
+			
+		/* Lisäys päättyy 14.8.2013 */
+		
 		$tee = '';
 
 		echo "<font class='message'>" . t("Hyväksyntäjärjestys").": $laskurow[hyvak1]";
@@ -699,6 +811,33 @@
 					WHERE yhtio = '$kukarow[yhtio]' and tunnus='$tunnus'";
 		$result = pupe_query($query);
 
+		/* Lisätty 14.8.2013, muutetaan myös "saatavat" laskua */
+		$query = "	SELECT vanhatunnus as tunnus, luontiaika
+					FROM lasku
+					WHERE tunnus = '$tunnus' and
+					yhtio = '$kukarow[yhtio]'";
+					
+		$tunnus_result = pupe_query($query);
+		$tunnari = mysql_fetch_assoc($tunnus_result);
+		
+		if ($tunnari['tunnus'] == 0)
+		{
+			$tunnus_uus = (int) $tunnus - 1;
+			
+			/* Muokattu 27.9.2013, otettu tila = '$tila' kokonaan pois. Mahdollistaa laskun poistumisen
+               "saatavien" laskujen joukosta ja sen että myyntilaskujen laskunumerot toimivat oikein */
+			$query = "	UPDATE lasku SET
+						$kentta = now(),
+						hyvaksyja_nyt = '$hyvaksyja_nyt',
+						mapvm='$mapvm'
+						WHERE tunnus = '$tunnus_uus'
+						AND luontiaika = '$tunnari[luontiaika]'";
+					
+			$result = pupe_query($query);
+		}
+			
+		/* Lisäys päättyy 14.8.2013 */
+		
 		echo "<br><font class='message'>'$laskurow[hyvaksyja_nyt]' ".t("hyväksyi laskun")." $viesti</font><br><br>";
 
 		$tunnus = '';

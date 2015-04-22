@@ -60,7 +60,10 @@ if (!function_exists("pupe_error")) {
 		$puperror .= "$query\n\n";
 
 		// l‰hetet‰‰n se meilitse adminille
-		mail($yhtiorow['admin_email'], mb_encode_mimeheader($yhtiorow['nimi']." - SQL Error", "ISO-8859-1", "Q"), $puperror, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+		/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+		//mail($yhtiorow['admin_email'], mb_encode_mimeheader($yhtiorow['nimi']." - SQL Error", "ISO-8859-1", "Q"), $puperror, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+		include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+		$boob = sendMail($yhtiorow['postittaja_email'], $yhtiorow['admin_email'], $yhtiorow['nimi']." - SQL Error", $puperror);
 
 		// kuollaan pois
 		exit(nl2br($puperror));
@@ -7065,12 +7068,19 @@ if (!function_exists('muuta_kuvan_koko')) {
 	}
 }
 
+/* Funktiota muokattu 30.7.2013, lis‰tty parametriksi yhtiˆ */
 if (!function_exists('tallenna_liite')) {
-	function tallenna_liite($userfile, $liitos, $liitostunnus, $selite, $kayttotarkoitus="", $tunnus=0, $jarjestys=0, $kieli="") {
+	function tallenna_liite($userfile, $liitos, $liitostunnus, $selite, $kayttotarkoitus="", $tunnus=0, $jarjestys=0, $kieli="", $yhtio="") {
 		global $kukarow, $yhtiorow, $_FILES;
 
 		$file = array();
-
+		
+		/* Lis‰tty 30.7.2013, lis‰tty ehto jolla katsotaan kenelle liite laitetaan */
+		if ($yhtio == "")
+		{
+			$yhtio = $kukarow['yhtio'];
+		}
+		
 		if ($kieli == "") {
 			$kieli = $yhtiorow["kieli"];
 		}
@@ -7148,15 +7158,15 @@ if (!function_exists('tallenna_liite')) {
 					$filetype = "application/msword";
 				}
 				else {
-					$filetype = "application/octet-stream";
+					$filetype = "text/xml";  // Muutettu 30.7.2013, oli ennen "application/octet-stream"
 				}
 			}
 			else {
-				$filetype = "application/octet-stream";
+				$filetype = "text/xml";  // Muutettu 30.7.2013, oli ennen "application/octet-stream"
 			}
 		}
 
-		// lis‰t‰‰n kuva
+		// lis‰t‰‰n kuva (Muokattu 30.7.2013, yhtioksi muutettu $yhtio)
 		if ($tunnus > 0) {
 			$query = "	UPDATE liitetiedostot SET
 						data     		= '$data',
@@ -7172,15 +7182,16 @@ if (!function_exists('tallenna_liite')) {
 						jarjestys		= '$jarjestys',
 						laatija			= '$kukarow[kuka]',
 						luontiaika		= now()
-						WHERE yhtio = '$kukarow[yhtio]' and tunnus = '$tunnus'";
+						WHERE yhtio = '$yhtio' and tunnus = '$tunnus'";
 			$result = pupe_query($query);
 			$id = $tunnus;
 		}
 		else {
 			if ((int) $jarjestys == 0) {
+				/* Muokattu 30.7.2013, yhtioksi muutettu $yhtio */
 				$query = "	SELECT max(jarjestys) jarjestys
 							FROM liitetiedostot
-							WHERE yhtio 		= '$kukarow[yhtio]'
+							WHERE yhtio 		= '$yhtio'
 							and liitos   		= '$liitos'
 							and liitostunnus 	= '$liitostunnus'";
 				$result = pupe_query($query);
@@ -7188,9 +7199,9 @@ if (!function_exists('tallenna_liite')) {
 
 				$jarjestys = $row["jarjestys"]+1;
 			}
-
+			/* Muokattu 30.7.2013, yhtioksi muutettu $yhtio */
 			$query = "	INSERT INTO liitetiedostot SET
-					  	yhtio    		= '$kukarow[yhtio]',
+					  	yhtio    		= '$yhtio',
 					  	liitos   		= '$liitos',
 					  	liitostunnus 	= '$liitostunnus',
 					  	data     		= '$data',
@@ -7214,6 +7225,7 @@ if (!function_exists('tallenna_liite')) {
 		return $id;
 	}
 }
+/* Lis‰ykset 30.7.2013 p‰‰ttyy */
 
 if (!function_exists('tarkasta_liite')) {
 	function tarkasta_liite($userfile, $sallitut_tiedostot="") {
@@ -9668,7 +9680,20 @@ if (!function_exists("tulosta_logo_pdf")) {
 		}
 
 		unset($data);
-
+		
+		/* Lis‰tty 31.10.2013, pit‰isi mahdollistaa orientalin ja hasselhoffin logojen n‰kyvyyden */
+		/* Jos kyseess‰ on Oriental tai Hasse niin laitetaan logojen osoitteet oikeiksi */
+		if ($yhtiorow["yhtio"] == "orien")
+		{
+			$apu_yhtiorow["lasku_logo"] = "../../orientalimports/images/oriental_logo.jpg";
+		}
+		
+		if ($yhtiorow["yhtio"] == "hasse")
+		{
+			$apu_yhtiorow["lasku_logo"] = "../../hasselhoff/images/hasselhoff_logo.jpg";
+		}
+		/* Lis‰ys p‰‰ttyy 31.10.2013 */
+		
 		if (isset($apu_yhtiorow["lasku_logo"]) and (int) $apu_yhtiorow["lasku_logo"] > 0) {
 			$liite = hae_liite($apu_yhtiorow["lasku_logo"], "Yllapito", "array");
 			$data = $liite["data"];
@@ -9676,7 +9701,7 @@ if (!function_exists("tulosta_logo_pdf")) {
 			$isizelogo[1] = $liite["image_height"];
 			unset($liite);
 		}
-		elseif (isset($apu_yhtiorow["lasku_logo"]) and $apu_yhtiorow["lasku_logo"] != "" and file_exists($apu_yhtiorow["lasku_logo"])) {
+		if (isset($apu_yhtiorow["lasku_logo"]) and $apu_yhtiorow["lasku_logo"] != "" and file_exists($apu_yhtiorow["lasku_logo"])) {  // Muokattu 31.10.2013, elseif -> if
 			$filename = $apu_yhtiorow["lasku_logo"];
 
 			$fh = fopen($filename, "r");

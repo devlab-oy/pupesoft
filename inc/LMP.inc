@@ -91,7 +91,7 @@
 			$tiliotedatatu = $tiliotedatarow['tiliointitunnus'];
 
 			echo "<tr>";
-
+			
 			// VVKKPP
 			$taso = substr($tietue, 187, 1);
 			$pvm = substr($tietue, 42, 6);

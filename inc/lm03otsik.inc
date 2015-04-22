@@ -7,7 +7,7 @@
 	$ulos = "LM03";															// 01 Aineistotunnus
 	$ulos .= "0";															// 02 Tietuetunnus (Er‰tietue)
 	$ulos .= "0";															// 03 Tapahtumalaji
-	$ulos .= sprintf('%-14.14s', $yritystilino);							// 04 Maksajan tilinumero
+	$ulos .= sprintf('%-18.18s', $yritystilino);							// 04 Maksajan tilinumero. Muokattu 13.9.2013, muutettu numerot 14 -> 18
 	$ulos .= sprintf('%09d', $yrityytunnus);								// 05 Maksajan tunnus
 	$ulos .= sprintf('%02d', substr($luonti['year'], 2, 2));				// 06 Tiedoston luontip‰iv‰ vv
 	$ulos .= sprintf('%02d', $luonti['mon']);								// 06 Tiedoston luontip‰iv‰ kk
@@ -26,7 +26,7 @@
 	$ulos .= " ";															// 15 Nordealla pakollinen Aineiston luonne (0 = maksut) / Sampolla "tyhj‰‰"
 	$ulos .= sprintf('%10.10s', '');										// 16 Nordealla Palvelutunnus / Sampolla "tyhj‰‰"
 	$ulos .= sprintf('%66.66s', '');										// 17 Varalla
-
+	$ulos .= sprintf('%-10.30s', $nimi);									// 18 Maksajan nimi. Lis‰tty 20.9.2013, t‰ll‰ helpotetaan Myyr‰n toimipaikkojen nimien saantia pankkiin
 	//print strlen($ulos) . "/" . $ulos;
 	//print "</pre><br>";
 

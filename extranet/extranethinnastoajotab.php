@@ -117,8 +117,21 @@
 		$content .= "\n" ;
 
 		$content .= "--$bound\n" ;
+		
+		$content_body = "";
+		
+		/* Lisätty 17.2.2014, lisätty taulukot liitetiedostolle ja niiden nimille */
+		$liitteet = array();
+		$liite_nimet = array();
+		
+		/* Lisätty 17.2.2014, lisätään taulukoihin liitetiedostot ja niiden nimet */
+		array_push($liitteet, $filenimi);
+		array_push ($liite_nimet, t("Hinnasto")."-$kukarow[yhtio]-$ytunnus-".date('Ymd_His').".zip");
 
-		$boob = mail($kukarow["eposti"], mb_encode_mimeheader(t("Hinnasto")."-$kukarow[yhtio]-$ytunnus-".date('Ymd_His'), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lisätty paranneltu sendMail */
+		//$boob = mail($kukarow["eposti"], mb_encode_mimeheader(t("Hinnasto")."-$kukarow[yhtio]-$ytunnus-".date('Ymd_His'), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		include_once '/var/www/html/lib/functions/sendMail.php';  // Lisätään sendMail funktio
+		$boob = sendMail($yhtiorow['postittaja_email'], $kukarow["eposti"], t("Hinnasto")."-$kukarow[yhtio]-$ytunnus-".date('Ymd_His'), $content_body, false, $liitteet, $liite_nimet);
 
 		if ($boob===FALSE) echo " - ".t("Sähköpostin lähetys epäonnistui")."!<br>";
 		else echo " $kukarow[eposti].<br>".t("Sähköposti lähetetty").".<br>";

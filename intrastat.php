@@ -644,6 +644,10 @@
 			require("inc/gpg.inc");
 			$tietue_gpg = $encrypted_message;
 			$tietue_plain = $message;
+			
+			/* Lis‰tty 17.2.2014, Lis‰tty taulukot liitteille ja niiden nimille */
+			$liitteet = array();
+			$liite_nimet = array();
 
 			$bound = uniqid(time()."_") ;
 
@@ -658,7 +662,11 @@
 			$content .= "Content-Disposition: attachment; filename=\"otsikko.pgp\"\n\n";
 			$content .= chunk_split(base64_encode($otsikko_gpg));
 			$content .= "\n";
-
+			
+			/* Lis‰tty 17.2.2014, lis‰t‰‰n taulukoihin liitteet ja nimet */
+			array_push($liitteet, $otsikko_gpg);
+			array_push($liite_nimet, "otsikko.pgp");
+			
 			$content .= "--$bound\n";
 
 			$content .= "Content-Type: application/pgp-encrypted;\n";
@@ -666,19 +674,31 @@
 			$content .= "Content-Disposition: attachment; filename=\"tietue.pgp\"\n\n";
 			$content .= chunk_split(base64_encode($tietue_gpg));
 			$content .= "\n";
+			
+			/* Lis‰tty 17.2.2014, lis‰t‰‰n taulukoihin liitteet ja nimet */
+			array_push($liitteet, $tietue_gpg);
+			array_push($liite_nimet, "tietue.pgp");
 
 			$content .= "--$bound\n";
+			
+			$content_body = "";
 
 			if ($lahetys == "tuli" or $lahetys == "mole") {
 				// l‰hetet‰‰n meili tulliin
 				$to = 'ascii.intrastat@tulli.fi';			// t‰m‰ on tullin virallinen osoite
-				mail($to, "", $content, $header, "-f $yhtiorow[postittaja_email]");
+				/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+				//mail($to, "", $content, $header, "-f $yhtiorow[postittaja_email]");
+				include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+				$posti = sendMail($yhtiorow['postittaja_email'], $to, "", $content_body, false, $liitteet, $liite_nimet);
 				echo "<font class='message'>".t("Tiedot l‰hetettiin tulliin").".</font><br><br>";
 			}
 			elseif ($lahetys == "test") {
 				// l‰hetet‰‰n TESTI meili tulliin
 				$to = 'test.ascii.intrastat@tulli.fi';		// t‰m‰ on tullin testiosoite
-				mail($to, "", $content, $header, "-f $yhtiorow[postittaja_email]");
+				/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+				//mail($to, "", $content, $header, "-f $yhtiorow[postittaja_email]");
+				include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+				$posti = sendMail($yhtiorow['postittaja_email'], $to, "", $content_body, false, $liitteet, $liite_nimet);
 				echo "<font class='message'>".t("Testitiedosto l‰hetettiin tullin testipalvelimelle").".</font><br><br>";
 			}
 			else {
@@ -691,6 +711,10 @@
 			$content .= "Content-Disposition: attachment; filename=\"otsikko.txt\"\n\n";
 			$content .= chunk_split(base64_encode($otsikko_plain));
 			$content .= "\n";
+			
+			/* Lis‰tty 17.2.2014, lis‰t‰‰n taulukoihin liitteet ja nimet */
+			array_push($liitteet, $otsikko_plain);
+			array_push($liite_nimet, "otsikko.txt");
 
 			$content .= "--$bound\n";
 
@@ -699,17 +723,27 @@
 			$content .= "Content-Disposition: attachment; filename=\"tietue.txt\"\n\n";
 			$content .= chunk_split(base64_encode($tietue_plain));
 			$content .= "\n";
+			
+			/* Lis‰tty 17.2.2014, lis‰t‰‰n taulukoihin liitteet ja nimet */
+			array_push($liitteet, $tietue_plain);
+			array_push($liite_nimet, "tietue.txt");
 
 			$content .= "--$bound\n";
 
 			// katotaan l‰hetet‰‰nkˆ meili k‰ytt‰j‰lle
 			if (($lahetys == "mina" or $lahetys == "mole" or $lahetys == "test") and $kukarow["eposti"] != "") {
 				// j‰ l‰hetet‰‰n k‰ytt‰j‰lle
-				mail($kukarow["eposti"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+				/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+				//mail($kukarow["eposti"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+				include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+				$posti = sendMail($yhtiorow['postittaja_email'], $kukarow["eposti"], "$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", $content_body, false, $liiteet, $liite_nimet);
 			}
 
 			// ja aina adminille
-			mail($yhtiorow["alert_email"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+			/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+			//mail($yhtiorow["alert_email"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+			include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+			$posti = sendMail($yhtiorow['postittaja_email'], $yhtiorow["alert_email"], "$yhtiorow[nimi] - ".t("Intrastat")." ".t($tapa)."-".t("ilmoitus")." $vv/$kk ($kukarow[kuka])", $content_body, false, $liiteet, $liite_nimet);
 
 		}
 		else {

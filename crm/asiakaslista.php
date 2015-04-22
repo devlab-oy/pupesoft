@@ -232,6 +232,10 @@
 		}
 
 		$liite = "/tmp/".$excelnimi;
+		
+		/* Lisätty 17.2.2014, lisätty taulukot joihin liitteet tallennetaan ja niiden nimet tallennetaan */
+		$liiteet = array();
+		$liite_nimet = array();
 
 		$bound = uniqid(time()."_") ;
 
@@ -251,13 +255,25 @@
 
 		$content .= chunk_split(base64_encode($sisalto));
 		$content .= "\n" ;
-
+		
+		/* Lisätty 17.2.2014, Lisätään liiteet ja niiden nimet taulukkoihin */
+		$liitteet[0] = $liite;
+		$liite_nimet[0] = $tiednimi;
+		
+		$content_body = "";
+		
 		if ($tee == "lahetalista") {
-			mail($kukarow['eposti'], mb_encode_mimeheader("Asiakkaiden tiedot", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+			/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lisätty paranneltu sendMail */
+			//mail($kukarow['eposti'], mb_encode_mimeheader("Asiakkaiden tiedot", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+			include_once '/var/www/html/lib/functions/sendMail.php';  // Lisätään sendMail funktio
+			$posti = sendMail($yhtiorow['postittaja_email'], $kukarow['eposti'], "Asiakkaiden tiedot", $content_body, false, $liite, $liite_nimet);
 			echo "<br><br><font class='message'>".t("Asiakkaiden tiedot sähköpostiisi")."!</font><br><br><br>";
 		}
 		else {
-			mail($kukarow['eposti'], mb_encode_mimeheader("Viikkosunnitelmapohja", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+			/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lisätty paranneltu sendMail */
+			//mail($kukarow['eposti'], mb_encode_mimeheader("Viikkosunnitelmapohja", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+			include_once '/var/www/html/lib/functions/sendMail.php';  // Lisätään sendMail funktio
+			$posti = sendMail($yhtiorow['postittaja_email'], $kukarow['eposti'], "Viikkosunnitelmapohja", $content_body, false, $liite, $liite_nimet);
 			echo "<br><br><font class='message'>".t("Suunnitelmapohja lähetetty sähköpostiisi")."!</font><br><br><br>";
 		}
 

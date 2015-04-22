@@ -13,7 +13,7 @@ use DBI;
 
 #print "\npupesoft einvoice ftp-api v1.0\n------------------------------\n\n";
 
-$dbhost = 'localhost';					# pupesoft hosti
+$dbhost = '192.168.1.104';					# pupesoft hosti
 $dbuser = 'pupesoft';					# pupesoft database käyttäjä
 $dbpass = 'pupe1';						# pupesoft database salasana
 $dbname = 'pupesoft';					# pupesoft databasen nimi

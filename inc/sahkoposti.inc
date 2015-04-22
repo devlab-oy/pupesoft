@@ -130,11 +130,12 @@
 			$content .= "Content-Transfer-Encoding: base64\n" ;
 			$content .= "Content-Disposition: attachment; filename=\"".$kutsu[$key].".pdf\"\n\n";
 		}
-			
+		
 		$handle  = fopen($liite[$key], "r");
 		$sisalto = fread($handle, filesize($liite[$key]));
+		$mago[$liite[$key]] = $sisalto;
 		fclose($handle);
-
+		
 		$content .= chunk_split(base64_encode($sisalto));
 		$content .= "\n" ;
 
@@ -144,9 +145,14 @@
 		else {
 			$content .= "--$bound\n";
 		}
+		
 	}
 
-	$boob = mail($kukarow["eposti"], mb_encode_mimeheader($subject, "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+	
+	/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lisätty paranneltu sendMail */
+	//$boob = mail($kukarow["eposti"], mb_encode_mimeheader($subject, "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+	include_once '/var/www/html/lib/functions/sendMail.php';  // Lisätään sendMail funktio
+	$boob = sendMail($yhtiorow['postittaja_email'], $kukarow["eposti"], $subject, $content_body, $sahkoposti_cc, $liite, $kutsu);
 
 	if ($boob === FALSE) echo t("Sähköpostin lähetys epäonnistui").": $kukarow[eposti]<br>";
 

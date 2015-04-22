@@ -70,7 +70,15 @@
 					$ebid = "gen".substr(md5(rand()),0,20);
 				}
 
-				$filenimi = "finvoice-$ebid.xml";
+				//alkuperäinen
+				//$filenimi = "finvoice-$ebid.xml";
+				
+				//uusi nimeäminen
+				$stringi = substr(md5(rand()),0,5);
+				$ebid .="-";
+				$ebide = $ebid.$stringi;
+				$filenimi = "finvoice-$ebide.xml";
+				
 				$save = file_put_contents($laskut."/".$filenimi, $boob);
 
 				if ($save !== FALSE) {

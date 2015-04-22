@@ -263,7 +263,21 @@
 	$query = "SELECT tila FROM lasku WHERE yhtio = '{$kukarow['yhtio']}' AND tunnus = '{$tunnus}'";
 	$tila_chk_res = pupe_query($query);
 	$tila_chk_row = mysql_fetch_assoc($tila_chk_res);
-
+	
+	/* Lisätty 5.6.2013 */
+	$ltunnus = '';
+	
+	if($trow['tapvm'] > '2013-01-01')
+	{
+		$ltunnus = $tunnus - 1;
+	}
+	else
+	{
+		$ltunnus = $tunnus;
+	}
+		
+	
+	/* Muokattu 5.6.2013. and tiliointi.ltunnus = '$tunnus' vaihdettu and tiliointi.ltunnus = '$ltunnus' */
 	$query = "	SELECT *,
 				concat_ws(' / ', a.nimi, b.nimi, c.nimi) tarkenne,
 				tili.nimi tilinimi,
@@ -283,7 +297,7 @@
 				LEFT JOIN kuka la ON (la.yhtio = tiliointi.yhtio and la.kuka = tiliointi.laatija)
 				LEFT JOIN kuka ko ON (ko.yhtio = tiliointi.yhtio and ko.kuka = tiliointi.korjattu)
 				WHERE tiliointi.yhtio = '$kukarow[yhtio]'
-				and tiliointi.ltunnus = '$tunnus'
+				and tiliointi.ltunnus = '$ltunnus'
 				$lisa
 				ORDER BY tiliointi.tapvm, tiliointi.tilino, tiliointi.laadittu, tiliointi.tunnus";
 	$result = pupe_query($query);

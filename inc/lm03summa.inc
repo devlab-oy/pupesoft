@@ -5,7 +5,7 @@
 	$ulos = "LM03";															// 01 Aineistotunnus
 	$ulos .= "9";															// 02 Tietuetunnus (Summatietue)
 	$ulos .= "0";															// 03 Tapahtumalaji
-	$ulos .= sprintf('%-14.14s', $lmp_st_4kentta);							// 04 Maksajan tilinumero
+	$ulos .= sprintf('%-18.18s', $lmp_st_4kentta);							// 04 Maksajan tilinumero. Muokattu 13.9.2013, muutettu numerot 14 -> 18
 	$ulos .= sprintf('%09d', $yrityytunnus);								// 05 Maksajan tunnus
 	$ulos .= sprintf('%02d', substr($luonti['year'], 2, 2));				// 06 Tiedoston luontipäivä vv
 	$ulos .= sprintf('%02d', $luonti['mon']);								// 06 Tiedoston luontipäivä kk

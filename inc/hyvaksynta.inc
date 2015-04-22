@@ -10,19 +10,44 @@ if ($tee == '') {
  	// Summaus hyväksynnässä olevista laskuista
 	echo "<font class='head'>".t("Laskuja hyväksymättä")."</font><hr>";
 
-	$query = "	SELECT hyvaksyja_nyt,
-				if(kuka.nimi is not null, kuka.nimi, hyvaksyja_nyt) nimi,
-				concat_ws('/',sum(1), sum(if(alatila='H', 1, 0))) kplpys,
-				min(erpcm) erpcm,
-				max(erpcm) maxerpcm,
-				round(sum(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi)), 2) summa
-				FROM lasku
-				LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvaksyja_nyt
-				WHERE lasku.yhtio = '$kukarow[yhtio]'
-				and tila = 'H'
-				and hyvaksyja_nyt != ''
-				GROUP BY 1,2
-				ORDER BY nimi";
+	/* Lisätty 2013 ehto, jolla osataan hakea oikea yhtiö/toimipiste  */
+	if ($kukarow['yhtio'] == "myyra")
+	{
+		$apuquery = "SELECT ovttunnus FROM yhtio WHERE yhtio='$kukarow[yhtio]'";
+		$apuresult = mysql_query($apuquery) or pupe_error($apuquery);
+		$tunnus = mysql_fetch_assoc($apuresult);
+		
+		$query = "	SELECT hyvaksyja_nyt,
+					if(kuka.nimi is not null, kuka.nimi, hyvaksyja_nyt) nimi,
+					concat_ws('/',sum(1), sum(if(alatila='H', 1, 0))) kplpys,
+					min(erpcm) erpcm,
+					max(erpcm) maxerpcm,
+					round(sum(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi)), 2) summa
+					FROM lasku
+					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvaksyja_nyt
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and lasku.yhtio_ovttunnus in (lasku.yhtio_ovttunnus,$tunnus[ovttunnus])
+					and tila = 'H'
+					and hyvaksyja_nyt != ''
+					GROUP BY 1,2
+					ORDER BY nimi";
+	}
+	else
+	{
+		$query = "	SELECT hyvaksyja_nyt,
+					if(kuka.nimi is not null, kuka.nimi, hyvaksyja_nyt) nimi,
+					concat_ws('/',sum(1), sum(if(alatila='H', 1, 0))) kplpys,
+					min(erpcm) erpcm,
+					max(erpcm) maxerpcm,
+					round(sum(if(lasku.alatila = 'K', lasku.summa - lasku.kasumma, lasku.summa) * if(lasku.maksu_kurssi = 0, lasku.vienti_kurssi, lasku.maksu_kurssi)), 2) summa
+					FROM lasku
+					LEFT JOIN kuka ON kuka.yhtio=lasku.yhtio and kuka.kuka=lasku.hyvaksyja_nyt
+					WHERE lasku.yhtio = '$kukarow[yhtio]'
+					and tila = 'H'
+					and hyvaksyja_nyt != ''
+					GROUP BY 1,2
+					ORDER BY nimi";
+	}
 	$result = mysql_query($query) or pupe_error($query);
 
 	echo "<table>";
@@ -35,13 +60,18 @@ if ($tee == '') {
 	echo "</tr>";
 
 	while ($trow = mysql_fetch_array($result)) {
-		echo "<tr class='aktiivi'>";
-		echo "<td><a href = 'raportit.php?toim=hyvaksynta&tee=T&kuka=$trow[hyvaksyja_nyt]'>$trow[nimi]</a></td>";
-		echo "<td>$trow[kplpys]</td>";
-		echo "<td>".tv1dateconv($trow["erpcm"])."</td>";
-		echo "<td>".tv1dateconv($trow["maxerpcm"])."</td>";
-		echo "<td align='right'>$trow[summa]</td>";
-		echo "</tr>";
+		
+		// Lisätty 3.7.2013, lisätty if lause, ettei tule vääriä hyväksyntiä
+		if ($trow['summa'] > 0)
+		{
+			echo "<tr class='aktiivi'>";
+			echo "<td><a href = 'raportit.php?toim=hyvaksynta&tee=T&kuka=$trow[hyvaksyja_nyt]'>$trow[nimi]</a></td>";
+			echo "<td>$trow[kplpys]</td>";
+			echo "<td>".tv1dateconv($trow["erpcm"])."</td>";
+			echo "<td>".tv1dateconv($trow["maxerpcm"])."</td>";
+			echo "<td align='right'>$trow[summa]</td>";
+			echo "</tr>";
+		}
 	}
 	echo "</table><br>";
 }

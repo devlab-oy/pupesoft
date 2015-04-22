@@ -106,8 +106,11 @@ else {
 		$rivi .= "$cmd\n";
 		$rivi .= "\n";
 		$rivi .= "$syy\n";
-
-		$boob = mail("$to_email", mb_encode_mimeheader(t("Tiedostonsiirto ep‰onnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+		
+		/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+		//$boob = mail("$to_email", mb_encode_mimeheader(t("Tiedostonsiirto ep‰onnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+		include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+		$boob = sendMail($yhtiorow['postittaja_email'], $to_email, t("Tiedostonsiirto ep‰onnistui")."!", $rivi);
 
 		if ($boob===FALSE) {
 			$tulos_ulos_ftp .= "<font class='error'>\n";
@@ -128,8 +131,11 @@ else {
 		$rivi .= "$ftpuser @ $ftphost : $ftppath\n";
 		$rivi .= "\n";
 		$rivi .= "\n";
-
-		$silari = mail("$to_email", mb_encode_mimeheader(t("Tiedostonsiirto onnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+		
+		/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+		//$silari = mail("$to_email", mb_encode_mimeheader(t("Tiedostonsiirto onnistui")."!", "ISO-8859-1", "Q"), $rivi, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+		include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+		$silari = sendMail($yhtiorow['postittaja_email'], $to_email, t("Tiedostonsiirto onnistui")."!", $rivi);
 	}
 }
 

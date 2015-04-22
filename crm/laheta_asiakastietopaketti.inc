@@ -246,7 +246,11 @@
 		$content .= "Content-Type: text/plain; charset=\"iso-8859-1\"\r\n";
 		$content .= "Content-Transfer-Encoding: quoted-printable\r\n\r\n";
 		$content .= "$viesti\r\n\r\n";
-
+		
+		/* Lisätty 17.2.2014, lisätty taulukot liitetiedostolle ja niiden nimille */
+		$liitteet = array();
+		$liite_nimet = array();
+		
 		if ($osraportti != '') {
 			$content .= "--$bound\r\n" ;
 
@@ -255,6 +259,10 @@
 			$content .= "Content-Disposition: attachment; filename=\"osastoseuranta.xls\"\r\n\r\n";
 			$content .= chunk_split(base64_encode($osraportti));
 			$content .= "\r\n";
+			
+			/* Lisätty 17.2.2014, lisätään taulukoihin liitetiedostot ja niiden nimet */
+			array_push($liitteet, $osraportti);
+			array_push ($liite_nimet, "osastoseuranta.xls");
 		}
 
 		if ($raportti != '') {
@@ -265,9 +273,16 @@
 			$content .= "Content-Disposition: attachment; filename=\"tuoteryhmäseuranta.xls\"\r\n\r\n";
 			$content .= chunk_split(base64_encode($raportti));
 			$content .= "\r\n";
+			
+			/* Lisätty 17.2.2014, lisätään taulukoihin liitetiedostot ja niiden nimet */
+			array_push($liitteet, $raportti);
+			array_push ($liite_nimet, "tuoteryhmäseuranta.xls");
 		}
 
 		$to = $kukarow['eposti'];
-		mail($to, mb_encode_mimeheader(t("Asiakkaan tietopaketti")." $row[ytunnus] $row[nimi]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lisätty paranneltu sendMail */
+		//mail($to, mb_encode_mimeheader(t("Asiakkaan tietopaketti")." $row[ytunnus] $row[nimi]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		include_once '/var/www/html/lib/functions/sendMail.php';  // Lisätään sendMail funktio
+		$posti = sendMail($yhtiorow['postittaja_email'], $to, t("Asiakkaan tietopaketti")." $row[ytunnus] $row[nimi]", $viesti, false, $liitteet, $liite_nimet);
 	}
 ?>

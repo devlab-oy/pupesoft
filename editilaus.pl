@@ -17,7 +17,7 @@ if (-f $tmpfile) {
 	$mode = (stat($tmpfile))[9];
 	$now = time();
 
-	$smtp = Net::SMTP->new('localhost');
+	$smtp = Net::SMTP->new('192.168.1.104');
 	$smtp->mail($emailfrom);
 	$smtp->to($email);
 	$smtp->data();
@@ -120,7 +120,7 @@ if (!-f $tmpfile) {
 
 				# jos ollaan luupattu samaa failia 10 kertaa, ni siirre‰t‰n se pois...
 				if ($laskuri > 10) {
-					$smtp = Net::SMTP->new('localhost');
+					$smtp = Net::SMTP->new('192.168.1.104');
 					$smtp->mail($emailfrom);
 					$smtp->to($email);
 					$smtp->data();
@@ -149,7 +149,7 @@ if (!-f $tmpfile) {
 
 	system("rm -f $tmpfile");
 
-	# siivotaan yli 90 p‰iv‰‰ vanhat aineistot
-	system("find $dirri2 -mtime +90 -delete");
+	# siivotaan yli 180 p‰iv‰‰ vanhat aineistot
+	system("find $dirri2 -mtime +180 -delete");
 
 } # end temp if

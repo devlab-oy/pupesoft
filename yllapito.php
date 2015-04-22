@@ -101,10 +101,18 @@
 
 	if ($otsikko == "") {
 		$otsikko = $toim;
-	}
+        if (substr($otsikko, 0,5) == 'TAMK_') {
+        $otsikko = substr($otsikko, 5);
+        }
+
+        }
+	
 	if ($otsikko_nappi == "") {
 		$otsikko_nappi = $toim;
+        if (substr($otsikko_nappi, 0,5) == 'TAMK_') {
+        $otsikko_nappi = substr($otsikko_nappi, 5);
 	}
+    }
 
 	echo "<font class='head'>".t("$otsikko")."</font><hr>";
 

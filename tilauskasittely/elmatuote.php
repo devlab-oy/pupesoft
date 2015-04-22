@@ -211,8 +211,17 @@ if ($aja=='run') {
 			$mail .= "Content-Disposition: attachment; filename=\"varastotilanne.zip\"\n\n";
 			$mail .= chunk_split(base64_encode($sisalto));
 			$mail .= "\n" ;
+			
+			/* Lisätty 17.2.2014, lisätty muuttujat liitteelle ja sen nimelle */
+			$liite = $sisalto;
+			$liitenimi = "varastotilanne.zip";
+			
+			$content = "";
 
-			$boob = mail($korow["email"], mb_encode_mimeheader("Varastotilanne - $yhtiorow[nimi]", "ISO-8859-1", "Q"), $mail, $header, "-f $yhtiorow[postittaja_email]");
+			/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lisätty paranneltu sendMail */
+			//$boob = mail($korow["email"], mb_encode_mimeheader("Varastotilanne - $yhtiorow[nimi]", "ISO-8859-1", "Q"), $mail, $header, "-f $yhtiorow[postittaja_email]");
+			include_once '/var/www/html/lib/functions/sendMail.php';  // Lisätään sendMail funktio
+			$boob = sendMail($yhtiorow['postittaja_email'], $korow["email"], "Varastotilanne - $yhtiorow[nimi]", $content, false, $liite, $liitenimi);
 			if ($boob === FALSE) $echoulos .= "Sähköpostin lähetys epäonnistui<br>";
 		}
 	}

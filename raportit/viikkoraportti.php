@@ -139,6 +139,10 @@ while ($myyjarow = mysql_fetch_array ($myyre)) {
 
 		$nyt = date('d.m.y');
         $bound = uniqid(time()."_") ;
+		
+		/* Lis‰tty 17.2.2014, lis‰tty taulukot liitteille ja niiden nimille */
+		$liitteet = array();
+		$liite_nimet = array();
 
         $header   = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
         $header  .= "MIME-Version: 1.0\n" ;
@@ -152,6 +156,10 @@ while ($myyjarow = mysql_fetch_array ($myyre)) {
 
         $content .= chunk_split(base64_encode($sivu));
         $content .= "\n" ;
+		
+		/* Lis‰tty 17.2.2014, lis‰t‰‰n liiteet ja niiden nimet taulukoihin */
+		array_push($liitteet, $sivu);
+		array_push($liite_nimet, "Excel-viikkoraportti$nyt.xls");
 
         $content .= "--$bound\n";
 
@@ -161,16 +169,31 @@ while ($myyjarow = mysql_fetch_array ($myyre)) {
 
         $content .= chunk_split(base64_encode($sivu));
         $content .= "\n" ;
+		
+		/* Lis‰tty 17.2.2014, lis‰t‰‰n liiteet ja niiden nimet taulukoihin */
+		array_push($liitteet, $sivu);
+		array_push($liite_nimet, "OpenOffice-viikkoraportti$nyt.csv");
 
         $content .= "--$bound\n";
+		
+		$content_body = "";
 
-        $boob = mail($kukro["eposti"], mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+        /* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+		//$boob = mail($kukro["eposti"], mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+		$boob = sendMail($yhtiorow['postittaja_email'], $kukro["eposti"], "Viikkoraportti $kukro[nimi] ".date("d.m.Y"), $content_body, false, $liitteet, $liite_nimet);
 
 		if ($pomomail != '') {
-			$boob = mail($pomomail, mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+			/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+			//$boob = mail($pomomail, mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+			include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+			$boob = sendMail($yhtiorow['postittaja_email'], $pomomail, "Viikkoraportti $kukro[nimi] ".date("d.m.Y"), $content_body, false, $liitteet, $liite_nimet);
 		}
 		if ($pomomail2 != '') {
-			$boob = mail($pomomail2, mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+			/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+			//$boob = mail($pomomail2, mb_encode_mimeheader("Viikkoraportti $kukro[nimi] ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+			include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+			$boob = sendMail($yhtiorow['postittaja_email'], $pomomail2, "Viikkoraportti $kukro[nimi] ".date("d.m.Y"), $content_body, false, $liitteet, $liite_nimet);
 		}
 	}
 

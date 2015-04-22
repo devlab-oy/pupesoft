@@ -1188,7 +1188,10 @@
 
 				// L‰hetet‰‰n ker‰yspoikkeama asiakkaalle
 				if ($laskurow["email"] != '' and $laskurow["kerayspoikkeama"] == 0) {
-					$boob = mail($laskurow["email"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Ker‰yspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f $yhtiorow[postittaja_email]");
+					/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+					//$boob = mail($laskurow["email"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Ker‰yspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f $yhtiorow[postittaja_email]");
+					include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+					$boob = sendMail($yhtiorow['postittaja_email'], $laskurow["email"], "$yhtiorow[nimi] - ".t("Ker‰yspoikkeamat", $kieli), $ulos);
 					if ($boob === FALSE) echo " - ".t("Email l‰hetys ep‰onnistui")."!<br>";
 				}
 
@@ -1211,7 +1214,10 @@
 
 					$ulos = str_replace("</font><hr><br><br><table>", "</font><hr><br><br>$uloslisa<table>", $ulos);
 
-					$boob = mail($laskurow["kukamail"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Ker‰yspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f $yhtiorow[postittaja_email]");
+					/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+					//$boob = mail($laskurow["kukamail"], mb_encode_mimeheader("$yhtiorow[nimi] - ".t("Ker‰yspoikkeamat", $kieli), "ISO-8859-1", "Q"), $ulos, $header, "-f $yhtiorow[postittaja_email]");
+					include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+					$boob = sendMail($yhtiorow['postittaja_email'], $laskurow["kukamail"], "$yhtiorow[nimi] - ".t("Ker‰yspoikkeamat", $kieli), $ulos);
 					if ($boob === FALSE) echo " - ".t("Email l‰hetys ep‰onnistui")."!<br>";
 				}
 

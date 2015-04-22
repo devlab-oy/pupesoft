@@ -141,5 +141,8 @@
 	$out .= "</table>";
 	$out .= "</body>";
 	$out .= "</html>";
-
-	$postia = mail($to_email, mb_encode_mimeheader("{$yhtiorow["nimi"]} - ".t("Vanhenevat sopimukset", $kieli), "ISO-8859-1", "Q"), $out, $header, "-f {$yhtiorow["postittaja_email"]}");
+	
+	/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+	//$postia = mail($to_email, mb_encode_mimeheader("{$yhtiorow["nimi"]} - ".t("Vanhenevat sopimukset", $kieli), "ISO-8859-1", "Q"), $out, $header, "-f {$yhtiorow["postittaja_email"]}");
+	include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+	$postia = sendMail($yhtiorow["postittaja_email"], $to_email, "{$yhtiorow["nimi"]} - ".t("Vanhenevat sopimukset", $kieli), $out);

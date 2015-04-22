@@ -1220,8 +1220,9 @@ while ($tietue = fgets($fd)) {
 						$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
 						$header .= "MIME-Version: 1.0\n" ;
 						$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
-
-						$mail  = "--$bound\n";
+						
+						/* Muokattu 17.2.2014, kommentoitu vanha $mail muuttuja pois ja tehty uusi */
+						/*$mail  = "--$bound\n";
 						$mail .= "Content-Type: text/plain;charset=iso-8859-1\n" ;
 						$mail .= "Content-Transfer-Encoding: quoted-printable\n";
 						$mail .= "\n";
@@ -1231,9 +1232,19 @@ while ($tietue = fgets($fd)) {
 						$mail .= "Asiakasnumero Futursoft-aineistossa: $OT_ASIAKASNRO\n\n";
 						$mail .= "Asiakkaan nimi Pupesoftissa: $asnokonflikti\n";
 						$mail .= "Asiakasnumero Pupesoftissa: $arow[asiakasnro]\n";
-						$mail .= "--$bound--\n";
+						$mail .= "--$bound--\n";*/
+						
+						$mail = "Tilausnumero: $id\n";
+						$mail .= "Pvm: ".date("d.m.Y")."\n\n";
+						$mail .= "Asiakkaan nimi Futursoft-aineistossa: $lnimitark\n";
+						$mail .= "Asiakasnumero Futursoft-aineistossa: $OT_ASIAKASNRO\n\n";
+						$mail .= "Asiakkaan nimi Pupesoftissa: $asnokonflikti\n";
+						$mail .= "Asiakasnumero Pupesoftissa: $arow[asiakasnro]\n";
 
-						$boob = mail("myynti@orum.fi,messages@devlab.fi", mb_encode_mimeheader("Asiakasnumero-konflikti Futursoft-tilauksen sis‰‰nluvussa", "ISO-8859-1", "Q"), $mail, $header, "-f $yhtiorow[postittaja_email]");
+						/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+						//$boob = mail("myynti@orum.fi,messages@devlab.fi", mb_encode_mimeheader("Asiakasnumero-konflikti Futursoft-tilauksen sis‰‰nluvussa", "ISO-8859-1", "Q"), $mail, $header, "-f $yhtiorow[postittaja_email]");
+						include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+						$boob = sendMail($yhtiorow['postittaja_email'], "myynti@orum.fi,messages@devlab.fi", "Asiakasnumero-konflikti Futursoft-tilauksen sis‰‰nluvussa", $mail);
 					}
 				}
 			}
@@ -1937,6 +1948,10 @@ if (strpos($_SERVER['SCRIPT_NAME'], "tilaus_in.php") === FALSE and isset($yhtior
 
 	$bound   = uniqid(time()."_") ;
 	$kutsu   = $yhtiorow["yhtio"]."-ediorder.txt";
+	
+	/* Lis‰tty 17.2.2014, lis‰tty taulukot liitteille ja niiden nimille */
+	$liitteet = array();
+	$liite_nimet = array();
 
 	$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
 	$header .= "MIME-Version: 1.0\n" ;
@@ -1959,8 +1974,17 @@ if (strpos($_SERVER['SCRIPT_NAME'], "tilaus_in.php") === FALSE and isset($yhtior
 	$content .= chunk_split(base64_encode($sisalto));
 	$content .= "\n";
 	$content .= "--$bound--\n";
-
-	$boob = mail($yhtiorow["alert_email"], mb_encode_mimeheader($edi_subj." - $yhtiorow[nimi]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+	
+	/* Lis‰tty 17.2.2014, lis‰t‰‰n liiteet ja niiden nimet taulukoihin */
+	array_push($liitteet, $mailfile);
+	array_push($liite_nimet, $kutsu);
+	
+	$content_body = $edi_ulos.t("K‰sitelty tiedosto liitteen‰");
+	
+	/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+	//$boob = mail($yhtiorow["alert_email"], mb_encode_mimeheader($edi_subj." - $yhtiorow[nimi]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+	include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+	$boob = sendMail($yhtiorow['postittaja_email'], $yhtiorow["alert_email"], $edi_subj." - $yhtiorow[nimi]", $content_body, false, $liitteet, $liite_nimet);
 }
 else {
 	echo "\n";

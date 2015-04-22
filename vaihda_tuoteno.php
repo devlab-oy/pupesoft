@@ -493,8 +493,11 @@ if ($error == 0 and $tee == "file") {
 				else {
 					$email_osoite = $posti['eposti'];
 				}
-
-				$tulos = mail($email_osoite, mb_encode_mimeheader(t("Tuotteiden tuotenumerot on vaihtuneet")." $yhtiorow[nimi]", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["postittaja_email"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+				
+				/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+				//$tulos = mail($email_osoite, mb_encode_mimeheader(t("Tuotteiden tuotenumerot on vaihtuneet")." $yhtiorow[nimi]", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["postittaja_email"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+				include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+				$tulos = sendMail($yhtiorow['postittaja_email'],$email_osoite, t("Tuotteiden tuotenumerot on vaihtuneet")." $yhtiorow[nimi]", $meili);
 			}
 		}
 	}

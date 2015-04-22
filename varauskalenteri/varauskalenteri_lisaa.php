@@ -58,7 +58,10 @@
 			$meili .= "Vieraslukum‰‰r‰:\n$kentta08\n\n\n";
 			$meili .= "Juomatoivomus:\n$kentta10\n";
 
-			$tulos = mail("$yhtiorow[varauskalenteri_email]", mb_encode_mimeheader("Saunavaraus", "ISO-8859-1", "Q"), $meili,"From: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$kukarow["eposti"].">\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
+			/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+			//$tulos = mail("$yhtiorow[varauskalenteri_email]", mb_encode_mimeheader("Saunavaraus", "ISO-8859-1", "Q"), $meili,"From: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$kukarow["eposti"].">\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
+			include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+			$tulos = sendMail($yhtiorow['postittaja_email'], $yhtiorow['varauskalenteri_email'], "Saunavaraus" $meili);
 		}
 		else{
 			echo "<br><br>Tarkista, ett&auml; kaikki tiedot on sy&ouml;tetty!";

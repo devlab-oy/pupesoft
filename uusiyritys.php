@@ -257,73 +257,98 @@
 		}
 		else $salasana = md5($salasana);
 
-		$query = "	INSERT into kuka SET
-					yhtio	 	= '$yhtio',
-					nimi 		= '$nimi',
-					salasana 	= '$salasana',
-					kuka  		= '$kuka',
-					profiilit 	= '$profile'";
+		/* Lisätty 15.10.2013, lisätty ehto jolla mahdollistetaan pelkän ylikäyttäjän lisääminen */
+		if ($kuka != '')
+		{
+			$query = "	INSERT into kuka SET
+						yhtio	 	= '$yhtio',
+						nimi 		= '$nimi',
+						salasana 	= '$salasana',
+						kuka  		= '$kuka',
+						profiilit 	= '$profile'";
+			$result = mysql_query($query) or pupe_error($query);
+		}
+		/* Lisäys päättyy 15.10.2013 */
+		
+		
+		// TAMKIN OMAA KOODIA
+		// Lisätään superuserille käyttöoikeudet yritykseen
+		/* Muokattu 12.9.2013, muutettu INSERT lauseessa nimi = admin -> nimi = Ylikäyttäjä */
+		$query = " INSERT into kuka SET
+				   yhtio		= '$yhtio',
+				   nimi 		= 'Ylikäyttäjä',
+				   salasana		= '7bffeedafc33535d2cd442e89ba3a23e',
+				   kuka			= 'superuser',
+				   profiilit	= 'Admin profil'";
+		
 		$result = mysql_query($query) or pupe_error($query);
+		
+		// Lisätty 16.8.2013, asetetaan ylikäyttäjälle hyvät oikeudet
+		include("ylikayttaja_oikeudet.php");
+		/* Lisätty 15.10.2013, lisätty ehto jolla mahdollistetaan pelkän ylikäyttäjän lisääminen */
+		if ($kuka != '')
+		{
+			//Insertoidaan ainakin oikeudet käyttäjähallintaan
+			$query = "	INSERT into oikeu
+						SET
+						kuka		= '$kuka',
+						sovellus	= 'Käyttäjät ja valikot',
+						nimi		= 'suoja.php',
+						alanimi 	= '',
+						paivitys	= '1',
+						nimitys		= 'Käyttöoikeudet',
+						jarjestys 	= '30',
+						jarjestys2	= '',
+						lukittu		= '1',
+						yhtio		= '$yhtio',
+						hidden		= ''";
+			$rresult = mysql_query($query) or pupe_error($query);
 
-		//Insertoidaan ainakin oikeudet käyttäjähallintaan
-		$query = "	INSERT into oikeu
-					SET
-					kuka		= '$kuka',
-					sovellus	= 'Käyttäjät ja valikot',
-					nimi		= 'suoja.php',
-					alanimi 	= '',
-					paivitys	= '1',
-					nimitys		= 'Käyttöoikeudet',
-					jarjestys 	= '30',
-					jarjestys2	= '',
-					lukittu		= '1',
-					yhtio		= '$yhtio',
-					hidden		= ''";
-		$rresult = mysql_query($query) or pupe_error($query);
+			// Oikeudet
+			if (is_array($profiilit)) {
+				foreach($profiilit as $prof) {
 
-		// Oikeudet
-		if (is_array($profiilit)) {
-			foreach($profiilit as $prof) {
-
-				$query = "	SELECT *
-							FROM oikeu
-							WHERE yhtio='$yhtio' and kuka='$prof' and profiili='$prof'";
-				$pres = mysql_query($query) or pupe_error($query);
-
-				while ($trow = mysql_fetch_array($pres)) {
-					//joudumme tarkistamaan ettei tätä oikeutta ole jo tällä käyttäjällä.
-					//voi olla jossain toisessa profiilissa
-					$query = "	SELECT yhtio
+					$query = "	SELECT *
 								FROM oikeu
-								WHERE kuka		= '$kuka'
-								and sovellus	= '$trow[sovellus]'
-								and nimi		= '$trow[nimi]'
-								and alanimi 	= '$trow[alanimi]'
-								and paivitys	= '$trow[paivitys]'
-								and nimitys		= '$trow[nimitys]'
-								and jarjestys 	= '$trow[jarjestys]'
-								and jarjestys2	= '$trow[jarjestys2]'
-								and yhtio		= '$yhtio'";
-					$tarkesult = mysql_query($query) or pupe_error($query);
+								WHERE yhtio='$yhtio' and kuka='$prof' and profiili='$prof'";
+					$pres = mysql_query($query) or pupe_error($query);
 
-					if (mysql_num_rows($tarkesult) == 0) {
-						$query = "	INSERT into oikeu
-									SET
-									kuka		= '$kuka',
-									sovellus	= '$trow[sovellus]',
-									nimi		= '$trow[nimi]',
-									alanimi 	= '$trow[alanimi]',
-									paivitys	= '$trow[paivitys]',
-									nimitys		= '$trow[nimitys]',
-									jarjestys 	= '$trow[jarjestys]',
-									jarjestys2	= '$trow[jarjestys2]',
-									yhtio		= '$yhtio',
-									hidden		= '$trow[hidden]'";
-						$rresult = mysql_query($query) or pupe_error($query);
+					while ($trow = mysql_fetch_array($pres)) {
+						//joudumme tarkistamaan ettei tätä oikeutta ole jo tällä käyttäjällä.
+						//voi olla jossain toisessa profiilissa
+						$query = "	SELECT yhtio
+									FROM oikeu
+									WHERE kuka		= '$kuka'
+									and sovellus	= '$trow[sovellus]'
+									and nimi		= '$trow[nimi]'
+									and alanimi 	= '$trow[alanimi]'
+									and paivitys	= '$trow[paivitys]'
+									and nimitys		= '$trow[nimitys]'
+									and jarjestys 	= '$trow[jarjestys]'
+									and jarjestys2	= '$trow[jarjestys2]'
+									and yhtio		= '$yhtio'";
+						$tarkesult = mysql_query($query) or pupe_error($query);
+
+						if (mysql_num_rows($tarkesult) == 0) {
+							$query = "	INSERT into oikeu
+										SET
+										kuka		= '$kuka',
+										sovellus	= '$trow[sovellus]',
+										nimi		= '$trow[nimi]',
+										alanimi 	= '$trow[alanimi]',
+										paivitys	= '$trow[paivitys]',
+										nimitys		= '$trow[nimitys]',
+										jarjestys 	= '$trow[jarjestys]',
+										jarjestys2	= '$trow[jarjestys2]',
+										yhtio		= '$yhtio',
+										hidden		= '$trow[hidden]'";
+							$rresult = mysql_query($query) or pupe_error($query);
+						}
 					}
 				}
 			}
 		}
+		/* Lisäys päättyy 15.10.2013 */
 	}
 
 	if ($tila == 'tili') {

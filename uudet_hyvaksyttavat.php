@@ -94,7 +94,10 @@
 			if ($trow['eposti'] != $veposti) {
 				if ($veposti != '') {
 					$meili = t("Sinulla on seuraavat uudet laskut hyv‰ksytt‰v‰n‰").":\n\n" . $meili;
-					$tulos = mail($veposti, mb_encode_mimeheader(t("Uudet hyv‰ksytt‰v‰t laskusi"), "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+					//$tulos = mail($veposti, mb_encode_mimeheader(t("Uudet hyv‰ksytt‰v‰t laskusi"), "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+					include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+					$tulos = sendMail($yhtiorow['postittaja_email'], $veposti, t("Uudet hyv‰ksytt‰v‰t laskusi"), $meili);
 				}
 				$meili = '';
 				$veposti = $trow['eposti'];
@@ -109,7 +112,10 @@
 
 	if ($meili != '') {
 		$meili = t("Sinulla on seuraavat uudet laskut hyv‰ksytt‰v‰n‰").":\n\n" . $meili;
-		$tulos = mail($veposti, mb_encode_mimeheader(t("Uudet hyv‰ksytt‰v‰t laskusi"), "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+		/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+		//$tulos = mail($veposti, mb_encode_mimeheader(t("Uudet hyv‰ksytt‰v‰t laskusi"), "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n", "-f $yhtiorow[postittaja_email]");
+		include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+		$tulos = sendMail($yhtiorow['postittaja_email'], $veposti, t("Uudet hyv‰ksytt‰v‰t laskusi"), $meili);
 	}
 
 ?>

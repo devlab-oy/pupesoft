@@ -29,7 +29,10 @@
 
 		if($row[1] == "Sauna") {
 			$meili = "$kukarow[nimi] on PERUNUT  saunavarauksen ajalta:\n\n##################################################\n$row[4].$row[3].$row[2] Klo: $row[5] --> Klo: $row[6]\n##################################################\n";
-			$tulos = mail("$yhtiorow[varauskalenteri_email]", mb_encode_mimeheader("Saunavarauksen peruutus", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$kukarow["eposti"].">\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
+			/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+			//$tulos = mail("$yhtiorow[varauskalenteri_email]", mb_encode_mimeheader("Saunavarauksen peruutus", "ISO-8859-1", "Q"), $meili, "From: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$kukarow["eposti"].">\nReply-To: ".mb_encode_mimeheader($kukarow["nimi"], "ISO-8859-1", "Q")." <".$row["eposti"].">\n", "-f $yhtiorow[postittaja_email]");
+			include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+			$tulos = sendMail($yhtiorow['postittaja_email'], $yhtiorow['varauskalenteri_email'], "Saunavarauksen peruutus", $meili);
 		}
 	}
 	else {

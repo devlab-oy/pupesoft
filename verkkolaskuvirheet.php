@@ -1,7 +1,9 @@
 <?php
-
+	
+	/* VANHAT KOODIT KOMMENTOITU POIS 13.12.2013, uudet koodit tilalla! */
+	
 	//* Tämä skripti käyttää slave-tietokantapalvelinta *//
-	$useslave = 1;
+	/*$useslave = 1;
 
 	if ($_REQUEST["tee"] == "NAYTATILAUS") {
 		$no_head = "yes";
@@ -115,9 +117,9 @@
 
 					//Olisiko toimittaja sittenkin jossain (väärin perustettu)
 					if ($lasku_toimittaja["tunnus"] == 0) {
-						$siivottu = preg_replace('/\b(oy|ab|ltd)\b/i', '', strtolower($laskuttajan_nimi));
-						$siivottu = preg_replace('/^\s*/', '', $siivottu);
-						$siivottu = preg_replace('/\s*$/', '', $siivottu);
+						$siivottu = preg_replace('/\b(oy|ab|ltd)\b/i', '', strtolower($laskuttajan_nimi)); */
+						//$siivottu = preg_replace('/^\s*/', '', $siivottu);
+						/*$siivottu = preg_replace('/\s*$/', '', $siivottu);
 
 						$query = "	SELECT tunnus, nimi
 									FROM toimi
@@ -209,7 +211,142 @@
 	}
 	if ($valitutlaskut == 0) {
 		echo "<font class='message'>".t("Ei hylättyjä laskuja")."</font><br>";
-	}
+	} */
+	
+	/* Uudet koodit 13.12.2013, näillä saadaan edes joitain "kadonneita" laskuja näkyville */
+	require ("inc/parametrit.inc");
+	
+	echo "<font class='head'>".t("Virheelliset verkkolaskut")."</font><hr><br><br>";
+	
+	/* Lisätty 17.12.2013, lisätty haku henkilön yrityksille, joidenka laskut näytetään */
+	$query = "	SELECT yhtio.nimi, yhtio.yhtio, if(yhtio.jarjestys=0, 9999, yhtio.jarjestys) jarj
+				FROM kuka
+				JOIN yhtio ON yhtio.yhtio = kuka.yhtio
+				WHERE kuka.kuka	= '$kukarow[kuka]'
+				and kuka.extranet = ''
+				ORDER BY jarj, yhtio.nimi";
 
+	$result = mysql_query($query) or pupe_error($query);
+	
+	$i = 0;
+	$yhtiot = array();
+	
+	/* Laitetaan kaikki yhtiot talteen yhteen taulukkoon */
+	while ($siirto = mysql_fetch_assoc($result))
+	{
+		$yhtiot[$i] = $siirto['yhtio'];
+		$i++;
+	}
+	/* Lisäys päättyy 17.12.2013 */
+	
+	/* Lisätty 13.12.2013, tietokanta haku jolla saadaan mahdollisesti kaikki virheelliset laskut näkyviin yhteen paikkaan */
+	$query = "SELECT yhtio, yhtio_nimi, nimi, laskunro, tunnus, vanhatunnus, tila, alatila, viite, luontiaika, ytunnus, hyvaksyja_nyt
+			  FROM lasku 
+			  WHERE tila = 'H' 
+			  AND yhtio != '' 
+			  AND hyvaksyja_nyt = '' 
+			  ORDER BY yhtio, laskunro";
+	$result = mysql_query($query);
+	
+	$kierros = 0;
+	$edellinen['toimittaja_nimi'] = '';
+	$edellinen['yhtio'] = '';
+	
+	/* Käydään läpi ns. eksyneitä/virheellisiä laskuja */
+	while ($virheelliset_laskut = mysql_fetch_assoc($result))
+	{
+		/* Käydään läpi henkilön yritykset */
+		foreach($yhtiot as $yhtio)
+		{
+			if ($virheelliset_laskut['yhtio'] == $yhtio)
+			{
+				$onko = true;
+				break;
+			}
+		}
+		
+		if (empty($virheelliset_laskut) and $kierros == 0)
+		{
+			echo "Virheellisiä laskuja ei ole!<br>";
+			break;
+		}
+		else if ($kierros == 0 and $onko == true)  // Ekalla kierroksella
+		{
+			$edellinen['toimittaja_nimi'] = $virheelliset_laskut['nimi'];
+			$edellinen['yhtio'] = $virheelliset_laskut['yhtio'];
+			
+			echo "<table>  
+					<tr>
+						<font class='head'>$virheelliset_laskut[yhtio_nimi]</font><hr>
+					</tr>
+					<tr>
+						<td style='font-weight:bold'>Myyjä</td>
+						<td style='font-weight:bold'>Ostaja</td>
+						<td style='font-weight:bold'>Laskunumero</td>
+						<td style='font-weight:bold'>Viite</td>
+						<td style='font-weight:bold'>Luontiaika</td>
+						<td style='font-weight:bold'>Löytyykö toimittajista</td>
+					</tr>";
+		}
+		else if ($edellinen['yhtio'] != '' and $edellinen['yhtio'] != $virheelliset_laskut['yhtio'] and $onko == true)  // Listataan uuden yhtiön laskuja
+		{
+			echo "</table><br><br>
+					<table>
+						<tr>
+							<font class='head'>$virheelliset_laskut[yhtio_nimi]</font><hr>
+						</tr>
+						<tr>
+							<td style='font-weight:bold'>Myyjä</td>
+							<td style='font-weight:bold'>Ostaja</td>
+							<td style='font-weight:bold'>Laskunumero</td>
+							<td style='font-weight:bold'>Viite</td>
+							<td style='font-weight:bold'>Luontiaika</td>
+							<td style='font-weight:bold'>Löytyykö toimittajista</td>
+						</tr>";
+		}
+		
+		if ($onko == true)
+		{
+			/* Listataan laskun tietoja ja katsotaan onko samantyyppisellä nimellä toimittajaa ko. yrityksellä */
+			echo "<tr>
+						<td>$virheelliset_laskut[yhtio_nimi]</td>
+						<td>$virheelliset_laskut[nimi]</td>
+						<td>$virheelliset_laskut[laskunro]</td>
+						<td>$virheelliset_laskut[viite]</td>
+						<td>$virheelliset_laskut[luontiaika]</td>
+						<td>";
+					
+			$siivottu = preg_replace('/\b(oy|ab|ltd)\b/i', '', strtolower($virheelliset_laskut['nimi']));
+			$siivottu = preg_replace('/^\s*/', '', $siivottu);
+			$siivottu = preg_replace('/\s*$/', '', $siivottu);
+			
+			$query = "	SELECT tunnus, nimi
+					FROM toimi
+					WHERE yhtio = '$virheelliset_laskut[yhtio]'
+					and nimi like '%$siivottu%'";
+			$lahellaresult = mysql_query($query) or die ("$query<br><br>".mysql_error());
+			
+			/* Ilmoitetaan löytyykö yrityksestä samantyyppisellä nimellä toimittajaa */
+			if (mysql_num_rows($lahellaresult) > 0)
+			{
+				$lahella = mysql_fetch_assoc($lahellaresult);
+				echo "<font color='darkgreen'>$lahella[nimi] (tunnus: $lahella[tunnus])</font>";
+			}
+			else
+			{
+				echo "<font class='error'>EI LÖYDY</font>";
+			}
+
+			echo "</td></tr>";
+		}
+		
+		$edellinen['toimittaja_nimi'] = $virheelliset_laskut['nimi'];
+		$edellinen['yhtio'] = $virheelliset_laskut['yhtio'];
+		$onko = false;
+		$kierros++;
+		
+	}
+	echo "</table>";
+	
 	require "inc/footer.inc";
 ?>

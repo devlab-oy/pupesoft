@@ -39,6 +39,7 @@
 		}
 
 		if ($virtu == "") {
+		
 			// meilin infoja
 			$failinimi = t("Tavarakatelista")."-$yhtiorow[yhtio].txt";
 
@@ -56,8 +57,17 @@
 			$content .= chunk_split(base64_encode($rivi));
 			$content .= "\n" ;
 			$content .= "--$bound\n";
+			
+			/* Lis‰tty 17.2.2014, lis‰tty muuttujat liittelle ja sen nimelle */
+			$liite = $rivi;
+			$liitenimi = $failinimi;
+			
+			$content_body = "";
 
-			$boob     = mail($kukarow["eposti"], mb_encode_mimeheader(t("Tavarakatelista"), "ISO-8859-1", "Q"), $content, $headeri, "-f $yhtiorow[postittaja_email]");
+			/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+			//$boob     = mail($kukarow["eposti"], mb_encode_mimeheader(t("Tavarakatelista"), "ISO-8859-1", "Q"), $content, $headeri, "-f $yhtiorow[postittaja_email]");
+			include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+			$boob = sendMail($yhtiorow['postittaja_email'], $kukarow["eposti"], t("Tavarakatelista"), $content_body, false, $liite, $liitenimi);
 
 			echo t("Tavarakatelista l‰hetettiin osoitteeseen"). " $kukarow[eposti].<br><br>";
 		}

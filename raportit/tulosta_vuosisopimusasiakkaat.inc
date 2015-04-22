@@ -211,6 +211,10 @@ function loppu ($firstpage, $sendemail = '') {
 	if ($asnum != '') { // ollaan valittu vain yksi asiakas, l‰hetet‰‰n meili ajajalle
 		$edemail = $kukarow['eposti'];
 	}
+	
+	/* Lis‰tty 17.2.2014, lis‰tty taulukot liitteille ja niiden nimille */
+	$liitteet = array();
+	$liite_nimet = array();
 
 	// asiakkaalla on emailosoite ja ei olla ruksattu, l‰hetet‰‰n s‰hkˆposti
 	if ($edemail!='' and $emailok=='') {
@@ -231,13 +235,22 @@ function loppu ($firstpage, $sendemail = '') {
 		$handle  = fopen($pdffilenimi, "r");
 		$sisalto = fread($handle, filesize($pdffilenimi));
 		fclose($handle);
+		
+		/* Lis‰tty 17.2.2014, lis‰t‰‰n liitteet ja niiden nimet tauluihin */
+		array_push($liitteet, $pdffilenimi);
+		array_push($liite_nimet, "Ostoseuranta.pdf");
 
 		$content .= chunk_split(base64_encode($sisalto));
 		$content .= "\n" ;
 
 		$content .= "--$bound\n";
+		
+		$content_body = "";
 
-		$boob     = mail($edemail, mb_encode_mimeheader($yhtiorow['nimi']." - Ostoseuranta ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+		//$boob     = mail($edemail, mb_encode_mimeheader($yhtiorow['nimi']." - Ostoseuranta ".date("d.m.Y"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+		$boob = sendMail($yhtiorow['postittaja_email'], $edemail, $yhtiorow['nimi']." - Ostoseuranta ".date("d.m.Y"), $content_body, false, $liitteet, $liite_nimet);
 
 		if ($boob===FALSE) {
 			echo "Meilin l‰hetys ep‰onnistui!<br>";

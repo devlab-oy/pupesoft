@@ -3654,7 +3654,10 @@ if ($tee == '') {
 
 					$content_body .= "$kpl ".t_avainsana("Y", "", " and avainsana.selite='$tuoterow[yksikko]'", "", "", "selite")." ".t("poistettu jälkitoimituksesta tuotetta")." $tilausrivi[tuoteno] ".t("tilauksella")." $kukarow[kesken]\n\n\n";
 
-					mail($yhtiorow['jt_email'], mb_encode_mimeheader($subject, "ISO-8859-1", "Q"), $content_body, $header, "-f $yhtiorow[postittaja_email]");
+					/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lisätty paranneltu sendMail */
+					//mail($yhtiorow['jt_email'], mb_encode_mimeheader($subject, "ISO-8859-1", "Q"), $content_body, $header, "-f $yhtiorow[postittaja_email]");
+					include_once '/var/www/html/lib/functions/sendMail.php';  // Lisätään sendMail funktio
+					$posti = sendMail($yhtiorow['postittaja_email'], $yhtiorow['jt_email'], $subject, $content_body);
 					echo t("Lähetettiin jälkitoimitus-sähköposti")."...<br><br>";
 				}
 

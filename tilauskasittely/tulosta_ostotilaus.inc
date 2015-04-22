@@ -85,8 +85,79 @@
 
 				$thispage = $pdf->new_page("a4");
 
-				tulosta_logo_pdf($pdf, $thispage, $laskurow);
+				// vanha: tulosta_logo_pdf($pdf, $thispage, $laskurow);
+//tamkin muutoksia...
+				unset($data);
+					
+					// jos kyse on myyrän automaattitilauksista, vaihdetaan logon polku
+					if($yhtiorow['yhtio']=='myyra'){
+						$query = "	SELECT lasku_logo 
+									FROM yhtion_toimipaikat 
+									WHERE yhtio = 'myyra' AND nimi = '$laskurow[toim_nimi]'";
+						$result = mysql_query($query);
+						$temprow = mysql_fetch_assoc($result);
+						
+						/* Muokattu 4.9.2013, lisätty ehto jolla saadaan myyrän logo näkyviin */
+						if (empty($temprow['lasku_logo']))
+						{
+							$temprow['lasku_logo'] = "myyra.jpg";
+						}
+						/* Muutos päättyy 4.9.2013 */
+						
+						$yhtiorow['lasku_logo'] = "/var/www/html/pupesoft/pics/myyra_logot/".$temprow['lasku_logo'];
+					}
+					
+					if ( (int) $yhtiorow["lasku_logo"] > 0) {
+						$liite = hae_liite($yhtiorow["lasku_logo"], "Yllapito", "array");
+						$data = $liite["data"];
+						$isizelogo[0] = $liite["image_width"];
+						$isizelogo[1] = $liite["image_height"];
+						unset($liite);
+					}
+					elseif (file_exists($yhtiorow["lasku_logo"])) {
+						$filename = $yhtiorow["lasku_logo"];
 
+						$fh = fopen($filename, "r");
+						$data = fread($fh, filesize($filename));
+						fclose($fh);
+
+						$isizelogo = getimagesize($yhtiorow["lasku_logo"]);
+					}
+
+					if ($data) {
+						$image = $pdf->jfif_embed($data);
+
+						if (!$image) {
+							echo t("Logokuvavirhe");
+						}
+						else {
+
+							$logoparam = array();
+
+							if ($isizelogo[0] > $isizelogo[1] and $isizelogo[1] * (240 / $isizelogo[0]) <= 50) {
+								$logoparam['scale'] = 240 / $isizelogo[0];
+							}
+							else {
+								$logoparam['scale'] = 50  / $isizelogo[1];
+							}
+
+							$placement = $pdf->image_place($image, 830-($logoparam['scale']*$isizelogo[1]), 20, $thispage, $logoparam);
+						}
+					}
+					else {
+						// Ei tulosteta myyrän automaattitilauksiin
+						if($yhtiorow['yhtio']!='myyra'){
+							$pdf->draw_text(30, 815, $yhtiorow["nimi"], 	$thispage, $norm);
+							$pdf->draw_text(30, 805, $yhtiorow["osoite"], 	$thispage, $norm);
+							$pdf->draw_text(30, 795, $yhtiorow["postino"]." ".$yhtiorow["postitp"], 	$thispage, $norm);
+							$pdf->draw_text(30, 785, $yhtiorow["maa"], 		$thispage, $norm);
+						}
+						else{
+							$pdf->draw_text(30, 815, $yhtiorow["lasku_logo"], 	$thispage, $norm);
+						}
+					}
+//...mutokset loppuvat
+				
 				$pdf->draw_text(310,815, t("Ostotilaus", $kieli), 		$thispage, $iso);
 				$pdf->draw_text(310, 803, t("Sivu", $kieli), 			$thispage, $norm);
 
@@ -171,10 +242,15 @@
 				$myyresult = pupe_query($query);
 				$myyrow = mysql_fetch_array($myyresult);
 
-				list($ff_string, $ff_font) = pdf_fontfit($myyrow["nimi"], 105, $pdf, $norm);
-				$pdf->draw_text(310, 740, $ff_string, $thispage, $ff_font);
-
-
+// Myyrän ostotilauksissa asiaa hoitaa "Ostopäällikkö"
+					if($yhtiorow['yhtio']=='myyra'){
+						$pdf->draw_text(310, 740, "Ostopäällikkö", 						$thispage, $norm);
+					}
+					else{
+						list($ff_string, $ff_font) = pdf_fontfit($myyrow["nimi"], 105, $pdf, $norm);
+						$pdf->draw_text(310, 740, $ff_string, $thispage, $ff_font);
+					}
+				
 				$pdf->draw_text(430, 750, t("Toimitusaika", $kieli), $thispage, $pieni);
 				$pdf->draw_text(430, 740, tv1dateconv($laskurow["toimaika"]), $thispage, $boldi);
 
@@ -302,7 +378,7 @@
 				$pdf->draw_rectangle($kala+30, 480, $kala+10, 520, $thispage, $rectparam);
 				$pdf->draw_rectangle($kala+30, 520, $kala+10, 580, $thispage, $rectparam);
 				$pdf->draw_text(25,  $kala+15, "#", $thispage, $norm);
-				$pdf->draw_text(42,  $kala+15, t("Tuotenumero", $kieli), $thispage, $norm);
+				$pdf->draw_text(42,  $kala+15, t("Tuotenimike (tuotenumero)", $kieli), $thispage, $norm);
 				$pdf->draw_text(292, $kala+15, t("Toimitusaika", $kieli), $thispage, $norm);
 				$pdf->draw_text(352, $kala+15, t("Määrä", $kieli), $thispage, $norm);
 				$pdf->draw_text(422, $kala+15, t("Hinta", $kieli), $thispage, $norm);
@@ -382,10 +458,11 @@
 				else {
 
 					if ($row["toim_tuoteno"] != "") {
-						$pdf->draw_text(45,  $kala, $row["toim_tuoteno"],$thispage, $norm);
+                                            $pdf->draw_text(45,  $kala, $row["toim_tuoteno"],$thispage, $norm);
 					}
 					else {
-						$pdf->draw_text(45,  $kala, $row["tuoteno"], $thispage, $norm);
+                                            $pdf->draw_text(45,  $kala, $row["nimitys"], $thispage, $norm); //TAMKedit muutettu
+                                            // toim_tuoteno->nimitys
 					}
 
 					if (strtoupper($row["toim_tuoteno"]) != strtoupper($row["tuoteno"])) {
@@ -394,7 +471,8 @@
 					}
 				}
 
-				$pdf->draw_text(300, $kala, tv1dateconv($row["toimaika"]), $thispage, $norm);
+                                $pdf->draw_text(300, $kala, tv1dateconv($laskurow["toimaika"]), $thispage, $norm); //TAMKedit muutettu
+                                // $row->$laskurow
 
 				//	Tarkastetaan olisiko toimittajalla yksikkö!
 				$query = "	SELECT toim_yksikko
@@ -466,6 +544,18 @@
 				// Luodaan muuttujat
 				extract($params);
 
+				/* Lisätty 16.8.2013, jos kyse on myyrän automaattitilauksista, vaihdetaan tulostuvia tietoja */
+				if($yhtiorow['yhtio']=='myyra'){
+					
+					$yhtiorow['nimi'] = $laskurow['toim_nimi'];
+					$yhtiorow['osoite'] = $laskurow['toim_osoite'];
+					$yhtiorow['postino'] = $laskurow['toim_postino'];
+					$yhtiorow['postitp'] = $laskurow['toim_postitp'];
+					$yhtiorow['maa'] = $laskurow['toim_maa'];
+				
+				}
+				/* Lisäys päättyy 16.8.2013 */
+
 				//Alimmat kolme laatikkoa, yhtiötietoja
 				$pdf->draw_rectangle(70, 20, 20, 580, $thispage, $rectparam);
 				$pdf->draw_rectangle(70, 207, 20, 580, $thispage, $rectparam);
@@ -512,7 +602,9 @@
 		        }
 
 				$pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":", $thispage, $pieni);
-				$pdf->draw_text(454, 55, $uytunnus, $thispage, $pieni);
+				//$pdf->draw_text(454, 55, $uytunnus, $thispage, $pieni);  // Kommentoitu 31.10.2013
+				$ytunnus = preg_replace("/[^0-9]/", "", $uytunnus);  // poistetaan kaikki paitsi numerot (Lisätty 3.11.2013)
+				$pdf->draw_text(454, 55, $ytunnus, $thispage, $pieni);  // Lisätty 31.10.2013, muokaattu 3.11.2013
 				$pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":", $thispage, $pieni);
 				$pdf->draw_text(454, 45, $yhtiorow["kotipaikka"], $thispage, $pieni);
 				$pdf->draw_text(404, 35,  t("Pankkiyhteys", $kieli).":", $thispage, $pieni);
@@ -521,6 +613,19 @@
 
 				if ($laitetaanko_yhteensarivi == 1 and $total != 0) {
 					$pdf->draw_text(430, 82, t("Yhteensä", $kieli).":", $thispage, $norm);
+					
+// myyrän automaattitilaus
+					if($yhtiorow['yhtio']=='myyra'){
+
+					// haetaan toimipaikkojen ovt-pääte ja korvataan yhtion ovt:n loppuosa sillä.
+					$query    = "SELECT ovtlisa FROM yhtion_toimipaikat WHERE nimi='$laskurow[toim_nimi]'";
+					$ovtlisar = mysql_query($query) or pupe_error($query);
+					$ovtlisa = mysql_fetch_array($ovtlisar);
+					$ovtlisa = substr($yhtiorow['ovttunnus'], 0, 12) . $ovtlisa['ovtlisa'];
+
+					$pdf->draw_text(404, 25, t("OVT-tunnus", $kieli).":",	   							$thispage, $pieni);
+					$pdf->draw_text(454, 25, $ovtlisa,									$thispage, $pieni);
+					}
 
 					$oikpos = $pdf->strlen(sprintf('%.2f',$total)." ".$laskurow["valkoodi"], $norm);
 					$pdf->draw_text(555-$oikpos, 82, sprintf('%.2f',$total)." ".$laskurow["valkoodi"], $thispage, $norm);
@@ -559,28 +664,116 @@
 					//keksitään uudelle failille joku varmasti uniikki nimi:
 					list($usec, $sec) = explode(' ', microtime());
 					mt_srand((float) $sec + ((float) $usec * 100000));
-					$pdffilenimi = "/tmp/Ostotilaus-".md5(uniqid(mt_rand(), true)).".pdf";
-
+					$pdffilenimi = "/tmp/Ostotilaus-".$laskurow["tunnus"]."-".tv1dateconv(date("Y-m-d")).".pdf";  // Muokattu 31.10.2013
+					$ruutu_nimi = substr($pdffilenimi,5);  // Lisätty 8.10.2013
+					
 					//kirjoitetaan pdf faili levylle..
 					$fh = fopen($pdffilenimi, "w+");
 					if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF kirjoitus epäonnistui $pdffilenimi");
 					fclose($fh);
 
-					// itse print komento...
-					if ($komento["Ostotilaus"] == 'email') {
-						$liite = $pdffilenimi;
-						$kutsu = t("Ostotilaus", $kieli)." $laskurow[tunnus]";
+//alkuperäinen					// itse print komento...
+//					if ($komento["Ostotilaus"] == 'email') {
+//						$liite = $pdffilenimi;
+//						$kutsu = t("Ostotilaus", $kieli)." $laskurow[tunnus]";
+//
+//						if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
+//							$kutsu .= ", ".trim($laskurow["nimi"]).", ".trim($laskurow["toim_nimi"]);
+//						}
+//
+//						require("inc/sahkoposti.inc");
+//						$tulosta_ostotilaus_ulos .= t("Tilaus tulostuu")."...<br>";
+//					}
+//muutosten alku
+if ($komento["Ostotilaus"] == 'email') {
+							$cbd = "";
+							$csubj = "";
+							
+							$query = "	SELECT *
+							FROM avainsana
+							WHERE yhtio = '$kukarow[yhtio]'
+							AND laji = 'OSTOTILAUS_SAAT'";
+							$result = mysql_query($query) or pupe_error($query);
+							if ($row = mysql_fetch_array($result)) {
+								$csubj	= $row["selitetark"];
+								$cbd	= $row["selitetark_2"];
 
-						if ($yhtiorow["liitetiedostojen_nimeaminen"] == "N") {
-							$kutsu .= ", ".trim($laskurow["nimi"]).", ".trim($laskurow["toim_nimi"]);
-						}
+								foreach ($laskurow as $key => $val){
 
-						require("inc/sahkoposti.inc");
-						$tulosta_ostotilaus_ulos .= t("Tilaus tulostuu")."...<br>";
-					}
+									if (preg_match_all("/\[($key)\]/", $csubj, $match)) {
+
+										foreach ($match[0] as $osuma) {
+
+											if (stristr($val, "-")) {
+												list($year, $month, $day) = explode("-", $val);
+
+												if (checkdate($month, $day, $year)) {
+													$val = tv1dateconv($val);
+												}
+											}
+											$csubj = str_replace($osuma, "$val", $csubj);
+										}
+									}
+
+									if (preg_match_all("/\[($key)\]/", $cbd, $match)) {
+
+										foreach ($match[0] as $osuma) {
+
+											if (stristr($val, "-")) {
+												list($year, $month, $day) = explode("-", $val);
+												if (checkdate($month, $day, $year)) {
+													$val = tv1dateconv($val);
+												}
+											}
+											$cbd = str_replace($osuma, "$val", $cbd);
+										}
+									}
+								}
+							}							
+							
+							if ($cbd != "" && $csubj != " "){
+								$liite = $pdffilenimi;
+								$kutsu = "Ostotilaus $laskurow[tunnus]";
+								$content_body = $cbd;
+								$content_subject = $csubj;
+								require("../inc/sahkoposti.inc");
+								$tulosta_ostotilaus_ulos .= t("Tilaus tulostuu")."...<br>";
+							}
+							else if ($cbd != ""){
+								$liite = $pdffilenimi;
+								$kutsu = "Ostotilaus $laskurow[tunnus]";
+								$content_body = $cbd;
+								require("../inc/sahkoposti.inc");
+								$tulosta_ostotilaus_ulos .= t("Tilaus tulostuu")."...<br>";
+							}
+							else if ($csubj != " "){
+								$liite = $pdffilenimi;
+								$kutsu = "Ostotilaus $laskurow[tunnus]";
+								$content_subject = $csubj;
+								require("../inc/sahkoposti.inc");
+								$tulosta_ostotilaus_ulos .= t("Tilaus tulostuu")."...<br>";
+							}
+							else {
+								$liite = $pdffilenimi;
+								$kutsu = "Ostotilaus $laskurow[tunnus]";
+								require("../inc/sahkoposti.inc");
+								$tulosta_ostotilaus_ulos .= t("Tilaus tulostuu")."...<br>";
+							}
+							}
+//muutokset loppuvat
 					elseif ($tee == 'NAYTATILAUS') {
             			//Työnnetään tuo pdf vaan putkeen!
-            			echo file_get_contents($pdffilenimi);
+            			//echo file_get_contents($pdffilenimi);  // Kommentoitu 8.10.2013
+						
+						/* Lisätty 8.10.2013, tällätavoin käyttäjä saa valita mitä pdf tiedostolle tekee (ja näin ne saa näkymään kaikilla) */
+						header('Cache-Control: public'); 
+						header('Content-Type: application/octet-stream');
+						header('Content-Disposition: attachment; filename="'.$ruutu_nimi.'"');
+						header('Content-Transfer-Encoding: binary');
+						header('Expires: 0');
+						header('Pragma: public');
+						readfile($pdffilenimi);
+						/* Lisäys päättyy 8.10.2013 */
             		}
 					elseif ($komento["Ostotilaus"] != '') {
 						$line = exec("$komento[Ostotilaus] $pdffilenimi");
@@ -612,13 +805,14 @@
 
 		if ($toim != "HAAMU") {
 			if ($mista == 'tulostakopio') {
+				/* Muokattu querya 5.12.2013, muutettu JOIN tuotteen_toimittajat -> LEFT JOIN tuotteen_toimittajat, että saadaan kaikkiin pdfiin tuoterivit näkyviin */
 				$query = "	SELECT tilausrivi.tunnus, toim_tuoteno, toim_nimitys, tuote.tuoteno, round(tilausrivi.tilkpl*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin),2) varattu,
 							tilausrivi.hinta, {$query_ale_select_lisa} round(tilausrivi.tilkpl*if (tuotteen_toimittajat.tuotekerroin=0,1,tuotteen_toimittajat.tuotekerroin)*tilausrivi.hinta*{$query_ale_lisa},'$yhtiorow[hintapyoristys]') rivihinta,
 							substring(tuote.nimitys,1,80) nimitys, kommentti, tilausrivi.yksikko, toimaika, substring(tilausrivi.nimitys,1,80) rivinimitys,
 							$sorttauskentta
 							FROM tilausrivi
-							join tuote USING (yhtio, tuoteno)
-							join tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
+							JOIN tuote USING (yhtio, tuoteno)
+							LEFT JOIN tuotteen_toimittajat on tuotteen_toimittajat.yhtio=tilausrivi.yhtio and tuotteen_toimittajat.tuoteno=tilausrivi.tuoteno and tuotteen_toimittajat.liitostunnus = '$laskurow[liitostunnus]'
 							WHERE tilausrivi.otunnus = '$otunnus'
 							and tilausrivi.yhtio	 = '$kukarow[yhtio]'
 							and tilausrivi.tyyppi	!= 'D'
@@ -705,7 +899,7 @@
 
 		// Aloitellaan lähetteen teko
 		$params = alku($params);
-
+		
 		while ($row = mysql_fetch_array($result)) {
 			if (($row["tuoteno"] == "99" or $yhtiorow["nimityksen_muutos_tilauksella"] == "Y") and $row["rivinimitys"] != "" ) {
 				$row["nimitys"] = $row["rivinimitys"];

@@ -2460,7 +2460,10 @@ if (!function_exists('loppu_lahete')) {
 			$pdf->draw_text(257, 25, $y_www,							$thispage, $pieni);
 
 			$pdf->draw_text(404, 55, t("Y-tunnus", $kieli).":",			$thispage, $pieni);
-			$pdf->draw_text(444, 55, tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);
+			//$pdf->draw_text(444, 55, tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);  // Kommentoitu 31.10.2013
+			$ytunnus = tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]);  // Lis‰tty 3.11.2013, n‰in mahdollisesti poistetaan ylim‰‰r‰iset nollat ytunnuksesta
+			$ytunnus = preg_replace("/[^0-9]/", "", $ytunnus);  // poistetaan kaikki paitsi numerot (Lis‰tty 31.10.2013, muokattu 3.11.2013)
+			$pdf->draw_text(444, 55, $ytunnus, $thispage, $pieni);  // Lis‰tty 31.10.2013
 			$pdf->draw_text(404, 45, t("Kotipaikka", $kieli).":",		$thispage, $pieni);
 			$pdf->draw_text(444, 45, $y_kotipaikka,						$thispage, $pieni);
 			$pdf->draw_text(404, 35, t("Alv.rek", $kieli),				$thispage, $pieni);
@@ -2905,8 +2908,9 @@ if (!function_exists('print_pdf_lahete')) {
 		//keksit‰‰n uudelle failille joku varmasti uniikki nimi:
 		list($usec, $sec) = explode(' ', microtime());
 		mt_srand((float) $sec + ((float) $usec * 100000));
-		$pdffilenimi = "/tmp/Lahete-".md5(uniqid(mt_rand(), true)).".pdf";
-
+		$pdffilenimi = "/tmp/Lahete-".$laskurow["tunnus"]."-".tv1dateconv(date("Y-m-d")).".pdf";  // Muokattu 31.10.2013
+		$ruutu_nimi = substr($pdffilenimi,5);  // Lis‰tty 8.10.2013
+		
 		//kirjoitetaan pdf faili levylle..
 		$fh = fopen($pdffilenimi, "w");
 		if (fwrite($fh, $pdf->generate()) === FALSE) die("PDF create error $pdffilenimi");
@@ -2914,7 +2918,17 @@ if (!function_exists('print_pdf_lahete')) {
 
 		if ($tee == 'NAYTATILAUS') {
 			//Tyˆnnet‰‰n tuo pdf vaan putkeen!
-			echo file_get_contents($pdffilenimi);
+			//echo file_get_contents($pdffilenimi);  // Kommentoitu 8.10.2013
+						
+			/* Lis‰tty 8.10.2013, t‰ll‰tavoin k‰ytt‰j‰ saa valita mit‰ pdf tiedostolle tekee (ja n‰in ne saa n‰kym‰‰n kaikilla) */
+			header('Cache-Control: public'); 
+			header('Content-Type: application/octet-stream');
+			header('Content-Disposition: attachment; filename="'.$ruutu_nimi.'"');
+			header('Content-Transfer-Encoding: binary');
+			header('Expires: 0');
+			header('Pragma: public');
+			readfile($pdffilenimi);
+			/* Lis‰ys p‰‰ttyy 8.10.2013 */
 		}
 		else {
 			if (!is_array($komento)) {

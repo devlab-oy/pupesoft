@@ -383,16 +383,25 @@ if ($virexx == 0 and strpos($laskurow['tilausvahvistus'], 'P') === FALSE) {
 	$content .= "Content-Disposition: attachment; filename=\"tilvahv.txt\"\n\n";
 	$content .= $liite;
 	$content .= "\n" ;
+	
+	/* Lisätty 17.2.2014, lisätty $liitenimi muuttuja jossa on liitteen nimi */
+	$liitenimi = "tilvahv.txt";
 
 	if (strpos($laskurow['tilausvahvistus'], 'S') !== FALSE) {
 		unset($boob);
-		$boob = mail($tilvahasiakas['email'], mb_encode_mimeheader($yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $laskurow[tunnus]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lisätty paranneltu sendMail */
+		//$boob = mail($tilvahasiakas['email'], mb_encode_mimeheader($yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $laskurow[tunnus]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		include_once '/var/www/html/lib/functions/sendMail.php';  // Lisätään sendMail funktio
+		$boob = sendMail($yhtiorow['postittaja_email'], $tilvahasiakas['email'], $yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $laskurow[tunnus]", $ulos, false, $liite, $liitenimi);
 		if ($boob===FALSE) echo t("Sähköpostin lähetys epäonnistui")."!<br>";
 	}
 
 	if (strpos($laskurow['tilausvahvistus'], 'O') !== FALSE) {
 		unset($boob);
-		$boob = mail($kukarow['eposti'], mb_encode_mimeheader($yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $laskurow[tunnus]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lisätty paranneltu sendMail */
+		//$boob = mail($kukarow['eposti'], mb_encode_mimeheader($yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $laskurow[tunnus]", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		include_once '/var/www/html/lib/functions/sendMail.php';  // Lisätään sendMail funktio
+		$boob = sendMail($yhtiorow['postittaja_email'], $kukarow['eposti'], $yhtiorow['nimi']." - ".t("Tilausvahvistus", $kieli)." $laskurow[tunnus]", $ulos, false, $liite, $liitenimi);
 		if ($boob===FALSE) echo t("Sähköpostin lähetys epäonnistui")."!<br>";
 	}
 }

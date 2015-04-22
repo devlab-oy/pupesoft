@@ -1510,7 +1510,10 @@ if (!function_exists('loppu')) {
 		$pdf_lasku->draw_text(217, 35 + $tileja + $barcode_korkeus, t("Sähköposti", $kieli).": $y_email",	$thispage, $pieni);
 		$pdf_lasku->draw_text(217, 25 + $tileja + $barcode_korkeus, t("Web", $kieli).": $y_www",			$thispage, $pieni);
 
-		$pdf_lasku->draw_text(404, 55 + $tileja + $barcode_korkeus, t("Y-tunnus", $kieli).": ".tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);
+		//$pdf_lasku->draw_text(404, 55 + $tileja + $barcode_korkeus, t("Y-tunnus", $kieli).": ".tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]), $thispage, $pieni);  // Kommentoitu 31.10.2013
+		$ytunnus = tulosta_ytunnus($y_vatnumero, $y_maa, $laskurow["vienti"]);  // Lisätty 3.11.2013, näin mahdollisesti poistetaan ylimääräiset nollat ytunnuksesta
+		$ytunnus = preg_replace("/[^0-9]/", "", $ytunnus);  // poistetaan kaikki paitsi numerot (Lisätty 31.10.2013, muokattu 3.11.2013)
+		$pdf_lasku->draw_text(404, 55 + $tileja + $barcode_korkeus, t("Y-tunnus", $kieli).": ".$ytunnus, $thispage, $pieni);  // Lisätty 31.10.2013
 		$pdf_lasku->draw_text(404, 45 + $tileja + $barcode_korkeus, t("Kotipaikka", $kieli).": $y_kotipaikka",	$thispage, $pieni);
 		$pdf_lasku->draw_text(404, 35 + $tileja + $barcode_korkeus, t("Enn.per.rek", $kieli),					$thispage, $pieni);
 		$pdf_lasku->draw_text(404, 25 + $tileja + $barcode_korkeus, t("Alv.rek", $kieli),						$thispage, $pieni);
@@ -2112,7 +2115,8 @@ if (!function_exists("tulosta_lasku")) {
 		// keksitään uudelle failille joku varmasti uniikki nimi:
 		list($usec, $sec) = explode(' ', microtime());
 		mt_srand((float) $sec + ((float) $usec * 100000));
-		$pdf_laskufilenimi = "/tmp/Lasku-".md5(uniqid(mt_rand(), true)).".pdf";
+		$pdf_laskufilenimi = "/tmp/Lasku-".$laskurow["tunnus"]."-".tv1dateconv(date("Y-m-d")).".pdf";  // Muokattu 31.10.2013
+		$ruutu_nimi = substr($pdf_laskufilenimi,5);  // Lisätty 8.10.2013
 
 		// kirjoitetaan pdf faili levylle..
 		$fh = fopen($pdf_laskufilenimi, "w");
@@ -2122,7 +2126,17 @@ if (!function_exists("tulosta_lasku")) {
 		// jos tämä haluttiin suoraan asiakkaalle sähköpostiin
 		if ($tee == 'NAYTATILAUS') {
 			//Työnnetään tuo pdf vaan putkeen!
-			echo file_get_contents($pdf_laskufilenimi);
+			//echo file_get_contents($pdf_laskufilenimi);  // Kommentoitu 8.10.2013
+			
+			/* Lisätty 8.10.2013, tällätavoin käyttäjä saa valita mitä pdf tiedostolle tekee (ja näin ne saa näkymään kaikilla) */
+			header('Cache-Control: public'); 
+			header('Content-Type: application/octet-stream');
+			header('Content-Disposition: attachment; filename="'.$ruutu_nimi.'"');
+			header('Content-Transfer-Encoding: binary');
+			header('Expires: 0');
+			header('Pragma: public');
+			readfile($pdf_laskufilenimi);
+			/* Lisäys päättyy 8.10.2013 */
 		}
 		elseif ($tee == 'VERKKOLASKU_APIX') {
 			// Palautetaan laskunumero ja $pdf_laskufilenimi jotta apixkoodi saa sen zipattua jne.

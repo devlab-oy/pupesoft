@@ -36,6 +36,27 @@ $query = "	SELECT tilausrivi.alv alv,
 			GROUP BY 1,2,3,4,5,6,7,8,9,10,11,12,13";
 $xresult = pupe_query($query);
 
+/* Kaikkien 5.6.2013 tehtyjen lisäysten, ja myöhempien muutosten, tarkoituksena on saada tiliöinti toimimaan
+	hyväksynnässä. Tätä varten tarvii tehdä insertit jossa yhtiönä on laskutettava yhtiö */
+
+/* Lisätty 5.6.2013, muokattu 12.6.2013 */
+
+$auttava_query = "SELECT *
+						FROM yhtio
+						WHERE ytunnus='$lasrow[ytunnus]'";
+$auttava_result = pupe_query($auttava_query);
+$laskutettava_yhtio = mysql_fetch_assoc($auttava_result);
+
+$lyquery = "SELECT yhtio.*, toimi.tilino
+			FROM yhtio, toimi
+			WHERE yhtio.yhtio = toimi.yhtio
+			AND toimi.osoite like '%$lasrow[yhtio_osoite]'
+			AND yhtio.ytunnus='$lasrow[ytunnus]'";
+$lyresult = pupe_query($lyquery);
+$lyrow = mysql_fetch_assoc($lyresult);  // Lisätty 7.6.2013	
+
+/* Lisäys päättyy 2013 */
+
 if (mysql_num_rows($xresult) == 0) {
 	$tulos_ulos_tiliointi .= "<font class='message'>".t("VIRHE: Laskulla ei ollut yhtään riviä").": $lasku[tunnus]</font><br><br>\r\n";
 }
@@ -83,6 +104,7 @@ else {
 		if ($xrow["alv"] >= 500 and $xrow["alv"] < 600 and $xrow["marginaaliostot"] == "EI" and $xrow["marginaalihyvitys"] == "EI") {
 			// Valitaan myyntitili, tässä on marginaalimyyntiä
 			$selite = "Marginaaliverolasku/Myynti ". $lasku['nimi']." ".$lasku['nimitark'];
+			$selite2 = "Marginaaliverolasku/Osto ". $lasku['yhtio_nimi']; // Lisätty 5.6.2013
 
 			// tässä on kaikki marginaali-myyntitilausrivit
 			$query = "	SELECT *
@@ -127,12 +149,33 @@ else {
 						laatija 			= '$kukarow[kuka]',
 						laadittu 			= now()";
 			$laskutusres = pupe_query($query);
-
+			
+			/* Lisätty 5.6.2013, muokattu 12.6.2013 */			
+			$query = "	INSERT into tiliointi set
+						yhtio 				= '$laskutettava_yhtio[yhtio]',
+						ltunnus 			= '$tunnus',
+						tilino 				= '$lyrow[osto_marginaali]',
+						kustp    			= '{$kustp_ins}',
+						kohde	 			= '{$kohde_ins}',
+						projekti 			= '{$projekti_ins}',
+						tapvm 				= '$tapvm',
+						summa				= $tiliointisumma * -1,
+						summa_valuutassa 	= $tiliointisumma_valuutassa * -1,
+						valkoodi			= '$lasku[valkoodi]',
+						vero 				= 0,
+						selite 				= '$selite2',
+						lukko 				= '1',
+						laatija 			= '$kukarow[kuka]',
+						laadittu 			= now()";
+			$laskutusres = pupe_query($query);
+			/* Lisäys päättyy 2013 */			
+			
 			$vastasumma += $tiliointisumma;
 			$vastasumma_valuutassa += $tiliointisumma_valuutassa;
 
 			//Sitten pitää vielä tilioidä itse marginaali joka on normaalia verollista myyntiä
 			$selite 		= "Marginaaliverolasku/Marginaali ". $lasku['nimi']." ".$lasku['nimitark'];
+			$selite2    = "Marginaaliverolasku/Marginaali ". $lasku['yhtio_nimi'];  // Lisätty 5.6.2013
 
 			$tilino 			= (int) $xrow['tilino'];
 			$tilino_eu 			= (int) $xrow['tilino_eu'];
@@ -154,6 +197,7 @@ else {
 		elseif ($xrow["alv"] >= 500 and $xrow["alv"] < 600 and ($xrow["marginaaliostot"] == "KYLLA" or $xrow["marginaalihyvitys"] == "KYLLA")) {
 			// Valitaan ostotili, tässä on marginaaliostoa
 			$selite				= "Marginaaliverolasku/Osto ". $lasku['nimi']." ".$lasku['nimitark'];
+			$selite2				= "Marginaaliverolasku/Osto ". $lasku['yhtio_nimi'];  // Lisätty 5.6.2013
 
 			$tilino 			= (int) $xrow['osto_marginaali'];
 			$tilino_eu 			= (int) $xrow['osto_marginaali'];
@@ -170,6 +214,7 @@ else {
 		else {
 			// Valitaan myyntitili, tässä on normaalimyyntiä
 			$selite 			= "Lasku ". $lasku['nimi']." ".$lasku['nimitark'];
+			$selite2 			= "Lasku ". $lasku['yhtio_nimi'];  // Lisätty 5.6.2013
 
 			$tilino 			= (int) $xrow['tilino'];
 			$tilino_eu 			= (int) $xrow['tilino_eu'];
@@ -224,7 +269,29 @@ else {
 						laadittu 			= now()";
 			$laskutusres = pupe_query($query);
 			$isa = mysql_insert_id ($link);
-
+			
+			/* Lisätty 5.6.2013, muokattu 12.6.2013 */
+			
+			$query = "	INSERT into tiliointi set
+						yhtio 				= '$laskutettava_yhtio[yhtio]',
+						ltunnus				= '$tunnus',
+						tilino				= '$lyrow[tilino]',
+						kustp    			= '{$kustp_ins}',
+						kohde	 			= '{$kohde_ins}',
+						projekti 			= '{$projekti_ins}',
+						tapvm 				= '$tapvm',
+						summa 				= $tiliointisumma * -1,
+						summa_valuutassa 	= $tiliointisumma_valuutassa * -1,
+						valkoodi			= '$lasku[valkoodi]',
+						vero 				= '$xrow[alv]',
+						selite 				= '$selite2',
+						lukko 				= '$lukko',
+						laatija 			= '$kukarow[kuka]',
+						laadittu 			= now()";
+			$laskutusres = pupe_query($query);
+			
+			/* Lisäys päättyy 2013 */			
+			
 			$lukko = "";
 
 			// Tiliöidaan ALV, jos sitä on
@@ -247,6 +314,29 @@ else {
 							laadittu 			= now(),
 							aputunnus			= '$isa'";
 				$laskutusres = pupe_query($query);
+				
+				/* Lisätty 5.6.2013, muokattu 12.6.2013 */
+				
+				$query = "	INSERT into tiliointi set
+							yhtio 				= '$laskutettava_yhtio[yhtio]',
+							ltunnus 			= '$tunnus',
+							tilino 				= '$lyrow[alv]',
+							kustp 				= 0,
+							kohde 				= 0,
+							projekti 			= 0,
+							tapvm 				= '$tapvm',
+							summa 				= $alv * -1,
+							summa_valuutassa 	= $alv_valuutassa * -1,
+							valkoodi			= '$lasku[valkoodi]',
+							vero 				= 0,
+							selite 				= '$selite2',
+							lukko 				= '1',
+							laatija 			= '$kukarow[kuka]',
+							laadittu 			= now(),
+							aputunnus			= '$isa'";
+				$laskutusres = pupe_query($query);				
+				
+				/* Lisäys päättyy 2013 */
 			}
 
 			// Jos maksetaan käteisellä ja meillä on kassa-alennusta, niin kirjataan ne tässä (samalle kustannuspaikalle ku myynti)
@@ -274,6 +364,27 @@ else {
 							laadittu 			= now()";
 				$laskutusres = pupe_query($query);
 				$isa = mysql_insert_id ($link);
+				
+				/* Lisätty 5.6.2013, muokattu 12.6.2013 */
+				$query = "	INSERT into tiliointi set
+							yhtio 				= '$laskutettava_yhtio[yhtio]',
+							ltunnus				= '$tunnus',
+							tilino				= '$lyrow[kateistilitys]',
+							kustp    			= '{$kustp_ins}',
+							kohde	 			= '{$kohde_ins}',
+							projekti 			= '{$projekti_ins}',
+							tapvm 				= '$tapvm',
+							summa 				= $kassaale,
+							summa_valuutassa 	= $kassaale_valuutassa,
+							valkoodi			= '$lasku[valkoodi]',
+							vero 				= '$xrow[alv]',
+							selite 				= '$selite2',
+							lukko 				= '$lukko',
+							laatija 			= '$kukarow[kuka]',
+							laadittu 			= now()";
+				$laskutusres = pupe_query($query);				
+				
+				/* Lisäys päättyy 2013 */
 
 				if ($xrow["alv"] != 0) {
 
@@ -303,6 +414,29 @@ else {
 								laadittu 			= now(),
 								aputunnus 			= $isa";
 					$laskutusres = pupe_query($query);
+					
+					/* Lisätty 5.6.2013, muokattu 12.6.2013 */
+					
+					$query = "	INSERT into tiliointi set
+								yhtio 				= '$laskutettava_yhtio[yhtio]',
+								ltunnus 			= '$lasku[tunnus]',
+								tilino 				= '$lyrow[alv]',
+								kustp 				= 0,
+								kohde 				= 0,
+								projekti 			= 0,
+								tapvm 				= '$suoritus[maksupvm]',
+								summa 				= $alv,
+								summa_valuutassa	= $alv_valuutassa,
+								valkoodi			= '$tiliointirow[valkoodi]',
+								vero 				= 0,
+								selite 				= '$selite2',
+								lukko 				= '1',
+								laatija 			= '$kukarow[kuka]',
+								laadittu 			= now(),
+								aputunnus 			= $isa";
+					$laskutusres = pupe_query($query);					
+					
+					/* Lisäys päättyy 2013 */
 				}
 			}
 		}
@@ -320,9 +454,11 @@ else {
 
 			if ($xrow["marginaaliostot"] == "KYLLA" or $xrow["marginaalihyvitys"] == "KYLLA") {
 				$selite	= "Varastoontulo ". $lasku['nimi'];
+				$selite2	= "Varastoontulo ". $lasku['yhtio_nimi'];  // Lisätty 5.6.2013
 			}
 			else {
 				$selite	= "Varastostamyynti ". $lasku['nimi'];
+				$selite2	= "Varastostamyynti ". $lasku['yhtio_nimi'];  // Lisätty 5.6.2013
 			}
 
 			$vero			= 0;
@@ -353,6 +489,28 @@ else {
 						laatija 			= '$kukarow[kuka]',
 						laadittu 			= now()";
 			$laskutusres = pupe_query($query);
+			
+			/* Lisätty 5.6.2013, muokattu 12.6.2013 */
+			
+			$query = "	INSERT into tiliointi set
+						yhtio 				= '$laskutettava_yhtio[yhtio]',
+						ltunnus 			= '$tunnus',
+						tilino 				= '$lyrow[varasto]',
+						kustp    			= '{$kustp_ins}',
+						kohde	 			= '{$kohde_ins}',
+						projekti 			= '{$projekti_ins}',
+						tapvm 				= '$tapvm',
+						summa				= '$tiliointisumma',
+						summa_valuutassa 	= '$tiliointisumma_valuutassa',
+						valkoodi			= '$lasku[valkoodi]',
+						vero 				= '$vero',
+						selite 				= '$selite2',
+						lukko 				= '',
+						laatija 			= '$kukarow[kuka]',
+						laadittu 			= now()";
+			$laskutusres = pupe_query($query);			
+			
+			/* Lisäys päättyy 2013 */
 
 			$tiliointisumma = $tiliointisumma * -1;
 			$tiliointisumma_valuutassa = $tiliointisumma_valuutassa * -1;
@@ -375,6 +533,28 @@ else {
 						laatija 			= '$kukarow[kuka]',
 						laadittu 			= now()";
 			$laskutusres = pupe_query($query);
+			
+			/* Lisätty 5.6.2013, muokattu 12.6.2013 */
+			
+			$query = "	INSERT into tiliointi set
+						yhtio 				= '$laskutettava_yhtio[yhtio]',
+						ltunnus 			= '$tunnus',
+						tilino 				= '$lyrow[varastonmuutos]',
+						kustp    			= '{$kustp_ins}',
+						kohde	 			= '{$kohde_ins}',
+						projekti 			= '{$projekti_ins}',
+						tapvm 				= '$tapvm',
+						summa 				= '$tiliointisumma',
+						summa_valuutassa 	= '$tiliointisumma_valuutassa',
+						valkoodi			= '$lasku[valkoodi]',
+						vero 				= '$vero',
+						selite 				= '$selite2',
+						lukko 				= '',
+						laatija 			= '$kukarow[kuka]',
+						laadittu 			= now()";
+			$laskutusres = pupe_query($query);			
+			
+			/* Lisäys päättyy 2013 */
 		}
 	}
 
@@ -460,6 +640,7 @@ else {
 	}
 
 	$selite = "Lasku ". $lasku['nimi']." ".$lasku['nimitark'];
+	$selite2 = "Lasku ". $lasku['yhtio_nimi'];  // Lisätty 5.6.2013
 
 	if (isset($kateismaksu)) {
 
@@ -500,6 +681,28 @@ else {
 							laatija 			= '$kukarow[kuka]',
 							laadittu 			= now()";
 				$laskutusres = pupe_query($query);
+				
+				/* Lisätty 5.6.2013, muokattu 12.6.2013 */
+
+				$query = "	INSERT into tiliointi set
+							yhtio 				= '$laskutettava_yhtio[yhtio]',
+							ltunnus 			= '$tunnus',
+							tilino 				= '$lyrow[ostovelat]',
+							kustp    			= '{$kustp_ins}',
+							kohde	 			= '{$kohde_ins}',
+							projekti 			= '{$projekti_ins}',
+							tapvm 				= '$tapvm',
+							summa 				= '$arvo',
+							summa_valuutassa 	= '$arvo_valuutassa',
+							valkoodi			= '$lasku[valkoodi]',
+							vero 				= 0,
+							selite 				= '$selite2',
+							lukko 				= '1',
+							laatija 			= '$kukarow[kuka]',
+							laadittu 			= now()";
+				$laskutusres = pupe_query($query);				
+				
+				/* Lisäys päättyy 2013 */
 
 				$loppusumma += $arvo;
 				$loppusumma_valuutassa += $arvo_valuutassa;
@@ -527,6 +730,28 @@ else {
 					laatija 			= '$kukarow[kuka]',
 					laadittu 			= now()";
 		$laskutusres = pupe_query($query);
+		
+		/* Lisätty 5.6.2013, muokattu 12.6.2013 */
+		
+		$query = "	INSERT into tiliointi set
+					yhtio 				= '$laskutettava_yhtio[yhtio]',
+					ltunnus 			= '$tunnus',
+					tilino 				= '$lyrow[ostovelat]',
+					kustp    			= '{$kustp_ins}',
+					kohde	 			= '{$kohde_ins}',
+					projekti 			= '{$projekti_ins}',
+					tapvm 				= '$tapvm',
+					summa 				= '$apusumma',
+					summa_valuutassa 	= '$apusumma_valuutassa',
+					valkoodi			= '$lasku[valkoodi]',
+					vero 				= 0,
+					selite 				= '$selite2',
+					lukko 				= '1',
+					laatija 			= '$kukarow[kuka]',
+					laadittu 			= now()";
+		$laskutusres = pupe_query($query);
+		
+		/* Lisäys päättyy 2013 */
 	}
 
 	// Kirjataan pyoristykset, jos niita on
@@ -551,6 +776,28 @@ else {
 					laatija 			= '$kukarow[kuka]',
 					laadittu 			= now()";
 		$laskutusres = pupe_query($query);
+		
+		/* Lisätty 5.6.2013, muokattu 12.6.2013 */
+		
+		$query = "	INSERT into tiliointi set
+					yhtio 				= '$laskutettava_yhtio[yhtio]',
+					ltunnus 			= '$tunnus',
+					tilino 				= '$lyrow[pyoristys]',
+					kustp 				= 0,
+					kohde 				= 0,
+					projekti 			= 0,
+					tapvm 				= '$tapvm',
+					summa 				= $vastasumma - $loppusumma,
+					summa_valuutassa 	= $vastasumma_valuutassa - $loppusumma_valuutassa,
+					valkoodi			= '$lasku[valkoodi]',
+					vero 				= 0,
+					selite 				= '$selite2',
+					lukko 				= '',
+					laatija 			= '$kukarow[kuka]',
+					laadittu 			= now()";
+		$laskutusres = pupe_query($query);		
+		
+		/* Lisäys päättyy 2013 */
 	}
 
 	$vastasumma = 0;

@@ -586,6 +586,10 @@
 
 		$content .= "--$bound\n";
 		*/
+		
+		/* Lis‰tty 17.2.2014, lis‰tty taulukot liitteille ja niiden nimille */
+		$liitteet = array();
+		$liite_nimet = array();
 
 		$content .= "Content-Type: application/pdf; name=\"".t("Tarkastuslista").".pdf\"\n" ;
 		$content .= "Content-Transfer-Encoding: base64\n" ;
@@ -597,6 +601,10 @@
 		fclose($handle);
 		$content .= chunk_split(base64_encode($sisalto));
 		$content .= "\n" ;
+		
+		/* Lis‰tty 17.2.2014, lis‰t‰‰n liiteet ja niiden nimet taulukoihin */
+		array_push($liitteet, $nimi);
+		array_push($liite_nimet, t("Tarkastuslista").".pdf");
 
 		$content .= "--$bound\n";
 
@@ -609,10 +617,19 @@
 		fclose($handle);
 		$content .= chunk_split(base64_encode($sisalto));
 		$content .= "\n" ;
+		
+		/* Lis‰tty 17.2.2014, lis‰t‰‰n liiteet ja niiden nimet taulukoihin */
+		array_push($liitteet, $nimi);
+		array_push($liite_nimet, t("Taydentava-Ilmoitus").".pdf");
 
 		$content .= "--$bound--\n";
+		
+		$content_body = "";
 
-		mail($kukarow["eposti"], mb_encode_mimeheader(t("T‰ydent‰v‰ vienti-ilmoitus"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+		//mail($kukarow["eposti"], mb_encode_mimeheader(t("T‰ydent‰v‰ vienti-ilmoitus"), "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+		include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+		$posti = sendMail($yhtiorow['postittaja_email'], $kukarow["eposti"], t("T‰ydent‰v‰ vienti-ilmoitus"), $content_body, false, $liitteet, $liite_nimet);
 
 		///* T‰ss‰ teh‰‰n t‰ydent‰v‰ ilmoitus s‰hkˆiseen muotoon *///
 		//PGP-encryptaus atklabeli
@@ -656,7 +673,15 @@
 		$header  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
 		$header .= "MIME-Version: 1.0\n" ;
 		$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
-
+		
+		
+		unset($liitteet);
+		unset($liite_nimet);
+		
+		/* Lis‰tty 17.2.2014, lis‰tty taulukot liitteille ja niiden nimille */
+		$liitteet = array();
+		$liite_nimet = array();
+		
 		$content = "--$bound\n" ;
 
 		$content .= "Content-Type: application/pgp-encrypted;\n" ;
@@ -664,6 +689,10 @@
 		$content .= "Content-Disposition: attachment; filename=\"otsikko.pgp\"\n\n";
 		$content .= chunk_split(base64_encode($label));
 		$content .= "\n" ;
+		
+		/* Lis‰tty 17.2.2014, lis‰t‰‰n liiteet ja niiden nimet taulukoihin */
+		array_push($liitteet, $label);
+		array_push($liite_nimet, "otsikko.pgp");
 
 		$content .= "--$bound\n" ;
 
@@ -672,19 +701,29 @@
 		$content .= "Content-Disposition: attachment; filename=\"tietue.pgp\"\n\n";
 		$content .= chunk_split(base64_encode($atk));
 		$content .= "\n" ;
+		
+		/* Lis‰tty 17.2.2014, lis‰t‰‰n liiteet ja niiden nimet taulukoihin */
+		array_push($liitteet, $atk);
+		array_push($liite_nimet, "tietue.pgp");
 
 		$content .= "--$bound--\n" ;
 
 		if ($lahetys == "tuli") {
 			// l‰hetet‰‰n meili tulliin
 			$to = 'ascii.vienti@tulli.fi';			// t‰m‰ on tullin virallinen osoite
-			mail($to, "", $content, $header, "-f $yhtiorow[postittaja_email]");
+			/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+			//mail($to, "", $content, $header, "-f $yhtiorow[postittaja_email]");
+			include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+			$posti = sendMail($yhtiorow['postittaja_email'], $to, "", $content_body, false, $liitteet, $liite_nimet);
 			echo "<font class='message'>".t("Tiedot l‰hetettiin tulliin").".</font><br><br>";
 		}
 		elseif ($lahetys == "test") {
 			// l‰hetet‰‰n TESTI meili tulliin
 			$to = 'test.ascii.vienti@tulli.fi';		// t‰m‰ on tullin testiosoite
-			mail($to, "", $content, $header, "-f $yhtiorow[postittaja_email]");
+			/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+			//mail($to, "", $content, $header, "-f $yhtiorow[postittaja_email]");
+			include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+			$posti = sendMail($yhtiorow['postittaja_email'], $to, "", $content_body, false, $liitteet, $liite_nimet);
 			echo "<font class='message'>".t("Testitiedosto l‰hetettiin tullin testipalvelimelle").".</font><br><br>";
 		}
 		else {

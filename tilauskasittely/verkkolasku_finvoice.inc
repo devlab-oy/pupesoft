@@ -22,6 +22,9 @@ if (!function_exists('finvoice_otsik')) {
 
 		//	Osataanko k‰sitell‰ t‰m‰n pankin finvoiceaineistoa?
 		switch ($senderintermediator) {
+			case 'AINOFIHH':
+			$tulostuspalvelu	= "tulostukseen";
+				break;
 			case 'NDEAFIHH':
 			$tulostuspalvelu	= "tulostukseen";
 				break;
@@ -192,7 +195,28 @@ if (!function_exists('finvoice_otsik')) {
 			$asquery = "SELECT * from asiakas where yhtio='$lasrow[yhtio]' and tunnus='$lasrow[liitostunnus]'";
 			$asiakasre = pupe_query($asquery);
 			$asiakasrow = mysql_fetch_assoc($asiakasre);
-
+			
+			/* Lis‰tty 18.12.2013, varmistetaan oikeanlainen viite xsl tiedostolle */
+			$pos = stripos($palvelin2,"http://www.");
+			$posi = stripos($palvelin2,"https://www.");
+			
+			if ($pos !== FALSE)
+			{
+				$palvelin2 = str_replace("http://www.", "http://", $palvelin2);
+				
+			}
+			else if ($posi !== FALSE)
+			{
+						
+				$palvelin2 = str_replace("https://www.", "https://", $palvelin2);
+				
+			}
+			else
+			{
+				$palvelin2 = "http://kykylaakso.fi";
+			}
+			/* Lis‰ys p‰‰ttyy 18.12.2013 */
+			
 			//laitetaan setit kuntoon..
 			fputs($tootfinvoice, "<?xml version=\"1.0\" encoding=\"ISO-8859-15\"?>\r\n");
 

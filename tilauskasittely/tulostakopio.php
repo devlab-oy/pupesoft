@@ -996,7 +996,7 @@
 							<input type='hidden' name='toim' value='$toim'>
 							<input type='hidden' name='tee' value='NAYTATILAUS'>
 							<input type='hidden' name='mista' value='tulostakopio'>
-							<input type='submit' value='".t("N‰yt‰ pdf")."' onClick=\"js_openFormInNewWindow('tulostakopioform_$row[tunnus]', 'tulostakopio_$row[tunnus]'); return false;\"></form>";
+							<input type='submit' value='".t("N‰yt‰ pdf")."' onClick=\"js_openFormInNewWindow('tulostakopioform_$row[tunnus]', 'samewindow'); return false;\"></form>";  // Muokattu 8.10.2013, vaihdettu parametri tulostakopio_$row[tunnus] -> samewindow (n‰in estet‰‰n tyhj‰n popupin ilmestyminen)
 
 					if ($kukarow["extranet"] == "") {
 						echo "<br>
@@ -1325,7 +1325,8 @@
 					list($usec, $sec) = explode(' ', microtime());
 					mt_srand((float) $sec + ((float) $usec * 100000));
 					$pdffilenimi = "/tmp/SAD_Lomake_Kopio-".md5(uniqid(mt_rand(), true)).".pdf";
-
+					$ruutu_nimi = substr($pdffilenimi,7);  // Lis‰tty 8.10.2013
+					
 					//kirjoitetaan pdf faili levylle..
 					$fh = fopen($pdffilenimi, "w");
 					if (fwrite($fh, $pdf2->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
@@ -1345,7 +1346,17 @@
 					}
 					elseif ($tee == 'NAYTATILAUS') {
 						//Tyˆnnet‰‰n tuo pdf vaan putkeen!
-						echo file_get_contents($pdffilenimi);
+						//echo file_get_contents($pdffilenimi);  // Kommentoitu 8.10.2013
+						
+						/* Lis‰tty 8.10.2013, t‰ll‰tavoin k‰ytt‰j‰ saa valita mit‰ pdf tiedostolle tekee (ja n‰in ne saa n‰kym‰‰n kaikilla) */
+						header('Cache-Control: public'); 
+						header('Content-Type: application/octet-stream');
+						header('Content-Disposition: attachment; filename="'.$ruutu_nimi.'"');
+						header('Content-Transfer-Encoding: binary');
+						header('Expires: 0');
+						header('Pragma: public');
+						readfile($pdffilenimi);
+						/* Lis‰ys p‰‰ttyy 8.10.2013 */
 					}
 					elseif ($komento["SAD-lomake"] != '' and $komento["SAD-lomake"] != 'edi') {
 						$line = exec($komento["SAD-lomake"]." ".$pdffilenimi);
@@ -1372,7 +1383,8 @@
 				list($usec, $sec) = explode(' ', microtime());
 				mt_srand((float) $sec + ((float) $usec * 100000));
 				$pdffilenimi = "/tmp/Vientierittely_Kopio-".md5(uniqid(mt_rand(), true)).".pdf";
-
+				$ruutu_nimi = substr($pdffilenimi,7);  // Lis‰tty 8.10.2013
+				
 				//kirjoitetaan pdf faili levylle..
 				$fh = fopen($pdffilenimi, "w");
 				if (fwrite($fh, $Xpdf->generate()) === FALSE) die("PDF kirjoitus ep‰onnistui $pdffilenimi");
@@ -1392,7 +1404,17 @@
 				}
 				elseif ($tee == 'NAYTATILAUS') {
 					//Tyˆnnet‰‰n tuo pdf vaan putkeen!
-					echo file_get_contents($pdffilenimi);
+					//echo file_get_contents($pdffilenimi);  // Kommentoitu 8.10.2013
+						
+						/* Lis‰tty 8.10.2013, t‰ll‰tavoin k‰ytt‰j‰ saa valita mit‰ pdf tiedostolle tekee (ja n‰in ne saa n‰kym‰‰n kaikilla) */
+						header('Cache-Control: public'); 
+						header('Content-Type: application/octet-stream');
+						header('Content-Disposition: attachment; filename="'.$ruutu_nimi.'"');
+						header('Content-Transfer-Encoding: binary');
+						header('Expires: 0');
+						header('Pragma: public');
+						readfile($pdffilenimi);
+						/* Lis‰ys p‰‰ttyy 8.10.2013 */
 				}
 				elseif ($komento["Vientierittely"] != '' and $komento["Vientierittely"] != 'edi') {
 					$line = exec($komento["Vientierittely"]." ".$pdffilenimi);

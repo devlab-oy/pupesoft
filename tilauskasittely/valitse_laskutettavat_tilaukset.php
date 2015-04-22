@@ -202,7 +202,20 @@
 			}
 			$laskutettavat = substr($laskutettavat,0,-1); // vika pilkku pois
 		}
-
+		
+		/* Lis‰tty 11.6.2013 */
+        
+        $query = "  SELECT *
+                    FROM yhtio
+                    WHERE ytunnus=(SELECT distinct ytunnus
+                                   FROM lasku
+                                   WHERE tunnus in ($laskutettavat)
+                                   AND yhtio= '$kukarow[yhtio]')";
+        $auttava_result = pupe_query($query);
+        $laskutettava_yhtio = mysql_fetch_assoc($auttava_result);
+        
+        /* Lis‰ys p‰‰ttyy 11.6.2013 */
+		
 		//tarkistetaan ekaks ettei yksik‰‰n tilauksista ole jo toimitettu/laskutettu
 		$query = "	SELECT yhtio
 		            FROM tilausrivi
@@ -223,7 +236,21 @@
 						and toimitettu  = ''
 						and tyyppi      = 'L'";
 			$result = pupe_query($query);
-
+			
+			/* Lis‰tty 11.6.2013 */
+			
+			$query = "	UPDATE tilausrivi
+						SET toimitettu = '$kukarow[kuka]', toimitettuaika = now()
+						WHERE otunnus  in ($laskutettavat)
+						and var not in ('P','J')
+						and yhtio 		= '$laskutettava_yhtio[yhtio]'
+						and keratty    != ''
+						and toimitettu  = ''
+						and tyyppi      = 'L'";
+			$result = pupe_query($query);
+			
+			/* Lis‰ys p‰‰ttyy 11.6.2013 */
+			
 			if (isset($vaihdakateista) and $vaihdakateista == "KYLLA") {
 				$katlisa = ", kassalipas = '$kassalipas', maksuehto = '$maksutapa'";
 			}
@@ -320,6 +347,24 @@
         }
 		$laskutettavat	= "";
 		$tee	 		= "";
+		
+		/* Lis‰tty 30.7.2013, Lis‰yksen tulisi mahdollistaa laskun olevan muutakin kuin paperilasku */
+		require_once("../inc/functions.inc");
+		global $nimifinvoice;  // Lis‰tty 30.7.2013, varmistetaan ett‰ saadaan tiedoston nimi
+		
+		$liite_id2 = (int) $lasrow['tunnus'];
+		$liite_id = $liite_id2 + 1; 
+		
+		// Tallennetaan alkuper‰inen aineisto tilauksen liitetiedostoksi
+		$liitefile = file_get_contents($nimifinvoice);
+		$filename  = basename($nimifinvoice);
+		$liitos    = 'lasku';
+		$liitefile = mysql_real_escape_string($liitefile);
+		$fileslite = t("Lasku")." $liite_id";
+		
+		$tarkaste = tallenna_liite($nimifinvoice, $liitos, $liite_id, $fileslite, "FINVOICE", 0, 0, "", $laskutettava_yhtio['yhtio'] );
+		
+		/* Lis‰ys p‰‰ttyy 30.7.2013 */
 	}
 
 	if ($tee == "VALITSE") {

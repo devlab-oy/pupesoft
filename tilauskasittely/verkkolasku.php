@@ -265,8 +265,8 @@
 			//Sis‰inenfinvoice xml-dataa
 			if (!$tootsisainenfinvoice = fopen($nimisisainenfinvoice, "w")) die("Filen $nimisisainenfinvoice luonti ep‰onnistui!");
 
-			// lock tables
-			$query = "LOCK TABLES tili READ, lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot WRITE, tilausrivin_lisatiedot t_lisa READ, tilausrivin_lisatiedot as tl2 WRITE, tilausrivin_lisatiedot as tlt2 WRITE, tilausrivin_lisatiedot as tlt3 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, tilausrivi as t READ, asiakkaan_positio READ, yhteyshenkilo as kk READ, yhteyshenkilo as kt READ, asiakasalennus READ, tyomaarays READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, puun_alkio READ, asiakaskommentti READ, pakkaus READ, panttitili WRITE, lasku AS ux_otsikko WRITE, lasku AS lx_otsikko WRITE";
+			// lock tables (lis‰tty toimi READ 31.5.2013)
+			$query = "LOCK TABLES yhtion_toimipaikat as yt READ, toimi READ, tili READ, lasku WRITE, tilausrivi WRITE, tilausrivi as t2 WRITE, yhtio READ, tilausrivi as t3 READ, tilausrivin_lisatiedot WRITE, tilausrivin_lisatiedot t_lisa READ, tilausrivin_lisatiedot as tl2 WRITE, tilausrivin_lisatiedot as tlt2 WRITE, tilausrivin_lisatiedot as tlt3 WRITE, sanakirja WRITE, tapahtuma WRITE, tuotepaikat WRITE, tiliointi WRITE, toimitustapa READ, maksuehto READ, sarjanumeroseuranta WRITE, tullinimike READ, kuka WRITE, varastopaikat READ, tuote READ, rahtikirjat READ, kirjoittimet READ, tuotteen_avainsanat READ, tuotteen_toimittajat READ, asiakas READ, rahtimaksut READ, avainsana READ, avainsana as a READ, avainsana as b READ, avainsana as avainsana_kieli READ, factoring READ, pankkiyhteystiedot READ, yhtion_toimipaikat READ, yhtion_parametrit READ, tuotteen_alv READ, maat READ, laskun_lisatiedot WRITE, kassalipas READ, kalenteri WRITE, etaisyydet READ, tilausrivi as t READ, asiakkaan_positio READ, yhteyshenkilo as kk READ, yhteyshenkilo as kt READ, asiakasalennus READ, tyomaarays READ, dynaaminen_puu AS node READ, dynaaminen_puu AS parent READ, puun_alkio READ, asiakaskommentti READ, pakkaus READ, panttitili WRITE, lasku AS ux_otsikko WRITE, lasku AS lx_otsikko WRITE";
 			$locre = pupe_query($query);
 
 			//Haetaan tarvittavat funktiot aineistojen tekoa varten
@@ -1669,10 +1669,10 @@
 								elmaedi_otsik($tootedi, $lasrow, $masrow, $tyyppi, $timestamppi, $toimaikarow);
 							}
 							elseif ($lasrow["chn"] == "112") {
-								finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
+								finvoice_otsik($tootsisainenfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, "NOSOAP");  // Lis‰tty NOSOAP 13.12.2013);
 							}
 							elseif ($yhtiorow["verkkolasku_lah"] == "iPost" or $yhtiorow["verkkolasku_lah"] == "finvoice") {
-								finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent);
+								finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, "NOSOAP");  // Lis‰tty NOSOAP 30.7.2013
 							}
 							elseif ($yhtiorow["verkkolasku_lah"] == "apix") {
 								finvoice_otsik($tootfinvoice, $lasrow, $kieli, $pankkitiedot, $masrow, $myyrow, $tyyppi, $toimaikarow, $tulos_ulos, $silent, "NOSOAPAPIX");
@@ -2121,7 +2121,216 @@
 						$tresult = pupe_query($tquery);
 
 					} // end foreach ketjut...
+					
+					// Lis‰tty 31.5.2013
+					
+					/* Haetaan tietokannasta tietoja */
+					if ($lasrow['toim_osoite'] == '')
+					{
+						$osoite = trim($lasrow['osoite']);
+					}
+					else
+					{
+						$osoite = trim($lasrow['toim_osoite']);
+					}
+					
+					$osoite = "%".str_replace(' ','%', $osoite)."%";  // Lis‰tty 13.12.2013, t‰ll‰ mahdollistetaan kunnollinen osoite haku.
+					
+					/* Lis‰tty 11.3.2014, lis‰tty ehto jolla katsotaan haetaanko muun kuin myyr‰n tietoja. ytunnus 32419754 on myyr‰n ytunnus.
+					   $apu muuttujaa k‰ytet‰‰n katsomaan, onko ytunnuksella yrityst‰.*/
+					if ($lasrow['ytunnus'] != '32419754')
+					{
+						$auttava_query = "SELECT *
+								  FROM yhtio
+								  WHERE ytunnus = '$lasrow[ytunnus]'";  // Muokattu 13.12.2013, lis‰tty yksi ehto lis‰‰ jolla haetaan tietoa.
+						$auttava_result = pupe_query($auttava_query);
 
+						$apu = mysql_fetch_assoc($auttava_result);
+					}
+					else
+					{
+						/* Mik‰li kyseess‰ myyr‰n tiedot niin pit‰‰ tarkistaa myˆs osoite */
+						$auttava_query = "SELECT *
+								  FROM yhtio
+								  WHERE osoite like '$osoite'
+								  AND ytunnus = '$lasrow[ytunnus]'";  // Muokattu 13.12.2013, lis‰tty yksi ehto lis‰‰ jolla haetaan tietoa.
+						$auttava_result = pupe_query($auttava_query);
+
+						$apu = mysql_fetch_assoc($auttava_result);
+					}
+					/* Lis‰ys p‰‰ttyy 11.3.2014 */
+					
+					
+					/* Lis‰tty 4.7.2013, mik‰li kyseess‰ on Kauppakeskus Myyr‰n toimipaikka, haetaan
+					   tietoa yhtion_toimipiste taulusta. */
+					if ($apu == FALSE or $laskutettava_yhtio == FALSE)
+					{
+						$auttava_query = "SELECT *
+								  FROM yhtio
+								  WHERE yhtio='myyra'";
+						$auttava_result = pupe_query($auttava_query);
+						$laskutettava_yhtio = mysql_fetch_assoc($auttava_result);
+
+						$auttava_query = "SELECT *
+								  FROM yhtion_toimipaikat
+								  WHERE osoite like '$osoite'";  // Muokattu 13.12.2013, vaihdettu osoite = $osoite -> osoite like osoite (johtuu osoitteen tyypist‰)
+						$auttava_result = pupe_query($auttava_query);
+						$muutokset = mysql_fetch_assoc($auttava_result);
+						
+						/* Lis‰tty 12.2.2014, lis‰tty ehto jonka avulla koitetaan varmistua, ett‰ varmana saadaan Myyr‰n toimipaikan tiedot */
+						if ($muutokset == FALSE)
+						{
+							$haku_nimi = trim($lasrow['nimi']);
+							
+							$auttava_query = "SELECT *
+									  FROM yhtion_toimipaikat
+									  WHERE nimi = '$haku_nimi'";
+							$auttava_result = pupe_query($auttava_query);
+							$muutokset = mysql_fetch_assoc($auttava_result);
+						}
+						/* Lis‰ys p‰‰ttyy 12.2.2014 */
+						
+						/* Muokattu 12.2.2014, lis‰tty ehto jonka avulla k‰ytet‰‰n toimipaikan tietoja, mik‰li niit‰ lˆytyy
+						   Muutoin haetaan tiedot asiakas -taulusta */
+						if ($muutokset != FALSE and !empty($muutokset))
+						{
+							$laskutettava_yhtio['ovttunnus'] = substr($laskutettava_yhtio['ovttunnus'], 0, 12) . $muutokset['ovtlisa'];
+							$laskutettava_yhtio['nimi'] = $muutokset['nimi'];
+							$laskutettava_yhtio['osoite'] = $muutokset['osoite'];
+						}
+						else
+						{
+							/* Lis‰tty 10.3.2014, lis‰tty else haara jota k‰ytet‰‰n, mik‰li kyseess‰ on yritys jota ei olla luotu j‰rjestelm‰‰n.
+    						   Muokattu 11.3.2014, muokattu hakua j‰rkev‰mm‰ksi, jolloin lˆydet‰‰n oikeat yritykset joille halutaan lasku hyv‰ksynt‰‰n. */
+							
+							// Haetaan tiedot asiakas tiedoista
+							$auttava_query = "SELECT yhtio.yhtio AS maksava_yhtio, asiakas.*
+										FROM yhtio, asiakas
+										WHERE asiakas.laji != 'P'
+										AND asiakas.yhtio = '$lasrow[yhtio]'
+										AND yhtio.ytunnus = '$lasrow[ytunnus]'
+										AND yhtio.ytunnus = asiakas.ytunnus";
+							$auttava_result = pupe_query($auttava_query);
+							$muutokset = mysql_fetch_assoc($auttava_result);
+							
+							$laskutettava_yhtio['yhtio'] = $muutokset['maksava_yhtio'];
+							$laskutettava_yhtio['ovttunnus'] = $muutokset['ovttunnus'];
+							$laskutettava_yhtio['nimi'] = $muutokset['nimi'];
+							$laskutettava_yhtio['osoite'] = $muutokset['osoite'];
+							$laskutettava_yhtio['postino'] = $muutokset['postino'];
+							$laskutettava_yhtio['postitp'] = $muutokset['postitp'];
+							$laskutettava_yhtio['maa'] = $muutokset['maa'];
+							
+							/* Lis‰ys p‰‰ttyy 10.3.2014 */
+						}
+					}
+					else
+					{
+						/* Lis‰tty 11.3.2014, lis‰tty else haara jossa laitetaan tiedot kohdilleen, jos kyseess‰ on toisen yrityksen ytunnusta k‰ytt‰v‰ yritys */
+						$auttava_query = "SELECT *
+									FROM asiakas
+									WHERE laji != 'P'
+									AND yhtio = '$lasrow[yhtio]'
+									AND ytunnus = '$lasrow[ytunnus]'";
+									
+						$auttava_result = pupe_query($auttava_query);
+						$muutokset = mysql_fetch_assoc($auttava_result);
+							
+						$laskutettava_yhtio['yhtio'] = $apu['yhtio'];
+						$laskutettava_yhtio['ovttunnus'] = $muutokset['ovttunnus'];
+						$laskutettava_yhtio['nimi'] = $muutokset['nimi'];
+						$laskutettava_yhtio['osoite'] = $muutokset['osoite'];
+						$laskutettava_yhtio['postino'] = $muutokset['postino'];
+						$laskutettava_yhtio['postitp'] = $muutokset['postitp'];
+						$laskutettava_yhtio['maa'] = $muutokset['maa'];
+					}
+					/* Lis‰ys p‰‰ttyy 4.7.2013 */
+					
+					$auttava_query = "SELECT *
+								  FROM yhtio
+								  WHERE yhtio='$lasrow[yhtio]'";
+					$auttava_result = pupe_query($auttava_query);
+					$laskuttava_yhtio = mysql_fetch_assoc($auttava_result);
+					
+					$ytunnus = mysql_real_escape_string($laskuttava_yhtio['ytunnus']);
+					$yhtio = mysql_real_escape_string($laskutettava_yhtio['yhtio']);									
+					
+					$auttava_query = "SELECT oletus_hyvak1, oletus_hyvak2, oletus_hyvak3, oletus_hyvak4, oletus_hyvak5,
+													 oletus_vienti, oletus_hyvaksynnanmuutos, oletus_valkoodi, tunnus
+											FROM toimi
+											WHERE yhtio='$yhtio'
+											AND ytunnus='$ytunnus'";
+					$auttava_result = pupe_query($auttava_query);
+					$oletukset = mysql_fetch_assoc($auttava_result);
+					
+					/* T‰ss‰ laitetaan swift koodit kohdillee, saa lis‰t‰ ehtoja kun tiet‰‰ mit‰ laitetaan */
+					if(stripos($laskutettava_yhtio['pankkinimi1'],"aino") !== FALSE)
+					{
+						$laskutettava_yhtio['swift'] = "AINOFIHH";
+					}
+					elseif(stripos($laskutettava_yhtio['pankkinimi1'],"nordea") !== FALSE) 
+					{
+						$laskutettava_yhtio['swift'] = "NDEAFIHH";
+					}
+					else 
+					{
+						$laskutettava_yhtio['swift'] = "";
+					}
+					
+					if(stripos($laskuttava_yhtio['pankkinimi1'],"aino") !== FALSE)
+					{
+						$laskuttava_yhtio['swift'] = "AINOFIHH";
+					}
+					elseif(stripos($laskuttava_yhtio['pankkinimi1'],"nordea") !== FALSE) 
+					{
+						$laskuttava_yhtio['swift'] = "NDEAFIHH";
+					}
+					else 
+					{
+						$laskuttava_yhtio['swift'] = "";
+					}
+					
+					/* Lis‰tty 18.12.2013, listty ehto jolla katsotaan mik‰ laitetaan "kopio" laskun tilaksi ja alatilaksi */
+					if($lasrow['chn'] != "666" and $lasrow['chn'] != "667" and $lasrow['chn'] != "100")
+					{
+						$tila = 'H';
+						$alatila = '';
+					}
+					else
+					{
+						if (empty($tunnukset))
+						{
+							$tunnukset = $lasrow['tunnus'];
+						}
+						
+						$query = "SELECT tila, alatila
+								  FROM lasku
+								  WHERE
+								  tunnus in ($tunnukset)";
+						echo $query."<br><br>";
+						$result = mysql_query($query) or die (mysql_error());
+						
+						$apu = mysql_fetch_assoc($result);
+						
+						$tila = $apu['tila'];
+						$alatila = $apu['alatila'];
+					}
+					
+					/* Lis‰t‰‰n tietokantaan laskusta "kopio" jonka avulla lasku saadaan hyv‰ksynt‰‰n. Muokattu 18.12.2013, laitettu tila ja alatila kolumneihin muuttujat */
+					$insert_query = "INSERT INTO lasku (yhtio, yhtio_nimi, yhtio_osoite, yhtio_postino, yhtio_postitp, yhtio_maa, yhtio_ovttunnus, yhtio_kotipaikka, nimi, osoite, postino, postitp, maa, tilinumero, swift,
+														pankki1, pankki2, pankki3, pankki4, ultilno, valkoodi, tapvm, erpcm, summa, laatija, luontiaika, laskuttaja, laskutettu, hyvak1, hyvak2, hyvak3, hyvak4, hyvak5, hyvaksyja_nyt, hyvaksynnanmuutos,
+														viite, laskunro, ytunnus, tila, alatila, vienti, liitostunnus, vienti_kurssi)
+												VALUES ('".$laskutettava_yhtio['yhtio']."','".$laskutettava_yhtio['nimi']."','".$laskutettava_yhtio['osoite']."','".$laskutettava_yhtio['postino']."','".$laskutettava_yhtio['postitp']."','".$laskutettava_yhtio['maa']."','".$laskutettava_yhtio['ovttunnus']."',
+														'".$laskutettava_yhtio['kotipaikka']."','".$laskuttava_yhtio['nimi']."','".$laskuttava_yhtio['osoite']."','".$laskuttava_yhtio['postino']."','".$laskuttava_yhtio['postitp']."','".$laskuttava_yhtio['maa']."','".$laskuttava_yhtio['pankkitili1']."',
+														'".$laskuttava_yhtio['swift']."','".$laskuttava_yhtio['pankkitili1']."','".$laskuttava_yhtio['pankkitili2']."','".$laskuttava_yhtio['pankkitili3']."','".$laskuttava_yhtio['pankkitili4']."','".$laskuttava_yhtio['ultilno']."',
+														'".$lasrow['valkoodi']."','".$lasrow['tapvm']."','".$lasrow['erpcm']."','".$lasrow['summa']."','".$lasrow['laatija']."','".$lasrow['luontiaika']."','".$lasrow['laskuttaja']."','".$lasrow['laskutettu']."',
+														'".$oletukset['oletus_hyvak1']."',
+														'".$oletukset['oletus_hyvak2']."','".$oletukset['oletus_hyvak3']."','".$oletukset['oletus_hyvak4']."','".$oletukset['oletus_hyvak5']."','".$oletukset['oletus_hyvak1']."',
+														'".$oletukset['oletus_hyvaksynnanmuutos']."','".$lasrow['viite']."','".$lasrow['laskunro']."','".$laskuttava_yhtio['ytunnus']."','".$tila."','".$alatila."','".$oletukset['oletus_vienti']."','".$oletukset['tunnus']."','".$lasrow['vienti_kurssi']."')";					
+					$insert_result = pupe_query($insert_query);
+					
+					// 31.5.2013 lis‰ykset loppuu
+					
 					if ($silent == "") {
 						$tulos_ulos .= "<br><br>\n\n";
 					}
@@ -2190,8 +2399,9 @@
 					$verkkolasheader  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
 					$verkkolasheader .= "MIME-Version: 1.0\n" ;
 					$verkkolasheader .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
-
-					$verkkolasmail = "--$bound\n";
+					
+					/* Muokattu 17.2.2014, kommentoitu vanha mailin sis‰ltˆ ja tehty uus */
+					/*$verkkolasmail = "--$bound\n";
 					$verkkolasmail .= "Content-type: text/plain; charset=iso-8859-1\n";
 					$verkkolasmail .= "Content-Transfer-Encoding: quoted-printable\n\n";
 					$verkkolasmail .= t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
@@ -2211,9 +2421,41 @@
 					$verkkolasmail .= chunk_split(base64_encode(file_get_contents($ftpfile)));
 					$verkkolasmail .= "\n" ;
 					$verkkolasmail .= "--$bound--\n";
+					
+					$verkkolasmail = t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
+					$verkkolasmail .= t("Aineiston laskut").":\n";
 
-					$silari = mail($yhtiorow["alert_email"], mb_encode_mimeheader(t("Pupevoice-aineiston siirto Itellaan"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
+					foreach ($verkkolaskuputkeen_pupevoice as $lasnoputk => $nimiputk) {
+						$verkkolasmail .= "$lasnoputk - $nimiputk\n";
+					}
 
+					$verkkolasmail .= "\n\n".t("FTP-komento").":\n";
+					$verkkolasmail .= "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile\n\n";
+					$verkkolasmail .= t("Aineisto liitteen‰")."!\n\n\n\n";*/
+					
+					$verkkolasmail = t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
+					$verkkolasmail .= t("Aineiston laskut").":\n";
+
+					foreach ($verkkolaskuputkeen_pupevoice as $lasnoputk => $nimiputk) {
+						$verkkolasmail .= "$lasnoputk - $nimiputk\n";
+					}
+
+					$verkkolasmail .= "\n\n".t("FTP-komento").":\n";
+					$verkkolasmail .= "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile\n\n";
+					$verkkolasmail .= t("Aineisto liitteen‰")."!\n\n\n\n";
+					
+					/* Lis‰tty 17.2.2014, lis‰tty taulukot liitteille ja niiden nimille */
+					$liitteet = array();
+					$liite_nimet = array();
+					
+					array_push($liitteet, $ftpfile);
+					array_push($liite_nimet, basename($ftpfile));
+					
+					/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+					//$silari = mail($yhtiorow["alert_email"], mb_encode_mimeheader(t("Pupevoice-aineiston siirto Itellaan"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
+					include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+					$silari = sendMail($yhtiorow['postittaja_email'], $yhtiorow["alert_email"], t("Pupevoice-aineiston siirto Itellaan"), $verkkolasmail, false, $liitteet, $liite_nimet);
+					
 					require("inc/ftp-send.inc");
 
 					if ($silent == "") {
@@ -2382,8 +2624,9 @@
 					$verkkolasheader  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
 					$verkkolasheader .= "MIME-Version: 1.0\n" ;
 					$verkkolasheader .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
-
-					$verkkolasmail = "--$bound\n";
+					
+					/* Muokattu 17.2.2014, kommentoitu vanha mailin sis‰ltˆ ja tehty uus */
+					/*$verkkolasmail = "--$bound\n";
 					$verkkolasmail .= "Content-type: text/plain; charset=iso-8859-1\n";
 					$verkkolasmail .= "Content-Transfer-Encoding: quoted-printable\n\n";
 					$verkkolasmail .= t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
@@ -2402,10 +2645,34 @@
 					$verkkolasmail .= "Content-Disposition: attachment; filename=\"".basename($ftpfile)."\"\n\n";
 					$verkkolasmail .= chunk_split(base64_encode(file_get_contents($ftpfile)));
 					$verkkolasmail .= "\n" ;
-					$verkkolasmail .= "--$bound--\n";
+					$verkkolasmail .= "--$bound--\n";*/
+					
+					$verkkolasmail = t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
+					$verkkolasmail .= t("Aineiston laskut").":\n";
 
-					$silari = mail($yhtiorow["alert_email"], mb_encode_mimeheader(t("iPost Finvoice-aineiston siirto Itellaan"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
+					foreach ($verkkolaskuputkeen_finvoice as $lasnoputk => $nimiputk) {
+						$verkkolasmail .= "$lasnoputk - $nimiputk\n";
+					}
 
+					$verkkolasmail .= "\n\n".t("FTP-komento").":\n";
+					$verkkolasmail .= "mv $ftpfile ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\nncftpput -u $ftpuser -p $ftppass -T T $ftphost $ftppath ".str_replace("TRANSFER_", "DELIVERED_", $ftpfile)."\n\n";
+					$verkkolasmail .= t("Aineisto liitteen‰")."!\n\n\n\n";
+					
+					unset($liitteet);
+					unset($liite_nimet);
+					
+					/* Lis‰tty 17.2.2014, lis‰tty taulukot liitteille ja niiden nimille */
+					$liitteet = array();
+					$liite_nimet = array();
+					
+					array_push($liitteet, $ftpfile);
+					array_push($liite_nimet, basename($ftpfile));
+
+					/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+					//$silari = mail($yhtiorow["alert_email"], mb_encode_mimeheader(t("iPost Finvoice-aineiston siirto Itellaan"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
+					include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+					$silari = sendMail($yhtiorow['postittaja_email'], $yhtiorow["alert_email"],t("iPost Finvoice-aineiston siirto Itellaan"), $verkkolasmail, false, $liitteet, $liite_nimet);
+					
 					require("inc/ftp-send.inc");
 
 					if ($silent == "" or $silent == "VIENTI") {
@@ -2441,8 +2708,9 @@
 					$verkkolasheader  = "From: ".mb_encode_mimeheader($yhtiorow["nimi"], "ISO-8859-1", "Q")." <$yhtiorow[postittaja_email]>\n";
 					$verkkolasheader .= "MIME-Version: 1.0\n" ;
 					$verkkolasheader .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
-
-					$verkkolasmail = "--$bound\n";
+					
+					/* Muokattu 17.2.2014, kommentoitu vanha mailin sis‰ltˆ ja tehty uus */
+					/*$verkkolasmail = "--$bound\n";
 					$verkkolasmail .= "Content-type: text/plain; charset=iso-8859-1\n";
 					$verkkolasmail .= "Content-Transfer-Encoding: quoted-printable\n\n";
 					$verkkolasmail .= t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
@@ -2461,10 +2729,34 @@
 					$verkkolasmail .= "Content-Disposition: attachment; filename=\"".basename($ftpfile)."\"\n\n";
 					$verkkolasmail .= chunk_split(base64_encode(file_get_contents($ftpfile)));
 					$verkkolasmail .= "\n" ;
-					$verkkolasmail .= "--$bound--\n";
+					$verkkolasmail .= "--$bound--\n";*/
+					
+					$verkkolasmail = t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
+					$verkkolasmail .= t("Aineiston laskut").":\n";
 
-					$silari = mail($yhtiorow["alert_email"], mb_encode_mimeheader(t("EDI-inhouse-aineiston siirto Itellaan"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
+					foreach ($verkkolaskuputkeen_elmaedi as $lasnoputk => $nimiputk) {
+						$verkkolasmail .= "$lasnoputk - $nimiputk\n";
+					}
 
+					$verkkolasmail .= "\n\n".t("FTP-komento").":\n";
+					$verkkolasmail .= "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile\n\n";
+					$verkkolasmail .= t("Aineisto liitteen‰")."!\n\n\n\n";
+					
+					unset($liitteet);
+					unset($liite_nimet);
+					
+					/* Lis‰tty 17.2.2014, lis‰tty taulukot liitteille ja niiden nimille */
+					$liitteet = array();
+					$liite_nimet = array();
+					
+					array_push($liitteet, $ftpfile);
+					array_push($liite_nimet, basename($ftpfile));
+					
+					/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+					//$silari = mail($yhtiorow["alert_email"], mb_encode_mimeheader(t("EDI-inhouse-aineiston siirto Itellaan"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
+					include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+					$silari = sendMail($yhtiorow['postittaja_email'], $yhtiorow["alert_email"], t("EDI-inhouse-aineiston siirto Itellaan"), $verkkolasmail, false, $liitteet, $liite_nimet);
+					
 					require("inc/ftp-send.inc");
 
 					if ($silent == "") {
@@ -2491,7 +2783,8 @@
 					$verkkolasheader .= "MIME-Version: 1.0\n" ;
 					$verkkolasheader .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
-					$verkkolasmail = "--$bound\n";
+					/* Muokattu 17.2.2014, kommentoitu vanha mailin sis‰ltˆ ja tehty uus */
+					/*$verkkolasmail = "--$bound\n";
 					$verkkolasmail .= "Content-type: text/plain; charset=iso-8859-1\n";
 					$verkkolasmail .= "Content-Transfer-Encoding: quoted-printable\n\n";
 					$verkkolasmail .= t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
@@ -2510,9 +2803,33 @@
 					$verkkolasmail .= "Content-Disposition: attachment; filename=\"".basename($ftpfile)."\"\n\n";
 					$verkkolasmail .= chunk_split(base64_encode(file_get_contents($ftpfile)));
 					$verkkolasmail .= "\n" ;
-					$verkkolasmail .= "--$bound--\n";
+					$verkkolasmail .= "--$bound--\n";*/
+					
+					$verkkolasmail = t("Pvm").": ".date("Y-m-d H:i:s")."\n\n";
+					$verkkolasmail .= t("Aineiston laskut").":\n";
 
-					$silari = mail($yhtiorow["alert_email"], mb_encode_mimeheader(t("Pupesoft-Finvoice-aineiston siirto eteenp‰in"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
+					foreach ($verkkolaskuputkeen_suora as $lasnoputk => $nimiputk) {
+						$verkkolasmail .= "$lasnoputk - $nimiputk\n";
+					}
+
+					$verkkolasmail .= "\n\n".t("FTP-komento").":\n";
+					$verkkolasmail .= "ncftpput -u $ftpuser -p $ftppass $ftphost $ftppath $ftpfile\n\n";
+					$verkkolasmail .= t("Aineisto liitteen‰")."!\n\n\n\n";
+					
+					unset($liitteet);
+					unset($liite_nimet);
+					
+					/* Lis‰tty 17.2.2014, lis‰tty taulukot liitteille ja niiden nimille */
+					$liitteet = array();
+					$liite_nimet = array();
+					
+					array_push($liitteet, $ftpfile);
+					array_push($liite_nimet, basename($ftpfile));
+
+					/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+					//$silari = mail($yhtiorow["alert_email"], mb_encode_mimeheader(t("Pupesoft-Finvoice-aineiston siirto eteenp‰in"), "ISO-8859-1", "Q"), $verkkolasmail, $verkkolasheader, "-f $yhtiorow[postittaja_email]");
+					include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+					$silari = sendMail($yhtiorow['postittaja_email'], $yhtiorow["alert_email"], t("Pupesoft-Finvoice-aineiston siirto eteenp‰in"), $verkkolasmail, false, $liitteet, $liite_nimet);
 
 					require("inc/ftp-send.inc");
 
@@ -2611,7 +2928,8 @@
 				$header .= "MIME-Version: 1.0\n" ;
 				$header .= "Content-Type: multipart/mixed; boundary=\"$bound\"\n" ;
 
-				$content = "--$bound\n";
+				/* Muokattu 17.2.2014, kommentoitu vanha muuttuja pois ja tehty uus */
+				/*$content = "--$bound\n";
 
 				$content .= "Content-Type: text/html;charset=iso-8859-1\n" ;
 				$content .= "Content-Transfer-Encoding: quoted-printable\n";
@@ -2620,9 +2938,17 @@
 				$content .= $tulos_ulos;
 				$content .= "</body></html>\n";
 				$content .= "\n";
-				$content .= "--$bound--\n";
+				$content .= "--$bound--\n";*/
+				
+				$content = "<html><body>\n";
+				$content .= $tulos_ulos;
+				$content .= "</body></html>\n";
+				$content .= "\n";
 
-				mail($yhtiorow["alert_email"],  mb_encode_mimeheader("$yhtiorow[nimi] - Laskutusajo", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+				/* Muokattu 14.2.2014, kommentoitu vanha mail() -funktio pois ja lis‰tty paranneltu sendMail */
+				//mail($yhtiorow["alert_email"],  mb_encode_mimeheader("$yhtiorow[nimi] - Laskutusajo", "ISO-8859-1", "Q"), $content, $header, "-f $yhtiorow[postittaja_email]");
+				include_once '/var/www/html/lib/functions/sendMail.php';  // Lis‰t‰‰n sendMail funktio
+				$posti = sendMail($yhtiorow['postittaja_email'], $yhtiorow["alert_email"],  "$yhtiorow[nimi] - Laskutusajo", $content);
 			}
 		}
 

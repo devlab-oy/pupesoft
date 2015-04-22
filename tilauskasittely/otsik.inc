@@ -3618,7 +3618,7 @@ if (isset($jatka)) {
   // ollaan annettu toimitusviikko
   $nyviikko = date("W");
   $nypaiva  = date("N");
-echo "3621 toimvko $toimvko <br><br>";
+
   if ($toimvko != '') {
 
     $nyvuosi  = date("Y");

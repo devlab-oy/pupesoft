@@ -22,6 +22,7 @@ if (strpos($_SERVER['SCRIPT_NAME'], "yllapito.php")  !== FALSE) {
 $psx_ohjelmat = array(
   "valuu" => "{$palvelin2}pupenext/currencies",
   "tili" => "{$palvelin2}pupenext/accounts",
+  "kustannuspaikka" => "{$palvelin2}pupenext/qualifiers",
   "taso" => "{$palvelin2}pupenext/sum_levels",
   "kirjoittimet" => "{$palvelin2}pupenext/printers"
 );
@@ -1400,7 +1401,7 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
     echo "</form>";
   }
 
-  if ($toim == "asiakas" or $toim == "maksuehto" or $toim == "toimi" or $toim == "tuote" or $toim == "yriti" or $toim == "kustannuspaikka" or $toim == "lahdot" or $toim == "toimitustavan_lahdot") {
+  if ($toim == "asiakas" or $toim == "maksuehto" or $toim == "toimi" or $toim == "tuote" or $toim == "yriti" or $toim == "lahdot" or $toim == "toimitustavan_lahdot") {
     echo "  <form action = 'yllapito.php?ojarj=$ojarj$ulisa' method = 'post'>
         <input type = 'hidden' name = 'toim' value = '$aputoim'>
         <input type = 'hidden' name = 'lopetus' value = '$lopetus'>
@@ -1602,7 +1603,6 @@ if ($tunnus == 0 and $uusi == 0 and $errori == '') {
       ($toim == "toimi" and $trow["HIDDEN_tyyppi"] == "P") or
       (($toim == "yriti" or $toim == 'maksuehto') and $trow["HIDDEN_kaytossa"] == "E") or
       ($toim == "tuote" and $trow["HIDDEN_status"] == "P") or
-      ($toim == "kustannuspaikka" and $trow["HIDDEN_kaytossa"] == "E") or
       ($toim == "lahdot" and $trow["HIDDEN_aktiivi"] == "E") or
       ($toim == "toimitustavan_lahdot" and $trow["HIDDEN_aktiivi"] == "E")) {
 

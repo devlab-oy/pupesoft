@@ -655,7 +655,7 @@ if ($tila == "" and !isset($jatka)) {
       if ($naytetaanko_tarjouksella != 'on' and ($toim == 'TARJOUS' or $toim == 'EXTTARJOUS')) {
         $toimpvm = '0000-00-00';
       }
-
+echo "658 kerayspvm $kerpvm toimaika $toimpvm <br><br>";
       $query = "UPDATE lasku
                 SET liitostunnus   = '$assrow[tunnus]',
                 ytunnus             = '$assrow[ytunnus]',
@@ -773,7 +773,7 @@ if ($tila == "" and !isset($jatka)) {
     //  Ylikirjoitetaan oletusarvot otsikon tiedoilla!
     if ($otsikolta == "YES" and $from != "vaihdaasiakas") {
       foreach ($_POST as $key => $val) {
-
+echo "776 kerayspvm {$_POST["kervv"]}-{$_POST["kerkk"]}-{$_POST["kerpp"]} toimaika {$_POST["toimvv"]}-{$_POST["toimkk"]}-{$_POST["toimpp"]} <br><br>";
         if ($key == "toimpp")         $srow["toimaika"] = $_POST["toimvv"]."-".$_POST["toimkk"]."-".$_POST["toimpp"];
         elseif ($key == "kerpp")      $srow["kerayspvm"] = $_POST["kervv"]."-".$_POST["kerkk"]."-".$_POST["kerpp"];
         elseif ($key == "tkohde")     $srow["asiakkaan_kohde"] = $val;
@@ -1743,7 +1743,7 @@ if ($tila == "" and !isset($jatka)) {
       $kerpp = substr($kerpp, 0, 2);
       $toimpp = substr($toimpp, 0, 2);
     }
-
+echo "1746 toimVVKKPP $toimvv-$toimkk-$toimpp kerVVKKPP $kervv-$kerkk-$kerpp <br><br>";
     //voidaan tarvita jos asiakas on vaihdettu
     if ($toimvv == '') {
       $toimpp = date("j");
@@ -1764,7 +1764,7 @@ if ($tila == "" and !isset($jatka)) {
     else {
       $vasen_sarake[$vasen] .= "<input type='text' name='kerpp' value='$kerpp' size='3'><input type='text' name='kerkk' value='$kerkk' size='3'><input type='text' name='kervv' value='$kervv' size='6'>
           <input type='hidden' name='vkerayspvm' value='".substr($srow["kerayspvm"], 0, 10)."'>";
-
+echo "1767 srowKeraysvko {$srow["keraysvko"]} <br><br>";
       if ($srow["keraysvko"] != '') {
         $keraysvko = date("W", strtotime($srow["kerayspvm"]));
       }
@@ -1860,7 +1860,7 @@ if ($tila == "" and !isset($jatka)) {
     else {
       $vasen_sarake[$vasen] .= "<input type='text' name='toimpp' value='$toimpp' size='3'><input type='text' name='toimkk' value='$toimkk' size='3'><input type='text' name='toimvv' value='$toimvv' size='6'>
         <input type='hidden' name='vtoimaika' value='".$srow["toimaika"]."'>";
-
+echo "1863 srowToimvko {$srow["toimvko"]} <br><br>";
       if ($srow["toimvko"] != '') {
         $toimvko = date("W", strtotime($srow["toimaika"]));
       }
@@ -3618,7 +3618,7 @@ if (isset($jatka)) {
   // ollaan annettu toimitusviikko
   $nyviikko = date("W");
   $nypaiva  = date("N");
-
+echo "3621 toimvko $toimvko <br><br>";
   if ($toimvko != '') {
 
     $nyvuosi  = date("Y");
@@ -3664,6 +3664,17 @@ if (isset($jatka)) {
     $keraysvko    = "";
     $keraysvkopva  = "";
   }
+  
+  if (($toim != 'TARJOUS' and $toim != 'EXTTARJOUS')) {
+    //Tarjous keisissä halutaan ohittaa tämä checki koska toimaika = 0000-00-00 merkkaa, että tarjousta ei haluta pdf:llä näkyviin
+    //Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
+    if (($kerpp > $toimpp and $kerkk >= $toimkk and $kervv >= $toimvv) or ($kerpp < $toimpp and $kerkk > $toimkk and $kervv >= $toimvv) or ($kervv > $toimvv)) {
+      $toimpp = $kerpp;
+      $toimkk = $kerkk;
+      $toimvv = $kervv;
+      $toimvko = $keraysvko;
+    }
+  }
 
   if ($kukarow["kesken"] == 0) {
     $query = "INSERT into ";
@@ -3704,7 +3715,7 @@ if (isset($jatka)) {
               and otunnus  = '$kukarow[kesken]'
               and toimaika = '$vtoimaika'";
     $result = pupe_query($query);
-
+echo "3707 kerpvm {$kervv}-{$kerkk}-{$kerpp} toimpvm {$toimvv}-{$toimkk}-{$toimpp} <br><br>";
     $query = "UPDATE ";
     $postquery = " WHERE tunnus = '$kukarow[kesken]'";
 
@@ -3960,17 +3971,17 @@ if (isset($jatka)) {
   if ($apuval == $valkoodi) {
     $kurssi = $apukurssi;
   }
-
-  if (($toim != 'TARJOUS' and $toim != 'EXTTARJOUS')) {
+echo "3963 and the winner is: ((kerpp $kerpp > toimpp $toimpp and kerkk $kerkk >= toimkk $toimkk and kervv $kervv >= toimvv $toimvv) or (kerpp $kerpp < toimpp $toimpp and kerkk $kerkk > toimkk $toimkk and kervv $kervv >= toimvv $toimvv) or (kervv $kervv > toimvv $toimvv)) <br><br>";
+  #if (($toim != 'TARJOUS' and $toim != 'EXTTARJOUS')) {
     //Tarjous keisissä halutaan ohittaa tämä checki koska toimaika = 0000-00-00 merkkaa, että tarjousta ei haluta pdf:llä näkyviin
     //Päivämäärävertailu (toivottukeräyspvm ei saa olla suurempi kuin toivottutoimituspvm)
-    if (($kerpp > $toimpp and $kerkk >= $toimkk and $kervv >= $toimvv) or ($kerpp < $toimpp and $kerkk > $toimkk and $kervv >= $toimvv) or ($kervv > $toimvv)) {
-      $toimpp = $kerpp;
-      $toimkk = $kerkk;
-      $toimvv = $kervv;
-      $toimvko = $keraysvko;
-    }
-  }
+    #if (($kerpp > $toimpp and $kerkk >= $toimkk and $kervv >= $toimvv) or ($kerpp < $toimpp and $kerkk > $toimkk and $kervv >= $toimvv) or ($kervv > $toimvv)) {
+      #$toimpp = $kerpp;
+      #$toimkk = $kerkk;
+      #$toimvv = $kervv;
+     # $toimvko = $keraysvko;
+    #}
+  #}
 
   if (($voimaika_vv == "" or !is_numeric($voimaika_vv)) or ($voimaika_kk == "" or !is_numeric($voimaika_kk)) or ($voimaika_pp == "" or !is_numeric($voimaika_pp))) {
     $voimaika_vv = "0000";
@@ -4280,7 +4291,7 @@ if (isset($jatka)) {
               break;
             }
           }
-
+echo "4283 kerVVKKPP $kervv-$kerkk-$kerpp toimVVKKPP $toimvv-$toimkk-$toimpp <br><br>";
           $values .= ")";
 
           //   Ja insertoidaan rivit kantaan

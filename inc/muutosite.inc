@@ -294,7 +294,7 @@ if ($kukarow['taso'] != 1) {
 
   //T‰‰ll‰ p‰ivitet‰‰n muun tositteen pvm
   if ($tila == 'P') {
-    
+
     // P‰ivitet‰‰n myyntilaskulle "popvm"-jotta me saadaan osittain k‰teisell‰ maksetut laskut
     // n‰kym‰‰n k‰teismyynnit-raportissa oikealla p‰iv‰ll‰ vaikka mapvm on nolla
     // T‰m‰ siis vain jos myyntlaskun popvm oli ennest‰‰n setattu

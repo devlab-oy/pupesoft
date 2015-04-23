@@ -2462,7 +2462,7 @@ if (!function_exists('alvierittely')) {
                 AND asiakkaan_kuitti != ''
                 AND tilausnumero != 0";
       $result = pupe_query($query);
-      
+
       if (mysql_affected_rows() > 0) {
         $pdf_lasku->draw_text(20, $kala, t("Maksupäätetapahtumat"), $thispage, $norm);
         $kala -= 10;

@@ -175,7 +175,7 @@ if (!function_exists("toimitustapatarkista")) {
 
       if ($tt_count > 0) {
         $virhe[$i] = t("Et voi asettaa toimitustavalle VAK-kieltoa, sillä muut toimitustavat " .
-                       "käyttävät tätä toimitustapaa vaihtoehtoisena VAK-toimitustapana");
+          "käyttävät tätä toimitustapaa vaihtoehtoisena VAK-toimitustapana");
       }
     }
 

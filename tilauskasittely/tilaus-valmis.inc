@@ -1151,12 +1151,13 @@ else {
        * Tulostetaan kassakuitti
        */
 
+
       require_once "tilauskasittely/tulosta_asiakkaan_kuitti.inc";
 
       $kuitin_parametrit = array("kateinen" => $kateista_annettu);
 
       tulosta_asiakkaan_kuitti($laskurow["laskunro"], $kukarow["kuittitulostin"],
-                               $kuitin_parametrit);
+        $kuitin_parametrit);
 
       unset($valittu_tulostin);
     }

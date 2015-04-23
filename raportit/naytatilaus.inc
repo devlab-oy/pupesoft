@@ -361,10 +361,10 @@ if ($laskurow["tila"] != "O" and $laskurow["tila"] != "K") {
   }
 
   echo "<tr><th colspan='{$toimitus_colspan}'>" . t("Toimitustapa") . " / " . t("Rahtikirjanro") .
-       "</th><th colspan='2'>" . t("Toimitusehto") . "</th>{$kassalipas_header}</tr>";
+    "</th><th colspan='2'>" . t("Toimitusehto") . "</th>{$kassalipas_header}</tr>";
   echo "<tr><td colspan='{$toimitus_colspan}'>" .
-       t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV") .
-       " / $linkurl</td><td colspan='2'>$laskurow[toimitusehto]</td>{$kassalipas_data}</tr>";
+    t_tunnus_avainsanat($laskurow['toimitustapa'], "selite", "TOIMTAPAKV") .
+    " / $linkurl</td><td colspan='2'>$laskurow[toimitusehto]</td>{$kassalipas_data}</tr>";
 }
 
 if (($laskurow["tila"] == "L" or $laskurow["tila"] == "N") and $kukarow["extranet"] == "") {

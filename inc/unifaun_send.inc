@@ -362,9 +362,9 @@ class Unifaun {
       if ((is_numeric($rahtisopimusnro) and (int) $rahtisopimusnro > 0) or (!is_numeric($rahtisopimusnro) and (string) $rahtisopimusnro != "")) {
 
         if (($this->toitarow['virallinen_selite'] == "IT09"
-          or $this->toitarow['virallinen_selite'] == "IT14"
-          or $this->toitarow['virallinen_selite'] == "IT16"
-          or $this->toitarow['virallinen_selite'] == "IT21") and strlen($rahtisopimusnro) != 6) {
+            or $this->toitarow['virallinen_selite'] == "IT14"
+            or $this->toitarow['virallinen_selite'] == "IT16"
+            or $this->toitarow['virallinen_selite'] == "IT21") and strlen($rahtisopimusnro) != 6) {
           $rahtisopimusnro = 999999;
         }
 
@@ -739,11 +739,11 @@ class Unifaun {
 
     // perille toimitettavissa Postin toimitustavoissa käytetään MPS:sää
     if (($this->rakir_row["jv"] == '' or $this->mehto['jv'] == '') and in_array($this->toitarow['virallinen_selite'], $posti_rahdinkuljettaja)) {
-          $uni_addon = $uni_service->addChild('addon');
-          $uni_addon->addAttribute('adnid', 'cons');
+      $uni_addon = $uni_service->addChild('addon');
+      $uni_addon->addAttribute('adnid', 'cons');
 
-          $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["ytunnus"])); // MPS-lähetyksen kokoava tekijä
-          $uni_add_val->addAttribute('n', "reference");
+      $uni_add_val = $uni_addon->addChild('val', utf8_encode($this->postirow["ytunnus"])); // MPS-lähetyksen kokoava tekijä
+      $uni_add_val->addAttribute('n', "reference");
     }
 
     if ($this->toitarow['virallinen_selite'] == "P19" and $this->postirow["toim_puh"] != "") {
@@ -755,9 +755,9 @@ class Unifaun {
       $uni_add_val->addAttribute('n', "misctype");
     }
     elseif (($this->toitarow['virallinen_selite'] == "IT09"
-      or $this->toitarow['virallinen_selite'] == "IT14"
-      or $this->toitarow['virallinen_selite'] == "IT16"
-      or $this->toitarow['virallinen_selite'] == "IT21")
+        or $this->toitarow['virallinen_selite'] == "IT14"
+        or $this->toitarow['virallinen_selite'] == "IT16"
+        or $this->toitarow['virallinen_selite'] == "IT21")
       and $this->postirow["toim_puh"] != "") {
       $uni_addon = $uni_service->addChild('addon'); // Corresponds to add-on service. See SUP-112-Services-en.xls for valid add-on services.
       $uni_addon->addAttribute('adnid', "NOT");

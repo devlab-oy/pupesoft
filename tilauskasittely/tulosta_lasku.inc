@@ -2456,11 +2456,11 @@ if (!function_exists('alvierittely')) {
                 *
                 FROM maksupaatetapahtumat
                 WHERE yhtio ='{$yhtiorow['yhtio']}'
-                AND tilausnumero IN ($tilausnumerot)
-                AND maksutapa != ''
-                AND tila != ''
+                AND tilausnumero      IN ($tilausnumerot)
+                AND maksutapa        != ''
+                AND tila             != ''
                 AND asiakkaan_kuitti != ''
-                AND tilausnumero != 0";
+                AND tilausnumero     != 0";
       $result = pupe_query($query);
 
       if (mysql_affected_rows() > 0) {

@@ -33,7 +33,7 @@ if ($tee == "PAIVITA_KASSALIPAS" and ($kukarow["dynaaminen_kassamyynti"] != "" o
   $paivita_kassalipas_query = "UPDATE lasku
                                SET kassalipas = '{$kertakassa}'
                                WHERE yhtio = '{$kukarow["yhtio"]}'
-                               AND tunnus = '{$kukarow["kesken"]}'";
+                               AND tunnus  = '{$kukarow["kesken"]}'";
 
   pupe_query($paivita_kassalipas_query);
 

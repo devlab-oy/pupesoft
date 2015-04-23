@@ -73,9 +73,9 @@ foreach($suoritukset as $suoritus) {
           // Haetaan viimeisimmän onnistuneen maksusuorituksen kuitti
           $query = "SELECT asiakkaan_kuitti
                     FROM maksupaatetapahtumat
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tilausnumero = '{$tilausnumero}'
-                    AND tila = 'K'
+                    WHERE yhtio           = '{$kukarow['yhtio']}'
+                    AND tilausnumero      = '{$tilausnumero}'
+                    AND tila              = 'K'
                     AND asiakkaan_kuitti != ''
                     ORDER BY luontiaika desc
                     LIMIT 1";
@@ -101,9 +101,9 @@ foreach($suoritukset as $suoritus) {
         elseif ($peruutus == "X") {
           $query = "SELECT *
                     FROM maksupaatetapahtumat
-                    WHERE yhtio = '{$kukarow['yhtio']}'
-                    AND tilausnumero = '{$tilausnumero}'
-                    AND tila = 'K'
+                    WHERE yhtio           = '{$kukarow['yhtio']}'
+                    AND tilausnumero      = '{$tilausnumero}'
+                    AND tila              = 'K'
                     AND asiakkaan_kuitti != ''
                     ORDER BY luontiaika desc
                     LIMIT 1";
@@ -217,15 +217,15 @@ if ($status == 'K' or $status == 'H') {
   }
 
   $query = "INSERT INTO maksupaatetapahtumat SET
-            yhtio = '{$kukarow['yhtio']}',
+            yhtio            = '{$kukarow['yhtio']}',
             $kuittilisa
-            maksutapa = '{$pankkivailuotto}',
-            luontiaika  = now(),
-            muutospvm   = now(),
-            laatija = 'Lumo',
-            valkoodi = '{$laskurow['valkoodi']}',
-            tila = '{$status}',
-            tilausnumero = '{$tilausnumero}',
+            maksutapa        = '{$pankkivailuotto}',
+            luontiaika       = now(),
+            muutospvm        = now(),
+            laatija          = 'Lumo',
+            valkoodi         = '{$laskurow['valkoodi']}',
+            tila             = '{$status}',
+            tilausnumero     = '{$tilausnumero}',
             summa_valuutassa = $korttimaksu
             ";
   $result = pupe_query($query);

@@ -591,9 +591,9 @@ if (mysql_field_name($result, $i) == "vaihtoehtoinen_vak_toimitustapa") {
 
   $query = "SELECT DISTINCT selite
             FROM toimitustapa
-            WHERE yhtio = '{$kukarow['yhtio']}'
+            WHERE yhtio    = '{$kukarow['yhtio']}'
             AND vak_kielto = ''
-            AND nouto = ''";
+            AND nouto      = ''";
   $toimitustapa_result = pupe_query($query);
 
   while ($row = mysql_fetch_assoc($toimitustapa_result)) {

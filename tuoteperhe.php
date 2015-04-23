@@ -1489,16 +1489,14 @@ require "inc/footer.inc";
 function hae_tuoteperhe($tuoteno) {
   global $kukarow;
 
-  $query = "SELECT tuoteperhe.tuoteno AS tuoteno,
+  $query = "SELECT tuote.tuoteno,
             tuote.nimitys,
             lapsi.tuoteno AS lapsi_tuoteno
-            FROM tuoteperhe
-            LEFT JOIN tuoteperhe AS lapsi ON (lapsi.yhtio = tuoteperhe.yhtio
-              AND lapsi.isatuoteno = tuoteperhe.tuoteno)
-            INNER JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio
-              AND tuote.tuoteno = tuoteperhe.tuoteno)
-            WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
-            AND tuoteperhe.tuoteno = '{$tuoteno}';";
+            FROM tuote
+            LEFT JOIN tuoteperhe AS lapsi ON (lapsi.yhtio = tuote.yhtio
+              AND lapsi.isatuoteno = tuote.tuoteno)
+            WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
+            AND tuote.tuoteno = '{$tuoteno}'";
   $result = pupe_query($query);
 
   $tuoteperhe = array();

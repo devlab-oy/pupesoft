@@ -1467,3 +1467,58 @@ elseif ($tee == "") {
 }
 
 require "inc/footer.inc";
+
+/**
+ * Hakee tuoteperheen kaikkine lapsineen rekursiivisesti
+ *
+ * @param int|string $tuoteno Isätuotteen tuoteno
+ *
+ * @return array Tuoteperhe lapsineen. Rakenne on seuraavanlainen:
+ *   array(
+ *     100 => array(
+ *       "lapset" => array(
+ *         101 => array(
+ *           "lapset => array(etc),
+ *           "nimitys" => "Kissa"
+ *         )
+ *       ),
+ *       "nimitys" => "Kala"
+ *     )
+ *   );
+ */
+function hae_tuoteperhe($tuoteno) {
+  global $kukarow;
+
+  $query = "SELECT tuoteperhe.tuoteno AS tuoteno,
+            tuote.nimitys,
+            lapsi.tuoteno AS lapsi_tuoteno
+            FROM tuoteperhe
+            LEFT JOIN tuoteperhe AS lapsi ON (lapsi.yhtio = tuoteperhe.yhtio
+              AND lapsi.isatuoteno = tuoteperhe.tuoteno)
+            INNER JOIN tuote ON (tuote.yhtio = tuoteperhe.yhtio
+              AND tuote.tuoteno = tuoteperhe.tuoteno)
+            WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
+            AND tuoteperhe.tuoteno = '{$tuoteno}';";
+  $result = pupe_query($query);
+
+  $tuoteperhe = array();
+
+  while ($row = mysql_fetch_assoc($result)) {
+    $tuoteno = $row["tuoteno"];
+    $nimitys = $row["nimitys"];
+    $lapsi = hae_tuoteperhe($row["lapsi_tuoteno"]);
+
+    if (empty($lapsi)) {
+      $tuoteperhe[$tuoteno]["lapset"] = array();
+    }
+    else {
+      $tuoteperhe[$tuoteno]["lapset"][$row["lapsi_tuoteno"]] = reset($lapsi);
+    }
+  }
+
+  if (!empty($nimitys)) {
+    $tuoteperhe[$tuoteno]["nimitys"] = $nimitys;
+  }
+
+  return $tuoteperhe;
+}

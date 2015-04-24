@@ -946,6 +946,9 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         echo "<th>".t("Kehahin")."</th>";
         echo "<th>".t("Kehahin*Kerroin")."</th>";
         echo "<th>".t("Pituus kerroin")."</th>";
+        echo "<th>".t("Piirustusnumero")."</th>";
+        echo "<th>".t("Osanumero")."</th>";
+        echo "<th>".t("Positiokenttä")."</th>";
 
         $worksheet->writeString($excelrivi, $excelsarake++, t("Raaka-aineet"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Nimitys"));
@@ -954,6 +957,9 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Kehahin*Kerroin"));
         $worksheet->writeString($excelrivi, $excelsarake++, t("Pituus kerroin"));
+        $worksheet->writeString($excelrivi, $excelsarake++, t("Piirustusnumero"));
+        $worksheet->writeString($excelrivi, $excelsarake++, t("Osanumero"));
+        $worksheet->writeString($excelrivi, $excelsarake++, t("Positiokenttä"));
       }
 
       echo "<td class='back'></td>";
@@ -1026,6 +1032,9 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
         }
         elseif ($toim == "RESEPTI") {
           echo "<td><input type='text' name='kerroin' size='10'></td>";
+          echo "<td></td>";
+          echo "<td></td>";
+          echo "<td></td>";
           echo "<td></td>";
           echo "<td></td>";
           echo "<td></td>";
@@ -1146,6 +1155,15 @@ if (($hakutuoteno != '' or $isatuoteno != '') and $tee == "") {
               echo "<td>".t("Kerrotaan")."</td>";
               $worksheet->writeString($excelrivi, $excelsarake++, t("Kerrotaan"));
             }
+
+            echo "<td>{$prow["piirustusnumero"]}</td>";
+            $worksheet->writeString($excelrivi, $excelsarake++, $prow["piirustusnumero"]);
+
+            echo "<td>{$prow["osanumero"]}</td>";
+            $worksheet->writeString($excelrivi, $excelsarake++, $prow["osanumero"]);
+
+            echo "<td>{$prow["positiokentta"]}</td>";
+            $worksheet->writeString($excelrivi, $excelsarake++, $prow["positiokentta"]);
           }
 
           $excelrivi++;

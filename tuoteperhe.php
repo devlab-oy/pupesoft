@@ -1525,12 +1525,25 @@ function hae_tuoteperhe($tuoteno) {
 }
 
 function piirra_tuoteperhe($tuoteperhe, $hidden = false) {
+  global $PHP_SELF, $toim;
+
   $hidden_class = $hidden ? "hidden" : "";
 
   echo "<ul class='list-unstyled {$hidden_class}'>";
 
   foreach ($tuoteperhe as $tuoteno => $tuote) {
-    echo "<li>{$tuoteno} {$tuote["nimitys"]}";
+    echo "<li>";
+
+    if (empty($tuote["lapset"])) {
+      echo "{$tuoteno} {$tuote["nimitys"]}";
+    }
+    else {
+      echo "<a href='{$PHP_SELF}" .
+                "?toim={$toim}" .
+                "&isatuoteno={$tuoteno}" .
+                "&hakutuoteno={$tuoteno}'>{$tuoteno} {$tuote["nimitys"]}
+            </a>";
+    }
 
     if (!empty($tuote["lapset"])) {
       echo " <a class='toggle-list'>+</a>";

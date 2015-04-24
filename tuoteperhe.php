@@ -7,6 +7,8 @@ if (isset($_POST["tee"])) {
 
 require "inc/parametrit.inc";
 
+echo "<script src='js/tuoteperhe.js'></script>";
+
 if (isset($tee) and $tee == "lataa_tiedosto") {
   readfile("/tmp/".$tmpfilenimi);
   exit;
@@ -1522,13 +1524,21 @@ function hae_tuoteperhe($tuoteno) {
   return $tuoteperhe;
 }
 
-function piirra_tuoteperhe($tuoteperhe) {
-  echo "<ul>";
+function piirra_tuoteperhe($tuoteperhe, $hidden = false) {
+  $hidden_class = $hidden ? "hidden" : "";
+
+  echo "<ul class='list-unstyled {$hidden_class}'>";
 
   foreach ($tuoteperhe as $tuoteno => $tuote) {
-    echo "<li>{$tuoteno} {$tuote["nimitys"]}</li>";
+    echo "<li>{$tuoteno} {$tuote["nimitys"]}";
 
-    piirra_tuoteperhe($tuote["lapset"]);
+    if (!empty($tuote["lapset"])) {
+      echo " <a class='toggle-list'>+</a>";
+    }
+
+    echo "</li>";
+
+    piirra_tuoteperhe($tuote["lapset"], true);
   }
   echo "</ul>";
 }

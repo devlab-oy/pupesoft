@@ -203,3 +203,7 @@ ul.list-unstyled {
 .clear {
   clear: both;
 }
+
+.toggle-list {
+  cursor: pointer;
+}

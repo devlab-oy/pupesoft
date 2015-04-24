@@ -63,3 +63,7 @@ table.indexvas td {
 .clear {
   clear: both;
 }
+
+.toggle-list {
+  cursor: pointer;
+}

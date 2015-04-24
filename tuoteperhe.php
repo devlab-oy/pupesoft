@@ -1412,24 +1412,17 @@ elseif ($tee == "") {
     $lisa1 .= " and tuoteperhe.tuoteno like '%$tuoteno_haku%' ";
   }
 
-  $query = "SELECT tuoteperhe.isatuoteno,
-            ti.nimitys,
-            group_concat(
-              concat(tuoteperhe.tuoteno, ' ' , tl.nimitys) ORDER BY tuoteperhe.tuoteno,
-              tuoteperhe.tunnus separator '<br>') AS tuotteet
+  $query = "SELECT DISTINCT tuoteperhe.isatuoteno
             FROM tuoteperhe
-            JOIN tuote ti ON (ti.yhtio = tuoteperhe.yhtio
-              AND ti.tuoteno       = tuoteperhe.isatuoteno)
-            JOIN tuote tl ON (tl.yhtio = tuoteperhe.yhtio
-              AND tl.tuoteno       = tuoteperhe.tuoteno)
-            WHERE tuoteperhe.yhtio = '$kukarow[yhtio]'
-            AND tuoteperhe.tyyppi  = '$hakutyyppi'
-            $lisa1
-            GROUP BY tuoteperhe.isatuoteno
-            ORDER BY $lisalimit
-            tuoteperhe.isatuoteno,
-            tuoteperhe.tuoteno
-            $limitteri";
+            INNER JOIN tuote ti ON (ti.yhtio = tuoteperhe.yhtio
+              AND ti.tuoteno = tuoteperhe.isatuoteno)
+            INNER JOIN tuote tl ON (tl.yhtio = tuoteperhe.yhtio
+              AND tl.tuoteno = tuoteperhe.tuoteno)
+            WHERE tuoteperhe.yhtio = '{$kukarow["yhtio"]}'
+            AND tuoteperhe.tyyppi = '{$hakutyyppi}'
+            ORDER BY tuoteperhe.isatuoteno
+            {$lisalimit}
+            {$limitteri}";
   $result = pupe_query($query);
 
   if (mysql_num_rows($result) > 0) {
@@ -1457,7 +1450,15 @@ elseif ($tee == "") {
 
       echo "<tr class='aktiivi'>";
       echo "<td><a href='{$_href}'>{$prow["isatuoteno"]} {$prow["nimitys"]}</a></td>";
-      echo "<td>{$prow["tuotteet"]} {$prow["nimitykset"]}</td>";
+      echo "<td>";
+
+      $tuoteperhe = hae_tuoteperhe($prow["isatuoteno"]);
+      $tuoteperhe = reset($tuoteperhe);
+      $tuoteperhe = $tuoteperhe["lapset"];
+
+      piirra_tuoteperhe($tuoteperhe);
+
+      echo "</td>";
       echo "</tr>";
     }
 
@@ -1519,4 +1520,15 @@ function hae_tuoteperhe($tuoteno) {
   }
 
   return $tuoteperhe;
+}
+
+function piirra_tuoteperhe($tuoteperhe) {
+  echo "<ul>";
+
+  foreach ($tuoteperhe as $tuoteno => $tuote) {
+    echo "<li>{$tuoteno} {$tuote["nimitys"]}</li>";
+
+    piirra_tuoteperhe($tuote["lapset"]);
+  }
+  echo "</ul>";
 }

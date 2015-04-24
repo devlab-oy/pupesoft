@@ -179,6 +179,15 @@ class Edi {
         // Rivin alennusprosentti
         $alennusprosentti = $_item['discount_percent'];
 
+        // Rivin alennusm‰‰r‰
+        $alennusmaara = $_item['base_discount_amount'];
+
+        // Jos alennusprosentti on 0, tarkistetaan viel‰ onko annettu hintam‰‰r‰ist‰ alennusta
+        if ($alennusprosentti == 0 and $alennusmaara > 0) {
+          // Lasketaan alennusm‰‰r‰ alennusprosentiksi
+          $alennusprosentti = round(($alennusmaara / $verollinen_hinta * 100), 2);
+        }
+
         // Verokanta
         $alvprosentti = $_item['tax_percent'];
 

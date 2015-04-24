@@ -1449,13 +1449,13 @@ elseif ($tee == "") {
     while ($prow = mysql_fetch_array($result)) {
       $_isatuoteno = urlencode($prow["isatuoteno"]);
       $_href = "{$PHP_SELF}?toim={$toim}&isatuoteno={$_isatuoteno}&hakutuoteno={$_isatuoteno}";
-
-      echo "<tr class='aktiivi'>";
-      echo "<td><a href='{$_href}'>{$prow["isatuoteno"]} {$prow["nimitys"]}</a></td>";
-      echo "<td>";
-
       $tuoteperhe = hae_tuoteperhe($prow["isatuoteno"]);
       $tuoteperhe = reset($tuoteperhe);
+
+      echo "<tr class='aktiivi'>";
+      echo "<td><a href='{$_href}'>{$prow["isatuoteno"]} {$tuoteperhe["nimitys"]}</a></td>";
+      echo "<td>";
+
       $tuoteperhe = $tuoteperhe["lapset"];
 
       piirra_tuoteperhe($tuoteperhe);

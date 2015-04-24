@@ -248,9 +248,12 @@ if ($tee != "KOPIOI") {
   echo "<tr><th>".t("Rajaa hakum‰‰r‰‰")."</th>";
   echo "<td>";
 
-  if (!isset($limitti)) $limitti = 100;
+  if (!isset($limitti)) $limitti = 20;
 
-  if ($limitti == 100) {
+  if ($limitti == 20) {
+    $sel0 = "selected";
+  }
+  elseif ($limitti == 100) {
     $sel1 = "selected";
   }
   elseif ($limitti == 1000) {
@@ -267,6 +270,7 @@ if ($tee != "KOPIOI") {
   }
 
   echo "<select name='limitti'>";
+  echo "<option value='20' $sel0>".t("20 ensimm‰ist‰")."</option>";
   echo "<option value='100' $sel1>".t("100 ensimm‰ist‰")."</option>";
   echo "<option value='1000' $sel2>".t("1000 ensimm‰ist‰")."</option>";
   echo "<option value='5000' $sel3>".t("5000 ensimm‰ist‰")."</option>";
@@ -1497,7 +1501,8 @@ function hae_tuoteperhe($tuoteno) {
             lapsi.tuoteno AS lapsi_tuoteno
             FROM tuote
             LEFT JOIN tuoteperhe AS lapsi ON (lapsi.yhtio = tuote.yhtio
-              AND lapsi.isatuoteno = tuote.tuoteno)
+              AND lapsi.isatuoteno = tuote.tuoteno
+              AND lapsi.tyyppi = 'R')
             WHERE tuote.yhtio = '{$kukarow["yhtio"]}'
             AND tuote.tuoteno = '{$tuoteno}'";
   $result = pupe_query($query);

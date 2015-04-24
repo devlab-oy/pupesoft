@@ -67,3 +67,8 @@ table.indexvas td {
 .toggle-list {
   cursor: pointer;
 }
+
+ul.list-unstyled {
+  list-style: none;
+  padding-left: 20px;
+}
